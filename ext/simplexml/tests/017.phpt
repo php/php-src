@@ -34,12 +34,11 @@ function print_xml($xml) {
 }
 
 function print_xml2($xml) {
-  $persons = 2;
-  for ($i=0;$i<$persons;$i++) {
-    echo "person: ".$xml->person[$i]['name']."\n";
-	$children = 2;
-    for ($j=0;$j<$children;$j++) {
-      echo "  child: ".$xml->person[$i]->child[$j]['name']."\n";
+  for ($i=0;$i<count($xml->person);$i++) {
+    $person = $xml->person[$i];
+    echo "person: ".$person['name']."\n";
+    for ($j=0;$j<count($person->child);$j++) {
+      echo "  child: ".$person->child[$j]['name']."\n";
     }
   }
 }
@@ -53,8 +52,7 @@ print_xml2(simplexml_load_string($xml));
 echo "---22---\n";
 print_xml2(simplexml_load_string($xml1));
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 ---11---
 person: Joe
   child: Ann
@@ -75,12 +73,3 @@ person: Boe
 ---22---
 person: Joe
   child: Ann
-  child: 
-person: 
-
-Notice: Trying to get property 'child' of non-object in %s017.php on line %d
-  child: 
-
-Notice: Trying to get property 'child' of non-object in %s017.php on line %d
-  child: 
-===DONE===

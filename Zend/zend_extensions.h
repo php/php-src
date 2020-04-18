@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,12 +12,10 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifndef ZEND_EXTENSIONS_H
 #define ZEND_EXTENSIONS_H
@@ -46,7 +44,7 @@ You can use the following macro to check the extension API version for compatibi
 
 /* The first number is the engine version and the rest is the date (YYYYMMDD).
  * This way engine 2/3 API no. is always greater than engine 1 API no..  */
-#define ZEND_EXTENSION_API_NO	320170718
+#define ZEND_EXTENSION_API_NO	420190128
 
 typedef struct _zend_extension_version_info {
 	int zend_extension_api_no;
@@ -113,7 +111,10 @@ struct _zend_extension {
 };
 
 BEGIN_EXTERN_C()
+extern ZEND_API int zend_op_array_extension_handles;
+
 ZEND_API int zend_get_resource_handle(zend_extension *extension);
+ZEND_API int zend_get_op_array_extension_handle(void);
 ZEND_API void zend_extension_dispatch_message(int message, void *arg);
 END_EXTERN_C()
 
@@ -153,13 +154,3 @@ ZEND_API size_t zend_extensions_op_array_persist(zend_op_array *op_array, void *
 END_EXTERN_C()
 
 #endif /* ZEND_EXTENSIONS_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

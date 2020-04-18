@@ -6,15 +6,15 @@ Testing array dereference on __invoke() result
 error_reporting(E_ALL);
 
 class foo {
-	public $x = array();
-	public function __construct() {
-		$h = array();
-		$h[] = new stdclass;
-		$this->x = $h;
-	}
-	public function __invoke() {
-		return $this->x;
-	}
+    public $x = array();
+    public function __construct() {
+        $h = array();
+        $h[] = new stdclass;
+        $this->x = $h;
+    }
+    public function __invoke() {
+        return $this->x;
+    }
 }
 
 

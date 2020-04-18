@@ -3,7 +3,7 @@ Test array_flip() function : usage variations - 'input' argument with different 
 --FILE--
 <?php
 /* Prototype  : array array_flip(array $input)
- * Description: Return array with key <-> value flipped 
+ * Description: Return array with key <-> value flipped
  * Source code: ext/standard/array.c
 */
 
@@ -38,7 +38,7 @@ $input = array(
   'bool_value2' => false,
   'bool_value3' => TRUE,
   'bool_value4' => FALSE,
-  
+
   // null values
   'null_value1' => null,
 
@@ -51,7 +51,7 @@ $input = array(
   // resource value
   'resource_value' => $fp,
 );
-  
+
 var_dump( array_flip($input) );
 
 // closing resource
@@ -62,29 +62,29 @@ echo "Done"
 --EXPECTF--
 *** Testing array_flip() : different invalid values in 'input' array argument ***
 
-Warning: array_flip(): Can only flip STRING and INTEGER values! in %s on line %d
+Warning: array_flip(): Can only flip string and integer values, entry skipped in %s on line %d
 
-Warning: array_flip(): Can only flip STRING and INTEGER values! in %s on line %d
+Warning: array_flip(): Can only flip string and integer values, entry skipped in %s on line %d
 
-Warning: array_flip(): Can only flip STRING and INTEGER values! in %s on line %d
+Warning: array_flip(): Can only flip string and integer values, entry skipped in %s on line %d
 
-Warning: array_flip(): Can only flip STRING and INTEGER values! in %s on line %d
+Warning: array_flip(): Can only flip string and integer values, entry skipped in %s on line %d
 
-Warning: array_flip(): Can only flip STRING and INTEGER values! in %s on line %d
+Warning: array_flip(): Can only flip string and integer values, entry skipped in %s on line %d
 
-Warning: array_flip(): Can only flip STRING and INTEGER values! in %s on line %d
+Warning: array_flip(): Can only flip string and integer values, entry skipped in %s on line %d
 
-Warning: array_flip(): Can only flip STRING and INTEGER values! in %s on line %d
+Warning: array_flip(): Can only flip string and integer values, entry skipped in %s on line %d
 
-Warning: array_flip(): Can only flip STRING and INTEGER values! in %s on line %d
+Warning: array_flip(): Can only flip string and integer values, entry skipped in %s on line %d
 
-Warning: array_flip(): Can only flip STRING and INTEGER values! in %s on line %d
+Warning: array_flip(): Can only flip string and integer values, entry skipped in %s on line %d
 
-Warning: array_flip(): Can only flip STRING and INTEGER values! in %s on line %d
+Warning: array_flip(): Can only flip string and integer values, entry skipped in %s on line %d
 
-Warning: array_flip(): Can only flip STRING and INTEGER values! in %s on line %d
+Warning: array_flip(): Can only flip string and integer values, entry skipped in %s on line %d
 
-Warning: array_flip(): Can only flip STRING and INTEGER values! in %s on line %d
+Warning: array_flip(): Can only flip string and integer values, entry skipped in %s on line %d
 array(0) {
 }
 Done

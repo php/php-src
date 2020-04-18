@@ -18,11 +18,11 @@ try {
 } catch (Exception $e) { var_dump($e->getMessage()); }
 
 try {
-    unserialize('C:3:"GMP":8:{s:2:"42";}');
+    unserialize('C:3:"GMP":9:{s:2:"42";}');
 } catch (Exception $e) { var_dump($e->getMessage()); }
 
 ?>
---EXPECTF--	
+--EXPECTF--
 object(GMP)#%d (1) {
   ["num"]=>
   string(2) "42"

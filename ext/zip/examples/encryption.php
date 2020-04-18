@@ -40,10 +40,9 @@ $zip->close();
 echo "== Stream with context\n";
 
 $ctx = stream_context_create(array(
-	'zip' => array(
-		'password' => $pass
-	)
+    'zip' => array(
+        'password' => $pass
+    )
 ));
 $text = file_get_contents("zip://$name#$file", false, $ctx);
 printf("Size = %d\n", strlen($text));
-

@@ -56,7 +56,7 @@ function ut_main()
         'sr-Latn-QM',
         'sr-Qaaa-CS',
 //Tags that use extensions (examples ONLY: extensions MUST be defined
-//   by revision or update to this document or by RFC): 
+//   by revision or update to this document or by RFC):
         'en-US-u-islamCal',
         'zh-CN-a-myExt-x-private',
         'en-a-myExt-b-another',
@@ -67,22 +67,22 @@ function ut_main()
     );
 
 /*
-	$locales = array(	
-		'es'
-	);
+    $locales = array(
+        'es'
+    );
 */
     $res_str = '';
 
     foreach( $locales as $locale )
     {
         $isSuccessful = ut_loc_set_default( $locale);
-	if ($isSuccessful ){
-		$lang = ut_loc_get_default( );
-		$res_str .= "$locale: set locale '$lang'";
-	}
-	else{
-		$res_str .= "$locale: Error in set locale";
-	}
+    if ($isSuccessful ){
+        $lang = ut_loc_get_default( );
+        $res_str .= "$locale: set locale '$lang'";
+    }
+    else{
+        $res_str .= "$locale: Error in set locale";
+    }
         $res_str .= "\n";
     }
 

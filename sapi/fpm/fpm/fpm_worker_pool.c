@@ -1,5 +1,3 @@
-
-	/* $Id: fpm_worker_pool.c,v 1.15.2.1 2008/12/13 03:21:18 anight Exp $ */
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #include "fpm_config.h"
@@ -19,6 +17,15 @@
 
 struct fpm_worker_pool_s *fpm_worker_all_pools;
 
+void fpm_worker_pool_free_limit_extensions(char **limit_extensions) {
+	char **ext = limit_extensions;
+	while (*ext) {
+		free(*ext);
+		ext++;
+	}
+	free(limit_extensions);
+}
+
 void fpm_worker_pool_free(struct fpm_worker_pool_s *wp) /* {{{ */
 {
 	if (wp->config) {
@@ -29,6 +36,9 @@ void fpm_worker_pool_free(struct fpm_worker_pool_s *wp) /* {{{ */
 	}
 	if (wp->home) {
 		free(wp->home);
+	}
+	if (wp->limit_extensions) {
+		fpm_worker_pool_free_limit_extensions(wp->limit_extensions);
 	}
 	fpm_unix_free_socket_premissions(wp);
 	free(wp);

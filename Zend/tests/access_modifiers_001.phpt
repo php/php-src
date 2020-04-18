@@ -4,11 +4,11 @@ using multiple access modifiers (methods)
 <?php
 
 class test {
-	static public public static final public final function foo() {
-	}
+    static public public static final public final function foo() {
+    }
 }
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Multiple access type modifiers are not allowed in %s on line %d

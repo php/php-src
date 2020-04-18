@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2017 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -699,6 +697,10 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_debug)
 MYSQLND_CLASS_METHODS_END;
 
 
+static void free_ptr(zval *zv) {
+	efree(Z_PTR_P(zv));
+}
+
 /* {{{ mysqlnd_debug_init */
 PHPAPI MYSQLND_DEBUG *
 mysqlnd_debug_init(const char * skip_functions[])
@@ -710,7 +712,7 @@ mysqlnd_debug_init(const char * skip_functions[])
 	zend_stack_init(&ret->call_stack, sizeof(char *));
 	zend_stack_init(&ret->call_time_stack, sizeof(uint64_t));
 	zend_hash_init(&ret->not_filtered_functions, 0, NULL, NULL, 0);
-	zend_hash_init(&ret->function_profiles, 0, NULL, NULL, 0);
+	zend_hash_init(&ret->function_profiles, 0, NULL, free_ptr, 0);
 
 	ret->m = & mysqlnd_mysqlnd_debug_methods;
 	ret->skip_functions = skip_functions;
@@ -780,13 +782,3 @@ mysqlnd_debug_trace_plugin_register(void)
 	mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_plugin_trace_log_plugin);
 }
 /* }}} */
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

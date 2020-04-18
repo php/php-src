@@ -1,9 +1,9 @@
 --TEST--
-Bug #20528 (preg_split() drops characters (re-opens Bug #15413)) 
+Bug #20528 (preg_split() drops characters (re-opens Bug #15413))
 --FILE--
 <?php
-	$data = '(#11/19/2002#)';
-	var_dump(preg_split('/\b/', $data));
+    $data = '(#11/19/2002#)';
+    var_dump(preg_split('/\b/', $data));
 ?>
 --EXPECT--
 array(7) {

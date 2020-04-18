@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,13 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 /*
  * This code implements the AUTODIN II polynomial
  * The variable corresponding to the macro argument "crc" should
  * be an unsigned long.
- * Oroginal code  by Spencer Garrett <srg@quick.com>
+ * Original code by Spencer Garrett <srg@quick.com>
  */
 
 #define CRC32(crc, ch)	 (crc = (crc >> 8) ^ crc32tab[(crc ^ (ch)) & 0xff])
@@ -98,12 +94,3 @@ static const unsigned int crc32tab[256] = {
 	0xb3667a2e, 0xc4614ab8, 0x5d681b02, 0x2a6f2b94,
 	0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d,
 };
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

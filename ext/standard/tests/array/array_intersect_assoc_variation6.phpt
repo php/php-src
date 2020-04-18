@@ -49,7 +49,7 @@ $arrays = array (
              "\v\fworld" => 2.2, "pen\n" => 33),
        array("hello", $heredoc => "string"), // heredoc
 
-       // array with  unset variable 
+       // array with  unset variable
 /*10*/ array( @$unset_var => "hello"),
 
        // array with mixed keys
@@ -63,7 +63,7 @@ $arr1 = array(0 => 0, 2 => "float", 4 => "f3", 33333333 => "f4",
               "\tHello" => 111, 2.2, 'color', "Hello world" => "string",
               "pen\n" => 33, 133 => "int");
 
-// loop through each sub-array within $arrrays to check the behavior of array_intersect_assoc()
+// loop through each sub-array within $arrays to check the behavior of array_intersect_assoc()
 $iterator = 1;
 foreach($arrays as $arr2) {
   echo "-- Iteration $iterator --\n";
@@ -79,7 +79,7 @@ foreach($arrays as $arr2) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_intersect_assoc() : assoc array with diff keys to $arr2 argument ***
 -- Iteration 1 --
 array(0) {

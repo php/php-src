@@ -3,7 +3,7 @@ Test array_sum() function : usage variations - 'input' array with unexpected val
 --FILE--
 <?php
 /* Prototype  : mixed array_sum(array $input)
- * Description: Returns the sum of the array entries 
+ * Description: Returns the sum of the array entries
  * Source code: ext/standard/array.c
 */
 
@@ -67,7 +67,7 @@ echo "-- array with mixed values --\n";
 var_dump( array_sum($input) );
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_sum() : array with unexpected entries ***
 -- empty array --
 int(0)

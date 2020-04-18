@@ -3,11 +3,11 @@ Trying to use an abstract class as trait
 --FILE--
 <?php
 
-abstract class abc { 
+abstract class abc {
 }
 
 class A {
-	use abc;
+    use abc;
 }
 
 ?>

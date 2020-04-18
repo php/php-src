@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +14,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -26,8 +22,26 @@
 #include "php_globals.h"
 #include "ext/standard/info.h"
 #include "php_sysvmsg.h"
+#include "sysvmsg_arginfo.h"
 #include "ext/standard/php_var.h"
 #include "zend_smart_str.h"
+
+#include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/msg.h>
+
+PHP_MINIT_FUNCTION(sysvmsg);
+PHP_MINFO_FUNCTION(sysvmsg);
+
+typedef struct {
+	key_t key;
+	zend_long id;
+} sysvmsg_queue_t;
+
+struct php_msgbuf {
+	zend_long mtype;
+	char mtext[1];
+};
 
 /* In order to detect MSG_EXCEPT use at run time; we have no way
  * of knowing what the bit definitions are, so we can't just define
@@ -39,72 +53,12 @@
 /* True global resources - no need for thread safety here */
 static int le_sysvmsg;
 
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_msg_get_queue, 0, 0, 1)
-	ZEND_ARG_INFO(0, key)
-	ZEND_ARG_INFO(0, perms)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_msg_send, 0, 0, 3)
-	ZEND_ARG_INFO(0, queue)
-	ZEND_ARG_INFO(0, msgtype)
-	ZEND_ARG_INFO(0, message)
-	ZEND_ARG_INFO(0, serialize)
-	ZEND_ARG_INFO(0, blocking)
-	ZEND_ARG_INFO(1, errorcode)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_msg_receive, 0, 0, 5)
-	ZEND_ARG_INFO(0, queue)
-	ZEND_ARG_INFO(0, desiredmsgtype)
-	ZEND_ARG_INFO(1, msgtype)
-	ZEND_ARG_INFO(0, maxsize)
-	ZEND_ARG_INFO(1, message)
-	ZEND_ARG_INFO(0, unserialize)
-	ZEND_ARG_INFO(0, flags)
-	ZEND_ARG_INFO(1, errorcode)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_msg_remove_queue, 0, 0, 1)
-	ZEND_ARG_INFO(0, queue)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_msg_stat_queue, 0, 0, 1)
-	ZEND_ARG_INFO(0, queue)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_msg_set_queue, 0, 0, 2)
-	ZEND_ARG_INFO(0, queue)
-	ZEND_ARG_INFO(0, data)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_msg_queue_exists, 0, 0, 1)
-	ZEND_ARG_INFO(0, key)
-ZEND_END_ARG_INFO()
-/* }}} */
-
-/* {{{ sysvmsg_functions[]
- *
- * Every user visible function must have an entry in sysvmsg_functions[].
- */
-const zend_function_entry sysvmsg_functions[] = {
-	PHP_FE(msg_get_queue,				arginfo_msg_get_queue)
-	PHP_FE(msg_send,					arginfo_msg_send)
-	PHP_FE(msg_receive,					arginfo_msg_receive)
-	PHP_FE(msg_remove_queue,			arginfo_msg_remove_queue)
-	PHP_FE(msg_stat_queue,				arginfo_msg_stat_queue)
-	PHP_FE(msg_set_queue,				arginfo_msg_set_queue)
-	PHP_FE(msg_queue_exists,			arginfo_msg_queue_exists)
-	PHP_FE_END
-};
-/* }}} */
-
 /* {{{ sysvmsg_module_entry
  */
 zend_module_entry sysvmsg_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"sysvmsg",
-	sysvmsg_functions,
+	ext_functions,
 	PHP_MINIT(sysvmsg),
 	NULL,
 	NULL,
@@ -145,7 +99,6 @@ PHP_MINFO_FUNCTION(sysvmsg)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "sysvmsg support", "enabled");
-	php_info_print_table_row(2, "Revision", "$Id$");
 	php_info_print_table_end();
 }
 /* }}} */
@@ -161,11 +114,11 @@ PHP_FUNCTION(msg_set_queue)
 	RETVAL_FALSE;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ra", &queue, &data) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((mq = (sysvmsg_queue_t *)zend_fetch_resource(Z_RES_P(queue), "sysvmsg queue", le_sysvmsg)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if (msgctl(mq->id, IPC_STAT, &stat) == 0) {
@@ -173,20 +126,16 @@ PHP_FUNCTION(msg_set_queue)
 
 		/* now pull out members of data and set them in the stat buffer */
 		if ((item = zend_hash_str_find(Z_ARRVAL_P(data), "msg_perm.uid", sizeof("msg_perm.uid") - 1)) != NULL) {
-			convert_to_long_ex(item);
-			stat.msg_perm.uid = Z_LVAL_P(item);
+			stat.msg_perm.uid = zval_get_long(item);
 		}
 		if ((item = zend_hash_str_find(Z_ARRVAL_P(data), "msg_perm.gid", sizeof("msg_perm.gid") - 1)) != NULL) {
-			convert_to_long_ex(item);
-			stat.msg_perm.gid = Z_LVAL_P(item);
+			stat.msg_perm.gid = zval_get_long(item);
 		}
 		if ((item = zend_hash_str_find(Z_ARRVAL_P(data), "msg_perm.mode", sizeof("msg_perm.mode") - 1)) != NULL) {
-			convert_to_long_ex(item);
-			stat.msg_perm.mode = Z_LVAL_P(item);
+			stat.msg_perm.mode = zval_get_long(item);
 		}
 		if ((item = zend_hash_str_find(Z_ARRVAL_P(data), "msg_qbytes", sizeof("msg_qbytes") - 1)) != NULL) {
-			convert_to_long_ex(item);
-			stat.msg_qbytes = Z_LVAL_P(item);
+			stat.msg_qbytes = zval_get_long(item);
 		}
 		if (msgctl(mq->id, IPC_SET, &stat) == 0) {
 			RETVAL_TRUE;
@@ -206,11 +155,11 @@ PHP_FUNCTION(msg_stat_queue)
 	RETVAL_FALSE;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &queue) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((mq = (sysvmsg_queue_t *)zend_fetch_resource(Z_RES_P(queue), "sysvmsg queue", le_sysvmsg)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if (msgctl(mq->id, IPC_STAT, &stat) == 0) {
@@ -237,7 +186,7 @@ PHP_FUNCTION(msg_queue_exists)
 	zend_long key;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &key) == FAILURE)	{
-		return;
+		RETURN_THROWS();
 	}
 
 	if (msgget(key, 0) < 0) {
@@ -257,7 +206,7 @@ PHP_FUNCTION(msg_get_queue)
 	sysvmsg_queue_t *mq;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|l", &key, &perms) == FAILURE)	{
-		return;
+		RETURN_THROWS();
 	}
 
 	mq = (sysvmsg_queue_t *) emalloc(sizeof(sysvmsg_queue_t));
@@ -268,7 +217,7 @@ PHP_FUNCTION(msg_get_queue)
 		/* doesn't already exist; create it */
 		mq->id = msgget(key, IPC_CREAT | IPC_EXCL | perms);
 		if (mq->id < 0)	{
-			php_error_docref(NULL, E_WARNING, "failed for key 0x" ZEND_XLONG_FMT ": %s", key, strerror(errno));
+			php_error_docref(NULL, E_WARNING, "Failed for key 0x" ZEND_XLONG_FMT ": %s", key, strerror(errno));
 			efree(mq);
 			RETURN_FALSE;
 		}
@@ -285,11 +234,11 @@ PHP_FUNCTION(msg_remove_queue)
 	sysvmsg_queue_t *mq = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &queue) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((mq = (sysvmsg_queue_t *)zend_fetch_resource(Z_RES_P(queue), "sysvmsg queue", le_sysvmsg)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if (msgctl(mq->id, IPC_RMID, NULL) == 0) {
@@ -300,7 +249,7 @@ PHP_FUNCTION(msg_remove_queue)
 }
 /* }}} */
 
-/* {{{ proto mixed msg_receive(resource queue, int desiredmsgtype, int &msgtype, int maxsize, mixed message [, bool unserialize=true [, int flags=0 [, int errorcode]]])
+/* {{{ proto mixed msg_receive(resource queue, int desiredmsgtype, int &msgtype, int maxsize, mixed &message [, bool unserialize=true [, int flags=0 [, int &errorcode]]])
    Send a message of type msgtype (must be > 0) to a message queue */
 PHP_FUNCTION(msg_receive)
 {
@@ -314,14 +263,14 @@ PHP_FUNCTION(msg_receive)
 
 	RETVAL_FALSE;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rlz/lz/|blz/",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rlzlz|blz",
 				&queue, &desiredmsgtype, &out_msgtype, &maxsize,
 				&out_message, &do_unserialize, &flags, &zerrcode) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (maxsize <= 0) {
-		php_error_docref(NULL, E_WARNING, "maximum size of the message has to be greater than zero");
+		php_error_docref(NULL, E_WARNING, "Maximum size of the message has to be greater than zero");
 		return;
 	}
 
@@ -343,27 +292,19 @@ PHP_FUNCTION(msg_receive)
 	}
 
 	if ((mq = (sysvmsg_queue_t *)zend_fetch_resource(Z_RES_P(queue), "sysvmsg queue", le_sysvmsg)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	messagebuffer = (struct php_msgbuf *) safe_emalloc(maxsize, 1, sizeof(struct php_msgbuf));
 
 	result = msgrcv(mq->id, messagebuffer, maxsize, desiredmsgtype, realflags);
 
-	zval_dtor(out_msgtype);
-	zval_dtor(out_message);
-	ZVAL_LONG(out_msgtype, 0);
-	ZVAL_FALSE(out_message);
-
-	if (zerrcode) {
-		ZVAL_DEREF(zerrcode);
-		zval_dtor(zerrcode);
-		ZVAL_LONG(zerrcode, 0);
-	}
-
 	if (result >= 0) {
 		/* got it! */
-		ZVAL_LONG(out_msgtype, messagebuffer->mtype);
+		ZEND_TRY_ASSIGN_REF_LONG(out_msgtype, messagebuffer->mtype);
+		if (zerrcode) {
+			ZEND_TRY_ASSIGN_REF_LONG(zerrcode, 0);
+		}
 
 		RETVAL_TRUE;
 		if (do_unserialize)	{
@@ -373,17 +314,22 @@ PHP_FUNCTION(msg_receive)
 
 			PHP_VAR_UNSERIALIZE_INIT(var_hash);
 			if (!php_var_unserialize(&tmp, &p, p + result, &var_hash)) {
-				php_error_docref(NULL, E_WARNING, "message corrupted");
+				php_error_docref(NULL, E_WARNING, "Message corrupted");
+				ZEND_TRY_ASSIGN_REF_FALSE(out_message);
 				RETVAL_FALSE;
 			} else {
-				ZVAL_COPY_VALUE(out_message, &tmp);
+				ZEND_TRY_ASSIGN_REF_TMP(out_message, &tmp);
 			}
 			PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 		} else {
-			ZVAL_STRINGL(out_message, messagebuffer->mtext, result);
+			ZEND_TRY_ASSIGN_REF_STRINGL(out_message, messagebuffer->mtext, result);
 		}
-	} else if (zerrcode) {
-		ZVAL_LONG(zerrcode, errno);
+	} else {
+		ZEND_TRY_ASSIGN_REF_LONG(out_msgtype, 0);
+		ZEND_TRY_ASSIGN_REF_FALSE(out_message);
+		if (zerrcode) {
+			ZEND_TRY_ASSIGN_REF_LONG(zerrcode, errno);
+		}
 	}
 	efree(messagebuffer);
 }
@@ -403,13 +349,13 @@ PHP_FUNCTION(msg_send)
 
 	RETVAL_FALSE;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rlz|bbz/",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rlz|bbz",
 				&queue, &msgtype, &message, &do_serialize, &blocking, &zerror) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((mq = (sysvmsg_queue_t *)zend_fetch_resource(Z_RES_P(queue), "sysvmsg queue", le_sysvmsg)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if (do_serialize) {
@@ -469,20 +415,10 @@ PHP_FUNCTION(msg_send)
 	if (result == -1) {
 		php_error_docref(NULL, E_WARNING, "msgsnd failed: %s", strerror(errno));
 		if (zerror) {
-			zval_ptr_dtor(zerror);
-			ZVAL_LONG(zerror, errno);
+			ZEND_TRY_ASSIGN_REF_LONG(zerror, errno);
 		}
 	} else {
 		RETVAL_TRUE;
 	}
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 tw=78 fdm=marker
- * vim<600: noet sw=4 ts=4 tw=78
- */

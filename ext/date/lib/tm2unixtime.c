@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015 Derick Rethans
+ * Copyright (c) 2015-2019 Derick Rethans
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,18 +32,6 @@ static int month_tab[12]          = {   0,  31,  59,  90, 120, 151, 181, 212, 24
 /*                                    dec  jan  feb  mrt  apr  may  jun  jul  aug  sep  oct  nov  dec */
 static int days_in_month_leap[13] = {  31,  31,  29,  31,  30,  31,  30,  31,  31,  30,  31,  30,  31 };
 static int days_in_month[13]      = {  31,  31,  28,  31,  30,  31,  30,  31,  31,  30,  31,  30,  31 };
-
-static void do_range_limit_fraction(timelib_sll *fraction, timelib_sll *seconds)
-{
-	if (*fraction < 0) {
-		*fraction += 1000000;
-		*seconds -= 1;
-	}
-	if (*fraction > 1000000) {
-		*fraction -= 1000000;
-		*seconds += 1;
-	}
-}
 
 static void do_range_limit(timelib_sll start, timelib_sll end, timelib_sll adj, timelib_sll *a, timelib_sll *b)
 {
@@ -194,6 +182,7 @@ static void do_adjust_for_weekday(timelib_time* time)
 
 void timelib_do_rel_normalize(timelib_time *base, timelib_rel_time *rt)
 {
+	do_range_limit(0, 1000000, 1000000, &rt->us, &rt->s);
 	do_range_limit(0, 60, 60, &rt->s, &rt->i);
 	do_range_limit(0, 60, 60, &rt->i, &rt->h);
 	do_range_limit(0, 24, 24, &rt->h, &rt->d);
@@ -233,7 +222,7 @@ static void magic_date_calc(timelib_time *time)
 
 void timelib_do_normalize(timelib_time* time)
 {
-	if (time->us != TIMELIB_UNSET) do_range_limit_fraction(&time->us, &time->s);
+	if (time->us != TIMELIB_UNSET) do_range_limit(0, 1000000, 1000000, &time->us, &time->s);
 	if (time->s != TIMELIB_UNSET) do_range_limit(0, 60, 60, &time->s, &time->i);
 	if (time->s != TIMELIB_UNSET) do_range_limit(0, 60, 60, &time->i, &time->h);
 	if (time->s != TIMELIB_UNSET) do_range_limit(0, 24, 24, &time->h, &time->d);

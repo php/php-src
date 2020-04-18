@@ -1,24 +1,24 @@
 --TEST--
-Test gzdeflate() function : basic functionality 
+Test gzdeflate() function : basic functionality
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded"; 
-}	 
+	print "skip - ZLIB extension not loaded";
+}
 ?>
 --FILE--
 <?php
 /* Prototype  : string gzdeflate(string data [, int level, [int encoding]])
- * Description: Gzip-compress a string 
+ * Description: Gzip-compress a string
  * Source code: ext/zlib/zlib.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 /*
  * add a comment here to say what the test is supposed to do
  */
 
-include(dirname(__FILE__) . '/data.inc');
+include(__DIR__ . '/data.inc');
 
 echo "*** Testing gzdeflate() : basic functionality ***\n";
 
@@ -34,7 +34,7 @@ for($i = -1; $i < 10; $i++) {
     echo "-- Compression level $i --\n";
     $output = gzdeflate($data, $i);
     var_dump(md5($output));
-	var_dump(strcmp(gzinflate($output), $data));
+    var_dump(strcmp(gzinflate($output), $data));
 }
 
 // Compressing a smaller string
@@ -42,7 +42,7 @@ for($i = -1; $i < 10; $i++) {
     echo "-- Compression level $i --\n";
     $output = gzdeflate($smallstring, $i);
     var_dump(bin2hex($output));
-	var_dump(strcmp(gzinflate($output), $smallstring));
+    var_dump(strcmp(gzinflate($output), $smallstring));
 }
 
 // Calling gzdeflate() with just mandatory arguments
@@ -50,7 +50,6 @@ echo "\n-- Testing with no specified compression level --\n";
 var_dump( bin2hex(gzdeflate($smallstring) ));
 
 ?>
-===Done===
 --EXPECT--
 *** Testing gzdeflate() : basic functionality ***
 -- Compression level -1 --
@@ -122,4 +121,3 @@ int(0)
 
 -- Testing with no specified compression level --
 string(58) "735428ce4dccc951282e29cacc4b5728c95748cecf2d284a2d2ee60200"
-===Done===

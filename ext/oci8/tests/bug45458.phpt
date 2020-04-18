@@ -5,7 +5,7 @@ Bug #45458 (OCI8: Numeric keys for associative arrays are not handled properly)
 --FILE--
 <?php
 
-require(dirname(__FILE__).'/connect.inc');
+require(__DIR__.'/connect.inc');
 
 // Run Test
 
@@ -37,8 +37,6 @@ oci_free_statement($s);
 oci_close($c);
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 Test 1
 array(1) {
@@ -81,4 +79,3 @@ array(1) {
 }
 string(1) "X"
 string(1) "X"
-===DONE===

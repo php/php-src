@@ -11,17 +11,17 @@ var_dump($a->count());
 
 /* negative init value */
 try {
-	$b = new SplFixedArray(-10);
+    $b = new SplFixedArray(-10);
 } catch (Exception $e) {
-	var_dump($e->getMessage());
+    var_dump($e->getMessage());
 }
 
 /* resize and negative value */
 $b = new SplFixedArray();
 try {
-	$b->setSize(-5);
+    $b->setSize(-5);
 } catch (Exception $e) {
-	var_dump($e->getMessage());
+    var_dump($e->getMessage());
 }
 
 /* calling __construct() twice */
@@ -43,11 +43,11 @@ $e[1] = 5;
 $e[2] = 10;
 
 try {
-	foreach ($e as $k=>&$v) {
-		var_dump($v);
-	}
+    foreach ($e as $k=>&$v) {
+        var_dump($v);
+    }
 } catch (Exception $e) {
-	var_dump($e->getMessage());
+    var_dump($e->getMessage());
 }
 
 //non-long indexes
@@ -60,7 +60,6 @@ var_dump(isset($a["0"], $a[-1]), $a["1"]);
 var_dump(empty($a["3"]));
 
 ?>
-==DONE==
 --EXPECTF--
 int(0)
 int(0)
@@ -75,4 +74,3 @@ string(52) "An iterator cannot be used with foreach by reference"
 bool(false)
 string(3) "foo"
 bool(true)
-==DONE==

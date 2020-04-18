@@ -1,5 +1,5 @@
 --TEST--
-array_uintersect_assoc(): Test return type and value for expected input 
+array_uintersect_assoc(): Test return type and value for expected input
 --FILE--
 <?php
 /*

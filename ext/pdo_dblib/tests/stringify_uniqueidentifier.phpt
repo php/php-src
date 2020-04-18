@@ -4,7 +4,7 @@ PDO_DBLIB: Uniqueidentifier column data type stringifying
 <?php
 if (!extension_loaded('pdo_dblib')) die('skip not loaded');
 require __DIR__ . '/config.inc';
-if (in_array(get_tds_version(), ['4.2', '4.6'])) die('skip feature unsupported by this TDS version');
+if (in_array($db->getAttribute(PDO::DBLIB_ATTR_TDS_VERSION), ['4.2', '4.6'])) die('skip feature unsupported by this TDS version');
 ?>
 --FILE--
 <?php

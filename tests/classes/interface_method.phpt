@@ -4,10 +4,9 @@ ZE2 An interface method must be abstract
 <?php
 
 interface if_a {
-	function err() {}
+    function err() {}
 }
 
 ?>
 --EXPECTF--
-
 Fatal error: Interface function if_a::err() cannot contain body %s on line %d

@@ -3,7 +3,7 @@ SimpleXML: foreach with children()
 --SKIPIF--
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--
-<?php 
+<?php
 
 $sxe = simplexml_load_string(<<<EOF
 <?xml version='1.0'?>
@@ -34,33 +34,32 @@ EOF
 );
 
 foreach($sxe->children() as $name => $data) {
-	var_dump($name);
-	var_dump(trim($data));
+    var_dump($name);
+    var_dump(trim($data));
 }
 
 echo "===CLONE===\n";
 
 foreach(clone $sxe->children() as $name => $data) {
-	var_dump($name);
-	var_dump(trim($data));
+    var_dump($name);
+    var_dump(trim($data));
 }
 
 echo "===ELEMENT===\n";
 
 foreach($sxe->elem11->children() as $name => $data) {
-	var_dump($name);
-	var_dump(trim($data));
+    var_dump($name);
+    var_dump(trim($data));
 }
 
 echo "===COMMENT===\n";
 
 foreach($sxe->elem1->children() as $name => $data) {
-	var_dump($name);
-	var_dump(trim($data));
+    var_dump($name);
+    var_dump(trim($data));
 }
 
 ?>
-===DONE===
 --EXPECT--
 string(5) "elem1"
 string(10) "Bla bla 1."
@@ -77,4 +76,3 @@ string(7) "Foo Bar"
 ===COMMENT===
 string(5) "elem2"
 string(28) "Here we have some text data."
-===DONE===

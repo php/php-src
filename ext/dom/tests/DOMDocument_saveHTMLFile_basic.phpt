@@ -5,11 +5,11 @@ Knut Urdalen <knut@php.net>
 #PHPTestFest2009 Norway 2009-06-09 \o/
 --SKIPIF--
 <?php
-require_once dirname(__FILE__) .'/skipif.inc';
+require_once __DIR__ .'/skipif.inc';
 ?>
 --FILE--
 <?php
-$filename = dirname(__FILE__)."/tmp_savehtmlfile".time().".html";
+$filename = __DIR__."/tmp_savehtmlfile".time().".html";
 $doc = new DOMDocument('1.0');
 $root = $doc->createElement('html');
 $root = $doc->appendChild($root);
@@ -24,6 +24,6 @@ var_dump($bytes);
 echo file_get_contents($filename);
 unlink($filename);
 ?>
---EXPECTF--
+--EXPECT--
 int(126)
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>This is the title</title></head></html>

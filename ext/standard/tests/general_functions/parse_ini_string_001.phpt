@@ -4,7 +4,7 @@ Test parse_ini_string() function
 <?php
 /* Prototype: array parse_ini_string(string $string [,bool $process_sections]);
    Description: parse_ini_string() loads in the ini file specified in filename,
-     and returns the settings in it in an associative array. 
+     and returns the settings in it in an associative array.
 */
 
 $parse_string = <<<EOD
@@ -23,7 +23,7 @@ PHP_CONSTANT = 1.2345678
 HELLO = HELLO
 
 [date]
-date = 
+date =
 time =
 
 [paths]
@@ -62,14 +62,14 @@ Non_alpha11 = /
 Non_alpha12 = \
 ;These chars have a special meaning when used in the value,
 ;  hence parser throws an error
-;Non_alpha13 = & 
+;Non_alpha13 = &
 ;Non_alpha14 = ^
 ;Non_alpha15 = {}
 ;Non_alpha16 = |
 ;Non_alpha17 = ~
 ;Non_alpha18 = !
 ;Non_alpha19 = $
-;Non_alpha20 = () 
+;Non_alpha20 = ()
 
 Non_alpha1_quotes = ";"
 Non_alpha2_quotes = "+"
@@ -170,7 +170,7 @@ Key16 = Null
 Key17 = nuLL
 Key18 = null
 
-[ReservedKeys_as_Keys] 
+[ReservedKeys_as_Keys]
 ; Expected:error, reserved key words must not be used as keys for ini file
 ;YES = 1
 ;Yes = 2
@@ -207,7 +207,7 @@ print_r($ini_array);
 
 echo "*** Done **\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Test parse_ini_string() function:  with various keys and values given in string ***
 -- ini string without process_sections optional arg --
 Array

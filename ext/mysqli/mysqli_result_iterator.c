@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +14,6 @@
   |          Andrey Hristov <andrey@php.net>                             |
   |          Ulf Wendel <uw@php.net>                                     |
   +----------------------------------------------------------------------+
-
-  $Id: mysqli.c 299335 2010-05-13 11:05:09Z andrey $
 */
 
 #ifdef HAVE_CONFIG_H
@@ -33,7 +29,7 @@
 #include "zend_interfaces.h"
 
 
-extern zend_object_iterator_funcs php_mysqli_result_iterator_funcs;
+extern const zend_object_iterator_funcs php_mysqli_result_iterator_funcs;
 
 typedef struct {
 	zend_object_iterator  intern;
@@ -54,7 +50,8 @@ zend_object_iterator *php_mysqli_result_get_iterator(zend_class_entry *ce, zval 
 	iterator = ecalloc(1, sizeof(php_mysqli_result_iterator));
 	zend_iterator_init(&iterator->intern);
 
-	ZVAL_COPY(&iterator->intern.data, object);
+	Z_ADDREF_P(object);
+	ZVAL_OBJ(&iterator->intern.data, Z_OBJ_P(object));
 	iterator->intern.funcs = &php_mysqli_result_iterator_funcs;
 	iterator->result = Z_MYSQLI_P(object);
 	iterator->row_num = -1;
@@ -68,7 +65,7 @@ static void php_mysqli_result_iterator_dtor(zend_object_iterator *iter)
 {
 	php_mysqli_result_iterator *iterator = (php_mysqli_result_iterator*)iter;
 
-	/* cleanup handled in sxe_object_dtor as we dont always have an iterator wrapper */
+	/* cleanup handled in sxe_object_dtor as we don't always have an iterator wrapper */
 	zval_ptr_dtor(&iterator->intern.data);
 	zval_ptr_dtor(&iterator->current_row);
 }
@@ -146,7 +143,7 @@ static void php_mysqli_result_iterator_current_key(zend_object_iterator *iter, z
 /* }}} */
 
 /* {{{ php_mysqli_result_iterator_funcs */
-zend_object_iterator_funcs php_mysqli_result_iterator_funcs = {
+const zend_object_iterator_funcs php_mysqli_result_iterator_funcs = {
 	php_mysqli_result_iterator_dtor,
 	php_mysqli_result_iterator_valid,
 	php_mysqli_result_iterator_current_data,
@@ -156,12 +153,3 @@ zend_object_iterator_funcs php_mysqli_result_iterator_funcs = {
 	NULL
 };
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

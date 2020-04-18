@@ -43,7 +43,7 @@ foreach( $strings as $str ){
 }
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing nl2br() : usage variations ***
 -- Iteration 1 --
 string(2) "\n"

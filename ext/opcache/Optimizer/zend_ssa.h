@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine, SSA - Static Single Assignment Form                     |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Dmitry Stogov <dmitry@zend.com>                             |
+   | Authors: Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -95,7 +95,6 @@ typedef struct _zend_ssa_op {
 typedef enum _zend_ssa_alias_kind {
 	NO_ALIAS,
 	SYMTABLE_ALIAS,
-	PHP_ERRORMSG_ALIAS,
 	HTTP_RESPONSE_HEADER_ALIAS
 } zend_ssa_alias_kind;
 
@@ -113,8 +112,8 @@ typedef struct _zend_ssa_var {
 	zend_ssa_phi          *definition_phi; /* phi that defines this value */
 	int                    use_chain;      /* uses of this value, linked through opN_use_chain */
 	zend_ssa_phi          *phi_use_chain;  /* uses of this value in Phi, linked through use_chain */
-	zend_ssa_phi          *sym_use_chain;  /* uses of this value in Pi constaints */
-	unsigned int           no_val : 1;     /* value doesn't mater (used as op1 in ZEND_ASSIGN) */
+	zend_ssa_phi          *sym_use_chain;  /* uses of this value in Pi constraints */
+	unsigned int           no_val : 1;     /* value doesn't matter (used as op1 in ZEND_ASSIGN) */
 	unsigned int           scc_entry : 1;
 	unsigned int           alias : 2;  /* value may be changed indirectly */
 	unsigned int           escape_state : 2;
@@ -132,18 +131,18 @@ typedef struct _zend_ssa_var_info {
 
 typedef struct _zend_ssa {
 	zend_cfg               cfg;            /* control flow graph             */
-	int                    rt_constants;   /* run-time or compile-time       */
 	int                    vars_count;     /* number of SSA variables        */
+	int                    sccs;           /* number of SCCs                 */
 	zend_ssa_block        *blocks;         /* array of SSA blocks            */
 	zend_ssa_op           *ops;            /* array of SSA instructions      */
 	zend_ssa_var          *vars;           /* use/def chain of SSA variables */
-	int                    sccs;           /* number of SCCs                 */
 	zend_ssa_var_info     *var_info;
 } zend_ssa;
 
 BEGIN_EXTERN_C()
 
 int zend_build_ssa(zend_arena **arena, const zend_script *script, const zend_op_array *op_array, uint32_t build_flags, zend_ssa *ssa);
+int zend_ssa_rename_op(const zend_op_array *op_array, const zend_op *opline, uint32_t k, uint32_t build_flags, int ssa_vars_count, zend_ssa_op *ssa_ops, int *var);
 int zend_ssa_compute_use_def_chains(zend_arena **arena, const zend_op_array *op_array, zend_ssa *ssa);
 int zend_ssa_unlink_use_chain(zend_ssa *ssa, int op, int var);
 
@@ -214,13 +213,18 @@ static zend_always_inline zend_ssa_phi* zend_ssa_next_use_phi(const zend_ssa *ss
 
 static zend_always_inline zend_bool zend_ssa_is_no_val_use(const zend_op *opline, const zend_ssa_op *ssa_op, int var)
 {
-	if (opline->opcode == ZEND_ASSIGN || opline->opcode == ZEND_UNSET_CV) {
+	if (opline->opcode == ZEND_ASSIGN
+			 || opline->opcode == ZEND_UNSET_CV
+			 || opline->opcode == ZEND_BIND_GLOBAL
+			 || opline->opcode == ZEND_BIND_STATIC) {
 		return ssa_op->op1_use == var && ssa_op->op2_use != var;
 	}
-	if (opline->opcode == ZEND_FE_FETCH_R) {
+	if (opline->opcode == ZEND_FE_FETCH_R || opline->opcode == ZEND_FE_FETCH_RW) {
 		return ssa_op->op2_use == var && ssa_op->op1_use != var;
 	}
-	if (ssa_op->result_use == var && opline->opcode != ZEND_ADD_ARRAY_ELEMENT) {
+	if (ssa_op->result_use == var
+			&& opline->opcode != ZEND_ADD_ARRAY_ELEMENT
+			&& opline->opcode != ZEND_ADD_ARRAY_UNPACK) {
 		return ssa_op->op1_use != var && ssa_op->op2_use != var;
 	}
 	return 0;
@@ -316,11 +320,3 @@ static zend_always_inline void zend_ssa_rename_defs_of_instr(zend_ssa *ssa, zend
 } while (0)
 
 #endif /* ZEND_SSA_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */

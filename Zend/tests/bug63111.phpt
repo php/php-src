@@ -9,9 +9,9 @@ interface MyInterface {
     static function bar();
 }
 abstract class Bar {
-	static function foo() {
-		echo "ok\n";
-	}
+    static function foo() {
+        echo "ok\n";
+    }
 }
 var_dump(is_callable(array("Foo", "bar")));
 var_dump(is_callable("Foo::bar"));
@@ -35,4 +35,3 @@ Fatal error: Uncaught Error: Cannot call abstract method Foo::bar() in %sbug6311
 Stack trace:
 #0 {main}
   thrown in %sbug63111.php on line 20
-

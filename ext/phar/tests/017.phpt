@@ -8,7 +8,7 @@ if (!extension_loaded("phar")) die("skip");
 phar.require_hash=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 $file = "<?php
 Phar::mapPhar('hio');
@@ -24,10 +24,10 @@ include $pname;
 $dir = opendir('phar://hio');
 ?>
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
 string(%d) "%s017.phar.php"
 bool(true)
 
-Warning: opendir(phar://hio): failed to open dir: phar error: no directory in "phar://hio", must have at least phar://hio/ for root directory (always use full path to a new phar)
+Warning: opendir(phar://hio): Failed to open directory: phar error: no directory in "phar://hio", must have at least phar://hio/ for root directory (always use full path to a new phar)
 phar url "phar://hio" is unknown in %s017.php on line %d

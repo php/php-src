@@ -1,4 +1,3 @@
-// $Id$
 // vim:ft=javascript
 
 ARG_WITH("gd", "Bundled GD support", "yes,shared");
@@ -15,8 +14,8 @@ if (PHP_GD != "no") {
 		CHECK_HEADER_ADD_INCLUDE("png.h", "CFLAGS_GD", PHP_GD +  ";" + PHP_PHP_BUILD + "\\include\\libpng15") ||
 		CHECK_HEADER_ADD_INCLUDE("png.h", "CFLAGS_GD", PHP_GD +  ";" + PHP_PHP_BUILD + "\\include\\libpng12")) &&
 		(CHECK_LIB("libiconv_a.lib;libiconv.lib", "gd", PHP_GD) || CHECK_LIB("iconv_a.lib;iconv.lib", "gd", PHP_GD)) &&
-		 CHECK_HEADER_ADD_INCLUDE("iconv.h", "CFLAGS_GD", PHP_GD) && 
-		(((PHP_ZLIB=="no") && (CHECK_LIB("zlib_a.lib;zlib.lib", "gd", PHP_GD) )) || 
+		 CHECK_HEADER_ADD_INCLUDE("iconv.h", "CFLAGS_GD", PHP_GD) &&
+		(((PHP_ZLIB=="no") && (CHECK_LIB("zlib_a.lib;zlib.lib", "gd", PHP_GD) )) ||
 			(PHP_ZLIB_SHARED && CHECK_LIB("zlib.lib", "gd", PHP_GD)) || (PHP_ZLIB == "yes" && (!PHP_ZLIB_SHARED))) &&
 		CHECK_LIB("libXpm_a.lib", "gd", PHP_GD) &&
 		CHECK_HEADER_ADD_INCLUDE("xpm.h", "CFLAGS_GD", PHP_GD + ";" + PHP_PHP_BUILD + "\\include\\X11")
@@ -41,7 +40,7 @@ if (PHP_GD != "no") {
 			gd_io_file.c gd_io_ss.c gd_jpeg.c gdkanji.c gd_png.c gd_ss.c \
 			gdtables.c gd_topal.c gd_wbmp.c gdxpm.c wbmp.c gd_xbm.c gd_security.c gd_transform.c \
 			gd_filter.c gd_pixelate.c gd_rotate.c gd_color_match.c gd_webp.c \
-			gd_crop.c gd_interpolation.c gd_matrix.c gd_bmp.c", "gd");
+			gd_crop.c gd_interpolation.c gd_matrix.c gd_bmp.c gd_tga.c", "gd");
 		AC_DEFINE('HAVE_LIBGD', 1, 'GD support');
 		ADD_FLAG("CFLAGS_GD", " \
 /D HAVE_GD_DYNAMIC_CTX_EX=1 \
@@ -64,6 +63,7 @@ if (PHP_GD != "no") {
 /D HAVE_GD_XPM  \
 /D HAVE_GD_FREETYPE=1  \
 /D HAVE_GD_BMP \
+/D HAVE_GD_TGA \
 /D HAVE_LIBGD13=1  \
 /D HAVE_LIBGD15=1  \
 /D HAVE_LIBGD20=1  \
@@ -72,13 +72,14 @@ if (PHP_GD != "no") {
 /D HAVE_LIBPNG  \
 /D HAVE_XPM  \
 /D HAVE_COLORCLOSESTHWB  \
+/D HAVE_GD_GET_INTERPOLATION \
 /D USE_GD_IOCTX \
 /D MSWIN32 \
 		");
 		if (ICC_TOOLSET) {
 			ADD_FLAG("LDFLAGS_GD", "/nodefaultlib:libcmt");
 		}
-		
+
 		PHP_INSTALL_HEADERS("", "ext/gd ext/gd/libgd" );
 	} else {
 		WARNING("gd not enabled; libraries and headers not found");

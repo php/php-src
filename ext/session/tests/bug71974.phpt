@@ -17,7 +17,5 @@ ob_start();
 session_start()
 ?>
 <a href="some.php">abc</a>
---EXPECTF--
+--EXPECT--
 <a href="some.php">abc</a>
-
-

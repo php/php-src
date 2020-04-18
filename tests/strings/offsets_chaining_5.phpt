@@ -1,7 +1,5 @@
 --TEST--
 testing the behavior of string offset chaining
---INI--
-error_reporting=E_ALL | E_DEPRECATED
 --FILE--
 <?php
 $array = array('expected_array' => "foobar");

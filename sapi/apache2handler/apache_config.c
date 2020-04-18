@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +13,6 @@
    | Author: Sascha Schumann <sascha@schumann.cx>                         |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #define ZEND_INCLUDE_FULL_WINDOWS_HEADERS
 
@@ -147,10 +143,28 @@ void config_entry_ctor(zval *zv)
 void *merge_php_config(apr_pool_t *p, void *base_conf, void *new_conf)
 {
 	php_conf_rec *d = base_conf, *e = new_conf, *n = NULL;
+#ifdef ZTS
+	zend_string *str;
+	zval *data;
+#endif
 
 	n = create_php_config(p, "merge_php_config");
 	/* copy old config */
+#ifdef ZTS
+	ZEND_HASH_FOREACH_STR_KEY_VAL(&d->config, str, data) {
+		zend_string *key;
+		zval *new_entry;
+
+		/* Avoid sharing the non interned string among threads. */
+		key = zend_string_dup(str, 1);
+
+		new_entry = zend_hash_add(&n->config, key, data);
+
+		config_entry_ctor(new_entry);
+	} ZEND_HASH_FOREACH_END();
+#else
 	zend_hash_copy(&n->config, &d->config, config_entry_ctor);
+#endif
 	/* merge new config */
 	phpapdebug((stderr, "Merge dir (%p)+(%p)=(%p)\n", base_conf, new_conf, n));
 	zend_hash_merge_ex(&n->config, &e->config, config_entry_ctor, should_overwrite_per_dir_entry, NULL);
@@ -217,12 +231,3 @@ void *create_php_config(apr_pool_t *p, char *dummy)
 	apr_pool_cleanup_register(p, newx, destroy_php_config, apr_pool_cleanup_null);
 	return (void *) newx;
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

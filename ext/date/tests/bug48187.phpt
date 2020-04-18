@@ -23,6 +23,6 @@ if (time() - $begin_t < 1) {
     var_dump('time() difference greater or equal 1 second');
 }
 ?>
---EXPECTF--
+--EXPECT--
 string(36) "microtime() difference less 1 second"
 string(31) "time() difference less 1 second"

@@ -5,7 +5,7 @@ Adam Gegotek <adam [dot] gegotek [at] gmail [dot] com>
 --FILE--
 <?php
 /* Prototype  : string http_build_query ( mixed $query_data [, string $numeric_prefix [, string $arg_separator [, int $enc_type = PHP_QUERY_RFC1738 ]]] )
- * Description: Generates a URL-encoded query string from the associative (or indexed) array provided. 
+ * Description: Generates a URL-encoded query string from the associative (or indexed) array provided.
  * Source code: ext/standard/http.c
 */
 
@@ -18,6 +18,6 @@ $oDimensional = array(
 echo http_build_query($oDimensional, '', ini_get('arg_separator.output'), PHP_QUERY_RFC1738) . PHP_EOL;
 echo http_build_query($oDimensional, '', ini_get('arg_separator.output'), PHP_QUERY_RFC3986);
 ?>
---EXPECTF--
+--EXPECT--
 name=main+page&sort=desc%2Cadmin&equation=10+%2B+10+-+5
 name=main%20page&sort=desc%2Cadmin&equation=10%20%2B%2010%20-%205

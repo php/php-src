@@ -1,5 +1,4 @@
 // vim:ft=javascript
-// $Id$
 
 ARG_ENABLE('cgi', 'Build CGI version of PHP', 'yes');
 

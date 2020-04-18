@@ -12,9 +12,9 @@ unset($f);
 echo $r, "\n";
 
 try  {
-	echo $r->getPrototype();
+    echo $r->getPrototype();
 } catch (Exception $e) {
-	echo $e->getMessage(), "\n";	
+    echo $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--

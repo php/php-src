@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,11 +10,9 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author:  Zeev Suraski <zeev@zend.com>                                |
+   | Author:  Zeev Suraski <zeev@php.net>                                 |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifndef SAPI_H
 #define SAPI_H
@@ -139,8 +135,9 @@ typedef struct _sapi_globals_struct {
 
 BEGIN_EXTERN_C()
 #ifdef ZTS
-# define SG(v) ZEND_TSRMG(sapi_globals_id, sapi_globals_struct *, v)
+# define SG(v) ZEND_TSRMG_FAST(sapi_globals_offset, sapi_globals_struct *, v)
 SAPI_API extern int sapi_globals_id;
+SAPI_API extern size_t sapi_globals_offset;
 #else
 # define SG(v) (sapi_globals.v)
 extern SAPI_API sapi_globals_struct sapi_globals;
@@ -151,6 +148,7 @@ SAPI_API void sapi_shutdown(void);
 SAPI_API void sapi_activate(void);
 SAPI_API void sapi_deactivate(void);
 SAPI_API void sapi_initialize_empty_request(void);
+SAPI_API void sapi_add_request_header(char *var, unsigned int var_len, char *val, unsigned int val_len, void *arg);
 END_EXTERN_C()
 
 /*
@@ -190,9 +188,9 @@ SAPI_API int sapi_send_headers(void);
 SAPI_API void sapi_free_header(sapi_header_struct *sapi_header);
 SAPI_API void sapi_handle_post(void *arg);
 SAPI_API size_t sapi_read_post_block(char *buffer, size_t buflen);
-SAPI_API int sapi_register_post_entries(sapi_post_entry *post_entry);
-SAPI_API int sapi_register_post_entry(sapi_post_entry *post_entry);
-SAPI_API void sapi_unregister_post_entry(sapi_post_entry *post_entry);
+SAPI_API int sapi_register_post_entries(const sapi_post_entry *post_entry);
+SAPI_API int sapi_register_post_entry(const sapi_post_entry *post_entry);
+SAPI_API void sapi_unregister_post_entry(const sapi_post_entry *post_entry);
 SAPI_API int sapi_register_default_post_reader(void (*default_post_reader)(void));
 SAPI_API int sapi_register_treat_data(void (*treat_data)(int arg, char *str, zval *destArray));
 SAPI_API int sapi_register_input_filter(unsigned int (*input_filter)(int arg, char *var, char **val, size_t val_len, size_t *new_val_len), unsigned int (*input_filter_init)(void));
@@ -321,12 +319,3 @@ END_EXTERN_C()
 	NULL  /* input_filter_init       */
 
 #endif /* SAPI_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

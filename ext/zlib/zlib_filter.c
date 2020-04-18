@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +13,6 @@
    | Authors: Sara Golemon (pollita@php.net)                              |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #include "php.h"
 #include "php_zlib.h"
@@ -78,12 +74,7 @@ static php_stream_filter_status_t php_zlib_inflate_filter(
 
 		bucket = php_stream_bucket_make_writeable(buckets_in->head);
 
-		while (bin < (unsigned int) bucket->buflen) {
-
-			if (data->finished) {
-				consumed += bucket->buflen;
-				break;
-			}
+		while (bin < (unsigned int) bucket->buflen && !data->finished) {
 
 			desired = bucket->buflen - bin;
 			if (desired > data->inbuf_len) {
@@ -96,6 +87,7 @@ static php_stream_filter_status_t php_zlib_inflate_filter(
 			if (status == Z_STREAM_END) {
 				inflateEnd(&(data->strm));
 				data->finished = '\1';
+				exit_status = PSFS_PASS_ON;
 			} else if (status != Z_OK) {
 				/* Something bad happened */
 				php_stream_bucket_delref(bucket);
@@ -118,10 +110,6 @@ static php_stream_filter_status_t php_zlib_inflate_filter(
 				data->strm.avail_out = data->outbuf_len;
 				data->strm.next_out = data->outbuf;
 				exit_status = PSFS_PASS_ON;
-			} else if (status == Z_STREAM_END && data->strm.avail_out >= data->outbuf_len) {
-				/* no more data to decompress, and nothing was spat out */
-				php_stream_bucket_delref(bucket);
-				return PSFS_PASS_ON;
 			}
 
 		}
@@ -167,7 +155,7 @@ static void php_zlib_inflate_dtor(php_stream_filter *thisfilter)
 	}
 }
 
-static php_stream_filter_ops php_zlib_inflate_ops = {
+static const php_stream_filter_ops php_zlib_inflate_ops = {
 	php_zlib_inflate_filter,
 	php_zlib_inflate_dtor,
 	"zlib.inflate"
@@ -276,7 +264,7 @@ static void php_zlib_deflate_dtor(php_stream_filter *thisfilter)
 	}
 }
 
-static php_stream_filter_ops php_zlib_deflate_ops = {
+static const php_stream_filter_ops php_zlib_deflate_ops = {
 	php_zlib_deflate_filter,
 	php_zlib_deflate_dtor,
 	"zlib.deflate"
@@ -288,7 +276,7 @@ static php_stream_filter_ops php_zlib_deflate_ops = {
 
 static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *filterparams, uint8_t persistent)
 {
-	php_stream_filter_ops *fops = NULL;
+	const php_stream_filter_ops *fops = NULL;
 	php_zlib_filter_data *data;
 	int status;
 
@@ -421,16 +409,7 @@ factory_setlevel:
 	return php_stream_filter_alloc(fops, data, persistent);
 }
 
-php_stream_filter_factory php_zlib_filter_factory = {
+const php_stream_filter_factory php_zlib_filter_factory = {
 	php_zlib_filter_create
 };
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

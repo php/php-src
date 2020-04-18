@@ -3,7 +3,7 @@ Test vsprintf() function : usage variations - scientific formats with non-scient
 --FILE--
 <?php
 /* Prototype  : string vsprintf(string format, array args)
- * Description: Return a formatted string 
+ * Description: Return a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
@@ -15,8 +15,8 @@ Test vsprintf() function : usage variations - scientific formats with non-scient
 echo "*** Testing vsprintf() : scientific formats and non-scientific values ***\n";
 
 // defining array of non-scientific formats
-$formats = 
-  '%e %+e %-e 
+$formats =
+  '%e %+e %-e
    %le %Le %4e %-4e
    %10.4e %-10.4e %04e %04.4e
    %\'#2e %\'2e %\'$2e %\'_2e
@@ -53,7 +53,7 @@ $args_array = array(
          true, false, TRUE, FALSE,
          0, 1, 1, 0,
          1, TRUE, 0, FALSE),
-  
+
 );
 
 // looping to test vsprintf() with different scientific formats from the above $format array
@@ -67,32 +67,32 @@ foreach($args_array as $args) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing vsprintf() : scientific formats and non-scientific values ***
 
 -- Iteration 1 --
-string(232) "2.200000e+0 +2.000000e-1 1.020000e+1 
+string(231) "2.200000e+0 +2.000000e-1 1.020000e+1
    1.234562e+5 e -1.234679e+3 1.234679e+3
     2.0000e+1 2.1220e+2  -4.110000e+11 2.2120e+3
    1.234578e+4 1.200000e+1 -1.200000e+1 -1.234562e+5
    1.020000e+1 1.234562e+5 2.200000e+0 2.000000e-1"
 
 -- Iteration 2 --
-string(228) "0.000000e+0 +0.000000e+0 0.000000e+0 
+string(227) "0.000000e+0 +0.000000e+0 0.000000e+0
    1.230000e+2 e -1.230000e+2 1.230000e+2
     0.0000e+0 0.0000e+0  1.234560e+5 0.0000e+0
    1.234000e+3 0.000000e+0 0.000000e+0 0.000000e+0
    0.000000e+0 1.230000e+2 0.000000e+0 0.000000e+0"
 
 -- Iteration 3 --
-string(227) "1.000000e+0 +1.000000e+0 1.000000e+0 
+string(226) "1.000000e+0 +1.000000e+0 1.000000e+0
    1.000000e+0 e 1.000000e+0 1.000000e+0
     1.0000e+0 1.0000e+0  1.000000e+0 1.0000e+0
    1.000000e+0 1.000000e+0 1.000000e+0 1.000000e+0
    1.000000e+0 1.000000e+0 1.000000e+0 1.000000e+0"
 
 -- Iteration 4 --
-string(227) "1.000000e+0 +1.000000e+0 0.000000e+0 
+string(226) "1.000000e+0 +1.000000e+0 0.000000e+0
    1.000000e+0 e 0.000000e+0 1.000000e+0
     1.0000e+0 0.0000e+0  1.000000e+0 0.0000e+0
    0.000000e+0 1.000000e+0 1.000000e+0 0.000000e+0

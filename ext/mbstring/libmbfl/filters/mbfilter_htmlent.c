@@ -31,14 +31,7 @@
 #include "config.h"
 #endif
 
-#ifdef HAVE_STRING_H
 #include <string.h>
-#endif
-
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif
-
 #include "mbfilter.h"
 #include "mbfilter_htmlent.h"
 #include "html_entities.h"
@@ -81,7 +74,8 @@ const struct mbfl_convert_vtbl vtbl_wchar_html = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_html_enc,
-	mbfl_filt_conv_html_enc_flush
+	mbfl_filt_conv_html_enc_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_html_wchar = {
@@ -91,7 +85,8 @@ const struct mbfl_convert_vtbl vtbl_html_wchar = {
 	mbfl_filt_conv_html_dec_dtor,
 	mbfl_filt_conv_html_dec,
 	mbfl_filt_conv_html_dec_flush,
-	mbfl_filt_conv_html_dec_copy };
+	mbfl_filt_conv_html_dec_copy,
+};
 
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)

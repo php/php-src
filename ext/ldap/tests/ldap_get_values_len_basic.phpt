@@ -15,10 +15,9 @@ insert_dummy_data($link, $base);
 $result = ldap_search($link, "$base", "(o=test)");
 $entry = ldap_first_entry($link, $result);
 var_dump(
-	ldap_get_values_len($link, $entry, "o")
+    ldap_get_values_len($link, $entry, "o")
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 include "connect.inc";
@@ -33,4 +32,3 @@ array(2) {
   ["count"]=>
   int(1)
 }
-===DONE===

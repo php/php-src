@@ -3,7 +3,7 @@ Bug #31402 (unserialize() generates references when it should not)
 --INI--
 error_reporting=E_ALL
 --FILE--
-<?php 
+<?php
 
 class TestX {
   var $i;
@@ -33,7 +33,6 @@ $after = unserialize($ser);
 var_dump($before, $after);
 
 ?>
-===DONE===
 --EXPECTF--
 object(TestY)#%d (2) {
   ["A"]=>
@@ -85,4 +84,3 @@ object(TestY)#%d (2) {
     int(1)
   }
 }
-===DONE===

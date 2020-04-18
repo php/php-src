@@ -4,15 +4,7 @@ Test copy() function: usage variations - destination dir access perms
 <?php
 if(substr(PHP_OS, 0, 3) == 'WIN')
   die("skip do not run on Windows");
-// Skip if being run by root (files are always readable, writeable and executable)
-$filename = dirname(__FILE__)."/copy_variation15_root_check.tmp";
-$fp = fopen($filename, 'w');
-fclose($fp);
-if(fileowner($filename) == 0) {
-        unlink ($filename);
-        die('skip cannot be run as root');
-}
-unlink($filename);
+require __DIR__ . '/../skipif_root.inc';
 ?>
 --FILE--
 <?php
@@ -23,7 +15,7 @@ unlink($filename);
 
 /* Test copy(): Trying to create a copy of file in a dir which doesn't have write permissions */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 echo "*** Test copy() function: Trying to create a copy of file in a dir which doesn't have write permissions ***";
 $file = $file_path."/copy_variation15.tmp";
@@ -40,7 +32,7 @@ chmod($dir, 0555);  //dir without write permissions
 
 $dest = $dir."/copy_copy_variation15.tmp";
 
-var_dump( copy($file, $dir."/copy_copy_variation15.tmp") ); 
+var_dump( copy($file, $dir."/copy_copy_variation15.tmp") );
 var_dump( file_exists($dir."/copy_copy_variation15_dir.tmp") );
 var_dump( filesize($file) );  //size of source
 
@@ -48,13 +40,11 @@ chmod($dir, $old_perms);
 
 echo "*** Done ***\n";
 ?>
-
 --CLEAN--
 <?php
-unlink(dirname(__FILE__)."/copy_variation15.tmp");
-rmdir(dirname(__FILE__)."/copy_variation15");
+unlink(__DIR__."/copy_variation15.tmp");
+rmdir(__DIR__."/copy_variation15");
 ?>
-
 --EXPECTF--
 *** Test copy() function: Trying to create a copy of file in a dir which doesn't have write permissions ***
 Warning: copy(%s): %s

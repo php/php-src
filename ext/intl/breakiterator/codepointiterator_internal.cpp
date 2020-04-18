@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -33,7 +31,9 @@ typedef union {
 
 using namespace PHP;
 
-UOBJECT_DEFINE_RTTI_IMPLEMENTATION(CodePointBreakIterator);
+using icu::UCharCharacterIterator;
+
+UOBJECT_DEFINE_RTTI_IMPLEMENTATION(CodePointBreakIterator)
 
 CodePointBreakIterator::CodePointBreakIterator()
 : BreakIterator(), fCharIter(NULL), lastCodePoint(U_SENTINEL)
@@ -51,7 +51,6 @@ CodePointBreakIterator::CodePointBreakIterator(const PHP::CodePointBreakIterator
 CodePointBreakIterator& CodePointBreakIterator::operator=(const CodePointBreakIterator& that)
 {
 	UErrorCode uec = UErrorCode();
-	UText *ut_clone = NULL;
 
 	if (this == &that) {
 		return *this;

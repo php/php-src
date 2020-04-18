@@ -3,7 +3,7 @@ SimpleXML: adding/removing attributes (second)
 --SKIPIF--
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--
-<?php 
+<?php
 $xml =<<<EOF
 <people>
    <person name="Joe"></person>
@@ -28,7 +28,6 @@ echo "---Unsupported---\n";
 $people->person[1]['age'] += 5;
 var_dump($people->person[1]['age']);
 ?>
-===DONE===
 --EXPECTF--
 object(SimpleXMLElement)#%d (1) {
   [0]=>
@@ -52,4 +51,3 @@ object(SimpleXMLElement)#%d (1) {
   [0]=>
   string(1) "5"
 }
-===DONE===

@@ -1,4 +1,3 @@
-
 /*
  * "streamable kanji code filter and converter"
  * Copyright (c) 1998-2002 HappySize, Inc. All rights reserved.
@@ -108,7 +107,8 @@ const struct mbfl_convert_vtbl vtbl_sjis_docomo_wchar = {
  	mbfl_filt_conv_common_ctor,
  	mbfl_filt_conv_common_dtor,
  	mbfl_filt_conv_sjis_mobile_wchar,
- 	mbfl_filt_conv_common_flush
+ 	mbfl_filt_conv_common_flush,
+ 	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_sjis_docomo = {
@@ -117,7 +117,8 @@ const struct mbfl_convert_vtbl vtbl_wchar_sjis_docomo = {
  	mbfl_filt_conv_common_ctor,
  	mbfl_filt_conv_common_dtor,
  	mbfl_filt_conv_wchar_sjis_mobile,
- 	mbfl_filt_conv_sjis_mobile_flush
+ 	mbfl_filt_conv_sjis_mobile_flush,
+ 	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_sjis_kddi_wchar = {
@@ -126,7 +127,8 @@ const struct mbfl_convert_vtbl vtbl_sjis_kddi_wchar = {
  	mbfl_filt_conv_common_ctor,
  	mbfl_filt_conv_common_dtor,
  	mbfl_filt_conv_sjis_mobile_wchar,
- 	mbfl_filt_conv_common_flush
+ 	mbfl_filt_conv_common_flush,
+ 	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_sjis_kddi = {
@@ -135,7 +137,8 @@ const struct mbfl_convert_vtbl vtbl_wchar_sjis_kddi = {
  	mbfl_filt_conv_common_ctor,
  	mbfl_filt_conv_common_dtor,
  	mbfl_filt_conv_wchar_sjis_mobile,
-	mbfl_filt_conv_sjis_mobile_flush
+	mbfl_filt_conv_sjis_mobile_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_sjis_sb_wchar = {
@@ -144,7 +147,8 @@ const struct mbfl_convert_vtbl vtbl_sjis_sb_wchar = {
  	mbfl_filt_conv_common_ctor,
  	mbfl_filt_conv_common_dtor,
  	mbfl_filt_conv_sjis_mobile_wchar,
- 	mbfl_filt_conv_common_flush
+ 	mbfl_filt_conv_common_flush,
+ 	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_sjis_sb = {
@@ -153,7 +157,8 @@ const struct mbfl_convert_vtbl vtbl_wchar_sjis_sb = {
  	mbfl_filt_conv_common_ctor,
  	mbfl_filt_conv_common_dtor,
  	mbfl_filt_conv_wchar_sjis_mobile,
-	mbfl_filt_conv_sjis_mobile_flush
+	mbfl_filt_conv_sjis_mobile_flush,
+	NULL,
 };
 
 static const char nflags_s[10][2] = {"CN","DE","ES","FR","GB","IT","JP","KR","RU","US"};
@@ -297,7 +302,7 @@ mbfilter_sjis_emoji_docomo2unicode(int s, int *snd)
 			w = mb_tbl_code2uni_docomo1[s - mb_tbl_code2uni_docomo1_min];
 			if (w > 0xf000) {
 				w += 0x10000;
-			} else if (w > 0xe000) { /* unsuported by Unicode 6.0 */
+			} else if (w > 0xe000) { /* unsupported by Unicode 6.0 */
 				w += 0xf0000;
 			}
 			*snd = 0;
@@ -332,7 +337,7 @@ mbfilter_sjis_emoji_kddi2unicode(int s, int *snd)
 			w = mb_tbl_code2uni_kddi1[si];
 			if (w > 0xf000) {
 				w += 0x10000;
-			} else if (w > 0xe000) { /* unsuported by Unicode 6.0 */
+			} else if (w > 0xe000) { /* unsupported by Unicode 6.0 */
 				w += 0xf0000;
 			}
 		}
@@ -350,7 +355,7 @@ mbfilter_sjis_emoji_kddi2unicode(int s, int *snd)
 			w = mb_tbl_code2uni_kddi2[si];
 			if (w > 0xf000) {
 				w += 0x10000;
-			} else if (w > 0xe000) { /* unsuported by Unicode 6.0 */
+			} else if (w > 0xe000) { /* unsupported by Unicode 6.0 */
 				w += 0xf0000;
 			}
 		}
@@ -377,7 +382,7 @@ mbfilter_sjis_emoji_sb2unicode(int s, int *snd)
 			w = mb_tbl_code2uni_sb1[si];
 			if (w > 0xf000) {
 				w += 0x10000;
-			} else if (w > 0xe000) { /* unsuported by Unicode 6.0 */
+			} else if (w > 0xe000) { /* unsupported by Unicode 6.0 */
 				w += 0xf0000;
 			}
 		}
@@ -386,7 +391,7 @@ mbfilter_sjis_emoji_sb2unicode(int s, int *snd)
 		w = mb_tbl_code2uni_sb2[si];
 		if (w > 0xf000) {
 			w += 0x10000;
-		} else if (w > 0xe000) { /* unsuported by Unicode 6.0 */
+		} else if (w > 0xe000) { /* unsupported by Unicode 6.0 */
 			w += 0xf0000;
 		}
 	} else if (s >= mb_tbl_code2uni_sb3_min && s <= mb_tbl_code2uni_sb3_max) {
@@ -398,7 +403,7 @@ mbfilter_sjis_emoji_sb2unicode(int s, int *snd)
 			w = mb_tbl_code2uni_sb3[si];
 			if (w > 0xf000) {
 				w += 0x10000;
-			} else if (w > 0xe000) { /* unsuported by Unicode 6.0 */
+			} else if (w > 0xe000) { /* unsupported by Unicode 6.0 */
 				w += 0xf0000;
 			}
 		}
@@ -906,9 +911,7 @@ mbfl_filt_conv_wchar_sjis_mobile(int c, mbfl_convert_filter *filter)
 			CK((*filter->output_function)(s2, filter->data));
 		}
 	} else {
-		if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-			CK(mbfl_filt_conv_illegal_output(c, filter));
-		}
+		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
 	return c;
@@ -930,4 +933,3 @@ mbfl_filt_conv_sjis_mobile_flush(mbfl_convert_filter *filter)
 
 	return 0;
 }
-

@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +13,6 @@
    | Author: Rasmus Lerdorf <rasmus@lerdorf.on.ca>                        |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifndef HTML_H
 #define HTML_H
@@ -47,12 +43,6 @@
 #define ENT_DISALLOWED	128
 
 void register_html_constants(INIT_FUNC_ARGS);
-
-PHP_FUNCTION(htmlspecialchars);
-PHP_FUNCTION(htmlentities);
-PHP_FUNCTION(htmlspecialchars_decode);
-PHP_FUNCTION(html_entity_decode);
-PHP_FUNCTION(get_html_translation_table);
 
 PHPAPI zend_string *php_escape_html_entities(unsigned char *old, size_t oldlen, int all, int flags, char *hint_charset);
 PHPAPI zend_string *php_escape_html_entities_ex(unsigned char *old, size_t oldlen, int all, int flags, char *hint_charset, zend_bool double_encode);

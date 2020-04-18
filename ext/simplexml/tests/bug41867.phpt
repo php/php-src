@@ -10,9 +10,7 @@ echo $a->getName()."\n";
 echo $a->b->getName()."\n";
 echo $a->b->c->getName()."\n";
 ?>
-===DONE===
 --EXPECT--
 a
 b
 c
-===DONE===

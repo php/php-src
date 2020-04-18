@@ -1,7 +1,7 @@
 --TEST--
 mime_content_type(): Testing wrong parameters
 --SKIPIF--
-<?php require_once(dirname(__FILE__) . '/skipif.inc'); ?>
+<?php require_once(__DIR__ . '/skipif.inc'); ?>
 --FILE--
 <?php
 
@@ -23,7 +23,7 @@ Warning: mime_content_type(): Can only process string or stream arguments in %s 
 
 Warning: mime_content_type(): Can only process string or stream arguments in %s on line %d
 
-Warning: mime_content_type(foo/inexistent): failed to open stream: No such file or directory in %s on line %d
+Warning: mime_content_type(foo/inexistent): Failed to open stream: No such file or directory in %s on line %d
 
 Warning: mime_content_type(): Empty filename or path in %s on line %d
 

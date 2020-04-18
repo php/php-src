@@ -13,4 +13,3 @@ Content-type: application/octet-stream
 Content-length: 4
 --EXPECT--
 hio3
-

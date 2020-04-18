@@ -1,7 +1,7 @@
 --TEST--
 Test finfo_file() function : regex rules
 --SKIPIF--
-<?php require_once(dirname(__FILE__) . '/skipif.inc'); 
+<?php require_once(__DIR__ . '/skipif.inc');
 ?>
 --FILE--
 <?php
@@ -10,7 +10,7 @@ Test finfo_file() function : regex rules
  * $ file -m magic resources/test.awk
  * resources/test.awk: awk script, ASCII text
  */
-$magicFile = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'magic';
+$magicFile = __DIR__ . DIRECTORY_SEPARATOR . 'magic';
 $finfo = finfo_open( FILEINFO_MIME, $magicFile );
 
 echo "*** Testing finfo_file() : regex rules ***\n";
@@ -21,9 +21,7 @@ var_dump( finfo_file( $finfo, $file ) );
 var_dump( finfo_file( $finfo, $file, FILEINFO_CONTINUE ) );
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing finfo_file() : regex rules ***
 string(28) "text/plain; charset=us-ascii"
-string(%d) "awk%sscript, ASCII text\012- data"
-===DONE===
+string(%d) "awk%sscript, ASCII text%A"

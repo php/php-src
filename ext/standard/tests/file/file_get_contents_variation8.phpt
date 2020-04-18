@@ -8,18 +8,20 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip.. Not valid for Windows');
 }
 ?>
+--CONFLICTS--
+obscure_filename
 --FILE--
 <?php
 /* Prototype  : string file_get_contents(string filename [, bool use_include_path [, resource context [, long offset [, long maxlen]]]])
- * Description: Read the entire file into a string 
+ * Description: Read the entire file into a string
  * Source code: ext/standard/file.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing file_get_contents() : variation ***\n";
-/* An array of filenames */ 
+/* An array of filenames */
 $names_arr = array(
-  /* Invalid args */ 
+  /* Invalid args */
   -1,
   TRUE,
   FALSE,
@@ -30,14 +32,18 @@ $names_arr = array(
   array(),
 
   /* prefix with path separator of a non existing directory*/
-  "/no/such/file/dir", 
+  "/no/such/file/dir",
   "php/php"
 
 );
 
 for( $i=0; $i<count($names_arr); $i++ ) {
   echo "-- Iteration $i --\n";
-  var_dump(file_get_contents($names_arr[$i]));
+  try {
+    var_dump(file_get_contents($names_arr[$i]));
+  } catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+  }
 }
 
 echo "\n*** Done ***\n";
@@ -46,11 +52,11 @@ echo "\n*** Done ***\n";
 *** Testing file_get_contents() : variation ***
 -- Iteration 0 --
 
-Warning: file_get_contents(-1): failed to open stream: No such file or directory in %s on line %d
+Warning: file_get_contents(-1): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 -- Iteration 1 --
 
-Warning: file_get_contents(1): failed to open stream: No such file or directory in %s on line %d
+Warning: file_get_contents(1): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 -- Iteration 2 --
 
@@ -66,23 +72,19 @@ Warning: file_get_contents(): Filename cannot be empty in %s on line %d
 bool(false)
 -- Iteration 5 --
 
-Warning: file_get_contents( ): failed to open stream: No such file or directory in %s on line %d
+Warning: file_get_contents( ): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 -- Iteration 6 --
-
-Warning: file_get_contents() expects parameter 1 to be a valid path, string given in %s on line %d
-NULL
+file_get_contents(): Argument #1 ($filename) must be a valid path, string given
 -- Iteration 7 --
-
-Warning: file_get_contents() expects parameter 1 to be a valid path, array given in %s on line %d
-NULL
+file_get_contents(): Argument #1 ($filename) must be a valid path, array given
 -- Iteration 8 --
 
-Warning: file_get_contents(/no/such/file/dir): failed to open stream: No such file or directory in %s on line %d
+Warning: file_get_contents(/no/such/file/dir): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 -- Iteration 9 --
 
-Warning: file_get_contents(php/php): failed to open stream: No such file or directory in %s on line %d
+Warning: file_get_contents(php/php): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 *** Done ***

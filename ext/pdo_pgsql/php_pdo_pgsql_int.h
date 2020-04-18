@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -17,8 +15,6 @@
   |          Wez Furlong <wez@php.net>                                   |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifndef PHP_PDO_PGSQL_INT_H
 #define PHP_PDO_PGSQL_INT_H
@@ -77,7 +73,7 @@ typedef struct {
 	Oid     oid;
 } pdo_pgsql_bound_param;
 
-extern pdo_driver_t pdo_pgsql_driver;
+extern const pdo_driver_t pdo_pgsql_driver;
 
 extern int _pdo_pgsql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, int errcode, const char *sqlstate, const char *msg, const char *file, int line);
 #define pdo_pgsql_error(d,e,z)	_pdo_pgsql_error(d, NULL, e, z, NULL, __FILE__, __LINE__)
@@ -85,7 +81,7 @@ extern int _pdo_pgsql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, int errcode, const
 #define pdo_pgsql_error_stmt(s,e,z)	_pdo_pgsql_error(s->dbh, s, e, z, NULL, __FILE__, __LINE__)
 #define pdo_pgsql_error_stmt_msg(s,e,m)	_pdo_pgsql_error(s->dbh, s, e, NULL, m, __FILE__, __LINE__)
 
-extern struct pdo_stmt_methods pgsql_stmt_methods;
+extern const struct pdo_stmt_methods pgsql_stmt_methods;
 
 #define pdo_pgsql_sqlstate(r) PQresultErrorField(r, PG_DIAG_SQLSTATE)
 
@@ -109,15 +105,6 @@ enum pdo_pgsql_specific_constants {
 };
 
 php_stream *pdo_pgsql_create_lob_stream(zval *pdh, int lfd, Oid oid);
-extern php_stream_ops pdo_pgsql_lob_stream_ops;
+extern const php_stream_ops pdo_pgsql_lob_stream_ops;
 
 #endif /* PHP_PDO_PGSQL_INT_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

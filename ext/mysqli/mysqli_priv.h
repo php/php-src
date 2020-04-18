@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -14,8 +12,6 @@
   +----------------------------------------------------------------------+
   | Author: Georg Richter <georg@php.net>                                |
   +----------------------------------------------------------------------+
-
-  $Id: php_mysqli_structs.h 302179 2010-08-13 09:57:04Z andrey $
 */
 
 #ifndef MYSQLI_PRIV_H
@@ -92,6 +88,7 @@ PHP_MYSQLI_EXPORT(zend_object *) mysqli_objects_new(zend_class_entry *);
 	mysql->multi_query = 1; \
 }
 
+/* Numbers that cannot be represented as a signed int are converted to a string instead (affects 32-bit builds). */
 #define MYSQLI_RETURN_LONG_INT(__val) \
 { \
 	if ((__val) < ZEND_LONG_MAX) {		\

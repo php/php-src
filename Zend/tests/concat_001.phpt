@@ -6,9 +6,9 @@ precision=14
 <?php
 
 class test {
-	function __toString() {
-		return "this is test object";
-	}
+    function __toString() {
+        return "this is test object";
+    }
 }
 
 $a = array(1,2,3);
@@ -49,26 +49,25 @@ var_dump($d.$d);
 
 echo "Done\n";
 ?>
---EXPECTF--	
-
-Notice: Array to string conversion in %sconcat_001.php on line %d
+--EXPECTF--
+Warning: Array to string conversion in %s on line %d
 string(24) "Arraythis is test object"
 
-Notice: Array to string conversion in %sconcat_001.php on line %d
+Warning: Array to string conversion in %s on line %d
 string(16) "Arraysome string"
 
-Notice: Array to string conversion in %sconcat_001.php on line %d
+Warning: Array to string conversion in %s on line %d
 string(8) "Array222"
 
-Notice: Array to string conversion in %sconcat_001.php on line %d
+Warning: Array to string conversion in %s on line %d
 string(13) "Array2323.444"
 
-Notice: Array to string conversion in %sconcat_001.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sconcat_001.php on line %d
+Warning: Array to string conversion in %s on line %d
 string(10) "ArrayArray"
 
-Notice: Array to string conversion in %sconcat_001.php on line %d
+Warning: Array to string conversion in %s on line %d
 string(24) "this is test objectArray"
 string(30) "this is test objectsome string"
 string(22) "this is test object222"
@@ -76,20 +75,20 @@ string(27) "this is test object2323.444"
 string(38) "this is test objectthis is test object"
 string(30) "some stringthis is test object"
 
-Notice: Array to string conversion in %sconcat_001.php on line %d
+Warning: Array to string conversion in %s on line %d
 string(16) "some stringArray"
 string(14) "some string222"
 string(19) "some string2323.444"
 string(22) "some stringsome string"
 
-Notice: Array to string conversion in %sconcat_001.php on line %d
+Warning: Array to string conversion in %s on line %d
 string(8) "222Array"
 string(22) "222this is test object"
 string(14) "222some string"
 string(11) "2222323.444"
 string(6) "222222"
 
-Notice: Array to string conversion in %sconcat_001.php on line %d
+Warning: Array to string conversion in %s on line %d
 string(13) "2323.444Array"
 string(27) "2323.444this is test object"
 string(19) "2323.444some string"

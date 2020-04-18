@@ -11,7 +11,7 @@ include "include.inc";
 $php = get_cgi_path();
 reset_env_vars();
 
-$filename = dirname(__FILE__)."/006.test.php";
+$filename = __DIR__."/006.test.php";
 
 $code = '
 <?php
@@ -19,7 +19,7 @@ $code = '
 $test = "var";
 
 class test {
-	private $var;
+    private $var;
 }
 
 echo test::$var;
@@ -35,8 +35,8 @@ var_dump(`"$php" -n -l some.unknown`);
 $code = '
 <?php
 
-class test 
-	private $var;
+class test
+    private $var;
 }
 
 ?>
@@ -45,16 +45,16 @@ class test
 file_put_contents($filename, $code);
 
 if (defined("PHP_WINDOWS_VERSION_MAJOR")) {
-	var_dump(`"$php" -n -l "$filename"`);
+    var_dump(`"$php" -n -l "$filename"`);
 } else {
-	var_dump(`"$php" -n -l "$filename" 2>/dev/null`);
+    var_dump(`"$php" -n -l "$filename" 2>/dev/null`);
 }
 
 @unlink($filename);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(%d) "No syntax errors detected in %s006.test.php
 "
 string(%d) "No input file specified.

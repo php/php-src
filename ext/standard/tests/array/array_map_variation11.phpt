@@ -3,7 +3,7 @@ Test array_map() function : usage variations - with recursive callback
 --FILE--
 <?php
 /* Prototype  : array array_map  ( callback $callback  , array $arr1  [, array $...  ] )
- * Description: Applies the callback to the elements of the given arrays 
+ * Description: Applies the callback to the elements of the given arrays
  * Source code: ext/standard/array.c
  */
 
@@ -26,7 +26,7 @@ var_dump( array_map('square_recur_single_array', $array1));
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_map() : recursive callback function ***
 array(3) {
   [0]=>

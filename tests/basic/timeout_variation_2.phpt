@@ -1,25 +1,19 @@
 --TEST--
-Timeout within array_walk
+Timeout within array_map
 --SKIPIF--
-<?php 
-	if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
+<?php
+if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
+if (PHP_OS_FAMILY !== "Windows") die("skip Windows only test");
 ?>
 --FILE--
 <?php
 
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "timeout_config.inc";
+set_time_limit(1);
 
-set_time_limit($t);
-
-function cb(&$i, $k, $p)
-{ 
-	busy_wait(1);
-}
-
-$a = array(1 => 1, 2 => 1, 3 => 1, 4 => 1, 5 => 1, 6 => 1, 7 => 1);
-array_walk($a, "cb", "junk");
+$a = array(1, 1);
+array_map("sleep", $a);
 
 ?>
 never reached here
 --EXPECTF--
-Fatal error: Maximum execution time of 3 seconds exceeded in %s on line %d
+Fatal error: Maximum execution time of 1 second exceeded in %s on line %d

@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,7 +18,7 @@
    | ZTS per process OCIPLogon by Harald Radi <harald.radi@nme.at>        |
    |                                                                      |
    | Redesigned by: Antony Dovgal <antony@zend.com>                       |
-   |                Andi Gutmans <andi@zend.com>                          |
+   |                Andi Gutmans <andi@php.net>                           |
    |                Wez Furlong <wez@omniti.com>                          |
    +----------------------------------------------------------------------+
 */
@@ -43,7 +41,7 @@
  */
 #undef PHP_OCI8_VERSION
 #endif
-#define PHP_OCI8_VERSION "2.1.8"
+#define PHP_OCI8_VERSION "2.2.0"
 
 extern zend_module_entry oci8_module_entry;
 #define phpext_oci8_ptr &oci8_module_entry
@@ -63,10 +61,3 @@ PHP_MINFO_FUNCTION(oci);
 # define oci8_module_ptr NULL
 
 #endif /* HAVE_OCI8 */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */

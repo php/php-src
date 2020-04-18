@@ -9,7 +9,7 @@ Test debug_zval_dump() function : working on objects
 */
 
 /* Prototype: void zval_dump( $value );
-   Description: use debug_zval_dump() to display the objects and its 
+   Description: use debug_zval_dump() to display the objects and its
                 reference count */
 function zval_dump( $values ) {
   $counter = 1;
@@ -29,13 +29,13 @@ class object_class {
   public $value4 = 30;
 
   private function foo1() {
-	echo "function foo1\n";
+    echo "function foo1\n";
   }
   protected function foo2() {
-	echo "function foo2\n";
+    echo "function foo2\n";
   }
   public function foo3() {
-	echo "function foo3\n";
+    echo "function foo3\n";
   }
   public $array_var  = array( "key1" => 1, "key2 " => 3);
 
@@ -76,7 +76,7 @@ class contains_object_class
 }
 
 /* creating new object $obj */
-$obj = new contains_object_class(); 
+$obj = new contains_object_class();
 $obj1 = & $obj;  //object $obj1 references object $obj
 $obj2 = & $obj;
 $obj3 = & $obj2;

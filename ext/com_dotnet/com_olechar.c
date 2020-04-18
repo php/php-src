@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +14,6 @@
    |         Harald Radi <h.radi@nme.at>                                  |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -65,7 +61,7 @@ PHP_COM_DOTNET_API OLECHAR *php_com_string_to_olestring(char *string, size_t str
 		php_error_docref(NULL, E_WARNING,
 			"Could not convert string to unicode: `%s'", msg);
 
-		LocalFree(msg);
+		php_win32_error_msg_free(msg);
 	}
 
 	return olestring;
@@ -96,7 +92,7 @@ PHP_COM_DOTNET_API char *php_com_olestring_to_string(OLECHAR *olestring, size_t 
 		php_error_docref(NULL, E_WARNING,
 			"Could not convert string from unicode: `%s'", msg);
 
-		LocalFree(msg);
+		php_win32_error_msg_free(msg);
 	}
 
 	if (string_len) {

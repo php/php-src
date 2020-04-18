@@ -1,5 +1,5 @@
 --TEST--
-Test mb_strstr() function : basic functionality 
+Test mb_strstr() function : basic functionality
 --SKIPIF--
 <?php
 extension_loaded('mbstring') or die('skip');
@@ -8,9 +8,9 @@ function_exists('mb_strstr') or die("skip mb_strstr() is not available in this b
 --FILE--
 <?php
 /* Prototype  : string mb_strstr(string haystack, string needle[, bool part[, string encoding]])
- * Description: Finds first occurrence of a string within another 
+ * Description: Finds first occurrence of a string within another
  * Source code: ext/mbstring/mbstring.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing mb_strstr() : basic functionality ***\n";
@@ -42,7 +42,6 @@ $needle2 = base64_decode('44GT44KT44Gr44Gh44Gv44CB5LiW55WM');
 var_dump(mb_strstr($string_mb, $needle2));
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing mb_strstr() : basic functionality ***
 
@@ -61,4 +60,3 @@ string(0) ""
 
 -- Multibyte string: needle doesn't exist --
 bool(false)
-===DONE===

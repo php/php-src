@@ -2,8 +2,11 @@
 dns_check_record() segfault with empty host
 --FILE--
 <?php
-var_dump(dns_check_record(''));
+try {
+    var_dump(dns_check_record(''));
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 ?>
---EXPECTF--
-Warning: dns_check_record(): Host cannot be empty in %s on line %d
-bool(false)
+--EXPECT--
+dns_check_record(): Argument #1 ($hostname) cannot be empty

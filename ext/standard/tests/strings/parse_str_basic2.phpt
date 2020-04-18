@@ -1,7 +1,7 @@
 --TEST--
 Test parse_str() function : non-default arg_separator.input specified
 --INI--
-arg_separator.input = "/" 
+arg_separator.input = "/"
 --FILE--
 <?php
 /* Prototype  : void parse_str  ( string $str  [, array &$arr  ] )
@@ -16,7 +16,6 @@ var_dump(parse_str($s1, $result));
 var_dump($result);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing parse_str() : non-default arg_separator.input specified ***
 NULL
@@ -28,4 +27,3 @@ array(3) {
   ["third"]=>
   string(4) "val3"
 }
-===DONE===

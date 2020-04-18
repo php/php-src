@@ -10,9 +10,9 @@ Test fscanf() function: usage variations - string formats with integer values
 
 /* Test fscanf() to scan integer values using different string format types */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
-echo "*** Test fscanf(): different string format types with integer values ***\n"; 
+echo "*** Test fscanf(): different string format types with integer values ***\n";
 
 // create a file
 $filename = "$file_path/fscanf_variation18.tmp";
@@ -73,7 +73,11 @@ foreach($string_formats as $string_format) {
   rewind($file_handle);
   echo "\n-- iteration $counter --\n";
   while( !feof($file_handle) ) {
-    var_dump( fscanf($file_handle,$string_format) );
+    try {
+      var_dump(fscanf($file_handle,$string_format));
+    } catch (ValueError $exception) {
+      echo $exception->getMessage() . "\n";
+    }
   }
   $counter++;
 }
@@ -82,11 +86,11 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $filename = "$file_path/fscanf_variation18.tmp";
 unlink($filename);
 ?>
---EXPECTF--
+--EXPECT--
 *** Test fscanf(): different string format types with integer values ***
 
 -- iteration 1 --
@@ -540,60 +544,24 @@ array(1) {
 bool(false)
 
 -- iteration 7 --
-
-Warning: fscanf(): Bad scan conversion character " " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character " " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character " " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character " " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character " " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character " " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character " " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character " " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character " " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character " " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character " " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character " " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character " " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character " " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character " " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character " " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character " " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character " " in %s on line %d
-NULL
+Bad scan conversion character " "
+Bad scan conversion character " "
+Bad scan conversion character " "
+Bad scan conversion character " "
+Bad scan conversion character " "
+Bad scan conversion character " "
+Bad scan conversion character " "
+Bad scan conversion character " "
+Bad scan conversion character " "
+Bad scan conversion character " "
+Bad scan conversion character " "
+Bad scan conversion character " "
+Bad scan conversion character " "
+Bad scan conversion character " "
+Bad scan conversion character " "
+Bad scan conversion character " "
+Bad scan conversion character " "
+Bad scan conversion character " "
 bool(false)
 
 -- iteration 8 --
@@ -1011,4 +979,3 @@ array(0) {
 bool(false)
 
 *** Done ***
-

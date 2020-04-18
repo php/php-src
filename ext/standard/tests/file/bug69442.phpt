@@ -17,7 +17,7 @@ EOC;
     $output = join("\n", $output);
     unlink($tmpFile);
 
-    if (strstr($output, "pty pseudo terminal not supported on this system") !== false) {
+    if (strstr($output, "PTY pseudo terminal not supported on this system") !== false) {
         die("skip PTY pseudo terminals are not supported");
     }
 --FILE--
@@ -42,5 +42,3 @@ type 1 string(0) ""
 type 2 string(0) ""
 type 3 string(3) "42
 "
-
-

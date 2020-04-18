@@ -10,6 +10,6 @@ var_dump(strpos("foo bar", 111));
 var_dump(strpos("foo 11", "11"));
 ?>
 --EXPECT--
+int(4)
 bool(false)
-int(1)
 int(4)

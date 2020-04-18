@@ -1,7 +1,7 @@
 --TEST--
 PDO Common: PDO::FETCH_BOUND w/o :
 --SKIPIF--
-<?php # vim:ft=php
+<?php
 if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
@@ -11,12 +11,12 @@ PDOTest::skip();
 ?>
 --FILE--
 <?php
-if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE__) . '/../../pdo/tests/');
+if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../../pdo/tests/');
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
 if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'mysql') {
-	$db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
+    $db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
 }
 
 $db->exec('CREATE TABLE test(idx int NOT NULL PRIMARY KEY, txt VARCHAR(20))');
@@ -42,39 +42,39 @@ $stmt2->bindColumn('txt', $txt);
 $stmt2->execute();
 
 while($stmt2->fetch(PDO::FETCH_BOUND)) {
-	var_dump(array($idx=>$txt));
+    var_dump(array($idx=>$txt));
 }
 
 echo "===ALONE===\n";
 
-$stmt3 = $db->prepare('SELECT txt FROM test WHERE idx=:inp'); 
+$stmt3 = $db->prepare('SELECT txt FROM test WHERE idx=:inp');
 $stmt3->bindParam('inp', $idx); /* by foreign name */
 
-$stmt4 = $db->prepare('SELECT idx FROM test WHERE txt=:txt'); 
+$stmt4 = $db->prepare('SELECT idx FROM test WHERE txt=:txt');
 $stmt4->bindParam('txt', $txt);  /* using same name */
 
 foreach($cont as $idx => $txt)
 {
-	var_dump(array($idx=>$txt));
-	var_dump($stmt3->execute());
+    var_dump(array($idx=>$txt));
+    var_dump($stmt3->execute());
 
-	if ($idx == 0) {
-		/* portability-wise, you may only bindColumn()s
-		 * after execute() has been called at least once */
-		$stmt3->bindColumn('txt', $col1);
-	}
-	var_dump($stmt3->fetch(PDO::FETCH_BOUND));
-	$stmt3->closeCursor();
+    if ($idx == 0) {
+        /* portability-wise, you may only bindColumn()s
+         * after execute() has been called at least once */
+        $stmt3->bindColumn('txt', $col1);
+    }
+    var_dump($stmt3->fetch(PDO::FETCH_BOUND));
+    $stmt3->closeCursor();
 
-	var_dump($stmt4->execute());
-	if ($idx == 0) {
-		/* portability-wise, you may only bindColumn()s
-		 * after execute() has been called at least once */
-		$stmt4->bindColumn('idx', $col2);
-	}
-	var_dump($stmt4->fetch(PDO::FETCH_BOUND));
-	$stmt4->closeCursor();
-	var_dump(array($col2=>$col1));
+    var_dump($stmt4->execute());
+    if ($idx == 0) {
+        /* portability-wise, you may only bindColumn()s
+         * after execute() has been called at least once */
+        $stmt4->bindColumn('idx', $col2);
+    }
+    var_dump($stmt4->fetch(PDO::FETCH_BOUND));
+    $stmt4->closeCursor();
+    var_dump(array($col2=>$col1));
 }
 
 echo "===REBIND/SAME===\n";
@@ -83,15 +83,15 @@ $stmt4->bindColumn('idx', $col1);
 
 foreach($cont as $idx => $txt)
 {
-	var_dump(array($idx=>$txt));
-	var_dump($stmt3->execute());
-	var_dump($stmt3->fetch(PDO::FETCH_BOUND));
-	$stmt3->closeCursor();
-	var_dump($col1);
-	var_dump($stmt4->execute());
-	var_dump($stmt4->fetch(PDO::FETCH_BOUND));
-	$stmt4->closeCursor();
-	var_dump($col1);
+    var_dump(array($idx=>$txt));
+    var_dump($stmt3->execute());
+    var_dump($stmt3->fetch(PDO::FETCH_BOUND));
+    $stmt3->closeCursor();
+    var_dump($col1);
+    var_dump($stmt4->execute());
+    var_dump($stmt4->fetch(PDO::FETCH_BOUND));
+    $stmt4->closeCursor();
+    var_dump($col1);
 }
 
 echo "===REBIND/CONFLICT===\n";
@@ -102,7 +102,7 @@ $stmt2->execute();
 
 while($stmt2->fetch(PDO::FETCH_BOUND))
 {
-	var_dump($col1);
+    var_dump($col1);
 }
 
 

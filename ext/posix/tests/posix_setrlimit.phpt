@@ -2,7 +2,7 @@
 posix_setrlimit(): Basic tests
 --SKIPIF--
 <?php
-if (!extension_loaded('posix')) die('skip - POSIX extension not loaded'); 
+if (!extension_loaded('posix')) die('skip - POSIX extension not loaded');
 if (!function_exists('posix_setrlimit')) die('skip posix_setrlimit() not found');
 ?>
 --FILE--
@@ -12,7 +12,6 @@ var_dump(posix_setrlimit(POSIX_RLIMIT_NOFILE, 128, 128));
 var_dump(posix_setrlimit(POSIX_RLIMIT_NOFILE, 129, 128));
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(false)
-

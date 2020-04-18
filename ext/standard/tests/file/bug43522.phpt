@@ -9,10 +9,10 @@ DoTest($fp, 'ZZZ');  // test multi-char delimiter
 DoTest($fp, "Z");  // test single-char delimiter
 
 function DoTest($fp, $delim) {
-	echo "Delimiter:  " . $delim . "\n";
-	rewind($fp);
-	echo "\t" . stream_get_line($fp, 10, $delim) . "\n";
-	echo "\t" . stream_get_line($fp, 10, $delim) . "\n";
+    echo "Delimiter:  " . $delim . "\n";
+    rewind($fp);
+    echo "\t" . stream_get_line($fp, 10, $delim) . "\n";
+    echo "\t" . stream_get_line($fp, 10, $delim) . "\n";
 }
 
 ?>

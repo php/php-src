@@ -1,8 +1,5 @@
 --TEST--
-Test is_callable() function : usage variations - on invalid function names  
---INI--
-precision=14
-error_reporting = E_ALL & ~E_NOTICE | E_STRICT
+Test is_callable() function : usage variations - on invalid function names
 --FILE--
 <?php
 /* Prototype: bool is_callable ( mixed $var [, bool $syntax_only [, string &$callable_name]] );
@@ -60,7 +57,6 @@ check_iscallable($variants);
 fclose($file_handle);
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing is_callable() on invalid function names ***
 -- Iteration  1 --
@@ -151,4 +147,3 @@ Resource id #%d
 bool(false)
 bool(false)
 Resource id #%d
-===DONE===

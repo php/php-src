@@ -12,10 +12,10 @@ session.save_handler=files
 
 ob_start();
 
-/* 
+/*
  * Prototype : bool session_set_save_handler(callback $open, callback $close, callback $read, callback $write, callback $destroy, callback $gc)
  * Description : Sets user-level session storage functions
- * Source code : ext/session/session.c 
+ * Source code : ext/session/session.c
  */
 
 echo "*** Testing session_set_save_handler() : basic functionality ***\n";
@@ -26,7 +26,7 @@ var_dump(session_module_name(FALSE));
 var_dump(session_module_name("blah"));
 var_dump(session_module_name("foo"));
 
-$path = dirname(__FILE__);
+$path = __DIR__;
 session_save_path($path);
 session_set_save_handler("open", "close", "read", "write", "destroy", "gc");
 
@@ -49,6 +49,12 @@ var_dump($_SESSION);
 $_SESSION['Bar'] = 'Foo';
 session_write_close();
 
+echo "Garbage collection..\n";
+session_id($session_id);
+session_start();
+var_dump(session_gc());
+session_write_close();
+
 echo "Cleanup..\n";
 session_id($session_id);
 session_start();
@@ -58,7 +64,6 @@ ob_end_flush();
 ?>
 --EXPECTF--
 *** Testing session_set_save_handler() : basic functionality ***
-
 string(%d) "%s"
 
 Warning: session_module_name(): Cannot find named PHP session module () in %s on line %d
@@ -100,6 +105,12 @@ array(3) {
   ["Guff"]=>
   int(1234567890)
 }
+Write [%s,%s,Blah|s:12:"Hello World!";Foo|b:0;Guff|i:1234567890;Bar|s:3:"Foo";]
+Close [%s,PHPSESSID]
+Garbage collection..
+Open [%s,PHPSESSID]
+Read [%s,%s]
+int(0)
 Write [%s,%s,Blah|s:12:"Hello World!";Foo|b:0;Guff|i:1234567890;Bar|s:3:"Foo";]
 Close [%s,PHPSESSID]
 Cleanup..

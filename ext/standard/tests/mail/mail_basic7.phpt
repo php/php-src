@@ -1,13 +1,8 @@
 --TEST--
 Test mail() function : array extra header basic functionality
 --INI--
-sendmail_path=tee mailBasic.out >/dev/null
+sendmail_path={MAIL:mailBasic7.out}
 mail.add_x_header = Off
---SKIPIF--
-<?php
-if(substr(PHP_OS, 0, 3) == "WIN")
-  die("skip Won't run on Windows");
-?>
 --FILE--
 <?php
 /* Prototype  : int mail(string to, string subject, string message [, mixed additional_headers [, string additional_parameters]])
@@ -27,15 +22,15 @@ $to = 'user@example.com';
 $subject = 'Test Subject';
 $message = 'A Message';
 $additional_headers = array(
-	'KHeaders' => 'aaaa',
-	'bcc'=>'foo@bar',
-	'foo'=>
-	array(
-		"bar\r\n hoge",
-		"bar\r\n\t fuga",
-	),
+    'KHeaders' => 'aaaa',
+    'bcc'=>'foo@bar',
+    'foo'=>
+    array(
+        "bar\r\n hoge",
+        "bar\r\n\t fuga",
+    ),
 );
-$outFile = "mailBasic.out";
+$outFile = "mailBasic7.out";
 @unlink($outFile);
 
 echo "-- All Mail Content Parameters --\n";
@@ -53,16 +48,16 @@ $subject = 'Test Subject';
 $message = 'A Message';
 // Headers should not have array values
 $additional_headers = array(
-	'orig-date' => array('foo1'),
-	'from' => array('foo2'),
-	'sender' => array('foo3'),
-	'reply-to' => array('foo4'),
-	'to' => array('foo5'),
-	'bcc' => array('foo6'),
-	'message-id' => array('foo7'),
-	'in-reply-to'=> array('foo8'),
+    'orig-date' => array('foo1'),
+    'from' => array('foo2'),
+    'sender' => array('foo3'),
+    'reply-to' => array('foo4'),
+    'to' => array('foo5'),
+    'bcc' => array('foo6'),
+    'message-id' => array('foo7'),
+    'in-reply-to'=> array('foo8'),
 );
-$outFile = "mailBasic.out";
+$outFile = "mailBasic7.out";
 @unlink($outFile);
 
 echo "-- All Mail Content Parameters --\n";
@@ -79,15 +74,15 @@ $to = 'user@example.com';
 $subject = 'Test Subject';
 $message = 'A Message';
 $additional_headers = array(
-	'foo1' => array('foo1'=>'bar1'),
-	'foo2' => array('foo2', array('foo3')),
-	'foo3' => array(123),
-	'foo4' => array(123.456),
-	'foo5' => array(FALSE),
-	'foo6' => array(NULL),
-	'foo7' => array(new StdClass),
+    'foo1' => array('foo1'=>'bar1'),
+    'foo2' => array('foo2', array('foo3')),
+    'foo3' => array(123),
+    'foo4' => array(123.456),
+    'foo5' => array(FALSE),
+    'foo6' => array(NULL),
+    'foo7' => array(new StdClass),
 );
-$outFile = "mailBasic.out";
+$outFile = "mailBasic7.out";
 @unlink($outFile);
 
 echo "-- All Mail Content Parameters --\n";
@@ -104,18 +99,18 @@ $to = 'user@example.com';
 $subject = 'Test Subject';
 $message = 'A Message';
 $additional_headers = array(
-	'*:foo1' => array('bar1'),
-	'foo2:::' => array('bar1'),
-	'foo3()' => array('bar1'),
-	'foo4@' => array('bar1'),
-	'foo5|' => array('bar1'),
-	"\0foo6" => array('bar1'),
-	"foo7\0" => array('bar1'),
-	"foo8" => array(),
-	"foo9" => '%&$#!',
-	"foo10" => "abc\0\tdef",
+    '*:foo1' => array('bar1'),
+    'foo2:::' => array('bar1'),
+    'foo3()' => array('bar1'),
+    'foo4@' => array('bar1'),
+    'foo5|' => array('bar1'),
+    "\0foo6" => array('bar1'),
+    "foo7\0" => array('bar1'),
+    "foo8" => array(),
+    "foo9" => '%&$#!',
+    "foo10" => "abc\0\tdef",
 );
-$outFile = "mailBasic.out";
+$outFile = "mailBasic7.out";
 @unlink($outFile);
 
 echo "-- All Mail Content Parameters --\n";
@@ -125,7 +120,6 @@ echo file_get_contents($outFile);
 unlink($outFile);
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing mail() : basic functionality ***
 
@@ -215,4 +209,3 @@ foo5|: bar1
 foo9: %&$#!
 
 A Message
-===DONE===

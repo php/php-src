@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -14,10 +12,9 @@
   +----------------------------------------------------------------------+
   | Authors: Brad Lafountain <rodif_bl@yahoo.com>                        |
   |          Shane Caraveo <shane@caraveo.com>                           |
-  |          Dmitry Stogov <dmitry@zend.com>                             |
+  |          Dmitry Stogov <dmitry@php.net>                              |
   +----------------------------------------------------------------------+
 */
-/* $Id$ */
 
 #include "php_soap.h"
 
@@ -236,10 +233,10 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 		}
 		add_soap_fault(this_ptr, faultcode, faultstring ? ZSTR_VAL(faultstring) : NULL, faultactor ? ZSTR_VAL(faultactor) : NULL, &details);
 		if (faultstring) {
-			zend_string_release(faultstring);
+			zend_string_release_ex(faultstring, 0);
 		}
 		if (faultactor) {
-			zend_string_release(faultactor);
+			zend_string_release_ex(faultactor, 0);
 		}
 		if (Z_REFCOUNTED(details)) {
 			Z_DELREF(details);
@@ -373,7 +370,7 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 
 	if (Z_TYPE_P(return_value) == IS_ARRAY) {
 		if (param_count == 0) {
-			zval_dtor(return_value);
+			zend_array_destroy(Z_ARR_P(return_value));
 			ZVAL_NULL(return_value);
 		} else if (param_count == 1) {
 			zval *tmp;
@@ -385,7 +382,7 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 			} else {
 				zend_refcounted *garbage = Z_COUNTED_P(return_value);
 				ZVAL_COPY(return_value, tmp);
-				zval_dtor_func(garbage);
+				rc_dtor_func(garbage);
 			}
 		}
 	}

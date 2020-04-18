@@ -2,8 +2,8 @@
 Test DOMNode::insertBefore()  check the error code DOM_NOT_FOUND is raised
 --DESCRIPTION--
 DOMNode::insertBefore(newNode, [refNode])
-DOM_NOT_FOUND is raised if refnode is not a child 
-This test checks the error message is raised when the refnode is a descendant but not a child 
+DOM_NOT_FOUND is raised if refnode is not a child
+This test checks the error message is raised when the refnode is a descendant but not a child
 --CREDITS--
 Antonio Diaz Ruiz <dejalatele@gmail.com>
 --INI--
@@ -14,7 +14,7 @@ assert.bail=true
 <?php
 $dom = new DOMDocument();
 
-$doc = $dom->load(dirname(__FILE__) . "/book.xml", LIBXML_NOBLANKS);
+$doc = $dom->load(__DIR__ . "/book.xml", LIBXML_NOBLANKS);
 assert($doc === true);
 
 $parent_node = $dom->getElementsByTagName("book")->item(0);
@@ -32,7 +32,7 @@ $dom->saveXML();
 try {
     $parent_node->insertBefore($new_node, $ref_node);
 } catch(DOMException $e) {
-	echo $e->getMessage();
+    echo $e->getMessage();
 }
 
 ?>

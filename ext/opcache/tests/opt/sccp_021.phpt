@@ -10,19 +10,19 @@ opcache.optimization_level=-1
 --FILE--
 <?php
 class A {
-	public function memleak($num_tokens) {
-		$queries = array();
-		for ( $i = 0; $i < $num_tokens; ++$i ) {
-			if ( 0 < $i )
-				$queries[$i] = $queries[$i - 1] . '&';
-			else
-				$queries[$i] = '';
+    public function memleak($num_tokens) {
+        $queries = array();
+        for ( $i = 0; $i < $num_tokens; ++$i ) {
+            if ( 0 < $i )
+                $queries[$i] = $queries[$i - 1] . '&';
+            else
+                $queries[$i] = '';
 
-			$queries[$i] .= $query_token;
-		}
+            $queries[$i] .= $query_token;
+        }
 
-		return; 
-	}
+        return;
+    }
 }
 ?>
 okey

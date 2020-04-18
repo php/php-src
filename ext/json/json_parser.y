@@ -1,9 +1,8 @@
+%require "3.0"
 %code top {
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -32,10 +31,6 @@ int json_yydebug = 1;
 #define YYFREE free
 #endif
 
-#define PHP_JSON_USE(uv) ((void) (uv))
-#define PHP_JSON_USE_1(uvr, uv1) PHP_JSON_USE(uvr); PHP_JSON_USE(uv1)
-#define PHP_JSON_USE_2(uvr, uv1, uv2) PHP_JSON_USE(uvr); PHP_JSON_USE(uv1); PHP_JSON_USE(uv2)
-
 #define PHP_JSON_DEPTH_DEC --parser->depth
 #define PHP_JSON_DEPTH_INC \
 	if (parser->max_depth && parser->depth >= parser->max_depth) { \
@@ -46,10 +41,9 @@ int json_yydebug = 1;
 
 }
 
-%pure-parser
-%name-prefix "php_json_yy"
-%lex-param  { php_json_parser *parser  }
-%parse-param { php_json_parser *parser }
+%define api.prefix {php_json_yy}
+%define api.pure full
+%param  { php_json_parser *parser  }
 
 %union {
 	zval value;
@@ -67,19 +61,21 @@ int json_yydebug = 1;
 %token <value> PHP_JSON_T_DOUBLE
 %token <value> PHP_JSON_T_STRING
 %token <value> PHP_JSON_T_ESTRING
-%token <value> PHP_JSON_T_EOI
-%token <value> PHP_JSON_T_ERROR
+%token PHP_JSON_T_EOI
+%token PHP_JSON_T_ERROR
 
-%type <value> start object key value array errlex
+%type <value> start object key value array
 %type <value> members member elements element
 %type <pair> pair
 
-%destructor { zval_dtor(&$$); } <value>
-%destructor { zend_string_release($$.key); zval_dtor(&$$.val); } <pair>
+%destructor { zval_ptr_dtor_nogc(&$$); } <value>
+%destructor { zend_string_release_ex($$.key, 0); zval_ptr_dtor_nogc(&$$.val); } <pair>
 
 %code {
 static int php_json_yylex(union YYSTYPE *value, php_json_parser *parser);
 static void php_json_yyerror(php_json_parser *parser, char const *msg);
+static int php_json_parser_array_create(php_json_parser *parser, zval *array);
+static int php_json_parser_object_create(php_json_parser *parser, zval *array);
 
 }
 
@@ -90,11 +86,7 @@ start:
 			{
 				ZVAL_COPY_VALUE(&$$, &$1);
 				ZVAL_COPY_VALUE(parser->return_value, &$1);
-				PHP_JSON_USE($2); YYACCEPT;
-			}
-	|	value errlex
-			{
-				PHP_JSON_USE_2($$, $1, $2);
+				YYACCEPT;
 			}
 ;
 
@@ -126,9 +118,13 @@ object_end:
 ;
 
 members:
-		/* empty */
+		%empty
 			{
-				parser->methods.object_create(parser, &$$);
+				if ((parser->scanner.options & PHP_JSON_OBJECT_AS_ARRAY) && parser->methods.object_create == php_json_parser_object_create) {
+					ZVAL_EMPTY_ARRAY(&$$);
+				} else {
+					parser->methods.object_create(parser, &$$);
+				}
 			}
 	|	member
 ;
@@ -148,10 +144,6 @@ member:
 				}
 				ZVAL_COPY_VALUE(&$$, &$1);
 			}
-	|	member errlex
-			{
-				PHP_JSON_USE_2($$, $1, $2);
-			}
 ;
 
 pair:
@@ -159,10 +151,6 @@ pair:
 			{
 				$$.key = Z_STR($1);
 				ZVAL_COPY_VALUE(&$$.val, &$3);
-			}
-	|	key errlex
-			{
-				PHP_JSON_USE_2($$, $1, $2);
 			}
 ;
 
@@ -194,9 +182,13 @@ array_end:
 ;
 
 elements:
-		/* empty */
+		%empty
 			{
-				parser->methods.array_create(parser, &$$);
+				if (parser->methods.array_create == php_json_parser_array_create) {
+					ZVAL_EMPTY_ARRAY(&$$);
+				} else {
+					parser->methods.array_create(parser, &$$);
+				}
 			}
 	|	element
 ;
@@ -211,10 +203,6 @@ element:
 			{
 				parser->methods.array_append(parser, &$1, &$3);
 				ZVAL_COPY_VALUE(&$$, &$1);
-			}
-	|	element errlex
-			{
-				PHP_JSON_USE_2($$, $1, $2);
 			}
 ;
 
@@ -233,15 +221,6 @@ value:
 	|	PHP_JSON_T_NUL
 	|	PHP_JSON_T_TRUE
 	|	PHP_JSON_T_FALSE
-	|	errlex
-;
-
-errlex:
-		PHP_JSON_T_ERROR
-			{
-				PHP_JSON_USE_1($$, $1);
-				YYERROR;
-			}
 ;
 
 %% /* Functions */
@@ -274,19 +253,17 @@ static int php_json_parser_object_update(php_json_parser *parser, zval *object, 
 	if (Z_TYPE_P(object) == IS_ARRAY) {
 		zend_symtable_update(Z_ARRVAL_P(object), key, zvalue);
 	} else {
-		zval zkey;
 		if (ZSTR_LEN(key) > 0 && ZSTR_VAL(key)[0] == '\0') {
 			parser->scanner.errcode = PHP_JSON_ERROR_INVALID_PROPERTY_NAME;
-			zend_string_release(key);
-			zval_dtor(zvalue);
-			zval_dtor(object);
+			zend_string_release_ex(key, 0);
+			zval_ptr_dtor_nogc(zvalue);
+			zval_ptr_dtor_nogc(object);
 			return FAILURE;
 		}
-		ZVAL_NEW_STR(&zkey, key);
-		zend_std_write_property(object, &zkey, zvalue, NULL);
+		zend_std_write_property(Z_OBJ_P(object), key, zvalue, NULL);
 		Z_TRY_DELREF_P(zvalue);
 	}
-	zend_string_release(key);
+	zend_string_release_ex(key, 0);
 
 	return SUCCESS;
 }

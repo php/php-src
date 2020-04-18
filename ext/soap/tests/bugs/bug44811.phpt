@@ -8,13 +8,13 @@ soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 try {
-    $x = new SoapClient('http://slashdot.org');
+    $x = new SoapClient('https://php.net');
 } catch (SoapFault $e) {
     echo $e->getMessage() . PHP_EOL;
 }
 die('ok');
 ?>
 --EXPECTF--
-SOAP-ERROR: Parsing WSDL: Couldn't load from 'http://slashdot.org' : %s
+SOAP-ERROR: Parsing WSDL: Couldn't load from 'https://php.net' : %s
 
 ok

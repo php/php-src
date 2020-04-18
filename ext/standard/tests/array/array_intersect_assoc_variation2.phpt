@@ -71,7 +71,7 @@ $arrays = array(
        // empty data
 /*16*/ "",
        '',
- 
+
        // string data
 /*18*/ "string",
        'string',
@@ -90,18 +90,26 @@ $arrays = array(
 /*24*/ $fp
 );
 
-// loop through each sub-array within $arrrays to check the behavior of array_intersect_assoc()
+// loop through each sub-array within $arrays to check the behavior of array_intersect_assoc()
 $iterator = 1;
 foreach($arrays as $unexpected_value) {
-  echo "\n-- Iteration $iterator --";
-  
-  // Calling array_intersect_assoc() with default arguments
-  var_dump( array_intersect_assoc($arr1,$unexpected_value) );
+    echo "\n-- Iteration $iterator --";
 
-  // Calling array_intersect_assoc() with more arguments
-  var_dump( array_intersect_assoc($arr1, $unexpected_value, $arr3) );
+    // Calling array_intersect_assoc() with default arguments
+    try {
+        var_dump( array_intersect_assoc($arr1,$unexpected_value) );
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
 
-  $iterator++;
+    // Calling array_intersect_assoc() with more arguments
+    try {
+        var_dump( array_intersect_assoc($arr1, $unexpected_value, $arr3) );
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
+
+    $iterator++;
 }
 
 // close the file resource used
@@ -109,174 +117,78 @@ fclose($fp);
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_intersect_assoc() : Passing non-array values to $arr2 argument ***
 
--- Iteration 1 --
-Warning: array_intersect_assoc(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 1 --array_intersect_assoc(): Argument #2 ($arr2) must be of type array, int given
+array_intersect_assoc(): Argument #2 ($arr2) must be of type array, int given
 
-Warning: array_intersect_assoc(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 2 --array_intersect_assoc(): Argument #2 ($arr2) must be of type array, int given
+array_intersect_assoc(): Argument #2 ($arr2) must be of type array, int given
 
--- Iteration 2 --
-Warning: array_intersect_assoc(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 3 --array_intersect_assoc(): Argument #2 ($arr2) must be of type array, int given
+array_intersect_assoc(): Argument #2 ($arr2) must be of type array, int given
 
-Warning: array_intersect_assoc(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 4 --array_intersect_assoc(): Argument #2 ($arr2) must be of type array, int given
+array_intersect_assoc(): Argument #2 ($arr2) must be of type array, int given
 
--- Iteration 3 --
-Warning: array_intersect_assoc(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 5 --array_intersect_assoc(): Argument #2 ($arr2) must be of type array, float given
+array_intersect_assoc(): Argument #2 ($arr2) must be of type array, float given
 
-Warning: array_intersect_assoc(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 6 --array_intersect_assoc(): Argument #2 ($arr2) must be of type array, float given
+array_intersect_assoc(): Argument #2 ($arr2) must be of type array, float given
 
--- Iteration 4 --
-Warning: array_intersect_assoc(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 7 --array_intersect_assoc(): Argument #2 ($arr2) must be of type array, float given
+array_intersect_assoc(): Argument #2 ($arr2) must be of type array, float given
 
-Warning: array_intersect_assoc(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 8 --array_intersect_assoc(): Argument #2 ($arr2) must be of type array, float given
+array_intersect_assoc(): Argument #2 ($arr2) must be of type array, float given
 
--- Iteration 5 --
-Warning: array_intersect_assoc(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 9 --array_intersect_assoc(): Argument #2 ($arr2) must be of type array, float given
+array_intersect_assoc(): Argument #2 ($arr2) must be of type array, float given
 
-Warning: array_intersect_assoc(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 10 --array_intersect_assoc(): Argument #2 ($arr2) must be of type array, null given
+array_intersect_assoc(): Argument #2 ($arr2) must be of type array, null given
 
--- Iteration 6 --
-Warning: array_intersect_assoc(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 11 --array_intersect_assoc(): Argument #2 ($arr2) must be of type array, null given
+array_intersect_assoc(): Argument #2 ($arr2) must be of type array, null given
 
-Warning: array_intersect_assoc(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 12 --array_intersect_assoc(): Argument #2 ($arr2) must be of type array, bool given
+array_intersect_assoc(): Argument #2 ($arr2) must be of type array, bool given
 
--- Iteration 7 --
-Warning: array_intersect_assoc(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 13 --array_intersect_assoc(): Argument #2 ($arr2) must be of type array, bool given
+array_intersect_assoc(): Argument #2 ($arr2) must be of type array, bool given
 
-Warning: array_intersect_assoc(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 14 --array_intersect_assoc(): Argument #2 ($arr2) must be of type array, bool given
+array_intersect_assoc(): Argument #2 ($arr2) must be of type array, bool given
 
--- Iteration 8 --
-Warning: array_intersect_assoc(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 15 --array_intersect_assoc(): Argument #2 ($arr2) must be of type array, bool given
+array_intersect_assoc(): Argument #2 ($arr2) must be of type array, bool given
 
-Warning: array_intersect_assoc(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 16 --array_intersect_assoc(): Argument #2 ($arr2) must be of type array, string given
+array_intersect_assoc(): Argument #2 ($arr2) must be of type array, string given
 
--- Iteration 9 --
-Warning: array_intersect_assoc(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 17 --array_intersect_assoc(): Argument #2 ($arr2) must be of type array, string given
+array_intersect_assoc(): Argument #2 ($arr2) must be of type array, string given
 
-Warning: array_intersect_assoc(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 18 --array_intersect_assoc(): Argument #2 ($arr2) must be of type array, string given
+array_intersect_assoc(): Argument #2 ($arr2) must be of type array, string given
 
--- Iteration 10 --
-Warning: array_intersect_assoc(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 19 --array_intersect_assoc(): Argument #2 ($arr2) must be of type array, string given
+array_intersect_assoc(): Argument #2 ($arr2) must be of type array, string given
 
-Warning: array_intersect_assoc(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 20 --array_intersect_assoc(): Argument #2 ($arr2) must be of type array, string given
+array_intersect_assoc(): Argument #2 ($arr2) must be of type array, string given
 
--- Iteration 11 --
-Warning: array_intersect_assoc(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 21 --array_intersect_assoc(): Argument #2 ($arr2) must be of type array, object given
+array_intersect_assoc(): Argument #2 ($arr2) must be of type array, object given
 
-Warning: array_intersect_assoc(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 22 --array_intersect_assoc(): Argument #2 ($arr2) must be of type array, null given
+array_intersect_assoc(): Argument #2 ($arr2) must be of type array, null given
 
--- Iteration 12 --
-Warning: array_intersect_assoc(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 23 --array_intersect_assoc(): Argument #2 ($arr2) must be of type array, null given
+array_intersect_assoc(): Argument #2 ($arr2) must be of type array, null given
 
-Warning: array_intersect_assoc(): Argument #2 is not an array in %s on line %d
-NULL
-
--- Iteration 13 --
-Warning: array_intersect_assoc(): Argument #2 is not an array in %s on line %d
-NULL
-
-Warning: array_intersect_assoc(): Argument #2 is not an array in %s on line %d
-NULL
-
--- Iteration 14 --
-Warning: array_intersect_assoc(): Argument #2 is not an array in %s on line %d
-NULL
-
-Warning: array_intersect_assoc(): Argument #2 is not an array in %s on line %d
-NULL
-
--- Iteration 15 --
-Warning: array_intersect_assoc(): Argument #2 is not an array in %s on line %d
-NULL
-
-Warning: array_intersect_assoc(): Argument #2 is not an array in %s on line %d
-NULL
-
--- Iteration 16 --
-Warning: array_intersect_assoc(): Argument #2 is not an array in %s on line %d
-NULL
-
-Warning: array_intersect_assoc(): Argument #2 is not an array in %s on line %d
-NULL
-
--- Iteration 17 --
-Warning: array_intersect_assoc(): Argument #2 is not an array in %s on line %d
-NULL
-
-Warning: array_intersect_assoc(): Argument #2 is not an array in %s on line %d
-NULL
-
--- Iteration 18 --
-Warning: array_intersect_assoc(): Argument #2 is not an array in %s on line %d
-NULL
-
-Warning: array_intersect_assoc(): Argument #2 is not an array in %s on line %d
-NULL
-
--- Iteration 19 --
-Warning: array_intersect_assoc(): Argument #2 is not an array in %s on line %d
-NULL
-
-Warning: array_intersect_assoc(): Argument #2 is not an array in %s on line %d
-NULL
-
--- Iteration 20 --
-Warning: array_intersect_assoc(): Argument #2 is not an array in %s on line %d
-NULL
-
-Warning: array_intersect_assoc(): Argument #2 is not an array in %s on line %d
-NULL
-
--- Iteration 21 --
-Warning: array_intersect_assoc(): Argument #2 is not an array in %s on line %d
-NULL
-
-Warning: array_intersect_assoc(): Argument #2 is not an array in %s on line %d
-NULL
-
--- Iteration 22 --
-Warning: array_intersect_assoc(): Argument #2 is not an array in %s on line %d
-NULL
-
-Warning: array_intersect_assoc(): Argument #2 is not an array in %s on line %d
-NULL
-
--- Iteration 23 --
-Warning: array_intersect_assoc(): Argument #2 is not an array in %s on line %d
-NULL
-
-Warning: array_intersect_assoc(): Argument #2 is not an array in %s on line %d
-NULL
-
--- Iteration 24 --
-Warning: array_intersect_assoc(): Argument #2 is not an array in %s on line %d
-NULL
-
-Warning: array_intersect_assoc(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 24 --array_intersect_assoc(): Argument #2 ($arr2) must be of type array, resource given
+array_intersect_assoc(): Argument #2 ($arr2) must be of type array, resource given
 Done

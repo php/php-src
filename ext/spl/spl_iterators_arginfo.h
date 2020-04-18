@@ -1,0 +1,328 @@
+/* This is a generated file, edit the .stub.php file instead. */
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_EmptyIterator_current, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_EmptyIterator_next arginfo_class_EmptyIterator_current
+
+#define arginfo_class_EmptyIterator_key arginfo_class_EmptyIterator_current
+
+#define arginfo_class_EmptyIterator_valid arginfo_class_EmptyIterator_current
+
+#define arginfo_class_EmptyIterator_rewind arginfo_class_EmptyIterator_current
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_CallbackFilterIterator___construct, 0, 0, 2)
+	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
+	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_CallbackFilterIterator_accept arginfo_class_EmptyIterator_current
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RecursiveCallbackFilterIterator___construct, 0, 0, 2)
+	ZEND_ARG_OBJ_INFO(0, iterator, RecursiveIterator, 0)
+	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_RecursiveCallbackFilterIterator_hasChildren arginfo_class_EmptyIterator_current
+
+#define arginfo_class_RecursiveCallbackFilterIterator_getChildren arginfo_class_EmptyIterator_current
+
+#define arginfo_class_RecursiveIterator_hasChildren arginfo_class_EmptyIterator_current
+
+#define arginfo_class_RecursiveIterator_getChildren arginfo_class_EmptyIterator_current
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RecursiveIteratorIterator___construct, 0, 0, 1)
+	ZEND_ARG_OBJ_INFO(0, iterator, Traversable, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "self::LEAVES_ONLY")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_RecursiveIteratorIterator_rewind arginfo_class_EmptyIterator_current
+
+#define arginfo_class_RecursiveIteratorIterator_valid arginfo_class_EmptyIterator_current
+
+#define arginfo_class_RecursiveIteratorIterator_key arginfo_class_EmptyIterator_current
+
+#define arginfo_class_RecursiveIteratorIterator_current arginfo_class_EmptyIterator_current
+
+#define arginfo_class_RecursiveIteratorIterator_next arginfo_class_EmptyIterator_current
+
+#define arginfo_class_RecursiveIteratorIterator_getDepth arginfo_class_EmptyIterator_current
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RecursiveIteratorIterator_getSubIterator, 0, 0, 0)
+	ZEND_ARG_TYPE_INFO(0, level, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_RecursiveIteratorIterator_getInnerIterator arginfo_class_EmptyIterator_current
+
+#define arginfo_class_RecursiveIteratorIterator_beginIteration arginfo_class_EmptyIterator_current
+
+#define arginfo_class_RecursiveIteratorIterator_endIteration arginfo_class_EmptyIterator_current
+
+#define arginfo_class_RecursiveIteratorIterator_callHasChildren arginfo_class_EmptyIterator_current
+
+#define arginfo_class_RecursiveIteratorIterator_callGetChildren arginfo_class_EmptyIterator_current
+
+#define arginfo_class_RecursiveIteratorIterator_beginChildren arginfo_class_EmptyIterator_current
+
+#define arginfo_class_RecursiveIteratorIterator_endChildren arginfo_class_EmptyIterator_current
+
+#define arginfo_class_RecursiveIteratorIterator_nextElement arginfo_class_EmptyIterator_current
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RecursiveIteratorIterator_setMaxDepth, 0, 0, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, max_depth, IS_LONG, 0, "-1")
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_RecursiveIteratorIterator_getMaxDepth arginfo_class_EmptyIterator_current
+
+#define arginfo_class_OuterIterator_getInnerIterator arginfo_class_EmptyIterator_current
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IteratorIterator___construct, 0, 0, 1)
+	ZEND_ARG_INFO(0, iterator)
+	ZEND_ARG_TYPE_INFO(0, class_name, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_IteratorIterator_getInnerIterator arginfo_class_EmptyIterator_current
+
+#define arginfo_class_IteratorIterator_rewind arginfo_class_EmptyIterator_current
+
+#define arginfo_class_IteratorIterator_valid arginfo_class_EmptyIterator_current
+
+#define arginfo_class_IteratorIterator_key arginfo_class_EmptyIterator_current
+
+#define arginfo_class_IteratorIterator_current arginfo_class_EmptyIterator_current
+
+#define arginfo_class_IteratorIterator_next arginfo_class_EmptyIterator_current
+
+#define arginfo_class_FilterIterator_accept arginfo_class_EmptyIterator_current
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_FilterIterator___construct, 0, 0, 1)
+	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_FilterIterator_rewind arginfo_class_EmptyIterator_current
+
+#define arginfo_class_FilterIterator_valid arginfo_class_EmptyIterator_current
+
+#define arginfo_class_FilterIterator_key arginfo_class_EmptyIterator_current
+
+#define arginfo_class_FilterIterator_current arginfo_class_EmptyIterator_current
+
+#define arginfo_class_FilterIterator_next arginfo_class_EmptyIterator_current
+
+#define arginfo_class_FilterIterator_getInnerIterator arginfo_class_EmptyIterator_current
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RecursiveFilterIterator___construct, 0, 0, 1)
+	ZEND_ARG_OBJ_INFO(0, iterator, RecursiveIterator, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_RecursiveFilterIterator_hasChildren arginfo_class_EmptyIterator_current
+
+#define arginfo_class_RecursiveFilterIterator_getChildren arginfo_class_EmptyIterator_current
+
+#define arginfo_class_ParentIterator___construct arginfo_class_RecursiveFilterIterator___construct
+
+#define arginfo_class_ParentIterator_accept arginfo_class_EmptyIterator_current
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SeekableIterator_seek, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, position, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_LimitIterator___construct, 0, 0, 1)
+	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, offset, IS_LONG, 0, "0")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, count, IS_LONG, 0, "-1")
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_LimitIterator_rewind arginfo_class_EmptyIterator_current
+
+#define arginfo_class_LimitIterator_valid arginfo_class_EmptyIterator_current
+
+#define arginfo_class_LimitIterator_key arginfo_class_EmptyIterator_current
+
+#define arginfo_class_LimitIterator_current arginfo_class_EmptyIterator_current
+
+#define arginfo_class_LimitIterator_next arginfo_class_EmptyIterator_current
+
+#define arginfo_class_LimitIterator_seek arginfo_class_SeekableIterator_seek
+
+#define arginfo_class_LimitIterator_getPosition arginfo_class_EmptyIterator_current
+
+#define arginfo_class_LimitIterator_getInnerIterator arginfo_class_EmptyIterator_current
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_CachingIterator___construct, 0, 0, 1)
+	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "self::CALL_TOSTRING")
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_CachingIterator_rewind arginfo_class_EmptyIterator_current
+
+#define arginfo_class_CachingIterator_valid arginfo_class_EmptyIterator_current
+
+#define arginfo_class_CachingIterator_key arginfo_class_EmptyIterator_current
+
+#define arginfo_class_CachingIterator_current arginfo_class_EmptyIterator_current
+
+#define arginfo_class_CachingIterator_next arginfo_class_EmptyIterator_current
+
+#define arginfo_class_CachingIterator_hasNext arginfo_class_EmptyIterator_current
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_CachingIterator___toString, 0, 0, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_CachingIterator_getInnerIterator arginfo_class_EmptyIterator_current
+
+#define arginfo_class_CachingIterator_getFlags arginfo_class_EmptyIterator_current
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_CachingIterator_setFlags, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_CachingIterator_offsetGet, 0, 0, 1)
+	ZEND_ARG_INFO(0, index)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_CachingIterator_offsetSet, 0, 0, 2)
+	ZEND_ARG_INFO(0, index)
+	ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_CachingIterator_offsetUnset arginfo_class_CachingIterator_offsetGet
+
+#define arginfo_class_CachingIterator_offsetExists arginfo_class_CachingIterator_offsetGet
+
+#define arginfo_class_CachingIterator_getCache arginfo_class_EmptyIterator_current
+
+#define arginfo_class_CachingIterator_count arginfo_class_EmptyIterator_current
+
+#define arginfo_class_RecursiveCachingIterator___construct arginfo_class_CachingIterator___construct
+
+#define arginfo_class_RecursiveCachingIterator_hasChildren arginfo_class_EmptyIterator_current
+
+#define arginfo_class_RecursiveCachingIterator_getChildren arginfo_class_EmptyIterator_current
+
+#define arginfo_class_NoRewindIterator___construct arginfo_class_FilterIterator___construct
+
+#define arginfo_class_NoRewindIterator_rewind arginfo_class_EmptyIterator_current
+
+#define arginfo_class_NoRewindIterator_valid arginfo_class_EmptyIterator_current
+
+#define arginfo_class_NoRewindIterator_key arginfo_class_EmptyIterator_current
+
+#define arginfo_class_NoRewindIterator_current arginfo_class_EmptyIterator_current
+
+#define arginfo_class_NoRewindIterator_next arginfo_class_EmptyIterator_current
+
+#define arginfo_class_NoRewindIterator_getInnerIterator arginfo_class_EmptyIterator_current
+
+#define arginfo_class_AppendIterator___construct arginfo_class_EmptyIterator_current
+
+#define arginfo_class_AppendIterator_append arginfo_class_FilterIterator___construct
+
+#define arginfo_class_AppendIterator_rewind arginfo_class_EmptyIterator_current
+
+#define arginfo_class_AppendIterator_valid arginfo_class_EmptyIterator_current
+
+#define arginfo_class_AppendIterator_key arginfo_class_EmptyIterator_current
+
+#define arginfo_class_AppendIterator_current arginfo_class_EmptyIterator_current
+
+#define arginfo_class_AppendIterator_next arginfo_class_EmptyIterator_current
+
+#define arginfo_class_AppendIterator_getInnerIterator arginfo_class_EmptyIterator_current
+
+#define arginfo_class_AppendIterator_getIteratorIndex arginfo_class_EmptyIterator_current
+
+#define arginfo_class_AppendIterator_getArrayIterator arginfo_class_EmptyIterator_current
+
+#define arginfo_class_InfiniteIterator___construct arginfo_class_FilterIterator___construct
+
+#define arginfo_class_InfiniteIterator_next arginfo_class_EmptyIterator_current
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RegexIterator___construct, 0, 0, 2)
+	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
+	ZEND_ARG_TYPE_INFO(0, regex, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "self::MATCH")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, preg_flags, IS_LONG, 0, "0")
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_RegexIterator_accept arginfo_class_EmptyIterator_current
+
+#define arginfo_class_RegexIterator_getMode arginfo_class_EmptyIterator_current
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RegexIterator_setMode, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, mode, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_RegexIterator_getFlags arginfo_class_EmptyIterator_current
+
+#define arginfo_class_RegexIterator_setFlags arginfo_class_CachingIterator_setFlags
+
+#define arginfo_class_RegexIterator_getRegex arginfo_class_EmptyIterator_current
+
+#define arginfo_class_RegexIterator_getPregFlags arginfo_class_EmptyIterator_current
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RegexIterator_setPregFlags, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, preg_flags, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RecursiveRegexIterator___construct, 0, 0, 2)
+	ZEND_ARG_OBJ_INFO(0, iterator, RecursiveIterator, 0)
+	ZEND_ARG_TYPE_INFO(0, regex, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "self::MATCH")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, preg_flags, IS_LONG, 0, "0")
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_RecursiveRegexIterator_accept arginfo_class_EmptyIterator_current
+
+#define arginfo_class_RecursiveRegexIterator_hasChildren arginfo_class_EmptyIterator_current
+
+#define arginfo_class_RecursiveRegexIterator_getChildren arginfo_class_EmptyIterator_current
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RecursiveTreeIterator___construct, 0, 0, 1)
+	ZEND_ARG_INFO(0, iterator)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "self::BYPASS_KEY")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, caching_it_flags, IS_LONG, 0, "CachingIterator::CATCH_GET_CHILD")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "self::SELF_FIRST")
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_RecursiveTreeIterator_rewind arginfo_class_EmptyIterator_current
+
+#define arginfo_class_RecursiveTreeIterator_valid arginfo_class_EmptyIterator_current
+
+#define arginfo_class_RecursiveTreeIterator_key arginfo_class_EmptyIterator_current
+
+#define arginfo_class_RecursiveTreeIterator_current arginfo_class_EmptyIterator_current
+
+#define arginfo_class_RecursiveTreeIterator_next arginfo_class_EmptyIterator_current
+
+#define arginfo_class_RecursiveTreeIterator_beginIteration arginfo_class_EmptyIterator_current
+
+#define arginfo_class_RecursiveTreeIterator_endIteration arginfo_class_EmptyIterator_current
+
+#define arginfo_class_RecursiveTreeIterator_callHasChildren arginfo_class_EmptyIterator_current
+
+#define arginfo_class_RecursiveTreeIterator_callGetChildren arginfo_class_EmptyIterator_current
+
+#define arginfo_class_RecursiveTreeIterator_beginChildren arginfo_class_EmptyIterator_current
+
+#define arginfo_class_RecursiveTreeIterator_endChildren arginfo_class_EmptyIterator_current
+
+#define arginfo_class_RecursiveTreeIterator_nextElement arginfo_class_EmptyIterator_current
+
+#define arginfo_class_RecursiveTreeIterator_getPrefix arginfo_class_EmptyIterator_current
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RecursiveTreeIterator_setPostfix, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, postfix, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RecursiveTreeIterator_setPrefixPart, 0, 0, 2)
+	ZEND_ARG_TYPE_INFO(0, part, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_RecursiveTreeIterator_getEntry arginfo_class_EmptyIterator_current
+
+#define arginfo_class_RecursiveTreeIterator_getPostfix arginfo_class_EmptyIterator_current

@@ -5,7 +5,6 @@ open_basedir=.
 --SKIPIF--
 <?php
 if (!extension_loaded('curl')) exit("skip curl extension not loaded");
-if (version_compare(curl_version()['version'], '7.19.4', '<')) exit("skip curl version is too old");
 ?>
 --FILE--
 <?php

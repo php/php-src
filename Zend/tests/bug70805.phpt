@@ -9,12 +9,12 @@ class B {
 }
 
 class C {
-	public function __destruct() {
-		if (isset($GLOBALS["a"])) {
-			unset($GLOBALS["array"]);
-			unset($GLOBALS["a"]); // this will be called in gc_colloct_roots and put $a into gc roots buf
-		}
-	}
+    public function __destruct() {
+        if (isset($GLOBALS["a"])) {
+            unset($GLOBALS["array"]);
+            unset($GLOBALS["a"]); // this will be called in gc_colloct_roots and put $a into gc roots buf
+        }
+    }
 }
 
 $a = new A;
@@ -28,18 +28,18 @@ $array = array($c); //This is used to leave a room for $GLOBALS["a"]
 unset($c);
 
 while ($i++ < 9998) {
-	$t = [];
-	$t[] = &$t;
-	unset($t);
+    $t = [];
+    $t[] = &$t;
+    unset($t);
 }
 $t = [new C];
 $t[] = &$t;
 unset($t); // This is used to trigger C::__destruct while doing gc_colloct_roots
 
 $e = $a;
-unset($a); // This one can not be putted into roots buf because it's full, thus gc_colloct_roots will be called, 
+unset($a); // This one can not be putted into roots buf because it's full, thus gc_colloct_roots will be called,
            // but C::__destructor which is called in gc_colloct_roots will put $a into buf
-		   // which will make $a be putted into gc roots buf twice
+           // which will make $a be putted into gc roots buf twice
 var_dump(gc_collect_cycles());
 ?>
 --EXPECT--

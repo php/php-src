@@ -20,12 +20,6 @@ var_dump(filter_input(INPUT_POST, "d", FILTER_VALIDATE_FLOAT));
 var_dump(filter_input(INPUT_POST, "c", FILTER_SANITIZE_SPECIAL_CHARS));
 var_dump(filter_input(INPUT_POST, "d", FILTER_VALIDATE_INT));
 
-var_dump(filter_var(new stdClass, "d"));
-
-var_dump(filter_input(INPUT_POST, "c", "", ""));
-var_dump(filter_var("", "", "", "", ""));
-var_dump(filter_var(0, 0, 0, 0, 0));
-
 echo "Done\n";
 ?>
 --EXPECTF--
@@ -39,16 +33,4 @@ string(6) "string"
 float(12345.7)
 string(29) "&#60;p&#62;string&#60;/p&#62;"
 bool(false)
-
-Warning: filter_var() expects parameter 2 to be integer, string given in %s011.php on line %d
-NULL
-
-Warning: filter_input() expects parameter 3 to be integer, string given in %s011.php on line %d
-NULL
-
-Warning: filter_var() expects at most 3 parameters, 5 given in %s011.php on line %d
-NULL
-
-Warning: filter_var() expects at most 3 parameters, 5 given in %s011.php on line %d
-NULL
 Done

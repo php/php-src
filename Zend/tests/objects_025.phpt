@@ -1,16 +1,16 @@
 --TEST--
 Testing invalid method names with __call and __callstatic
 --FILE--
-<?php 
+<?php
 
 class foo {
-	public function __call($a, $b) {
-		print "non-static - ok\n";
-	}
-	
-	public static function __callstatic($a, $b) {
-		print "static - ok\n";
-	}
+    public function __call($a, $b) {
+        print "non-static - ok\n";
+    }
+
+    public static function __callstatic($a, $b) {
+        print "static - ok\n";
+    }
 }
 
 $a = new foo;

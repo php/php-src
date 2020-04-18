@@ -8,7 +8,7 @@ class Root {
 
 interface MyInterface
 {
-	function MyInterfaceFunc();
+    function MyInterfaceFunc();
 }
 
 abstract class Derived extends Root implements MyInterface {
@@ -16,7 +16,7 @@ abstract class Derived extends Root implements MyInterface {
 
 class Leaf extends Derived
 {
-	function MyInterfaceFunc() {}	
+    function MyInterfaceFunc() {}
 }
 
 var_dump(new Leaf);

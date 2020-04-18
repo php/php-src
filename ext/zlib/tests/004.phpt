@@ -5,24 +5,16 @@ gzfile() with various invalid params
 --FILE--
 <?php
 
-var_dump(gzfile());
 var_dump(gzfile("nonexistent_file_gzfile",1));
-var_dump(gzfile(1,1,1));
 
-var_dump(gzfile(dirname(__FILE__)."/004.txt.gz"));
-var_dump(gzfile(dirname(__FILE__)."/004.txt.gz", 1));
+var_dump(gzfile(__DIR__."/004.txt.gz"));
+var_dump(gzfile(__DIR__."/004.txt.gz", 1));
 
 echo "Done\n";
 ?>
---EXPECTF--	
-Warning: gzfile() expects at least 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: gzfile(nonexistent_file_gzfile): failed to open stream: No such file or directory in %s on line %d
+--EXPECTF--
+Warning: gzfile(nonexistent_file_gzfile): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
-
-Warning: gzfile() expects at most 2 parameters, 3 given in %s on line %d
-NULL
 array(6) {
   [0]=>
   string(36) "When you're taught through feelings

@@ -5,7 +5,7 @@ Test token_get_all() function : usage variations - with type casting operators
 --FILE--
 <?php
 /* Prototype  : array token_get_all(string $source)
- * Description: splits the given source into an array of PHP languange tokens
+ * Description: splits the given source into an array of PHP language tokens
  * Source code: ext/tokenizer/tokenizer.c
 */
 
@@ -18,8 +18,8 @@ Test token_get_all() function : usage variations - with type casting operators
 
 echo "*** Testing token_get_all() : 'source' string with different type casting operators ***\n";
 
-// type casting operators : (int), (integer), (float), (real), (double), (string), (array), (object), (bool), (boolean),(unset)
-$source = '<?php 
+// type casting operators : (int), (integer), (float), (double), (string), (array), (object), (bool), (boolean),(unset)
+$source = '<?php
 $a = 1, $b = 10.5
 $c = (int)$b + $a;
 $d = (float)$a + $b;
@@ -36,13 +36,14 @@ echo "Done"
 ?>
 --EXPECTF--
 *** Testing token_get_all() : 'source' string with different type casting operators ***
-array(108) {
+array(107) {
   [0]=>
   array(3) {
     [0]=>
     int(%d)
     [1]=>
-    string(6) "<?php "
+    string(6) "<?php
+"
     [2]=>
     int(1)
   }
@@ -51,32 +52,22 @@ array(108) {
     [0]=>
     int(%d)
     [1]=>
-    string(1) "
-"
+    string(2) "$a"
     [2]=>
-    int(1)
+    int(2)
   }
   [2]=>
   array(3) {
     [0]=>
     int(%d)
     [1]=>
-    string(2) "$a"
+    string(1) " "
     [2]=>
     int(2)
   }
   [3]=>
-  array(3) {
-    [0]=>
-    int(%d)
-    [1]=>
-    string(1) " "
-    [2]=>
-    int(2)
-  }
-  [4]=>
   string(1) "="
-  [5]=>
+  [4]=>
   array(3) {
     [0]=>
     int(%d)
@@ -85,7 +76,7 @@ array(108) {
     [2]=>
     int(2)
   }
-  [6]=>
+  [5]=>
   array(3) {
     [0]=>
     int(%d)
@@ -94,14 +85,23 @@ array(108) {
     [2]=>
     int(2)
   }
-  [7]=>
+  [6]=>
   string(1) ","
-  [8]=>
+  [7]=>
   array(3) {
     [0]=>
     int(%d)
     [1]=>
     string(1) " "
+    [2]=>
+    int(2)
+  }
+  [8]=>
+  array(3) {
+    [0]=>
+    int(%d)
+    [1]=>
+    string(2) "$b"
     [2]=>
     int(2)
   }
@@ -110,22 +110,13 @@ array(108) {
     [0]=>
     int(%d)
     [1]=>
-    string(2) "$b"
+    string(1) " "
     [2]=>
     int(2)
   }
   [10]=>
-  array(3) {
-    [0]=>
-    int(%d)
-    [1]=>
-    string(1) " "
-    [2]=>
-    int(2)
-  }
-  [11]=>
   string(1) "="
-  [12]=>
+  [11]=>
   array(3) {
     [0]=>
     int(%d)
@@ -134,7 +125,7 @@ array(108) {
     [2]=>
     int(2)
   }
-  [13]=>
+  [12]=>
   array(3) {
     [0]=>
     int(%d)
@@ -143,7 +134,7 @@ array(108) {
     [2]=>
     int(2)
   }
-  [14]=>
+  [13]=>
   array(3) {
     [0]=>
     int(%d)
@@ -153,7 +144,7 @@ array(108) {
     [2]=>
     int(2)
   }
-  [15]=>
+  [14]=>
   array(3) {
     [0]=>
     int(%d)
@@ -162,18 +153,18 @@ array(108) {
     [2]=>
     int(%d)
   }
+  [15]=>
+  array(3) {
+    [0]=>
+    int(%d)
+    [1]=>
+    string(1) " "
+    [2]=>
+    int(%d)
+  }
   [16]=>
-  array(3) {
-    [0]=>
-    int(%d)
-    [1]=>
-    string(1) " "
-    [2]=>
-    int(%d)
-  }
-  [17]=>
   string(1) "="
-  [18]=>
+  [17]=>
   array(3) {
     [0]=>
     int(%d)
@@ -182,7 +173,7 @@ array(108) {
     [2]=>
     int(%d)
   }
-  [19]=>
+  [18]=>
   array(3) {
     [0]=>
     int(%d)
@@ -191,7 +182,7 @@ array(108) {
     [2]=>
     int(%d)
   }
-  [20]=>
+  [19]=>
   array(3) {
     [0]=>
     int(%d)
@@ -200,18 +191,18 @@ array(108) {
     [2]=>
     int(%d)
   }
+  [20]=>
+  array(3) {
+    [0]=>
+    int(%d)
+    [1]=>
+    string(1) " "
+    [2]=>
+    int(%d)
+  }
   [21]=>
-  array(3) {
-    [0]=>
-    int(%d)
-    [1]=>
-    string(1) " "
-    [2]=>
-    int(%d)
-  }
-  [22]=>
   string(1) "+"
-  [23]=>
+  [22]=>
   array(3) {
     [0]=>
     int(%d)
@@ -220,7 +211,7 @@ array(108) {
     [2]=>
     int(%d)
   }
-  [24]=>
+  [23]=>
   array(3) {
     [0]=>
     int(%d)
@@ -229,9 +220,9 @@ array(108) {
     [2]=>
     int(%d)
   }
-  [25]=>
+  [24]=>
   string(1) ";"
-  [26]=>
+  [25]=>
   array(3) {
     [0]=>
     int(%d)
@@ -241,7 +232,7 @@ array(108) {
     [2]=>
     int(%d)
   }
-  [27]=>
+  [26]=>
   array(3) {
     [0]=>
     int(%d)
@@ -250,18 +241,18 @@ array(108) {
     [2]=>
     int(4)
   }
+  [27]=>
+  array(3) {
+    [0]=>
+    int(%d)
+    [1]=>
+    string(1) " "
+    [2]=>
+    int(4)
+  }
   [28]=>
-  array(3) {
-    [0]=>
-    int(%d)
-    [1]=>
-    string(1) " "
-    [2]=>
-    int(4)
-  }
-  [29]=>
   string(1) "="
-  [30]=>
+  [29]=>
   array(3) {
     [0]=>
     int(%d)
@@ -270,7 +261,7 @@ array(108) {
     [2]=>
     int(4)
   }
-  [31]=>
+  [30]=>
   array(3) {
     [0]=>
     int(%d)
@@ -279,7 +270,7 @@ array(108) {
     [2]=>
     int(4)
   }
-  [32]=>
+  [31]=>
   array(3) {
     [0]=>
     int(%d)
@@ -288,18 +279,18 @@ array(108) {
     [2]=>
     int(4)
   }
+  [32]=>
+  array(3) {
+    [0]=>
+    int(%d)
+    [1]=>
+    string(1) " "
+    [2]=>
+    int(4)
+  }
   [33]=>
-  array(3) {
-    [0]=>
-    int(%d)
-    [1]=>
-    string(1) " "
-    [2]=>
-    int(4)
-  }
-  [34]=>
   string(1) "+"
-  [35]=>
+  [34]=>
   array(3) {
     [0]=>
     int(%d)
@@ -308,7 +299,7 @@ array(108) {
     [2]=>
     int(4)
   }
-  [36]=>
+  [35]=>
   array(3) {
     [0]=>
     int(%d)
@@ -317,9 +308,9 @@ array(108) {
     [2]=>
     int(4)
   }
-  [37]=>
+  [36]=>
   string(1) ";"
-  [38]=>
+  [37]=>
   array(3) {
     [0]=>
     int(%d)
@@ -329,7 +320,7 @@ array(108) {
     [2]=>
     int(4)
   }
-  [39]=>
+  [38]=>
   array(3) {
     [0]=>
     int(%d)
@@ -338,7 +329,7 @@ array(108) {
     [2]=>
     int(5)
   }
-  [40]=>
+  [39]=>
   array(3) {
     [0]=>
     int(%d)
@@ -347,14 +338,23 @@ array(108) {
     [2]=>
     int(5)
   }
-  [41]=>
+  [40]=>
   string(1) "="
-  [42]=>
+  [41]=>
   array(3) {
     [0]=>
     int(%d)
     [1]=>
     string(1) " "
+    [2]=>
+    int(5)
+  }
+  [42]=>
+  array(3) {
+    [0]=>
+    int(%d)
+    [1]=>
+    string(8) "(string)"
     [2]=>
     int(5)
   }
@@ -363,22 +363,13 @@ array(108) {
     [0]=>
     int(%d)
     [1]=>
-    string(8) "(string)"
-    [2]=>
-    int(5)
-  }
-  [44]=>
-  array(3) {
-    [0]=>
-    int(%d)
-    [1]=>
     string(2) "$a"
     [2]=>
     int(5)
   }
-  [45]=>
+  [44]=>
   string(1) "."
-  [46]=>
+  [45]=>
   array(3) {
     [0]=>
     int(%d)
@@ -387,7 +378,7 @@ array(108) {
     [2]=>
     int(5)
   }
-  [47]=>
+  [46]=>
   array(3) {
     [0]=>
     int(%d)
@@ -396,9 +387,9 @@ array(108) {
     [2]=>
     int(5)
   }
-  [48]=>
+  [47]=>
   string(1) ";"
-  [49]=>
+  [48]=>
   array(3) {
     [0]=>
     int(%d)
@@ -408,7 +399,7 @@ array(108) {
     [2]=>
     int(5)
   }
-  [50]=>
+  [49]=>
   array(3) {
     [0]=>
     int(%d)
@@ -417,9 +408,9 @@ array(108) {
     [2]=>
     int(6)
   }
-  [51]=>
+  [50]=>
   string(1) "("
-  [52]=>
+  [51]=>
   array(3) {
     [0]=>
     int(%d)
@@ -428,7 +419,7 @@ array(108) {
     [2]=>
     int(6)
   }
-  [53]=>
+  [52]=>
   array(3) {
     [0]=>
     int(%d)
@@ -437,14 +428,23 @@ array(108) {
     [2]=>
     int(6)
   }
-  [54]=>
+  [53]=>
   string(1) ")"
-  [55]=>
+  [54]=>
   array(3) {
     [0]=>
     int(%d)
     [1]=>
     string(1) " "
+    [2]=>
+    int(6)
+  }
+  [55]=>
+  array(3) {
+    [0]=>
+    int(%d)
+    [1]=>
+    string(4) "echo"
     [2]=>
     int(6)
   }
@@ -453,7 +453,7 @@ array(108) {
     [0]=>
     int(%d)
     [1]=>
-    string(4) "echo"
+    string(1) " "
     [2]=>
     int(6)
   }
@@ -462,22 +462,13 @@ array(108) {
     [0]=>
     int(%d)
     [1]=>
-    string(1) " "
-    [2]=>
-    int(6)
-  }
-  [58]=>
-  array(3) {
-    [0]=>
-    int(%d)
-    [1]=>
     string(6) ""true""
     [2]=>
     int(6)
   }
-  [59]=>
+  [58]=>
   string(1) ";"
-  [60]=>
+  [59]=>
   array(3) {
     [0]=>
     int(%d)
@@ -487,7 +478,7 @@ array(108) {
     [2]=>
     int(6)
   }
-  [61]=>
+  [60]=>
   array(3) {
     [0]=>
     int(%d)
@@ -496,11 +487,11 @@ array(108) {
     [2]=>
     int(7)
   }
-  [62]=>
+  [61]=>
   string(1) "("
-  [63]=>
+  [62]=>
   string(1) "!"
-  [64]=>
+  [63]=>
   array(3) {
     [0]=>
     int(%d)
@@ -509,7 +500,7 @@ array(108) {
     [2]=>
     int(7)
   }
-  [65]=>
+  [64]=>
   array(3) {
     [0]=>
     int(%d)
@@ -518,9 +509,9 @@ array(108) {
     [2]=>
     int(7)
   }
-  [66]=>
+  [65]=>
   string(1) ")"
-  [67]=>
+  [66]=>
   array(3) {
     [0]=>
     int(%d)
@@ -529,7 +520,7 @@ array(108) {
     [2]=>
     int(7)
   }
-  [68]=>
+  [67]=>
   array(3) {
     [0]=>
     int(%d)
@@ -538,7 +529,7 @@ array(108) {
     [2]=>
     int(7)
   }
-  [69]=>
+  [68]=>
   array(3) {
     [0]=>
     int(%d)
@@ -547,7 +538,7 @@ array(108) {
     [2]=>
     int(7)
   }
-  [70]=>
+  [69]=>
   array(3) {
     [0]=>
     int(%d)
@@ -556,9 +547,9 @@ array(108) {
     [2]=>
     int(7)
   }
-  [71]=>
+  [70]=>
   string(1) ";"
-  [72]=>
+  [71]=>
   array(3) {
     [0]=>
     int(%d)
@@ -568,7 +559,7 @@ array(108) {
     [2]=>
     int(7)
   }
-  [73]=>
+  [72]=>
   array(3) {
     [0]=>
     int(%d)
@@ -577,7 +568,7 @@ array(108) {
     [2]=>
     int(8)
   }
-  [74]=>
+  [73]=>
   array(3) {
     [0]=>
     int(%d)
@@ -586,14 +577,23 @@ array(108) {
     [2]=>
     int(8)
   }
-  [75]=>
+  [74]=>
   string(1) "="
-  [76]=>
+  [75]=>
   array(3) {
     [0]=>
     int(%d)
     [1]=>
     string(1) " "
+    [2]=>
+    int(8)
+  }
+  [76]=>
+  array(3) {
+    [0]=>
+    int(%d)
+    [1]=>
+    string(2) "$c"
     [2]=>
     int(8)
   }
@@ -602,22 +602,13 @@ array(108) {
     [0]=>
     int(%d)
     [1]=>
-    string(2) "$c"
+    string(1) " "
     [2]=>
     int(8)
   }
   [78]=>
-  array(3) {
-    [0]=>
-    int(%d)
-    [1]=>
-    string(1) " "
-    [2]=>
-    int(8)
-  }
-  [79]=>
   string(1) "+"
-  [80]=>
+  [79]=>
   array(3) {
     [0]=>
     int(%d)
@@ -626,7 +617,7 @@ array(108) {
     [2]=>
     int(8)
   }
-  [81]=>
+  [80]=>
   array(3) {
     [0]=>
     int(%d)
@@ -635,7 +626,7 @@ array(108) {
     [2]=>
     int(8)
   }
-  [82]=>
+  [81]=>
   array(3) {
     [0]=>
     int(%d)
@@ -644,7 +635,7 @@ array(108) {
     [2]=>
     int(8)
   }
-  [83]=>
+  [82]=>
   array(3) {
     [0]=>
     int(%d)
@@ -653,9 +644,9 @@ array(108) {
     [2]=>
     int(8)
   }
-  [84]=>
+  [83]=>
   string(1) ";"
-  [85]=>
+  [84]=>
   array(3) {
     [0]=>
     int(%d)
@@ -665,7 +656,7 @@ array(108) {
     [2]=>
     int(8)
   }
-  [86]=>
+  [85]=>
   array(3) {
     [0]=>
     int(%d)
@@ -674,18 +665,18 @@ array(108) {
     [2]=>
     int(9)
   }
+  [86]=>
+  array(3) {
+    [0]=>
+    int(%d)
+    [1]=>
+    string(1) " "
+    [2]=>
+    int(9)
+  }
   [87]=>
-  array(3) {
-    [0]=>
-    int(%d)
-    [1]=>
-    string(1) " "
-    [2]=>
-    int(9)
-  }
-  [88]=>
   string(1) "="
-  [89]=>
+  [88]=>
   array(3) {
     [0]=>
     int(%d)
@@ -694,7 +685,7 @@ array(108) {
     [2]=>
     int(9)
   }
-  [90]=>
+  [89]=>
   array(3) {
     [0]=>
     int(%d)
@@ -703,18 +694,18 @@ array(108) {
     [2]=>
     int(9)
   }
+  [90]=>
+  array(3) {
+    [0]=>
+    int(%d)
+    [1]=>
+    string(1) " "
+    [2]=>
+    int(9)
+  }
   [91]=>
-  array(3) {
-    [0]=>
-    int(%d)
-    [1]=>
-    string(1) " "
-    [2]=>
-    int(9)
-  }
-  [92]=>
   string(1) "-"
-  [93]=>
+  [92]=>
   array(3) {
     [0]=>
     int(%d)
@@ -723,7 +714,7 @@ array(108) {
     [2]=>
     int(9)
   }
-  [94]=>
+  [93]=>
   array(3) {
     [0]=>
     int(%d)
@@ -732,7 +723,7 @@ array(108) {
     [2]=>
     int(9)
   }
-  [95]=>
+  [94]=>
   array(3) {
     [0]=>
     int(%d)
@@ -741,7 +732,7 @@ array(108) {
     [2]=>
     int(9)
   }
-  [96]=>
+  [95]=>
   array(3) {
     [0]=>
     int(%d)
@@ -750,9 +741,9 @@ array(108) {
     [2]=>
     int(9)
   }
-  [97]=>
+  [96]=>
   string(1) ";"
-  [98]=>
+  [97]=>
   array(3) {
     [0]=>
     int(%d)
@@ -762,7 +753,7 @@ array(108) {
     [2]=>
     int(9)
   }
-  [99]=>
+  [98]=>
   array(3) {
     [0]=>
     int(%d)
@@ -771,18 +762,18 @@ array(108) {
     [2]=>
     int(10)
   }
+  [99]=>
+  array(3) {
+    [0]=>
+    int(%d)
+    [1]=>
+    string(1) " "
+    [2]=>
+    int(10)
+  }
   [100]=>
-  array(3) {
-    [0]=>
-    int(%d)
-    [1]=>
-    string(1) " "
-    [2]=>
-    int(10)
-  }
-  [101]=>
   string(1) "="
-  [102]=>
+  [101]=>
   array(3) {
     [0]=>
     int(%d)
@@ -791,7 +782,7 @@ array(108) {
     [2]=>
     int(10)
   }
-  [103]=>
+  [102]=>
   array(3) {
     [0]=>
     int(%d)
@@ -800,7 +791,7 @@ array(108) {
     [2]=>
     int(10)
   }
-  [104]=>
+  [103]=>
   array(3) {
     [0]=>
     int(%d)
@@ -809,9 +800,9 @@ array(108) {
     [2]=>
     int(10)
   }
-  [105]=>
+  [104]=>
   string(1) ";"
-  [106]=>
+  [105]=>
   array(3) {
     [0]=>
     int(%d)
@@ -821,7 +812,7 @@ array(108) {
     [2]=>
     int(10)
   }
-  [107]=>
+  [106]=>
   array(3) {
     [0]=>
     int(%d)

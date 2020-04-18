@@ -5,8 +5,8 @@ Test ctype_graph() function : usage variations - different data types as $c arg
 --FILE--
 <?php
 /* Prototype  : bool ctype_graph(mixed $c)
- * Description: Checks for any printable character(s) except space 
- * Source code: ext/ctype/ctype.c 
+ * Description: Checks for any printable character(s) except space
+ * Source code: ext/ctype/ctype.c
  */
 
 /*
@@ -24,9 +24,9 @@ unset ($unset_var);
 // get a class
 class classA
 {
-	public function __toString() {
-		return "myClass";
-	}
+    public function __toString() {
+        return "myClass";
+    }
 }
 
 // heredoc string
@@ -62,7 +62,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -72,7 +72,7 @@ $inputs = array(
 /*19*/ "string",
        'string',
        $heredoc,
-       
+
        // object data
 /*22*/ new classA(),
 
@@ -98,8 +98,7 @@ fclose($fp);
 
 setlocale(LC_CTYPE, $orig);
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ctype_graph() : usage variations ***
 
 -- Iteration 1 --
@@ -176,4 +175,3 @@ bool(false)
 
 -- Iteration 25 --
 bool(false)
-===DONE===

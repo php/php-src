@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,11 +10,9 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author: Andi Gutmans <andi@zend.com>                                 |
+   | Author: Andi Gutmans <andi@php.net>                                  |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -27,6 +23,8 @@
 #if HAVE_BCMATH
 
 #include "php_ini.h"
+#include "zend_exceptions.h"
+#include "bcmath_arginfo.h"
 #include "ext/standard/info.h"
 #include "php_bcmath.h"
 #include "libbcmath/src/bcmath.h"
@@ -35,84 +33,10 @@ ZEND_DECLARE_MODULE_GLOBALS(bcmath)
 static PHP_GINIT_FUNCTION(bcmath);
 static PHP_GSHUTDOWN_FUNCTION(bcmath);
 
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_bcadd, 0, 0, 2)
-	ZEND_ARG_INFO(0, left_operand)
-	ZEND_ARG_INFO(0, right_operand)
-	ZEND_ARG_INFO(0, scale)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_bcsub, 0, 0, 2)
-	ZEND_ARG_INFO(0, left_operand)
-	ZEND_ARG_INFO(0, right_operand)
-	ZEND_ARG_INFO(0, scale)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_bcmul, 0, 0, 2)
-	ZEND_ARG_INFO(0, left_operand)
-	ZEND_ARG_INFO(0, right_operand)
-	ZEND_ARG_INFO(0, scale)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_bcdiv, 0, 0, 2)
-	ZEND_ARG_INFO(0, left_operand)
-	ZEND_ARG_INFO(0, right_operand)
-	ZEND_ARG_INFO(0, scale)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_bcmod, 0)
-	ZEND_ARG_INFO(0, left_operand)
-	ZEND_ARG_INFO(0, right_operand)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_bcpowmod, 0, 0, 3)
-	ZEND_ARG_INFO(0, x)
-	ZEND_ARG_INFO(0, y)
-	ZEND_ARG_INFO(0, mod)
-	ZEND_ARG_INFO(0, scale)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_bcpow, 0, 0, 2)
-	ZEND_ARG_INFO(0, x)
-	ZEND_ARG_INFO(0, y)
-	ZEND_ARG_INFO(0, scale)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_bcsqrt, 0, 0, 1)
-	ZEND_ARG_INFO(0, operand)
-	ZEND_ARG_INFO(0, scale)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_bccomp, 0, 0, 2)
-	ZEND_ARG_INFO(0, left_operand)
-	ZEND_ARG_INFO(0, right_operand)
-	ZEND_ARG_INFO(0, scale)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_bcscale, 0, 0, 0)
-	ZEND_ARG_INFO(0, scale)
-ZEND_END_ARG_INFO()
-
-/* }}} */
-
-const zend_function_entry bcmath_functions[] = {
-	PHP_FE(bcadd,									arginfo_bcadd)
-	PHP_FE(bcsub,									arginfo_bcsub)
-	PHP_FE(bcmul,									arginfo_bcmul)
-	PHP_FE(bcdiv,									arginfo_bcdiv)
-	PHP_FE(bcmod,									arginfo_bcmod)
-	PHP_FE(bcpow,									arginfo_bcpow)
-	PHP_FE(bcsqrt,									arginfo_bcsqrt)
-	PHP_FE(bcscale,									arginfo_bcscale)
-	PHP_FE(bccomp,									arginfo_bccomp)
-	PHP_FE(bcpowmod,								arginfo_bcpowmod)
-	PHP_FE_END
-};
-
 zend_module_entry bcmath_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"bcmath",
-	bcmath_functions,
+	ext_functions,
 	PHP_MINIT(bcmath),
 	PHP_MSHUTDOWN(bcmath),
 	NULL,
@@ -199,11 +123,15 @@ static void php_str2num(bc_num *num, char *str)
 	char *p;
 
 	if (!(p = strchr(str, '.'))) {
-		bc_str2num(num, str, 0);
+		if (!bc_str2num(num, str, 0)) {
+			php_error_docref(NULL, E_WARNING, "bcmath function argument is not well-formed");
+		}
 		return;
 	}
 
-	bc_str2num(num, str, strlen(p+1));
+	if (!bc_str2num(num, str, strlen(p+1))) {
+		php_error_docref(NULL, E_WARNING, "bcmath function argument is not well-formed");
+	}
 }
 /* }}} */
 
@@ -343,7 +271,7 @@ PHP_FUNCTION(bcdiv)
 			RETVAL_STR(bc_num2str_ex(result, scale));
 			break;
 		case -1: /* division by zero */
-			php_error_docref(NULL, E_WARNING, "Division by zero");
+			zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Division by zero");
 			break;
 	}
 
@@ -354,17 +282,25 @@ PHP_FUNCTION(bcdiv)
 }
 /* }}} */
 
-/* {{{ proto string bcmod(string left_operand, string right_operand)
+/* {{{ proto string bcmod(string left_operand, string right_operand [, int scale])
    Returns the modulus of the two arbitrary precision operands */
 PHP_FUNCTION(bcmod)
 {
 	zend_string *left, *right;
+	zend_long scale_param = 0;
 	bc_num first, second, result;
+	int scale = (int)BCG(bc_precision);
 
-	ZEND_PARSE_PARAMETERS_START(2, 2)
+	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STR(left)
 		Z_PARAM_STR(right)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(scale_param)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (ZEND_NUM_ARGS() == 3) {
+		scale = (int) ((int)scale_param < 0 ? 0 : scale_param);
+	}
 
 	bc_init_num(&first);
 	bc_init_num(&second);
@@ -372,12 +308,12 @@ PHP_FUNCTION(bcmod)
 	php_str2num(&first, ZSTR_VAL(left));
 	php_str2num(&second, ZSTR_VAL(right));
 
-	switch (bc_modulo(first, second, &result, 0)) {
+	switch (bc_modulo(first, second, &result, scale)) {
 		case 0:
-			RETVAL_STR(bc_num2str(result));
+			RETVAL_STR(bc_num2str_ex(result, scale));
 			break;
 		case -1:
-			php_error_docref(NULL, E_WARNING, "Division by zero");
+			zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Modulo by zero");
 			break;
 	}
 
@@ -389,10 +325,10 @@ PHP_FUNCTION(bcmod)
 /* }}} */
 
 /* {{{ proto string bcpowmod(string x, string y, string mod [, int scale])
-   Returns the value of an arbitrary precision number raised to the power of another reduced by a modulous */
+   Returns the value of an arbitrary precision number raised to the power of another reduced by a modulus */
 PHP_FUNCTION(bcpowmod)
 {
-	zend_string *left, *right, *modulous;
+	zend_string *left, *right, *modulus;
 	bc_num first, second, mod, result;
 	zend_long scale = BCG(bc_precision);
 	int scale_int;
@@ -400,7 +336,7 @@ PHP_FUNCTION(bcpowmod)
 	ZEND_PARSE_PARAMETERS_START(3, 4)
 		Z_PARAM_STR(left)
 		Z_PARAM_STR(right)
-		Z_PARAM_STR(modulous)
+		Z_PARAM_STR(modulus)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(scale)
 	ZEND_PARSE_PARAMETERS_END();
@@ -411,7 +347,7 @@ PHP_FUNCTION(bcpowmod)
 	bc_init_num(&result);
 	php_str2num(&first, ZSTR_VAL(left));
 	php_str2num(&second, ZSTR_VAL(right));
-	php_str2num(&mod, ZSTR_VAL(modulous));
+	php_str2num(&mod, ZSTR_VAL(modulus));
 
 	scale_int = (int) ((int)scale < 0 ? 0 : scale);
 
@@ -465,7 +401,7 @@ PHP_FUNCTION(bcpow)
 /* }}} */
 
 /* {{{ proto string bcsqrt(string operand [, int scale])
-   Returns the square root of an arbitray precision number */
+   Returns the square root of an arbitrary precision number */
 PHP_FUNCTION(bcsqrt)
 {
 	zend_string *left;
@@ -489,7 +425,7 @@ PHP_FUNCTION(bcsqrt)
 	if (bc_sqrt (&result, scale) != 0) {
 		RETVAL_STR(bc_num2str_ex(result, scale));
 	} else {
-		php_error_docref(NULL, E_WARNING, "Square root of negative number");
+		zend_value_error("Square root of negative number");
 	}
 
 	bc_free_num(&result);
@@ -520,8 +456,12 @@ PHP_FUNCTION(bccomp)
 	bc_init_num(&first);
 	bc_init_num(&second);
 
-	bc_str2num(&first, ZSTR_VAL(left), scale);
-	bc_str2num(&second, ZSTR_VAL(right), scale);
+	if (!bc_str2num(&first, ZSTR_VAL(left), scale)) {
+		php_error_docref(NULL, E_WARNING, "bcmath function argument is not well-formed");
+	}
+	if (!bc_str2num(&second, ZSTR_VAL(right), scale)) {
+	    php_error_docref(NULL, E_WARNING, "bcmath function argument is not well-formed");
+	}
 	RETVAL_LONG(bc_compare(first, second));
 
 	bc_free_num(&first);
@@ -553,12 +493,3 @@ PHP_FUNCTION(bcscale)
 
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

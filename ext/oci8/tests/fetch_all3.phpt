@@ -5,7 +5,7 @@ oci_fetch_all() - all combinations of flags
 --FILE--
 <?php
 
-require(dirname(__FILE__)."/connect.inc");
+require(__DIR__."/connect.inc");
 
 // Initialize
 
@@ -122,10 +122,10 @@ $stmtarray = array(
 );
 
 oci8_test_sql_execute($c, $stmtarray);
-    
+
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 None
 int(4)
 array(2) {

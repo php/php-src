@@ -1,16 +1,11 @@
 ARG_ENABLE("opcache", "whether to enable Zend OPcache support", "yes");
 
-ARG_ENABLE("opcache-file", "whether to enable file based caching", "yes");
-
-/* var PHP_OPCACHE_PGO = false; */
 
 if (PHP_OPCACHE != "no") {
 
-	if (PHP_OPCACHE_FILE == "yes") {
-		AC_DEFINE('HAVE_OPCACHE_FILE_CACHE', 1, 'Define to enable file based caching (experimental)');
-	}
+	ARG_ENABLE("opcache-jit", "whether to enable JIT", "yes");
 
-	EXTENSION('opcache', "\
+	ZEND_EXTENSION('opcache', "\
 		ZendAccelerator.c \
 		zend_accelerator_blacklist.c \
 		zend_accelerator_debug.c \
@@ -23,9 +18,28 @@ if (PHP_OPCACHE != "no") {
 		zend_shared_alloc.c \
 		shared_alloc_win32.c", true, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 
-	ADD_SOURCES(configure_module_dirname + "/Optimizer", "zend_optimizer.c pass1_5.c pass2.c pass3.c optimize_func_calls.c block_pass.c optimize_temp_vars_5.c nop_removal.c compact_literals.c zend_cfg.c zend_dfg.c dfa_pass.c zend_ssa.c zend_inference.c zend_func_info.c zend_call_graph.c sccp.c scdf.c dce.c escape_analysis.c compact_vars.c zend_dump.c", "opcache", "OptimizerObj");
+	if (PHP_OPCACHE_JIT == "yes") {
+		if (CHECK_HEADER_ADD_INCLUDE("dynasm/dasm_x86.h", "CFLAGS_OPCACHE", PHP_OPCACHE + ";ext\\opcache\\jit")) {
+			var dasm_flags = (X64 ? "-D X64=1" : "") + (X64 ? " -D X64WIN=1" : "") + " -D WIN=1";
+			if (PHP_ZTS == "yes") {
+				dasm_flags += " -D ZTS=1";
+			}
+			DEFINE("DASM_FLAGS", dasm_flags);
 
-  
+			AC_DEFINE('HAVE_JIT', 1, 'Define to enable JIT');
+			/* XXX read this dynamically */
+			/*ADD_FLAG("CFLAGS_OPCACHE", "/D DASM_VERSION=10400");*/
+
+			ADD_MAKEFILE_FRAGMENT(configure_module_dirname + "\\jit\\Makefile.frag.w32");
+
+			ADD_SOURCES(configure_module_dirname + "\\jit", "zend_jit.c zend_jit_vm_helpers.c", "opcache", "opcache_jit");
+		} else {
+			WARNING("JIT not enabled, headers not found");
+		}
+	}
+
+	ADD_SOURCES(configure_module_dirname + "/Optimizer", "zend_optimizer.c pass1.c pass3.c optimize_func_calls.c block_pass.c optimize_temp_vars_5.c nop_removal.c compact_literals.c zend_cfg.c zend_dfg.c dfa_pass.c zend_ssa.c zend_inference.c zend_func_info.c zend_call_graph.c zend_dump.c escape_analysis.c compact_vars.c dce.c sccp.c scdf.c", "opcache", "OptimizerObj");
+
 	ADD_FLAG('CFLAGS_OPCACHE', "/I " + configure_module_dirname);
 
 }

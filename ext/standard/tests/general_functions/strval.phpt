@@ -21,27 +21,27 @@ EOD;
 /* null heredoc string */
 $heredoc_empty_string = <<<EOD
 EOD;
-/* heredoc string with NULL */ 
+/* heredoc string with NULL */
 $heredoc_NULL_string = <<<EOD
 NULL
 EOD;
 
-// different valid  scalar vlaues 
+// different valid  scalar values
 $scalars = array(
   /* integers */
   0,
   1,
   -1,
   -2147483648, // max negative integer value
-  -2147483647, 
+  -2147483647,
   2147483647,  // max positive integer value
   2147483640,
   0x123B,      // integer as hexadecimal
   0x12ab,
   0Xfff,
   0XFA,
- 
-  /* floats */ 
+
+  /* floats */
   -0x80000000, // max negative integer as hexadecimal
   0x7fffffff,  // max positive integer as hexadecimal
   0x7FFFFFFF,  // max positive integer as hexadecimal
@@ -66,12 +66,12 @@ $scalars = array(
   .0034E-30,
 
   /* booleans */
-  true,  
+  true,
   TRUE,
   FALSE,
-  false,  
+  false,
 
-  /* strings */  
+  /* strings */
   "",
   '',
   " ",
@@ -91,11 +91,11 @@ $scalars = array(
   "true",
   /*"\0123",
   "\0x12FF",*/
-  $heredoc_string, 
+  $heredoc_string,
   $heredoc_numeric_string,
   $heredoc_empty_string
 );
-/* loop to check that strval() recognizes different 
+/* loop to check that strval() recognizes different
    scalar values and returns the string conversion of same */
 $loop_counter = 1;
 foreach ($scalars as $scalar ) {
@@ -106,13 +106,13 @@ foreach ($scalars as $scalar ) {
 echo "\n*** Testing strval() with non_scalar values ***\n";
 // get a resource type variable
 $fp = fopen(__FILE__, "r");
-$dfp = opendir( dirname(__FILE__) );
+$dfp = opendir( __DIR__ );
 
 // unset variable
 $unset_var = 10;
 unset ($unset_var);
 
-// non_scalar values, objects, arrays, resources and boolean 
+// non_scalar values, objects, arrays, resources and boolean
 class foo
 {
   function __toString() {
@@ -133,7 +133,7 @@ $not_scalars = array (
   @$unset_var,  // unset variable
   @$undefined_var
 );
-/* loop through the $not_scalars to see working of 
+/* loop through the $not_scalars to see working of
    strval() on objects, arrays, boolean and others */
 $loop_counter = 1;
 foreach ($not_scalars as $value ) {
@@ -141,13 +141,6 @@ foreach ($not_scalars as $value ) {
    var_dump( strval($value) );
 }
 
-echo "\n*** Testing error conditions ***\n";
-//Zero argument
-var_dump( strval() );
-
-//arguments more than expected 
-var_dump( strval( $scalars[0], $scalars[1]) );
- 
 echo "Done\n";
 
 // close the resources used
@@ -284,19 +277,19 @@ string(14) "Resource id #%d"
 string(14) "Resource id #%d"
 -- Iteration 4 --
 
-Notice: Array to string conversion in %sstrval.php on line %d
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 -- Iteration 5 --
 
-Notice: Array to string conversion in %sstrval.php on line %d
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 -- Iteration 6 --
 
-Notice: Array to string conversion in %sstrval.php on line %d
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 -- Iteration 7 --
 
-Notice: Array to string conversion in %sstrval.php on line %d
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 -- Iteration 8 --
 string(0) ""
@@ -306,12 +299,4 @@ string(0) ""
 string(0) ""
 -- Iteration 11 --
 string(0) ""
-
-*** Testing error conditions ***
-
-Warning: strval() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: strval() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
 Done

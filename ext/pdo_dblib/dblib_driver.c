@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +14,6 @@
   |         Frank M. Kromann <frank@kromann.info>                        |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 # include "config.h"
@@ -298,6 +294,73 @@ static int dblib_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 	}
 }
 
+static void dblib_get_tds_version(zval *return_value, int tds)
+{
+	switch (tds) {
+		case DBTDS_2_0:
+			ZVAL_STRING(return_value, "2.0");
+			break;
+
+		case DBTDS_3_4:
+			ZVAL_STRING(return_value, "3.4");
+			break;
+
+		case DBTDS_4_0:
+			ZVAL_STRING(return_value, "4.0");
+			break;
+
+		case DBTDS_4_2:
+			ZVAL_STRING(return_value, "4.2");
+			break;
+
+		case DBTDS_4_6:
+			ZVAL_STRING(return_value, "4.6");
+			break;
+
+		case DBTDS_4_9_5:
+			ZVAL_STRING(return_value, "4.9.5");
+			break;
+
+		case DBTDS_5_0:
+			ZVAL_STRING(return_value, "5.0");
+			break;
+
+#ifdef DBTDS_7_0
+		case DBTDS_7_0:
+			ZVAL_STRING(return_value, "7.0");
+			break;
+#endif
+
+#ifdef DBTDS_7_1
+		case DBTDS_7_1:
+			ZVAL_STRING(return_value, "7.1");
+			break;
+#endif
+
+#ifdef DBTDS_7_2
+		case DBTDS_7_2:
+			ZVAL_STRING(return_value, "7.2");
+			break;
+#endif
+
+#ifdef DBTDS_7_3
+		case DBTDS_7_3:
+			ZVAL_STRING(return_value, "7.3");
+			break;
+#endif
+
+#ifdef DBTDS_7_4
+		case DBTDS_7_4:
+			ZVAL_STRING(return_value, "7.4");
+			break;
+#endif
+
+		default:
+			ZVAL_FALSE(return_value);
+			break;
+	}
+}
+
 static int dblib_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_value)
 {
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
@@ -320,6 +383,10 @@ static int dblib_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_valu
 			ZVAL_STRING(return_value, dbversion());
 			break;
 
+		case PDO_DBLIB_ATTR_TDS_VERSION:
+			dblib_get_tds_version(return_value, dbtds(H->link));
+			break;
+
 		case PDO_DBLIB_ATTR_SKIP_EMPTY_ROWSETS:
 			ZVAL_BOOL(return_value, H->skip_empty_rowsets);
 			break;
@@ -335,7 +402,7 @@ static int dblib_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_valu
 	return 1;
 }
 
-static struct pdo_dbh_methods dblib_methods = {
+static const struct pdo_dbh_methods dblib_methods = {
 	dblib_handle_closer,
 	dblib_handle_preparer,
 	dblib_handle_doer,
@@ -389,6 +456,8 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 		,{ "dbname",	NULL,	0 }
 		,{ "secure",	NULL,	0 } /* DBSETLSECURE */
 		,{ "version",	NULL,	0 } /* DBSETLVERSION */
+		,{ "user",      NULL,   0 }
+		,{ "password",  NULL,   0 }
 	};
 
 	nvars = sizeof(vars)/sizeof(vars[0]);
@@ -450,10 +519,18 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 		}
 	}
 
+	if (!dbh->username && vars[6].optval) {
+		dbh->username = pestrdup(vars[6].optval, dbh->is_persistent);
+	}
+
 	if (dbh->username) {
 		if(FAIL == DBSETLUSER(H->login, dbh->username)) {
 			goto cleanup;
 		}
+	}
+
+	if (!dbh->password && vars[7].optval) {
+		dbh->password = pestrdup(vars[7].optval, dbh->is_persistent);
 	}
 
 	if (dbh->password) {
@@ -529,7 +606,7 @@ cleanup:
 	return ret;
 }
 
-pdo_driver_t pdo_dblib_driver = {
+const pdo_driver_t pdo_dblib_driver = {
 #if PDO_DBLIB_IS_MSSQL
 	PDO_DRIVER_HEADER(mssql),
 #elif defined(PHP_WIN32)

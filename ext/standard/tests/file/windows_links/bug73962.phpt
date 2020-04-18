@@ -6,11 +6,11 @@ if(substr(PHP_OS, 0, 3) != 'WIN' ) {
     die('skip windows only test');
 }
 include_once __DIR__ . '/common.inc';
-$ret = exec('mklink bug48746_tmp.lnk ' . __FILE__ .' 2>&1', $out);
+$ret = exec('mklink bug73962_tmp.lnk ' . __FILE__ .' 2>&1', $out);
 if (strpos($ret, 'privilege')) {
 	die('skip. SeCreateSymbolicLinkPrivilege not enable for this user.');
 }
-unlink('bug48746_tmp.lnk');
+unlink('bug73962_tmp.lnk');
 ?>
 --FILE--
 <?php
@@ -74,4 +74,3 @@ array(4) {
   string(5) "b.php"
 }
 bool(true)
-

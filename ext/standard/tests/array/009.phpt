@@ -2,7 +2,7 @@
 Test key(), current(), next() & reset() functions
 --FILE--
 <?php
-/* Prototype & Usage: 
+/* Prototype & Usage:
    mixed key ( array &$array ) -> returns the index element of the current array position
    mixed current ( array &$array ) -> returns the current element in the array
    mixed next ( array &$array ) -> similar to current() but advances the internal pointer to next element
@@ -19,16 +19,16 @@ $basic_arrays = array (
   array('d' => 'drink', 'p' => 'port', 's' => 'set'),   // another associative array
   array(1 => 'One', 2 => 'two', 3 => "three")           // associative array with key as integers
 );
-            
+
 $varient_arrays = array (
    array(),    // empty array
    array(""),  // array with null string
-   array(NULL),// array with NULL 
+   array(NULL),// array with NULL
    array(null),// array with null
    array(NULL, true, null, "", 1), // mixed array
-   array(-1.5 => "test", -2 => "rest", 2.5 => "two", 
+   array(-1.5 => "test", -2 => "rest", 2.5 => "two",
          "" => "string", 0 => "zero", "" => "" ) // mixed array
-);  
+);
 
 echo "*** Testing basic operations ***\n";
 $loop_count = 1;
@@ -69,54 +69,9 @@ foreach ($varient_arrays as $sub_array )  {
   echo "\n";
 }
 
-/*test these functions on array which is already unset */ 
-echo "\n-- Testing variation: when array is unset --\n";
-$unset_array = array (1);
-unset($unset_array);
-
-var_dump( current($unset_array) );
-var_dump( key($unset_array) );
-var_dump( next($unset_array) );
-var_dump( reset($unset_array) );
-
-
-echo "\n*** Testing error conditions ***\n";
-//Zero argument, expected 1 argument
-var_dump( key() );
-var_dump( current() );
-var_dump( reset() );
-var_dump( next() );
-
-// args more than expected, expected 1 argument
-$temp_array = array(1);
-var_dump( key($temp_array, $temp_array) );
-var_dump( current($temp_array, $temp_array) );
-var_dump( reset($temp_array, $temp_array) );
-var_dump( next($temp_array, $temp_array) );
-
-// invalid args type, valid argument: array 
-$int_var = 1;
-$float_var = 1.5;
-$string = "string";
-var_dump( key($int_var) );
-var_dump( key($float_var) );
-var_dump( key($string) );
-
-var_dump( current($int_var) );
-var_dump( current($float_var) );
-var_dump( current($string) );
-
-var_dump( next($int_var) );
-var_dump( next($float_var) );
-var_dump( next($string) );
-
-var_dump( reset($int_var) );
-var_dump( reset($float_var) );
-var_dump( reset($string) );
-
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 *** Testing basic operations ***
 -- Iteration 1 --
 int(0)
@@ -456,84 +411,4 @@ array(5) {
   string(4) "zero"
 }
 
-
--- Testing variation: when array is unset --
-
-Notice: Undefined variable: unset_array in %s on line %d
-
-Warning: current() expects parameter 1 to be array, null given in %s on line %d
-NULL
-
-Notice: Undefined variable: unset_array in %s on line %d
-
-Warning: key() expects parameter 1 to be array, null given in %s on line %d
-NULL
-
-Warning: next() expects parameter 1 to be array, null given in %s on line %d
-NULL
-
-Warning: reset() expects parameter 1 to be array, null given in %s on line %d
-NULL
-
-*** Testing error conditions ***
-
-Warning: key() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: current() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: reset() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: next() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: key() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
-
-Warning: current() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
-
-Warning: reset() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
-
-Warning: next() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
-
-Warning: key() expects parameter 1 to be array, integer given in %s on line %d
-NULL
-
-Warning: key() expects parameter 1 to be array, float given in %s on line %d
-NULL
-
-Warning: key() expects parameter 1 to be array, string given in %s on line %d
-NULL
-
-Warning: current() expects parameter 1 to be array, integer given in %s on line %d
-NULL
-
-Warning: current() expects parameter 1 to be array, float given in %s on line %d
-NULL
-
-Warning: current() expects parameter 1 to be array, string given in %s on line %d
-NULL
-
-Warning: next() expects parameter 1 to be array, integer given in %s on line %d
-NULL
-
-Warning: next() expects parameter 1 to be array, float given in %s on line %d
-NULL
-
-Warning: next() expects parameter 1 to be array, string given in %s on line %d
-NULL
-
-Warning: reset() expects parameter 1 to be array, integer given in %s on line %d
-NULL
-
-Warning: reset() expects parameter 1 to be array, float given in %s on line %d
-NULL
-
-Warning: reset() expects parameter 1 to be array, string given in %s on line %d
-NULL
 Done

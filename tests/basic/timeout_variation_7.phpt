@@ -1,21 +1,20 @@
 --TEST--
 Timeout within for loop
 --SKIPIF--
-<?php 
-	if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
+<?php
+if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 ?>
 --FILE--
 <?php
 
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "timeout_config.inc";
+set_time_limit(1);
 
-set_time_limit($t);
-
-for ($i = 0; $i < 42; $i++) { 
-	busy_wait(1);
+$y = 0;
+for ($i = 0; $i < INF; $i++) {
+    $y++;
 }
 
 ?>
 never reached here
 --EXPECTF--
-Fatal error: Maximum execution time of 3 seconds exceeded in %s on line %d
+Fatal error: Maximum execution time of 1 second exceeded in %s on line %d

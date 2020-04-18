@@ -1,4 +1,3 @@
-// $Id$
 // vim:ft=javascript
 
 ARG_ENABLE("xmlreader", "XMLReader support", "yes");
@@ -16,4 +15,3 @@ if (PHP_XMLREADER == "yes" &&
 	ADD_EXTENSION_DEP('xmlreader', 'libxml');
 	ADD_EXTENSION_DEP('xmlreader', 'dom');
 }
-

@@ -1,15 +1,9 @@
 --TEST--
-Test crc32() function : basic functionality 
---SKIPIF--
-<?php
-if (PHP_INT_SIZE != 4) 
-  die("skip this test is for 32bit platform only");
-?>
-
+Test crc32() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : string crc32(string $str)
- * Description: Calculate the crc32 polynomial of a string 
+ * Description: Calculate the crc32 polynomial of a string
  * Source code: ext/standard/crc32.c
  * Alias to functions: none
 */
@@ -34,7 +28,7 @@ printf("%u\n", crc32($str) );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing crc32() : basic functionality ***
 bool(true)
 256895812

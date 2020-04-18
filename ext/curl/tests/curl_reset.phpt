@@ -37,7 +37,5 @@ unlink($log_file);
 
 ?>
 
-===DONE===
 --EXPECT--
 testtest
-===DONE===

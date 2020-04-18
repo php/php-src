@@ -1,5 +1,5 @@
 --TEST--
-Test chr() function : basic functionality 
+Test chr() function : basic functionality
 --FILE--
 <?php
 
@@ -15,9 +15,7 @@ echo chr(10); // "\n"
 echo "World";
 echo "\n";
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing chr() : basic functionality ***
 Hello
 World
-===DONE===

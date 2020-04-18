@@ -12,14 +12,13 @@ error_reporting(E_ERROR);
 
 foreach ($strVals as $strVal) {
    foreach($strVals as $otherVal) {
-	   echo "--- testing: '$strVal' * '$otherVal' ---\n";   
+       echo "--- testing: '$strVal' * '$otherVal' ---\n";
       var_dump($strVal*$otherVal);
    }
 }
 
-   
+
 ?>
-===DONE===
 --EXPECT--
 --- testing: '0' * '0' ---
 int(0)
@@ -142,7 +141,7 @@ float(338.8)
 --- testing: '-7.7' * '1.2' ---
 float(-9.24)
 --- testing: '-7.7' * '-7.7' ---
-float(59.29)
+float(59.290000000000006)
 --- testing: '-7.7' * 'abc' ---
 float(-0)
 --- testing: '-7.7' * '123abc' ---
@@ -232,9 +231,9 @@ float(0)
 --- testing: '123e5' * '123abc' ---
 float(1512900000)
 --- testing: '123e5' * '123e5' ---
-float(1.5129E+14)
+float(151290000000000)
 --- testing: '123e5' * '123e5xyz' ---
-float(1.5129E+14)
+float(151290000000000)
 --- testing: '123e5' * ' 123abc' ---
 float(1512900000)
 --- testing: '123e5' * '123 abc' ---
@@ -260,9 +259,9 @@ float(0)
 --- testing: '123e5xyz' * '123abc' ---
 float(1512900000)
 --- testing: '123e5xyz' * '123e5' ---
-float(1.5129E+14)
+float(151290000000000)
 --- testing: '123e5xyz' * '123e5xyz' ---
-float(1.5129E+14)
+float(151290000000000)
 --- testing: '123e5xyz' * ' 123abc' ---
 float(1512900000)
 --- testing: '123e5xyz' * '123 abc' ---
@@ -382,7 +381,7 @@ float(418.2)
 --- testing: '3.4a' * '123abc ' ---
 float(418.2)
 --- testing: '3.4a' * '3.4a' ---
-float(11.56)
+float(11.559999999999999)
 --- testing: '3.4a' * 'a5.9' ---
 float(0)
 --- testing: 'a5.9' * '0' ---
@@ -413,4 +412,3 @@ int(0)
 float(0)
 --- testing: 'a5.9' * 'a5.9' ---
 int(0)
-===DONE===

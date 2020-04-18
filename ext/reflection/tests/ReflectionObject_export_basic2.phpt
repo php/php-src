@@ -1,15 +1,15 @@
 --TEST--
-ReflectionObject::export() : very basic test with dynamic properties
+ReflectionObject::__toString() : very basic test with dynamic properties
 --FILE--
 <?php
 
 class Foo  {
-	public $bar = 1;
+    public $bar = 1;
 }
 $f = new foo;
 $f->dynProp = 'hello';
 $f->dynProp2 = 'hello again';
-ReflectionObject::export($f);
+echo new ReflectionObject($f);
 
 ?>
 --EXPECTF--
@@ -26,7 +26,7 @@ Object of class [ <user> class Foo ] {
   }
 
   - Properties [1] {
-    Property [ <default> public $bar ]
+    Property [ public $bar = 1 ]
   }
 
   - Dynamic properties [2] {

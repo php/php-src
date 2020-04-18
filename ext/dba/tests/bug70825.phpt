@@ -49,7 +49,6 @@ var_dump(dba_fetch('[foo]bar', 2, $db));
 dba_close($db);
 unlink($filename);
 ?>
-==DONE==
 --EXPECT--
 string(2) "23"
 string(2) "42"
@@ -63,7 +62,6 @@ string(4) "1337"
 string(2) "23"
 string(2) "42"
 string(4) "1337"
-==DONE==
 --CLEAN--
 <?php
 $filename = __DIR__ . DIRECTORY_SEPARATOR . 'bug70825.ini';

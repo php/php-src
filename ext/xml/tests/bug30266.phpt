@@ -33,7 +33,7 @@ class XML_Parser
     function startHandler($XmlParser, $tag, $attr)
     {
             $this->dummy = "b";
-		    throw new Exception("ex");
+            throw new Exception("ex");
     }
 
     function endHandler($XmlParser, $tag)
@@ -43,9 +43,9 @@ class XML_Parser
 
 $p1 = new Xml_Parser();
 try {
-    $p1->parse('<tag1><tag2></tag2></tag1>'); 
+    $p1->parse('<tag1><tag2></tag2></tag1>');
 } catch (Exception $e) {
-	echo "OK\n";
+    echo "OK\n";
 }
 ?>
 --EXPECT--

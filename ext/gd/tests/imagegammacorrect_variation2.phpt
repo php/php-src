@@ -26,9 +26,9 @@ function test_gamma($in, $out, $constructor)
             draw_cell($im, $i, $j);
         }
     }
-    
+
     imagegammacorrect($im, $in, $out);
-    
+
     $filename = __DIR__ . DIRECTORY_SEPARATOR
         . "imagegammacorrect_variation2_{$in}_{$out}.png";
     $kind = $constructor === 'imagecreate' ? 'palette' : 'truecolor';
@@ -61,7 +61,6 @@ function cell_color($im, $x, $y)
     }
 }
 ?>
-===DONE===
 --EXPECT--
 palette gamma (1, 2): The images are equal.
 truecolor gamma (1, 2): The images are equal.
@@ -69,4 +68,3 @@ palette gamma (1, 1): The images are equal.
 truecolor gamma (1, 1): The images are equal.
 palette gamma (2, 1): The images are equal.
 truecolor gamma (2, 1): The images are equal.
-===DONE===

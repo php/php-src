@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -77,10 +75,6 @@ char *phpdbg_decode_input_op(
 		if (op.num != (uint32_t)-1) {
 			spprintf(&result, 0, "try-catch(%" PRIu32 ")", op.num);
 		}
-	} else if (ZEND_VM_OP_LIVE_RANGE == (flags & ZEND_VM_OP_MASK)) {
-		if (opline->extended_value & ZEND_FREE_ON_RETURN) {
-			spprintf(&result, 0, "live-range(%" PRIu32 ")", op.num);
-		}
 	} else if (ZEND_VM_OP_THIS == (flags & ZEND_VM_OP_MASK)) {
 		result = estrdup("THIS");
 	} else if (ZEND_VM_OP_NEXT == (flags & ZEND_VM_OP_MASK)) {
@@ -115,7 +109,13 @@ char *phpdbg_decode_opline(zend_op_array *ops, zend_op *opline) /*{{{ */
 	/* RESULT */
 	switch (opline->opcode) {
 	case ZEND_CATCH:
-		spprintf(&decode[3], 0, "%" PRIu32, opline->result.num);
+		if (opline->extended_value & ZEND_LAST_CATCH) {
+			if (decode[2]) {
+				efree(decode[2]);
+				decode[2] = NULL;
+			}
+		}
+		decode[3] = phpdbg_decode_op(ops, opline, &opline->result, opline->result_type);
 		break;
 	default:
 		decode[3] = phpdbg_decode_op(ops, opline, &opline->result, opline->result_type);

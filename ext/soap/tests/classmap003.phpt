@@ -14,7 +14,7 @@ class A {
 }
 
 class B extends A {
-  public $y; 
+  public $y;
   function __construct($a){
     parent::__construct($a);
     $this->y = $a + 1;
@@ -42,7 +42,7 @@ class LocalSoapClient extends SoapClient {
   }
 }
 
-$client = new LocalSoapClient(dirname(__FILE__)."/classmap003.wsdl",
+$client = new LocalSoapClient(__DIR__."/classmap003.wsdl",
     array('classmap'=>array('A'=>'A','B'=>'B')));
 print_r($client->f());
 ?>

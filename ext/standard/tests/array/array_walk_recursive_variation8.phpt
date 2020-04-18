@@ -3,7 +3,7 @@ Test array_walk_recursive() function : usage variations - buit-in function as ca
 --FILE--
 <?php
 /* Prototype  : bool array_walk_recursive(array $input, string $funcname [, mixed $userdata])
- * Description: Apply a user function to every member of an array 
+ * Description: Apply a user function to every member of an array
  * Source code: ext/standard/array.c
 */
 
@@ -25,18 +25,20 @@ echo "-- With 'min' built-in function --\n";
 var_dump( array_walk_recursive($input, "min"));
 
 echo "-- With 'echo' language construct --\n";
-var_dump( array_walk_recursive($input, "echo"));
+try {
+    var_dump( array_walk_recursive($input, "echo"));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_walk_recursive() : built-in function as callback ***
 -- With 'pow' built-in function --
 bool(true)
 -- With 'min' built-in function --
 bool(true)
 -- With 'echo' language construct --
-
-Warning: array_walk_recursive() expects parameter 2 to be a valid callback, function 'echo' not found or invalid function name in %s on line %d
-NULL
+array_walk_recursive(): Argument #2 ($funcname) must be a valid callback, function 'echo' not found or invalid function name
 Done

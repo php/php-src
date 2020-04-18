@@ -57,4 +57,3 @@ _VC_MANIFEST_EMBED_DLL= if exist $@.manifest $(MT) -nologo -manifest $@.manifest
 !endif
 
 install: build-headers  build-bins
-

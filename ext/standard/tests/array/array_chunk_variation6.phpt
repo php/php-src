@@ -1,5 +1,5 @@
 --TEST--
-Test array_chunk() function : usage variations - different arrays  
+Test array_chunk() function : usage variations - different arrays
 --FILE--
 <?php
 /* Prototype  : array array_chunk(array $array, int $size [, bool $preserve_keys])
@@ -9,10 +9,10 @@ Test array_chunk() function : usage variations - different arrays
 */
 
 /*
- * Testing array_chunk() function with following conditions 
+ * Testing array_chunk() function with following conditions
  *   1. array without elements
  *   2. associative array with duplicate keys
- *   3. array with one element 
+ *   3. array with one element
 */
 
 echo "*** Testing array_chunk() : usage variations ***\n";
@@ -25,7 +25,7 @@ $input_arrays = array (
 
   // array with one element
   "array2" => array(1),
-  
+
   // associative array with duplicate keys
   "array3" => array("a" => 1, "b" => 2, "c" => 3, "a" => 4, "d" => 5)
 
@@ -47,7 +47,7 @@ foreach ($input_arrays as $input_array){
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_chunk() : usage variations ***
 
 -- Testing array_chunk() by supplying various arrays --

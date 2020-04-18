@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Dmitry Stogov <dmitry@zend.com>                             |
+   | Authors: Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -110,7 +110,7 @@ int zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, 
 		return FAILURE;
 	}
 
-	if (zend_ssa_inference(&ctx->arena, op_array, ctx->script, ssa) != SUCCESS) {
+	if (zend_ssa_inference(&ctx->arena, op_array, ctx->script, ssa, ctx->optimization_level) != SUCCESS) {
 		return FAILURE;
 	}
 
@@ -125,10 +125,10 @@ int zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, 
 	return SUCCESS;
 }
 
-static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa)
+static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa, zend_optimizer_ctx *ctx)
 {
 	zend_basic_block *blocks = ssa->cfg.blocks;
-	zend_basic_block *end = blocks + ssa->cfg.blocks_count;
+	zend_basic_block *blocks_end = blocks + ssa->cfg.blocks_count;
 	zend_basic_block *b;
 	zend_func_info *func_info;
 	int j;
@@ -152,16 +152,15 @@ static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa)
 		}
 	}
 
-	for (b = blocks; b < end; b++) {
+	for (b = blocks; b < blocks_end; b++) {
 		if (b->flags & (ZEND_BB_REACHABLE|ZEND_BB_UNREACHABLE_FREE)) {
-			uint32_t end;
-
 			if (b->len) {
+				uint32_t new_start, old_end;
 				while (i < b->start) {
 					shiftlist[i] = i - target;
 					i++;
 				}
-				
+
 				if (b->flags & ZEND_BB_UNREACHABLE_FREE) {
 					/* Only keep the FREE for the loop var */
 					ZEND_ASSERT(op_array->opcodes[b->start].opcode == ZEND_FREE
@@ -169,17 +168,11 @@ static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa)
 					b->len = 1;
 				}
 
-				end = b->start + b->len;
-				b->start = target;
-				while (i < end) {
+				new_start = target;
+				old_end = b->start + b->len;
+				while (i < old_end) {
 					shiftlist[i] = i - target;
-					if (EXPECTED(op_array->opcodes[i].opcode != ZEND_NOP) ||
-					   /*keep NOP to support ZEND_VM_SMART_BRANCH */
-					   (i > 0 &&
-					    i + 1 < op_array->last &&
-					    (op_array->opcodes[i+1].opcode == ZEND_JMPZ ||
-					     op_array->opcodes[i+1].opcode == ZEND_JMPNZ) &&
-					    zend_is_smart_branch(op_array->opcodes + i - 1))) {
+					if (EXPECTED(op_array->opcodes[i].opcode != ZEND_NOP)) {
 						if (i != target) {
 							op_array->opcodes[target] = op_array->opcodes[i];
 							ssa->ops[target] = ssa->ops[i];
@@ -189,12 +182,13 @@ static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa)
 					}
 					i++;
 				}
-				if (target != end) {
+				b->start = new_start;
+				if (target != old_end) {
 					zend_op *opline;
 					zend_op *new_opline;
 
 					b->len = target - b->start;
-					opline = op_array->opcodes + end - 1;
+					opline = op_array->opcodes + old_end - 1;
 					if (opline->opcode == ZEND_NOP) {
 						continue;
 					}
@@ -239,17 +233,11 @@ static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa)
 		}
 
 		/* update branch targets */
-		for (b = blocks; b < end; b++) {
+		for (b = blocks; b < blocks_end; b++) {
 			if ((b->flags & ZEND_BB_REACHABLE) && b->len != 0) {
 				zend_op *opline = op_array->opcodes + b->start + b->len - 1;
 				zend_optimizer_shift_jump(op_array, opline, shiftlist);
 			}
-		}
-
-		/* update brk/cont array */
-		for (j = 0; j < op_array->last_live_range; j++) {
-			op_array->live_range[j].start -= shiftlist[op_array->live_range[j].start];
-			op_array->live_range[j].end   -= shiftlist[op_array->live_range[j].end];
 		}
 
 		/* update try/catch array */
@@ -263,9 +251,10 @@ static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa)
 		}
 
 		/* update early binding list */
-		if (op_array->early_binding != (uint32_t)-1) {
-			uint32_t *opline_num = &op_array->early_binding;
+		if (op_array->fn_flags & ZEND_ACC_EARLY_BINDING) {
+			uint32_t *opline_num = &ctx->script->first_early_binding_opline;
 
+			ZEND_ASSERT(op_array == &ctx->script->main_op_array);
 			do {
 				*opline_num -= shiftlist[*opline_num];
 				opline_num = &op_array->opcodes[*opline_num].result.opline_num;
@@ -278,8 +267,10 @@ static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa)
 			while (call_info) {
 				call_info->caller_init_opline -=
 					shiftlist[call_info->caller_init_opline - op_array->opcodes];
-				call_info->caller_call_opline -=
-					shiftlist[call_info->caller_call_opline - op_array->opcodes];
+				if (call_info->caller_call_opline) {
+					call_info->caller_call_opline -=
+						shiftlist[call_info->caller_call_opline - op_array->opcodes];
+				}
 				call_info = call_info->next_callee;
 			}
 		}
@@ -289,12 +280,25 @@ static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa)
 	free_alloca(shiftlist, use_heap);
 }
 
+static zend_bool safe_instanceof(zend_class_entry *ce1, zend_class_entry *ce2) {
+	if (ce1 == ce2) {
+		return 1;
+	}
+	if (!(ce1->ce_flags & ZEND_ACC_LINKED)) {
+		/* This case could be generalized, similarly to unlinked_instanceof */
+		return 0;
+	}
+	return instanceof_function(ce1, ce2);
+}
+
 static inline zend_bool can_elide_return_type_check(
 		zend_op_array *op_array, zend_ssa *ssa, zend_ssa_op *ssa_op) {
 	zend_arg_info *info = &op_array->arg_info[-1];
 	zend_ssa_var_info *use_info = &ssa->var_info[ssa_op->op1_use];
 	zend_ssa_var_info *def_info = &ssa->var_info[ssa_op->op1_def];
 
+	/* TODO: It would be better to rewrite this without using def_info,
+	 * which may not be an exact representation of the type. */
 	if (use_info->type & MAY_BE_REF) {
 		return 0;
 	}
@@ -304,12 +308,13 @@ static inline zend_bool can_elide_return_type_check(
 		return 0;
 	}
 
-	if (ZEND_TYPE_CODE(info->type) == IS_CALLABLE) {
+	/* These types are not represented exactly */
+	if (ZEND_TYPE_FULL_MASK(info->type) & (MAY_BE_CALLABLE|MAY_BE_ITERABLE|MAY_BE_STATIC)) {
 		return 0;
 	}
 
-	if (ZEND_TYPE_IS_CLASS(info->type)) {
-		if (!use_info->ce || !def_info->ce || !instanceof_function(use_info->ce, def_info->ce)) {
+	if (ZEND_TYPE_HAS_CLASS(info->type)) {
+		if (!use_info->ce || !def_info->ce || !safe_instanceof(use_info->ce, def_info->ce)) {
 			return 0;
 		}
 	}
@@ -364,7 +369,8 @@ int zend_dfa_optimize_calls(zend_op_array *op_array, zend_ssa *ssa)
 		zend_call_info *call_info = func_info->callee_info;
 
 		do {
-			if (call_info->caller_call_opline->opcode == ZEND_DO_ICALL
+			if (call_info->caller_call_opline
+			 && call_info->caller_call_opline->opcode == ZEND_DO_ICALL
 			 && call_info->callee_func
 			 && ZSTR_LEN(call_info->callee_func->common.function_name) == sizeof("in_array")-1
 			 && memcmp(ZSTR_VAL(call_info->callee_func->common.function_name), "in_array", sizeof("in_array")-1) == 0
@@ -463,6 +469,24 @@ int zend_dfa_optimize_calls(zend_op_array *op_array, zend_ssa *ssa)
 						MAKE_NOP(send_array);
 						removed_ops++;
 
+						op_num = call_info->caller_call_opline - op_array->opcodes;
+						ssa_op = ssa->ops + op_num;
+						if (ssa_op->result_def >= 0) {
+							int var = ssa_op->result_def;
+							int use = ssa->vars[var].use_chain;
+
+							if (ssa->vars[var].phi_use_chain == NULL) {
+								if (ssa->ops[use].op1_use == var
+								 && ssa->ops[use].op1_use_chain == -1) {
+									call_info->caller_call_opline->result_type = IS_TMP_VAR;
+									op_array->opcodes[use].op1_type = IS_TMP_VAR;
+								} else if (ssa->ops[use].op2_use == var
+								 && ssa->ops[use].op2_use_chain == -1) {
+									call_info->caller_call_opline->result_type = IS_TMP_VAR;
+									op_array->opcodes[use].op2_type = IS_TMP_VAR;
+								}
+							}
+						}
 					}
 				}
 			}
@@ -494,17 +518,72 @@ static zend_always_inline void take_successor_1(zend_ssa *ssa, int block_num, ze
 	}
 }
 
+static zend_always_inline void take_successor_ex(zend_ssa *ssa, int block_num, zend_basic_block *block, int target_block)
+{
+	int i;
+
+	for (i = 0; i < block->successors_count; i++) {
+		if (block->successors[i] != target_block) {
+			zend_ssa_remove_predecessor(ssa, block_num, block->successors[i]);
+		}
+	}
+	block->successors[0] = target_block;
+	block->successors_count = 1;
+}
+
 static void compress_block(zend_op_array *op_array, zend_basic_block *block)
 {
 	while (block->len > 0) {
 		zend_op *opline = &op_array->opcodes[block->start + block->len - 1];
 
-		if (opline->opcode == ZEND_NOP
-				&& (block->len == 1 || !zend_is_smart_branch(opline - 1))) {
+		if (opline->opcode == ZEND_NOP) {
 			block->len--;
 		} else {
 			break;
 		}
+	}
+}
+
+static void replace_predecessor(zend_ssa *ssa, int block_id, int old_pred, int new_pred) {
+	zend_basic_block *block = &ssa->cfg.blocks[block_id];
+	int *predecessors = &ssa->cfg.predecessors[block->predecessor_offset];
+	zend_ssa_phi *phi;
+
+	int i;
+	int old_pred_idx = -1;
+	int new_pred_idx = -1;
+	for (i = 0; i < block->predecessors_count; i++) {
+		if (predecessors[i] == old_pred) {
+			old_pred_idx = i;
+		}
+		if (predecessors[i] == new_pred) {
+			new_pred_idx = i;
+		}
+	}
+
+	ZEND_ASSERT(old_pred_idx != -1);
+	if (new_pred_idx == -1) {
+		/* If the new predecessor doesn't exist yet, simply rewire the old one */
+		predecessors[old_pred_idx] = new_pred;
+	} else {
+		/* Otherwise, rewiring the old predecessor would make the new predecessor appear
+		 * twice, which violates our CFG invariants. Remove the old predecessor instead. */
+		memmove(
+			predecessors + old_pred_idx,
+			predecessors + old_pred_idx + 1,
+			sizeof(int) * (block->predecessors_count - old_pred_idx - 1)
+		);
+
+		/* Also remove the corresponding phi node entries */
+		for (phi = ssa->blocks[block_id].phis; phi; phi = phi->next) {
+			memmove(
+				phi->sources + old_pred_idx,
+				phi->sources + old_pred_idx + 1,
+				sizeof(int) * (block->predecessors_count - old_pred_idx - 1)
+			);
+		}
+
+		block->predecessors_count--;
 	}
 }
 
@@ -513,8 +592,6 @@ static void zend_ssa_replace_control_link(zend_op_array *op_array, zend_ssa *ssa
 	zend_basic_block *src = &ssa->cfg.blocks[from];
 	zend_basic_block *old = &ssa->cfg.blocks[to];
 	zend_basic_block *dst = &ssa->cfg.blocks[new_to];
-	int *predecessors = &ssa->cfg.predecessors[dst->predecessor_offset];
-	int dup = 0;
 	int i;
 	zend_op *opline;
 
@@ -551,14 +628,12 @@ static void zend_ssa_replace_control_link(zend_op_array *op_array, zend_ssa *ssa
 				}
 				break;
 			case ZEND_CATCH:
-				if (!opline->result.num) {
-					if (ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value) == old->start) {
-						opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, dst->start);
+				if (!(opline->extended_value & ZEND_LAST_CATCH)) {
+					if (ZEND_OP2_JMP_ADDR(opline) == op_array->opcodes + old->start) {
+						ZEND_SET_OP_JMP_ADDR(opline, opline->op2, op_array->opcodes + dst->start);
 					}
 				}
 				break;
-			case ZEND_DECLARE_ANON_CLASS:
-			case ZEND_DECLARE_ANON_INHERITED_CLASS:
 			case ZEND_FE_FETCH_R:
 			case ZEND_FE_FETCH_RW:
 				if (ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value) == old->start) {
@@ -583,16 +658,7 @@ static void zend_ssa_replace_control_link(zend_op_array *op_array, zend_ssa *ssa
 		}
 	}
 
-	for (i = 0; i < dst->predecessors_count; i++) {
-		if (dup) {
-			predecessors[i] = predecessors[i+1];
-		} else if (predecessors[i] == to) {
-			predecessors[i] = from;
-		} else if (predecessors[i] == from) {
-			dup = 1;
-			dst->predecessors_count--;
-		}
-	}
+	replace_predecessor(ssa, new_to, to, from);
 }
 
 static void zend_ssa_unlink_block(zend_op_array *op_array, zend_ssa *ssa, zend_basic_block *block, int block_num)
@@ -702,8 +768,7 @@ optimize_jmpnz:
 							take_successor_1(ssa, block_num, block);
 							goto optimize_nop;
 						}
-					} else {
-						ZEND_ASSERT(block->successors_count == 2);
+					} else if (block->successors_count == 2) {
 						if (block->successors[0] == next_block_num) {
 							take_successor_0(ssa, block_num, block);
 							if (opline->op1_type == IS_CV && (OP1_INFO() & MAY_BE_UNDEF)) {
@@ -735,8 +800,7 @@ optimize_jmpnz:
 						opline->extended_value = 0;
 						opline->opcode = ZEND_JMP;
 						goto optimize_jmp;
-					} else {
-						ZEND_ASSERT(block->successors_count == 2);
+					} else if (block->successors_count == 2) {
 						if (block->successors[0] == block->successors[1]) {
 							take_successor_0(ssa, block_num, block);
 							if (block->successors[0] == next_block_num) {
@@ -804,32 +868,88 @@ optimize_jmpnz:
 							MAKE_NOP(opline);
 							removed_ops++;
 							take_successor_1(ssa, block_num, block);
+							zend_ssa_remove_result_def(ssa, ssa_op);
 							goto optimize_nop;
 						}
 					}
 					break;
 				case ZEND_COALESCE:
-					if (opline->op1_type == IS_CONST) {
+				{
+					zend_ssa_var *var = &ssa->vars[ssa_op->result_def];
+					if (opline->op1_type == IS_CONST
+							&& var->use_chain < 0 && var->phi_use_chain == NULL) {
 						if (Z_TYPE_P(CT_CONSTANT_EX(op_array, opline->op1.constant)) == IS_NULL) {
+							zend_ssa_remove_result_def(ssa, ssa_op);
 							MAKE_NOP(opline);
 							removed_ops++;
 							take_successor_1(ssa, block_num, block);
 							goto optimize_nop;
 						} else {
-							zend_ssa_var *var = &ssa->vars[ssa_op->result_def];
-							if (var->use_chain < 0 && var->phi_use_chain == NULL) {
-								ssa_op->result_def = -1;
-								if (opline->result_type & (IS_TMP_VAR|IS_VAR)) {
-									zend_optimizer_remove_live_range_ex(op_array, opline->result.var, var->definition);
-								}
-								zend_ssa_unlink_use_chain(ssa, opline - op_array->opcodes, ssa_op->op1_use);
-								ssa_op->op1_use = -1;
-								ssa_op->op1_use_chain = -1;
-								opline->opcode = ZEND_JMP;
-								COPY_NODE(opline->op1, opline->op2);
-								take_successor_0(ssa, block_num, block);
-								goto optimize_jmp;
+							opline->opcode = ZEND_JMP;
+							opline->result_type = IS_UNUSED;
+							zend_ssa_remove_result_def(ssa, ssa_op);
+							COPY_NODE(opline->op1, opline->op2);
+							take_successor_0(ssa, block_num, block);
+							goto optimize_jmp;
+						}
+					}
+					break;
+				}
+				case ZEND_SWITCH_LONG:
+					if (opline->op1_type == IS_CONST) {
+						zval *zv = CT_CONSTANT_EX(op_array, opline->op1.constant);
+						if (Z_TYPE_P(zv) != IS_LONG) {
+							removed_ops++;
+							MAKE_NOP(opline);
+							opline->extended_value = 0;
+							take_successor_ex(ssa, block_num, block, block->successors[0]);
+							goto optimize_nop;
+						} else {
+							HashTable *jmptable = Z_ARRVAL_P(CT_CONSTANT_EX(op_array, opline->op2.constant));
+							zval *jmp_zv = zend_hash_index_find(jmptable, Z_LVAL_P(zv));
+							uint32_t target;
+
+							if (jmp_zv) {
+								target = ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, Z_LVAL_P(jmp_zv));
+							} else {
+								target = ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value);
 							}
+							opline->opcode = ZEND_JMP;
+							opline->extended_value = 0;
+							SET_UNUSED(opline->op1);
+							ZEND_SET_OP_JMP_ADDR(opline, opline->op1, op_array->opcodes + target);
+							SET_UNUSED(opline->op2);
+							take_successor_ex(ssa, block_num, block, ssa->cfg.map[target]);
+							goto optimize_jmp;
+						}
+					}
+					break;
+				case ZEND_SWITCH_STRING:
+					if (opline->op1_type == IS_CONST) {
+						zval *zv = CT_CONSTANT_EX(op_array, opline->op1.constant);
+						if (Z_TYPE_P(zv) != IS_STRING) {
+							removed_ops++;
+							MAKE_NOP(opline);
+							opline->extended_value = 0;
+							take_successor_ex(ssa, block_num, block, block->successors[0]);
+							goto optimize_nop;
+						} else {
+							HashTable *jmptable = Z_ARRVAL_P(CT_CONSTANT_EX(op_array, opline->op2.constant));
+							zval *jmp_zv = zend_hash_find(jmptable, Z_STR_P(zv));
+							uint32_t target;
+
+							if (jmp_zv) {
+								target = ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, Z_LVAL_P(jmp_zv));
+							} else {
+								target = ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value);
+							}
+							opline->opcode = ZEND_JMP;
+							opline->extended_value = 0;
+							SET_UNUSED(opline->op1);
+							ZEND_SET_OP_JMP_ADDR(opline, opline->op1, op_array->opcodes + target);
+							SET_UNUSED(opline->op2);
+							take_successor_ex(ssa, block_num, block, ssa->cfg.map[target]);
+							goto optimize_jmp;
 						}
 					}
 					break;
@@ -872,7 +992,12 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 		int v;
 		int remove_nops = 0;
 		zend_op *opline;
+		zend_ssa_op *ssa_op;
 		zval tmp;
+
+#if ZEND_DEBUG_DFA
+		ssa_verify_integrity(op_array, ssa, "before dfa");
+#endif
 
 		if (ZEND_OPTIMIZER_PASS_8 & ctx->optimization_level) {
 			if (sccp_optimize_op_array(ctx, op_array, ssa, call_map)) {
@@ -923,6 +1048,7 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 			}
 
 			opline = op_array->opcodes + op_1;
+			ssa_op = &ssa->ops[op_1];
 
 			/* Convert LONG constants to DOUBLE */
 			if (ssa->var_info[v].use_as_double) {
@@ -990,6 +1116,34 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 					 && !(OP2_INFO() & MAY_BE_OBJECT)) {
 						opline->opcode = ZEND_FAST_CONCAT;
 					}
+				} else if (opline->opcode == ZEND_VERIFY_RETURN_TYPE
+				 && opline->op1_type != IS_CONST
+				 && ssa->ops[op_1].op1_def == v
+				 && ssa->ops[op_1].op1_use >= 0
+				 && ssa->ops[op_1].op1_use_chain == -1
+				 && ssa->vars[v].use_chain >= 0
+				 && can_elide_return_type_check(op_array, ssa, &ssa->ops[op_1])) {
+
+// op_1: VERIFY_RETURN_TYPE #orig_var.? [T] -> #v.? [T] => NOP
+
+					int orig_var = ssa->ops[op_1].op1_use;
+					if (zend_ssa_unlink_use_chain(ssa, op_1, orig_var)) {
+
+						int ret = ssa->vars[v].use_chain;
+
+						ssa->ops[ret].op1_use = orig_var;
+						ssa->ops[ret].op1_use_chain = ssa->vars[orig_var].use_chain;
+						ssa->vars[orig_var].use_chain = ret;
+
+						ssa->vars[v].definition = -1;
+						ssa->vars[v].use_chain = -1;
+
+						ssa->ops[op_1].op1_def = -1;
+						ssa->ops[op_1].op1_use = -1;
+
+						MAKE_NOP(opline);
+						remove_nops = 1;
+					}
 				}
 			}
 
@@ -1046,8 +1200,64 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 							/* Update opcodes */
 							op_array->opcodes[op_2].result_type = opline->op1_type;
 							op_array->opcodes[op_2].result.var = opline->op1.var;
+
 							MAKE_NOP(opline);
 							remove_nops = 1;
+
+							if (op_array->opcodes[op_2].opcode == ZEND_SUB
+							 && op_array->opcodes[op_2].op1_type == op_array->opcodes[op_2].result_type
+							 && op_array->opcodes[op_2].op1.var == op_array->opcodes[op_2].result.var
+							 && op_array->opcodes[op_2].op2_type == IS_CONST
+							 && Z_TYPE_P(CT_CONSTANT_EX(op_array, op_array->opcodes[op_2].op2.constant)) == IS_LONG
+							 && Z_LVAL_P(CT_CONSTANT_EX(op_array, op_array->opcodes[op_2].op2.constant)) == 1
+							 && ssa->ops[op_2].op1_use >= 0
+							 && !(ssa->var_info[ssa->ops[op_2].op1_use].type & (MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) {
+
+								op_array->opcodes[op_2].opcode = ZEND_PRE_DEC;
+								SET_UNUSED(op_array->opcodes[op_2].op2);
+								SET_UNUSED(op_array->opcodes[op_2].result);
+
+								ssa->ops[op_2].result_def = -1;
+								ssa->ops[op_2].op1_def = v;
+
+							} else if (op_array->opcodes[op_2].opcode == ZEND_ADD
+							 && op_array->opcodes[op_2].op1_type == op_array->opcodes[op_2].result_type
+							 && op_array->opcodes[op_2].op1.var == op_array->opcodes[op_2].result.var
+							 && op_array->opcodes[op_2].op2_type == IS_CONST
+							 && Z_TYPE_P(CT_CONSTANT_EX(op_array, op_array->opcodes[op_2].op2.constant)) == IS_LONG
+							 && Z_LVAL_P(CT_CONSTANT_EX(op_array, op_array->opcodes[op_2].op2.constant)) == 1
+							 && ssa->ops[op_2].op1_use >= 0
+							 && !(ssa->var_info[ssa->ops[op_2].op1_use].type & (MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) {
+
+								op_array->opcodes[op_2].opcode = ZEND_PRE_INC;
+								SET_UNUSED(op_array->opcodes[op_2].op2);
+								SET_UNUSED(op_array->opcodes[op_2].result);
+
+								ssa->ops[op_2].result_def = -1;
+								ssa->ops[op_2].op1_def = v;
+
+							} else if (op_array->opcodes[op_2].opcode == ZEND_ADD
+							 && op_array->opcodes[op_2].op2_type == op_array->opcodes[op_2].result_type
+							 && op_array->opcodes[op_2].op2.var == op_array->opcodes[op_2].result.var
+							 && op_array->opcodes[op_2].op1_type == IS_CONST
+							 && Z_TYPE_P(CT_CONSTANT_EX(op_array, op_array->opcodes[op_2].op1.constant)) == IS_LONG
+							 && Z_LVAL_P(CT_CONSTANT_EX(op_array, op_array->opcodes[op_2].op1.constant)) == 1
+							 && ssa->ops[op_2].op2_use >= 0
+							 && !(ssa->var_info[ssa->ops[op_2].op2_use].type & (MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) {
+
+								op_array->opcodes[op_2].opcode = ZEND_PRE_INC;
+								op_array->opcodes[op_2].op1_type = op_array->opcodes[op_2].op2_type;
+								op_array->opcodes[op_2].op1.var = op_array->opcodes[op_2].op2.var;
+								SET_UNUSED(op_array->opcodes[op_2].op2);
+								SET_UNUSED(op_array->opcodes[op_2].result);
+
+								ssa->ops[op_2].result_def = -1;
+								ssa->ops[op_2].op1_def = v;
+								ssa->ops[op_2].op1_use = ssa->ops[op_2].op2_use;
+								ssa->ops[op_2].op1_use_chain = ssa->ops[op_2].op2_use_chain;
+								ssa->ops[op_2].op2_use = -1;
+								ssa->ops[op_2].op2_use_chain = -1;
+							}
 						}
 					} else if (opline->op2_type == IS_CONST
 					 || ((opline->op2_type & (IS_TMP_VAR|IS_VAR|IS_CV))
@@ -1082,8 +1292,8 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 					}
 				}
 
-			} else if (opline->opcode == ZEND_ASSIGN_ADD
-			 && opline->extended_value == 0
+			} else if (opline->opcode == ZEND_ASSIGN_OP
+			 && opline->extended_value == ZEND_ADD
 			 && ssa->ops[op_1].op1_def == v
 			 && opline->op2_type == IS_CONST
 			 && Z_TYPE_P(CT_CONSTANT_EX(op_array, opline->op2.constant)) == IS_LONG
@@ -1094,10 +1304,11 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 // op_1: ASSIGN_ADD #?.CV [undef,null,int,foat] ->#v.CV, int(1) => PRE_INC #?.CV ->#v.CV
 
 				opline->opcode = ZEND_PRE_INC;
+				opline->extended_value = 0;
 				SET_UNUSED(opline->op2);
 
-			} else if (opline->opcode == ZEND_ASSIGN_SUB
-			 && opline->extended_value == 0
+			} else if (opline->opcode == ZEND_ASSIGN_OP
+			 && opline->extended_value == ZEND_SUB
 			 && ssa->ops[op_1].op1_def == v
 			 && opline->op2_type == IS_CONST
 			 && Z_TYPE_P(CT_CONSTANT_EX(op_array, opline->op2.constant)) == IS_LONG
@@ -1108,60 +1319,25 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 // op_1: ASSIGN_SUB #?.CV [undef,null,int,foat] -> #v.CV, int(1) => PRE_DEC #?.CV ->#v.CV
 
 				opline->opcode = ZEND_PRE_DEC;
+				opline->extended_value = 0;
 				SET_UNUSED(opline->op2);
-
-			} else if (opline->opcode == ZEND_VERIFY_RETURN_TYPE
-			 && ssa->ops[op_1].op1_def == v
-			 && ssa->ops[op_1].op1_use >= 0
-			 && ssa->ops[op_1].op1_use_chain == -1
-			 && ssa->vars[v].use_chain >= 0
-			 && can_elide_return_type_check(op_array, ssa, &ssa->ops[op_1])) {
-
-// op_1: VERIFY_RETURN_TYPE #orig_var.CV [T] -> #v.CV [T] => NOP
-
-				int orig_var = ssa->ops[op_1].op1_use;
-				if (zend_ssa_unlink_use_chain(ssa, op_1, orig_var)) {
-
-					int ret = ssa->vars[v].use_chain;
-
-					ssa->ops[ret].op1_use = orig_var;
-					ssa->ops[ret].op1_use_chain = ssa->vars[orig_var].use_chain;
-					ssa->vars[orig_var].use_chain = ret;
-
-					ssa->vars[v].definition = -1;
-					ssa->vars[v].use_chain = -1;
-
-					ssa->ops[op_1].op1_def = -1;
-					ssa->ops[op_1].op1_use = -1;
-
-					MAKE_NOP(opline);
-					remove_nops = 1;
-				}
 
 			} else if (ssa->ops[op_1].op1_def == v
 			 && !RETURN_VALUE_USED(opline)
 			 && ssa->ops[op_1].op1_use >= 0
 			 && !(ssa->var_info[ssa->ops[op_1].op1_use].type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))
-			 && (opline->opcode == ZEND_ASSIGN_ADD
-			  || opline->opcode == ZEND_ASSIGN_SUB
-			  || opline->opcode == ZEND_ASSIGN_MUL
-			  || opline->opcode == ZEND_ASSIGN_DIV
-			  || opline->opcode == ZEND_ASSIGN_MOD
-			  || opline->opcode == ZEND_ASSIGN_SL
-			  || opline->opcode == ZEND_ASSIGN_SR
-			  || opline->opcode == ZEND_ASSIGN_BW_OR
-			  || opline->opcode == ZEND_ASSIGN_BW_AND
-			  || opline->opcode == ZEND_ASSIGN_BW_XOR)
-			 && opline->extended_value == 0) {
+			 && opline->opcode == ZEND_ASSIGN_OP
+			 && opline->extended_value != ZEND_CONCAT) {
 
-// op_1: ASSIGN_ADD #orig_var.CV [undef,null,bool,int,double] -> #v.CV, ? => #v.CV = ADD #orig_var.CV, ?
+// op_1: ASSIGN_OP #orig_var.CV [undef,null,bool,int,double] -> #v.CV, ? => #v.CV = ADD #orig_var.CV, ?
 
 				/* Reconstruct SSA */
 				ssa->ops[op_1].result_def = ssa->ops[op_1].op1_def;
 				ssa->ops[op_1].op1_def = -1;
 
 				/* Update opcode */
-				opline->opcode -= (ZEND_ASSIGN_ADD - ZEND_ADD);
+				opline->opcode = opline->extended_value;
+				opline->extended_value = 0;
 				opline->result_type = opline->op1_type;
 				opline->result.var = opline->op1.var;
 
@@ -1173,7 +1349,7 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 #endif
 
 		if (remove_nops) {
-			zend_ssa_remove_nops(op_array, ssa);
+			zend_ssa_remove_nops(op_array, ssa, ctx);
 #if ZEND_DEBUG_DFA
 			ssa_verify_integrity(op_array, ssa, "after nop");
 #endif
@@ -1200,11 +1376,3 @@ void zend_optimize_dfa(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 	/* Destroy SSA */
 	zend_arena_release(&ctx->arena, checkpoint);
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */

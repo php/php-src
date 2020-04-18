@@ -17,7 +17,7 @@ $iterator->next();
 var_dump(get_class($iterator->getSubIterator()));
 var_dump($iterator->getSubIterator()->getArrayCopy());
 ?>
---EXPECTF--
+--EXPECT--
 string(22) "RecursiveArrayIterator"
 array(3) {
   [0]=>
@@ -39,4 +39,3 @@ array(2) {
   [1]=>
   int(4)
 }
-

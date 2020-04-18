@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +16,6 @@
    |         Marcus Boerger <helly@php.net>                               |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 /* These iterators were designed to operate within the foreach()
  * structures provided by the engine, but could be extended for use
@@ -57,18 +55,17 @@ typedef struct _zend_object_iterator_funcs {
 struct _zend_object_iterator {
 	zend_object std;
 	zval data;
-	zend_object_iterator_funcs *funcs;
+	const zend_object_iterator_funcs *funcs;
 	zend_ulong index; /* private to fe_reset/fe_fetch opcodes */
 };
 
 typedef struct _zend_class_iterator_funcs {
-	zend_object_iterator_funcs  *funcs;
-	union _zend_function *zf_new_iterator;
-	union _zend_function *zf_valid;
-	union _zend_function *zf_current;
-	union _zend_function *zf_key;
-	union _zend_function *zf_next;
-	union _zend_function *zf_rewind;
+	zend_function *zf_new_iterator;
+	zend_function *zf_valid;
+	zend_function *zf_current;
+	zend_function *zf_key;
+	zend_function *zf_next;
+	zend_function *zf_rewind;
 } zend_class_iterator_funcs;
 
 BEGIN_EXTERN_C()
@@ -81,13 +78,3 @@ ZEND_API void zend_iterator_dtor(zend_object_iterator *iter);
 
 ZEND_API void zend_register_iterator_wrapper(void);
 END_EXTERN_C()
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

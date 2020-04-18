@@ -4,12 +4,12 @@ errmsg: can't use function return value in write context
 <?php
 
 function foo() {
-	return "blah";
+    return "blah";
 }
 
 foo() = 1;
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Can't use function return value in write context in %s on line %d

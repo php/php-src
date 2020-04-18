@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -73,12 +71,3 @@ PHP_FUNCTION(class_uses);
 PHPAPI zend_string *php_spl_object_hash(zval *obj);
 
 #endif /* PHP_SPL_H */
-
-/*
- * Local Variables:
- * c-basic-offset: 4
- * tab-width: 4
- * End:
- * vim600: fdm=marker
- * vim: noet sw=4 ts=4
- */

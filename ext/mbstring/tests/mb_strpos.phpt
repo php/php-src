@@ -1,12 +1,11 @@
 --TEST--
-mb_strpos() 
+mb_strpos()
 --SKIPIF--
 <?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
 --FILE--
 <?php
 // TODO: Add more encodings
 
-//$debug=true;
 ini_set('include_path','.');
 include_once('common.inc');
 
@@ -40,51 +39,6 @@ print mb_strpos($euc_jp, '0', -15,     'EUC-JP') . "\n";
 print mb_strpos($euc_jp, 3, -15,       'EUC-JP') . "\n";
 print mb_strpos($euc_jp, 0, -15,       'EUC-JP') . "\n";
 print mb_strpos($euc_jp, 0, -43,       'EUC-JP') . "\n";
-
-
-// Invalid offset - should return false with warning
-print ("== INVALID OFFSET ==\n");
-
-$r =  mb_strpos($euc_jp, '日本語', 44, 'EUC-JP');
-($r === FALSE) ? print "OK_INVALID_OFFSET\n"     : print "NG_INVALID_OFFSET\n";
-$r =  mb_strpos($euc_jp, '日本語', 50, 'EUC-JP');
-($r === FALSE) ? print "OK_INVALID_OFFSET\n"     : print "NG_INVALID_OFFSET\n";
-$r =  mb_strpos($euc_jp, '0', 50,     'EUC-JP');
-($r === FALSE) ? print "OK_INVALID_OFFSET\n"     : print "NG_INVALID_OFFSET\n";
-$r =  mb_strpos($euc_jp, 3, 50,       'EUC-JP');
-($r === FALSE) ? print "OK_INVALID_OFFSET\n"     : print "NG_INVALID_OFFSET\n";
-$r =   mb_strpos($euc_jp, 0, 50,       'EUC-JP');
-($r === FALSE) ? print "OK_INVALID_OFFSET\n"     : print "NG_INVALID_OFFSET\n";
-$r = mb_strpos($euc_jp, '日本語', -50, 'EUC-JP');
-($r === FALSE) ? print "OK_INVALID_OFFSET\n"     : print "NG_INVALID_OFFSET\n";
-$r = mb_strpos($euc_jp, '0', -50,     'EUC-JP');
-($r === FALSE) ? print "OK_INVALID_OFFSET\n"     : print "NG_INVALID_OFFSET\n";
-$r = mb_strpos($euc_jp, 3, -50,       'EUC-JP');
-($r === FALSE) ? print "OK_INVALID_OFFSET\n"     : print "NG_INVALID_OFFSET\n";
-$r = mb_strpos($euc_jp, 0, -50,       'EUC-JP');
-($r === FALSE) ? print "OK_INVALID_OFFSET\n"     : print "NG_INVALID_OFFSET\n";
-$r = mb_strpos($euc_jp, 0, -44,       'EUC-JP');
-($r === FALSE) ? print "OK_INVALID_OFFSET\n"     : print "NG_INVALID_OFFSET\n";
-
-// Out of range - should return false
-print ("== OUT OF RANGE ==\n");
-
-$r =  mb_strpos($euc_jp, '日本語', 40, 'EUC-JP');
-($r === FALSE) ? print "OK_OUT_RANGE\n"     : print "NG_OUT_RANGE\n";
-$r =  mb_strpos($euc_jp, '0', 40,     'EUC-JP');
-($r === FALSE) ? print "OK_OUT_RANGE\n"     : print "NG_OUT_RANGE\n";
-$r =  mb_strpos($euc_jp, 3, 40,       'EUC-JP');
-($r === FALSE) ? print "OK_OUT_RANGE\n"     : print "NG_OUT_RANGE\n";
-$r =   mb_strpos($euc_jp, 0, 40,       'EUC-JP');
-($r === FALSE) ? print "OK_OUT_RANGE\n"     : print "NG_OUT_RANGE\n";
-$r =  mb_strpos($euc_jp, '日本語', -3, 'EUC-JP');
-($r === FALSE) ? print "OK_OUT_RANGE\n"     : print "NG_OUT_RANGE\n";
-$r =  mb_strpos($euc_jp, '0', -3,     'EUC-JP');
-($r === FALSE) ? print "OK_OUT_RANGE\n"     : print "NG_OUT_RANGE\n";
-$r =  mb_strpos($euc_jp, 3, -3,       'EUC-JP');
-($r === FALSE) ? print "OK_OUT_RANGE\n"     : print "NG_OUT_RANGE\n";
-$r =   mb_strpos($euc_jp, 0, -3,       'EUC-JP');
-($r === FALSE) ? print "OK_OUT_RANGE\n"     : print "NG_OUT_RANGE\n";
 
 
 // Non-existent
@@ -126,20 +80,7 @@ $r = mb_strpos($euc_jp, '韓国語');
 $r = mb_strpos($euc_jp, "\n");
 ($r === FALSE) ? print "OK_NEWLINE\n" : print "NG_NEWLINE\n";
 
-
-// Invalid Parameters
-echo "== INVALID PARAMETER TEST ==\n";
-
-$r = mb_strpos($euc_jp,'','EUC-JP');
-($r === NULL) ? print("OK_NULL\n") : print("NG_NULL\n");
-$r = mb_strpos($euc_jp, $t_ary, 'EUC-JP');
-($r === NULL) ? print("OK_ARRAY\n") : print("NG_ARRAY\n");
-$r = mb_strpos($euc_jp, $t_obj, 'EUC-JP');
-($r === NULL) ? print("OK_OBJECT\n") : print("NG_OBJECT\n");
-$r = mb_strpos($euc_jp, $t_obj, 'BAD_ENCODING');
-($r === NULL) ? print("OK_BAD_ENCODING\n") : print("NG_BAD_ENCODING\n");
 ?>
-==DONE==
 --EXPECT--
 String len: 43
 == POSITIVE OFFSET ==
@@ -157,36 +98,6 @@ String len: 43
 33
 30
 0
-== INVALID OFFSET ==
-ERR: Warning
-OK_INVALID_OFFSET
-ERR: Warning
-OK_INVALID_OFFSET
-ERR: Warning
-OK_INVALID_OFFSET
-ERR: Warning
-OK_INVALID_OFFSET
-ERR: Warning
-OK_INVALID_OFFSET
-ERR: Warning
-OK_INVALID_OFFSET
-ERR: Warning
-OK_INVALID_OFFSET
-ERR: Warning
-OK_INVALID_OFFSET
-ERR: Warning
-OK_INVALID_OFFSET
-ERR: Warning
-OK_INVALID_OFFSET
-== OUT OF RANGE ==
-OK_OUT_RANGE
-OK_OUT_RANGE
-OK_OUT_RANGE
-OK_OUT_RANGE
-OK_OUT_RANGE
-OK_OUT_RANGE
-OK_OUT_RANGE
-OK_OUT_RANGE
 == NON-EXISTENT ==
 OK_STR
 OK_NEWLINE
@@ -204,13 +115,3 @@ OK_NEWLINE
 0
 OK_STR
 OK_NEWLINE
-== INVALID PARAMETER TEST ==
-ERR: Warning
-OK_NULL
-ERR: Warning
-OK_ARRAY
-ERR: Warning
-OK_OBJECT
-ERR: Warning
-OK_BAD_ENCODING
-==DONE==

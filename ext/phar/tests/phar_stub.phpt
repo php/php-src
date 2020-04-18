@@ -7,7 +7,7 @@ phar.require_hash=0
 phar.readonly=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 $file = '<?php echo "first stub\n"; __HALT_COMPILER(); ?>';
 
@@ -32,7 +32,7 @@ $fp = fopen($fname, 'rb');
 echo fread($fp, strlen($file)) . "\n";
 fclose($fp);
 
-$fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phartmp.php';
+$fname2 = __DIR__ . '/' . basename(__FILE__, '.php') . '.phartmp.php';
 $file = '<?php echo "third stub\n"; __HALT_COMPILER(); ?>';
 $fp = fopen($fname2, 'wb');
 fwrite($fp, $file);
@@ -61,7 +61,7 @@ fclose($fp);
 $fp = fopen($fname, 'rb');
 echo fread($fp, strlen($file)) . "\n";
 if (fread($fp, strlen('booya')) == 'booya') {
-	echo 'failed - copied booya';
+    echo 'failed - copied booya';
 }
 fclose($fp);
 $phar['testing'] = 'hi';
@@ -70,16 +70,15 @@ $phar['testing'] = 'hi';
 $fp = fopen($fname, 'rb');
 echo fread($fp, strlen($file)) . "\n";
 if (fread($fp, strlen('booya')) == 'booya') {
-	echo 'failed - copied booya';
+    echo 'failed - copied booya';
 }
 fclose($fp);
 
 ?>
-===DONE===
 --CLEAN--
-<?php 
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phartmp.php');
+<?php
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phartmp.php');
 __HALT_COMPILER();
 ?>
 --EXPECT--
@@ -89,4 +88,3 @@ __HALT_COMPILER();
 <?php echo "third stub\n"; __HALT_COMPILER(); ?>booya
 <?php echo "third stub\n"; __HALT_COMPILER(); ?>
 <?php echo "third stub\n"; __HALT_COMPILER(); ?>
-===DONE===

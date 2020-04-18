@@ -1,5 +1,3 @@
-
-	/* $Id: fpm_trace_mach.c,v 1.4 2008/08/26 15:09:15 anight Exp $ */
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #include "fpm_config.h"
@@ -95,5 +93,3 @@ int fpm_trace_get_long(long addr, long *data) /* {{{ */
 	return 0;
 }
 /* }}} */
-
-

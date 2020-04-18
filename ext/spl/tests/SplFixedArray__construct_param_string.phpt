@@ -5,12 +5,12 @@ PHPNW Test Fest 2009 - Jordan Hatch
 --FILE--
 <?php
 try {
-	$array = new SplFixedArray( "string" );
+    $array = new SplFixedArray( "string" );
 } catch (TypeError $iae) {
-	echo "Ok - ".$iae->getMessage().PHP_EOL;
+    echo "Ok - ".$iae->getMessage().PHP_EOL;
 }
 
 
 ?>
---EXPECTF--
-Ok - SplFixedArray::__construct() expects parameter 1 to be integer, string given
+--EXPECT--
+Ok - SplFixedArray::__construct(): Argument #1 ($size) must be of type int, string given

@@ -9,8 +9,8 @@ if (!extension_loaded('json')) die('skip');
 
 class MyClass implements JsonSerializable {
     public function jsonSerialize() {
-	    throw new Exception('Not implemented!');
-	}
+        throw new Exception('Not implemented!');
+    }
 }
 $classes = [];
 for($i = 0; $i < 5; $i++) {
@@ -21,8 +21,8 @@ try {
     json_encode($classes);
 } catch(Exception $e) {
     do {
-	    printf("%s (%d) [%s]\n", $e->getMessage(), $e->getCode(), get_class($e));
-	} while ($e = $e->getPrevious());
+        printf("%s (%d) [%s]\n", $e->getMessage(), $e->getCode(), get_class($e));
+    } while ($e = $e->getPrevious());
 }
 ?>
 --EXPECT--

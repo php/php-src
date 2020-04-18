@@ -7,10 +7,10 @@ Test session_unset() function : variation
 
 ob_start();
 
-/* 
+/*
  * Prototype : void session_unset(void)
  * Description : Free all session variables
- * Source code : ext/session/session.c 
+ * Source code : ext/session/session.c
  */
 
 echo "*** Testing session_unset() : variation ***\n";
@@ -28,7 +28,7 @@ var_dump(session_unset());
 echo "Done";
 ob_end_flush();
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing session_unset() : variation ***
 bool(false)
 bool(true)
@@ -45,4 +45,3 @@ array(1) {
 }
 bool(false)
 Done
-

@@ -45,8 +45,7 @@ var_dump(current($multi_array[3][3][3]));
 // see if internal pointer is in the same position from when accessing this inner array
 var_dump(current($multi_array[3][3][3][1]));
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing current() : usage variations ***
 
 -- Two Dimensional Array --
@@ -68,4 +67,3 @@ Initial Position: int(1)
 Current Position: string(3) "two"
 string(3) "two"
 int(1)
-===DONE===

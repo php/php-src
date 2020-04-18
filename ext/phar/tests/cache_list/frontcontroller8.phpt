@@ -18,6 +18,6 @@ Status: 404 Not Found
   <title>File Not Found</title>
  </head>
  <body>
-  <h1>404 - File /index.php Not Found</h1>
+  <h1>404 - File Not Found</h1>
  </body>
 </html>

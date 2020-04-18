@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -18,10 +16,6 @@
 
 #include <php.h>
 
-PHP_FUNCTION( datefmt_create );
-PHP_FUNCTION( datefmt_get_error_code );
-PHP_FUNCTION( datefmt_get_error_message );
-PHP_METHOD( IntlDateFormatter, __construct );
 void dateformat_register_constants( INIT_FUNC_ARGS );
 
 /*

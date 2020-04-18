@@ -22,12 +22,12 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 */
 
 /* Variation 3 : Create file and a soft link to the file
-                 Access data of the file through the soft link 
+                 Access data of the file through the soft link
                  Update the file through soft link
                  Check size of file and soft link link
 */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 echo "*** Accessing and updating data of file through soft link ***\n";
 // Creating file and inserting data into it
 $filename = "$file_path/symlink_link_linkinfo_is_link_variation3.tmp";
@@ -113,7 +113,7 @@ unlink($filename);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Accessing and updating data of file through soft link ***
 bool(true)
 

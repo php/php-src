@@ -5,16 +5,7 @@ Test is_executable() function: basic functionality
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip not for windows');
 }
-// Skip if being run by root (files are always readable, writeable and executable)
-$filename = dirname(__FILE__)."/is_readable_root_check.tmp";
-$fp = fopen($filename, 'w');
-fclose($fp);
-if(fileowner($filename) == 0) {
-	unlink ($filename);
-	die('skip cannot be run as root');
-}
-
-unlink($filename);
+require __DIR__ . '/../skipif_root.inc';
 ?>
 --FILE--
 <?php
@@ -23,16 +14,16 @@ unlink($filename);
 */
 
 // include common file test functions
-require dirname(__FILE__).'/file.inc';
+require __DIR__.'/file.inc';
 
 echo "*** Testing is_executable(): basic functionality ***\n";
 
 // create a file
-$filename = dirname(__FILE__)."/is_executable.tmp";
+$filename = __DIR__."/is_executable.tmp";
 create_file($filename);
 
 $counter = 1;
-/* loop to check if the file with new mode is executable 
+/* loop to check if the file with new mode is executable
    using is_executable() */
 for($mode = 0000; $mode <= 0777; $mode++) {
   echo "-- Changing mode of file to $mode --\n";
@@ -47,7 +38,7 @@ delete_file($filename);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing is_executable(): basic functionality ***
 -- Changing mode of file to 0 --
 bool(false)

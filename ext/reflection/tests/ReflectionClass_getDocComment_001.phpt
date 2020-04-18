@@ -10,9 +10,9 @@ opcache.save_comments=1
 /**
 
 
-		My
-Doc 
-		* Comment 
+        My
+Doc
+        * Comment
 for A
 
 * */
@@ -48,23 +48,21 @@ final class G extends C implements I {} {}
 
 $classes = array('A', 'B', 'C', 'D', 'E', 'F', 'G', 'I');
 foreach ($classes as $class) {
-	echo "\n\n---> Doc comment for class $class:\n";
-	$rc = new ReflectionClass($class);	
-	var_dump($rc->getDocComment());	
+    echo "\n\n---> Doc comment for class $class:\n";
+    $rc = new ReflectionClass($class);
+    var_dump($rc->getDocComment());
 }
 
 
 ?>
 --EXPECTF--
-
-
 ---> Doc comment for class A:
 string(%d) "/**
 
 
-		My
-Doc 
-		* Comment 
+        My
+Doc
+        * Comment
 for A
 
 * */"

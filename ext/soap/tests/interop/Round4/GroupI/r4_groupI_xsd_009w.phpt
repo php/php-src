@@ -16,7 +16,7 @@ class SOAPComplexType {
 }
 $struct = new SOAPComplexType('arg',34,325.325);
 unset($struct->varString);
-$client = new SoapClient(dirname(__FILE__)."/round4_groupI_xsd.wsdl",array("trace"=>1,"exceptions"=>0));
+$client = new SoapClient(__DIR__."/round4_groupI_xsd.wsdl",array("trace"=>1,"exceptions"=>0));
 $client->echoComplexType(array("inputComplexType"=>$struct));
 echo $client->__getlastrequest();
 $HTTP_RAW_POST_DATA = $client->__getlastrequest();

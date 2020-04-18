@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +14,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include "php.h"
 
 #ifndef HAVE_EXPLICIT_BZERO
@@ -30,22 +26,21 @@
 
 #include <string.h>
 
-__attribute__((weak)) void
-__explicit_bzero_hook(void *dst, size_t siz)
-{
-}
-
 PHPAPI void php_explicit_bzero(void *dst, size_t siz)
 {
+#if HAVE_EXPLICIT_MEMSET
+    explicit_memset(dst, 0, siz);
+#elif defined(PHP_WIN32)
+	RtlSecureZeroMemory(dst, siz);
+#elif defined(__GNUC__)
 	memset(dst, 0, siz);
-	__explicit_bzero_hook(dst, siz);
+	asm __volatile__("" :: "r"(dst) : "memory");
+#else
+	size_t i = 0;
+	volatile unsigned char *buf = (volatile unsigned char *)dst;
+
+	for (; i < siz; i ++)
+		buf[i] = 0;
+#endif
 }
 #endif
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

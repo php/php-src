@@ -46,10 +46,10 @@ $args_array = array(
 
 
 /* creating dumping file */
-$data_file = dirname(__FILE__) . '/vfprintf_variation19.txt';
+$data_file = __DIR__ . '/vfprintf_variation19.txt';
 if (!($fp = fopen($data_file, 'wt')))
    return;
-   
+
 // looping to test vfprintf() with different scientific formats from the above $format array
 // and with non-scientific values from the above $args_array array
 $counter = 1;
@@ -63,9 +63,8 @@ fclose($fp);
 print_r(file_get_contents($data_file));
 echo "\n";
 
-unlink($data_file); 
+unlink($data_file);
 ?>
-===DONE===
 --EXPECT--
 *** Testing vfprintf() : with  white spaces in format strings ***
 
@@ -91,4 +90,3 @@ A  B  C
 11  FFFFFFDE  33
 -- Iteration 11 --
 2.000000E+1  2.000000E-1  -2.000000E+1
-===DONE===

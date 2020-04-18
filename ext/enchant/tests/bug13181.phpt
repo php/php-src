@@ -1,7 +1,7 @@
 --TEST--
 bug #13181, leaving a context frees the broker resources
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded('enchant')) {
 	echo "skip: Enchant extension not enabled\n";
 	exit;
@@ -26,8 +26,8 @@ enchant_broker_free($broker);
 <?php
 function get_dictionnary() {
     $rBroker = enchant_broker_init();
-	$t = enchant_broker_request_dict($rBroker, 'en');
-	var_dump($t);
+    $t = enchant_broker_request_dict($rBroker, 'en');
+    var_dump($t);
     return $t;
 }
 $rDict = get_dictionnary();
@@ -36,7 +36,7 @@ enchant_dict_suggest($rDict, "soong");
 
 function get_broker() {
     $t = enchant_broker_init();
-	var_dump($t);
+    var_dump($t);
     return $t;
 }
 
@@ -44,8 +44,8 @@ $rbroker = get_broker();
 var_dump($rbroker);
 
 function get_dict($broker) {
-	$t = enchant_broker_request_dict($broker, 'en');
-	var_dump($t);
+    $t = enchant_broker_request_dict($broker, 'en');
+    var_dump($t);
     return $t;
 }
 $rDict = get_dict($rbroker);

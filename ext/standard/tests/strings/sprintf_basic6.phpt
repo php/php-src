@@ -3,7 +3,7 @@ Test sprintf() function : basic functionality - exponential format
 --FILE--
 <?php
 /* Prototype  : string sprintf(string $format [, mixed $arg1 [, mixed ...]])
- * Description: Return a formatted string 
+ * Description: Return a formatted string
  * Source code: ext/standard/formatted_print.c
  */
 
@@ -32,7 +32,7 @@ var_dump( sprintf($format3, $arg1, $arg2, $arg3) );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sprintf() : basic functionality - using exponential format ***
 string(6) "format"
 string(11) "1.000000e+3"

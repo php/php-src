@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,14 +16,12 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef PHP_ODBC_INCLUDES_H
 #define PHP_ODBC_INCLUDES_H
 
 #if HAVE_UODBC
 
-/* checking in the same order as in configure.in */
+/* checking in the same order as in configure.ac */
 
 #if defined(HAVE_SOLID) || defined(HAVE_SOLID_30) || defined(HAVE_SOLID_35) /* Solid Server */
 
@@ -280,10 +276,3 @@ ZEND_TSRMLS_CACHE_EXTERN()
 
 #endif /* HAVE_UODBC */
 #endif /* PHP_ODBC_INCLUDES_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */

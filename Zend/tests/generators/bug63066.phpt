@@ -4,12 +4,12 @@ Bug #63066 (Calling an undefined method in a generator results in a seg fault)
 <?php
 function gen($o)
 {
-	yield 'foo';
-	$o->fatalError();
+    yield 'foo';
+    $o->fatalError();
 }
 
 foreach(gen(new stdClass()) as $value)
-	echo $value, "\n";
+    echo $value, "\n";
 --EXPECTF--
 foo
 

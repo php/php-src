@@ -4,13 +4,13 @@ errmsg: class declarations may not be nested
 <?php
 
 class test {
-	function foo() {
-		class test2 {
-		}
-	}
+    function foo() {
+        class test2 {
+        }
+    }
 }
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Class declarations may not be nested in %s on line %d

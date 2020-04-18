@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +14,6 @@
    |          Wez Furlong <wez@thebrainroom.com>                          |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifndef PHP_LIBXML_H
 #define PHP_LIBXML_H
@@ -129,10 +125,3 @@ ZEND_TSRMLS_CACHE_EXTERN()
 #define phpext_libxml_ptr libxml_module_ptr
 
 #endif /* PHP_LIBXML_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */

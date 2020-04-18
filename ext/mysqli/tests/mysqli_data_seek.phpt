@@ -8,60 +8,51 @@ require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php
-	require_once("connect.inc");
+    require_once("connect.inc");
 
-	$tmp    = NULL;
-	$link   = NULL;
+    require('table.inc');
+    if (!$res = mysqli_query($link, 'SELECT * FROM test ORDER BY id LIMIT 4', MYSQLI_STORE_RESULT))
+        printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	if (NULL !== ($tmp = @mysqli_data_seek()))
-		printf("[001] Expecting NULL/NULL, got %s/%s\n", gettype($tmp), $tmp);
+    if (true !== ($tmp = mysqli_data_seek($res, 3)))
+        printf("[005] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (NULL !== ($tmp = @mysqli_data_seek($link)))
-		printf("[002] Expecting NULL/NULL, got %s/%s\n", gettype($tmp), $tmp);
+    $row = mysqli_fetch_assoc($res);
+    if (4 != $row['id'])
+        printf("[006] Expecting record 4/d, got record %s/%s\n", $row['id'], $row['label']);
 
-	if (NULL !== ($tmp = @mysqli_data_seek($link, $link)))
-		printf("[003] Expecting NULL/NULL, got %s/%s\n", gettype($tmp), $tmp);
+    if (true !== ($tmp = mysqli_data_seek($res, 0)))
+        printf("[007] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
 
-	require('table.inc');
-	if (!$res = mysqli_query($link, 'SELECT * FROM test ORDER BY id LIMIT 4', MYSQLI_STORE_RESULT))
-		printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    $row = mysqli_fetch_assoc($res);
+    if (1 != $row['id'])
+        printf("[008] Expecting record 1/a, got record %s/%s\n", $row['id'], $row['label']);
 
-	if (true !== ($tmp = mysqli_data_seek($res, 3)))
-		printf("[005] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
+    if (false !== ($tmp = mysqli_data_seek($res, 4)))
+        printf("[009] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
 
-	$row = mysqli_fetch_assoc($res);
-	if (4 != $row['id'])
-		printf("[006] Expecting record 4/d, got record %s/%s\n", $row['id'], $row['label']);
+    if (false !== ($tmp = mysqli_data_seek($res, -1)))
+        printf("[010] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (true !== ($tmp = mysqli_data_seek($res, 0)))
-		printf("[007] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
+    mysqli_free_result($res);
 
-	$row = mysqli_fetch_assoc($res);
-	if (1 != $row['id'])
-		printf("[008] Expecting record 1/a, got record %s/%s\n", $row['id'], $row['label']);
+    if (!$res = mysqli_query($link, 'SELECT * FROM test ORDER BY id', MYSQLI_USE_RESULT))
+        printf("[011] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	if (false !== ($tmp = mysqli_data_seek($res, 4)))
-		printf("[009] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
+    if (false !== ($tmp = mysqli_data_seek($res, 3)))
+        printf("[012] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (false !== ($tmp = mysqli_data_seek($res, -1)))
-		printf("[010] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
+    mysqli_free_result($res);
 
-	mysqli_free_result($res);
+    try {
+        mysqli_data_seek($res, 1);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
-	if (!$res = mysqli_query($link, 'SELECT * FROM test ORDER BY id', MYSQLI_USE_RESULT))
-		printf("[011] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    mysqli_close($link);
 
-	if (false !== ($tmp = mysqli_data_seek($res, 3)))
-		printf("[012] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
-
-	mysqli_free_result($res);
-
-	if (NULL !== ($tmp = mysqli_data_seek($res, 1)))
-		printf("[013] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	mysqli_close($link);
-
-	print "done!";
+    print "done!";
 ?>
 --CLEAN--
 <?php
@@ -69,6 +60,5 @@ require_once('skipifconnectfailure.inc');
 ?>
 --EXPECTF--
 Warning: mysqli_data_seek(): Function cannot be used with MYSQL_USE_RESULT in %s on line %d
-
-Warning: mysqli_data_seek(): Couldn't fetch mysqli_result in %s on line %d
+mysqli_result object is already closed
 done!

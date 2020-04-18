@@ -13,4 +13,3 @@ Fatal error: Uncaught Error: Cannot declare self-referencing constant 'self::BAR
 Stack trace:
 #0 {main}
   thrown in %s on line %d
-

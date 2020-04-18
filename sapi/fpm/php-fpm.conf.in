@@ -41,6 +41,24 @@
 ; Default Value: notice
 ;log_level = notice
 
+; Log limit on number of characters in the single line (log entry). If the
+; line is over the limit, it is wrapped on multiple lines. The limit is for
+; all logged characters including message prefix and suffix if present. However
+; the new line character does not count into it as it is present only when
+; logging to a file descriptor. It means the new line character is not present
+; when logging to syslog.
+; Default Value: 1024
+;log_limit = 4096
+
+; Log buffering specifies if the log line is buffered which means that the
+; line is written in a single write operation. If the value is false, then the
+; data is written directly into the file descriptor. It is an experimental
+; option that can potentionaly improve logging performance and memory usage
+; for some heavy logging scenarios. This option is ignored if logging to syslog
+; as it has to be always buffered.
+; Default value: yes
+;log_buffering = no
+
 ; If this number of child processes exit with SIGSEGV or SIGBUS within the time
 ; interval set by emergency_restart_interval then FPM will restart. A value
 ; of '0' means 'Off'.

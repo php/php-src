@@ -1,9 +1,4 @@
-dnl
-dnl $Id$
-dnl
-
 dnl Suppose we need FlatFile if no support or only CDB is used.
-
 AC_DEFUN([PHP_DBA_STD_BEGIN],[
   unset THIS_INCLUDE THIS_LIBS THIS_LFLAGS THIS_PREFIX THIS_RESULT
 ])
@@ -69,52 +64,86 @@ dnl
 dnl Options
 dnl
 
-PHP_ARG_ENABLE(dba,,
-[  --enable-dba            Build DBA with bundled modules. To build shared DBA
-                          extension use --enable-dba=shared])
+PHP_ARG_ENABLE([dba],,
+  [AS_HELP_STRING([--enable-dba],
+    [Build DBA with bundled modules. To build shared DBA extension use
+    --enable-dba=shared])])
 
-PHP_ARG_WITH(qdbm,,
-[  --with-qdbm[=DIR]         DBA: QDBM support], no, no)
+PHP_ARG_WITH([qdbm],,
+  [AS_HELP_STRING([[--with-qdbm[=DIR]]],
+    [DBA: QDBM support])],
+  [no],
+  [no])
 
-PHP_ARG_WITH(gdbm,,
-[  --with-gdbm[=DIR]         DBA: GDBM support], no, no)
+PHP_ARG_WITH([gdbm],,
+  [AS_HELP_STRING([[--with-gdbm[=DIR]]],
+    [DBA: GDBM support])],
+  [no],
+  [no])
 
-PHP_ARG_WITH(ndbm,,
-[  --with-ndbm[=DIR]         DBA: NDBM support], no, no)
+PHP_ARG_WITH([ndbm],,
+  [AS_HELP_STRING([[--with-ndbm[=DIR]]],
+    [DBA: NDBM support])],
+  [no],
+  [no])
 
-PHP_ARG_WITH(db4,,
-[  --with-db4[=DIR]          DBA: Oracle Berkeley DB 4.x or 5.x support], no, no)
+PHP_ARG_WITH([db4],,
+  [AS_HELP_STRING([[--with-db4[=DIR]]],
+    [DBA: Oracle Berkeley DB 4.x or 5.x support])],
+  [no],
+  [no])
 
-PHP_ARG_WITH(db3,,
-[  --with-db3[=DIR]          DBA: Oracle Berkeley DB 3.x support], no, no)
+PHP_ARG_WITH([db3],,
+  [AS_HELP_STRING([[--with-db3[=DIR]]],
+    [DBA: Oracle Berkeley DB 3.x support])],
+  [no],
+  [no])
 
-PHP_ARG_WITH(db2,,
-[  --with-db2[=DIR]          DBA: Oracle Berkeley DB 2.x support], no, no)
+PHP_ARG_WITH([db2],,
+  [AS_HELP_STRING([[--with-db2[=DIR]]],
+    [DBA: Oracle Berkeley DB 2.x support])],
+  [no],
+  [no])
 
-PHP_ARG_WITH(db1,,
-[  --with-db1[=DIR]          DBA: Oracle Berkeley DB 1.x support/emulation], no, no)
+PHP_ARG_WITH([db1],,
+  [AS_HELP_STRING([[--with-db1[=DIR]]],
+    [DBA: Oracle Berkeley DB 1.x support/emulation])],
+  [no],
+  [no])
 
-PHP_ARG_WITH(dbm,,
-[  --with-dbm[=DIR]          DBA: DBM support], no, no)
+PHP_ARG_WITH([dbm],,
+  [AS_HELP_STRING([[--with-dbm[=DIR]]],
+    [DBA: DBM support])],
+  [no],
+  [no])
 
-PHP_ARG_WITH(tcadb,,
-[  --with-tcadb[=DIR]        DBA: Tokyo Cabinet abstract DB support], no, no)
+PHP_ARG_WITH([tcadb],,
+  [AS_HELP_STRING([[--with-tcadb[=DIR]]],
+    [DBA: Tokyo Cabinet abstract DB support])],
+  [no],
+  [no])
 
-PHP_ARG_WITH(lmdb,,
-[  --with-lmdb[=DIR]        DBA: Lightning memory-mapped database support], no, no)
-
+PHP_ARG_WITH([lmdb],,
+  [AS_HELP_STRING([[--with-lmdb[=DIR]]],
+    [DBA: Lightning memory-mapped database support])],
+  [no],
+  [no])
 
 dnl
 dnl Library checks
 dnl
 
-# QDBM
+dnl QDBM
 if test "$PHP_QDBM" != "no"; then
   PHP_DBA_STD_BEGIN
   for i in $PHP_QDBM /usr/local /usr; do
     if test -f "$i/include/depot.h"; then
       THIS_PREFIX=$i
       THIS_INCLUDE=$i/include/depot.h
+      break
+    elif test -f "$i/include/qdbm/depot.h"; then
+      THIS_PREFIX=$i
+      THIS_INCLUDE=$i/include/qdbm/depot.h
       break
     fi
   done
@@ -138,7 +167,7 @@ if test "$PHP_QDBM" != "no"; then
 fi
 PHP_DBA_STD_RESULT(qdbm)
 
-# GDBM
+dnl GDBM
 if test "$PHP_GDBM" != "no"; then
   PHP_DBA_STD_BEGIN
   if test "$HAVE_QDBM" = "1"; then
@@ -155,18 +184,18 @@ if test "$PHP_GDBM" != "no"; then
   if test -n "$THIS_INCLUDE"; then
     PHP_CHECK_LIBRARY(gdbm, gdbm_open, [
       AC_DEFINE_UNQUOTED(GDBM_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
-      AC_DEFINE(DBA_GDBM, 1, [ ]) 
+      AC_DEFINE(DBA_GDBM, 1, [ ])
       THIS_LIBS=gdbm
     ], [], [-L$THIS_PREFIX/$PHP_LIBDIR])
   fi
-    
+
   PHP_DBA_STD_ASSIGN
   PHP_DBA_STD_CHECK
   PHP_DBA_STD_ATTACH
 fi
 PHP_DBA_STD_RESULT(gdbm)
 
-# NDBM
+dnl NDBM
 if test "$PHP_NDBM" != "no"; then
   PHP_DBA_STD_BEGIN
   for i in $PHP_NDBM /usr/local /usr; do
@@ -180,12 +209,12 @@ if test "$PHP_NDBM" != "no"; then
       break
     fi
   done
-  
+
   if test -n "$THIS_INCLUDE"; then
     for LIB in ndbm db1 c; do
       PHP_CHECK_LIBRARY($LIB, dbm_open, [
         AC_DEFINE_UNQUOTED(NDBM_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
-        AC_DEFINE(DBA_NDBM, 1, [ ]) 
+        AC_DEFINE(DBA_NDBM, 1, [ ])
         THIS_LIBS=$LIB
       ], [], [-L$THIS_PREFIX/$PHP_LIBDIR])
       if test -n "$THIS_LIBS"; then
@@ -272,11 +301,11 @@ AC_DEFUN([PHP_DBA_DB_CHECK],[
     if test -f $THIS_PREFIX/$PHP_LIBDIR/lib$LIB.a || test -f $THIS_PREFIX/$PHP_LIBDIR/lib$LIB.$SHLIB_SUFFIX_NAME; then
       lib_found="";
       PHP_TEMP_LDFLAGS(-L$THIS_PREFIX/$PHP_LIBDIR, -l$LIB,[
-        AC_TRY_LINK([
+        AC_LINK_IFELSE([AC_LANG_PROGRAM([[
 #include "$THIS_INCLUDE"
-        ],[
+        ]],[[
           $3;
-        ],[
+        ]])],[
           AC_EGREP_CPP(yes,[
 #include "$THIS_INCLUDE"
 #if DB_VERSION_MAJOR == $1 || ($1 == 4 && DB_VERSION_MAJOR == 5)
@@ -286,7 +315,7 @@ AC_DEFUN([PHP_DBA_DB_CHECK],[
             THIS_LIBS=$LIB
             lib_found=1
           ])
-        ])
+        ],[])
       ])
       if test -n "$lib_found"; then
         lib_found="";
@@ -325,7 +354,7 @@ AC_DEFUN([PHP_DBA_DB_CHECK],[
     ])
   fi
   if test -n "$THIS_LIBS"; then
-    AC_DEFINE(DBA_DB$1, 1, [ ]) 
+    AC_DEFINE(DBA_DB$1, 1, [ ])
     if test -n "$THIS_INCLUDE"; then
       AC_DEFINE_UNQUOTED(DB$1_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
     fi
@@ -340,7 +369,7 @@ AC_DEFUN([PHP_DBA_DB_CHECK],[
   PHP_DBA_STD_ATTACH
 ])
 
-# DB4
+dnl DB4
 if test "$PHP_DB4" != "no"; then
   PHP_DBA_STD_BEGIN
   dbdp4="/usr/local/BerkeleyDB.4."
@@ -404,7 +433,7 @@ if test "$PHP_DB4" != "no"; then
 fi
 PHP_DBA_STD_RESULT(db4,Berkeley DB4)
 
-# DB3
+dnl DB3
 if test "$PHP_DB3" != "no"; then
   PHP_DBA_STD_BEGIN
   if test "$HAVE_DB4" = "1"; then
@@ -437,7 +466,7 @@ if test "$PHP_DB3" != "no"; then
 fi
 PHP_DBA_STD_RESULT(db3,Berkeley DB3)
 
-# DB2
+dnl DB2
 if test "$PHP_DB2" != "no"; then
   PHP_DBA_STD_BEGIN
   if test "$HAVE_DB3" = "1" || test "$HAVE_DB4" = "1"; then
@@ -470,7 +499,7 @@ if test "$PHP_DB2" != "no"; then
 fi
 PHP_DBA_STD_RESULT(db2, Berkeley DB2)
 
-# DB1
+dnl DB1
 if test "$PHP_DB1" != "no"; then
   PHP_DBA_STD_BEGIN
   AC_MSG_CHECKING([for DB1 in library])
@@ -518,11 +547,11 @@ if test "$PHP_DB1" != "no"; then
   AC_MSG_RESULT([$THIS_INCLUDE])
   if test -n "$THIS_INCLUDE"; then
     PHP_TEMP_LDFLAGS(-L$THIS_PREFIX/$PHP_LIBDIR, -l$THIS_LIBS,[
-      AC_TRY_LINK([
+      AC_LINK_IFELSE([AC_LANG_PROGRAM([[
 #include "$THIS_INCLUDE"
-      ],[
+      ]],[[
         DB * dbp = dbopen("", 0, 0, DB_HASH, 0);
-      ],[
+      ]])],[
         AC_DEFINE_UNQUOTED(DB1_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
         AC_DEFINE(DBA_DB1, 1, [ ])
         THIS_RESULT=yes
@@ -537,7 +566,7 @@ if test "$PHP_DB1" != "no"; then
 fi
 PHP_DBA_STD_RESULT(db1, DB1)
 
-# DBM
+dnl DBM
 if test "$PHP_DBM" != "no"; then
   PHP_DBA_STD_BEGIN
   if test "$HAVE_QDBM" = "1"; then
@@ -567,7 +596,7 @@ if test "$PHP_DBM" != "no"; then
           AC_DEFINE_UNQUOTED(DBM_VERSION, "DBM", [ ])
           AC_MSG_RESULT(no)
         fi
-        AC_DEFINE(DBA_DBM, 1, [ ]) 
+        AC_DEFINE(DBA_DBM, 1, [ ])
         THIS_LIBS=$LIB
       ], [], [-L$THIS_PREFIX/$PHP_LIBDIR])
       if test -n "$THIS_LIBS"; then
@@ -575,32 +604,40 @@ if test "$PHP_DBM" != "no"; then
       fi
     done
   fi
-  
+
   PHP_DBA_STD_ASSIGN
   PHP_DBA_STD_CHECK
   PHP_DBA_STD_ATTACH
 fi
 PHP_DBA_STD_RESULT(dbm)
 
-dnl
-dnl Bundled modules that should be enabled by default if any other option is enabled
-dnl
+dnl Bundled modules that should be enabled by default if any other option is
+dnl enabled
 if test "$PHP_DBA" != "no" || test "$HAVE_DBA" = "1" || test "$with_cdb" = "yes" || test "$enable_inifile" = "yes" || test "$enable_flatfile" = "yes"; then
   php_dba_enable=yes
 else
   php_dba_enable=no
 fi
 
-PHP_ARG_WITH(cdb,,
-[  --without-cdb[=DIR]       DBA: CDB support (bundled)], $php_dba_enable, no)
+PHP_ARG_WITH([cdb],,
+  [AS_HELP_STRING([[--without-cdb[=DIR]]],
+    [DBA: CDB support (bundled)])],
+  [$php_dba_enable],
+  [no])
 
-PHP_ARG_ENABLE(inifile,,
-[  --disable-inifile       DBA: INI support (bundled)], $php_dba_enable, no)
+PHP_ARG_ENABLE([inifile],,
+  [AS_HELP_STRING([--disable-inifile],
+    [DBA: INI support (bundled)])],
+  [$php_dba_enable],
+  [no])
 
-PHP_ARG_ENABLE(flatfile,,
-[  --disable-flatfile      DBA: FlatFile support (bundled)], $php_dba_enable, no)
+PHP_ARG_ENABLE([flatfile],,
+  [AS_HELP_STRING([--disable-flatfile],
+    [DBA: FlatFile support (bundled)])],
+  [$php_dba_enable],
+  [no])
 
-# CDB
+dnl CDB
 if test "$PHP_CDB" = "yes"; then
   AC_DEFINE(DBA_CDB_BUILTIN, 1, [ ])
   AC_DEFINE(DBA_CDB_MAKE, 1, [ ])
@@ -621,7 +658,7 @@ elif test "$PHP_CDB" != "no"; then
     for LIB in cdb c; do
       PHP_CHECK_LIBRARY($LIB, cdb_read, [
         AC_DEFINE_UNQUOTED(CDB_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
-        AC_DEFINE(DBA_CDB, 1, [ ]) 
+        AC_DEFINE(DBA_CDB, 1, [ ])
         THIS_LIBS=$LIB
       ], [], [-L$THIS_PREFIX/$PHP_LIBDIR])
       if test -n "$THIS_LIBS"; then
@@ -636,7 +673,7 @@ elif test "$PHP_CDB" != "no"; then
 fi
 PHP_DBA_STD_RESULT(cdb)
 
-# INIFILE
+dnl INIFILE
 if test "$PHP_INIFILE" != "no"; then
   AC_DEFINE(DBA_INIFILE, 1, [ ])
   ini_sources="libinifile/inifile.c"
@@ -644,7 +681,7 @@ if test "$PHP_INIFILE" != "no"; then
 fi
 PHP_DBA_STD_RESULT(inifile, [INI File])
 
-# FLATFILE
+dnl FLATFILE
 if test "$PHP_FLATFILE" != "no"; then
   AC_DEFINE(DBA_FLATFILE, 1, [ ])
   flat_sources="libflatfile/flatfile.c"
@@ -654,7 +691,7 @@ PHP_DBA_STD_RESULT(FlatFile, FlatFile)
 
 dnl
 dnl Extension setup
-dnl 
+dnl
 AC_MSG_CHECKING([whether to enable DBA interface])
 if test "$HAVE_DBA" = "1"; then
   if test "$ext_shared" = "yes"; then
@@ -663,7 +700,7 @@ if test "$HAVE_DBA" = "1"; then
     AC_MSG_RESULT([yes])
   fi
   AC_DEFINE(HAVE_DBA, 1, [ ])
-  PHP_NEW_EXTENSION(dba, dba.c dba_cdb.c dba_dbm.c dba_gdbm.c dba_ndbm.c dba_db1.c dba_db2.c dba_db3.c dba_db4.c dba_flatfile.c dba_inifile.c dba_qdbm.c dba_tcadb.c dba_lmdb.c $cdb_sources $flat_sources $ini_sources, $ext_shared)
+  PHP_NEW_EXTENSION(dba, dba.c dba_cdb.c dba_dbm.c dba_gdbm.c dba_ndbm.c dba_db1.c dba_db2.c dba_db3.c dba_db4.c dba_flatfile.c dba_inifile.c dba_qdbm.c dba_tcadb.c dba_lmdb.c $cdb_sources $flat_sources $ini_sources, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
   PHP_ADD_BUILD_DIR($ext_builddir/libinifile)
   PHP_ADD_BUILD_DIR($ext_builddir/libcdb)
   PHP_ADD_BUILD_DIR($ext_builddir/libflatfile)

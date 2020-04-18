@@ -4,11 +4,11 @@ ZE2 object references
 <?php
 
 class Foo {
-	public $name;
-    
-	function __construct() {
-		$this->name = "I'm Foo!\n";
-	}
+    public $name;
+
+    function __construct() {
+        $this->name = "I'm Foo!\n";
+    }
 }
 
 $foo = new Foo;

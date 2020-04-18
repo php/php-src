@@ -3,17 +3,17 @@ Returning a reference from a static method
 --FILE--
 <?php
 Class C {
-	static function returnConstantByValue() {
-		return 100;
-	}
+    static function returnConstantByValue() {
+        return 100;
+    }
 
-	static function &returnConstantByRef() {
-		return 100;
-	}
-	
-	static function &returnVariableByRef() {
-		return $GLOBALS['a'];
-	}
+    static function &returnConstantByRef() {
+        return 100;
+    }
+
+    static function &returnVariableByRef() {
+        return $GLOBALS['a'];
+    }
 }
 
 echo "\n---> 1. Trying to assign by reference the return value of a function that returns by value:\n";
@@ -39,7 +39,6 @@ var_dump($a, $b);
 
 ?>
 --EXPECTF--
-
 ---> 1. Trying to assign by reference the return value of a function that returns by value:
 
 Notice: Only variables should be assigned by reference in %s on line 19

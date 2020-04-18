@@ -16,18 +16,17 @@ echo "*** Testing sscanf() : basic functionality - using integer format ***\n";
 $str = "Part: Widget Serial Number: 1234789 Stock: 25";
 $format = "Part: %s Serial Number: %d Stock: %d";
 
-echo "\n-- Try sccanf() WITHOUT optional args --\n"; 
+echo "\n-- Try sccanf() WITHOUT optional args --\n";
 // extract details using short format
 list($part, $number, $stock) = sscanf($str, $format);
 var_dump($part, $number, $stock);
 
-echo "\n-- Try sccanf() WITH optional args --\n"; 
+echo "\n-- Try sccanf() WITH optional args --\n";
 // extract details using long  format
 $res = sscanf($str, $format, $part, $number, $stock);
-var_dump($res, $part, $number, $stock); 
+var_dump($res, $part, $number, $stock);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing sscanf() : basic functionality - using integer format ***
 
@@ -41,4 +40,3 @@ int(3)
 string(6) "Widget"
 int(1234789)
 int(25)
-===DONE===

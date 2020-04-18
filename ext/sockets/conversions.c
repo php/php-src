@@ -36,16 +36,6 @@ struct _WSAMSG {
     WSABUF           Control;			//void *msg_control, size_t msg_controllen
     DWORD            dwFlags;			//int msg_flags
 }
-struct __WSABUF {
-  u_long			len;				//size_t iov_len (2nd member)
-  char FAR			*buf;				//void *iov_base (1st member)
-}
-struct _WSACMSGHDR {
-  UINT        cmsg_len;					//socklen_t cmsg_len
-  INT         cmsg_level;				//int       cmsg_level
-  INT         cmsg_type;				//int       cmsg_type;
-  followed by UCHAR cmsg_data[]
-}
 */
 # define msg_name		name
 # define msg_namelen	namelen
@@ -57,7 +47,6 @@ struct _WSACMSGHDR {
 # define iov_base		buf
 # define iov_len		len
 
-# define cmsghdr		_WSACMSGHDR
 # ifdef CMSG_DATA
 #  undef CMSG_DATA
 # endif
@@ -199,7 +188,7 @@ static void do_to_zval_err(res_context *ctx, const char *fmt, ...)
 void err_msg_dispose(struct err_s *err)
 {
 	if (err->msg != NULL) {
-		php_error_docref0(NULL, err->level, "%s", err->msg);
+		php_error_docref(NULL, err->level, "%s", err->msg);
 		if (err->should_free) {
 			efree(err->msg);
 		}
@@ -332,16 +321,19 @@ double_case:
 		zend_long lval;
 		double dval;
 
-		convert_to_string(&lzval);
+		if (!try_convert_to_string(&lzval)) {
+			ctx->err.has_error = 1;
+			break;
+		}
 
 		switch (is_numeric_string(Z_STRVAL(lzval), Z_STRLEN(lzval), &lval, &dval, 0)) {
 		case IS_DOUBLE:
-			zval_dtor(&lzval);
+			zval_ptr_dtor_str(&lzval);
 			ZVAL_DOUBLE(&lzval, dval);
 			goto double_case;
 
 		case IS_LONG:
-			zval_dtor(&lzval);
+			zval_ptr_dtor_str(&lzval);
 			ZVAL_LONG(&lzval, lval);
 			goto long_case;
 		}
@@ -358,7 +350,7 @@ double_case:
 		break;
 	}
 
-	zval_dtor(&lzval);
+	zval_ptr_dtor(&lzval);
 
 	return ret;
 }
@@ -438,6 +430,8 @@ static void from_zval_write_sa_family(const zval *arr_value, char *field, ser_co
 	ival = (sa_family_t)lval;
 	memcpy(field, &ival, sizeof(ival));
 }
+
+#ifdef SO_PASSCRED
 static void from_zval_write_pid_t(const zval *arr_value, char *field, ser_context *ctx)
 {
 	zend_long lval;
@@ -485,6 +479,7 @@ static void from_zval_write_uid_t(const zval *arr_value, char *field, ser_contex
 	ival = (uid_t)lval;
 	memcpy(field, &ival, sizeof(ival));
 }
+#endif
 
 void to_zval_read_int(const char *data, zval *zv, res_context *ctx)
 {
@@ -521,6 +516,7 @@ static void to_zval_read_sa_family(const char *data, zval *zv, res_context *ctx)
 
 	ZVAL_LONG(zv, (zend_long)ival);
 }
+#ifdef SO_PASSCRED
 static void to_zval_read_pid_t(const char *data, zval *zv, res_context *ctx)
 {
 	pid_t ival;
@@ -535,15 +531,16 @@ static void to_zval_read_uid_t(const char *data, zval *zv, res_context *ctx)
 
 	ZVAL_LONG(zv, (zend_long)ival);
 }
+#endif
 
 /* CONVERSIONS for sockaddr */
 static void from_zval_write_sin_addr(const zval *zaddr_str, char *inaddr, ser_context *ctx)
 {
 	int					res;
 	struct sockaddr_in	saddr = {0};
-	zend_string			*addr_str;
+	zend_string			*addr_str, *tmp_addr_str;
 
-	addr_str = zval_get_string((zval *) zaddr_str);
+	addr_str = zval_get_tmp_string((zval *) zaddr_str, &tmp_addr_str);
 	res = php_set_inet_addr(&saddr, ZSTR_VAL(addr_str), ctx->sock);
 	if (res) {
 		memcpy(inaddr, &saddr.sin_addr, sizeof saddr.sin_addr);
@@ -553,7 +550,7 @@ static void from_zval_write_sin_addr(const zval *zaddr_str, char *inaddr, ser_co
 				"address", ZSTR_VAL(addr_str));
 	}
 
-	zend_string_release(addr_str);
+	zend_tmp_string_release(tmp_addr_str);
 }
 static void to_zval_read_sin_addr(const char *data, zval *zv, res_context *ctx)
 {
@@ -591,9 +588,9 @@ static void from_zval_write_sin6_addr(const zval *zaddr_str, char *addr6, ser_co
 {
 	int					res;
 	struct sockaddr_in6	saddr6 = {0};
-	zend_string			*addr_str;
+	zend_string			*addr_str, *tmp_addr_str;
 
-	addr_str = zval_get_string((zval *) zaddr_str);
+	addr_str = zval_get_tmp_string((zval *) zaddr_str, &tmp_addr_str);
 	res = php_set_inet6_addr(&saddr6, ZSTR_VAL(addr_str), ctx->sock);
 	if (res) {
 		memcpy(addr6, &saddr6.sin6_addr, sizeof saddr6.sin6_addr);
@@ -603,7 +600,7 @@ static void from_zval_write_sin6_addr(const zval *zaddr_str, char *addr6, ser_co
 				"address", Z_STRVAL_P(zaddr_str));
 	}
 
-	zend_string_release(addr_str);
+	zend_tmp_string_release(tmp_addr_str);
 }
 static void to_zval_read_sin6_addr(const char *data, zval *zv, res_context *ctx)
 {
@@ -642,28 +639,30 @@ static void to_zval_read_sockaddr_in6(const char *data, zval *zv, res_context *c
 #endif /* HAVE_IPV6 */
 static void from_zval_write_sun_path(const zval *path, char *sockaddr_un_c, ser_context *ctx)
 {
-	zend_string			*path_str;
+	zend_string			*path_str, *tmp_path_str;
 	struct sockaddr_un	*saddr = (struct sockaddr_un*)sockaddr_un_c;
 
-	path_str = zval_get_string((zval *) path);
+	path_str = zval_get_tmp_string((zval *) path, &tmp_path_str);
 
 	/* code in this file relies on the path being nul terminated, even though
 	 * this is not required, at least on linux for abstract paths. It also
 	 * assumes that the path is not empty */
 	if (ZSTR_LEN(path_str) == 0) {
 		do_from_zval_err(ctx, "%s", "the path is cannot be empty");
+		zend_tmp_string_release(tmp_path_str);
 		return;
 	}
 	if (ZSTR_LEN(path_str) >= sizeof(saddr->sun_path)) {
 		do_from_zval_err(ctx, "the path is too long, the maximum permitted "
 				"length is %zd", sizeof(saddr->sun_path) - 1);
+		zend_tmp_string_release(tmp_path_str);
 		return;
 	}
 
 	memcpy(&saddr->sun_path, ZSTR_VAL(path_str), ZSTR_LEN(path_str));
 	saddr->sun_path[ZSTR_LEN(path_str)] = '\0';
 
-	zend_string_release(path_str);
+	zend_tmp_string_release(tmp_path_str);
 }
 static void to_zval_read_sun_path(const char *data, zval *zv, res_context *ctx) {
 	struct sockaddr_un	*saddr = (struct sockaddr_un*)data;
@@ -698,6 +697,9 @@ static void from_zval_write_sockaddr_aux(const zval *container,
 	int		family;
 	zval	*elem;
 	int		fill_sockaddr;
+
+	*sockaddr_ptr = NULL;
+	*sockaddr_len = 0;
 
 	if (Z_TYPE_P(container) != IS_ARRAY) {
 		do_from_zval_err(ctx, "%s", "expected an array here");
@@ -1002,13 +1004,6 @@ static void to_zval_read_control_array(const char *msghdr_c, zval *zv, res_conte
 	char			*bufp = buf;
 	uint32_t		i = 1;
 
-	/*if (msg->msg_flags & MSG_CTRUNC) {
-		php_error_docref0(NULL, E_WARNING, "The MSG_CTRUNC flag is present; will not "
-				"attempt to read control messages");
-		ZVAL_FALSE(zv);
-		return;
-	}*/
-
 	array_init(zv);
 
 	for (cmsg = CMSG_FIRSTHDR(msg);
@@ -1075,16 +1070,15 @@ static void from_zval_write_msghdr_buffer_size(const zval *elem, char *msghdr_c,
 static void from_zval_write_iov_array_aux(zval *elem, unsigned i, void **args, ser_context *ctx)
 {
 	struct msghdr	*msg = args[0];
-	size_t			len;
-	zend_string     *str;
+	zend_string     *str, *tmp_str;
 
-	str = zval_get_string(elem);
+	str = zval_get_tmp_string(elem, &tmp_str);
 
 	msg->msg_iov[i - 1].iov_base = accounted_emalloc(ZSTR_LEN(str), ctx);
 	msg->msg_iov[i - 1].iov_len = ZSTR_LEN(str);
 	memcpy(msg->msg_iov[i - 1].iov_base, ZSTR_VAL(str), ZSTR_LEN(str));
 
-	zend_string_release(str);
+	zend_tmp_string_release(tmp_str);
 }
 static void from_zval_write_iov_array(const zval *arr, char *msghdr_c, ser_context *ctx)
 {
@@ -1240,9 +1234,9 @@ static void from_zval_write_ifindex(const zval *zv, char *uinteger, ser_context 
 			ret = (unsigned)Z_LVAL_P(zv);
 		}
 	} else {
-		zend_string *str;
+		zend_string *str, *tmp_str;
 
-		str = zval_get_string((zval *) zv);
+		str = zval_get_tmp_string((zval *) zv, &tmp_str);
 
 #if HAVE_IF_NAMETOINDEX
 		ret = if_nametoindex(ZSTR_VAL(str));
@@ -1274,7 +1268,7 @@ static void from_zval_write_ifindex(const zval *zv, char *uinteger, ser_context 
 				"name, an integer interface index must be supplied instead");
 #endif
 
-		zend_string_release(str);
+		zend_tmp_string_release(tmp_str);
 	}
 
 	if (!ctx->err.has_error) {

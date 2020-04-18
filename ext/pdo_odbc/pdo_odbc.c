@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +13,6 @@
   | Author: Wez Furlong <wez@php.net>                                    |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -31,7 +27,7 @@
 #include "php_pdo_odbc_int.h"
 
 /* {{{ pdo_odbc_functions[] */
-const zend_function_entry pdo_odbc_functions[] = {
+static const zend_function_entry pdo_odbc_functions[] = {
 	PHP_FE_END
 };
 /* }}} */
@@ -68,13 +64,6 @@ zend_ulong pdo_odbc_pool_on = SQL_CP_OFF;
 zend_ulong pdo_odbc_pool_mode = SQL_CP_ONE_PER_HENV;
 #endif
 
-#if defined(DB2CLI_VER) && !defined(PHP_WIN32)
-PHP_INI_BEGIN()
-	PHP_INI_ENTRY("pdo_odbc.db2_instance_name", NULL, PHP_INI_SYSTEM, NULL)
-PHP_INI_END()
-
-#endif
-
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(pdo_odbc)
 {
@@ -85,23 +74,6 @@ PHP_MINIT_FUNCTION(pdo_odbc)
 	if (FAILURE == php_pdo_register_driver(&pdo_odbc_driver)) {
 		return FAILURE;
 	}
-
-#if defined(DB2CLI_VER) && !defined(PHP_WIN32)
-	REGISTER_INI_ENTRIES();
-	{
-		char *instance = INI_STR("pdo_odbc.db2_instance_name");
-		if (instance) {
-			char *env = malloc(sizeof("DB2INSTANCE=") + strlen(instance));
-			if (!env) {
-				return FAILURE;
-			}
-			strcpy(env, "DB2INSTANCE=");
-			strcat(env, instance);
-			putenv(env);
-			/* after this point, we can't free env without breaking the environment */
-		}
-	}
-#endif
 
 #ifdef SQL_ATTR_CONNECTION_POOLING
 	/* ugh, we don't really like .ini stuff in PDO, but since ODBC connection
@@ -144,9 +116,6 @@ PHP_MINIT_FUNCTION(pdo_odbc)
  */
 PHP_MSHUTDOWN_FUNCTION(pdo_odbc)
 {
-#if defined(DB2CLI_VER) && !defined(PHP_WIN32)
-	UNREGISTER_INI_ENTRIES();
-#endif
 	php_pdo_unregister_driver(&pdo_odbc_driver);
 	return SUCCESS;
 }
@@ -165,18 +134,5 @@ PHP_MINFO_FUNCTION(pdo_odbc)
 	php_info_print_table_row(2, "ODBC Connection Pooling", "Not supported in this build");
 #endif
 	php_info_print_table_end();
-
-#if defined(DB2CLI_VER) && !defined(PHP_WIN32)
-	DISPLAY_INI_ENTRIES();
-#endif
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

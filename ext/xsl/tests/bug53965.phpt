@@ -7,7 +7,7 @@ if (!extension_loaded('xsl')) die("skip Extension XSL is required\n");
 --FILE--
 <?php
 
-$base = 'file://' . dirname(__FILE__) . DIRECTORY_SEPARATOR . '53965';
+$base = 'file://' . __DIR__ . DIRECTORY_SEPARATOR . '53965';
 
 $xml = new DOMDocument();
 $xml->load($base . DIRECTORY_SEPARATOR . 'collection.xml');
@@ -20,7 +20,7 @@ $proc->importStyleSheet($xsl);
 
 echo $proc->transformToXML($xml);
 ?>
---EXPECTF--
+--EXPECT--
 Hey! Welcome to Nicolas Eliaszewicz's sweet CD collection! 
   
  <h1>Fight for your mind</h1><h2>by Ben Harper - 1995</h2><hr>

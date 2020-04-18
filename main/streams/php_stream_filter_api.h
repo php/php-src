@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,11 +17,9 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 /* The filter API works on the principle of "Bucket-Brigades".  This is
  * partially inspired by the Apache 2 method of doing things, although
- * it is intentially a light-weight implementation.
+ * it is intentionally a light-weight implementation.
  *
  * Each stream can have a chain of filters for reading and another for writing.
  *
@@ -106,7 +102,7 @@ typedef struct _php_stream_filter_chain {
 } php_stream_filter_chain;
 
 struct _php_stream_filter {
-	php_stream_filter_ops *fops;
+	const php_stream_filter_ops *fops;
 	zval abstract; /* for use by filter implementation */
 	php_stream_filter *next;
 	php_stream_filter *prev;
@@ -131,7 +127,7 @@ PHPAPI int php_stream_filter_append_ex(php_stream_filter_chain *chain, php_strea
 PHPAPI int _php_stream_filter_flush(php_stream_filter *filter, int finish);
 PHPAPI php_stream_filter *php_stream_filter_remove(php_stream_filter *filter, int call_dtor);
 PHPAPI void php_stream_filter_free(php_stream_filter *filter);
-PHPAPI php_stream_filter *_php_stream_filter_alloc(php_stream_filter_ops *fops, void *abstract, uint8_t persistent STREAMS_DC);
+PHPAPI php_stream_filter *_php_stream_filter_alloc(const php_stream_filter_ops *fops, void *abstract, uint8_t persistent STREAMS_DC);
 END_EXTERN_C()
 #define php_stream_filter_alloc(fops, thisptr, persistent) _php_stream_filter_alloc((fops), (thisptr), (persistent) STREAMS_CC)
 #define php_stream_filter_alloc_rel(fops, thisptr, persistent) _php_stream_filter_alloc((fops), (thisptr), (persistent) STREAMS_REL_CC)
@@ -146,17 +142,8 @@ typedef struct _php_stream_filter_factory {
 } php_stream_filter_factory;
 
 BEGIN_EXTERN_C()
-PHPAPI int php_stream_filter_register_factory(const char *filterpattern, php_stream_filter_factory *factory);
+PHPAPI int php_stream_filter_register_factory(const char *filterpattern, const php_stream_filter_factory *factory);
 PHPAPI int php_stream_filter_unregister_factory(const char *filterpattern);
-PHPAPI int php_stream_filter_register_factory_volatile(zend_string *filterpattern, php_stream_filter_factory *factory);
+PHPAPI int php_stream_filter_register_factory_volatile(zend_string *filterpattern, const php_stream_filter_factory *factory);
 PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval *filterparams, uint8_t persistent);
 END_EXTERN_C()
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

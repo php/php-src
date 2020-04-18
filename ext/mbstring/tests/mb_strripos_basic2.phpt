@@ -8,9 +8,9 @@ function_exists('mb_strripos') or die("skip mb_strripos() is not available in th
 --FILE--
 <?php
 /* Prototype  : int mb_strripos(string haystack, string needle [, int offset [, string encoding]])
- * Description: Finds position of last occurrence of a string within another, case insensitive 
+ * Description: Finds position of last occurrence of a string within another, case insensitive
  * Source code: ext/mbstring/mbstring.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 /*
@@ -56,7 +56,7 @@ $greek_needles = array(
 echo "\n -- ASCII Strings --\n";
 foreach ($ascii_needles as $needle) {
    foreach ($ascii_haystacks as $haystack) {
-      var_dump(mb_strripos($haystack, $needle));      
+      var_dump(mb_strripos($haystack, $needle));
       var_dump(mb_strripos($haystack, $needle, 14));
    }
 }
@@ -65,13 +65,13 @@ echo "\n -- Greek Strings --\n";
 foreach ($greek_needles as $needle) {
    foreach ($greek_haystacks as $haystack) {
       var_dump(mb_strripos($haystack, $needle));
-      var_dump(mb_strripos($haystack, $needle, 12));         
+      var_dump(mb_strripos($haystack, $needle, 12));
    }
 }
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing mb_strripos() : basic functionality***
 
  -- ASCII Strings --

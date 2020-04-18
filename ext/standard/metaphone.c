@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,18 +14,15 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 /*
 	Based on CPANs "Text-Metaphone-1.96" by Michael G Schwern <schwern@pobox.com>
 */
 
 #include "php.h"
-#include "php_metaphone.h"
 
 static int metaphone(unsigned char *word, size_t word_len, zend_long max_phonemes, zend_string **phoned_word, int traditional);
 
-/* {{{ proto string metaphone(string text[, int phones])
+/* {{{ proto string|false metaphone(string text[, int phones])
    Break english phrases down into their phonemes */
 PHP_FUNCTION(metaphone)
 {
@@ -78,7 +73,7 @@ PHP_FUNCTION(metaphone)
 /* Metachar.h ... little bits about characters for metaphone */
 /*-- Character encoding array & accessing macros --*/
 /* Stolen directly out of the book... */
-char _codes[26] =
+static const char _codes[26] =
 {
 	1, 16, 4, 16, 9, 2, 4, 16, 9, 2, 0, 2, 2, 2, 1, 4, 0, 2, 4, 4, 1, 0, 0, 0, 8, 0
 /*  a  b c  d e f g  h i j k l m n o p q r s t u v w x y z */
@@ -472,12 +467,3 @@ static int metaphone(unsigned char *word, size_t word_len, zend_long max_phoneme
 	return 0;
 }								/* END metaphone */
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

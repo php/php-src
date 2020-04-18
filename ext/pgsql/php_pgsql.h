@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,12 +10,10 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Zeev Suraski <zeev@zend.com>                                |
+   | Authors: Zeev Suraski <zeev@php.net>                                 |
    |          Jouni Ahto <jouni.ahto@exdec.fi>                            |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #ifndef PHP_PGSQL_H
 #define PHP_PGSQL_H
@@ -36,9 +32,8 @@ extern zend_module_entry pgsql_module_entry;
 #undef SOCKET_SIZE_TYPE
 #include <libpq-fe.h>
 
+#include <libpq/libpq-fs.h>
 #ifdef PHP_WIN32
-#define INV_WRITE            0x00020000
-#define INV_READ             0x00040000
 #undef PHP_PGSQL_API
 #ifdef PGSQL_EXPORTS
 #define PHP_PGSQL_API __declspec(dllexport)
@@ -46,7 +41,6 @@ extern zend_module_entry pgsql_module_entry;
 #define PHP_PGSQL_API __declspec(dllimport)
 #endif
 #else
-#include <libpq/libpq-fs.h>
 # if defined(__GNUC__) && __GNUC__ >= 4
 #  define PHP_PGSQL_API __attribute__ ((visibility("default")))
 # else
@@ -200,7 +194,7 @@ PHP_FUNCTION(pg_select);
 #define PGSQL_CONNECT_FORCE_NEW     (1<<1)
 #define PGSQL_CONNECT_ASYNC         (1<<2)
 /* php_pgsql_convert options */
-#define PGSQL_CONV_IGNORE_DEFAULT   (1<<1)     /* Do not use DEAFULT value by removing field from returned array */
+#define PGSQL_CONV_IGNORE_DEFAULT   (1<<1)     /* Do not use DEFAULT value by removing field from returned array */
 #define PGSQL_CONV_FORCE_NULL       (1<<2)     /* Convert to NULL if string is null string */
 #define PGSQL_CONV_IGNORE_NOT_NULL  (1<<3)     /* Ignore NOT NULL constraints */
 #define PGSQL_CONV_OPTS             (PGSQL_CONV_IGNORE_DEFAULT|PGSQL_CONV_FORCE_NULL|PGSQL_CONV_IGNORE_NOT_NULL)
@@ -229,8 +223,8 @@ static void php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_typ
 static void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type);
 static void php_pgsql_do_async(INTERNAL_FUNCTION_PARAMETERS,int entry_type);
 
-static size_t php_pgsql_fd_write(php_stream *stream, const char *buf, size_t count);
-static size_t php_pgsql_fd_read(php_stream *stream, char *buf, size_t count);
+static ssize_t php_pgsql_fd_write(php_stream *stream, const char *buf, size_t count);
+static ssize_t php_pgsql_fd_read(php_stream *stream, char *buf, size_t count);
 static int php_pgsql_fd_close(php_stream *stream, int close_handle);
 static int php_pgsql_fd_flush(php_stream *stream);
 static int php_pgsql_fd_set_option(php_stream *stream, int option, int value, void *ptrparam);
@@ -298,7 +292,7 @@ typedef struct _php_pgsql_notice {
 	size_t len;
 } php_pgsql_notice;
 
-static php_stream_ops php_stream_pgsql_fd_ops = {
+static const php_stream_ops php_stream_pgsql_fd_ops = {
 	php_pgsql_fd_write,
 	php_pgsql_fd_read,
 	php_pgsql_fd_close,
@@ -319,6 +313,7 @@ ZEND_BEGIN_MODULE_GLOBALS(pgsql)
 	int ignore_notices,log_notices;
 	HashTable notices;  /* notice message for each connection */
 	zend_resource *default_link; /* default link when connection is omitted */
+	HashTable hashes; /* hashes for each connection */
 ZEND_END_MODULE_GLOBALS(pgsql)
 
 ZEND_EXTERN_MODULE_GLOBALS(pgsql)

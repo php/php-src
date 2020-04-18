@@ -4,26 +4,25 @@ Bug #48228 (crash when exception is thrown while passing function arguments)
 <?php
 
 function do_throw() {
-	throw new Exception();
+    throw new Exception();
 }
 
-class aa 
+class aa
 {
-	function check()
-	{
-	}
+    function check()
+    {
+    }
 
-	function dosome()
-	{
-		$this->check(do_throw());
-	}
+    function dosome()
+    {
+        $this->check(do_throw());
+    }
 }
 $l_aa=new aa();
 
 $l_aa->dosome();
 ?>
 --EXPECTF--
-
 Fatal error: Uncaught Exception in %s
 Stack trace:
 #0 %s(%d): do_throw()

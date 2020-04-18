@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +14,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #ifndef SXE_H
 #define SXE_H
 
@@ -29,12 +25,3 @@ extern PHP_SXE_API zend_class_entry *ce_SimpleXMLElement;
 PHP_MINIT_FUNCTION(sxe);
 
 #endif /* SXE_H */
-
-/*
- * Local Variables:
- * c-basic-offset: 4
- * tab-width: 4
- * End:
- * vim600: fdm=marker
- * vim: noet sw=4 ts=4
- */

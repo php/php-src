@@ -1,124 +1,124 @@
 <?php
 class Soap12test {
-	public $header;
+    public $header;
 
-	function echoOk($x) {
-  	return $x;
-	}
+    function echoOk($x) {
+    return $x;
+    }
 
-	function echoString($inputString) {
-		return $inputString;
-	}
+    function echoString($inputString) {
+        return $inputString;
+    }
 
-	function echoStringArray($inputStringArray) {
-		return $inputStringArray;
-	}
+    function echoStringArray($inputStringArray) {
+        return $inputStringArray;
+    }
 
-	function echoInteger($inputInteger) {
-		return $inputInteger;
-	}
+    function echoInteger($inputInteger) {
+        return $inputInteger;
+    }
 
-	function echoIntegerArray($inputIntegerArray) {
-		return $inputIntegerArray;
-	}
+    function echoIntegerArray($inputIntegerArray) {
+        return $inputIntegerArray;
+    }
 
-	function echoFloat($inputFloat) {
-		return $inputFloat;
-	}
+    function echoFloat($inputFloat) {
+        return $inputFloat;
+    }
 
-	function echoFloatArray($inputFloatArray) {
-		return $inputFloatArray;
+    function echoFloatArray($inputFloatArray) {
+        return $inputFloatArray;
   }
 
-	function echoStruct($x) {
-  	return $x;
-	}
+    function echoStruct($x) {
+    return $x;
+    }
 
-	function echoStructArray($x) {
-  	return $x;
-	}
+    function echoStructArray($x) {
+    return $x;
+    }
 
-	function echoVoid() {
-		return NULL;
-	}
+    function echoVoid() {
+        return NULL;
+    }
 
-	function echoBase64($b_encoded) {
-		return $b_encoded;
+    function echoBase64($b_encoded) {
+        return $b_encoded;
   }
 
-	function echoDate($timeInstant) {
-		return $timeInstant;
-	}
+    function echoDate($timeInstant) {
+        return $timeInstant;
+    }
 
-	function echoHexBinary($hb) {
-		return $hb;
-	}
+    function echoHexBinary($hb) {
+        return $hb;
+    }
 
-	function echoDecimal($dec) {
-		return $dec;
-	}
+    function echoDecimal($dec) {
+        return $dec;
+    }
 
-	function echoBoolean($boolean) {
-		return $boolean;
-	}
+    function echoBoolean($boolean) {
+        return $boolean;
+    }
 
-	function echoStructAsSimpleTypes ($struct) {
-		 return array('outputString'  => $struct->varString,
-		              'outputInteger' => $struct->varInt,
-		              'outputFloat'   => $struct->varFloat);
-	}
+    function echoStructAsSimpleTypes ($struct) {
+         return array('outputString'  => $struct->varString,
+                      'outputInteger' => $struct->varInt,
+                      'outputFloat'   => $struct->varFloat);
+    }
 
-	function echoSimpleTypesAsStruct($string, $int, $float) {
-		return (object)array("varString" => $string,
-		 										 "varInt"    => $int,
-	  										 "varFloat"  => $float);
-	}
+    function echoSimpleTypesAsStruct($string, $int, $float) {
+        return (object)array("varString" => $string,
+                                                 "varInt"    => $int,
+                                             "varFloat"  => $float);
+    }
 
-	function echoNestedStruct($struct) {
-		return $struct;
-	}
+    function echoNestedStruct($struct) {
+        return $struct;
+    }
 
-	function echo2DStringArray($ary) {
-		return $ary;
-	}
+    function echo2DStringArray($ary) {
+        return $ary;
+    }
 
-	function echoNestedArray($ary) {
-		return $ary;
-	}
+    function echoNestedArray($ary) {
+        return $ary;
+    }
 
-	function countItems($input) {
-		return count($input);
-	}
+    function countItems($input) {
+        return count($input);
+    }
 
-	function isNil($input=NULL) {
-		return is_null($input);
-	}
+    function isNil($input=NULL) {
+        return is_null($input);
+    }
 
-	function returnVoid() {
-	}
+    function returnVoid() {
+    }
 
-	function emptyBody() {
-	}
+    function emptyBody() {
+    }
 
-	function requiredHeader($x) {
-		$this->header = $x;
-	}
+    function requiredHeader($x) {
+        $this->header = $x;
+    }
 
-	function echoHeader() {
-	  return $this->header;
-	}
+    function echoHeader() {
+      return $this->header;
+    }
 
-	function echoResolvedRef($ref) {
-	  return $ref->RelativeReference->base.$ref->RelativeReference->href;
-	}
+    function echoResolvedRef($ref) {
+      return $ref->RelativeReference->base.$ref->RelativeReference->href;
+    }
 
-	function validateCountryCode($code) {
-		if (strlen($code) != 2) {
-		  return new SoapFault("Client", "Not a valid country code", NULL, NULL, NULL, new SoapHeader("http://example.org/ts-tests", "validateCountryCodeFault", "Country code must be 2 letters."));
-		} else {
-			return "OK";
-		}
-	}
+    function validateCountryCode($code) {
+        if (strlen($code) != 2) {
+          return new SoapFault("Client", "Not a valid country code", NULL, NULL, NULL, new SoapHeader("http://example.org/ts-tests", "validateCountryCodeFault", "Country code must be 2 letters."));
+        } else {
+            return "OK";
+        }
+    }
 
 }
 

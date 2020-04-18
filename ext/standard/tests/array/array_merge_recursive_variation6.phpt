@@ -8,7 +8,7 @@ Test array_merge_recursive() function : usage variations - array with duplicate 
 */
 
 /*
- * Testing the functionality of array_merge_recursive() by passing 
+ * Testing the functionality of array_merge_recursive() by passing
  * array having duplicate keys.
 */
 
@@ -33,7 +33,7 @@ var_dump( array_merge_recursive($arr1_string_key, $arr2) );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_merge_recursive() : array with duplicate keys for $arr1 argument ***
 -- With default argument --
 array(3) {

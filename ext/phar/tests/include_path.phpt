@@ -2,11 +2,13 @@
 Phar: include_path with phar:// wrapper
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
+--CONFLICTS--
+tempmanifest1.phar.php
 --INI--
 phar.readonly=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/tempmanifest1.phar.php';
+$fname = __DIR__ . '/tempmanifest1.phar.php';
 $a = new Phar($fname);
 $a['file1.php'] = 'file1.php
 ';
@@ -19,16 +21,14 @@ set_include_path('.' . PATH_SEPARATOR . 'phar://' . $fname . '/test');
 include 'file1.php';
 include 'file2.php';
 ?>
-===DONE===
 --CLEAN--
 <?php
-@unlink(dirname(__FILE__) . '/tempmanifest1.phar.php');
+@unlink(__DIR__ . '/tempmanifest1.phar.php');
 ?>
 --EXPECTF--
 file1.php
 test/file1.php
 
-Warning: include(file2.php): failed to open stream: No such file or directory in %sinclude_path.php on line %d
+Warning: include(file2.php): Failed to open stream: No such file or directory in %sinclude_path.php on line %d
 
 Warning: include(): Failed opening 'file2.php' for inclusion (include_path='%sphar://%stempmanifest1.phar.php/test') in %sinclude_path.php on line %d
-===DONE===

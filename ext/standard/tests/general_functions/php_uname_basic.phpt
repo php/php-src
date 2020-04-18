@@ -20,7 +20,6 @@ var_dump(php_uname('v'));
 var_dump(php_uname('m'));
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing php_uname() - basic test
 string(%d) "%s"
@@ -32,4 +31,3 @@ string(%d) "%s"
 string(%d) "%s"
 string(%d) "%s"
 string(%d) "%s"
-===DONE===

@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +13,6 @@
   | Author: Wez Furlong <wez@thebrainroom.com>                           |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #include "php.h"
 #include "ext/standard/file.h"
@@ -46,22 +42,22 @@
 # define XP_SOCK_BUF_SIZE(sz) (sz)
 #endif
 
-php_stream_ops php_stream_generic_socket_ops;
-PHPAPI php_stream_ops php_stream_socket_ops;
-php_stream_ops php_stream_udp_socket_ops;
+const php_stream_ops php_stream_generic_socket_ops;
+PHPAPI const php_stream_ops php_stream_socket_ops;
+const php_stream_ops php_stream_udp_socket_ops;
 #ifdef AF_UNIX
-php_stream_ops php_stream_unix_socket_ops;
-php_stream_ops php_stream_unixdg_socket_ops;
+const php_stream_ops php_stream_unix_socket_ops;
+const php_stream_ops php_stream_unixdg_socket_ops;
 #endif
 
 
 static int php_tcp_sockop_set_option(php_stream *stream, int option, int value, void *ptrparam);
 
 /* {{{ Generic socket stream operations */
-static size_t php_sockop_write(php_stream *stream, const char *buf, size_t count)
+static ssize_t php_sockop_write(php_stream *stream, const char *buf, size_t count)
 {
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
-	int didwrite;
+	ssize_t didwrite;
 	struct timeval *ptimeout;
 
 	if (!sock || sock->socket == -1) {
@@ -77,42 +73,44 @@ retry:
 	didwrite = send(sock->socket, buf, XP_SOCK_BUF_SIZE(count), (sock->is_blocked && ptimeout) ? MSG_DONTWAIT : 0);
 
 	if (didwrite <= 0) {
-		int err = php_socket_errno();
 		char *estr;
+		int err = php_socket_errno();
+		if (err == EWOULDBLOCK || err == EAGAIN) {
+			if (sock->is_blocked) {
+				int retval;
 
-		if (sock->is_blocked && (err == EWOULDBLOCK || err == EAGAIN)) {
-			int retval;
+				sock->timeout_event = 0;
 
-			sock->timeout_event = 0;
+				do {
+					retval = php_pollfd_for(sock->socket, POLLOUT, ptimeout);
 
-			do {
-				retval = php_pollfd_for(sock->socket, POLLOUT, ptimeout);
+					if (retval == 0) {
+						sock->timeout_event = 1;
+						break;
+					}
 
-				if (retval == 0) {
-					sock->timeout_event = 1;
-					break;
-				}
+					if (retval > 0) {
+						/* writable now; retry */
+						goto retry;
+					}
 
-				if (retval > 0) {
-					/* writable now; retry */
-					goto retry;
-				}
-
-				err = php_socket_errno();
-			} while (err == EINTR);
+					err = php_socket_errno();
+				} while (err == EINTR);
+			} else {
+				/* EWOULDBLOCK/EAGAIN is not an error for a non-blocking stream.
+				 * Report zero byte write instead. */
+				return 0;
+			}
 		}
+
 		estr = php_socket_strerror(err, NULL, 0);
-		php_error_docref(NULL, E_NOTICE, "send of " ZEND_LONG_FMT " bytes failed with errno=%d %s",
+		php_error_docref(NULL, E_NOTICE, "Send of " ZEND_LONG_FMT " bytes failed with errno=%d %s",
 				(zend_long)count, err, estr);
 		efree(estr);
 	}
 
 	if (didwrite > 0) {
 		php_stream_notify_progress_increment(PHP_STREAM_CONTEXT(stream), didwrite, 0);
-	}
-
-	if (didwrite < 0) {
-		didwrite = 0;
 	}
 
 	return didwrite;
@@ -148,14 +146,14 @@ static void php_sock_stream_wait_for_data(php_stream *stream, php_netstream_data
 	}
 }
 
-static size_t php_sockop_read(php_stream *stream, char *buf, size_t count)
+static ssize_t php_sockop_read(php_stream *stream, char *buf, size_t count)
 {
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
 	ssize_t nr_bytes = 0;
 	int err;
 
 	if (!sock || sock->socket == -1) {
-		return 0;
+		return -1;
 	}
 
 	if (sock->is_blocked) {
@@ -167,14 +165,18 @@ static size_t php_sockop_read(php_stream *stream, char *buf, size_t count)
 	nr_bytes = recv(sock->socket, buf, XP_SOCK_BUF_SIZE(count), (sock->is_blocked && sock->timeout.tv_sec != -1) ? MSG_DONTWAIT : 0);
 	err = php_socket_errno();
 
-	stream->eof = (nr_bytes == 0 || (nr_bytes == -1 && err != EWOULDBLOCK && err != EAGAIN));
+	if (nr_bytes < 0) {
+		if (err == EAGAIN || err == EWOULDBLOCK) {
+			nr_bytes = 0;
+		} else {
+			stream->eof = 1;
+		}
+	} else if (nr_bytes == 0) {
+		stream->eof = 1;
+	}
 
 	if (nr_bytes > 0) {
 		php_stream_notify_progress_increment(PHP_STREAM_CONTEXT(stream), nr_bytes, 0);
-	}
-
-	if (nr_bytes < 0) {
-		nr_bytes = 0;
 	}
 
 	return nr_bytes;
@@ -274,6 +276,12 @@ static inline int sock_recvfrom(php_netstream_data_t *sock, char *buf, size_t bu
 		socklen_t sl = sizeof(sa);
 		ret = recvfrom(sock->socket, buf, XP_SOCK_BUF_SIZE(buflen), flags, (struct sockaddr*)&sa, &sl);
 		ret = (ret == SOCK_CONN_ERR) ? -1 : ret;
+#ifdef PHP_WIN32
+		/* POSIX discards excess bytes without signalling failure; emulate this on Windows */
+		if (ret == -1 && WSAGetLastError() == WSAEMSGSIZE) {
+			ret = buflen;
+		}
+#endif
 		if (sl) {
 			php_network_populate_name_from_sockaddr((struct sockaddr*)&sa, sl,
 					textaddr, addr, addrlen);
@@ -484,7 +492,7 @@ static int php_sockop_cast(php_stream *stream, int castas, void **ret)
  * A "useful" side-effect is that the user's scripts can then
  * make similar decisions using stream_get_meta_data.
  * */
-php_stream_ops php_stream_generic_socket_ops = {
+const php_stream_ops php_stream_generic_socket_ops = {
 	php_sockop_write, php_sockop_read,
 	php_sockop_close, php_sockop_flush,
 	"generic_socket",
@@ -495,7 +503,7 @@ php_stream_ops php_stream_generic_socket_ops = {
 };
 
 
-php_stream_ops php_stream_socket_ops = {
+const php_stream_ops php_stream_socket_ops = {
 	php_sockop_write, php_sockop_read,
 	php_sockop_close, php_sockop_flush,
 	"tcp_socket",
@@ -505,7 +513,7 @@ php_stream_ops php_stream_socket_ops = {
 	php_tcp_sockop_set_option,
 };
 
-php_stream_ops php_stream_udp_socket_ops = {
+const php_stream_ops php_stream_udp_socket_ops = {
 	php_sockop_write, php_sockop_read,
 	php_sockop_close, php_sockop_flush,
 	"udp_socket",
@@ -516,7 +524,7 @@ php_stream_ops php_stream_udp_socket_ops = {
 };
 
 #ifdef AF_UNIX
-php_stream_ops php_stream_unix_socket_ops = {
+const php_stream_ops php_stream_unix_socket_ops = {
 	php_sockop_write, php_sockop_read,
 	php_sockop_close, php_sockop_flush,
 	"unix_socket",
@@ -525,7 +533,7 @@ php_stream_ops php_stream_unix_socket_ops = {
 	php_sockop_stat,
 	php_tcp_sockop_set_option,
 };
-php_stream_ops php_stream_unixdg_socket_ops = {
+const php_stream_ops php_stream_unixdg_socket_ops = {
 	php_sockop_write, php_sockop_read,
 	php_sockop_close, php_sockop_flush,
 	"udg_socket",
@@ -883,7 +891,7 @@ PHPAPI php_stream *php_stream_generic_socket_factory(const char *proto, size_t p
 {
 	php_stream *stream = NULL;
 	php_netstream_data_t *sock;
-	php_stream_ops *ops;
+	const php_stream_ops *ops;
 
 	/* which type of socket ? */
 	if (strncmp(proto, "tcp", protolen) == 0) {
@@ -927,13 +935,3 @@ PHPAPI php_stream *php_stream_generic_socket_factory(const char *proto, size_t p
 
 	return stream;
 }
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

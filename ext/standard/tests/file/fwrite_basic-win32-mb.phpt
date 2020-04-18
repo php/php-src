@@ -29,10 +29,10 @@ $file_content_types = array("numeric","text","text_with_new_line","alphanumeric"
 
 foreach($file_content_types as $file_content_type) {
   echo "\n-- Testing fwrite() with file having data of type ". $file_content_type ." --\n";
-  $filename = dirname(__FILE__)."/fwrite_basic-win32私はガラスを食べられます.tmp"; // this is name of the file
+  $filename = __DIR__."/fwrite_basic-win32私はガラスを食べられます.tmp"; // this is name of the file
 
-  for($inner_loop_counter = 0; 
-      $inner_loop_counter < count($file_modes); 
+  for($inner_loop_counter = 0;
+      $inner_loop_counter < count($file_modes);
       $inner_loop_counter++) {
      echo "--  File opened in mode : " . $file_modes[$inner_loop_counter]. " --\n";
      /* open the file using $files_modes and perform fwrite() on it */
@@ -44,14 +44,14 @@ foreach($file_content_types as $file_content_type) {
      $data_to_be_written="";
      fill_buffer($data_to_be_written, $file_content_type, 1024);  //get the data of size 1024
 
-    /* Write the data in to the file, verify the write by checking file pointer position, 
+    /* Write the data in to the file, verify the write by checking file pointer position,
        eof position, and data. */
     // writing 100 bytes
     var_dump( ftell($file_handle) );  // Expecting 0
     var_dump( fwrite($file_handle, $data_to_be_written, 100)); //int(100)
     var_dump( feof($file_handle) );  // expected : false
     var_dump( ftell($file_handle) );  //expected: 100
-   
+
     // trying to write more than the available data, available 1024 bytes but trying 2048
     var_dump( fwrite($file_handle, $data_to_be_written, 2048)); //int(1024)
     var_dump( feof($file_handle) );  // expected : false
@@ -66,7 +66,7 @@ foreach($file_content_types as $file_content_type) {
     var_dump( fclose($file_handle) ); //expected : true
     clearstatcache();//clears file status cache
     var_dump( filesize($filename) );  // expected:  2148
-    var_dump(md5(file_get_contents($filename))); // hash the output 
+    var_dump(md5(file_get_contents($filename))); // hash the output
 
   } // end of inner for loop
 
@@ -75,7 +75,7 @@ foreach($file_content_types as $file_content_type) {
 } // end of outer foreach loop
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fwrite() basic operations ***
 
 -- Testing fwrite() with file having data of type numeric --

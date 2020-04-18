@@ -21,8 +21,6 @@
 ************************************************************************/
 
 
-static const char rcsid[] = "#(@) $Id:";
-
 #include <string.h>
 #include <stdlib.h>
 #include "xml_to_soap.h"
@@ -664,4 +662,3 @@ xml_element* SOAP_REQUEST_to_xml_element(XMLRPC_REQUEST request) {
 
 	return root;
 }
-

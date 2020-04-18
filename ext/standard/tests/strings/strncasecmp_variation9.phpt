@@ -22,7 +22,7 @@ EOD;
 $identifier_str1 = <<<identifier_str1
 Example of heredoc
 string, whose identifier
-having underscore("_") 
+having underscore("_")
 & numeric value.
 identifier_str1;
 
@@ -73,12 +73,12 @@ for($index1 = 0; $index1 < count($strings); $index1++) {
 }
 echo "*** Done ***\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Test strncasecmp() function: with here-doc strings ***
 int(0)
 int(63)
 int(0)
-int(84)
+int(83)
 int(0)
 int(-1)
 int(0)

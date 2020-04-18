@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -135,7 +133,7 @@ static void resourcebundle_iterator_reset( zend_object_iterator *iter )
 /* }}} */
 
 /* {{{ resourcebundle_iterator_funcs */
-static zend_object_iterator_funcs resourcebundle_iterator_funcs = {
+static const zend_object_iterator_funcs resourcebundle_iterator_funcs = {
 	resourcebundle_iterator_dtor,
 	resourcebundle_iterator_has_more,
 	resourcebundle_iterator_current,
@@ -157,7 +155,8 @@ zend_object_iterator *resourcebundle_get_iterator( zend_class_entry *ce, zval *o
 	}
 
 	zend_iterator_init(&iterator->intern);
-	ZVAL_COPY(&iterator->intern.data, object);
+	Z_ADDREF_P(object);
+	ZVAL_OBJ(&iterator->intern.data, Z_OBJ_P(object));
 	iterator->intern.funcs = &resourcebundle_iterator_funcs;
 
 	iterator->subject = rb;
@@ -175,12 +174,3 @@ zend_object_iterator *resourcebundle_get_iterator( zend_class_entry *ce, zval *o
 	return (zend_object_iterator *) iterator;
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

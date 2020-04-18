@@ -11,7 +11,7 @@
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.  (COPYING.LIB)
+    Lesser General Public License for more details.  (LICENSE)
 
     You should have received a copy of the GNU Lesser General Public
     License along with this library; if not, write to:
@@ -31,7 +31,6 @@
 
 #include <config.h>
 #include <stdio.h>
-#include <assert.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdarg.h>
@@ -80,21 +79,21 @@ bc_raisemod (bc_num base, bc_num expo, bc_num mod, bc_num *result, int scale)
   /* Check the base for scale digits. */
   if (power->n_scale != 0)
     {
-      php_error_docref (NULL, E_WARNING, "non-zero scale in base");
+      php_error_docref (NULL, E_WARNING, "Non-zero scale in base");
       _bc_truncate (&power);
     }
 
   /* Check the exponent for scale digits. */
   if (exponent->n_scale != 0)
     {
-      php_error_docref (NULL, E_WARNING, "non-zero scale in exponent");
+      php_error_docref (NULL, E_WARNING, "Non-zero scale in exponent");
       _bc_truncate (&exponent);
     }
 
   /* Check the modulus for scale digits. */
   if (modulus->n_scale != 0)
     {
-      php_error_docref (NULL, E_WARNING, "non-zero scale in modulus");
+      php_error_docref (NULL, E_WARNING, "Non-zero scale in modulus");
       _bc_truncate (&modulus);
     }
 
@@ -102,6 +101,7 @@ bc_raisemod (bc_num base, bc_num expo, bc_num mod, bc_num *result, int scale)
   rscale = MAX(scale, power->n_scale);
   if ( !bc_compare(modulus, BCG(_one_)) )
     {
+      bc_free_num (&temp);
       temp = bc_new_num (1, scale);
     }
   else

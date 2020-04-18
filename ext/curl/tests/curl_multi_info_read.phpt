@@ -4,14 +4,13 @@ array curl_multi_info_read ( resource $mh [, int &$msgs_in_queue = NULL ] );
 marcosptf - <marcosptf@yahoo.com.br> - @phpsp - sao paulo - br
 --SKIPIF--
 <?php
-if (getenv("SKIP_ONLINE_TESTS")) { die('skip: online test'); }
 if (!extension_loaded('curl')) { print("skip"); }
 ?>
 --FILE--
 <?php
 $urls = array(
-    "bugs.php.net",
-    "pear.php.net"
+    "file://".__DIR__."/curl_testdata1.txt",
+    "file://".__DIR__."/curl_testdata2.txt",
 );
 
 $mh = curl_multi_init();
@@ -23,16 +22,30 @@ foreach ($urls as $i => $url) {
 
 do {
     $status = curl_multi_exec($mh, $active);
-    $info = curl_multi_info_read($mh);
-    if (false !== $info) {
-        var_dump(is_array($info));
-    }
 } while ($status === CURLM_CALL_MULTI_PERFORM || $active);
+
+while ($info = curl_multi_info_read($mh)) {
+    var_dump($info);
+}
 
 foreach ($urls as $i => $url) {
     curl_close($conn[$i]);
 }
 ?>
---EXPECT--
-bool(true)
-bool(true)
+--EXPECTF--
+array(3) {
+  ["msg"]=>
+  int(%d)
+  ["result"]=>
+  int(%d)
+  ["handle"]=>
+  resource(%d) of type (curl)
+}
+array(3) {
+  ["msg"]=>
+  int(%d)
+  ["result"]=>
+  int(%d)
+  ["handle"]=>
+  resource(%d) of type (curl)
+}

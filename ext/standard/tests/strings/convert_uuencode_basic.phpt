@@ -1,5 +1,5 @@
 --TEST--
-Test convert_uuencode() function : basic functionality 
+Test convert_uuencode() function : basic functionality
 --FILE--
 <?php
 
@@ -20,14 +20,14 @@ $strings =  array (
   "Here is a simple string to test convert_uuencode/decode",
   "\t This String contains \t\t some control characters\r\n",
   "\x90\x91\x00\x93\x94\x90\x91\x95\x96\x97\x98\x99\x9a\x9b\x9c\x9d\x9e\x9f",
-  
+
    //single quoted strings
   '123',
   'abc',
   '1a2b3c',
   '\t This String contains \t\t some control characters\r\n',
-  
-);  
+
+);
 
 // loop through with each element of the $strings array to test convert_uuencode() function
 $count = 1;
@@ -39,7 +39,6 @@ foreach($strings as $string) {
 
 
 ?>
-===DONE=== 
 --EXPECTF--
 *** Testing convert_uuencode() : basic functionality ***
 -- Iteration 1 --
@@ -85,4 +84,3 @@ string(82) "M7'0@5&AI<R!3=')I;F<@8V]N=&%I;G,@7'1<="!S;VUE(&-O;G1R;VP@8VAA
 +<F%C=&5R<UQR7&X`
 `
 "
-===DONE===

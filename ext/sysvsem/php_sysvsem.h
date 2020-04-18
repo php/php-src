@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +14,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef PHP_SYSVSEM_H
 #define PHP_SYSVSEM_H
 
@@ -30,6 +26,7 @@ extern zend_module_entry sysvsem_module_entry;
 #define PHP_SYSVSEM_VERSION PHP_VERSION
 
 PHP_MINIT_FUNCTION(sysvsem);
+PHP_MINFO_FUNCTION(sysvsem);
 PHP_FUNCTION(sem_get);
 PHP_FUNCTION(sem_acquire);
 PHP_FUNCTION(sem_release);

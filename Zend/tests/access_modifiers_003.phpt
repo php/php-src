@@ -4,10 +4,10 @@ using multiple access modifiers (classes)
 <?php
 
 final final class test {
-	function foo() {}
+    function foo() {}
 }
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Multiple final modifiers are not allowed in %s on line %d

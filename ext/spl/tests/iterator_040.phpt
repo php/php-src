@@ -5,10 +5,10 @@ SPL: RecursiveFilterIterator
 
 class MyRecursiveFilterIterator extends RecursiveFilterIterator
 {
-	function accept()
-	{
-		return true;
-	}
+    function accept()
+    {
+        return true;
+    }
 }
 
 $ar = array(1, array(21, 22), 3);
@@ -18,15 +18,13 @@ $it = new RecursiveIteratorIterator($it);
 
 foreach($it as $k => $v)
 {
-	echo "===\n";
-	var_dump($it->getDepth());
-	var_dump($k);
-	var_dump($v);
+    echo "===\n";
+    var_dump($it->getDepth());
+    var_dump($k);
+    var_dump($v);
 }
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 ===
 int(0)
@@ -44,4 +42,3 @@ int(22)
 int(0)
 int(2)
 int(3)
-===DONE===

@@ -16,9 +16,9 @@ class JsonSerializableObject implements \JsonSerializable
 
 $obj = new JsonSerializableObject();
 try {
-	echo json_encode($obj);
+    echo json_encode($obj);
 } catch (\Exception $e) {
-	echo $e->getMessage();
+    echo $e->getMessage();
 }
---EXPECTF--
+--EXPECT--
 This error is expected

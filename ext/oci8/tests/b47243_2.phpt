@@ -3,12 +3,12 @@ Bug #47243 (Crash on exit with ZTS mode)
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
-?> 
+require(__DIR__.'/skipif.inc');
+?>
 --FILE--
 <?php
 
-require(dirname(__FILE__).'/connect.inc');
+require(__DIR__.'/connect.inc');
 
 // Run Test
 
@@ -21,6 +21,5 @@ oci_free_statement($s);
 
 ?>
 ===DONE===
-<?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 ===DONE===

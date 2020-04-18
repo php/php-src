@@ -1,11 +1,11 @@
 --TEST--
-Test strpbrk() function : basic functionality 
+Test strpbrk() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : array strpbrk(string haystack, string char_list)
- * Description: Search a string for any of a set of characters 
+ * Description: Search a string for any of a set of characters
  * Source code: ext/standard/string.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing strpbrk() : basic functionality ***\n";
@@ -27,7 +27,6 @@ var_dump( strpbrk(5, 5) );
 var_dump( strpbrk(5, "5") );
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing strpbrk() : basic functionality ***
 string(20) "is is a Simple text."
@@ -38,4 +37,3 @@ bool(false)
 string(12) "  aaa aaaSLR"
 string(1) "5"
 string(1) "5"
-===DONE===

@@ -1,11 +1,11 @@
 --TEST--
-SplFileObject::fflush function - basic test 
+SplFileObject::fflush function - basic test
 --FILE--
 <?php
 /*
  * test a successful flush
 */
-$obj = New SplFileObject(dirname(__FILE__).'/SplFileObject_testinput.csv');
+$obj = New SplFileObject(__DIR__.'/SplFileObject_testinput.csv');
 var_dump($obj->fflush());
 
 /*
@@ -33,6 +33,6 @@ $obj = New SplFileObject("SPLtest://ftruncate_test");
 var_dump($obj->fflush());
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(false)

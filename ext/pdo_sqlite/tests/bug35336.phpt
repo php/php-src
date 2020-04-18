@@ -1,15 +1,15 @@
 --TEST--
 Bug #35336 (crash on PDO::FETCH_CLASS + __set())
 --SKIPIF--
-<?php # vim:ft=php
+<?php
 if (!extension_loaded('pdo_sqlite')) print 'skip not loaded';
 ?>
 --FILE--
 <?php
 class EEE {
-	function __set ($field, $value) {
-		echo "hello world\n";
-	}
+    function __set ($field, $value) {
+        echo "hello world\n";
+    }
 }
 
 $a = new PDO("sqlite::memory:");// pool ("sqlite::memory:");
@@ -20,7 +20,7 @@ $rez = $a->query ("SELECT * FROM test")->fetchAll(PDO::FETCH_CLASS, 'EEE');
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--
 hello world
 hello world
 Done

@@ -27,9 +27,7 @@ foreach ($h as $out) {
     echo $out."\n";
 }
 ?>
-===DONE===
-<?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 10
 9
 8
@@ -41,4 +39,3 @@ foreach ($h as $out) {
 2
 1
 0
-===DONE===

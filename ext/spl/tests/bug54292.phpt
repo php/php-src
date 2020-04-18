@@ -4,11 +4,11 @@ Bug #54292 (Wrong parameter causes crash in SplFileObject::__construct())
 <?php
 
 try {
-	new SplFileObject('foo', array());
+    new SplFileObject('foo', array());
 } catch (TypeError $e) {
-	var_dump($e->getMessage());
+    var_dump($e->getMessage());
 }
 
 ?>
---EXPECTF--
-string(74) "SplFileObject::__construct() expects parameter 2 to be string, array given"
+--EXPECT--
+string(90) "SplFileObject::__construct(): Argument #2 ($open_mode) must be of type string, array given"

@@ -7,7 +7,7 @@ $a = clone $b;
 
 ?>
 --EXPECTF--
-Notice: Undefined variable: b in %s on line %d
+Warning: Undefined variable $b in %s on line %d
 
 Fatal error: Uncaught Error: __clone method called on non-object in %s:%d
 Stack trace:

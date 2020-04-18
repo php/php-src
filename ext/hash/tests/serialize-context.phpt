@@ -1,7 +1,5 @@
 --TEST--
-Serialize a context
---SKIPIF--
-<?php if (!extension_loaded('hash')) echo 'skip';
+Hash: Context serialization
 --FILE--
 <?php
 
@@ -11,5 +9,5 @@ try {
 } catch (Exception $e) {
   echo "Exception: {$e->getMessage()}\n";
 }
---EXPECTF--
+--EXPECT--
 Exception: Serialization of 'HashContext' is not allowed

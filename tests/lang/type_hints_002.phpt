@@ -4,10 +4,10 @@ ZE2 type hinting
 <?php
 class P { }
 class T {
-	function f(P $p = NULL) {
-		var_dump($p);
-		echo "-\n";
-	}
+    function f(P $p = NULL) {
+        var_dump($p);
+        echo "-\n";
+    }
 }
 
 $o=new T();
@@ -23,4 +23,3 @@ NULL
 -
 NULL
 -
-

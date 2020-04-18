@@ -1,7 +1,3 @@
-/* charset=UTF-8
- * vim: encoding=utf-8:
- * */
-
 /*
  * "streamable kanji code filter and converter"
  *
@@ -125,6 +121,13 @@
 #define MBFL_OUTPUTFILTER_ILLEGAL_MODE_ENTITY 3
 
 /*
+ * convenience macros
+ */
+#ifndef MIN
+#define MIN(a,b) ((a)<(b)?(a):(b))
+#endif
+
+/*
  * buffering converter
  */
 typedef struct _mbfl_buffer_converter mbfl_buffer_converter;
@@ -190,7 +193,7 @@ static inline int mbfl_is_error(size_t len) {
  * strlen
  */
 MBFLAPI extern size_t
-mbfl_strlen(mbfl_string *string);
+mbfl_strlen(const mbfl_string *string);
 
 /*
  * oddlen
@@ -198,8 +201,14 @@ mbfl_strlen(mbfl_string *string);
 MBFLAPI extern size_t
 mbfl_oddlen(mbfl_string *string);
 
+#define MBFL_ERROR_NOT_FOUND ((size_t) -1)
+#define MBFL_ERROR_ENCODING ((size_t) -4)
+#define MBFL_ERROR_EMPTY ((size_t) -8)
+#define MBFL_ERROR_OFFSET ((size_t) -16)
+
 /*
- * strpos
+ * strpos.
+ * Errors: MBFL_ERROR_NOT_FOUND, MBFL_ERROR_ENCODING, MBFL_ERROR_OFFSET
  */
 MBFLAPI extern size_t
 mbfl_strpos(mbfl_string *haystack, mbfl_string *needle, ssize_t offset, int reverse);

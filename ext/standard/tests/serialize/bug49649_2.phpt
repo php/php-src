@@ -7,11 +7,11 @@ Bug #49649 (unserialize() doesn't handle changes in property visibility) - to pr
  *class Foo
  *{
  *	private $private = 1;
- *	
+ *
  *	protected $protected = 2;
- *	
+ *
  *	public $public = 3;
- *	
+ *
  *	public $notThere = 'old';
  * }
  *
@@ -23,11 +23,11 @@ $serialized = 'TzozOiJGb28iOjQ6e3M6MTI6IgBGb28AcHJpdmF0ZSI7aToxO3M6MTI6IgAqAHByb
 
 class Foo
 {
-	private $public = null;
+    private $public = null;
 
-	private $protected = null;
+    private $protected = null;
 
-	private $private = null;
+    private $private = null;
 }
 
 $class = unserialize(base64_decode($serialized));

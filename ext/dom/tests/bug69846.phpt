@@ -6,7 +6,7 @@ Bug #69846 Segmenation fault (access violation) when iterating over DOMNodeList
 <?php
 
 $tmpDomDocument = new DOMDocument();
-        
+
 $xml = '<?xml version="1.0" encoding="UTF-8"?><dummy xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/"><xfa:data>
   <form1>
     <TextField1>Value A</TextField1>
@@ -28,10 +28,9 @@ foreach ($dataNodes AS $node) {
 }
 
 ?>
-===DONE===
 --EXPECTF--
 int(3)
-object(DOMText)#%d (19) {
+object(DOMText)#%d (21) {
   ["wholeText"]=>
   string(3) "
   "
@@ -40,6 +39,10 @@ object(DOMText)#%d (19) {
   "
   ["length"]=>
   int(3)
+  ["previousElementSibling"]=>
+  NULL
+  ["nextElementSibling"]=>
+  NULL
   ["nodeName"]=>
   string(5) "#text"
   ["nodeValue"]=>
@@ -50,7 +53,7 @@ object(DOMText)#%d (19) {
   ["parentNode"]=>
   NULL
   ["childNodes"]=>
-  NULL
+  string(22) "(object value omitted)"
   ["firstChild"]=>
   NULL
   ["lastChild"]=>
@@ -75,11 +78,21 @@ object(DOMText)#%d (19) {
   string(3) "
   "
 }
-object(DOMElement)#%d (18) {
+object(DOMElement)#%d (23) {
   ["tagName"]=>
   string(5) "form1"
   ["schemaTypeInfo"]=>
   NULL
+  ["firstElementChild"]=>
+  string(22) "(object value omitted)"
+  ["lastElementChild"]=>
+  string(22) "(object value omitted)"
+  ["childElementCount"]=>
+  int(3)
+  ["previousElementSibling"]=>
+  NULL
+  ["nextElementSibling"]=>
+  NULL
   ["nodeName"]=>
   string(5) "form1"
   ["nodeValue"]=>
@@ -121,7 +134,7 @@ object(DOMElement)#%d (18) {
     Value C
   "
 }
-object(DOMText)#%d (19) {
+object(DOMText)#%d (21) {
   ["wholeText"]=>
   string(1) "
 "
@@ -130,6 +143,10 @@ object(DOMText)#%d (19) {
 "
   ["length"]=>
   int(1)
+  ["previousElementSibling"]=>
+  NULL
+  ["nextElementSibling"]=>
+  NULL
   ["nodeName"]=>
   string(5) "#text"
   ["nodeValue"]=>
@@ -140,7 +157,7 @@ object(DOMText)#%d (19) {
   ["parentNode"]=>
   NULL
   ["childNodes"]=>
-  NULL
+  string(22) "(object value omitted)"
   ["firstChild"]=>
   NULL
   ["lastChild"]=>
@@ -165,4 +182,3 @@ object(DOMText)#%d (19) {
   string(1) "
 "
 }
-===DONE===

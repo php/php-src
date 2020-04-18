@@ -15,8 +15,8 @@ Test vfprintf() function : usage variations - scientific formats with non-scient
 echo "*** Testing vfprintf() : scientific formats and non-scientific values ***\n";
 
 // defining array of non-scientific formats
-$formats = 
-  '%e %+e %-e 
+$formats =
+  '%e %+e %-e
    %le %Le %4e %-4e
    %10.4e %-10.4e %04e %04.4e
    %\'#2e %\'2e %\'$2e %\'_2e
@@ -53,14 +53,14 @@ $args_array = array(
          true, false, TRUE, FALSE,
          0, 1, 1, 0,
          1, TRUE, 0, FALSE),
-  
+
 );
 
 /* creating dumping file */
-$data_file = dirname(__FILE__) . '/vfprintf_variation18.txt';
+$data_file = __DIR__ . '/vfprintf_variation18.txt';
 if (!($fp = fopen($data_file, 'wt')))
    return;
-   
+
 // looping to test vfprintf() with different scientific formats from the above $format array
 // and with non-scientific values from the above $args_array array
 $counter = 1;
@@ -74,34 +74,32 @@ fclose($fp);
 print_r(file_get_contents($data_file));
 echo "\n";
 
-unlink($data_file); 
+unlink($data_file);
 ?>
-===DONE===
 --EXPECT--
 *** Testing vfprintf() : scientific formats and non-scientific values ***
 
 -- Iteration 1 --
-2.200000e+0 +2.000000e-1 1.020000e+1 
+2.200000e+0 +2.000000e-1 1.020000e+1
    1.234562e+5 e -1.234679e+3 1.234679e+3
     2.0000e+1 2.1220e+2  -4.110000e+11 2.2120e+3
    1.234578e+4 1.200000e+1 -1.200000e+1 -1.234562e+5
    1.020000e+1 1.234562e+5 2.200000e+0 2.000000e-1
 -- Iteration 2 --
-0.000000e+0 +0.000000e+0 0.000000e+0 
+0.000000e+0 +0.000000e+0 0.000000e+0
    1.230000e+2 e -1.230000e+2 1.230000e+2
     0.0000e+0 0.0000e+0  1.234560e+5 0.0000e+0
    1.234000e+3 0.000000e+0 0.000000e+0 0.000000e+0
    0.000000e+0 1.230000e+2 0.000000e+0 0.000000e+0
 -- Iteration 3 --
-1.000000e+0 +1.000000e+0 1.000000e+0 
+1.000000e+0 +1.000000e+0 1.000000e+0
    1.000000e+0 e 1.000000e+0 1.000000e+0
     1.0000e+0 1.0000e+0  1.000000e+0 1.0000e+0
    1.000000e+0 1.000000e+0 1.000000e+0 1.000000e+0
    1.000000e+0 1.000000e+0 1.000000e+0 1.000000e+0
 -- Iteration 4 --
-1.000000e+0 +1.000000e+0 0.000000e+0 
+1.000000e+0 +1.000000e+0 0.000000e+0
    1.000000e+0 e 0.000000e+0 1.000000e+0
     1.0000e+0 0.0000e+0  1.000000e+0 0.0000e+0
    0.000000e+0 1.000000e+0 1.000000e+0 0.000000e+0
    0.000000e+0 1.000000e+0 1.000000e+0 1.000000e+0
-===DONE===

@@ -5,7 +5,7 @@ Bug #42820 (defined() on constant with namespace prefixes tries to load class)
 namespace ns;
 const ok = 0;
 class foo {
-	const ok = 0;
+    const ok = 0;
 }
 var_dump(defined('ns\\ok'));
 var_dump(defined('ns\\bug'));
@@ -28,4 +28,3 @@ bool(true)
 bool(false)
 bool(false)
 bool(false)
-

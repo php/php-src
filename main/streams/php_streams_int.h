@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -15,9 +13,6 @@
   | Author: Wez Furlong <wez@thebrainroom.com>                           |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
-
 
 #if ZEND_DEBUG
 
@@ -68,4 +63,3 @@ void php_stream_mode_sanitize_fdopen_fopencookie(php_stream *stream, char *resul
 
 void php_stream_tidy_wrapper_error_log(php_stream_wrapper *wrapper);
 void php_stream_display_wrapper_errors(php_stream_wrapper *wrapper, const char *path, const char *caption);
-

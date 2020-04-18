@@ -4,7 +4,7 @@ Bug #71204 (segfault if clean spl_autoload_funcs while autoloading )
 <?php
 
 spl_autoload_register(function ($name) {
-	spl_autoload_unregister("spl_autoload_call");
+    spl_autoload_unregister("spl_autoload_call");
 });
 
 spl_autoload_register(function ($name) {

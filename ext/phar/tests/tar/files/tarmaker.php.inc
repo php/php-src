@@ -32,7 +32,7 @@ class tarmaker
 
     /**
      * save a file inside this package
-     * 
+     *
      * This code is modified from Vincent Lascaux's File_Archive
      * package, which is licensed under the LGPL license.
      * @param string relative path within the package
@@ -144,7 +144,7 @@ class tarmaker
 
     /**
      * Create an internal directory, creating parent directories as needed
-     * 
+     *
      * @param string $dir
      */
     function mkdir($dir)

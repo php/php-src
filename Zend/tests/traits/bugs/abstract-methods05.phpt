@@ -6,7 +6,7 @@ error_reporting(E_ALL);
 
 trait THelloB {
   public function hello() {
-	echo 'Hello';
+    echo 'Hello';
   }
 }
 
@@ -15,11 +15,11 @@ trait THelloA {
 }
 
 class TraitsTest1 {
-	use THelloB;
-	use THelloA;  
+    use THelloB;
+    use THelloA;
 }
 
 
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Declaration of THelloB::hello() must be compatible with THelloA::hello($a) in %s on line %d

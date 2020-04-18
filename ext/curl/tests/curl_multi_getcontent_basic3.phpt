@@ -7,46 +7,46 @@ Rein Velt (rein@velt.org)
 <?php include 'skipif.inc'; ?>
 --FILE--
 <?php
-	//CURL_MULTI_GETCONTENT TEST
+    //CURL_MULTI_GETCONTENT TEST
 
-	//CREATE RESOURCES
- 	$ch1=curl_init();
-	$ch2=curl_init();
+    //CREATE RESOURCES
+    $ch1=curl_init();
+    $ch2=curl_init();
 
-	//SET URL AND OTHER OPTIONS
+    //SET URL AND OTHER OPTIONS
     include 'server.inc';
     $host = curl_cli_server_start();
-	curl_setopt($ch1, CURLOPT_URL, "{$host}/get.php?test=getpost&get_param=Hello%20World");
-	curl_setopt($ch2, CURLOPT_URL, "file://".dirname(__FILE__). DIRECTORY_SEPARATOR . "curl_testdata2.txt");
-	curl_setopt($ch1, CURLOPT_RETURNTRANSFER, true);
-	curl_setopt($ch2, CURLOPT_RETURNTRANSFER, true);
-	
-	//CREATE MULTIPLE CURL HANDLE
-	$mh=curl_multi_init();
+    curl_setopt($ch1, CURLOPT_URL, "{$host}/get.inc?test=getpost&get_param=Hello%20World");
+    curl_setopt($ch2, CURLOPT_URL, "file://".__DIR__. DIRECTORY_SEPARATOR . "curl_testdata2.txt");
+    curl_setopt($ch1, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch2, CURLOPT_RETURNTRANSFER, true);
 
-	//ADD THE 2 HANDLES
-	curl_multi_add_handle($mh,$ch1);
-	curl_multi_add_handle($mh,$ch2);
+    //CREATE MULTIPLE CURL HANDLE
+    $mh=curl_multi_init();
 
-	//EXECUTE
-	$running=0;
-	do {
-		curl_multi_exec($mh,$running);
-	} while ($running>0);
+    //ADD THE 2 HANDLES
+    curl_multi_add_handle($mh,$ch1);
+    curl_multi_add_handle($mh,$ch2);
 
-	$results1=curl_multi_getcontent($ch1);
+    //EXECUTE
+    $running=0;
+    do {
+        curl_multi_exec($mh,$running);
+    } while ($running>0);
+
+    $results1=curl_multi_getcontent($ch1);
         $results2=curl_multi_getcontent($ch2);
 
-	//CLOSE
- 	curl_multi_remove_handle($mh,$ch1);
-	curl_multi_remove_handle($mh,$ch2);
-	curl_multi_close($mh);	
+    //CLOSE
+    curl_multi_remove_handle($mh,$ch1);
+    curl_multi_remove_handle($mh,$ch2);
+    curl_multi_close($mh);
 
-	echo $results1;
-	echo $results2;
+    echo $results1;
+    echo $results2;
 
 ?>
---EXPECTF--
+--EXPECT--
 array(2) {
   ["test"]=>
   string(7) "getpost"

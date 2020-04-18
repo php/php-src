@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +14,6 @@
    |          Rob Richards <rrichards@php.net>                            |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -42,7 +38,11 @@ struct _notationIterator {
 	xmlNotation *notation;
 };
 
-static void itemHashScanner (void *payload, void *data, xmlChar *name) /* {{{ */
+#if LIBXML_VERSION >= 20908
+static void itemHashScanner (void *payload, void *data, const xmlChar *name) /* {{{ */
+#else
+static void itemHashScanner (void *payload, void *data, xmlChar *name)
+#endif
 {
 	nodeIterator *priv = (nodeIterator *)data;
 
@@ -243,7 +243,7 @@ err:
 }
 /* }}} */
 
-zend_object_iterator_funcs php_dom_iterator_funcs = {
+static const zend_object_iterator_funcs php_dom_iterator_funcs = {
 	php_dom_iterator_dtor,
 	php_dom_iterator_valid,
 	php_dom_iterator_current_data,
@@ -264,12 +264,14 @@ zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, i
 	php_dom_iterator *iterator;
 
 	if (by_ref) {
-		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
+		zend_throw_error(NULL, "An iterator cannot be used with foreach by reference");
+		return NULL;
 	}
 	iterator = emalloc(sizeof(php_dom_iterator));
 	zend_iterator_init(&iterator->intern);
 
-	ZVAL_COPY(&iterator->intern.data, object);
+	Z_ADDREF_P(object);
+	ZVAL_OBJ(&iterator->intern.data, Z_OBJ_P(object));
 	iterator->intern.funcs = &php_dom_iterator_funcs;
 
 	ZVAL_UNDEF(&iterator->curobj);
@@ -324,12 +326,3 @@ err:
 /* }}} */
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

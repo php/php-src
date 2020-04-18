@@ -53,7 +53,7 @@ $arrays = array (
 /*8*/  array(11 => new classA(), "string" => @$unset_var, "resource" => $fp, new classA(), $fp),
 );
 
-// initialise the second array 
+// initialise the second array
 $arr2 = array( 1 => "one", 2, "string" => "hello", "array" => array("a", "b", "c"));
 
 // loop through each sub array of $arrays and check the behavior of array_merge_recursive()
@@ -74,7 +74,7 @@ foreach($arrays as $arr1) {
 
 // close the file resource used
 fclose($fp);
-  
+
 echo "Done";
 ?>
 --EXPECTF--
@@ -199,7 +199,7 @@ array(4) {
   ["f2"]=>
   float(3.33)
   [0]=>
-  float(4.8999992284)
+  float(4.89999922839999)
   ["f4"]=>
   array(2) {
     [0]=>
@@ -215,7 +215,7 @@ array(8) {
   ["f2"]=>
   float(3.33)
   [0]=>
-  float(4.8999992284)
+  float(4.89999922839999)
   ["f4"]=>
   array(2) {
     [0]=>

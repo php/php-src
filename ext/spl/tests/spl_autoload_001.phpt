@@ -17,7 +17,7 @@ if (!class_exists("TestClass")) {
 $test_exts = array(NULL, "1", ".inc,,.php.inc", "");
 
 foreach($test_exts as $exts) {
-	echo "===($exts)===\n";
+    echo "===($exts)===\n";
     spl_autoload("TestClass", $exts);
     if (!class_exists("TestClass")) {
         echo "Class TestClass could not be loaded\n";
@@ -32,12 +32,12 @@ if (!class_exists("TestClass")) {
 
 function TestFunc1($classname)
 {
-	echo __METHOD__ . "($classname)\n";
+    echo __METHOD__ . "($classname)\n";
 }
 
 function TestFunc2($classname)
 {
-	echo __METHOD__ . "($classname)\n";
+    echo __METHOD__ . "($classname)\n";
 }
 
 echo "===SPL_AUTOLOAD()===\n";
@@ -66,16 +66,14 @@ echo "===NOFUNCTION===\n";
 
 try
 {
-	spl_autoload_register("unavailable_autoload_function");
+    spl_autoload_register("unavailable_autoload_function");
 }
 catch(Exception $e)
 {
-	echo 'Exception: ' . $e->getMessage() . "\n";
+    echo 'Exception: ' . $e->getMessage() . "\n";
 }
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 ===EMPTY===
 string(9) ".inc,.php"
@@ -106,4 +104,3 @@ TestFunc2(TestClass)
 bool(true)
 ===NOFUNCTION===
 Exception: Function 'unavailable_autoload_function' not found (function 'unavailable_autoload_function' not found or invalid function name)
-===DONE===

@@ -3,7 +3,7 @@ Test sprintf() function : usage variations - with whitespaces in format strings
 --FILE--
 <?php
 /* Prototype  : string sprintf(string $format [, mixed $arg1 [, mixed ...]])
- * Description: Return a formatted string 
+ * Description: Return a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
@@ -32,7 +32,7 @@ foreach($formats as $format) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sprintf() : with  white spaces in format strings ***
 string(4) "1234"
 string(4) "1234"

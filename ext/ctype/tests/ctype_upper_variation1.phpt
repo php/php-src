@@ -5,7 +5,7 @@ Test ctype_upper() function : usage variations - different data types
 --FILE--
 <?php
 /* Prototype  : bool ctype_upper(mixed $c)
- * Description: Checks for uppercase character(s) 
+ * Description: Checks for uppercase character(s)
  * Source code: ext/ctype/ctype.c
  */
 
@@ -24,9 +24,9 @@ unset ($unset_var);
 // get a class
 class classA
 {
-	public function __toString() {
-		return "HELLO";
-	}
+    public function __toString() {
+        return "HELLO";
+    }
 }
 
 // heredoc string
@@ -62,7 +62,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -72,7 +72,7 @@ $inputs = array(
 /*19*/ "STRING",
        'STRING',
        $heredoc,
-       
+
        // object data
 /*22*/ new classA(),
 
@@ -89,17 +89,16 @@ $inputs = array(
 // loop through each element of $inputs to check the behavior of ctype_upper()
 $iterator = 1;
 foreach($inputs as $input) {
-	echo "\n-- Iteration $iterator --\n";
-	var_dump( ctype_upper($input) );
-	$iterator++;
+    echo "\n-- Iteration $iterator --\n";
+    var_dump( ctype_upper($input) );
+    $iterator++;
 };
 
 fclose($fp);
 
 setlocale(LC_CTYPE, $orig);
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ctype_upper() : usage variations ***
 
 -- Iteration 1 --
@@ -176,4 +175,3 @@ bool(false)
 
 -- Iteration 25 --
 bool(false)
-===DONE===

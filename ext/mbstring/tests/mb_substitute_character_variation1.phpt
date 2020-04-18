@@ -1,5 +1,5 @@
 --TEST--
-Test mb_substitute_character() function : usage variation 
+Test mb_substitute_character() function : usage variation
 --SKIPIF--
 <?php
 extension_loaded('mbstring') or die('skip');
@@ -8,19 +8,19 @@ function_exists('mb_substitute_character') or die("skip mb_substitute_character(
 --FILE--
 <?php
 /* Prototype  : mixed mb_substitute_character([mixed substchar])
- * Description: Sets the current substitute_character or returns the current substitute_character 
+ * Description: Sets the current substitute_character or returns the current substitute_character
  * Source code: ext/mbstring/mbstring.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing mb_substitute_character() : usage variation ***\n";
 
 // Define error handler
-function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
-	if (error_reporting() != 0) {
-		// report non-silenced errors
-		echo "Error: $err_no - $err_msg, $filename($linenum)\n";
-	}
+function test_error_handler($err_no, $err_msg, $filename, $linenum) {
+    if (error_reporting() & $err_no) {
+        // report non-silenced errors
+        echo "Error: $err_no - $err_msg, $filename($linenum)\n";
+    }
 }
 set_error_handler('test_error_handler');
 
@@ -33,9 +33,9 @@ unset ($unset_var);
 // define some classes
 class classWithToString
 {
-	public function __toString() {
-		return "Class A object";
-	}
+    public function __toString() {
+        return "Class A object";
+    }
 }
 
 class classWithoutToString
@@ -118,7 +118,6 @@ foreach($inputs as $key =>$value) {
 fclose($fp);
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing mb_substitute_character() : usage variation ***
 
@@ -227,5 +226,3 @@ bool(false)
 --unset var--
 Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
 bool(false)
-===DONE===
-

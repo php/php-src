@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +13,6 @@
    | Author: Michael Wallner <mike@php.net>                               |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifndef PHP_HASH_ADLER32_H
 #define PHP_HASH_ADLER32_H
@@ -33,12 +29,3 @@ PHP_HASH_API void PHP_ADLER32Final(unsigned char digest[4], PHP_ADLER32_CTX *con
 PHP_HASH_API int PHP_ADLER32Copy(const php_hash_ops *ops, PHP_ADLER32_CTX *orig_context, PHP_ADLER32_CTX *copy_context);
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

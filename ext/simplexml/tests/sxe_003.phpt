@@ -1,12 +1,12 @@
 --TEST--
 SPL: SimpleXMLIterator and getChildren()
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded('simplexml')) print 'skip';
 if (!extension_loaded("libxml")) print "skip LibXML not present";
 ?>
 --FILE--
-<?php 
+<?php
 
 $xml =<<<EOF
 <?xml version='1.0'?>
@@ -38,29 +38,27 @@ EOF;
 $sxe = simplexml_load_string($xml, 'SimpleXMLIterator');
 
 foreach($sxe->getChildren() as $name => $data) {
-	var_dump($name);
-	var_dump(get_class($data));
-	var_dump(trim($data));
+    var_dump($name);
+    var_dump(get_class($data));
+    var_dump(trim($data));
 }
 
 echo "===RESET===\n";
 
 for ($sxe->rewind(); $sxe->valid(); $sxe->next()) {
-	var_dump($sxe->hasChildren());
-	var_dump(trim($sxe->key()));
-	var_dump(trim($sxe->current()));
-	foreach($sxe->getChildren() as $name => $data) {
-		var_dump($name);
-		var_dump(get_class($data));
-		var_dump(trim($data));
-	}
+    var_dump($sxe->hasChildren());
+    var_dump(trim($sxe->key()));
+    var_dump(trim($sxe->current()));
+    foreach($sxe->getChildren() as $name => $data) {
+        var_dump($name);
+        var_dump(get_class($data));
+        var_dump(trim($data));
+    }
 }
 
 ?>
-===DONE===
 --EXPECTF--
-
-Warning: Invalid argument supplied for foreach() in %ssxe_003.php on line %d
+Warning: foreach() argument must be of type array|object, null given in %ssxe_003.php on line %d
 ===RESET===
 bool(true)
 string(5) "elem1"
@@ -74,4 +72,3 @@ string(10) "Bla bla 2."
 string(7) "elem111"
 string(17) "SimpleXMLIterator"
 string(7) "Foo Bar"
-===DONE===

@@ -67,7 +67,7 @@ void closelog(void)
 		PW32G(log_source) = INVALID_HANDLE_VALUE;
 	}
 	if (PW32G(log_header)) {
-		efree(PW32G(log_header));
+		free(PW32G(log_header));
 		PW32G(log_header) = NULL;
 	}
 }
@@ -137,7 +137,6 @@ void vsyslog(int priority, const char *message, va_list args)
 	efree(tmp);
 }
 
-
 /* Emulator for BSD openlog() routine
  * Accepts: identity
  *      options
@@ -146,17 +145,12 @@ void vsyslog(int priority, const char *message, va_list args)
 
 void openlog(const char *ident, int logopt, int facility)
 {
+	size_t header_len;
 
 	closelog();
 
 	PW32G(log_source) = RegisterEventSource(NULL, "PHP-" PHP_VERSION);
-	spprintf(&PW32G(log_header), 0, (logopt & LOG_PID) ? "%s[%d]" : "%s", ident, getpid());
+	header_len = strlen(ident) + 2 + 11;
+	PW32G(log_header) = malloc(header_len*sizeof(char));
+	sprintf_s(PW32G(log_header), header_len, (logopt & LOG_PID) ? "%s[%d]" : "%s", ident, getpid());
 }
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

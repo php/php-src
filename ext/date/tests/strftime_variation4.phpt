@@ -3,9 +3,9 @@ Test strftime() function : usage variation - Passing month related format string
 --FILE--
 <?php
 /* Prototype  : string strftime(string format [, int timestamp])
- * Description: Format a local time/date according to locale settings 
+ * Description: Format a local time/date according to locale settings
  * Source code: ext/date/php_date.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing strftime() : usage variation ***\n";
@@ -18,7 +18,7 @@ $timestamp = mktime(8, 8, 8, 8, 8, 2008);
 $inputs = array(
       'Abbreviated month name' => "%b",
       'Full month name' => "%B",
-	  'Month as decimal' => "%m",
+      'Month as decimal' => "%m",
 );
 
 // loop through each element of the array for timestamp
@@ -30,7 +30,6 @@ foreach($inputs as $key =>$value) {
 };
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing strftime() : usage variation ***
 
@@ -45,4 +44,3 @@ string(6) "August"
 --Month as decimal--
 string(%d) "%d"
 string(2) "08"
-===DONE===

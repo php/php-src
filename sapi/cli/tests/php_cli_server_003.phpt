@@ -4,7 +4,7 @@ Bug #55726 (Changing the working directory makes router script inaccessible)
 allow_url_fopen=1
 --SKIPIF--
 <?php
-include "skipif.inc"; 
+include "skipif.inc";
 ?>
 --FILE--
 <?php
@@ -13,6 +13,6 @@ php_cli_server_start('chdir(__DIR__); echo "okey";');
 var_dump(file_get_contents("http://" . PHP_CLI_SERVER_ADDRESS));
 var_dump(file_get_contents("http://" . PHP_CLI_SERVER_ADDRESS));
 ?>
---EXPECTF--	
+--EXPECT--
 string(4) "okey"
 string(4) "okey"

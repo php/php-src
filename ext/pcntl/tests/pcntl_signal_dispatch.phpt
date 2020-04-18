@@ -2,7 +2,7 @@
 pcnt_signal_dispatch()
 --SKIPIF--
 <?php
-	if (!extension_loaded("pcntl")) print "skip"; 
+	if (!extension_loaded("pcntl")) print "skip";
 	elseif (!function_exists("pcntl_signal")) print "skip pcntl_signal() not available";
 	elseif (!function_exists("pcntl_signal_dispatch")) print "skip pcntl_signal_dispatch() not available";
 	elseif (!function_exists("posix_kill")) print "skip posix_kill() not available";
@@ -20,7 +20,7 @@ pcntl_signal_dispatch();
 echo "Done!\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 Start!
 Signal handler called!
 Done!

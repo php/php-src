@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +13,6 @@
   | Author: Wez Furlong <wez@php.net>                                    |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -347,7 +343,7 @@ static int odbc_handle_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 			strcpy(H->einfo.last_err_msg, "Unknown Attribute");
 			H->einfo.what = "setAttribute";
 			strcpy(H->einfo.last_state, "IM001");
-			return -1;
+			return 0;
 	}
 }
 
@@ -373,7 +369,7 @@ static int odbc_handle_get_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 	return 0;
 }
 
-static struct pdo_dbh_methods odbc_methods = {
+static const struct pdo_dbh_methods odbc_methods = {
 	odbc_handle_closer,
 	odbc_handle_preparer,
 	odbc_handle_doer,
@@ -478,16 +474,7 @@ fail:
 }
 /* }}} */
 
-pdo_driver_t pdo_odbc_driver = {
+const pdo_driver_t pdo_odbc_driver = {
 	PDO_DRIVER_HEADER(odbc),
 	pdo_odbc_handle_factory
 };
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

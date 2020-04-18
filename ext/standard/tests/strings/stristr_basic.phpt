@@ -1,5 +1,5 @@
 --TEST--
-Test stristr() function : basic functionality 
+Test stristr() function : basic functionality
 --FILE--
 <?php
 /* Prototype:  string stristr  ( string $haystack  , mixed $needle  [, bool $before_needle  ] )
@@ -20,8 +20,7 @@ var_dump( stristr("teSt", "test") );
 var_dump( stristr("Test String", "String", false) );
 var_dump( stristr("Test String", "String", true) );
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing stristr() : basic functionality ***
 string(11) "Test string"
 string(6) "stRIng"
@@ -33,4 +32,3 @@ string(4) "tEst"
 string(4) "teSt"
 string(6) "String"
 string(5) "Test "
-===DONE===

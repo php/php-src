@@ -8,10 +8,6 @@ Daniel Londero <daniel.londero@gmail.com>
 Francesco Trucchia <ft@ideato.it>
 Jacopo Romei <jacopo@sviluppoagile.it>
 #Test Fest Cesena (Italy) on 2009-06-20
---SKIPIF--
-<?php
-if (substr(PHP_OS, 0, 3) == 'WIN') die("skip this test not for Windows platforms");
-?>
 --FILE--
 <?php
 
@@ -19,7 +15,6 @@ if (substr(PHP_OS, 0, 3) == 'WIN') die("skip this test not for Windows platforms
 $fileInfo = new SplFileInfo('not_existing');
 var_dump($fileInfo->getInode());
 ?>
-
 --EXPECTF--
 Fatal error: Uncaught RuntimeException: SplFileInfo::getInode(): stat failed for not_existing in %s
 Stack trace:

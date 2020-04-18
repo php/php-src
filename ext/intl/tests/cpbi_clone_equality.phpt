@@ -25,9 +25,7 @@ $it_clone->setText($text2);
 var_dump($it == $it_clone);
 
 ?>
-==DONE==
 --EXPECT--
 bool(true)
 bool(false)
 bool(true)
-==DONE==

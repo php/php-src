@@ -5,7 +5,7 @@ Test ctype_alnum() function : usage variations - different integers
 --FILE--
 <?php
 /* Prototype  : bool ctype_alnum(mixed $c)
- * Description: Checks for alphanumeric character(s) 
+ * Description: Checks for alphanumeric character(s)
  * Source code: ext/ctype/ctype.c
  */
 
@@ -16,18 +16,17 @@ Test ctype_alnum() function : usage variations - different integers
 
 echo "*** Testing ctype_alnum() : usage variations ***\n";
 
-$orig = setlocale(LC_CTYPE, "C"); 
+$orig = setlocale(LC_CTYPE, "C");
 
 for ($i = 0; $i < 256; $i++) {
-	if (ctype_alnum($i)) {
-		echo "character code $i is alpha numeric\n";
-	}
+    if (ctype_alnum($i)) {
+        echo "character code $i is alpha numeric\n";
+    }
 }
 
 setlocale(LC_CTYPE, $orig);
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ctype_alnum() : usage variations ***
 character code 48 is alpha numeric
 character code 49 is alpha numeric
@@ -91,4 +90,3 @@ character code 119 is alpha numeric
 character code 120 is alpha numeric
 character code 121 is alpha numeric
 character code 122 is alpha numeric
-===DONE===

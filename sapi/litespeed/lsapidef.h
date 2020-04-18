@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -163,7 +161,7 @@ struct lsapi_req_header
 
 struct lsapi_http_header_index
 {
-    int16_t m_headerLen[H_TRANSFER_ENCODING+1];
+    uint16_t m_headerLen[H_TRANSFER_ENCODING+1];
     int32_t m_headerOff[H_TRANSFER_ENCODING+1];
 } ;
 
@@ -193,4 +191,3 @@ struct lsapi_resp_header
 
 
 #endif
-

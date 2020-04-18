@@ -7,10 +7,8 @@ serialize_precision=10
 var_dump(unserialize('d:2e+2;'));
 var_dump(unserialize('d:2e++2;'));
 ?>
-===DONE===
 --EXPECTF--
 float(200)
 
 Notice: unserialize(): Error at offset 0 of 8 bytes in %s on line %d
 bool(false)
-===DONE===

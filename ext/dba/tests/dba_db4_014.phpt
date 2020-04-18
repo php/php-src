@@ -1,16 +1,16 @@
 --TEST--
 DBA DB4 File open("wl") & Insert Test
 --SKIPIF--
-<?php 
+<?php
 $handler = "db4";
-require_once(dirname(__FILE__) .'/skipif.inc');
+require_once(__DIR__ .'/skipif.inc');
 die("info $HND handler used");
 ?>
 --FILE--
 <?php
 
 $handler = "db4";
-require_once(dirname(__FILE__) .'/test.inc');
+require_once(__DIR__ .'/test.inc');
 echo "database handler: $handler\n";
 
 if (($db_file = dba_open($db_filename, "wl", $handler)) !== FALSE) {
@@ -22,8 +22,8 @@ if (($db_file = dba_open($db_filename, "wl", $handler)) !== FALSE) {
 
 ?>
 --CLEAN--
-<?php 
-require(dirname(__FILE__) .'/clean.inc'); 
+<?php
+require(__DIR__ .'/clean.inc');
 ?>
 --EXPECTF--
 database handler: db4

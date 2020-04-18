@@ -6,13 +6,13 @@ Rein Velt <rein@velt.org>
 --FILE--
 <?php
 
-	class myClass
-	{	
-		public $varX;
-		public $varY;
-	}
-	$rc=new reflectionClass('myClass');
-	var_dump( $rc->getExtensionName()) ;
+    class myClass
+    {
+        public $varX;
+        public $varY;
+    }
+    $rc=new reflectionClass('myClass');
+    var_dump( $rc->getExtensionName()) ;
 ?>
 --EXPECT--
 bool(false)

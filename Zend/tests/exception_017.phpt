@@ -3,37 +3,38 @@ Exceptions on improper usage of $this
 --FILE--
 <?php
 abstract class C {
-	abstract static function foo();
+    abstract static function foo();
 }
 
 function foo(callable $x) {
 }
 
 try {
-	C::foo();
+    C::foo();
 } catch (Error $e) {
-	echo "\nException: " . $e->getMessage() . " in " , $e->getFile() . " on line " . $e->getLine() . "\n";
+    echo $e, "\n\n";
 }
 
 try {
-	foo("C::foo");
+    foo("C::foo");
 } catch (Error $e) {
-	echo "\n";
-	do {
-		echo "Exception: " . $e->getMessage() . "\n";
-		$e = $e->getPrevious();
-	} while ($e instanceof Error);
+    echo $e, "\n\n";
 }
 
 C::foo();
 ?>
 --EXPECTF--
-Exception: Cannot call abstract method C::foo() in %sexception_017.php on line %d
-
-Exception: Argument 1 passed to foo() must be callable, string given, called in %sexception_017.php on line %d
-Exception: Cannot call abstract method C::foo()
-
-Fatal error: Uncaught Error: Cannot call abstract method C::foo() in %sexception_017.php:%d
+Error: Cannot call abstract method C::foo() in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %sexception_017.php on line %d
+
+TypeError: foo(): Argument #1 ($x) must be of type callable, string given, called in %s:%d
+Stack trace:
+#0 %s(%d): foo('C::foo')
+#1 {main}
+
+
+Fatal error: Uncaught Error: Cannot call abstract method C::foo() in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d

@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -30,10 +28,10 @@
 #include "mysqli_fe.h"
 
 #define MAP_PROPERTY_MYG_BOOL_READ(name, value) \
-static zval *name(mysqli_object *obj, zval *retval) \
+static int name(mysqli_object *obj, zval *retval, zend_bool quiet) \
 { \
 	ZVAL_BOOL(retval, MyG(value)); \
-	return retval; \
+	return SUCCESS; \
 } \
 
 #define MAP_PROPERTY_MYG_BOOL_WRITE(name, value) \
@@ -44,10 +42,10 @@ static int name(mysqli_object *obj, zval *value) \
 } \
 
 #define MAP_PROPERTY_MYG_LONG_READ(name, value) \
-static zval *name(mysqli_object *obj, zval *retval) \
+static int name(mysqli_object *obj, zval *retval, zend_bool quiet) \
 { \
 	ZVAL_LONG(retval, MyG(value)); \
-	return retval; \
+	return SUCCESS; \
 } \
 
 #define MAP_PROPERTY_MYG_LONG_WRITE(name, value) \
@@ -58,10 +56,10 @@ static int name(mysqli_object *obj, zval *value) \
 } \
 
 #define MAP_PROPERTY_MYG_STRING_READ(name, value) \
-static zval *name(mysqli_object *obj, zval *retval) \
+static int name(mysqli_object *obj, zval *retval, zend_bool quiet) \
 { \
 	ZVAL_STRING(retval, MyG(value)); \
-	return retval; \
+	return SUCCESS; \
 } \
 
 #define MAP_PROPERTY_MYG_STRING_WRITE(name, value) \
@@ -82,38 +80,38 @@ static int driver_report_write(mysqli_object *obj, zval *value)
 /* }}} */
 
 /* {{{ property driver_embedded_read */
-static zval *driver_embedded_read(mysqli_object *obj, zval *retval)
+static int driver_embedded_read(mysqli_object *obj, zval *retval, zend_bool quiet)
 {
-#ifdef HAVE_EMBEDDED_MYSQLI
-	ZVAL_TRUE(retval);
-#else
 	ZVAL_FALSE(retval);
-#endif
-	return retval;
+
+	return SUCCESS;
 }
 /* }}} */
 
 /* {{{ property driver_client_version_read */
-static zval *driver_client_version_read(mysqli_object *obj, zval *retval)
+static int driver_client_version_read(mysqli_object *obj, zval *retval, zend_bool quiet)
 {
-	ZVAL_LONG(retval, MYSQL_VERSION_ID);
-	return retval;
+	ZVAL_LONG(retval, mysql_get_client_version());
+
+	return SUCCESS;
 }
 /* }}} */
 
 /* {{{ property driver_client_info_read */
-static zval *driver_client_info_read(mysqli_object *obj, zval *retval)
+static int driver_client_info_read(mysqli_object *obj, zval *retval, zend_bool quiet)
 {
 	ZVAL_STRING(retval, (char *)mysql_get_client_info());
-	return retval;
+
+	return SUCCESS;
 }
 /* }}} */
 
 /* {{{ property driver_driver_version_read */
-static zval *driver_driver_version_read(mysqli_object *obj, zval *retval)
+static int driver_driver_version_read(mysqli_object *obj, zval *retval, zend_bool quiet)
 {
 	ZVAL_LONG(retval, MYSQLI_VERSION_ID);
-	return retval;
+
+	return SUCCESS;
 }
 /* }}} */
 
@@ -146,20 +144,6 @@ const mysqli_property_entry mysqli_driver_property_entries[] = {
 /* {{{ mysqli_driver_methods[]
  */
 const zend_function_entry mysqli_driver_methods[] = {
-#if defined(HAVE_EMBEDDED_MYSQLI)
-	PHP_FALIAS(embedded_server_start, mysqli_embedded_server_start, NULL)
-	PHP_FALIAS(embedded_server_end, mysqli_embedded_server_end, NULL)
-#endif
 	PHP_FE_END
 };
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

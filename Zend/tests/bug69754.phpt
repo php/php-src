@@ -4,11 +4,11 @@ Bug #69754 (Use of ::class inside array causes compile error)
 <?php
 
 class Example {
-	public function test() {
-		var_dump(static::class);
-		var_dump(static::class . 'IsAwesome');
-		var_dump(static::class . date('Ymd'));
-		var_dump([static::class]);
+    public function test() {
+        var_dump(static::class);
+        var_dump(static::class . 'IsAwesome');
+        var_dump(static::class . date('Ymd'));
+        var_dump([static::class]);
     }
 }
 

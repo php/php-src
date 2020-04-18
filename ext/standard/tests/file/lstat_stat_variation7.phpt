@@ -15,7 +15,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
    Description: Gives information about a file
 */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require "$file_path/file.inc";
 
 /* test the effects on stats with writing data into a  file */
@@ -36,19 +36,18 @@ $new_stat = stat($file_name);
 var_dump( compare_self_stat($old_stat) );
 var_dump( compare_self_stat($new_stat) );
 // compare the stats
-$comp_arr = array(7, 12, 'size', 'blocks');
+$comp_arr = array(7, 'size');
 var_dump(compare_stats($old_stat, $new_stat, $comp_arr, "<"));
 clearstatcache();
 
 echo "\n--- Done ---";
 ?>
-
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink("$file_path/lstat_stat_variation7.tmp");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing stat() on file after data is written in it ***
 bool(true)
 bool(true)

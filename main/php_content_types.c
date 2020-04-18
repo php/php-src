@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +14,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include "php.h"
 #include "SAPI.h"
 #include "rfc1867.h"
@@ -26,7 +22,7 @@
 
 /* {{{ php_post_entries[]
  */
-static sapi_post_entry php_post_entries[] = {
+static const sapi_post_entry php_post_entries[] = {
 	{ DEFAULT_POST_CONTENT_TYPE, sizeof(DEFAULT_POST_CONTENT_TYPE)-1, sapi_read_standard_form_data,	php_std_post_handler },
 	{ MULTIPART_CONTENT_TYPE,    sizeof(MULTIPART_CONTENT_TYPE)-1,    NULL,                         rfc1867_post_handler },
 	{ NULL, 0, NULL, NULL }
@@ -66,12 +62,3 @@ int php_setup_sapi_content_types(void)
 	return SUCCESS;
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

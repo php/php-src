@@ -30,7 +30,7 @@ $p->inc();
 $p->inc();
 
 ?>
---EXPECTF--	
+--EXPECT--
 1
 2
 1

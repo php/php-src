@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +13,6 @@
    | Author: Wez Furlong (wez@thebrainroom.com)                           |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #ifndef PHP_STREAMS_H
 #define PHP_STREAMS_H
@@ -117,8 +113,8 @@ typedef struct _php_stream_dirent {
 /* operations on streams that are file-handles */
 typedef struct _php_stream_ops  {
 	/* stdio like functions - these are mandatory! */
-	size_t (*write)(php_stream *stream, const char *buf, size_t count);
-	size_t (*read)(php_stream *stream, char *buf, size_t count);
+	ssize_t (*write)(php_stream *stream, const char *buf, size_t count);
+	ssize_t (*read)(php_stream *stream, char *buf, size_t count);
 	int    (*close)(php_stream *stream, int close_handle);
 	int    (*flush)(php_stream *stream);
 
@@ -161,7 +157,7 @@ typedef struct _php_stream_wrapper_ops {
 } php_stream_wrapper_ops;
 
 struct _php_stream_wrapper	{
-	php_stream_wrapper_ops *wops;	/* operations the wrapper can perform */
+	const php_stream_wrapper_ops *wops;	/* operations the wrapper can perform */
 	void *abstract;					/* context for the wrapper */
 	int is_url;						/* so that PG(allow_url_fopen) can be respected */
 };
@@ -188,7 +184,7 @@ struct _php_stream_wrapper	{
 #define PHP_STREAM_FLAG_WAS_WRITTEN					0x80000000
 
 struct _php_stream  {
-	php_stream_ops *ops;
+	const php_stream_ops *ops;
 	void *abstract;			/* convenience pointer for abstraction */
 
 	php_stream_filter_chain readfilters, writefilters;
@@ -246,7 +242,7 @@ struct _php_stream  {
 
 /* allocate a new stream for a particular ops */
 BEGIN_EXTERN_C()
-PHPAPI php_stream *_php_stream_alloc(php_stream_ops *ops, void *abstract,
+PHPAPI php_stream *_php_stream_alloc(const php_stream_ops *ops, void *abstract,
 		const char *persistent_id, const char *mode STREAMS_DC);
 END_EXTERN_C()
 #define php_stream_alloc(ops, thisptr, persistent_id, mode)	_php_stream_alloc((ops), (thisptr), (persistent_id), (mode) STREAMS_CC)
@@ -262,13 +258,13 @@ END_EXTERN_C()
 #define php_stream_from_zval(xstr, pzval)	do { \
 	if (((xstr) = (php_stream*)zend_fetch_resource2_ex((pzval), \
 				"stream", php_file_le_stream(), php_file_le_pstream())) == NULL) { \
-		RETURN_FALSE; \
+		return; \
 	} \
 } while (0)
 #define php_stream_from_res(xstr, res)	do { \
 	if (((xstr) = (php_stream*)zend_fetch_resource2((res), \
 			   	"stream", php_file_le_stream(), php_file_le_pstream())) == NULL) { \
-		RETURN_FALSE; \
+		return; \
 	} \
 } while (0)
 #define php_stream_from_res_no_verify(xstr, pzval)	(xstr) = (php_stream*)zend_fetch_resource2((res), "stream", php_file_le_stream(), php_file_le_pstream())
@@ -307,17 +303,19 @@ PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence);
 PHPAPI zend_off_t _php_stream_tell(php_stream *stream);
 #define php_stream_tell(stream)	_php_stream_tell((stream))
 
-PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t count);
+PHPAPI ssize_t _php_stream_read(php_stream *stream, char *buf, size_t count);
 #define php_stream_read(stream, buf, count)		_php_stream_read((stream), (buf), (count))
 
-PHPAPI size_t _php_stream_write(php_stream *stream, const char *buf, size_t count);
+PHPAPI zend_string *php_stream_read_to_str(php_stream *stream, size_t len);
+
+PHPAPI ssize_t _php_stream_write(php_stream *stream, const char *buf, size_t count);
 #define php_stream_write_string(stream, str)	_php_stream_write(stream, str, strlen(str))
 #define php_stream_write(stream, buf, count)	_php_stream_write(stream, (buf), (count))
 
-PHPAPI void _php_stream_fill_read_buffer(php_stream *stream, size_t size);
+PHPAPI int _php_stream_fill_read_buffer(php_stream *stream, size_t size);
 #define php_stream_fill_read_buffer(stream, size)	_php_stream_fill_read_buffer((stream), (size))
 
-PHPAPI size_t _php_stream_printf(php_stream *stream, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 2, 3);
+PHPAPI ssize_t _php_stream_printf(php_stream *stream, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 2, 3);
 
 /* php_stream_printf macro & function require */
 #define php_stream_printf _php_stream_printf
@@ -413,7 +411,7 @@ END_EXTERN_C()
 /* whether or not locking is supported */
 #define PHP_STREAM_LOCK_SUPPORTED		1
 
-#define php_stream_supports_lock(stream)	_php_stream_set_option((stream), PHP_STREAM_OPTION_LOCKING, 0, (void *) PHP_STREAM_LOCK_SUPPORTED) == 0 ? 1 : 0
+#define php_stream_supports_lock(stream)	(_php_stream_set_option((stream), PHP_STREAM_OPTION_LOCKING, 0, (void *) PHP_STREAM_LOCK_SUPPORTED) == 0 ? 1 : 0)
 #define php_stream_lock(stream, mode)		_php_stream_set_option((stream), PHP_STREAM_OPTION_LOCKING, (mode), (void *) NULL)
 
 /* option code used by the php_stream_xport_XXX api */
@@ -464,7 +462,7 @@ PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, int 
 #define php_stream_copy_to_mem(src, maxlen, persistent) _php_stream_copy_to_mem((src), (maxlen), (persistent) STREAMS_CC)
 
 /* output all data from a stream */
-PHPAPI size_t _php_stream_passthru(php_stream * src STREAMS_DC);
+PHPAPI ssize_t _php_stream_passthru(php_stream * src STREAMS_DC);
 #define php_stream_passthru(stream)	_php_stream_passthru((stream) STREAMS_CC)
 END_EXTERN_C()
 
@@ -561,7 +559,7 @@ void php_shutdown_stream_hashes(void);
 PHP_RSHUTDOWN_FUNCTION(streams);
 
 BEGIN_EXTERN_C()
-PHPAPI int php_register_url_stream_wrapper(const char *protocol, php_stream_wrapper *wrapper);
+PHPAPI int php_register_url_stream_wrapper(const char *protocol, const php_stream_wrapper *wrapper);
 PHPAPI int php_unregister_url_stream_wrapper(const char *protocol);
 PHPAPI int php_register_url_stream_wrapper_volatile(zend_string *protocol, php_stream_wrapper *wrapper);
 PHPAPI int php_unregister_url_stream_wrapper_volatile(zend_string *protocol);
@@ -573,7 +571,7 @@ PHPAPI const char *php_stream_locate_eol(php_stream *stream, zend_string *buf);
 #define php_stream_open_wrapper_ex(path, mode, options, opened, context)	_php_stream_open_wrapper_ex((path), (mode), (options), (opened), (context) STREAMS_CC)
 
 /* pushes an error message onto the stack for a wrapper instance */
-PHPAPI void php_stream_wrapper_log_error(php_stream_wrapper *wrapper, int options, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
+PHPAPI void php_stream_wrapper_log_error(const php_stream_wrapper *wrapper, int options, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
 
 #define PHP_STREAM_UNCHANGED	0 /* orig stream was seekable anyway */
 #define PHP_STREAM_RELEASED		1 /* newstream should be used; origstream is no longer valid */
@@ -593,7 +591,7 @@ PHPAPI HashTable *php_stream_get_url_stream_wrappers_hash_global(void);
 PHPAPI HashTable *_php_get_stream_filters_hash(void);
 #define php_get_stream_filters_hash()	_php_get_stream_filters_hash()
 PHPAPI HashTable *php_get_stream_filters_hash_global(void);
-extern php_stream_wrapper_ops *php_stream_user_wrapper_ops;
+extern const php_stream_wrapper_ops *php_stream_user_wrapper_ops;
 END_EXTERN_C()
 #endif
 
@@ -608,11 +606,3 @@ END_EXTERN_C()
 #define PHP_STREAM_META_GROUP_NAME	4
 #define PHP_STREAM_META_GROUP		5
 #define PHP_STREAM_META_ACCESS		6
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

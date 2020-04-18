@@ -2,7 +2,7 @@
  * Copyright (c) Ian F. Darwin 1986-1995.
  * Software written by Ian F. Darwin and others;
  * maintained 1995-present by Christos Zoulas and others.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -12,7 +12,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- *  
+ *
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -32,7 +32,7 @@
 #include "file.h"
 
 #ifndef	lint
-FILE_RCSID("@(#)$File: fsmagic.c,v 1.76 2015/04/09 20:01:41 christos Exp $")
+FILE_RCSID("@(#)$File: fsmagic.c,v 1.80 2019/04/23 18:59:27 christos Exp $")
 #endif	/* lint */
 
 #include "magic.h"
@@ -46,11 +46,14 @@ FILE_RCSID("@(#)$File: fsmagic.c,v 1.76 2015/04/09 20:01:41 christos Exp $")
 # include <sys/mkdev.h>
 # define HAVE_MAJOR
 #endif
-#ifdef MAJOR_IN_SYSMACROS
+#ifdef HAVE_SYS_SYSMACROS_H
 # include <sys/sysmacros.h>
+#endif
+#ifdef MAJOR_IN_SYSMACROS
 # define HAVE_MAJOR
 #endif
-#ifdef major			/* Might be defined in sys/types.h.  */
+#if defined(major) && !defined(HAVE_MAJOR)
+/* Might be defined in sys/types.h.  */
 # define HAVE_MAJOR
 #endif
 #ifdef WIN32
@@ -68,16 +71,6 @@ FILE_RCSID("@(#)$File: fsmagic.c,v 1.76 2015/04/09 20:01:41 christos Exp $")
 
 # undef S_IFIFO
 #endif
-
-
-#ifndef S_ISDIR
-#define S_ISDIR(mode) ((mode) & _S_IFDIR)
-#endif
-
-#ifndef S_ISREG
-#define S_ISREG(mode) ((mode) & _S_IFREG)
-#endif
-
 private int
 handle_mime(struct magic_set *ms, int mime, const char *str)
 {
@@ -94,59 +87,48 @@ handle_mime(struct magic_set *ms, int mime, const char *str)
 }
 
 protected int
-file_fsmagic(struct magic_set *ms, const char *fn, zend_stat_t *sb, php_stream *stream)
+file_fsmagic(struct magic_set *ms, const char *fn, zend_stat_t *sb)
 {
 	int ret, did = 0;
 	int mime = ms->flags & MAGIC_MIME;
+	int silent = ms->flags & (MAGIC_APPLE|MAGIC_EXTENSION);
 
-	if (ms->flags & (MAGIC_APPLE|MAGIC_EXTENSION))
+	if (fn == NULL)
 		return 0;
-
-	if (fn == NULL && !stream) {
-		return 0;
-	}
 
 #define COMMA	(did++ ? ", " : "")
+	ret = php_sys_stat(fn, sb);
 
-	if (stream) {
-		php_stream_statbuf ssb;
-		if (php_stream_stat(stream, &ssb) < 0) {
-			if (ms->flags & MAGIC_ERROR) {
-				file_error(ms, errno, "cannot stat `%s'", fn);
-				return -1;
-			}
-			return 0;
+	if (ret) {
+		if (ms->flags & MAGIC_ERROR) {
+			file_error(ms, errno, "cannot stat `%s'", fn);
+			return -1;
 		}
-		memcpy(sb, &ssb.sb, sizeof(struct stat));
-	} else {
-		if (php_sys_stat(fn, sb) != 0) {
-			if (ms->flags & MAGIC_ERROR) {
-				file_error(ms, errno, "cannot stat `%s'", fn);
-				return -1;
-			}
-			return 0;
-		}
+		if (file_printf(ms, "cannot open `%s' (%s)",
+		    fn, strerror(errno)) == -1)
+			return -1;
+		return 0;
 	}
 
 	ret = 1;
-	if (!mime) {
+	if (!mime && !silent) {
 #ifdef S_ISUID
 		if (sb->st_mode & S_ISUID)
 			if (file_printf(ms, "%ssetuid", COMMA) == -1)
 				return -1;
 #endif
 #ifdef S_ISGID
-		if (sb->st_mode & S_ISGID) 
+		if (sb->st_mode & S_ISGID)
 			if (file_printf(ms, "%ssetgid", COMMA) == -1)
 				return -1;
 #endif
 #ifdef S_ISVTX
-		if (sb->st_mode & S_ISVTX) 
+		if (sb->st_mode & S_ISVTX)
 			if (file_printf(ms, "%ssticky", COMMA) == -1)
 				return -1;
 #endif
 	}
-	
+
 	switch (sb->st_mode & S_IFMT) {
 #ifndef PHP_WIN32
 # ifdef S_IFCHR
@@ -192,6 +174,7 @@ file_fsmagic(struct magic_set *ms, const char *fn, zend_stat_t *sb, php_stream *
 		if (mime) {
 			if (handle_mime(ms, mime, "fifo") == -1)
 				return -1;
+		} else if (silent) {
 		} else if (file_printf(ms, "%sfifo (named pipe)", COMMA) == -1)
 			return -1;
 		break;
@@ -201,6 +184,7 @@ file_fsmagic(struct magic_set *ms, const char *fn, zend_stat_t *sb, php_stream *
 		if (mime) {
 			if (handle_mime(ms, mime, "door") == -1)
 				return -1;
+		} else if (silent) {
 		} else if (file_printf(ms, "%sdoor", COMMA) == -1)
 			return -1;
 		break;
@@ -221,6 +205,7 @@ file_fsmagic(struct magic_set *ms, const char *fn, zend_stat_t *sb, php_stream *
 		if (mime) {
 			if (handle_mime(ms, mime, "socket") == -1)
 				return -1;
+		} else if (silent) {
 		} else if (file_printf(ms, "%ssocket", COMMA) == -1)
 			return -1;
 		break;
@@ -243,6 +228,7 @@ file_fsmagic(struct magic_set *ms, const char *fn, zend_stat_t *sb, php_stream *
 			if (mime) {
 				if (handle_mime(ms, mime, "x-empty") == -1)
 					return -1;
+			} else if (silent) {
 			} else if (file_printf(ms, "%sempty", COMMA) == -1)
 				return -1;
 			break;
@@ -256,7 +242,7 @@ file_fsmagic(struct magic_set *ms, const char *fn, zend_stat_t *sb, php_stream *
 		/*NOTREACHED*/
 	}
 
-	if (!mime && did && ret == 0) {
+	if (!silent && !mime && did && ret == 0) {
 	    if (file_printf(ms, " ") == -1)
 		    return -1;
 	}

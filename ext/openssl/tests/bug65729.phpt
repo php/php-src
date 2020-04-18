@@ -1,9 +1,10 @@
 --TEST--
 Bug #65729: CN_match gives false positive when wildcard is used
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("openssl")) die("skip openssl not loaded");
 if (!function_exists("proc_open")) die("skip no proc_open");
+?>
 --FILE--
 <?php
 $serverCode = <<<'CODE'
@@ -42,12 +43,13 @@ CODE;
 
 include 'ServerClientTestCase.inc';
 ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
+?>
 --EXPECTF--
 Warning: stream_socket_client(): Peer certificate CN=`*.test.com' did not match expected CN=`foo.test.com.sg' in %s on line %d
 
 Warning: stream_socket_client(): Failed to enable crypto in %s on line %d
 
-Warning: stream_socket_client(): unable to connect to ssl://127.0.0.1:64321 (Unknown error) in %s on line %d
+Warning: stream_socket_client(): Unable to connect to ssl://127.0.0.1:64321 (Unknown error) in %s on line %d
 bool(false)
 resource(%d) of type (stream)
 resource(%d) of type (stream)
@@ -56,5 +58,5 @@ Warning: stream_socket_client(): Peer certificate CN=`*.test.com' did not match 
 
 Warning: stream_socket_client(): Failed to enable crypto in %s on line %d
 
-Warning: stream_socket_client(): unable to connect to ssl://127.0.0.1:64321 (Unknown error) in %s on line %d
+Warning: stream_socket_client(): Unable to connect to ssl://127.0.0.1:64321 (Unknown error) in %s on line %d
 bool(false)

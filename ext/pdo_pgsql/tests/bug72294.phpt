@@ -3,13 +3,13 @@ Bug #72294 Segmentation fault/invalid pointer in connection with pgsql_stmt_dtor
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_pgsql')) die('skip not loaded');
-require dirname(__FILE__) . '/config.inc';
-require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
+require __DIR__ . '/config.inc';
+require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
 PDOTest::skip();
 ?>
 --FILE--
 <?php
-require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
+require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
 
 function handleError($errno, $errstr, $errfile, $errline)
 {
@@ -74,7 +74,7 @@ class PHPUnit_Framework_TestResult
 
         $oldErrorHandler = set_error_handler(
             'handleError',
-            E_ALL | E_STRICT
+            E_ALL
         );
 
         try {
@@ -102,37 +102,37 @@ class PreparedStatementCache
         //return $pdo->prepare( $sql );
         $this->cached_statements[$sql] = $pdo->prepare( $sql );
 
-	return $this->cached_statements[$sql];
+    return $this->cached_statements[$sql];
     }
 }
 
-class DatabaseTest extends PHPUnit_Framework_TestCase 
+class DatabaseTest extends PHPUnit_Framework_TestCase
 {
     public function testIt()
     {
-	$pdo = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
+    $pdo = PDOTest::test_factory(__DIR__ . '/common.phpt');
 
-	$prepared_statement_cache = new PreparedStatementCache( $pdo );
+    $prepared_statement_cache = new PreparedStatementCache( $pdo );
 
-	for( $i = 1; $i <= 300; ++$i ) {
-	    $statement = $prepared_statement_cache->prepare( $pdo,  <<<SQL
+    for( $i = 1; $i <= 300; ++$i ) {
+        $statement = $prepared_statement_cache->prepare( $pdo,  <<<SQL
                 SELECT $i;
 SQL
-	    );
+        );
             $statement->execute();
-	}
+    }
     }
 
     public function test_construct()
     {
-	$pdo = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
+    $pdo = PDOTest::test_factory(__DIR__ . '/common.phpt');
 
-	$pdo->exec( 'CREATE TEMPORARY TABLE temp_table ( test_column INT NOT NULL );' );
+    $pdo->exec( 'CREATE TEMPORARY TABLE temp_table ( test_column INT NOT NULL );' );
 
-	$this->cache = new PreparedStatementCache( $pdo );
+    $this->cache = new PreparedStatementCache( $pdo );
 
-	$statement = $this->cache->prepare( $pdo, 'SELECT * FROM temp_table WHERE test_column > 0' );
-	$statement->execute();
+    $statement = $this->cache->prepare( $pdo, 'SELECT * FROM temp_table WHERE test_column > 0' );
+    $statement->execute();
     }
 }
 
@@ -146,4 +146,3 @@ $test->run( $result );
 ==NOCRASH==
 --EXPECT--
 ==NOCRASH==
-

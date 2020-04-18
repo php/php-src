@@ -35,7 +35,7 @@ $inputs = array(
 /*1*/  0,
        1,
        12345,
-       -2345,       
+       -2345,
        2147483647,
 
        // float data
@@ -54,7 +54,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*17*/ "",
        '',
@@ -64,10 +64,10 @@ $inputs = array(
 /*20*/ "abcxyz",
        'abcxyz',
        $heredoc,
-       
+
        // object data
-/*23*/ new classA(),       
-       
+/*23*/ new classA(),
+
        // undefined data
 /*24*/ @$undefined_var,
 
@@ -81,14 +81,17 @@ $inputs = array(
 // loop through each element of $inputs to check the behaviour of round()
 $iterator = 1;
 foreach($inputs as $input) {
-	echo "\n-- Iteration $iterator --\n";
-	var_dump(round($input, 14));
-	$iterator++;
+    echo "\n-- Iteration $iterator --\n";
+    try {
+        var_dump(round($input, 14));
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
+    $iterator++;
 };
 fclose($fp);
 ?>
-===Done===
---EXPECTF--
+--EXPECT--
 *** Testing round() : usage variations ***
 
 -- Iteration 1 --
@@ -140,27 +143,25 @@ float(1)
 float(0)
 
 -- Iteration 17 --
-float(0)
+round(): Argument #1 ($number) must be of type int|float, string given
 
 -- Iteration 18 --
-float(0)
+round(): Argument #1 ($number) must be of type int|float, string given
 
 -- Iteration 19 --
-bool(false)
+round(): Argument #1 ($number) must be of type int|float, array given
 
 -- Iteration 20 --
-float(0)
+round(): Argument #1 ($number) must be of type int|float, string given
 
 -- Iteration 21 --
-float(0)
+round(): Argument #1 ($number) must be of type int|float, string given
 
 -- Iteration 22 --
-float(0)
+round(): Argument #1 ($number) must be of type int|float, string given
 
 -- Iteration 23 --
-
-Notice: Object of class classA could not be converted to int in %s on line %d
-float(1)
+round(): Argument #1 ($number) must be of type int|float, object given
 
 -- Iteration 24 --
 float(0)
@@ -169,5 +170,4 @@ float(0)
 float(0)
 
 -- Iteration 26 --
-float(%f)
-===Done===
+round(): Argument #1 ($number) must be of type int|float, resource given

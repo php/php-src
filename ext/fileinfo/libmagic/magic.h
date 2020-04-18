@@ -58,6 +58,7 @@
 #define	MAGIC_NO_CHECK_CDF	0x0040000 /* Don't check for cdf files */
 #define	MAGIC_NO_CHECK_TOKENS	0x0100000 /* Don't check tokens */
 #define MAGIC_NO_CHECK_ENCODING 0x0200000 /* Don't check text encodings */
+#define MAGIC_NO_CHECK_JSON	0x0400000 /* Don't check for JSON files */
 
 /* No built-in tests; only consult the magic file */
 #define MAGIC_NO_CHECK_BUILTIN	( \
@@ -70,8 +71,38 @@
 	MAGIC_NO_CHECK_CDF	| \
 	MAGIC_NO_CHECK_TOKENS	| \
 	MAGIC_NO_CHECK_ENCODING	| \
+	MAGIC_NO_CHECK_JSON	| \
 	0			  \
 )
+
+#define MAGIC_SNPRINTB "\177\020\
+b\0debug\0\
+b\1symlink\0\
+b\2compress\0\
+b\3devices\0\
+b\4mime_type\0\
+b\5continue\0\
+b\6check\0\
+b\7preserve_atime\0\
+b\10raw\0\
+b\11error\0\
+b\12mime_encoding\0\
+b\13apple\0\
+b\14no_check_compress\0\
+b\15no_check_tar\0\
+b\16no_check_soft\0\
+b\17no_check_sapptype\0\
+b\20no_check_elf\0\
+b\21no_check_text\0\
+b\22no_check_cdf\0\
+b\23no_check_reserved0\0\
+b\24no_check_tokens\0\
+b\25no_check_encoding\0\
+b\26no_check_json\0\
+b\27no_check_reserved2\0\
+b\30extension\0\
+b\31transp_compression\0\
+"
 
 /* Defined for backwards compatibility (renamed) */
 #define	MAGIC_NO_CHECK_ASCII	MAGIC_NO_CHECK_TEXT
@@ -80,7 +111,7 @@
 #define	MAGIC_NO_CHECK_FORTRAN	0x000000 /* Don't check ascii/fortran */
 #define	MAGIC_NO_CHECK_TROFF	0x000000 /* Don't check ascii/troff */
 
-#define MAGIC_VERSION		531	/* This implementation */
+#define MAGIC_VERSION		537	/* This implementation */
 
 
 #ifdef __cplusplus
@@ -98,6 +129,7 @@ const char *magic_descriptor(magic_t, int);
 const char *magic_buffer(magic_t, const void *, size_t);
 
 const char *magic_error(magic_t);
+int magic_getflags(magic_t);
 int magic_setflags(magic_t, int);
 
 int magic_version(void);
@@ -105,6 +137,7 @@ int magic_load(magic_t, const char *);
 int magic_load_buffers(magic_t, void **, size_t *, size_t);
 
 int magic_compile(magic_t, const char *);
+int magic_check(magic_t, const char *);
 int magic_list(magic_t, const char *);
 int magic_errno(magic_t);
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,12 +12,10 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifndef ZEND_CONFIG_W32_H
 #define ZEND_CONFIG_W32_H
@@ -40,9 +38,6 @@
 
 #include <float.h>
 
-typedef unsigned long ulong;
-typedef unsigned int uint;
-
 #define HAVE_STDIOSTR_H 1
 #define HAVE_CLASS_ISTDIOSTREAM
 #define istdiostream stdiostream
@@ -52,11 +47,6 @@ typedef unsigned int uint;
 #endif
 #define strcasecmp(s1, s2) _stricmp(s1, s2)
 #define strncasecmp(s1, s2, n) _strnicmp(s1, s2, n)
-#define zend_isinf(a)	((_fpclass(a) == _FPCLASS_PINF) || (_fpclass(a) == _FPCLASS_NINF))
-#define zend_finite(x)	_finite(x)
-#define zend_isnan(x)	_isnan(x)
-
-#define zend_sprintf sprintf
 
 #ifndef __cplusplus
 /* This will cause the compilation process to be MUCH longer, but will generate
@@ -78,13 +68,3 @@ typedef unsigned int uint;
 #define ZEND_DLIMPORT		__declspec(dllimport)
 
 #endif /* ZEND_CONFIG_W32_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

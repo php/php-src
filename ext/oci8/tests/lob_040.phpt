@@ -3,19 +3,19 @@ Bug #37706 (Test LOB locator reuse. Extends simple test of lob_037.phpt)
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
-?> 
+require(__DIR__.'/skipif.inc');
+?>
 --FILE--
 <?php
 
 define('NUMLOBS', 200);
 
-require(dirname(__FILE__).'/connect.inc');
-require(dirname(__FILE__).'/create_table.inc');
+require(__DIR__.'/connect.inc');
+require(__DIR__.'/create_table.inc');
 
 for ($i = 0; $i < NUMLOBS; $i++) {
-	$s = oci_parse($c, "insert into ".$schema.$table_name." (id, clob) values(".$i.", '".$i."aaaa".$i.$i."aaaaaaaaaaaaaaaaaaaaaaaaaaaz')");
-	oci_execute($s);
+    $s = oci_parse($c, "insert into ".$schema.$table_name." (id, clob) values(".$i.", '".$i."aaaa".$i.$i."aaaaaaaaaaaaaaaaaaaaaaaaaaaz')");
+    oci_execute($s);
 }
 
 echo "Test 1: CLOB as locator\n";
@@ -23,19 +23,19 @@ echo "Test 1: CLOB as locator\n";
 $s = oci_parse($c, "select clob from ".$schema.$table_name." order by id");
 oci_execute($s);
 
-$row = array(); 
+$row = array();
 for ($i = 0; $i < NUMLOBS; $i++) {
-	$row[$i] = oci_fetch_array($s, OCI_NUM);
+    $row[$i] = oci_fetch_array($s, OCI_NUM);
 }
 
 for ($i = 0; $i < NUMLOBS; $i++) {
-	echo "Row $i Size:  " . $row[$i][0]->size() . "\n";
-	echo "Pos 1: " . $row[$i][0]->tell() . "\n";
-	echo "Data:  " . $row[$i][0]->read(5) . "\n";
-	echo "Pos 2: " . $row[$i][0]->tell() . "\n";
-	echo "Data:  " . $row[$i][0]->read(12) . "\n";
+    echo "Row $i Size:  " . $row[$i][0]->size() . "\n";
+    echo "Pos 1: " . $row[$i][0]->tell() . "\n";
+    echo "Data:  " . $row[$i][0]->read(5) . "\n";
+    echo "Pos 2: " . $row[$i][0]->tell() . "\n";
+    echo "Data:  " . $row[$i][0]->read(12) . "\n";
 }
- 
+
 echo "Done\n";
 
 ?>

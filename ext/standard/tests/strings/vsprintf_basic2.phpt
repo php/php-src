@@ -3,7 +3,7 @@ Test vsprintf() function : basic functionality - integer format
 --FILE--
 <?php
 /* Prototype  : string vsprintf(string $format , array $args)
- * Description: Return a formatted string 
+ * Description: Return a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
@@ -28,7 +28,7 @@ var_dump( vsprintf($format3,$arg3) );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing vsprintf() : basic functionality - using integer format ***
 string(3) "111"
 string(7) "111 222"

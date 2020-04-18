@@ -6,14 +6,14 @@ Bug #39036 (Unsetting key of foreach() yields segmentation fault)
 $key = 'asdf';
 
 foreach (get_defined_vars() as $key => $value) {
-	unset($$key);
+    unset($$key);
 }
 
 var_dump($key);
 
 echo "Done\n";
 ?>
---EXPECTF--	
-Notice: Undefined variable: key in %s on line %d
+--EXPECTF--
+Warning: Undefined variable $key in %s on line %d
 NULL
 Done

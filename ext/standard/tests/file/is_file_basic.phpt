@@ -13,9 +13,9 @@ echo "*** Testing is_file(): basic functionality ***\n";
 var_dump( is_file(__FILE__) );
 
 /* Checking with (current) dir */
-var_dump( is_file(dirname(__FILE__)) );
+var_dump( is_file(__DIR__) );
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $file_name = $file_path."/is_file_basic.tmp";
 /* With non-existing file */
 var_dump( is_file($file_name) );
@@ -31,11 +31,11 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $file_name = $file_path."/is_file_basic.tmp";
 unlink($file_name);
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing is_file(): basic functionality ***
 bool(true)
 bool(false)

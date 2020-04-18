@@ -1,13 +1,18 @@
 #!/bin/bash
-if [[ "$ENABLE_MAINTAINER_ZTS" == 1 ]]; then
-	TS="--enable-maintainer-zts";
+if [[ "$ENABLE_ZTS" == 1 ]]; then
+	TS="--enable-zts";
 else
 	TS="";
 fi
 if [[ "$ENABLE_DEBUG" == 1 ]]; then
-	DEBUG="--enable-debug --without-pcre-valgrind";
+	DEBUG="--enable-debug";
 else
 	DEBUG="";
+fi
+if [[ "$S390X" == 1 ]]; then
+	S390X_CONFIG="--without-pcre-jit";
+else
+	S390X_CONFIG="";
 fi
 
 if [[ -z "$CONFIG_LOG_FILE" ]]; then
@@ -23,14 +28,16 @@ else
 	MAKE_QUIET=""
 fi
 
-MAKE_JOBS=${MAKE_JOBS:-2}
+MAKE_JOBS=${MAKE_JOBS:-$(nproc)}
 
 ./buildconf --force
 ./configure \
+--enable-option-checking=fatal \
 --prefix="$HOME"/php-install \
 $CONFIG_QUIET \
 $DEBUG \
 $TS \
+$S390X_CONFIG \
 --enable-phpdbg \
 --enable-fpm \
 --with-pdo-mysql=mysqlnd \
@@ -40,18 +47,18 @@ $TS \
 --with-pdo-sqlite \
 --enable-intl \
 --without-pear \
---with-gd \
---with-jpeg-dir=/usr \
---with-png-dir=/usr \
+--enable-gd \
+--with-jpeg \
+--with-webp \
+--with-freetype \
+--with-xpm \
 --enable-exif \
---enable-zip \
---without-libzip \
+--with-zip \
 --with-zlib \
 --with-zlib-dir=/usr \
 --enable-soap \
 --enable-xmlreader \
 --with-xsl \
---with-curl=/usr \
 --with-tidy \
 --with-xmlrpc \
 --enable-sysvsem \
@@ -71,13 +78,13 @@ $TS \
 --enable-ftp \
 --with-pspell=/usr \
 --with-enchant=/usr \
---enable-wddx \
---with-freetype-dir=/usr \
---with-xpm-dir=/usr \
 --with-kerberos \
 --enable-sysvmsg \
---enable-zend-test \
-> "$CONFIG_LOG_FILE"
+--with-ffi \
+--with-sodium \
+--enable-zend-test=shared \
+--enable-werror \
+--with-pear
 
-make "-j${MAKE_JOBS}" $MAKE_QUIET > "$MAKE_LOG_FILE"
-make install >> "$MAKE_LOG_FILE"
+make "-j${MAKE_JOBS}" $MAKE_QUIET
+make install

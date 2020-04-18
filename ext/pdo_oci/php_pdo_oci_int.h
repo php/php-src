@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +13,6 @@
   | Author: Wez Furlong <wez@php.net>                                    |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #include <oci.h>
 
@@ -85,7 +81,7 @@ typedef struct {
 } pdo_oci_bound_param;
 
 extern const ub4 PDO_OCI_INIT_MODE;
-extern pdo_driver_t pdo_oci_driver;
+extern const pdo_driver_t pdo_oci_driver;
 extern OCIEnv *pdo_oci_Env;
 
 ub4 _oci_error(OCIError *err, pdo_dbh_t *dbh, pdo_stmt_t *stmt, char *what, sword status, int isinit, const char *file, int line);
@@ -93,10 +89,19 @@ ub4 _oci_error(OCIError *err, pdo_dbh_t *dbh, pdo_stmt_t *stmt, char *what, swor
 #define oci_drv_error(w)	_oci_error(H->err, dbh, NULL, w, H->last_err, FALSE, __FILE__, __LINE__)
 #define oci_stmt_error(w)	_oci_error(S->err, stmt->dbh, stmt, w, S->last_err, FALSE, __FILE__, __LINE__)
 
-extern struct pdo_stmt_methods oci_stmt_methods;
+extern const struct pdo_stmt_methods oci_stmt_methods;
 
 /* Default prefetch size in number of rows */
 #define PDO_OCI_PREFETCH_DEFAULT 100
 
 /* Arbitrary assumed row length for prefetch memory limit calcuation */
 #define PDO_OCI_PREFETCH_ROWSIZE 1024
+
+
+enum {
+	PDO_OCI_ATTR_ACTION = PDO_ATTR_DRIVER_SPECIFIC,
+	PDO_OCI_ATTR_CLIENT_INFO,
+	PDO_OCI_ATTR_CLIENT_IDENTIFIER,
+	PDO_OCI_ATTR_MODULE,
+	PDO_OCI_ATTR_CALL_TIMEOUT
+};

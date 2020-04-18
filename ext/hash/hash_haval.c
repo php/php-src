@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +13,6 @@
   | Author: Sara Golemon <pollita@php.net>                               |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #include "php_hash.h"
 #include "php_hash_haval.h"
@@ -282,7 +278,7 @@ PHP_HASH_HAVAL_INIT(5,256)
 
 /* {{{ PHP_HAVALUpdate
  */
-PHP_HASH_API void PHP_HAVALUpdate(PHP_HAVAL_CTX *context, const unsigned char *input, unsigned int inputLen)
+PHP_HASH_API void PHP_HAVALUpdate(PHP_HAVAL_CTX *context, const unsigned char *input, size_t inputLen)
 {
 	unsigned int i, index, partLen;
 
@@ -540,12 +536,3 @@ PHP_HASH_API void PHP_HAVAL256Final(unsigned char *digest, PHP_HAVAL_CTX * conte
 	ZEND_SECURE_ZERO((unsigned char*) context, sizeof(*context));
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

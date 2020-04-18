@@ -7,8 +7,8 @@ Test strrpos() function : usage variations - heredoc string containing escape ch
  * Source code: ext/standard/string.c
 */
 
-/* Test strrpos() function by passing heredoc string containing escape chars for haystack 
- *  and with various needles & offsets 
+/* Test strrpos() function by passing heredoc string containing escape chars for haystack
+ *  and with various needles & offsets
 */
 
 echo "*** Testing strrpos() function: with heredoc strings ***\n";
@@ -24,7 +24,7 @@ var_dump( strrpos($control_char_str, "\t", 15) );
 
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strrpos() function: with heredoc strings ***
 -- With heredoc string containing escape characters --
 int(13)

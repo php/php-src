@@ -6,7 +6,6 @@ Test preg_split() function : error conditions - bad regular expressions
 * proto array preg_split(string pattern, string subject [, int limit [, int flags]])
 * Function is implemented in ext/pcre/php_pcre.c
 */
-error_reporting(E_ALL&~E_NOTICE);
 /*
 * Testing how preg_split reacts to being passed the wrong type of regex argument
 */
@@ -19,11 +18,19 @@ $regex_array = array('abcdef', //Regex without delimiter
 );
 $subject = '1 2 a 3 4 b 5 6';
 foreach($regex_array as $regex_value) {
-    print "\nArg value is $regex_value\n";
-    var_dump(preg_split($regex_value, $subject));
+    @print "\nArg value is $regex_value\n";
+    try {
+        var_dump(preg_split($regex_value, $subject));
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
 }
 $regex_value = new stdclass(); //Object
-var_dump(preg_split($regex_value, $subject));
+try {
+    var_dump(preg_split($regex_value, $subject));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
 --EXPECTF--
 *** Testing preg_split() : error conditions ***
@@ -49,9 +56,7 @@ Warning: preg_split(): Unknown modifier 'F' in %spreg_split_error1.php on line %
 bool(false)
 
 Arg value is Array
-
-Warning: preg_split() expects parameter 1 to be string, array given in %spreg_split_error1.php on line %d
-bool(false)
+preg_split(): Argument #1 ($pattern) must be of type string, array given
 
 Arg value is /[a-zA-Z]/
 array(3) {
@@ -62,6 +67,4 @@ array(3) {
   [2]=>
   string(4) " 5 6"
 }
-
-Warning: preg_split() expects parameter 1 to be string, object given in %spreg_split_error1.php on line %d
-bool(false)
+preg_split(): Argument #1 ($pattern) must be of type string, object given

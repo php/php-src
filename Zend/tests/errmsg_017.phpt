@@ -1,14 +1,14 @@
 --TEST--
-errmsg: __unset() must take exactly 1 argument 
+errmsg: __unset() must take exactly 1 argument
 --FILE--
 <?php
 
 class test {
-	function __unset() {
-	}
+    function __unset() {
+    }
 }
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Method test::__unset() must take exactly 1 argument in %s on line %d

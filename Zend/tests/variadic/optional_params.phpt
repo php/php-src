@@ -3,15 +3,15 @@ Optional parameter before variadic parameter
 --FILE--
 <?php
 
-function fn($reqParam, $optParam = null, ...$params) {
+function f($reqParam, $optParam = null, ...$params) {
     var_dump($reqParam, $optParam, $params);
 }
- 
-fn(1);
-fn(1, 2);
-fn(1, 2, 3);
-fn(1, 2, 3, 4);
-fn(1, 2, 3, 4, 5);
+
+f(1);
+f(1, 2);
+f(1, 2, 3);
+f(1, 2, 3, 4);
+f(1, 2, 3, 4, 5);
 
 ?>
 --EXPECT--

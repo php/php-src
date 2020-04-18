@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -14,10 +12,9 @@
   +----------------------------------------------------------------------+
   | Authors: Brad Lafountain <rodif_bl@yahoo.com>                        |
   |          Shane Caraveo <shane@caraveo.com>                           |
-  |          Dmitry Stogov <dmitry@zend.com>                             |
+  |          Dmitry Stogov <dmitry@php.net>                              |
   +----------------------------------------------------------------------+
 */
-/* $Id$ */
 
 #include "php_soap.h"
 #include "libxml/uri.h"
@@ -459,7 +456,7 @@ static int schema_list(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr listType, sdlTypeP
 		{
 			char buf[MAX_LENGTH_OF_LONG + 1];
 			char *res = zend_print_long_to_buf(buf + sizeof(buf) - 1, zend_hash_num_elements(sdl->types));
-			char *str = emalloc(sizeof("anonymous") + buf + sizeof(buf) - 1 - res);
+			char *str = emalloc(sizeof("anonymous")-1 + (buf + sizeof(buf) - res));
 
 			memcpy(str, "anonymous", sizeof("anonymous")-1);
 			memcpy(str + sizeof("anonymous")-1, res, buf + sizeof(buf) - res);
@@ -556,7 +553,7 @@ static int schema_union(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr unionType, sdlTyp
 			{
 				char buf[MAX_LENGTH_OF_LONG + 1];
 				char *res = zend_print_long_to_buf(buf + sizeof(buf) - 1, zend_hash_num_elements(sdl->types));
-				char *str = emalloc(sizeof("anonymous") + buf + sizeof(buf) - 1 - res);
+				char *str = emalloc(sizeof("anonymous")-1 + (buf + sizeof(buf) - res));
 
 				memcpy(str, "anonymous", sizeof("anonymous")-1);
 				memcpy(str + sizeof("anonymous")-1, res, buf + sizeof(buf) - res);
@@ -1800,6 +1797,7 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 		smart_str_free(&key);
 	} else{
 		soap_error0(E_ERROR, "Parsing Schema: attribute has no 'name' nor 'ref' attributes");
+		return FALSE; /* the above call is noreturn, but not marked as such */
 	}
 
 	/* type = QName */
@@ -1928,7 +1926,7 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 			{
 				char buf[MAX_LENGTH_OF_LONG + 1];
 				char *res = zend_print_long_to_buf(buf + sizeof(buf) - 1, zend_hash_num_elements(sdl->types));
-				char *str = emalloc(sizeof("anonymous") + buf + sizeof(buf) - 1 - res);
+				char *str = emalloc(sizeof("anonymous")-1 + (buf + sizeof(buf) - res));
 
 				memcpy(str, "anonymous", sizeof("anonymous")-1);
 				memcpy(str + sizeof("anonymous")-1, res, buf + sizeof(buf) - res);

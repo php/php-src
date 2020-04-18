@@ -14,7 +14,5 @@ $v2=0xffffffff / 4 + 0x1337;
 shm_attach($v1,$v2);
 
 ?>
-==DONE==
---EXPECTF--	
-Warning: shm_attach(): failed for key 0x64: Not enough space in %s on line %d
-==DONE==
+--EXPECTF--
+Warning: shm_attach(): Failed for key 0x64: Not enough space in %s on line %d

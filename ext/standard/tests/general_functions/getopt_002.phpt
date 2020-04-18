@@ -7,7 +7,7 @@ register_argc_argv=On
 variables_order=GPS
 --FILE--
 <?php
-	var_dump(getopt("2a:vcd1"));
+    var_dump(getopt("2a:vcd1"));
 ?>
 --EXPECT--
 array(4) {
@@ -38,5 +38,3 @@ array(4) {
   [2]=>
   bool(false)
 }
-
-

@@ -4,22 +4,22 @@ Reflection Bug #37964 (Reflection shows private methods of parent class)
 <?php
 
 abstract class foobar {
-	private function test2() {
-	}	
+    private function test2() {
+    }
 }
 class foo extends foobar {
-	private $foo = 1;
-	private function test() {
-	}
-	protected function test3() {
-	}
+    private $foo = 1;
+    private function test() {
+    }
+    protected function test3() {
+    }
 }
 class bar extends foo {
-	private function foobar() {
-	}
+    private function foobar() {
+    }
 }
 
-Reflection::export(new ReflectionClass(new bar));
+echo new ReflectionClass(new bar);
 
 ?>
 --EXPECTF--

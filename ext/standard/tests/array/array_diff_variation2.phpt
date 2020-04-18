@@ -3,8 +3,8 @@ Test array_diff() function : usage variations - unexpected values for 'arr2' arg
 --FILE--
 <?php
 /* Prototype  : array array_diff(array $arr1, array $arr2 [, array ...])
- * Description: Returns the entries of $arr1 that have values which are 
- * not present in any of the others arguments. 
+ * Description: Returns the entries of $arr1 that have values which are
+ * not present in any of the others arguments.
  * Source code: ext/standard/array.c
  */
 
@@ -61,7 +61,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -70,10 +70,10 @@ $inputs = array(
 /*18*/ "string",
        'string',
        $heredoc,
-              
+
        // binary data
 /*21*/ b"binary",
-	   (binary)"binary",
+       (binary)"binary",
 
        // object data
 /*23*/ new classA(),
@@ -91,117 +91,69 @@ $inputs = array(
 // loop through each element of $inputs to check the behavior of array_diff
 $iterator = 1;
 foreach($inputs as $input) {
-  echo "\n-- Iteration $iterator --";
-  var_dump( array_diff($array, $input));
-  $iterator++;
+    echo "\n-- Iteration $iterator --";
+    try {
+        var_dump( array_diff($array, $input));
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
+    $iterator++;
 };
 fclose($fp);
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_diff() : usage variations ***
 
--- Iteration 1 --
-Warning: array_diff(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 1 --array_diff(): Argument #2 ($arr2) must be of type array, int given
 
--- Iteration 2 --
-Warning: array_diff(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 2 --array_diff(): Argument #2 ($arr2) must be of type array, int given
 
--- Iteration 3 --
-Warning: array_diff(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 3 --array_diff(): Argument #2 ($arr2) must be of type array, int given
 
--- Iteration 4 --
-Warning: array_diff(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 4 --array_diff(): Argument #2 ($arr2) must be of type array, int given
 
--- Iteration 5 --
-Warning: array_diff(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 5 --array_diff(): Argument #2 ($arr2) must be of type array, float given
 
--- Iteration 6 --
-Warning: array_diff(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 6 --array_diff(): Argument #2 ($arr2) must be of type array, float given
 
--- Iteration 7 --
-Warning: array_diff(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 7 --array_diff(): Argument #2 ($arr2) must be of type array, float given
 
--- Iteration 8 --
-Warning: array_diff(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 8 --array_diff(): Argument #2 ($arr2) must be of type array, float given
 
--- Iteration 9 --
-Warning: array_diff(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 9 --array_diff(): Argument #2 ($arr2) must be of type array, float given
 
--- Iteration 10 --
-Warning: array_diff(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 10 --array_diff(): Argument #2 ($arr2) must be of type array, null given
 
--- Iteration 11 --
-Warning: array_diff(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 11 --array_diff(): Argument #2 ($arr2) must be of type array, null given
 
--- Iteration 12 --
-Warning: array_diff(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 12 --array_diff(): Argument #2 ($arr2) must be of type array, bool given
 
--- Iteration 13 --
-Warning: array_diff(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 13 --array_diff(): Argument #2 ($arr2) must be of type array, bool given
 
--- Iteration 14 --
-Warning: array_diff(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 14 --array_diff(): Argument #2 ($arr2) must be of type array, bool given
 
--- Iteration 15 --
-Warning: array_diff(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 15 --array_diff(): Argument #2 ($arr2) must be of type array, bool given
 
--- Iteration 16 --
-Warning: array_diff(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 16 --array_diff(): Argument #2 ($arr2) must be of type array, string given
 
--- Iteration 17 --
-Warning: array_diff(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 17 --array_diff(): Argument #2 ($arr2) must be of type array, string given
 
--- Iteration 18 --
-Warning: array_diff(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 18 --array_diff(): Argument #2 ($arr2) must be of type array, string given
 
--- Iteration 19 --
-Warning: array_diff(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 19 --array_diff(): Argument #2 ($arr2) must be of type array, string given
 
--- Iteration 20 --
-Warning: array_diff(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 20 --array_diff(): Argument #2 ($arr2) must be of type array, string given
 
--- Iteration 21 --
-Warning: array_diff(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 21 --array_diff(): Argument #2 ($arr2) must be of type array, string given
 
--- Iteration 22 --
-Warning: array_diff(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 22 --array_diff(): Argument #2 ($arr2) must be of type array, string given
 
--- Iteration 23 --
-Warning: array_diff(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 23 --array_diff(): Argument #2 ($arr2) must be of type array, object given
 
--- Iteration 24 --
-Warning: array_diff(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 24 --array_diff(): Argument #2 ($arr2) must be of type array, null given
 
--- Iteration 25 --
-Warning: array_diff(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 25 --array_diff(): Argument #2 ($arr2) must be of type array, null given
 
--- Iteration 26 --
-Warning: array_diff(): Argument #2 is not an array in %s on line %d
-NULL
+-- Iteration 26 --array_diff(): Argument #2 ($arr2) must be of type array, resource given
 Done

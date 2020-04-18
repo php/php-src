@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -104,6 +102,9 @@ static int firebird_stmt_execute(pdo_stmt_t *stmt) /* {{{ */
 			unsigned int i;
 			for (i = 0; i < S->out_sqlda.sqld; i++) {
 				XSQLVAR *var = &S->out_sqlda.sqlvar[i];
+				if (var->sqlind) {
+					efree(var->sqlind);
+				}
 				var->sqlind = (void*)ecalloc(1, var->sqllen + 2 * sizeof(short));
 				var->sqldata = &((char*)var->sqlind)[sizeof(short)];
 			}
@@ -224,11 +225,16 @@ static int firebird_stmt_describe(pdo_stmt_t *stmt, int colno) /* {{{ */
 		switch (var->sqltype & ~1) {
 			case SQL_SHORT:
 			case SQL_LONG:
-#if SIZEOF_ZEND_LONG >= 8 
+#if SIZEOF_ZEND_LONG >= 8
 			case SQL_INT64:
 #endif
 				col->param_type = PDO_PARAM_INT;
 				break;
+#ifdef SQL_BOOLEAN
+			case SQL_BOOLEAN:
+				col->param_type = PDO_PARAM_BOOL;
+				break;
+#endif
 			default:
 				col->param_type = PDO_PARAM_STR;
 				break;
@@ -294,7 +300,7 @@ static int firebird_fetch_blob(pdo_stmt_t *stmt, int colno, char **ptr, /* {{{ *
 		unsigned short seg_len;
 		ISC_STATUS stat;
 
-		*ptr = S->fetch_buf[colno] = erealloc(*ptr, *len+1);
+		*ptr = S->fetch_buf[colno] = erealloc(S->fetch_buf[colno], *len+1);
 
 		for (cur_len = stat = 0; (!stat || stat == isc_segment) && cur_len < *len; cur_len += seg_len) {
 
@@ -366,7 +372,9 @@ static int firebird_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,  /* {{
 
 			*ptr = FETCH_BUF(S->fetch_buf[colno], char, CHAR_BUF_LEN, NULL);
 
-			if (n >= 0) {
+			if ((var->sqltype & ~1) == SQL_DOUBLE) {
+				*len = slprintf(*ptr, CHAR_BUF_LEN, "%.*F", -var->sqlscale, *(double*)var->sqldata);
+			} else if (n >= 0) {
 				*len = slprintf(*ptr, CHAR_BUF_LEN, "%" LL_MASK "d.%0*" LL_MASK "d",
 					n / f, -var->sqlscale, n % f);
 			} else if (n <= -f) {
@@ -399,7 +407,7 @@ static int firebird_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,  /* {{
 					*(zend_long *)*ptr = *(ISC_LONG*)var->sqldata;
 					break;
 				case SQL_INT64:
-#if SIZEOF_ZEND_LONG >= 8 
+#if SIZEOF_ZEND_LONG >= 8
 					*len = sizeof(zend_long);
 					*ptr = FETCH_BUF(S->fetch_buf[colno], zend_long, 1, NULL);
 					*(zend_long *)*ptr = *(ISC_INT64*)var->sqldata;
@@ -416,6 +424,13 @@ static int firebird_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,  /* {{
 					*ptr = FETCH_BUF(S->fetch_buf[colno], char, CHAR_BUF_LEN, NULL);
 					*len = slprintf(*ptr, CHAR_BUF_LEN, "%F" , *(double*)var->sqldata);
 					break;
+#ifdef SQL_BOOLEAN
+				case SQL_BOOLEAN:
+					*len = sizeof(zend_bool);
+					*ptr = FETCH_BUF(S->fetch_buf[colno], zend_bool, 1, NULL);
+					*(zend_bool*)*ptr = *(FB_BOOLEAN*)var->sqldata;
+					break;
+#endif
 				case SQL_TYPE_DATE:
 					isc_decode_sql_date((ISC_DATE*)var->sqldata, &t);
 					fmt = S->H->date_format ? S->H->date_format : PDO_FB_DEF_DATE_FMT;
@@ -458,11 +473,10 @@ static int firebird_bind_blob(pdo_stmt_t *stmt, ISC_QUAD *blob_id, zval *param)
 		return 0;
 	}
 
-	data = *param;
-
 	if (Z_TYPE_P(param) != IS_STRING) {
-		zval_copy_ctor(&data);
-		convert_to_string(&data);
+		ZVAL_STR(&data, zval_get_string_func(param));
+	} else {
+		ZVAL_COPY_VALUE(&data, param);
 	}
 
 	for (rem_cnt = Z_STRLEN(data); rem_cnt > 0; rem_cnt -= chunk_size) {
@@ -476,7 +490,7 @@ static int firebird_bind_blob(pdo_stmt_t *stmt, ISC_QUAD *blob_id, zval *param)
 	}
 
 	if (Z_TYPE_P(param) != IS_STRING) {
-		zval_dtor(&data);
+		zval_ptr_dtor_str(&data);
 	}
 
 	if (isc_close_blob(H->isc_status, &h)) {
@@ -597,6 +611,60 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 				}
 			}
 
+#ifdef SQL_BOOLEAN
+			/* keep native BOOLEAN type */
+			if ((var->sqltype & ~1) == SQL_BOOLEAN) {
+				switch (Z_TYPE_P(parameter)) {
+					case IS_LONG:
+					case IS_DOUBLE:
+					case IS_TRUE:
+					case IS_FALSE:
+						*(FB_BOOLEAN*)var->sqldata = zend_is_true(parameter) ? FB_TRUE : FB_FALSE;
+						break;
+					case IS_STRING:
+						{
+							zend_long lval;
+							double dval;
+
+							if ((Z_STRLEN_P(parameter) == 0)) {
+								*(FB_BOOLEAN*)var->sqldata = FB_FALSE;
+								break;
+							}
+
+							switch (is_numeric_string(Z_STRVAL_P(parameter), Z_STRLEN_P(parameter), &lval, &dval, 0)) {
+								case IS_LONG:
+									*(FB_BOOLEAN*)var->sqldata = (lval != 0) ? FB_TRUE : FB_FALSE;
+									break;
+								case IS_DOUBLE:
+									*(FB_BOOLEAN*)var->sqldata = (dval != 0) ? FB_TRUE : FB_FALSE;
+									break;
+								default:
+									if (!zend_binary_strncasecmp(Z_STRVAL_P(parameter), Z_STRLEN_P(parameter), "true", 4, 4)) {
+										*(FB_BOOLEAN*)var->sqldata = FB_TRUE;
+									} else if (!zend_binary_strncasecmp(Z_STRVAL_P(parameter), Z_STRLEN_P(parameter), "false", 5, 5)) {
+										*(FB_BOOLEAN*)var->sqldata = FB_FALSE;
+									} else {
+										strcpy(stmt->error_code, "HY105");
+										S->H->last_app_error = "Cannot convert string to boolean";
+										return 0;
+									}
+
+							}
+						}
+						break;
+					case IS_NULL:
+						*var->sqlind = -1;
+						break;
+					default:
+						strcpy(stmt->error_code, "HY105");
+						S->H->last_app_error = "Binding arrays/objects is not supported";
+						return 0;
+				}
+				break;
+			}
+#endif
+
+
 			/* check if a NULL should be inserted */
 			switch (Z_TYPE_P(parameter)) {
 				int force_null;
@@ -632,7 +700,7 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 						/* keep the allow-NULL flag */
 						var->sqltype = SQL_TEXT | (var->sqltype & 1);
 						var->sqldata = Z_STRVAL_P(parameter);
-						var->sqllen	 = Z_STRLEN_P(parameter);
+						var->sqllen = Z_STRLEN_P(parameter);
 						break;
 					}
 				case IS_NULL:
@@ -652,9 +720,9 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 			break;
 
 		case PDO_PARAM_EVT_FETCH_POST:
-                        if (param->paramno == -1) {
-                            return 0;
-                        }
+			if (param->paramno == -1) {
+				return 0;
+			}
 			if (param->is_param) {
 				break;
 			}
@@ -682,13 +750,13 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 							break;
 						}
 					case PDO_PARAM_EVT_NORMALIZE:
-							 if (!param->is_param) {
-								  char *s = ZSTR_VAL(param->name);
-								  while (*s != '\0') {
-									   *s = toupper(*s);
-										s++;
-								  }
-							 }
+						if (!param->is_param) {
+							char *s = ZSTR_VAL(param->name);
+							while (*s != '\0') {
+								*s = toupper(*s);
+								s++;
+							}
+						}
 						break;
 					default:
 						ZVAL_NULL(parameter);
@@ -714,7 +782,9 @@ static int firebird_stmt_set_attribute(pdo_stmt_t *stmt, zend_long attr, zval *v
 		default:
 			return 0;
 		case PDO_ATTR_CURSOR_NAME:
-			convert_to_string(val);
+			if (!try_convert_to_string(val)) {
+				return 0;
+			}
 
 			if (isc_dsql_set_cursor_name(S->H->isc_status, &S->stmt, Z_STRVAL_P(val),0)) {
 				RECORD_ERROR(stmt);
@@ -762,7 +832,7 @@ static int firebird_stmt_cursor_closer(pdo_stmt_t *stmt) /* {{{ */
 /* }}} */
 
 
-struct pdo_stmt_methods firebird_stmt_methods = { /* {{{ */
+const struct pdo_stmt_methods firebird_stmt_methods = { /* {{{ */
 	firebird_stmt_dtor,
 	firebird_stmt_execute,
 	firebird_stmt_fetch,
@@ -776,12 +846,3 @@ struct pdo_stmt_methods firebird_stmt_methods = { /* {{{ */
 	firebird_stmt_cursor_closer
 };
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

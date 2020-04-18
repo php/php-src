@@ -17,15 +17,15 @@ class SOAPComplexType {
 $struct = new SOAPComplexType('arg',34,325.325);
 
 function echoAnyElement($x) {
-	global $g;
+    global $g;
 
-	$g = $x;
-	$struct = $x->inputAny->any["SOAPComplexType"];
-	if ($struct instanceof SOAPComplexType) {
-		return array("return" => array("any" => array("SOAPComplexType"=>new SoapVar($struct, SOAP_ENC_OBJECT, "SOAPComplexType", "http://soapinterop.org/xsd", "SOAPComplexType", "http://soapinterop.org/"))));
-	} else {
-		return "?";
-	}
+    $g = $x;
+    $struct = $x->inputAny->any["SOAPComplexType"];
+    if ($struct instanceof SOAPComplexType) {
+        return array("return" => array("any" => array("SOAPComplexType"=>new SoapVar($struct, SOAP_ENC_OBJECT, "SOAPComplexType", "http://soapinterop.org/xsd", "SOAPComplexType", "http://soapinterop.org/"))));
+    } else {
+        return "?";
+    }
 }
 
 class TestSoapClient extends SoapClient {
@@ -44,7 +44,7 @@ class TestSoapClient extends SoapClient {
   }
 }
 
-$client = new TestSoapClient(dirname(__FILE__)."/interop/Round4/GroupI/round4_groupI_xsd.wsdl",
+$client = new TestSoapClient(__DIR__."/interop/Round4/GroupI/round4_groupI_xsd.wsdl",
                              array("trace"=>1,"exceptions"=>0,
                              'classmap' => array('SOAPComplexType'=>'SOAPComplexType')));
 $ret = $client->echoAnyElement(

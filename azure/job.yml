@@ -1,0 +1,45 @@
+parameters:
+  configurationName: ''
+  configurationParameters: ''
+  runTestsParameters: ''
+  timeoutInMinutes: 60
+
+jobs:
+  - job: ${{ parameters.configurationName }}
+    timeoutInMinutes: ${{ parameters.timeoutInMinutes }}
+    pool:
+      vmImage: 'ubuntu-18.04'
+    steps:
+    - template: apt.yml
+    - template: configure.yml
+      parameters:
+        configurationParameters: ${{ parameters.configurationParameters }}
+    - script: make -j$(/usr/bin/nproc) >/dev/null
+      displayName: 'Make Build'
+    - template: install.yml
+    - script: |
+        set -e
+        sudo service mysql start
+        mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS test"
+        sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'postgres';"
+        sudo -u postgres psql -c "CREATE DATABASE test;"
+      displayName: 'Setup'
+    - template: test.yml
+      parameters:
+        configurationName: ${{ parameters.configurationName }}
+        runTestsParameters: ${{ parameters.runTestsParameters }}
+    - template: test.yml
+      parameters:
+        configurationName: ${{ parameters.configurationName }}
+        runTestsName: 'OpCache'
+        runTestsParameters: >-
+          ${{ parameters.runTestsParameters }}
+          -d zend_extension=opcache.so
+    - template: test.yml
+      parameters:
+        configurationName: ${{ parameters.configurationName }}
+        runTestsName: 'JIT'
+        runTestsParameters: >-
+          ${{ parameters.runTestsParameters }}
+          -d zend_extension=opcache.so
+          -d opcache.jit_buffer_size=16M

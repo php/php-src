@@ -22,12 +22,12 @@ if (!$link->query("CREATE TABLE `bug_bits` (`inty` bigint(20) unsigned NOT NULL 
 }
 
 $insertQuery = "INSERT INTO `bug_bits` VALUES (18446744073709551615, 18446744073709551615)".
-			   ",(18446744073709551614, 18446744073709551614)".
-			   ",(4294967296, 4294967296)".
-			   ",(4294967295, 4294967295)".
-			   ",(2147483648, 2147483648)".
-			   ",(2147483647, 2147483647)".
-			   ",(1, 1)";
+               ",(18446744073709551614, 18446744073709551614)".
+               ",(4294967296, 4294967296)".
+               ",(4294967295, 4294967295)".
+               ",(2147483648, 2147483648)".
+               ",(2147483647, 2147483647)".
+               ",(1, 1)";
 if (!$link->query($insertQuery)) {
     printf("[004] [%d] %s\n", $link->errno, $link->error);
 }
@@ -37,12 +37,12 @@ if (!($res = $link->query("SELECT * FROM `bug_bits`"))) {
 }
 
 while ($row = $res->fetch_assoc()) {
-	var_dump($row);
+    var_dump($row);
 }
 
 $link->close();
 
-echo "Done\n";	
+echo "Done\n";
 ?>
 --CLEAN--
 <?php

@@ -17,9 +17,7 @@ var_dump($bi->preceding(5));
 var_dump($bi->preceding(50));
 var_dump($bi->preceding(-1));
 ?>
-==DONE==
 --EXPECTF--
 int(4)
 int(21)
 int(%i)
-==DONE==

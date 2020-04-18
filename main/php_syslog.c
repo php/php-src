@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,11 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include <stdio.h>
 #include <string.h>
-#include <assert.h>
 #include <stdlib.h>
 #include "php.h"
 #include "php_syslog.h"
@@ -42,6 +37,15 @@ PHPAPI void php_syslog(int priority, const char *format, ...) /* {{{ */
 {
 	va_list args;
 
+	/*
+	 * don't rely on openlog() being called by syslog() if it's
+	 * not already been done; call it ourselves and pass the
+	 * correct parameters!
+	 */
+	if (!PG(have_called_openlog)) {
+		php_openlog(PG(syslog_ident), 0, PG(syslog_facility));
+	}
+
 	va_start(args, format);
 	vsyslog(priority, format, args);
 	va_end(args);
@@ -56,10 +60,26 @@ PHPAPI void php_syslog(int priority, const char *format, ...) /* {{{ */
 	smart_string sbuf = {0};
 	va_list args;
 
+	/*
+	 * don't rely on openlog() being called by syslog() if it's
+	 * not already been done; call it ourselves and pass the
+	 * correct parameters!
+	 */
+	if (!PG(have_called_openlog)) {
+		php_openlog(PG(syslog_ident), 0, PG(syslog_facility));
+	}
+
 	va_start(args, format);
 	zend_printf_to_smart_string(&fbuf, format, args);
 	smart_string_0(&fbuf);
 	va_end(args);
+
+	if (PG(syslog_filter) == PHP_SYSLOG_FILTER_RAW) {
+		/* Just send it directly to the syslog */
+		syslog(priority, "%.*s", (int)fbuf.len, fbuf.c);
+		smart_string_free(&fbuf);
+		return;
+	}
 
 	for (ptr = fbuf.c; ; ++ptr) {
 		c = *ptr;
@@ -68,11 +88,23 @@ PHPAPI void php_syslog(int priority, const char *format, ...) /* {{{ */
 			break;
 		}
 
-		if (c != '\n')
+		/* check for NVT ASCII only unless test disabled */
+		if (((0x20 <= c) && (c <= 0x7e)))
 			smart_string_appendc(&sbuf, c);
-		else {
+		else if ((c >= 0x80) && (PG(syslog_filter) != PHP_SYSLOG_FILTER_ASCII))
+			smart_string_appendc(&sbuf, c);
+		else if (c == '\n') {
 			syslog(priority, "%.*s", (int)sbuf.len, sbuf.c);
 			smart_string_reset(&sbuf);
+		} else if ((c < 0x20) && (PG(syslog_filter) == PHP_SYSLOG_FILTER_ALL))
+			smart_string_appendc(&sbuf, c);
+		else {
+			const char xdigits[] = "0123456789abcdef";
+
+			smart_string_appendl(&sbuf, "\\x", 2);
+			smart_string_appendc(&sbuf, xdigits[(c / 0x10)]);
+			c &= 0x0f;
+			smart_string_appendc(&sbuf, xdigits[c]);
 		}
 	}
 
@@ -81,12 +113,3 @@ PHPAPI void php_syslog(int priority, const char *format, ...) /* {{{ */
 }
 /* }}} */
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

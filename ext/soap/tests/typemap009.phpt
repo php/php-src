@@ -7,11 +7,11 @@ soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 $GLOBALS['HTTP_RAW_POST_DATA']="
-<env:Envelope xmlns:env=\"http://schemas.xmlsoap.org/soap/envelope/\" 
-	xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" 
-	xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" 
-	xmlns:enc=\"http://schemas.xmlsoap.org/soap/encoding/\"
-	xmlns:ns1=\"http://schemas.nothing.com\"
+<env:Envelope xmlns:env=\"http://schemas.xmlsoap.org/soap/envelope/\"
+    xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"
+    xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"
+    xmlns:enc=\"http://schemas.xmlsoap.org/soap/encoding/\"
+    xmlns:ns1=\"http://schemas.nothing.com\"
 >
   <env:Body>
  <ns1:dotest>
@@ -22,32 +22,32 @@ $GLOBALS['HTTP_RAW_POST_DATA']="
 </ns1:dotest>
  </env:Body>
 <env:Header/>
-</env:Envelope>";	
+</env:Envelope>";
 
 function book_from_xml($xml) {
-	throw new SoapFault("Server", "Conversion Failed");
+    throw new SoapFault("Server", "Conversion Failed");
 }
 
 class test{
-	function dotest($book){
-		$classname=get_class($book);
-		return "Object: ".$classname. "(".$book->a.",".$book->b.")";
-	}	
+    function dotest($book){
+        $classname=get_class($book);
+        return "Object: ".$classname. "(".$book->a.",".$book->b.")";
+    }
 }
 
 class book{
-	public $a="a";
-	public $b="c";
-		
+    public $a="a";
+    public $b="c";
+
 }
 $options=Array(
-		'actor'   =>'http://schemas.nothing.com',
-		'typemap' => array(array("type_ns"   => "http://schemas.nothing.com",
-		                         "type_name" => "book",
-		                         "from_xml"  => "book_from_xml"))
-		);
+        'actor'   =>'http://schemas.nothing.com',
+        'typemap' => array(array("type_ns"   => "http://schemas.nothing.com",
+                                 "type_name" => "book",
+                                 "from_xml"  => "book_from_xml"))
+        );
 
-$server = new SoapServer(dirname(__FILE__)."/classmap.wsdl",$options);
+$server = new SoapServer(__DIR__."/classmap.wsdl",$options);
 $server->setClass("test");
 $server->handle($HTTP_RAW_POST_DATA);
 echo "ok\n";

@@ -3,7 +3,6 @@ checks zlib compression output size is always the same
 --SKIPIF--
 <?php if (!extension_loaded("zlib")) print "skip"; ?>
 --CGI--
-1
 --FILE--
 <?php
 
@@ -20,29 +19,29 @@ $lens = array();
 
 for ( $i=0 ; $i < 100 ; $i++ ) {
 
-	// can't use ob_gzhandler with zlib.output_compression
-	ob_start();//"ob_gzhandler");
-	phpinfo();
-	$html = ob_get_clean();
+    // can't use ob_gzhandler with zlib.output_compression
+    ob_start();//"ob_gzhandler");
+    phpinfo();
+    $html = ob_get_clean();
 
-	$len = strlen($html);
+    $len = strlen($html);
 
-	$lens[$len] = $len;
-} 
- 
+    $lens[$len] = $len;
+}
+
 $lens = array_values($lens);
 
 echo "Compressed Lengths\n";
 
 // pass == only ONE length for all iterations
 //         (length didn't change during run)
-// 
+//
 // hard to anticipate what 'correct' length should be since
 // return value of phpinfo() will vary between installations...
 // just check that there is only one length
-// 
+//
 var_dump($lens); // show lengths to help triage in case of failure
- 
+
 // expected headers since its CGI
 
 ?>

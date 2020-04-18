@@ -1,7 +1,5 @@
 --TEST--
 serialize()/unserialize() objects
---SKIPIF--
-<?php if (!interface_exists('Serializable')) die('skip Interface Serialzable not defined'); ?>
 --FILE--
 <?php
 
@@ -9,93 +7,93 @@ serialize()/unserialize() objects
 
 function do_autoload($class_name)
 {
-	if ($class_name != 'autoload_not_available')
-	{
-		require_once(dirname(__FILE__) . '/' . strtolower($class_name) . '.p5c');
-	}
-	echo __FUNCTION__ . "($class_name)\n";
+    if ($class_name != 'autoload_not_available')
+    {
+        require_once(__DIR__ . '/' . strtolower($class_name) . '.inc');
+    }
+    echo __FUNCTION__ . "($class_name)\n";
 }
 
 function unserializer($class_name)
 {
-	echo __METHOD__ . "($class_name)\n";
-	switch($class_name)
-	{
-	case 'TestNAOld':
-		eval("class TestNAOld extends TestOld {}");
-		break;
-	case 'TestNANew':
-		eval("class TestNANew extends TestNew {}");
-		break;
-	case 'TestNANew2':
-		eval("class TestNANew2 extends TestNew {}");
-		break;
-	default:
-		echo "Try autoloader\n";
-		if (!spl_autoload_functions()) {
-			spl_autoload_register(function ($class_name) { do_autoload($class_name); });
-		}
-		spl_autoload_call($class_name);
-		break;
-	}
+    echo __METHOD__ . "($class_name)\n";
+    switch($class_name)
+    {
+    case 'TestNAOld':
+        eval("class TestNAOld extends TestOld {}");
+        break;
+    case 'TestNANew':
+        eval("class TestNANew extends TestNew {}");
+        break;
+    case 'TestNANew2':
+        eval("class TestNANew2 extends TestNew {}");
+        break;
+    default:
+        echo "Try autoloader\n";
+        if (!spl_autoload_functions()) {
+            spl_autoload_register(function ($class_name) { do_autoload($class_name); });
+        }
+        spl_autoload_call($class_name);
+        break;
+    }
 }
 
 ini_set('unserialize_callback_func', 'unserializer');
 
 class TestOld
 {
-	function serialize()
-	{
-		echo __METHOD__ . "()\n";
-	}
-	
-	function unserialize($serialized)
-	{
-		echo __METHOD__ . "()\n";
-	}
-	
-	function __wakeup()
-	{
-		echo __METHOD__ . "()\n";
-	}
-	
-	function __sleep()
-	{
-		echo __METHOD__ . "()\n";
-		return array();
-	}
+    function serialize()
+    {
+        echo __METHOD__ . "()\n";
+    }
+
+    function unserialize($serialized)
+    {
+        echo __METHOD__ . "()\n";
+    }
+
+    function __wakeup()
+    {
+        echo __METHOD__ . "()\n";
+    }
+
+    function __sleep()
+    {
+        echo __METHOD__ . "()\n";
+        return array();
+    }
 }
 
 class TestNew implements Serializable
 {
-	protected static $check = 0;
+    protected static $check = 0;
 
-	function serialize()
-	{
-		echo __METHOD__ . "()\n";
-		switch(++self::$check)
-		{
-		case 1:
-			return NULL;
-		case 2:
-			return "2";
-		}
-	}
-	
-	function unserialize($serialized)
-	{
-		echo __METHOD__ . "()\n";
-	}
-	
-	function __wakeup()
-	{
-		echo __METHOD__ . "()\n";
-	}
-	
-	function __sleep()
-	{
-		echo __METHOD__ . "()\n";
-	}
+    function serialize()
+    {
+        echo __METHOD__ . "()\n";
+        switch(++self::$check)
+        {
+        case 1:
+            return NULL;
+        case 2:
+            return "2";
+        }
+    }
+
+    function unserialize($serialized)
+    {
+        echo __METHOD__ . "()\n";
+    }
+
+    function __wakeup()
+    {
+        echo __METHOD__ . "()\n";
+    }
+
+    function __sleep()
+    {
+        echo __METHOD__ . "()\n";
+    }
 }
 
 echo "===O1===\n";
@@ -129,8 +127,6 @@ var_dump(unserialize('O:19:"autoload_implements":0:{}'));
 echo "===AutoNA===\n";
 var_dump(unserialize('O:22:"autoload_not_available":0:{}'));
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 ===O1===
 TestOld::__sleep()
@@ -184,4 +180,3 @@ object(__PHP_Incomplete_Class)#%d (1) {
   ["__PHP_Incomplete_Class_Name"]=>
   string(22) "autoload_not_available"
 }
-===DONE===

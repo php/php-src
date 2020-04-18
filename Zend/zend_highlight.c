@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,12 +12,10 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #include "zend.h"
 #include <zend_language_parser.h>
@@ -93,8 +91,7 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 	zend_printf("<code>");
 	zend_printf("<span style=\"color: %s\">\n", last_color);
 	/* highlight stuff coming back from zendlex() */
-	ZVAL_UNDEF(&token);
-	while ((token_type=lex_scan(&token))) {
+	while ((token_type=lex_scan(&token, NULL))) {
 		switch (token_type) {
 			case T_INLINE_HTML:
 				next_color = syntax_highlighter_ini->highlight_html;
@@ -157,7 +154,7 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 				case T_DOC_COMMENT:
 					break;
 				default:
-					zend_string_release(Z_STR(token));
+					zval_ptr_dtor_str(&token);
 					break;
 			}
 		}
@@ -180,8 +177,7 @@ ZEND_API void zend_strip(void)
 	int token_type;
 	int prev_space = 0;
 
-	ZVAL_UNDEF(&token);
-	while ((token_type=lex_scan(&token))) {
+	while ((token_type=lex_scan(&token, NULL))) {
 		switch (token_type) {
 			case T_WHITESPACE:
 				if (!prev_space) {
@@ -197,7 +193,7 @@ ZEND_API void zend_strip(void)
 			case T_END_HEREDOC:
 				zend_write((char*)LANG_SCNG(yy_text), LANG_SCNG(yy_leng));
 				/* read the following character, either newline or ; */
-				if (lex_scan(&token) != T_WHITESPACE) {
+				if (lex_scan(&token, NULL) != T_WHITESPACE) {
 					zend_write((char*)LANG_SCNG(yy_text), LANG_SCNG(yy_leng));
 				}
 				zend_write("\n", sizeof("\n") - 1);
@@ -221,7 +217,7 @@ ZEND_API void zend_strip(void)
 					break;
 
 				default:
-					zend_string_release(Z_STR(token));
+					zval_ptr_dtor_str(&token);
 					break;
 			}
 		}
@@ -232,14 +228,3 @@ ZEND_API void zend_strip(void)
 	/* Discard parse errors thrown during tokenization */
 	zend_clear_exception();
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */
-

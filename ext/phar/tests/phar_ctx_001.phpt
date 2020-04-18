@@ -8,7 +8,7 @@ phar.require_hash=0
 phar.readonly=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 $file = '<?php __HALT_COMPILER(); ?>';
 
@@ -58,10 +58,9 @@ var_dump(file_get_contents($pname . '/b'));
 var_dump($phar['b']->isCompressed());
 var_dump($phar['b']->getMetaData());
 ?>
-===DONE===
 --CLEAN--
-<?php 
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
+<?php
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
 ?>
 --EXPECT--
 string(1) "a"
@@ -97,4 +96,3 @@ array(1) {
   [0]=>
   int(4)
 }
-===DONE===

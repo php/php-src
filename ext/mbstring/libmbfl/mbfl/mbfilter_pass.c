@@ -31,9 +31,7 @@
 #include "config.h"
 #endif
 
-#ifdef HAVE_STDDEF_H
 #include <stddef.h>
-#endif
 
 #include "mbfilter.h"
 #include "mbfilter_pass.h"
@@ -57,11 +55,11 @@ const struct mbfl_convert_vtbl vtbl_pass = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_pass,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 int mbfl_filt_conv_pass(int c, mbfl_convert_filter *filter)
 {
 	return (*filter->output_function)(c, filter->data);
 }
-

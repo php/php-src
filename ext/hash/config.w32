@@ -1,35 +1,34 @@
-// $Id$
 // vim:ft=javascript
 
-ARG_ENABLE("hash", "enable hash support", "yes");
-ARG_WITH("mhash", "mhash support", "no"); 
+ARG_WITH('mhash', 'mhash support (BC via hash)', 'no');
 
-if (PHP_MHASH != "no") {
-	if (PHP_HASH == "no") {
-		PHP_HASH = "yes";
-	}
+if (PHP_MHASH != 'no') {
 	AC_DEFINE('PHP_MHASH_BC', 1);
 }
 
-if (PHP_HASH != "no") {
-	var sha3_arch_dir = "sha3/" + (X64 ? "generic64lc" : "generic32lc");
-	var sha3_dir = "ext/hash/" + sha3_arch_dir;
-	if (CHECK_HEADER_ADD_INCLUDE("KeccakHash.h", "CFLAGS_HASH", PHP_HASH + ";" + sha3_dir)) {
-		AC_DEFINE('HAVE_HASH_EXT', 1);
-		EXTENSION("hash", "hash.c hash_md.c hash_sha.c hash_ripemd.c hash_haval.c "
-			+ "hash_tiger.c hash_gost.c hash_snefru.c hash_whirlpool.c "
-			+ "hash_adler32.c hash_crc32.c hash_joaat.c hash_fnv.c hash_sha3.c");
+PHP_HASH = 'yes';
 
-		ADD_SOURCES(sha3_dir, "KeccakHash.c KeccakSponge.c " + (X64 ? "KeccakP-1600-opt64.c" : "KeccakP-1600-inplace32BI.c"),
-			"hash");
-		ADD_FLAG("CFLAGS_HASH", "/DKeccakP200_excluded /DKeccakP400_excluded /DKeccakP800_excluded");
+EXTENSION('hash',	'hash.c hash_md.c hash_sha.c hash_ripemd.c hash_haval.c ' +
+					'hash_tiger.c hash_gost.c hash_snefru.c hash_whirlpool.c ' +
+					'hash_adler32.c hash_crc32.c hash_joaat.c hash_fnv.c ' +
+					'hash_sha3.c', false);
 
+var hash_sha3_dir = 'ext/hash/sha3/generic' + (X64 ? '64' : '32') + 'lc';
 
-		PHP_INSTALL_HEADERS("ext/hash/", "php_hash.h php_hash_md.h php_hash_sha.h php_hash_ripemd.h " +
-		"php_hash_haval.h php_hash_tiger.h php_hash_gost.h php_hash_snefru.h " + 
-		"php_hash_whirlpool.h php_hash_adler32.h php_hash_crc32.h php_hash_sha3.h ");
-	} else {
-		WARNING("hash not enabled; libraries and headers not found");
-	}
+if(X64) {
+	ADD_SOURCES(hash_sha3_dir, 'KeccakHash.c KeccakSponge.c KeccakP-1600-opt64.c', 'hash');
+} else {
+	ADD_SOURCES(hash_sha3_dir, 'KeccakHash.c KeccakSponge.c KeccakP-1600-inplace32BI.c', 'hash');
 }
 
+if (!CHECK_HEADER_ADD_INCLUDE('KeccakHash.h', 'CFLAGS_HASH', hash_sha3_dir)) {
+	// Should NEVER happen
+	ERROR('Unable to locate SHA3 headers');
+}
+
+ADD_FLAG('CFLAGS_HASH', '/DKeccakP200_excluded /DKeccakP400_excluded /DKeccakP800_excluded /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1');
+
+PHP_INSTALL_HEADERS('ext/hash/',	'php_hash.h php_hash_md.h php_hash_sha.h ' +
+									'php_hash_ripemd.h php_hash_haval.h php_hash_tiger.h ' +
+									'php_hash_gost.h php_hash_snefru.h php_hash_whirlpool.h ' +
+									'php_hash_adler32.h php_hash_crc32.h php_hash_sha3.h');

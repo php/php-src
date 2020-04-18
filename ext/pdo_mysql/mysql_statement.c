@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -18,8 +16,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -34,7 +30,7 @@
 
 #ifdef PDO_USE_MYSQLND
 #	define pdo_mysql_stmt_execute_prepared(stmt) pdo_mysql_stmt_execute_prepared_mysqlnd(stmt)
-#	define pdo_free_bound_result(res) zval_dtor(res.zv)
+#	define pdo_free_bound_result(res) zval_ptr_dtor(res.zv)
 #	define pdo_mysql_stmt_close(stmt) mysqlnd_stmt_close(stmt, 0)
 #else
 #	define pdo_mysql_stmt_execute_prepared(stmt) pdo_mysql_stmt_execute_prepared_libmysql(stmt)
@@ -90,7 +86,7 @@ static int pdo_mysql_stmt_dtor(pdo_stmt_t *stmt) /* {{{ */
 
 	if (!Z_ISUNDEF(stmt->database_object_handle)
 		&& IS_OBJ_VALID(EG(objects_store).object_buckets[Z_OBJ_HANDLE(stmt->database_object_handle)])
-		&& (!(GC_FLAGS(Z_OBJ(stmt->database_object_handle)) & IS_OBJ_FREE_CALLED))) {
+		&& (!(OBJ_FLAGS(Z_OBJ(stmt->database_object_handle)) & IS_OBJ_FREE_CALLED))) {
 		while (mysql_more_results(S->H->server)) {
 			MYSQL_RES *res;
 			if (mysql_next_result(S->H->server) != 0) {
@@ -560,6 +556,10 @@ static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 						mysqlnd_stmt_bind_one_param(S->stmt, param->paramno, parameter, MYSQL_TYPE_LONG);
 #endif /* SIZEOF_LONG */
 						break;
+					case IS_TRUE:
+					case IS_FALSE:
+						mysqlnd_stmt_bind_one_param(S->stmt, param->paramno, parameter, MYSQL_TYPE_TINY);
+						break;
 					case IS_DOUBLE:
 						mysqlnd_stmt_bind_one_param(S->stmt, param->paramno, parameter, MYSQL_TYPE_DOUBLE);
 						break;
@@ -876,7 +876,7 @@ static int pdo_mysql_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *retu
 		case MYSQL_TYPE_SHORT:
 		case MYSQL_TYPE_INT24:
 		case MYSQL_TYPE_LONG:
-#if SIZEOF_LONG==8
+#if SIZEOF_ZEND_LONG==8
 		case MYSQL_TYPE_LONGLONG:
 #endif
 			add_assoc_long(return_value, "pdo_type", PDO_PARAM_INT);
@@ -923,7 +923,7 @@ static int pdo_mysql_stmt_cursor_closer(pdo_stmt_t *stmt) /* {{{ */
 }
 /* }}} */
 
-struct pdo_stmt_methods mysql_stmt_methods = {
+const struct pdo_stmt_methods mysql_stmt_methods = {
 	pdo_mysql_stmt_dtor,
 	pdo_mysql_stmt_execute,
 	pdo_mysql_stmt_fetch,
@@ -936,12 +936,3 @@ struct pdo_stmt_methods mysql_stmt_methods = {
 	pdo_mysql_stmt_next_rowset,
 	pdo_mysql_stmt_cursor_closer
 };
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

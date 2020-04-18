@@ -15,8 +15,8 @@ echo "*** Testing strtok() : with embedded nulls in the strings ***\n";
 
 // defining varous strings with embedded nulls
 $strings_with_nulls = array(
- 		           "\0",
- 		           '\0',
+                   "\0",
+                   '\0',
                            "hello\0world",
                            "\0hel\0lo",
                            "hello\0",
@@ -41,7 +41,7 @@ foreach( $strings_with_nulls as $string )  {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strtok() : with embedded nulls in the strings ***
 
 --- Iteration 1 ---

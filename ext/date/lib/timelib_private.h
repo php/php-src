@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015 Derick Rethans
+ * Copyright (c) 2015-2019 Derick Rethans
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,10 +25,6 @@
 #ifndef __TIMELIB_PRIVATE_H__
 #define __TIMELIB_PRIVATE_H__
 
-#ifdef HAVE_SETLOCALE
-# include "locale.h"
-#endif
-
 #ifdef HAVE_TIMELIB_CONFIG_H
 # include "timelib_config.h"
 #endif
@@ -43,13 +39,7 @@
 # endif
 #endif
 
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif
-
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif
+#include <string.h>
 
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -72,10 +62,7 @@
 #endif
 
 #include <stdio.h>
-
-#if HAVE_LIMITS_H
 #include <limits.h>
-#endif
 
 #define TIMELIB_SECOND   1
 #define TIMELIB_MINUTE   2
@@ -127,7 +114,7 @@ struct _ttinfo
 
 struct _tlinfo
 {
-	int32_t  trans;
+	int64_t  trans;
 	int32_t  offset;
 };
 
@@ -140,19 +127,14 @@ struct _tlinfo
 #define LONG_MIN (- LONG_MAX - 1)
 #endif
 
-#if defined(_MSC_VER) && !defined(strcasecmp)
-#define strcasecmp stricmp
-#endif
-
-#if defined(_MSC_VER) && !defined(strncasecmp)
-#define strncasecmp strnicmp
-#endif
-
 /* From unixtime2tm.c */
 int timelib_apply_localtime(timelib_time *t, unsigned int localtime);
 
 /* From parse_tz.c */
 void timelib_time_tz_abbr_update(timelib_time* tm, char* tz_abbr);
 
+/* From timelib.c */
+int timelib_strcasecmp(const char *s1, const char *s2);
+int timelib_strncasecmp(const char *s1, const char *s2, size_t n);
 
 #endif

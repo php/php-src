@@ -1,18 +1,18 @@
 --TEST--
-ZE2 a class cannot extend an interface 
+ZE2 a class cannot extend an interface
 --FILE--
 <?php
 
 interface Test
 {
-	function show();
+    function show();
 }
 
 class Tester extends Test
 {
-	function show() {
-		echo __METHOD__ . "\n";
-	}
+    function show() {
+        echo __METHOD__ . "\n";
+    }
 }
 
 $o = new Tester;

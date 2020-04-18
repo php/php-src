@@ -3,7 +3,7 @@ Bug #41633.2 (Undefined class constants must not be substituted by strings)
 --FILE--
 <?php
 class Foo {
-	const A = self::B;
+    const A = self::B;
 }
 echo Foo::A."\n";
 ?>

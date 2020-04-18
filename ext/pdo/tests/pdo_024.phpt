@@ -1,7 +1,7 @@
 --TEST--
 PDO Common: assert that bindParam does not modify parameter
 --SKIPIF--
-<?php # vim:ft=php
+<?php
 if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
@@ -10,19 +10,19 @@ PDOTest::skip();
 ?>
 --FILE--
 <?php
-if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE__) . '/../../pdo/tests/');
+if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../../pdo/tests/');
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
 switch ($db->getAttribute(PDO::ATTR_DRIVER_NAME)) {
-	case 'dblib':
-		// environment settings can influence how the table is created if specifics are missing
-		// https://msdn.microsoft.com/en-us/library/ms174979.aspx#Nullability Rules Within a Table Definition
-		$sql = 'create table test (id int, name varchar(10) null)';
-		break;
-	default:
-		$sql = 'create table test (id int, name varchar(10))';
-		break;
+    case 'dblib':
+        // environment settings can influence how the table is created if specifics are missing
+        // https://msdn.microsoft.com/en-us/library/ms174979.aspx#Nullability Rules Within a Table Definition
+        $sql = 'create table test (id int, name varchar(10) null)';
+        break;
+    default:
+        $sql = 'create table test (id int, name varchar(10))';
+        break;
 }
 $db->exec($sql);
 
@@ -31,9 +31,9 @@ $name = NULL;
 $before_bind = $name;
 $stmt->bindParam(':name', $name, PDO::PARAM_NULL);
 if ($name !== $before_bind) {
-	echo "bind: fail\n";
+    echo "bind: fail\n";
 } else {
-	echo "bind: success\n";
+    echo "bind: success\n";
 }
 var_dump($stmt->execute());
 var_dump($db->query('select name from test where id=0')->fetchColumn());

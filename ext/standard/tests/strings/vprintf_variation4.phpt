@@ -7,7 +7,7 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 --FILE--
 <?php
 /* Prototype  : string vprintf(string format, array args)
- * Description: Output a formatted string 
+ * Description: Output a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
@@ -19,8 +19,8 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 echo "*** Testing vprintf() : int formats and non-integer values ***\n";
 
 // defining array of int formats
-$formats = 
-  '%d %+d %-d 
+$formats =
+  '%d %+d %-d
    %ld %Ld %4d %-4d
    %10.4d %-10.4d %.4d %04.4d
    %\'#2d %\'2d %\'$2d %\'_2d
@@ -57,7 +57,7 @@ $args_array = array(
          true, false, TRUE, FALSE,
          0, 1, 1, 0,
          1, TRUE, 0, FALSE),
-  
+
 );
 
 // looping to test vprintf() with different int formats from the above $format array
@@ -72,39 +72,37 @@ foreach($args_array as $args) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing vprintf() : int formats and non-integer values ***
 
 -- Iteration 1 --
-2 +0 10 
+2 +0 10
    123456 d -1234 1234
    -1474836480 200000     4000 22000000
    12345 12 -12 -123456
    10 123456 2 0
-int(112)
+int(111)
 
 -- Iteration 2 --
-0 +0 0 
+0 +0 0
    123 d -123 123 
             0 0          123456 0000
    1234 0 $0 _0
    0 123 0 0
-int(92)
+int(91)
 
 -- Iteration 3 --
-1 +1 1 
+1 +1 1
    1 d    1 1   
             1 1          1 0001
    #1 1 $1 _1
    1 1 1 1
-int(81)
+int(80)
 
 -- Iteration 4 --
-1 +1 0 
+1 +1 0
    1 d    0 1   
             1 0          1 0000
    #0 1 $1 _0
    0 1 1 1
-int(81)
-===DONE===
+int(80)

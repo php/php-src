@@ -7,7 +7,7 @@ syntax check
 
 $php = getenv('TEST_PHP_EXECUTABLE');
 
-$filename = dirname(__FILE__)."/011.test.php";
+$filename = __DIR__."/011.test.php";
 
 $code = '
 <?php
@@ -15,7 +15,7 @@ $code = '
 $test = "var";
 
 class test {
-	private $var;
+    private $var;
 }
 
 echo test::$var;
@@ -31,8 +31,8 @@ var_dump(`"$php" -n -l some.unknown`);
 $code = '
 <?php
 
-class test 
-	private $var;
+class test
+    private $var;
 }
 
 ?>
@@ -46,7 +46,7 @@ var_dump(`"$php" -n -l $filename`);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(%d) "No syntax errors detected in %s011.test.php
 "
 string(40) "Could not open input file: some.unknown

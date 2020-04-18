@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +13,6 @@
    | Author:  Jim Winstead <jimw@php.net>                                 |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #include "php.h"
 #include "fopen_wrappers.h"
@@ -116,7 +112,9 @@ static int php_disk_total_space(char *path, double *space) /* {{{ */
 	PHP_WIN32_IOUTIL_INIT_W(path)
 
 	if (GetDiskFreeSpaceExW(pathw, &FreeBytesAvailableToCaller, &TotalNumberOfBytes, &TotalNumberOfFreeBytes) == 0) {
-		php_error_docref(NULL, E_WARNING, "%s", php_win_err());
+		char *err = php_win_err();
+		php_error_docref(NULL, E_WARNING, "%s", err);
+		php_win_err_free(err);
 		PHP_WIN32_IOUTIL_CLEANUP_W()
 		return FAILURE;
 	}
@@ -178,7 +176,7 @@ static int php_disk_total_space(char *path, double *space) /* {{{ */
 /* }}} */
 /* }}} */
 
-/* {{{ proto float disk_total_space(string path)
+/* {{{ proto float|false disk_total_space(string path)
    Get total disk space for filesystem that path is on */
 PHP_FUNCTION(disk_total_space)
 {
@@ -210,13 +208,14 @@ static int php_disk_free_space(char *path, double *space) /* {{{ */
 	PHP_WIN32_IOUTIL_INIT_W(path)
 
 	if (GetDiskFreeSpaceExW(pathw, &FreeBytesAvailableToCaller, &TotalNumberOfBytes, &TotalNumberOfFreeBytes) == 0) {
-		php_error_docref(NULL, E_WARNING, "%s", php_win_err());
+		char *err = php_win_err();
+		php_error_docref(NULL, E_WARNING, "%s", err);
+		php_win_err_free(err);
 		PHP_WIN32_IOUTIL_CLEANUP_W()
 		return FAILURE;
 	}
 
-	/* i know - this is ugly, but i works <thies@thieso.net> */
-	*space = FreeBytesAvailableToCaller.HighPart * (double) (((zend_ulong)1) << 31) * 2.0 + FreeBytesAvailableToCaller.LowPart;
+	*space = FreeBytesAvailableToCaller.HighPart * (double) (1ULL << 32)  + FreeBytesAvailableToCaller.LowPart;
 
 	PHP_WIN32_IOUTIL_CLEANUP_W()
 
@@ -271,7 +270,7 @@ static int php_disk_free_space(char *path, double *space) /* {{{ */
 /* }}} */
 /* }}} */
 
-/* {{{ proto float disk_free_space(string path)
+/* {{{ proto float|false disk_free_space(string path)
    Get free disk space for filesystem that path is on */
 PHP_FUNCTION(disk_free_space)
 {
@@ -340,7 +339,7 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_PATH(filename, filename_len)
 		Z_PARAM_ZVAL(group)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	wrapper = php_stream_locate_url_wrapper(filename, NULL, 0);
 	if(wrapper != &php_plain_files_wrapper || strncasecmp("file://", filename, 7) == 0) {
@@ -354,8 +353,8 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 				option = PHP_STREAM_META_GROUP_NAME;
 				value = Z_STRVAL_P(group);
 			} else {
-				php_error_docref(NULL, E_WARNING, "parameter 2 should be string or integer, %s given", zend_zval_type_name(group));
-				RETURN_FALSE;
+				zend_argument_type_error(2, "must be of type string|int, %s given", zend_zval_type_name(group));
+				RETURN_THROWS();
 			}
 			if(wrapper->wops->stream_metadata(wrapper, filename, option, value, NULL)) {
 				RETURN_TRUE;
@@ -383,8 +382,8 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 			RETURN_FALSE;
 		}
 	} else {
-		php_error_docref(NULL, E_WARNING, "parameter 2 should be string or integer, %s given", zend_zval_type_name(group));
-		RETURN_FALSE;
+		zend_argument_type_error(2, "must be of type string|int, %s given", zend_zval_type_name(group));
+		RETURN_THROWS();
 	}
 
 	/* Check the basedir */
@@ -490,7 +489,7 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 				option = PHP_STREAM_META_OWNER_NAME;
 				value = Z_STRVAL_P(user);
 			} else {
-				php_error_docref(NULL, E_WARNING, "parameter 2 should be string or integer, %s given", zend_zval_type_name(user));
+				php_error_docref(NULL, E_WARNING, "Parameter 2 should be string or int, %s given", zend_zval_type_name(user));
 				RETURN_FALSE;
 			}
 			if(wrapper->wops->stream_metadata(wrapper, filename, option, value, NULL)) {
@@ -520,7 +519,7 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 			RETURN_FALSE;
 		}
 	} else {
-		php_error_docref(NULL, E_WARNING, "parameter 2 should be string or integer, %s given", zend_zval_type_name(user));
+		php_error_docref(NULL, E_WARNING, "Parameter 2 should be string or int, %s given", zend_zval_type_name(user));
 		RETURN_FALSE;
 	}
 
@@ -546,7 +545,7 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 /* }}} */
 
 
-/* {{{ proto bool chown (string filename, mixed user)
+/* {{{ proto bool chown(string filename, mixed user)
    Change file owner */
 PHP_FUNCTION(chown)
 {
@@ -554,7 +553,7 @@ PHP_FUNCTION(chown)
 }
 /* }}} */
 
-/* {{{ proto bool chown (string filename, mixed user)
+/* {{{ proto bool chown(string filename, mixed user)
    Change file owner */
 #if HAVE_LCHOWN
 PHP_FUNCTION(lchown)
@@ -642,11 +641,7 @@ PHP_FUNCTION(touch)
 
 	switch (argc) {
 		case 1:
-#ifdef HAVE_UTIME_NULL
 			newtime = NULL;
-#else
-			newtime->modtime = newtime->actime = time(NULL);
-#endif
 			break;
 		case 2:
 			newtime->modtime = newtime->actime = filetime;
@@ -905,7 +900,7 @@ PHPAPI void php_stat(const char *filename, size_t filename_length, int type, zva
 	case FS_IS_R:
 		RETURN_BOOL((ssb.sb.st_mode&rmask)!=0);
 	case FS_IS_X:
-		RETURN_BOOL((ssb.sb.st_mode&xmask)!=0 && !S_ISDIR(ssb.sb.st_mode));
+		RETURN_BOOL((ssb.sb.st_mode&xmask)!=0);
 	case FS_IS_FILE:
 		RETURN_BOOL(S_ISREG(ssb.sb.st_mode));
 	case FS_IS_DIR:
@@ -925,19 +920,8 @@ PHPAPI void php_stat(const char *filename, size_t filename_length, int type, zva
 		ZVAL_LONG(&stat_nlink, stat_sb->st_nlink);
 		ZVAL_LONG(&stat_uid, stat_sb->st_uid);
 		ZVAL_LONG(&stat_gid, stat_sb->st_gid);
-#ifdef HAVE_ST_RDEV
-# ifdef PHP_WIN32
-	/* It is unsigned, so if a negative came from userspace, it'll
-	   convert to UINT_MAX, but we wan't to keep the userspace value.
-	   Almost the same as in php_if_fstat. */
-	if ((int)stat_sb->st_rdev < 0) {
-		ZVAL_LONG(&stat_rdev, (int)stat_sb->st_rdev);
-	} else {
+#ifdef HAVE_STRUCT_STAT_ST_RDEV
 		ZVAL_LONG(&stat_rdev, stat_sb->st_rdev);
-	}
-# else
-	ZVAL_LONG(&stat_rdev, stat_sb->st_rdev);
-# endif
 #else
 		ZVAL_LONG(&stat_rdev, -1);
 #endif
@@ -945,12 +929,12 @@ PHPAPI void php_stat(const char *filename, size_t filename_length, int type, zva
 		ZVAL_LONG(&stat_atime, stat_sb->st_atime);
 		ZVAL_LONG(&stat_mtime, stat_sb->st_mtime);
 		ZVAL_LONG(&stat_ctime, stat_sb->st_ctime);
-#ifdef HAVE_ST_BLKSIZE
+#ifdef HAVE_STRUCT_STAT_ST_BLKSIZE
 		ZVAL_LONG(&stat_blksize, stat_sb->st_blksize);
 #else
 		ZVAL_LONG(&stat_blksize,-1);
 #endif
-#ifdef HAVE_ST_BLOCKS
+#ifdef HAVE_STRUCT_STAT_ST_BLOCKS
 		ZVAL_LONG(&stat_blocks, stat_sb->st_blocks);
 #else
 		ZVAL_LONG(&stat_blocks,-1);
@@ -972,19 +956,19 @@ PHPAPI void php_stat(const char *filename, size_t filename_length, int type, zva
 		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_blocks);
 
 		/* Store string indexes referencing the same zval*/
-		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[0], strlen(stat_sb_names[0]), &stat_dev);
-		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[1], strlen(stat_sb_names[1]), &stat_ino);
-		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[2], strlen(stat_sb_names[2]), &stat_mode);
-		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[3], strlen(stat_sb_names[3]), &stat_nlink);
-		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[4], strlen(stat_sb_names[4]), &stat_uid);
-		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[5], strlen(stat_sb_names[5]), &stat_gid);
-		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[6], strlen(stat_sb_names[6]), &stat_rdev);
-		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[7], strlen(stat_sb_names[7]), &stat_size);
-		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[8], strlen(stat_sb_names[8]), &stat_atime);
-		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[9], strlen(stat_sb_names[9]), &stat_mtime);
-		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[10], strlen(stat_sb_names[10]), &stat_ctime);
-		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[11], strlen(stat_sb_names[11]), &stat_blksize);
-		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[12], strlen(stat_sb_names[12]), &stat_blocks);
+		zend_hash_str_add_new(Z_ARRVAL_P(return_value), stat_sb_names[0], strlen(stat_sb_names[0]), &stat_dev);
+		zend_hash_str_add_new(Z_ARRVAL_P(return_value), stat_sb_names[1], strlen(stat_sb_names[1]), &stat_ino);
+		zend_hash_str_add_new(Z_ARRVAL_P(return_value), stat_sb_names[2], strlen(stat_sb_names[2]), &stat_mode);
+		zend_hash_str_add_new(Z_ARRVAL_P(return_value), stat_sb_names[3], strlen(stat_sb_names[3]), &stat_nlink);
+		zend_hash_str_add_new(Z_ARRVAL_P(return_value), stat_sb_names[4], strlen(stat_sb_names[4]), &stat_uid);
+		zend_hash_str_add_new(Z_ARRVAL_P(return_value), stat_sb_names[5], strlen(stat_sb_names[5]), &stat_gid);
+		zend_hash_str_add_new(Z_ARRVAL_P(return_value), stat_sb_names[6], strlen(stat_sb_names[6]), &stat_rdev);
+		zend_hash_str_add_new(Z_ARRVAL_P(return_value), stat_sb_names[7], strlen(stat_sb_names[7]), &stat_size);
+		zend_hash_str_add_new(Z_ARRVAL_P(return_value), stat_sb_names[8], strlen(stat_sb_names[8]), &stat_atime);
+		zend_hash_str_add_new(Z_ARRVAL_P(return_value), stat_sb_names[9], strlen(stat_sb_names[9]), &stat_mtime);
+		zend_hash_str_add_new(Z_ARRVAL_P(return_value), stat_sb_names[10], strlen(stat_sb_names[10]), &stat_ctime);
+		zend_hash_str_add_new(Z_ARRVAL_P(return_value), stat_sb_names[11], strlen(stat_sb_names[11]), &stat_blksize);
+		zend_hash_str_add_new(Z_ARRVAL_P(return_value), stat_sb_names[12], strlen(stat_sb_names[12]), &stat_blocks);
 
 		return;
 	}
@@ -1090,21 +1074,20 @@ FileFunction(PHP_FN(file_exists), FS_EXISTS)
 
 /* {{{ proto array lstat(string filename)
    Give information about a file or symbolic link */
-FileFunction(php_if_lstat, FS_LSTAT)
+FileFunction(PHP_FN(lstat), FS_LSTAT)
 /* }}} */
 
 /* {{{ proto array stat(string filename)
    Give information about a file */
-FileFunction(php_if_stat, FS_STAT)
+FileFunction(PHP_FN(stat), FS_STAT)
 /* }}} */
 
 /* {{{ proto bool realpath_cache_size()
    Get current size of realpath cache */
 PHP_FUNCTION(realpath_cache_size)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	RETURN_LONG(realpath_cache_size());
 }
 
@@ -1114,9 +1097,7 @@ PHP_FUNCTION(realpath_cache_get)
 {
 	realpath_cache_bucket **buckets = realpath_cache_get_buckets(), **end = buckets + realpath_cache_max_buckets();
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 	while(buckets < end) {
@@ -1147,12 +1128,3 @@ PHP_FUNCTION(realpath_cache_get)
 		buckets++;
 	}
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

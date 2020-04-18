@@ -68,10 +68,10 @@ $values =  array (
   "",
   '',
 
-  // null vlaues
+  // null values
   NULL,
   null,
-  
+
   // resource variable
   $fp,
 
@@ -91,14 +91,18 @@ for($index = 0; $index < count($values); $index ++) {
   echo "-- Iteration $counter --\n";
   $glue = $values [$index];
 
-  var_dump( join($glue, $pieces) );
+  try {
+    var_dump(join($glue, $pieces));
+  } catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+  }
 
-  $counter ++;
+  $counter++;
 }
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing join() : usage variations ***
 
 --- Testing join() by supplying different values for 'glue' argument ---
@@ -121,25 +125,15 @@ string(29) "element11.07654321E-9element2"
 -- Iteration 9 --
 string(19) "element10.5element2"
 -- Iteration 10 --
-
-Notice: Array to string conversion in %s on line %d
-string(0) ""
+join(): Argument #1 ($glue) must be of type string, array given
 -- Iteration 11 --
-
-Notice: Array to string conversion in %s on line %d
-string(1) "0"
+join(): Argument #1 ($glue) must be of type string, array given
 -- Iteration 12 --
-
-Notice: Array to string conversion in %s on line %d
-string(1) "1"
+join(): Argument #1 ($glue) must be of type string, array given
 -- Iteration 13 --
-
-Notice: Array to string conversion in %s on line %d
-string(7) "1Array2"
+join(): Argument #1 ($glue) must be of type string, array given
 -- Iteration 14 --
-
-Notice: Array to string conversion in %s on line %d
-string(11) "redArraypen"
+join(): Argument #1 ($glue) must be of type string, array given
 -- Iteration 15 --
 string(17) "element11element2"
 -- Iteration 16 --
@@ -159,7 +153,7 @@ string(16) "element1element2"
 -- Iteration 23 --
 string(16) "element1element2"
 -- Iteration 24 --
-string(%d) "element1Resource id #%delement2"
+join(): Argument #1 ($glue) must be of type string|array, resource given
 -- Iteration 25 --
 string(16) "element1element2"
 -- Iteration 26 --

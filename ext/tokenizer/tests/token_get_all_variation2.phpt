@@ -5,7 +5,7 @@ Test token_get_all() function : usage variations - with different arithmetic ope
 --FILE--
 <?php
 /* Prototype  : array token_get_all(string $source)
- * Description: splits the given source into an array of PHP languange tokens
+ * Description: splits the given source into an array of PHP language tokens
  * Source code: ext/tokenizer/tokenizer.c
 */
 
@@ -17,7 +17,7 @@ Test token_get_all() function : usage variations - with different arithmetic ope
 
 echo "*** Testing token_get_all() : 'source' string with different arithmetic operators ***\n";
 
-// arithmetic operators - '+', '-', '*', '/', '%' 
+// arithmetic operators - '+', '-', '*', '/', '%'
 $source = array (
   '<?php $a = 1 + 2; ?>',
   '<?php $b = $b - 2; ?>',

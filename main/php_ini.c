@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,11 +10,9 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author: Zeev Suraski <zeev@zend.com>                                 |
+   | Author: Zeev Suraski <zeev@php.net>                                  |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #include "php.h"
 #include "ext/standard/info.h"
@@ -31,6 +27,7 @@
 #include "php_scandir.h"
 #ifdef PHP_WIN32
 #include "win32/php_registry.h"
+#include "win32/winutil.h"
 #endif
 
 #if HAVE_SCANDIR && HAVE_ALPHASORT && HAVE_DIRENT_H
@@ -70,7 +67,7 @@ PHPAPI char *php_ini_scanned_files=NULL;
 
 /* {{{ php_ini_displayer_cb
  */
-static void php_ini_displayer_cb(zend_ini_entry *ini_entry, int type)
+static ZEND_COLD void php_ini_displayer_cb(zend_ini_entry *ini_entry, int type)
 {
 	if (ini_entry->displayer) {
 		ini_entry->displayer(ini_entry, type);
@@ -116,69 +113,48 @@ static void php_ini_displayer_cb(zend_ini_entry *ini_entry, int type)
 }
 /* }}} */
 
-/* {{{ php_ini_displayer
- */
-static int php_ini_displayer(zval *el, void *arg)
-{
-	zend_ini_entry *ini_entry = (zend_ini_entry*)Z_PTR_P(el);
-	int module_number = *(int *)arg;
-
-	if (ini_entry->module_number != module_number) {
-		return 0;
-	}
-	if (!sapi_module.phpinfo_as_text) {
-		PUTS("<tr>");
-		PUTS("<td class=\"e\">");
-		PHPWRITE(ZSTR_VAL(ini_entry->name), ZSTR_LEN(ini_entry->name));
-		PUTS("</td><td class=\"v\">");
-		php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ACTIVE);
-		PUTS("</td><td class=\"v\">");
-		php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ORIG);
-		PUTS("</td></tr>\n");
-	} else {
-		PHPWRITE(ZSTR_VAL(ini_entry->name), ZSTR_LEN(ini_entry->name));
-		PUTS(" => ");
-		php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ACTIVE);
-		PUTS(" => ");
-		php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ORIG);
-		PUTS("\n");
-	}
-	return 0;
-}
-/* }}} */
-
-/* {{{ php_ini_available
- */
-static int php_ini_available(zval *el, void *arg)
-{
-	zend_ini_entry *ini_entry = (zend_ini_entry *)Z_PTR_P(el);
-	int *module_number_available = (int *)arg;
-	if (ini_entry->module_number == *(int *)module_number_available) {
-		*(int *)module_number_available = -1;
-		return ZEND_HASH_APPLY_STOP;
-	} else {
-		return ZEND_HASH_APPLY_KEEP;
-	}
-}
-/* }}} */
-
 /* {{{ display_ini_entries
  */
-PHPAPI void display_ini_entries(zend_module_entry *module)
+PHPAPI ZEND_COLD void display_ini_entries(zend_module_entry *module)
 {
-	int module_number, module_number_available;
+	int module_number;
+	zend_ini_entry *ini_entry;
+	zend_bool first = 1;
 
 	if (module) {
 		module_number = module->module_number;
 	} else {
 		module_number = 0;
 	}
-	module_number_available = module_number;
-	zend_hash_apply_with_argument(EG(ini_directives), php_ini_available, &module_number_available);
-	if (module_number_available == -1) {
-		php_info_print_table_start();
-		php_info_print_table_header(3, "Directive", "Local Value", "Master Value");
-		zend_hash_apply_with_argument(EG(ini_directives), php_ini_displayer, (void *)&module_number);
+
+	ZEND_HASH_FOREACH_PTR(EG(ini_directives), ini_entry) {
+		if (ini_entry->module_number != module_number) {
+			continue;
+		}
+		if (first) {
+			php_info_print_table_start();
+			php_info_print_table_header(3, "Directive", "Local Value", "Master Value");
+			first = 0;
+		}
+		if (!sapi_module.phpinfo_as_text) {
+			PUTS("<tr>");
+			PUTS("<td class=\"e\">");
+			PHPWRITE(ZSTR_VAL(ini_entry->name), ZSTR_LEN(ini_entry->name));
+			PUTS("</td><td class=\"v\">");
+			php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ACTIVE);
+			PUTS("</td><td class=\"v\">");
+			php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ORIG);
+			PUTS("</td></tr>\n");
+		} else {
+			PHPWRITE(ZSTR_VAL(ini_entry->name), ZSTR_LEN(ini_entry->name));
+			PUTS(" => ");
+			php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ACTIVE);
+			PUTS(" => ");
+			php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ORIG);
+			PUTS("\n");
+		}
+	} ZEND_HASH_FOREACH_END();
+	if (!first) {
 		php_info_print_table_end();
 	}
 }
@@ -196,7 +172,7 @@ PHPAPI void config_zval_dtor(zval *zvalue)
 		zend_hash_destroy(Z_ARRVAL_P(zvalue));
 		free(Z_ARR_P(zvalue));
 	} else if (Z_TYPE_P(zvalue) == IS_STRING) {
-		zend_string_release(Z_STR_P(zvalue));
+		zend_string_release_ex(Z_STR_P(zvalue), 1);
 	}
 }
 /* Reset / free active_ini_sectin global */
@@ -350,6 +326,7 @@ static void php_load_php_extension_cb(void *arg)
 
 /* {{{ php_load_zend_extension_cb
  */
+#ifdef HAVE_LIBDL
 static void php_load_zend_extension_cb(void *arg)
 {
 	char *filename = *((char **) arg);
@@ -360,6 +337,13 @@ static void php_load_zend_extension_cb(void *arg)
 #endif
 
 	if (IS_ABSOLUTE_PATH(filename, length)) {
+#ifdef PHP_WIN32
+	char *err;
+	if (!php_win32_image_compatible(filename, &err)) {
+		php_error(E_CORE_WARNING, err);
+		return;
+	}
+#endif
 		zend_load_extension(filename);
 	} else {
 		DL_HANDLE handle;
@@ -405,10 +389,23 @@ static void php_load_zend_extension_cb(void *arg)
 			efree(err1);
 		}
 
+#ifdef PHP_WIN32
+		if (!php_win32_image_compatible(libpath, &err1)) {
+				php_error(E_CORE_WARNING, err1);
+				efree(err1);
+				efree(libpath);
+				DL_UNLOAD(handle);
+				return;
+		}
+#endif
+
 		zend_load_extension_handle(handle, libpath);
 		efree(libpath);
 	}
 }
+#else
+static void php_load_zend_extension_cb(void *arg) { }
+#endif
 /* }}} */
 
 /* {{{ php_init_config
@@ -420,8 +417,9 @@ int php_init_config(void)
 	int php_ini_scanned_path_len;
 	char *open_basedir;
 	int free_ini_search_path = 0;
-	zend_file_handle fh;
 	zend_string *opened_path = NULL;
+	FILE *fp;
+	const char *filename;
 
 	zend_hash_init(&configuration_hash, 8, NULL, config_zval_dtor, 1);
 
@@ -573,7 +571,8 @@ int php_init_config(void)
 	 * Find and open actual ini file
 	 */
 
-	memset(&fh, 0, sizeof(fh));
+	fp = NULL;
+	filename = NULL;
 
 	/* If SAPI does not want to ignore all ini files OR an overriding file/path is given.
 	 * This allows disabling scanning for ini files in the PHP_CONFIG_FILE_SCAN_DIR but still
@@ -586,31 +585,31 @@ int php_init_config(void)
 
 			if (!VCWD_STAT(php_ini_file_name, &statbuf)) {
 				if (!((statbuf.st_mode & S_IFMT) == S_IFDIR)) {
-					fh.handle.fp = VCWD_FOPEN(php_ini_file_name, "r");
-					if (fh.handle.fp) {
-						fh.filename = expand_filepath(php_ini_file_name, NULL);
+					fp = VCWD_FOPEN(php_ini_file_name, "r");
+					if (fp) {
+						filename = expand_filepath(php_ini_file_name, NULL);
 					}
 				}
 			}
 		}
 
 		/* Otherwise search for php-%sapi-module-name%.ini file in search path */
-		if (!fh.handle.fp) {
+		if (!fp) {
 			const char *fmt = "php-%s.ini";
 			char *ini_fname;
 			spprintf(&ini_fname, 0, fmt, sapi_module.name);
-			fh.handle.fp = php_fopen_with_path(ini_fname, "r", php_ini_search_path, &opened_path);
+			fp = php_fopen_with_path(ini_fname, "r", php_ini_search_path, &opened_path);
 			efree(ini_fname);
-			if (fh.handle.fp) {
-				fh.filename = ZSTR_VAL(opened_path);
+			if (fp) {
+				filename = ZSTR_VAL(opened_path);
 			}
 		}
 
 		/* If still no ini file found, search for php.ini file in search path */
-		if (!fh.handle.fp) {
-			fh.handle.fp = php_fopen_with_path("php.ini", "r", php_ini_search_path, &opened_path);
-			if (fh.handle.fp) {
-				fh.filename = ZSTR_VAL(opened_path);
+		if (!fp) {
+			fp = php_fopen_with_path("php.ini", "r", php_ini_search_path, &opened_path);
+			if (fp) {
+				filename = ZSTR_VAL(opened_path);
 			}
 		}
 	}
@@ -621,8 +620,9 @@ int php_init_config(void)
 
 	PG(open_basedir) = open_basedir;
 
-	if (fh.handle.fp) {
-		fh.type = ZEND_HANDLE_FP;
+	if (fp) {
+		zend_file_handle fh;
+		zend_stream_init_fp(&fh, fp, filename);
 		RESET_ACTIVE_INI_HASH();
 
 		zend_parse_ini_file(&fh, 1, ZEND_INI_SCANNER_NORMAL, (zend_ini_parser_cb_t) php_ini_parser_cb, &configuration_hash);
@@ -633,7 +633,7 @@ int php_init_config(void)
 			ZVAL_NEW_STR(&tmp, zend_string_init(fh.filename, strlen(fh.filename), 1));
 			zend_hash_str_update(&configuration_hash, "cfg_file_path", sizeof("cfg_file_path")-1, &tmp);
 			if (opened_path) {
-				zend_string_release(opened_path);
+				zend_string_release_ex(opened_path, 0);
 			} else {
 				efree((char *)fh.filename);
 			}
@@ -656,7 +656,6 @@ int php_init_config(void)
 		zend_stat_t sb;
 		char ini_file[MAXPATHLEN];
 		char *p;
-		zend_file_handle fh2;
 		zend_llist scanned_ini_list;
 		zend_llist_element *element;
 		int l, total_l = 0;
@@ -664,7 +663,6 @@ int php_init_config(void)
 		int lenpath;
 
 		zend_llist_init(&scanned_ini_list, sizeof(char *), (llist_dtor_func_t) free_estring, 1);
-		memset(&fh2, 0, sizeof(fh2));
 
 		bufpath = estrdup(php_ini_scanned_path);
 		for (debpath = bufpath ; debpath ; debpath=endpath) {
@@ -698,11 +696,10 @@ int php_init_config(void)
 					}
 					if (VCWD_STAT(ini_file, &sb) == 0) {
 						if (S_ISREG(sb.st_mode)) {
-							if ((fh2.handle.fp = VCWD_FOPEN(ini_file, "r"))) {
-								fh2.filename = ini_file;
-								fh2.type = ZEND_HANDLE_FP;
-
-								if (zend_parse_ini_file(&fh2, 1, ZEND_INI_SCANNER_NORMAL, (zend_ini_parser_cb_t) php_ini_parser_cb, &configuration_hash) == SUCCESS) {
+							zend_file_handle fh;
+							zend_stream_init_fp(&fh, VCWD_FOPEN(ini_file, "r"), ini_file);
+							if (fh.handle.fp) {
+								if (zend_parse_ini_file(&fh, 1, ZEND_INI_SCANNER_NORMAL, (zend_ini_parser_cb_t) php_ini_parser_cb, &configuration_hash) == SUCCESS) {
 									/* Here, add it to the list of ini files read */
 									l = (int)strlen(ini_file);
 									total_l += l + 2;
@@ -785,17 +782,14 @@ PHPAPI int php_parse_user_ini_file(const char *dirname, char *ini_filename, Hash
 {
 	zend_stat_t sb;
 	char ini_file[MAXPATHLEN];
-	zend_file_handle fh;
 
 	snprintf(ini_file, MAXPATHLEN, "%s%c%s", dirname, DEFAULT_SLASH, ini_filename);
 
 	if (VCWD_STAT(ini_file, &sb) == 0) {
 		if (S_ISREG(sb.st_mode)) {
-			memset(&fh, 0, sizeof(fh));
-			if ((fh.handle.fp = VCWD_FOPEN(ini_file, "r"))) {
-				fh.filename = ini_file;
-				fh.type = ZEND_HANDLE_FP;
-
+			zend_file_handle fh;
+			zend_stream_init_fp(&fh, VCWD_FOPEN(ini_file, "r"), ini_file);
+			if (fh.handle.fp) {
 				/* Reset active ini section */
 				RESET_ACTIVE_INI_HASH();
 
@@ -964,13 +958,3 @@ PHPAPI HashTable* php_ini_get_configuration_hash(void) /* {{{ */
 {
 	return &configuration_hash;
 } /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

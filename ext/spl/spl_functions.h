@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +13,6 @@
    | Authors: Marcus Boerger <helly@php.net>                              |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #ifndef PHP_FUNCTIONS_H
 #define PHP_FUNCTIONS_H
@@ -80,12 +76,3 @@ zend_string *spl_gen_private_prop_name(zend_class_entry *ce, char *prop_name, in
 #define SPL_MA(class_name, function_name, alias_class, alias_function, arg_info, flags) \
 	PHP_MALIAS(spl_ ## alias_class, function_name, alias_function, arg_info, flags)
 #endif /* PHP_FUNCTIONS_H */
-
-/*
- * Local Variables:
- * c-basic-offset: 4
- * tab-width: 4
- * End:
- * vim600: fdm=marker
- * vim: noet sw=4 ts=4
- */

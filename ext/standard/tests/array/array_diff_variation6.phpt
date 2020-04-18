@@ -3,8 +3,8 @@ Test array_diff() function : usage variations - array containing duplicate keys 
 --FILE--
 <?php
 /* Prototype  : array array_diff(array $arr1, array $arr2 [, array ...])
- * Description: Returns the entries of $arr1 that have values which are not 
- * present in any of the others arguments. 
+ * Description: Returns the entries of $arr1 that have values which are not
+ * present in any of the others arguments.
  * Source code: ext/standard/array.c
  */
 
@@ -20,8 +20,8 @@ echo "*** Testing array_diff() : usage variations ***\n";
 $array_index = array('a', 'b', 'c', 0 => 'd', 'b');   //duplicate key (0), duplicate value (b)
 $array_assoc = array ('2' => 'c',   //same key=>value pair, different order
                       '1' => 'b',
-                      '0' => 'a', 
-                      'b' => '3',   //key and value from array_index swapped 
+                      '0' => 'a',
+                      'b' => '3',   //key and value from array_index swapped
                       'c' => 2);    //same as above, using integer
 
 var_dump(array_diff($array_index, $array_assoc));
@@ -29,7 +29,7 @@ var_dump(array_diff($array_assoc, $array_index));
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_diff() : usage variations ***
 array(1) {
   [0]=>

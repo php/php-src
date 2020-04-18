@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -21,7 +19,6 @@
 
 #include "php_intl.h"
 #include "collator_class.h"
-#include "collator_error.h"
 
 /* {{{ proto int Collator::getErrorCode( Collator $coll )
  * Get collator's last error code. }}} */
@@ -36,10 +33,7 @@ PHP_FUNCTION( collator_get_error_code )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, Collator_ce_ptr ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"collator_get_error_code: unable to parse input params", 0 );
-
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object (without resetting its last error code). */
@@ -67,10 +61,7 @@ PHP_FUNCTION( collator_get_error_message )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, Collator_ce_ptr ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"collator_get_error_message: unable to parse input params", 0 );
-
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object (without resetting its last error code). */
@@ -83,12 +74,3 @@ PHP_FUNCTION( collator_get_error_message )
 	RETURN_STR(message);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

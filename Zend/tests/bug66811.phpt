@@ -1,5 +1,5 @@
 --TEST--
-Bug #66811: Cannot access static::class in lambda, writen outside of a class
+Bug #66811: Cannot access static::class in lambda, written outside of a class
 --FILE--
 <?php
 class A {

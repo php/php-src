@@ -1,42 +1,41 @@
 --TEST--
-Bug #31102 (Exception not handled when thrown inside __autoload())
+Bug #31102 (Exception not handled when thrown inside autoloader)
 --FILE--
 <?php
 
 $test = 0;
 
 spl_autoload_register(function ($class) {
-	global $test;
+    global $test;
 
-	echo __METHOD__ . "($class,$test)\n";
-	switch($test)
-	{
-	case 1:
-		eval("class $class { function __construct(){throw new Exception('$class::__construct');}}");
-		return;
-	case 2:
-		eval("class $class { function __construct(){throw new Exception('$class::__construct');}}");
-		throw new Exception(__METHOD__);
-		return;
-	case 3:
-		return;
-	}
+    echo __METHOD__ . "($class,$test)\n";
+    switch($test)
+    {
+    case 1:
+        eval("class $class { function __construct(){throw new Exception('$class::__construct');}}");
+        return;
+    case 2:
+        eval("class $class { function __construct(){throw new Exception('$class::__construct');}}");
+        throw new Exception(__METHOD__);
+        return;
+    case 3:
+        return;
+    }
 });
 
 while($test++ < 5)
 {
-	try
-	{
-		eval("\$bug = new Test$test();");
-	}
-	catch (Exception $e)
-	{
-		echo "Caught: " . $e->getMessage() . "\n";
-	}
+    try
+    {
+        eval("\$bug = new Test$test();");
+    }
+    catch (Exception $e)
+    {
+        echo "Caught: " . $e->getMessage() . "\n";
+    }
 }
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 {closure}(Test1,1)
 Caught: Test1::__construct

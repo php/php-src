@@ -1,20 +1,20 @@
 --TEST--
-Bug #45571 (ReflectionClass::export() shows superclasses' private static methods.)
+Bug #45571 (ReflectionClass::__toString() shows superclasses' private static methods.)
 --FILE--
 <?php
 
 Class A {
-	static private $a 	= 0;
-	static protected $b = 1;
-	static public $c 	= 2;
-	
-	private function f() {}
-	private static function sf() {}
+    static private $a 	= 0;
+    static protected $b = 1;
+    static public $c 	= 2;
+
+    private function f() {}
+    private static function sf() {}
 }
 
 Class C extends A { }
 
-ReflectionClass::export("C");
+echo new ReflectionClass("C");
 
 ?>
 --EXPECTF--
@@ -25,8 +25,8 @@ Class [ <user> class C extends A ] {
   }
 
   - Static properties [2] {
-    Property [ protected static $b ]
-    Property [ public static $c ]
+    Property [ protected static $b = 1 ]
+    Property [ public static $c = 2 ]
   }
 
   - Static methods [0] {

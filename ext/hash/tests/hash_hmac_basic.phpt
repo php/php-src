@@ -1,14 +1,12 @@
 --TEST--
-Test hash_file() function : basic functionality 
---SKIPIF--
-<?php extension_loaded('hash') or die('skip: hash extension not loaded.'); ?>
+Hash: hash_file() function : basic functionality
 --FILE--
 <?php
 
 /* Prototype  : string hash_hmac  ( string $algo  , string $data  , string $key  [, bool $raw_output  ] )
  * Description: Generate a keyed hash value using the HMAC method
  * Source code: ext/hash/hash.c
- * Alias to functions: 
+ * Alias to functions:
 */
 
 echo "*** Testing hash_hmac() : basic functionality ***\n";
@@ -36,8 +34,7 @@ echo "md5(raw): " . bin2hex(hash_hmac('md5', $content, $key, TRUE)) . "\n";
 echo "sha256(raw): " . bin2hex(hash_hmac('sha256', $content, $key, TRUE)) . "\n";
 
 ?>
-===Done===
---EXPECTF--
+--EXPECT--
 *** Testing hash_hmac() : basic functionality ***
 gost: a4a3c80bdf3f8665bf07376a34dc9c1b11af7c813f4928f62e39f0c0dc564dad
 haval128,3: 4d1318607f0406bd1b7bd50907772672
@@ -57,4 +54,3 @@ tiger192,3: 00a0f884f15a9e5549ed0e40ca0190522d369027e16d5b59
 whirlpool: 4a0f1582b21b7aff59bfba7f9c29131c69741b2ce80acdc7d314040f3b768cf5a17e30b74cceb86fbc6b34b1692e0addd5bfd7cfc043d40c0621f1b97e26fa49
 md5(raw): 2a632783e2812cf23de100d7d6a463ae
 sha256(raw): 49bde3496b9510a17d0edd8a4b0ac70148e32a1d51e881ec76faa96534125838
-===Done===

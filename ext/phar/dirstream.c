@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | phar:// stream wrapper support                                       |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2005-2017 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -25,7 +25,7 @@ BEGIN_EXTERN_C()
 void phar_dostat(phar_archive_data *phar, phar_entry_info *data, php_stream_statbuf *ssb, zend_bool is_dir);
 END_EXTERN_C()
 
-php_stream_ops phar_dir_ops = {
+const php_stream_ops phar_dir_ops = {
 	phar_dir_write, /* write */
 	phar_dir_read,  /* read  */
 	phar_dir_close, /* close */
@@ -44,9 +44,8 @@ static int phar_dir_close(php_stream *stream, int close_handle)  /* {{{ */
 {
 	HashTable *data = (HashTable *)stream->abstract;
 
-	if (data && data->u.flags) {
+	if (data) {
 		zend_hash_destroy(data);
-		data->u.flags = 0;
 		FREE_HASHTABLE(data);
 		stream->abstract = NULL;
 	}
@@ -90,7 +89,7 @@ static int phar_dir_seek(php_stream *stream, zend_off_t offset, int whence, zend
 /**
  * Used for readdir() on an opendir()ed phar directory handle
  */
-static size_t phar_dir_read(php_stream *stream, char *buf, size_t count) /* {{{ */
+static ssize_t phar_dir_read(php_stream *stream, char *buf, size_t count) /* {{{ */
 {
 	size_t to_read;
 	HashTable *data = (HashTable *)stream->abstract;
@@ -119,9 +118,9 @@ static size_t phar_dir_read(php_stream *stream, char *buf, size_t count) /* {{{ 
 /**
  * Dummy: Used for writing to a phar directory (i.e. not used)
  */
-static size_t phar_dir_write(php_stream *stream, const char *buf, size_t count) /* {{{ */
+static ssize_t phar_dir_write(php_stream *stream, const char *buf, size_t count) /* {{{ */
 {
-	return 0;
+	return -1;
 }
 /* }}} */
 
@@ -145,30 +144,19 @@ static int phar_add_empty(HashTable *ht, char *arKey, uint32_t nKeyLength)  /* {
 	zval dummy;
 
 	ZVAL_NULL(&dummy);
-	return (zend_hash_str_update(ht, arKey, nKeyLength, &dummy) != NULL) ? SUCCESS : FAILURE;
+	zend_hash_str_update(ht, arKey, nKeyLength, &dummy);
+	return SUCCESS;
 }
 /* }}} */
 
 /**
  * Used for sorting directories alphabetically
  */
-static int phar_compare_dir_name(const void *a, const void *b)  /* {{{ */
+static int phar_compare_dir_name(Bucket *f, Bucket *s)  /* {{{ */
 {
-	Bucket *f;
-	Bucket *s;
-	int result;
-
-	f = (Bucket *) a;
-	s = (Bucket *) b;
-	result = zend_binary_strcmp(ZSTR_VAL(f->key), ZSTR_LEN(f->key), ZSTR_VAL(s->key), ZSTR_LEN(s->key));
-
-	if (result < 0) {
-		return -1;
-	} else if (result > 0) {
-		return 1;
-	} else {
-		return 0;
-	}
+	int result = zend_binary_strcmp(
+		ZSTR_VAL(f->key), ZSTR_LEN(f->key), ZSTR_VAL(s->key), ZSTR_LEN(s->key));
+	return ZEND_NORMALIZE_BOOL(result);
 }
 /* }}} */
 
@@ -183,7 +171,7 @@ static php_stream *phar_make_dirstream(char *dir, HashTable *manifest) /* {{{ */
 	size_t dirlen = strlen(dir);
 	char *entry, *found, *save;
 	zend_string *str_key;
-	uint32_t keylen;
+	size_t keylen;
 	zend_ulong unused;
 
 	ALLOC_HASHTABLE(data);
@@ -204,8 +192,8 @@ static php_stream *phar_make_dirstream(char *dir, HashTable *manifest) /* {{{ */
 		}
 
 		keylen = ZSTR_LEN(str_key);
-		if (keylen <= (uint32_t)dirlen) {
-			if (keylen == 0 || keylen < (uint32_t)dirlen || !strncmp(ZSTR_VAL(str_key), dir, dirlen)) {
+		if (keylen <= dirlen) {
+			if (keylen == 0 || keylen < dirlen || !strncmp(ZSTR_VAL(str_key), dir, dirlen)) {
 				if (SUCCESS != zend_hash_move_forward(manifest)) {
 					break;
 				}
@@ -285,10 +273,7 @@ PHAR_ADD_ENTRY:
 
 	if (FAILURE != zend_hash_has_more_elements(data)) {
 		efree(dir);
-		if (zend_hash_sort(data, phar_compare_dir_name, 0) == FAILURE) {
-			FREE_HASHTABLE(data);
-			return NULL;
-		}
+		zend_hash_sort(data, phar_compare_dir_name, 0);
 		return php_stream_alloc(&phar_dir_ops, data, NULL, "r");
 	} else {
 		efree(dir);
@@ -361,7 +346,7 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path,
 		return ret;
 	}
 
-	if (!phar->manifest.u.flags) {
+	if (!HT_IS_INITIALIZED(&phar->manifest)) {
 		php_url_free(resource);
 		return NULL;
 	}
@@ -378,14 +363,14 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path,
 		php_url_free(resource);
 		return phar_make_dirstream(internal_file, &phar->manifest);
 	} else {
-		int i_len = strlen(internal_file);
+		size_t i_len = strlen(internal_file);
 
 		/* search for directory */
 		zend_hash_internal_pointer_reset(&phar->manifest);
 		while (FAILURE != zend_hash_has_more_elements(&phar->manifest)) {
 			if (HASH_KEY_NON_EXISTENT !=
 					zend_hash_get_current_key(&phar->manifest, &str_key, &unused)) {
-				if (ZSTR_LEN(str_key) > (uint32_t)i_len && 0 == memcmp(ZSTR_VAL(str_key), internal_file, i_len)) {
+				if (ZSTR_LEN(str_key) > i_len && 0 == memcmp(ZSTR_VAL(str_key), internal_file, i_len)) {
 					/* directory found */
 					internal_file = estrndup(internal_file,
 							i_len);
@@ -413,7 +398,7 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url_from, int mo
 	phar_entry_info entry, *e;
 	phar_archive_data *phar = NULL;
 	char *error, *arch, *entry2;
-	int arch_len, entry_len;
+	size_t arch_len, entry_len;
 	php_url *resource = NULL;
 	uint32_t host_len;
 
@@ -455,7 +440,7 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url_from, int mo
 	host_len = ZSTR_LEN(resource->host);
 
 	if (FAILURE == phar_get_archive(&phar, ZSTR_VAL(resource->host), host_len, NULL, 0, &error)) {
-		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot create directory \"%s\" in phar \"%s\", error retrieving phar information: %s", resource->path+1, ZSTR_VAL(resource->host), error);
+		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot create directory \"%s\" in phar \"%s\", error retrieving phar information: %s", ZSTR_VAL(resource->path) + 1, ZSTR_VAL(resource->host), error);
 		efree(error);
 		php_url_free(resource);
 		return 0;
@@ -545,7 +530,7 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 	phar_entry_info *entry;
 	phar_archive_data *phar = NULL;
 	char *error, *arch, *entry2;
-	int arch_len, entry_len;
+	size_t arch_len, entry_len;
 	php_url *resource = NULL;
 	uint32_t host_len;
 	zend_string *str_key;
@@ -666,12 +651,3 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 	return 1;
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

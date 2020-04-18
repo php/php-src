@@ -15,7 +15,7 @@ echo "*** Testing array_reverse() : usage variations ***\n";
 
 // Initializing the 2-d arrays
 $two_dimensional_array = array(
-     
+
   // associative array
   array('color' => 'red', 'item' => 'pen', 'place' => 'LA'),
 
@@ -24,7 +24,7 @@ $two_dimensional_array = array(
 
    // combination of numeric and associative arrays
    array('a' => 'green', 'red', 'brown', 33, 88, 'orange', 'item' => 'ball')
-); 
+);
 
 // calling array_reverse() with various types of 2-d arrays
 // with default arguments
@@ -43,7 +43,7 @@ var_dump( array_reverse($two_dimensional_array[1], false) );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_reverse() : usage variations ***
 -- with default argument --
 array(3) {

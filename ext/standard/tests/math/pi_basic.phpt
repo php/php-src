@@ -6,9 +6,9 @@ precision=14
 <?php
 echo pi(), "\n";
 echo M_PI, "\n";
-// N.B pi() ignores all specified arguments no error 
-// messages are produced if arguments are spcified. 
+// N.B pi() ignores all specified arguments no error
+// messages are produced if arguments are spcified.
 ?>
---EXPECTF--
+--EXPECT--
 3.1415926535898
 3.1415926535898

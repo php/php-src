@@ -8,7 +8,7 @@ Test natcasesort() function : usage variations - referenced variables
  */
 
 /*
- * Pass an array of referenced varaibles to test how natcasesort() re-orders it
+ * Pass an array of referenced variables to test how natcasesort() re-orders it
  */
 
 echo "*** Testing natcasesort() : usage variation ***\n";
@@ -29,7 +29,7 @@ var_dump($array);
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing natcasesort() : usage variation ***
 
 -- Initial test --

@@ -35,7 +35,6 @@
 #include "mbfilter_iso2022jp_2004.h"
 #include "mbfilter_sjis_2004.h"
 
-#include "unicode_table_jis2004.h"
 #include "unicode_table_jis.h"
 
 extern int mbfl_filt_conv_any_jis_flush(mbfl_convert_filter *filter);
@@ -65,7 +64,8 @@ const struct mbfl_convert_vtbl vtbl_2022jp_2004_wchar = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_jis2004_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_2022jp_2004 = {
@@ -74,7 +74,8 @@ const struct mbfl_convert_vtbl vtbl_wchar_2022jp_2004 = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_wchar_jis2004,
-	mbfl_filt_conv_jis2004_flush
+	mbfl_filt_conv_jis2004_flush,
+	NULL,
 };
 
 static int mbfl_filt_ident_2022jp_2004(int c, mbfl_identify_filter *filter)
@@ -166,5 +167,3 @@ retry:
 
 	return c;
 }
-
-

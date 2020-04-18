@@ -17,23 +17,35 @@ var_dump($str[TRUE]);
 var_dump($str[FALSE]);
 
 $fp = fopen(__FILE__, "r");
-var_dump($str[$fp]);
+try {
+    var_dump($str[$fp]);
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
 $obj = new stdClass;
-var_dump($str[$obj]);
+try {
+    var_dump($str[$obj]);
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
 $arr = Array(1,2,3);
-var_dump($str[$arr]);
+try {
+    var_dump($str[$arr]);
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(1) "i"
 
-Notice: String offset cast occurred in %s on line %d
+Warning: String offset cast occurred in %s on line %d
 string(1) "S"
 
-Notice: String offset cast occurred in %s on line %d
+Warning: String offset cast occurred in %s on line %d
 string(1) "S"
 
 Warning: Illegal string offset 'run away' in %s on line %d
@@ -46,20 +58,14 @@ string(1) "o"
 Notice: A non well formed numeric value encountered in %s on line %d
 string(1) "r"
 
-Notice: String offset cast occurred in %s on line %d
+Warning: String offset cast occurred in %s on line %d
 string(1) "i"
 
-Notice: String offset cast occurred in %s on line %d
+Warning: String offset cast occurred in %s on line %d
 string(1) "S"
-
-Warning: Illegal offset type in %s on line %d
-string(1) "%s"
-
-Warning: Illegal offset type in %s on line %d
+Illegal offset type
 
 Notice: Object of class stdClass could not be converted to int in %s on line %d
-string(1) "%s"
-
-Warning: Illegal offset type in %s on line %d
-string(1) "i"
+Illegal offset type
+Illegal offset type
 Done

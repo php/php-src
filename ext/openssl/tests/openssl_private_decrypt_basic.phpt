@@ -5,8 +5,8 @@ openssl_private_decrypt() tests
 --FILE--
 <?php
 $data = "Testing openssl_public_decrypt()";
-$privkey = "file://" . dirname(__FILE__) . "/private_rsa_1024.key";
-$pubkey = "file://" . dirname(__FILE__) . "/public.key";
+$privkey = "file://" . __DIR__ . "/private_rsa_1024.key";
+$pubkey = "file://" . __DIR__ . "/public.key";
 $wrong = "wrong";
 
 openssl_public_encrypt($data, $encrypted, $pubkey);
@@ -31,7 +31,7 @@ NULL
 bool(false)
 NULL
 
-Warning: openssl_private_decrypt(): key array must be of the form array(0 => key, 1 => phrase) in %s on line %d
+Warning: openssl_private_decrypt(): Key array must be of the form array(0 => key, 1 => phrase) in %s on line %d
 
 Warning: openssl_private_decrypt(): key parameter is not a valid private key in %s on line %d
 bool(false)

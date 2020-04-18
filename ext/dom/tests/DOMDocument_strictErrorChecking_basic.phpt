@@ -1,5 +1,5 @@
 --TEST--
-DomDocument::$strictErrorChecking - basic test 
+DomDocument::$strictErrorChecking - basic test
 --CREDITS--
 Vincent Tsao <notes4vincent@gmail.com>
 # TestFest 2009 NYPHP
@@ -9,7 +9,7 @@ Vincent Tsao <notes4vincent@gmail.com>
 <?php
 
 $doc = new DOMDocument;
-$doc->load(dirname(__FILE__)."/book.xml");
+$doc->load(__DIR__."/book.xml");
 
 var_dump($doc->strictErrorChecking);
 

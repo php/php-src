@@ -175,7 +175,7 @@ Cannot rebind scope of closure created by ReflectionFunctionAbstract::getClosure
 -------------------
 
 bindTo(null, Cls::class):
-Success!
+Cannot unbind $this of method
 
 bindTo(new Cls, Cls::class):
 Success!
@@ -208,10 +208,10 @@ bindTo(new ClsUnrelated, SplDoublyLinkedList::class):
 Cannot bind method SplDoublyLinkedList::count() to object of class ClsUnrelated
 
 bindTo(null, null):
-Cannot unbind $this of internal method
+Cannot unbind $this of method
 
 bindTo(null, SplDoublyLinkedList::class):
-Cannot unbind $this of internal method
+Cannot unbind $this of method
 
 bindTo(new SplDoublyLinkedList, null):
 Cannot rebind scope of closure created by ReflectionFunctionAbstract::getClosure()

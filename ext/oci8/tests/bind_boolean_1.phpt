@@ -1,22 +1,22 @@
 --TEST--
 Basic PL/SQL "BOOLEAN" (SQLT_BOL) bind test
 --SKIPIF--
-<?php 
-if (!extension_loaded('oci8')) die ("skip no oci8 extension"); 
-require(dirname(__FILE__).'/connect.inc');
+<?php
+if (!extension_loaded('oci8')) die ("skip no oci8 extension");
+require(__DIR__.'/connect.inc');
 preg_match('/.*Release ([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)*/', oci_server_version($c), $matches);
 if (!(isset($matches[0]) && $matches[1] >= 12)) {
     die("skip expected output only valid when using Oracle Database 12c or greater");
 }
 preg_match('/^[[:digit:]]+/', oci_client_version(), $matches);
-if (!(isset($matches[0]) && $matches[0] >= 12)) { 
+if (!(isset($matches[0]) && $matches[0] >= 12)) {
     die("skip works only with Oracle 12c or greater version of Oracle client libraries");
 }
 ?>
 --FILE--
 <?php
 
-require(dirname(__FILE__).'/connect.inc');
+require(__DIR__.'/connect.inc');
 
 // Run Test
 
@@ -46,7 +46,7 @@ var_dump($b);
 
 echo "Test 3\n";
 
-$sql = 
+$sql =
     "begin
     if (:input < 10) then
         :output := true;
@@ -64,7 +64,7 @@ for ($input = 5; $input < 15; ++$input) {
 
 echo "Test 4\n";
 
-$sql = 
+$sql =
 "begin
   if (mod(:userid,2) = 0) then
     :b := true;
@@ -82,7 +82,7 @@ for ($userid = 1; $userid <= 10; ++$userid) {
 
 echo "Test 5\n";
 
-$sql = 
+$sql =
 "declare
   l boolean;
 begin
@@ -100,9 +100,7 @@ oci_execute($s);
 var_dump($b1, $b2);
 
 ?>
-===DONE===
-<?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 Test 1
 bool(true)
 bool(false)
@@ -135,4 +133,3 @@ bool(true)
 bool(false)
 bool(false)
 bool(true)
-===DONE===

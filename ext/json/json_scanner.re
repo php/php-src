@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -104,7 +102,7 @@ void php_json_scanner_init(php_json_scanner *s, char *str, size_t str_len, int o
 int php_json_scan(php_json_scanner *s)
 {
 	ZVAL_NULL(&s->value);
-	
+
 std:
 	s->token = s->cursor;
 
@@ -393,4 +391,3 @@ std:
 */
 
 }
-

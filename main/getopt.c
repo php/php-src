@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +14,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
@@ -28,6 +24,7 @@
 #define OPTERRNF (2)
 #define OPTERRARG (3)
 
+// Print error message to stderr and return -2 to distinguish it from '?' command line option.
 static int php_opt_error(int argc, char * const *argv, int oint, int optchr, int err, int show_err) /* {{{ */
 {
 	if (show_err)
@@ -49,7 +46,7 @@ static int php_opt_error(int argc, char * const *argv, int oint, int optchr, int
 			break;
 		}
 	}
-	return('?');
+	return PHP_GETOPT_INVALID_ARG;
 }
 /* }}} */
 
@@ -196,12 +193,3 @@ PHPAPI int php_getopt(int argc, char* const *argv, const opt_struct opts[], char
 	return(0);	/* never reached */
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

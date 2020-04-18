@@ -1,5 +1,5 @@
 --TEST--
-Test mb_ereg() function : basic functionality 
+Test mb_ereg() function : basic functionality
 --SKIPIF--
 <?php
 extension_loaded('mbstring') or die('skip');
@@ -8,7 +8,7 @@ function_exists('mb_ereg') or die("skip mb_ereg() is not available in this build
 --FILE--
 <?php
 /* Prototype  : int mb_ereg(string $pattern, string $string [, array $registers])
- * Description: Regular expression match for multibyte string 
+ * Description: Regular expression match for multibyte string
  * Source code: ext/mbstring/php_mbregex.c
  */
 
@@ -19,9 +19,9 @@ function_exists('mb_ereg') or die("skip mb_ereg() is not available in this build
 echo "*** Testing mb_ereg() : basic functionality ***\n";
 
 if(mb_regex_encoding('utf-8') == true) {
-	echo "Regex encoding set to utf-8\n";
+    echo "Regex encoding set to utf-8\n";
 } else {
-	echo "Could not set regex encoding to utf-8\n";
+    echo "Could not set regex encoding to utf-8\n";
 }
 $string_ascii = 'This is an English string. 0123456789.';
 $regex_ascii1 = '(.*is)+.*\.[[:blank:]][0-9]{9}';
@@ -59,23 +59,22 @@ echo "Done";
  * @param array $regs
  */
 function base64_encode_var_dump($regs) {
-	if ($regs) {
-		echo "array(" . count($regs) . ") {\n";
-		foreach ($regs as $key => $value) {
-			echo "  [$key]=>\n  ";
-			if (is_string($value)) {
-				var_dump(base64_encode($value));
-			} else {
-				var_dump($value);
-			}
-		}
-		echo "}\n";
-	} else {
-		echo "NULL\n";
-	}
+    if ($regs) {
+        echo "array(" . count($regs) . ") {\n";
+        foreach ($regs as $key => $value) {
+            echo "  [$key]=>\n  ";
+            if (is_string($value)) {
+                var_dump(base64_encode($value));
+            } else {
+                var_dump($value);
+            }
+        }
+        echo "}\n";
+    } else {
+        echo "NULL\n";
+    }
 }
 ?>
-
 --EXPECT--
 *** Testing mb_ereg() : basic functionality ***
 Regex encoding set to utf-8

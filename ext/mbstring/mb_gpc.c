@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +14,6 @@
    |         Moriyoshi Koizumi <moriyoshi@php.net>                        |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 /* {{{ includes */
 #ifdef HAVE_CONFIG_H
@@ -60,11 +56,6 @@ MBSTRING_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
 	const mbfl_encoding *detected;
 	php_mb_encoding_handler_info_t info;
 
-	if (arg != PARSE_STRING) {
-		char *value = MBSTRG(internal_encoding_name);
-		_php_mb_ini_mbstring_internal_encoding_set(value, value ? strlen(value): 0);
-	}
-
 	if (!MBSTRG(encoding_translation)) {
 		php_default_treat_data(arg, str, destArray);
 		return;
@@ -92,30 +83,28 @@ MBSTRING_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
 			break;
 	}
 
-	if (arg == PARSE_POST) {
-		sapi_handle_post(&v_array);
-		return;
-	}
-
-	if (arg == PARSE_GET) {		/* GET data */
-		c_var = SG(request_info).query_string;
-		if (c_var && *c_var) {
-			res = (char *) estrdup(c_var);
+	switch (arg) {
+		case PARSE_POST:
+			sapi_handle_post(&v_array);
+			return;
+		case PARSE_GET: /* GET data */
+			c_var = SG(request_info).query_string;
+			if (c_var && *c_var) {
+				res = (char *) estrdup(c_var);
+				free_buffer = 1;
+			}
+			break;
+		case PARSE_COOKIE: /* Cookie data */
+			c_var = SG(request_info).cookie_data;
+			if (c_var && *c_var) {
+				res = (char *) estrdup(c_var);
+				free_buffer = 1;
+			}
+			break;
+		case PARSE_STRING: /* String data */
+			res = str;
 			free_buffer = 1;
-		} else {
-			free_buffer = 0;
-		}
-	} else if (arg == PARSE_COOKIE) {		/* Cookie data */
-		c_var = SG(request_info).cookie_data;
-		if (c_var && *c_var) {
-			res = (char *) estrdup(c_var);
-			free_buffer = 1;
-		} else {
-			free_buffer = 0;
-		}
-	} else if (arg == PARSE_STRING) {		/* String data */
-		res = str;
-		free_buffer = 1;
+			break;
 	}
 
 	if (!res) {
@@ -261,7 +250,7 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 	num = n; /* make sure to process initialized vars only */
 
 	/* initialize converter */
-	if (info->num_from_encodings <= 0) {
+	if (info->num_from_encodings == 0) {
 		from_encoding = &mbfl_encoding_pass;
 	} else if (info->num_from_encodings == 1) {
 		from_encoding = info->from_encodings[0];
@@ -379,7 +368,7 @@ SAPI_POST_HANDLER_FUNC(php_mb_post_handler)
 	post_data_str = php_stream_copy_to_mem(SG(request_info).request_body, PHP_STREAM_COPY_ALL, 0);
 	detected = _php_mb_encoding_handler_ex(&info, arg, post_data_str ? ZSTR_VAL(post_data_str) : NULL);
 	if (post_data_str) {
-		zend_string_release(post_data_str);
+		zend_string_release_ex(post_data_str, 0);
 	}
 
 	MBSTRG(http_input_identify) = detected;
@@ -390,13 +379,3 @@ SAPI_POST_HANDLER_FUNC(php_mb_post_handler)
 /* }}} */
 
 #endif /* HAVE_MBSTRING */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: fdm=marker
- * vim: noet sw=4 ts=4
- */
-

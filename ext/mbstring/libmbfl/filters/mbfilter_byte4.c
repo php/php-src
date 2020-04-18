@@ -63,7 +63,8 @@ const struct mbfl_convert_vtbl vtbl_byte4be_wchar = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_byte4be_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_byte4be = {
@@ -72,7 +73,9 @@ const struct mbfl_convert_vtbl vtbl_wchar_byte4be = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_wchar_byte4be,
-	mbfl_filt_conv_common_flush };
+	mbfl_filt_conv_common_flush,
+	NULL,
+};
 
 const struct mbfl_convert_vtbl vtbl_byte4le_wchar = {
 	mbfl_no_encoding_byte4le,
@@ -80,7 +83,8 @@ const struct mbfl_convert_vtbl vtbl_byte4le_wchar = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_byte4le_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_byte4le = {
@@ -89,7 +93,8 @@ const struct mbfl_convert_vtbl vtbl_wchar_byte4le = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_wchar_byte4le,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
@@ -159,5 +164,3 @@ int mbfl_filt_conv_wchar_byte4le(int c, mbfl_convert_filter *filter)
 	CK((*filter->output_function)((c >> 24) & 0xff, filter->data));
 	return c;
 }
-
-

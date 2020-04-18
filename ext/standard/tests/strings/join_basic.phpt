@@ -1,5 +1,5 @@
 --TEST--
-Test join() function : basic functionality 
+Test join() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : string join( string $glue, array $pieces )
@@ -14,7 +14,7 @@ echo "*** Testing join() : basic functionality ***\n";
 $glue = ',';
 $pieces = array(1, 2, 3, 4);
 
-// pieces as arry with numeric values
+// pieces as array with numeric values
 var_dump( join($glue, $pieces) );
 
 // pieces as array with strings values
@@ -34,7 +34,7 @@ var_dump( join($glue, $pieces) );
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing join() : basic functionality ***
 string(7) "1,2,3,4"
 string(30) "Red, Green, Blue, Black, White"

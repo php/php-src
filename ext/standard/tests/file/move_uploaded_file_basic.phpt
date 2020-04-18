@@ -49,11 +49,6 @@ fclose($fd);
 var_dump(move_uploaded_file($_FILES['file2']['tmp_name'], $destination4));
 unlink($destination4);
 
-echo "Wrong parameters\n";
-var_dump(move_uploaded_file());
-var_dump(move_uploaded_file(1, 2, 3));
-
-
 ?>
 --EXPECTF--
 Valid move
@@ -66,11 +61,3 @@ Non-uploaded source file
 bool(false)
 Valid move to existing file
 bool(true)
-Wrong parameters
-
-Warning: move_uploaded_file() expects exactly 2 parameters, 0 given in %s on line %d
-NULL
-
-Warning: move_uploaded_file() expects exactly 2 parameters, 3 given in %s on line %d
-NULL
-

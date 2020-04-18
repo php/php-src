@@ -6,7 +6,7 @@ if (!extension_loaded('oci8')) die ("skip no oci8 extension");
 ?>
 --FILE--
 <?php
-require(dirname(__FILE__).'/connect.inc');
+require(__DIR__.'/connect.inc');
 
 // Initialization
 
@@ -47,9 +47,7 @@ $stmtarray = array(
 oci8_test_sql_execute($c, $stmtarray);
 
 ?>
-===DONE===
-<?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 array(5) {
   [0]=>
   int(-2)
@@ -62,4 +60,3 @@ array(5) {
   [4]=>
   int(-10)
 }
-===DONE===

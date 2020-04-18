@@ -6,19 +6,19 @@ Trying to write on method return
 error_reporting(E_ALL);
 
 class foo {
-	public $x = array();
-		
-	public function b() {
-		return $this->x;
-	}
-	
-	public function c() {
-		return $x;
-	}
-	
-	static public function d() {
-		
-	}
+    public $x = array();
+
+    public function b() {
+        return $this->x;
+    }
+
+    public function c() {
+        return $x;
+    }
+
+    static public function d() {
+
+    }
 }
 
 $foo = new foo;
@@ -33,5 +33,5 @@ print "ok\n";
 
 ?>
 --EXPECTF--
-Notice: Undefined variable: x in %s on line %d
+Warning: Undefined variable $x in %s on line %d
 ok

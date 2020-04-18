@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 2017 The PHP Group                                     |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +13,6 @@
   | Author: Anatol Belski <ab@php.net>                                   |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -45,11 +41,18 @@ DBA_OPEN_FUNC(lmdb)
 	MDB_env *env;
 	MDB_txn *txn;
 	int rc, mode = 0644, flags = MDB_NOSUBDIR;
+	zend_long mapsize = 0;
 
 	if(info->argc > 0) {
-		convert_to_long_ex(&info->argv[0]);
-		mode = Z_LVAL(info->argv[0]);
+		mode = zval_get_long(&info->argv[0]);
 
+		if (info->argc > 1) {
+			mapsize = zval_get_long(&info->argv[1]);
+			if (mapsize < 0) {
+				*error = "mapsize must be greater than or equal to zero";
+				return FAILURE;
+			}
+		}
 		/* TODO implement handling of the additional flags. */
 	}
 
@@ -57,6 +60,14 @@ DBA_OPEN_FUNC(lmdb)
 	if (rc) {
 		*error = mdb_strerror(rc);
 		return FAILURE;
+	}
+
+	if (mapsize > 0) {
+		rc = mdb_env_set_mapsize(env, (size_t) mapsize);
+		if (rc) {
+			*error = mdb_strerror(rc);
+			return FAILURE;
+		}
 	}
 
 	rc = mdb_env_open(env, info->path, flags, mode);
@@ -108,7 +119,7 @@ DBA_FETCH_FUNC(lmdb)
 	int rc;
 	MDB_val k, v;
 	char *ret = NULL;
-	
+
 	if (LMDB_IT(cur)) {
 		rc = mdb_txn_renew(LMDB_IT(txn));
 	} else {
@@ -125,7 +136,7 @@ DBA_FETCH_FUNC(lmdb)
 	rc = mdb_get(LMDB_IT(txn), LMDB_IT(dbi), &k, &v);
 	if (rc) {
 		if (MDB_NOTFOUND != rc) {
-			php_error_docref1(NULL, key, E_WARNING, "%s", mdb_strerror(rc)); 
+			php_error_docref1(NULL, key, E_WARNING, "%s", mdb_strerror(rc));
 		}
 		mdb_txn_abort(LMDB_IT(txn));
 		return NULL;
@@ -201,7 +212,7 @@ DBA_EXISTS_FUNC(lmdb)
 	rc = mdb_get(LMDB_IT(txn), LMDB_IT(dbi), &k, &v);
 	if (rc) {
 		if (MDB_NOTFOUND != rc) {
-			php_error_docref1(NULL, key, E_WARNING, "%s", mdb_strerror(rc)); 
+			php_error_docref1(NULL, key, E_WARNING, "%s", mdb_strerror(rc));
 		}
 		mdb_txn_abort(LMDB_IT(txn));
 		return FAILURE;
@@ -254,24 +265,24 @@ DBA_FIRSTKEY_FUNC(lmdb)
 
 	rc = mdb_txn_begin(LMDB_IT(env), NULL, MDB_RDONLY, &LMDB_IT(txn));
 	if (rc) {
-		php_error_docref0(NULL, E_WARNING, "%s", mdb_strerror(rc));
+		php_error_docref(NULL, E_WARNING, "%s", mdb_strerror(rc));
 		return NULL;
 	}
 
 	rc = mdb_cursor_open(LMDB_IT(txn), LMDB_IT(dbi), &LMDB_IT(cur));
 	if (rc) {
 		mdb_txn_abort(LMDB_IT(txn));
-		php_error_docref0(NULL, E_WARNING, "%s", mdb_strerror(rc));
+		php_error_docref(NULL, E_WARNING, "%s", mdb_strerror(rc));
 		return NULL;
 	}
 
-	rc = mdb_cursor_get(LMDB_IT(cur), &k, &v, MDB_FIRST); 
+	rc = mdb_cursor_get(LMDB_IT(cur), &k, &v, MDB_FIRST);
 	if (rc) {
 		mdb_txn_abort(LMDB_IT(txn));
 		mdb_cursor_close(LMDB_IT(cur));
 		LMDB_IT(cur) = NULL;
 		if (MDB_NOTFOUND != rc) {
-			php_error_docref0(NULL, E_WARNING, "%s", mdb_strerror(rc));
+			php_error_docref(NULL, E_WARNING, "%s", mdb_strerror(rc));
 		}
 		return NULL;
 	}
@@ -294,17 +305,17 @@ DBA_NEXTKEY_FUNC(lmdb)
 
 	rc = mdb_txn_renew(LMDB_IT(txn));
 	if (rc) {
-		php_error_docref0(NULL, E_WARNING, "%s", mdb_strerror(rc));
+		php_error_docref(NULL, E_WARNING, "%s", mdb_strerror(rc));
 		return NULL;
 	}
 
-	rc = mdb_cursor_get(LMDB_IT(cur), &k, &v, MDB_NEXT); 
+	rc = mdb_cursor_get(LMDB_IT(cur), &k, &v, MDB_NEXT);
 	if (rc) {
 		mdb_txn_abort(LMDB_IT(txn));
 		mdb_cursor_close(LMDB_IT(cur));
 		LMDB_IT(cur) = NULL;
 		if (MDB_NOTFOUND != rc) {
-			php_error_docref0(NULL, E_WARNING, "%s", mdb_strerror(rc));
+			php_error_docref(NULL, E_WARNING, "%s", mdb_strerror(rc));
 		}
 		return NULL;
 	}
@@ -330,7 +341,7 @@ DBA_SYNC_FUNC(lmdb)
 
 	rc = mdb_env_sync(LMDB_IT(env), 1);
 	if (rc) {
-			php_error_docref0(NULL, E_WARNING, "%s", mdb_strerror(rc));
+			php_error_docref(NULL, E_WARNING, "%s", mdb_strerror(rc));
 			return FAILURE;
 	}
 
@@ -343,12 +354,3 @@ DBA_INFO_FUNC(lmdb)
 }
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

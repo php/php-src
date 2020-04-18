@@ -1,20 +1,20 @@
 --TEST--
-ReflectionClass::setStaticPropertyValue() 
+ReflectionClass::setStaticPropertyValue()
 --CREDITS--
 Robin Fernandes <robinf@php.net>
 Steve Seear <stevseea@php.net>
 --FILE--
 <?php
 class A {
-	static private $privateOverridden = "original private";
-	static protected $protectedOverridden = "original protected";
-	static public $publicOverridden = "original public";
+    static private $privateOverridden = "original private";
+    static protected $protectedOverridden = "original protected";
+    static public $publicOverridden = "original public";
 }
 
 class B extends A {
-	static private $privateOverridden = "changed private";
-	static protected $protectedOverridden = "changed protected";
-	static public $publicOverridden = "changed public";
+    static private $privateOverridden = "changed private";
+    static protected $protectedOverridden = "changed protected";
+    static public $publicOverridden = "changed public";
 }
 
 echo "Set static values in A:\n";
@@ -35,17 +35,17 @@ print_r($rcB->getStaticProperties());
 
 echo "\nSet non-existent values from A with no default value:\n";
 try {
-	var_dump($rcA->setStaticPropertyValue("protectedOverridden", "new value 8"));
-	echo "you should not see this";
+    var_dump($rcA->setStaticPropertyValue("protectedOverridden", "new value 8"));
+    echo "you should not see this";
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 
 try {
-	var_dump($rcA->setStaticPropertyValue("privateOverridden", "new value 9"));
-	echo "you should not see this";	
+    var_dump($rcA->setStaticPropertyValue("privateOverridden", "new value 9"));
+    echo "you should not see this";
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 
 ?>

@@ -2,9 +2,9 @@
 Bug #22382 (fgetcsv() does not handle escaped quotes correctly)
 --FILE--
 <?php
-$fp = fopen(dirname(__FILE__)."/test2.csv", "r");
+$fp = fopen(__DIR__."/test2.csv", "r");
 while(($line = fgetcsv($fp, 1024))) {
-	var_dump($line);
+    var_dump($line);
 }
 fclose($fp);
 ?>

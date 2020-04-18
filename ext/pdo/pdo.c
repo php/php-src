@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -18,8 +16,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -33,14 +29,12 @@
 #include "php_pdo_int.h"
 #include "zend_exceptions.h"
 #include "ext/spl/spl_exceptions.h"
+#include "pdo_arginfo.h"
 
 zend_class_entry *pdo_dbh_ce, *pdo_dbstmt_ce, *pdo_row_ce;
 
 /* for exceptional circumstances */
 zend_class_entry *pdo_exception_ce;
-
-ZEND_DECLARE_MODULE_GLOBALS(pdo)
-static PHP_GINIT_FUNCTION(pdo);
 
 /* True global resources - no need for thread safety here */
 
@@ -91,9 +85,7 @@ PHP_FUNCTION(pdo_drivers)
 {
 	pdo_driver_t *pdriver;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 
@@ -101,18 +93,6 @@ PHP_FUNCTION(pdo_drivers)
 		add_next_index_stringl(return_value, (char*)pdriver->driver_name, pdriver->driver_name_len);
 	} ZEND_HASH_FOREACH_END();
 }
-/* }}} */
-
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO(arginfo_pdo_drivers, 0)
-ZEND_END_ARG_INFO()
-/* }}} */
-
-/* {{{ pdo_functions[] */
-const zend_function_entry pdo_functions[] = {
-	PHP_FE(pdo_drivers,             arginfo_pdo_drivers)
-	PHP_FE_END
-};
 /* }}} */
 
 /* {{{ pdo_functions[] */
@@ -127,18 +107,14 @@ zend_module_entry pdo_module_entry = {
 	STANDARD_MODULE_HEADER_EX, NULL,
 	pdo_deps,
 	"PDO",
-	pdo_functions,
+	ext_functions,
 	PHP_MINIT(pdo),
 	PHP_MSHUTDOWN(pdo),
 	NULL,
 	NULL,
 	PHP_MINFO(pdo),
 	PHP_PDO_VERSION,
-	PHP_MODULE_GLOBALS(pdo),
-	PHP_GINIT(pdo),
-	NULL,
-	NULL,
-	STANDARD_MODULE_PROPERTIES_EX
+	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
 
@@ -149,14 +125,7 @@ zend_module_entry pdo_module_entry = {
 ZEND_GET_MODULE(pdo)
 #endif
 
-/* {{{ PHP_GINIT_FUNCTION */
-static PHP_GINIT_FUNCTION(pdo)
-{
-	pdo_globals->global_value = 0;
-}
-/* }}} */
-
-PDO_API int php_pdo_register_driver(pdo_driver_t *driver) /* {{{ */
+PDO_API int php_pdo_register_driver(const pdo_driver_t *driver) /* {{{ */
 {
 	if (driver->api_version != PDO_DRIVER_API) {
 		zend_error(E_ERROR, "PDO: driver %s requires PDO API version " ZEND_ULONG_FMT "; this is PDO version %d",
@@ -168,11 +137,11 @@ PDO_API int php_pdo_register_driver(pdo_driver_t *driver) /* {{{ */
 		return FAILURE;	/* NOTREACHED */
 	}
 
-	return zend_hash_str_add_ptr(&pdo_driver_hash, (char*)driver->driver_name, driver->driver_name_len, driver) != NULL;
+	return zend_hash_str_add_ptr(&pdo_driver_hash, (char*)driver->driver_name, driver->driver_name_len, (void*)driver) != NULL ? SUCCESS : FAILURE;
 }
 /* }}} */
 
-PDO_API void php_pdo_unregister_driver(pdo_driver_t *driver) /* {{{ */
+PDO_API void php_pdo_unregister_driver(const pdo_driver_t *driver) /* {{{ */
 {
 	if (!zend_hash_str_exists(&module_registry, "pdo", sizeof("pdo") - 1)) {
 		return;
@@ -394,12 +363,3 @@ PHP_MINFO_FUNCTION(pdo)
 
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

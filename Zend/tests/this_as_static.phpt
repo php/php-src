@@ -3,8 +3,8 @@ $this as static variable
 --FILE--
 <?php
 function foo() {
-	static $this;
-	var_dump($this);
+    static $this;
+    var_dump($this);
 }
 foo();
 ?>

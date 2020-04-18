@@ -3,12 +3,12 @@ Bug #40415 (Using oci_fetchall with nested cursors)
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
-?> 
+require(__DIR__.'/skipif.inc');
+?>
 --FILE--
-<?php 
+<?php
 
-require dirname(__FILE__)."/connect.inc";
+require __DIR__."/connect.inc";
 
 // Setup
 
@@ -40,13 +40,13 @@ for($i=1; $i < 4; $i++) {
 }
 
 
-function do_assoc($c) 
+function do_assoc($c)
 {
     $query = "SELECT t1.*, CURSOR( SELECT * FROM t2 ) AS CURSOR FROM t1";
 
     $stmt = oci_parse($c, $query);
     oci_execute($stmt);
-    
+
     while ($row = oci_fetch_assoc($stmt)) {
         print "Got row \"".$row['ID1']."\". Now getting nested cursor:\n";
         var_dump(oci_execute($row['CURSOR']));
@@ -56,15 +56,15 @@ function do_assoc($c)
     }
 }
 
-function do_all($c) 
+function do_all($c)
 {
     $query = "SELECT t1.*, CURSOR( SELECT * FROM t2 ) AS CURSOR FROM t1";
 
     $stmt = oci_parse($c, $query);
     oci_execute($stmt);
-    
+
     $rc1 = oci_fetch_all($stmt, $res);
-    
+
     echo "Rows returned $rc1\n";
 
     var_dump($res);
@@ -86,7 +86,7 @@ echo "\nTest 2: fetchall of nested cursor\n";
 do_all($c);
 
 
-// Cleanup 
+// Cleanup
 $s1 = oci_parse($c, $drop_1);
 $s2 = oci_parse($c, $drop_2);
 @oci_execute($s1);

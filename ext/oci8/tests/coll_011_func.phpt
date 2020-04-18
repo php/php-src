@@ -3,22 +3,22 @@ collections and strings
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
-?> 
+require(__DIR__.'/skipif.inc');
+?>
 --FILE--
 <?php
 
-require dirname(__FILE__)."/connect.inc";
+require __DIR__."/connect.inc";
 
 $ora_sql = "DROP TYPE
-						".$type_name."
-		   ";
+                        ".$type_name."
+           ";
 
 $statement = OCIParse($c,$ora_sql);
 @OCIExecute($statement);
 
 $ora_sql = "CREATE TYPE ".$type_name." AS TABLE OF VARCHAR(10)";
-			  
+
 $statement = OCIParse($c,$ora_sql);
 OCIExecute($statement);
 
@@ -35,7 +35,7 @@ var_dump(oci_collection_element_get($coll2, 0));
 
 echo "Done\n";
 
-require dirname(__FILE__)."/drop_type.inc";
+require __DIR__."/drop_type.inc";
 
 ?>
 --EXPECT--

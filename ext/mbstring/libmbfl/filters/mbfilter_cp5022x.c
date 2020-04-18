@@ -145,6 +145,7 @@ const struct mbfl_convert_vtbl vtbl_jis_ms_wchar = {
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_jis_ms_wchar,
 	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_jis_ms = {
@@ -153,7 +154,8 @@ const struct mbfl_convert_vtbl vtbl_wchar_jis_ms = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_wchar_jis_ms,
-	mbfl_filt_conv_any_jis_flush
+	mbfl_filt_conv_any_jis_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_cp50220_wchar = {
@@ -162,7 +164,8 @@ const struct mbfl_convert_vtbl vtbl_cp50220_wchar = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_jis_ms_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_cp50220 = {
@@ -181,7 +184,8 @@ const struct mbfl_convert_vtbl vtbl_cp50220raw_wchar = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_jis_ms_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_cp50220raw = {
@@ -200,7 +204,8 @@ const struct mbfl_convert_vtbl vtbl_cp50221_wchar = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_jis_ms_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_cp50221 = {
@@ -209,7 +214,8 @@ const struct mbfl_convert_vtbl vtbl_wchar_cp50221 = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_wchar_cp50221,
-	mbfl_filt_conv_any_jis_flush
+	mbfl_filt_conv_any_jis_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_cp50222_wchar = {
@@ -218,7 +224,8 @@ const struct mbfl_convert_vtbl vtbl_cp50222_wchar = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_jis_ms_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_cp50222 = {
@@ -227,7 +234,8 @@ const struct mbfl_convert_vtbl vtbl_wchar_cp50222 = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_wchar_cp50222,
-	mbfl_filt_conv_wchar_cp50222_flush
+	mbfl_filt_conv_wchar_cp50222_flush,
+	NULL,
 };
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
@@ -563,9 +571,7 @@ mbfl_filt_conv_wchar_jis_ms(int c, mbfl_convert_filter *filter)
 			CK((*filter->output_function)(s & 0x7f, filter->data));
 		}
 	} else {
-		if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-			CK(mbfl_filt_conv_illegal_output(c, filter));
-		}
+		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
 	return c;
@@ -776,9 +782,7 @@ mbfl_filt_conv_wchar_cp50221(int c, mbfl_convert_filter *filter)
 			CK((*filter->output_function)((s >> 8) & 0x7f, filter->data));
 			CK((*filter->output_function)(s & 0x7f, filter->data));
 		} else if (s < 0x10000) { /* X0212 */
-			if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-				CK(mbfl_filt_conv_illegal_output(c, filter));
-			}
+			CK(mbfl_filt_conv_illegal_output(c, filter));
 		} else { /* X 0201 latin */
 			if ((filter->status & 0xff00) != 0x400) {
 				CK((*filter->output_function)(0x1b, filter->data));		/* ESC */
@@ -789,9 +793,7 @@ mbfl_filt_conv_wchar_cp50221(int c, mbfl_convert_filter *filter)
 			CK((*filter->output_function)(s & 0x7f, filter->data));
 		}
 	} else {
-		if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-			CK(mbfl_filt_conv_illegal_output(c, filter));
-		}
+		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
 	return c;
@@ -928,9 +930,7 @@ mbfl_filt_conv_wchar_cp50222(int c, mbfl_convert_filter *filter)
 			CK((*filter->output_function)((s >> 8) & 0x7f, filter->data));
 			CK((*filter->output_function)(s & 0x7f, filter->data));
 		} else if (s < 0x10000) { /* X0212 */
-			if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-				CK(mbfl_filt_conv_illegal_output(c, filter));
-			}
+			CK(mbfl_filt_conv_illegal_output(c, filter));
 		} else { /* X 0201 latin */
 			if ((filter->status & 0xff00) == 0x500) {
 				CK((*filter->output_function)(0x0f, filter->data));		/* SO */
@@ -945,9 +945,7 @@ mbfl_filt_conv_wchar_cp50222(int c, mbfl_convert_filter *filter)
 			CK((*filter->output_function)(s & 0x7f, filter->data));
 		}
 	} else {
-		if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-			CK(mbfl_filt_conv_illegal_output(c, filter));
-		}
+		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
 	return c;
@@ -1301,6 +1299,3 @@ retry:
 
 	return c;
 }
-
-
-

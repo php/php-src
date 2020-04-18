@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,13 +14,11 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 /* definitions for the plain files wrapper */
 
 /* operations for a plain file; use the php_stream_fopen_XXX funcs below */
 PHPAPI extern php_stream_ops php_stream_stdio_ops;
-PHPAPI extern php_stream_wrapper php_plain_files_wrapper;
+PHPAPI extern /*const*/ php_stream_wrapper php_plain_files_wrapper;
 
 BEGIN_EXTERN_C()
 
@@ -54,13 +50,7 @@ PHPAPI php_stream *_php_stream_fopen_temporary_file(const char *dir, const char 
 PHPAPI FILE * _php_stream_open_wrapper_as_file(char * path, char * mode, int options, zend_string **opened_path STREAMS_DC);
 #define php_stream_open_wrapper_as_file(path, mode, options, opened_path) _php_stream_open_wrapper_as_file((path), (mode), (options), (opened_path) STREAMS_CC)
 
-END_EXTERN_C()
+/* parse standard "fopen" modes into open() flags */
+PHPAPI int php_stream_parse_fopen_modes(const char *mode, int *open_flags);
 
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */
+END_EXTERN_C()

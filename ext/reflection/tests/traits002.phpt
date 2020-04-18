@@ -7,11 +7,11 @@ abstract class foo {
 }
 
 trait bar {
-	
+
 }
 
-reflectionclass::export('foo');
-reflectionclass::export('bar');
+echo new ReflectionClass('foo'), "\n";
+echo new ReflectionClass('bar'), "\n";
 
 ?>
 --EXPECTF--

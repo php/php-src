@@ -15,7 +15,7 @@ Warning: Unknown: POST Content-Length of 2050 bytes exceeds the limit of 1024 by
 
 Warning: Cannot modify header information - headers already sent in Unknown on line 0
 
-Notice: Undefined variable: HTTP_RAW_POST_DATA in %s on line %d
+Warning: Undefined variable $HTTP_RAW_POST_DATA in %s on line %d
 array(0) {
 }
 NULL

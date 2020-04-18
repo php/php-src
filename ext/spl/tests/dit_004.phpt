@@ -13,12 +13,10 @@ $c = clone $a;
 var_dump((string)$c == (string)$a);
 var_dump($a->key(), $c->key());
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 bool(true)
 int(0)
 int(0)
 bool(true)
 int(3)
 int(3)
-===DONE===

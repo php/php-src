@@ -1,5 +1,5 @@
 <?php
-	$driver = new mysqli_driver();
-	if (!$driver->embedded)
-		die("skip test for with embedded server only");
+    $driver = new mysqli_driver();
+    if (!$driver->embedded)
+        die("skip test for with embedded server only");
 ?>

@@ -589,13 +589,10 @@ int XMLRPC_ServerRegisterIntrospectionCallback(XMLRPC_SERVER server, XMLRPC_Intr
          }
       }
    }
-   return 0;
+   return bSuccess;
 }
 /*******/
 
 /*-**********************
 * End Introspection API *
 ************************/
-
-
-

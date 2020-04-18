@@ -5,9 +5,9 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
 /* Prototype  : array parse_ini_file(string filename [, bool process_sections])
- * Description: Parse configuration file 
+ * Description: Parse configuration file
  * Source code: ext/standard/basic_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing parse_ini_file() : variation ***\n";
@@ -30,7 +30,6 @@ var_dump($a);
 
 unlink($output_file);
 ?>
-===DONE===
 --EXPECT--
 *** Testing parse_ini_file() : variation ***
 array(2) {
@@ -65,4 +64,3 @@ array(2) {
     string(9) "different"
   }
 }
-===DONE===

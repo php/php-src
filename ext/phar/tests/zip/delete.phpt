@@ -8,7 +8,7 @@ phar.require_hash=0
 --FILE--
 <?php
 
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.zip';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.zip';
 $alias = 'phar://' . $fname;
 $file = "<?php
 Phar::mapPhar('hio');
@@ -24,8 +24,8 @@ $phar->delete('a');
 echo file_get_contents($alias . '/a') . "\n";
 ?>
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.zip'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip'); ?>
 --EXPECTF--
 a
 
-Warning: file_get_contents(phar://%sdelete.phar.zip/a): failed to open stream: phar error: "a" is not a file in phar "%sdelete.phar.zip" in %sdelete.php on line %d
+Warning: file_get_contents(phar://%sdelete.phar.zip/a): Failed to open stream: phar error: "a" is not a file in phar "%sdelete.phar.zip" in %sdelete.php on line %d

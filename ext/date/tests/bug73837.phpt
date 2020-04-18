@@ -6,9 +6,9 @@ $collect = [];
 
 for ( $i = 0; $i < 1000; $i++ )
 {
-	$a = new DateTime();
-	$key = "s" . $a->format( "u" );
-	$collect[$key] = true;
+    $a = new DateTime();
+    $key = "s" . $a->format( "u" );
+    $collect[$key] = true;
 }
 
 var_dump($n = count( $collect ));

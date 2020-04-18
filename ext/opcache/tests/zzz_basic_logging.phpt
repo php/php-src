@@ -1,15 +1,16 @@
 --TEST--
 Test basic logging for the Opcache
 --DESCRIPTION--
-This test runs a simple PHP script and ensures the Opcache 
+This test runs a simple PHP script and ensures the Opcache
 outputs the correct logging at the highest log_verbosity_level
-
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
 opcache.file_cache_only=0
+opcache.error_log=
 opcache.log_verbosity_level=4
 opcache.huge_code_pages=0
+opcache.preload=
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--

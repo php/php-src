@@ -21,7 +21,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 // include file.inc
 require("file.inc");
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 // temp file used here
 $filename = "$file_path/readfile_variation2.tmp";
@@ -61,10 +61,10 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink("$file_path/readfile_variation2.tmp");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing readfile() on soft link ***
 bool(true)
 line

@@ -5,7 +5,7 @@ Test ctype_digit() function : usage variations - different data types as $c arg
 --FILE--
 <?php
 /* Prototype  : bool ctype_digit(mixed $c)
- * Description: Checks for numeric character(s) 
+ * Description: Checks for numeric character(s)
  * Source code: ext/ctype/ctype.c
  */
 
@@ -24,9 +24,9 @@ unset ($unset_var);
 // get a class
 class classA
 {
-	public function __toString() {
-		return "123456";
-	}
+    public function __toString() {
+        return "123456";
+    }
 }
 
 // heredoc string
@@ -62,7 +62,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -72,7 +72,7 @@ $inputs = array(
 /*19*/ "2",
        '309',
        $heredoc,
-       
+
        // object data
 /*22*/ new classA(),
 
@@ -98,8 +98,7 @@ fclose($fp);
 
 setlocale(LC_CTYPE, $orig);
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ctype_digit() : usage variations ***
 
 -- Iteration 1 --
@@ -176,4 +175,3 @@ bool(false)
 
 -- Iteration 25 --
 bool(false)
-===DONE===

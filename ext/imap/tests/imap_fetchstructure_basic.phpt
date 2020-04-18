@@ -4,7 +4,7 @@ imap_fetchstructure() function : basic functionality
 Olivier Doucet
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__).'/skipif.inc');
+require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
@@ -15,7 +15,7 @@ echo  "Checking with incorrect parameter type\n";
 imap_fetchstructure('');
 imap_fetchstructure(false);
 
-require_once(dirname(__FILE__).'/imap_include.inc');
+require_once(__DIR__.'/imap_include.inc');
 $stream_id = setup_test_mailbox('', 1);
 
 imap_fetchstructure($stream_id);
@@ -28,7 +28,7 @@ $fields = array('type','encoding','ifsubtype','subtype',
 'ifdescription','lines','bytes','parameters');
 
 foreach ($fields as $key) {
-	var_dump(isset($z->$key));
+    var_dump(isset($z->$key));
 }
 var_dump($z->type);
 var_dump($z->encoding);

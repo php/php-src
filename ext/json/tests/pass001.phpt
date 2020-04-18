@@ -1,7 +1,6 @@
 --TEST--
 JSON (http://www.crockford.com/JSON/JSON_checker/test/pass1.json)
 --INI--
-precision=14
 serialize_precision=-1
 --SKIPIF--
 <?php

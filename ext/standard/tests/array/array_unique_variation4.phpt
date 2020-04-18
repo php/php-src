@@ -3,7 +3,7 @@ Test array_unique() function : usage variations - associative array with differe
 --FILE--
 <?php
 /* Prototype  : array array_unique(array $input)
- * Description: Removes duplicate values from array 
+ * Description: Removes duplicate values from array
  * Source code: ext/standard/array.c
 */
 
@@ -62,7 +62,7 @@ foreach($inputs as $input) {
 }
 
 fclose($fp);
-  
+
 echo "Done";
 ?>
 --EXPECTF--
@@ -91,7 +91,7 @@ array(3) {
   ["f2"]=>
   float(3.33)
   [3]=>
-  float(4.8999992284)
+  float(4.89999922839999)
 }
 -- Iteration 5 --
 array(3) {

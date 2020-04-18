@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine, SSA - Static Single Assignment Form                     |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Dmitry Stogov <dmitry@zend.com>                             |
+   | Authors: Dmitry Stogov <dmitry@php.net>                              |
    |          Nikita Popov <nikic@php.net>                                |
    +----------------------------------------------------------------------+
 */
@@ -32,16 +32,30 @@ static zend_bool dominates(const zend_basic_block *blocks, int a, int b) {
 	return a == b;
 }
 
-static zend_bool dominates_other_predecessors(
-		const zend_cfg *cfg, const zend_basic_block *block, int check, int exclude) {
+static zend_bool will_rejoin(
+		const zend_cfg *cfg, const zend_dfg *dfg, const zend_basic_block *block,
+		int other_successor, int exclude, int var) {
 	int i;
 	for (i = 0; i < block->predecessors_count; i++) {
 		int predecessor = cfg->predecessors[block->predecessor_offset + i];
-		if (predecessor != exclude && !dominates(cfg->blocks, check, predecessor)) {
-			return 0;
+		if (predecessor == exclude) {
+			continue;
+		}
+
+		/* The variable is changed in this predecessor,
+		 * so we will not rejoin with the original value. */
+		// TODO: This should not be limited to the direct predecessor block.
+		if (DFG_ISSET(dfg->def, dfg->size, predecessor, var)) {
+			continue;
+		}
+
+		/* The other successor dominates this predecessor,
+		 * so we will get the original value from it. */
+		if (dominates(cfg->blocks, other_successor, predecessor)) {
+			return 1;
 		}
 	}
-	return 1;
+	return 0;
 }
 
 static zend_bool needs_pi(const zend_op_array *op_array, zend_dfg *dfg, zend_ssa *ssa, int from, int to, int var) /* {{{ */
@@ -54,19 +68,25 @@ static zend_bool needs_pi(const zend_op_array *op_array, zend_dfg *dfg, zend_ssa
 		return 0;
 	}
 
+	/* Make sure that both successors of the from block aren't the same. Pi nodes are associated
+	 * with predecessor blocks, so we can't distinguish which edge the pi belongs to. */
+	from_block = &ssa->cfg.blocks[from];
+	ZEND_ASSERT(from_block->successors_count == 2);
+	if (from_block->successors[0] == from_block->successors[1]) {
+		return 0;
+	}
+
 	to_block = &ssa->cfg.blocks[to];
 	if (to_block->predecessors_count == 1) {
 		/* Always place pi if one predecessor (an if branch) */
 		return 1;
 	}
 
-	/* Check that the other successor of the from block does not dominate all other predecessors.
-	 * If it does, we'd probably end up annihilating a positive+negative pi assertion. */
-	from_block = &ssa->cfg.blocks[from];
-	ZEND_ASSERT(from_block->successors_count == 2);
+	/* Check whether we will rejoin with the original value coming from the other successor,
+	 * in which case the pi node will not have an effect. */
 	other_successor = from_block->successors[0] == to
 		? from_block->successors[1] : from_block->successors[0];
-	return !dominates_other_predecessors(&ssa->cfg, to_block, other_successor, from);
+	return !will_rejoin(&ssa->cfg, dfg, to_block, other_successor, from, var);
 }
 /* }}} */
 
@@ -154,12 +174,10 @@ static inline void pi_not_type_mask(zend_ssa_phi *phi, uint32_t type_mask) {
 	pi_type_mask(phi, ~type_mask & relevant);
 }
 static inline uint32_t mask_for_type_check(uint32_t type) {
-	if (type == _IS_BOOL) {
-		return MAY_BE_TRUE|MAY_BE_FALSE;
-	} else if (type == IS_ARRAY) {
-		return MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
+	if (type & MAY_BE_ARRAY) {
+		return type | (MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF);
 	} else {
-		return 1 << type;
+		return type;
 	}
 }
 
@@ -188,14 +206,14 @@ static int find_adjusted_tmp_var(const zend_op_array *op_array, uint32_t build_f
 			}
 		} else if (op->opcode == ZEND_ADD) {
 			if (op->op1_type == IS_CV && op->op2_type == IS_CONST) {
-				zv = CRT_CONSTANT_EX(op_array, op, op->op2, (build_flags & ZEND_RT_CONSTANTS));
+				zv = CRT_CONSTANT_EX(op_array, op, op->op2);
 				if (Z_TYPE_P(zv) == IS_LONG
 				 && Z_LVAL_P(zv) != ZEND_LONG_MIN) {
 					*adjustment = -Z_LVAL_P(zv);
 					return EX_VAR_TO_NUM(op->op1.var);
 				}
 			} else if (op->op2_type == IS_CV && op->op1_type == IS_CONST) {
-				zv = CRT_CONSTANT_EX(op_array, op, op->op1, (build_flags & ZEND_RT_CONSTANTS));
+				zv = CRT_CONSTANT_EX(op_array, op, op->op1);
 				if (Z_TYPE_P(zv) == IS_LONG
 				 && Z_LVAL_P(zv) != ZEND_LONG_MIN) {
 					*adjustment = -Z_LVAL_P(zv);
@@ -204,7 +222,7 @@ static int find_adjusted_tmp_var(const zend_op_array *op_array, uint32_t build_f
 			}
 		} else if (op->opcode == ZEND_SUB) {
 			if (op->op1_type == IS_CV && op->op2_type == IS_CONST) {
-				zv = CRT_CONSTANT_EX(op_array, op, op->op2, (build_flags & ZEND_RT_CONSTANTS));
+				zv = CRT_CONSTANT_EX(op_array, op, op->op2);
 				if (Z_TYPE_P(zv) == IS_LONG) {
 					*adjustment = Z_LVAL_P(zv);
 					return EX_VAR_TO_NUM(op->op1.var);
@@ -217,18 +235,9 @@ static int find_adjusted_tmp_var(const zend_op_array *op_array, uint32_t build_f
 }
 /* }}} */
 
-static inline zend_bool add_will_overflow(zend_long a, zend_long b) {
-	return (b > 0 && a > ZEND_LONG_MAX - b)
-		|| (b < 0 && a < ZEND_LONG_MIN - b);
-}
-static inline zend_bool sub_will_overflow(zend_long a, zend_long b) {
-	return (b > 0 && a < ZEND_LONG_MIN + b)
-		|| (b < 0 && a > ZEND_LONG_MAX + b);
-}
-
 /* e-SSA construction: Pi placement (Pi is actually a Phi with single
  * source and constraint).
- * Order of Phis is importent, Pis must be placed before Phis
+ * Order of Phis is important, Pis must be placed before Phis
  */
 static void place_essa_pis(
 		zend_arena **arena, const zend_script *script, const zend_op_array *op_array,
@@ -257,6 +266,14 @@ static void place_essa_pis(
 				bt = blocks[j].successors[0];
 				bf = blocks[j].successors[1];
 				break;
+			case ZEND_COALESCE:
+				if (opline->op1_type == IS_CV) {
+					int var = EX_VAR_TO_NUM(opline->op1.var);
+					if ((pi = add_pi(arena, op_array, dfg, ssa, j, blocks[j].successors[0], var))) {
+						pi_not_type_mask(pi, MAY_BE_NULL);
+					}
+				}
+				continue;
 			default:
 				continue;
 		}
@@ -287,7 +304,7 @@ static void place_essa_pis(
 			}
 
 			if (var1 >= 0 && var2 >= 0) {
-				if (!sub_will_overflow(val1, val2) && !sub_will_overflow(val2, val1)) {
+				if (!zend_sub_will_overflow(val1, val2) && !zend_sub_will_overflow(val2, val1)) {
 					zend_long tmp = val1;
 					val1 -= val2;
 					val2 -= tmp;
@@ -298,7 +315,7 @@ static void place_essa_pis(
 			} else if (var1 >= 0 && var2 < 0) {
 				zend_long add_val2 = 0;
 				if ((opline-1)->op2_type == IS_CONST) {
-					zval *zv = CRT_CONSTANT_EX(op_array, (opline-1), (opline-1)->op2, (build_flags & ZEND_RT_CONSTANTS));
+					zval *zv = CRT_CONSTANT_EX(op_array, (opline-1), (opline-1)->op2);
 
 					if (Z_TYPE_P(zv) == IS_LONG) {
 						add_val2 = Z_LVAL_P(zv);
@@ -312,7 +329,7 @@ static void place_essa_pis(
 				} else {
 					var1 = -1;
 				}
-				if (!add_will_overflow(val2, add_val2)) {
+				if (!zend_add_will_overflow(val2, add_val2)) {
 					val2 += add_val2;
 				} else {
 					var1 = -1;
@@ -320,9 +337,9 @@ static void place_essa_pis(
 			} else if (var1 < 0 && var2 >= 0) {
 				zend_long add_val1 = 0;
 				if ((opline-1)->op1_type == IS_CONST) {
-					zval *zv = CRT_CONSTANT_EX(op_array, (opline-1), (opline-1)->op1, (build_flags & ZEND_RT_CONSTANTS));
+					zval *zv = CRT_CONSTANT_EX(op_array, (opline-1), (opline-1)->op1);
 					if (Z_TYPE_P(zv) == IS_LONG) {
-						add_val1 = Z_LVAL_P(CRT_CONSTANT_EX(op_array, (opline-1), (opline-1)->op1, (build_flags & ZEND_RT_CONSTANTS)));
+						add_val1 = Z_LVAL_P(CRT_CONSTANT_EX(op_array, (opline-1), (opline-1)->op1));
 					} else if (Z_TYPE_P(zv) == IS_FALSE) {
 						add_val1 = 0;
 					} else if (Z_TYPE_P(zv) == IS_TRUE) {
@@ -333,7 +350,7 @@ static void place_essa_pis(
 				} else {
 					var2 = -1;
 				}
-				if (!add_will_overflow(val1, add_val1)) {
+				if (!zend_add_will_overflow(val1, add_val1)) {
 					val1 += add_val1;
 				} else {
 					var2 = -1;
@@ -432,7 +449,7 @@ static void place_essa_pis(
 					pi_range_not_equals(pi, -1, 1);
 				}
 			}
-		} else if (opline->op1_type == IS_VAR &&
+		} else if (opline->op1_type == IS_TMP_VAR &&
 		           ((opline-1)->opcode == ZEND_PRE_INC ||
 		            (opline-1)->opcode == ZEND_PRE_DEC) &&
 		           opline->op1.var == (opline-1)->result.var &&
@@ -453,7 +470,7 @@ static void place_essa_pis(
 			if ((pi = add_pi(arena, op_array, dfg, ssa, j, bt, var))) {
 				pi_type_mask(pi, mask_for_type_check(type));
 			}
-			if (type != IS_RESOURCE) {
+			if (type != MAY_BE_RESOURCE) {
 				/* is_resource() may return false for closed resources */
 				if ((pi = add_pi(arena, op_array, dfg, ssa, j, bf, var))) {
 					pi_not_type_mask(pi, mask_for_type_check(type));
@@ -468,10 +485,10 @@ static void place_essa_pis(
 			uint32_t type_mask;
 			if ((opline-1)->op1_type == IS_CV && (opline-1)->op2_type == IS_CONST) {
 				var = EX_VAR_TO_NUM((opline-1)->op1.var);
-				val = CRT_CONSTANT_EX(op_array, (opline-1), (opline-1)->op2, (build_flags & ZEND_RT_CONSTANTS));
+				val = CRT_CONSTANT_EX(op_array, (opline-1), (opline-1)->op2);
 			} else if ((opline-1)->op1_type == IS_CONST && (opline-1)->op2_type == IS_CV) {
 				var = EX_VAR_TO_NUM((opline-1)->op2.var);
-				val = CRT_CONSTANT_EX(op_array, (opline-1), (opline-1)->op1, (build_flags & ZEND_RT_CONSTANTS));
+				val = CRT_CONSTANT_EX(op_array, (opline-1), (opline-1)->op1);
 			} else {
 				continue;
 			}
@@ -502,7 +519,7 @@ static void place_essa_pis(
 				   opline->op1.var == (opline-1)->result.var && (opline-1)->op1_type == IS_CV &&
 				   (opline-1)->op2_type == IS_CONST) {
 			int var = EX_VAR_TO_NUM((opline-1)->op1.var);
-			zend_string *lcname = Z_STR_P(CRT_CONSTANT_EX(op_array, (opline-1), (opline-1)->op2, (build_flags & ZEND_RT_CONSTANTS)) + 1);
+			zend_string *lcname = Z_STR_P(CRT_CONSTANT_EX(op_array, (opline-1), (opline-1)->op2) + 1);
 			zend_class_entry *ce = script ? zend_hash_find_ptr(&script->class_table, lcname) : NULL;
 			if (!ce) {
 				ce = zend_hash_find_ptr(CG(class_table), lcname);
@@ -520,6 +537,235 @@ static void place_essa_pis(
 }
 /* }}} */
 
+static zend_always_inline int _zend_ssa_rename_op(const zend_op_array *op_array, const zend_op *opline, uint32_t k, uint32_t build_flags, int ssa_vars_count, zend_ssa_op *ssa_ops, int *var) /* {{{ */
+{
+	const zend_op *next;
+
+	if (opline->op1_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
+		ssa_ops[k].op1_use = var[EX_VAR_TO_NUM(opline->op1.var)];
+		//USE_SSA_VAR(op_array->last_var + opline->op1.var)
+	}
+	if (opline->op2_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
+		ssa_ops[k].op2_use = var[EX_VAR_TO_NUM(opline->op2.var)];
+		//USE_SSA_VAR(op_array->last_var + opline->op2.var)
+	}
+	if ((build_flags & ZEND_SSA_USE_CV_RESULTS)
+	 && opline->result_type == IS_CV
+	 && opline->opcode != ZEND_RECV) {
+		ssa_ops[k].result_use = var[EX_VAR_TO_NUM(opline->result.var)];
+		//USE_SSA_VAR(op_array->last_var + opline->result.var)
+	}
+
+	switch (opline->opcode) {
+		case ZEND_ASSIGN:
+			if ((build_flags & ZEND_SSA_RC_INFERENCE) && opline->op2_type == IS_CV) {
+				ssa_ops[k].op2_def = ssa_vars_count;
+				var[EX_VAR_TO_NUM(opline->op2.var)] = ssa_vars_count;
+				ssa_vars_count++;
+				//NEW_SSA_VAR(opline->op2.var)
+			}
+			if (opline->op1_type == IS_CV) {
+add_op1_def:
+				ssa_ops[k].op1_def = ssa_vars_count;
+				var[EX_VAR_TO_NUM(opline->op1.var)] = ssa_vars_count;
+				ssa_vars_count++;
+				//NEW_SSA_VAR(opline->op1.var)
+			}
+			break;
+		case ZEND_ASSIGN_REF:
+			if (opline->op2_type == IS_CV) {
+				ssa_ops[k].op2_def = ssa_vars_count;
+				var[EX_VAR_TO_NUM(opline->op2.var)] = ssa_vars_count;
+				ssa_vars_count++;
+				//NEW_SSA_VAR(opline->op2.var)
+			}
+			if (opline->op1_type == IS_CV) {
+				goto add_op1_def;
+			}
+			break;
+		case ZEND_ASSIGN_DIM:
+		case ZEND_ASSIGN_OBJ:
+			next = opline + 1;
+			if (next->op1_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
+				ssa_ops[k + 1].op1_use = var[EX_VAR_TO_NUM(next->op1.var)];
+				//USE_SSA_VAR(op_array->last_var + next->op1.var);
+				if (build_flags & ZEND_SSA_RC_INFERENCE && next->op1_type == IS_CV) {
+					ssa_ops[k + 1].op1_def = ssa_vars_count;
+					var[EX_VAR_TO_NUM(next->op1.var)] = ssa_vars_count;
+					ssa_vars_count++;
+					//NEW_SSA_VAR(next->op1.var)
+				}
+			}
+			if (opline->op1_type == IS_CV) {
+				goto add_op1_def;
+			}
+			break;
+		case ZEND_ASSIGN_OBJ_REF:
+			next = opline + 1;
+			if (next->op1_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
+				ssa_ops[k + 1].op1_use = var[EX_VAR_TO_NUM(next->op1.var)];
+				//USE_SSA_VAR(op_array->last_var + next->op1.var);
+				if (next->op1_type == IS_CV) {
+					ssa_ops[k + 1].op1_def = ssa_vars_count;
+					var[EX_VAR_TO_NUM(next->op1.var)] = ssa_vars_count;
+					ssa_vars_count++;
+					//NEW_SSA_VAR(next->op1.var)
+				}
+			}
+			if (opline->op1_type == IS_CV) {
+				goto add_op1_def;
+			}
+			break;
+		case ZEND_ASSIGN_STATIC_PROP:
+			next = opline + 1;
+			if (next->op1_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
+				ssa_ops[k + 1].op1_use = var[EX_VAR_TO_NUM(next->op1.var)];
+				//USE_SSA_VAR(op_array->last_var + next->op1.var);
+				if ((build_flags & ZEND_SSA_RC_INFERENCE) && next->op1_type == IS_CV) {
+					ssa_ops[k + 1].op1_def = ssa_vars_count;
+					var[EX_VAR_TO_NUM(next->op1.var)] = ssa_vars_count;
+					ssa_vars_count++;
+					//NEW_SSA_VAR(next->op1.var)
+				}
+			}
+			break;
+		case ZEND_ASSIGN_STATIC_PROP_REF:
+			next = opline + 1;
+			if (next->op1_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
+				ssa_ops[k + 1].op1_use = var[EX_VAR_TO_NUM(next->op1.var)];
+				//USE_SSA_VAR(op_array->last_var + next->op1.var);
+				if (next->op1_type == IS_CV) {
+					ssa_ops[k + 1].op1_def = ssa_vars_count;
+					var[EX_VAR_TO_NUM(next->op1.var)] = ssa_vars_count;
+					ssa_vars_count++;
+					//NEW_SSA_VAR(next->op1.var)
+				}
+			}
+			break;
+		case ZEND_ASSIGN_STATIC_PROP_OP:
+			next = opline + 1;
+			if (next->op1_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
+				ssa_ops[k + 1].op1_use = var[EX_VAR_TO_NUM(next->op1.var)];
+				//USE_SSA_VAR(op_array->last_var + next->op1.var);
+			}
+			break;
+		case ZEND_ASSIGN_DIM_OP:
+		case ZEND_ASSIGN_OBJ_OP:
+			next = opline + 1;
+			if (next->op1_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
+				ssa_ops[k + 1].op1_use = var[EX_VAR_TO_NUM(next->op1.var)];
+				//USE_SSA_VAR(op_array->last_var + next->op1.var);
+			}
+			if (opline->op1_type == IS_CV) {
+				goto add_op1_def;
+			}
+			break;
+		case ZEND_ASSIGN_OP:
+		case ZEND_PRE_INC:
+		case ZEND_PRE_DEC:
+		case ZEND_POST_INC:
+		case ZEND_POST_DEC:
+		case ZEND_BIND_GLOBAL:
+		case ZEND_BIND_STATIC:
+		case ZEND_SEND_VAR_NO_REF:
+		case ZEND_SEND_VAR_NO_REF_EX:
+		case ZEND_SEND_VAR_EX:
+		case ZEND_SEND_FUNC_ARG:
+		case ZEND_SEND_REF:
+		case ZEND_SEND_UNPACK:
+		case ZEND_FE_RESET_RW:
+		case ZEND_MAKE_REF:
+		case ZEND_PRE_INC_OBJ:
+		case ZEND_PRE_DEC_OBJ:
+		case ZEND_POST_INC_OBJ:
+		case ZEND_POST_DEC_OBJ:
+		case ZEND_UNSET_DIM:
+		case ZEND_UNSET_OBJ:
+		case ZEND_FETCH_DIM_W:
+		case ZEND_FETCH_DIM_RW:
+		case ZEND_FETCH_DIM_FUNC_ARG:
+		case ZEND_FETCH_DIM_UNSET:
+		case ZEND_FETCH_LIST_W:
+			if (opline->op1_type == IS_CV) {
+				goto add_op1_def;
+			}
+			break;
+		case ZEND_SEND_VAR:
+		case ZEND_CAST:
+		case ZEND_QM_ASSIGN:
+		case ZEND_JMP_SET:
+		case ZEND_COALESCE:
+		case ZEND_FE_RESET_R:
+			if ((build_flags & ZEND_SSA_RC_INFERENCE) && opline->op1_type == IS_CV) {
+				goto add_op1_def;
+			}
+			break;
+		case ZEND_ADD_ARRAY_UNPACK:
+			ssa_ops[k].result_use = var[EX_VAR_TO_NUM(opline->result.var)];
+			break;
+		case ZEND_ADD_ARRAY_ELEMENT:
+			ssa_ops[k].result_use = var[EX_VAR_TO_NUM(opline->result.var)];
+			/* break missing intentionally */
+		case ZEND_INIT_ARRAY:
+			if (((build_flags & ZEND_SSA_RC_INFERENCE)
+						|| (opline->extended_value & ZEND_ARRAY_ELEMENT_REF))
+					&& opline->op1_type == IS_CV) {
+				goto add_op1_def;
+			}
+			break;
+		case ZEND_YIELD:
+			if (opline->op1_type == IS_CV
+					&& ((op_array->fn_flags & ZEND_ACC_RETURN_REFERENCE)
+						|| (build_flags & ZEND_SSA_RC_INFERENCE))) {
+				goto add_op1_def;
+			}
+			break;
+		case ZEND_UNSET_CV:
+			goto add_op1_def;
+		case ZEND_VERIFY_RETURN_TYPE:
+			if (opline->op1_type & (IS_TMP_VAR|IS_VAR|IS_CV)) {
+				goto add_op1_def;
+			}
+			break;
+		case ZEND_FE_FETCH_R:
+		case ZEND_FE_FETCH_RW:
+			if (opline->op2_type != IS_CV) {
+				ssa_ops[k].op2_use = -1; /* not used */
+			}
+			ssa_ops[k].op2_def = ssa_vars_count;
+			var[EX_VAR_TO_NUM(opline->op2.var)] = ssa_vars_count;
+			ssa_vars_count++;
+			//NEW_SSA_VAR(opline->op2.var)
+			break;
+		case ZEND_BIND_LEXICAL:
+			if ((opline->extended_value & ZEND_BIND_REF) || (build_flags & ZEND_SSA_RC_INFERENCE)) {
+				ssa_ops[k].op2_def = ssa_vars_count;
+				var[EX_VAR_TO_NUM(opline->op2.var)] = ssa_vars_count;
+				ssa_vars_count++;
+				//NEW_SSA_VAR(opline->op2.var)
+			}
+			break;
+		default:
+			break;
+	}
+
+	if (opline->result_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
+		ssa_ops[k].result_def = ssa_vars_count;
+		var[EX_VAR_TO_NUM(opline->result.var)] = ssa_vars_count;
+		ssa_vars_count++;
+		//NEW_SSA_VAR(op_array->last_var + opline->result.var)
+	}
+
+	return ssa_vars_count;
+}
+/* }}} */
+
+int zend_ssa_rename_op(const zend_op_array *op_array, const zend_op *opline, uint32_t k, uint32_t build_flags, int ssa_vars_count, zend_ssa_op *ssa_ops, int *var) /* {{{ */
+{
+	return _zend_ssa_rename_op(op_array, opline, k, build_flags, ssa_vars_count, ssa_ops, var);
+}
+/* }}} */
+
 static int zend_ssa_rename(const zend_op_array *op_array, uint32_t build_flags, zend_ssa *ssa, int *var, int n) /* {{{ */
 {
 	zend_basic_block *blocks = ssa->cfg.blocks;
@@ -529,7 +775,7 @@ static int zend_ssa_rename(const zend_op_array *op_array, uint32_t build_flags, 
 	int i, j;
 	zend_op *opline, *end;
 	int *tmp = NULL;
-	ALLOCA_FLAG(use_heap);
+	ALLOCA_FLAG(use_heap = 0);
 
 	// FIXME: Can we optimize this copying out in some cases?
 	if (blocks[n].next_child >= 0) {
@@ -557,240 +803,14 @@ static int zend_ssa_rename(const zend_op_array *op_array, uint32_t build_flags, 
 	for (; opline < end; opline++) {
 		uint32_t k = opline - op_array->opcodes;
 		if (opline->opcode != ZEND_OP_DATA) {
-			zend_op *next = opline + 1;
-			if (next < end && next->opcode == ZEND_OP_DATA) {
-				if (next->op1_type == IS_CV) {
-					ssa_ops[k + 1].op1_use = var[EX_VAR_TO_NUM(next->op1.var)];
-					//USE_SSA_VAR(next->op1.var);
-				} else if (next->op1_type & (IS_VAR|IS_TMP_VAR)) {
-					ssa_ops[k + 1].op1_use = var[EX_VAR_TO_NUM(next->op1.var)];
-					//USE_SSA_VAR(op_array->last_var + next->op1.var);
-				}
-				if (next->op2_type == IS_CV) {
-					ssa_ops[k + 1].op2_use = var[EX_VAR_TO_NUM(next->op2.var)];
-					//USE_SSA_VAR(next->op2.var);
-				} else if (next->op2_type & (IS_VAR|IS_TMP_VAR)) {
-					ssa_ops[k + 1].op2_use = var[EX_VAR_TO_NUM(next->op2.var)];
-					//USE_SSA_VAR(op_array->last_var + next->op2.var);
-				}
-			}
-			if (opline->op1_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
-				ssa_ops[k].op1_use = var[EX_VAR_TO_NUM(opline->op1.var)];
-				//USE_SSA_VAR(op_array->last_var + opline->op1.var)
-			}
-			if (opline->opcode == ZEND_FE_FETCH_R || opline->opcode == ZEND_FE_FETCH_RW) {
-				if (opline->op2_type == IS_CV) {
-					ssa_ops[k].op2_use = var[EX_VAR_TO_NUM(opline->op2.var)];
-				}
-				ssa_ops[k].op2_def = ssa_vars_count;
-				var[EX_VAR_TO_NUM(opline->op2.var)] = ssa_vars_count;
-				ssa_vars_count++;
-				//NEW_SSA_VAR(opline->op2.var)
-			} else if (opline->op2_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
-				ssa_ops[k].op2_use = var[EX_VAR_TO_NUM(opline->op2.var)];
-				//USE_SSA_VAR(op_array->last_var + opline->op2.var)
-			}
-			switch (opline->opcode) {
-				case ZEND_ASSIGN:
-					if ((build_flags & ZEND_SSA_RC_INFERENCE) && opline->op2_type == IS_CV) {
-						ssa_ops[k].op2_def = ssa_vars_count;
-						var[EX_VAR_TO_NUM(opline->op2.var)] = ssa_vars_count;
-						ssa_vars_count++;
-						//NEW_SSA_VAR(opline->op2.var)
-					}
-					if (opline->op1_type == IS_CV) {
-						ssa_ops[k].op1_def = ssa_vars_count;
-						var[EX_VAR_TO_NUM(opline->op1.var)] = ssa_vars_count;
-						ssa_vars_count++;
-						//NEW_SSA_VAR(opline->op1.var)
-					}
-					break;
-				case ZEND_ASSIGN_REF:
-//TODO: ???
-					if (opline->op2_type == IS_CV) {
-						ssa_ops[k].op2_def = ssa_vars_count;
-						var[EX_VAR_TO_NUM(opline->op2.var)] = ssa_vars_count;
-						ssa_vars_count++;
-						//NEW_SSA_VAR(opline->op2.var)
-					}
-					if (opline->op1_type == IS_CV) {
-						ssa_ops[k].op1_def = ssa_vars_count;
-						var[EX_VAR_TO_NUM(opline->op1.var)] = ssa_vars_count;
-						ssa_vars_count++;
-						//NEW_SSA_VAR(opline->op1.var)
-					}
-					break;
-				case ZEND_BIND_GLOBAL:
-				case ZEND_BIND_STATIC:
-					if (opline->op1_type == IS_CV) {
-						ssa_ops[k].op1_def = ssa_vars_count;
-						var[EX_VAR_TO_NUM(opline->op1.var)] = ssa_vars_count;
-						ssa_vars_count++;
-						//NEW_SSA_VAR(opline->op1.var)
-					}
-					break;
-				case ZEND_ASSIGN_DIM:
-				case ZEND_ASSIGN_OBJ:
-					if (opline->op1_type == IS_CV) {
-						ssa_ops[k].op1_def = ssa_vars_count;
-						var[EX_VAR_TO_NUM(opline->op1.var)] = ssa_vars_count;
-						ssa_vars_count++;
-						//NEW_SSA_VAR(opline->op1.var)
-					}
-					if ((build_flags & ZEND_SSA_RC_INFERENCE) && next->op1_type == IS_CV) {
-						ssa_ops[k + 1].op1_def = ssa_vars_count;
-						var[EX_VAR_TO_NUM(next->op1.var)] = ssa_vars_count;
-						ssa_vars_count++;
-						//NEW_SSA_VAR(next->op1.var)
-					}
-					break;
-				case ZEND_PRE_INC_OBJ:
-				case ZEND_PRE_DEC_OBJ:
-				case ZEND_POST_INC_OBJ:
-				case ZEND_POST_DEC_OBJ:
-					if (opline->op1_type == IS_CV) {
-						ssa_ops[k].op1_def = ssa_vars_count;
-						var[EX_VAR_TO_NUM(opline->op1.var)] = ssa_vars_count;
-						ssa_vars_count++;
-						//NEW_SSA_VAR(opline->op1.var)
-					}
-					break;
-				case ZEND_ADD_ARRAY_ELEMENT:
-					ssa_ops[k].result_use = var[EX_VAR_TO_NUM(opline->result.var)];
-				case ZEND_INIT_ARRAY:
-					if (((build_flags & ZEND_SSA_RC_INFERENCE)
-								|| (opline->extended_value & ZEND_ARRAY_ELEMENT_REF))
-							&& opline->op1_type == IS_CV) {
-						ssa_ops[k].op1_def = ssa_vars_count;
-						var[EX_VAR_TO_NUM(opline->op1.var)] = ssa_vars_count;
-						ssa_vars_count++;
-						//NEW_SSA_VAR(opline+->op1.var)
-					}
-					break;
-				case ZEND_SEND_VAR:
-				case ZEND_CAST:
-				case ZEND_QM_ASSIGN:
-				case ZEND_JMP_SET:
-				case ZEND_COALESCE:
-					if ((build_flags & ZEND_SSA_RC_INFERENCE) && opline->op1_type == IS_CV) {
-						ssa_ops[k].op1_def = ssa_vars_count;
-						var[EX_VAR_TO_NUM(opline->op1.var)] = ssa_vars_count;
-						ssa_vars_count++;
-						//NEW_SSA_VAR(opline->op1.var)
-					}
-					break;
-				case ZEND_SEND_VAR_NO_REF:
-				case ZEND_SEND_VAR_NO_REF_EX:
-				case ZEND_SEND_VAR_EX:
-				case ZEND_SEND_REF:
-				case ZEND_SEND_UNPACK:
-				case ZEND_FE_RESET_RW:
-//TODO: ???
-					if (opline->op1_type == IS_CV) {
-						ssa_ops[k].op1_def = ssa_vars_count;
-						var[EX_VAR_TO_NUM(opline->op1.var)] = ssa_vars_count;
-						ssa_vars_count++;
-						//NEW_SSA_VAR(opline->op1.var)
-					}
-					break;
-				case ZEND_FE_RESET_R:
-					if ((build_flags & ZEND_SSA_RC_INFERENCE) && opline->op1_type == IS_CV) {
-						ssa_ops[k].op1_def = ssa_vars_count;
-						var[EX_VAR_TO_NUM(opline->op1.var)] = ssa_vars_count;
-						ssa_vars_count++;
-						//NEW_SSA_VAR(opline->op1.var)
-					}
-					break;
-				case ZEND_ASSIGN_ADD:
-				case ZEND_ASSIGN_SUB:
-				case ZEND_ASSIGN_MUL:
-				case ZEND_ASSIGN_DIV:
-				case ZEND_ASSIGN_MOD:
-				case ZEND_ASSIGN_SL:
-				case ZEND_ASSIGN_SR:
-				case ZEND_ASSIGN_CONCAT:
-				case ZEND_ASSIGN_BW_OR:
-				case ZEND_ASSIGN_BW_AND:
-				case ZEND_ASSIGN_BW_XOR:
-				case ZEND_ASSIGN_POW:
-				case ZEND_PRE_INC:
-				case ZEND_PRE_DEC:
-				case ZEND_POST_INC:
-				case ZEND_POST_DEC:
-					if (opline->op1_type == IS_CV) {
-						ssa_ops[k].op1_def = ssa_vars_count;
-						var[EX_VAR_TO_NUM(opline->op1.var)] = ssa_vars_count;
-						ssa_vars_count++;
-						//NEW_SSA_VAR(opline->op1.var)
-					}
-					break;
-				case ZEND_UNSET_CV:
-					ssa_ops[k].op1_def = ssa_vars_count;
-					var[EX_VAR_TO_NUM(opline->op1.var)] = ssa_vars_count;
-					ssa_vars_count++;
-					break;
-				case ZEND_UNSET_DIM:
-				case ZEND_UNSET_OBJ:
-				case ZEND_FETCH_DIM_W:
-				case ZEND_FETCH_DIM_RW:
-				case ZEND_FETCH_DIM_FUNC_ARG:
-				case ZEND_FETCH_DIM_UNSET:
-				case ZEND_FETCH_OBJ_W:
-				case ZEND_FETCH_OBJ_RW:
-				case ZEND_FETCH_OBJ_FUNC_ARG:
-				case ZEND_FETCH_OBJ_UNSET:
-					if (opline->op1_type == IS_CV) {
-						ssa_ops[k].op1_def = ssa_vars_count;
-						var[EX_VAR_TO_NUM(opline->op1.var)] = ssa_vars_count;
-						ssa_vars_count++;
-						//NEW_SSA_VAR(opline->op1.var)
-					}
-					break;
-				case ZEND_BIND_LEXICAL:
-					if (opline->extended_value || (build_flags & ZEND_SSA_RC_INFERENCE)) {
-						ssa_ops[k].op2_def = ssa_vars_count;
-						var[EX_VAR_TO_NUM(opline->op2.var)] = ssa_vars_count;
-						ssa_vars_count++;
-					}
-					break;
-				case ZEND_YIELD:
-					if (opline->op1_type == IS_CV
-							&& ((op_array->fn_flags & ZEND_ACC_RETURN_REFERENCE)
-								|| (build_flags & ZEND_SSA_RC_INFERENCE))) {
-						ssa_ops[k].op1_def = ssa_vars_count;
-						var[EX_VAR_TO_NUM(opline->op1.var)] = ssa_vars_count;
-						ssa_vars_count++;
-					}
-					break;
-				case ZEND_VERIFY_RETURN_TYPE:
-					if (opline->op1_type & (IS_TMP_VAR|IS_VAR|IS_CV)) {
-						ssa_ops[k].op1_def = ssa_vars_count;
-						var[EX_VAR_TO_NUM(opline->op1.var)] = ssa_vars_count;
-						ssa_vars_count++;
-						//NEW_SSA_VAR(opline->op1.var)
-					}
-					break;
-				default:
-					break;
-			}
-			if (opline->result_type == IS_CV) {
-				if ((build_flags & ZEND_SSA_USE_CV_RESULTS)
-				 && opline->opcode != ZEND_RECV) {
-					ssa_ops[k].result_use = var[EX_VAR_TO_NUM(opline->result.var)];
-				}
-				ssa_ops[k].result_def = ssa_vars_count;
-				var[EX_VAR_TO_NUM(opline->result.var)] = ssa_vars_count;
-				ssa_vars_count++;
-				//NEW_SSA_VAR(opline->result.var)
-			} else if (opline->result_type & (IS_VAR|IS_TMP_VAR)) {
-				ssa_ops[k].result_def = ssa_vars_count;
-				var[EX_VAR_TO_NUM(opline->result.var)] = ssa_vars_count;
-				ssa_vars_count++;
-				//NEW_SSA_VAR(op_array->last_var + opline->result.var)
-			}
+			ssa_vars_count = _zend_ssa_rename_op(op_array, opline, k, build_flags, ssa_vars_count, ssa_ops, var);
 		}
 	}
 
+	zend_ssa_op *fe_fetch_ssa_op = blocks[n].len != 0
+			&& ((end-1)->opcode == ZEND_FE_FETCH_R || (end-1)->opcode == ZEND_FE_FETCH_RW)
+			&& (end-1)->op2_type == IS_CV
+		? &ssa_ops[blocks[n].start + blocks[n].len - 1] : NULL;
 	for (i = 0; i < blocks[n].successors_count; i++) {
 		int succ = blocks[n].successors[i];
 		zend_ssa_phi *p;
@@ -820,6 +840,10 @@ static int zend_ssa_rename(const zend_op_array *op_array, uint32_t build_flags, 
 					}
 				ZEND_ASSERT(j < blocks[succ].predecessors_count);
 				p->sources[j] = var[p->var];
+				if (fe_fetch_ssa_op && i == 0 && p->sources[j] == fe_fetch_ssa_op->op2_def) {
+					/* On the exit edge of an FE_FETCH, use the pre-modification value instead. */
+					p->sources[j] = fe_fetch_ssa_op->op2_use;
+				}
 			}
 		}
 		for (p = ssa_blocks[succ].phis; p && (p->pi >= 0); p = p->next) {
@@ -873,11 +897,10 @@ int zend_build_ssa(zend_arena **arena, const zend_script *script, const zend_op_
 	ALLOCA_FLAG(var_use_heap)
 
 	if ((blocks_count * (op_array->last_var + op_array->T)) > 4 * 1024 * 1024) {
-	    /* Don't buld SSA for very big functions */
+	    /* Don't build SSA for very big functions */
 		return FAILURE;
 	}
 
-	ssa->rt_constants = (build_flags & ZEND_RT_CONSTANTS);
 	ssa_blocks = zend_arena_calloc(arena, blocks_count, sizeof(zend_ssa_block));
 	ssa->blocks = ssa_blocks;
 
@@ -1117,8 +1140,6 @@ int zend_ssa_compute_use_def_chains(zend_arena **arena, const zend_op_array *op_
 	for (i = 0; i < op_array->last_var; i++) {
 		if ((ssa->cfg.flags & ZEND_FUNC_INDIRECT_VAR_ACCESS)) {
 			ssa_vars[i].alias = SYMTABLE_ALIAS;
-		} else if (zend_string_equals_literal(op_array->vars[i], "php_errormsg")) {
-			ssa_vars[i].alias = PHP_ERRORMSG_ALIAS;
 		} else if (zend_string_equals_literal(op_array->vars[i], "http_response_header")) {
 			ssa_vars[i].alias = HTTP_RESPONSE_HEADER_ALIAS;
 		}
@@ -1290,7 +1311,11 @@ static inline void zend_ssa_remove_phi_source(zend_ssa *ssa, zend_ssa_phi *phi, 
 	for (j = 0; j < predecessors_count; j++) {
 		if (phi->sources[j] == var_num) {
 			if (j < pred_offset) {
-				ZEND_ASSERT(phi->use_chains[pred_offset] == NULL);
+				if (next_phi == NULL) {
+					next_phi = phi->use_chains[pred_offset];
+				} else {
+					ZEND_ASSERT(phi->use_chains[pred_offset] == NULL);
+				}
 			} else if (j >= pred_offset) {
 				phi->use_chains[j] = next_phi;
 			}
@@ -1416,9 +1441,6 @@ void zend_ssa_remove_block(zend_op_array *op_array, zend_ssa *ssa, int i) /* {{{
 			continue;
 		}
 
-		if (op_array->opcodes[j].result_type & (IS_TMP_VAR|IS_VAR)) {
-			zend_optimizer_remove_live_range_ex(op_array, op_array->opcodes[j].result.var, j);
-		}
 		zend_ssa_remove_defs_of_instr(ssa, &ssa->ops[j]);
 		zend_ssa_remove_instr(ssa, &op_array->opcodes[j], &ssa->ops[j]);
 	}
@@ -1598,11 +1620,3 @@ void zend_ssa_rename_var_uses(zend_ssa *ssa, int old, int new, zend_bool update_
 	old_var->phi_use_chain = NULL;
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */

@@ -1,7 +1,7 @@
 --TEST--
 eval() test
 --FILE--
-<?php 
+<?php
 
 error_reporting(0);
 

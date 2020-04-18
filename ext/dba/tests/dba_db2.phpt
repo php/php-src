@@ -1,17 +1,16 @@
 --TEST--
 DBA DB2 handler test
 --SKIPIF--
-<?php 
+<?php
 	$handler = 'db2';
-	require_once dirname(__FILE__) .'/skipif.inc';
+	require_once __DIR__ .'/skipif.inc';
 ?>
 --FILE--
 <?php
-	$handler = 'db2';
-	require_once dirname(__FILE__) .'/test.inc';
-	require_once dirname(__FILE__) .'/dba_handler.inc';
+    $handler = 'db2';
+    require_once __DIR__ .'/test.inc';
+    require_once __DIR__ .'/dba_handler.inc';
 ?>
-===DONE===
 --EXPECT--
 database handler: db2
 3NYNYY
@@ -47,4 +46,3 @@ array(3) {
   ["key5"]=>
   string(23) "The last content string"
 }
-===DONE===

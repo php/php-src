@@ -65,7 +65,8 @@ const struct mbfl_convert_vtbl vtbl_gb18030_wchar = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_gb18030_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_gb18030 = {
@@ -74,7 +75,8 @@ const struct mbfl_convert_vtbl vtbl_wchar_gb18030 = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_wchar_gb18030,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
@@ -412,9 +414,7 @@ mbfl_filt_conv_wchar_gb18030(int c, mbfl_convert_filter *filter)
 			CK((*filter->output_function)(s & 0xff, filter->data));
 		}
 	} else {
-		if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-			CK(mbfl_filt_conv_illegal_output(c, filter));
-		}
+		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
 	return c;
@@ -471,5 +471,3 @@ static int mbfl_filt_ident_gb18030(int c, mbfl_identify_filter *filter)
 
 	return c;
 }
-
-

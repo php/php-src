@@ -19,7 +19,5 @@ $class = $params[0]->getClass();
 
 var_dump($class->getName());
 ?>
-===DONE===
 --EXPECT--
 string(3) "Foo"
-===DONE===

@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 2014-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -109,4 +107,3 @@ sigio_watcher_stop(void)
 	PHPDBG_G(swd).fd = -1;
 	PHPDBG_G(sigio_watcher_thread) = INVALID_HANDLE_VALUE;
 }
-

@@ -6,7 +6,7 @@ Bug #70213: Unserialize context shared on double class lookup
 ini_set('unserialize_callback_func', 'evil');
 
 function evil() {
-	spl_autoload_register(function ($arg) {
+    spl_autoload_register(function ($arg) {
         var_dump(unserialize('R:1;'));
     });
 }

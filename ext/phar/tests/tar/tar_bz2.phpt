@@ -3,7 +3,6 @@ Phar: tar-based phar, bzipped tar
 --SKIPIF--
 <?php
 if (!extension_loaded("phar")) die("skip");
-if (!extension_loaded("spl")) die("skip SPL not available");
 if (!extension_loaded("bz2")) die("skip bz2 not available");
 ?>
 --INI--
@@ -11,11 +10,11 @@ phar.readonly=0
 phar.require_hash=0
 --FILE--
 <?php
-include dirname(__FILE__) . '/files/tarmaker.php.inc';
+include __DIR__ . '/files/tarmaker.php.inc';
 
-$fname = dirname(__FILE__) . '/tar_bz2.phar';
+$fname = __DIR__ . '/tar_bz2.phar';
 $alias = 'phar://' . $fname;
-$fname2 = dirname(__FILE__) . '/tar_bz2.phar.tar';
+$fname2 = __DIR__ . '/tar_bz2.phar.tar';
 $alias2 = 'phar://' . $fname2;
 
 $tar = new tarmaker($fname, 'bz2');
@@ -46,11 +45,10 @@ var_dump($phar2->isFileFormat(Phar::TAR));
 var_dump($phar2->isCompressed() == Phar::BZ2);
 
 ?>
-===DONE===
 --CLEAN--
 <?php
-@unlink(dirname(__FILE__) . '/tar_bz2.phar');
-@unlink(dirname(__FILE__) . '/tar_bz2.phar.tar');
+@unlink(__DIR__ . '/tar_bz2.phar');
+@unlink(__DIR__ . '/tar_bz2.phar.tar');
 ?>
 --EXPECTF--
 string(%d) "%star_bz2.phar"
@@ -59,4 +57,3 @@ string(9) "it worked"
 string(%d) "phar://%star_bz2.phar/tar_004.php"
 bool(true)
 bool(true)
-===DONE===

@@ -1,5 +1,3 @@
-static const char rcsid[] = "#(@) $Id$";
-
 /*
 
 	   Encode or decode file as MIME base64 (RFC 1341)
@@ -57,9 +55,6 @@ void base64_encode_xmlrpc(struct buffer_st *b, const char *source, int length)
 {
   int i, hiteof = 0;
   int offset = 0;
-  int olen;
-
-  olen = 0;
 
   buffer_new(b);
 
@@ -77,7 +72,7 @@ void base64_encode_xmlrpc(struct buffer_st *b, const char *source, int length)
 
   while (!hiteof) {
     unsigned char igroup[3], ogroup[4];
-    int c, n;
+	int c, n;
 
     igroup[0] = igroup[1] = igroup[2] = 0;
     for (n = 0; n < 3; n++) {
@@ -169,7 +164,7 @@ void base64_decode_xmlrpc(struct buffer_st *bfr, const char *source, int length)
 		return;
 	    }
 
-	    if (dtable[c] & 0x80) {
+	    if (dtable[(unsigned char)c] & 0x80) {
 	      /*
 	      fprintf(stderr, "Offset %i length %i\n", offset, length);
 	      fprintf(stderr, "character '%c:%x:%c' in input file.\n", c, c, dtable[c]);

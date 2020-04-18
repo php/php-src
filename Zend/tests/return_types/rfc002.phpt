@@ -1,6 +1,5 @@
 --TEST--
 RFC example: Scalar Types
-
 --FILE--
 <?php
 function answer(): int {
@@ -8,6 +7,5 @@ function answer(): int {
 }
 
 var_dump(answer());
-
---EXPECTF--
+--EXPECT--
 int(42)

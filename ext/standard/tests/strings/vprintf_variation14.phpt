@@ -7,7 +7,7 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 --FILE--
 <?php
 /* Prototype  : string vprintf(string format, array args)
- * Description: Output a formatted string 
+ * Description: Output a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
@@ -19,10 +19,10 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 echo "*** Testing vprintf() : hexa formats and non-hexa values ***\n";
 
 // defining array of different hexa formats
-$formats = 
-  '%x %+x %-x 
+$formats =
+  '%x %+x %-x
    %lx %Lx %4x %-4x
-   %10.4x %-10.4x %.4x 
+   %10.4x %-10.4x %.4x
    %\'#2x %\'2x %\'$2x %\'_2x
    %3$x %4$x %1$x %2$x';
 
@@ -64,12 +64,12 @@ $args_array = array(
          true, TRUE, FALSE,
          0, 1, 1, 0,
          1, TRUE, 0, FALSE),
-  
+
 );
 
 // looping to test vprintf() with different hexa formats from the above $format array
 // and with non-hexa values from the above $args_array array
- 
+
 $counter = 1;
 foreach($args_array as $args) {
   echo "\n-- Iteration $counter --\n";
@@ -80,47 +80,45 @@ foreach($args_array as $args) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing vprintf() : hexa formats and non-hexa values ***
 
 -- Iteration 1 --
-2 0 a 
+2 0 a
    1e240 x fffffb2e 4d2 
-                          
+                         
    3039 c fffffff4 fffe1dc0
    a 1e240 2 0
-int(101)
+int(99)
 
 -- Iteration 2 --
-2 fffffffe 2 
+2 fffffffe 2
    1e240 x ff439a5b bc65a5
-                          
+                         
    bc61b4 127ae7 ff4732f9 ff439ede
    2 1e240 2 fffffffe
-int(124)
+int(122)
 
 -- Iteration 3 --
-0 0 0 
+0 0 0
    7b x ffffff85 7b  
-                          
+                         
    4d2 0 $0 _0
    0 7b 0 0
-int(82)
+int(80)
 
 -- Iteration 4 --
-1 1 1 
+1 1 1
    1 x    1 1   
-                          
+                         
    #1 1 $1 _1
    1 1 1 1
-int(75)
+int(73)
 
 -- Iteration 5 --
-1 1 0 
+1 1 0
    1 x    0 1   
-                          
+                         
    #0 1 $1 _0
    0 1 1 1
-int(75)
-===DONE===
+int(73)

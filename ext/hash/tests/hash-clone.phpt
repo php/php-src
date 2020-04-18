@@ -1,36 +1,34 @@
 --TEST--
-hash_copy() via clone
---SKIPIF--
-<?php extension_loaded('hash') or die('skip'); ?>
+Hash: hash_copy() via clone
 --FILE--
 <?php
 
 $algos = hash_algos();
 
 foreach ($algos as $algo) {
-	var_dump($algo);
-	$orig = hash_init($algo);
-	hash_update($orig, "I can't remember anything");
-	$copy = clone $orig;
-	var_dump(hash_final($orig));
+    var_dump($algo);
+    $orig = hash_init($algo);
+    hash_update($orig, "I can't remember anything");
+    $copy = clone $orig;
+    var_dump(hash_final($orig));
 
-	var_dump(hash_final($copy));
+    var_dump(hash_final($copy));
 }
 
 foreach ($algos as $algo) {
-	var_dump($algo);
-	$orig = hash_init($algo);
-	hash_update($orig, "I can't remember anything");
-	$copy = clone $orig;
-	var_dump(hash_final($orig));
+    var_dump($algo);
+    $orig = hash_init($algo);
+    hash_update($orig, "I can't remember anything");
+    $copy = clone $orig;
+    var_dump(hash_final($orig));
 
-	hash_update($copy, "Can’t tell if this is true or dream");
-	var_dump(hash_final($copy));
+    hash_update($copy, "Can’t tell if this is true or dream");
+    var_dump(hash_final($copy));
 }
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 string(3) "md2"
 string(32) "d5ac4ffd08f6a57b9bd402b8068392ff"
 string(32) "d5ac4ffd08f6a57b9bd402b8068392ff"
@@ -127,6 +125,9 @@ string(8) "e5cfc160"
 string(6) "crc32b"
 string(8) "69147a4e"
 string(8) "69147a4e"
+string(6) "crc32c"
+string(8) "5e405e93"
+string(8) "5e405e93"
 string(6) "fnv132"
 string(8) "98139504"
 string(8) "98139504"
@@ -283,6 +284,9 @@ string(8) "59f8d3d2"
 string(6) "crc32b"
 string(8) "69147a4e"
 string(8) "3ee63999"
+string(6) "crc32c"
+string(8) "5e405e93"
+string(8) "516ad412"
 string(6) "fnv132"
 string(8) "98139504"
 string(8) "59ad036f"

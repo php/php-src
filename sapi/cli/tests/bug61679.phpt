@@ -12,13 +12,8 @@ echo "This should never echo";
 PHP
 );
 
-list($host, $port) = explode(':', PHP_CLI_SERVER_ADDRESS);
-$port = intval($port)?:80;
-
-$fp = fsockopen($host, $port, $errno, $errstr, 0.5);
-if (!$fp) {
-  die("connect failed");
-}
+$host = PHP_CLI_SERVER_HOSTNAME;
+$fp = php_cli_server_connect();
 
 // Send a request with a fictitious request method,
 // I like smurfs, the smurf everything.
@@ -39,5 +34,5 @@ HEADER
 
 fclose($fp);
 ?>
---EXPECTF--
+--EXPECT--
 HTTP/1.1 501 Not Implemented

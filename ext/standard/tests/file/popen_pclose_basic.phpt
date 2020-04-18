@@ -1,11 +1,10 @@
 --TEST--
-Test popen() and pclose function: basic functionality 
+Test popen() and pclose function: basic functionality
 --SKIPIF--
 <?php
 if(substr(PHP_OS, 0, 3) == 'WIN' )
   die("skip Not Valid for Windows");
 ?>
-
 --FILE--
 <?php
 /*
@@ -16,7 +15,7 @@ if(substr(PHP_OS, 0, 3) == 'WIN' )
  *  Description: Closes process file pointer.
  */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require($file_path."/file.inc");
 
 echo "*** Testing popen() and pclose() with different processes ***\n";
@@ -65,14 +64,13 @@ echo "\n--- Done ---";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $dirpath = $file_path."/popen_basic";
 unlink($dirpath."/popen_basic.tmp");
 unlink($dirpath."/popen_basic1.tmp");
 rmdir($dirpath);
 ?>
-
---EXPECTF--
+--EXPECT--
 *** Testing popen() and pclose() with different processes ***
 -- Testing popen(): reading from the pipe --
 popen_basic.tmp

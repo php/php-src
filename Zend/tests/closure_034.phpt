@@ -7,7 +7,6 @@ $a = function () use(&$a) {};
 var_dump($a);
 
 ?>
-===DONE===
 --EXPECTF--
 object(Closure)#%d (1) {
   ["static"]=>
@@ -16,4 +15,3 @@ object(Closure)#%d (1) {
     *RECURSION*
   }
 }
-===DONE===

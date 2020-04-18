@@ -17,7 +17,6 @@ var_dump(
   ldap_exop_whoami($link)
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 require "connect.inc";
@@ -28,4 +27,3 @@ remove_dummy_data($link, $base);
 ?>
 --EXPECTF--
 string(%d) "dn:%s"
-===DONE===

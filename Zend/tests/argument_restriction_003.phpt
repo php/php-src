@@ -6,14 +6,14 @@ class Foo {
 }
 
 Abstract Class Base {
-	public function test(Foo $foo, array $bar, $option = NULL, $extra = "lllllllllllllllllllllllllllllllllllllllllllllllllll") {
-	}	
+    public function test(Foo $foo, array $bar, $option = NULL, $extra = "lllllllllllllllllllllllllllllllllllllllllllllllllll") {
+    }
 }
 
 class Sub extends Base {
-	public function test() {
-	}	
+    public function test() {
+    }
 }
 ?>
 --EXPECTF--
-Warning: Declaration of Sub::test() should be compatible with Base::test(Foo $foo, array $bar, $option = NULL, $extra = 'llllllllll...') in %sargument_restriction_003.php on line %d
+Fatal error: Declaration of Sub::test() must be compatible with Base::test(Foo $foo, array $bar, $option = null, $extra = 'llllllllll...') in %s on line %d

@@ -31,11 +31,11 @@ function sort_arrays( $locale, $test_arrays, $sort_flag = Collator::SORT_REGULAR
         $res_dump = "\n" . dump( $test_array ) .
                     "\n Result: " . dump( $res_val );
 
-		// Preppend test signature to output string
+        // Preppend test signature to output string
         $md5 = md5( $res_dump );
 
         global $test_num;
-        
+
         $res_str .= "\n\n".
                     "Test $test_num.$md5:" .
                     $res_dump;

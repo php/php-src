@@ -16,14 +16,14 @@ function ut_main()
 
     $locales = array(
         'uk-ua_CALIFORNIA@currency=;currency=GRN',
-	'root',
+    'root',
         'uk@currency=EURO',
         'Hindi',
 //Simple language subtag
         'de',
         'fr',
         'ja',
-      	'i-enochian', //(example of a grandfathered tag)
+        'i-enochian', //(example of a grandfathered tag)
 //Language subtag plus Script subtag:
         'zh-Hant',
         'zh-Hans',
@@ -83,9 +83,9 @@ include_once( 'ut_common.inc' );
 ut_run();
 
 ?>
---EXPECT--
+--EXPECTF--
 uk-ua_CALIFORNIA@currency=;currency=GRN:  primary_language='uk'
-root:  primary_language='root'
+root:  primary_language='%S'
 uk@currency=EURO:  primary_language='uk'
 Hindi:  primary_language='hindi'
 de:  primary_language='de'

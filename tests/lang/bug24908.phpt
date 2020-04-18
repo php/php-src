@@ -4,13 +4,13 @@ Bug #24908 (super-globals can not be used in __destruct())
 variables_order=GPS
 --FILE--
 <?php
-class test { 
-	function __construct() {
-		if (count($_SERVER)) echo "O";
-	}
-	function __destruct() {
-		if (count($_SERVER)) echo "K\n";
-	}
+class test {
+    function __construct() {
+        if (count($_SERVER)) echo "O";
+    }
+    function __destruct() {
+        if (count($_SERVER)) echo "K\n";
+    }
 }
 $test = new test();
 ?>

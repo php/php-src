@@ -3,12 +3,12 @@ Test array_walk_recursive() function : usage variations - 'input' argument as di
 --FILE--
 <?php
 /* Prototype  : bool array_walk_recursive(array $input, string $funcname [, mixed $userdata])
- * Description: Apply a user function to every member of an array 
+ * Description: Apply a user function to every member of an array
  * Source code: ext/standard/array.c
 */
 
 /*
- * Passing 'input' argument as an associative array 
+ * Passing 'input' argument as an associative array
  *    with Numeric & string keys
 */
 
@@ -16,14 +16,14 @@ echo "*** Testing array_walk_recursive() : 'input' as an associative array ***\n
 
 // callback functions
 /* Prototype : for_numeric( int $value, int $key, int $user_data)
- * Parameters : $value - value from key/value pair of the array 
+ * Parameters : $value - value from key/value pair of the array
  *              $key - key from key/value pair of the array
  *              $user_data - data to be added to 'value'
  * Description : Function adds values with keys & user_data
  */
 function for_numeric($value, $key, $user_data)
 {
-  // dump the input values to see if they are 
+  // dump the input values to see if they are
   // passed with correct type
   var_dump($key);
   var_dump($value);
@@ -38,7 +38,7 @@ function for_numeric($value, $key, $user_data)
  */
 function for_string($value, $key)
 {
-  // dump the input values to see if they are 
+  // dump the input values to see if they are
   // passed with correct type
   var_dump($key);
   var_dump($value);
@@ -52,7 +52,7 @@ function for_string($value, $key)
  */
 function for_mixed($value, $key)
 {
-  // dump the input values to see if they are 
+  // dump the input values to see if they are
   // passed with correct type
   var_dump($key);
   var_dump($value);
@@ -81,7 +81,7 @@ var_dump( array_walk_recursive($input, "for_mixed"));
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_walk_recursive() : 'input' as an associative array ***
 -- Associative array with numeric keys --
 int(1)

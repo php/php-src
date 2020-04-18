@@ -16,9 +16,9 @@ $qry->execute();
 $qry->bind_result($text);
 $qry->fetch();
 if ($text !== str_repeat('a', ($IS_MYSQLND || mysqli_get_server_version($db) > 50110)? 100000:(mysqli_get_server_version($db)>=50000? 8193:8191))) {
-	var_dump(strlen($text));
+    var_dump(strlen($text));
 }
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 Done

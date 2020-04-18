@@ -6,11 +6,11 @@ zend.enable_gc = 1
 <?php
 $bar = NULL;
 class bad {
-	public function __destruct() {
-		global $bar;
-		$bar = $this;
-		$bar->y = new stdClass;
-	}
+    public function __destruct() {
+        global $bar;
+        $bar = $this;
+        $bar->y = new stdClass;
+    }
 }
 
 $foo = new stdClass;

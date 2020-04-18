@@ -41,7 +41,7 @@ var_dump(sodium_crypto_auth_verify($badmac, $msg, $key));
 ?>
 --EXPECT--
 bool(true)
-key must be SODIUM_CRYPTO_AUTH_KEYBYTES bytes
+sodium_crypto_auth(): Argument #2 ($key) must be SODIUM_CRYPTO_AUTH_KEYBYTES bytes long
 bool(false)
 bool(false)
 bool(false)

@@ -15,24 +15,24 @@ intl.error_level=E_WARNING
 
 function ut_main()
 {
-	$timezone_id_arr = array (
-		'America/New_York',
-		'US/Pacific',
-		'US/Central'
-	);
-	
-	$res_str = '';
+    $timezone_id_arr = array (
+        'America/New_York',
+        'US/Pacific',
+        'US/Central'
+    );
 
-	foreach( $timezone_id_arr as $timezone_id_entry )
-	{
-		$res_str .= "\nCreating IntlDateFormatter with timezone_id = $timezone_id_entry";
-		$fmt = ut_datefmt_create( "de-DE",  IntlDateFormatter::SHORT, IntlDateFormatter::SHORT, $timezone_id_entry , IntlDateFormatter::GREGORIAN  );
-		$timezone_id = ut_datefmt_get_timezone_id( $fmt);
-		$res_str .= "\nAfter call to get_timezone_id :  timezone_id= $timezone_id";
-		$res_str .= "\n";
-	}
+    $res_str = '';
 
-	return $res_str;
+    foreach( $timezone_id_arr as $timezone_id_entry )
+    {
+        $res_str .= "\nCreating IntlDateFormatter with timezone_id = $timezone_id_entry";
+        $fmt = ut_datefmt_create( "de-DE",  IntlDateFormatter::SHORT, IntlDateFormatter::SHORT, $timezone_id_entry , IntlDateFormatter::GREGORIAN  );
+        $timezone_id = ut_datefmt_get_timezone_id( $fmt);
+        $res_str .= "\nAfter call to get_timezone_id :  timezone_id= $timezone_id";
+        $res_str .= "\n";
+    }
+
+    return $res_str;
 
 }
 

@@ -3,19 +3,19 @@ Unsetting and recreating protected properties.
 --FILE--
 <?php
 class C {
-	protected $p = 'test';
-	function unsetProtected() {
-		unset($this->p);		
-	}
-	function setProtected() {
-		$this->p = 'changed';		
-	}
+    protected $p = 'test';
+    function unsetProtected() {
+        unset($this->p);
+    }
+    function setProtected() {
+        $this->p = 'changed';
+    }
 }
 
 class D extends C {
-	function setP() {
-		$this->p = 'changed in D';
-	}
+    function setP() {
+        $this->p = 'changed in D';
+    }
 }
 
 $d = new D;

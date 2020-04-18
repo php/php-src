@@ -32,7 +32,7 @@ prompt>
 <?php
 function foo() {
     $other = bar();
-    
+
     return ["hello", $other];
 }
 

@@ -15,10 +15,7 @@ echo "ok\n"
 --EXPECT--
 array(1) {
   [0]=>
-  &array(1) {
-    [0]=>
-    *RECURSION*
-  }
+  *RECURSION*
 }
 int(0)
 int(1)

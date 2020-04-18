@@ -3,7 +3,7 @@ Test sprintf() function : usage variations - unexpected values for format argume
 --FILE--
 <?php
 /* Prototype  : string sprintf(string $format [, mixed $arg1 [, mixed ...]])
- * Description: Return a formatted string 
+ * Description: Return a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
@@ -87,25 +87,37 @@ $values = array(
 $count = 1;
 foreach($values as $value) {
   echo "\n-- Iteration $count --\n";
-  
+
   // with default argument
-  var_dump( sprintf($value) );
+  try {
+    var_dump(sprintf($value));
+  } catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+  }
 
   // with two arguments
-  var_dump( sprintf($value, $arg1) );
+  try {
+    var_dump(sprintf($value, $arg1));
+  } catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+  }
 
   // with three arguments
-  var_dump( sprintf($value, $arg1, $arg2) );
+  try {
+    var_dump(sprintf($value, $arg1, $arg2));
+  } catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+  }
 
   $count++;
-};
+}
 
 // close the resource
 fclose($file_handle);
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sprintf() : with unexpected values for format argument ***
 
 -- Iteration 1 --
@@ -154,59 +166,29 @@ string(3) "0.5"
 string(3) "0.5"
 
 -- Iteration 10 --
-
-Notice: Array to string conversion in %s on line %d
-string(5) "Array"
-
-Notice: Array to string conversion in %s on line %d
-string(5) "Array"
-
-Notice: Array to string conversion in %s on line %d
-string(5) "Array"
+sprintf(): Argument #1 ($format) must be of type string, array given
+sprintf(): Argument #1 ($format) must be of type string, array given
+sprintf(): Argument #1 ($format) must be of type string, array given
 
 -- Iteration 11 --
-
-Notice: Array to string conversion in %s on line %d
-string(5) "Array"
-
-Notice: Array to string conversion in %s on line %d
-string(5) "Array"
-
-Notice: Array to string conversion in %s on line %d
-string(5) "Array"
+sprintf(): Argument #1 ($format) must be of type string, array given
+sprintf(): Argument #1 ($format) must be of type string, array given
+sprintf(): Argument #1 ($format) must be of type string, array given
 
 -- Iteration 12 --
-
-Notice: Array to string conversion in %s on line %d
-string(5) "Array"
-
-Notice: Array to string conversion in %s on line %d
-string(5) "Array"
-
-Notice: Array to string conversion in %s on line %d
-string(5) "Array"
+sprintf(): Argument #1 ($format) must be of type string, array given
+sprintf(): Argument #1 ($format) must be of type string, array given
+sprintf(): Argument #1 ($format) must be of type string, array given
 
 -- Iteration 13 --
-
-Notice: Array to string conversion in %s on line %d
-string(5) "Array"
-
-Notice: Array to string conversion in %s on line %d
-string(5) "Array"
-
-Notice: Array to string conversion in %s on line %d
-string(5) "Array"
+sprintf(): Argument #1 ($format) must be of type string, array given
+sprintf(): Argument #1 ($format) must be of type string, array given
+sprintf(): Argument #1 ($format) must be of type string, array given
 
 -- Iteration 14 --
-
-Notice: Array to string conversion in %s on line %d
-string(5) "Array"
-
-Notice: Array to string conversion in %s on line %d
-string(5) "Array"
-
-Notice: Array to string conversion in %s on line %d
-string(5) "Array"
+sprintf(): Argument #1 ($format) must be of type string, array given
+sprintf(): Argument #1 ($format) must be of type string, array given
+sprintf(): Argument #1 ($format) must be of type string, array given
 
 -- Iteration 15 --
 string(0) ""
@@ -264,7 +246,7 @@ string(0) ""
 string(0) ""
 
 -- Iteration 26 --
-string(%d) "Resource id #%d"
-string(%d) "Resource id #%d"
-string(%d) "Resource id #%d"
+sprintf(): Argument #1 ($format) must be of type string, resource given
+sprintf(): Argument #1 ($format) must be of type string, resource given
+sprintf(): Argument #1 ($format) must be of type string, resource given
 Done

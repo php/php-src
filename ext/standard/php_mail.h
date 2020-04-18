@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,17 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef PHP_MAIL_H
 #define PHP_MAIL_H
 
-PHP_FUNCTION(mail);
-PHP_FUNCTION(ezmlm_hash);
-
 PHP_MINFO_FUNCTION(mail);
 
-PHPAPI zend_string *php_mail_build_headers(zval *headers);
+PHPAPI zend_string *php_mail_build_headers(HashTable *headers);
 PHPAPI extern int php_mail(char *to, char *subject, char *message, char *headers, char *extra_cmd);
 
 #define PHP_MAIL_BUILD_HEADER_CHECK(target, s, key, val) \

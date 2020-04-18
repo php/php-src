@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,8 +19,6 @@
 
 #ifndef PHP_SOCKETS_H
 #define PHP_SOCKETS_H
-
-/* $Id$ */
 
 #if HAVE_CONFIG_H
 # include "config.h"
@@ -92,6 +88,10 @@ PHP_SOCKETS_API void php_destroy_sockaddr(zend_resource *rsrc);
 ZEND_BEGIN_MODULE_GLOBALS(sockets)
 	int last_error;
 	char *strerror_buf;
+#ifdef PHP_WIN32
+	uint32_t wsa_child_count;
+	HashTable wsa_info;
+#endif
 ZEND_END_MODULE_GLOBALS(sockets)
 
 ZEND_EXTERN_MODULE_GLOBALS(sockets)
@@ -115,11 +115,3 @@ php_socket *socket_import_file_descriptor(PHP_SOCKET sock);
 #endif
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */
-

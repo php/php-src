@@ -20,7 +20,7 @@ $arg3 = array("one","two","three");
 
 
 /* creating dumping file */
-$data_file = dirname(__FILE__) . '/vfprintf_basic1.txt';
+$data_file = __DIR__ . '/vfprintf_basic1.txt';
 if (!($fp = fopen($data_file, 'wt')))
    return;
 
@@ -37,7 +37,6 @@ print_r(file_get_contents($data_file));
 unlink($data_file);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing vfprintf() : basic functionality - using string format ***
 int(4)
@@ -46,4 +45,3 @@ int(14)
 one
 one two
 one two three
-===DONE===

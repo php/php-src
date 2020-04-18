@@ -5,47 +5,47 @@ ZE2 iterators and array wrapping
 
 class ai implements Iterator {
 
-	private $array;
+    private $array;
 
-	function __construct() {
-		$this->array = array('foo', 'bar', 'baz');
-	}
+    function __construct() {
+        $this->array = array('foo', 'bar', 'baz');
+    }
 
-	function rewind() {
-		reset($this->array);
-		$this->next();
-	}
+    function rewind() {
+        reset($this->array);
+        $this->next();
+    }
 
-	function valid() {
-		return $this->key !== NULL;
-	}
+    function valid() {
+        return $this->key !== NULL;
+    }
 
-	function key() {
-		return $this->key;
-	}
+    function key() {
+        return $this->key;
+    }
 
-	function current() {
-		return $this->current;
-	}
+    function current() {
+        return $this->current;
+    }
 
-	function next() {
+    function next() {
         $this->key = key($this->array);
         $this->current = current($this->array);
         next($this->array);
-	}
+    }
 }
 
 class a implements IteratorAggregate {
 
-	public function getIterator() {
-		return new ai();
-	}
+    public function getIterator() {
+        return new ai();
+    }
 }
 
 $array = new a();
 
 foreach ($array as $property => $value) {
-	print "$property: $value\n";    
+    print "$property: $value\n";
 }
 
 #$array = $array->getIterator();
@@ -58,17 +58,16 @@ echo "===2nd===\n";
 $array = new ai();
 
 foreach ($array as $property => $value) {
-	print "$property: $value\n";    
+    print "$property: $value\n";
 }
 
 echo "===3rd===\n";
 
 foreach ($array as $property => $value) {
-	print "$property: $value\n";    
+    print "$property: $value\n";
 }
 
 ?>
-===DONE===
 --EXPECT--
 0: foo
 1: bar
@@ -81,4 +80,3 @@ foreach ($array as $property => $value) {
 0: foo
 1: bar
 2: baz
-===DONE===

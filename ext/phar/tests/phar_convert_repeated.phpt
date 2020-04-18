@@ -8,10 +8,10 @@ phar.readonly=0
 --FILE--
 <?php
 
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar';
 $pname = 'phar://' . $fname;
-$fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.zip';
-$fname3 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.tar';
+$fname2 = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.zip';
+$fname3 = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.tar';
 $stub = '<?php echo "first stub\n"; __HALT_COMPILER(); ?>';
 $file = $stub;
 
@@ -85,18 +85,17 @@ var_dump($phar->getStub());
 var_dump($phar->getAlias());
 
 ?>
-===DONE===
 --CLEAN--
-<?php 
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.zip');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.2.phar.zip');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.2.2.phar.tar');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.phar');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.2.2.3.phar.zip');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.3.phar.tar');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.3.phar');
+<?php
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.2.2.phar.zip');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.2.2.2.phar.tar');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.2.phar');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.2.2.2.3.phar.zip');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.3.phar.tar');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.3.phar');
 ?>
 --EXPECTF--
 =================== new Phar() =======================
@@ -123,7 +122,7 @@ NULL
 bool(true)
 bool(false)
 bool(false)
-int(6651)
+int(6641)
 NULL
 ================= convertToZip() =====================
 bool(false)
@@ -146,4 +145,3 @@ bool(true)
 string(60) "<?php // zip-based phar archive stub file
 __HALT_COMPILER();"
 NULL
-===DONE===

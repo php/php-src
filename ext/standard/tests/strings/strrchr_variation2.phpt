@@ -71,7 +71,7 @@ $needle = array(
   42, //needle as int(ASCII value of '*')
   $haystack  //haystack as needle
 );
-  
+
 /* loop through to get the position of the needle in haystack string */
 $count = 1;
 for($index=0; $index<count($needle); $index++) {
@@ -213,7 +213,7 @@ bool(false)
 string(7) "4 \101 "
 
 -- Iteration 44 --
-string(37) "*+-./:;<=>?@hello123456he \x234 \101 "
+string(7) "4 \101 "
 
 -- Iteration 45 --
 string(63) "Hello,\t\n\0\n  $&!#%\o,()*+-./:;<=>?@hello123456he \x234 \101 "

@@ -8,7 +8,7 @@ var_dump(FOO);
 
 ?>
 --EXPECTF--
-Notice: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
+Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 array(1) {
   [%d]=>
   int(42)

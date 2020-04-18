@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -87,8 +85,8 @@ MBSTRING_API int php_unicode_is_prop(unsigned long code, ...);
 MBSTRING_API int php_unicode_is_prop1(unsigned long code, int prop);
 
 MBSTRING_API char *php_unicode_convert_case(
-		int case_mode, const char *srcstr, size_t srclen, size_t *retlen,
-		const mbfl_encoding *src_encoding);
+		int case_mode, const char *srcstr, size_t srclen, size_t *ret_len,
+		const mbfl_encoding *src_encoding, int illegal_mode, int illegal_substchar);
 
 #define PHP_UNICODE_CASE_UPPER        0
 #define PHP_UNICODE_CASE_LOWER        1
@@ -197,6 +195,3 @@ static inline int php_unicode_is_upper(unsigned long code) {
 
 
 #endif /* PHP_UNICODE_H */
-
-
-

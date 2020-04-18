@@ -4,23 +4,23 @@ Bug #54624 (class_alias and type hint)
 <?php
 class A
 {
-	function foo(A $param) {
-	}
+    function foo(A $param) {
+    }
 
 }
 
 class_alias('A', 'AliasA');
 
-eval(' 
-	class B extends A
-	{
-		function foo(AliasA $param) {
-		}
+eval('
+    class B extends A
+    {
+        function foo(AliasA $param) {
+        }
 
-	}
+    }
 ');
 
 echo "DONE\n";
 ?>
---EXPECTF--
+--EXPECT--
 DONE

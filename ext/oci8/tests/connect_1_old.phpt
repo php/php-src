@@ -5,20 +5,20 @@ ociplogon() & ocinlogon()
 --FILE--
 <?php
 
-require dirname(__FILE__)."/connect.inc";
+require __DIR__."/connect.inc";
 
 if (!empty($dbase)) {
-	var_dump($c1 = ociplogon($user, $password, $dbase));
+    var_dump($c1 = ociplogon($user, $password, $dbase));
 }
 else {
-	var_dump($c1 = ociplogon($user, $password));
+    var_dump($c1 = ociplogon($user, $password));
 }
 
 if (!empty($dbase)) {
-	var_dump($c2 = ocinlogon($user, $password, $dbase));
+    var_dump($c2 = ocinlogon($user, $password, $dbase));
 }
 else {
-	var_dump($c2 = ocinlogon($user, $password));
+    var_dump($c2 = ocinlogon($user, $password));
 }
 
 var_dump(ocilogoff($c1));

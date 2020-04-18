@@ -1,4 +1,4 @@
-/* -*- mode: c; c-file-style: "k&r" -*-
+/*
 
   Modified for PHP by Andrei Zmievski <andrei@ispi.net>
 
@@ -24,7 +24,6 @@
 
 #include <ctype.h>
 #include <string.h>
-#include <assert.h>
 #include <stdio.h>
 
 #include "php.h"
@@ -141,6 +140,10 @@ PHPAPI int strnatcmp_ex(char const *a, size_t a_len, char const *b, size_t b_len
 			else if (ap == aend && bp == bend)
 				/* End of the strings. Let caller sort them out. */
 				return 0;
+			else if (ap == aend)
+				return -1;
+			else if (bp == bend)
+				return 1;
 			else {
 				/* Keep on comparing from the current point. */
 				ca = *ap; cb = *bp;
@@ -169,12 +172,3 @@ PHPAPI int strnatcmp_ex(char const *a, size_t a_len, char const *b, size_t b_len
 	}
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

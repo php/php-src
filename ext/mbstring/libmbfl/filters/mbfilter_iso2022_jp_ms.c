@@ -66,7 +66,8 @@ const struct mbfl_convert_vtbl vtbl_2022jpms_wchar = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_2022jpms_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_2022jpms = {
@@ -75,7 +76,8 @@ const struct mbfl_convert_vtbl vtbl_wchar_2022jpms = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_wchar_2022jpms,
-	mbfl_filt_conv_any_2022jpms_flush
+	mbfl_filt_conv_any_2022jpms_flush,
+	NULL,
 };
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
@@ -408,9 +410,7 @@ mbfl_filt_conv_wchar_2022jpms(int c, mbfl_convert_filter *filter)
 			CK((*filter->output_function)(s1 & 0x7f, filter->data));
 		}
 	} else {
-		if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-			CK(mbfl_filt_conv_illegal_output(c, filter));
-		}
+		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
 	return c;

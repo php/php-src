@@ -8,43 +8,42 @@ $source = count($_SERVER['argv']) > 1 ? $_SERVER['argv'][1] : 'https://raw.githu
 // See if we can actually load it.
 $types = @file($source);
 if ($types === false) {
-	fprintf(STDERR, "Error: unable to read $source\n");
-	exit(1);
+    fprintf(STDERR, "Error: unable to read $source\n");
+    exit(1);
 }
 
 // Remove comments and flip into an extensions array.
 $extensions = [];
 array_walk($types, function ($line) use (&$extensions) {
-	$line = trim($line);
-	if ($line && $line[0] != '#') {
-		$fields = preg_split('/\s+/', $line);
-		if (count($fields) > 1) {
-			$mime = array_shift($fields);
-			foreach ($fields as $extension) {
-				$extensions[$extension] = $mime;
-			}
-		}
-	}
+    $line = trim($line);
+    if ($line && $line[0] != '#') {
+        $fields = preg_split('/\s+/', $line);
+        if (count($fields) > 1) {
+            $mime = array_shift($fields);
+            foreach ($fields as $extension) {
+                $extensions[$extension] = $mime;
+            }
+        }
+    }
 });
 
 $additional_mime_maps = [
-	"map" => "application/json",	// from commit: a0d62f08ae8cbebc88e5c92e08fca8d0cdc7309d
+    "map" => "application/json",	// from commit: a0d62f08ae8cbebc88e5c92e08fca8d0cdc7309d
+    "jsm" => "application/javascript",
 ];
 
 foreach($additional_mime_maps as $ext => $mime) {
-	if (!isset($extensions[$ext])) {
-		$extensions[$ext] = $mime;
-	} else {
-		printf(STDERR, "Ignored exist mime type: $ext => $mime\n");
-	}
+    if (!isset($extensions[$ext])) {
+        $extensions[$ext] = $mime;
+    } else {
+        printf(STDERR, "Ignored exist mime type: $ext => $mime\n");
+    }
 }
 
 ?>
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -65,24 +64,15 @@ foreach($additional_mime_maps as $ext => $mime) {
 #define PHP_CLI_SERVER_MIME_TYPE_MAP_H
 
 typedef struct php_cli_server_ext_mime_type_pair {
-	const char *ext;
-	const char *mime_type;
+    const char *ext;
+    const char *mime_type;
 } php_cli_server_ext_mime_type_pair;
 
-static php_cli_server_ext_mime_type_pair mime_type_map[] = {
+static const php_cli_server_ext_mime_type_pair mime_type_map[] = {
 <?php foreach ($extensions as $extension => $mime): ?>
-	{ "<?= addcslashes($extension, "\0..\37!@\@\177..\377") ?>", "<?= addcslashes($mime, "\0..\37!@\@\177..\377") ?>" },
+    { "<?= addcslashes($extension, "\0..\37!@\@\177..\377") ?>", "<?= addcslashes($mime, "\0..\37!@\@\177..\377") ?>" },
 <?php endforeach ?>
-	{ NULL, NULL }
+    { NULL, NULL }
 };
 
 #endif /* PHP_CLI_SERVER_MIME_TYPE_MAP_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

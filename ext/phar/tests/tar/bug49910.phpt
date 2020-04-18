@@ -5,15 +5,14 @@ Bug #49910: no support for ././@LongLink for long filenames in phar tar support
 <?php if (!extension_loaded("zlib")) die("skip"); ?>
 --FILE--
 <?php
-$fname = str_replace('\\', '/', dirname(__FILE__) . '/files/Structures_Graph-1.0.3.tgz');
+$fname = str_replace('\\', '/', __DIR__ . '/files/Structures_Graph-1.0.3.tgz');
 $tar = new PharData($fname);
 $files = array();
 foreach (new RecursiveIteratorIterator($tar) as $file) {
-	$files[] = str_replace($fname, '*', $file->getPathName());
+    $files[] = str_replace($fname, '*', $file->getPathName());
 }
 print_r($files);
 ?>
-===DONE===
 --EXPECT--
 Array
 (
@@ -47,4 +46,3 @@ Array
     [27] => phar://*/Structures_Graph-1.0.3/tests/testCase/BasicGraph.php
     [28] => phar://*/package.xml
 )
-===DONE===

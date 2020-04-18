@@ -1,5 +1,7 @@
 --TEST--
 Edge-cases in elimination of JMPZ JMP with same target
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 
@@ -12,5 +14,5 @@ echo "done\n";
 
 ?>
 --EXPECTF--
-Notice: Undefined variable: undef in %s on line %d
+Warning: Undefined variable $undef in %s on line %d
 done

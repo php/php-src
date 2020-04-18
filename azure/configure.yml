@@ -1,0 +1,62 @@
+parameters:
+  configurationParameters: ''
+
+steps:
+- script: |
+    ./buildconf --force
+    ./configure ${{ parameters.configurationParameters }} \
+        --enable-option-checking=fatal \
+        --prefix=/usr \
+        --enable-phpdbg \
+        --enable-fpm \
+        --with-pdo-mysql=mysqlnd \
+        --with-mysqli=mysqlnd \
+        --with-pgsql \
+        --with-pdo-pgsql \
+        --with-pdo-sqlite \
+        --enable-intl \
+        --without-pear \
+        --enable-gd \
+        --with-jpeg \
+        --with-webp \
+        --with-freetype \
+        --with-xpm \
+        --enable-exif \
+        --with-zip \
+        --with-zlib \
+        --with-zlib-dir=/usr \
+        --enable-soap \
+        --enable-xmlreader \
+        --with-xsl \
+        --with-tidy \
+        --with-xmlrpc \
+        --enable-sysvsem \
+        --enable-sysvshm \
+        --enable-shmop \
+        --enable-pcntl \
+        --with-readline \
+        --enable-mbstring \
+        --with-curl \
+        --with-gettext \
+        --enable-sockets \
+        --with-bz2 \
+        --with-openssl \
+        --with-gmp \
+        --enable-bcmath \
+        --enable-calendar \
+        --enable-ftp \
+        --with-pspell=/usr \
+        --with-enchant=/usr \
+        --with-kerberos \
+        --enable-sysvmsg \
+        --with-ffi \
+        --enable-zend-test \
+        --with-ldap \
+        --with-ldap-sasl \
+        --with-password-argon2 \
+        --with-mhash \
+        --with-sodium \
+        --enable-werror \
+        --with-config-file-path=/etc \
+        --with-config-file-scan-dir=/etc/php.d
+  displayName: 'Configure Build'

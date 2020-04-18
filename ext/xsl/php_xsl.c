@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +14,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -26,6 +22,7 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_xsl.h"
+#include "php_xsl_arginfo.h"
 
 zend_class_entry *xsl_xsltprocessor_class_entry;
 static zend_object_handlers xsl_object_handlers;
@@ -108,7 +105,7 @@ zend_object *xsl_objects_new(zend_class_entry *class_type)
 {
 	xsl_object *intern;
 
-	intern = ecalloc(1, sizeof(xsl_object) + zend_object_properties_size(class_type));
+	intern = zend_object_alloc(sizeof(xsl_object), class_type);
 	intern->securityPrefs = XSL_SECPREF_DEFAULT;
 
 	zend_object_std_init(&intern->std, class_type);
@@ -128,12 +125,12 @@ PHP_MINIT_FUNCTION(xsl)
 
 	zend_class_entry ce;
 
-	memcpy(&xsl_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	memcpy(&xsl_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	xsl_object_handlers.offset = XtOffsetOf(xsl_object, std);
 	xsl_object_handlers.clone_obj = NULL;
 	xsl_object_handlers.free_obj = xsl_objects_free_storage;
 
-	REGISTER_XSL_CLASS(ce, "XSLTProcessor", NULL, php_xsl_xsltprocessor_class_functions, xsl_xsltprocessor_class_entry);
+	REGISTER_XSL_CLASS(ce, "XSLTProcessor", NULL, class_XSLTProcessor_methods, xsl_xsltprocessor_class_entry);
 #if HAVE_XSL_EXSLT
 	exsltRegisterAll();
 #endif
@@ -275,12 +272,3 @@ PHP_MINFO_FUNCTION(xsl)
 	php_info_print_table_end();
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

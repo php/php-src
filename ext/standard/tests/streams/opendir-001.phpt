@@ -1,5 +1,5 @@
 --TEST--
-opendir() with 'ftp://' stream. 
+opendir() with 'ftp://' stream.
 --SKIPIF--
 <?php
 if (array_search('ftp',stream_get_wrappers()) === FALSE) die("skip ftp wrapper not available.");
@@ -14,9 +14,7 @@ $path="ftp://localhost:" . $port."/bogusdir";
 
 var_dump(opendir($path));
 ?>
-==DONE== 
 --EXPECTF--
-Warning: opendir(ftp://localhost:%d/bogusdir): failed to open dir: FTP server reports 250 /bogusdir: No such file or directory
+Warning: opendir(ftp://localhost:%d/bogusdir): Failed to open directory: FTP server reports 250 /bogusdir: No such file or directory
  in %s on line %d
 bool(false)
-==DONE==

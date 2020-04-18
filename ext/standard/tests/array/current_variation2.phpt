@@ -39,7 +39,7 @@ $inputs = array(
 
        // int data
 /*1*/  'int' => array(
-	   0,
+       0,
        1,
        12345,
        -2345,
@@ -67,13 +67,13 @@ $inputs = array(
        TRUE,
        FALSE,
        ),
-       
+
        // empty data
 /*5*/ 'empty string' => array(
        "",
        '',
        ),
-       
+
 /*6*/ 'empty array' => array(
        ),
 
@@ -83,7 +83,7 @@ $inputs = array(
        'string',
        $heredoc,
        ),
-       
+
        // object data
 /*8*/ 'object' => array(
        new classA(),
@@ -115,7 +115,6 @@ foreach($inputs as $key => $input) {
 
 fclose($fp);
 ?>
-===DONE===
 --EXPECTF--
 *** Testing current() : usage variations ***
 
@@ -152,4 +151,3 @@ NULL
 
 -- Iteration 11 : resource data --
 resource(%d) of type (stream)
-===DONE===

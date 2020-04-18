@@ -16,7 +16,7 @@ $file = __DIR__ . '/SplFileObject_fputcsv1.csv';
 unlink($file);
 ?>
 --EXPECTF--
-Notice: Array to string conversion in %s on line %d
+Warning: Array to string conversion in %s on line %d
 array(7) {
   [0]=>
   int(1)

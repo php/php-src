@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,	  |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,9 +27,9 @@
  * WATCH_ON_HASHDATA: special watchpoint to watch for HT_GET_DATA_ADDR(ht) being efree()'d to be able to properly relocate Bucket watches
  *
  * Watch elements are either simple, recursive or implicit (PHPDBG_WATCH_* flags)
- * Simple means that a particular watchpoint was explicitely defined
+ * Simple means that a particular watchpoint was explicitly defined
  * Recursive watch elements are created recursively (recursive root flag is to distinguish the root element easily from its children recursive elements)
- * Implicit  watch elements are implicitely created on all ancestors of simple or recursive watch elements
+ * Implicit  watch elements are implicitly created on all ancestors of simple or recursive watch elements
  * Recursive and (simple or implicit) watch elements are mutually exclusive
  * Array/Object to distinguish watch elements on arrays
  *
@@ -429,7 +427,7 @@ void phpdbg_update_watch_ref(phpdbg_watchpoint_t *watch) {
 			phpdbg_store_watchpoint_btree(&coll->ref);
 			phpdbg_activate_watchpoint(&coll->ref);
 			phpdbg_watch_backup_data(&coll->ref);
-			
+
 			zend_hash_init(&coll->parents, 8, shitty stupid parameter, NULL, 0);
 			zend_hash_index_add_ptr(&PHPDBG_G(watch_collisions), (zend_ulong) watch->ref, coll);
 		}
@@ -1014,13 +1012,14 @@ void phpdbg_check_watchpoint(phpdbg_watchpoint_t *watch) {
 	}
 	if (watch->type == WATCH_ON_BUCKET) {
 		if (watch->backup.bucket.key != watch->addr.bucket->key || (watch->backup.bucket.key != NULL && watch->backup.bucket.h != watch->addr.bucket->h)) {
-			phpdbg_watch_element *element;
+			phpdbg_watch_element *element = NULL;
 			zval *new;
 
 			ZEND_HASH_FOREACH_PTR(&watch->elements, element) {
 				break;
 			} ZEND_HASH_FOREACH_END();
 
+			ZEND_ASSERT(element); /* elements must be non-empty */
 			new = zend_symtable_find(element->parent_container, element->name_in_parent);
 
 			if (!new) {
@@ -1072,7 +1071,7 @@ void phpdbg_reenable_memory_watches(void) {
 	phpdbg_watchpoint_t *watch;
 
 	ZEND_HASH_FOREACH_NUM_KEY(PHPDBG_G(watchlist_mem), page) {
-		/* Disble writing again if there are any watchers on that page */
+		/* Disable writing again if there are any watchers on that page */
 		res = phpdbg_btree_find_closest(&PHPDBG_G(watchpoint_tree), page + phpdbg_pagesize - 1);
 		if (res) {
 			watch = res->ptr;

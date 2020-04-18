@@ -16,16 +16,16 @@ comment */
 
 // a class
 class TestClass {
-	public function foo() {
-		echo "Called foo()\n";
-	}
+    public function foo() {
+        echo "Called foo()\n";
+    }
 }
 
 $a = new TestClass();
 $a->foo();
 
 for ($i = 0; $i < 10; $i++) {
-	echo "Loop iteration $i\n";
+    echo "Loop iteration $i\n";
 }
 
 ?>';
@@ -33,19 +33,19 @@ for ($i = 0; $i < 10; $i++) {
 $token_array = token_get_all($phpstr);
 
 $script = "";
-// reconstruct a script (without open/close tags) from the token array 
+// reconstruct a script (without open/close tags) from the token array
 foreach ($token_array as $token) {
-	if (is_array($token)) {
-		if (strncmp($token[1], '<?php', 5) == 0) {
-			continue;
-		}
-		if (strncmp($token[1], '?>', 2) == 0) {
-			continue;
-		}
-		$script .= $token[1];
-	} else {
-		$script .= $token;
-	}
+    if (is_array($token)) {
+        if (strncmp($token[1], '<?php', 5) == 0) {
+            continue;
+        }
+        if (strncmp($token[1], '?>', 2) == 0) {
+            continue;
+        }
+        $script .= $token[1];
+    } else {
+        $script .= $token;
+    }
 }
 
 var_dump($script);
@@ -54,7 +54,7 @@ eval($script);
 
 ?>
 --EXPECT--
-string(259) "
+string(274) "
 
 // A php script to test token_get_all()
 
@@ -64,16 +64,16 @@ comment */
 
 // a class
 class TestClass {
-	public function foo() {
-		echo "Called foo()\n";
-	}
+    public function foo() {
+        echo "Called foo()\n";
+    }
 }
 
 $a = new TestClass();
 $a->foo();
 
 for ($i = 0; $i < 10; $i++) {
-	echo "Loop iteration $i\n";
+    echo "Loop iteration $i\n";
 }
 
 "

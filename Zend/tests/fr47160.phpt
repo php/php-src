@@ -4,51 +4,37 @@ Calling method from array
 <?php
 
 class Hello {
-	public function world($x) {
-		echo "Hello, $x\n";return $this;
-	}
+    public function world($x) {
+        echo "Hello, $x\n";return $this;
+    }
 }
 
 class Hello2 {
-	static public function world($x) {
-		echo "Hello, $x\n";
-	}
+    static public function world($x) {
+        echo "Hello, $x\n";
+    }
 }
 
 class Magic {
-	public function __call($f, $a) {
-		printf("%s called (%s)!\n", __METHOD__, $f);
-	}
+    public function __call($f, $a) {
+        printf("%s called (%s)!\n", __METHOD__, $f);
+    }
 }
 
 class Magic2 {
-	public static function __callStatic($f, $a) {
-		printf("%s called (%s)!\n", __METHOD__, $f);
-	}
+    public static function __callStatic($f, $a) {
+        printf("%s called (%s)!\n", __METHOD__, $f);
+    }
 }
 
 class Magic3 {
-	public static function __callStatic($f, $a) {
-		printf("%s called (%s)!\n", __METHOD__, $f);
-	}
-	public function __call($f, $a) {
-		printf("%s called (%s)!\n", __METHOD__, $f);
-	}
+    public static function __callStatic($f, $a) {
+        printf("%s called (%s)!\n", __METHOD__, $f);
+    }
+    public function __call($f, $a) {
+        printf("%s called (%s)!\n", __METHOD__, $f);
+    }
 }
-
-$f = array('Hello','world');
-try {
-	var_dump($f('you'));
-} catch (Throwable $e) {
-	echo "Exception: " . $e->getMessage() . "\n";
-}
-try {
-	var_dump(call_user_func($f, 'you'));
-} catch (Throwable $e) {
-	echo "Exception: " . $e->getMessage() . "\n";
-}
-
-printf("-----\n");
 
 $h= new Hello;
 $f = array($h,'world');
@@ -58,7 +44,7 @@ var_dump(call_user_func($f, 'again'));
 printf("-----\n");
 
 function bar() {
-	return array(new Hello,'world');
+    return array(new Hello,'world');
 }
 $f = bar();
 var_dump($f('there'));
@@ -107,14 +93,6 @@ var_dump(call_user_func($f, 'you'));
 
 ?>
 --EXPECTF--
-Deprecated: Non-static method Hello::world() should not be called statically in %s on line %d
-Hello, you
-Exception: Using $this when not in object context
-
-Deprecated: %son-static method Hello::world() should not be called statically in %s on line %d
-Hello, you
-Exception: Using $this when not in object context
------
 Hello, again
 object(Hello)#%d (0) {
 }

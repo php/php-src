@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,8 +15,6 @@
    |          Sascha Schumann <sascha@schumann.cx>                        |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #include "php.h"
 #include "php_globals.h"
@@ -55,10 +51,10 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		Z_PARAM_STRING(host, host_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(port)
-		Z_PARAM_ZVAL_DEREF(zerrno)
-		Z_PARAM_ZVAL_DEREF(zerrstr)
+		Z_PARAM_ZVAL(zerrno)
+		Z_PARAM_ZVAL(zerrstr)
 		Z_PARAM_DOUBLE(timeout)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (persistent) {
 		spprintf(&hashkey, 0, "pfsockopen__%s:" ZEND_LONG_FMT, host, port);
@@ -81,15 +77,6 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 #endif
 	tv.tv_usec = conv % 1000000;
 
-	if (zerrno)	{
-		zval_ptr_dtor(zerrno);
-		ZVAL_LONG(zerrno, 0);
-	}
-	if (zerrstr) {
-		zval_ptr_dtor(zerrstr);
-		ZVAL_EMPTY_STRING(zerrstr);
-	}
-
 	stream = php_stream_xport_create(hostname, hostname_len, REPORT_ERRORS,
 			STREAM_XPORT_CLIENT | STREAM_XPORT_CONNECT, hashkey, &tv, NULL, &errstr, &err);
 
@@ -97,31 +84,37 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		efree(hostname);
 	}
 	if (stream == NULL) {
-		php_error_docref(NULL, E_WARNING, "unable to connect to %s:" ZEND_LONG_FMT " (%s)", host, port, errstr == NULL ? "Unknown error" : ZSTR_VAL(errstr));
+		php_error_docref(NULL, E_WARNING, "Unable to connect to %s:" ZEND_LONG_FMT " (%s)", host, port, errstr == NULL ? "Unknown error" : ZSTR_VAL(errstr));
 	}
 
 	if (hashkey) {
 		efree(hashkey);
 	}
 
-	if (stream == NULL)	{
+	if (stream == NULL) {
 		if (zerrno) {
-			zval_ptr_dtor(zerrno);
-			ZVAL_LONG(zerrno, err);
+			ZEND_TRY_ASSIGN_REF_LONG(zerrno, err);
 		}
-		if (zerrstr && errstr) {
-			/* no need to dup; we need to efree buf anyway */
-			zval_ptr_dtor(zerrstr);
-			ZVAL_STR(zerrstr, errstr);
-		} else if (!zerrstr && errstr) {
-			zend_string_release(errstr);
+		if (errstr) {
+			if (zerrstr) {
+				ZEND_TRY_ASSIGN_REF_STR(zerrstr, errstr);
+			} else {
+				zend_string_release(errstr);
+			}
 		}
 
 		RETURN_FALSE;
 	}
 
+	if (zerrno) {
+		ZEND_TRY_ASSIGN_REF_LONG(zerrno, 0);
+	}
+	if (zerrstr) {
+		ZEND_TRY_ASSIGN_REF_EMPTY_STRING(zerrstr);
+	}
+
 	if (errstr) {
-		zend_string_release(errstr);
+		zend_string_release_ex(errstr, 0);
 	}
 
 	php_stream_to_zval(stream, return_value);
@@ -144,12 +137,3 @@ PHP_FUNCTION(pfsockopen)
 	php_fsockopen_stream(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

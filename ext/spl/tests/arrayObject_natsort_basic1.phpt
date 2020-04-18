@@ -1,12 +1,12 @@
 --TEST--
-SPL: Test ArrayObject::natsort() function : basic functionality 
+SPL: Test ArrayObject::natsort() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : int ArrayObject::natsort()
  * Description: proto int ArrayIterator::natsort()
- Sort the entries by values using "natural order" algorithm. 
+ Sort the entries by values using "natural order" algorithm.
  * Source code: ext/spl/spl_array.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing ArrayObject::natsort() : basic functionality ***\n";
@@ -18,8 +18,7 @@ var_dump($ao1);
 var_dump($ao2->natsort('blah'));
 var_dump($ao2);
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ArrayObject::natsort() : basic functionality ***
 bool(true)
 object(ArrayObject)#1 (1) {
@@ -53,5 +52,3 @@ object(ArrayObject)#2 (1) {
     string(5) "boo22"
   }
 }
-===DONE===
-

@@ -4,11 +4,11 @@ using multiple access modifiers (abstract methods)
 <?php
 
 class test {
-	abstract abstract function foo() {
-	}
+    abstract abstract function foo() {
+    }
 }
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Multiple abstract modifiers are not allowed in %s on line %d

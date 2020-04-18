@@ -1,13 +1,13 @@
 --TEST--
 xmlwriter_start/end_attribute()
 --SKIPIF--
-<?php 
-if (!extension_loaded("xmlwriter")) die("skip"); 
+<?php
+if (!extension_loaded("xmlwriter")) die("skip");
 ?>
 --FILE--
 <?php
 
-$file = dirname(__FILE__).'/010.tmp';
+$file = __DIR__.'/010.tmp';
 
 $xw = xmlwriter_open_uri($file);
 

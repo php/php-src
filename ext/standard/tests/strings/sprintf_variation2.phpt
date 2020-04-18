@@ -3,11 +3,9 @@ Test sprintf() function : usage variations - with all types of values for arg1 a
 --FILE--
 <?php
 /* Prototype  : string sprintf(string $format [, mixed $arg1 [, mixed ...]])
- * Description: Return a formatted string 
+ * Description: Return a formatted string
  * Source code: ext/standard/formatted_print.c
 */
-
-error_reporting(E_ALL & ~E_NOTICE);
 
 echo "*** Testing sprintf() : with different types of values passed for arg1 argument ***\n";
 
@@ -24,7 +22,7 @@ class sample
 {
   public function __toString() {
     return "Object";
-  } 
+  }
 }
 
 // creating a file resource
@@ -89,14 +87,14 @@ $values = array(
 $count = 1;
 foreach($values as $value) {
   echo "\n-- Iteration $count --\n";
-  
+
   // with two arguments
   var_dump( sprintf($format, $value) );
 
   // with three arguments
   var_dump( sprintf($format, $value, $arg2) );
-  
-  $count++;   
+
+  $count++;
 };
 
 // closing the resource
@@ -144,23 +142,43 @@ string(3) "0.5"
 string(3) "0.5"
 
 -- Iteration 10 --
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 
 -- Iteration 11 --
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 
 -- Iteration 12 --
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 
 -- Iteration 13 --
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 
 -- Iteration 14 --
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 
 -- Iteration 15 --

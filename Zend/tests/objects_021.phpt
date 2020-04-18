@@ -4,33 +4,33 @@ Testing magic methods __set, __get and __call in cascade
 <?php
 
 class test {
-	static public $i = 0;
-	
-	public function __construct() {
-		self::$i++;
-	}
-	
-	public function __set($a, $b) {
-		return x();
-	}
-	
-	public function __get($a) {
-		return x();
-	}
-	
-	public function __call($a, $b) {
-		return x();
-	}
+    static public $i = 0;
+
+    public function __construct() {
+        self::$i++;
+    }
+
+    public function __set($a, $b) {
+        return x();
+    }
+
+    public function __get($a) {
+        return x();
+    }
+
+    public function __call($a, $b) {
+        return x();
+    }
 }
 
 function x() {
-	return new test;
+    return new test;
 }
 
 x()
-	->a
-		->b()
-			->c	= 1;
+    ->a
+        ->b()
+            ->c	= 1;
 
 var_dump(test::$i);
 

@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,8 +15,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -27,54 +23,24 @@
 #if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
 
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_implementation_get_feature, 0, 0, 2)
-	ZEND_ARG_INFO(0, feature)
-	ZEND_ARG_INFO(0, version)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_implementation_has_feature, 0, 0, 0)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_implementation_create_documenttype, 0, 0, 3)
-	ZEND_ARG_INFO(0, qualifiedName)
-	ZEND_ARG_INFO(0, publicId)
-	ZEND_ARG_INFO(0, systemId)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_implementation_create_document, 0, 0, 3)
-	ZEND_ARG_INFO(0, namespaceURI)
-	ZEND_ARG_INFO(0, qualifiedName)
-	ZEND_ARG_OBJ_INFO(0, docType, DOMDocumentType, 0)
-ZEND_END_ARG_INFO();
-/* }}} */
-
 /*
 * class DOMImplementation
 *
-* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-102161490
+* URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-102161490
 * Since:
 */
 
-const zend_function_entry php_dom_domimplementation_class_functions[] = {
-	PHP_ME(domimplementation, getFeature, arginfo_dom_implementation_get_feature, ZEND_ACC_PUBLIC|ZEND_ACC_ALLOW_STATIC)
-	PHP_ME(domimplementation, hasFeature, arginfo_dom_implementation_has_feature, ZEND_ACC_PUBLIC|ZEND_ACC_ALLOW_STATIC)
-	PHP_ME(domimplementation, createDocumentType, arginfo_dom_implementation_create_documenttype, ZEND_ACC_PUBLIC|ZEND_ACC_ALLOW_STATIC)
-	PHP_ME(domimplementation, createDocument, arginfo_dom_implementation_create_document, ZEND_ACC_PUBLIC|ZEND_ACC_ALLOW_STATIC)
-	PHP_FE_END
-};
-
-/* {{{ proto boolean dom_domimplementation_has_feature(string feature, string version);
+/* {{{ proto bool dom_domimplementation_has_feature(string feature, string version);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-5CED94D7
 Since:
 */
-PHP_METHOD(domimplementation, hasFeature)
+PHP_METHOD(DOMImplementation, hasFeature)
 {
 	size_t feature_len, version_len;
 	char *feature, *version;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &feature, &feature_len, &version, &version_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (dom_has_feature(feature, version)) {
@@ -89,7 +55,7 @@ PHP_METHOD(domimplementation, hasFeature)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Level-2-Core-DOM-createDocType
 Since: DOM Level 2
 */
-PHP_METHOD(domimplementation, createDocumentType)
+PHP_METHOD(DOMImplementation, createDocumentType)
 {
 	xmlDtd *doctype;
 	int ret;
@@ -98,8 +64,8 @@ PHP_METHOD(domimplementation, createDocumentType)
 	xmlChar *pch1 = NULL, *pch2 = NULL, *localname = NULL;
 	xmlURIPtr uri;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|sss", &name, &name_len, &publicid, &publicid_len, &systemid, &systemid_len) == FAILURE) {
-		return;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|ss", &name, &name_len, &publicid, &publicid_len, &systemid, &systemid_len) == FAILURE) {
+		RETURN_THROWS();
 	}
 
 	if (name_len == 0) {
@@ -151,7 +117,7 @@ PHP_METHOD(domimplementation, createDocumentType)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Level-2-Core-DOM-createDocument
 Since: DOM Level 2
 */
-PHP_METHOD(domimplementation, createDocument)
+PHP_METHOD(DOMImplementation, createDocument)
 {
 	zval *node = NULL;
 	xmlDoc *docp;
@@ -164,8 +130,8 @@ PHP_METHOD(domimplementation, createDocument)
 	char *prefix = NULL, *localname = NULL;
 	dom_object *doctobj;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|ssO", &uri, &uri_len, &name, &name_len, &node, dom_documenttype_class_entry) == FAILURE) {
-		return;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|ssO!", &uri, &uri_len, &name, &name_len, &node, dom_documenttype_class_entry) == FAILURE) {
+		RETURN_THROWS();
 	}
 
 	if (node != NULL) {
@@ -256,19 +222,17 @@ PHP_METHOD(domimplementation, createDocument)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMImplementation3-getFeature
 Since: DOM Level 3
 */
-PHP_METHOD(domimplementation, getFeature)
+PHP_METHOD(DOMImplementation, getFeature)
 {
- DOM_NOT_IMPLEMENTED();
+	size_t feature_len, version_len;
+	char *feature, *version;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &feature, &feature_len, &version, &version_len) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	DOM_NOT_IMPLEMENTED();
 }
 /* }}} end dom_domimplementation_get_feature */
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

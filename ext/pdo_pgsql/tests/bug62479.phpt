@@ -3,14 +3,14 @@ PDO PgSQL Bug #62479 (PDO-psql cannot connect if password contains spaces)
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_pgsql')) die('skip not loaded');
-require dirname(__FILE__) . '/config.inc';
-require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
+require __DIR__ . '/config.inc';
+require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
 PDOTest::skip();
 
 $dsn = getenv('PDOTEST_DSN');
 if (empty($dsn)) die('skip no dsn found in env');
 
-$db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
+$db = PDOTest::test_factory(__DIR__ . '/common.phpt');
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 
@@ -37,8 +37,9 @@ $db->exec("DROP USER $user");
 ?>
 --FILE--
 <?php
-require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
-$pdo = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
+require __DIR__ . '/config.inc';
+require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
+$pdo = PDOTest::test_factory(__DIR__ . '/common.phpt');
 $pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
 $rand = rand(5, 400);
 $user = "pdo_test_$rand";
@@ -49,7 +50,7 @@ $testQuery = 'SELECT 1 as verification';
 // Create temp user with space in password
 $sql = sprintf($template, 'my password');
 $pdo->query($sql);
-$testConn = new PDO($conf['ENV']['PDOTEST_DSN'], $user, "my password");
+$testConn = new PDO($config['ENV']['PDOTEST_DSN'], $user, "my password");
 $result = $testConn->query($testQuery)->fetch();
 $check = $result[0];
 var_dump($check);
@@ -61,7 +62,7 @@ $pdo->query($dropUser);
 $sql = sprintf($template, "my pass''word");
 $pdo->query($sql);
 
-$testConn = new PDO($conf['ENV']['PDOTEST_DSN'], $user, "my pass'word");
+$testConn = new PDO($config['ENV']['PDOTEST_DSN'], $user, "my pass'word");
 $result = $testConn->query($testQuery)->fetch();
 $check = $result[0];
 var_dump($check);
@@ -72,4 +73,3 @@ $pdo->query($dropUser);
 --EXPECT--
 int(1)
 int(1)
-

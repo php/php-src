@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,7 +13,6 @@
    | Author: Jim Winstead <jimw@php.net>                                  |
    +----------------------------------------------------------------------+
  */
-/* $Id$ */
 
 #include <stdlib.h>
 #include <string.h>
@@ -27,14 +24,10 @@
 #include "url.h"
 #include "file.h"
 #ifdef _OSD_POSIX
-#ifndef APACHE
-#error On this EBCDIC platform, PHP is only supported as an Apache module.
-#else /*APACHE*/
-#ifndef CHARSET_EBCDIC
-#define CHARSET_EBCDIC /* this machine uses EBCDIC, not ASCII! */
-#endif
-#include "ebcdic.h"
-#endif /*APACHE*/
+# ifndef CHARSET_EBCDIC
+#  define CHARSET_EBCDIC /* this machine uses EBCDIC, not ASCII! */
+# endif
+# include "ebcdic.h"
 #endif /*_OSD_POSIX*/
 
 /* {{{ free_url
@@ -42,19 +35,19 @@
 PHPAPI void php_url_free(php_url *theurl)
 {
 	if (theurl->scheme)
-		zend_string_release(theurl->scheme);
+		zend_string_release_ex(theurl->scheme, 0);
 	if (theurl->user)
-		zend_string_release(theurl->user);
+		zend_string_release_ex(theurl->user, 0);
 	if (theurl->pass)
-		zend_string_release(theurl->pass);
+		zend_string_release_ex(theurl->pass, 0);
 	if (theurl->host)
-		zend_string_release(theurl->host);
+		zend_string_release_ex(theurl->host, 0);
 	if (theurl->path)
-		zend_string_release(theurl->path);
+		zend_string_release_ex(theurl->path, 0);
 	if (theurl->query)
-		zend_string_release(theurl->query);
+		zend_string_release_ex(theurl->query, 0);
 	if (theurl->fragment)
-		zend_string_release(theurl->fragment);
+		zend_string_release_ex(theurl->fragment, 0);
 	efree(theurl);
 }
 /* }}} */
@@ -298,6 +291,8 @@ PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
 		if (p < e) {
 			ret->fragment = zend_string_init(p, (e - p), 0);
 			php_replace_controlchars_ex(ZSTR_VAL(ret->fragment), ZSTR_LEN(ret->fragment));
+		} else {
+			ret->fragment = ZSTR_EMPTY_ALLOC();
 		}
 		e = p-1;
 	}
@@ -308,6 +303,8 @@ PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
 		if (p < e) {
 			ret->query = zend_string_init(p, (e - p), 0);
 			php_replace_controlchars_ex(ZSTR_VAL(ret->query), ZSTR_LEN(ret->query));
+		} else {
+			ret->query = ZSTR_EMPTY_ALLOC();
 		}
 		e = p-1;
 	}
@@ -370,8 +367,8 @@ PHP_FUNCTION(parse_url)
 				if (resource->fragment != NULL) RETVAL_STR_COPY(resource->fragment);
 				break;
 			default:
-				php_error_docref(NULL, E_WARNING, "Invalid URL component identifier " ZEND_LONG_FMT, key);
-				RETVAL_FALSE;
+				zend_argument_value_error(2, "must be a valid URL component identifier, " ZEND_LONG_FMT " given", key);
+				break;
 		}
 		goto done;
 	}
@@ -548,7 +545,7 @@ PHPAPI size_t php_url_decode(char *str, size_t len)
 #ifndef CHARSET_EBCDIC
 			*dest = (char) php_htoi(data + 1);
 #else
-			*dest = os_toebcdic[(char) php_htoi(data + 1)];
+			*dest = os_toebcdic[(unsigned char) php_htoi(data + 1)];
 #endif
 			data += 2;
 			len -= 2;
@@ -569,27 +566,31 @@ PHPAPI zend_string *php_raw_url_encode(char const *s, size_t len)
 {
 	register size_t x, y;
 	zend_string *str;
+	char *ret;
 
 	str = zend_string_safe_alloc(3, len, 0, 0);
+	ret = ZSTR_VAL(str);
 	for (x = 0, y = 0; len--; x++, y++) {
-		ZSTR_VAL(str)[y] = (unsigned char) s[x];
+		char c = s[x];
+
+		ret[y] = c;
 #ifndef CHARSET_EBCDIC
-		if ((ZSTR_VAL(str)[y] < '0' && ZSTR_VAL(str)[y] != '-' && ZSTR_VAL(str)[y] != '.') ||
-			(ZSTR_VAL(str)[y] < 'A' && ZSTR_VAL(str)[y] > '9') ||
-			(ZSTR_VAL(str)[y] > 'Z' && ZSTR_VAL(str)[y] < 'a' && ZSTR_VAL(str)[y] != '_') ||
-			(ZSTR_VAL(str)[y] > 'z' && ZSTR_VAL(str)[y] != '~')) {
-			ZSTR_VAL(str)[y++] = '%';
-			ZSTR_VAL(str)[y++] = hexchars[(unsigned char) s[x] >> 4];
-			ZSTR_VAL(str)[y] = hexchars[(unsigned char) s[x] & 15];
+		if ((c < '0' && c != '-' &&  c != '.') ||
+			(c < 'A' && c > '9') ||
+			(c > 'Z' && c < 'a' && c != '_') ||
+			(c > 'z' && c != '~')) {
+			ret[y++] = '%';
+			ret[y++] = hexchars[(unsigned char) c >> 4];
+			ret[y] = hexchars[(unsigned char) c & 15];
 #else /*CHARSET_EBCDIC*/
-		if (!isalnum(ZSTR_VAL(str)[y]) && strchr("_-.~", ZSTR_VAL(str)[y]) != NULL) {
-			ZSTR_VAL(str)[y++] = '%';
-			ZSTR_VAL(str)[y++] = hexchars[os_toascii[(unsigned char) s[x]] >> 4];
-			ZSTR_VAL(str)[y] = hexchars[os_toascii[(unsigned char) s[x]] & 15];
+		if (!isalnum(c) && strchr("_-.~", c) != NULL) {
+			ret[y++] = '%';
+			ret[y++] = hexchars[os_toascii[(unsigned char) c] >> 4];
+			ret[y] = hexchars[os_toascii[(unsigned char) c] & 15];
 #endif /*CHARSET_EBCDIC*/
 		}
 	}
-	ZSTR_VAL(str)[y] = '\0';
+	ret[y] = '\0';
 	str = zend_string_truncate(str, y, 0);
 
 	return str;
@@ -640,7 +641,7 @@ PHPAPI size_t php_raw_url_decode(char *str, size_t len)
 #ifndef CHARSET_EBCDIC
 			*dest = (char) php_htoi(data + 1);
 #else
-			*dest = os_toebcdic[(char) php_htoi(data + 1)];
+			*dest = os_toebcdic[(unsigned char) php_htoi(data + 1)];
 #endif
 			data += 2;
 			len -= 2;
@@ -655,24 +656,23 @@ PHPAPI size_t php_raw_url_decode(char *str, size_t len)
 }
 /* }}} */
 
-/* {{{ proto array get_headers(string url[, int format[, resource context]])
+/* {{{ proto array|false get_headers(string url[, int format[, resource context]])
    fetches all the headers sent by the server in response to a HTTP request */
 PHP_FUNCTION(get_headers)
 {
 	char *url;
 	size_t url_len;
 	php_stream *stream;
-	zval *prev_val, *hdr = NULL, *h;
-	HashTable *hashT;
+	zval *prev_val, *hdr = NULL;
 	zend_long format = 0;
 	zval *zcontext = NULL;
 	php_stream_context *context;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
-		Z_PARAM_STRING(url, url_len)
+		Z_PARAM_PATH(url, url_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(format)
-		Z_PARAM_RESOURCE_EX(zcontext, 1, 0)
+		Z_PARAM_RESOURCE_OR_NULL(zcontext)
 	ZEND_PARSE_PARAMETERS_END();
 
 	context = php_stream_context_from_zval(zcontext, 0);
@@ -688,19 +688,7 @@ PHP_FUNCTION(get_headers)
 
 	array_init(return_value);
 
-	/* check for curl-wrappers that provide headers via a special "headers" element */
-	if ((h = zend_hash_str_find(HASH_OF(&stream->wrapperdata), "headers", sizeof("headers")-1)) != NULL && Z_TYPE_P(h) == IS_ARRAY) {
-		/* curl-wrappers don't load data until the 1st read */
-		if (!Z_ARRVAL_P(h)->nNumOfElements) {
-			php_stream_getc(stream);
-		}
-		h = zend_hash_str_find(HASH_OF(&stream->wrapperdata), "headers", sizeof("headers")-1);
-		hashT = Z_ARRVAL_P(h);
-	} else {
-		hashT = HASH_OF(&stream->wrapperdata);
-	}
-
-	ZEND_HASH_FOREACH_VAL(hashT, hdr) {
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(&stream->wrapperdata), hdr) {
 		if (Z_TYPE_P(hdr) != IS_STRING) {
 			continue;
 		}
@@ -736,12 +724,3 @@ no_name_header:
 	php_stream_close(stream);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

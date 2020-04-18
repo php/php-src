@@ -1,5 +1,5 @@
 --TEST--
-Test scandir() function : basic functionality 
+Test scandir() function : basic functionality
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) != 'WIN') {
@@ -9,7 +9,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 --FILE--
 <?php
 /* Prototype  : array scandir(string $dir [, int $sorting_order [, resource $context]])
- * Description: List files & directories inside the specified path 
+ * Description: List files & directories inside the specified path
  * Source code: ext/standard/dir.c
  */
 
@@ -20,10 +20,10 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 echo "*** Testing scandir() : basic functionality ***\n";
 
 // include file.inc for create_files function
-include (dirname(__FILE__) . '/../file/file.inc');
+include (__DIR__ . '/../file/file.inc');
 
 // set up directory
-$directory = dirname(__FILE__) . '/私はガラスを食べられますscandir_basic';
+$directory = __DIR__ . '/私はガラスを食べられますscandir_basic';
 mkdir($directory);
 create_files($directory, 3, "numeric", 0755, 1, "w", "私はガラスを食べられますfile");
 
@@ -37,13 +37,12 @@ var_dump(scandir($directory, $sorting_order, $context));
 
 delete_files($directory, 3, "私はガラスを食べられますfile");
 ?>
-===DONE===
 --CLEAN--
 <?php
-$directory = dirname(__FILE__) . '/私はガラスを食べられますscandir_basic';
+$directory = __DIR__ . '/私はガラスを食べられますscandir_basic';
 rmdir($directory);
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing scandir() : basic functionality ***
 
 -- scandir() with mandatory arguments --
@@ -73,4 +72,3 @@ array(5) {
   [4]=>
   string(1) "."
 }
-===DONE===

@@ -11,11 +11,9 @@ $im = imagecreatetruecolor(8, 8);
 var_dump(imagepng($im, $stream));
 var_dump($stream);
 ?>
-===DONE===
 --EXPECTF--
 bool(true)
 resource(%d) of type (stream)
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . DIRECTORY_SEPARATOR . 'bug73549.png');

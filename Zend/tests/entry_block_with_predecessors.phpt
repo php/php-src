@@ -28,6 +28,6 @@ test2();
 
 ?>
 --EXPECTF--
-Notice: Undefined variable: a in %s on line %d
+Warning: Undefined variable $a in %s on line %d
 int(1)
 int(2)

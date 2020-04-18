@@ -3,9 +3,9 @@ Test gmmktime() function : usage variation - Checking with few optional argument
 --FILE--
 <?php
 /* Prototype  : int gmmktime([int hour [, int min [, int sec [, int mon [, int day [, int year]]]]]])
- * Description: Get UNIX timestamp for a GMT date 
+ * Description: Get UNIX timestamp for a GMT date
  * Source code: ext/date/php_date.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing gmmktime() : usage variation ***\n";
@@ -33,7 +33,6 @@ echo "\n-- Testing gmmktime() function with five optional argument --\n";
 var_dump( gmmktime($hour, $min, $sec, $mon, $day) );
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing gmmktime() : usage variation ***
 
@@ -51,4 +50,3 @@ int(%d)
 
 -- Testing gmmktime() function with five optional argument --
 int(%d)
-===DONE===

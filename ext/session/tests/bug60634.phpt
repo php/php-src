@@ -16,15 +16,15 @@ function open($save_path, $session_name) {
 }
 
 function close() {
-	die("close: goodbye cruel world\n");
+    die("close: goodbye cruel world\n");
 }
 
 function read($id) {
-	return '';
+    return '';
 }
 
 function write($id, $session_data) {
-	die("write: goodbye cruel world\n");
+    die("write: goodbye cruel world\n");
 }
 
 function destroy($id) {
@@ -50,7 +50,7 @@ echo "um, hi\n";
  */
 
 ?>
---EXPECTF--
+--EXPECT--
 write: goodbye cruel world
 
 Warning: Unknown: Cannot call session save handler in a recursive manner in Unknown on line 0

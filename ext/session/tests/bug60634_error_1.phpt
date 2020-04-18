@@ -16,17 +16,17 @@ function open($save_path, $session_name) {
 }
 
 function close() {
-	echo "close: goodbye cruel world\n";
-	return true;
+    echo "close: goodbye cruel world\n";
+    return true;
 }
 
 function read($id) {
-	return '';
+    return '';
 }
 
 function write($id, $session_data) {
-	echo "write: goodbye cruel world\n";
-	undefined_function();
+    echo "write: goodbye cruel world\n";
+    undefined_function();
 }
 
 function destroy($id) {
@@ -57,4 +57,3 @@ Stack trace:
 #1 %s(%d): session_write_close()
 #2 {main}
   thrown in %s on line %d
-

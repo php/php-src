@@ -32,9 +32,7 @@
 #include "config.h"
 #endif
 
-#ifdef HAVE_STDDEF_H
 #include <stddef.h>
-#endif
 
 #include "mbfl_encoding.h"
 #include "mbfl_allocators.h"
@@ -171,9 +169,8 @@ mbfl_convert_filter_new(
 	const struct mbfl_convert_vtbl *vtbl;
 
 	vtbl = mbfl_convert_filter_get_vtbl(from, to);
-
 	if (vtbl == NULL) {
-		vtbl = &vtbl_pass;
+		return NULL;
 	}
 
 	/* allocate */
@@ -430,6 +427,7 @@ mbfl_filt_conv_illegal_output(int c, mbfl_convert_filter *filter)
 			}
 		}
 		break;
+	case MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE:
 	default:
 		break;
 	}
@@ -452,6 +450,10 @@ const struct mbfl_convert_vtbl * mbfl_convert_filter_get_vtbl(
 			   from->no_encoding == mbfl_no_encoding_qprint ||
 			   from->no_encoding == mbfl_no_encoding_uuencode) {
 		to = &mbfl_encoding_8bit;
+	}
+
+	if (to == from && (to == &mbfl_encoding_wchar || to == &mbfl_encoding_8bit)) {
+		return &vtbl_pass;
 	}
 
 	if (to->no_encoding == mbfl_no_encoding_wchar) {
@@ -495,5 +497,3 @@ void mbfl_filt_conv_common_dtor(mbfl_convert_filter *filter)
 	filter->status = 0;
 	filter->cache = 0;
 }
-
-

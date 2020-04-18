@@ -1,7 +1,7 @@
 --TEST--
 Test 2: Transform To HTML String
 --SKIPIF--
-<?php require_once dirname(__FILE__) .'/skipif.inc'; ?>
+<?php require_once __DIR__ .'/skipif.inc'; ?>
 --FILE--
 <?php
 echo "Test 2: Transform To HTML String";
@@ -18,8 +18,6 @@ $proc->importStylesheet($xsl);
 print "\n";
 print $proc->transformToXml($dom);
 print "\n";
-
-
 --EXPECT--
 Test 2: Transform To HTML String
 <html><body>bar

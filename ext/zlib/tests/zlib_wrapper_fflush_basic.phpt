@@ -1,9 +1,9 @@
 --TEST--
 Test function fflush() on a zlib stream wrapper
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded"; 
+	print "skip - ZLIB extension not loaded";
 }
 ?>
 --FILE--
@@ -25,9 +25,7 @@ gzclose($h);
 echo "\n";
 unlink($filename);
 ?>
-===DONE===
 --EXPECT--
 bool(true)
 bool(true)
 Here is the string to be written.Here is the string to be written.
-===DONE===

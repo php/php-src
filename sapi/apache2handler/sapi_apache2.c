@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,8 +15,6 @@
    |          Rasmus Lerdorf and Zeev Suraski                             |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #define ZEND_INCLUDE_FULL_WINDOWS_HEADERS
 
@@ -57,7 +53,7 @@
 
 #define PHP_MAGIC_TYPE "application/x-httpd-php"
 #define PHP_SOURCE_MAGIC_TYPE "application/x-httpd-php-source"
-#define PHP_SCRIPT "php7-script"
+#define PHP_SCRIPT "php-script"
 
 /* A way to specify the location of the php.ini dir in an apache directive */
 char *apache2_php_ini_path_override = NULL;
@@ -476,15 +472,18 @@ php_apache_server_startup(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp
 		apache2_sapi_module.php_ini_path_override = apache2_php_ini_path_override;
 	}
 #ifdef ZTS
-	tsrm_startup(1, 1, 0, NULL);
-	(void)ts_resource(0);
+	php_tsrm_startup();
+# ifdef PHP_WIN32
 	ZEND_TSRMLS_CACHE_UPDATE();
+# endif
 #endif
 
 	zend_signal_startup();
 
 	sapi_startup(&apache2_sapi_module);
-	apache2_sapi_module.startup(&apache2_sapi_module);
+	if (apache2_sapi_module.startup(&apache2_sapi_module) != SUCCESS) {
+		return DONE;
+	}
 	apr_pool_cleanup_register(pconf, NULL, php_apache_server_shutdown, apr_pool_cleanup_null);
 	php_apache_add_version(pconf);
 
@@ -550,7 +549,7 @@ typedef struct {
 	HashTable config;
 } php_conf_rec;
 		zend_string *str;
-		php_conf_rec *c = ap_get_module_config(r->per_dir_config, &php7_module);
+		php_conf_rec *c = ap_get_module_config(r->per_dir_config, &php_module);
 
 		ZEND_HASH_FOREACH_STR_KEY(&c->config, str) {
 			zend_restore_ini_entry(str, ZEND_INI_STAGE_SHUTDOWN);
@@ -574,12 +573,14 @@ static int php_handler(request_rec *r)
 #ifdef ZTS
 	/* initial resource fetch */
 	(void)ts_resource(0);
+# ifdef PHP_WIN32
 	ZEND_TSRMLS_CACHE_UPDATE();
+# endif
 #endif
 
 #define PHPAP_INI_OFF php_apache_ini_dtor(r, parent_req);
 
-	conf = ap_get_module_config(r->per_dir_config, &php7_module);
+	conf = ap_get_module_config(r->per_dir_config, &php_module);
 
 	/* apply_config() needs r in some cases, so allocate server_context early */
 	ctx = SG(server_context);
@@ -691,11 +692,7 @@ zend_first_try {
 		highlight_file((char *)r->filename, &syntax_highlighter_ini);
 	} else {
 		zend_file_handle zfd;
-
-		zfd.type = ZEND_HANDLE_FILENAME;
-		zfd.filename = (char *) r->filename;
-		zfd.free_filename = 0;
-		zfd.opened_path = NULL;
+		zend_stream_init_filename(&zfd, (char *) r->filename);
 
 		if (!parent_req) {
 			php_execute_script(&zfd);
@@ -712,6 +709,7 @@ zend_first_try {
 	if (!parent_req) {
 		php_apache_request_dtor(r);
 		ctx->request_processed = 1;
+		apr_brigade_cleanup(brigade);
 		bucket = apr_bucket_eos_create(r->connection->bucket_alloc);
 		APR_BRIGADE_INSERT_TAIL(brigade, bucket);
 
@@ -735,22 +733,20 @@ static void php_apache_child_init(apr_pool_t *pchild, server_rec *s)
 	apr_pool_cleanup_register(pchild, NULL, php_apache_child_shutdown, apr_pool_cleanup_null);
 }
 
+#ifdef ZEND_SIGNALS
+static void php_apache_signal_init(apr_pool_t *pchild, server_rec *s)
+{
+	zend_signal_init();
+}
+#endif
+
 void php_ap2_register_hook(apr_pool_t *p)
 {
 	ap_hook_pre_config(php_pre_config, NULL, NULL, APR_HOOK_MIDDLE);
 	ap_hook_post_config(php_apache_server_startup, NULL, NULL, APR_HOOK_MIDDLE);
 	ap_hook_handler(php_handler, NULL, NULL, APR_HOOK_MIDDLE);
 #ifdef ZEND_SIGNALS
-	ap_hook_child_init(zend_signal_init, NULL, NULL, APR_HOOK_MIDDLE);
+	ap_hook_child_init(php_apache_signal_init, NULL, NULL, APR_HOOK_MIDDLE);
 #endif
 	ap_hook_child_init(php_apache_child_init, NULL, NULL, APR_HOOK_MIDDLE);
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

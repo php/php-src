@@ -1,4 +1,3 @@
-// $Id$
 // vim:ft=javascript
 
 ARG_WITH("enchant", "Enchant Support", "no");
@@ -9,6 +8,7 @@ if (PHP_ENCHANT == "yes") {
 			CHECK_LIB("libenchant.lib", "enchant", PHP_ENCHANT) ) {
 		EXTENSION("enchant", "enchant.c");
 		AC_DEFINE('HAVE_ENCHANT', 1, 'Have Enchant support', false);
+		AC_DEFINE('HAVE_ENCHANT_GET_VERSION', 1);
 		AC_DEFINE('HAVE_ENCHANT_BROKER_SET_PARAM', 1);
 		ADD_FLAG("CFLAG_ENCHANT", "/D _WIN32");
 	} else {

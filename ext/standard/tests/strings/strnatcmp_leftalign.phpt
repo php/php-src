@@ -1,6 +1,6 @@
 --TEST--
 Test strnatcmp() function : left align, whitespace, digits
---CREDIT--
+--CREDITS--
 Sol Richardson <sr5732358@hotmail.com>
 --FILE--
 <?php
@@ -20,8 +20,7 @@ $str1 = " 0";
 $str2 = " 00";
 var_dump( strnatcmp( $str1, $str2) );
 ?>
-
---EXPECTF--
+--EXPECT--
 -- Testing strnatcmp() function whitespace, left-align, digit --
 -- Leading whitespace, digits, string 1 longer --
 int(1)

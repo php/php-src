@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -20,8 +18,10 @@
 #ifndef PHP_JSON_H
 #define PHP_JSON_H
 
-#define PHP_JSON_VERSION "1.6.0"
+#include "php_version.h"
 #include "zend_smart_str_public.h"
+
+#define PHP_JSON_VERSION PHP_VERSION
 
 extern zend_module_entry json_module_entry;
 #define phpext_json_ptr &json_module_entry
@@ -106,12 +106,3 @@ static inline int php_json_decode(zval *return_value, char *str, int str_len, ze
 }
 
 #endif  /* PHP_JSON_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

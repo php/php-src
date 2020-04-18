@@ -1,7 +1,7 @@
 --TEST--
 MySQL
 --SKIPIF--
-<?php # vim:ft=php
+<?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_mysql')) print 'skip not loaded';
 ?>
 --REDIRECTTEST--

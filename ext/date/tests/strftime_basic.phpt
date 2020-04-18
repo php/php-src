@@ -1,11 +1,11 @@
 --TEST--
-Test strftime() function : basic functionality 
+Test strftime() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : string strftime(string format [, int timestamp])
- * Description: Format a local time/date according to locale settings 
+ * Description: Format a local time/date according to locale settings
  * Source code: ext/date/php_date.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing strftime() : basic functionality ***\n";
@@ -22,9 +22,7 @@ var_dump( strftime($format, $timestamp) );
 var_dump( strftime($format) );
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing strftime() : basic functionality ***
 string(20) "Aug 08 2008 08:08:08"
 string(%d) "%s %d %d %d:%d:%d"
-===DONE===

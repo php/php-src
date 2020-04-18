@@ -10,18 +10,16 @@ if(substr(PHP_OS, 0, 3) != "WIN")
 
 $s = '/php_sanity/sanity.php?';
 while (dirname($s) == "/php_sanity" && strlen($s) < 10000) {
-	$s .= str_repeat('X', 250);
+    $s .= str_repeat('X', 250);
 }
 
 if (strlen($s) >= 10000) {
-	echo "OK\n";
+    echo "OK\n";
 } else {
-	print "ERROR: " . PHP_EOL;
-	var_dump(dirname($s));
-	var_dump(strlen($s));
-} 
+    print "ERROR: " . PHP_EOL;
+    var_dump(dirname($s));
+    var_dump(strlen($s));
+}
 ?>
-===DONE===
 --EXPECT--
 OK
-===DONE===

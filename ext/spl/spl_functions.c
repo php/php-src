@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +13,6 @@
    | Authors: Marcus Boerger <helly@php.net>                              |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 	#include "config.h"
@@ -96,8 +92,11 @@ void spl_add_interfaces(zval *list, zend_class_entry * pce, int allow, int ce_fl
 {
 	uint32_t num_interfaces;
 
-	for (num_interfaces = 0; num_interfaces < pce->num_interfaces; num_interfaces++) {
-		spl_add_class_name(list, pce->interfaces[num_interfaces], allow, ce_flags);
+	if (pce->num_interfaces) {
+		ZEND_ASSERT(pce->ce_flags & ZEND_ACC_LINKED);
+		for (num_interfaces = 0; num_interfaces < pce->num_interfaces; num_interfaces++) {
+			spl_add_class_name(list, pce->interfaces[num_interfaces], allow, ce_flags);
+		}
 	}
 }
 /* }}} */
@@ -106,9 +105,13 @@ void spl_add_interfaces(zval *list, zend_class_entry * pce, int allow, int ce_fl
 void spl_add_traits(zval *list, zend_class_entry * pce, int allow, int ce_flags)
 {
 	uint32_t num_traits;
+	zend_class_entry *trait;
 
 	for (num_traits = 0; num_traits < pce->num_traits; num_traits++) {
-		spl_add_class_name(list, pce->traits[num_traits], allow, ce_flags);
+		trait = zend_fetch_class_by_name(pce->trait_names[num_traits].name,
+			pce->trait_names[num_traits].lc_name, ZEND_FETCH_CLASS_TRAIT);
+		ZEND_ASSERT(trait);
+		spl_add_class_name(list, trait, allow, ce_flags);
 	}
 }
 /* }}} */
@@ -137,12 +140,3 @@ zend_string * spl_gen_private_prop_name(zend_class_entry *ce, char *prop_name, i
 	return zend_mangle_property_name(ZSTR_VAL(ce->name), ZSTR_LEN(ce->name), prop_name, prop_len, 0);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: fdm=marker
- * vim: noet sw=4 ts=4
- */

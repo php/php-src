@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +13,6 @@
   | Author: Wez Furlong <wez@php.net>                                    |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -34,7 +30,7 @@
 #endif
 
 /* {{{ pdo_oci_functions[] */
-const zend_function_entry pdo_oci_functions[] = {
+static const zend_function_entry pdo_oci_functions[] = {
 	PHP_FE_END
 };
 /* }}} */
@@ -92,6 +88,12 @@ static MUTEX_T pdo_oci_env_mutex;
  */
 PHP_MINIT_FUNCTION(pdo_oci)
 {
+	REGISTER_PDO_CLASS_CONST_LONG("OCI_ATTR_ACTION", (zend_long)PDO_OCI_ATTR_ACTION);
+	REGISTER_PDO_CLASS_CONST_LONG("OCI_ATTR_CLIENT_INFO", (zend_long)PDO_OCI_ATTR_CLIENT_INFO);
+	REGISTER_PDO_CLASS_CONST_LONG("OCI_ATTR_CLIENT_IDENTIFIER", (zend_long)PDO_OCI_ATTR_CLIENT_IDENTIFIER);
+	REGISTER_PDO_CLASS_CONST_LONG("OCI_ATTR_MODULE", (zend_long)PDO_OCI_ATTR_MODULE);
+	REGISTER_PDO_CLASS_CONST_LONG("OCI_ATTR_CALL_TIMEOUT", (zend_long)PDO_OCI_ATTR_CALL_TIMEOUT);
+
 	php_pdo_register_driver(&pdo_oci_driver);
 
 	// Defer OCI init to PHP_RINIT_FUNCTION because with php-fpm,
@@ -157,12 +159,3 @@ PHP_MINFO_FUNCTION(pdo_oci)
 	php_info_print_table_end();
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

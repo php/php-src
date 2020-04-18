@@ -4,10 +4,10 @@ Test for bug #65701: copy() doesn't work when destination filename is created by
 Boro Sitnikovski <buritomath@yahoo.com>
 --FILE--
 <?php
-$file_path = dirname(__FILE__) . "/bug65701/";
+$file_path = __DIR__ . "/bug65701/";
 
 if (!is_dir($file_path)) {
-	mkdir($file_path);
+    mkdir($file_path);
 }
 
 $src = $file_path . '/srcbug65701_file.txt';
@@ -20,7 +20,7 @@ var_dump(filesize($dst));
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__) . "/bug65701/";
+$file_path = __DIR__ . "/bug65701/";
 foreach (scandir($file_path) as $file) {
     if (strpos($file, "bug65701") !== false || 'WIN' == substr(PHP_OS, 0, 3)) {
         unlink($file_path . $file);

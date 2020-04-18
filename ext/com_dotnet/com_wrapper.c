@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +13,6 @@
    | Author: Wez Furlong  <wez@thebrainroom.com>                          |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 /* This module exports a PHP object as a COM object by wrapping it
  * using IDispatchEx */
@@ -288,8 +284,8 @@ static HRESULT STDMETHODCALLTYPE disp_invokeex(
 		} else if (wFlags & DISPATCH_METHOD) {
 			zend_try {
 				retval = &rv;
-				if (SUCCESS == call_user_function_ex(EG(function_table), &disp->object, name,
-							retval, pdp->cArgs, params, 1, NULL)) {
+				if (SUCCESS == call_user_function(NULL, &disp->object, name,
+							retval, pdp->cArgs, params)) {
 					ret = S_OK;
 					trace("function called ok\n");
 
@@ -399,7 +395,7 @@ static HRESULT STDMETHODCALLTYPE disp_getnextdispid(
 	/* [in] */ DISPID id,
 	/* [out] */ DISPID *pid)
 {
-	ulong next = id+1;
+	zend_ulong next = id+1;
 	FETCH_DISP("GetNextDispID");
 
 	while(!zend_hash_index_exists(disp->dispid_to_name, next))
@@ -476,7 +472,7 @@ static void generate_dispids(php_dispatchex *disp)
 
 			/* Find the existing id */
 			if ((tmp = zend_hash_find(disp->name_to_dispid, name)) != NULL) {
-				zend_string_release(name);
+				zend_string_release_ex(name, 0);
 				continue;
 			}
 
@@ -488,7 +484,7 @@ static void generate_dispids(php_dispatchex *disp)
 			ZVAL_LONG(&tmp2, pid);
 			zend_hash_update(disp->name_to_dispid, name, &tmp2);
 
-			zend_string_release(name);
+			zend_string_release_ex(name, 0);
 		}
 	}
 
@@ -501,7 +497,7 @@ static void generate_dispids(php_dispatchex *disp)
 
 			char namebuf[32];
 			if (keytype == HASH_KEY_IS_LONG) {
-				snprintf(namebuf, sizeof(namebuf), "%d", pid);
+				snprintf(namebuf, sizeof(namebuf), ZEND_ULONG_FMT, pid);
 				name = zend_string_init(namebuf, strlen(namebuf), 0);
 			} else {
 				zend_string_addref(name);
@@ -511,7 +507,7 @@ static void generate_dispids(php_dispatchex *disp)
 
 			/* Find the existing id */
 			if ((tmp = zend_hash_find(disp->name_to_dispid, name)) != NULL) {
-				zend_string_release(name);
+				zend_string_release_ex(name, 0);
 				continue;
 			}
 
@@ -523,7 +519,7 @@ static void generate_dispids(php_dispatchex *disp)
 			ZVAL_LONG(&tmp2, pid);
 			zend_hash_update(disp->name_to_dispid, name, &tmp2);
 
-			zend_string_release(name);
+			zend_string_release_ex(name, 0);
 		}
 	}
 }
@@ -645,5 +641,3 @@ PHP_COM_DOTNET_API IDispatch *php_com_wrapper_export(zval *val)
 
 	return (IDispatch*)disp;
 }
-
-

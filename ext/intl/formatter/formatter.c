@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -25,10 +23,6 @@
 #include "php_intl.h"
 #include "formatter_class.h"
 #include "formatter_format.h"
-
-#if U_ICU_VERSION_MAJOR_NUM == 3 && U_ICU_VERSION_MINOR_NUM <= 4
-#define UNUM_MONETARY_GROUPING_SEPARATOR_SYMBOL 17
-#endif
 
 /* {{{ formatter_register_constants
  * Register constants common for the both (OO and procedural)
@@ -55,13 +49,10 @@ void formatter_register_constants( INIT_FUNC_ARGS )
 	FORMATTER_EXPOSE_CLASS_CONST( DURATION );
 	FORMATTER_EXPOSE_CLASS_CONST( PATTERN_RULEBASED );
 	FORMATTER_EXPOSE_CLASS_CONST( IGNORE );
-
-	FORMATTER_EXPOSE_CUSTOM_CLASS_CONST( "DEFAULT_STYLE",  UNUM_DEFAULT );
-
-/* workaround for ICU bug */
-#if U_ICU_VERSION_MAJOR_NUM == 3 && U_ICU_VERSION_MINOR_NUM < 8
-#define UNUM_ROUND_HALFEVEN UNUM_FOUND_HALFEVEN
+#if U_ICU_VERSION_MAJOR_NUM >= 53
+	FORMATTER_EXPOSE_CLASS_CONST( CURRENCY_ACCOUNTING );
 #endif
+	FORMATTER_EXPOSE_CUSTOM_CLASS_CONST( "DEFAULT_STYLE",  UNUM_DEFAULT );
 
 	/* UNumberFormatRoundingMode */
 	FORMATTER_EXPOSE_CLASS_CONST( ROUND_CEILING );
@@ -141,12 +132,3 @@ void formatter_register_constants( INIT_FUNC_ARGS )
 	#undef FORMATTER_EXPOSE_CONST
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

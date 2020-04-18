@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine, Func Info                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Dmitry Stogov <dmitry@zend.com>                             |
+   | Authors: Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -22,20 +22,17 @@
 #include "zend_ssa.h"
 
 /* func flags */
-#define ZEND_FUNC_INDIRECT_VAR_ACCESS      (1<<0)  /* accesses varables by name   */
+#define ZEND_FUNC_INDIRECT_VAR_ACCESS      (1<<0)  /* accesses variables by name  */
 #define ZEND_FUNC_HAS_CALLS                (1<<1)
 #define ZEND_FUNC_VARARG                   (1<<2)  /* uses func_get_args()        */
 #define ZEND_FUNC_NO_LOOPS                 (1<<3)
 #define ZEND_FUNC_IRREDUCIBLE              (1<<4)
+#define ZEND_FUNC_FREE_LOOP_VAR            (1<<5)
 #define ZEND_FUNC_RECURSIVE                (1<<7)
 #define ZEND_FUNC_RECURSIVE_DIRECTLY       (1<<8)
 #define ZEND_FUNC_RECURSIVE_INDIRECTLY     (1<<9)
-#define ZEND_FUNC_HAS_EXTENDED_INFO        (1<<10)
-
-/* The following flags are valid only for return values of internal functions
- * returned by zend_get_func_info()
- */
-#define FUNC_MAY_WARN                      (1<<30)
+#define ZEND_FUNC_HAS_EXTENDED_FCALL       (1<<10)
+#define ZEND_FUNC_HAS_EXTENDED_STMT        (1<<11)
 
 typedef struct _zend_func_info zend_func_info;
 typedef struct _zend_call_info zend_call_info;
@@ -60,11 +57,3 @@ int zend_func_info_shutdown(void);
 END_EXTERN_C()
 
 #endif /* ZEND_FUNC_INFO_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */

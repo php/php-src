@@ -13,15 +13,22 @@ $s = str_replace("Foo", "Bar", $s);
 $y = unserialize($s);
 var_dump($y);
 --EXPECTF--
-Warning: Class __PHP_Incomplete_Class has no unserializer in %sbug45706.php on line %d
 array(2) {
   [0]=>
-  object(__PHP_Incomplete_Class)#%d (1) {
+  object(__PHP_Incomplete_Class)#3 (4) {
     ["__PHP_Incomplete_Class_Name"]=>
     string(4) "Bar1"
+    ["0"]=>
+    int(0)
+    ["1"]=>
+    array(0) {
+    }
+    ["2"]=>
+    array(0) {
+    }
   }
   [1]=>
-  object(__PHP_Incomplete_Class)#%d (1) {
+  object(__PHP_Incomplete_Class)#4 (1) {
     ["__PHP_Incomplete_Class_Name"]=>
     string(4) "Bar2"
   }

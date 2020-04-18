@@ -17,7 +17,7 @@ $item->$a = new stdclass;
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 object(SimpleXMLElement)#%d (1) {
   [0]=>
   string(9) "something"
@@ -27,7 +27,7 @@ object(SimpleXMLElement)#%d (1) {
   string(9) "something"
 }
 
-Notice: Array to string conversion in %s on line %d
+Warning: Array to string conversion in %s on line %d
 
 Warning: It is not yet possible to assign complex types to properties in %s on line %d
 Done

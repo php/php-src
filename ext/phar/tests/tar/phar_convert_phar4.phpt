@@ -9,8 +9,8 @@ phar.readonly=0
 --FILE--
 <?php
 
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar';
-$fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '2.phar';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar';
+$fname2 = __DIR__ . '/' . basename(__FILE__, '.php') . '2.phar';
 
 $phar = new Phar($fname);
 $phar['a.txt'] = 'some text';
@@ -42,19 +42,18 @@ var_dump(strlen($phar->getStub()));
 var_dump($phar->getMetadata());
 
 ?>
-===DONE===
 --CLEAN--
-<?php 
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.gz');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '2.phar');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.tar.gz');
+<?php
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.gz');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '2.phar');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar.gz');
 __HALT_COMPILER();
 ?>
 --EXPECT--
 bool(false)
-int(6651)
+int(6641)
 string(2) "hi"
 bool(true)
 string(60) "<?php // tar-based phar archive stub file
@@ -62,10 +61,9 @@ __HALT_COMPILER();"
 string(2) "hi"
 bool(true)
 int(4096)
-int(6651)
+int(6641)
 string(2) "hi"
 bool(true)
 bool(true)
-int(6651)
+int(6641)
 string(2) "hi"
-===DONE===

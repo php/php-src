@@ -1,11 +1,11 @@
 --TEST--
-Test fseek() function : variation functionality beyond file boundaries 
+Test fseek() function : variation functionality beyond file boundaries
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
 /* Prototype  : proto int fseek(resource fp, int offset [, int whence])
- * Description: Seek on a file pointer 
+ * Description: Seek on a file pointer
  * Source code: ext/standard/file.c
  * Alias to functions: gzseek
  */
@@ -39,7 +39,7 @@ unlink($outputfile);
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fseek() : variation - beyond file boundaries ***
 --- fseek beyond start of file ---
 int(-1)

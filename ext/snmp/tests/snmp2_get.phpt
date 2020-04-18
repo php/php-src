@@ -1,22 +1,20 @@
---TEST--                                 
+--TEST--
 Function snmp2_get
 --CREDITS--
 Olivier Doucet & Boris Lytochkin
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__).'/skipif.inc');
+require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
-require_once(dirname(__FILE__).'/snmp_include.inc');
+require_once(__DIR__.'/snmp_include.inc');
 
 //EXPECTF format is quickprint OFF
 snmp_set_quick_print(false);
 snmp_set_valueretrieval(SNMP_VALUE_PLAIN);
 
 echo "Checking error handling\n";
-var_dump(snmp2_get($hostname, $community, '.1.3.6.1.2.1.1.1.0', ''));
-var_dump(snmp2_get($hostname, $community, '.1.3.6.1.2.1.1.1.0', $timeout, ''));
 echo "Empty OID array\n";
 var_dump(snmp2_get($hostname, $community, array(), $timeout, $retries));
 
@@ -48,12 +46,6 @@ var_dump(snmp2_get($hostname, $community, array('.1.3.6.1.2.1.1.1.0', '.1.3.6.1.
 ?>
 --EXPECTF--
 Checking error handling
-
-Warning: snmp2_get() expects parameter 4 to be integer,%s given in %s on line %d
-bool(false)
-
-Warning: snmp2_get() expects parameter 5 to be integer,%s given in %s on line %d
-bool(false)
 Empty OID array
 
 Warning: snmp2_get(): Got empty OID array in %s on line %d

@@ -1,8 +1,8 @@
 --TEST--
 Test if socket_set_option() works, option:SO_RCVTIMEO
 --DESCRIPTION--
--wrong params 
--set/get params comparison 
+-wrong params
+-set/get params comparison
 --SKIPIF--
 <?php
 if (!extension_loaded('sockets')) {
@@ -29,9 +29,8 @@ var_dump($retval_2);
 var_dump($retval_3 === $options);
 socket_close($socket);
 ?>
-
 --EXPECTF--
-Warning: socket_set_option(): no key "sec" passed in optval in %s on line %d
+Warning: socket_set_option(): No key "sec" passed in optval in %s on line %d
 bool(true)
 bool(true)
 --CREDITS--

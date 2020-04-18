@@ -3,7 +3,7 @@ ReflectionClass::hasProperty()
 --CREDITS--
 Marc Veldman <marc@ibuildings.nl>
 #testfest roosendaal on 2008-05-10
---FILE-- 
+--FILE--
 <?php
 //New instance of class C - defined below
 $rc = new ReflectionClass("C");
@@ -30,7 +30,7 @@ Class C {
   public static $staticFoo;
 }
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 bool(true)

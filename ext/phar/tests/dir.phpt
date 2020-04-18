@@ -7,11 +7,11 @@ phar.readonly=0
 phar.require_hash=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
-$fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.1.phar.php';
+$fname2 = __DIR__ . '/' . basename(__FILE__, '.php') . '.1.phar.php';
 $pname2 = 'phar://' . $fname2;
-$fname3 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.2.phar.php';
+$fname3 = __DIR__ . '/' . basename(__FILE__, '.php') . '.2.phar.php';
 $pname3 = 'phar://' . $fname3;
 $phar = new Phar($fname);
 var_dump($phar->isFileFormat(Phar::PHAR));
@@ -32,17 +32,17 @@ ini_set('phar.readonly', 1);
 mkdir($pname . '/fails');
 ini_set('phar.readonly', 0);
 // create new phar by mkdir
-mkdir('phar://' . dirname(__FILE__) . '/ok.phar/fails');
-mkdir('phar://' . dirname(__FILE__) . '/ok.phar/fails');
-file_put_contents('phar://' . dirname(__FILE__) . '/ok.phar/sub/directory.txt', 'hi');
-mkdir('phar://' . dirname(__FILE__) . '/ok.phar/sub');
-mkdir('phar://' . dirname(__FILE__) . '/ok.phar/sub/directory.txt');
-file_put_contents(dirname(__FILE__) . '/oops.phar', '<?php this should screw em up __HALT_COMPILER();');
-mkdir('phar://' . dirname(__FILE__) . '/oops.phar/fails');
+mkdir('phar://' . __DIR__ . '/ok.phar/fails');
+mkdir('phar://' . __DIR__ . '/ok.phar/fails');
+file_put_contents('phar://' . __DIR__ . '/ok.phar/sub/directory.txt', 'hi');
+mkdir('phar://' . __DIR__ . '/ok.phar/sub');
+mkdir('phar://' . __DIR__ . '/ok.phar/sub/directory.txt');
+file_put_contents(__DIR__ . '/oops.phar', '<?php this should screw em up __HALT_COMPILER();');
+mkdir('phar://' . __DIR__ . '/oops.phar/fails');
 
 mkdir('phar://');
 rmdir('phar://');
-rmdir('phar://' . dirname(__FILE__) . '/unknown.phar/hi');
+rmdir('phar://' . __DIR__ . '/unknown.phar/hi');
 ini_set('phar.readonly', 1);
 rmdir($pname . '/another/dir');
 ini_set('phar.readonly', 0);
@@ -50,13 +50,12 @@ rmdir($pname);
 rmdir($pname . '/');
 mkdir($pname . '/');
 ?>
-===DONE===
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
-<?php unlink(dirname(__FILE__) . '/ok.phar'); ?>
-<?php unlink(dirname(__FILE__) . '/oops.phar'); ?>
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.1.phar.php'); ?>
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.phar.php'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
+<?php unlink(__DIR__ . '/ok.phar'); ?>
+<?php unlink(__DIR__ . '/oops.phar'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.1.phar.php'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.2.phar.php'); ?>
 --EXPECTF--
 bool(true)
 bool(true)
@@ -89,4 +88,3 @@ Warning: rmdir(): phar error: cannot remove directory "" in phar "%sdir.phar.php
 Warning: rmdir(): phar error: cannot remove directory "" in phar "%sdir.phar.php", directory does not exist in %sdir.php on line %d
 
 Warning: mkdir(): phar error: cannot create directory "" in phar "%sdir.phar.php", phar error: invalid path "" must not be empty in %sdir.php on line %d
-===DONE===

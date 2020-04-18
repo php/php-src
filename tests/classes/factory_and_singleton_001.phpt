@@ -27,7 +27,7 @@ class test {
   }
 
   protected function __destruct() {
-  	test::$cnt--;
+    test::$cnt--;
   }
 
   public function get() {
@@ -41,7 +41,7 @@ class test {
       return NULL;
     }
   }
-  
+
   static public function count() {
     return test::$cnt;
   }

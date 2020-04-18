@@ -5,7 +5,7 @@ Test token_get_all() function : usage variations - invalid token values
 --FILE--
 <?php
 /* Prototype  : array token_get_all(string $source)
- * Description: splits the given source into an array of PHP languange tokens
+ * Description: splits the given source into an array of PHP language tokens
  * Source code: ext/tokenizer/tokenizer.c
 */
 
@@ -18,7 +18,7 @@ echo "*** Testing token_get_all() : with invalid/unknown tokens ***\n";
 
 // with valid php tags and invalid tokens
 echo "-- with valid PHP tags & invlid tokens --\n";
-$source = '<?php 
+$source = '<?php
 struct myStruct {
   variable $a;
   method() { display $a; }
@@ -28,7 +28,7 @@ var_dump( token_get_all($source));
 
 // with invalid open tag for testing entire source to be unknown token
 echo "-- with invlalid PHP open tag & valid tokens --\n";
-$source = '<pli 
+$source = '<pli
 echo "hello world"; ?>';
 var_dump( token_get_all($source));
 
@@ -42,13 +42,14 @@ echo "Done"
 --EXPECTF--
 *** Testing token_get_all() : with invalid/unknown tokens ***
 -- with valid PHP tags & invlid tokens --
-array(29) {
+array(28) {
   [0]=>
   array(3) {
     [0]=>
     int(%d)
     [1]=>
-    string(6) "<?php "
+    string(6) "<?php
+"
     [2]=>
     int(1)
   }
@@ -57,17 +58,16 @@ array(29) {
     [0]=>
     int(%d)
     [1]=>
-    string(1) "
-"
+    string(6) "struct"
     [2]=>
-    int(1)
+    int(2)
   }
   [2]=>
   array(3) {
     [0]=>
     int(%d)
     [1]=>
-    string(6) "struct"
+    string(1) " "
     [2]=>
     int(2)
   }
@@ -76,7 +76,7 @@ array(29) {
     [0]=>
     int(%d)
     [1]=>
-    string(1) " "
+    string(8) "myStruct"
     [2]=>
     int(2)
   }
@@ -85,22 +85,13 @@ array(29) {
     [0]=>
     int(%d)
     [1]=>
-    string(8) "myStruct"
-    [2]=>
-    int(2)
-  }
-  [5]=>
-  array(3) {
-    [0]=>
-    int(%d)
-    [1]=>
     string(1) " "
     [2]=>
     int(2)
   }
-  [6]=>
+  [5]=>
   string(1) "{"
-  [7]=>
+  [6]=>
   array(3) {
     [0]=>
     int(%d)
@@ -110,7 +101,7 @@ array(29) {
     [2]=>
     int(2)
   }
-  [8]=>
+  [7]=>
   array(3) {
     [0]=>
     int(%d)
@@ -119,7 +110,7 @@ array(29) {
     [2]=>
     int(%d)
   }
-  [9]=>
+  [8]=>
   array(3) {
     [0]=>
     int(%d)
@@ -128,7 +119,7 @@ array(29) {
     [2]=>
     int(%d)
   }
-  [10]=>
+  [9]=>
   array(3) {
     [0]=>
     int(%d)
@@ -137,9 +128,9 @@ array(29) {
     [2]=>
     int(%d)
   }
-  [11]=>
+  [10]=>
   string(1) ";"
-  [12]=>
+  [11]=>
   array(3) {
     [0]=>
     int(%d)
@@ -149,7 +140,7 @@ array(29) {
     [2]=>
     int(%d)
   }
-  [13]=>
+  [12]=>
   array(3) {
     [0]=>
     int(%d)
@@ -158,22 +149,22 @@ array(29) {
     [2]=>
     int(4)
   }
-  [14]=>
+  [13]=>
   string(1) "("
-  [15]=>
+  [14]=>
   string(1) ")"
+  [15]=>
+  array(3) {
+    [0]=>
+    int(%d)
+    [1]=>
+    string(1) " "
+    [2]=>
+    int(4)
+  }
   [16]=>
-  array(3) {
-    [0]=>
-    int(%d)
-    [1]=>
-    string(1) " "
-    [2]=>
-    int(4)
-  }
-  [17]=>
   string(1) "{"
-  [18]=>
+  [17]=>
   array(3) {
     [0]=>
     int(%d)
@@ -182,7 +173,7 @@ array(29) {
     [2]=>
     int(4)
   }
-  [19]=>
+  [18]=>
   array(3) {
     [0]=>
     int(%d)
@@ -191,7 +182,7 @@ array(29) {
     [2]=>
     int(4)
   }
-  [20]=>
+  [19]=>
   array(3) {
     [0]=>
     int(%d)
@@ -200,7 +191,7 @@ array(29) {
     [2]=>
     int(4)
   }
-  [21]=>
+  [20]=>
   array(3) {
     [0]=>
     int(%d)
@@ -209,9 +200,9 @@ array(29) {
     [2]=>
     int(4)
   }
-  [22]=>
+  [21]=>
   string(1) ";"
-  [23]=>
+  [22]=>
   array(3) {
     [0]=>
     int(%d)
@@ -220,9 +211,9 @@ array(29) {
     [2]=>
     int(4)
   }
-  [24]=>
+  [23]=>
   string(1) "}"
-  [25]=>
+  [24]=>
   array(3) {
     [0]=>
     int(%d)
@@ -232,9 +223,9 @@ array(29) {
     [2]=>
     int(4)
   }
-  [26]=>
+  [25]=>
   string(1) "}"
-  [27]=>
+  [26]=>
   array(3) {
     [0]=>
     int(%d)
@@ -244,7 +235,7 @@ array(29) {
     [2]=>
     int(5)
   }
-  [28]=>
+  [27]=>
   array(3) {
     [0]=>
     int(%d)
@@ -261,7 +252,7 @@ array(1) {
     [0]=>
     int(%d)
     [1]=>
-    string(28) "<pli 
+    string(27) "<pli
 echo "hello world"; ?>"
     [2]=>
     int(1)

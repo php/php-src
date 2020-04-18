@@ -4,13 +4,12 @@ $http_reponse_header (redirect + not found)
 <?php require 'server.inc'; http_server_skipif('tcp://127.0.0.1:22348'); ?>
 --INI--
 allow_url_fopen=1
-allow_url_include=1
 --FILE--
 <?php
 require 'server.inc';
 
 $responses = array(
-	"data://text/plain,HTTP/1.0 302 Found\r\n"
+    "data://text/plain,HTTP/1.0 302 Found\r\n"
     . "Some: Header\r\nLocation: http://127.0.0.1:22348/try-again\r\n\r\n",
     "data://test/plain,HTTP/1.0 404 Not Found\r\nSome: Header\r\n\r\nBody",
 );
@@ -26,9 +25,8 @@ test();
 
 http_server_kill($pid);
 ?>
-==DONE==
 --EXPECTF--
-Warning: file_get_contents(http://127.0.0.1:22348/): failed to open stream: HTTP request failed! HTTP/1.0 404 Not Found%a
+Warning: file_get_contents(http://127.0.0.1:22348/): Failed to open stream: HTTP request failed! HTTP/1.0 404 Not Found%a
 bool(false)
 array(5) {
   [0]=>
@@ -42,4 +40,3 @@ array(5) {
   [4]=>
   string(12) "Some: Header"
 }
-==DONE==

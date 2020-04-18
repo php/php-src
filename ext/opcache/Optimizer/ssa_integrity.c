@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine, SSA validation                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -87,7 +87,7 @@ static inline zend_bool is_in_successors(zend_basic_block *block, int check) {
 }
 
 static inline zend_bool is_var_type(zend_uchar type) {
-	return type == IS_CV || type == IS_VAR || type == IS_TMP_VAR;
+	return (type & (IS_CV|IS_VAR|IS_TMP_VAR)) != 0;
 }
 
 #define FAIL(...) do { \

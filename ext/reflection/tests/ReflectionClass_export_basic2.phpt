@@ -1,33 +1,37 @@
 --TEST--
-ReflectionClass::export() - ensure inherited private props are hidden.
+ReflectionClass::__toString() - ensure inherited private props are hidden.
 --FILE--
 <?php
 Class c {
-	private $a;
-	static private $b;
+    private $a;
+    static private $b;
+    public ?int $c = 42;
+    public Foo $d;
 }
 
 class d extends c {}
 
-ReflectionClass::export("c");
-ReflectionClass::export("d");
+echo new ReflectionClass("c"), "\n";
+echo new ReflectionClass("d"), "\n";
 ?>
 --EXPECTF--
 Class [ <user> class c ] {
-  @@ %s 2-5
+  @@ %s 2-7
 
   - Constants [0] {
   }
 
   - Static properties [1] {
-    Property [ private static $b ]
+    Property [ private static $b = NULL ]
   }
 
   - Static methods [0] {
   }
 
-  - Properties [1] {
-    Property [ <default> private $a ]
+  - Properties [3] {
+    Property [ private $a = NULL ]
+    Property [ public ?int $c = 42 ]
+    Property [ public Foo $d ]
   }
 
   - Methods [0] {
@@ -35,7 +39,7 @@ Class [ <user> class c ] {
 }
 
 Class [ <user> class d extends c ] {
-  @@ %s 7-7
+  @@ %s 9-9
 
   - Constants [0] {
   }
@@ -46,7 +50,9 @@ Class [ <user> class d extends c ] {
   - Static methods [0] {
   }
 
-  - Properties [0] {
+  - Properties [2] {
+    Property [ public ?int $c = 42 ]
+    Property [ public Foo $d ]
   }
 
   - Methods [0] {

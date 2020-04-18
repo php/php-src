@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +13,6 @@
   | Author: Wez Furlong <wez@thebrainroom.com>                           |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #include "php.h"
 #include "php_streams_int.h"
@@ -31,12 +27,11 @@ PHPAPI HashTable *php_stream_xport_get_hash(void)
 
 PHPAPI int php_stream_xport_register(const char *protocol, php_stream_transport_factory factory)
 {
-	int ret;
 	zend_string *str = zend_string_init_interned(protocol, strlen(protocol), 1);
 
-	ret = zend_hash_update_ptr(&xport_hash, str, factory) ? SUCCESS : FAILURE;
-	zend_string_release(str);
-	return ret;
+	zend_hash_update_ptr(&xport_hash, str, factory);
+	zend_string_release_ex(str, 1);
+	return SUCCESS;
 }
 
 PHPAPI int php_stream_xport_unregister(const char *protocol)
@@ -51,7 +46,7 @@ PHPAPI int php_stream_xport_unregister(const char *protocol)
 #define ERR_RETURN(out_err, local_err, fmt) \
 	if (out_err) { *out_err = local_err; } \
 	else { php_error_docref(NULL, E_WARNING, fmt, local_err ? ZSTR_VAL(local_err) : "Unspecified error"); \
-		if (local_err) { zend_string_release(local_err); local_err = NULL; } \
+		if (local_err) { zend_string_release_ex(local_err, 0); local_err = NULL; } \
 	}
 
 PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, int options,
@@ -112,8 +107,7 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 	}
 
 	if (protocol) {
-		char *tmp = estrndup(protocol, n);
-		if (NULL == (factory = zend_hash_str_find_ptr(&xport_hash, tmp, n))) {
+		if (NULL == (factory = zend_hash_str_find_ptr(&xport_hash, protocol, n))) {
 			char wrapper_name[32];
 
 			if (n >= sizeof(wrapper_name))
@@ -123,10 +117,8 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 			ERR_REPORT(error_string, "Unable to find the socket transport \"%s\" - did you forget to enable it when you configured PHP?",
 					wrapper_name);
 
-			efree(tmp);
 			return NULL;
 		}
-		efree(tmp);
 	}
 
 	if (factory == NULL) {
@@ -167,13 +159,7 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 					int backlog = 32;
 
 					if (PHP_STREAM_CONTEXT(stream) && (zbacklog = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "backlog")) != NULL) {
-						zval *ztmp = zbacklog;
-
-						convert_to_long_ex(ztmp);
-						backlog = Z_LVAL_P(ztmp);
-						if (ztmp != zbacklog) {
-							zval_ptr_dtor(ztmp);
-						}
+						backlog = zval_get_long(zbacklog);
 					}
 
 					if (0 != php_stream_xport_listen(stream, backlog, &error_text)) {
@@ -371,7 +357,7 @@ PHPAPI int php_stream_xport_crypto_setup(php_stream *stream, php_stream_xport_cr
 		return param.outputs.returncode;
 	}
 
-	php_error_docref("streams.crypto", E_WARNING, "this stream does not support SSL/crypto");
+	php_error_docref("streams.crypto", E_WARNING, "This stream does not support SSL/crypto");
 
 	return ret;
 }
@@ -391,7 +377,7 @@ PHPAPI int php_stream_xport_crypto_enable(php_stream *stream, int activate)
 		return param.outputs.returncode;
 	}
 
-	php_error_docref("streams.crypto", E_WARNING, "this stream does not support SSL/crypto");
+	php_error_docref("streams.crypto", E_WARNING, "This stream does not support SSL/crypto");
 
 	return ret;
 }
@@ -413,7 +399,7 @@ PHPAPI int php_stream_xport_recvfrom(php_stream *stream, char *buf, size_t bufle
 	}
 
 	if (stream->readfilters.head) {
-		php_error_docref(NULL, E_WARNING, "cannot peek or fetch OOB data from a filtered stream");
+		php_error_docref(NULL, E_WARNING, "Cannot peek or fetch OOB data from a filtered stream");
 		return -1;
 	}
 
@@ -483,7 +469,7 @@ PHPAPI int php_stream_xport_sendto(php_stream *stream, const char *buf, size_t b
 	oob = (flags & STREAM_OOB) == STREAM_OOB;
 
 	if ((oob || addr) && stream->writefilters.head) {
-		php_error_docref(NULL, E_WARNING, "cannot write OOB data, or data to a targeted address on a filtered stream");
+		php_error_docref(NULL, E_WARNING, "Cannot write OOB data, or data to a targeted address on a filtered stream");
 		return -1;
 	}
 
@@ -524,12 +510,3 @@ PHPAPI int php_stream_xport_shutdown(php_stream *stream, stream_shutdown_t how)
 	}
 	return -1;
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

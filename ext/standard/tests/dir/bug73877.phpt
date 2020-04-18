@@ -10,7 +10,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 --FILE--
 <?php
 
-$base = dirname(__FILE__) . DIRECTORY_SEPARATOR . "bug73877";
+$base = __DIR__ . DIRECTORY_SEPARATOR . "bug73877";
 $dir0 = $base . DIRECTORY_SEPARATOR . "bug73877";
 $dir1 = $base . DIRECTORY_SEPARATOR . "Серёжка";
 $junk0 = $base . DIRECTORY_SEPARATOR . "Серёжка2";
@@ -21,17 +21,17 @@ mkdir($dir1);
 `mklink /J $junk0 $dir0`;
 
 var_dump(
-	readlink($dir0),
-	readlink($dir1),
-	readlink($junk0),
-	strlen(readlink($dir0)) === strlen(readlink($junk0))
+    readlink($dir0),
+    readlink($dir1),
+    readlink($junk0),
+    strlen(readlink($dir0)) === strlen(readlink($junk0))
 );
 
 ?>
 --CLEAN--
 <?php
 
-$base = dirname(__FILE__) . DIRECTORY_SEPARATOR . "bug73877";
+$base = __DIR__ . DIRECTORY_SEPARATOR . "bug73877";
 $dir0 = $base . DIRECTORY_SEPARATOR . "bug73877";
 $dir1 = $base . DIRECTORY_SEPARATOR . "Серёжка";
 $junk0 = $base . DIRECTORY_SEPARATOR . "Серёжка2";
@@ -47,4 +47,3 @@ string(%d) "%sbug73877"
 string(%d) "%sСерёжка"
 string(%d) "%sbug73877"
 bool(true)
-

@@ -26,13 +26,12 @@ if (!extension_loaded('sockets')) {
 
     $msg = "Ping!";
     $len = strlen($msg);
-    $bytes_sent = socket_sendto($socket, $msg, $len, 0); // cause warning
     $bytes_sent = socket_sendto($socket, $msg, $len, 0, $address);
     if ($bytes_sent == -1) {
-		@unlink($address);
+        @unlink($address);
         die('An error occurred while sending to the socket');
     } else if ($bytes_sent != $len) {
-		@unlink($address);
+        @unlink($address);
         die($bytes_sent . ' bytes have been sent instead of the ' . $len . ' bytes expected');
     }
 
@@ -40,22 +39,20 @@ if (!extension_loaded('sockets')) {
     var_dump(socket_recvfrom($socket, $buf, 0, 0, $from)); // expect false
     $bytes_received = socket_recvfrom($socket, $buf, 12, 0, $from);
     if ($bytes_received == -1) {
-		@unlink($address);
+        @unlink($address);
         die('An error occurred while receiving from the socket');
     } else if ($bytes_received != $len) {
-		@unlink($address);
+        @unlink($address);
         die($bytes_received . ' bytes have been received instead of the ' . $len . ' bytes expected');
     }
     echo "Received $buf";
 
     socket_close($socket);
-	@unlink($address);
+    @unlink($address);
 ?>
 --EXPECTF--
 Warning: socket_create(): Unable to create socket [%d]: Protocol not supported in %s on line %d
 bool(false)
-
-Warning: socket_sendto() expects at least 5 parameters, 4 given in %s on line %d
 bool(false)
 Received Ping!
 --CREDITS--

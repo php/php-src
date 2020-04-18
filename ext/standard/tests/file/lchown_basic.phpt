@@ -1,5 +1,5 @@
 --TEST--
-Test lchown() function : basic functionality 
+Test lchown() function : basic functionality
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) == 'WIN') die('skip no windows support');
@@ -10,12 +10,12 @@ if (!function_exists("posix_getuid")) die("skip no posix_getuid()");
 /* Prototype  : bool lchown (string filename, mixed user)
  * Description: Change file owner of a symlink
  * Source code: ext/standard/filestat.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing lchown() : basic functionality ***\n";
-$filename = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'lchown_basic.txt';
-$symlink = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'lchown_basic_symlink.txt';
+$filename = __DIR__ . DIRECTORY_SEPARATOR . 'lchown_basic.txt';
+$symlink = __DIR__ . DIRECTORY_SEPARATOR . 'lchown_basic_symlink.txt';
 
 $uid = posix_getuid();
 
@@ -25,20 +25,18 @@ var_dump( lchown( $filename, $uid ) );
 var_dump( fileowner( $symlink ) === $uid );
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 
-$filename = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'lchown_basic.txt';
-$symlink = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'lchown_basic_symlink.txt';
+$filename = __DIR__ . DIRECTORY_SEPARATOR . 'lchown_basic.txt';
+$symlink = __DIR__ . DIRECTORY_SEPARATOR . 'lchown_basic_symlink.txt';
 unlink($filename);
 unlink($symlink);
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing lchown() : basic functionality ***
 bool(true)
 bool(true)
 bool(true)
 bool(true)
-===DONE===

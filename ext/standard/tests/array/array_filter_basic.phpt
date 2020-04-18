@@ -1,9 +1,9 @@
 --TEST--
-Test array_filter() function : basic functionality 
+Test array_filter() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : array array_filter(array $input [, callback $callback])
- * Description: Filters elements from the array via the callback. 
+ * Description: Filters elements from the array via the callback.
  * Source code: ext/standard/array.c
 */
 
@@ -34,7 +34,7 @@ var_dump( array_filter($input) );
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_filter() : basic functionality ***
 array(2) {
   [1]=>

@@ -1,9 +1,9 @@
 --TEST--
-Test usort() function : basic functionality 
+Test usort() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : bool usort(array $array_arg, string $cmp_function)
- * Description: Sort an array by values using a user-defined comparison function 
+ * Description: Sort an array by values using a user-defined comparison function
  * Source code: ext/standard/array.c
  */
 
@@ -53,8 +53,7 @@ echo "\n-- Associative array with string keys --\n";
 var_dump( usort($string_key_arg, 'cmp') );
 var_dump($string_key_arg);
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing usort() : basic functionality ***
 
 -- Numeric array with default keys --
@@ -116,4 +115,3 @@ array(4) {
   [3]=>
   int(10)
 }
-===DONE===

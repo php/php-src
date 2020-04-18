@@ -3,9 +3,9 @@ Test array_diff_assoc() function : usage variations  - unexpected values for 'ar
 --FILE--
 <?php
 /* Prototype  : array array_diff_assoc(array $arr1, array $arr2 [, array ...])
- * Description: Returns the entries of arr1 that have values which are not present 
- * in any of the others arguments but do additional checks whether the keys are equal 
- * Source code: ext/standard/array.c 
+ * Description: Returns the entries of arr1 that have values which are not present
+ * in any of the others arguments but do additional checks whether the keys are equal
+ * Source code: ext/standard/array.c
  */
 
 /*
@@ -36,7 +36,7 @@ EOT;
 // get a resource variable
 $fp = fopen(__FILE__, "r");
 
-//array of unexpected values to be passed to $arr1 argument 
+//array of unexpected values to be passed to $arr1 argument
 $inputs = array(
 
        // int data
@@ -61,7 +61,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -70,11 +70,11 @@ $inputs = array(
 /*18*/ "string",
        'string',
        $heredoc,
-       
+
        // binary data
 /*21*/ b"binary",
-	   (binary)"binary",
-	   
+       (binary)"binary",
+
        // object data
 /*23*/ new classA(),
 
@@ -91,145 +91,95 @@ $inputs = array(
 // loop through each element of $inputs to check the behavior of array_diff_assoc
 $iterator = 1;
 foreach($inputs as $input) {
-  echo "\n-- Iteration $iterator --\n";
-  var_dump( array_diff_assoc($array, $input));
-  $iterator++;
+    echo "\n-- Iteration $iterator --\n";
+    try {
+        var_dump(array_diff_assoc($array, $input));
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
+    $iterator++;
 };
 fclose($fp);
 echo "Done";
 ?>
-
---EXPECTF--
-
+--EXPECT--
 *** Testing array_diff_assoc() : usage variations ***
 
 -- Iteration 1 --
-
-Warning: array_diff_assoc(): Argument #2 is not an array in %s on line %d
-NULL
+array_diff_assoc(): Argument #2 ($arr2) must be of type array, int given
 
 -- Iteration 2 --
-
-Warning: array_diff_assoc(): Argument #2 is not an array in %s on line %d
-NULL
+array_diff_assoc(): Argument #2 ($arr2) must be of type array, int given
 
 -- Iteration 3 --
-
-Warning: array_diff_assoc(): Argument #2 is not an array in %s on line %d
-NULL
+array_diff_assoc(): Argument #2 ($arr2) must be of type array, int given
 
 -- Iteration 4 --
-
-Warning: array_diff_assoc(): Argument #2 is not an array in %s on line %d
-NULL
+array_diff_assoc(): Argument #2 ($arr2) must be of type array, int given
 
 -- Iteration 5 --
-
-Warning: array_diff_assoc(): Argument #2 is not an array in %s on line %d
-NULL
+array_diff_assoc(): Argument #2 ($arr2) must be of type array, float given
 
 -- Iteration 6 --
-
-Warning: array_diff_assoc(): Argument #2 is not an array in %s on line %d
-NULL
+array_diff_assoc(): Argument #2 ($arr2) must be of type array, float given
 
 -- Iteration 7 --
-
-Warning: array_diff_assoc(): Argument #2 is not an array in %s on line %d
-NULL
+array_diff_assoc(): Argument #2 ($arr2) must be of type array, float given
 
 -- Iteration 8 --
-
-Warning: array_diff_assoc(): Argument #2 is not an array in %s on line %d
-NULL
+array_diff_assoc(): Argument #2 ($arr2) must be of type array, float given
 
 -- Iteration 9 --
-
-Warning: array_diff_assoc(): Argument #2 is not an array in %s on line %d
-NULL
+array_diff_assoc(): Argument #2 ($arr2) must be of type array, float given
 
 -- Iteration 10 --
-
-Warning: array_diff_assoc(): Argument #2 is not an array in %s on line %d
-NULL
+array_diff_assoc(): Argument #2 ($arr2) must be of type array, null given
 
 -- Iteration 11 --
-
-Warning: array_diff_assoc(): Argument #2 is not an array in %s on line %d
-NULL
+array_diff_assoc(): Argument #2 ($arr2) must be of type array, null given
 
 -- Iteration 12 --
-
-Warning: array_diff_assoc(): Argument #2 is not an array in %s on line %d
-NULL
+array_diff_assoc(): Argument #2 ($arr2) must be of type array, bool given
 
 -- Iteration 13 --
-
-Warning: array_diff_assoc(): Argument #2 is not an array in %s on line %d
-NULL
+array_diff_assoc(): Argument #2 ($arr2) must be of type array, bool given
 
 -- Iteration 14 --
-
-Warning: array_diff_assoc(): Argument #2 is not an array in %s on line %d
-NULL
+array_diff_assoc(): Argument #2 ($arr2) must be of type array, bool given
 
 -- Iteration 15 --
-
-Warning: array_diff_assoc(): Argument #2 is not an array in %s on line %d
-NULL
+array_diff_assoc(): Argument #2 ($arr2) must be of type array, bool given
 
 -- Iteration 16 --
-
-Warning: array_diff_assoc(): Argument #2 is not an array in %s on line %d
-NULL
+array_diff_assoc(): Argument #2 ($arr2) must be of type array, string given
 
 -- Iteration 17 --
-
-Warning: array_diff_assoc(): Argument #2 is not an array in %s on line %d
-NULL
+array_diff_assoc(): Argument #2 ($arr2) must be of type array, string given
 
 -- Iteration 18 --
-
-Warning: array_diff_assoc(): Argument #2 is not an array in %s on line %d
-NULL
+array_diff_assoc(): Argument #2 ($arr2) must be of type array, string given
 
 -- Iteration 19 --
-
-Warning: array_diff_assoc(): Argument #2 is not an array in %s on line %d
-NULL
+array_diff_assoc(): Argument #2 ($arr2) must be of type array, string given
 
 -- Iteration 20 --
-
-Warning: array_diff_assoc(): Argument #2 is not an array in %s on line %d
-NULL
+array_diff_assoc(): Argument #2 ($arr2) must be of type array, string given
 
 -- Iteration 21 --
-
-Warning: array_diff_assoc(): Argument #2 is not an array in %s on line %d
-NULL
+array_diff_assoc(): Argument #2 ($arr2) must be of type array, string given
 
 -- Iteration 22 --
-
-Warning: array_diff_assoc(): Argument #2 is not an array in %s on line %d
-NULL
+array_diff_assoc(): Argument #2 ($arr2) must be of type array, string given
 
 -- Iteration 23 --
-
-Warning: array_diff_assoc(): Argument #2 is not an array in %s on line %d
-NULL
+array_diff_assoc(): Argument #2 ($arr2) must be of type array, object given
 
 -- Iteration 24 --
-
-Warning: array_diff_assoc(): Argument #2 is not an array in %s on line %d
-NULL
+array_diff_assoc(): Argument #2 ($arr2) must be of type array, null given
 
 -- Iteration 25 --
-
-Warning: array_diff_assoc(): Argument #2 is not an array in %s on line %d
-NULL
+array_diff_assoc(): Argument #2 ($arr2) must be of type array, null given
 
 -- Iteration 26 --
-
-Warning: array_diff_assoc(): Argument #2 is not an array in %s on line %d
-NULL
+array_diff_assoc(): Argument #2 ($arr2) must be of type array, resource given
 Done

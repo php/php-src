@@ -19,12 +19,12 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 echo "*** Testing vfprintf() : unsigned formats and signed & other types of values ***\n";
 
 // defining array of unsigned formats
-$formats = 
-  '%u %+u %-u 
-   %lu %Lu %4u %-4u
-   %10.4u %-10.4u %.4u 
-   %\'#2u %\'2u %\'$2u %\'_2u
-   %3$u %4$u %1$u %2$u';
+$formats =
+    '%u %+u %-u
+    %lu %Lu %4u %-4u
+    %10.4u %-10.4u %.4u
+    %\'#2u %\'2u %\'$2u %\'_2u
+    %3$u %4$u %1$u %2$u';
 
 // Arrays of signed and other type of values for the format defined in $format.
 // Each sub array contains signed values which correspond to each format in $format
@@ -57,11 +57,11 @@ $args_array = array(
          true, TRUE, FALSE,
          0, 1, 1, 0,
          1, TRUE, 0, FALSE),
-  
+
 );
- 
+
 /* creating dumping file */
-$data_file = dirname(__FILE__) . '/vfprintf_variation16_64bit.txt';
+$data_file = __DIR__ . '/vfprintf_variation16_64bit.txt';
 if (!($fp = fopen($data_file, 'wt')))
    return;
 
@@ -78,35 +78,33 @@ fclose($fp);
 print_r(file_get_contents($data_file));
 echo "\n";
 
-unlink($data_file);  
+unlink($data_file);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing vfprintf() : unsigned formats and signed & other types of values ***
 
 -- Iteration 1 --
-2 0 10 
-   123456 u 1234 20000000000
-   2000000000000 22000000000000 12345 
-   12 18446744073709551604 18446744073709428160 _3
-   10 123456 2 0
+2 0 10
+    123456 u 1234 20000000000
+    2000000000000 22000000000000 12345
+    12 18446744073709551604 18446744073709428160 _3
+    10 123456 2 0
 -- Iteration 2 --
-0 0 0 
-   123 u 18446744073709551493 123 
-            0 0          0 
-   1234 0 $0 _0
-   0 123 0 0
+0 0 0
+    123 u 18446744073709551493 123 
+             0 0          0
+    1234 0 $0 _0
+    0 123 0 0
 -- Iteration 3 --
-1 1 1 
-   1 u    1 1   
-            1 1          1 
-   #1 1 $1 _1
-   1 1 1 1
+1 1 1
+    1 u    1 1   
+             1 1          1
+    #1 1 $1 _1
+    1 1 1 1
 -- Iteration 4 --
-1 1 0 
-   1 u    0 1   
-            1 1          0 
-   #0 1 $1 _0
-   0 1 1 1
-===DONE===
+1 1 0
+    1 u    0 1   
+             1 1          0
+    #0 1 $1 _0
+    0 1 1 1

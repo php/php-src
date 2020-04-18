@@ -1,5 +1,5 @@
 --TEST--
-Test array_combine() function : usage variations - binary safe checking 
+Test array_combine() function : usage variations - binary safe checking
 --FILE--
 <?php
 /* Prototype  : array array_combine(array $keys, array $values)
@@ -9,8 +9,8 @@ Test array_combine() function : usage variations - binary safe checking
 */
 
 /*
-* Testing the behavior of array_combine() by passing array with 
-* binary values for $keys and $values argument. 
+* Testing the behavior of array_combine() by passing array with
+* binary values for $keys and $values argument.
 */
 
 echo "*** Testing array_combine() : binary safe checking ***\n";
@@ -30,7 +30,7 @@ var_dump( array_combine($arr_binary, $arr_normal) );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_combine() : binary safe checking ***
 array(2) {
   ["hello"]=>

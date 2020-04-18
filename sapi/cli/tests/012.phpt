@@ -18,7 +18,7 @@ var_dump(`"$php" -n -r '' -r ''`);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--
 string(32) "You can use -R or -F only once.
 "
 string(32) "You can use -R or -F only once.

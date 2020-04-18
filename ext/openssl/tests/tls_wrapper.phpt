@@ -4,6 +4,8 @@ tls stream wrapper
 <?php
 if (!extension_loaded("openssl")) die("skip openssl not loaded");
 if (!function_exists("proc_open")) die("skip no proc_open");
+if (OPENSSL_VERSION_NUMBER < 0x10101000) die("skip OpenSSL v1.1.1 required");
+?>
 --FILE--
 <?php
 $serverCode = <<<'CODE'
@@ -15,7 +17,7 @@ $serverCode = <<<'CODE'
     $server = stream_socket_server('tls://127.0.0.1:64321', $errno, $errstr, $flags, $ctx);
     phpt_notify();
 
-    for ($i=0; $i < 6; $i++) {
+    for ($i = 0; $i < (phpt_has_sslv3() ? 6 : 5); $i++) {
         @stream_socket_accept($server, 3);
     }
 CODE;
@@ -50,6 +52,7 @@ CODE;
 
 include 'ServerClientTestCase.inc';
 ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
+?>
 --EXPECTF--
 resource(%d) of type (stream)
 bool(false)

@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -26,6 +24,9 @@ extern "C" {
 #include "../intl_convertcpp.h"
 #include "../intl_common.h"
 
+using icu::RuleBasedBreakIterator;
+using icu::Locale;
+
 static inline RuleBasedBreakIterator *fetch_rbbi(BreakIterator_object *bio) {
 	return (RuleBasedBreakIterator*)bio->biter;
 }
@@ -38,11 +39,9 @@ static void _php_intlrbbi_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 	UErrorCode	status		= U_ZERO_ERROR;
 	intl_error_reset(NULL);
 
-	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s|b",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|b",
 			&rules, &rules_len, &compiled) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"rbbi_create_instance: bad arguments", 0);
-		return;
+		RETURN_THROWS();
 	}
 
 	// instantiation of ICU object
@@ -74,18 +73,13 @@ static void _php_intlrbbi_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 			return;
 		}
 	} else { // compiled
-#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 48
 		rbbi = new RuleBasedBreakIterator((uint8_t*)rules, rules_len, status);
 		if (U_FAILURE(status)) {
 			intl_error_set(NULL, status, "rbbi_create_instance: unable to "
 				"create instance from compiled rules", 0);
+			delete rbbi;
 			return;
 		}
-#else
-		intl_error_set(NULL, U_UNSUPPORTED_ERROR, "rbbi_create_instance: "
-			"compiled rules require ICU >= 4.8", 0);
-		return;
-#endif
 	}
 
 	breakiterator_object_create(return_value, rbbi, 0);
@@ -96,20 +90,18 @@ U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, __construct)
 	zend_error_handling error_handling;
 
 	zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, &error_handling);
-	return_value = getThis();
+	return_value = ZEND_THIS;
 	_php_intlrbbi_constructor_body(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	zend_restore_error_handling(&error_handling);
 }
 
-U_CFUNC PHP_FUNCTION(rbbi_get_rules)
+U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, getRules)
 {
 	BREAKITER_METHOD_INIT_VARS;
-	object = getThis();
+	object = ZEND_THIS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"rbbi_get_rules: bad arguments", 0);
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	BREAKITER_METHOD_FETCH_OBJECT;
@@ -128,15 +120,13 @@ U_CFUNC PHP_FUNCTION(rbbi_get_rules)
 	RETVAL_STR(u8str);
 }
 
-U_CFUNC PHP_FUNCTION(rbbi_get_rule_status)
+U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, getRuleStatus)
 {
 	BREAKITER_METHOD_INIT_VARS;
-	object = getThis();
+	object = ZEND_THIS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"rbbi_get_rule_status: bad arguments", 0);
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	BREAKITER_METHOD_FETCH_OBJECT;
@@ -144,15 +134,13 @@ U_CFUNC PHP_FUNCTION(rbbi_get_rule_status)
 	RETURN_LONG(fetch_rbbi(bio)->getRuleStatus());
 }
 
-U_CFUNC PHP_FUNCTION(rbbi_get_rule_status_vec)
+U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, getRuleStatusVec)
 {
 	BREAKITER_METHOD_INIT_VARS;
-	object = getThis();
+	object = ZEND_THIS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"rbbi_get_rule_status_vec: bad arguments", 0);
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	BREAKITER_METHOD_FETCH_OBJECT;
@@ -184,16 +172,13 @@ U_CFUNC PHP_FUNCTION(rbbi_get_rule_status_vec)
 	delete[] rules;
 }
 
-#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 48
-U_CFUNC PHP_FUNCTION(rbbi_get_binary_rules)
+U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, getBinaryRules)
 {
 	BREAKITER_METHOD_INIT_VARS;
-	object = getThis();
+	object = ZEND_THIS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"rbbi_get_binary_rules: bad arguments", 0);
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	BREAKITER_METHOD_FETCH_OBJECT;
@@ -214,4 +199,3 @@ U_CFUNC PHP_FUNCTION(rbbi_get_binary_rules)
 
 	RETURN_STR(ret_rules);
 }
-#endif

@@ -13,18 +13,17 @@ echo "*** Testing sscanf() : basic functionality - using octal format ***\n";
 $str = "0123 -0123 +0123 0129 -0129 +0129";
 $format = "%o %o %o %o %o %o";
 
-echo "\n-- Try sccanf() WITHOUT optional args --\n"; 
+echo "\n-- Try sccanf() WITHOUT optional args --\n";
 // extract details using short format
 list($arg1, $arg2, $arg3, $arg4, $arg5, $arg6) = sscanf($str, $format);
 var_dump($arg1, $arg2, $arg3, $arg4, $arg5, $arg6);
 
-echo "\n-- Try sccanf() WITH optional args --\n"; 
+echo "\n-- Try sccanf() WITH optional args --\n";
 // extract details using long  format
 $res = sscanf($str, $format, $arg1, $arg2, $arg3, $arg4, $arg5, $arg6);
-var_dump($res, $arg1, $arg2, $arg3, $arg4, $arg5, $arg6); 
+var_dump($res, $arg1, $arg2, $arg3, $arg4, $arg5, $arg6);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing sscanf() : basic functionality - using octal format ***
 
@@ -44,4 +43,3 @@ int(83)
 int(10)
 NULL
 NULL
-===DONE===

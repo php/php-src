@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +14,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #include <stdio.h>
 #include <sys/types.h>
 #include <ctype.h>
@@ -25,8 +21,6 @@
 #include <string.h>
 #include "php.h"
 #include "php_versioning.h"
-
-#define sign(n) ((n)<0?-1:((n)>0?1:0))
 
 /* {{{ php_canonicalize_version() */
 
@@ -117,7 +111,7 @@ compare_special_version_forms(char *form1, char *form2)
 			break;
 		}
 	}
-	return sign(found1 - found2);
+	return ZEND_NORMALIZE_BOOL(found1 - found2);
 }
 
 /* }}} */
@@ -162,7 +156,7 @@ php_version_compare(const char *orig_ver1, const char *orig_ver2)
 			/* compare element numerically */
 			l1 = strtol(p1, NULL, 10);
 			l2 = strtol(p2, NULL, 10);
-			compare = sign(l1 - l2);
+			compare = ZEND_NORMALIZE_BOOL(l1 - l2);
 		} else if (!isdigit(*p1) && !isdigit(*p2)) {
 			/* compare element names */
 			compare = compare_special_version_forms(p1, p2);
@@ -205,7 +199,7 @@ php_version_compare(const char *orig_ver1, const char *orig_ver2)
 }
 
 /* }}} */
-/* {{{ proto int version_compare(string ver1, string ver2 [, string oper])
+/* {{{ proto int|bool|null version_compare(string ver1, string ver2 [, string oper])
   Compares two "PHP-standardized" version number strings */
 
 PHP_FUNCTION(version_compare)
@@ -243,15 +237,8 @@ PHP_FUNCTION(version_compare)
 	if (!strncmp(op, "!=", op_len) || !strncmp(op, "<>", op_len) || !strncmp(op, "ne", op_len)) {
 		RETURN_BOOL(compare != 0);
 	}
-	RETURN_NULL();
+
+	zend_argument_value_error(3, "must be a valid comparison operator");
 }
 
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */

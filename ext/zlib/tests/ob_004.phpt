@@ -21,4 +21,3 @@ echo "hi\n";
 --EXPECTHEADERS--
 Content-Encoding: gzip
 Vary: Accept-Encoding
-

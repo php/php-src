@@ -3,15 +3,15 @@ Returning a reference from a function
 --FILE--
 <?php
 function returnConstantByValue() {
-	return 100;
+    return 100;
 }
 
 function &returnConstantByRef() {
-	return 100;
+    return 100;
 }
 
 function &returnVariableByRef() {
-	return $GLOBALS['a'];
+    return $GLOBALS['a'];
 }
 
 echo "\n---> 1. Trying to assign by reference the return value of a function that returns by value:\n";
@@ -37,7 +37,6 @@ var_dump($a, $b);
 
 ?>
 --EXPECTF--
-
 ---> 1. Trying to assign by reference the return value of a function that returns by value:
 
 Notice: Only variables should be assigned by reference in %s on line 17

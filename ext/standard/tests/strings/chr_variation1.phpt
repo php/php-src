@@ -18,7 +18,7 @@ unset($unset_var);
 class sample  {
   public function __toString() {
     return "sample object";
-  } 
+  }
 }
 
 //getting the resource
@@ -27,42 +27,31 @@ $file_handle = fopen(__FILE__, "r");
 // array with different values for $input
 $inputs =  array (
 
-		  // integer values
+          // integer values
 /*1*/	  0,
-		  1,
-		  255,
-		  256,
-		
-		  // float values
+          1,
+          255,
+          256,
+
+          // float values
 /*5*/	  10.5,
-		  -20.5,
-		  1.1234e6,
-		
-		  // array values
-/*8*/	  array(),
-		  array(0),
-		  array(1, 2),
-		
-		  // boolean values
+          -20.5,
+          1.1234e6,
+
+          // boolean values
 /*11*/	  true,
-		  false,
-		  TRUE,
-		  FALSE,
-		
-		  // null values
+          false,
+          TRUE,
+          FALSE,
+
+          // null values
 /*15*/	  NULL,
-		  null,
-		
-		  // objects
-/*17*/	  new sample(),
-		
-		  // resource
-/*18*/	  $file_handle,
-		
-		  // undefined variable
+          null,
+
+          // undefined variable
 /*19*/	  @$undefined_var,
-		
-		  // unset variable
+
+          // unset variable
 /*20*/	  @$unset_var
 );
 
@@ -77,8 +66,7 @@ foreach($inputs as $input) {
 fclose($file_handle);  //closing the file handle
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing chr() function: with unexpected inputs for 'ascii' argument ***
 -- Iteration 1 --
 string(2) "00"
@@ -95,29 +83,18 @@ string(2) "ec"
 -- Iteration 7 --
 string(2) "48"
 -- Iteration 8 --
-string(2) "00"
+string(2) "01"
 -- Iteration 9 --
 string(2) "00"
 -- Iteration 10 --
-string(2) "00"
--- Iteration 11 --
 string(2) "01"
+-- Iteration 11 --
+string(2) "00"
 -- Iteration 12 --
 string(2) "00"
 -- Iteration 13 --
-string(2) "01"
+string(2) "00"
 -- Iteration 14 --
 string(2) "00"
 -- Iteration 15 --
 string(2) "00"
--- Iteration 16 --
-string(2) "00"
--- Iteration 17 --
-string(2) "00"
--- Iteration 18 --
-string(2) "00"
--- Iteration 19 --
-string(2) "00"
--- Iteration 20 --
-string(2) "00"
-===DONE===

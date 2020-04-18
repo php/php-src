@@ -20,9 +20,9 @@ echo "*** Testing vfprintf() : unsigned formats and unsigned values ***\n";
 
 // defining array of unsigned formats
 $formats = array(
-  '%u %+u %-u', 
+  '%u %+u %-u',
   '%lu %Lu %4u %-4u',
-  '%10.4u %-10.4u %.4u', 
+  '%10.4u %-10.4u %.4u',
   '%\'#2u %\'2u %\'$2u %\'_2u',
   '%3$u %4$u %1$u %2$u'
 );
@@ -38,7 +38,7 @@ $args_array = array(
 );
 
 /* creating dumping file */
-$data_file = dirname(__FILE__) . '/vfprintf_variation15_64bit.txt';
+$data_file = __DIR__ . '/vfprintf_variation15_64bit.txt';
 if (!($fp = fopen($data_file, 'wt')))
    return;
 
@@ -55,10 +55,9 @@ fclose($fp);
 print_r(file_get_contents($data_file));
 echo "\n";
 
-unlink($data_file); 
+unlink($data_file);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing vfprintf() : unsigned formats and unsigned values ***
 
@@ -72,4 +71,3 @@ unlink($data_file);
 #1 0 $0 10
 -- Iteration 5 --
 1 2 3 4
-===DONE===

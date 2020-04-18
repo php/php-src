@@ -4,22 +4,22 @@ serialize() integrity with non string on __sleep
 <?php
 class testString
 {
-	public $a = true;
+    public $a = true;
 
-	public function __sleep()
-	{
-		return array('a', '1');
-	}
+    public function __sleep()
+    {
+        return array('a', '1');
+    }
 }
 
 class testInteger
 {
-	public $a = true;
+    public $a = true;
 
-	public function __sleep()
-	{
-		return array('a', 1);
-	}
+    public function __sleep()
+    {
+        return array('a', 1);
+    }
 }
 
 $cs = new testString();

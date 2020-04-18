@@ -6,12 +6,12 @@ Bug #69425: Use After Free in unserialize()
 // POC 1
 class test
 {
-	var $ryat;
-	
-	function __wakeup()
-	{
-		$this->ryat = 1;
-	}
+    var $ryat;
+
+    function __wakeup()
+    {
+        $this->ryat = 1;
+    }
 }
 
 $data = unserialize('a:2:{i:0;O:4:"test":1:{s:4:"ryat";R:1;}i:1;i:2;}');

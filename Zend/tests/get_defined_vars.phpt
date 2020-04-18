@@ -3,7 +3,7 @@ Testing get_defined_vars() Function
 --FILE--
 <?php
 /* Prototype: array get_defined_vars(void);
- * Description: Returns a  multidimentional array of all defined variables.
+ * Description: Returns a  multidimensional array of all defined variables.
  */
 
 /* Various variables definitions used for testing of the function */
@@ -34,7 +34,7 @@ $arr = get_defined_vars();
 
 /* Displaying various variable through the array captured by the get_defined_vars function call */
 echo "\n*** Displaying various variables through the array captured by the get_defined_vars function call ***\n";
-var_dump( $arr["argc"] ); 
+var_dump( $arr["argc"] );
 var_dump( $arr["number"] );
 var_dump( $arr["string"] );
 var_dump( $arr["array1"] );
@@ -63,8 +63,8 @@ func2();
 func1();
 
 echo "\nDone";
-?> 
---EXPECTF--
+?>
+--EXPECT--
 *** Displaying various variables through the array captured by the get_defined_vars function call ***
 int(1)
 float(22.33)

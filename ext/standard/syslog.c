@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +13,6 @@
    | Author: Stig Sæther Bakken <ssb@php.net>                             |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #include "php.h"
 
@@ -44,7 +40,7 @@ PHP_MINIT_FUNCTION(syslog)
 	REGISTER_LONG_CONSTANT("LOG_EMERG", LOG_EMERG, CONST_CS | CONST_PERSISTENT); /* system unusable */
 	REGISTER_LONG_CONSTANT("LOG_ALERT", LOG_ALERT, CONST_CS | CONST_PERSISTENT); /* immediate action required */
 	REGISTER_LONG_CONSTANT("LOG_CRIT", LOG_CRIT, CONST_CS | CONST_PERSISTENT); /* critical conditions */
-	REGISTER_LONG_CONSTANT("LOG_ERR", LOG_ERR, CONST_CS | CONST_PERSISTENT); 
+	REGISTER_LONG_CONSTANT("LOG_ERR", LOG_ERR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("LOG_WARNING", LOG_WARNING, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("LOG_NOTICE", LOG_NOTICE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("LOG_INFO", LOG_INFO, CONST_CS | CONST_PERSISTENT);
@@ -125,6 +121,12 @@ PHP_MSHUTDOWN_FUNCTION(syslog)
 	return SUCCESS;
 }
 
+void php_openlog(const char *ident, int option, int facility)
+{
+	openlog(ident, option, facility);
+	PG(have_called_openlog) = 1;
+}
+
 /* {{{ proto bool openlog(string ident, int option, int facility)
    Open connection to system logger */
 /*
@@ -151,7 +153,7 @@ PHP_FUNCTION(openlog)
 	if(BG(syslog_device) == NULL) {
 		RETURN_FALSE;
 	}
-	openlog(BG(syslog_device), option, facility);
+	php_openlog(BG(syslog_device), option, facility);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -160,9 +162,7 @@ PHP_FUNCTION(openlog)
    Close connection to system logger */
 PHP_FUNCTION(closelog)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	closelog();
 	if (BG(syslog_device)) {
@@ -192,12 +192,3 @@ PHP_FUNCTION(syslog)
 /* }}} */
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

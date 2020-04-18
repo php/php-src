@@ -3,7 +3,7 @@ Test getimagesize() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : array getimagesize(string imagefile [, array info])
- * Description: Get the size of an image as 4-element array 
+ * Description: Get the size of an image as 4-element array
  * Source code: ext/standard/image.c
  */
 
@@ -16,15 +16,15 @@ $imagetype_filenames = array(
 
       //PNG file
       "PNG image file" => "200x100.png",
-    
+
       //SWF file
       "SWF image file" => "200x100.swf",
-      
+
       //BMP file
       "BMP image file" => "200x100.bmp",
-      
+
       //TIFF intel byte order
-      "TIFF intel byte order image file" => "200x100.tif",
+      "TIFF intel byte order image file" => "200x100.tiff",
 
       //JPC file
       "JPC image file" => "test1pix.jpc",
@@ -41,11 +41,10 @@ echo "*** Testing getimagesize() : basic functionality ***\n";
 // loop through each element of the array for imagetype
 foreach($imagetype_filenames as $key => $filename) {
       echo "\n-- $key ($filename) --\n";
-      var_dump( getimagesize(dirname(__FILE__)."/$filename", $info) );
+      var_dump( getimagesize(__DIR__."/$filename", $info) );
       var_dump( $info );
 };
 ?>
-===DONE===
 --EXPECTF--
 *** Testing getimagesize() : basic functionality ***
 
@@ -143,7 +142,7 @@ array(6) {
 array(0) {
 }
 
--- TIFF intel byte order image file (200x100.tif) --
+-- TIFF intel byte order image file (200x100.tiff) --
 array(5) {
   [0]=>
   int(200)
@@ -216,4 +215,3 @@ array(6) {
 }
 array(0) {
 }
-===DONE===

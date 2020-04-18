@@ -2,13 +2,13 @@
 Test imap_fetch_overview() function : error conditions - incorrect number of args
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__).'/skipif.inc');
+require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
 /* Prototype  : array imap_fetch_overview(resource $stream_id, int $msg_no [, int $options])
- * Description: Read an overview of the information in the headers 
- * of the given message sequence 
+ * Description: Read an overview of the information in the headers
+ * of the given message sequence
  * Source code: ext/imap/php_imap.c
  */
 
@@ -18,7 +18,7 @@ require_once(dirname(__FILE__).'/skipif.inc');
 
 echo "*** Testing imap_fetch_overview() : error conditions ***\n";
 
-require_once(dirname(__FILE__).'/imap_include.inc');
+require_once(__DIR__.'/imap_include.inc');
 
 //Test imap_fetch_overview with one more than the expected number of arguments
 echo "\n-- Testing imap_fetch_overview() function with more than expected no. of arguments --\n";
@@ -32,10 +32,9 @@ var_dump( imap_fetch_overview($stream_id, $msg_no, $options, $extra_arg) );
 echo "\n-- Testing imap_fetch_overview() function with less than expected no. of arguments --\n";
 var_dump( imap_fetch_overview($stream_id) );
 ?>
-===DONE===
 --CLEAN--
 <?php
-require_once(dirname(__FILE__).'/clean.inc');
+require_once(__DIR__.'/clean.inc');
 ?>
 --EXPECTF--
 *** Testing imap_fetch_overview() : error conditions ***
@@ -51,4 +50,3 @@ NULL
 
 Warning: imap_fetch_overview() expects at least 2 parameters, 1 given in %s on line %d
 NULL
-===DONE===

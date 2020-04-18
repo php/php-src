@@ -7,7 +7,7 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 --FILE--
 <?php
 /* Prototype  : string vprintf(string format, array args)
- * Description: Output a formatted string 
+ * Description: Output a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
@@ -48,15 +48,14 @@ $args_array = array(
 // and with octal values from the above $args_array array
 $counter = 1;
 foreach($formats as $format) {
-  echo "\n-- Iteration $counter --\n";   
+  echo "\n-- Iteration $counter --\n";
   $result = vprintf($format, $args_array[$counter-1]);
   echo "\n";
-  var_dump($result); 
+  var_dump($result);
   $counter++;
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing vprintf() : octal formats with octal values ***
 
@@ -91,4 +90,3 @@ int(6)
 -- Iteration 8 --
 1 2 3 4
 int(7)
-===DONE===

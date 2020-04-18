@@ -1,5 +1,5 @@
 --TEST--
-Test mb_strrchr() function : basic functionality 
+Test mb_strrchr() function : basic functionality
 --SKIPIF--
 <?php
 extension_loaded('mbstring') or die('skip');
@@ -8,9 +8,9 @@ function_exists('mb_strrchr') or die("skip mb_strrchr() is not available in this
 --FILE--
 <?php
 /* Prototype  : string mb_strrchr(string haystack, string needle[, bool part[, string encoding]])
- * Description: Finds the last occurrence of a character in a string within another 
+ * Description: Finds the last occurrence of a character in a string within another
  * Source code: ext/mbstring/mbstring.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing mb_strrchr() : basic functionality ***\n";
@@ -42,7 +42,6 @@ $needle2 = base64_decode('44GT44KT44Gr44Gh44Gv44CB5LiW55WM');
 var_dump(mb_strrchr($string_mb, $needle2));
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing mb_strrchr() : basic functionality ***
 
@@ -61,4 +60,3 @@ string(0) ""
 
 -- Multibyte string: needle doesn't exist --
 bool(false)
-===DONE===

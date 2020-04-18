@@ -17,10 +17,9 @@ $three = new class implements Two {
     }
 };
 $three->a();
-
 --EXPECTF--
-Fatal error: Uncaught TypeError: Return value of class@anonymous::a() must be an object, integer returned in %s:13
+Fatal error: Uncaught TypeError: Return value of Two@anonymous::a() must be of type object, int returned in %s:%d
 Stack trace:
-#0 %s(16): class@anonymous->a()
+#0 %s(%d): Two@anonymous->a()
 #1 {main}
   thrown in %s on line 13

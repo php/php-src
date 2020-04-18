@@ -43,8 +43,6 @@ var_dump(ini_get('mbstring.internal_encoding'));
 var_dump(mb_internal_encoding());
 var_dump(ini_get('mbstring.http_input'));
 var_dump(ini_get('mbstring.http_output'));
-
-
 --EXPECT--
 Getting INI
 string(0) ""
@@ -52,7 +50,7 @@ string(6) "EUC-JP"
 string(0) ""
 string(0) ""
 string(0) ""
-string(5) "UTF-8"
+string(6) "EUC-JP"
 string(0) ""
 string(0) ""
 Setting INI

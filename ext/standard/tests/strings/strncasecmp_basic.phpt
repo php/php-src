@@ -1,5 +1,5 @@
 --TEST--
-Test strncasecmp() function : basic functionality 
+Test strncasecmp() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : int strncasecmp ( string $str1, string $str2, int $len );

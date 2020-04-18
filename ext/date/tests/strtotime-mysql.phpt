@@ -1,7 +1,7 @@
 --TEST--
 strtotime() and mysql timestamps (32 bit)
 --SKIPIF--
-<?php echo PHP_INT_SIZE == 8 ? "skip 32-bit only" : "OK"; ?>
+<?php if (PHP_INT_SIZE == 8) die("skip 32-bit only"); ?>
 --FILE--
 <?php
 date_default_timezone_set('UTC');
@@ -12,13 +12,13 @@ $d[] = '20001231185859';
 $d[] = '20800410101010'; // overflow..
 
 foreach($d as $date) {
-	$time = strtotime($date);
+    $time = strtotime($date);
 
-	if (is_integer($time)) {
-		var_dump(date('r', $time));
-	} else {
-		var_dump($time);
-	}
+    if (is_integer($time)) {
+        var_dump(date('r', $time));
+    } else {
+        var_dump($time);
+    }
 }
 ?>
 --EXPECT--

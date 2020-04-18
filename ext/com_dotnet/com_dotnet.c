@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +13,6 @@
    | Author: Wez Furlong  <wez@thebrainroom.com>                          |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -183,7 +179,7 @@ out:
 }
 
 /* {{{ com_dotnet_create_instance - ctor for DOTNET class */
-PHP_FUNCTION(com_dotnet_create_instance)
+PHP_METHOD(dotnet, __construct)
 {
 	zval *object = getThis();
 	php_com_dotnet_object *obj;
@@ -199,6 +195,13 @@ PHP_FUNCTION(com_dotnet_create_instance)
 	zend_long cp = GetACP();
 	const struct php_win32_cp *cp_it;
 
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "ss|l",
+			&assembly_name, &assembly_name_len,
+			&datatype_name, &datatype_name_len,
+			&cp)) {
+		RETURN_THROWS();
+	}
+
 	php_com_initialize();
 	stuff = (struct dotnet_runtime_stuff*)COMG(dotnet_runtime_stuff);
 	if (stuff == NULL) {
@@ -207,10 +210,9 @@ PHP_FUNCTION(com_dotnet_create_instance)
 			char buf[1024];
 			char *err = php_win32_error_to_msg(hr);
 			snprintf(buf, sizeof(buf), "Failed to init .Net runtime [%s] %s", where, err);
-			if (err)
-				LocalFree(err);
+			php_win32_error_msg_free(err);
 			php_com_throw_exception(hr, buf);
-			return;
+			RETURN_THROWS();
 		}
 		stuff = (struct dotnet_runtime_stuff*)COMG(dotnet_runtime_stuff);
 
@@ -221,11 +223,10 @@ PHP_FUNCTION(com_dotnet_create_instance)
 			char buf[1024];
 			char *err = php_win32_error_to_msg(hr);
 			snprintf(buf, sizeof(buf), "Failed to re-init .Net domain [%s] %s", where, err);
-			if (err)
-				LocalFree(err);
+			php_win32_error_msg_free(err);
 			php_com_throw_exception(hr, buf);
 			ZVAL_NULL(object);
-			return;
+			RETURN_THROWS();
 		}
 
 		where = "QI: System._AppDomain";
@@ -234,28 +235,19 @@ PHP_FUNCTION(com_dotnet_create_instance)
 			char buf[1024];
 			char *err = php_win32_error_to_msg(hr);
 			snprintf(buf, sizeof(buf), "Failed to re-init .Net domain [%s] %s", where, err);
-			if (err)
-				LocalFree(err);
+			php_win32_error_msg_free(err);
 			php_com_throw_exception(hr, buf);
 			ZVAL_NULL(object);
-			return;
+			RETURN_THROWS();
 		}
 	}
 
 	obj = CDNO_FETCH(object);
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "ss|l",
-			&assembly_name, &assembly_name_len,
-			&datatype_name, &datatype_name_len,
-			&cp)) {
-		php_com_throw_exception(E_INVALIDARG, "Could not create .Net object - invalid arguments!");
-		return;
-	}
-
 	cp_it = php_win32_cp_get_by_id((DWORD)cp);
 	if (!cp_it) {
 		php_com_throw_exception(E_INVALIDARG, "Could not create .Net object - invalid codepage!");
-		return;
+		RETURN_THROWS();
 	}
 	obj->code_page = (int)cp_it->id;
 
@@ -317,11 +309,9 @@ PHP_FUNCTION(com_dotnet_create_instance)
 		char buf[1024];
 		char *err = php_win32_error_to_msg(hr);
 		snprintf(buf, sizeof(buf), "Failed to instantiate .Net object [%s] [0x%08x] %s", where, hr, err);
-		if (err && err[0]) {
-			LocalFree(err);
-		}
+		php_win32_error_msg_free(err);
 		php_com_throw_exception(hr, buf);
-		return;
+		RETURN_THROWS();
 	}
 }
 /* }}} */

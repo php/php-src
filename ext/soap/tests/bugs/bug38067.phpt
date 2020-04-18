@@ -7,9 +7,9 @@ soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 function Test($param) {
-	global $g;
-	$g = $param->str;
-	return $g;
+    global $g;
+    $g = $param->str;
+    return $g;
 }
 
 class TestSoapClient extends SoapClient {
@@ -28,8 +28,8 @@ class TestSoapClient extends SoapClient {
   }
 }
 
-$client = new TestSoapClient(dirname(__FILE__).'/bug38067.wsdl',
-	array('encoding' => 'ISO-8859-1'));
+$client = new TestSoapClient(__DIR__.'/bug38067.wsdl',
+    array('encoding' => 'ISO-8859-1'));
 $str = 'test: Ä';
 $res = $client->Test(array('str'=>$str));
 echo $str."\n";

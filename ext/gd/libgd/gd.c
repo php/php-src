@@ -1239,6 +1239,12 @@ void gdImageAALine (gdImagePtr im, int x1, int y1, int x2, int y2, int col)
 	long x, y, inc, frac;
 	long dx, dy,tmp;
 
+	if (!im->trueColor) {
+		/* TBB: don't crash when the image is of the wrong type */
+		gdImageLine(im, x1, y1, x2, y2, col);
+		return;
+	}
+
 	/* 2.0.10: Nick Atty: clip to edges of drawing rectangle, return if no points need to be drawn */
 	if (!clip_1d(&x1,&y1,&x2,&y2,gdImageSX(im)-1) || !clip_1d(&y1,&x1,&y2,&x2,gdImageSY(im)-1)) {
 		return;
@@ -1250,7 +1256,7 @@ void gdImageAALine (gdImagePtr im, int x1, int y1, int x2, int y2, int col)
 	if (dx == 0 && dy == 0) {
 		return;
 	}
-	if (abs(dx) > abs(dy)) {
+	if (abs((int)dx) > abs((int)dy)) {
 		if (dx < 0) {
 			tmp = x1;
 			x1 = x2;
@@ -1332,7 +1338,6 @@ void gdImageDashedLine (gdImagePtr im, int x1, int y1, int x2, int y2, int color
 		} else {
 			wid = 1;
 		}
-		wid = (int)(thick * sin(atan2(dy, dx)));
 		vert = 1;
 
 		d = 2 * dy - dx;
@@ -1588,7 +1593,7 @@ void gdImageFilledArc (gdImagePtr im, int cx, int cy, int w, int h, int s, int e
 	int i, pti;
 	int lx = 0, ly = 0;
 	int fx = 0, fy = 0;
-
+	int startx = -1, starty = -1, endx = -1, endy = -1;
 
     if ((s % 360)  == (e % 360)) {
 		s = 0; e = 360;
@@ -1615,8 +1620,8 @@ void gdImageFilledArc (gdImagePtr im, int cx, int cy, int w, int h, int s, int e
 
 	for (i = s, pti = 1; i <= e; i++, pti++) {
 		int x, y;
-		x = ((long) gdCosT[i % 360] * (long) w / (2 * 1024)) + cx;
-		y = ((long) gdSinT[i % 360] * (long) h / (2 * 1024)) + cy;
+		x = endx = ((long) gdCosT[i % 360] * (long) w / (2 * 1024)) + cx;
+		y = endy = ((long) gdSinT[i % 360] * (long) h / (2 * 1024)) + cy;
 		if (i != s) {
 			if (!(style & gdChord)) {
 				if (style & gdNoFill) {
@@ -1641,8 +1646,8 @@ void gdImageFilledArc (gdImagePtr im, int cx, int cy, int w, int h, int s, int e
 			if (!(style & (gdChord | gdNoFill))) {
 				pts[0].x = cx;
 				pts[0].y = cy;
-				pts[pti].x = x;
-				pts[pti].y = y;
+				pts[pti].x = startx = x;
+				pts[pti].y = starty = y;
 			}
 		}
 		lx = x;
@@ -1671,6 +1676,24 @@ void gdImageFilledArc (gdImagePtr im, int cx, int cy, int w, int h, int s, int e
 				gdImageLine(im, cx, cy, fx, fy, color);
 			}
 		} else {
+			if (e - s < 360) {
+				if (pts[1].x != startx && pts[1].y == starty) {
+					/* start point has been removed due to y-coord fix => insert it */
+					for (i = pti; i > 1; i--) {
+						pts[i].x = pts[i-1].x;
+						pts[i].y = pts[i-1].y;
+					}
+					pts[1].x = startx;
+					pts[1].y = starty;
+					pti++;
+				}
+				if (pts[pti-1].x != endx && pts[pti-1].y == endy) {
+					/* end point has been removed due to y-coord fix => insert it */
+					pts[pti].x = endx;
+					pts[pti].y = endy;
+					pti++;
+				}
+			}
 			pts[pti].x = cx;
 			pts[pti].y = cy;
 			gdImageFilledPolygon(im, pts, pti+1, color);
@@ -1893,7 +1916,7 @@ void gdImageFill(gdImagePtr im, int x, int y, int nc)
 	int alphablending_bak;
 
 	/* stack of filled segments */
-	/* struct seg stack[FILL_MAX],*sp = stack;; */
+	/* struct seg stack[FILL_MAX],*sp = stack; */
 	struct seg *stack = NULL;
 	struct seg *sp;
 
@@ -1967,7 +1990,8 @@ void gdImageFill(gdImagePtr im, int x, int y, int nc)
 			if (x>x2+1) {
 				FILL_PUSH(y, x2+1, x-1, -dy);
 			}
-skip:			for (x++; x<=x2 && (gdImageGetPixel(im, x, y)!=oc); x++);
+skip:
+			for (x++; x<=x2 && (gdImageGetPixel(im, x, y)!=oc); x++);
 
 			l = x;
 		} while (x<=x2);
@@ -2039,7 +2063,8 @@ static void _gdImageFillTiled(gdImagePtr im, int x, int y, int nc)
 			if (x>x2+1) {
 				FILL_PUSH(y, x2+1, x-1, -dy);
 			}
-skip:		for(x++; x<=x2 && (pts[y][x] || gdImageGetPixel(im,x, y)!=oc); x++);
+skip:
+			for(x++; x<=x2 && (pts[y][x] || gdImageGetPixel(im,x, y)!=oc); x++);
 			l = x;
 		} while (x<=x2);
 	}
@@ -2069,7 +2094,7 @@ void gdImageRectangle (gdImagePtr im, int x1, int y1, int x2, int y2, int color)
 		y1 = y2;
 		y2 = t;
 	}
-	
+
 	if (x2 < x1) {
 		t = x1;
 		x1 = x2;
@@ -3138,4 +3163,3 @@ clean_on_error:
 	gdFree(src->tpixels);
 	return 0;
 }
-

@@ -8,9 +8,9 @@ function_exists('mb_strrchr') or die("skip mb_strrchr() is not available in this
 --FILE--
 <?php
 /* Prototype  : string mb_strrchr(string haystack, string needle[, bool part[, string encoding]])
- * Description: Finds the last occurrence of a character in a string within another 
+ * Description: Finds the last occurrence of a character in a string within another
  * Source code: ext/mbstring/mbstring.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing mb_strrchr() : variation ***\n";
@@ -51,7 +51,6 @@ var_dump(mb_strrchr($string_mb, $needle_mb_mixed));
 
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing mb_strrchr() : variation ***
 -- Ascii data --
@@ -62,4 +61,3 @@ bool(false)
 string(52) "cebccebdcebecebfcf80cf81cf83cf84cf85cf86cf87cf88cf89"
 bool(false)
 bool(false)
-===DONE===

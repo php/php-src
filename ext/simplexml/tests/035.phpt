@@ -18,9 +18,7 @@ echo $p."\n";
 echo $p->__toString()."\n";
 echo $p."\n";
 ?>
-==Done==
 --EXPECT--
 Blah 1
 Blah 1
 Blah 1
-==Done==

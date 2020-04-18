@@ -4,10 +4,9 @@ ZE2 An interface method cannot be final
 <?php
 
 class if_a {
-	abstract final function err();
+    abstract final function err();
 }
 
 ?>
 --EXPECTF--
-
 Fatal error: Cannot use the final modifier on an abstract class member in %s on line %d

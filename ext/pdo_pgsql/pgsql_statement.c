@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -17,8 +15,6 @@
   |          Wez Furlong <wez@php.net>                                   |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -63,7 +59,7 @@ static int pgsql_stmt_dtor(pdo_stmt_t *stmt)
 	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
 	zend_bool server_obj_usable = !Z_ISUNDEF(stmt->database_object_handle)
 		&& IS_OBJ_VALID(EG(objects_store).object_buckets[Z_OBJ_HANDLE(stmt->database_object_handle)])
-		&& !(GC_FLAGS(Z_OBJ(stmt->database_object_handle)) & IS_OBJ_FREE_CALLED);
+		&& !(OBJ_FLAGS(Z_OBJ(stmt->database_object_handle)) & IS_OBJ_FREE_CALLED);
 
 	if (S->result) {
 		/* free the resource */
@@ -151,7 +147,7 @@ static int pgsql_stmt_execute(pdo_stmt_t *stmt)
 
 		if (S->is_prepared) {
 			spprintf(&q, 0, "CLOSE %s", S->cursor_name);
-			S->result = PQexec(H->server, q);
+			PQclear(PQexec(H->server, q));
 			efree(q);
 		}
 
@@ -165,6 +161,7 @@ static int pgsql_stmt_execute(pdo_stmt_t *stmt)
 			pdo_pgsql_error_stmt(stmt, status, pdo_pgsql_sqlstate(S->result));
 			return 0;
 		}
+		PQclear(S->result);
 
 		/* the cursor was declared correctly */
 		S->is_prepared = 1;
@@ -434,6 +431,11 @@ static int pgsql_stmt_fetch(pdo_stmt_t *stmt,
 				return 0;
 		}
 
+		if(S->result) {
+			PQclear(S->result);
+			S->result = NULL;
+		}
+
 		spprintf(&q, 0, "FETCH %s FROM %s", ori_str, S->cursor_name);
 		efree(ori_str);
 		S->result = PQexec(S->H->server, q);
@@ -522,7 +524,7 @@ static int pgsql_stmt_describe(pdo_stmt_t *stmt, int colno)
 	return 1;
 }
 
-static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, zend_ulong *len, int *caller_frees )
+static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, size_t *len, int *caller_frees )
 {
 	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
 	struct pdo_column_data *cols = stmt->columns;
@@ -549,7 +551,7 @@ static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, zend_ulon
 				break;
 
 			case PDO_PARAM_BOOL:
-				S->cols[colno].boolval = **ptr == 't' ? 1: 0;
+				S->cols[colno].boolval = **ptr == 't';
 				*ptr = (char *) &(S->cols[colno].boolval);
 				*len = sizeof(zend_bool);
 				break;
@@ -618,10 +620,12 @@ static zend_always_inline char * pdo_pgsql_translate_oid_to_table(Oid oid, PGcon
 	}
 	efree(querystr);
 
-	if ((table_name = PQgetvalue(tmp_res, 0, 0)) == NULL) {
+	if (1 == PQgetisnull(tmp_res, 0, 0) || (table_name = PQgetvalue(tmp_res, 0, 0)) == NULL) {
 		PQclear(tmp_res);
 		return 0;
 	}
+
+	table_name = estrdup(table_name);
 
 	PQclear(tmp_res);
 	return table_name;
@@ -652,6 +656,7 @@ static int pgsql_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zval *r
 	table_name = pdo_pgsql_translate_oid_to_table(table_oid, S->H->server);
 	if (table_name) {
 		add_assoc_string(return_value, "table", table_name);
+		efree(table_name);
 	}
 
 	switch (S->cols[colno].pgsql_type) {
@@ -707,7 +712,7 @@ static int pdo_pgsql_stmt_cursor_closer(pdo_stmt_t *stmt)
 	return 1;
 }
 
-struct pdo_stmt_methods pgsql_stmt_methods = {
+const struct pdo_stmt_methods pgsql_stmt_methods = {
 	pgsql_stmt_dtor,
 	pgsql_stmt_execute,
 	pgsql_stmt_fetch,
@@ -720,12 +725,3 @@ struct pdo_stmt_methods pgsql_stmt_methods = {
 	NULL,  /* next_rowset */
 	pdo_pgsql_stmt_cursor_closer
 };
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

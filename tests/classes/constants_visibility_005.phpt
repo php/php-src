@@ -3,7 +3,7 @@ Static constants are not allowed
 --FILE--
 <?php
 class A {
-	static const X = 1;
+    static const X = 1;
 }
 ?>
 --EXPECTF--

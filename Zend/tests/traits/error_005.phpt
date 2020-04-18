@@ -3,11 +3,11 @@ Trying to use a final class as trait
 --FILE--
 <?php
 
-final class abc { 
+final class abc {
 }
 
 class A {
-	use abc;
+    use abc;
 }
 
 ?>

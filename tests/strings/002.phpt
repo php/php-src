@@ -1,8 +1,7 @@
 --TEST--
 Formatted print functions
 --FILE--
-<?php 
-error_reporting(0);
+<?php
 
 $fp = fopen("php://stdout", "w") or die("Arrggsgg!!");
 $x = fprintf($fp, "fprintf test 1:%.5s", "abcdefghij");
@@ -40,7 +39,11 @@ printf("printf test 26:%2\$d %1\$d\n", 1, 2);
 printf("printf test 27:%3\$d %d %d\n", 1, 2, 3);
 printf("printf test 28:%2\$02d %1\$2d\n", 1, 2);
 printf("printf test 29:%2\$-2d %1\$2d\n", 1, 2);
-print("printf test 30:"); printf("%0\$s", 1); print("x\n");
+try {
+    print("printf test 30:"); printf("%0\$s", 1); print("x\n");
+} catch(\ValueError $e) {
+    print('Error found: '.$e->getMessage()."\n");
+}
 vprintf("vprintf test 1:%2\$-2d %1\$2d\n", array(1, 2));
 
 
@@ -79,5 +82,5 @@ printf test 26:2 1
 printf test 27:3 1 2
 printf test 28:02  1
 printf test 29:2   1
-printf test 30:x
+printf test 30:Error found: Argument number must be greater than zero
 vprintf test 1:2   1

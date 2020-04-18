@@ -8,7 +8,7 @@ function_exists('mb_ereg') or die("skip mb_ereg() is not available in this build
 --FILE--
 <?php
 /* Prototype  : int mb_ereg(string $pattern, string $string [, array $registers])
- * Description: Regular expression match for multibyte string 
+ * Description: Regular expression match for multibyte string
  * Source code: ext/mbstring/php_mbregex.c
  */
 
@@ -39,15 +39,15 @@ $character_classes = array ('[[:alnum:]]+', /*1*/
 
 $iterator = 1;
 foreach ($character_classes as $pattern) {
-	if (is_array(@$regs)) {
-		$regs = null;
-	}
-	echo "\n-- Iteration $iterator --\n";
-	var_dump(mb_ereg($pattern, $string_mb, $regs));
-	if ($regs) {
-		base64_encode_var_dump($regs);
-	}
-	$iterator++;
+    if (is_array(@$regs)) {
+        $regs = null;
+    }
+    echo "\n-- Iteration $iterator --\n";
+    var_dump(mb_ereg($pattern, $string_mb, $regs));
+    if ($regs) {
+        base64_encode_var_dump($regs);
+    }
+    $iterator++;
 }
 /**
  * replicate a var dump of an array but outputted string values are base64 encoded
@@ -55,25 +55,25 @@ foreach ($character_classes as $pattern) {
  * @param array $regs
  */
 function base64_encode_var_dump($regs) {
-	if ($regs) {
-		echo "array(" . count($regs) . ") {\n";
-		foreach ($regs as $key => $value) {
-			echo "  [$key]=>\n  ";
-			if (is_string($value)) {
-				var_dump(base64_encode($value));
-			} else {
-				var_dump($value);
-			}
-		}
-		echo "}\n";
-	} else {
-		echo "NULL\n";
-	}
+    if ($regs) {
+        echo "array(" . count($regs) . ") {\n";
+        foreach ($regs as $key => $value) {
+            echo "  [$key]=>\n  ";
+            if (is_string($value)) {
+                var_dump(base64_encode($value));
+            } else {
+                var_dump($value);
+            }
+        }
+        echo "}\n";
+    } else {
+        echo "NULL\n";
+    }
 }
 echo "Done";
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing mb_ereg() : usage variations ***
 
 -- Iteration 1 --

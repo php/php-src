@@ -5,7 +5,7 @@ Bug #73792 (invalid foreach loop hangs script)
 $a = 'aaa';
 
 foreach ($a['bbb'] as &$value) {
-	echo 'loop';
+    echo 'loop';
 }
 
 unset($value);

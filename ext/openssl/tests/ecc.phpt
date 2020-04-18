@@ -1,20 +1,20 @@
 --TEST--
 openssl_*() with OPENSSL_KEYTYPE_EC
 --SKIPIF--
-<?php if (!extension_loaded("openssl") && !defined("OPENSSL_KEYTYPE_EC")) print "skip"; ?>
+<?php if (!extension_loaded("openssl") || !defined("OPENSSL_KEYTYPE_EC")) print "skip"; ?>
 --FILE--
 <?php
 $args = array(
-	"curve_name" => "secp384r1",
-	"private_key_type" => OPENSSL_KEYTYPE_EC,
+    "curve_name" => "secp384r1",
+    "private_key_type" => OPENSSL_KEYTYPE_EC,
 );
 echo "Testing openssl_pkey_new\n";
 $key1 = openssl_pkey_new($args);
 var_dump($key1);
 
 $argsFailed = array(
-	"curve_name" => "invalid_cuve_name",
-	"private_key_type" => OPENSSL_KEYTYPE_EC,
+    "curve_name" => "invalid_cuve_name",
+    "private_key_type" => OPENSSL_KEYTYPE_EC,
 );
 
 $keyFailed = openssl_pkey_new($argsFailed);
@@ -34,11 +34,11 @@ $d2 = openssl_pkey_get_details($key2);
 var_dump($d1 === $d2);
 
 $dn = array(
-	"countryName" => "BR",
-	"stateOrProvinceName" => "Rio Grande do Sul",
-	"localityName" => "Porto Alegre",
-	"commonName" => "Henrique do N. Angelo",
-	"emailAddress" => "hnangelo@php.net"
+    "countryName" => "BR",
+    "stateOrProvinceName" => "Rio Grande do Sul",
+    "localityName" => "Porto Alegre",
+    "commonName" => "Henrique do N. Angelo",
+    "emailAddress" => "hnangelo@php.net"
 );
 
 // openssl_csr_new creates a new public key pair if the key argument is null
@@ -74,9 +74,9 @@ $curve_names = openssl_get_curve_names();
 var_dump(is_array($curve_names));
 
 foreach ($curve_names as $curve_name) {
-	if ("secp384r1" === $curve_name) {
-		echo "Found secp384r1 in curve names\n";
-	}
+    if ("secp384r1" === $curve_name) {
+        echo "Found secp384r1 in curve names\n";
+    }
 }
 ?>
 --EXPECTF--

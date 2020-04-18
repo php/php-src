@@ -8,7 +8,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-/* 
+/*
  * Prototype  : object dir(string $directory[, resource $context])
  * Description: Directory class with properties, handle and class and methods read, rewind and close
  * Source code: ext/standard/dir.c
@@ -22,10 +22,10 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 echo "*** Testing dir() : operate on previously opened directory ***\n";
 
 // include the file.inc for Function: function create_files()
-include( dirname(__FILE__)."/../file/file.inc");
+include( __DIR__."/../file/file.inc");
 
 // create the temporary directory
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $dir_path = $file_path."/私はガラスを食べられますdir_variation4";
 @mkdir($dir_path);
 
@@ -52,7 +52,7 @@ echo "Done";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $dir_path = $file_path."/私はガラスを食べられますdir_variation4";
 
 rmdir($dir_path);

@@ -15,8 +15,8 @@ Test vfprintf() function : usage variations - float formats with non-float value
 echo "*** Testing vfprintf() : float formats and non-float values ***\n";
 
 // defining array of float formats
-$formats = 
-  '%f %+f %-f 
+$formats =
+  '%f %+f %-f
    %lf %Lf %4f %-4f
    %10.4f %-10.4f %04f %04.4f
    %\'#2f %\'2f %\'$2f %\'_2f
@@ -53,11 +53,11 @@ $args_array = array(
          true, false, TRUE, FALSE,
          0, 1, 1, 0,
          1, TRUE, 0, FALSE),
-  
+
 );
 
 /* creating dumping file */
-$data_file = dirname(__FILE__) . '/vfprintf_variation6.txt';
+$data_file = __DIR__ . '/vfprintf_variation6.txt';
 if (!($fp = fopen($data_file, 'wt')))
    return;
 
@@ -77,32 +77,30 @@ echo "\n";
 unlink($data_file);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing vfprintf() : float formats and non-float values ***
 
 -- Iteration 1 --
-2.000000 -2.000000 2.000000 
+2.000000 -2.000000 2.000000
    123456.000000 f -12346789.000000 12346789.000000
    123200.0000 20000.0000 -40000.000000 22212.0000
    12345780.000000 1211111.000000 -12111111.000000 -12345634.000000
    2.000000 123456.000000 2.000000 -2.000000
 -- Iteration 2 --
-0.000000 +0.000000 0.000000 
+0.000000 +0.000000 0.000000
    123.000000 f -123.000000 123.000000
        0.0000 0.0000     123456.000000 0.0000
    1234.000000 0.000000 0.000000 0.000000
    0.000000 123.000000 0.000000 0.000000
 -- Iteration 3 --
-1.000000 +1.000000 1.000000 
+1.000000 +1.000000 1.000000
    1.000000 f 1.000000 1.000000
        1.0000 1.0000     1.000000 1.0000
    1.000000 1.000000 1.000000 1.000000
    1.000000 1.000000 1.000000 1.000000
 -- Iteration 4 --
-1.000000 +1.000000 0.000000 
+1.000000 +1.000000 0.000000
    1.000000 f 0.000000 1.000000
        1.0000 0.0000     1.000000 0.0000
    0.000000 1.000000 1.000000 0.000000
    0.000000 1.000000 1.000000 1.000000
-===DONE===

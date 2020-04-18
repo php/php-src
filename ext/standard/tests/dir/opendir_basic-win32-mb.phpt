@@ -1,5 +1,5 @@
 --TEST--
-Test opendir() function : basic functionality 
+Test opendir() function : basic functionality
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) != 'WIN') {
@@ -9,7 +9,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 --FILE--
 <?php
 /* Prototype  : mixed opendir(string $path[, resource $context])
- * Description: Open a directory and return a dir_handle 
+ * Description: Open a directory and return a dir_handle
  * Source code: ext/standard/dir.c
  */
 
@@ -19,7 +19,8 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 
 echo "*** Testing opendir() : basic functionality ***\n";
 
-$base_dir_path = dirname(__FILE__);
+$base_dir_path = __DIR__ . '/opendir_basic-win32-mb';
+@mkdir($base_dir_path);
 
 $level_one_dir_name = "私はガラスを食べられますlevel_one";
 $level_one_dir_path = "$base_dir_path/$level_one_dir_name";
@@ -45,12 +46,12 @@ var_dump($dh1);
 closedir($dh2);
 var_dump($dh2);
 ?>
-===DONE===
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
-rmdir("$file_path/私はガラスを食べられますlevel_one/私はガラスを食べられますlevel_two");
-rmdir("$file_path/私はガラスを食べられますlevel_one");
+$base_dir_path = __DIR__ . '/opendir_basic-win32-mb';
+rmdir("$base_dir_path/私はガラスを食べられますlevel_one/私はガラスを食べられますlevel_two");
+rmdir("$base_dir_path/私はガラスを食べられますlevel_one");
+rmdir($base_dir_path);
 ?>
 --EXPECTF--
 *** Testing opendir() : basic functionality ***
@@ -65,4 +66,3 @@ resource(%d) of type (stream)
 -- Close directory handles: --
 resource(%d) of type (Unknown)
 resource(%d) of type (Unknown)
-===DONE===

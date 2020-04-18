@@ -7,8 +7,8 @@ phar.require_hash=0
 phar.readonly=0
 --FILE--
 <?php
-$fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.2.phar.zip.php';
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.zip.php';
+$fname2 = __DIR__ . '/' . basename(__FILE__, '.php') . '.2.phar.zip.php';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.zip.php';
 $pname = 'phar://' . $fname;
 $pname2 = 'phar://' . $fname2;
 
@@ -28,7 +28,7 @@ $file = '<?php echo "second stub\n"; __HALT_COMPILER(); ?>';
 $phar->setStub($file);
 echo $phar->getStub();
 
-$fname3 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phartmp.php';
+$fname3 = __DIR__ . '/' . basename(__FILE__, '.php') . '.phartmp.php';
 $file = '<?php echo "third stub\n"; __HALT_COMPILER(); ?>';
 $fp = fopen($fname3, 'wb');
 fwrite($fp, $file);
@@ -57,12 +57,11 @@ $phar['testing'] = 'hi';
 
 echo $phar->getStub();
 ?>
-===DONE===
 --CLEAN--
-<?php 
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.zip.php');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.phar.zip.php');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phartmp.php');
+<?php
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip.php');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.2.phar.zip.php');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phartmp.php');
 __HALT_COMPILER();
 ?>
 --EXPECT--
@@ -72,4 +71,3 @@ __HALT_COMPILER();
 <?php echo "third stub\n"; __HALT_COMPILER(); ?>booya
 <?php echo "third stub\n"; __HALT_COMPILER(); ?>
 <?php echo "third stub\n"; __HALT_COMPILER(); ?>
-===DONE===

@@ -4,13 +4,13 @@ ZE2 A protected method can only be called inside the class
 <?php
 
 class pass {
-	protected static function fail() {
-		echo "Call fail()\n";
-	}
+    protected static function fail() {
+        echo "Call fail()\n";
+    }
 
-	public static function good() {
-		pass::fail();
-	}
+    public static function good() {
+        pass::fail();
+    }
 }
 
 pass::good();

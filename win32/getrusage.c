@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,8 +19,8 @@
 #include "getrusage.h"
 
 /*
- * Parts of this file is based on code from the OpenVSwitch project, that 
- * is released under the Apache 2.0 license and is copyright 2014 Nicira, Inc. 
+ * Parts of this file is based on code from the OpenVSwitch project, that
+ * is released under the Apache 2.0 license and is copyright 2014 Nicira, Inc.
  * and have been modified to work with PHP.
  */
 
@@ -73,12 +71,3 @@ PHPAPI int getrusage(int who, struct rusage *usage)
 		return -1;
 	}
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

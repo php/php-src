@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,11 +21,9 @@
    |          Hartmut Holzgraefe  <hholzgra@php.net>                      |
    |          Jani Taskinen       <sniper@iki.fi>                         |
    |          Daniel R. Kalowsky  <kalowsky@php.net>                      |
-   | PHP 4.0 updates:  Zeev Suraski <zeev@zend.com>                       |
+   | PHP 4.0 updates:  Zeev Suraski <zeev@php.net>                        |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #ifndef PHP_IMAP_H
 #define PHP_IMAP_H
@@ -120,86 +116,6 @@ PHP_RINIT_FUNCTION(imap);
 PHP_RSHUTDOWN_FUNCTION(imap);
 PHP_MINFO_FUNCTION(imap);
 
-PHP_FUNCTION(imap_open);
-PHP_FUNCTION(imap_popen);
-PHP_FUNCTION(imap_reopen);
-PHP_FUNCTION(imap_num_msg);
-PHP_FUNCTION(imap_num_recent);
-PHP_FUNCTION(imap_headers);
-PHP_FUNCTION(imap_headerinfo);
-PHP_FUNCTION(imap_rfc822_parse_headers);
-PHP_FUNCTION(imap_body);
-PHP_FUNCTION(imap_fetchstructure);
-PHP_FUNCTION(imap_fetchbody);
-PHP_FUNCTION(imap_fetchmime);
-PHP_FUNCTION(imap_savebody);
-PHP_FUNCTION(imap_gc);
-PHP_FUNCTION(imap_expunge);
-PHP_FUNCTION(imap_delete);
-PHP_FUNCTION(imap_undelete);
-PHP_FUNCTION(imap_check);
-PHP_FUNCTION(imap_close);
-PHP_FUNCTION(imap_mail_copy);
-PHP_FUNCTION(imap_mail_move);
-PHP_FUNCTION(imap_createmailbox);
-PHP_FUNCTION(imap_renamemailbox);
-PHP_FUNCTION(imap_deletemailbox);
-PHP_FUNCTION(imap_listmailbox);
-PHP_FUNCTION(imap_scanmailbox);
-PHP_FUNCTION(imap_subscribe);
-PHP_FUNCTION(imap_unsubscribe);
-PHP_FUNCTION(imap_append);
-PHP_FUNCTION(imap_ping);
-PHP_FUNCTION(imap_base64);
-PHP_FUNCTION(imap_qprint);
-PHP_FUNCTION(imap_8bit);
-PHP_FUNCTION(imap_binary);
-PHP_FUNCTION(imap_mailboxmsginfo);
-PHP_FUNCTION(imap_rfc822_write_address);
-PHP_FUNCTION(imap_rfc822_parse_adrlist);
-PHP_FUNCTION(imap_setflag_full);
-PHP_FUNCTION(imap_clearflag_full);
-PHP_FUNCTION(imap_sort);
-PHP_FUNCTION(imap_fetchheader);
-PHP_FUNCTION(imap_fetchtext);
-PHP_FUNCTION(imap_uid);
-PHP_FUNCTION(imap_msgno);
-PHP_FUNCTION(imap_list);
-PHP_FUNCTION(imap_list_full);
-PHP_FUNCTION(imap_listscan);
-PHP_FUNCTION(imap_lsub);
-PHP_FUNCTION(imap_lsub_full);
-PHP_FUNCTION(imap_create);
-PHP_FUNCTION(imap_rename);
-PHP_FUNCTION(imap_status);
-PHP_FUNCTION(imap_bodystruct);
-PHP_FUNCTION(imap_fetch_overview);
-PHP_FUNCTION(imap_mail_compose);
-PHP_FUNCTION(imap_alerts);
-PHP_FUNCTION(imap_errors);
-PHP_FUNCTION(imap_last_error);
-PHP_FUNCTION(imap_mail);
-PHP_FUNCTION(imap_search);
-PHP_FUNCTION(imap_utf8);
-PHP_FUNCTION(imap_utf7_decode);
-PHP_FUNCTION(imap_utf7_encode);
-#ifdef HAVE_IMAP_MUTF7
-PHP_FUNCTION(imap_utf8_to_mutf7);
-PHP_FUNCTION(imap_mutf7_to_utf8);
-#endif
-PHP_FUNCTION(imap_mime_header_decode);
-PHP_FUNCTION(imap_thread);
-PHP_FUNCTION(imap_timeout);
-
-#if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
-PHP_FUNCTION(imap_get_quota);
-PHP_FUNCTION(imap_get_quotaroot);
-PHP_FUNCTION(imap_set_quota);
-PHP_FUNCTION(imap_setacl);
-PHP_FUNCTION(imap_getacl);
-#endif
-
-
 ZEND_BEGIN_MODULE_GLOBALS(imap)
 	char *imap_user;
 	char *imap_password;
@@ -231,13 +147,15 @@ ZEND_BEGIN_MODULE_GLOBALS(imap)
 #endif
 	/* php_stream for php_mail_gets() */
 	php_stream *gets_stream;
+	zend_bool enable_rsh;
 ZEND_END_MODULE_GLOBALS(imap)
 
-#ifdef ZTS
-# define IMAPG(v) TSRMG(imap_globals_id, zend_imap_globals *, v)
-#else
-# define IMAPG(v) (imap_globals.v)
+#if defined(ZTS) && defined(COMPILE_DL_IMAP)
+ZEND_TSRMLS_CACHE_EXTERN()
 #endif
+
+ZEND_EXTERN_MODULE_GLOBALS(imap)
+#define IMAPG(v) ZEND_MODULE_GLOBALS_ACCESSOR(imap, v)
 
 #else
 

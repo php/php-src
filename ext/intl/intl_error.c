@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -233,7 +231,7 @@ void intl_errors_set_code( intl_error* err, UErrorCode err_code )
 void intl_register_IntlException_class( void )
 {
 	zend_class_entry ce;
-	
+
 	/* Create and register 'IntlException' class. */
 	INIT_CLASS_ENTRY_EX( ce, "IntlException", sizeof( "IntlException" ) - 1, NULL );
 	IntlException_ce_ptr = zend_register_internal_class_ex( &ce,
@@ -280,7 +278,7 @@ smart_str intl_parse_error_to_string( UParseError* pe )
 		}
 		else {
 			smart_str_append( &ret, u8str );
-			zend_string_release( u8str );
+			zend_string_release_ex( u8str, 0 );
 		}
 		smart_str_appends( &ret, "\"" );
 		any = 1;
@@ -300,7 +298,7 @@ smart_str intl_parse_error_to_string( UParseError* pe )
 		else
 		{
 			smart_str_append( &ret, u8str );
-			zend_string_release( u8str );
+			zend_string_release_ex( u8str, 0 );
 		}
 		smart_str_appends( &ret, "\"" );
 		any = 1;
@@ -315,12 +313,3 @@ smart_str intl_parse_error_to_string( UParseError* pe )
 	smart_str_0( &ret );
 	return ret;
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

@@ -10,11 +10,11 @@ PDOTest::skip();
 
 $db = PDOTest::factory();
 if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'pgsql') die('skip pgsql has its own test for this feature');
-if (!$db->getAttribute(PDO::ATTR_EMULATE_PREPARES) && !$db->setAttribute(PDO::ATTR_EMULATE_PREPARES, true)) die('skip driver cannot emulate prepared statements');
+if (!@$db->getAttribute(PDO::ATTR_EMULATE_PREPARES) && !@$db->setAttribute(PDO::ATTR_EMULATE_PREPARES, true)) die('skip driver cannot emulate prepared statements');
 ?>
 --FILE--
 <?php
-if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE__) . '/../../pdo/tests/');
+if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../../pdo/tests/');
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 
 $db = PDOTest::factory();

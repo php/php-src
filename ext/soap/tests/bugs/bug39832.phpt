@@ -20,7 +20,7 @@ function Test($x) {
   return $x->priority;
 }
 
-$x = new SoapServer(dirname(__FILE__)."/bug39832.wsdl");
+$x = new SoapServer(__DIR__."/bug39832.wsdl");
 $x->addFunction("Test");
 $x->handle($HTTP_RAW_POST_DATA);
 ?>

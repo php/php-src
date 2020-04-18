@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +13,6 @@
   | Author: Sterling Hughes <sterling@php.net>                           |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifndef PHP_SIMPLEXML_H
 #define PHP_SIMPLEXML_H
@@ -71,12 +67,6 @@ typedef struct {
 	zend_object zo;
 } php_sxe_object;
 
-#ifdef ZTS
-#define SIMPLEXML_G(v) TSRMG(simplexml_globals_id, zend_simplexml_globals *, v)
-#else
-#define SIMPLEXML_G(v) (simplexml_globals.v)
-#endif
-
 #ifdef PHP_WIN32
 #	ifdef PHP_SIMPLEXML_EXPORTS
 #		define PHP_SXE_API __declspec(dllexport)
@@ -90,13 +80,3 @@ typedef struct {
 PHP_SXE_API zend_class_entry *sxe_get_element_class_entry();
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: fdm=marker
- * vim: noet sw=4 ts=4
- */

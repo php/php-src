@@ -2,9 +2,8 @@
 ZipArchive::setEncryption*() functions
 --SKIPIF--
 <?php
-/* $Id$ */
 if (!extension_loaded('zip')) die('skip');
-if (!method_exists('ZipArchive', 'setEncryptionName')) die('skip encrytion not supported');
+if (!method_exists('ZipArchive', 'setEncryptionName')) die('skip encryption not supported');
 ?>
 --FILE--
 <?php
@@ -16,7 +15,7 @@ echo "== Write\n";
 $zip  = new ZipArchive;
 $r = $zip->open($name, ZIPARCHIVE::CREATE);
 // Clear
-$zip->addFromString('foo.txt', 'foo'); 
+$zip->addFromString('foo.txt', 'foo');
 // Encrypted
 $zip->addFromString('bar.txt', 'bar');
 var_dump($zip->setEncryptionName('bar.txt', 9999, $pass)); // Fails
@@ -60,7 +59,7 @@ string(3) "bar"
 == Stream
 string(3) "foo"
 
-Warning: file_get_contents(%s): failed to open stream: operation failed in %s on line %d
+Warning: file_get_contents(%s): Failed to open stream: operation failed in %s on line %d
 bool(false)
 string(3) "bar"
 == Done

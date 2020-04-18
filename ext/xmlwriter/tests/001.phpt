@@ -3,8 +3,7 @@ XMLWriter: libxml2 XML Writer, file buffer, flush
 --SKIPIF--
 <?php if (!extension_loaded("xmlwriter")) print "skip"; ?>
 --FILE--
-<?php 
-/* $Id$ */
+<?php
 
 $doc_dest = '001.xml';
 $xw = xmlwriter_open_uri($doc_dest);
@@ -16,10 +15,8 @@ xmlwriter_end_document($xw);
 $output_bytes = xmlwriter_flush($xw, true);
 echo file_get_contents($doc_dest);
 unset($xw);
-unlink('001.xml');
+unlink($doc_dest);
 ?>
-===DONE===
 --EXPECT--
 <?xml version="1.0" encoding="UTF-8"?>
 <tag1/>
-===DONE===

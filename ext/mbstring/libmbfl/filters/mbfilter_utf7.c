@@ -75,7 +75,8 @@ const struct mbfl_convert_vtbl vtbl_utf7_wchar = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_utf7_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_utf7 = {
@@ -84,7 +85,8 @@ const struct mbfl_convert_vtbl vtbl_wchar_utf7 = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_wchar_utf7,
-	mbfl_filt_conv_wchar_utf7_flush
+	mbfl_filt_conv_wchar_utf7_flush,
+	NULL,
 };
 
 
@@ -296,9 +298,7 @@ int mbfl_filt_conv_wchar_utf7(int c, mbfl_convert_filter *filter)
 		CK((*filter->filter_function)(s, filter));
 		return c;
 	} else {
-		if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-			CK(mbfl_filt_conv_illegal_output(c, filter));
-		}
+		CK(mbfl_filt_conv_illegal_output(c, filter));
 		return c;
 	}
 
@@ -463,5 +463,3 @@ static int mbfl_filt_ident_utf7(int c, mbfl_identify_filter *filter)
 
 	return c;
 }
-
-

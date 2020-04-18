@@ -4,13 +4,12 @@ $http_reponse_header (header with trailing whitespace)
 <?php require 'server.inc'; http_server_skipif('tcp://127.0.0.1:22349'); ?>
 --INI--
 allow_url_fopen=1
-allow_url_include=1
 --FILE--
 <?php
 require 'server.inc';
 
 $responses = array(
-	"data://text/plain,HTTP/1.0 200 Ok\r\nSome:   Header   \r\n\r\nBody",
+    "data://text/plain,HTTP/1.0 200 Ok\r\nSome:   Header   \r\n\r\nBody",
 );
 
 $pid = http_server("tcp://127.0.0.1:22349", $responses, $output);
@@ -24,7 +23,6 @@ test();
 
 http_server_kill($pid);
 ?>
-==DONE==
 --EXPECT--
 string(4) "Body"
 array(2) {
@@ -33,5 +31,3 @@ array(2) {
   [1]=>
   string(14) "Some:   Header"
 }
-==DONE==
-

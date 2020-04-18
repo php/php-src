@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -193,14 +191,14 @@ PHPDBG_API int phpdbg_mixed_read(int sock, char *ptr, int len, int tmo) {
 static int phpdbg_output_pager(int sock, const char *ptr, int len) {
 	int count = 0, bytes = 0;
 	const char *p = ptr, *endp = ptr + len;
-	
+
 	while ((p = memchr(p, '\n', endp - p))) {
 		count++;
 		p++;
-		
+
 		if (count % PHPDBG_G(lines) == 0) {
 			bytes += write(sock, ptr + bytes, (p - ptr) - bytes);
-			
+
 			if (memchr(p, '\n', endp - p)) {
 				char buf[PHPDBG_MAX_CMD];
 				zend_quiet_write(sock, ZEND_STRL("\r---Type <return> to continue or q <return> to quit---"));
@@ -208,7 +206,7 @@ static int phpdbg_output_pager(int sock, const char *ptr, int len) {
 				if (*buf == 'q') {
 					break;
 				}
-				write(sock, "\r", 1);
+				zend_quiet_write(sock, "\r", 1);
 			} else break;
 		}
 	}
@@ -224,7 +222,7 @@ PHPDBG_API int phpdbg_mixed_write(int sock, const char *ptr, int len) {
 	if (PHPDBG_G(flags) & PHPDBG_IS_REMOTE) {
 		return phpdbg_send_bytes(sock, ptr, len);
 	}
-	
+
 	if ((PHPDBG_G(flags) & PHPDBG_HAS_PAGINATION)
 	 && !(PHPDBG_G(flags) & PHPDBG_WRITE_XML)
 	 && PHPDBG_G(io)[PHPDBG_STDOUT].fd == sock
@@ -290,7 +288,7 @@ PHPDBG_API int phpdbg_create_listenable_socket(const char *addr, unsigned short 
 			}
 		}
 
-		snprintf(port_buf, 7, "%u", port);
+		snprintf(port_buf, sizeof(port_buf), "%u", port);
 		if (!any_addr) {
 			rc = getaddrinfo(addr, port_buf, &hints, &res);
 		} else {
@@ -301,20 +299,18 @@ PHPDBG_API int phpdbg_create_listenable_socket(const char *addr, unsigned short 
 #ifndef PHP_WIN32
 			if (rc == EAI_SYSTEM) {
 				char buf[128];
-				int wrote;
 
-				wrote = snprintf(buf, 128, "Could not translate address '%s'", addr);
-				buf[wrote] = '\0';
+				snprintf(buf, sizeof(buf), "Could not translate address '%s'", addr);
+
 				zend_quiet_write(PHPDBG_G(io)[PHPDBG_STDERR].fd, buf, strlen(buf));
 
 				return sock;
 			} else {
 #endif
 				char buf[256];
-				int wrote;
 
-				wrote = snprintf(buf, 256, "Host '%s' not found. %s", addr, estrdup(gai_strerror(rc)));
-				buf[wrote] = '\0';
+				snprintf(buf, sizeof(buf), "Host '%s' not found. %s", addr, estrdup(gai_strerror(rc)));
+
 				zend_quiet_write(PHPDBG_G(io)[PHPDBG_STDERR].fd, buf, strlen(buf));
 
 				return sock;
@@ -324,13 +320,10 @@ PHPDBG_API int phpdbg_create_listenable_socket(const char *addr, unsigned short 
 			return sock;
 		}
 
-		if((sock = socket(res->ai_family, res->ai_socktype, res->ai_protocol)) == -1) {
-			char buf[128];
-			int wrote;
+		if ((sock = socket(res->ai_family, res->ai_socktype, res->ai_protocol)) == -1) {
+			const char *msg = "Unable to create socket";
 
-			wrote = sprintf(buf, "Unable to create socket");
-			buf[wrote] = '\0';
-			zend_quiet_write(PHPDBG_G(io)[PHPDBG_STDERR].fd, buf, strlen(buf));
+			zend_quiet_write(PHPDBG_G(io)[PHPDBG_STDERR].fd, msg, strlen(msg));
 
 			return sock;
 		}
@@ -358,4 +351,3 @@ PHPDBG_API void phpdbg_close_socket(int sock) {
 #endif
 	}
 }
-

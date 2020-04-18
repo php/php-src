@@ -11,17 +11,17 @@ $it = new CachingIterator($it, CachingIterator::FULL_CACHE);
 
 foreach($it as $k=>$v)
 {
-	echo "$k=>$v\n";
+    echo "$k=>$v\n";
 }
 
 echo "===CHECK===\n";
 
 for ($i = 0; $i < 4; $i++)
 {
-	if (isset($it[$i]))
-	{
-		var_dump($i, $it[$i]);
-	}
+    if (isset($it[$i]))
+    {
+        var_dump($i, $it[$i]);
+    }
 }
 
 $it[2] = 'foo';
@@ -51,8 +51,6 @@ var_dump(isset($it[2])); // unset
 var_dump(isset($it[3])); // deleted
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 0=>1
 1=>2
@@ -80,4 +78,3 @@ bool(true)
 bool(false)
 bool(false)
 bool(false)
-===DONE===

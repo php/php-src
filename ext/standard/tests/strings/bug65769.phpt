@@ -15,18 +15,21 @@ if (PHP_WINDOWS_VERSION_MAJOR < 10) {
 $locales = array('sve', 'french', 'us', 'ru', 'czech', 'serbian');
 
 foreach ($locales as $locale) {
-	$locale = setlocale(LC_ALL, $locale);
-	$lconv = localeconv();
-	var_dump(
-		$locale,
-		$lconv['decimal_point'],
-		$lconv['thousands_sep'],
-		$lconv['int_curr_symbol'],
-		$lconv['currency_symbol'],
-		$lconv['mon_decimal_point'],
-		$lconv['mon_thousands_sep']
-	);
-	echo '++++++++++++++++++++++', "\n";
+    $locale = setlocale(LC_ALL, $locale);
+    $lconv = localeconv();
+    var_dump(
+        $locale,
+        $lconv['decimal_point'],
+        $lconv['thousands_sep'],
+        $lconv['int_curr_symbol'],
+        $lconv['currency_symbol'],
+        $lconv['mon_decimal_point'],
+        $lconv['mon_thousands_sep']
+    );
+    if ($locale === 'Swedish_Sweden.1252') {
+        var_dump(in_array($lconv['mon_thousands_sep'], ['.', ' ']));
+    }
+    echo '++++++++++++++++++++++', "\n";
 }
 
 ?>
@@ -38,7 +41,8 @@ string(1) " "
 string(3) "SEK"
 string(2) "kr"
 string(1) ","
-string(1) "."
+string(1) "%c"
+bool(true)
 ++++++++++++++++++++++
 string(18) "French_France.1252"
 string(1) ","
@@ -64,7 +68,7 @@ string(1) "?"
 string(1) ","
 string(1) " "
 ++++++++++++++++++++++
-string(25) "Czech_Czech Republic.1250"
+string(%d) "Czech_Czech%s.1250"
 string(1) ","
 string(1) " "
 string(3) "CZK"

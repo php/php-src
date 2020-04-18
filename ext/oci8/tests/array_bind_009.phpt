@@ -5,13 +5,13 @@ oci_bind_array_by_name() and invalid values 9
 --FILE--
 <?php
 
-require dirname(__FILE__).'/connect.inc';
+require __DIR__.'/connect.inc';
 
 var_dump(oci_bind_array_by_name($c, ":c1", $array, 5, 5, SQLT_CHR));
-
-echo "Done\n";
 ?>
---EXPECTF--	
-Warning: oci_bind_array_by_name(): supplied resource is not a valid oci8 statement resource in %s on line %d
-bool(false)
-Done
+--EXPECTF--
+Fatal error: Uncaught TypeError: oci_bind_array_by_name(): supplied resource is not a valid oci8 statement resource in %s:%d
+Stack trace:
+#0 %s: oci_bind_array_by_name(%s)
+#1 {main}
+  thrown in %s on line %d

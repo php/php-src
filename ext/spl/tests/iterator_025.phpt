@@ -5,15 +5,15 @@ SPL: RecursiveIteratorIterator and begin/endIteration()
 
 class MyRecursiveIteratorIterator extends RecursiveIteratorIterator
 {
-	function beginIteration()
-	{
-		echo __METHOD__ . "()\n";
-	}
-	
-	function endIteration()
-	{
-		echo __METHOD__ . "()\n";
-	}
+    function beginIteration()
+    {
+        echo __METHOD__ . "()\n";
+    }
+
+    function endIteration()
+    {
+        echo __METHOD__ . "()\n";
+    }
 }
 
 $ar = array(1, 2, array(31, 32, array(331)), 4);
@@ -37,20 +37,18 @@ echo "===MANUAL===\n";
 $it->rewind();
 while($it->valid())
 {
-	echo $it->current() . "\n";
-	$it->next();
-	break;
+    echo $it->current() . "\n";
+    $it->next();
+    break;
 }
 $it->rewind();
 while($it->valid())
 {
-	echo $it->current() . "\n";
-	$it->next();
+    echo $it->current() . "\n";
+    $it->next();
 }
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 MyRecursiveIteratorIterator::beginIteration()
 1
@@ -89,4 +87,3 @@ MyRecursiveIteratorIterator::beginIteration()
 331
 4
 MyRecursiveIteratorIterator::endIteration()
-===DONE===

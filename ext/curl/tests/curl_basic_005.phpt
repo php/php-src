@@ -19,21 +19,19 @@ TestFest 2009 - AFUP - Jean-Marc Fontaine <jmf@durcommefaire.net>
   // start testing
   echo '*** Testing curl with user agent ***' . "\n";
 
-  $url = "{$host}/get.php?test=useragent";
+  $url = "{$host}/get.inc?test=useragent";
   $ch = curl_init();
 
   ob_start(); // start output buffering
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
   curl_setopt($ch, CURLOPT_USERAGENT, 'cURL phpt');
   curl_setopt($ch, CURLOPT_URL, $url); //set the url we want to use
-  
+
   $curl_content = curl_exec($ch);
   curl_close($ch);
 
   var_dump( $curl_content );
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing curl with user agent ***
 string(9) "cURL phpt"
-===DONE===

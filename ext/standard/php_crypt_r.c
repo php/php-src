@@ -1,9 +1,6 @@
-/* $Id$ */
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -155,9 +152,7 @@ char * php_md5_crypt_r(const char *pw, const char *salt, char *out) {
 	}
 
 	/* It stops at the first '$', max 8 chars */
-	for (ep = sp; *ep != '\0' && *ep != '$' && ep < (sp + 8); ep++) {
-		continue;
-	}
+	for (ep = sp; *ep != '\0' && *ep != '$' && ep < (sp + 8); ep++);
 
 	/* get the length of the true salt */
 	sl = (DWORD)(ep - sp);
@@ -336,8 +331,7 @@ char * php_md5_crypt_r(const char *pw, const char *salt, char *out)
 		sp += MD5_MAGIC_LEN;
 
 	/* It stops at the first '$', max 8 chars */
-	for (ep = sp; *ep != '\0' && *ep != '$' && ep < (sp + 8); ep++)
-		continue;
+	for (ep = sp; *ep != '\0' && *ep != '$' && ep < (sp + 8); ep++);
 
 	/* get the length of the true salt */
 	sl = ep - sp;
@@ -425,4 +419,3 @@ char * php_md5_crypt_r(const char *pw, const char *salt, char *out)
 #undef MD5_MAGIC
 #undef MD5_MAGIC_LEN
 #endif
-

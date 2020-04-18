@@ -1,13 +1,13 @@
 --TEST--
-Test pathinfo() function : usage variation 
+Test pathinfo() function : usage variation
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
 /* Prototype  : array pathinfo(string path[, int options])
- * Description: Returns information about a certain string 
+ * Description: Returns information about a certain string
  * Source code: ext/standard/string.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing pathinfo() : usage variation ***\n";
@@ -32,7 +32,6 @@ var_dump(pathinfo($testfile, PATHINFO_DIRNAME|PATHINFO_BASENAME));
 
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing pathinfo() : usage variation ***
 array(4) {
@@ -77,4 +76,3 @@ string(17) "/usr/include/arpa"
 string(6) "inet.h"
 string(17) "/usr/include/arpa"
 string(17) "/usr/include/arpa"
-===DONE===

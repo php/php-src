@@ -5,9 +5,6 @@ phpinfo()
 var_dump(phpinfo());
 
 echo "--\n";
-var_dump(phpinfo(array()));
-
-echo "--\n";
 var_dump(phpinfo(0));
 
 echo "--\n";
@@ -33,7 +30,7 @@ Zend Extension => %d
 Zend Extension Build => API%s
 PHP Extension Build => API%s
 Debug Build => %s
-Thread Safety => %s
+Thread Safety => %s%A
 Zend Signal Handling => %s
 Zend Memory Manager => %s
 Zend Multibyte Support => %s
@@ -61,10 +58,6 @@ PHP Variables
 PHP License
 %A
 bool(true)
---
-
-Warning: phpinfo() expects parameter 1 to be integer, array given in %sphpinfo.php on line 5
-NULL
 --
 phpinfo()
 bool(true)

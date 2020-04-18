@@ -24,7 +24,7 @@ $file_content_types = array( "text_with_new_line","alphanumeric");
 $whence_set = array(SEEK_SET,SEEK_CUR,SEEK_END);
 $whence_string = array("SEEK_SET", "SEEK_CUR", "SEEK_END");
 
-$filename = dirname(__FILE__)."/fseek_ftell_rewind_basic1.tmp"; // this is name of the file created by create_files()
+$filename = __DIR__."/fseek_ftell_rewind_basic1.tmp"; // this is name of the file created by create_files()
   /* open the file using $files_modes and perform fseek(),ftell() and rewind() on it */
 foreach($file_content_types as $file_content_type){
   echo "\n-- File having data of type ". $file_content_type ." --\n";
@@ -32,7 +32,7 @@ foreach($file_content_types as $file_content_type){
   foreach($file_modes as $file_mode) {
     echo "-- File opened in mode ".$file_mode." --\n";
 
-    create_files ( dirname(__FILE__), 1, $file_content_type, 0755, 512, "w", "fseek_ftell_rewind_basic"
+    create_files ( __DIR__, 1, $file_content_type, 0755, 512, "w", "fseek_ftell_rewind_basic"
                       ,1,"bytes",".tmp"); //create a file with 512 bytes size
     $file_handle = fopen($filename, $file_mode);
     if (!$file_handle) {
@@ -42,7 +42,7 @@ foreach($file_content_types as $file_content_type){
     // set the file pointer to 0
     var_dump( rewind($file_handle) ); // Confirm file pointer moves correctly
     var_dump( ftell($file_handle) ); // confirm the file pointer position
- 
+
     foreach($whence_set as $whence){
       echo "-- Testing fseek() with whence = $whence_string[$whence] --\n";
       var_dump( fseek($file_handle,10,$whence) ); //expecting int(0)
@@ -60,7 +60,7 @@ foreach($file_content_types as $file_content_type){
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fseek(), ftell(), rewind() : basic operations ***
 
 -- File having data of type text_with_new_line --

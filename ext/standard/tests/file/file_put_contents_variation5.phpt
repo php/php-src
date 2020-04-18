@@ -6,12 +6,12 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 <?php
 
 
-$thisTestDir = dirname(__FILE__) . '/' .basename(__FILE__, ".php") . ".directory";
+$thisTestDir = __DIR__ . '/' .basename(__FILE__, ".php") . ".directory";
 mkdir($thisTestDir);
 chdir($thisTestDir);
 
-$filename = basename(__FILE__, ".php") . ".tmp"; 
-$scriptLocFile = dirname(__FILE__)."/".$filename;
+$filename = basename(__FILE__, ".php") . ".tmp";
+$scriptLocFile = __DIR__."/".$filename;
 
 $newpath = "rubbish";
 set_include_path($newpath);
@@ -24,7 +24,7 @@ runtest();
 set_include_path(";;  ; ;c:\\rubbish");
 runtest();
 
-chdir(dirname(__FILE__));
+chdir(__DIR__);
 rmdir($thisTestDir);
 
 
@@ -35,16 +35,14 @@ function runtest() {
       echo "Fail - this is PHP52 behaviour\n";
       unlink($scriptLocFile);
    }else {
-      $line = file_get_contents($filename); 
+      $line = file_get_contents($filename);
       echo "$line\n";
-      unlink($filename);     
+      unlink($filename);
    }
 }
 ?>
-===DONE===
 --EXPECT--
 File written in working directory
 File written in working directory
 File written in working directory
 File written in working directory
-===DONE===

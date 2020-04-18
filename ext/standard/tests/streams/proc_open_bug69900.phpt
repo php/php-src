@@ -5,8 +5,8 @@ Bug #69900 Commandline input/output weird behaviour with STDIO
 
 error_reporting(E_ALL);
 
-$fl = dirname(__FILE__) . DIRECTORY_SEPARATOR . "test69900.php";
-$max_ms = ((bool)getenv('TRAVIS')) ? 10 : 1;
+$fl = __DIR__ . DIRECTORY_SEPARATOR . "test69900.php";
+$max_ms = 10;
 
 $test_content = '<?php
 
@@ -14,7 +14,7 @@ $in = fopen("php://stdin", "rb", false, stream_context_create(array("pipe" => ar
 
 while(!feof($in)){
 $s = fgets($in);
-	fwrite(STDOUT, $s);
+    fwrite(STDOUT, $s);
 }
 
 ?>';
@@ -25,16 +25,21 @@ $pipes = array();
 
 $process = proc_open(PHP_BINARY.' -n -f ' . $fl, $descriptorspec, $pipes, NULL, NULL, array("blocking_pipes" => true));
 
+$moreThanLimit = 0;
 for($i = 0; $i < 10; $i++){
-	fwrite($pipes[0], "hello$i\r\n");
-	fflush($pipes[0]);
+    fwrite($pipes[0], "hello$i\r\n");
+    fflush($pipes[0]);
 
-	$t0 = microtime(1);
-	$s = fgets($pipes[1]);
-	$t1 = microtime(1);
+    $t0 = microtime(1);
+    $s = fgets($pipes[1]);
+    $t1 = microtime(1);
 
-	echo $s;		
-	echo "fgets() took ", (($t1 - $t0)*1000 > $max_ms ? 'more' : 'less'), " than $max_ms ms\n";
+    echo $s;
+
+    $dt_ms = ($t1 - $t0)*1000;
+    if ($dt_ms > $max_ms) {
+        $moreThanLimit++;
+    }
 }
 
 fclose($pipes[0]);
@@ -42,32 +47,26 @@ fclose($pipes[1]);
 
 proc_close($process);
 
+/* It is expected that the first call takes more than the limit.
+ * Allow one more to account for a possible process switch. */
+if ($moreThanLimit > 2) {
+    echo "fgets() took more than $max_ms ms $moreThanLimit times\n";
+}
+
 ?>
-===DONE===
 --CLEAN--
 <?php
-$fl = dirname(__FILE__) . DIRECTORY_SEPARATOR . "test69900.php";
+$fl = __DIR__ . DIRECTORY_SEPARATOR . "test69900.php";
 @unlink($fl);
 ?>
---EXPECTF--
+--EXPECT--
 hello0
-fgets() took more than %d ms
 hello1
-fgets() took less than %d ms
 hello2
-fgets() took less than %d ms
 hello3
-fgets() took less than %d ms
 hello4
-fgets() took less than %d ms
 hello5
-fgets() took less than %d ms
 hello6
-fgets() took less than %d ms
 hello7
-fgets() took less than %d ms
 hello8
-fgets() took less than %d ms
 hello9
-fgets() took less than %d ms
-===DONE===

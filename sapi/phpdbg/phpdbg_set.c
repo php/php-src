@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -74,7 +72,7 @@ PHPDBG_SET(pagination) /* {{{ */
 		default:
 			phpdbg_error("setpagination", "type=\"wrongargs\"", "set pagination used incorrectly: set pagination <on|off>");
 	}
-	
+
 	return SUCCESS;
 } /* }}} */
 
@@ -90,7 +88,7 @@ PHPDBG_SET(lines) /* {{{ */
 		default:
 			phpdbg_error("setlines", "type=\"wrongargs\"", "set lines used incorrectly: set lines <number>");
 	}
-	
+
 	return SUCCESS;
 } /* }}} */
 

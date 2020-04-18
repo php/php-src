@@ -5,12 +5,12 @@ Bind with SQLT_INT
 --FILE--
 <?php
 
-require(dirname(__FILE__).'/connect.inc');
+require(__DIR__.'/connect.inc');
 
 // Initialization
 
 $stmtarray = array(
-	"drop table bind_sqltint_tab",
+    "drop table bind_sqltint_tab",
 
     "create table bind_sqltint_tab (
         id                number,
@@ -208,15 +208,13 @@ var_dump($p2);
 // Clean up
 
 $stmtarray = array(
-	"drop table bind_sqltint_tab"
+    "drop table bind_sqltint_tab"
 );
 
 oci8_test_sql_execute($c, $stmtarray);
 
 ?>
-===DONE===
-<?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 TEST141 wrong bind type SQLT_INT
 array(1) {
   ["VARCHAR2_T10"]=>
@@ -333,4 +331,3 @@ int(4444)
 
 TEST159
 int(5555)
-===DONE===

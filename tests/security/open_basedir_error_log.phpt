@@ -42,4 +42,3 @@ bool(false)
 string(0) ""
 string(%d) "%s/test/ok/ok.txt"
 *** Finished testing open_basedir configuration [error_log] ***
-

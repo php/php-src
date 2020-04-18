@@ -16,45 +16,45 @@ if(substr(PHP_OS, 0, 3) == "WIN")
 echo "*** Testing basic functions of pathinfo() ***\n";
 
 $paths = array (
-				'',
- 			' ',
-			'c:',
-			'c:\\',
-			'c:/',
-			'afile',
-			'c:\test\adir',
-			'c:\test\adir\\',
-			'/usr/include/arpa',
-			'/usr/include/arpa/',
-			'usr/include/arpa',
-			'usr/include/arpa/',			
-			'c:\test\afile',
-			'c:\\test\\afile',
-			'c://test//afile',
-			'c:\test\afile\\',
-			'c:\test\prog.exe',
-			'c:\\test\\prog.exe',
-			'c:/test/prog.exe',			
-			'/usr/include/arpa/inet.h',
-			'//usr/include//arpa/inet.h',
-			'\\',
-			'\\\\',
-			'/',
-			'//',
-			'///',
-			'/usr/include/arpa/inet.h',
-			'c:\windows/system32\drivers/etc\hosts',
-			'/usr\include/arpa\inet.h',
-			'   c:\test\adir\afile.txt',
-			'c:\test\adir\afile.txt   ',
-			'   c:\test\adir\afile.txt   ',
-			'   /usr/include/arpa/inet.h',
-			'/usr/include/arpa/inet.h   ',
-			'   /usr/include/arpa/inet.h   ',
-			' c:',
-			'		c:\test\adir\afile.txt',
-			'/usr',
-			'/usr/'
+                '',
+            ' ',
+            'c:',
+            'c:\\',
+            'c:/',
+            'afile',
+            'c:\test\adir',
+            'c:\test\adir\\',
+            '/usr/include/arpa',
+            '/usr/include/arpa/',
+            'usr/include/arpa',
+            'usr/include/arpa/',
+            'c:\test\afile',
+            'c:\\test\\afile',
+            'c://test//afile',
+            'c:\test\afile\\',
+            'c:\test\prog.exe',
+            'c:\\test\\prog.exe',
+            'c:/test/prog.exe',
+            '/usr/include/arpa/inet.h',
+            '//usr/include//arpa/inet.h',
+            '\\',
+            '\\\\',
+            '/',
+            '//',
+            '///',
+            '/usr/include/arpa/inet.h',
+            'c:\windows/system32\drivers/etc\hosts',
+            '/usr\include/arpa\inet.h',
+            '   c:\test\adir\afile.txt',
+            'c:\test\adir\afile.txt   ',
+            '   c:\test\adir\afile.txt   ',
+            '   /usr/include/arpa/inet.h',
+            '/usr/include/arpa/inet.h   ',
+            '   /usr/include/arpa/inet.h   ',
+            ' c:',
+            '		c:\test\adir\afile.txt',
+            '/usr',
+            '/usr/'
 );
 
 $counter = 1;
@@ -71,7 +71,7 @@ foreach($paths as $path) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing basic functions of pathinfo() ***
 -- Iteration 1 --
 string(0) ""
@@ -607,4 +607,3 @@ array(3) {
   string(3) "usr"
 }
 Done
-

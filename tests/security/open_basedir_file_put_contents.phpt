@@ -31,27 +31,26 @@ bool(true)
 
 Warning: file_put_contents(): open_basedir restriction in effect. File(../bad/bad.txt) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: file_put_contents(../bad/bad.txt): failed to open stream: %s in %s on line %d
+Warning: file_put_contents(../bad/bad.txt): Failed to open stream: %s in %s on line %d
 bool(false)
 
 Warning: file_put_contents(): open_basedir restriction in effect. File(.././bad/bad.txt) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: file_put_contents(.././bad/bad.txt): failed to open stream: %s in %s on line %d
+Warning: file_put_contents(.././bad/bad.txt): Failed to open stream: %s in %s on line %d
 bool(false)
 
 Warning: file_put_contents(): open_basedir restriction in effect. File(../bad/../bad/bad.txt) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: file_put_contents(../bad/../bad/bad.txt): failed to open stream: %s in %s on line %d
+Warning: file_put_contents(../bad/../bad/bad.txt): Failed to open stream: %s in %s on line %d
 bool(false)
 
 Warning: file_put_contents(): open_basedir restriction in effect. File(./.././bad/bad.txt) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: file_put_contents(./.././bad/bad.txt): failed to open stream: %s in %s on line %d
+Warning: file_put_contents(./.././bad/bad.txt): Failed to open stream: %s in %s on line %d
 bool(false)
 
 Warning: file_put_contents(): open_basedir restriction in effect. File%s/test/bad/bad.txt) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: file_put_contents%s/test/bad/bad.txt): failed to open stream: %s in %s on line %d
+Warning: file_put_contents%s/test/bad/bad.txt): Failed to open stream: %s in %s on line %d
 bool(false)
 *** Finished testing open_basedir configuration [file_put_contents] ***
-

@@ -1,7 +1,7 @@
 --TEST--
 Bug #73127 (gost-crypto hash incorrect if input data contains long 0xFF sequence)
 --FILE--
-<?php // $Id$
+<?php
 
 $test1 = str_repeat("\xFF", 40);
 $test2 = str_repeat("\x00", 40);

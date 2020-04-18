@@ -4,17 +4,17 @@ Bug #32660 (Assignment by reference causes crash when field access is overloaded
 <?php
 class A
 {
-	public $q;
+    public $q;
 
-	function __construct()
-	{
-		$this->q = 3;//array();
-	}
+    function __construct()
+    {
+        $this->q = 3;//array();
+    }
 
-	function __get($name)
-	{
-		return $this->q;
-	}
+    function __get($name)
+    {
+        return $this->q;
+    }
 }
 
 $a = new A;

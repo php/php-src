@@ -3,21 +3,21 @@ Bug #55871 (Interruption in substr_replace()) (PHP7)
 --FILE--
 <?php
 class test1 {
-	public function __toString() {
-		preg_match('//', '', $GLOBALS['my_var']);
-		return '';
-	}
+    public function __toString() {
+        preg_match('//', '', $GLOBALS['my_var']);
+        return '';
+    }
 }
 
 class test2 {
         public function __toString() {
-		$GLOBALS['my_var'] += 0x08048000;
+        $GLOBALS['my_var'] += 0x08048000;
                 return '';
         }
 }
 
 class test3 {
-        public function __toString() {                
+        public function __toString() {
                 $GLOBALS['my_var'] .= "AAAAAAAA";
                 return '';
         }

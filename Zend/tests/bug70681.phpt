@@ -12,5 +12,5 @@ var_dump($c("foo"));
 
 ?>
 --EXPECTF--
-Warning: Cannot unbind $this of internal method in %s on line %d
+Warning: Cannot unbind $this of method in %s on line %d
 int(3)

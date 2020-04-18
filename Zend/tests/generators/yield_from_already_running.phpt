@@ -4,7 +4,7 @@ Yielding from the already running Generator should fail (bug #69458)
 <?php
 
 function gen() {
-	yield from yield;
+    yield from yield;
 }
 
 ($gen = gen())->send($gen);

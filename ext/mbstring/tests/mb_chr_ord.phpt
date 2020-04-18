@@ -6,17 +6,17 @@ mb_chr() and mb_ord()
 <?php
 ini_set('internal_encoding', 'utf-8');
 for($ch = 1; $ch < 80000; $ch++) {
-	$str = mb_chr($ch);
-	if (false === $str) {
-		echo "ERROR($ch)\n";
-		continue;
-	}
-	if ($ch != mb_ord($str)) {
-		echo "REAL ERROR($ch)\n";
-	}
+    $str = mb_chr($ch);
+    if (false === $str) {
+        echo "ERROR($ch)\n";
+        continue;
+    }
+    if ($ch != mb_ord($str)) {
+        echo "REAL ERROR($ch)\n";
+    }
 }
 echo 'OK';
---EXPECTF--
+--EXPECT--
 ERROR(55296)
 ERROR(55297)
 ERROR(55298)
@@ -2066,4 +2066,3 @@ ERROR(57341)
 ERROR(57342)
 ERROR(57343)
 OK
-

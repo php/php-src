@@ -9,12 +9,11 @@ $s = new SplObjectStorage();
 $o1 = new stdClass();
 
 try {
-	$s->offsetGet($o1);
+    $s->offsetGet($o1);
 } catch (UnexpectedValueException $e) {
-	echo $e->getMessage();
+    echo $e->getMessage();
 }
 
 ?>
 --EXPECT--
 Object not found
-

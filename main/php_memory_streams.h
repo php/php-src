@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +13,6 @@
    | Author: Marcus Boerger <helly@php.net>                               |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #ifndef PHP_MEMORY_STREAM_H
 #define PHP_MEMORY_STREAM_H
@@ -56,21 +52,12 @@ PHPAPI const char *_php_stream_mode_to_str(int mode);
 
 END_EXTERN_C()
 
-extern PHPAPI php_stream_ops php_stream_memory_ops;
-extern PHPAPI php_stream_ops php_stream_temp_ops;
-extern PHPAPI php_stream_ops php_stream_rfc2397_ops;
-extern PHPAPI php_stream_wrapper php_stream_rfc2397_wrapper;
+extern PHPAPI const php_stream_ops php_stream_memory_ops;
+extern PHPAPI const php_stream_ops php_stream_temp_ops;
+extern PHPAPI const php_stream_ops php_stream_rfc2397_ops;
+extern PHPAPI const php_stream_wrapper php_stream_rfc2397_wrapper;
 
 #define PHP_STREAM_IS_MEMORY &php_stream_memory_ops
 #define PHP_STREAM_IS_TEMP   &php_stream_temp_ops
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

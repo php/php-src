@@ -5,17 +5,17 @@ zend.enable_gc=1
 --FILE--
 <?php
 class Foo {
-	public $bar;
-	public $x = array(1,2,3);
-	function __destruct() {
-		if ($this->bar !== null) {
-			$this->x = null;
-			unset($this->bar);
-		}
-	}
+    public $bar;
+    public $x = array(1,2,3);
+    function __destruct() {
+        if ($this->bar !== null) {
+            $this->x = null;
+            unset($this->bar);
+        }
+    }
 }
 class Bar {
-	public $foo;
+    public $foo;
         function __destruct() {
                 if ($this->foo !== null) {
                         unset($this->foo);
@@ -30,6 +30,8 @@ $bar->foo = $foo;
 unset($foo);
 unset($bar);
 var_dump(gc_collect_cycles());
+var_dump(gc_collect_cycles());
 ?>
---EXPECTREGEX--
-int\([23]\)
+--EXPECT--
+int(0)
+int(1)

@@ -1,17 +1,17 @@
 --TEST--
 Bug #42783 (pg_insert() does not support an empty value array)
 --SKIPIF--
-<?php 
+<?php
 require_once('skipif.inc');
 ?>
 --FILE--
 <?php
 
 require_once('config.inc');
-	
+
 $dbh = @pg_connect($conn_str);
 if (!$dbh) {
-	die ("Could not connect to the server");
+    die ("Could not connect to the server");
 }
 
 pg_query("CREATE TABLE php_test (id SERIAL PRIMARY KEY, time TIMESTAMP NOT NULL DEFAULT now())");
@@ -23,7 +23,6 @@ var_dump(pg_fetch_assoc(pg_query("SELECT * FROM php_test")));
 pg_query($dbh, "DROP TABLE php_test");
 pg_close($dbh);
 ?>
-===DONE===
 --EXPECTF--
 array(2) {
   ["id"]=>
@@ -31,4 +30,3 @@ array(2) {
   ["time"]=>
   string(%d) "%s"
 }
-===DONE===

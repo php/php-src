@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | phar:// stream wrapper support                                       |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2005-2017 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -22,7 +22,7 @@
 #include "stream.h"
 #include "dirstream.h"
 
-php_stream_ops phar_ops = {
+const php_stream_ops phar_ops = {
 	phar_stream_write, /* write */
 	phar_stream_read,  /* read */
 	phar_stream_close, /* close */
@@ -34,7 +34,7 @@ php_stream_ops phar_ops = {
 	NULL, /* set option */
 };
 
-php_stream_wrapper_ops phar_stream_wops = {
+const php_stream_wrapper_ops phar_stream_wops = {
 	phar_wrapper_open_url,
 	NULL,                  /* phar_wrapper_close */
 	NULL,                  /* phar_wrapper_stat, */
@@ -48,7 +48,7 @@ php_stream_wrapper_ops phar_stream_wops = {
 	NULL
 };
 
-php_stream_wrapper php_stream_phar_wrapper = {
+const php_stream_wrapper php_stream_phar_wrapper = {
 	&phar_stream_wops,
 	NULL,
 	0 /* is_url */
@@ -61,7 +61,7 @@ php_url* phar_parse_url(php_stream_wrapper *wrapper, const char *filename, const
 {
 	php_url *resource;
 	char *arch = NULL, *entry = NULL, *error;
-	int arch_len, entry_len;
+	size_t arch_len, entry_len;
 
 	if (strlen(filename) < 7 || strncasecmp(filename, "phar://", 7)) {
 		return NULL;
@@ -106,7 +106,7 @@ php_url* phar_parse_url(php_stream_wrapper *wrapper, const char *filename, const
 	if (mode[0] == 'w' || (mode[0] == 'r' && mode[1] == '+')) {
 		phar_archive_data *pphar = NULL, *phar;
 
-		if (PHAR_G(request_init) && PHAR_G(phar_fname_map.u.flags) && NULL == (pphar = zend_hash_find_ptr(&(PHAR_G(phar_fname_map)), resource->host))) {
+		if (PHAR_G(request_init) && HT_IS_INITIALIZED(&PHAR_G(phar_fname_map)) && NULL == (pphar = zend_hash_find_ptr(&(PHAR_G(phar_fname_map)), resource->host))) {
 			pphar = NULL;
 		}
 		if (PHAR_G(readonly) && (!pphar || !pphar->is_data)) {
@@ -229,8 +229,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 				}
 
 				metadata = pzoption;
-				ZVAL_DEREF(metadata);
-				ZVAL_COPY(&idata->internal_file->metadata, metadata);
+				ZVAL_COPY_DEREF(&idata->internal_file->metadata, metadata);
 				idata->phar->is_modified = 1;
 			}
 		}
@@ -362,7 +361,7 @@ static int phar_stream_close(php_stream *stream, int close_handle) /* {{{ */
 /**
  * used for fread($fp) and company on a fopen()ed phar file handle
  */
-static size_t phar_stream_read(php_stream *stream, char *buf, size_t count) /* {{{ */
+static ssize_t phar_stream_read(php_stream *stream, char *buf, size_t count) /* {{{ */
 {
 	phar_entry_data *data = (phar_entry_data *)stream->abstract;
 	size_t got;
@@ -376,13 +375,13 @@ static size_t phar_stream_read(php_stream *stream, char *buf, size_t count) /* {
 
 	if (entry->is_deleted) {
 		stream->eof = 1;
-		return 0;
+		return -1;
 	}
 
 	/* use our proxy position */
 	php_stream_seek(data->fp, data->position + data->zero, SEEK_SET);
 
-	got = php_stream_read(data->fp, buf, MIN(count, entry->uncompressed_filesize - data->position));
+	got = php_stream_read(data->fp, buf, MIN(count, (size_t)(entry->uncompressed_filesize - data->position)));
 	data->position = php_stream_tell(data->fp) - data->zero;
 	stream->eof = (data->position == (zend_off_t) entry->uncompressed_filesize);
 
@@ -437,14 +436,14 @@ static int phar_stream_seek(php_stream *stream, zend_off_t offset, int whence, z
 /**
  * Used for writing to a phar file
  */
-static size_t phar_stream_write(php_stream *stream, const char *buf, size_t count) /* {{{ */
+static ssize_t phar_stream_write(php_stream *stream, const char *buf, size_t count) /* {{{ */
 {
 	phar_entry_data *data = (phar_entry_data *) stream->abstract;
 
 	php_stream_seek(data->fp, data->position, SEEK_SET);
 	if (count != php_stream_write(data->fp, buf, count)) {
 		php_stream_wrapper_log_error(stream->wrapper, stream->flags, "phar error: Could not write %d characters to \"%s\" in phar \"%s\"", (int) count, data->internal_file->filename, data->phar->fname);
-		return 0;
+		return -1;
 	}
 	data->position = php_stream_tell(data->fp);
 	if (data->position > (zend_off_t)data->internal_file->uncompressed_filesize) {
@@ -559,7 +558,7 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, const char *url, int f
 	phar_archive_data *phar;
 	phar_entry_info *entry;
 	uint32_t host_len;
-	int internal_file_len;
+	size_t internal_file_len;
 
 	if ((resource = phar_parse_url(wrapper, url, "r", flags|PHP_STREAM_URL_STAT_QUIET)) == NULL) {
 		return FAILURE;
@@ -597,7 +596,7 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, const char *url, int f
 		php_url_free(resource);
 		return SUCCESS;
 	}
-	if (!phar->manifest.u.flags) {
+	if (!HT_IS_INITIALIZED(&phar->manifest)) {
 		php_url_free(resource);
 		return FAILURE;
 	}
@@ -614,15 +613,15 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, const char *url, int f
 		return SUCCESS;
 	}
 	/* check for mounted directories */
-	if (phar->mounted_dirs.u.flags && zend_hash_num_elements(&phar->mounted_dirs)) {
+	if (HT_IS_INITIALIZED(&phar->mounted_dirs) && zend_hash_num_elements(&phar->mounted_dirs)) {
 		zend_string *str_key;
 
 		ZEND_HASH_FOREACH_STR_KEY(&phar->mounted_dirs, str_key) {
-			if ((int)ZSTR_LEN(str_key) >= internal_file_len || strncmp(ZSTR_VAL(str_key), internal_file, ZSTR_LEN(str_key))) {
+			if (ZSTR_LEN(str_key) >= internal_file_len || strncmp(ZSTR_VAL(str_key), internal_file, ZSTR_LEN(str_key))) {
 				continue;
 			} else {
 				char *test;
-				int test_len;
+				size_t test_len;
 				php_stream_statbuf ssbi;
 
 				if (NULL == (entry = zend_hash_find_ptr(&phar->manifest, str_key))) {
@@ -907,7 +906,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 				entry->filename = estrndup(ZSTR_VAL(new_str_key), ZSTR_LEN(new_str_key));
 				entry->filename_len = ZSTR_LEN(new_str_key);
 
-				zend_string_release(str_key);
+				zend_string_release_ex(str_key, 0);
 				b->h = zend_string_hash_val(new_str_key);
 				b->key = new_str_key;
 			}
@@ -925,7 +924,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 				memcpy(ZSTR_VAL(new_str_key) + to_len, ZSTR_VAL(str_key) + from_len, ZSTR_LEN(str_key) - from_len);
 				ZSTR_VAL(new_str_key)[ZSTR_LEN(new_str_key)] = 0;
 
-				zend_string_release(str_key);
+				zend_string_release_ex(str_key, 0);
 				b->h = zend_string_hash_val(new_str_key);
 				b->key = new_str_key;
 			}
@@ -943,7 +942,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 				memcpy(ZSTR_VAL(new_str_key) + to_len, ZSTR_VAL(str_key) + from_len, ZSTR_LEN(str_key) - from_len);
 				ZSTR_VAL(new_str_key)[ZSTR_LEN(new_str_key)] = 0;
 
-				zend_string_release(str_key);
+				zend_string_release_ex(str_key, 0);
 				b->h = zend_string_hash_val(new_str_key);
 				b->key = new_str_key;
 			}
@@ -968,12 +967,3 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 	return 1;
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

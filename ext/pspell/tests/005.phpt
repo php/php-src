@@ -4,11 +4,12 @@ pspell configs
 <?php
 if (!extension_loaded('pspell')) die('skip');
 if (!@pspell_new('en')) die('skip English dictionary is not available');
+if (getenv('SKIP_ASAN')) die('skip pspell leaks memory for invalid dicationaries');
 ?>
 --FILE--
 <?php
 
-$wordlist = dirname(__FILE__).'/wordlist.txt';
+$wordlist = __DIR__.'/wordlist.txt';
 
 var_dump(pspell_new_personal(__FILE__, 'en'));
 $p = pspell_new_personal($wordlist, 'en');

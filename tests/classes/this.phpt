@@ -3,14 +3,14 @@ ZE2 $this cannot be exchanged
 --FILE--
 <?php
 
-/* please don't shorten this test. It shows what would happen if 
+/* please don't shorten this test. It shows what would happen if
  * the fatal error would have been a warning.
  */
 class Foo
 {
     function replace($other)
     {
-    	echo __METHOD__ . "\n";
+        echo __METHOD__ . "\n";
         $this = $other;
         print $this->prop;
         print $other->prop;
@@ -18,7 +18,7 @@ class Foo
 
     function indirect($other)
     {
-    	echo __METHOD__ . "\n";
+        echo __METHOD__ . "\n";
         $this = $other;
         $result = $this = $other;
         print $result->prop;
@@ -27,8 +27,8 @@ class Foo
 
     function retrieve(&$other)
     {
-    	echo __METHOD__ . "\n";
-    	$other = $this;
+        echo __METHOD__ . "\n";
+        $other = $this;
     }
 }
 

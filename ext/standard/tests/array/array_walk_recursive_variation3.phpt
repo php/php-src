@@ -3,7 +3,7 @@ Test array_walk_recursive() function : usage variations - 'input' array with dif
 --FILE--
 <?php
 /* Prototype  : bool array_walk_recursive(array $input, string $funcname [, mixed $userdata])
- * Description: Apply a user function to every member of an array 
+ * Description: Apply a user function to every member of an array
  * Source code: ext/standard/array.c
 */
 
@@ -29,11 +29,11 @@ echo "*** Testing array_walk_recursive() : 'input' array with different values**
 
 // different arrays as input
 $input_values = array(
-  
+
        // integer values
 /*1*/  array(array(1, 0, -10), array(023, -041), array(0x5A, 0X1F, -0x6E)),
-  
-       // float value 
+
+       // float value
        array(array(3.4, 0.8, -2.9), array(6.25e2, 8.20E-3)),
 
        // string values
@@ -58,10 +58,10 @@ $input_values = array(
 for($count = 0; $count < count($input_values); $count++) {
   echo "\n-- Iteration ".($count + 1)." --\n";
   var_dump( array_walk_recursive($input_values[$count], "print_value", $count+1));
-}  
+}
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_walk_recursive() : 'input' array with different values***
 
 -- Iteration 1 --

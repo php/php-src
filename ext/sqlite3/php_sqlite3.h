@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +14,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef PHP_SQLITE3_H
 #define PHP_SQLITE3_H
 
@@ -28,27 +24,18 @@ extern zend_module_entry sqlite3_module_entry;
 
 ZEND_BEGIN_MODULE_GLOBALS(sqlite3)
 	char *extension_dir;
+	int dbconfig_defensive;
 ZEND_END_MODULE_GLOBALS(sqlite3)
 
-#ifdef ZTS
-# define SQLITE3G(v) TSRMG(sqlite3_globals_id, zend_sqlite3_globals *, v)
-# ifdef COMPILE_DL_SQLITE3
+#if defined(ZTS) && defined(COMPILE_DL_SQLITE3)
 ZEND_TSRMLS_CACHE_EXTERN()
-# endif
-#else
-# define SQLITE3G(v) (sqlite3_globals.v)
 #endif
+
+ZEND_EXTERN_MODULE_GLOBALS(sqlite3)
+#define SQLITE3G(v) ZEND_MODULE_GLOBALS_ACCESSOR(sqlite3, v)
 
 #define PHP_SQLITE3_ASSOC	1<<0
 #define PHP_SQLITE3_NUM		1<<1
 #define PHP_SQLITE3_BOTH	(PHP_SQLITE3_ASSOC|PHP_SQLITE3_NUM)
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */

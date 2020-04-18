@@ -26,4 +26,3 @@ catch (DOMException $e) {
 ?>
 --EXPECT--
 Test failed!
-

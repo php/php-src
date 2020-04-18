@@ -2,12 +2,12 @@
 Test imap_close() function : error conditions - incorrect number of args
 --SKIPIF--
 <?php
-require_once (dirname(__FILE__).'/skipif.inc');
+require_once (__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
 /* Prototype  : bool imap_close(resource $stream_id [, int $options])
- * Description: Close an IMAP stream 
+ * Description: Close an IMAP stream
  * Source code: ext/imap/php_imap.c
  */
 
@@ -16,7 +16,7 @@ require_once (dirname(__FILE__).'/skipif.inc');
  */
 
 echo "*** Testing imap_close() : error conditions ***\n";
-require_once(dirname(__FILE__).'/imap_include.inc');
+require_once(__DIR__.'/imap_include.inc');
 
 // Zero arguments
 echo "\n-- Testing imap_close() function with Zero arguments --\n";
@@ -29,7 +29,6 @@ $options = CL_EXPUNGE;
 $extra_arg = 10;
 var_dump( imap_close($stream_id, $options, $extra_arg) );
 ?>
-===DONE===
 --EXPECTF--
 *** Testing imap_close() : error conditions ***
 
@@ -42,4 +41,3 @@ NULL
 
 Warning: imap_close() expects at most 2 parameters, 3 given in %s on line %d
 NULL
-===DONE===

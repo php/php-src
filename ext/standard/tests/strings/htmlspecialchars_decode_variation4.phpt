@@ -21,7 +21,7 @@ $values = array (
   '\r\tRoy&#039;s height &gt\r; Sam\t&#039;s height',
   '\n 1\t3 &\tgt; 11 but 11 &\tlt; 12',
 );
-  
+
 // loop through each element of the values array to check htmlspecialchars_decode() function with all possible arguments
 $iterator = 1;
 foreach($values as $value) {
@@ -35,7 +35,7 @@ foreach($values as $value) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing htmlspecialchars_decode() : usage variations ***
 -- Iteration 1 --
 string(90) "Roy&#039s height > Sam&#039;s \$height... 1111 &ap; 0000 = 0000... " double quote string ""

@@ -13,7 +13,5 @@ $ch = curl_multi_init();
 curl_multi_close($ch);
 var_dump($ch);
 ?>
-===DONE===
 --EXPECTF--
 resource(%d) of type (Unknown)
-===DONE===

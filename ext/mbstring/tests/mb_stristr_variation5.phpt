@@ -8,9 +8,9 @@ function_exists('mb_stristr') or die("skip mb_stristr() is not available in this
 --FILE--
 <?php
 /* Prototype  : string mb_stristr(string haystack, string needle[, bool part[, string encoding]])
- * Description: Finds first occurrence of a string within another, case insensitive 
+ * Description: Finds first occurrence of a string within another, case insensitive
  * Source code: ext/mbstring/mbstring.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing mb_stristr() : basic functionality ***\n";
@@ -47,7 +47,6 @@ var_dump(bin2hex(mb_stristr($string_mb, $needle_mb_mixed, false)));
 var_dump(bin2hex(mb_stristr($string_mb, $needle_mb_mixed, true)));
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing mb_stristr() : basic functionality ***
 
@@ -66,4 +65,3 @@ string(54) "cebccebdcebece9fcea0cea120cebacebbce9cce9dcebecebfcea0"
 string(8) "cebacebb"
 string(54) "cebccebdcebece9fcea0cea120cebacebbce9cce9dcebecebfcea0"
 string(8) "cebacebb"
-===DONE===

@@ -1,8 +1,8 @@
 --TEST--
-CLI -a and libedit 
+CLI -a and libedit
 --SKIPIF--
-<?php 
-include "skipif.inc"; 
+<?php
+include "skipif.inc";
 if (!extension_loaded('readline') || readline_info('done') !== NULL) {
 	die ("skip need readline support using libedit");
 }
@@ -52,14 +52,14 @@ a_function_w	);
 EOT;
 
 foreach ($codes as $key => $code) {
-	echo "\n--------------\nSnippet no. $key:\n--------------\n";
-	$code = escapeshellarg($code);
-	echo `echo $code | "$php" -a`, "\n";
+    echo "\n--------------\nSnippet no. $key:\n--------------\n";
+    $code = escapeshellarg($code);
+    echo `echo $code | "$php" -a`, "\n";
 }
 
 echo "\nDone\n";
 ?>
---EXPECTF--
+--EXPECT--
 --------------
 Snippet no. 1:
 --------------

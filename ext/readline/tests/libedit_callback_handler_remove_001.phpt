@@ -15,7 +15,7 @@ var_dump(readline_callback_handler_install('testing: ', 'foo'));
 var_dump(readline_callback_handler_remove());
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(false)
 bool(true)
 bool(true)

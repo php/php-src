@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -105,7 +103,7 @@ PHPDBG_INFO(constants) /* {{{ */
 	if (EG(zend_constants)) {
 		phpdbg_try_access {
 			ZEND_HASH_FOREACH_PTR(EG(zend_constants), data) {
-				if (data->module_number == PHP_USER_CONSTANT) {
+				if (ZEND_CONSTANT_MODULE_NUMBER(data) == PHP_USER_CONSTANT) {
 					zend_hash_update_ptr(&consts, data->name, data);
 				}
 			} ZEND_HASH_FOREACH_END();
@@ -343,11 +341,11 @@ PHPDBG_INFO(literal) /* {{{ */
 PHPDBG_INFO(memory) /* {{{ */
 {
 	size_t used, real, peak_used, peak_real;
-	zend_mm_heap *heap;
+	zend_mm_heap *orig_heap = NULL;
 	zend_bool is_mm;
 
 	if (PHPDBG_G(flags) & PHPDBG_IN_SIGNAL_HANDLER) {
-		heap = zend_mm_set_heap(phpdbg_original_heap_sigsafe_mem());
+		orig_heap = zend_mm_set_heap(phpdbg_original_heap_sigsafe_mem());
 	}
 	if ((is_mm = is_zend_mm())) {
 		used = zend_memory_usage(0);
@@ -355,8 +353,8 @@ PHPDBG_INFO(memory) /* {{{ */
 		peak_used = zend_memory_peak_usage(0);
 		peak_real = zend_memory_peak_usage(1);
 	}
-	if (PHPDBG_G(flags) & PHPDBG_IN_SIGNAL_HANDLER) {
-		zend_mm_set_heap(heap);
+	if (orig_heap) {
+		zend_mm_set_heap(orig_heap);
 	}
 
 	if (is_mm) {

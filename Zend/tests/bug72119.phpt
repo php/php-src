@@ -15,5 +15,4 @@ class Hello implements Foo {
 echo "OK\n";
 ?>
 --EXPECTF--
-Fatal error: Declaration of Hello::bar(array $baz = Array) must be compatible with Foo::bar(?array $baz = NULL) in %s on line %d
-
+Fatal error: Declaration of Hello::bar(array $baz = []) must be compatible with Foo::bar(?array $baz = null) in %s on line %d

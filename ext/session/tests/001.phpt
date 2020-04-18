@@ -12,9 +12,9 @@ session.save_handler=files
 error_reporting(E_ALL);
 
 class foo {
-	public $bar = "ok";
+    public $bar = "ok";
 
-	function method() { $this->yes = "done"; }
+    function method() { $this->yes = "done"; }
 }
 
 $baz = new foo;
@@ -33,4 +33,3 @@ print session_encode()."\n";
 session_destroy();
 --EXPECT--
 baz|O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";s:4:"done";}arr|a:1:{i:3;O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";s:4:"done";}}
-

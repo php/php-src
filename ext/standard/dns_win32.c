@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 2008-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -50,8 +48,8 @@ PHP_FUNCTION(dns_get_mx) /* {{{ */
 	DNS_STATUS      status;                 /* Return value of DnsQuery_A() function */
 	PDNS_RECORD     pResult, pRec;          /* Pointer to DNS_RECORD structure */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sz/|z/", &hostname, &hostname_len, &mx_list, &weight_list) == FAILURE) {
-		return;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sz|z", &hostname, &hostname_len, &mx_list, &weight_list) == FAILURE) {
+		RETURN_THROWS();
 	}
 
 	status = DnsQuery_A(hostname, DNS_TYPE_MX, DNS_QUERY_STANDARD, NULL, &pResult, NULL);
@@ -60,12 +58,16 @@ PHP_FUNCTION(dns_get_mx) /* {{{ */
 		RETURN_FALSE;
 	}
 
-	zval_dtor(mx_list);
-	array_init(mx_list);
+	mx_list = zend_try_array_init(mx_list);
+	if (!mx_list) {
+		goto cleanup;
+	}
 
 	if (weight_list) {
-		zval_dtor(weight_list);
-		array_init(weight_list);
+		weight_list = zend_try_array_init(weight_list);
+		if (!weight_list) {
+			goto cleanup;
+		}
 	}
 
 	for (pRec = pResult; pRec; pRec = pRec->pNext) {
@@ -81,6 +83,7 @@ PHP_FUNCTION(dns_get_mx) /* {{{ */
 		}
 	}
 
+cleanup:
 	/* Free memory allocated for DNS records. */
 	DnsRecordListFree(pResult, DnsFreeRecordListDeep);
 
@@ -100,12 +103,12 @@ PHP_FUNCTION(dns_check_record)
 	PDNS_RECORD     pResult;          /* Pointer to DNS_RECORD structure */
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s", &hostname, &hostname_len, &rectype, &rectype_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (hostname_len == 0) {
-		php_error_docref(NULL, E_WARNING, "Host cannot be empty");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
 	}
 
 	if (rectype) {
@@ -352,18 +355,22 @@ PHP_FUNCTION(dns_get_record)
 	int type, type_to_fetch, first_query = 1, store_results = 1;
 	zend_bool raw = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|lz/!z/!b",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|lz!z!b",
 			&hostname, &hostname_len, &type_param, &authns, &addtl, &raw) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (authns) {
-		zval_dtor(authns);
-		array_init(authns);
+		authns = zend_try_array_init(authns);
+		if (!authns) {
+			RETURN_THROWS();
+		}
 	}
 	if (addtl) {
-		zval_dtor(addtl);
-		array_init(addtl);
+		addtl = zend_try_array_init(addtl);
+		if (!addtl) {
+			RETURN_THROWS();
+		}
 	}
 
 	if (!raw) {
@@ -457,7 +464,7 @@ PHP_FUNCTION(dns_get_record)
 					continue;
 				} else {
 					php_error_docref(NULL, E_WARNING, "DNS Query failed");
-					zval_dtor(return_value);
+					zend_array_destroy(Z_ARR_P(return_value));
 					RETURN_FALSE;
 				}
 			}

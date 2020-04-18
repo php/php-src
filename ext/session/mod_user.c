@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,13 +14,11 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #include "php.h"
 #include "php_session.h"
 #include "mod_user.h"
 
-ps_module ps_mod_user = {
+const ps_module ps_mod_user = {
 	PS_MOD_UPDATE_TIMESTAMP(user)
 };
 
@@ -37,7 +33,7 @@ static void ps_call_handler(zval *func, int argc, zval *argv, zval *retval)
 		return;
 	}
 	PS(in_save_handler) = 1;
-	if (call_user_function(EG(function_table), NULL, func, retval, argc, argv) == FAILURE) {
+	if (call_user_function(NULL, NULL, func, retval, argc, argv) == FAILURE) {
 		zval_ptr_dtor(retval);
 		ZVAL_UNDEF(retval);
 	} else if (Z_ISUNDEF_P(retval)) {
@@ -191,15 +187,15 @@ PS_GC_FUNC(user)
 	ps_call_handler(&PSF(gc), 1, args, &retval);
 
 	if (Z_TYPE(retval) == IS_LONG) {
-		convert_to_long(&retval);
-		return Z_LVAL(retval);
+		*nrdels = Z_LVAL(retval);
+	} else if (Z_TYPE(retval) == IS_TRUE) {
+		/* This is for older API compatibility */
+		*nrdels = 1;
+	} else {
+		/* Anything else is some kind of error */
+		*nrdels = -1; // Error
 	}
-	/* This is for older API compatibility */
-	if (Z_TYPE(retval) == IS_TRUE) {
-		return 1;
-	}
-	/* Anything else is some kind of error */
-	return -1; // Error
+	return *nrdels;
 }
 
 PS_CREATE_SID_FUNC(user)
@@ -268,12 +264,3 @@ PS_UPDATE_TIMESTAMP_FUNC(user)
 
 	FINISH;
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

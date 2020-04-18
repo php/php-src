@@ -3,7 +3,7 @@ Test array_push() function : usage variations - multidimensional arrays
 --FILE--
 <?php
 /* Prototype  : int array_push(array $stack, mixed $var [, mixed $...])
- * Description: Pushes elements onto the end of the array 
+ * Description: Pushes elements onto the end of the array
  * Source code: ext/standard/array.c
  */
 
@@ -27,7 +27,7 @@ var_dump($array);
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_push() : usage variations ***
 
 -- Pass array as $var argument --

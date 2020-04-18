@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -82,10 +80,6 @@ struct _phpdbg_param {
 	(v)->next = NULL; \
 	(v)->top = NULL; \
 } while(0)
-
-#ifndef YYSTYPE
-#define YYSTYPE phpdbg_param_t
-#endif
 
 #define PHPDBG_ASYNC_SAFE 1
 

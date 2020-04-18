@@ -3,7 +3,7 @@ Test array_walk() function : usage variations - 'input' argument containing refe
 --FILE--
 <?php
 /* Prototype  : bool array_walk(array $input, string $funcname [, mixed $userdata])
- * Description: Apply a user function to every member of an array 
+ * Description: Apply a user function to every member of an array
  * Source code: ext/standard/array.c
 */
 
@@ -40,7 +40,7 @@ var_dump( array_walk($input, "callback"));
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_walk() : array with references ***
 int(0)
 int(10)

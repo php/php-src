@@ -13,7 +13,7 @@ function stream_notification_callback($notification_code, $severity, $message, $
     switch($notification_code) {
         case STREAM_NOTIFY_MIME_TYPE_IS:
             echo "Type='$message'\n";
-	    break;
+        break;
         case STREAM_NOTIFY_FILE_SIZE_IS:
             echo "Size=$bytes_max\n";
             break;
@@ -90,4 +90,3 @@ Type='text/plain'
 Hello
 Size=5
 World
-

@@ -82,7 +82,8 @@ const struct mbfl_convert_vtbl vtbl_jis_wchar = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_jis_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_jis = {
@@ -91,7 +92,8 @@ const struct mbfl_convert_vtbl vtbl_wchar_jis = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_wchar_jis,
-	mbfl_filt_conv_any_jis_flush
+	mbfl_filt_conv_any_jis_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_2022jp_wchar = {
@@ -100,7 +102,8 @@ const struct mbfl_convert_vtbl vtbl_2022jp_wchar = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_jis_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_2022jp = {
@@ -109,7 +112,8 @@ const struct mbfl_convert_vtbl vtbl_wchar_2022jp = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_wchar_2022jp,
-	mbfl_filt_conv_any_jis_flush
+	mbfl_filt_conv_any_jis_flush,
+	NULL,
 };
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
@@ -381,9 +385,7 @@ mbfl_filt_conv_wchar_jis(int c, mbfl_convert_filter *filter)
 			CK((*filter->output_function)(s & 0x7f, filter->data));
 		}
 	} else {
-		if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-			CK(mbfl_filt_conv_illegal_output(c, filter));
-		}
+		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
 	return c;
@@ -464,9 +466,7 @@ mbfl_filt_conv_wchar_2022jp(int c, mbfl_convert_filter *filter)
 			CK((*filter->output_function)(s & 0x7f, filter->data));
 		}
 	} else {
-		if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-			CK(mbfl_filt_conv_illegal_output(c, filter));
-		}
+		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
 	return c;
@@ -663,5 +663,3 @@ retry:
 
 	return c;
 }
-
-

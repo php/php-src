@@ -9,8 +9,8 @@ try {
 $p = Phar::LoadPhar('bug73768.phar', 'alias.phar');
 echo "OK\n";
 } catch(PharException $e) {
-	echo $e->getMessage();
+    echo $e->getMessage();
 }
 ?>
 --EXPECTF--
-cannot load phar "%sbug73768.phar" with implicit alias "" under different alias "alias.phar"
+internal corruption of phar "%sbug73768.phar" (truncated manifest header)

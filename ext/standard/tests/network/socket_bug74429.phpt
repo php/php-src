@@ -4,8 +4,8 @@ Bug #74429 Remote socket URI with unique persistence identifier broken
 <?php
 
 /* This behavior is undocumented, but might be in use. Until there's no officially
-	supported alternative, ensure changes doesn't cause BC breach. Otherwise,
-	the test should be removed once the undocumented behavior changes. */
+    supported alternative, ensure changes doesn't cause BC breach. Otherwise,
+    the test should be removed once the undocumented behavior changes. */
 
 for ($i=0; $i<100; $i++) {
   $port = rand(10000, 65000);
@@ -29,4 +29,3 @@ fclose($client1);
 --EXPECTF--
 resource(%d) of type (stream)
 resource(%d) of type (stream)
-

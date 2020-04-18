@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,7 +27,7 @@ ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
 /* {{{ Commands Table */
 #define PHPDBG_COMMAND_HELP_D(name, tip, alias, action) \
-	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, action, &phpdbg_prompt_commands[16], 0}
+	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, action, &phpdbg_prompt_commands[16], 0, NULL, (zend_bool) 0}
 
 const phpdbg_command_t phpdbg_help_commands[] = {
 	PHPDBG_COMMAND_HELP_D(aliases,    "show alias list", 'a', phpdbg_do_help_aliases),
@@ -430,7 +428,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 
 "This mode is enabled by specifying the **-a** option. Phpdbg will bind only to the loopback "
 "interface by default, and this can only be overridden by explicitly setting the remote console "
-"bind address using the **-a** option. If **-a** is specied without an argument, then phpdbg "
+"bind address using the **-a** option. If **-a** is specified without an argument, then phpdbg "
 "will bind to all available interfaces.  You should be aware of the security implications of "
 "doing this, so measures should be taken to secure this service if bound to a publicly accessible "
 "interface/port." CR CR
@@ -544,8 +542,8 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "types:" CR CR
 
 "  **Target**   **Alias** **Purpose**" CR
-"  **at**       **A**     specify breakpoint by location and condition" CR
-"  **del**      **d**     delete breakpoint by breakpoint identifier number" CR CR
+"  **at**       **@**     specify breakpoint by location and condition" CR
+"  **del**      **~**     delete breakpoint by breakpoint identifier number" CR CR
 
 "**Break at** takes two arguments. The first is any valid target. The second "
 "is a valid PHP expression which will trigger the break in "
@@ -924,7 +922,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "     Enable refcount display when hitting watchpoints" CR CR
 
 "     $P S b 4 off" CR
-"     Temporarily disable breakpoint 4.  This can be subsequently reenabled by a **S b 4 on**." CR
+"     Temporarily disable breakpoint 4.  This can be subsequently re-enabled by a **S b 4 on**." CR
 //*********** check oplog syntax
 },
 

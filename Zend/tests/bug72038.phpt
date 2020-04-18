@@ -3,25 +3,31 @@ Bug #72038 (Function calls with values to a by-ref parameter don't always throw 
 --FILE--
 <?php
 
-test($foo = new stdClass);
-var_dump($foo);
-test($bar = 2);
-var_dump($bar);
-test($baz = &$bar);
-var_dump($baz);
+try {
+	test($foo = new stdClass);
+	var_dump($foo);
+} catch (Throwable $e) {
+	echo "Exception: " . $e->getMessage() . "\n";
+}
+try {
+	test($bar = 2);
+	var_dump($bar);
+} catch (Throwable $e) {
+	echo "Exception: " . $e->getMessage() . "\n";
+}
+try {
+	test($baz = &$bar);
+	var_dump($baz);
+} catch (Throwable $e) {
+	echo "Exception: " . $e->getMessage() . "\n";
+}
 
 function test(&$param) {
         $param = 1;
 }
 
 ?>
---EXPECTF--
-
-Notice: Only variables should be passed by reference in %s on line %d
-object(stdClass)#1 (0) {
-}
-
-Notice: Only variables should be passed by reference in %s on line %d
-int(2)
+--EXPECT--
+Exception: Cannot pass parameter 1 by reference
+Exception: Cannot pass parameter 1 by reference
 int(1)
-

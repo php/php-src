@@ -1,16 +1,16 @@
 --TEST--
-Test serialize() & unserialize() functions: objects - ensure that COW references of objects are not serialized separately (unlike other types). 
+Test serialize() & unserialize() functions: objects - ensure that COW references of objects are not serialized separately (unlike other types).
 --FILE--
 <?php
 /* Prototype  : proto string serialize(mixed variable)
- * Description: Returns a string representation of variable (which can later be unserialized) 
+ * Description: Returns a string representation of variable (which can later be unserialized)
  * Source code: ext/standard/var.c
- * Alias to functions: 
+ * Alias to functions:
  */
 /* Prototype  : proto mixed unserialize(string variable_representation)
- * Description: Takes a string representation of variable and recreates it 
+ * Description: Takes a string representation of variable and recreates it
  * Source code: ext/standard/var.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 $x = new stdClass;
@@ -39,7 +39,7 @@ var_dump(serialize(array($x, $x)));
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 string(37) "a:2:{i:0;O:8:"stdClass":0:{}i:1;r:2;}"
 string(22) "a:2:{i:0;i:1;i:1;i:1;}"
 string(30) "a:2:{i:0;s:1:"a";i:1;s:1:"a";}"

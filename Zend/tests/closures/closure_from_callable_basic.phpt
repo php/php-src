@@ -37,8 +37,8 @@ echo 'Closure is already a closure';
 $fn = Closure::fromCallable($closure);
 echo $fn(" OK".PHP_EOL);
 
-echo 'Class with public invokable';
-$fn = Closure::fromCallable(new PublicInvokable);
+echo 'Class with public invocable';
+$fn = Closure::fromCallable(new PublicInvocable);
 echo $fn(" OK".PHP_EOL);
 
 echo "Instance return private method as callable";
@@ -81,7 +81,7 @@ $foo = new SubFoo;
 $fn = $foo->getSelfColonParentPublicInstanceMethod();
 echo $fn(" OK".PHP_EOL);
 
-echo 'Access proteced instance method of parent object through "self::" to parent method';
+echo 'Access protected instance method of parent object through "self::" to parent method';
 $foo = new SubFoo;
 $fn = $foo->getSelfColonParentProtectedInstanceMethod();
 echo $fn(" OK".PHP_EOL);
@@ -96,9 +96,7 @@ echo $fn(" OK".PHP_EOL);
 
 
 ?>
-===DONE===
 --EXPECT--
-
 Access public static function OK
 Access public static function with different case OK
 Access public static function with colon scheme OK
@@ -107,7 +105,7 @@ Access public instance method of parent object through parent::  OK
 Function that exists OK
 Function that exists with different spelling OK
 Closure is already a closure OK
-Class with public invokable OK
+Class with public invocable OK
 Instance return private method as callable OK
 Instance return private static method as callable OK
 Instance return protected static method as callable OK
@@ -116,7 +114,6 @@ Subclass closure over parent class static protected method OK
 Access public instance method of parent object through "parent::"  OK
 Access public instance method of self object through "self::"  OK
 Access public instance method of parent object through "self::" to parent method OK
-Access proteced instance method of parent object through "self::" to parent method OK
+Access protected instance method of parent object through "self::" to parent method OK
 MagicCall __call instance method __call,nonExistentMethod, OK
 MagicCall __callStatic static method __callStatic,nonExistentMethod, OK
-===DONE===

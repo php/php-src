@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -84,4 +82,3 @@ PHP_JSON_API int php_json_parse(php_json_parser *parser);
 int php_json_yyparse(php_json_parser *parser);
 
 #endif	/* PHP_JSON_PARSER_H */
-

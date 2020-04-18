@@ -2,25 +2,16 @@
 Bug #60477: Segfault after two multipart/form-data POST requestes
 --SKIPIF--
 <?php
-include "skipif.inc"; 
+include "skipif.inc";
 ?>
 --FILE--
 <?php
 include "php_cli_server.inc";
 php_cli_server_start('echo "done\n";', null);
 
-list($host, $port) = explode(':', PHP_CLI_SERVER_ADDRESS);
-$port = intval($port)?:80;
 $output = '';
-
-// note: select() on Windows (& some other platforms) has historical issues with
-//       timeouts less than 1000 millis(0.5). it may be better to increase these
-//       timeouts to 1000 millis(1.0) (fsockopen eventually calls select()).
-//       see articles like: http://support.microsoft.com/kb/257821
-$fp = fsockopen($host, $port, $errno, $errstr, 0.5);
-if (!$fp) {
-  die("connect failed");
-}
+$host = PHP_CLI_SERVER_HOSTNAME;
+$fp = php_cli_server_connect();
 
 if(fwrite($fp, <<<HEADER
 POST /index.php HTTP/1.1
@@ -33,14 +24,14 @@ Content-Type: application/x-www-form-urlencoded
 a=b
 HEADER
 )) {
-	while (!feof($fp)) {
-		$output .= fgets($fp);
-	}
+    while (!feof($fp)) {
+        $output .= fgets($fp);
+    }
 }
 
 fclose($fp);
 
-$fp = fsockopen($host, $port, $errno, $errstr, 0.5);
+$fp = php_cli_server_connect();
 if(fwrite($fp, <<<HEADER
 POST /main/no-exists.php HTTP/1.1
 Host: {$host}
@@ -52,9 +43,9 @@ Content-Type: application/x-www-form-urlencoded
 a=b
 HEADER
 )) {
-	while (!feof($fp)) {
-		$output .= fgets($fp);
-	}
+    while (!feof($fp)) {
+        $output .= fgets($fp);
+    }
 }
 
 echo preg_replace("/<style>(.*?)<\/style>/s", "<style>AAA</style>", $output), "\n";
@@ -62,7 +53,6 @@ fclose($fp);
 
 ?>
 --EXPECTF--
-
 HTTP/1.1 200 OK
 Host: %s
 Date: %s

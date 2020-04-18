@@ -5,7 +5,7 @@ Test token_get_all() function : usage variations - with constant tokens
 --FILE--
 <?php
 /* Prototype  : array token_get_all(string $source)
- * Description: splits the given source into an array of PHP languange tokens
+ * Description: splits the given source into an array of PHP language tokens
  * Source code: ext/tokenizer/tokenizer.c
 */
 
@@ -25,17 +25,17 @@ $b = 0;
 
 $source = array (
   // int const
-  '<?php $a = 1 + 034; $b = $a + 0x3F; ?>', 
-  
+  '<?php $a = 1 + 034; $b = $a + 0x3F; ?>',
+
   // float const
   '<?php $a = 0.23E-2 + 0.43e2 + 0.5; ?>',
 
   // string const
-  '<?php $a = "hello ".\'world\'; ?>',  
+  '<?php $a = "hello ".\'world\'; ?>',
 
   // bool const
-  "<?php \$a = (\$b)? true : false; ?>",  
-  "<?php \$b = (\$a)? FALSE : TRUE; ?>",  
+  "<?php \$a = (\$b)? true : false; ?>",
+  "<?php \$b = (\$a)? FALSE : TRUE; ?>",
 
   // null const
   '<?php $b = null | NULL; ?>'

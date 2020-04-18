@@ -6,11 +6,11 @@ filter_var() and FILTER_VALIDATE_URL
 <?php
 
 $values = Array(
-'http://example.com/index.html',	
-'http://www.example.com/index.php',	
-'http://www.example/img/test.png',	
-'http://www.example/img/dir/',	
-'http://www.example/img/dir',	
+'http://example.com/index.html',
+'http://www.example.com/index.php',
+'http://www.example/img/test.png',
+'http://www.example/img/dir/',
+'http://www.example/img/dir',
 'http://www.thelongestdomainnameintheworldandthensomeandthensomemoreandmore.com/',
 'http://toolongtoolongtoolongtoolongtoolongtoolongtoolongtoolongtoolongtoolong.com',
 'http://eauBcFReEmjLcoZwI0RuONNnwU4H9r151juCaqTI5VeIP5jcYIqhx1lh5vV00l2rTs6y7hOp7rYw42QZiq6VIzjcYrRm8gFRMk9U9Wi1grL8Mr5kLVloYLthHgyA94QK3SaXCATklxgo6XvcbXIqAGG7U0KxTr8hJJU1p2ZQ2mXHmp4DhYP8N9SRuEKzaCPcSIcW7uj21jZqBigsLsNAXEzU8SPXZjmVQVtwQATPWeWyGW4GuJhjP4Q8o0.com',
@@ -27,19 +27,19 @@ $values = Array(
 'http://-.abc.com',
 'http://abc.-.abc.com',
 'http://underscore_.example.com',
-'http//www.example/wrong/url/',	
-'http:/www.example',	
-'file:///tmp/test.c',	
-'ftp://ftp.example.com/tmp/',	
-'/tmp/test.c',	
-'/',	
-'http://',	
-'http:/',	
-'http:',	
-'http',	
-'',	
--1,	
-array(),	
+'http//www.example/wrong/url/',
+'http:/www.example',
+'file:///tmp/test.c',
+'ftp://ftp.example.com/tmp/',
+'/tmp/test.c',
+'/',
+'http://',
+'http:/',
+'http:',
+'http',
+'',
+-1,
+array(),
 'mailto:foo@bar.com',
 'news:news.php.net',
 'file://foo/bar',
@@ -50,7 +50,7 @@ array(),
 "http://example.com:65537",
 );
 foreach ($values as $value) {
-	var_dump(filter_var($value, FILTER_VALIDATE_URL));
+    var_dump(filter_var($value, FILTER_VALIDATE_URL));
 }
 
 
@@ -66,7 +66,7 @@ var_dump(filter_var("http://www.example.com/index.php?a=b&c=d", FILTER_VALIDATE_
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 string(29) "http://example.com/index.html"
 string(32) "http://www.example.com/index.php"
 string(31) "http://www.example/img/test.png"

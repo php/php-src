@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,11 +12,9 @@
    +----------------------------------------------------------------------+
    | Authors: Brian Schaffner <brian@tool.net>                            |
    |          Shane Caraveo <shane@caraveo.com>                           |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   |          Zeev Suraski <zeev@php.net>                                 |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #include "php.h"
 #include "dl.h"
@@ -31,11 +27,7 @@
 #if defined(HAVE_LIBDL)
 #include <stdlib.h>
 #include <stdio.h>
-#ifdef HAVE_STRING_H
 #include <string.h>
-#else
-#include <strings.h>
-#endif
 #ifdef PHP_WIN32
 #include "win32/param.h"
 #include "win32/winutil.h"
@@ -88,8 +80,10 @@ PHPAPI void *php_load_shlib(char *path, char **errp)
 		err = GET_DL_ERROR();
 #ifdef PHP_WIN32
 		if (err && (*err)) {
+			size_t i = strlen(err);
 			(*errp)=estrdup(err);
-			LocalFree(err);
+			php_win32_error_msg_free(err);
+			while (i > 0 && isspace((*errp)[i-1])) { (*errp)[i-1] = '\0'; i--; }
 		} else {
 			(*errp) = estrdup("<No message>");
 		}
@@ -170,6 +164,16 @@ PHPAPI int php_load_extension(char *filename, int type, int start_now)
 		efree(orig_libpath);
 		efree(err1);
 	}
+
+#ifdef PHP_WIN32
+	if (!php_win32_image_compatible(libpath, &err1)) {
+			php_error_docref(NULL, error_type, err1);
+			efree(err1);
+			efree(libpath);
+			DL_UNLOAD(handle);
+			return FAILURE;
+	}
+#endif
 
 	efree(libpath);
 
@@ -271,12 +275,3 @@ PHP_MINFO_FUNCTION(dl)
 }
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

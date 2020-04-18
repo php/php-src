@@ -5,7 +5,7 @@ Test ctype_xdigit() function : usage variations - different data typse as $c arg
 --FILE--
 <?php
 /* Prototype  : bool ctype_xdigit(mixed $c)
- * Description: Checks for character(s) representing a hexadecimal digit 
+ * Description: Checks for character(s) representing a hexadecimal digit
  * Source code: ext/ctype/ctype.c
  */
 
@@ -15,7 +15,7 @@ Test ctype_xdigit() function : usage variations - different data typse as $c arg
 
 echo "*** Testing ctype_xdigit() : usage variations ***\n";
 
-$orig = setlocale(LC_CTYPE, "C"); 
+$orig = setlocale(LC_CTYPE, "C");
 
 //get an unset variable
 $unset_var = 10;
@@ -62,7 +62,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -72,7 +72,7 @@ $inputs = array(
 /*19*/ "456",
        'def',
        $heredoc,
-       
+
        // object data
 /*22*/ new classA(),
 
@@ -89,17 +89,16 @@ $inputs = array(
 // loop through each element of $inputs to check the behavior of ctype_xdigit()
 $iterator = 1;
 foreach($inputs as $input) {
-	echo "\n-- Iteration $iterator --\n";
-	var_dump( ctype_xdigit($input) );
-	$iterator++;
+    echo "\n-- Iteration $iterator --\n";
+    var_dump( ctype_xdigit($input) );
+    $iterator++;
 };
 
 fclose($fp);
 
-setlocale(LC_CTYPE, $orig); 
+setlocale(LC_CTYPE, $orig);
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ctype_xdigit() : usage variations ***
 
 -- Iteration 1 --
@@ -176,4 +175,3 @@ bool(false)
 
 -- Iteration 25 --
 bool(false)
-===DONE===

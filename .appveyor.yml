@@ -1,30 +1,30 @@
-
 version: "{branch}.build.{build}"
 
-image: Visual Studio 2017
+image: Visual Studio 2019
 
 branches:
         except:
                 - PHP-5.6
                 - PHP-7.0
 
-skip_commits:
-        files:
-                - NEWS
-                - UPGRADING*
-                - README.*
-
 clone_depth: 64
+
+skip_commits:
+  files:
+    - docs/*
+    - NEWS
+    - UPGRADING
+    - UPGRADING.INTERNALS
 
 cache:
         - c:\build-cache
 
 environment:
-        PHP_BUILD_CACHE_BASE_DIR: c:\build-cache  
+        PHP_BUILD_CACHE_BASE_DIR: c:\build-cache
         PHP_BUILD_OBJ_DIR: c:\obj
         PHP_BUILD_CACHE_SDK_DIR: c:\build-cache\sdk
-        PHP_BUILD_SDK_BRANCH: php-sdk-2.0.12
-        PHP_BUILD_CRT: vc15
+        PHP_BUILD_SDK_BRANCH: php-sdk-2.2.0
+        PHP_BUILD_CRT: vs16
         # ext and env setup for tests
         #MYSQL_TEST_PASSWD: Password12!
         #MYSQL_TEST_USER: root
@@ -37,13 +37,17 @@ environment:
         matrix:
                 - THREAD_SAFE: 0
                   OPCACHE: 0
+                  PARALLEL: -j2
                 - THREAD_SAFE: 1
                   OPCACHE: 1
+                  PARALLEL: -j2
+                  INTRINSICS: AVX
 
 services:
         # the setup scripts have to be touched, once some other db version is used
         - mysql
-        - postgresql96
+        - postgresql101
+        - mssql2017
 
 platform:
         - x64
@@ -54,4 +58,3 @@ build_script:
 
 test_script:
         - appveyor\test.bat
-
