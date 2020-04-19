@@ -1350,6 +1350,29 @@ static unsigned int umin (unsigned int a, unsigned int b)
   return a < b ? a : b;
 }
 
+struct string {
+  const unsigned char *str;
+  unsigned int len;
+};
+
+// The name of this token.
+// E.g. YYSYMBOL_T_IS_SMALLER_OR_EQUAL => "T_IS_SMALLER_OR_EQUAL"
+// Or null.
+static
+struct string
+token_name (yysymbol_kind_t kind)
+{
+  const char *unexp_str = yysymbol_name (kind);
+  const unsigned int unexp_len = (unsigned int)strlen(unexp_str);
+  const unsigned char *tok1 = memchr(unexp_str, '(', unexp_len);
+  const unsigned char *tok2 = zend_memrchr(unexp_str, ')', unexp_len);
+
+  struct string res;
+  res.str = tok1;
+  res.len = tok1 != NULL && tok2 != NULL ? tok2 - tok1 + 1 : 0;
+  return res;
+}
+
 int
 yyreport_syntax_error (const yypcontext_t *ctx)
 {
@@ -1369,15 +1392,10 @@ yyreport_syntax_error (const yypcontext_t *ctx)
         umin(30, end != NULL ? end - str : LANG_SCNG(yy_leng));
 
       // Maybe include the token name.
-      // Strings are like "<<= (T_SL_EQUAL)": extract the part in parens.
-      const char *unexp_str = yysymbol_name (unexp);
-      const unsigned int unexp_len = (unsigned int)strlen(unexp_str);
-      const unsigned char *tok1 = memchr(unexp_str, '(', unexp_len);
-      const unsigned char *tok2 = zend_memrchr(unexp_str, ')', unexp_len);
-      const unsigned int toklen = tok1 != NULL && tok2 != NULL ? tok2 - tok1 + 1 : 0;
+      struct string token = token_name (unexp);
 
-      if (toklen) {
-        snprintf(unexpected, sizeof(unexpected), "'%.*s' %.*s", len, str, toklen, tok1);
+      if (token.len) {
+        snprintf(unexpected, sizeof(unexpected), "'%.*s' %.*s", len, str, token.len, token.str);
       } else {
         snprintf(unexpected, sizeof(unexpected), "'%.*s'", len, str);
       }
