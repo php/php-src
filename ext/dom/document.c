@@ -161,6 +161,7 @@ int dom_document_encoding_write(dom_object *obj, zval *newval)
 		}
 		docp->encoding = xmlStrdup((const xmlChar *) ZSTR_VAL(str));
     } else {
+    	// Todo convert to error?
 		php_error_docref(NULL, E_WARNING, "Invalid Document Encoding");
     }
 

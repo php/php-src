@@ -44,7 +44,7 @@ PHP_METHOD(DOMDocumentFragment, __construct)
 
 	if (!nodep) {
 		php_dom_throw_error(INVALID_STATE_ERR, 1);
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_DOMOBJ_P(ZEND_THIS);
@@ -109,6 +109,7 @@ PHP_METHOD(DOMDocumentFragment, appendXML) {
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
 
 	if (dom_node_is_read_only(nodep) == SUCCESS) {
+		// Should always be in strict mode?
 		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, dom_get_strict_error(intern->document));
 		RETURN_FALSE;
 	}

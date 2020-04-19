@@ -47,7 +47,7 @@ PHP_METHOD(DOMText, __construct)
 
 	if (!nodep) {
 		php_dom_throw_error(INVALID_STATE_ERR, 1);
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	intern = Z_DOMOBJ_P(ZEND_THIS);
@@ -123,16 +123,19 @@ PHP_METHOD(DOMText, splitText)
 	DOM_GET_OBJ(node, id, xmlNodePtr, intern);
 
 	if (node->type != XML_TEXT_NODE && node->type != XML_CDATA_SECTION_NODE) {
+		// Todo make this throw an error?
 		RETURN_FALSE;
 	}
 
 	cur = xmlNodeGetContent(node);
 	if (cur == NULL) {
+		// Todo make this throw an error?
 		RETURN_FALSE;
 	}
 	length = xmlUTF8Strlen(cur);
 
 	if (ZEND_LONG_INT_OVFL(offset) || (int)offset > length || offset < 0) {
+		// Todo make this throw an error?
 		xmlFree(cur);
 		RETURN_FALSE;
 	}
@@ -149,6 +152,7 @@ PHP_METHOD(DOMText, splitText)
 	xmlFree(second);
 
 	if (nnode == NULL) {
+		// Todo make this throw an error?
 		RETURN_FALSE;
 	}
 

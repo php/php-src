@@ -98,6 +98,7 @@ int dom_node_node_name_read(dom_object *obj, zval *retval)
 			str = "#text";
 			break;
 		default:
+			// Todo convert to error?
 			php_error_docref(NULL, E_WARNING, "Invalid Node Type");
 	}
 
@@ -856,6 +857,7 @@ PHP_METHOD(DOMNode, insertBefore)
 
 	new_child = NULL;
 
+	// Todo should always be strict?
 	stricterror = dom_get_strict_error(intern->document);
 
 	if (dom_node_is_read_only(parentp) == SUCCESS ||
@@ -875,6 +877,7 @@ PHP_METHOD(DOMNode, insertBefore)
 	}
 
 	if (child->type == XML_DOCUMENT_FRAG_NODE && child->children == NULL) {
+		// Todo convert to Error?
 		php_error_docref(NULL, E_WARNING, "Document Fragment is empty");
 		RETURN_FALSE;
 	}
@@ -981,6 +984,7 @@ PHP_METHOD(DOMNode, insertBefore)
 	}
 
 	if (NULL == new_child) {
+		// Todo convert to error?
 		php_error_docref(NULL, E_WARNING, "Couldn't add newnode as the previous sibling of refnode");
 		RETURN_FALSE;
 	}
@@ -1023,6 +1027,7 @@ PHP_METHOD(DOMNode, replaceChild)
 		RETURN_FALSE;
 	}
 
+	// Todo make alway strict?
 	stricterror = dom_get_strict_error(intern->document);
 
 	if (dom_node_is_read_only(nodep) == SUCCESS ||
@@ -1074,7 +1079,7 @@ PHP_METHOD(DOMNode, replaceChild)
 		DOM_RET_OBJ(oldchild, &ret, intern);
 		return;
 	} else {
-		php_dom_throw_error(NOT_FOUND_ERR, dom_get_strict_error(intern->document));
+		php_dom_throw_error(NOT_FOUND_ERR, stricterror);
 		RETURN_FALSE;
 	}
 }
@@ -1173,6 +1178,7 @@ PHP_METHOD(DOMNode, appendChild)
 	}
 
 	if (child->type == XML_DOCUMENT_FRAG_NODE && child->children == NULL) {
+		// Todo convert to error?
 		php_error_docref(NULL, E_WARNING, "Document Fragment is empty");
 		RETURN_FALSE;
 	}
@@ -1462,6 +1468,7 @@ PHP_METHOD(DOMNode, lookupPrefix)
 		}
 	}
 
+	// Todo return empty string?
 	RETURN_NULL();
 }
 /* }}} end dom_node_lookup_prefix */
@@ -1570,6 +1577,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 	docp = nodep->doc;
 
 	if (! docp) {
+		// TOdo convert to error?
 		php_error_docref(NULL, E_WARNING, "Node must be associated with a document");
 		RETURN_FALSE;
 	}
@@ -1587,6 +1595,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 					xmlXPathFreeObject(xpathobjp);
 				}
 				xmlXPathFreeContext(ctxp);
+				// Todo convert to error?
 				php_error_docref(NULL, E_WARNING, "XPath query did not return a nodeset.");
 				RETURN_FALSE;
 			}
@@ -1601,6 +1610,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 		if (tmp && Z_TYPE_P(tmp) == IS_STRING) {
 			xquery = Z_STRVAL_P(tmp);
 		} else {
+			// Todo convert to error?
 			php_error_docref(NULL, E_WARNING, "'query' missing from xpath array or is not a string");
 			RETURN_FALSE;
 		}
@@ -1738,6 +1748,7 @@ PHP_METHOD(DOMNode, getNodePath)
 
 	value = (char *) xmlGetNodePath(nodep);
 	if (value == NULL) {
+		// Todo return empty string?
 		RETURN_NULL();
 	} else {
 		RETVAL_STRING(value);

@@ -49,7 +49,7 @@ PHP_METHOD(DOMElement, __construct)
 	name_valid = xmlValidateName((xmlChar *) name, 0);
 	if (name_valid != 0) {
 		php_dom_throw_error(INVALID_CHARACTER_ERR, 1);
-		return;
+		RETURN_THROWS();
 	}
 
 	/* Namespace logic is separate and only when uri passed in to insure no BC breakage */
@@ -71,7 +71,7 @@ PHP_METHOD(DOMElement, __construct)
 				xmlFreeNode(nodep);
 			}
 			php_dom_throw_error(errorcode, 1);
-			return;
+			RETURN_THROWS();
 		}
 	} else {
 	    /* If you don't pass a namespace uri, then you can't set a prefix */
@@ -80,14 +80,14 @@ PHP_METHOD(DOMElement, __construct)
 			xmlFree(localname);
 			xmlFree(prefix);
 	        php_dom_throw_error(NAMESPACE_ERR, 1);
-	        return;
+	        RETURN_THROWS();
 	    }
 		nodep = xmlNewNode(NULL, (xmlChar *) name);
 	}
 
 	if (!nodep) {
 		php_dom_throw_error(INVALID_STATE_ERR, 1);
-		return;
+		RETURN_THROWS();
 	}
 
 	if (value_len > 0) {
@@ -255,19 +255,20 @@ PHP_METHOD(DOMElement, setAttribute)
 	}
 
 	if (name_len == 0) {
-		php_error_docref(NULL, E_WARNING, "Attribute Name is required");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
 	}
 
 	name_valid = xmlValidateName((xmlChar *) name, 0);
 	if (name_valid != 0) {
 		php_dom_throw_error(INVALID_CHARACTER_ERR, 1);
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
 
 	if (dom_node_is_read_only(nodep) == SUCCESS) {
+		// Todo make it always strict?
 		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, dom_get_strict_error(intern->document));
 		RETURN_FALSE;
 	}
@@ -294,6 +295,7 @@ PHP_METHOD(DOMElement, setAttribute)
 		attr = (xmlNodePtr)xmlSetProp(nodep, (xmlChar *) name, (xmlChar *)value);
 	}
 	if (!attr) {
+		// TODO Convert to error?
 		php_error_docref(NULL, E_WARNING, "No such attribute '%s'", name);
 		RETURN_FALSE;
 	}
@@ -424,6 +426,7 @@ PHP_METHOD(DOMElement, setAttributeNode)
 	DOM_GET_OBJ(attrp, node, xmlAttrPtr, attrobj);
 
 	if (attrp->type != XML_ATTRIBUTE_NODE) {
+		// Todo convert to a ValueError?
 		php_error_docref(NULL, E_WARNING, "Attribute node is required");
 		RETURN_FALSE;
 	}
@@ -628,8 +631,8 @@ PHP_METHOD(DOMElement, setAttributeNS)
 	}
 
 	if (name_len == 0) {
-		php_error_docref(NULL, E_WARNING, "Attribute Name is required");
-		RETURN_FALSE;
+		zend_argument_value_error(2, "cannot be empty");
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(elemp, id, xmlNodePtr, intern);
@@ -641,6 +644,7 @@ PHP_METHOD(DOMElement, setAttributeNS)
 		RETURN_NULL();
 	}
 
+	// Todo should always be strict?
 	errorcode = dom_check_qname(name, &localname, &prefix, uri_len, name_len);
 
 	if (errorcode == 0) {
@@ -874,6 +878,7 @@ PHP_METHOD(DOMElement, setAttributeNodeNS)
 	DOM_GET_OBJ(attrp, node, xmlAttrPtr, attrobj);
 
 	if (attrp->type != XML_ATTRIBUTE_NODE) {
+		// Todo convert to error?
 		php_error_docref(NULL, E_WARNING, "Attribute node is required");
 		RETURN_FALSE;
 	}

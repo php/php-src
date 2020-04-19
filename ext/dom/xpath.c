@@ -136,6 +136,7 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs,
 
 	obj = valuePop(ctxt);
 	if (obj->stringval == NULL) {
+		// Todo convert to type error?
 		php_error_docref(NULL, E_WARNING, "Handler name must be a string");
 		xmlXPathFreeObject(obj);
 		if (fci.param_count > 0) {
@@ -154,8 +155,10 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs,
 	fci.retval = &retval;
 
 	if (!zend_make_callable(&fci.function_name, &callable)) {
+		// TODO make this an error?
 		php_error_docref(NULL, E_WARNING, "Unable to call handler %s()", ZSTR_VAL(callable));
 	} else if (intern->registerPhpFunctions == 2 && zend_hash_exists(intern->registered_phpfunctions, callable) == 0) {
+		// TODO make this an error?
 		php_error_docref(NULL, E_WARNING, "Not allowed to call handler '%s()'.", ZSTR_VAL(callable));
 		/* Push an empty string, so that we at least have an xslt result... */
 		valuePush(ctxt, xmlXPathNewString((xmlChar *)""));
@@ -176,6 +179,7 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs,
 			} else if (Z_TYPE(retval) == IS_FALSE || Z_TYPE(retval) == IS_TRUE) {
 				valuePush(ctxt, xmlXPathNewBoolean(Z_TYPE(retval) == IS_TRUE));
 			} else if (Z_TYPE(retval) == IS_OBJECT) {
+				// TODO make this an error?
 				php_error_docref(NULL, E_WARNING, "A PHP Object cannot be converted to a XPath-string");
 				valuePush(ctxt, xmlXPathNewString((xmlChar *)""));
 			} else {
@@ -228,7 +232,7 @@ PHP_METHOD(DOMXPath, __construct)
 	ctx = xmlXPathNewContext(docp);
 	if (ctx == NULL) {
 		php_dom_throw_error(INVALID_STATE_ERR, 1);
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	intern = Z_XPATHOBJ_P(ZEND_THIS);
@@ -308,6 +312,7 @@ PHP_METHOD(DOMXPath, registerNamespace)
 
 	ctxp = (xmlXPathContextPtr) intern->dom.ptr;
 	if (ctxp == NULL) {
+		// Todo convert to error?
 		php_error_docref(NULL, E_WARNING, "Invalid XPath Context");
 		RETURN_FALSE;
 	}
@@ -352,12 +357,14 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 
 	ctxp = (xmlXPathContextPtr) intern->dom.ptr;
 	if (ctxp == NULL) {
+		// Todo convert to error?
 		php_error_docref(NULL, E_WARNING, "Invalid XPath Context");
 		RETURN_FALSE;
 	}
 
 	docp = (xmlDocPtr) ctxp->doc;
 	if (docp == NULL) {
+		// Todo convert to error?
 		php_error_docref(NULL, E_WARNING, "Invalid XPath Document Pointer");
 		RETURN_FALSE;
 	}
@@ -371,6 +378,7 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 	}
 
 	if (nodep && docp != nodep->doc) {
+		// Todo convert to error?
 		php_error_docref(NULL, E_WARNING, "Node From Wrong Document");
 		RETURN_FALSE;
 	}
@@ -401,6 +409,7 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 	}
 
 	if (! xpathobjp) {
+		// Make this an error state?
 		RETURN_FALSE;
 	}
 
