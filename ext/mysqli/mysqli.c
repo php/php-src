@@ -32,6 +32,7 @@
 #include "zend_exceptions.h"
 #include "ext/spl/spl_exceptions.h"
 #include "zend_interfaces.h"
+#include "mysqli_arginfo.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(mysqli)
 static PHP_GINIT_FUNCTION(mysqli);
@@ -572,13 +573,13 @@ PHP_MINIT_FUNCTION(mysqli)
 	le_pmysqli = zend_register_list_destructors_ex(NULL, php_mysqli_dtor,
 		"MySqli persistent connection", module_number);
 
-	INIT_CLASS_ENTRY(cex, "mysqli_sql_exception", mysqli_exception_methods);
+	INIT_CLASS_ENTRY(cex, "mysqli_sql_exception", class_mysqli_sql_exception_methods);
 	mysqli_exception_class_entry = zend_register_internal_class_ex(&cex, spl_ce_RuntimeException);
 	mysqli_exception_class_entry->ce_flags |= ZEND_ACC_FINAL;
 	zend_declare_property_long(mysqli_exception_class_entry, "code", sizeof("code")-1, 0, ZEND_ACC_PROTECTED);
 	zend_declare_property_string(mysqli_exception_class_entry, "sqlstate", sizeof("sqlstate")-1, "00000", ZEND_ACC_PROTECTED);
 
-	REGISTER_MYSQLI_CLASS_ENTRY("mysqli_driver", mysqli_driver_class_entry, mysqli_driver_methods);
+	REGISTER_MYSQLI_CLASS_ENTRY("mysqli_driver", mysqli_driver_class_entry, class_mysqli_driver_methods);
 	ce = mysqli_driver_class_entry;
 	zend_hash_init(&mysqli_driver_properties, 0, NULL, free_prop_handler, 1);
 	MYSQLI_ADD_PROPERTIES(&mysqli_driver_properties, mysqli_driver_property_entries);
@@ -591,7 +592,7 @@ PHP_MINIT_FUNCTION(mysqli)
 	ce->ce_flags |= ZEND_ACC_FINAL;
 	zend_hash_add_ptr(&classes, ce->name, &mysqli_driver_properties);
 
-	REGISTER_MYSQLI_CLASS_ENTRY("mysqli", mysqli_link_class_entry, mysqli_link_methods);
+	REGISTER_MYSQLI_CLASS_ENTRY("mysqli", mysqli_link_class_entry, class_mysqli_methods);
 	ce = mysqli_link_class_entry;
 	zend_hash_init(&mysqli_link_properties, 0, NULL, free_prop_handler, 1);
 	MYSQLI_ADD_PROPERTIES(&mysqli_link_properties, mysqli_link_property_entries);
@@ -615,7 +616,7 @@ PHP_MINIT_FUNCTION(mysqli)
 	zend_declare_property_null(ce, "warning_count",		sizeof("warning_count") - 1, ZEND_ACC_PUBLIC);
 	zend_hash_add_ptr(&classes, ce->name, &mysqli_link_properties);
 
-	REGISTER_MYSQLI_CLASS_ENTRY("mysqli_warning", mysqli_warning_class_entry, mysqli_warning_methods);
+	REGISTER_MYSQLI_CLASS_ENTRY("mysqli_warning", mysqli_warning_class_entry, class_mysqli_warning_methods);
 	ce = mysqli_warning_class_entry;
 	ce->ce_flags |= ZEND_ACC_FINAL;
 	zend_hash_init(&mysqli_warning_properties, 0, NULL, free_prop_handler, 1);
@@ -625,7 +626,7 @@ PHP_MINIT_FUNCTION(mysqli)
 	zend_declare_property_null(ce, "errno",		sizeof("errno") - 1, ZEND_ACC_PUBLIC);
 	zend_hash_add_ptr(&classes, ce->name, &mysqli_warning_properties);
 
-	REGISTER_MYSQLI_CLASS_ENTRY("mysqli_result", mysqli_result_class_entry, mysqli_result_methods);
+	REGISTER_MYSQLI_CLASS_ENTRY("mysqli_result", mysqli_result_class_entry, class_mysqli_result_methods);
 	ce = mysqli_result_class_entry;
 	zend_hash_init(&mysqli_result_properties, 0, NULL, free_prop_handler, 1);
 	MYSQLI_ADD_PROPERTIES(&mysqli_result_properties, mysqli_result_property_entries);
@@ -638,7 +639,7 @@ PHP_MINIT_FUNCTION(mysqli)
 	zend_class_implements(mysqli_result_class_entry, 1, zend_ce_traversable);
 	zend_hash_add_ptr(&classes, ce->name, &mysqli_result_properties);
 
-	REGISTER_MYSQLI_CLASS_ENTRY("mysqli_stmt", mysqli_stmt_class_entry, mysqli_stmt_methods);
+	REGISTER_MYSQLI_CLASS_ENTRY("mysqli_stmt", mysqli_stmt_class_entry, class_mysqli_stmt_methods);
 	ce = mysqli_stmt_class_entry;
 	zend_hash_init(&mysqli_stmt_properties, 0, NULL, free_prop_handler, 1);
 	MYSQLI_ADD_PROPERTIES(&mysqli_stmt_properties, mysqli_stmt_property_entries);
@@ -975,7 +976,7 @@ zend_module_entry mysqli_module_entry = {
 	STANDARD_MODULE_HEADER_EX, NULL,
 	mysqli_deps,
 	"mysqli",
-	mysqli_functions,
+	ext_functions,
 	PHP_MINIT(mysqli),
 	PHP_MSHUTDOWN(mysqli),
 	PHP_RINIT(mysqli),

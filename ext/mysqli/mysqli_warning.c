@@ -26,8 +26,6 @@
 #include "php_mysqli_structs.h"
 #include "mysqli_priv.h"
 
-#include "mysqli_warning_arginfo.h"
-
 /* Define these in the PHP7 tree to make merging easy process */
 #define ZSTR_DUPLICATE (1<<0)
 #define ZSTR_AUTOFREE  (1<<1)
@@ -316,14 +314,6 @@ PHP_METHOD(mysqli_warning, __construct)
 	}
 
 }
-/* }}} */
-
-/* {{{ mysqli_warning_methods */
-const zend_function_entry mysqli_warning_methods[] = {
-	PHP_ME(mysqli_warning, __construct,	arginfo_class_mysqli_warning___construct, ZEND_ACC_PROTECTED)
-	PHP_ME(mysqli_warning, next, arginfo_class_mysqli_warning_next, ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};
 /* }}} */
 
 /* {{{ mysqli_warning_property_entries */
