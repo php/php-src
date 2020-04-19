@@ -185,119 +185,12 @@ PHP_MINIT_FUNCTION(soap);
 PHP_MSHUTDOWN_FUNCTION(soap);
 PHP_MINFO_FUNCTION(soap);
 
-/*
-  Registry Functions
-  TODO: this!
-*/
-PHP_FUNCTION(soap_encode_to_xml);
-PHP_FUNCTION(soap_encode_to_zval);
-PHP_FUNCTION(use_soap_error_handler);
-PHP_FUNCTION(is_soap_fault);
-
-
-/* Server Functions */
-PHP_METHOD(SoapServer, __construct);
-PHP_METHOD(SoapServer, setClass);
-PHP_METHOD(SoapServer, setObject);
-PHP_METHOD(SoapServer, addFunction);
-PHP_METHOD(SoapServer, getFunctions);
-PHP_METHOD(SoapServer, handle);
-PHP_METHOD(SoapServer, setPersistence);
-PHP_METHOD(SoapServer, fault);
-PHP_METHOD(SoapServer, addSoapHeader);
-
-/* Client Functions */
-PHP_METHOD(SoapClient, __construct);
-PHP_METHOD(SoapClient, __call);
-PHP_METHOD(SoapClient, __getLastRequest);
-PHP_METHOD(SoapClient, __getLastResponse);
-PHP_METHOD(SoapClient, __getLastRequestHeaders);
-PHP_METHOD(SoapClient, __getLastResponseHeaders);
-PHP_METHOD(SoapClient, __getFunctions);
-PHP_METHOD(SoapClient, __getTypes);
-PHP_METHOD(SoapClient, __doRequest);
-PHP_METHOD(SoapClient, __setCookie);
-PHP_METHOD(SoapClient, __getCookies);
-PHP_METHOD(SoapClient, __setLocation);
-PHP_METHOD(SoapClient, __setSoapHeaders);
-
-/* SoapVar Functions */
-PHP_METHOD(SoapVar, __construct);
-
-/* SoapFault Functions */
-PHP_METHOD(SoapFault, __construct);
-PHP_METHOD(SoapFault, __toString);
-
-/* SoapParam Functions */
-PHP_METHOD(SoapParam, __construct);
-
-/* SoapHeader Functions */
-PHP_METHOD(SoapHeader, __construct);
-
-static const zend_function_entry soap_functions[] = {
-	PHP_FE(use_soap_error_handler, 	arginfo_use_soap_error_handler)
-	PHP_FE(is_soap_fault, 			arginfo_is_soap_fault)
-	PHP_FE_END
-};
-
-static const zend_function_entry soap_fault_functions[] = {
-	PHP_ME(SoapFault, __construct, arginfo_class_SoapFault___construct, 0)
-	PHP_ME(SoapFault, __toString, arginfo_class_SoapFault___toString, 0)
-	PHP_FE_END
-};
-
-static const zend_function_entry soap_server_functions[] = {
-	PHP_ME(SoapServer, __construct, 	arginfo_class_SoapServer___construct, 0)
-	PHP_ME(SoapServer, setPersistence, 	arginfo_class_SoapServer_setPersistence, 0)
-	PHP_ME(SoapServer, setClass, 		arginfo_class_SoapServer_setClass, 0)
-	PHP_ME(SoapServer, setObject, 		arginfo_class_SoapServer_setObject, 0)
-	PHP_ME(SoapServer, addFunction, 	arginfo_class_SoapServer_addFunction, 0)
-	PHP_ME(SoapServer, getFunctions, 	arginfo_class_SoapServer_getFunctions, 0)
-	PHP_ME(SoapServer, handle, 			arginfo_class_SoapServer_handle, 0)
-	PHP_ME(SoapServer, fault, 			arginfo_class_SoapServer_fault, 0)
-	PHP_ME(SoapServer, addSoapHeader, 	arginfo_class_SoapServer_addSoapHeader, 0)
-	PHP_FE_END
-};
-
-static const zend_function_entry soap_client_functions[] = {
-	PHP_ME(SoapClient, __construct, 				arginfo_class_SoapClient___construct, 0)
-	PHP_ME(SoapClient, __call, 						arginfo_class_SoapClient___call, 0)
-	ZEND_NAMED_ME(__soapCall, ZEND_MN(SoapClient___call), arginfo_class_SoapClient___soapCall, 0)
-	PHP_ME(SoapClient, __getLastRequest, 			arginfo_class_SoapClient___getLastRequest, 0)
-	PHP_ME(SoapClient, __getLastResponse, 			arginfo_class_SoapClient___getLastResponse, 0)
-	PHP_ME(SoapClient, __getLastRequestHeaders, 	arginfo_class_SoapClient___getLastRequestHeaders, 0)
-	PHP_ME(SoapClient, __getLastResponseHeaders, 	arginfo_class_SoapClient___getLastResponseHeaders, 0)
-	PHP_ME(SoapClient, __getFunctions, 				arginfo_class_SoapClient___getFunctions, 0)
-	PHP_ME(SoapClient, __getTypes, 					arginfo_class_SoapClient___getTypes, 0)
-	PHP_ME(SoapClient, __doRequest, 				arginfo_class_SoapClient___doRequest, 0)
-	PHP_ME(SoapClient, __setCookie, 				arginfo_class_SoapClient___setCookie, 0)
-	PHP_ME(SoapClient, __getCookies, 				arginfo_class_SoapClient___getCookies, 0)
-	PHP_ME(SoapClient, __setLocation, 				arginfo_class_SoapClient___setLocation, 0)
-	PHP_ME(SoapClient, __setSoapHeaders, 			arginfo_class_SoapClient___setSoapHeaders, 0)
-	PHP_FE_END
-};
-
-static const zend_function_entry soap_var_functions[] = {
-	PHP_ME(SoapVar, __construct, arginfo_class_SoapVar___construct, 0)
-	PHP_FE_END
-};
-
-static const zend_function_entry soap_param_functions[] = {
-	PHP_ME(SoapParam, __construct, arginfo_class_SoapParam___construct, 0)
-	PHP_FE_END
-};
-
-static const zend_function_entry soap_header_functions[] = {
-	PHP_ME(SoapHeader, __construct, arginfo_class_SoapHeader___construct, 0)
-	PHP_FE_END
-};
-
 zend_module_entry soap_module_entry = {
 #ifdef STANDARD_MODULE_HEADER
   STANDARD_MODULE_HEADER,
 #endif
   "soap",
-  soap_functions,
+  ext_functions,
   PHP_MINIT(soap),
   PHP_MSHUTDOWN(soap),
   PHP_RINIT(soap),
@@ -496,26 +389,26 @@ PHP_MINIT_FUNCTION(soap)
 		soap_call_function_handler should be of type zend_function, not (*handle_function_call).
 	*/
 	{
-		INIT_CLASS_ENTRY(ce, PHP_SOAP_CLIENT_CLASSNAME, soap_client_functions);
+		INIT_CLASS_ENTRY(ce, PHP_SOAP_CLIENT_CLASSNAME, class_SoapClient_methods);
 		soap_class_entry = zend_register_internal_class(&ce);
 	}
 	/* Register SoapVar class */
-	INIT_CLASS_ENTRY(ce, PHP_SOAP_VAR_CLASSNAME, soap_var_functions);
+	INIT_CLASS_ENTRY(ce, PHP_SOAP_VAR_CLASSNAME, class_SoapVar_methods);
 	soap_var_class_entry = zend_register_internal_class(&ce);
 
 	/* Register SoapServer class */
-	INIT_CLASS_ENTRY(ce, PHP_SOAP_SERVER_CLASSNAME, soap_server_functions);
+	INIT_CLASS_ENTRY(ce, PHP_SOAP_SERVER_CLASSNAME, class_SoapServer_methods);
 	soap_server_class_entry = zend_register_internal_class(&ce);
 
 	/* Register SoapFault class */
-	INIT_CLASS_ENTRY(ce, PHP_SOAP_FAULT_CLASSNAME, soap_fault_functions);
+	INIT_CLASS_ENTRY(ce, PHP_SOAP_FAULT_CLASSNAME, class_SoapFault_methods);
 	soap_fault_class_entry = zend_register_internal_class_ex(&ce, zend_ce_exception);
 
 	/* Register SoapParam class */
-	INIT_CLASS_ENTRY(ce, PHP_SOAP_PARAM_CLASSNAME, soap_param_functions);
+	INIT_CLASS_ENTRY(ce, PHP_SOAP_PARAM_CLASSNAME, class_SoapParam_methods);
 	soap_param_class_entry = zend_register_internal_class(&ce);
 
-	INIT_CLASS_ENTRY(ce, PHP_SOAP_HEADER_CLASSNAME, soap_header_functions);
+	INIT_CLASS_ENTRY(ce, PHP_SOAP_HEADER_CLASSNAME, class_SoapHeader_methods);
 	soap_header_class_entry = zend_register_internal_class(&ce);
 
 	le_sdl = zend_register_list_destructors_ex(delete_sdl_res, NULL, "SOAP SDL", module_number);

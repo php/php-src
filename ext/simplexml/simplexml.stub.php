@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 function simplexml_load_file(string $filename, ?string $class_name = SimpleXMLElement::class, int $options = 0, string $ns = '', bool $is_prefix = false): SimpleXMLElement|false {}
 
 function simplexml_load_string(string $data, ?string $class_name = SimpleXMLElement::class, int $options = 0, string $ns = '', bool $is_prefix = false): SimpleXMLElement|false {}
@@ -17,7 +19,10 @@ class SimpleXMLElement implements Stringable
     /** @return string|bool */
     public function asXML(string $filename = UNKNOWN) {}
 
-    /** @return string|bool */
+    /**
+     * @return string|bool
+     * @alias SimpleXMLElement::asXML
+     */
     public function saveXML(string $filename = UNKNOWN) {}
 
     /** @return array */

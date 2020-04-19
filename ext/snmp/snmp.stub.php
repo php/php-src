@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 /** @param array|string $object_id */
 function snmpget(string $host, string $community, $object_id, int $timeout = UNKNOWN, int $retries = UNKNOWN): array|bool {}
 
