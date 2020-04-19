@@ -11,6 +11,9 @@ PHP                                                                        NEWS
   . Fixed bug #78221 (DOMNode::normalize() doesn't remove empty text nodes).
     (cmb)
 
+- FCGI:
+  . Fixed bug #79491 (Search for .user.ini extends up to root dir). (cmb)
+
 - MBString:
   . Fixed bug #79441 (Segfault in mb_chr() if internal encoding is unsupported).
     (Girgias)
