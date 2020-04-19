@@ -44,7 +44,7 @@ PHP_SXE_API zend_class_entry *sxe_get_element_class_entry() /* {{{ */
 #define SXE_ME(func, arg_info, flags) PHP_ME(simplexml_element, func, arg_info, flags)
 #define SXE_MALIAS(func, alias, arg_info, flags) PHP_MALIAS(simplexml_element, func, alias, arg_info, flags)
 
-#define SXE_METHOD(func) PHP_METHOD(simplexml_element, func)
+#define SXE_METHOD(func) PHP_METHOD(SimpleXMLElement, func)
 
 static php_sxe_object* php_sxe_object_new(zend_class_entry *ce, zend_function *fptr_count);
 static xmlNodePtr php_sxe_reset_iterator(php_sxe_object *sxe, int use_data);
@@ -2576,14 +2576,6 @@ PHP_FUNCTION(simplexml_import_dom)
 }
 /* }}} */
 
-static const zend_function_entry simplexml_functions[] = { /* {{{ */
-	PHP_FE(simplexml_load_file, 	arginfo_simplexml_load_file)
-	PHP_FE(simplexml_load_string,	arginfo_simplexml_load_string)
-	PHP_FE(simplexml_import_dom,	arginfo_simplexml_import_dom)
-	PHP_FE_END
-};
-/* }}} */
-
 static const zend_module_dep simplexml_deps[] = { /* {{{ */
 	ZEND_MOD_REQUIRED("libxml")
 	ZEND_MOD_REQUIRED("spl")
@@ -2595,7 +2587,7 @@ zend_module_entry simplexml_module_entry = { /* {{{ */
 	STANDARD_MODULE_HEADER_EX, NULL,
 	simplexml_deps,
 	"SimpleXML",
-	simplexml_functions,
+	ext_functions,
 	PHP_MINIT(simplexml),
 	PHP_MSHUTDOWN(simplexml),
 	NULL,
@@ -2610,34 +2602,13 @@ zend_module_entry simplexml_module_entry = { /* {{{ */
 ZEND_GET_MODULE(simplexml)
 #endif
 
-/* the method table */
-/* each method can have its own parameters and visibility */
-static const zend_function_entry sxe_functions[] = { /* {{{ */
-	SXE_ME(__construct,            arginfo_class_SimpleXMLElement___construct, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL) /* must be called */
-	SXE_ME(asXML,                  arginfo_class_SimpleXMLElement_asXML, ZEND_ACC_PUBLIC)
-	SXE_MALIAS(saveXML, asXML,	   arginfo_class_SimpleXMLElement_saveXML, ZEND_ACC_PUBLIC)
-	SXE_ME(xpath,                  arginfo_class_SimpleXMLElement_xpath, ZEND_ACC_PUBLIC)
-	SXE_ME(registerXPathNamespace, arginfo_class_SimpleXMLElement_registerXPathNamespace, ZEND_ACC_PUBLIC)
-	SXE_ME(attributes,             arginfo_class_SimpleXMLElement_attributes, ZEND_ACC_PUBLIC)
-	SXE_ME(children,               arginfo_class_SimpleXMLElement_children, ZEND_ACC_PUBLIC)
-	SXE_ME(getNamespaces,          arginfo_class_SimpleXMLElement_getNamespaces, ZEND_ACC_PUBLIC)
-	SXE_ME(getDocNamespaces,       arginfo_class_SimpleXMLElement_getDocNamespaces, ZEND_ACC_PUBLIC)
-	SXE_ME(getName,                arginfo_class_SimpleXMLElement_getName, ZEND_ACC_PUBLIC)
-	SXE_ME(addChild,               arginfo_class_SimpleXMLElement_addChild, ZEND_ACC_PUBLIC)
-	SXE_ME(addAttribute,           arginfo_class_SimpleXMLElement_addAttribute, ZEND_ACC_PUBLIC)
-	SXE_ME(__toString,             arginfo_class_SimpleXMLElement___toString, ZEND_ACC_PUBLIC)
-	SXE_ME(count,                  arginfo_class_SimpleXMLElement_count, ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};
-/* }}} */
-
 /* {{{ PHP_MINIT_FUNCTION(simplexml)
  */
 PHP_MINIT_FUNCTION(simplexml)
 {
 	zend_class_entry sxe;
 
-	INIT_CLASS_ENTRY(sxe, "SimpleXMLElement", sxe_functions);
+	INIT_CLASS_ENTRY(sxe, "SimpleXMLElement", class_SimpleXMLElement_methods);
 	sxe.create_object = sxe_object_new;
 	sxe_class_entry = zend_register_internal_class(&sxe);
 	sxe_class_entry->get_iterator = php_sxe_get_iterator;

@@ -57,53 +57,10 @@
 ZEND_DECLARE_MODULE_GLOBALS(pcntl)
 static PHP_GINIT_FUNCTION(pcntl);
 
-static const zend_function_entry pcntl_functions[] = {
-	PHP_FE(pcntl_fork,			arginfo_pcntl_fork)
-	PHP_FE(pcntl_waitpid,		arginfo_pcntl_waitpid)
-	PHP_FE(pcntl_wait,			arginfo_pcntl_wait)
-	PHP_FE(pcntl_signal,		arginfo_pcntl_signal)
-	PHP_FE(pcntl_signal_get_handler,		arginfo_pcntl_signal_get_handler)
-	PHP_FE(pcntl_signal_dispatch,	arginfo_pcntl_signal_dispatch)
-	PHP_FE(pcntl_wifexited,		arginfo_pcntl_wifexited)
-	PHP_FE(pcntl_wifstopped,	arginfo_pcntl_wifstopped)
-	PHP_FE(pcntl_wifsignaled,	arginfo_pcntl_wifsignaled)
-	PHP_FE(pcntl_wexitstatus,	arginfo_pcntl_wifexitstatus)
-	PHP_FE(pcntl_wtermsig,		arginfo_pcntl_wtermsig)
-	PHP_FE(pcntl_wstopsig,		arginfo_pcntl_wstopsig)
-	PHP_FE(pcntl_exec,			arginfo_pcntl_exec)
-	PHP_FE(pcntl_alarm,			arginfo_pcntl_alarm)
-	PHP_FE(pcntl_get_last_error,	arginfo_pcntl_get_last_error)
-	PHP_FALIAS(pcntl_errno, pcntl_get_last_error,	arginfo_pcntl_errno)
-	PHP_FE(pcntl_strerror,		arginfo_pcntl_strerror)
-#ifdef HAVE_GETPRIORITY
-	PHP_FE(pcntl_getpriority,	arginfo_pcntl_getpriority)
-#endif
-#ifdef HAVE_SETPRIORITY
-	PHP_FE(pcntl_setpriority,	arginfo_pcntl_setpriority)
-#endif
-#ifdef HAVE_SIGPROCMASK
-	PHP_FE(pcntl_sigprocmask,	arginfo_pcntl_sigprocmask)
-#endif
-#ifdef HAVE_STRUCT_SIGINFO_T
-# if HAVE_SIGWAITINFO && HAVE_SIGTIMEDWAIT
-	PHP_FE(pcntl_sigwaitinfo,	arginfo_pcntl_sigwaitinfo)
-	PHP_FE(pcntl_sigtimedwait,	arginfo_pcntl_sigtimedwait)
-# endif
-#endif
-#ifdef HAVE_WCONTINUED
-	PHP_FE(pcntl_wifcontinued,	arginfo_pcntl_wifcontinued)
-#endif
-	PHP_FE(pcntl_async_signals,	arginfo_pcntl_async_signals)
-#ifdef HAVE_UNSHARE
-	PHP_FE(pcntl_unshare,		arginfo_pcntl_unshare)
-#endif
-	PHP_FE_END
-};
-
 zend_module_entry pcntl_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"pcntl",
-	pcntl_functions,
+	ext_functions,
 	PHP_MINIT(pcntl),
 	PHP_MSHUTDOWN(pcntl),
 	PHP_RINIT(pcntl),
