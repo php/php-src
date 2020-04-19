@@ -27,13 +27,6 @@
 #include "mysqli_priv.h"
 #include "zend_exceptions.h"
 
-/* {{{ mysqli_exception_methods[]
- */
-const zend_function_entry mysqli_exception_methods[] = {
-	PHP_FE_END
-};
-/* }}} */
-
 void php_mysqli_throw_sql_exception(char *sqlstate, int errorno, char *format, ...)
 {
 	zval	sql_ex;

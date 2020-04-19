@@ -25,7 +25,6 @@
 #include "ext/standard/info.h"
 #include "php_mysqli_structs.h"
 #include "zend_exceptions.h"
-#include "mysqli_fe.h"
 
 #define MAP_PROPERTY_MYG_BOOL_READ(name, value) \
 static int name(mysqli_object *obj, zval *retval, zend_bool quiet) \
@@ -141,9 +140,3 @@ const mysqli_property_entry mysqli_driver_property_entries[] = {
 	{NULL, 0, NULL, NULL}
 };
 
-/* {{{ mysqli_driver_methods[]
- */
-const zend_function_entry mysqli_driver_methods[] = {
-	PHP_FE_END
-};
-/* }}} */
