@@ -2,120 +2,72 @@
 
 /** @generate-function-entries */
 
-/** @param resource $handle */
-function curl_close($handle): void {}
+function curl_close(Curl $handle): void {}
 
-/**
- * @param resource $handle
- * @return resource|false
- */
-function curl_copy_handle($handle) {}
+function curl_copy_handle(Curl $handle): Curl|false {}
 
-/** @param resource $handle */
-function curl_errno($handle): int {}
+function curl_errno(Curl $handle): int {}
 
-/** @param resource $handle */
-function curl_error($handle): string {}
+function curl_error(Curl $handle): string {}
 
 #if LIBCURL_VERSION_NUM >= 0x070f04 /* 7.15.4 */
-/** @param resource $handle */
-function curl_escape($handle, string $string): string|false {}
+function curl_escape(Curl $handle, string $string): string|false {}
 
-/** @param resource $handle */
-function curl_unescape($handle, string $string): string|false {}
+function curl_unescape(Curl $handle, string $string): string|false {}
 
-/**
- * @param resource $multi_handle
- * @param mixed $value
- */
-function curl_multi_setopt($multi_handle, int $option, $value): bool {}
+/** @param mixed $value */
+function curl_multi_setopt(CurlMulti $multi_handle, int $option, $value): bool {}
 
 #endif
 
-/** @param resource $handle */
-function curl_exec($handle): string|bool {}
+function curl_exec(Curl $handle): string|bool {}
 
-function curl_file_create(
-    string $filename,
-    string $mimetype = UNKNOWN,
-    string $postname = UNKNOWN
-): CURLFile {}
+function curl_file_create(string $filename, string $mimetype = UNKNOWN, string $postname = UNKNOWN): CURLFile {}
 
-/**
- * @param resource $handle
- * @return mixed
- */
-function curl_getinfo($handle, int $option = UNKNOWN) {}
+/** @return mixed */
+function curl_getinfo(Curl $handle, int $option = UNKNOWN) {}
 
-/**
- * @param resource $handle
- * @return resource|false
- */
-function curl_init(string $url = UNKNOWN) {}
+function curl_init(string $url = UNKNOWN): Curl|false {}
 
-/**
- * @param resource $multi_handle
- * @param resource $handle
- */
-function curl_multi_add_handle($multi_handle, $handle): int {}
+function curl_multi_add_handle(CurlMulti $multi_handle, Curl $handle): int {}
 
-/** @param resource $multi_handle */
-function curl_multi_close($multi_handle): void {}
+function curl_multi_close(CurlMulti $multi_handle): void {}
 
-/** @param resource $multi_handle */
-function curl_multi_errno($multi_handle): int {}
+function curl_multi_errno(CurlMulti $multi_handle): int {}
 
-/** @param resource $multi_handle */
-function curl_multi_exec($multi_handle, &$still_running): int {}
+function curl_multi_exec(CurlMulti $multi_handle, &$still_running): int {}
 
-/** @param resource $multi_handle */
-function curl_multi_getcontent($multi_handle): ?string {}
+function curl_multi_getcontent(CurlMulti $multi_handle): ?string {}
 
-/** @param resource $multi_handle */
-function curl_multi_info_read($multi_handle, &$msgs_in_queue = null): array|false {}
+function curl_multi_info_read(CurlMulti $multi_handle, &$msgs_in_queue = null): array|false {}
 
-/** @return resource */
-function curl_multi_init() {}
+function curl_multi_init(): CurlMulti {}
 
-/**
- * @param resource $multi_handle
- * @param resource $handle
- */
-function curl_multi_remove_handle($multi_handle, $handle): int {}
+function curl_multi_remove_handle(CurlMulti $multi_handle, Curl $handle): int {}
 
-/** @param resource $multi_handle */
-function curl_multi_select($multi_handle, float $timeout = 1.0): int {}
+function curl_multi_select(CurlMulti $multi_handle, float $timeout = 1.0): int {}
 
 function curl_multi_strerror(int $error_number): ?string {}
 
 #if LIBCURL_VERSION_NUM >= 0x071200 /* 7.18.0 */
-/** @param resource $handle */
-function curl_pause($handle, int $bitmask): int {}
+function curl_pause(Curl $handle, int $bitmask): int {}
 #endif
 
-/** @param resource $handle */
-function curl_reset($handle): void {}
+function curl_reset(Curl $handle): void {}
 
-/** @param resource $handle */
-function curl_setopt_array($handle, array $options): bool {}
+function curl_setopt_array(Curl $handle, array $options): bool {}
 
-/**
- * @param resource $handle
- * @param mixed $value
- */
-function curl_setopt($handle, int $option, $value): bool {}
+/** @param mixed $value */
+function curl_setopt(Curl $handle, int $option, $value): bool {}
 
-/** @param resource $share_handle */
-function curl_share_close($share_handle): void {}
+function curl_share_close(CurlShare $share_handle): void {}
 
-/** @param resource $share_handle */
-function curl_share_errno($share_handle): int {}
+function curl_share_errno(CurlShare $share_handle): int {}
 
-/** @return resource */
-function curl_share_init() {}
+function curl_share_init(): CurlShare {}
 
-/** @param resource $share_handle */
-function curl_share_setopt($share_handle, int $option, $value): bool {}
+/** @param mixed $value */
+function curl_share_setopt(CurlShare $share_handle, int $option, $value): bool {}
 
 function curl_share_strerror(int $error_number): ?string {}
 

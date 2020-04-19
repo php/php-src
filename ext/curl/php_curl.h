@@ -59,21 +59,9 @@ extern zend_module_entry curl_module_entry;
 #define SAVE_CURL_ERROR(__handle, __err) \
     do { (__handle)->err.no = (int) __err; } while (0)
 
-extern int  le_curl;
-#define le_curl_name "cURL handle"
-extern int  le_curl_multi_handle;
-#define le_curl_multi_handle_name "cURL Multi Handle"
-extern int  le_curl_share_handle;
-#define le_curl_share_handle_name "cURL Share Handle"
-//extern int  le_curl_pushheaders;
-//#define le_curl_pushheaders "cURL Push Headers"
-
 PHP_MINIT_FUNCTION(curl);
 PHP_MSHUTDOWN_FUNCTION(curl);
 PHP_MINFO_FUNCTION(curl);
-
-void _php_curl_multi_close(zend_resource *);
-void _php_curl_share_close(zend_resource *);
 
 typedef struct {
 	zval                  func_name;
@@ -137,6 +125,7 @@ typedef struct {
 	uint32_t*                     clone;
 #if LIBCURL_VERSION_NUM >= 0x073800 /* 7.56.0 */
 	zval                          postfields;
+	zend_object                   std;
 #endif
 } php_curl;
 
@@ -154,6 +143,7 @@ typedef struct {
 	struct {
 		int no;
 	} err;
+	zend_object std;
 } php_curlm;
 
 typedef struct {
@@ -161,13 +151,34 @@ typedef struct {
 	struct {
 		int no;
 	} err;
+	zend_object std;
 } php_curlsh;
 
-php_curl *alloc_curl_handle();
+php_curl *alloc_curl_handle(zval *curl);
 void _php_curl_cleanup_handle(php_curl *);
 void _php_curl_multi_cleanup_list(void *data);
 void _php_curl_verify_handlers(php_curl *ch, int reporterror);
 void _php_setup_easy_copy_handlers(php_curl *ch, php_curl *source);
+
+static inline php_curl *curl_from_obj(zend_object *obj) {
+	return (php_curl *)((char *)(obj) - XtOffsetOf(php_curl, std));
+}
+
+#define Z_CURL_P(zv) curl_from_obj(Z_OBJ_P(zv))
+
+static inline php_curlsh *curl_share_from_obj(zend_object *obj) {
+	return (php_curlsh *)((char *)(obj) - XtOffsetOf(php_curlsh, std));
+}
+
+#define Z_CURL_SHARE_P(zv) curl_share_from_obj(Z_OBJ_P(zv))
+
+PHP_CURL_API extern zend_class_entry *curl_ce;
+
+PHP_CURL_API extern zend_class_entry *curl_multi_ce;
+void curl_multi_register_class(void);
+
+PHP_CURL_API extern zend_class_entry *curl_share_ce;
+void curl_share_register_class(void);
 
 void curlfile_register_class(void);
 PHP_CURL_API extern zend_class_entry *curl_CURLFile_class;

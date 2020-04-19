@@ -30,7 +30,7 @@
 
 #define SAVE_CURLSH_ERROR(__handle, __err) (__handle)->err.no = (int) __err;
 
-/* {{{ proto void curl_share_init()
+/* {{{ proto CurlShare curl_share_init()
    Initialize a share curl handle */
 PHP_FUNCTION(curl_share_init)
 {
@@ -38,30 +38,22 @@ PHP_FUNCTION(curl_share_init)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	sh = ecalloc(1, sizeof(php_curlsh));
+	object_init_ex(return_value, curl_share_ce);
+	sh = Z_CURL_SHARE_P(return_value);
 
 	sh->share = curl_share_init();
-
-	RETURN_RES(zend_register_resource(sh, le_curl_share_handle));
 }
 /* }}} */
 
-/* {{{ proto void curl_share_close(resource sh)
+/* {{{ proto void curl_share_close(CurlShare sh)
    Close a set of cURL handles */
 PHP_FUNCTION(curl_share_close)
 {
 	zval *z_sh;
-	php_curlsh *sh;
 
 	ZEND_PARSE_PARAMETERS_START(1,1)
-		Z_PARAM_RESOURCE(z_sh)
+		Z_PARAM_OBJECT_OF_CLASS(z_sh, curl_share_ce)
 	ZEND_PARSE_PARAMETERS_END();
-
-	if ((sh = (php_curlsh *)zend_fetch_resource(Z_RES_P(z_sh), le_curl_share_handle_name, le_curl_share_handle)) == NULL) {
-		RETURN_THROWS();
-	}
-
-	zend_list_close(Z_RES_P(z_sh));
 }
 /* }}} */
 
@@ -87,23 +79,21 @@ static int _php_curl_share_setopt(php_curlsh *sh, zend_long option, zval *zvalue
 }
 /* }}} */
 
-/* {{{ proto bool curl_share_setopt(resource sh, int option, mixed value)
+/* {{{ proto bool curl_share_setopt(CurlShare sh, int option, mixed value)
       Set an option for a cURL transfer */
 PHP_FUNCTION(curl_share_setopt)
 {
-	zval       *zid, *zvalue;
+	zval       *z_sh, *zvalue;
 	zend_long        options;
 	php_curlsh *sh;
 
 	ZEND_PARSE_PARAMETERS_START(3,3)
-		Z_PARAM_RESOURCE(zid)
+		Z_PARAM_OBJECT_OF_CLASS(z_sh, curl_share_ce)
 		Z_PARAM_LONG(options)
 		Z_PARAM_ZVAL(zvalue)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if ((sh = (php_curlsh *)zend_fetch_resource(Z_RES_P(zid), le_curl_share_handle_name, le_curl_share_handle)) == NULL) {
-		RETURN_THROWS();
-	}
+	sh = Z_CURL_SHARE_P(z_sh);
 
 	if (!_php_curl_share_setopt(sh, options, zvalue, return_value)) {
 		RETURN_TRUE;
@@ -113,18 +103,7 @@ PHP_FUNCTION(curl_share_setopt)
 }
 /* }}} */
 
-void _php_curl_share_close(zend_resource *rsrc) /* {{{ */
-{
-	php_curlsh *sh = (php_curlsh *)rsrc->ptr;
-	if (sh) {
-		curl_share_cleanup(sh->share);
-		efree(sh);
-		rsrc->ptr = NULL;
-	}
-}
-/* }}} */
-
-/* {{{ proto int curl_share_errno(resource mh)
+/* {{{ proto int curl_share_errno(CurlShare sh)
          Return an integer containing the last share curl error number */
 PHP_FUNCTION(curl_share_errno)
 {
@@ -132,12 +111,10 @@ PHP_FUNCTION(curl_share_errno)
 	php_curlsh  *sh;
 
 	ZEND_PARSE_PARAMETERS_START(1,1)
-		Z_PARAM_RESOURCE(z_sh)
+		Z_PARAM_OBJECT_OF_CLASS(z_sh, curl_share_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if ((sh = (php_curlsh *)zend_fetch_resource(Z_RES_P(z_sh), le_curl_share_handle_name, le_curl_share_handle)) == NULL) {
-		RETURN_THROWS();
-	}
+	sh = Z_CURL_SHARE_P(z_sh);
 
 	RETURN_LONG(sh->err.no);
 }
@@ -163,5 +140,53 @@ PHP_FUNCTION(curl_share_strerror)
 	}
 }
 /* }}} */
+
+/* CurlShare class */
+
+static zend_object_handlers curl_share_handlers;
+
+static const zend_function_entry curl_share_methods[] = {
+	PHP_FE_END
+};
+
+static zend_object *curl_share_create_object(zend_class_entry *class_type) {
+	php_curlsh *intern = zend_object_alloc(sizeof(php_curlsh), class_type);
+	memset(intern, 0, sizeof(php_curlsh) - sizeof(zend_object));
+
+	zend_object_std_init(&intern->std, class_type);
+	object_properties_init(&intern->std, class_type);
+	intern->std.handlers = &curl_share_handlers;
+
+	return &intern->std;
+}
+
+static zend_function *curl_share_get_constructor(zend_object *object) {
+	zend_throw_error(NULL, "Cannot directly construct CurlShare, use curl_share_init() instead");
+	return NULL;
+}
+
+void curl_share_free_obj(zend_object *object)
+{
+	php_curlsh *sh = curl_share_from_obj(object);
+
+	if (sh) {
+		curl_share_cleanup(sh->share);
+		zend_object_std_dtor(&sh->std);
+		efree(sh);
+	}
+}
+
+void curl_share_register_class(void) {
+	zend_class_entry ce_share;
+	INIT_CLASS_ENTRY(ce_share, "CurlShare", curl_share_methods);
+	ce_share.create_object = curl_share_create_object;
+	ce_share.ce_flags |= ZEND_ACC_FINAL;
+	curl_share_ce = zend_register_internal_class(&ce_share);
+
+	memcpy(&curl_share_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	curl_share_handlers.offset = XtOffsetOf(php_curlsh, std);
+	curl_share_handlers.free_obj = curl_share_free_obj;
+	curl_share_handlers.get_constructor = curl_share_get_constructor;
+}
 
 #endif
