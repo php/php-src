@@ -65,7 +65,7 @@ if test "$PHP_TIDY" != "no"; then
   PHP_ADD_LIBRARY_WITH_PATH($TIDY_LIB_NAME, $TIDY_LIBDIR, TIDY_SHARED_LIBADD)
   PHP_ADD_INCLUDE($TIDY_INCDIR)
 
-  dnl Add -Wno-empty-body as this is an issue upstream
+  dnl Add -Wno-ignored-qualifiers as this is an issue upstream
   TIDY_COMPILER_FLAGS="$TIDY_CFLAGS -Wno-ignored-qualifiers -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
   PHP_NEW_EXTENSION(tidy, tidy.c, $ext_shared,, $TIDY_COMPILER_FLAGS)
   PHP_SUBST(TIDY_SHARED_LIBADD)
