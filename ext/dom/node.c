@@ -97,8 +97,7 @@ int dom_node_node_name_read(dom_object *obj, zval *retval)
 		case XML_TEXT_NODE:
 			str = "#text";
 			break;
-		default:
-			php_error_docref(NULL, E_WARNING, "Invalid Node Type");
+		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 
 	if (str != NULL) {
@@ -875,6 +874,7 @@ PHP_METHOD(DOMNode, insertBefore)
 	}
 
 	if (child->type == XML_DOCUMENT_FRAG_NODE && child->children == NULL) {
+		/* TODO Drop Warning? */
 		php_error_docref(NULL, E_WARNING, "Document Fragment is empty");
 		RETURN_FALSE;
 	}
@@ -981,8 +981,8 @@ PHP_METHOD(DOMNode, insertBefore)
 	}
 
 	if (NULL == new_child) {
-		php_error_docref(NULL, E_WARNING, "Couldn't add newnode as the previous sibling of refnode");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Cannot add newnode as the previous sibling of refnode");
+		RETURN_THROWS();
 	}
 
 	dom_reconcile_ns(parentp->doc, new_child);
@@ -1074,7 +1074,7 @@ PHP_METHOD(DOMNode, replaceChild)
 		DOM_RET_OBJ(oldchild, &ret, intern);
 		return;
 	} else {
-		php_dom_throw_error(NOT_FOUND_ERR, dom_get_strict_error(intern->document));
+		php_dom_throw_error(NOT_FOUND_ERR, stricterror);
 		RETURN_FALSE;
 	}
 }
@@ -1173,6 +1173,7 @@ PHP_METHOD(DOMNode, appendChild)
 	}
 
 	if (child->type == XML_DOCUMENT_FRAG_NODE && child->children == NULL) {
+		/* TODO Drop Warning? */
 		php_error_docref(NULL, E_WARNING, "Document Fragment is empty");
 		RETURN_FALSE;
 	}
@@ -1221,6 +1222,7 @@ PHP_METHOD(DOMNode, appendChild)
 	if (new_child == NULL) {
 		new_child = xmlAddChild(nodep, child);
 		if (new_child == NULL) {
+			// TODO Convert to Error?
 			php_error_docref(NULL, E_WARNING, "Couldn't append node");
 			RETURN_FALSE;
 		}
@@ -1570,8 +1572,8 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 	docp = nodep->doc;
 
 	if (! docp) {
-		php_error_docref(NULL, E_WARNING, "Node must be associated with a document");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Node must be associated with a document");
+		RETURN_THROWS();
 	}
 
 	if (xpath_array == NULL) {
@@ -1587,8 +1589,8 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 					xmlXPathFreeObject(xpathobjp);
 				}
 				xmlXPathFreeContext(ctxp);
-				php_error_docref(NULL, E_WARNING, "XPath query did not return a nodeset.");
-				RETURN_FALSE;
+				zend_throw_error(NULL, "XPath query did not return a nodeset");
+				RETURN_THROWS();
 			}
 		}
 	} else {
@@ -1598,12 +1600,17 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 		char *xquery;
 
 		tmp = zend_hash_str_find(ht, "query", sizeof("query")-1);
-		if (tmp && Z_TYPE_P(tmp) == IS_STRING) {
-			xquery = Z_STRVAL_P(tmp);
-		} else {
-			php_error_docref(NULL, E_WARNING, "'query' missing from xpath array or is not a string");
-			RETURN_FALSE;
+		if (!tmp) {
+			/* if mode == 0 then $xpath arg is 3, if mode == 1 then $xpath is 4 */
+			zend_argument_value_error(3 + mode, "must have a \"query\" key");
+			RETURN_THROWS();
 		}
+		if (Z_TYPE_P(tmp) != IS_STRING) {
+			/* if mode == 0 then $xpath arg is 3, if mode == 1 then $xpath is 4 */
+			zend_argument_type_error(3 + mode, "\"query\" option must be a string, %s given", zend_zval_type_name(tmp));
+			RETURN_THROWS();
+		}
+		xquery = Z_STRVAL_P(tmp);
 
 		ctxp = xmlXPathNewContext(docp);
 		ctxp->node = nodep;
@@ -1631,8 +1638,8 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 				xmlXPathFreeObject(xpathobjp);
 			}
 			xmlXPathFreeContext(ctxp);
-			php_error_docref(NULL, E_WARNING, "XPath query did not return a nodeset.");
-			RETURN_FALSE;
+			zend_throw_error(NULL, "XPath query did not return a nodeset");
+			RETURN_THROWS();
 		}
 	}
 
@@ -1738,6 +1745,7 @@ PHP_METHOD(DOMNode, getNodePath)
 
 	value = (char *) xmlGetNodePath(nodep);
 	if (value == NULL) {
+		/* TODO Research if can return empty string */
 		RETURN_NULL();
 	} else {
 		RETVAL_STRING(value);

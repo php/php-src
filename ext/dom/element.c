@@ -49,7 +49,7 @@ PHP_METHOD(DOMElement, __construct)
 	name_valid = xmlValidateName((xmlChar *) name, 0);
 	if (name_valid != 0) {
 		php_dom_throw_error(INVALID_CHARACTER_ERR, 1);
-		return;
+		RETURN_THROWS();
 	}
 
 	/* Namespace logic is separate and only when uri passed in to insure no BC breakage */
@@ -71,7 +71,7 @@ PHP_METHOD(DOMElement, __construct)
 				xmlFreeNode(nodep);
 			}
 			php_dom_throw_error(errorcode, 1);
-			return;
+			RETURN_THROWS();
 		}
 	} else {
 	    /* If you don't pass a namespace uri, then you can't set a prefix */
@@ -80,14 +80,14 @@ PHP_METHOD(DOMElement, __construct)
 			xmlFree(localname);
 			xmlFree(prefix);
 	        php_dom_throw_error(NAMESPACE_ERR, 1);
-	        return;
+	        RETURN_THROWS();
 	    }
 		nodep = xmlNewNode(NULL, (xmlChar *) name);
 	}
 
 	if (!nodep) {
 		php_dom_throw_error(INVALID_STATE_ERR, 1);
-		return;
+		RETURN_THROWS();
 	}
 
 	if (value_len > 0) {
@@ -255,14 +255,14 @@ PHP_METHOD(DOMElement, setAttribute)
 	}
 
 	if (name_len == 0) {
-		php_error_docref(NULL, E_WARNING, "Attribute Name is required");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
 	}
 
 	name_valid = xmlValidateName((xmlChar *) name, 0);
 	if (name_valid != 0) {
 		php_dom_throw_error(INVALID_CHARACTER_ERR, 1);
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
@@ -294,8 +294,8 @@ PHP_METHOD(DOMElement, setAttribute)
 		attr = (xmlNodePtr)xmlSetProp(nodep, (xmlChar *) name, (xmlChar *)value);
 	}
 	if (!attr) {
-		php_error_docref(NULL, E_WARNING, "No such attribute '%s'", name);
-		RETURN_FALSE;
+		zend_argument_value_error(1, "must be a valid XML attribute");
+		RETURN_THROWS();
 	}
 
 	DOM_RET_OBJ(attr, &ret, intern);
@@ -424,8 +424,8 @@ PHP_METHOD(DOMElement, setAttributeNode)
 	DOM_GET_OBJ(attrp, node, xmlAttrPtr, attrobj);
 
 	if (attrp->type != XML_ATTRIBUTE_NODE) {
-		php_error_docref(NULL, E_WARNING, "Attribute node is required");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "must have the node attribute");
+		RETURN_THROWS();
 	}
 
 	if (!(attrp->doc == NULL || attrp->doc == nodep->doc)) {
@@ -628,8 +628,8 @@ PHP_METHOD(DOMElement, setAttributeNS)
 	}
 
 	if (name_len == 0) {
-		php_error_docref(NULL, E_WARNING, "Attribute Name is required");
-		RETURN_FALSE;
+		zend_argument_value_error(2, "cannot be empty");
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(elemp, id, xmlNodePtr, intern);
@@ -873,10 +873,10 @@ PHP_METHOD(DOMElement, setAttributeNodeNS)
 
 	DOM_GET_OBJ(attrp, node, xmlAttrPtr, attrobj);
 
-	if (attrp->type != XML_ATTRIBUTE_NODE) {
-		php_error_docref(NULL, E_WARNING, "Attribute node is required");
-		RETURN_FALSE;
-	}
+	/* ZPP Guarantees that a DOMAttr class is given, as it is converted to a xmlAttr
+	 * to pass to libxml (see http://www.xmlsoft.org/html/libxml-tree.html#xmlAttr)
+	 * if it is not of type XML_ATTRIBUTE_NODE it indicates a bug somewhere */
+	ZEND_ASSERT(attrp->type == XML_ATTRIBUTE_NODE);
 
 	if (!(attrp->doc == NULL || attrp->doc == nodep->doc)) {
 		php_dom_throw_error(WRONG_DOCUMENT_ERR, dom_get_strict_error(intern->document));

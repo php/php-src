@@ -10,7 +10,11 @@ require_once('skipif.inc');
 $dom = new DOMDocument();
 $dom->loadXML("<root />");
 
-$dom->adoptNode($dom->documentElement);
+try {
+    $dom->adoptNode($dom->documentElement);
+} catch (\Error $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 ?>
---EXPECTF--
-Warning: DOMDocument::adoptNode(): Not yet implemented in %s
+--EXPECT--
+Not yet implemented

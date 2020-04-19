@@ -67,8 +67,8 @@ PHP_METHOD(DOMImplementation, createDocumentType)
 	}
 
 	if (name_len == 0) {
-		php_error_docref(NULL, E_WARNING, "qualifiedName is required");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
 	}
 
 	if (publicid_len > 0) {
@@ -134,12 +134,12 @@ PHP_METHOD(DOMImplementation, createDocument)
 	if (node != NULL) {
 		DOM_GET_OBJ(doctype, node, xmlDtdPtr, doctobj);
 		if (doctype->type == XML_DOCUMENT_TYPE_NODE) {
-			php_error_docref(NULL, E_WARNING, "Invalid DocumentType object");
-			RETURN_FALSE;
+			zend_argument_value_error(3, "is an invalid DocumentType object");
+			RETURN_THROWS();
 		}
 		if (doctype->doc != NULL) {
 			php_dom_throw_error(WRONG_DOCUMENT_ERR, 1);
-			RETURN_FALSE;
+			RETURN_THROWS();
 		}
 	} else {
 		doctobj = NULL;
@@ -163,7 +163,7 @@ PHP_METHOD(DOMImplementation, createDocument)
 			xmlFree(localname);
 		}
 		php_dom_throw_error(errorcode, 1);
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* currently letting libxml2 set the version string */
@@ -195,9 +195,9 @@ PHP_METHOD(DOMImplementation, createDocument)
 			}
 			xmlFreeDoc(docp);
 			xmlFree(localname);
-			/* Need some type of error here */
-			php_error_docref(NULL, E_WARNING, "Unexpected Error");
-			RETURN_FALSE;
+			/* Need some better type of error here */
+			php_dom_throw_error(PHP_ERR, 1);
+			RETURN_THROWS();
 		}
 
 		nodep->nsDef = nsptr;
