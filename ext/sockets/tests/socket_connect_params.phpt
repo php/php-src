@@ -11,18 +11,20 @@ fa@php.net
 ?>
 --FILE--
 <?php
-    $rand = rand(1,999);
-    $s_c = socket_create_listen(31330+$rand);
-    // wrong parameter count
-    try {
-        $s_w = socket_connect($s_c);
-    } catch (TypeError $e) {
-        echo $e->getMessage(), "\n";
-    }
-    $s_w = socket_connect($s_c, '0.0.0.0');
-    $s_w = socket_connect($s_c, '0.0.0.0', 31330+$rand);
 
-    socket_close($s_c);
+$s_c = socket_create_listen(0);
+socket_getsockname($s_c, $addr, $port);
+
+// wrong parameter count
+try {
+    $s_w = socket_connect($s_c);
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+$s_w = socket_connect($s_c, '0.0.0.0');
+$s_w = socket_connect($s_c, '0.0.0.0', $port);
+
+socket_close($s_c);
 
 ?>
 --EXPECTF--
