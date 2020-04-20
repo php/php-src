@@ -302,9 +302,10 @@ typedef struct _zend_jit_trace_start_rec {
 #define ZEND_JIT_TRACE_START_REC_SIZE 2
 
 typedef struct _zend_jit_trace_exit_info {
-	const zend_op *opline;     /* opline where VM should continue execution */
-	uint32_t       stack_size;
-	uint32_t       stack_offset;
+	const zend_op       *opline;     /* opline where VM should continue execution */
+	const zend_op_array *op_array;
+	uint32_t             stack_size;
+	uint32_t             stack_offset;
 } zend_jit_trace_exit_info;
 
 typedef union _zend_jit_trace_stack {
@@ -430,6 +431,7 @@ struct _zend_jit_trace_stack_frame {
 	} while (0)
 
 typedef struct _zend_jit_globals {
+	zend_jit_trace_rec *current_trace;
 	zend_jit_trace_stack_frame *current_frame;
 
 	const zend_op *bad_root_cache_opline[ZEND_JIT_TRACE_BAD_ROOT_SLOTS];

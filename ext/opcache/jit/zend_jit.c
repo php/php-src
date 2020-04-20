@@ -1370,7 +1370,7 @@ static uint32_t zend_interval_intersection(zend_lifetime_interval *ival1, zend_l
 
 /* See "Optimized Interval Splitting in a Linear Scan Register Allocator",
    Christian Wimmer VEE'05 (2005), Figure 4. Allocation without spilling */
-static int zend_jit_try_allocate_free_reg(const zend_op_array *op_array, zend_ssa *ssa, zend_lifetime_interval *current, zend_regset available, zend_regset *hints, zend_lifetime_interval *active, zend_lifetime_interval *inactive, zend_lifetime_interval **list, zend_lifetime_interval **free)
+static int zend_jit_try_allocate_free_reg(const zend_op_array *op_array, const zend_op **ssa_opcodes, zend_ssa *ssa, zend_lifetime_interval *current, zend_regset available, zend_regset *hints, zend_lifetime_interval *active, zend_lifetime_interval *inactive, zend_lifetime_interval **list, zend_lifetime_interval **free)
 {
 	zend_lifetime_interval *it;
 	uint32_t freeUntilPos[ZREG_NUM];
@@ -1403,7 +1403,9 @@ static int zend_jit_try_allocate_free_reg(const zend_op_array *op_array, zend_ss
 		while (it) {
 			if (current->range.start != zend_interval_end(it)) {
 				freeUntilPos[it->reg] = 0;
-			} else if (zend_jit_may_reuse_reg(op_array->opcodes + current->range.start, ssa->ops + current->range.start, ssa, current->ssa_var, it->ssa_var)) {
+			} else if (zend_jit_may_reuse_reg(
+					ssa_opcodes ? ssa_opcodes[current->range.start] : op_array->opcodes + current->range.start,
+					ssa->ops + current->range.start, ssa, current->ssa_var, it->ssa_var)) {
 				if (!ZEND_REGSET_IN(*hints, it->reg) &&
 				    /* TODO: Avoid most often scratch registers. Find a better way ??? */
 				    (!current->used_as_hint ||
@@ -1468,7 +1470,7 @@ static int zend_jit_try_allocate_free_reg(const zend_op_array *op_array, zend_ss
 		}
 		while (line <= range->end) {
 			regset = zend_jit_get_scratch_regset(
-				op_array->opcodes + line,
+				ssa_opcodes ? ssa_opcodes[line] : op_array->opcodes + line,
 				ssa->ops + line,
 				op_array, ssa, current->ssa_var, line == last_use_line);
 			ZEND_REGSET_FOREACH(regset, reg) {
@@ -1600,7 +1602,7 @@ static int zend_jit_allocate_blocked_reg(void)
 
 /* See "Optimized Interval Splitting in a Linear Scan Register Allocator",
    Christian Wimmer VEE'10 (2005), Figure 2. */
-static zend_lifetime_interval* zend_jit_linear_scan(const zend_op_array *op_array, zend_ssa *ssa, zend_lifetime_interval *list)
+static zend_lifetime_interval* zend_jit_linear_scan(const zend_op_array *op_array, const zend_op **ssa_opcodes, zend_ssa *ssa, zend_lifetime_interval *list)
 {
 	zend_lifetime_interval *unhandled, *active, *inactive, *handled, *free;
 	zend_lifetime_interval *current, **p, *q;
@@ -1659,7 +1661,7 @@ static zend_lifetime_interval* zend_jit_linear_scan(const zend_op_array *op_arra
 			}
 		}
 
-		if (zend_jit_try_allocate_free_reg(op_array, ssa, current, available, &hints, active, inactive, &unhandled, &free) ||
+		if (zend_jit_try_allocate_free_reg(op_array, ssa_opcodes, ssa, current, available, &hints, active, inactive, &unhandled, &free) ||
 		    zend_jit_allocate_blocked_reg()) {
 			ZEND_REGSET_EXCL(available, current->reg);
 			current->list_next = active;
@@ -1792,7 +1794,7 @@ static zend_lifetime_interval** zend_jit_allocate_registers(const zend_op_array 
 		}
 
 		/* Linear Scan Register Allocation */
-		list = zend_jit_linear_scan(op_array, ssa, list);
+		list = zend_jit_linear_scan(op_array, NULL, ssa, list);
 
 		if (list) {
 			intervals = zend_arena_calloc(&CG(arena), ssa->vars_count, sizeof(zend_lifetime_interval*));
@@ -2132,7 +2134,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 			}
 		}
 		if (ssa->cfg.blocks[b].flags & ZEND_BB_LOOP_HEADER) {
-			if (!zend_jit_check_timeout(&dasm_state, op_array->opcodes + ssa->cfg.blocks[b].start)) {
+			if (!zend_jit_check_timeout(&dasm_state, op_array->opcodes + ssa->cfg.blocks[b].start, NULL)) {
 				goto jit_failure;
 			}
 		}
