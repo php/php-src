@@ -15,6 +15,9 @@ PHP                                                                        NEWS
   . Fixed bug #79336 (ext/exif/tests/bug79046.phpt fails on Big endian arch).
     (Nikita)
 
+- FCGI:
+  . Fixed bug #79491 (Search for .user.ini extends up to root dir). (cmb)
+
 - MBString:
   . Fixed bug #79441 (Segfault in mb_chr() if internal encoding is unsupported).
     (Girgias)
