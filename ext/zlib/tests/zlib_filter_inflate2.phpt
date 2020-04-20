@@ -34,7 +34,7 @@ fclose($fp);
 @unlink(__DIR__ . '/test.txt.gz');
 ?>
 --EXPECTF--
-Notice: fread(): zlib inflate failed in %s on line %d
+Notice: fread(): zlib: data error in %s on line %d
 1
 2
 This is quite the thing ain't it

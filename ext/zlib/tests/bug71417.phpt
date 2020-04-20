@@ -70,7 +70,7 @@ gzdecode():
 Warning: gzdecode(): data error in %s on line %d
 
 
-Notice: fread(): zlib inflate failed in %s on line %d
+Notice: fread(): zlib: data error in %s on line %d
 read: bool(false)
 gzdecode(): 
 Warning: gzdecode(): data error in %s on line %d
@@ -80,11 +80,11 @@ gzdecode():
 Warning: gzdecode(): data error in %s on line %d
 
 
-Notice: fread(): zlib inflate failed in %s on line %d
+Notice: fread(): zlib: data error in %s on line %d
 read: bool(false)
 gzdecode(): 
 Warning: gzdecode(): data error in %s on line %d
 
 
-Notice: fread(): zlib inflate failed in %s on line %d
+Notice: fread(): zlib: data error in %s on line %d
 read: bool(false)

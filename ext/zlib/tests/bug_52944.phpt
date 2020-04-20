@@ -20,7 +20,7 @@ fclose($fp);
 echo "Done.\n";
 ?>
 --EXPECTF--
-Notice: fread(): zlib inflate failed in %s on line %d
+Notice: fread(): zlib: data error in %s on line %d
 bool(false)
 string(0) ""
 Done.
