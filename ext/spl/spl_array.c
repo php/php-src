@@ -1901,7 +1901,7 @@ SPL_METHOD(Array, __unserialize)
 			return;
 		} else if (!instanceof_function(ce, spl_ce_Iterator)) {
 			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0,
-				"Cannot deserialize ArrayObject with iterator class '%s'; this class does not implement Iterator interface",
+				"Cannot deserialize ArrayObject with iterator class '%s'; this class does not implement the Iterator interface",
 				ZSTR_VAL(Z_STR_P(iterator_class_zv)));
 			return;
 		} else {
