@@ -168,4 +168,7 @@ PHP                                                                        NEWS
   . Add ZipArchive::isCompressionMethodSupported() and
     ZipArchive::isEncryptionMethodSupported() method (libzip 1.7.0). (Remi)
 
+- Zlib:
+  . Fixed bug #71417 (fread() does not report zlib.inflate errors). (cmb)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
