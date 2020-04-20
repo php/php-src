@@ -529,7 +529,7 @@ PHP_FUNCTION(proc_open)
 		zval *arg_zv;
 		uint32_t num_elems = zend_hash_num_elements(Z_ARRVAL_P(command_zv));
 		if (num_elems == 0) {
-			zend_value_error("Command array must have at least one element");
+			zend_argument_value_error(1, "must have at least one element");
 			RETURN_THROWS();
 		}
 
@@ -662,7 +662,7 @@ PHP_FUNCTION(proc_open)
 			descriptors[ndesc].mode = DESC_FILE;
 
 		} else if (Z_TYPE_P(descitem) != IS_ARRAY) {
-			zend_value_error("Descriptor item must be either an array or a File-Handle");
+			zend_argument_value_error(2, "must only contain arrays and File-Handles");
 			goto exit_fail;
 		} else {
 

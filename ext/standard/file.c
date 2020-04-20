@@ -348,7 +348,7 @@ PHP_FUNCTION(flock)
 
 	act = operation & 3;
 	if (act < 1 || act > 3) {
-		zend_value_error("Illegal operation argument");
+		zend_argument_value_error(2, "must be either LOCK_SH, LOCK_EX, or LOCK_UN");
 		RETURN_THROWS();
 	}
 

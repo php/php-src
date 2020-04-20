@@ -132,3 +132,99 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SoapClient___setLocation, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, new_location, IS_STRING, 0, "\"\"")
 ZEND_END_ARG_INFO()
+
+
+ZEND_FUNCTION(use_soap_error_handler);
+ZEND_FUNCTION(is_soap_fault);
+ZEND_METHOD(SoapParam, __construct);
+ZEND_METHOD(SoapHeader, __construct);
+ZEND_METHOD(SoapFault, __construct);
+ZEND_METHOD(SoapFault, __toString);
+ZEND_METHOD(SoapVar, __construct);
+ZEND_METHOD(SoapServer, __construct);
+ZEND_METHOD(SoapServer, fault);
+ZEND_METHOD(SoapServer, addSoapHeader);
+ZEND_METHOD(SoapServer, setPersistence);
+ZEND_METHOD(SoapServer, setClass);
+ZEND_METHOD(SoapServer, setObject);
+ZEND_METHOD(SoapServer, getFunctions);
+ZEND_METHOD(SoapServer, addFunction);
+ZEND_METHOD(SoapServer, handle);
+ZEND_METHOD(SoapClient, __construct);
+ZEND_METHOD(SoapClient, __call);
+ZEND_METHOD(SoapClient, __getFunctions);
+ZEND_METHOD(SoapClient, __getTypes);
+ZEND_METHOD(SoapClient, __getLastRequest);
+ZEND_METHOD(SoapClient, __getLastResponse);
+ZEND_METHOD(SoapClient, __getLastRequestHeaders);
+ZEND_METHOD(SoapClient, __getLastResponseHeaders);
+ZEND_METHOD(SoapClient, __doRequest);
+ZEND_METHOD(SoapClient, __setCookie);
+ZEND_METHOD(SoapClient, __getCookies);
+ZEND_METHOD(SoapClient, __setSoapHeaders);
+ZEND_METHOD(SoapClient, __setLocation);
+
+
+static const zend_function_entry ext_functions[] = {
+	ZEND_FE(use_soap_error_handler, arginfo_use_soap_error_handler)
+	ZEND_FE(is_soap_fault, arginfo_is_soap_fault)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_SoapParam_methods[] = {
+	ZEND_ME(SoapParam, __construct, arginfo_class_SoapParam___construct, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_SoapHeader_methods[] = {
+	ZEND_ME(SoapHeader, __construct, arginfo_class_SoapHeader___construct, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_SoapFault_methods[] = {
+	ZEND_ME(SoapFault, __construct, arginfo_class_SoapFault___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(SoapFault, __toString, arginfo_class_SoapFault___toString, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_SoapVar_methods[] = {
+	ZEND_ME(SoapVar, __construct, arginfo_class_SoapVar___construct, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_SoapServer_methods[] = {
+	ZEND_ME(SoapServer, __construct, arginfo_class_SoapServer___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(SoapServer, fault, arginfo_class_SoapServer_fault, ZEND_ACC_PUBLIC)
+	ZEND_ME(SoapServer, addSoapHeader, arginfo_class_SoapServer_addSoapHeader, ZEND_ACC_PUBLIC)
+	ZEND_ME(SoapServer, setPersistence, arginfo_class_SoapServer_setPersistence, ZEND_ACC_PUBLIC)
+	ZEND_ME(SoapServer, setClass, arginfo_class_SoapServer_setClass, ZEND_ACC_PUBLIC)
+	ZEND_ME(SoapServer, setObject, arginfo_class_SoapServer_setObject, ZEND_ACC_PUBLIC)
+	ZEND_ME(SoapServer, getFunctions, arginfo_class_SoapServer_getFunctions, ZEND_ACC_PUBLIC)
+	ZEND_ME(SoapServer, addFunction, arginfo_class_SoapServer_addFunction, ZEND_ACC_PUBLIC)
+	ZEND_ME(SoapServer, handle, arginfo_class_SoapServer_handle, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_SoapClient_methods[] = {
+	ZEND_ME(SoapClient, __construct, arginfo_class_SoapClient___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(SoapClient, __call, arginfo_class_SoapClient___call, ZEND_ACC_PUBLIC)
+	ZEND_MALIAS(SoapClient, __soapCall, __call, arginfo_class_SoapClient___soapCall, ZEND_ACC_PUBLIC)
+	ZEND_ME(SoapClient, __getFunctions, arginfo_class_SoapClient___getFunctions, ZEND_ACC_PUBLIC)
+	ZEND_ME(SoapClient, __getTypes, arginfo_class_SoapClient___getTypes, ZEND_ACC_PUBLIC)
+	ZEND_ME(SoapClient, __getLastRequest, arginfo_class_SoapClient___getLastRequest, ZEND_ACC_PUBLIC)
+	ZEND_ME(SoapClient, __getLastResponse, arginfo_class_SoapClient___getLastResponse, ZEND_ACC_PUBLIC)
+	ZEND_ME(SoapClient, __getLastRequestHeaders, arginfo_class_SoapClient___getLastRequestHeaders, ZEND_ACC_PUBLIC)
+	ZEND_ME(SoapClient, __getLastResponseHeaders, arginfo_class_SoapClient___getLastResponseHeaders, ZEND_ACC_PUBLIC)
+	ZEND_ME(SoapClient, __doRequest, arginfo_class_SoapClient___doRequest, ZEND_ACC_PUBLIC)
+	ZEND_ME(SoapClient, __setCookie, arginfo_class_SoapClient___setCookie, ZEND_ACC_PUBLIC)
+	ZEND_ME(SoapClient, __getCookies, arginfo_class_SoapClient___getCookies, ZEND_ACC_PUBLIC)
+	ZEND_ME(SoapClient, __setSoapHeaders, arginfo_class_SoapClient___setSoapHeaders, ZEND_ACC_PUBLIC)
+	ZEND_ME(SoapClient, __setLocation, arginfo_class_SoapClient___setLocation, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};

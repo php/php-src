@@ -40,4 +40,4 @@ try {
 }
 --EXPECT--
 OK
-Break string cannot be empty
+wordwrap(): Argument #3 ($break) cannot be empty

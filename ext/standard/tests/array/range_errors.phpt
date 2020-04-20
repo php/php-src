@@ -87,33 +87,33 @@ foreach( $step_arr as $step ) {
 *** Testing error conditions ***
 
 -- Testing ( (low < high) && (step = 0) ) --
-Step exceeds the specified range
-Step exceeds the specified range
+range(): Argument #3 ($step) must not exceed the specified range
+range(): Argument #3 ($step) must not exceed the specified range
 
 
 -- Testing ( (low > high) && (step = 0) ) --
-Step exceeds the specified range
-Step exceeds the specified range
+range(): Argument #3 ($step) must not exceed the specified range
+range(): Argument #3 ($step) must not exceed the specified range
 
 
 -- Testing ( (low < high) && (high-low < step) ) --
-Step exceeds the specified range
+range(): Argument #3 ($step) must not exceed the specified range
 
 
 -- Testing ( (low > high) && (low-high < step) ) --
-Step exceeds the specified range
+range(): Argument #3 ($step) must not exceed the specified range
 
 -- Testing other conditions --
-Step exceeds the specified range
+range(): Argument #3 ($step) must not exceed the specified range
 range(): Argument #3 ($step) must be of type int|float, string given
-Step exceeds the specified range
+range(): Argument #3 ($step) must not exceed the specified range
 
 Notice: A non well formed numeric value encountered in %s on line %d
-Step exceeds the specified range
+range(): Argument #3 ($step) must not exceed the specified range
 
 -- Testing Invalid steps --
 range(): Argument #3 ($step) must be of type int|float, string given
-Step exceeds the specified range
-Step exceeds the specified range
+range(): Argument #3 ($step) must not exceed the specified range
+range(): Argument #3 ($step) must not exceed the specified range
 range(): Argument #3 ($step) must be of type int|float, string given
 range(): Argument #3 ($step) must be of type int|float, string given

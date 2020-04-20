@@ -614,7 +614,7 @@ static void sapi_cgi_log_message(char *message, int syslog_type_int)
 
 /* {{{ php_cgi_ini_activate_user_config
  */
-static void php_cgi_ini_activate_user_config(char *path, int path_len, const char *doc_root, int doc_root_len, int start)
+static void php_cgi_ini_activate_user_config(char *path, int path_len, const char *doc_root, int doc_root_len)
 {
 	char *ptr;
 	time_t request_time = sapi_get_request_time();
@@ -664,7 +664,7 @@ static void php_cgi_ini_activate_user_config(char *path, int path_len, const cha
 			to find more user.ini, if not we only scan the current path.
 		  */
 		if (strncmp(s1, s2, s_len) == 0) {
-			ptr = s2 + start;  /* start is the point where doc_root ends! */
+			ptr = s2 + doc_root_len;
 			while ((ptr = strchr(ptr, DEFAULT_SLASH)) != NULL) {
 				*ptr = 0;
 				php_parse_user_ini_file(path, PG(user_ini_filename), entry->user_config);
@@ -741,7 +741,7 @@ static int sapi_cgi_activate(void) /* {{{ */
 					--doc_root_len;
 				}
 
-				php_cgi_ini_activate_user_config(path, path_len, doc_root, doc_root_len, doc_root_len - 1);
+				php_cgi_ini_activate_user_config(path, path_len, doc_root, doc_root_len);
 			}
 		}
 

@@ -21,6 +21,9 @@ PHP                                                                        NEWS
   . Fixed bug #79368 ("Unexpected end of file" is not an acceptable error
     message). (Alex Dowad)
 
+- BZ2:
+  . Fixed bug #71263 (fread() does not report bzip2.decompress errors). (cmb)
+
 - CURL:
   . Bumped required libcurl version to 7.29.0. (cmb)
 
@@ -164,5 +167,8 @@ PHP                                                                        NEWS
   . Add ZipArchive::EM_UNKNOWN and ZipArchive::EM_TRAD_PKWARE constants. (Remi)
   . Add ZipArchive::isCompressionMethodSupported() and
     ZipArchive::isEncryptionMethodSupported() method (libzip 1.7.0). (Remi)
+
+- Zlib:
+  . Fixed bug #71417 (fread() does not report zlib.inflate errors). (cmb)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

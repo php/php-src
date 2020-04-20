@@ -429,7 +429,7 @@ static PHP_FUNCTION(phpdbg_color)
 		break;
 
 		default:
-			zend_value_error("phpdbg detected an incorrect color constant");
+			zend_argument_value_error(1, "must be either PHPDBG_COLOR_PROMPT, PHPDBG_COLOR_NOTICE, or PHPDBG_COLOR_ERROR");
 	}
 } /* }}} */
 

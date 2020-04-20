@@ -1,7 +1,10 @@
 <?php
 
+/** @generate-function-entries */
+
 class SQLite3
 {
+    /** @alias SQLite3::open */
     public function __construct(string $filename, int $flags = SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE, string $encryption_key = '') {}
 
     /** @return void */
@@ -11,7 +14,7 @@ class SQLite3
     public function close() {}
 
     /** @return array */
-    public function version() {}
+    public static function version() {}
 
     /** @return int */
     public function lastInsertRowID() {}
@@ -42,10 +45,13 @@ class SQLite3
 #endif
 
     /** @return string */
-    public function escapeString(string $value) {}
+    public static function escapeString(string $value) {}
 
     /** @return SQLite3Stmt|false */
     public function prepare(string $query) {}
+
+    /** @return bool */
+    public function exec(string $query) {}
 
     /** @return SQLite3Result|false|null */
     public function query(string $query) {}
@@ -77,7 +83,7 @@ class SQLite3
 
 class SQLite3Stmt
 {
-    public function __construct(SQLite3 $sqlite3, string $sql) {}
+    private function __construct(SQLite3 $sqlite3, string $sql) {}
 
     /** @return bool */
     public function bindParam($param_number, &$param, int $type = UNKNOWN) {}
@@ -109,7 +115,7 @@ class SQLite3Stmt
 
 class SQLite3Result
 {
-    public function __construct() {}
+    private function __construct() {}
 
     /** @return int */
     public function numColumns() {}

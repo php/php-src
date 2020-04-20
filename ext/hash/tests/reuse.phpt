@@ -13,4 +13,4 @@ catch (\Error $e) {
 }
 
 --EXPECT--
-hash_update(): supplied resource is not a valid Hash Context resource
+hash_update(): Argument #1 ($context) must be a valid Hash Context resource

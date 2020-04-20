@@ -44,42 +44,6 @@ PHP_MINIT_FUNCTION(snmp);
 PHP_MSHUTDOWN_FUNCTION(snmp);
 PHP_MINFO_FUNCTION(snmp);
 
-PHP_FUNCTION(snmpget);
-PHP_FUNCTION(snmpgetnext);
-PHP_FUNCTION(snmpwalk);
-PHP_FUNCTION(snmprealwalk);
-PHP_FUNCTION(snmpset);
-PHP_FUNCTION(snmp_get_quick_print);
-PHP_FUNCTION(snmp_set_quick_print);
-PHP_FUNCTION(snmp_set_enum_print);
-PHP_FUNCTION(snmp_set_oid_output_format);
-
-PHP_FUNCTION(snmp2_get);
-PHP_FUNCTION(snmp2_getnext);
-PHP_FUNCTION(snmp2_walk);
-PHP_FUNCTION(snmp2_real_walk);
-PHP_FUNCTION(snmp2_set);
-
-PHP_FUNCTION(snmp3_get);
-PHP_FUNCTION(snmp3_getnext);
-PHP_FUNCTION(snmp3_walk);
-PHP_FUNCTION(snmp3_real_walk);
-PHP_FUNCTION(snmp3_set);
-
-PHP_FUNCTION(snmp_set_valueretrieval);
-PHP_FUNCTION(snmp_get_valueretrieval);
-
-PHP_FUNCTION(snmp_read_mib);
-
-PHP_METHOD(SNMP, setSecurity);
-PHP_METHOD(SNMP, close);
-PHP_METHOD(SNMP, get);
-PHP_METHOD(SNMP, getnext);
-PHP_METHOD(SNMP, walk);
-PHP_METHOD(SNMP, set);
-PHP_METHOD(SNMP, getErrno);
-PHP_METHOD(SNMP, getError);
-
 typedef struct _php_snmp_object {
 	struct snmp_session *session;
 	int max_oids;

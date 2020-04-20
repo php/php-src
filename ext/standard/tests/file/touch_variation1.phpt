@@ -11,8 +11,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 --FILE--
 <?php
 
-$filename = __DIR__."/touch.dat";
-
+$filename = __DIR__."/touch_variation1.dat";
 
 var_dump(touch($filename, 101));
 var_dump(filemtime($filename));

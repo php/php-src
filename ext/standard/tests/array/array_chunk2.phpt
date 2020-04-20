@@ -24,8 +24,8 @@ var_dump(array_chunk($input_array, 10));
 var_dump(array_chunk($input_array, 10, true));
 ?>
 --EXPECT--
-Size parameter expected to be greater than 0
-Size parameter expected to be greater than 0
+array_chunk(): Argument #2 ($size) must be greater than 0
+array_chunk(): Argument #2 ($size) must be greater than 0
 array(5) {
   [0]=>
   array(1) {

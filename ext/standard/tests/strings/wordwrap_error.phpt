@@ -52,7 +52,7 @@ var_dump( wordwrap($str, $width, $break, $cut) );
 -- width = 0 & cut = false --
 string(39) "testing<br />\nwordwrap<br />\nfunction"
 -- width = 0 & cut = true --
-Can't force cut when width is zero
+wordwrap(): Argument #4 ($cut) cannot be true when argument #2 ($width) is 0
 -- width = -10 & cut = false --
 string(39) "testing<br />\nwordwrap<br />\nfunction"
 -- width = -10 & cut = true --

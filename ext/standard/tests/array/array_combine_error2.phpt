@@ -47,8 +47,8 @@ array(0) {
 }
 
 -- Testing array_combine() function with empty array for $keys argument --
-Both parameters should have an equal number of elements
+array_combine(): Argument #1 ($keys) and argument #2 ($values) must have the same number of elements
 -- Testing array_combine() function with empty array for $values argument --
-Both parameters should have an equal number of elements
+array_combine(): Argument #1 ($keys) and argument #2 ($values) must have the same number of elements
 -- Testing array_combine() function by passing array with unequal number of elements --
-Both parameters should have an equal number of elements
+array_combine(): Argument #1 ($keys) and argument #2 ($values) must have the same number of elements

@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 function pcntl_fork(): int {}
 
 function pcntl_waitpid(int $pid, &$status, int $options = 0, &$rusage = []): int {}
@@ -38,7 +40,7 @@ function pcntl_wifcontinued(int $status): bool {}
 
 function pcntl_wifsignaled(int $status): bool {}
 
-function pcntl_wifexitstatus(int $status): int|false {}
+function pcntl_wexitstatus(int $status): int|false {}
 
 function pcntl_wtermsig(int $status): int|false {}
 

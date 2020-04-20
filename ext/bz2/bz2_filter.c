@@ -123,6 +123,7 @@ static php_stream_filter_status_t php_bz2_decompress_filter(
 				}
 			} else if (status != BZ_OK) {
 				/* Something bad happened */
+				php_error_docref(NULL, E_NOTICE, "bzip2 decompression failed");
 				php_stream_bucket_delref(bucket);
 				return PSFS_ERR_FATAL;
 			}
