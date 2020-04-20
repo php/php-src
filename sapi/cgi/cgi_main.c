@@ -843,7 +843,7 @@ static void php_cgi_ini_activate_user_config(char *path, size_t path_len, const 
 		if (strncmp(s1, s2, s_len) == 0) {
 #endif
 			char *ptr = s2 + doc_root_len;
-			while ((ptr = strchr(ptr, DEFAULT_SLASH)) != NULL) {
+			while ((ptr = strpbrk(ptr, "\\/")) != NULL) {
 				*ptr = 0;
 				php_parse_user_ini_file(path, PG(user_ini_filename), entry->user_config);
 				*ptr = '/';
