@@ -2189,8 +2189,8 @@ static struct timeval php_openssl_subtract_timeval(struct timeval a, struct time
 	difference.tv_usec = a.tv_usec - b.tv_usec;
 
 	if (a.tv_usec < b.tv_usec) {
-	  	b.tv_sec  -= 1L;
-	   	b.tv_usec += 1000000L;
+		difference.tv_sec  -= 1L;
+		difference.tv_usec += 1000000L;
 	}
 
 	return difference;
