@@ -1850,6 +1850,14 @@ SPL_METHOD(Array, __serialize)
 	ZVAL_ARR(&tmp, zend_std_get_properties(&intern->std));
 	Z_TRY_ADDREF(tmp);
 	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &tmp);
+
+	/* iterator class */
+	if (intern->ce_get_iterator == spl_ce_ArrayIterator) {
+		ZVAL_NULL(&tmp);
+	} else {
+		ZVAL_STR_COPY(&tmp, intern->ce_get_iterator->name);
+	}
+	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &tmp);
 }
 /* }}} */
 
@@ -1859,18 +1867,22 @@ SPL_METHOD(Array, __unserialize)
 {
 	spl_array_object *intern = Z_SPLARRAY_P(ZEND_THIS);
 	HashTable *data;
-	zval *flags_zv, *storage_zv, *members_zv;
+	zval *flags_zv, *storage_zv, *members_zv, *iterator_class_zv;
 	zend_long flags;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "h", &data) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	flags_zv = zend_hash_index_find(data, 0);
-	storage_zv = zend_hash_index_find(data, 1);
-	members_zv = zend_hash_index_find(data, 2);
+	flags_zv          = zend_hash_index_find(data, 0);
+	storage_zv        = zend_hash_index_find(data, 1);
+	members_zv        = zend_hash_index_find(data, 2);
+	iterator_class_zv = zend_hash_index_find(data, 3);
+
 	if (!flags_zv || !storage_zv || !members_zv ||
-			Z_TYPE_P(flags_zv) != IS_LONG || Z_TYPE_P(members_zv) != IS_ARRAY) {
+			Z_TYPE_P(flags_zv) != IS_LONG || Z_TYPE_P(members_zv) != IS_ARRAY ||
+			(iterator_class_zv && (Z_TYPE_P(iterator_class_zv) != IS_NULL &&
+				Z_TYPE_P(iterator_class_zv) != IS_STRING))) {
 		zend_throw_exception(spl_ce_UnexpectedValueException,
 			"Incomplete or ill-typed serialization data", 0);
 		RETURN_THROWS();
@@ -1888,6 +1900,26 @@ SPL_METHOD(Array, __unserialize)
 	}
 
 	object_properties_load(&intern->std, Z_ARRVAL_P(members_zv));
+
+	if (iterator_class_zv && Z_TYPE_P(iterator_class_zv) == IS_STRING) {
+		zend_class_entry *ce = zend_lookup_class(Z_STR_P(iterator_class_zv));
+
+		if (!ce) {
+			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0,
+				"Cannot deserialize ArrayObject with iterator class '%s'; no such class exists",
+				ZSTR_VAL(Z_STR_P(iterator_class_zv)));
+			RETURN_THROWS();
+		}
+
+		if (!instanceof_function(ce, spl_ce_Iterator)) {
+			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0,
+				"Cannot deserialize ArrayObject with iterator class '%s'; this class does not implement the Iterator interface",
+				ZSTR_VAL(Z_STR_P(iterator_class_zv)));
+			RETURN_THROWS();
+		}
+
+		intern->ce_get_iterator = ce;
+	}
 }
 /* }}} */
 
