@@ -19,6 +19,10 @@ PHP                                                                        NEWS
   . Fixed bug #79441 (Segfault in mb_chr() if internal encoding is unsupported).
     (Girgias)
 
+- OpenSSL:
+  . Fixed bug #79497 (stream_socket_client() throws an unknown error sometimes
+    with <1s timeout). (Joe Cai)
+
 - SPL:
   . Fixed bug #69264 (__debugInfo() ignored while extending SPL classes). (cmb)
 
