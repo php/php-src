@@ -202,3 +202,124 @@ ZEND_END_ARG_INFO()
 #define arginfo_gc_disable arginfo_gc_enable
 
 #define arginfo_gc_status arginfo_func_get_args
+
+
+ZEND_FUNCTION(zend_version);
+ZEND_FUNCTION(func_num_args);
+ZEND_FUNCTION(func_get_arg);
+ZEND_FUNCTION(func_get_args);
+ZEND_FUNCTION(strlen);
+ZEND_FUNCTION(strcmp);
+ZEND_FUNCTION(strncmp);
+ZEND_FUNCTION(strcasecmp);
+ZEND_FUNCTION(strncasecmp);
+ZEND_FUNCTION(error_reporting);
+ZEND_FUNCTION(define);
+ZEND_FUNCTION(defined);
+ZEND_FUNCTION(get_class);
+ZEND_FUNCTION(get_called_class);
+ZEND_FUNCTION(get_parent_class);
+ZEND_FUNCTION(is_subclass_of);
+ZEND_FUNCTION(is_a);
+ZEND_FUNCTION(get_class_vars);
+ZEND_FUNCTION(get_object_vars);
+ZEND_FUNCTION(get_mangled_object_vars);
+ZEND_FUNCTION(get_class_methods);
+ZEND_FUNCTION(method_exists);
+ZEND_FUNCTION(property_exists);
+ZEND_FUNCTION(class_exists);
+ZEND_FUNCTION(interface_exists);
+ZEND_FUNCTION(trait_exists);
+ZEND_FUNCTION(function_exists);
+ZEND_FUNCTION(class_alias);
+ZEND_FUNCTION(get_included_files);
+ZEND_FUNCTION(trigger_error);
+ZEND_FUNCTION(set_error_handler);
+ZEND_FUNCTION(restore_error_handler);
+ZEND_FUNCTION(set_exception_handler);
+ZEND_FUNCTION(restore_exception_handler);
+ZEND_FUNCTION(get_declared_classes);
+ZEND_FUNCTION(get_declared_traits);
+ZEND_FUNCTION(get_declared_interfaces);
+ZEND_FUNCTION(get_defined_functions);
+ZEND_FUNCTION(get_defined_vars);
+ZEND_FUNCTION(get_resource_type);
+ZEND_FUNCTION(get_resources);
+ZEND_FUNCTION(get_loaded_extensions);
+ZEND_FUNCTION(get_defined_constants);
+ZEND_FUNCTION(debug_backtrace);
+ZEND_FUNCTION(debug_print_backtrace);
+ZEND_FUNCTION(extension_loaded);
+ZEND_FUNCTION(get_extension_funcs);
+#if ZEND_DEBUG && defined(ZTS)
+ZEND_FUNCTION(zend_thread_id);
+#endif
+ZEND_FUNCTION(gc_mem_caches);
+ZEND_FUNCTION(gc_collect_cycles);
+ZEND_FUNCTION(gc_enabled);
+ZEND_FUNCTION(gc_enable);
+ZEND_FUNCTION(gc_disable);
+ZEND_FUNCTION(gc_status);
+
+
+static const zend_function_entry ext_functions[] = {
+	ZEND_FE(zend_version, arginfo_zend_version)
+	ZEND_FE(func_num_args, arginfo_func_num_args)
+	ZEND_FE(func_get_arg, arginfo_func_get_arg)
+	ZEND_FE(func_get_args, arginfo_func_get_args)
+	ZEND_FE(strlen, arginfo_strlen)
+	ZEND_FE(strcmp, arginfo_strcmp)
+	ZEND_FE(strncmp, arginfo_strncmp)
+	ZEND_FE(strcasecmp, arginfo_strcasecmp)
+	ZEND_FE(strncasecmp, arginfo_strncasecmp)
+	ZEND_FE(error_reporting, arginfo_error_reporting)
+	ZEND_FE(define, arginfo_define)
+	ZEND_FE(defined, arginfo_defined)
+	ZEND_FE(get_class, arginfo_get_class)
+	ZEND_FE(get_called_class, arginfo_get_called_class)
+	ZEND_FE(get_parent_class, arginfo_get_parent_class)
+	ZEND_FE(is_subclass_of, arginfo_is_subclass_of)
+	ZEND_FE(is_a, arginfo_is_a)
+	ZEND_FE(get_class_vars, arginfo_get_class_vars)
+	ZEND_FE(get_object_vars, arginfo_get_object_vars)
+	ZEND_FE(get_mangled_object_vars, arginfo_get_mangled_object_vars)
+	ZEND_FE(get_class_methods, arginfo_get_class_methods)
+	ZEND_FE(method_exists, arginfo_method_exists)
+	ZEND_FE(property_exists, arginfo_property_exists)
+	ZEND_FE(class_exists, arginfo_class_exists)
+	ZEND_FE(interface_exists, arginfo_interface_exists)
+	ZEND_FE(trait_exists, arginfo_trait_exists)
+	ZEND_FE(function_exists, arginfo_function_exists)
+	ZEND_FE(class_alias, arginfo_class_alias)
+	ZEND_FE(get_included_files, arginfo_get_included_files)
+	ZEND_FALIAS(get_required_files, get_included_files, arginfo_get_required_files)
+	ZEND_FE(trigger_error, arginfo_trigger_error)
+	ZEND_FALIAS(user_error, trigger_error, arginfo_user_error)
+	ZEND_FE(set_error_handler, arginfo_set_error_handler)
+	ZEND_FE(restore_error_handler, arginfo_restore_error_handler)
+	ZEND_FE(set_exception_handler, arginfo_set_exception_handler)
+	ZEND_FE(restore_exception_handler, arginfo_restore_exception_handler)
+	ZEND_FE(get_declared_classes, arginfo_get_declared_classes)
+	ZEND_FE(get_declared_traits, arginfo_get_declared_traits)
+	ZEND_FE(get_declared_interfaces, arginfo_get_declared_interfaces)
+	ZEND_FE(get_defined_functions, arginfo_get_defined_functions)
+	ZEND_FE(get_defined_vars, arginfo_get_defined_vars)
+	ZEND_FE(get_resource_type, arginfo_get_resource_type)
+	ZEND_FE(get_resources, arginfo_get_resources)
+	ZEND_FE(get_loaded_extensions, arginfo_get_loaded_extensions)
+	ZEND_FE(get_defined_constants, arginfo_get_defined_constants)
+	ZEND_FE(debug_backtrace, arginfo_debug_backtrace)
+	ZEND_FE(debug_print_backtrace, arginfo_debug_print_backtrace)
+	ZEND_FE(extension_loaded, arginfo_extension_loaded)
+	ZEND_FE(get_extension_funcs, arginfo_get_extension_funcs)
+#if ZEND_DEBUG && defined(ZTS)
+	ZEND_FE(zend_thread_id, arginfo_zend_thread_id)
+#endif
+	ZEND_FE(gc_mem_caches, arginfo_gc_mem_caches)
+	ZEND_FE(gc_collect_cycles, arginfo_gc_collect_cycles)
+	ZEND_FE(gc_enabled, arginfo_gc_enabled)
+	ZEND_FE(gc_enable, arginfo_gc_enable)
+	ZEND_FE(gc_disable, arginfo_gc_disable)
+	ZEND_FE(gc_status, arginfo_gc_status)
+	ZEND_FE_END
+};

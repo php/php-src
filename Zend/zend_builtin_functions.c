@@ -27,129 +27,8 @@
 #include "zend_extensions.h"
 #include "zend_closures.h"
 #include "zend_generators.h"
-
-static ZEND_FUNCTION(zend_version);
-static ZEND_FUNCTION(func_num_args);
-static ZEND_FUNCTION(func_get_arg);
-static ZEND_FUNCTION(func_get_args);
-static ZEND_FUNCTION(strlen);
-static ZEND_FUNCTION(strcmp);
-static ZEND_FUNCTION(strncmp);
-static ZEND_FUNCTION(strcasecmp);
-static ZEND_FUNCTION(strncasecmp);
-static ZEND_FUNCTION(error_reporting);
-static ZEND_FUNCTION(define);
-static ZEND_FUNCTION(defined);
-static ZEND_FUNCTION(get_class);
-static ZEND_FUNCTION(get_called_class);
-static ZEND_FUNCTION(get_parent_class);
-static ZEND_FUNCTION(method_exists);
-static ZEND_FUNCTION(property_exists);
-static ZEND_FUNCTION(class_exists);
-static ZEND_FUNCTION(interface_exists);
-static ZEND_FUNCTION(trait_exists);
-static ZEND_FUNCTION(function_exists);
-static ZEND_FUNCTION(class_alias);
-static ZEND_FUNCTION(get_included_files);
-static ZEND_FUNCTION(is_subclass_of);
-static ZEND_FUNCTION(is_a);
-static ZEND_FUNCTION(get_class_vars);
-static ZEND_FUNCTION(get_object_vars);
-static ZEND_FUNCTION(get_mangled_object_vars);
-static ZEND_FUNCTION(get_class_methods);
-static ZEND_FUNCTION(trigger_error);
-static ZEND_FUNCTION(set_error_handler);
-static ZEND_FUNCTION(restore_error_handler);
-static ZEND_FUNCTION(set_exception_handler);
-static ZEND_FUNCTION(restore_exception_handler);
-static ZEND_FUNCTION(get_declared_classes);
-static ZEND_FUNCTION(get_declared_traits);
-static ZEND_FUNCTION(get_declared_interfaces);
-static ZEND_FUNCTION(get_defined_functions);
-static ZEND_FUNCTION(get_defined_vars);
-static ZEND_FUNCTION(get_resource_type);
-static ZEND_FUNCTION(get_resources);
-static ZEND_FUNCTION(get_loaded_extensions);
-static ZEND_FUNCTION(extension_loaded);
-static ZEND_FUNCTION(get_extension_funcs);
-static ZEND_FUNCTION(get_defined_constants);
-static ZEND_FUNCTION(debug_backtrace);
-static ZEND_FUNCTION(debug_print_backtrace);
-#if ZEND_DEBUG && defined(ZTS)
-static ZEND_FUNCTION(zend_thread_id);
-#endif
-static ZEND_FUNCTION(gc_mem_caches);
-static ZEND_FUNCTION(gc_collect_cycles);
-static ZEND_FUNCTION(gc_enabled);
-static ZEND_FUNCTION(gc_enable);
-static ZEND_FUNCTION(gc_disable);
-static ZEND_FUNCTION(gc_status);
-
 #include "zend_builtin_functions_arginfo.h"
 
-/* }}} */
-
-static const zend_function_entry builtin_functions[] = { /* {{{ */
-	ZEND_FE(zend_version,		arginfo_zend_version)
-	ZEND_FE(func_num_args,		arginfo_func_num_args)
-	ZEND_FE(func_get_arg,		arginfo_func_get_arg)
-	ZEND_FE(func_get_args,		arginfo_func_get_args)
-	ZEND_FE(strlen,			arginfo_strlen)
-	ZEND_FE(strcmp,			arginfo_strcmp)
-	ZEND_FE(strncmp,		arginfo_strncmp)
-	ZEND_FE(strcasecmp,		arginfo_strcasecmp)
-	ZEND_FE(strncasecmp,		arginfo_strncasecmp)
-	ZEND_FE(error_reporting,	arginfo_error_reporting)
-	ZEND_FE(define,			arginfo_define)
-	ZEND_FE(defined,		arginfo_defined)
-	ZEND_FE(get_class,		arginfo_get_class)
-	ZEND_FE(get_called_class,	arginfo_get_called_class)
-	ZEND_FE(get_parent_class,	arginfo_get_parent_class)
-	ZEND_FE(method_exists,		arginfo_method_exists)
-	ZEND_FE(property_exists,	arginfo_property_exists)
-	ZEND_FE(class_exists,		arginfo_class_exists)
-	ZEND_FE(interface_exists,	arginfo_interface_exists)
-	ZEND_FE(trait_exists,		arginfo_trait_exists)
-	ZEND_FE(function_exists,	arginfo_function_exists)
-	ZEND_FE(class_alias,		arginfo_class_alias)
-	ZEND_FE(get_included_files,	arginfo_get_included_files)
-	ZEND_FALIAS(get_required_files,	get_included_files,		arginfo_get_required_files)
-	ZEND_FE(is_subclass_of,		arginfo_is_subclass_of)
-	ZEND_FE(is_a,			arginfo_is_a)
-	ZEND_FE(get_class_vars,		arginfo_get_class_vars)
-	ZEND_FE(get_object_vars,	arginfo_get_object_vars)
-	ZEND_FE(get_mangled_object_vars,	arginfo_get_mangled_object_vars)
-	ZEND_FE(get_class_methods,	arginfo_get_class_methods)
-	ZEND_FE(trigger_error,		arginfo_trigger_error)
-	ZEND_FALIAS(user_error,		trigger_error,		arginfo_user_error)
-	ZEND_FE(set_error_handler,		arginfo_set_error_handler)
-	ZEND_FE(restore_error_handler,		arginfo_restore_error_handler)
-	ZEND_FE(set_exception_handler,		arginfo_set_exception_handler)
-	ZEND_FE(restore_exception_handler,	arginfo_restore_exception_handler)
-	ZEND_FE(get_declared_classes, 		arginfo_get_declared_classes)
-	ZEND_FE(get_declared_traits, 		arginfo_get_declared_traits)
-	ZEND_FE(get_declared_interfaces, 	arginfo_get_declared_interfaces)
-	ZEND_FE(get_defined_functions, 		arginfo_get_defined_functions)
-	ZEND_FE(get_defined_vars,		arginfo_get_defined_vars)
-	ZEND_FE(get_resource_type,		arginfo_get_resource_type)
-	ZEND_FE(get_resources,			arginfo_get_resources)
-	ZEND_FE(get_loaded_extensions,		arginfo_get_loaded_extensions)
-	ZEND_FE(extension_loaded,		arginfo_extension_loaded)
-	ZEND_FE(get_extension_funcs,		arginfo_get_extension_funcs)
-	ZEND_FE(get_defined_constants,		arginfo_get_defined_constants)
-	ZEND_FE(debug_backtrace, 		arginfo_debug_backtrace)
-	ZEND_FE(debug_print_backtrace, 		arginfo_debug_print_backtrace)
-#if ZEND_DEBUG && defined(ZTS)
-	ZEND_FE(zend_thread_id,		arginfo_zend_thread_id)
-#endif
-	ZEND_FE(gc_mem_caches,      arginfo_gc_mem_caches)
-	ZEND_FE(gc_collect_cycles, 	arginfo_gc_collect_cycles)
-	ZEND_FE(gc_enabled, 		arginfo_gc_enabled)
-	ZEND_FE(gc_enable, 		arginfo_gc_enable)
-	ZEND_FE(gc_disable, 		arginfo_gc_disable)
-	ZEND_FE(gc_status, 		arginfo_gc_status)
-	ZEND_FE_END
-};
 /* }}} */
 
 ZEND_MINIT_FUNCTION(core) { /* {{{ */
@@ -167,7 +46,7 @@ ZEND_MINIT_FUNCTION(core) { /* {{{ */
 zend_module_entry zend_builtin_module = { /* {{{ */
 	STANDARD_MODULE_HEADER,
 	"Core",
-	builtin_functions,
+	ext_functions,
 	ZEND_MINIT(core),
 	NULL,
 	NULL,

@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 function zend_version(): string {}
 
 function func_num_args(): int {}
