@@ -2500,7 +2500,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 					goto jit_failure;
 				}
 			}
-			// TODO: interupt exit may require deoptimization through side exit ????
 			zend_jit_check_timeout(&dasm_state, opline, exit_addr);
 		}
 
