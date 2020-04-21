@@ -91,6 +91,8 @@ function get_defined_vars(): array {}
 
 function get_resource_type($res): string {}
 
+function get_resource_id($res): int {}
+
 function get_resources(string $type = UNKNOWN): array {}
 
 function get_loaded_extensions(bool $zend_extensions = false): array {}
