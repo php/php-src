@@ -117,16 +117,13 @@ struct _php_curl_free {
 typedef struct {
 	CURL                         *cp;
 	php_curl_handlers            *handlers;
-	zend_resource                *res;
 	struct _php_curl_free        *to_free;
 	struct _php_curl_send_headers header;
 	struct _php_curl_error        err;
 	zend_bool                     in_callback;
 	uint32_t*                     clone;
-#if LIBCURL_VERSION_NUM >= 0x073800 /* 7.56.0 */
 	zval                          postfields;
 	zend_object                   std;
-#endif
 } php_curl;
 
 #define CURLOPT_SAFE_UPLOAD -1
@@ -173,14 +170,12 @@ static inline php_curlsh *curl_share_from_obj(zend_object *obj) {
 #define Z_CURL_SHARE_P(zv) curl_share_from_obj(Z_OBJ_P(zv))
 
 PHP_CURL_API extern zend_class_entry *curl_ce;
-
-PHP_CURL_API extern zend_class_entry *curl_multi_ce;
-void curl_multi_register_class(void);
-
 PHP_CURL_API extern zend_class_entry *curl_share_ce;
-void curl_share_register_class(void);
 
+void curl_multi_register_class(void);
+void curl_share_register_class(void);
 void curlfile_register_class(void);
+
 PHP_CURL_API extern zend_class_entry *curl_CURLFile_class;
 
 #else

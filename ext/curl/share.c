@@ -21,6 +21,7 @@
 #endif
 
 #include "php.h"
+#include "Zend/zend_interfaces.h"
 
 #ifdef HAVE_CURL
 
@@ -29,6 +30,8 @@
 #include <curl/curl.h>
 
 #define SAVE_CURLSH_ERROR(__handle, __err) (__handle)->err.no = (int) __err;
+
+zend_class_entry *curl_share_ce;
 
 /* {{{ proto CurlShare curl_share_init()
    Initialize a share curl handle */
@@ -151,7 +154,6 @@ static const zend_function_entry curl_share_methods[] = {
 
 static zend_object *curl_share_create_object(zend_class_entry *class_type) {
 	php_curlsh *intern = zend_object_alloc(sizeof(php_curlsh), class_type);
-	memset(intern, 0, sizeof(php_curlsh) - sizeof(zend_object));
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
@@ -169,24 +171,24 @@ void curl_share_free_obj(zend_object *object)
 {
 	php_curlsh *sh = curl_share_from_obj(object);
 
-	if (sh) {
-		curl_share_cleanup(sh->share);
-		zend_object_std_dtor(&sh->std);
-		efree(sh);
-	}
+	curl_share_cleanup(sh->share);
+	zend_object_std_dtor(&sh->std);
 }
 
 void curl_share_register_class(void) {
 	zend_class_entry ce_share;
 	INIT_CLASS_ENTRY(ce_share, "CurlShare", curl_share_methods);
-	ce_share.create_object = curl_share_create_object;
-	ce_share.ce_flags |= ZEND_ACC_FINAL;
 	curl_share_ce = zend_register_internal_class(&ce_share);
+	curl_share_ce->ce_flags |= ZEND_ACC_FINAL;
+	curl_share_ce->create_object = curl_share_create_object;
+	curl_share_ce->serialize = &zend_class_serialize_deny;
+	curl_share_ce->unserialize = &zend_class_unserialize_deny;
 
 	memcpy(&curl_share_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	curl_share_handlers.offset = XtOffsetOf(php_curlsh, std);
 	curl_share_handlers.free_obj = curl_share_free_obj;
 	curl_share_handlers.get_constructor = curl_share_get_constructor;
+	curl_share_handlers.clone_obj = NULL;
 }
 
 #endif

@@ -21,6 +21,7 @@
 #endif
 
 #include "php.h"
+#include "Zend/zend_interfaces.h"
 
 #ifdef HAVE_CURL
 
@@ -48,6 +49,8 @@
 #define SAVE_CURLM_ERROR(__handle, __err) (__handle)->err.no = (int) __err;
 
 /* CurlMulti class */
+
+static zend_class_entry *curl_multi_ce;
 
 static inline php_curlm *curl_multi_from_obj(zend_object *obj) {
 	return (php_curlm *)((char *)(obj) - XtOffsetOf(php_curlm, std));
@@ -107,7 +110,6 @@ PHP_FUNCTION(curl_multi_add_handle)
 void _php_curl_multi_cleanup_list(void *data) /* {{{ */
 {
 	zval *z_ch = (zval *)data;
-	php_curl *ch;
 
 	if (!z_ch) {
 		return;
@@ -115,7 +117,6 @@ void _php_curl_multi_cleanup_list(void *data) /* {{{ */
 	if (!Z_RES_P(z_ch)->ptr) {
 		return;
 	}
-	ch = Z_CURL_P(z_ch);
 
 	zend_list_delete(Z_RES_P(z_ch));
 }
@@ -229,7 +230,7 @@ PHP_FUNCTION(curl_multi_exec)
 
 		for (pz_ch = (zval *)zend_llist_get_first_ex(&mh->easyh, &pos); pz_ch;
 			pz_ch = (zval *)zend_llist_get_next_ex(&mh->easyh, &pos)) {
-            ch = Z_CURL_P(pz_ch);
+			ch = Z_CURL_P(pz_ch);
 
 			_php_curl_verify_handlers(ch, 1);
 		}
@@ -251,7 +252,7 @@ PHP_FUNCTION(curl_multi_getcontent)
 	zval     *z_ch;
 	php_curl *ch;
 
-	ZEND_PARSE_PARAMETERS_START(1,1)
+	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_OBJECT_OF_CLASS(z_ch, curl_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -538,7 +539,6 @@ static const zend_function_entry curl_multi_methods[] = {
 
 static zend_object *curl_multi_create_object(zend_class_entry *class_type) {
 	php_curlm *intern = zend_object_alloc(sizeof(php_curlm), class_type);
-	memset(intern, 0, sizeof(php_curlm) - sizeof(zend_object));
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
@@ -556,47 +556,46 @@ void curl_multi_free_obj(zend_object *object)
 {
 	php_curlm *mh = curl_multi_from_obj(object);
 
-	if (mh) {
-		zend_llist_position pos;
-		php_curl *ch;
-		zval	*pz_ch;
+	zend_llist_position pos;
+	php_curl *ch;
+	zval	*pz_ch;
 
-		for (pz_ch = (zval *)zend_llist_get_first_ex(&mh->easyh, &pos); pz_ch;
-			pz_ch = (zval *)zend_llist_get_next_ex(&mh->easyh, &pos)) {
-			/* ptr is NULL means it already be freed */
-			if (Z_RES_P(pz_ch)->ptr) {
-				ch = Z_CURL_P(pz_ch);
-				_php_curl_verify_handlers(ch, 0);
-			}
+	for (pz_ch = (zval *)zend_llist_get_first_ex(&mh->easyh, &pos); pz_ch;
+		pz_ch = (zval *)zend_llist_get_next_ex(&mh->easyh, &pos)) {
+		/* ptr is NULL means it already be freed */
+		if (Z_OBJ_P(pz_ch)) {
+			ch = Z_CURL_P(pz_ch);
+			_php_curl_verify_handlers(ch, 0);
 		}
-
-		curl_multi_cleanup(mh->multi);
-		zend_llist_clean(&mh->easyh);
-		if (mh->handlers->server_push) {
-			zval_ptr_dtor(&mh->handlers->server_push->func_name);
-			efree(mh->handlers->server_push);
-		}
-		if (mh->handlers) {
-			efree(mh->handlers);
-		}
-
-		zend_object_std_dtor(&mh->std);
-
-		efree(mh);
 	}
+
+	curl_multi_cleanup(mh->multi);
+	zend_llist_clean(&mh->easyh);
+	if (mh->handlers->server_push) {
+		zval_ptr_dtor(&mh->handlers->server_push->func_name);
+		efree(mh->handlers->server_push);
+	}
+	if (mh->handlers) {
+		efree(mh->handlers);
+	}
+
+	zend_object_std_dtor(&mh->std);
 }
 
 void curl_multi_register_class(void) {
 	zend_class_entry ce_multi;
 	INIT_CLASS_ENTRY(ce_multi, "CurlMulti", curl_multi_methods);
-	ce_multi.create_object = curl_multi_create_object;
-	ce_multi.ce_flags |= ZEND_ACC_FINAL;
 	curl_multi_ce = zend_register_internal_class(&ce_multi);
+	curl_multi_ce->ce_flags |= ZEND_ACC_FINAL;
+	curl_multi_ce->create_object = curl_multi_create_object;
+	curl_multi_ce->serialize = zend_class_serialize_deny;
+	curl_multi_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&curl_multi_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	curl_multi_handlers.offset = XtOffsetOf(php_curlm, std);
 	curl_multi_handlers.free_obj = curl_multi_free_obj;
 	curl_multi_handlers.get_constructor = curl_multi_get_constructor;
+	curl_multi_handlers.clone_obj = NULL;
 }
 
 #endif
