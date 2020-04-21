@@ -207,7 +207,11 @@ echo"\n\n*** Output for precision value more than maximum ***\n";
 printf("%.988f",1.23456789e10);
 
 echo"\n\n*** Output for invalid width(-15) specifier ***\n";
-printf("%030.-15s", $tempstring);
+try {
+    printf("%030.-15s", $tempstring);
+} catch (ValueError $e) {
+    echo $e->getMessage();
+}
 
 echo"\n\n*** Output for '%F' as the format parameter ***\n";
 printf("%F",1.23456789e10);
@@ -679,7 +683,7 @@ Notice: printf(): Requested precision of 988 digits was truncated to PHP maximum
 12345678900.0000000000%d
 
 *** Output for invalid width(-15) specifier ***
-15s
+Unknown format specifier '-'
 
 *** Output for '%F' as the format parameter ***
 12345678900.000000

@@ -22,7 +22,7 @@ echo "*** Testing vprintf() : hexa formats with hexa values ***\n";
 $formats = array(
   "%x",
   "%+x %-x %X",
-  "%lx %Lx, %4x %-4x",
+  "%lx %4x %-4x",
   "%10.4x %-10.4x %04x %04.4x",
   "%'#2x %'2x %'$2x %'_2x",
   "%x %x %x %x",
@@ -35,7 +35,7 @@ $formats = array(
 $args_array = array(
   array(0x0),
   array(-0x1, 0x1, +0x22),
-  array(0x7FFFFFFF, -0x7fffffff, +0x7000000, -0x80000000),
+  array(0x7FFFFFFF, +0x7000000, -0x80000000),
   array(123456, 12345678, -1234567, 1234567),
   array(1, 0x2222, 0333333, -0x44444444),
   array(0x123b, 0xfAb, "0xaxz", 012),
@@ -56,7 +56,7 @@ foreach($formats as $format) {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing vprintf() : hexa formats with hexa values ***
 
 -- Iteration 1 --
@@ -68,8 +68,8 @@ ffffffffffffffff 1 22
 int(21)
 
 -- Iteration 3 --
-7fffffff x, 7000000 ffffffff80000000
-int(36)
+7fffffff 7000000 ffffffff80000000
+int(33)
 
 -- Iteration 4 --
                       ffffffffffed2979 0000

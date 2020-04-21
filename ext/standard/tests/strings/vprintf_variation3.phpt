@@ -18,8 +18,8 @@ echo "*** Testing vprintf() : int formats with int values ***\n";
 // defining array of int formats
 $formats = array(
   "%d",
-  "%+d %-d %D",
-  "%ld %Ld, %4d %-4d",
+  "%+d %-d",
+  "%ld %4d %-4d",
   "%10.4d %-10.4d %04d %04.4d",
   "%'#2d %'2d %'$2d %'_2d",
   "%d %d %d %d",
@@ -31,8 +31,8 @@ $formats = array(
 // Each sub array contains int values which correspond to each format string in $format
 $args_array = array(
   array(0),
-  array(-1, 1, +22),
-  array(2147483647, -2147483648, +2147483640, -2147483640),
+  array(-1, 1),
+  array(2147483647, +2147483640, -2147483640),
   array(123456, 12345678, -1234567, 1234567),
   array(111, 2222, 333333, 44444444),
   array(0x123b, 0xfAb, 0123, 012),
@@ -61,12 +61,12 @@ foreach($formats as $format) {
 int(1)
 
 -- Iteration 2 --
--1 1 
-int(5)
+-1 1
+int(4)
 
 -- Iteration 3 --
-2147483647 d, 2147483640 -2147483640
-int(36)
+2147483647 2147483640 -2147483640
+int(33)
 
 -- Iteration 4 --
     123456 12345678   -1234567 1234567

@@ -23,7 +23,11 @@ try {
   echo $exception->getMessage() . "\n";
 }
 
-var_dump( vfprintf( $fp, "Foo %y fake", "not available" ) );
+try {
+    var_dump( vfprintf( $fp, "Foo %y fake", "not available" ) );
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 rewind( $fp );
 var_dump( stream_get_contents( $fp ) );
@@ -44,5 +48,5 @@ unlink( $file );
 --EXPECT--
 -- Testing vfprintf() function with wrong variable types as argument --
 vfprintf(): Argument #2 ($format) must be of type string, array given
-int(9)
-string(9) "Foo  fake"
+Unknown format specifier 'y'
+string(0) ""
