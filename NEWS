@@ -16,6 +16,8 @@ PHP                                                                        NEWS
 - DOM:
   . Fixed bug #78221 (DOMNode::normalize() doesn't remove empty text nodes).
     (cmb)
+  . Fixed bug #79065 (DOM classes do not expose properties to Reflection).
+    (cmb)
 
 - EXIF:
   . Fixed bug #79336 (ext/exif/tests/bug79046.phpt fails on Big endian arch).

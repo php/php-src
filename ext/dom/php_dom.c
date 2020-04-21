@@ -410,6 +410,28 @@ static int dom_property_exists(zval *object, zval *member, int check_empty, void
 }
 /* }}} */
 
+/* {{{ dom_get_properties */
+static HashTable *dom_get_properties(zval *object)
+{
+	dom_object *obj = Z_DOMOBJ_P(object);
+	HashTable *props = zend_std_get_properties(object);
+
+	if (obj->prop_handler != NULL) {
+		zend_string *key;
+		dom_prop_handler *hnd;
+
+		ZEND_HASH_FOREACH_STR_KEY_PTR(obj->prop_handler, key, hnd) {
+			zval val;
+
+			if (hnd->read_func(obj, &val) == SUCCESS) {
+				zend_hash_update(props, key, &val);
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
+	return props;
+}
+/* }}} */
+
 static HashTable* dom_get_debug_info_helper(zval *object, int *is_temp) /* {{{ */
 {
 	dom_object			*obj = Z_DOMOBJ_P(object);
@@ -602,6 +624,7 @@ PHP_MINIT_FUNCTION(dom)
 	dom_object_handlers.get_property_ptr_ptr = dom_get_property_ptr_ptr;
 	dom_object_handlers.clone_obj = dom_objects_store_clone_obj;
 	dom_object_handlers.has_property = dom_property_exists;
+	dom_object_handlers.get_properties = dom_get_properties;
 	dom_object_handlers.get_debug_info = dom_get_debug_info;
 
 	memcpy(&dom_nnodemap_object_handlers, &dom_object_handlers, sizeof(zend_object_handlers));
