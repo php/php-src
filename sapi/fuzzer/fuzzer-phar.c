@@ -53,7 +53,9 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 	write(tmpfd, Data, Size);
 	close(tmpfd);
 
-	phar_create_or_parse_filename(tmp_filename, strlen(tmp_filename), NULL, 0, 1, REPORT_ERRORS, &phar_data, NULL);
+	zend_first_try {
+		phar_create_or_parse_filename(tmp_filename, strlen(tmp_filename), NULL, 0, 1, REPORT_ERRORS, &phar_data, NULL);
+	} zend_end_try();
 
 	/* cleanup */
 	unlink(tmp_filename);
