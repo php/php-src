@@ -399,7 +399,7 @@ php_formatted_print(char *format, size_t format_len, zval *args, int argc, int n
 	char *temppos, padding;
 	zend_string *result;
 	int always_sign;
-	int bad_arg_number = 0;
+	int max_missing_argnum = -1;
 
 	result = zend_string_alloc(size, 0);
 
@@ -527,7 +527,7 @@ php_formatted_print(char *format, size_t format_len, zval *args, int argc, int n
 			PRINTF_DEBUG(("sprintf: format character='%c'\n", *format));
 
 			if (argnum >= argc) {
-				bad_arg_number = 1;
+				max_missing_argnum = MAX(max_missing_argnum, argnum);
 				continue;
 			}
 
@@ -626,12 +626,12 @@ php_formatted_print(char *format, size_t format_len, zval *args, int argc, int n
 		}
 	}
 
-	if (bad_arg_number == 1) {
+	if (max_missing_argnum >= 0) {
 		efree(result);
 		if (nb_additional_parameters == -1) {
-			zend_value_error("The arguments array must contain %d items, %d given", argnum + 1, argc);
+			zend_value_error("The arguments array must contain %d items, %d given", max_missing_argnum + 1, argc);
 		} else {
-			zend_argument_count_error("%d parameters are required, %d given", argnum + nb_additional_parameters + 1, argc + nb_additional_parameters);
+			zend_argument_count_error("%d parameters are required, %d given", max_missing_argnum + nb_additional_parameters + 1, argc + nb_additional_parameters);
 		}
 		return NULL;
 	}

@@ -60,6 +60,12 @@ try {
     echo $e->getMessage(), "\n";
 }
 
+try {
+    var_dump(sprintf('%100$d %d'));
+} catch (\ArgumentCountError $e) {
+    echo $e->getMessage(), "\n";
+}
+
 echo "Done";
 ?>
 --EXPECTF--
@@ -75,4 +81,5 @@ sprintf() expects at least %d parameter, %d given
 3 parameters are required, 1 given
 4 parameters are required, 2 given
 4 parameters are required, 1 given
+101 parameters are required, 1 given
 Done
