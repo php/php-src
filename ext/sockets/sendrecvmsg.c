@@ -289,7 +289,7 @@ PHP_FUNCTION(socket_cmsg_space)
 	LONG_CHECK_VALID_INT(n, 3);
 
 	if (n < 0) {
-		zend_argument_value_error(3, "must be greater or equal than 0");
+		zend_argument_value_error(3, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
 
