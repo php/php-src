@@ -155,6 +155,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_get_resource_type, 0, 1, IS_STRI
 	ZEND_ARG_INFO(0, res)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_get_resource_id, 0, 1, IS_LONG, 0)
+	ZEND_ARG_INFO(0, res)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_get_resources, 0, 0, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, type, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -244,6 +248,7 @@ ZEND_FUNCTION(get_declared_interfaces);
 ZEND_FUNCTION(get_defined_functions);
 ZEND_FUNCTION(get_defined_vars);
 ZEND_FUNCTION(get_resource_type);
+ZEND_FUNCTION(get_resource_id);
 ZEND_FUNCTION(get_resources);
 ZEND_FUNCTION(get_loaded_extensions);
 ZEND_FUNCTION(get_defined_constants);
@@ -305,6 +310,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(get_defined_functions, arginfo_get_defined_functions)
 	ZEND_FE(get_defined_vars, arginfo_get_defined_vars)
 	ZEND_FE(get_resource_type, arginfo_get_resource_type)
+	ZEND_FE(get_resource_id, arginfo_get_resource_id)
 	ZEND_FE(get_resources, arginfo_get_resources)
 	ZEND_FE(get_loaded_extensions, arginfo_get_loaded_extensions)
 	ZEND_FE(get_defined_constants, arginfo_get_defined_constants)

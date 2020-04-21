@@ -1495,6 +1495,20 @@ ZEND_FUNCTION(get_resource_type)
 }
 /* }}} */
 
+/* {{{ proto int get_resource_id(resource res)
+   Get the resource ID for a given resource */
+ZEND_FUNCTION(get_resource_id)
+{
+	zval *resource;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_RESOURCE(resource)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_LONG(Z_RES_HANDLE_P(resource));
+}
+/* }}} */
+
 /* {{{ proto array get_resources([string resource_type])
    Get an array with all active resources */
 ZEND_FUNCTION(get_resources)

@@ -570,6 +570,10 @@ PHP 8.0 UPGRADE NOTES
 6. New Functions
 ========================================
 
+- Core:
+  . Added get_resource_id($resource) function, which returns the same value as
+    (int) $resource. It provides the same functionality under a clearer API.
+
 - PCRE:
   . Added preg_last_error_msg(), which returns a human-readable message for
     the last PCRE error. It complements preg_last_error(), which returns an
