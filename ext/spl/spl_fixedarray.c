@@ -54,7 +54,6 @@ typedef struct _spl_fixedarray_object { /* {{{ */
 	zend_function         *fptr_count;
 	int                    current;
 	int                    flags;
-	zend_class_entry      *ce_get_iterator;
 	zend_object            std;
 } spl_fixedarray_object;
 /* }}} */
@@ -221,7 +220,6 @@ static zend_object *spl_fixedarray_object_new_ex(zend_class_entry *class_type, z
 
 	if (orig && clone_orig) {
 		spl_fixedarray_object *other = spl_fixed_array_from_obj(orig);
-		intern->ce_get_iterator = other->ce_get_iterator;
 		spl_fixedarray_init(&intern->array, other->array.size);
 		spl_fixedarray_copy(&intern->array, &other->array);
 	}
