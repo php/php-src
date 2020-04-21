@@ -2332,7 +2332,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 	ssa = zend_jit_trace_build_tssa(trace_buffer, parent_trace, exit_num, script, op_arrays, &num_op_arrays);
 
 	/* Register allocation */
-	if (zend_jit_reg_alloc) {
+	if (zend_jit_reg_alloc && zend_jit_level >= ZEND_JIT_LEVEL_INLINE) {
 		ra = zend_jit_trace_allocate_registers(trace_buffer, ssa);
 	}
 
