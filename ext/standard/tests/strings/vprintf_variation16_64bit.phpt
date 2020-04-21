@@ -21,7 +21,7 @@ echo "*** Testing vprintf() : unsigned formats and signed & other types of value
 // defining array of unsigned formats
 $formats =
     '%u %+u %-u
-    %lu %Lu %4u %-4u
+    %lu %4u %-4u
     %10.4u %-10.4u %.4u
     %\'#2u %\'2u %\'$2u %\'_2u
     %3$u %4$u %1$u %2$u';
@@ -39,21 +39,21 @@ $args_array = array(
 
   // array of strings
   array(" ", ' ', 'hello',
-        '123hello', "123hello", '-123hello', '+123hello',
+        '123hello', '-123hello', '+123hello',
         "\12345678hello", "-\12345678hello", 'h123456ello',
         "1234hello", "hello\0world", "NULL", "true",
         "3", "4", '1', '2'),
 
   // different arrays
   array( array(0), array(1, 2), array(-1, -1),
-         array("123"), array('123'), array('-123'), array("-123"),
+         array("123"), array('-123'), array("-123"),
          array(true), array(TRUE), array(FALSE),
          array("123hello"), array("1", "2"), array('123hello'), array(12=>"12twelve"),
          array("3"), array("4"), array("1"), array("2") ),
 
   // array of boolean data
   array( true, TRUE, false,
-         TRUE, 0, FALSE, 1,
+         TRUE, FALSE, 1,
          true, TRUE, FALSE,
          0, 1, 1, 0,
          1, TRUE, 0, FALSE),
@@ -77,32 +77,32 @@ foreach($args_array as $args) {
 
 -- Iteration 1 --
 2 0 10
-    123456 u 1234 20000000000
-    2000000000000 22000000000000 12345
-    12 18446744073709551604 18446744073709428160 _3
+    123456 123456 1234
+    20000000000 2000000000000 22000000000000
+    12345 12 18446744073709551604 18446744073709428160
     10 123456 2 0
-int(145)
+int(147)
 
 -- Iteration 2 --
 0 0 0
-    123 u 18446744073709551493 123 
+    123 18446744073709551493 123 
              0 0          0
     1234 0 $0 _0
     0 123 0 0
-int(100)
+int(98)
 
 -- Iteration 3 --
 1 1 1
-    1 u    1 1   
+    1    1 1   
              1 1          1
     #1 1 $1 _1
     1 1 1 1
-int(78)
+int(76)
 
 -- Iteration 4 --
 1 1 0
-    1 u    0 1   
+    1    0 1   
              1 1          0
     #0 1 $1 _0
     0 1 1 1
-int(78)
+int(76)

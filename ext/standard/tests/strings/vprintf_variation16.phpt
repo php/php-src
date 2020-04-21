@@ -21,7 +21,7 @@ echo "*** Testing vprintf() : unsigned formats and signed & other types of value
 // defining array of unsigned formats
 $formats =
   '%u %+u %-u
-   %lu %Lu %4u %-4u
+   %lu %4u %-4u
    %10.4u %-10.4u %.4u
    %\'#2u %\'2u %\'$2u %\'_2u
    %3$u %4$u %1$u %2$u';
@@ -39,21 +39,21 @@ $args_array = array(
 
   // array of strings
   array(" ", ' ', 'hello',
-        '123hello', "123hello", '-123hello', '+123hello',
+        '123hello', '-123hello', '+123hello',
         "\12345678hello", "-\12345678hello", 'h123456ello',
         "1234hello", "hello\0world", "NULL", "true",
         "3", "4", '1', '2'),
 
   // different arrays
   array( array(0), array(1, 2), array(-1, -1),
-         array("123"), array('123'), array('-123'), array("-123"),
+         array("123"), array('-123'), array("-123"),
          array(true), array(TRUE), array(FALSE),
          array("123hello"), array("1", "2"), array('123hello'), array(12=>"12twelve"),
          array("3"), array("4"), array("1"), array("2") ),
 
   // array of boolean data
   array( true, TRUE, false,
-         TRUE, 0, FALSE, 1,
+         TRUE, FALSE, 1,
          true, TRUE, FALSE,
          0, 1, 1, 0,
          1, TRUE, 0, FALSE),
@@ -76,32 +76,32 @@ foreach($args_array as $args) {
 
 -- Iteration 1 --
 2 0 10
-   123456 u 1234 2820130816
-   2840207360 1177509888 12345
-   12 4294967284 4294843840 _3
+   123456 123456 1234
+   2820130816 2840207360 1177509888
+   12345 12 4294967284 4294843840
    10 123456 2 0
-int(113)
+int(115)
 
 -- Iteration 2 --
 0 0 0
-   123 u 4294967173 123 
+   123 4294967173 123 
             0 0          0
    1234 0 $0 _0
    0 123 0 0
-int(86)
+int(84)
 
 -- Iteration 3 --
 1 1 1
-   1 u    1 1   
+   1    1 1   
             1 1          1
    #1 1 $1 _1
    1 1 1 1
-int(74)
+int(72)
 
 -- Iteration 4 --
 1 1 0
-   1 u    0 1   
+   1    0 1   
             1 1          0
    #0 1 $1 _0
    0 1 1 1
-int(74)
+int(72)

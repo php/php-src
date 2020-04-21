@@ -21,7 +21,7 @@ echo "*** Testing vprintf() : hexa formats and non-hexa values ***\n";
 // defining array of different hexa formats
 $formats =
   '%x %+x %-x
-   %lx %Lx %4x %-4x
+   %lx x %4x %-4x
    %10.4x %-10.4x %.4x
    %\'#2x %\'2x %\'$2x %\'_2x
    %3$x %4$x %1$x %2$x';
@@ -32,35 +32,35 @@ $args_array = array(
 
   // array of float values
   array(2.2, .2, 10.2,
-        123456.234, 123456.234, -1234.6789, +1234.6789,
+        123456.234, -1234.6789, +1234.6789,
         2e10, +2e12, 22e+12,
         12345.780, 12.000000011111, -12.00000111111, -123456.234,
         3.33, +4.44, 1.11,-2.22 ),
 
   // array of int values
   array(2, -2, +2,
-        123456, 123456234, -12346789, +12346789,
+        123456, -12346789, +12346789,
         123200, +20000, 22212,
         12345780, 1211111, -12111111, -12345634,
         3, +4, 1,-2 ),
 
   // array of strings
   array(" ", ' ', 'hello',
-        '123hello', "123hello", '-123hello', '+123hello',
+        '123hello', '-123hello', '+123hello',
         "\12345678hello", "-\12345678hello", 'h123456ello',
         "1234hello", "hello\0world", "NULL", "true",
         "3", "4", '1', '2'),
 
   // different arrays
   array( array(0), array(1, 2), array(-1, -1),
-         array("123"), array('123'), array('-123'), array("-123"),
+         array("123"), array('-123'), array("-123"),
          array(true), array(TRUE), array(FALSE),
          array("123hello"), array("1", "2"), array('123hello'), array(12=>"12twelve"),
          array("3"), array("4"), array("1"), array("2") ),
 
   // array of boolean data
   array( true, TRUE, false,
-         TRUE, 0, FALSE, 1,
+         TRUE, FALSE, 1,
          true, TRUE, FALSE,
          0, 1, 1, 0,
          1, TRUE, 0, FALSE),
