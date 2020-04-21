@@ -3719,7 +3719,7 @@ ZEND_METHOD(reflection_class, __construct)
 /* }}} */
 
 /* {{{ add_class_vars */
-static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value)
+static void add_class_vars(zend_class_entry *ce, int statics, int defaults, zval *return_value)
 {
 	zend_property_info *prop_info;
 	zval *prop, prop_copy;
@@ -3734,7 +3734,12 @@ static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value
 		}
 		prop = NULL;
 		if (statics && (prop_info->flags & ZEND_ACC_STATIC) != 0) {
-			prop = &ce->default_static_members_table[prop_info->offset];
+			zval *members;
+			if (!defaults && (members = CE_STATIC_MEMBERS(ce))) {
+				prop = &members[prop_info->offset];
+			} else {
+				prop = &ce->default_static_members_table[prop_info->offset];
+			}
 			ZVAL_DEINDIRECT(prop);
 		} else if (!statics && (prop_info->flags & ZEND_ACC_STATIC) == 0) {
 			prop = &ce->default_properties_table[OBJ_PROP_TO_NUM(prop_info->offset)];
@@ -3778,7 +3783,7 @@ ZEND_METHOD(reflection_class, getStaticProperties)
 	}
 
 	array_init(return_value);
-	add_class_vars(ce, 1, return_value);
+	add_class_vars(ce, 1, 0, return_value);
 }
 /* }}} */
 
@@ -3876,8 +3881,8 @@ ZEND_METHOD(reflection_class, getDefaultProperties)
 	if (UNEXPECTED(zend_update_class_constants(ce) != SUCCESS)) {
 		return;
 	}
-	add_class_vars(ce, 1, return_value);
-	add_class_vars(ce, 0, return_value);
+	add_class_vars(ce, 1, 1, return_value);
+	add_class_vars(ce, 0, 1, return_value);
 }
 /* }}} */
 
