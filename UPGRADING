@@ -192,7 +192,7 @@ PHP 8.0 UPGRADE NOTES
 - dom:
   . Remove unimplemented classes from ext/dom that had no behavior and contained
     test data. These classes have also been removed in the latest version of DOM
-	standard:
+    standard:
 
      * DOMNameList
      * DomImplementationList
@@ -325,6 +325,9 @@ PHP 8.0 UPGRADE NOTES
         ReflectionParameter::getDefaultValue()
         ReflectionParameter::isDefaultValueConstant()
         ReflectionParameter::getDefaultValueConstantName()
+  . ReflectionMethod::isConstructor() and ReflectionMethod::isDestructor() now
+    also return true for `__construct` and `__destruct` in methods of interfaces.
+    Previously, this would only be true in methods of classes and traits.
 
 - Socket:
   . The deprecated AI_IDN_ALLOW_UNASSIGNED and AI_IDN_USE_STD3_ASCII_RULES
