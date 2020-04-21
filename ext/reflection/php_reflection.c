@@ -3719,7 +3719,7 @@ ZEND_METHOD(reflection_class, __construct)
 /* }}} */
 
 /* {{{ add_class_vars */
-static void add_class_vars(zend_class_entry *ce, int statics, int defaults, zval *return_value)
+static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value)
 {
 	zend_property_info *prop_info;
 	zval *prop, prop_copy;
@@ -3734,12 +3734,7 @@ static void add_class_vars(zend_class_entry *ce, int statics, int defaults, zval
 		}
 		prop = NULL;
 		if (statics && (prop_info->flags & ZEND_ACC_STATIC) != 0) {
-			zval *members;
-			if (!defaults && (members = CE_STATIC_MEMBERS(ce))) {
-				prop = &members[prop_info->offset];
-			} else {
-				prop = &ce->default_static_members_table[prop_info->offset];
-			}
+			prop = &ce->default_static_members_table[prop_info->offset];
 			ZVAL_DEINDIRECT(prop);
 		} else if (!statics && (prop_info->flags & ZEND_ACC_STATIC) == 0) {
 			prop = &ce->default_properties_table[OBJ_PROP_TO_NUM(prop_info->offset)];
@@ -3771,6 +3766,9 @@ ZEND_METHOD(reflection_class, getStaticProperties)
 {
 	reflection_object *intern;
 	zend_class_entry *ce;
+	zend_property_info *prop_info;
+	zval *prop, prop_copy;
+	zend_string *key;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -3783,7 +3781,42 @@ ZEND_METHOD(reflection_class, getStaticProperties)
 	}
 
 	array_init(return_value);
-	add_class_vars(ce, 1, 0, return_value);
+
+	ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->properties_info, key, prop_info) {
+		if (((prop_info->flags & ZEND_ACC_PROTECTED) &&
+		     !zend_check_protected(prop_info->ce, ce)) ||
+		    ((prop_info->flags & ZEND_ACC_PRIVATE) &&
+		     prop_info->ce != ce)) {
+			continue;
+		}
+		prop = NULL;
+		if ((prop_info->flags & ZEND_ACC_STATIC) != 0) {
+			zval *members;
+			if ((members = CE_STATIC_MEMBERS(ce))) {
+				prop = &members[prop_info->offset];
+			} else {
+				prop = &ce->default_static_members_table[prop_info->offset];
+			}
+			ZVAL_DEINDIRECT(prop);
+		}
+		if (!prop || (prop_info->type && Z_ISUNDEF_P(prop))) {
+			continue;
+		}
+
+		/* copy: enforce read only access */
+		ZVAL_DEREF(prop);
+		ZVAL_COPY_OR_DUP(&prop_copy, prop);
+
+		/* this is necessary to make it able to work with default array
+		* properties, returned to user */
+		if (Z_TYPE(prop_copy) == IS_CONSTANT_AST) {
+			if (UNEXPECTED(zval_update_constant_ex(&prop_copy, ce) != SUCCESS)) {
+				return;
+			}
+		}
+
+		zend_hash_update(Z_ARRVAL_P(return_value), key, &prop_copy);
+	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
 
@@ -3881,8 +3914,8 @@ ZEND_METHOD(reflection_class, getDefaultProperties)
 	if (UNEXPECTED(zend_update_class_constants(ce) != SUCCESS)) {
 		return;
 	}
-	add_class_vars(ce, 1, 1, return_value);
-	add_class_vars(ce, 0, 1, return_value);
+	add_class_vars(ce, 1, return_value);
+	add_class_vars(ce, 0, return_value);
 }
 /* }}} */
 
