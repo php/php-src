@@ -68,7 +68,6 @@ typedef struct _spl_heap_it spl_heap_it;
 struct _spl_heap_object {
 	spl_ptr_heap       *heap;
 	int                 flags;
-	zend_class_entry   *ce_get_iterator;
 	zend_function      *fptr_cmp;
 	zend_function      *fptr_count;
 	zend_object         std;
@@ -398,7 +397,6 @@ static zend_object *spl_heap_object_new_ex(zend_class_entry *class_type, zend_ob
 	if (orig) {
 		spl_heap_object *other = spl_heap_from_obj(orig);
 		intern->std.handlers = other->std.handlers;
-		intern->ce_get_iterator = other->ce_get_iterator;
 
 		if (clone_orig) {
 			intern->heap = spl_ptr_heap_clone(other->heap);
