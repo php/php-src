@@ -539,6 +539,13 @@ PHP 8.0 UPGRADE NOTES
   . printf() and friends how support the %h and %H format specifiers. These
     are the same as %g and %G, but always use "." as the decimal separator,
     rather than determining it through the LC_NUMERIC locale.
+  . printf() and friends now support using "*" as width or precision, in which
+    case the width/precision is passed as an argument to printf. This also
+    allows using precision -1 with %g, %G, %h and %H. For example, the following
+    code can be used to reproduce PHP's default floating point formatting:
+
+        printf("%.*H", (int) ini_get("precision"), $float);
+        printf("%.*H", (int) ini_get("serialize_precision"), $float);
 
 - Zip:
   . Extension updated to version 1.19.0
