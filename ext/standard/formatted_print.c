@@ -364,6 +364,27 @@ php_sprintf_getnumber(char **buffer, size_t *len)
 }
 /* }}} */
 
+#define ARG_NUM_NEXT -1
+#define ARG_NUM_INVALID -2
+
+int php_sprintf_get_argnum(char **format, size_t *format_len) {
+	char *temppos = *format;
+	while (isdigit((int) *temppos)) temppos++;
+	if (*temppos != '$') {
+		return ARG_NUM_NEXT;
+	}
+
+	int argnum = php_sprintf_getnumber(format, format_len);
+	if (argnum <= 0) {
+		zend_value_error("Argument number must be greater than zero");
+		return ARG_NUM_INVALID;
+	}
+
+	(*format)++;  /* skip the '$' */
+	(*format_len)--;
+	return argnum - 1;
+}
+
 /* php_formatted_print() {{{
  * New sprintf implementation for PHP.
  *
@@ -438,23 +459,12 @@ php_formatted_print(char *format, size_t format_len, zval *args, int argc, int n
 						  *format, format - Z_STRVAL_P(z_format)));
 			if (isalpha((int)*format)) {
 				width = precision = 0;
-				argnum = currarg++;
+				argnum = ARG_NUM_NEXT;
 			} else {
 				/* first look for argnum */
-				temppos = format;
-				while (isdigit((int)*temppos)) temppos++;
-				if (*temppos == '$') {
-					argnum = php_sprintf_getnumber(&format, &format_len);
-
-					if (argnum <= 0) {
-						zend_value_error("Argument number must be greater than zero");
-						goto fail;
-					}
-					argnum--;
-					format++;  /* skip the '$' */
-					format_len--;
-				} else {
-					argnum = currarg++;
+				argnum = php_sprintf_get_argnum(&format, &format_len);
+				if (argnum == ARG_NUM_INVALID) {
+					goto fail;
 				}
 
 				/* after argnum comes modifiers */
@@ -489,7 +499,34 @@ php_formatted_print(char *format, size_t format_len, zval *args, int argc, int n
 
 
 				/* after modifiers comes width */
-				if (isdigit((int)*format)) {
+				if (*format == '*') {
+					format++;
+					format_len--;
+
+					int width_argnum = php_sprintf_get_argnum(&format, &format_len);
+					if (width_argnum == ARG_NUM_INVALID) {
+						goto fail;
+					}
+					if (width_argnum == ARG_NUM_NEXT) {
+						width_argnum = currarg++;
+					}
+					if (width_argnum >= argc) {
+						max_missing_argnum = MAX(max_missing_argnum, width_argnum);
+						continue;
+					}
+					tmp = &args[width_argnum];
+					ZVAL_DEREF(tmp);
+					if (Z_TYPE_P(tmp) != IS_LONG) {
+						zend_value_error("Width must be an integer");
+						goto fail;
+					}
+					if (Z_LVAL_P(tmp) < 0 || Z_LVAL_P(tmp) > INT_MAX) {
+						zend_value_error("Width must be greater than zero and less than %d", INT_MAX);
+						goto fail;
+					}
+					width = Z_LVAL_P(tmp);
+					adjusting |= ADJ_WIDTH;
+				} else if (isdigit((int)*format)) {
 					PRINTF_DEBUG(("sprintf: getting width\n"));
 					if ((width = php_sprintf_getnumber(&format, &format_len)) < 0) {
 						zend_value_error("Width must be greater than zero and less than %d", INT_MAX);
@@ -506,7 +543,35 @@ php_formatted_print(char *format, size_t format_len, zval *args, int argc, int n
 					format++;
 					format_len--;
 					PRINTF_DEBUG(("sprintf: getting precision\n"));
-					if (isdigit((int)*format)) {
+					if (*format == '*') {
+						format++;
+						format_len--;
+
+						int prec_argnum = php_sprintf_get_argnum(&format, &format_len);
+						if (prec_argnum == ARG_NUM_INVALID) {
+							goto fail;
+						}
+						if (prec_argnum == ARG_NUM_NEXT) {
+							prec_argnum = currarg++;
+						}
+						if (prec_argnum >= argc) {
+							max_missing_argnum = MAX(max_missing_argnum, prec_argnum);
+							continue;
+						}
+						tmp = &args[prec_argnum];
+						ZVAL_DEREF(tmp);
+						if (Z_TYPE_P(tmp) != IS_LONG) {
+							zend_value_error("Precision must be an integer");
+							goto fail;
+						}
+						if (Z_LVAL_P(tmp) < -1 || Z_LVAL_P(tmp) > INT_MAX) {
+							zend_value_error("Precision must be between -1 and %d", INT_MAX);
+							goto fail;
+						}
+						precision = Z_LVAL_P(tmp);
+						adjusting |= ADJ_PRECISION;
+						expprec = 1;
+					} else if (isdigit((int)*format)) {
 						if ((precision = php_sprintf_getnumber(&format, &format_len)) < 0) {
 							zend_value_error("Precision must be greater than zero and less than %d", INT_MAX);
 							goto fail;
@@ -528,9 +593,17 @@ php_formatted_print(char *format, size_t format_len, zval *args, int argc, int n
 			}
 			PRINTF_DEBUG(("sprintf: format character='%c'\n", *format));
 
+			if (argnum == ARG_NUM_NEXT) {
+				argnum = currarg++;
+			}
 			if (argnum >= argc) {
 				max_missing_argnum = MAX(max_missing_argnum, argnum);
 				continue;
+			}
+
+			if (expprec && precision == -1 && *format != 'g' && *format != 'G') {
+				zend_value_error("Precision -1 is only supported for %%g and %%G");
+				goto fail;
 			}
 
 			/* now we expect to find a type specifier */
