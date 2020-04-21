@@ -1717,9 +1717,12 @@ static void zend_jit_dump_lifetime_interval(const zend_op_array *op_array, const
 		fprintf(stderr, " store");
 	}
 	if (ival->hint) {
-		var_num = ssa->vars[ival->hint->ssa_var].var;
-		fprintf(stderr, " hint=#%d.", ival->hint->ssa_var);
-		zend_dump_var(op_array, (var_num < op_array->last_var ? IS_CV : 0), var_num);
+		fprintf(stderr, " hint");
+		if (ival->hint->ssa_var >= 0) {
+			var_num = ssa->vars[ival->hint->ssa_var].var;
+			fprintf(stderr, "=#%d.", ival->hint->ssa_var);
+			zend_dump_var(op_array, (var_num < op_array->last_var ? IS_CV : 0), var_num);
+		}
 		if (ival->hint->reg != ZREG_NONE) {
 			fprintf(stderr, " (%s)", zend_reg_name[ival->hint->reg]);
 		}
