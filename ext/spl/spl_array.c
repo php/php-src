@@ -161,8 +161,6 @@ static void spl_array_object_free_storage(zend_object *object)
 }
 /* }}} */
 
-zend_object_iterator *spl_array_get_iterator(zend_class_entry *ce, zval *object, int by_ref);
-
 /* {{{ spl_array_object_new_ex */
 static zend_object *spl_array_object_new_ex(zend_class_entry *class_type, zend_object *orig, int clone_orig)
 {
