@@ -71,10 +71,15 @@ memory_limit=256M
         printf("[011] Failed to change max_allowed_packet");
     }
 
-    if (!mysqli_query($link, "CREATE TABLE test(col_blob LONGBLOB) ENGINE=" . $engine))
-        printf("[012] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    $table_name = 'test__mysqli_insert_packet_overflow';
+    if (!mysqli_query($link, "DROP TABLE IF EXISTS {$table_name}")) {
+        printf("[012] Failed to drop old test table: [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    }
 
-    $query_prefix = "INSERT INTO test(col_blob) VALUES ('";
+    if (!mysqli_query($link, "CREATE TABLE {$table_name}(col_blob LONGBLOB) ENGINE=" . $engine))
+        printf("[013] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+
+    $query_prefix = "INSERT INTO {$table_name}(col_blob) VALUES ('";
     $query_postfix = "')";
     $query_len = strlen($query_prefix) + strlen($query_postfix);
     $com_query_len = 2;
@@ -84,16 +89,16 @@ memory_limit=256M
     $query = sprintf("%s%s%s", $query_prefix, $blob, $query_postfix);
 
     if (!mysqli_query($link, $query))
-        printf("[013] max_allowed_packet = %d, strlen(query) = %d, [%d] %s\n", $max_allowed_packet, strlen($query), mysqli_errno($link), mysqli_error($link));
+        printf("[014] max_allowed_packet = %d, strlen(query) = %d, [%d] %s\n", $max_allowed_packet, strlen($query), mysqli_errno($link), mysqli_error($link));
 
-    if (!$res = mysqli_query($link, "SELECT col_blob FROM test"))
-        printf("[014] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    if (!$res = mysqli_query($link, "SELECT col_blob FROM {$table_name}"))
+        printf("[015] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
     if (!$row = mysqli_fetch_assoc($res)) {
-        printf("[015] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+        printf("[016] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
     } else {
         if ($row['col_blob'] != $blob) {
-            printf("[016] Blob seems wrong, dumping data\n");
+            printf("[017] Blob seems wrong, dumping data\n");
             var_dump(strlen($row['col_blob']));
             var_dump(strlen($blob));
         }
@@ -102,15 +107,11 @@ memory_limit=256M
 
     if (!mysqli_query($link, "SET GLOBAL max_allowed_packet = " . $org_max_allowed_packet))
         if (1227 != mysqli_errno($link))
-            printf("[017] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+            printf("[018] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
     mysqli_close($link);
 
     print "done!";
-?>
---CLEAN--
-<?php
-	require_once("clean_table.inc");
 ?>
 --EXPECT--
 done!
