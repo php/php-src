@@ -11024,10 +11024,7 @@ static zend_bool zend_jit_opline_supports_reg(const zend_op_array *op_array, zen
 		case ZEND_MUL:
 			op1_info = OP1_INFO();
 			op2_info = OP2_INFO();
-			if ((op1_info | op2_info) & MAY_BE_UNDEF) {
-				return 0;
-			}
-			return (op1_info & op2_info & (MAY_BE_LONG|MAY_BE_DOUBLE)) != 0;
+			return !((op1_info | op2_info) & (MAY_BE_ANY - (MAY_BE_LONG|MAY_BE_DOUBLE)));
 		case ZEND_BW_OR:
 		case ZEND_BW_AND:
 		case ZEND_BW_XOR:
@@ -11036,18 +11033,13 @@ static zend_bool zend_jit_opline_supports_reg(const zend_op_array *op_array, zen
 		case ZEND_MOD:
 			op1_info = OP1_INFO();
 			op2_info = OP2_INFO();
-			if ((op1_info | op2_info) & MAY_BE_UNDEF) {
-				return 0;
-			}
-			return (op1_info & op2_info & MAY_BE_LONG) != 0;
+			return !((op1_info | op2_info) & (MAY_BE_ANY - MAY_BE_LONG));
 		case ZEND_PRE_INC:
 		case ZEND_PRE_DEC:
 		case ZEND_POST_INC:
 		case ZEND_POST_DEC:
 			op1_info = OP1_INFO();
-			return
-				opline->op1_type == IS_CV &&
-				(op1_info & MAY_BE_LONG);
+			return opline->op1_type == IS_CV && !(op1_info & (MAY_BE_ANY - MAY_BE_LONG));
 		case ZEND_BOOL:
 		case ZEND_BOOL_NOT:
 		case ZEND_JMPZ:
