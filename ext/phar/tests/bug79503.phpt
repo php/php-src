@@ -13,4 +13,4 @@ try {
 }
 ?>
 --EXPECTF--
-phar error: "%s%ebug79503.phar" is a corrupted tar file (checksum mismatch of file "")
+phar error: tar-based phar "%s%ebug79503.phar" has invalid metadata in magic file ".phar/.metadata.bin"
