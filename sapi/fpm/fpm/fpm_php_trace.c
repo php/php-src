@@ -9,11 +9,7 @@
 
 #include <stdio.h>
 #include <stddef.h>
-#if HAVE_INTTYPES_H
-# include <inttypes.h>
-#else
-# include <stdint.h>
-#endif
+#include <inttypes.h>
 #include <unistd.h>
 #include <sys/time.h>
 #include <sys/types.h>

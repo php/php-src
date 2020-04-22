@@ -1044,9 +1044,7 @@ AC_DEFUN([_PHP_CHECK_SIZEOF], [
     AC_RUN_IFELSE([AC_LANG_SOURCE([[#include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
-#ifdef HAVE_INTTYPES_H
 #include <inttypes.h>
-#endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -2421,9 +2419,7 @@ AC_DEFUN([PHP_CHECK_STDINT_TYPES], [
   AC_CHECK_SIZEOF([long long])
   AC_CHECK_SIZEOF([size_t])
   AC_CHECK_TYPES([int8, int16, int32, int64, int8_t, int16_t, int32_t, int64_t, uint8, uint16, uint32, uint64, uint8_t, uint16_t, uint32_t, uint64_t, u_int8_t, u_int16_t, u_int32_t, u_int64_t], [], [], [
-#if HAVE_STDINT_H
-# include <stdint.h>
-#endif
+#include <stdint.h>
 #if HAVE_SYS_TYPES_H
 # include <sys/types.h>
 #endif

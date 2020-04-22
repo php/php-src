@@ -17,7 +17,7 @@
 # include <sys/ioctl.h>
 # include <net/if.h>
 #else
-# include <win32/php_stdint.h>
+# include <stdint.h>
 #endif
 
 #include <limits.h>

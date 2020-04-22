@@ -25,9 +25,6 @@
 #include "php_content_types.h"
 #include "SAPI.h"
 #include "zend_globals.h"
-#ifdef PHP_WIN32
-# include "win32/php_inttypes.h"
-#endif
 
 /* for systems that need to override reading of environment variables */
 void _php_import_environment_variables(zval *array_ptr);

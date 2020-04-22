@@ -13,7 +13,7 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #include <io.h>
 #include <malloc.h>
 
-#include <win32/php_stdint.h>
+#include <stdint.h>
 
 #ifndef HAVE_INT8_T
 #define HAVE_INT8_T
