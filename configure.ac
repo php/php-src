@@ -594,7 +594,6 @@ strptime \
 strtok_r \
 symlink \
 tzset \
-unlockpt \
 unsetenv \
 usleep \
 utime \
