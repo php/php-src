@@ -22,6 +22,7 @@
 
 #include "php.h"
 #include "Zend/zend_interfaces.h"
+#include "Zend/zend_exceptions.h"
 
 #ifdef HAVE_CURL
 
@@ -239,6 +240,9 @@ static zend_object *curl_create_object(zend_class_entry *class_type);
 static void curl_free_obj(zend_object *object);
 static HashTable *curl_get_gc(zend_object *object, zval **table, int *n);
 static zend_function *curl_get_constructor(zend_object *object);
+static zend_object *curl_clone_obj(zend_object *object);
+php_curl *alloc_curl_handle_from_zval(zval *curl);
+static inline int build_mime_structure_from_hash(php_curl *ch, zval *zpostfields);
 
 static const zend_function_entry curl_object_methods[] = {
 	PHP_FE_END
@@ -1203,7 +1207,7 @@ PHP_MINIT_FUNCTION(curl)
 	curl_object_handlers.free_obj = curl_free_obj;
 	curl_object_handlers.get_gc = curl_get_gc;
 	curl_object_handlers.get_constructor = curl_get_constructor;
-	curl_object_handlers.clone_obj = NULL;
+	curl_object_handlers.clone_obj = curl_clone_obj;
 
 	curl_multi_register_class();
 	curl_share_register_class();
@@ -1228,6 +1232,38 @@ static zend_object *curl_create_object(zend_class_entry *class_type) {
 static zend_function *curl_get_constructor(zend_object *object) {
 	zend_throw_error(NULL, "Cannot directly construct Curl, use curl_init() instead");
 	return NULL;
+}
+
+static zend_object *curl_clone_obj(zend_object *object) {
+	php_curl *ch;
+	CURL *cp;
+	zval *postfields;
+	zend_object *clone_object;
+	php_curl *clone_ch;
+
+	clone_object = curl_create_object(curl_ce);
+	clone_ch = curl_from_obj(clone_object);
+	clone_ch = alloc_curl_handle(clone_ch);
+
+	ch = curl_from_obj(object);
+	cp = curl_easy_duphandle(ch->cp);
+	if (!cp) {
+		zend_throw_exception(NULL, "Cannot clone unconstructed Curl object", 0);
+		return &clone_ch->std;
+	}
+
+	clone_ch->cp = cp;
+	_php_setup_easy_copy_handlers(clone_ch, ch);
+
+	postfields = &clone_ch->postfields;
+	if (Z_TYPE_P(postfields) != IS_UNDEF) {
+		if (build_mime_structure_from_hash(clone_ch, postfields) != SUCCESS) {
+			zend_throw_exception(NULL, "Cannot clone unconstructed Curl object", 0);
+			return &clone_ch->std;
+		}
+	}
+
+	return &clone_ch->std;
 }
 
 static HashTable *curl_get_gc(zend_object *object, zval **table, int *n)
@@ -1692,15 +1728,18 @@ PHP_FUNCTION(curl_version)
 }
 /* }}} */
 
-/* {{{ alloc_curl_handle
- */
-php_curl *alloc_curl_handle(zval *curl)
+php_curl *alloc_curl_handle_from_zval(zval *curl)
 {
 	php_curl *ch;
 
 	object_init_ex(curl, curl_ce);
 	ch = Z_CURL_P(curl);
 
+	return alloc_curl_handle(ch);
+}
+
+php_curl *alloc_curl_handle(php_curl *ch)
+{
 	ch->to_free                = ecalloc(1, sizeof(struct _php_curl_free));
 	ch->handlers               = ecalloc(1, sizeof(php_curl_handlers));
 	ch->handlers->write        = ecalloc(1, sizeof(php_curl_write));
@@ -1723,6 +1762,7 @@ php_curl *alloc_curl_handle(zval *curl)
 
 	return ch;
 }
+
 /* }}} */
 
 /* {{{ create_certinfo
@@ -1813,7 +1853,7 @@ PHP_FUNCTION(curl_init)
 		RETURN_FALSE;
 	}
 
-	ch = alloc_curl_handle(return_value);
+	ch = alloc_curl_handle_from_zval(return_value);
 
 	ch->cp = cp;
 
@@ -2123,7 +2163,7 @@ static inline int build_mime_structure_from_hash(php_curl *ch, zval *zpostfields
    Copy a cURL handle along with all of it's preferences */
 PHP_FUNCTION(curl_copy_handle)
 {
-	php_curl    *ch;
+	php_curl	*ch;
 	CURL		*cp;
 	zval		*zid;
 	php_curl	*dupch;
@@ -2141,7 +2181,7 @@ PHP_FUNCTION(curl_copy_handle)
 		RETURN_FALSE;
 	}
 
-	dupch = alloc_curl_handle(return_value);
+	dupch = alloc_curl_handle_from_zval(return_value);
 	dupch->cp = cp;
 
 	_php_setup_easy_copy_handlers(dupch, ch);

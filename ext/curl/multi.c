@@ -114,11 +114,8 @@ void _php_curl_multi_cleanup_list(void *data) /* {{{ */
 	if (!z_ch) {
 		return;
 	}
-	if (!Z_RES_P(z_ch)->ptr) {
-		return;
-	}
 
-	zend_list_delete(Z_RES_P(z_ch));
+	zval_ptr_dtor(z_ch);
 }
 /* }}} */
 
@@ -401,7 +398,7 @@ static int _php_server_push_callback(CURL *parent_ch, CURL *easy, size_t num_hea
 
 	parent = Z_CURL_P(pz_parent_ch);
 
-	ch = alloc_curl_handle(&pz_ch);
+	ch = alloc_curl_handle_from_zval(&pz_ch);
 	ch->cp = easy;
 	_php_setup_easy_copy_handlers(ch, parent);
 
