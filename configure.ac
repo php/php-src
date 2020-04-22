@@ -566,7 +566,6 @@ getgrnam_r \
 getpwuid_r \
 getwd \
 glob \
-grantpt \
 inet_ntoa \
 inet_ntop \
 inet_pton \
