@@ -1840,40 +1840,34 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 
 			support_opline =
 				zend_jit_opline_supports_reg(op_array, ssa, opline, ssa_op);
-			if (support_opline) {
-				if (ssa_op->op1_use >= 0
-				 && start[ssa_op->op1_use] >= 0
-				 && !zend_ssa_is_no_val_use(opline, ssa_op, ssa_op->op1_use)) {
+			if (ssa_op->op1_use >= 0
+			 && start[ssa_op->op1_use] >= 0
+			 && !zend_ssa_is_no_val_use(opline, ssa_op, ssa_op->op1_use)) {
+				if (support_opline) {
 					end[ssa_op->op1_use] = idx;
-				}
-				if (ssa_op->op2_use >= 0
-				 && start[ssa_op->op2_use] >= 0
-				 && !zend_ssa_is_no_val_use(opline, ssa_op, ssa_op->op2_use)) {
-					end[ssa_op->op2_use] = idx;
-				}
-				if (ssa_op->result_use >= 0
-				 && start[ssa_op->result_use] >= 0
-				 && !zend_ssa_is_no_val_use(opline, ssa_op, ssa_op->result_use)) {
-					end[ssa_op->result_use] = idx;
-				}
-			} else {
-				if (ssa_op->op1_use >= 0
-				 && start[ssa_op->op1_use] >= 0
-				 && !zend_ssa_is_no_val_use(opline, ssa_op, ssa_op->op1_use)) {
+				} else {
 					start[ssa_op->op1_use] = -1;
 					end[ssa_op->op1_use] = -1;
 					count--;
 				}
-				if (ssa_op->op2_use >= 0
-				 && start[ssa_op->op2_use] >= 0
-				 && !zend_ssa_is_no_val_use(opline, ssa_op, ssa_op->op2_use)) {
+			}
+			if (ssa_op->op2_use >= 0
+			 && start[ssa_op->op2_use] >= 0
+			 && !zend_ssa_is_no_val_use(opline, ssa_op, ssa_op->op2_use)) {
+				if (support_opline) {
+					end[ssa_op->op2_use] = idx;
+				} else {
 					start[ssa_op->op2_use] = -1;
 					end[ssa_op->op2_use] = -1;
 					count--;
 				}
-				if (ssa_op->result_use >= 0
-				 && start[ssa_op->result_use] >= 0
-				 && !zend_ssa_is_no_val_use(opline, ssa_op, ssa_op->result_use)) {
+			}
+			if (ssa_op->result_use >= 0
+			 && start[ssa_op->result_use] >= 0
+			 && !zend_ssa_is_no_val_use(opline, ssa_op, ssa_op->result_use)) {
+				if (support_opline) {
+					end[ssa_op->result_use] = idx;
+				} else {
 					start[ssa_op->result_use] = -1;
 					end[ssa_op->result_use] = -1;
 					count--;
@@ -1933,16 +1927,12 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 					/* OP_DATA */
 					ssa_op++;
 					opline++;
-					if (support_opline) {
-						if (ssa_op->op1_use >= 0
-						 && start[ssa_op->op1_use] >= 0
-						 && !zend_ssa_is_no_val_use(opline, ssa_op, ssa_op->op1_use)) {
+					if (ssa_op->op1_use >= 0
+					 && start[ssa_op->op1_use] >= 0
+					 && !zend_ssa_is_no_val_use(opline, ssa_op, ssa_op->op1_use)) {
+						if (support_opline) {
 							end[ssa_op->op1_use] = idx;
-						}
-					} else {
-						if (ssa_op->op1_use >= 0
-						 && start[ssa_op->op1_use] >= 0
-						 && !zend_ssa_is_no_val_use(opline, ssa_op, ssa_op->op1_use)) {
+						} else {
 							start[ssa_op->op1_use] = -1;
 							end[ssa_op->op1_use] = -1;
 							count--;
@@ -1951,9 +1941,7 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 					if (ssa_op->op1_def >= 0) {
 						zend_jit_close_var(stack, EX_VAR_TO_NUM(opline->op1.var), ssa, ssa_opcodes, op_array, op_array_ssa, start, end, flags, idx);
 						SET_STACK_VAR(stack, EX_VAR_TO_NUM(opline->op1.var), ssa_op->op1_def);
-					}
-					if (support_opline) {
-						if (ssa_op->op1_def >= 0
+						if (support_opline
 						 && (ssa->vars[ssa_op->op1_def].use_chain >= 0
 					      || ssa->vars[ssa_op->op1_def].phi_use_chain)
 						 && zend_jit_var_supports_reg(ssa, ssa_op->op1_def)) {
