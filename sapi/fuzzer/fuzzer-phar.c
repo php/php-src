@@ -66,6 +66,9 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 }
 
 int LLVMFuzzerInitialize(int *argc, char ***argv) {
+	/* Gracefully handle bailouts. */
+	putenv("USE_TRACKED_ALLOC=1");
+
 	fuzzer_init_php();
 
 	/* fuzzer_shutdown_php(); */
