@@ -281,17 +281,25 @@ php_sprintf_appenddouble(zend_string **buffer, size_t *pos,
 
 		case 'g':
 		case 'G':
+		case 'h':
+		case 'H':
+		{
 			if (precision == 0)
 				precision = 1;
-			/*
-			 * * We use &num_buf[ 1 ], so that we have room for the sign
-			 */
+
+			char decimal_point = '.';
+			if (fmt == 'g' || fmt == 'G') {
 #ifdef ZTS
-			localeconv_r(&lconv);
+				localeconv_r(&lconv);
 #else
-			lconv = localeconv();
+				lconv = localeconv();
 #endif
-			s = php_gcvt(number, precision, LCONV_DECIMAL_POINT, (fmt == 'G')?'E':'e', &num_buf[1]);
+				decimal_point = LCONV_DECIMAL_POINT;
+			}
+
+			char exp_char = fmt == 'G' || fmt == 'H' ? 'E' : 'e';
+			/* We use &num_buf[ 1 ], so that we have room for the sign. */
+			s = php_gcvt(number, precision, decimal_point, exp_char, &num_buf[1]);
 			is_negative = 0;
 			if (*s == '-') {
 				is_negative = 1;
@@ -303,6 +311,7 @@ php_sprintf_appenddouble(zend_string **buffer, size_t *pos,
 
 			s_len = strlen(s);
 			break;
+		}
 	}
 
 	php_sprintf_appendstring(buffer, pos, s, width, 0, padding,
@@ -562,12 +571,14 @@ php_formatted_print(char *format, size_t format_len, zval *args, int argc, int n
 										  width, padding, alignment);
 					break;
 
-				case 'g':
-				case 'G':
 				case 'e':
 				case 'E':
 				case 'f':
 				case 'F':
+				case 'g':
+				case 'G':
+				case 'h':
+				case 'H':
 					php_sprintf_appenddouble(&result, &outpos,
 											 zval_get_double(tmp),
 											 width, padding, alignment,
