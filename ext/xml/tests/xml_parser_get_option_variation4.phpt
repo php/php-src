@@ -1,8 +1,5 @@
 --TEST--
-xml_parser_get_option() - Test that a parameter not set defaults
-and returns a E_WARNING-level message with "Unknown option" text
---CREDITS--
-Symeon Charalabides <symeon@systasis.com> - @phpdublin
+xml_parser_get_option() - Test parameter not set
 --SKIPIF--
 <?php
 if (!extension_loaded('xml')) {
