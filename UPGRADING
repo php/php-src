@@ -535,6 +535,11 @@ PHP 8.0 UPGRADE NOTES
     compile-time warnings and replay them on the next include, even if it is
     served from cache.
 
+- Standard:
+  . printf() and friends how support the %h and %H format specifiers. These
+    are the same as %g and %G, but always use "." as the decimal separator,
+    rather than determining it through the LC_NUMERIC locale.
+
 - Zip:
   . Extension updated to version 1.19.0
   . New ZipArchive::lastId property to get index value of last added entry.
