@@ -181,9 +181,17 @@ static int phar_tar_process_metadata(phar_entry_info *entry, php_stream *fp) /* 
 	}
 
 	if (entry->filename_len == sizeof(".phar/.metadata.bin")-1 && !memcmp(entry->filename, ".phar/.metadata.bin", sizeof(".phar/.metadata.bin")-1)) {
+		if (Z_TYPE(entry->phar->metadata) != IS_UNDEF) {
+			efree(metadata);
+			return FAILURE;
+		}
 		entry->phar->metadata = entry->metadata;
 		ZVAL_UNDEF(&entry->metadata);
 	} else if (entry->filename_len >= sizeof(".phar/.metadata/") + sizeof("/.metadata.bin") - 1 && NULL != (mentry = zend_hash_str_find_ptr(&(entry->phar->manifest), entry->filename + sizeof(".phar/.metadata/") - 1, entry->filename_len - (sizeof("/.metadata.bin") - 1 + sizeof(".phar/.metadata/") - 1)))) {
+		if (Z_TYPE(mentry->metadata) != IS_UNDEF) {
+			efree(metadata);
+			return FAILURE;
+		}
 		/* transfer this metadata to the entry it refers */
 		mentry->metadata = entry->metadata;
 		ZVAL_UNDEF(&entry->metadata);

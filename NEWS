@@ -22,6 +22,9 @@ PHP                                                                        NEWS
   . Fixed bug #79497 (stream_socket_client() throws an unknown error sometimes
     with <1s timeout). (Joe Cai)
 
+- Phar:
+  . Fix bug #79503 (Memory leak on duplicate metadata). (cmb)
+
 - Standard:
   . Fixed bug #79468 (SIGSEGV when closing stream handle with a stream filter
     appended). (dinosaur)
