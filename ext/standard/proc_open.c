@@ -495,10 +495,6 @@ PHP_FUNCTION(proc_open)
 	php_process_id_t child;
 	struct php_process_handle *proc;
 	int is_persistent = 0; /* TODO: ensure that persistent procs will work */
-#if PHP_CAN_DO_PTS
-	php_file_descriptor_t dev_ptmx = -1;	/* master */
-	php_file_descriptor_t slave_pty = -1;
-#endif
 
 	ZEND_PARSE_PARAMETERS_START(3, 6)
 		Z_PARAM_ZVAL(command_zv)
@@ -827,31 +823,8 @@ PHP_FUNCTION(proc_open)
 #endif
 				descriptors[ndesc].mode = DESC_FILE;
 			} else if (strcmp(Z_STRVAL_P(ztype), "pty") == 0) {
-#if PHP_CAN_DO_PTS
-				if (dev_ptmx == -1) {
-					/* open things up */
-					dev_ptmx = open("/dev/ptmx", O_RDWR);
-					if (dev_ptmx == -1) {
-						php_error_docref(NULL, E_WARNING, "Failed to open /dev/ptmx, errno %d", errno);
-						goto exit_fail;
-					}
-					grantpt(dev_ptmx);
-					unlockpt(dev_ptmx);
-					slave_pty = open(ptsname(dev_ptmx), O_RDWR);
-
-					if (slave_pty == -1) {
-						php_error_docref(NULL, E_WARNING, "Failed to open slave pty, errno %d", errno);
-						goto exit_fail;
-					}
-				}
-				descriptors[ndesc].mode = DESC_PIPE;
-				descriptors[ndesc].childend = dup(slave_pty);
-				descriptors[ndesc].parentend = dup(dev_ptmx);
-				descriptors[ndesc].mode_flags = O_RDWR;
-#else
 				php_error_docref(NULL, E_WARNING, "PTY pseudo terminal not supported on this system");
 				goto exit_fail;
-#endif
 			} else {
 				php_error_docref(NULL, E_WARNING, "%s is not a valid descriptor spec/mode", Z_STRVAL_P(ztype));
 				goto exit_fail;
@@ -993,28 +966,6 @@ PHP_FUNCTION(proc_open)
 	if (child == 0) {
 		/* this is the child process */
 
-#if PHP_CAN_DO_PTS
-		if (dev_ptmx >= 0) {
-			int my_pid = getpid();
-
-#ifdef TIOCNOTTY
-			/* detach from original tty. Might only need this if isatty(0) is true */
-			ioctl(0,TIOCNOTTY,NULL);
-#else
-			setsid();
-#endif
-			/* become process group leader */
-			setpgid(my_pid, my_pid);
-			tcsetpgrp(0, my_pid);
-		}
-#endif
-
-#if PHP_CAN_DO_PTS
-		if (dev_ptmx >= 0) {
-			close(dev_ptmx);
-			close(slave_pty);
-		}
-#endif
 		/* close those descriptors that we just opened for the parent stuff,
 		 * dup new descriptors into required descriptors and close the original
 		 * cruft */
@@ -1084,13 +1035,6 @@ PHP_FUNCTION(proc_open)
 	proc->childHandle = childHandle;
 #endif
 	proc->env = env;
-
-#if PHP_CAN_DO_PTS
-	if (dev_ptmx >= 0) {
-		close(dev_ptmx);
-		close(slave_pty);
-	}
-#endif
 
 	/* clean up all the child ends and then open streams on the parent
 	 * ends, where appropriate */
@@ -1187,16 +1131,7 @@ exit_fail:
 		efree(argv);
 	}
 #endif
-#if PHP_CAN_DO_PTS
-	if (dev_ptmx >= 0) {
-		close(dev_ptmx);
-	}
-	if (slave_pty >= 0) {
-		close(slave_pty);
-	}
-#endif
 	RETURN_FALSE;
-
 }
 /* }}} */
 
