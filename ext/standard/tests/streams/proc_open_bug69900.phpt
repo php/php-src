@@ -6,7 +6,7 @@ Bug #69900 Commandline input/output weird behaviour with STDIO
 error_reporting(E_ALL);
 
 $fl = __DIR__ . DIRECTORY_SEPARATOR . "test69900.php";
-$max_ms = 10;
+$max_ms = 20;
 
 $test_content = '<?php
 
@@ -48,8 +48,8 @@ fclose($pipes[1]);
 proc_close($process);
 
 /* It is expected that the first call takes more than the limit.
- * Allow one more to account for a possible process switch. */
-if ($moreThanLimit > 2) {
+ * Allow two more to account for possible process switch, etc. */
+if ($moreThanLimit > 3) {
     echo "fgets() took more than $max_ms ms $moreThanLimit times\n";
 }
 
