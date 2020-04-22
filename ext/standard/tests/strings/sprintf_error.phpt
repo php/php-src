@@ -66,6 +66,12 @@ try {
     echo $e->getMessage(), "\n";
 }
 
+try {
+    var_dump(sprintf("foo %", 42));
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+
 echo "Done";
 ?>
 --EXPECTF--
@@ -82,4 +88,5 @@ sprintf() expects at least %d parameter, %d given
 4 parameters are required, 2 given
 4 parameters are required, 1 given
 101 parameters are required, 1 given
+Missing format specifier at end of string
 Done

@@ -26,7 +26,7 @@ $formats = array(
   "%10.4x %-10.4x %04x %04.4x",
   "%'#2x %'2x %'$2x %'_2x",
   "%x %x %x %x",
-  "% %%x x%",
+  "% %%x",
   '%3$x %4$x %1$x %2$x'
 );
 
@@ -56,7 +56,7 @@ foreach($formats as $format) {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing vprintf() : hexa formats with hexa values ***
 
 -- Iteration 1 --
@@ -84,8 +84,8 @@ int(22)
 int(12)
 
 -- Iteration 7 --
-%34 x
-int(5)
+%34
+int(3)
 
 -- Iteration 8 --
 1 2 3 4

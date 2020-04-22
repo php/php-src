@@ -616,9 +616,10 @@ php_formatted_print(char *format, size_t format_len, zval *args, int argc, int n
 
 				case '\0':
 					if (!format_len) {
-						goto exit;
+						zend_value_error("Missing format specifier at end of string");
+						goto fail;
 					}
-					break;
+					/* break missing intentionally */
 
 				default:
 					zend_value_error("Unknown format specifier '%c'", *format);
@@ -638,7 +639,6 @@ php_formatted_print(char *format, size_t format_len, zval *args, int argc, int n
 		goto fail;
 	}
 
-exit:
 	/* possibly, we have to make sure we have room for the terminating null? */
 	ZSTR_VAL(result)[outpos]=0;
 	ZSTR_LEN(result) = outpos;
