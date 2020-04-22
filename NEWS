@@ -26,8 +26,11 @@ PHP                                                                        NEWS
   . Fixed bug #79497 (stream_socket_client() throws an unknown error sometimes
     with <1s timeout). (Joe Cai)
 
-PCRE:
+- PCRE:
   . Upgraded to PCRE2 10.34. (cmb)
+
+- Phar:
+  . Fixed bug #79503 (Memory leak on duplicate metadata). (cmb)
 
 - SPL:
   . Fixed bug #69264 (__debugInfo() ignored while extending SPL classes). (cmb)
