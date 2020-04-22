@@ -548,7 +548,6 @@ ctime_r \
 crypt \
 explicit_memset \
 flock \
-fpclass \
 ftok \
 funopen \
 gai_strerror \
