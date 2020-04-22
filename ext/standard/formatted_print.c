@@ -470,10 +470,16 @@ php_formatted_print(char *format, size_t format_len, zval *args, int argc, int n
 						/* space padding, the default */
 					} else if (*format == '+') {
 						always_sign = 1;
-					} else if (*format == '\'' && format_len > 1) {
-						format++;
-						format_len--;
-						padding = *format;
+					} else if (*format == '\'') {
+						if (format_len > 1) {
+							format++;
+							format_len--;
+							padding = *format;
+						} else {
+							zend_value_error("Missing padding character");
+							zend_string_efree(result);
+							return NULL;
+						}
 					} else {
 						PRINTF_DEBUG(("sprintf: end of modifiers\n"));
 						break;
