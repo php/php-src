@@ -964,7 +964,7 @@ static void spl_dllist_it_rewind(zend_object_iterator *iter) /* {{{ */
 	spl_dllist_object *object = Z_SPLDLLIST_P(&iter->data);
 	spl_ptr_llist *llist = object->llist;
 
-	spl_dllist_it_helper_rewind(&iterator->traverse_pointer, &iterator->traverse_position, llist, object->flags);
+	spl_dllist_it_helper_rewind(&iterator->traverse_pointer, &iterator->traverse_position, llist, iterator->flags);
 }
 /* }}} */
 
@@ -1005,7 +1005,7 @@ static void spl_dllist_it_move_forward(zend_object_iterator *iter) /* {{{ */
 
 	zend_user_it_invalidate_current(iter);
 
-	spl_dllist_it_helper_move_forward(&iterator->traverse_pointer, &iterator->traverse_position, object->llist, object->flags);
+	spl_dllist_it_helper_move_forward(&iterator->traverse_pointer, &iterator->traverse_position, object->llist, iterator->flags);
 }
 /* }}} */
 
