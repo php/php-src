@@ -8955,7 +8955,7 @@ void zend_compile_expr(znode *result, zend_ast *ast) /* {{{ */
 			return;
 		case ZEND_AST_THROW:
 			zend_compile_throw(result, ast);
-			break;
+			return;
 		default:
 			ZEND_ASSERT(0 /* not supported */);
 	}
