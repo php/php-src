@@ -180,6 +180,11 @@ typedef struct _zend_live_range {
 	uint32_t end;
 } zend_live_range;
 
+typedef struct _zend_unfreed_var {
+	uint32_t var;
+	uint32_t opline_offset;
+} zend_unfreed_var;
+
 /* Compilation context that is different for each op array. */
 typedef struct _zend_oparray_context {
 	uint32_t   opcodes_size;
@@ -191,6 +196,10 @@ typedef struct _zend_oparray_context {
 	int        last_brk_cont;
 	zend_brk_cont_element *brk_cont_array;
 	HashTable *labels;
+
+	uint32_t unfreed_vars_num;
+	uint32_t unfreed_vars_size;
+	zend_unfreed_var *unfreed_vars;
 } zend_oparray_context;
 
 /* Class, property and method flags                  class|meth.|prop.|const*/
