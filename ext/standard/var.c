@@ -777,9 +777,7 @@ static int php_var_serialize_try_add_sleep_prop(
 		if (Z_TYPE_P(val) == IS_UNDEF) {
 			zend_property_info *info = zend_get_typed_property_info_for_slot(Z_OBJ_P(struc), val);
 			if (info) {
-				zend_throw_error(NULL,
-					"Typed property %s::$%s must not be accessed before initialization (in __sleep)",
-					ZSTR_VAL(Z_OBJCE_P(struc)->name), ZSTR_VAL(error_name));
+				return SUCCESS;
 			}
 			return FAILURE;
 		}
