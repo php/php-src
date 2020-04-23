@@ -535,7 +535,7 @@ PHP 8.0 UPGRADE NOTES
     IEEE 754 semantics. Division by zero is considered well-defined and
     will return one of Inf, -Inf or NaN.
   . Added get_debug_type() function, which returns a type useful for error
-    messages. Unlike get_type(), it uses canonical type names, returns class
+    messages. Unlike gettype(), it uses canonical type names, returns class
     names for objects, and indicates the resource type for resources.
     RFC: https://wiki.php.net/rfc/get_debug_type
 
