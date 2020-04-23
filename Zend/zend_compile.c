@@ -6171,6 +6171,10 @@ void zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_boo
 	} else if (zend_string_equals_literal(lcname, ZEND_DEBUGINFO_FUNC_NAME)) {
 		zend_check_magic_method_attr(fn_flags, ce, "__debugInfo", 0);
 		ce->__debugInfo = (zend_function *) op_array;
+	} else if (zend_string_equals_literal(lcname, "__serialize")) {
+		zend_check_magic_method_attr(fn_flags, ce, "__serialize", 0);
+	} else if (zend_string_equals_literal(lcname, "__unserialize")) {
+		zend_check_magic_method_attr(fn_flags, ce, "__unserialize", 0);
 	}
 
 	zend_string_release_ex(lcname, 0);
