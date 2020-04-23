@@ -2035,12 +2035,20 @@ sxe_object_clone(zend_object *object)
 	php_sxe_object *clone;
 	xmlNodePtr nodep = NULL;
 	xmlDocPtr docp = NULL;
+	zend_bool is_root_element = sxe->node && sxe->node->node && sxe->node->node->parent
+		&& (sxe->node->node->parent->type == XML_DOCUMENT_NODE || sxe->node->node->parent->type == XML_HTML_DOCUMENT_NODE);
 
 	clone = php_sxe_object_new(sxe->zo.ce, sxe->fptr_count);
-	clone->document = sxe->document;
-	if (clone->document) {
-		clone->document->refcount++;
-		docp = clone->document->ptr;
+
+	if (is_root_element) {
+		docp = xmlCopyDoc(sxe->document->ptr, 1);
+		php_libxml_increment_doc_ref((php_libxml_node_object *)clone, docp);
+	} else {
+		clone->document = sxe->document;
+		if (clone->document) {
+			clone->document->refcount++;
+			docp = clone->document->ptr;
+		}
 	}
 
 	clone->iter.isprefix = sxe->iter.isprefix;
@@ -2053,7 +2061,11 @@ sxe_object_clone(zend_object *object)
 	clone->iter.type = sxe->iter.type;
 
 	if (sxe->node) {
-		nodep = xmlDocCopyNode(sxe->node->node, docp, 1);
+		if (is_root_element) {
+			nodep = xmlDocGetRootElement(docp);
+		} else {
+			nodep = xmlDocCopyNode(sxe->node->node, docp, 1);
+		}
 	}
 
 	php_libxml_increment_node_ptr((php_libxml_node_object *)clone, nodep, NULL);
