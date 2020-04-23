@@ -359,8 +359,6 @@ static void spl_dllist_object_free_storage(zend_object *object) /* {{{ */
 }
 /* }}} */
 
-zend_object_iterator *spl_dllist_get_iterator(zend_class_entry *ce, zval *object, int by_ref);
-
 static zend_object *spl_dllist_object_new_ex(zend_class_entry *class_type, zend_object *orig, int clone_orig) /* {{{ */
 {
 	spl_dllist_object *intern;
