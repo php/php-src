@@ -34,7 +34,7 @@ foreach([Phar::TAR => 'tar', Phar::ZIP => 'zip'] as $mode => $ext) {
 }
 ?>
 --CLEAN--
-<?
+<?php
 unlink(__DIR__ . '/test79082.tar');
 unlink(__DIR__ . '/test79082.zip');
 unlink(__DIR__ . '/test79082-d.tar');
