@@ -2023,6 +2023,18 @@ ZEND_API void zend_check_magic_method_implementation(const zend_class_entry *ce,
 	} else if (name_len == sizeof(ZEND_DEBUGINFO_FUNC_NAME) - 1 &&
 		!memcmp(lcname, ZEND_DEBUGINFO_FUNC_NAME, sizeof(ZEND_DEBUGINFO_FUNC_NAME)-1) && fptr->common.num_args != 0) {
 		zend_error(error_type, "Method %s::__debugInfo() cannot take arguments", ZSTR_VAL(ce->name));
+	} else if (
+		name_len == sizeof("__serialize") - 1
+		&& !memcmp(lcname, "__serialize", sizeof("__serialize") - 1)
+		&& fptr->common.num_args != 0
+	) {
+		zend_error(error_type, "Method %s::__serialize() cannot take arguments", ZSTR_VAL(ce->name));
+	} else if (
+		name_len == sizeof("__unserialize") - 1
+		&& !memcmp(lcname, "__unserialize", sizeof("__unserialize") - 1)
+		&& fptr->common.num_args != 1
+	) {
+		zend_error(error_type, "Method %s::__unserialize() must take exactly 1 argument", ZSTR_VAL(ce->name));
 	}
 }
 /* }}} */
