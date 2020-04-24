@@ -272,23 +272,9 @@ static zend_always_inline zend_bool zend_is_confusable_type(const zend_string *n
 }
 /* }}} */
 
-static void *zend_hash_find_ptr_lc(HashTable *ht, const char *str, size_t len) {
-	void *result;
-	zend_string *lcname;
-	ALLOCA_FLAG(use_heap);
-
-	ZSTR_ALLOCA_ALLOC(lcname, len, use_heap);
-	zend_str_tolower_copy(ZSTR_VAL(lcname), str, len);
-	result = zend_hash_find_ptr(ht, lcname);
-	ZSTR_ALLOCA_FREE(lcname, use_heap);
-
-	return result;
-}
-
 static zend_bool zend_is_not_imported(zend_string *name) {
 	/* Assuming "name" is unqualified here. */
-	return !FC(imports)
-		|| zend_hash_find_ptr_lc(FC(imports), ZSTR_VAL(name), ZSTR_LEN(name)) == NULL;
+	return !FC(imports) || zend_hash_find_ptr_lc(FC(imports), name) == NULL;
 }
 
 void zend_oparray_context_begin(zend_oparray_context *prev_context) /* {{{ */
@@ -901,7 +887,7 @@ zend_string *zend_resolve_non_class_name(
 		if (case_sensitive) {
 			import_name = zend_hash_find_ptr(current_import_sub, name);
 		} else {
-			import_name = zend_hash_find_ptr_lc(current_import_sub, ZSTR_VAL(name), ZSTR_LEN(name));
+			import_name = zend_hash_find_ptr_lc(current_import_sub, name);
 		}
 
 		if (import_name) {
@@ -918,7 +904,7 @@ zend_string *zend_resolve_non_class_name(
 	if (compound && FC(imports)) {
 		/* If the first part of a qualified name is an alias, substitute it. */
 		size_t len = compound - ZSTR_VAL(name);
-		zend_string *import_name = zend_hash_find_ptr_lc(FC(imports), ZSTR_VAL(name), len);
+		zend_string *import_name = zend_hash_str_find_ptr_lc(FC(imports), ZSTR_VAL(name), len);
 
 		if (import_name) {
 			return zend_concat_names(
@@ -971,7 +957,7 @@ zend_string *zend_resolve_class_name(zend_string *name, uint32_t type) /* {{{ */
 			/* If the first part of a qualified name is an alias, substitute it. */
 			size_t len = compound - ZSTR_VAL(name);
 			zend_string *import_name =
-				zend_hash_find_ptr_lc(FC(imports), ZSTR_VAL(name), len);
+				zend_hash_str_find_ptr_lc(FC(imports), ZSTR_VAL(name), len);
 
 			if (import_name) {
 				return zend_concat_names(
@@ -980,7 +966,7 @@ zend_string *zend_resolve_class_name(zend_string *name, uint32_t type) /* {{{ */
 		} else {
 			/* If an unqualified name is an alias, replace it. */
 			zend_string *import_name
-				= zend_hash_find_ptr_lc(FC(imports), ZSTR_VAL(name), ZSTR_LEN(name));
+				= zend_hash_find_ptr_lc(FC(imports), name);
 
 			if (import_name) {
 				return zend_string_copy(import_name);
@@ -1613,7 +1599,7 @@ static zend_bool zend_verify_ct_const_access(zend_class_constant *c, zend_class_
 			if (ce->ce_flags & ZEND_ACC_RESOLVED_PARENT) {
 				ce = ce->parent;
 			} else {
-				ce = zend_hash_find_ptr_lc(CG(class_table), ZSTR_VAL(ce->parent_name), ZSTR_LEN(ce->parent_name));
+				ce = zend_hash_find_ptr_lc(CG(class_table), ce->parent_name);
 				if (!ce) {
 					break;
 				}
@@ -1633,7 +1619,7 @@ static zend_bool zend_try_ct_eval_class_const(zval *zv, zend_string *class_name,
 	if (class_name_refers_to_active_ce(class_name, fetch_type)) {
 		cc = zend_hash_find_ptr(&CG(active_class_entry)->constants_table, name);
 	} else if (fetch_type == ZEND_FETCH_CLASS_DEFAULT && !(CG(compiler_options) & ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION)) {
-		zend_class_entry *ce = zend_hash_find_ptr_lc(CG(class_table), ZSTR_VAL(class_name), ZSTR_LEN(class_name));
+		zend_class_entry *ce = zend_hash_find_ptr_lc(CG(class_table), class_name);
 		if (ce) {
 			cc = zend_hash_find_ptr(&ce->constants_table, name);
 		} else {
@@ -6191,8 +6177,8 @@ static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_as
 	lcname = zend_string_tolower(name);
 
 	if (FC(imports_function)) {
-		zend_string *import_name = zend_hash_find_ptr_lc(
-			FC(imports_function), ZSTR_VAL(unqualified_name), ZSTR_LEN(unqualified_name));
+		zend_string *import_name =
+			zend_hash_find_ptr_lc(FC(imports_function), unqualified_name);
 		if (import_name && !zend_string_equals_ci(lcname, import_name)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare function %s "
 				"because the name is already in use", ZSTR_VAL(name));
@@ -6657,8 +6643,8 @@ void zend_compile_class_decl(znode *result, zend_ast *ast, zend_bool toplevel) /
 		lcname = zend_string_tolower(name);
 
 		if (FC(imports)) {
-			zend_string *import_name = zend_hash_find_ptr_lc(
-				FC(imports), ZSTR_VAL(unqualified_name), ZSTR_LEN(unqualified_name));
+			zend_string *import_name =
+				zend_hash_find_ptr_lc(FC(imports), unqualified_name);
 			if (import_name && !zend_string_equals_ci(lcname, import_name)) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare class %s "
 						"because the name is already in use", ZSTR_VAL(name));

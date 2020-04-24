@@ -84,6 +84,28 @@ static void _zend_is_inconsistent(const HashTable *ht, const char *file, int lin
 		zend_hash_do_resize(ht);					\
 	}
 
+ZEND_API void *zend_hash_str_find_ptr_lc(const HashTable *ht, const char *str, size_t len) {
+	void *result;
+	char *lc_str;
+
+	/* Stack allocate small strings to improve performance */
+	ALLOCA_FLAG(use_heap)
+
+	lc_str = zend_str_tolower_copy(do_alloca(len + 1, use_heap), str, len);
+	result = zend_hash_str_find_ptr(ht, lc_str, len);
+	free_alloca(lc_str, use_heap);
+
+	return result;
+}
+
+ZEND_API void *zend_hash_find_ptr_lc(const HashTable *ht, zend_string *key) {
+	void *result;
+	zend_string *lc_key = zend_string_tolower(key);
+	result = zend_hash_find_ptr(ht, lc_key);
+	zend_string_release(lc_key);
+	return result;
+}
+
 static void ZEND_FASTCALL zend_hash_do_resize(HashTable *ht);
 
 static zend_always_inline uint32_t zend_hash_check_size(uint32_t nSize)
