@@ -518,8 +518,10 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle)
 	zend_string *compiled_filename;
 
 	if (zend_stream_fixup(file_handle, &buf, &size) == FAILURE) {
-		/* Still add it to open_files to make destroy_file_handle work */
-		zend_llist_add_element(&CG(open_files), file_handle);
+		if (file_handle->type != ZEND_HANDLE_FILENAME || file_handle->handle.fp != NULL) {
+			/* Still add it to open_files to make destroy_file_handle work */
+			zend_llist_add_element(&CG(open_files), file_handle);
+		}
 		return FAILURE;
 	}
 
