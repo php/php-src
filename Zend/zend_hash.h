@@ -847,6 +847,14 @@ static zend_always_inline void *zend_hash_str_find_ptr(const HashTable *ht, cons
 	}
 }
 
+/* Will lowercase the str; use only if you don't need the lowercased string for
+ * anything else. If you have a lowered string, use zend_hash_str_find_ptr. */
+ZEND_API void *zend_hash_str_find_ptr_lc(const HashTable *ht, const char *str, size_t len);
+
+/* Will lowercase the str; use only if you don't need the lowercased string for
+ * anything else. If you have a lowered string, use zend_hash_find_ptr. */
+ZEND_API void *zend_hash_find_ptr_lc(const HashTable *ht, zend_string *key);
+
 static zend_always_inline void *zend_hash_index_find_ptr(const HashTable *ht, zend_ulong h)
 {
 	zval *zv;
