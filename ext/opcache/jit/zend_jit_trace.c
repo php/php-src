@@ -2513,8 +2513,10 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 		// TODO: Merge two loops implementing paralel move ???
 		for (i = 0; i < parent_vars_count; i++) {
 			if (STACK_REG(parent_stack, i) != ZREG_NONE) {
-				// TODO: optimize out useless stores ????
-				if (!zend_jit_store_var(&dasm_state, ssa->var_info[i].type, i, STACK_REG(parent_stack, i))) {
+				if (ra && ra[i] && ra[i]->reg == STACK_REG(parent_stack, i)) {
+				    /* register already loaded by parent trace */
+					SET_STACK_REG(stack, i, ra[i]->reg);
+				} else if (!zend_jit_store_var(&dasm_state, ssa->var_info[i].type, i, STACK_REG(parent_stack, i))) {
 					goto jit_failure;
 				}
 			}
