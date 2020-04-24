@@ -1754,20 +1754,21 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 	uint8_t *flags;
 	const zend_op_array **vars_op_array;
 	zend_lifetime_interval **intervals, *list, *ival;
-	zend_lifetime_interval *hints = NULL;
 	void *checkpoint;
 	zend_jit_trace_stack_frame *frame;
 	zend_jit_trace_stack *stack;
 	uint32_t parent_vars_count = parent_trace ?
 		zend_jit_traces[parent_trace].exit_info[exit_num].stack_size : 0;
+    zend_jit_trace_stack *parent_stack = parent_trace ?
+		zend_jit_traces[parent_trace].stack_map +
+		zend_jit_traces[parent_trace].exit_info[exit_num].stack_offset : NULL;
 	ALLOCA_FLAG(use_heap);
 
 	ZEND_ASSERT(ssa->var_info != NULL);
 
 	start = do_alloca(sizeof(int) * ssa->vars_count * 2 +
 		ZEND_MM_ALIGNED_SIZE(sizeof(uint8_t) * ssa->vars_count) +
-		ZEND_MM_ALIGNED_SIZE(sizeof(zend_op_array*) * ssa->vars_count) +
-		ZEND_MM_ALIGNED_SIZE(sizeof(zend_lifetime_interval) * parent_vars_count),
+		ZEND_MM_ALIGNED_SIZE(sizeof(zend_op_array*) * ssa->vars_count),
 		use_heap);
 	if (!start) {
 		return NULL;
@@ -1775,7 +1776,6 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 	end = start + ssa->vars_count;
 	flags = (uint8_t*)(end + ssa->vars_count);
 	vars_op_array = (const zend_op_array**)(flags + ZEND_MM_ALIGNED_SIZE(sizeof(uint8_t) * ssa->vars_count));
-	hints = (zend_lifetime_interval*)((char*)vars_op_array + ZEND_MM_ALIGNED_SIZE(sizeof(zend_op_array*) * ssa->vars_count));
 
 	memset(start, -1, sizeof(int) * ssa->vars_count * 2);
 	memset(flags, 0, sizeof(uint8_t) * ssa->vars_count);
@@ -1802,8 +1802,13 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 		if ((ssa->vars[i].use_chain >= 0 /*|| ssa->vars[i].phi_use_chain*/)
 		 && zend_jit_var_supports_reg(ssa, i)) {
 			start[i] = 0;
-			flags[i] = ZREG_LOAD;
-			count++;
+			if (i < parent_vars_count && STACK_REG(parent_stack, i) != ZREG_NONE) {
+				/* We will try to reuse register from parent trace */
+				count += 2;
+			} else {
+				flags[i] = ZREG_LOAD;
+				count++;
+			}
 		}
 		i++;
 	}
@@ -2086,10 +2091,8 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 	memset(intervals, 0, sizeof(zend_lifetime_interval*) * ssa->vars_count);
 	list = zend_arena_alloc(&CG(arena), sizeof(zend_lifetime_interval) * count);
 	j = 0;
-//fprintf(stderr, "(%d)\n", count);
 	for (i = 0; i < ssa->vars_count; i++) {
 		if (start[i] >= 0 && end[i] >= 0) {
-//fprintf(stderr, "#%d: %d..%d\n", i, start[i], end[i]);
 			ZEND_ASSERT(j < count);
 			intervals[i] = &list[j];
 			list[j].ssa_var = i;
@@ -2115,25 +2118,27 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 
 	/* Add hints */
 	if (parent_vars_count) {
-	    zend_jit_trace_stack *parent_stack =
-			zend_jit_traces[parent_trace].stack_map +
-			zend_jit_traces[parent_trace].exit_info[exit_num].stack_offset;
-
-		j = trace_buffer->op_array->last_var;
+		i = trace_buffer->op_array->last_var;
 		if (trace_buffer->start != ZEND_JIT_TRACE_START_ENTER) {
-			j += trace_buffer->op_array->T;
+			i += trace_buffer->op_array->T;
 		}
-		if (parent_vars_count < (uint32_t)j) {
-			j = parent_vars_count;
+		if ((uint32_t)i > parent_vars_count) {
+			i = parent_vars_count;
 		}
-		if (j) {
-			memset(hints, 0, sizeof(zend_lifetime_interval) * j);
-			for (i = 0; i < j; i++) {
-				if (intervals[i] && STACK_REG(parent_stack, i) != ZREG_NONE) {
-					intervals[i]->hint = hints + i;
-					hints[i].ssa_var = - 1;
-					hints[i].reg = STACK_REG(parent_stack, i);
-				}
+		while (i > 0) {
+			i--;
+			if (intervals[i] && STACK_REG(parent_stack, i) != ZREG_NONE) {
+				list[j].ssa_var = - 1;
+				list[j].reg = STACK_REG(parent_stack, i);
+				list[j].flags = 0;
+				list[j].range.start = -1;
+				list[j].range.end = -1;
+				list[j].range.next = NULL;
+				list[j].hint = NULL;
+				list[j].used_as_hint = NULL;
+				list[j].list_next = NULL;
+				intervals[i]->hint = &list[j];
+				j++;
 			}
 		}
 	}
@@ -2246,6 +2251,23 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 			return NULL;
 		}
 
+		/* Add LOAD flag to registers that can't reuse register from parent trace */
+		if (parent_vars_count) {
+			i = trace_buffer->op_array->last_var;
+			if (trace_buffer->start != ZEND_JIT_TRACE_START_ENTER) {
+				i += trace_buffer->op_array->T;
+			}
+			if ((uint32_t)i > parent_vars_count) {
+				i = parent_vars_count;
+			}
+			while (i > 0) {
+				i--;
+				if (intervals[i] && intervals[i]->reg != STACK_REG(parent_stack, i)) {
+					intervals[i]->flags |= ZREG_LOAD;
+				}
+			}
+		}
+
 		/* SSA resolution */
 		if (trace_buffer->stop == ZEND_JIT_TRACE_STOP_LOOP) {
 			zend_ssa_phi *phi = ssa->blocks[1].phis;
@@ -2259,7 +2281,12 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 						intervals[def]->flags |= ZREG_LOAD;
 					} else if (intervals[def]->reg != intervals[use]->reg) {
 						intervals[def]->flags |= ZREG_LOAD;
-						intervals[use]->flags |= ZREG_STORE;
+						if (ssa->vars[use].use_chain >= 0) {
+							intervals[use]->flags |= ZREG_STORE;
+						} else {
+							intervals[use] = NULL;
+							count--;
+						}
 					} else {
 						use = phi->sources[0];
 						ZEND_ASSERT(!intervals[use]);
@@ -2275,56 +2302,16 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 						intervals[use]->list_next = NULL;
 					}
 				} else if (intervals[use] && !ssa->vars[phi->ssa_var].no_val) {
-					intervals[use]->flags |= ZREG_STORE;
+					if (ssa->vars[use].use_chain >= 0) {
+						intervals[use]->flags |= ZREG_STORE;
+					} else {
+						intervals[use] = NULL;
+						count--;
+					}
 				}
 				phi = phi->next;
 			}
 		}
-
-		if (parent_vars_count) {
-			/* Variables that reuse registers from parent trace don't have to be loaded */
-			j = op_array->last_var;
-			if (trace_buffer->start != ZEND_JIT_TRACE_START_ENTER) {
-				j += op_array->T;
-			}
-			if (parent_vars_count < (uint32_t)j) {
-				j = parent_vars_count;
-			}
-			for (i = 0; i < j; i++) {
-				if (intervals[i]
-				 && intervals[i]->hint
-				 && intervals[i]->reg == intervals[i]->hint->reg
-				 && intervals[i]->hint->ssa_var == -1) {
-					intervals[i]->flags &= ~ZREG_LOAD;
-				}
-			}
-		}
-
-		/* Remove useless register allocation */
-		for (i = 0; i < ssa->vars_count; i++) {
-			if (intervals[i] &&
-			    ((intervals[i]->flags & ZREG_LOAD) ||
-			     ((intervals[i]->flags & ZREG_STORE) && ssa->vars[i].definition >= 0)) &&
-			    ssa->vars[i].use_chain < 0) {
-			    zend_bool may_remove = 1;
-				zend_ssa_phi *phi = ssa->vars[i].phi_use_chain;
-
-				while (phi) {
-					if (intervals[phi->ssa_var] &&
-					    !(intervals[phi->ssa_var]->flags & ZREG_LOAD)) {
-						may_remove = 0;
-						break;
-					}
-					phi = zend_ssa_next_use_phi(ssa, i, phi);
-				}
-				if (may_remove) {
-					intervals[i] = NULL;
-					count--;
-				}
-			}
-		}
-
-		// Remove intervals used once ????
 
 		if (!count) {
 			zend_arena_release(&CG(arena), checkpoint);
