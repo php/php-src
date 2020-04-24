@@ -2094,6 +2094,12 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 	for (i = 0; i < ssa->vars_count; i++) {
 		if (start[i] >= 0 && end[i] >= 0) {
 			ZEND_ASSERT(j < count);
+			if ((flags[i] & ZREG_LOAD) &&
+			    (flags[i] & ZREG_LAST_USE) &&
+			    end[i] == ssa->vars[i].use_chain) {
+				/* skip life range with single use */
+				continue;
+			}
 			intervals[i] = &list[j];
 			list[j].ssa_var = i;
 			list[j].reg = ZREG_NONE;
