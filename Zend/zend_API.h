@@ -1163,6 +1163,8 @@ static zend_always_inline zval *zend_try_array_init(zval *zv)
 	_(Z_EXPECTED_NUMBER_OR_NULL,	"of type int|float|null") \
 	_(Z_EXPECTED_STRING_OR_ARRAY,	"of type string|array") \
 	_(Z_EXPECTED_STRING_OR_ARRAY_OR_NULL, "of type string|array|null") \
+	_(Z_EXPECTED_STRING_OR_LONG,	"of type string|int") \
+	_(Z_EXPECTED_STRING_OR_LONG_OR_NULL, "of type string|int|null") \
 
 #define Z_EXPECTED_TYPE
 
@@ -1598,6 +1600,19 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_value_error(uint32_t arg_num
 #define Z_PARAM_STR_OR_ARRAY_HT_OR_NULL(dest_str, dest_ht) \
 	Z_PARAM_STR_OR_ARRAY_HT_EX(dest_str, dest_ht, 1);
 
+#define Z_PARAM_STR_OR_LONG_EX(dest_str, dest_long, is_null, allow_null) \
+	Z_PARAM_PROLOGUE(0, 0); \
+	if (UNEXPECTED(!zend_parse_arg_str_or_long(_arg, &dest_str, &dest_long, &is_null, allow_null))) { \
+		_expected_type = allow_null ? Z_EXPECTED_STRING_OR_LONG_OR_NULL : Z_EXPECTED_STRING_OR_LONG; \
+		_error_code = ZPP_ERROR_WRONG_ARG; \
+		break; \
+	}
+
+#define Z_PARAM_STR_OR_LONG(dest_str, dest_long) \
+	Z_PARAM_STR_OR_LONG_EX(dest_str, dest_long, _dummy, 0);
+
+#define Z_PARAM_STR_OR_LONG_OR_NULL(dest_str, dest_long, is_null) \
+	Z_PARAM_STR_OR_LONG_EX(dest_str, dest_long, is_null, 1);
 /* End of new parameter parsing API */
 
 /* Inlined implementations shared by new and old parameter parsing APIs */
@@ -1612,6 +1627,7 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_double_weak(zval *arg, double *dest);
 ZEND_API int ZEND_FASTCALL zend_parse_arg_str_slow(zval *arg, zend_string **dest);
 ZEND_API int ZEND_FASTCALL zend_parse_arg_str_weak(zval *arg, zend_string **dest);
 ZEND_API int ZEND_FASTCALL zend_parse_arg_number_slow(zval *arg, zval **dest);
+ZEND_API int ZEND_FASTCALL zend_parse_arg_str_or_long_slow(zval *arg, zend_string **dest_str, zend_long *dest_long);
 
 static zend_always_inline int zend_parse_arg_bool(zval *arg, zend_bool *dest, zend_bool *is_null, int check_null)
 {
@@ -1831,6 +1847,26 @@ static zend_always_inline int zend_parse_arg_str_or_array_ht(
 	} else {
 		*dest_ht = NULL;
 		return zend_parse_arg_str_slow(arg, dest_str);
+	}
+	return 1;
+}
+
+static zend_always_inline int zend_parse_arg_str_or_long(zval *arg, zend_string **dest_str, zend_long *dest_long,
+	zend_bool *is_null, int allow_null)
+{
+	if (allow_null) {
+		*is_null = 0;
+	}
+	if (EXPECTED(Z_TYPE_P(arg) == IS_STRING)) {
+		*dest_str = Z_STR_P(arg);
+	} else if (EXPECTED(Z_TYPE_P(arg) == IS_LONG)) {
+		*dest_str = NULL;
+		*dest_long = Z_LVAL_P(arg);
+	} else if (allow_null && EXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
+		*dest_str = NULL;
+		*is_null = 1;
+	} else {
+		return zend_parse_arg_str_or_long_slow(arg, dest_str, dest_long);
 	}
 	return 1;
 }

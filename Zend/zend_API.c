@@ -506,6 +506,23 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_str_slow(zval *arg, zend_string **dest
 }
 /* }}} */
 
+ZEND_API int ZEND_FASTCALL zend_parse_arg_str_or_long_slow(zval *arg, zend_string **dest_str, zend_long *dest_long) /* {{{ */
+{
+	if (UNEXPECTED(ZEND_ARG_USES_STRICT_TYPES())) {
+		return 0;
+	}
+	if (zend_parse_arg_long_weak(arg, dest_long)) {
+		*dest_str = NULL;
+		return 1;
+	} else if (zend_parse_arg_str_weak(arg, dest_str)) {
+		*dest_long = 0;
+		return 1;
+	} else {
+		return 0;
+	}
+}
+/* }}} */
+
 static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, const char **spec, char **error) /* {{{ */
 {
 	const char *spec_walk = *spec;
