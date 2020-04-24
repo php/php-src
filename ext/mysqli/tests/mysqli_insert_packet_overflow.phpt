@@ -71,6 +71,10 @@ memory_limit=256M
         printf("[011] Failed to change max_allowed_packet");
     }
 
+    if (!mysqli_query($link, 'DROP TABLE IF EXISTS test')) {
+        printf("[clean] Failed to drop old test table: [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    }
+
     if (!mysqli_query($link, "CREATE TABLE test(col_blob LONGBLOB) ENGINE=" . $engine))
         printf("[012] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
