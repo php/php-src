@@ -6,6 +6,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #78434 (Generator yields no items after valid() call). (Nikita)
   . Fixed bug #79477 (casting object into array creates references). (Nikita)
+  . Fixed bug #79514 (Memory leaks while including unexistent file). (cmb,
+    Nikita)
 
 - DOM:
   . Fixed bug #78221 (DOMNode::normalize() doesn't remove empty text nodes).
