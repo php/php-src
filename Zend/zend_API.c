@@ -133,7 +133,8 @@ ZEND_API const char *zend_get_type_by_const(int type) /* {{{ */
 ZEND_API const char *zend_zval_type_name(const zval *arg) /* {{{ */
 {
 	ZVAL_DEREF(arg);
-	return zend_get_type_by_const(Z_TYPE_P(arg));
+
+	return Z_ISUNDEF_P(arg) ? "null" : zend_get_type_by_const(Z_TYPE_P(arg));
 }
 /* }}} */
 
