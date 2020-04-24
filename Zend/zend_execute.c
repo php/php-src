@@ -621,17 +621,22 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_throw_non_object_erro
 	 || opline->opcode == ZEND_POST_INC_OBJ
 	 || opline->opcode == ZEND_POST_DEC_OBJ) {
 		zend_throw_error(NULL,
-			"Attempt to increment/decrement property '%s' of non-object",
-			ZSTR_VAL(property_name));
+			"Attempt to increment/decrement property '%s' on %s",
+			ZSTR_VAL(property_name), zend_zval_type_name(object)
+		);
 	} else if (opline->opcode == ZEND_FETCH_OBJ_W
 			|| opline->opcode == ZEND_FETCH_OBJ_RW
 			|| opline->opcode == ZEND_FETCH_OBJ_FUNC_ARG
 			|| opline->opcode == ZEND_ASSIGN_OBJ_REF) {
 		zend_throw_error(NULL,
-			"Attempt to modify property '%s' of non-object", ZSTR_VAL(property_name));
+			"Attempt to modify property '%s' on %s",
+			ZSTR_VAL(property_name), zend_zval_type_name(object)
+		);
 	} else {
 		zend_throw_error(NULL,
-			"Attempt to assign property '%s' of non-object", ZSTR_VAL(property_name));
+			"Attempt to assign property '%s' on %s",
+			ZSTR_VAL(property_name), zend_zval_type_name(object)
+		);
 	}
 	zend_tmp_string_release(tmp_property_name);
 
@@ -1494,11 +1499,11 @@ static zend_never_inline ZEND_COLD void zend_wrong_string_offset(EXECUTE_DATA_D)
 	zend_throw_error(NULL, "%s", msg);
 }
 
-static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_wrong_property_read(zval *property)
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_wrong_property_read(zval *object, zval *property)
 {
 	zend_string *tmp_property_name;
 	zend_string *property_name = zval_get_tmp_string(property, &tmp_property_name);
-	zend_error(E_WARNING, "Trying to get property '%s' of non-object", ZSTR_VAL(property_name));
+	zend_error(E_WARNING, "Attempt to read property '%s' on %s", ZSTR_VAL(property_name), zend_zval_type_name(object));
 	zend_tmp_string_release(tmp_property_name);
 }
 

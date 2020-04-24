@@ -10537,7 +10537,7 @@ static int zend_jit_fetch_obj_read(dasm_State **Dst, const zend_op *opline, cons
 	zval *member;
 	uint32_t offset;
 	zend_bool may_be_dynamic = 1;
-	zend_jit_addr op1_addr = 0;
+	zend_jit_addr op1_addr = 0, orig_op1_addr = 0;
 	zend_jit_addr res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
 	zend_jit_addr this_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, offsetof(zend_execute_data, This));
 	zend_jit_addr prop_addr;
@@ -10552,7 +10552,7 @@ static int zend_jit_fetch_obj_read(dasm_State **Dst, const zend_op *opline, cons
 	if (opline->op1_type == IS_UNUSED) {
 		|	GET_ZVAL_PTR FCARG1a, this_addr
 	} else {
-		op1_addr = OP1_ADDR();
+		op1_addr = orig_op1_addr = OP1_ADDR();
 		if (op1_info & MAY_BE_REF) {
 			|	LOAD_ZVAL_ADDR r0, op1_addr
 			|	ZVAL_DEREF r0, op1_info
@@ -10659,19 +10659,9 @@ static int zend_jit_fetch_obj_read(dasm_State **Dst, const zend_op *opline, cons
 				|	EXT_CALL zend_jit_undefined_op_helper, r0
 				|1:
 			}
-			|.if X64
-				|	mov CARG1, E_WARNING
-				|	LOAD_ADDR CARG2, "Trying to get property '%s' of non-object"
-				|	LOAD_ADDR CARG3, Z_STRVAL_P(member)
-				|	EXT_CALL zend_error, r0
-			|.else
-				|	sub r4, 4
-				|	push Z_STRVAL_P(member)
-				|	push "Trying to get property '%s' of non-object"
-				|	push E_WARNING
-				|	EXT_CALL zend_error, r0
-				|	add r4, 16
-			|.endif
+			|	LOAD_ZVAL_ADDR FCARG1a, orig_op1_addr
+			|	LOAD_ADDR FCARG2a, Z_STRVAL_P(member)
+			|	EXT_CALL zend_jit_invalid_property_read, r0
 		}
 		|	SET_ZVAL_TYPE_INFO res_addr, IS_NULL
 		|	jmp >9

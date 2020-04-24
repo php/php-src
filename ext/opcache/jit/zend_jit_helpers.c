@@ -1506,8 +1506,12 @@ static void ZEND_FASTCALL zend_jit_only_vars_by_reference(zval *arg)
 
 static void ZEND_FASTCALL zend_jit_invalid_array_access(zval *container)
 {
-	const char *type = Z_ISUNDEF_P(container) ? "null" : zend_zval_type_name(container);
-	zend_error(E_WARNING, "Trying to access array offset on value of type %s", type);
+	zend_error(E_WARNING, "Trying to access array offset on value of type %s", zend_zval_type_name(container));
+}
+
+static void ZEND_FASTCALL zend_jit_invalid_property_read(zval *container, const char *property_name)
+{
+	zend_error(E_WARNING, "Attempt to read property '%s' on %s", property_name, zend_zval_type_name(container));
 }
 
 static zval * ZEND_FASTCALL zend_jit_prepare_assign_dim_ref(zval *ref) {

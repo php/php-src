@@ -25,13 +25,13 @@ try {
 ?>
 --EXPECTF--
 Warning: Undefined variable $u1 in %s on line %d
-Attempt to assign property 'a' of non-object
+Attempt to assign property 'a' on null
 
 Warning: Undefined variable $u2 in %s on line %d
-Attempt to increment/decrement property 'a' of non-object
+Attempt to increment/decrement property 'a' on null
 
 Warning: Undefined variable $u3 in %s on line %d
-Attempt to increment/decrement property 'a' of non-object
+Attempt to increment/decrement property 'a' on null
 
 Warning: Undefined variable $u4 in %s on line %d
-Attempt to modify property 'a' of non-object
+Attempt to modify property 'a' on null
