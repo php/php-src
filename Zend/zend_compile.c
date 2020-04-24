@@ -4245,7 +4245,7 @@ void zend_compile_static_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 }
 /* }}} */
 
-zend_op *zend_compile_class_decl(zend_ast *ast, zend_bool toplevel);
+void zend_compile_class_decl(znode *result, zend_ast *ast, zend_bool toplevel);
 
 void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 {
@@ -4257,9 +4257,7 @@ void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 
 	if (class_ast->kind == ZEND_AST_CLASS) {
 		/* anon class declaration */
-		opline = zend_compile_class_decl(class_ast, 0);
-		class_node.op_type = opline->result_type;
-		class_node.u.op.var = opline->result.var;
+		 zend_compile_class_decl(&class_node, class_ast, 0);
 	} else {
 		zend_compile_class_ref(&class_node, class_ast, ZEND_FETCH_CLASS_EXCEPTION);
 	}
@@ -6630,7 +6628,7 @@ static zend_string *zend_generate_anon_class_name(zend_ast_decl *decl)
 	return zend_new_interned_string(result);
 }
 
-zend_op *zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
+void zend_compile_class_decl(znode *result, zend_ast *ast, zend_bool toplevel) /* {{{ */
 {
 	zend_ast_decl *decl = (zend_ast_decl *) ast;
 	zend_ast *extends_ast = decl->child[0];
@@ -6769,7 +6767,7 @@ zend_op *zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 				if (zend_try_early_bind(ce, parent_ce, lcname, NULL)) {
 					CG(zend_lineno) = ast->lineno;
 					zend_string_release(lcname);
-					return NULL;
+					return;
 				}
 				CG(zend_lineno) = ast->lineno;
 			}
@@ -6777,7 +6775,7 @@ zend_op *zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 			zend_string_release(lcname);
 			zend_build_properties_info_table(ce);
 			ce->ce_flags |= ZEND_ACC_LINKED;
-			return NULL;
+			return;
 		}
 	}
 
@@ -6796,8 +6794,7 @@ zend_op *zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 	if (decl->flags & ZEND_ACC_ANON_CLASS) {
 		opline->opcode = ZEND_DECLARE_ANON_CLASS;
 		opline->extended_value = zend_alloc_cache_slot();
-		opline->result_type = IS_VAR;
-		opline->result.var = get_temporary_variable();
+		zend_make_var_result(result, opline);
 		if (!zend_hash_add_ptr(CG(class_table), lcname, ce)) {
 			zend_error_noreturn(E_ERROR,
 				"Runtime definition key collision for %s. This is a bug", ZSTR_VAL(name));
@@ -6825,7 +6822,6 @@ zend_op *zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 			opline->result.opline_num = -1;
 		}
 	}
-	return opline;
 }
 /* }}} */
 
@@ -8702,7 +8698,7 @@ void zend_compile_top_stmt(zend_ast *ast) /* {{{ */
 		CG(zend_lineno) = ((zend_ast_decl *) ast)->end_lineno;
 	} else if (ast->kind == ZEND_AST_CLASS) {
 		CG(zend_lineno) = ast->lineno;
-		zend_compile_class_decl(ast, 1);
+		zend_compile_class_decl(NULL, ast, 1);
 		CG(zend_lineno) = ((zend_ast_decl *) ast)->end_lineno;
 	} else {
 		zend_compile_stmt(ast);
@@ -8792,7 +8788,7 @@ void zend_compile_stmt(zend_ast *ast) /* {{{ */
 			zend_compile_use_trait(ast);
 			break;
 		case ZEND_AST_CLASS:
-			zend_compile_class_decl(ast, 0);
+			zend_compile_class_decl(NULL, ast, 0);
 			break;
 		case ZEND_AST_GROUP_USE:
 			zend_compile_group_use(ast);
