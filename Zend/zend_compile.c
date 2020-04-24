@@ -7617,12 +7617,11 @@ void zend_compile_short_circuiting(znode *result, zend_ast *ast) /* {{{ */
 
 	if (left_node.op_type == IS_TMP_VAR) {
 		SET_NODE(opline_jmpz->result, &left_node);
+		GET_NODE(result, opline_jmpz->result);
 	} else {
-		opline_jmpz->result.var = get_temporary_variable();
-		opline_jmpz->result_type = IS_TMP_VAR;
+		zend_make_tmp_result(result, opline_jmpz);
 	}
 
-	GET_NODE(result, opline_jmpz->result);
 	zend_compile_expr(&right_node, right_ast);
 
 	opline_bool = zend_emit_op(NULL, ZEND_BOOL, &right_node, NULL);
@@ -8442,28 +8441,23 @@ static void zend_compile_encaps_list(znode *result, zend_ast *ast) /* {{{ */
 			opline->extended_value = IS_STRING;
 			opline->op1_type = opline->op2_type;
 			opline->op1 = opline->op2;
-			opline->result_type = IS_TMP_VAR;
-			opline->result.var = get_temporary_variable();
 			SET_UNUSED(opline->op2);
-			GET_NODE(result, opline->result);
+			zend_make_tmp_result(result, opline);
 		}
 	} else if (j == 2) {
 		opline->opcode = ZEND_FAST_CONCAT;
 		opline->extended_value = 0;
 		opline->op1_type = init_opline->op2_type;
 		opline->op1 = init_opline->op2;
-		opline->result_type = IS_TMP_VAR;
-		opline->result.var = get_temporary_variable();
+		zend_make_tmp_result(result, opline);
 		MAKE_NOP(init_opline);
-		GET_NODE(result, opline->result);
 	} else {
 		uint32_t var;
 
 		init_opline->extended_value = j;
 		opline->opcode = ZEND_ROPE_END;
-		opline->result.var = get_temporary_variable();
+		zend_make_tmp_result(result, opline);
 		var = opline->op1.var = get_temporary_variable();
-		GET_NODE(result, opline->result);
 
 		/* Allocates the necessary number of zval slots to keep the rope */
 		i = ((j * sizeof(zend_string*)) + (sizeof(zval) - 1)) / sizeof(zval);
