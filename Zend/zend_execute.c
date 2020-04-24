@@ -1502,12 +1502,16 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_wrong_property_read(z
 	zend_tmp_string_release(tmp_property_name);
 }
 
-static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_deprecated_function(const zend_function *fbc)
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_deprecated_function(const zend_function *fbc)
 {
-	zend_error(E_DEPRECATED, "Function %s%s%s() is deprecated",
-		fbc->common.scope ? ZSTR_VAL(fbc->common.scope->name) : "",
-		fbc->common.scope ? "::" : "",
-		ZSTR_VAL(fbc->common.function_name));
+	if (fbc->common.scope) {
+		zend_error(E_DEPRECATED, "Method %s::%s() is deprecated",
+			ZSTR_VAL(fbc->common.scope->name),
+			ZSTR_VAL(fbc->common.function_name)
+		);
+	} else {
+		zend_error(E_DEPRECATED, "Function %s() is deprecated", ZSTR_VAL(fbc->common.function_name));
+	}
 }
 
 static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim, zval *value OPLINE_DC EXECUTE_DATA_DC)

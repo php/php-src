@@ -20,5 +20,5 @@ $class = $params[0]->getClass();
 var_dump($class->getName());
 ?>
 --EXPECTF--
-Deprecated: Function ReflectionParameter::getClass() is deprecated in %s on line %d
+Deprecated: Method ReflectionParameter::getClass() is deprecated in %s on line %d
 string(3) "Foo"

@@ -20,5 +20,5 @@ var_dump($rf->isDisabled());
 --EXPECTF--
 Function is_file() does not exist
 
-Deprecated: Function ReflectionFunction::isDisabled() is deprecated in %s on line %d
+Deprecated: Method ReflectionFunction::isDisabled() is deprecated in %s on line %d
 bool(false)

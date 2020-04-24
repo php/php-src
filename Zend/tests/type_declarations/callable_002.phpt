@@ -21,11 +21,11 @@ var_dump($rc->getParameters()[0]->isCallable());
 
 ?>
 --EXPECTF--
-Deprecated: Function ReflectionParameter::isCallable() is deprecated in %s on line %d
+Deprecated: Method ReflectionParameter::isCallable() is deprecated in %s on line %d
 bool(true)
 
-Deprecated: Function ReflectionParameter::isCallable() is deprecated in %s on line %d
+Deprecated: Method ReflectionParameter::isCallable() is deprecated in %s on line %d
 bool(true)
 
-Deprecated: Function ReflectionParameter::isCallable() is deprecated in %s on line %d
+Deprecated: Method ReflectionParameter::isCallable() is deprecated in %s on line %d
 bool(true)

@@ -22,7 +22,7 @@ foreach($parameters as $parameter)
 echo "ok\n";
 ?>
 --EXPECTF--
-Deprecated: Function ReflectionParameter::getClass() is deprecated in %s on line %d
+Deprecated: Method ReflectionParameter::getClass() is deprecated in %s on line %d
 __autoload(A)
 A
 ok

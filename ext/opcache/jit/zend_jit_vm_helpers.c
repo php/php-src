@@ -157,10 +157,9 @@ void ZEND_FASTCALL zend_jit_deprecated_helper(OPLINE_D)
 {
 	zend_execute_data *call = (zend_execute_data *) opline;
 	zend_function *fbc = call->func;
-	zend_error(E_DEPRECATED, "Function %s%s%s() is deprecated",
-		fbc->common.scope ? ZSTR_VAL(fbc->common.scope->name) : "",
-		fbc->common.scope ? "::" : "",
-		ZSTR_VAL(fbc->common.function_name));
+
+	zend_deprecated_function(fbc);
+
 	if (EG(exception)) {
 #ifndef HAVE_GCC_GLOBAL_REGS
 		zend_execute_data *execute_data = EG(current_execute_data);
