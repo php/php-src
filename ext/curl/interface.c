@@ -241,7 +241,7 @@ static void curl_free_obj(zend_object *object);
 static HashTable *curl_get_gc(zend_object *object, zval **table, int *n);
 static zend_function *curl_get_constructor(zend_object *object);
 static zend_object *curl_clone_obj(zend_object *object);
-php_curl *alloc_curl_handle_from_zval(zval *curl);
+php_curl *init_curl_handle_into_zval(zval *curl);
 static inline int build_mime_structure_from_hash(php_curl *ch, zval *zpostfields);
 
 static const zend_function_entry curl_object_methods[] = {
@@ -1243,7 +1243,7 @@ static zend_object *curl_clone_obj(zend_object *object) {
 
 	clone_object = curl_create_object(curl_ce);
 	clone_ch = curl_from_obj(clone_object);
-	clone_ch = alloc_curl_handle(clone_ch);
+	init_curl_handle(clone_ch);
 
 	ch = curl_from_obj(object);
 	cp = curl_easy_duphandle(ch->cp);
@@ -1728,17 +1728,19 @@ PHP_FUNCTION(curl_version)
 }
 /* }}} */
 
-php_curl *alloc_curl_handle_from_zval(zval *curl)
+php_curl *init_curl_handle_into_zval(zval *curl)
 {
 	php_curl *ch;
 
 	object_init_ex(curl, curl_ce);
 	ch = Z_CURL_P(curl);
 
-	return alloc_curl_handle(ch);
+	init_curl_handle(ch);
+
+	return ch;
 }
 
-php_curl *alloc_curl_handle(php_curl *ch)
+void init_curl_handle(php_curl *ch)
 {
 	ch->to_free                = ecalloc(1, sizeof(struct _php_curl_free));
 	ch->handlers               = ecalloc(1, sizeof(php_curl_handlers));
@@ -1759,8 +1761,6 @@ php_curl *alloc_curl_handle(php_curl *ch)
 	ch->to_free->slist = emalloc(sizeof(HashTable));
 	zend_hash_init(ch->to_free->slist, 4, NULL, curl_free_slist, 0);
 	ZVAL_UNDEF(&ch->postfields);
-
-	return ch;
 }
 
 /* }}} */
@@ -1853,7 +1853,7 @@ PHP_FUNCTION(curl_init)
 		RETURN_FALSE;
 	}
 
-	ch = alloc_curl_handle_from_zval(return_value);
+	ch = init_curl_handle_into_zval(return_value);
 
 	ch->cp = cp;
 
@@ -2058,8 +2058,8 @@ static inline int build_mime_structure_from_hash(php_curl *ch, zval *zpostfields
 					filename = Z_STRVAL_P(prop);
 				}
 
-				zval_ptr_dtor(&ch->postfields);
 #if LIBCURL_VERSION_NUM >= 0x073800 /* 7.56.0 */
+				zval_ptr_dtor(&ch->postfields);
 				ZVAL_COPY(&ch->postfields, zpostfields);
 
 				if ((stream = php_stream_open_wrapper(ZSTR_VAL(postval), "rb", STREAM_MUST_SEEK, NULL))) {
@@ -2181,7 +2181,7 @@ PHP_FUNCTION(curl_copy_handle)
 		RETURN_FALSE;
 	}
 
-	dupch = alloc_curl_handle_from_zval(return_value);
+	dupch = init_curl_handle_into_zval(return_value);
 	dupch->cp = cp;
 
 	_php_setup_easy_copy_handlers(dupch, ch);
@@ -2826,8 +2826,6 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 				if (Z_TYPE_P(zvalue) == IS_OBJECT && Z_OBJCE_P(zvalue) == curl_share_ce) {
 					php_curlsh *sh = Z_CURL_SHARE_P(zvalue);
 					curl_easy_setopt(ch->cp, CURLOPT_SHARE, sh->share);
-				} else {
-					return FAILURE;
 				}
 			}
 			break;

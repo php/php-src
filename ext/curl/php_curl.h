@@ -151,8 +151,8 @@ typedef struct {
 	zend_object std;
 } php_curlsh;
 
-php_curl *alloc_curl_handle_from_zval(zval *curl);
-php_curl *alloc_curl_handle(php_curl *ch);
+php_curl *init_curl_handle_into_zval(zval *curl);
+void init_curl_handle(php_curl *ch);
 void _php_curl_cleanup_handle(php_curl *);
 void _php_curl_multi_cleanup_list(void *data);
 void _php_curl_verify_handlers(php_curl *ch, int reporterror);

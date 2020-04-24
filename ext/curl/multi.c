@@ -398,7 +398,7 @@ static int _php_server_push_callback(CURL *parent_ch, CURL *easy, size_t num_hea
 
 	parent = Z_CURL_P(pz_parent_ch);
 
-	ch = alloc_curl_handle_from_zval(&pz_ch);
+	ch = init_curl_handle_into_zval(&pz_ch);
 	ch->cp = easy;
 	_php_setup_easy_copy_handlers(ch, parent);
 
@@ -559,7 +559,6 @@ void curl_multi_free_obj(zend_object *object)
 
 	for (pz_ch = (zval *)zend_llist_get_first_ex(&mh->easyh, &pos); pz_ch;
 		pz_ch = (zval *)zend_llist_get_next_ex(&mh->easyh, &pos)) {
-		/* ptr is NULL means it already be freed */
 		if (Z_OBJ_P(pz_ch)) {
 			ch = Z_CURL_P(pz_ch);
 			_php_curl_verify_handlers(ch, 0);
