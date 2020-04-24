@@ -182,7 +182,8 @@ typedef struct _zend_live_range {
 
 typedef struct _zend_unfreed_var {
 	uint32_t var;
-	uint32_t opline_offset;
+	uint8_t var_type;
+	uint8_t opcode;
 } zend_unfreed_var;
 
 /* Compilation context that is different for each op array. */
