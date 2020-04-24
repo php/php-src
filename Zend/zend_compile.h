@@ -927,6 +927,8 @@ ZEND_API zend_string *zend_type_to_string(zend_type type);
 #define ZEND_SEND_BY_REF     1u
 #define ZEND_SEND_PREFER_REF 2u
 
+#define ZEND_THROW_IS_EXPR 1u
+
 /* The send mode and is_variadic flag are stored as part of zend_type */
 #define _ZEND_SEND_MODE_SHIFT _ZEND_TYPE_EXTRA_FLAGS_SHIFT
 #define _ZEND_IS_VARIADIC_BIT (1 << (_ZEND_TYPE_EXTRA_FLAGS_SHIFT + 2))
