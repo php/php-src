@@ -33,7 +33,7 @@ ZEND_BEGIN_MODULE_GLOBALS(bcmath)
 	bc_num _zero_;
 	bc_num _one_;
 	bc_num _two_;
-	zend_long bc_precision;
+	int bc_precision;
 ZEND_END_MODULE_GLOBALS(bcmath)
 
 #if defined(ZTS) && defined(COMPILE_DL_BCMATH)
