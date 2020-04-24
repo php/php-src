@@ -238,6 +238,8 @@ ZEND_API int zend_compare_file_handles(zend_file_handle *fh1, zend_file_handle *
 		return 0;
 	}
 	switch (fh1->type) {
+		case ZEND_HANDLE_FILENAME:
+			return strcmp(fh1->filename, fh2->filename) == 0;
 		case ZEND_HANDLE_FP:
 			return fh1->handle.fp == fh2->handle.fp;
 		case ZEND_HANDLE_STREAM:
