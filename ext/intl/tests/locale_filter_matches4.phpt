@@ -1,8 +1,8 @@
 --TEST--
-locale_filter_matches.phpt() ICU >= 51.2 && ICU < 67.1
+locale_filter_matches.phpt() ICU >= 67.1
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if (version_compare(INTL_ICU_VERSION, '67.1') >= 0) die('skip for ICU < 67.1'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '67.1') < 0) die('skip for ICU >= 67.1'); ?>
 --FILE--
 <?php
 
@@ -111,13 +111,13 @@ loc_range:de-de matches lang_tag sgn-CH-de ? NO
 loc_range:de_DE canonically matches lang_tag sgn_CH_DE ? NO
 --------------
 loc_range:de-de matches lang_tag art-lojban ? NO
-loc_range:de_DE canonically matches lang_tag art__LOJBAN ? NO
+loc_range:de_DE canonically matches lang_tag jbo ? NO
 --------------
 loc_range:de-de matches lang_tag i-lux ? NO
 loc_range:de_DE canonically matches lang_tag lb ? NO
 --------------
 loc_range:de-de matches lang_tag art-lojban ? NO
-loc_range:de_DE canonically matches lang_tag art__LOJBAN ? NO
+loc_range:de_DE canonically matches lang_tag jbo ? NO
 --------------
 loc_range:de-de matches lang_tag jbo ? NO
 loc_range:de_DE canonically matches lang_tag jbo ? NO
@@ -159,13 +159,13 @@ loc_range:sl_IT matches lang_tag sgn-CH-de ? NO
 loc_range:sl_IT canonically matches lang_tag sgn_CH_DE ? NO
 --------------
 loc_range:sl_IT matches lang_tag art-lojban ? NO
-loc_range:sl_IT canonically matches lang_tag art__LOJBAN ? NO
+loc_range:sl_IT canonically matches lang_tag jbo ? NO
 --------------
 loc_range:sl_IT matches lang_tag i-lux ? NO
 loc_range:sl_IT canonically matches lang_tag lb ? NO
 --------------
 loc_range:sl_IT matches lang_tag art-lojban ? NO
-loc_range:sl_IT canonically matches lang_tag art__LOJBAN ? NO
+loc_range:sl_IT canonically matches lang_tag jbo ? NO
 --------------
 loc_range:sl_IT matches lang_tag jbo ? NO
 loc_range:sl_IT canonically matches lang_tag jbo ? NO
@@ -207,13 +207,13 @@ loc_range:sl_IT_Nedis matches lang_tag sgn-CH-de ? NO
 loc_range:sl_IT_NEDIS canonically matches lang_tag sgn_CH_DE ? NO
 --------------
 loc_range:sl_IT_Nedis matches lang_tag art-lojban ? NO
-loc_range:sl_IT_NEDIS canonically matches lang_tag art__LOJBAN ? NO
+loc_range:sl_IT_NEDIS canonically matches lang_tag jbo ? NO
 --------------
 loc_range:sl_IT_Nedis matches lang_tag i-lux ? NO
 loc_range:sl_IT_NEDIS canonically matches lang_tag lb ? NO
 --------------
 loc_range:sl_IT_Nedis matches lang_tag art-lojban ? NO
-loc_range:sl_IT_NEDIS canonically matches lang_tag art__LOJBAN ? NO
+loc_range:sl_IT_NEDIS canonically matches lang_tag jbo ? NO
 --------------
 loc_range:sl_IT_Nedis matches lang_tag jbo ? NO
 loc_range:sl_IT_NEDIS canonically matches lang_tag jbo ? NO
@@ -255,13 +255,13 @@ loc_range:jbo matches lang_tag sgn-CH-de ? NO
 loc_range:jbo canonically matches lang_tag sgn_CH_DE ? NO
 --------------
 loc_range:jbo matches lang_tag art-lojban ? NO
-loc_range:jbo canonically matches lang_tag art__LOJBAN ? NO
+loc_range:jbo canonically matches lang_tag jbo ? YES
 --------------
 loc_range:jbo matches lang_tag i-lux ? NO
 loc_range:jbo canonically matches lang_tag lb ? NO
 --------------
 loc_range:jbo matches lang_tag art-lojban ? NO
-loc_range:jbo canonically matches lang_tag art__LOJBAN ? NO
+loc_range:jbo canonically matches lang_tag jbo ? YES
 --------------
 loc_range:jbo matches lang_tag jbo ? YES
 loc_range:jbo canonically matches lang_tag jbo ? YES
@@ -270,52 +270,52 @@ loc_range:jbo matches lang_tag en_sl_IT ? NO
 loc_range:jbo canonically matches lang_tag en_SL_IT ? NO
 --------------
 loc_range:art-lojban matches lang_tag de-DEVA ? NO
-loc_range:art__LOJBAN canonically matches lang_tag de_Deva ? NO
+loc_range:jbo canonically matches lang_tag de_Deva ? NO
 --------------
 loc_range:art-lojban matches lang_tag de-DE-1996 ? NO
-loc_range:art__LOJBAN canonically matches lang_tag de_DE_1996 ? NO
+loc_range:jbo canonically matches lang_tag de_DE_1996 ? NO
 --------------
 loc_range:art-lojban matches lang_tag de-DE ? NO
-loc_range:art__LOJBAN canonically matches lang_tag de_DE ? NO
+loc_range:jbo canonically matches lang_tag de_DE ? NO
 --------------
 loc_range:art-lojban matches lang_tag zh_Hans ? NO
-loc_range:art__LOJBAN canonically matches lang_tag zh_Hans ? NO
+loc_range:jbo canonically matches lang_tag zh_Hans ? NO
 --------------
 loc_range:art-lojban matches lang_tag de-CH-1996 ? NO
-loc_range:art__LOJBAN canonically matches lang_tag de_CH_1996 ? NO
+loc_range:jbo canonically matches lang_tag de_CH_1996 ? NO
 --------------
 loc_range:art-lojban matches lang_tag sl_IT ? NO
-loc_range:art__LOJBAN canonically matches lang_tag sl_IT ? NO
+loc_range:jbo canonically matches lang_tag sl_IT ? NO
 --------------
 loc_range:art-lojban matches lang_tag sl_IT_nedis-a-kirti-x-xyz ? NO
-loc_range:art__LOJBAN canonically matches lang_tag sl_IT_NEDIS_A_KIRTI_X_XYZ ? NO
+loc_range:jbo canonically matches lang_tag sl_IT_NEDIS_A_KIRTI_X_XYZ ? NO
 --------------
 loc_range:art-lojban matches lang_tag sl_IT_rozaj ? NO
-loc_range:art__LOJBAN canonically matches lang_tag sl_IT_ROZAJ ? NO
+loc_range:jbo canonically matches lang_tag sl_IT_ROZAJ ? NO
 --------------
 loc_range:art-lojban matches lang_tag sl_IT_NEDIS_ROJAZ_1901 ? NO
-loc_range:art__LOJBAN canonically matches lang_tag sl_IT_NEDIS_ROJAZ_1901 ? NO
+loc_range:jbo canonically matches lang_tag sl_IT_NEDIS_ROJAZ_1901 ? NO
 --------------
 loc_range:art-lojban matches lang_tag i-enochian ? NO
-loc_range:art__LOJBAN canonically matches lang_tag @x=i-enochian ? NO
+loc_range:jbo canonically matches lang_tag @x=i-enochian ? NO
 --------------
 loc_range:art-lojban matches lang_tag sgn-CH-de ? NO
-loc_range:art__LOJBAN canonically matches lang_tag sgn_CH_DE ? NO
+loc_range:jbo canonically matches lang_tag sgn_CH_DE ? NO
 --------------
 loc_range:art-lojban matches lang_tag art-lojban ? YES
-loc_range:art__LOJBAN canonically matches lang_tag art__LOJBAN ? YES
+loc_range:jbo canonically matches lang_tag jbo ? YES
 --------------
 loc_range:art-lojban matches lang_tag i-lux ? NO
-loc_range:art__LOJBAN canonically matches lang_tag lb ? NO
+loc_range:jbo canonically matches lang_tag lb ? NO
 --------------
 loc_range:art-lojban matches lang_tag art-lojban ? YES
-loc_range:art__LOJBAN canonically matches lang_tag art__LOJBAN ? YES
+loc_range:jbo canonically matches lang_tag jbo ? YES
 --------------
 loc_range:art-lojban matches lang_tag jbo ? NO
-loc_range:art__LOJBAN canonically matches lang_tag jbo ? NO
+loc_range:jbo canonically matches lang_tag jbo ? YES
 --------------
 loc_range:art-lojban matches lang_tag en_sl_IT ? NO
-loc_range:art__LOJBAN canonically matches lang_tag en_SL_IT ? NO
+loc_range:jbo canonically matches lang_tag en_SL_IT ? NO
 --------------
 loc_range:sl_IT matches lang_tag de-DEVA ? NO
 loc_range:sl_IT canonically matches lang_tag de_Deva ? NO
@@ -351,13 +351,13 @@ loc_range:sl_IT matches lang_tag sgn-CH-de ? NO
 loc_range:sl_IT canonically matches lang_tag sgn_CH_DE ? NO
 --------------
 loc_range:sl_IT matches lang_tag art-lojban ? NO
-loc_range:sl_IT canonically matches lang_tag art__LOJBAN ? NO
+loc_range:sl_IT canonically matches lang_tag jbo ? NO
 --------------
 loc_range:sl_IT matches lang_tag i-lux ? NO
 loc_range:sl_IT canonically matches lang_tag lb ? NO
 --------------
 loc_range:sl_IT matches lang_tag art-lojban ? NO
-loc_range:sl_IT canonically matches lang_tag art__LOJBAN ? NO
+loc_range:sl_IT canonically matches lang_tag jbo ? NO
 --------------
 loc_range:sl_IT matches lang_tag jbo ? NO
 loc_range:sl_IT canonically matches lang_tag jbo ? NO
