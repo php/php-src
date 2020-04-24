@@ -50,7 +50,7 @@ PHPAPI void php_url_free(php_url *theurl)
 }
 /* }}} */
 
-/* {{{ php_replace_controlchars
+/* {{{ php_replace_controlchars_ex
  */
 PHPAPI char *php_replace_controlchars_ex(char *str, size_t len)
 {
