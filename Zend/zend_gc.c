@@ -1416,6 +1416,8 @@ tail_call:
 	} while (0);
 }
 
+static void zend_get_gc_buffer_release();
+
 ZEND_API int zend_gc_collect_cycles(void)
 {
 	int count = 0;
@@ -1451,6 +1453,7 @@ ZEND_API int zend_gc_collect_cycles(void)
 		if (!GC_G(num_roots)) {
 			/* nothing to free */
 			GC_TRACE("Nothing to free");
+			zend_get_gc_buffer_release();
 			GC_G(gc_active) = 0;
 			return 0;
 		}
@@ -1533,6 +1536,7 @@ ZEND_API int zend_gc_collect_cycles(void)
 
 			if (GC_G(gc_protected)) {
 				/* something went wrong */
+				zend_get_gc_buffer_release();
 				return 0;
 			}
 		}
@@ -1595,7 +1599,7 @@ ZEND_API int zend_gc_collect_cycles(void)
 	}
 
 	gc_compact();
-
+	zend_get_gc_buffer_release();
 	return count;
 }
 
@@ -1605,6 +1609,28 @@ ZEND_API void zend_gc_get_status(zend_gc_status *status)
 	status->collected = GC_G(collected);
 	status->threshold = GC_G(gc_threshold);
 	status->num_roots = GC_G(num_roots);
+}
+
+ZEND_API zend_get_gc_buffer *zend_get_gc_buffer_create() {
+	/* There can only be one get_gc() call active at a time,
+	 * so there only needs to be one buffer. */
+	zend_get_gc_buffer *gc_buffer = &EG(get_gc_buffer);
+	gc_buffer->cur = gc_buffer->start;
+	return gc_buffer;
+}
+
+ZEND_API void zend_get_gc_buffer_grow(zend_get_gc_buffer *gc_buffer) {
+	size_t old_capacity = gc_buffer->end - gc_buffer->start;
+	size_t new_capacity = old_capacity == 0 ? 64 : old_capacity * 2;
+	gc_buffer->start = erealloc(gc_buffer->start, new_capacity * sizeof(zval));
+	gc_buffer->end = gc_buffer->start + new_capacity;
+	gc_buffer->cur = gc_buffer->start + old_capacity;
+}
+
+static void zend_get_gc_buffer_release() {
+	zend_get_gc_buffer *gc_buffer = &EG(get_gc_buffer);
+	efree(gc_buffer->start);
+	gc_buffer->start = gc_buffer->end = gc_buffer->cur = NULL;
 }
 
 #ifdef ZTS

@@ -184,6 +184,8 @@ void init_executor(void) /* {{{ */
 	EG(persistent_functions_count) = EG(function_table)->nNumUsed;
 	EG(persistent_classes_count)   = EG(class_table)->nNumUsed;
 
+	EG(get_gc_buffer).start = EG(get_gc_buffer).end = EG(get_gc_buffer).cur = NULL;
+
 	zend_weakrefs_init();
 
 	EG(active) = 1;

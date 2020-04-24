@@ -91,8 +91,6 @@ struct _spl_dllist_object {
 	zend_function         *fptr_offset_del;
 	zend_function         *fptr_count;
 	zend_class_entry      *ce_get_iterator;
-	zval                  *gc_data;
-	int                    gc_data_count;
 	zend_object            std;
 };
 
@@ -356,10 +354,6 @@ static void spl_dllist_object_free_storage(zend_object *object) /* {{{ */
 		zval_ptr_dtor(&tmp);
 	}
 
-	if (intern->gc_data != NULL) {
-		efree(intern->gc_data);
-	};
-
 	spl_ptr_llist_destroy(intern->llist);
 	SPL_LLIST_CHECK_DELREF(intern->traverse_pointer);
 }
@@ -534,21 +528,15 @@ static inline HashTable* spl_dllist_object_get_debug_info(zend_object *obj) /* {
 static HashTable *spl_dllist_object_get_gc(zend_object *obj, zval **gc_data, int *gc_data_count) /* {{{ */
 {
 	spl_dllist_object *intern = spl_dllist_from_obj(obj);
+	zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
 	spl_ptr_llist_element *current = intern->llist->head;
-	int i = 0;
-
-	if (intern->gc_data_count < intern->llist->count) {
-		intern->gc_data_count = intern->llist->count;
-		intern->gc_data = safe_erealloc(intern->gc_data, intern->gc_data_count, sizeof(zval), 0);
-	}
 
 	while (current) {
-		ZVAL_COPY_VALUE(&intern->gc_data[i++], &current->data);
+		zend_get_gc_buffer_add_zval(gc_buffer, &current->data);
 		current = current->next;
 	}
 
-	*gc_data = intern->gc_data;
-	*gc_data_count = i;
+	zend_get_gc_buffer_use(gc_buffer, gc_data, gc_data_count);
 	return zend_std_get_properties(obj);
 }
 /* }}} */
