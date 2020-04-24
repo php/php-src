@@ -4548,10 +4548,13 @@ void zend_compile_throw(znode *result, zend_ast *ast) /* {{{ */
 	znode expr_node;
 	zend_compile_expr(&expr_node, expr_ast);
 
-	zend_emit_op(NULL, ZEND_THROW, &expr_node, NULL);
-
-	result->op_type = IS_CONST;
-	ZVAL_BOOL(&result->u.constant, 1);
+	zend_op *opline = zend_emit_op(NULL, ZEND_THROW, &expr_node, NULL);
+	if (result) {
+		/* Mark this as an "expression throw" for opcache. */
+		opline->extended_value = ZEND_THROW_IS_EXPR;
+		result->op_type = IS_CONST;
+		ZVAL_BOOL(&result->u.constant, 1);
+	}
 }
 /* }}} */
 
@@ -8790,6 +8793,9 @@ void zend_compile_stmt(zend_ast *ast) /* {{{ */
 			break;
 		case ZEND_AST_HALT_COMPILER:
 			zend_compile_halt_compiler(ast);
+			break;
+		case ZEND_AST_THROW:
+			zend_compile_throw(NULL, ast);
 			break;
 		default:
 		{

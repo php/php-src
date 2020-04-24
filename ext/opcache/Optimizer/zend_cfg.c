@@ -296,8 +296,14 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 			case ZEND_RETURN_BY_REF:
 			case ZEND_GENERATOR_RETURN:
 			case ZEND_EXIT:
-			case ZEND_THROW:
 				if (i + 1 < op_array->last) {
+					BB_START(i + 1);
+				}
+				break;
+			case ZEND_THROW:
+				/* Don't treat THROW as terminator if it's used in expression context,
+				 * as we may lose live ranges when eliminating unreachable code. */
+				if (opline->extended_value != ZEND_THROW_IS_EXPR && i + 1 < op_array->last) {
 					BB_START(i + 1);
 				}
 				break;
