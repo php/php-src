@@ -2104,8 +2104,14 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 			j++;
 		}
 	}
+	count = j;
 	free_alloca(start, use_heap);
 	start = end = NULL;
+
+	if (!count) {
+		zend_arena_release(&CG(arena), checkpoint);
+		return NULL;
+	}
 
 	/* Add hints */
 	if (parent_vars_count) {
@@ -2225,12 +2231,19 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 
 		memset(intervals, 0, ssa->vars_count * sizeof(zend_lifetime_interval*));
 		ival = list;
+		count = 0;
 		while (ival != NULL) {
 			ZEND_ASSERT(ival->reg != ZREG_NONE);
+			count++;
 			next = ival->list_next;
 			ival->list_next = intervals[ival->ssa_var];
 			intervals[ival->ssa_var] = ival;
 			ival = next;
+		}
+
+		if (!count) {
+			zend_arena_release(&CG(arena), checkpoint);
+			return NULL;
 		}
 
 		/* SSA resolution */
@@ -2306,11 +2319,17 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 				}
 				if (may_remove) {
 					intervals[i] = NULL;
+					count--;
 				}
 			}
 		}
 
 		// Remove intervals used once ????
+
+		if (!count) {
+			zend_arena_release(&CG(arena), checkpoint);
+			return NULL;
+		}
 
 		if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_REG_ALLOC) {
 			fprintf(stderr, "---- TRACE %d Allocated Live Ranges\n", ZEND_JIT_TRACE_NUM);
