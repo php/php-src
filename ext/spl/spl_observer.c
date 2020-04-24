@@ -50,8 +50,6 @@ typedef struct _spl_SplObjectStorage { /* {{{ */
 	HashPosition      pos;
 	zend_long         flags;
 	zend_function    *fptr_get_hash;
-	zval             *gcdata;
-	size_t            gcdata_num;
 	zend_object       std;
 } spl_SplObjectStorage; /* }}} */
 
@@ -75,11 +73,6 @@ void spl_SplObjectStorage_free_storage(zend_object *object) /* {{{ */
 	zend_object_std_dtor(&intern->std);
 
 	zend_hash_destroy(&intern->storage);
-
-	if (intern->gcdata != NULL) {
-		efree(intern->gcdata);
-	}
-
 } /* }}} */
 
 static int spl_object_storage_get_hash(zend_hash_key *key, spl_SplObjectStorage *intern, zval *obj) {
@@ -285,23 +278,16 @@ static inline HashTable* spl_object_storage_debug_info(zend_object *obj) /* {{{ 
 /* overridden for garbage collection */
 static HashTable *spl_object_storage_get_gc(zend_object *obj, zval **table, int *n) /* {{{ */
 {
-	int i = 0;
 	spl_SplObjectStorage *intern = spl_object_storage_from_obj(obj);
 	spl_SplObjectStorageElement *element;
-
-	if (intern->storage.nNumOfElements * 2 > intern->gcdata_num) {
-		intern->gcdata_num = intern->storage.nNumOfElements * 2;
-		intern->gcdata = (zval*)erealloc(intern->gcdata, sizeof(zval) * intern->gcdata_num);
-	}
+	zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
 
 	ZEND_HASH_FOREACH_PTR(&intern->storage, element) {
-		ZVAL_COPY_VALUE(&intern->gcdata[i++], &element->obj);
-		ZVAL_COPY_VALUE(&intern->gcdata[i++], &element->inf);
+		zend_get_gc_buffer_add_zval(gc_buffer, &element->obj);
+		zend_get_gc_buffer_add_zval(gc_buffer, &element->inf);
 	} ZEND_HASH_FOREACH_END();
 
-	*table = intern->gcdata;
-	*n = i;
-
+	zend_get_gc_buffer_use(gc_buffer, table, n);
 	return zend_std_get_properties(obj);
 }
 /* }}} */
