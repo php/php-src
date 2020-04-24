@@ -392,7 +392,7 @@ static ssize_t php_stdiop_read(php_stream *stream, char *buf, size_t count)
 				if (!PeekNamedPipe(ph, NULL, 0, NULL, &avail_read, NULL)) {
 					break;
 				}
-				/* If there's nothing to read, wait in 10ms periods. */
+				/* If there's nothing to read, wait in 10us periods. */
 				if (0 == avail_read) {
 					usleep(10);
 				}
