@@ -2748,7 +2748,7 @@ COMMAND $cmd
         }
 
         // write .sh
-        if (strpos($log_format, 'S') !== false && file_put_contents($sh_filename, <<<SH
+        if (strpos($log_format, 'S') !== false && file_put_contents($sh_filename, '
 #!/bin/sh
 
 case "$1" in
@@ -2765,7 +2765,7 @@ case "$1" in
     {$cmd}
     ;;
 esac
-SH, FILE_BINARY) === false) {
+', FILE_BINARY) === false) {
             error("Cannot create test shell script - $sh_filename");
         }
         chmod($sh_filename, 0755);
