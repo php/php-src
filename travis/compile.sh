@@ -15,21 +15,6 @@ else
 	S390X_CONFIG="";
 fi
 
-if [[ -z "$CONFIG_LOG_FILE" ]]; then
-	CONFIG_QUIET="--quiet"
-	CONFIG_LOG_FILE="/dev/stdout"
-else
-	CONFIG_QUIET=""
-fi
-if [[ -z "$MAKE_LOG_FILE" ]]; then
-	MAKE_QUIET="--quiet"
-	MAKE_LOG_FILE="/dev/stdout"
-else
-	MAKE_QUIET=""
-fi
-
-MAKE_JOBS=${MAKE_JOBS:-$(nproc)}
-
 ./buildconf --force
 ./configure \
 --enable-option-checking=fatal \
@@ -86,5 +71,8 @@ $S390X_CONFIG \
 --enable-werror \
 --with-pear
 
-make "-j${MAKE_JOBS}" $MAKE_QUIET
-make install
+if [[ -z "$CONFIG_ONLY" ]]; then
+	MAKE_JOBS=${MAKE_JOBS:-$(nproc)}
+	make "-j${MAKE_JOBS}" $MAKE_QUIET
+	make install
+fi
