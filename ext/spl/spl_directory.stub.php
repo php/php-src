@@ -145,12 +145,6 @@ class FilesystemIterator extends DirectoryIterator
     /** @return void */
     public function rewind() {}
 
-    /**
-     * @return void
-     * @alias DirectoryIterator::next
-     */
-    public function next() {}
-
     /** @return string */
     public function key() {}
 

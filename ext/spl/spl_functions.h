@@ -64,12 +64,4 @@ int spl_add_classes(zend_class_entry *pce, zval *list, int sub, int allow, int c
 /* caller must efree(return) */
 zend_string *spl_gen_private_prop_name(zend_class_entry *ce, char *prop_name, int prop_len);
 
-#define SPL_ME(class_name, function_name, arg_info, flags) \
-	PHP_ME( spl_ ## class_name, function_name, arg_info, flags)
-
-#define SPL_ABSTRACT_ME(class_name, function_name, arg_info) \
-	ZEND_ABSTRACT_ME( spl_ ## class_name, function_name, arg_info)
-
-#define SPL_MA(class_name, function_name, alias_class, alias_function, arg_info, flags) \
-	PHP_MALIAS(spl_ ## alias_class, function_name, alias_function, arg_info, flags)
 #endif /* PHP_FUNCTIONS_H */

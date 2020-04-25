@@ -113,8 +113,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_FilesystemIterator_rewind arginfo_class_SplFileInfo_getPath
 
-#define arginfo_class_FilesystemIterator_next arginfo_class_SplFileInfo_getPath
-
 #define arginfo_class_FilesystemIterator_key arginfo_class_SplFileInfo_getPath
 
 #define arginfo_class_FilesystemIterator_current arginfo_class_SplFileInfo_getPath
@@ -406,7 +404,6 @@ static const zend_function_entry class_DirectoryIterator_methods[] = {
 static const zend_function_entry class_FilesystemIterator_methods[] = {
 	ZEND_ME(FilesystemIterator, __construct, arginfo_class_FilesystemIterator___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(FilesystemIterator, rewind, arginfo_class_FilesystemIterator_rewind, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(DirectoryIterator, next, next, arginfo_class_FilesystemIterator_next, ZEND_ACC_PUBLIC)
 	ZEND_ME(FilesystemIterator, key, arginfo_class_FilesystemIterator_key, ZEND_ACC_PUBLIC)
 	ZEND_ME(FilesystemIterator, current, arginfo_class_FilesystemIterator_current, ZEND_ACC_PUBLIC)
 	ZEND_ME(FilesystemIterator, getFlags, arginfo_class_FilesystemIterator_getFlags, ZEND_ACC_PUBLIC)

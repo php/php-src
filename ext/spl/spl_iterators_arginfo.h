@@ -102,15 +102,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_FilterIterator_rewind arginfo_class_EmptyIterator_current
 
-#define arginfo_class_FilterIterator_valid arginfo_class_EmptyIterator_current
-
-#define arginfo_class_FilterIterator_key arginfo_class_EmptyIterator_current
-
-#define arginfo_class_FilterIterator_current arginfo_class_EmptyIterator_current
-
 #define arginfo_class_FilterIterator_next arginfo_class_EmptyIterator_current
-
-#define arginfo_class_FilterIterator_getInnerIterator arginfo_class_EmptyIterator_current
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RecursiveFilterIterator___construct, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, iterator, RecursiveIterator, 0)
@@ -138,17 +130,11 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_LimitIterator_valid arginfo_class_EmptyIterator_current
 
-#define arginfo_class_LimitIterator_key arginfo_class_EmptyIterator_current
-
-#define arginfo_class_LimitIterator_current arginfo_class_EmptyIterator_current
-
 #define arginfo_class_LimitIterator_next arginfo_class_EmptyIterator_current
 
 #define arginfo_class_LimitIterator_seek arginfo_class_SeekableIterator_seek
 
 #define arginfo_class_LimitIterator_getPosition arginfo_class_EmptyIterator_current
-
-#define arginfo_class_LimitIterator_getInnerIterator arginfo_class_EmptyIterator_current
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_CachingIterator___construct, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
@@ -159,18 +145,12 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_CachingIterator_valid arginfo_class_EmptyIterator_current
 
-#define arginfo_class_CachingIterator_key arginfo_class_EmptyIterator_current
-
-#define arginfo_class_CachingIterator_current arginfo_class_EmptyIterator_current
-
 #define arginfo_class_CachingIterator_next arginfo_class_EmptyIterator_current
 
 #define arginfo_class_CachingIterator_hasNext arginfo_class_EmptyIterator_current
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_CachingIterator___toString, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
-
-#define arginfo_class_CachingIterator_getInnerIterator arginfo_class_EmptyIterator_current
 
 #define arginfo_class_CachingIterator_getFlags arginfo_class_EmptyIterator_current
 
@@ -213,8 +193,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_NoRewindIterator_next arginfo_class_EmptyIterator_current
 
-#define arginfo_class_NoRewindIterator_getInnerIterator arginfo_class_EmptyIterator_current
-
 #define arginfo_class_AppendIterator___construct arginfo_class_EmptyIterator_current
 
 #define arginfo_class_AppendIterator_append arginfo_class_FilterIterator___construct
@@ -223,13 +201,9 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_AppendIterator_valid arginfo_class_EmptyIterator_current
 
-#define arginfo_class_AppendIterator_key arginfo_class_EmptyIterator_current
-
 #define arginfo_class_AppendIterator_current arginfo_class_EmptyIterator_current
 
 #define arginfo_class_AppendIterator_next arginfo_class_EmptyIterator_current
-
-#define arginfo_class_AppendIterator_getInnerIterator arginfo_class_EmptyIterator_current
 
 #define arginfo_class_AppendIterator_getIteratorIndex arginfo_class_EmptyIterator_current
 
@@ -288,29 +262,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RecursiveTreeIterator___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "self::SELF_FIRST")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_RecursiveTreeIterator_rewind arginfo_class_EmptyIterator_current
-
-#define arginfo_class_RecursiveTreeIterator_valid arginfo_class_EmptyIterator_current
-
 #define arginfo_class_RecursiveTreeIterator_key arginfo_class_EmptyIterator_current
 
 #define arginfo_class_RecursiveTreeIterator_current arginfo_class_EmptyIterator_current
-
-#define arginfo_class_RecursiveTreeIterator_next arginfo_class_EmptyIterator_current
-
-#define arginfo_class_RecursiveTreeIterator_beginIteration arginfo_class_EmptyIterator_current
-
-#define arginfo_class_RecursiveTreeIterator_endIteration arginfo_class_EmptyIterator_current
-
-#define arginfo_class_RecursiveTreeIterator_callHasChildren arginfo_class_EmptyIterator_current
-
-#define arginfo_class_RecursiveTreeIterator_callGetChildren arginfo_class_EmptyIterator_current
-
-#define arginfo_class_RecursiveTreeIterator_beginChildren arginfo_class_EmptyIterator_current
-
-#define arginfo_class_RecursiveTreeIterator_endChildren arginfo_class_EmptyIterator_current
-
-#define arginfo_class_RecursiveTreeIterator_nextElement arginfo_class_EmptyIterator_current
 
 #define arginfo_class_RecursiveTreeIterator_getPrefix arginfo_class_EmptyIterator_current
 
@@ -507,11 +461,7 @@ static const zend_function_entry class_FilterIterator_methods[] = {
 	ZEND_ABSTRACT_ME_WITH_FLAGS(FilterIterator, accept, arginfo_class_FilterIterator_accept, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
 	ZEND_ME(FilterIterator, __construct, arginfo_class_FilterIterator___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(FilterIterator, rewind, arginfo_class_FilterIterator_rewind, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(IteratorIterator, valid, valid, arginfo_class_FilterIterator_valid, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(IteratorIterator, key, key, arginfo_class_FilterIterator_key, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(IteratorIterator, current, current, arginfo_class_FilterIterator_current, ZEND_ACC_PUBLIC)
 	ZEND_ME(FilterIterator, next, arginfo_class_FilterIterator_next, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(IteratorIterator, getInnerIterator, getInnerIterator, arginfo_class_FilterIterator_getInnerIterator, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -541,12 +491,9 @@ static const zend_function_entry class_LimitIterator_methods[] = {
 	ZEND_ME(LimitIterator, __construct, arginfo_class_LimitIterator___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(LimitIterator, rewind, arginfo_class_LimitIterator_rewind, ZEND_ACC_PUBLIC)
 	ZEND_ME(LimitIterator, valid, arginfo_class_LimitIterator_valid, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(IteratorIterator, key, key, arginfo_class_LimitIterator_key, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(IteratorIterator, current, current, arginfo_class_LimitIterator_current, ZEND_ACC_PUBLIC)
 	ZEND_ME(LimitIterator, next, arginfo_class_LimitIterator_next, ZEND_ACC_PUBLIC)
 	ZEND_ME(LimitIterator, seek, arginfo_class_LimitIterator_seek, ZEND_ACC_PUBLIC)
 	ZEND_ME(LimitIterator, getPosition, arginfo_class_LimitIterator_getPosition, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(IteratorIterator, getInnerIterator, getInnerIterator, arginfo_class_LimitIterator_getInnerIterator, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -555,12 +502,9 @@ static const zend_function_entry class_CachingIterator_methods[] = {
 	ZEND_ME(CachingIterator, __construct, arginfo_class_CachingIterator___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(CachingIterator, rewind, arginfo_class_CachingIterator_rewind, ZEND_ACC_PUBLIC)
 	ZEND_ME(CachingIterator, valid, arginfo_class_CachingIterator_valid, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(IteratorIterator, key, key, arginfo_class_CachingIterator_key, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(IteratorIterator, current, current, arginfo_class_CachingIterator_current, ZEND_ACC_PUBLIC)
 	ZEND_ME(CachingIterator, next, arginfo_class_CachingIterator_next, ZEND_ACC_PUBLIC)
 	ZEND_ME(CachingIterator, hasNext, arginfo_class_CachingIterator_hasNext, ZEND_ACC_PUBLIC)
 	ZEND_ME(CachingIterator, __toString, arginfo_class_CachingIterator___toString, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(IteratorIterator, getInnerIterator, getInnerIterator, arginfo_class_CachingIterator_getInnerIterator, ZEND_ACC_PUBLIC)
 	ZEND_ME(CachingIterator, getFlags, arginfo_class_CachingIterator_getFlags, ZEND_ACC_PUBLIC)
 	ZEND_ME(CachingIterator, setFlags, arginfo_class_CachingIterator_setFlags, ZEND_ACC_PUBLIC)
 	ZEND_ME(CachingIterator, offsetGet, arginfo_class_CachingIterator_offsetGet, ZEND_ACC_PUBLIC)
@@ -588,7 +532,6 @@ static const zend_function_entry class_NoRewindIterator_methods[] = {
 	ZEND_ME(NoRewindIterator, key, arginfo_class_NoRewindIterator_key, ZEND_ACC_PUBLIC)
 	ZEND_ME(NoRewindIterator, current, arginfo_class_NoRewindIterator_current, ZEND_ACC_PUBLIC)
 	ZEND_ME(NoRewindIterator, next, arginfo_class_NoRewindIterator_next, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(IteratorIterator, getInnerIterator, getInnerIterator, arginfo_class_NoRewindIterator_getInnerIterator, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -598,10 +541,8 @@ static const zend_function_entry class_AppendIterator_methods[] = {
 	ZEND_ME(AppendIterator, append, arginfo_class_AppendIterator_append, ZEND_ACC_PUBLIC)
 	ZEND_ME(AppendIterator, rewind, arginfo_class_AppendIterator_rewind, ZEND_ACC_PUBLIC)
 	ZEND_ME(AppendIterator, valid, arginfo_class_AppendIterator_valid, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(IteratorIterator, key, key, arginfo_class_AppendIterator_key, ZEND_ACC_PUBLIC)
 	ZEND_ME(AppendIterator, current, arginfo_class_AppendIterator_current, ZEND_ACC_PUBLIC)
 	ZEND_ME(AppendIterator, next, arginfo_class_AppendIterator_next, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(IteratorIterator, getInnerIterator, getInnerIterator, arginfo_class_AppendIterator_getInnerIterator, ZEND_ACC_PUBLIC)
 	ZEND_ME(AppendIterator, getIteratorIndex, arginfo_class_AppendIterator_getIteratorIndex, ZEND_ACC_PUBLIC)
 	ZEND_ME(AppendIterator, getArrayIterator, arginfo_class_AppendIterator_getArrayIterator, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
@@ -640,18 +581,8 @@ static const zend_function_entry class_RecursiveRegexIterator_methods[] = {
 
 static const zend_function_entry class_RecursiveTreeIterator_methods[] = {
 	ZEND_ME(RecursiveTreeIterator, __construct, arginfo_class_RecursiveTreeIterator___construct, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(RecursiveIteratorIterator, rewind, rewind, arginfo_class_RecursiveTreeIterator_rewind, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(RecursiveIteratorIterator, valid, valid, arginfo_class_RecursiveTreeIterator_valid, ZEND_ACC_PUBLIC)
 	ZEND_ME(RecursiveTreeIterator, key, arginfo_class_RecursiveTreeIterator_key, ZEND_ACC_PUBLIC)
 	ZEND_ME(RecursiveTreeIterator, current, arginfo_class_RecursiveTreeIterator_current, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(RecursiveIteratorIterator, next, next, arginfo_class_RecursiveTreeIterator_next, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(RecursiveIteratorIterator, beginIteration, beginIteration, arginfo_class_RecursiveTreeIterator_beginIteration, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(RecursiveIteratorIterator, endIteration, endIteration, arginfo_class_RecursiveTreeIterator_endIteration, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(RecursiveIteratorIterator, callHasChildren, callHasChildren, arginfo_class_RecursiveTreeIterator_callHasChildren, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(RecursiveIteratorIterator, callGetChildren, callGetChildren, arginfo_class_RecursiveTreeIterator_callGetChildren, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(RecursiveIteratorIterator, beginChildren, beginChildren, arginfo_class_RecursiveTreeIterator_beginChildren, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(RecursiveIteratorIterator, endChildren, endChildren, arginfo_class_RecursiveTreeIterator_endChildren, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(RecursiveIteratorIterator, nextElement, nextElement, arginfo_class_RecursiveTreeIterator_nextElement, ZEND_ACC_PUBLIC)
 	ZEND_ME(RecursiveTreeIterator, getPrefix, arginfo_class_RecursiveTreeIterator_getPrefix, ZEND_ACC_PUBLIC)
 	ZEND_ME(RecursiveTreeIterator, setPostfix, arginfo_class_RecursiveTreeIterator_setPostfix, ZEND_ACC_PUBLIC)
 	ZEND_ME(RecursiveTreeIterator, setPrefixPart, arginfo_class_RecursiveTreeIterator_setPrefixPart, ZEND_ACC_PUBLIC)
