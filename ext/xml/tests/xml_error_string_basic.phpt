@@ -25,7 +25,7 @@ foreach ($xmls as $xml) {
     xml_parser_free($xml_parser);
 }
 ?>
---EXPECTF--
+--EXPECT--
 int(5)
 string(20) "Invalid document end"
 int(47)
