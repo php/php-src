@@ -37,7 +37,7 @@ string(183) "Class [ <internal:Core> class stdClass ] {
 }
 
 "
-string(2003) "Class [ <internal:Core> class Exception implements Throwable, Stringable ] {
+string(2159) "Class [ <internal:Core> class Exception implements Throwable, Stringable ] {
 
   - Constants [0] {
   }
@@ -84,6 +84,7 @@ string(2003) "Class [ <internal:Core> class Exception implements Throwable, Stri
 
       - Parameters [0] {
       }
+      - Return [ string ]
     }
 
     Method [ <internal:Core, prototype Throwable> final public method getCode ] {
@@ -96,30 +97,35 @@ string(2003) "Class [ <internal:Core> class Exception implements Throwable, Stri
 
       - Parameters [0] {
       }
+      - Return [ string ]
     }
 
     Method [ <internal:Core, prototype Throwable> final public method getLine ] {
 
       - Parameters [0] {
       }
+      - Return [ int ]
     }
 
     Method [ <internal:Core, prototype Throwable> final public method getTrace ] {
 
       - Parameters [0] {
       }
+      - Return [ array ]
     }
 
     Method [ <internal:Core, prototype Throwable> final public method getPrevious ] {
 
       - Parameters [0] {
       }
+      - Return [ ?Throwable ]
     }
 
     Method [ <internal:Core, prototype Throwable> final public method getTraceAsString ] {
 
       - Parameters [0] {
       }
+      - Return [ string ]
     }
 
     Method [ <internal:Core, prototype Stringable> public method __toString ] {

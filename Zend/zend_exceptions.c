@@ -258,7 +258,7 @@ static zend_object *zend_error_exception_new(zend_class_entry *class_type) /* {{
 
 /* {{{ proto Exception|Error Exception|Error::__clone()
    Clone the exception object */
-ZEND_COLD ZEND_METHOD(exception, __clone)
+ZEND_COLD ZEND_METHOD(Exception, __clone)
 {
 	/* Should never be executable */
 	zend_throw_exception(NULL, "Cannot clone object using __clone()", 0);
@@ -267,7 +267,7 @@ ZEND_COLD ZEND_METHOD(exception, __clone)
 
 /* {{{ proto Exception|Error::__construct(string message, int code [, Throwable previous])
    Exception constructor */
-ZEND_METHOD(exception, __construct)
+ZEND_METHOD(Exception, __construct)
 {
 	zend_string *message = NULL;
 	zend_long   code = 0;
@@ -305,7 +305,7 @@ ZEND_METHOD(exception, __construct)
 		zend_unset_property(i_get_exception_base(object), object, ZSTR_VAL(ZSTR_KNOWN(id)), ZSTR_LEN(ZSTR_KNOWN(id))); \
 	}
 
-ZEND_METHOD(exception, __wakeup)
+ZEND_METHOD(Exception, __wakeup)
 {
 	zval value, *pvalue;
 	zval *object = ZEND_THIS;
@@ -326,7 +326,7 @@ ZEND_METHOD(exception, __wakeup)
 
 /* {{{ proto ErrorException::__construct(string message, int code, int severity [, string filename [, int lineno [, Throwable previous]]])
    ErrorException constructor */
-ZEND_METHOD(error_exception, __construct)
+ZEND_METHOD(ErrorException, __construct)
 {
 	zend_string *message = NULL, *filename = NULL;
 	zend_long   code = 0, severity = E_ERROR, lineno;
@@ -377,7 +377,7 @@ ZEND_METHOD(error_exception, __construct)
 
 /* {{{ proto string Exception|Error::getFile()
    Get the file in which the exception occurred */
-ZEND_METHOD(exception, getFile)
+ZEND_METHOD(Exception, getFile)
 {
 	zval *prop, rv;
 
@@ -391,7 +391,7 @@ ZEND_METHOD(exception, getFile)
 
 /* {{{ proto int Exception|Error::getLine()
    Get the line in which the exception occurred */
-ZEND_METHOD(exception, getLine)
+ZEND_METHOD(Exception, getLine)
 {
 	zval *prop, rv;
 
@@ -405,7 +405,7 @@ ZEND_METHOD(exception, getLine)
 
 /* {{{ proto string Exception|Error::getMessage()
    Get the exception message */
-ZEND_METHOD(exception, getMessage)
+ZEND_METHOD(Exception, getMessage)
 {
 	zval *prop, rv;
 
@@ -419,7 +419,7 @@ ZEND_METHOD(exception, getMessage)
 
 /* {{{ proto int Exception|Error::getCode()
    Get the exception code */
-ZEND_METHOD(exception, getCode)
+ZEND_METHOD(Exception, getCode)
 {
 	zval *prop, rv;
 
@@ -433,7 +433,7 @@ ZEND_METHOD(exception, getCode)
 
 /* {{{ proto array Exception|Error::getTrace()
    Get the stack trace for the location in which the exception occurred */
-ZEND_METHOD(exception, getTrace)
+ZEND_METHOD(Exception, getTrace)
 {
 	zval *prop, rv;
 
@@ -447,7 +447,7 @@ ZEND_METHOD(exception, getTrace)
 
 /* {{{ proto int ErrorException::getSeverity()
    Get the exception severity */
-ZEND_METHOD(error_exception, getSeverity)
+ZEND_METHOD(ErrorException, getSeverity)
 {
 	zval *prop, rv;
 
@@ -590,7 +590,7 @@ static void _build_trace_string(smart_str *str, HashTable *ht, uint32_t num) /* 
 
 /* {{{ proto string Exception|Error::getTraceAsString()
    Obtain the backtrace for the exception as a string (instead of an array) */
-ZEND_METHOD(exception, getTraceAsString)
+ZEND_METHOD(Exception, getTraceAsString)
 {
 	zval *trace, *frame, rv;
 	zend_ulong index;
@@ -629,7 +629,7 @@ ZEND_METHOD(exception, getTraceAsString)
 
 /* {{{ proto Throwable Exception|Error::getPrevious()
    Return previous Throwable or NULL. */
-ZEND_METHOD(exception, getPrevious)
+ZEND_METHOD(Exception, getPrevious)
 {
 	zval rv;
 
@@ -640,7 +640,7 @@ ZEND_METHOD(exception, getPrevious)
 
 /* {{{ proto string Exception|Error::__toString()
    Obtain the string representation of the Exception object */
-ZEND_METHOD(exception, __toString)
+ZEND_METHOD(Exception, __toString)
 {
 	zval trace, *exception;
 	zend_class_entry *base_ce;
@@ -733,51 +733,6 @@ ZEND_METHOD(exception, __toString)
 }
 /* }}} */
 
-/** {{{ Throwable method definition */
-static const zend_function_entry zend_funcs_throwable[] = {
-	ZEND_ABSTRACT_ME(throwable, getMessage,       arginfo_class_Throwable_getMessage)
-	ZEND_ABSTRACT_ME(throwable, getCode,          arginfo_class_Throwable_getCode)
-	ZEND_ABSTRACT_ME(throwable, getFile,          arginfo_class_Throwable_getFile)
-	ZEND_ABSTRACT_ME(throwable, getLine,          arginfo_class_Throwable_getLine)
-	ZEND_ABSTRACT_ME(throwable, getTrace,         arginfo_class_Throwable_getTrace)
-	ZEND_ABSTRACT_ME(throwable, getPrevious,      arginfo_class_Throwable_getPrevious)
-	ZEND_ABSTRACT_ME(throwable, getTraceAsString, arginfo_class_Throwable_getTraceAsString)
-	ZEND_FE_END
-};
-/* }}} */
-
-/* {{{ internal structs */
-/* All functions that may be used in uncaught exception handlers must be final
- * and must not throw exceptions. Otherwise we would need a facility to handle
- * such exceptions in that handler.
- * Also all getXY() methods are final because thy serve as read only access to
- * their corresponding properties, no more, no less. If after all you need to
- * override something then it is method __toString().
- * And never try to change the state of exceptions and never implement anything
- * that gives the user anything to accomplish this.
- */
-static const zend_function_entry default_exception_functions[] = {
-	ZEND_ME(exception, __clone, arginfo_class_Exception___clone, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
-	ZEND_ME(exception, __construct, arginfo_class_Exception___construct, ZEND_ACC_PUBLIC)
-	ZEND_ME(exception, __wakeup, arginfo_class_Exception___wakeup, ZEND_ACC_PUBLIC)
-	ZEND_ME(exception, getMessage, arginfo_class_Exception_getMessage, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
-	ZEND_ME(exception, getCode, arginfo_class_Exception_getCode, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
-	ZEND_ME(exception, getFile, arginfo_class_Exception_getFile, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
-	ZEND_ME(exception, getLine, arginfo_class_Exception_getLine, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
-	ZEND_ME(exception, getTrace, arginfo_class_Exception_getTrace, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
-	ZEND_ME(exception, getPrevious, arginfo_class_Exception_getPrevious, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
-	ZEND_ME(exception, getTraceAsString, arginfo_class_Exception_getTraceAsString, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
-	ZEND_ME(exception, __toString, arginfo_class_Exception___toString, 0)
-	ZEND_FE_END
-};
-
-static const zend_function_entry error_exception_functions[] = {
-	ZEND_ME(error_exception, __construct, arginfo_class_ErrorException___construct, ZEND_ACC_PUBLIC)
-	ZEND_ME(error_exception, getSeverity, arginfo_class_ErrorException_getSeverity, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
-	ZEND_FE_END
-};
-/* }}} */
-
 void zend_register_default_exception(void) /* {{{ */
 {
 	zend_class_entry ce;
@@ -788,7 +743,7 @@ void zend_register_default_exception(void) /* {{{ */
 	memcpy(&default_exception_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	default_exception_handlers.clone_obj = NULL;
 
-	INIT_CLASS_ENTRY(ce, "Exception", default_exception_functions);
+	INIT_CLASS_ENTRY(ce, "Exception", class_Exception_methods);
 	zend_ce_exception = zend_register_internal_class_ex(&ce, NULL);
 	zend_ce_exception->create_object = zend_default_exception_new;
 	zend_class_implements(zend_ce_exception, 1, zend_ce_throwable);
@@ -801,12 +756,12 @@ void zend_register_default_exception(void) /* {{{ */
 	zend_declare_property_null(zend_ce_exception, "trace", sizeof("trace")-1, ZEND_ACC_PRIVATE);
 	zend_declare_property_null(zend_ce_exception, "previous", sizeof("previous")-1, ZEND_ACC_PRIVATE);
 
-	INIT_CLASS_ENTRY(ce, "ErrorException", error_exception_functions);
+	INIT_CLASS_ENTRY(ce, "ErrorException", class_ErrorException_methods);
 	zend_ce_error_exception = zend_register_internal_class_ex(&ce, zend_ce_exception);
 	zend_ce_error_exception->create_object = zend_error_exception_new;
 	zend_declare_property_long(zend_ce_error_exception, "severity", sizeof("severity")-1, E_ERROR, ZEND_ACC_PROTECTED);
 
-	INIT_CLASS_ENTRY(ce, "Error", default_exception_functions);
+	INIT_CLASS_ENTRY(ce, "Error", class_Error_methods);
 	zend_ce_error = zend_register_internal_class_ex(&ce, NULL);
 	zend_ce_error->create_object = zend_default_exception_new;
 	zend_class_implements(zend_ce_error, 1, zend_ce_throwable);
@@ -819,31 +774,31 @@ void zend_register_default_exception(void) /* {{{ */
 	zend_declare_property_null(zend_ce_error, "trace", sizeof("trace")-1, ZEND_ACC_PRIVATE);
 	zend_declare_property_null(zend_ce_error, "previous", sizeof("previous")-1, ZEND_ACC_PRIVATE);
 
-	INIT_CLASS_ENTRY(ce, "CompileError", NULL);
+	INIT_CLASS_ENTRY(ce, "CompileError", class_CompileError_methods);
 	zend_ce_compile_error = zend_register_internal_class_ex(&ce, zend_ce_error);
 	zend_ce_compile_error->create_object = zend_default_exception_new;
 
-	INIT_CLASS_ENTRY(ce, "ParseError", NULL);
+	INIT_CLASS_ENTRY(ce, "ParseError", class_ParseError_methods);
 	zend_ce_parse_error = zend_register_internal_class_ex(&ce, zend_ce_compile_error);
 	zend_ce_parse_error->create_object = zend_default_exception_new;
 
-	INIT_CLASS_ENTRY(ce, "TypeError", NULL);
+	INIT_CLASS_ENTRY(ce, "TypeError", class_TypeError_methods);
 	zend_ce_type_error = zend_register_internal_class_ex(&ce, zend_ce_error);
 	zend_ce_type_error->create_object = zend_default_exception_new;
 
-	INIT_CLASS_ENTRY(ce, "ArgumentCountError", NULL);
+	INIT_CLASS_ENTRY(ce, "ArgumentCountError", class_ArgumentCountError_methods);
 	zend_ce_argument_count_error = zend_register_internal_class_ex(&ce, zend_ce_type_error);
 	zend_ce_argument_count_error->create_object = zend_default_exception_new;
 
-	INIT_CLASS_ENTRY(ce, "ValueError", NULL);
+	INIT_CLASS_ENTRY(ce, "ValueError", class_ValueError_methods);
 	zend_ce_value_error = zend_register_internal_class_ex(&ce, zend_ce_error);
 	zend_ce_value_error->create_object = zend_default_exception_new;
 
-	INIT_CLASS_ENTRY(ce, "ArithmeticError", NULL);
+	INIT_CLASS_ENTRY(ce, "ArithmeticError", class_ArithmeticError_methods);
 	zend_ce_arithmetic_error = zend_register_internal_class_ex(&ce, zend_ce_error);
 	zend_ce_arithmetic_error->create_object = zend_default_exception_new;
 
-	INIT_CLASS_ENTRY(ce, "DivisionByZeroError", NULL);
+	INIT_CLASS_ENTRY(ce, "DivisionByZeroError", class_DivisionByZeroError_methods);
 	zend_ce_division_by_zero_error = zend_register_internal_class_ex(&ce, zend_ce_arithmetic_error);
 	zend_ce_division_by_zero_error->create_object = zend_default_exception_new;
 }

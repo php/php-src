@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 interface Traversable {}
 
 interface IteratorAggregate extends Traversable

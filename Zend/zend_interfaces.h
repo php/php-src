@@ -52,7 +52,7 @@ ZEND_API zval* zend_call_method(zend_object *object, zend_class_entry *obj_ce, z
 #define REGISTER_MAGIC_INTERFACE(class_name, class_name_str) \
 	{\
 		zend_class_entry ce;\
-		INIT_CLASS_ENTRY(ce, # class_name_str, zend_funcs_ ## class_name) \
+		INIT_CLASS_ENTRY(ce, # class_name_str, class_ ## class_name_str ## _methods) \
 		zend_ce_ ## class_name = zend_register_internal_interface(&ce);\
 		zend_ce_ ## class_name->interface_gets_implemented = zend_implement_ ## class_name;\
 	}

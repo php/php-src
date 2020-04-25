@@ -1189,23 +1189,11 @@ zend_object_iterator *zend_generator_get_iterator(zend_class_entry *ce, zval *ob
 }
 /* }}} */
 
-static const zend_function_entry generator_functions[] = {
-	ZEND_ME(Generator, rewind,   arginfo_class_Generator_rewind, ZEND_ACC_PUBLIC)
-	ZEND_ME(Generator, valid,    arginfo_class_Generator_valid, ZEND_ACC_PUBLIC)
-	ZEND_ME(Generator, current,  arginfo_class_Generator_current, ZEND_ACC_PUBLIC)
-	ZEND_ME(Generator, key,      arginfo_class_Generator_key, ZEND_ACC_PUBLIC)
-	ZEND_ME(Generator, next,     arginfo_class_Generator_next, ZEND_ACC_PUBLIC)
-	ZEND_ME(Generator, send,     arginfo_class_Generator_send, ZEND_ACC_PUBLIC)
-	ZEND_ME(Generator, throw,    arginfo_class_Generator_throw, ZEND_ACC_PUBLIC)
-	ZEND_ME(Generator, getReturn,arginfo_class_Generator_getReturn, ZEND_ACC_PUBLIC)
-	ZEND_FE_END
-};
-
 void zend_register_generator_ce(void) /* {{{ */
 {
 	zend_class_entry ce;
 
-	INIT_CLASS_ENTRY(ce, "Generator", generator_functions);
+	INIT_CLASS_ENTRY(ce, "Generator", class_Generator_methods);
 	zend_ce_generator = zend_register_internal_class(&ce);
 	zend_ce_generator->ce_flags |= ZEND_ACC_FINAL;
 	zend_ce_generator->create_object = zend_generator_create;

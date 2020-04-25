@@ -298,13 +298,6 @@ ZEND_METHOD(WeakReference, get)
 	zend_weakref_get(getThis(), return_value);
 }
 
-static const zend_function_entry zend_weakref_methods[] = {
-	ZEND_ME(WeakReference, __construct, arginfo_class_WeakReference___construct, ZEND_ACC_PUBLIC)
-	ZEND_ME(WeakReference, create, arginfo_class_WeakReference_create, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME(WeakReference, get, arginfo_class_WeakReference_get, ZEND_ACC_PUBLIC)
-	ZEND_FE_END
-};
-
 static zend_object *zend_weakmap_create_object(zend_class_entry *ce)
 {
 	zend_weakmap *wm = zend_object_alloc(sizeof(zend_weakmap), ce);
@@ -620,20 +613,11 @@ ZEND_METHOD(WeakMap, count)
 	RETURN_LONG(count);
 }
 
-static const zend_function_entry zend_weakmap_methods[] = {
-	ZEND_ME(WeakMap, offsetGet, arginfo_class_WeakMap_offsetGet, ZEND_ACC_PUBLIC)
-	ZEND_ME(WeakMap, offsetSet, arginfo_class_WeakMap_offsetSet, ZEND_ACC_PUBLIC)
-	ZEND_ME(WeakMap, offsetExists, arginfo_class_WeakMap_offsetExists, ZEND_ACC_PUBLIC)
-	ZEND_ME(WeakMap, offsetUnset, arginfo_class_WeakMap_offsetUnset, ZEND_ACC_PUBLIC)
-	ZEND_ME(WeakMap, count, arginfo_class_WeakMap_count, ZEND_ACC_PUBLIC)
-	ZEND_FE_END
-};
-
 void zend_register_weakref_ce(void) /* {{{ */
 {
 	zend_class_entry ce;
 
-	INIT_CLASS_ENTRY(ce, "WeakReference", zend_weakref_methods);
+	INIT_CLASS_ENTRY(ce, "WeakReference", class_WeakReference_methods);
 	zend_ce_weakref = zend_register_internal_class(&ce);
 	zend_ce_weakref->ce_flags |= ZEND_ACC_FINAL;
 
@@ -652,7 +636,7 @@ void zend_register_weakref_ce(void) /* {{{ */
 	zend_weakref_handlers.get_property_ptr_ptr = zend_weakref_no_read_ptr;
 	zend_weakref_handlers.clone_obj = NULL;
 
-	INIT_CLASS_ENTRY(ce, "WeakMap", zend_weakmap_methods);
+	INIT_CLASS_ENTRY(ce, "WeakMap", class_WeakMap_methods);
 	zend_ce_weakmap = zend_register_internal_class(&ce);
 	zend_ce_weakmap->ce_flags |= ZEND_ACC_FINAL;
 

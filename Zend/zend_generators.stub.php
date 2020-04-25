@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 final class Generator implements Iterator
 {
     public function rewind(): void {}
