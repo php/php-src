@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 class EmptyIterator implements Iterator
 {
     /** @return void */
@@ -30,7 +32,10 @@ class RecursiveCallbackFilterIterator extends CallbackFilterIterator implements 
 {
     public function __construct(RecursiveIterator $iterator, callable $callback) {}
 
-    /** @return bool */
+    /**
+     * @return bool
+     * @alias RecursiveFilterIterator::hasChildren
+     */
     public function hasChildren() {}
 
     /** @return RecursiveCallbackFilterIterator */
@@ -81,7 +86,7 @@ class RecursiveIteratorIterator implements OuterIterator
     /** @return void */
     public function endIteration() {}
 
-    /** @return bool */
+    /** @return bool|null */
     public function callHasChildren() {}
 
     /** @return RecursiveIterator|null */
@@ -143,20 +148,8 @@ abstract class FilterIterator extends IteratorIterator
     /** @return void */
     public function rewind() {}
 
-    /** @return bool */
-    public function valid() {}
-
-    /** @return mixed */
-    public function key() {}
-
-    /** @return mixed */
-    public function current() {}
-
     /** @return void */
     public function next() {}
-
-    /** @return Iterator|null */
-    public function getInnerIterator() {}
 }
 
 abstract class RecursiveFilterIterator extends FilterIterator implements RecursiveIterator
@@ -174,7 +167,10 @@ class ParentIterator extends RecursiveFilterIterator
 {
     public function __construct(RecursiveIterator $iterator) {}
 
-    /** @return bool */
+    /**
+     * @return bool
+     * @alias RecursiveFilterIterator::hasChildren
+     */
     public function accept() {}
 }
 
@@ -194,12 +190,6 @@ class LimitIterator extends IteratorIterator
     /** @return bool */
     public function valid() {}
 
-    /** @return mixed */
-    public function key() {}
-
-    /** @return mixed */
-    public function current() {}
-
     /** @return void */
     public function next() {}
 
@@ -208,9 +198,6 @@ class LimitIterator extends IteratorIterator
 
     /** @return int */
     public function getPosition() {}
-
-    /** @return Iterator|null */
-    public function getInnerIterator() {}
 }
 
 class CachingIterator extends IteratorIterator implements ArrayAccess, Countable
@@ -223,12 +210,6 @@ class CachingIterator extends IteratorIterator implements ArrayAccess, Countable
     /** @return bool */
     public function valid() {}
 
-    /** @return mixed */
-    public function key() {}
-
-    /** @return mixed */
-    public function current() {}
-
     /** @return void */
     public function next() {}
 
@@ -236,9 +217,6 @@ class CachingIterator extends IteratorIterator implements ArrayAccess, Countable
     public function hasNext() {}
 
     public function __toString(): string {}
-
-    /** @return Iterator|null */
-    public function getInnerIterator() {}
 
     /** @return int */
     public function getFlags() {}
@@ -307,9 +285,6 @@ class NoRewindIterator extends IteratorIterator
 
     /** @return void */
     public function next() {}
-
-    /** @return Iterator|null */
-    public function getInnerIterator() {}
 }
 
 class AppendIterator extends IteratorIterator
@@ -326,16 +301,10 @@ class AppendIterator extends IteratorIterator
     public function valid() {}
 
     /** @return mixed */
-    public function key() {}
-
-    /** @return mixed */
     public function current() {}
 
     /** @return void */
     public function next() {}
-
-    /** @return Iterator|null */
-    public function getInnerIterator() {}
 
     /** @return int */
     public function getIteratorIndex() {}
@@ -388,7 +357,10 @@ class RecursiveRegexIterator extends RegexIterator implements RecursiveIterator
     /** @return bool */
     public function accept() {}
 
-    /** @return bool */
+    /**
+     * @return bool
+     * @alias RecursiveFilterIterator::hasChildren
+     */
     public function hasChildren() {}
 
     /** @return RecursiveRegexIterator */
@@ -403,41 +375,11 @@ class RecursiveTreeIterator extends RecursiveIteratorIterator
         int $mode = self::SELF_FIRST
     ) {}
 
-    /** @return void */
-    public function rewind() {}
-
-    /** @return bool */
-    public function valid() {}
-
     /** @return mixed */
     public function key() {}
 
     /** @return mixed */
     public function current() {}
-
-    /** @return void */
-    public function next() {}
-
-    /** @return void */
-    public function beginIteration() {}
-
-    /** @return void */
-    public function endIteration() {}
-
-    /** @return bool|null */
-    public function callHasChildren() {}
-
-    /** @return RecursiveIterator|null */
-    public function callGetChildren() {}
-
-    /** @return void */
-    public function beginChildren() {}
-
-    /** @return void */
-    public function endChildren() {}
-
-    /** @return void */
-    public function nextElement() {}
 
     /** @return string */
     public function getPrefix() {}

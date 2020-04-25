@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 function class_implements($what, bool $autoload = true): array|false {}
 
 function class_parents($instance, bool $autoload = true): array|false {}

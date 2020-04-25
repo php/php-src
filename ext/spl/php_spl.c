@@ -893,28 +893,6 @@ PHP_MINFO_FUNCTION(spl)
 }
 /* }}} */
 
-/* {{{ spl_functions
- */
-static const zend_function_entry spl_functions[] = {
-	PHP_FE(spl_classes,             arginfo_spl_classes)
-	PHP_FE(spl_autoload,            arginfo_spl_autoload)
-	PHP_FE(spl_autoload_extensions, arginfo_spl_autoload_extensions)
-	PHP_FE(spl_autoload_register,   arginfo_spl_autoload_register)
-	PHP_FE(spl_autoload_unregister, arginfo_spl_autoload_unregister)
-	PHP_FE(spl_autoload_functions,  arginfo_spl_autoload_functions)
-	PHP_FE(spl_autoload_call,       arginfo_spl_autoload_call)
-	PHP_FE(class_parents,           arginfo_class_parents)
-	PHP_FE(class_implements,        arginfo_class_implements)
-	PHP_FE(class_uses,              arginfo_class_uses)
-	PHP_FE(spl_object_hash,         arginfo_spl_object_hash)
-	PHP_FE(spl_object_id,           arginfo_spl_object_id)
-	PHP_FE(iterator_to_array,       arginfo_iterator_to_array)
-	PHP_FE(iterator_count,          arginfo_iterator_count)
-	PHP_FE(iterator_apply,          arginfo_iterator_apply)
-	PHP_FE_END
-};
-/* }}} */
-
 /* {{{ PHP_MINIT_FUNCTION(spl)
  */
 PHP_MINIT_FUNCTION(spl)
@@ -966,7 +944,7 @@ PHP_RSHUTDOWN_FUNCTION(spl) /* {{{ */
 zend_module_entry spl_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"SPL",
-	spl_functions,
+	ext_functions,
 	PHP_MINIT(spl),
 	NULL,
 	PHP_RINIT(spl),
