@@ -31,7 +31,7 @@ typedef zend_object* (*create_object_func_t)(zend_class_entry *class_type);
 	spl_register_sub_class(&spl_ce_ ## class_name, spl_ce_ ## parent_class_name, # class_name, obj_ctor, funcs);
 
 #define REGISTER_SPL_INTERFACE(class_name) \
-	spl_register_interface(&spl_ce_ ## class_name, # class_name, spl_funcs_ ## class_name);
+	spl_register_interface(&spl_ce_ ## class_name, # class_name, class_ ## class_name ## _methods);
 
 #define REGISTER_SPL_IMPLEMENTS(class_name, interface_name) \
 	zend_class_implements(spl_ce_ ## class_name, 1, spl_ce_ ## interface_name);
@@ -69,9 +69,6 @@ zend_string *spl_gen_private_prop_name(zend_class_entry *ce, char *prop_name, in
 
 #define SPL_ABSTRACT_ME(class_name, function_name, arg_info) \
 	ZEND_ABSTRACT_ME( spl_ ## class_name, function_name, arg_info)
-
-#define SPL_METHOD(class_name, function_name) \
-	PHP_METHOD(spl_ ## class_name, function_name)
 
 #define SPL_MA(class_name, function_name, alias_class, alias_function, arg_info, flags) \
 	PHP_MALIAS(spl_ ## alias_class, function_name, alias_function, arg_info, flags)

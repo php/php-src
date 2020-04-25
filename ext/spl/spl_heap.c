@@ -558,7 +558,7 @@ static HashTable *spl_pqueue_object_get_gc(zend_object *obj, zval **gc_data, int
 
 /* {{{ proto int SplHeap::count()
  Return the number of elements in the heap. */
-SPL_METHOD(SplHeap, count)
+PHP_METHOD(SplHeap, count)
 {
 	zend_long count;
 	spl_heap_object *intern = Z_SPLHEAP_P(ZEND_THIS);
@@ -574,7 +574,7 @@ SPL_METHOD(SplHeap, count)
 
 /* {{{ proto int SplHeap::isEmpty()
  Return true if the heap is empty. */
-SPL_METHOD(SplHeap, isEmpty)
+PHP_METHOD(SplHeap, isEmpty)
 {
 	spl_heap_object *intern = Z_SPLHEAP_P(ZEND_THIS);
 
@@ -588,7 +588,7 @@ SPL_METHOD(SplHeap, isEmpty)
 
 /* {{{ proto bool SplHeap::insert(mixed value)
 	   Push $value on the heap */
-SPL_METHOD(SplHeap, insert)
+PHP_METHOD(SplHeap, insert)
 {
 	zval *value;
 	spl_heap_object *intern;
@@ -613,7 +613,7 @@ SPL_METHOD(SplHeap, insert)
 
 /* {{{ proto mixed SplHeap::extract()
 	   extract the element out of the top of the heap */
-SPL_METHOD(SplHeap, extract)
+PHP_METHOD(SplHeap, extract)
 {
 	spl_heap_object *intern;
 
@@ -637,7 +637,7 @@ SPL_METHOD(SplHeap, extract)
 
 /* {{{ proto bool SplPriorityQueue::insert(mixed value, mixed priority)
 	   Push $value with the priority $priodiry on the priorityqueue */
-SPL_METHOD(SplPriorityQueue, insert)
+PHP_METHOD(SplPriorityQueue, insert)
 {
 	zval *data, *priority;
 	spl_heap_object *intern;
@@ -665,7 +665,7 @@ SPL_METHOD(SplPriorityQueue, insert)
 
 /* {{{ proto mixed SplPriorityQueue::extract()
 	   extract the element out of the top of the priority queue */
-SPL_METHOD(SplPriorityQueue, extract)
+PHP_METHOD(SplPriorityQueue, extract)
 {
 	spl_pqueue_elem elem;
 	spl_heap_object *intern;
@@ -693,7 +693,7 @@ SPL_METHOD(SplPriorityQueue, extract)
 
 /* {{{ proto mixed SplPriorityQueue::top()
 	   Peek at the top element of the priority queue */
-SPL_METHOD(SplPriorityQueue, top)
+PHP_METHOD(SplPriorityQueue, top)
 {
 	spl_heap_object *intern;
 	spl_pqueue_elem *elem;
@@ -723,7 +723,7 @@ SPL_METHOD(SplPriorityQueue, top)
 
 /* {{{ proto int SplPriorityQueue::setExtractFlags(int flags)
  Set the flags of extraction*/
-SPL_METHOD(SplPriorityQueue, setExtractFlags)
+PHP_METHOD(SplPriorityQueue, setExtractFlags)
 {
 	zend_long value;
 	spl_heap_object *intern;
@@ -746,7 +746,7 @@ SPL_METHOD(SplPriorityQueue, setExtractFlags)
 
 /* {{{ proto int SplPriorityQueue::getExtractFlags()
  Get the flags of extraction*/
-SPL_METHOD(SplPriorityQueue, getExtractFlags)
+PHP_METHOD(SplPriorityQueue, getExtractFlags)
 {
 	spl_heap_object *intern;
 
@@ -762,7 +762,7 @@ SPL_METHOD(SplPriorityQueue, getExtractFlags)
 
 /* {{{ proto int SplHeap::recoverFromCorruption()
  Recover from a corrupted state*/
-SPL_METHOD(SplHeap, recoverFromCorruption)
+PHP_METHOD(SplHeap, recoverFromCorruption)
 {
 	spl_heap_object *intern;
 
@@ -780,7 +780,7 @@ SPL_METHOD(SplHeap, recoverFromCorruption)
 
 /* {{{ proto int SplHeap::isCorrupted()
  Tells if the heap is in a corrupted state*/
-SPL_METHOD(SplHeap, isCorrupted)
+PHP_METHOD(SplHeap, isCorrupted)
 {
 	spl_heap_object *intern;
 
@@ -796,7 +796,7 @@ SPL_METHOD(SplHeap, isCorrupted)
 
 /* {{{ proto bool SplPriorityQueue::compare(mixed $value1, mixed $value2)
 	   compare the priorities */
-SPL_METHOD(SplPriorityQueue, compare)
+PHP_METHOD(SplPriorityQueue, compare)
 {
 	zval *a, *b;
 
@@ -810,7 +810,7 @@ SPL_METHOD(SplPriorityQueue, compare)
 
 /* {{{ proto mixed SplHeap::top()
 	   Peek at the top element of the heap */
-SPL_METHOD(SplHeap, top)
+PHP_METHOD(SplHeap, top)
 {
 	zval *value;
 	spl_heap_object *intern;
@@ -839,7 +839,7 @@ SPL_METHOD(SplHeap, top)
 
 /* {{{ proto bool SplMinHeap::compare(mixed $value1, mixed $value2)
 	   compare the values */
-SPL_METHOD(SplMinHeap, compare)
+PHP_METHOD(SplMinHeap, compare)
 {
 	zval *a, *b;
 
@@ -853,7 +853,7 @@ SPL_METHOD(SplMinHeap, compare)
 
 /* {{{ proto bool SplMaxHeap::compare(mixed $value1, mixed $value2)
 	   compare the values */
-SPL_METHOD(SplMaxHeap, compare)
+PHP_METHOD(SplMaxHeap, compare)
 {
 	zval *a, *b;
 
@@ -949,7 +949,7 @@ static void spl_heap_it_move_forward(zend_object_iterator *iter) /* {{{ */
 
 /* {{{  proto int SplHeap::key()
    Return current array key */
-SPL_METHOD(SplHeap, key)
+PHP_METHOD(SplHeap, key)
 {
 	spl_heap_object *intern = Z_SPLHEAP_P(ZEND_THIS);
 
@@ -963,7 +963,7 @@ SPL_METHOD(SplHeap, key)
 
 /* {{{ proto void SplHeap::next()
    Move to next entry */
-SPL_METHOD(SplHeap, next)
+PHP_METHOD(SplHeap, next)
 {
 	spl_heap_object *intern = Z_SPLHEAP_P(ZEND_THIS);
 
@@ -977,7 +977,7 @@ SPL_METHOD(SplHeap, next)
 
 /* {{{ proto bool SplHeap::valid()
    Check whether the datastructure contains more entries */
-SPL_METHOD(SplHeap, valid)
+PHP_METHOD(SplHeap, valid)
 {
 	spl_heap_object *intern = Z_SPLHEAP_P(ZEND_THIS);
 
@@ -991,7 +991,7 @@ SPL_METHOD(SplHeap, valid)
 
 /* {{{ proto void SplHeap::rewind()
    Rewind the datastructure back to the start */
-SPL_METHOD(SplHeap, rewind)
+PHP_METHOD(SplHeap, rewind)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
@@ -1002,7 +1002,7 @@ SPL_METHOD(SplHeap, rewind)
 
 /* {{{ proto mixed|NULL SplHeap::current()
    Return current datastructure entry */
-SPL_METHOD(SplHeap, current)
+PHP_METHOD(SplHeap, current)
 {
 	spl_heap_object *intern  = Z_SPLHEAP_P(ZEND_THIS);
 
@@ -1021,7 +1021,7 @@ SPL_METHOD(SplHeap, current)
 
 /* {{{ proto mixed|NULL SplPriorityQueue::current()
    Return current datastructure entry */
-SPL_METHOD(SplPriorityQueue, current)
+PHP_METHOD(SplPriorityQueue, current)
 {
 	spl_heap_object  *intern  = Z_SPLHEAP_P(ZEND_THIS);
 
@@ -1039,7 +1039,7 @@ SPL_METHOD(SplPriorityQueue, current)
 /* }}} */
 
 /* {{{ proto void SplHeap::__debugInfo() */
-SPL_METHOD(SplHeap, __debugInfo)
+PHP_METHOD(SplHeap, __debugInfo)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -1049,7 +1049,7 @@ SPL_METHOD(SplHeap, __debugInfo)
 } /* }}} */
 
 /* {{{ proto void SplPriorityQueue::__debugInfo() */
-SPL_METHOD(SplPriorityQueue, __debugInfo)
+PHP_METHOD(SplPriorityQueue, __debugInfo)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -1130,57 +1130,9 @@ zend_object_iterator *spl_pqueue_get_iterator(zend_class_entry *ce, zval *object
 }
 /* }}} */
 
-static const zend_function_entry spl_funcs_SplMinHeap[] = {
-	SPL_ME(SplMinHeap, compare, arginfo_class_SplMinHeap_compare, ZEND_ACC_PROTECTED)
-	PHP_FE_END
-};
-static const zend_function_entry spl_funcs_SplMaxHeap[] = {
-	SPL_ME(SplMaxHeap, compare, arginfo_class_SplMaxHeap_compare, ZEND_ACC_PROTECTED)
-	PHP_FE_END
-};
-
-static const zend_function_entry spl_funcs_SplPriorityQueue[] = {
-	SPL_ME(SplPriorityQueue, compare,               arginfo_class_SplPriorityQueue_compare,			ZEND_ACC_PUBLIC)
-	SPL_ME(SplPriorityQueue, insert,                arginfo_class_SplPriorityQueue_insert,			ZEND_ACC_PUBLIC)
-	SPL_ME(SplPriorityQueue, setExtractFlags,       arginfo_class_SplPriorityQueue_setExtractFlags,	ZEND_ACC_PUBLIC)
-	SPL_ME(SplPriorityQueue, getExtractFlags,       arginfo_class_SplPriorityQueue_getExtractFlags,	ZEND_ACC_PUBLIC)
-	SPL_ME(SplPriorityQueue, top,                   arginfo_class_SplPriorityQueue_top,				ZEND_ACC_PUBLIC)
-	SPL_ME(SplPriorityQueue, extract,               arginfo_class_SplPriorityQueue_extract,			ZEND_ACC_PUBLIC)
-	SPL_ME(SplHeap,          count,                 arginfo_class_SplPriorityQueue_count,			ZEND_ACC_PUBLIC)
-	SPL_ME(SplHeap,          isEmpty,               arginfo_class_SplPriorityQueue_isEmpty,			ZEND_ACC_PUBLIC)
-	SPL_ME(SplHeap,          rewind,                arginfo_class_SplPriorityQueue_rewind,			ZEND_ACC_PUBLIC)
-	SPL_ME(SplPriorityQueue, current,               arginfo_class_SplPriorityQueue_current,			ZEND_ACC_PUBLIC)
-	SPL_ME(SplHeap,          key,                   arginfo_class_SplPriorityQueue_key,				ZEND_ACC_PUBLIC)
-	SPL_ME(SplHeap,          next,                  arginfo_class_SplPriorityQueue_next,			ZEND_ACC_PUBLIC)
-	SPL_ME(SplHeap,          valid,                 arginfo_class_SplPriorityQueue_valid,			ZEND_ACC_PUBLIC)
-	SPL_ME(SplHeap,          recoverFromCorruption, arginfo_class_SplPriorityQueue_recoverFromCorruption, ZEND_ACC_PUBLIC)
-	SPL_ME(SplHeap,          isCorrupted,           arginfo_class_SplPriorityQueue_isCorrupted,		ZEND_ACC_PUBLIC)
-	SPL_ME(SplPriorityQueue, __debugInfo,           arginfo_class_SplPriorityQueue___debugInfo,		ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};
-
-static const zend_function_entry spl_funcs_SplHeap[] = {
-	SPL_ME(SplHeap, extract,               arginfo_class_SplHeap_extract,				ZEND_ACC_PUBLIC)
-	SPL_ME(SplHeap, insert,                arginfo_class_SplHeap_insert,				ZEND_ACC_PUBLIC)
-	SPL_ME(SplHeap, top,                   arginfo_class_SplHeap_top,					ZEND_ACC_PUBLIC)
-	SPL_ME(SplHeap, count,                 arginfo_class_SplHeap_count,					ZEND_ACC_PUBLIC)
-	SPL_ME(SplHeap, isEmpty,               arginfo_class_SplHeap_isEmpty,				ZEND_ACC_PUBLIC)
-	SPL_ME(SplHeap, rewind,                arginfo_class_SplHeap_rewind,				ZEND_ACC_PUBLIC)
-	SPL_ME(SplHeap, current,               arginfo_class_SplHeap_current,				ZEND_ACC_PUBLIC)
-	SPL_ME(SplHeap, key,                   arginfo_class_SplHeap_key,					ZEND_ACC_PUBLIC)
-	SPL_ME(SplHeap, next,                  arginfo_class_SplHeap_next,					ZEND_ACC_PUBLIC)
-	SPL_ME(SplHeap, valid,                 arginfo_class_SplHeap_valid,					ZEND_ACC_PUBLIC)
-	SPL_ME(SplHeap, recoverFromCorruption, arginfo_class_SplHeap_recoverFromCorruption, ZEND_ACC_PUBLIC)
-	SPL_ME(SplHeap, isCorrupted,           arginfo_class_SplHeap_isCorrupted,			ZEND_ACC_PUBLIC)
-	SPL_ME(SplHeap, __debugInfo,           arginfo_class_SplHeap___debugInfo,			ZEND_ACC_PUBLIC)
-	ZEND_FENTRY(compare, NULL, arginfo_class_SplHeap_compare, ZEND_ACC_PROTECTED|ZEND_ACC_ABSTRACT)
-	PHP_FE_END
-};
-/* }}} */
-
 PHP_MINIT_FUNCTION(spl_heap) /* {{{ */
 {
-	REGISTER_SPL_STD_CLASS_EX(SplHeap, spl_heap_object_new, spl_funcs_SplHeap);
+	REGISTER_SPL_STD_CLASS_EX(SplHeap, spl_heap_object_new, class_SplHeap_methods);
 	memcpy(&spl_handler_SplHeap, &std_object_handlers, sizeof(zend_object_handlers));
 
 	spl_handler_SplHeap.offset         = XtOffsetOf(spl_heap_object, std);
@@ -1195,13 +1147,13 @@ PHP_MINIT_FUNCTION(spl_heap) /* {{{ */
 
 	spl_ce_SplHeap->get_iterator = spl_heap_get_iterator;
 
-	REGISTER_SPL_SUB_CLASS_EX(SplMinHeap,           SplHeap,        spl_heap_object_new, spl_funcs_SplMinHeap);
-	REGISTER_SPL_SUB_CLASS_EX(SplMaxHeap,           SplHeap,        spl_heap_object_new, spl_funcs_SplMaxHeap);
+	REGISTER_SPL_SUB_CLASS_EX(SplMinHeap,           SplHeap,        spl_heap_object_new, class_SplMinHeap_methods);
+	REGISTER_SPL_SUB_CLASS_EX(SplMaxHeap,           SplHeap,        spl_heap_object_new, class_SplMaxHeap_methods);
 
 	spl_ce_SplMaxHeap->get_iterator = spl_heap_get_iterator;
 	spl_ce_SplMinHeap->get_iterator = spl_heap_get_iterator;
 
-	REGISTER_SPL_STD_CLASS_EX(SplPriorityQueue, spl_heap_object_new, spl_funcs_SplPriorityQueue);
+	REGISTER_SPL_STD_CLASS_EX(SplPriorityQueue, spl_heap_object_new, class_SplPriorityQueue_methods);
 	memcpy(&spl_handler_SplPriorityQueue, &std_object_handlers, sizeof(zend_object_handlers));
 
 	spl_handler_SplPriorityQueue.offset         = XtOffsetOf(spl_heap_object, std);

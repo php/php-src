@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 class SplFileInfo
 {
     public function __construct(string $file_name) {}
@@ -88,6 +90,7 @@ class SplFileInfo
     /** @return void */
     public function setInfoClass(string $class_name = SplFileInfo::class) {}
 
+    /** @alias SplFileInfo::getPathname */
     public function __toString(): string {}
 
     /** @return array */
@@ -131,6 +134,7 @@ class DirectoryIterator extends SplFileInfo implements SeekableIterator
     /** @return void */
     public function seek(int $position) {}
 
+    /** @alias DirectoryIterator::getFilename */
     public function __toString(): string {}
 }
 
@@ -141,7 +145,10 @@ class FilesystemIterator extends DirectoryIterator
     /** @return void */
     public function rewind() {}
 
-    /** @return void */
+    /**
+     * @return void
+     * @alias DirectoryIterator::next
+     */
     public function next() {}
 
     /** @return string */
@@ -174,6 +181,7 @@ class RecursiveDirectoryIterator extends FilesystemIterator implements Recursive
     public function getSubPathname() {}
 }
 
+#ifdef HAVE_GLOB
 class GlobIterator extends FilesystemIterator implements Countable
 {
     public function __construct(string $path, int $flags = FilesystemIterator::KEY_AS_PATHNAME | FilesystemIterator::CURRENT_AS_FILEINFO) {}
@@ -181,6 +189,7 @@ class GlobIterator extends FilesystemIterator implements Countable
     /** @return int */
     public function count() {}
 }
+#endif
 
 class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIterator
 {
@@ -277,9 +286,13 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIt
     /** @return void */
     public function seek(int $line_pos) {}
 
-    /** @return string|false */
+    /**
+     * @return string|false
+     * @alias SplFileObject::fgets
+     */
     public function getCurrentLine() {}
 
+    /** @alias SplFileObject::fgets */
     public function __toString(): string {}
 }
 

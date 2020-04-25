@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 class SplFixedArray implements Iterator, ArrayAccess, Countable
 {
     public function __construct(int $size = 0) {}

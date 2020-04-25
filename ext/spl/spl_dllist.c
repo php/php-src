@@ -555,7 +555,7 @@ static HashTable *spl_dllist_object_get_gc(zend_object *obj, zval **gc_data, int
 
 /* {{{ proto bool SplDoublyLinkedList::push(mixed value)
 	   Push $value on the SplDoublyLinkedList */
-SPL_METHOD(SplDoublyLinkedList, push)
+PHP_METHOD(SplDoublyLinkedList, push)
 {
 	zval *value;
 	spl_dllist_object *intern;
@@ -571,7 +571,7 @@ SPL_METHOD(SplDoublyLinkedList, push)
 
 /* {{{ proto bool SplDoublyLinkedList::unshift(mixed value)
 	   Unshift $value on the SplDoublyLinkedList */
-SPL_METHOD(SplDoublyLinkedList, unshift)
+PHP_METHOD(SplDoublyLinkedList, unshift)
 {
 	zval *value;
 	spl_dllist_object *intern;
@@ -587,7 +587,7 @@ SPL_METHOD(SplDoublyLinkedList, unshift)
 
 /* {{{ proto mixed SplDoublyLinkedList::pop()
 	   Pop an element out of the SplDoublyLinkedList */
-SPL_METHOD(SplDoublyLinkedList, pop)
+PHP_METHOD(SplDoublyLinkedList, pop)
 {
 	spl_dllist_object *intern;
 
@@ -607,7 +607,7 @@ SPL_METHOD(SplDoublyLinkedList, pop)
 
 /* {{{ proto mixed SplDoublyLinkedList::shift()
 	   Shift an element out of the SplDoublyLinkedList */
-SPL_METHOD(SplDoublyLinkedList, shift)
+PHP_METHOD(SplDoublyLinkedList, shift)
 {
 	spl_dllist_object *intern;
 
@@ -627,7 +627,7 @@ SPL_METHOD(SplDoublyLinkedList, shift)
 
 /* {{{ proto mixed SplDoublyLinkedList::top()
 	   Peek at the top element of the SplDoublyLinkedList */
-SPL_METHOD(SplDoublyLinkedList, top)
+PHP_METHOD(SplDoublyLinkedList, top)
 {
 	zval *value;
 	spl_dllist_object *intern;
@@ -650,7 +650,7 @@ SPL_METHOD(SplDoublyLinkedList, top)
 
 /* {{{ proto mixed SplDoublyLinkedList::bottom()
 	   Peek at the bottom element of the SplDoublyLinkedList */
-SPL_METHOD(SplDoublyLinkedList, bottom)
+PHP_METHOD(SplDoublyLinkedList, bottom)
 {
 	zval *value;
 	spl_dllist_object *intern;
@@ -673,7 +673,7 @@ SPL_METHOD(SplDoublyLinkedList, bottom)
 
 /* {{{ proto int SplDoublyLinkedList::count()
  Return the number of elements in the datastructure. */
-SPL_METHOD(SplDoublyLinkedList, count)
+PHP_METHOD(SplDoublyLinkedList, count)
 {
 	zend_long count;
 	spl_dllist_object *intern = Z_SPLDLLIST_P(ZEND_THIS);
@@ -689,7 +689,7 @@ SPL_METHOD(SplDoublyLinkedList, count)
 
 /* {{{ proto int SplDoublyLinkedList::isEmpty()
  Return true if the SplDoublyLinkedList is empty. */
-SPL_METHOD(SplDoublyLinkedList, isEmpty)
+PHP_METHOD(SplDoublyLinkedList, isEmpty)
 {
 	zend_long count;
 
@@ -704,7 +704,7 @@ SPL_METHOD(SplDoublyLinkedList, isEmpty)
 
 /* {{{ proto int SplDoublyLinkedList::setIteratorMode(int mode)
  Set the mode of iteration */
-SPL_METHOD(SplDoublyLinkedList, setIteratorMode)
+PHP_METHOD(SplDoublyLinkedList, setIteratorMode)
 {
 	zend_long value;
 	spl_dllist_object *intern;
@@ -729,7 +729,7 @@ SPL_METHOD(SplDoublyLinkedList, setIteratorMode)
 
 /* {{{ proto int SplDoublyLinkedList::getIteratorMode()
  Return the mode of iteration */
-SPL_METHOD(SplDoublyLinkedList, getIteratorMode)
+PHP_METHOD(SplDoublyLinkedList, getIteratorMode)
 {
 	spl_dllist_object *intern;
 
@@ -745,7 +745,7 @@ SPL_METHOD(SplDoublyLinkedList, getIteratorMode)
 
 /* {{{ proto bool SplDoublyLinkedList::offsetExists(mixed index)
  Returns whether the requested $index exists. */
-SPL_METHOD(SplDoublyLinkedList, offsetExists)
+PHP_METHOD(SplDoublyLinkedList, offsetExists)
 {
 	zval              *zindex;
 	spl_dllist_object *intern;
@@ -763,7 +763,7 @@ SPL_METHOD(SplDoublyLinkedList, offsetExists)
 
 /* {{{ proto mixed SplDoublyLinkedList::offsetGet(mixed index)
  Returns the value at the specified $index. */
-SPL_METHOD(SplDoublyLinkedList, offsetGet)
+PHP_METHOD(SplDoublyLinkedList, offsetGet)
 {
 	zval                  *zindex;
 	zend_long                   index;
@@ -795,7 +795,7 @@ SPL_METHOD(SplDoublyLinkedList, offsetGet)
 
 /* {{{ proto void SplDoublyLinkedList::offsetSet(mixed index, mixed newval)
  Sets the value at the specified $index to $newval. */
-SPL_METHOD(SplDoublyLinkedList, offsetSet)
+PHP_METHOD(SplDoublyLinkedList, offsetSet)
 {
 	zval                  *zindex, *value;
 	spl_dllist_object     *intern;
@@ -848,7 +848,7 @@ SPL_METHOD(SplDoublyLinkedList, offsetSet)
 
 /* {{{ proto void SplDoublyLinkedList::offsetUnset(mixed index)
  Unsets the value at the specified $index. */
-SPL_METHOD(SplDoublyLinkedList, offsetUnset)
+PHP_METHOD(SplDoublyLinkedList, offsetUnset)
 {
 	zval                  *zindex;
 	zend_long             index;
@@ -1025,7 +1025,7 @@ static void spl_dllist_it_move_forward(zend_object_iterator *iter) /* {{{ */
 
 /* {{{  proto int SplDoublyLinkedList::key()
    Return current array key */
-SPL_METHOD(SplDoublyLinkedList, key)
+PHP_METHOD(SplDoublyLinkedList, key)
 {
 	spl_dllist_object *intern = Z_SPLDLLIST_P(ZEND_THIS);
 
@@ -1039,7 +1039,7 @@ SPL_METHOD(SplDoublyLinkedList, key)
 
 /* {{{ proto void SplDoublyLinkedList::prev()
    Move to next entry */
-SPL_METHOD(SplDoublyLinkedList, prev)
+PHP_METHOD(SplDoublyLinkedList, prev)
 {
 	spl_dllist_object *intern = Z_SPLDLLIST_P(ZEND_THIS);
 
@@ -1053,7 +1053,7 @@ SPL_METHOD(SplDoublyLinkedList, prev)
 
 /* {{{ proto void SplDoublyLinkedList::next()
    Move to next entry */
-SPL_METHOD(SplDoublyLinkedList, next)
+PHP_METHOD(SplDoublyLinkedList, next)
 {
 	spl_dllist_object *intern = Z_SPLDLLIST_P(ZEND_THIS);
 
@@ -1067,7 +1067,7 @@ SPL_METHOD(SplDoublyLinkedList, next)
 
 /* {{{ proto bool SplDoublyLinkedList::valid()
    Check whether the datastructure contains more entries */
-SPL_METHOD(SplDoublyLinkedList, valid)
+PHP_METHOD(SplDoublyLinkedList, valid)
 {
 	spl_dllist_object *intern = Z_SPLDLLIST_P(ZEND_THIS);
 
@@ -1081,7 +1081,7 @@ SPL_METHOD(SplDoublyLinkedList, valid)
 
 /* {{{ proto void SplDoublyLinkedList::rewind()
    Rewind the datastructure back to the start */
-SPL_METHOD(SplDoublyLinkedList, rewind)
+PHP_METHOD(SplDoublyLinkedList, rewind)
 {
 	spl_dllist_object *intern = Z_SPLDLLIST_P(ZEND_THIS);
 
@@ -1095,7 +1095,7 @@ SPL_METHOD(SplDoublyLinkedList, rewind)
 
 /* {{{ proto mixed SplDoublyLinkedList::current()
    Return current datastructure entry */
-SPL_METHOD(SplDoublyLinkedList, current)
+PHP_METHOD(SplDoublyLinkedList, current)
 {
 	spl_dllist_object     *intern  = Z_SPLDLLIST_P(ZEND_THIS);
 	spl_ptr_llist_element *element = intern->traverse_pointer;
@@ -1116,7 +1116,7 @@ SPL_METHOD(SplDoublyLinkedList, current)
 
 /* {{{ proto string SplDoublyLinkedList::serialize()
  Serializes storage */
-SPL_METHOD(SplDoublyLinkedList, serialize)
+PHP_METHOD(SplDoublyLinkedList, serialize)
 {
 	spl_dllist_object     *intern   = Z_SPLDLLIST_P(ZEND_THIS);
 	smart_str              buf      = {0};
@@ -1154,7 +1154,7 @@ SPL_METHOD(SplDoublyLinkedList, serialize)
 
 /* {{{ proto void SplDoublyLinkedList::unserialize(string serialized)
  Unserializes storage */
-SPL_METHOD(SplDoublyLinkedList, unserialize)
+PHP_METHOD(SplDoublyLinkedList, unserialize)
 {
 	spl_dllist_object *intern = Z_SPLDLLIST_P(ZEND_THIS);
 	zval *flags, *elem;
@@ -1215,7 +1215,7 @@ error:
 } /* }}} */
 
 /* {{{ proto array SplDoublyLinkedList::__serialize() */
-SPL_METHOD(SplDoublyLinkedList, __serialize)
+PHP_METHOD(SplDoublyLinkedList, __serialize)
 {
 	spl_dllist_object *intern = Z_SPLDLLIST_P(ZEND_THIS);
 	spl_ptr_llist_element *current = intern->llist->head;
@@ -1247,7 +1247,7 @@ SPL_METHOD(SplDoublyLinkedList, __serialize)
 } /* }}} */
 
 /* {{{ proto void SplDoublyLinkedList::__unserialize(array serialized) */
-SPL_METHOD(SplDoublyLinkedList, __unserialize) {
+PHP_METHOD(SplDoublyLinkedList, __unserialize) {
 	spl_dllist_object *intern = Z_SPLDLLIST_P(ZEND_THIS);
 	HashTable *data;
 	zval *flags_zv, *storage_zv, *members_zv, *elem;
@@ -1278,7 +1278,7 @@ SPL_METHOD(SplDoublyLinkedList, __unserialize) {
 
 /* {{{ proto void SplDoublyLinkedList::add(mixed index, mixed newval)
  Inserts a new entry before the specified $index consisting of $newval. */
-SPL_METHOD(SplDoublyLinkedList, add)
+PHP_METHOD(SplDoublyLinkedList, add)
 {
 	zval                  *zindex, *value;
 	spl_dllist_object     *intern;
@@ -1331,7 +1331,7 @@ SPL_METHOD(SplDoublyLinkedList, add)
 } /* }}} */
 
 /* {{{ proto void SplDoublyLinkedList::__debugInfo() */
-SPL_METHOD(SplDoublyLinkedList, __debugInfo)
+PHP_METHOD(SplDoublyLinkedList, __debugInfo)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -1380,52 +1380,9 @@ zend_object_iterator *spl_dllist_get_iterator(zend_class_entry *ce, zval *object
 }
 /* }}} */
 
-static const zend_function_entry spl_funcs_SplQueue[] = {
-	SPL_MA(SplQueue, enqueue, SplDoublyLinkedList, push,  arginfo_class_SplQueue_enqueue, ZEND_ACC_PUBLIC)
-	SPL_MA(SplQueue, dequeue, SplDoublyLinkedList, shift, arginfo_class_SplQueue_dequeue, ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};
-
-static const zend_function_entry spl_funcs_SplDoublyLinkedList[] = {
-	SPL_ME(SplDoublyLinkedList, pop,             arginfo_class_SplDoublyLinkedList_pop,            ZEND_ACC_PUBLIC)
-	SPL_ME(SplDoublyLinkedList, shift,           arginfo_class_SplDoublyLinkedList_shift,            ZEND_ACC_PUBLIC)
-	SPL_ME(SplDoublyLinkedList, push,            arginfo_class_SplDoublyLinkedList_push,            ZEND_ACC_PUBLIC)
-	SPL_ME(SplDoublyLinkedList, unshift,         arginfo_class_SplDoublyLinkedList_unshift,            ZEND_ACC_PUBLIC)
-	SPL_ME(SplDoublyLinkedList, top,             arginfo_class_SplDoublyLinkedList_top,            ZEND_ACC_PUBLIC)
-	SPL_ME(SplDoublyLinkedList, bottom,          arginfo_class_SplDoublyLinkedList_bottom,            ZEND_ACC_PUBLIC)
-	SPL_ME(SplDoublyLinkedList, isEmpty,         arginfo_class_SplDoublyLinkedList_isEmpty,            ZEND_ACC_PUBLIC)
-	SPL_ME(SplDoublyLinkedList, setIteratorMode, arginfo_class_SplDoublyLinkedList_setIteratorMode, ZEND_ACC_PUBLIC)
-	SPL_ME(SplDoublyLinkedList, getIteratorMode, arginfo_class_SplDoublyLinkedList_getIteratorMode,            ZEND_ACC_PUBLIC)
-	SPL_ME(SplDoublyLinkedList, __debugInfo,     arginfo_class_SplDoublyLinkedList___debugInfo,            ZEND_ACC_PUBLIC)
-	/* Countable */
-	SPL_ME(SplDoublyLinkedList, count,           arginfo_class_SplDoublyLinkedList_count,            ZEND_ACC_PUBLIC)
-	/* ArrayAccess */
-	SPL_ME(SplDoublyLinkedList, offsetExists,    arginfo_class_SplDoublyLinkedList_offsetExists,       ZEND_ACC_PUBLIC)
-	SPL_ME(SplDoublyLinkedList, offsetGet,       arginfo_class_SplDoublyLinkedList_offsetGet,       ZEND_ACC_PUBLIC)
-	SPL_ME(SplDoublyLinkedList, offsetSet,       arginfo_class_SplDoublyLinkedList_offsetSet,       ZEND_ACC_PUBLIC)
-	SPL_ME(SplDoublyLinkedList, offsetUnset,     arginfo_class_SplDoublyLinkedList_offsetUnset,       ZEND_ACC_PUBLIC)
-
-	SPL_ME(SplDoublyLinkedList, add,             arginfo_class_SplDoublyLinkedList_add,       ZEND_ACC_PUBLIC)
-
-	/* Iterator */
-	SPL_ME(SplDoublyLinkedList, rewind,          arginfo_class_SplDoublyLinkedList_rewind,            ZEND_ACC_PUBLIC)
-	SPL_ME(SplDoublyLinkedList, current,         arginfo_class_SplDoublyLinkedList_current,            ZEND_ACC_PUBLIC)
-	SPL_ME(SplDoublyLinkedList, key,             arginfo_class_SplDoublyLinkedList_key,            ZEND_ACC_PUBLIC)
-	SPL_ME(SplDoublyLinkedList, next,            arginfo_class_SplDoublyLinkedList_next,            ZEND_ACC_PUBLIC)
-	SPL_ME(SplDoublyLinkedList, prev,            arginfo_class_SplDoublyLinkedList_prev,            ZEND_ACC_PUBLIC)
-	SPL_ME(SplDoublyLinkedList, valid,           arginfo_class_SplDoublyLinkedList_valid,            ZEND_ACC_PUBLIC)
-	/* Serializable */
-	SPL_ME(SplDoublyLinkedList,  unserialize,    arginfo_class_SplDoublyLinkedList_unserialize,      ZEND_ACC_PUBLIC)
-	SPL_ME(SplDoublyLinkedList,  serialize,      arginfo_class_SplDoublyLinkedList_serialize,            ZEND_ACC_PUBLIC)
-	SPL_ME(SplDoublyLinkedList,  __unserialize,    arginfo_class_SplDoublyLinkedList___unserialize,    ZEND_ACC_PUBLIC)
-	SPL_ME(SplDoublyLinkedList,  __serialize,      arginfo_class_SplDoublyLinkedList___serialize,          ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};
-/* }}} */
-
 PHP_MINIT_FUNCTION(spl_dllist) /* {{{ */
 {
-	REGISTER_SPL_STD_CLASS_EX(SplDoublyLinkedList, spl_dllist_object_new, spl_funcs_SplDoublyLinkedList);
+	REGISTER_SPL_STD_CLASS_EX(SplDoublyLinkedList, spl_dllist_object_new, class_SplDoublyLinkedList_methods);
 	memcpy(&spl_handler_SplDoublyLinkedList, &std_object_handlers, sizeof(zend_object_handlers));
 
 	spl_handler_SplDoublyLinkedList.offset = XtOffsetOf(spl_dllist_object, std);
@@ -1447,8 +1404,8 @@ PHP_MINIT_FUNCTION(spl_dllist) /* {{{ */
 
 	spl_ce_SplDoublyLinkedList->get_iterator = spl_dllist_get_iterator;
 
-	REGISTER_SPL_SUB_CLASS_EX(SplQueue,           SplDoublyLinkedList,        spl_dllist_object_new, spl_funcs_SplQueue);
-	REGISTER_SPL_SUB_CLASS_EX(SplStack,           SplDoublyLinkedList,        spl_dllist_object_new, NULL);
+	REGISTER_SPL_SUB_CLASS_EX(SplQueue,           SplDoublyLinkedList,        spl_dllist_object_new, class_SplQueue_methods);
+	REGISTER_SPL_SUB_CLASS_EX(SplStack,           SplDoublyLinkedList,        spl_dllist_object_new, class_SplStack_methods);
 
 	spl_ce_SplQueue->get_iterator = spl_dllist_get_iterator;
 	spl_ce_SplStack->get_iterator = spl_dllist_get_iterator;

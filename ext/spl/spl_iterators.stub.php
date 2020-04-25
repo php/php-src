@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 class EmptyIterator implements Iterator
 {
     /** @return void */
@@ -30,7 +32,10 @@ class RecursiveCallbackFilterIterator extends CallbackFilterIterator implements 
 {
     public function __construct(RecursiveIterator $iterator, callable $callback) {}
 
-    /** @return bool */
+    /**
+     * @return bool
+     * @alias RecursiveFilterIterator::hasChildren
+     */
     public function hasChildren() {}
 
     /** @return RecursiveCallbackFilterIterator */
@@ -143,19 +148,31 @@ abstract class FilterIterator extends IteratorIterator
     /** @return void */
     public function rewind() {}
 
-    /** @return bool */
+    /**
+     * @return bool
+     * @alias IteratorIterator::valid
+     */
     public function valid() {}
 
-    /** @return mixed */
+    /**
+     * @return mixed
+     * @alias IteratorIterator::key
+     */
     public function key() {}
 
-    /** @return mixed */
+    /**
+     * @return mixed
+     * @alias IteratorIterator::current
+     */
     public function current() {}
 
     /** @return void */
     public function next() {}
 
-    /** @return Iterator|null */
+    /**
+     * @return Iterator|null
+     * @alias IteratorIterator::getInnerIterator
+     */
     public function getInnerIterator() {}
 }
 
@@ -174,7 +191,10 @@ class ParentIterator extends RecursiveFilterIterator
 {
     public function __construct(RecursiveIterator $iterator) {}
 
-    /** @return bool */
+    /**
+     * @return bool
+     * @alias RecursiveFilterIterator::hasChildren
+     */
     public function accept() {}
 }
 
@@ -194,10 +214,16 @@ class LimitIterator extends IteratorIterator
     /** @return bool */
     public function valid() {}
 
-    /** @return mixed */
+    /**
+     * @return mixed
+     * @alias IteratorIterator::key
+     */
     public function key() {}
 
-    /** @return mixed */
+    /**
+     * @return mixed
+     * @alias IteratorIterator::current
+     */
     public function current() {}
 
     /** @return void */
@@ -209,7 +235,10 @@ class LimitIterator extends IteratorIterator
     /** @return int */
     public function getPosition() {}
 
-    /** @return Iterator|null */
+    /**
+     * @return Iterator|null
+     * @alias IteratorIterator::getInnerIterator
+     */
     public function getInnerIterator() {}
 }
 
@@ -223,10 +252,16 @@ class CachingIterator extends IteratorIterator implements ArrayAccess, Countable
     /** @return bool */
     public function valid() {}
 
-    /** @return mixed */
+    /**
+     * @return mixed
+     * @alias IteratorIterator::key
+     */
     public function key() {}
 
-    /** @return mixed */
+    /**
+     * @return mixed
+     * @alias IteratorIterator::current
+     */
     public function current() {}
 
     /** @return void */
@@ -237,7 +272,10 @@ class CachingIterator extends IteratorIterator implements ArrayAccess, Countable
 
     public function __toString(): string {}
 
-    /** @return Iterator|null */
+    /**
+     * @return Iterator|null
+     * @alias IteratorIterator::getInnerIterator
+     */
     public function getInnerIterator() {}
 
     /** @return int */
@@ -308,7 +346,10 @@ class NoRewindIterator extends IteratorIterator
     /** @return void */
     public function next() {}
 
-    /** @return Iterator|null */
+    /**
+     * @return Iterator|null
+     * @alias IteratorIterator::getInnerIterator
+     */
     public function getInnerIterator() {}
 }
 
@@ -325,7 +366,10 @@ class AppendIterator extends IteratorIterator
     /** @return bool */
     public function valid() {}
 
-    /** @return mixed */
+    /**
+     * @return mixed
+     * @alias IteratorIterator::key
+     */
     public function key() {}
 
     /** @return mixed */
@@ -334,7 +378,10 @@ class AppendIterator extends IteratorIterator
     /** @return void */
     public function next() {}
 
-    /** @return Iterator|null */
+    /**
+     * @return Iterator|null
+     * @alias IteratorIterator::getInnerIterator
+     */
     public function getInnerIterator() {}
 
     /** @return int */
@@ -388,7 +435,10 @@ class RecursiveRegexIterator extends RegexIterator implements RecursiveIterator
     /** @return bool */
     public function accept() {}
 
-    /** @return bool */
+    /**
+     * @return bool
+     * @alias RecursiveFilterIterator::hasChildren
+     */
     public function hasChildren() {}
 
     /** @return RecursiveRegexIterator */
@@ -403,10 +453,16 @@ class RecursiveTreeIterator extends RecursiveIteratorIterator
         int $mode = self::SELF_FIRST
     ) {}
 
-    /** @return void */
+    /**
+     * @return void
+     * @alias RecursiveIteratorIterator::rewind
+     */
     public function rewind() {}
 
-    /** @return bool */
+    /**
+     * @return bool
+     * @alias RecursiveIteratorIterator::valid
+     */
     public function valid() {}
 
     /** @return mixed */
@@ -415,28 +471,52 @@ class RecursiveTreeIterator extends RecursiveIteratorIterator
     /** @return mixed */
     public function current() {}
 
-    /** @return void */
+    /**
+     * @return void
+     * @alias RecursiveIteratorIterator::next
+     */
     public function next() {}
 
-    /** @return void */
+    /**
+     * @return void
+     * @alias RecursiveIteratorIterator::beginIteration
+     */
     public function beginIteration() {}
 
-    /** @return void */
+    /**
+     * @return void
+     * @alias RecursiveIteratorIterator::endIteration
+     */
     public function endIteration() {}
 
-    /** @return bool|null */
+    /**
+     * @return bool|null
+     * @alias RecursiveIteratorIterator::callHasChildren
+     */
     public function callHasChildren() {}
 
-    /** @return RecursiveIterator|null */
+    /**
+     * @return RecursiveIterator|null
+     * @alias RecursiveIteratorIterator::callGetChildren
+     */
     public function callGetChildren() {}
 
-    /** @return void */
+    /**
+     * @return void
+     * @alias RecursiveIteratorIterator::beginChildren
+     */
     public function beginChildren() {}
 
-    /** @return void */
+    /**
+     * @return void
+     * @alias RecursiveIteratorIterator::endChildren
+     */
     public function endChildren() {}
 
-    /** @return void */
+    /**
+     * @return void
+     * @alias RecursiveIteratorIterator::nextElement
+     */
     public function nextElement() {}
 
     /** @return string */

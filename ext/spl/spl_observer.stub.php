@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 interface SplObserver
 {
     /** @return void */
@@ -77,6 +79,7 @@ class SplObjectStorage implements Countable, Iterator, Serializable, ArrayAccess
     /**
      * @param object $object
      * @return bool
+     * @alias SplObjectStorage::contains
      */
     public function offsetExists($object) {}
 
@@ -90,12 +93,14 @@ class SplObjectStorage implements Countable, Iterator, Serializable, ArrayAccess
      * @param object $object
      * @param mixed $info
      * @return void
+     * @alias SplObjectStorage::attach
      */
     public function offsetSet($object, $info = null) {}
 
     /**
      * @param object $object
      * @return void
+     * @alias SplObjectStorage::detach
      */
     public function offsetUnset($object) {}
 
@@ -135,7 +140,10 @@ class MultipleIterator implements Iterator
     /** @return bool */
     public function containsIterator(Iterator $iterator) {}
 
-    /** @return int */
+    /**
+     * @return int
+     * @alias SplObjectStorage::count
+     */
     public function countIterators() {}
 
     /** @return void */
@@ -153,6 +161,9 @@ class MultipleIterator implements Iterator
     /** @return void */
     public function next() {}
 
-    /** @return array */
+    /**
+     * @return array
+     * @alias SplObjectStorage::__debugInfo
+     */
     public function __debugInfo() {}
 }

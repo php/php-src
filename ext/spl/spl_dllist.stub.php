@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 class SplDoublyLinkedList implements Iterator, Countable, ArrayAccess, Serializable
 {
     /**
@@ -109,10 +111,14 @@ class SplQueue extends SplDoublyLinkedList
     /**
      * @param mixed $value
      * @return void
+     * @alias SplDoublyLinkedList::push
      */
     public function enqueue($value) {}
 
-    /** @return mixed */
+    /**
+     * @return mixed
+     * @alias SplDoublyLinkedList::shift
+     */
     public function dequeue() {}
 }
 

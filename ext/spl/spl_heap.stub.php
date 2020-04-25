@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 class SplPriorityQueue implements Iterator, Countable
 {
     /**
@@ -25,31 +27,55 @@ class SplPriorityQueue implements Iterator, Countable
     /** @return mixed */
     public function extract() {}
 
-    /** @return int */
+    /**
+     * @return int
+     * @alias SplHeap::count
+     */
     public function count() {}
 
-    /** @return bool */
+    /**
+     * @return bool
+     * @alias SplHeap::isEmpty
+     */
     public function isEmpty() {}
 
-    /** @return void */
+    /**
+     * @return void
+     * @alias SplHeap::rewind
+     */
     public function rewind() {}
 
     /** @return mixed */
     public function current() {}
 
-    /** @return int */
+    /**
+     * @return int
+     * @alias SplHeap::key
+     */
     public function key() {}
 
-    /** @return void */
+    /**
+     * @return void
+     * @alias SplHeap::next
+     */
     public function next() {}
 
-    /** @return bool */
+    /**
+     * @return bool
+     * @alias SplHeap::valid
+     */
     public function valid() {}
 
-    /** @return bool */
+    /**
+     * @return bool
+     * @alias SplHeap::recoverFromCorruption
+     */
     public function recoverFromCorruption() {}
 
-    /** @return bool */
+    /**
+     * @return bool
+     * @alias SplHeap::isCorrupted
+     */
     public function isCorrupted() {}
 
     /** @return int */
