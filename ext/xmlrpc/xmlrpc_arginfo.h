@@ -34,21 +34,21 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xmlrpc_is_fault, 0, 1, _IS_BOOL,
 	ZEND_ARG_TYPE_INFO(0, arg, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlrpc_server_create, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_xmlrpc_server_create, 0, 0, XmlRpcServer, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xmlrpc_server_destroy, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, server)
+	ZEND_ARG_OBJ_INFO(0, server, XmlRpcServer, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xmlrpc_server_register_method, 0, 3, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, server)
+	ZEND_ARG_OBJ_INFO(0, server, XmlRpcServer, 0)
 	ZEND_ARG_TYPE_INFO(0, method_name, IS_STRING, 0)
 	ZEND_ARG_INFO(0, function)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlrpc_server_call_method, 0, 0, 3)
-	ZEND_ARG_INFO(0, server)
+	ZEND_ARG_OBJ_INFO(0, server, XmlRpcServer, 0)
 	ZEND_ARG_TYPE_INFO(0, xml, IS_STRING, 0)
 	ZEND_ARG_INFO(0, user_data)
 	ZEND_ARG_TYPE_INFO(0, output_options, IS_ARRAY, 0)
@@ -59,12 +59,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlrpc_parse_method_descriptions, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xmlrpc_server_add_introspection_data, 0, 2, IS_LONG, 0)
-	ZEND_ARG_INFO(0, server)
+	ZEND_ARG_OBJ_INFO(0, server, XmlRpcServer, 0)
 	ZEND_ARG_TYPE_INFO(0, desc, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xmlrpc_server_register_introspection_callback, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, server)
+	ZEND_ARG_OBJ_INFO(0, server, XmlRpcServer, 0)
 	ZEND_ARG_INFO(0, function)
 ZEND_END_ARG_INFO()
 
@@ -100,5 +100,10 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(xmlrpc_parse_method_descriptions, arginfo_xmlrpc_parse_method_descriptions)
 	ZEND_FE(xmlrpc_server_add_introspection_data, arginfo_xmlrpc_server_add_introspection_data)
 	ZEND_FE(xmlrpc_server_register_introspection_callback, arginfo_xmlrpc_server_register_introspection_callback)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_XmlRpcServer_methods[] = {
 	ZEND_FE_END
 };
