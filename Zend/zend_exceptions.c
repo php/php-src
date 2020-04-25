@@ -273,22 +273,11 @@ ZEND_METHOD(exception, __construct)
 	zend_long   code = 0;
 	zval  tmp, *object, *previous = NULL;
 	zend_class_entry *base_ce;
-	int    argc = ZEND_NUM_ARGS();
 
 	object = ZEND_THIS;
 	base_ce = i_get_exception_base(object);
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc, "|SlO!", &message, &code, &previous, zend_ce_throwable) == FAILURE) {
-		zend_class_entry *ce;
-
-		if (Z_TYPE(EX(This)) == IS_OBJECT) {
-			ce = Z_OBJCE(EX(This));
-		} else if (Z_CE(EX(This))) {
-			ce = Z_CE(EX(This));
-		} else {
-			ce = base_ce;
-		}
-		zend_throw_error(NULL, "Wrong parameters for %s([string $message [, long $code [, Throwable $previous = NULL]]])", ZSTR_VAL(ce->name));
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|SlO!", &message, &code, &previous, zend_ce_throwable) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -344,17 +333,7 @@ ZEND_METHOD(error_exception, __construct)
 	zval   tmp, *object, *previous = NULL;
 	int    argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc, "|SllSlO!", &message, &code, &severity, &filename, &lineno, &previous, zend_ce_throwable) == FAILURE) {
-		zend_class_entry *ce;
-
-		if (Z_TYPE(EX(This)) == IS_OBJECT) {
-			ce = Z_OBJCE(EX(This));
-		} else if (Z_CE(EX(This))) {
-			ce = Z_CE(EX(This));
-		} else {
-			ce = zend_ce_error_exception;
-		}
-		zend_throw_error(NULL, "Wrong parameters for %s([string $message [, long $code, [ long $severity, [ string $filename, [ long $lineno  [, Throwable $previous = NULL]]]]]])", ZSTR_VAL(ce->name));
+	if (zend_parse_parameters(argc, "|SllSlO!", &message, &code, &severity, &filename, &lineno, &previous, zend_ce_throwable) == FAILURE) {
 		RETURN_THROWS();
 	}
 
