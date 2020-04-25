@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 interface Throwable extends Stringable
 {
     /** @return string */
@@ -32,26 +34,20 @@ class Exception implements Throwable
 
     public function __wakeup() {}
 
-    /** @return string */
-    final public function getMessage() {}
+    final public function getMessage(): string {}
 
     /** @return int */
     final public function getCode() {}
 
-    /** @return string */
-    final public function getFile() {}
+    final public function getFile(): string {}
 
-    /** @return int */
-    final public function getLine() {}
+    final public function getLine(): int {}
 
-    /** @return array */
-    final public function getTrace() {}
+    final public function getTrace(): array {}
 
-    /** @return ?Throwable */
-    final public function getPrevious() {}
+    final public function getPrevious(): ?Throwable {}
 
-    /** @return string */
-    final public function getTraceAsString() {}
+    final public function getTraceAsString(): string {}
 
     public function __toString(): string {}
 }
@@ -60,6 +56,72 @@ class ErrorException extends Exception
 {
     public function __construct(string $message = UNKNOWN, int $code = 0, int $severity = E_ERROR, string $filename = UNKNOWN, int $lineno = 0, ?Throwable $previous = null) {}
 
-    /** @return int */
-    final public function getSeverity() {}
+    final public function getSeverity(): int {}
+}
+
+class Error implements Throwable
+{
+    /** @alias Exception::__clone */
+    final private function __clone() {}
+
+    /** @alias Exception::__construct */
+    public function __construct(string $message = UNKNOWN, int $code = 0, ?Throwable $previous = null) {}
+
+    /** @alias Exception::__wakeup */
+    public function __wakeup() {}
+
+    /** @alias Exception::getMessage */
+    final public function getMessage(): string {}
+
+    /**
+     * @return int
+     * @alias Exception::getCode
+     */
+    final public function getCode() {}
+
+    /** @alias Exception::getFile */
+    final public function getFile(): string {}
+
+    /** @alias Exception::getLine */
+    final public function getLine(): int {}
+
+    /** @alias Exception::getTrace */
+    final public function getTrace(): array {}
+
+    /** @alias Exception::getPrevious */
+    final public function getPrevious(): ?Throwable {}
+
+    /** @alias Exception::getTraceAsString */
+    final public function getTraceAsString(): string {}
+
+    /** @alias Exception::__toString */
+    public function __toString(): string {}
+}
+
+class CompileError extends Error
+{
+}
+
+class ParseError extends CompileError
+{
+}
+
+class TypeError extends Error
+{
+}
+
+class ArgumentCountError extends TypeError
+{
+}
+
+class ValueError extends Error
+{
+}
+
+class ArithmeticError extends Error
+{
+}
+
+class DivisionByZeroError extends ArithmeticError
+{
 }

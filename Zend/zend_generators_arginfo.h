@@ -22,3 +22,26 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Generator_throw, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_Generator_getReturn arginfo_class_Generator_current
+
+
+ZEND_METHOD(Generator, rewind);
+ZEND_METHOD(Generator, valid);
+ZEND_METHOD(Generator, current);
+ZEND_METHOD(Generator, key);
+ZEND_METHOD(Generator, next);
+ZEND_METHOD(Generator, send);
+ZEND_METHOD(Generator, throw);
+ZEND_METHOD(Generator, getReturn);
+
+
+static const zend_function_entry class_Generator_methods[] = {
+	ZEND_ME(Generator, rewind, arginfo_class_Generator_rewind, ZEND_ACC_PUBLIC)
+	ZEND_ME(Generator, valid, arginfo_class_Generator_valid, ZEND_ACC_PUBLIC)
+	ZEND_ME(Generator, current, arginfo_class_Generator_current, ZEND_ACC_PUBLIC)
+	ZEND_ME(Generator, key, arginfo_class_Generator_key, ZEND_ACC_PUBLIC)
+	ZEND_ME(Generator, next, arginfo_class_Generator_next, ZEND_ACC_PUBLIC)
+	ZEND_ME(Generator, send, arginfo_class_Generator_send, ZEND_ACC_PUBLIC)
+	ZEND_ME(Generator, throw, arginfo_class_Generator_throw, ZEND_ACC_PUBLIC)
+	ZEND_ME(Generator, getReturn, arginfo_class_Generator_getReturn, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
