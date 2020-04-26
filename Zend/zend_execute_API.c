@@ -797,9 +797,9 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 		const zend_op *current_opline_before_exception = EG(opline_before_exception);
 
 		zend_init_func_execute_data(call, &func->op_array, fci->retval);
-		zend_instrument_cache *cache = ZEND_MAP_PTR_GET(func->common.instrument_cache);
-		if (cache != ZEND_NOT_INSTRUMENTED) {
-			zend_instrument_call_begin_handlers(call, cache);
+		zend_instrument_fcall_cache *cache = ZEND_MAP_PTR_GET(func->common.instrument_cache);
+		if (cache != ZEND_INSTRUMENT_FCALL_NOT_INSTRUMENTED) {
+			zend_instrument_fcall_call_begin(cache, call);
 		}
 		zend_execute_ex(call);
 		EG(opline_before_exception) = current_opline_before_exception;
@@ -813,7 +813,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 		ZEND_ASSERT(func->type == ZEND_INTERNAL_FUNCTION);
 
 		if (UNEXPECTED(!ZEND_MAP_PTR_GET(func->common.instrument_cache))) {
-			zend_instrument_install_handlers(func);
+			zend_instrument_fcall_install(func);
 		}
 
 		ZVAL_NULL(fci->retval);

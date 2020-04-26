@@ -310,8 +310,8 @@ static int zend_create_closure_from_callable(zval *return_value, zval *callable,
 		call.scope = mptr->common.scope;
 
 		// TODO: Is this correct???
-		static const zend_instrument_cache *dummy_handlers = ZEND_NOT_INSTRUMENTED;
-		ZEND_MAP_PTR_INIT(call.instrument_cache, (zend_instrument_cache **) &dummy_handlers);
+		static const zend_instrument_fcall_cache *dummy_handlers = ZEND_INSTRUMENT_FCALL_NOT_INSTRUMENTED;
+		ZEND_MAP_PTR_INIT(call.instrument_cache, (zend_instrument_fcall_cache **) &dummy_handlers);
 
 		zend_free_trampoline(mptr);
 		mptr = (zend_function *) &call;
@@ -401,8 +401,8 @@ ZEND_API zend_function *zend_get_closure_invoke_method(zend_object *object) /* {
 	invoke->internal_function.function_name = ZSTR_KNOWN(ZEND_STR_MAGIC_INVOKE);
 
 	// TODO: Is this correct???
-	static const zend_instrument_cache *dummy_handler = ZEND_NOT_INSTRUMENTED;
-	ZEND_MAP_PTR_INIT(invoke->internal_function.instrument_cache, (zend_instrument_cache **) &dummy_handler);
+	static const zend_instrument_fcall_cache *dummy_handler = ZEND_INSTRUMENT_FCALL_NOT_INSTRUMENTED;
+	ZEND_MAP_PTR_INIT(invoke->internal_function.instrument_cache, (zend_instrument_fcall_cache **) &dummy_handler);
 	return invoke;
 }
 /* }}} */

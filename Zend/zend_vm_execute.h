@@ -1333,9 +1333,10 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_UCALL_SPEC_RETV
 	execute_data = call;
 	i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
 
-	zend_instrument_cache *cache = ZEND_MAP_PTR_GET(fbc->common.instrument_cache);
-	if (cache != ZEND_NOT_INSTRUMENTED) {
-		zend_instrument_call_begin_handlers(call, cache);
+	zend_instrument_fcall_cache *cache =
+		ZEND_MAP_PTR_GET(fbc->common.instrument_cache);
+	if (cache != ZEND_INSTRUMENT_FCALL_NOT_INSTRUMENTED) {
+		zend_instrument_fcall_call_begin(cache, call);
 	}
 
 	LOAD_OPLINE_EX();
@@ -1362,9 +1363,10 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_UCALL_SPEC_RETV
 	execute_data = call;
 	i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
 
-	zend_instrument_cache *cache = ZEND_MAP_PTR_GET(fbc->common.instrument_cache);
-	if (cache != ZEND_NOT_INSTRUMENTED) {
-		zend_instrument_call_begin_handlers(call, cache);
+	zend_instrument_fcall_cache *cache =
+		ZEND_MAP_PTR_GET(fbc->common.instrument_cache);
+	if (cache != ZEND_INSTRUMENT_FCALL_NOT_INSTRUMENTED) {
+		zend_instrument_fcall_call_begin(cache, call);
 	}
 
 	LOAD_OPLINE_EX();
@@ -1392,9 +1394,10 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_S
 		execute_data = call;
 		i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
 
-		zend_instrument_cache *cache = ZEND_MAP_PTR_GET(fbc->common.instrument_cache);
-		if (cache != ZEND_NOT_INSTRUMENTED) {
-			zend_instrument_call_begin_handlers(call, cache);
+		zend_instrument_fcall_cache *cache =
+			ZEND_MAP_PTR_GET(fbc->common.instrument_cache);
+		if (cache != ZEND_INSTRUMENT_FCALL_NOT_INSTRUMENTED) {
+			zend_instrument_fcall_call_begin(cache, call);
 		}
 
 		LOAD_OPLINE_EX();
@@ -1479,9 +1482,10 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_S
 		execute_data = call;
 		i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
 
-		zend_instrument_cache *cache = ZEND_MAP_PTR_GET(fbc->common.instrument_cache);
-		if (cache != ZEND_NOT_INSTRUMENTED) {
-			zend_instrument_call_begin_handlers(call, cache);
+		zend_instrument_fcall_cache *cache =
+			ZEND_MAP_PTR_GET(fbc->common.instrument_cache);
+		if (cache != ZEND_INSTRUMENT_FCALL_NOT_INSTRUMENTED) {
+			zend_instrument_fcall_call_begin(cache, call);
 		}
 
 		LOAD_OPLINE_EX();
@@ -1566,9 +1570,10 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 		execute_data = call;
 		i_init_func_execute_data(&fbc->op_array, ret, 1 EXECUTE_DATA_CC);
 
-		zend_instrument_cache *cache = ZEND_MAP_PTR_GET(fbc->common.instrument_cache);
-		if (cache != ZEND_NOT_INSTRUMENTED) {
-			zend_instrument_call_begin_handlers(call, cache);
+		zend_instrument_fcall_cache *cache =
+			ZEND_MAP_PTR_GET(fbc->common.instrument_cache);
+		if (cache != ZEND_INSTRUMENT_FCALL_NOT_INSTRUMENTED) {
+			zend_instrument_fcall_call_begin(cache, call);
 		}
 
 		if (EXPECTED(zend_execute_ex == execute_ex)) {
@@ -1669,9 +1674,10 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 		execute_data = call;
 		i_init_func_execute_data(&fbc->op_array, ret, 1 EXECUTE_DATA_CC);
 
-		zend_instrument_cache *cache = ZEND_MAP_PTR_GET(fbc->common.instrument_cache);
-		if (cache != ZEND_NOT_INSTRUMENTED) {
-			zend_instrument_call_begin_handlers(call, cache);
+		zend_instrument_fcall_cache *cache =
+			ZEND_MAP_PTR_GET(fbc->common.instrument_cache);
+		if (cache != ZEND_INSTRUMENT_FCALL_NOT_INSTRUMENTED) {
+			zend_instrument_fcall_call_begin(cache, call);
 		}
 
 		if (EXPECTED(zend_execute_ex == execute_ex)) {
@@ -2557,9 +2563,12 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_dispatch_try
 
 	if (execute_data->func) {
 		zend_function *func = execute_data->func;
-		zend_instrument_cache *cache = ZEND_MAP_PTR_GET(func->common.instrument_cache);
-		if (cache != ZEND_NOT_INSTRUMENTED) {
-			zend_instrument_call_end_handlers(execute_data, cache);
+		zend_instrument_fcall_cache *cache =
+			ZEND_MAP_PTR_GET(func->common.instrument_cache);
+		if (cache != ZEND_INSTRUMENT_FCALL_NOT_INSTRUMENTED) {
+			zval undef;
+			ZVAL_UNDEF(&undef);
+			zend_instrument_fcall_call_end(cache, execute_data, &undef);
 		}
 	}
 
@@ -2790,7 +2799,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CALL_TRAMPOLINE_SPEC_HANDLER(Z
 			init_func_run_time_cache(&fbc->op_array);
 		}
 		if (UNEXPECTED(!ZEND_MAP_PTR_GET(fbc->common.instrument_cache))) {
-			zend_instrument_install_handlers(fbc);
+			zend_instrument_fcall_install(fbc);
 		}
 		execute_data = call;
 		i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
@@ -2909,7 +2918,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_FCALL_BY_NAME
 			init_func_run_time_cache(&fbc->op_array);
 		}
 		if (UNEXPECTED(!ZEND_MAP_PTR_GET(fbc->common.instrument_cache))) {
-			zend_instrument_install_handlers(fbc);
+			zend_instrument_fcall_install(fbc);
 		}
 		CACHE_PTR(opline->result.num, fbc);
 	}
@@ -2998,7 +3007,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_NS_FCALL_BY_N
 			init_func_run_time_cache(&fbc->op_array);
 		}
 		if (UNEXPECTED(!ZEND_MAP_PTR_GET(fbc->common.instrument_cache))) {
-			zend_instrument_install_handlers(fbc);
+			zend_instrument_fcall_install(fbc);
 		}
 		CACHE_PTR(opline->result.num, fbc);
 	}
@@ -3031,7 +3040,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_FCALL_SPEC_CO
 			init_func_run_time_cache(&fbc->op_array);
 		}
 		if (UNEXPECTED(!ZEND_MAP_PTR_GET(fbc->common.instrument_cache))) {
-			zend_instrument_install_handlers(fbc);
+			zend_instrument_fcall_install(fbc);
 		}
 		CACHE_PTR(opline->result.num, fbc);
 	}
@@ -3580,9 +3589,10 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_CONST_
 
 	if (EG(current_execute_data)->func) {
 		zend_function *func = EG(current_execute_data)->func;
-		zend_instrument_cache *cache = ZEND_MAP_PTR_GET(func->common.instrument_cache);
-		if (cache != ZEND_NOT_INSTRUMENTED) {
-			zend_instrument_call_end_handlers(EG(current_execute_data), cache);
+		zend_instrument_fcall_cache *cache =
+			ZEND_MAP_PTR_GET(func->common.instrument_cache);
+		if (cache != ZEND_INSTRUMENT_FCALL_NOT_INSTRUMENTED) {
+			zend_instrument_fcall_call_end(cache, EG(current_execute_data), return_value);
 		}
 	}
 
@@ -5744,7 +5754,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_
 			init_func_run_time_cache(&fbc->op_array);
 		}
 		if (UNEXPECTED(!ZEND_MAP_PTR_GET(fbc->common.instrument_cache))) {
-			zend_instrument_install_handlers(fbc);
+			zend_instrument_fcall_install(fbc);
 		}
 	}
 
@@ -5870,7 +5880,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 			init_func_run_time_cache(&fbc->op_array);
 		}
 		if (UNEXPECTED(!ZEND_MAP_PTR_GET(fbc->common.instrument_cache))) {
-			zend_instrument_install_handlers(fbc);
+			zend_instrument_fcall_install(fbc);
 		}
 		if (IS_CONST != IS_CONST) {
 
@@ -5889,7 +5899,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 			init_func_run_time_cache(&fbc->op_array);
 		}
 		if (UNEXPECTED(!ZEND_MAP_PTR_GET(fbc->common.instrument_cache))) {
-			zend_instrument_install_handlers(fbc);
+			zend_instrument_fcall_install(fbc);
 		}
 	}
 
@@ -5970,7 +5980,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_USER_CALL_SPEC_CONST_CONS
 			init_func_run_time_cache(&func->op_array);
 		}
 		if (UNEXPECTED(!ZEND_MAP_PTR_GET(func->common.instrument_cache))) {
-			zend_instrument_install_handlers(func);
+			zend_instrument_fcall_install(func);
 		}
 	} else {
 		zend_type_error("%s(): Argument #1 ($function) must be a valid callback, %s", Z_STRVAL_P(RT_CONSTANT(opline, opline->op1)), error);
@@ -7931,7 +7941,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_
 			init_func_run_time_cache(&fbc->op_array);
 		}
 		if (UNEXPECTED(!ZEND_MAP_PTR_GET(fbc->common.instrument_cache))) {
-			zend_instrument_install_handlers(fbc);
+			zend_instrument_fcall_install(fbc);
 		}
 	}
 
@@ -8057,7 +8067,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 			init_func_run_time_cache(&fbc->op_array);
 		}
 		if (UNEXPECTED(!ZEND_MAP_PTR_GET(fbc->common.instrument_cache))) {
-			zend_instrument_install_handlers(fbc);
+			zend_instrument_fcall_install(fbc);
 		}
 		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
 			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
@@ -8076,7 +8086,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 			init_func_run_time_cache(&fbc->op_array);
 		}
 		if (UNEXPECTED(!ZEND_MAP_PTR_GET(fbc->common.instrument_cache))) {
-			zend_instrument_install_handlers(fbc);
+			zend_instrument_fcall_install(fbc);
 		}
 	}
 
@@ -8158,7 +8168,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_USER_CALL_SPEC_CONST_TMPV
 			init_func_run_time_cache(&func->op_array);
 		}
 		if (UNEXPECTED(!ZEND_MAP_PTR_GET(func->common.instrument_cache))) {
-			zend_instrument_install_handlers(func);
+			zend_instrument_fcall_install(func);
 		}
 	} else {
 		zend_type_error("%s(): Argument #1 ($function) must be a valid callback, %s", Z_STRVAL_P(RT_CONSTANT(opline, opline->op1)), error);
@@ -8809,7 +8819,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 			init_func_run_time_cache(&fbc->op_array);
 		}
 		if (UNEXPECTED(!ZEND_MAP_PTR_GET(fbc->common.instrument_cache))) {
-			zend_instrument_install_handlers(fbc);
+			zend_instrument_fcall_install(fbc);
 		}
 		if (IS_UNUSED != IS_CONST) {
 
@@ -8828,7 +8838,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 			init_func_run_time_cache(&fbc->op_array);
 		}
 		if (UNEXPECTED(!ZEND_MAP_PTR_GET(fbc->common.instrument_cache))) {
-			zend_instrument_install_handlers(fbc);
+			zend_instrument_fcall_install(fbc);
 		}
 	}
 
@@ -8973,14 +8983,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_NEW_SPEC_CONST_UNUSED_HANDLER(
 		call = zend_vm_stack_push_call_frame(
 			ZEND_CALL_FUNCTION, (zend_function *) &zend_pass_function,
 			opline->extended_value, NULL);
-		static const zend_instrument_cache *dummy_handler = ZEND_NOT_INSTRUMENTED;
-		ZEND_MAP_PTR_INIT(call->func->common.instrument_cache, (zend_instrument_cache **) &dummy_handler);
+		static const zend_instrument_fcall_cache *dummy_handler = ZEND_INSTRUMENT_FCALL_NOT_INSTRUMENTED;
+		ZEND_MAP_PTR_INIT(call->func->common.instrument_cache, (zend_instrument_fcall_cache **) &dummy_handler);
 	} else {
 		if (EXPECTED(constructor->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&constructor->op_array))) {
 			init_func_run_time_cache(&constructor->op_array);
 		}
 		if (UNEXPECTED(!ZEND_MAP_PTR_GET(constructor->common.instrument_cache))) {
-			zend_instrument_install_handlers(constructor);
+			zend_instrument_fcall_install(constructor);
 		}
 		/* We are not handling overloaded classes right now */
 		call = zend_vm_stack_push_call_frame(
@@ -10210,7 +10220,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_
 			init_func_run_time_cache(&fbc->op_array);
 		}
 		if (UNEXPECTED(!ZEND_MAP_PTR_GET(fbc->common.instrument_cache))) {
-			zend_instrument_install_handlers(fbc);
+			zend_instrument_fcall_install(fbc);
 		}
 	}
 
@@ -10336,7 +10346,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 			init_func_run_time_cache(&fbc->op_array);
 		}
 		if (UNEXPECTED(!ZEND_MAP_PTR_GET(fbc->common.instrument_cache))) {
-			zend_instrument_install_handlers(fbc);
+			zend_instrument_fcall_install(fbc);
 		}
 		if (IS_CV != IS_CONST) {
 
@@ -10355,7 +10365,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 			init_func_run_time_cache(&fbc->op_array);
 		}
 		if (UNEXPECTED(!ZEND_MAP_PTR_GET(fbc->common.instrument_cache))) {
-			zend_instrument_install_handlers(fbc);
+			zend_instrument_fcall_install(fbc);
 		}
 	}
 
@@ -10436,7 +10446,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_USER_CALL_SPEC_CONST_CV_H
 			init_func_run_time_cache(&func->op_array);
 		}
 		if (UNEXPECTED(!ZEND_MAP_PTR_GET(func->common.instrument_cache))) {
-			zend_instrument_install_handlers(func);
+			zend_instrument_fcall_install(func);
 		}
 	} else {
 		zend_type_error("%s(): Argument #1 ($function) must be a valid callback, %s", Z_STRVAL_P(RT_CONSTANT(opline, opline->op1)), error);
@@ -14512,7 +14522,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_C
 			init_func_run_time_cache(&fbc->op_array);
 		}
 		if (UNEXPECTED(!ZEND_MAP_PTR_GET(fbc->common.instrument_cache))) {
-			zend_instrument_install_handlers(fbc);
+			zend_instrument_fcall_install(fbc);
 		}
 	}
 
@@ -15896,7 +15906,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_T
 			init_func_run_time_cache(&fbc->op_array);
 		}
 		if (UNEXPECTED(!ZEND_MAP_PTR_GET(fbc->common.instrument_cache))) {
-			zend_instrument_install_handlers(fbc);
+			zend_instrument_fcall_install(fbc);
 		}
 	}
 
@@ -17174,7 +17184,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_C
 			init_func_run_time_cache(&fbc->op_array);
 		}
 		if (UNEXPECTED(!ZEND_MAP_PTR_GET(fbc->common.instrument_cache))) {
-			zend_instrument_install_handlers(fbc);
+			zend_instrument_fcall_install(fbc);
 		}
 	}
 
@@ -17499,9 +17509,10 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_TMP_HA
 
 	if (EG(current_execute_data)->func) {
 		zend_function *func = EG(current_execute_data)->func;
-		zend_instrument_cache *cache = ZEND_MAP_PTR_GET(func->common.instrument_cache);
-		if (cache != ZEND_NOT_INSTRUMENTED) {
-			zend_instrument_call_end_handlers(EG(current_execute_data), cache);
+		zend_instrument_fcall_cache *cache =
+			ZEND_MAP_PTR_GET(func->common.instrument_cache);
+		if (cache != ZEND_INSTRUMENT_FCALL_NOT_INSTRUMENTED) {
+			zend_instrument_fcall_call_end(cache, EG(current_execute_data), return_value);
 		}
 	}
 
@@ -19930,9 +19941,10 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_VAR_HA
 
 	if (EG(current_execute_data)->func) {
 		zend_function *func = EG(current_execute_data)->func;
-		zend_instrument_cache *cache = ZEND_MAP_PTR_GET(func->common.instrument_cache);
-		if (cache != ZEND_NOT_INSTRUMENTED) {
-			zend_instrument_call_end_handlers(EG(current_execute_data), cache);
+		zend_instrument_fcall_cache *cache =
+			ZEND_MAP_PTR_GET(func->common.instrument_cache);
+		if (cache != ZEND_INSTRUMENT_FCALL_NOT_INSTRUMENTED) {
+			zend_instrument_fcall_call_end(cache, EG(current_execute_data), return_value);
 		}
 	}
 
@@ -22854,7 +22866,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 			init_func_run_time_cache(&fbc->op_array);
 		}
 		if (UNEXPECTED(!ZEND_MAP_PTR_GET(fbc->common.instrument_cache))) {
-			zend_instrument_install_handlers(fbc);
+			zend_instrument_fcall_install(fbc);
 		}
 		if (IS_CONST != IS_CONST) {
 
@@ -22873,7 +22885,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 			init_func_run_time_cache(&fbc->op_array);
 		}
 		if (UNEXPECTED(!ZEND_MAP_PTR_GET(fbc->common.instrument_cache))) {
-			zend_instrument_install_handlers(fbc);
+			zend_instrument_fcall_install(fbc);
 		}
 	}
 
@@ -25090,7 +25102,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 			init_func_run_time_cache(&fbc->op_array);
 		}
 		if (UNEXPECTED(!ZEND_MAP_PTR_GET(fbc->common.instrument_cache))) {
-			zend_instrument_install_handlers(fbc);
+			zend_instrument_fcall_install(fbc);
 		}
 		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
 			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
@@ -25109,7 +25121,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 			init_func_run_time_cache(&fbc->op_array);
 		}
 		if (UNEXPECTED(!ZEND_MAP_PTR_GET(fbc->common.instrument_cache))) {
-			zend_instrument_install_handlers(fbc);
+			zend_instrument_fcall_install(fbc);
 		}
 	}
 
@@ -26368,7 +26380,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 			init_func_run_time_cache(&fbc->op_array);
 		}
 		if (UNEXPECTED(!ZEND_MAP_PTR_GET(fbc->common.instrument_cache))) {
-			zend_instrument_install_handlers(fbc);
+			zend_instrument_fcall_install(fbc);
 		}
 		if (IS_UNUSED != IS_CONST) {
 
@@ -26387,7 +26399,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 			init_func_run_time_cache(&fbc->op_array);
 		}
 		if (UNEXPECTED(!ZEND_MAP_PTR_GET(fbc->common.instrument_cache))) {
-			zend_instrument_install_handlers(fbc);
+			zend_instrument_fcall_install(fbc);
 		}
 	}
 
@@ -26532,14 +26544,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_NEW_SPEC_VAR_UNUSED_HANDLER(ZE
 		call = zend_vm_stack_push_call_frame(
 			ZEND_CALL_FUNCTION, (zend_function *) &zend_pass_function,
 			opline->extended_value, NULL);
-		static const zend_instrument_cache *dummy_handler = ZEND_NOT_INSTRUMENTED;
-		ZEND_MAP_PTR_INIT(call->func->common.instrument_cache, (zend_instrument_cache **) &dummy_handler);
+		static const zend_instrument_fcall_cache *dummy_handler = ZEND_INSTRUMENT_FCALL_NOT_INSTRUMENTED;
+		ZEND_MAP_PTR_INIT(call->func->common.instrument_cache, (zend_instrument_fcall_cache **) &dummy_handler);
 	} else {
 		if (EXPECTED(constructor->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&constructor->op_array))) {
 			init_func_run_time_cache(&constructor->op_array);
 		}
 		if (UNEXPECTED(!ZEND_MAP_PTR_GET(constructor->common.instrument_cache))) {
-			zend_instrument_install_handlers(constructor);
+			zend_instrument_fcall_install(constructor);
 		}
 		/* We are not handling overloaded classes right now */
 		call = zend_vm_stack_push_call_frame(
@@ -28632,7 +28644,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 			init_func_run_time_cache(&fbc->op_array);
 		}
 		if (UNEXPECTED(!ZEND_MAP_PTR_GET(fbc->common.instrument_cache))) {
-			zend_instrument_install_handlers(fbc);
+			zend_instrument_fcall_install(fbc);
 		}
 		if (IS_CV != IS_CONST) {
 
@@ -28651,7 +28663,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 			init_func_run_time_cache(&fbc->op_array);
 		}
 		if (UNEXPECTED(!ZEND_MAP_PTR_GET(fbc->common.instrument_cache))) {
-			zend_instrument_install_handlers(fbc);
+			zend_instrument_fcall_install(fbc);
 		}
 	}
 
@@ -30700,7 +30712,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_S
 			init_func_run_time_cache(&fbc->op_array);
 		}
 		if (UNEXPECTED(!ZEND_MAP_PTR_GET(fbc->common.instrument_cache))) {
-			zend_instrument_install_handlers(fbc);
+			zend_instrument_fcall_install(fbc);
 		}
 	}
 
@@ -30826,7 +30838,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 			init_func_run_time_cache(&fbc->op_array);
 		}
 		if (UNEXPECTED(!ZEND_MAP_PTR_GET(fbc->common.instrument_cache))) {
-			zend_instrument_install_handlers(fbc);
+			zend_instrument_fcall_install(fbc);
 		}
 		if (IS_CONST != IS_CONST) {
 
@@ -30845,7 +30857,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 			init_func_run_time_cache(&fbc->op_array);
 		}
 		if (UNEXPECTED(!ZEND_MAP_PTR_GET(fbc->common.instrument_cache))) {
-			zend_instrument_install_handlers(fbc);
+			zend_instrument_fcall_install(fbc);
 		}
 	}
 
@@ -32577,7 +32589,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_UNUSED_T
 			init_func_run_time_cache(&fbc->op_array);
 		}
 		if (UNEXPECTED(!ZEND_MAP_PTR_GET(fbc->common.instrument_cache))) {
-			zend_instrument_install_handlers(fbc);
+			zend_instrument_fcall_install(fbc);
 		}
 	}
 
@@ -32703,7 +32715,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 			init_func_run_time_cache(&fbc->op_array);
 		}
 		if (UNEXPECTED(!ZEND_MAP_PTR_GET(fbc->common.instrument_cache))) {
-			zend_instrument_install_handlers(fbc);
+			zend_instrument_fcall_install(fbc);
 		}
 		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
 			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
@@ -32722,7 +32734,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 			init_func_run_time_cache(&fbc->op_array);
 		}
 		if (UNEXPECTED(!ZEND_MAP_PTR_GET(fbc->common.instrument_cache))) {
-			zend_instrument_install_handlers(fbc);
+			zend_instrument_fcall_install(fbc);
 		}
 	}
 
@@ -33125,7 +33137,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 			init_func_run_time_cache(&fbc->op_array);
 		}
 		if (UNEXPECTED(!ZEND_MAP_PTR_GET(fbc->common.instrument_cache))) {
-			zend_instrument_install_handlers(fbc);
+			zend_instrument_fcall_install(fbc);
 		}
 		if (IS_UNUSED != IS_CONST) {
 
@@ -33144,7 +33156,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 			init_func_run_time_cache(&fbc->op_array);
 		}
 		if (UNEXPECTED(!ZEND_MAP_PTR_GET(fbc->common.instrument_cache))) {
-			zend_instrument_install_handlers(fbc);
+			zend_instrument_fcall_install(fbc);
 		}
 	}
 
@@ -33289,14 +33301,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_NEW_SPEC_UNUSED_UNUSED_HANDLER
 		call = zend_vm_stack_push_call_frame(
 			ZEND_CALL_FUNCTION, (zend_function *) &zend_pass_function,
 			opline->extended_value, NULL);
-		static const zend_instrument_cache *dummy_handler = ZEND_NOT_INSTRUMENTED;
-		ZEND_MAP_PTR_INIT(call->func->common.instrument_cache, (zend_instrument_cache **) &dummy_handler);
+		static const zend_instrument_fcall_cache *dummy_handler = ZEND_INSTRUMENT_FCALL_NOT_INSTRUMENTED;
+		ZEND_MAP_PTR_INIT(call->func->common.instrument_cache, (zend_instrument_fcall_cache **) &dummy_handler);
 	} else {
 		if (EXPECTED(constructor->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&constructor->op_array))) {
 			init_func_run_time_cache(&constructor->op_array);
 		}
 		if (UNEXPECTED(!ZEND_MAP_PTR_GET(constructor->common.instrument_cache))) {
-			zend_instrument_install_handlers(constructor);
+			zend_instrument_fcall_install(constructor);
 		}
 		/* We are not handling overloaded classes right now */
 		call = zend_vm_stack_push_call_frame(
@@ -34991,7 +35003,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_UNUSED_C
 			init_func_run_time_cache(&fbc->op_array);
 		}
 		if (UNEXPECTED(!ZEND_MAP_PTR_GET(fbc->common.instrument_cache))) {
-			zend_instrument_install_handlers(fbc);
+			zend_instrument_fcall_install(fbc);
 		}
 	}
 
@@ -35117,7 +35129,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 			init_func_run_time_cache(&fbc->op_array);
 		}
 		if (UNEXPECTED(!ZEND_MAP_PTR_GET(fbc->common.instrument_cache))) {
-			zend_instrument_install_handlers(fbc);
+			zend_instrument_fcall_install(fbc);
 		}
 		if (IS_CV != IS_CONST) {
 
@@ -35136,7 +35148,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 			init_func_run_time_cache(&fbc->op_array);
 		}
 		if (UNEXPECTED(!ZEND_MAP_PTR_GET(fbc->common.instrument_cache))) {
-			zend_instrument_install_handlers(fbc);
+			zend_instrument_fcall_install(fbc);
 		}
 	}
 
@@ -35939,9 +35951,10 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_CV_HAN
 
 	if (EG(current_execute_data)->func) {
 		zend_function *func = EG(current_execute_data)->func;
-		zend_instrument_cache *cache = ZEND_MAP_PTR_GET(func->common.instrument_cache);
-		if (cache != ZEND_NOT_INSTRUMENTED) {
-			zend_instrument_call_end_handlers(EG(current_execute_data), cache);
+		zend_instrument_fcall_cache *cache =
+			ZEND_MAP_PTR_GET(func->common.instrument_cache);
+		if (cache != ZEND_INSTRUMENT_FCALL_NOT_INSTRUMENTED) {
+			zend_instrument_fcall_call_end(cache, EG(current_execute_data), return_value);
 		}
 	}
 
@@ -39857,7 +39870,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_S
 			init_func_run_time_cache(&fbc->op_array);
 		}
 		if (UNEXPECTED(!ZEND_MAP_PTR_GET(fbc->common.instrument_cache))) {
-			zend_instrument_install_handlers(fbc);
+			zend_instrument_fcall_install(fbc);
 		}
 	}
 
@@ -43297,7 +43310,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_TMPVA
 			init_func_run_time_cache(&fbc->op_array);
 		}
 		if (UNEXPECTED(!ZEND_MAP_PTR_GET(fbc->common.instrument_cache))) {
-			zend_instrument_install_handlers(fbc);
+			zend_instrument_fcall_install(fbc);
 		}
 	}
 
@@ -48182,7 +48195,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HA
 			init_func_run_time_cache(&fbc->op_array);
 		}
 		if (UNEXPECTED(!ZEND_MAP_PTR_GET(fbc->common.instrument_cache))) {
-			zend_instrument_install_handlers(fbc);
+			zend_instrument_fcall_install(fbc);
 		}
 	}
 
@@ -52522,9 +52535,10 @@ zend_leave_helper_SPEC_LABEL:
 
 	if (EG(current_execute_data)->func) {
 		zend_function *func = EG(current_execute_data)->func;
-		zend_instrument_cache *cache = ZEND_MAP_PTR_GET(func->common.instrument_cache);
-		if (cache != ZEND_NOT_INSTRUMENTED) {
-			zend_instrument_call_end_handlers(EG(current_execute_data), cache);
+		zend_instrument_fcall_cache *cache =
+			ZEND_MAP_PTR_GET(func->common.instrument_cache);
+		if (cache != ZEND_INSTRUMENT_FCALL_NOT_INSTRUMENTED) {
+			zend_instrument_fcall_call_end(cache, EG(current_execute_data), return_value);
 		}
 	}
 
@@ -54016,9 +54030,10 @@ zend_leave_helper_SPEC_LABEL:
 
 	if (EG(current_execute_data)->func) {
 		zend_function *func = EG(current_execute_data)->func;
-		zend_instrument_cache *cache = ZEND_MAP_PTR_GET(func->common.instrument_cache);
-		if (cache != ZEND_NOT_INSTRUMENTED) {
-			zend_instrument_call_end_handlers(EG(current_execute_data), cache);
+		zend_instrument_fcall_cache *cache =
+			ZEND_MAP_PTR_GET(func->common.instrument_cache);
+		if (cache != ZEND_INSTRUMENT_FCALL_NOT_INSTRUMENTED) {
+			zend_instrument_fcall_call_end(cache, EG(current_execute_data), return_value);
 		}
 	}
 
@@ -54302,9 +54317,10 @@ zend_leave_helper_SPEC_LABEL:
 
 	if (EG(current_execute_data)->func) {
 		zend_function *func = EG(current_execute_data)->func;
-		zend_instrument_cache *cache = ZEND_MAP_PTR_GET(func->common.instrument_cache);
-		if (cache != ZEND_NOT_INSTRUMENTED) {
-			zend_instrument_call_end_handlers(EG(current_execute_data), cache);
+		zend_instrument_fcall_cache *cache =
+			ZEND_MAP_PTR_GET(func->common.instrument_cache);
+		if (cache != ZEND_INSTRUMENT_FCALL_NOT_INSTRUMENTED) {
+			zend_instrument_fcall_call_end(cache, EG(current_execute_data), return_value);
 		}
 	}
 
@@ -55376,9 +55392,10 @@ zend_leave_helper_SPEC_LABEL:
 
 	if (EG(current_execute_data)->func) {
 		zend_function *func = EG(current_execute_data)->func;
-		zend_instrument_cache *cache = ZEND_MAP_PTR_GET(func->common.instrument_cache);
-		if (cache != ZEND_NOT_INSTRUMENTED) {
-			zend_instrument_call_end_handlers(EG(current_execute_data), cache);
+		zend_instrument_fcall_cache *cache =
+			ZEND_MAP_PTR_GET(func->common.instrument_cache);
+		if (cache != ZEND_INSTRUMENT_FCALL_NOT_INSTRUMENTED) {
+			zend_instrument_fcall_call_end(cache, EG(current_execute_data), return_value);
 		}
 	}
 

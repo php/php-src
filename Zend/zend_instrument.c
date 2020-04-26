@@ -21,59 +21,61 @@
 #include "zend_API.h"
 #include "zend_instrument.h"
 
-struct zend_instruments_list {
-	struct zend_instruments_list *prev;
-	zend_instrument instrument;
+struct zend_instrument_fcall_init_list {
+	struct zend_instrument_fcall_init_list *prev;
+	zend_instrument_fcall_init instrument;
 };
-typedef struct zend_instruments_list zend_instruments_list;
+typedef struct zend_instrument_fcall_init_list zend_instrument_fcall_init_list;
 
-static zend_instruments_list *_zend_instruments;
+static zend_instrument_fcall_init_list *zend_instrument_fcalls;
 
-ZEND_API void zend_instrument_init(void)
-{
-	_zend_instruments = NULL;
+ZEND_API void zend_instrument_init(void) {
+	zend_instrument_fcalls = NULL;
 }
 
-ZEND_API void zend_instrument_shutdown(void)
-{
-	zend_instruments_list *curr, *prev;
-	for (curr = _zend_instruments; curr; curr = prev) {
+ZEND_API void zend_instrument_shutdown(void) {
+	zend_instrument_fcall_init_list *curr, *prev;
+	for (curr = zend_instrument_fcalls; curr; curr = prev) {
 		prev = curr->prev;
 		free(curr);
 	}
 }
 
-ZEND_API void zend_instrument_register(zend_instrument instrument)
-{
-	zend_instruments_list *node = malloc(sizeof(zend_instruments_list));
-	node->instrument = instrument;
-	node->prev = _zend_instruments;
-	_zend_instruments = node;
+ZEND_API void zend_instrument_fcall_register(zend_instrument_fcall_init cb) {
+	zend_instrument_fcall_init_list *node =
+		malloc(sizeof(zend_instrument_fcall_init_list));
+	node->instrument = cb;
+	node->prev = zend_instrument_fcalls;
+	zend_instrument_fcalls = node;
 }
 
-struct zend_instrument_handlers_list {
-	struct zend_instrument_handlers_list *prev;
-	zend_instrument_handlers handlers;
+struct zend_instrument_fcall_list {
+	struct zend_instrument_fcall_list *prev;
+	zend_instrument_fcall handlers;
 	size_t count;
 };
-typedef struct zend_instrument_handlers_list zend_instrument_handlers_list;
+typedef struct zend_instrument_fcall_list zend_instrument_fcall_list;
 
 
-extern inline void zend_instrument_call_begin_handlers(
-	zend_execute_data *execute_data, zend_instrument_cache *cache);
-extern inline void zend_instrument_call_end_handlers(
-	zend_execute_data *execute_data, zend_instrument_cache *cache);
+extern inline void zend_instrument_fcall_call_begin(
+	zend_instrument_fcall_cache *cache,
+	zend_execute_data *execute_data);
 
-static zend_instrument_handlers_list *_instrument_add(
-	zend_instrument_handlers_list *instruments,
-	zend_instrument_handlers handlers)
+extern inline void zend_instrument_fcall_call_end(
+	zend_instrument_fcall_cache *cache,
+	zend_execute_data *execute_data,
+	zval *return_value);
+
+static zend_instrument_fcall_list *zend_instrument_fcall_add(
+	zend_instrument_fcall_list *instruments,
+	zend_instrument_fcall handlers)
 {
 	if (!handlers.begin && !handlers.end) {
 		return instruments;
 	}
 
-	zend_instrument_handlers_list *n =
-		emalloc(sizeof(zend_instrument_handlers_list));
+	zend_instrument_fcall_list *n =
+		emalloc(sizeof(zend_instrument_fcall_list));
 	if (instruments) {
 		n->prev = instruments;
 		n->count = instruments->count + 1;
@@ -85,18 +87,18 @@ static zend_instrument_handlers_list *_instrument_add(
 	return n;
 }
 
-static zend_instrument_cache *_instrument_attach_handler(
+static zend_instrument_fcall_cache *zend_instrument_fcall_list_attach(
 	zend_function *function,
-	zend_instrument_handlers_list *handlers_list)
+	zend_instrument_fcall_list *handlers_list)
 {
-	zend_instrument_cache *cache =
-		malloc(sizeof(zend_instrument_cache));
+	zend_instrument_fcall_cache *cache =
+		malloc(sizeof(zend_instrument_fcall_cache));
 	cache->instruments_len = handlers_list->count;
 	cache->handlers =
-		calloc(handlers_list->count, sizeof(zend_instrument_handlers));
+		calloc(handlers_list->count, sizeof(zend_instrument_fcall));
 
-	zend_instrument_handlers *handlers = cache->handlers;
-	zend_instrument_handlers_list *curr;
+	zend_instrument_fcall *handlers = cache->handlers;
+	zend_instrument_fcall_list *curr;
 	for (curr = handlers_list; curr; curr = curr->prev) {
 		*handlers++ = curr->handlers;
 	}
@@ -106,26 +108,26 @@ static zend_instrument_cache *_instrument_attach_handler(
 	return cache;
 }
 
-ZEND_API void zend_instrument_install_handlers(zend_function *function)
-{
-	zend_instrument_handlers_list *handlers_list = NULL;
-	zend_instruments_list *elem;
+ZEND_API void zend_instrument_fcall_install(zend_function *function) {
+	zend_instrument_fcall_list *fcall_list = NULL;
+	zend_instrument_fcall_init_list *elem;
 
-	for (elem = _zend_instruments; elem; elem = elem->prev) {
-		zend_instrument_handlers handlers = elem->instrument(function);
-		handlers_list = _instrument_add(handlers_list, handlers);
+	for (elem = zend_instrument_fcalls; elem; elem = elem->prev) {
+		zend_instrument_fcall handlers = elem->instrument(function);
+		fcall_list = zend_instrument_fcall_add(fcall_list, handlers);
 	}
 
-	if (handlers_list) {
-		_instrument_attach_handler(function, handlers_list);
+	if (fcall_list) {
+		zend_instrument_fcall_list_attach(function, fcall_list);
 
-		// cleanup handlers_list
-		zend_instrument_handlers_list *curr, *prev;
-		for (curr = handlers_list; curr; curr = prev) {
+		// cleanup fcall_list
+		zend_instrument_fcall_list *curr, *prev;
+		for (curr = fcall_list; curr; curr = prev) {
 			prev = curr->prev;
 			efree(curr);
 		}
 	} else {
-		ZEND_MAP_PTR_SET(function->common.instrument_cache, ZEND_NOT_INSTRUMENTED);
+		ZEND_MAP_PTR_SET(function->common.instrument_cache,
+		                 ZEND_INSTRUMENT_FCALL_NOT_INSTRUMENTED);
 	}
 }

@@ -1204,7 +1204,8 @@ ZEND_API zend_function *zend_get_call_trampoline_func(zend_class_entry *ce, zend
 	 * The low bit must be zero, to not be interpreted as a MAP_PTR offset.
 	 */
 	static const void *dummy = (void*)(intptr_t)2;
-	static const zend_instrument_cache *dummy_handlers = ZEND_NOT_INSTRUMENTED;
+	static const zend_instrument_fcall_cache *dummy_handlers =
+		ZEND_INSTRUMENT_FCALL_NOT_INSTRUMENTED;
 
 	ZEND_ASSERT(fbc);
 
@@ -1224,7 +1225,7 @@ ZEND_API zend_function *zend_get_call_trampoline_func(zend_class_entry *ce, zend
 	}
 	func->opcodes = &EG(call_trampoline_op);
 	ZEND_MAP_PTR_INIT(func->run_time_cache, (void***)&dummy);
-	ZEND_MAP_PTR_INIT(func->instrument_cache, (zend_instrument_cache **) &dummy_handlers);
+	ZEND_MAP_PTR_INIT(func->instrument_cache, (zend_instrument_fcall_cache **) &dummy_handlers);
 	func->scope = fbc->common.scope;
 	/* reserve space for arguments, local and temporary variables */
 	func->T = (fbc->type == ZEND_USER_FUNCTION)? MAX(fbc->op_array.last_var + fbc->op_array.T, 2) : 2;

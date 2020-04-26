@@ -22,45 +22,43 @@
 
 BEGIN_EXTERN_C()
 
-typedef void (*zend_instrument_begin_handler)(zend_execute_data *ex);
-typedef void (*zend_instrument_end_handler)(zend_execute_data *ex/*, zval *return_value*/);
-
-struct zend_instrument_handlers {
-	zend_instrument_begin_handler begin;
+struct zend_instrument_fcall {
+	void (*begin)(zend_execute_data *execute_data);
 
 	/* todo: need to figure out how to tell end that it is exiting normally
 	 * or not; checking for EG(exception) is not enough (unclean shutdown).
 	 */
-	zend_instrument_end_handler end;
+	void (*end)(zend_execute_data* execute_data, zval *return_value);
 };
-typedef struct zend_instrument_handlers zend_instrument_handlers;
+typedef struct zend_instrument_fcall zend_instrument_fcall;
 
-struct zend_instrument_cache {
+struct zend_instrument_fcall_cache {
 	// todo: use arena
 	size_t instruments_len;
-	zend_instrument_handlers *handlers;
+	zend_instrument_fcall *handlers;
 };
-typedef struct zend_instrument_cache zend_instrument_cache;
+typedef struct zend_instrument_fcall_cache zend_instrument_fcall_cache;
 
 /* If the fn should not be instrumented then return {NULL, NULL} */
-typedef zend_instrument_handlers (*zend_instrument)(zend_function *func);
+typedef zend_instrument_fcall (*zend_instrument_fcall_init)(zend_function *func);
 
-#define ZEND_NOT_INSTRUMENTED ((void *) 1)
+#define ZEND_INSTRUMENT_FCALL_NOT_INSTRUMENTED ((void *) 1)
 
 // Call during minit/startup ONLY
-ZEND_API void zend_instrument_register(zend_instrument cb);
+ZEND_API void zend_instrument_fcall_register(zend_instrument_fcall_init cb);
 
 // Called by engine before MINITs
 ZEND_API void zend_instrument_init(void);
 ZEND_API void zend_instrument_shutdown(void);
 
-ZEND_API void zend_instrument_install_handlers(zend_function *function);
+ZEND_API void zend_instrument_fcall_install(zend_function *function);
 
-inline void zend_instrument_call_begin_handlers(
-	zend_execute_data *execute_data, zend_instrument_cache *cache)
+inline void zend_instrument_fcall_call_begin(
+	zend_instrument_fcall_cache *cache,
+	zend_execute_data *execute_data)
 {
-	zend_instrument_handlers *handler;
-	zend_instrument_handlers *stop =
+	zend_instrument_fcall *handler;
+	zend_instrument_fcall *stop =
 		cache->handlers + cache->instruments_len;
 
 	for (handler = cache->handlers; handler != stop; ++handler) {
@@ -70,18 +68,20 @@ inline void zend_instrument_call_begin_handlers(
 	}
 }
 
-inline void zend_instrument_call_end_handlers(
-	zend_execute_data *execute_data, zend_instrument_cache *cache)
+inline void zend_instrument_fcall_call_end(
+	zend_instrument_fcall_cache *cache,
+	zend_execute_data *execute_data,
+	zval *return_value)
 {
-	zend_instrument_handlers *handler =
+	zend_instrument_fcall *handler =
 		cache->handlers + cache->instruments_len;
-	zend_instrument_handlers *stop = cache->handlers;
+	zend_instrument_fcall *stop = cache->handlers;
 
 	// todo: send return_value to end, maybe protected via zval copy
 	// todo: decide if this should run in reverse order or not
 	while (handler-- != stop) {
 		if (handler->end) {
-			handler->end(execute_data);
+			handler->end(execute_data, return_value);
 		}
 	}
 }

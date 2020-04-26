@@ -41,14 +41,13 @@ ZEND_API void zend_init_code_execute_data(zend_execute_data *execute_data, zend_
 ZEND_API void zend_execute(zend_op_array *op_array, zval *return_value);
 ZEND_API void execute_ex(zend_execute_data *execute_data);
 
-ZEND_API inline void execute_internal(zend_execute_data *execute_data, zval *return_value)
-{
-	zend_instrument_cache *cache = (zend_instrument_cache *)
+ZEND_API inline void execute_internal(zend_execute_data *execute_data, zval *return_value) {
+	zend_instrument_fcall_cache *cache = (zend_instrument_fcall_cache *)
 		ZEND_MAP_PTR_GET(execute_data->func->common.instrument_cache);
-	if (UNEXPECTED(cache != ZEND_NOT_INSTRUMENTED)) {
-		zend_instrument_call_begin_handlers(execute_data, cache);
+	if (UNEXPECTED(cache != ZEND_INSTRUMENT_FCALL_NOT_INSTRUMENTED)) {
+		zend_instrument_fcall_call_begin(cache, execute_data);
 		execute_data->func->internal_function.handler(execute_data, return_value);
-		zend_instrument_call_end_handlers(execute_data, cache);
+		zend_instrument_fcall_call_end(cache, execute_data, return_value);
 	} else {
 		execute_data->func->internal_function.handler(execute_data, return_value);
 	}
