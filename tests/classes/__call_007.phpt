@@ -51,7 +51,7 @@ try {
 }
 ?>
 --EXPECTF--
-Warning: The magic method A::__call() must have public visibility and cannot be static in %s on line 3
+Warning: The magic method A::__call() cannot be static in %s on line 3
 ---> Invoke __call via simple method call.
 object(A)#1 (0) {
 }

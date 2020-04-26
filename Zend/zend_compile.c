@@ -6041,15 +6041,21 @@ static void zend_compile_implicit_closure_uses(closure_info *info)
 
 static void zend_check_magic_method_attr(uint32_t attr, zend_class_entry *ce, const char* method, zend_bool is_static) /* {{{ */
 {
+	if (!(attr & ZEND_ACC_PUBLIC)) {
+		zend_error(E_WARNING,
+				"The magic method %s::%s() must have public visibility",
+				ZSTR_VAL(ce->name), method);
+	}
+
 	if (is_static) {
-		if (!(attr & ZEND_ACC_PUBLIC) || !(attr & ZEND_ACC_STATIC)) {
+		if (!(attr & ZEND_ACC_STATIC)) {
 			zend_error(E_WARNING,
-				"The magic method %s::%s() must have public visibility and be static",
+				"The magic method %s::%s() must be static",
 				ZSTR_VAL(ce->name), method);
 		}
-	} else if (!(attr & ZEND_ACC_PUBLIC) || (attr & ZEND_ACC_STATIC)) {
+	} else if (attr & ZEND_ACC_STATIC) {
 		zend_error(E_WARNING,
-				"The magic method %s::%s() must have public visibility and cannot be static",
+				"The magic method %s::%s() cannot be static",
 				ZSTR_VAL(ce->name), method);
 	}
 }
