@@ -2035,6 +2035,14 @@ ZEND_API void zend_check_magic_method_implementation(const zend_class_entry *ce,
 		&& fptr->common.num_args != 1
 	) {
 		zend_error(error_type, "Method %s::__unserialize() must take exactly 1 argument", ZSTR_VAL(ce->name));
+	} else if (
+		name_len == sizeof("__set_state") - 1
+		&& !memcmp(lcname, "__set_state", sizeof("__set_state") - 1)
+		&& fptr->common.num_args == 1
+		&& ZEND_TYPE_IS_SET(fptr->common.arg_info[0].type)
+		&& ZEND_TYPE_FULL_MASK(fptr->common.arg_info[1].type) != MAY_BE_ARRAY
+	) {
+		zend_error(error_type, "Type of first argument of %s::__set_state() must be array", ZSTR_VAL(ce->name));
 	}
 }
 /* }}} */
