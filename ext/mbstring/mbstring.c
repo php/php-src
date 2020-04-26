@@ -2345,8 +2345,9 @@ PHP_FUNCTION(mb_strcut)
 	}
 
 	if (from > string.len) {
-		// TODO Out of bounds ValueError
-		RETURN_FALSE;
+		zend_argument_value_error(2, "must be contained in argument #1 ($%s)",
+			get_active_function_arg_name(1));
+		RETURN_THROWS();
 	}
 
 	ret = mbfl_strcut(&string, &result, from, len);
