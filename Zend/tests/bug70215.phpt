@@ -17,5 +17,5 @@ $b();
 
 ?>
 --EXPECTF--
-Warning: The magic method A::__invoke() must have public visibility and cannot be static in %s on line %d
+Warning: The magic method A::__invoke() cannot be static in %s on line %d
 A
