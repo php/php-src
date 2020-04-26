@@ -6170,6 +6170,8 @@ zend_string *zend_begin_method_decl(zend_op_array *op_array, zend_string *name, 
 		zend_check_magic_method_attr(fn_flags, ce, "__serialize", 0);
 	} else if (zend_string_equals_literal(lcname, "__unserialize")) {
 		zend_check_magic_method_attr(fn_flags, ce, "__unserialize", 0);
+	} else if (zend_string_equals_literal(lcname, "__set_state")) {
+        zend_check_magic_method_attr(fn_flags, ce, "__set_state", 1);
 	}
 
 	return lcname;
