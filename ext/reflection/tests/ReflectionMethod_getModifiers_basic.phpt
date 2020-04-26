@@ -52,7 +52,7 @@ class TestClass
 
     public function __wakeup() {}
 
-    public function __set_state() {}
+    public static function __set_state() {}
 
     public function __autoload() {}
 }
@@ -143,7 +143,7 @@ Modifiers for method TestClass::__wakeup():
 
 
 Modifiers for method TestClass::__set_state():
-0x00000001
+0x00000011
 
 
 Modifiers for method TestClass::__autoload():
@@ -207,7 +207,7 @@ Modifiers for method TestClass::__wakeup():
 
 
 Modifiers for method TestClass::__set_state():
-0x00000001
+0x00000011
 
 
 Modifiers for method TestClass::__autoload():
