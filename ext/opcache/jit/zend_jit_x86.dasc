@@ -4538,7 +4538,7 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 	zend_jit_addr res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
 	const void *exit_addr = NULL;
 
-	if (zend_jit_trigger == ZEND_JIT_ON_HOT_TRACE && type == BP_VAR_R) {
+	if (zend_jit_trigger == ZEND_JIT_ON_HOT_TRACE && (type == BP_VAR_R || type == BP_VAR_RW)) {
 		int32_t exit_point = zend_jit_trace_get_exit_point(opline, opline, NULL);
 		exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 		if (!exit_addr) {
