@@ -70,9 +70,6 @@ zend_class_entry *php_session_iface_entry;
 /* SessionIdInterface */
 zend_class_entry *php_session_id_iface_entry;
 
-/* SessionUpdateTimestampHandler class */
-zend_class_entry *php_session_update_timestamp_class_entry;
-
 /* SessionUpdateTimestampInterface */
 zend_class_entry *php_session_update_timestamp_iface_entry;
 
