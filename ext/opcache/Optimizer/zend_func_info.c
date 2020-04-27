@@ -886,6 +886,28 @@ static const func_info_t func_infos[] = {
 static HashTable func_info;
 int zend_func_info_rid = -1;
 
+static uint32_t get_internal_func_info(
+		const zend_call_info *call_info, const zend_ssa *ssa, zend_string *lcname) {
+	if (call_info->callee_func->common.scope) {
+		/* This is a method, not a function. */
+		return 0;
+	}
+
+	zval *zv = zend_hash_find_ex(&func_info, lcname, 1);
+	if (!zv) {
+		return 0;
+	}
+
+	func_info_t *info = Z_PTR_P(zv);
+	if (UNEXPECTED(zend_optimizer_is_disabled_func(info->name, info->name_len))) {
+		return MAY_BE_NULL;
+	} else if (info->info_func) {
+		return info->info_func(call_info, ssa);
+	} else {
+		return info->info;
+	}
+}
+
 uint32_t zend_get_func_info(
 		const zend_call_info *call_info, const zend_ssa *ssa,
 		zend_class_entry **ce, zend_bool *ce_is_instanceof)
@@ -896,21 +918,14 @@ uint32_t zend_get_func_info(
 	*ce_is_instanceof = 0;
 
 	if (callee_func->type == ZEND_INTERNAL_FUNCTION) {
-		zval *zv;
 		zend_string *lcname = Z_STR_P(CRT_CONSTANT_EX(call_info->caller_op_array, call_info->caller_init_opline, call_info->caller_init_opline->op2));
 
-		if (!call_info->callee_func->common.scope
-				&& (zv = zend_hash_find_ex(&func_info, lcname, 1))) {
-			func_info_t *info = Z_PTR_P(zv);
-			if (UNEXPECTED(zend_optimizer_is_disabled_func(info->name, info->name_len))) {
-				ret = MAY_BE_NULL;
-			} else if (info->info_func) {
-				ret = info->info_func(call_info, ssa);
-			} else {
-				ret = info->info;
-			}
-			return ret;
+		uint32_t internal_ret = get_internal_func_info(call_info, ssa, lcname);
+#if !ZEND_DEBUG
+		if (internal_ret) {
+			return internal_ret;
 		}
+#endif
 
 		if (callee_func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
 			ret = zend_fetch_arg_info_type(NULL, callee_func->common.arg_info - 1, ce);
@@ -925,6 +940,17 @@ uint32_t zend_get_func_info(
 		if (callee_func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) {
 			ret |= MAY_BE_REF;
 		}
+
+#if ZEND_DEBUG
+		/* Check whether the func_info information is a subset of the information we can compute
+		 * from the specified return type. */
+		if (internal_ret) {
+			if (internal_ret & ~ret) {
+				fprintf(stderr, "Inaccurate func info for %s()\n", ZSTR_VAL(lcname));
+			}
+			return internal_ret;
+		}
+#endif
 	} else {
 		// FIXME: the order of functions matters!!!
 		zend_func_info *info = ZEND_FUNC_INFO((zend_op_array*)callee_func);
