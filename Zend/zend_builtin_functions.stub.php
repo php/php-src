@@ -85,7 +85,7 @@ function get_declared_traits(): array {}
 
 function get_declared_interfaces(): array {}
 
-function get_defined_functions(bool $exclude_disabled = false): array {}
+function get_defined_functions(bool $exclude_disabled = true): array {}
 
 function get_defined_vars(): array {}
 

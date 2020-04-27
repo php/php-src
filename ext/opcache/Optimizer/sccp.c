@@ -1019,8 +1019,7 @@ static inline int ct_eval_func_call(
 	}
 
 	func = zend_hash_find_ptr(CG(function_table), name);
-	if (!func || func->type != ZEND_INTERNAL_FUNCTION
-			|| func->internal_function.handler == ZEND_FN(display_disabled_function)) {
+	if (!func || func->type != ZEND_INTERNAL_FUNCTION) {
 		return FAILURE;
 	}
 

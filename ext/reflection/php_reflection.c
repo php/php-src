@@ -1549,16 +1549,12 @@ ZEND_METHOD(ReflectionFunctionAbstract, isUserDefined)
    Returns whether this function has been disabled or not */
 ZEND_METHOD(ReflectionFunction, isDisabled)
 {
-	reflection_object *intern;
-	zend_function *fptr;
-
-	GET_REFLECTION_OBJECT_PTR(fptr);
-
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	RETURN_BOOL(fptr->type == ZEND_INTERNAL_FUNCTION && fptr->internal_function.handler == zif_display_disabled_function);
+	/* A disabled function cannot be queried using Reflection. */
+	RETURN_FALSE;
 }
 /* }}} */
 

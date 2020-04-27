@@ -593,8 +593,6 @@ ZEND_API zend_bool zend_is_iterable(zval *iterable);
 
 ZEND_API zend_bool zend_is_countable(zval *countable);
 
-ZEND_API ZEND_FUNCTION(display_disabled_function);
-
 ZEND_API int zend_get_default_from_internal_arg_info(
 		zval *default_value_zval, zend_internal_arg_info *arg_info);
 

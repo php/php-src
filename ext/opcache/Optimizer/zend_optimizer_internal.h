@@ -108,7 +108,6 @@ void zend_optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_c
 void zend_optimizer_nop_removal(zend_op_array *op_array, zend_optimizer_ctx *ctx);
 void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx *ctx);
 void zend_optimizer_compact_vars(zend_op_array *op_array);
-int zend_optimizer_is_disabled_func(const char *name, size_t len);
 zend_function *zend_optimizer_get_called_func(
 		zend_script *script, zend_op_array *op_array, zend_op *opline, zend_bool *is_prototype);
 uint32_t zend_optimizer_classify_function(zend_string *name, uint32_t num_args);
