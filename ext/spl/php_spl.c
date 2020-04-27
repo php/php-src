@@ -393,13 +393,15 @@ static void autoload_func_info_dtor(zval *element)
  Try all registered autoload function to load the requested class */
 PHP_FUNCTION(spl_autoload_call)
 {
-	zval *class_name, retval;
-	zend_string *lc_name, *func_name;
+	zend_string *class_name, *lc_name, *func_name;
 	autoload_func_info *alfi;
+	zval retval, params[1];
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &class_name) == FAILURE || Z_TYPE_P(class_name) != IS_STRING) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &class_name) == FAILURE) {
 		RETURN_THROWS();
 	}
+
+	ZVAL_STR(&params[0], class_name);
 
 	if (SPL_G(autoload_functions)) {
 		HashPosition pos;
@@ -411,12 +413,12 @@ PHP_FUNCTION(spl_autoload_call)
 		int l_autoload_running = SPL_G(autoload_running);
 
 		SPL_G(autoload_running) = 1;
-		lc_name = zend_string_tolower(Z_STR_P(class_name));
+		lc_name = zend_string_tolower(class_name);
 
 		fci.size = sizeof(fci);
 		fci.retval = &retval;
 		fci.param_count = 1;
-		fci.params = class_name;
+		fci.params = params;
 		fci.no_separation = 1;
 
 		ZVAL_UNDEF(&fci.function_name); /* Unused */
@@ -474,7 +476,7 @@ PHP_FUNCTION(spl_autoload_call)
 		ZVAL_UNDEF(&fcall_info.function_name);
 		fcall_info.retval = &retval;
 		fcall_info.param_count = 1;
-		fcall_info.params = class_name;
+		fcall_info.params = params;
 		fcall_info.object = NULL;
 		fcall_info.no_separation = 1;
 
