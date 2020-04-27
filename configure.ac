@@ -1044,9 +1044,7 @@ enable_static=yes
 
 case $php_sapi_module in
   shared[)]
-    if test "$PHP_CGI" = "no" && test "$PHP_CLI" = "no" && test "$PHP_FPM" = "no" && test "$PHP_LITESPEED" = "no" && test "$PHP_PHPDBG" = "no"; then
-      enable_static=no
-    fi
+    enable_static=no
     case $with_pic in
       yes)
         standard_libtool_flag='-prefer-pic'
