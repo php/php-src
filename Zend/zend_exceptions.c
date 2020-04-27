@@ -893,6 +893,7 @@ static void zend_error_va(int type, const char *file, uint32_t lineno, const cha
 	va_list args;
 	va_start(args, format);
 	zend_string *message = zend_vstrpprintf(0, format, args);
+	zend_error_notify_all_callbacks(type, file, lineno, message);
 	zend_error_cb(type, file, lineno, message);
 	zend_string_release(message);
 	va_end(args);
@@ -913,10 +914,10 @@ ZEND_API ZEND_COLD int zend_exception_error(zend_object *ex, int severity) /* {{
 		zend_string *message = zval_get_string(GET_PROPERTY(&exception, ZEND_STR_MESSAGE));
 		zend_string *file = zval_get_string(GET_PROPERTY_SILENT(&exception, ZEND_STR_FILE));
 		zend_long line = zval_get_long(GET_PROPERTY_SILENT(&exception, ZEND_STR_LINE));
+		int type = (ce_exception == zend_ce_parse_error ? E_PARSE : E_COMPILE_ERROR) | E_DONT_BAIL;
 
-		zend_error_cb(
-			(ce_exception == zend_ce_parse_error ? E_PARSE : E_COMPILE_ERROR) | E_DONT_BAIL,
-			ZSTR_VAL(file), line, message);
+		zend_error_notify_all_callbacks(type, ZSTR_VAL(file), line, message);
+		zend_error_cb(type, ZSTR_VAL(file), line, message);
 
 		zend_string_release_ex(file, 0);
 		zend_string_release_ex(message, 0);

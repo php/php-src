@@ -61,6 +61,8 @@ ZEND_TSRMLS_CACHE_DEFINE()
 ZEND_API zend_utility_values zend_uv;
 ZEND_API zend_bool zend_dtrace_enabled;
 
+zend_llist zend_error_notify_callbacks;
+
 /* version information */
 static char *zend_version_info;
 static uint32_t zend_version_info_length;
@@ -815,6 +817,7 @@ int zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 
 	zend_startup_strtod();
 	zend_startup_extensions_mechanism();
+	zend_startup_error_notify_callbacks();
 
 	/* Set up utility functions and values */
 	zend_error_cb = utility_functions->error_function;
@@ -846,6 +849,8 @@ int zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 			zend_compile_file = dtrace_compile_file;
 			zend_execute_ex = dtrace_execute_ex;
 			zend_execute_internal = dtrace_execute_internal;
+
+			zend_register_error_notify_callback(dtrace_error_notify_cb);
 		} else {
 			zend_compile_file = compile_file;
 			zend_execute_ex = execute_ex;
@@ -1075,6 +1080,7 @@ void zend_shutdown(void) /* {{{ */
 	zend_hash_destroy(GLOBAL_AUTO_GLOBALS_TABLE);
 	free(GLOBAL_AUTO_GLOBALS_TABLE);
 
+	zend_shutdown_error_notify_callbacks();
 	zend_shutdown_extensions();
 	free(zend_version_info);
 
@@ -1311,11 +1317,7 @@ static ZEND_COLD void zend_error_impl(
 		}
 	}
 
-#ifdef HAVE_DTRACE
-	if (DTRACE_ERROR_ENABLED()) {
-		DTRACE_ERROR(ZSTR_VAL(message), (char *)error_filename, error_lineno);
-	}
-#endif /* HAVE_DTRACE */
+	zend_error_notify_all_callbacks(type, error_filename, error_lineno, message);
 
 	/* if we don't have a user defined error handler */
 	if (Z_TYPE(EG(user_error_handler)) == IS_UNDEF
@@ -1769,5 +1771,31 @@ ZEND_API void zend_map_ptr_extend(size_t last)
 		ptr = (void**)ZEND_MAP_PTR_REAL_BASE(CG(map_ptr_base)) + CG(map_ptr_last);
 		memset(ptr, 0, (last - CG(map_ptr_last)) * sizeof(void*));
 		CG(map_ptr_last) = last;
+	}
+}
+
+void zend_startup_error_notify_callbacks()
+{
+	zend_llist_init(&zend_error_notify_callbacks, sizeof(zend_error_notify_cb), NULL, 1);
+}
+
+void zend_shutdown_error_notify_callbacks()
+{
+	zend_llist_destroy(&zend_error_notify_callbacks);
+}
+
+void zend_register_error_notify_callback(zend_error_notify_cb cb)
+{
+	zend_llist_add_element(&zend_error_notify_callbacks, &cb);
+}
+
+void zend_error_notify_all_callbacks(int type, const char *error_filename, uint32_t error_lineno, zend_string *message)
+{
+	zend_llist_element *element;
+	zend_error_notify_cb callback;
+
+	for (element = zend_error_notify_callbacks.head; element; element = element->next) {
+		callback = *(zend_error_notify_cb *) (element->data);
+		callback(type, error_filename, error_lineno, message);
 	}
 }
