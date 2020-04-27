@@ -319,7 +319,8 @@ ZEND_API int zend_startup_module_ex(zend_module_entry *module);
 ZEND_API int zend_startup_modules(void);
 ZEND_API void zend_collect_module_handlers(void);
 ZEND_API void zend_destroy_modules(void);
-ZEND_API void zend_check_magic_method_implementation(const zend_class_entry *ce, const zend_function *fptr, int error_type);
+ZEND_API void zend_check_magic_method_implementation(
+		const zend_class_entry *ce, const zend_function *fptr, zend_string *lcname, int error_type);
 
 ZEND_API zend_class_entry *zend_register_internal_class(zend_class_entry *class_entry);
 ZEND_API zend_class_entry *zend_register_internal_class_ex(zend_class_entry *class_entry, zend_class_entry *parent_ce);

@@ -1958,16 +1958,12 @@ ZEND_API zend_module_entry* zend_register_internal_module(zend_module_entry *mod
 }
 /* }}} */
 
-ZEND_API void zend_check_magic_method_implementation(const zend_class_entry *ce, const zend_function *fptr, int error_type) /* {{{ */
+ZEND_API void zend_check_magic_method_implementation(const zend_class_entry *ce, const zend_function *fptr, zend_string *lcname, int error_type) /* {{{ */
 {
-	zend_string *lcname;
-
 	if (ZSTR_VAL(fptr->common.function_name)[0] != '_'
 	 || ZSTR_VAL(fptr->common.function_name)[1] != '_') {
 		return;
 	}
-
-	lcname = zend_string_tolower(fptr->common.function_name);
 
 	if (zend_string_equals_literal(lcname, ZEND_DESTRUCTOR_FUNC_NAME) && fptr->common.num_args != 0) {
 		zend_error(error_type, "Destructor %s::%s() cannot take arguments", ZSTR_VAL(ce->name), ZEND_DESTRUCTOR_FUNC_NAME);
@@ -2018,8 +2014,6 @@ ZEND_API void zend_check_magic_method_implementation(const zend_class_entry *ce,
 	} else if (zend_string_equals_literal(lcname, "__unserialize") && fptr->common.num_args != 1) {
 		zend_error(error_type, "Method %s::__unserialize() must take exactly 1 argument", ZSTR_VAL(ce->name));
 	}
-
-	zend_string_release_ex(lcname, 0);
 }
 /* }}} */
 
@@ -2237,7 +2231,8 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 				reg_function = NULL;
 			}
 			if (reg_function) {
-				zend_check_magic_method_implementation(scope, reg_function, error_type);
+				zend_check_magic_method_implementation(
+					scope, reg_function, lowercase_name, error_type);
 			}
 		}
 		ptr++;

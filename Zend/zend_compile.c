@@ -6070,7 +6070,7 @@ static void add_stringable_interface(zend_class_entry *ce) {
 		zend_string_init("stringable", sizeof("stringable") - 1, 0);
 }
 
-void zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_bool has_body) /* {{{ */
+zend_string *zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_bool has_body) /* {{{ */
 {
 	zend_class_entry *ce = CG(active_class_entry);
 	zend_bool in_interface = (ce->ce_flags & ZEND_ACC_INTERFACE) != 0;
@@ -6163,7 +6163,7 @@ void zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_boo
 		zend_check_magic_method_attr(fn_flags, ce, "__unserialize", 0);
 	}
 
-	zend_string_release_ex(lcname, 0);
+	return lcname;
 }
 /* }}} */
 
@@ -6236,6 +6236,7 @@ void zend_compile_func_decl(znode *result, zend_ast *ast, zend_bool toplevel) /*
 	zend_ast *stmt_ast = decl->child[2];
 	zend_ast *return_type_ast = decl->child[3];
 	zend_bool is_method = decl->kind == ZEND_AST_METHOD;
+	zend_string *method_lcname;
 
 	zend_class_entry *orig_class_entry = CG(active_class_entry);
 	zend_op_array *orig_op_array = CG(active_op_array);
@@ -6268,7 +6269,7 @@ void zend_compile_func_decl(znode *result, zend_ast *ast, zend_bool toplevel) /*
 
 	if (is_method) {
 		zend_bool has_body = stmt_ast != NULL;
-		zend_begin_method_decl(op_array, decl->name, has_body);
+		method_lcname = zend_begin_method_decl(op_array, decl->name, has_body);
 	} else {
 		zend_begin_func_decl(result, op_array, decl, toplevel);
 		if (decl->kind == ZEND_AST_ARROW_FUNC) {
@@ -6323,7 +6324,8 @@ void zend_compile_func_decl(znode *result, zend_ast *ast, zend_bool toplevel) /*
 
 	if (is_method) {
 		zend_check_magic_method_implementation(
-			CG(active_class_entry), (zend_function *) op_array, E_COMPILE_ERROR);
+			CG(active_class_entry), (zend_function *) op_array, method_lcname, E_COMPILE_ERROR);
+		zend_string_release_ex(method_lcname, 0);
 	}
 
 	/* put the implicit return on the really last line */
