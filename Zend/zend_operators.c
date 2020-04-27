@@ -2463,7 +2463,7 @@ ZEND_API void zend_update_current_locale(void) /* {{{ */
 static zend_always_inline void zend_str_tolower_impl(char *dest, const char *str, size_t length) /* {{{ */ {
 	register unsigned char *p = (unsigned char*)str;
 	register unsigned char *q = (unsigned char*)dest;
-	register unsigned char *end = p + length;
+	unsigned char *end = p + length;
 #ifdef __SSE2__
 	if (length >= 16) {
 		const __m128i _A = _mm_set1_epi8('A' - 1);
