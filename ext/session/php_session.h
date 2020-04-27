@@ -325,7 +325,5 @@ extern PHP_METHOD(SessionHandler, write);
 extern PHP_METHOD(SessionHandler, destroy);
 extern PHP_METHOD(SessionHandler, gc);
 extern PHP_METHOD(SessionHandler, create_sid);
-extern PHP_METHOD(SessionHandler, validateId);
-extern PHP_METHOD(SessionHandler, updateTimestamp);
 
 #endif

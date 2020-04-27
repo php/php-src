@@ -176,37 +176,3 @@ PHP_METHOD(SessionHandler, create_sid)
 	RETURN_STR(id);
 }
 /* }}} */
-
-/* {{{ proto char SessionUpdateTimestampHandler::validateId(string id)
-   Simply return TRUE */
-PHP_METHOD(SessionHandler, validateId)
-{
-	zend_string *key;
-
-	PS_SANITY_CHECK_IS_OPEN;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &key) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	/* Legacy save handler may not support validate_sid API. Return TRUE. */
-	RETURN_TRUE;
-}
-/* }}} */
-
-/* {{{ proto bool SessionUpdateTimestampHandler::updateTimestamp(string id, string data)
-   Simply call update_timestamp */
-PHP_METHOD(SessionHandler, updateTimestamp)
-{
-	zend_string *key, *val;
-
-	PS_SANITY_CHECK_IS_OPEN;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS", &key, &val) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	/* Legacy save handler may not support update_timestamp API. Just write. */
-	RETVAL_BOOL(SUCCESS == PS(default_mod)->s_write(&PS(mod_data), key, val, PS(gc_maxlifetime)));
-}
-/* }}} */
