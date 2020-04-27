@@ -3436,16 +3436,13 @@ static zend_always_inline int _zend_update_type_info(
 				if (!call_info) {
 					goto unknown_opcode;
 				}
-				tmp = zend_get_func_info(call_info, ssa);
+
+				zend_class_entry *ce;
+				zend_bool ce_is_instanceof;
+				tmp = zend_get_func_info(call_info, ssa, &ce, &ce_is_instanceof);
 				UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
-				if (call_info->callee_func->type == ZEND_USER_FUNCTION) {
-					func_info = ZEND_FUNC_INFO(&call_info->callee_func->op_array);
-					if (func_info) {
-						UPDATE_SSA_OBJ_TYPE(
-							func_info->return_info.ce,
-							func_info->return_info.is_instanceof,
-							ssa_op->result_def);
-					}
+				if (ce) {
+					UPDATE_SSA_OBJ_TYPE(ce, ce_is_instanceof, ssa_op->result_def);
 				}
 			}
 			break;

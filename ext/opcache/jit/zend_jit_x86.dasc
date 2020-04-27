@@ -8463,8 +8463,10 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 		|1:
 
 		if (!RETURN_VALUE_USED(opline)) {
+			zend_class_entry *ce;
+			zend_bool ce_is_instanceof;
 			uint32_t func_info = call_info ?
-				zend_get_func_info(call_info, ssa) :
+				zend_get_func_info(call_info, ssa, &ce, &ce_is_instanceof) :
 				(MAY_BE_ANY|MAY_BE_REF|MAY_BE_RC1|MAY_BE_RCN);
 
 			if (func_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
