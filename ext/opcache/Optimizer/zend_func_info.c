@@ -61,7 +61,7 @@ static uint32_t zend_range_info(const zend_call_info *call_info, const zend_ssa 
 		uint32_t t2 = _ssa_op1_info(op_array, ssa, call_info->arg_info[1].opline,
 			&ssa->ops[call_info->arg_info[1].opline - op_array->opcodes]);
 		uint32_t t3 = 0;
-		uint32_t tmp = MAY_BE_RC1 | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG;
+		uint32_t tmp = MAY_BE_RC1 | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG;
 
 		if (call_info->num_args == 3) {
 			t3 = _ssa_op1_info(op_array, ssa, call_info->arg_info[2].opline,
@@ -82,8 +82,8 @@ static uint32_t zend_range_info(const zend_call_info *call_info, const zend_ssa 
 		}
 		return tmp;
 	} else {
-		/* may warning, and return FALSE */
-		return MAY_BE_RC1 | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_DOUBLE | MAY_BE_ARRAY_OF_STRING;
+		/* May throw */
+		return MAY_BE_RC1 | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_DOUBLE | MAY_BE_ARRAY_OF_STRING;
 	}
 }
 
