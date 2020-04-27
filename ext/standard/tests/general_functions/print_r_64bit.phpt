@@ -280,7 +280,7 @@ closedir($dir_handle);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing print_r() on integer variables ***
 
 -- Iteration 1 --

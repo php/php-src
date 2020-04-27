@@ -22,7 +22,7 @@ set_error_handler(function() {
 $triggerNotice1++;
 $triggerNotice2++;
 ?>
---EXPECTF--
+--EXPECT--
 Second handler
 Internal handler
 Second handler

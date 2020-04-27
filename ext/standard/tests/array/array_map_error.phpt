@@ -38,7 +38,7 @@ var_dump( array_map('callback2', $arr1, $arr2, $arr3) );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_map() : error conditions ***
 
 -- Testing array_map() function with one less than expected no. of arguments --

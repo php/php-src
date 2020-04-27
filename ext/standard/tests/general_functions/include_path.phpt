@@ -31,7 +31,7 @@ var_dump(get_include_path());
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 string(1) "."
 NULL
 string(1) "."

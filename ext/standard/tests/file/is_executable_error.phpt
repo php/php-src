@@ -10,7 +10,7 @@ echo "\n*** Testing is_exceutable() on non-existent directory ***\n";
 var_dump( is_executable(__DIR__."/is_executable") );
 
 echo "Done\n";
---EXPECTF--
+--EXPECT--
 *** Testing is_exceutable() on non-existent directory ***
 bool(false)
 Done

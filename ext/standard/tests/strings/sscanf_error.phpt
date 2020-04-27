@@ -20,7 +20,7 @@ try {
     echo $exception->getMessage() . "\n";
 }
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sscanf() : error conditions ***
 
 -- Testing sscanf() function with more than expected no. of arguments --

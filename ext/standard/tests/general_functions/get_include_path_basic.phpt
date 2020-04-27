@@ -20,7 +20,7 @@ if (ini_get("include_path") == get_include_path()) {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing get_include_path()
 string(1) "."
 PASSED

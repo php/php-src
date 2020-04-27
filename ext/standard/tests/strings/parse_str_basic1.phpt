@@ -27,7 +27,7 @@ var_dump(parse_str($s1, $res3_array));
 var_dump($res3_array);
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing parse_str() : basic functionality ***
 
 Basic test WITH undefined var for result arg

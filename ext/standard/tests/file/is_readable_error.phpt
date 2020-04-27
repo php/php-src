@@ -11,7 +11,7 @@ var_dump( is_readable(__DIR__."/is_readable.tmp") );
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing is_readable() on non-existent file ***
 bool(false)
 Done

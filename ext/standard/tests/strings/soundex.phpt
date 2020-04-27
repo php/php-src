@@ -30,7 +30,7 @@ foreach ($array as $str) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 bool(false)
 string(4) "0000"
 string(4) "F650"

@@ -22,7 +22,7 @@ var_dump( posix_getpgid($pid) );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing posix_getpgid() : error conditions ***
 
 -- Testing posix_getpgid() with negative pid  --

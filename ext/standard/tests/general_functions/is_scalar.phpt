@@ -112,7 +112,7 @@ fclose($fp);
 closedir($dfp);
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing basic operations ***
 -- Iteration 1 --
 bool(true)

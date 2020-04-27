@@ -145,7 +145,7 @@ fclose($fp);
 closedir($dfp);
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing is_object() with valid objects ***
 -- Iteration 1 --
 bool(true)

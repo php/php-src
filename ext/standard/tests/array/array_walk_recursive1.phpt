@@ -24,7 +24,7 @@ try {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 int(1)
 int(0)
 string(4) "data"

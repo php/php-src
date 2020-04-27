@@ -61,7 +61,7 @@ try {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing printf() : error conditions ***
 
 -- Testing printf() function with Zero arguments --

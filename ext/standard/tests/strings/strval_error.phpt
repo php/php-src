@@ -25,7 +25,7 @@ try {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strval() : error conditions ***
 
 -- Testing strval() function with object which has not toString() method  --

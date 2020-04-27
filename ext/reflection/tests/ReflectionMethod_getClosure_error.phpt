@@ -43,7 +43,7 @@ try {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing ReflectionMethod::getClosure() : error conditions ***
 
 -- Testing ReflectionMethod::getClosure() function with invalid object --

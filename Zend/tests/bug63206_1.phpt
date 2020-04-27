@@ -22,5 +22,5 @@ restore_error_handler();
 
 $triggerNotice++;
 ?>
---EXPECTF--
+--EXPECT--
 Second handler

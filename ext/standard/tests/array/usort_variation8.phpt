@@ -31,7 +31,7 @@ var_dump( usort($temp_array2, 'strcmp') );
 var_dump($temp_array2);
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing usort() : usage variation ***
 
 -- Testing usort() with built-in 'cmp_function': strcasecmp() --

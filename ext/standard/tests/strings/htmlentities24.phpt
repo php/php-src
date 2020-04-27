@@ -37,7 +37,7 @@ var_dump( htmlentities($str, ENT_COMPAT) );
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Retrieving htmlentities for 256 characters ***
 string(12) "636872283029"
 string(12) "636872283129"

@@ -22,5 +22,5 @@ restore_exception_handler();
 
 throw new Exception();
 ?>
---EXPECTF--
+--EXPECT--
 Second handler

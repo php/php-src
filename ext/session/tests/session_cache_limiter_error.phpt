@@ -89,7 +89,7 @@ fclose($fp);
 echo "Done";
 ob_end_flush();
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing session_cache_limiter() : error functionality ***
 
 -- Iteration 1 --

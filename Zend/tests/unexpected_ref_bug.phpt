@@ -15,5 +15,5 @@ $my_var = str_repeat("A", 64);
 $data = call_user_func_array("str_replace", array(&$my_var, new Test(), "foo"));
 echo "Done.\n";
 ?>
---EXPECTF--
+--EXPECT--
 Done.

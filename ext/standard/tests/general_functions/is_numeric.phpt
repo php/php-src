@@ -152,7 +152,7 @@ fclose($fp);
 closedir($dfp);
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing is_numeric() with valid numeric values ***
 -- Iteration 1 --
 bool(true)

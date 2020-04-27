@@ -40,6 +40,6 @@ session_start();
 var_dump($_SESSION);
 session_destroy();
 
---EXPECTF--
+--EXPECT--
 array(0) {
 }

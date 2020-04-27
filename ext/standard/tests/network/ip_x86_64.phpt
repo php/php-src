@@ -29,7 +29,7 @@ var_dump(long2ip(-110000));
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 int(2130706433)
 string(9) "127.0.0.1"
 int(167772161)

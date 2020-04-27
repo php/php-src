@@ -37,7 +37,7 @@ var_dump( htmlspecialchars($str, ENT_COMPAT) );
 
 echo "Done\n"
 ?>
---EXPECTF--
+--EXPECT--
 *** Retrieving htmlspecialchars for 256 characters ***
 string(12) "636872283029"
 string(12) "636872283129"

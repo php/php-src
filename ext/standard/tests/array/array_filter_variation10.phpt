@@ -56,7 +56,7 @@ try {
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_filter() : usage variations - using array keys in 'callback' ***
 0 = 0
 1 = 1

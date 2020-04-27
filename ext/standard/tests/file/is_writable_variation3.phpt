@@ -37,7 +37,7 @@ foreach( $misc_files as $misc_file ) {
   clearstatcache();
 }
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing is_writable(): usage variations ***
 
 *** Testing is_writable() with invalid filenames ***
