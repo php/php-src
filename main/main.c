@@ -1175,6 +1175,31 @@ static void clear_last_error() {
 	}
 }
 
+#if ZEND_DEBUG
+/* {{{ report_zend_debug_error_notify_cb */
+static void report_zend_debug_error_notify_cb(int type, const char *error_filename, uint32_t error_lineno, zend_string *message)
+{
+	if (PG(report_zend_debug)) {
+		zend_bool trigger_break;
+
+		switch (type) {
+			case E_ERROR:
+			case E_CORE_ERROR:
+			case E_COMPILE_ERROR:
+			case E_USER_ERROR:
+				trigger_break=1;
+				break;
+			default:
+				trigger_break=0;
+				break;
+		}
+
+		zend_output_debug_string(trigger_break, "%s(%" PRIu32 ") : %s", error_filename, error_lineno, ZSTR_VAL(message));
+	}
+}
+/* }}} */
+#endif
+
 /* {{{ php_error_cb
  extended error handling function */
 static ZEND_COLD void php_error_cb(int orig_type, const char *error_filename, const uint32_t error_lineno, zend_string *message)
@@ -1330,24 +1355,6 @@ static ZEND_COLD void php_error_cb(int orig_type, const char *error_filename, co
 				}
 			}
 		}
-#if ZEND_DEBUG
-		if (PG(report_zend_debug)) {
-			zend_bool trigger_break;
-
-			switch (type) {
-				case E_ERROR:
-				case E_CORE_ERROR:
-				case E_COMPILE_ERROR:
-				case E_USER_ERROR:
-					trigger_break=1;
-					break;
-				default:
-					trigger_break=0;
-					break;
-			}
-			zend_output_debug_string(trigger_break, "%s(%" PRIu32 ") : %s - %s", error_filename, error_lineno, error_type_str, ZSTR_VAL(message));
-		}
-#endif
 	}
 
 	/* Bail out if we can't recover */
@@ -2082,6 +2089,10 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	zuf.resolve_path_function = php_resolve_path_for_zend;
 	zend_startup(&zuf);
 	zend_update_current_locale();
+
+#if ZEND_DEBUG
+	zend_register_error_notify_callback(report_zend_debug_error_notify_cb);
+#endif
 
 #if HAVE_TZSET
 	tzset();
