@@ -1127,7 +1127,7 @@ ZEND_FUNCTION(trait_exists)
 ZEND_FUNCTION(function_exists)
 {
 	zend_string *name;
-	zend_function *func;
+	zend_bool exists;
 	zend_string *lcname;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -1142,15 +1142,10 @@ ZEND_FUNCTION(function_exists)
 		lcname = zend_string_tolower(name);
 	}
 
-	func = zend_hash_find_ptr(EG(function_table), lcname);
+	exists = zend_hash_exists(EG(function_table), lcname);
 	zend_string_release_ex(lcname, 0);
 
-	/*
-	 * A bit of a hack, but not a bad one: we see if the handler of the function
-	 * is actually one that displays "function is disabled" message.
-	 */
-	RETURN_BOOL(func && (func->type != ZEND_INTERNAL_FUNCTION ||
-		func->internal_function.handler != zif_display_disabled_function));
+	RETURN_BOOL(exists);
 }
 /* }}} */
 
@@ -1420,30 +1415,22 @@ ZEND_FUNCTION(get_defined_functions)
 	zval internal, user;
 	zend_string *key;
 	zend_function *func;
-	zend_bool exclude_disabled = 0;
-	char *disable_functions = NULL;
+	zend_bool exclude_disabled = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &exclude_disabled) == FAILURE) {
 		RETURN_THROWS();
 	}
 
+	/* exclude_disabled = 0 is ignored. */
+
 	array_init(&internal);
 	array_init(&user);
 	array_init(return_value);
 
-	if (exclude_disabled) {
-		disable_functions = INI_STR("disable_functions");
-	}
 	ZEND_HASH_FOREACH_STR_KEY_PTR(EG(function_table), key, func) {
 		if (key && ZSTR_VAL(key)[0] != 0) {
 			if (func->type == ZEND_INTERNAL_FUNCTION) {
-				if (disable_functions != NULL) {
-					if (strstr(disable_functions, func->common.function_name->val) == NULL) {
-						add_next_index_str(&internal, zend_string_copy(key));
-					}
-				} else {
-					add_next_index_str(&internal, zend_string_copy(key));
-				}
+				add_next_index_str(&internal, zend_string_copy(key));
 			} else if (func->type == ZEND_USER_FUNCTION) {
 				add_next_index_str(&user, zend_string_copy(key));
 			}

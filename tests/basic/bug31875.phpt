@@ -8,6 +8,8 @@ disable_functions=dl
 <?php
 $disabled_function = 'dl';
 
+/* exclude_disabled parameters is harded to true */
+
 $functions = get_defined_functions();
 var_dump(in_array($disabled_function, $functions['internal']));
 
@@ -18,6 +20,6 @@ $functions = get_defined_functions(true);
 var_dump(in_array($disabled_function, $functions['internal']));
 ?>
 --EXPECT--
-bool(true)
-bool(true)
+bool(false)
+bool(false)
 bool(false)

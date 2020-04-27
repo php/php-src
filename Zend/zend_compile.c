@@ -3934,10 +3934,6 @@ int zend_compile_func_array_slice(znode *result, zend_ast_list *args) /* {{{ */
 
 int zend_try_compile_special_func(znode *result, zend_string *lcname, zend_ast_list *args, zend_function *fbc, uint32_t type) /* {{{ */
 {
-	if (fbc->internal_function.handler == ZEND_FN(display_disabled_function)) {
-		return FAILURE;
-	}
-
 	if (CG(compiler_options) & ZEND_COMPILE_NO_BUILTINS) {
 		return FAILURE;
 	}

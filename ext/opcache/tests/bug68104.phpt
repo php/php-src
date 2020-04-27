@@ -11,9 +11,12 @@ disable_functions=dl
 --FILE--
 <?php
 var_dump(is_callable("dl"));
-dl("a.so");
+try {
+    dl("a.so");
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
---EXPECTF--
-bool(true)
-
-Warning: dl() has been disabled for security reasons in %sbug68104.php on line %d
+--EXPECT--
+bool(false)
+Call to undefined function dl()

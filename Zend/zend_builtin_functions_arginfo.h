@@ -146,7 +146,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_get_declared_interfaces arginfo_func_get_args
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_get_defined_functions, 0, 0, IS_ARRAY, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, exclude_disabled, _IS_BOOL, 0, "false")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, exclude_disabled, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
 
 #define arginfo_get_defined_vars arginfo_func_get_args

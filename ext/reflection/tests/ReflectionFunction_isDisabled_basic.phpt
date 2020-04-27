@@ -7,8 +7,12 @@ TestFest PHP|Tek
 disable_functions=is_file
 --FILE--
 <?php
-$rc = new ReflectionFunction('is_file');
-var_dump($rc->isDisabled());
+try {
+    $rc = new ReflectionFunction('is_file');
+    var_dump($rc->isDisabled());
+} catch (ReflectionException $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
 --EXPECT--
-bool(true)
+Function is_file() does not exist

@@ -157,13 +157,6 @@ static inline int zend_optimizer_add_literal_string(zend_op_array *op_array, zen
 	return zend_optimizer_add_literal(op_array, &zv);
 }
 
-int zend_optimizer_is_disabled_func(const char *name, size_t len) {
-	zend_function *fbc = (zend_function *)zend_hash_str_find_ptr(EG(function_table), name, len);
-
-	return (fbc && fbc->type == ZEND_INTERNAL_FUNCTION &&
-			fbc->internal_function.handler == ZEND_FN(display_disabled_function));
-}
-
 static inline void drop_leading_backslash(zval *val) {
 	if (Z_STRVAL_P(val)[0] == '\\') {
 		zend_string *str = zend_string_init(Z_STRVAL_P(val) + 1, Z_STRLEN_P(val) - 1, 0);

@@ -899,9 +899,7 @@ static uint32_t get_internal_func_info(
 	}
 
 	func_info_t *info = Z_PTR_P(zv);
-	if (UNEXPECTED(zend_optimizer_is_disabled_func(info->name, info->name_len))) {
-		return MAY_BE_NULL;
-	} else if (info->info_func) {
+	if (info->info_func) {
 		return info->info_func(call_info, ssa);
 	} else {
 		return info->info;
