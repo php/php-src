@@ -194,4 +194,12 @@ typedef struct _zend_ini_parser_param {
 	void *arg;
 } zend_ini_parser_param;
 
+#ifndef ZTS
+# define ZEND_INI_GET_BASE() ((char *) mh_arg2)
+#else
+# define ZEND_INI_GET_BASE() ((char *) ts_resource(*((int *) mh_arg2)))
+#endif
+
+#define ZEND_INI_GET_ADDR() (ZEND_INI_GET_BASE() + (size_t) mh_arg1)
+
 #endif /* ZEND_INI_H */

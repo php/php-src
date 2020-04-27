@@ -63,19 +63,8 @@ static int validate_api_restriction(void)
 
 static ZEND_INI_MH(OnUpdateMemoryConsumption)
 {
-	zend_long *p;
-	zend_long memsize;
-#ifndef ZTS
-	char *base = (char *) mh_arg2;
-#else
-	char *base = (char *) ts_resource(*((int *) mh_arg2));
-#endif
-
-	/* keep the compiler happy */
-	(void)entry; (void)mh_arg2; (void)mh_arg3; (void)stage;
-
-	p = (zend_long *) (base + (size_t)mh_arg1);
-	memsize = atoi(ZSTR_VAL(new_value));
+	zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
+	zend_long memsize = atoi(ZSTR_VAL(new_value));
 	/* sanity check we must use at least 8 MB */
 	if (memsize < 8) {
 		const char *new_new_value = "8";
@@ -103,19 +92,8 @@ static ZEND_INI_MH(OnUpdateMemoryConsumption)
 
 static ZEND_INI_MH(OnUpdateMaxAcceleratedFiles)
 {
-	zend_long *p;
-	zend_long size;
-#ifndef ZTS
-	char *base = (char *) mh_arg2;
-#else
-	char *base = (char *) ts_resource(*((int *) mh_arg2));
-#endif
-
-	/* keep the compiler happy */
-	(void)entry; (void)mh_arg2; (void)mh_arg3; (void)stage;
-
-	p = (zend_long *) (base + (size_t)mh_arg1);
-	size = atoi(ZSTR_VAL(new_value));
+	zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
+	zend_long size = atoi(ZSTR_VAL(new_value));
 	/* sanity check we must use a value between MIN_ACCEL_FILES and MAX_ACCEL_FILES */
 
 	if (size < MIN_ACCEL_FILES || size > MAX_ACCEL_FILES) {
@@ -147,19 +125,8 @@ static ZEND_INI_MH(OnUpdateMaxAcceleratedFiles)
 
 static ZEND_INI_MH(OnUpdateMaxWastedPercentage)
 {
-	double *p;
-	zend_long percentage;
-#ifndef ZTS
-	char *base = (char *) mh_arg2;
-#else
-	char *base = (char *) ts_resource(*((int *) mh_arg2));
-#endif
-
-	/* keep the compiler happy */
-	(void)entry; (void)mh_arg2; (void)mh_arg3; (void)stage;
-
-	p = (double *) (base + (size_t)mh_arg1);
-	percentage = atoi(ZSTR_VAL(new_value));
+	double *p = (double *) ZEND_INI_GET_ADDR();
+	zend_long percentage = atoi(ZSTR_VAL(new_value));
 
 	if (percentage <= 0 || percentage > 50) {
 		const char *new_new_value = "5";
@@ -187,14 +154,7 @@ static ZEND_INI_MH(OnEnable)
 		return OnUpdateBool(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 	} else {
 		/* It may be only temporary disabled */
-		zend_bool *p;
-#ifndef ZTS
-		char *base = (char *) mh_arg2;
-#else
-		char *base = (char *) ts_resource(*((int *) mh_arg2));
-#endif
-
-		p = (zend_bool *) (base+(size_t) mh_arg1);
+		zend_bool *p = (zend_bool *) ZEND_INI_GET_ADDR();
 		if ((ZSTR_LEN(new_value) == 2 && strcasecmp("on", ZSTR_VAL(new_value)) == 0) ||
 		    (ZSTR_LEN(new_value) == 3 && strcasecmp("yes", ZSTR_VAL(new_value)) == 0) ||
 		    (ZSTR_LEN(new_value) == 4 && strcasecmp("true", ZSTR_VAL(new_value)) == 0) ||

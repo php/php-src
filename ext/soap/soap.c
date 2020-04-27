@@ -211,17 +211,8 @@ ZEND_GET_MODULE(soap)
 
 ZEND_INI_MH(OnUpdateCacheMode)
 {
-	char *p;
-#ifndef ZTS
-	char *base = (char *) mh_arg2;
-#else
-	char *base = (char *) ts_resource(*((int *) mh_arg2));
-#endif
-
-	p = (char*) (base+(size_t) mh_arg1);
-
+	char *p = (char *) ZEND_INI_GET_ADDR();
 	*p = (char)atoi(ZSTR_VAL(new_value));
-
 	return SUCCESS;
 }
 
