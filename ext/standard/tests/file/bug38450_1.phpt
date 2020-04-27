@@ -101,8 +101,14 @@ var_dump($myvar);
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 string(12) "constructor!"
+
+Notice: substr(): Argument #2 ($start) is not contained in argument #1 ($str) in %s on line %d
+
+Notice: substr(): Argument #2 ($start) is not contained in argument #1 ($str) in %s on line %d
+
+Notice: substr(): Argument #2 ($start) is not contained in argument #1 ($str) in %s on line %d
 line1
 line2
 line3

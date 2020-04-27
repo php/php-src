@@ -44,31 +44,47 @@ for ($i = -60; $i <= 60; $i += 10) {
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing mb_substr() : usage variations ***
 
 **-- Offset is: -60 --**
 -- ASCII String --
+
+Notice: mb_substr(): Argument #2 ($start) is not contained in argument #1 ($str) in %s on line %d
 string(8) "K0lzIA=="
 --Multibyte String --
+
+Notice: mb_substr(): Argument #2 ($start) is not contained in argument #1 ($str) in %s on line %d
 string(16) "5pel5pys6Kqe44OG"
 
 **-- Offset is: -50 --**
 -- ASCII String --
+
+Notice: mb_substr(): Argument #2 ($start) is not contained in argument #1 ($str) in %s on line %d
 string(8) "K0lzIA=="
 --Multibyte String --
+
+Notice: mb_substr(): Argument #2 ($start) is not contained in argument #1 ($str) in %s on line %d
 string(16) "5pel5pys6Kqe44OG"
 
 **-- Offset is: -40 --**
 -- ASCII String --
+
+Notice: mb_substr(): Argument #2 ($start) is not contained in argument #1 ($str) in %s on line %d
 string(8) "K0lzIA=="
 --Multibyte String --
+
+Notice: mb_substr(): Argument #2 ($start) is not contained in argument #1 ($str) in %s on line %d
 string(16) "5pel5pys6Kqe44OG"
 
 **-- Offset is: -30 --**
 -- ASCII String --
+
+Notice: mb_substr(): Argument #2 ($start) is not contained in argument #1 ($str) in %s on line %d
 string(8) "K0lzIA=="
 --Multibyte String --
+
+Notice: mb_substr(): Argument #2 ($start) is not contained in argument #1 ($str) in %s on line %d
 string(16) "5pel5pys6Kqe44OG"
 
 **-- Offset is: -20 --**

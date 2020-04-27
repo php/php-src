@@ -76,11 +76,17 @@ var_dump(chunk_split("abcde", $v, "abc"));
 var_dump(substr("abcde", $v, $v));
 
 ?>
---EXPECT--
+--EXPECTF--
 string(4) "bcde"
+
+Notice: substr_replace(): Argument #3 ($replace) is not contained in argument #1 ($str) in %s on line %d
 string(6) "abcdex"
-bool(false)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strcspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
 substr_count(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 substr_compare(): Argument #3 ($offset) must be contained in argument #1 ($main_str)
 stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
@@ -93,4 +99,6 @@ strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 int(2)
 string(8) "abcdeabc"
-bool(false)
+
+Notice: substr(): Argument #2 ($start) is not contained in argument #1 ($str) in %s on line %d
+string(0) ""

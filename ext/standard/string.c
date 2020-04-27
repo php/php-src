@@ -267,24 +267,30 @@ static void php_spn_common_handler(INTERNAL_FUNCTION_PARAMETERS, int behavior) /
 	if (start < 0) {
 		start += (zend_long)ZSTR_LEN(s11);
 		if (start < 0) {
+			php_error_docref(NULL, E_NOTICE, "Argument #3 ($%s) is not contained in argument #1 ($%s)",
+				get_active_function_arg_name(3), get_active_function_arg_name(1));
 			start = 0;
 		}
 	} else if ((size_t)start > ZSTR_LEN(s11)) {
-		RETURN_FALSE;
+		php_error_docref(NULL, E_NOTICE, "Argument #3 ($%s) is not contained in argument #1 ($%s)",
+			get_active_function_arg_name(3), get_active_function_arg_name(1));
+		RETURN_LONG(0);
 	}
 
 	if (len < 0) {
 		len += (ZSTR_LEN(s11) - start);
 		if (len < 0) {
+			// TODO Emit notice or ValueError
 			len = 0;
 		}
 	}
 
 	if (len > (zend_long)ZSTR_LEN(s11) - start) {
+		// TODO Emit notice or ValueError
 		len = ZSTR_LEN(s11) - start;
 	}
 
-	if(len == 0) {
+	if (len == 0) {
 		RETURN_LONG(0);
 	}
 
@@ -2165,42 +2171,49 @@ PHP_FUNCTION(chunk_split)
 PHP_FUNCTION(substr)
 {
 	zend_string *str;
-	zend_long l = 0, f;
+	zend_long l = 0, start;
 	zend_bool len_is_null = 1;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STR(str)
-		Z_PARAM_LONG(f)
+		Z_PARAM_LONG(start)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG_OR_NULL(l, len_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (f > (zend_long)ZSTR_LEN(str)) {
-		RETURN_FALSE;
-	} else if (f < 0) {
-		/* if "from" position is negative, count start position from the end
+	/* If start point goes past the last byte emit a notice */
+	if (start > (zend_long)ZSTR_LEN(str)) {
+		php_error_docref(NULL, E_NOTICE, "Argument #2 ($%s) is not contained in argument #1 ($%s)",
+			get_active_function_arg_name(2), get_active_function_arg_name(1));
+		RETURN_EMPTY_STRING();
+	} else if (start < 0) {
+		/* if start position is negative, count start position from the end
 		 * of the string
 		 */
-		if ((size_t)-f > ZSTR_LEN(str)) {
-			f = 0;
+		/* If start point goes past the initial byte emit a notice */
+		if ((size_t)-start > ZSTR_LEN(str)) {
+			php_error_docref(NULL, E_NOTICE, "Argument #2 ($%s) is not contained in argument #1 ($%s)",
+				get_active_function_arg_name(2), get_active_function_arg_name(1));
+			start = 0;
 		} else {
-			f = (zend_long)ZSTR_LEN(str) + f;
+			start = (zend_long)ZSTR_LEN(str) + start;
 		}
 		if (!len_is_null) {
 			if (l < 0) {
 				/* if "length" position is negative, set it to the length
 				 * needed to stop that many chars from the end of the string
 				 */
-				if ((size_t)(-l) > ZSTR_LEN(str) - (size_t)f) {
+				if ((size_t)(-l) > ZSTR_LEN(str) - (size_t)start) {
 					if ((size_t)(-l) > ZSTR_LEN(str)) {
+						// TODO Emit notice or ValueError
 						RETURN_FALSE;
 					} else {
 						l = 0;
 					}
 				} else {
-					l = (zend_long)ZSTR_LEN(str) - f + l;
+					l = (zend_long)ZSTR_LEN(str) - start + l;
 				}
-			} else if ((size_t)l > ZSTR_LEN(str) - (size_t)f) {
+			} else if ((size_t)l > ZSTR_LEN(str) - (size_t)start) {
 				goto truncate_len;
 			}
 		} else {
@@ -2211,23 +2224,28 @@ PHP_FUNCTION(substr)
 			/* if "length" position is negative, set it to the length
 			 * needed to stop that many chars from the end of the string
 			 */
-			if ((size_t)(-l) > ZSTR_LEN(str) - (size_t)f) {
+			if ((size_t)(-l) > ZSTR_LEN(str) - (size_t)start) {
+				// TODO Emit notice or ValueError
 				RETURN_FALSE;
 			} else {
-				l = (zend_long)ZSTR_LEN(str) - f + l;
+				l = (zend_long)ZSTR_LEN(str) - start + l;
 			}
-		} else if ((size_t)l > ZSTR_LEN(str) - (size_t)f) {
+		} else if ((size_t)l > ZSTR_LEN(str) - (size_t)start) {
 			goto truncate_len;
 		}
 	} else {
 truncate_len:
-		l = (zend_long)ZSTR_LEN(str) - f;
+		l = (zend_long)ZSTR_LEN(str) - start;
 	}
 
-	if (l == ZSTR_LEN(str)) {
+	if (l == 0) {
+		RETURN_EMPTY_STRING();
+	} else if (l == 1) {
+		RETURN_INTERNED_STR(ZSTR_CHAR((zend_uchar)(ZSTR_VAL(str)[start])));
+	} else if (l == ZSTR_LEN(str)) {
 		RETURN_STR_COPY(str);
 	} else {
-		RETURN_STRINGL_FAST(ZSTR_VAL(str) + f, l);
+		RETURN_STRINGL_FAST(ZSTR_VAL(str) + start, l);
 	}
 }
 /* }}} */
@@ -2287,9 +2305,13 @@ PHP_FUNCTION(substr_replace)
 			if (f < 0) {
 				f = (zend_long)ZSTR_LEN(str) + f;
 				if (f < 0) {
+					php_error_docref(NULL, E_NOTICE, "Argument #3 ($%s) is not contained in argument #1 ($%s)",
+						get_active_function_arg_name(2), get_active_function_arg_name(1));
 					f = 0;
 				}
 			} else if ((size_t)f > ZSTR_LEN(str)) {
+				php_error_docref(NULL, E_NOTICE, "Argument #3 ($%s) is not contained in argument #1 ($%s)",
+					get_active_function_arg_name(2), get_active_function_arg_name(1));
 				f = ZSTR_LEN(str);
 			}
 			/* if "length" position is negative, set it to the length
@@ -2298,6 +2320,7 @@ PHP_FUNCTION(substr_replace)
 			if (l < 0) {
 				l = ((zend_long)ZSTR_LEN(str) - f) + l;
 				if (l < 0) {
+					// TODO Emit notice or ValueError
 					l = 0;
 				}
 			}
@@ -2368,6 +2391,7 @@ PHP_FUNCTION(substr_replace)
 					if (f < 0) {
 						f = (zend_long)ZSTR_LEN(orig_str) + f;
 						if (f < 0) {
+							// TODO Emit notice
 							f = 0;
 						}
 					} else if (f > (zend_long)ZSTR_LEN(orig_str)) {
@@ -2382,6 +2406,7 @@ PHP_FUNCTION(substr_replace)
 				if (f < 0) {
 					f = (zend_long)ZSTR_LEN(orig_str) + f;
 					if (f < 0) {
+						// TODO Emit notice
 						f = 0;
 					}
 				} else if (f > (zend_long)ZSTR_LEN(orig_str)) {
@@ -2412,6 +2437,7 @@ PHP_FUNCTION(substr_replace)
 			if (l < 0) {
 				l = (ZSTR_LEN(orig_str) - f) + l;
 				if (l < 0) {
+					// TODO Emit notice or ValueError
 					l = 0;
 				}
 			}
@@ -5432,6 +5458,7 @@ PHP_FUNCTION(substr_count)
 		offset += (zend_long)haystack_len;
 	}
 	if ((offset < 0) || ((size_t)offset > haystack_len)) {
+		// Change to notice?
 		zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
 		RETURN_THROWS();
 	}
@@ -5904,7 +5931,11 @@ PHP_FUNCTION(substr_compare)
 
 	if (offset < 0) {
 		offset = ZSTR_LEN(s1) + offset;
-		offset = (offset < 0) ? 0 : offset;
+		if (offset < 0) {
+			php_error_docref(NULL, E_NOTICE, "Argument #3 ($%s) is not contained in argument #1 ($%s)",
+				get_active_function_arg_name(3), get_active_function_arg_name(1));
+			offset = 0;
+		}
 	}
 
 	if ((size_t)offset > ZSTR_LEN(s1)) {

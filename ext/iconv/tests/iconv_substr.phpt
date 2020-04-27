@@ -40,13 +40,17 @@ bar("This is a test", 0, -100000);
 bar("This is a test", -9, -100000);
 var_dump(iconv("ISO-2022-JP", "EUC-JP", iconv_substr(iconv("EUC-JP", "ISO-2022-JP", "こんにちは ISO-2022-JP"), 3, 8, "ISO-2022-JP")));
 ?>
---EXPECT--
+--EXPECTF--
 666768696a6b6c
 666768696a6b6c
 a6a4a8a4aaa4ab
 a4aba4ada4afa4b1a4b3a4b5a4b7
-bool(false)
-bool(false)
+
+Notice: substr(): Argument #2 ($start) is not contained in argument #1 ($str) in %s on line %d
+string(0) ""
+
+Notice: iconv_substr(): Argument #2 ($offset) is not contained in argument #1 ($str) in %s on line %d
+string(0) ""
 string(14) "This is a test"
 string(14) "This is a test"
 string(3) "est"
@@ -56,7 +60,11 @@ string(3) "est"
 string(5) "This "
 string(5) "This "
 bool(false)
+
+Notice: iconv_substr(): Argument #2 ($offset) is not contained in argument #1 ($str) in %s on line %d
+string(0) ""
 bool(false)
-bool(false)
-bool(false)
+
+Notice: iconv_substr(): Argument #2 ($offset) is not contained in argument #1 ($str) in %s on line %d
+string(0) ""
 string(10) "ちは ISO-2"

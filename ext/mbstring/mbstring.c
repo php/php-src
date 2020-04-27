@@ -2160,6 +2160,8 @@ PHP_FUNCTION(mb_substr)
 	} else if (-from < mblen) {
 		real_from = mblen + from;
 	} else {
+		php_error_docref(NULL, E_NOTICE, "Argument #2 ($%s) is not contained in argument #1 ($%s)",
+			get_active_function_arg_name(2), get_active_function_arg_name(1));
 		real_from = 0;
 	}
 
@@ -2173,6 +2175,7 @@ PHP_FUNCTION(mb_substr)
 	} else if (real_from < mblen && -len < mblen - real_from) {
 		real_len = (mblen - real_from) + len;
 	} else {
+		// TODO Emit notice?
 		real_len = 0;
 	}
 
@@ -2218,6 +2221,8 @@ PHP_FUNCTION(mb_strcut)
 	if (from < 0) {
 		from = string.len + from;
 		if (from < 0) {
+			php_error_docref(NULL, E_NOTICE, "Argument #2 ($%s) is not contained in argument #1 ($%s)",
+				get_active_function_arg_name(2), get_active_function_arg_name(1));
 			from = 0;
 		}
 	}
@@ -2233,6 +2238,8 @@ PHP_FUNCTION(mb_strcut)
 	}
 
 	if (from > string.len) {
+		php_error_docref(NULL, E_NOTICE, "Argument #2 ($%s) is not contained in argument #1 ($%s)",
+			get_active_function_arg_name(2), get_active_function_arg_name(1));
 		RETURN_EMPTY_STRING();
 	}
 

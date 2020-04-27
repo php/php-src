@@ -543,9 +543,9 @@ function bin2hex(string $data): string {}
 
 function hex2bin(string $data): string|false {}
 
-function strspn(string $str, string $mask, int $start = 0, ?int $len = null): int|false {}
+function strspn(string $str, string $mask, int $start = 0, ?int $len = null): int {}
 
-function strcspn(string $str, string $mask, int $start = 0, ?int $len = null): int|false {}
+function strcspn(string $str, string $mask, int $start = 0, ?int $len = null): int {}
 
 #if HAVE_NL_LANGINFO
 function nl_langinfo(int $item): string|false {}
@@ -610,7 +610,7 @@ function chunk_split(string $str, int $chunklen = 76, string $ending = "\r\n"): 
 
 function substr(string $str, int $start, ?int $length = null): string|false {}
 
-function substr_replace(array|string $str, array|string $replace, array|int $start, array|int|null $length = null): string|array|false {}
+function substr_replace(array|string $str, array|string $replace, array|int $start, array|int|null $length = null): string|array {}
 
 function quotemeta(string $str): string {}
 
@@ -688,7 +688,7 @@ function str_split(string $str, int $split_length = 1): array {}
 
 function strpbrk(string $haystack, string $char_list): string|false {}
 
-function substr_compare(string $main_str, string $str, int $offset, ?int $length = null, bool $case_insensitivity = false): int|false {}
+function substr_compare(string $main_str, string $str, int $offset, ?int $length = null, bool $case_insensitivity = false): int {}
 
 function utf8_encode(string $data): string {}
 

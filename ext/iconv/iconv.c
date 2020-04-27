@@ -639,23 +639,38 @@ static php_iconv_err_t _php_iconv_substr(smart_str *pretval,
 	}
 
 	if (len < 0) {
-		if ((len += (total_len - offset)) < 0) {
-			return PHP_ICONV_ERR_SUCCESS;
+		len += (total_len - offset);
+		if (len < 0) {
+			/* Argument 2 is offsetn and argument 1 is source string */
+			php_error_docref(NULL, E_NOTICE, "Argument #2 ($%s) is not contained in argument #1 ($%s)",
+				get_active_function_arg_name(2), get_active_function_arg_name(1));
+			len = 0;
 		}
 	}
 
 	if (offset < 0) {
-		if ((offset += total_len) < 0) {
-			return PHP_ICONV_ERR_SUCCESS;
+		offset += total_len;
+		if (offset < 0) {
+			/* Argument 2 is offsetn and argument 1 is source string */
+			php_error_docref(NULL, E_NOTICE, "Argument #2 ($%s) is not contained in argument #1 ($%s)",
+				get_active_function_arg_name(2), get_active_function_arg_name(1));
+			offset = 0;
 		}
 	}
 
 	if((size_t)len > total_len) {
+		// TODO Emit notice/ValueError
 		len = total_len;
 	}
 
 
 	if ((size_t)offset > total_len) {
+		/* Argument 2 is offsetn and argument 1 is source string */
+		php_error_docref(NULL, E_NOTICE, "Argument #2 ($%s) is not contained in argument #1 ($%s)",
+			get_active_function_arg_name(2), get_active_function_arg_name(1));
+		/* Return an empty string */
+		smart_str_appendl(pretval, "", 0);
+		smart_str_0(pretval);
 		return PHP_ICONV_ERR_SUCCESS;
 	}
 

@@ -13,10 +13,12 @@ var_dump(mb_strcut($crap, 12, 100, 'UTF-8'));
 var_dump(mb_strcut($crap, 13, 100, 'UTF-8'));
 
 ?>
---EXPECT--
+--EXPECTF--
 string(12) "AåBäCöDü"
 string(11) "åBäCöDü"
 string(11) "åBäCöDü"
 string(9) "BäCöDü"
 string(0) ""
+
+Notice: mb_strcut(): Argument #2 ($start) is not contained in argument #1 ($str) in %s on line %d
 string(0) ""

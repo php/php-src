@@ -968,12 +968,6 @@ static inline int ct_eval_func_call(
 				return FAILURE;
 			}
 			/* pass */
-		} else if (zend_string_equals_literal(name, "substr")) {
-			if (Z_TYPE_P(args[0]) != IS_STRING
-					|| Z_TYPE_P(args[1]) != IS_LONG) {
-				return FAILURE;
-			}
-			/* pass */
 		} else if (zend_string_equals_literal(name, "pow")) {
 			if ((Z_TYPE_P(args[0]) != IS_LONG && Z_TYPE_P(args[0]) != IS_DOUBLE)
 					|| (Z_TYPE_P(args[1]) != IS_LONG && Z_TYPE_P(args[1]) != IS_DOUBLE)) {

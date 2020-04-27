@@ -96,79 +96,199 @@ foreach($heredoc_strings as $str)  {
 
 echo "Done"
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing strspn() : with different start values ***
 
 -- Iteration 1 --
 int(0)
-bool(false)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(0)
 int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(0)
 int(0)
-bool(false)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(0)
 int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(0)
 int(0)
-bool(false)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(0)
 int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(0)
 int(0)
-bool(false)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(0)
 int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(0)
 int(0)
-bool(false)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(0)
 int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(0)
-bool(false)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(0)
-int(0)
-bool(false)
-bool(false)
-int(0)
-int(0)
-bool(false)
-int(0)
-int(0)
-bool(false)
-bool(false)
-int(0)
-int(0)
-bool(false)
-int(0)
-int(0)
-bool(false)
-bool(false)
-int(0)
-int(0)
-bool(false)
-int(0)
-int(0)
-bool(false)
-bool(false)
-int(0)
-int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(0)
 
 -- Iteration 2 --
@@ -177,70 +297,110 @@ int(0)
 int(0)
 int(0)
 int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(0)
 int(0)
 int(0)
 int(0)
 int(0)
 int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(0)
-int(2)
-int(1)
-int(0)
-int(1)
-int(2)
-bool(false)
-int(2)
-int(0)
-int(0)
-int(0)
-int(0)
-int(0)
-bool(false)
-int(0)
-int(0)
-int(0)
-int(0)
-int(0)
-int(0)
-bool(false)
-int(0)
-int(0)
-int(0)
-int(0)
-int(0)
-int(0)
-bool(false)
-int(0)
-int(0)
-int(0)
-int(0)
-int(0)
-int(0)
-bool(false)
-int(0)
-int(0)
-int(0)
-int(0)
-int(0)
-int(0)
-bool(false)
-int(0)
-int(0)
-int(0)
-int(0)
-int(0)
-int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(0)
 int(2)
 int(1)
 int(0)
 int(1)
 int(2)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(2)
+int(0)
+int(0)
+int(0)
+int(0)
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+int(0)
+int(0)
+int(0)
+int(0)
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+int(0)
+int(0)
+int(0)
+int(0)
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+int(0)
+int(0)
+int(0)
+int(0)
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+int(0)
+int(0)
+int(0)
+int(0)
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+int(0)
+int(0)
+int(0)
+int(0)
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+int(2)
+int(1)
+int(0)
+int(1)
+int(2)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(2)
 
 -- Iteration 3 --
@@ -249,70 +409,110 @@ int(0)
 int(0)
 int(0)
 int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(0)
 int(0)
 int(0)
 int(0)
 int(0)
 int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(0)
 int(8)
 int(7)
 int(6)
 int(0)
 int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(8)
 int(11)
 int(10)
 int(9)
 int(0)
 int(1)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(11)
 int(0)
 int(0)
 int(0)
 int(0)
 int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(0)
 int(0)
 int(0)
 int(0)
 int(0)
 int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(0)
 int(0)
 int(0)
 int(0)
 int(0)
 int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(0)
 int(1)
 int(0)
 int(0)
 int(0)
 int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(1)
 int(0)
 int(0)
 int(0)
 int(0)
 int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(0)
 int(2)
 int(1)
 int(0)
 int(0)
 int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(2)
 
 -- Iteration 4 --
@@ -321,70 +521,110 @@ int(0)
 int(0)
 int(0)
 int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(0)
 int(0)
 int(0)
 int(0)
 int(0)
 int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(0)
 int(4)
 int(3)
 int(2)
 int(1)
 int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(4)
 int(4)
 int(3)
 int(2)
 int(0)
 int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(4)
 int(0)
 int(0)
 int(0)
 int(0)
 int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(0)
 int(0)
 int(1)
 int(0)
 int(0)
 int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(0)
 int(0)
 int(0)
 int(0)
 int(0)
 int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(0)
 int(2)
 int(1)
 int(0)
 int(0)
 int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(2)
 int(0)
 int(0)
 int(0)
 int(0)
 int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(0)
 int(2)
 int(1)
 int(0)
 int(1)
 int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(2)
 
 -- Iteration 5 --
@@ -393,70 +633,110 @@ int(0)
 int(0)
 int(0)
 int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(0)
 int(0)
 int(0)
 int(0)
 int(0)
 int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(0)
 int(4)
 int(3)
 int(2)
 int(0)
 int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(4)
 int(4)
 int(3)
 int(2)
 int(0)
 int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(4)
 int(0)
 int(0)
 int(0)
 int(0)
 int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(0)
 int(0)
 int(1)
 int(0)
 int(0)
 int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(0)
 int(0)
 int(0)
 int(0)
 int(0)
 int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(0)
-int(2)
-int(1)
-int(0)
-int(0)
-int(0)
-bool(false)
-int(2)
-int(0)
-int(0)
-int(0)
-int(0)
-int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(0)
 int(2)
 int(1)
 int(0)
 int(0)
 int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(2)
+int(0)
+int(0)
+int(0)
+int(0)
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+int(2)
+int(1)
+int(0)
+int(0)
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(2)
 
 -- Iteration 6 --
@@ -465,70 +745,110 @@ int(0)
 int(0)
 int(0)
 int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(0)
 int(0)
 int(0)
 int(0)
 int(0)
 int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(0)
 int(4)
 int(3)
 int(2)
 int(0)
 int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(4)
 int(4)
 int(3)
 int(2)
 int(0)
 int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(4)
 int(0)
 int(0)
 int(0)
 int(0)
 int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(0)
 int(0)
 int(1)
 int(0)
 int(0)
 int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(0)
 int(0)
 int(0)
 int(0)
 int(0)
 int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(0)
-int(2)
-int(1)
-int(0)
-int(0)
-int(0)
-bool(false)
-int(2)
-int(0)
-int(0)
-int(0)
-int(0)
-int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(0)
 int(2)
 int(1)
 int(0)
 int(0)
 int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(2)
+int(0)
+int(0)
+int(0)
+int(0)
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+int(2)
+int(1)
+int(0)
+int(0)
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(2)
 
 -- Iteration 7 --
@@ -537,69 +857,109 @@ int(0)
 int(0)
 int(0)
 int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(0)
 int(0)
 int(0)
 int(0)
 int(0)
 int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(0)
 int(4)
 int(3)
 int(2)
 int(0)
 int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(4)
 int(4)
 int(3)
 int(2)
 int(0)
 int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(4)
 int(0)
 int(0)
 int(0)
 int(0)
 int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(0)
 int(0)
 int(1)
 int(0)
 int(0)
 int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(0)
 int(0)
 int(0)
 int(0)
 int(0)
 int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(0)
-int(2)
-int(1)
-int(0)
-int(0)
-int(0)
-bool(false)
-int(2)
-int(0)
-int(0)
-int(0)
-int(0)
-int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(0)
 int(2)
 int(1)
 int(0)
 int(0)
 int(0)
-bool(false)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(2)
+int(0)
+int(0)
+int(0)
+int(0)
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+int(2)
+int(1)
+int(0)
+int(0)
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
+int(0)
+
+Notice: strspn(): Argument #3 ($start) is not contained in argument #1 ($str) in %s on line %d
 int(2)
 Done

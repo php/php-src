@@ -22,7 +22,7 @@ try {
 }
 var_dump(substr_compare("abcde", "abc", -1, NULL, -5) > 0);
 ?>
---EXPECT--
+--EXPECTF--
 bool(true)
 bool(true)
 int(0)
@@ -31,6 +31,8 @@ int(0)
 bool(true)
 bool(true)
 int(-1)
+
+Notice: substr_compare(): Argument #3 ($offset) is not contained in argument #1 ($main_str) in %s on line %d
 bool(true)
 int(0)
 Test

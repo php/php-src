@@ -55,12 +55,16 @@ print MBStringChars(mb_strcut($utf16le, 1, 3, 'UTF-16LE'), 'UTF-16LE') . "\n";
 print MBStringChars(mb_strcut($utf16le, 1, 4, 'UTF-16LE'), 'UTF-16LE') . "\n";
 
 ?>
---EXPECT--
+--EXPECTF--
 == EUC-JP ==
 [a4ce cab8]
 [a4b3 a4ce]
 [30 31 32 33 a4b3 a4ce cab8 bbfa cef3 a4cf c6fc cbdc b8ec a4c7 a4b9 a1a3 45 55 43 2d 4a 50 a4f2 bbc8 a4c3 a4c6 a4a4 a4de a4b9 a1a3 c6fc cbdc b8ec a4cf cccc c5dd bdad a4a4 a1a3]
+
+Notice: mb_strcut(): Argument #2 ($start) is not contained in argument #1 ($str) in %s on line %d
 OK
+
+Notice: mb_strcut(): Argument #2 ($start) is not contained in argument #1 ($str) in %s on line %d
 OK
 == UTF-8 ==
 []
