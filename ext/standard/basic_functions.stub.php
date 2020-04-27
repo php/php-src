@@ -176,11 +176,7 @@ function array_values(array $arg): array {}
 
 function array_count_values(array $arg): array {}
 
-/**
- * @param int|string|null $column_key
- * @param int|string|null $index_key
- */
-function array_column(array $arg, $column_key, $index_key = null): array {}
+function array_column(array $arg, int|string|null $column_key, int|string|null $index_key = null): array {}
 
 function array_reverse(array $input, bool $preserve_keys = false): array {}
 

@@ -4083,47 +4083,24 @@ PHP_FUNCTION(array_count_values)
 }
 /* }}} */
 
-/* {{{ array_column_param_helper
- * Specialized conversion rules for array_column() function
- */
-static inline
-zend_bool array_column_param_helper(zval *param, int parameter_number) {
-	switch (Z_TYPE_P(param)) {
-		case IS_DOUBLE:
-			convert_to_long_ex(param);
-			/* fallthrough */
-		case IS_LONG:
-			return 1;
-
-		case IS_OBJECT:
-			if (!try_convert_to_string(param)) {
-				return 0;
-			}
-			/* fallthrough */
-		case IS_STRING:
-			return 1;
-
-		default:
-			zend_argument_type_error(parameter_number, "must be of type string|int, %s given", zend_zval_type_name(param));
-			return 0;
-	}
-}
-/* }}} */
-
-static inline zval *array_column_fetch_prop(zval *data, zval *name, zval *rv) /* {{{ */
+static inline zval *array_column_fetch_prop(zval *data, zend_string *name_str, zend_long name_long, zval *rv) /* {{{ */
 {
 	zval *prop = NULL;
 
 	if (Z_TYPE_P(data) == IS_OBJECT) {
+		zend_string *tmp_str;
+		/* If name is an integer convert integer to string */
+		if (name_str == NULL) {
+			tmp_str = zend_long_to_str(name_long);
+		} else {
+			tmp_str = zend_string_copy(name_str);
+		}
 		/* The has_property check is first performed in "exists" mode (which returns true for
 		 * properties that are null but exist) and then in "has" mode to handle objects that
 		 * implement __isset (which is not called in "exists" mode). */
-		zend_string *str, *tmp_str;
-
-		str = zval_get_tmp_string(name, &tmp_str);
-		if (Z_OBJ_HANDLER_P(data, has_property)(Z_OBJ_P(data), str, ZEND_PROPERTY_EXISTS, NULL)
-				|| Z_OBJ_HANDLER_P(data, has_property)(Z_OBJ_P(data), str, ZEND_PROPERTY_ISSET, NULL)) {
-			prop = Z_OBJ_HANDLER_P(data, read_property)(Z_OBJ_P(data), str, BP_VAR_R, NULL, rv);
+		if (Z_OBJ_HANDLER_P(data, has_property)(Z_OBJ_P(data), tmp_str, ZEND_PROPERTY_EXISTS, NULL)
+				|| Z_OBJ_HANDLER_P(data, has_property)(Z_OBJ_P(data), tmp_str, ZEND_PROPERTY_ISSET, NULL)) {
+			prop = Z_OBJ_HANDLER_P(data, read_property)(Z_OBJ_P(data), tmp_str, BP_VAR_R, NULL, rv);
 			if (prop) {
 				ZVAL_DEREF(prop);
 				if (prop != rv) {
@@ -4131,12 +4108,13 @@ static inline zval *array_column_fetch_prop(zval *data, zval *name, zval *rv) /*
 				}
 			}
 		}
-		zend_tmp_string_release(tmp_str);
+		zend_string_release(tmp_str);
 	} else if (Z_TYPE_P(data) == IS_ARRAY) {
-		if (Z_TYPE_P(name) == IS_STRING) {
-			prop = zend_symtable_find(Z_ARRVAL_P(data), Z_STR_P(name));
-		} else if (Z_TYPE_P(name) == IS_LONG) {
-			prop = zend_hash_index_find(Z_ARRVAL_P(data), Z_LVAL_P(name));
+		/* Name is a string */
+		if (name_str != NULL) {
+			prop = zend_symtable_find(Z_ARRVAL_P(data), name_str);
+		} else {
+			prop = zend_hash_index_find(Z_ARRVAL_P(data), name_long);
 		}
 		if (prop) {
 			ZVAL_DEREF(prop);
@@ -4144,42 +4122,42 @@ static inline zval *array_column_fetch_prop(zval *data, zval *name, zval *rv) /*
 		}
 	}
 
-
 	return prop;
 }
 /* }}} */
 
-/* {{{ proto array array_column(array input, mixed column_key[, mixed index_key])
+/* {{{ proto array array_column(array input, string|int|null column_key[, string|int|null index_key])
    Return the values from a single column in the input array, identified by the
    value_key and optionally indexed by the index_key */
 PHP_FUNCTION(array_column)
 {
 	HashTable *input;
 	zval *colval, *data, rv;
-	zval *column = NULL, *index = NULL;
+	zend_string *column_str = NULL;
+	zend_long column_long;
+	zend_bool column_is_null = 0;
+	zend_string *index_str = NULL;
+	zend_long index_long;
+	zend_bool index_is_null = 1;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_ARRAY_HT(input)
-		Z_PARAM_ZVAL_EX(column, 1, 0)
+		Z_PARAM_STR_OR_LONG_OR_NULL(column_str, column_long, column_is_null)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL_EX(index, 1, 0)
+		Z_PARAM_STR_OR_LONG_OR_NULL(index_str, index_long, index_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if ((column && !array_column_param_helper(column, 2)) ||
-	    (index && !array_column_param_helper(index, 3))) {
-		RETURN_THROWS();
-	}
-
 	array_init_size(return_value, zend_hash_num_elements(input));
-	if (!index) {
+	/* Index param is not passed */
+	if (index_is_null) {
 		zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 			ZEND_HASH_FOREACH_VAL(input, data) {
 				ZVAL_DEREF(data);
-				if (!column) {
+				if (column_is_null) {
 					Z_TRY_ADDREF_P(data);
 					colval = data;
-				} else if ((colval = array_column_fetch_prop(data, column, &rv)) == NULL) {
+				} else if ((colval = array_column_fetch_prop(data, column_str, column_long, &rv)) == NULL) {
 					continue;
 				}
 				ZEND_HASH_FILL_ADD(colval);
@@ -4189,10 +4167,10 @@ PHP_FUNCTION(array_column)
 		ZEND_HASH_FOREACH_VAL(input, data) {
 			ZVAL_DEREF(data);
 
-			if (!column) {
+			if (column_is_null) {
 				Z_TRY_ADDREF_P(data);
 				colval = data;
-			} else if ((colval = array_column_fetch_prop(data, column, &rv)) == NULL) {
+			} else if ((colval = array_column_fetch_prop(data, column_str, column_long, &rv)) == NULL) {
 				continue;
 			}
 
@@ -4200,7 +4178,7 @@ PHP_FUNCTION(array_column)
 			 * which is to append the value as next_index
 			 */
 			zval rv;
-			zval *keyval = array_column_fetch_prop(data, index, &rv);
+			zval *keyval = array_column_fetch_prop(data, index_str, index_long, &rv);
 
 			if (keyval) {
 				switch (Z_TYPE_P(keyval)) {
