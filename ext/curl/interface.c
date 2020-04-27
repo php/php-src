@@ -1270,8 +1270,39 @@ static HashTable *curl_get_gc(zend_object *object, zval **table, int *n)
 {
 	php_curl *curl = curl_from_obj(object);
 
-	*table = &curl->postfields;
-	*n = 1;
+	zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
+
+	zend_get_gc_buffer_add_zval(gc_buffer, &curl->postfields);
+	if (curl->handlers) {
+		if (curl->handlers->read) {
+			zend_get_gc_buffer_add_zval(gc_buffer, &curl->handlers->read->func_name);
+			zend_get_gc_buffer_add_zval(gc_buffer, &curl->handlers->read->stream);
+		}
+
+		if (curl->handlers->write) {
+			zend_get_gc_buffer_add_zval(gc_buffer, &curl->handlers->write->func_name);
+			zend_get_gc_buffer_add_zval(gc_buffer, &curl->handlers->write->stream);
+		}
+
+		if (curl->handlers->write_header) {
+			zend_get_gc_buffer_add_zval(gc_buffer, &curl->handlers->write_header->func_name);
+			zend_get_gc_buffer_add_zval(gc_buffer, &curl->handlers->write_header->stream);
+		}
+
+		if (curl->handlers->progress) {
+			zend_get_gc_buffer_add_zval(gc_buffer, &curl->handlers->progress->func_name);
+		}
+
+#if LIBCURL_VERSION_NUM >= 0x071500
+		if (curl->handlers->fnmatch) {
+			zend_get_gc_buffer_add_zval(gc_buffer, &curl->handlers->fnmatch->func_name);
+		}
+#endif
+
+		zend_get_gc_buffer_add_zval(gc_buffer, &curl->handlers->std_err);
+	}
+
+	zend_get_gc_buffer_use(gc_buffer, table, n);
 
 	return zend_std_get_properties(object);
 }

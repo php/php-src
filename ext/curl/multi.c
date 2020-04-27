@@ -578,6 +578,23 @@ void curl_multi_free_obj(zend_object *object)
 	zend_object_std_dtor(&mh->std);
 }
 
+static HashTable *curl_multi_get_gc(zend_object *object, zval **table, int *n)
+{
+	php_curlm *curl_multi = curl_multi_from_obj(object);
+
+	zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
+
+	if (curl_multi->handlers) {
+		if (curl_multi->handlers->server_push) {
+			zend_get_gc_buffer_add_zval(gc_buffer, &curl_multi->handlers->server_push->func_name);
+		}
+	}
+
+	zend_get_gc_buffer_use(gc_buffer, table, n);
+
+	return zend_std_get_properties(object);
+}
+
 void curl_multi_register_class(void) {
 	zend_class_entry ce_multi;
 	INIT_CLASS_ENTRY(ce_multi, "CurlMulti", curl_multi_methods);
@@ -590,6 +607,7 @@ void curl_multi_register_class(void) {
 	memcpy(&curl_multi_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	curl_multi_handlers.offset = XtOffsetOf(php_curlm, std);
 	curl_multi_handlers.free_obj = curl_multi_free_obj;
+	curl_multi_handlers.get_gc = curl_multi_get_gc;
 	curl_multi_handlers.get_constructor = curl_multi_get_constructor;
 	curl_multi_handlers.clone_obj = NULL;
 }
