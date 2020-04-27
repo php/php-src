@@ -1068,13 +1068,13 @@ function find_files(string $dir, bool $is_ext_dir = false, bool $ignore = false)
         }
 
         // Cleanup any left-over tmp files from last run.
-        if (substr($name, -4) == '.tmp') {
+        if (@substr($name, -4) === '.tmp') {
             @unlink("$dir/$name");
             continue;
         }
 
         // Otherwise we're only interested in *.phpt files.
-        if (substr($name, -5) == '.phpt') {
+        if (@substr($name, -5) === '.phpt') {
             if ($ignore) {
                 $ignored_by_ext++;
             } else {
