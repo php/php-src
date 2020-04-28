@@ -51,6 +51,7 @@ extern zend_module_entry pgsql_module_entry;
 #endif
 
 #ifdef HAVE_PG_CONFIG_H
+#undef SIZEOF_OFF_T
 #include <pg_config.h>
 #endif
 
