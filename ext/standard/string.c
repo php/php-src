@@ -1462,29 +1462,33 @@ PHPAPI zend_string *php_string_tolower(zend_string *s)
 	unsigned char *c;
 	const unsigned char *e;
 
-	c = (unsigned char *)ZSTR_VAL(s);
-	e = c + ZSTR_LEN(s);
+	if (EXPECTED(!BG(locale_changed))) {
+		return zend_string_tolower(s);
+	} else {
+		c = (unsigned char *)ZSTR_VAL(s);
+		e = c + ZSTR_LEN(s);
 
-	while (c < e) {
-		if (isupper(*c)) {
-			register unsigned char *r;
-			zend_string *res = zend_string_alloc(ZSTR_LEN(s), 0);
+		while (c < e) {
+			if (isupper(*c)) {
+				register unsigned char *r;
+				zend_string *res = zend_string_alloc(ZSTR_LEN(s), 0);
 
-			if (c != (unsigned char*)ZSTR_VAL(s)) {
-				memcpy(ZSTR_VAL(res), ZSTR_VAL(s), c - (unsigned char*)ZSTR_VAL(s));
+				if (c != (unsigned char*)ZSTR_VAL(s)) {
+					memcpy(ZSTR_VAL(res), ZSTR_VAL(s), c - (unsigned char*)ZSTR_VAL(s));
+				}
+				r = c + (ZSTR_VAL(res) - ZSTR_VAL(s));
+				while (c < e) {
+					*r = tolower(*c);
+					r++;
+					c++;
+				}
+				*r = '\0';
+				return res;
 			}
-			r = c + (ZSTR_VAL(res) - ZSTR_VAL(s));
-			while (c < e) {
-				*r = tolower(*c);
-				r++;
-				c++;
-			}
-			*r = '\0';
-			return res;
+			c++;
 		}
-		c++;
+		return zend_string_copy(s);
 	}
-	return zend_string_copy(s);
 }
 /* }}} */
 
