@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.3.18
+?? ??? ????, PHP 7.3.19
+
+30 Apr 2020, PHP 7.3.18RC1
 
 - Core:
   . Fixed bug #79434 (PHP 7.3 and PHP-7.4 crash with NULL-pointer dereference
