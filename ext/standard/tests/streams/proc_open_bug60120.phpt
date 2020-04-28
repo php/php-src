@@ -90,6 +90,7 @@ fclose($pipes[2]);
 ?>
 --CLEAN--
 <?php
+$file = preg_replace("~\.clean\.php$~", ".io.php", __FILE__);
 unlink($file);
 ?>
 --EXPECTF--

@@ -45,7 +45,6 @@ ob_end_flush();
 <?php
 $initdir = __DIR__;
 $sessions = ($initdir."/sessions");
-chdir($initdir);
 var_dump(rmdir($sessions));
 ?>
 --EXPECTF--
