@@ -111,10 +111,6 @@ void _php_curl_multi_cleanup_list(void *data) /* {{{ */
 {
 	zval *z_ch = (zval *)data;
 
-	if (!z_ch) {
-		return;
-	}
-
 	zval_ptr_dtor(z_ch);
 }
 /* }}} */
@@ -137,7 +133,7 @@ static zval *_php_curl_multi_find_easy_handle(php_curlm *mh, CURL *easy) /* {{{ 
 
 	for(pz_ch_temp = (zval *)zend_llist_get_first_ex(&mh->easyh, &pos); pz_ch_temp;
 		pz_ch_temp = (zval *)zend_llist_get_next_ex(&mh->easyh, &pos)) {
-        tmp_ch = Z_CURL_P(pz_ch_temp);
+		tmp_ch = Z_CURL_P(pz_ch_temp);
 
 		if (tmp_ch->cp == easy) {
 			return pz_ch_temp;
