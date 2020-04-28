@@ -172,6 +172,8 @@ static const struct reserved_class_name reserved_class_names[] = {
 	{ZEND_STRL("void")},
 	{ZEND_STRL("iterable")},
 	{ZEND_STRL("object")},
+	{ZEND_STRL("number")},
+	{ZEND_STRL("scalar")},
 	{NULL, 0}
 };
 
@@ -220,6 +222,8 @@ static const builtin_type_info builtin_types[] = {
 	{ZEND_STRL("void"), IS_VOID},
 	{ZEND_STRL("iterable"), IS_ITERABLE},
 	{ZEND_STRL("object"), IS_OBJECT},
+	{ZEND_STRL("number"), IS_NUMBER},
+	{ZEND_STRL("scalar"), IS_SCALAR},
 	{NULL, 0, IS_UNDEF}
 };
 
@@ -1166,6 +1170,7 @@ static zend_string *resolve_class_name(zend_string *name, zend_class_entry *scop
 
 zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scope) {
 	zend_string *str = NULL;
+
 	if (ZEND_TYPE_HAS_LIST(type)) {
 		zend_type *list_type;
 		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(type), list_type) {
@@ -1204,15 +1209,25 @@ zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scop
 	if (type_mask & MAY_BE_ARRAY) {
 		str = add_type_string(str, ZSTR_KNOWN(ZEND_STR_ARRAY));
 	}
+
+	if (type_mask == MAY_BE_SCALAR) {
+		str = add_type_string(str, ZSTR_KNOWN(ZEND_STR_SCALAR));
+	} else if (type_mask == MAY_BE_NUMBER) {
+		str = add_type_string(str, ZSTR_KNOWN(ZEND_STR_NUMBER));
+	} else {
+		if (type_mask & MAY_BE_LONG) {
+			str = add_type_string(str, ZSTR_KNOWN(ZEND_STR_INT));
+		}
+
+		if (type_mask & MAY_BE_DOUBLE) {
+			str = add_type_string(str, ZSTR_KNOWN(ZEND_STR_FLOAT));
+		}
+	}
+
 	if (type_mask & MAY_BE_STRING) {
 		str = add_type_string(str, ZSTR_KNOWN(ZEND_STR_STRING));
 	}
-	if (type_mask & MAY_BE_LONG) {
-		str = add_type_string(str, ZSTR_KNOWN(ZEND_STR_INT));
-	}
-	if (type_mask & MAY_BE_DOUBLE) {
-		str = add_type_string(str, ZSTR_KNOWN(ZEND_STR_FLOAT));
-	}
+
 	if ((type_mask & MAY_BE_BOOL) == MAY_BE_BOOL) {
 		str = add_type_string(str, ZSTR_KNOWN(ZEND_STR_BOOL));
 	} else if (type_mask & MAY_BE_FALSE) {
@@ -5580,8 +5595,9 @@ static zend_type zend_compile_typename(
 		for (uint32_t i = 0; i < list->children; i++) {
 			zend_ast *type_ast = list->child[i];
 			zend_type single_type = zend_compile_single_typename(type_ast);
-			uint32_t type_mask_overlap =
-				ZEND_TYPE_PURE_MASK(type) & ZEND_TYPE_PURE_MASK(single_type);
+			uint32_t single_type_mask = ZEND_TYPE_PURE_MASK(single_type);
+
+			uint32_t type_mask_overlap = ZEND_TYPE_PURE_MASK(type) & single_type_mask;
 			if (type_mask_overlap) {
 				zend_type overlap_type = ZEND_TYPE_INIT_MASK(type_mask_overlap);
 				zend_string *overlap_type_str = zend_type_to_string(overlap_type);

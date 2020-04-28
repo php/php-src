@@ -181,7 +181,7 @@ try_again:
 			{
 				zval dst;
 
-				convert_object_to_type(op, &dst, _IS_NUMBER);
+				convert_object_to_type(op, &dst, IS_NUMBER);
 				zval_ptr_dtor(op);
 
 				if (Z_TYPE(dst) == IS_LONG || Z_TYPE(dst) == IS_DOUBLE) {
@@ -215,7 +215,7 @@ static zend_never_inline zval* ZEND_FASTCALL _zendi_convert_scalar_to_number_sil
 			ZVAL_LONG(holder, Z_RES_HANDLE_P(op));
 			return holder;
 		case IS_OBJECT:
-			convert_object_to_type(op, holder, _IS_NUMBER);
+			convert_object_to_type(op, holder, IS_NUMBER);
 			if (UNEXPECTED(EG(exception)) ||
 			    UNEXPECTED(Z_TYPE_P(holder) != IS_LONG && Z_TYPE_P(holder) != IS_DOUBLE)) {
 				ZVAL_LONG(holder, 1);
@@ -252,7 +252,7 @@ static zend_never_inline int ZEND_FASTCALL _zendi_try_convert_scalar_to_number(z
 			ZVAL_LONG(holder, Z_RES_HANDLE_P(op));
 			return SUCCESS;
 		case IS_OBJECT:
-			convert_object_to_type(op, holder, _IS_NUMBER);
+			convert_object_to_type(op, holder, IS_NUMBER);
 			if (UNEXPECTED(EG(exception))) {
 				return FAILURE;
 			}

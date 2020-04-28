@@ -41,6 +41,8 @@
 #define MAY_BE_ITERABLE             (1 << IS_ITERABLE)
 #define MAY_BE_VOID                 (1 << IS_VOID)
 #define MAY_BE_STATIC               (1 << IS_STATIC)
+#define MAY_BE_NUMBER               (MAY_BE_LONG|MAY_BE_DOUBLE)
+#define MAY_BE_SCALAR               (MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_STRING)
 
 #define MAY_BE_ARRAY_SHIFT          (IS_REFERENCE)
 

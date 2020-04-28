@@ -1,0 +1,14 @@
+--TEST--
+Test that the number property type doesn't accept any non-numeric type in strict mode
+--FILE--
+<?php
+declare(strict_types=1);
+
+class Foo
+{
+    public number $property1 = true;
+}
+
+?>
+--EXPECTF--
+Fatal error: Cannot use bool as default value for property Foo::$property1 of type number in %s on line %d

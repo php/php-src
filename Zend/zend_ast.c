@@ -1572,6 +1572,8 @@ simple_list:
 				case IS_ARRAY:    APPEND_STR("array");
 				case IS_CALLABLE: APPEND_STR("callable");
 				case IS_STATIC:   APPEND_STR("static");
+				case IS_NUMBER:   APPEND_STR("number");
+				case IS_SCALAR:   APPEND_STR("scalar");
 				EMPTY_SWITCH_DEFAULT_CASE();
 			}
 			break;

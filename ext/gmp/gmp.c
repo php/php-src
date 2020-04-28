@@ -289,7 +289,7 @@ static int gmp_cast_object(zend_object *readobj, zval *writeobj, int type) /* {{
 		gmpnum = GET_GMP_OBJECT_FROM_OBJ(readobj)->num;
 		ZVAL_DOUBLE(writeobj, mpz_get_d(gmpnum));
 		return SUCCESS;
-	case _IS_NUMBER:
+	case IS_NUMBER:
 		gmpnum = GET_GMP_OBJECT_FROM_OBJ(readobj)->num;
 		if (mpz_fits_slong_p(gmpnum)) {
 			ZVAL_LONG(writeobj, mpz_get_si(gmpnum));

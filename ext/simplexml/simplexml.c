@@ -1874,7 +1874,7 @@ static int cast_object(zval *object, int type, char *contents)
 		case IS_DOUBLE:
 			convert_to_double(object);
 			break;
-		case _IS_NUMBER:
+		case IS_NUMBER:
 			convert_scalar_to_number(object);
 			break;
 		default:

@@ -123,8 +123,10 @@ ZEND_API const char *zend_get_type_by_const(int type) /* {{{ */
 			return "array";
 		case IS_VOID:
 			return "void";
-		case _IS_NUMBER:
+		case IS_NUMBER:
 			return "number";
+		case IS_SCALAR:
+			return "scalar";
 		default:
 			return "unknown";
 	}

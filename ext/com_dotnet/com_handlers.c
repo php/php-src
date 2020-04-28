@@ -451,7 +451,7 @@ static int com_object_cast(zend_object *readobj, zval *writeobj, int type)
 
 	switch(type) {
 		case IS_LONG:
-		case _IS_NUMBER:
+		case IS_NUMBER:
 			vt = VT_INT;
 			break;
 		case IS_DOUBLE:
