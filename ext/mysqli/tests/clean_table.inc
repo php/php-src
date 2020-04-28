@@ -11,4 +11,5 @@ if (!mysqli_query($link, 'DROP TABLE IF EXISTS test')) {
 }
 
 mysqli_close($link);
+echo "Cleaned successfully\n";
 ?>
