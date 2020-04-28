@@ -97,7 +97,7 @@ PHP_FUNCTION(curl_multi_add_handle)
 
 	_php_curl_cleanup_handle(ch);
 
-	GC_ADDREF(Z_RES_P(z_ch));
+	Z_ADDREF_P(z_ch);
 	zend_llist_add_element(&mh->easyh, z_ch);
 
 	error = curl_multi_add_handle(mh->multi, ch->cp);
@@ -301,24 +301,13 @@ PHP_FUNCTION(curl_multi_info_read)
 
 	/* find the original easy curl handle */
 	{
-		zval	*pz_ch = _php_curl_multi_find_easy_handle(mh, tmp_msg->easy_handle);
+		zval *pz_ch = _php_curl_multi_find_easy_handle(mh, tmp_msg->easy_handle);
 		if (pz_ch != NULL) {
-			/* we are adding a reference to the underlying php_curl
-			   resource, so we need to add one to the resource's refcount
-			   in order to ensure it doesn't get destroyed when the
-			   underlying curl easy handle goes out of scope.
-			   Normally you would call zval_copy_ctor( pz_ch ), or
-			   SEPARATE_ZVAL, but those create new zvals, which is already
-			   being done in add_assoc_resource */
-			Z_ADDREF_P(pz_ch);
-
 			/* we must save result to be able to read error message */
 			ch = Z_CURL_P(pz_ch);
 			SAVE_CURL_ERROR(ch, tmp_msg->data.result);
 
-			/* add_assoc_resource automatically creates a new zval to
-			   wrap the "resource" represented by the current pz_ch */
-
+			Z_ADDREF_P(pz_ch);
 			add_assoc_zval(return_value, "handle", pz_ch);
 		}
 	}
@@ -402,8 +391,6 @@ static int _php_server_push_callback(CURL *parent_ch, CURL *easy, size_t num_hea
 	ch->cp = easy;
 	_php_setup_easy_copy_handlers(ch, parent);
 
-	Z_ADDREF_P(pz_parent_ch);
-
 	size_t i;
 	array_init(&headers);
 	for(i=0; i<num_headers; i++) {
@@ -431,7 +418,6 @@ static int _php_server_push_callback(CURL *parent_ch, CURL *easy, size_t num_hea
 	} else if (!Z_ISUNDEF(retval)) {
 		if (CURL_PUSH_DENY != zval_get_long(&retval)) {
 		    rval = CURL_PUSH_OK;
-			GC_ADDREF(Z_RES(pz_ch));
 			zend_llist_add_element(&mh->easyh, &pz_ch);
 		} else {
 			/* libcurl will free this easy handle, avoid double free */
@@ -589,6 +575,12 @@ static HashTable *curl_multi_get_gc(zend_object *object, zval **table, int *n)
 			zend_get_gc_buffer_add_zval(gc_buffer, &curl_multi->handlers->server_push->func_name);
 		}
 	}
+
+	/*zend_llist_position pos;
+	for (zval *pz_ch = (zval *) zend_llist_get_first_ex(&curl_multi->easyh, &pos); pz_ch;
+		pz_ch = (zval *) zend_llist_get_next_ex(&curl_multi->easyh, &pos)) {
+		zend_get_gc_buffer_add_zval(gc_buffer, pz_ch);
+	}*/
 
 	zend_get_gc_buffer_use(gc_buffer, table, n);
 
