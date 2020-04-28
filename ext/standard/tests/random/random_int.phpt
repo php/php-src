@@ -15,7 +15,7 @@ var_dump(is_int(random_int(PHP_INT_MIN, PHP_INT_MAX)));
 var_dump(random_int(42,42));
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 bool(true)

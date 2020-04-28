@@ -37,7 +37,7 @@ foreach( $misc_files as $misc_file ) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing is_readable(): usage variations ***
 
 *** Testing is_readable() on miscellaneous filenames ***

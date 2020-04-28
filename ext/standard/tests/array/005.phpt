@@ -69,7 +69,7 @@ var_dump( current($mixed_array[1]) );
 
 echo"Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing Error Conditions ***
 NULL
 

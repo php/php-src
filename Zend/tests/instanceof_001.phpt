@@ -17,7 +17,7 @@ var_dump($c[0] instanceof stdClass);
 var_dump(@$inexistent instanceof stdClass);
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 bool(true)

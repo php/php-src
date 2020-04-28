@@ -33,7 +33,7 @@ try {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_diff() : error conditions ***
 
 -- Testing array_diff() function with zero arguments --

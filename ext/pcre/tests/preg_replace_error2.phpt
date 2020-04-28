@@ -29,7 +29,7 @@ try {
 }
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing preg_replace() : error conditions ***
 
 Arg value is: this is a string

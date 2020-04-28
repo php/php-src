@@ -29,7 +29,7 @@ var_dump($array_arg);
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing uasort() : built in function as 'cmp_function' ***
 -- Testing uasort() with built-in 'cmp_function': strcasecmp() --
 bool(true)

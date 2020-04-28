@@ -35,7 +35,7 @@ try {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing mktime() : error conditions ***
 
 -- Testing mktime() function with Zero arguments --

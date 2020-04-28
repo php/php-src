@@ -82,7 +82,7 @@ $file_path = __DIR__;
 $filename = "$file_path/fscanf_variation10.tmp";
 unlink($filename);
 ?>
---EXPECTF--
+--EXPECT--
 *** Test fscanf(): different float format types with resource ***
 
 -- iteration 1 --

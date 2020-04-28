@@ -35,7 +35,7 @@ foreach ($array as $val) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 string(9) "127.0.0.1"
 string(13) "255.255.255.0"
 bool(false)

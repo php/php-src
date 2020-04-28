@@ -35,7 +35,7 @@ include $fname3;
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar'); ?>
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.tar'); ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 is_link
 bool(false)

@@ -60,7 +60,7 @@ var_dump( $mixed_array[2] );
 
 echo"\nDone";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing Edge Conditions ***
 int(11)
 int(1)

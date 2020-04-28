@@ -75,7 +75,7 @@ echo "Done\n";
 $filename = __DIR__."/fscanf.dat";
 unlink($filename);
 ?>
---EXPECTF--
+--EXPECT--
 int(0)
 NULL
 int(1)

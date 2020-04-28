@@ -103,7 +103,7 @@ echo "Done\n";
 fclose($fp);
 closedir($dfp);
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing is_array() on different type of arrays ***
 -- Iteration 1 --
 bool(true)

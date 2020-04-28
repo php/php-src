@@ -83,7 +83,7 @@ var_dump(array_merge());
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_merge() basic functionality ***
 
 --- Iteration 0 ---

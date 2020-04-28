@@ -10,5 +10,5 @@ Bug #27669 (PHP 5 didn't support all possibilities for calling static methods dy
     $y[0] = 'hello';
     A::{$y[0]}();
 ?>
---EXPECTF--
+--EXPECT--
 Hello World

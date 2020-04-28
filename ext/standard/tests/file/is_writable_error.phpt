@@ -14,7 +14,7 @@ var_dump( is_writeable(__DIR__."/is_writable") );
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing is_writable() on non-existent file ***
 bool(false)
 bool(false)

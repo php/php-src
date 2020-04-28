@@ -279,7 +279,7 @@ closedir($dir_handle);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing var_dump() on integer variables ***
 -- Iteration 1 --
 int(0)

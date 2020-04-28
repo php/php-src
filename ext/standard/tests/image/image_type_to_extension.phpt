@@ -33,7 +33,7 @@ image_type_to_extension()
     var_dump(image_type_to_extension(0));
 ?>
 Done
---EXPECTF--
+--EXPECT--
 Constant: IMAGETYPE_GIF
 	With dot: .gif
 	Without dot: gif

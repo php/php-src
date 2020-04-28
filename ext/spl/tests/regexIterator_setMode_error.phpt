@@ -18,7 +18,7 @@ try {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 int(0)
 string(14) "Illegal mode 7"
 int(0)

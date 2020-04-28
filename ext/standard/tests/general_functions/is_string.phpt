@@ -147,7 +147,7 @@ fclose($fp);
 closedir($dfp);
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing is_string() with valid string values ***
 -- Iteration 1 --
 bool(true)

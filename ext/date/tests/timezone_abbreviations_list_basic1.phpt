@@ -22,7 +22,7 @@ echo "\n-- Format a sample entry --\n";
 var_dump( $abbr["acst"] );
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing timezone_abbreviations_list() : basic functionality ***
 string(5) "array"
 int(144)

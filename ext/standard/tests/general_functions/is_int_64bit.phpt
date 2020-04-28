@@ -136,7 +136,7 @@ foreach ($not_int_types as $type ) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing is_int(), is_integer() & is_long()  with valid integer values ***
 --Iteration 1--
 bool(true)

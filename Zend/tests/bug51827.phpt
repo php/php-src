@@ -13,7 +13,7 @@ register_shutdown_function('ABC');
 register_shutdown_function('exploDe');
 
 ?>
---EXPECTF--
+--EXPECT--
 int(1)
 
 Fatal error: Uncaught ArgumentCountError: explode() expects at least 2 parameters, 0 given in [no active file]:0

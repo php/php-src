@@ -25,7 +25,7 @@ catch (\Error $e) {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing hash_hkdf(): edge cases ***
 Length < digestSize: 98b16391063ece
 Length % digestSize != 0: 98b16391063ecee006a3ca8ee5776b1e5f

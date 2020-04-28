@@ -26,7 +26,7 @@ try {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing chr() : error conditions ***
 
 -- Testing chr() function with no arguments --

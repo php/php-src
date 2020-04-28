@@ -19,7 +19,7 @@ var_dump(preg_split('/(\d*)/', 'ab2c3u'));
 var_dump(preg_last_error() == PREG_RECURSION_LIMIT_ERROR);
 
 ?>
---EXPECTF--
+--EXPECT--
 array(15) {
   [0]=>
   string(0) ""

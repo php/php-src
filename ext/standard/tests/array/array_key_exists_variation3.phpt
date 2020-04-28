@@ -34,7 +34,7 @@ foreach($keys as $key) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_key_exists() : usage variations ***
 
 -- Iteration 1 --

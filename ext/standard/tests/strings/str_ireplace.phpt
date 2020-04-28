@@ -44,7 +44,7 @@ var_dump($Data = str_ireplace("\n", "<br>", $Data));
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 string(0) ""
 string(8) "aaaaaaaT"
 string(8) "aaaaaaaT"

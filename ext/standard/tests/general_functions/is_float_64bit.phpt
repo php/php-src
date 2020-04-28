@@ -131,7 +131,7 @@ foreach ($not_floats as $value ) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing is_float(), is_double() and is_real() with float values***
 -- Iteration 1 --
 bool(false)

@@ -67,7 +67,7 @@ var_dump($rao=assert_options(ASSERT_CALLBACK));
 echo "ini.get(\"assert.callback\") => [".ini_get("assert.callback")."]\n\n";
 var_dump($r2=assert(0 != 0));
 echo"\n";
---EXPECTF--
+--EXPECT--
 Initial values: assert_options(ASSERT_CALLBACK) => [f1]
 Initial values: ini.get("assert.callback") => [f1]
 f1 called

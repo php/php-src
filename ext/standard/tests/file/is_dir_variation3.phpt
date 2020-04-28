@@ -30,7 +30,7 @@ foreach($dirnames as $dirname) {
   var_dump( is_dir($dirname) );
 }
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing is_dir() with Invalid arguments: expected bool(false) ***
 bool(false)
 bool(false)

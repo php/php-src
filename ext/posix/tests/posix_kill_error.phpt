@@ -28,7 +28,7 @@ var_dump( posix_kill($pid, 999) );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing posix_kill() : error conditions ***
 
 -- Testing posix_kill() function with invalid signal --

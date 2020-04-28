@@ -39,7 +39,7 @@ foreach([
   clearstatcache();
 }
 ?>
---EXPECTF--
+--EXPECT--
 float(-2.34555): 0
 string(1) " ": 0
 string(0) "": 0

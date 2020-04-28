@@ -24,7 +24,7 @@ foreach($array as $str) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 string(0) ""
 string(0) ""
 bool(false)

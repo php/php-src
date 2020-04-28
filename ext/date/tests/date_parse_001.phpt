@@ -14,7 +14,7 @@ Test basic date_parse()
     var_dump(date_parse(""));
     echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 array(12) {
   ["year"]=>
   int(2006)

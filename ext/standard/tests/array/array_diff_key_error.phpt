@@ -28,7 +28,7 @@ try {
     echo $e->getMessage(), "\n";
 }
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_diff_key() : error conditions ***
 
 -- Testing array_diff_key() function with less than expected no. of arguments --
