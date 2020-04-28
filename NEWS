@@ -22,6 +22,7 @@ PHP                                                                        NEWS
     message). (Alex Dowad)
   . Fixed bug #36365 (scandir duplicates file name at every 65535th file).
     (cmb)
+  . Use SSE2 instructions do locale independent strtolower. (Laruence)
 
 - BZ2:
   . Fixed bug #71263 (fread() does not report bzip2.decompress errors). (cmb)
