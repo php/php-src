@@ -104,7 +104,10 @@ class ReflectionFunction extends ReflectionFunctionAbstract
 
     public function __toString(): string {}
 
-    /** @return bool */
+    /**
+     * @return bool
+     * @deprecated ReflectionFunction can no longer be constructed for disabled functions
+     */
     public function isDisabled() {}
 
     /** @return mixed */

@@ -8,11 +8,17 @@ disable_functions=is_file
 --FILE--
 <?php
 try {
-    $rc = new ReflectionFunction('is_file');
-    var_dump($rc->isDisabled());
+    $rf = new ReflectionFunction('is_file');
+    var_dump($rf->isDisabled());
 } catch (ReflectionException $e) {
     echo $e->getMessage(), "\n";
 }
+
+$rf = new ReflectionFunction('is_string');
+var_dump($rf->isDisabled());
 ?>
---EXPECT--
+--EXPECTF--
 Function is_file() does not exist
+
+Deprecated: Function ReflectionFunction::isDisabled() is deprecated in %s on line %d
+bool(false)
