@@ -757,32 +757,75 @@ static int find_return_ssa_var(zend_jit_trace_rec *p, zend_ssa_op *ssa_op)
 	}
 }
 
-static int find_call_num_args(zend_jit_trace_rec *p)
+static const zend_op *zend_jit_trace_find_init_fcall_op(zend_jit_trace_rec *p, const zend_op_array *op_array)
 {
-	while (1) {
-		if (p->op == ZEND_JIT_TRACE_VM) {
-			if (p->opline->opcode == ZEND_INIT_FCALL
-			 || p->opline->opcode == ZEND_INIT_FCALL_BY_NAME
-			 || p->opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME
-			 || p->opline->opcode == ZEND_INIT_DYNAMIC_CALL
-			 || p->opline->opcode == ZEND_INIT_USER_CALL
-			 || p->opline->opcode == ZEND_NEW
-			 || p->opline->opcode == ZEND_INIT_METHOD_CALL
-			 || p->opline->opcode == ZEND_INIT_STATIC_METHOD_CALL) {
-				if (p->opline->extended_value <= TRACE_FRAME_MAX_NUM_ARGS) {
-					return p->opline->extended_value;
-				} else {
-					return -1;
+	if (!p->fake) {
+		p--;
+		while (1) {
+			if (p->op == ZEND_JIT_TRACE_VM) {
+				if (p->opline->opcode == ZEND_INIT_FCALL
+				 || p->opline->opcode == ZEND_INIT_FCALL_BY_NAME
+				 || p->opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME
+				 || p->opline->opcode == ZEND_INIT_DYNAMIC_CALL
+				 || p->opline->opcode == ZEND_INIT_USER_CALL
+				 || p->opline->opcode == ZEND_NEW
+				 || p->opline->opcode == ZEND_INIT_METHOD_CALL
+				 || p->opline->opcode == ZEND_INIT_STATIC_METHOD_CALL) {
+					return p->opline;
+				}
+				return NULL;
+			} else if (p->op == ZEND_JIT_TRACE_OP1_TYPE || p->op == ZEND_JIT_TRACE_OP2_TYPE) {
+				/*skip */
+			} else {
+				return NULL;
+			}
+			p--;
+		}
+	} else {
+		const zend_op *opline = NULL;
+		int call_level = 0;
+
+		p++;
+		while (1) {
+			if (p->op == ZEND_JIT_TRACE_VM) {
+				opline = p->opline;
+				break;
+			} else if (p->op == ZEND_JIT_TRACE_INIT_CALL) {
+				call_level++;
+				/*skip */
+			} else {
+				return NULL;
+			}
+			p--;
+		}
+		if (opline) {
+			while (opline > op_array->opcodes) {
+				opline--;
+				switch (opline->opcode) {
+					case ZEND_INIT_FCALL:
+					case ZEND_INIT_FCALL_BY_NAME:
+					case ZEND_INIT_NS_FCALL_BY_NAME:
+					case ZEND_INIT_METHOD_CALL:
+					case ZEND_INIT_DYNAMIC_CALL:
+					case ZEND_INIT_STATIC_METHOD_CALL:
+					case ZEND_INIT_USER_CALL:
+					case ZEND_NEW:
+						if (call_level == 0) {
+							return opline;
+						}
+						call_level--;
+						break;
+					case ZEND_DO_FCALL:
+					case ZEND_DO_ICALL:
+					case ZEND_DO_UCALL:
+					case ZEND_DO_FCALL_BY_NAME:
+						call_level++;
+						break;
 				}
 			}
-			return -1;
-		} else if (p->op == ZEND_JIT_TRACE_OP1_TYPE || p->op == ZEND_JIT_TRACE_OP2_TYPE) {
-			/*skip */
-		} else {
-			return -1;
 		}
-		p--;
 	}
+	return NULL;
 }
 
 static int is_checked_guard(const zend_ssa *tssa, const zend_op **ssa_opcodes, uint32_t var, uint32_t phi_var)
@@ -3854,8 +3897,16 @@ done:
 		} else if (p->op == ZEND_JIT_TRACE_END) {
 			break;
 		} else if (p->op == ZEND_JIT_TRACE_INIT_CALL) {
+			const zend_op *init_opline = zend_jit_trace_find_init_fcall_op(p, op_array);
+			int num_args = -1;
+
+			if (init_opline
+			 && init_opline->extended_value <= TRACE_FRAME_MAX_NUM_ARGS) {
+				num_args = init_opline->extended_value;
+			}
+
 			call = top;
-			TRACE_FRAME_INIT(call, p->func, 1, !p->fake ? find_call_num_args(p-1) : -1);
+			TRACE_FRAME_INIT(call, p->func, 1, num_args);
 			call->prev = frame->call;
 			if (!p->fake) {
 				TRACE_FRAME_SET_LAST_SEND_BY_VAL(call);
@@ -3879,7 +3930,20 @@ done:
 				}
 			}
 			if (p->fake) {
-				if (!zend_jit_init_fcall_guard(&dasm_state, NULL, p->func)) {
+				int skip_guard = 0;
+
+				if (init_opline) {
+					zend_call_info *call_info = jit_extension->func_info.callee_info;
+
+					while (call_info) {
+						if (call_info->caller_init_opline == init_opline) {
+							skip_guard = 1;
+							break;
+						}
+						call_info = call_info->next_callee;
+					}
+				}
+				if (!skip_guard && !zend_jit_init_fcall_guard(&dasm_state, NULL, p->func)) {
 					goto jit_failure;
 				}
 			}
