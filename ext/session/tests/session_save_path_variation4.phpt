@@ -42,10 +42,12 @@ echo "Done";
 ob_end_flush();
 ?>
 --CLEAN--
+<?php
 $initdir = __DIR__;
 $sessions = ($initdir."/sessions");
 chdir($initdir);
 var_dump(rmdir($sessions));
+?>
 --EXPECTF--
 *** Testing session_save_path() : variation ***
 bool(true)

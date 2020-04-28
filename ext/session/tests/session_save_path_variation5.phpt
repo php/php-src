@@ -40,9 +40,11 @@ echo "Done";
 ob_end_flush();
 ?>
 --CLEAN--
+<?php
 $directory = __DIR__;
 $sessions = ($directory."/sessions");
 var_dump(rmdir($sessions));
+?>
 --EXPECTF--
 *** Testing session_save_path() : variation ***
 bool(true)

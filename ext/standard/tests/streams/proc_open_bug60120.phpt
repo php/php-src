@@ -88,10 +88,12 @@ var_dump(
 fclose($pipes[1]);
 fclose($pipes[2]);
 ?>
+--CLEAN--
+<?php
+unlink($file);
+?>
 --EXPECTF--
 string(10000) "%s"
 string(10000) "%s"
 string(0) ""
 string(0) ""
---CLEAN--
-unlink($file);

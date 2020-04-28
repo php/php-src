@@ -110,9 +110,11 @@ echo "Done\n";
 
 ?>
 --CLEAN--
+<?php
 /* cleaning resource handles */
 fclose( $file_handle );  //file resource handle deleted
 closedir( $dir_handle );  //dir resource handle deleted
+?>
 --EXPECTF--
 *** Testing end() on different arrays ***
 -- Iteration 1 --
