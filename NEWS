@@ -1,7 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
-?? ??? ????, PHP 7.4.6
+30 Apr 2020, PHP 7.4.6RC1
 
 - Core:
   . Fixed bug #78434 (Generator yields no items after valid() call). (Nikita)
@@ -49,7 +49,7 @@ PHP                                                                        NEWS
   . Fixed bug #79447 (Serializing uninitialized typed properties with __sleep
     should not throw). (nicolas-grekas)
 
-?? ??? ????, PHP 7.4.5
+30 Apr 2020, PHP 7.4.6RC1
 
 - Core:
   . Fixed bug #79364 (When copy empty array, next key is unspecified). (cmb)
