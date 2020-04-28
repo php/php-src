@@ -2522,12 +2522,8 @@ ZEND_API char* ZEND_FASTCALL zend_str_tolower_dup_ex(const char *source, size_t 
 				memcpy(res, source, p - (const unsigned char*)source);
 			}
 			r = (unsigned char*)p + (res - source);
-			while (p < end) {
-				*r = zend_tolower_ascii(*p);
-				p++;
-				r++;
-			}
-			*r = '\0';
+			zend_str_tolower_impl((char *)r, (const char*)p, end - p);
+			res[length] = '\0';
 			return res;
 		}
 		p++;
