@@ -729,8 +729,11 @@ static int php_var_serialize_call_sleep(zval *retval, zval *struc) /* {{{ */
 	}
 
 	if (!HASH_OF(retval)) {
+		zend_class_entry *ce;
+		ZEND_ASSERT(Z_TYPE_P(struc) == IS_OBJECT);
+		ce = Z_OBJCE_P(struc);
 		zval_ptr_dtor(retval);
-		php_error_docref(NULL, E_NOTICE, "__sleep should return an array only containing the names of instance-variables to serialize");
+		php_error_docref(NULL, E_NOTICE, "%s::__sleep should return an array only containing the names of instance-variables to serialize", ZSTR_VAL(ce->name));
 		return FAILURE;
 	}
 
@@ -811,7 +814,8 @@ static int php_var_serialize_get_sleep_props(
 		ZVAL_DEREF(name_val);
 		if (Z_TYPE_P(name_val) != IS_STRING) {
 			php_error_docref(NULL, E_NOTICE,
-					"__sleep should return an array only containing the names of instance-variables to serialize.");
+					"%s::__sleep should return an array only containing the names of instance-variables to serialize",
+					ZSTR_VAL(ce->name));
 		}
 
 		name = zval_get_tmp_string(name_val, &tmp_name);
