@@ -541,7 +541,7 @@ void curl_multi_free_obj(zend_object *object)
 
 	for (pz_ch = (zval *)zend_llist_get_first_ex(&mh->easyh, &pos); pz_ch;
 		pz_ch = (zval *)zend_llist_get_next_ex(&mh->easyh, &pos)) {
-		if (Z_OBJ_P(pz_ch)) {
+		if (!(OBJ_FLAGS(Z_OBJ_P(pz_ch)) & IS_OBJ_FREE_CALLED)) {
 			ch = Z_CURL_P(pz_ch);
 			_php_curl_verify_handlers(ch, 0);
 		}
@@ -572,11 +572,11 @@ static HashTable *curl_multi_get_gc(zend_object *object, zval **table, int *n)
 		}
 	}
 
-	/*zend_llist_position pos;
+	zend_llist_position pos;
 	for (zval *pz_ch = (zval *) zend_llist_get_first_ex(&curl_multi->easyh, &pos); pz_ch;
 		pz_ch = (zval *) zend_llist_get_next_ex(&curl_multi->easyh, &pos)) {
 		zend_get_gc_buffer_add_zval(gc_buffer, pz_ch);
-	}*/
+	}
 
 	zend_get_gc_buffer_use(gc_buffer, table, n);
 
