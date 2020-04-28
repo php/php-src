@@ -2869,7 +2869,7 @@ ZEND_METHOD(FFI, cdef) /* {{{ */
 				efree(FFI_G(tags));
 				FFI_G(tags) = NULL;
 			}
-			return;
+			RETURN_THROWS();
 		}
 
 		if (FFI_G(symbols)) {
@@ -2881,6 +2881,7 @@ ZEND_METHOD(FFI, cdef) /* {{{ */
 					addr = DL_FETCH_SYMBOL(handle, ZSTR_VAL(name));
 					if (!addr) {
 						zend_throw_error(zend_ffi_exception_ce, "Failed resolving C variable '%s'", ZSTR_VAL(name));
+						RETURN_THROWS();
 					}
 					sym->addr = addr;
 				} else if (sym->kind == ZEND_FFI_SYM_FUNC) {
@@ -2890,6 +2891,7 @@ ZEND_METHOD(FFI, cdef) /* {{{ */
 					zend_string_release(mangled_name);
 					if (!addr) {
 						zend_throw_error(zend_ffi_exception_ce, "Failed resolving C function '%s'", ZSTR_VAL(name));
+						RETURN_THROWS();
 					}
 					sym->addr = addr;
 				}
