@@ -1421,7 +1421,10 @@ ZEND_FUNCTION(get_defined_functions)
 		RETURN_THROWS();
 	}
 
-	/* exclude_disabled = 0 is ignored. */
+	if (exclude_disabled == 0) {
+		zend_error(E_DEPRECATED,
+			"get_defined_functions(): Setting $exclude_disabled to false has no effect");
+	}
 
 	array_init(&internal);
 	array_init(&user);

@@ -19,7 +19,9 @@ var_dump(in_array($disabled_function, $functions['internal']));
 $functions = get_defined_functions(true);
 var_dump(in_array($disabled_function, $functions['internal']));
 ?>
---EXPECT--
+--EXPECTF--
 bool(false)
+
+Deprecated: get_defined_functions(): Setting $exclude_disabled to false has no effect in %s on line %d
 bool(false)
 bool(false)
