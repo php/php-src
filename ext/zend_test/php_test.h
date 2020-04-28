@@ -38,5 +38,6 @@ struct bug79096 {
 };
 
 ZEND_API struct bug79096 bug79096(void);
+ZEND_API void bug79532(off_t *array, size_t elems);
 
 #endif
