@@ -814,6 +814,8 @@ int zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 	fpsetmask(0);
 #endif
 
+	zend_startup_error_display_functions();
+
 	zend_startup_strtod();
 	zend_startup_extensions_mechanism();
 
@@ -1077,6 +1079,7 @@ void zend_shutdown(void) /* {{{ */
 	free(GLOBAL_AUTO_GLOBALS_TABLE);
 
 	zend_shutdown_extensions();
+	zend_shutdown_error_display_functions();
 	free(zend_version_info);
 
 	free(GLOBAL_FUNCTION_TABLE);

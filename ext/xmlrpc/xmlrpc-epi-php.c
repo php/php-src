@@ -198,10 +198,24 @@ static void xmlrpc_server_destructor(zend_resource *rsrc)
 	}
 }
 
+static int xmlrpc_error_display_cb(int type, const char *error_filename, const uint32_t error_lineno, char *buffer, int buffer_len)
+{
+	if (PG(xmlrpc_errors)) {
+		char *error_type_str = zend_error_get_type_string(type);
+		php_printf("<?xml version=\"1.0\"?><methodResponse><fault><value><struct><member><name>faultCode</name><value><int>" ZEND_LONG_FMT "</int></value></member><member><name>faultString</name><value><string>%s:%s in %s on line %" PRIu32 "</string></value></member></struct></value></fault></methodResponse>", PG(xmlrpc_error_number), error_type_str, buffer, error_filename, error_lineno);
+
+		return 1;
+	}
+
+	return 0;
+}
+
 /* module init */
 PHP_MINIT_FUNCTION(xmlrpc)
 {
 	le_xmlrpc_server = zend_register_list_destructors_ex(xmlrpc_server_destructor, NULL, "xmlrpc server", module_number);
+
+	zend_register_error_display_callback(xmlrpc_error_display_cb);
 
 	return SUCCESS;
 }

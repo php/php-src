@@ -1188,6 +1188,79 @@ PHPAPI void php_html_puts(const char *str, size_t size)
 }
 /* }}} */
 
+static int php_error_default_display_cb(int type, const char *error_filename, const uint32_t error_lineno, char *buffer, int buffer_len)
+{
+	char *prepend_string = INI_STR("error_prepend_string");
+	char *append_string = INI_STR("error_append_string");
+	char *error_type_str = zend_error_get_type_string(type);
+
+	if (PG(html_errors)) {
+		if (type == E_ERROR || type == E_PARSE) {
+			zend_string *buf = php_escape_html_entities((unsigned char*)buffer, buffer_len, 0, ENT_COMPAT, get_safe_charset_hint());
+			php_printf("%s<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%" PRIu32 "</b><br />\n%s", STR_PRINT(prepend_string), error_type_str, ZSTR_VAL(buf), error_filename, error_lineno, STR_PRINT(append_string));
+			zend_string_free(buf);
+		} else {
+			php_printf("%s<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%" PRIu32 "</b><br />\n%s", STR_PRINT(prepend_string), error_type_str, buffer, error_filename, error_lineno, STR_PRINT(append_string));
+		}
+		return 1;
+	}
+
+	/* Write CLI/CGI errors to stderr if display_errors = "stderr" */
+	if ((!strcmp(sapi_module.name, "cli") || !strcmp(sapi_module.name, "cgi") || !strcmp(sapi_module.name, "phpdbg")) &&
+		PG(display_errors) == PHP_DISPLAY_ERRORS_STDERR
+	) {
+		fprintf(stderr, "%s: %s in %s on line %" PRIu32 "\n", error_type_str, buffer, error_filename, error_lineno);
+#ifdef PHP_WIN32
+		fflush(stderr);
+#endif
+
+		return 1;
+	}
+
+	return 0;
+}
+
+int php_error_get_syslog_facility(int type)
+{
+	int syslog_type_int = LOG_NOTICE;
+
+	switch (type) {
+		case E_ERROR:
+		case E_CORE_ERROR:
+		case E_COMPILE_ERROR:
+		case E_USER_ERROR:
+			syslog_type_int = LOG_ERR;
+			break;
+		case E_RECOVERABLE_ERROR:
+			syslog_type_int = LOG_ERR;
+			break;
+		case E_WARNING:
+		case E_CORE_WARNING:
+		case E_COMPILE_WARNING:
+		case E_USER_WARNING:
+			syslog_type_int = LOG_WARNING;
+			break;
+		case E_PARSE:
+			syslog_type_int = LOG_ERR;
+			break;
+		case E_NOTICE:
+		case E_USER_NOTICE:
+			syslog_type_int = LOG_NOTICE;
+			break;
+		case E_STRICT:
+			syslog_type_int = LOG_INFO;
+			break;
+		case E_DEPRECATED:
+		case E_USER_DEPRECATED:
+			syslog_type_int = LOG_INFO;
+			break;
+		default:
+			break;
+	}
+
+	return syslog_type_int;
+}
+
 /* {{{ php_error_cb
  extended error handling function */
 static ZEND_COLD void php_error_cb(int orig_type, const char *error_filename, const uint32_t error_lineno, const char *format, va_list args)
@@ -1269,53 +1342,12 @@ static ZEND_COLD void php_error_cb(int orig_type, const char *error_filename, co
 	/* display/log the error if necessary */
 	if (display && (EG(error_reporting) & type || (type & E_CORE))
 		&& (PG(log_errors) || PG(display_errors) || (!module_initialized))) {
-		char *error_type_str;
-		int syslog_type_int = LOG_NOTICE;
-
-		switch (type) {
-			case E_ERROR:
-			case E_CORE_ERROR:
-			case E_COMPILE_ERROR:
-			case E_USER_ERROR:
-				error_type_str = "Fatal error";
-				syslog_type_int = LOG_ERR;
-				break;
-			case E_RECOVERABLE_ERROR:
-				error_type_str = "Recoverable fatal error";
-				syslog_type_int = LOG_ERR;
-				break;
-			case E_WARNING:
-			case E_CORE_WARNING:
-			case E_COMPILE_WARNING:
-			case E_USER_WARNING:
-				error_type_str = "Warning";
-				syslog_type_int = LOG_WARNING;
-				break;
-			case E_PARSE:
-				error_type_str = "Parse error";
-				syslog_type_int = LOG_ERR;
-				break;
-			case E_NOTICE:
-			case E_USER_NOTICE:
-				error_type_str = "Notice";
-				syslog_type_int = LOG_NOTICE;
-				break;
-			case E_STRICT:
-				error_type_str = "Strict Standards";
-				syslog_type_int = LOG_INFO;
-				break;
-			case E_DEPRECATED:
-			case E_USER_DEPRECATED:
-				error_type_str = "Deprecated";
-				syslog_type_int = LOG_INFO;
-				break;
-			default:
-				error_type_str = "Unknown error";
-				break;
-		}
 
 		if (!module_initialized || PG(log_errors)) {
 			char *log_buffer;
+			char *error_type_str = zend_error_get_type_string(type);
+			int syslog_type_int = php_error_get_syslog_facility(type);
+
 #ifdef PHP_WIN32
 			if (type == E_CORE_ERROR || type == E_CORE_WARNING) {
 				syslog(LOG_ALERT, "PHP %s: %s (%s)", error_type_str, buffer, GetCommandLine());
@@ -1327,38 +1359,19 @@ static ZEND_COLD void php_error_cb(int orig_type, const char *error_filename, co
 		}
 
 		if (PG(display_errors) && ((module_initialized && !PG(during_request_startup)) || (PG(display_startup_errors)))) {
-			if (PG(xmlrpc_errors)) {
-				php_printf("<?xml version=\"1.0\"?><methodResponse><fault><value><struct><member><name>faultCode</name><value><int>" ZEND_LONG_FMT "</int></value></member><member><name>faultString</name><value><string>%s:%s in %s on line %" PRIu32 "</string></value></member></struct></value></fault></methodResponse>", PG(xmlrpc_error_number), error_type_str, buffer, error_filename, error_lineno);
-			} else {
+			if (zend_error_display_handle(type, error_filename, error_lineno, buffer, buffer_len) == 0) {
+				// default error handling if no display callback was triggered
 				char *prepend_string = INI_STR("error_prepend_string");
 				char *append_string = INI_STR("error_append_string");
+				char *error_type_str = zend_error_get_type_string(type);
 
-				if (PG(html_errors)) {
-					if (type == E_ERROR || type == E_PARSE) {
-						zend_string *buf = php_escape_html_entities((unsigned char*)buffer, buffer_len, 0, ENT_COMPAT, get_safe_charset_hint());
-						php_printf("%s<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%" PRIu32 "</b><br />\n%s", STR_PRINT(prepend_string), error_type_str, ZSTR_VAL(buf), error_filename, error_lineno, STR_PRINT(append_string));
-						zend_string_free(buf);
-					} else {
-						php_printf("%s<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%" PRIu32 "</b><br />\n%s", STR_PRINT(prepend_string), error_type_str, buffer, error_filename, error_lineno, STR_PRINT(append_string));
-					}
-				} else {
-					/* Write CLI/CGI errors to stderr if display_errors = "stderr" */
-					if ((!strcmp(sapi_module.name, "cli") || !strcmp(sapi_module.name, "cgi") || !strcmp(sapi_module.name, "phpdbg")) &&
-						PG(display_errors) == PHP_DISPLAY_ERRORS_STDERR
-					) {
-						fprintf(stderr, "%s: %s in %s on line %" PRIu32 "\n", error_type_str, buffer, error_filename, error_lineno);
-#ifdef PHP_WIN32
-						fflush(stderr);
-#endif
-					} else {
-						php_printf("%s\n%s: %s in %s on line %" PRIu32 "\n%s", STR_PRINT(prepend_string), error_type_str, buffer, error_filename, error_lineno, STR_PRINT(append_string));
-					}
-				}
+				php_printf("%s\n%s: %s in %s on line %" PRIu32 "\n%s", STR_PRINT(prepend_string), error_type_str, buffer, error_filename, error_lineno, STR_PRINT(append_string));
 			}
 		}
 #if ZEND_DEBUG
 		if (PG(report_zend_debug)) {
 			zend_bool trigger_break;
+			char *error_type_str = zend_error_get_type_string(type);
 
 			switch (type) {
 				case E_ERROR:
@@ -2269,6 +2282,8 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 		php_printf("PHP:  Unable to initialize stream url wrappers.\n");
 		return FAILURE;
 	}
+
+	zend_register_error_display_callback(php_error_default_display_cb);
 
 	zuv.html_errors = 1;
 	php_startup_auto_globals();

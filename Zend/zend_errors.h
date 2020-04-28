@@ -47,4 +47,18 @@
 
 #define E_HAS_ONLY_FATAL_ERRORS(mask) !((mask) & ~E_FATAL_ERRORS)
 
+typedef int (*zend_error_display_cb)(int type, const char *error_filename, const uint32_t error_lineno, char *buffer, int buffer_len);
+
+BEGIN_EXTERN_C()
+typedef struct {
+	zend_error_display_cb display_callback;
+} zend_error_display_callback;
+
+char *zend_error_get_type_string(int type);
+void zend_register_error_display_callback(zend_error_display_cb callback);
+void zend_startup_error_display_functions(void);
+void zend_shutdown_error_display_functions(void);
+int zend_error_display_handle(int type, const char *error_filename, const uint32_t error_lineno, char *buffer, int buffer_len);
+END_EXTERN_C()
+
 #endif /* ZEND_ERRORS_H */
