@@ -3673,9 +3673,12 @@ void php_stripslashes_default(zend_string *str);
 PHPAPI zend_string *php_addslashes(zend_string *str) __attribute__((ifunc("resolve_addslashes")));
 PHPAPI void php_stripslashes(zend_string *str) __attribute__((ifunc("resolve_stripslashes")));
 
+typedef zend_string *(*php_addslashes_func_t)(zend_string *);
+typedef void (*php_stripslashes_func_t)(zend_string *);
+
 ZEND_NO_SANITIZE_ADDRESS
 ZEND_ATTRIBUTE_UNUSED /* clang mistakenly warns about this */
-static void *resolve_addslashes() {
+static php_addslashes_func_t resolve_addslashes() {
 	if (zend_cpu_supports_sse42()) {
 		return php_addslashes_sse42;
 	}
@@ -3684,7 +3687,7 @@ static void *resolve_addslashes() {
 
 ZEND_NO_SANITIZE_ADDRESS
 ZEND_ATTRIBUTE_UNUSED /* clang mistakenly warns about this */
-static void *resolve_stripslashes() {
+static php_stripslashes_func_t resolve_stripslashes() {
 	if (zend_cpu_supports_sse42()) {
 		return php_stripslashes_sse42;
 	}
