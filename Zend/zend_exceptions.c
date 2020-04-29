@@ -182,16 +182,18 @@ ZEND_API ZEND_COLD void zend_throw_exception_internal(zval *exception) /* {{{ */
 
 ZEND_API void zend_clear_exception(void) /* {{{ */
 {
+	zend_object *exception;
 	if (EG(prev_exception)) {
-
 		OBJ_RELEASE(EG(prev_exception));
 		EG(prev_exception) = NULL;
 	}
 	if (!EG(exception)) {
 		return;
 	}
-	OBJ_RELEASE(EG(exception));
+	/* exception may have destructor */
+	exception = EG(exception);
 	EG(exception) = NULL;
+	OBJ_RELEASE(exception);
 	if (EG(current_execute_data)) {
 		EG(current_execute_data)->opline = EG(opline_before_exception);
 	}
