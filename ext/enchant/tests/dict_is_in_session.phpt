@@ -1,5 +1,5 @@
 --TEST--
-enchant_dict_is_in_session() function
+enchant_dict_is_added() function
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br>
 --SKIPIF--
@@ -23,7 +23,7 @@ if (is_resource($broker)) {
         $AddtoPersonalDict = enchant_dict_add_to_personal($requestDict,$newWord);
 
         if (NULL === $AddtoPersonalDict) {
-            var_dump(enchant_dict_is_in_session($requestDict,$newWord));
+            var_dump(enchant_dict_is_added($requestDict,$newWord));
         } else {
             echo("dict add to personal failed\n");
         }

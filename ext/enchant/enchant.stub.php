@@ -14,10 +14,16 @@ function enchant_broker_free($broker): bool {}
 */
 function enchant_broker_get_error($broker) {}
 
-/** @param resource $broker */
+/**
+* @param resource $broker
+* @deprecated
+*/
 function enchant_broker_set_dict_path($broker, int $name, string $value): bool {}
 
-/** @param resource $broker */
+/**
+* @param resource $broker
+* @deprecated
+*/
 function enchant_broker_get_dict_path($broker, int $name): string|false {}
 
 /** @param resource $broker */
@@ -63,6 +69,13 @@ function enchant_dict_add_to_personal($dict, string $word): void {}
 function enchant_dict_add_to_session($dict, string $word): void {}
 
 /** @param resource $dict */
+function enchant_dict_is_added($dict, string $word): bool {}
+
+/**
+* @param resource $dict
+* @alias enchant_dict_is_added
+* @deprecated
+*/
 function enchant_dict_is_in_session($dict, string $word): bool {}
 
 /** @param resource $dict */

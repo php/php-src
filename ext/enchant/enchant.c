@@ -55,9 +55,6 @@ static int le_enchant_dict;
 /* If you declare any globals in php_enchant.h uncomment this:*/
 /*ZEND_DECLARE_MODULE_GLOBALS(enchant)*/
 
-#define PHP_ENCHANT_MYSPELL 1
-#define PHP_ENCHANT_ISPELL 2
-
 /* {{{ enchant_module_entry
  */
 zend_module_entry enchant_module_entry = {
@@ -195,8 +192,6 @@ PHP_MINIT_FUNCTION(enchant)
 {
 	le_enchant_broker = zend_register_list_destructors_ex(php_enchant_broker_free, NULL, "enchant_broker", module_number);
 	le_enchant_dict = zend_register_list_destructors_ex(php_enchant_dict_free, NULL, "enchant_dict", module_number);
-	REGISTER_LONG_CONSTANT("ENCHANT_MYSPELL", PHP_ENCHANT_MYSPELL, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("ENCHANT_ISPELL", PHP_ENCHANT_ISPELL, CONST_CS | CONST_PERSISTENT);
 	return SUCCESS;
 }
 /* }}} */
@@ -227,11 +222,7 @@ PHP_MINFO_FUNCTION(enchant)
 	pbroker = enchant_broker_init();
 	php_info_print_table_start();
 	php_info_print_table_row(2, "enchant support", "enabled");
-#ifdef HAVE_ENCHANT_GET_VERSION
 	php_info_print_table_row(2, "Libenchant Version", enchant_get_version());
-#elif defined(HAVE_ENCHANT_BROKER_SET_PARAM)
-	php_info_print_table_row(2, "Libenchant Version", "1.5.x");
-#endif
 	php_info_print_table_end();
 
 	php_info_print_table_start();
@@ -304,7 +295,7 @@ PHP_FUNCTION(enchant_broker_get_error)
 {
 	zval *broker;
 	enchant_broker *pbroker;
-	char *msg;
+	const char *msg;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &broker) == FAILURE) {
 		RETURN_THROWS();
@@ -320,88 +311,8 @@ PHP_FUNCTION(enchant_broker_get_error)
 }
 /* }}} */
 
-#if HAVE_ENCHANT_BROKER_SET_PARAM
 /* {{{ proto bool enchant_broker_set_dict_path(resource broker, int dict_type, string value)
-	Set the directory path for a given backend, works with ispell and myspell */
-PHP_FUNCTION(enchant_broker_set_dict_path)
-{
-	zval *broker;
-	enchant_broker *pbroker;
-	zend_long dict_type;
-	char *value;
-	size_t value_len;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rls", &broker, &dict_type, &value, &value_len) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	if (!value_len) {
-		RETURN_FALSE;
-	}
-
-	PHP_ENCHANT_GET_BROKER;
-
-	switch (dict_type) {
-		case PHP_ENCHANT_MYSPELL:
-			PHP_ENCHANT_GET_BROKER;
-			enchant_broker_set_param(pbroker->pbroker, "enchant.myspell.dictionary.path", (const char *)value);
-			RETURN_TRUE;
-			break;
-
-		case PHP_ENCHANT_ISPELL:
-			PHP_ENCHANT_GET_BROKER;
-			enchant_broker_set_param(pbroker->pbroker, "enchant.ispell.dictionary.path", (const char *)value);
-			RETURN_TRUE;
-			break;
-
-		default:
-			RETURN_FALSE;
-	}
-}
-/* }}} */
-
-
-/* {{{ proto string enchant_broker_get_dict_path(resource broker, int dict_type)
-	Get the directory path for a given backend, works with ispell and myspell */
-PHP_FUNCTION(enchant_broker_get_dict_path)
-{
-	zval *broker;
-	enchant_broker *pbroker;
-	zend_long dict_type;
-	char *value;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rl", &broker, &dict_type) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	PHP_ENCHANT_GET_BROKER;
-
-	switch (dict_type) {
-		case PHP_ENCHANT_MYSPELL:
-			PHP_ENCHANT_GET_BROKER;
-			value = enchant_broker_get_param(pbroker->pbroker, "enchant.myspell.dictionary.path");
-			break;
-
-		case PHP_ENCHANT_ISPELL:
-			PHP_ENCHANT_GET_BROKER;
-			value = enchant_broker_get_param(pbroker->pbroker, "enchant.ispell.dictionary.path");
-			break;
-
-		default:
-			RETURN_FALSE;
-	}
-
-	if (value == NULL) {
-		php_error_docref(NULL, E_WARNING, "dict_path not set");
-		RETURN_FALSE;
-	}
-
-	RETURN_STRING(value);
-}
-/* }}} */
-#else
-/* {{{ proto bool enchant_broker_set_dict_path(resource broker, int dict_type, string value)
-	Set the directory path for a given backend, works with ispell and myspell */
+	dropped in enchant2 */
 PHP_FUNCTION(enchant_broker_set_dict_path)
 {
 	RETURN_FALSE;
@@ -410,13 +321,12 @@ PHP_FUNCTION(enchant_broker_set_dict_path)
 
 
 /* {{{ proto string enchant_broker_get_dict_path(resource broker, int dict_type)
-	Get the directory path for a given backend, works with ispell and myspell */
+	dropped in enchant2 */
 PHP_FUNCTION(enchant_broker_get_dict_path)
 {
 	RETURN_FALSE;
 }
 /* }}} */
-#endif
 
 /* {{{ proto array enchant_broker_list_dicts(resource broker)
    Lists the dictionaries available for the given broker */
@@ -650,7 +560,7 @@ PHP_FUNCTION(enchant_dict_quick_check)
 			for (i = 0; i < n_sugg; i++) {
 				add_next_index_string(sugg, suggs[i]);
 			}
-			enchant_dict_free_suggestions(pdict->pdict, suggs);
+			enchant_dict_free_string_list(pdict->pdict, suggs);
 		}
 
 
@@ -705,7 +615,7 @@ PHP_FUNCTION(enchant_dict_suggest)
 			add_next_index_string(return_value, suggs[i]);
 		}
 
-		enchant_dict_free_suggestions(pdict->pdict, suggs);
+		enchant_dict_free_string_list(pdict->pdict, suggs);
 	}
 }
 /* }}} */
@@ -725,7 +635,7 @@ PHP_FUNCTION(enchant_dict_add_to_personal)
 
 	PHP_ENCHANT_GET_DICT;
 
-	enchant_dict_add_to_personal(pdict->pdict, word, wordlen);
+	enchant_dict_add(pdict->pdict, word, wordlen);
 }
 /* }}} */
 
@@ -748,9 +658,10 @@ PHP_FUNCTION(enchant_dict_add_to_session)
 }
 /* }}} */
 
-/* {{{ proto bool enchant_dict_is_in_session(resource dict, string word)
+
+/* {{{ proto bool enchant_dict_is_added(resource dict, string word)
    whether or not 'word' exists in this spelling-session */
-PHP_FUNCTION(enchant_dict_is_in_session)
+PHP_FUNCTION(enchant_dict_is_added)
 {
 	zval *dict;
 	char *word;
@@ -763,7 +674,7 @@ PHP_FUNCTION(enchant_dict_is_in_session)
 
 	PHP_ENCHANT_GET_DICT;
 
-	RETURN_BOOL(enchant_dict_is_in_session(pdict->pdict, word, wordlen));
+	RETURN_BOOL(enchant_dict_is_added(pdict->pdict, word, wordlen));
 }
 /* }}} */
 
@@ -796,7 +707,7 @@ PHP_FUNCTION(enchant_dict_get_error)
 {
 	zval *dict;
 	enchant_dict *pdict;
-	char *msg;
+	const char *msg;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &dict) == FAILURE) {
 		RETURN_THROWS();
