@@ -9471,7 +9471,9 @@ static int zend_jit_leave_func(dasm_State **Dst, const zend_op *opline, const ze
 			const void *exit_addr;
 			zend_jit_trace_stack_frame *current_frame;
 
-			trace++;
+			do {
+				trace++;
+			} while (trace->op == ZEND_JIT_TRACE_INIT_CALL);
 			ZEND_ASSERT(trace->op == ZEND_JIT_TRACE_VM || trace->op == ZEND_JIT_TRACE_END);
 			next_opline = trace->opline;
 			current_frame = JIT_G(current_frame);

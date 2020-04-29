@@ -363,6 +363,7 @@ struct _zend_jit_trace_stack_frame {
 	zend_jit_trace_stack_frame *call;
 	zend_jit_trace_stack_frame *prev;
 	const zend_function        *func;
+	uint32_t                    call_level;
 	uint32_t                    _info;
 	zend_jit_trace_stack        stack[1];
 };
@@ -384,6 +385,7 @@ struct _zend_jit_trace_stack_frame {
 		_frame->call = NULL; \
 		_frame->prev = NULL; \
 		_frame->func = (const zend_function*)_func; \
+		_frame->call_level = 0; \
 		_frame->_info = (((uint32_t)(num_args)) << TRACE_FRAME_SHIFT_NUM_ARGS) & TRACE_FRAME_MASK_NUM_ARGS; \
 		if (nested) { \
 			_frame->_info |= TRACE_FRAME_MASK_NESTED; \

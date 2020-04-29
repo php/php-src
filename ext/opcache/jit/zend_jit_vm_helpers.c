@@ -696,6 +696,7 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 			if (rc == 1) {
 #endif
 				/* Enter into function */
+				prev_call = NULL;
 				if (level > ZEND_JIT_TRACE_MAX_CALL_DEPTH) {
 					stop = ZEND_JIT_TRACE_STOP_TOO_DEEP;
 					break;
@@ -726,6 +727,7 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 				level++;
 			} else {
 				/* Return from function */
+				prev_call = EX(call);
 				if (level == 0) {
 					if (is_toplevel) {
 						stop = ZEND_JIT_TRACE_STOP_TOPLEVEL;
@@ -757,6 +759,10 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 						unrolled_calls[ret_level] = &EX(func)->op_array;
 						ret_level++;
 						is_toplevel = EX(func)->op_array.function_name == NULL;
+
+						if (prev_call) {
+							idx = zend_jit_trace_record_fake_init_call(prev_call, trace_buffer, idx);
+						}
 #endif
 					} else if (start & ZEND_JIT_TRACE_START_LOOP
 					 && !zend_jit_trace_bad_loop_exit(orig_opline)) {
@@ -785,8 +791,7 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 			offset = jit_extension->offset;
 		}
 		if (EX(call) != prev_call) {
-			if (trace_buffer[idx-1].op != ZEND_JIT_TRACE_BACK
-			 && EX(call)
+			if (EX(call)
 			 && EX(call)->prev_execute_data == prev_call) {
 				if (EX(call)->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
 					/* TODO: Can we continue recording ??? */
@@ -865,6 +870,13 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 			idx = backtrack_ret_recursion;
 			ret_level = backtrack_ret_recursion_level;
 			stop = ZEND_JIT_TRACE_STOP_RECURSIVE_RET;
+		}
+	}
+
+	if (stop == ZEND_JIT_TRACE_STOP_LINK) {
+		/* Shrink fake INIT_CALLs */
+		while (trace_buffer[idx-1].op == ZEND_JIT_TRACE_INIT_CALL && trace_buffer[idx-1].fake) {
+			idx--;
 		}
 	}
 

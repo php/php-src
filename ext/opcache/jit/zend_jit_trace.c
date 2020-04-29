@@ -1614,8 +1614,12 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 					v++;
 				}
 				if (return_value_info.type != 0) {
-					if ((p+1)->op == ZEND_JIT_TRACE_VM) {
-						const zend_op *opline = (p+1)->opline - 1;
+					zend_jit_trace_rec *q = p + 1;
+					while (q->op == ZEND_JIT_TRACE_INIT_CALL) {
+						q++;
+					}
+					if (q->op == ZEND_JIT_TRACE_VM) {
+						const zend_op *opline = q->opline - 1;
 						if (opline->result_type != IS_UNUSED) {
 							ssa_var_info[
 								p->first_ssa_var +
@@ -2429,7 +2433,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 	const zend_op_array *op_array;
 	zend_ssa *ssa, *op_array_ssa;
 	zend_jit_trace_rec *p;
-	int call_level = -1; // TODO: proper support for inlined functions ???
 	zend_jit_op_array_trace_extension *jit_extension;
 	int num_op_arrays = 0;
 	zend_jit_trace_info *t;
@@ -2671,8 +2674,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 				p++;
 			}
 
-#if 0
-			// TODO: call level calculation doesn't work for traces ???
 			switch (opline->opcode) {
 				case ZEND_INIT_FCALL:
 				case ZEND_INIT_FCALL_BY_NAME:
@@ -2682,9 +2683,8 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 				case ZEND_INIT_STATIC_METHOD_CALL:
 				case ZEND_INIT_USER_CALL:
 				case ZEND_NEW:
-					call_level++;
+					frame->call_level++;
 			}
-#endif
 
 			if (zend_jit_level >= ZEND_JIT_LEVEL_INLINE) {
 				switch (opline->opcode) {
@@ -3043,7 +3043,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 					case ZEND_INIT_FCALL:
 					case ZEND_INIT_FCALL_BY_NAME:
 					case ZEND_INIT_NS_FCALL_BY_NAME:
-						if (!zend_jit_init_fcall(&dasm_state, opline, op_array_ssa->cfg.map ? op_array_ssa->cfg.map[opline - op_array->opcodes] : -1, op_array, op_array_ssa, call_level, p + 1)) {
+						if (!zend_jit_init_fcall(&dasm_state, opline, op_array_ssa->cfg.map ? op_array_ssa->cfg.map[opline - op_array->opcodes] : -1, op_array, op_array_ssa, frame->call_level, p + 1)) {
 							goto jit_failure;
 						}
 						goto done;
@@ -3128,7 +3128,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 					case ZEND_DO_ICALL:
 					case ZEND_DO_FCALL_BY_NAME:
 					case ZEND_DO_FCALL:
-						if (!zend_jit_do_fcall(&dasm_state, opline, op_array, op_array_ssa, call_level, -1, p + 1)) {
+						if (!zend_jit_do_fcall(&dasm_state, opline, op_array, op_array_ssa, frame->call_level, -1, p + 1)) {
 							goto jit_failure;
 						}
 						goto done;
@@ -3608,16 +3608,13 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 			}
 
 done:
-#if 0
-			// TODO: call level calculation doesn't work for traces ???
 			switch (opline->opcode) {
 				case ZEND_DO_FCALL:
 				case ZEND_DO_ICALL:
 				case ZEND_DO_UCALL:
 				case ZEND_DO_FCALL_BY_NAME:
-					call_level--;
+					frame->call_level--;
 			}
-#endif
 
 			if (ra) {
 				zend_jit_trace_clenup_stack(stack, opline, ssa_op, ssa, ra);
@@ -3946,6 +3943,7 @@ done:
 				if (!skip_guard && !zend_jit_init_fcall_guard(&dasm_state, NULL, p->func)) {
 					goto jit_failure;
 				}
+				frame->call_level++;
 			}
 		} else if (p->op == ZEND_JIT_TRACE_DO_ICALL) {
 			call = frame->call;
