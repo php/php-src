@@ -2476,6 +2476,9 @@ COMMAND $cmd
                 $clean_params = array();
                 settings2array($ini_overwrites, $clean_params);
                 $clean_params = settings2params($clean_params);
+                if (substr(PHP_OS, 0, 3) === "WIN" && $workerID) {
+                    $clean_params .= " -d opcache.cache_id=worker$workerID";
+                }
                 $extra = substr(PHP_OS, 0, 3) !== "WIN" ?
                     "unset REQUEST_METHOD; unset QUERY_STRING; unset PATH_TRANSLATED; unset SCRIPT_FILENAME; unset REQUEST_METHOD;" : "";
                 system_with_timeout("$extra $php $pass_options $extra_options -q $clean_params $no_file_cache \"$test_clean\"", $env);
