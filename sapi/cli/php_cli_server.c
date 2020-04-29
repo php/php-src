@@ -225,7 +225,7 @@ static void php_cli_server_buffer_append(php_cli_server_buffer *buffer, php_cli_
 static void php_cli_server_logf(int type, const char *format, ...);
 static void php_cli_server_log_response(php_cli_server_client *client, int status, const char *message);
 
-ZEND_DECLARE_MODULE_GLOBALS(cli_server);
+ZEND_DECLARE_MODULE_GLOBALS(cli_server)
 
 /* {{{ static char php_cli_server_css[]
  * copied from ext/standard/info.c

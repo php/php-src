@@ -56,7 +56,7 @@
 ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 
-ZEND_DECLARE_MODULE_GLOBALS(phpdbg);
+ZEND_DECLARE_MODULE_GLOBALS(phpdbg)
 int phpdbg_startup_run = 0;
 
 static PHP_INI_MH(OnUpdateEol)

@@ -47,7 +47,7 @@ int le_deflate;
 int le_inflate;
 #define le_inflate_name "zlib inflate"
 
-ZEND_DECLARE_MODULE_GLOBALS(zlib);
+ZEND_DECLARE_MODULE_GLOBALS(zlib)
 
 /* {{{ Memory management wrappers */
 
