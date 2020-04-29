@@ -1504,19 +1504,15 @@ PHP_FUNCTION(strtolower)
 
 /* {{{ php_basename
  */
-PHPAPI zend_string *php_basename(const char *s, size_t len, char *suffix, size_t sufflen)
+PHPAPI zend_string *php_basename(const char *s, size_t len, char *suffix, size_t suffix_len)
 {
-	char *c;
-	const char *comp, *cend;
-	size_t inc_len, cnt;
-	int state;
-	zend_string *ret;
-
-	comp = cend = c = (char*)s;
-	cnt = len;
-	state = 0;
-	while (cnt > 0) {
-		inc_len = (*c == '\0' ? 1 : php_mblen(c, cnt));
+	/* State 0 is directly after a directory separator (or at the start of the string).
+	 * State 1 is everything else. */
+	int state = 0;
+	const char *basename_start = s;
+	const char *basename_end = s;
+	while (len > 0) {
+		int inc_len = (*s == '\0' ? 1 : php_mblen(s, len));
 
 		switch (inc_len) {
 			case -2:
@@ -1528,58 +1524,56 @@ PHPAPI zend_string *php_basename(const char *s, size_t len, char *suffix, size_t
 				goto quit_loop;
 			case 1:
 #if defined(PHP_WIN32)
-				if (*c == '/' || *c == '\\') {
+				if (*s == '/' || *s == '\\') {
 #else
-				if (*c == '/') {
+				if (*s == '/') {
 #endif
 					if (state == 1) {
 						state = 0;
-						cend = c;
+						basename_end = s;
 					}
 #if defined(PHP_WIN32)
 				/* Catch relative paths in c:file.txt style. They're not to confuse
 				   with the NTFS streams. This part ensures also, that no drive
 				   letter traversing happens. */
-				} else if ((*c == ':' && (c - comp == 1))) {
+				} else if ((*s == ':' && (s - basename_start == 1))) {
 					if (state == 0) {
-						comp = c;
+						basename_start = s;
 						state = 1;
 					} else {
-						cend = c;
+						basename_end = s;
 						state = 0;
 					}
 #endif
 				} else {
 					if (state == 0) {
-						comp = c;
+						basename_start = s;
 						state = 1;
 					}
 				}
 				break;
 			default:
 				if (state == 0) {
-					comp = c;
+					basename_start = s;
 					state = 1;
 				}
 				break;
 		}
-		c += inc_len;
-		cnt -= inc_len;
+		s += inc_len;
+		len -= inc_len;
 	}
 
 quit_loop:
 	if (state == 1) {
-		cend = c;
-	}
-	if (suffix != NULL && sufflen < (size_t)(cend - comp) &&
-			memcmp(cend - sufflen, suffix, sufflen) == 0) {
-		cend -= sufflen;
+		basename_end = s;
 	}
 
-	len = cend - comp;
+	if (suffix != NULL && suffix_len < (size_t)(basename_end - basename_start) &&
+			memcmp(basename_end - suffix_len, suffix, suffix_len) == 0) {
+		basename_end -= suffix_len;
+	}
 
-	ret = zend_string_init(comp, len, 0);
-	return ret;
+	return zend_string_init(basename_start, basename_end - basename_start, 0);
 }
 /* }}} */
 
