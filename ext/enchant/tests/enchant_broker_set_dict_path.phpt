@@ -46,8 +46,16 @@ if (is_resource($broker)) {
     echo("broker is not a resource; failed; \n");
 }
 ?>
---EXPECT--
+--EXPECTF--
 OK
+
+Deprecated: Function enchant_broker_set_dict_path() is deprecated in %s
 OK
+
+Deprecated: Function enchant_broker_set_dict_path() is deprecated in %s
 OK
+
+Deprecated: Function enchant_broker_get_dict_path() is deprecated in %s
+
+Deprecated: Function enchant_broker_get_dict_path() is deprecated in %s
 OK
