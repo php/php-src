@@ -698,6 +698,10 @@ PHP 8.0 UPGRADE NOTES
   . The function imagegetinterpolation() to get the current interpolation method
     has been added.
 
+- JSON:
+  . The JSON extension cannot be disabled anymore and is always an integral part
+    of any PHP build, similar to the date extension.
+
 - MBString:
   . The Unicode data tables have been updated to version 13.0.0.
 

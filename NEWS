@@ -73,6 +73,10 @@ PHP                                                                        NEWS
   . Fixed bug #79255 (PHP cannot be compiled with enable JIT).
     (Laruence, Dmitry)
 
+- JSON:
+  . The JSON extension is now an integral part of PHP and cannot be disabled
+    as per RFC: https://wiki.php.net/rfc/always_enable_json (tandre)
+
 - LDAP:
   . Removed deprecated ldap_sort. (mcmic)
 
