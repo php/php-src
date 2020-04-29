@@ -2492,12 +2492,9 @@ COMMAND $cmd
             save_text($test_clean, trim($section_text['CLEAN']), $temp_clean);
 
             if (!$no_clean) {
-                $clean_params = array();
-                settings2array($ini_overwrites, $clean_params);
-                $clean_params = settings2params($clean_params);
                 $extra = !IS_WINDOWS ?
                     "unset REQUEST_METHOD; unset QUERY_STRING; unset PATH_TRANSLATED; unset SCRIPT_FILENAME; unset REQUEST_METHOD;" : "";
-                $clean_output = system_with_timeout("$extra $php $pass_options $extra_options -q $clean_params $no_file_cache \"$test_clean\"", $env);
+                $clean_output = system_with_timeout("$extra $php $pass_options $extra_options -q $orig_ini_settings $no_file_cache \"$test_clean\"", $env);
                 if (trim($clean_output) != '') {
                     echo "\nCLEAN OUTPUT: $file: $clean_output\n";
                 }
