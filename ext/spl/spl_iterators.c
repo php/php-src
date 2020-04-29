@@ -2360,9 +2360,7 @@ static inline void spl_caching_it_next(spl_dual_it_object *intern)
 			zval *data = &intern->current.data;
 
 			ZVAL_DEREF(data);
-			Z_TRY_ADDREF_P(data);
 			array_set_zval_key(Z_ARRVAL(intern->u.caching.zcache), key, data);
-			zval_ptr_dtor(data);
 		}
 		/* Recursion ? */
 		if (intern->dit_type == DIT_RecursiveCachingIterator) {

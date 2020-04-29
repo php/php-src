@@ -1578,7 +1578,7 @@ ZEND_API int array_set_zval_key(HashTable *ht, zval *key, zval *value) /* {{{ */
 			result = zend_symtable_update(ht, Z_STR_P(key), value);
 			break;
 		case IS_NULL:
-			result = zend_symtable_update(ht, ZSTR_EMPTY_ALLOC(), value);
+			result = zend_hash_update(ht, ZSTR_EMPTY_ALLOC(), value);
 			break;
 		case IS_RESOURCE:
 			zend_error(E_WARNING, "Resource ID#%d used as offset, casting to integer (%d)", Z_RES_HANDLE_P(key), Z_RES_HANDLE_P(key));
