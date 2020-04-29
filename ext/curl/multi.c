@@ -314,11 +314,22 @@ PHP_FUNCTION(curl_multi_info_read)
    Close a set of cURL handles */
 PHP_FUNCTION(curl_multi_close)
 {
-	zval      *z_mh;
+	php_curlm *mh;
+	zval *z_mh;
+
+	zend_llist_position pos;
+	zval *pz_ch;
 
 	ZEND_PARSE_PARAMETERS_START(1,1)
 		Z_PARAM_OBJECT_OF_CLASS(z_mh, curl_multi_ce)
 	ZEND_PARSE_PARAMETERS_END();
+
+	mh = Z_CURL_MULTI_P(z_mh);
+
+	for (pz_ch = (zval *)zend_llist_get_first_ex(&mh->easyh, &pos); pz_ch;
+		pz_ch = (zval *)zend_llist_get_next_ex(&mh->easyh, &pos)) {
+		zend_llist_del_element(&mh->easyh, pz_ch, (int (*)(void *, void *))curl_compare_objects);
+	}
 }
 /* }}} */
 
