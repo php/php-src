@@ -27,6 +27,7 @@
 #include "php_pdo_pgsql_int.h"
 
 #ifdef HAVE_PG_CONFIG_H
+#undef SIZEOF_OFF_T
 #include <pg_config.h>
 #endif
 
