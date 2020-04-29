@@ -69,12 +69,16 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_enchant_dict_suggest, 0, 2, IS_A
 	ZEND_ARG_TYPE_INFO(0, word, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_enchant_dict_add_to_personal, 0, 2, IS_VOID, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_enchant_dict_add, 0, 2, IS_VOID, 0)
 	ZEND_ARG_INFO(0, dict)
 	ZEND_ARG_TYPE_INFO(0, word, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_enchant_dict_add_to_session arginfo_enchant_dict_add_to_personal
+#define arginfo_enchant_dict_add_to_personal arginfo_enchant_dict_add
+
+#define arginfo_enchant_dict_add_to_session arginfo_enchant_dict_add
+
+#define arginfo_enchant_dict_is_added arginfo_enchant_dict_check
 
 #define arginfo_enchant_dict_is_in_session arginfo_enchant_dict_check
 
@@ -108,9 +112,9 @@ ZEND_FUNCTION(enchant_broker_describe);
 ZEND_FUNCTION(enchant_dict_quick_check);
 ZEND_FUNCTION(enchant_dict_check);
 ZEND_FUNCTION(enchant_dict_suggest);
-ZEND_FUNCTION(enchant_dict_add_to_personal);
+ZEND_FUNCTION(enchant_dict_add);
 ZEND_FUNCTION(enchant_dict_add_to_session);
-ZEND_FUNCTION(enchant_dict_is_in_session);
+ZEND_FUNCTION(enchant_dict_is_added);
 ZEND_FUNCTION(enchant_dict_store_replacement);
 ZEND_FUNCTION(enchant_dict_get_error);
 ZEND_FUNCTION(enchant_dict_describe);
@@ -120,8 +124,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(enchant_broker_init, arginfo_enchant_broker_init)
 	ZEND_FE(enchant_broker_free, arginfo_enchant_broker_free)
 	ZEND_FE(enchant_broker_get_error, arginfo_enchant_broker_get_error)
-	ZEND_FE(enchant_broker_set_dict_path, arginfo_enchant_broker_set_dict_path)
-	ZEND_FE(enchant_broker_get_dict_path, arginfo_enchant_broker_get_dict_path)
+	ZEND_DEP_FE(enchant_broker_set_dict_path, arginfo_enchant_broker_set_dict_path)
+	ZEND_DEP_FE(enchant_broker_get_dict_path, arginfo_enchant_broker_get_dict_path)
 	ZEND_FE(enchant_broker_list_dicts, arginfo_enchant_broker_list_dicts)
 	ZEND_FE(enchant_broker_request_dict, arginfo_enchant_broker_request_dict)
 	ZEND_FE(enchant_broker_request_pwl_dict, arginfo_enchant_broker_request_pwl_dict)
@@ -132,9 +136,11 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(enchant_dict_quick_check, arginfo_enchant_dict_quick_check)
 	ZEND_FE(enchant_dict_check, arginfo_enchant_dict_check)
 	ZEND_FE(enchant_dict_suggest, arginfo_enchant_dict_suggest)
-	ZEND_FE(enchant_dict_add_to_personal, arginfo_enchant_dict_add_to_personal)
+	ZEND_FE(enchant_dict_add, arginfo_enchant_dict_add)
+	ZEND_DEP_FALIAS(enchant_dict_add_to_personal, enchant_dict_add, arginfo_enchant_dict_add_to_personal)
 	ZEND_FE(enchant_dict_add_to_session, arginfo_enchant_dict_add_to_session)
-	ZEND_FE(enchant_dict_is_in_session, arginfo_enchant_dict_is_in_session)
+	ZEND_FE(enchant_dict_is_added, arginfo_enchant_dict_is_added)
+	ZEND_DEP_FALIAS(enchant_dict_is_in_session, enchant_dict_is_added, arginfo_enchant_dict_is_in_session)
 	ZEND_FE(enchant_dict_store_replacement, arginfo_enchant_dict_store_replacement)
 	ZEND_FE(enchant_dict_get_error, arginfo_enchant_dict_get_error)
 	ZEND_FE(enchant_dict_describe, arginfo_enchant_dict_describe)

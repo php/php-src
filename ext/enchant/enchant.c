@@ -197,6 +197,9 @@ PHP_MINIT_FUNCTION(enchant)
 	le_enchant_dict = zend_register_list_destructors_ex(php_enchant_dict_free, NULL, "enchant_dict", module_number);
 	REGISTER_LONG_CONSTANT("ENCHANT_MYSPELL", PHP_ENCHANT_MYSPELL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ENCHANT_ISPELL", PHP_ENCHANT_ISPELL, CONST_CS | CONST_PERSISTENT);
+#ifdef HAVE_ENCHANT_GET_VERSION
+	REGISTER_STRING_CONSTANT("LIBENCHANT_VERSION", enchant_get_version(), CONST_CS | CONST_PERSISTENT);
+#endif
 	return SUCCESS;
 }
 /* }}} */
@@ -304,7 +307,7 @@ PHP_FUNCTION(enchant_broker_get_error)
 {
 	zval *broker;
 	enchant_broker *pbroker;
-	char *msg;
+	const char *msg;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &broker) == FAILURE) {
 		RETURN_THROWS();
@@ -650,7 +653,7 @@ PHP_FUNCTION(enchant_dict_quick_check)
 			for (i = 0; i < n_sugg; i++) {
 				add_next_index_string(sugg, suggs[i]);
 			}
-			enchant_dict_free_suggestions(pdict->pdict, suggs);
+			enchant_dict_free_string_list(pdict->pdict, suggs);
 		}
 
 
@@ -705,14 +708,14 @@ PHP_FUNCTION(enchant_dict_suggest)
 			add_next_index_string(return_value, suggs[i]);
 		}
 
-		enchant_dict_free_suggestions(pdict->pdict, suggs);
+		enchant_dict_free_string_list(pdict->pdict, suggs);
 	}
 }
 /* }}} */
 
-/* {{{ proto void enchant_dict_add_to_personal(resource dict, string word)
+/* {{{ proto void enchant_dict_add(resource dict, string word)
      add 'word' to personal word list */
-PHP_FUNCTION(enchant_dict_add_to_personal)
+PHP_FUNCTION(enchant_dict_add)
 {
 	zval *dict;
 	char *word;
@@ -725,7 +728,7 @@ PHP_FUNCTION(enchant_dict_add_to_personal)
 
 	PHP_ENCHANT_GET_DICT;
 
-	enchant_dict_add_to_personal(pdict->pdict, word, wordlen);
+	enchant_dict_add(pdict->pdict, word, wordlen);
 }
 /* }}} */
 
@@ -748,9 +751,9 @@ PHP_FUNCTION(enchant_dict_add_to_session)
 }
 /* }}} */
 
-/* {{{ proto bool enchant_dict_is_in_session(resource dict, string word)
+/* {{{ proto bool enchant_dict_is_added(resource dict, string word)
    whether or not 'word' exists in this spelling-session */
-PHP_FUNCTION(enchant_dict_is_in_session)
+PHP_FUNCTION(enchant_dict_is_added)
 {
 	zval *dict;
 	char *word;
@@ -763,7 +766,7 @@ PHP_FUNCTION(enchant_dict_is_in_session)
 
 	PHP_ENCHANT_GET_DICT;
 
-	RETURN_BOOL(enchant_dict_is_in_session(pdict->pdict, word, wordlen));
+	RETURN_BOOL(enchant_dict_is_added(pdict->pdict, word, wordlen));
 }
 /* }}} */
 
@@ -796,7 +799,7 @@ PHP_FUNCTION(enchant_dict_get_error)
 {
 	zval *dict;
 	enchant_dict *pdict;
-	char *msg;
+	const char *msg;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &dict) == FAILURE) {
 		RETURN_THROWS();

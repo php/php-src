@@ -21,7 +21,7 @@ if (is_resource($broker)) {
     if ($requestDict) {
         echo("OK\n");
         for($x=0;$x<count($newWord);$x++) {
-            $AddtoPersonalDict = enchant_dict_add_to_personal($requestDict,$newWord[$x]);
+            $AddtoPersonalDict = enchant_dict_add($requestDict,$newWord[$x]);
         }
 
         if (NULL === $AddtoPersonalDict) {
