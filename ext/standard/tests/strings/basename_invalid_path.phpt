@@ -13,9 +13,12 @@ if((substr(PHP_OS, 0, 3) == "WIN"))
                 If the filename ends in suffix this will also be cut off.
 */
 
-var_dump(basename(chr(-1)));
+setlocale(LC_CTYPE, "C");
+var_dump(bin2hex(basename("\xff")));
+var_dump(bin2hex(basename("a\xffb")));
 
 echo "Done\n";
 --EXPECT--
-string(0) ""
+string(2) "ff"
+string(6) "61ff62"
 Done

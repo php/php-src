@@ -1515,11 +1515,6 @@ PHPAPI zend_string *php_basename(const char *s, size_t len, char *suffix, size_t
 		int inc_len = (*s == '\0' ? 1 : php_mblen(s, len));
 
 		switch (inc_len) {
-			case -2:
-			case -1:
-				inc_len = 1;
-				php_mb_reset();
-				break;
 			case 0:
 				goto quit_loop;
 			case 1:
@@ -1553,6 +1548,11 @@ PHPAPI zend_string *php_basename(const char *s, size_t len, char *suffix, size_t
 				}
 				break;
 			default:
+				if (inc_len < 0) {
+					/* If character is invalid, treat it like other non-significant characters. */
+					inc_len = 1;
+					php_mb_reset();
+				}
 				if (state == 0) {
 					basename_start = s;
 					state = 1;
