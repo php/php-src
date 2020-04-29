@@ -397,6 +397,12 @@ PHP 8.0 UPGRADE NOTES
   . If the array returned by __sleep() contains non-existing properties, these
     are now silently ignored. Previously, such properties would have been
     serialized as if they had the value NULL.
+  . The default locale on startup is now always "C". No locales are inherited
+    from the environment by default. Previously, LC_ALL was set to "C", while
+    LC_CTYPE was inherited from the environment. However, some functions did not
+    respect the inherited locale without an explicit setlocale() call. An
+    explicit setlocale() call is now always required if you wish to change any
+    locale component from the default.
 
 - tidy:
   . The $use_include_path parameter, which was not used internally, has been

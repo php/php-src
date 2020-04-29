@@ -49,6 +49,7 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#include <locale.h>
 
 #ifndef __P
 #ifdef __GNUC__
@@ -1971,6 +1972,8 @@ PHP_MINIT_FUNCTION(snmp)
 	le_snmp_session = zend_register_list_destructors_ex(php_snmp_session_destructor, NULL, PHP_SNMP_SESSION_RES_NAME, module_number);
 
 	init_snmp("snmpapp");
+	/* net-snmp corrupts the CTYPE locale during initialization. */
+	setlocale(LC_CTYPE, "C");
 
 #ifdef NETSNMP_DS_LIB_DONT_PERSIST_STATE
 	/* Prevent update of the snmpapp.conf file */
