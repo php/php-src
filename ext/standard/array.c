@@ -4196,48 +4196,11 @@ PHP_FUNCTION(array_column)
 				continue;
 			}
 
-			/* Failure will leave keyval alone which will land us on the final else block below
-			 * which is to append the value as next_index
-			 */
 			zval rv;
 			zval *keyval = array_column_fetch_prop(data, index, &rv);
-
 			if (keyval) {
-				switch (Z_TYPE_P(keyval)) {
-					case IS_STRING:
-						zend_symtable_update(Z_ARRVAL_P(return_value), Z_STR_P(keyval), colval);
-						break;
-					case IS_LONG:
-						zend_hash_index_update(Z_ARRVAL_P(return_value), Z_LVAL_P(keyval), colval);
-						break;
-					case IS_OBJECT:
-						{
-							zend_string *tmp_key;
-							zend_string *key = zval_get_tmp_string(keyval, &tmp_key);
-							zend_symtable_update(Z_ARRVAL_P(return_value), key, colval);
-							zend_tmp_string_release(tmp_key);
-							break;
-						}
-					case IS_NULL:
-						zend_hash_update(Z_ARRVAL_P(return_value), ZSTR_EMPTY_ALLOC(), colval);
-						break;
-					case IS_DOUBLE:
-						zend_hash_index_update(Z_ARRVAL_P(return_value),
-								zend_dval_to_lval(Z_DVAL_P(keyval)), colval);
-						break;
-					case IS_TRUE:
-						zend_hash_index_update(Z_ARRVAL_P(return_value), 1, colval);
-						break;
-					case IS_FALSE:
-						zend_hash_index_update(Z_ARRVAL_P(return_value), 0, colval);
-						break;
-					case IS_RESOURCE:
-						zend_hash_index_update(Z_ARRVAL_P(return_value), Z_RES_HANDLE_P(keyval), colval);
-						break;
-					default:
-						zend_hash_next_index_insert(Z_ARRVAL_P(return_value), colval);
-						break;
-				}
+				array_set_zval_key(Z_ARRVAL_P(return_value), keyval, colval);
+				zval_ptr_dtor(colval);
 				zval_ptr_dtor(keyval);
 			} else {
 				zend_hash_next_index_insert(Z_ARRVAL_P(return_value), colval);
