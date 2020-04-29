@@ -2133,7 +2133,6 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	zuf.getenv_function = sapi_getenv;
 	zuf.resolve_path_function = php_resolve_path_for_zend;
 	zend_startup(&zuf);
-	setlocale(LC_CTYPE, "");
 	zend_update_current_locale();
 
 #if HAVE_TZSET
