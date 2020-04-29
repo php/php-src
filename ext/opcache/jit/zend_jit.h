@@ -118,8 +118,8 @@ struct _zend_lifetime_interval {
 		struct {
 		ZEND_ENDIAN_LOHI_3(
 			int8_t          reg,
-			uint8_t			flags,
-			uint16_t		reserved
+			uint8_t         flags,
+			uint16_t        reserved
 		)};
 		uint32_t            reg_flags;
 	};

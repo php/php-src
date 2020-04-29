@@ -390,7 +390,7 @@ static int zend_jit_disasm_init(void)
 #undef  REGISTER_EG
 #endif
 
-    /* Register JIT helper functions */
+	/* Register JIT helper functions */
 #define REGISTER_HELPER(n)  \
 	zend_jit_disasm_add_symbol(#n, \
 		(uint64_t)(uintptr_t)n, sizeof(void*));

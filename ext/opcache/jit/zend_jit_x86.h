@@ -75,14 +75,14 @@ typedef struct _zend_jit_registers_buf {
 #endif
 } zend_jit_registers_buf;
 
-#define	ZREG_RAX ZREG_R0
-#define	ZREG_RCX ZREG_R1
-#define	ZREG_RDX ZREG_R2
-#define	ZREG_RBX ZREG_R3
-#define	ZREG_RSP ZREG_R4
-#define	ZREG_RBP ZREG_R5
-#define	ZREG_RSI ZREG_R6
-#define	ZREG_RDI ZREG_R7
+#define ZREG_RAX ZREG_R0
+#define ZREG_RCX ZREG_R1
+#define ZREG_RDX ZREG_R2
+#define ZREG_RBX ZREG_R3
+#define ZREG_RSP ZREG_R4
+#define ZREG_RBP ZREG_R5
+#define ZREG_RSI ZREG_R6
+#define ZREG_RDI ZREG_R7
 
 #ifdef _WIN64
 # define ZREG_FP      ZREG_R14

@@ -600,7 +600,7 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 		ce1 = ce2 = NULL;
 		op1_type = op2_type = op3_type = IS_UNKNOWN;
 		if ((opline->op1_type & (IS_TMP_VAR|IS_VAR|IS_CV))
-		 &&	(opline->opcode != ZEND_ROPE_ADD && opline->opcode != ZEND_ROPE_END)) {
+		 && (opline->opcode != ZEND_ROPE_ADD && opline->opcode != ZEND_ROPE_END)) {
 			zval *zv = EX_VAR(opline->op1.var);
 			op1_type = Z_TYPE_P(zv);
 			if (op1_type == IS_INDIRECT) {

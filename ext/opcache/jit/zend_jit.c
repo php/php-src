@@ -70,7 +70,7 @@ zend_jit_globals jit_globals;
     } \
   } while(0)
 
-#define DASM_M_FREE(ctx, p, sz)	efree(p)
+#define DASM_M_FREE(ctx, p, sz) efree(p)
 
 #include "dynasm/dasm_proto.h"
 
@@ -254,7 +254,7 @@ static void *dasm_link_and_encode(dasm_State             **dasm_state,
 	zend_string *str = NULL;
 #endif
 
-    if (rt_opline && ssa && ssa->cfg.map) {
+	if (rt_opline && ssa && ssa->cfg.map) {
 		/* Create additional entry point, to switch from interpreter to JIT-ed
 		 * code at run-time.
 		 */
@@ -291,7 +291,7 @@ static void *dasm_link_and_encode(dasm_State             **dasm_state,
 			}
 			zend_jit_jmp(dasm_state, b);
 		}
-    }
+	}
 
 	if (dasm_link(dasm_state, &size) != DASM_S_OK) {
 		// TODO: dasm_link() failed ???
@@ -347,7 +347,7 @@ static void *dasm_link_and_encode(dasm_State             **dasm_state,
 	}
 
 #if defined(HAVE_DISASM) || defined(HAVE_GDB) || defined(HAVE_OPROFILE) || defined(HAVE_PERFTOOLS) || defined(HAVE_VTUNE)
-    if (!name) {
+	if (!name) {
 		if (ZCG(accel_directives).jit_debug & (ZEND_JIT_DEBUG_ASM|ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_OPROFILE|ZEND_JIT_DEBUG_PERF|ZEND_JIT_DEBUG_VTUNE|ZEND_JIT_DEBUG_PERF_DUMP)) {
 			str = zend_jit_func_name(op_array);
 			if (str) {
@@ -1513,13 +1513,13 @@ static int zend_jit_try_allocate_free_reg(const zend_op_array *op_array, const z
 	}
 #endif
 
-    if (hint != ZREG_NONE && freeUntilPos[hint] > zend_interval_end(current)) {
+	if (hint != ZREG_NONE && freeUntilPos[hint] > zend_interval_end(current)) {
 		current->reg = hint;
 		if (current->used_as_hint) {
 			ZEND_REGSET_INCL(*hints, hint);
 		}
 		return 1;
-    }
+	}
 
 	if (ZEND_REGSET_IS_EMPTY(available)) {
 		return 0;
@@ -3031,9 +3031,9 @@ done:
 	return SUCCESS;
 
 jit_failure:
-    if (dasm_state) {
+	if (dasm_state) {
 		dasm_free(&dasm_state);
-    }
+	}
 	if (zend_jit_reg_alloc) {
 		zend_arena_release(&CG(arena), checkpoint);
 	}
@@ -3063,7 +3063,7 @@ static int zend_real_jit_func(zend_op_array *op_array, zend_script *script, cons
 
 	checkpoint = zend_arena_checkpoint(CG(arena));
 
-    /* Build SSA */
+	/* Build SSA */
 	memset(&ssa, 0, sizeof(zend_ssa));
 
 	if (zend_jit_op_array_analyze1(op_array, script, &ssa) != SUCCESS) {

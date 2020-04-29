@@ -63,14 +63,14 @@
 #define PADDING8(size) (ALIGN8(size) - (size))
 
 typedef struct zend_perf_jitdump_header {
-  uint32_t magic;
-  uint32_t version;
-  uint32_t size;
-  uint32_t elf_mach_target;
-  uint32_t reserved;
-  uint32_t process_id;
-  uint64_t time_stamp;
-  uint64_t flags;
+	uint32_t magic;
+	uint32_t version;
+	uint32_t size;
+	uint32_t elf_mach_target;
+	uint32_t reserved;
+	uint32_t process_id;
+	uint64_t time_stamp;
+	uint64_t flags;
 } zend_perf_jitdump_header;
 
 typedef struct _zend_perf_jitdump_record {
@@ -123,7 +123,7 @@ static void zend_jit_perf_jitdump_open(void)
 	size_t pathlen = sizeof(path);
 	int mib[4] = {CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, -1};
 	if (sysctl(mib, 4, path, &pathlen, NULL, 0) == -1) {
-             return;
+		return;
 	}
 	fd = open(path, O_RDONLY);
 #else

@@ -83,7 +83,7 @@ static const void *zend_jit_trace_allocate_exit_group(uint32_t n)
 	dasm_free(&dasm_state);
 
 #ifdef HAVE_DISASM
-    if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_ASM) {
+	if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_ASM) {
 		uint32_t i;
 
 		for (i = 0; i < ZEND_JIT_EXIT_POINTS_PER_GROUP; i++) {
@@ -112,7 +112,7 @@ static const void *zend_jit_trace_allocate_exit_point(uint32_t n)
 			group;
 		ZEND_JIT_EXIT_NUM += ZEND_JIT_EXIT_POINTS_PER_GROUP;
 	} while (n >= ZEND_JIT_EXIT_NUM);
-    return (const void*)
+	return (const void*)
 		((const char*)group +
 		((n % ZEND_JIT_EXIT_POINTS_PER_GROUP) * ZEND_JIT_EXIT_POINTS_SPACING));
 }
@@ -122,7 +122,7 @@ static const void *zend_jit_trace_get_exit_addr(uint32_t n)
 	if (UNEXPECTED(n >= ZEND_JIT_EXIT_NUM)) {
 		return zend_jit_trace_allocate_exit_point(n);
 	}
-    return (const void*)
+	return (const void*)
 		((const char*)zend_jit_exit_groups[n / ZEND_JIT_EXIT_POINTS_PER_GROUP] +
 		((n % ZEND_JIT_EXIT_POINTS_PER_GROUP) * ZEND_JIT_EXIT_POINTS_SPACING));
 }
@@ -1802,7 +1802,7 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 	zend_jit_trace_stack *stack;
 	uint32_t parent_vars_count = parent_trace ?
 		zend_jit_traces[parent_trace].exit_info[exit_num].stack_size : 0;
-    zend_jit_trace_stack *parent_stack = parent_trace ?
+	zend_jit_trace_stack *parent_stack = parent_trace ?
 		zend_jit_traces[parent_trace].stack_map +
 		zend_jit_traces[parent_trace].exit_info[exit_num].stack_offset : NULL;
 	ALLOCA_FLAG(use_heap);
@@ -2620,7 +2620,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 				uint32_t exit_point = zend_jit_trace_get_exit_point(NULL, NULL, NULL);
 
 				exit_addr = zend_jit_trace_get_exit_addr(exit_point);
-                if (!exit_addr) {
+				if (!exit_addr) {
 					goto jit_failure;
 				}
 			}

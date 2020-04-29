@@ -58,7 +58,7 @@ void zend_elf_load_symbols(void)
 	size_t pathlen = sizeof(path);
 	int mib[4] = {CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, -1};
 	if (sysctl(mib, 4, path, &pathlen, NULL, 0) == -1) {
-             return;
+		return;
 	}
 	int fd = open(path, O_RDONLY);
 #else
