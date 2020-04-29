@@ -197,6 +197,9 @@ PHP_MINIT_FUNCTION(enchant)
 	le_enchant_dict = zend_register_list_destructors_ex(php_enchant_dict_free, NULL, "enchant_dict", module_number);
 	REGISTER_LONG_CONSTANT("ENCHANT_MYSPELL", PHP_ENCHANT_MYSPELL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ENCHANT_ISPELL", PHP_ENCHANT_ISPELL, CONST_CS | CONST_PERSISTENT);
+#ifdef HAVE_ENCHANT_GET_VERSION
+	REGISTER_STRING_CONSTANT("LIBENCHANT_VERSION", enchant_get_version(), CONST_CS | CONST_PERSISTENT);
+#endif
 	return SUCCESS;
 }
 /* }}} */
