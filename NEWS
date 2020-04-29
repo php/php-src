@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 7.4.6
 
 - Core:
+  . Fixed bug #79536 (zend_clear_exception prevent exception's destructor to be
+    called). (Laruence)
   . Fixed bug #78434 (Generator yields no items after valid() call). (Nikita)
   . Fixed bug #79477 (casting object into array creates references). (Nikita)
   . Fixed bug #79514 (Memory leaks while including unexistent file). (cmb,
