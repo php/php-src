@@ -328,3 +328,11 @@ struct bug79096 bug79096(void)
   b.b = 1;
   return b;
 }
+
+void bug79532(off_t *array, size_t elems)
+{
+	int i;
+	for (i = 0; i < elems; i++) {
+		array[i] = i;
+	}
+}
