@@ -443,6 +443,13 @@ class FuncInfo {
                 );
             }
         } else {
+            if ($this->alias && $this->isDeprecated) {
+                return sprintf(
+                    "\tZEND_DEP_FALIAS(%s, %s, %s)\n",
+                    $this->name, $this->alias->name, $this->getArgInfoName()
+                );
+            }
+
             if ($this->alias) {
                 return sprintf(
                     "\tZEND_FALIAS(%s, %s, %s)\n",
