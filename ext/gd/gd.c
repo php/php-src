@@ -195,7 +195,7 @@ zend_object *php_gd_image_object_create(zend_class_entry *class_type)
 	intern->std.handlers = &php_gd_image_object_handlers;
 
 	return &intern->std;
-};
+}
 
 static void php_gd_image_object_free(zend_object *intern)
 {
@@ -204,7 +204,7 @@ static void php_gd_image_object_free(zend_object *intern)
 	img_obj_ptr->image = NULL;
 
 	zend_object_std_dtor(intern);
-};
+}
 
 /**
  * Creates a new GdImage object wrapping the gdImagePtr and attaches it
