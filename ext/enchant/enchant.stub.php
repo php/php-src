@@ -80,7 +80,7 @@ function enchant_dict_is_added($dict, string $word): bool {}
 
 /**
 * @param resource $dict
-* @alias enchant_dict_add
+* @alias enchant_dict_is_added
 * @deprecated
 */
 function enchant_dict_is_in_session($dict, string $word): bool {}

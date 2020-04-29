@@ -140,7 +140,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_DEP_FALIAS(enchant_dict_add_to_personal, enchant_dict_add, arginfo_enchant_dict_add_to_personal)
 	ZEND_FE(enchant_dict_add_to_session, arginfo_enchant_dict_add_to_session)
 	ZEND_FE(enchant_dict_is_added, arginfo_enchant_dict_is_added)
-	ZEND_DEP_FALIAS(enchant_dict_is_in_session, enchant_dict_add, arginfo_enchant_dict_is_in_session)
+	ZEND_DEP_FALIAS(enchant_dict_is_in_session, enchant_dict_is_added, arginfo_enchant_dict_is_in_session)
 	ZEND_FE(enchant_dict_store_replacement, arginfo_enchant_dict_store_replacement)
 	ZEND_FE(enchant_dict_get_error, arginfo_enchant_dict_get_error)
 	ZEND_FE(enchant_dict_describe, arginfo_enchant_dict_describe)
