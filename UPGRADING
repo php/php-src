@@ -511,7 +511,7 @@ PHP 8.0 UPGRADE NOTES
    . comp_method
    . comp_flags
    . env_method
-   . enc_pasword
+   . enc_password
  . ZipArchive::addEmptyDir, ZipArchive::addFile and aZipArchive::addFromString
    methods have a new "flags" argument. This allow to manage name encoding
    (ZipArchive::FL_ENC_*) and entry replacement (ZipArchive::FL_OVERWRITE)
