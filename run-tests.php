@@ -2494,10 +2494,7 @@ COMMAND $cmd
             if (!$no_clean) {
                 $extra = !IS_WINDOWS ?
                     "unset REQUEST_METHOD; unset QUERY_STRING; unset PATH_TRANSLATED; unset SCRIPT_FILENAME; unset REQUEST_METHOD;" : "";
-                $clean_output = system_with_timeout("$extra $php $pass_options $extra_options -q $orig_ini_settings $no_file_cache \"$test_clean\"", $env);
-                if (trim($clean_output) != '') {
-                    echo "\nCLEAN OUTPUT: $file: $clean_output\n";
-                }
+                system_with_timeout("$extra $php $pass_options $extra_options -q $orig_ini_settings $no_file_cache \"$test_clean\"", $env);
             }
 
             if (!$cfg['keep']['clean']) {
