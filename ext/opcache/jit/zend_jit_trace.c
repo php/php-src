@@ -1056,7 +1056,10 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 			stack = frame->stack;
 			op_array = p->op_array;
 			level++;
-			ZEND_ASSERT(ssa_vars_count < 0xff);
+			// TODO: remove this restriction ???
+			if (ssa_vars_count >= 0xff) {
+				return NULL;
+			}
 			p->first_ssa_var = ssa_vars_count;
 			for (i = 0; i < op_array->last_var; i++) {
 				SET_STACK_VAR(stack, i, ssa_vars_count++);
@@ -1066,7 +1069,10 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 			frame = zend_jit_trace_ret_frame(frame, op_array);
 			stack = frame->stack;
 			if (level == 0) {
-				ZEND_ASSERT(ssa_vars_count <= 0xff);
+				// TODO: remove this restriction ???
+				if (ssa_vars_count >= 0xff) {
+					return NULL;
+				}
 				p->first_ssa_var = ssa_vars_count;
 				for (i = 0; i < op_array->last_var + op_array->T; i++) {
 					SET_STACK_VAR(stack, i, ssa_vars_count++);
@@ -2455,6 +2461,12 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 	checkpoint = zend_arena_checkpoint(CG(arena));
 
 	ssa = zend_jit_trace_build_tssa(trace_buffer, parent_trace, exit_num, script, op_arrays, &num_op_arrays);
+
+	if (!ssa) {
+		zend_arena_release(&CG(arena), checkpoint);
+		JIT_G(current_trace) = NULL;
+		return NULL;
+	}
 
 	/* Register allocation */
 	if (zend_jit_reg_alloc && zend_jit_level >= ZEND_JIT_LEVEL_INLINE) {
@@ -3990,7 +4002,7 @@ done:
 		t->link = zend_jit_find_trace(p->opline->handler);
 		zend_jit_trace_link_to_root(&dasm_state, p->opline->handler);
 	} else if (p->stop == ZEND_JIT_TRACE_STOP_RETURN) {
-		zend_jit_trace_return(&dasm_state);
+		zend_jit_trace_return(&dasm_state, 0);
 	} else {
 		// TODO: not implemented ???
 		ZEND_ASSERT(0 && p->stop);
@@ -4053,6 +4065,7 @@ static const void *zend_jit_trace_exit_to_vm(uint32_t trace_num, uint32_t exit_n
 	const zend_op *opline;
 	uint32_t i, stack_size;
 	zend_jit_trace_stack *stack;
+	zend_bool original_handler = 0;
 
 	if (!zend_jit_trace_exit_needs_deoptimization(trace_num, exit_num)) {
 		return dasm_labels[zend_lbtrace_escape];
@@ -4084,9 +4097,13 @@ static const void *zend_jit_trace_exit_to_vm(uint32_t trace_num, uint32_t exit_n
 	opline = (const zend_op*)((uintptr_t)opline & ~(ZEND_JIT_EXIT_JITED|ZEND_JIT_EXIT_BLACKLISTED));
 	if (opline) {
 		zend_jit_set_ip(&dasm_state, opline);
+		if (opline == zend_jit_traces[zend_jit_traces[trace_num].root].opline) {
+			/* prevent endless loop */
+			original_handler = 1;
+		}
 	}
 
-	zend_jit_trace_return(&dasm_state);
+	zend_jit_trace_return(&dasm_state, original_handler);
 
 	handler = dasm_link_and_encode(&dasm_state, NULL, NULL, NULL, NULL, name, 1);
 
@@ -4123,6 +4140,7 @@ static zend_jit_trace_stop zend_jit_compile_root_trace(zend_jit_trace_rec *trace
 		t->exit_count = 0;
 		t->child_count = 0;
 		t->stack_map_size = 0;
+		t->opline = ((zend_jit_trace_start_rec*)trace_buffer)->opline;
 		t->exit_info = exit_info;
 		t->stack_map = NULL;
 
@@ -4674,6 +4692,7 @@ static zend_jit_trace_stop zend_jit_compile_side_trace(zend_jit_trace_rec *trace
 		t->exit_count = 0;
 		t->child_count = 0;
 		t->stack_map_size = 0;
+		t->opline = NULL;
 		t->exit_info = exit_info;
 		t->stack_map = NULL;
 
