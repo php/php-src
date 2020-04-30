@@ -14,15 +14,11 @@ $s = shm_attach($key, 1024);
 var_dump(shm_remove($s));
 
 shm_detach($s);
-try {
-    var_dump(shm_remove($s));
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
-}
+var_dump(shm_remove($s));
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 bool(true)
-shm_remove(): supplied resource is not a valid sysvshm resource
+bool(true)
 Done

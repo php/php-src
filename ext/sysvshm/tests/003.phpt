@@ -13,16 +13,8 @@ $key = ftok(__DIR__."/003.phpt", 'q');
 $s = shm_attach($key);
 
 var_dump(shm_detach($s));
-try {
-    var_dump(shm_detach($s));
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
-}
-try {
-    shm_remove($s);
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
-}
+var_dump(shm_detach($s));
+shm_remove($s);
 
 echo "Done\n";
 ?>
@@ -36,6 +28,5 @@ shm_remove($s);
 ?>
 --EXPECT--
 bool(true)
-shm_detach(): supplied resource is not a valid sysvshm resource
-shm_remove(): supplied resource is not a valid sysvshm resource
+bool(true)
 Done

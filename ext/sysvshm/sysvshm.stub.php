@@ -2,36 +2,22 @@
 
 /** @generate-function-entries */
 
-/** @return resource|false */
-function shm_attach(int $key, int $memsize = UNKNOWN, int $perm = 0666) {}
+final class Sysvshm
+{
+}
 
-/**
- * @param resource $shm_identifier
- */
-function shm_detach($shm_identifier): bool {}
+/** @return Sysvshm|false */
+function shm_attach(int $key, int $memsize = UNKNOWN, int $perm = 0666): Sysvshm|false {}
 
-/**
- * @param resource $id
- */
-function shm_has_var($id, int $variable_key): bool {}
+function shm_detach(Sysvshm $shm_identifier): bool {}
 
-/**
- * @param resource $shm_identifier
- */
-function shm_remove($shm_identifier): bool {}
+function shm_has_var(Sysvshm $id, int $variable_key): bool {}
 
-/**
- * @param resource $shm_identifier
- */
-function shm_put_var($shm_identifier, int $variable_key, $variable): bool {}
+function shm_remove(Sysvshm $shm_identifier): bool {}
 
-/**
- * @param resource $id
- * @return mixed
- */
-function shm_get_var($id, int $variable_key) {}
+function shm_put_var(Sysvshm $shm_identifier, int $variable_key, $variable): bool {}
 
-/**
- * @param resource $id
- */
-function shm_remove_var($id, int $variable_key): bool {}
+/** @return mixed */
+function shm_get_var(Sysvshm $id, int $variable_key) {}
+
+function shm_remove_var(Sysvshm $id, int $variable_key): bool {}

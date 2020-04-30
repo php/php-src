@@ -45,9 +45,14 @@ bool(false)
 
 Warning: shm_attach(): Segment size must be greater than zero in %s on line %d
 bool(false)
-resource(%d) of type (sysvshm)
-resource(%d) of type (sysvshm)
-resource(%d) of type (sysvshm)
-resource(%d) of type (sysvshm)
-resource(%d) of type (sysvshm)
+object(Sysvshm)#1 (0) {
+}
+object(Sysvshm)#2 (0) {
+}
+object(Sysvshm)#1 (0) {
+}
+object(Sysvshm)#2 (0) {
+}
+object(Sysvshm)#1 (0) {
+}
 Done

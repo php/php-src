@@ -38,10 +38,7 @@ extern zend_module_entry sysvshm_module_entry;
 # include <sys/shm.h>
 #endif
 
-#define PHP_SHM_RSRC_NAME "sysvshm"
-
 typedef struct {
-	int le_shm;
 	zend_long init_mem;
 } sysvshm_module;
 
@@ -64,6 +61,7 @@ typedef struct {
 	key_t key;               /* key set by user */
 	zend_long id;                 /* returned by shmget */
 	sysvshm_chunk_head *ptr; /* memory address of shared memory */
+	zend_object std;
 } sysvshm_shm;
 
 PHP_MINIT_FUNCTION(sysvshm);
