@@ -27,7 +27,7 @@ function enchant_broker_set_dict_path($broker, int $name, string $value): bool {
 function enchant_broker_get_dict_path($broker, int $name): string|false {}
 
 /** @param resource $broker */
-function enchant_broker_list_dicts($broker): array {}
+function enchant_broker_list_dicts($broker): ?array {}
 
 /**
  * @param resource $broker
@@ -51,7 +51,7 @@ function enchant_broker_dict_exists($broker, string $tag): bool {}
 function enchant_broker_set_ordering($broker, string $tag, string $ordering): bool {}
 
 /** @param resource $broker */
-function enchant_broker_describe($broker): array {}
+function enchant_broker_describe($broker): ?array {}
 
 /** @param resource $dict */
 function enchant_dict_quick_check($dict, string $word, &$suggestions = UNKNOWN): bool {}
