@@ -25,7 +25,7 @@
 #include "php_com_dotnet_internal.h"
 #include "Zend/zend_exceptions.h"
 
-static zval *com_property_read(zend_object *object, zend_string *member, int type, void **cahce_slot, zval *rv)
+static zval *com_property_read(zend_object *object, zend_string *member, int type, void **cache_slot, zval *rv)
 {
 	php_com_dotnet_object *obj;
 	VARIANT v;
