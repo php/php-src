@@ -2494,7 +2494,20 @@ COMMAND $cmd
             if (!$no_clean) {
                 $extra = !IS_WINDOWS ?
                     "unset REQUEST_METHOD; unset QUERY_STRING; unset PATH_TRANSLATED; unset SCRIPT_FILENAME; unset REQUEST_METHOD;" : "";
-                system_with_timeout("$extra $php $pass_options $extra_options -q $orig_ini_settings $no_file_cache \"$test_clean\"", $env);
+                $clean_output = system_with_timeout("$extra $php $pass_options $extra_options -q $orig_ini_settings $no_file_cache \"$test_clean\"", $env);
+                if (trim($clean_output) != '') {
+                    show_result("BORK", $clean_output, $tested_file, 'reason: invalid output from CLEAN', $temp_filenames);
+                    $PHP_FAILED_TESTS['BORKED'][] = array(
+                        'name' => $file,
+                        'test_name' => '',
+                        'output' => '',
+                        'diff' => '',
+                        'info' => "$clean_output [$file]",
+                    );
+
+                    junit_mark_test_as('BORK', $shortname, $tested, null, $clean_output);
+                    return 'BORKED';
+                }
             }
 
             if (!$cfg['keep']['clean']) {
