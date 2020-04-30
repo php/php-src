@@ -1167,26 +1167,27 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 	if (trace_buffer->start == ZEND_JIT_TRACE_START_ENTER) {
 		i = 0;
 		while (i < op_array->last_var) {
-			if (!ssa->var_info
-			 || !zend_jit_trace_copy_ssa_var_info(op_array, ssa, ssa_opcodes, tssa, i)) {
-				if (i < op_array->num_args) {
-					if (op_array->arg_info) {
-						zend_arg_info *arg_info = &op_array->arg_info[i];
-						zend_class_entry *ce;
-						uint32_t tmp = zend_fetch_arg_info_type(script, arg_info, &ce);
+			if (i < op_array->num_args) {
+				if (ssa->var_info
+				 && zend_jit_trace_copy_ssa_var_info(op_array, ssa, ssa_opcodes, tssa, i)) {
+					/* pass */
+				} else if (op_array->arg_info) {
+					zend_arg_info *arg_info = &op_array->arg_info[i];
+					zend_class_entry *ce;
+					uint32_t tmp = zend_fetch_arg_info_type(script, arg_info, &ce);
 
-						if (ZEND_ARG_SEND_MODE(arg_info)) {
-							tmp |= MAY_BE_REF;
-						}
-						ssa_var_info[i].type = tmp;
-						ssa_var_info[i].ce = ce;
-						ssa_var_info[i].is_instanceof = 1;
-					} else {
-						ssa_var_info[i].type = MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_REF | MAY_BE_ANY  | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
+					if (ZEND_ARG_SEND_MODE(arg_info)) {
+						tmp |= MAY_BE_REF;
 					}
+					ssa_var_info[i].type = tmp;
+					ssa_var_info[i].ce = ce;
+					ssa_var_info[i].is_instanceof = 1;
 				} else {
-					ssa_var_info[i].type = MAY_BE_UNDEF;
+					ssa_var_info[i].type = MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_REF | MAY_BE_ANY  | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
 				}
+			} else {
+				ssa_vars[i].no_val = ssa->vars ? ssa->vars[i].no_val : 0;
+				ssa_var_info[i].type = MAY_BE_UNDEF;
 			}
 			i++;
 		}
@@ -1563,26 +1564,27 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 			v = p->first_ssa_var;
 			while (i < op_array->last_var) {
 				ssa_vars[v].var = i;
-				if (!ssa->var_info
-				 || !zend_jit_trace_copy_ssa_var_info(op_array, ssa, ssa_opcodes, tssa, v)) {
-					if (i < op_array->num_args) {
-						if (op_array->arg_info) {
-							zend_arg_info *arg_info = &op_array->arg_info[i];
-							zend_class_entry *ce;
-							uint32_t tmp = zend_fetch_arg_info_type(script, arg_info, &ce);
+				if (i < op_array->num_args) {
+					if (ssa->var_info
+					 && zend_jit_trace_copy_ssa_var_info(op_array, ssa, ssa_opcodes, tssa, v)) {
+						/* pass */
+					} else if (op_array->arg_info) {
+						zend_arg_info *arg_info = &op_array->arg_info[i];
+						zend_class_entry *ce;
+						uint32_t tmp = zend_fetch_arg_info_type(script, arg_info, &ce);
 
-							if (ZEND_ARG_SEND_MODE(arg_info)) {
-								tmp |= MAY_BE_REF;
-							}
-							ssa_var_info[v].type = tmp;
-							ssa_var_info[i].ce = ce;
-							ssa_var_info[i].is_instanceof = 1;
-						} else {
-							ssa_var_info[v].type = MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_REF | MAY_BE_ANY  | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
+						if (ZEND_ARG_SEND_MODE(arg_info)) {
+							tmp |= MAY_BE_REF;
 						}
+						ssa_var_info[v].type = tmp;
+						ssa_var_info[i].ce = ce;
+						ssa_var_info[i].is_instanceof = 1;
 					} else {
-						ssa_var_info[v].type = MAY_BE_UNDEF;
+						ssa_var_info[v].type = MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_REF | MAY_BE_ANY  | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
 					}
+				} else {
+					ssa_vars[v].no_val = ssa->vars ? ssa->vars[i].no_val : 0;
+					ssa_var_info[v].type = MAY_BE_UNDEF;
 				}
 				if (!(op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)
 				 && i < op_array->num_args) {
@@ -1592,7 +1594,6 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 				i++;
 				v++;
 			}
-
 		} else if (p->op == ZEND_JIT_TRACE_BACK) {
 			op_array = p->op_array;
 			jit_extension =
