@@ -44,7 +44,20 @@ function evalBinOp(string $op, string $value1, string $value2) {
     }
 }
 
-echo "BINOP:\n";
+function evalAssignOp(string $op, string $value1, string $value2) {
+    $x = $origX = eval("return $value1;");
+    try {
+        eval("\$x $op= $value2;");
+        echo "No error for $value1 $op= $value2\n";
+    } catch (Throwable $e) {
+        echo $e->getMessage() . "\n";
+        if ($x !== $origX) {
+            die("Value corrupted!");
+        }
+    }
+}
+
+echo "BINARY OP:\n";
 foreach ($binops as $op) {
     foreach ($illegalValues as $illegalValue1) {
         foreach ($illegalValues as $illegalValue2) {
@@ -59,7 +72,24 @@ foreach ($binops as $op) {
     }
 }
 
-echo "\n\nUNOP:\n";
+echo "\n\nASSIGN OP:\n";
+foreach ($binops as $op) {
+    if ($op === 'xor') continue;
+
+    foreach ($illegalValues as $illegalValue1) {
+        foreach ($illegalValues as $illegalValue2) {
+            evalAssignOp($op, $illegalValue1, $illegalValue2);
+        }
+    }
+    foreach ($illegalValues as $illegalValue) {
+        foreach ($legalValues as $legalValue) {
+            evalAssignOp($op, $illegalValue, $legalValue);
+            evalAssignOp($op, $legalValue, $illegalValue);
+        }
+    }
+}
+
+echo "\n\nUNARY OP:\n";
 foreach ($illegalValues as $illegalValue) {
     try {
         eval("return ~$illegalValue;");
@@ -89,7 +119,7 @@ foreach ($illegalValues as $illegalValue) {
 
 ?>
 --EXPECTF--
-BINOP:
+BINARY OP:
 No error for [] + []
 Unsupported operand types: array + object
 Unsupported operand types: array + resource
@@ -845,7 +875,726 @@ No error for STDOUT . "foo"
 No error for "foo" . STDOUT
 
 
-UNOP:
+ASSIGN OP:
+No error for [] += []
+Unsupported operand types: array + object
+Unsupported operand types: array + resource
+Unsupported operand types: object + array
+Unsupported operand types: object + object
+Unsupported operand types: object + resource
+Unsupported operand types: resource + array
+Unsupported operand types: resource + object
+Unsupported operand types: resource + resource
+Unsupported operand types: array + null
+Unsupported operand types: null + array
+Unsupported operand types: array + bool
+Unsupported operand types: bool + array
+Unsupported operand types: array + bool
+Unsupported operand types: bool + array
+Unsupported operand types: array + int
+Unsupported operand types: int + array
+Unsupported operand types: array + float
+Unsupported operand types: float + array
+Unsupported operand types: array + string
+Unsupported operand types: string + array
+Unsupported operand types: array + string
+
+Warning: A non-numeric value encountered in %s on line %d
+Unsupported operand types: string + array
+Unsupported operand types: object + null
+Unsupported operand types: null + object
+Unsupported operand types: object + bool
+Unsupported operand types: bool + object
+Unsupported operand types: object + bool
+Unsupported operand types: bool + object
+Unsupported operand types: object + int
+Unsupported operand types: int + object
+Unsupported operand types: object + float
+Unsupported operand types: float + object
+Unsupported operand types: object + string
+Unsupported operand types: string + object
+Unsupported operand types: object + string
+
+Warning: A non-numeric value encountered in %s on line %d
+Unsupported operand types: string + object
+Unsupported operand types: resource + null
+Unsupported operand types: null + resource
+Unsupported operand types: resource + bool
+Unsupported operand types: bool + resource
+Unsupported operand types: resource + bool
+Unsupported operand types: bool + resource
+Unsupported operand types: resource + int
+Unsupported operand types: int + resource
+Unsupported operand types: resource + float
+Unsupported operand types: float + resource
+Unsupported operand types: resource + string
+Unsupported operand types: string + resource
+Unsupported operand types: resource + string
+
+Warning: A non-numeric value encountered in %s on line %d
+Unsupported operand types: string + resource
+Unsupported operand types: array - array
+Unsupported operand types: array - object
+Unsupported operand types: array - resource
+Unsupported operand types: object - array
+Unsupported operand types: object - object
+Unsupported operand types: object - resource
+Unsupported operand types: resource - array
+Unsupported operand types: resource - object
+Unsupported operand types: resource - resource
+Unsupported operand types: array - null
+Unsupported operand types: null - array
+Unsupported operand types: array - bool
+Unsupported operand types: bool - array
+Unsupported operand types: array - bool
+Unsupported operand types: bool - array
+Unsupported operand types: array - int
+Unsupported operand types: int - array
+Unsupported operand types: array - float
+Unsupported operand types: float - array
+Unsupported operand types: array - string
+Unsupported operand types: string - array
+Unsupported operand types: array - string
+
+Warning: A non-numeric value encountered in %s on line %d
+Unsupported operand types: string - array
+Unsupported operand types: object - null
+Unsupported operand types: null - object
+Unsupported operand types: object - bool
+Unsupported operand types: bool - object
+Unsupported operand types: object - bool
+Unsupported operand types: bool - object
+Unsupported operand types: object - int
+Unsupported operand types: int - object
+Unsupported operand types: object - float
+Unsupported operand types: float - object
+Unsupported operand types: object - string
+Unsupported operand types: string - object
+Unsupported operand types: object - string
+
+Warning: A non-numeric value encountered in %s on line %d
+Unsupported operand types: string - object
+Unsupported operand types: resource - null
+Unsupported operand types: null - resource
+Unsupported operand types: resource - bool
+Unsupported operand types: bool - resource
+Unsupported operand types: resource - bool
+Unsupported operand types: bool - resource
+Unsupported operand types: resource - int
+Unsupported operand types: int - resource
+Unsupported operand types: resource - float
+Unsupported operand types: float - resource
+Unsupported operand types: resource - string
+Unsupported operand types: string - resource
+Unsupported operand types: resource - string
+
+Warning: A non-numeric value encountered in %s on line %d
+Unsupported operand types: string - resource
+Unsupported operand types: array * array
+Unsupported operand types: array * object
+Unsupported operand types: array * resource
+Unsupported operand types: object * array
+Unsupported operand types: object * object
+Unsupported operand types: object * resource
+Unsupported operand types: resource * array
+Unsupported operand types: resource * object
+Unsupported operand types: resource * resource
+Unsupported operand types: array * null
+Unsupported operand types: null * array
+Unsupported operand types: array * bool
+Unsupported operand types: bool * array
+Unsupported operand types: array * bool
+Unsupported operand types: bool * array
+Unsupported operand types: array * int
+Unsupported operand types: int * array
+Unsupported operand types: array * float
+Unsupported operand types: float * array
+Unsupported operand types: array * string
+Unsupported operand types: string * array
+Unsupported operand types: array * string
+
+Warning: A non-numeric value encountered in %s on line %d
+Unsupported operand types: string * array
+Unsupported operand types: object * null
+Unsupported operand types: null * object
+Unsupported operand types: object * bool
+Unsupported operand types: bool * object
+Unsupported operand types: object * bool
+Unsupported operand types: bool * object
+Unsupported operand types: object * int
+Unsupported operand types: int * object
+Unsupported operand types: object * float
+Unsupported operand types: float * object
+Unsupported operand types: object * string
+Unsupported operand types: string * object
+Unsupported operand types: object * string
+
+Warning: A non-numeric value encountered in %s on line %d
+Unsupported operand types: string * object
+Unsupported operand types: resource * null
+Unsupported operand types: null * resource
+Unsupported operand types: resource * bool
+Unsupported operand types: bool * resource
+Unsupported operand types: resource * bool
+Unsupported operand types: bool * resource
+Unsupported operand types: resource * int
+Unsupported operand types: int * resource
+Unsupported operand types: resource * float
+Unsupported operand types: float * resource
+Unsupported operand types: resource * string
+Unsupported operand types: string * resource
+Unsupported operand types: resource * string
+
+Warning: A non-numeric value encountered in %s on line %d
+Unsupported operand types: string * resource
+Unsupported operand types: array / array
+Unsupported operand types: array / object
+Unsupported operand types: array / resource
+Unsupported operand types: object / array
+Unsupported operand types: object / object
+Unsupported operand types: object / resource
+Unsupported operand types: resource / array
+Unsupported operand types: resource / object
+Unsupported operand types: resource / resource
+Unsupported operand types: array / null
+Unsupported operand types: null / array
+Unsupported operand types: array / bool
+Unsupported operand types: bool / array
+Unsupported operand types: array / bool
+Unsupported operand types: bool / array
+Unsupported operand types: array / int
+Unsupported operand types: int / array
+Unsupported operand types: array / float
+Unsupported operand types: float / array
+Unsupported operand types: array / string
+Unsupported operand types: string / array
+Unsupported operand types: array / string
+
+Warning: A non-numeric value encountered in %s on line %d
+Unsupported operand types: string / array
+Unsupported operand types: object / null
+Unsupported operand types: null / object
+Unsupported operand types: object / bool
+Unsupported operand types: bool / object
+Unsupported operand types: object / bool
+Unsupported operand types: bool / object
+Unsupported operand types: object / int
+Unsupported operand types: int / object
+Unsupported operand types: object / float
+Unsupported operand types: float / object
+Unsupported operand types: object / string
+Unsupported operand types: string / object
+Unsupported operand types: object / string
+
+Warning: A non-numeric value encountered in %s on line %d
+Unsupported operand types: string / object
+Unsupported operand types: resource / null
+Unsupported operand types: null / resource
+Unsupported operand types: resource / bool
+Unsupported operand types: bool / resource
+Unsupported operand types: resource / bool
+Unsupported operand types: bool / resource
+Unsupported operand types: resource / int
+Unsupported operand types: int / resource
+Unsupported operand types: resource / float
+Unsupported operand types: float / resource
+Unsupported operand types: resource / string
+Unsupported operand types: string / resource
+Unsupported operand types: resource / string
+
+Warning: A non-numeric value encountered in %s on line %d
+Unsupported operand types: string / resource
+Unsupported operand types: array % array
+Unsupported operand types: array % object
+Unsupported operand types: array % resource
+Unsupported operand types: object % array
+Unsupported operand types: object % object
+Unsupported operand types: object % resource
+Unsupported operand types: resource % array
+Unsupported operand types: resource % object
+Unsupported operand types: resource % resource
+Unsupported operand types: array % null
+Unsupported operand types: null % array
+Unsupported operand types: array % bool
+Unsupported operand types: bool % array
+Unsupported operand types: array % bool
+Unsupported operand types: bool % array
+Unsupported operand types: array % int
+Unsupported operand types: int % array
+Unsupported operand types: array % float
+Unsupported operand types: float % array
+Unsupported operand types: array % string
+Unsupported operand types: string % array
+Unsupported operand types: array % string
+
+Warning: A non-numeric value encountered in %s on line %d
+Unsupported operand types: string % array
+Unsupported operand types: object % null
+Unsupported operand types: null % object
+Unsupported operand types: object % bool
+Unsupported operand types: bool % object
+Unsupported operand types: object % bool
+Unsupported operand types: bool % object
+Unsupported operand types: object % int
+Unsupported operand types: int % object
+Unsupported operand types: object % float
+Unsupported operand types: float % object
+Unsupported operand types: object % string
+Unsupported operand types: string % object
+Unsupported operand types: object % string
+
+Warning: A non-numeric value encountered in %s on line %d
+Unsupported operand types: string % object
+Unsupported operand types: resource % null
+Unsupported operand types: null % resource
+Unsupported operand types: resource % bool
+Unsupported operand types: bool % resource
+Unsupported operand types: resource % bool
+Unsupported operand types: bool % resource
+Unsupported operand types: resource % int
+Unsupported operand types: int % resource
+Unsupported operand types: resource % float
+Unsupported operand types: float % resource
+Unsupported operand types: resource % string
+Unsupported operand types: string % resource
+Unsupported operand types: resource % string
+
+Warning: A non-numeric value encountered in %s on line %d
+Unsupported operand types: string % resource
+Unsupported operand types: array ** array
+Unsupported operand types: array ** object
+Unsupported operand types: array ** resource
+Unsupported operand types: object ** array
+Unsupported operand types: object ** object
+Unsupported operand types: object ** resource
+Unsupported operand types: resource ** array
+Unsupported operand types: resource ** object
+Unsupported operand types: resource ** resource
+Unsupported operand types: array ** null
+Unsupported operand types: null ** array
+Unsupported operand types: array ** bool
+Unsupported operand types: bool ** array
+Unsupported operand types: array ** bool
+Unsupported operand types: bool ** array
+Unsupported operand types: array ** int
+Unsupported operand types: int ** array
+Unsupported operand types: array ** float
+Unsupported operand types: float ** array
+Unsupported operand types: array ** string
+Unsupported operand types: string ** array
+Unsupported operand types: array ** string
+
+Warning: A non-numeric value encountered in %s on line %d
+Unsupported operand types: string ** array
+Unsupported operand types: object ** null
+Unsupported operand types: null ** object
+Unsupported operand types: object ** bool
+Unsupported operand types: bool ** object
+Unsupported operand types: object ** bool
+Unsupported operand types: bool ** object
+Unsupported operand types: object ** int
+Unsupported operand types: int ** object
+Unsupported operand types: object ** float
+Unsupported operand types: float ** object
+Unsupported operand types: object ** string
+Unsupported operand types: string ** object
+Unsupported operand types: object ** string
+
+Warning: A non-numeric value encountered in %s on line %d
+Unsupported operand types: string ** object
+Unsupported operand types: resource ** null
+Unsupported operand types: null ** resource
+Unsupported operand types: resource ** bool
+Unsupported operand types: bool ** resource
+Unsupported operand types: resource ** bool
+Unsupported operand types: bool ** resource
+Unsupported operand types: resource ** int
+Unsupported operand types: int ** resource
+Unsupported operand types: resource ** float
+Unsupported operand types: float ** resource
+Unsupported operand types: resource ** string
+Unsupported operand types: string ** resource
+Unsupported operand types: resource ** string
+
+Warning: A non-numeric value encountered in %s on line %d
+Unsupported operand types: string ** resource
+Unsupported operand types: array << array
+Unsupported operand types: array << object
+Unsupported operand types: array << resource
+Unsupported operand types: object << array
+Unsupported operand types: object << object
+Unsupported operand types: object << resource
+Unsupported operand types: resource << array
+Unsupported operand types: resource << object
+Unsupported operand types: resource << resource
+Unsupported operand types: array << null
+Unsupported operand types: null << array
+Unsupported operand types: array << bool
+Unsupported operand types: bool << array
+Unsupported operand types: array << bool
+Unsupported operand types: bool << array
+Unsupported operand types: array << int
+Unsupported operand types: int << array
+Unsupported operand types: array << float
+Unsupported operand types: float << array
+Unsupported operand types: array << string
+Unsupported operand types: string << array
+Unsupported operand types: array << string
+
+Warning: A non-numeric value encountered in %s on line %d
+Unsupported operand types: string << array
+Unsupported operand types: object << null
+Unsupported operand types: null << object
+Unsupported operand types: object << bool
+Unsupported operand types: bool << object
+Unsupported operand types: object << bool
+Unsupported operand types: bool << object
+Unsupported operand types: object << int
+Unsupported operand types: int << object
+Unsupported operand types: object << float
+Unsupported operand types: float << object
+Unsupported operand types: object << string
+Unsupported operand types: string << object
+Unsupported operand types: object << string
+
+Warning: A non-numeric value encountered in %s on line %d
+Unsupported operand types: string << object
+Unsupported operand types: resource << null
+Unsupported operand types: null << resource
+Unsupported operand types: resource << bool
+Unsupported operand types: bool << resource
+Unsupported operand types: resource << bool
+Unsupported operand types: bool << resource
+Unsupported operand types: resource << int
+Unsupported operand types: int << resource
+Unsupported operand types: resource << float
+Unsupported operand types: float << resource
+Unsupported operand types: resource << string
+Unsupported operand types: string << resource
+Unsupported operand types: resource << string
+
+Warning: A non-numeric value encountered in %s on line %d
+Unsupported operand types: string << resource
+Unsupported operand types: array >> array
+Unsupported operand types: array >> object
+Unsupported operand types: array >> resource
+Unsupported operand types: object >> array
+Unsupported operand types: object >> object
+Unsupported operand types: object >> resource
+Unsupported operand types: resource >> array
+Unsupported operand types: resource >> object
+Unsupported operand types: resource >> resource
+Unsupported operand types: array >> null
+Unsupported operand types: null >> array
+Unsupported operand types: array >> bool
+Unsupported operand types: bool >> array
+Unsupported operand types: array >> bool
+Unsupported operand types: bool >> array
+Unsupported operand types: array >> int
+Unsupported operand types: int >> array
+Unsupported operand types: array >> float
+Unsupported operand types: float >> array
+Unsupported operand types: array >> string
+Unsupported operand types: string >> array
+Unsupported operand types: array >> string
+
+Warning: A non-numeric value encountered in %s on line %d
+Unsupported operand types: string >> array
+Unsupported operand types: object >> null
+Unsupported operand types: null >> object
+Unsupported operand types: object >> bool
+Unsupported operand types: bool >> object
+Unsupported operand types: object >> bool
+Unsupported operand types: bool >> object
+Unsupported operand types: object >> int
+Unsupported operand types: int >> object
+Unsupported operand types: object >> float
+Unsupported operand types: float >> object
+Unsupported operand types: object >> string
+Unsupported operand types: string >> object
+Unsupported operand types: object >> string
+
+Warning: A non-numeric value encountered in %s on line %d
+Unsupported operand types: string >> object
+Unsupported operand types: resource >> null
+Unsupported operand types: null >> resource
+Unsupported operand types: resource >> bool
+Unsupported operand types: bool >> resource
+Unsupported operand types: resource >> bool
+Unsupported operand types: bool >> resource
+Unsupported operand types: resource >> int
+Unsupported operand types: int >> resource
+Unsupported operand types: resource >> float
+Unsupported operand types: float >> resource
+Unsupported operand types: resource >> string
+Unsupported operand types: string >> resource
+Unsupported operand types: resource >> string
+
+Warning: A non-numeric value encountered in %s on line %d
+Unsupported operand types: string >> resource
+Unsupported operand types: array & array
+Unsupported operand types: array & object
+Unsupported operand types: array & resource
+Unsupported operand types: object & array
+Unsupported operand types: object & object
+Unsupported operand types: object & resource
+Unsupported operand types: resource & array
+Unsupported operand types: resource & object
+Unsupported operand types: resource & resource
+Unsupported operand types: array & null
+Unsupported operand types: null & array
+Unsupported operand types: array & bool
+Unsupported operand types: bool & array
+Unsupported operand types: array & bool
+Unsupported operand types: bool & array
+Unsupported operand types: array & int
+Unsupported operand types: int & array
+Unsupported operand types: array & float
+Unsupported operand types: float & array
+Unsupported operand types: array & string
+Unsupported operand types: string & array
+Unsupported operand types: array & string
+
+Warning: A non-numeric value encountered in %s on line %d
+Unsupported operand types: string & array
+Unsupported operand types: object & null
+Unsupported operand types: null & object
+Unsupported operand types: object & bool
+Unsupported operand types: bool & object
+Unsupported operand types: object & bool
+Unsupported operand types: bool & object
+Unsupported operand types: object & int
+Unsupported operand types: int & object
+Unsupported operand types: object & float
+Unsupported operand types: float & object
+Unsupported operand types: object & string
+Unsupported operand types: string & object
+Unsupported operand types: object & string
+
+Warning: A non-numeric value encountered in %s on line %d
+Unsupported operand types: string & object
+Unsupported operand types: resource & null
+Unsupported operand types: null & resource
+Unsupported operand types: resource & bool
+Unsupported operand types: bool & resource
+Unsupported operand types: resource & bool
+Unsupported operand types: bool & resource
+Unsupported operand types: resource & int
+Unsupported operand types: int & resource
+Unsupported operand types: resource & float
+Unsupported operand types: float & resource
+Unsupported operand types: resource & string
+Unsupported operand types: string & resource
+Unsupported operand types: resource & string
+
+Warning: A non-numeric value encountered in %s on line %d
+Unsupported operand types: string & resource
+Unsupported operand types: array | array
+Unsupported operand types: array | object
+Unsupported operand types: array | resource
+Unsupported operand types: object | array
+Unsupported operand types: object | object
+Unsupported operand types: object | resource
+Unsupported operand types: resource | array
+Unsupported operand types: resource | object
+Unsupported operand types: resource | resource
+Unsupported operand types: array | null
+Unsupported operand types: null | array
+Unsupported operand types: array | bool
+Unsupported operand types: bool | array
+Unsupported operand types: array | bool
+Unsupported operand types: bool | array
+Unsupported operand types: array | int
+Unsupported operand types: int | array
+Unsupported operand types: array | float
+Unsupported operand types: float | array
+Unsupported operand types: array | string
+Unsupported operand types: string | array
+Unsupported operand types: array | string
+
+Warning: A non-numeric value encountered in %s on line %d
+Unsupported operand types: string | array
+Unsupported operand types: object | null
+Unsupported operand types: null | object
+Unsupported operand types: object | bool
+Unsupported operand types: bool | object
+Unsupported operand types: object | bool
+Unsupported operand types: bool | object
+Unsupported operand types: object | int
+Unsupported operand types: int | object
+Unsupported operand types: object | float
+Unsupported operand types: float | object
+Unsupported operand types: object | string
+Unsupported operand types: string | object
+Unsupported operand types: object | string
+
+Warning: A non-numeric value encountered in %s on line %d
+Unsupported operand types: string | object
+Unsupported operand types: resource | null
+Unsupported operand types: null | resource
+Unsupported operand types: resource | bool
+Unsupported operand types: bool | resource
+Unsupported operand types: resource | bool
+Unsupported operand types: bool | resource
+Unsupported operand types: resource | int
+Unsupported operand types: int | resource
+Unsupported operand types: resource | float
+Unsupported operand types: float | resource
+Unsupported operand types: resource | string
+Unsupported operand types: string | resource
+Unsupported operand types: resource | string
+
+Warning: A non-numeric value encountered in %s on line %d
+Unsupported operand types: string | resource
+Unsupported operand types: array ^ array
+Unsupported operand types: array ^ object
+Unsupported operand types: array ^ resource
+Unsupported operand types: object ^ array
+Unsupported operand types: object ^ object
+Unsupported operand types: object ^ resource
+Unsupported operand types: resource ^ array
+Unsupported operand types: resource ^ object
+Unsupported operand types: resource ^ resource
+Unsupported operand types: array ^ null
+Unsupported operand types: null ^ array
+Unsupported operand types: array ^ bool
+Unsupported operand types: bool ^ array
+Unsupported operand types: array ^ bool
+Unsupported operand types: bool ^ array
+Unsupported operand types: array ^ int
+Unsupported operand types: int ^ array
+Unsupported operand types: array ^ float
+Unsupported operand types: float ^ array
+Unsupported operand types: array ^ string
+Unsupported operand types: string ^ array
+Unsupported operand types: array ^ string
+
+Warning: A non-numeric value encountered in %s on line %d
+Unsupported operand types: string ^ array
+Unsupported operand types: object ^ null
+Unsupported operand types: null ^ object
+Unsupported operand types: object ^ bool
+Unsupported operand types: bool ^ object
+Unsupported operand types: object ^ bool
+Unsupported operand types: bool ^ object
+Unsupported operand types: object ^ int
+Unsupported operand types: int ^ object
+Unsupported operand types: object ^ float
+Unsupported operand types: float ^ object
+Unsupported operand types: object ^ string
+Unsupported operand types: string ^ object
+Unsupported operand types: object ^ string
+
+Warning: A non-numeric value encountered in %s on line %d
+Unsupported operand types: string ^ object
+Unsupported operand types: resource ^ null
+Unsupported operand types: null ^ resource
+Unsupported operand types: resource ^ bool
+Unsupported operand types: bool ^ resource
+Unsupported operand types: resource ^ bool
+Unsupported operand types: bool ^ resource
+Unsupported operand types: resource ^ int
+Unsupported operand types: int ^ resource
+Unsupported operand types: resource ^ float
+Unsupported operand types: float ^ resource
+Unsupported operand types: resource ^ string
+Unsupported operand types: string ^ resource
+Unsupported operand types: resource ^ string
+
+Warning: A non-numeric value encountered in %s on line %d
+Unsupported operand types: string ^ resource
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+No error for [] .= []
+
+Warning: Array to string conversion in %s on line %d
+Object of class stdClass could not be converted to string
+
+Warning: Array to string conversion in %s on line %d
+No error for [] .= STDOUT
+Object of class stdClass could not be converted to string
+Object of class stdClass could not be converted to string
+Object of class stdClass could not be converted to string
+
+Warning: Array to string conversion in %s on line %d
+No error for STDOUT .= []
+Object of class stdClass could not be converted to string
+No error for STDOUT .= STDOUT
+
+Warning: Array to string conversion in %s on line %d
+No error for [] .= null
+
+Warning: Array to string conversion in %s on line %d
+No error for null .= []
+
+Warning: Array to string conversion in %s on line %d
+No error for [] .= true
+
+Warning: Array to string conversion in %s on line %d
+No error for true .= []
+
+Warning: Array to string conversion in %s on line %d
+No error for [] .= false
+
+Warning: Array to string conversion in %s on line %d
+No error for false .= []
+
+Warning: Array to string conversion in %s on line %d
+No error for [] .= 2
+
+Warning: Array to string conversion in %s on line %d
+No error for 2 .= []
+
+Warning: Array to string conversion in %s on line %d
+No error for [] .= 3.5
+
+Warning: Array to string conversion in %s on line %d
+No error for 3.5 .= []
+
+Warning: Array to string conversion in %s on line %d
+No error for [] .= "123"
+
+Warning: Array to string conversion in %s on line %d
+No error for "123" .= []
+
+Warning: Array to string conversion in %s on line %d
+No error for [] .= "foo"
+
+Warning: Array to string conversion in %s on line %d
+No error for "foo" .= []
+Object of class stdClass could not be converted to string
+Object of class stdClass could not be converted to string
+Object of class stdClass could not be converted to string
+Object of class stdClass could not be converted to string
+Object of class stdClass could not be converted to string
+Object of class stdClass could not be converted to string
+Object of class stdClass could not be converted to string
+Object of class stdClass could not be converted to string
+Object of class stdClass could not be converted to string
+Object of class stdClass could not be converted to string
+Object of class stdClass could not be converted to string
+Object of class stdClass could not be converted to string
+Object of class stdClass could not be converted to string
+Object of class stdClass could not be converted to string
+No error for STDOUT .= null
+No error for null .= STDOUT
+No error for STDOUT .= true
+No error for true .= STDOUT
+No error for STDOUT .= false
+No error for false .= STDOUT
+No error for STDOUT .= 2
+No error for 2 .= STDOUT
+No error for STDOUT .= 3.5
+No error for 3.5 .= STDOUT
+No error for STDOUT .= "123"
+No error for "123" .= STDOUT
+No error for STDOUT .= "foo"
+No error for "foo" .= STDOUT
+
+
+UNARY OP:
 Cannot perform bitwise not on array
 Cannot perform bitwise not on object
 Cannot perform bitwise not on resource
