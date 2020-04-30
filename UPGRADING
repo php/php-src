@@ -469,6 +469,11 @@ PHP 8.0 UPGRADE NOTES
   . Added DateTime::createFromInterface() and
     DateTimeImmutable::createFromInterface().
 
+- Enchant:
+  . enchant_dict_add()
+  . enchant_dict_is_added()
+  . LIBENCHANT_VERSION macro
+
 - dom:
   . Introduce DOMParentNode and DOMChildNode with new traversal and manipulation APIs
     RFC: https://wiki.php.net/rfc/dom_living_standard_api
@@ -494,6 +499,12 @@ PHP 8.0 UPGRADE NOTES
 ========================================
 4. Deprecated Functionality
 ========================================
+
+- Enchant:
+  . enchant_broker_set_dict_path and enchant_broker_get_dict_path
+    not available in libenchant < 1.5 nor in libenchant-2
+  . enchant_dict_add_to_personal, use enchant_dict_add instead
+  . enchant_dict_is_in_session, use enchant_dict_is_added instead
 
 - Zip:
   . Using empty file as ZipArchive is deprecated. Libzip 1.6.0
