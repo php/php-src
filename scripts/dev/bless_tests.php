@@ -106,7 +106,8 @@ function generateMinimallyDifferingOutput(string $out, string $oldExpect) {
 
 function insertOutput(string $phpt, string $out): string {
     return preg_replace_callback('/--EXPECTF?--.*$/s', function($matches) use($out) {
-        $F = strpos($out, '%') !== false ? 'F' : '';
+        $hasWildcard = preg_match('/%[resSaAwidxfc]/', $out);
+        $F = $hasWildcard ? 'F' : '';
         return "--EXPECT$F--\n" . $out . "\n";
     }, $phpt);
 }

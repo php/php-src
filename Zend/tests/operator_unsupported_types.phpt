@@ -35,6 +35,11 @@ $legalValues = [
     '"foo"', // Semi-legal.
 ];
 
+set_error_handler(function($errno, $errstr) {
+    assert($errno == E_WARNING);
+    echo "Warning: $errstr\n";
+});
+
 function evalBinOp(string $op, string $value1, string $value2) {
     try {
         eval("return $value1 $op $value2;");
@@ -118,7 +123,7 @@ foreach ($illegalValues as $illegalValue) {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 BINARY OP:
 No error for [] + []
 Unsupported operand types: array + object
@@ -142,8 +147,7 @@ Unsupported operand types: float + array
 Unsupported operand types: array + string
 Unsupported operand types: string + array
 Unsupported operand types: array + string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string + array
 Unsupported operand types: object + null
 Unsupported operand types: null + object
@@ -158,8 +162,7 @@ Unsupported operand types: float + object
 Unsupported operand types: object + string
 Unsupported operand types: string + object
 Unsupported operand types: object + string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string + object
 Unsupported operand types: resource + null
 Unsupported operand types: null + resource
@@ -174,8 +177,7 @@ Unsupported operand types: float + resource
 Unsupported operand types: resource + string
 Unsupported operand types: string + resource
 Unsupported operand types: resource + string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string + resource
 Unsupported operand types: array - array
 Unsupported operand types: array - object
@@ -199,8 +201,7 @@ Unsupported operand types: float - array
 Unsupported operand types: array - string
 Unsupported operand types: string - array
 Unsupported operand types: array - string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string - array
 Unsupported operand types: object - null
 Unsupported operand types: null - object
@@ -215,8 +216,7 @@ Unsupported operand types: float - object
 Unsupported operand types: object - string
 Unsupported operand types: string - object
 Unsupported operand types: object - string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string - object
 Unsupported operand types: resource - null
 Unsupported operand types: null - resource
@@ -231,8 +231,7 @@ Unsupported operand types: float - resource
 Unsupported operand types: resource - string
 Unsupported operand types: string - resource
 Unsupported operand types: resource - string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string - resource
 Unsupported operand types: array * array
 Unsupported operand types: object * array
@@ -256,8 +255,7 @@ Unsupported operand types: float * array
 Unsupported operand types: array * string
 Unsupported operand types: string * array
 Unsupported operand types: array * string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string * array
 Unsupported operand types: object * null
 Unsupported operand types: object * null
@@ -309,8 +307,7 @@ Unsupported operand types: float / array
 Unsupported operand types: array / string
 Unsupported operand types: string / array
 Unsupported operand types: array / string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string / array
 Unsupported operand types: object / null
 Unsupported operand types: null / object
@@ -325,8 +322,7 @@ Unsupported operand types: float / object
 Unsupported operand types: object / string
 Unsupported operand types: string / object
 Unsupported operand types: object / string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string / object
 Unsupported operand types: resource / null
 Unsupported operand types: null / resource
@@ -341,8 +337,7 @@ Unsupported operand types: float / resource
 Unsupported operand types: resource / string
 Unsupported operand types: string / resource
 Unsupported operand types: resource / string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string / resource
 Unsupported operand types: array % array
 Unsupported operand types: array % object
@@ -366,8 +361,7 @@ Unsupported operand types: float % array
 Unsupported operand types: array % string
 Unsupported operand types: string % array
 Unsupported operand types: array % string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string % array
 Unsupported operand types: object % null
 Unsupported operand types: null % object
@@ -382,8 +376,7 @@ Unsupported operand types: float % object
 Unsupported operand types: object % string
 Unsupported operand types: string % object
 Unsupported operand types: object % string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string % object
 Unsupported operand types: resource % null
 Unsupported operand types: null % resource
@@ -398,8 +391,7 @@ Unsupported operand types: float % resource
 Unsupported operand types: resource % string
 Unsupported operand types: string % resource
 Unsupported operand types: resource % string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string % resource
 Unsupported operand types: array ** array
 Unsupported operand types: array ** object
@@ -423,8 +415,7 @@ Unsupported operand types: float ** array
 Unsupported operand types: array ** string
 Unsupported operand types: string ** array
 Unsupported operand types: array ** string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string ** array
 Unsupported operand types: object ** null
 Unsupported operand types: null ** object
@@ -439,8 +430,7 @@ Unsupported operand types: float ** object
 Unsupported operand types: object ** string
 Unsupported operand types: string ** object
 Unsupported operand types: object ** string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string ** object
 Unsupported operand types: resource ** null
 Unsupported operand types: null ** resource
@@ -455,8 +445,7 @@ Unsupported operand types: float ** resource
 Unsupported operand types: resource ** string
 Unsupported operand types: string ** resource
 Unsupported operand types: resource ** string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string ** resource
 Unsupported operand types: array << array
 Unsupported operand types: array << object
@@ -480,8 +469,7 @@ Unsupported operand types: float << array
 Unsupported operand types: array << string
 Unsupported operand types: string << array
 Unsupported operand types: array << string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string << array
 Unsupported operand types: object << null
 Unsupported operand types: null << object
@@ -496,8 +484,7 @@ Unsupported operand types: float << object
 Unsupported operand types: object << string
 Unsupported operand types: string << object
 Unsupported operand types: object << string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string << object
 Unsupported operand types: resource << null
 Unsupported operand types: null << resource
@@ -512,8 +499,7 @@ Unsupported operand types: float << resource
 Unsupported operand types: resource << string
 Unsupported operand types: string << resource
 Unsupported operand types: resource << string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string << resource
 Unsupported operand types: array >> array
 Unsupported operand types: array >> object
@@ -537,8 +523,7 @@ Unsupported operand types: float >> array
 Unsupported operand types: array >> string
 Unsupported operand types: string >> array
 Unsupported operand types: array >> string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string >> array
 Unsupported operand types: object >> null
 Unsupported operand types: null >> object
@@ -553,8 +538,7 @@ Unsupported operand types: float >> object
 Unsupported operand types: object >> string
 Unsupported operand types: string >> object
 Unsupported operand types: object >> string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string >> object
 Unsupported operand types: resource >> null
 Unsupported operand types: null >> resource
@@ -569,8 +553,7 @@ Unsupported operand types: float >> resource
 Unsupported operand types: resource >> string
 Unsupported operand types: string >> resource
 Unsupported operand types: resource >> string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string >> resource
 Unsupported operand types: array & array
 Unsupported operand types: object & array
@@ -594,8 +577,7 @@ Unsupported operand types: float & array
 Unsupported operand types: array & string
 Unsupported operand types: string & array
 Unsupported operand types: array & string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string & array
 Unsupported operand types: object & null
 Unsupported operand types: object & null
@@ -647,8 +629,7 @@ Unsupported operand types: float | array
 Unsupported operand types: array | string
 Unsupported operand types: string | array
 Unsupported operand types: array | string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string | array
 Unsupported operand types: object | null
 Unsupported operand types: object | null
@@ -700,8 +681,7 @@ Unsupported operand types: float ^ array
 Unsupported operand types: array ^ string
 Unsupported operand types: string ^ array
 Unsupported operand types: array ^ string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string ^ array
 Unsupported operand types: object ^ null
 Unsupported operand types: object ^ null
@@ -782,68 +762,48 @@ No error for STDOUT xor "123"
 No error for "123" xor STDOUT
 No error for STDOUT xor "foo"
 No error for "foo" xor STDOUT
-
-Warning: Array to string conversion in %s on line %d
-
-Warning: Array to string conversion in %s on line %d
+Warning: Array to string conversion
+Warning: Array to string conversion
 No error for [] . []
-
-Warning: Array to string conversion in %s on line %d
+Warning: Array to string conversion
 Object of class stdClass could not be converted to string
-
-Warning: Array to string conversion in %s on line %d
+Warning: Array to string conversion
 No error for [] . STDOUT
-
-Warning: Array to string conversion in %s on line %d
+Warning: Array to string conversion
 Object of class stdClass could not be converted to string
 Object of class stdClass could not be converted to string
 Object of class stdClass could not be converted to string
-
-Warning: Array to string conversion in %s on line %d
+Warning: Array to string conversion
 No error for STDOUT . []
 Object of class stdClass could not be converted to string
 No error for STDOUT . STDOUT
-
-Warning: Array to string conversion in %s on line %d
+Warning: Array to string conversion
 No error for [] . null
-
-Warning: Array to string conversion in %s on line %d
+Warning: Array to string conversion
 No error for null . []
-
-Warning: Array to string conversion in %s on line %d
+Warning: Array to string conversion
 No error for [] . true
-
-Warning: Array to string conversion in %s on line %d
+Warning: Array to string conversion
 No error for true . []
-
-Warning: Array to string conversion in %s on line %d
+Warning: Array to string conversion
 No error for [] . false
-
-Warning: Array to string conversion in %s on line %d
+Warning: Array to string conversion
 No error for false . []
-
-Warning: Array to string conversion in %s on line %d
+Warning: Array to string conversion
 No error for [] . 2
-
-Warning: Array to string conversion in %s on line %d
+Warning: Array to string conversion
 No error for 2 . []
-
-Warning: Array to string conversion in %s on line %d
+Warning: Array to string conversion
 No error for [] . 3.5
-
-Warning: Array to string conversion in %s on line %d
+Warning: Array to string conversion
 No error for 3.5 . []
-
-Warning: Array to string conversion in %s on line %d
+Warning: Array to string conversion
 No error for [] . "123"
-
-Warning: Array to string conversion in %s on line %d
+Warning: Array to string conversion
 No error for "123" . []
-
-Warning: Array to string conversion in %s on line %d
+Warning: Array to string conversion
 No error for [] . "foo"
-
-Warning: Array to string conversion in %s on line %d
+Warning: Array to string conversion
 No error for "foo" . []
 Object of class stdClass could not be converted to string
 Object of class stdClass could not be converted to string
@@ -898,8 +858,7 @@ Unsupported operand types: float + array
 Unsupported operand types: array + string
 Unsupported operand types: string + array
 Unsupported operand types: array + string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string + array
 Unsupported operand types: object + null
 Unsupported operand types: null + object
@@ -914,8 +873,7 @@ Unsupported operand types: float + object
 Unsupported operand types: object + string
 Unsupported operand types: string + object
 Unsupported operand types: object + string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string + object
 Unsupported operand types: resource + null
 Unsupported operand types: null + resource
@@ -930,8 +888,7 @@ Unsupported operand types: float + resource
 Unsupported operand types: resource + string
 Unsupported operand types: string + resource
 Unsupported operand types: resource + string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string + resource
 Unsupported operand types: array - array
 Unsupported operand types: array - object
@@ -955,8 +912,7 @@ Unsupported operand types: float - array
 Unsupported operand types: array - string
 Unsupported operand types: string - array
 Unsupported operand types: array - string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string - array
 Unsupported operand types: object - null
 Unsupported operand types: null - object
@@ -971,8 +927,7 @@ Unsupported operand types: float - object
 Unsupported operand types: object - string
 Unsupported operand types: string - object
 Unsupported operand types: object - string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string - object
 Unsupported operand types: resource - null
 Unsupported operand types: null - resource
@@ -987,8 +942,7 @@ Unsupported operand types: float - resource
 Unsupported operand types: resource - string
 Unsupported operand types: string - resource
 Unsupported operand types: resource - string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string - resource
 Unsupported operand types: array * array
 Unsupported operand types: array * object
@@ -1012,8 +966,7 @@ Unsupported operand types: float * array
 Unsupported operand types: array * string
 Unsupported operand types: string * array
 Unsupported operand types: array * string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string * array
 Unsupported operand types: object * null
 Unsupported operand types: null * object
@@ -1028,8 +981,7 @@ Unsupported operand types: float * object
 Unsupported operand types: object * string
 Unsupported operand types: string * object
 Unsupported operand types: object * string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string * object
 Unsupported operand types: resource * null
 Unsupported operand types: null * resource
@@ -1044,8 +996,7 @@ Unsupported operand types: float * resource
 Unsupported operand types: resource * string
 Unsupported operand types: string * resource
 Unsupported operand types: resource * string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string * resource
 Unsupported operand types: array / array
 Unsupported operand types: array / object
@@ -1069,8 +1020,7 @@ Unsupported operand types: float / array
 Unsupported operand types: array / string
 Unsupported operand types: string / array
 Unsupported operand types: array / string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string / array
 Unsupported operand types: object / null
 Unsupported operand types: null / object
@@ -1085,8 +1035,7 @@ Unsupported operand types: float / object
 Unsupported operand types: object / string
 Unsupported operand types: string / object
 Unsupported operand types: object / string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string / object
 Unsupported operand types: resource / null
 Unsupported operand types: null / resource
@@ -1101,8 +1050,7 @@ Unsupported operand types: float / resource
 Unsupported operand types: resource / string
 Unsupported operand types: string / resource
 Unsupported operand types: resource / string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string / resource
 Unsupported operand types: array % array
 Unsupported operand types: array % object
@@ -1126,8 +1074,7 @@ Unsupported operand types: float % array
 Unsupported operand types: array % string
 Unsupported operand types: string % array
 Unsupported operand types: array % string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string % array
 Unsupported operand types: object % null
 Unsupported operand types: null % object
@@ -1142,8 +1089,7 @@ Unsupported operand types: float % object
 Unsupported operand types: object % string
 Unsupported operand types: string % object
 Unsupported operand types: object % string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string % object
 Unsupported operand types: resource % null
 Unsupported operand types: null % resource
@@ -1158,8 +1104,7 @@ Unsupported operand types: float % resource
 Unsupported operand types: resource % string
 Unsupported operand types: string % resource
 Unsupported operand types: resource % string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string % resource
 Unsupported operand types: array ** array
 Unsupported operand types: array ** object
@@ -1183,8 +1128,7 @@ Unsupported operand types: float ** array
 Unsupported operand types: array ** string
 Unsupported operand types: string ** array
 Unsupported operand types: array ** string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string ** array
 Unsupported operand types: object ** null
 Unsupported operand types: null ** object
@@ -1199,8 +1143,7 @@ Unsupported operand types: float ** object
 Unsupported operand types: object ** string
 Unsupported operand types: string ** object
 Unsupported operand types: object ** string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string ** object
 Unsupported operand types: resource ** null
 Unsupported operand types: null ** resource
@@ -1215,8 +1158,7 @@ Unsupported operand types: float ** resource
 Unsupported operand types: resource ** string
 Unsupported operand types: string ** resource
 Unsupported operand types: resource ** string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string ** resource
 Unsupported operand types: array << array
 Unsupported operand types: array << object
@@ -1240,8 +1182,7 @@ Unsupported operand types: float << array
 Unsupported operand types: array << string
 Unsupported operand types: string << array
 Unsupported operand types: array << string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string << array
 Unsupported operand types: object << null
 Unsupported operand types: null << object
@@ -1256,8 +1197,7 @@ Unsupported operand types: float << object
 Unsupported operand types: object << string
 Unsupported operand types: string << object
 Unsupported operand types: object << string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string << object
 Unsupported operand types: resource << null
 Unsupported operand types: null << resource
@@ -1272,8 +1212,7 @@ Unsupported operand types: float << resource
 Unsupported operand types: resource << string
 Unsupported operand types: string << resource
 Unsupported operand types: resource << string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string << resource
 Unsupported operand types: array >> array
 Unsupported operand types: array >> object
@@ -1297,8 +1236,7 @@ Unsupported operand types: float >> array
 Unsupported operand types: array >> string
 Unsupported operand types: string >> array
 Unsupported operand types: array >> string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string >> array
 Unsupported operand types: object >> null
 Unsupported operand types: null >> object
@@ -1313,8 +1251,7 @@ Unsupported operand types: float >> object
 Unsupported operand types: object >> string
 Unsupported operand types: string >> object
 Unsupported operand types: object >> string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string >> object
 Unsupported operand types: resource >> null
 Unsupported operand types: null >> resource
@@ -1329,8 +1266,7 @@ Unsupported operand types: float >> resource
 Unsupported operand types: resource >> string
 Unsupported operand types: string >> resource
 Unsupported operand types: resource >> string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string >> resource
 Unsupported operand types: array & array
 Unsupported operand types: array & object
@@ -1354,8 +1290,7 @@ Unsupported operand types: float & array
 Unsupported operand types: array & string
 Unsupported operand types: string & array
 Unsupported operand types: array & string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string & array
 Unsupported operand types: object & null
 Unsupported operand types: null & object
@@ -1370,8 +1305,7 @@ Unsupported operand types: float & object
 Unsupported operand types: object & string
 Unsupported operand types: string & object
 Unsupported operand types: object & string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string & object
 Unsupported operand types: resource & null
 Unsupported operand types: null & resource
@@ -1386,8 +1320,7 @@ Unsupported operand types: float & resource
 Unsupported operand types: resource & string
 Unsupported operand types: string & resource
 Unsupported operand types: resource & string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string & resource
 Unsupported operand types: array | array
 Unsupported operand types: array | object
@@ -1411,8 +1344,7 @@ Unsupported operand types: float | array
 Unsupported operand types: array | string
 Unsupported operand types: string | array
 Unsupported operand types: array | string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string | array
 Unsupported operand types: object | null
 Unsupported operand types: null | object
@@ -1427,8 +1359,7 @@ Unsupported operand types: float | object
 Unsupported operand types: object | string
 Unsupported operand types: string | object
 Unsupported operand types: object | string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string | object
 Unsupported operand types: resource | null
 Unsupported operand types: null | resource
@@ -1443,8 +1374,7 @@ Unsupported operand types: float | resource
 Unsupported operand types: resource | string
 Unsupported operand types: string | resource
 Unsupported operand types: resource | string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string | resource
 Unsupported operand types: array ^ array
 Unsupported operand types: array ^ object
@@ -1468,8 +1398,7 @@ Unsupported operand types: float ^ array
 Unsupported operand types: array ^ string
 Unsupported operand types: string ^ array
 Unsupported operand types: array ^ string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string ^ array
 Unsupported operand types: object ^ null
 Unsupported operand types: null ^ object
@@ -1484,8 +1413,7 @@ Unsupported operand types: float ^ object
 Unsupported operand types: object ^ string
 Unsupported operand types: string ^ object
 Unsupported operand types: object ^ string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string ^ object
 Unsupported operand types: resource ^ null
 Unsupported operand types: null ^ resource
@@ -1500,69 +1428,49 @@ Unsupported operand types: float ^ resource
 Unsupported operand types: resource ^ string
 Unsupported operand types: string ^ resource
 Unsupported operand types: resource ^ string
-
-Warning: A non-numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered
 Unsupported operand types: string ^ resource
-
-Warning: Array to string conversion in %s on line %d
-
-Warning: Array to string conversion in %s on line %d
+Warning: Array to string conversion
+Warning: Array to string conversion
 No error for [] .= []
-
-Warning: Array to string conversion in %s on line %d
+Warning: Array to string conversion
 Object of class stdClass could not be converted to string
-
-Warning: Array to string conversion in %s on line %d
+Warning: Array to string conversion
 No error for [] .= STDOUT
 Object of class stdClass could not be converted to string
 Object of class stdClass could not be converted to string
 Object of class stdClass could not be converted to string
-
-Warning: Array to string conversion in %s on line %d
+Warning: Array to string conversion
 No error for STDOUT .= []
 Object of class stdClass could not be converted to string
 No error for STDOUT .= STDOUT
-
-Warning: Array to string conversion in %s on line %d
+Warning: Array to string conversion
 No error for [] .= null
-
-Warning: Array to string conversion in %s on line %d
+Warning: Array to string conversion
 No error for null .= []
-
-Warning: Array to string conversion in %s on line %d
+Warning: Array to string conversion
 No error for [] .= true
-
-Warning: Array to string conversion in %s on line %d
+Warning: Array to string conversion
 No error for true .= []
-
-Warning: Array to string conversion in %s on line %d
+Warning: Array to string conversion
 No error for [] .= false
-
-Warning: Array to string conversion in %s on line %d
+Warning: Array to string conversion
 No error for false .= []
-
-Warning: Array to string conversion in %s on line %d
+Warning: Array to string conversion
 No error for [] .= 2
-
-Warning: Array to string conversion in %s on line %d
+Warning: Array to string conversion
 No error for 2 .= []
-
-Warning: Array to string conversion in %s on line %d
+Warning: Array to string conversion
 No error for [] .= 3.5
-
-Warning: Array to string conversion in %s on line %d
+Warning: Array to string conversion
 No error for 3.5 .= []
-
-Warning: Array to string conversion in %s on line %d
+Warning: Array to string conversion
 No error for [] .= "123"
-
-Warning: Array to string conversion in %s on line %d
+Warning: Array to string conversion
 No error for "123" .= []
-
-Warning: Array to string conversion in %s on line %d
+Warning: Array to string conversion
 No error for [] .= "foo"
-
-Warning: Array to string conversion in %s on line %d
+Warning: Array to string conversion
 No error for "foo" .= []
 Object of class stdClass could not be converted to string
 Object of class stdClass could not be converted to string
