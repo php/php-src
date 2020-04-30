@@ -1,13 +1,11 @@
 --TEST--
-Testing __debugInfo() magic method with bad returns RESOURCE
---INI--
-allow_url_fopen=1
+Testing __debugInfo() magic method with bad returns int
 --FILE--
 <?php
 
 class C {
   public function __debugInfo() {
-    return fopen("data:text/plain,Foo", 'r');
+    return 2;
   }
 }
 
