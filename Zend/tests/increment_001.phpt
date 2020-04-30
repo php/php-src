@@ -37,7 +37,7 @@ foreach ($a as $var) {
 echo "Done\n";
 ?>
 --EXPECTF--
-Cannot decrement array
+Cannot increment array
 array(3) {
   [0]=>
   int(1)
@@ -56,10 +56,10 @@ float(3.5)
 int(1)
 bool(true)
 bool(false)
-Cannot decrement object
+Cannot increment object
 object(stdClass)#%d (0) {
 }
-Cannot decrement array
+Cannot increment array
 array(0) {
 }
 float(2147483648)
