@@ -814,7 +814,7 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 					if ((start & ZEND_JIT_TRACE_START_LOOP) != 0
 					 && level + ret_level == 0
 					 && !zend_jit_trace_bad_compiled_loop(orig_opline)) {
-						/* Fail to try close outer loop throgh side exit.
+						/* Fail to try close outer loop through side exit.
 						   If this doesn't work just link. */
 						stop = ZEND_JIT_TRACE_STOP_COMPILED_LOOP;
 						break;

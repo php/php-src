@@ -2556,7 +2556,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 			}
 		}
 
-		// TODO: Merge two loops implementing paralel move ???
+		// TODO: Merge two loops implementing parallel move ???
 		for (i = 0; i < parent_vars_count; i++) {
 			if (STACK_REG(parent_stack, i) != ZREG_NONE) {
 				if (ra && ra[i] && ra[i]->reg == STACK_REG(parent_stack, i)) {
@@ -2608,7 +2608,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							goto jit_failure;
 						}
 					} else {
-						/* Register has to be writen back on side exit */
+						/* Register has to be written back on side exit */
 						SET_STACK_REG(stack, phi->var, ival->reg);
 					}
 				}
@@ -4889,7 +4889,7 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 	}
 
 	/* Lock-free check if the side trace was already JIT-ed or blacklist-ed in another process */
-	// TODO: We may remoive this, becaus of the same check in zend_jit_trace_hot_side() ???
+	// TODO: We may remove this, because of the same check in zend_jit_trace_hot_side() ???
 	opline = t->exit_info[exit_num].opline;
 	if (EG(vm_interrupt) || ((uintptr_t)opline & (ZEND_JIT_EXIT_JITED|ZEND_JIT_EXIT_BLACKLISTED))) {
 		opline = (const zend_op*)((uintptr_t)opline & ~(ZEND_JIT_EXIT_JITED|ZEND_JIT_EXIT_BLACKLISTED));

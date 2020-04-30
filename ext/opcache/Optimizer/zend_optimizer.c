@@ -849,7 +849,7 @@ zend_function *zend_optimizer_get_called_func(
 						 * as a prototype, as it may be overridden with changed signature. */
 						return same_scope ? fbc : NULL;
 					}
-					/* If the method is non-final, it may be overriden,
+					/* If the method is non-final, it may be overridden,
 					 * but only with a compatible method signature. */
 					*is_prototype = !is_final;
 					return fbc;
