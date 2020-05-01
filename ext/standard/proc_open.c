@@ -1093,7 +1093,9 @@ PHP_FUNCTION(proc_open)
 			}
 		}
 
-		/* Show errors from exec!! */
+		/* If execvp/execle/execl are successful, we will never reach here
+		 * Display error and exit with non-zero (error) status code */
+		php_error_docref(NULL, E_WARNING, "Exec failed - %s", strerror(errno));
 		_exit(127);
 	} else if (child < 0) {
 		/* failed to fork() */
