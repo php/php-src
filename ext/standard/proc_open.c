@@ -476,6 +476,12 @@ static int get_option(zval *other_options, char *option_name)
 }
 #endif
 
+static struct php_proc_open_descriptor_item* alloc_descriptor_array(zval *descriptorspec)
+{
+	int ndescriptors = zend_hash_num_elements(Z_ARRVAL_P(descriptorspec));
+	return ecalloc(sizeof(struct php_proc_open_descriptor_item), ndescriptors);
+}
+
 static int set_proc_descriptor_to_blackhole(struct php_proc_open_descriptor_item *desc)
 {
 #ifdef PHP_WIN32
@@ -527,7 +533,6 @@ PHP_FUNCTION(proc_open)
 	zend_string *str_index;
 	zend_ulong nindex;
 	struct php_proc_open_descriptor_item *descriptors = NULL;
-	int ndescriptors_array;
 #ifdef PHP_WIN32
 	PROCESS_INFORMATION pi;
 	HANDLE childHandle;
@@ -622,11 +627,7 @@ PHP_FUNCTION(proc_open)
 		env = _php_array_to_envp(environment);
 	}
 
-	ndescriptors_array = zend_hash_num_elements(Z_ARRVAL_P(descriptorspec));
-
-	descriptors = safe_emalloc(sizeof(struct php_proc_open_descriptor_item), ndescriptors_array, 0);
-
-	memset(descriptors, 0, sizeof(struct php_proc_open_descriptor_item) * ndescriptors_array);
+	descriptors = alloc_descriptor_array(descriptorspec);
 
 #ifdef PHP_WIN32
 	/* we use this to allow the child to inherit handles */
