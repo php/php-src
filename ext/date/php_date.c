@@ -782,14 +782,15 @@ static void php_date(INTERNAL_FUNCTION_PARAMETERS, int localtime)
 {
 	zend_string *format;
 	zend_long    ts;
+	zend_bool    ts_is_null = 1;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STR(format)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(ts)
+		Z_PARAM_LONG_OR_NULL(ts, ts_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (ZEND_NUM_ARGS() == 1) {
+	if (ts_is_null) {
 		ts = php_time();
 	}
 
@@ -940,13 +941,14 @@ PHP_FUNCTION(gmdate)
 PHP_FUNCTION(idate)
 {
 	zend_string *format;
-	zend_long    ts = 0;
+	zend_long    ts;
+	zend_bool    ts_is_null = 1;
 	int ret;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STR(format)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(ts)
+		Z_PARAM_LONG_OR_NULL(ts, ts_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZSTR_LEN(format) != 1) {
@@ -954,7 +956,7 @@ PHP_FUNCTION(idate)
 		RETURN_FALSE;
 	}
 
-	if (ZEND_NUM_ARGS() == 1) {
+	if (ts_is_null) {
 		ts = php_time();
 	}
 
@@ -1011,14 +1013,15 @@ PHP_FUNCTION(strtotime)
 	zend_string *times;
 	int error1, error2;
 	timelib_error_container *error;
-	zend_long preset_ts = 0, ts;
+	zend_long preset_ts, ts;
+	zend_bool preset_ts_is_null = 1;
 	timelib_time *t, *now;
 	timelib_tzinfo *tzi;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STR(times)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(preset_ts)
+		Z_PARAM_LONG_OR_NULL(preset_ts, preset_ts_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
 	tzi = get_timezone_info();
@@ -1027,7 +1030,7 @@ PHP_FUNCTION(strtotime)
 	now->tz_info = tzi;
 	now->zone_type = TIMELIB_ZONETYPE_ID;
 	timelib_unixtime2local(now,
-		(ZEND_NUM_ARGS() == 2) ? (timelib_sll) preset_ts : (timelib_sll) php_time());
+		!preset_ts_is_null ? (timelib_sll) preset_ts : (timelib_sll) php_time());
 
 	t = timelib_strtotime(ZSTR_VAL(times), ZSTR_LEN(times), &error,
 		DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper);
@@ -1051,7 +1054,8 @@ PHP_FUNCTION(strtotime)
 /* {{{ php_mktime - (gm)mktime helper */
 PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 {
-	zend_long hou = 0, min = 0, sec = 0, mon = 0, day = 0, yea = 0;
+	zend_long hou, min, sec, mon, day, yea;
+	zend_bool min_is_null = 1, sec_is_null = 1, mon_is_null = 1, day_is_null = 1, yea_is_null = 1;
 	timelib_time *now;
 	timelib_tzinfo *tzi = NULL;
 	zend_long ts, adjust_seconds = 0;
@@ -1060,11 +1064,11 @@ PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 	ZEND_PARSE_PARAMETERS_START(1, 6)
 		Z_PARAM_LONG(hou)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(min)
-		Z_PARAM_LONG(sec)
-		Z_PARAM_LONG(mon)
-		Z_PARAM_LONG(day)
-		Z_PARAM_LONG(yea)
+		Z_PARAM_LONG_OR_NULL(min, min_is_null)
+		Z_PARAM_LONG_OR_NULL(sec, sec_is_null)
+		Z_PARAM_LONG_OR_NULL(mon, mon_is_null)
+		Z_PARAM_LONG_OR_NULL(day, day_is_null)
+		Z_PARAM_LONG_OR_NULL(yea, yea_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
 	/* Initialize structure with current time */
@@ -1077,33 +1081,34 @@ PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 		now->zone_type = TIMELIB_ZONETYPE_ID;
 		timelib_unixtime2local(now, (timelib_sll) php_time());
 	}
-	/* Fill in the new data */
-	switch (ZEND_NUM_ARGS()) {
-		case 6:
-			if (yea >= 0 && yea < 70) {
-				yea += 2000;
-			} else if (yea >= 70 && yea <= 100) {
-				yea += 1900;
-			}
-			now->y = yea;
-			/* break intentionally missing again */
-		case 5:
-			now->d = day;
-			/* break missing intentionally here too */
-		case 4:
-			now->m = mon;
-			/* and here */
-		case 3:
-			now->s = sec;
-			/* yup, this break isn't here on purpose too */
-		case 2:
-			now->i = min;
-			/* last intentionally missing break */
-		case 1:
-			now->h = hou;
-			break;
-		EMPTY_SWITCH_DEFAULT_CASE()
+
+	now->h = hou;
+
+	if (!min_is_null) {
+		now->i = min;
 	}
+
+	if (!sec_is_null) {
+		now->s = sec;
+	}
+
+	if (!mon_is_null) {
+		now->m = mon;
+	}
+
+	if (!day_is_null) {
+		now->d = day;
+	}
+
+	if (!yea_is_null) {
+		if (yea >= 0 && yea < 70) {
+			yea += 2000;
+		} else if (yea >= 70 && yea <= 100) {
+			yea += 1900;
+		}
+		now->y = yea;
+	}
+
 	/* Update the timestamp */
 	if (gmt) {
 		timelib_update_ts(now, NULL);
@@ -1163,7 +1168,8 @@ PHP_FUNCTION(checkdate)
 PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 {
 	zend_string         *format;
-	zend_long            timestamp = 0;
+	zend_long            timestamp;
+	zend_bool            timestamp_is_null = 1;
 	struct tm            ta;
 	int                  max_reallocs = 5;
 	size_t               buf_len = 256, real_len;
@@ -1172,16 +1178,18 @@ PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 	timelib_time_offset *offset = NULL;
 	zend_string 		*buf;
 
-	timestamp = (zend_long) php_time();
-
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STR(format)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(timestamp)
+		Z_PARAM_LONG_OR_NULL(timestamp, timestamp_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZSTR_LEN(format) == 0) {
 		RETURN_FALSE;
+	}
+
+	if (timestamp_is_null) {
+		timestamp = (zend_long) php_time();
 	}
 
 	ts = timelib_time_ctor();
@@ -1286,17 +1294,18 @@ PHP_FUNCTION(time)
 PHP_FUNCTION(localtime)
 {
 	zend_long timestamp;
+	zend_bool timestamp_is_null = 1;
 	zend_bool associative = 0;
 	timelib_tzinfo *tzi;
 	timelib_time   *ts;
 
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(timestamp)
+		Z_PARAM_LONG_OR_NULL(timestamp, timestamp_is_null)
 		Z_PARAM_BOOL(associative)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (ZEND_NUM_ARGS() == 0) {
+	if (timestamp_is_null) {
 		timestamp = (zend_long) php_time();
 	}
 
@@ -1339,15 +1348,16 @@ PHP_FUNCTION(localtime)
 PHP_FUNCTION(getdate)
 {
 	zend_long timestamp;
+	zend_bool timestamp_is_null = 1;
 	timelib_tzinfo *tzi;
 	timelib_time   *ts;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(timestamp)
+		Z_PARAM_LONG_OR_NULL(timestamp, timestamp_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (ZEND_NUM_ARGS() == 0) {
+	if (timestamp_is_null) {
 		timestamp = (zend_long) php_time();
 	}
 
@@ -4511,10 +4521,11 @@ PHP_FUNCTION(date_default_timezone_get)
  */
 static void php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAMETERS, int calc_sunset)
 {
-	double latitude = 0.0, longitude = 0.0, zenith = 0.0, gmt_offset = 0, altitude;
+	double latitude, longitude, zenith, gmt_offset, altitude;
+	zend_bool latitude_is_null = 1, longitude_is_null = 1, zenith_is_null = 1, gmt_offset_is_null = 1;
 	double h_rise, h_set, N;
 	timelib_sll rise, set, transit;
-	zend_long time, retformat = 0;
+	zend_long time, retformat = SUNFUNCS_RET_STRING;
 	int             rs;
 	timelib_time   *t;
 	timelib_tzinfo *tzi;
@@ -4524,33 +4535,28 @@ static void php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAMETERS, int calc_su
 		Z_PARAM_LONG(time)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(retformat)
-		Z_PARAM_DOUBLE(latitude)
-		Z_PARAM_DOUBLE(longitude)
-		Z_PARAM_DOUBLE(zenith)
-		Z_PARAM_DOUBLE(gmt_offset)
+		Z_PARAM_DOUBLE_OR_NULL(latitude, latitude_is_null)
+		Z_PARAM_DOUBLE_OR_NULL(longitude, longitude_is_null)
+		Z_PARAM_DOUBLE_OR_NULL(zenith, zenith_is_null)
+		Z_PARAM_DOUBLE_OR_NULL(gmt_offset, gmt_offset_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
-	switch (ZEND_NUM_ARGS()) {
-		case 1:
-			retformat = SUNFUNCS_RET_STRING;
-		case 2:
-			latitude = INI_FLT("date.default_latitude");
-		case 3:
-			longitude = INI_FLT("date.default_longitude");
-		case 4:
-			if (calc_sunset) {
-				zenith = INI_FLT("date.sunset_zenith");
-			} else {
-				zenith = INI_FLT("date.sunrise_zenith");
-			}
-		case 5:
-		case 6:
-			break;
-		default:
-			php_error_docref(NULL, E_WARNING, "Invalid format");
-			RETURN_FALSE;
-			break;
+	if (latitude_is_null) {
+		latitude = INI_FLT("date.default_latitude");
 	}
+
+	if (longitude_is_null) {
+		latitude = INI_FLT("date.default_longitude");
+	}
+
+	if (zenith_is_null) {
+		if (calc_sunset) {
+			zenith = INI_FLT("date.sunset_zenith");
+		} else {
+			zenith = INI_FLT("date.sunrise_zenith");
+		}
+	}
+
 	if (retformat != SUNFUNCS_RET_TIMESTAMP &&
 		retformat != SUNFUNCS_RET_STRING &&
 		retformat != SUNFUNCS_RET_DOUBLE)
@@ -4566,7 +4572,7 @@ static void php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAMETERS, int calc_su
 	t->tz_info = tzi;
 	t->zone_type = TIMELIB_ZONETYPE_ID;
 
-	if (ZEND_NUM_ARGS() <= 5) {
+	if (gmt_offset_is_null) {
 		gmt_offset = timelib_get_current_offset(t) / 3600;
 	}
 
