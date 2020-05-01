@@ -416,6 +416,11 @@ PHP 8.0 UPGRADE NOTES
     explicit setlocale() call is now always required if you wish to change any
     locale component from the default.
 
+- Sysvsem:
+  . sem_get() will now return an Sysvsem object rather than a resource.
+    Return value checks using is_resource() should be replaced with checks
+    for `false`.
+
 - tidy:
   . The $use_include_path parameter, which was not used internally, has been
     removed from tidy_repair_string().

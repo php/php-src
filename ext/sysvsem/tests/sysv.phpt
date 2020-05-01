@@ -19,15 +19,15 @@ if ($sem_id === FALSE) {
     echo "Fail to get semaphore";
     exit;
 }
-echo "Got semaphore $sem_id.\n";
+echo "Got semaphore.\n";
 
 // Accuire semaphore
 if (! sem_acquire($sem_id)) {
-    echo "Fail to acquire semaphore $sem_id.\n";
+    echo "Fail to acquire semaphore.\n";
     sem_remove($sem_id);
     exit;
 }
-echo "Success acquire semaphore $sem_id.\n";
+echo "Success acquire semaphore.\n";
 
 $shm_id =   shm_attach($SHMKEY, $MEMSIZE);
 if ($shm_id === FALSE) {
@@ -72,9 +72,9 @@ if ($var1 === FALSE) {
 }
 // Release semaphore
 if (!sem_release($sem_id)) {
-    echo "Fail to release $sem_id semaphore.\n";
+    echo "Fail to release semaphore.\n";
 } else {
-    echo "Semaphore $sem_id released.\n";
+    echo "Semaphore released.\n";
 }
 
 // remove shared memory segmant from SysV
@@ -88,7 +88,7 @@ if (shm_remove ($shm_id)) {
 if (sem_remove($sem_id)) {
     echo "semaphore removed successfully from SysV.\n";
 } else {
-    echo "Fail to remove $sem_id semaphore from SysV.\n";
+    echo "Fail to remove semaphore from SysV.\n";
 }
 echo "End.\n";
 /* NOTE: assigned semids differ depending on the kernel, since
@@ -99,14 +99,14 @@ echo "End.\n";
 ?>
 --EXPECTF--
 Start.
-Got semaphore Resource id #%i.
-Success acquire semaphore Resource id #%i.
+Got semaphore.
+Success acquire semaphore.
 Success to attach shared memory : %s.
 Write var1 to shared memory.
 Write var2 to shared memory.
 Read var1=Variable 1.
 Read var2=Variable 2.
-Semaphore Resource id #%s released.
+Semaphore released.
 Shared memory successfully removed from SysV.
 semaphore removed successfully from SysV.
 End.

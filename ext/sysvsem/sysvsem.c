@@ -39,6 +39,7 @@
 #include "sysvsem_arginfo.h"
 #include "php_sysvsem.h"
 #include "ext/standard/info.h"
+#include "Zend/zend_interfaces.h"
 
 #if !HAVE_SEMUN
 
@@ -74,9 +75,6 @@ zend_module_entry sysvsem_module_entry = {
 ZEND_GET_MODULE(sysvsem)
 #endif
 
-
-THREAD_LS sysvsem_module php_sysvsem_module;
-
 /* Semaphore functions using System V semaphores.  Each semaphore
  * actually consists of three semaphores allocated as a unit under the
  * same key.  Semaphore 0 (SYSVSEM_SEM) is the actual semaphore, it is
@@ -96,11 +94,35 @@ THREAD_LS sysvsem_module php_sysvsem_module;
 #define SYSVSEM_USAGE	1
 #define SYSVSEM_SETVAL	2
 
-/* {{{ release_sysvsem_sem
- */
-static void release_sysvsem_sem(zend_resource *rsrc)
+/* Sysvsem class */
+
+zend_class_entry *sysvsem_ce;
+static zend_object_handlers sysvsem_object_handlers;
+
+static inline sysvsem_sem *sysvsem_from_obj(zend_object *obj) {
+	return (sysvsem_sem *)((char *)(obj) - XtOffsetOf(sysvsem_sem, std));
+}
+
+#define Z_SYSVSEM_P(zv) sysvsem_from_obj(Z_OBJ_P(zv))
+
+static zend_object *sysvsem_create_object(zend_class_entry *class_type) {
+	sysvsem_sem *intern = zend_object_alloc(sizeof(sysvsem_sem), class_type);
+
+	zend_object_std_init(&intern->std, class_type);
+	object_properties_init(&intern->std, class_type);
+	intern->std.handlers = &sysvsem_object_handlers;
+
+	return &intern->std;
+}
+
+static zend_function *sysvsem_get_constructor(zend_object *object) {
+	zend_throw_error(NULL, "Cannot directly construct Sysvsem, use sem_get() instead");
+	return NULL;
+}
+
+static void sysvsem_free_obj(zend_object *object)
 {
-	sysvsem_sem *sem_ptr = (sysvsem_sem *)rsrc->ptr;
+	sysvsem_sem *sem_ptr = sysvsem_from_obj(object);
 	struct sembuf sop[2];
 	int opcount = 1;
 /*
@@ -130,7 +152,8 @@ static void release_sysvsem_sem(zend_resource *rsrc)
 	}
 
 	semop(sem_ptr->semid, sop, opcount);
-	efree(sem_ptr);
+
+	zend_object_std_dtor(&sem_ptr->std);
 }
 /* }}} */
 
@@ -138,7 +161,20 @@ static void release_sysvsem_sem(zend_resource *rsrc)
  */
 PHP_MINIT_FUNCTION(sysvsem)
 {
-	php_sysvsem_module.le_sem = zend_register_list_destructors_ex(release_sysvsem_sem, NULL, "sysvsem", module_number);
+	zend_class_entry ce;
+	INIT_CLASS_ENTRY(ce, "Sysvsem", class_Sysvsem_methods);
+	sysvsem_ce = zend_register_internal_class(&ce);
+	sysvsem_ce->ce_flags |= ZEND_ACC_FINAL;
+	sysvsem_ce->create_object = sysvsem_create_object;
+	sysvsem_ce->serialize = zend_class_serialize_deny;
+	sysvsem_ce->unserialize = zend_class_unserialize_deny;
+
+	memcpy(&sysvsem_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	sysvsem_object_handlers.offset = XtOffsetOf(sysvsem_sem, std);
+	sysvsem_object_handlers.free_obj = sysvsem_free_obj;
+	sysvsem_object_handlers.get_constructor = sysvsem_get_constructor;
+	sysvsem_object_handlers.clone_obj = NULL;
+
 	return SUCCESS;
 }
 /* }}} */
@@ -159,7 +195,7 @@ PHP_MINFO_FUNCTION(sysvsem)
 #undef SETVAL_WANTS_PTR
 #endif
 
-/* {{{ proto resource sem_get(int key [, int max_acquire [, int perm [, int auto_release]])
+/* {{{ proto Sysvsem sem_get(int key [, int max_acquire [, int perm [, int auto_release]])
    Return an id for the semaphore with the given key, and allow max_acquire (default 1) processes to acquire it simultaneously */
 PHP_FUNCTION(sem_get)
 {
@@ -259,14 +295,13 @@ PHP_FUNCTION(sem_get)
 		}
 	}
 
-	sem_ptr = (sysvsem_sem *) emalloc(sizeof(sysvsem_sem));
+	object_init_ex(return_value, sysvsem_ce);
+
+	sem_ptr = Z_SYSVSEM_P(return_value);
 	sem_ptr->key   = key;
 	sem_ptr->semid = semid;
 	sem_ptr->count = 0;
 	sem_ptr->auto_release = auto_release;
-
-	RETVAL_RES(zend_register_resource(sem_ptr, php_sysvsem_module.le_sem));
-	sem_ptr->id = Z_RES_HANDLE_P(return_value);
 }
 /* }}} */
 
@@ -280,21 +315,19 @@ static void php_sysvsem_semop(INTERNAL_FUNCTION_PARAMETERS, int acquire)
 	struct sembuf sop;
 
 	if (acquire) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|b", &arg_id, &nowait) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|b", &arg_id, sysvsem_ce, &nowait) == FAILURE) {
 			RETURN_THROWS();
 		}
 	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &arg_id) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &arg_id, sysvsem_ce) == FAILURE) {
 			RETURN_THROWS();
 		}
 	}
 
-	if ((sem_ptr = (sysvsem_sem *)zend_fetch_resource(Z_RES_P(arg_id), "SysV semaphore", php_sysvsem_module.le_sem)) == NULL) {
-		RETURN_THROWS();
-	}
+	sem_ptr = Z_SYSVSEM_P(arg_id);
 
 	if (!acquire && sem_ptr->count == 0) {
-		php_error_docref(NULL, E_WARNING, "SysV semaphore " ZEND_LONG_FMT " (key 0x%x) is not currently acquired", Z_LVAL_P(arg_id), sem_ptr->key);
+		php_error_docref(NULL, E_WARNING, "SysV semaphore for key 0x%x is not currently acquired", sem_ptr->key);
 		RETURN_FALSE;
 	}
 
@@ -316,7 +349,7 @@ static void php_sysvsem_semop(INTERNAL_FUNCTION_PARAMETERS, int acquire)
 }
 /* }}} */
 
-/* {{{ proto bool sem_acquire(resource id)
+/* {{{ proto bool sem_acquire(Sysvsem id)
    Acquires the semaphore with the given id, blocking if necessary */
 PHP_FUNCTION(sem_acquire)
 {
@@ -324,7 +357,7 @@ PHP_FUNCTION(sem_acquire)
 }
 /* }}} */
 
-/* {{{ proto bool sem_release(resource id)
+/* {{{ proto bool sem_release(Sysvsem id)
    Releases the semaphore with the given id */
 PHP_FUNCTION(sem_release)
 {
@@ -332,7 +365,7 @@ PHP_FUNCTION(sem_release)
 }
 /* }}} */
 
-/* {{{ proto bool sem_remove(resource id)
+/* {{{ proto bool sem_remove(Sysvsem id)
    Removes semaphore from Unix systems */
 
 /*
@@ -349,13 +382,11 @@ PHP_FUNCTION(sem_remove)
 	struct semid_ds buf;
 #endif
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &arg_id) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &arg_id, sysvsem_ce) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	if ((sem_ptr = (sysvsem_sem *)zend_fetch_resource(Z_RES_P(arg_id), "SysV semaphore", php_sysvsem_module.le_sem)) == NULL) {
-		RETURN_THROWS();
-	}
+	sem_ptr = Z_SYSVSEM_P(arg_id);
 
 #if HAVE_SEMUN
 	un.buf = &buf;
@@ -363,7 +394,7 @@ PHP_FUNCTION(sem_remove)
 #else
 	if (semctl(sem_ptr->semid, 0, IPC_STAT, NULL) < 0) {
 #endif
-		php_error_docref(NULL, E_WARNING, "SysV semaphore " ZEND_LONG_FMT " does not (any longer) exist", Z_LVAL_P(arg_id));
+		php_error_docref(NULL, E_WARNING, "SysV semaphore for key 0x%x does not (any longer) exist", sem_ptr->key);
 		RETURN_FALSE;
 	}
 
@@ -372,7 +403,7 @@ PHP_FUNCTION(sem_remove)
 #else
 	if (semctl(sem_ptr->semid, 0, IPC_RMID, NULL) < 0) {
 #endif
-		php_error_docref(NULL, E_WARNING, "Failed for SysV semaphore " ZEND_LONG_FMT ": %s", Z_LVAL_P(arg_id), strerror(errno));
+		php_error_docref(NULL, E_WARNING, "Failed for SysV semaphore for key 0x%x: %s", sem_ptr->key, strerror(errno));
 		RETURN_FALSE;
 	}
 
