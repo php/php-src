@@ -486,6 +486,18 @@ static int set_proc_descriptor_to_blackhole(struct php_proc_open_descriptor_item
 	return SUCCESS;
 }
 
+static void efree_argv(char **argv)
+{
+	if (argv) {
+		char **arg = argv;
+		while (*arg != NULL) {
+			efree(*arg);
+			arg++;
+		}
+		efree(argv);
+	}
+}
+
 /* {{{ proto resource|false proc_open(string|array command, array descriptorspec, array &pipes [, string cwd [, array env [, array other_options]]])
    Run a process with more control over it's file descriptors */
 PHP_FUNCTION(proc_open)
@@ -1163,14 +1175,7 @@ PHP_FUNCTION(proc_open)
 	}
 
 #ifndef PHP_WIN32
-	if (argv) {
-		char **arg = argv;
-		while (*arg != NULL) {
-			efree(*arg);
-			arg++;
-		}
-		efree(argv);
-	}
+	efree_argv(argv);
 #endif
 
 	efree(descriptors);
@@ -1190,14 +1195,7 @@ exit_fail:
 	free(cmdw);
 	free(envpw);
 #else
-	if (argv) {
-		char **arg = argv;
-		while (*arg != NULL) {
-			efree(*arg);
-			arg++;
-		}
-		efree(argv);
-	}
+	efree_argv(argv);
 #endif
 #if PHP_CAN_DO_PTS
 	if (dev_ptmx >= 0) {
