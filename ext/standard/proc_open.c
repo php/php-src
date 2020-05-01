@@ -482,6 +482,32 @@ static int get_option(zval *other_options, char *option_name)
 	}
 	return 0;
 }
+
+static void init_startup_info(STARTUPINFOW *si, struct php_proc_open_descriptor_item *descriptors, int ndesc)
+{
+	memset(si, 0, sizeof(STARTUPINFOW));
+	si->cb = sizeof(STARTUPINFOW);
+	si->dwFlags = STARTF_USESTDHANDLES;
+
+	si->hStdInput  = GetStdHandle(STD_INPUT_HANDLE);
+	si->hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+	si->hStdError  = GetStdHandle(STD_ERROR_HANDLE);
+
+	/* redirect stdin/stdout/stderr if requested */
+	for (int i = 0; i < ndesc; i++) {
+		switch (descriptors[i].index) {
+			case 0:
+				si->hStdInput = descriptors[i].childend;
+				break;
+			case 1:
+				si->hStdOutput = descriptors[i].childend;
+				break;
+			case 2:
+				si->hStdError = descriptors[i].childend;
+				break;
+		}
+	}
+}
 #endif
 
 static struct php_proc_open_descriptor_item* alloc_descriptor_array(zval *descriptorspec)
@@ -895,29 +921,7 @@ PHP_FUNCTION(proc_open)
 		goto exit_fail;
 	}
 
-	memset(&si, 0, sizeof(si));
-	si.cb = sizeof(si);
-	si.dwFlags = STARTF_USESTDHANDLES;
-
-	si.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
-	si.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
-	si.hStdError = GetStdHandle(STD_ERROR_HANDLE);
-
-	/* redirect stdin/stdout/stderr if requested */
-	for (i = 0; i < ndesc; i++) {
-		switch(descriptors[i].index) {
-			case 0:
-				si.hStdInput = descriptors[i].childend;
-				break;
-			case 1:
-				si.hStdOutput = descriptors[i].childend;
-				break;
-			case 2:
-				si.hStdError = descriptors[i].childend;
-				break;
-		}
-	}
-
+	init_startup_info(&si, descriptors, ndesc);
 
 	memset(&pi, 0, sizeof(pi));
 
