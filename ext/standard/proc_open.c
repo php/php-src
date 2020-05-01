@@ -868,8 +868,7 @@ PHP_FUNCTION(proc_open)
 				}
 			} else if (strcmp(Z_STRVAL_P(ztype), "redirect") == 0) {
 				zval *ztarget = zend_hash_index_find_deref(Z_ARRVAL_P(descitem), 1);
-				struct php_proc_open_descriptor_item *target = NULL;
-				php_file_descriptor_t childend;
+				php_file_descriptor_t childend = -1;
 
 				if (!ztarget) {
 					zend_value_error("Missing redirection target");
@@ -882,13 +881,12 @@ PHP_FUNCTION(proc_open)
 
 				for (i = 0; i < ndesc; i++) {
 					if (descriptors[i].index == Z_LVAL_P(ztarget)) {
-						target = &descriptors[i];
+						childend = descriptors[i].childend;
 						break;
 					}
 				}
-				if (target) {
-					childend = target->childend;
-				} else {
+
+				if (childend == -1) {
 					if (Z_LVAL_P(ztarget) < 0 || Z_LVAL_P(ztarget) > 2) {
 						php_error_docref(NULL, E_WARNING,
 							"Redirection target " ZEND_LONG_FMT " not found", Z_LVAL_P(ztarget));
