@@ -385,15 +385,10 @@ static inline HANDLE dup_fd_as_handle(int fd)
 # define close_descriptor(fd)	close(fd)
 #endif
 
-/* possible values of php_proc_open_descriptor_item.mode */
-#define DESC_PIPE		1
-#define DESC_FILE		2
-#define DESC_REDIRECT	3
-
 struct php_proc_open_descriptor_item {
 	int index;                                 /* desired FD number in child process */
+	int is_pipe;
 	php_file_descriptor_t parentend, childend; /* FDs for pipes in parent/child */
-	int mode;                                  /* mode for proc_open code */
 	int mode_flags;                            /* mode flags for opening FDs */
 };
 /* }}} */
@@ -560,7 +555,6 @@ static int set_proc_descriptor_to_blackhole(struct php_proc_open_descriptor_item
 		return FAILURE;
 	}
 #endif
-	desc->mode = DESC_FILE;
 	return SUCCESS;
 }
 
@@ -573,7 +567,7 @@ static int set_proc_descriptor_to_pipe(struct php_proc_open_descriptor_item *des
 		return FAILURE;
 	}
 
-	desc->mode = DESC_PIPE;
+	desc->is_pipe = 1;
 
 	if (strncmp(Z_STRVAL_P(zmode), "w", 1) != 0) {
 		desc->parentend = newpipe[1];
@@ -611,8 +605,6 @@ static int set_proc_descriptor_to_file(struct php_proc_open_descriptor_item *des
 	if (php_stream_cast(stream, PHP_STREAM_CAST_RELEASE|PHP_STREAM_AS_FD, (void **)&fd, REPORT_ERRORS) == FAILURE) {
 		return FAILURE;
 	}
-
-	desc->mode = DESC_FILE;
 
 #ifdef PHP_WIN32
 	desc->childend = dup_fd_as_handle((int)fd);
@@ -798,8 +790,6 @@ PHP_FUNCTION(proc_open)
 				goto exit_fail;
 			}
 #endif
-			descriptors[ndesc].mode = DESC_FILE;
-
 		} else if (Z_TYPE_P(descitem) != IS_ARRAY) {
 			zend_argument_value_error(2, "must only contain arrays and File-Handles");
 			goto exit_fail;
@@ -912,7 +902,6 @@ PHP_FUNCTION(proc_open)
 					goto exit_fail;
 				}
 #endif
-				descriptors[ndesc].mode = DESC_REDIRECT;
 			} else if (strcmp(Z_STRVAL_P(ztype), "null") == 0) {
 				if (set_proc_descriptor_to_blackhole(&descriptors[ndesc]) == FAILURE) {
 					goto exit_fail;
@@ -935,7 +924,7 @@ PHP_FUNCTION(proc_open)
 						goto exit_fail;
 					}
 				}
-				descriptors[ndesc].mode = DESC_PIPE;
+				descriptors[ndesc].is_pipe = 1;
 				descriptors[ndesc].childend = dup(slave_pty);
 				descriptors[ndesc].parentend = dup(dev_ptmx);
 				descriptors[ndesc].mode_flags = O_RDWR;
@@ -1059,7 +1048,7 @@ PHP_FUNCTION(proc_open)
 		 * dup new descriptors into required descriptors and close the original
 		 * cruft */
 		for (i = 0; i < ndesc; i++) {
-			if (descriptors[i].mode == DESC_PIPE) {
+			if (descriptors[i].is_pipe) {
 				close(descriptors[i].parentend);
 			}
 			if (dup2(descriptors[i].childend, descriptors[i].index) < 0) {
@@ -1133,7 +1122,7 @@ PHP_FUNCTION(proc_open)
 
 		close_descriptor(descriptors[i].childend);
 
-		if (descriptors[i].mode == DESC_PIPE) {
+		if (descriptors[i].is_pipe) {
 			switch (descriptors[i].mode_flags) {
 #ifdef PHP_WIN32
 				case O_WRONLY|O_BINARY:
