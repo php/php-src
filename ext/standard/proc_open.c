@@ -464,6 +464,27 @@ static char *create_win_command_from_args(HashTable *args) {
 }
 #endif
 
+static int set_proc_descriptor_to_blackhole(struct php_proc_open_descriptor_item *desc)
+{
+#ifdef PHP_WIN32
+	desc->childend = CreateFileA(
+		"nul", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
+		NULL, OPEN_EXISTING, 0, NULL);
+	if (desc->childend == NULL) {
+		php_error_docref(NULL, E_WARNING, "Failed to open nul");
+		return FAILURE;
+	}
+#else
+	desc->childend = open("/dev/null", O_RDWR);
+	if (desc->childend < 0) {
+		php_error_docref(NULL, E_WARNING, "Failed to open /dev/null - %s", strerror(errno));
+		return FAILURE;
+	}
+#endif
+	desc->mode = DESC_FILE;
+	return SUCCESS;
+}
+
 /* {{{ proto resource|false proc_open(string|array command, array descriptorspec, array &pipes [, string cwd [, array env [, array other_options]]])
    Run a process with more control over it's file descriptors */
 PHP_FUNCTION(proc_open)
@@ -818,23 +839,9 @@ PHP_FUNCTION(proc_open)
 #endif
 				descriptors[ndesc].mode = DESC_REDIRECT;
 			} else if (strcmp(Z_STRVAL_P(ztype), "null") == 0) {
-#ifndef PHP_WIN32
-				descriptors[ndesc].childend = open("/dev/null", O_RDWR);
-				if (descriptors[ndesc].childend < 0) {
-					php_error_docref(NULL, E_WARNING,
-						"Failed to open /dev/null - %s", strerror(errno));
+				if (set_proc_descriptor_to_blackhole(&descriptors[ndesc]) == FAILURE) {
 					goto exit_fail;
 				}
-#else
-				descriptors[ndesc].childend = CreateFileA(
-					"nul", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
-					NULL, OPEN_EXISTING, 0, NULL);
-				if (descriptors[ndesc].childend == NULL) {
-					php_error_docref(NULL, E_WARNING, "Failed to open nul");
-					goto exit_fail;
-				}
-#endif
-				descriptors[ndesc].mode = DESC_FILE;
 			} else if (strcmp(Z_STRVAL_P(ztype), "pty") == 0) {
 #if PHP_CAN_DO_PTS
 				if (dev_ptmx == -1) {
