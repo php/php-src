@@ -621,6 +621,25 @@ static int set_proc_descriptor_to_file(struct php_proc_open_descriptor_item *des
 	return SUCCESS;
 }
 
+static int dup_proc_descriptor(php_file_descriptor_t from, php_file_descriptor_t *to, zend_ulong nindex)
+{
+#ifdef PHP_WIN32
+	*to = dup_handle(from, TRUE, FALSE);
+	if (*to == NULL) {
+		php_error_docref(NULL, E_WARNING, "Failed to dup() for descriptor " ZEND_LONG_FMT, nindex);
+		return FAILURE;
+	}
+#else
+	*to = dup(from);
+	if (*to < 0) {
+		php_error_docref(NULL, E_WARNING,
+			"Failed to dup() for descriptor " ZEND_LONG_FMT " - %s", nindex, strerror(errno));
+		return FAILURE;
+	}
+#endif
+	return SUCCESS;
+}
+
 static int close_parent_ends_of_pipes_in_child(struct php_proc_open_descriptor_item *descriptors, int ndesc)
 {
 	/* we are running in child process
@@ -907,22 +926,9 @@ PHP_FUNCTION(proc_open)
 #endif
 				}
 
-#ifdef PHP_WIN32
-				descriptors[ndesc].childend = dup_handle(childend, TRUE, FALSE);
-				if (descriptors[ndesc].childend == NULL) {
-					php_error_docref(NULL, E_WARNING,
-						"Failed to dup() for descriptor " ZEND_LONG_FMT, nindex);
+				if (dup_proc_descriptor(childend, &descriptors[ndesc].childend, nindex) == FAILURE) {
 					goto exit_fail;
 				}
-#else
-				descriptors[ndesc].childend = dup(childend);
-				if (descriptors[ndesc].childend < 0) {
-					php_error_docref(NULL, E_WARNING,
-						"Failed to dup() for descriptor " ZEND_LONG_FMT " - %s",
-						nindex, strerror(errno));
-					goto exit_fail;
-				}
-#endif
 			} else if (strcmp(Z_STRVAL_P(ztype), "null") == 0) {
 				if (set_proc_descriptor_to_blackhole(&descriptors[ndesc]) == FAILURE) {
 					goto exit_fail;
