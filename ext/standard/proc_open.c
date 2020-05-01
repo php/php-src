@@ -569,6 +569,15 @@ static int set_proc_descriptor_to_pipe(struct php_proc_open_descriptor_item *des
 	return SUCCESS;
 }
 
+static void close_all_descriptors(struct php_proc_open_descriptor_item *descriptors, int ndesc)
+{
+	for (int i = 0; i < ndesc; i++) {
+		close_descriptor(descriptors[i].childend);
+		if (descriptors[i].parentend)
+			close_descriptor(descriptors[i].parentend);
+	}
+}
+
 static void efree_argv(char **argv)
 {
 	if (argv) {
@@ -996,14 +1005,7 @@ PHP_FUNCTION(proc_open)
 
 	if (FALSE == newprocok) {
 		DWORD dw = GetLastError();
-
-		/* clean up all the descriptors */
-		for (i = 0; i < ndesc; i++) {
-			CloseHandle(descriptors[i].childend);
-			if (descriptors[i].parentend) {
-				CloseHandle(descriptors[i].parentend);
-			}
-		}
+		close_all_descriptors(descriptors, ndesc);
 		php_error_docref(NULL, E_WARNING, "CreateProcess failed, error code - %u", dw);
 		goto exit_fail;
 	}
@@ -1076,16 +1078,8 @@ PHP_FUNCTION(proc_open)
 		_exit(127);
 	} else if (child < 0) {
 		/* failed to fork() */
-
-		/* clean up all the descriptors */
-		for (i = 0; i < ndesc; i++) {
-			close(descriptors[i].childend);
-			if (descriptors[i].parentend)
-				close(descriptors[i].parentend);
-		}
-
+		close_all_descriptors(descriptors, ndesc);
 		php_error_docref(NULL, E_WARNING, "Fork failed - %s", strerror(errno));
-
 		goto exit_fail;
 	}
 #else
