@@ -538,6 +538,19 @@ static struct php_proc_open_descriptor_item* alloc_descriptor_array(zval *descri
 	return ecalloc(sizeof(struct php_proc_open_descriptor_item), ndescriptors);
 }
 
+static int get_string_parameter(zval **dest, zval *array, int index, char *param_name)
+{
+	if ((*dest = zend_hash_index_find(Z_ARRVAL_P(array), index)) == NULL) {
+		zend_value_error("Missing %s", param_name);
+		return FAILURE;
+	}
+	if (!try_convert_to_string(*dest)) {
+		return FAILURE;
+	}
+
+	return SUCCESS;
+}
+
 static int set_proc_descriptor_to_blackhole(struct php_proc_open_descriptor_item *desc)
 {
 #ifdef PHP_WIN32
@@ -831,26 +844,13 @@ PHP_FUNCTION(proc_open)
 		} else if (Z_TYPE_P(descitem) != IS_ARRAY) {
 			zend_argument_value_error(2, "must only contain arrays and File-Handles");
 			goto exit_fail;
-		} else {
-
-			if ((ztype = zend_hash_index_find(Z_ARRVAL_P(descitem), 0)) != NULL) {
-				if (!try_convert_to_string(ztype)) {
-					goto exit_fail;
-				}
-			} else {
-				zend_value_error("Missing handle qualifier in array");
+		} else if (get_string_parameter(&ztype, descitem, 0, "handle qualifier") == FAILURE) {
 				goto exit_fail;
-			}
-
+		} else {
 			if (strcmp(Z_STRVAL_P(ztype), "pipe") == 0) {
 				zval *zmode;
 
-				if ((zmode = zend_hash_index_find(Z_ARRVAL_P(descitem), 1)) != NULL) {
-					if (!try_convert_to_string(zmode)) {
-						goto exit_fail;
-					}
-				} else {
-					zend_value_error("Missing mode parameter for 'pipe'");
+				if (get_string_parameter(&zmode, descitem, 1, "mode parameter for 'pipe'") == FAILURE) {
 					goto exit_fail;
 				}
 
@@ -860,21 +860,10 @@ PHP_FUNCTION(proc_open)
 			} else if (strcmp(Z_STRVAL_P(ztype), "file") == 0) {
 				zval *zfile, *zmode;
 
-				if ((zfile = zend_hash_index_find(Z_ARRVAL_P(descitem), 1)) != NULL) {
-					if (!try_convert_to_string(zfile)) {
-						goto exit_fail;
-					}
-				} else {
-					zend_value_error("Missing file name parameter for 'file'");
+				if (get_string_parameter(&zfile, descitem, 1, "file name parameter for 'file'") == FAILURE) {
 					goto exit_fail;
 				}
-
-				if ((zmode = zend_hash_index_find(Z_ARRVAL_P(descitem), 2)) != NULL) {
-					if (!try_convert_to_string(zmode)) {
-						goto exit_fail;
-					}
-				} else {
-					zend_value_error("Missing mode parameter for 'file'");
+				if (get_string_parameter(&zmode, descitem, 2, "mode parameter for 'file'") == FAILURE) {
 					goto exit_fail;
 				}
 
