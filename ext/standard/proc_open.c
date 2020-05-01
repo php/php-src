@@ -463,6 +463,17 @@ static char *create_win_command_from_args(HashTable *args)
 	smart_string_0(&str);
 	return str.c;
 }
+
+static int get_option(zval *other_options, char *option_name)
+{
+	zval *item = zend_hash_str_find(Z_ARRVAL_P(other_options), option_name, strlen(option_name));
+	if (item != NULL) {
+		if (Z_TYPE_P(item) == IS_TRUE || ((Z_TYPE_P(item) == IS_LONG) && Z_LVAL_P(item))) {
+			return 1;
+		}
+	}
+	return 0;
+}
 #endif
 
 static int set_proc_descriptor_to_blackhole(struct php_proc_open_descriptor_item *desc)
@@ -598,41 +609,12 @@ PHP_FUNCTION(proc_open)
 
 #ifdef PHP_WIN32
 	if (other_options) {
-		zval *item = zend_hash_str_find(Z_ARRVAL_P(other_options), "suppress_errors", sizeof("suppress_errors") - 1);
-		if (item != NULL) {
-			if (Z_TYPE_P(item) == IS_TRUE || ((Z_TYPE_P(item) == IS_LONG) && Z_LVAL_P(item))) {
-				suppress_errors = 1;
-			}
-		}
-
+		suppress_errors      = get_option(other_options, "suppress_errors");
 		/* TODO Deprecate in favor of array command? */
-		item = zend_hash_str_find(Z_ARRVAL_P(other_options), "bypass_shell", sizeof("bypass_shell") - 1);
-		if (item != NULL) {
-			if (Z_TYPE_P(item) == IS_TRUE || ((Z_TYPE_P(item) == IS_LONG) && Z_LVAL_P(item))) {
-				bypass_shell = 1;
-			}
-		}
-
-		item = zend_hash_str_find(Z_ARRVAL_P(other_options), "blocking_pipes", sizeof("blocking_pipes") - 1);
-		if (item != NULL) {
-			if (Z_TYPE_P(item) == IS_TRUE || ((Z_TYPE_P(item) == IS_LONG) && Z_LVAL_P(item))) {
-				blocking_pipes = 1;
-			}
-		}
-
-		item = zend_hash_str_find(Z_ARRVAL_P(other_options), "create_process_group", sizeof("create_process_group") - 1);
-		if (item != NULL) {
-			if (Z_TYPE_P(item) == IS_TRUE || ((Z_TYPE_P(item) == IS_LONG) && Z_LVAL_P(item))) {
-				create_process_group = 1;
-			}
-		}
-
-		item = zend_hash_str_find(Z_ARRVAL_P(other_options), "create_new_console", sizeof("create_new_console") - 1);
-		if (item != NULL) {
-			if (Z_TYPE_P(item) == IS_TRUE || ((Z_TYPE_P(item) == IS_LONG) && Z_LVAL_P(item))) {
-				create_new_console = 1;
-			}
-		}
+		bypass_shell         = bypass_shell || get_option(other_options, "bypass_shell");
+		blocking_pipes       = get_option(other_options, "blocking_pipes");
+		create_process_group = get_option(other_options, "create_process_group");
+		create_new_console   = get_option(other_options, "create_new_console");
 	}
 #endif
 
