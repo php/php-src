@@ -2,23 +2,17 @@
 
 /** @generate-function-entries */
 
+final class Sysvsem
+{
+}
+
 /**
  * @todo use bool for $auto_release
- * @return resource|false
  */
-function sem_get(int $key, int $max_acquire = 1, int $perm = 0666, int $auto_release = 1) {}
+function sem_get(int $key, int $max_acquire = 1, int $perm = 0666, int $auto_release = 1): Sysvsem|false {}
 
-/**
- * @param resource $sem_identifier
- */
-function sem_acquire($sem_identifier, bool $nowait = false): bool {}
+function sem_acquire(Sysvsem $sem_identifier, bool $nowait = false): bool {}
 
-/**
- * @param resource $sem_identifier
- */
-function sem_release($sem_identifier): bool {}
+function sem_release(Sysvsem $sem_identifier): bool {}
 
-/**
- * @param resource $sem_identifier
- */
-function sem_remove($sem_identifier): bool {}
+function sem_remove(Sysvsem $sem_identifier): bool {}
