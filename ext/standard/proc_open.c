@@ -511,6 +511,38 @@ static int set_proc_descriptor_to_blackhole(struct php_proc_open_descriptor_item
 	return SUCCESS;
 }
 
+static int set_proc_descriptor_to_pipe(struct php_proc_open_descriptor_item *desc, zval *zmode)
+{
+	php_file_descriptor_t newpipe[2];
+
+	if (pipe(newpipe)) {
+		php_error_docref(NULL, E_WARNING, "Unable to create pipe %s", strerror(errno));
+		return FAILURE;
+	}
+
+	desc->mode = DESC_PIPE;
+
+	if (strncmp(Z_STRVAL_P(zmode), "w", 1) != 0) {
+		desc->parentend = newpipe[1];
+		desc->childend = newpipe[0];
+		desc->mode_flags = O_WRONLY;
+	} else {
+		desc->parentend = newpipe[0];
+		desc->childend = newpipe[1];
+		desc->mode_flags = O_RDONLY;
+	}
+
+#ifdef PHP_WIN32
+	/* don't let the child inherit the parent side of the pipe */
+	desc->parentend = dup_handle(desc->parentend, FALSE, TRUE);
+
+	if (Z_STRLEN_P(zmode) >= 2 && Z_STRVAL_P(zmode)[1] == 'b')
+		desc->mode_flags |= O_BINARY;
+#endif
+
+	return SUCCESS;
+}
+
 static void efree_argv(char **argv)
 {
 	if (argv) {
@@ -688,7 +720,6 @@ PHP_FUNCTION(proc_open)
 			}
 
 			if (strcmp(Z_STRVAL_P(ztype), "pipe") == 0) {
-				php_file_descriptor_t newpipe[2];
 				zval *zmode;
 
 				if ((zmode = zend_hash_index_find(Z_ARRVAL_P(descitem), 1)) != NULL) {
@@ -700,30 +731,9 @@ PHP_FUNCTION(proc_open)
 					goto exit_fail;
 				}
 
-				descriptors[ndesc].mode = DESC_PIPE;
-
-				if (0 != pipe(newpipe)) {
-					php_error_docref(NULL, E_WARNING, "Unable to create pipe %s", strerror(errno));
+				if (set_proc_descriptor_to_pipe(&descriptors[ndesc], zmode) == FAILURE) {
 					goto exit_fail;
 				}
-
-				if (strncmp(Z_STRVAL_P(zmode), "w", 1) != 0) {
-					descriptors[ndesc].parentend = newpipe[1];
-					descriptors[ndesc].childend = newpipe[0];
-					descriptors[ndesc].mode_flags = O_WRONLY;
-				} else {
-					descriptors[ndesc].parentend = newpipe[0];
-					descriptors[ndesc].childend = newpipe[1];
-					descriptors[ndesc].mode_flags = O_RDONLY;
-				}
-#ifdef PHP_WIN32
-				/* don't let the child inherit the parent side of the pipe */
-				descriptors[ndesc].parentend = dup_handle(descriptors[ndesc].parentend, FALSE, TRUE);
-
-				if (Z_STRLEN_P(zmode) >= 2 && Z_STRVAL_P(zmode)[1] == 'b')
-					descriptors[ndesc].mode_flags |= O_BINARY;
-#endif
-
 			} else if (strcmp(Z_STRVAL_P(ztype), "file") == 0) {
 				zval *zfile, *zmode;
 				php_socket_t fd;
