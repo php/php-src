@@ -6,13 +6,13 @@ function cal_days_in_month(int $calendar, int $month, int $year): int {}
 
 function cal_from_jd(int $jd, int $calendar): array {}
 
-function cal_info(?int $calendar = UNKNOWN): array {}
+function cal_info(int $calendar = -1): array {}
 
 function cal_to_jd(int $calendar, int $month, int $day, int $year): int {}
 
-function easter_date(int $year = UNKNOWN, int $method = CAL_EASTER_DEFAULT): int {}
+function easter_date(?int $year = null, int $method = CAL_EASTER_DEFAULT): int {}
 
-function easter_days(int $year = UNKNOWN, int $method = CAL_EASTER_DEFAULT): int {}
+function easter_days(?int $year = null, int $method = CAL_EASTER_DEFAULT): int {}
 
 function frenchtojd(int $month, int $day, int $year): int {}
 
@@ -36,4 +36,4 @@ function jewishtojd(int $month, int $day, int $year): int {}
 
 function juliantojd(int $month, int $day, int $year): int {}
 
-function unixtojd(int $timestamp = UNKNOWN): int|false {}
+function unixtojd(?int $timestamp = null): int|false {}

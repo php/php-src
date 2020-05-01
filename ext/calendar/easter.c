@@ -23,15 +23,20 @@
 
 static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, zend_long gm)
 {
-
 	/* based on code by Simon Kershaw, <webmaster@ely.anglican.org> */
 
 	struct tm te;
 	zend_long year, golden, solar, lunar, pfm, dom, tmp, easter, result;
 	zend_long method = CAL_EASTER_DEFAULT;
+	zend_bool year_is_null = 1;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(),
+		"|l!l", &year, &year_is_null, &method) == FAILURE) {
+			RETURN_THROWS();
+	}
 
 	/* Default to the current year if year parameter is not given */
-	{
+	if (year_is_null) {
 		time_t a;
 		struct tm b, *res;
 		time(&a);
@@ -41,11 +46,6 @@ static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, zend_long gm)
 		} else {
 			year = 1900 + b.tm_year;
 		}
-	}
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(),
-		"|ll", &year, &method) == FAILURE) {
-			RETURN_THROWS();
 	}
 
 	if (gm && (year<1970 || year>2037)) {				/* out of range for timestamps */

@@ -25,14 +25,15 @@
    Convert UNIX timestamp to Julian Day */
 PHP_FUNCTION(unixtojd)
 {
-	time_t ts = 0;
+	time_t ts;
+	zend_bool ts_is_null = 1;
 	struct tm *ta, tmbuf;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &ts) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l!", &ts, &ts_is_null) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	if (!ts) {
+	if (ts_is_null) {
 		ts = time(NULL);
 	} else if (ts < 0) {
 		zend_argument_value_error(1, "must be greater than or equal to 0");
