@@ -1017,13 +1017,6 @@ PHP_FUNCTION(proc_open)
 	newprocok = CreateProcessW(NULL, cmdw, &php_proc_open_security, &php_proc_open_security,
 		TRUE, dwCreateFlags, envpw, cwdw, &si, &pi);
 
-	free(cwdw);
-	cwdw = NULL;
-	free(cmdw);
-	cmdw = NULL;
-	free(envpw);
-	envpw = NULL;
-
 	if (suppress_errors) {
 		SetErrorMode(old_error_mode);
 	}
@@ -1185,7 +1178,11 @@ PHP_FUNCTION(proc_open)
 		}
 	}
 
-#ifndef PHP_WIN32
+#ifdef PHP_WIN32
+	free(cwdw);
+	free(cmdw);
+	free(envpw);
+#else
 	efree_argv(argv);
 #endif
 
