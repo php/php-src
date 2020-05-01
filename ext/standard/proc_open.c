@@ -381,7 +381,6 @@ static inline HANDLE dup_fd_as_handle(int fd)
 #define DESC_PIPE		1
 #define DESC_FILE		2
 #define DESC_REDIRECT	3
-#define DESC_PARENT_MODE_WRITE	8
 
 struct php_proc_open_descriptor_item {
 	int index; 							/* desired fd number in child process */
@@ -715,16 +714,17 @@ PHP_FUNCTION(proc_open)
 				if (strncmp(Z_STRVAL_P(zmode), "w", 1) != 0) {
 					descriptors[ndesc].parentend = newpipe[1];
 					descriptors[ndesc].childend = newpipe[0];
-					descriptors[ndesc].mode |= DESC_PARENT_MODE_WRITE;
+					descriptors[ndesc].mode_flags = O_WRONLY;
 				} else {
 					descriptors[ndesc].parentend = newpipe[0];
 					descriptors[ndesc].childend = newpipe[1];
+					descriptors[ndesc].mode_flags = O_RDONLY;
 				}
 #ifdef PHP_WIN32
 				/* don't let the child inherit the parent side of the pipe */
 				descriptors[ndesc].parentend = dup_handle(descriptors[ndesc].parentend, FALSE, TRUE);
 #endif
-				descriptors[ndesc].mode_flags = descriptors[ndesc].mode & DESC_PARENT_MODE_WRITE ? O_WRONLY : O_RDONLY;
+
 #ifdef PHP_WIN32
 				if (Z_STRLEN_P(zmode) >= 2 && Z_STRVAL_P(zmode)[1] == 'b')
 					descriptors[ndesc].mode_flags |= O_BINARY;
@@ -1035,7 +1035,7 @@ PHP_FUNCTION(proc_open)
 		 * dup new descriptors into required descriptors and close the original
 		 * cruft */
 		for (i = 0; i < ndesc; i++) {
-			switch (descriptors[i].mode & ~DESC_PARENT_MODE_WRITE) {
+			switch (descriptors[i].mode) {
 				case DESC_PIPE:
 					close(descriptors[i].parentend);
 					break;
@@ -1115,7 +1115,7 @@ PHP_FUNCTION(proc_open)
 
 		close_descriptor(descriptors[i].childend);
 
-		switch (descriptors[i].mode & ~DESC_PARENT_MODE_WRITE) {
+		switch (descriptors[i].mode) {
 			case DESC_PIPE:
 				switch(descriptors[i].mode_flags) {
 #ifdef PHP_WIN32
