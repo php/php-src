@@ -301,6 +301,7 @@ ZEND_INI_BEGIN()
 #if ENABLE_FILE_CACHE_FALLBACK
 	STD_PHP_INI_BOOLEAN("opcache.file_cache_fallback"           , "1"   , PHP_INI_SYSTEM, OnUpdateBool,	   accel_directives.file_cache_fallback,           zend_accel_globals, accel_globals)
 #endif
+	STD_PHP_INI_ENTRY("opcache.no_cache"                      , "0"   , PHP_INI_SYSTEM, OnUpdateBool,	   accel_directives.no_cache,                      zend_accel_globals, accel_globals)
 #ifdef HAVE_HUGE_CODE_PAGES
 	STD_PHP_INI_BOOLEAN("opcache.huge_code_pages"             , "0"   , PHP_INI_SYSTEM, OnUpdateBool,      accel_directives.huge_code_pages,               zend_accel_globals, accel_globals)
 #endif
@@ -405,6 +406,10 @@ void zend_accel_override_file_functions(void)
 {
 	zend_function *old_function;
 	if (ZCG(enabled) && accel_startup_ok && ZCG(accel_directives).file_override_enabled) {
+		if (no_cache) {
+			zend_accel_error(ACCEL_LOG_WARNING, "file_override_enabled has no effect when no_cache is set");
+			return;
+		}
 		if (file_cache_only) {
 			zend_accel_error(ACCEL_LOG_WARNING, "file_override_enabled has no effect when file_cache_only is set");
 			return;
@@ -438,7 +443,7 @@ void zend_accel_info(ZEND_MODULE_INFO_FUNC_ARGS)
 {
 	php_info_print_table_start();
 
-	if (ZCG(accelerator_enabled) || file_cache_only) {
+	if ((ZCG(accelerator_enabled) || file_cache_only) && !no_cache) {
 		php_info_print_table_row(2, "Opcode Caching", "Up and Running");
 	} else {
 		php_info_print_table_row(2, "Opcode Caching", "Disabled");
@@ -448,12 +453,12 @@ void zend_accel_info(ZEND_MODULE_INFO_FUNC_ARGS)
 	} else {
 		php_info_print_table_row(2, "Optimization", "Disabled");
 	}
-	if (!file_cache_only) {
+	if (!file_cache_only && !no_cache) {
 		php_info_print_table_row(2, "SHM Cache", "Enabled");
 	} else {
 		php_info_print_table_row(2, "SHM Cache", "Disabled");
 	}
-	if (ZCG(accel_directives).file_cache) {
+	if (ZCG(accel_directives).file_cache && !no_cache) {
 		php_info_print_table_row(2, "File Cache", "Enabled");
 	} else {
 		php_info_print_table_row(2, "File Cache", "Disabled");
@@ -471,7 +476,7 @@ void zend_accel_info(ZEND_MODULE_INFO_FUNC_ARGS)
 #else
 	php_info_print_table_row(2, "JIT", "Not Available");
 #endif
-	if (file_cache_only) {
+	if (file_cache_only || no_cache) {  // TODO test failure mode
 		if (!accel_startup_ok || zps_api_failure_reason) {
 			php_info_print_table_row(2, "Startup Failed", zps_api_failure_reason);
 		} else {
@@ -613,8 +618,15 @@ ZEND_FUNCTION(opcache_get_status)
 	array_init(return_value);
 
 	/* Trivia */
+	/* Whether opcodes get optimized */
+	add_assoc_bool(return_value, "optimizations_enabled", ZCG(enabled) && accel_startup_ok && ZCG(accel_directives).optimization_level);
+	/* Whether the caching is enabled */
 	add_assoc_bool(return_value, "opcache_enabled", ZCG(accelerator_enabled));
 
+	if (no_cache) {
+		add_assoc_bool(return_value, "no_cache", 1);
+		return;
+	}
 	if (ZCG(accel_directives).file_cache) {
 		add_assoc_string(return_value, "file_cache", ZCG(accel_directives).file_cache);
 	}
@@ -784,6 +796,7 @@ ZEND_FUNCTION(opcache_get_configuration)
 #if ENABLE_FILE_CACHE_FALLBACK
 	add_assoc_bool(&directives,   "opcache.file_cache_fallback",           ZCG(accel_directives).file_cache_fallback);
 #endif
+	add_assoc_bool(&directives,   "opcache.no_cache",                      ZCG(accel_directives).no_cache);
 
 	add_assoc_long(&directives,   "opcache.file_update_protection",  ZCG(accel_directives).file_update_protection);
 	add_assoc_long(&directives,   "opcache.opt_debug_level",         ZCG(accel_directives).opt_debug_level);

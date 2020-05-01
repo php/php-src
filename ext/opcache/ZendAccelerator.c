@@ -114,6 +114,7 @@ zend_bool accel_startup_ok = 0;
 static char *zps_failure_reason = NULL;
 char *zps_api_failure_reason = NULL;
 zend_bool file_cache_only = 0;  /* process uses file cache only */
+zend_bool no_cache = 0;  /* process does not use any cache (takes precedence over file_cache_only) */
 #if ENABLE_FILE_CACHE_FALLBACK
 zend_bool fallback_process = 0; /* process uses file cache fallback */
 #endif
@@ -469,7 +470,7 @@ zend_string* ZEND_FASTCALL accel_new_interned_string(zend_string *str)
 	uint32_t     pos, *hash_slot;
 	zend_string *s;
 
-	if (UNEXPECTED(file_cache_only)) {
+	if (UNEXPECTED(file_cache_only || no_cache)) {
 		return str;
 	}
 
@@ -1947,6 +1948,28 @@ zend_op_array *file_cache_compile_file(zend_file_handle *file_handle, int type)
 	return op_array;
 }
 
+// Optimize opcodes without caching the file in shared memory or in disk
+zend_op_array *no_cache_compile_file(zend_file_handle *file_handle, int type)
+{
+	zend_op_array *op_array = NULL;
+	zend_persistent_script *persistent_script;  // not actually persistent with opcache.no_cache.
+
+	if (is_stream_path(file_handle->filename) &&
+	    !is_cacheable_stream_path(file_handle->filename)) {
+		return accelerator_orig_compile_file(file_handle, type);
+	}
+
+	// Take the same code path as if attempting to save a blacklisted script to file cache.
+	persistent_script = opcache_compile_file(file_handle, type, NULL, &op_array);
+	if (persistent_script) {
+		// Attempt to optimize the script before returning it.
+		zend_optimize_script(&persistent_script->script, ZCG(accel_directives).optimization_level, ZCG(accel_directives).opt_debug_level);
+
+		return zend_accel_load_script(persistent_script, /* from_memory */ 0);
+	}
+	return op_array;
+}
+
 int check_persistent_script_access(zend_persistent_script *persistent_script)
 {
     char *phar_path, *ptr;
@@ -1983,11 +2006,19 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		ZCG(cache_opline) = NULL;
 		ZCG(cache_persistent_script) = NULL;
 		if (file_handle->filename
-		 && ZCG(accel_directives).file_cache
 		 && ZCG(enabled) && accel_startup_ok) {
-			return file_cache_compile_file(file_handle, type);
+			if (no_cache) {
+				return no_cache_compile_file(file_handle, type);
+			} else if (ZCG(accel_directives).file_cache) {
+				return file_cache_compile_file(file_handle, type);
+			}
 		}
 		return accelerator_orig_compile_file(file_handle, type);
+	} else if (no_cache) {
+		// TODO: Why is opcache_get_status using accelerator_enabled instead of enabled?
+		ZCG(cache_opline) = NULL;
+		ZCG(cache_persistent_script) = NULL;
+		return no_cache_compile_file(file_handle, type);
 	} else if (file_cache_only) {
 		ZCG(cache_opline) = NULL;
 		ZCG(cache_persistent_script) = NULL;
@@ -2313,7 +2344,7 @@ static int persistent_stream_open_function(const char *filename, zend_file_handl
 /* zend_resolve_path() replacement for PHP 5.3 and above */
 static zend_string* persistent_zend_resolve_path(const char *filename, size_t filename_len)
 {
-	if (!file_cache_only &&
+	if (!file_cache_only && !no_cache &&
 	    ZCG(accelerator_enabled)) {
 
 		/* check if callback is called from include_once or it's a main request */
@@ -2437,7 +2468,7 @@ int accel_activate(INIT_FUNC_ARGS)
 	ZCG(cwd_key_len) = 0;
 	ZCG(cwd_check) = 1;
 
-	if (file_cache_only) {
+	if (file_cache_only || no_cache) {
 		ZCG(accelerator_enabled) = 0;
 		return SUCCESS;
 	}
@@ -2997,7 +3028,8 @@ static int accel_post_startup(void)
 /* End of non-SHM dependent initializations */
 /********************************************/
 	file_cache_only = ZCG(accel_directives).file_cache_only;
-	if (!file_cache_only) {
+	no_cache = ZCG(accel_directives).no_cache;
+	if (!file_cache_only && !no_cache) {
 		size_t shm_size = ZCG(accel_directives).memory_consumption;
 #ifdef HAVE_JIT
 		size_t jit_size = 0;
@@ -3085,7 +3117,7 @@ static int accel_post_startup(void)
 		zend_shared_alloc_unlock();
 
 		SHM_PROTECT();
-	} else if (!ZCG(accel_directives).file_cache) {
+	} else if (file_cache_only && !ZCG(accel_directives).file_cache) {
 		accel_startup_ok = 0;
 		zend_accel_error(ACCEL_LOG_FATAL, "opcache.file_cache_only is set without a proper setting of opcache.file_cache");
 		return SUCCESS;
@@ -3149,7 +3181,7 @@ file_cache_fallback:
 
 	zend_optimizer_startup();
 
-	if (!file_cache_only && ZCG(accel_directives).interned_strings_buffer) {
+	if (!file_cache_only && !no_cache && ZCG(accel_directives).interned_strings_buffer) {
 		accel_use_shm_interned_strings();
 	}
 
@@ -3167,6 +3199,7 @@ void accel_shutdown(void)
 {
 	zend_ini_entry *ini_entry;
 	zend_bool _file_cache_only = 0;
+	zend_bool _no_cache = 0;
 
 #ifdef HAVE_JIT
 	zend_jit_shutdown();
@@ -3188,6 +3221,7 @@ void accel_shutdown(void)
 	}
 
 	_file_cache_only = file_cache_only;
+	_no_cache = no_cache;
 
 	accel_reset_pcre_cache();
 
@@ -3195,8 +3229,8 @@ void accel_shutdown(void)
 	ts_free_id(accel_globals_id);
 #endif
 
-	if (!_file_cache_only) {
-		/* Delay SHM detach */
+	if (!_file_cache_only && !_no_cache) {
+		/* Delay SHM detach - this only needs to be done if SHM is used */
 		orig_post_shutdown_cb = zend_post_shutdown_cb;
 		zend_post_shutdown_cb = accel_post_shutdown;
 	}
@@ -4786,6 +4820,10 @@ static int accel_finish_startup(void)
 	}
 
 	if (ZCG(accel_directives).preload && *ZCG(accel_directives).preload) {
+		if (no_cache) {
+			zend_accel_error(ACCEL_LOG_ERROR, "Preloading cannot be combined with no_cache");
+			return FAILURE;
+		}
 #ifdef ZEND_WIN32
 		zend_accel_error(ACCEL_LOG_ERROR, "Preloading is not supported on Windows");
 		return FAILURE;
@@ -4809,6 +4847,10 @@ static int accel_finish_startup(void)
 		zend_bool old_reset_signals = SIGG(reset);
 #endif
 
+		if (UNEXPECTED(no_cache)) {
+			zend_accel_error(ACCEL_LOG_WARNING, "Preloading doesn't work in \"no_cache\" mode");
+			return SUCCESS;
+		}
 		if (UNEXPECTED(file_cache_only)) {
 			zend_accel_error(ACCEL_LOG_WARNING, "Preloading doesn't work in \"file_cache_only\" mode");
 			return SUCCESS;
