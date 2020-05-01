@@ -192,14 +192,12 @@ PHP_FUNCTION(cal_info)
 		return;
 	}
 
-
-	if (cal != -1 && (cal < 0 || cal >= CAL_NUM_CALS)) {
+	if (cal < 0 || cal >= CAL_NUM_CALS) {
 		zend_argument_value_error(1, "must be a valid calendar ID");
 		RETURN_THROWS();
 	}
 
 	_php_cal_info(cal, return_value);
-
 }
 /* }}} */
 
