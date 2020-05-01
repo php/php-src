@@ -2093,8 +2093,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_is_double arginfo_boolval
 
-#define arginfo_is_real arginfo_boolval
-
 #define arginfo_is_numeric arginfo_boolval
 
 #define arginfo_is_string arginfo_boolval
@@ -3454,7 +3452,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FALIAS(is_long, is_int, arginfo_is_long)
 	ZEND_FE(is_float, arginfo_is_float)
 	ZEND_FALIAS(is_double, is_float, arginfo_is_double)
-	ZEND_FALIAS(is_real, is_float, arginfo_is_real)
 	ZEND_FE(is_numeric, arginfo_is_numeric)
 	ZEND_FE(is_string, arginfo_is_string)
 	ZEND_FE(is_array, arginfo_is_array)
