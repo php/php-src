@@ -17,9 +17,11 @@
 #ifdef PHP_WIN32
 typedef HANDLE php_file_descriptor_t;
 typedef DWORD php_process_id_t;
+# define PHP_INVALID_FD INVALID_HANDLE_VALUE
 #else
 typedef int php_file_descriptor_t;
 typedef pid_t php_process_id_t;
+# define PHP_INVALID_FD (-1)
 #endif
 
 /* Environment block under win32 is a NUL terminated sequence of NUL terminated

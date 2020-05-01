@@ -14,16 +14,10 @@
    +----------------------------------------------------------------------+
  */
 
-#if 0 && (defined(__linux__) || defined(sun) || defined(__IRIX__))
-# define _BSD_SOURCE 		/* linux wants this when XOPEN mode is on */
-# define _BSD_COMPAT		/* irix: uint32_t */
-# define _XOPEN_SOURCE 500  /* turn on Unix98 */
-# define __EXTENSIONS__	1	/* Solaris: uint32_t */
-#endif
-
 #include "php.h"
 #include <stdio.h>
 #include <ctype.h>
+#include <signal.h>
 #include "php_string.h"
 #include "ext/standard/head.h"
 #include "ext/standard/basic_functions.h"
@@ -37,11 +31,7 @@
 #if HAVE_SYS_WAIT_H
 #include <sys/wait.h>
 #endif
-#include <signal.h>
 
-#if HAVE_SYS_STAT_H
-#include <sys/stat.h>
-#endif
 #if HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
@@ -164,7 +154,6 @@ static void _php_free_envp(php_process_env_t env)
 static void proc_open_rsrc_dtor(zend_resource *rsrc)
 {
 	struct php_process_handle *proc = (struct php_process_handle*)rsrc->ptr;
-	int i;
 #ifdef PHP_WIN32
 	DWORD wstatus;
 #elif HAVE_SYS_WAIT_H
@@ -174,11 +163,11 @@ static void proc_open_rsrc_dtor(zend_resource *rsrc)
 #endif
 
 	/* Close all handles to avoid a deadlock */
-	for (i = 0; i < proc->npipes; i++) {
-		if (proc->pipes[i] != 0) {
+	for (int i = 0; i < proc->npipes; i++) {
+		if (proc->pipes[i] != NULL) {
 			GC_DELREF(proc->pipes[i]);
 			zend_list_close(proc->pipes[i]);
-			proc->pipes[i] = 0;
+			proc->pipes[i] = NULL;
 		}
 	}
 
@@ -357,7 +346,15 @@ PHP_FUNCTION(proc_get_status)
 
 /* {{{ handy definitions for portability/readability */
 #ifdef PHP_WIN32
-# define pipe(pair)		(CreatePipe(&pair[0], &pair[1], &security, 0) ? 0 : -1)
+
+/* we use this to allow child processes to inherit handles */
+SECURITY_ATTRIBUTES php_proc_open_security = {
+	.nLength = sizeof(SECURITY_ATTRIBUTES),
+	.lpSecurityDescriptor = NULL,
+	.bInheritHandle = TRUE
+};
+
+# define pipe(pair)		(CreatePipe(&pair[0], &pair[1], &php_proc_open_security, 0) ? 0 : -1)
 
 # define COMSPEC_NT	"cmd.exe"
 
@@ -381,16 +378,11 @@ static inline HANDLE dup_fd_as_handle(int fd)
 # define close_descriptor(fd)	close(fd)
 #endif
 
-#define DESC_PIPE		1
-#define DESC_FILE		2
-#define DESC_REDIRECT	3
-#define DESC_PARENT_MODE_WRITE	8
-
 struct php_proc_open_descriptor_item {
-	int index; 							/* desired fd number in child process */
-	php_file_descriptor_t parentend, childend;	/* fds for pipes in parent/child */
-	int mode;							/* mode for proc_open code */
-	int mode_flags;						/* mode flags for opening fds */
+	int index;                                 /* desired FD number in child process */
+	int is_pipe;
+	php_file_descriptor_t parentend, childend; /* FDs for pipes in parent/child */
+	int mode_flags;                            /* mode flags for opening FDs */
 };
 /* }}} */
 
@@ -410,15 +402,16 @@ static zend_string *get_valid_arg_string(zval *zv, int elem_num) {
 }
 
 #ifdef PHP_WIN32
-static void append_backslashes(smart_string *str, size_t num_bs) {
-	size_t i;
-	for (i = 0; i < num_bs; i++) {
+static void append_backslashes(smart_string *str, size_t num_bs)
+{
+	for (size_t i = 0; i < num_bs; i++) {
 		smart_string_appendc(str, '\\');
 	}
 }
 
 /* See https://docs.microsoft.com/en-us/cpp/cpp/parsing-cpp-command-line-arguments */
-static void append_win_escaped_arg(smart_string *str, char *arg) {
+static void append_win_escaped_arg(smart_string *str, char *arg)
+{
 	char c;
 	size_t num_bs = 0;
 	smart_string_appendc(str, '"');
@@ -440,7 +433,8 @@ static void append_win_escaped_arg(smart_string *str, char *arg) {
 	smart_string_appendc(str, '"');
 }
 
-static char *create_win_command_from_args(HashTable *args) {
+static char *create_win_command_from_args(HashTable *args)
+{
 	smart_string str = {0};
 	zval *arg_zv;
 	zend_bool is_prog_name = 1;
@@ -465,7 +459,298 @@ static char *create_win_command_from_args(HashTable *args) {
 	smart_string_0(&str);
 	return str.c;
 }
+
+static int get_option(zval *other_options, char *option_name)
+{
+	zval *item = zend_hash_str_find_deref(Z_ARRVAL_P(other_options), option_name, strlen(option_name));
+	if (item != NULL) {
+		if (Z_TYPE_P(item) == IS_TRUE || ((Z_TYPE_P(item) == IS_LONG) && Z_LVAL_P(item))) {
+			return 1;
+		}
+	}
+	return 0;
+}
+
+static void init_startup_info(STARTUPINFOW *si, struct php_proc_open_descriptor_item *descriptors, int ndesc)
+{
+	memset(si, 0, sizeof(STARTUPINFOW));
+	si->cb = sizeof(STARTUPINFOW);
+	si->dwFlags = STARTF_USESTDHANDLES;
+
+	si->hStdInput  = GetStdHandle(STD_INPUT_HANDLE);
+	si->hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+	si->hStdError  = GetStdHandle(STD_ERROR_HANDLE);
+
+	/* redirect stdin/stdout/stderr if requested */
+	for (int i = 0; i < ndesc; i++) {
+		switch (descriptors[i].index) {
+			case 0:
+				si->hStdInput = descriptors[i].childend;
+				break;
+			case 1:
+				si->hStdOutput = descriptors[i].childend;
+				break;
+			case 2:
+				si->hStdError = descriptors[i].childend;
+				break;
+		}
+	}
+}
+
+static void init_process_info(PROCESS_INFORMATION *pi)
+{
+	memset(&pi, 0, sizeof(pi));
+}
+
+static int convert_command_to_use_shell(wchar_t **cmdw, size_t cmdw_len)
+{
+	size_t len = sizeof(COMSPEC_NT) + sizeof(" /s /c ") + cmdw_len + 3;
+	wchar_t *cmdw_shell = (wchar_t *)malloc(len * sizeof(wchar_t));
+
+	if (cmdw_shell == NULL) {
+		php_error_docref(NULL, E_WARNING, "Command conversion failed");
+		return FAILURE;
+	}
+
+	if (_snwprintf(cmdw_shell, len, L"%hs /s /c \"%s\"", COMSPEC_NT, *cmdw) == -1) {
+		free(cmdw_shell);
+		php_error_docref(NULL, E_WARNING, "Command conversion failed");
+		return FAILURE;
+	}
+
+	free(*cmdw);
+	*cmdw = cmdw_shell;
+
+	return SUCCESS;
+}
 #endif
+
+static char* get_command_from_array(zval *array, char ***argv, int num_elems)
+{
+	zval *arg_zv;
+	char *command = NULL;
+	int i = 0;
+
+	*argv = safe_emalloc(sizeof(char *), num_elems + 1, 0);
+
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(array), arg_zv) {
+		zend_string *arg_str = get_valid_arg_string(arg_zv, i + 1);
+		if (!arg_str) {
+			/* terminate argv with NULL so exit_fail code knows how many entries to free */
+			(*argv)[i] = NULL;
+			if (command != NULL) {
+				efree(command);
+			}
+			return NULL;
+		}
+
+		if (i == 0) {
+			command = estrdup(ZSTR_VAL(arg_str));
+		}
+
+		(*argv)[i++] = estrdup(ZSTR_VAL(arg_str));
+		zend_string_release(arg_str);
+	} ZEND_HASH_FOREACH_END();
+
+	(*argv)[i] = NULL;
+	return command;
+}
+
+static struct php_proc_open_descriptor_item* alloc_descriptor_array(zval *descriptorspec)
+{
+	int ndescriptors = zend_hash_num_elements(Z_ARRVAL_P(descriptorspec));
+	return ecalloc(sizeof(struct php_proc_open_descriptor_item), ndescriptors);
+}
+
+static zend_string* get_string_parameter(zval *array, int index, char *param_name)
+{
+	zval *array_item;
+	if ((array_item = zend_hash_index_find(Z_ARRVAL_P(array), index)) == NULL) {
+		zend_value_error("Missing %s", param_name);
+		return NULL;
+	}
+	return zval_try_get_string(array_item);
+}
+
+static int set_proc_descriptor_to_blackhole(struct php_proc_open_descriptor_item *desc)
+{
+#ifdef PHP_WIN32
+	desc->childend = CreateFileA(
+		"nul", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
+		NULL, OPEN_EXISTING, 0, NULL);
+	if (desc->childend == NULL) {
+		php_error_docref(NULL, E_WARNING, "Failed to open nul");
+		return FAILURE;
+	}
+#else
+	desc->childend = open("/dev/null", O_RDWR);
+	if (desc->childend < 0) {
+		php_error_docref(NULL, E_WARNING, "Failed to open /dev/null - %s", strerror(errno));
+		return FAILURE;
+	}
+#endif
+	return SUCCESS;
+}
+
+static int set_proc_descriptor_to_pipe(struct php_proc_open_descriptor_item *desc, zend_string *zmode)
+{
+	php_file_descriptor_t newpipe[2];
+
+	if (pipe(newpipe)) {
+		php_error_docref(NULL, E_WARNING, "Unable to create pipe %s", strerror(errno));
+		return FAILURE;
+	}
+
+	desc->is_pipe = 1;
+
+	if (strncmp(ZSTR_VAL(zmode), "w", 1) != 0) {
+		desc->parentend = newpipe[1];
+		desc->childend = newpipe[0];
+		desc->mode_flags = O_WRONLY;
+	} else {
+		desc->parentend = newpipe[0];
+		desc->childend = newpipe[1];
+		desc->mode_flags = O_RDONLY;
+	}
+
+#ifdef PHP_WIN32
+	/* don't let the child inherit the parent side of the pipe */
+	desc->parentend = dup_handle(desc->parentend, FALSE, TRUE);
+
+	if (ZSTR_LEN(zmode) >= 2 && ZSTR_VAL(zmode)[1] == 'b')
+		desc->mode_flags |= O_BINARY;
+#endif
+
+	return SUCCESS;
+}
+
+static int set_proc_descriptor_to_file(struct php_proc_open_descriptor_item *desc, zend_string *zfile, zend_string *zmode)
+{
+	php_socket_t fd;
+
+	/* try a wrapper */
+	php_stream *stream = php_stream_open_wrapper(ZSTR_VAL(zfile), ZSTR_VAL(zmode),
+			REPORT_ERRORS|STREAM_WILL_CAST, NULL);
+	if (stream == NULL) {
+		return FAILURE;
+	}
+
+	/* force into an fd */
+	if (php_stream_cast(stream, PHP_STREAM_CAST_RELEASE|PHP_STREAM_AS_FD, (void **)&fd, REPORT_ERRORS) == FAILURE) {
+		return FAILURE;
+	}
+
+#ifdef PHP_WIN32
+	desc->childend = dup_fd_as_handle((int)fd);
+	_close((int)fd);
+
+	/* simulate the append mode by fseeking to the end of the file
+	this introduces a potential race-condition, but it is the best we can do, though */
+	if (strchr(ZSTR_VAL(zmode), 'a')) {
+		SetFilePointer(desc->childend, 0, NULL, FILE_END);
+	}
+#else
+	desc->childend = fd;
+#endif
+	return SUCCESS;
+}
+
+static int dup_proc_descriptor(php_file_descriptor_t from, php_file_descriptor_t *to, zend_ulong nindex)
+{
+#ifdef PHP_WIN32
+	*to = dup_handle(from, TRUE, FALSE);
+	if (*to == NULL) {
+		php_error_docref(NULL, E_WARNING, "Failed to dup() for descriptor " ZEND_LONG_FMT, nindex);
+		return FAILURE;
+	}
+#else
+	*to = dup(from);
+	if (*to < 0) {
+		php_error_docref(NULL, E_WARNING,
+			"Failed to dup() for descriptor " ZEND_LONG_FMT " - %s", nindex, strerror(errno));
+		return FAILURE;
+	}
+#endif
+	return SUCCESS;
+}
+
+static int redirect_proc_descriptor(struct php_proc_open_descriptor_item *desc, int target, struct php_proc_open_descriptor_item *descriptors, int ndesc, int nindex)
+{
+	php_file_descriptor_t redirect_to = PHP_INVALID_FD;
+
+	for (int i = 0; i < ndesc; i++) {
+		if (descriptors[i].index == target) {
+			redirect_to = descriptors[i].childend;
+			break;
+		}
+	}
+
+	if (redirect_to == PHP_INVALID_FD) { /* didn't find the index we wanted */
+		if (target < 0 || target > 2) {
+			php_error_docref(NULL, E_WARNING, "Redirection target %d not found", target);
+			return FAILURE;
+		}
+
+		/* Support referring to a stdin/stdout/stderr pipe adopted from the parent,
+		 * which happens whenever an explicit override is not provided. */
+#ifndef PHP_WIN32
+		redirect_to = target;
+#else
+		switch (target) {
+			case 0: redirect_to = GetStdHandle(STD_INPUT_HANDLE); break;
+			case 1: redirect_to = GetStdHandle(STD_OUTPUT_HANDLE); break;
+			case 2: redirect_to = GetStdHandle(STD_ERROR_HANDLE); break;
+			EMPTY_SWITCH_DEFAULT_CASE()
+		}
+#endif
+	}
+
+	return dup_proc_descriptor(redirect_to, &desc->childend, nindex);
+}
+
+static int close_parent_ends_of_pipes_in_child(struct php_proc_open_descriptor_item *descriptors, int ndesc)
+{
+	/* we are running in child process
+	 * close the 'parent end' of all pipes which were opened before forking/spawning
+	 * also, dup() the child end of all pipes as necessary so they will use the FD number
+	 *   which the user requested */
+	for (int i = 0; i < ndesc; i++) {
+		if (descriptors[i].is_pipe) {
+			close(descriptors[i].parentend);
+		}
+		if (descriptors[i].childend != descriptors[i].index) {
+			if (dup2(descriptors[i].childend, descriptors[i].index) < 0) {
+				php_error_docref(NULL, E_WARNING, "Unable to copy file descriptor %d (for pipe) into file descriptor %d - %s",
+					descriptors[i].childend, descriptors[i].index, strerror(errno));
+				return FAILURE;
+			}
+			close(descriptors[i].childend);
+		}
+	}
+
+	return SUCCESS;
+}
+
+static void close_all_descriptors(struct php_proc_open_descriptor_item *descriptors, int ndesc)
+{
+	for (int i = 0; i < ndesc; i++) {
+		close_descriptor(descriptors[i].childend);
+		if (descriptors[i].parentend)
+			close_descriptor(descriptors[i].parentend);
+	}
+}
+
+static void efree_argv(char **argv)
+{
+	if (argv) {
+		char **arg = argv;
+		while (*arg != NULL) {
+			efree(*arg);
+			arg++;
+		}
+		efree(argv);
+	}
+}
 
 /* {{{ proto resource|false proc_open(string|array command, array descriptorspec, array &pipes [, string cwd [, array env [, array other_options]]])
    Run a process with more control over it's file descriptors */
@@ -485,18 +770,16 @@ PHP_FUNCTION(proc_open)
 	zend_string *str_index;
 	zend_ulong nindex;
 	struct php_proc_open_descriptor_item *descriptors = NULL;
-	int ndescriptors_array;
 #ifdef PHP_WIN32
 	PROCESS_INFORMATION pi;
 	HANDLE childHandle;
 	STARTUPINFOW si;
 	BOOL newprocok;
-	SECURITY_ATTRIBUTES security;
 	DWORD dwCreateFlags = 0;
 	UINT old_error_mode;
 	char cur_cwd[MAXPATHLEN];
 	wchar_t *cmdw = NULL, *cwdw = NULL, *envpw = NULL;
-	size_t tmp_len;
+	size_t cmdw_len;
 	int suppress_errors = 0;
 	int bypass_shell = 0;
 	int blocking_pipes = 0;
@@ -507,6 +790,13 @@ PHP_FUNCTION(proc_open)
 #endif
 	php_process_id_t child;
 	struct php_process_handle *proc;
+
+  /* zend_strings which may be allocated while processing the descriptorspec
+   * we need to make sure that each one allocated is released once and only once */
+	zend_string *ztype = NULL, *zmode = NULL, *zfile = NULL;
+#define cleanup_zend_string(ptr) do { zend_tmp_string_release(ptr); ptr = NULL; } while(0)
+#define cleanup_zend_strings() cleanup_zend_string(ztype); cleanup_zend_string(zmode); cleanup_zend_string(zfile)
+
 #if PHP_CAN_DO_PTS
 	php_file_descriptor_t dev_ptmx = -1;	/* master */
 	php_file_descriptor_t slave_pty = -1;
@@ -525,7 +815,6 @@ PHP_FUNCTION(proc_open)
 	memset(&env, 0, sizeof(env));
 
 	if (Z_TYPE_P(command_zv) == IS_ARRAY) {
-		zval *arg_zv;
 		uint32_t num_elems = zend_hash_num_elements(Z_ARRVAL_P(command_zv));
 		if (num_elems == 0) {
 			zend_argument_value_error(1, "must have at least one element");
@@ -539,26 +828,9 @@ PHP_FUNCTION(proc_open)
 			RETURN_FALSE;
 		}
 #else
-		argv = safe_emalloc(sizeof(char *), num_elems + 1, 0);
-		i = 0;
-		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(command_zv), arg_zv) {
-			zend_string *arg_str = get_valid_arg_string(arg_zv, i + 1);
-			if (!arg_str) {
-				argv[i] = NULL;
-				goto exit_fail;
-			}
-
-			if (i == 0) {
-				command = estrdup(ZSTR_VAL(arg_str));
-			}
-
-			argv[i++] = estrdup(ZSTR_VAL(arg_str));
-			zend_string_release(arg_str);
-		} ZEND_HASH_FOREACH_END();
-		argv[i] = NULL;
-
-		/* As the array is non-empty, we should have found a command. */
-		ZEND_ASSERT(command);
+		if ((command = get_command_from_array(command_zv, &argv, num_elems)) == NULL) {
+			goto exit_fail;
+		}
 #endif
 	} else {
 		convert_to_string(command_zv);
@@ -567,41 +839,12 @@ PHP_FUNCTION(proc_open)
 
 #ifdef PHP_WIN32
 	if (other_options) {
-		zval *item = zend_hash_str_find(Z_ARRVAL_P(other_options), "suppress_errors", sizeof("suppress_errors") - 1);
-		if (item != NULL) {
-			if (Z_TYPE_P(item) == IS_TRUE || ((Z_TYPE_P(item) == IS_LONG) && Z_LVAL_P(item))) {
-				suppress_errors = 1;
-			}
-		}
-
+		suppress_errors      = get_option(other_options, "suppress_errors");
 		/* TODO Deprecate in favor of array command? */
-		item = zend_hash_str_find(Z_ARRVAL_P(other_options), "bypass_shell", sizeof("bypass_shell") - 1);
-		if (item != NULL) {
-			if (Z_TYPE_P(item) == IS_TRUE || ((Z_TYPE_P(item) == IS_LONG) && Z_LVAL_P(item))) {
-				bypass_shell = 1;
-			}
-		}
-
-		item = zend_hash_str_find(Z_ARRVAL_P(other_options), "blocking_pipes", sizeof("blocking_pipes") - 1);
-		if (item != NULL) {
-			if (Z_TYPE_P(item) == IS_TRUE || ((Z_TYPE_P(item) == IS_LONG) && Z_LVAL_P(item))) {
-				blocking_pipes = 1;
-			}
-		}
-
-		item = zend_hash_str_find(Z_ARRVAL_P(other_options), "create_process_group", sizeof("create_process_group") - 1);
-		if (item != NULL) {
-			if (Z_TYPE_P(item) == IS_TRUE || ((Z_TYPE_P(item) == IS_LONG) && Z_LVAL_P(item))) {
-				create_process_group = 1;
-			}
-		}
-
-		item = zend_hash_str_find(Z_ARRVAL_P(other_options), "create_new_console", sizeof("create_new_console") - 1);
-		if (item != NULL) {
-			if (Z_TYPE_P(item) == IS_TRUE || ((Z_TYPE_P(item) == IS_LONG) && Z_LVAL_P(item))) {
-				create_new_console = 1;
-			}
-		}
+		bypass_shell         = bypass_shell || get_option(other_options, "bypass_shell");
+		blocking_pipes       = get_option(other_options, "blocking_pipes");
+		create_process_group = get_option(other_options, "create_process_group");
+		create_new_console   = get_option(other_options, "create_new_console");
 	}
 #endif
 
@@ -609,24 +852,10 @@ PHP_FUNCTION(proc_open)
 		env = _php_array_to_envp(environment);
 	}
 
-	ndescriptors_array = zend_hash_num_elements(Z_ARRVAL_P(descriptorspec));
-
-	descriptors = safe_emalloc(sizeof(struct php_proc_open_descriptor_item), ndescriptors_array, 0);
-
-	memset(descriptors, 0, sizeof(struct php_proc_open_descriptor_item) * ndescriptors_array);
-
-#ifdef PHP_WIN32
-	/* we use this to allow the child to inherit handles */
-	memset(&security, 0, sizeof(security));
-	security.nLength = sizeof(security);
-	security.bInheritHandle = TRUE;
-	security.lpSecurityDescriptor = NULL;
-#endif
+	descriptors = alloc_descriptor_array(descriptorspec);
 
 	/* walk the descriptor spec and set up files/pipes */
 	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(descriptorspec), nindex, str_index, descitem) {
-		zval *ztype;
-
 		if (str_index) {
 			zend_argument_value_error(2, "must be an integer indexed array");
 			goto exit_fail;
@@ -638,6 +867,7 @@ PHP_FUNCTION(proc_open)
 			/* should be a stream - try and dup the descriptor */
 			php_stream *stream;
 			php_socket_t fd;
+			php_file_descriptor_t desc;
 
 			php_stream_from_zval(stream, descitem);
 
@@ -646,199 +876,55 @@ PHP_FUNCTION(proc_open)
 			}
 
 #ifdef PHP_WIN32
-			descriptors[ndesc].childend = dup_fd_as_handle((int)fd);
-			if (descriptors[ndesc].childend == NULL) {
-				php_error_docref(NULL, E_WARNING, "Unable to dup File-Handle for descriptor %d", nindex);
-				goto exit_fail;
-			}
+			desc = (HANDLE)_get_osfhandle(fd);
 #else
-			descriptors[ndesc].childend = dup(fd);
-			if (descriptors[ndesc].childend < 0) {
-				php_error_docref(NULL, E_WARNING, "Unable to dup File-Handle for descriptor " ZEND_ULONG_FMT " - %s", nindex, strerror(errno));
+			desc = fd;
+#endif
+			if (dup_proc_descriptor(desc, &descriptors[ndesc].childend, nindex) == FAILURE) {
 				goto exit_fail;
 			}
-#endif
-			descriptors[ndesc].mode = DESC_FILE;
-
 		} else if (Z_TYPE_P(descitem) != IS_ARRAY) {
 			zend_argument_value_error(2, "must only contain arrays and File-Handles");
 			goto exit_fail;
-		} else {
-
-			if ((ztype = zend_hash_index_find(Z_ARRVAL_P(descitem), 0)) != NULL) {
-				if (!try_convert_to_string(ztype)) {
-					goto exit_fail;
-				}
-			} else {
-				zend_value_error("Missing handle qualifier in array");
+		} else if ((ztype = get_string_parameter(descitem, 0, "handle qualifier")) == NULL) {
 				goto exit_fail;
-			}
-
-			if (strcmp(Z_STRVAL_P(ztype), "pipe") == 0) {
-				php_file_descriptor_t newpipe[2];
-				zval *zmode;
-
-				if ((zmode = zend_hash_index_find(Z_ARRVAL_P(descitem), 1)) != NULL) {
-					if (!try_convert_to_string(zmode)) {
-						goto exit_fail;
-					}
-				} else {
-					zend_value_error("Missing mode parameter for 'pipe'");
+		} else {
+			if (zend_string_equals_literal(ztype, "pipe")) {
+				if ((zmode = get_string_parameter(descitem, 1, "mode parameter for 'pipe'")) == NULL) {
+					goto exit_fail;
+				}
+				if (set_proc_descriptor_to_pipe(&descriptors[ndesc], zmode) == FAILURE) {
+					goto exit_fail;
+				}
+			} else if (zend_string_equals_literal(ztype, "file")) {
+				if ((zfile = get_string_parameter(descitem, 1, "file name parameter for 'file'")) == NULL) {
+					goto exit_fail;
+				}
+				if ((zmode = get_string_parameter(descitem, 2, "mode parameter for 'file'")) == NULL) {
 					goto exit_fail;
 				}
 
-				descriptors[ndesc].mode = DESC_PIPE;
-
-				if (0 != pipe(newpipe)) {
-					php_error_docref(NULL, E_WARNING, "Unable to create pipe %s", strerror(errno));
+				if (set_proc_descriptor_to_file(&descriptors[ndesc], zfile, zmode) == FAILURE) {
 					goto exit_fail;
 				}
-
-				if (strncmp(Z_STRVAL_P(zmode), "w", 1) != 0) {
-					descriptors[ndesc].parentend = newpipe[1];
-					descriptors[ndesc].childend = newpipe[0];
-					descriptors[ndesc].mode |= DESC_PARENT_MODE_WRITE;
-				} else {
-					descriptors[ndesc].parentend = newpipe[0];
-					descriptors[ndesc].childend = newpipe[1];
-				}
-#ifdef PHP_WIN32
-				/* don't let the child inherit the parent side of the pipe */
-				descriptors[ndesc].parentend = dup_handle(descriptors[ndesc].parentend, FALSE, TRUE);
-#endif
-				descriptors[ndesc].mode_flags = descriptors[ndesc].mode & DESC_PARENT_MODE_WRITE ? O_WRONLY : O_RDONLY;
-#ifdef PHP_WIN32
-				if (Z_STRLEN_P(zmode) >= 2 && Z_STRVAL_P(zmode)[1] == 'b')
-					descriptors[ndesc].mode_flags |= O_BINARY;
-#endif
-
-			} else if (strcmp(Z_STRVAL_P(ztype), "file") == 0) {
-				zval *zfile, *zmode;
-				php_socket_t fd;
-				php_stream *stream;
-
-				descriptors[ndesc].mode = DESC_FILE;
-
-				if ((zfile = zend_hash_index_find(Z_ARRVAL_P(descitem), 1)) != NULL) {
-					if (!try_convert_to_string(zfile)) {
-						goto exit_fail;
-					}
-				} else {
-					zend_value_error("Missing file name parameter for 'file'");
-					goto exit_fail;
-				}
-
-				if ((zmode = zend_hash_index_find(Z_ARRVAL_P(descitem), 2)) != NULL) {
-					if (!try_convert_to_string(zmode)) {
-						goto exit_fail;
-					}
-				} else {
-					zend_value_error("Missing mode parameter for 'file'");
-					goto exit_fail;
-				}
-
-				/* try a wrapper */
-				stream = php_stream_open_wrapper(Z_STRVAL_P(zfile), Z_STRVAL_P(zmode),
-						REPORT_ERRORS|STREAM_WILL_CAST, NULL);
-
-				/* force into an fd */
-				if (stream == NULL || FAILURE == php_stream_cast(stream,
-							PHP_STREAM_CAST_RELEASE|PHP_STREAM_AS_FD,
-							(void **)&fd, REPORT_ERRORS)) {
-					goto exit_fail;
-				}
-
-#ifdef PHP_WIN32
-				descriptors[ndesc].childend = dup_fd_as_handle((int)fd);
-				_close((int)fd);
-
-				/* simulate the append mode by fseeking to the end of the file
-				this introduces a potential race-condition, but it is the best we can do, though */
-				if (strchr(Z_STRVAL_P(zmode), 'a')) {
-					SetFilePointer(descriptors[ndesc].childend, 0, NULL, FILE_END);
-				}
-#else
-				descriptors[ndesc].childend = fd;
-#endif
-			} else if (strcmp(Z_STRVAL_P(ztype), "redirect") == 0) {
+			} else if (zend_string_equals_literal(ztype, "redirect")) {
 				zval *ztarget = zend_hash_index_find_deref(Z_ARRVAL_P(descitem), 1);
-				struct php_proc_open_descriptor_item *target = NULL;
-				php_file_descriptor_t childend;
-
 				if (!ztarget) {
 					zend_value_error("Missing redirection target");
 					goto exit_fail;
 				}
 				if (Z_TYPE_P(ztarget) != IS_LONG) {
-					zend_value_error("Redirection target must be an integer");
+					zend_value_error("Redirection target must be of type int, %s given", zend_get_type_by_const(Z_TYPE_P(ztarget)));
 					goto exit_fail;
 				}
-
-				for (i = 0; i < ndesc; i++) {
-					if (descriptors[i].index == Z_LVAL_P(ztarget)) {
-						target = &descriptors[i];
-						break;
-					}
-				}
-				if (target) {
-					childend = target->childend;
-				} else {
-					if (Z_LVAL_P(ztarget) < 0 || Z_LVAL_P(ztarget) > 2) {
-						php_error_docref(NULL, E_WARNING,
-							"Redirection target " ZEND_LONG_FMT " not found", Z_LVAL_P(ztarget));
-						goto exit_fail;
-					}
-
-					/* Support referring to a stdin/stdout/stderr pipe adopted from the parent,
-					 * which happens whenever an explicit override is not provided. */
-#ifndef PHP_WIN32
-					childend = Z_LVAL_P(ztarget);
-#else
-					switch (Z_LVAL_P(ztarget)) {
-						case 0: childend = GetStdHandle(STD_INPUT_HANDLE); break;
-						case 1: childend = GetStdHandle(STD_OUTPUT_HANDLE); break;
-						case 2: childend = GetStdHandle(STD_ERROR_HANDLE); break;
-						EMPTY_SWITCH_DEFAULT_CASE()
-					}
-#endif
-				}
-
-#ifdef PHP_WIN32
-				descriptors[ndesc].childend = dup_handle(childend, TRUE, FALSE);
-				if (descriptors[ndesc].childend == NULL) {
-					php_error_docref(NULL, E_WARNING,
-						"Failed to dup() for descriptor " ZEND_LONG_FMT, nindex);
+				if (redirect_proc_descriptor(&descriptors[ndesc], Z_LVAL_P(ztarget), descriptors, ndesc, nindex) == FAILURE) {
 					goto exit_fail;
 				}
-#else
-				descriptors[ndesc].childend = dup(childend);
-				if (descriptors[ndesc].childend < 0) {
-					php_error_docref(NULL, E_WARNING,
-						"Failed to dup() for descriptor " ZEND_LONG_FMT " - %s",
-						nindex, strerror(errno));
+			} else if (zend_string_equals_literal(ztype, "null")) {
+				if (set_proc_descriptor_to_blackhole(&descriptors[ndesc]) == FAILURE) {
 					goto exit_fail;
 				}
-#endif
-				descriptors[ndesc].mode = DESC_REDIRECT;
-			} else if (strcmp(Z_STRVAL_P(ztype), "null") == 0) {
-#ifndef PHP_WIN32
-				descriptors[ndesc].childend = open("/dev/null", O_RDWR);
-				if (descriptors[ndesc].childend < 0) {
-					php_error_docref(NULL, E_WARNING,
-						"Failed to open /dev/null - %s", strerror(errno));
-					goto exit_fail;
-				}
-#else
-				descriptors[ndesc].childend = CreateFileA(
-					"nul", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
-					NULL, OPEN_EXISTING, 0, NULL);
-				if (descriptors[ndesc].childend == NULL) {
-					php_error_docref(NULL, E_WARNING, "Failed to open nul");
-					goto exit_fail;
-				}
-#endif
-				descriptors[ndesc].mode = DESC_FILE;
-			} else if (strcmp(Z_STRVAL_P(ztype), "pty") == 0) {
+			} else if (zend_string_equals_literal(ztype, "pty")) {
 #if PHP_CAN_DO_PTS
 				if (dev_ptmx == -1) {
 					/* open things up */
@@ -856,7 +942,7 @@ PHP_FUNCTION(proc_open)
 						goto exit_fail;
 					}
 				}
-				descriptors[ndesc].mode = DESC_PIPE;
+				descriptors[ndesc].is_pipe = 1;
 				descriptors[ndesc].childend = dup(slave_pty);
 				descriptors[ndesc].parentend = dup(dev_ptmx);
 				descriptors[ndesc].mode_flags = O_RDWR;
@@ -865,17 +951,17 @@ PHP_FUNCTION(proc_open)
 				goto exit_fail;
 #endif
 			} else {
-				php_error_docref(NULL, E_WARNING, "%s is not a valid descriptor spec/mode", Z_STRVAL_P(ztype));
+				php_error_docref(NULL, E_WARNING, "%s is not a valid descriptor spec/mode", ZSTR_VAL(ztype));
 				goto exit_fail;
 			}
+			cleanup_zend_strings();
 		}
 		ndesc++;
 	} ZEND_HASH_FOREACH_END();
 
 #ifdef PHP_WIN32
 	if (cwd == NULL) {
-		char *getcwd_result;
-		getcwd_result = VCWD_GETCWD(cur_cwd, MAXPATHLEN);
+		char *getcwd_result = VCWD_GETCWD(cur_cwd, MAXPATHLEN);
 		if (!getcwd_result) {
 			php_error_docref(NULL, E_WARNING, "Cannot get current directory");
 			goto exit_fail;
@@ -888,31 +974,8 @@ PHP_FUNCTION(proc_open)
 		goto exit_fail;
 	}
 
-	memset(&si, 0, sizeof(si));
-	si.cb = sizeof(si);
-	si.dwFlags = STARTF_USESTDHANDLES;
-
-	si.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
-	si.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
-	si.hStdError = GetStdHandle(STD_ERROR_HANDLE);
-
-	/* redirect stdin/stdout/stderr if requested */
-	for (i = 0; i < ndesc; i++) {
-		switch(descriptors[i].index) {
-			case 0:
-				si.hStdInput = descriptors[i].childend;
-				break;
-			case 1:
-				si.hStdOutput = descriptors[i].childend;
-				break;
-			case 2:
-				si.hStdError = descriptors[i].childend;
-				break;
-		}
-	}
-
-
-	memset(&pi, 0, sizeof(pi));
+	init_startup_info(&si, descriptors, ndesc);
+	init_process_info(&pi);
 
 	if (suppress_errors) {
 		old_error_mode = SetErrorMode(SEM_FAILCRITICALERRORS|SEM_NOGPFAULTERRORBOX);
@@ -938,44 +1001,19 @@ PHP_FUNCTION(proc_open)
 		}
 	}
 
-	cmdw = php_win32_cp_conv_any_to_w(command, strlen(command), &tmp_len);
+	cmdw = php_win32_cp_conv_any_to_w(command, strlen(command), &cmdw_len);
 	if (!cmdw) {
 		php_error_docref(NULL, E_WARNING, "Command conversion failed");
 		goto exit_fail;
 	}
 
-	if (bypass_shell) {
-		newprocok = CreateProcessW(NULL, cmdw, &security, &security, TRUE, dwCreateFlags, envpw, cwdw, &si, &pi);
-	} else {
-		int ret;
-		size_t len;
-		wchar_t *cmdw2;
-
-
-		len = (sizeof(COMSPEC_NT) + sizeof(" /s /c ") + tmp_len + 3);
-		cmdw2 = (wchar_t *)malloc(len * sizeof(wchar_t));
-		if (!cmdw2) {
-			php_error_docref(NULL, E_WARNING, "Command conversion failed");
+	if (!bypass_shell) {
+		if (convert_command_to_use_shell(&cmdw, cmdw_len) == FAILURE) {
 			goto exit_fail;
 		}
-		ret = _snwprintf(cmdw2, len, L"%hs /s /c \"%s\"", COMSPEC_NT, cmdw);
-
-		if (-1 == ret) {
-			free(cmdw2);
-			php_error_docref(NULL, E_WARNING, "Command conversion failed");
-			goto exit_fail;
-		}
-
-		newprocok = CreateProcessW(NULL, cmdw2, &security, &security, TRUE, dwCreateFlags, envpw, cwdw, &si, &pi);
-		free(cmdw2);
 	}
-
-	free(cwdw);
-	cwdw = NULL;
-	free(cmdw);
-	cmdw = NULL;
-	free(envpw);
-	envpw = NULL;
+	newprocok = CreateProcessW(NULL, cmdw, &php_proc_open_security, &php_proc_open_security,
+		TRUE, dwCreateFlags, envpw, cwdw, &si, &pi);
 
 	if (suppress_errors) {
 		SetErrorMode(old_error_mode);
@@ -983,14 +1021,7 @@ PHP_FUNCTION(proc_open)
 
 	if (FALSE == newprocok) {
 		DWORD dw = GetLastError();
-
-		/* clean up all the descriptors */
-		for (i = 0; i < ndesc; i++) {
-			CloseHandle(descriptors[i].childend);
-			if (descriptors[i].parentend) {
-				CloseHandle(descriptors[i].parentend);
-			}
-		}
+		close_all_descriptors(descriptors, ndesc);
 		php_error_docref(NULL, E_WARNING, "CreateProcess failed, error code - %u", dw);
 		goto exit_fail;
 	}
@@ -1019,27 +1050,18 @@ PHP_FUNCTION(proc_open)
 			setpgid(my_pid, my_pid);
 			tcsetpgrp(0, my_pid);
 		}
-#endif
 
-#if PHP_CAN_DO_PTS
 		if (dev_ptmx >= 0) {
 			close(dev_ptmx);
 			close(slave_pty);
 		}
 #endif
-		/* close those descriptors that we just opened for the parent stuff,
-		 * dup new descriptors into required descriptors and close the original
-		 * cruft */
-		for (i = 0; i < ndesc; i++) {
-			switch (descriptors[i].mode & ~DESC_PARENT_MODE_WRITE) {
-				case DESC_PIPE:
-					close(descriptors[i].parentend);
-					break;
-			}
-			if (dup2(descriptors[i].childend, descriptors[i].index) < 0)
-				perror("dup2");
-			if (descriptors[i].childend != descriptors[i].index)
-				close(descriptors[i].childend);
+
+		if (close_parent_ends_of_pipes_in_child(descriptors, ndesc) == FAILURE) {
+			/* We are already in child process and can't do anything to make
+			 *   proc_open() return an error in the parent
+			 * All we can do is exit with a non-zero (error) exit code */
+			_exit(127);
 		}
 
 		if (cwd) {
@@ -1059,26 +1081,21 @@ PHP_FUNCTION(proc_open)
 				execl("/bin/sh", "sh", "-c", command, NULL);
 			}
 		}
-		_exit(127);
 
+		/* If execvp/execle/execl are successful, we will never reach here
+		 * Display error and exit with non-zero (error) status code */
+		php_error_docref(NULL, E_WARNING, "Exec failed - %s", strerror(errno));
+		_exit(127);
 	} else if (child < 0) {
 		/* failed to fork() */
-
-		/* clean up all the descriptors */
-		for (i = 0; i < ndesc; i++) {
-			close(descriptors[i].childend);
-			if (descriptors[i].parentend)
-				close(descriptors[i].parentend);
-		}
-
+		close_all_descriptors(descriptors, ndesc);
 		php_error_docref(NULL, E_WARNING, "Fork failed - %s", strerror(errno));
-
 		goto exit_fail;
-
 	}
 #else
 # error You lose (configure should not have let you get here)
 #endif
+
 	/* we forked/spawned and this is the parent */
 
 	pipes = zend_try_array_init(pipes);
@@ -1106,70 +1123,65 @@ PHP_FUNCTION(proc_open)
 	/* clean up all the child ends and then open streams on the parent
 	 * ends, where appropriate */
 	for (i = 0; i < ndesc; i++) {
-		char *mode_string=NULL;
+		char *mode_string = NULL;
 		php_stream *stream = NULL;
 
 		close_descriptor(descriptors[i].childend);
 
-		switch (descriptors[i].mode & ~DESC_PARENT_MODE_WRITE) {
-			case DESC_PIPE:
-				switch(descriptors[i].mode_flags) {
+		if (descriptors[i].is_pipe) {
+			switch (descriptors[i].mode_flags) {
 #ifdef PHP_WIN32
-					case O_WRONLY|O_BINARY:
-						mode_string = "wb";
-						break;
-					case O_RDONLY|O_BINARY:
-						mode_string = "rb";
-						break;
+				case O_WRONLY|O_BINARY:
+					mode_string = "wb";
+					break;
+				case O_RDONLY|O_BINARY:
+					mode_string = "rb";
+					break;
 #endif
-					case O_WRONLY:
-						mode_string = "w";
-						break;
-					case O_RDONLY:
-						mode_string = "r";
-						break;
-					case O_RDWR:
-						mode_string = "r+";
-						break;
-				}
+				case O_WRONLY:
+					mode_string = "w";
+					break;
+				case O_RDONLY:
+					mode_string = "r";
+					break;
+				case O_RDWR:
+					mode_string = "r+";
+					break;
+			}
 #ifdef PHP_WIN32
-				stream = php_stream_fopen_from_fd(_open_osfhandle((zend_intptr_t)descriptors[i].parentend,
-							descriptors[i].mode_flags), mode_string, NULL);
-				php_stream_set_option(stream, PHP_STREAM_OPTION_PIPE_BLOCKING, blocking_pipes, NULL);
+			stream = php_stream_fopen_from_fd(_open_osfhandle((zend_intptr_t)descriptors[i].parentend,
+						descriptors[i].mode_flags), mode_string, NULL);
+			php_stream_set_option(stream, PHP_STREAM_OPTION_PIPE_BLOCKING, blocking_pipes, NULL);
 #else
-				stream = php_stream_fopen_from_fd(descriptors[i].parentend, mode_string, NULL);
+			stream = php_stream_fopen_from_fd(descriptors[i].parentend, mode_string, NULL);
 # if defined(F_SETFD) && defined(FD_CLOEXEC)
-				/* mark the descriptor close-on-exec, so that it won't be inherited by potential other children */
-				fcntl(descriptors[i].parentend, F_SETFD, FD_CLOEXEC);
+			/* mark the descriptor close-on-exec, so that it won't be inherited by potential other children */
+			fcntl(descriptors[i].parentend, F_SETFD, FD_CLOEXEC);
 # endif
 #endif
-				if (stream) {
-					zval retfp;
+			if (stream) {
+				zval retfp;
 
-					/* nasty hack; don't copy it */
-					stream->flags |= PHP_STREAM_FLAG_NO_SEEK;
+				/* nasty hack; don't copy it */
+				stream->flags |= PHP_STREAM_FLAG_NO_SEEK;
 
-					php_stream_to_zval(stream, &retfp);
-					add_index_zval(pipes, descriptors[i].index, &retfp);
+				php_stream_to_zval(stream, &retfp);
+				add_index_zval(pipes, descriptors[i].index, &retfp);
 
-					proc->pipes[i] = Z_RES(retfp);
-					Z_ADDREF(retfp);
-				}
-				break;
-			default:
-				proc->pipes[i] = NULL;
+				proc->pipes[i] = Z_RES(retfp);
+				Z_ADDREF(retfp);
+			}
+		} else {
+			proc->pipes[i] = NULL;
 		}
 	}
 
-#ifndef PHP_WIN32
-	if (argv) {
-		char **arg = argv;
-		while (*arg != NULL) {
-			efree(*arg);
-			arg++;
-		}
-		efree(argv);
-	}
+#ifdef PHP_WIN32
+	free(cwdw);
+	free(cmdw);
+	free(envpw);
+#else
+	efree_argv(argv);
 #endif
 
 	efree(descriptors);
@@ -1189,15 +1201,9 @@ exit_fail:
 	free(cmdw);
 	free(envpw);
 #else
-	if (argv) {
-		char **arg = argv;
-		while (*arg != NULL) {
-			efree(*arg);
-			arg++;
-		}
-		efree(argv);
-	}
+	efree_argv(argv);
 #endif
+	cleanup_zend_strings();
 #if PHP_CAN_DO_PTS
 	if (dev_ptmx >= 0) {
 		close(dev_ptmx);
@@ -1207,7 +1213,6 @@ exit_fail:
 	}
 #endif
 	RETURN_FALSE;
-
 }
 /* }}} */
 

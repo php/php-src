@@ -53,7 +53,7 @@ proc_close($proc);
 ?>
 --EXPECTF--
 Missing redirection target
-Redirection target must be an integer
+Redirection target must be of type int, string given
 
 Warning: proc_open(): Redirection target 42 not found in %s
 
