@@ -508,6 +508,28 @@ static void init_startup_info(STARTUPINFOW *si, struct php_proc_open_descriptor_
 		}
 	}
 }
+
+static int convert_command_to_use_shell(wchar_t **cmdw, size_t cmdw_len)
+{
+	size_t len = sizeof(COMSPEC_NT) + sizeof(" /s /c ") + cmdw_len + 3;
+	wchar_t *cmdw_shell = (wchar_t *)malloc(len * sizeof(wchar_t));
+
+	if (cmdw_shell == NULL) {
+		php_error_docref(NULL, E_WARNING, "Command conversion failed");
+		return FAILURE;
+	}
+
+	if (_snwprintf(cmdw_shell, len, L"%hs /s /c \"%s\"", COMSPEC_NT, *cmdw) == -1) {
+		free(cmdw_shell);
+		php_error_docref(NULL, E_WARNING, "Command conversion failed");
+		return FAILURE;
+	}
+
+	free(*cmdw);
+	*cmdw = cmdw_shell;
+
+	return SUCCESS;
+}
 #endif
 
 static struct php_proc_open_descriptor_item* alloc_descriptor_array(zval *descriptorspec)
@@ -650,7 +672,7 @@ PHP_FUNCTION(proc_open)
 	UINT old_error_mode;
 	char cur_cwd[MAXPATHLEN];
 	wchar_t *cmdw = NULL, *cwdw = NULL, *envpw = NULL;
-	size_t tmp_len;
+	size_t cmdw_len;
 	int suppress_errors = 0;
 	int bypass_shell = 0;
 	int blocking_pipes = 0;
@@ -967,39 +989,19 @@ PHP_FUNCTION(proc_open)
 		}
 	}
 
-	cmdw = php_win32_cp_conv_any_to_w(command, strlen(command), &tmp_len);
+	cmdw = php_win32_cp_conv_any_to_w(command, strlen(command), &cmdw_len);
 	if (!cmdw) {
 		php_error_docref(NULL, E_WARNING, "Command conversion failed");
 		goto exit_fail;
 	}
 
-	if (bypass_shell) {
-		newprocok = CreateProcessW(NULL, cmdw, &php_proc_open_security, &php_proc_open_security,
-			TRUE, dwCreateFlags, envpw, cwdw, &si, &pi);
-	} else {
-		int ret;
-		size_t len;
-		wchar_t *cmdw2;
-
-
-		len = (sizeof(COMSPEC_NT) + sizeof(" /s /c ") + tmp_len + 3);
-		cmdw2 = (wchar_t *)malloc(len * sizeof(wchar_t));
-		if (!cmdw2) {
-			php_error_docref(NULL, E_WARNING, "Command conversion failed");
+	if (!bypass_shell) {
+		if (convert_command_to_use_shell(&cmdw, cmdw_len) == FAILURE) {
 			goto exit_fail;
 		}
-		ret = _snwprintf(cmdw2, len, L"%hs /s /c \"%s\"", COMSPEC_NT, cmdw);
-
-		if (-1 == ret) {
-			free(cmdw2);
-			php_error_docref(NULL, E_WARNING, "Command conversion failed");
-			goto exit_fail;
-		}
-
-		newprocok = CreateProcessW(NULL, cmdw2, &php_proc_open_security, &php_proc_open_security,
-			TRUE, dwCreateFlags, envpw, cwdw, &si, &pi);
-		free(cmdw2);
 	}
+	newprocok = CreateProcessW(NULL, cmdw, &php_proc_open_security, &php_proc_open_security,
+		TRUE, dwCreateFlags, envpw, cwdw, &si, &pi);
 
 	free(cwdw);
 	cwdw = NULL;
