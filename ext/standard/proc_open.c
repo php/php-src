@@ -353,7 +353,15 @@ PHP_FUNCTION(proc_get_status)
 
 /* {{{ handy definitions for portability/readability */
 #ifdef PHP_WIN32
-# define pipe(pair)		(CreatePipe(&pair[0], &pair[1], &security, 0) ? 0 : -1)
+
+/* we use this to allow child processes to inherit handles */
+SECURITY_ATTRIBUTES php_proc_open_security = {
+	.nLength = sizeof(SECURITY_ATTRIBUTES),
+	.lpSecurityDescriptor = NULL,
+	.bInheritHandle = TRUE
+};
+
+# define pipe(pair)		(CreatePipe(&pair[0], &pair[1], &php_proc_open_security, 0) ? 0 : -1)
 
 # define COMSPEC_NT	"cmd.exe"
 
@@ -538,7 +546,6 @@ PHP_FUNCTION(proc_open)
 	HANDLE childHandle;
 	STARTUPINFOW si;
 	BOOL newprocok;
-	SECURITY_ATTRIBUTES security;
 	DWORD dwCreateFlags = 0;
 	UINT old_error_mode;
 	char cur_cwd[MAXPATHLEN];
@@ -628,14 +635,6 @@ PHP_FUNCTION(proc_open)
 	}
 
 	descriptors = alloc_descriptor_array(descriptorspec);
-
-#ifdef PHP_WIN32
-	/* we use this to allow the child to inherit handles */
-	memset(&security, 0, sizeof(security));
-	security.nLength = sizeof(security);
-	security.bInheritHandle = TRUE;
-	security.lpSecurityDescriptor = NULL;
-#endif
 
 	/* walk the descriptor spec and set up files/pipes */
 	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(descriptorspec), nindex, str_index, descitem) {
@@ -943,7 +942,8 @@ PHP_FUNCTION(proc_open)
 	}
 
 	if (bypass_shell) {
-		newprocok = CreateProcessW(NULL, cmdw, &security, &security, TRUE, dwCreateFlags, envpw, cwdw, &si, &pi);
+		newprocok = CreateProcessW(NULL, cmdw, &php_proc_open_security, &php_proc_open_security,
+			TRUE, dwCreateFlags, envpw, cwdw, &si, &pi);
 	} else {
 		int ret;
 		size_t len;
@@ -964,7 +964,8 @@ PHP_FUNCTION(proc_open)
 			goto exit_fail;
 		}
 
-		newprocok = CreateProcessW(NULL, cmdw2, &security, &security, TRUE, dwCreateFlags, envpw, cwdw, &si, &pi);
+		newprocok = CreateProcessW(NULL, cmdw2, &php_proc_open_security, &php_proc_open_security,
+			TRUE, dwCreateFlags, envpw, cwdw, &si, &pi);
 		free(cmdw2);
 	}
 
