@@ -621,6 +621,29 @@ static int set_proc_descriptor_to_file(struct php_proc_open_descriptor_item *des
 	return SUCCESS;
 }
 
+static int close_parent_ends_of_pipes_in_child(struct php_proc_open_descriptor_item *descriptors, int ndesc)
+{
+	/* we are running in child process
+	 * close the 'parent end' of all pipes which were opened before forking/spawning
+	 * also, dup() the child end of all pipes as necessary so they will use the FD number
+	 *   which the user requested */
+	for (int i = 0; i < ndesc; i++) {
+		if (descriptors[i].is_pipe) {
+			close(descriptors[i].parentend);
+		}
+		if (descriptors[i].childend != descriptors[i].index) {
+			if (dup2(descriptors[i].childend, descriptors[i].index) < 0) {
+				php_error_docref(NULL, E_WARNING, "Unable to copy file descriptor %d (for pipe) into file descriptor %d - %s",
+					descriptors[i].childend, descriptors[i].index, strerror(errno));
+				return FAILURE;
+			}
+			close(descriptors[i].childend);
+		}
+	}
+
+	return SUCCESS;
+}
+
 static void close_all_descriptors(struct php_proc_open_descriptor_item *descriptors, int ndesc)
 {
 	for (int i = 0; i < ndesc; i++) {
@@ -1044,20 +1067,12 @@ PHP_FUNCTION(proc_open)
 			close(slave_pty);
 		}
 #endif
-		/* close those descriptors that we just opened for the parent stuff,
-		 * dup new descriptors into required descriptors and close the original
-		 * cruft */
-		for (i = 0; i < ndesc; i++) {
-			if (descriptors[i].is_pipe) {
-				close(descriptors[i].parentend);
-			}
-			if (dup2(descriptors[i].childend, descriptors[i].index) < 0) {
-				/* better way to report any problems? */
-				perror("dup2");
-			}
-			if (descriptors[i].childend != descriptors[i].index) {
-				close(descriptors[i].childend);
-			}
+
+		if (close_parent_ends_of_pipes_in_child(descriptors, ndesc) == FAILURE) {
+			/* We are already in child process and can't do anything to make
+			 *   proc_open() return an error in the parent
+			 * All we can do is exit with a non-zero (error) exit code */
+			_exit(127);
 		}
 
 		if (cwd) {
