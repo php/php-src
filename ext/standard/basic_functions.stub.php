@@ -1438,13 +1438,6 @@ function is_float($value): bool {}
  */
 function is_double($value): bool {}
 
-/**
- * @param mixed $value
- * @alias is_float
- * @deprecated
- */
-function is_real($value): bool {}
-
 /** @param mixed $value */
 function is_numeric($value): bool {}
 
