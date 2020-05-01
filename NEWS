@@ -1,5 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? ????, PHP 7.4.7
+
+- SimpleXML:
+  . Fixed bug #79528 (Different object of the same xml between 7.4.5 and
+    7.4.4). (cmb)
 
 ?? ??? ????, PHP 7.4.6
 
