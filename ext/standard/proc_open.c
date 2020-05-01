@@ -569,6 +569,39 @@ static int set_proc_descriptor_to_pipe(struct php_proc_open_descriptor_item *des
 	return SUCCESS;
 }
 
+static int set_proc_descriptor_to_file(struct php_proc_open_descriptor_item *desc, zval *zfile, zval *zmode)
+{
+	php_socket_t fd;
+
+	/* try a wrapper */
+	php_stream *stream = php_stream_open_wrapper(Z_STRVAL_P(zfile), Z_STRVAL_P(zmode),
+			REPORT_ERRORS|STREAM_WILL_CAST, NULL);
+	if (stream == NULL) {
+		return FAILURE;
+	}
+
+	/* force into an fd */
+	if (php_stream_cast(stream, PHP_STREAM_CAST_RELEASE|PHP_STREAM_AS_FD, (void **)&fd, REPORT_ERRORS) == FAILURE) {
+		return FAILURE;
+	}
+
+	desc->mode = DESC_FILE;
+
+#ifdef PHP_WIN32
+	desc->childend = dup_fd_as_handle((int)fd);
+	_close((int)fd);
+
+	/* simulate the append mode by fseeking to the end of the file
+	this introduces a potential race-condition, but it is the best we can do, though */
+	if (strchr(Z_STRVAL_P(zmode), 'a')) {
+		SetFilePointer(desc->childend, 0, NULL, FILE_END);
+	}
+#else
+	desc->childend = fd;
+#endif
+	return SUCCESS;
+}
+
 static void close_all_descriptors(struct php_proc_open_descriptor_item *descriptors, int ndesc)
 {
 	for (int i = 0; i < ndesc; i++) {
@@ -771,10 +804,6 @@ PHP_FUNCTION(proc_open)
 				}
 			} else if (strcmp(Z_STRVAL_P(ztype), "file") == 0) {
 				zval *zfile, *zmode;
-				php_socket_t fd;
-				php_stream *stream;
-
-				descriptors[ndesc].mode = DESC_FILE;
 
 				if ((zfile = zend_hash_index_find(Z_ARRVAL_P(descitem), 1)) != NULL) {
 					if (!try_convert_to_string(zfile)) {
@@ -794,29 +823,9 @@ PHP_FUNCTION(proc_open)
 					goto exit_fail;
 				}
 
-				/* try a wrapper */
-				stream = php_stream_open_wrapper(Z_STRVAL_P(zfile), Z_STRVAL_P(zmode),
-						REPORT_ERRORS|STREAM_WILL_CAST, NULL);
-
-				/* force into an fd */
-				if (stream == NULL || FAILURE == php_stream_cast(stream,
-							PHP_STREAM_CAST_RELEASE|PHP_STREAM_AS_FD,
-							(void **)&fd, REPORT_ERRORS)) {
+				if (set_proc_descriptor_to_file(&descriptors[ndesc], zfile, zmode) == FAILURE) {
 					goto exit_fail;
 				}
-
-#ifdef PHP_WIN32
-				descriptors[ndesc].childend = dup_fd_as_handle((int)fd);
-				_close((int)fd);
-
-				/* simulate the append mode by fseeking to the end of the file
-				this introduces a potential race-condition, but it is the best we can do, though */
-				if (strchr(Z_STRVAL_P(zmode), 'a')) {
-					SetFilePointer(descriptors[ndesc].childend, 0, NULL, FILE_END);
-				}
-#else
-				descriptors[ndesc].childend = fd;
-#endif
 			} else if (strcmp(Z_STRVAL_P(ztype), "redirect") == 0) {
 				zval *ztarget = zend_hash_index_find_deref(Z_ARRVAL_P(descitem), 1);
 				struct php_proc_open_descriptor_item *target = NULL;
