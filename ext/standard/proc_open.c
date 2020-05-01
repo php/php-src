@@ -532,6 +532,37 @@ static int convert_command_to_use_shell(wchar_t **cmdw, size_t cmdw_len)
 }
 #endif
 
+static char* get_command_from_array(zval *array, char ***argv, int num_elems)
+{
+	zval *arg_zv;
+	char *command = NULL;
+	int i = 0;
+
+	*argv = safe_emalloc(sizeof(char *), num_elems + 1, 0);
+
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(array), arg_zv) {
+		zend_string *arg_str = get_valid_arg_string(arg_zv, i + 1);
+		if (!arg_str) {
+			/* terminate argv with NULL so exit_fail code knows how many entries to free */
+			(*argv)[i] = NULL;
+			if (command != NULL) {
+				efree(command);
+			}
+			return NULL;
+		}
+
+		if (i == 0) {
+			command = estrdup(ZSTR_VAL(arg_str));
+		}
+
+		(*argv)[i++] = estrdup(ZSTR_VAL(arg_str));
+		zend_string_release(arg_str);
+	} ZEND_HASH_FOREACH_END();
+
+	(*argv)[i] = NULL;
+	return command;
+}
+
 static struct php_proc_open_descriptor_item* alloc_descriptor_array(zval *descriptorspec)
 {
 	int ndescriptors = zend_hash_num_elements(Z_ARRVAL_P(descriptorspec));
@@ -753,7 +784,6 @@ PHP_FUNCTION(proc_open)
 	memset(&env, 0, sizeof(env));
 
 	if (Z_TYPE_P(command_zv) == IS_ARRAY) {
-		zval *arg_zv;
 		uint32_t num_elems = zend_hash_num_elements(Z_ARRVAL_P(command_zv));
 		if (num_elems == 0) {
 			zend_argument_value_error(1, "must have at least one element");
@@ -767,26 +797,9 @@ PHP_FUNCTION(proc_open)
 			RETURN_FALSE;
 		}
 #else
-		argv = safe_emalloc(sizeof(char *), num_elems + 1, 0);
-		i = 0;
-		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(command_zv), arg_zv) {
-			zend_string *arg_str = get_valid_arg_string(arg_zv, i + 1);
-			if (!arg_str) {
-				argv[i] = NULL;
-				goto exit_fail;
-			}
-
-			if (i == 0) {
-				command = estrdup(ZSTR_VAL(arg_str));
-			}
-
-			argv[i++] = estrdup(ZSTR_VAL(arg_str));
-			zend_string_release(arg_str);
-		} ZEND_HASH_FOREACH_END();
-		argv[i] = NULL;
-
-		/* As the array is non-empty, we should have found a command. */
-		ZEND_ASSERT(command);
+		if ((command = get_command_from_array(command_zv, &argv, num_elems)) == NULL) {
+			goto exit_fail;
+		}
 #endif
 	} else {
 		convert_to_string(command_zv);
