@@ -509,6 +509,11 @@ static void init_startup_info(STARTUPINFOW *si, struct php_proc_open_descriptor_
 	}
 }
 
+static void init_process_info(PROCESS_INFORMATION *pi)
+{
+	memset(&pi, 0, sizeof(pi));
+}
+
 static int convert_command_to_use_shell(wchar_t **cmdw, size_t cmdw_len)
 {
 	size_t len = sizeof(COMSPEC_NT) + sizeof(" /s /c ") + cmdw_len + 3;
@@ -962,8 +967,7 @@ PHP_FUNCTION(proc_open)
 	}
 
 	init_startup_info(&si, descriptors, ndesc);
-
-	memset(&pi, 0, sizeof(pi));
+	init_process_info(&pi);
 
 	if (suppress_errors) {
 		old_error_mode = SetErrorMode(SEM_FAILCRITICALERRORS|SEM_NOGPFAULTERRORBOX);
