@@ -812,6 +812,7 @@ PHP_FUNCTION(proc_open)
 			/* should be a stream - try and dup the descriptor */
 			php_stream *stream;
 			php_socket_t fd;
+			php_file_descriptor_t desc;
 
 			php_stream_from_zval(stream, descitem);
 
@@ -820,18 +821,13 @@ PHP_FUNCTION(proc_open)
 			}
 
 #ifdef PHP_WIN32
-			descriptors[ndesc].childend = dup_fd_as_handle((int)fd);
-			if (descriptors[ndesc].childend == NULL) {
-				php_error_docref(NULL, E_WARNING, "Unable to dup File-Handle for descriptor %d", nindex);
-				goto exit_fail;
-			}
+			desc = (HANDLE)_get_osfhandle(fd);
 #else
-			descriptors[ndesc].childend = dup(fd);
-			if (descriptors[ndesc].childend < 0) {
-				php_error_docref(NULL, E_WARNING, "Unable to dup File-Handle for descriptor " ZEND_ULONG_FMT " - %s", nindex, strerror(errno));
+			desc = fd;
+#endif
+			if (dup_proc_descriptor(desc, &descriptors[ndesc].childend, nindex) == FAILURE) {
 				goto exit_fail;
 			}
-#endif
 		} else if (Z_TYPE_P(descitem) != IS_ARRAY) {
 			zend_argument_value_error(2, "must only contain arrays and File-Handles");
 			goto exit_fail;
