@@ -2,33 +2,33 @@
 
 /** @generate-function-entries */
 
-function strtotime(string $time, int $now = UNKNOWN): int|false {}
+function strtotime(string $time, ?int $now = null): int|false {}
 
-function date(string $format, int $timestamp = UNKNOWN): string {}
+function date(string $format, ?int $timestamp = null): string {}
 
-function idate(string $format, int $timestamp = UNKNOWN): int|false {}
+function idate(string $format, ?int $timestamp = null): int|false {}
 
-function gmdate(string $format, int $timestamp = UNKNOWN): string {}
+function gmdate(string $format, ?int $timestamp = null): string {}
 
 function mktime(
-    int $hour, int $min = UNKNOWN, int $sec = UNKNOWN,
-    int $mon = UNKNOWN, int $day = UNKNOWN, int $year = UNKNOWN): int|false {}
+    int $hour, ?int $min = null, ?int $sec = null,
+    ?int $mon = null, ?int $day = null, ?int $year = null): int|false {}
 
 function gmmktime(
-    int $hour, int $min = UNKNOWN, int $sec = UNKNOWN,
-    int $mon = UNKNOWN, int $day = UNKNOWN, int $year = UNKNOWN): int|false {}
+    int $hour, ?int $min = null, ?int $sec = null,
+    ?int $mon = null, ?int $day = null, ?int $year = null): int|false {}
 
 function checkdate(int $m, int $d, int $y): bool {}
 
-function strftime(string $format, int $timestamp = UNKNOWN): string|false {}
+function strftime(string $format, ?int $timestamp = null): string|false {}
 
-function gmstrftime(string $format, int $timestamp = UNKNOWN): string|false {}
+function gmstrftime(string $format, ?int $timestamp = null): string|false {}
 
 function time(): int {}
 
-function localtime(int $timestamp = UNKNOWN, bool $associative = false): array {}
+function localtime(?int $timestamp = null, bool $associative = false): array {}
 
-function getdate(int $timestamp = UNKNOWN): array {}
+function getdate(?int $timestamp = null): array {}
 
 function date_create(string $time = "now", ?DateTimeZone $timezone = null): DateTime|false {}
 
@@ -104,12 +104,12 @@ function date_default_timezone_get(): string {}
 
 function date_sunrise(
     int $time, int $retformat = SUNFUNCS_RET_STRING,
-    float $latitude = UNKNOWN, float $longitude = UNKNOWN, float $zenith = UNKNOWN,
+    ?float $latitude = null, ?float $longitude = null, ?float $zenith = null,
     float $gmt_offset = 0): string|int|float|false {}
 
 function date_sunset(
     int $time, int $retformat = SUNFUNCS_RET_STRING,
-    float $latitude = UNKNOWN, float $longitude = UNKNOWN, float $zenith = UNKNOWN,
+    ?float $latitude = null, ?float $longitude = null, ?float $zenith = null,
     float $gmt_offset = 0): string|int|float|false {}
 
 function date_sun_info(int $time, float $latitude, float $longitude): array {}
