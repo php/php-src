@@ -38,7 +38,7 @@ function ftp_rmdir($ftp, string $directory): bool {}
 function ftp_chmod($ftp, int $mode, string $filename): int|false {}
 
 /** @param resource $ftp */
-function ftp_alloc($ftp, int $size, &$response = UNKNOWN): bool {}
+function ftp_alloc($ftp, int $size, &$response = null): bool {}
 
 /** @param resource $ftp */
 function ftp_nlist($ftp, string $directory): array|false {}

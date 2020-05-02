@@ -656,9 +656,9 @@ PHP_FUNCTION(enchant_dict_quick_check)
 			enchant_dict_free_string_list(pdict->pdict, suggs);
 		}
 
-
 		RETURN_FALSE;
 	}
+
 	RETURN_TRUE;
 }
 /* }}} */

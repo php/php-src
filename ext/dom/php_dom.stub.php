@@ -103,11 +103,10 @@ class DOMImplementation
     public function hasFeature(string $feature, string $version) {}
 
     /** @return DOMDocumentType|false */
-    public function createDocumentType(
-        string $qualifiedName, string $publicId = "", string $systemId = "") {}
+    public function createDocumentType(string $qualifiedName, string $publicId = "", string $systemId = "") {}
 
     /** @return DOMDocument|false */
-    public function createDocument(string $namespaceURI = "", string $qualifiedName = "", DOMDocumentType $doctype = UNKNOWN) {}
+    public function createDocument(string $namespaceURI = "", string $qualifiedName = "", ?DOMDocumentType $doctype = null) {}
 }
 
 class DOMDocumentFragment implements DOMParentNode
@@ -248,7 +247,7 @@ class DOMElement implements DOMParentNode, DOMChildNode
 
 class DOMDocument implements DOMParentNode
 {
-    public function __construct(string $version = "1.0", string $encoding = UNKNOWN) {}
+    public function __construct(string $version = "1.0", string $encoding = "") {}
 
     /** @return DOMAttr|false */
     public function createAttribute(string $name) {}
