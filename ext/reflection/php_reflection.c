@@ -2112,7 +2112,8 @@ ZEND_METHOD(ReflectionGenerator, getExecutingGenerator)
 ZEND_METHOD(ReflectionParameter, __construct)
 {
 	parameter_reference *ref;
-	zval *reference;
+	zend_fcall_info function_fci;
+	zend_fcall_info_cache function_fci_cache;
 	zend_string *arg_name = NULL;
 	zend_long position;
 	zval *object;
@@ -2122,102 +2123,17 @@ ZEND_METHOD(ReflectionParameter, __construct)
 	struct _zend_arg_info *arg_info;
 	uint32_t num_args;
 	zend_class_entry *ce = NULL;
-	zend_bool is_closure = 0;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_ZVAL(reference)
+		Z_PARAM_FUNC_EX3(function_fci, function_fci_cache, 0, 0, 0, IS_CALLABLE_ACCEPT_NON_STATIC)
 		Z_PARAM_STR_OR_LONG(arg_name, position)
 	ZEND_PARSE_PARAMETERS_END();
 
 	object = ZEND_THIS;
 	intern = Z_REFLECTION_P(object);
 
-	/* First, find the function */
-	switch (Z_TYPE_P(reference)) {
-		case IS_STRING:
-			{
-				zend_string *lcname = zend_string_tolower(Z_STR_P(reference));
-				fptr = zend_hash_find_ptr(EG(function_table), lcname);
-				zend_string_release(lcname);
-				if (!fptr) {
-					zend_throw_exception_ex(reflection_exception_ptr, 0,
-						"Function %s() does not exist", Z_STRVAL_P(reference));
-					RETURN_THROWS();
-				}
-				ce = fptr->common.scope;
-			}
-			break;
-
-		case IS_ARRAY: {
-				zval *classref;
-				zval *method;
-				zend_string *name, *lcname;
-
-				if (((classref = zend_hash_index_find(Z_ARRVAL_P(reference), 0)) == NULL)
-					|| ((method = zend_hash_index_find(Z_ARRVAL_P(reference), 1)) == NULL))
-				{
-					_DO_THROW("Expected array($object, $method) or array($classname, $method)");
-					RETURN_THROWS();
-				}
-
-				if (Z_TYPE_P(classref) == IS_OBJECT) {
-					ce = Z_OBJCE_P(classref);
-				} else {
-					name = zval_try_get_string(classref);
-					if (UNEXPECTED(!name)) {
-						return;
-					}
-					if ((ce = zend_lookup_class(name)) == NULL) {
-						zend_throw_exception_ex(reflection_exception_ptr, 0,
-								"Class %s does not exist", ZSTR_VAL(name));
-						zend_string_release(name);
-						RETURN_THROWS();
-					}
-					zend_string_release(name);
-				}
-
-				name = zval_try_get_string(method);
-				if (UNEXPECTED(!name)) {
-					return;
-				}
-
-				lcname = zend_string_tolower(name);
-				if (Z_TYPE_P(classref) == IS_OBJECT && is_closure_invoke(ce, lcname)
-					&& (fptr = zend_get_closure_invoke_method(Z_OBJ_P(classref))) != NULL)
-				{
-					/* nothing to do. don't set is_closure since is the invoke handler,
-					   not the closure itself */
-				} else if ((fptr = zend_hash_find_ptr(&ce->function_table, lcname)) == NULL) {
-					zend_string_release(name);
-					zend_string_release(lcname);
-					zend_throw_exception_ex(reflection_exception_ptr, 0,
-						"Method %s::%s() does not exist", ZSTR_VAL(ce->name), Z_STRVAL_P(method));
-					RETURN_THROWS();
-				}
-				zend_string_release(name);
-				zend_string_release(lcname);
-			}
-			break;
-
-		case IS_OBJECT: {
-				ce = Z_OBJCE_P(reference);
-
-				if (instanceof_function(ce, zend_ce_closure)) {
-					fptr = (zend_function *)zend_get_closure_method_def(reference);
-					Z_ADDREF_P(reference);
-					is_closure = 1;
-				} else if ((fptr = zend_hash_find_ptr(&ce->function_table, ZSTR_KNOWN(ZEND_STR_MAGIC_INVOKE))) == NULL) {
-					zend_throw_exception_ex(reflection_exception_ptr, 0,
-						"Method %s::%s() does not exist", ZSTR_VAL(ce->name), ZEND_INVOKE_FUNC_NAME);
-					RETURN_THROWS();
-				}
-			}
-			break;
-
-		default:
-			zend_argument_error(reflection_exception_ptr, 1, "must be either a string, an array(class, method) or a callable object, %s given", zend_zval_type_name(reference));
-			RETURN_THROWS();
-	}
+	ZEND_ASSERT(function_fci_cache.function_handler != NULL);
+	fptr = function_fci_cache.function_handler;
 
 	/* Now, search for the parameter */
 	arg_info = fptr->common.arg_info;
@@ -2272,9 +2188,6 @@ ZEND_METHOD(ReflectionParameter, __construct)
 	intern->ptr = ref;
 	intern->ref_type = REF_TYPE_PARAMETER;
 	intern->ce = ce;
-	if (reference && is_closure) {
-		ZVAL_COPY_VALUE(&intern->obj, reference);
-	}
 
 	prop_name = reflection_prop_name(object);
 	if (has_internal_arg_info(fptr)) {
@@ -2288,9 +2201,6 @@ failure:
 	if (fptr->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
 		zend_string_release_ex(fptr->common.function_name, 0);
 		zend_free_trampoline(fptr);
-	}
-	if (is_closure) {
-		zval_ptr_dtor(reference);
 	}
 	RETURN_THROWS();
 }
