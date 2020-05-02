@@ -181,6 +181,7 @@ PHP 8.0 UPGRADE NOTES
   . Disabled functions are now treated exactly like non-existent functions.
     Calling a disabled function will report it as unknown, and redefining a
     disabled function is now possible.
+  . data: wrappers are no longer writable, what matches the documented behavior.
 
 - COM:
   . Removed the ability to import case-insensitive constants from type

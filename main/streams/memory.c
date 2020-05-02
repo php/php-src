@@ -619,7 +619,7 @@ PHPAPI php_stream *_php_stream_temp_open(int mode, size_t max_memory_usage, char
 /* }}} */
 
 PHPAPI const php_stream_ops php_stream_rfc2397_ops = {
-	php_stream_temp_write, php_stream_temp_read,
+	NULL, php_stream_temp_read,
 	php_stream_temp_close, php_stream_temp_flush,
 	"RFC2397",
 	php_stream_temp_seek,
