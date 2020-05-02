@@ -569,17 +569,14 @@ static struct php_proc_open_descriptor_item* alloc_descriptor_array(zval *descri
 	return ecalloc(sizeof(struct php_proc_open_descriptor_item), ndescriptors);
 }
 
-static int get_string_parameter(zval **dest, zval *array, int index, char *param_name)
+static zend_string* get_string_parameter(zval *array, int index, char *param_name)
 {
-	if ((*dest = zend_hash_index_find(Z_ARRVAL_P(array), index)) == NULL) {
+	zval *array_item;
+	if ((array_item = zend_hash_index_find(Z_ARRVAL_P(array), index)) == NULL) {
 		zend_value_error("Missing %s", param_name);
-		return FAILURE;
+		return NULL;
 	}
-	if (!try_convert_to_string(*dest)) {
-		return FAILURE;
-	}
-
-	return SUCCESS;
+	return zval_try_get_string(array_item);
 }
 
 static int set_proc_descriptor_to_blackhole(struct php_proc_open_descriptor_item *desc)
@@ -602,7 +599,7 @@ static int set_proc_descriptor_to_blackhole(struct php_proc_open_descriptor_item
 	return SUCCESS;
 }
 
-static int set_proc_descriptor_to_pipe(struct php_proc_open_descriptor_item *desc, zval *zmode)
+static int set_proc_descriptor_to_pipe(struct php_proc_open_descriptor_item *desc, zend_string *zmode)
 {
 	php_file_descriptor_t newpipe[2];
 
@@ -613,7 +610,7 @@ static int set_proc_descriptor_to_pipe(struct php_proc_open_descriptor_item *des
 
 	desc->is_pipe = 1;
 
-	if (strncmp(Z_STRVAL_P(zmode), "w", 1) != 0) {
+	if (strncmp(ZSTR_VAL(zmode), "w", 1) != 0) {
 		desc->parentend = newpipe[1];
 		desc->childend = newpipe[0];
 		desc->mode_flags = O_WRONLY;
@@ -627,19 +624,19 @@ static int set_proc_descriptor_to_pipe(struct php_proc_open_descriptor_item *des
 	/* don't let the child inherit the parent side of the pipe */
 	desc->parentend = dup_handle(desc->parentend, FALSE, TRUE);
 
-	if (Z_STRLEN_P(zmode) >= 2 && Z_STRVAL_P(zmode)[1] == 'b')
+	if (ZSTR_LEN(zmode) >= 2 && ZSTR_VAL(zmode)[1] == 'b')
 		desc->mode_flags |= O_BINARY;
 #endif
 
 	return SUCCESS;
 }
 
-static int set_proc_descriptor_to_file(struct php_proc_open_descriptor_item *desc, zval *zfile, zval *zmode)
+static int set_proc_descriptor_to_file(struct php_proc_open_descriptor_item *desc, zend_string *zfile, zend_string *zmode)
 {
 	php_socket_t fd;
 
 	/* try a wrapper */
-	php_stream *stream = php_stream_open_wrapper(Z_STRVAL_P(zfile), Z_STRVAL_P(zmode),
+	php_stream *stream = php_stream_open_wrapper(ZSTR_VAL(zfile), ZSTR_VAL(zmode),
 			REPORT_ERRORS|STREAM_WILL_CAST, NULL);
 	if (stream == NULL) {
 		return FAILURE;
@@ -656,7 +653,7 @@ static int set_proc_descriptor_to_file(struct php_proc_open_descriptor_item *des
 
 	/* simulate the append mode by fseeking to the end of the file
 	this introduces a potential race-condition, but it is the best we can do, though */
-	if (strchr(Z_STRVAL_P(zmode), 'a')) {
+	if (strchr(ZSTR_VAL(zmode), 'a')) {
 		SetFilePointer(desc->childend, 0, NULL, FILE_END);
 	}
 #else
@@ -766,6 +763,13 @@ PHP_FUNCTION(proc_open)
 #endif
 	php_process_id_t child;
 	struct php_process_handle *proc;
+
+  /* zend_strings which may be allocated while processing the descriptorspec
+   * we need to make sure that each one allocated is released once and only once */
+	zend_string *ztype = NULL, *zmode = NULL, *zfile = NULL;
+#define cleanup_zend_string(ptr) do { zend_tmp_string_release(ptr); ptr = NULL; } while(0)
+#define cleanup_zend_strings() cleanup_zend_string(ztype); cleanup_zend_string(zmode); cleanup_zend_string(zfile)
+
 #if PHP_CAN_DO_PTS
 	php_file_descriptor_t dev_ptmx = -1;	/* master */
 	php_file_descriptor_t slave_pty = -1;
@@ -825,8 +829,6 @@ PHP_FUNCTION(proc_open)
 
 	/* walk the descriptor spec and set up files/pipes */
 	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(descriptorspec), nindex, str_index, descitem) {
-		zval *ztype;
-
 		if (str_index) {
 			zend_argument_value_error(2, "must be an integer indexed array");
 			goto exit_fail;
@@ -857,33 +859,28 @@ PHP_FUNCTION(proc_open)
 		} else if (Z_TYPE_P(descitem) != IS_ARRAY) {
 			zend_argument_value_error(2, "must only contain arrays and File-Handles");
 			goto exit_fail;
-		} else if (get_string_parameter(&ztype, descitem, 0, "handle qualifier") == FAILURE) {
+		} else if ((ztype = get_string_parameter(descitem, 0, "handle qualifier")) == NULL) {
 				goto exit_fail;
 		} else {
-			if (strcmp(Z_STRVAL_P(ztype), "pipe") == 0) {
-				zval *zmode;
-
-				if (get_string_parameter(&zmode, descitem, 1, "mode parameter for 'pipe'") == FAILURE) {
+			if (zend_string_equals_literal(ztype, "pipe")) {
+				if ((zmode = get_string_parameter(descitem, 1, "mode parameter for 'pipe'")) == NULL) {
 					goto exit_fail;
 				}
-
 				if (set_proc_descriptor_to_pipe(&descriptors[ndesc], zmode) == FAILURE) {
 					goto exit_fail;
 				}
-			} else if (strcmp(Z_STRVAL_P(ztype), "file") == 0) {
-				zval *zfile, *zmode;
-
-				if (get_string_parameter(&zfile, descitem, 1, "file name parameter for 'file'") == FAILURE) {
+			} else if (zend_string_equals_literal(ztype, "file")) {
+				if ((zfile = get_string_parameter(descitem, 1, "file name parameter for 'file'")) == NULL) {
 					goto exit_fail;
 				}
-				if (get_string_parameter(&zmode, descitem, 2, "mode parameter for 'file'") == FAILURE) {
+				if ((zmode = get_string_parameter(descitem, 2, "mode parameter for 'file'")) == NULL) {
 					goto exit_fail;
 				}
 
 				if (set_proc_descriptor_to_file(&descriptors[ndesc], zfile, zmode) == FAILURE) {
 					goto exit_fail;
 				}
-			} else if (strcmp(Z_STRVAL_P(ztype), "redirect") == 0) {
+			} else if (zend_string_equals_literal(ztype, "redirect")) {
 				zval *ztarget = zend_hash_index_find_deref(Z_ARRVAL_P(descitem), 1);
 				php_file_descriptor_t childend = -1;
 
@@ -927,11 +924,11 @@ PHP_FUNCTION(proc_open)
 				if (dup_proc_descriptor(childend, &descriptors[ndesc].childend, nindex) == FAILURE) {
 					goto exit_fail;
 				}
-			} else if (strcmp(Z_STRVAL_P(ztype), "null") == 0) {
+			} else if (zend_string_equals_literal(ztype, "null")) {
 				if (set_proc_descriptor_to_blackhole(&descriptors[ndesc]) == FAILURE) {
 					goto exit_fail;
 				}
-			} else if (strcmp(Z_STRVAL_P(ztype), "pty") == 0) {
+			} else if (zend_string_equals_literal(ztype, "pty")) {
 #if PHP_CAN_DO_PTS
 				if (dev_ptmx == -1) {
 					/* open things up */
@@ -958,9 +955,10 @@ PHP_FUNCTION(proc_open)
 				goto exit_fail;
 #endif
 			} else {
-				php_error_docref(NULL, E_WARNING, "%s is not a valid descriptor spec/mode", Z_STRVAL_P(ztype));
+				php_error_docref(NULL, E_WARNING, "%s is not a valid descriptor spec/mode", ZSTR_VAL(ztype));
 				goto exit_fail;
 			}
+			cleanup_zend_strings();
 		}
 		ndesc++;
 	} ZEND_HASH_FOREACH_END();
@@ -1209,6 +1207,7 @@ exit_fail:
 #else
 	efree_argv(argv);
 #endif
+	cleanup_zend_strings();
 #if PHP_CAN_DO_PTS
 	if (dev_ptmx >= 0) {
 		close(dev_ptmx);
