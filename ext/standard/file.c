@@ -655,7 +655,7 @@ PHP_FUNCTION(file_put_contents)
 		case IS_STRING:
 			if (Z_STRLEN_P(data)) {
 				numbytes = php_stream_write(stream, Z_STRVAL_P(data), Z_STRLEN_P(data));
-				if (numbytes != Z_STRLEN_P(data)) {
+				if (numbytes != -1 && numbytes != Z_STRLEN_P(data)) {
 					php_error_docref(NULL, E_WARNING, "Only %zd of %zd bytes written, possibly out of free disk space", numbytes, Z_STRLEN_P(data));
 					numbytes = -1;
 				}
@@ -691,7 +691,7 @@ PHP_FUNCTION(file_put_contents)
 
 				if (zend_std_cast_object_tostring(Z_OBJ_P(data), &out, IS_STRING) == SUCCESS) {
 					numbytes = php_stream_write(stream, Z_STRVAL(out), Z_STRLEN(out));
-					if (numbytes != Z_STRLEN(out)) {
+					if (numbytes != -1 && numbytes != Z_STRLEN(out)) {
 						php_error_docref(NULL, E_WARNING, "Only %zd of %zd bytes written, possibly out of free disk space", numbytes, Z_STRLEN(out));
 						numbytes = -1;
 					}
