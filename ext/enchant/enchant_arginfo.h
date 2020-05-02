@@ -56,7 +56,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_enchant_dict_quick_check, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, dict)
 	ZEND_ARG_TYPE_INFO(0, word, IS_STRING, 0)
-	ZEND_ARG_INFO(1, suggestions)
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, suggestions, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_enchant_dict_check, 0, 2, _IS_BOOL, 0)

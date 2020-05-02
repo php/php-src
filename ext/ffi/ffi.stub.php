@@ -4,7 +4,7 @@
 
 final class FFI
 {
-    public static function cdef(string $code = UNKNOWN, string $lib = UNKNOWN): FFI {}
+    public static function cdef(?string $code = null, ?string $lib = null): FFI {}
 
     public static function load(string $filename): ?FFI {}
 

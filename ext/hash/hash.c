@@ -481,19 +481,22 @@ PHP_FUNCTION(hash_update_file)
 {
 	zval *zhash, *zcontext = NULL;
 	php_hashcontext_object *hash;
-	php_stream_context *context;
+	php_stream_context *context = NULL;
 	php_stream *stream;
 	zend_string *filename;
 	char buf[1024];
 	ssize_t n;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OP|r", &zhash, php_hashcontext_ce, &filename, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OP|r!", &zhash, php_hashcontext_ce, &filename, &zcontext) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	hash = php_hashcontext_from_object(Z_OBJ_P(zhash));
 	PHP_HASHCONTEXT_VERIFY(hash);
-	context = php_stream_context_from_zval(zcontext, 0);
+
+	if (zcontext) {
+		context = php_stream_context_from_zval(zcontext, 0);
+	}
 
 	stream = php_stream_open_wrapper_ex(ZSTR_VAL(filename), "rb", REPORT_ERRORS, NULL, context);
 	if (!stream) {

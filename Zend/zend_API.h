@@ -1558,6 +1558,9 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_value_error(uint32_t arg_num
 #define Z_PARAM_STR(dest) \
 	Z_PARAM_STR_EX(dest, 0, 0)
 
+#define Z_PARAM_STR_OR_NULL(dest) \
+	Z_PARAM_STR_EX(dest, 1, 0)
+
 /* old "z" */
 #define Z_PARAM_ZVAL_EX2(dest, check_null, deref, separate) \
 		Z_PARAM_PROLOGUE(deref, separate); \

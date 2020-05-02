@@ -54,7 +54,7 @@ function enchant_broker_set_ordering($broker, string $tag, string $ordering): bo
 function enchant_broker_describe($broker): array {}
 
 /** @param resource $dict */
-function enchant_dict_quick_check($dict, string $word, &$suggestions = UNKNOWN): bool {}
+function enchant_dict_quick_check($dict, string $word, &$suggestions = null): bool {}
 
 /** @param resource $dict */
 function enchant_dict_check($dict, string $word): bool {}

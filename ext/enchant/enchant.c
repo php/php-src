@@ -626,7 +626,7 @@ PHP_FUNCTION(enchant_dict_quick_check)
 	size_t wordlen;
 	enchant_dict *pdict;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs|z", &dict, &word, &wordlen, &sugg) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs|z!", &dict, &word, &wordlen, &sugg) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -643,7 +643,7 @@ PHP_FUNCTION(enchant_dict_quick_check)
 		size_t n_sugg;
 		char **suggs;
 
-		if (!sugg && ZEND_NUM_ARGS() == 2) {
+		if (!sugg) {
 			RETURN_FALSE;
 		}
 
@@ -656,9 +656,9 @@ PHP_FUNCTION(enchant_dict_quick_check)
 			enchant_dict_free_string_list(pdict->pdict, suggs);
 		}
 
-
 		RETURN_FALSE;
 	}
+
 	RETURN_TRUE;
 }
 /* }}} */

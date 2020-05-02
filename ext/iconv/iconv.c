@@ -1826,7 +1826,7 @@ static void _php_iconv_show_error(php_iconv_err_t err, const char *out_charset, 
    Returns the character count of str */
 PHP_FUNCTION(iconv_strlen)
 {
-	const char *charset = get_internal_encoding();
+	const char *charset;
 	size_t charset_len = 0;
 	zend_string *str;
 
@@ -1839,7 +1839,9 @@ PHP_FUNCTION(iconv_strlen)
 		RETURN_THROWS();
 	}
 
-	if (charset_len >= ICONV_CSNMAXLEN) {
+	if (charset_len == 0) {
+	 	charset = get_internal_encoding();
+	} else if (charset_len >= ICONV_CSNMAXLEN) {
 		php_error_docref(NULL, E_WARNING, "Charset parameter exceeds the maximum allowed length of %d characters", ICONV_CSNMAXLEN);
 		RETURN_FALSE;
 	}
@@ -1858,7 +1860,7 @@ PHP_FUNCTION(iconv_strlen)
    Returns specified part of a string */
 PHP_FUNCTION(iconv_substr)
 {
-	const char *charset = get_internal_encoding();
+	const char *charset;
 	size_t charset_len = 0;
 	zend_string *str;
 	zend_long offset, length = 0;
@@ -1874,7 +1876,9 @@ PHP_FUNCTION(iconv_substr)
 		RETURN_THROWS();
 	}
 
-	if (charset_len >= ICONV_CSNMAXLEN) {
+	if (charset_len == 0) {
+	 	charset = get_internal_encoding();
+	} else if (charset_len >= ICONV_CSNMAXLEN) {
 		php_error_docref(NULL, E_WARNING, "Charset parameter exceeds the maximum allowed length of %d characters", ICONV_CSNMAXLEN);
 		RETURN_FALSE;
 	}
@@ -1898,7 +1902,7 @@ PHP_FUNCTION(iconv_substr)
    Finds position of first occurrence of needle within part of haystack beginning with offset */
 PHP_FUNCTION(iconv_strpos)
 {
-	const char *charset = get_internal_encoding();
+	const char *charset;
 	size_t charset_len = 0, haystk_len;
 	zend_string *haystk;
 	zend_string *ndl;
@@ -1914,7 +1918,9 @@ PHP_FUNCTION(iconv_strpos)
 		RETURN_THROWS();
 	}
 
-	if (charset_len >= ICONV_CSNMAXLEN) {
+	if (charset_len == 0) {
+	 	charset = get_internal_encoding();
+	} else if (charset_len >= ICONV_CSNMAXLEN) {
 		php_error_docref(NULL, E_WARNING, "Charset parameter exceeds the maximum allowed length of %d characters", ICONV_CSNMAXLEN);
 		RETURN_FALSE;
 	}
@@ -1953,7 +1959,7 @@ PHP_FUNCTION(iconv_strpos)
    Finds position of last occurrence of needle within part of haystack beginning with offset */
 PHP_FUNCTION(iconv_strrpos)
 {
-	const char *charset = get_internal_encoding();
+	const char *charset;
 	size_t charset_len = 0;
 	zend_string *haystk;
 	zend_string *ndl;
@@ -1972,7 +1978,9 @@ PHP_FUNCTION(iconv_strrpos)
 		RETURN_FALSE;
 	}
 
-	if (charset_len >= ICONV_CSNMAXLEN) {
+	if (charset_len == 0) {
+	 	charset = get_internal_encoding();
+	} else if (charset_len >= ICONV_CSNMAXLEN) {
 		php_error_docref(NULL, E_WARNING, "Charset parameter exceeds the maximum allowed length of %d characters", ICONV_CSNMAXLEN);
 		RETURN_FALSE;
 	}
@@ -2097,7 +2105,7 @@ PHP_FUNCTION(iconv_mime_encode)
 PHP_FUNCTION(iconv_mime_decode)
 {
 	zend_string *encoded_str;
-	const char *charset = get_internal_encoding();
+	const char *charset;
 	size_t charset_len = 0;
 	zend_long mode = 0;
 
@@ -2111,7 +2119,9 @@ PHP_FUNCTION(iconv_mime_decode)
 		RETURN_THROWS();
 	}
 
-	if (charset_len >= ICONV_CSNMAXLEN) {
+	if (charset_len == 0) {
+	 	charset = get_internal_encoding();
+	} else if (charset_len >= ICONV_CSNMAXLEN) {
 		php_error_docref(NULL, E_WARNING, "Charset parameter exceeds the maximum allowed length of %d characters", ICONV_CSNMAXLEN);
 		RETURN_FALSE;
 	}
@@ -2137,7 +2147,7 @@ PHP_FUNCTION(iconv_mime_decode)
 PHP_FUNCTION(iconv_mime_decode_headers)
 {
 	zend_string *encoded_str;
-	const char *charset = get_internal_encoding();
+	const char *charset;
 	size_t charset_len = 0;
 	zend_long mode = 0;
 	char *enc_str_tmp;
@@ -2151,7 +2161,9 @@ PHP_FUNCTION(iconv_mime_decode_headers)
 		RETURN_THROWS();
 	}
 
-	if (charset_len >= ICONV_CSNMAXLEN) {
+	if (charset_len == 0) {
+	 	charset = get_internal_encoding();
+	} else if (charset_len >= ICONV_CSNMAXLEN) {
 		php_error_docref(NULL, E_WARNING, "Charset parameter exceeds the maximum allowed length of %d characters", ICONV_CSNMAXLEN);
 		RETURN_FALSE;
 	}

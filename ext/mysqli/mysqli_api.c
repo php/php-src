@@ -737,7 +737,7 @@ PHP_FUNCTION(mysqli_commit)
 	MY_MYSQL	*mysql;
 	zval		*mysql_link;
 	zend_long		flags = TRANS_COR_NO_OPT;
-	char *		name = NULL;
+	char *		name;
 	size_t			name_len = 0;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|ls", &mysql_link, mysqli_link_class_entry, &flags, &name, &name_len) == FAILURE) {
@@ -746,9 +746,9 @@ PHP_FUNCTION(mysqli_commit)
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 
 #if !defined(MYSQLI_USE_MYSQLND)
-	if (mysqli_commit_or_rollback_libmysql(mysql->mysql, TRUE, flags, name)) {
+	if (mysqli_commit_or_rollback_libmysql(mysql->mysql, TRUE, flags, name_len ? name : NULL)) {
 #else
-	if (FAIL == mysqlnd_commit(mysql->mysql, flags, name)) {
+	if (FAIL == mysqlnd_commit(mysql->mysql, flags, name_len ? name : NULL)) {
 #endif
 		RETURN_FALSE;
 	}
