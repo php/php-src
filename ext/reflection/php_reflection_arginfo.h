@@ -346,7 +346,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionParameter___construct, 0, 0, 2)
 	ZEND_ARG_INFO(0, function)
-	ZEND_ARG_INFO(0, parameter)
+	ZEND_ARG_TYPE_MASK(0, parameter, MAY_BE_LONG|MAY_BE_STRING, NULL)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionParameter___toString arginfo_class_ReflectionFunction___toString

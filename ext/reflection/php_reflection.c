@@ -2112,20 +2112,22 @@ ZEND_METHOD(ReflectionGenerator, getExecutingGenerator)
 ZEND_METHOD(ReflectionParameter, __construct)
 {
 	parameter_reference *ref;
-	zval *reference, *parameter;
+	zval *reference;
+	zend_string *string_parameter = NULL;
+	zend_long position_parameter;
 	zval *object;
 	zval *prop_name;
 	reflection_object *intern;
 	zend_function *fptr;
 	struct _zend_arg_info *arg_info;
-	int position;
 	uint32_t num_args;
 	zend_class_entry *ce = NULL;
 	zend_bool is_closure = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &reference, &parameter) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_ZVAL(reference)
+		Z_PARAM_STR_OR_LONG(string_parameter, position_parameter)
+	ZEND_PARSE_PARAMETERS_END();
 
 	object = ZEND_THIS;
 	intern = Z_REFLECTION_P(object);
@@ -2223,50 +2225,48 @@ ZEND_METHOD(ReflectionParameter, __construct)
 	if (fptr->common.fn_flags & ZEND_ACC_VARIADIC) {
 		num_args++;
 	}
-	if (Z_TYPE_P(parameter) == IS_LONG) {
-		position= (int)Z_LVAL_P(parameter);
-		if (position < 0 || (uint32_t)position >= num_args) {
-			_DO_THROW("The parameter specified by its offset could not be found");
-			goto failure;
-		}
-	} else {
+	if (string_parameter != NULL) {
 		uint32_t i;
-
-		position = -1;
-		if (!try_convert_to_string(parameter)) {
-			goto failure;
-		}
+		position_parameter = -1;
 
 		if (has_internal_arg_info(fptr)) {
 			for (i = 0; i < num_args; i++) {
 				if (arg_info[i].name) {
-					if (strcmp(((zend_internal_arg_info*)arg_info)[i].name, Z_STRVAL_P(parameter)) == 0) {
-						position = i;
+					if (strcmp(((zend_internal_arg_info*)arg_info)[i].name, ZSTR_VAL(string_parameter)) == 0) {
+						position_parameter = i;
 						break;
 					}
-
 				}
 			}
 		} else {
 			for (i = 0; i < num_args; i++) {
 				if (arg_info[i].name) {
-					if (strcmp(ZSTR_VAL(arg_info[i].name), Z_STRVAL_P(parameter)) == 0) {
-						position = i;
+					if (zend_string_equals(string_parameter, arg_info[i].name)) {
+						position_parameter = i;
 						break;
 					}
 				}
 			}
 		}
-		if (position == -1) {
+		if (position_parameter == -1) {
 			_DO_THROW("The parameter specified by its name could not be found");
+			goto failure;
+		}
+	} else {
+		if (position_parameter < 0) {
+			zend_argument_value_error(2, "must be greater than or equal to 0");
+			goto failure;
+		}
+		if (position_parameter >= num_args) {
+			_DO_THROW("The parameter specified by its offset could not be found");
 			goto failure;
 		}
 	}
 
 	ref = (parameter_reference*) emalloc(sizeof(parameter_reference));
-	ref->arg_info = &arg_info[position];
-	ref->offset = (uint32_t)position;
-	ref->required = (uint32_t)position < fptr->common.required_num_args;
+	ref->arg_info = &arg_info[position_parameter];
+	ref->offset = (uint32_t)position_parameter;
+	ref->required = (uint32_t)position_parameter < fptr->common.required_num_args;
 	ref->fptr = fptr;
 	/* TODO: copy fptr */
 	intern->ptr = ref;
@@ -2278,9 +2278,9 @@ ZEND_METHOD(ReflectionParameter, __construct)
 
 	prop_name = reflection_prop_name(object);
 	if (has_internal_arg_info(fptr)) {
-		ZVAL_STRING(prop_name, ((zend_internal_arg_info*)arg_info)[position].name);
+		ZVAL_STRING(prop_name, ((zend_internal_arg_info*)arg_info)[position_parameter].name);
 	} else {
-		ZVAL_STR_COPY(prop_name, arg_info[position].name);
+		ZVAL_STR_COPY(prop_name, arg_info[position_parameter].name);
 	}
 	return;
 
@@ -2292,6 +2292,7 @@ failure:
 	if (is_closure) {
 		zval_ptr_dtor(reference);
 	}
+	RETURN_THROWS();
 }
 /* }}} */
 
