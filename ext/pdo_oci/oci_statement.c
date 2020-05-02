@@ -327,6 +327,11 @@ static int oci_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *pa
 						value_sz = (sb4) sizeof(OCILobLocator*);
 						break;
 
+					case PDO_PARAM_NULL:
+						P->oci_type = SQLT_CHR;
+						value_sz = 0;
+						break;
+
 					case PDO_PARAM_STR:
 					default:
 						P->oci_type = SQLT_CHR;

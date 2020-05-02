@@ -39,22 +39,37 @@ SQL
         printf("[002] Expecting false got %s\n", var_export($tmp, true));
 
     $stmt->execute();
-    // Warning: PDOStatement::getColumnMeta() expects exactly 1 parameter, 0 given in
-    if (false !== ($tmp = @$stmt->getColumnMeta()))
-        printf("[003] Expecting false got %s\n", var_export($tmp, true));
 
+    echo "Test 1.1\n";
+    try {
+        $tmp = $stmt->getColumnMeta();
+    } catch (Throwable $e) {
+        echo get_class($e) . "\n";
+        echo $e->getMessage() . "\n";
+    }
+
+    echo "Test 1.2\n";
     // invalid offset
     if (false !== ($tmp = @$stmt->getColumnMeta(-1)))
         printf("[004] Expecting false got %s\n", var_export($tmp, true));
 
-    // Warning: PDOStatement::getColumnMeta(): Argument #1 must be of type int, array given in
-    if (false !== ($tmp = @$stmt->getColumnMeta(array())))
-        printf("[005] Expecting false got %s\n", var_export($tmp, true));
+    echo "Test 1.3\n";
+    try {
+        $stmt->getColumnMeta([]);
+    } catch (Throwable $e) {
+        echo get_class($e) . "\n";
+        echo $e->getMessage() . "\n";
+    }
 
-    // Warning: PDOStatement::getColumnMeta() expects exactly 1 parameter, 2 given in
-    if (false !== ($tmp = @$stmt->getColumnMeta(1, 1)))
-        printf("[006] Expecting false got %s\n", var_export($tmp, true));
+    echo "Test 1.4\n";
+    try {
+        $stmt->getColumnMeta(1, 1);
+    } catch (Throwable $e) {
+        echo get_class($e) . "\n";
+        echo $e->getMessage() . "\n";
+    }
 
+    echo "Test 1.5\n";
     // invalid offset
     if (false !== ($tmp = $stmt->getColumnMeta(1)))
         printf("[007] Expecting false because of invalid offset got %s\n", var_export($tmp, true));
@@ -290,6 +305,17 @@ print "done!";
 --EXPECT--
 Preparations before the test
 Test 1. calling function with invalid parameters
+Test 1.1
+ArgumentCountError
+PDOStatement::getColumnMeta() expects exactly 1 parameter, 0 given
+Test 1.2
+Test 1.3
+TypeError
+PDOStatement::getColumnMeta(): Argument #1 ($column) must be of type int, array given
+Test 1.4
+ArgumentCountError
+PDOStatement::getColumnMeta() expects exactly 1 parameter, 2 given
+Test 1.5
 Test 2. testing return values
 Test 2.1 testing array returned
 Test 2.2 testing numeric columns
