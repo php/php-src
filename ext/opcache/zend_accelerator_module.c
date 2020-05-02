@@ -251,7 +251,11 @@ ZEND_INI_BEGIN()
 	STD_PHP_INI_ENTRY("opcache.cache_id"                      , ""    , PHP_INI_SYSTEM, OnUpdateString,           accel_directives.cache_id,               zend_accel_globals, accel_globals)
 #endif
 #ifdef HAVE_JIT
-	STD_PHP_INI_ENTRY("opcache.jit"                           , ZEND_JIT_DEFAULT, PHP_INI_SYSTEM, OnUpdateLong, accel_directives.jit,                      zend_accel_globals, accel_globals)
+	STD_PHP_INI_ENTRY("opcache.jit"                           , "1"   , PHP_INI_SYSTEM, OnUpdateBool,      accel_directives.jit,                      zend_accel_globals, accel_globals)
+	STD_PHP_INI_ENTRY("opcache.jit_optimization_level"        , "5"   , PHP_INI_SYSTEM, OnUpdateLong,      accel_directives.jit_optimization_level,        zend_accel_globals, accel_globals)
+	STD_PHP_INI_ENTRY("opcache.jit_trigger"                   , "0"   , PHP_INI_SYSTEM, OnUpdateLong,      accel_directives.jit_trigger,                   zend_accel_globals, accel_globals)
+	STD_PHP_INI_ENTRY("opcache.jit_register_allocation"       , "2"   , PHP_INI_SYSTEM, OnUpdateLong,      accel_directives.jit_register_allocation,       zend_accel_globals, accel_globals)
+	STD_PHP_INI_ENTRY("opcache.jit_cpu_flags"                 , "1"   , PHP_INI_SYSTEM,	OnUpdateLong,      accel_directives.jit_cpu_flags,                 zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.jit_buffer_size"               , "0"   , PHP_INI_SYSTEM, OnUpdateLong,	   accel_directives.jit_buffer_size,               zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.jit_debug"                     , "0"   , PHP_INI_SYSTEM, OnUpdateLong,	   accel_directives.jit_debug,                     zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.jit_bisect_limit"              , "0"   , PHP_INI_SYSTEM, OnUpdateLong,      accel_directives.jit_bisect_limit,              zend_accel_globals, accel_globals)
@@ -722,7 +726,11 @@ ZEND_FUNCTION(opcache_get_configuration)
 	add_assoc_string(&directives, "opcache.cache_id", STRING_NOT_NULL(ZCG(accel_directives).cache_id));
 #endif
 #ifdef HAVE_JIT
-	add_assoc_long(&directives,   "opcache.jit", ZCG(accel_directives).jit);
+	add_assoc_bool(&directives,   "opcache.jit", ZCG(accel_directives).jit);
+	add_assoc_long(&directives,   "opcache.jit_optimization_level", ZCG(accel_directives).jit_optimization_level);
+	add_assoc_long(&directives,   "opcache.jit_trigger", ZCG(accel_directives).jit_trigger);
+	add_assoc_long(&directives,   "opcache.jit_register_allocation", ZCG(accel_directives).jit_register_allocation);
+	add_assoc_long(&directives,   "opcache.jit_cpu_flags", ZCG(accel_directives).jit_cpu_flags);
 	add_assoc_long(&directives,   "opcache.jit_buffer_size", ZCG(accel_directives).jit_buffer_size);
 	add_assoc_long(&directives,   "opcache.jit_debug", ZCG(accel_directives).jit_debug);
 	add_assoc_long(&directives,   "opcache.jit_bisect_limit", ZCG(accel_directives).jit_bisect_limit);

@@ -3010,10 +3010,15 @@ static int accel_post_startup(void)
 
 		zend_shared_alloc_lock();
 #ifdef HAVE_JIT
+		zend_long jit_flags = ZCG(accel_directives).jit_optimization_level * 1 +
+			ZCG(accel_directives).jit_trigger * 10 +
+			ZCG(accel_directives).jit_register_allocation * 100 +
+			ZCG(accel_directives).jit_cpu_flags * 1000;
+
 		if (ZCG(accel_directives).jit &&
 		    ZCG(accel_directives).jit_buffer_size &&
 		    ZSMMG(reserved) &&
-			zend_jit_startup(ZCG(accel_directives).jit, ZSMMG(reserved), jit_size, reattached) == SUCCESS) {
+			zend_jit_startup(jit_flags, ZSMMG(reserved), jit_size, reattached) == SUCCESS) {
 			ZCG(jit_enabled) = 1;
 		} else {
 			ZCG(jit_enabled) = 0;

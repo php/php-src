@@ -192,7 +192,11 @@ typedef struct _zend_accel_directives {
 	char *cache_id;
 #endif
 #ifdef HAVE_JIT
-	zend_long      jit;
+	zend_bool      jit;
+	zend_long      jit_optimization_level;
+	zend_long      jit_trigger;
+	zend_long      jit_register_allocation;
+	zend_long      jit_cpu_flags;
 	zend_long      jit_buffer_size;
 	zend_long      jit_debug;
 	zend_long      jit_bisect_limit;
