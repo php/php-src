@@ -4,107 +4,64 @@
 
 class IntlChar
 {
-    /**
-     * @param int|string $codepoint
-     * @return bool|null
-     */
-    public static function hasBinaryProperty($codepoint, int $property) {}
+    /** @return bool|null */
+    public static function hasBinaryProperty(int|string $codepoint, int $property) {}
 
-    /**
-     * @param int|string $codepoint
-     * @return array|null
-     */
-    public static function charAge($codepoint) {}
+    /** @return array|null */
+    public static function charAge(int|string $codepoint) {}
 
-    /**
-     * @param int|string $codepoint
-     * @return int|null
-     */
-    public static function charDigitValue($codepoint) {}
+    /** @return int|null */
+    public static function charDigitValue(int|string $codepoint) {}
 
-    /**
-     * @param int|string $codepoint
-     * @return int|null
+    /** @return int|null
      */
-    public static function charDirection($codepoint) {}
+    public static function charDirection(int|string $codepoint) {}
 
     /** @return int|null */
     public static function charFromName(string $characterName, int $nameChoice = IntlChar::UNICODE_CHAR_NAME) {}
 
-    /**
-     * @param int|string $codepoint
-     * @return int|string|null
-     */
-    public static function charMirror($codepoint) {}
+    /** @return int|string|null */
+    public static function charMirror(int|string $codepoint) {}
 
-    /**
-     * @param int|string $codepoint
-     * @return string|null
-     */
-    public static function charName($codepoint, int $nameChoice = IntlChar::UNICODE_CHAR_NAME) {}
+    /** @return string|null */
+    public static function charName(int|string $codepoint, int $nameChoice = IntlChar::UNICODE_CHAR_NAME) {}
 
-    /**
-     * @param int|string $codepoint
-     * @return int|null
-     */
-    public static function charType($codepoint) {}
+    /** @return int|null */
+    public static function charType(int|string $codepoint) {}
 
-    /**
-     * @param int|string $codepoint
-     * @return string|null
-     */
-    public static function chr($codepoint) {}
+    /** @return string|null */
+    public static function chr(int|string $codepoint) {}
 
-    /**
-     * @param int|string $codepoint
-     * @return int|false|null
-     */
-    public static function digit($codepoint, int $radix = 10) {}
+    /** @return int|false|null */
+    public static function digit(int|string $codepoint, int $radix = 10) {}
 
-    /**
-     * @param int|string $start
-     * @param int|string $limit
-     * @return bool|null
-     */
-    public static function enumCharNames($start, $limit, callable $callback, int $nameChoice = IntlChar::UNICODE_CHAR_NAME) {}
+    /** @return bool|null */
+    public static function enumCharNames(int|string $start, int|string $limit, callable $callback, int $nameChoice = IntlChar::UNICODE_CHAR_NAME) {}
 
     /** @return void */
     public static function enumCharTypes(callable $callback) {}
 
     /**
-     * @param int|string $codepoint
      * @return int|string|null
      */
-    public static function foldCase($codepoint, int $options = IntlChar::FOLD_CASE_DEFAULT) {}
+    public static function foldCase(int|string $codepoint, int $options = IntlChar::FOLD_CASE_DEFAULT) {}
 
     /** @return int */
     public static function forDigit(int $digit, $radix = 10) {}
 
 #if U_ICU_VERSION_MAJOR_NUM >= 52
-    /**
-     * @param int|string $codepoint
-     * @return int|string|null
-     */
-    public static function getBidiPairedBracket($codepoint) {}
+    /** @return int|string|null */
+    public static function getBidiPairedBracket(int|string $codepoint) {}
 #endif
 
-    /**
-     * @param int|string $codepoint
-     * @return int|null
-     */
-    public static function getBlockCode($codepoint) {}
+    /** @return int|null */
+    public static function getBlockCode(int|string $codepoint) {}
 
-    /**
-     * @param int|string $codepoint
-     * @return int|null
-     */
-    public static function getCombiningClass($codepoint) {}
+    /** @return int|null */
+    public static function getCombiningClass(int|string $codepoint) {}
 
-    /**
-     * @param int|string $codepoint
-     * @return string|false|null
-     */
-    public static function getFC_NFKC_Closure($codepoint) {}
+    /** @return string|false|null */
+    public static function getFC_NFKC_Closure(int|string $codepoint) {}
 
     /** @return int */
     public static function getIntPropertyMaxValue(int $property) {}
@@ -112,22 +69,13 @@ class IntlChar
     /** @return int */
     public static function getIntPropertyMinValue(int $property) {}
 
-    /**
-     * @param int|string $codepoint
-     * @return int|null
-     */
-    public static function getIntPropertyValue($codepoint, int $property) {}
+    /** @return int|null */
+    public static function getIntPropertyValue(int|string $codepoint, int $property) {}
 
-    /**
-     * @param int|string $codepoint
-     * @return float|null
-     */
-    public static function getNumericValue($codepoint) {}
+    /** @return float|null */
+    public static function getNumericValue(int|string $codepoint) {}
 
-    /**
-     * @param string $alias
-     * @return int
-     */
+    /** @return int */
     public static function getPropertyEnum(string $alias) {}
 
     /** @return string|false */
@@ -137,200 +85,104 @@ class IntlChar
     public static function getPropertyValueEnum(int $property, string $name) {}
 
     /** @return string|false */
-    public static function getPropertyValueName(int $property, int $value, $nameChoice = IntlChar::LONG_PROPERTY_NAME) {}
+    public static function getPropertyValueName(int $property, int $value, int $nameChoice = IntlChar::LONG_PROPERTY_NAME) {}
 
     /** @return array */
     public static function getUnicodeVersion() {}
 
-    /**
-     * @param int|string $codepoint
-     * @return bool|null
-     */
-    public static function isalnum($codepoint) {}
+    /** @return bool|null */
+    public static function isalnum(int|string $codepoint) {}
 
-    /**
-     * @param int|string $codepoint
-     * @return bool|null
-     */
-    public static function isalpha($codepoint) {}
+    /** @return bool|null */
+    public static function isalpha(int|string $codepoint) {}
 
-    /**
-     * @param int|string $codepoint
-     * @return bool|null
-     */
-    public static function isbase($codepoint) {}
+    /** @return bool|null */
+    public static function isbase(int|string $codepoint) {}
 
-    /**
-     * @param int|string $codepoint
-     * @return bool|null
-     */
-    public static function isblank($codepoint) {}
+    /** @return bool|null */
+    public static function isblank(int|string $codepoint) {}
 
-    /**
-     * @param int|string $codepoint
-     * @return bool|null
-     */
-    public static function iscntrl($codepoint ) {}
+    /** @return bool|null */
+    public static function iscntrl(int|string $codepoint) {}
 
-    /**
-     * @param int|string $codepoint
-     * @return bool|null
-     */
-    public static function isdefined($codepoint) {}
+    /** @return bool|null */
+    public static function isdefined(int|string $codepoint) {}
 
-    /**
-     * @param int|string $codepoint
-     * @return bool|null
-     */
-    public static function isdigit($codepoint) {}
+    /** @return bool|null */
+    public static function isdigit(int|string $codepoint) {}
 
-    /**
-     * @param int|string $codepoint
-     * @return bool|null
-     */
-    public static function isgraph($codepoint ) {}
+    /** @return bool|null */
+    public static function isgraph(int|string $codepoint) {}
 
-    /**
-     * @param int|string $codepoint
-     * @return bool|null
-     */
-    public static function isIDIgnorable($codepoint) {}
+    /** @return bool|null */
+    public static function isIDIgnorable(int|string $codepoint) {}
 
-    /**
-     * @param int|string $codepoint
-     * @return bool|null
-     */
-    public static function isIDPart($codepoint) {}
+    /** @return bool|null */
+    public static function isIDPart(int|string $codepoint) {}
 
-    /**
-     * @param int|string $codepoint
-     * @return bool|null
-     */
-    public static function isIDStart($codepoint) {}
+    /** @return bool|null */
+    public static function isIDStart(int|string $codepoint) {}
 
-    /**
-     * @param int|string $codepoint
-     * @return bool|null
-     */
-    public static function isISOControl($codepoint) {}
+    /** @return bool|null */
+    public static function isISOControl(int|string $codepoint) {}
 
-    /**
-     * @param int|string $codepoint
-     * @return bool|null
-     */
-    public static function isJavaIDPart($codepoint) {}
+    /** @return bool|null */
+    public static function isJavaIDPart(int|string $codepoint) {}
 
-    /**
-     * @param int|string $codepoint
-     * @return bool|null
-     */
-    public static function isJavaIDStart($codepoint) {}
+    /** @return bool|null */
+    public static function isJavaIDStart(int|string $codepoint) {}
 
-    /**
-     * @param int|string $codepoint
-     * @return bool|null
-     */
-    public static function isJavaSpaceChar($codepoint) {}
+    /** @return bool|null */
+    public static function isJavaSpaceChar(int|string $codepoint) {}
 
-    /**
-     * @param int|string $codepoint
-     * @return bool|null
-     */
-    public static function islower($codepoint) {}
+    /** @return bool|null */
+    public static function islower(int|string $codepoint) {}
 
-    /**
-     * @param int|string $codepoint
-     * @return bool|null
-     */
-    public static function isMirrored($codepoint) {}
+    /** @return bool|null */
+    public static function isMirrored(int|string $codepoint) {}
 
-    /**
-     * @param int|string $codepoint
-     * @return bool|null
-     */
-    public static function isprint($codepoint) {}
+    /** @return bool|null */
+    public static function isprint(int|string $codepoint) {}
 
-    /**
-     * @param int|string $codepoint
-     * @return bool|null
-     */
-    public static function ispunct($codepoint) {}
+    /** @return bool|null */
+    public static function ispunct(int|string $codepoint) {}
 
-    /**
-     * @param int|string $codepoint
-     * @return bool|null
-     */
-    public static function isspace($codepoint) {}
+    /** @return bool|null */
+    public static function isspace(int|string $codepoint) {}
 
-    /**
-     * @param int|string $codepoint
-     * @return bool|null
-     */
-    public static function istitle($codepoint) {}
+    /** @return bool|null */
+    public static function istitle(int|string $codepoint) {}
 
-    /**
-     * @param int|string $codepoint
-     * @return bool|null
-     */
-    public static function isUAlphabetic($codepoint) {}
+    /** @return bool|null */
+    public static function isUAlphabetic(int|string $codepoint) {}
 
-    /**
-     * @param int|string $codepoint
-     * @return bool|null
-     */
-    public static function isULowercase($codepoint) {}
+    /** @return bool|null */
+    public static function isULowercase(int|string $codepoint) {}
 
-    /**
-     * @param int|string $codepoint
-     * @return bool|null
-     */
-    public static function isupper($codepoint) {}
+    /** @return bool|null */
+    public static function isupper(int|string $codepoint) {}
 
-    /**
-     * @param int|string $codepoint
-     * @return bool|null
-     */
-    public static function isUUppercase($codepoint) {}
+    /** @return bool|null */
+    public static function isUUppercase(int|string $codepoint) {}
 
-    /**
-     * @param int|string $codepoint
-     * @return bool|null
-     */
-    public static function isUWhiteSpace($codepoint) {}
+    /** @return bool|null */
+    public static function isUWhiteSpace(int|string $codepoint) {}
 
-    /**
-     * @param int|string $codepoint
-     * @return bool|null
-     */
-    public static function isWhitespace($codepoint) {}
+    /** @return bool|null */
+    public static function isWhitespace(int|string $codepoint) {}
 
-    /**
-     * @param int|string $codepoint
-     * @return bool|null
-     */
-    public static function isxdigit($codepoint) {}
+    /** @return bool|null */
+    public static function isxdigit(int|string $codepoint) {}
 
-    /**
-     * @param int|string $character
-     * @return int|null
-     */
-    public static function ord($character) {}
+    /** @return int|null */
+    public static function ord(int|string $character) {}
 
-    /**
-     * @param int|string $codepoint
-     * @return int|string|null
-     */
-    public static function tolower($codepoint) {}
+    /** @return int|string|null */
+    public static function tolower(int|string $codepoint) {}
 
-    /**
-     * @param mixed $codepoint
-     * @return int|string|null
-     */
-    public static function totitle($codepoint) {}
+    /** @return int|string|null */
+    public static function totitle(int|string $codepoint) {}
 
-    /**
-     * @param int|string $codepoint
-     * @return int|string|null
-     */
-    public static function toupper($codepoint) {}
+    /** @return int|string|null */
+    public static function toupper(int|string $codepoint) {}
 }
