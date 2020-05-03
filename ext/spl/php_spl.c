@@ -310,10 +310,14 @@ PHP_FUNCTION(spl_autoload)
 {
 	int pos_len, pos1_len;
 	char *pos, *pos1;
-	zend_string *class_name, *lc_name, *file_exts = SPL_G(autoload_extensions);
+	zend_string *class_name, *lc_name, *file_exts = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|S", &class_name, &file_exts) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|S!", &class_name, &file_exts) == FAILURE) {
 		RETURN_THROWS();
+	}
+
+	if (!file_exts) {
+		file_exts = SPL_G(autoload_extensions);
 	}
 
 	if (file_exts == NULL) { /* autoload_extensions is not initialized, set to defaults */
@@ -347,9 +351,10 @@ PHP_FUNCTION(spl_autoload_extensions)
 {
 	zend_string *file_exts = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S", &file_exts) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S!", &file_exts) == FAILURE) {
 		RETURN_THROWS();
 	}
+
 	if (file_exts) {
 		if (SPL_G(autoload_extensions)) {
 			zend_string_release_ex(SPL_G(autoload_extensions), 0);
@@ -513,11 +518,11 @@ PHP_FUNCTION(spl_autoload_register)
 	zend_object *obj_ptr;
 	zend_fcall_info_cache fcc;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|zbb", &zcallable, &do_throw, &prepend) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|z!bb", &zcallable, &do_throw, &prepend) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	if (ZEND_NUM_ARGS()) {
+	if (zcallable) {
 		if (!zend_is_callable_ex(zcallable, NULL, 0, &func_name, &fcc, &error)) {
 			alfi.ce = fcc.calling_scope;
 			alfi.func_ptr = fcc.function_handler;
