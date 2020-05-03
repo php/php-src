@@ -213,13 +213,37 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, ph
 					protocol = "ssl";
 					break;
 
-				default:
+				case SOAP_SSL_METHOD_TLSv1_0:
+					protocol = "tlsv1.0";
+					break;
+
+				case SOAP_SSL_METHOD_TLSv1_1:
+					protocol = "tlsv1.1";
+					break;
+
+				case SOAP_SSL_METHOD_TLSv1_2:
+					protocol = "tlsv1.2";
+					break;
+
+				case SOAP_SSL_METHOD_TLSv1_3:
+					protocol = "tlsv1.3";
+					break;
+
+				case SOAP_SSL_METHOD_TLS_ANY:
+					protocol = "tls";
+					break;
+
+				case SOAP_SSL_METHOD_ANY:
 					protocol = "ssl";
+					break;
+
+				default:
+					protocol = "tls";
 					break;
 
 			}
 		} else {
-			protocol = "ssl";
+			protocol = "tls";
 		}
 	} else {
 		protocol = "tcp";
@@ -280,7 +304,7 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, ph
 		if (stream) {
 			/* if a stream is created without encryption, check to see if SSL method parameter is specified and use
  			   proper encrypyion method based on constants defined in soap.c */
-			int crypto_method = STREAM_CRYPTO_METHOD_SSLv23_CLIENT;
+			int crypto_method = STREAM_CRYPTO_METHOD_TLS_ANY_CLIENT;
 			if ((tmp = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_ssl_method", sizeof("_ssl_method")-1)) != NULL &&
 				Z_TYPE_P(tmp) == IS_LONG) {
 				switch (Z_LVAL_P(tmp)) {
@@ -300,8 +324,32 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, ph
 						crypto_method = STREAM_CRYPTO_METHOD_SSLv23_CLIENT;
 						break;
 
+					case SOAP_SSL_METHOD_TLSv1_0:
+						crypto_method = STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT;
+						break;
+
+					case SOAP_SSL_METHOD_TLSv1_1:
+						crypto_method = STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT;
+						break;
+
+					case SOAP_SSL_METHOD_TLSv1_2:
+						crypto_method = STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT;
+						break;
+
+					case SOAP_SSL_METHOD_TLSv1_3:
+						crypto_method = STREAM_CRYPTO_METHOD_TLSv1_3_CLIENT;
+						break;
+
+					case SOAP_SSL_METHOD_TLS_ANY:
+						crypto_method = STREAM_CRYPTO_METHOD_TLS_ANY_CLIENT;
+						break;
+
+					case SOAP_SSL_METHOD_ANY:
+						crypto_method = STREAM_CRYPTO_METHOD_ANY_CLIENT;
+						break;
+
 					default:
-						crypto_method = STREAM_CRYPTO_METHOD_TLS_CLIENT;
+						crypto_method = STREAM_CRYPTO_METHOD_TLS_ANY_CLIENT;
 						break;
 				}
 			}

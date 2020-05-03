@@ -147,11 +147,16 @@ struct _soapService {
 #define WSDL_CACHE_BOTH     0x3
 
 /* New SOAP SSL Method Constants */
-#define SOAP_SSL_METHOD_TLS     0
-#define SOAP_SSL_METHOD_SSLv2   1
-#define SOAP_SSL_METHOD_SSLv3   2
-#define SOAP_SSL_METHOD_SSLv23  3
-
+#define SOAP_SSL_METHOD_TLS      0
+#define SOAP_SSL_METHOD_SSLv2    1
+#define SOAP_SSL_METHOD_SSLv3    2
+#define SOAP_SSL_METHOD_SSLv23   3
+#define SOAP_SSL_METHOD_TLSv1_0  4
+#define SOAP_SSL_METHOD_TLSv1_1  5
+#define SOAP_SSL_METHOD_TLSv1_2  6
+#define SOAP_SSL_METHOD_TLSv1_3  7
+#define SOAP_SSL_METHOD_TLS_ANY  8
+#define SOAP_SSL_METHOD_ANY      9
 
 ZEND_BEGIN_MODULE_GLOBALS(soap)
 	HashTable  defEncNs;     /* mapping of default namespaces to prefixes */
