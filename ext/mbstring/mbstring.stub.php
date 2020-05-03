@@ -12,8 +12,7 @@ function mb_http_output(string $encoding = UNKNOWN): string|bool {}
 
 function mb_detect_order(array|string $encoding = UNKNOWN): array|bool {}
 
-/** @param string|int $substchar */
-function mb_substitute_character($substchar = UNKNOWN): string|int|bool {}
+function mb_substitute_character(string|int|null $substitute_character = null): string|int|bool {}
 
 function mb_preferred_mime_name(string $encoding): string|false {}
 

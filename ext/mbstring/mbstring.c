@@ -1527,7 +1527,7 @@ PHP_FUNCTION(mb_detect_order)
 
 static inline int php_mb_check_code_point(zend_long cp)
 {
-	if (cp <= 0 || cp >= 0x110000) {
+	if (cp < 0 || cp >= 0x110000) {
 		/* Out of Unicode range */
 		return 0;
 	}
@@ -1544,61 +1544,58 @@ static inline int php_mb_check_code_point(zend_long cp)
 	return 1;
 }
 
-/* {{{ proto mixed mb_substitute_character([mixed substchar])
+/* {{{ proto string|int|true mb_substitute_character([string|int|null substitute_character])
    Sets the current substitute_character or returns the current substitute_character */
 PHP_FUNCTION(mb_substitute_character)
 {
-	zval *arg1 = NULL;
+	zend_string *substitute_character = NULL;
+	zend_long substitute_codepoint;
+	zend_bool substitute_is_null = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|z", &arg1) == FAILURE) {
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_LONG_OR_NULL(substitute_character, substitute_codepoint, substitute_is_null)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (substitute_is_null) {
+		if (MBSTRG(current_filter_illegal_mode) == MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
+			RETURN_STRING("none");
+		}
+		if (MBSTRG(current_filter_illegal_mode) == MBFL_OUTPUTFILTER_ILLEGAL_MODE_LONG) {
+			RETURN_STRING("long");
+		}
+		if (MBSTRG(current_filter_illegal_mode) == MBFL_OUTPUTFILTER_ILLEGAL_MODE_ENTITY) {
+			RETURN_STRING("entity");
+		}
+		RETURN_LONG(MBSTRG(current_filter_illegal_substchar));
+	}
+
+	if (substitute_character != NULL) {
+		if (zend_string_equals_literal_ci(substitute_character, "none")) {
+			MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE;
+			RETURN_TRUE;
+		}
+		if (zend_string_equals_literal_ci(substitute_character, "long")) {
+			MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_LONG;
+			RETURN_TRUE;
+		}
+		if (zend_string_equals_literal_ci(substitute_character, "entity")) {
+			MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_ENTITY;
+			RETURN_TRUE;
+		}
+		/* Invalid string value */
+		zend_argument_value_error(1, "must be 'none', 'long', 'entity' or a valid codepoint");
+		RETURN_THROWS();
+	}
+	/* Integer codepoint passed */
+	if (!php_mb_check_code_point(substitute_codepoint)) {
+		zend_argument_value_error(1, "is not a valid codepoint");
 		RETURN_THROWS();
 	}
 
-	if (!arg1) {
-		if (MBSTRG(current_filter_illegal_mode) == MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-			RETURN_STRING("none");
-		} else if (MBSTRG(current_filter_illegal_mode) == MBFL_OUTPUTFILTER_ILLEGAL_MODE_LONG) {
-			RETURN_STRING("long");
-		} else if (MBSTRG(current_filter_illegal_mode) == MBFL_OUTPUTFILTER_ILLEGAL_MODE_ENTITY) {
-			RETURN_STRING("entity");
-		} else {
-			RETURN_LONG(MBSTRG(current_filter_illegal_substchar));
-		}
-	} else {
-		RETVAL_TRUE;
-
-		switch (Z_TYPE_P(arg1)) {
-			case IS_STRING:
-				if (strncasecmp("none", Z_STRVAL_P(arg1), Z_STRLEN_P(arg1)) == 0) {
-					MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE;
-				} else if (strncasecmp("long", Z_STRVAL_P(arg1), Z_STRLEN_P(arg1)) == 0) {
-					MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_LONG;
-				} else if (strncasecmp("entity", Z_STRVAL_P(arg1), Z_STRLEN_P(arg1)) == 0) {
-					MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_ENTITY;
-				} else {
-					convert_to_long_ex(arg1);
-
-					if (php_mb_check_code_point(Z_LVAL_P(arg1))) {
-						MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
-						MBSTRG(current_filter_illegal_substchar) = Z_LVAL_P(arg1);
-					} else {
-						php_error_docref(NULL, E_WARNING, "Unknown character");
-						RETURN_FALSE;
-					}
-				}
-				break;
-			default:
-				convert_to_long_ex(arg1);
-				if (php_mb_check_code_point(Z_LVAL_P(arg1))) {
-					MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
-					MBSTRG(current_filter_illegal_substchar) = Z_LVAL_P(arg1);
-				} else {
-					php_error_docref(NULL, E_WARNING, "Unknown character");
-					RETURN_FALSE;
-				}
-				break;
-		}
-	}
+	MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
+	MBSTRG(current_filter_illegal_substchar) = substitute_codepoint;
+	RETURN_TRUE;
 }
 /* }}} */
 

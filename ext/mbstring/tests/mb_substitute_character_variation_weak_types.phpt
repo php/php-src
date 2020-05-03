@@ -3,26 +3,16 @@ Test mb_substitute_character() function : usage variation
 --SKIPIF--
 <?php
 extension_loaded('mbstring') or die('skip');
-function_exists('mb_substitute_character') or die("skip mb_substitute_character() is not available in this build");
 ?>
 --FILE--
 <?php
-/* Prototype  : mixed mb_substitute_character([mixed substchar])
+/* Prototype  : string|int|true mb_substitute_character([string|int|null substitute_character])
  * Description: Sets the current substitute_character or returns the current substitute_character
  * Source code: ext/mbstring/mbstring.c
  * Alias to functions:
  */
 
-echo "*** Testing mb_substitute_character() : usage variation ***\n";
-
-// Define error handler
-function test_error_handler($err_no, $err_msg, $filename, $linenum) {
-    if (error_reporting() & $err_no) {
-        // report non-silenced errors
-        echo "Error: $err_no - $err_msg, $filename($linenum)\n";
-    }
-}
-set_error_handler('test_error_handler');
+echo "*** Testing mb_substitute_character(): various types in weak typing mode ***\n";
 
 // Initialise function arguments not being substituted (if any)
 
@@ -66,8 +56,8 @@ $inputs = array(
       // float data
       'float 10.5' => 10.5,
       'float -10.5' => -10.5,
-      'float 12.3456789000e10' => 12.3456789000e10,
-      'float -12.3456789000e10' => -12.3456789000e10,
+      'float 10.0e19' => 10.0e19, // Cannot be represented as int
+      'float -10.0e19' => -10.0e19, // Cannot be represented as int
       'float .5' => .5,
 
       // array data
@@ -111,118 +101,74 @@ $inputs = array(
 
 mb_internal_encoding('utf-8');
 foreach($inputs as $key =>$value) {
-      echo "\n--$key--\n";
-      var_dump( mb_substitute_character($value) );
-};
+      echo "--$key--\n";
+      try {
+          var_dump( mb_substitute_character($value) );
+      } catch (\ValueError|\TypeError $e) {
+          echo get_class($e) . ': ' . $e->getMessage() . \PHP_EOL;
+      }
+}
 
 fclose($fp);
 
 ?>
---EXPECTF--
-*** Testing mb_substitute_character() : usage variation ***
-
+--EXPECT--
+*** Testing mb_substitute_character(): various types in weak typing mode ***
 --int 0--
-Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
-bool(false)
-
+bool(true)
 --int 1--
 bool(true)
-
 --int 12345--
 bool(true)
-
 --int -12345--
-Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
-bool(false)
-
+ValueError: mb_substitute_character(): Argument #1 ($substitute_character) is not a valid codepoint
 --float 10.5--
 bool(true)
-
 --float -10.5--
-Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
-bool(false)
-
---float 12.3456789000e10--
-Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
-bool(false)
-
---float -12.3456789000e10--
-Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
-bool(false)
-
+ValueError: mb_substitute_character(): Argument #1 ($substitute_character) is not a valid codepoint
+--float 10.0e19--
+ValueError: mb_substitute_character(): Argument #1 ($substitute_character) must be 'none', 'long', 'entity' or a valid codepoint
+--float -10.0e19--
+ValueError: mb_substitute_character(): Argument #1 ($substitute_character) must be 'none', 'long', 'entity' or a valid codepoint
 --float .5--
-Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
-bool(false)
-
+bool(true)
 --empty array--
-Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
-bool(false)
-
+TypeError: mb_substitute_character(): Argument #1 ($substitute_character) must be of type string|int|null, array given
 --int indexed array--
-bool(true)
-
+TypeError: mb_substitute_character(): Argument #1 ($substitute_character) must be of type string|int|null, array given
 --associative array--
-bool(true)
-
+TypeError: mb_substitute_character(): Argument #1 ($substitute_character) must be of type string|int|null, array given
 --nested arrays--
-bool(true)
-
+TypeError: mb_substitute_character(): Argument #1 ($substitute_character) must be of type string|int|null, array given
 --uppercase NULL--
-Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
-bool(false)
-
+int(0)
 --lowercase null--
-Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
-bool(false)
-
+int(0)
 --lowercase true--
 bool(true)
-
 --lowercase false--
-Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
-bool(false)
-
+bool(true)
 --uppercase TRUE--
 bool(true)
-
 --uppercase FALSE--
-Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
-bool(false)
-
+bool(true)
 --empty string DQ--
-bool(true)
-
+ValueError: mb_substitute_character(): Argument #1 ($substitute_character) must be 'none', 'long', 'entity' or a valid codepoint
 --empty string SQ--
-bool(true)
-
+ValueError: mb_substitute_character(): Argument #1 ($substitute_character) must be 'none', 'long', 'entity' or a valid codepoint
 --string DQ--
-Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
-bool(false)
-
+ValueError: mb_substitute_character(): Argument #1 ($substitute_character) must be 'none', 'long', 'entity' or a valid codepoint
 --string SQ--
-Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
-bool(false)
-
+ValueError: mb_substitute_character(): Argument #1 ($substitute_character) must be 'none', 'long', 'entity' or a valid codepoint
 --mixed case string--
-Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
-bool(false)
-
+ValueError: mb_substitute_character(): Argument #1 ($substitute_character) must be 'none', 'long', 'entity' or a valid codepoint
 --heredoc--
-Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
-bool(false)
-
+ValueError: mb_substitute_character(): Argument #1 ($substitute_character) must be 'none', 'long', 'entity' or a valid codepoint
 --instance of classWithToString--
-Error: 8 - Object of class classWithToString could not be converted to int, %s(%d)
-bool(true)
-
+ValueError: mb_substitute_character(): Argument #1 ($substitute_character) must be 'none', 'long', 'entity' or a valid codepoint
 --instance of classWithoutToString--
-Error: 8 - Object of class classWithoutToString could not be converted to int, %s(%d)
-bool(true)
-
+TypeError: mb_substitute_character(): Argument #1 ($substitute_character) must be of type string|int|null, object given
 --undefined var--
-Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
-bool(false)
-
+int(0)
 --unset var--
-Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
-bool(false)
+int(0)
