@@ -811,7 +811,7 @@ PHP_METHOD(XMLReader, next)
 	xmlreader_object *intern;
 	char *name = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s", &name, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s!", &name, &name_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
