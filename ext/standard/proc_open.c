@@ -914,7 +914,7 @@ PHP_FUNCTION(proc_open)
 					goto exit_fail;
 				}
 				if (Z_TYPE_P(ztarget) != IS_LONG) {
-					zend_value_error("Redirection target must be an integer");
+					zend_value_error("Redirection target must be of type int; got %s", zend_get_type_by_const(Z_TYPE_P(ztarget)));
 					goto exit_fail;
 				}
 				if (redirect_proc_descriptor(&descriptors[ndesc], Z_LVAL_P(ztarget), descriptors, ndesc, nindex) == FAILURE) {
