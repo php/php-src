@@ -41,7 +41,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_XMLReader_read arginfo_class_XMLReader_close
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_XMLReader_next, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, localname, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, localname, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_XMLReader_open, 0, 0, 1)

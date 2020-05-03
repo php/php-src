@@ -47,7 +47,7 @@ class XMLReader
     public function read() {}
 
     /** @return bool */
-    public function next(string $localname = UNKNOWN) {}
+    public function next(?string $localname = null) {}
 
     /** @return bool|XMLReader */
     public static function open(string $URI, ?string $encoding = null, int $options = 0) {}

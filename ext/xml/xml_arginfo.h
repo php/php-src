@@ -1,11 +1,11 @@
 /* This is a generated file, edit the .stub.php file instead. */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_xml_parser_create, 0, 0, XmlParser, MAY_BE_FALSE)
-	ZEND_ARG_TYPE_INFO(0, encoding, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encoding, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_xml_parser_create_ns, 0, 0, XmlParser, MAY_BE_FALSE)
-	ZEND_ARG_TYPE_INFO(0, encoding, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encoding, IS_STRING, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, sep, IS_STRING, 0, "\':\'")
 ZEND_END_ARG_INFO()
 
@@ -49,7 +49,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xml_parse_into_struct, 0, 3, IS_
 	ZEND_ARG_OBJ_INFO(0, parser, XmlParser, 0)
 	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
 	ZEND_ARG_INFO(1, values)
-	ZEND_ARG_INFO(1, index)
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, index, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xml_get_error_code, 0, 1, IS_LONG, 0)

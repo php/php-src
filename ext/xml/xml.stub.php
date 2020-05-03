@@ -2,9 +2,9 @@
 
 /** @generate-function-entries */
 
-function xml_parser_create(string $encoding = UNKNOWN): XmlParser|false {}
+function xml_parser_create(?string $encoding = null): XmlParser|false {}
 
-function xml_parser_create_ns(string $encoding = UNKNOWN, string $sep = ':'): XmlParser|false {}
+function xml_parser_create_ns(?string $encoding = null, string $sep = ':'): XmlParser|false {}
 
 function xml_set_object(XmlParser $parser, object $obj): bool {}
 
@@ -40,7 +40,7 @@ function xml_set_end_namespace_decl_handler(XmlParser $parser, $hdl): bool {}
 
 function xml_parse(XmlParser $parser, string $data, bool $isfinal = false): int {}
 
-function xml_parse_into_struct(XmlParser $parser, string $data, &$values, &$index = UNKNOWN): int {}
+function xml_parse_into_struct(XmlParser $parser, string $data, &$values, &$index = null): int {}
 
 function xml_get_error_code(XmlParser $parser): int {}
 
