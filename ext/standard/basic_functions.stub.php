@@ -1534,11 +1534,7 @@ function sapi_windows_cp_set(int $cp): bool {}
 
 function sapi_windows_cp_get(string $kind = UNKNOWN): int {}
 
-/**
- * @param int|string $in_codepage
- * @param int|string $out_codepage
- */
-function sapi_windows_cp_conv($in_codepage, $out_codepage, string $subject): ?string {}
+function sapi_windows_cp_conv(int|string $in_codepage, int|string $out_codepage, string $subject): ?string {}
 
 function sapi_windows_cp_is_utf8(): bool {}
 
