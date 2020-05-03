@@ -3048,7 +3048,8 @@ get_function_via_handler:
 				if (error) {
 					zend_spprintf(error, 0, "cannot call abstract method %s::%s()", ZSTR_VAL(fcc->calling_scope->name), ZSTR_VAL(fcc->function_handler->common.function_name));
 				}
-			} else if (!fcc->object && !(fcc->function_handler->common.fn_flags & ZEND_ACC_STATIC)) {
+			} else if (!fcc->object && !(check_flags & IS_CALLABLE_ACCEPT_NON_STATIC)
+				&& !(fcc->function_handler->common.fn_flags & ZEND_ACC_STATIC)) {
 				retval = 0;
 				if (error) {
 					zend_spprintf(error, 0, "non-static method %s::%s() cannot be called statically", ZSTR_VAL(fcc->calling_scope->name), ZSTR_VAL(fcc->function_handler->common.function_name));

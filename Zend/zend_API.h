@@ -340,6 +340,7 @@ ZEND_API int zend_disable_class(char *class_name, size_t class_name_length);
 ZEND_API ZEND_COLD void zend_wrong_param_count(void);
 
 #define IS_CALLABLE_CHECK_SYNTAX_ONLY (1<<0)
+#define IS_CALLABLE_ACCEPT_NON_STATIC (1<<2)
 #define IS_CALLABLE_CHECK_SILENT      (1<<3)
 
 ZEND_API void zend_release_fcall_info_cache(zend_fcall_info_cache *fcc);
@@ -1361,10 +1362,9 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_value_error(uint32_t arg_num
 #define Z_PARAM_DOUBLE_OR_NULL(dest, is_null) \
 	Z_PARAM_DOUBLE_EX(dest, is_null, 1, 0)
 
-/* old "f" */
-#define Z_PARAM_FUNC_EX2(dest_fci, dest_fcc, check_null, deref, separate) \
+#define Z_PARAM_FUNC_EX3(dest_fci, dest_fcc, check_null, deref, separate, check_flags) \
 		Z_PARAM_PROLOGUE(deref, separate); \
-		if (UNEXPECTED(!zend_parse_arg_func(_arg, &dest_fci, &dest_fcc, check_null, &_error))) { \
+		if (UNEXPECTED(!zend_parse_arg_func(_arg, check_flags, &dest_fci, &dest_fcc, check_null, &_error))) { \
 			if (!_error) { \
 				_expected_type = check_null ? Z_EXPECTED_FUNC_OR_NULL : Z_EXPECTED_FUNC; \
 				_error_code = ZPP_ERROR_WRONG_ARG; \
@@ -1373,6 +1373,9 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_value_error(uint32_t arg_num
 			} \
 			break; \
 		} \
+/* old "f" */
+#define Z_PARAM_FUNC_EX2(dest_fci, dest_fcc, check_null, deref, separate) \
+	Z_PARAM_FUNC_EX3(dest_fci, dest_fcc, check_null, separate, separate, 0)
 
 #define Z_PARAM_FUNC_EX(dest_fci, dest_fcc, check_null, separate) \
 	Z_PARAM_FUNC_EX2(dest_fci, dest_fcc, check_null, separate, separate)
@@ -1815,13 +1818,14 @@ static zend_always_inline int zend_parse_arg_resource(zval *arg, zval **dest, in
 	return 1;
 }
 
-static zend_always_inline int zend_parse_arg_func(zval *arg, zend_fcall_info *dest_fci, zend_fcall_info_cache *dest_fcc, int check_null, char **error)
+static zend_always_inline int zend_parse_arg_func(zval *arg, uint32_t check_flags, zend_fcall_info *dest_fci,
+	zend_fcall_info_cache *dest_fcc, int check_null, char **error)
 {
 	if (check_null && UNEXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
 		dest_fci->size = 0;
 		dest_fcc->function_handler = NULL;
 		*error = NULL;
-	} else if (UNEXPECTED(zend_fcall_info_init(arg, 0, dest_fci, dest_fcc, NULL, error) != SUCCESS)) {
+	} else if (UNEXPECTED(zend_fcall_info_init(arg, check_flags, dest_fci, dest_fcc, NULL, error) != SUCCESS)) {
 		return 0;
 	}
 	return 1;
