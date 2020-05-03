@@ -14,13 +14,6 @@
    +----------------------------------------------------------------------+
  */
 
-#if 0 && (defined(__linux__) || defined(sun) || defined(__IRIX__))
-# define _BSD_SOURCE 		/* linux wants this when XOPEN mode is on */
-# define _BSD_COMPAT		/* irix: uint32_t */
-# define _XOPEN_SOURCE 500  /* turn on Unix98 */
-# define __EXTENSIONS__	1	/* Solaris: uint32_t */
-#endif
-
 #include "php.h"
 #include <stdio.h>
 #include <ctype.h>
