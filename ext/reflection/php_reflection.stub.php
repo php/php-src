@@ -471,7 +471,10 @@ class ReflectionParameter implements Reflector
     /** @alias ReflectionClass::__clone */
     final private function __clone() {}
 
-    public function __construct(callable $function, int|string $parameter) {}
+    /**
+     * @param $function string|array|object
+     */
+    public function __construct($function, int|string $parameter) {}
 
     public function __toString(): string {}
 
