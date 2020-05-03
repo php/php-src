@@ -4954,6 +4954,17 @@ void zend_compile_if(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
+void zend_compile_debug(zend_ast *ast) { /* {{{ */
+	/*
+	 * When not using assertions, everything contained as part of these statements
+	 * should be completely omitted from the opcodes
+	 */
+
+	if (EG(assertions) > 0) {
+		zend_compile_stmt(ast->child[0]);
+	}
+}
+
 static zend_uchar determine_switch_jumptable_type(zend_ast_list *cases) {
 	uint32_t i;
 	zend_uchar common_type = IS_UNDEF;
@@ -8757,6 +8768,9 @@ void zend_compile_stmt(zend_ast *ast) /* {{{ */
 			break;
 		case ZEND_AST_IF:
 			zend_compile_if(ast);
+			break;
+		case ZEND_AST_DEBUG:
+			zend_compile_debug(ast);
 			break;
 		case ZEND_AST_SWITCH:
 			zend_compile_switch(ast);
