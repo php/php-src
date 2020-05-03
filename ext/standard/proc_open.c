@@ -674,6 +674,40 @@ static int dup_proc_descriptor(php_file_descriptor_t from, php_file_descriptor_t
 	return SUCCESS;
 }
 
+static int redirect_proc_descriptor(struct php_proc_open_descriptor_item *desc, int target, struct php_proc_open_descriptor_item *descriptors, int ndesc, int nindex)
+{
+	php_file_descriptor_t redirect_to = PHP_INVALID_FD;
+
+	for (int i = 0; i < ndesc; i++) {
+		if (descriptors[i].index == target) {
+			redirect_to = descriptors[i].childend;
+			break;
+		}
+	}
+
+	if (redirect_to == PHP_INVALID_FD) { /* didn't find the index we wanted */
+		if (target < 0 || target > 2) {
+			php_error_docref(NULL, E_WARNING, "Redirection target %d not found", target);
+			return FAILURE;
+		}
+
+		/* Support referring to a stdin/stdout/stderr pipe adopted from the parent,
+		 * which happens whenever an explicit override is not provided. */
+#ifndef PHP_WIN32
+		redirect_to = target;
+#else
+		switch (target) {
+			case 0: redirect_to = GetStdHandle(STD_INPUT_HANDLE); break;
+			case 1: redirect_to = GetStdHandle(STD_OUTPUT_HANDLE); break;
+			case 2: redirect_to = GetStdHandle(STD_ERROR_HANDLE); break;
+			EMPTY_SWITCH_DEFAULT_CASE()
+		}
+#endif
+	}
+
+	return dup_proc_descriptor(redirect_to, &desc->childend, nindex);
+}
+
 static int close_parent_ends_of_pipes_in_child(struct php_proc_open_descriptor_item *descriptors, int ndesc)
 {
 	/* we are running in child process
@@ -875,8 +909,6 @@ PHP_FUNCTION(proc_open)
 				}
 			} else if (zend_string_equals_literal(ztype, "redirect")) {
 				zval *ztarget = zend_hash_index_find_deref(Z_ARRVAL_P(descitem), 1);
-				php_file_descriptor_t childend = -1;
-
 				if (!ztarget) {
 					zend_value_error("Missing redirection target");
 					goto exit_fail;
@@ -885,36 +917,7 @@ PHP_FUNCTION(proc_open)
 					zend_value_error("Redirection target must be an integer");
 					goto exit_fail;
 				}
-
-				for (i = 0; i < ndesc; i++) {
-					if (descriptors[i].index == Z_LVAL_P(ztarget)) {
-						childend = descriptors[i].childend;
-						break;
-					}
-				}
-
-				if (childend == -1) {
-					if (Z_LVAL_P(ztarget) < 0 || Z_LVAL_P(ztarget) > 2) {
-						php_error_docref(NULL, E_WARNING,
-							"Redirection target " ZEND_LONG_FMT " not found", Z_LVAL_P(ztarget));
-						goto exit_fail;
-					}
-
-					/* Support referring to a stdin/stdout/stderr pipe adopted from the parent,
-					 * which happens whenever an explicit override is not provided. */
-#ifndef PHP_WIN32
-					childend = Z_LVAL_P(ztarget);
-#else
-					switch (Z_LVAL_P(ztarget)) {
-						case 0: childend = GetStdHandle(STD_INPUT_HANDLE); break;
-						case 1: childend = GetStdHandle(STD_OUTPUT_HANDLE); break;
-						case 2: childend = GetStdHandle(STD_ERROR_HANDLE); break;
-						EMPTY_SWITCH_DEFAULT_CASE()
-					}
-#endif
-				}
-
-				if (dup_proc_descriptor(childend, &descriptors[ndesc].childend, nindex) == FAILURE) {
+				if (redirect_proc_descriptor(&descriptors[ndesc], Z_LVAL_P(ztarget), descriptors, ndesc, nindex) == FAILURE) {
 					goto exit_fail;
 				}
 			} else if (zend_string_equals_literal(ztype, "null")) {
