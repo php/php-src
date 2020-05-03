@@ -392,6 +392,7 @@ malloc.h \
 monetary.h \
 netdb.h \
 poll.h \
+pty.h \
 pwd.h \
 resolv.h \
 strings.h \
@@ -560,7 +561,6 @@ getgrnam_r \
 getpwuid_r \
 getwd \
 glob \
-grantpt \
 inet_ntoa \
 inet_ntop \
 inet_pton \
@@ -572,7 +572,6 @@ mmap \
 nice \
 nl_langinfo \
 poll \
-ptsname \
 putenv \
 scandir \
 setitimer \
@@ -588,7 +587,6 @@ strptime \
 strtok_r \
 symlink \
 tzset \
-unlockpt \
 unsetenv \
 usleep \
 utime \
@@ -712,6 +710,9 @@ if test "$PHP_VALGRIND" != "no"; then
     fi
   fi
 fi
+
+dnl Check for openpty. It may require linking against libutil.
+PHP_CHECK_FUNC(openpty, util)
 
 dnl General settings.
 dnl ----------------------------------------------------------------------------

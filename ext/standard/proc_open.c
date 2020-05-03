@@ -43,10 +43,13 @@
  * */
 #ifdef PHP_CAN_SUPPORT_PROC_OPEN
 
-#if 0 && HAVE_PTSNAME && HAVE_GRANTPT && HAVE_UNLOCKPT && HAVE_SYS_IOCTL_H && HAVE_TERMIOS_H
-# include <sys/ioctl.h>
-# include <termios.h>
-# define PHP_CAN_DO_PTS	1
+#if HAVE_OPENPTY
+# if HAVE_PTY_H
+#  include <pty.h>
+# else
+/* Mac OS X defines openpty() in <util.h> */
+#  include <util.h>
+# endif
 #endif
 
 #include "proc_open.h"
@@ -592,6 +595,27 @@ static int set_proc_descriptor_to_blackhole(struct php_proc_open_descriptor_item
 	return SUCCESS;
 }
 
+static int set_proc_descriptor_to_pty(struct php_proc_open_descriptor_item *desc, int *master_fd, int *slave_fd)
+{
+#if HAVE_OPENPTY
+	if (*master_fd == -1) {
+		if (openpty(master_fd, slave_fd, NULL, NULL, NULL)) {
+			php_error_docref(NULL, E_WARNING, "Could not open PTY (pseudoterminal) - %s", strerror(errno));
+			return FAILURE;
+		}
+	}
+
+	desc->is_pipe    = 1;
+	desc->childend   = dup(*slave_fd);
+	desc->parentend  = dup(*master_fd);
+	desc->mode_flags = O_RDWR;
+	return SUCCESS;
+#else
+	php_error_docref(NULL, E_WARNING, "PTY (pseudoterminal) not supported on this system");
+	return FAILURE;
+#endif
+}
+
 static int set_proc_descriptor_to_pipe(struct php_proc_open_descriptor_item *desc, zend_string *zmode)
 {
 	php_file_descriptor_t newpipe[2];
@@ -708,9 +732,9 @@ static int redirect_proc_descriptor(struct php_proc_open_descriptor_item *desc, 
 	return dup_proc_descriptor(redirect_to, &desc->childend, nindex);
 }
 
-
 int set_proc_descriptor_from_array(
-		zval *descitem, struct php_proc_open_descriptor_item *descriptors, int ndesc, int nindex) {
+		zval *descitem, struct php_proc_open_descriptor_item *descriptors, int ndesc,
+		int nindex, int *pty_master_fd, int *pty_slave_fd) {
 	zend_string *ztype = get_string_parameter(descitem, 0, "handle qualifier");
 	if (!ztype) {
 		return FAILURE;
@@ -749,32 +773,7 @@ int set_proc_descriptor_from_array(
 	} else if (zend_string_equals_literal(ztype, "null")) {
 		retval = set_proc_descriptor_to_blackhole(&descriptors[ndesc]);
 	} else if (zend_string_equals_literal(ztype, "pty")) {
-#if PHP_CAN_DO_PTS
-		if (dev_ptmx == -1) {
-			/* open things up */
-			dev_ptmx = open("/dev/ptmx", O_RDWR);
-			if (dev_ptmx == -1) {
-				php_error_docref(NULL, E_WARNING, "Failed to open /dev/ptmx, errno %d", errno);
-				goto finish;
-			}
-			grantpt(dev_ptmx);
-			unlockpt(dev_ptmx);
-			slave_pty = open(ptsname(dev_ptmx), O_RDWR);
-
-			if (slave_pty == -1) {
-				php_error_docref(NULL, E_WARNING, "Failed to open slave pty, errno %d", errno);
-				goto finish;
-			}
-		}
-		descriptors[ndesc].is_pipe = 1;
-		descriptors[ndesc].childend = dup(slave_pty);
-		descriptors[ndesc].parentend = dup(dev_ptmx);
-		descriptors[ndesc].mode_flags = O_RDWR;
-		retval = SUCCESS;
-#else
-		php_error_docref(NULL, E_WARNING, "PTY pseudo terminal not supported on this system");
-		goto finish;
-#endif
+		retval = set_proc_descriptor_to_pty(&descriptors[ndesc], pty_master_fd, pty_slave_fd);
 	} else {
 		php_error_docref(NULL, E_WARNING, "%s is not a valid descriptor spec/mode", ZSTR_VAL(ztype));
 		goto finish;
@@ -867,13 +866,9 @@ PHP_FUNCTION(proc_open)
 #else
 	char **argv = NULL;
 #endif
+	int pty_master_fd = -1, pty_slave_fd = -1;
 	php_process_id_t child;
 	struct php_process_handle *proc;
-
-#if PHP_CAN_DO_PTS
-	php_file_descriptor_t dev_ptmx = -1;	/* master */
-	php_file_descriptor_t slave_pty = -1;
-#endif
 
 	ZEND_PARSE_PARAMETERS_START(3, 6)
 		Z_PARAM_ZVAL(command_zv)
@@ -957,7 +952,8 @@ PHP_FUNCTION(proc_open)
 				goto exit_fail;
 			}
 		} else if (Z_TYPE_P(descitem) == IS_ARRAY) {
-			if (set_proc_descriptor_from_array(descitem, descriptors, ndesc, nindex) == FAILURE) {
+			if (set_proc_descriptor_from_array(descitem, descriptors, ndesc, nindex,
+				                                 &pty_master_fd, &pty_slave_fd) == FAILURE) {
 				goto exit_fail;
 			}
 		} else {
@@ -1044,27 +1040,6 @@ PHP_FUNCTION(proc_open)
 	if (child == 0) {
 		/* this is the child process */
 
-#if PHP_CAN_DO_PTS
-		if (dev_ptmx >= 0) {
-			int my_pid = getpid();
-
-#ifdef TIOCNOTTY
-			/* detach from original tty. Might only need this if isatty(0) is true */
-			ioctl(0,TIOCNOTTY,NULL);
-#else
-			setsid();
-#endif
-			/* become process group leader */
-			setpgid(my_pid, my_pid);
-			tcsetpgrp(0, my_pid);
-		}
-
-		if (dev_ptmx >= 0) {
-			close(dev_ptmx);
-			close(slave_pty);
-		}
-#endif
-
 		if (close_parent_ends_of_pipes_in_child(descriptors, ndesc) == FAILURE) {
 			/* We are already in child process and can't do anything to make
 			 *   proc_open() return an error in the parent
@@ -1120,13 +1095,6 @@ PHP_FUNCTION(proc_open)
 	proc->childHandle = childHandle;
 #endif
 	proc->env = env;
-
-#if PHP_CAN_DO_PTS
-	if (dev_ptmx >= 0) {
-		close(dev_ptmx);
-		close(slave_pty);
-	}
-#endif
 
 	/* clean up all the child ends and then open streams on the parent
 	 * ends, where appropriate */
@@ -1191,7 +1159,14 @@ PHP_FUNCTION(proc_open)
 #else
 	efree_argv(argv);
 #endif
-
+#if HAVE_OPENPTY
+	if (pty_master_fd != -1) {
+		close(pty_master_fd);
+	}
+	if (pty_slave_fd != -1) {
+		close(pty_slave_fd);
+	}
+#endif
 	efree(descriptors);
 	ZVAL_RES(return_value, zend_register_resource(proc, le_proc_open));
 	return;
@@ -1211,12 +1186,12 @@ exit_fail:
 #else
 	efree_argv(argv);
 #endif
-#if PHP_CAN_DO_PTS
-	if (dev_ptmx >= 0) {
-		close(dev_ptmx);
+#if HAVE_OPENPTY
+	if (pty_master_fd != -1) {
+		close(pty_master_fd);
 	}
-	if (slave_pty >= 0) {
-		close(slave_pty);
+	if (pty_slave_fd != -1) {
+		close(pty_slave_fd);
 	}
 #endif
 	RETURN_FALSE;
