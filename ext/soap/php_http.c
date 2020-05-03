@@ -225,10 +225,6 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, ph
 					protocol = "tlsv1.2";
 					break;
 
-				case SOAP_SSL_METHOD_TLSv1_3:
-					protocol = "tlsv1.3";
-					break;
-
 				case SOAP_SSL_METHOD_TLS_ANY:
 					protocol = "tls";
 					break;
@@ -334,10 +330,6 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, ph
 
 					case SOAP_SSL_METHOD_TLSv1_2:
 						crypto_method = STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT;
-						break;
-
-					case SOAP_SSL_METHOD_TLSv1_3:
-						crypto_method = STREAM_CRYPTO_METHOD_TLSv1_3_CLIENT;
 						break;
 
 					case SOAP_SSL_METHOD_TLS_ANY:

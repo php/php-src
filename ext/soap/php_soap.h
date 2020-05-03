@@ -154,9 +154,8 @@ struct _soapService {
 #define SOAP_SSL_METHOD_TLSv1_0  4
 #define SOAP_SSL_METHOD_TLSv1_1  5
 #define SOAP_SSL_METHOD_TLSv1_2  6
-#define SOAP_SSL_METHOD_TLSv1_3  7
-#define SOAP_SSL_METHOD_TLS_ANY  8
-#define SOAP_SSL_METHOD_ANY      9
+#define SOAP_SSL_METHOD_TLS_ANY  7
+#define SOAP_SSL_METHOD_ANY      8
 
 ZEND_BEGIN_MODULE_GLOBALS(soap)
 	HashTable  defEncNs;     /* mapping of default namespaces to prefixes */
