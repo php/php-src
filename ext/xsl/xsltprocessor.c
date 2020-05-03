@@ -760,33 +760,46 @@ PHP_METHOD(XSLTProcessor, registerPHPFunctions)
 {
 	zval *id = ZEND_THIS;
 	xsl_object *intern;
-	zval *array_value, *entry, new_string;
-	zend_string *name;
+	zval *zv = NULL, *entry, new_string;
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "a",  &array_value) == SUCCESS) {
-		intern = Z_XSL_P(id);
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|z!", &zv) == FAILURE) {
+		RETURN_THROWS();
+	}
 
-		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(array_value), entry) {
-			zend_string *str = zval_try_get_string(entry);
-			if (UNEXPECTED(!str)) {
-				return;
-			}
-			ZVAL_LONG(&new_string, 1);
-			zend_hash_update(intern->registered_phpfunctions, str, &new_string);
-			zend_string_release(str);
-		} ZEND_HASH_FOREACH_END();
-
-		intern->registerPhpFunctions = 2;
-	} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "S",  &name) == SUCCESS) {
-		intern = Z_XSL_P(id);
-
-		ZVAL_LONG(&new_string,1);
-		zend_hash_update(intern->registered_phpfunctions, name, &new_string);
-		intern->registerPhpFunctions = 2;
-
-	} else if (zend_parse_parameters_none() == SUCCESS) {
+	if (!zv) {
 		intern = Z_XSL_P(id);
 		intern->registerPhpFunctions = 1;
+
+		return;
+	}
+
+	switch (Z_TYPE_P(zv)) {
+		case IS_ARRAY:
+			intern = Z_XSL_P(id);
+
+			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(zv), entry) {
+				zend_string *str = zval_try_get_string(entry);
+				if (UNEXPECTED(!str)) {
+					return;
+				}
+				ZVAL_LONG(&new_string, 1);
+				zend_hash_update(intern->registered_phpfunctions, str, &new_string);
+				zend_string_release(str);
+			} ZEND_HASH_FOREACH_END();
+
+			intern->registerPhpFunctions = 2;
+			break;
+
+		case IS_STRING:
+			intern = Z_XSL_P(id);
+
+			ZVAL_LONG(&new_string, 1);
+			zend_hash_update(intern->registered_phpfunctions, Z_STR_P(zv), &new_string);
+			intern->registerPhpFunctions = 2;
+			break;
+
+		default:
+			zend_argument_type_error(1, "must be of type string|array|null, %s given", zend_zval_type_name(zv));
 	}
 }
 /* }}} end XSLTProcessor::registerPHPFunctions(); */

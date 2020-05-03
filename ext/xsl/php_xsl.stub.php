@@ -41,10 +41,10 @@ class XSLTProcessor
     public function hasExsltSupport() {}
 
     /**
-     * @param string|array $restrict
+     * @param string|array|null $restrict
      * @return void
      */
-    public function registerPHPFunctions($restrict = UNKNOWN) {}
+    public function registerPHPFunctions($restrict = null) {}
 
     /** @return bool */
     public function setProfiling(?string $filename) {}
