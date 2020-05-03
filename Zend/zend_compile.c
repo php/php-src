@@ -8137,6 +8137,30 @@ void zend_compile_shell_exec(znode *result, zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
+void zend_compile_array_fill(znode *result, zend_ast *ast) /* {{{ */
+{
+	zend_op *opline;
+
+	zend_ast *value_ast = ast->child[0];
+	znode value_node;
+	zend_compile_expr(&value_node, value_ast);
+
+	zval *size_zv = zend_ast_get_zval(ast->child[1]);
+	if (size_zv == NULL) {
+		zend_error(E_COMPILE_ERROR, "Cannot fill array without defined size");
+	}
+
+	opline = zend_emit_op_tmp(result, ZEND_INIT_ARRAY, NULL, NULL);
+	opline->extended_value = Z_LVAL_P(size_zv) << ZEND_ARRAY_SIZE_SHIFT;
+	SET_NODE(opline->result, result);
+
+	for (int i = 0; i < Z_LVAL_P(size_zv); i++) {
+		opline = zend_emit_op(NULL, ZEND_ADD_ARRAY_ELEMENT, &value_node, NULL);
+		SET_NODE(opline->result, result);
+	}
+}
+/* }}} */
+
 void zend_compile_array(znode *result, zend_ast *ast) /* {{{ */
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
@@ -8925,6 +8949,9 @@ void zend_compile_expr(znode *result, zend_ast *ast) /* {{{ */
 			return;
 		case ZEND_AST_ARRAY:
 			zend_compile_array(result, ast);
+			return;
+		case ZEND_AST_ARRAY_FILL:
+			zend_compile_array_fill(result, ast);
 			return;
 		case ZEND_AST_CONST:
 			zend_compile_const(result, ast);

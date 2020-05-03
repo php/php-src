@@ -910,6 +910,8 @@ expr:
 			{ $3->attr = ZEND_ARRAY_SYNTAX_LIST; $$ = zend_ast_create(ZEND_AST_ASSIGN, $3, $6); }
 	|	'[' array_pair_list ']' '=' expr
 			{ $2->attr = ZEND_ARRAY_SYNTAX_SHORT; $$ = zend_ast_create(ZEND_AST_ASSIGN, $2, $5); }
+	|	'[' expr ';' expr ']'
+			{ $$ = zend_ast_create(ZEND_AST_ARRAY_FILL, $2, $4); }
 	|	variable '=' expr
 			{ $$ = zend_ast_create(ZEND_AST_ASSIGN, $1, $3); }
 	|	variable '=' '&' variable
