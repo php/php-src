@@ -1725,6 +1725,7 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 		php_error_docref(NULL, E_NOTICE, "Empty string as pattern");
 		RETURN_FALSE;
 	}
+	if (options && zend_hash_num_elements(Z_ARRVAL_P(options)) > 0 && (php_zip_parse_options(options, &opts) < 0)) {
 		RETURN_FALSE;
 	}
 
@@ -2302,9 +2303,7 @@ static ZIPARCHIVE_METHOD(setEncryptionName)
 	char *name, *password = NULL;
 	size_t name_len, password_len;
 
-	ZIP_FROM_OBJECT(intern, self);
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl|s",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl|s!",
 			&name, &name_len, &method, &password, &password_len) == FAILURE) {
 		RETURN_THROWS();
 	}
@@ -2337,14 +2336,14 @@ static ZIPARCHIVE_METHOD(setEncryptionIndex)
 	char *password = NULL;
 	size_t password_len;
 
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll|s",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll|s!",
 			&index, &method, &password, &password_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	if (zip_file_set_encryption(intern, index, (zip_uint16_t)method, password)) {
 	ZIP_FROM_OBJECT(intern, self);
+
+	if (zip_file_set_encryption(intern, index, (zip_uint16_t)method, password)) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -2765,6 +2764,7 @@ static ZIPARCHIVE_METHOD(extractTo)
 	size_t pathto_len;
 	int ret;
 
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|z", &pathto, &pathto_len, &zval_files) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -2773,13 +2773,15 @@ static ZIPARCHIVE_METHOD(extractTo)
 	}
 
 	if (php_stream_stat_path_ex(pathto, PHP_STREAM_URL_STAT_QUIET, &ssb, NULL) < 0) {
-			ret = php_stream_mkdir(pathto, 0777,  PHP_STREAM_MKDIR_RECURSIVE, NULL);
-			if (!ret) {
-					RETURN_FALSE;
-			}
+		ret = php_stream_mkdir(pathto, 0777, PHP_STREAM_MKDIR_RECURSIVE, NULL);
+		if (!ret) {
+			RETURN_FALSE;
+		}
 	}
 
 	ZIP_FROM_OBJECT(intern, self);
+
+	if (zval_files && Z_TYPE_P(zval_files) != IS_NULL) {
 		uint32_t nelems, i;
 
 		switch (Z_TYPE_P(zval_files)) {

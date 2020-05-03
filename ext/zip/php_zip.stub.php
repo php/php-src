@@ -64,16 +64,16 @@ class ZipArchive
     public function addFromString(string $name, string $content, int $flags = ZipArchive::FL_OVERWRITE) {}
 
     /** @return bool */
-    public function addFile(string $filepath, string $entryname = UNKNOWN, int $start = 0, int $length = 0, int $flags = ZipArchive::FL_OVERWRITE) {}
+    public function addFile(string $filepath, string $entryname = "", int $start = 0, int $length = 0, int $flags = ZipArchive::FL_OVERWRITE) {}
 
     /** @return bool */
     public function replaceFile(string $filepath, string $index, int $start = 0, int $length = 0, int $flags = 0) {}
 
     /** @return array|false */
-    public function addGlob(string $pattern, int $flags = 0, $options = UNKNOWN) {}
+    public function addGlob(string $pattern, int $flags = 0, array $options = []) {}
 
     /** @return array|false */
-    public function addPattern(string $pattern, string $path = UNKNOWN, $options = UNKNOWN) {}
+    public function addPattern(string $pattern, string $path = ".", array $options = []) {}
 
     /** @return bool */
     public function renameIndex(int $index, string $new_name) {}
@@ -138,7 +138,7 @@ class ZipArchive
     public function unchangeName(string $name) {}
 
     /** @return bool */
-    public function extractTo(string $pathto, $files = UNKNOWN) {}
+    public function extractTo(string $pathto, $files = null) {}
 
     /** @return string|false */
     public function getFromName(string $entryname, int $len = 0, int $flags = 0) {}
@@ -171,10 +171,10 @@ class ZipArchive
 
 #ifdef HAVE_ENCRYPTION
     /** @return bool */
-    public function setEncryptionName(string $name, int $method, string $password = UNKNOWN) {}
+    public function setEncryptionName(string $name, int $method, ?string $password = null) {}
 
     /** @return bool */
-    public function setEncryptionIndex(int $index, int $method, string $password = UNKNOWN) {}
+    public function setEncryptionIndex(int $index, int $method, ?string $password = null) {}
 #endif
 
 #ifdef HAVE_PROGRESS_CALLBACK
