@@ -35,7 +35,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_XSLTProcessor_hasExsltSupport, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_XSLTProcessor_registerPHPFunctions, 0, 0, 0)
-	ZEND_ARG_INFO(0, restrict)
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, restrict, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_XSLTProcessor_setProfiling, 0, 0, 1)
