@@ -105,13 +105,13 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SQLite3Stmt_bindParam, 0, 0, 2)
 	ZEND_ARG_INFO(0, param_number)
 	ZEND_ARG_INFO(1, param)
-	ZEND_ARG_TYPE_INFO(0, type, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, type, IS_LONG, 0, "SQLITE3_TEXT")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SQLite3Stmt_bindValue, 0, 0, 2)
 	ZEND_ARG_INFO(0, param_number)
 	ZEND_ARG_INFO(0, param)
-	ZEND_ARG_TYPE_INFO(0, type, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, type, IS_LONG, 0, "SQLITE3_TEXT")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_SQLite3Stmt_clear arginfo_class_SQLite3_close

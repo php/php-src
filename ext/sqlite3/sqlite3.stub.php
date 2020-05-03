@@ -86,10 +86,10 @@ class SQLite3Stmt
     private function __construct(SQLite3 $sqlite3, string $sql) {}
 
     /** @return bool */
-    public function bindParam($param_number, &$param, int $type = UNKNOWN) {}
+    public function bindParam($param_number, &$param, int $type = SQLITE3_TEXT) {}
 
     /** @return bool */
-    public function bindValue($param_number, $param, int $type = UNKNOWN) {}
+    public function bindValue($param_number, $param, int $type = SQLITE3_TEXT) {}
 
     /** @return bool */
     public function clear() {}
