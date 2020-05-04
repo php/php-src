@@ -93,6 +93,7 @@ PHP                                                                        NEWS
   . Don't ignore invalid escape sequences. (sjon)
 
 - PDO:
+  . Changed default PDO error mode to exceptions. (AllenJB)
   . Fixed bug #77849 (Disable cloning of PDO handle/connection objects).
     (camporter)
 

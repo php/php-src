@@ -8,6 +8,8 @@ if (!extension_loaded('pdo_sqlite')) print 'skip not loaded';
 <?php
 
 $db = new PDO('sqlite::memory:');
+$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+
 $db->exec('CREATE TABLE testing (id INTEGER , name VARCHAR)');
 $db->exec('INSERT INTO testing VALUES(1, "php")');
 $db->exec('INSERT INTO testing VALUES(2, "")');
@@ -91,18 +93,28 @@ array(2) {
 }
 
 Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: function 'nothing' not found or invalid function name in %s on line %d
+
+Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error in %s on line %d
 bool(false)
 
 Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: function '' not found or invalid function name in %s on line %d
+
+Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error in %s on line %d
 bool(false)
 
 Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: no array or string given in %s on line %d
+
+Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error in %s on line %d
 bool(false)
 
 Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: no array or string given in %s on line %d
+
+Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error in %s on line %d
 bool(false)
 
 Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: class 'PDOStatement' does not have a method 'foo' in %s on line %d
+
+Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error in %s on line %d
 bool(false)
 array(2) {
   [0]=>
@@ -118,10 +130,16 @@ array(2) {
 }
 
 Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: non-static method bar::test2() cannot be called statically in %s on line %d
+
+Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error in %s on line %d
 bool(false)
 
 Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: non-static method bar::test3() cannot be called statically in %s on line %d
+
+Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error in %s on line %d
 bool(false)
 
 Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: class 'bar' does not have a method 'inexistent' in %s on line %d
+
+Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error in %s on line %d
 bool(false)
