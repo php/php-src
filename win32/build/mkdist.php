@@ -335,9 +335,13 @@ libenchant_ispell.dll
 $ENCHANT_DLLS = array(
     array('', 'glib-2.dll'),
     array('', 'gmodule-2.dll'),
-    array('lib/enchant', 'libenchant_myspell.dll'),
-    array('lib/enchant', 'libenchant_ispell.dll'),
 );
+if (file_exists("$php_build_dir/bin/libenchant2.dll")) {
+    $ENCHANT_DLLS[] = array('lib/enchant', 'libenchant2_hunspell.dll');
+} else {
+    $ENCHANT_DLLS[] = array('lib/enchant', 'libenchant_myspell.dll');
+    $ENCHANT_DLLS[] = array('lib/enchant', 'libenchant_ispell.dll');
+}
 foreach ($ENCHANT_DLLS as $dll) {
     $dest  = "$dist_dir/$dll[0]";
     $filename = $dll[1];
