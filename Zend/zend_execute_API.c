@@ -832,14 +832,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 
 		/* This flag is regularly checked while running user functions, but not internal
 		 * So see whether interrupt flag was set while the function was running... */
-		if (EG(vm_interrupt)) {
-			EG(vm_interrupt) = 0;
-			if (EG(timed_out)) {
-				zend_timeout();
-			} else if (zend_interrupt_function) {
-				zend_interrupt_function(EG(current_execute_data));
-			}
-		}
+		zend_handle_interrupt();
 	}
 
 	zend_vm_stack_free_call_frame(call);
@@ -1111,6 +1104,17 @@ ZEND_API int zend_eval_string_ex(const char *str, zval *retval_ptr, const char *
 	return zend_eval_stringl_ex(str, strlen(str), retval_ptr, string_name, handle_exceptions);
 }
 /* }}} */
+
+ZEND_API zend_bool zend_handle_interrupt_impl() {
+	ZEND_ASSERT(EG(vm_interrupt));
+	EG(vm_interrupt) = 0;
+	if (EG(timed_out)) {
+		zend_timeout();
+	} else if (zend_interrupt_function) {
+		zend_interrupt_function(EG(current_execute_data));
+	}
+	return EG(exception) == NULL;
+}
 
 static void zend_set_timeout_ex(zend_long seconds, int reset_signals);
 

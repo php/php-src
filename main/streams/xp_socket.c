@@ -116,14 +116,10 @@ retry:
 	return didwrite;
 }
 
-static void php_sock_stream_wait_for_data(php_stream *stream, php_netstream_data_t *sock)
+static int php_sock_stream_wait_for_data(php_stream *stream, php_netstream_data_t *sock)
 {
-	int retval;
 	struct timeval *ptimeout;
-
-	if (!sock || sock->socket == -1) {
-		return;
-	}
+	ZEND_ASSERT(sock && sock->socket != -1);
 
 	sock->timeout_event = 0;
 
@@ -132,17 +128,16 @@ static void php_sock_stream_wait_for_data(php_stream *stream, php_netstream_data
 	else
 		ptimeout = &sock->timeout;
 
-	while(1) {
-		retval = php_pollfd_for(sock->socket, PHP_POLLREADABLE, ptimeout);
-
-		if (retval == 0)
+	while (1) {
+		int retval = php_pollfd_for(sock->socket, PHP_POLLREADABLE, ptimeout);
+		if (retval > 0) {
+			return SUCCESS;
+		} else if (retval == 0) {
 			sock->timeout_event = 1;
-
-		if (retval >= 0)
-			break;
-
-		if (php_socket_errno() != EINTR)
-			break;
+			return FAILURE;
+		} else if (php_socket_errno() != EINTR || !zend_handle_interrupt()) {
+			return FAILURE;
+		}
 	}
 }
 
@@ -157,9 +152,9 @@ static ssize_t php_sockop_read(php_stream *stream, char *buf, size_t count)
 	}
 
 	if (sock->is_blocked) {
-		php_sock_stream_wait_for_data(stream, sock);
-		if (sock->timeout_event)
-			return 0;
+		if (php_sock_stream_wait_for_data(stream, sock) == FAILURE) {
+			return sock->timeout_event ? 0 : -1;
+		}
 	}
 
 	nr_bytes = recv(sock->socket, buf, XP_SOCK_BUF_SIZE(count), (sock->is_blocked && sock->timeout.tv_sec != -1) ? MSG_DONTWAIT : 0);

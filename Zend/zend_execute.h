@@ -296,9 +296,18 @@ ZEND_API uint32_t zend_get_executed_lineno(void);
 ZEND_API zend_class_entry *zend_get_executed_scope(void);
 ZEND_API zend_bool zend_is_executing(void);
 
+ZEND_API zend_bool zend_handle_interrupt_impl();
 ZEND_API void zend_set_timeout(zend_long seconds, int reset_signals);
 ZEND_API void zend_unset_timeout(void);
 ZEND_API ZEND_NORETURN void ZEND_FASTCALL zend_timeout(void);
+
+static zend_always_inline zend_bool zend_handle_interrupt() {
+	if (EG(vm_interrupt)) {
+		return zend_handle_interrupt_impl();
+	}
+	return 1;
+}
+
 ZEND_API zend_class_entry *zend_fetch_class(zend_string *class_name, int fetch_type);
 ZEND_API zend_class_entry *zend_fetch_class_by_name(zend_string *class_name, zend_string *lcname, int fetch_type);
 
