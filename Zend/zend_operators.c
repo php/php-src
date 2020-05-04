@@ -2464,8 +2464,8 @@ ZEND_API void zend_update_current_locale(void) /* {{{ */
 #endif
 
 static zend_always_inline void zend_str_tolower_impl(char *dest, const char *str, size_t length) /* {{{ */ {
-	register unsigned char *p = (unsigned char*)str;
-	register unsigned char *q = (unsigned char*)dest;
+	unsigned char *p = (unsigned char*)str;
+	unsigned char *q = (unsigned char*)dest;
 	unsigned char *end = p + length;
 #ifdef __SSE2__
 	if (length >= 16) {
@@ -2537,23 +2537,54 @@ ZEND_API char* ZEND_FASTCALL zend_str_tolower_dup_ex(const char *source, size_t 
 
 ZEND_API zend_string* ZEND_FASTCALL zend_string_tolower_ex(zend_string *str, int persistent) /* {{{ */
 {
-	register unsigned char *p = (unsigned char*)ZSTR_VAL(str);
-	register unsigned char *end = p + ZSTR_LEN(str);
+	size_t length = ZSTR_LEN(str);
+	unsigned char *p = (unsigned char *) ZSTR_VAL(str);
+	unsigned char *end = p + length;
+
+#ifdef __SSE2__
+	while (p + 16 <= end) {
+		const __m128i _A = _mm_set1_epi8('A' - 1);
+		const __m128i Z_ = _mm_set1_epi8('Z' + 1);
+		__m128i op = _mm_loadu_si128((__m128i*)p);
+		__m128i gt = _mm_cmpgt_epi8(op, _A);
+		__m128i lt = _mm_cmplt_epi8(op, Z_);
+		__m128i mingle = _mm_and_si128(gt, lt);
+		if (_mm_movemask_epi8(mingle)) {
+			zend_string *res = zend_string_alloc(length, persistent);
+			memcpy(ZSTR_VAL(res), ZSTR_VAL(str), p - (unsigned char *) ZSTR_VAL(str));
+			unsigned char *q = p + (ZSTR_VAL(res) - ZSTR_VAL(str));
+
+			/* Lowercase the chunk we already compared. */
+			const __m128i delta = _mm_set1_epi8('a' - 'A');
+			__m128i add = _mm_and_si128(mingle, delta);
+			__m128i lower = _mm_add_epi8(op, add);
+			_mm_storeu_si128((__m128i *) q, lower);
+
+			/* Lowercase the rest of the string. */
+			p += 16; q += 16;
+			zend_str_tolower_impl((char *) q, (const char *) p, end - p);
+			ZSTR_VAL(res)[length] = '\0';
+			return res;
+		}
+		p += 16;
+	}
+#endif
+
 	while (p < end) {
 		if (*p != zend_tolower_ascii(*p)) {
-			zend_string *res = zend_string_alloc(ZSTR_LEN(str), persistent);
-			register unsigned char *r;
+			zend_string *res = zend_string_alloc(length, persistent);
+			memcpy(ZSTR_VAL(res), ZSTR_VAL(str), p - (unsigned char*) ZSTR_VAL(str));
 
-			if (p != (unsigned char*)ZSTR_VAL(str)) {
-				memcpy(ZSTR_VAL(res), ZSTR_VAL(str), p - (unsigned char*)ZSTR_VAL(str));
+			unsigned char *q = p + (ZSTR_VAL(res) - ZSTR_VAL(str));
+			while (p < end) {
+				*q++ = zend_tolower_ascii(*p++);
 			}
-			r = p + (ZSTR_VAL(res) - ZSTR_VAL(str));
-			zend_str_tolower_impl((char*)r, (const char*)p, end - p);
-			ZSTR_VAL(res)[ZSTR_LEN(res)] = '\0';
+			ZSTR_VAL(res)[length] = '\0';
 			return res;
 		}
 		p++;
 	}
+
 	return zend_string_copy(str);
 }
 /* }}} */
