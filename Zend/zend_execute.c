@@ -3010,7 +3010,7 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 {
 	zval *ptr;
 	zend_object *zobj;
-	zend_string *name, *tmp_name;
+	zend_string *name, *tmp_name = NULL;
 
 	if (container_op_type != IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) != IS_OBJECT)) {
 		do {
