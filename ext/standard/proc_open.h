@@ -41,6 +41,5 @@ struct php_process_handle {
 	int npipes;
 	zend_resource **pipes;
 	char *command;
-	int is_persistent;
 	php_process_env_t env;
 };
