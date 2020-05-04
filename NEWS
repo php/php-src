@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.19
 
+- Opcache:
+  . Fixed bug #79535 (PHP crashes with specific opcache.optimization_level).
+    (Nikita)
+
 - SimpleXML:
   . Fixed bug #79528 (Different object of the same xml between 7.4.5 and
     7.4.4). (cmb)
