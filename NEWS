@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     called). (Laruence)
   . Fixed bug #79566 (Private SHM is not private on Windows). (cmb)
   . Fixed bug #79489 (.user.ini does not inherit). (cmb)
+  . Fixed bug #79557 (extension_dir = ./ext now use current directory for 
+    base). (cmb)
 
 - FFI:
   . Fixed bug #79571 (FFI: var_dumping unions may segfault). (cmb)
