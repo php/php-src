@@ -462,7 +462,7 @@ static char *create_win_command_from_args(HashTable *args)
 
 static int get_option(zval *other_options, char *option_name)
 {
-	zval *item = zend_hash_str_find(Z_ARRVAL_P(other_options), option_name, strlen(option_name));
+	zval *item = zend_hash_str_find_deref(Z_ARRVAL_P(other_options), option_name, strlen(option_name));
 	if (item != NULL) {
 		if (Z_TYPE_P(item) == IS_TRUE || ((Z_TYPE_P(item) == IS_LONG) && Z_LVAL_P(item))) {
 			return 1;
