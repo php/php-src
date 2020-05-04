@@ -165,7 +165,7 @@ mbfl_convert_filter_new(
     int (*flush_function)(void*),
     void* data)
 {
-	mbfl_convert_filter * filter;
+	mbfl_convert_filter *filter;
 	const struct mbfl_convert_vtbl *vtbl;
 
 	vtbl = mbfl_convert_filter_get_vtbl(from, to);
@@ -173,11 +173,7 @@ mbfl_convert_filter_new(
 		return NULL;
 	}
 
-	/* allocate */
-	filter = (mbfl_convert_filter *)mbfl_malloc(sizeof(mbfl_convert_filter));
-	if (filter == NULL) {
-		return NULL;
-	}
+	filter = mbfl_malloc(sizeof(mbfl_convert_filter));
 
 	if (mbfl_convert_filter_common_init(filter, from, to, vtbl,
 			output_function, flush_function, data)) {
@@ -195,7 +191,7 @@ mbfl_convert_filter_new2(
     int (*flush_function)(void*),
     void* data)
 {
-	mbfl_convert_filter * filter;
+	mbfl_convert_filter *filter;
 	const mbfl_encoding *from_encoding, *to_encoding;
 
 	if (vtbl == NULL) {
@@ -205,11 +201,7 @@ mbfl_convert_filter_new2(
 	from_encoding = mbfl_no2encoding(vtbl->from);
 	to_encoding = mbfl_no2encoding(vtbl->to);
 
-	/* allocate */
-	filter = (mbfl_convert_filter *)mbfl_malloc(sizeof(mbfl_convert_filter));
-	if (filter == NULL) {
-		return NULL;
-	}
+	filter = mbfl_malloc(sizeof(mbfl_convert_filter));
 
 	if (mbfl_convert_filter_common_init(filter, from_encoding, to_encoding, vtbl,
 			output_function, flush_function, data)) {

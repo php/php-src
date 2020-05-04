@@ -191,14 +191,7 @@ const struct mbfl_identify_vtbl * mbfl_identify_filter_get_vtbl(enum mbfl_no_enc
 
 mbfl_identify_filter *mbfl_identify_filter_new(enum mbfl_no_encoding encoding)
 {
-	mbfl_identify_filter *filter;
-
-	/* allocate */
-	filter = (mbfl_identify_filter *)mbfl_malloc(sizeof(mbfl_identify_filter));
-	if (filter == NULL) {
-		return NULL;
-	}
-
+	mbfl_identify_filter *filter = mbfl_malloc(sizeof(mbfl_identify_filter));
 	if (mbfl_identify_filter_init(filter, encoding)) {
 		mbfl_free(filter);
 		return NULL;
@@ -209,14 +202,7 @@ mbfl_identify_filter *mbfl_identify_filter_new(enum mbfl_no_encoding encoding)
 
 mbfl_identify_filter *mbfl_identify_filter_new2(const mbfl_encoding *encoding)
 {
-	mbfl_identify_filter *filter;
-
-	/* allocate */
-	filter = (mbfl_identify_filter *)mbfl_malloc(sizeof(mbfl_identify_filter));
-	if (filter == NULL) {
-		return NULL;
-	}
-
+	mbfl_identify_filter *filter = mbfl_malloc(sizeof(mbfl_identify_filter));
 	if (mbfl_identify_filter_init2(filter, encoding)) {
 		mbfl_free(filter);
 		return NULL;

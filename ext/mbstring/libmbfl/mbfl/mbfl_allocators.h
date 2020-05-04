@@ -34,6 +34,9 @@
 #include <stddef.h>
 #include "mbfl_defs.h"
 
+/* All allocation functions are required to be infallible.
+ * That is, they must never return NULL. */
+
 typedef struct _mbfl_allocators {
 	void *(*malloc)(size_t);
 	void *(*realloc)(void *, size_t);
