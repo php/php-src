@@ -97,7 +97,14 @@ static zend_function *zend_duplicate_user_function(zend_function *func) /* {{{ *
 	if (!(GC_FLAGS(new_function->op_array.static_variables) & IS_ARRAY_IMMUTABLE)) {
 		GC_ADDREF(new_function->op_array.static_variables);
 	}
-	ZEND_MAP_PTR_INIT(new_function->op_array.static_variables_ptr, &new_function->op_array.static_variables);
+
+	if (CG(compiler_options) & ZEND_COMPILE_PRELOAD) {
+		ZEND_ASSERT(new_function->op_array.fn_flags & ZEND_ACC_PRELOADED);
+		ZEND_MAP_PTR_NEW(new_function->op_array.static_variables_ptr);
+	} else {
+		ZEND_MAP_PTR_INIT(new_function->op_array.static_variables_ptr, &new_function->op_array.static_variables);
+	}
+
 	return new_function;
 }
 /* }}} */
