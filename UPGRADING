@@ -607,6 +607,11 @@ PHP 8.0 UPGRADE NOTES
 - CURL:
   . The CURL extension now requires at least libcurl 7.29.0.
 
+- Enchant:
+  . The enchant extension now uses libenchant-2 by default when available.
+    libenchant version 1 is still supported but is deprecated and could
+    be removed in the future.
+
 - GD:
   . The $num_points parameter of imagepolygon(), imageopenpolygon() and
     imagefilledpolygon() is now optional, i.e. these functions may be called
