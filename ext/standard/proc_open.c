@@ -708,6 +708,85 @@ static int redirect_proc_descriptor(struct php_proc_open_descriptor_item *desc, 
 	return dup_proc_descriptor(redirect_to, &desc->childend, nindex);
 }
 
+
+int set_proc_descriptor_from_array(
+		zval *descitem, struct php_proc_open_descriptor_item *descriptors, int ndesc, int nindex) {
+	zend_string *ztype = get_string_parameter(descitem, 0, "handle qualifier");
+	if (!ztype) {
+		return FAILURE;
+	}
+
+	zend_string *zmode = NULL, *zfile = NULL;
+	int retval = FAILURE;
+	if (zend_string_equals_literal(ztype, "pipe")) {
+		if ((zmode = get_string_parameter(descitem, 1, "mode parameter for 'pipe'")) == NULL) {
+			goto finish;
+		}
+
+		retval = set_proc_descriptor_to_pipe(&descriptors[ndesc], zmode);
+	} else if (zend_string_equals_literal(ztype, "file")) {
+		if ((zfile = get_string_parameter(descitem, 1, "file name parameter for 'file'")) == NULL) {
+			goto finish;
+		}
+		if ((zmode = get_string_parameter(descitem, 2, "mode parameter for 'file'")) == NULL) {
+			goto finish;
+		}
+
+		retval = set_proc_descriptor_to_file(&descriptors[ndesc], zfile, zmode);
+	} else if (zend_string_equals_literal(ztype, "redirect")) {
+		zval *ztarget = zend_hash_index_find_deref(Z_ARRVAL_P(descitem), 1);
+		if (!ztarget) {
+			zend_value_error("Missing redirection target");
+			goto finish;
+		}
+		if (Z_TYPE_P(ztarget) != IS_LONG) {
+			zend_value_error("Redirection target must be of type int, %s given", zend_get_type_by_const(Z_TYPE_P(ztarget)));
+			goto finish;
+		}
+
+		retval = redirect_proc_descriptor(
+			&descriptors[ndesc], Z_LVAL_P(ztarget), descriptors, ndesc, nindex);
+	} else if (zend_string_equals_literal(ztype, "null")) {
+		retval = set_proc_descriptor_to_blackhole(&descriptors[ndesc]);
+	} else if (zend_string_equals_literal(ztype, "pty")) {
+#if PHP_CAN_DO_PTS
+		if (dev_ptmx == -1) {
+			/* open things up */
+			dev_ptmx = open("/dev/ptmx", O_RDWR);
+			if (dev_ptmx == -1) {
+				php_error_docref(NULL, E_WARNING, "Failed to open /dev/ptmx, errno %d", errno);
+				goto finish;
+			}
+			grantpt(dev_ptmx);
+			unlockpt(dev_ptmx);
+			slave_pty = open(ptsname(dev_ptmx), O_RDWR);
+
+			if (slave_pty == -1) {
+				php_error_docref(NULL, E_WARNING, "Failed to open slave pty, errno %d", errno);
+				goto finish;
+			}
+		}
+		descriptors[ndesc].is_pipe = 1;
+		descriptors[ndesc].childend = dup(slave_pty);
+		descriptors[ndesc].parentend = dup(dev_ptmx);
+		descriptors[ndesc].mode_flags = O_RDWR;
+		retval = SUCCESS;
+#else
+		php_error_docref(NULL, E_WARNING, "PTY pseudo terminal not supported on this system");
+		goto finish;
+#endif
+	} else {
+		php_error_docref(NULL, E_WARNING, "%s is not a valid descriptor spec/mode", ZSTR_VAL(ztype));
+		goto finish;
+	}
+
+finish:
+	if (zmode) zend_string_release(zmode);
+	if (zfile) zend_string_release(zfile);
+	zend_string_release(ztype);
+	return retval;
+}
+
 static int close_parent_ends_of_pipes_in_child(struct php_proc_open_descriptor_item *descriptors, int ndesc)
 {
 	/* we are running in child process
@@ -790,12 +869,6 @@ PHP_FUNCTION(proc_open)
 #endif
 	php_process_id_t child;
 	struct php_process_handle *proc;
-
-  /* zend_strings which may be allocated while processing the descriptorspec
-   * we need to make sure that each one allocated is released once and only once */
-	zend_string *ztype = NULL, *zmode = NULL, *zfile = NULL;
-#define cleanup_zend_string(ptr) do { zend_tmp_string_release(ptr); ptr = NULL; } while(0)
-#define cleanup_zend_strings() cleanup_zend_string(ztype); cleanup_zend_string(zmode); cleanup_zend_string(zfile)
 
 #if PHP_CAN_DO_PTS
 	php_file_descriptor_t dev_ptmx = -1;	/* master */
@@ -883,78 +956,13 @@ PHP_FUNCTION(proc_open)
 			if (dup_proc_descriptor(desc, &descriptors[ndesc].childend, nindex) == FAILURE) {
 				goto exit_fail;
 			}
-		} else if (Z_TYPE_P(descitem) != IS_ARRAY) {
-			zend_argument_value_error(2, "must only contain arrays and File-Handles");
-			goto exit_fail;
-		} else if ((ztype = get_string_parameter(descitem, 0, "handle qualifier")) == NULL) {
-				goto exit_fail;
-		} else {
-			if (zend_string_equals_literal(ztype, "pipe")) {
-				if ((zmode = get_string_parameter(descitem, 1, "mode parameter for 'pipe'")) == NULL) {
-					goto exit_fail;
-				}
-				if (set_proc_descriptor_to_pipe(&descriptors[ndesc], zmode) == FAILURE) {
-					goto exit_fail;
-				}
-			} else if (zend_string_equals_literal(ztype, "file")) {
-				if ((zfile = get_string_parameter(descitem, 1, "file name parameter for 'file'")) == NULL) {
-					goto exit_fail;
-				}
-				if ((zmode = get_string_parameter(descitem, 2, "mode parameter for 'file'")) == NULL) {
-					goto exit_fail;
-				}
-
-				if (set_proc_descriptor_to_file(&descriptors[ndesc], zfile, zmode) == FAILURE) {
-					goto exit_fail;
-				}
-			} else if (zend_string_equals_literal(ztype, "redirect")) {
-				zval *ztarget = zend_hash_index_find_deref(Z_ARRVAL_P(descitem), 1);
-				if (!ztarget) {
-					zend_value_error("Missing redirection target");
-					goto exit_fail;
-				}
-				if (Z_TYPE_P(ztarget) != IS_LONG) {
-					zend_value_error("Redirection target must be of type int, %s given", zend_get_type_by_const(Z_TYPE_P(ztarget)));
-					goto exit_fail;
-				}
-				if (redirect_proc_descriptor(&descriptors[ndesc], Z_LVAL_P(ztarget), descriptors, ndesc, nindex) == FAILURE) {
-					goto exit_fail;
-				}
-			} else if (zend_string_equals_literal(ztype, "null")) {
-				if (set_proc_descriptor_to_blackhole(&descriptors[ndesc]) == FAILURE) {
-					goto exit_fail;
-				}
-			} else if (zend_string_equals_literal(ztype, "pty")) {
-#if PHP_CAN_DO_PTS
-				if (dev_ptmx == -1) {
-					/* open things up */
-					dev_ptmx = open("/dev/ptmx", O_RDWR);
-					if (dev_ptmx == -1) {
-						php_error_docref(NULL, E_WARNING, "Failed to open /dev/ptmx, errno %d", errno);
-						goto exit_fail;
-					}
-					grantpt(dev_ptmx);
-					unlockpt(dev_ptmx);
-					slave_pty = open(ptsname(dev_ptmx), O_RDWR);
-
-					if (slave_pty == -1) {
-						php_error_docref(NULL, E_WARNING, "Failed to open slave pty, errno %d", errno);
-						goto exit_fail;
-					}
-				}
-				descriptors[ndesc].is_pipe = 1;
-				descriptors[ndesc].childend = dup(slave_pty);
-				descriptors[ndesc].parentend = dup(dev_ptmx);
-				descriptors[ndesc].mode_flags = O_RDWR;
-#else
-				php_error_docref(NULL, E_WARNING, "PTY pseudo terminal not supported on this system");
-				goto exit_fail;
-#endif
-			} else {
-				php_error_docref(NULL, E_WARNING, "%s is not a valid descriptor spec/mode", ZSTR_VAL(ztype));
+		} else if (Z_TYPE_P(descitem) == IS_ARRAY) {
+			if (set_proc_descriptor_from_array(descitem, descriptors, ndesc, nindex) == FAILURE) {
 				goto exit_fail;
 			}
-			cleanup_zend_strings();
+		} else {
+			zend_argument_value_error(2, "must only contain arrays and File-Handles");
+			goto exit_fail;
 		}
 		ndesc++;
 	} ZEND_HASH_FOREACH_END();
@@ -1203,7 +1211,6 @@ exit_fail:
 #else
 	efree_argv(argv);
 #endif
-	cleanup_zend_strings();
 #if PHP_CAN_DO_PTS
 	if (dev_ptmx >= 0) {
 		close(dev_ptmx);
