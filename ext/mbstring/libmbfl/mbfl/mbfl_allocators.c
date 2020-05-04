@@ -48,9 +48,6 @@ static mbfl_allocators default_allocators = {
 	__mbfl__realloc,
 	__mbfl__calloc,
 	__mbfl__free,
-	__mbfl__malloc,
-	__mbfl__realloc,
-	__mbfl__free
 };
 
 mbfl_allocators *__mbfl_allocators = &default_allocators;
