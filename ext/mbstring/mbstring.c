@@ -237,29 +237,11 @@ static void _php_mb_allocators_free(void *ptr)
 	efree(ptr);
 }
 
-static void *_php_mb_allocators_pmalloc(size_t sz)
-{
-	return pemalloc(sz, 1);
-}
-
-static void *_php_mb_allocators_prealloc(void *ptr, size_t sz)
-{
-	return perealloc(ptr, sz, 1);
-}
-
-static void _php_mb_allocators_pfree(void *ptr)
-{
-	pefree(ptr, 1);
-}
-
 static const mbfl_allocators _php_mb_allocators = {
 	_php_mb_allocators_malloc,
 	_php_mb_allocators_realloc,
 	_php_mb_allocators_calloc,
 	_php_mb_allocators_free,
-	_php_mb_allocators_pmalloc,
-	_php_mb_allocators_prealloc,
-	_php_mb_allocators_pfree
 };
 /* }}} */
 
