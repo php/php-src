@@ -287,6 +287,10 @@ PHP 8.0 UPGRADE NOTES
     now ignored.
 
 - PDO:
+  . The default error handling mode has been changed from "silent" to
+   "exceptions". See https://www.php.net/manual/en/pdo.error-handling.php
+    for details of behavior changes and how to explicitly set this attribute.
+    RFC: https://wiki.php.net/rfc/pdo_default_errmode
   . The method PDOStatement::setFetchMode() now accepts the following signature:
 
         PDOStatement::setFetchMode($mode, $classname, $params)
