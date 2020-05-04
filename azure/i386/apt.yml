@@ -7,7 +7,8 @@ steps:
       sudo apt-get update -y | true
       sudo apt-get install -y gcc-multilib
       sudo apt-get install -y g++-multilib
-      sudo apt-get install -y valgrind:i386
+      sudo apt-get purge -y libxml2
+      # TODO: Reenable postgresql + postgresql-contrib packages once they work again.
       sudo apt-get install -y bison \
                               re2c \
                               locales \
@@ -41,7 +42,5 @@ steps:
                               libffi-dev:i386 \
                               libfreetype6-dev:i386 \
                               libsodium-dev:i386 \
-                              postgresql \
-                              postgresql-contrib \
                               ${{ parameters.packages }}
     displayName: 'APT'
