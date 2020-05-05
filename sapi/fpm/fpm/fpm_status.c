@@ -50,9 +50,10 @@ int fpm_status_export_to_zval(zval *status)
 	zval fpm_proc_stats, fpm_proc_stat;
 	time_t now_epoch;
 	struct timeval duration, now;
-	double cpu;
 	int i;
-
+#if HAVE_FPM_LQ
+	double cpu;
+#endif
 
 	scoreboard_p = fpm_scoreboard_acquire(NULL, 1);
 	if (!scoreboard_p) {
