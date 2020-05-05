@@ -4,10 +4,61 @@
 
 final class EnchantBroker
 {
+	/** @alias enchant_broker_init */
+	public function __construct() {}
+
+	/** @alias enchant_broker_get_error */
+	public function getError(): string|false {}
+
+	/** @alias enchant_broker_list_dicts */
+	public function listDicts(): array {}
+
+	/** @alias enchant_broker_request_dict */
+	public function requestDict(string $tag): EnchantDict|false {}
+
+	/** @alias enchant_broker_request_pwl_dict */
+	public function requestPWL(string $filename): EnchantDict|false {}
+
+	/** @alias enchant_broker_dict_exists */
+	public function isDict(string $tag): bool {}
+
+	/** @alias enchant_broker_set_ordering */
+	public function setOrdering(string $tag, string $ordering): bool {}
+
+	/** @alias enchant_broker_describe */
+	public function describe($broker): array {}
 }
 
 final class EnchantDict
 {
+	public function __construct(EnchantBroker $broker, string $tag) {}
+
+	/** @alias enchant_dict_quick_check */
+	public function checkAndSuggest(string $word, &$suggestions = UNKNOWN): bool {}
+
+	/** @alias enchant_dict_check */
+	public function check(string $word): bool {}
+
+	/** @alias enchant_dict_suggest */
+	public function suggest(string $word): ?array {}
+
+	/** @alias enchant_dict_add */
+	public function add(string $word): void {}
+
+	/** @alias enchant_dict_add_to_session */
+	public function addToSession(string $word): void {}
+
+	/** @alias enchant_dict_is_added */
+	public function isAdded(string $word): bool {}
+
+	/** @alias enchant_dict_store_replacement */
+	public function storeReplacement(string $mis, string $cor): void {}
+
+	/** @alias enchant_dict_get_error */
+	public function getError(): string|false {}
+
+	/** @alias enchant_dict_describe */
+	public function describe(): array {}
 }
 
 function enchant_broker_init(): EnchantBroker|false {}
