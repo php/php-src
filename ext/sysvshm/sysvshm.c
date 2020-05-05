@@ -87,6 +87,10 @@ PHP_MINIT_FUNCTION(sysvshm)
 {
 	php_sysvshm.le_shm = zend_register_list_destructors_ex(php_release_sysvshm, NULL, PHP_SHM_RSRC_NAME, module_number);
 
+	if (!zend_hash_str_find(EG(zend_constants), "PHP_IPC_PRIVATE", sizeof("PHP_IPC_PRIVATE") - 1)) {
+		REGISTER_LONG_CONSTANT("PHP_IPC_PRIVATE", IPC_PRIVATE, CONST_PERSISTENT | CONST_CS);
+	}
+
 	if (cfg_get_long("sysvshm.init_mem", &php_sysvshm.init_mem) == FAILURE) {
 		php_sysvshm.init_mem=10000;
 	}
