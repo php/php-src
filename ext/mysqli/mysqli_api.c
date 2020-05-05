@@ -737,18 +737,18 @@ PHP_FUNCTION(mysqli_commit)
 	MY_MYSQL	*mysql;
 	zval		*mysql_link;
 	zend_long		flags = TRANS_COR_NO_OPT;
-	char *		name;
-	size_t			name_len = 0;
+	char *		name = NULL;
+	size_t			name_len;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|ls", &mysql_link, mysqli_link_class_entry, &flags, &name, &name_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|ls!", &mysql_link, mysqli_link_class_entry, &flags, &name, &name_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 
 #if !defined(MYSQLI_USE_MYSQLND)
-	if (mysqli_commit_or_rollback_libmysql(mysql->mysql, TRUE, flags, name_len ? name : NULL)) {
+	if (mysqli_commit_or_rollback_libmysql(mysql->mysql, TRUE, flags, name)) {
 #else
-	if (FAIL == mysqlnd_commit(mysql->mysql, flags, name_len ? name : NULL)) {
+	if (FAIL == mysqlnd_commit(mysql->mysql, flags, name)) {
 #endif
 		RETURN_FALSE;
 	}
@@ -1981,7 +1981,7 @@ PHP_FUNCTION(mysqli_rollback)
 	char *		name = NULL;
 	size_t			name_len = 0;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|ls", &mysql_link, mysqli_link_class_entry, &flags, &name, &name_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|ls!", &mysql_link, mysqli_link_class_entry, &flags, &name, &name_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);

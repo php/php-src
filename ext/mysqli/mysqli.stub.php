@@ -52,7 +52,7 @@ class mysqli
      * @return bool
      * @alias mysqli_commit
      */
-    public function commit(int $flags = -1, string $name = "") {}
+    public function commit(int $flags = -1, ?string $name = null) {}
 
     /**
      * @return mysqli|null|false
@@ -217,7 +217,7 @@ class mysqli
      * @return bool
      * @alias mysqli_rollback
      */
-    public function rollback(int $flags = 0, string $name = "") {}
+    public function rollback(int $flags = 0, ?string $name = null) {}
 
     /**
      * @return bool
@@ -534,7 +534,7 @@ function mysqli_character_set_name(mysqli $mysql_link): ?string {}
 
 function mysqli_close(mysqli $mysql_link): bool {}
 
-function mysqli_commit(mysqli $mysql_link, int $flags = -1, string $name = ""): bool {}
+function mysqli_commit(mysqli $mysql_link, int $flags = -1, ?string $name = null): bool {}
 
 function mysqli_connect(
     ?string $host = null,
@@ -668,7 +668,7 @@ function mysqli_reap_async_query(mysqli $mysqli_link): mysqli_result|bool {}
 
 function mysqli_release_savepoint(mysqli $mysqli_link, string $name): bool {}
 
-function mysqli_rollback(mysqli $mysqli_link, int $flags = 0, string $name = ""): bool {}
+function mysqli_rollback(mysqli $mysqli_link, int $flags = 0, ?string $name = null): bool {}
 
 function mysqli_savepoint(mysqli $mysqli_link, string $name): bool {}
 

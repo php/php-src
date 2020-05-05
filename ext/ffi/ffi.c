@@ -2854,7 +2854,7 @@ ZEND_METHOD(FFI, cdef) /* {{{ */
 	FFI_G(symbols) = NULL;
 	FFI_G(tags) = NULL;
 
-	if (ZSTR_LEN(code)) {
+	if (code && ZSTR_LEN(code)) {
 		/* Parse C definitions */
 		FFI_G(default_type_attr) = ZEND_FFI_ATTR_STORED;
 
