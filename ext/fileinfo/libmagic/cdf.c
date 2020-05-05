@@ -297,7 +297,7 @@ cdf_zero_stream(cdf_stream_t *scn)
 static size_t
 cdf_check_stream(const cdf_stream_t *sst, const cdf_header_t *h)
 {
-#ifndef NDEBUG
+#if PHP_DEBUG
 	size_t ss = sst->sst_dirlen < h->h_min_size_standard_stream ?
 	    CDF_SHORT_SEC_SIZE(h) : CDF_SEC_SIZE(h);
 	assert(ss == sst->sst_ss);
