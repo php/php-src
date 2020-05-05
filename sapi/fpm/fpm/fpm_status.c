@@ -85,7 +85,7 @@ int fpm_status_export_to_zval(zval *status)
 	add_assoc_long(status, "start-time", scoreboard.start_epoch);
 	add_assoc_long(status, "start-since", now_epoch - scoreboard.start_epoch);
 	add_assoc_long(status, "accepted-conn", scoreboard.requests);
-#ifdef HAVE_FPM_LQ
+#if HAVE_FPM_LQ
 	add_assoc_long(status, "listen-queue", scoreboard.lq);
 	add_assoc_long(status, "max-listen-queue", scoreboard.lq_max);
 	add_assoc_long(status, "listen-queue-len", scoreboard.lq_len);
@@ -103,7 +103,7 @@ int fpm_status_export_to_zval(zval *status)
 			continue;
 		}
 		proc_p = &procs[i];
-#ifdef HAVE_FPM_LQ
+#if HAVE_FPM_LQ
 		/* prevent NaN */
 		if (procs[i].cpu_duration.tv_sec == 0 && procs[i].cpu_duration.tv_usec == 0) {
 			cpu = 0.;
@@ -130,7 +130,7 @@ int fpm_status_export_to_zval(zval *status)
 		add_assoc_long(&fpm_proc_stat, "request-length", procs[i].content_length);
 		add_assoc_string(&fpm_proc_stat, "user", procs[i].auth_user[0] != '\0' ? procs[i].auth_user : "-");
 		add_assoc_string(&fpm_proc_stat, "script", procs[i].script_filename[0] != '\0' ? procs[i].script_filename : "-");
-#ifdef HAVE_FPM_LQ
+#if HAVE_FPM_LQ
 		add_assoc_double(&fpm_proc_stat, "last-request-cpu", procs[i].request_stage == FPM_REQUEST_ACCEPTING ? cpu : 0.);
 #endif
 		add_assoc_long(&fpm_proc_stat, "last-request-memory", procs[i].request_stage == FPM_REQUEST_ACCEPTING ? procs[i].memory : 0);
@@ -245,7 +245,7 @@ int fpm_status_handle_request(void) /* {{{ */
 					"<tr><th>start time</th><td>%s</td></tr>\n"
 					"<tr><th>start since</th><td>%lu</td></tr>\n"
 					"<tr><th>accepted conn</th><td>%lu</td></tr>\n"
-#ifdef HAVE_FPM_LQ
+#if HAVE_FPM_LQ
 					"<tr><th>listen queue</th><td>%d</td></tr>\n"
 					"<tr><th>max listen queue</th><td>%d</td></tr>\n"
 					"<tr><th>listen queue len</th><td>%u</td></tr>\n"
@@ -275,7 +275,7 @@ int fpm_status_handle_request(void) /* {{{ */
 						"<th>content length</th>"
 						"<th>user</th>"
 						"<th>script</th>"
-#ifdef HAVE_FPM_LQ
+#if HAVE_FPM_LQ
 						"<th>last request cpu</th>"
 #endif
 						"<th>last request memory</th>"
@@ -294,7 +294,7 @@ int fpm_status_handle_request(void) /* {{{ */
 						"<td>%zu</td>"
 						"<td>%s</td>"
 						"<td>%s</td>"
-#ifdef HAVE_FPM_LQ
+#if HAVE_FPM_LQ
 						"<td>%.2f</td>"
 #endif
 						"<td>%zu</td>"
@@ -317,7 +317,7 @@ int fpm_status_handle_request(void) /* {{{ */
 				"<start-time>%s</start-time>\n"
 				"<start-since>%lu</start-since>\n"
 				"<accepted-conn>%lu</accepted-conn>\n"
-#ifdef HAVE_FPM_LQ
+#if HAVE_FPM_LQ
 				"<listen-queue>%d</listen-queue>\n"
 				"<max-listen-queue>%d</max-listen-queue>\n"
 				"<listen-queue-len>%u</listen-queue-len>\n"
@@ -346,7 +346,7 @@ int fpm_status_handle_request(void) /* {{{ */
 							"<content-length>%zu</content-length>"
 							"<user>%s</user>"
 							"<script>%s</script>"
-#ifdef HAVE_FPM_LQ
+#if HAVE_FPM_LQ
 							"<last-request-cpu>%.2f</last-request-cpu>"
 #endif
 							"<last-request-memory>%zu</last-request-memory>"
@@ -367,7 +367,7 @@ int fpm_status_handle_request(void) /* {{{ */
 				"\"start time\":%s,"
 				"\"start since\":%lu,"
 				"\"accepted conn\":%lu,"
-#ifdef HAVE_FPM_LQ
+#if HAVE_FPM_LQ
 				"\"listen queue\":%d,"
 				"\"max listen queue\":%d,"
 				"\"listen queue len\":%u,"
@@ -397,7 +397,7 @@ int fpm_status_handle_request(void) /* {{{ */
 					"\"content length\":%zu,"
 					"\"user\":\"%s\","
 					"\"script\":\"%s\","
-#ifdef HAVE_FPM_LQ
+#if HAVE_FPM_LQ
 					"\"last request cpu\":%.2f,"
 #endif
 					"\"last request memory\":%zu"
@@ -417,7 +417,7 @@ int fpm_status_handle_request(void) /* {{{ */
 				"start time:           %s\n"
 				"start since:          %lu\n"
 				"accepted conn:        %lu\n"
-#ifdef HAVE_FPM_LQ
+#if HAVE_FPM_LQ
 				"listen queue:         %d\n"
 				"max listen queue:     %d\n"
 				"listen queue len:     %u\n"
@@ -444,7 +444,7 @@ int fpm_status_handle_request(void) /* {{{ */
 						"content length:       %zu\n"
 						"user:                 %s\n"
 						"script:               %s\n"
-#ifdef HAVE_FPM_LQ
+#if HAVE_FPM_LQ
 						"last request cpu:     %.2f\n"
 #endif
 						"last request memory:  %zu\n";
@@ -459,7 +459,7 @@ int fpm_status_handle_request(void) /* {{{ */
 				time_buffer,
 				(unsigned long) (now_epoch - scoreboard.start_epoch),
 				scoreboard.requests,
-#ifdef HAVE_FPM_LQ
+#if HAVE_FPM_LQ
 				scoreboard.lq,
 				scoreboard.lq_max,
 				scoreboard.lq_len,
@@ -486,7 +486,7 @@ int fpm_status_handle_request(void) /* {{{ */
 			zend_string *tmp_query_string;
 			char *query_string;
 			struct timeval duration, now;
-#ifdef HAVE_FPM_LQ
+#if HAVE_FPM_LQ
 			float cpu;
 #endif
 
@@ -522,7 +522,7 @@ int fpm_status_handle_request(void) /* {{{ */
 					}
 				}
 
-#ifdef HAVE_FPM_LQ
+#if HAVE_FPM_LQ
 				/* prevent NaN */
 				if (proc.cpu_duration.tv_sec == 0 && proc.cpu_duration.tv_usec == 0) {
 					cpu = 0.;
@@ -551,7 +551,7 @@ int fpm_status_handle_request(void) /* {{{ */
 					proc.content_length,
 					proc.auth_user[0] != '\0' ? proc.auth_user : "-",
 					proc.script_filename[0] != '\0' ? proc.script_filename : "-",
-#ifdef HAVE_FPM_LQ
+#if HAVE_FPM_LQ
 					proc.request_stage == FPM_REQUEST_ACCEPTING ? cpu : 0.,
 #endif
 					proc.request_stage == FPM_REQUEST_ACCEPTING ? proc.memory : 0);
