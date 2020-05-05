@@ -1007,7 +1007,7 @@ ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *zobj, zend_string *nam
 	zend_property_info *prop_info = NULL;
 
 #if DEBUG_OBJECT_HANDLERS
-	fprintf(stderr, "Ptr object #%d property: %s\n", object->handle, ZSTR_VAL(name));
+	fprintf(stderr, "Ptr object #%d property: %s\n", zobj->handle, ZSTR_VAL(name));
 #endif
 
 	property_offset = zend_get_property_offset(zobj->ce, name, (zobj->ce->__get != NULL), cache_slot, &prop_info);
