@@ -2834,7 +2834,7 @@ ZEND_METHOD(FFI, cdef) /* {{{ */
 	ZEND_FFI_VALIDATE_API_RESTRICTION();
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR_OR_NULL(code)
+		Z_PARAM_STR(code)
 		Z_PARAM_STR_OR_NULL(lib)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -2854,7 +2854,7 @@ ZEND_METHOD(FFI, cdef) /* {{{ */
 	FFI_G(symbols) = NULL;
 	FFI_G(tags) = NULL;
 
-	if (code) {
+	if (ZSTR_LEN(code)) {
 		/* Parse C definitions */
 		FFI_G(default_type_attr) = ZEND_FFI_ATTR_STORED;
 

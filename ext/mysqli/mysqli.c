@@ -1003,10 +1003,10 @@ PHP_FUNCTION(mysqli_stmt_construct)
 	zval				*mysql_link;
 	MY_STMT				*stmt;
 	MYSQLI_RESOURCE		*mysqli_resource;
-	char				*statement;
-	size_t					statement_len = 0;
+	char				*statement = NULL;
+	size_t					statement_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|s", &mysql_link, mysqli_link_class_entry, &statement, &statement_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|s!", &mysql_link, mysqli_link_class_entry, &statement, &statement_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1014,7 +1014,7 @@ PHP_FUNCTION(mysqli_stmt_construct)
 
 	stmt = (MY_STMT *) ecalloc(1, sizeof(MY_STMT));
 	stmt->stmt = mysql_stmt_init(mysql->mysql);
-	if (stmt->stmt && statement_len != 0) {
+	if (stmt->stmt && statement) {
 		mysql_stmt_prepare(stmt->stmt, (char *)statement, statement_len);
 	}
 

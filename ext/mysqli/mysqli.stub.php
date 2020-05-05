@@ -217,7 +217,7 @@ class mysqli
      * @return bool
      * @alias mysqli_rollback
      */
-    public function rollback(int $flags = 0, string $name = '') {}
+    public function rollback(int $flags = 0, string $name = "") {}
 
     /**
      * @return bool
@@ -389,7 +389,7 @@ class mysqli_result
 class mysqli_stmt
 {
     /** @alias mysqli_stmt_construct */
-    public function __construct(mysqli $mysqli_link, string $statement = "") {}
+    public function __construct(mysqli $mysqli_link, ?string $statement = null) {}
 
     /**
      * @return int|false
@@ -668,7 +668,7 @@ function mysqli_reap_async_query(mysqli $mysqli_link): mysqli_result|bool {}
 
 function mysqli_release_savepoint(mysqli $mysqli_link, string $name): bool {}
 
-function mysqli_rollback(mysqli $mysqli_link, int $flags = 0, string $name = ''): bool {}
+function mysqli_rollback(mysqli $mysqli_link, int $flags = 0, string $name = ""): bool {}
 
 function mysqli_savepoint(mysqli $mysqli_link, string $name): bool {}
 

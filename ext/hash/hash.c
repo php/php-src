@@ -493,10 +493,7 @@ PHP_FUNCTION(hash_update_file)
 
 	hash = php_hashcontext_from_object(Z_OBJ_P(zhash));
 	PHP_HASHCONTEXT_VERIFY(hash);
-
-	if (zcontext) {
-		context = php_stream_context_from_zval(zcontext, 0);
-	}
+	context = php_stream_context_from_zval(zcontext, 0);
 
 	stream = php_stream_open_wrapper_ex(ZSTR_VAL(filename), "rb", REPORT_ERRORS, NULL, context);
 	if (!stream) {

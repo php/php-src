@@ -913,11 +913,11 @@ PHP_FUNCTION(libxml_set_streams_context)
 PHP_FUNCTION(libxml_use_internal_errors)
 {
 	xmlStructuredErrorFunc current_handler;
-	zend_bool use_errors=0, retval;
+	zend_bool use_errors, use_errors_is_null = 1, retval;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_BOOL(use_errors)
+		Z_PARAM_BOOL_OR_NULL(use_errors, use_errors_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
 	current_handler = xmlStructuredError;
@@ -927,7 +927,7 @@ PHP_FUNCTION(libxml_use_internal_errors)
 		retval = 0;
 	}
 
-	if (ZEND_NUM_ARGS() == 0) {
+	if (use_errors_is_null) {
 		RETURN_BOOL(retval);
 	}
 
