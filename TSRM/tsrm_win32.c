@@ -613,14 +613,16 @@ TSRM_API int shmget(key_t key, size_t size, int flags)
 {/*{{{*/
 	shm_pair *shm;
 	char shm_segment[26], shm_info[29];
-	HANDLE shm_handle, info_handle;
+	HANDLE shm_handle = NULL, info_handle = NULL;
 	BOOL created = FALSE;
 
-	snprintf(shm_segment, sizeof(shm_segment), "TSRM_SHM_SEGMENT:%d", key);
-	snprintf(shm_info, sizeof(shm_info), "TSRM_SHM_DESCRIPTOR:%d", key);
+	if (key != IPC_PRIVATE) {
+		snprintf(shm_segment, sizeof(shm_segment), "TSRM_SHM_SEGMENT:%d", key);
+		snprintf(shm_info, sizeof(shm_info), "TSRM_SHM_DESCRIPTOR:%d", key);
 
-	shm_handle  = OpenFileMapping(FILE_MAP_ALL_ACCESS, FALSE, shm_segment);
-	info_handle = OpenFileMapping(FILE_MAP_ALL_ACCESS, FALSE, shm_info);
+		shm_handle  = OpenFileMapping(FILE_MAP_ALL_ACCESS, FALSE, shm_segment);
+		info_handle = OpenFileMapping(FILE_MAP_ALL_ACCESS, FALSE, shm_info);
+	}
 
 	if (!shm_handle && !info_handle) {
 		if (flags & IPC_CREAT) {
@@ -631,8 +633,8 @@ TSRM_API int shmget(key_t key, size_t size, int flags)
 			DWORD high = 0;
 			DWORD low = size;
 #endif
-			shm_handle	= CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, high, low, shm_segment);
-			info_handle	= CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, sizeof(shm->descriptor), shm_info);
+			shm_handle	= CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, high, low, key == IPC_PRIVATE ? NULL : shm_segment);
+			info_handle	= CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, sizeof(shm->descriptor), key == IPC_PRIVATE ? NULL : shm_info);
 			created		= TRUE;
 		}
 		if (!shm_handle || !info_handle) {
