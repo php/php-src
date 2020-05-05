@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.4.7
 
+- Core:
+  . Fixed bug #79566 (Private SHM is not private on Windows). (cmb)
+
 - SimpleXML:
   . Fixed bug #79528 (Different object of the same xml between 7.4.5 and
     7.4.4). (cmb)
