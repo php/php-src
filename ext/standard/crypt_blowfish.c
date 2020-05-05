@@ -53,14 +53,9 @@
 /* Just to make sure the prototypes match the actual definitions */
 #include "crypt_blowfish.h"
 
-#ifdef __i386__
-#define BF_ASM				0
-#define BF_SCALE			1
-#elif defined(__x86_64__) || defined(__alpha__) || defined(__hppa__)
-#define BF_ASM				0
+#if defined(__i386__) || defined(__x86_64__) || defined(__alpha__) || defined(__hppa__)
 #define BF_SCALE			1
 #else
-#define BF_ASM				0
 #define BF_SCALE			0
 #endif
 
@@ -525,10 +520,6 @@ static void BF_swap(BF_word *x, int count)
 	R = L; \
 	L = tmp4 ^ data.ctx.P[BF_N + 1];
 
-#if BF_ASM
-#define BF_body() \
-	_BF_body_r(&data.ctx);
-#else
 #define BF_body() \
 	L = R = 0; \
 	ptr = data.ctx.P; \
@@ -546,7 +537,6 @@ static void BF_swap(BF_word *x, int count)
 		*(ptr - 2) = L; \
 		*(ptr - 1) = R; \
 	} while (ptr < &data.ctx.S[3][0xFF]);
-#endif
 
 static void BF_set_key(const char *key, BF_key expanded, BF_key initial,
     unsigned char flags)
@@ -658,9 +648,6 @@ static char *BF_crypt(const char *key, const char *setting,
 	char *output, int size,
 	BF_word min)
 {
-#if BF_ASM
-	extern void _BF_body_r(BF_ctx *ctx);
-#endif
 	struct {
 		BF_ctx ctx;
 		BF_key expanded_key;
