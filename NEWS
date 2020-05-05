@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.19
 
+- Core:
+  . Fixed bug #79566 (Private SHM is not private on Windows). (cmb)
+
 - Opcache:
   . Fixed bug #79535 (PHP crashes with specific opcache.optimization_level).
     (Nikita)
