@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug #79566 (Private SHM is not private on Windows). (cmb)
+  . Fixed bug #79489 (.user.ini does not inherit). (cmb)
 
 - Opcache:
   . Fixed bug #79535 (PHP crashes with specific opcache.optimization_level).
