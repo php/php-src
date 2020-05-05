@@ -22,6 +22,10 @@
 
 BEGIN_EXTERN_C()
 
+#ifndef GC_BENCH
+# define GC_BENCH 0
+#endif
+
 typedef struct _zend_gc_status {
 	uint32_t runs;
 	uint32_t collected;
