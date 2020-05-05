@@ -383,6 +383,10 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 				op_array->vars = zend_shared_alloc_get_xlat_entry(op_array->vars);
 				ZEND_ASSERT(op_array->vars != NULL);
 			}
+			if (op_array->scalar_extensions) {
+				op_array->scalar_extensions = zend_shared_alloc_get_xlat_entry(op_array->scalar_extensions);
+				ZEND_ASSERT(op_array->scalar_extensions != NULL);
+			}
 			ZCG(mem) = (void*)((char*)ZCG(mem) + ZEND_ALIGNED_SIZE(zend_extensions_op_array_persist(op_array, ZCG(mem))));
 			return;
 		}
@@ -560,6 +564,15 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 		op_array->vars = zend_shared_memdup_put_free(op_array->vars, sizeof(zend_string*) * op_array->last_var);
 		for (i = 0; i < op_array->last_var; i++) {
 			zend_accel_store_interned_string(op_array->vars[i]);
+		}
+	}
+
+	if (op_array->scalar_extensions) {
+		op_array->scalar_extensions = zend_shared_memdup_put_free(op_array->scalar_extensions, sizeof(zend_string*) * ZEND_SCALAR_EXTENSIONS_NUM_HANDLERS);
+		for (uint32_t i = 0; i < ZEND_SCALAR_EXTENSIONS_NUM_HANDLERS; i++) {
+			if (op_array->scalar_extensions[i]) {
+				zend_accel_store_interned_string(op_array->scalar_extensions[i]);
+			}
 		}
 	}
 

@@ -262,6 +262,15 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 		}
 	}
 
+	if (op_array->scalar_extensions) {
+		ADD_SIZE(sizeof(zend_string*) * ZEND_SCALAR_EXTENSIONS_NUM_HANDLERS);
+		for (uint32_t i = 0; i < ZEND_SCALAR_EXTENSIONS_NUM_HANDLERS; i++) {
+			if (op_array->scalar_extensions[i]) {
+				ADD_INTERNED_STRING(op_array->scalar_extensions[i]);
+			}
+		}
+	}
+
 	ADD_SIZE(ZEND_ALIGNED_SIZE(zend_extensions_op_array_persist_calc(op_array)));
 }
 

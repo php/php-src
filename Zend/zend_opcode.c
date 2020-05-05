@@ -68,6 +68,8 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 	op_array->num_args = 0;
 	op_array->required_num_args = 0;
 
+	op_array->scalar_extensions = NULL;
+
 	op_array->scope = NULL;
 	op_array->prototype = NULL;
 
@@ -512,6 +514,16 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 			zend_type_release(arg_info[i].type, /* persistent */ 0);
 		}
 		efree(arg_info);
+	}
+
+	if (op_array->scalar_extensions) {
+		for (uint32_t i = 0; i < ZEND_SCALAR_EXTENSIONS_NUM_HANDLERS; i++) {
+			zend_string *scalar_handler_class_name = op_array->scalar_extensions[i];
+			if (scalar_handler_class_name) {
+				zend_string_release_ex(scalar_handler_class_name, 0);
+			}
+		}
+		efree(op_array->scalar_extensions);
 	}
 }
 

@@ -6274,6 +6274,16 @@ void zend_compile_func_decl(znode *result, zend_ast *ast, zend_bool toplevel) /*
 		op_array->fn_flags |= ZEND_ACC_CLOSURE;
 	}
 
+	if (orig_op_array->scalar_extensions && !op_array->scalar_extensions) {
+		op_array->scalar_extensions = ecalloc(ZEND_SCALAR_EXTENSIONS_NUM_HANDLERS, sizeof(zend_string *));
+		for (uint32_t i = 0; i < ZEND_SCALAR_EXTENSIONS_NUM_HANDLERS; i++) {
+			zend_string *scalar_handler_class_name = orig_op_array->scalar_extensions[i];
+			if (scalar_handler_class_name) {
+				op_array->scalar_extensions[i] = zend_string_copy(scalar_handler_class_name);
+			}
+		}
+	}
+
 	if (is_method) {
 		zend_bool has_body = stmt_ast != NULL;
 		method_lcname = zend_begin_method_decl(op_array, decl->name, has_body);
@@ -6971,6 +6981,46 @@ void zend_compile_group_use(zend_ast *ast) /* {{{ */
 	}
 }
 /* }}} */
+
+static int zend_get_type_from_string(const char *str) {
+	/* Not all of these types will make sense in practice, but for now
+	 * we support all of them. */
+	if (!strcasecmp(str, "null")) {
+		return IS_NULL;
+	} else if (!strcasecmp(str, "bool")) {
+		return IS_TRUE;
+	} else if (!strcasecmp(str, "int")) {
+		return IS_LONG;
+	} else if (!strcasecmp(str, "float")) {
+		return IS_DOUBLE;
+	} else if (!strcasecmp(str, "string")) {
+		return IS_STRING;
+	} else if (!strcasecmp(str, "array")) {
+		return IS_ARRAY;
+	} else if (!strcasecmp(str, "resource")) {
+		return IS_RESOURCE;
+	} else {
+		zend_error(E_WARNING, "Invalid type \"%s\" specified", str);
+		return -1;
+	}
+}
+
+static void zend_compile_use_extension(zend_ast *ast)
+{
+	zend_ast *scalar_type_ast = ast->child[0];
+	zend_ast *extension_class_ast = ast->child[1];
+
+	if (!CG(active_op_array)->scalar_extensions) {
+		CG(active_op_array)->scalar_extensions = ecalloc(ZEND_SCALAR_EXTENSIONS_NUM_HANDLERS, sizeof(zend_string *));
+	}
+
+	zend_string *scalar_type_name = zend_ast_get_str(scalar_type_ast);
+	uint32_t scalar_type = zend_get_type_from_string(ZSTR_VAL(scalar_type_name));
+
+	zend_string *extension_class_name = zend_ast_get_str(extension_class_ast);
+
+	CG(active_op_array)->scalar_extensions[scalar_type] = zend_string_copy(extension_class_name);
+}
 
 void zend_compile_const_decl(zend_ast *ast) /* {{{ */
 {
@@ -8798,6 +8848,9 @@ void zend_compile_stmt(zend_ast *ast) /* {{{ */
 			break;
 		case ZEND_AST_THROW:
 			zend_compile_throw(NULL, ast);
+			break;
+		case ZEND_AST_USE_EXTENSION:
+			zend_compile_use_extension(ast);
 			break;
 		default:
 		{

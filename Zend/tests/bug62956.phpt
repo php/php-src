@@ -8,7 +8,7 @@ class Base
     {}
 }
 
-class Extension extends Base
+class SubClass extends Base
 {
     private function test($arg)
     {}

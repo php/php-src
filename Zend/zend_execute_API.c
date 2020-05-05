@@ -1613,3 +1613,69 @@ ZEND_API int zend_set_local_var_str(const char *name, size_t len, zval *value, i
 	return FAILURE;
 }
 /* }}} */
+
+static ZEND_NAMED_FUNCTION(zend_scalar_extensions_indirection_func)
+{
+	zend_indirection_function *ind = (zend_indirection_function *) execute_data->func;
+	zval *obj = &ind->obj;
+	zval *params = safe_emalloc(sizeof(zval), ZEND_NUM_ARGS() + 1, 0);
+	zval result;
+	zend_class_entry *ce = ind->fn.scope;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
+
+	fci.size = sizeof(fci);
+	fci.param_count = ZEND_NUM_ARGS() + 1;
+	fci.params = params;
+	fci.no_separation = 1;
+
+	fcc.calling_scope = ce;
+	fcc.function_handler = ind->fbc;
+
+	zend_get_parameters_array_ex(ZEND_NUM_ARGS(), &params[1]);
+
+	ZVAL_COPY_VALUE(&params[0], obj);
+	ZVAL_STR(&fci.function_name, ind->fn.function_name);
+	fci.retval = &result;
+	fci.object = NULL;
+
+	fcc.object = NULL;
+	fcc.called_scope = zend_get_called_scope(execute_data);
+
+	if (zend_call_function(&fci, &fcc) == SUCCESS && !Z_ISUNDEF(result)) {
+		ZVAL_COPY_VALUE(return_value, &result);
+	}
+	zval_ptr_dtor(obj);
+	execute_data->func = NULL;
+
+	zval_ptr_dtor(&fci.function_name);
+	efree(params);
+	efree(ind);
+}
+
+ZEND_API zend_function *zend_scalar_extensions_get_indirection_func(zend_class_entry *ce, zend_function *fbc, zval *method, zval *obj) {
+	zend_indirection_function *ind = emalloc(sizeof(zend_indirection_function));
+	zend_function *fn = (zend_function *) &ind->fn;
+	long keep_flags = ZEND_ACC_RETURN_REFERENCE | ZEND_ACC_VARIADIC;
+
+	ind->fn.type = ZEND_INTERNAL_FUNCTION;
+	ind->fn.module = (ce->type == ZEND_INTERNAL_CLASS) ? ce->info.internal.module : NULL;
+	ind->fn.handler = zend_scalar_extensions_indirection_func;
+	ind->fn.scope = ce;
+	ind->fn.fn_flags = ZEND_ACC_CALL_VIA_HANDLER | (fbc->common.fn_flags & keep_flags);
+	ind->fn.num_args = fbc->common.num_args - 1;
+	ind->fn.required_num_args = fbc->common.required_num_args - 1;
+
+	ind->fbc = fbc;
+	if (fbc->common.arg_info) {
+		fn->common.arg_info = &fbc->common.arg_info[1];
+	} else {
+		fn->common.arg_info = NULL;
+	}
+
+	ind->fn.function_name = zend_string_copy(Z_STR_P(method));
+	zend_set_function_arg_flags(fn);
+	ZVAL_COPY_VALUE(&ind->obj, obj);
+
+	return fn;
+}

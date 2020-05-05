@@ -3425,9 +3425,73 @@ ZEND_VM_HOT_OBJ_HANDLER(112, ZEND_INIT_METHOD_CALL, CONST|TMPVAR|UNUSED|THIS|CV,
 				if (OP2_TYPE == IS_CONST) {
 					function_name = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
 				}
-				zend_invalid_method_call(object, function_name);
+
+				const zend_op *opline = execute_data->opline;
+				zval *obj, *method;
+				zend_class_entry *ce;
+				zend_function *fbc;
+
+				zend_string **scalar_extensions = EX(func)->op_array.scalar_extensions;
+				if (!scalar_extensions) {
+					zend_invalid_method_call(object, function_name);
+					FREE_OP2();
+					FREE_OP1();
+					HANDLE_EXCEPTION();
+				}
+
+				zend_string *extension_class_name = scalar_extensions[Z_TYPE_P(object)];
+				if (!extension_class_name) {
+					zend_invalid_method_call(object, function_name);
+					FREE_OP2();
+					FREE_OP1();
+					HANDLE_EXCEPTION();
+				}
+
+				ce = zend_fetch_class_by_name(extension_class_name, NULL, 0);
+
+				obj = zend_get_zval_ptr(opline, opline->op1_type, &opline->op1, execute_data, BP_VAR_R);
+				ZVAL_DEREF(obj);
+				method = zend_get_zval_ptr(opline, opline->op2_type, &opline->op2, execute_data, BP_VAR_R);
+				ZVAL_DEREF(method);
+
+				if (!obj || Z_TYPE_P(obj) == IS_OBJECT || Z_TYPE_P(method) != IS_STRING) {
+					zend_invalid_method_call(object, function_name);
+					FREE_OP2();
+					FREE_OP1();
+					HANDLE_EXCEPTION();
+				}
+
+				if (ce->get_static_method) {
+					fbc = ce->get_static_method(ce, Z_STR_P(method));
+				} else {
+					fbc = zend_std_get_static_method(
+						ce, Z_STR_P(method),
+						opline->op2_type == IS_CONST ? RT_CONSTANT(opline, opline->op2) + 1 : NULL
+					);
+				}
+
+				if (!fbc) {
+					if (!EG(exception)) {
+						zend_throw_error(NULL, "Call to undefined method %s::%s()",
+							ZSTR_VAL(ce->name), Z_STRVAL_P(method));
+					}
+					FREE_OP2();
+					FREE_OP1();
+					HANDLE_EXCEPTION();
+				}
+
+				Z_TRY_ADDREF_P(obj);
+				fbc = zend_scalar_extensions_get_indirection_func(ce, fbc, method, obj);
+
+				zend_execute_data *call = zend_vm_stack_push_call_frame(
+					ZEND_CALL_NESTED_FUNCTION, fbc, opline->extended_value, ce);
+				call->prev_execute_data = EX(call);
+				EX(call) = call;
+
 				FREE_OP2();
 				FREE_OP1();
+
+				execute_data->opline++;
 				HANDLE_EXCEPTION();
 			}
 		} while (0);

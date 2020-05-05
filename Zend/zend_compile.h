@@ -340,6 +340,9 @@ typedef struct _zend_oparray_context {
 /* call through internal function handler. e.g. Closure::invoke() */
 #define ZEND_ACC_CALL_VIA_HANDLER     ZEND_ACC_CALL_VIA_TRAMPOLINE
 
+#define ZEND_SCALAR_EXTENSIONS_MAX_HANDLER  IS_RESOURCE
+#define ZEND_SCALAR_EXTENSIONS_NUM_HANDLERS (ZEND_SCALAR_EXTENSIONS_MAX_HANDLER + 1)
+
 char *zend_visibility_string(uint32_t fn_flags);
 
 typedef struct _zend_property_info {
@@ -403,6 +406,7 @@ struct _zend_op_array {
 	uint32_t num_args;
 	uint32_t required_num_args;
 	zend_arg_info *arg_info;
+	zend_string **scalar_extensions;
 	/* END of common elements */
 
 	int cache_size;     /* number of run_time_cache_slots * sizeof(void*) */
@@ -1012,6 +1016,7 @@ static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, 
 #define ZEND_SYMBOL_CLASS    (1<<0)
 #define ZEND_SYMBOL_FUNCTION (1<<1)
 #define ZEND_SYMBOL_CONST    (1<<2)
+#define ZEND_SYMBOL_EXTENSION (1<<3)
 
 /* All increment opcodes are even (decrement are odd) */
 #define ZEND_IS_INCREMENT(opcode) (((opcode) & 1) == 0)

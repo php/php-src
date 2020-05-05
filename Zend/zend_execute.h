@@ -158,6 +158,12 @@ struct _zend_vm_stack {
 	zend_vm_stack prev;
 };
 
+typedef struct _zend_indirection_function {
+	zend_internal_function fn;
+	zend_function *fbc;
+	zval obj;
+} zend_indirection_function;
+
 #define ZEND_VM_STACK_HEADER_SLOTS \
 	((ZEND_MM_ALIGNED_SIZE(sizeof(struct _zend_vm_stack)) + ZEND_MM_ALIGNED_SIZE(sizeof(zval)) - 1) / ZEND_MM_ALIGNED_SIZE(sizeof(zval)))
 
