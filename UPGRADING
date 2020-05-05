@@ -568,9 +568,16 @@ PHP 8.0 UPGRADE NOTES
     PR: https://github.com/php/php-src/pull/4797
 
 - Standard:
-  . Added str_contains($haystack, $needle) function, which checks whether
-    $haystack contains $needle as a sub-string. It is equivalent to writing
-    strpos($haystack, $needle) !== false.
+  . Added
+
+        str_contains(string $haystack, string $needle): bool
+        str_starts_with(string $haystack, string $needle): bool
+        str_ends_with(string $haystack, string $needle): bool
+
+    functions, which check whether $haystack contains, starts with or ends with
+    $needle.
+    RFC: https://wiki.php.net/rfc/str_contains
+    RFC: https://wiki.php.net/rfc/add_str_starts_with_and_ends_with_functions
   . Added fdiv() function, which performs a floating-point division under
     IEEE 754 semantics. Division by zero is considered well-defined and
     will return one of Inf, -Inf or NaN.

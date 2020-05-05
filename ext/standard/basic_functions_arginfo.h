@@ -923,6 +923,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_str_contains, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, needle, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+#define arginfo_str_starts_with arginfo_str_contains
+
+#define arginfo_str_ends_with arginfo_str_contains
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_chunk_split, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, chunklen, IS_LONG, 0, "76")
@@ -2496,6 +2500,8 @@ ZEND_FUNCTION(strrpos);
 ZEND_FUNCTION(strripos);
 ZEND_FUNCTION(strrchr);
 ZEND_FUNCTION(str_contains);
+ZEND_FUNCTION(str_starts_with);
+ZEND_FUNCTION(str_ends_with);
 ZEND_FUNCTION(chunk_split);
 ZEND_FUNCTION(substr);
 ZEND_FUNCTION(substr_replace);
@@ -3129,6 +3135,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(strripos, arginfo_strripos)
 	ZEND_FE(strrchr, arginfo_strrchr)
 	ZEND_FE(str_contains, arginfo_str_contains)
+	ZEND_FE(str_starts_with, arginfo_str_starts_with)
+	ZEND_FE(str_ends_with, arginfo_str_ends_with)
 	ZEND_FE(chunk_split, arginfo_chunk_split)
 	ZEND_FE(substr, arginfo_substr)
 	ZEND_FE(substr_replace, arginfo_substr_replace)
