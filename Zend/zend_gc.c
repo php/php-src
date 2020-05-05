@@ -69,10 +69,6 @@
 #include "zend.h"
 #include "zend_API.h"
 
-#ifndef GC_BENCH
-# define GC_BENCH 0
-#endif
-
 #ifndef ZEND_GC_DEBUG
 # define ZEND_GC_DEBUG 0
 #endif
