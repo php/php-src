@@ -11,7 +11,7 @@ final class EnchantBroker
 	public function getError(): string|false {}
 
 	/** @alias enchant_broker_list_dicts */
-	public function listDicts(): array {}
+	public function listDicts(): ?array {}
 
 	/** @alias enchant_broker_request_dict */
 	public function requestDict(string $tag): EnchantDict|false {}
@@ -26,7 +26,7 @@ final class EnchantBroker
 	public function setOrdering(string $tag, string $ordering): bool {}
 
 	/** @alias enchant_broker_describe */
-	public function describe($broker): array {}
+	public function describe(): ?array {}
 }
 
 final class EnchantDict
@@ -80,7 +80,7 @@ function enchant_broker_set_dict_path(EnchantBroker $broker, int $name, string $
 */
 function enchant_broker_get_dict_path(EnchantBroker $broker, int $name): string|false {}
 
-function enchant_broker_list_dicts(EnchantBroker $broker): array {}
+function enchant_broker_list_dicts(EnchantBroker $broker): ?array {}
 
 function enchant_broker_request_dict(EnchantBroker $broker, string $tag): EnchantDict|false {}
 
@@ -95,7 +95,7 @@ function enchant_broker_dict_exists(EnchantBroker $broker, string $tag): bool {}
 
 function enchant_broker_set_ordering(EnchantBroker $broker, string $tag, string $ordering): bool {}
 
-function enchant_broker_describe(EnchantBroker $broker): array {}
+function enchant_broker_describe(EnchantBroker $broker): ?array {}
 
 function enchant_dict_quick_check(EnchantDict $dict, string $word, &$suggestions = null): bool {}
 

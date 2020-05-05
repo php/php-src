@@ -275,15 +275,15 @@ PHP_MINFO_FUNCTION(enchant)
 #define PHP_ENCHANT_GET_BROKER	\
 	pbroker = Z_ENCHANT_BROKER_P(broker); \
 	if (!pbroker || !pbroker->pbroker) {	\
-		php_error_docref(NULL, E_WARNING, "Invalid EnchantBroker object");	\
-		RETURN_FALSE;	\
+		zend_value_error("Invalid or uninitialized EnchantBroker object"); \
+		RETURN_THROWS(); \
 	}
 
 #define PHP_ENCHANT_GET_DICT	\
 	pdict = Z_ENCHANT_DICT_P(dict); \
 	if (!pdict || !pdict->pdict) {	\
-		php_error_docref(NULL, E_WARNING, "Invalid EnchantDict object");	\
-		RETURN_FALSE;	\
+		zend_value_error("Invalid or uninitialized EnchantBroker object"); \
+		RETURN_THROWS(); \
 	}
 
 /* {{{ proto resource enchant_broker_init()
@@ -545,7 +545,7 @@ PHP_METHOD(EnchantDict, __construct)
 		dict->pdict =pdict;
 		ZVAL_COPY(&dict->zbroker, broker);
 	} else {
-		zend_throw_exception(spl_ce_RuntimeException, "Can't create a new EnchantBroker", 0);
+		zend_throw_exception(spl_ce_RuntimeException, "Can't create a new EnchantDict", 0);
 	}
 }
 /* }}} */
