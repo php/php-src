@@ -27,7 +27,7 @@ enchant_broker_free($broker);
 --FILE--
 <?php
 $broker = enchant_broker_init();
-if (is_resource($broker)) {
+if (is_object($broker)) {
     echo("OK\n");
     $brokerListDicts = enchant_broker_list_dicts($broker);
 

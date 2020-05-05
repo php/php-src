@@ -52,9 +52,16 @@ $rDict = get_dict($rbroker);
 var_dump($rDict);
 ?>
 --EXPECTF--
-resource(%d) of type (enchant_dict)
-resource(%d) of type (enchant_dict)
-resource(%d) of type (enchant_broker)
-resource(%d) of type (enchant_broker)
-resource(%d) of type (enchant_dict)
-resource(%d) of type (enchant_dict)
+object(EnchantDict)#%d (0) {
+}
+object(EnchantDict)#%d (0) {
+}
+object(EnchantBroker)#%d (0) {
+}
+object(EnchantBroker)#%d (0) {
+}
+object(EnchantDict)#%d (0) {
+}
+object(EnchantDict)#%d (0) {
+}
+
