@@ -1,5 +1,5 @@
 --TEST--
-enchant_broker_free() function
+@enchant_broker_free() function
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br>
 --SKIPIF--
@@ -13,7 +13,7 @@ $broker = enchant_broker_init();
 if (is_object($broker)) {
     echo("OK\n");
 
-    if (enchant_broker_free($broker)) {
+    if (@enchant_broker_free($broker)) {
         echo("OK\n");
     } else {
         echo("broker free failed\n");

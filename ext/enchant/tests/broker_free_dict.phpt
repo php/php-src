@@ -44,9 +44,11 @@ if (is_object($broker)) {
 }
 echo "OK\n";
 ?>
---EXPECT--
+--EXPECTF--
 OK
 OK
 NULL
+
+Deprecated: Function enchant_broker_free_dict() is deprecated in %s
 OK
 OK

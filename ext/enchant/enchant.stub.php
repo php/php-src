@@ -12,6 +12,9 @@ final class EnchantDict
 
 function enchant_broker_init(): EnchantBroker|false {}
 
+/**
+* @deprecated
+*/
 function enchant_broker_free(EnchantBroker $broker): bool {}
 
 function enchant_broker_get_error(EnchantBroker $broker): string|false {}
@@ -24,14 +27,17 @@ function enchant_broker_set_dict_path(EnchantBroker $broker, int $name, string $
 /**
 * @deprecated
 */
-function enchant_broker_get_dict_path(EnchantBroker$broker, int $name): string|false {}
+function enchant_broker_get_dict_path(EnchantBroker $broker, int $name): string|false {}
 
-function enchant_broker_list_dicts(EnchantBroker$broker): array {}
+function enchant_broker_list_dicts(EnchantBroker $broker): array {}
 
-function enchant_broker_request_dict(EnchantBroker$broker, string $tag): EnchantDict|false {}
+function enchant_broker_request_dict(EnchantBroker $broker, string $tag): EnchantDict|false {}
 
 function enchant_broker_request_pwl_dict(EnchantBroker $broker, string $filename): EnchantDict|false {}
 
+/**
+* @deprecated
+*/
 function enchant_broker_free_dict(EnchantDict $dict): bool {}
 
 function enchant_broker_dict_exists(EnchantBroker $broker, string $tag): bool {}

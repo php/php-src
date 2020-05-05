@@ -122,14 +122,14 @@ ZEND_FUNCTION(enchant_dict_describe);
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(enchant_broker_init, arginfo_enchant_broker_init)
-	ZEND_FE(enchant_broker_free, arginfo_enchant_broker_free)
+	ZEND_DEP_FE(enchant_broker_free, arginfo_enchant_broker_free)
 	ZEND_FE(enchant_broker_get_error, arginfo_enchant_broker_get_error)
 	ZEND_DEP_FE(enchant_broker_set_dict_path, arginfo_enchant_broker_set_dict_path)
 	ZEND_DEP_FE(enchant_broker_get_dict_path, arginfo_enchant_broker_get_dict_path)
 	ZEND_FE(enchant_broker_list_dicts, arginfo_enchant_broker_list_dicts)
 	ZEND_FE(enchant_broker_request_dict, arginfo_enchant_broker_request_dict)
 	ZEND_FE(enchant_broker_request_pwl_dict, arginfo_enchant_broker_request_pwl_dict)
-	ZEND_FE(enchant_broker_free_dict, arginfo_enchant_broker_free_dict)
+	ZEND_DEP_FE(enchant_broker_free_dict, arginfo_enchant_broker_free_dict)
 	ZEND_FE(enchant_broker_dict_exists, arginfo_enchant_broker_dict_exists)
 	ZEND_FE(enchant_broker_set_ordering, arginfo_enchant_broker_set_ordering)
 	ZEND_FE(enchant_broker_describe, arginfo_enchant_broker_describe)

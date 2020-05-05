@@ -1,5 +1,5 @@
 --TEST--
-enchant_broker_free() function
+@enchant_broker_free() function
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br>
 --SKIPIF--
@@ -27,10 +27,10 @@ if (is_object($broker)) {
         if (NULL === $AddtoPersonalDict) {
             var_dump($AddtoPersonalDict);
 
-            if (enchant_broker_free_dict($requestDict)) {
+            if (@enchant_broker_free_dict($requestDict)) {
                 echo("OK\n");
 
-                if (enchant_broker_free($broker)) {
+                if (@enchant_broker_free($broker)) {
                     echo("OK\n");
 
                 } else {

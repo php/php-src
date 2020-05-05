@@ -19,6 +19,8 @@ if (is_object($broker)) {
 }
 echo "OK\n";
 ?>
---EXPECT--
+--EXPECTF--
 OK
+
+Deprecated: Function enchant_broker_free() is deprecated in %s
 OK
