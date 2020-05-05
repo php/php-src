@@ -282,7 +282,7 @@ PHP_MINFO_FUNCTION(enchant)
 #define PHP_ENCHANT_GET_DICT	\
 	pdict = Z_ENCHANT_DICT_P(dict); \
 	if (!pdict || !pdict->pdict) {	\
-		zend_value_error("Invalid or uninitialized EnchantBroker object"); \
+		zend_value_error("Invalid or uninitialized EnchantDict object"); \
 		RETURN_THROWS(); \
 	}
 
