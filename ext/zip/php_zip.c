@@ -1523,11 +1523,11 @@ static ZIPARCHIVE_METHOD(setPassword)
 		RETURN_THROWS();
 	}
 
+	ZIP_FROM_OBJECT(intern, self);
+
 	if (password_len < 1) {
 		RETURN_FALSE;
 	}
-
-	ZIP_FROM_OBJECT(intern, self);
 
 	int res = zip_set_default_password(intern, (const char *)password);
 	if (res == 0) {
@@ -1669,6 +1669,8 @@ static ZIPARCHIVE_METHOD(addEmptyDir)
 		RETURN_THROWS();
 	}
 
+	ZIP_FROM_OBJECT(intern, self);
+
 	if (dirname_len<1) {
 		RETURN_FALSE;
 	}
@@ -1681,8 +1683,6 @@ static ZIPARCHIVE_METHOD(addEmptyDir)
 	} else {
 		s = dirname;
 	}
-
-	ZIP_FROM_OBJECT(intern, self);
 
 	if ((Z_ZIP_P(self)->last_id = zip_dir_add(intern, (const char *)s, flags)) == -1) {
 		RETVAL_FALSE;
@@ -2005,11 +2005,11 @@ static ZIPARCHIVE_METHOD(locateName)
 		RETURN_THROWS();
 	}
 
+	ZIP_FROM_OBJECT(intern, self);
+
 	if (ZSTR_LEN(name) < 1) {
 		RETURN_FALSE;
 	}
-
-	ZIP_FROM_OBJECT(intern, self);
 
 	idx = (zend_long)zip_name_locate(intern, (const char *)ZSTR_VAL(name), flags);
 
@@ -2060,12 +2060,12 @@ static ZIPARCHIVE_METHOD(setArchiveComment)
 		RETURN_THROWS();
 	}
 
+	ZIP_FROM_OBJECT(intern, self);
+
 	if (comment_len > 0xffff) {
 		php_error_docref(NULL, E_WARNING, "Comment must not exceed 65535 bytes");
 		RETURN_FALSE;
 	}
-
-	ZIP_FROM_OBJECT(intern, self);
 
 	if (zip_set_archive_comment(intern, (const char *)comment, comment_len)) {
 		RETURN_FALSE;
@@ -2118,12 +2118,12 @@ static ZIPARCHIVE_METHOD(setCommentName)
 		php_error_docref(NULL, E_NOTICE, "Empty string as entry name");
 	}
 
+	ZIP_FROM_OBJECT(intern, self);
+
 	if (comment_len > 0xffff) {
 		php_error_docref(NULL, E_WARNING, "Comment must not exceed 65535 bytes");
 		RETURN_FALSE;
 	}
-
-	ZIP_FROM_OBJECT(intern, self);
 
 	idx = zip_name_locate(intern, name, 0);
 	if (idx < 0) {
@@ -2149,12 +2149,12 @@ static ZIPARCHIVE_METHOD(setCommentIndex)
 		RETURN_THROWS();
 	}
 
+	ZIP_FROM_OBJECT(intern, self);
+
 	if (comment_len > 0xffff) {
 		php_error_docref(NULL, E_WARNING, "Comment must not exceed 65535 bytes");
 		RETURN_FALSE;
 	}
-
-	ZIP_FROM_OBJECT(intern, self);
 
 	PHP_ZIP_STAT_INDEX(intern, index, 0, sb);
 	PHP_ZIP_SET_FILE_COMMENT(intern, index, comment, comment_len);
@@ -2180,11 +2180,11 @@ static ZIPARCHIVE_METHOD(setExternalAttributesName)
 		RETURN_THROWS();
 	}
 
+	ZIP_FROM_OBJECT(intern, self);
+
 	if (name_len < 1) {
 		php_error_docref(NULL, E_NOTICE, "Empty string as entry name");
 	}
-
-	ZIP_FROM_OBJECT(intern, self);
 
 	idx = zip_name_locate(intern, name, 0);
 	if (idx < 0) {
@@ -2241,11 +2241,11 @@ static ZIPARCHIVE_METHOD(getExternalAttributesName)
 		RETURN_THROWS();
 	}
 
+	ZIP_FROM_OBJECT(intern, self);
+
 	if (name_len < 1) {
 		php_error_docref(NULL, E_NOTICE, "Empty string as entry name");
 	}
-
-	ZIP_FROM_OBJECT(intern, self);
 
 	idx = zip_name_locate(intern, name, 0);
 	if (idx < 0) {
@@ -2308,11 +2308,11 @@ static ZIPARCHIVE_METHOD(setEncryptionName)
 		RETURN_THROWS();
 	}
 
+	ZIP_FROM_OBJECT(intern, self);
+
 	if (name_len < 1) {
 		php_error_docref(NULL, E_NOTICE, "Empty string as entry name");
 	}
-
-	ZIP_FROM_OBJECT(intern, self);
 
 	idx = zip_name_locate(intern, name, 0);
 	if (idx < 0) {
@@ -2369,12 +2369,12 @@ static ZIPARCHIVE_METHOD(getCommentName)
 		RETURN_THROWS();
 	}
 
+	ZIP_FROM_OBJECT(intern, self);
+
 	if (name_len < 1) {
 		php_error_docref(NULL, E_NOTICE, "Empty string as entry name");
 		RETURN_FALSE;
 	}
-
-	ZIP_FROM_OBJECT(intern, self);
 
 	idx = zip_name_locate(intern, name, 0);
 	if (idx < 0) {
@@ -2426,11 +2426,11 @@ static ZIPARCHIVE_METHOD(setCompressionName)
 		RETURN_THROWS();
 	}
 
+	ZIP_FROM_OBJECT(intern, this);
+
 	if (name_len < 1) {
 		php_error_docref(NULL, E_NOTICE, "Empty string as entry name");
 	}
-
-	ZIP_FROM_OBJECT(intern, this);
 
 	idx = zip_name_locate(intern, name, 0);
 	if (idx < 0) {
@@ -2486,11 +2486,11 @@ static ZIPARCHIVE_METHOD(setMtimeName)
 		return;
 	}
 
+	ZIP_FROM_OBJECT(intern, this);
+
 	if (name_len < 1) {
 		php_error_docref(NULL, E_NOTICE, "Empty string as entry name");
 	}
-
-	ZIP_FROM_OBJECT(intern, this);
 
 	idx = zip_name_locate(intern, name, 0);
 	if (idx < 0) {
@@ -2542,11 +2542,11 @@ static ZIPARCHIVE_METHOD(deleteIndex)
 		RETURN_THROWS();
 	}
 
+	ZIP_FROM_OBJECT(intern, self);
+
 	if (index < 0) {
 		RETURN_FALSE;
 	}
-
-	ZIP_FROM_OBJECT(intern, self);
 
 	if (zip_delete(intern, index) < 0) {
 		RETURN_FALSE;
@@ -2569,11 +2569,12 @@ static ZIPARCHIVE_METHOD(deleteName)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
 		RETURN_THROWS();
 	}
+
+	ZIP_FROM_OBJECT(intern, self);
+
 	if (name_len < 1) {
 		RETURN_FALSE;
 	}
-
-	ZIP_FROM_OBJECT(intern, self);
 
 	PHP_ZIP_STAT_PATH(intern, name, name_len, 0, sb);
 	if (zip_delete(intern, sb.index)) {
@@ -2601,12 +2602,12 @@ static ZIPARCHIVE_METHOD(renameIndex)
 		RETURN_FALSE;
 	}
 
+	ZIP_FROM_OBJECT(intern, self);
+
 	if (new_name_len < 1) {
 		php_error_docref(NULL, E_NOTICE, "Empty string as new entry name");
 		RETURN_FALSE;
 	}
-
-	ZIP_FROM_OBJECT(intern, self);
 
 	if (zip_file_rename(intern, index, (const char *)new_name, 0) != 0) {
 		RETURN_FALSE;
@@ -2630,12 +2631,12 @@ static ZIPARCHIVE_METHOD(renameName)
 		RETURN_THROWS();
 	}
 
+	ZIP_FROM_OBJECT(intern, self);
+
 	if (new_name_len < 1) {
 		php_error_docref(NULL, E_NOTICE, "Empty string as new entry name");
 		RETURN_FALSE;
 	}
-
-	ZIP_FROM_OBJECT(intern, self);
 
 	PHP_ZIP_STAT_PATH(intern, name, name_len, 0, sb);
 
@@ -2659,11 +2660,11 @@ static ZIPARCHIVE_METHOD(unchangeIndex)
 		RETURN_THROWS();
 	}
 
+	ZIP_FROM_OBJECT(intern, self);
+
 	if (index < 0) {
 		RETURN_FALSE;
 	}
-
-	ZIP_FROM_OBJECT(intern, self);
 
 	if (zip_unchange(intern, index) != 0) {
 		RETURN_FALSE;
@@ -2687,11 +2688,11 @@ static ZIPARCHIVE_METHOD(unchangeName)
 		RETURN_THROWS();
 	}
 
+	ZIP_FROM_OBJECT(intern, self);
+
 	if (name_len < 1) {
 		RETURN_FALSE;
 	}
-
-	ZIP_FROM_OBJECT(intern, self);
 
 	PHP_ZIP_STAT_PATH(intern, name, name_len, 0, sb);
 
@@ -2768,6 +2769,8 @@ static ZIPARCHIVE_METHOD(extractTo)
 		RETURN_THROWS();
 	}
 
+	ZIP_FROM_OBJECT(intern, self);
+
 	if (pathto_len < 1) {
 		RETURN_FALSE;
 	}
@@ -2778,8 +2781,6 @@ static ZIPARCHIVE_METHOD(extractTo)
 			RETURN_FALSE;
 		}
 	}
-
-	ZIP_FROM_OBJECT(intern, self);
 
 	if (zval_files && Z_TYPE_P(zval_files) != IS_NULL) {
 		uint32_t nelems, i;
