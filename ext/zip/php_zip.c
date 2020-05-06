@@ -2809,10 +2809,9 @@ static ZIPARCHIVE_METHOD(extractTo)
 					}
 				}
 				break;
-			case IS_LONG:
 			default:
-				php_error_docref(NULL, E_WARNING, "Invalid argument, expect string or array of strings");
-				break;
+				zend_argument_type_error(2, "must be of type array|string, %s given", zend_zval_type_name(zval_files));
+				RETURN_THROWS();
 		}
 	} else {
 		/* Extract all files */
