@@ -34,7 +34,7 @@ final class EnchantDict
 	public function __construct(EnchantBroker $broker, string $tag) {}
 
 	/** @alias enchant_dict_quick_check */
-	public function checkAndSuggest(string $word, &$suggestions = UNKNOWN): bool {}
+	public function checkAndSuggest(string $word, &$suggestions = null): bool {}
 
 	/** @alias enchant_dict_check */
 	public function check(string $word): bool {}

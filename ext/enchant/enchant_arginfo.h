@@ -131,7 +131,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_EnchantDict_checkAndSuggest, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, word, IS_STRING, 0)
-	ZEND_ARG_INFO(1, suggestions)
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, suggestions, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_EnchantDict_check, 0, 1, _IS_BOOL, 0)
