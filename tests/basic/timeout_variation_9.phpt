@@ -5,8 +5,6 @@ Timeout within shutdown function
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 if (PHP_OS_FAMILY !== "Windows") die("skip Windows only test");
 ?>
---XFAIL--
-Missing timeout check in call_user_function
 --FILE--
 <?php
 
