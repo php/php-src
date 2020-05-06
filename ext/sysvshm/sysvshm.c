@@ -32,7 +32,7 @@
 #include "Zend/zend_interfaces.h"
 #include "php_ini.h"
 
-/* Sysvshm class */
+/* SysvSharedMemory class */
 
 zend_class_entry *sysvshm_ce;
 static zend_object_handlers sysvshm_object_handlers;
@@ -54,7 +54,7 @@ static zend_object *sysvshm_create_object(zend_class_entry *class_type) {
 }
 
 static zend_function *sysvshm_get_constructor(zend_object *object) {
-	zend_throw_error(NULL, "Cannot directly construct Sysvshm, use shm_attach() instead");
+	zend_throw_error(NULL, "Cannot directly construct SysvSharedMemory, use shm_attach() instead");
 	return NULL;
 }
 
@@ -100,7 +100,7 @@ static int php_remove_shm_data(sysvshm_chunk_head *ptr, zend_long shm_varpos);
 PHP_MINIT_FUNCTION(sysvshm)
 {
 	zend_class_entry ce;
-	INIT_CLASS_ENTRY(ce, "Sysvshm", class_Sysvshm_methods);
+	INIT_CLASS_ENTRY(ce, "SysvSharedMemory", class_SysvSharedMemory_methods);
 	sysvshm_ce = zend_register_internal_class(&ce);
 	sysvshm_ce->ce_flags |= ZEND_ACC_FINAL;
 	sysvshm_ce->create_object = sysvshm_create_object;
@@ -185,7 +185,7 @@ PHP_FUNCTION(shm_attach)
 }
 /* }}} */
 
-/* {{{ proto bool shm_detach(Sysvshm shm_identifier)
+/* {{{ proto bool shm_detach(SysvSharedMemory shm_identifier)
    Disconnects from shared memory segment */
 PHP_FUNCTION(shm_detach)
 {
@@ -199,7 +199,7 @@ PHP_FUNCTION(shm_detach)
 }
 /* }}} */
 
-/* {{{ proto bool shm_remove(Sysvshm shm_identifier)
+/* {{{ proto bool shm_remove(SysvSharedMemory shm_identifier)
    Removes shared memory from Unix systems */
 PHP_FUNCTION(shm_remove)
 {
@@ -224,7 +224,7 @@ PHP_FUNCTION(shm_remove)
 }
 /* }}} */
 
-/* {{{ proto bool shm_put_var(Sysvshm shm_identifier, int variable_key, mixed variable)
+/* {{{ proto bool shm_put_var(SysvSharedMemory shm_identifier, int variable_key, mixed variable)
    Inserts or updates a variable in shared memory */
 PHP_FUNCTION(shm_put_var)
 {
@@ -260,7 +260,7 @@ PHP_FUNCTION(shm_put_var)
 }
 /* }}} */
 
-/* {{{ proto mixed shm_get_var(Sysvshm id, int variable_key)
+/* {{{ proto mixed shm_get_var(SysvSharedMemory id, int variable_key)
    Returns a variable from shared memory */
 PHP_FUNCTION(shm_get_var)
 {
@@ -298,7 +298,7 @@ PHP_FUNCTION(shm_get_var)
 }
 /* }}} */
 
-/* {{{ proto bool shm_has_var(Sysvshm id, int variable_key)
+/* {{{ proto bool shm_has_var(SysvSharedMemory id, int variable_key)
 	Checks whether a specific entry exists */
 PHP_FUNCTION(shm_has_var)
 {
@@ -316,7 +316,7 @@ PHP_FUNCTION(shm_has_var)
 }
 /* }}} */
 
-/* {{{ proto bool shm_remove_var(Sysvshm id, int variable_key)
+/* {{{ proto bool shm_remove_var(SysvSharedMemory id, int variable_key)
    Removes variable from shared memory */
 PHP_FUNCTION(shm_remove_var)
 {

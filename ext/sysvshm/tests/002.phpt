@@ -45,14 +45,14 @@ bool(false)
 
 Warning: shm_attach(): Segment size must be greater than zero in %s on line %d
 bool(false)
-object(Sysvshm)#1 (0) {
+object(SysvSharedMemory)#1 (0) {
 }
-object(Sysvshm)#2 (0) {
+object(SysvSharedMemory)#2 (0) {
 }
-object(Sysvshm)#1 (0) {
+object(SysvSharedMemory)#1 (0) {
 }
-object(Sysvshm)#2 (0) {
+object(SysvSharedMemory)#2 (0) {
 }
-object(Sysvshm)#1 (0) {
+object(SysvSharedMemory)#1 (0) {
 }
 Done
