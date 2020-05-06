@@ -603,31 +603,41 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 		 && (opline->opcode != ZEND_ROPE_ADD && opline->opcode != ZEND_ROPE_END)) {
 			zval *zv = EX_VAR(opline->op1.var);
 			op1_type = Z_TYPE_P(zv);
+			uint8_t flags = 0;
+
 			if (op1_type == IS_INDIRECT) {
 				zv = Z_INDIRECT_P(zv);
 				op1_type = Z_TYPE_P(zv);
+				flags |= IS_TRACE_INDIRECT;
 			}
 			if (op1_type == IS_REFERENCE) {
 				zv = Z_REFVAL_P(zv);
-				op1_type = Z_TYPE_P(zv) | IS_TRACE_REFERENCE;
+				op1_type = Z_TYPE_P(zv);
+				flags |= IS_TRACE_REFERENCE;
 			}
+			op1_type |= flags;
 			if (Z_TYPE_P(zv) == IS_OBJECT) {
-					ce1 = Z_OBJCE_P(zv);
+				ce1 = Z_OBJCE_P(zv);
 			}
 		}
 		if (opline->op2_type & (IS_TMP_VAR|IS_VAR|IS_CV)) {
 			zval *zv = EX_VAR(opline->op2.var);
+			uint8_t flags = 0;
+
 			op2_type = Z_TYPE_P(zv);
 			if (op2_type == IS_INDIRECT) {
 				zv = Z_INDIRECT_P(zv);
 				op2_type = Z_TYPE_P(zv);
+				flags |= IS_TRACE_INDIRECT;
 			}
 			if (op2_type == IS_REFERENCE) {
 				zv = Z_REFVAL_P(zv);
-				op2_type = Z_TYPE_P(zv) | IS_TRACE_REFERENCE;
+				op2_type = Z_TYPE_P(zv);
+				flags |= IS_TRACE_REFERENCE;
 			}
+			op2_type |= flags;
 			if (Z_TYPE_P(zv) == IS_OBJECT) {
-					ce2 = Z_OBJCE_P(zv);
+				ce2 = Z_OBJCE_P(zv);
 			}
 		}
 		if (opline->opcode == ZEND_ASSIGN_DIM ||
@@ -640,15 +650,20 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 			opline->opcode == ZEND_ASSIGN_STATIC_PROP_REF) {
 			if ((opline+1)->op1_type & (IS_TMP_VAR|IS_VAR|IS_CV)) {
 				zval *zv = EX_VAR((opline+1)->op1.var);
+				uint8_t flags = 0;
+
 				op3_type = Z_TYPE_P(zv);
 				if (op3_type == IS_INDIRECT) {
 					zv = Z_INDIRECT_P(zv);
 					op3_type = Z_TYPE_P(zv);
+					flags |= IS_TRACE_INDIRECT;
 				}
 				if (op3_type == IS_REFERENCE) {
 					zv = Z_REFVAL_P(zv);
-					op3_type = Z_TYPE_P(zv) | IS_TRACE_REFERENCE;
+					op3_type = Z_TYPE_P(zv);
+					flags |= IS_TRACE_REFERENCE;
 				}
+				op3_type |= flags;
 			}
 		}
 

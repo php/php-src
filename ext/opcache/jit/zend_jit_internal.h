@@ -258,6 +258,7 @@ typedef enum _zend_jit_trace_op {
 
 #define IS_UNKNOWN 255 /* may be used for zend_jit_trace_rec.op?_type */
 #define IS_TRACE_REFERENCE (1<<5)
+#define IS_TRACE_INDIRECT  (1<<6)
 
 typedef struct _zend_jit_trace_rec {
 	uint8_t   op;    /* zend_jit_trace_op */
