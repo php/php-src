@@ -14,12 +14,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* This has been built and tested on Linux 2.2.14
- *
- * This has been built and tested on Solaris 2.6.
- * It may not compile or execute correctly on other systems.
- */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
