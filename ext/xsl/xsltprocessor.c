@@ -760,46 +760,35 @@ PHP_METHOD(XSLTProcessor, registerPHPFunctions)
 {
 	zval *id = ZEND_THIS;
 	xsl_object *intern;
-	zval *zv = NULL, *entry, new_string;
+	zval *entry, new_string;
+	zend_string *restrict_str = NULL;
+	HashTable *restrict_ht = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|z!", &zv) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_ARRAY_HT_OR_NULL(restrict_str, restrict_ht)
+	ZEND_PARSE_PARAMETERS_END();
 
-	if (!zv) {
-		intern = Z_XSL_P(id);
-		intern->registerPhpFunctions = 1;
+	intern = Z_XSL_P(id);
 
-		return;
-	}
-
-	switch (Z_TYPE_P(zv)) {
-		case IS_ARRAY:
-			intern = Z_XSL_P(id);
-
-			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(zv), entry) {
-				zend_string *str = zval_try_get_string(entry);
-				if (UNEXPECTED(!str)) {
-					return;
-				}
-				ZVAL_LONG(&new_string, 1);
-				zend_hash_update(intern->registered_phpfunctions, str, &new_string);
-				zend_string_release(str);
-			} ZEND_HASH_FOREACH_END();
-
-			intern->registerPhpFunctions = 2;
-			break;
-
-		case IS_STRING:
-			intern = Z_XSL_P(id);
-
+	if (restrict_ht) {
+		ZEND_HASH_FOREACH_VAL(restrict_ht, entry) {
+			zend_string *str = zval_try_get_string(entry);
+			if (UNEXPECTED(!str)) {
+				return;
+			}
 			ZVAL_LONG(&new_string, 1);
-			zend_hash_update(intern->registered_phpfunctions, Z_STR_P(zv), &new_string);
-			intern->registerPhpFunctions = 2;
-			break;
+			zend_hash_update(intern->registered_phpfunctions, str, &new_string);
+			zend_string_release(str);
+		} ZEND_HASH_FOREACH_END();
 
-		default:
-			zend_argument_type_error(1, "must be of type string|array|null, %s given", zend_zval_type_name(zv));
+		intern->registerPhpFunctions = 2;
+	} else if (restrict_str) {
+		ZVAL_LONG(&new_string, 1);
+		zend_hash_update(intern->registered_phpfunctions, restrict_str, &new_string);
+		intern->registerPhpFunctions = 2;
+	} else {
+		intern->registerPhpFunctions = 1;
 	}
 }
 /* }}} end XSLTProcessor::registerPHPFunctions(); */
