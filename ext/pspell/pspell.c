@@ -91,7 +91,7 @@ static void php_pspell_close_config(zend_resource *rsrc)
 	manager = (PspellManager *)Z_RES_P(res)->ptr; \
 } while (0);
 
-/* {{{ PHP_MINIT_FUNCTION
+/* PHP_MINIT_FUNCTION
  */
 static PHP_MINIT_FUNCTION(pspell)
 {
@@ -103,7 +103,6 @@ static PHP_MINIT_FUNCTION(pspell)
 	le_pspell_config = zend_register_list_destructors_ex(php_pspell_close_config, NULL, "pspell config", module_number);
 	return SUCCESS;
 }
-/* }}} */
 
 /* Load a dictionary */
 PHP_FUNCTION(pspell_new)
@@ -199,7 +198,6 @@ PHP_FUNCTION(pspell_new)
 	ind = zend_list_insert(manager, le_pspell);
 	RETURN_LONG(Z_RES_HANDLE_P(ind));
 }
-/* }}} */
 
 /* Load a dictionary with a personal wordlist*/
 PHP_FUNCTION(pspell_new_personal)
@@ -303,7 +301,6 @@ PHP_FUNCTION(pspell_new_personal)
 	ind = zend_list_insert(manager, le_pspell);
 	RETURN_LONG(Z_RES_HANDLE_P(ind));
 }
-/* }}} */
 
 /* Load a dictionary based on the given config */
 PHP_FUNCTION(pspell_new_config)
@@ -332,7 +329,6 @@ PHP_FUNCTION(pspell_new_config)
 	ind = zend_list_insert(manager, le_pspell);
 	RETURN_LONG(Z_RES_HANDLE_P(ind));
 }
-/* }}} */
 
 /* Returns true if word is valid */
 PHP_FUNCTION(pspell_check)
@@ -354,7 +350,6 @@ PHP_FUNCTION(pspell_check)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Returns array of suggestions */
 PHP_FUNCTION(pspell_suggest)
@@ -386,7 +381,6 @@ PHP_FUNCTION(pspell_suggest)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Notify the dictionary of a user-selected replacement */
 PHP_FUNCTION(pspell_store_replacement)
@@ -410,7 +404,6 @@ PHP_FUNCTION(pspell_store_replacement)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Adds a word to a personal list */
 PHP_FUNCTION(pspell_add_to_personal)
@@ -439,7 +432,6 @@ PHP_FUNCTION(pspell_add_to_personal)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Adds a word to the current session */
 PHP_FUNCTION(pspell_add_to_session)
@@ -468,7 +460,6 @@ PHP_FUNCTION(pspell_add_to_session)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Clears the current session */
 PHP_FUNCTION(pspell_clear_session)
@@ -490,7 +481,6 @@ PHP_FUNCTION(pspell_clear_session)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Saves the current (personal) wordlist */
 PHP_FUNCTION(pspell_save_wordlist)
@@ -514,7 +504,6 @@ PHP_FUNCTION(pspell_save_wordlist)
 	}
 
 }
-/* }}} */
 
 /* Create a new config to be used later to create a manager */
 PHP_FUNCTION(pspell_config_create)
@@ -581,7 +570,6 @@ PHP_FUNCTION(pspell_config_create)
 	ind = zend_list_insert(config, le_pspell_config);
 	RETURN_LONG(Z_RES_HANDLE_P(ind));
 }
-/* }}} */
 
 /* Consider run-together words as valid components */
 PHP_FUNCTION(pspell_config_runtogether)
@@ -600,7 +588,6 @@ PHP_FUNCTION(pspell_config_runtogether)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Select mode for config (PSPELL_FAST, PSPELL_NORMAL or PSPELL_BAD_SPELLERS) */
 PHP_FUNCTION(pspell_config_mode)
@@ -625,7 +612,6 @@ PHP_FUNCTION(pspell_config_mode)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Ignore words <= n chars */
 PHP_FUNCTION(pspell_config_ignore)
@@ -645,7 +631,6 @@ PHP_FUNCTION(pspell_config_ignore)
 	pspell_config_replace(config, "ignore", ignore_str);
 	RETURN_TRUE;
 }
-/* }}} */
 
 static void pspell_config_path(INTERNAL_FUNCTION_PARAMETERS, char *option)
 {
@@ -674,21 +659,18 @@ PHP_FUNCTION(pspell_config_personal)
 {
 	pspell_config_path(INTERNAL_FUNCTION_PARAM_PASSTHRU, "personal");
 }
-/* }}} */
 
 /* location of the main word list */
 PHP_FUNCTION(pspell_config_dict_dir)
 {
 	pspell_config_path(INTERNAL_FUNCTION_PARAM_PASSTHRU, "dict-dir");
 }
-/* }}} */
 
 /* location of language data files */
 PHP_FUNCTION(pspell_config_data_dir)
 {
 	pspell_config_path(INTERNAL_FUNCTION_PARAM_PASSTHRU, "data-dir");
 }
-/* }}} */
 
 /* Use a personal dictionary with replacement pairs for this config */
 PHP_FUNCTION(pspell_config_repl)
@@ -714,7 +696,6 @@ PHP_FUNCTION(pspell_config_repl)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Save replacement pairs when personal list is saved for this config */
 PHP_FUNCTION(pspell_config_save_repl)
@@ -733,9 +714,8 @@ PHP_FUNCTION(pspell_config_save_repl)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
+/* PHP_MINFO_FUNCTION
  */
 static PHP_MINFO_FUNCTION(pspell)
 {
@@ -743,6 +723,5 @@ static PHP_MINFO_FUNCTION(pspell)
 	php_info_print_table_row(2, "PSpell Support", "enabled");
 	php_info_print_table_end();
 }
-/* }}} */
 
 #endif

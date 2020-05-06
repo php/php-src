@@ -24,7 +24,7 @@ static const char * const mysqlnd_debug_default_trace_file = "/tmp/mysqlnd.trace
 static const char * const mysqlnd_debug_empty_string = "";
 
 
-/* {{{ mysqlnd_debug::open */
+/* mysqlnd_debug::open */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_debug, open)(MYSQLND_DEBUG * self, zend_bool reopen)
 {
@@ -37,10 +37,8 @@ MYSQLND_METHOD(mysqlnd_debug, open)(MYSQLND_DEBUG * self, zend_bool reopen)
 										   REPORT_ERRORS, NULL);
 	return self->stream? PASS:FAIL;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_debug::log */
+/* mysqlnd_debug::log */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_debug, log)(MYSQLND_DEBUG * self,
 								   unsigned int line, const char * const file,
@@ -132,10 +130,8 @@ MYSQLND_METHOD(mysqlnd_debug, log)(MYSQLND_DEBUG * self,
 	}
 	return ret;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_debug::log_va */
+/* mysqlnd_debug::log_va */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_debug, log_va)(MYSQLND_DEBUG *self,
 									  unsigned int line, const char * const file,
@@ -234,11 +230,9 @@ MYSQLND_METHOD(mysqlnd_debug, log_va)(MYSQLND_DEBUG *self,
 	}
 	return ret;
 }
-/* }}} */
-
 
 /* FALSE - The DBG_ calls won't be traced, TRUE - will be traced */
-/* {{{ mysqlnd_debug::func_enter */
+/* mysqlnd_debug::func_enter */
 static zend_bool
 MYSQLND_METHOD(mysqlnd_debug, func_enter)(MYSQLND_DEBUG * self,
 										  unsigned int line, const char * const file,
@@ -285,7 +279,6 @@ MYSQLND_METHOD(mysqlnd_debug, func_enter)(MYSQLND_DEBUG * self,
 	self->m->log_va(self, line, file, zend_stack_count(&self->call_stack) - 1, NULL, ">%s", func_name);
 	return TRUE;
 }
-/* }}} */
 
 #ifndef MYSQLND_PROFILING_DISABLED
 struct st_mysqlnd_dbg_function_profile {
@@ -306,7 +299,7 @@ struct st_mysqlnd_dbg_function_profile {
 #define PROFILE_UNDERPERFORM_THRESHOLD 10
 #endif
 
-/* {{{ mysqlnd_debug::func_leave */
+/* mysqlnd_debug::func_leave */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_debug, func_leave)(MYSQLND_DEBUG * self, unsigned int line, const char * const file, uint64_t call_time)
 {
@@ -414,10 +407,8 @@ MYSQLND_METHOD(mysqlnd_debug, func_leave)(MYSQLND_DEBUG * self, unsigned int lin
 
 	return zend_stack_del_top(&self->call_stack) == SUCCESS? PASS:FAIL;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_debug::close */
+/* mysqlnd_debug::close */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_debug, close)(MYSQLND_DEBUG * self)
 {
@@ -461,10 +452,8 @@ MYSQLND_METHOD(mysqlnd_debug, close)(MYSQLND_DEBUG * self)
 	/* no DBG_RETURN please */
 	return PASS;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_res_meta::free */
+/* mysqlnd_res_meta::free */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_debug, free)(MYSQLND_DEBUG * self)
 {
@@ -479,7 +468,6 @@ MYSQLND_METHOD(mysqlnd_debug, free)(MYSQLND_DEBUG * self)
 	free(self);
 	return PASS;
 }
-/* }}} */
 
 enum mysqlnd_debug_parser_state
 {
@@ -489,7 +477,7 @@ enum mysqlnd_debug_parser_state
 };
 
 
-/* {{{ mysqlnd_res_meta::set_mode */
+/* mysqlnd_res_meta::set_mode */
 static void
 MYSQLND_METHOD(mysqlnd_debug, set_mode)(MYSQLND_DEBUG * self, const char * const mode)
 {
@@ -683,7 +671,6 @@ MYSQLND_METHOD(mysqlnd_debug, set_mode)(MYSQLND_DEBUG * self, const char * const
 		}
 	}
 }
-/* }}} */
 
 MYSQLND_CLASS_METHODS_START(mysqlnd_debug)
 	MYSQLND_METHOD(mysqlnd_debug, open),
@@ -701,7 +688,7 @@ static void free_ptr(zval *zv) {
 	efree(Z_PTR_P(zv));
 }
 
-/* {{{ mysqlnd_debug_init */
+/* mysqlnd_debug_init */
 PHPAPI MYSQLND_DEBUG *
 mysqlnd_debug_init(const char * skip_functions[])
 {
@@ -719,10 +706,8 @@ mysqlnd_debug_init(const char * skip_functions[])
 
 	return ret;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_debug */
+/* mysqlnd_debug */
 PHPAPI void mysqlnd_debug(const char * mode)
 {
 #if PHP_DEBUG
@@ -749,8 +734,6 @@ PHPAPI void mysqlnd_debug(const char * mode)
 	}
 #endif
 }
-/* }}} */
-
 
 static struct st_mysqlnd_plugin_trace_log mysqlnd_plugin_trace_log_plugin =
 {
@@ -775,10 +758,10 @@ static struct st_mysqlnd_plugin_trace_log mysqlnd_plugin_trace_log_plugin =
 };
 
 
-/* {{{ mysqlnd_debug_trace_plugin_register */
+/* mysqlnd_debug_trace_plugin_register */
 void
 mysqlnd_debug_trace_plugin_register(void)
 {
 	mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_plugin_trace_log_plugin);
 }
-/* }}} */
+

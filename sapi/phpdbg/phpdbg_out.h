@@ -80,7 +80,7 @@ PHPDBG_API void phpdbg_activate_err_buf(zend_bool active);
 PHPDBG_API int phpdbg_output_err_buf(const char *tag, const char *xmlfmt, const char *strfmt, ...);
 
 
-/* {{{ For separation */
-#define SEPARATE "------------------------------------------------" /* }}} */
+/* For separation */
+#define SEPARATE "------------------------------------------------"
 
 #endif /* PHPDBG_OUT_H */

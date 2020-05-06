@@ -57,7 +57,7 @@
  * Materiel Command, USAF, under agreement number F39502-99-1-0512.
  */
 
-static char * __cvt(double value, int ndigit, int *decpt, int *sign, int fmode, int pad) /* {{{ */
+static char * __cvt(double value, int ndigit, int *decpt, int *sign, int fmode, int pad)
 {
 	register char *s = NULL;
 	char *p, *rve, c;
@@ -114,21 +114,18 @@ static char * __cvt(double value, int ndigit, int *decpt, int *sign, int fmode, 
 
 	return(s);
 }
-/* }}} */
 
-static inline char *php_ecvt(double value, int ndigit, int *decpt, int *sign) /* {{{ */
+static inline char *php_ecvt(double value, int ndigit, int *decpt, int *sign)
 {
 	return(__cvt(value, ndigit, decpt, sign, 0, 1));
 }
-/* }}} */
 
-static inline char *php_fcvt(double value, int ndigit, int *decpt, int *sign) /* {{{ */
+static inline char *php_fcvt(double value, int ndigit, int *decpt, int *sign)
 {
     return(__cvt(value, ndigit, decpt, sign, 1, 1));
 }
-/* }}} */
 
-PHPAPI char *php_gcvt(double value, int ndigit, char dec_point, char exponent, char *buf) /* {{{ */
+PHPAPI char *php_gcvt(double value, int ndigit, char dec_point, char exponent, char *buf)
 {
 	char *digits, *dst, *src;
 	int i, decpt, sign;
@@ -224,9 +221,8 @@ PHPAPI char *php_gcvt(double value, int ndigit, char dec_point, char exponent, c
     zend_freedtoa(digits);
     return (buf);
 }
-/* }}} */
 
-/* {{{ Apache license */
+/* Apache license */
 /* ====================================================================
  * Copyright (c) 1995-1998 The Apache Group.  All rights reserved.
  *
@@ -281,7 +277,6 @@ PHPAPI char *php_gcvt(double value, int ndigit, char dec_point, char exponent, c
  * SIO stdio-replacement strx_* functions by Panos Tsirigotis
  * <panos@alumni.cs.colorado.edu> for xinetd.
  */
-/* }}} */
 
 #define FALSE			0
 #define TRUE			1
@@ -307,7 +302,6 @@ PHPAPI char *php_gcvt(double value, int ndigit, char dec_point, char exponent, c
  * which is a pointer to the END of the buffer + 1 (i.e. if the buffer
  * is declared as buf[ 100 ], buf_end should be &buf[ 100 ])
  */
-/* char * ap_php_conv_10() {{{ */
 PHPAPI char * ap_php_conv_10(register wide_int num, register bool_int is_unsigned,
 	   register bool_int * is_negative, char *buf_end, register size_t *len)
 {
@@ -351,7 +345,6 @@ PHPAPI char * ap_php_conv_10(register wide_int num, register bool_int is_unsigne
 	*len = buf_end - p;
 	return (p);
 }
-/* }}} */
 
 /* If you change this value then also change bug24640.phpt.
  * Also NDIG must be reasonable smaller than NUM_BUF_SIZE.
@@ -365,7 +358,7 @@ PHPAPI char * ap_php_conv_10(register wide_int num, register bool_int is_unsigne
  * The sign is returned in the is_negative argument (and is not placed
  * in buf).
  */
-/* PHPAPI char * php_conv_fp() {{{ */
+
 PHPAPI char * php_conv_fp(register char format, register double num,
 		 boolean_e add_dp, int precision, char dec_point, bool_int * is_negative, char *buf, size_t *len)
 {
@@ -459,7 +452,6 @@ PHPAPI char * php_conv_fp(register char format, register double num,
 	free(p_orig);
 	return (buf);
 }
-/* }}} */
 
 /*
  * Convert num to a base X number where X is a power of 2. nbits determines X.
@@ -471,7 +463,7 @@ PHPAPI char * php_conv_fp(register char format, register double num,
  * which is a pointer to the END of the buffer + 1 (i.e. if the buffer
  * is declared as buf[ 100 ], buf_end should be &buf[ 100 ])
  */
-PHPAPI char * ap_php_conv_p2(register u_wide_int num, register int nbits, char format, char *buf_end, register size_t *len) /* {{{ */
+PHPAPI char * ap_php_conv_p2(register u_wide_int num, register int nbits, char format, char *buf_end, register size_t *len)
 {
 	register int mask = (1 << nbits) - 1;
 	register char *p = buf_end;
@@ -488,7 +480,6 @@ PHPAPI char * ap_php_conv_p2(register u_wide_int num, register int nbits, char f
 	*len = buf_end - p;
 	return (p);
 }
-/* }}} */
 
 /*
  * NUM_BUF_SIZE is the size of the buffer used for arithmetic conversions
@@ -576,7 +567,7 @@ typedef struct buf_area buffy;
 /*
  * Do format conversion placing the output in buffer
  */
-static int format_converter(register buffy * odp, const char *fmt, va_list ap) /* {{{ */
+static int format_converter(register buffy * odp, const char *fmt, va_list ap)
 {
 	char *sp;
 	char *bep;
@@ -1185,12 +1176,11 @@ skip_output:
 	odp->nextb = sp;
 	return (cc);
 }
-/* }}} */
 
 /*
  * This is the general purpose conversion function.
  */
-static void strx_printv(int *ccp, char *buf, size_t len, const char *format, va_list ap) /* {{{ */
+static void strx_printv(int *ccp, char *buf, size_t len, const char *format, va_list ap)
 {
 	buffy od;
 	int cc;
@@ -1219,9 +1209,8 @@ static void strx_printv(int *ccp, char *buf, size_t len, const char *format, va_
 		*ccp = cc;
 	}
 }
-/* }}} */
 
-PHPAPI int ap_php_slprintf(char *buf, size_t len, const char *format,...) /* {{{ */
+PHPAPI int ap_php_slprintf(char *buf, size_t len, const char *format,...)
 {
 	int cc;
 	va_list ap;
@@ -1235,9 +1224,8 @@ PHPAPI int ap_php_slprintf(char *buf, size_t len, const char *format,...) /* {{{
 	}
 	return cc;
 }
-/* }}} */
 
-PHPAPI int ap_php_vslprintf(char *buf, size_t len, const char *format, va_list ap) /* {{{ */
+PHPAPI int ap_php_vslprintf(char *buf, size_t len, const char *format, va_list ap)
 {
 	int cc;
 
@@ -1248,9 +1236,8 @@ PHPAPI int ap_php_vslprintf(char *buf, size_t len, const char *format, va_list a
 	}
 	return cc;
 }
-/* }}} */
 
-PHPAPI int ap_php_snprintf(char *buf, size_t len, const char *format,...) /* {{{ */
+PHPAPI int ap_php_snprintf(char *buf, size_t len, const char *format,...)
 {
 	int cc;
 	va_list ap;
@@ -1260,18 +1247,16 @@ PHPAPI int ap_php_snprintf(char *buf, size_t len, const char *format,...) /* {{{
 	va_end(ap);
 	return (cc);
 }
-/* }}} */
 
-PHPAPI int ap_php_vsnprintf(char *buf, size_t len, const char *format, va_list ap) /* {{{ */
+PHPAPI int ap_php_vsnprintf(char *buf, size_t len, const char *format, va_list ap)
 {
 	int cc;
 
 	strx_printv(&cc, buf, len, format, ap);
 	return (cc);
 }
-/* }}} */
 
-PHPAPI int ap_php_vasprintf(char **buf, const char *format, va_list ap) /* {{{ */
+PHPAPI int ap_php_vasprintf(char **buf, const char *format, va_list ap)
 {
 	va_list ap2;
 	int cc;
@@ -1293,9 +1278,8 @@ PHPAPI int ap_php_vasprintf(char **buf, const char *format, va_list ap) /* {{{ *
 
 	return cc;
 }
-/* }}} */
 
-PHPAPI int ap_php_asprintf(char **buf, const char *format, ...) /* {{{ */
+PHPAPI int ap_php_asprintf(char **buf, const char *format, ...)
 {
 	int cc;
 	va_list ap;
@@ -1305,4 +1289,4 @@ PHPAPI int ap_php_asprintf(char **buf, const char *format, ...) /* {{{ */
 	va_end(ap);
 	return cc;
 }
-/* }}} */
+

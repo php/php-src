@@ -25,17 +25,17 @@ php_win32_core_globals the_php_win32_core_globals;
 #endif
 
 void php_win32_core_globals_ctor(void *vg)
-{/*{{{*/
+{
 	php_win32_core_globals *wg = (php_win32_core_globals*)vg;
 	memset(wg, 0, sizeof(*wg));
 
 	wg->mail_socket = INVALID_SOCKET;
 
 	wg->log_source = INVALID_HANDLE_VALUE;
-}/*}}}*/
+}
 
 void php_win32_core_globals_dtor(void *vg)
-{/*{{{*/
+{
 	php_win32_core_globals *wg = (php_win32_core_globals*)vg;
 
 	if (wg->registry_key) {
@@ -56,12 +56,12 @@ void php_win32_core_globals_dtor(void *vg)
 		closesocket(wg->mail_socket);
 		wg->mail_socket = INVALID_SOCKET;
 	}
-}/*}}}*/
+}
 
 
 PHP_RSHUTDOWN_FUNCTION(win32_core_globals)
-{/*{{{*/
+{
 	closelog();
 
 	return SUCCESS;
-}/*}}}*/
+}

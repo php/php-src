@@ -96,7 +96,7 @@ ZEND_TSRMLS_CACHE_DEFINE()
 ZEND_GET_MODULE(ldap)
 #endif
 
-static void _close_ldap_link(zend_resource *rsrc) /* {{{ */
+static void _close_ldap_link(zend_resource *rsrc)
 {
 	ldap_linkdata *ld = (ldap_linkdata *)rsrc->ptr;
 
@@ -111,16 +111,14 @@ static void _close_ldap_link(zend_resource *rsrc) /* {{{ */
 	efree(ld);
 	LDAPG(num_links)--;
 }
-/* }}} */
 
-static void _free_ldap_result(zend_resource *rsrc) /* {{{ */
+static void _free_ldap_result(zend_resource *rsrc)
 {
 	LDAPMessage *result = (LDAPMessage *)rsrc->ptr;
 	ldap_msgfree(result);
 }
-/* }}} */
 
-static void _free_ldap_result_entry(zend_resource *rsrc) /* {{{ */
+static void _free_ldap_result_entry(zend_resource *rsrc)
 {
 	ldap_resultentry *entry = (ldap_resultentry *)rsrc->ptr;
 
@@ -131,9 +129,8 @@ static void _free_ldap_result_entry(zend_resource *rsrc) /* {{{ */
 	zval_ptr_dtor(&entry->res);
 	efree(entry);
 }
-/* }}} */
 
-/* {{{ Parse controls from and to arrays */
+/* Parse controls from and to arrays */
 static void _php_ldap_control_to_array(LDAP *ld, LDAPControl* ctrl, zval* array, int request)
 {
 	array_init(array);
@@ -692,16 +689,14 @@ static void _php_ldap_controls_free (LDAPControl*** ctrls)
 		*ctrls = NULL;
 	}
 }
-/* }}} */
 
-/* {{{ PHP_INI_BEGIN
+/* PHP_INI_BEGIN
  */
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY_EX("ldap.max_links", "-1", PHP_INI_SYSTEM, OnUpdateLong, max_links, zend_ldap_globals, ldap_globals, display_link_numbers)
 PHP_INI_END()
-/* }}} */
 
-/* {{{ PHP_GINIT_FUNCTION
+/* PHP_GINIT_FUNCTION
  */
 static PHP_GINIT_FUNCTION(ldap)
 {
@@ -710,9 +705,8 @@ static PHP_GINIT_FUNCTION(ldap)
 #endif
 	ldap_globals->num_links = 0;
 }
-/* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION
+/* PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(ldap)
 {
@@ -931,18 +925,16 @@ PHP_MINIT_FUNCTION(ldap)
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_MSHUTDOWN_FUNCTION
+/* PHP_MSHUTDOWN_FUNCTION
  */
 PHP_MSHUTDOWN_FUNCTION(ldap)
 {
 	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
+/* PHP_MINFO_FUNCTION
  */
 PHP_MINFO_FUNCTION(ldap)
 {
@@ -979,7 +971,6 @@ PHP_MINFO_FUNCTION(ldap)
 	php_info_print_table_end();
 	DISPLAY_INI_ENTRIES();
 }
-/* }}} */
 
 /* Connect to an LDAP server */
 PHP_FUNCTION(ldap_connect)
@@ -1081,9 +1072,8 @@ PHP_FUNCTION(ldap_connect)
 	}
 
 }
-/* }}} */
 
-/* {{{ _get_lderrno
+/* _get_lderrno
  */
 static int _get_lderrno(LDAP *ldap)
 {
@@ -1097,9 +1087,8 @@ static int _get_lderrno(LDAP *ldap)
 	return ldap->ld_errno;
 #endif
 }
-/* }}} */
 
-/* {{{ _set_lderrno
+/* _set_lderrno
  */
 static void _set_lderrno(LDAP *ldap, int lderr)
 {
@@ -1110,7 +1099,6 @@ static void _set_lderrno(LDAP *ldap, int lderr)
 	ldap->ld_errno = lderr;
 #endif
 }
-/* }}} */
 
 /* Bind to LDAP directory */
 PHP_FUNCTION(ldap_bind)
@@ -1163,7 +1151,6 @@ PHP_FUNCTION(ldap_bind)
 		RETURN_TRUE;
 	}
 }
-/* }}} */
 
 /* Bind to LDAP directory */
 PHP_FUNCTION(ldap_bind_ext)
@@ -1239,7 +1226,6 @@ cleanup:
 
 	return;
 }
-/* }}} */
 
 #ifdef HAVE_LDAP_SASL
 typedef struct {
@@ -1250,7 +1236,7 @@ typedef struct {
 	char *authzid;
 } php_ldap_bictx;
 
-/* {{{ _php_sasl_setdefs
+/* _php_sasl_setdefs
  */
 static php_ldap_bictx *_php_sasl_setdefs(LDAP *ld, char *sasl_mech, char *sasl_realm, char *sasl_authc_id, char *passwd, char *sasl_authz_id)
 {
@@ -1278,9 +1264,8 @@ static php_ldap_bictx *_php_sasl_setdefs(LDAP *ld, char *sasl_mech, char *sasl_r
 
 	return ctx;
 }
-/* }}} */
 
-/* {{{ _php_sasl_freedefs
+/* _php_sasl_freedefs
  */
 static void _php_sasl_freedefs(php_ldap_bictx *ctx)
 {
@@ -1291,9 +1276,8 @@ static void _php_sasl_freedefs(php_ldap_bictx *ctx)
 	if (ctx->authzid) ber_memfree(ctx->authzid);
 	ber_memfree(ctx);
 }
-/* }}} */
 
-/* {{{ _php_sasl_interact
+/* _php_sasl_interact
    Internal interact function for SASL */
 static int _php_sasl_interact(LDAP *ld, unsigned flags, void *defaults, void *in)
 {
@@ -1324,7 +1308,6 @@ static int _php_sasl_interact(LDAP *ld, unsigned flags, void *defaults, void *in
 	}
 	return LDAP_SUCCESS;
 }
-/* }}} */
 
 /* Bind to LDAP directory using SASL */
 PHP_FUNCTION(ldap_sasl_bind)
@@ -1364,7 +1347,7 @@ PHP_FUNCTION(ldap_sasl_bind)
 	}
 	_php_sasl_freedefs(ctx);
 }
-/* }}} */
+
 #endif /* HAVE_LDAP_SASL */
 
 /* Unbind from LDAP directory */
@@ -1384,9 +1367,8 @@ PHP_FUNCTION(ldap_unbind)
 	zend_list_close(Z_RES_P(link));
 	RETURN_TRUE;
 }
-/* }}} */
 
-/* {{{ php_set_opts
+/* php_set_opts
  */
 static void php_set_opts(LDAP *ldap, int sizelimit, int timelimit, int deref, int *old_sizelimit, int *old_timelimit, int *old_deref)
 {
@@ -1423,9 +1405,8 @@ static void php_set_opts(LDAP *ldap, int sizelimit, int timelimit, int deref, in
 #endif
 	}
 }
-/* }}} */
 
-/* {{{ php_ldap_do_search
+/* php_ldap_do_search
  */
 static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 {
@@ -1671,28 +1652,24 @@ cleanup:
 		_php_ldap_controls_free(&lserverctrls);
 	}
 }
-/* }}} */
 
 /* Read an entry */
 PHP_FUNCTION(ldap_read)
 {
 	php_ldap_do_search(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_SCOPE_BASE);
 }
-/* }}} */
 
 /* Single-level search */
 PHP_FUNCTION(ldap_list)
 {
 	php_ldap_do_search(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_SCOPE_ONELEVEL);
 }
-/* }}} */
 
 /* Search LDAP tree under base_dn */
 PHP_FUNCTION(ldap_search)
 {
 	php_ldap_do_search(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_SCOPE_SUBTREE);
 }
-/* }}} */
 
 /* Free result memory */
 PHP_FUNCTION(ldap_free_result)
@@ -1711,7 +1688,6 @@ PHP_FUNCTION(ldap_free_result)
 	zend_list_close(Z_RES_P(result));  /* Delete list entry */
 	RETVAL_TRUE;
 }
-/* }}} */
 
 /* Count the number of entries in a search result */
 PHP_FUNCTION(ldap_count_entries)
@@ -1734,7 +1710,6 @@ PHP_FUNCTION(ldap_count_entries)
 
 	RETURN_LONG(ldap_count_entries(ld->link, ldap_result));
 }
-/* }}} */
 
 /* Return first result id */
 PHP_FUNCTION(ldap_first_entry)
@@ -1766,7 +1741,6 @@ PHP_FUNCTION(ldap_first_entry)
 		resultentry->ber = NULL;
 	}
 }
-/* }}} */
 
 /* Get next result entry */
 PHP_FUNCTION(ldap_next_entry)
@@ -1797,7 +1771,6 @@ PHP_FUNCTION(ldap_next_entry)
 		resultentry_next->ber = NULL;
 	}
 }
-/* }}} */
 
 /* Get all result entries */
 PHP_FUNCTION(ldap_get_entries)
@@ -1897,7 +1870,6 @@ PHP_FUNCTION(ldap_get_entries)
 	add_assoc_long(return_value, "count", num_entries);
 
 }
-/* }}} */
 
 /* Return first attribute */
 PHP_FUNCTION(ldap_first_attribute)
@@ -1929,7 +1901,6 @@ PHP_FUNCTION(ldap_first_attribute)
 #endif
 	}
 }
-/* }}} */
 
 /* Get the next attribute in result */
 PHP_FUNCTION(ldap_next_attribute)
@@ -1972,7 +1943,6 @@ PHP_FUNCTION(ldap_next_attribute)
 #endif
 	}
 }
-/* }}} */
 
 /* Get attributes from a search result entry */
 PHP_FUNCTION(ldap_get_attributes)
@@ -2030,7 +2000,6 @@ PHP_FUNCTION(ldap_get_attributes)
 
 	add_assoc_long(return_value, "count", num_attrib);
 }
-/* }}} */
 
 /* Get all values with lengths from a result entry */
 PHP_FUNCTION(ldap_get_values_len)
@@ -2071,7 +2040,6 @@ PHP_FUNCTION(ldap_get_values_len)
 	ldap_value_free_len(ldap_value_len);
 
 }
-/* }}} */
 
 /* Get the DN of a result entry */
 PHP_FUNCTION(ldap_get_dn)
@@ -2105,7 +2073,6 @@ PHP_FUNCTION(ldap_get_dn)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Splits DN into its component parts */
 PHP_FUNCTION(ldap_explode_dn)
@@ -2137,7 +2104,6 @@ PHP_FUNCTION(ldap_explode_dn)
 
 	ldap_memvfree((void **)ldap_value);
 }
-/* }}} */
 
 /* Convert DN to User Friendly Naming format */
 PHP_FUNCTION(ldap_dn2ufn)
@@ -2160,12 +2126,10 @@ PHP_FUNCTION(ldap_dn2ufn)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
-
 
 /* added to fix use of ldap_modify_add for doing an ldap_add, gerrit thomson. */
 #define PHP_LD_FULL_ADD 0xff
-/* {{{ php_ldap_do_modify
+/* php_ldap_do_modify
  */
 static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 {
@@ -2341,7 +2305,6 @@ cleanup:
 
 	return;
 }
-/* }}} */
 
 /* Add entries to LDAP directory */
 PHP_FUNCTION(ldap_add)
@@ -2349,14 +2312,12 @@ PHP_FUNCTION(ldap_add)
 	/* use a newly define parameter into the do_modify so ldap_mod_add can be used the way it is supposed to be used , Gerrit THomson */
 	php_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_LD_FULL_ADD, 0);
 }
-/* }}} */
 
 /* Add entries to LDAP directory */
 PHP_FUNCTION(ldap_add_ext)
 {
 	php_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_LD_FULL_ADD, 1);
 }
-/* }}} */
 
 /* three functions for attribute base modifications, gerrit Thomson */
 
@@ -2365,44 +2326,38 @@ PHP_FUNCTION(ldap_mod_replace)
 {
 	php_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_MOD_REPLACE, 0);
 }
-/* }}} */
 
 /* Replace attribute values with new ones */
 PHP_FUNCTION(ldap_mod_replace_ext)
 {
 	php_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_MOD_REPLACE, 1);
 }
-/* }}} */
 
 /* Add attribute values to current */
 PHP_FUNCTION(ldap_mod_add)
 {
 	php_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_MOD_ADD, 0);
 }
-/* }}} */
 
 /* Add attribute values to current */
 PHP_FUNCTION(ldap_mod_add_ext)
 {
 	php_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_MOD_ADD, 1);
 }
-/* }}} */
 
 /* Delete attribute values */
 PHP_FUNCTION(ldap_mod_del)
 {
 	php_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_MOD_DELETE, 0);
 }
-/* }}} */
 
 /* Delete attribute values */
 PHP_FUNCTION(ldap_mod_del_ext)
 {
 	php_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_MOD_DELETE, 1);
 }
-/* }}} */
 
-/* {{{ php_ldap_do_delete
+/* php_ldap_do_delete
  */
 static void php_ldap_do_delete(INTERNAL_FUNCTION_PARAMETERS, int ext)
 {
@@ -2461,23 +2416,20 @@ cleanup:
 
 	return;
 }
-/* }}} */
 
 /* Delete an entry from a directory */
 PHP_FUNCTION(ldap_delete)
 {
 	php_ldap_do_delete(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
-/* }}} */
 
 /* Delete an entry from a directory */
 PHP_FUNCTION(ldap_delete_ext)
 {
 	php_ldap_do_delete(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
-/* }}} */
 
-/* {{{ _ldap_str_equal_to_const
+/* _ldap_str_equal_to_const
  */
 static size_t _ldap_str_equal_to_const(const char *str, size_t str_len, const char *cstr)
 {
@@ -2494,9 +2446,8 @@ static size_t _ldap_str_equal_to_const(const char *str, size_t str_len, const ch
 
 	return 1;
 }
-/* }}} */
 
-/* {{{ _ldap_strlen_max
+/* _ldap_strlen_max
  */
 static size_t _ldap_strlen_max(const char *str, size_t max_len)
 {
@@ -2510,15 +2461,13 @@ static size_t _ldap_strlen_max(const char *str, size_t max_len)
 
 	return max_len;
 }
-/* }}} */
 
-/* {{{ _ldap_hash_fetch
+/* _ldap_hash_fetch
  */
 static void _ldap_hash_fetch(zval *hashTbl, const char *key, zval **out)
 {
 	*out = zend_hash_str_find(Z_ARRVAL_P(hashTbl), key, strlen(key));
 }
-/* }}} */
 
 /* Perform multiple modifications as part of one operation */
 PHP_FUNCTION(ldap_modify_batch)
@@ -2835,7 +2784,6 @@ PHP_FUNCTION(ldap_modify_batch)
 		}
 	}
 }
-/* }}} */
 
 /* Get the current ldap error number */
 PHP_FUNCTION(ldap_errno)
@@ -2853,7 +2801,6 @@ PHP_FUNCTION(ldap_errno)
 
 	RETURN_LONG(_get_lderrno(ld->link));
 }
-/* }}} */
 
 /* Convert error number to error string */
 PHP_FUNCTION(ldap_err2str)
@@ -2866,7 +2813,6 @@ PHP_FUNCTION(ldap_err2str)
 
 	RETURN_STRING(ldap_err2string(perrno));
 }
-/* }}} */
 
 /* Get the current ldap error string */
 PHP_FUNCTION(ldap_error)
@@ -2887,7 +2833,6 @@ PHP_FUNCTION(ldap_error)
 
 	RETURN_STRING(ldap_err2string(ld_errno));
 }
-/* }}} */
 
 /* Determine if an entry has a specific value for one of its attributes */
 PHP_FUNCTION(ldap_compare)
@@ -2943,7 +2888,6 @@ cleanup:
 
 	return;
 }
-/* }}} */
 
 #if (LDAP_API_VERSION > 2000) || HAVE_ORALDAP
 /* Get the current value of various session-wide parameters */
@@ -3111,7 +3055,6 @@ PHP_FUNCTION(ldap_get_option)
 	}
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Set the value of various session-wide parameters */
 PHP_FUNCTION(ldap_set_option)
@@ -3292,7 +3235,6 @@ PHP_FUNCTION(ldap_set_option)
 	}
 	RETURN_TRUE;
 }
-/* }}} */
 
 #ifdef HAVE_LDAP_PARSE_RESULT
 /* Extract information from result */
@@ -3365,10 +3307,10 @@ PHP_FUNCTION(ldap_parse_result)
 	}
 	RETURN_TRUE;
 }
-/* }}} */
+
 #endif
 
-/* {{{ Extended operation response parsing, Pierangelo Masarati */
+/* Extended operation response parsing, Pierangelo Masarati */
 #ifdef HAVE_LDAP_PARSE_EXTENDED_RESULT
 /* Extract information from extended operation result */
 PHP_FUNCTION(ldap_parse_exop)
@@ -3422,9 +3364,8 @@ PHP_FUNCTION(ldap_parse_exop)
 	}
 	RETURN_TRUE;
 }
-/* }}} */
+
 #endif
-/* }}} */
 
 /* Return first reference */
 PHP_FUNCTION(ldap_first_reference)
@@ -3456,7 +3397,6 @@ PHP_FUNCTION(ldap_first_reference)
 		resultentry->ber = NULL;
 	}
 }
-/* }}} */
 
 /* Get next reference */
 PHP_FUNCTION(ldap_next_reference)
@@ -3488,7 +3428,6 @@ PHP_FUNCTION(ldap_next_reference)
 		resultentry_next->ber = NULL;
 	}
 }
-/* }}} */
 
 #ifdef HAVE_LDAP_PARSE_REFERENCE
 /* Extract information from reference entry */
@@ -3530,10 +3469,10 @@ PHP_FUNCTION(ldap_parse_reference)
 	}
 	RETURN_TRUE;
 }
-/* }}} */
+
 #endif
 
-/* {{{ php_ldap_do_rename
+/* php_ldap_do_rename
  */
 static void php_ldap_do_rename(INTERNAL_FUNCTION_PARAMETERS, int ext)
 {
@@ -3613,21 +3552,18 @@ cleanup:
 
 	return;
 }
-/* }}} */
 
 /* Modify the name of an entry */
 PHP_FUNCTION(ldap_rename)
 {
 	php_ldap_do_rename(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
-/* }}} */
 
 /* Modify the name of an entry */
 PHP_FUNCTION(ldap_rename_ext)
 {
 	php_ldap_do_rename(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
-/* }}} */
 
 #ifdef HAVE_LDAP_START_TLS_S
 /* Start TLS */
@@ -3654,12 +3590,12 @@ PHP_FUNCTION(ldap_start_tls)
 		RETURN_TRUE;
 	}
 }
-/* }}} */
+
 #endif
 #endif /* (LDAP_API_VERSION > 2000) || HAVE_ORALDAP */
 
 #if defined(LDAP_API_FEATURE_X_OPENLDAP) && defined(HAVE_3ARG_SETREBINDPROC)
-/* {{{ _ldap_rebind_proc()
+/* _ldap_rebind_proc()
 */
 int _ldap_rebind_proc(LDAP *ldap, const char *url, ber_tag_t req, ber_int_t msgid, void *params)
 {
@@ -3690,7 +3626,6 @@ int _ldap_rebind_proc(LDAP *ldap, const char *url, ber_tag_t req, ber_int_t msgi
 	zval_ptr_dtor(&cb_args[1]);
 	return retval;
 }
-/* }}} */
 
 /* Set a callback function to do re-binds on referral chasing. */
 PHP_FUNCTION(ldap_set_rebind_proc)
@@ -3734,7 +3669,7 @@ PHP_FUNCTION(ldap_set_rebind_proc)
 	ZVAL_COPY(&ld->rebindproc, callback);
 	RETURN_TRUE;
 }
-/* }}} */
+
 #endif
 
 static zend_string* php_ldap_do_escape(const zend_bool *map, const char *value, size_t valuelen, zend_long flags)
@@ -3822,7 +3757,7 @@ PHP_FUNCTION(ldap_escape)
 }
 
 #ifdef STR_TRANSLATION
-/* {{{ php_ldap_do_translate
+/* php_ldap_do_translate
  */
 static void php_ldap_do_translate(INTERNAL_FUNCTION_PARAMETERS, int way)
 {
@@ -3852,21 +3787,19 @@ static void php_ldap_do_translate(INTERNAL_FUNCTION_PARAMETERS, int way)
 		RETVAL_FALSE;
 	}
 }
-/* }}} */
 
 /* Translate t61 characters to 8859 characters */
 PHP_FUNCTION(ldap_t61_to_8859)
 {
 	php_ldap_do_translate(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
-/* }}} */
 
 /* Translate 8859 characters to t61 characters */
 PHP_FUNCTION(ldap_8859_to_t61)
 {
 	php_ldap_do_translate(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
-/* }}} */
+
 #endif
 
 #ifdef LDAP_CONTROL_PAGEDRESULTS
@@ -3961,7 +3894,6 @@ lcpr_error_out:
 	}
 	return;
 }
-/* }}} */
 
 /* Extract paged results control response */
 PHP_FUNCTION(ldap_control_paged_result_response)
@@ -4055,10 +3987,10 @@ PHP_FUNCTION(ldap_control_paged_result_response)
 
 	RETURN_TRUE;
 }
-/* }}} */
+
 #endif
 
-/* {{{ Extended operations, Pierangelo Masarati */
+/* Extended operations, Pierangelo Masarati */
 #ifdef HAVE_LDAP_EXTENDED_OPERATION_S
 /* Extended operation */
 PHP_FUNCTION(ldap_exop)
@@ -4158,7 +4090,7 @@ PHP_FUNCTION(ldap_exop)
 		_php_ldap_controls_free(&lserverctrls);
 	}
 }
-/* }}} */
+
 #endif
 
 #ifdef HAVE_LDAP_PASSWD
@@ -4250,7 +4182,7 @@ PHP_FUNCTION(ldap_exop_passwd)
 
 	ldap_memfree(lgenpasswd.bv_val);
 }
-/* }}} */
+
 #endif
 
 #ifdef HAVE_LDAP_WHOAMI_S
@@ -4285,7 +4217,7 @@ PHP_FUNCTION(ldap_exop_whoami)
 		ldap_memfree(lauthzid);
 	}
 }
-/* }}} */
+
 #endif
 
 #ifdef HAVE_LDAP_REFRESH_S
@@ -4317,10 +4249,10 @@ PHP_FUNCTION(ldap_exop_refresh)
 
 	RETURN_LONG(newttl);
 }
-/* }}} */
+
 #endif
 
-zend_module_entry ldap_module_entry = { /* {{{ */
+zend_module_entry ldap_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"ldap",
 	ext_functions,
@@ -4336,4 +4268,4 @@ zend_module_entry ldap_module_entry = { /* {{{ */
 	NULL,
 	STANDARD_MODULE_PROPERTIES_EX
 };
-/* }}} */
+

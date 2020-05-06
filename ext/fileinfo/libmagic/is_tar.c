@@ -56,7 +56,7 @@ private int from_oct(const char *, size_t);	/* Decode octal number */
 static const char tartype[][32] = {	/* should be equal to messages */
 	"tar archive",			/* found in ../magic/Magdir/archive */
 	"POSIX tar archive",
-	"POSIX tar archive (GNU)",	/*  */
+	"POSIX tar archive (GNU)",
 };
 
 protected int

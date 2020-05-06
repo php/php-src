@@ -27,7 +27,7 @@ static zend_bool *vm_interrupt_flag = NULL;
 static void (*orig_interrupt_function)(zend_execute_data *execute_data);
 
 static void php_win32_signal_ctrl_interrupt_function(zend_execute_data *execute_data)
-{/*{{{*/
+{
 	if (IS_UNDEF != Z_TYPE(ctrl_handler)) {
 		zval retval, params[1];
 
@@ -41,10 +41,10 @@ static void php_win32_signal_ctrl_interrupt_function(zend_execute_data *execute_
 	if (orig_interrupt_function) {
 		orig_interrupt_function(execute_data);
 	}
-}/*}}}*/
+}
 
 PHP_WINUTIL_API void php_win32_signal_ctrl_handler_init(void)
-{/*{{{*/
+{
 	/* We are in the main thread! */
 	if (!php_win32_console_is_cli_sapi()) {
 		return;
@@ -57,10 +57,10 @@ PHP_WINUTIL_API void php_win32_signal_ctrl_handler_init(void)
 
 	REGISTER_MAIN_LONG_CONSTANT("PHP_WINDOWS_EVENT_CTRL_C", CTRL_C_EVENT, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_LONG_CONSTANT("PHP_WINDOWS_EVENT_CTRL_BREAK", CTRL_BREAK_EVENT, CONST_PERSISTENT | CONST_CS);
-}/*}}}*/
+}
 
 PHP_WINUTIL_API void php_win32_signal_ctrl_handler_shutdown(void)
-{/*{{{*/
+{
 	if (!php_win32_console_is_cli_sapi()) {
 		return;
 	}
@@ -69,10 +69,10 @@ PHP_WINUTIL_API void php_win32_signal_ctrl_handler_shutdown(void)
 	orig_interrupt_function = NULL;
 	vm_interrupt_flag = NULL;
 	ZVAL_UNDEF(&ctrl_handler);
-}/*}}}*/
+}
 
 static BOOL WINAPI php_win32_signal_system_ctrl_handler(DWORD evt)
-{/*{{{*/
+{
 	if (CTRL_C_EVENT != evt && CTRL_BREAK_EVENT != evt) {
 		return FALSE;
 	}
@@ -82,7 +82,7 @@ static BOOL WINAPI php_win32_signal_system_ctrl_handler(DWORD evt)
 	ctrl_evt = evt;
 
 	return TRUE;
-}/*}}}*/
+}
 
 /* Assigns a CTRL signal handler to a PHP function */
 PHP_FUNCTION(sapi_windows_set_ctrl_handler)
@@ -132,10 +132,10 @@ PHP_FUNCTION(sapi_windows_set_ctrl_handler)
 	ZVAL_COPY(&ctrl_handler, handler);
 
 	RETURN_TRUE;
-}/*}}}*/
+}
 
 PHP_FUNCTION(sapi_windows_generate_ctrl_event)
-{/*{{{*/
+{
 	zend_long evt, pid = 0;
 	zend_bool ret = 0;
 
@@ -157,4 +157,4 @@ PHP_FUNCTION(sapi_windows_generate_ctrl_event)
 	}
 
 	RETURN_BOOL(ret);
-}/*}}}*/
+}

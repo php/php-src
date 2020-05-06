@@ -24,9 +24,7 @@
 #include "formatter_format.h"
 #include "intl_convert.h"
 
-/* Format a number. }}} */
-/* Format a number.
- */
+/* Format a number. */
 PHP_FUNCTION( numfmt_format )
 {
 	zval *number;
@@ -114,11 +112,8 @@ PHP_FUNCTION( numfmt_format )
 
 	INTL_METHOD_RETVAL_UTF8( nfo, formatted, formatted_len, ( formatted != format_buf ) );
 }
-/* }}} */
 
-/* Format a number as currency. }}} */
-/* Format a number as currency.
- */
+/* Format a number as currency. */
 PHP_FUNCTION( numfmt_format_currency )
 {
 	double     number;
@@ -174,4 +169,4 @@ PHP_FUNCTION( numfmt_format_currency )
 	}
 }
 
-/* }}} */
+

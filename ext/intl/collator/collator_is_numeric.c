@@ -15,10 +15,10 @@
 
 #include "collator_is_numeric.h"
 
-/* {{{ collator_u_strtod
+/* collator_u_strtod
  * Taken from PHP6:zend_u_strtod()
  */
-static double collator_u_strtod(const UChar *nptr, UChar **endptr) /* {{{ */
+static double collator_u_strtod(const UChar *nptr, UChar **endptr)
 {
 	const UChar *u = nptr, *nstart;
 	UChar c = *u;
@@ -103,9 +103,8 @@ static double collator_u_strtod(const UChar *nptr, UChar **endptr) /* {{{ */
 
 	return 0;
 }
-/* }}} */
 
-/* {{{ collator_u_strtol
+/* collator_u_strtol
  * Taken from PHP6:zend_u_strtol()
  *
  * Convert a Unicode string to a long integer.
@@ -203,10 +202,8 @@ static zend_long collator_u_strtol(nptr, endptr, base)
 		*endptr = (UChar *)(any ? s - 1 : nptr);
 	return (acc);
 }
-/* }}} */
 
-
-/* {{{ collator_is_numeric]
+/* collator_is_numeric]
  * Taken from PHP6:is_numeric_unicode()
  */
 zend_uchar collator_is_numeric( UChar *str, int32_t length, zend_long *lval, double *dval, int allow_errors )
@@ -280,4 +277,4 @@ zend_uchar collator_is_numeric( UChar *str, int32_t length, zend_long *lval, dou
 	}
 	return 0;
 }
-/* }}} */
+

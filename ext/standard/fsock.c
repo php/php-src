@@ -23,7 +23,7 @@
 #include "php_network.h"
 #include "file.h"
 
-/* {{{ php_fsockopen() */
+/* php_fsockopen() */
 
 static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
@@ -120,18 +120,16 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	php_stream_to_zval(stream, return_value);
 }
 
-/* }}} */
 
 /* Open Internet or Unix domain socket connection */
 PHP_FUNCTION(fsockopen)
 {
 	php_fsockopen_stream(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
-/* }}} */
 
 /* Open persistent Internet or Unix domain socket connection */
 PHP_FUNCTION(pfsockopen)
 {
 	php_fsockopen_stream(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
-/* }}} */
+

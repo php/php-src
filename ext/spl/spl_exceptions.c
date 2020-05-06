@@ -45,7 +45,7 @@ PHPAPI zend_class_entry *spl_ce_UnexpectedValueException;
 
 #define spl_ce_Exception zend_ce_exception
 
-/* {{{ PHP_MINIT_FUNCTION(spl_exceptions) */
+/* PHP_MINIT_FUNCTION(spl_exceptions) */
 PHP_MINIT_FUNCTION(spl_exceptions)
 {
     REGISTER_SPL_SUB_CLASS_EX(LogicException,           Exception,        NULL, NULL);
@@ -65,4 +65,4 @@ PHP_MINIT_FUNCTION(spl_exceptions)
 
 	return SUCCESS;
 }
-/* }}} */
+

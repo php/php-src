@@ -21,7 +21,6 @@
 #include "collator_class.h"
 #include "intl_data.h"
 
-/* {{{ */
 static int collator_ctor(INTERNAL_FUNCTION_PARAMETERS)
 {
 	const char*      locale;
@@ -50,7 +49,6 @@ static int collator_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	INTL_CTOR_CHECK_STATUS(co, "collator_create: unable to open ICU collator");
 	return SUCCESS;
 }
-/* }}} */
 
 /* Create collator.
  */
@@ -62,7 +60,6 @@ PHP_FUNCTION( collator_create )
 		RETURN_NULL();
 	}
 }
-/* }}} */
 
 /* Collator object constructor.
  */
@@ -79,4 +76,4 @@ PHP_METHOD( Collator, __construct )
 	}
 	zend_restore_error_handling(&error_handling);
 }
-/* }}} */
+

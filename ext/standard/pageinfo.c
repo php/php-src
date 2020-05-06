@@ -51,7 +51,7 @@
 
 #include "ext/standard/basic_functions.h"
 
-/* {{{ php_statpage
+/* php_statpage
  */
 PHPAPI void php_statpage(void)
 {
@@ -71,16 +71,14 @@ PHPAPI void php_statpage(void)
 		}
 	}
 }
-/* }}} */
 
-/* {{{ php_getuid
+/* php_getuid
  */
 zend_long php_getuid(void)
 {
 	php_statpage();
 	return (BG(page_uid));
 }
-/* }}} */
 
 zend_long php_getgid(void)
 {
@@ -102,7 +100,6 @@ PHP_FUNCTION(getmyuid)
 		RETURN_LONG(uid);
 	}
 }
-/* }}} */
 
 /* Get PHP script owner's GID */
 PHP_FUNCTION(getmygid)
@@ -118,7 +115,6 @@ PHP_FUNCTION(getmygid)
 		RETURN_LONG(gid);
 	}
 }
-/* }}} */
 
 /* Get current process ID */
 PHP_FUNCTION(getmypid)
@@ -134,7 +130,6 @@ PHP_FUNCTION(getmypid)
 		RETURN_LONG(pid);
 	}
 }
-/* }}} */
 
 /* Get the inode of the current script being parsed */
 PHP_FUNCTION(getmyinode)
@@ -148,7 +143,6 @@ PHP_FUNCTION(getmyinode)
 		RETURN_LONG(BG(page_inode));
 	}
 }
-/* }}} */
 
 PHPAPI time_t php_getlastmod(void)
 {
@@ -170,4 +164,4 @@ PHP_FUNCTION(getlastmod)
 		RETURN_LONG(lm);
 	}
 }
-/* }}} */
+

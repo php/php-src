@@ -44,7 +44,7 @@ const phpdbg_command_t phpdbg_list_commands[] = {
 	PHPDBG_END_COMMAND
 };
 
-PHPDBG_LIST(lines) /* {{{ */
+PHPDBG_LIST(lines)
 {
 	if (!PHPDBG_G(exec) && !zend_is_executing()) {
 		phpdbg_error("inactive", "type=\"execution\"", "Not executing, and execution context not set");
@@ -75,16 +75,16 @@ PHPDBG_LIST(lines) /* {{{ */
 	}
 
 	return SUCCESS;
-} /* }}} */
+}
 
-PHPDBG_LIST(func) /* {{{ */
+PHPDBG_LIST(func)
 {
 	phpdbg_list_function_byname(param->str, param->len);
 
 	return SUCCESS;
-} /* }}} */
+}
 
-PHPDBG_LIST(method) /* {{{ */
+PHPDBG_LIST(method)
 {
 	zend_class_entry *ce;
 
@@ -104,9 +104,9 @@ PHPDBG_LIST(method) /* {{{ */
 	}
 
 	return SUCCESS;
-} /* }}} */
+}
 
-PHPDBG_LIST(class) /* {{{ */
+PHPDBG_LIST(class)
 {
 	zend_class_entry *ce;
 
@@ -125,9 +125,9 @@ PHPDBG_LIST(class) /* {{{ */
 	}
 
 	return SUCCESS;
-} /* }}} */
+}
 
-void phpdbg_list_file(zend_string *filename, uint32_t count, int offset, uint32_t highlight) /* {{{ */
+void phpdbg_list_file(zend_string *filename, uint32_t count, int offset, uint32_t highlight)
 {
 	uint32_t line, lastline;
 	phpdbg_file_source *data;
@@ -171,9 +171,9 @@ void phpdbg_list_file(zend_string *filename, uint32_t count, int offset, uint32_
 	}
 
 	phpdbg_xml("</list>");
-} /* }}} */
+}
 
-void phpdbg_list_function(const zend_function *fbc) /* {{{ */
+void phpdbg_list_function(const zend_function *fbc)
 {
 	const zend_op_array *ops;
 
@@ -185,9 +185,9 @@ void phpdbg_list_function(const zend_function *fbc) /* {{{ */
 	ops = (zend_op_array *) fbc;
 
 	phpdbg_list_file(ops->filename, ops->line_end - ops->line_start + 1, ops->line_start, 0);
-} /* }}} */
+}
 
-void phpdbg_list_function_byname(const char *str, size_t len) /* {{{ */
+void phpdbg_list_function_byname(const char *str, size_t len)
 {
 	HashTable *func_table = EG(function_table);
 	zend_function* fbc;
@@ -227,7 +227,7 @@ void phpdbg_list_function_byname(const char *str, size_t len) /* {{{ */
 	} phpdbg_end_try_access();
 
 	efree(func_name);
-} /* }}} */
+}
 
 /* Note: do not free the original file handler, let original compile_file() or caller do that. Caller may rely on its value to check success */
 zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type) {

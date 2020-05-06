@@ -27,21 +27,19 @@
 #include "php_pdo_sqlite_int.h"
 #include "zend_exceptions.h"
 
-/* {{{ pdo_sqlite_functions[] */
+/* pdo_sqlite_functions[] */
 static const zend_function_entry pdo_sqlite_functions[] = {
 	PHP_FE_END
 };
-/* }}} */
 
-/* {{{ pdo_sqlite_deps
+/* pdo_sqlite_deps
  */
 static const zend_module_dep pdo_sqlite_deps[] = {
 	ZEND_MOD_REQUIRED("pdo")
 	ZEND_MOD_END
 };
-/* }}} */
 
-/* {{{ pdo_sqlite_module_entry
+/* pdo_sqlite_module_entry
  */
 zend_module_entry pdo_sqlite_module_entry = {
 	STANDARD_MODULE_HEADER_EX, NULL,
@@ -56,13 +54,12 @@ zend_module_entry pdo_sqlite_module_entry = {
 	PHP_PDO_SQLITE_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
-/* }}} */
 
 #if defined(COMPILE_DL_PDO_SQLITE) || defined(COMPILE_DL_PDO_SQLITE_EXTERNAL)
 ZEND_GET_MODULE(pdo_sqlite)
 #endif
 
-/* {{{ PHP_MINIT_FUNCTION */
+/* PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(pdo_sqlite)
 {
 #ifdef SQLITE_DETERMINISTIC
@@ -78,17 +75,15 @@ PHP_MINIT_FUNCTION(pdo_sqlite)
 
 	return php_pdo_register_driver(&pdo_sqlite_driver);
 }
-/* }}} */
 
-/* {{{ PHP_MSHUTDOWN_FUNCTION */
+/* PHP_MSHUTDOWN_FUNCTION */
 PHP_MSHUTDOWN_FUNCTION(pdo_sqlite)
 {
 	php_pdo_unregister_driver(&pdo_sqlite_driver);
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
+/* PHP_MINFO_FUNCTION
  */
 PHP_MINFO_FUNCTION(pdo_sqlite)
 {
@@ -97,4 +92,4 @@ PHP_MINFO_FUNCTION(pdo_sqlite)
 	php_info_print_table_row(2, "SQLite Library", sqlite3_libversion());
 	php_info_print_table_end();
 }
-/* }}} */
+

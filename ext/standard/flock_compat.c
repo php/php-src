@@ -37,7 +37,7 @@ PHPAPI int flock(int fd, int operation)
 #endif /* !defined(HAVE_FLOCK) */
 
 PHPAPI int php_flock(int fd, int operation)
-#if HAVE_STRUCT_FLOCK /* {{{ */
+#if HAVE_STRUCT_FLOCK
 {
 	struct flock flck;
 	int ret;
@@ -66,8 +66,8 @@ PHPAPI int php_flock(int fd, int operation)
 
 	return ret;
 }
-/* }}} */
-#elif defined(PHP_WIN32) /* {{{ */
+
+#elif defined(PHP_WIN32)
 /*
  * Program:   Unix compatibility routines
  *
@@ -152,7 +152,7 @@ PHPAPI int php_flock(int fd, int operation)
 
     return -1;
 }
-/* }}} */
+
 #else
 #warning no proper flock support for your site
 {
@@ -163,7 +163,7 @@ PHPAPI int php_flock(int fd, int operation)
 
 #ifndef PHP_WIN32
 #if !(HAVE_INET_ATON)
-/* {{{ inet_aton
+/* inet_aton
  * Check whether "cp" is a valid ascii representation
  * of an Internet address and convert to a binary address.
  * Returns 1 if the address is valid, 0 if not.
@@ -223,6 +223,6 @@ int inet_aton(const char *cp, struct in_addr *ap)
 
     return 1;
 }
-/* }}} */
+
 #endif /* !HAVE_INET_ATON */
 #endif

@@ -33,7 +33,7 @@
 #endif
 
 #ifdef PHP_WIN32
-PHPAPI void php_syslog(int priority, const char *format, ...) /* {{{ */
+PHPAPI void php_syslog(int priority, const char *format, ...)
 {
 	va_list args;
 
@@ -50,9 +50,9 @@ PHPAPI void php_syslog(int priority, const char *format, ...) /* {{{ */
 	vsyslog(priority, format, args);
 	va_end(args);
 }
-/* }}} */
+
 #else
-PHPAPI void php_syslog(int priority, const char *format, ...) /* {{{ */
+PHPAPI void php_syslog(int priority, const char *format, ...)
 {
 	const char *ptr;
 	unsigned char c;
@@ -111,5 +111,5 @@ PHPAPI void php_syslog(int priority, const char *format, ...) /* {{{ */
 	smart_string_free(&fbuf);
 	smart_string_free(&sbuf);
 }
-/* }}} */
+
 #endif

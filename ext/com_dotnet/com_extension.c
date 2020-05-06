@@ -37,7 +37,7 @@ zend_class_entry
    	*php_com_exception_class_entry,
 	*php_com_saproxy_class_entry;
 
-/* {{{ com_dotnet_module_entry
+/* com_dotnet_module_entry
  */
 zend_module_entry com_dotnet_module_entry = {
 	STANDARD_MODULE_HEADER,
@@ -55,7 +55,6 @@ zend_module_entry com_dotnet_module_entry = {
 	NULL,
 	STANDARD_MODULE_PROPERTIES_EX
 };
-/* }}} */
 
 #ifdef COMPILE_DL_COM_DOTNET
 #ifdef ZTS
@@ -64,7 +63,7 @@ ZEND_TSRMLS_CACHE_DEFINE()
 ZEND_GET_MODULE(com_dotnet)
 #endif
 
-/* {{{ PHP_INI
+/* PHP_INI
  */
 
 /* com.typelib_file is the path to a file containing a
@@ -147,9 +146,8 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("com.code_page", "", PHP_INI_ALL, OnUpdateLong, code_page, zend_com_dotnet_globals, com_dotnet_globals)
 	PHP_INI_ENTRY("com.typelib_file", "", PHP_INI_SYSTEM, OnTypeLibFileUpdate)
 PHP_INI_END()
-/* }}} */
 
-/* {{{ PHP_GINIT_FUNCTION
+/* PHP_GINIT_FUNCTION
  */
 static PHP_GINIT_FUNCTION(com_dotnet)
 {
@@ -159,9 +157,8 @@ static PHP_GINIT_FUNCTION(com_dotnet)
 	memset(com_dotnet_globals, 0, sizeof(*com_dotnet_globals));
 	com_dotnet_globals->code_page = CP_ACP;
 }
-/* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION
+/* PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(com_dotnet)
 {
@@ -286,9 +283,8 @@ PHP_MINIT_FUNCTION(com_dotnet)
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_MSHUTDOWN_FUNCTION
+/* PHP_MSHUTDOWN_FUNCTION
  */
 PHP_MSHUTDOWN_FUNCTION(com_dotnet)
 {
@@ -303,18 +299,16 @@ PHP_MSHUTDOWN_FUNCTION(com_dotnet)
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_RINIT_FUNCTION
+/* PHP_RINIT_FUNCTION
  */
 PHP_RINIT_FUNCTION(com_dotnet)
 {
 	COMG(rshutdown_started) = 0;
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_RSHUTDOWN_FUNCTION
+/* PHP_RSHUTDOWN_FUNCTION
  */
 PHP_RSHUTDOWN_FUNCTION(com_dotnet)
 {
@@ -326,9 +320,8 @@ PHP_RSHUTDOWN_FUNCTION(com_dotnet)
 	COMG(rshutdown_started) = 1;
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
+/* PHP_MINFO_FUNCTION
  */
 PHP_MINFO_FUNCTION(com_dotnet)
 {
@@ -347,4 +340,4 @@ PHP_MINFO_FUNCTION(com_dotnet)
 
 	DISPLAY_INI_ENTRIES();
 }
-/* }}} */
+

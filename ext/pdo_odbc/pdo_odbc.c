@@ -26,20 +26,18 @@
 #include "php_pdo_odbc.h"
 #include "php_pdo_odbc_int.h"
 
-/* {{{ pdo_odbc_functions[] */
+/* pdo_odbc_functions[] */
 static const zend_function_entry pdo_odbc_functions[] = {
 	PHP_FE_END
 };
-/* }}} */
 
-/* {{{ pdo_odbc_deps[] */
+/* pdo_odbc_deps[] */
 static const zend_module_dep pdo_odbc_deps[] = {
 	ZEND_MOD_REQUIRED("pdo")
 	ZEND_MOD_END
 };
-/* }}} */
 
-/* {{{ pdo_odbc_module_entry */
+/* pdo_odbc_module_entry */
 zend_module_entry pdo_odbc_module_entry = {
 	STANDARD_MODULE_HEADER_EX, NULL,
 	pdo_odbc_deps,
@@ -53,7 +51,6 @@ zend_module_entry pdo_odbc_module_entry = {
 	PHP_PDO_ODBC_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
-/* }}} */
 
 #ifdef COMPILE_DL_PDO_ODBC
 ZEND_GET_MODULE(pdo_odbc)
@@ -64,7 +61,7 @@ zend_ulong pdo_odbc_pool_on = SQL_CP_OFF;
 zend_ulong pdo_odbc_pool_mode = SQL_CP_ONE_PER_HENV;
 #endif
 
-/* {{{ PHP_MINIT_FUNCTION */
+/* PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(pdo_odbc)
 {
 #ifdef SQL_ATTR_CONNECTION_POOLING
@@ -110,18 +107,16 @@ PHP_MINIT_FUNCTION(pdo_odbc)
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_MSHUTDOWN_FUNCTION
+/* PHP_MSHUTDOWN_FUNCTION
  */
 PHP_MSHUTDOWN_FUNCTION(pdo_odbc)
 {
 	php_pdo_unregister_driver(&pdo_odbc_driver);
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
+/* PHP_MINFO_FUNCTION
  */
 PHP_MINFO_FUNCTION(pdo_odbc)
 {
@@ -135,4 +130,4 @@ PHP_MINFO_FUNCTION(pdo_odbc)
 #endif
 	php_info_print_table_end();
 }
-/* }}} */
+

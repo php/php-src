@@ -68,7 +68,7 @@ static int name(mysqli_object *obj, zval *value) \
 	return SUCCESS; \
 } \
 
-/* {{{ property driver_report_write */
+/* property driver_report_write */
 static int driver_report_write(mysqli_object *obj, zval *value)
 {
 	MyG(report_mode) = Z_LVAL_P(value);
@@ -76,43 +76,38 @@ static int driver_report_write(mysqli_object *obj, zval *value)
 	/* zend_replace_error_handling(MyG(report_mode) & MYSQLI_REPORT_STRICT ? EH_THROW : EH_NORMAL, NULL, NULL); */
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ property driver_embedded_read */
+/* property driver_embedded_read */
 static int driver_embedded_read(mysqli_object *obj, zval *retval, zend_bool quiet)
 {
 	ZVAL_FALSE(retval);
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ property driver_client_version_read */
+/* property driver_client_version_read */
 static int driver_client_version_read(mysqli_object *obj, zval *retval, zend_bool quiet)
 {
 	ZVAL_LONG(retval, mysql_get_client_version());
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ property driver_client_info_read */
+/* property driver_client_info_read */
 static int driver_client_info_read(mysqli_object *obj, zval *retval, zend_bool quiet)
 {
 	ZVAL_STRING(retval, (char *)mysql_get_client_info());
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ property driver_driver_version_read */
+/* property driver_driver_version_read */
 static int driver_driver_version_read(mysqli_object *obj, zval *retval, zend_bool quiet)
 {
 	ZVAL_LONG(retval, MYSQLI_VERSION_ID);
 
 	return SUCCESS;
 }
-/* }}} */
 
 MAP_PROPERTY_MYG_BOOL_READ(driver_reconnect_read, reconnect)
 MAP_PROPERTY_MYG_BOOL_WRITE(driver_reconnect_write, reconnect)

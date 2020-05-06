@@ -27,7 +27,7 @@
 #include "dateformat_class.h"
 #include "dateformat_data.h"
 
-/* {{{
+/*
  * Internal function which calls the udat_format
 */
 static void internal_format(IntlDateFormatter_object *dfo, UDate timestamp, zval *return_value)
@@ -51,10 +51,8 @@ static void internal_format(IntlDateFormatter_object *dfo, UDate timestamp, zval
 	INTL_METHOD_RETVAL_UTF8( dfo, formatted, resultlengthneeded, 1 );
 
 }
-/* }}} */
 
-
-/* {{{
+/*
  * Internal function which fetches an element from the passed array for the key_name passed
 */
 static int32_t internal_get_arr_ele(IntlDateFormatter_object *dfo,
@@ -90,9 +88,8 @@ static int32_t internal_get_arr_ele(IntlDateFormatter_object *dfo,
 
 	return result;
 }
-/* }}} */
 
-/* {{{
+/*
  * Internal function which sets UCalendar  from the passed array and retrieves timestamp
 */
 static UDate internal_get_timestamp(IntlDateFormatter_object *dfo,
@@ -142,9 +139,7 @@ static UDate internal_get_timestamp(IntlDateFormatter_object *dfo,
 	return result;
 }
 
-
-/* Format the time value as a string. }}}*/
-/* Format the time value as a string. }}}*/
+/* Format the time value as a string. */
 PHP_FUNCTION(datefmt_format)
 {
 	UDate 		timestamp	= 0;
@@ -182,4 +177,4 @@ PHP_FUNCTION(datefmt_format)
 	internal_format( dfo, timestamp, return_value);
 }
 
-/* }}} */
+

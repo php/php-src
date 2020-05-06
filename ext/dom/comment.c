@@ -57,6 +57,5 @@ PHP_METHOD(DOMComment, __construct)
 		php_libxml_increment_node_ptr((php_libxml_node_object *)intern, (xmlNodePtr)nodep, (void *)intern);
 	}
 }
-/* }}} end DOMComment::__construct */
 
 #endif

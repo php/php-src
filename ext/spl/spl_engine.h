@@ -25,7 +25,7 @@ PHPAPI void spl_instantiate(zend_class_entry *pce, zval *object);
 
 PHPAPI zend_long spl_offset_convert_to_long(zval *offset);
 
-/* {{{ spl_instantiate_arg_ex1 */
+/* spl_instantiate_arg_ex1 */
 static inline int spl_instantiate_arg_ex1(zend_class_entry *pce, zval *retval, zval *arg1)
 {
 	zend_function *func = pce->constructor;
@@ -34,9 +34,8 @@ static inline int spl_instantiate_arg_ex1(zend_class_entry *pce, zval *retval, z
 	zend_call_method(Z_OBJ_P(retval), pce, &func, ZSTR_VAL(func->common.function_name), ZSTR_LEN(func->common.function_name), NULL, 1, arg1, NULL);
 	return 0;
 }
-/* }}} */
 
-/* {{{ spl_instantiate_arg_ex2 */
+/* spl_instantiate_arg_ex2 */
 static inline int spl_instantiate_arg_ex2(zend_class_entry *pce, zval *retval, zval *arg1, zval *arg2)
 {
 	zend_function *func = pce->constructor;
@@ -45,9 +44,8 @@ static inline int spl_instantiate_arg_ex2(zend_class_entry *pce, zval *retval, z
 	zend_call_method(Z_OBJ_P(retval), pce, &func, ZSTR_VAL(func->common.function_name), ZSTR_LEN(func->common.function_name), NULL, 2, arg1, arg2);
 	return 0;
 }
-/* }}} */
 
-/* {{{ spl_instantiate_arg_n */
+/* spl_instantiate_arg_n */
 static inline void spl_instantiate_arg_n(zend_class_entry *pce, zval *retval, int argc, zval *argv)
 {
 	zend_function *func = pce->constructor;
@@ -71,6 +69,5 @@ static inline void spl_instantiate_arg_n(zend_class_entry *pce, zval *retval, in
 
 	zend_call_function(&fci, &fcc);
 }
-/* }}} */
 
 #endif /* SPL_ENGINE_H */

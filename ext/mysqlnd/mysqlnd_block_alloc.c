@@ -22,7 +22,7 @@
 #include "mysqlnd_debug.h"
 #include "mysqlnd_priv.h"
 
-/* {{{ mysqlnd_mempool_free_chunk */
+/* mysqlnd_mempool_free_chunk */
 static void
 mysqlnd_mempool_free_chunk(MYSQLND_MEMORY_POOL * pool, void * ptr)
 {
@@ -40,10 +40,8 @@ mysqlnd_mempool_free_chunk(MYSQLND_MEMORY_POOL * pool, void * ptr)
 #endif
 	DBG_VOID_RETURN;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_mempool_resize_chunk */
+/* mysqlnd_mempool_resize_chunk */
 static void *
 mysqlnd_mempool_resize_chunk(MYSQLND_MEMORY_POOL * pool, void * ptr, size_t old_size, size_t size)
 {
@@ -67,10 +65,8 @@ mysqlnd_mempool_resize_chunk(MYSQLND_MEMORY_POOL * pool, void * ptr, size_t old_
 	pool->last = ptr = new_ptr;
 	DBG_RETURN(ptr);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_mempool_get_chunk */
+/* mysqlnd_mempool_get_chunk */
 static void *
 mysqlnd_mempool_get_chunk(MYSQLND_MEMORY_POOL * pool, size_t size)
 {
@@ -82,10 +78,8 @@ mysqlnd_mempool_get_chunk(MYSQLND_MEMORY_POOL * pool, size_t size)
 
 	DBG_RETURN(ptr);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_mempool_create */
+/* mysqlnd_mempool_create */
 PHPAPI MYSQLND_MEMORY_POOL *
 mysqlnd_mempool_create(size_t arena_size)
 {
@@ -103,10 +97,8 @@ mysqlnd_mempool_create(size_t arena_size)
 	ret->resize_chunk = mysqlnd_mempool_resize_chunk;
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_mempool_destroy */
+/* mysqlnd_mempool_destroy */
 PHPAPI void
 mysqlnd_mempool_destroy(MYSQLND_MEMORY_POOL * pool)
 {
@@ -115,9 +107,8 @@ mysqlnd_mempool_destroy(MYSQLND_MEMORY_POOL * pool)
 	zend_arena_destroy(pool->arena);
 	DBG_VOID_RETURN;
 }
-/* }}} */
 
-/* {{{ mysqlnd_mempool_save_state */
+/* mysqlnd_mempool_save_state */
 PHPAPI void
 mysqlnd_mempool_save_state(MYSQLND_MEMORY_POOL * pool)
 {
@@ -125,9 +116,8 @@ mysqlnd_mempool_save_state(MYSQLND_MEMORY_POOL * pool)
 	pool->checkpoint = zend_arena_checkpoint(pool->arena);
 	DBG_VOID_RETURN;
 }
-/* }}} */
 
-/* {{{ mysqlnd_mempool_restore_state */
+/* mysqlnd_mempool_restore_state */
 PHPAPI void
 mysqlnd_mempool_restore_state(MYSQLND_MEMORY_POOL * pool)
 {
@@ -142,4 +132,4 @@ mysqlnd_mempool_restore_state(MYSQLND_MEMORY_POOL * pool)
 	}
 	DBG_VOID_RETURN;
 }
-/* }}} */
+

@@ -20,9 +20,7 @@
 #include "php_intl.h"
 #include "collator_class.h"
 
-/* Get collator's last error code. }}} */
-/* Get collator's last error code.
- */
+/* Get collator's last error code. */
 PHP_FUNCTION( collator_get_error_code )
 {
 	COLLATOR_METHOD_INIT_VARS
@@ -42,11 +40,8 @@ PHP_FUNCTION( collator_get_error_code )
 	/* Return collator's last error code. */
 	RETURN_LONG( COLLATOR_ERROR_CODE( co ) );
 }
-/* }}} */
 
-/* Get text description for collator's last error code. }}} */
-/* Get text description for collator's last error code.
- */
+/* Get text description for collator's last error code. */
 PHP_FUNCTION( collator_get_error_message )
 {
 	zend_string* message = NULL;
@@ -69,4 +64,4 @@ PHP_FUNCTION( collator_get_error_message )
 	message = intl_error_get_message( COLLATOR_ERROR_P( co ) );
 	RETURN_STR(message);
 }
-/* }}} */
+

@@ -156,7 +156,7 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_put(zend_object *object)
 	EG(objects_store).object_buckets[handle] = object;
 }
 
-ZEND_API void ZEND_FASTCALL zend_objects_store_del(zend_object *object) /* {{{ */
+ZEND_API void ZEND_FASTCALL zend_objects_store_del(zend_object *object)
 {
 	ZEND_ASSERT(GC_REFCOUNT(object) == 0);
 
@@ -198,4 +198,4 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_del(zend_object *object) /* {{{ *
 		ZEND_OBJECTS_STORE_ADD_TO_FREE_LIST(handle);
 	}
 }
-/* }}} */
+

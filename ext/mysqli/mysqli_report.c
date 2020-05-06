@@ -39,16 +39,14 @@ PHP_FUNCTION(mysqli_report)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
-/* {{{ void php_mysqli_report_error(char *sqlstate, int errorno, char *error) */
+/* void php_mysqli_report_error(char *sqlstate, int errorno, char *error) */
 void php_mysqli_report_error(const char *sqlstate, int errorno, const char *error)
 {
 	php_mysqli_throw_sql_exception((char *)sqlstate, errorno, "%s", error);
 }
-/* }}} */
 
-/* {{{ void php_mysqli_report_index() */
+/* void php_mysqli_report_index() */
 void php_mysqli_report_index(const char *query, unsigned int status) {
 	char index[15];
 
@@ -61,4 +59,4 @@ void php_mysqli_report_index(const char *query, unsigned int status) {
 	}
 	php_mysqli_throw_sql_exception("00000", 0, "%s used in query/prepared statement %s", index, query);
 }
-/* }}} */
+

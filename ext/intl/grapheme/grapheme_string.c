@@ -12,7 +12,7 @@
    +----------------------------------------------------------------------+
  */
 
-/* {{{ includes */
+/* includes */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -29,7 +29,6 @@
 
 #include "ext/standard/php_string.h"
 
-/* }}} */
 
 #define GRAPHEME_EXTRACT_TYPE_COUNT		0
 #define GRAPHEME_EXTRACT_TYPE_MAXBYTES	1
@@ -38,7 +37,7 @@
 #define GRAPHEME_EXTRACT_TYPE_MAX	GRAPHEME_EXTRACT_TYPE_MAXCHARS
 
 
-/* {{{ grapheme_register_constants
+/* grapheme_register_constants
  * Register API constants
  */
 void grapheme_register_constants( INIT_FUNC_ARGS )
@@ -47,7 +46,6 @@ void grapheme_register_constants( INIT_FUNC_ARGS )
 	REGISTER_LONG_CONSTANT("GRAPHEME_EXTR_MAXBYTES", GRAPHEME_EXTRACT_TYPE_MAXBYTES, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("GRAPHEME_EXTR_MAXCHARS", GRAPHEME_EXTRACT_TYPE_MAXCHARS, CONST_CS | CONST_PERSISTENT);
 }
-/* }}} */
 
 /* Get number of graphemes in a string */
 PHP_FUNCTION(grapheme_strlen)
@@ -96,7 +94,6 @@ PHP_FUNCTION(grapheme_strlen)
 		RETVAL_FALSE;
 	}
 }
-/* }}} */
 
 /* Find position of first occurrence of a string within another */
 PHP_FUNCTION(grapheme_strpos)
@@ -156,7 +153,6 @@ PHP_FUNCTION(grapheme_strpos)
 	}
 
 }
-/* }}} */
 
 /* Find position of first occurrence of a string within another, ignoring case differences */
 PHP_FUNCTION(grapheme_stripos)
@@ -223,7 +219,6 @@ PHP_FUNCTION(grapheme_stripos)
 	}
 
 }
-/* }}} */
 
 /* Find position of last occurrence of a string within another */
 PHP_FUNCTION(grapheme_strrpos)
@@ -283,7 +278,6 @@ PHP_FUNCTION(grapheme_strrpos)
 
 
 }
-/* }}} */
 
 /* Find position of last occurrence of a string within another, ignoring case */
 PHP_FUNCTION(grapheme_strripos)
@@ -352,7 +346,6 @@ PHP_FUNCTION(grapheme_strripos)
 
 
 }
-/* }}} */
 
 /* Returns part of a string */
 PHP_FUNCTION(grapheme_substr)
@@ -566,9 +559,8 @@ PHP_FUNCTION(grapheme_substr)
 	 /* return the allocated string, not a duplicate */
 	RETVAL_NEW_STR(u8_sub_str);
 }
-/* }}} */
 
-/* {{{	strstr_common_handler */
+/*	strstr_common_handler */
 static void strstr_common_handler(INTERNAL_FUNCTION_PARAMETERS, int f_ignore_case)
 {
 	char *haystack, *needle;
@@ -633,23 +625,20 @@ static void strstr_common_handler(INTERNAL_FUNCTION_PARAMETERS, int f_ignore_cas
 	}
 
 }
-/* }}} */
 
 /* Finds first occurrence of a string within another */
 PHP_FUNCTION(grapheme_strstr)
 {
 	strstr_common_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0 /* f_ignore_case */);
 }
-/* }}} */
 
 /* Finds first occurrence of a string within another */
 PHP_FUNCTION(grapheme_stristr)
 {
 	strstr_common_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1 /* f_ignore_case */);
 }
-/* }}} */
 
-/* {{{ grapheme_extract_charcount_iter - grapheme iterator for grapheme_extract MAXCHARS */
+/* grapheme_extract_charcount_iter - grapheme iterator for grapheme_extract MAXCHARS */
 static inline int32_t
 grapheme_extract_charcount_iter(UBreakIterator *bi, int32_t csize, unsigned char *pstr, int32_t str_len)
 {
@@ -687,9 +676,8 @@ grapheme_extract_charcount_iter(UBreakIterator *bi, int32_t csize, unsigned char
 
 	return ret_pos;
 }
-/* }}} */
 
-/* {{{ grapheme_extract_bytecount_iter - grapheme iterator for grapheme_extract MAXBYTES */
+/* grapheme_extract_bytecount_iter - grapheme iterator for grapheme_extract MAXBYTES */
 static inline int32_t
 grapheme_extract_bytecount_iter(UBreakIterator *bi, int32_t bsize, unsigned char *pstr, int32_t str_len)
 {
@@ -712,9 +700,8 @@ grapheme_extract_bytecount_iter(UBreakIterator *bi, int32_t bsize, unsigned char
 
 	return ret_pos;
 }
-/* }}} */
 
-/* {{{ grapheme_extract_count_iter - grapheme iterator for grapheme_extract COUNT */
+/* grapheme_extract_count_iter - grapheme iterator for grapheme_extract COUNT */
 static inline int32_t
 grapheme_extract_count_iter(UBreakIterator *bi, int32_t size, unsigned char *pstr, int32_t str_len)
 {
@@ -733,9 +720,8 @@ grapheme_extract_count_iter(UBreakIterator *bi, int32_t size, unsigned char *pst
 
 	return ret_pos;
 }
-/* }}} */
 
-/* {{{ grapheme extract iter function pointer array */
+/* grapheme extract iter function pointer array */
 typedef int32_t (*grapheme_extract_iter)(UBreakIterator * /*bi*/, int32_t /*size*/, unsigned char * /*pstr*/, int32_t /*str_len*/);
 
 static grapheme_extract_iter grapheme_extract_iters[] = {
@@ -743,7 +729,6 @@ static grapheme_extract_iter grapheme_extract_iters[] = {
 	&grapheme_extract_bytecount_iter,
 	&grapheme_extract_charcount_iter,
 };
-/* }}} */
 
 /* Function to extract a sequence of default grapheme clusters */
 PHP_FUNCTION(grapheme_extract)
@@ -870,4 +855,4 @@ PHP_FUNCTION(grapheme_extract)
 	RETURN_STRINGL(((char *)pstr), ret_pos);
 }
 
-/* }}} */
+

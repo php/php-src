@@ -95,17 +95,16 @@ const char *intl_locale_get_default( void )
 	return INTL_G(default_locale);
 }
 
-/* {{{ INI Settings */
+/* INI Settings */
 PHP_INI_BEGIN()
     STD_PHP_INI_ENTRY(LOCALE_INI_NAME, NULL, PHP_INI_ALL, OnUpdateStringUnempty, default_locale, zend_intl_globals, intl_globals)
     STD_PHP_INI_ENTRY("intl.error_level", "0", PHP_INI_ALL, OnUpdateLong, error_level, zend_intl_globals, intl_globals)
 	STD_PHP_INI_ENTRY("intl.use_exceptions", "0", PHP_INI_ALL, OnUpdateBool, use_exceptions, zend_intl_globals, intl_globals)
 PHP_INI_END()
-/* }}} */
 
 static PHP_GINIT_FUNCTION(intl);
 
-/* {{{ intl_module_entry */
+/* intl_module_entry */
 zend_module_entry intl_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"intl",
@@ -122,7 +121,6 @@ zend_module_entry intl_module_entry = {
 	NULL,                       /* post deactivate */
 	STANDARD_MODULE_PROPERTIES_EX
 };
-/* }}} */
 
 #ifdef COMPILE_DL_INTL
 #ifdef ZTS
@@ -131,7 +129,7 @@ ZEND_TSRMLS_CACHE_DEFINE()
 ZEND_GET_MODULE( intl )
 #endif
 
-/* {{{ intl_init_globals */
+/* intl_init_globals */
 static PHP_GINIT_FUNCTION(intl)
 {
 #if defined(COMPILE_DL_INTL) && defined(ZTS)
@@ -139,9 +137,8 @@ static PHP_GINIT_FUNCTION(intl)
 #endif
 	memset( intl_globals, 0, sizeof(zend_intl_globals) );
 }
-/* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION
+/* PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION( intl )
 {
@@ -238,11 +235,10 @@ PHP_MINIT_FUNCTION( intl )
 
 	return SUCCESS;
 }
-/* }}} */
 
 #define EXPLICIT_CLEANUP_ENV_VAR "INTL_EXPLICIT_CLEANUP"
 
-/* {{{ PHP_MSHUTDOWN_FUNCTION
+/* PHP_MSHUTDOWN_FUNCTION
  */
 PHP_MSHUTDOWN_FUNCTION( intl )
 {
@@ -257,17 +253,15 @@ PHP_MSHUTDOWN_FUNCTION( intl )
 
     return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_RINIT_FUNCTION
+/* PHP_RINIT_FUNCTION
  */
 PHP_RINIT_FUNCTION( intl )
 {
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_RSHUTDOWN_FUNCTION
+/* PHP_RSHUTDOWN_FUNCTION
  */
 PHP_RSHUTDOWN_FUNCTION( intl )
 {
@@ -282,9 +276,8 @@ PHP_RSHUTDOWN_FUNCTION( intl )
 	intl_error_reset( NULL);
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
+/* PHP_MINFO_FUNCTION
  */
 PHP_MINFO_FUNCTION( intl )
 {
@@ -311,4 +304,4 @@ PHP_MINFO_FUNCTION( intl )
     /* For the default locale php.ini setting */
     DISPLAY_INI_ENTRIES() ;
 }
-/* }}} */
+

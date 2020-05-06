@@ -9,7 +9,7 @@
  *
  * Phar Command
  */
-// {{{ class Phar extends PHP_Archive
+
 /**
  * Phar class
  *

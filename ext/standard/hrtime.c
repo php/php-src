@@ -18,7 +18,6 @@
 #include "php.h"
 #include "hrtime.h"
 
-/* {{{ */
 /* This file reuses code parts from the cross-platform timer library
 	Public Domain - 2011 Mattias Jansson / Rampant Pixels */
 
@@ -52,10 +51,9 @@ static mach_timebase_info_data_t _timerlib_info;
 #endif
 
 #define NANO_IN_SEC 1000000000
-/* }}} */
 
 static int _timer_init()
-{/*{{{*/
+{
 #if PHP_HRTIME_PLATFORM_WINDOWS
 
 	LARGE_INTEGER tf = {0};
@@ -94,9 +92,8 @@ static int _timer_init()
 #endif
 
 	return 0;
-}/*}}}*/
+}
 
-/* {{{ */
 PHP_MINIT_FUNCTION(hrtime)
 {
 	if (0 > _timer_init()) {
@@ -106,10 +103,9 @@ PHP_MINIT_FUNCTION(hrtime)
 
 	return SUCCESS;
 }
-/* }}} */
 
 static zend_always_inline php_hrtime_t _timer_current(void)
-{/*{{{*/
+{
 #if PHP_HRTIME_PLATFORM_WINDOWS
 	LARGE_INTEGER lt = {0};
 	QueryPerformanceCounter(&lt);
@@ -132,7 +128,7 @@ static zend_always_inline php_hrtime_t _timer_current(void)
 #else
 	return 0;
 #endif
-}/*}}}*/
+}
 
 #if ZEND_ENABLE_ZVAL_LONG64
 #define PHP_RETURN_HRTIME(t) RETURN_LONG((zend_long)t)
@@ -183,9 +179,8 @@ PHP_FUNCTION(hrtime)
 	RETURN_FALSE;
 #endif
 }
-/* }}} */
 
 PHPAPI php_hrtime_t php_hrtime_current(void)
-{/*{{{*/
+{
 	return _timer_current();
-}/*}}}*/
+}

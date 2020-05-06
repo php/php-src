@@ -26,7 +26,7 @@ static zend_class_entry *phar_ce_data;
 static zend_class_entry *phar_ce_PharException;
 static zend_class_entry *phar_ce_entry;
 
-static int phar_file_type(HashTable *mimes, char *file, char **mime_type) /* {{{ */
+static int phar_file_type(HashTable *mimes, char *file, char **mime_type)
 {
 	char *ext;
 	phar_mime_type *mime;
@@ -44,9 +44,8 @@ static int phar_file_type(HashTable *mimes, char *file, char **mime_type) /* {{{
 	*mime_type = mime->mime;
 	return mime->type;
 }
-/* }}} */
 
-static void phar_mung_server_vars(char *fname, char *entry, size_t entry_len, char *basename, size_t request_uri_len) /* {{{ */
+static void phar_mung_server_vars(char *fname, char *entry, size_t entry_len, char *basename, size_t request_uri_len)
 {
 	HashTable *_SERVER;
 	zval *stuff;
@@ -130,9 +129,8 @@ static void phar_mung_server_vars(char *fname, char *entry, size_t entry_len, ch
 		}
 	}
 }
-/* }}} */
 
-static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char *mime_type, int code, char *entry, size_t entry_len, char *arch, char *basename, char *ru, size_t ru_len) /* {{{ */
+static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char *mime_type, int code, char *entry, size_t entry_len, char *arch, char *basename, char *ru, size_t ru_len)
 {
 	char *name = NULL, buf[8192];
 	const char *cwd;
@@ -291,9 +289,8 @@ static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char
 	}
 	return -1;
 }
-/* }}} */
 
-static void phar_do_403(char *entry, size_t entry_len) /* {{{ */
+static void phar_do_403(char *entry, size_t entry_len)
 {
 	sapi_header_line ctr = {0};
 
@@ -305,9 +302,8 @@ static void phar_do_403(char *entry, size_t entry_len) /* {{{ */
 	PHPWRITE("<html>\n <head>\n  <title>Access Denied</title>\n </head>\n <body>\n  <h1>403 - File ", sizeof("<html>\n <head>\n  <title>Access Denied</title>\n </head>\n <body>\n  <h1>403 - File ") - 1);
 	PHPWRITE("Access Denied</h1>\n </body>\n</html>", sizeof("Access Denied</h1>\n </body>\n</html>") - 1);
 }
-/* }}} */
 
-static void phar_do_404(phar_archive_data *phar, char *fname, size_t fname_len, char *f404, size_t f404_len, char *entry, size_t entry_len) /* {{{ */
+static void phar_do_404(phar_archive_data *phar, char *fname, size_t fname_len, char *f404, size_t f404_len, char *entry, size_t entry_len)
 {
 	sapi_header_line ctr = {0};
 	phar_entry_info	*info;
@@ -329,12 +325,11 @@ static void phar_do_404(phar_archive_data *phar, char *fname, size_t fname_len, 
 	PHPWRITE("<html>\n <head>\n  <title>File Not Found</title>\n </head>\n <body>\n  <h1>404 - File ", sizeof("<html>\n <head>\n  <title>File Not Found</title>\n </head>\n <body>\n  <h1>404 - File ") - 1);
 	PHPWRITE("Not Found</h1>\n </body>\n</html>",  sizeof("Not Found</h1>\n </body>\n</html>") - 1);
 }
-/* }}} */
 
 /* post-process REQUEST_URI and retrieve the actual request URI.  This is for
    cases like http://localhost/blah.phar/path/to/file.php/extra/stuff
    which calls "blah.phar" file "path/to/file.php" with PATH_INFO "/extra/stuff" */
-static void phar_postprocess_ru_web(char *fname, size_t fname_len, char **entry, size_t *entry_len, char **ru, size_t *ru_len) /* {{{ */
+static void phar_postprocess_ru_web(char *fname, size_t fname_len, char **entry, size_t *entry_len, char **ru, size_t *ru_len)
 {
 	char *e = *entry + 1, *u = NULL, *u1 = NULL, *saveu = NULL;
 	size_t e_len = *entry_len - 1, u_len = 0;
@@ -386,7 +381,6 @@ static void phar_postprocess_ru_web(char *fname, size_t fname_len, char **entry,
 		e_len -= u_len + 1;
 	} while (1);
 }
-/* }}} */
 
 /* return the name of the currently running phar archive.  If the optional parameter
  * is set to true, return the phar:// URL to the currently running phar
@@ -420,7 +414,6 @@ PHP_METHOD(Phar, running)
 
 	RETURN_EMPTY_STRING();
 }
-/* }}} */
 
 /* mount an external file or path to a location within the phar.  This maps
  * an external file or directory to a location within the phar archive, allowing
@@ -527,7 +520,6 @@ finish: ;
 	}
 #endif
 }
-/* }}} */
 
 /* mapPhar for web-based phars. Reads the currently executed file (a phar)
  * and registers its manifest. When executed in the CLI or CGI command-line sapi,
@@ -867,7 +859,6 @@ PHP_METHOD(Phar, webPhar)
 	}
 	phar_file_action(phar, info, mime_type, code, entry, entry_len, fname, pt, ru, ru_len);
 }
-/* }}} */
 
 /* Defines a list of up to 4 $_SERVER variables that should be modified for execution
  * to mask the presence of the phar archive.  This should be used in conjunction with
@@ -919,7 +910,6 @@ PHP_METHOD(Phar, mungServer)
 		}
 	} ZEND_HASH_FOREACH_END();
 }
-/* }}} */
 
 /* instructs phar to intercept fopen, file_get_contents, opendir, and all of the stat-related functions
  * and return stat on files within the phar for relative paths
@@ -935,7 +925,6 @@ PHP_METHOD(Phar, interceptFileFuncs)
 	}
 	phar_intercept_functions();
 }
-/* }}} */
 
 /* Return a stub that can be used to run a phar-based archive without the phar extension
  * indexfile is the CLI startup filename, which defaults to "index.php", webindexfile
@@ -960,7 +949,6 @@ PHP_METHOD(Phar, createDefaultStub)
 	}
 	RETURN_NEW_STR(stub);
 }
-/* }}} */
 
 /* Reads the currently executed file (a phar) and registers its manifest */
 PHP_METHOD(Phar, mapPhar)
@@ -981,7 +969,7 @@ PHP_METHOD(Phar, mapPhar)
 		zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
 		efree(error);
 	}
-} /* }}} */
+}
 
 /* Loads any phar archive with an alias */
 PHP_METHOD(Phar, loadPhar)
@@ -1001,7 +989,7 @@ PHP_METHOD(Phar, loadPhar)
 		zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
 		efree(error);
 	}
-} /* }}} */
+}
 
 /* Returns the api version */
 PHP_METHOD(Phar, apiVersion)
@@ -1011,7 +999,6 @@ PHP_METHOD(Phar, apiVersion)
 	}
 	RETURN_STRINGL(PHP_PHAR_API_VERSION, sizeof(PHP_PHAR_API_VERSION)-1);
 }
-/* }}}*/
 
 /* Returns whether phar extension supports compression using zlib/bzip2 */
 PHP_METHOD(Phar, canCompress)
@@ -1044,7 +1031,6 @@ PHP_METHOD(Phar, canCompress)
 		}
 	}
 }
-/* }}} */
 
 /* Returns whether phar extension supports writing and creating phars */
 PHP_METHOD(Phar, canWrite)
@@ -1054,7 +1040,6 @@ PHP_METHOD(Phar, canWrite)
 	}
 	RETURN_BOOL(!PHAR_G(readonly));
 }
-/* }}} */
 
 /* Returns whether the given filename is a valid phar filename */
 PHP_METHOD(Phar, isValidPharFilename)
@@ -1073,12 +1058,11 @@ PHP_METHOD(Phar, isValidPharFilename)
 	is_executable = executable;
 	RETVAL_BOOL(phar_detect_phar_fname_ext(fname, fname_len, &ext_str, &ext_len, is_executable, 2, 1) == SUCCESS);
 }
-/* }}} */
 
 /**
  * from spl_directory
  */
-static void phar_spl_foreign_dtor(spl_filesystem_object *object) /* {{{ */
+static void phar_spl_foreign_dtor(spl_filesystem_object *object)
 {
 	phar_archive_data *phar = (phar_archive_data *) object->oth;
 
@@ -1088,12 +1072,11 @@ static void phar_spl_foreign_dtor(spl_filesystem_object *object) /* {{{ */
 
 	object->oth = NULL;
 }
-/* }}} */
 
 /**
  * from spl_directory
  */
-static void phar_spl_foreign_clone(spl_filesystem_object *src, spl_filesystem_object *dst) /* {{{ */
+static void phar_spl_foreign_clone(spl_filesystem_object *src, spl_filesystem_object *dst)
 {
 	phar_archive_data *phar_data = (phar_archive_data *) dst->oth;
 
@@ -1101,7 +1084,6 @@ static void phar_spl_foreign_clone(spl_filesystem_object *src, spl_filesystem_ob
 		++(phar_data->refcount);
 	}
 }
-/* }}} */
 
 static const spl_other_handler phar_spl_foreign_handler = {
 	phar_spl_foreign_dtor,
@@ -1243,7 +1225,6 @@ PHP_METHOD(Phar, __construct)
 	phar_obj->spl.info_class = phar_ce_entry;
 	efree(fname);
 }
-/* }}} */
 
 /* Return array of supported signature types
  */
@@ -1267,7 +1248,6 @@ PHP_METHOD(Phar, getSupportedSignatures)
 	}
 #endif
 }
-/* }}} */
 
 /* Return array of supported comparession algorithms
  */
@@ -1288,7 +1268,6 @@ PHP_METHOD(Phar, getSupportedCompression)
 		add_next_index_stringl(return_value, "BZIP2", 5);
 	}
 }
-/* }}} */
 
 /* Completely remove a phar archive from memory and disk
  */
@@ -1353,7 +1332,6 @@ PHP_METHOD(Phar, unlinkArchive)
 	efree(fname);
 	RETURN_TRUE;
 }
-/* }}} */
 
 #define PHAR_ARCHIVE_OBJECT() \
 	zval *zobj = ZEND_THIS; \
@@ -1379,7 +1357,6 @@ PHP_METHOD(Phar, __destruct)
 		zend_hash_str_del(&PHAR_G(phar_persist_map), (const char *) phar_obj->archive, sizeof(phar_obj->archive));
 	}
 }
-/* }}} */
 
 struct _phar_t {
 	phar_archive_object *p;
@@ -1391,7 +1368,7 @@ struct _phar_t {
 	int count;
 };
 
-static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
+static int phar_build(zend_object_iterator *iter, void *puser)
 {
 	zval *value;
 	zend_bool close_fp = 1;
@@ -1705,7 +1682,6 @@ after_open_fp:
 
 	return ZEND_HASH_APPLY_KEEP;
 }
-/* }}} */
 
 /* Construct a phar archive from an existing directory, recursively.
  * Optional second parameter is a regular expression for filtering directory contents.
@@ -1836,7 +1812,6 @@ PHP_METHOD(Phar, buildFromDirectory)
 		php_stream_close(pass.fp);
 	}
 }
-/* }}} */
 
 /* Construct a phar archive from an iterator.  The iterator must return a series of strings
  * that are full paths to files that should be added to the phar.  The iterator key should
@@ -1901,7 +1876,6 @@ PHP_METHOD(Phar, buildFromIterator)
 		php_stream_close(pass.fp);
 	}
 }
-/* }}} */
 
 /* Returns the number of entries in the Phar archive
  */
@@ -1917,7 +1891,6 @@ PHP_METHOD(Phar, count)
 
 	RETURN_LONG(zend_hash_num_elements(&phar_obj->archive->manifest));
 }
-/* }}} */
 
 /* Returns true if the phar archive is based on the tar/zip/phar file format depending
  * on whether Phar::TAR, Phar::ZIP or Phar::PHAR was passed in
@@ -1942,9 +1915,8 @@ PHP_METHOD(Phar, isFileFormat)
 			zend_throw_exception_ex(phar_ce_PharException, 0, "Unknown file format specified");
 	}
 }
-/* }}} */
 
-static int phar_copy_file_contents(phar_entry_info *entry, php_stream *fp) /* {{{ */
+static int phar_copy_file_contents(phar_entry_info *entry, php_stream *fp)
 {
 	char *error;
 	zend_off_t offset;
@@ -1988,9 +1960,8 @@ static int phar_copy_file_contents(phar_entry_info *entry, php_stream *fp) /* {{
 	entry->offset = offset;
 	return SUCCESS;
 }
-/* }}} */
 
-static zend_object *phar_rename_archive(phar_archive_data **sphar, char *ext) /* {{{ */
+static zend_object *phar_rename_archive(phar_archive_data **sphar, char *ext)
 {
 	const char *oldname = NULL;
 	phar_archive_data *phar = *sphar;
@@ -2238,9 +2209,8 @@ its_ok:
 	zval_ptr_dtor(&arg1);
 	return Z_OBJ(ret);
 }
-/* }}} */
 
-static zend_object *phar_convert_to_other(phar_archive_data *source, int convert, char *ext, uint32_t flags) /* {{{ */
+static zend_object *phar_convert_to_other(phar_archive_data *source, int convert, char *ext, uint32_t flags)
 {
 	phar_archive_data *phar;
 	phar_entry_info *entry, newentry;
@@ -2352,7 +2322,6 @@ no_copy:
 		return NULL;
 	}
 }
-/* }}} */
 
 /* Convert a phar.tar or phar.zip archive to the phar file format. The
  * optional parameter allows the user to determine the new
@@ -2455,7 +2424,6 @@ PHP_METHOD(Phar, convertToExecutable)
 		RETURN_NULL();
 	}
 }
-/* }}} */
 
 /* Convert an archive to a non-executable .tar or .zip.
  * The optional parameter allows the user to determine the new
@@ -2557,7 +2525,6 @@ PHP_METHOD(Phar, convertToData)
 		RETURN_NULL();
 	}
 }
-/* }}} */
 
 /* Returns Phar::GZ or PHAR::BZ2 if the entire archive is compressed
  * (.tar.gz/tar.bz2 and so on), or FALSE otherwise.
@@ -2580,7 +2547,6 @@ PHP_METHOD(Phar, isCompressed)
 
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* Returns true if phar.readonly=0 or phar is a PharData AND the actual file is writable.
  */
@@ -2607,7 +2573,6 @@ PHP_METHOD(Phar, isWritable)
 
 	RETURN_BOOL((ssb.sb.st_mode & (S_IWOTH | S_IWGRP | S_IWUSR)) != 0);
 }
-/* }}} */
 
 /* Deletes a named file within the archive.
  */
@@ -2658,7 +2623,6 @@ PHP_METHOD(Phar, delete)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Returns the alias for the Phar or NULL.
  */
@@ -2674,7 +2638,6 @@ PHP_METHOD(Phar, getAlias)
 		RETURN_STRINGL(phar_obj->archive->alias, phar_obj->archive->alias_len);
 	}
 }
-/* }}} */
 
 /* Returns the real path to the phar archive on disk
  */
@@ -2688,7 +2651,6 @@ PHP_METHOD(Phar, getPath)
 
 	RETURN_STRINGL(phar_obj->archive->fname, phar_obj->archive->fname_len);
 }
-/* }}} */
 
 /* Sets the alias for a Phar archive. The default value is the full path
  * to the archive.
@@ -2789,7 +2751,6 @@ valid_alias:
 
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* Return version info of Phar archive
  */
@@ -2803,7 +2764,6 @@ PHP_METHOD(Phar, getVersion)
 
 	RETURN_STRING(phar_obj->archive->version);
 }
-/* }}} */
 
 /* Do not flush a writeable phar (save its contents) until explicitly requested
  */
@@ -2817,7 +2777,6 @@ PHP_METHOD(Phar, startBuffering)
 
 	phar_obj->archive->donotflush = 1;
 }
-/* }}} */
 
 /* Returns whether write operations are flushing to disk immediately.
  */
@@ -2831,7 +2790,6 @@ PHP_METHOD(Phar, isBuffering)
 
 	RETURN_BOOL(phar_obj->archive->donotflush);
 }
-/* }}} */
 
 /* Saves the contents of a modified archive to disk.
  */
@@ -2859,7 +2817,6 @@ PHP_METHOD(Phar, stopBuffering)
 		efree(error);
 	}
 }
-/* }}} */
 
 /* Change the stub in a phar, phar.tar or phar.zip archive to something other
  * than the default. The stub *must* end with a call to __HALT_COMPILER().
@@ -2929,7 +2886,6 @@ PHP_METHOD(Phar, setStub)
 
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* In a pure phar archive, sets a stub that can be used to run the archive
  * regardless of whether the phar extension is available. The first parameter
@@ -3010,7 +2966,6 @@ PHP_METHOD(Phar, setDefaultStub)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Sets the signature algorithm for a phar and applies it. The signature
  * algorithm must be one of Phar::MD5, Phar::SHA1, Phar::SHA256,
@@ -3061,7 +3016,6 @@ PHP_METHOD(Phar, setSignatureAlgorithm)
 				"Unknown signature algorithm specified");
 	}
 }
-/* }}} */
 
 /* Returns a hash signature, or FALSE if the archive is unsigned.
  */
@@ -3103,7 +3057,6 @@ PHP_METHOD(Phar, getSignature)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Return whether phar was modified
  */
@@ -3117,9 +3070,8 @@ PHP_METHOD(Phar, getModified)
 
 	RETURN_BOOL(phar_obj->archive->is_modified);
 }
-/* }}} */
 
-static int phar_set_compression(zval *zv, void *argument) /* {{{ */
+static int phar_set_compression(zval *zv, void *argument)
 {
 	phar_entry_info *entry = (phar_entry_info *)Z_PTR_P(zv);
 	uint32_t compress = *(uint32_t *)argument;
@@ -3134,9 +3086,8 @@ static int phar_set_compression(zval *zv, void *argument) /* {{{ */
 	entry->is_modified = 1;
 	return ZEND_HASH_APPLY_KEEP;
 }
-/* }}} */
 
-static int phar_test_compression(zval *zv, void *argument) /* {{{ */
+static int phar_test_compression(zval *zv, void *argument)
 {
 	phar_entry_info *entry = (phar_entry_info *)Z_PTR_P(zv);
 
@@ -3158,15 +3109,13 @@ static int phar_test_compression(zval *zv, void *argument) /* {{{ */
 
 	return ZEND_HASH_APPLY_KEEP;
 }
-/* }}} */
 
-static void pharobj_set_compression(HashTable *manifest, uint32_t compress) /* {{{ */
+static void pharobj_set_compression(HashTable *manifest, uint32_t compress)
 {
 	zend_hash_apply_with_argument(manifest, phar_set_compression, &compress);
 }
-/* }}} */
 
-static int pharobj_cancompress(HashTable *manifest) /* {{{ */
+static int pharobj_cancompress(HashTable *manifest)
 {
 	int test;
 
@@ -3174,7 +3123,6 @@ static int pharobj_cancompress(HashTable *manifest) /* {{{ */
 	zend_hash_apply_with_argument(manifest, phar_test_compression, &test);
 	return test;
 }
-/* }}} */
 
 /* Compress a .tar, or .phar.tar with whole-file compression
  * The parameter can be one of Phar::GZ or Phar::BZ2 to specify
@@ -3244,7 +3192,6 @@ PHP_METHOD(Phar, compress)
 		RETURN_NULL();
 	}
 }
-/* }}} */
 
 /* Decompress a .tar, or .phar.tar with whole-file compression
  */
@@ -3283,7 +3230,6 @@ PHP_METHOD(Phar, decompress)
 		RETURN_NULL();
 	}
 }
-/* }}} */
 
 /* Compress all files within a phar or zip archive using the specified compression
  * The parameter can be one of Phar::GZ or Phar::BZ2 to specify
@@ -3360,7 +3306,6 @@ PHP_METHOD(Phar, compressFiles)
 		efree(error);
 	}
 }
-/* }}} */
 
 /* decompress every file
  */
@@ -3405,7 +3350,6 @@ PHP_METHOD(Phar, decompressFiles)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* copy a file internal to the phar archive to another new file within the phar
  */
@@ -3505,7 +3449,6 @@ PHP_METHOD(Phar, copy)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* determines whether a file exists in the phar
  */
@@ -3541,7 +3484,6 @@ PHP_METHOD(Phar, offsetExists)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* get a PharFileInfo object for a specific file
  */
@@ -3588,9 +3530,8 @@ PHP_METHOD(Phar, offsetGet)
 		zval_ptr_dtor(&zfname);
 	}
 }
-/* }}} */
 
-/* {{{ add a file within the phar archive from a string or resource
+/* add a file within the phar archive from a string or resource
  */
 static void phar_add_file(phar_archive_data **pphar, char *filename, size_t filename_len, char *cont_str, size_t cont_len, zval *zresource)
 {
@@ -3684,9 +3625,8 @@ finish: ;
 	}
 #endif
 }
-/* }}} */
 
-/* {{{ create a directory within the phar archive
+/* create a directory within the phar archive
  */
 static void phar_mkdir(phar_archive_data **pphar, char *dirname, size_t dirname_len)
 {
@@ -3720,7 +3660,6 @@ static void phar_mkdir(phar_archive_data **pphar, char *dirname, size_t dirname_
 		}
 	}
 }
-/* }}} */
 
 /* set the contents of an internal file to those of an external file
  */
@@ -3757,7 +3696,6 @@ PHP_METHOD(Phar, offsetSet)
 
 	phar_add_file(&(phar_obj->archive), fname, fname_len, cont_str, cont_len, zresource);
 }
-/* }}} */
 
 /* remove a file from a phar
  */
@@ -3808,7 +3746,6 @@ PHP_METHOD(Phar, offsetUnset)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Adds an empty directory to the phar archive
  */
@@ -3830,7 +3767,6 @@ PHP_METHOD(Phar, addEmptyDir)
 
 	phar_mkdir(&phar_obj->archive, dirname, dirname_len);
 }
-/* }}} */
 
 /* Adds a file to the archive using the filename, or the second parameter as the name within the archive
  */
@@ -3866,7 +3802,6 @@ PHP_METHOD(Phar, addFile)
 	phar_add_file(&(phar_obj->archive), fname, fname_len, NULL, 0, &zresource);
 	zval_ptr_dtor(&zresource);
 }
-/* }}} */
 
 /* Adds a file to the archive using its contents as a string
  */
@@ -3883,7 +3818,6 @@ PHP_METHOD(Phar, addFromString)
 
 	phar_add_file(&(phar_obj->archive), localname, localname_len, cont_str, cont_len, NULL);
 }
-/* }}} */
 
 /* Returns the stub at the head of a phar archive as a string.
  */
@@ -3981,7 +3915,6 @@ carry_on:
 	ZSTR_LEN(buf) = len;
 	RETVAL_STR(buf);
 }
-/* }}}*/
 
 /* Returns TRUE if the phar has global metadata, FALSE otherwise.
  */
@@ -3995,7 +3928,6 @@ PHP_METHOD(Phar, hasMetadata)
 
 	RETURN_BOOL(Z_TYPE(phar_obj->archive->metadata) != IS_UNDEF);
 }
-/* }}} */
 
 /* Returns the global metadata of the phar
  */
@@ -4018,7 +3950,6 @@ PHP_METHOD(Phar, getMetadata)
 		}
 	}
 }
-/* }}} */
 
 /* Sets the global metadata of the phar
  */
@@ -4056,7 +3987,6 @@ PHP_METHOD(Phar, setMetadata)
 		efree(error);
 	}
 }
-/* }}} */
 
 /* Deletes the global metadata of the phar
  */
@@ -4093,9 +4023,8 @@ PHP_METHOD(Phar, delMetadata)
 		RETURN_TRUE;
 	}
 }
-/* }}} */
 
-static int phar_extract_file(zend_bool overwrite, phar_entry_info *entry, char *dest, size_t dest_len, char **error) /* {{{ */
+static int phar_extract_file(zend_bool overwrite, phar_entry_info *entry, char *dest, size_t dest_len, char **error)
 {
 	php_stream_statbuf ssb;
 	size_t len;
@@ -4275,9 +4204,8 @@ static int phar_extract_file(zend_bool overwrite, phar_entry_info *entry, char *
 	efree(fullpath);
 	return SUCCESS;
 }
-/* }}} */
 
-static int extract_helper(phar_archive_data *archive, zend_string *search, char *pathto, size_t pathto_len, zend_bool overwrite, char **error) { /* {{{ */
+static int extract_helper(phar_archive_data *archive, zend_string *search, char *pathto, size_t pathto_len, zend_bool overwrite, char **error) {
 	int extracted = 0;
 	phar_entry_info *entry;
 
@@ -4304,7 +4232,6 @@ static int extract_helper(phar_archive_data *archive, zend_string *search, char 
 
 	return extracted;
 }
-/* }}} */
 
 /* Extract one or more file from a phar archive, optionally overwriting existing files
  */
@@ -4420,8 +4347,6 @@ PHP_METHOD(Phar, extractTo)
 		RETURN_TRUE;
 	}
 }
-/* }}} */
-
 
 /* Construct a Phar entry object
  */
@@ -4486,7 +4411,6 @@ PHP_METHOD(PharFileInfo, __construct)
 
 	zval_ptr_dtor(&arg1);
 }
-/* }}} */
 
 #define PHAR_ENTRY_OBJECT() \
 	zval *zobj = ZEND_THIS; \
@@ -4514,7 +4438,6 @@ PHP_METHOD(PharFileInfo, __destruct)
 		entry_obj->entry = NULL;
 	}
 }
-/* }}} */
 
 /* Returns the compressed size
  */
@@ -4528,7 +4451,6 @@ PHP_METHOD(PharFileInfo, getCompressedSize)
 
 	RETURN_LONG(entry_obj->entry->compressed_filesize);
 }
-/* }}} */
 
 /* Returns whether the entry is compressed, and whether it is compressed with Phar::GZ or Phar::BZ2 if specified
  */
@@ -4554,7 +4476,6 @@ PHP_METHOD(PharFileInfo, isCompressed)
 				"Unknown compression type specified"); \
 	}
 }
-/* }}} */
 
 /* Returns CRC32 code or throws an exception if not CRC checked
  */
@@ -4579,7 +4500,6 @@ PHP_METHOD(PharFileInfo, getCRC32)
 			"Phar entry was not CRC checked"); \
 	}
 }
-/* }}} */
 
 /* Returns whether file entry is CRC checked
  */
@@ -4593,7 +4513,6 @@ PHP_METHOD(PharFileInfo, isCRCChecked)
 
 	RETURN_BOOL(entry_obj->entry->is_crc_checked);
 }
-/* }}} */
 
 /* Returns the Phar file entry flags
  */
@@ -4607,7 +4526,6 @@ PHP_METHOD(PharFileInfo, getPharFlags)
 
 	RETURN_LONG(entry_obj->entry->flags & ~(PHAR_ENT_PERM_MASK|PHAR_ENT_COMPRESSION_MASK));
 }
-/* }}} */
 
 /* set the file permissions for the Phar.  This only allows setting execution bit, read/write
  */
@@ -4669,7 +4587,6 @@ PHP_METHOD(PharFileInfo, chmod)
 		efree(error);
 	}
 }
-/* }}} */
 
 /* Returns the metadata of the entry
  */
@@ -4683,7 +4600,6 @@ PHP_METHOD(PharFileInfo, hasMetadata)
 
 	RETURN_BOOL(Z_TYPE(entry_obj->entry->metadata) != IS_UNDEF);
 }
-/* }}} */
 
 /* Returns the metadata of the entry
  */
@@ -4706,7 +4622,6 @@ PHP_METHOD(PharFileInfo, getMetadata)
 		}
 	}
 }
-/* }}} */
 
 /* Sets the metadata of the entry
  */
@@ -4758,7 +4673,6 @@ PHP_METHOD(PharFileInfo, setMetadata)
 		efree(error);
 	}
 }
-/* }}} */
 
 /* Deletes the metadata of the entry
  */
@@ -4813,7 +4727,6 @@ PHP_METHOD(PharFileInfo, delMetadata)
 		RETURN_TRUE;
 	}
 }
-/* }}} */
 
 /* return the complete file contents of the entry (like file_get_contents)
  */
@@ -4863,7 +4776,6 @@ PHP_METHOD(PharFileInfo, getContent)
 		RETURN_EMPTY_STRING();
 	}
 }
-/* }}} */
 
 /* Instructs the Phar class to compress the current file using zlib or bzip2 compression
  */
@@ -4990,7 +4902,6 @@ PHP_METHOD(PharFileInfo, compress)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Instructs the Phar class to decompress the current file
  */
@@ -5082,14 +4993,13 @@ PHP_METHOD(PharFileInfo, decompress)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
-/* {{{ phar methods */
+/* phar methods */
 
 #define REGISTER_PHAR_CLASS_CONST_LONG(class_name, const_name, value) \
 	zend_declare_class_constant_long(class_name, const_name, sizeof(const_name)-1, (zend_long)value);
 
-void phar_object_init(void) /* {{{ */
+void phar_object_init(void)
 {
 	zend_class_entry ce;
 
@@ -5124,4 +5034,4 @@ void phar_object_init(void) /* {{{ */
 	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "SHA256", PHAR_SIG_SHA256)
 	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "SHA512", PHAR_SIG_SHA512)
 }
-/* }}} */
+

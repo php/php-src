@@ -43,7 +43,7 @@
 #define O_BINARY 0
 #endif
 
-/* {{{ php_oci_lob_create()
+/* php_oci_lob_create()
  Create LOB descriptor and allocate all the resources needed */
 php_oci_descriptor *php_oci_lob_create (php_oci_connection *connection, zend_long type)
 {
@@ -108,9 +108,8 @@ php_oci_descriptor *php_oci_lob_create (php_oci_connection *connection, zend_lon
 	return descriptor;
 
 }
-/* }}} */
 
-/* {{{ php_oci_lob_get_length()
+/* php_oci_lob_get_length()
  Get length of the LOB. The length is cached so we don't need to ask Oracle every time */
 int php_oci_lob_get_length (php_oci_descriptor *descriptor, ub4 *length)
 {
@@ -156,9 +155,8 @@ int php_oci_lob_get_length (php_oci_descriptor *descriptor, ub4 *length)
 	}
 	return 0;
 }
-/* }}} */
 
-/* {{{ php_oci_lob_callback()
+/* php_oci_lob_callback()
    Append LOB portion to a memory buffer */
 sb4 php_oci_lob_callback (dvoid *ctxp, CONST dvoid *bufxp, oraub8 len, ub1 piece, dvoid **changed_bufpp, oraub8 *changed_lenp)
 {
@@ -199,9 +197,8 @@ sb4 php_oci_lob_callback (dvoid *ctxp, CONST dvoid *bufxp, oraub8 len, ub1 piece
 		}
 	}
 }
-/* }}} */
 
-/* {{{ php_oci_lob_calculate_buffer()
+/* php_oci_lob_calculate_buffer()
    Work out the size for LOB buffering */
 static inline int php_oci_lob_calculate_buffer(php_oci_descriptor *descriptor, zend_long read_length)
 {
@@ -230,9 +227,8 @@ static inline int php_oci_lob_calculate_buffer(php_oci_descriptor *descriptor, z
 	}
 	return (int) read_length;
 }
-/* }}} */
 
-/* {{{ php_oci_lob_read()
+/* php_oci_lob_read()
  Read specified portion of the LOB into the buffer */
 int php_oci_lob_read (php_oci_descriptor *descriptor, zend_long read_length, zend_long initial_offset, char **data, ub4 *data_len)
 {
@@ -390,9 +386,8 @@ int php_oci_lob_read (php_oci_descriptor *descriptor, zend_long read_length, zen
 	connection->errcode = 0; /* retain backwards compat with OCI8 1.4 */
 	return 0;
 }
-/* }}} */
 
-/* {{{ php_oci_lob_write()
+/* php_oci_lob_write()
  Write data to the LOB */
 int php_oci_lob_write (php_oci_descriptor *descriptor, ub4 offset, char *data, int data_len, ub4 *bytes_written)
 {
@@ -452,9 +447,8 @@ int php_oci_lob_write (php_oci_descriptor *descriptor, ub4 offset, char *data, i
 	connection->errcode = 0; /* retain backwards compat with OCI8 1.4 */
 	return 0;
 }
-/* }}} */
 
-/* {{{ php_oci_lob_set_buffering()
+/* php_oci_lob_set_buffering()
  Turn buffering off/onn for this particular LOB */
 int php_oci_lob_set_buffering (php_oci_descriptor *descriptor, int on_off)
 {
@@ -486,9 +480,8 @@ int php_oci_lob_set_buffering (php_oci_descriptor *descriptor, int on_off)
 	connection->errcode = 0; /* retain backwards compat with OCI8 1.4 */
 	return 0;
 }
-/* }}} */
 
-/* {{{ php_oci_lob_get_buffering()
+/* php_oci_lob_get_buffering()
  Return current buffering state for the LOB */
 int php_oci_lob_get_buffering (php_oci_descriptor *descriptor)
 {
@@ -498,9 +491,8 @@ int php_oci_lob_get_buffering (php_oci_descriptor *descriptor)
 		return 0;
 	}
 }
-/* }}} */
 
-/* {{{ php_oci_lob_copy()
+/* php_oci_lob_copy()
  Copy one LOB (or its part) to another one */
 int php_oci_lob_copy (php_oci_descriptor *descriptor_dest, php_oci_descriptor *descriptor_from, zend_long length)
 {
@@ -548,9 +540,8 @@ int php_oci_lob_copy (php_oci_descriptor *descriptor_dest, php_oci_descriptor *d
 	connection->errcode = 0; /* retain backwards compat with OCI8 1.4 */
 	return 0;
 }
-/* }}} */
 
-/* {{{ php_oci_lob_close()
+/* php_oci_lob_close()
  Close LOB */
 int php_oci_lob_close (php_oci_descriptor *descriptor)
 {
@@ -574,9 +565,8 @@ int php_oci_lob_close (php_oci_descriptor *descriptor)
 
 	return 0;
 }
-/* }}} */
 
-/* {{{ php_oci_temp_lob_close()
+/* php_oci_temp_lob_close()
    Close Temporary LOB */
 int php_oci_temp_lob_close (php_oci_descriptor *descriptor)
 {
@@ -604,9 +594,8 @@ int php_oci_temp_lob_close (php_oci_descriptor *descriptor)
 	connection->errcode = 0; /* retain backwards compat with OCI8 1.4 */
 	return 0;
 }
-/* }}} */
 
-/* {{{ php_oci_lob_flush()
+/* php_oci_lob_flush()
  Flush buffers for the LOB (only if they have been used) */
 int php_oci_lob_flush(php_oci_descriptor *descriptor, zend_long flush_flag)
 {
@@ -649,9 +638,8 @@ int php_oci_lob_flush(php_oci_descriptor *descriptor, zend_long flush_flag)
 	connection->errcode = 0; /* retain backwards compat with OCI8 1.4 */
 	return 0;
 }
-/* }}} */
 
-/* {{{ php_oci_lob_free()
+/* php_oci_lob_free()
  Close LOB descriptor and free associated resources */
 void php_oci_lob_free (php_oci_descriptor *descriptor)
 {
@@ -696,9 +684,8 @@ void php_oci_lob_free (php_oci_descriptor *descriptor)
 	zend_list_delete(descriptor->connection->id);
 	efree(descriptor);
 }
-/* }}} */
 
-/* {{{ php_oci_lob_import()
+/* php_oci_lob_import()
  Import LOB contents from the given file */
 int php_oci_lob_import (php_oci_descriptor *descriptor, char *filename)
 {
@@ -752,9 +739,8 @@ int php_oci_lob_import (php_oci_descriptor *descriptor, char *filename)
 
 	return 0;
 }
- 	/* }}} */
 
-/* {{{ php_oci_lob_append()
+/* php_oci_lob_append()
  Append data to the end of the LOB */
 int php_oci_lob_append (php_oci_descriptor *descriptor_dest, php_oci_descriptor *descriptor_from)
 {
@@ -786,9 +772,8 @@ int php_oci_lob_append (php_oci_descriptor *descriptor_dest, php_oci_descriptor 
 	connection->errcode = 0; /* retain backwards compat with OCI8 1.4 */
 	return 0;
 }
-/* }}} */
 
-/* {{{ php_oci_lob_truncate()
+/* php_oci_lob_truncate()
  Truncate LOB to the given length */
 int php_oci_lob_truncate (php_oci_descriptor *descriptor, zend_long new_lob_length)
 {
@@ -828,9 +813,8 @@ int php_oci_lob_truncate (php_oci_descriptor *descriptor, zend_long new_lob_leng
 
 	return 0;
 }
-/* }}} */
 
-/* {{{ php_oci_lob_erase()
+/* php_oci_lob_erase()
  Erase (or fill with whitespaces, depending on LOB type) the LOB (or its part) */
 int php_oci_lob_erase (php_oci_descriptor *descriptor, zend_long offset, ub4 length, ub4 *bytes_erased)
 {
@@ -865,9 +849,8 @@ int php_oci_lob_erase (php_oci_descriptor *descriptor, zend_long offset, ub4 len
 	connection->errcode = 0; /* retain backwards compat with OCI8 1.4 */
 	return 0;
 }
-/* }}} */
 
-/* {{{ php_oci_lob_is_equal()
+/* php_oci_lob_is_equal()
  Compare two LOB descriptors and figure out if they are pointing to the same LOB */
 int php_oci_lob_is_equal (php_oci_descriptor *descriptor_first, php_oci_descriptor *descriptor_second, boolean *result)
 {
@@ -886,9 +869,8 @@ int php_oci_lob_is_equal (php_oci_descriptor *descriptor_first, php_oci_descript
 	connection->errcode = 0; /* retain backwards compat with OCI8 1.4 */
 	return 0;
 }
-/* }}} */
 
-/* {{{ php_oci_lob_write_tmp()
+/* php_oci_lob_write_tmp()
  Create temporary LOB and write data to it */
 int php_oci_lob_write_tmp (php_oci_descriptor *descriptor, zend_long type, char *data, int data_len)
 {
@@ -944,6 +926,5 @@ int php_oci_lob_write_tmp (php_oci_descriptor *descriptor, zend_long type, char 
 
 	return php_oci_lob_write(descriptor, 0, data, data_len, &bytes_written);
 }
-/* }}} */
 
 #endif /* HAVE_OCI8 */

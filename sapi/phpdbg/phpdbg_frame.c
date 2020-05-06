@@ -97,7 +97,7 @@ void phpdbg_print_cur_frame_info() {
 	efree(file);
 }
 
-void phpdbg_restore_frame(void) /* {{{ */
+void phpdbg_restore_frame(void)
 {
 	if (PHPDBG_FRAME(num) == 0) {
 		return;
@@ -114,9 +114,9 @@ void phpdbg_restore_frame(void) /* {{{ */
 
 	/* move things back */
 	EG(current_execute_data) = PHPDBG_FRAME(execute_data);
-} /* }}} */
+}
 
-void phpdbg_switch_frame(int frame) /* {{{ */
+void phpdbg_switch_frame(int frame)
 {
 	zend_execute_data *execute_data = PHPDBG_FRAME(num) ? PHPDBG_FRAME(execute_data) : EG(current_execute_data);
 	int i = 0;
@@ -165,9 +165,9 @@ void phpdbg_switch_frame(int frame) /* {{{ */
 	} phpdbg_end_try_access();
 
 	phpdbg_print_cur_frame_info();
-} /* }}} */
+}
 
-static void phpdbg_dump_prototype(zval *tmp) /* {{{ */
+static void phpdbg_dump_prototype(zval *tmp)
 {
 	zval *funcname, *class, class_zv, *args, *argstmp;
 
@@ -257,7 +257,7 @@ static void phpdbg_dump_prototype(zval *tmp) /* {{{ */
 	phpdbg_out(")");
 }
 
-void phpdbg_dump_backtrace(size_t num) /* {{{ */
+void phpdbg_dump_backtrace(size_t num)
 {
 	HashPosition position;
 	zval zbacktrace;
@@ -317,7 +317,7 @@ void phpdbg_dump_backtrace(size_t num) /* {{{ */
 	zend_string_release(Z_STR(startfile));
 
 	PHPDBG_OUTPUT_BACKUP_RESTORE();
-} /* }}} */
+}
 
 void phpdbg_open_generator_frame(zend_generator *gen) {
 	zend_string *s;

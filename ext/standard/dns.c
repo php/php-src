@@ -16,7 +16,7 @@
    +----------------------------------------------------------------------+
  */
 
-/* {{{ includes */
+/* includes */
 #include "php.h"
 #include "php_network.h"
 
@@ -112,7 +112,6 @@
 #ifndef DNS_T_ANY
 #define DNS_T_ANY	255
 #endif
-/* }}} */
 
 static zend_string *php_gethostbyaddr(char *ip);
 static zend_string *php_gethostbyname(char *name);
@@ -132,7 +131,7 @@ PHP_FUNCTION(gethostname)
 
 	RETURN_STRING(buf);
 }
-/* }}} */
+
 #endif
 
 /* TODO: Reimplement the gethostby* functions using the new winxp+ API, in dns_win32.c, then
@@ -163,9 +162,8 @@ PHP_FUNCTION(gethostbyaddr)
 		RETVAL_STR(hostname);
 	}
 }
-/* }}} */
 
-/* {{{ php_gethostbyaddr */
+/* php_gethostbyaddr */
 static zend_string *php_gethostbyaddr(char *ip)
 {
 #if HAVE_IPV6 && HAVE_INET_PTON
@@ -198,7 +196,6 @@ static zend_string *php_gethostbyaddr(char *ip)
 
 	return zend_string_init(hp->h_name, strlen(hp->h_name), 0);
 }
-/* }}} */
 
 /* Get the IP address corresponding to a given Internet host name */
 PHP_FUNCTION(gethostbyname)
@@ -218,7 +215,6 @@ PHP_FUNCTION(gethostbyname)
 
 	RETURN_STR(php_gethostbyname(hostname));
 }
-/* }}} */
 
 /* Return a list of IP addresses that a given hostname resolves to. */
 PHP_FUNCTION(gethostbynamel)
@@ -258,9 +254,8 @@ PHP_FUNCTION(gethostbynamel)
 		add_next_index_string(return_value, inet_ntoa(in));
 	}
 }
-/* }}} */
 
-/* {{{ php_gethostbyname */
+/* php_gethostbyname */
 static zend_string *php_gethostbyname(char *name)
 {
 	struct hostent *hp;
@@ -284,7 +279,6 @@ static zend_string *php_gethostbyname(char *name)
 	address = inet_ntoa(in);
 	return zend_string_init(address, strlen(address), 0);
 }
-/* }}} */
 
 #if HAVE_FULL_DNS_FUNCS || defined(PHP_WIN32)
 # define PHP_DNS_NUM_TYPES	13	/* Number of DNS Types Supported by PHP currently */
@@ -337,7 +331,7 @@ typedef union {
 
 #if defined(__GLIBC__) && !defined(HAVE_DEPRECATED_DNS_FUNCS)
 #define php_dns_free_res(__res__) _php_dns_free_res(__res__)
-static void _php_dns_free_res(struct __res_state *res) { /* {{{ */
+static void _php_dns_free_res(struct __res_state *res) {
 	int ns;
 	for (ns = 0; ns < MAXNS; ns++) {
 		if (res->_u._ext.nsaddrs[ns] != NULL) {
@@ -345,7 +339,7 @@ static void _php_dns_free_res(struct __res_state *res) { /* {{{ */
 			res->_u._ext.nsaddrs[ns] = NULL;
 		}
 	}
-} /* }}} */
+}
 #else
 #define php_dns_free_res(__res__)
 #endif
@@ -423,7 +417,6 @@ PHP_FUNCTION(dns_check_record)
 
 	php_dns_free_handle(handle);
 }
-/* }}} */
 
 #if HAVE_FULL_DNS_FUNCS
 
@@ -433,7 +426,7 @@ PHP_FUNCTION(dns_check_record)
 	} \
 } while (0)
 
-/* {{{ php_parserr */
+/* php_parserr */
 static u_char *php_parserr(u_char *cp, u_char *end, querybuf *answer, int type_to_fetch, int store, int raw, zval *subarray)
 {
 	u_short type, class, dlen;
@@ -790,7 +783,6 @@ static u_char *php_parserr(u_char *cp, u_char *end, querybuf *answer, int type_t
 
 	return cp;
 }
-/* }}} */
 
 /* Get any Resource Record corresponding to a given Internet host name */
 PHP_FUNCTION(dns_get_record)
@@ -1029,7 +1021,6 @@ PHP_FUNCTION(dns_get_record)
 		}
 	}
 }
-/* }}} */
 
 /* Get MX records corresponding to a given Internet host name */
 PHP_FUNCTION(dns_get_mx)
@@ -1130,7 +1121,7 @@ PHP_FUNCTION(dns_get_mx)
 	php_dns_free_handle(handle);
 	RETURN_TRUE;
 }
-/* }}} */
+
 #endif /* HAVE_FULL_DNS_FUNCS */
 #endif /* !defined(PHP_WIN32) && HAVE_DNS_SEARCH_FUNC */
 

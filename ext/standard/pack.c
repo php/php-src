@@ -78,7 +78,7 @@ static int big_endian_longlong_map[8];
 static int little_endian_longlong_map[8];
 #endif
 
-/* {{{ php_pack
+/* php_pack
  */
 static void php_pack(zval *val, size_t size, int *map, char *output)
 {
@@ -92,9 +92,8 @@ static void php_pack(zval *val, size_t size, int *map, char *output)
 		*output++ = v[map[i]];
 	}
 }
-/* }}} */
 
-/* {{{ php_pack_reverse_int32
+/* php_pack_reverse_int32
  */
 static inline uint32_t php_pack_reverse_int32(uint32_t arg)
 {
@@ -103,9 +102,8 @@ static inline uint32_t php_pack_reverse_int32(uint32_t arg)
 
 	return result;
 }
-/* }}} */
 
-/* {{{ php_pack
+/* php_pack
  */
 static inline uint64_t php_pack_reverse_int64(uint64_t arg)
 {
@@ -119,9 +117,8 @@ static inline uint64_t php_pack_reverse_int64(uint64_t arg)
 
 	return result.i;
 }
-/* }}} */
 
-/* {{{ php_pack_copy_float
+/* php_pack_copy_float
  */
 static void php_pack_copy_float(int is_little_endian, void * dst, float f)
 {
@@ -143,9 +140,8 @@ static void php_pack_copy_float(int is_little_endian, void * dst, float f)
 
 	memcpy(dst, &m.f, sizeof(float));
 }
-/* }}} */
 
-/* {{{ php_pack_copy_double
+/* php_pack_copy_double
  */
 static void php_pack_copy_double(int is_little_endian, void * dst, double d)
 {
@@ -167,9 +163,8 @@ static void php_pack_copy_double(int is_little_endian, void * dst, double d)
 
 	memcpy(dst, &m.d, sizeof(double));
 }
-/* }}} */
 
-/* {{{ php_pack_parse_float
+/* php_pack_parse_float
  */
 static float php_pack_parse_float(int is_little_endian, void * src)
 {
@@ -191,9 +186,8 @@ static float php_pack_parse_float(int is_little_endian, void * src)
 
 	return m.f;
 }
-/* }}} */
 
-/* {{{ php_pack_parse_double
+/* php_pack_parse_double
  */
 static double php_pack_parse_double(int is_little_endian, void * src)
 {
@@ -215,7 +209,6 @@ static double php_pack_parse_double(int is_little_endian, void * src)
 
 	return m.d;
 }
-/* }}} */
 
 /* pack() idea stolen from Perl (implemented formats behave the same as there except J and P)
  * Implemented formats are Z, A, a, h, H, c, C, s, S, i, I, l, L, n, N, q, Q, J, P, f, d, x, X, @.
@@ -682,9 +675,8 @@ too_few_args:
 	ZSTR_LEN(output) = outputpos;
 	RETURN_NEW_STR(output);
 }
-/* }}} */
 
-/* {{{ php_unpack
+/* php_unpack
  */
 static zend_long php_unpack(char *data, size_t size, int issigned, int *map)
 {
@@ -700,7 +692,6 @@ static zend_long php_unpack(char *data, size_t size, int issigned, int *map)
 
 	return result;
 }
-/* }}} */
 
 /* unpack() is based on Perl's unpack(), but is modified a bit from there.
  * Rather than depending on error-prone ordered lists or syntactically
@@ -1206,9 +1197,8 @@ PHP_FUNCTION(unpack)
 		}
 	}
 }
-/* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION
+/* PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(pack)
 {
@@ -1334,4 +1324,4 @@ PHP_MINIT_FUNCTION(pack)
 
 	return SUCCESS;
 }
-/* }}} */
+

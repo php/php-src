@@ -45,7 +45,7 @@
 #define TIDY_CALL
 #endif
 
-/* {{{ ext/tidy macros
+/* ext/tidy macros
 */
 #define FIX_BUFFER(bptr) do { if ((bptr)->size) { (bptr)->bp[(bptr)->size-1] = '\0'; } } while(0)
 
@@ -162,9 +162,8 @@ if (php_check_open_basedir(filename)) { \
 			php_error_docref(NULL, E_WARNING, "Unable to load Tidy configuration file at '%s'.", TG(default_config)); \
 		} \
 	}
-/* }}} */
 
-/* {{{ ext/tidy structs
+/* ext/tidy structs
 */
 typedef struct _PHPTidyDoc PHPTidyDoc;
 typedef struct _PHPTidyObj PHPTidyObj;
@@ -200,9 +199,8 @@ static inline PHPTidyObj *php_tidy_fetch_object(zend_object *obj) {
 }
 
 #define Z_TIDY_P(zv) php_tidy_fetch_object(Z_OBJ_P((zv)))
-/* }}} */
 
-/* {{{ ext/tidy prototypes
+/* ext/tidy prototypes
 */
 static zend_string *php_tidy_file_to_mem(char *, zend_bool);
 static void tidy_object_free_storage(zend_object *);
@@ -1012,7 +1010,6 @@ PHP_FUNCTION(tidy_parse_string)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Return warnings and errors which occurred parsing the specified document*/
 PHP_FUNCTION(tidy_get_error_buffer)
@@ -1025,7 +1022,6 @@ PHP_FUNCTION(tidy_get_error_buffer)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Return a string representing the parsed tidy markup */
 PHP_FUNCTION(tidy_get_output)
@@ -1039,7 +1035,6 @@ PHP_FUNCTION(tidy_get_output)
 	RETVAL_STRINGL((char *) output.bp, output.size ? output.size-1 : 0);
 	tidyBufFree(&output);
 }
-/* }}} */
 
 /* Parse markup in file or URI */
 PHP_FUNCTION(tidy_parse_file)
@@ -1079,7 +1074,6 @@ PHP_FUNCTION(tidy_parse_file)
 
 	zend_string_release_ex(contents, 0);
 }
-/* }}} */
 
 /* Execute configured cleanup and repair operations on parsed markup */
 PHP_FUNCTION(tidy_clean_repair)
@@ -1093,21 +1087,18 @@ PHP_FUNCTION(tidy_clean_repair)
 
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* Repair a string using an optionally provided configuration file */
 PHP_FUNCTION(tidy_repair_string)
 {
 	php_tidy_quick_repair(INTERNAL_FUNCTION_PARAM_PASSTHRU, FALSE);
 }
-/* }}} */
 
 /* Repair a file using an optionally provided configuration file */
 PHP_FUNCTION(tidy_repair_file)
 {
 	php_tidy_quick_repair(INTERNAL_FUNCTION_PARAM_PASSTHRU, TRUE);
 }
-/* }}} */
 
 /* Run configured diagnostics on parsed and repaired markup. */
 PHP_FUNCTION(tidy_diagnose)
@@ -1121,7 +1112,6 @@ PHP_FUNCTION(tidy_diagnose)
 
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* Get release date (version) for Tidy library */
 PHP_FUNCTION(tidy_get_release)
@@ -1136,8 +1126,6 @@ PHP_FUNCTION(tidy_get_release)
 	RETURN_STRING((char *)"unknown");
 #endif
 }
-/* }}} */
-
 
 #if HAVE_TIDYOPTGETDOC
 /* Returns the documentation for the given option name */
@@ -1168,7 +1156,7 @@ PHP_FUNCTION(tidy_get_opt_doc)
 
 	RETURN_FALSE;
 }
-/* }}} */
+
 #endif
 
 
@@ -1208,7 +1196,6 @@ PHP_FUNCTION(tidy_get_config)
 
 	return;
 }
-/* }}} */
 
 /* Get status of specified document. */
 PHP_FUNCTION(tidy_get_status)
@@ -1217,7 +1204,6 @@ PHP_FUNCTION(tidy_get_status)
 
 	RETURN_LONG(tidyStatus(obj->ptdoc->doc));
 }
-/* }}} */
 
 /* Get the Detected HTML version for the specified document. */
 PHP_FUNCTION(tidy_get_html_ver)
@@ -1226,7 +1212,6 @@ PHP_FUNCTION(tidy_get_html_ver)
 
 	RETURN_LONG(tidyDetectedHtmlVersion(obj->ptdoc->doc));
 }
-/* }}} */
 
 /* Indicates if the document is a XHTML document. */
 PHP_FUNCTION(tidy_is_xhtml)
@@ -1235,7 +1220,6 @@ PHP_FUNCTION(tidy_is_xhtml)
 
 	RETURN_BOOL(tidyDetectedXhtml(obj->ptdoc->doc));
 }
-/* }}} */
 
 /* Indicates if the document is a generic (non HTML/XHTML) XML document. */
 PHP_FUNCTION(tidy_is_xml)
@@ -1244,7 +1228,6 @@ PHP_FUNCTION(tidy_is_xml)
 
 	RETURN_BOOL(tidyDetectedGenericXml(obj->ptdoc->doc));
 }
-/* }}} */
 
 /* Returns the Number of Tidy errors encountered for specified document. */
 PHP_FUNCTION(tidy_error_count)
@@ -1253,7 +1236,6 @@ PHP_FUNCTION(tidy_error_count)
 
 	RETURN_LONG(tidyErrorCount(obj->ptdoc->doc));
 }
-/* }}} */
 
 /* Returns the Number of Tidy warnings encountered for specified document. */
 PHP_FUNCTION(tidy_warning_count)
@@ -1262,7 +1244,6 @@ PHP_FUNCTION(tidy_warning_count)
 
 	RETURN_LONG(tidyWarningCount(obj->ptdoc->doc));
 }
-/* }}} */
 
 /* Returns the Number of Tidy accessibility warnings encountered for specified document. */
 PHP_FUNCTION(tidy_access_count)
@@ -1271,7 +1252,6 @@ PHP_FUNCTION(tidy_access_count)
 
 	RETURN_LONG(tidyAccessWarningCount(obj->ptdoc->doc));
 }
-/* }}} */
 
 /* Returns the Number of Tidy configuration errors encountered for specified document. */
 PHP_FUNCTION(tidy_config_count)
@@ -1280,7 +1260,6 @@ PHP_FUNCTION(tidy_config_count)
 
 	RETURN_LONG(tidyConfigErrorCount(obj->ptdoc->doc));
 }
-/* }}} */
 
 /* Returns the value of the specified configuration option for the tidy document. */
 PHP_FUNCTION(tidy_getopt)
@@ -1331,7 +1310,6 @@ PHP_FUNCTION(tidy_getopt)
 
 	RETURN_FALSE;
 }
-/* }}} */
 
 PHP_METHOD(tidy, __construct)
 {
@@ -1445,28 +1423,24 @@ PHP_FUNCTION(tidy_get_root)
 {
 	php_tidy_create_node(INTERNAL_FUNCTION_PARAM_PASSTHRU, is_root_node);
 }
-/* }}} */
 
 /* Returns a TidyNode Object starting from the <HTML> tag of the tidy parse tree */
 PHP_FUNCTION(tidy_get_html)
 {
 	php_tidy_create_node(INTERNAL_FUNCTION_PARAM_PASSTHRU, is_html_node);
 }
-/* }}} */
 
 /* Returns a TidyNode Object starting from the <HEAD> tag of the tidy parse tree */
 PHP_FUNCTION(tidy_get_head)
 {
 	php_tidy_create_node(INTERNAL_FUNCTION_PARAM_PASSTHRU, is_head_node);
 }
-/* }}} */
 
 /* Returns a TidyNode Object starting from the <BODY> tag of the tidy parse tree */
 PHP_FUNCTION(tidy_get_body)
 {
 	php_tidy_create_node(INTERNAL_FUNCTION_PARAM_PASSTHRU, is_body_node);
 }
-/* }}} */
 
 /* Returns true if this node has children */
 PHP_METHOD(tidyNode, hasChildren)
@@ -1479,7 +1453,6 @@ PHP_METHOD(tidyNode, hasChildren)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Returns true if this node has siblings */
 PHP_METHOD(tidyNode, hasSiblings)
@@ -1492,7 +1465,6 @@ PHP_METHOD(tidyNode, hasSiblings)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Returns true if this node represents a comment */
 PHP_METHOD(tidyNode, isComment)
@@ -1505,7 +1477,6 @@ PHP_METHOD(tidyNode, isComment)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Returns true if this node is part of a HTML document */
 PHP_METHOD(tidyNode, isHtml)
@@ -1518,7 +1489,6 @@ PHP_METHOD(tidyNode, isHtml)
 
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* Returns true if this node represents text (no markup) */
 PHP_METHOD(tidyNode, isText)
@@ -1531,7 +1501,6 @@ PHP_METHOD(tidyNode, isText)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Returns true if this node is JSTE */
 PHP_METHOD(tidyNode, isJste)
@@ -1544,7 +1513,6 @@ PHP_METHOD(tidyNode, isJste)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Returns true if this node is ASP */
 PHP_METHOD(tidyNode, isAsp)
@@ -1557,7 +1525,6 @@ PHP_METHOD(tidyNode, isAsp)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Returns true if this node is PHP */
 PHP_METHOD(tidyNode, isPhp)
@@ -1570,7 +1537,6 @@ PHP_METHOD(tidyNode, isPhp)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Returns the parent node if available or NULL */
 PHP_METHOD(tidyNode, getParent)
@@ -1592,15 +1558,12 @@ PHP_METHOD(tidyNode, getParent)
 		ZVAL_NULL(return_value);
 	}
 }
-/* }}} */
-
 
 /* __constructor for tidyNode. */
 PHP_METHOD(tidyNode, __construct)
 {
 	zend_throw_error(NULL, "You should not create a tidyNode manually");
 }
-/* }}} */
 
 static void _php_tidy_register_nodetypes(INIT_FUNC_ARGS)
 {

@@ -45,7 +45,7 @@ typedef struct _zend_closure {
 ZEND_API zend_class_entry *zend_ce_closure;
 static zend_object_handlers closure_handlers;
 
-ZEND_METHOD(Closure, __invoke) /* {{{ */
+ZEND_METHOD(Closure, __invoke)
 {
 	zend_function *func = EX(func);
 	zval *arguments = ZEND_CALL_ARG(execute_data, 1);
@@ -61,10 +61,9 @@ ZEND_METHOD(Closure, __invoke) /* {{{ */
 	execute_data->func = NULL;
 #endif
 }
-/* }}} */
 
 static zend_bool zend_valid_closure_binding(
-		zend_closure *closure, zval *newthis, zend_class_entry *scope) /* {{{ */
+		zend_closure *closure, zval *newthis, zend_class_entry *scope)
 {
 	zend_function *func = &closure->func;
 	zend_bool is_fake_closure = (func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE) != 0;
@@ -107,7 +106,6 @@ static zend_bool zend_valid_closure_binding(
 
 	return 1;
 }
-/* }}} */
 
 /* Call closure, binding to a given object with its class as the scope */
 ZEND_METHOD(Closure, call)
@@ -184,7 +182,6 @@ ZEND_METHOD(Closure, call)
 		efree(ZEND_MAP_PTR(my_function.op_array.run_time_cache));
 	}
 }
-/* }}} */
 
 /* Create a closure from another one and bind to another object and scope */
 ZEND_METHOD(Closure, bind)
@@ -232,9 +229,8 @@ ZEND_METHOD(Closure, bind)
 
 	zend_create_closure(return_value, &closure->func, ce, called_scope, newthis);
 }
-/* }}} */
 
-static ZEND_NAMED_FUNCTION(zend_closure_call_magic) /* {{{ */ {
+static ZEND_NAMED_FUNCTION(zend_closure_call_magic) {
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcc;
 	zval params[2];
@@ -264,9 +260,8 @@ static ZEND_NAMED_FUNCTION(zend_closure_call_magic) /* {{{ */ {
 	zval_ptr_dtor(&fci.params[0]);
 	zval_ptr_dtor(&fci.params[1]);
 }
-/* }}} */
 
-static int zend_create_closure_from_callable(zval *return_value, zval *callable, char **error) /* {{{ */ {
+static int zend_create_closure_from_callable(zval *return_value, zval *callable, char **error) {
 	zend_fcall_info_cache fcc;
 	zend_function *mptr;
 	zval instance;
@@ -320,7 +315,6 @@ static int zend_create_closure_from_callable(zval *return_value, zval *callable,
 
 	return SUCCESS;
 }
-/* }}} */
 
 /* Create a closure from a callable using the current scope. */
 ZEND_METHOD(Closure, fromCallable)
@@ -352,23 +346,20 @@ ZEND_METHOD(Closure, fromCallable)
 		}
 	}
 }
-/* }}} */
 
-static ZEND_COLD zend_function *zend_closure_get_constructor(zend_object *object) /* {{{ */
+static ZEND_COLD zend_function *zend_closure_get_constructor(zend_object *object)
 {
 	zend_throw_error(NULL, "Instantiation of 'Closure' is not allowed");
 	return NULL;
 }
-/* }}} */
 
-static int zend_closure_compare(zval *o1, zval *o2) /* {{{ */
+static int zend_closure_compare(zval *o1, zval *o2)
 {
 	ZEND_COMPARE_OBJECTS_FALLBACK(o1, o2);
 	return Z_OBJ_P(o1) != Z_OBJ_P(o2);
 }
-/* }}} */
 
-ZEND_API zend_function *zend_get_closure_invoke_method(zend_object *object) /* {{{ */
+ZEND_API zend_function *zend_get_closure_invoke_method(zend_object *object)
 {
 	zend_closure *closure = (zend_closure *)object;
 	zend_function *invoke = (zend_function*)emalloc(sizeof(zend_function));
@@ -394,23 +385,20 @@ ZEND_API zend_function *zend_get_closure_invoke_method(zend_object *object) /* {
 	invoke->internal_function.function_name = ZSTR_KNOWN(ZEND_STR_MAGIC_INVOKE);
 	return invoke;
 }
-/* }}} */
 
-ZEND_API const zend_function *zend_get_closure_method_def(zval *obj) /* {{{ */
+ZEND_API const zend_function *zend_get_closure_method_def(zval *obj)
 {
 	zend_closure *closure = (zend_closure *)Z_OBJ_P(obj);
 	return &closure->func;
 }
-/* }}} */
 
-ZEND_API zval* zend_get_closure_this_ptr(zval *obj) /* {{{ */
+ZEND_API zval* zend_get_closure_this_ptr(zval *obj)
 {
 	zend_closure *closure = (zend_closure *)Z_OBJ_P(obj);
 	return &closure->this_ptr;
 }
-/* }}} */
 
-static zend_function *zend_closure_get_method(zend_object **object, zend_string *method, const zval *key) /* {{{ */
+static zend_function *zend_closure_get_method(zend_object **object, zend_string *method, const zval *key)
 {
 	if (zend_string_equals_literal_ci(method, ZEND_INVOKE_FUNC_NAME)) {
 		return zend_get_closure_invoke_method(*object);
@@ -418,45 +406,39 @@ static zend_function *zend_closure_get_method(zend_object **object, zend_string 
 
 	return zend_std_get_method(object, method, key);
 }
-/* }}} */
 
-static ZEND_COLD zval *zend_closure_read_property(zend_object *object, zend_string *member, int type, void **cache_slot, zval *rv) /* {{{ */
+static ZEND_COLD zval *zend_closure_read_property(zend_object *object, zend_string *member, int type, void **cache_slot, zval *rv)
 {
 	ZEND_CLOSURE_PROPERTY_ERROR();
 	return &EG(uninitialized_zval);
 }
-/* }}} */
 
-static ZEND_COLD zval *zend_closure_write_property(zend_object *object, zend_string *member, zval *value, void **cache_slot) /* {{{ */
+static ZEND_COLD zval *zend_closure_write_property(zend_object *object, zend_string *member, zval *value, void **cache_slot)
 {
 	ZEND_CLOSURE_PROPERTY_ERROR();
 	return &EG(error_zval);
 }
-/* }}} */
 
-static ZEND_COLD zval *zend_closure_get_property_ptr_ptr(zend_object *object, zend_string *member, int type, void **cache_slot) /* {{{ */
+static ZEND_COLD zval *zend_closure_get_property_ptr_ptr(zend_object *object, zend_string *member, int type, void **cache_slot)
 {
 	ZEND_CLOSURE_PROPERTY_ERROR();
 	return NULL;
 }
-/* }}} */
 
-static ZEND_COLD int zend_closure_has_property(zend_object *object, zend_string *member, int has_set_exists, void **cache_slot) /* {{{ */
+static ZEND_COLD int zend_closure_has_property(zend_object *object, zend_string *member, int has_set_exists, void **cache_slot)
 {
 	if (has_set_exists != ZEND_PROPERTY_EXISTS) {
 		ZEND_CLOSURE_PROPERTY_ERROR();
 	}
 	return 0;
 }
-/* }}} */
 
-static ZEND_COLD void zend_closure_unset_property(zend_object *object, zend_string *member, void **cache_slot) /* {{{ */
+static ZEND_COLD void zend_closure_unset_property(zend_object *object, zend_string *member, void **cache_slot)
 {
 	ZEND_CLOSURE_PROPERTY_ERROR();
 }
-/* }}} */
 
-static void zend_closure_free_storage(zend_object *object) /* {{{ */
+static void zend_closure_free_storage(zend_object *object)
 {
 	zend_closure *closure = (zend_closure *)object;
 
@@ -470,9 +452,8 @@ static void zend_closure_free_storage(zend_object *object) /* {{{ */
 		zval_ptr_dtor(&closure->this_ptr);
 	}
 }
-/* }}} */
 
-static zend_object *zend_closure_new(zend_class_entry *class_type) /* {{{ */
+static zend_object *zend_closure_new(zend_class_entry *class_type)
 {
 	zend_closure *closure;
 
@@ -484,9 +465,8 @@ static zend_object *zend_closure_new(zend_class_entry *class_type) /* {{{ */
 
 	return (zend_object*)closure;
 }
-/* }}} */
 
-static zend_object *zend_closure_clone(zend_object *zobject) /* {{{ */
+static zend_object *zend_closure_clone(zend_object *zobject)
 {
 	zend_closure *closure = (zend_closure *)zobject;
 	zval result;
@@ -495,9 +475,8 @@ static zend_object *zend_closure_clone(zend_object *zobject) /* {{{ */
 		closure->func.common.scope, closure->called_scope, &closure->this_ptr);
 	return Z_OBJ(result);
 }
-/* }}} */
 
-int zend_closure_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr, zend_bool check_only) /* {{{ */
+int zend_closure_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr, zend_bool check_only)
 {
 	zend_closure *closure = (zend_closure *)obj;
 	*fptr_ptr = &closure->func;
@@ -511,9 +490,8 @@ int zend_closure_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_f
 
 	return SUCCESS;
 }
-/* }}} */
 
-static HashTable *zend_closure_get_debug_info(zend_object *object, int *is_temp) /* {{{ */
+static HashTable *zend_closure_get_debug_info(zend_object *object, int *is_temp)
 {
 	zend_closure *closure = (zend_closure *)object;
 	zval val;
@@ -576,9 +554,8 @@ static HashTable *zend_closure_get_debug_info(zend_object *object, int *is_temp)
 
 	return debug_info;
 }
-/* }}} */
 
-static HashTable *zend_closure_get_gc(zend_object *obj, zval **table, int *n) /* {{{ */
+static HashTable *zend_closure_get_gc(zend_object *obj, zval **table, int *n)
 {
 	zend_closure *closure = (zend_closure *)obj;
 
@@ -587,14 +564,12 @@ static HashTable *zend_closure_get_gc(zend_object *obj, zval **table, int *n) /*
 	return (closure->func.type == ZEND_USER_FUNCTION) ?
 		ZEND_MAP_PTR_GET(closure->func.op_array.static_variables_ptr) : NULL;
 }
-/* }}} */
 
 /* Private constructor preventing instantiation */
 ZEND_COLD ZEND_METHOD(Closure, __construct)
 {
 	zend_throw_error(NULL, "Instantiation of 'Closure' is not allowed");
 }
-/* }}} */
 
 static const zend_function_entry closure_functions[] = {
 	ZEND_ME(Closure, __construct, arginfo_class_Closure___construct, ZEND_ACC_PRIVATE)
@@ -605,7 +580,7 @@ static const zend_function_entry closure_functions[] = {
 	ZEND_FE_END
 };
 
-void zend_register_closure_ce(void) /* {{{ */
+void zend_register_closure_ce(void)
 {
 	zend_class_entry ce;
 
@@ -631,18 +606,16 @@ void zend_register_closure_ce(void) /* {{{ */
 	closure_handlers.get_closure = zend_closure_get_closure;
 	closure_handlers.get_gc = zend_closure_get_gc;
 }
-/* }}} */
 
-static ZEND_NAMED_FUNCTION(zend_closure_internal_handler) /* {{{ */
+static ZEND_NAMED_FUNCTION(zend_closure_internal_handler)
 {
 	zend_closure *closure = (zend_closure*)ZEND_CLOSURE_OBJECT(EX(func));
 	closure->orig_internal_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	OBJ_RELEASE((zend_object*)closure);
 	EX(func) = NULL;
 }
-/* }}} */
 
-ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_entry *scope, zend_class_entry *called_scope, zval *this_ptr) /* {{{ */
+ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_entry *scope, zend_class_entry *called_scope, zval *this_ptr)
 {
 	zend_closure *closure;
 
@@ -735,9 +708,8 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 		}
 	}
 }
-/* }}} */
 
-ZEND_API void zend_create_fake_closure(zval *res, zend_function *func, zend_class_entry *scope, zend_class_entry *called_scope, zval *this_ptr) /* {{{ */
+ZEND_API void zend_create_fake_closure(zval *res, zend_function *func, zend_class_entry *scope, zend_class_entry *called_scope, zval *this_ptr)
 {
 	zend_closure *closure;
 
@@ -746,17 +718,15 @@ ZEND_API void zend_create_fake_closure(zval *res, zend_function *func, zend_clas
 	closure = (zend_closure *)Z_OBJ_P(res);
 	closure->func.common.fn_flags |= ZEND_ACC_FAKE_CLOSURE;
 }
-/* }}} */
 
-void zend_closure_bind_var(zval *closure_zv, zend_string *var_name, zval *var) /* {{{ */
+void zend_closure_bind_var(zval *closure_zv, zend_string *var_name, zval *var)
 {
 	zend_closure *closure = (zend_closure *) Z_OBJ_P(closure_zv);
 	HashTable *static_variables = ZEND_MAP_PTR_GET(closure->func.op_array.static_variables_ptr);
 	zend_hash_update(static_variables, var_name, var);
 }
-/* }}} */
 
-void zend_closure_bind_var_ex(zval *closure_zv, uint32_t offset, zval *val) /* {{{ */
+void zend_closure_bind_var_ex(zval *closure_zv, uint32_t offset, zval *val)
 {
 	zend_closure *closure = (zend_closure *) Z_OBJ_P(closure_zv);
 	HashTable *static_variables = ZEND_MAP_PTR_GET(closure->func.op_array.static_variables_ptr);
@@ -764,4 +734,4 @@ void zend_closure_bind_var_ex(zval *closure_zv, uint32_t offset, zval *val) /* {
 	zval_ptr_dtor(var);
 	ZVAL_COPY_VALUE(var, val);
 }
-/* }}} */
+

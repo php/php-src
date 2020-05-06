@@ -32,7 +32,7 @@
 
 extern zend_class_entry *dom_domexception_class_entry;
 
-void php_dom_throw_error_with_message(int error_code, char *error_message, int strict_error) /* {{{ */
+void php_dom_throw_error_with_message(int error_code, char *error_message, int strict_error)
 {
 	if (strict_error == 1) {
 		zend_throw_exception(dom_domexception_class_entry, error_message, error_code);
@@ -40,9 +40,8 @@ void php_dom_throw_error_with_message(int error_code, char *error_message, int s
 		php_libxml_issue_error(E_WARNING, error_message);
 	}
 }
-/* }}} */
 
-/* {{{ php_dom_throw_error */
+/* php_dom_throw_error */
 void php_dom_throw_error(int error_code, int strict_error)
 {
 	char *error_message;
@@ -103,6 +102,5 @@ void php_dom_throw_error(int error_code, int strict_error)
 
 	php_dom_throw_error_with_message(error_code, error_message, strict_error);
 }
-/* }}} end php_dom_throw_error */
 
 #endif /* HAVE_LIBXML && HAVE_DOM */

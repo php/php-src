@@ -29,7 +29,7 @@
 
 static inline ub4 pdo_oci_sanitize_prefetch(long prefetch);
 
-static int pdo_oci_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info) /* {{{ */
+static int pdo_oci_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info)
 {
 	pdo_oci_db_handle *H = (pdo_oci_db_handle *)dbh->driver_data;
 	pdo_oci_error_info *einfo;
@@ -51,9 +51,8 @@ static int pdo_oci_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info
 
 	return 1;
 }
-/* }}} */
 
-ub4 _oci_error(OCIError *err, pdo_dbh_t *dbh, pdo_stmt_t *stmt, char *what, sword status, int isinit, const char *file, int line) /* {{{ */
+ub4 _oci_error(OCIError *err, pdo_dbh_t *dbh, pdo_stmt_t *stmt, char *what, sword status, int isinit, const char *file, int line)
 {
 	text errbuf[1024] = "<<Unknown>>";
 	char tmp_buf[2048];
@@ -183,9 +182,8 @@ ub4 _oci_error(OCIError *err, pdo_dbh_t *dbh, pdo_stmt_t *stmt, char *what, swor
 
 	return einfo->errcode;
 }
-/* }}} */
 
-static int oci_handle_closer(pdo_dbh_t *dbh) /* {{{ */
+static int oci_handle_closer(pdo_dbh_t *dbh)
 {
 	pdo_oci_db_handle *H = (pdo_oci_db_handle *)dbh->driver_data;
 
@@ -236,9 +234,8 @@ static int oci_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 
 	return 0;
 }
-/* }}} */
 
-static int oci_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len, pdo_stmt_t *stmt, zval *driver_options) /* {{{ */
+static int oci_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len, pdo_stmt_t *stmt, zval *driver_options)
 {
 	pdo_oci_db_handle *H = (pdo_oci_db_handle *)dbh->driver_data;
 	pdo_oci_stmt *S = ecalloc(1, sizeof(*S));
@@ -310,9 +307,8 @@ static int oci_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len, 
 
 	return 1;
 }
-/* }}} */
 
-static zend_long oci_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sql_len) /* {{{ */
+static zend_long oci_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sql_len)
 {
 	pdo_oci_db_handle *H = (pdo_oci_db_handle *)dbh->driver_data;
 	OCIStmt		*stmt;
@@ -354,9 +350,8 @@ static zend_long oci_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sql_len
 
 	return ret;
 }
-/* }}} */
 
-static int oci_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unquotedlen, char **quoted, size_t *quotedlen, enum pdo_param_type paramtype ) /* {{{ */
+static int oci_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unquotedlen, char **quoted, size_t *quotedlen, enum pdo_param_type paramtype )
 {
 	int qcount = 0;
 	char const *cu, *l, *r;
@@ -391,16 +386,14 @@ static int oci_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unquot
 
 	return 1;
 }
-/* }}} */
 
-static int oci_handle_begin(pdo_dbh_t *dbh) /* {{{ */
+static int oci_handle_begin(pdo_dbh_t *dbh)
 {
 	/* with Oracle, there is nothing special to be done */
 	return 1;
 }
-/* }}} */
 
-static int oci_handle_commit(pdo_dbh_t *dbh) /* {{{ */
+static int oci_handle_commit(pdo_dbh_t *dbh)
 {
 	pdo_oci_db_handle *H = (pdo_oci_db_handle *)dbh->driver_data;
 
@@ -412,9 +405,8 @@ static int oci_handle_commit(pdo_dbh_t *dbh) /* {{{ */
 	}
 	return 1;
 }
-/* }}} */
 
-static int oci_handle_rollback(pdo_dbh_t *dbh) /* {{{ */
+static int oci_handle_rollback(pdo_dbh_t *dbh)
 {
 	pdo_oci_db_handle *H = (pdo_oci_db_handle *)dbh->driver_data;
 
@@ -426,9 +418,8 @@ static int oci_handle_rollback(pdo_dbh_t *dbh) /* {{{ */
 	}
 	return 1;
 }
-/* }}} */
 
-static int oci_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /* {{{ */
+static int oci_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 {
 	zend_long lval = zval_get_long(val);
 	pdo_oci_db_handle *H = (pdo_oci_db_handle *)dbh->driver_data;
@@ -562,9 +553,8 @@ static int oci_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /
 	}
 
 }
-/* }}} */
 
-static int oci_handle_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_value)  /* {{{ */
+static int oci_handle_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_value)
 {
 	pdo_oci_db_handle *H = (pdo_oci_db_handle *)dbh->driver_data;
 
@@ -651,9 +641,8 @@ static int oci_handle_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return
 	return FALSE;
 
 }
-/* }}} */
 
-static int pdo_oci_check_liveness(pdo_dbh_t *dbh) /* {{{ */
+static int pdo_oci_check_liveness(pdo_dbh_t *dbh)
 {
 	pdo_oci_db_handle *H = (pdo_oci_db_handle *)dbh->driver_data;
 	sb4 error_code = 0;
@@ -690,7 +679,6 @@ static int pdo_oci_check_liveness(pdo_dbh_t *dbh) /* {{{ */
 	}
 	return FAILURE;
 }
-/* }}} */
 
 static const struct pdo_dbh_methods oci_methods = {
 	oci_handle_closer,
@@ -708,7 +696,7 @@ static const struct pdo_dbh_methods oci_methods = {
 	NULL	/* get_driver_methods */
 };
 
-static int pdo_oci_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ */
+static int pdo_oci_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 {
 	pdo_oci_db_handle *H;
 	int i, ret = 0;
@@ -852,14 +840,13 @@ cleanup:
 
 	return ret;
 }
-/* }}} */
 
 const pdo_driver_t pdo_oci_driver = {
 	PDO_DRIVER_HEADER(oci),
 	pdo_oci_handle_factory
 };
 
-static inline ub4 pdo_oci_sanitize_prefetch(long prefetch) /* {{{ */
+static inline ub4 pdo_oci_sanitize_prefetch(long prefetch)
 {
 	if (prefetch < 0) {
 		prefetch = 0;
@@ -868,4 +855,4 @@ static inline ub4 pdo_oci_sanitize_prefetch(long prefetch) /* {{{ */
 	}
 	return ((ub4)prefetch);
 }
-/* }}} */
+

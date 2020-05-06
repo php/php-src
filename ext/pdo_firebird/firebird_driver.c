@@ -33,18 +33,17 @@ static int firebird_alloc_prepare_stmt(pdo_dbh_t*, const char*, size_t, XSQLDA*,
 	HashTable*);
 
 /* map driver specific error message to PDO error */
-void _firebird_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, char const *file, zend_long line) /* {{{ */
+void _firebird_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, char const *file, zend_long line)
 {
 	pdo_error_type *const error_code = stmt ? &stmt->error_code : &dbh->error_code;
 
 	strcpy(*error_code, "HY000");
 }
-/* }}} */
 
 #define RECORD_ERROR(dbh) _firebird_error(dbh, NULL, __FILE__, __LINE__)
 
 /* called by PDO to close a db handle */
-static int firebird_handle_closer(pdo_dbh_t *dbh) /* {{{ */
+static int firebird_handle_closer(pdo_dbh_t *dbh)
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 
@@ -78,10 +77,9 @@ static int firebird_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 
 	return 0;
 }
-/* }}} */
 
 /* called by PDO to prepare an SQL query */
-static int firebird_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len, /* {{{ */
+static int firebird_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len,
 	pdo_stmt_t *stmt, zval *driver_options)
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
@@ -164,10 +162,9 @@ static int firebird_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_
 
 	return 0;
 }
-/* }}} */
 
 /* called by PDO to execute a statement that doesn't produce a result set */
-static zend_long firebird_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sql_len) /* {{{ */
+static zend_long firebird_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sql_len)
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 	isc_stmt_handle stmt = PDO_FIREBIRD_HANDLE_INITIALIZER;
@@ -226,10 +223,9 @@ free_statement:
 
 	return ret;
 }
-/* }}} */
 
 /* called by the PDO SQL parser to add quotes to values that are copied into SQL */
-static int firebird_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unquotedlen, /* {{{ */
+static int firebird_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unquotedlen,
 	char **quoted, size_t *quotedlen, enum pdo_param_type paramtype)
 {
 	int qcount = 0;
@@ -266,10 +262,9 @@ static int firebird_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t u
 
 	return 1;
 }
-/* }}} */
 
 /* called by PDO to start a transaction */
-static int firebird_handle_begin(pdo_dbh_t *dbh) /* {{{ */
+static int firebird_handle_begin(pdo_dbh_t *dbh)
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 	char tpb[8] = { isc_tpb_version3 }, *ptpb = tpb+1;
@@ -319,10 +314,9 @@ static int firebird_handle_begin(pdo_dbh_t *dbh) /* {{{ */
 	}
 	return 1;
 }
-/* }}} */
 
 /* called by PDO to commit a transaction */
-static int firebird_handle_commit(pdo_dbh_t *dbh) /* {{{ */
+static int firebird_handle_commit(pdo_dbh_t *dbh)
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 
@@ -332,10 +326,9 @@ static int firebird_handle_commit(pdo_dbh_t *dbh) /* {{{ */
 	}
 	return 1;
 }
-/* }}} */
 
 /* called by PDO to rollback a transaction */
-static int firebird_handle_rollback(pdo_dbh_t *dbh) /* {{{ */
+static int firebird_handle_rollback(pdo_dbh_t *dbh)
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 
@@ -345,10 +338,9 @@ static int firebird_handle_rollback(pdo_dbh_t *dbh) /* {{{ */
 	}
 	return 1;
 }
-/* }}} */
 
 /* used by prepare and exec to allocate a statement handle and prepare the SQL */
-static int firebird_alloc_prepare_stmt(pdo_dbh_t *dbh, const char *sql, size_t sql_len, /* {{{ */
+static int firebird_alloc_prepare_stmt(pdo_dbh_t *dbh, const char *sql, size_t sql_len,
 	XSQLDA *out_sqlda, isc_stmt_handle *s, HashTable *named_params)
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
@@ -424,10 +416,9 @@ static int firebird_alloc_prepare_stmt(pdo_dbh_t *dbh, const char *sql, size_t s
 	efree(new_sql);
 	return 1;
 }
-/* }}} */
 
 /* called by PDO to set a driver-specific dbh attribute */
-static int firebird_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /* {{{ */
+static int firebird_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 
@@ -505,10 +496,9 @@ static int firebird_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *v
 	}
 	return 0;
 }
-/* }}} */
 
 /* callback to used to report database server info */
-static void firebird_info_cb(void *arg, char const *s) /* {{{ */
+static void firebird_info_cb(void *arg, char const *s)
 {
 	if (arg) {
 		if (*(char*)arg) { /* second call */
@@ -517,10 +507,9 @@ static void firebird_info_cb(void *arg, char const *s) /* {{{ */
 		strcat(arg, s);
 	}
 }
-/* }}} */
 
 /* called by PDO to get a driver-specific dbh attribute */
-static int firebird_handle_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /* {{{ */
+static int firebird_handle_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 
@@ -573,10 +562,9 @@ static int firebird_handle_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *v
 	}
 	return 0;
 }
-/* }}} */
 
 /* called by PDO to retrieve driver-specific information about an error that has occurred */
-static int pdo_firebird_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info) /* {{{ */
+static int pdo_firebird_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info)
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 	const ISC_STATUS *s = H->isc_status;
@@ -597,9 +585,8 @@ static int pdo_firebird_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval 
 	}
 	return 1;
 }
-/* }}} */
 
-static const struct pdo_dbh_methods firebird_methods = { /* {{{ */
+static const struct pdo_dbh_methods firebird_methods = {
 	firebird_handle_closer,
 	firebird_handle_preparer,
 	firebird_handle_doer,
@@ -613,10 +600,9 @@ static const struct pdo_dbh_methods firebird_methods = { /* {{{ */
 	firebird_handle_get_attribute,
 	NULL /* check_liveness */
 };
-/* }}} */
 
 /* the driver-specific PDO handle constructor */
-static int pdo_firebird_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ */
+static int pdo_firebird_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 {
 	struct pdo_data_src_parser vars[] = {
 		{ "dbname", NULL, 0 },
@@ -697,11 +683,9 @@ static int pdo_firebird_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* 
 
 	return ret;
 }
-/* }}} */
 
-
-const pdo_driver_t pdo_firebird_driver = { /* {{{ */
+const pdo_driver_t pdo_firebird_driver = {
 	PDO_DRIVER_HEADER(firebird),
 	pdo_firebird_handle_factory
 };
-/* }}} */
+

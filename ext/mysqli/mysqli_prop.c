@@ -107,16 +107,15 @@ static int __func(mysqli_object *obj, zval *retval, zend_bool quiet)\
 	return SUCCESS; \
 }
 
-/* {{{ property link_client_version_read */
+/* property link_client_version_read */
 static int link_client_version_read(mysqli_object *obj, zval *retval, zend_bool quiet)
 {
 	ZVAL_LONG(retval, MYSQL_VERSION_ID);
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ property link_client_info_read */
+/* property link_client_info_read */
 static int link_client_info_read(mysqli_object *obj, zval *retval, zend_bool quiet)
 {
 	CHECK_STATUS(MYSQLI_STATUS_INITIALIZED, quiet);
@@ -124,18 +123,16 @@ static int link_client_info_read(mysqli_object *obj, zval *retval, zend_bool qui
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ property link_connect_errno_read */
+/* property link_connect_errno_read */
 static int link_connect_errno_read(mysqli_object *obj, zval *retval, zend_bool quiet)
 {
 	ZVAL_LONG(retval, (zend_long)MyG(error_no));
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ property link_connect_error_read */
+/* property link_connect_error_read */
 static int link_connect_error_read(mysqli_object *obj, zval *retval, zend_bool quiet)
 {
 	if (MyG(error_msg)) {
@@ -146,9 +143,8 @@ static int link_connect_error_read(mysqli_object *obj, zval *retval, zend_bool q
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ property link_affected_rows_read */
+/* property link_affected_rows_read */
 static int link_affected_rows_read(mysqli_object *obj, zval *retval, zend_bool quiet)
 {
 	MY_MYSQL *mysql;
@@ -179,9 +175,8 @@ static int link_affected_rows_read(mysqli_object *obj, zval *retval, zend_bool q
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ property link_error_list_read */
+/* property link_error_list_read */
 static int link_error_list_read(mysqli_object *obj, zval *retval, zend_bool quiet)
 {
 	MY_MYSQL *mysql;
@@ -224,7 +219,6 @@ static int link_error_list_read(mysqli_object *obj, zval *retval, zend_bool quie
 
 	return SUCCESS;
 }
-/* }}} */
 
 /* link properties */
 MYSQLI_MAP_PROPERTY_FUNC_LONG(link_errno_read, mysql_errno, MYSQLI_GET_MYSQL(MYSQLI_STATUS_INITIALIZED), zend_ulong, ZEND_ULONG_FMT)
@@ -242,7 +236,7 @@ MYSQLI_MAP_PROPERTY_FUNC_LONG(link_warning_count_read, mysql_warning_count, MYSQ
 
 /* result properties */
 
-/* {{{ property result_type_read */
+/* property result_type_read */
 static int result_type_read(mysqli_object *obj, zval *retval, zend_bool quiet)
 {
 	MYSQL_RES *p;
@@ -258,9 +252,8 @@ static int result_type_read(mysqli_object *obj, zval *retval, zend_bool quiet)
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ property result_lengths_read */
+/* property result_lengths_read */
 static int result_lengths_read(mysqli_object *obj, zval *retval, zend_bool quiet)
 {
 	MYSQL_RES *p;
@@ -288,7 +281,6 @@ static int result_lengths_read(mysqli_object *obj, zval *retval, zend_bool quiet
 
 	return SUCCESS;
 }
-/* }}} */
 
 MYSQLI_MAP_PROPERTY_FUNC_LONG(result_current_field_read, mysql_field_tell, MYSQLI_GET_RESULT(MYSQLI_STATUS_VALID), zend_ulong, ZEND_ULONG_FMT)
 MYSQLI_MAP_PROPERTY_FUNC_LONG(result_field_count_read, mysql_num_fields, MYSQLI_GET_RESULT(MYSQLI_STATUS_VALID), zend_ulong, ZEND_ULONG_FMT)
@@ -296,7 +288,7 @@ MYSQLI_MAP_PROPERTY_FUNC_LONG(result_num_rows_read, mysql_num_rows, MYSQLI_GET_R
 
 /* statement properties */
 
-/* {{{ property stmt_id_read */
+/* property stmt_id_read */
 static int stmt_id_read(mysqli_object *obj, zval *retval, zend_bool quiet)
 {
 	MY_STMT *p;
@@ -313,9 +305,8 @@ static int stmt_id_read(mysqli_object *obj, zval *retval, zend_bool quiet)
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ property stmt_affected_rows_read */
+/* property stmt_affected_rows_read */
 static int stmt_affected_rows_read(mysqli_object *obj, zval *retval, zend_bool quiet)
 {
 	MY_STMT *p;
@@ -344,9 +335,8 @@ static int stmt_affected_rows_read(mysqli_object *obj, zval *retval, zend_bool q
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ property stmt_error_list_read */
+/* property stmt_error_list_read */
 static int stmt_error_list_read(mysqli_object *obj, zval *retval, zend_bool quiet)
 {
 	MY_STMT * stmt;
@@ -388,7 +378,6 @@ static int stmt_error_list_read(mysqli_object *obj, zval *retval, zend_bool quie
 
 	return SUCCESS;
 }
-/* }}} */
 
 MYSQLI_MAP_PROPERTY_FUNC_LONG(stmt_insert_id_read, mysql_stmt_insert_id, MYSQLI_GET_STMT(MYSQLI_STATUS_VALID), my_ulonglong, MYSQLI_LLU_SPEC)
 MYSQLI_MAP_PROPERTY_FUNC_LONG(stmt_num_rows_read, mysql_stmt_num_rows, MYSQLI_GET_STMT(MYSQLI_STATUS_VALID), my_ulonglong, MYSQLI_LLU_SPEC)
@@ -398,7 +387,7 @@ MYSQLI_MAP_PROPERTY_FUNC_LONG(stmt_errno_read, mysql_stmt_errno, MYSQLI_GET_STMT
 MYSQLI_MAP_PROPERTY_FUNC_STRING(stmt_error_read, mysql_stmt_error, MYSQLI_GET_STMT(MYSQLI_STATUS_INITIALIZED))
 MYSQLI_MAP_PROPERTY_FUNC_STRING(stmt_sqlstate_read, mysql_stmt_sqlstate, MYSQLI_GET_STMT(MYSQLI_STATUS_INITIALIZED))
 
-/* }}} */
+
 const mysqli_property_entry mysqli_link_property_entries[] = {
 	{"affected_rows", 	sizeof("affected_rows") - 1,	link_affected_rows_read, NULL},
 	{"client_info", 	sizeof("client_info") - 1,		link_client_info_read, NULL},

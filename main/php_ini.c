@@ -65,7 +65,7 @@ static php_extension_lists extension_lists;
 PHPAPI char *php_ini_scanned_path=NULL;
 PHPAPI char *php_ini_scanned_files=NULL;
 
-/* {{{ php_ini_displayer_cb
+/* php_ini_displayer_cb
  */
 static ZEND_COLD void php_ini_displayer_cb(zend_ini_entry *ini_entry, int type)
 {
@@ -111,9 +111,8 @@ static ZEND_COLD void php_ini_displayer_cb(zend_ini_entry *ini_entry, int type)
 		}
 	}
 }
-/* }}} */
 
-/* {{{ display_ini_entries
+/* display_ini_entries
  */
 PHPAPI ZEND_COLD void display_ini_entries(zend_module_entry *module)
 {
@@ -158,13 +157,12 @@ PHPAPI ZEND_COLD void display_ini_entries(zend_module_entry *module)
 		php_info_print_table_end();
 	}
 }
-/* }}} */
 
 /* php.ini support */
 #define PHP_EXTENSION_TOKEN		"extension"
 #define ZEND_EXTENSION_TOKEN	"zend_extension"
 
-/* {{{ config_zval_dtor
+/* config_zval_dtor
  */
 PHPAPI void config_zval_dtor(zval *zvalue)
 {
@@ -180,9 +178,8 @@ PHPAPI void config_zval_dtor(zval *zvalue)
 	active_ini_hash = NULL;          \
 	is_special_section = 0;          \
 } while (0)
-/* }}} */
 
-/* {{{ php_ini_parser_cb
+/* php_ini_parser_cb
  */
 static void php_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callback_type, HashTable *target_hash)
 {
@@ -312,9 +309,8 @@ static void php_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callback_t
 			break;
 	}
 }
-/* }}} */
 
-/* {{{ php_load_php_extension_cb
+/* php_load_php_extension_cb
  */
 static void php_load_php_extension_cb(void *arg)
 {
@@ -322,9 +318,8 @@ static void php_load_php_extension_cb(void *arg)
 	php_load_extension(*((char **) arg), MODULE_PERSISTENT, 0);
 #endif
 }
-/* }}} */
 
-/* {{{ php_load_zend_extension_cb
+/* php_load_zend_extension_cb
  */
 #ifdef HAVE_LIBDL
 static void php_load_zend_extension_cb(void *arg)
@@ -406,9 +401,8 @@ static void php_load_zend_extension_cb(void *arg)
 #else
 static void php_load_zend_extension_cb(void *arg) { }
 #endif
-/* }}} */
 
-/* {{{ php_init_config
+/* php_init_config
  */
 int php_init_config(void)
 {
@@ -745,9 +739,8 @@ int php_init_config(void)
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ php_shutdown_config
+/* php_shutdown_config
  */
 int php_shutdown_config(void)
 {
@@ -762,9 +755,8 @@ int php_shutdown_config(void)
 	}
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ php_ini_register_extensions
+/* php_ini_register_extensions
  */
 void php_ini_register_extensions(void)
 {
@@ -774,9 +766,8 @@ void php_ini_register_extensions(void)
 	zend_llist_destroy(&extension_lists.engine);
 	zend_llist_destroy(&extension_lists.functions);
 }
-/* }}} */
 
-/* {{{ php_parse_user_ini_file
+/* php_parse_user_ini_file
  */
 PHPAPI int php_parse_user_ini_file(const char *dirname, char *ini_filename, HashTable *target_hash)
 {
@@ -803,9 +794,8 @@ PHPAPI int php_parse_user_ini_file(const char *dirname, char *ini_filename, Hash
 	}
 	return FAILURE;
 }
-/* }}} */
 
-/* {{{ php_ini_activate_config
+/* php_ini_activate_config
  */
 PHPAPI void php_ini_activate_config(HashTable *source_hash, int modify_type, int stage)
 {
@@ -817,17 +807,15 @@ PHPAPI void php_ini_activate_config(HashTable *source_hash, int modify_type, int
 		zend_alter_ini_entry_ex(str, Z_STR_P(data), modify_type, stage, 0);
 	} ZEND_HASH_FOREACH_END();
 }
-/* }}} */
 
-/* {{{ php_ini_has_per_dir_config
+/* php_ini_has_per_dir_config
  */
 PHPAPI int php_ini_has_per_dir_config(void)
 {
 	return has_per_dir_config;
 }
-/* }}} */
 
-/* {{{ php_ini_activate_per_dir_config
+/* php_ini_activate_per_dir_config
  */
 PHPAPI void php_ini_activate_per_dir_config(char *path, size_t path_len)
 {
@@ -868,17 +856,15 @@ PHPAPI void php_ini_activate_per_dir_config(char *path, size_t path_len)
 		}
 	}
 }
-/* }}} */
 
-/* {{{ php_ini_has_per_host_config
+/* php_ini_has_per_host_config
  */
 PHPAPI int php_ini_has_per_host_config(void)
 {
 	return has_per_host_config;
 }
-/* }}} */
 
-/* {{{ php_ini_activate_per_host_config
+/* php_ini_activate_per_host_config
  */
 PHPAPI void php_ini_activate_per_host_config(const char *host, size_t host_len)
 {
@@ -891,25 +877,22 @@ PHPAPI void php_ini_activate_per_host_config(const char *host, size_t host_len)
 		}
 	}
 }
-/* }}} */
 
-/* {{{ cfg_get_entry
+/* cfg_get_entry
  */
 PHPAPI zval *cfg_get_entry_ex(zend_string *name)
 {
 	return zend_hash_find(&configuration_hash, name);
 }
-/* }}} */
 
-/* {{{ cfg_get_entry
+/* cfg_get_entry
  */
 PHPAPI zval *cfg_get_entry(const char *name, size_t name_length)
 {
 	return zend_hash_str_find(&configuration_hash, name, name_length);
 }
-/* }}} */
 
-/* {{{ cfg_get_long
+/* cfg_get_long
  */
 PHPAPI int cfg_get_long(const char *varname, zend_long *result)
 {
@@ -922,9 +905,8 @@ PHPAPI int cfg_get_long(const char *varname, zend_long *result)
 	*result = zval_get_long(tmp);
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ cfg_get_double
+/* cfg_get_double
  */
 PHPAPI int cfg_get_double(const char *varname, double *result)
 {
@@ -937,9 +919,8 @@ PHPAPI int cfg_get_double(const char *varname, double *result)
 	*result = zval_get_double(tmp);
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ cfg_get_string
+/* cfg_get_string
  */
 PHPAPI int cfg_get_string(const char *varname, char **result)
 {
@@ -952,9 +933,8 @@ PHPAPI int cfg_get_string(const char *varname, char **result)
 	*result = Z_STRVAL_P(tmp);
 	return SUCCESS;
 }
-/* }}} */
 
-PHPAPI HashTable* php_ini_get_configuration_hash(void) /* {{{ */
+PHPAPI HashTable* php_ini_get_configuration_hash(void)
 {
 	return &configuration_hash;
-} /* }}} */
+}

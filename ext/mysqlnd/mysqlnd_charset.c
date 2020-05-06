@@ -22,7 +22,7 @@
 #include "mysqlnd_debug.h"
 #include "mysqlnd_charset.h"
 
-/* {{{ utf8 functions */
+/* utf8 functions */
 static unsigned int check_mb_utf8mb3_sequence(const char * const start, const char * const end)
 {
 	zend_uchar	c;
@@ -184,10 +184,8 @@ static unsigned int mysqlnd_mbcharlen_utf8(const unsigned int utf8)
 	}
 	return 0;
 }
-/* }}} */
 
-
-/* {{{ big5 functions */
+/* big5 functions */
 #define valid_big5head(c)	(0xA1 <= (unsigned int)(c) && (unsigned int)(c) <= 0xF9)
 #define valid_big5tail(c)	((0x40 <= (unsigned int)(c) && (unsigned int)(c) <= 0x7E) || \
 							(0xA1 <= (unsigned int)(c) && (unsigned int)(c) <= 0xFE))
@@ -204,10 +202,8 @@ static unsigned int mysqlnd_mbcharlen_big5(const unsigned int big5)
 {
 	return (valid_big5head(big5)) ? 2 : 1;
 }
-/* }}} */
 
-
-/* {{{ cp932 functions */
+/* cp932 functions */
 #define valid_cp932head(c) ((0x81 <= (c) && (c) <= 0x9F) || (0xE0 <= (c) && c <= 0xFC))
 #define valid_cp932tail(c) ((0x40 <= (c) && (c) <= 0x7E) || (0x80 <= (c) && c <= 0xFC))
 
@@ -223,10 +219,8 @@ static unsigned int mysqlnd_mbcharlen_cp932(const unsigned int cp932)
 {
 	return (valid_cp932head((zend_uchar)cp932)) ? 2 : 1;
 }
-/* }}} */
 
-
-/* {{{ euckr functions */
+/* euckr functions */
 #define valid_euckr(c)	((0xA1 <= (zend_uchar)(c) && (zend_uchar)(c) <= 0xFE))
 
 static unsigned int check_mb_euckr(const char * const start, const char * const end)
@@ -248,10 +242,8 @@ static unsigned int mysqlnd_mbcharlen_euckr(const unsigned int kr)
 {
 	return (valid_euckr(kr)) ? 2 : 1;
 }
-/* }}} */
 
-
-/* {{{ eucjpms functions */
+/* eucjpms functions */
 #define valid_eucjpms(c) 		(((c) & 0xFF) >= 0xA1 && ((c) & 0xFF) <= 0xFE)
 #define valid_eucjpms_kata(c)	(((c) & 0xFF) >= 0xA1 && ((c) & 0xFF) <= 0xDF)
 #define valid_eucjpms_ss2(c)	(((c) & 0xFF) == 0x8E)
@@ -286,10 +278,8 @@ static unsigned int mysqlnd_mbcharlen_eucjpms(const unsigned int jpms)
 	}
 	return 1;
 }
-/* }}} */
 
-
-/* {{{ gb2312 functions */
+/* gb2312 functions */
 #define valid_gb2312_head(c)	(0xA1 <= (zend_uchar)(c) && (zend_uchar)(c) <= 0xF7)
 #define valid_gb2312_tail(c)	(0xA1 <= (zend_uchar)(c) && (zend_uchar)(c) <= 0xFE)
 
@@ -305,10 +295,8 @@ static unsigned int mysqlnd_mbcharlen_gb2312(const unsigned int gb)
 {
 	return (valid_gb2312_head(gb)) ? 2 : 1;
 }
-/* }}} */
 
-
-/* {{{ gbk functions */
+/* gbk functions */
 #define valid_gbk_head(c)	(0x81<=(zend_uchar)(c) && (zend_uchar)(c)<=0xFE)
 #define valid_gbk_tail(c)	((0x40<=(zend_uchar)(c) && (zend_uchar)(c)<=0x7E) || (0x80<=(zend_uchar)(c) && (zend_uchar)(c)<=0xFE))
 
@@ -321,10 +309,8 @@ static unsigned int mysqlnd_mbcharlen_gbk(const unsigned int gbk)
 {
 	return (valid_gbk_head(gbk) ? 2 : 1);
 }
-/* }}} */
 
-
-/* {{{ sjis functions */
+/* sjis functions */
 #define valid_sjis_head(c)	((0x81 <= (c) && (c) <= 0x9F) || (0xE0 <= (c) && (c) <= 0xFC))
 #define valid_sjis_tail(c)	((0x40 <= (c) && (c) <= 0x7E) || (0x80 <= (c) && (c) <= 0xFC))
 
@@ -339,10 +325,8 @@ static unsigned int mysqlnd_mbcharlen_sjis(const unsigned int sjis)
 {
 	return (valid_sjis_head((zend_uchar)sjis)) ? 2 : 1;
 }
-/* }}} */
 
-
-/* {{{ ucs2 functions */
+/* ucs2 functions */
 static unsigned int check_mb_ucs2(const char * const start __attribute((unused)), const char * const end __attribute((unused)))
 {
 	return 2; /* always 2 */
@@ -352,10 +336,8 @@ static unsigned int mysqlnd_mbcharlen_ucs2(const unsigned int ucs2 __attribute((
 {
 	return 2; /* always 2 */
 }
-/* }}} */
 
-
-/* {{{ ujis functions */
+/* ujis functions */
 #define valid_ujis(c)     	((0xA1 <= ((c)&0xFF) && ((c)&0xFF) <= 0xFE))
 #define valid_ujis_kata(c)  ((0xA1 <= ((c)&0xFF) && ((c)&0xFF) <= 0xDF))
 #define valid_ujis_ss2(c) 	(((c)&0xFF) == 0x8E)
@@ -383,11 +365,8 @@ static unsigned int mysqlnd_mbcharlen_ujis(const unsigned int ujis)
 {
 	return (valid_ujis(ujis)? 2: valid_ujis_ss2(ujis)? 2: valid_ujis_ss3(ujis)? 3: 1);
 }
-/* }}} */
 
-
-
-/* {{{ utf16 functions */
+/* utf16 functions */
 #define UTF16_HIGH_HEAD(x)  ((((zend_uchar) (x)) & 0xFC) == 0xD8)
 #define UTF16_LOW_HEAD(x)   ((((zend_uchar) (x)) & 0xFC) == 0xDC)
 
@@ -412,10 +391,8 @@ static uint32_t mysqlnd_mbcharlen_utf16(const unsigned int utf16)
 {
   return UTF16_HIGH_HEAD(utf16) ? 4 : 2;
 }
-/* }}} */
 
-
-/* {{{ utf32 functions */
+/* utf32 functions */
 static unsigned int check_mb_utf32(const char * const start __attribute((unused)), const char * const end __attribute((unused)))
 {
 	return 4;
@@ -426,10 +403,8 @@ static unsigned int mysqlnd_mbcharlen_utf32(const unsigned int utf32 __attribute
 {
 	return 4;
 }
-/* }}} */
 
-
-/* {{{ gb18030 functions */
+/* gb18030 functions */
 #define is_gb18030_odd(c)          (0x81 <= (zend_uchar) (c) && (zend_uchar) (c) <= 0xFE)
 #define is_gb18030_even_2(c)       ((0x40 <= (zend_uchar) (c) && (zend_uchar) (c) <= 0x7E) || (0x80 <= (zend_uchar) (c) && (zend_uchar) (c) <= 0xFE))
 #define is_gb18030_even_4(c)       (0x30 <= (zend_uchar) (c) && (zend_uchar) (c) <= 0x39)
@@ -468,7 +443,6 @@ static unsigned int my_ismbchar_gb18030(const char * start, const char * end)
 
 	return 0;
 }
-/* }}} */
 
 /*
   The server compiles sometimes the full utf-8 (the mb4) as utf8m4, and the old as utf8,
@@ -479,7 +453,7 @@ static unsigned int my_ismbchar_gb18030(const char * start, const char * end)
 #define UTF8_MB4 "utf8mb4"
 #define UTF8_MB3 "utf8"
 
-/* {{{ mysqlnd_charsets */
+/* mysqlnd_charsets */
 const MYSQLND_CHARSET mysqlnd_charsets[] =
 {
 	{   1, "big5","big5_chinese_ci", 1, 2, "", mysqlnd_mbcharlen_big5, check_mb_big5},
@@ -734,10 +708,8 @@ const MYSQLND_CHARSET mysqlnd_charsets[] =
 	{ 303, UTF8_MB4, UTF8_MB4"_ja_0900_as_cs", 1, 4, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
 	{   0, NULL, NULL, 0, 0, NULL, NULL, NULL}
 };
-/* }}} */
 
-
-/* {{{ mysqlnd_find_charset_nr */
+/* mysqlnd_find_charset_nr */
 PHPAPI const MYSQLND_CHARSET * mysqlnd_find_charset_nr(const unsigned int charsetnr)
 {
 	const MYSQLND_CHARSET * c = mysqlnd_charsets;
@@ -750,10 +722,8 @@ PHPAPI const MYSQLND_CHARSET * mysqlnd_find_charset_nr(const unsigned int charse
 	} while (c[0].nr != 0);
 	return NULL;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_find_charset_name */
+/* mysqlnd_find_charset_name */
 PHPAPI const MYSQLND_CHARSET * mysqlnd_find_charset_name(const char * const name)
 {
 	if (name) {
@@ -767,10 +737,8 @@ PHPAPI const MYSQLND_CHARSET * mysqlnd_find_charset_name(const char * const name
 	}
 	return NULL;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_cset_escape_quotes */
+/* mysqlnd_cset_escape_quotes */
 PHPAPI zend_ulong mysqlnd_cset_escape_quotes(const MYSQLND_CHARSET * const cset, char * newstr,
 											 const char * escapestr, const size_t escapestr_len)
 {
@@ -821,10 +789,8 @@ PHPAPI zend_ulong mysqlnd_cset_escape_quotes(const MYSQLND_CHARSET * const cset,
 	}
 	DBG_RETURN((zend_ulong)(newstr - newstr_s));
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_cset_escape_slashes */
+/* mysqlnd_cset_escape_slashes */
 PHPAPI zend_ulong mysqlnd_cset_escape_slashes(const MYSQLND_CHARSET * const cset, char *newstr,
 											  const char * escapestr, const size_t escapestr_len)
 {
@@ -901,8 +867,6 @@ PHPAPI zend_ulong mysqlnd_cset_escape_slashes(const MYSQLND_CHARSET * const cset
 	}
 	DBG_RETURN((zend_ulong)(newstr - newstr_s));
 }
-/* }}} */
-
 
 static struct st_mysqlnd_plugin_charsets mysqlnd_plugin_charsets_plugin =
 {
@@ -930,10 +894,10 @@ static struct st_mysqlnd_plugin_charsets mysqlnd_plugin_charsets_plugin =
 };
 
 
-/* {{{ mysqlnd_charsets_plugin_register */
+/* mysqlnd_charsets_plugin_register */
 void
 mysqlnd_charsets_plugin_register(void)
 {
 	mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_plugin_charsets_plugin);
 }
-/* }}} */
+

@@ -65,7 +65,7 @@ const php_hash_ops php_hash_ripemd320_ops = {
 	1
 };
 
-/* {{{ PHP_RIPEMD128Init
+/* PHP_RIPEMD128Init
  * ripemd128 initialization. Begins a ripemd128 operation, writing a new context.
  */
 PHP_HASH_API void PHP_RIPEMD128Init(PHP_RIPEMD128_CTX * context)
@@ -78,9 +78,8 @@ PHP_HASH_API void PHP_RIPEMD128Init(PHP_RIPEMD128_CTX * context)
 	context->state[2] = 0x98BADCFE;
 	context->state[3] = 0x10325476;
 }
-/* }}} */
 
-/* {{{ PHP_RIPEMD256Init
+/* PHP_RIPEMD256Init
  * ripemd256 initialization. Begins a ripemd256 operation, writing a new context.
  */
 PHP_HASH_API void PHP_RIPEMD256Init(PHP_RIPEMD256_CTX * context)
@@ -97,9 +96,8 @@ PHP_HASH_API void PHP_RIPEMD256Init(PHP_RIPEMD256_CTX * context)
 	context->state[6] = 0x89ABCDEF;
 	context->state[7] = 0x01234567;
 }
-/* }}} */
 
-/* {{{ PHP_RIPEMD160Init
+/* PHP_RIPEMD160Init
  * ripemd160 initialization. Begins a ripemd160 operation, writing a new context.
  */
 PHP_HASH_API void PHP_RIPEMD160Init(PHP_RIPEMD160_CTX * context)
@@ -113,9 +111,8 @@ PHP_HASH_API void PHP_RIPEMD160Init(PHP_RIPEMD160_CTX * context)
 	context->state[3] = 0x10325476;
 	context->state[4] = 0xC3D2E1F0;
 }
-/* }}} */
 
-/* {{{ PHP_RIPEMD320Init
+/* PHP_RIPEMD320Init
  * ripemd320 initialization. Begins a ripemd320 operation, writing a new context.
  */
 PHP_HASH_API void PHP_RIPEMD320Init(PHP_RIPEMD320_CTX * context)
@@ -134,7 +131,6 @@ PHP_HASH_API void PHP_RIPEMD320Init(PHP_RIPEMD320_CTX * context)
 	context->state[8] = 0x01234567;
 	context->state[9] = 0x3C2D1E0F;
 }
-/* }}} */
 
 /* Basic ripemd function */
 #define F0(x,y,z)		((x) ^ (y) ^ (z))
@@ -183,7 +179,7 @@ static const unsigned char SS[80] = {
 #define ROLSS(j, x)	(((x) << SS[j]) | ((x) >> (32 - SS[j])))
 #define ROL(n, x)	(((x) << n) | ((x) >> (32 - n)))
 
-/* {{{ RIPEMDDecode
+/* RIPEMDDecode
    Decodes input (unsigned char) into output (uint32_t). Assumes len is
    a multiple of 4.
  */
@@ -195,9 +191,8 @@ static void RIPEMDDecode(uint32_t *output, const unsigned char *input, unsigned 
 		output[i] = ((uint32_t) input[j + 0]) | (((uint32_t) input[j + 1]) << 8) |
 			(((uint32_t) input[j + 2]) << 16) | (((uint32_t) input[j + 3]) << 24);
 }
-/* }}} */
 
-/* {{{ RIPEMD128Transform
+/* RIPEMD128Transform
  * ripemd128 basic transformation. Transforms state based on block.
  */
 static void RIPEMD128Transform(uint32_t state[4], const unsigned char block[64])
@@ -246,9 +241,8 @@ static void RIPEMD128Transform(uint32_t state[4], const unsigned char block[64])
 	tmp = 0;
 	ZEND_SECURE_ZERO(x, sizeof(x));
 }
-/* }}} */
 
-/* {{{ PHP_RIPEMD128Update
+/* PHP_RIPEMD128Update
    ripemd128 block update operation. Continues a ripemd128 message-digest
    operation, processing another message block, and updating the
    context.
@@ -286,9 +280,8 @@ PHP_HASH_API void PHP_RIPEMD128Update(PHP_RIPEMD128_CTX * context, const unsigne
 	/* Buffer remaining input */
 	memcpy((unsigned char*) & context->buffer[index], (unsigned char*) & input[i], inputLen - i);
 }
-/* }}} */
 
-/* {{{ RIPEMD256Transform
+/* RIPEMD256Transform
  * ripemd256 basic transformation. Transforms state based on block.
  */
 static void RIPEMD256Transform(uint32_t state[8], const unsigned char block[64])
@@ -344,9 +337,8 @@ static void RIPEMD256Transform(uint32_t state[8], const unsigned char block[64])
 	tmp = 0;
 	ZEND_SECURE_ZERO(x, sizeof(x));
 }
-/* }}} */
 
-/* {{{ PHP_RIPEMD256Update
+/* PHP_RIPEMD256Update
    ripemd256 block update operation. Continues a ripemd256 message-digest
    operation, processing another message block, and updating the
    context.
@@ -384,9 +376,8 @@ PHP_HASH_API void PHP_RIPEMD256Update(PHP_RIPEMD256_CTX * context, const unsigne
 	/* Buffer remaining input */
 	memcpy((unsigned char*) & context->buffer[index], (unsigned char*) & input[i], inputLen - i);
 }
-/* }}} */
 
-/* {{{ RIPEMD160Transform
+/* RIPEMD160Transform
  * ripemd160 basic transformation. Transforms state based on block.
  */
 static void RIPEMD160Transform(uint32_t state[5], const unsigned char block[64])
@@ -443,9 +434,8 @@ static void RIPEMD160Transform(uint32_t state[5], const unsigned char block[64])
 	tmp = 0;
 	ZEND_SECURE_ZERO(x, sizeof(x));
 }
-/* }}} */
 
-/* {{{ PHP_RIPEMD160Update
+/* PHP_RIPEMD160Update
    ripemd160 block update operation. Continues a ripemd160 message-digest
    operation, processing another message block, and updating the
    context.
@@ -483,9 +473,8 @@ PHP_HASH_API void PHP_RIPEMD160Update(PHP_RIPEMD160_CTX * context, const unsigne
 	/* Buffer remaining input */
 	memcpy((unsigned char*) & context->buffer[index], (unsigned char*) & input[i], inputLen - i);
 }
-/* }}} */
 
-/* {{{ RIPEMD320Transform
+/* RIPEMD320Transform
  * ripemd320 basic transformation. Transforms state based on block.
  */
 static void RIPEMD320Transform(uint32_t state[10], const unsigned char block[64])
@@ -551,9 +540,8 @@ static void RIPEMD320Transform(uint32_t state[10], const unsigned char block[64]
 	tmp = 0;
 	ZEND_SECURE_ZERO(x, sizeof(x));
 }
-/* }}} */
 
-/* {{{ PHP_RIPEMD320Update
+/* PHP_RIPEMD320Update
    ripemd320 block update operation. Continues a ripemd320 message-digest
    operation, processing another message block, and updating the
    context.
@@ -591,7 +579,6 @@ PHP_HASH_API void PHP_RIPEMD320Update(PHP_RIPEMD320_CTX * context, const unsigne
 	/* Buffer remaining input */
 	memcpy((unsigned char*) & context->buffer[index], (unsigned char*) & input[i], inputLen - i);
 }
-/* }}} */
 
 static const unsigned char PADDING[64] =
 {
@@ -600,7 +587,7 @@ static const unsigned char PADDING[64] =
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
-/* {{{ RIPEMDEncode
+/* RIPEMDEncode
    Encodes input (uint32_t) into output (unsigned char). Assumes len is
    a multiple of 4.
  */
@@ -615,9 +602,8 @@ static void RIPEMDEncode(unsigned char *output, uint32_t *input, unsigned int le
 		output[j + 0] = (unsigned char) (input[i] & 0xff);
 	}
 }
-/* }}} */
 
-/* {{{ PHP_RIPEMD128Final
+/* PHP_RIPEMD128Final
    ripemd128 finalization. Ends a ripemd128 message-digest operation, writing the
    the message digest and zeroizing the context.
  */
@@ -652,9 +638,8 @@ PHP_HASH_API void PHP_RIPEMD128Final(unsigned char digest[16], PHP_RIPEMD128_CTX
 	 */
 	ZEND_SECURE_ZERO((unsigned char*) context, sizeof(*context));
 }
-/* }}} */
 
-/* {{{ PHP_RIPEMD256Final
+/* PHP_RIPEMD256Final
    ripemd256 finalization. Ends a ripemd256 message-digest operation, writing the
    the message digest and zeroizing the context.
  */
@@ -689,9 +674,8 @@ PHP_HASH_API void PHP_RIPEMD256Final(unsigned char digest[32], PHP_RIPEMD256_CTX
 	 */
 	ZEND_SECURE_ZERO((unsigned char*) context, sizeof(*context));
 }
-/* }}} */
 
-/* {{{ PHP_RIPEMD160Final
+/* PHP_RIPEMD160Final
    ripemd160 finalization. Ends a ripemd160 message-digest operation, writing the
    the message digest and zeroizing the context.
  */
@@ -726,9 +710,8 @@ PHP_HASH_API void PHP_RIPEMD160Final(unsigned char digest[20], PHP_RIPEMD160_CTX
 	 */
 	ZEND_SECURE_ZERO((unsigned char*) context, sizeof(*context));
 }
-/* }}} */
 
-/* {{{ PHP_RIPEMD320Final
+/* PHP_RIPEMD320Final
    ripemd320 finalization. Ends a ripemd320 message-digest operation, writing the
    the message digest and zeroizing the context.
  */
@@ -763,4 +746,4 @@ PHP_HASH_API void PHP_RIPEMD320Final(unsigned char digest[40], PHP_RIPEMD320_CTX
 	 */
 	ZEND_SECURE_ZERO((unsigned char*) context, sizeof(*context));
 }
-/* }}} */
+

@@ -25,7 +25,7 @@ zend_class_entry *Transliterator_ce_ptr = NULL;
 
 zend_object_handlers Transliterator_handlers;
 
-/* {{{ int transliterator_object_construct( zval *object, UTransliterator *utrans, UErrorCode *status )
+/* int transliterator_object_construct( zval *object, UTransliterator *utrans, UErrorCode *status )
  * Initialize internals of Transliterator_object.
  */
 int transliterator_object_construct( zval *object,
@@ -59,13 +59,12 @@ int transliterator_object_construct( zval *object,
 	GC_DELREF(u8str);
 	return SUCCESS;
 }
-/* }}} */
 
 /*
  * Auxiliary functions needed by objects of 'Transliterator' class
  */
 
-/* {{{ void transliterator_object_init( Transliterator_object* to )
+/* void transliterator_object_init( Transliterator_object* to )
  * Initialize internals of Transliterator_object.
  */
 static void transliterator_object_init( Transliterator_object* to )
@@ -75,9 +74,8 @@ static void transliterator_object_init( Transliterator_object* to )
 
 	intl_error_init( TRANSLITERATOR_ERROR_P( to ) );
 }
-/* }}} */
 
-/* {{{ void transliterator_object_destroy( Transliterator_object* to )
+/* void transliterator_object_destroy( Transliterator_object* to )
  * Clean up mem allocted by internals of Transliterator_object
  */
 static void transliterator_object_destroy( Transliterator_object* to )
@@ -93,9 +91,8 @@ static void transliterator_object_destroy( Transliterator_object* to )
 
 	intl_error_reset( TRANSLITERATOR_ERROR_P( to ) );
 }
-/* }}} */
 
-/* {{{ Transliterator_objects_free */
+/* Transliterator_objects_free */
 static void Transliterator_objects_free( zend_object *object )
 {
 	Transliterator_object* to = php_intl_transliterator_fetch_object(object);
@@ -104,9 +101,8 @@ static void Transliterator_objects_free( zend_object *object )
 
 	transliterator_object_destroy( to );
 }
-/* }}} */
 
-/* {{{ Transliterator_object_create */
+/* Transliterator_object_create */
 static zend_object *Transliterator_object_create( zend_class_entry *ce )
 {
 	Transliterator_object* intern;
@@ -121,13 +117,12 @@ static zend_object *Transliterator_object_create( zend_class_entry *ce )
 
 	return &intern->zo;
 }
-/* }}} */
 
 /*
  * Object handlers for Transliterator class (and subclasses)
  */
 
-/* {{{ clone handler for Transliterator */
+/* clone handler for Transliterator */
 static zend_object *Transliterator_clone_obj( zend_object *object )
 {
 	Transliterator_object *to_orig,
@@ -185,9 +180,8 @@ err:
 
 	return ret_val;
 }
-/* }}} */
 
-/* {{{ get_property_ptr_ptr handler */
+/* get_property_ptr_ptr handler */
 static zval *Transliterator_get_property_ptr_ptr( zend_object *object, zend_string *name, int type, void **cache_slot )
 {
 	zval *retval;
@@ -204,9 +198,8 @@ static zval *Transliterator_get_property_ptr_ptr( zend_object *object, zend_stri
 
 	return retval;
 }
-/* }}} */
 
-/* {{{ read_property handler */
+/* read_property handler */
 static zval *Transliterator_read_property( zend_object *object, zend_string *name, int type, void **cache_slot, zval *rv )
 {
 	zval *retval;
@@ -226,9 +219,8 @@ static zval *Transliterator_read_property( zend_object *object, zend_string *nam
 	return retval;
 }
 
-/* }}} */
 
-/* {{{ write_property handler */
+/* write_property handler */
 static zval *Transliterator_write_property( zend_object *object, zend_string *name, zval *value,
 	void **cache_slot )
 {
@@ -252,9 +244,8 @@ static zval *Transliterator_write_property( zend_object *object, zend_string *na
 
 	return value;
 }
-/* }}} */
 
-/* {{{ transliterator_register_Transliterator_class
+/* transliterator_register_Transliterator_class
  * Initialize 'Transliterator' class
  */
 void transliterator_register_Transliterator_class( void )
@@ -288,4 +279,4 @@ void transliterator_register_Transliterator_class( void )
 	/* constants are declared in transliterator_register_constants, called from MINIT */
 
 }
-/* }}} */
+

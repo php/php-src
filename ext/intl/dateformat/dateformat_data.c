@@ -17,7 +17,7 @@
 
 #include "dateformat_data.h"
 
-/* {{{ void dateformat_data_init( dateformat_data* datef_data )
+/* void dateformat_data_init( dateformat_data* datef_data )
  * Initialize internals of dateformat_data.
  */
 void dateformat_data_init( dateformat_data* datef_data )
@@ -28,9 +28,8 @@ void dateformat_data_init( dateformat_data* datef_data )
 	datef_data->udatf = NULL;
 	intl_error_reset( &datef_data->error );
 }
-/* }}} */
 
-/* {{{ void dateformat_data_free( dateformat_data* datef_data )
+/* void dateformat_data_free( dateformat_data* datef_data )
  * Clean up memory allocated for dateformat_data
  */
 void dateformat_data_free( dateformat_data* datef_data )
@@ -44,9 +43,8 @@ void dateformat_data_free( dateformat_data* datef_data )
 	datef_data->udatf = NULL;
 	intl_error_reset( &datef_data->error );
 }
-/* }}} */
 
-/* {{{ dateformat_data* dateformat_data_create()
+/* dateformat_data* dateformat_data_create()
  * Allocate memory for dateformat_data and initialize it with default values.
  */
 dateformat_data* dateformat_data_create( void )
@@ -57,4 +55,4 @@ dateformat_data* dateformat_data_create( void )
 
 	return datef_data;
 }
-/* }}} */
+

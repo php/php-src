@@ -50,7 +50,7 @@ struct st_mysqlnd_perm_bind mysqlnd_ps_fetch_functions[MYSQL_TYPE_LAST + 1];
 #define MYSQLND_PS_SKIP_RESULT_W_LEN	-1
 #define MYSQLND_PS_SKIP_RESULT_STR		-2
 
-/* {{{ ps_fetch_from_1_to_8_bytes */
+/* ps_fetch_from_1_to_8_bytes */
 void
 ps_fetch_from_1_to_8_bytes(zval * zv, const MYSQLND_FIELD * const field, const unsigned int pack_len,
 						   const zend_uchar ** row, unsigned int byte_count)
@@ -121,55 +121,43 @@ ps_fetch_from_1_to_8_bytes(zval * zv, const MYSQLND_FIELD * const field, const u
 	(*row)+= byte_count;
 	DBG_VOID_RETURN;
 }
-/* }}} */
 
-
-/* {{{ ps_fetch_null */
+/* ps_fetch_null */
 static void
 ps_fetch_null(zval *zv, const MYSQLND_FIELD * const field, const unsigned int pack_len, const zend_uchar ** row)
 {
 	ZVAL_NULL(zv);
 }
-/* }}} */
 
-
-/* {{{ ps_fetch_int8 */
+/* ps_fetch_int8 */
 static void
 ps_fetch_int8(zval * zv, const MYSQLND_FIELD * const field, const unsigned int pack_len, const zend_uchar ** row)
 {
 	ps_fetch_from_1_to_8_bytes(zv, field, pack_len, row, 1);
 }
-/* }}} */
 
-
-/* {{{ ps_fetch_int16 */
+/* ps_fetch_int16 */
 static void
 ps_fetch_int16(zval * zv, const MYSQLND_FIELD * const field, const unsigned int pack_len, const zend_uchar ** row)
 {
 	ps_fetch_from_1_to_8_bytes(zv, field, pack_len, row, 2);
 }
-/* }}} */
 
-
-/* {{{ ps_fetch_int32 */
+/* ps_fetch_int32 */
 static void
 ps_fetch_int32(zval * zv, const MYSQLND_FIELD * const field, const unsigned int pack_len, const zend_uchar ** row)
 {
 	ps_fetch_from_1_to_8_bytes(zv, field, pack_len, row, 4);
 }
-/* }}} */
 
-
-/* {{{ ps_fetch_int64 */
+/* ps_fetch_int64 */
 static void
 ps_fetch_int64(zval * zv, const MYSQLND_FIELD * const field, const unsigned int pack_len, const zend_uchar ** row)
 {
 	ps_fetch_from_1_to_8_bytes(zv, field, pack_len, row, 8);
 }
-/* }}} */
 
-
-/* {{{ ps_fetch_float */
+/* ps_fetch_float */
 static void
 ps_fetch_float(zval * zv, const MYSQLND_FIELD * const field, const unsigned int pack_len, const zend_uchar ** row)
 {
@@ -189,10 +177,8 @@ ps_fetch_float(zval * zv, const MYSQLND_FIELD * const field, const unsigned int 
 	ZVAL_DOUBLE(zv, dval);
 	DBG_VOID_RETURN;
 }
-/* }}} */
 
-
-/* {{{ ps_fetch_double */
+/* ps_fetch_double */
 static void
 ps_fetch_double(zval * zv, const MYSQLND_FIELD * const field, const unsigned int pack_len, const zend_uchar ** row)
 {
@@ -204,10 +190,8 @@ ps_fetch_double(zval * zv, const MYSQLND_FIELD * const field, const unsigned int
 	DBG_INF_FMT("value=%f", value);
 	DBG_VOID_RETURN;
 }
-/* }}} */
 
-
-/* {{{ ps_fetch_time */
+/* ps_fetch_time */
 static void
 ps_fetch_time(zval * zv, const MYSQLND_FIELD * const field, const unsigned int pack_len, const zend_uchar ** row)
 {
@@ -261,10 +245,8 @@ ps_fetch_time(zval * zv, const MYSQLND_FIELD * const field, const unsigned int p
 	mnd_sprintf_free(value);
 	DBG_VOID_RETURN;
 }
-/* }}} */
 
-
-/* {{{ ps_fetch_date */
+/* ps_fetch_date */
 static void
 ps_fetch_date(zval * zv, const MYSQLND_FIELD * const field, const unsigned int pack_len, const zend_uchar ** row)
 {
@@ -298,10 +280,8 @@ ps_fetch_date(zval * zv, const MYSQLND_FIELD * const field, const unsigned int p
 	mnd_sprintf_free(value);
 	DBG_VOID_RETURN;
 }
-/* }}} */
 
-
-/* {{{ ps_fetch_datetime */
+/* ps_fetch_datetime */
 static void
 ps_fetch_datetime(zval * zv, const MYSQLND_FIELD * const field, const unsigned int pack_len, const zend_uchar ** row)
 {
@@ -358,10 +338,8 @@ ps_fetch_datetime(zval * zv, const MYSQLND_FIELD * const field, const unsigned i
 	mnd_sprintf_free(value);
 	DBG_VOID_RETURN;
 }
-/* }}} */
 
-
-/* {{{ ps_fetch_string */
+/* ps_fetch_string */
 static void
 ps_fetch_string(zval * zv, const MYSQLND_FIELD * const field, const unsigned int pack_len, const zend_uchar ** row)
 {
@@ -378,20 +356,16 @@ ps_fetch_string(zval * zv, const MYSQLND_FIELD * const field, const unsigned int
 	(*row) += length;
 	DBG_VOID_RETURN;
 }
-/* }}} */
 
-
-/* {{{ ps_fetch_bit */
+/* ps_fetch_bit */
 static void
 ps_fetch_bit(zval * zv, const MYSQLND_FIELD * const field, const unsigned int pack_len, const zend_uchar ** row)
 {
 	const zend_ulong length = php_mysqlnd_net_field_length(row);
 	ps_fetch_from_1_to_8_bytes(zv, field, pack_len, row, length);
 }
-/* }}} */
 
-
-/* {{{ _mysqlnd_init_ps_fetch_subsystem */
+/* _mysqlnd_init_ps_fetch_subsystem */
 void _mysqlnd_init_ps_fetch_subsystem()
 {
 	memset(mysqlnd_ps_fetch_functions, 0, sizeof(mysqlnd_ps_fetch_functions));
@@ -537,10 +511,8 @@ void _mysqlnd_init_ps_fetch_subsystem()
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_GEOMETRY].pack_len= MYSQLND_PS_SKIP_RESULT_STR;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_GEOMETRY].php_type= IS_STRING;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_stmt_copy_it */
+/* mysqlnd_stmt_copy_it */
 static enum_func_status
 mysqlnd_stmt_copy_it(zval ** copies, zval * original, unsigned int param_count, unsigned int current)
 {
@@ -553,10 +525,8 @@ mysqlnd_stmt_copy_it(zval ** copies, zval * original, unsigned int param_count, 
 	}
 	return FAIL;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_stmt_free_copies */
+/* mysqlnd_stmt_free_copies */
 static void
 mysqlnd_stmt_free_copies(MYSQLND_STMT_DATA * stmt, zval *copies)
 {
@@ -568,10 +538,8 @@ mysqlnd_stmt_free_copies(MYSQLND_STMT_DATA * stmt, zval *copies)
 		mnd_efree(copies);
 	}
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_stmt_execute_check_n_enlarge_buffer */
+/* mysqlnd_stmt_execute_check_n_enlarge_buffer */
 static enum_func_status
 mysqlnd_stmt_execute_check_n_enlarge_buffer(zend_uchar **buf, zend_uchar **p, size_t * buf_len, zend_uchar * const provided_buffer, size_t needed_bytes)
 {
@@ -596,10 +564,8 @@ mysqlnd_stmt_execute_check_n_enlarge_buffer(zend_uchar **buf, zend_uchar **p, si
 	}
 	return PASS;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_stmt_execute_prepare_param_types */
+/* mysqlnd_stmt_execute_prepare_param_types */
 static enum_func_status
 mysqlnd_stmt_execute_prepare_param_types(MYSQLND_STMT_DATA * stmt, zval ** copies_param, int * resend_types_next_time)
 {
@@ -649,10 +615,8 @@ mysqlnd_stmt_execute_prepare_param_types(MYSQLND_STMT_DATA * stmt, zval ** copie
 end:
 	DBG_RETURN(FAIL);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_stmt_execute_store_types */
+/* mysqlnd_stmt_execute_store_types */
 static void
 mysqlnd_stmt_execute_store_types(MYSQLND_STMT_DATA * stmt, zval * copies, zend_uchar ** p)
 {
@@ -693,10 +657,8 @@ mysqlnd_stmt_execute_store_types(MYSQLND_STMT_DATA * stmt, zval * copies, zend_u
 		*p+= 2;
 	}
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_stmt_execute_calculate_param_values_size */
+/* mysqlnd_stmt_execute_calculate_param_values_size */
 static enum_func_status
 mysqlnd_stmt_execute_calculate_param_values_size(MYSQLND_STMT_DATA * stmt, zval ** copies_param, size_t * data_size)
 {
@@ -787,10 +749,8 @@ use_string:
 end:
 	DBG_RETURN(FAIL);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_stmt_execute_store_param_values */
+/* mysqlnd_stmt_execute_store_param_values */
 static void
 mysqlnd_stmt_execute_store_param_values(MYSQLND_STMT_DATA * stmt, zval * copies, zend_uchar * buf, zend_uchar ** p, size_t null_byte_offset)
 {
@@ -859,10 +819,8 @@ send_string:
 		}
 	}
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_stmt_execute_store_params */
+/* mysqlnd_stmt_execute_store_params */
 static enum_func_status
 mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar **p, size_t *buf_len )
 {
@@ -935,10 +893,8 @@ end:
 	DBG_INF_FMT("ret=%s", ret == PASS? "PASS":"FAIL");
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_stmt_execute_generate_request */
+/* mysqlnd_stmt_execute_generate_request */
 enum_func_status
 mysqlnd_stmt_execute_generate_request(MYSQLND_STMT * const s, zend_uchar ** request, size_t *request_len, zend_bool * free_buffer)
 {
@@ -973,4 +929,4 @@ mysqlnd_stmt_execute_generate_request(MYSQLND_STMT * const s, zend_uchar ** requ
 	DBG_INF_FMT("ret=%s", ret == PASS? "PASS":"FAIL");
 	DBG_RETURN(ret);
 }
-/* }}} */
+

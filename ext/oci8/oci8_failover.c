@@ -38,7 +38,7 @@
 #include "php_oci8.h"
 #include "php_oci8_int.h"
 
-/* {{{ callback_fn()
+/* callback_fn()
    OCI TAF callback function, calling userspace function */
 sb4 callback_fn(void *svchp, void *envhp, void *fo_ctx, ub4 fo_type, ub4 fo_event)
 {
@@ -80,18 +80,16 @@ sb4 callback_fn(void *svchp, void *envhp, void *fo_ctx, ub4 fo_type, ub4 fo_even
 
 	return returnValue;
 }
-/* }}} */
 
-/* {{{ php_oci_unregister_taf_callback()
+/* php_oci_unregister_taf_callback()
    Unregister the userspace callback function for Oracle TAF,
    while keeping the OCI callback alive */
 int php_oci_unregister_taf_callback(php_oci_connection *connection)
 {
 	return php_oci_register_taf_callback(connection, NULL);
 }
-/* }}} */
 
-/* {{{ php_oci_register_taf_callback()
+/* php_oci_register_taf_callback()
    Register a callback function for Oracle TAF */
 int php_oci_register_taf_callback(php_oci_connection *connection, zval *callback)
 {
@@ -147,6 +145,5 @@ int php_oci_register_taf_callback(php_oci_connection *connection, zval *callback
 	/* successful conclusion */
 	return 0;
 }
-/* }}} */
 
 #endif /* HAVE_OCI8 */

@@ -73,13 +73,12 @@ ZEND_INI_MH(OnUpdateScale)
 	return SUCCESS;
 }
 
-/* {{{ PHP_INI */
+/* PHP_INI */
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("bcmath.scale", "0", PHP_INI_ALL, OnUpdateScale, bc_precision, zend_bcmath_globals, bcmath_globals)
 PHP_INI_END()
-/* }}} */
 
-/* {{{ PHP_GINIT_FUNCTION
+/* PHP_GINIT_FUNCTION
  */
 static PHP_GINIT_FUNCTION(bcmath)
 {
@@ -89,9 +88,8 @@ static PHP_GINIT_FUNCTION(bcmath)
 	bcmath_globals->bc_precision = 0;
 	bc_init_numbers();
 }
-/* }}} */
 
-/* {{{ PHP_GSHUTDOWN_FUNCTION
+/* PHP_GSHUTDOWN_FUNCTION
  */
 static PHP_GSHUTDOWN_FUNCTION(bcmath)
 {
@@ -99,9 +97,8 @@ static PHP_GSHUTDOWN_FUNCTION(bcmath)
 	_bc_free_num_ex(&bcmath_globals->_one_, 1);
 	_bc_free_num_ex(&bcmath_globals->_two_, 1);
 }
-/* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION
+/* PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(bcmath)
 {
@@ -109,9 +106,8 @@ PHP_MINIT_FUNCTION(bcmath)
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_MSHUTDOWN_FUNCTION
+/* PHP_MSHUTDOWN_FUNCTION
  */
 PHP_MSHUTDOWN_FUNCTION(bcmath)
 {
@@ -119,9 +115,8 @@ PHP_MSHUTDOWN_FUNCTION(bcmath)
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
+/* PHP_MINFO_FUNCTION
  */
 PHP_MINFO_FUNCTION(bcmath)
 {
@@ -130,9 +125,8 @@ PHP_MINFO_FUNCTION(bcmath)
 	php_info_print_table_end();
 	DISPLAY_INI_ENTRIES();
 }
-/* }}} */
 
-/* {{{ php_str2num
+/* php_str2num
    Convert to bc_num detecting scale */
 static void php_str2num(bc_num *num, char *str)
 {
@@ -149,7 +143,6 @@ static void php_str2num(bc_num *num, char *str)
 		php_error_docref(NULL, E_WARNING, "bcmath function argument is not well-formed");
 	}
 }
-/* }}} */
 
 /* Returns the sum of two arbitrary precision numbers */
 PHP_FUNCTION(bcadd)
@@ -189,7 +182,6 @@ PHP_FUNCTION(bcadd)
 	bc_free_num(&result);
 	return;
 }
-/* }}} */
 
 /* Returns the difference between two arbitrary precision numbers */
 PHP_FUNCTION(bcsub)
@@ -229,7 +221,6 @@ PHP_FUNCTION(bcsub)
 	bc_free_num(&result);
 	return;
 }
-/* }}} */
 
 /* Returns the multiplication of two arbitrary precision numbers */
 PHP_FUNCTION(bcmul)
@@ -269,7 +260,6 @@ PHP_FUNCTION(bcmul)
 	bc_free_num(&result);
 	return;
 }
-/* }}} */
 
 /* Returns the quotient of two arbitrary precision numbers (division) */
 PHP_FUNCTION(bcdiv)
@@ -316,7 +306,6 @@ PHP_FUNCTION(bcdiv)
 	bc_free_num(&result);
 	return;
 }
-/* }}} */
 
 /* Returns the modulus of the two arbitrary precision operands */
 PHP_FUNCTION(bcmod)
@@ -362,7 +351,6 @@ PHP_FUNCTION(bcmod)
 	bc_free_num(&second);
 	bc_free_num(&result);
 }
-/* }}} */
 
 /* Returns the value of an arbitrary precision number raised to the power of another reduced by a modulus */
 PHP_FUNCTION(bcpowmod)
@@ -409,7 +397,6 @@ PHP_FUNCTION(bcpowmod)
 	bc_free_num(&mod);
 	bc_free_num(&result);
 }
-/* }}} */
 
 /* Returns the value of an arbitrary precision number raised to the power of another */
 PHP_FUNCTION(bcpow)
@@ -448,7 +435,6 @@ PHP_FUNCTION(bcpow)
 	bc_free_num(&second);
 	bc_free_num(&result);
 }
-/* }}} */
 
 /* Returns the square root of an arbitrary precision number */
 PHP_FUNCTION(bcsqrt)
@@ -486,7 +472,6 @@ PHP_FUNCTION(bcsqrt)
 	bc_free_num(&result);
 	return;
 }
-/* }}} */
 
 /* Compares two arbitrary precision numbers */
 PHP_FUNCTION(bccomp)
@@ -528,7 +513,6 @@ PHP_FUNCTION(bccomp)
 	bc_free_num(&second);
 	return;
 }
-/* }}} */
 
 /* Sets default scale parameter for all bc math functions */
 PHP_FUNCTION(bcscale)
@@ -554,7 +538,5 @@ PHP_FUNCTION(bcscale)
 
 	RETURN_LONG(old_scale);
 }
-/* }}} */
-
 
 #endif

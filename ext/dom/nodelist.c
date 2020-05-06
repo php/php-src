@@ -30,7 +30,7 @@
 * Since:
 */
 
-/* {{{ length	int
+/* length	int
 readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-203510337
 Since:
@@ -96,9 +96,7 @@ PHP_METHOD(DOMNodeList, count)
 		RETURN_FALSE;
 	}
 }
-/* }}} end dom_nodelist_count */
 
-/* }}} */
 
 /* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-844377136
 Since:
@@ -170,7 +168,5 @@ PHP_METHOD(DOMNodeList, item)
 
 	RETVAL_NULL();
 }
-/* }}} end dom_nodelist_item */
-
 
 #endif

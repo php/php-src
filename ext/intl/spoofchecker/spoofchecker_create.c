@@ -60,4 +60,4 @@ PHP_METHOD(Spoofchecker, __construct)
 #endif
 	zend_restore_error_handling(&error_handling);
 }
-/* }}} */
+

@@ -23,9 +23,7 @@
 #include <unicode/ustring.h>
 #include <unicode/udat.h>
 
-/* Get formatter datetype. }}} */
-/* Get formatter datetype.
- */
+/* Get formatter datetype. */
 PHP_FUNCTION( datefmt_get_datetype )
 {
 	DATE_FORMAT_METHOD_INIT_VARS;
@@ -43,11 +41,8 @@ PHP_FUNCTION( datefmt_get_datetype )
 
 	RETURN_LONG(dfo->date_type );
 }
-/* }}} */
 
-/* Get formatter timetype. }}} */
-/* Get formatter timetype.
- */
+/* Get formatter timetype. */
 PHP_FUNCTION( datefmt_get_timetype )
 {
 	DATE_FORMAT_METHOD_INIT_VARS;
@@ -65,11 +60,8 @@ PHP_FUNCTION( datefmt_get_timetype )
 
 	RETURN_LONG(dfo->time_type );
 }
-/* }}} */
 
-/* Get formatter pattern. }}} */
-/* Get formatter pattern.
- */
+/* Get formatter pattern. */
 PHP_FUNCTION( datefmt_get_pattern )
 {
 	UChar  value_buf[64];
@@ -103,11 +95,8 @@ PHP_FUNCTION( datefmt_get_pattern )
 
 	INTL_METHOD_RETVAL_UTF8( dfo, value, length, ( value != value_buf ) );
 }
-/* }}} */
 
-/* Set formatter pattern. }}} */
-/* Set formatter pattern.
- */
+/* Set formatter pattern. */
 PHP_FUNCTION( datefmt_set_pattern )
 {
 	char*       value = NULL;
@@ -141,11 +130,8 @@ PHP_FUNCTION( datefmt_set_pattern )
 
 	RETURN_TRUE;
 }
-/* }}} */
 
-/* Get formatter locale. }}} */
-/* Get formatter locale.
- */
+/* Get formatter locale. */
 PHP_FUNCTION( datefmt_get_locale )
 {
 	char *loc;
@@ -168,11 +154,8 @@ PHP_FUNCTION( datefmt_get_locale )
 	INTL_METHOD_CHECK_STATUS(dfo, "Error getting locale");
 	RETURN_STRING(loc);
 }
-/* }}} */
 
-/* Get formatter isLenient. }}} */
-/* Get formatter locale.
- */
+/* Get formatter locale. */
 PHP_FUNCTION( datefmt_is_lenient )
 {
 
@@ -191,11 +174,8 @@ PHP_FUNCTION( datefmt_is_lenient )
 
 	RETVAL_BOOL(udat_isLenient(DATE_FORMAT_OBJECT(dfo)));
 }
-/* }}} */
 
-/* Set formatter lenient. }}} */
-/* Set formatter lenient.
- */
+/* Set formatter lenient. */
 PHP_FUNCTION( datefmt_set_lenient )
 {
 	zend_bool isLenient  = FALSE;
@@ -214,4 +194,4 @@ PHP_FUNCTION( datefmt_set_lenient )
 
 	udat_setLenient(DATE_FORMAT_OBJECT(dfo), (UBool)isLenient );
 }
-/* }}} */
+

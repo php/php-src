@@ -30,7 +30,7 @@
 #endif
 
 
-/* {{{ mysqlnd_set_sock_no_delay */
+/* mysqlnd_set_sock_no_delay */
 static int
 mysqlnd_set_sock_no_delay(php_stream * stream)
 {
@@ -47,10 +47,8 @@ mysqlnd_set_sock_no_delay(php_stream * stream)
 
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_set_sock_keepalive */
+/* mysqlnd_set_sock_keepalive */
 static int
 mysqlnd_set_sock_keepalive(php_stream * stream)
 {
@@ -67,10 +65,8 @@ mysqlnd_set_sock_keepalive(php_stream * stream)
 
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_vio::network_read */
+/* mysqlnd_vio::network_read */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_vio, network_read)(MYSQLND_VIO * const vio, zend_uchar * const buffer, const size_t count,
 										  MYSQLND_STATS * const stats, MYSQLND_ERROR_INFO * const error_info)
@@ -96,10 +92,8 @@ MYSQLND_METHOD(mysqlnd_vio, network_read)(MYSQLND_VIO * const vio, zend_uchar * 
 	MYSQLND_INC_CONN_STATISTIC_W_VALUE(stats, STAT_BYTES_RECEIVED, count - to_read);
 	DBG_RETURN(return_value);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_vio::network_write */
+/* mysqlnd_vio::network_write */
 static ssize_t
 MYSQLND_METHOD(mysqlnd_vio, network_write)(MYSQLND_VIO * const vio, const zend_uchar * const buffer, const size_t count,
 										   MYSQLND_STATS * const stats, MYSQLND_ERROR_INFO * const error_info)
@@ -110,10 +104,8 @@ MYSQLND_METHOD(mysqlnd_vio, network_write)(MYSQLND_VIO * const vio, const zend_u
 	ret = php_stream_write(vio->data->m.get_stream(vio), (char *)buffer, count);
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_vio::open_pipe */
+/* mysqlnd_vio::open_pipe */
 static php_stream *
 MYSQLND_METHOD(mysqlnd_vio, open_pipe)(MYSQLND_VIO * const vio, const MYSQLND_CSTRING scheme, const zend_bool persistent,
 									   MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info)
@@ -145,10 +137,8 @@ MYSQLND_METHOD(mysqlnd_vio, open_pipe)(MYSQLND_VIO * const vio, const MYSQLND_CS
 
 	DBG_RETURN(net_stream);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_vio::open_tcp_or_unix */
+/* mysqlnd_vio::open_tcp_or_unix */
 static php_stream *
 MYSQLND_METHOD(mysqlnd_vio, open_tcp_or_unix)(MYSQLND_VIO * const vio, const MYSQLND_CSTRING scheme, const zend_bool persistent,
 											  MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info)
@@ -236,10 +226,8 @@ MYSQLND_METHOD(mysqlnd_vio, open_tcp_or_unix)(MYSQLND_VIO * const vio, const MYS
 	EG(regular_list).pDestructor = origin_dtor;
 	DBG_RETURN(net_stream);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_vio::post_connect_set_opt */
+/* mysqlnd_vio::post_connect_set_opt */
 static void
 MYSQLND_METHOD(mysqlnd_vio, post_connect_set_opt)(MYSQLND_VIO * const vio, const MYSQLND_CSTRING scheme,
 												  MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info)
@@ -267,10 +255,8 @@ MYSQLND_METHOD(mysqlnd_vio, post_connect_set_opt)(MYSQLND_VIO * const vio, const
 
 	DBG_VOID_RETURN;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_vio::get_open_stream */
+/* mysqlnd_vio::get_open_stream */
 static func_mysqlnd_vio__open_stream
 MYSQLND_METHOD(mysqlnd_vio, get_open_stream)(MYSQLND_VIO * const vio, const MYSQLND_CSTRING scheme,
 											 MYSQLND_ERROR_INFO * const error_info)
@@ -292,10 +278,8 @@ MYSQLND_METHOD(mysqlnd_vio, get_open_stream)(MYSQLND_VIO * const vio, const MYSQ
 
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_vio::connect */
+/* mysqlnd_vio::connect */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_vio, connect)(MYSQLND_VIO * const vio, const MYSQLND_CSTRING scheme, const zend_bool persistent,
 									 MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info)
@@ -317,10 +301,8 @@ MYSQLND_METHOD(mysqlnd_vio, connect)(MYSQLND_VIO * const vio, const MYSQLND_CSTR
 
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_vio::set_client_option */
+/* mysqlnd_vio::set_client_option */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_vio, set_client_option)(MYSQLND_VIO * const net, enum_mysqlnd_client_option option, const char * const value)
 {
@@ -425,10 +407,8 @@ MYSQLND_METHOD(mysqlnd_vio, set_client_option)(MYSQLND_VIO * const net, enum_mys
 	}
 	DBG_RETURN(PASS);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_vio::consume_uneaten_data */
+/* mysqlnd_vio::consume_uneaten_data */
 size_t
 MYSQLND_METHOD(mysqlnd_vio, consume_uneaten_data)(MYSQLND_VIO * const net, enum php_mysqlnd_server_command cmd)
 {
@@ -479,12 +459,11 @@ MYSQLND_METHOD(mysqlnd_vio, consume_uneaten_data)(MYSQLND_VIO * const net, enum 
 	return 0;
 #endif
 }
-/* }}} */
 
 /*
   in libmyusql, if cert and !key then key=cert
 */
-/* {{{ mysqlnd_vio::enable_ssl */
+/* mysqlnd_vio::enable_ssl */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_vio, enable_ssl)(MYSQLND_VIO * const net)
 {
@@ -592,20 +571,16 @@ MYSQLND_METHOD(mysqlnd_vio, enable_ssl)(MYSQLND_VIO * const net)
 	DBG_RETURN(PASS);
 #endif
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_vio::disable_ssl */
+/* mysqlnd_vio::disable_ssl */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_vio, disable_ssl)(MYSQLND_VIO * const vio)
 {
 	DBG_ENTER("mysqlnd_vio::disable_ssl");
 	DBG_RETURN(PASS);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_vio::free_contents */
+/* mysqlnd_vio::free_contents */
 static void
 MYSQLND_METHOD(mysqlnd_vio, free_contents)(MYSQLND_VIO * net)
 {
@@ -635,10 +610,8 @@ MYSQLND_METHOD(mysqlnd_vio, free_contents)(MYSQLND_VIO * net)
 
 	DBG_VOID_RETURN;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_vio::close_stream */
+/* mysqlnd_vio::close_stream */
 static void
 MYSQLND_METHOD(mysqlnd_vio, close_stream)(MYSQLND_VIO * const net, MYSQLND_STATS * const stats, MYSQLND_ERROR_INFO * const error_info)
 {
@@ -664,10 +637,8 @@ MYSQLND_METHOD(mysqlnd_vio, close_stream)(MYSQLND_VIO * const net, MYSQLND_STATS
 
 	DBG_VOID_RETURN;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_vio::init */
+/* mysqlnd_vio::init */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_vio, init)(MYSQLND_VIO * const net, MYSQLND_STATS * const stats, MYSQLND_ERROR_INFO * const error_info)
 {
@@ -682,10 +653,8 @@ MYSQLND_METHOD(mysqlnd_vio, init)(MYSQLND_VIO * const net, MYSQLND_STATS * const
 
 	DBG_RETURN(PASS);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_vio::dtor */
+/* mysqlnd_vio::dtor */
 static void
 MYSQLND_METHOD(mysqlnd_vio, dtor)(MYSQLND_VIO * const vio, MYSQLND_STATS * const stats, MYSQLND_ERROR_INFO * const error_info)
 {
@@ -698,10 +667,8 @@ MYSQLND_METHOD(mysqlnd_vio, dtor)(MYSQLND_VIO * const vio, MYSQLND_STATS * const
 	}
 	DBG_VOID_RETURN;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_vio::get_stream */
+/* mysqlnd_vio::get_stream */
 static php_stream *
 MYSQLND_METHOD(mysqlnd_vio, get_stream)(const MYSQLND_VIO * const net)
 {
@@ -709,10 +676,8 @@ MYSQLND_METHOD(mysqlnd_vio, get_stream)(const MYSQLND_VIO * const net)
 	DBG_INF_FMT("%p", net? net->data->stream:NULL);
 	DBG_RETURN(net? net->data->stream:NULL);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_vio::set_stream */
+/* mysqlnd_vio::set_stream */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_vio, set_stream)(MYSQLND_VIO * const vio, php_stream * net_stream)
 {
@@ -723,10 +688,8 @@ MYSQLND_METHOD(mysqlnd_vio, set_stream)(MYSQLND_VIO * const vio, php_stream * ne
 	}
 	DBG_RETURN(FAIL);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_vio::has_valid_stream */
+/* mysqlnd_vio::has_valid_stream */
 static zend_bool
 MYSQLND_METHOD(mysqlnd_vio, has_valid_stream)(const MYSQLND_VIO * const vio)
 {
@@ -734,8 +697,6 @@ MYSQLND_METHOD(mysqlnd_vio, has_valid_stream)(const MYSQLND_VIO * const vio)
 	DBG_INF_FMT("%p %p", vio, vio? vio->data->stream:NULL);
 	DBG_RETURN((vio && vio->data->stream)? TRUE: FALSE);
 }
-/* }}} */
-
 
 MYSQLND_CLASS_METHODS_START(mysqlnd_vio)
 	MYSQLND_METHOD(mysqlnd_vio, init),
@@ -767,7 +728,7 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_vio)
 MYSQLND_CLASS_METHODS_END;
 
 
-/* {{{ mysqlnd_vio_init */
+/* mysqlnd_vio_init */
 PHPAPI MYSQLND_VIO *
 mysqlnd_vio_init(zend_bool persistent, MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) *object_factory, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info)
 {
@@ -777,10 +738,8 @@ mysqlnd_vio_init(zend_bool persistent, MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object
 	vio = factory->get_vio(persistent, stats, error_info);
 	DBG_RETURN(vio);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_vio_free */
+/* mysqlnd_vio_free */
 PHPAPI void
 mysqlnd_vio_free(MYSQLND_VIO * const vio, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info)
 {
@@ -790,4 +749,4 @@ mysqlnd_vio_free(MYSQLND_VIO * const vio, MYSQLND_STATS * stats, MYSQLND_ERROR_I
 	}
 	DBG_VOID_RETURN;
 }
-/* }}} */
+

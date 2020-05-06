@@ -45,7 +45,6 @@ PHP_FUNCTION(header)
 	ctr.line_len = (uint32_t)len;
 	sapi_header_op(rep ? SAPI_HEADER_REPLACE:SAPI_HEADER_ADD, &ctr);
 }
-/* }}} */
 
 /* Removes an HTTP header previously set using header() */
 PHP_FUNCTION(header_remove)
@@ -61,7 +60,6 @@ PHP_FUNCTION(header_remove)
 	ctr.line_len = (uint32_t)len;
 	sapi_header_op(ZEND_NUM_ARGS() == 0 ? SAPI_HEADER_DELETE_ALL : SAPI_HEADER_DELETE, &ctr);
 }
-/* }}} */
 
 PHPAPI int php_header(void)
 {
@@ -273,7 +271,6 @@ PHP_FUNCTION(setcookie)
 		}
 	}
 }
-/* }}} */
 
 /* setrawcookie(string name [, string value [, array options]])
    Send a cookie with no url encoding of the value */
@@ -327,8 +324,6 @@ PHP_FUNCTION(setrawcookie)
 		}
 	}
 }
-/* }}} */
-
 
 /* Returns true if headers have already been sent, false otherwise */
 PHP_FUNCTION(headers_sent)
@@ -366,9 +361,8 @@ PHP_FUNCTION(headers_sent)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
-/* {{{ php_head_apply_header_list_to_hash
+/* php_head_apply_header_list_to_hash
    Turn an llist of sapi_header_struct headers into a numerically indexed zval hash */
 static void php_head_apply_header_list_to_hash(void *data, void *arg)
 {
@@ -387,7 +381,6 @@ PHP_FUNCTION(headers_list)
 	array_init(return_value);
 	zend_llist_apply_with_argument(&SG(sapi_headers).headers, php_head_apply_header_list_to_hash, return_value);
 }
-/* }}} */
 
 /* Sets a response code, or returns the current HTTP response code */
 PHP_FUNCTION(http_response_code)
@@ -419,4 +412,4 @@ PHP_FUNCTION(http_response_code)
 
 	RETURN_LONG(SG(sapi_headers).http_response_code);
 }
-/* }}} */
+

@@ -53,7 +53,7 @@
 
 static int le_proc_open;
 
-/* {{{ _php_array_to_envp */
+/* _php_array_to_envp */
 static php_process_env_t _php_array_to_envp(zval *environment)
 {
 	zval *element;
@@ -134,9 +134,8 @@ static php_process_env_t _php_array_to_envp(zval *environment)
 
 	return env;
 }
-/* }}} */
 
-/* {{{ _php_free_envp */
+/* _php_free_envp */
 static void _php_free_envp(php_process_env_t env)
 {
 #ifndef PHP_WIN32
@@ -148,9 +147,8 @@ static void _php_free_envp(php_process_env_t env)
 		efree(env.envp);
 	}
 }
-/* }}} */
 
-/* {{{ proc_open_rsrc_dtor */
+/* proc_open_rsrc_dtor */
 static void proc_open_rsrc_dtor(zend_resource *rsrc)
 {
 	struct php_process_handle *proc = (struct php_process_handle*)rsrc->ptr;
@@ -209,15 +207,13 @@ static void proc_open_rsrc_dtor(zend_resource *rsrc)
 	efree(proc);
 
 }
-/* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION(proc_open) */
+/* PHP_MINIT_FUNCTION(proc_open) */
 PHP_MINIT_FUNCTION(proc_open)
 {
 	le_proc_open = zend_register_list_destructors_ex(proc_open_rsrc_dtor, NULL, "process", module_number);
 	return SUCCESS;
 }
-/* }}} */
 
 /* kill a process opened by proc_open */
 PHP_FUNCTION(proc_terminate)
@@ -250,7 +246,6 @@ PHP_FUNCTION(proc_terminate)
 	}
 #endif
 }
-/* }}} */
 
 /* close a process opened by proc_open */
 PHP_FUNCTION(proc_close)
@@ -271,7 +266,6 @@ PHP_FUNCTION(proc_close)
 	FG(pclose_wait) = 0;
 	RETURN_LONG(FG(pclose_ret));
 }
-/* }}} */
 
 /* get information about a process opened by proc_open */
 PHP_FUNCTION(proc_get_status)
@@ -339,9 +333,8 @@ PHP_FUNCTION(proc_get_status)
 	add_assoc_long(return_value, "termsig", termsig);
 	add_assoc_long(return_value, "stopsig", stopsig);
 }
-/* }}} */
 
-/* {{{ handy definitions for portability/readability */
+/* handy definitions for portability/readability */
 #ifdef PHP_WIN32
 
 /* we use this to allow child processes to inherit handles */
@@ -381,7 +374,6 @@ struct php_proc_open_descriptor_item {
 	php_file_descriptor_t parentend, childend; /* FDs for pipes in parent/child */
 	int mode_flags;                            /* mode flags for opening FDs */
 };
-/* }}} */
 
 static zend_string *get_valid_arg_string(zval *zv, int elem_num) {
 	zend_string *str = zval_get_string(zv);
@@ -1217,6 +1209,5 @@ exit_fail:
 #endif
 	RETURN_FALSE;
 }
-/* }}} */
 
 #endif /* PHP_CAN_SUPPORT_PROC_OPEN */

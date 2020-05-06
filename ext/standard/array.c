@@ -43,7 +43,7 @@
 #include "zend_exceptions.h"
 #include "ext/spl/spl_array.h"
 
-/* {{{ defines */
+/* defines */
 #define EXTR_OVERWRITE			0
 #define EXTR_SKIP				1
 #define EXTR_PREFIX_SAME		2
@@ -74,19 +74,17 @@
 #define INTERSECT_COMP_DATA_USER     1
 #define INTERSECT_COMP_KEY_INTERNAL  0
 #define INTERSECT_COMP_KEY_USER      1
-/* }}} */
 
 ZEND_DECLARE_MODULE_GLOBALS(array)
 
-/* {{{ php_array_init_globals
+/* php_array_init_globals
 */
 static void php_array_init_globals(zend_array_globals *array_globals)
 {
 	memset(array_globals, 0, sizeof(zend_array_globals));
 }
-/* }}} */
 
-PHP_MINIT_FUNCTION(array) /* {{{ */
+PHP_MINIT_FUNCTION(array)
 {
 	ZEND_INIT_MODULE_GLOBALS(array, php_array_init_globals, NULL);
 
@@ -120,9 +118,8 @@ PHP_MINIT_FUNCTION(array) /* {{{ */
 
 	return SUCCESS;
 }
-/* }}} */
 
-PHP_MSHUTDOWN_FUNCTION(array) /* {{{ */
+PHP_MSHUTDOWN_FUNCTION(array)
 {
 #ifdef ZTS
 	ts_free_id(array_globals_id);
@@ -130,9 +127,8 @@ PHP_MSHUTDOWN_FUNCTION(array) /* {{{ */
 
 	return SUCCESS;
 }
-/* }}} */
 
-static int php_array_key_compare(Bucket *f, Bucket *s) /* {{{ */
+static int php_array_key_compare(Bucket *f, Bucket *s)
 {
 	zend_uchar t;
 	zend_long l1, l2;
@@ -169,15 +165,13 @@ static int php_array_key_compare(Bucket *f, Bucket *s) /* {{{ */
 	}
 	return ZEND_NORMALIZE_BOOL(l1 - l2);
 }
-/* }}} */
 
-static int php_array_reverse_key_compare(Bucket *a, Bucket *b) /* {{{ */
+static int php_array_reverse_key_compare(Bucket *a, Bucket *b)
 {
 	return php_array_key_compare(b, a);
 }
-/* }}} */
 
-static int php_array_key_compare_numeric(Bucket *f, Bucket *s) /* {{{ */
+static int php_array_key_compare_numeric(Bucket *f, Bucket *s)
 {
 	if (f->key == NULL && s->key == NULL) {
 		return (zend_long)f->h > (zend_long)s->h ? 1 : -1;
@@ -196,15 +190,13 @@ static int php_array_key_compare_numeric(Bucket *f, Bucket *s) /* {{{ */
 		return ZEND_NORMALIZE_BOOL(d1 - d2);
 	}
 }
-/* }}} */
 
-static int php_array_reverse_key_compare_numeric(Bucket *a, Bucket *b) /* {{{ */
+static int php_array_reverse_key_compare_numeric(Bucket *a, Bucket *b)
 {
 	return php_array_key_compare_numeric(b, a);
 }
-/* }}} */
 
-static int php_array_key_compare_string_case(Bucket *f, Bucket *s) /* {{{ */
+static int php_array_key_compare_string_case(Bucket *f, Bucket *s)
 {
 	const char *s1, *s2;
 	size_t l1, l2;
@@ -227,15 +219,13 @@ static int php_array_key_compare_string_case(Bucket *f, Bucket *s) /* {{{ */
 	}
 	return zend_binary_strcasecmp_l(s1, l1, s2, l2);
 }
-/* }}} */
 
-static int php_array_reverse_key_compare_string_case(Bucket *a, Bucket *b) /* {{{ */
+static int php_array_reverse_key_compare_string_case(Bucket *a, Bucket *b)
 {
 	return php_array_key_compare_string_case(b, a);
 }
-/* }}} */
 
-static int php_array_key_compare_string(Bucket *f, Bucket *s) /* {{{ */
+static int php_array_key_compare_string(Bucket *f, Bucket *s)
 {
 	const char *s1, *s2;
 	size_t l1, l2;
@@ -258,15 +248,13 @@ static int php_array_key_compare_string(Bucket *f, Bucket *s) /* {{{ */
 	}
 	return zend_binary_strcmp(s1, l1, s2, l2);
 }
-/* }}} */
 
-static int php_array_reverse_key_compare_string(Bucket *a, Bucket *b) /* {{{ */
+static int php_array_reverse_key_compare_string(Bucket *a, Bucket *b)
 {
 	return php_array_key_compare_string(b, a);
 }
-/* }}} */
 
-static int php_array_key_compare_string_natural_general(Bucket *f, Bucket *s, int fold_case) /* {{{ */
+static int php_array_key_compare_string_natural_general(Bucket *f, Bucket *s, int fold_case)
 {
 	const char *s1, *s2;
 	size_t l1, l2;
@@ -289,33 +277,28 @@ static int php_array_key_compare_string_natural_general(Bucket *f, Bucket *s, in
 	}
 	return strnatcmp_ex(s1, l1, s2, l2, fold_case);
 }
-/* }}} */
 
-static int php_array_key_compare_string_natural_case(Bucket *a, Bucket *b) /* {{{ */
+static int php_array_key_compare_string_natural_case(Bucket *a, Bucket *b)
 {
 	return php_array_key_compare_string_natural_general(a, b, 1);
 }
-/* }}} */
 
-static int php_array_reverse_key_compare_string_natural_case(Bucket *a, Bucket *b) /* {{{ */
+static int php_array_reverse_key_compare_string_natural_case(Bucket *a, Bucket *b)
 {
 	return php_array_key_compare_string_natural_general(b, a, 1);
 }
-/* }}} */
 
-static int php_array_key_compare_string_natural(Bucket *a, Bucket *b) /* {{{ */
+static int php_array_key_compare_string_natural(Bucket *a, Bucket *b)
 {
 	return php_array_key_compare_string_natural_general(a, b, 0);
 }
-/* }}} */
 
-static int php_array_reverse_key_compare_string_natural(Bucket *a, Bucket *b) /* {{{ */
+static int php_array_reverse_key_compare_string_natural(Bucket *a, Bucket *b)
 {
 	return php_array_key_compare_string_natural_general(b, a, 0);
 }
-/* }}} */
 
-static int php_array_key_compare_string_locale(Bucket *f, Bucket *s) /* {{{ */
+static int php_array_key_compare_string_locale(Bucket *f, Bucket *s)
 {
 	const char *s1, *s2;
 	char buf1[MAX_LENGTH_OF_LONG + 1];
@@ -333,15 +316,13 @@ static int php_array_key_compare_string_locale(Bucket *f, Bucket *s) /* {{{ */
 	}
 	return strcoll(s1, s2);
 }
-/* }}} */
 
-static int php_array_reverse_key_compare_string_locale(Bucket *a, Bucket *b) /* {{{ */
+static int php_array_reverse_key_compare_string_locale(Bucket *a, Bucket *b)
 {
 	return php_array_key_compare_string_locale(b, a);
 }
-/* }}} */
 
-static int php_array_data_compare(Bucket *f, Bucket *s) /* {{{ */
+static int php_array_data_compare(Bucket *f, Bucket *s)
 {
 	zval *first = &f->val;
 	zval *second = &s->val;
@@ -354,15 +335,13 @@ static int php_array_data_compare(Bucket *f, Bucket *s) /* {{{ */
 	}
 	return zend_compare(first, second);
 }
-/* }}} */
 
-static int php_array_reverse_data_compare(Bucket *a, Bucket *b) /* {{{ */
+static int php_array_reverse_data_compare(Bucket *a, Bucket *b)
 {
 	return php_array_data_compare(a, b) * -1;
 }
-/* }}} */
 
-static int php_array_data_compare_numeric(Bucket *f, Bucket *s) /* {{{ */
+static int php_array_data_compare_numeric(Bucket *f, Bucket *s)
 {
 	zval *first = &f->val;
 	zval *second = &s->val;
@@ -376,15 +355,13 @@ static int php_array_data_compare_numeric(Bucket *f, Bucket *s) /* {{{ */
 
 	return numeric_compare_function(first, second);
 }
-/* }}} */
 
-static int php_array_reverse_data_compare_numeric(Bucket *a, Bucket *b) /* {{{ */
+static int php_array_reverse_data_compare_numeric(Bucket *a, Bucket *b)
 {
 	return php_array_data_compare_numeric(b, a);
 }
-/* }}} */
 
-static int php_array_data_compare_string_case(Bucket *f, Bucket *s) /* {{{ */
+static int php_array_data_compare_string_case(Bucket *f, Bucket *s)
 {
 	zval *first = &f->val;
 	zval *second = &s->val;
@@ -398,15 +375,13 @@ static int php_array_data_compare_string_case(Bucket *f, Bucket *s) /* {{{ */
 
 	return string_case_compare_function(first, second);
 }
-/* }}} */
 
-static int php_array_reverse_data_compare_string_case(Bucket *a, Bucket *b) /* {{{ */
+static int php_array_reverse_data_compare_string_case(Bucket *a, Bucket *b)
 {
 	return php_array_data_compare_string_case(b, a);
 }
-/* }}} */
 
-static int php_array_data_compare_string(Bucket *f, Bucket *s) /* {{{ */
+static int php_array_data_compare_string(Bucket *f, Bucket *s)
 {
 	zval *first = &f->val;
 	zval *second = &s->val;
@@ -420,15 +395,13 @@ static int php_array_data_compare_string(Bucket *f, Bucket *s) /* {{{ */
 
 	return string_compare_function(first, second);
 }
-/* }}} */
 
-static int php_array_reverse_data_compare_string(Bucket *a, Bucket *b) /* {{{ */
+static int php_array_reverse_data_compare_string(Bucket *a, Bucket *b)
 {
 	return php_array_data_compare_string(b, a);
 }
-/* }}} */
 
-static int php_array_natural_general_compare(Bucket *f, Bucket *s, int fold_case) /* {{{ */
+static int php_array_natural_general_compare(Bucket *f, Bucket *s, int fold_case)
 {
 	zend_string *tmp_str1, *tmp_str2;
 	zend_string *str1 = zval_get_tmp_string(&f->val, &tmp_str1);
@@ -440,33 +413,28 @@ static int php_array_natural_general_compare(Bucket *f, Bucket *s, int fold_case
 	zend_tmp_string_release(tmp_str2);
 	return result;
 }
-/* }}} */
 
-static int php_array_natural_compare(Bucket *a, Bucket *b) /* {{{ */
+static int php_array_natural_compare(Bucket *a, Bucket *b)
 {
 	return php_array_natural_general_compare(a, b, 0);
 }
-/* }}} */
 
-static int php_array_reverse_natural_compare(Bucket *a, Bucket *b) /* {{{ */
+static int php_array_reverse_natural_compare(Bucket *a, Bucket *b)
 {
 	return php_array_natural_general_compare(b, a, 0);
 }
-/* }}} */
 
-static int php_array_natural_case_compare(Bucket *a, Bucket *b) /* {{{ */
+static int php_array_natural_case_compare(Bucket *a, Bucket *b)
 {
 	return php_array_natural_general_compare(a, b, 1);
 }
-/* }}} */
 
-static int php_array_reverse_natural_case_compare(Bucket *a, Bucket *b) /* {{{ */
+static int php_array_reverse_natural_case_compare(Bucket *a, Bucket *b)
 {
 	return php_array_natural_general_compare(b, a, 1);
 }
-/* }}} */
 
-static int php_array_data_compare_string_locale(Bucket *f, Bucket *s) /* {{{ */
+static int php_array_data_compare_string_locale(Bucket *f, Bucket *s)
 {
 	zval *first = &f->val;
 	zval *second = &s->val;
@@ -480,15 +448,13 @@ static int php_array_data_compare_string_locale(Bucket *f, Bucket *s) /* {{{ */
 
 	return string_locale_compare_function(first, second);
 }
-/* }}} */
 
-static int php_array_reverse_data_compare_string_locale(Bucket *a, Bucket *b) /* {{{ */
+static int php_array_reverse_data_compare_string_locale(Bucket *a, Bucket *b)
 {
 	return php_array_data_compare_string_locale(b, a);
 }
-/* }}} */
 
-static bucket_compare_func_t php_get_key_compare_func(zend_long sort_type, int reverse) /* {{{ */
+static bucket_compare_func_t php_get_key_compare_func(zend_long sort_type, int reverse)
 {
 	switch (sort_type & ~PHP_SORT_FLAG_CASE) {
 		case PHP_SORT_NUMERIC:
@@ -550,9 +516,8 @@ static bucket_compare_func_t php_get_key_compare_func(zend_long sort_type, int r
 	}
 	return NULL;
 }
-/* }}} */
 
-static bucket_compare_func_t php_get_data_compare_func(zend_long sort_type, int reverse) /* {{{ */
+static bucket_compare_func_t php_get_data_compare_func(zend_long sort_type, int reverse)
 {
 	switch (sort_type & ~PHP_SORT_FLAG_CASE) {
 		case PHP_SORT_NUMERIC:
@@ -614,7 +579,6 @@ static bucket_compare_func_t php_get_data_compare_func(zend_long sort_type, int 
 	}
 	return NULL;
 }
-/* }}} */
 
 /* Sort an array by key value in reverse order */
 PHP_FUNCTION(krsort)
@@ -635,7 +599,6 @@ PHP_FUNCTION(krsort)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Sort an array by key */
 PHP_FUNCTION(ksort)
@@ -656,9 +619,8 @@ PHP_FUNCTION(ksort)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
-PHPAPI zend_long php_count_recursive(HashTable *ht) /* {{{ */
+PHPAPI zend_long php_count_recursive(HashTable *ht)
 {
 	zend_long cnt = 0;
 	zval *element;
@@ -685,7 +647,6 @@ PHPAPI zend_long php_count_recursive(HashTable *ht) /* {{{ */
 
 	return cnt;
 }
-/* }}} */
 
 /* Count the number of elements in a variable (usually an array) */
 PHP_FUNCTION(count)
@@ -754,9 +715,8 @@ PHP_FUNCTION(count)
 			break;
 	}
 }
-/* }}} */
 
-static void php_natsort(INTERNAL_FUNCTION_PARAMETERS, int fold_case) /* {{{ */
+static void php_natsort(INTERNAL_FUNCTION_PARAMETERS, int fold_case)
 {
 	zval *array;
 
@@ -772,21 +732,18 @@ static void php_natsort(INTERNAL_FUNCTION_PARAMETERS, int fold_case) /* {{{ */
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Sort an array using natural sort */
 PHP_FUNCTION(natsort)
 {
 	php_natsort(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
-/* }}} */
 
 /* Sort an array using case-insensitive natural sort */
 PHP_FUNCTION(natcasesort)
 {
 	php_natsort(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
-/* }}} */
 
 /* Sort an array and maintain index association */
 PHP_FUNCTION(asort)
@@ -807,7 +764,6 @@ PHP_FUNCTION(asort)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Sort an array in reverse order and maintain index association */
 PHP_FUNCTION(arsort)
@@ -828,7 +784,6 @@ PHP_FUNCTION(arsort)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Sort an array */
 PHP_FUNCTION(sort)
@@ -849,7 +804,6 @@ PHP_FUNCTION(sort)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Sort an array in reverse order */
 PHP_FUNCTION(rsort)
@@ -870,9 +824,8 @@ PHP_FUNCTION(rsort)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
-static int php_array_user_compare(Bucket *f, Bucket *s) /* {{{ */
+static int php_array_user_compare(Bucket *f, Bucket *s)
 {
 	zval args[2];
 	zval retval;
@@ -896,7 +849,6 @@ static int php_array_user_compare(Bucket *f, Bucket *s) /* {{{ */
 		return 0;
 	}
 }
-/* }}} */
 
 /* check if comparison function is valid */
 #define PHP_ARRAY_CMP_FUNC_CHECK(func_name)	\
@@ -928,7 +880,7 @@ static int php_array_user_compare(Bucket *f, Bucket *s) /* {{{ */
 	BG(user_compare_fci) = old_user_compare_fci; \
 	BG(user_compare_fci_cache) = old_user_compare_fci_cache; \
 
-static void php_usort(INTERNAL_FUNCTION_PARAMETERS, bucket_compare_func_t compare_func, zend_bool renumber) /* {{{ */
+static void php_usort(INTERNAL_FUNCTION_PARAMETERS, bucket_compare_func_t compare_func, zend_bool renumber)
 {
 	zval *array;
 	zend_array *arr;
@@ -958,23 +910,20 @@ static void php_usort(INTERNAL_FUNCTION_PARAMETERS, bucket_compare_func_t compar
 	PHP_ARRAY_CMP_FUNC_RESTORE();
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Sort an array by values using a user-defined comparison function */
 PHP_FUNCTION(usort)
 {
 	php_usort(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_array_user_compare, 1);
 }
-/* }}} */
 
 /* Sort an array with a user-defined comparison function and maintain index association */
 PHP_FUNCTION(uasort)
 {
 	php_usort(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_array_user_compare, 0);
 }
-/* }}} */
 
-static int php_array_user_key_compare(Bucket *f, Bucket *s) /* {{{ */
+static int php_array_user_key_compare(Bucket *f, Bucket *s)
 {
 	zval args[2];
 	zval retval;
@@ -1007,14 +956,12 @@ static int php_array_user_key_compare(Bucket *f, Bucket *s) /* {{{ */
 
 	return ZEND_NORMALIZE_BOOL(result);
 }
-/* }}} */
 
 /* Sort an array by keys using a user-defined comparison function */
 PHP_FUNCTION(uksort)
 {
 	php_usort(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_array_user_key_compare, 0);
 }
-/* }}} */
 
 /* Advances array argument's internal pointer to the last element and return it */
 PHP_FUNCTION(end)
@@ -1040,7 +987,6 @@ PHP_FUNCTION(end)
 		ZVAL_COPY_DEREF(return_value, entry);
 	}
 }
-/* }}} */
 
 /* Move array argument's internal pointer to the previous element and return it */
 PHP_FUNCTION(prev)
@@ -1066,7 +1012,6 @@ PHP_FUNCTION(prev)
 		ZVAL_COPY_DEREF(return_value, entry);
 	}
 }
-/* }}} */
 
 /* Move array argument's internal pointer to the next element and return it */
 PHP_FUNCTION(next)
@@ -1092,7 +1037,6 @@ PHP_FUNCTION(next)
 		ZVAL_COPY_DEREF(return_value, entry);
 	}
 }
-/* }}} */
 
 /* Set array argument's internal pointer to the first element and return it */
 PHP_FUNCTION(reset)
@@ -1118,7 +1062,6 @@ PHP_FUNCTION(reset)
 		ZVAL_COPY_DEREF(return_value, entry);
 	}
 }
-/* }}} */
 
 /* Return the element currently pointed to by the internal array pointer */
 PHP_FUNCTION(current)
@@ -1140,7 +1083,6 @@ PHP_FUNCTION(current)
 
 	ZVAL_COPY_DEREF(return_value, entry);
 }
-/* }}} */
 
 /* Return the key of the element currently pointed to by the internal array pointer */
 PHP_FUNCTION(key)
@@ -1153,7 +1095,6 @@ PHP_FUNCTION(key)
 
 	zend_hash_get_current_key_zval(array, return_value);
 }
-/* }}} */
 
 /* Return the lowest value in an array or a series of arguments */
 PHP_FUNCTION(min)
@@ -1197,7 +1138,6 @@ PHP_FUNCTION(min)
 		ZVAL_COPY(return_value, min);
 	}
 }
-/* }}} */
 
 /* Return the highest value in an array or a series of arguments */
 PHP_FUNCTION(max)
@@ -1241,9 +1181,8 @@ PHP_FUNCTION(max)
 		ZVAL_COPY(return_value, max);
 	}
 }
-/* }}} */
 
-static int php_array_walk(zval *array, zval *userdata, int recursive) /* {{{ */
+static int php_array_walk(zval *array, zval *userdata, int recursive)
 {
 	zval args[3],		/* Arguments to userland function */
 		 retval,		/* Return value - unused */
@@ -1371,7 +1310,6 @@ static int php_array_walk(zval *array, zval *userdata, int recursive) /* {{{ */
 	zend_hash_iterator_del(ht_iter);
 	return result;
 }
-/* }}} */
 
 /* Apply a user function to every member of an array */
 PHP_FUNCTION(array_walk)
@@ -1401,7 +1339,6 @@ PHP_FUNCTION(array_walk)
 	BG(array_walk_fci_cache) = orig_array_walk_fci_cache;
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Apply a user function recursively to every member of an array */
 PHP_FUNCTION(array_walk_recursive)
@@ -1431,13 +1368,12 @@ PHP_FUNCTION(array_walk_recursive)
 	BG(array_walk_fci_cache) = orig_array_walk_fci_cache;
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior)
  * 0 = return boolean
  * 1 = return key
  */
-static inline void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) /* {{{ */
+static inline void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 {
 	zval *value,				/* value to check for */
 		 *array,				/* array to check in */
@@ -1538,23 +1474,20 @@ static inline void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) 
 
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* Checks if the given value exists in the array */
 PHP_FUNCTION(in_array)
 {
 	php_search_array(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
-/* }}} */
 
 /* Searches the array for a given value and returns the corresponding key if successful */
 PHP_FUNCTION(array_search)
 {
 	php_search_array(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
-/* }}} */
 
-static zend_always_inline int php_valid_var_name(const char *var_name, size_t var_name_len) /* {{{ */
+static zend_always_inline int php_valid_var_name(const char *var_name, size_t var_name_len)
 {
 #if 1
 	/* first 256 bits for first character, and second 256 bits for the next */
@@ -1609,9 +1542,8 @@ static zend_always_inline int php_valid_var_name(const char *var_name, size_t va
 	}
 	return 1;
 }
-/* }}} */
 
-PHPAPI int php_prefix_varname(zval *result, zend_string *prefix, const char *var_name, size_t var_name_len, zend_bool add_underscore) /* {{{ */
+PHPAPI int php_prefix_varname(zval *result, zend_string *prefix, const char *var_name, size_t var_name_len, zend_bool add_underscore)
 {
 	ZVAL_NEW_STR(result, zend_string_alloc(ZSTR_LEN(prefix) + (add_underscore ? 1 : 0) + var_name_len, 0));
 	memcpy(Z_STRVAL_P(result), ZSTR_VAL(prefix), ZSTR_LEN(prefix));
@@ -1624,9 +1556,8 @@ PHPAPI int php_prefix_varname(zval *result, zend_string *prefix, const char *var
 
 	return SUCCESS;
 }
-/* }}} */
 
-static zend_long php_extract_ref_if_exists(zend_array *arr, zend_array *symbol_table) /* {{{ */
+static zend_long php_extract_ref_if_exists(zend_array *arr, zend_array *symbol_table)
 {
 	zend_long count = 0;
 	zend_string *var_name;
@@ -1667,9 +1598,8 @@ static zend_long php_extract_ref_if_exists(zend_array *arr, zend_array *symbol_t
 
 	return count;
 }
-/* }}} */
 
-static zend_long php_extract_if_exists(zend_array *arr, zend_array *symbol_table) /* {{{ */
+static zend_long php_extract_if_exists(zend_array *arr, zend_array *symbol_table)
 {
 	zend_long count = 0;
 	zend_string *var_name;
@@ -1708,9 +1638,8 @@ static zend_long php_extract_if_exists(zend_array *arr, zend_array *symbol_table
 
 	return count;
 }
-/* }}} */
 
-static zend_long php_extract_ref_overwrite(zend_array *arr, zend_array *symbol_table) /* {{{ */
+static zend_long php_extract_ref_overwrite(zend_array *arr, zend_array *symbol_table)
 {
 	zend_long count = 0;
 	zend_string *var_name;
@@ -1755,9 +1684,8 @@ static zend_long php_extract_ref_overwrite(zend_array *arr, zend_array *symbol_t
 
 	return count;
 }
-/* }}} */
 
-static zend_long php_extract_overwrite(zend_array *arr, zend_array *symbol_table) /* {{{ */
+static zend_long php_extract_overwrite(zend_array *arr, zend_array *symbol_table)
 {
 	zend_long count = 0;
 	zend_string *var_name;
@@ -1797,9 +1725,8 @@ static zend_long php_extract_overwrite(zend_array *arr, zend_array *symbol_table
 
 	return count;
 }
-/* }}} */
 
-static zend_long php_extract_ref_prefix_if_exists(zend_array *arr, zend_array *symbol_table, zend_string *prefix) /* {{{ */
+static zend_long php_extract_ref_prefix_if_exists(zend_array *arr, zend_array *symbol_table, zend_string *prefix)
 {
 	zend_long count = 0;
 	zend_string *var_name;
@@ -1853,9 +1780,8 @@ static zend_long php_extract_ref_prefix_if_exists(zend_array *arr, zend_array *s
 
 	return count;
 }
-/* }}} */
 
-static zend_long php_extract_prefix_if_exists(zend_array *arr, zend_array *symbol_table, zend_string *prefix) /* {{{ */
+static zend_long php_extract_prefix_if_exists(zend_array *arr, zend_array *symbol_table, zend_string *prefix)
 {
 	zend_long count = 0;
 	zend_string *var_name;
@@ -1904,9 +1830,8 @@ static zend_long php_extract_prefix_if_exists(zend_array *arr, zend_array *symbo
 
 	return count;
 }
-/* }}} */
 
-static zend_long php_extract_ref_prefix_same(zend_array *arr, zend_array *symbol_table, zend_string *prefix) /* {{{ */
+static zend_long php_extract_ref_prefix_same(zend_array *arr, zend_array *symbol_table, zend_string *prefix)
 {
 	zend_long count = 0;
 	zend_string *var_name;
@@ -1978,9 +1903,8 @@ prefix:
 
 	return count;
 }
-/* }}} */
 
-static zend_long php_extract_prefix_same(zend_array *arr, zend_array *symbol_table, zend_string *prefix) /* {{{ */
+static zend_long php_extract_prefix_same(zend_array *arr, zend_array *symbol_table, zend_string *prefix)
 {
 	zend_long count = 0;
 	zend_string *var_name;
@@ -2044,9 +1968,8 @@ prefix:
 
 	return count;
 }
-/* }}} */
 
-static zend_long php_extract_ref_prefix_all(zend_array *arr, zend_array *symbol_table, zend_string *prefix) /* {{{ */
+static zend_long php_extract_ref_prefix_all(zend_array *arr, zend_array *symbol_table, zend_string *prefix)
 {
 	zend_long count = 0;
 	zend_string *var_name;
@@ -2091,9 +2014,8 @@ static zend_long php_extract_ref_prefix_all(zend_array *arr, zend_array *symbol_
 
 	return count;
 }
-/* }}} */
 
-static zend_long php_extract_prefix_all(zend_array *arr, zend_array *symbol_table, zend_string *prefix) /* {{{ */
+static zend_long php_extract_prefix_all(zend_array *arr, zend_array *symbol_table, zend_string *prefix)
 {
 	zend_long count = 0;
 	zend_string *var_name;
@@ -2138,9 +2060,8 @@ static zend_long php_extract_prefix_all(zend_array *arr, zend_array *symbol_tabl
 
 	return count;
 }
-/* }}} */
 
-static zend_long php_extract_ref_prefix_invalid(zend_array *arr, zend_array *symbol_table, zend_string *prefix) /* {{{ */
+static zend_long php_extract_ref_prefix_invalid(zend_array *arr, zend_array *symbol_table, zend_string *prefix)
 {
 	zend_long count = 0;
 	zend_string *var_name;
@@ -2193,9 +2114,8 @@ static zend_long php_extract_ref_prefix_invalid(zend_array *arr, zend_array *sym
 
 	return count;
 }
-/* }}} */
 
-static zend_long php_extract_prefix_invalid(zend_array *arr, zend_array *symbol_table, zend_string *prefix) /* {{{ */
+static zend_long php_extract_prefix_invalid(zend_array *arr, zend_array *symbol_table, zend_string *prefix)
 {
 	zend_long count = 0;
 	zend_string *var_name;
@@ -2248,9 +2168,8 @@ static zend_long php_extract_prefix_invalid(zend_array *arr, zend_array *symbol_
 
 	return count;
 }
-/* }}} */
 
-static zend_long php_extract_ref_skip(zend_array *arr, zend_array *symbol_table) /* {{{ */
+static zend_long php_extract_ref_skip(zend_array *arr, zend_array *symbol_table)
 {
 	zend_long count = 0;
 	zend_string *var_name;
@@ -2293,9 +2212,8 @@ static zend_long php_extract_ref_skip(zend_array *arr, zend_array *symbol_table)
 
 	return count;
 }
-/* }}} */
 
-static zend_long php_extract_skip(zend_array *arr, zend_array *symbol_table) /* {{{ */
+static zend_long php_extract_skip(zend_array *arr, zend_array *symbol_table)
 {
 	zend_long count = 0;
 	zend_string *var_name;
@@ -2330,7 +2248,6 @@ static zend_long php_extract_skip(zend_array *arr, zend_array *symbol_table) /* 
 
 	return count;
 }
-/* }}} */
 
 /* Imports variables into symbol table from an array */
 PHP_FUNCTION(extract)
@@ -2435,9 +2352,8 @@ PHP_FUNCTION(extract)
 
 	RETURN_LONG(count);
 }
-/* }}} */
 
-static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_value, zval *entry) /* {{{ */
+static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_value, zval *entry)
 {
 	zval *value_ptr, data;
 
@@ -2473,7 +2389,6 @@ static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_valu
 		}
 	}
 }
-/* }}} */
 
 /* Creates a hash containing variables and their values */
 PHP_FUNCTION(compact)
@@ -2506,7 +2421,6 @@ PHP_FUNCTION(compact)
 		php_compact_var(symbol_table, return_value, &args[i]);
 	}
 }
-/* }}} */
 
 /* Create an array containing num elements starting with index start_key each initialized to val */
 PHP_FUNCTION(array_fill)
@@ -2575,7 +2489,6 @@ PHP_FUNCTION(array_fill)
 		RETURN_THROWS();
 	}
 }
-/* }}} */
 
 /* Create an array using the elements of the first parameter as keys each initialized to val */
 PHP_FUNCTION(array_fill_keys)
@@ -2603,7 +2516,6 @@ PHP_FUNCTION(array_fill_keys)
 		}
 	} ZEND_HASH_FOREACH_END();
 }
-/* }}} */
 
 #define RANGE_CHECK_DOUBLE_INIT_ARRAY(start, end) do { \
 		double __calc_size = ((start - end) / step) + 1; \
@@ -2814,12 +2726,11 @@ err:
 		RETURN_THROWS();
 	}
 }
-/* }}} */
 
 #undef RANGE_CHECK_DOUBLE_INIT_ARRAY
 #undef RANGE_CHECK_LONG_INIT_ARRAY
 
-static void php_array_data_shuffle(zval *array) /* {{{ */
+static void php_array_data_shuffle(zval *array)
 {
 	uint32_t idx, j, n_elems;
 	Bucket *p, temp;
@@ -2898,7 +2809,6 @@ static void php_array_data_shuffle(zval *array) /* {{{ */
 		zend_hash_to_packed(hash);
 	}
 }
-/* }}} */
 
 /* Randomly shuffle the contents of an array */
 PHP_FUNCTION(shuffle)
@@ -2913,9 +2823,8 @@ PHP_FUNCTION(shuffle)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
-static void php_splice(HashTable *in_hash, zend_long offset, zend_long length, HashTable *replace, HashTable *removed) /* {{{ */
+static void php_splice(HashTable *in_hash, zend_long offset, zend_long length, HashTable *replace, HashTable *removed)
 {
 	HashTable 	 out_hash;			/* Output hashtable */
 	zend_long	 num_in;			/* Number of entries in the input hashtable */
@@ -3048,7 +2957,6 @@ static void php_splice(HashTable *in_hash, zend_long offset, zend_long length, H
 
 	zend_hash_internal_pointer_reset(in_hash);
 }
-/* }}} */
 
 /* Pushes elements onto the end of the array */
 PHP_FUNCTION(array_push)
@@ -3079,7 +2987,6 @@ PHP_FUNCTION(array_push)
 	/* Clean up and return the number of values in the stack */
 	RETVAL_LONG(zend_hash_num_elements(Z_ARRVAL_P(stack)));
 }
-/* }}} */
 
 /* Pops an element off the end of the array */
 PHP_FUNCTION(array_pop)
@@ -3128,7 +3035,6 @@ PHP_FUNCTION(array_pop)
 
 	zend_hash_internal_pointer_reset(Z_ARRVAL_P(stack));
 }
-/* }}} */
 
 /* Pops an element off the beginning of the array */
 PHP_FUNCTION(array_shift)
@@ -3234,7 +3140,6 @@ PHP_FUNCTION(array_shift)
 
 	zend_hash_internal_pointer_reset(Z_ARRVAL_P(stack));
 }
-/* }}} */
 
 /* Pushes elements onto the beginning of the array */
 PHP_FUNCTION(array_unshift)
@@ -3290,7 +3195,6 @@ PHP_FUNCTION(array_unshift)
 	/* Clean up and return the number of elements in the stack */
 	RETVAL_LONG(zend_hash_num_elements(Z_ARRVAL_P(stack)));
 }
-/* }}} */
 
 /* Removes the elements designated by offset and length and replace them with supplied array */
 PHP_FUNCTION(array_splice)
@@ -3352,9 +3256,8 @@ PHP_FUNCTION(array_splice)
 	/* Perform splice */
 	php_splice(Z_ARRVAL_P(array), offset, length, repl_array ? Z_ARRVAL_P(repl_array) : NULL, rem_hash);
 }
-/* }}} */
 
-/* {{{ find_bucket_at_offset(HashTable* ht, zend_long offset)
+/* find_bucket_at_offset(HashTable* ht, zend_long offset)
    Finds the bucket at the given valid offset */
 static inline Bucket* find_bucket_at_offset(HashTable* ht, zend_long offset)
 {
@@ -3379,7 +3282,6 @@ static inline Bucket* find_bucket_at_offset(HashTable* ht, zend_long offset)
 	/* Return a pointer to the end of the bucket array. */
 	return ht->arData + ht->nNumUsed;
 }
-/* }}} */
 
 /* Returns elements specified by offset and length */
 PHP_FUNCTION(array_slice)
@@ -3488,9 +3390,8 @@ PHP_FUNCTION(array_slice)
 		}
 	}
 }
-/* }}} */
 
-PHPAPI int php_array_merge_recursive(HashTable *dest, HashTable *src) /* {{{ */
+PHPAPI int php_array_merge_recursive(HashTable *dest, HashTable *src)
 {
 	zval *src_entry, *dest_entry;
 	zend_string *string_key;
@@ -3555,9 +3456,8 @@ PHPAPI int php_array_merge_recursive(HashTable *dest, HashTable *src) /* {{{ */
 	} ZEND_HASH_FOREACH_END();
 	return 1;
 }
-/* }}} */
 
-PHPAPI int php_array_merge(HashTable *dest, HashTable *src) /* {{{ */
+PHPAPI int php_array_merge(HashTable *dest, HashTable *src)
 {
 	zval *src_entry;
 	zend_string *string_key;
@@ -3590,9 +3490,8 @@ PHPAPI int php_array_merge(HashTable *dest, HashTable *src) /* {{{ */
 	}
 	return 1;
 }
-/* }}} */
 
-PHPAPI int php_array_replace_recursive(HashTable *dest, HashTable *src) /* {{{ */
+PHPAPI int php_array_replace_recursive(HashTable *dest, HashTable *src)
 {
 	zval *src_entry, *dest_entry, *src_zval, *dest_zval;
 	zend_string *string_key;
@@ -3660,9 +3559,8 @@ PHPAPI int php_array_replace_recursive(HashTable *dest, HashTable *src) /* {{{ *
 
 	return 1;
 }
-/* }}} */
 
-static zend_always_inline void php_array_replace_wrapper(INTERNAL_FUNCTION_PARAMETERS, int recursive) /* {{{ */
+static zend_always_inline void php_array_replace_wrapper(INTERNAL_FUNCTION_PARAMETERS, int recursive)
 {
 	zval *args = NULL;
 	zval *arg;
@@ -3699,9 +3597,8 @@ static zend_always_inline void php_array_replace_wrapper(INTERNAL_FUNCTION_PARAM
 		}
 	}
 }
-/* }}} */
 
-static zend_always_inline void php_array_merge_wrapper(INTERNAL_FUNCTION_PARAMETERS, int recursive) /* {{{ */
+static zend_always_inline void php_array_merge_wrapper(INTERNAL_FUNCTION_PARAMETERS, int recursive)
 {
 	zval *args = NULL;
 	zval *arg;
@@ -3805,35 +3702,30 @@ static zend_always_inline void php_array_merge_wrapper(INTERNAL_FUNCTION_PARAMET
 		}
 	}
 }
-/* }}} */
 
 /* Merges elements from passed arrays into one array */
 PHP_FUNCTION(array_merge)
 {
 	php_array_merge_wrapper(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
-/* }}} */
 
 /* Recursively merges elements from passed arrays into one array */
 PHP_FUNCTION(array_merge_recursive)
 {
 	php_array_merge_wrapper(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
-/* }}} */
 
 /* Replaces elements from passed arrays into one array */
 PHP_FUNCTION(array_replace)
 {
 	php_array_replace_wrapper(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
-/* }}} */
 
 /* Recursively replaces elements from passed arrays into one array */
 PHP_FUNCTION(array_replace_recursive)
 {
 	php_array_replace_wrapper(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
-/* }}} */
 
 /* Return just the keys from the input array, optionally only for the specified search_value */
 PHP_FUNCTION(array_keys)
@@ -3916,7 +3808,6 @@ PHP_FUNCTION(array_keys)
 		} ZEND_HASH_FILL_END();
 	}
 }
-/* }}} */
 
 /* Get the key of the first element of the array */
 PHP_FUNCTION(array_key_first)
@@ -3931,7 +3822,6 @@ PHP_FUNCTION(array_key_first)
 	HashPosition pos = 0;
 	zend_hash_get_current_key_zval_ex(target_hash, return_value, &pos);
 }
-/* }}} */
 
 /* Get the key of the last element of the array */
 PHP_FUNCTION(array_key_last)
@@ -3947,7 +3837,6 @@ PHP_FUNCTION(array_key_last)
 	zend_hash_internal_pointer_end_ex(target_hash, &pos);
 	zend_hash_get_current_key_zval_ex(target_hash, return_value, &pos);
 }
-/* }}} */
 
 /* Return just the values from the input array */
 PHP_FUNCTION(array_values)
@@ -3990,7 +3879,6 @@ PHP_FUNCTION(array_values)
 		} ZEND_HASH_FOREACH_END();
 	} ZEND_HASH_FILL_END();
 }
-/* }}} */
 
 /* Return the value as key and the frequency of that value in input as value */
 PHP_FUNCTION(array_count_values)
@@ -4032,9 +3920,8 @@ PHP_FUNCTION(array_count_values)
 		}
 	} ZEND_HASH_FOREACH_END();
 }
-/* }}} */
 
-static inline zval *array_column_fetch_prop(zval *data, zend_string *name_str, zend_long name_long, zval *rv) /* {{{ */
+static inline zval *array_column_fetch_prop(zval *data, zend_string *name_str, zend_long name_long, zval *rv)
 {
 	zval *prop = NULL;
 
@@ -4075,7 +3962,6 @@ static inline zval *array_column_fetch_prop(zval *data, zend_string *name_str, z
 
 	return prop;
 }
-/* }}} */
 
 /* Return the values from a single column in the input array, identified by the
    value_key and optionally indexed by the index_key */
@@ -4173,7 +4059,6 @@ PHP_FUNCTION(array_column)
 		} ZEND_HASH_FOREACH_END();
 	}
 }
-/* }}} */
 
 /* Return input as a new array with the order of the entries reversed */
 PHP_FUNCTION(array_reverse)
@@ -4219,7 +4104,6 @@ PHP_FUNCTION(array_reverse)
 		} ZEND_HASH_FOREACH_END();
 	}
 }
-/* }}} */
 
 /* Returns a copy of input array padded with pad_value to size pad_size */
 PHP_FUNCTION(array_pad)
@@ -4308,7 +4192,6 @@ PHP_FUNCTION(array_pad)
 		}
 	}
 }
-/* }}} */
 
 /* Return array with key <-> value flipped */
 PHP_FUNCTION(array_flip)
@@ -4344,7 +4227,6 @@ PHP_FUNCTION(array_flip)
 		}
 	} ZEND_HASH_FOREACH_END();
 }
-/* }}} */
 
 /* Returns an array with all string keys lowercased [or uppercased] */
 PHP_FUNCTION(array_change_key_case)
@@ -4379,14 +4261,13 @@ PHP_FUNCTION(array_change_key_case)
 		zval_add_ref(entry);
 	} ZEND_HASH_FOREACH_END();
 }
-/* }}} */
 
 struct bucketindex {
 	Bucket b;
 	unsigned int i;
 };
 
-static void array_bucketindex_swap(void *p, void *q) /* {{{ */
+static void array_bucketindex_swap(void *p, void *q)
 {
 	struct bucketindex *f = (struct bucketindex *)p;
 	struct bucketindex *g = (struct bucketindex *)q;
@@ -4395,7 +4276,6 @@ static void array_bucketindex_swap(void *p, void *q) /* {{{ */
 	*f = *g;
 	*g = t;
 }
-/* }}} */
 
 /* Removes duplicate values from array */
 PHP_FUNCTION(array_unique)
@@ -4500,15 +4380,13 @@ PHP_FUNCTION(array_unique)
 	}
 	pefree(arTmp, GC_FLAGS(Z_ARRVAL_P(array)) & IS_ARRAY_PERSISTENT);
 }
-/* }}} */
 
-static int zval_compare(zval *first, zval *second) /* {{{ */
+static int zval_compare(zval *first, zval *second)
 {
 	return string_compare_function(first, second);
 }
-/* }}} */
 
-static int zval_user_compare(zval *a, zval *b) /* {{{ */
+static int zval_user_compare(zval *a, zval *b)
 {
 	zval args[2];
 	zval retval;
@@ -4529,9 +4407,8 @@ static int zval_user_compare(zval *a, zval *b) /* {{{ */
 		return 0;
 	}
 }
-/* }}} */
 
-static void php_array_intersect_key(INTERNAL_FUNCTION_PARAMETERS, int data_compare_type) /* {{{ */
+static void php_array_intersect_key(INTERNAL_FUNCTION_PARAMETERS, int data_compare_type)
 {
 	int argc, i;
 	zval *args;
@@ -4617,9 +4494,8 @@ static void php_array_intersect_key(INTERNAL_FUNCTION_PARAMETERS, int data_compa
 		}
 	} ZEND_HASH_FOREACH_END();
 }
-/* }}} */
 
-static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_compare_type, int key_compare_type) /* {{{ */
+static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_compare_type, int key_compare_type)
 {
 	zval *args = NULL;
 	HashTable *hash;
@@ -4877,65 +4753,56 @@ out:
 	efree(ptrs);
 	efree(lists);
 }
-/* }}} */
 
 /* Returns the entries of arr1 that have keys which are present in all the other arguments. Kind of equivalent to array_diff(array_keys($arr1), array_keys($arr2)[,array_keys(...)]). Equivalent of array_intersect_assoc() but does not do compare of the data. */
 PHP_FUNCTION(array_intersect_key)
 {
 	php_array_intersect_key(INTERNAL_FUNCTION_PARAM_PASSTHRU, INTERSECT_COMP_DATA_NONE);
 }
-/* }}} */
 
 /* Returns the entries of arr1 that have keys which are present in all the other arguments. Kind of equivalent to array_diff(array_keys($arr1), array_keys($arr2)[,array_keys(...)]). The comparison of the keys is performed by a user supplied function. Equivalent of array_intersect_uassoc() but does not do compare of the data. */
 PHP_FUNCTION(array_intersect_ukey)
 {
 	php_array_intersect(INTERNAL_FUNCTION_PARAM_PASSTHRU, INTERSECT_KEY, INTERSECT_COMP_DATA_INTERNAL, INTERSECT_COMP_KEY_USER);
 }
-/* }}} */
 
 /* Returns the entries of arr1 that have values which are present in all the other arguments */
 PHP_FUNCTION(array_intersect)
 {
 	php_array_intersect(INTERNAL_FUNCTION_PARAM_PASSTHRU, INTERSECT_NORMAL, INTERSECT_COMP_DATA_INTERNAL, INTERSECT_COMP_KEY_INTERNAL);
 }
-/* }}} */
 
 /* Returns the entries of arr1 that have values which are present in all the other arguments. Data is compared by using a user-supplied callback. */
 PHP_FUNCTION(array_uintersect)
 {
 	php_array_intersect(INTERNAL_FUNCTION_PARAM_PASSTHRU, INTERSECT_NORMAL, INTERSECT_COMP_DATA_USER, INTERSECT_COMP_KEY_INTERNAL);
 }
-/* }}} */
 
 /* Returns the entries of arr1 that have values which are present in all the other arguments. Keys are used to do more restrictive check */
 PHP_FUNCTION(array_intersect_assoc)
 {
 	php_array_intersect_key(INTERNAL_FUNCTION_PARAM_PASSTHRU, INTERSECT_COMP_DATA_INTERNAL);
 }
-/* }}} */
 
 /* Returns the entries of arr1 that have values which are present in all the other arguments. Keys are used to do more restrictive check and they are compared by using a user-supplied callback. */
 PHP_FUNCTION(array_intersect_uassoc)
 {
 	php_array_intersect(INTERNAL_FUNCTION_PARAM_PASSTHRU, INTERSECT_ASSOC, INTERSECT_COMP_DATA_INTERNAL, INTERSECT_COMP_KEY_USER);
 }
-/* }}} */
 
 /* Returns the entries of arr1 that have values which are present in all the other arguments. Keys are used to do more restrictive check. Data is compared by using a user-supplied callback. */
 PHP_FUNCTION(array_uintersect_assoc)
 {
 	php_array_intersect_key(INTERNAL_FUNCTION_PARAM_PASSTHRU, INTERSECT_COMP_DATA_USER);
 }
-/* }}} */
 
 /* Returns the entries of arr1 that have values which are present in all the other arguments. Keys are used to do more restrictive check. Both data and keys are compared by using user-supplied callbacks. */
 PHP_FUNCTION(array_uintersect_uassoc)
 {
 	php_array_intersect(INTERNAL_FUNCTION_PARAM_PASSTHRU, INTERSECT_ASSOC, INTERSECT_COMP_DATA_USER, INTERSECT_COMP_KEY_USER);
 }
-/* }}} */
 
-static void php_array_diff_key(INTERNAL_FUNCTION_PARAMETERS, int data_compare_type) /* {{{ */
+static void php_array_diff_key(INTERNAL_FUNCTION_PARAMETERS, int data_compare_type)
 {
 	int argc, i;
 	zval *args;
@@ -5016,9 +4883,8 @@ static void php_array_diff_key(INTERNAL_FUNCTION_PARAMETERS, int data_compare_ty
 		}
 	} ZEND_HASH_FOREACH_END();
 }
-/* }}} */
 
-static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_compare_type, int key_compare_type) /* {{{ */
+static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_compare_type, int key_compare_type)
 {
 	zval *args = NULL;
 	HashTable *hash;
@@ -5274,21 +5140,18 @@ out:
 	efree(ptrs);
 	efree(lists);
 }
-/* }}} */
 
 /* Returns the entries of arr1 that have keys which are not present in any of the others arguments. This function is like array_diff() but works on the keys instead of the values. The associativity is preserved. */
 PHP_FUNCTION(array_diff_key)
 {
 	php_array_diff_key(INTERNAL_FUNCTION_PARAM_PASSTHRU, DIFF_COMP_DATA_NONE);
 }
-/* }}} */
 
 /* Returns the entries of arr1 that have keys which are not present in any of the others arguments. User supplied function is used for comparing the keys. This function is like array_udiff() but works on the keys instead of the values. The associativity is preserved. */
 PHP_FUNCTION(array_diff_ukey)
 {
 	php_array_diff(INTERNAL_FUNCTION_PARAM_PASSTHRU, DIFF_KEY, DIFF_COMP_DATA_INTERNAL, DIFF_COMP_KEY_USER);
 }
-/* }}} */
 
 /* Returns the entries of arr1 that have values which are not present in any of the others arguments. */
 PHP_FUNCTION(array_diff)
@@ -5417,48 +5280,42 @@ PHP_FUNCTION(array_diff)
 
 	zend_hash_destroy(&exclude);
 }
-/* }}} */
 
 /* Returns the entries of arr1 that have values which are not present in any of the others arguments. Elements are compared by user supplied function. */
 PHP_FUNCTION(array_udiff)
 {
 	php_array_diff(INTERNAL_FUNCTION_PARAM_PASSTHRU, DIFF_NORMAL, DIFF_COMP_DATA_USER, DIFF_COMP_KEY_INTERNAL);
 }
-/* }}} */
 
 /* Returns the entries of arr1 that have values which are not present in any of the others arguments but do additional checks whether the keys are equal */
 PHP_FUNCTION(array_diff_assoc)
 {
 	php_array_diff_key(INTERNAL_FUNCTION_PARAM_PASSTHRU, DIFF_COMP_DATA_INTERNAL);
 }
-/* }}} */
 
 /* Returns the entries of arr1 that have values which are not present in any of the others arguments but do additional checks whether the keys are equal. Elements are compared by user supplied function. */
 PHP_FUNCTION(array_diff_uassoc)
 {
 	php_array_diff(INTERNAL_FUNCTION_PARAM_PASSTHRU, DIFF_ASSOC, DIFF_COMP_DATA_INTERNAL, DIFF_COMP_KEY_USER);
 }
-/* }}} */
 
 /* Returns the entries of arr1 that have values which are not present in any of the others arguments but do additional checks whether the keys are equal. Keys are compared by user supplied function. */
 PHP_FUNCTION(array_udiff_assoc)
 {
 	php_array_diff_key(INTERNAL_FUNCTION_PARAM_PASSTHRU, DIFF_COMP_DATA_USER);
 }
-/* }}} */
 
 /* Returns the entries of arr1 that have values which are not present in any of the others arguments but do additional checks whether the keys are equal. Keys and elements are compared by user supplied functions. */
 PHP_FUNCTION(array_udiff_uassoc)
 {
 	php_array_diff(INTERNAL_FUNCTION_PARAM_PASSTHRU, DIFF_ASSOC, DIFF_COMP_DATA_USER, DIFF_COMP_KEY_USER);
 }
-/* }}} */
 
 #define MULTISORT_ORDER	0
 #define MULTISORT_TYPE	1
 #define MULTISORT_LAST	2
 
-PHPAPI int php_multisort_compare(const void *a, const void *b) /* {{{ */
+PHPAPI int php_multisort_compare(const void *a, const void *b)
 {
 	Bucket *ab = *(Bucket **)a;
 	Bucket *bb = *(Bucket **)b;
@@ -5476,14 +5333,13 @@ PHPAPI int php_multisort_compare(const void *a, const void *b) /* {{{ */
 
 	return 0;
 }
-/* }}} */
 
 #define MULTISORT_ABORT				\
 	efree(func);	\
 	efree(arrays);					\
 	return;
 
-static void array_bucket_p_sawp(void *p, void *q) /* {{{ */ {
+static void array_bucket_p_sawp(void *p, void *q) {
 	Bucket *t;
 	Bucket **f = (Bucket **)p;
 	Bucket **g = (Bucket **)q;
@@ -5492,7 +5348,6 @@ static void array_bucket_p_sawp(void *p, void *q) /* {{{ */ {
 	*f = *g;
 	*g = t;
 }
-/* }}} */
 
 /* Sort multiple arrays at once similar to how ORDER BY clause works in SQL */
 PHP_FUNCTION(array_multisort)
@@ -5666,7 +5521,6 @@ PHP_FUNCTION(array_multisort)
 	efree(arrays);
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Return key/keys for random entry/entries in the array */
 PHP_FUNCTION(array_rand)
@@ -5776,7 +5630,6 @@ PHP_FUNCTION(array_rand)
 
 	free_alloca(bitset, use_heap);
 }
-/* }}} */
 
 /* Returns the sum of the array entries */
 PHP_FUNCTION(array_sum)
@@ -5800,7 +5653,6 @@ PHP_FUNCTION(array_sum)
 		fast_add_function(return_value, return_value, &entry_n);
 	} ZEND_HASH_FOREACH_END();
 }
-/* }}} */
 
 /* Returns the product of the array entries */
 PHP_FUNCTION(array_product)
@@ -5838,7 +5690,6 @@ PHP_FUNCTION(array_product)
 		Z_DVAL_P(return_value) *= Z_DVAL(entry_n);
 	} ZEND_HASH_FOREACH_END();
 }
-/* }}} */
 
 /* Iteratively reduce the array to a single value via the callback. */
 PHP_FUNCTION(array_reduce)
@@ -5898,7 +5749,6 @@ PHP_FUNCTION(array_reduce)
 
 	zend_release_fcall_info_cache(&fci_cache);
 }
-/* }}} */
 
 /* Filters elements from the array via the callback. */
 PHP_FUNCTION(array_filter)
@@ -5990,7 +5840,6 @@ PHP_FUNCTION(array_filter)
 
 	zend_release_fcall_info_cache(&fci_cache);
 }
-/* }}} */
 
 /* Applies the callback to the elements in given arrays. */
 PHP_FUNCTION(array_map)
@@ -6148,7 +5997,6 @@ PHP_FUNCTION(array_map)
 		efree(array_pos);
 	}
 }
-/* }}} */
 
 /* Checks if the given key or index exists in the array */
 PHP_FUNCTION(array_key_exists)
@@ -6189,7 +6037,6 @@ PHP_FUNCTION(array_key_exists)
 			break;
 	}
 }
-/* }}} */
 
 /* Split array into chunks */
 PHP_FUNCTION(array_chunk)
@@ -6261,7 +6108,6 @@ PHP_FUNCTION(array_chunk)
 		add_next_index_zval(return_value, &chunk);
 	}
 }
-/* }}} */
 
 /* Creates an array by using the elements of the first parameter as keys and the elements of the second as the corresponding values */
 PHP_FUNCTION(array_combine)
@@ -6313,4 +6159,4 @@ PHP_FUNCTION(array_combine)
 		}
 	} ZEND_HASH_FOREACH_END();
 }
-/* }}} */
+

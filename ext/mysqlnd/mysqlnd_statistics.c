@@ -23,7 +23,7 @@
 #include "mysqlnd_debug.h"
 
 
-/* {{{ mysqlnd_stats_values_names */
+/* mysqlnd_stats_values_names */
 const MYSQLND_STRING mysqlnd_stats_values_names[STAT_LAST] =
 {
 	{ MYSQLND_STR_W_LEN("bytes_sent") },
@@ -190,10 +190,8 @@ const MYSQLND_STRING mysqlnd_stats_values_names[STAT_LAST] =
 	{ MYSQLND_STR_W_LEN("bytes_received_real_data_normal") },
 	{ MYSQLND_STR_W_LEN("bytes_received_real_data_ps") }
 };
-/* }}} */
 
-
-/* {{{ mysqlnd_fill_stats_hash */
+/* mysqlnd_fill_stats_hash */
 PHPAPI void
 mysqlnd_fill_stats_hash(const MYSQLND_STATS * const stats, const MYSQLND_STRING * names, zval *return_value ZEND_FILE_LINE_DC)
 {
@@ -207,10 +205,8 @@ mysqlnd_fill_stats_hash(const MYSQLND_STATS * const stats, const MYSQLND_STRING 
 		add_assoc_string_ex(return_value, names[i].s, names[i].l, tmp);
 	}
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_stats_init */
+/* mysqlnd_stats_init */
 PHPAPI void
 mysqlnd_stats_init(MYSQLND_STATS ** stats, const size_t statistic_count, const zend_bool persistent)
 {
@@ -223,10 +219,8 @@ mysqlnd_stats_init(MYSQLND_STATS ** stats, const size_t statistic_count, const z
 	(*stats)->LOCK_access = tsrm_mutex_alloc();
 #endif
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_stats_end */
+/* mysqlnd_stats_end */
 PHPAPI void
 mysqlnd_stats_end(MYSQLND_STATS * stats, const zend_bool persistent)
 {
@@ -238,10 +232,8 @@ mysqlnd_stats_end(MYSQLND_STATS * stats, const zend_bool persistent)
 	/* mnd_free will reference LOCK_access and crash...*/
 	pefree(stats, persistent);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_stats_set_trigger */
+/* mysqlnd_stats_set_trigger */
 PHPAPI mysqlnd_stat_trigger
 mysqlnd_stats_set_trigger(MYSQLND_STATS * const stats, enum_mysqlnd_collected_stats statistic, mysqlnd_stat_trigger trigger)
 {
@@ -255,10 +247,8 @@ mysqlnd_stats_set_trigger(MYSQLND_STATS * const stats, enum_mysqlnd_collected_st
 	}
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_stats_set_handler */
+/* mysqlnd_stats_set_handler */
 PHPAPI mysqlnd_stat_trigger
 mysqlnd_stats_reset_triggers(MYSQLND_STATS * const stats)
 {
@@ -271,12 +261,10 @@ mysqlnd_stats_reset_triggers(MYSQLND_STATS * const stats)
 	}
 	DBG_RETURN(ret);
 }
-/* }}} */
-
 
 /************ MYSQLND specific code **********/
 
-/* {{{ _mysqlnd_get_client_stats */
+/* _mysqlnd_get_client_stats */
 PHPAPI void
 _mysqlnd_get_client_stats(MYSQLND_STATS * stats_ptr, zval *return_value ZEND_FILE_LINE_DC)
 {
@@ -289,4 +277,4 @@ _mysqlnd_get_client_stats(MYSQLND_STATS * stats_ptr, zval *return_value ZEND_FIL
 	mysqlnd_fill_stats_hash(stats_ptr, mysqlnd_stats_values_names, return_value ZEND_FILE_LINE_CC);
 	DBG_VOID_RETURN;
 }
-/* }}} */
+

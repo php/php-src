@@ -31,7 +31,7 @@ PHPDBG_API char *phpdbg_resolve_path(const char*);
 PHPDBG_API char *phpdbg_trim(const char*, size_t, size_t*);
 PHPDBG_API const zend_function *phpdbg_get_function(const char*, const char*);
 
-/* {{{ Color Management */
+/* Color Management */
 #define PHPDBG_COLOR_LEN 12
 #define PHPDBG_COLOR_D(color, code) \
 	{color, sizeof(color)-1, code}
@@ -65,15 +65,15 @@ PHPDBG_API const phpdbg_color_t *phpdbg_get_color(const char *name, size_t name_
 PHPDBG_API void phpdbg_set_color(int element, const phpdbg_color_t *color);
 PHPDBG_API void phpdbg_set_color_ex(int element, const char *name, size_t name_length);
 PHPDBG_API const phpdbg_color_t *phpdbg_get_colors(void);
-PHPDBG_API int phpdbg_get_element(const char *name, size_t len); /* }}} */
+PHPDBG_API int phpdbg_get_element(const char *name, size_t len);
 
-/* {{{ Prompt Management */
+/* Prompt Management */
 PHPDBG_API void phpdbg_set_prompt(const char*);
-PHPDBG_API const char *phpdbg_get_prompt(void); /* }}} */
+PHPDBG_API const char *phpdbg_get_prompt(void);
 
-/* {{{ Console size */
+/* Console size */
 PHPDBG_API int phpdbg_get_terminal_width(void);
-PHPDBG_API int phpdbg_get_terminal_height(void); /* }}} */
+PHPDBG_API int phpdbg_get_terminal_height(void);
 
 PHPDBG_API void phpdbg_set_async_io(int fd);
 

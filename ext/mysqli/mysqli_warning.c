@@ -33,7 +33,7 @@
 #define ZVAL_UTF8_STRING(z, s, flags)          ZVAL_STRING((z), (char*)(s))
 #define ZVAL_UTF8_STRINGL(z, s, l, flags)      ZVAL_STRINGL((z), (char*)(s), (l))
 
-/* {{{ void php_clear_warnings() */
+/* void php_clear_warnings() */
 void php_clear_warnings(MYSQLI_WARNING *w)
 {
 	MYSQLI_WARNING *n;
@@ -46,10 +46,9 @@ void php_clear_warnings(MYSQLI_WARNING *w)
 		efree(n);
 	}
 }
-/* }}} */
 
 #ifndef MYSQLI_USE_MYSQLND
-/* {{{ MYSQLI_WARNING *php_new_warning */
+/* MYSQLI_WARNING *php_new_warning */
 static
 MYSQLI_WARNING *php_new_warning(const char *reason, int errorno)
 {
@@ -65,9 +64,8 @@ MYSQLI_WARNING *php_new_warning(const char *reason, int errorno)
 
 	return w;
 }
-/* }}} */
 
-/* {{{ MYSQLI_WARNING *php_get_warnings(MYSQL *mysql) */
+/* MYSQLI_WARNING *php_get_warnings(MYSQL *mysql) */
 MYSQLI_WARNING *php_get_warnings(MYSQL *mysql)
 {
 	MYSQLI_WARNING *w, *first = NULL, *prev = NULL;
@@ -93,9 +91,9 @@ MYSQLI_WARNING *php_get_warnings(MYSQL *mysql)
 	mysql_free_result(result);
 	return first;
 }
-/* }}} */
+
 #else
-/* {{{ MYSQLI_WARNING *php_new_warning */
+/* MYSQLI_WARNING *php_new_warning */
 static
 MYSQLI_WARNING *php_new_warning(zval * reason, int errorno)
 {
@@ -112,9 +110,8 @@ MYSQLI_WARNING *php_new_warning(zval * reason, int errorno)
 
 	return w;
 }
-/* }}} */
 
-/* {{{ MYSQLI_WARNING *php_get_warnings(MYSQL *mysql) */
+/* MYSQLI_WARNING *php_get_warnings(MYSQL *mysql) */
 MYSQLI_WARNING * php_get_warnings(MYSQLND_CONN_DATA * mysql)
 {
 	MYSQLI_WARNING	*w, *first = NULL, *prev = NULL;
@@ -168,10 +165,10 @@ MYSQLI_WARNING * php_get_warnings(MYSQLND_CONN_DATA * mysql)
 	mysql_free_result(result);
 	return first;
 }
-/* }}} */
+
 #endif
 
-/* {{{ bool mysqli_warning::next() */
+/* bool mysqli_warning::next() */
 PHP_METHOD(mysqli_warning, next)
 {
 	MYSQLI_WARNING 	*w;
@@ -192,9 +189,8 @@ PHP_METHOD(mysqli_warning, next)
 	}
 	RETURN_FALSE;
 }
-/* }}} */
 
-/* {{{ property mysqli_warning_message */
+/* property mysqli_warning_message */
 static int mysqli_warning_message(mysqli_object *obj, zval *retval, zend_bool quiet)
 {
 	MYSQLI_WARNING *w;
@@ -212,9 +208,8 @@ static int mysqli_warning_message(mysqli_object *obj, zval *retval, zend_bool qu
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ property mysqli_warning_sqlstate */
+/* property mysqli_warning_sqlstate */
 static int mysqli_warning_sqlstate(mysqli_object *obj, zval *retval, zend_bool quiet)
 {
 	MYSQLI_WARNING *w;
@@ -232,9 +227,8 @@ static int mysqli_warning_sqlstate(mysqli_object *obj, zval *retval, zend_bool q
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ property mysqli_warning_error */
+/* property mysqli_warning_error */
 static int mysqli_warning_errno(mysqli_object *obj, zval *retval, zend_bool quiet)
 {
 	MYSQLI_WARNING *w;
@@ -252,9 +246,8 @@ static int mysqli_warning_errno(mysqli_object *obj, zval *retval, zend_bool quie
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ mysqli_warning_construct(object obj) */
+/* mysqli_warning_construct(object obj) */
 PHP_METHOD(mysqli_warning, __construct)
 {
 	zval			*z;
@@ -314,13 +307,12 @@ PHP_METHOD(mysqli_warning, __construct)
 	}
 
 }
-/* }}} */
 
-/* {{{ mysqli_warning_property_entries */
+/* mysqli_warning_property_entries */
 const mysqli_property_entry mysqli_warning_property_entries[] = {
 	{"message", sizeof("message") - 1, mysqli_warning_message, NULL},
 	{"sqlstate", sizeof("sqlstate") - 1, mysqli_warning_sqlstate, NULL},
 	{"errno", sizeof("errno") - 1, mysqli_warning_errno, NULL},
 	{NULL, 0, NULL, NULL}
 };
-/* }}} */
+

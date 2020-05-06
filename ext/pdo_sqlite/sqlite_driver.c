@@ -27,7 +27,7 @@
 #include "php_pdo_sqlite_int.h"
 #include "zend_exceptions.h"
 
-int _pdo_sqlite_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int line) /* {{{ */
+int _pdo_sqlite_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int line)
 {
 	pdo_sqlite_db_handle *H = (pdo_sqlite_db_handle *)dbh->driver_data;
 	pdo_error_type *pdo_err = stmt ? &stmt->error_code : &dbh->error_code;
@@ -80,7 +80,6 @@ int _pdo_sqlite_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int li
 
 	return einfo->errcode;
 }
-/* }}} */
 
 static int pdo_sqlite_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info)
 {
@@ -148,7 +147,7 @@ static void pdo_sqlite_cleanup_callbacks(pdo_sqlite_db_handle *H)
 	}
 }
 
-static int sqlite_handle_closer(pdo_dbh_t *dbh) /* {{{ */
+static int sqlite_handle_closer(pdo_dbh_t *dbh)
 {
 	pdo_sqlite_db_handle *H = (pdo_sqlite_db_handle *)dbh->driver_data;
 
@@ -173,7 +172,6 @@ static int sqlite_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 	}
 	return 0;
 }
-/* }}} */
 
 static int sqlite_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len, pdo_stmt_t *stmt, zval *driver_options)
 {
@@ -514,7 +512,7 @@ static int php_sqlite3_collation_callback(void *context,
 	return ret;
 }
 
-/* {{{ bool SQLite::sqliteCreateFunction(string name, mixed callback [, int argcount, int flags])
+/* bool SQLite::sqliteCreateFunction(string name, mixed callback [, int argcount, int flags])
    Registers a UDF with the sqlite db handle */
 static PHP_METHOD(SQLite, sqliteCreateFunction)
 {
@@ -568,9 +566,8 @@ static PHP_METHOD(SQLite, sqliteCreateFunction)
 	efree(func);
 	RETURN_FALSE;
 }
-/* }}} */
 
-/* {{{ bool SQLite::sqliteCreateAggregate(string name, mixed step, mixed fini [, int argcount])
+/* bool SQLite::sqliteCreateAggregate(string name, mixed step, mixed fini [, int argcount])
    Registers a UDF with the sqlite db handle */
 
 /* The step function should have the prototype:
@@ -649,9 +646,8 @@ static PHP_METHOD(SQLite, sqliteCreateAggregate)
 	efree(func);
 	RETURN_FALSE;
 }
-/* }}} */
 
-/* {{{ bool SQLite::sqliteCreateCollation(string name, mixed callback)
+/* bool SQLite::sqliteCreateCollation(string name, mixed callback)
    Registers a collation with the sqlite db handle */
 static PHP_METHOD(SQLite, sqliteCreateCollation)
 {
@@ -697,7 +693,6 @@ static PHP_METHOD(SQLite, sqliteCreateCollation)
 	efree(collation);
 	RETURN_FALSE;
 }
-/* }}} */
 
 static const zend_function_entry dbh_methods[] = {
 	PHP_ME(SQLite, sqliteCreateFunction, NULL, ZEND_ACC_PUBLIC)
@@ -792,7 +787,7 @@ static int authorizer(void *autharg, int access_type, const char *arg3, const ch
 	}
 }
 
-static int pdo_sqlite_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ */
+static int pdo_sqlite_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 {
 	pdo_sqlite_db_handle *H;
 	int i, ret = 0;
@@ -844,7 +839,6 @@ cleanup:
 
 	return ret;
 }
-/* }}} */
 
 const pdo_driver_t pdo_sqlite_driver = {
 	PDO_DRIVER_HEADER(sqlite),

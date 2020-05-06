@@ -153,7 +153,7 @@ typedef struct _php_cgi_globals_struct {
 	char *fpm_config;
 } php_cgi_globals_struct;
 
-/* {{{ user_config_cache
+/* user_config_cache
  *
  * Key for each cache entry is dirname(PATH_TRANSLATED).
  *
@@ -174,7 +174,6 @@ static void user_config_cache_entry_dtor(zval *el)
 	free(entry->user_config);
 	free(entry);
 }
-/* }}} */
 
 #ifdef ZTS
 static int php_cgi_globals_id;
@@ -184,14 +183,13 @@ static php_cgi_globals_struct php_cgi_globals;
 #define CGIG(v) (php_cgi_globals.v)
 #endif
 
-static int module_name_cmp(Bucket *f, Bucket *s) /* {{{ */
+static int module_name_cmp(Bucket *f, Bucket *s)
 {
 	return strcasecmp(	((zend_module_entry *) Z_PTR(f->val))->name,
 						((zend_module_entry *) Z_PTR(s->val))->name);
 }
-/* }}} */
 
-static void print_modules(void) /* {{{ */
+static void print_modules(void)
 {
 	HashTable sorted_registry;
 	zend_module_entry *module;
@@ -204,23 +202,20 @@ static void print_modules(void) /* {{{ */
 	} ZEND_HASH_FOREACH_END();
 	zend_hash_destroy(&sorted_registry);
 }
-/* }}} */
 
-static void print_extension_info(zend_extension *ext) /* {{{ */
+static void print_extension_info(zend_extension *ext)
 {
 	php_printf("%s\n", ext->name);
 }
-/* }}} */
 
-static int extension_name_cmp(const zend_llist_element **f, const zend_llist_element **s) /* {{{ */
+static int extension_name_cmp(const zend_llist_element **f, const zend_llist_element **s)
 {
 	zend_extension *fe = (zend_extension*)(*f)->data;
 	zend_extension *se = (zend_extension*)(*s)->data;
 	return strcmp(fe->name, se->name);
 }
-/* }}} */
 
-static void print_extensions(void) /* {{{ */
+static void print_extensions(void)
 {
 	zend_llist sorted_exts;
 
@@ -230,13 +225,12 @@ static void print_extensions(void) /* {{{ */
 	zend_llist_apply(&sorted_exts, (llist_apply_func_t) print_extension_info);
 	zend_llist_destroy(&sorted_exts);
 }
-/* }}} */
 
 #ifndef STDOUT_FILENO
 #define STDOUT_FILENO 1
 #endif
 
-static inline size_t sapi_cgibin_single_write(const char *str, uint32_t str_length) /* {{{ */
+static inline size_t sapi_cgibin_single_write(const char *str, uint32_t str_length)
 {
 	ssize_t ret;
 
@@ -261,9 +255,8 @@ static inline size_t sapi_cgibin_single_write(const char *str, uint32_t str_leng
 	return fwrite(str, 1, MIN(str_length, 16384), stdout);
 #endif
 }
-/* }}} */
 
-static size_t sapi_cgibin_ub_write(const char *str, size_t str_length) /* {{{ */
+static size_t sapi_cgibin_ub_write(const char *str, size_t str_length)
 {
 	const char *ptr = str;
 	uint32_t remaining = str_length;
@@ -281,9 +274,8 @@ static size_t sapi_cgibin_ub_write(const char *str, size_t str_length) /* {{{ */
 
 	return str_length;
 }
-/* }}} */
 
-static void sapi_cgibin_flush(void *server_context) /* {{{ */
+static void sapi_cgibin_flush(void *server_context)
 {
 	/* fpm has started, let use fcgi instead of stdout */
 	if (fpm_is_running) {
@@ -299,11 +291,10 @@ static void sapi_cgibin_flush(void *server_context) /* {{{ */
 		php_handle_aborted_connection();
 	}
 }
-/* }}} */
 
 #define SAPI_CGI_MAX_HEADER_LENGTH 1024
 
-static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers) /* {{{ */
+static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers)
 {
 	char buf[SAPI_CGI_MAX_HEADER_LENGTH];
 	sapi_header_struct *h;
@@ -404,14 +395,13 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers) /* {{{ */
 
 	return SAPI_HEADER_SENT_SUCCESSFULLY;
 }
-/* }}} */
 
 #ifndef STDIN_FILENO
 # define STDIN_FILENO 0
 #endif
 
 #ifndef HAVE_ATTRIBUTE_WEAK
-static void fpm_fcgi_log(int type, const char *fmt, ...) /* {{{ */
+static void fpm_fcgi_log(int type, const char *fmt, ...)
 #else
 void fcgi_log(int type, const char *fmt, ...)
 #endif
@@ -421,9 +411,8 @@ void fcgi_log(int type, const char *fmt, ...)
 	vzlog("", 0, type, fmt, args);
 	va_end(args);
 }
-/* }}} */
 
-static size_t sapi_cgi_read_post(char *buffer, size_t count_bytes) /* {{{ */
+static size_t sapi_cgi_read_post(char *buffer, size_t count_bytes)
 {
 	uint32_t read_bytes = 0;
 	int tmp_read_bytes;
@@ -461,9 +450,8 @@ static size_t sapi_cgi_read_post(char *buffer, size_t count_bytes) /* {{{ */
 	}
 	return read_bytes;
 }
-/* }}} */
 
-static char *sapi_cgibin_getenv(char *name, size_t name_len) /* {{{ */
+static char *sapi_cgibin_getenv(char *name, size_t name_len)
 {
 	/* if fpm has started, use fcgi env */
 	if (fpm_is_running) {
@@ -474,10 +462,9 @@ static char *sapi_cgibin_getenv(char *name, size_t name_len) /* {{{ */
 	/* if fpm has not started yet, use std env */
 	return getenv(name);
 }
-/* }}} */
 
 #if 0
-static char *_sapi_cgibin_putenv(char *name, char *value) /* {{{ */
+static char *_sapi_cgibin_putenv(char *name, char *value)
 {
 	int name_len;
 
@@ -489,18 +476,17 @@ static char *_sapi_cgibin_putenv(char *name, char *value) /* {{{ */
 	fcgi_request *request = (fcgi_request*) SG(server_context);
 	return fcgi_putenv(request, name, name_len, value);
 }
-/* }}} */
+
 #endif
 
-static char *sapi_cgi_read_cookies(void) /* {{{ */
+static char *sapi_cgi_read_cookies(void)
 {
 	fcgi_request *request = (fcgi_request*) SG(server_context);
 
 	return FCGI_GETENV(request, "HTTP_COOKIE");
 }
-/* }}} */
 
-static void cgi_php_load_env_var(char *var, unsigned int var_len, char *val, unsigned int val_len, void *arg) /* {{{ */
+static void cgi_php_load_env_var(char *var, unsigned int var_len, char *val, unsigned int val_len, void *arg)
 {
 	zval *array_ptr = (zval*)arg;
 	int filter_arg = (Z_ARR_P(array_ptr) == Z_ARR(PG(http_globals)[TRACK_VARS_ENV]))?PARSE_ENV:PARSE_SERVER;
@@ -510,9 +496,8 @@ static void cgi_php_load_env_var(char *var, unsigned int var_len, char *val, uns
 		php_register_variable_safe(var, val, new_val_len, array_ptr);
 	}
 }
-/* }}} */
 
-void cgi_php_import_environment_variables(zval *array_ptr) /* {{{ */
+void cgi_php_import_environment_variables(zval *array_ptr)
 {
 	fcgi_request *request = NULL;
 
@@ -538,9 +523,8 @@ void cgi_php_import_environment_variables(zval *array_ptr) /* {{{ */
 	request = (fcgi_request*) SG(server_context);
 	fcgi_loadenv(request, cgi_php_load_env_var, array_ptr);
 }
-/* }}} */
 
-static void sapi_cgi_register_variables(zval *track_vars_array) /* {{{ */
+static void sapi_cgi_register_variables(zval *track_vars_array)
 {
 	size_t php_self_len;
 	char *php_self;
@@ -580,9 +564,8 @@ static void sapi_cgi_register_variables(zval *track_vars_array) /* {{{ */
 		}
 	}
 }
-/* }}} */
 
-/* {{{ sapi_cgi_log_fastcgi
+/* sapi_cgi_log_fastcgi
  *
  * Ignore level, we want to send all messages through fastcgi
  */
@@ -602,17 +585,15 @@ void sapi_cgi_log_fastcgi(int level, char *message, size_t len)
 		php_handle_aborted_connection();
 	}
 }
-/* }}} */
 
-/* {{{ sapi_cgi_log_message
+/* sapi_cgi_log_message
  */
 static void sapi_cgi_log_message(char *message, int syslog_type_int)
 {
 	zlog_msg(ZLOG_NOTICE, "PHP message: ", message);
 }
-/* }}} */
 
-/* {{{ php_cgi_ini_activate_user_config
+/* php_cgi_ini_activate_user_config
  */
 static void php_cgi_ini_activate_user_config(char *path, int path_len, const char *doc_root, int doc_root_len)
 {
@@ -681,9 +662,8 @@ static void php_cgi_ini_activate_user_config(char *path, int path_len, const cha
 	/* Activate ini entries with values from the user config hash */
 	php_ini_activate_config(entry->user_config, PHP_INI_PERDIR, PHP_INI_STAGE_HTACCESS);
 }
-/* }}} */
 
-static int sapi_cgi_activate(void) /* {{{ */
+static int sapi_cgi_activate(void)
 {
 	fcgi_request *request = (fcgi_request*) SG(server_context);
 	char *path, *doc_root, *server_name;
@@ -750,9 +730,8 @@ static int sapi_cgi_activate(void) /* {{{ */
 
 	return SUCCESS;
 }
-/* }}} */
 
-static int sapi_cgi_deactivate(void) /* {{{ */
+static int sapi_cgi_deactivate(void)
 {
 	/* flush only when SAPI was started. The reasons are:
 		1. SAPI Deactivate is called from two places: module init and request shutdown
@@ -765,18 +744,16 @@ static int sapi_cgi_deactivate(void) /* {{{ */
 	}
 	return SUCCESS;
 }
-/* }}} */
 
-static int php_cgi_startup(sapi_module_struct *sapi_module) /* {{{ */
+static int php_cgi_startup(sapi_module_struct *sapi_module)
 {
 	if (php_module_startup(sapi_module, &cgi_module_entry, 1) == FAILURE) {
 		return FAILURE;
 	}
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ sapi_module_struct cgi_sapi_module
+/* sapi_module_struct cgi_sapi_module
  */
 static sapi_module_struct cgi_sapi_module = {
 	"fpm-fcgi",						/* name */
@@ -809,9 +786,8 @@ static sapi_module_struct cgi_sapi_module = {
 
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
-/* }}} */
 
-/* {{{ php_cgi_usage
+/* php_cgi_usage
  */
 static void php_cgi_usage(char *argv0)
 {
@@ -849,9 +825,8 @@ static void php_cgi_usage(char *argv0)
 				"                   Allow pool to run as root (disabled by default)\n",
 				prog, PHP_PREFIX);
 }
-/* }}} */
 
-/* {{{ is_valid_path
+/* is_valid_path
  *
  * some server configurations allow '..' to slip through in the
  * translated path.   We'll just refuse to handle such a path.
@@ -884,9 +859,8 @@ static int is_valid_path(const char *path)
 	}
 	return 1;
 }
-/* }}} */
 
-/* {{{ init_request_info
+/* init_request_info
 
   initializes request_info structure
 
@@ -1341,18 +1315,16 @@ static void init_request_info(void)
 		efree(tmp);
 	}
 }
-/* }}} */
 
-static fcgi_request *fpm_init_request(int listen_fd) /* {{{ */ {
+static fcgi_request *fpm_init_request(int listen_fd) {
 	fcgi_request *req = fcgi_init_request(listen_fd,
 		fpm_request_accepting,
 		fpm_request_reading_headers,
 		fpm_request_finished);
 	return req;
 }
-/* }}} */
 
-static void fastcgi_ini_parser(zval *arg1, zval *arg2, zval *arg3, int callback_type, void *arg) /* {{{ */
+static void fastcgi_ini_parser(zval *arg1, zval *arg2, zval *arg3, int callback_type, void *arg)
 {
 	int *mode = (int *)arg;
 	char *key;
@@ -1389,7 +1361,6 @@ static void fastcgi_ini_parser(zval *arg1, zval *arg2, zval *arg3, int callback_
 		zlog(ZLOG_ERROR, "Passing INI directive through FastCGI: unable to set '%s'", key);
 	}
 }
-/* }}} */
 
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("cgi.rfc2616_headers",     "0",  PHP_INI_ALL,    OnUpdateBool,   rfc2616_headers, php_cgi_globals_struct, php_cgi_globals)
@@ -1403,7 +1374,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("fpm.config",    NULL, PHP_INI_SYSTEM, OnUpdateString, fpm_config, php_cgi_globals_struct, php_cgi_globals)
 PHP_INI_END()
 
-/* {{{ php_cgi_globals_ctor
+/* php_cgi_globals_ctor
  */
 static void php_cgi_globals_ctor(php_cgi_globals_struct *php_cgi_globals)
 {
@@ -1418,9 +1389,8 @@ static void php_cgi_globals_ctor(php_cgi_globals_struct *php_cgi_globals)
 	php_cgi_globals->error_header = NULL;
 	php_cgi_globals->fpm_config = NULL;
 }
-/* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION
+/* PHP_MINIT_FUNCTION
  */
 static PHP_MINIT_FUNCTION(cgi)
 {
@@ -1432,9 +1402,8 @@ static PHP_MINIT_FUNCTION(cgi)
 	REGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_MSHUTDOWN_FUNCTION
+/* PHP_MSHUTDOWN_FUNCTION
  */
 static PHP_MSHUTDOWN_FUNCTION(cgi)
 {
@@ -1443,9 +1412,8 @@ static PHP_MSHUTDOWN_FUNCTION(cgi)
 	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
+/* PHP_MINFO_FUNCTION
  */
 static PHP_MINFO_FUNCTION(cgi)
 {
@@ -1455,12 +1423,11 @@ static PHP_MINFO_FUNCTION(cgi)
 
 	DISPLAY_INI_ENTRIES();
 }
-/* }}} */
 
 ZEND_BEGIN_ARG_INFO(cgi_fcgi_sapi_no_arginfo, 0)
 ZEND_END_ARG_INFO()
 
-PHP_FUNCTION(fastcgi_finish_request) /* {{{ */
+PHP_FUNCTION(fastcgi_finish_request)
 {
 	fcgi_request *request = (fcgi_request*) SG(server_context);
 
@@ -1480,9 +1447,8 @@ PHP_FUNCTION(fastcgi_finish_request) /* {{{ */
 	RETURN_FALSE;
 
 }
-/* }}} */
 
-PHP_FUNCTION(apache_request_headers) /* {{{ */
+PHP_FUNCTION(apache_request_headers)
 {
 	fcgi_request *request;
 
@@ -1494,10 +1460,10 @@ PHP_FUNCTION(apache_request_headers) /* {{{ */
 	if ((request = (fcgi_request*) SG(server_context))) {
 		fcgi_loadenv(request, sapi_add_request_header, return_value);
 	}
-} /* }}} */
+}
 
 /* Returns the status of the fastcgi process manager */
-PHP_FUNCTION(fpm_get_status) /* {{{ */
+PHP_FUNCTION(fpm_get_status)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
@@ -1507,7 +1473,6 @@ PHP_FUNCTION(fpm_get_status) /* {{{ */
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 static const zend_function_entry cgi_fcgi_sapi_functions[] = {
 	PHP_FE(fastcgi_finish_request,                    cgi_fcgi_sapi_no_arginfo)
@@ -1530,7 +1495,7 @@ static zend_module_entry cgi_module_entry = {
 	STANDARD_MODULE_PROPERTIES
 };
 
-/* {{{ main
+/* main
  */
 int main(int argc, char *argv[])
 {
@@ -2003,4 +1968,4 @@ out:
 
 	return exit_status;
 }
-/* }}} */
+

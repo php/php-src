@@ -37,7 +37,7 @@
  * the format of the header block for a file, in the older UNIX-compatible
  * TAR format
  */
-typedef struct _old_tar_header {  /* {{{ */
+typedef struct _old_tar_header {
 	char name[100];     /* name of file;
 	                         directory is indicated by a trailing slash (/) */
 	char mode[8];       /* file mode */
@@ -52,7 +52,6 @@ typedef struct _old_tar_header {  /* {{{ */
 	                         0 otherwise */
 	char linkname[100]; /* name of linked file */
 } PHAR_TAR_PACK old_tar_header;
-/* }}} */
 
 #if defined(__sgi)
 # pragma pack 0
@@ -62,7 +61,7 @@ typedef struct _old_tar_header {  /* {{{ */
  * Note that tar can determine that the USTAR format is being used by the
  * presence of the null-terminated string "ustar" in the magic field.
  */
-typedef struct _tar_header {  /* {{{ */
+typedef struct _tar_header {
 	char name[100];     /* name of file */
 	char mode[8];       /* file mode   */
 	char uid[8];        /* owner user ID */
@@ -92,7 +91,6 @@ typedef struct _tar_header {  /* {{{ */
 	                       longer then 100 characters */
 	char padding[12];   /* unused zeroed bytes */
 } PHAR_TAR_PACK tar_header;
-/* }}} */
 
 #ifdef PHP_WIN32
 #pragma pack()

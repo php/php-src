@@ -63,11 +63,10 @@ PHPAPI PHP_FUNCTION(dl)
 		EG(full_tables_cleanup) = 1;
 	}
 }
-/* }}} */
 
 #if defined(HAVE_LIBDL)
 
-/* {{{ php_load_shlib
+/* php_load_shlib
  */
 PHPAPI void *php_load_shlib(char *path, char **errp)
 {
@@ -93,9 +92,8 @@ PHPAPI void *php_load_shlib(char *path, char **errp)
 	}
 	return handle;
 }
-/* }}} */
 
-/* {{{ php_load_extension
+/* php_load_extension
  */
 PHPAPI int php_load_extension(char *filename, int type, int start_now)
 {
@@ -240,9 +238,8 @@ PHPAPI int php_load_extension(char *filename, int type, int start_now)
 	}
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ php_dl
+/* php_dl
  */
 PHPAPI void php_dl(char *file, int type, zval *return_value, int start_now)
 {
@@ -253,7 +250,6 @@ PHPAPI void php_dl(char *file, int type, zval *return_value, int start_now)
 		RETVAL_TRUE;
 	}
 }
-/* }}} */
 
 PHP_MINFO_FUNCTION(dl)
 {

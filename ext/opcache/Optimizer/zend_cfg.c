@@ -24,7 +24,7 @@
 #include "zend_optimizer.h"
 #include "zend_optimizer_internal.h"
 
-static void zend_mark_reachable(zend_op *opcodes, zend_cfg *cfg, zend_basic_block *b) /* {{{ */
+static void zend_mark_reachable(zend_op *opcodes, zend_cfg *cfg, zend_basic_block *b)
 {
 	zend_basic_block *blocks = cfg->blocks;
 
@@ -101,9 +101,8 @@ static void zend_mark_reachable(zend_op *opcodes, zend_cfg *cfg, zend_basic_bloc
 		}
 	}
 }
-/* }}} */
 
-static void zend_mark_reachable_blocks(const zend_op_array *op_array, zend_cfg *cfg, int start) /* {{{ */
+static void zend_mark_reachable_blocks(const zend_op_array *op_array, zend_cfg *cfg, int start)
 {
 	zend_basic_block *blocks = cfg->blocks;
 
@@ -222,9 +221,8 @@ static void zend_mark_reachable_blocks(const zend_op_array *op_array, zend_cfg *
 		}
 	}
 }
-/* }}} */
 
-void zend_cfg_remark_reachable_blocks(const zend_op_array *op_array, zend_cfg *cfg) /* {{{ */
+void zend_cfg_remark_reachable_blocks(const zend_op_array *op_array, zend_cfg *cfg)
 {
 	zend_basic_block *blocks = cfg->blocks;
 	int i;
@@ -245,7 +243,6 @@ void zend_cfg_remark_reachable_blocks(const zend_op_array *op_array, zend_cfg *c
 
 	zend_mark_reachable_blocks(op_array, cfg, start);
 }
-/* }}} */
 
 static void initialize_block(zend_basic_block *block) {
 	block->flags = 0;
@@ -265,7 +262,7 @@ static void initialize_block(zend_basic_block *block) {
 		block_map[i]++; \
 	} while (0)
 
-int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t build_flags, zend_cfg *cfg) /* {{{ */
+int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t build_flags, zend_cfg *cfg)
 {
 	uint32_t flags = 0;
 	uint32_t i;
@@ -587,9 +584,8 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 
 	return SUCCESS;
 }
-/* }}} */
 
-int zend_cfg_build_predecessors(zend_arena **arena, zend_cfg *cfg) /* {{{ */
+int zend_cfg_build_predecessors(zend_arena **arena, zend_cfg *cfg)
 {
 	int j, s, edges;
 	zend_basic_block *b;
@@ -650,11 +646,10 @@ int zend_cfg_build_predecessors(zend_arena **arena, zend_cfg *cfg) /* {{{ */
 
 	return SUCCESS;
 }
-/* }}} */
 
 /* Computes a postorder numbering of the CFG */
 static void compute_postnum_recursive(
-		int *postnum, int *cur, const zend_cfg *cfg, int block_num) /* {{{ */
+		int *postnum, int *cur, const zend_cfg *cfg, int block_num)
 {
 	int s;
 	zend_basic_block *block = &cfg->blocks[block_num];
@@ -668,11 +663,10 @@ static void compute_postnum_recursive(
 	}
 	postnum[block_num] = (*cur)++;
 }
-/* }}} */
 
 /* Computes dominator tree using algorithm from "A Simple, Fast Dominance Algorithm" by
  * Cooper, Harvey and Kennedy. */
-int zend_cfg_compute_dominators_tree(const zend_op_array *op_array, zend_cfg *cfg) /* {{{ */
+int zend_cfg_compute_dominators_tree(const zend_op_array *op_array, zend_cfg *cfg)
 {
 	zend_basic_block *blocks = cfg->blocks;
 	int blocks_count = cfg->blocks_count;
@@ -761,16 +755,14 @@ int zend_cfg_compute_dominators_tree(const zend_op_array *op_array, zend_cfg *cf
 	free_alloca(postnum, use_heap);
 	return SUCCESS;
 }
-/* }}} */
 
-static int dominates(zend_basic_block *blocks, int a, int b) /* {{{ */
+static int dominates(zend_basic_block *blocks, int a, int b)
 {
 	while (blocks[b].level > blocks[a].level) {
 		b = blocks[b].idom;
 	}
 	return a == b;
 }
-/* }}} */
 
 typedef struct {
 	int id;
@@ -785,7 +777,7 @@ static void swap_blocks(block_info *a, block_info *b) {
 	*b = tmp;
 }
 
-int zend_cfg_identify_loops(const zend_op_array *op_array, zend_cfg *cfg) /* {{{ */
+int zend_cfg_identify_loops(const zend_op_array *op_array, zend_cfg *cfg)
 {
 	int i, j, k, n;
 	int time;
@@ -896,4 +888,4 @@ int zend_cfg_identify_loops(const zend_op_array *op_array, zend_cfg *cfg) /* {{{
 
 	return SUCCESS;
 }
-/* }}} */
+

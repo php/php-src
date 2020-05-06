@@ -30,7 +30,7 @@ ZEND_API zend_class_entry *zend_ce_serializable;
 ZEND_API zend_class_entry *zend_ce_countable;
 ZEND_API zend_class_entry *zend_ce_stringable;
 
-/* {{{ zend_call_method
+/* zend_call_method
  Only returns the returned zval if retval_ptr != NULL */
 ZEND_API zval* zend_call_method(zend_object *object, zend_class_entry *obj_ce, zend_function **fn_proxy, const char *function_name, size_t function_name_len, zval *retval_ptr, int param_count, zval* arg1, zval* arg2)
 {
@@ -119,18 +119,16 @@ ZEND_API zval* zend_call_method(zend_object *object, zend_class_entry *obj_ce, z
 	}
 	return retval_ptr;
 }
-/* }}} */
 
 /* iterator interface, c-level functions used by engine */
 
-/* {{{ zend_user_it_new_iterator */
+/* zend_user_it_new_iterator */
 ZEND_API void zend_user_it_new_iterator(zend_class_entry *ce, zval *object, zval *retval)
 {
 	zend_call_method_with_0_params(Z_OBJ_P(object), ce, &ce->iterator_funcs_ptr->zf_new_iterator, "getiterator", retval);
 }
-/* }}} */
 
-/* {{{ zend_user_it_invalidate_current */
+/* zend_user_it_invalidate_current */
 ZEND_API void zend_user_it_invalidate_current(zend_object_iterator *_iter)
 {
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
@@ -140,9 +138,8 @@ ZEND_API void zend_user_it_invalidate_current(zend_object_iterator *_iter)
 		ZVAL_UNDEF(&iter->value);
 	}
 }
-/* }}} */
 
-/* {{{ zend_user_it_dtor */
+/* zend_user_it_dtor */
 static void zend_user_it_dtor(zend_object_iterator *_iter)
 {
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
@@ -151,9 +148,8 @@ static void zend_user_it_dtor(zend_object_iterator *_iter)
 	zend_user_it_invalidate_current(_iter);
 	zval_ptr_dtor(object);
 }
-/* }}} */
 
-/* {{{ zend_user_it_valid */
+/* zend_user_it_valid */
 ZEND_API int zend_user_it_valid(zend_object_iterator *_iter)
 {
 	if (_iter) {
@@ -169,9 +165,8 @@ ZEND_API int zend_user_it_valid(zend_object_iterator *_iter)
 	}
 	return FAILURE;
 }
-/* }}} */
 
-/* {{{ zend_user_it_get_current_data */
+/* zend_user_it_get_current_data */
 ZEND_API zval *zend_user_it_get_current_data(zend_object_iterator *_iter)
 {
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
@@ -182,9 +177,8 @@ ZEND_API zval *zend_user_it_get_current_data(zend_object_iterator *_iter)
 	}
 	return &iter->value;
 }
-/* }}} */
 
-/* {{{ zend_user_it_get_current_key */
+/* zend_user_it_get_current_key */
 ZEND_API void zend_user_it_get_current_key(zend_object_iterator *_iter, zval *key)
 {
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
@@ -203,9 +197,8 @@ ZEND_API void zend_user_it_get_current_key(zend_object_iterator *_iter, zval *ke
 		ZVAL_LONG(key, 0);
 	}
 }
-/* }}} */
 
-/* {{{ zend_user_it_move_forward */
+/* zend_user_it_move_forward */
 ZEND_API void zend_user_it_move_forward(zend_object_iterator *_iter)
 {
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
@@ -214,9 +207,8 @@ ZEND_API void zend_user_it_move_forward(zend_object_iterator *_iter)
 	zend_user_it_invalidate_current(_iter);
 	zend_call_method_with_0_params(Z_OBJ_P(object), iter->ce, &iter->ce->iterator_funcs_ptr->zf_next, "next", NULL);
 }
-/* }}} */
 
-/* {{{ zend_user_it_rewind */
+/* zend_user_it_rewind */
 ZEND_API void zend_user_it_rewind(zend_object_iterator *_iter)
 {
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
@@ -225,7 +217,6 @@ ZEND_API void zend_user_it_rewind(zend_object_iterator *_iter)
 	zend_user_it_invalidate_current(_iter);
 	zend_call_method_with_0_params(Z_OBJ_P(object), iter->ce, &iter->ce->iterator_funcs_ptr->zf_rewind, "rewind", NULL);
 }
-/* }}} */
 
 static const zend_object_iterator_funcs zend_interface_iterator_funcs_iterator = {
 	zend_user_it_dtor,
@@ -237,7 +228,7 @@ static const zend_object_iterator_funcs zend_interface_iterator_funcs_iterator =
 	zend_user_it_invalidate_current
 };
 
-/* {{{ zend_user_it_get_iterator */
+/* zend_user_it_get_iterator */
 static zend_object_iterator *zend_user_it_get_iterator(zend_class_entry *ce, zval *object, int by_ref)
 {
 	zend_user_iterator *iterator;
@@ -258,9 +249,8 @@ static zend_object_iterator *zend_user_it_get_iterator(zend_class_entry *ce, zva
 	ZVAL_UNDEF(&iterator->value);
 	return (zend_object_iterator*)iterator;
 }
-/* }}} */
 
-/* {{{ zend_user_it_get_new_iterator */
+/* zend_user_it_get_new_iterator */
 ZEND_API zend_object_iterator *zend_user_it_get_new_iterator(zend_class_entry *ce, zval *object, int by_ref)
 {
 	zval iterator;
@@ -282,9 +272,8 @@ ZEND_API zend_object_iterator *zend_user_it_get_new_iterator(zend_class_entry *c
 	zval_ptr_dtor(&iterator);
 	return new_iterator;
 }
-/* }}} */
 
-/* {{{ zend_implement_traversable */
+/* zend_implement_traversable */
 static int zend_implement_traversable(zend_class_entry *interface, zend_class_entry *class_type)
 {
 	/* check that class_type is traversable at c-level or implements at least one of 'aggregate' and 'Iterator' */
@@ -313,9 +302,8 @@ static int zend_implement_traversable(zend_class_entry *interface, zend_class_en
 		ZSTR_VAL(zend_ce_aggregate->name));
 	return FAILURE;
 }
-/* }}} */
 
-/* {{{ zend_implement_aggregate */
+/* zend_implement_aggregate */
 static int zend_implement_aggregate(zend_class_entry *interface, zend_class_entry *class_type)
 {
 	if (zend_class_implements_interface(class_type, zend_ce_iterator)) {
@@ -353,9 +341,8 @@ static int zend_implement_aggregate(zend_class_entry *interface, zend_class_entr
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ zend_implement_iterator */
+/* zend_implement_iterator */
 static int zend_implement_iterator(zend_class_entry *interface, zend_class_entry *class_type)
 {
 	if (zend_class_implements_interface(class_type, zend_ce_aggregate)) {
@@ -389,9 +376,8 @@ static int zend_implement_iterator(zend_class_entry *interface, zend_class_entry
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ zend_user_serialize */
+/* zend_user_serialize */
 ZEND_API int zend_user_serialize(zval *object, unsigned char **buffer, size_t *buf_len, zend_serialize_data *data)
 {
 	zend_class_entry * ce = Z_OBJCE_P(object);
@@ -426,9 +412,8 @@ ZEND_API int zend_user_serialize(zval *object, unsigned char **buffer, size_t *b
 	}
 	return result;
 }
-/* }}} */
 
-/* {{{ zend_user_unserialize */
+/* zend_user_unserialize */
 ZEND_API int zend_user_unserialize(zval *object, zend_class_entry *ce, const unsigned char *buf, size_t buf_len, zend_unserialize_data *data)
 {
 	zval zdata;
@@ -449,24 +434,21 @@ ZEND_API int zend_user_unserialize(zval *object, zend_class_entry *ce, const uns
 		return SUCCESS;
 	}
 }
-/* }}} */
 
-ZEND_API int zend_class_serialize_deny(zval *object, unsigned char **buffer, size_t *buf_len, zend_serialize_data *data) /* {{{ */
+ZEND_API int zend_class_serialize_deny(zval *object, unsigned char **buffer, size_t *buf_len, zend_serialize_data *data)
 {
 	zend_class_entry *ce = Z_OBJCE_P(object);
 	zend_throw_exception_ex(NULL, 0, "Serialization of '%s' is not allowed", ZSTR_VAL(ce->name));
 	return FAILURE;
 }
-/* }}} */
 
-ZEND_API int zend_class_unserialize_deny(zval *object, zend_class_entry *ce, const unsigned char *buf, size_t buf_len, zend_unserialize_data *data) /* {{{ */
+ZEND_API int zend_class_unserialize_deny(zval *object, zend_class_entry *ce, const unsigned char *buf, size_t buf_len, zend_unserialize_data *data)
 {
 	zend_throw_exception_ex(NULL, 0, "Unserialization of '%s' is not allowed", ZSTR_VAL(ce->name));
 	return FAILURE;
 }
-/* }}} */
 
-/* {{{ zend_implement_serializable */
+/* zend_implement_serializable */
 static int zend_implement_serializable(zend_class_entry *interface, zend_class_entry *class_type)
 {
 	if (class_type->parent
@@ -482,9 +464,8 @@ static int zend_implement_serializable(zend_class_entry *interface, zend_class_e
 	}
 	return SUCCESS;
 }
-/* }}}*/
 
-/* {{{ zend_register_interfaces */
+/* zend_register_interfaces */
 ZEND_API void zend_register_interfaces(void)
 {
 	REGISTER_MAGIC_INTERFACE(traversable, Traversable);
@@ -507,4 +488,4 @@ ZEND_API void zend_register_interfaces(void)
 	INIT_CLASS_ENTRY(ce, "Stringable", class_Stringable_methods);
 	zend_ce_stringable = zend_register_internal_interface(&ce);
 }
-/* }}} */
+

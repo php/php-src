@@ -97,7 +97,7 @@ const struct in6_addr in6addr_any = {0}; /* IN6ADDR_ANY_INIT; */
 #  define PHP_GAI_STRERROR(x) (gai_strerror(x))
 #else
 #  define PHP_GAI_STRERROR(x) (php_gai_strerror(x))
-/* {{{ php_gai_strerror
+/* php_gai_strerror
  */
 static const char *php_gai_strerror(int code)
 {
@@ -132,11 +132,11 @@ static const char *php_gai_strerror(int code)
 
         return "Unknown error";
 }
-/* }}} */
+
 #endif
 #endif
 
-/* {{{ php_network_freeaddresses
+/* php_network_freeaddresses
  */
 PHPAPI void php_network_freeaddresses(struct sockaddr **sal)
 {
@@ -148,9 +148,8 @@ PHPAPI void php_network_freeaddresses(struct sockaddr **sal)
 		efree(*sap);
 	efree(sal);
 }
-/* }}} */
 
-/* {{{ php_network_getaddresses
+/* php_network_getaddresses
  * Returns number of addresses, 0 for none/error
  */
 PHPAPI int php_network_getaddresses(const char *host, int socktype, struct sockaddr ***sal, zend_string **error_string)
@@ -262,7 +261,6 @@ PHPAPI int php_network_getaddresses(const char *host, int socktype, struct socka
 	*sap = NULL;
 	return n;
 }
-/* }}} */
 
 #ifndef O_NONBLOCK
 #define O_NONBLOCK O_NDELAY
@@ -287,7 +285,7 @@ typedef int php_non_blocking_flags_t;
  * Optionally, the connect can be made asynchronously, which will implicitly
  * enable non-blocking mode on the socket.
  * */
-/* {{{ php_network_connect_socket */
+/* php_network_connect_socket */
 PHPAPI int php_network_connect_socket(php_socket_t sockfd,
 		const struct sockaddr *addr,
 		socklen_t addrlen,
@@ -374,9 +372,8 @@ ok:
 	}
 	return ret;
 }
-/* }}} */
 
-/* {{{ sub_times */
+/* sub_times */
 static inline void sub_times(struct timeval a, struct timeval b, struct timeval *result)
 {
 	result->tv_usec = a.tv_usec - b.tv_usec;
@@ -390,12 +387,11 @@ static inline void sub_times(struct timeval a, struct timeval b, struct timeval 
 		result->tv_usec -= 1000000L;
 	}
 }
-/* }}} */
 
 /* Bind to a local IP address.
  * Returns the bound socket, or -1 on failure.
  * */
-/* {{{ php_network_bind_socket_to_local_addr */
+/* php_network_bind_socket_to_local_addr */
 php_socket_t php_network_bind_socket_to_local_addr(const char *host, unsigned port,
 		int socktype, long sockopts, zend_string **error_string, int *error_code
 		)
@@ -497,7 +493,6 @@ bound:
 	return sock;
 
 }
-/* }}} */
 
 PHPAPI int php_network_parse_network_address_with_port(const char *addr, zend_long addrlen, struct sockaddr *sa, socklen_t *sl)
 {
@@ -705,7 +700,7 @@ PHPAPI int php_network_get_sock_name(php_socket_t sock,
  * version of the address will be emalloc'd and returned.
  * */
 
-/* {{{ php_network_accept_incoming */
+/* php_network_accept_incoming */
 PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
 		zend_string **textaddr,
 		struct sockaddr **addr,
@@ -756,8 +751,6 @@ PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
 
 	return clisock;
 }
-/* }}} */
-
 
 /* Connect to a remote host using an interruptible connect with optional timeout.
  * Optionally, the connect can be made asynchronously, which will implicitly
@@ -765,7 +758,7 @@ PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
  * Returns the connected (or connecting) socket, or -1 on failure.
  * */
 
-/* {{{ php_network_connect_socket_to_host */
+/* php_network_connect_socket_to_host */
 php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short port,
 		int socktype, int asynchronous, struct timeval *timeout, zend_string **error_string,
 		int *error_code, char *bindto, unsigned short bindport, long sockopts
@@ -952,9 +945,8 @@ connected:
 
 	return sock;
 }
-/* }}} */
 
-/* {{{ php_any_addr
+/* php_any_addr
  * Fills the any (wildcard) address into php_sockaddr_storage
  */
 PHPAPI void php_any_addr(int family, php_sockaddr_storage *addr, unsigned short port)
@@ -979,9 +971,8 @@ PHPAPI void php_any_addr(int family, php_sockaddr_storage *addr, unsigned short 
 	}
 	}
 }
-/* }}} */
 
-/* {{{ php_sockaddr_size
+/* php_sockaddr_size
  * Returns the size of struct sockaddr_xx for the family
  */
 PHPAPI int php_sockaddr_size(php_sockaddr_storage *addr)
@@ -1001,14 +992,13 @@ PHPAPI int php_sockaddr_size(php_sockaddr_storage *addr)
 		return 0;
 	}
 }
-/* }}} */
 
 /* Given a socket error code, if buf == NULL:
  *   emallocs storage for the error message and returns
  * else
  *   sprintf message into provided buffer and returns buf
  */
-/* {{{ php_socket_strerror */
+/* php_socket_strerror */
 PHPAPI char *php_socket_strerror(long err, char *buf, size_t bufsize)
 {
 #ifndef PHP_WIN32
@@ -1040,9 +1030,8 @@ PHPAPI char *php_socket_strerror(long err, char *buf, size_t bufsize)
 	return buf;
 #endif
 }
-/* }}} */
 
-/* {{{ php_socket_error_str */
+/* php_socket_error_str */
 PHPAPI zend_string *php_socket_error_str(long err)
 {
 #ifndef PHP_WIN32
@@ -1065,7 +1054,6 @@ PHPAPI zend_string *php_socket_error_str(long err)
 	return ret;
 #endif
 }
-/* }}} */
 
 /* deprecated */
 PHPAPI php_stream *_php_stream_sock_open_from_socket(php_socket_t socket, const char *persistent_id STREAMS_DC)

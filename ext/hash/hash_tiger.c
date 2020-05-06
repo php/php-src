@@ -29,7 +29,6 @@
 # endif
 #endif
 
-/* {{{ */
 #define save_abc \
 	aa = a; \
 	bb = b; \
@@ -130,7 +129,6 @@
 	state[1] = b; \
 	state[2] = c; \
 }
-/* }}} */
 
 static inline void TigerFinalize(PHP_TIGER_CTX *context)
 {

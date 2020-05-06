@@ -158,7 +158,7 @@ static struct ini_value_parser_s ini_fpm_pool_options[] = {
 	{ 0, 0, 0 }
 };
 
-static int fpm_conf_is_dir(char *path) /* {{{ */
+static int fpm_conf_is_dir(char *path)
 {
 	struct stat sb;
 
@@ -168,7 +168,6 @@ static int fpm_conf_is_dir(char *path) /* {{{ */
 
 	return (sb.st_mode & S_IFMT) == S_IFDIR;
 }
-/* }}} */
 
 /*
  * Expands the '$pool' token in a dynamically allocated string
@@ -204,7 +203,7 @@ static int fpm_conf_expand_pool_name(char **value) {
 	return 0;
 }
 
-static char *fpm_conf_set_boolean(zval *value, void **config, intptr_t offset) /* {{{ */
+static char *fpm_conf_set_boolean(zval *value, void **config, intptr_t offset)
 {
 	char *val = Z_STRVAL_P(value);
 	long value_y = !strcasecmp(val, "1");
@@ -217,9 +216,8 @@ static char *fpm_conf_set_boolean(zval *value, void **config, intptr_t offset) /
 	* (int *) ((char *) *config + offset) = value_y ? 1 : 0;
 	return NULL;
 }
-/* }}} */
 
-static char *fpm_conf_set_string(zval *value, void **config, intptr_t offset) /* {{{ */
+static char *fpm_conf_set_string(zval *value, void **config, intptr_t offset)
 {
 	char **config_val = (char **) ((char *) *config + offset);
 
@@ -242,9 +240,8 @@ static char *fpm_conf_set_string(zval *value, void **config, intptr_t offset) /*
 
 	return NULL;
 }
-/* }}} */
 
-static char *fpm_conf_set_integer(zval *value, void **config, intptr_t offset) /* {{{ */
+static char *fpm_conf_set_integer(zval *value, void **config, intptr_t offset)
 {
 	char *val = Z_STRVAL_P(value);
 	char *p;
@@ -259,10 +256,9 @@ static char *fpm_conf_set_integer(zval *value, void **config, intptr_t offset) /
 	* (int *) ((char *) *config + offset) = atoi(val);
 	return NULL;
 }
-/* }}} */
 
 #if 0 /* not used for now */
-static char *fpm_conf_set_long(zval *value, void **config, intptr_t offset) /* {{{ */
+static char *fpm_conf_set_long(zval *value, void **config, intptr_t offset)
 {
 	char *val = Z_STRVAL_P(value);
 	char *p;
@@ -276,10 +272,10 @@ static char *fpm_conf_set_long(zval *value, void **config, intptr_t offset) /* {
 	* (long int *) ((char *) *config + offset) = atol(val);
 	return NULL;
 }
-/* }}} */
+
 #endif
 
-static char *fpm_conf_set_time(zval *value, void **config, intptr_t offset) /* {{{ */
+static char *fpm_conf_set_time(zval *value, void **config, intptr_t offset)
 {
 	char *val = Z_STRVAL_P(value);
 	int len = strlen(val);
@@ -317,9 +313,8 @@ static char *fpm_conf_set_time(zval *value, void **config, intptr_t offset) /* {
 	* (int *) ((char *) *config + offset) = seconds;
 	return NULL;
 }
-/* }}} */
 
-static char *fpm_conf_set_log_level(zval *value, void **config, intptr_t offset) /* {{{ */
+static char *fpm_conf_set_log_level(zval *value, void **config, intptr_t offset)
 {
 	char *val = Z_STRVAL_P(value);
 	int log_level;
@@ -341,10 +336,9 @@ static char *fpm_conf_set_log_level(zval *value, void **config, intptr_t offset)
 	* (int *) ((char *) *config + offset) = log_level;
 	return NULL;
 }
-/* }}} */
 
 #ifdef HAVE_SYSLOG_H
-static char *fpm_conf_set_syslog_facility(zval *value, void **config, intptr_t offset) /* {{{ */
+static char *fpm_conf_set_syslog_facility(zval *value, void **config, intptr_t offset)
 {
 	char *val = Z_STRVAL_P(value);
 	int *conf = (int *) ((char *) *config + offset);
@@ -491,10 +485,10 @@ static char *fpm_conf_set_syslog_facility(zval *value, void **config, intptr_t o
 
 	return "invalid value";
 }
-/* }}} */
+
 #endif
 
-static char *fpm_conf_set_rlimit_core(zval *value, void **config, intptr_t offset) /* {{{ */
+static char *fpm_conf_set_rlimit_core(zval *value, void **config, intptr_t offset)
 {
 	char *val = Z_STRVAL_P(value);
 	int *ptr = (int *) ((char *) *config + offset);
@@ -521,9 +515,8 @@ static char *fpm_conf_set_rlimit_core(zval *value, void **config, intptr_t offse
 
 	return NULL;
 }
-/* }}} */
 
-static char *fpm_conf_set_pm(zval *value, void **config, intptr_t offset) /* {{{ */
+static char *fpm_conf_set_pm(zval *value, void **config, intptr_t offset)
 {
 	char *val = Z_STRVAL_P(value);
 	struct fpm_worker_pool_config_s  *c = *config;
@@ -538,9 +531,8 @@ static char *fpm_conf_set_pm(zval *value, void **config, intptr_t offset) /* {{{
 	}
 	return NULL;
 }
-/* }}} */
 
-static char *fpm_conf_set_array(zval *key, zval *value, void **config, int convert_to_bool) /* {{{ */
+static char *fpm_conf_set_array(zval *key, zval *value, void **config, int convert_to_bool)
 {
 	struct key_value_s *kv;
 	struct key_value_s ***parent = (struct key_value_s ***) config;
@@ -588,9 +580,8 @@ static char *fpm_conf_set_array(zval *key, zval *value, void **config, int conve
 	**parent = kv;
 	return NULL;
 }
-/* }}} */
 
-static void *fpm_worker_pool_config_alloc() /* {{{ */
+static void *fpm_worker_pool_config_alloc()
 {
 	struct fpm_worker_pool_s *wp;
 
@@ -631,9 +622,8 @@ static void *fpm_worker_pool_config_alloc() /* {{{ */
 	current_wp = wp;
 	return wp->config;
 }
-/* }}} */
 
-int fpm_worker_pool_config_free(struct fpm_worker_pool_config_s *wpc) /* {{{ */
+int fpm_worker_pool_config_free(struct fpm_worker_pool_config_s *wpc)
 {
 	struct key_value_s *kv, *kv_next;
 
@@ -680,9 +670,8 @@ int fpm_worker_pool_config_free(struct fpm_worker_pool_config_s *wpc) /* {{{ */
 
 	return 0;
 }
-/* }}} */
 
-static int fpm_evaluate_full_path(char **path, struct fpm_worker_pool_s *wp, char *default_prefix, int expand) /* {{{ */
+static int fpm_evaluate_full_path(char **path, struct fpm_worker_pool_s *wp, char *default_prefix, int expand)
 {
 	char *prefix = NULL;
 	char *full_path;
@@ -740,9 +729,8 @@ static int fpm_evaluate_full_path(char **path, struct fpm_worker_pool_s *wp, cha
 	}
 	return 0;
 }
-/* }}} */
 
-static int fpm_conf_process_all_pools() /* {{{ */
+static int fpm_conf_process_all_pools()
 {
 	struct fpm_worker_pool_s *wp, *wp2;
 
@@ -1132,9 +1120,8 @@ static int fpm_conf_process_all_pools() /* {{{ */
 	}
 	return 0;
 }
-/* }}} */
 
-int fpm_conf_unlink_pid() /* {{{ */
+int fpm_conf_unlink_pid()
 {
 	if (fpm_global_config.pid_file) {
 		if (0 > unlink(fpm_global_config.pid_file)) {
@@ -1144,9 +1131,8 @@ int fpm_conf_unlink_pid() /* {{{ */
 	}
 	return 0;
 }
-/* }}} */
 
-int fpm_conf_write_pid() /* {{{ */
+int fpm_conf_write_pid()
 {
 	int fd;
 
@@ -1173,9 +1159,8 @@ int fpm_conf_write_pid() /* {{{ */
 	}
 	return 0;
 }
-/* }}} */
 
-static int fpm_conf_post_process(int force_daemon) /* {{{ */
+static int fpm_conf_post_process(int force_daemon)
 {
 	struct fpm_worker_pool_s *wp;
 
@@ -1260,9 +1245,8 @@ static int fpm_conf_post_process(int force_daemon) /* {{{ */
 
 	return 0;
 }
-/* }}} */
 
-static void fpm_conf_cleanup(int which, void *arg) /* {{{ */
+static void fpm_conf_cleanup(int which, void *arg)
 {
 	free(fpm_global_config.pid_file);
 	free(fpm_global_config.error_log);
@@ -1276,9 +1260,8 @@ static void fpm_conf_cleanup(int which, void *arg) /* {{{ */
 #endif
 	free(fpm_globals.config);
 }
-/* }}} */
 
-static void fpm_conf_ini_parser_include(char *inc, void *arg) /* {{{ */
+static void fpm_conf_ini_parser_include(char *inc, void *arg)
 {
 	char *filename;
 	int *error = (int *)arg;
@@ -1332,9 +1315,8 @@ static void fpm_conf_ini_parser_include(char *inc, void *arg) /* {{{ */
 
 	efree(filename);
 }
-/* }}} */
 
-static void fpm_conf_ini_parser_section(zval *section, void *arg) /* {{{ */
+static void fpm_conf_ini_parser_section(zval *section, void *arg)
 {
 	struct fpm_worker_pool_s *wp;
 	struct fpm_worker_pool_config_s *config;
@@ -1370,9 +1352,8 @@ static void fpm_conf_ini_parser_section(zval *section, void *arg) /* {{{ */
 		return;
 	}
 }
-/* }}} */
 
-static void fpm_conf_ini_parser_entry(zval *name, zval *value, void *arg) /* {{{ */
+static void fpm_conf_ini_parser_entry(zval *name, zval *value, void *arg)
 {
 	struct ini_value_parser_s *parser;
 	void *config = NULL;
@@ -1427,9 +1408,8 @@ static void fpm_conf_ini_parser_entry(zval *name, zval *value, void *arg) /* {{{
 	zlog(ZLOG_ERROR, "[%s:%d] unknown entry '%s'", ini_filename, ini_lineno, Z_STRVAL_P(name));
 	*error = 1;
 }
-/* }}} */
 
-static void fpm_conf_ini_parser_array(zval *name, zval *key, zval *value, void *arg) /* {{{ */
+static void fpm_conf_ini_parser_array(zval *name, zval *key, zval *value, void *arg)
 {
 	int *error = (int *)arg;
 	char *err = NULL;
@@ -1483,9 +1463,8 @@ static void fpm_conf_ini_parser_array(zval *name, zval *key, zval *value, void *
 		return;
 	}
 }
-/* }}} */
 
-static void fpm_conf_ini_parser(zval *arg1, zval *arg2, zval *arg3, int callback_type, void *arg) /* {{{ */
+static void fpm_conf_ini_parser(zval *arg1, zval *arg2, zval *arg3, int callback_type, void *arg)
 {
 	int *error;
 
@@ -1509,9 +1488,8 @@ static void fpm_conf_ini_parser(zval *arg1, zval *arg2, zval *arg3, int callback
 			break;
 	}
 }
-/* }}} */
 
-int fpm_conf_load_ini_file(char *filename) /* {{{ */
+int fpm_conf_load_ini_file(char *filename)
 {
 	int error = 0;
 	char *buf = NULL, *newbuf = NULL;
@@ -1595,9 +1573,8 @@ int fpm_conf_load_ini_file(char *filename) /* {{{ */
 	close(fd);
 	return ret;
 }
-/* }}} */
 
-static void fpm_conf_dump() /* {{{ */
+static void fpm_conf_dump()
 {
 	struct fpm_worker_pool_s *wp;
 
@@ -1695,9 +1672,8 @@ static void fpm_conf_dump() /* {{{ */
 		zlog(ZLOG_NOTICE, " ");
 	}
 }
-/* }}} */
 
-int fpm_conf_init_main(int test_conf, int force_daemon) /* {{{ */
+int fpm_conf_init_main(int test_conf, int force_daemon)
 {
 	int ret;
 
@@ -1762,4 +1738,4 @@ int fpm_conf_init_main(int test_conf, int force_daemon) /* {{{ */
 
 	return 0;
 }
-/* }}} */
+

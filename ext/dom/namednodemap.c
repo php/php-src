@@ -30,7 +30,7 @@
 * Since:
 */
 
-/* {{{ length	int
+/* length	int
 readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-6D0FB19E
 Since:
@@ -69,7 +69,6 @@ int dom_namednodemap_length_read(dom_object *obj, zval *retval)
 	return SUCCESS;
 }
 
-/* }}} */
 
 /* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1074577549
 Since:
@@ -124,7 +123,6 @@ PHP_METHOD(DOMNamedNodeMap, getNamedItem)
 		RETVAL_NULL();
 	}
 }
-/* }}} end dom_namednodemap_get_named_item */
 
 /* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-349467F9
 Since:
@@ -187,7 +185,6 @@ PHP_METHOD(DOMNamedNodeMap, item)
 
 	RETVAL_NULL();
 }
-/* }}} end dom_namednodemap_item */
 
 /* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-getNamedItemNS
 Since: DOM Level 2
@@ -242,7 +239,6 @@ PHP_METHOD(DOMNamedNodeMap, getNamedItemNS)
 		RETVAL_NULL();
 	}
 }
-/* }}} end dom_namednodemap_get_named_item_ns */
 
 PHP_METHOD(DOMNamedNodeMap, count)
 {
@@ -259,6 +255,5 @@ PHP_METHOD(DOMNamedNodeMap, count)
 		RETURN_FALSE;
 	}
 }
-/* }}} end dom_namednodemap_count */
 
 #endif

@@ -23,9 +23,7 @@
 
 #include <zend_API.h>
 
-/* Gets the locale name of the collator. }}} */
-/* Gets the locale name of the collator.
- */
+/* Gets the locale name of the collator. */
 PHP_FUNCTION( collator_get_locale )
 {
 	zend_long   type        = 0;
@@ -60,4 +58,4 @@ PHP_FUNCTION( collator_get_locale )
 	/* Return it. */
 	RETVAL_STRINGL( locale_name, strlen(locale_name) );
 }
-/* }}} */
+

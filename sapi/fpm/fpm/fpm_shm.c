@@ -15,7 +15,7 @@
 
 static size_t fpm_shm_size = 0;
 
-void *fpm_shm_alloc(size_t size) /* {{{ */
+void *fpm_shm_alloc(size_t size)
 {
 	void *mem;
 
@@ -36,9 +36,8 @@ void *fpm_shm_alloc(size_t size) /* {{{ */
 	fpm_shm_size += size;
 	return mem;
 }
-/* }}} */
 
-int fpm_shm_free(void *mem, size_t size) /* {{{ */
+int fpm_shm_free(void *mem, size_t size)
 {
 	if (!mem) {
 		zlog(ZLOG_ERROR, "mem is NULL");
@@ -58,10 +57,9 @@ int fpm_shm_free(void *mem, size_t size) /* {{{ */
 
 	return 1;
 }
-/* }}} */
 
-size_t fpm_shm_get_size_allocated() /* {{{*/
+size_t fpm_shm_get_size_allocated()
 {
 	return fpm_shm_size;
 }
-/* }}} */
+

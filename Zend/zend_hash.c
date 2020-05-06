@@ -437,7 +437,6 @@ static uint32_t zend_array_recalc_elements(HashTable *ht)
        } ZEND_HASH_FOREACH_END();
        return num;
 }
-/* }}} */
 
 ZEND_API uint32_t zend_array_count(HashTable *ht)
 {
@@ -454,7 +453,6 @@ ZEND_API uint32_t zend_array_count(HashTable *ht)
 	}
 	return num;
 }
-/* }}} */
 
 static zend_always_inline HashPosition _zend_hash_get_valid_pos(const HashTable *ht, HashPosition pos)
 {

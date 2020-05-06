@@ -34,7 +34,7 @@ zend_class_entry *ResourceBundle_ce_ptr = NULL;
 
 static zend_object_handlers ResourceBundle_object_handlers;
 
-/* {{{ ResourceBundle_object_free */
+/* ResourceBundle_object_free */
 static void ResourceBundle_object_free( zend_object *object )
 {
 	ResourceBundle_object *rb = php_intl_resourcebundle_fetch_object(object);
@@ -51,9 +51,8 @@ static void ResourceBundle_object_free( zend_object *object )
 
 	zend_object_std_dtor( &rb->zend );
 }
-/* }}} */
 
-/* {{{ ResourceBundle_object_create */
+/* ResourceBundle_object_create */
 static zend_object *ResourceBundle_object_create( zend_class_entry *ce )
 {
 	ResourceBundle_object *rb;
@@ -71,9 +70,8 @@ static zend_object *ResourceBundle_object_create( zend_class_entry *ce )
 
 	return &rb->zend;
 }
-/* }}} */
 
-/* {{{ ResourceBundle_ctor */
+/* ResourceBundle_ctor */
 static int resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS)
 {
 	const char *bundlename;
@@ -130,7 +128,6 @@ static int resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS)
 
 	return SUCCESS;
 }
-/* }}} */
 
 /* ResourceBundle object constructor
  */
@@ -147,7 +144,6 @@ PHP_METHOD( ResourceBundle, __construct )
 	}
 	zend_restore_error_handling(&error_handling);
 }
-/* }}} */
 
 PHP_FUNCTION( resourcebundle_create )
 {
@@ -157,9 +153,8 @@ PHP_FUNCTION( resourcebundle_create )
 		RETURN_NULL();
 	}
 }
-/* }}} */
 
-/* {{{ resourcebundle_array_fetch */
+/* resourcebundle_array_fetch */
 static void resourcebundle_array_fetch(zend_object *object, zval *offset, zval *return_value, int fallback)
 {
 	int32_t     meindex = 0;
@@ -211,9 +206,8 @@ static void resourcebundle_array_fetch(zend_object *object, zval *offset, zval *
 
 	resourcebundle_extract_value( return_value, rb );
 }
-/* }}} */
 
-/* {{{ resourcebundle_array_get */
+/* resourcebundle_array_get */
 zval *resourcebundle_array_get(zend_object *object, zval *offset, int type, zval *rv)
 {
 	if(offset == NULL) {
@@ -223,7 +217,6 @@ zval *resourcebundle_array_get(zend_object *object, zval *offset, int type, zval
 	resourcebundle_array_fetch(object, offset, rv, 1);
 	return rv;
 }
-/* }}} */
 
 /* Get resource identified by numerical index or key name. */
 PHP_FUNCTION( resourcebundle_get )
@@ -238,9 +231,8 @@ PHP_FUNCTION( resourcebundle_get )
 
 	resourcebundle_array_fetch(Z_OBJ_P(object), offset, return_value, fallback);
 }
-/* }}} */
 
-/* {{{ resourcebundle_array_count */
+/* resourcebundle_array_count */
 int resourcebundle_array_count(zend_object *object, zend_long *count)
 {
 	ResourceBundle_object *rb = php_intl_resourcebundle_fetch_object(object);
@@ -255,7 +247,6 @@ int resourcebundle_array_count(zend_object *object, zend_long *count)
 
 	return SUCCESS;
 }
-/* }}} */
 
 /* Get resources count */
 PHP_FUNCTION( resourcebundle_count )
@@ -312,7 +303,6 @@ PHP_FUNCTION( resourcebundle_locales )
 	}
 	uenum_close( icuenum );
 }
-/* }}} */
 
 /* Get text description for ResourceBundle's last error code. */
 PHP_FUNCTION( resourcebundle_get_error_code )
@@ -329,7 +319,6 @@ PHP_FUNCTION( resourcebundle_get_error_code )
 
 	RETURN_LONG(INTL_DATA_ERROR_CODE(rb));
 }
-/* }}} */
 
 /* Get text description for ResourceBundle's last error. */
 PHP_FUNCTION( resourcebundle_get_error_message )
@@ -347,9 +336,8 @@ PHP_FUNCTION( resourcebundle_get_error_message )
 	message = intl_error_get_message(INTL_DATA_ERROR_P(rb));
 	RETURN_STR(message);
 }
-/* }}} */
 
-/* {{{ resourcebundle_register_class
+/* resourcebundle_register_class
  * Initialize 'ResourceBundle' class
  */
 void resourcebundle_register_class( void )
@@ -372,4 +360,4 @@ void resourcebundle_register_class( void )
 
 	zend_class_implements(ResourceBundle_ce_ptr, 2, zend_ce_traversable, zend_ce_countable);
 }
-/* }}} */
+

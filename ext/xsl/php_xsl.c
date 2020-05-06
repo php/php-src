@@ -27,21 +27,20 @@
 zend_class_entry *xsl_xsltprocessor_class_entry;
 static zend_object_handlers xsl_object_handlers;
 
-/* {{{ xsl_functions[]
+/* xsl_functions[]
  *
  * Every user visible function must have an entry in xsl_functions[].
  */
 const zend_function_entry xsl_functions[] = {
 	PHP_FE_END
 };
-/* }}} */
 
 static const zend_module_dep xsl_deps[] = {
 	ZEND_MOD_REQUIRED("libxml")
 	ZEND_MOD_END
 };
 
-/* {{{ xsl_module_entry
+/* xsl_module_entry
  */
 zend_module_entry xsl_module_entry = {
 	STANDARD_MODULE_HEADER_EX, NULL,
@@ -56,13 +55,12 @@ zend_module_entry xsl_module_entry = {
 	PHP_XSL_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
-/* }}} */
 
 #ifdef COMPILE_DL_XSL
 ZEND_GET_MODULE(xsl)
 #endif
 
-/* {{{ xsl_objects_free_storage */
+/* xsl_objects_free_storage */
 void xsl_objects_free_storage(zend_object *object)
 {
 	xsl_object *intern = php_xsl_fetch_object(object);
@@ -98,9 +96,8 @@ void xsl_objects_free_storage(zend_object *object)
 		efree(intern->profiling);
 	}
 }
-/* }}} */
 
-/* {{{ xsl_objects_new */
+/* xsl_objects_new */
 zend_object *xsl_objects_new(zend_class_entry *class_type)
 {
 	xsl_object *intern;
@@ -116,9 +113,8 @@ zend_object *xsl_objects_new(zend_class_entry *class_type)
 	intern->std.handlers = &xsl_object_handlers;
 	return &intern->std;
 }
-/* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION
+/* PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(xsl)
 {
@@ -165,25 +161,22 @@ PHP_MINIT_FUNCTION(xsl)
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ xsl_object_get_data */
+/* xsl_object_get_data */
 zval *xsl_object_get_data(void *obj)
 {
 	zval *dom_wrapper;
 	dom_wrapper = ((xsltStylesheetPtr) obj)->_private;
 	return dom_wrapper;
 }
-/* }}} */
 
-/* {{{ xsl_object_set_data */
+/* xsl_object_set_data */
 static void xsl_object_set_data(void *obj, zval *wrapper)
 {
 	((xsltStylesheetPtr) obj)->_private = wrapper;
 }
-/* }}} */
 
-/* {{{ php_xsl_set_object */
+/* php_xsl_set_object */
 void php_xsl_set_object(zval *wrapper, void *obj)
 {
 	xsl_object *object;
@@ -192,9 +185,8 @@ void php_xsl_set_object(zval *wrapper, void *obj)
 	object->ptr = obj;
 	xsl_object_set_data(obj, wrapper);
 }
-/* }}} */
 
-/* {{{ php_xsl_create_object */
+/* php_xsl_create_object */
 void php_xsl_create_object(xsltStylesheetPtr obj, zval *wrapper_in, zval *return_value )
 {
 	zval *wrapper;
@@ -227,9 +219,8 @@ void php_xsl_create_object(xsltStylesheetPtr obj, zval *wrapper_in, zval *return
 
 	return;
 }
-/* }}} */
 
-/* {{{ PHP_MSHUTDOWN_FUNCTION
+/* PHP_MSHUTDOWN_FUNCTION
  */
 PHP_MSHUTDOWN_FUNCTION(xsl)
 {
@@ -242,9 +233,8 @@ PHP_MSHUTDOWN_FUNCTION(xsl)
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
+/* PHP_MINFO_FUNCTION
  */
 PHP_MINFO_FUNCTION(xsl)
 {
@@ -271,4 +261,4 @@ PHP_MINFO_FUNCTION(xsl)
 #endif
 	php_info_print_table_end();
 }
-/* }}} */
+

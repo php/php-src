@@ -24,7 +24,7 @@
 
 
 PHP_WINUTIL_API char *php_win32_error_to_msg(HRESULT error)
-{/*{{{*/
+{
 	wchar_t *bufw = NULL;
 	char *buf;
 
@@ -42,17 +42,17 @@ PHP_WINUTIL_API char *php_win32_error_to_msg(HRESULT error)
 	LocalFree(bufw);
 
 	return (buf ? buf : "");
-}/*}}}*/
+}
 
 PHP_WINUTIL_API void php_win32_error_msg_free(char *msg)
-{/*{{{*/
+{
 	if (msg && msg[0]) {
 		free(msg);
 	}
-}/*}}}*/
+}
 
 int php_win32_check_trailing_space(const char * path, const size_t path_len)
-{/*{{{*/
+{
 	if (path_len > MAXPATHLEN - 1) {
 		return 1;
 	}
@@ -65,7 +65,7 @@ int php_win32_check_trailing_space(const char * path, const size_t path_len)
 	} else {
 		return 0;
 	}
-}/*}}}*/
+}
 
 static BCRYPT_ALG_HANDLE bcrypt_algo;
 static BOOL has_bcrypt_algo = 0;
@@ -74,7 +74,7 @@ static BOOL has_bcrypt_algo = 0;
 
 #ifdef PHP_EXPORTS
 BOOL php_win32_shutdown_random_bytes(void)
-{/*{{{*/
+{
 	BOOL ret = TRUE;
 
 	if (has_bcrypt_algo) {
@@ -83,10 +83,10 @@ BOOL php_win32_shutdown_random_bytes(void)
 	}
 
 	return ret;
-}/*}}}*/
+}
 
 BOOL php_win32_init_random_bytes(void)
-{/*{{{*/
+{
 	if (has_bcrypt_algo) {
 		return TRUE;
 	}
@@ -94,11 +94,11 @@ BOOL php_win32_init_random_bytes(void)
 	has_bcrypt_algo = NT_SUCCESS(BCryptOpenAlgorithmProvider(&bcrypt_algo, BCRYPT_RNG_ALGORITHM, NULL, 0));
 
 	return has_bcrypt_algo;
-}/*}}}*/
+}
 #endif
 
 PHP_WINUTIL_API int php_win32_get_random_bytes(unsigned char *buf, size_t size)
-{  /* {{{ */
+{
 
 	BOOL ret;
 
@@ -116,8 +116,6 @@ PHP_WINUTIL_API int php_win32_get_random_bytes(unsigned char *buf, size_t size)
 
 	return ret ? SUCCESS : FAILURE;
 }
-/* }}} */
-
 
 /*
 * This functions based on the code from the UNIXem project under
@@ -129,7 +127,7 @@ PHP_WINUTIL_API int php_win32_get_random_bytes(unsigned char *buf, size_t size)
 */
 
 PHP_WINUTIL_API int php_win32_code_to_errno(unsigned long w32Err)
-{/*{{{*/
+{
     size_t  i;
 
     struct code_to_errno_map
@@ -413,10 +411,10 @@ PHP_WINUTIL_API int php_win32_code_to_errno(unsigned long w32Err)
     assert(!"Unrecognised value");
 
     return EINVAL;
-}/*}}}*/
+}
 
 PHP_WINUTIL_API char *php_win32_get_username(void)
-{/*{{{*/
+{
 	wchar_t unamew[UNLEN + 1];
 	size_t uname_len;
 	char *uname;
@@ -434,10 +432,10 @@ PHP_WINUTIL_API char *php_win32_get_username(void)
 	}
 
 	return uname;
-}/*}}}*/
+}
 
 static zend_always_inline BOOL is_compatible(const char *name, BOOL is_smaller, char *format, char **err)
-{/*{{{*/
+{
 	PLOADED_IMAGE img = ImageLoad(name, NULL);
 
 	if (!img) {
@@ -475,16 +473,16 @@ static zend_always_inline BOOL is_compatible(const char *name, BOOL is_smaller, 
 	ImageUnload(img);
 
 	return TRUE;
-}/*}}}*/
+}
 
 PHP_WINUTIL_API BOOL php_win32_image_compatible(const char *name, char **err)
-{/*{{{*/
+{
 	return is_compatible(name, TRUE, "Can't load module '%s' as it's linked with %u.%u, but the core is linked with %d.%d", err);
-}/*}}}*/
+}
 
 /* Expect a CRT name DLL. */
 PHP_WINUTIL_API BOOL php_win32_crt_compatible(const char *name, char **err)
-{/*{{{*/
+{
 	return is_compatible(name, FALSE, "'%s' %u.%u is not compatible with this PHP build linked with %d.%d", err);
-}/*}}}*/
+}
 

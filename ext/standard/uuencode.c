@@ -61,7 +61,7 @@
 
 #define PHP_UU_DEC(c) (((c) - ' ') & 077)
 
-PHPAPI zend_string *php_uuencode(char *src, size_t src_len) /* {{{ */
+PHPAPI zend_string *php_uuencode(char *src, size_t src_len)
 {
 	size_t len = 45;
 	unsigned char *p, *s, *e, *ee;
@@ -123,9 +123,8 @@ PHPAPI zend_string *php_uuencode(char *src, size_t src_len) /* {{{ */
 	dest = zend_string_truncate(dest, (char *) p - ZSTR_VAL(dest), 0);
 	return dest;
 }
-/* }}} */
 
-PHPAPI zend_string *php_uudecode(char *src, size_t src_len) /* {{{ */
+PHPAPI zend_string *php_uudecode(char *src, size_t src_len)
 {
 	size_t len, total_len=0;
 	char *s, *e, *p, *ee;
@@ -192,7 +191,6 @@ err:
 
 	return NULL;
 }
-/* }}} */
 
 /* uuencode a string */
 PHP_FUNCTION(convert_uuencode)
@@ -206,7 +204,6 @@ PHP_FUNCTION(convert_uuencode)
 
 	RETURN_STR(php_uuencode(ZSTR_VAL(src), ZSTR_LEN(src)));
 }
-/* }}} */
 
 /* decode a uuencoded string */
 PHP_FUNCTION(convert_uudecode)
@@ -226,4 +223,4 @@ PHP_FUNCTION(convert_uudecode)
 
 	RETURN_STR(dest);
 }
-/* }}} */
+

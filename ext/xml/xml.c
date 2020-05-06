@@ -131,14 +131,13 @@ enum php_xml_option {
     PHP_XML_OPTION_SKIP_WHITE
 };
 
-/* {{{ dynamically loadable module stuff */
+/* dynamically loadable module stuff */
 #ifdef COMPILE_DL_XML
 #ifdef ZTS
 ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 ZEND_GET_MODULE(xml)
 #endif /* COMPILE_DL_XML */
-/* }}} */
 
 #define XML_MAXLEVEL 255 /* XXX this should be dynamic */
 
@@ -147,7 +146,7 @@ ZEND_GET_MODULE(xml)
 static zend_class_entry *xml_parser_ce;
 static zend_object_handlers xml_parser_object_handlers;
 
-/* {{{ function prototypes */
+/* function prototypes */
 PHP_MINIT_FUNCTION(xml);
 PHP_MINFO_FUNCTION(xml);
 static PHP_GINIT_FUNCTION(xml);
@@ -180,7 +179,6 @@ int  _xml_externalEntityRefHandler(XML_Parser, const XML_Char *, const XML_Char 
 
 void _xml_startNamespaceDeclHandler(void *, const XML_Char *, const XML_Char *);
 void _xml_endNamespaceDeclHandler(void *, const XML_Char *);
-/* }}} */
 
 #ifdef LIBXML_EXPAT_COMPAT
 static const zend_module_dep xml_deps[] = {
@@ -223,9 +221,8 @@ const xml_encoding xml_encodings[] = {
 
 static XML_Memory_Handling_Suite php_xml_mem_hdlrs;
 
-/* }}} */
 
-/* {{{ startup, shutdown and info functions */
+/* startup, shutdown and info functions */
 static PHP_GINIT_FUNCTION(xml)
 {
 #if defined(COMPILE_DL_XML) && defined(ZTS)
@@ -324,9 +321,8 @@ PHP_MINFO_FUNCTION(xml)
 #endif
 	php_info_print_table_end();
 }
-/* }}} */
 
-/* {{{ extension-internal functions */
+/* extension-internal functions */
 
 static void _xml_xmlchar_zval(const XML_Char *s, int len, const XML_Char *encoding, zval *ret)
 {
@@ -339,7 +335,6 @@ static void _xml_xmlchar_zval(const XML_Char *s, int len, const XML_Char *encodi
 	}
 	ZVAL_STR(ret, xml_utf8_decode(s, len, encoding));
 }
-/* }}} */
 
 static inline xml_parser *xml_parser_from_obj(zend_object *obj) {
 	return (xml_parser *)((char *)(obj) - XtOffsetOf(xml_parser, std));
@@ -427,7 +422,7 @@ static zend_function *xml_parser_get_constructor(zend_object *object) {
 	return NULL;
 }
 
-/* {{{ xml_set_handler() */
+/* xml_set_handler() */
 static void xml_set_handler(zval *handler, zval *data)
 {
 	/* If we have already a handler, release it */
@@ -446,9 +441,8 @@ static void xml_set_handler(zval *handler, zval *data)
 
 	ZVAL_COPY(handler, data);
 }
-/* }}} */
 
-/* {{{ xml_call_handler() */
+/* xml_call_handler() */
 static void xml_call_handler(xml_parser *parser, zval *handler, zend_function *function_ptr, int argc, zval *argv, zval *retval)
 {
 	int i;
@@ -488,37 +482,32 @@ static void xml_call_handler(xml_parser *parser, zval *handler, zend_function *f
 		zval_ptr_dtor(&argv[i]);
 	}
 }
-/* }}} */
 
-/* {{{ xml_encode_iso_8859_1() */
+/* xml_encode_iso_8859_1() */
 inline static unsigned short xml_encode_iso_8859_1(unsigned char c)
 {
 	return (unsigned short)c;
 }
-/* }}} */
 
-/* {{{ xml_decode_iso_8859_1() */
+/* xml_decode_iso_8859_1() */
 inline static char xml_decode_iso_8859_1(unsigned short c)
 {
 	return (char)(c > 0xff ? '?' : c);
 }
-/* }}} */
 
-/* {{{ xml_encode_us_ascii() */
+/* xml_encode_us_ascii() */
 inline static unsigned short xml_encode_us_ascii(unsigned char c)
 {
 	return (unsigned short)c;
 }
-/* }}} */
 
-/* {{{ xml_decode_us_ascii() */
+/* xml_decode_us_ascii() */
 inline static char xml_decode_us_ascii(unsigned short c)
 {
 	return (char)(c > 0x7f ? '?' : c);
 }
-/* }}} */
 
-/* {{{ xml_get_encoding() */
+/* xml_get_encoding() */
 static const xml_encoding *xml_get_encoding(const XML_Char *name)
 {
 	const xml_encoding *enc = &xml_encodings[0];
@@ -531,9 +520,8 @@ static const xml_encoding *xml_get_encoding(const XML_Char *name)
 	}
 	return NULL;
 }
-/* }}} */
 
-/* {{{ xml_utf8_decode() */
+/* xml_utf8_decode() */
 static zend_string *xml_utf8_decode(const XML_Char *s, size_t len, const XML_Char *encoding)
 {
 	size_t pos = 0;
@@ -573,9 +561,8 @@ static zend_string *xml_utf8_decode(const XML_Char *s, size_t len, const XML_Cha
 
 	return str;
 }
-/* }}} */
 
-/* {{{ _xml_xmlcharlen() */
+/* _xml_xmlcharlen() */
 static int _xml_xmlcharlen(const XML_Char *s)
 {
 	int len = 0;
@@ -586,9 +573,8 @@ static int _xml_xmlcharlen(const XML_Char *s)
 	}
 	return len;
 }
-/* }}} */
 
-/* {{{ _xml_add_to_info() */
+/* _xml_add_to_info() */
 static void _xml_add_to_info(xml_parser *parser,char *name)
 {
 	zval *element;
@@ -607,9 +593,8 @@ static void _xml_add_to_info(xml_parser *parser,char *name)
 
 	parser->curtag++;
 }
-/* }}} */
 
-/* {{{ _xml_decode_tag() */
+/* _xml_decode_tag() */
 static zend_string *_xml_decode_tag(xml_parser *parser, const char *tag)
 {
 	zend_string *str;
@@ -622,9 +607,8 @@ static zend_string *_xml_decode_tag(xml_parser *parser, const char *tag)
 
 	return str;
 }
-/* }}} */
 
-/* {{{ _xml_startElementHandler() */
+/* _xml_startElementHandler() */
 void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Char **attributes)
 {
 	xml_parser *parser = (xml_parser *)userData;
@@ -709,9 +693,8 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
 		zend_string_release_ex(tag_name, 0);
 	}
 }
-/* }}} */
 
-/* {{{ _xml_endElementHandler() */
+/* _xml_endElementHandler() */
 void _xml_endElementHandler(void *userData, const XML_Char *name)
 {
 	xml_parser *parser = (xml_parser *)userData;
@@ -758,9 +741,8 @@ void _xml_endElementHandler(void *userData, const XML_Char *name)
 		parser->level--;
 	}
 }
-/* }}} */
 
-/* {{{ _xml_characterDataHandler() */
+/* _xml_characterDataHandler() */
 void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 {
 	xml_parser *parser = (xml_parser *)userData;
@@ -851,9 +833,8 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 		}
 	}
 }
-/* }}} */
 
-/* {{{ _xml_processingInstructionHandler() */
+/* _xml_processingInstructionHandler() */
 void _xml_processingInstructionHandler(void *userData, const XML_Char *target, const XML_Char *data)
 {
 	xml_parser *parser = (xml_parser *)userData;
@@ -868,9 +849,8 @@ void _xml_processingInstructionHandler(void *userData, const XML_Char *target, c
 		zval_ptr_dtor(&retval);
 	}
 }
-/* }}} */
 
-/* {{{ _xml_defaultHandler() */
+/* _xml_defaultHandler() */
 void _xml_defaultHandler(void *userData, const XML_Char *s, int len)
 {
 	xml_parser *parser = (xml_parser *)userData;
@@ -884,9 +864,8 @@ void _xml_defaultHandler(void *userData, const XML_Char *s, int len)
 		zval_ptr_dtor(&retval);
 	}
 }
-/* }}} */
 
-/* {{{ _xml_unparsedEntityDeclHandler() */
+/* _xml_unparsedEntityDeclHandler() */
 void _xml_unparsedEntityDeclHandler(void *userData,
 										 const XML_Char *entityName,
 										 const XML_Char *base,
@@ -909,9 +888,8 @@ void _xml_unparsedEntityDeclHandler(void *userData,
 		zval_ptr_dtor(&retval);
 	}
 }
-/* }}} */
 
-/* {{{ _xml_notationDeclHandler() */
+/* _xml_notationDeclHandler() */
 void _xml_notationDeclHandler(void *userData,
 							  const XML_Char *notationName,
 							  const XML_Char *base,
@@ -932,9 +910,8 @@ void _xml_notationDeclHandler(void *userData,
 		zval_ptr_dtor(&retval);
 	}
 }
-/* }}} */
 
-/* {{{ _xml_externalEntityRefHandler() */
+/* _xml_externalEntityRefHandler() */
 int _xml_externalEntityRefHandler(XML_Parser parserPtr,
 								   const XML_Char *openEntityNames,
 								   const XML_Char *base,
@@ -962,9 +939,8 @@ int _xml_externalEntityRefHandler(XML_Parser parserPtr,
 	}
 	return ret;
 }
-/* }}} */
 
-/* {{{ _xml_startNamespaceDeclHandler() */
+/* _xml_startNamespaceDeclHandler() */
 void _xml_startNamespaceDeclHandler(void *userData,const XML_Char *prefix, const XML_Char *uri)
 {
 	xml_parser *parser = (xml_parser *)userData;
@@ -979,9 +955,8 @@ void _xml_startNamespaceDeclHandler(void *userData,const XML_Char *prefix, const
 		zval_ptr_dtor(&retval);
 	}
 }
-/* }}} */
 
-/* {{{ _xml_endNamespaceDeclHandler() */
+/* _xml_endNamespaceDeclHandler() */
 void _xml_endNamespaceDeclHandler(void *userData, const XML_Char *prefix)
 {
 	xml_parser *parser = (xml_parser *)userData;
@@ -995,11 +970,10 @@ void _xml_endNamespaceDeclHandler(void *userData, const XML_Char *prefix)
 		zval_ptr_dtor(&retval);
 	}
 }
-/* }}} */
 
 /************************* EXTENSION FUNCTIONS *************************/
 
-static void php_xml_parser_create_impl(INTERNAL_FUNCTION_PARAMETERS, int ns_support) /* {{{ */
+static void php_xml_parser_create_impl(INTERNAL_FUNCTION_PARAMETERS, int ns_support)
 {
 	xml_parser *parser;
 	int auto_detect = 0;
@@ -1053,21 +1027,18 @@ static void php_xml_parser_create_impl(INTERNAL_FUNCTION_PARAMETERS, int ns_supp
 	XML_SetUserData(parser->parser, parser);
 	ZVAL_COPY_VALUE(&parser->index, return_value);
 }
-/* }}} */
 
 /* Create an XML parser */
 PHP_FUNCTION(xml_parser_create)
 {
 	php_xml_parser_create_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
-/* }}} */
 
 /* Create an XML parser */
 PHP_FUNCTION(xml_parser_create_ns)
 {
 	php_xml_parser_create_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
-/* }}} */
 
 /* Set up object which should be used for callbacks */
 PHP_FUNCTION(xml_set_object)
@@ -1087,7 +1058,6 @@ PHP_FUNCTION(xml_set_object)
 
 	RETVAL_TRUE;
 }
-/* }}} */
 
 /* Set up start and end element handlers */
 PHP_FUNCTION(xml_set_element_handler)
@@ -1105,7 +1075,6 @@ PHP_FUNCTION(xml_set_element_handler)
 	XML_SetElementHandler(parser->parser, _xml_startElementHandler, _xml_endElementHandler);
 	RETVAL_TRUE;
 }
-/* }}} */
 
 /* Set up character data handler */
 PHP_FUNCTION(xml_set_character_data_handler)
@@ -1122,7 +1091,6 @@ PHP_FUNCTION(xml_set_character_data_handler)
 	XML_SetCharacterDataHandler(parser->parser, _xml_characterDataHandler);
 	RETVAL_TRUE;
 }
-/* }}} */
 
 /* Set up processing instruction (PI) handler */
 PHP_FUNCTION(xml_set_processing_instruction_handler)
@@ -1139,7 +1107,6 @@ PHP_FUNCTION(xml_set_processing_instruction_handler)
 	XML_SetProcessingInstructionHandler(parser->parser, _xml_processingInstructionHandler);
 	RETVAL_TRUE;
 }
-/* }}} */
 
 /* Set up default handler */
 PHP_FUNCTION(xml_set_default_handler)
@@ -1156,7 +1123,6 @@ PHP_FUNCTION(xml_set_default_handler)
 	XML_SetDefaultHandler(parser->parser, _xml_defaultHandler);
 	RETVAL_TRUE;
 }
-/* }}} */
 
 /* Set up unparsed entity declaration handler */
 PHP_FUNCTION(xml_set_unparsed_entity_decl_handler)
@@ -1173,7 +1139,6 @@ PHP_FUNCTION(xml_set_unparsed_entity_decl_handler)
 	XML_SetUnparsedEntityDeclHandler(parser->parser, _xml_unparsedEntityDeclHandler);
 	RETVAL_TRUE;
 }
-/* }}} */
 
 /* Set up notation declaration handler */
 PHP_FUNCTION(xml_set_notation_decl_handler)
@@ -1190,7 +1155,6 @@ PHP_FUNCTION(xml_set_notation_decl_handler)
 	XML_SetNotationDeclHandler(parser->parser, _xml_notationDeclHandler);
 	RETVAL_TRUE;
 }
-/* }}} */
 
 /* Set up external entity reference handler */
 PHP_FUNCTION(xml_set_external_entity_ref_handler)
@@ -1207,7 +1171,6 @@ PHP_FUNCTION(xml_set_external_entity_ref_handler)
 	XML_SetExternalEntityRefHandler(parser->parser, (void *) _xml_externalEntityRefHandler);
 	RETVAL_TRUE;
 }
-/* }}} */
 
 /* Set up character data handler */
 PHP_FUNCTION(xml_set_start_namespace_decl_handler)
@@ -1224,7 +1187,6 @@ PHP_FUNCTION(xml_set_start_namespace_decl_handler)
 	XML_SetStartNamespaceDeclHandler(parser->parser, _xml_startNamespaceDeclHandler);
 	RETVAL_TRUE;
 }
-/* }}} */
 
 /* Set up character data handler */
 PHP_FUNCTION(xml_set_end_namespace_decl_handler)
@@ -1241,7 +1203,6 @@ PHP_FUNCTION(xml_set_end_namespace_decl_handler)
 	XML_SetEndNamespaceDeclHandler(parser->parser, _xml_endNamespaceDeclHandler);
 	RETVAL_TRUE;
 }
-/* }}} */
 
 /* Start parsing an XML document */
 PHP_FUNCTION(xml_parse)
@@ -1264,7 +1225,6 @@ PHP_FUNCTION(xml_parse)
 	RETVAL_LONG(ret);
 }
 
-/* }}} */
 
 /* Parsing a XML document */
 PHP_FUNCTION(xml_parse_into_struct)
@@ -1311,7 +1271,6 @@ PHP_FUNCTION(xml_parse_into_struct)
 
 	RETVAL_LONG(ret);
 }
-/* }}} */
 
 /* Get XML parser error code */
 PHP_FUNCTION(xml_get_error_code)
@@ -1326,7 +1285,6 @@ PHP_FUNCTION(xml_get_error_code)
 	parser = Z_XMLPARSER_P(pind);
 	RETURN_LONG((zend_long)XML_GetErrorCode(parser->parser));
 }
-/* }}} */
 
 /* Get XML parser error string */
 PHP_FUNCTION(xml_error_string)
@@ -1343,7 +1301,6 @@ PHP_FUNCTION(xml_error_string)
 		RETVAL_STRING(str);
 	}
 }
-/* }}} */
 
 /* Get current line number for an XML parser */
 PHP_FUNCTION(xml_get_current_line_number)
@@ -1358,7 +1315,6 @@ PHP_FUNCTION(xml_get_current_line_number)
 	parser = Z_XMLPARSER_P(pind);
 	RETVAL_LONG(XML_GetCurrentLineNumber(parser->parser));
 }
-/* }}} */
 
 /* Get current column number for an XML parser */
 PHP_FUNCTION(xml_get_current_column_number)
@@ -1373,7 +1329,6 @@ PHP_FUNCTION(xml_get_current_column_number)
 	parser = Z_XMLPARSER_P(pind);
 	RETVAL_LONG(XML_GetCurrentColumnNumber(parser->parser));
 }
-/* }}} */
 
 /* Get current byte index for an XML parser */
 PHP_FUNCTION(xml_get_current_byte_index)
@@ -1388,7 +1343,6 @@ PHP_FUNCTION(xml_get_current_byte_index)
 	parser = Z_XMLPARSER_P(pind);
 	RETVAL_LONG(XML_GetCurrentByteIndex(parser->parser));
 }
-/* }}} */
 
 /* Free an XML parser */
 PHP_FUNCTION(xml_parser_free)
@@ -1408,7 +1362,6 @@ PHP_FUNCTION(xml_parser_free)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Set options in an XML parser */
 PHP_FUNCTION(xml_parser_set_option)
@@ -1457,7 +1410,6 @@ PHP_FUNCTION(xml_parser_set_option)
 	}
 	RETVAL_TRUE;
 }
-/* }}} */
 
 /* Get options from an XML parser */
 PHP_FUNCTION(xml_parser_get_option)
@@ -1492,6 +1444,5 @@ PHP_FUNCTION(xml_parser_get_option)
 
 	RETVAL_FALSE;	/* never reached */
 }
-/* }}} */
 
 #endif

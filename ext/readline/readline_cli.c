@@ -75,7 +75,7 @@ ZEND_DECLARE_MODULE_GLOBALS(cli_readline)
 static char php_last_char = '\0';
 static FILE *pager_pipe = NULL;
 
-static size_t readline_shell_write(const char *str, size_t str_length) /* {{{ */
+static size_t readline_shell_write(const char *str, size_t str_length)
 {
 	if (CLIR_G(prompt_str)) {
 		smart_str_appendl(CLIR_G(prompt_str), str, str_length);
@@ -91,9 +91,8 @@ static size_t readline_shell_write(const char *str, size_t str_length) /* {{{ */
 
 	return -1;
 }
-/* }}} */
 
-static size_t readline_shell_ub_write(const char *str, size_t str_length) /* {{{ */
+static size_t readline_shell_ub_write(const char *str, size_t str_length)
 {
 	/* We just store the last char here and then pass back to the
 	   caller (sapi_cli_single_write in sapi/cli) which will actually
@@ -102,7 +101,6 @@ static size_t readline_shell_ub_write(const char *str, size_t str_length) /* {{{
 
 	return (size_t) -1;
 }
-/* }}} */
 
 static void cli_readline_init_globals(zend_cli_readline_globals *rg)
 {
@@ -131,7 +129,7 @@ typedef enum {
 	outside,
 } php_code_type;
 
-static zend_string *cli_get_prompt(char *block, char prompt) /* {{{ */
+static zend_string *cli_get_prompt(char *block, char prompt)
 {
 	smart_str retval = {0};
 	char *prompt_spec = CLIR_G(prompt) ? CLIR_G(prompt) : DEFAULT_PROMPT;
@@ -199,9 +197,8 @@ static zend_string *cli_get_prompt(char *block, char prompt) /* {{{ */
 	smart_str_0(&retval);
 	return retval.s;
 }
-/* }}} */
 
-static int cli_is_valid_code(char *code, size_t len, zend_string **prompt) /* {{{ */
+static int cli_is_valid_code(char *code, size_t len, zend_string **prompt)
 {
 	int valid_end = 1, last_valid_end;
 	int brackets_count = 0;
@@ -404,9 +401,8 @@ static int cli_is_valid_code(char *code, size_t len, zend_string **prompt) /* {{
 		return 1;
 	}
 }
-/* }}} */
 
-static char *cli_completion_generator_ht(const char *text, size_t textlen, int *state, HashTable *ht, void **pData) /* {{{ */
+static char *cli_completion_generator_ht(const char *text, size_t textlen, int *state, HashTable *ht, void **pData)
 {
 	zend_string *name;
 	zend_ulong number;
@@ -430,9 +426,9 @@ static char *cli_completion_generator_ht(const char *text, size_t textlen, int *
 	}
 	(*state)++;
 	return NULL;
-} /* }}} */
+}
 
-static char *cli_completion_generator_var(const char *text, size_t textlen, int *state) /* {{{ */
+static char *cli_completion_generator_var(const char *text, size_t textlen, int *state)
 {
 	char *retval, *tmp;
 	zend_array *symbol_table = &EG(symbol_table);
@@ -445,9 +441,9 @@ static char *cli_completion_generator_var(const char *text, size_t textlen, int 
 		rl_completion_append_character = '\0';
 	}
 	return retval;
-} /* }}} */
+}
 
-static char *cli_completion_generator_ini(const char *text, size_t textlen, int *state) /* {{{ */
+static char *cli_completion_generator_ini(const char *text, size_t textlen, int *state)
 {
 	char *retval, *tmp;
 
@@ -459,9 +455,9 @@ static char *cli_completion_generator_ini(const char *text, size_t textlen, int 
 		rl_completion_append_character = '=';
 	}
 	return retval;
-} /* }}} */
+}
 
-static char *cli_completion_generator_func(const char *text, size_t textlen, int *state, HashTable *ht) /* {{{ */
+static char *cli_completion_generator_func(const char *text, size_t textlen, int *state, HashTable *ht)
 {
 	zend_function *func;
 	char *retval = cli_completion_generator_ht(text, textlen, state, ht, (void**)&func);
@@ -471,9 +467,9 @@ static char *cli_completion_generator_func(const char *text, size_t textlen, int
 	}
 
 	return retval;
-} /* }}} */
+}
 
-static char *cli_completion_generator_class(const char *text, size_t textlen, int *state) /* {{{ */
+static char *cli_completion_generator_class(const char *text, size_t textlen, int *state)
 {
 	zend_class_entry *ce;
 	char *retval = cli_completion_generator_ht(text, textlen, state, EG(class_table), (void**)&ce);
@@ -483,9 +479,9 @@ static char *cli_completion_generator_class(const char *text, size_t textlen, in
 	}
 
 	return retval;
-} /* }}} */
+}
 
-static char *cli_completion_generator_define(const char *text, size_t textlen, int *state, HashTable *ht) /* {{{ */
+static char *cli_completion_generator_define(const char *text, size_t textlen, int *state, HashTable *ht)
 {
 	zend_class_entry **pce;
 	char *retval = cli_completion_generator_ht(text, textlen, state, ht, (void**)&pce);
@@ -495,11 +491,11 @@ static char *cli_completion_generator_define(const char *text, size_t textlen, i
 	}
 
 	return retval;
-} /* }}} */
+}
 
 static int cli_completion_state;
 
-static char *cli_completion_generator(const char *text, int index) /* {{{ */
+static char *cli_completion_generator(const char *text, int index)
 {
 /*
 TODO:
@@ -575,15 +571,14 @@ TODO:
 	}
 
 	return retval;
-} /* }}} */
+}
 
-static char **cli_code_completion(const char *text, int start, int end) /* {{{ */
+static char **cli_code_completion(const char *text, int start, int end)
 {
 	return rl_completion_matches(text, cli_completion_generator);
 }
-/* }}} */
 
-static int readline_shell_run(void) /* {{{ */
+static int readline_shell_run(void)
 {
 	char *line;
 	size_t size = 4096, pos = 0, len;
@@ -701,7 +696,6 @@ static int readline_shell_run(void) /* {{{ */
 	zend_string_release_ex(prompt, 0);
 	return EG(exit_status);
 }
-/* }}} */
 
 #ifdef PHP_WIN32
 typedef cli_shell_callbacks_t *(__cdecl *get_cli_shell_callbacks)(void);

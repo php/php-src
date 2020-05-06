@@ -57,7 +57,7 @@ typedef struct _xmlreader_prop_handler {
 #define XMLREADER_LOAD_STRING 0
 #define XMLREADER_LOAD_FILE 1
 
-/* {{{ xmlreader_register_prop_handler */
+/* xmlreader_register_prop_handler */
 static void xmlreader_register_prop_handler(HashTable *prop_handler, char *name, xmlreader_read_int_t read_int_func, xmlreader_read_const_char_t read_char_func, int rettype)
 {
 	xmlreader_prop_handler hnd;
@@ -70,9 +70,8 @@ static void xmlreader_register_prop_handler(HashTable *prop_handler, char *name,
 	zend_hash_add_mem(prop_handler, str, &hnd, sizeof(xmlreader_prop_handler));
 	zend_string_release_ex(str, 1);
 }
-/* }}} */
 
-/* {{{ xmlreader_property_reader */
+/* xmlreader_property_reader */
 static int xmlreader_property_reader(xmlreader_object *obj, xmlreader_prop_handler *hnd, zval *rv)
 {
 	const xmlChar *retchar = NULL;
@@ -113,9 +112,8 @@ static int xmlreader_property_reader(xmlreader_object *obj, xmlreader_prop_handl
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ xmlreader_get_property_ptr_ptr */
+/* xmlreader_get_property_ptr_ptr */
 zval *xmlreader_get_property_ptr_ptr(zend_object *object, zend_string *name, int type, void **cache_slot)
 {
 	xmlreader_object *obj;
@@ -134,9 +132,8 @@ zval *xmlreader_get_property_ptr_ptr(zend_object *object, zend_string *name, int
 
 	return retval;
 }
-/* }}} */
 
-/* {{{ xmlreader_read_property */
+/* xmlreader_read_property */
 zval *xmlreader_read_property(zend_object *object, zend_string *name, int type, void **cache_slot, zval *rv)
 {
 	xmlreader_object *obj;
@@ -161,9 +158,8 @@ zval *xmlreader_read_property(zend_object *object, zend_string *name, int type, 
 
 	return retval;
 }
-/* }}} */
 
-/* {{{ xmlreader_write_property */
+/* xmlreader_write_property */
 zval *xmlreader_write_property(zend_object *object, zend_string *name, zval *value, void **cache_slot)
 {
 	xmlreader_object *obj;
@@ -182,9 +178,7 @@ zval *xmlreader_write_property(zend_object *object, zend_string *name, zval *val
 
 	return value;
 }
-/* }}} */
 
-/* {{{ */
 static zend_function *xmlreader_get_method(zend_object **obj, zend_string *name, const zval *key)
 {
 	if (ZSTR_LEN(name) == sizeof("open") - 1
@@ -201,9 +195,8 @@ static zend_function *xmlreader_get_method(zend_object **obj, zend_string *name,
 	}
 	return zend_std_get_method(obj, name, key);;
 }
-/* }}} */
 
-/* {{{ _xmlreader_get_valid_file_path */
+/* _xmlreader_get_valid_file_path */
 /* _xmlreader_get_valid_file_path and _xmlreader_get_relaxNG should be made a
 	common function in libxml extension as code is common to a few xml extensions */
 char *_xmlreader_get_valid_file_path(char *source, char *resolved_path, int resolved_path_len ) {
@@ -250,10 +243,9 @@ char *_xmlreader_get_valid_file_path(char *source, char *resolved_path, int reso
 
 	return file_dest;
 }
-/* }}} */
 
 #ifdef LIBXML_SCHEMAS_ENABLED
-/* {{{ _xmlreader_get_relaxNG */
+/* _xmlreader_get_relaxNG */
 static xmlRelaxNGPtr _xmlreader_get_relaxNG(char *source, size_t source_len, size_t type,
 											xmlRelaxNGValidityErrorFunc error_func,
 											xmlRelaxNGValidityWarningFunc warn_func)
@@ -295,7 +287,7 @@ static xmlRelaxNGPtr _xmlreader_get_relaxNG(char *source, size_t source_len, siz
 
 	return sptr;
 }
-/* }}} */
+
 #endif
 
 static const zend_module_dep xmlreader_deps[] = {
@@ -303,7 +295,7 @@ static const zend_module_dep xmlreader_deps[] = {
 	ZEND_MOD_END
 };
 
-/* {{{ xmlreader_module_entry
+/* xmlreader_module_entry
  */
 zend_module_entry xmlreader_module_entry = {
 	STANDARD_MODULE_HEADER_EX, NULL,
@@ -318,20 +310,18 @@ zend_module_entry xmlreader_module_entry = {
 	PHP_XMLREADER_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
-/* }}} */
 
 #ifdef COMPILE_DL_XMLREADER
 ZEND_GET_MODULE(xmlreader)
 #endif
 
-/* {{{ xmlreader_objects_clone */
+/* xmlreader_objects_clone */
 void xmlreader_objects_clone(void *object, void **object_clone)
 {
 	/* TODO */
 }
-/* }}} */
 
-/* {{{ xmlreader_free_resources */
+/* xmlreader_free_resources */
 static void xmlreader_free_resources(xmlreader_object *intern) {
 	if (intern) {
 		if (intern->input) {
@@ -351,9 +341,8 @@ static void xmlreader_free_resources(xmlreader_object *intern) {
 #endif
 	}
 }
-/* }}} */
 
-/* {{{ xmlreader_objects_free_storage */
+/* xmlreader_objects_free_storage */
 void xmlreader_objects_free_storage(zend_object *object)
 {
 	xmlreader_object *intern = php_xmlreader_fetch_object(object);
@@ -362,9 +351,8 @@ void xmlreader_objects_free_storage(zend_object *object)
 
 	xmlreader_free_resources(intern);
 }
-/* }}} */
 
-/* {{{ xmlreader_objects_new */
+/* xmlreader_objects_new */
 zend_object *xmlreader_objects_new(zend_class_entry *class_type)
 {
 	xmlreader_object *intern;
@@ -377,9 +365,8 @@ zend_object *xmlreader_objects_new(zend_class_entry *class_type)
 
 	return &intern->std;
 }
-/* }}} */
 
-/* {{{ php_xmlreader_string_arg */
+/* php_xmlreader_string_arg */
 static void php_xmlreader_string_arg(INTERNAL_FUNCTION_PARAMETERS, xmlreader_read_one_char_t internal_function) {
 	zval *id;
 	size_t name_len = 0;
@@ -410,9 +397,8 @@ static void php_xmlreader_string_arg(INTERNAL_FUNCTION_PARAMETERS, xmlreader_rea
 		RETVAL_NULL();
 	}
 }
-/* }}} */
 
-/* {{{ php_xmlreader_no_arg */
+/* php_xmlreader_no_arg */
 static void php_xmlreader_no_arg(INTERNAL_FUNCTION_PARAMETERS, xmlreader_read_int_t internal_function) {
 	zval *id;
 	int retval;
@@ -434,13 +420,12 @@ static void php_xmlreader_no_arg(INTERNAL_FUNCTION_PARAMETERS, xmlreader_read_in
 
 	RETURN_FALSE;
 }
-/* }}} */
 
-static void php_xmlreader_free_prop_handler(zval *el) /* {{{ */ {
+static void php_xmlreader_free_prop_handler(zval *el) {
 	pefree(Z_PTR_P(el), 1);
-} /* }}} */
+}
 
-/* {{{ php_xmlreader_no_arg_string */
+/* php_xmlreader_no_arg_string */
 static void php_xmlreader_no_arg_string(INTERNAL_FUNCTION_PARAMETERS, xmlreader_read_char_t internal_function) {
 	zval *id;
 	char *retchar = NULL;
@@ -464,9 +449,8 @@ static void php_xmlreader_no_arg_string(INTERNAL_FUNCTION_PARAMETERS, xmlreader_
 		RETVAL_EMPTY_STRING();
 	}
 }
-/* }}} */
 
-/* {{{ php_xmlreader_set_relaxng_schema */
+/* php_xmlreader_set_relaxng_schema */
 static void php_xmlreader_set_relaxng_schema(INTERNAL_FUNCTION_PARAMETERS, int type) {
 #ifdef LIBXML_SCHEMAS_ENABLED
 	zval *id;
@@ -519,7 +503,6 @@ static void php_xmlreader_set_relaxng_schema(INTERNAL_FUNCTION_PARAMETERS, int t
 	RETURN_FALSE;
 #endif
 }
-/* }}} */
 
 /* Closes xmlreader - current frees resources until xmlTextReaderClose is fixed in libxml */
 PHP_METHOD(XMLReader, close)
@@ -540,14 +523,12 @@ PHP_METHOD(XMLReader, close)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Get value of an attribute from current element */
 PHP_METHOD(XMLReader, getAttribute)
 {
 	php_xmlreader_string_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextReaderGetAttribute);
 }
-/* }}} */
 
 /* Get value of an attribute at index from current element */
 PHP_METHOD(XMLReader, getAttributeNo)
@@ -572,7 +553,6 @@ PHP_METHOD(XMLReader, getAttributeNo)
 		xmlFree(retchar);
 	}
 }
-/* }}} */
 
 /* Get value of a attribute via name and namespace from current element */
 PHP_METHOD(XMLReader, getAttributeNs)
@@ -602,7 +582,6 @@ PHP_METHOD(XMLReader, getAttributeNs)
 		xmlFree(retchar);
 	}
 }
-/* }}} */
 
 /* Indicates whether given property (one of the parser option constants) is set or not on parser */
 PHP_METHOD(XMLReader, getParserProperty)
@@ -629,7 +608,6 @@ PHP_METHOD(XMLReader, getParserProperty)
 
 	RETURN_BOOL(retval);
 }
-/* }}} */
 
 /* Returns boolean indicating if parsed document is valid or not.
 Must set XMLREADER_LOADDTD or XMLREADER_VALIDATE parser option prior to the first call to read
@@ -638,14 +616,12 @@ PHP_METHOD(XMLReader, isValid)
 {
 	php_xmlreader_no_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextReaderIsValid);
 }
-/* }}} */
 
 /* Return namespaceURI for associated prefix on current node */
 PHP_METHOD(XMLReader, lookupNamespace)
 {
 	php_xmlreader_string_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextReaderLookupNamespace);
 }
-/* }}} */
 
 /* Positions reader at specified attribute - Returns TRUE on success and FALSE on failure */
 PHP_METHOD(XMLReader, moveToAttribute)
@@ -677,7 +653,6 @@ PHP_METHOD(XMLReader, moveToAttribute)
 
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* Positions reader at attribute at specified index.
 Returns TRUE on success and FALSE on failure */
@@ -704,7 +679,6 @@ PHP_METHOD(XMLReader, moveToAttributeNo)
 
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* Positions reader at attribute spcified by name and namespaceURI.
 Returns TRUE on success and FALSE on failure */
@@ -737,28 +711,24 @@ PHP_METHOD(XMLReader, moveToAttributeNs)
 
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* Moves the position of the current instance to the node that contains the current Attribute node. */
 PHP_METHOD(XMLReader, moveToElement)
 {
 	php_xmlreader_no_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextReaderMoveToElement);
 }
-/* }}} */
 
 /* Moves the position of the current instance to the first attribute associated with the current node. */
 PHP_METHOD(XMLReader, moveToFirstAttribute)
 {
 	php_xmlreader_no_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextReaderMoveToFirstAttribute);
 }
-/* }}} */
 
 /* Moves the position of the current instance to the next attribute associated with the current node. */
 PHP_METHOD(XMLReader, moveToNextAttribute)
 {
 	php_xmlreader_no_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextReaderMoveToNextAttribute);
 }
-/* }}} */
 
 /* Moves the position of the current instance to the next node in the stream. */
 PHP_METHOD(XMLReader, read)
@@ -785,7 +755,6 @@ PHP_METHOD(XMLReader, read)
 	php_error_docref(NULL, E_WARNING, "Load Data before trying to read");
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* Moves the position of the current instance to the next node in the stream. */
 PHP_METHOD(XMLReader, next)
@@ -820,7 +789,6 @@ PHP_METHOD(XMLReader, next)
 	php_error_docref(NULL, E_WARNING, "Load Data before trying to read");
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* Sets the URI that the XMLReader will parse. */
 PHP_METHOD(XMLReader, open)
@@ -876,7 +844,6 @@ PHP_METHOD(XMLReader, open)
 	RETURN_TRUE;
 
 }
-/* }}} */
 
 /* Not Yet Implemented in libxml - functions exist just not coded
 PHP_METHOD(XMLReader, resetState)
@@ -890,21 +857,18 @@ PHP_METHOD(XMLReader, readInnerXml)
 {
 	php_xmlreader_no_arg_string(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextReaderReadInnerXml);
 }
-/* }}} */
 
 /* Reads the contents of the current node, including child nodes and markup. */
 PHP_METHOD(XMLReader, readOuterXml)
 {
 	php_xmlreader_no_arg_string(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextReaderReadOuterXml);
 }
-/* }}} */
 
 /* Reads the contents of an element or a text node as a string. */
 PHP_METHOD(XMLReader, readString)
 {
 	php_xmlreader_no_arg_string(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextReaderReadString);
 }
-/* }}} */
 
 /* Use W3C XSD schema to validate the document as it is processed. Activation is only possible before the first Read(). */
 PHP_METHOD(XMLReader, setSchema)
@@ -945,7 +909,6 @@ PHP_METHOD(XMLReader, setSchema)
 	RETURN_FALSE;
 #endif
 }
-/* }}} */
 
 /* Sets parser property (one of the parser option constants).
 Properties must be set after open() or XML() and before the first read() is called */
@@ -974,21 +937,18 @@ PHP_METHOD(XMLReader, setParserProperty)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Sets the string that the XMLReader will parse. */
 PHP_METHOD(XMLReader, setRelaxNGSchema)
 {
 	php_xmlreader_set_relaxng_schema(INTERNAL_FUNCTION_PARAM_PASSTHRU, XMLREADER_LOAD_FILE);
 }
-/* }}} */
 
 /* Sets the string that the XMLReader will parse. */
 PHP_METHOD(XMLReader, setRelaxNGSchemaSource)
 {
 	php_xmlreader_set_relaxng_schema(INTERNAL_FUNCTION_PARAM_PASSTHRU, XMLREADER_LOAD_STRING);
 }
-/* }}} */
 
 /* TODO
 XMLPUBFUN int XMLCALL
@@ -1077,7 +1037,6 @@ PHP_METHOD(XMLReader, XML)
 	php_error_docref(NULL, E_WARNING, "Unable to load source data");
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* Moves the position of the current instance to the next node in the stream. */
 PHP_METHOD(XMLReader, expand)
@@ -1126,9 +1085,8 @@ PHP_METHOD(XMLReader, expand)
 	return;
 #endif
 }
-/* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION
+/* PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(xmlreader)
 {
@@ -1206,18 +1164,16 @@ PHP_MINIT_FUNCTION(xmlreader)
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_MSHUTDOWN_FUNCTION
+/* PHP_MSHUTDOWN_FUNCTION
  */
 PHP_MSHUTDOWN_FUNCTION(xmlreader)
 {
 	zend_hash_destroy(&xmlreader_prop_handlers);
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
+/* PHP_MINFO_FUNCTION
  */
 PHP_MINFO_FUNCTION(xmlreader)
 {
@@ -1227,4 +1183,4 @@ PHP_MINFO_FUNCTION(xmlreader)
 	}
 	php_info_print_table_end();
 }
-/* }}} */
+

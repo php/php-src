@@ -15,7 +15,7 @@
    +----------------------------------------------------------------------+
  */
 
-/* {{{ includes */
+/* includes */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -39,13 +39,12 @@
 #include "TSRM.h"
 
 #include "mb_gpc.h"
-/* }}} */
 
 #if HAVE_MBSTRING
 
 ZEND_EXTERN_MODULE_GLOBALS(mbstring)
 
-/* {{{ MBSTRING_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
+/* MBSTRING_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
  * http input processing */
 MBSTRING_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
 {
@@ -176,9 +175,8 @@ MBSTRING_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
 		efree(res);
 	}
 }
-/* }}} */
 
-/* {{{ mbfl_no_encoding _php_mb_encoding_handler_ex() */
+/* mbfl_no_encoding _php_mb_encoding_handler_ex() */
 const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_info_t *info, zval *arg, char *res)
 {
 	char *var, *val;
@@ -344,9 +342,8 @@ out:
 
 	return from_encoding;
 }
-/* }}} */
 
-/* {{{ SAPI_POST_HANDLER_FUNC(php_mb_post_handler) */
+/* SAPI_POST_HANDLER_FUNC(php_mb_post_handler) */
 SAPI_POST_HANDLER_FUNC(php_mb_post_handler)
 {
 	const mbfl_encoding *detected;
@@ -376,6 +373,5 @@ SAPI_POST_HANDLER_FUNC(php_mb_post_handler)
 		MBSTRG(http_input_identify_post) = detected;
 	}
 }
-/* }}} */
 
 #endif /* HAVE_MBSTRING */

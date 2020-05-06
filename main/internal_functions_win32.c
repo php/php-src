@@ -15,7 +15,7 @@
 	+----------------------------------------------------------------------+
 */
 
-/* {{{ includes
+/* includes
  */
 #include "php.h"
 #include "php_main.h"
@@ -94,9 +94,8 @@
 #if HAVE_XML && HAVE_XMLWRITER
 #include "ext/xmlwriter/php_xmlwriter.h"
 #endif
-/* }}} */
 
-/* {{{ php_builtin_extensions[]
+/* php_builtin_extensions[]
  */
 static zend_module_entry * const php_builtin_extensions[] = {
 	phpext_standard_ptr
@@ -155,7 +154,6 @@ static zend_module_entry * const php_builtin_extensions[] = {
 	,phpext_xmlwriter_ptr
 #endif
 };
-/* }}} */
 
 #define EXTCOUNT (sizeof(php_builtin_extensions)/sizeof(zend_module_entry *))
 

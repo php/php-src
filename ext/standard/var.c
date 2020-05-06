@@ -16,7 +16,7 @@
    +----------------------------------------------------------------------+
 */
 
-/* {{{ includes
+/* includes
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,7 +27,6 @@
 #include "zend_smart_str.h"
 #include "basic_functions.h"
 #include "php_incomplete_class.h"
-/* }}} */
 
 struct php_serialize_data {
 	HashTable ht;
@@ -36,7 +35,7 @@ struct php_serialize_data {
 
 #define COMMON (is_ref ? "&" : "")
 
-static void php_array_element_dump(zval *zv, zend_ulong index, zend_string *key, int level) /* {{{ */
+static void php_array_element_dump(zval *zv, zend_ulong index, zend_string *key, int level)
 {
 	if (key == NULL) { /* numeric key */
 		php_printf("%*c[" ZEND_LONG_FMT "]=>\n", level + 1, ' ', index);
@@ -47,9 +46,8 @@ static void php_array_element_dump(zval *zv, zend_ulong index, zend_string *key,
 	}
 	php_var_dump(zv, level + 2);
 }
-/* }}} */
 
-static void php_object_property_dump(zend_property_info *prop_info, zval *zv, zend_ulong index, zend_string *key, int level) /* {{{ */
+static void php_object_property_dump(zend_property_info *prop_info, zval *zv, zend_ulong index, zend_string *key, int level)
 {
 	const char *prop_name, *class_name;
 
@@ -83,9 +81,8 @@ static void php_object_property_dump(zend_property_info *prop_info, zval *zv, ze
 		php_var_dump(zv, level + 2);
 	}
 }
-/* }}} */
 
-PHPAPI void php_var_dump(zval *struc, int level) /* {{{ */
+PHPAPI void php_var_dump(zval *struc, int level)
 {
 	HashTable *myht;
 	zend_string *class_name;
@@ -201,7 +198,6 @@ again:
 			break;
 	}
 }
-/* }}} */
 
 /* Dumps a string representation of variable to output */
 PHP_FUNCTION(var_dump)
@@ -218,9 +214,8 @@ PHP_FUNCTION(var_dump)
 		php_var_dump(&args[i], 1);
 	}
 }
-/* }}} */
 
-static void zval_array_element_dump(zval *zv, zend_ulong index, zend_string *key, int level) /* {{{ */
+static void zval_array_element_dump(zval *zv, zend_ulong index, zend_string *key, int level)
 {
 	if (key == NULL) { /* numeric key */
 		php_printf("%*c[" ZEND_LONG_FMT "]=>\n", level + 1, ' ', index);
@@ -231,9 +226,8 @@ static void zval_array_element_dump(zval *zv, zend_ulong index, zend_string *key
 	}
 	php_debug_zval_dump(zv, level + 2);
 }
-/* }}} */
 
-static void zval_object_property_dump(zend_property_info *prop_info, zval *zv, zend_ulong index, zend_string *key, int level) /* {{{ */
+static void zval_object_property_dump(zend_property_info *prop_info, zval *zv, zend_ulong index, zend_string *key, int level)
 {
 	const char *prop_name, *class_name;
 
@@ -263,9 +257,8 @@ static void zval_object_property_dump(zend_property_info *prop_info, zval *zv, z
 		php_debug_zval_dump(zv, level + 2);
 	}
 }
-/* }}} */
 
-PHPAPI void php_debug_zval_dump(zval *struc, int level) /* {{{ */
+PHPAPI void php_debug_zval_dump(zval *struc, int level)
 {
 	HashTable *myht = NULL;
 	zend_string *class_name;
@@ -376,7 +369,6 @@ again:
 		break;
 	}
 }
-/* }}} */
 
 /* Dumps a string representation of an internal zend value to output. */
 PHP_FUNCTION(debug_zval_dump)
@@ -393,7 +385,6 @@ PHP_FUNCTION(debug_zval_dump)
 		php_debug_zval_dump(&args[i], 1);
 	}
 }
-/* }}} */
 
 #define buffer_append_spaces(buf, num_spaces) \
 	do { \
@@ -404,7 +395,7 @@ PHP_FUNCTION(debug_zval_dump)
 		efree(tmp_spaces); \
 	} while(0);
 
-static void php_array_element_export(zval *zv, zend_ulong index, zend_string *key, int level, smart_str *buf) /* {{{ */
+static void php_array_element_export(zval *zv, zend_ulong index, zend_string *key, int level, smart_str *buf)
 {
 	if (key == NULL) { /* numeric key */
 		buffer_append_spaces(buf, level+1);
@@ -430,9 +421,8 @@ static void php_array_element_export(zval *zv, zend_ulong index, zend_string *ke
 	smart_str_appendc(buf, ',');
 	smart_str_appendc(buf, '\n');
 }
-/* }}} */
 
-static void php_object_element_export(zval *zv, zend_ulong index, zend_string *key, int level, smart_str *buf) /* {{{ */
+static void php_object_element_export(zval *zv, zend_ulong index, zend_string *key, int level, smart_str *buf)
 {
 	buffer_append_spaces(buf, level + 2);
 	if (key != NULL) {
@@ -455,9 +445,8 @@ static void php_object_element_export(zval *zv, zend_ulong index, zend_string *k
 	smart_str_appendc(buf, ',');
 	smart_str_appendc(buf, '\n');
 }
-/* }}} */
 
-PHPAPI void php_var_export_ex(zval *struc, int level, smart_str *buf) /* {{{ */
+PHPAPI void php_var_export_ex(zval *struc, int level, smart_str *buf)
 {
 	HashTable *myht;
 	char tmp_str[PHP_DOUBLE_MAX_LENGTH];
@@ -590,10 +579,9 @@ again:
 			break;
 	}
 }
-/* }}} */
 
 /* FOR BC reasons, this will always perform and then print */
-PHPAPI void php_var_export(zval *struc, int level) /* {{{ */
+PHPAPI void php_var_export(zval *struc, int level)
 {
 	smart_str buf = {0};
 	php_var_export_ex(struc, level, &buf);
@@ -601,7 +589,6 @@ PHPAPI void php_var_export(zval *struc, int level) /* {{{ */
 	PHPWRITE(ZSTR_VAL(buf.s), ZSTR_LEN(buf.s));
 	smart_str_free(&buf);
 }
-/* }}} */
 
 /* Outputs or returns a string representation of a variable */
 PHP_FUNCTION(var_export)
@@ -626,11 +613,10 @@ PHP_FUNCTION(var_export)
 		smart_str_free(&buf);
 	}
 }
-/* }}} */
 
 static void php_var_serialize_intern(smart_str *buf, zval *struc, php_serialize_data_t var_hash);
 
-static inline zend_long php_add_var_hash(php_serialize_data_t data, zval *var) /* {{{ */
+static inline zend_long php_add_var_hash(php_serialize_data_t data, zval *var)
 {
 	zval *zv;
 	zend_ulong key;
@@ -674,17 +660,15 @@ static inline zend_long php_add_var_hash(php_serialize_data_t data, zval *var) /
 		return 0;
 	}
 }
-/* }}} */
 
-static inline void php_var_serialize_long(smart_str *buf, zend_long val) /* {{{ */
+static inline void php_var_serialize_long(smart_str *buf, zend_long val)
 {
 	smart_str_appendl(buf, "i:", 2);
 	smart_str_append_long(buf, val);
 	smart_str_appendc(buf, ';');
 }
-/* }}} */
 
-static inline void php_var_serialize_string(smart_str *buf, char *str, size_t len) /* {{{ */
+static inline void php_var_serialize_string(smart_str *buf, char *str, size_t len)
 {
 	smart_str_appendl(buf, "s:", 2);
 	smart_str_append_unsigned(buf, len);
@@ -692,9 +676,8 @@ static inline void php_var_serialize_string(smart_str *buf, char *str, size_t le
 	smart_str_appendl(buf, str, len);
 	smart_str_appendl(buf, "\";", 2);
 }
-/* }}} */
 
-static inline zend_bool php_var_serialize_class_name(smart_str *buf, zval *struc) /* {{{ */
+static inline zend_bool php_var_serialize_class_name(smart_str *buf, zval *struc)
 {
 	PHP_CLASS_ATTRIBUTES;
 
@@ -707,9 +690,8 @@ static inline zend_bool php_var_serialize_class_name(smart_str *buf, zval *struc
 	PHP_CLEANUP_CLASS_ATTRIBUTES();
 	return incomplete_class;
 }
-/* }}} */
 
-static int php_var_serialize_call_sleep(zval *retval, zval *struc) /* {{{ */
+static int php_var_serialize_call_sleep(zval *retval, zval *struc)
 {
 	zval fname;
 	int res;
@@ -736,9 +718,8 @@ static int php_var_serialize_call_sleep(zval *retval, zval *struc) /* {{{ */
 
 	return SUCCESS;
 }
-/* }}} */
 
-static int php_var_serialize_call_magic_serialize(zval *retval, zval *obj) /* {{{ */
+static int php_var_serialize_call_magic_serialize(zval *retval, zval *obj)
 {
 	zval fname;
 	int res;
@@ -762,10 +743,9 @@ static int php_var_serialize_call_magic_serialize(zval *retval, zval *obj) /* {{
 
 	return SUCCESS;
 }
-/* }}} */
 
 static int php_var_serialize_try_add_sleep_prop(
-		HashTable *ht, HashTable *props, zend_string *name, zend_string *error_name, zval *struc) /* {{{ */
+		HashTable *ht, HashTable *props, zend_string *name, zend_string *error_name, zval *struc)
 {
 	zval *val = zend_hash_find(props, name);
 	if (val == NULL) {
@@ -792,10 +772,9 @@ static int php_var_serialize_try_add_sleep_prop(
 	Z_TRY_ADDREF_P(val);
 	return SUCCESS;
 }
-/* }}} */
 
 static int php_var_serialize_get_sleep_props(
-		HashTable *ht, zval *struc, HashTable *sleep_retval) /* {{{ */
+		HashTable *ht, zval *struc, HashTable *sleep_retval)
 {
 	zend_class_entry *ce = Z_OBJCE_P(struc);
 	HashTable *props = zend_get_properties_for(struc, ZEND_PROP_PURPOSE_SERIALIZE);
@@ -866,9 +845,8 @@ static int php_var_serialize_get_sleep_props(
 	zend_release_properties(props);
 	return retval;
 }
-/* }}} */
 
-static void php_var_serialize_nested_data(smart_str *buf, zval *struc, HashTable *ht, uint32_t count, zend_bool incomplete_class, php_serialize_data_t var_hash) /* {{{ */
+static void php_var_serialize_nested_data(smart_str *buf, zval *struc, HashTable *ht, uint32_t count, zend_bool incomplete_class, php_serialize_data_t var_hash)
 {
 	smart_str_append_unsigned(buf, count);
 	smart_str_appendl(buf, ":{", 2);
@@ -915,9 +893,8 @@ static void php_var_serialize_nested_data(smart_str *buf, zval *struc, HashTable
 	}
 	smart_str_appendc(buf, '}');
 }
-/* }}} */
 
-static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_ptr, php_serialize_data_t var_hash) /* {{{ */
+static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_ptr, php_serialize_data_t var_hash)
 {
 	HashTable props;
 	if (php_var_serialize_get_sleep_props(&props, struc, HASH_OF(retval_ptr)) == SUCCESS) {
@@ -927,9 +904,8 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 	}
 	zend_hash_destroy(&props);
 }
-/* }}} */
 
-static void php_var_serialize_intern(smart_str *buf, zval *struc, php_serialize_data_t var_hash) /* {{{ */
+static void php_var_serialize_intern(smart_str *buf, zval *struc, php_serialize_data_t var_hash)
 {
 	zend_long var_already;
 	HashTable *myht;
@@ -1107,14 +1083,12 @@ again:
 			return;
 	}
 }
-/* }}} */
 
-PHPAPI void php_var_serialize(smart_str *buf, zval *struc, php_serialize_data_t *data) /* {{{ */
+PHPAPI void php_var_serialize(smart_str *buf, zval *struc, php_serialize_data_t *data)
 {
 	php_var_serialize_intern(buf, struc, *data);
 	smart_str_0(buf);
 }
-/* }}} */
 
 PHPAPI php_serialize_data_t php_var_serialize_init() {
 	struct php_serialize_data *d;
@@ -1171,7 +1145,6 @@ PHP_FUNCTION(serialize)
 		RETURN_EMPTY_STRING();
 	}
 }
-/* }}} */
 
 /* Takes a string representation of variable and recreates it */
 PHP_FUNCTION(unserialize)
@@ -1291,7 +1264,6 @@ cleanup:
 		zend_unwrap_reference(return_value);
 	}
 }
-/* }}} */
 
 /* Returns the allocated by PHP memory */
 PHP_FUNCTION(memory_get_usage) {
@@ -1304,7 +1276,6 @@ PHP_FUNCTION(memory_get_usage) {
 
 	RETURN_LONG(zend_memory_usage(real_usage));
 }
-/* }}} */
 
 /* Returns the peak allocated by PHP memory */
 PHP_FUNCTION(memory_get_peak_usage) {
@@ -1317,7 +1288,6 @@ PHP_FUNCTION(memory_get_peak_usage) {
 
 	RETURN_LONG(zend_memory_peak_usage(real_usage));
 }
-/* }}} */
 
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("unserialize_max_depth", "4096", PHP_INI_ALL, OnUpdateLong, unserialize_max_depth, php_basic_globals, basic_globals)

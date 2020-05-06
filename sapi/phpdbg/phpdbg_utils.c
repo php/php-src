@@ -38,7 +38,7 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
-/* {{{ color structures */
+/* color structures */
 static const phpdbg_color_t colors[] = {
 	PHPDBG_COLOR_D("none",             "0;0"),
 
@@ -67,17 +67,16 @@ static const phpdbg_color_t colors[] = {
 	PHPDBG_COLOR_D("black-bold",       "1;30"),
 	PHPDBG_COLOR_D("black-underline",  "4;30"),
 	PHPDBG_COLOR_END
-}; /* }}} */
+};
 
-/* {{{ */
 static const phpdbg_element_t elements[] = {
 	PHPDBG_ELEMENT_D("prompt", PHPDBG_COLOR_PROMPT),
 	PHPDBG_ELEMENT_D("error", PHPDBG_COLOR_ERROR),
 	PHPDBG_ELEMENT_D("notice", PHPDBG_COLOR_NOTICE),
 	PHPDBG_ELEMENT_END
-}; /* }}} */
+};
 
-PHPDBG_API int phpdbg_is_numeric(const char *str) /* {{{ */
+PHPDBG_API int phpdbg_is_numeric(const char *str)
 {
 	if (!str)
 		return 0;
@@ -89,9 +88,9 @@ PHPDBG_API int phpdbg_is_numeric(const char *str) /* {{{ */
 		return isdigit(*str);
 	}
 	return 0;
-} /* }}} */
+}
 
-PHPDBG_API int phpdbg_is_empty(const char *str) /* {{{ */
+PHPDBG_API int phpdbg_is_empty(const char *str)
 {
 	if (!str)
 		return 1;
@@ -103,14 +102,14 @@ PHPDBG_API int phpdbg_is_empty(const char *str) /* {{{ */
 		return 0;
 	}
 	return 1;
-} /* }}} */
+}
 
-PHPDBG_API int phpdbg_is_addr(const char *str) /* {{{ */
+PHPDBG_API int phpdbg_is_addr(const char *str)
 {
 	return str[0] && str[1] && memcmp(str, "0x", 2) == 0;
-} /* }}} */
+}
 
-PHPDBG_API int phpdbg_is_class_method(const char *str, size_t len, char **class, char **method) /* {{{ */
+PHPDBG_API int phpdbg_is_class_method(const char *str, size_t len, char **class, char **method)
 {
 	char *sep = NULL;
 
@@ -142,9 +141,9 @@ PHPDBG_API int phpdbg_is_class_method(const char *str, size_t len, char **class,
 	}
 
 	return 1;
-} /* }}} */
+}
 
-PHPDBG_API char *phpdbg_resolve_path(const char *path) /* {{{ */
+PHPDBG_API char *phpdbg_resolve_path(const char *path)
 {
 	char resolved_name[MAXPATHLEN];
 
@@ -153,9 +152,9 @@ PHPDBG_API char *phpdbg_resolve_path(const char *path) /* {{{ */
 	}
 
 	return strdup(resolved_name);
-} /* }}} */
+}
 
-PHPDBG_API const char *phpdbg_current_file(void) /* {{{ */
+PHPDBG_API const char *phpdbg_current_file(void)
 {
 	const char *file = zend_get_executed_filename();
 
@@ -164,9 +163,9 @@ PHPDBG_API const char *phpdbg_current_file(void) /* {{{ */
 	}
 
 	return file;
-} /* }}} */
+}
 
-PHPDBG_API const zend_function *phpdbg_get_function(const char *fname, const char *cname) /* {{{ */
+PHPDBG_API const zend_function *phpdbg_get_function(const char *fname, const char *cname)
 {
 	zend_function *func = NULL;
 	zend_string *lfname = zend_string_init(fname, strlen(fname), 0);
@@ -193,9 +192,9 @@ PHPDBG_API const zend_function *phpdbg_get_function(const char *fname, const cha
 
 	zend_string_release(lfname);
 	return func;
-} /* }}} */
+}
 
-PHPDBG_API char *phpdbg_trim(const char *str, size_t len, size_t *new_len) /* {{{ */
+PHPDBG_API char *phpdbg_trim(const char *str, size_t len, size_t *new_len)
 {
 	const char *p = str;
 	char *new = NULL;
@@ -223,9 +222,9 @@ PHPDBG_API char *phpdbg_trim(const char *str, size_t len, size_t *new_len) /* {{
 
 	return new;
 
-} /* }}} */
+}
 
-PHPDBG_API const phpdbg_color_t *phpdbg_get_color(const char *name, size_t name_length) /* {{{ */
+PHPDBG_API const phpdbg_color_t *phpdbg_get_color(const char *name, size_t name_length)
 {
 	const phpdbg_color_t *color = colors;
 
@@ -241,26 +240,26 @@ PHPDBG_API const phpdbg_color_t *phpdbg_get_color(const char *name, size_t name_
 	phpdbg_debug("phpdbg_get_color(%s, %lu): failed", name, name_length);
 
 	return NULL;
-} /* }}} */
+}
 
-PHPDBG_API void phpdbg_set_color(int element, const phpdbg_color_t *color) /* {{{ */
+PHPDBG_API void phpdbg_set_color(int element, const phpdbg_color_t *color)
 {
 	PHPDBG_G(colors)[element] = color;
-} /* }}} */
+}
 
-PHPDBG_API void phpdbg_set_color_ex(int element, const char *name, size_t name_length) /* {{{ */
+PHPDBG_API void phpdbg_set_color_ex(int element, const char *name, size_t name_length)
 {
 	const phpdbg_color_t *color = phpdbg_get_color(name, name_length);
 
 	if (color) {
 		phpdbg_set_color(element, color);
 	} else PHPDBG_G(colors)[element] = colors;
-} /* }}} */
+}
 
-PHPDBG_API const phpdbg_color_t* phpdbg_get_colors(void) /* {{{ */
+PHPDBG_API const phpdbg_color_t* phpdbg_get_colors(void)
 {
 	return colors;
-} /* }}} */
+}
 
 PHPDBG_API int phpdbg_get_element(const char *name, size_t len) {
 	const phpdbg_element_t *element = elements;
@@ -277,7 +276,7 @@ PHPDBG_API int phpdbg_get_element(const char *name, size_t len) {
 	return PHPDBG_COLOR_INVALID;
 }
 
-PHPDBG_API void phpdbg_set_prompt(const char *prompt) /* {{{ */
+PHPDBG_API void phpdbg_set_prompt(const char *prompt)
 {
 	/* free formatted prompt */
 	if (PHPDBG_G(prompt)[1]) {
@@ -292,9 +291,9 @@ PHPDBG_API void phpdbg_set_prompt(const char *prompt) /* {{{ */
 
 	/* copy new prompt */
 	PHPDBG_G(prompt)[0] = strdup(prompt);
-} /* }}} */
+}
 
-PHPDBG_API const char *phpdbg_get_prompt(void) /* {{{ */
+PHPDBG_API const char *phpdbg_get_prompt(void)
 {
 	/* find cached prompt */
 	if (PHPDBG_G(prompt)[1]) {
@@ -315,7 +314,7 @@ PHPDBG_API const char *phpdbg_get_prompt(void) /* {{{ */
 	}
 
 	return PHPDBG_G(prompt)[1];
-} /* }}} */
+}
 
 int phpdbg_rebuild_symtable(void) {
 	if (!EG(current_execute_data) || !EG(current_execute_data)->func) {
@@ -331,7 +330,7 @@ int phpdbg_rebuild_symtable(void) {
 	return SUCCESS;
 }
 
-PHPDBG_API int phpdbg_get_terminal_width(void) /* {{{ */
+PHPDBG_API int phpdbg_get_terminal_width(void)
 {
 	int columns;
 #ifdef _WIN32
@@ -347,9 +346,9 @@ PHPDBG_API int phpdbg_get_terminal_width(void) /* {{{ */
 	columns = 80;
 #endif
 	return columns;
-} /* }}} */
+}
 
-PHPDBG_API int phpdbg_get_terminal_height(void) /* {{{ */
+PHPDBG_API int phpdbg_get_terminal_height(void)
 {
 	int lines;
 #ifdef _WIN32
@@ -365,7 +364,7 @@ PHPDBG_API int phpdbg_get_terminal_height(void) /* {{{ */
 	lines = 40;
 #endif
 	return lines;
-} /* }}} */
+}
 
 PHPDBG_API void phpdbg_set_async_io(int fd) {
 #if !defined(_WIN32) && defined(FASYNC)
@@ -780,7 +779,7 @@ PHPDBG_API zend_bool phpdbg_check_caught_ex(zend_execute_data *execute_data, zen
 	return op->opcode == ZEND_CATCH;
 }
 
-char *phpdbg_short_zval_print(zval *zv, int maxlen) /* {{{ */
+char *phpdbg_short_zval_print(zval *zv, int maxlen)
 {
 	char *decode = NULL;
 
@@ -858,4 +857,4 @@ char *phpdbg_short_zval_print(zval *zv, int maxlen) /* {{{ */
 	}
 
 	return decode;
-} /* }}} */
+}

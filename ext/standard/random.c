@@ -59,7 +59,6 @@ static void random_globals_dtor(php_random_globals *random_globals_p)
 	}
 }
 
-/* {{{ */
 PHP_MINIT_FUNCTION(random)
 {
 #ifdef ZTS
@@ -70,9 +69,7 @@ PHP_MINIT_FUNCTION(random)
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ */
 PHP_MSHUTDOWN_FUNCTION(random)
 {
 #ifndef ZTS
@@ -81,9 +78,8 @@ PHP_MSHUTDOWN_FUNCTION(random)
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ php_random_bytes */
+/* php_random_bytes */
 PHPAPI int php_random_bytes(void *bytes, size_t size, zend_bool should_throw)
 {
 #ifdef PHP_WIN32
@@ -191,7 +187,6 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, zend_bool should_throw)
 
 	return SUCCESS;
 }
-/* }}} */
 
 /* Return an arbitrary length of pseudo-random bytes as binary string */
 PHP_FUNCTION(random_bytes)
@@ -219,9 +214,7 @@ PHP_FUNCTION(random_bytes)
 
 	RETURN_STR(bytes);
 }
-/* }}} */
 
-/* {{{ */
 PHPAPI int php_random_int(zend_long min, zend_long max, zend_long *result, zend_bool should_throw)
 {
 	zend_ulong umax;
@@ -263,7 +256,6 @@ PHPAPI int php_random_int(zend_long min, zend_long max, zend_long *result, zend_
 	*result = (zend_long)((trial % umax) + min);
 	return SUCCESS;
 }
-/* }}} */
 
 /* Return an arbitrary pseudo-random integer */
 PHP_FUNCTION(random_int)
@@ -288,4 +280,4 @@ PHP_FUNCTION(random_int)
 
 	RETURN_LONG(result);
 }
-/* }}} */
+

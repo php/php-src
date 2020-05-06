@@ -352,8 +352,6 @@ PHP_FUNCTION(mail)
 		efree(subject_r);
 	}
 }
-/* }}} */
-
 
 void php_mail_log_crlf_to_spaces(char *message) {
 	/* Find all instances of carriage returns or line feeds and
@@ -422,7 +420,7 @@ static int php_mail_detect_multiple_crlf(char *hdr) {
 }
 
 
-/* {{{ php_mail
+/* php_mail
  */
 PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char *extra_cmd)
 {
@@ -600,9 +598,8 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 
 	MAIL_RET(1); /* never reached */
 }
-/* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
+/* PHP_MINFO_FUNCTION
  */
 PHP_MINFO_FUNCTION(mail)
 {
@@ -618,4 +615,4 @@ PHP_MINFO_FUNCTION(mail)
 	php_info_print_table_row(2, "Path to sendmail", sendmail_path);
 #endif
 }
-/* }}} */
+

@@ -45,7 +45,6 @@ PHP_FUNCTION(unixtojd)
 
 	RETURN_LONG(GregorianToSdn(ta->tm_year+1900, ta->tm_mon+1, ta->tm_mday));
 }
-/* }}} */
 
 /* Convert Julian Day to UNIX timestamp */
 PHP_FUNCTION(jdtounix)
@@ -64,4 +63,4 @@ PHP_FUNCTION(jdtounix)
 
 	RETURN_LONG(uday * 24 * 3600);
 }
-/* }}} */
+

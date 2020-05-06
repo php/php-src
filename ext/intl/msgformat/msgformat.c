@@ -24,7 +24,6 @@
 #include "msgformat_data.h"
 #include "intl_convert.h"
 
-/* {{{ */
 static int msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 {
 	const char* locale;
@@ -83,11 +82,8 @@ static int msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	INTL_CTOR_CHECK_STATUS(mfo, "msgfmt_create: message formatter creation failed");
 	return SUCCESS;
 }
-/* }}} */
 
-/* Create formatter. }}} */
-/* Create formatter.
- */
+/* Create formatter. */
 PHP_FUNCTION( msgfmt_create )
 {
 	object_init_ex( return_value, MessageFormatter_ce_ptr );
@@ -96,7 +92,6 @@ PHP_FUNCTION( msgfmt_create )
 		RETURN_NULL();
 	}
 }
-/* }}} */
 
 /* MessageFormatter object constructor.
  */
@@ -113,11 +108,8 @@ PHP_METHOD( MessageFormatter, __construct )
 	}
 	zend_restore_error_handling(&error_handling);
 }
-/* }}} */
 
-/* Get formatter's last error code. }}} */
-/* Get formatter's last error code.
- */
+/* Get formatter's last error code. */
 PHP_FUNCTION( msgfmt_get_error_code )
 {
 	zval*                    object  = NULL;
@@ -135,11 +127,8 @@ PHP_FUNCTION( msgfmt_get_error_code )
 	/* Return formatter's last error code. */
 	RETURN_LONG( INTL_DATA_ERROR_CODE(mfo) );
 }
-/* }}} */
 
-/* Get text description for formatter's last error code. }}} */
-/* Get text description for formatter's last error code.
- */
+/* Get text description for formatter's last error code. */
 PHP_FUNCTION( msgfmt_get_error_message )
 {
 	zend_string*             message = NULL;
@@ -159,4 +148,4 @@ PHP_FUNCTION( msgfmt_get_error_message )
 	message = intl_error_get_message( &mfo->mf_data.error );
 	RETURN_STR(message);
 }
-/* }}} */
+

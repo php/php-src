@@ -40,7 +40,7 @@
 	  RETURN_FALSE;	\
   }	\
 
-static inline int rewrite_name_to_position(pdo_stmt_t *stmt, struct pdo_bound_param_data *param) /* {{{ */
+static inline int rewrite_name_to_position(pdo_stmt_t *stmt, struct pdo_bound_param_data *param)
 {
 	if (stmt->bound_param_map) {
 		/* rewriting :name to ? style.
@@ -83,10 +83,9 @@ static inline int rewrite_name_to_position(pdo_stmt_t *stmt, struct pdo_bound_pa
 	}
 	return 1;
 }
-/* }}} */
 
 /* trigger callback hook for parameters */
-static int dispatch_param_event(pdo_stmt_t *stmt, enum pdo_param_event event_type) /* {{{ */
+static int dispatch_param_event(pdo_stmt_t *stmt, enum pdo_param_event event_type)
 {
 	int ret = 1, is_param = 1;
 	struct pdo_bound_param_data *param;
@@ -115,9 +114,8 @@ iterate:
 
 	return ret;
 }
-/* }}} */
 
-int pdo_stmt_describe_columns(pdo_stmt_t *stmt) /* {{{ */
+int pdo_stmt_describe_columns(pdo_stmt_t *stmt)
 {
 	int col;
 
@@ -163,9 +161,8 @@ int pdo_stmt_describe_columns(pdo_stmt_t *stmt) /* {{{ */
 	}
 	return 1;
 }
-/* }}} */
 
-static void get_lazy_object(pdo_stmt_t *stmt, zval *return_value) /* {{{ */
+static void get_lazy_object(pdo_stmt_t *stmt, zval *return_value)
 {
 	if (Z_ISUNDEF(stmt->lazy_object_ref)) {
 		pdo_row_t *row = ecalloc(1, sizeof(pdo_row_t));
@@ -178,9 +175,8 @@ static void get_lazy_object(pdo_stmt_t *stmt, zval *return_value) /* {{{ */
 	}
 	ZVAL_COPY(return_value, &stmt->lazy_object_ref);
 }
-/* }}} */
 
-static void param_dtor(zval *el) /* {{{ */
+static void param_dtor(zval *el)
 {
 	struct pdo_bound_param_data *param = (struct pdo_bound_param_data *)Z_PTR_P(el);
 
@@ -202,9 +198,8 @@ static void param_dtor(zval *el) /* {{{ */
 	}
 	efree(param);
 }
-/* }}} */
 
-static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_stmt_t *stmt, int is_param) /* {{{ */
+static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_stmt_t *stmt, int is_param)
 {
 	HashTable *hash;
 	zval *parameter;
@@ -341,7 +336,6 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 	}
 	return 1;
 }
-/* }}} */
 
 /* Execute a prepared statement, optionally binding parameters */
 PHP_METHOD(PDOStatement, execute)
@@ -450,9 +444,8 @@ PHP_METHOD(PDOStatement, execute)
 	PDO_HANDLE_STMT_ERR();
 	RETURN_FALSE;
 }
-/* }}} */
 
-static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno, int *type_override) /* {{{ */
+static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno, int *type_override)
 {
 	struct pdo_column_data *col;
 	char *value = NULL;
@@ -591,9 +584,8 @@ static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno, int *typ
 		ZVAL_EMPTY_STRING(dest);
 	}
 }
-/* }}} */
 
-static int do_fetch_common(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori, zend_long offset, int do_bind) /* {{{ */
+static int do_fetch_common(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori, zend_long offset, int do_bind)
 {
 	if (!stmt->executed) {
 		return 0;
@@ -642,9 +634,8 @@ static int do_fetch_common(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori, zen
 
 	return 1;
 }
-/* }}} */
 
-static int do_fetch_class_prepare(pdo_stmt_t *stmt) /* {{{ */
+static int do_fetch_class_prepare(pdo_stmt_t *stmt)
 {
 	zend_class_entry *ce = stmt->fetch.cls.ce;
 	zend_fcall_info *fci = &stmt->fetch.cls.fci;
@@ -676,9 +667,8 @@ static int do_fetch_class_prepare(pdo_stmt_t *stmt) /* {{{ */
 		return 1; /* no ctor no args is also ok */
 	}
 }
-/* }}} */
 
-static int make_callable_ex(pdo_stmt_t *stmt, zval *callable, zend_fcall_info * fci, zend_fcall_info_cache * fcc, int num_args) /* {{{ */
+static int make_callable_ex(pdo_stmt_t *stmt, zval *callable, zend_fcall_info * fci, zend_fcall_info_cache * fcc, int num_args)
 {
 	char *is_callable_error = NULL;
 
@@ -701,9 +691,8 @@ static int make_callable_ex(pdo_stmt_t *stmt, zval *callable, zend_fcall_info * 
 
 	return 1;
 }
-/* }}} */
 
-static int do_fetch_func_prepare(pdo_stmt_t *stmt) /* {{{ */
+static int do_fetch_func_prepare(pdo_stmt_t *stmt)
 {
 	zend_fcall_info *fci = &stmt->fetch.cls.fci;
 	zend_fcall_info_cache *fcc = &stmt->fetch.cls.fcc;
@@ -715,9 +704,8 @@ static int do_fetch_func_prepare(pdo_stmt_t *stmt) /* {{{ */
 		return 1;
 	}
 }
-/* }}} */
 
-static void do_fetch_opt_finish(pdo_stmt_t *stmt, int free_ctor_agrs) /* {{{ */
+static void do_fetch_opt_finish(pdo_stmt_t *stmt, int free_ctor_agrs)
 {
 	/* fci.size is used to check if it is valid */
 	if (stmt->fetch.cls.fci.size && stmt->fetch.cls.fci.params) {
@@ -741,11 +729,10 @@ static void do_fetch_opt_finish(pdo_stmt_t *stmt, int free_ctor_agrs) /* {{{ */
 		stmt->fetch.func.values = NULL;
 	}
 }
-/* }}} */
 
 /* perform a fetch.  If do_bind is true, update any bound columns.
  * If return_value is not null, store values into it according to HOW. */
-static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value, enum pdo_fetch_type how, enum pdo_fetch_orientation ori, zend_long offset, zval *return_all) /* {{{ */
+static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value, enum pdo_fetch_type how, enum pdo_fetch_orientation ori, zend_long offset, zval *return_all)
 {
 	int flags, idx, old_arg_count = 0;
 	zend_class_entry *ce = NULL, *old_ce = NULL;
@@ -1112,9 +1099,8 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value, enum pdo_
 
 	return 1;
 }
-/* }}} */
 
-static int pdo_stmt_verify_mode(pdo_stmt_t *stmt, zend_long mode, int fetch_all) /* {{{ */
+static int pdo_stmt_verify_mode(pdo_stmt_t *stmt, zend_long mode, int fetch_all)
 {
 	int flags = mode & PDO_FETCH_FLAGS;
 
@@ -1163,7 +1149,6 @@ static int pdo_stmt_verify_mode(pdo_stmt_t *stmt, zend_long mode, int fetch_all)
 			return 1;
 	}
 }
-/* }}} */
 
 /* Fetches the next row and returns it, or false if there are no more rows */
 PHP_METHOD(PDOStatement, fetch)
@@ -1191,7 +1176,6 @@ PHP_METHOD(PDOStatement, fetch)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Fetches the next row and returns it as an object. */
 PHP_METHOD(PDOStatement, fetchObject)
@@ -1257,7 +1241,6 @@ PHP_METHOD(PDOStatement, fetchObject)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Returns a data of the specified column in the result set. */
 PHP_METHOD(PDOStatement, fetchColumn)
@@ -1279,7 +1262,6 @@ PHP_METHOD(PDOStatement, fetchColumn)
 
 	fetch_value(stmt, return_value, col_n, NULL);
 }
-/* }}} */
 
 /* Returns an array of all of the results. */
 PHP_METHOD(PDOStatement, fetchAll)
@@ -1442,9 +1424,8 @@ PHP_METHOD(PDOStatement, fetchAll)
 		}
 	}
 }
-/* }}} */
 
-static int register_bound_param(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, int is_param) /* {{{ */
+static int register_bound_param(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, int is_param)
 {
 	struct pdo_bound_param_data param;
 	zend_long param_type = PDO_PARAM_STR;
@@ -1484,7 +1465,7 @@ static int register_bound_param(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, 
 		return 0;
 	}
 	return 1;
-} /* }}} */
+}
 
 /* bind an input parameter to the value of a PHP variable.  $paramno is the 1-based position of the placeholder in the SQL statement (but can be the parameter name for drivers that support named placeholders).  It should be called prior to execute(). */
 PHP_METHOD(PDOStatement, bindValue)
@@ -1524,7 +1505,6 @@ PHP_METHOD(PDOStatement, bindValue)
 	}
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* bind a parameter to a PHP variable.  $paramno is the 1-based position of the placeholder in the SQL statement (but can be the parameter name for drivers that support named placeholders).  This isn't supported by all drivers.  It should be called prior to execute(). */
 PHP_METHOD(PDOStatement, bindParam)
@@ -1532,7 +1512,6 @@ PHP_METHOD(PDOStatement, bindParam)
 	PHP_STMT_GET_OBJ;
 	RETURN_BOOL(register_bound_param(INTERNAL_FUNCTION_PARAM_PASSTHRU, stmt, TRUE));
 }
-/* }}} */
 
 /* bind a column to a PHP variable.  On each row fetch $param will contain the value of the corresponding column.  $column is the 1-based offset of the column, or the column name.  For portability, don't call this before execute(). */
 PHP_METHOD(PDOStatement, bindColumn)
@@ -1540,7 +1519,6 @@ PHP_METHOD(PDOStatement, bindColumn)
 	PHP_STMT_GET_OBJ;
 	RETURN_BOOL(register_bound_param(INTERNAL_FUNCTION_PARAM_PASSTHRU, stmt, 0));
 }
-/* }}} */
 
 /* Returns the number of rows in a result set, or the number of rows affected by the last execute().  It is not always meaningful. */
 PHP_METHOD(PDOStatement, rowCount)
@@ -1551,7 +1529,6 @@ PHP_METHOD(PDOStatement, rowCount)
 
 	RETURN_LONG(stmt->row_count);
 }
-/* }}} */
 
 /* Fetch the error code associated with the last operation on the statement handle */
 PHP_METHOD(PDOStatement, errorCode)
@@ -1566,7 +1543,6 @@ PHP_METHOD(PDOStatement, errorCode)
 
 	RETURN_STRING(stmt->error_code);
 }
-/* }}} */
 
 /* Fetch extended error information associated with the last operation on the statement handle */
 PHP_METHOD(PDOStatement, errorInfo)
@@ -1597,7 +1573,6 @@ PHP_METHOD(PDOStatement, errorInfo)
 		}
 	}
 }
-/* }}} */
 
 /* Set an attribute */
 PHP_METHOD(PDOStatement, setAttribute)
@@ -1628,7 +1603,6 @@ fail:
 	}
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* Get an attribute */
 
@@ -1679,7 +1653,6 @@ PHP_METHOD(PDOStatement, getAttribute)
 			return;
 	}
 }
-/* }}} */
 
 /* Returns the number of columns in the result set */
 PHP_METHOD(PDOStatement, columnCount)
@@ -1690,7 +1663,6 @@ PHP_METHOD(PDOStatement, columnCount)
 
 	RETURN_LONG(stmt->column_count);
 }
-/* }}} */
 
 /* Returns meta data for a numbered column */
 PHP_METHOD(PDOStatement, getColumnMeta)
@@ -1729,7 +1701,6 @@ PHP_METHOD(PDOStatement, getColumnMeta)
 		add_assoc_long(return_value, "pdo_type", col->param_type);
 	}
 }
-/* }}} */
 
 /* Changes the default fetch mode for subsequent fetches (params have different meaning for different fetch modes) */
 
@@ -1910,7 +1881,6 @@ PHP_METHOD(PDOStatement, setFetchMode)
 			stmt, 0) == SUCCESS
 		);
 }
-/* }}} */
 
 /* Advances to the next rowset in a multi-rowset statement handle. Returns true if it succeeded, false otherwise */
 
@@ -1962,7 +1932,6 @@ PHP_METHOD(PDOStatement, nextRowset)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Closes the cursor, leaving the statement ready for re-execution. */
 PHP_METHOD(PDOStatement, closeCursor)
@@ -1998,7 +1967,6 @@ PHP_METHOD(PDOStatement, closeCursor)
 	stmt->executed = 0;
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* A utility for internals hackers to debug parameter internals */
 PHP_METHOD(PDOStatement, debugDumpParams)
@@ -2058,9 +2026,8 @@ PHP_METHOD(PDOStatement, debugDumpParams)
 
 	php_stream_close(out);
 }
-/* }}} */
 
-/* {{{ overloaded handlers for PDOStatement class */
+/* overloaded handlers for PDOStatement class */
 static zval *dbstmt_prop_write(zend_object *object, zend_string *name, zval *value, void **cache_slot)
 {
 	pdo_stmt_t *stmt = php_pdo_stmt_fetch_object(object);
@@ -2203,9 +2170,8 @@ zend_object *pdo_dbstmt_new(zend_class_entry *ce)
 
 	return &stmt->std;
 }
-/* }}} */
 
-/* {{{ statement iterator */
+/* statement iterator */
 
 struct php_pdo_iterator {
 	zend_object_iterator iter;
@@ -2312,9 +2278,8 @@ zend_object_iterator *pdo_stmt_iter_get(zend_class_entry *ce, zval *object, int 
 	return &I->iter;
 }
 
-/* }}} */
 
-/* {{{ overloaded handlers for PDORow class (used by PDO_FETCH_LAZY) */
+/* overloaded handlers for PDORow class (used by PDO_FETCH_LAZY) */
 
 static zval *row_prop_read(zend_object *object, zend_string *name, int type, void **cache_slot, zval *rv)
 {

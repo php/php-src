@@ -28,14 +28,13 @@ static zend_object_handlers IntlDateFormatter_handlers;
  * Auxiliary functions needed by objects of 'IntlDateFormatter' class
  */
 
-/* {{{ IntlDateFormatter_objects_dtor */
+/* IntlDateFormatter_objects_dtor */
 static void IntlDateFormatter_object_dtor(zend_object *object )
 {
 	zend_objects_destroy_object( object );
 }
-/* }}} */
 
-/* {{{ IntlDateFormatter_objects_free */
+/* IntlDateFormatter_objects_free */
 void IntlDateFormatter_object_free( zend_object *object )
 {
 	IntlDateFormatter_object* dfo = php_intl_dateformatter_fetch_object(object);
@@ -48,9 +47,8 @@ void IntlDateFormatter_object_free( zend_object *object )
 
 	dateformat_data_free( &dfo->datef_data );
 }
-/* }}} */
 
-/* {{{ IntlDateFormatter_object_create */
+/* IntlDateFormatter_object_create */
 zend_object *IntlDateFormatter_object_create(zend_class_entry *ce)
 {
 	IntlDateFormatter_object*     intern;
@@ -68,9 +66,8 @@ zend_object *IntlDateFormatter_object_create(zend_class_entry *ce)
 
 	return &intern->zo;
 }
-/* }}} */
 
-/* {{{ IntlDateFormatter_object_clone */
+/* IntlDateFormatter_object_clone */
 zend_object *IntlDateFormatter_object_clone(zend_object *object)
 {
 	IntlDateFormatter_object *dfo, *new_dfo;
@@ -96,13 +93,12 @@ zend_object *IntlDateFormatter_object_clone(zend_object *object)
 	}
 	return new_obj;
 }
-/* }}} */
 
 /*
  * 'IntlDateFormatter' class registration structures & functions
  */
 
-/* {{{ dateformat_register_class
+/* dateformat_register_class
  * Initialize 'IntlDateFormatter' class
  */
 void dateformat_register_IntlDateFormatter_class( void )
@@ -121,4 +117,4 @@ void dateformat_register_IntlDateFormatter_class( void )
 	IntlDateFormatter_handlers.dtor_obj = IntlDateFormatter_object_dtor;
 	IntlDateFormatter_handlers.free_obj = IntlDateFormatter_object_free;
 }
-/* }}} */
+

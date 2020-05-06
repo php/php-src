@@ -58,7 +58,7 @@ static php_stream *oci_create_lob_stream(zval *dbh, pdo_stmt_t *stmt, OCILobLoca
 			OCILobFreeTemporary(svchp, errhp, lob);				\
 	} while(0)
 
-static int oci_stmt_dtor(pdo_stmt_t *stmt) /* {{{ */
+static int oci_stmt_dtor(pdo_stmt_t *stmt)
 {
 	pdo_oci_stmt *S = (pdo_oci_stmt*)stmt->driver_data;
 	HashTable *BC = stmt->bound_columns;
@@ -121,9 +121,9 @@ static int oci_stmt_dtor(pdo_stmt_t *stmt) /* {{{ */
 	stmt->driver_data = NULL;
 
 	return 1;
-} /* }}} */
+}
 
-static int oci_stmt_execute(pdo_stmt_t *stmt) /* {{{ */
+static int oci_stmt_execute(pdo_stmt_t *stmt)
 {
 	pdo_oci_stmt *S = (pdo_oci_stmt*)stmt->driver_data;
 	ub4 rowcount;
@@ -189,9 +189,9 @@ static int oci_stmt_execute(pdo_stmt_t *stmt) /* {{{ */
 	stmt->row_count = (long)rowcount;
 
 	return 1;
-} /* }}} */
+}
 
-static sb4 oci_bind_input_cb(dvoid *ctx, OCIBind *bindp, ub4 iter, ub4 index, dvoid **bufpp, ub4 *alenp, ub1 *piecep, dvoid **indpp) /* {{{ */
+static sb4 oci_bind_input_cb(dvoid *ctx, OCIBind *bindp, ub4 iter, ub4 index, dvoid **bufpp, ub4 *alenp, ub1 *piecep, dvoid **indpp)
 {
 	struct pdo_bound_param_data *param = (struct pdo_bound_param_data*)ctx;
 	pdo_oci_bound_param *P = (pdo_oci_bound_param*)param->driver_data;
@@ -228,9 +228,9 @@ static sb4 oci_bind_input_cb(dvoid *ctx, OCIBind *bindp, ub4 iter, ub4 index, dv
 
 	*piecep = OCI_ONE_PIECE;
 	return OCI_CONTINUE;
-} /* }}} */
+}
 
-static sb4 oci_bind_output_cb(dvoid *ctx, OCIBind *bindp, ub4 iter, ub4 index, dvoid **bufpp, ub4 **alenpp, ub1 *piecep, dvoid **indpp, ub2 **rcodepp) /* {{{ */
+static sb4 oci_bind_output_cb(dvoid *ctx, OCIBind *bindp, ub4 iter, ub4 index, dvoid **bufpp, ub4 **alenpp, ub1 *piecep, dvoid **indpp, ub2 **rcodepp)
 {
 	struct pdo_bound_param_data *param = (struct pdo_bound_param_data*)ctx;
 	pdo_oci_bound_param *P = (pdo_oci_bound_param*)param->driver_data;
@@ -273,9 +273,9 @@ static sb4 oci_bind_output_cb(dvoid *ctx, OCIBind *bindp, ub4 iter, ub4 index, d
 	*indpp = &P->indicator;
 
 	return OCI_CONTINUE;
-} /* }}} */
+}
 
-static int oci_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *param, enum pdo_param_event event_type) /* {{{ */
+static int oci_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *param, enum pdo_param_event event_type)
 {
 	pdo_oci_stmt *S = (pdo_oci_stmt*)stmt->driver_data;
 
@@ -454,9 +454,9 @@ static int oci_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *pa
 	}
 
 	return 1;
-} /* }}} */
+}
 
-static int oci_stmt_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori,	zend_long offset) /* {{{ */
+static int oci_stmt_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori,	zend_long offset)
 {
 #if HAVE_OCISTMTFETCH2
 	ub4 ociori;
@@ -494,7 +494,7 @@ static int oci_stmt_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori,	zend
 	oci_stmt_error("OCIStmtFetch");
 
 	return 0;
-} /* }}} */
+}
 
 static sb4 oci_define_callback(dvoid *octxp, OCIDefine *define, ub4 iter, dvoid **bufpp,
 		ub4 **alenpp, ub1 *piecep, dvoid **indpp, ub2 **rcodepp)
@@ -519,7 +519,7 @@ static sb4 oci_define_callback(dvoid *octxp, OCIDefine *define, ub4 iter, dvoid 
 	return OCI_CONTINUE;
 }
 
-static int oci_stmt_describe(pdo_stmt_t *stmt, int colno) /* {{{ */
+static int oci_stmt_describe(pdo_stmt_t *stmt, int colno)
 {
 	pdo_oci_stmt *S = (pdo_oci_stmt*)stmt->driver_data;
 	OCIParam *param = NULL;
@@ -615,7 +615,7 @@ static int oci_stmt_describe(pdo_stmt_t *stmt, int colno) /* {{{ */
 	}
 
 	return 1;
-} /* }}} */
+}
 
 struct _oci_lob_env {
 	OCISvcCtx *svc;
@@ -752,7 +752,7 @@ static php_stream *oci_create_lob_stream(zval *dbh, pdo_stmt_t *stmt, OCILobLoca
 	return NULL;
 }
 
-static int oci_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, size_t *len, int *caller_frees) /* {{{ */
+static int oci_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, size_t *len, int *caller_frees)
 {
 	pdo_oci_stmt *S = (pdo_oci_stmt*)stmt->driver_data;
 	pdo_oci_column *C = &S->cols[colno];
@@ -786,10 +786,10 @@ static int oci_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, size_t *len
 		*len = (size_t) C->fetched_len;
 		return 1;
 	}
-} /* }}} */
+}
 
 
-static int oci_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_value) /* {{{ */
+static int oci_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_value)
 {
 	pdo_oci_stmt *S = (pdo_oci_stmt*)stmt->driver_data;
 	OCIParam *param = NULL;
@@ -979,7 +979,7 @@ static int oci_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_val
 
 	OCIDescriptorFree(param, OCI_DTYPE_PARAM);
 	return SUCCESS;
-} /* }}} */
+}
 
 const struct pdo_stmt_methods oci_stmt_methods = {
 	oci_stmt_dtor,

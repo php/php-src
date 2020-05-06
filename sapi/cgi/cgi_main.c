@@ -172,7 +172,7 @@ typedef struct _php_cgi_globals_struct {
 #endif
 } php_cgi_globals_struct;
 
-/* {{{ user_config_cache
+/* user_config_cache
  *
  * Key for each cache entry is dirname(PATH_TRANSLATED).
  *
@@ -193,7 +193,6 @@ static void user_config_cache_entry_dtor(zval *el)
 	free(entry->user_config);
 	free(entry);
 }
-/* }}} */
 
 #ifdef ZTS
 static int php_cgi_globals_id;
@@ -773,7 +772,7 @@ static void sapi_cgi_log_message(char *message, int syslog_type_int)
 	}
 }
 
-/* {{{ php_cgi_ini_activate_user_config
+/* php_cgi_ini_activate_user_config
  */
 static void php_cgi_ini_activate_user_config(char *path, size_t path_len, const char *doc_root, size_t doc_root_len)
 {
@@ -848,7 +847,6 @@ static void php_cgi_ini_activate_user_config(char *path, size_t path_len, const 
 	/* Activate ini entries with values from the user config hash */
 	php_ini_activate_config(entry->user_config, PHP_INI_PERDIR, PHP_INI_STAGE_HTACCESS);
 }
-/* }}} */
 
 static int sapi_cgi_activate(void)
 {
@@ -969,7 +967,7 @@ static int php_cgi_startup(sapi_module_struct *sapi_module)
 	return SUCCESS;
 }
 
-/* {{{ sapi_module_struct cgi_sapi_module
+/* sapi_module_struct cgi_sapi_module
  */
 static sapi_module_struct cgi_sapi_module = {
 	"cgi-fcgi",						/* name */
@@ -1002,20 +1000,18 @@ static sapi_module_struct cgi_sapi_module = {
 
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
-/* }}} */
 
-/* {{{ arginfo ext/standard/dl.c */
+/* arginfo ext/standard/dl.c */
 ZEND_BEGIN_ARG_INFO(arginfo_dl, 0)
 	ZEND_ARG_INFO(0, extension_filename)
 ZEND_END_ARG_INFO()
-/* }}} */
 
 static const zend_function_entry additional_functions[] = {
 	ZEND_FE(dl, arginfo_dl)
 	PHP_FE_END
 };
 
-/* {{{ php_cgi_usage
+/* php_cgi_usage
  */
 static void php_cgi_usage(char *argv0)
 {
@@ -1050,9 +1046,8 @@ static void php_cgi_usage(char *argv0)
 				"  -T <count>       Measure execution time of script repeated <count> times.\n",
 				prog, prog);
 }
-/* }}} */
 
-/* {{{ is_valid_path
+/* is_valid_path
  *
  * some server configurations allow '..' to slip through in the
  * translated path.   We'll just refuse to handle such a path.
@@ -1084,7 +1079,6 @@ static int is_valid_path(const char *path)
 	}
 	return 1;
 }
-/* }}} */
 
 #define CGI_GETENV(name) \
 	((has_env) ? \
@@ -1096,7 +1090,7 @@ static int is_valid_path(const char *path)
 		FCGI_PUTENV(request, name, value) : \
 		_sapi_cgi_putenv(name, sizeof(name)-1, value))
 
-/* {{{ init_request_info
+/* init_request_info
 
   initializes request_info structure
 
@@ -1455,7 +1449,6 @@ static void init_request_info(fcgi_request *request)
 		php_handle_auth_data(auth);
 	}
 }
-/* }}} */
 
 #ifndef PHP_WIN32
 /**
@@ -1521,7 +1514,7 @@ PHP_INI_BEGIN()
 #endif
 PHP_INI_END()
 
-/* {{{ php_cgi_globals_ctor
+/* php_cgi_globals_ctor
  */
 static void php_cgi_globals_ctor(php_cgi_globals_struct *php_cgi_globals)
 {
@@ -1541,18 +1534,16 @@ static void php_cgi_globals_ctor(php_cgi_globals_struct *php_cgi_globals)
 #endif
 	zend_hash_init(&php_cgi_globals->user_config_cache, 8, NULL, user_config_cache_entry_dtor, 1);
 }
-/* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION
+/* PHP_MINIT_FUNCTION
  */
 static PHP_MINIT_FUNCTION(cgi)
 {
 	REGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_MSHUTDOWN_FUNCTION
+/* PHP_MSHUTDOWN_FUNCTION
  */
 static PHP_MSHUTDOWN_FUNCTION(cgi)
 {
@@ -1561,17 +1552,15 @@ static PHP_MSHUTDOWN_FUNCTION(cgi)
 	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
+/* PHP_MINFO_FUNCTION
  */
 static PHP_MINFO_FUNCTION(cgi)
 {
 	DISPLAY_INI_ENTRIES();
 }
-/* }}} */
 
-PHP_FUNCTION(apache_child_terminate) /* {{{ */
+PHP_FUNCTION(apache_child_terminate)
 {
 	if (zend_parse_parameters_none()) {
 		RETURN_THROWS();
@@ -1580,10 +1569,8 @@ PHP_FUNCTION(apache_child_terminate) /* {{{ */
 		fcgi_terminate();
 	}
 }
-/* }}} */
 
-
-PHP_FUNCTION(apache_request_headers) /* {{{ */
+PHP_FUNCTION(apache_request_headers)
 {
 	if (zend_parse_parameters_none()) {
 		RETURN_THROWS();
@@ -1664,9 +1651,8 @@ PHP_FUNCTION(apache_request_headers) /* {{{ */
 		}
 	}
 }
-/* }}} */
 
-static void add_response_header(sapi_header_struct *h, zval *return_value) /* {{{ */
+static void add_response_header(sapi_header_struct *h, zval *return_value)
 {
 	if (h->header_len > 0) {
 		char *s;
@@ -1694,9 +1680,8 @@ static void add_response_header(sapi_header_struct *h, zval *return_value) /* {{
 		}
 	}
 }
-/* }}} */
 
-PHP_FUNCTION(apache_response_headers) /* {{{ */
+PHP_FUNCTION(apache_response_headers)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
@@ -1705,7 +1690,6 @@ PHP_FUNCTION(apache_response_headers) /* {{{ */
 	array_init(return_value);
 	zend_llist_apply_with_argument(&SG(sapi_headers).headers, (llist_apply_with_arg_func_t)add_response_header, return_value);
 }
-/* }}} */
 
 ZEND_BEGIN_ARG_INFO(arginfo_no_args, 0)
 ZEND_END_ARG_INFO()
@@ -1731,7 +1715,7 @@ static zend_module_entry cgi_module_entry = {
 	STANDARD_MODULE_PROPERTIES
 };
 
-/* {{{ main
+/* main
  */
 int main(int argc, char *argv[])
 {
@@ -2701,4 +2685,4 @@ parent_out:
 
 	return exit_status;
 }
-/* }}} */
+

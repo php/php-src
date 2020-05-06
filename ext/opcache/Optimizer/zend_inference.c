@@ -169,7 +169,7 @@ static inline zend_bool sub_will_overflow(zend_long a, zend_long b) {
 }
 #endif
 
-static void zend_ssa_check_scc_var(const zend_op_array *op_array, zend_ssa *ssa, int var, int *index, int *dfs, int *root, zend_worklist_stack *stack) /* {{{ */
+static void zend_ssa_check_scc_var(const zend_op_array *op_array, zend_ssa *ssa, int var, int *index, int *dfs, int *root, zend_worklist_stack *stack)
 {
 #ifdef SYM_RANGE
 	zend_ssa_phi *p;
@@ -205,9 +205,8 @@ static void zend_ssa_check_scc_var(const zend_op_array *op_array, zend_ssa *ssa,
 		zend_worklist_stack_push(stack, var);
 	}
 }
-/* }}} */
 
-int zend_ssa_find_sccs(const zend_op_array *op_array, zend_ssa *ssa) /* {{{ */
+int zend_ssa_find_sccs(const zend_op_array *op_array, zend_ssa *ssa)
 {
 	int index = 0, *dfs, *root;
 	zend_worklist_stack stack;
@@ -251,9 +250,8 @@ int zend_ssa_find_sccs(const zend_op_array *op_array, zend_ssa *ssa) /* {{{ */
 
 	return SUCCESS;
 }
-/* }}} */
 
-int zend_ssa_find_false_dependencies(const zend_op_array *op_array, zend_ssa *ssa) /* {{{ */
+int zend_ssa_find_false_dependencies(const zend_op_array *op_array, zend_ssa *ssa)
 {
 	zend_ssa_var *ssa_vars = ssa->vars;
 	zend_ssa_op *ssa_ops = ssa->ops;
@@ -308,7 +306,6 @@ int zend_ssa_find_false_dependencies(const zend_op_array *op_array, zend_ssa *ss
 
 	return SUCCESS;
 }
-/* }}} */
 
 /* From "Hacker's Delight" */
 zend_ulong minOR(zend_ulong a, zend_ulong b, zend_ulong c, zend_ulong d)
@@ -1723,7 +1720,7 @@ static void zend_infer_ranges_warmup(const zend_op_array *op_array, zend_ssa *ss
 	free_alloca(worklist, use_heap);
 }
 
-static int zend_infer_ranges(const zend_op_array *op_array, zend_ssa *ssa) /* {{{ */
+static int zend_infer_ranges(const zend_op_array *op_array, zend_ssa *ssa)
 {
 	int worklist_len = zend_bitset_len(ssa->vars_count);
 	zend_bitset worklist;
@@ -1833,7 +1830,6 @@ static int zend_infer_ranges(const zend_op_array *op_array, zend_ssa *ssa) /* {{
 
 	return SUCCESS;
 }
-/* }}} */
 
 static uint32_t get_ssa_alias_types(zend_ssa_alias_kind alias) {
 	if (alias == HTTP_RESPONSE_HEADER_ALIAS) {
@@ -4160,7 +4156,7 @@ static int zend_infer_types(const zend_op_array *op_array, const zend_script *sc
 	return SUCCESS;
 }
 
-int zend_ssa_inference(zend_arena **arena, const zend_op_array *op_array, const zend_script *script, zend_ssa *ssa, zend_long optimization_level) /* {{{ */
+int zend_ssa_inference(zend_arena **arena, const zend_op_array *op_array, const zend_script *script, zend_ssa *ssa, zend_long optimization_level)
 {
 	zend_ssa_var_info *ssa_var_info;
 	int i;
@@ -4199,7 +4195,6 @@ int zend_ssa_inference(zend_arena **arena, const zend_op_array *op_array, const 
 
 	return SUCCESS;
 }
-/* }}} */
 
 void zend_inference_check_recursive_dependencies(zend_op_array *op_array)
 {

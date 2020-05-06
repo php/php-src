@@ -41,13 +41,12 @@ const char php_output_devnull_handler_name[sizeof("null output handler")] = "nul
 # define inline
 #endif
 
-/* {{{ aliases, conflict and reverse conflict hash tables */
+/* aliases, conflict and reverse conflict hash tables */
 static HashTable php_output_handler_aliases;
 static HashTable php_output_handler_conflicts;
 static HashTable php_output_handler_reverse_conflicts;
-/* }}} */
 
-/* {{{ forward declarations */
+/* forward declarations */
 static inline int php_output_lock_error(int op);
 static inline void php_output_op(int op, const char *str, size_t len);
 
@@ -71,17 +70,15 @@ static int php_output_stack_apply_status(void *h, void *z);
 static int php_output_handler_compat_func(void **handler_context, php_output_context *output_context);
 static int php_output_handler_default_func(void **handler_context, php_output_context *output_context);
 static int php_output_handler_devnull_func(void **handler_context, php_output_context *output_context);
-/* }}} */
 
-/* {{{ static void php_output_init_globals(zend_output_globals *G)
+/* static void php_output_init_globals(zend_output_globals *G)
  * Initialize the module globals on MINIT */
 static inline void php_output_init_globals(zend_output_globals *G)
 {
 	memset(G, 0, sizeof(*G));
 }
-/* }}} */
 
-/* {{{ stderr/stdout writer if not PHP_OUTPUT_ACTIVATED */
+/* stderr/stdout writer if not PHP_OUTPUT_ACTIVATED */
 static size_t php_output_stdout(const char *str, size_t str_len)
 {
 	fwrite(str, 1, str_len, stdout);
@@ -97,9 +94,8 @@ static size_t php_output_stderr(const char *str, size_t str_len)
 	return str_len;
 }
 static size_t (*php_output_direct)(const char *str, size_t str_len) = php_output_stderr;
-/* }}} */
 
-/* {{{ void php_output_header(void) */
+/* void php_output_header(void) */
 static void php_output_header(void)
 {
 	if (!SG(headers_sent)) {
@@ -120,7 +116,6 @@ static void php_output_header(void)
 		}
 	}
 }
-/* }}} */
 
 static void reverse_conflict_dtor(zval *zv)
 {
@@ -128,7 +123,7 @@ static void reverse_conflict_dtor(zval *zv)
 	zend_hash_destroy(ht);
 }
 
-/* {{{ void php_output_startup(void)
+/* void php_output_startup(void)
  * Set up module globals and initialize the conflict and reverse conflict hash tables */
 PHPAPI void php_output_startup(void)
 {
@@ -138,9 +133,8 @@ PHPAPI void php_output_startup(void)
 	zend_hash_init(&php_output_handler_reverse_conflicts, 8, NULL, reverse_conflict_dtor, 1);
 	php_output_direct = php_output_stdout;
 }
-/* }}} */
 
-/* {{{ void php_output_shutdown(void)
+/* void php_output_shutdown(void)
  * Destroy module globals and the conflict and reverse conflict hash tables */
 PHPAPI void php_output_shutdown(void)
 {
@@ -149,9 +143,8 @@ PHPAPI void php_output_shutdown(void)
 	zend_hash_destroy(&php_output_handler_conflicts);
 	zend_hash_destroy(&php_output_handler_reverse_conflicts);
 }
-/* }}} */
 
-/* {{{ SUCCESS|FAILURE php_output_activate(void)
+/* SUCCESS|FAILURE php_output_activate(void)
  * Reset output globals and setup the output handler stack */
 PHPAPI int php_output_activate(void)
 {
@@ -166,9 +159,8 @@ PHPAPI int php_output_activate(void)
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ void php_output_deactivate(void)
+/* void php_output_deactivate(void)
  * Destroy the output handler stack */
 PHPAPI void php_output_deactivate(void)
 {
@@ -191,9 +183,8 @@ PHPAPI void php_output_deactivate(void)
 		zend_stack_destroy(&OG(handlers));
 	}
 }
-/* }}} */
 
-/* {{{ void php_output_register_constants() */
+/* void php_output_register_constants() */
 PHPAPI void php_output_register_constants(void)
 {
 	REGISTER_MAIN_LONG_CONSTANT("PHP_OUTPUT_HANDLER_START", PHP_OUTPUT_HANDLER_START, CONST_CS | CONST_PERSISTENT);
@@ -211,17 +202,15 @@ PHPAPI void php_output_register_constants(void)
 	REGISTER_MAIN_LONG_CONSTANT("PHP_OUTPUT_HANDLER_STARTED", PHP_OUTPUT_HANDLER_STARTED, CONST_CS | CONST_PERSISTENT);
 	REGISTER_MAIN_LONG_CONSTANT("PHP_OUTPUT_HANDLER_DISABLED", PHP_OUTPUT_HANDLER_DISABLED, CONST_CS | CONST_PERSISTENT);
 }
-/* }}} */
 
-/* {{{ void php_output_set_status(int status)
+/* void php_output_set_status(int status)
  * Used by SAPIs to disable output */
 PHPAPI void php_output_set_status(int status)
 {
 	OG(flags) = (OG(flags) & ~0xf) | (status & 0xf);
 }
-/* }}} */
 
-/* {{{ int php_output_get_status()
+/* int php_output_get_status()
  * Get output control status */
 PHPAPI int php_output_get_status(void)
 {
@@ -231,9 +220,8 @@ PHPAPI int php_output_get_status(void)
 		|	(OG(running)? PHP_OUTPUT_LOCKED : 0)
 	) & 0xff;
 }
-/* }}} */
 
-/* {{{ int php_output_write_unbuffered(const char *str, size_t len)
+/* int php_output_write_unbuffered(const char *str, size_t len)
  * Unbuffered write */
 PHPAPI size_t php_output_write_unbuffered(const char *str, size_t len)
 {
@@ -242,9 +230,8 @@ PHPAPI size_t php_output_write_unbuffered(const char *str, size_t len)
 	}
 	return php_output_direct(str, len);
 }
-/* }}} */
 
-/* {{{ int php_output_write(const char *str, size_t len)
+/* int php_output_write(const char *str, size_t len)
  * Buffered write */
 PHPAPI size_t php_output_write(const char *str, size_t len)
 {
@@ -257,9 +244,8 @@ PHPAPI size_t php_output_write(const char *str, size_t len)
 	}
 	return php_output_direct(str, len);
 }
-/* }}} */
 
-/* {{{ SUCCESS|FAILURE php_output_flush(void)
+/* SUCCESS|FAILURE php_output_flush(void)
  * Flush the most recent output handlers buffer */
 PHPAPI int php_output_flush(void)
 {
@@ -278,9 +264,8 @@ PHPAPI int php_output_flush(void)
 	}
 	return FAILURE;
 }
-/* }}} */
 
-/* {{{ void php_output_flush_all()
+/* void php_output_flush_all()
  * Flush all output buffers subsequently */
 PHPAPI void php_output_flush_all(void)
 {
@@ -288,9 +273,8 @@ PHPAPI void php_output_flush_all(void)
 		php_output_op(PHP_OUTPUT_HANDLER_FLUSH, NULL, 0);
 	}
 }
-/* }}} */
 
-/* {{{ SUCCESS|FAILURE php_output_clean(void)
+/* SUCCESS|FAILURE php_output_clean(void)
  * Cleans the most recent output handlers buffer if the handler is cleanable */
 PHPAPI int php_output_clean(void)
 {
@@ -304,9 +288,8 @@ PHPAPI int php_output_clean(void)
 	}
 	return FAILURE;
 }
-/* }}} */
 
-/* {{{ void php_output_clean_all(void)
+/* void php_output_clean_all(void)
  * Cleans all output handler buffers, without regard whether the handler is cleanable */
 PHPAPI void php_output_clean_all(void)
 {
@@ -318,7 +301,7 @@ PHPAPI void php_output_clean_all(void)
 	}
 }
 
-/* {{{ SUCCESS|FAILURE php_output_end(void)
+/* SUCCESS|FAILURE php_output_end(void)
  * Finalizes the most recent output handler at pops it off the stack if the handler is removable */
 PHPAPI int php_output_end(void)
 {
@@ -327,17 +310,15 @@ PHPAPI int php_output_end(void)
 	}
 	return FAILURE;
 }
-/* }}} */
 
-/* {{{ void php_output_end_all(void)
+/* void php_output_end_all(void)
  * Finalizes all output handlers and ends output buffering without regard whether a handler is removable */
 PHPAPI void php_output_end_all(void)
 {
 	while (OG(active) && php_output_stack_pop(PHP_OUTPUT_POP_FORCE));
 }
-/* }}} */
 
-/* {{{ SUCCESS|FAILURE php_output_discard(void)
+/* SUCCESS|FAILURE php_output_discard(void)
  * Discards the most recent output handlers buffer and pops it off the stack if the handler is removable */
 PHPAPI int php_output_discard(void)
 {
@@ -346,9 +327,8 @@ PHPAPI int php_output_discard(void)
 	}
 	return FAILURE;
 }
-/* }}} */
 
-/* {{{ void php_output_discard_all(void)
+/* void php_output_discard_all(void)
  * Discard all output handlers and buffers without regard whether a handler is removable */
 PHPAPI void php_output_discard_all(void)
 {
@@ -356,17 +336,15 @@ PHPAPI void php_output_discard_all(void)
 		php_output_stack_pop(PHP_OUTPUT_POP_DISCARD|PHP_OUTPUT_POP_FORCE);
 	}
 }
-/* }}} */
 
-/* {{{ int php_output_get_level(void)
+/* int php_output_get_level(void)
  * Get output buffering level, ie. how many output handlers the stack contains */
 PHPAPI int php_output_get_level(void)
 {
 	return OG(active) ? zend_stack_count(&OG(handlers)) : 0;
 }
-/* }}} */
 
-/* {{{ SUCCESS|FAILURE php_output_get_contents(zval *z)
+/* SUCCESS|FAILURE php_output_get_contents(zval *z)
  * Get the contents of the active output handlers buffer */
 PHPAPI int php_output_get_contents(zval *p)
 {
@@ -379,7 +357,7 @@ PHPAPI int php_output_get_contents(zval *p)
 	}
 }
 
-/* {{{ SUCCESS|FAILURE php_output_get_length(zval *z)
+/* SUCCESS|FAILURE php_output_get_length(zval *z)
  * Get the length of the active output handlers buffer */
 PHPAPI int php_output_get_length(zval *p)
 {
@@ -391,17 +369,15 @@ PHPAPI int php_output_get_length(zval *p)
 		return FAILURE;
 	}
 }
-/* }}} */
 
-/* {{{ php_output_handler* php_output_get_active_handler(void)
+/* php_output_handler* php_output_get_active_handler(void)
  * Get active output handler */
 PHPAPI php_output_handler* php_output_get_active_handler(void)
 {
 	return OG(active);
 }
-/* }}} */
 
-/* {{{ SUCCESS|FAILURE php_output_handler_start_default(void)
+/* SUCCESS|FAILURE php_output_handler_start_default(void)
  * Start a "default output handler" */
 PHPAPI int php_output_start_default(void)
 {
@@ -414,9 +390,8 @@ PHPAPI int php_output_start_default(void)
 	php_output_handler_free(&handler);
 	return FAILURE;
 }
-/* }}} */
 
-/* {{{ SUCCESS|FAILURE php_output_handler_start_devnull(void)
+/* SUCCESS|FAILURE php_output_handler_start_devnull(void)
  * Start a "null output handler" */
 PHPAPI int php_output_start_devnull(void)
 {
@@ -429,9 +404,8 @@ PHPAPI int php_output_start_devnull(void)
 	php_output_handler_free(&handler);
 	return FAILURE;
 }
-/* }}} */
 
-/* {{{ SUCCESS|FAILURE php_output_start_user(zval *handler, size_t chunk_size, int flags)
+/* SUCCESS|FAILURE php_output_start_user(zval *handler, size_t chunk_size, int flags)
  * Start a user level output handler */
 PHPAPI int php_output_start_user(zval *output_handler, size_t chunk_size, int flags)
 {
@@ -448,9 +422,8 @@ PHPAPI int php_output_start_user(zval *output_handler, size_t chunk_size, int fl
 	php_output_handler_free(&handler);
 	return FAILURE;
 }
-/* }}} */
 
-/* {{{ SUCCESS|FAILURE php_output_start_internal(zval *name, php_output_handler_func_t handler, size_t chunk_size, int flags)
+/* SUCCESS|FAILURE php_output_start_internal(zval *name, php_output_handler_func_t handler, size_t chunk_size, int flags)
  * Start an internal output handler that does not have to maintain a non-global state */
 PHPAPI int php_output_start_internal(const char *name, size_t name_len, php_output_handler_func_t output_handler, size_t chunk_size, int flags)
 {
@@ -464,9 +437,8 @@ PHPAPI int php_output_start_internal(const char *name, size_t name_len, php_outp
 	php_output_handler_free(&handler);
 	return FAILURE;
 }
-/* }}} */
 
-/* {{{ php_output_handler *php_output_handler_create_user(zval *handler, size_t chunk_size, int flags)
+/* php_output_handler *php_output_handler_create_user(zval *handler, size_t chunk_size, int flags)
  * Create a user level output handler */
 PHPAPI php_output_handler *php_output_handler_create_user(zval *output_handler, size_t chunk_size, int flags)
 {
@@ -505,9 +477,8 @@ PHPAPI php_output_handler *php_output_handler_create_user(zval *output_handler, 
 
 	return handler;
 }
-/* }}} */
 
-/* {{{ php_output_handler *php_output_handler_create_internal(zval *name, php_output_handler_context_func_t handler, size_t chunk_size, int flags)
+/* php_output_handler *php_output_handler_create_internal(zval *name, php_output_handler_context_func_t handler, size_t chunk_size, int flags)
  * Create an internal output handler that can maintain a non-global state */
 PHPAPI php_output_handler *php_output_handler_create_internal(const char *name, size_t name_len, php_output_handler_context_func_t output_handler, size_t chunk_size, int flags)
 {
@@ -520,9 +491,8 @@ PHPAPI php_output_handler *php_output_handler_create_internal(const char *name, 
 
 	return handler;
 }
-/* }}} */
 
-/* {{{ void php_output_handler_set_context(php_output_handler *handler, void *opaq, void (*dtor)(void*))
+/* void php_output_handler_set_context(php_output_handler *handler, void *opaq, void (*dtor)(void*))
  * Set the context/state of an output handler. Calls the dtor of the previous context if there is one */
 PHPAPI void php_output_handler_set_context(php_output_handler *handler, void *opaq, void (*dtor)(void*))
 {
@@ -532,9 +502,8 @@ PHPAPI void php_output_handler_set_context(php_output_handler *handler, void *op
 	handler->dtor = dtor;
 	handler->opaq = opaq;
 }
-/* }}} */
 
-/* {{{ SUCCESS|FAILURE php_output_handler_start(php_output_handler *handler)
+/* SUCCESS|FAILURE php_output_handler_start(php_output_handler *handler)
  * Starts the set up output handler and pushes it on top of the stack. Checks for any conflicts regarding the output handler to start */
 PHPAPI int php_output_handler_start(php_output_handler *handler)
 {
@@ -561,9 +530,8 @@ PHPAPI int php_output_handler_start(php_output_handler *handler)
 	OG(active) = handler;
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ int php_output_handler_started(zval *name)
+/* int php_output_handler_started(zval *name)
  * Check whether a certain output handler is in use */
 PHPAPI int php_output_handler_started(const char *name, size_t name_len)
 {
@@ -582,9 +550,8 @@ PHPAPI int php_output_handler_started(const char *name, size_t name_len)
 
 	return 0;
 }
-/* }}} */
 
-/* {{{ int php_output_handler_conflict(zval *handler_new, zval *handler_old)
+/* int php_output_handler_conflict(zval *handler_new, zval *handler_old)
  * Check whether a certain handler is in use and issue a warning that the new handler would conflict with the already used one */
 PHPAPI int php_output_handler_conflict(const char *handler_new, size_t handler_new_len, const char *handler_set, size_t handler_set_len)
 {
@@ -598,9 +565,8 @@ PHPAPI int php_output_handler_conflict(const char *handler_new, size_t handler_n
 	}
 	return 0;
 }
-/* }}} */
 
-/* {{{ SUCCESS|FAILURE php_output_handler_conflict_register(zval *name, php_output_handler_conflict_check_t check_func)
+/* SUCCESS|FAILURE php_output_handler_conflict_register(zval *name, php_output_handler_conflict_check_t check_func)
  * Register a conflict checking function on MINIT */
 PHPAPI int php_output_handler_conflict_register(const char *name, size_t name_len, php_output_handler_conflict_check_t check_func)
 {
@@ -615,9 +581,8 @@ PHPAPI int php_output_handler_conflict_register(const char *name, size_t name_le
 	zend_string_release_ex(str, 1);
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ SUCCESS|FAILURE php_output_handler_reverse_conflict_register(zval *name, php_output_handler_conflict_check_t check_func)
+/* SUCCESS|FAILURE php_output_handler_reverse_conflict_register(zval *name, php_output_handler_conflict_check_t check_func)
  * Register a reverse conflict checking function on MINIT */
 PHPAPI int php_output_handler_reverse_conflict_register(const char *name, size_t name_len, php_output_handler_conflict_check_t check_func)
 {
@@ -644,17 +609,15 @@ PHPAPI int php_output_handler_reverse_conflict_register(const char *name, size_t
 		return SUCCESS;
 	}
 }
-/* }}} */
 
-/* {{{ php_output_handler_alias_ctor_t php_output_handler_alias(zval *name)
+/* php_output_handler_alias_ctor_t php_output_handler_alias(zval *name)
  * Get an internal output handler for a user handler if it exists */
 PHPAPI php_output_handler_alias_ctor_t php_output_handler_alias(const char *name, size_t name_len)
 {
 	return zend_hash_str_find_ptr(&php_output_handler_aliases, name, name_len);
 }
-/* }}} */
 
-/* {{{ SUCCESS|FAILURE php_output_handler_alias_register(zval *name, php_output_handler_alias_ctor_t func)
+/* SUCCESS|FAILURE php_output_handler_alias_register(zval *name, php_output_handler_alias_ctor_t func)
  * Registers an internal output handler as alias for a user handler */
 PHPAPI int php_output_handler_alias_register(const char *name, size_t name_len, php_output_handler_alias_ctor_t func)
 {
@@ -669,9 +632,8 @@ PHPAPI int php_output_handler_alias_register(const char *name, size_t name_len, 
 	zend_string_release_ex(str, 1);
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ SUCCESS|FAILURE php_output_handler_hook(php_output_handler_hook_t type, void *arg)
+/* SUCCESS|FAILURE php_output_handler_hook(php_output_handler_hook_t type, void *arg)
  * Output handler hook for output handler functions to check/modify the current handlers abilities */
 PHPAPI int php_output_handler_hook(php_output_handler_hook_t type, void *arg)
 {
@@ -698,9 +660,8 @@ PHPAPI int php_output_handler_hook(php_output_handler_hook_t type, void *arg)
 	}
 	return FAILURE;
 }
-/* }}} */
 
-/* {{{ void php_output_handler_dtor(php_output_handler *handler)
+/* void php_output_handler_dtor(php_output_handler *handler)
  * Destroy an output handler */
 PHPAPI void php_output_handler_dtor(php_output_handler *handler)
 {
@@ -719,9 +680,8 @@ PHPAPI void php_output_handler_dtor(php_output_handler *handler)
 	}
 	memset(handler, 0, sizeof(*handler));
 }
-/* }}} */
 
-/* {{{ void php_output_handler_free(php_output_handler **handler)
+/* void php_output_handler_free(php_output_handler **handler)
  * Destroy and free an output handler */
 PHPAPI void php_output_handler_free(php_output_handler **h)
 {
@@ -731,7 +691,6 @@ PHPAPI void php_output_handler_free(php_output_handler **h)
 		*h = NULL;
 	}
 }
-/* }}} */
 
 /* void php_output_set_implicit_flush(int enabled)
  * Enable or disable implicit flush */
@@ -743,25 +702,22 @@ PHPAPI void php_output_set_implicit_flush(int flush)
 		OG(flags) &= ~PHP_OUTPUT_IMPLICITFLUSH;
 	}
 }
-/* }}} */
 
-/* {{{ char *php_output_get_start_filename(void)
+/* char *php_output_get_start_filename(void)
  * Get the file name where output has started */
 PHPAPI const char *php_output_get_start_filename(void)
 {
 	return OG(output_start_filename);
 }
-/* }}} */
 
-/* {{{ int php_output_get_start_lineno(void)
+/* int php_output_get_start_lineno(void)
  * Get the line number where output has started */
 PHPAPI int php_output_get_start_lineno(void)
 {
 	return OG(output_start_lineno);
 }
-/* }}} */
 
-/* {{{ static int php_output_lock_error(int op)
+/* static int php_output_lock_error(int op)
  * Checks whether an unallowed operation is attempted from within the output handler and issues a fatal error */
 static inline int php_output_lock_error(int op)
 {
@@ -774,18 +730,16 @@ static inline int php_output_lock_error(int op)
 	}
 	return 0;
 }
-/* }}} */
 
-/* {{{ static php_output_context *php_output_context_init(php_output_context *context, int op)
+/* static php_output_context *php_output_context_init(php_output_context *context, int op)
  * Initialize a new output context */
 static inline void php_output_context_init(php_output_context *context, int op)
 {
 	memset(context, 0, sizeof(php_output_context));
 	context->op = op;
 }
-/* }}} */
 
-/* {{{ static void php_output_context_reset(php_output_context *context)
+/* static void php_output_context_reset(php_output_context *context)
  * Reset an output context */
 static inline void php_output_context_reset(php_output_context *context)
 {
@@ -794,9 +748,8 @@ static inline void php_output_context_reset(php_output_context *context)
 	memset(context, 0, sizeof(php_output_context));
 	context->op = op;
 }
-/* }}} */
 
-/* {{{ static void php_output_context_feed(php_output_context *context, char *, size_t, size_t)
+/* static void php_output_context_feed(php_output_context *context, char *, size_t, size_t)
  * Feed output contexts input buffer */
 static inline void php_output_context_feed(php_output_context *context, char *data, size_t size, size_t used, zend_bool free)
 {
@@ -808,9 +761,8 @@ static inline void php_output_context_feed(php_output_context *context, char *da
 	context->in.free = free;
 	context->in.size = size;
 }
-/* }}} */
 
-/* {{{ static void php_output_context_swap(php_output_context *context)
+/* static void php_output_context_swap(php_output_context *context)
  * Swap output contexts buffers */
 static inline void php_output_context_swap(php_output_context *context)
 {
@@ -826,9 +778,8 @@ static inline void php_output_context_swap(php_output_context *context)
 	context->out.free = 0;
 	context->out.size = 0;
 }
-/* }}} */
 
-/* {{{ static void php_output_context_pass(php_output_context *context)
+/* static void php_output_context_pass(php_output_context *context)
  * Pass input to output buffer */
 static inline void php_output_context_pass(php_output_context *context)
 {
@@ -841,9 +792,8 @@ static inline void php_output_context_pass(php_output_context *context)
 	context->in.free = 0;
 	context->in.size = 0;
 }
-/* }}} */
 
-/* {{{ static void php_output_context_dtor(php_output_context *context)
+/* static void php_output_context_dtor(php_output_context *context)
  * Destroy the contents of an output context */
 static inline void php_output_context_dtor(php_output_context *context)
 {
@@ -856,9 +806,8 @@ static inline void php_output_context_dtor(php_output_context *context)
 		context->out.data = NULL;
 	}
 }
-/* }}} */
 
-/* {{{ static php_output_handler *php_output_handler_init(zval *name, size_t chunk_size, int flags)
+/* static php_output_handler *php_output_handler_init(zval *name, size_t chunk_size, int flags)
  * Allocates and initializes a php_output_handler structure */
 static inline php_output_handler *php_output_handler_init(zend_string *name, size_t chunk_size, int flags)
 {
@@ -873,9 +822,8 @@ static inline php_output_handler *php_output_handler_init(zend_string *name, siz
 
 	return handler;
 }
-/* }}} */
 
-/* {{{ static int php_output_handler_appen(php_output_handler *handler, const php_output_buffer *buf)
+/* static int php_output_handler_appen(php_output_handler *handler, const php_output_buffer *buf)
  * Appends input to the output handlers buffer and indicates whether the buffer does not have to be processed by the output handler */
 static inline int php_output_handler_append(php_output_handler *handler, const php_output_buffer *buf)
 {
@@ -901,9 +849,8 @@ static inline int php_output_handler_append(php_output_handler *handler, const p
 	}
 	return 1;
 }
-/* }}} */
 
-/* {{{ static php_output_handler_status_t php_output_handler_op(php_output_handler *handler, php_output_context *context)
+/* static php_output_handler_status_t php_output_handler_op(php_output_handler *handler, php_output_context *context)
  * Output handler operation dispatcher, applying context op to the php_output_handler handler */
 static inline php_output_handler_status_t php_output_handler_op(php_output_handler *handler, php_output_context *context)
 {
@@ -1025,10 +972,8 @@ static inline php_output_handler_status_t php_output_handler_op(php_output_handl
 	context->op = original_op;
 	return status;
 }
-/* }}} */
 
-
-/* {{{ static void php_output_op(int op, const char *str, size_t len)
+/* static void php_output_op(int op, const char *str, size_t len)
  * Output op dispatcher, passes input and output handlers output through the output handler stack until it gets written to the SAPI */
 static inline void php_output_op(int op, const char *str, size_t len)
 {
@@ -1081,9 +1026,8 @@ static inline void php_output_op(int op, const char *str, size_t len)
 	}
 	php_output_context_dtor(&context);
 }
-/* }}} */
 
-/* {{{ static int php_output_stack_apply_op(void *h, void *c)
+/* static int php_output_stack_apply_op(void *h, void *c)
  * Operation callback for the stack apply function */
 static int php_output_stack_apply_op(void *h, void *c)
 {
@@ -1129,9 +1073,8 @@ static int php_output_stack_apply_op(void *h, void *c)
 			return 0;
 	}
 }
-/* }}} */
 
-/* {{{ static int php_output_stack_apply_clean(void *h, void *c)
+/* static int php_output_stack_apply_clean(void *h, void *c)
  * Clean callback for the stack apply function */
 static int php_output_stack_apply_clean(void *h, void *c)
 {
@@ -1143,9 +1086,8 @@ static int php_output_stack_apply_clean(void *h, void *c)
 	php_output_context_reset(context);
 	return 0;
 }
-/* }}} */
 
-/* {{{ static int php_output_stack_apply_list(void *h, void *z)
+/* static int php_output_stack_apply_list(void *h, void *z)
  * List callback for the stack apply function */
 static int php_output_stack_apply_list(void *h, void *z)
 {
@@ -1155,9 +1097,8 @@ static int php_output_stack_apply_list(void *h, void *z)
 	add_next_index_str(array, zend_string_copy(handler->name));
 	return 0;
 }
-/* }}} */
 
-/* {{{ static int php_output_stack_apply_status(void *h, void *z)
+/* static int php_output_stack_apply_status(void *h, void *z)
  * Status callback for the stack apply function */
 static int php_output_stack_apply_status(void *h, void *z)
 {
@@ -1169,7 +1110,7 @@ static int php_output_stack_apply_status(void *h, void *z)
 	return 0;
 }
 
-/* {{{ static zval *php_output_handler_status(php_output_handler *handler, zval *entry)
+/* static zval *php_output_handler_status(php_output_handler *handler, zval *entry)
  * Returns an array with the status of the output handler */
 static inline zval *php_output_handler_status(php_output_handler *handler, zval *entry)
 {
@@ -1186,9 +1127,8 @@ static inline zval *php_output_handler_status(php_output_handler *handler, zval 
 
 	return entry;
 }
-/* }}} */
 
-/* {{{ static int php_output_stack_pop(int flags)
+/* static int php_output_stack_pop(int flags)
  * Pops an output handler off the stack */
 static int php_output_stack_pop(int flags)
 {
@@ -1241,9 +1181,8 @@ static int php_output_stack_pop(int flags)
 		return 1;
 	}
 }
-/* }}} */
 
-/* {{{ static SUCCESS|FAILURE php_output_handler_compat_func(void *ctx, php_output_context *)
+/* static SUCCESS|FAILURE php_output_handler_compat_func(void *ctx, php_output_context *)
  * php_output_handler_context_func_t for php_output_handler_func_t output handlers */
 static int php_output_handler_compat_func(void **handler_context, php_output_context *output_context)
 {
@@ -1267,24 +1206,21 @@ static int php_output_handler_compat_func(void **handler_context, php_output_con
 	}
 	return FAILURE;
 }
-/* }}} */
 
-/* {{{ static SUCCESS|FAILURE php_output_handler_default_func(void *ctx, php_output_context *)
+/* static SUCCESS|FAILURE php_output_handler_default_func(void *ctx, php_output_context *)
  * Default output handler */
 static int php_output_handler_default_func(void **handler_context, php_output_context *output_context)
 {
 	php_output_context_pass(output_context);
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ static SUCCESS|FAILURE php_output_handler_devnull_func(void *ctx, php_output_context *)
+/* static SUCCESS|FAILURE php_output_handler_devnull_func(void *ctx, php_output_context *)
  * Null output handler */
 static int php_output_handler_devnull_func(void **handler_context, php_output_context *output_context)
 {
 	return SUCCESS;
 }
-/* }}} */
 
 /*
  * USERLAND (nearly 1:1 of old output.c)
@@ -1311,7 +1247,6 @@ PHP_FUNCTION(ob_start)
 	}
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Flush (send) contents of the output buffer. The last buffer content is sent to next buffer */
 PHP_FUNCTION(ob_flush)
@@ -1331,7 +1266,6 @@ PHP_FUNCTION(ob_flush)
 	}
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Clean (delete) the current output buffer */
 PHP_FUNCTION(ob_clean)
@@ -1351,7 +1285,6 @@ PHP_FUNCTION(ob_clean)
 	}
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Flush (send) the output buffer, and delete current output buffer */
 PHP_FUNCTION(ob_end_flush)
@@ -1367,7 +1300,6 @@ PHP_FUNCTION(ob_end_flush)
 
 	RETURN_BOOL(SUCCESS == php_output_end());
 }
-/* }}} */
 
 /* Clean the output buffer, and delete current output buffer */
 PHP_FUNCTION(ob_end_clean)
@@ -1383,7 +1315,6 @@ PHP_FUNCTION(ob_end_clean)
 
 	RETURN_BOOL(SUCCESS == php_output_discard());
 }
-/* }}} */
 
 /* Get current buffer contents, flush (send) the output buffer, and delete current output buffer */
 PHP_FUNCTION(ob_get_flush)
@@ -1401,7 +1332,6 @@ PHP_FUNCTION(ob_get_flush)
 		php_error_docref("ref.outcontrol", E_NOTICE, "Failed to delete buffer of %s (%d)", ZSTR_VAL(OG(active)->name), OG(active)->level);
 	}
 }
-/* }}} */
 
 /* Get current buffer contents and delete current output buffer */
 PHP_FUNCTION(ob_get_clean)
@@ -1423,7 +1353,6 @@ PHP_FUNCTION(ob_get_clean)
 		php_error_docref("ref.outcontrol", E_NOTICE, "Failed to delete buffer of %s (%d)", ZSTR_VAL(OG(active)->name), OG(active)->level);
 	}
 }
-/* }}} */
 
 /* Return the contents of the output buffer */
 PHP_FUNCTION(ob_get_contents)
@@ -1436,7 +1365,6 @@ PHP_FUNCTION(ob_get_contents)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Return the nesting level of the output buffer */
 PHP_FUNCTION(ob_get_level)
@@ -1447,7 +1375,6 @@ PHP_FUNCTION(ob_get_level)
 
 	RETURN_LONG(php_output_get_level());
 }
-/* }}} */
 
 /* Return the length of the output buffer */
 PHP_FUNCTION(ob_get_length)
@@ -1460,7 +1387,6 @@ PHP_FUNCTION(ob_get_length)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* List all output_buffers in an array */
 PHP_FUNCTION(ob_list_handlers)
@@ -1477,7 +1403,6 @@ PHP_FUNCTION(ob_list_handlers)
 
 	zend_stack_apply_with_argument(&OG(handlers), ZEND_STACK_APPLY_BOTTOMUP, php_output_stack_apply_list, return_value);
 }
-/* }}} */
 
 /* Return the status of the active or all output buffers */
 PHP_FUNCTION(ob_get_status)
@@ -1500,7 +1425,6 @@ PHP_FUNCTION(ob_get_status)
 		php_output_handler_status(OG(active), return_value);
 	}
 }
-/* }}} */
 
 /* Turn implicit flush on/off and is equivalent to calling flush() after every output call */
 PHP_FUNCTION(ob_implicit_flush)
@@ -1513,7 +1437,6 @@ PHP_FUNCTION(ob_implicit_flush)
 
 	php_output_set_implicit_flush(flag);
 }
-/* }}} */
 
 /* Reset(clear) URL rewriter values */
 PHP_FUNCTION(output_reset_rewrite_vars)
@@ -1528,7 +1451,6 @@ PHP_FUNCTION(output_reset_rewrite_vars)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Add URL rewriter values */
 PHP_FUNCTION(output_add_rewrite_var)
@@ -1546,4 +1468,4 @@ PHP_FUNCTION(output_add_rewrite_var)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
+

@@ -147,7 +147,7 @@ static size_t browscap_compute_regex_len(zend_string *pattern) {
 	return len + sizeof("~^$~")-1;
 }
 
-static zend_string *browscap_convert_pattern(zend_string *pattern, int persistent) /* {{{ */
+static zend_string *browscap_convert_pattern(zend_string *pattern, int persistent)
 {
 	size_t i, j=0;
 	char *t;
@@ -211,7 +211,6 @@ static zend_string *browscap_convert_pattern(zend_string *pattern, int persisten
 	free_alloca(lc_pattern, use_heap);
 	return res;
 }
-/* }}} */
 
 typedef struct _browscap_parser_ctx {
 	browser_data *bdata;
@@ -297,7 +296,7 @@ static HashTable *browscap_entry_to_array(browser_data *bdata, browscap_entry *e
 	return ht;
 }
 
-static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callback_type, void *arg) /* {{{ */
+static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callback_type, void *arg)
 {
 	browscap_parser_ctx *ctx = arg;
 	browser_data *bdata = ctx->bdata;
@@ -396,13 +395,12 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 		}
 	}
 }
-/* }}} */
 
 static void str_interned_dtor(zval *zv) {
 	zend_string_release(Z_STR_P(zv));
 }
 
-static int browscap_read_file(char *filename, browser_data *browdata, int persistent) /* {{{ */
+static int browscap_read_file(char *filename, browser_data *browdata, int persistent)
 {
 	zend_file_handle fh;
 	browscap_parser_ctx ctx = {0};
@@ -442,19 +440,18 @@ static int browscap_read_file(char *filename, browser_data *browdata, int persis
 
 	return SUCCESS;
 }
-/* }}} */
 
 #ifdef ZTS
-static void browscap_globals_ctor(zend_browscap_globals *browscap_globals) /* {{{ */
+static void browscap_globals_ctor(zend_browscap_globals *browscap_globals)
 {
 	browscap_globals->activation_bdata.htab = NULL;
 	browscap_globals->activation_bdata.kv = NULL;
 	browscap_globals->activation_bdata.filename[0] = '\0';
 }
-/* }}} */
+
 #endif
 
-static void browscap_bdata_dtor(browser_data *bdata, int persistent) /* {{{ */
+static void browscap_bdata_dtor(browser_data *bdata, int persistent)
 {
 	if (bdata->htab != NULL) {
 		uint32_t i;
@@ -472,9 +469,8 @@ static void browscap_bdata_dtor(browser_data *bdata, int persistent) /* {{{ */
 	}
 	bdata->filename[0] = '\0';
 }
-/* }}} */
 
-/* {{{ PHP_INI_MH
+/* PHP_INI_MH
  */
 PHP_INI_MH(OnChangeBrowscap)
 {
@@ -494,9 +490,8 @@ PHP_INI_MH(OnChangeBrowscap)
 
 	return FAILURE;
 }
-/* }}} */
 
-PHP_MINIT_FUNCTION(browscap) /* {{{ */
+PHP_MINIT_FUNCTION(browscap)
 {
 	char *browscap = INI_STR("browscap");
 
@@ -513,9 +508,8 @@ PHP_MINIT_FUNCTION(browscap) /* {{{ */
 
 	return SUCCESS;
 }
-/* }}} */
 
-PHP_RSHUTDOWN_FUNCTION(browscap) /* {{{ */
+PHP_RSHUTDOWN_FUNCTION(browscap)
 {
 	browser_data *bdata = &BROWSCAP_G(activation_bdata);
 	if (bdata->filename[0] != '\0') {
@@ -524,15 +518,13 @@ PHP_RSHUTDOWN_FUNCTION(browscap) /* {{{ */
 
 	return SUCCESS;
 }
-/* }}} */
 
-PHP_MSHUTDOWN_FUNCTION(browscap) /* {{{ */
+PHP_MSHUTDOWN_FUNCTION(browscap)
 {
 	browscap_bdata_dtor(&global_bdata, 1);
 
 	return SUCCESS;
 }
-/* }}} */
 
 static inline size_t browscap_get_minimum_length(browscap_entry *entry) {
 	size_t len = entry->prefix_len;
@@ -543,7 +535,7 @@ static inline size_t browscap_get_minimum_length(browscap_entry *entry) {
 	return len;
 }
 
-static int browser_reg_compare(browscap_entry *entry, zend_string *agent_name, browscap_entry **found_entry_ptr) /* {{{ */
+static int browser_reg_compare(browscap_entry *entry, zend_string *agent_name, browscap_entry **found_entry_ptr)
 {
 	browscap_entry *found_entry = *found_entry_ptr;
 	ALLOCA_FLAG(use_heap)
@@ -658,9 +650,8 @@ static int browser_reg_compare(browscap_entry *entry, zend_string *agent_name, b
 	zend_string_release(regex);
 	return 0;
 }
-/* }}} */
 
-static void browscap_zval_copy_ctor(zval *p) /* {{{ */
+static void browscap_zval_copy_ctor(zval *p)
 {
 	if (Z_REFCOUNTED_P(p)) {
 		zend_string *str;
@@ -674,7 +665,6 @@ static void browscap_zval_copy_ctor(zval *p) /* {{{ */
 		}
 	}
 }
-/* }}} */
 
 /* Get information about the capabilities of a browser. If browser_name is omitted or null, HTTP_USER_AGENT is used. Returns an object by default; if return_array is true, returns an array. */
 PHP_FUNCTION(get_browser)
@@ -769,4 +759,4 @@ PHP_FUNCTION(get_browser)
 
 	zend_string_release_ex(lookup_browser_name, 0);
 }
-/* }}} */
+

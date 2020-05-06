@@ -63,16 +63,15 @@ static PHP_GINIT_FUNCTION(libxml);
 
 static zend_class_entry *libxmlerror_class_entry;
 
-/* {{{ dynamically loadable module stuff */
+/* dynamically loadable module stuff */
 #ifdef COMPILE_DL_LIBXML
 #ifdef ZTS
 ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 ZEND_GET_MODULE(libxml)
 #endif /* COMPILE_DL_LIBXML */
-/* }}} */
 
-/* {{{ function prototypes */
+/* function prototypes */
 static PHP_MINIT_FUNCTION(libxml);
 static PHP_RINIT_FUNCTION(libxml);
 static PHP_RSHUTDOWN_FUNCTION(libxml);
@@ -80,7 +79,6 @@ static PHP_MSHUTDOWN_FUNCTION(libxml);
 static PHP_MINFO_FUNCTION(libxml);
 static int php_libxml_post_deactivate(void);
 
-/* }}} */
 
 zend_module_entry libxml_module_entry = {
 	STANDARD_MODULE_HEADER,
@@ -99,9 +97,8 @@ zend_module_entry libxml_module_entry = {
 	STANDARD_MODULE_PROPERTIES_EX
 };
 
-/* }}} */
 
-/* {{{ internal functions for interoperability */
+/* internal functions for interoperability */
 static int php_libxml_clear_object(php_libxml_node_object *object)
 {
 	if (object->properties) {
@@ -213,9 +210,8 @@ PHP_LIBXML_API void php_libxml_node_free_list(xmlNodePtr node)
 	}
 }
 
-/* }}} */
 
-/* {{{ startup, shutdown and info functions */
+/* startup, shutdown and info functions */
 static PHP_GINIT_FUNCTION(libxml)
 {
 #if defined(COMPILE_DL_LIBXML) && defined(ZTS)
@@ -888,7 +884,6 @@ static PHP_MINFO_FUNCTION(libxml)
 	php_info_print_table_row(2, "libXML streams", "enabled");
 	php_info_print_table_end();
 }
-/* }}} */
 
 /* Set the streams context for the next libxml document load or write */
 PHP_FUNCTION(libxml_set_streams_context)
@@ -905,7 +900,6 @@ PHP_FUNCTION(libxml_set_streams_context)
 	}
 	ZVAL_COPY(&LIBXML(stream_context), arg);
 }
-/* }}} */
 
 /* Disable libxml errors and allow user to fetch error information as needed */
 PHP_FUNCTION(libxml_use_internal_errors)
@@ -945,7 +939,6 @@ PHP_FUNCTION(libxml_use_internal_errors)
 	}
 	RETURN_BOOL(retval);
 }
-/* }}} */
 
 /* Retrieve last error from libxml */
 PHP_FUNCTION(libxml_get_last_error)
@@ -976,7 +969,6 @@ PHP_FUNCTION(libxml_get_last_error)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Retrieve array of errors */
 PHP_FUNCTION(libxml_get_errors)
@@ -1017,7 +1009,6 @@ PHP_FUNCTION(libxml_get_errors)
 		RETURN_EMPTY_ARRAY();
 	}
 }
-/* }}} */
 
 /* Clear last error from libxml */
 PHP_FUNCTION(libxml_clear_errors)
@@ -1029,15 +1020,14 @@ PHP_FUNCTION(libxml_clear_errors)
 		zend_llist_clean(LIBXML(error_list));
 	}
 }
-/* }}} */
 
-PHP_LIBXML_API zend_bool php_libxml_disable_entity_loader(zend_bool disable) /* {{{ */
+PHP_LIBXML_API zend_bool php_libxml_disable_entity_loader(zend_bool disable)
 {
 	zend_bool old = LIBXML(entity_loader_disabled);
 
 	LIBXML(entity_loader_disabled) = disable;
 	return old;
-} /* }}} */
+}
 
 /* Disable/Enable ability to load external entities */
 PHP_FUNCTION(libxml_disable_entity_loader)
@@ -1051,7 +1041,6 @@ PHP_FUNCTION(libxml_disable_entity_loader)
 
 	RETURN_BOOL(php_libxml_disable_entity_loader(disable));
 }
-/* }}} */
 
 /* Changes the default external entity loader */
 PHP_FUNCTION(libxml_set_external_entity_loader)
@@ -1077,9 +1066,8 @@ PHP_FUNCTION(libxml_set_external_entity_loader)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
-/* {{{ Common functions shared by extensions */
+/* Common functions shared by extensions */
 int php_libxml_xmlCheckUTF8(const unsigned char *s)
 {
 	int i;
@@ -1289,7 +1277,6 @@ PHP_LIBXML_API void php_libxml_node_decrement_resource(php_libxml_node_object *o
 		php_libxml_decrement_doc_ref(object);
 	}
 }
-/* }}} */
 
 #if defined(PHP_WIN32) && defined(COMPILE_DL_LIBXML)
 PHP_LIBXML_API BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)

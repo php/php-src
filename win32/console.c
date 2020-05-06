@@ -20,7 +20,7 @@
 
 
 PHP_WINUTIL_API BOOL php_win32_console_fileno_is_console(zend_long fileno)
-{/*{{{*/
+{
 	BOOL result = FALSE;
 	HANDLE handle = (HANDLE) _get_osfhandle(fileno);
 
@@ -31,10 +31,10 @@ PHP_WINUTIL_API BOOL php_win32_console_fileno_is_console(zend_long fileno)
 		}
 	}
 	return result;
-}/*}}}*/
+}
 
 PHP_WINUTIL_API BOOL php_win32_console_fileno_has_vt100(zend_long fileno)
-{/*{{{*/
+{
 	BOOL result = FALSE;
 	HANDLE handle = (HANDLE) _get_osfhandle(fileno);
 
@@ -53,10 +53,10 @@ PHP_WINUTIL_API BOOL php_win32_console_fileno_has_vt100(zend_long fileno)
 		}
 	}
 	return result;
-}/*}}}*/
+}
 
 PHP_WINUTIL_API BOOL php_win32_console_fileno_set_vt100(zend_long fileno, BOOL enable)
-{/*{{{*/
+{
 	BOOL result = FALSE;
 	HANDLE handle = (HANDLE) _get_osfhandle(fileno);
 
@@ -88,10 +88,10 @@ PHP_WINUTIL_API BOOL php_win32_console_fileno_set_vt100(zend_long fileno, BOOL e
 		}
 	}
 	return result;
-}/*}}}*/
+}
 
 PHP_WINUTIL_API BOOL php_win32_console_is_own(void)
-{/*{{{*/
+{
 	if (!IsDebuggerPresent()) {
 		CONSOLE_SCREEN_BUFFER_INFO csbi;
 		DWORD pl[1];
@@ -107,10 +107,10 @@ PHP_WINUTIL_API BOOL php_win32_console_is_own(void)
 	}
 
 	return FALSE;
-}/*}}}*/
+}
 
 PHP_WINUTIL_API BOOL php_win32_console_is_cli_sapi(void)
-{/*{{{*/
+{
 	return strlen(sapi_module.name) >= sizeof("cli") - 1 && !strncmp(sapi_module.name, "cli", sizeof("cli") - 1);
-}/*}}}*/
+}
 

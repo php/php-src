@@ -178,7 +178,7 @@ out:
 	return S_OK;
 }
 
-/* {{{ com_dotnet_create_instance - ctor for DOTNET class */
+/* com_dotnet_create_instance - ctor for DOTNET class */
 PHP_METHOD(dotnet, __construct)
 {
 	zval *object = getThis();
@@ -314,7 +314,6 @@ PHP_METHOD(dotnet, __construct)
 		RETURN_THROWS();
 	}
 }
-/* }}} */
 
 void php_com_dotnet_mshutdown(void)
 {

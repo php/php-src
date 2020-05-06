@@ -30,7 +30,7 @@
 
 #if U_ICU_VERSION_MAJOR_NUM >= 56
 static const UNormalizer2 *intl_get_normalizer(zend_long form, UErrorCode *err)
-{/*{{{*/
+{
 	switch (form)
 	{
 		case NORMALIZER_FORM_C:
@@ -52,20 +52,20 @@ static const UNormalizer2 *intl_get_normalizer(zend_long form, UErrorCode *err)
 
 	*err = U_ILLEGAL_ARGUMENT_ERROR;
 	return NULL;
-}/*}}}*/
+}
 
 static int32_t intl_normalize(zend_long form, const UChar *src, int32_t src_len, UChar *dst, int32_t dst_len, UErrorCode *err)
-{/*{{{*/
+{
 	const UNormalizer2 *norm = intl_get_normalizer(form, err);
 	if (U_FAILURE(*err)) {
 		return -1;
 	}
 
 	return unorm2_normalize(norm, src, src_len, dst, dst_len, err);
-}/*}}}*/
+}
 
 static UBool intl_is_normalized(zend_long form, const UChar *uinput, int32_t uinput_len, UErrorCode *err)
-{/*{{{*/
+{
 	const UNormalizer2 *norm = intl_get_normalizer(form, err);
 
 	if(U_FAILURE(*err)) {
@@ -73,12 +73,10 @@ static UBool intl_is_normalized(zend_long form, const UChar *uinput, int32_t uin
 	}
 
 	return unorm2_isNormalized(norm, uinput, uinput_len, err);
-}/*}}}*/
+}
 #endif
 
-/* Normalize a string. }}} */
-/* Normalize a string.
- */
+/* Normalize a string. */
 PHP_FUNCTION( normalizer_normalize )
 {
 	char*			input = NULL;
@@ -215,11 +213,8 @@ PHP_FUNCTION( normalizer_normalize )
 	/* Return it. */
 	RETVAL_NEW_STR( u8str );
 }
-/* }}} */
 
-/* Test if a string is in a given normalization form. }}} */
-/* Test if a string is in a given normalization form.
- */
+/* Test if a string is in a given normalization form. */
 PHP_FUNCTION( normalizer_is_normalized )
 {
 	char*	 	input = NULL;
@@ -300,11 +295,8 @@ PHP_FUNCTION( normalizer_is_normalized )
 
 	RETURN_FALSE;
 }
-/* }}} */
 
-/* Returns the Decomposition_Mapping property for the given UTF-8 encoded code point. }}} */
-/* Returns the Decomposition_Mapping property for the given UTF-8 encoded code point.
- */
+/* Returns the Decomposition_Mapping property for the given UTF-8 encoded code point. */
 #if U_ICU_VERSION_MAJOR_NUM >= 56
 PHP_FUNCTION( normalizer_get_raw_decomposition )
 {
@@ -350,4 +342,4 @@ PHP_FUNCTION( normalizer_get_raw_decomposition )
 	RETVAL_NEW_STR(intl_convert_utf16_to_utf8(decomposition, decomposition_length, &status));
 }
 #endif
-/* }}} */
+

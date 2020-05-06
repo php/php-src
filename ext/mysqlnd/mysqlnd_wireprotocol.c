@@ -41,7 +41,7 @@ const char mysqlnd_read_body_name[]		= "mysqlnd_read_body";
 #define ERROR_MARKER 0xFF
 #define EODATA_MARKER 0xFE
 
-/* {{{ mysqlnd_command_to_text
+/* mysqlnd_command_to_text
  */
 const char * const mysqlnd_command_to_text[COM_END] =
 {
@@ -54,9 +54,6 @@ const char * const mysqlnd_command_to_text[COM_END] =
   "STMT_RESET", "SET_OPTION", "STMT_FETCH", "DAEMON", "BINLOG_DUMP_GTID",
   "RESET_CONNECTION"
 };
-/* }}} */
-
-
 
 static enum_mysqlnd_collected_stats packet_type_to_statistic_byte_count[PROT_LAST] =
 {
@@ -87,7 +84,7 @@ static enum_mysqlnd_collected_stats packet_type_to_statistic_packet_count[PROT_L
 };
 
 
-/* {{{ php_mysqlnd_net_field_length
+/* php_mysqlnd_net_field_length
    Get next field's length */
 zend_ulong
 php_mysqlnd_net_field_length(const zend_uchar **packet)
@@ -114,10 +111,8 @@ php_mysqlnd_net_field_length(const zend_uchar **packet)
 			return (zend_ulong) uint4korr(p+1);
 	}
 }
-/* }}} */
 
-
-/* {{{ php_mysqlnd_net_field_length_ll
+/* php_mysqlnd_net_field_length_ll
    Get next field's length */
 uint64_t
 php_mysqlnd_net_field_length_ll(const zend_uchar **packet)
@@ -144,10 +139,8 @@ php_mysqlnd_net_field_length_ll(const zend_uchar **packet)
 			return (uint64_t) uint8korr(p + 1);
 	}
 }
-/* }}} */
 
-
-/* {{{ php_mysqlnd_net_store_length */
+/* php_mysqlnd_net_store_length */
 zend_uchar *
 php_mysqlnd_net_store_length(zend_uchar *packet, const uint64_t length)
 {
@@ -171,10 +164,8 @@ php_mysqlnd_net_store_length(zend_uchar *packet, const uint64_t length)
 	int8store(packet, length);
 	return packet + 8;
 }
-/* }}} */
 
-
-/* {{{ php_mysqlnd_net_store_length_size */
+/* php_mysqlnd_net_store_length_size */
 size_t
 php_mysqlnd_net_store_length_size(uint64_t length)
 {
@@ -189,10 +180,8 @@ php_mysqlnd_net_store_length_size(uint64_t length)
 	}
 	return 9;
 }
-/* }}} */
 
-
-/* {{{ php_mysqlnd_read_error_from_line */
+/* php_mysqlnd_read_error_from_line */
 static enum_func_status
 php_mysqlnd_read_error_from_line(const zend_uchar * const buf, const size_t buf_len,
 								 char *error, const size_t error_buf_len,
@@ -233,10 +222,8 @@ end:
 
 	DBG_RETURN(FAIL);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_read_header */
+/* mysqlnd_read_header */
 static enum_func_status
 mysqlnd_read_header(MYSQLND_PFC * pfc, MYSQLND_VIO * vio, MYSQLND_PACKET_HEADER * header,
 					MYSQLND_STATS * conn_stats, MYSQLND_ERROR_INFO * error_info)
@@ -274,10 +261,8 @@ mysqlnd_read_header(MYSQLND_PFC * pfc, MYSQLND_VIO * vio, MYSQLND_PACKET_HEADER 
 			  pfc->data->packet_no, header->packet_no, header->size);
 	DBG_RETURN(FAIL);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_read_packet_header_and_body */
+/* mysqlnd_read_packet_header_and_body */
 static enum_func_status
 mysqlnd_read_packet_header_and_body(MYSQLND_PACKET_HEADER * packet_header,
 									MYSQLND_PFC * pfc,
@@ -314,10 +299,8 @@ mysqlnd_read_packet_header_and_body(MYSQLND_PACKET_HEADER * packet_header,
 										1);
 	DBG_RETURN(PASS);
 }
-/* }}} */
 
-
-/* {{{ php_mysqlnd_greet_read */
+/* php_mysqlnd_greet_read */
 static enum_func_status
 php_mysqlnd_greet_read(MYSQLND_CONN_DATA * conn, void * _packet)
 {
@@ -457,10 +440,8 @@ premature_end:
 					 p - begin - packet->header.size);
 	DBG_RETURN(FAIL);
 }
-/* }}} */
 
-
-/* {{{ php_mysqlnd_greet_free_mem */
+/* php_mysqlnd_greet_free_mem */
 static
 void php_mysqlnd_greet_free_mem(void * _packet)
 {
@@ -478,12 +459,10 @@ void php_mysqlnd_greet_free_mem(void * _packet)
 		p->auth_protocol = NULL;
 	}
 }
-/* }}} */
-
 
 #define AUTH_WRITE_BUFFER_LEN (MYSQLND_HEADER_SIZE + MYSQLND_MAX_ALLOWED_USER_LEN + SCRAMBLE_LENGTH + MYSQLND_MAX_ALLOWED_DB_LEN + 1 + 4096)
 
-/* {{{ php_mysqlnd_auth_write */
+/* php_mysqlnd_auth_write */
 static
 size_t php_mysqlnd_auth_write(MYSQLND_CONN_DATA * conn, void * _packet)
 {
@@ -631,12 +610,10 @@ size_t php_mysqlnd_auth_write(MYSQLND_CONN_DATA * conn, void * _packet)
 		DBG_RETURN(sent);
 	}
 }
-/* }}} */
-
 
 #define AUTH_RESP_BUFFER_SIZE 2048
 
-/* {{{ php_mysqlnd_auth_response_read */
+/* php_mysqlnd_auth_response_read */
 static enum_func_status
 php_mysqlnd_auth_response_read(MYSQLND_CONN_DATA * conn, void * _packet)
 {
@@ -732,10 +709,8 @@ premature_end:
 					 p - begin - packet->header.size);
 	DBG_RETURN(FAIL);
 }
-/* }}} */
 
-
-/* {{{ php_mysqlnd_auth_response_free_mem */
+/* php_mysqlnd_auth_response_free_mem */
 static void
 php_mysqlnd_auth_response_free_mem(void * _packet)
 {
@@ -756,10 +731,8 @@ php_mysqlnd_auth_response_free_mem(void * _packet)
 	}
 	p->new_auth_protocol_data_len = 0;
 }
-/* }}} */
 
-
-/* {{{ php_mysqlnd_change_auth_response_write */
+/* php_mysqlnd_change_auth_response_write */
 static size_t
 php_mysqlnd_change_auth_response_write(MYSQLND_CONN_DATA * conn, void * _packet)
 {
@@ -794,12 +767,10 @@ php_mysqlnd_change_auth_response_write(MYSQLND_CONN_DATA * conn, void * _packet)
 		DBG_RETURN(sent);
 	}
 }
-/* }}} */
-
 
 #define OK_BUFFER_SIZE 2048
 
-/* {{{ php_mysqlnd_ok_read */
+/* php_mysqlnd_ok_read */
 static enum_func_status
 php_mysqlnd_ok_read(MYSQLND_CONN_DATA * conn, void * _packet)
 {
@@ -872,10 +843,8 @@ premature_end:
 					 p - begin - packet->header.size);
 	DBG_RETURN(FAIL);
 }
-/* }}} */
 
-
-/* {{{ php_mysqlnd_ok_free_mem */
+/* php_mysqlnd_ok_free_mem */
 static void
 php_mysqlnd_ok_free_mem(void * _packet)
 {
@@ -885,10 +854,8 @@ php_mysqlnd_ok_free_mem(void * _packet)
 		p->message = NULL;
 	}
 }
-/* }}} */
 
-
-/* {{{ php_mysqlnd_eof_read */
+/* php_mysqlnd_eof_read */
 static enum_func_status
 php_mysqlnd_eof_read(MYSQLND_CONN_DATA * conn, void * _packet)
 {
@@ -959,10 +926,8 @@ premature_end:
 					 p - begin - packet->header.size);
 	DBG_RETURN(FAIL);
 }
-/* }}} */
 
-
-/* {{{ php_mysqlnd_cmd_write */
+/* php_mysqlnd_cmd_write */
 size_t php_mysqlnd_cmd_write(MYSQLND_CONN_DATA * conn, void * _packet)
 {
 	/* Let's have some space, which we can use, if not enough, we will allocate new buffer */
@@ -1027,10 +992,8 @@ end:
 	}
 	DBG_RETURN(sent);
 }
-/* }}} */
 
-
-/* {{{ php_mysqlnd_rset_header_read */
+/* php_mysqlnd_rset_header_read */
 static enum_func_status
 php_mysqlnd_rset_header_read(MYSQLND_CONN_DATA * conn, void * _packet)
 {
@@ -1138,10 +1101,8 @@ premature_end:
 					 p - begin - packet->header.size);
 	DBG_RETURN(FAIL);
 }
-/* }}} */
 
-
-/* {{{ php_mysqlnd_rset_header_free_mem */
+/* php_mysqlnd_rset_header_free_mem */
 static
 void php_mysqlnd_rset_header_free_mem(void * _packet)
 {
@@ -1153,7 +1114,6 @@ void php_mysqlnd_rset_header_free_mem(void * _packet)
 	}
 	DBG_VOID_RETURN;
 }
-/* }}} */
 
 #define READ_RSET_FIELD(field_name) do { \
 		len = php_mysqlnd_net_field_length(&p); \
@@ -1171,7 +1131,7 @@ void php_mysqlnd_rset_header_free_mem(void * _packet)
 	} while (0)
 
 
-/* {{{ php_mysqlnd_rset_field_read */
+/* php_mysqlnd_rset_field_read */
 static enum_func_status
 php_mysqlnd_rset_field_read(MYSQLND_CONN_DATA * conn, void * _packet)
 {
@@ -1350,10 +1310,8 @@ premature_end:
 			 		"shorter than expected", p - begin - packet->header.size);
 	DBG_RETURN(FAIL);
 }
-/* }}} */
 
-
-/* {{{ php_mysqlnd_read_row_ex */
+/* php_mysqlnd_read_row_ex */
 static enum_func_status
 php_mysqlnd_read_row_ex(MYSQLND_PFC * pfc,
 						MYSQLND_VIO * vio,
@@ -1435,10 +1393,8 @@ php_mysqlnd_read_row_ex(MYSQLND_PFC * pfc,
 	}
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ php_mysqlnd_rowp_read_binary_protocol */
+/* php_mysqlnd_rowp_read_binary_protocol */
 enum_func_status
 php_mysqlnd_rowp_read_binary_protocol(MYSQLND_ROW_BUFFER * row_buffer, zval * fields,
 									  const unsigned int field_count, const MYSQLND_FIELD * const fields_metadata,
@@ -1526,10 +1482,8 @@ php_mysqlnd_rowp_read_binary_protocol(MYSQLND_ROW_BUFFER * row_buffer, zval * fi
 
 	DBG_RETURN(PASS);
 }
-/* }}} */
 
-
-/* {{{ php_mysqlnd_rowp_read_text_protocol */
+/* php_mysqlnd_rowp_read_text_protocol */
 enum_func_status
 php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_ROW_BUFFER * row_buffer, zval * fields,
 									unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
@@ -1679,10 +1633,8 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_ROW_BUFFER * row_buffer, zval * 
 
 	DBG_RETURN(PASS);
 }
-/* }}} */
 
-
-/* {{{ php_mysqlnd_rowp_read_text_protocol_zval */
+/* php_mysqlnd_rowp_read_text_protocol_zval */
 enum_func_status
 php_mysqlnd_rowp_read_text_protocol_zval(MYSQLND_ROW_BUFFER * row_buffer, zval * fields,
 										 const unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
@@ -1693,10 +1645,8 @@ php_mysqlnd_rowp_read_text_protocol_zval(MYSQLND_ROW_BUFFER * row_buffer, zval *
 	ret = php_mysqlnd_rowp_read_text_protocol_aux(row_buffer, fields, field_count, fields_metadata, as_int_or_float, stats);
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ php_mysqlnd_rowp_read_text_protocol_c */
+/* php_mysqlnd_rowp_read_text_protocol_c */
 enum_func_status
 php_mysqlnd_rowp_read_text_protocol_c(MYSQLND_ROW_BUFFER * row_buffer, zval * fields,
 									  const unsigned int field_count, const MYSQLND_FIELD * const fields_metadata,
@@ -1707,10 +1657,8 @@ php_mysqlnd_rowp_read_text_protocol_c(MYSQLND_ROW_BUFFER * row_buffer, zval * fi
 	ret = php_mysqlnd_rowp_read_text_protocol_aux(row_buffer, fields, field_count, fields_metadata, as_int_or_float, stats);
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ php_mysqlnd_rowp_read */
+/* php_mysqlnd_rowp_read */
 /*
   if normal statements => packet->fields is created by this function,
   if PS => packet->fields is passed from outside
@@ -1807,10 +1755,8 @@ php_mysqlnd_rowp_read(MYSQLND_CONN_DATA * conn, void * _packet)
 end:
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ php_mysqlnd_rowp_free_mem */
+/* php_mysqlnd_rowp_free_mem */
 static void
 php_mysqlnd_rowp_free_mem(void * _packet)
 {
@@ -1831,10 +1777,8 @@ php_mysqlnd_rowp_free_mem(void * _packet)
 	*/
 	DBG_VOID_RETURN;
 }
-/* }}} */
 
-
-/* {{{ php_mysqlnd_stats_read */
+/* php_mysqlnd_stats_read */
 static enum_func_status
 php_mysqlnd_stats_read(MYSQLND_CONN_DATA * conn, void * _packet)
 {
@@ -1860,10 +1804,8 @@ php_mysqlnd_stats_read(MYSQLND_CONN_DATA * conn, void * _packet)
 
 	DBG_RETURN(PASS);
 }
-/* }}} */
 
-
-/* {{{ php_mysqlnd_stats_free_mem */
+/* php_mysqlnd_stats_free_mem */
 static
 void php_mysqlnd_stats_free_mem(void * _packet)
 {
@@ -1873,14 +1815,12 @@ void php_mysqlnd_stats_free_mem(void * _packet)
 		p->message.s = NULL;
 	}
 }
-/* }}} */
-
 
 /* 1 + 4 (id) + 2 (field_c) + 2 (param_c) + 1 (filler) + 2 (warnings ) */
 #define PREPARE_RESPONSE_SIZE_41 9
 #define PREPARE_RESPONSE_SIZE_50 12
 
-/* {{{ php_mysqlnd_prepare_read */
+/* php_mysqlnd_prepare_read */
 static enum_func_status
 php_mysqlnd_prepare_read(MYSQLND_CONN_DATA * conn, void * _packet)
 {
@@ -1960,10 +1900,8 @@ premature_end:
 					 p - begin - packet->header.size);
 	DBG_RETURN(FAIL);
 }
-/* }}} */
 
-
-/* {{{ php_mysqlnd_chg_user_read */
+/* php_mysqlnd_chg_user_read */
 static enum_func_status
 php_mysqlnd_chg_user_read(MYSQLND_CONN_DATA * conn, void * _packet)
 {
@@ -2030,10 +1968,8 @@ premature_end:
 						 p - begin - packet->header.size);
 	DBG_RETURN(FAIL);
 }
-/* }}} */
 
-
-/* {{{ php_mysqlnd_chg_user_free_mem */
+/* php_mysqlnd_chg_user_free_mem */
 static void
 php_mysqlnd_chg_user_free_mem(void * _packet)
 {
@@ -2051,10 +1987,8 @@ php_mysqlnd_chg_user_free_mem(void * _packet)
 	}
 	p->new_auth_protocol_data_len = 0;
 }
-/* }}} */
 
-
-/* {{{ php_mysqlnd_sha256_pk_request_write */
+/* php_mysqlnd_sha256_pk_request_write */
 static
 size_t php_mysqlnd_sha256_pk_request_write(MYSQLND_CONN_DATA * conn, void * _packet)
 {
@@ -2072,12 +2006,10 @@ size_t php_mysqlnd_sha256_pk_request_write(MYSQLND_CONN_DATA * conn, void * _pac
 
 	DBG_RETURN(sent);
 }
-/* }}} */
-
 
 #define SHA256_PK_REQUEST_RESP_BUFFER_SIZE 2048
 
-/* {{{ php_mysqlnd_sha256_pk_request_response_read */
+/* php_mysqlnd_sha256_pk_request_response_read */
 static enum_func_status
 php_mysqlnd_sha256_pk_request_response_read(MYSQLND_CONN_DATA * conn, void * _packet)
 {
@@ -2115,10 +2047,8 @@ premature_end:
 					 p - begin - packet->header.size);
 	DBG_RETURN(FAIL);
 }
-/* }}} */
 
-
-/* {{{ php_mysqlnd_sha256_pk_request_response_free_mem */
+/* php_mysqlnd_sha256_pk_request_response_free_mem */
 static void
 php_mysqlnd_sha256_pk_request_response_free_mem(void * _packet)
 {
@@ -2129,7 +2059,6 @@ php_mysqlnd_sha256_pk_request_response_free_mem(void * _packet)
 	}
 	p->public_key_len = 0;
 }
-/* }}} */
 
 static
 size_t php_mysqlnd_cached_sha2_result_write(MYSQLND_CONN_DATA * conn, void * _packet)
@@ -2226,7 +2155,7 @@ premature_end:
 	DBG_RETURN(FAIL);
 }
 
-/* {{{ packet_methods */
+/* packet_methods */
 static
 mysqlnd_packet_methods packet_methods[PROT_LAST] =
 {
@@ -2311,10 +2240,8 @@ mysqlnd_packet_methods packet_methods[PROT_LAST] =
 		NULL
 	} /* PROT_CACHED_SHA2_RESULT_PACKET */
 };
-/* }}} */
 
-
-/* {{{ mysqlnd_protocol::init_greet_packet */
+/* mysqlnd_protocol::init_greet_packet */
 static void
 MYSQLND_METHOD(mysqlnd_protocol, init_greet_packet)(struct st_mysqlnd_packet_greet *packet)
 {
@@ -2323,10 +2250,8 @@ MYSQLND_METHOD(mysqlnd_protocol, init_greet_packet)(struct st_mysqlnd_packet_gre
 	packet->header.m = &packet_methods[PROT_GREET_PACKET];
 	DBG_VOID_RETURN;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_protocol::init_auth_packet */
+/* mysqlnd_protocol::init_auth_packet */
 static void
 MYSQLND_METHOD(mysqlnd_protocol, init_auth_packet)(struct st_mysqlnd_packet_auth *packet)
 {
@@ -2335,10 +2260,8 @@ MYSQLND_METHOD(mysqlnd_protocol, init_auth_packet)(struct st_mysqlnd_packet_auth
 	packet->header.m = &packet_methods[PROT_AUTH_PACKET];
 	DBG_VOID_RETURN;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_protocol::init_auth_response_packet */
+/* mysqlnd_protocol::init_auth_response_packet */
 static void
 MYSQLND_METHOD(mysqlnd_protocol, init_auth_response_packet)(struct st_mysqlnd_packet_auth_response *packet)
 {
@@ -2347,10 +2270,8 @@ MYSQLND_METHOD(mysqlnd_protocol, init_auth_response_packet)(struct st_mysqlnd_pa
 	packet->header.m = &packet_methods[PROT_AUTH_RESP_PACKET];
 	DBG_VOID_RETURN;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_protocol::init_change_auth_response_packet */
+/* mysqlnd_protocol::init_change_auth_response_packet */
 static void
 MYSQLND_METHOD(mysqlnd_protocol, init_change_auth_response_packet)(struct st_mysqlnd_packet_change_auth_response *packet)
 {
@@ -2359,10 +2280,8 @@ MYSQLND_METHOD(mysqlnd_protocol, init_change_auth_response_packet)(struct st_mys
 	packet->header.m = &packet_methods[PROT_CHANGE_AUTH_RESP_PACKET];
 	DBG_VOID_RETURN;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_protocol::init_ok_packet */
+/* mysqlnd_protocol::init_ok_packet */
 static void
 MYSQLND_METHOD(mysqlnd_protocol, init_ok_packet)(struct st_mysqlnd_packet_ok *packet)
 {
@@ -2371,10 +2290,8 @@ MYSQLND_METHOD(mysqlnd_protocol, init_ok_packet)(struct st_mysqlnd_packet_ok *pa
 	packet->header.m = &packet_methods[PROT_OK_PACKET];
 	DBG_VOID_RETURN;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_protocol::init_eof_packet */
+/* mysqlnd_protocol::init_eof_packet */
 static void
 MYSQLND_METHOD(mysqlnd_protocol, init_eof_packet)(struct st_mysqlnd_packet_eof *packet)
 {
@@ -2383,10 +2300,8 @@ MYSQLND_METHOD(mysqlnd_protocol, init_eof_packet)(struct st_mysqlnd_packet_eof *
 	packet->header.m = &packet_methods[PROT_EOF_PACKET];
 	DBG_VOID_RETURN;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_protocol::init_command_packet */
+/* mysqlnd_protocol::init_command_packet */
 static void
 MYSQLND_METHOD(mysqlnd_protocol, init_command_packet)(struct st_mysqlnd_packet_command *packet)
 {
@@ -2395,10 +2310,8 @@ MYSQLND_METHOD(mysqlnd_protocol, init_command_packet)(struct st_mysqlnd_packet_c
 	packet->header.m = &packet_methods[PROT_CMD_PACKET];
 	DBG_VOID_RETURN;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_protocol::init_rset_packet */
+/* mysqlnd_protocol::init_rset_packet */
 static void
 MYSQLND_METHOD(mysqlnd_protocol, init_rset_header_packet)(struct st_mysqlnd_packet_rset_header *packet)
 {
@@ -2407,10 +2320,8 @@ MYSQLND_METHOD(mysqlnd_protocol, init_rset_header_packet)(struct st_mysqlnd_pack
 	packet->header.m = &packet_methods[PROT_RSET_HEADER_PACKET];
 	DBG_VOID_RETURN;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_protocol::init_result_field_packet */
+/* mysqlnd_protocol::init_result_field_packet */
 static void
 MYSQLND_METHOD(mysqlnd_protocol, init_result_field_packet)(struct st_mysqlnd_packet_res_field *packet)
 {
@@ -2419,10 +2330,8 @@ MYSQLND_METHOD(mysqlnd_protocol, init_result_field_packet)(struct st_mysqlnd_pac
 	packet->header.m = &packet_methods[PROT_RSET_FLD_PACKET];
 	DBG_VOID_RETURN;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_protocol::init_row_packet */
+/* mysqlnd_protocol::init_row_packet */
 static void
 MYSQLND_METHOD(mysqlnd_protocol, init_row_packet)(struct st_mysqlnd_packet_row *packet)
 {
@@ -2431,10 +2340,8 @@ MYSQLND_METHOD(mysqlnd_protocol, init_row_packet)(struct st_mysqlnd_packet_row *
 	packet->header.m = &packet_methods[PROT_ROW_PACKET];
 	DBG_VOID_RETURN;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_protocol::init_stats_packet */
+/* mysqlnd_protocol::init_stats_packet */
 static void
 MYSQLND_METHOD(mysqlnd_protocol, init_stats_packet)(struct st_mysqlnd_packet_stats *packet)
 {
@@ -2443,10 +2350,8 @@ MYSQLND_METHOD(mysqlnd_protocol, init_stats_packet)(struct st_mysqlnd_packet_sta
 	packet->header.m = &packet_methods[PROT_STATS_PACKET];
 	DBG_VOID_RETURN;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_protocol::init_prepare_response_packet */
+/* mysqlnd_protocol::init_prepare_response_packet */
 static void
 MYSQLND_METHOD(mysqlnd_protocol, init_prepare_response_packet)(struct st_mysqlnd_packet_prepare_response *packet)
 {
@@ -2455,10 +2360,8 @@ MYSQLND_METHOD(mysqlnd_protocol, init_prepare_response_packet)(struct st_mysqlnd
 	packet->header.m = &packet_methods[PROT_PREPARE_RESP_PACKET];
 	DBG_VOID_RETURN;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_protocol::init_change_user_response_packet */
+/* mysqlnd_protocol::init_change_user_response_packet */
 static void
 MYSQLND_METHOD(mysqlnd_protocol, init_change_user_response_packet)(struct st_mysqlnd_packet_chg_user_resp *packet)
 {
@@ -2467,10 +2370,8 @@ MYSQLND_METHOD(mysqlnd_protocol, init_change_user_response_packet)(struct st_mys
 	packet->header.m = &packet_methods[PROT_CHG_USER_RESP_PACKET];
 	DBG_VOID_RETURN;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_protocol::init_sha256_pk_request_packet */
+/* mysqlnd_protocol::init_sha256_pk_request_packet */
 static void
 MYSQLND_METHOD(mysqlnd_protocol, init_sha256_pk_request_packet)(struct st_mysqlnd_packet_sha256_pk_request *packet)
 {
@@ -2479,10 +2380,8 @@ MYSQLND_METHOD(mysqlnd_protocol, init_sha256_pk_request_packet)(struct st_mysqln
 	packet->header.m = &packet_methods[PROT_SHA256_PK_REQUEST_PACKET];
 	DBG_VOID_RETURN;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_protocol::init_sha256_pk_request_response_packet */
+/* mysqlnd_protocol::init_sha256_pk_request_response_packet */
 static void
 MYSQLND_METHOD(mysqlnd_protocol, init_sha256_pk_request_response_packet)(struct st_mysqlnd_packet_sha256_pk_request_response *packet)
 {
@@ -2491,9 +2390,8 @@ MYSQLND_METHOD(mysqlnd_protocol, init_sha256_pk_request_response_packet)(struct 
 	packet->header.m = &packet_methods[PROT_SHA256_PK_REQUEST_RESPONSE_PACKET];
 	DBG_VOID_RETURN;
 }
-/* }}} */
 
-/* {{{ mysqlnd_protocol::init_cached_sha2_result_packet */
+/* mysqlnd_protocol::init_cached_sha2_result_packet */
 static void
 MYSQLND_METHOD(mysqlnd_protocol, init_cached_sha2_result_packet)(struct st_mysqlnd_packet_cached_sha2_result *packet)
 {
@@ -2502,10 +2400,8 @@ MYSQLND_METHOD(mysqlnd_protocol, init_cached_sha2_result_packet)(struct st_mysql
 	packet->header.m = &packet_methods[PROT_CACHED_SHA2_RESULT_PACKET];
 	DBG_VOID_RETURN;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_protocol::send_command */
+/* mysqlnd_protocol::send_command */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_protocol, send_command)(
 		MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * payload_decoder_factory,
@@ -2568,10 +2464,8 @@ MYSQLND_METHOD(mysqlnd_protocol, send_command)(
 	PACKET_FREE(&cmd_packet);
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_protocol::send_command_handle_OK */
+/* mysqlnd_protocol::send_command_handle_OK */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_protocol, send_command_handle_OK)(
 						MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const payload_decoder_factory,
@@ -2624,10 +2518,8 @@ end:
 	DBG_INF(ret == PASS ? "PASS":"FAIL");
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_protocol::send_command_handle_EOF */
+/* mysqlnd_protocol::send_command_handle_EOF */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_protocol, send_command_handle_EOF)(
 						MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const payload_decoder_factory,
@@ -2663,10 +2555,8 @@ MYSQLND_METHOD(mysqlnd_protocol, send_command_handle_EOF)(
 	DBG_INF(ret == PASS ? "PASS":"FAIL");
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ send_command_handle_response */
+/* send_command_handle_response */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_protocol, send_command_handle_response)(
 		MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * payload_decoder_factory,
@@ -2703,8 +2593,6 @@ MYSQLND_METHOD(mysqlnd_protocol, send_command_handle_response)(
 	DBG_INF(ret == PASS ? "PASS":"FAIL");
 	DBG_RETURN(ret);
 }
-/* }}} */
-
 
 MYSQLND_CLASS_METHODS_START(mysqlnd_protocol_payload_decoder_factory)
 	MYSQLND_METHOD(mysqlnd_protocol, init_greet_packet),
@@ -2731,7 +2619,7 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_protocol_payload_decoder_factory)
 MYSQLND_CLASS_METHODS_END;
 
 
-/* {{{ mysqlnd_protocol_payload_decoder_factory_init */
+/* mysqlnd_protocol_payload_decoder_factory_init */
 PHPAPI MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY *
 mysqlnd_protocol_payload_decoder_factory_init(MYSQLND_CONN_DATA * conn, const zend_bool persistent)
 {
@@ -2740,10 +2628,8 @@ mysqlnd_protocol_payload_decoder_factory_init(MYSQLND_CONN_DATA * conn, const ze
 	ret = MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_object_factory).get_protocol_payload_decoder_factory(conn, persistent);
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_protocol_payload_decoder_factory_free */
+/* mysqlnd_protocol_payload_decoder_factory_free */
 PHPAPI void
 mysqlnd_protocol_payload_decoder_factory_free(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory)
 {
@@ -2755,4 +2641,4 @@ mysqlnd_protocol_payload_decoder_factory_free(MYSQLND_PROTOCOL_PAYLOAD_DECODER_F
 	}
 	DBG_VOID_RETURN;
 }
-/* }}} */
+

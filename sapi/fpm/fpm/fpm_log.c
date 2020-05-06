@@ -28,7 +28,7 @@
 static char *fpm_log_format = NULL;
 static int fpm_log_fd = -1;
 
-int fpm_log_open(int reopen) /* {{{ */
+int fpm_log_open(int reopen)
 {
 	struct fpm_worker_pool_s *wp;
 	int ret = 1;
@@ -64,10 +64,9 @@ int fpm_log_open(int reopen) /* {{{ */
 
 	return ret;
 }
-/* }}} */
 
-/* }}} */
-int fpm_log_init_child(struct fpm_worker_pool_s *wp)  /* {{{ */
+
+int fpm_log_init_child(struct fpm_worker_pool_s *wp)
 {
 	if (!wp || !wp->config) {
 		return -1;
@@ -93,9 +92,8 @@ int fpm_log_init_child(struct fpm_worker_pool_s *wp)  /* {{{ */
 
 	return 0;
 }
-/* }}} */
 
-int fpm_log_write(char *log_format) /* {{{ */
+int fpm_log_write(char *log_format)
 {
 	char *s, *b;
 	char buffer[FPM_LOG_BUFFER+1];
@@ -470,4 +468,4 @@ int fpm_log_write(char *log_format) /* {{{ */
 
 	return 0;
 }
-/* }}} */
+

@@ -62,7 +62,7 @@ static struct st_mysqlnd_typeii_plugin_example mysqlnd_example_plugin =
 };
 
 
-/* {{{ mysqlnd_example_plugin_end */
+/* mysqlnd_example_plugin_end */
 static
 enum_func_status mysqlnd_example_plugin_end(void * p)
 {
@@ -72,10 +72,8 @@ enum_func_status mysqlnd_example_plugin_end(void * p)
 	plugin->plugin_header.plugin_stats.values = NULL;
 	DBG_RETURN(PASS);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_example_plugin_register */
+/* mysqlnd_example_plugin_register */
 void
 mysqlnd_example_plugin_register(void)
 {
@@ -83,7 +81,7 @@ mysqlnd_example_plugin_register(void)
 	mysqlnd_example_plugin.plugin_header.plugin_stats.values = mysqlnd_plugin_example_stats;
 	mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_example_plugin);
 }
-/* }}} */
+
 #endif /* defined(MYSQLND_DBG_ENABLED) && MYSQLND_DBG_ENABLED == 1 */
 /*--------------------------------------------------------------------*/
 
@@ -92,16 +90,14 @@ static HashTable mysqlnd_registered_plugins;
 static unsigned int mysqlnd_plugins_counter = 0;
 
 
-/* {{{ mysqlnd_plugin_subsystem_init */
+/* mysqlnd_plugin_subsystem_init */
 void
 mysqlnd_plugin_subsystem_init(void)
 {
 	zend_hash_init(&mysqlnd_registered_plugins, 4 /* initial hash size */, NULL /* hash_func */, NULL /* dtor */, TRUE /* pers */);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_plugin_end_apply_func */
+/* mysqlnd_plugin_end_apply_func */
 int
 mysqlnd_plugin_end_apply_func(zval *el)
 {
@@ -111,28 +107,22 @@ mysqlnd_plugin_end_apply_func(zval *el)
 	}
 	return ZEND_HASH_APPLY_REMOVE;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_plugin_subsystem_end */
+/* mysqlnd_plugin_subsystem_end */
 void
 mysqlnd_plugin_subsystem_end(void)
 {
 	zend_hash_apply(&mysqlnd_registered_plugins, mysqlnd_plugin_end_apply_func);
 	zend_hash_destroy(&mysqlnd_registered_plugins);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_plugin_register */
+/* mysqlnd_plugin_register */
 PHPAPI unsigned int mysqlnd_plugin_register()
 {
 	return mysqlnd_plugin_register_ex(NULL);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_plugin_register_ex */
+/* mysqlnd_plugin_register_ex */
 PHPAPI unsigned int mysqlnd_plugin_register_ex(struct st_mysqlnd_plugin_header * plugin)
 {
 	if (plugin) {
@@ -146,10 +136,8 @@ PHPAPI unsigned int mysqlnd_plugin_register_ex(struct st_mysqlnd_plugin_header *
 	}
 	return mysqlnd_plugins_counter++;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_plugin_find */
+/* mysqlnd_plugin_find */
 PHPAPI void * mysqlnd_plugin_find(const char * const name)
 {
 	void * plugin;
@@ -158,10 +146,8 @@ PHPAPI void * mysqlnd_plugin_find(const char * const name)
 	}
 	return NULL;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_plugin_apply_with_argument */
+/* mysqlnd_plugin_apply_with_argument */
 PHPAPI void mysqlnd_plugin_apply_with_argument(apply_func_arg_t apply_func, void * argument)
 {
 	zval *val;
@@ -177,12 +163,10 @@ PHPAPI void mysqlnd_plugin_apply_with_argument(apply_func_arg_t apply_func, void
 		}
 	} ZEND_HASH_FOREACH_END();
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_plugin_count */
+/* mysqlnd_plugin_count */
 PHPAPI unsigned int mysqlnd_plugin_count()
 {
 	return mysqlnd_plugins_counter;
 }
-/* }}} */
+

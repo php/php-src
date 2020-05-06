@@ -28,7 +28,7 @@
 
 #define MAX_XBM_LINE_SIZE 255
 
-/* {{{ gdImagePtr gdImageCreateFromXbm */
+/* gdImagePtr gdImageCreateFromXbm */
 gdImagePtr gdImageCreateFromXbm(FILE * fd)
 {
 	char fline[MAX_XBM_LINE_SIZE];
@@ -156,9 +156,8 @@ gdImagePtr gdImageCreateFromXbm(FILE * fd)
 	gdImageDestroy(im);
 	return 0;
 }
-/* }}} */
 
-/* {{{ gdCtxPrintf */
+/* gdCtxPrintf */
 void gdCtxPrintf(gdIOCtx * out, const char *format, ...)
 {
 	char *buf;
@@ -171,9 +170,8 @@ void gdCtxPrintf(gdIOCtx * out, const char *format, ...)
 	out->putBuf(out, buf, len);
 	efree(buf);
 }
-/* }}} */
 
-/* {{{ gdImageXbmCtx */
+/* gdImageXbmCtx */
 void gdImageXbmCtx(gdImagePtr image, char* file_name, int fg, gdIOCtx * out)
 {
 	int x, y, c, b, sx, sy, p;
@@ -232,4 +230,4 @@ void gdImageXbmCtx(gdImagePtr image, char* file_name, int fg, gdIOCtx * out)
 	}
 	gdCtxPrintf(out, "};\n");
 }
-/* }}} */
+

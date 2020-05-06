@@ -119,7 +119,6 @@ PHP_FUNCTION( transliterator_create )
 
 	/* success, leave return_value as it is (set by create_transliterator) */
 }
-/* }}} */
 
 /* Opens a transliterator by id. */
 PHP_FUNCTION( transliterator_create_from_rules )
@@ -186,7 +185,6 @@ PHP_FUNCTION( transliterator_create_from_rules )
 	/* no need to close the transliterator manually on construction error */
 	INTL_METHOD_CHECK_STATUS_OR_NULL( to, "transliterator_create_from_rules: internal constructor call failed" );
 }
-/* }}} */
 
 /* Opens the inverse transliterator transliterator. */
 PHP_FUNCTION( transliterator_create_inverse )
@@ -215,7 +213,6 @@ PHP_FUNCTION( transliterator_create_inverse )
 	/* no need to close the transliterator manually on construction error */
 	INTL_METHOD_CHECK_STATUS_OR_NULL( to, "transliterator_create: internal constructor call failed" );
 }
-/* }}} */
 
 /* Return an array with the registered transliterator IDs. */
 PHP_FUNCTION( transliterator_list_ids )
@@ -261,7 +258,6 @@ PHP_FUNCTION( transliterator_list_ids )
 			"Failed to build array of registered transliterators", 0 );
 	}
 }
-/* }}} */
 
 /* Transliterate a string. */
 PHP_FUNCTION( transliterator_transliterate )
@@ -426,7 +422,6 @@ cleanup:
 
 	zval_ptr_dtor( &tmp_object );
 }
-/* }}} */
 
 PHP_METHOD( Transliterator, __construct )
 {
@@ -454,8 +449,6 @@ PHP_FUNCTION( transliterator_get_error_code )
 
 	RETURN_LONG( (zend_long) TRANSLITERATOR_ERROR_CODE( to ) );
 }
-/* }}} */
-
 
 /* Get the last error message for this transliterator. */
 PHP_FUNCTION( transliterator_get_error_message )
@@ -479,4 +472,4 @@ PHP_FUNCTION( transliterator_get_error_message )
 	message = intl_error_get_message( TRANSLITERATOR_ERROR_P( to ) );
 	RETURN_STR( message );
 }
-/* }}} */
+

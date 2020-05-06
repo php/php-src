@@ -13,7 +13,7 @@ extern int php_string_to_if_index(const char *val, unsigned *out);
 
 #if HAVE_IPV6
 /* Sets addr by hostname, or by ip in string form (AF_INET6) */
-int php_set_inet6_addr(struct sockaddr_in6 *sin6, char *string, php_socket *php_sock) /* {{{ */
+int php_set_inet6_addr(struct sockaddr_in6 *sin6, char *string, php_socket *php_sock)
 {
 	struct in6_addr tmp;
 #if HAVE_GETADDRINFO
@@ -78,11 +78,11 @@ int php_set_inet6_addr(struct sockaddr_in6 *sin6, char *string, php_socket *php_
 
 	return 1;
 }
-/* }}} */
+
 #endif
 
 /* Sets addr by hostname, or by ip in string form (AF_INET)  */
-int php_set_inet_addr(struct sockaddr_in *sin, char *string, php_socket *php_sock) /* {{{ */
+int php_set_inet_addr(struct sockaddr_in *sin, char *string, php_socket *php_sock)
 {
 	struct in_addr tmp;
 	struct hostent *host_entry;
@@ -108,11 +108,10 @@ int php_set_inet_addr(struct sockaddr_in *sin, char *string, php_socket *php_soc
 
 	return 1;
 }
-/* }}} */
 
 /* Sets addr by hostname or by ip in string form (AF_INET or AF_INET6,
  * depending on the socket) */
-int php_set_inet46_addr(php_sockaddr_storage *ss, socklen_t *ss_len, char *string, php_socket *php_sock) /* {{{ */
+int php_set_inet46_addr(php_sockaddr_storage *ss, socklen_t *ss_len, char *string, php_socket *php_sock)
 {
 	if (php_sock->type == AF_INET) {
 		struct sockaddr_in t = {0};

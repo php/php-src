@@ -43,7 +43,7 @@ typedef struct {
 	size_t   pattern_len;
 } glob_s_t;
 
-PHPAPI char* _php_glob_stream_get_path(php_stream *stream, size_t *plen STREAMS_DC) /* {{{ */
+PHPAPI char* _php_glob_stream_get_path(php_stream *stream, size_t *plen STREAMS_DC)
 {
 	glob_s_t *pglob = (glob_s_t *)stream->abstract;
 
@@ -59,9 +59,8 @@ PHPAPI char* _php_glob_stream_get_path(php_stream *stream, size_t *plen STREAMS_
 		return NULL;
 	}
 }
-/* }}} */
 
-PHPAPI char* _php_glob_stream_get_pattern(php_stream *stream, size_t *plen STREAMS_DC) /* {{{ */
+PHPAPI char* _php_glob_stream_get_pattern(php_stream *stream, size_t *plen STREAMS_DC)
 {
 	glob_s_t *pglob = (glob_s_t *)stream->abstract;
 
@@ -77,9 +76,8 @@ PHPAPI char* _php_glob_stream_get_pattern(php_stream *stream, size_t *plen STREA
 		return NULL;
 	}
 }
-/* }}} */
 
-PHPAPI int _php_glob_stream_get_count(php_stream *stream, int *pflags STREAMS_DC) /* {{{ */
+PHPAPI int _php_glob_stream_get_count(php_stream *stream, int *pflags STREAMS_DC)
 {
 	glob_s_t *pglob = (glob_s_t *)stream->abstract;
 
@@ -95,9 +93,8 @@ PHPAPI int _php_glob_stream_get_count(php_stream *stream, int *pflags STREAMS_DC
 		return 0;
 	}
 }
-/* }}} */
 
-static void php_glob_stream_path_split(glob_s_t *pglob, const char *path, int get_path, const char **p_file) /* {{{ */
+static void php_glob_stream_path_split(glob_s_t *pglob, const char *path, int get_path, const char **p_file)
 {
 	const char *pos, *gpath = path;
 
@@ -123,9 +120,8 @@ static void php_glob_stream_path_split(glob_s_t *pglob, const char *path, int ge
 		pglob->path = estrndup(gpath, pglob->path_len);
 	}
 }
-/* }}} */
 
-static ssize_t php_glob_stream_read(php_stream *stream, char *buf, size_t count) /* {{{ */
+static ssize_t php_glob_stream_read(php_stream *stream, char *buf, size_t count)
 {
 	glob_s_t *pglob = (glob_s_t *)stream->abstract;
 	php_stream_dirent *ent = (php_stream_dirent*)buf;
@@ -147,9 +143,8 @@ static ssize_t php_glob_stream_read(php_stream *stream, char *buf, size_t count)
 
 	return -1;
 }
-/* }}} */
 
-static int php_glob_stream_close(php_stream *stream, int close_handle)  /* {{{ */
+static int php_glob_stream_close(php_stream *stream, int close_handle)
 {
 	glob_s_t *pglob = (glob_s_t *)stream->abstract;
 
@@ -166,9 +161,8 @@ static int php_glob_stream_close(php_stream *stream, int close_handle)  /* {{{ *
 	efree(stream->abstract);
 	return 0;
 }
-/* {{{ */
 
-static int php_glob_stream_rewind(php_stream *stream, zend_off_t offset, int whence, zend_off_t *newoffs) /* {{{ */
+static int php_glob_stream_rewind(php_stream *stream, zend_off_t offset, int whence, zend_off_t *newoffs)
 {
 	glob_s_t *pglob = (glob_s_t *)stream->abstract;
 
@@ -181,7 +175,6 @@ static int php_glob_stream_rewind(php_stream *stream, zend_off_t offset, int whe
 	}
 	return 0;
 }
-/* }}} */
 
 const php_stream_ops  php_glob_stream_ops = {
 	NULL, php_glob_stream_read,
@@ -193,7 +186,7 @@ const php_stream_ops  php_glob_stream_ops = {
 	NULL  /* set_option */
 };
 
- /* {{{ php_glob_stream_opener */
+ /* php_glob_stream_opener */
 static php_stream *php_glob_stream_opener(php_stream_wrapper *wrapper, const char *path, const char *mode,
 		int options, zend_string **opened_path, php_stream_context *context STREAMS_DC)
 {
@@ -247,7 +240,6 @@ static php_stream *php_glob_stream_opener(php_stream_wrapper *wrapper, const cha
 
 	return php_stream_alloc(&php_glob_stream_ops, pglob, 0, mode);
 }
-/* }}} */
 
 static const php_stream_wrapper_ops  php_glob_stream_wrapper_ops = {
 	NULL,

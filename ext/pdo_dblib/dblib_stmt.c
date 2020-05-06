@@ -30,7 +30,7 @@
 #include "zend_exceptions.h"
 
 
-/* {{{ pdo_dblib_get_field_name
+/* pdo_dblib_get_field_name
  *
  * Return the data type name for a given TDS number
  *
@@ -89,7 +89,6 @@ static char *pdo_dblib_get_field_name(int type)
 		default: return "unknown";
 	}
 }
-/* }}} */
 
 static int pdo_dblib_stmt_cursor_closer(pdo_stmt_t *stmt)
 {

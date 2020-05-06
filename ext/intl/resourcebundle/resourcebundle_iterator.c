@@ -26,7 +26,7 @@
  * can however be accessed by numerical index, with table keys readable ex post.
  */
 
-/* {{{ resourcebundle_iterator_read */
+/* resourcebundle_iterator_read */
 static void resourcebundle_iterator_read( ResourceBundle_iterator *iterator )
 {
 	UErrorCode icuerror = U_ZERO_ERROR;
@@ -46,9 +46,8 @@ static void resourcebundle_iterator_read( ResourceBundle_iterator *iterator )
 		ZVAL_UNDEF(&iterator->current);
 	}
 }
-/* }}} */
 
-/* {{{ resourcebundle_iterator_invalidate */
+/* resourcebundle_iterator_invalidate */
 static void resourcebundle_iterator_invalidate( zend_object_iterator *iter )
 {
 	ResourceBundle_iterator *iterator = (ResourceBundle_iterator *) iter;
@@ -62,9 +61,8 @@ static void resourcebundle_iterator_invalidate( zend_object_iterator *iter )
 		iterator->currentkey = NULL;
 	}
 }
-/* }}} */
 
-/* {{{ resourcebundle_iterator_dtor */
+/* resourcebundle_iterator_dtor */
 static void resourcebundle_iterator_dtor( zend_object_iterator *iter )
 {
 	ResourceBundle_iterator *iterator = (ResourceBundle_iterator *) iter;
@@ -74,17 +72,15 @@ static void resourcebundle_iterator_dtor( zend_object_iterator *iter )
 
 	zval_ptr_dtor(object);
 }
-/* }}} */
 
-/* {{{ resourcebundle_iterator_has_more */
+/* resourcebundle_iterator_has_more */
 static int resourcebundle_iterator_has_more( zend_object_iterator *iter )
 {
 	ResourceBundle_iterator *iterator = (ResourceBundle_iterator *) iter;
 	return (iterator->i < iterator->length) ? SUCCESS : FAILURE;
 }
-/* }}} */
 
-/* {{{ resourcebundle_iterator_current */
+/* resourcebundle_iterator_current */
 static zval *resourcebundle_iterator_current( zend_object_iterator *iter )
 {
 	ResourceBundle_iterator *iterator = (ResourceBundle_iterator *) iter;
@@ -93,9 +89,8 @@ static zval *resourcebundle_iterator_current( zend_object_iterator *iter )
 	}
 	return &iterator->current;
 }
-/* }}} */
 
-/* {{{ resourcebundle_iterator_key */
+/* resourcebundle_iterator_key */
 static void resourcebundle_iterator_key( zend_object_iterator *iter, zval *key )
 {
 	ResourceBundle_iterator *iterator = (ResourceBundle_iterator *) iter;
@@ -110,9 +105,8 @@ static void resourcebundle_iterator_key( zend_object_iterator *iter, zval *key )
 		ZVAL_LONG(key, iterator->i);
 	}
 }
-/* }}} */
 
-/* {{{ resourcebundle_iterator_step */
+/* resourcebundle_iterator_step */
 static void resourcebundle_iterator_step( zend_object_iterator *iter )
 {
 	ResourceBundle_iterator *iterator = (ResourceBundle_iterator *) iter;
@@ -120,9 +114,8 @@ static void resourcebundle_iterator_step( zend_object_iterator *iter )
 	iterator->i++;
 	resourcebundle_iterator_invalidate( iter );
 }
-/* }}} */
 
-/* {{{ resourcebundle_iterator_has_reset */
+/* resourcebundle_iterator_has_reset */
 static void resourcebundle_iterator_reset( zend_object_iterator *iter )
 {
 	ResourceBundle_iterator *iterator = (ResourceBundle_iterator *) iter;
@@ -130,9 +123,8 @@ static void resourcebundle_iterator_reset( zend_object_iterator *iter )
 	iterator->i = 0;
 	resourcebundle_iterator_invalidate( iter );
 }
-/* }}} */
 
-/* {{{ resourcebundle_iterator_funcs */
+/* resourcebundle_iterator_funcs */
 static const zend_object_iterator_funcs resourcebundle_iterator_funcs = {
 	resourcebundle_iterator_dtor,
 	resourcebundle_iterator_has_more,
@@ -142,9 +134,8 @@ static const zend_object_iterator_funcs resourcebundle_iterator_funcs = {
 	resourcebundle_iterator_reset,
 	resourcebundle_iterator_invalidate
 };
-/* }}} */
 
-/* {{{ resourcebundle_get_iterator */
+/* resourcebundle_get_iterator */
 zend_object_iterator *resourcebundle_get_iterator( zend_class_entry *ce, zval *object, int byref )
 {
 	ResourceBundle_object   *rb = Z_INTL_RESOURCEBUNDLE_P(object );
@@ -173,4 +164,4 @@ zend_object_iterator *resourcebundle_get_iterator( zend_class_entry *ce, zval *o
 
 	return (zend_object_iterator *) iterator;
 }
-/* }}} */
+

@@ -23,9 +23,7 @@
 
 #include <unicode/ustring.h>
 
-/* Get collation attribute value. }}} */
-/* Get collation attribute value.
- */
+/* Get collation attribute value. */
 PHP_FUNCTION( collator_get_attribute )
 {
 	zend_long attribute, value;
@@ -47,11 +45,8 @@ PHP_FUNCTION( collator_get_attribute )
 
 	RETURN_LONG( value );
 }
-/* }}} */
 
-/* Get collation attribute value. }}} */
-/* Set collation attribute.
- */
+/* Set collation attribute. */
 PHP_FUNCTION( collator_set_attribute )
 {
 	zend_long attribute, value;
@@ -74,11 +69,8 @@ PHP_FUNCTION( collator_set_attribute )
 
 	RETURN_TRUE;
 }
-/* }}} */
 
-/* Returns the current collation strength. }}} */
-/* Returns the current collation strength.
- */
+/* Returns the current collation strength. */
 PHP_FUNCTION( collator_get_strength )
 {
 	COLLATOR_METHOD_INIT_VARS
@@ -96,11 +88,8 @@ PHP_FUNCTION( collator_get_strength )
 	/* Get current strength and return it. */
 	RETURN_LONG( ucol_getStrength( co->ucoll ) );
 }
-/* }}} */
 
-/* Set the collation strength. }}} */
-/* Set the collation strength.
- */
+/* Set the collation strength. */
 PHP_FUNCTION( collator_set_strength )
 {
 	zend_long strength;
@@ -122,4 +111,4 @@ PHP_FUNCTION( collator_set_strength )
 
 	RETURN_TRUE;
 }
-/* }}} */
+

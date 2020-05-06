@@ -29,9 +29,8 @@
 #include "zend_generators.h"
 #include "zend_builtin_functions_arginfo.h"
 
-/* }}} */
 
-ZEND_MINIT_FUNCTION(core) { /* {{{ */
+ZEND_MINIT_FUNCTION(core) {
 	zend_class_entry class_entry;
 
 	INIT_CLASS_ENTRY(class_entry, "stdClass", NULL);
@@ -41,9 +40,8 @@ ZEND_MINIT_FUNCTION(core) { /* {{{ */
 
 	return SUCCESS;
 }
-/* }}} */
 
-zend_module_entry zend_builtin_module = { /* {{{ */
+zend_module_entry zend_builtin_module = {
 	STANDARD_MODULE_HEADER,
 	"Core",
 	ext_functions,
@@ -55,15 +53,13 @@ zend_module_entry zend_builtin_module = { /* {{{ */
 	ZEND_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
-/* }}} */
 
-int zend_startup_builtin_functions(void) /* {{{ */
+int zend_startup_builtin_functions(void)
 {
 	zend_builtin_module.module_number = 0;
 	zend_builtin_module.type = MODULE_PERSISTENT;
 	return (EG(current_module) = zend_register_module_ex(&zend_builtin_module)) == NULL ? FAILURE : SUCCESS;
 }
-/* }}} */
 
 /* Get the version of the Zend Engine */
 ZEND_FUNCTION(zend_version)
@@ -72,7 +68,6 @@ ZEND_FUNCTION(zend_version)
 
 	RETURN_STRINGL(ZEND_VERSION, sizeof(ZEND_VERSION)-1);
 }
-/* }}} */
 
 /* Reclaims memory used by MM caches.
    Returns number of freed bytes */
@@ -82,7 +77,6 @@ ZEND_FUNCTION(gc_mem_caches)
 
 	RETURN_LONG(zend_mm_gc(zend_mm_get_heap()));
 }
-/* }}} */
 
 /* Forces collection of any existing garbage cycles.
    Returns number of freed zvals */
@@ -92,7 +86,6 @@ ZEND_FUNCTION(gc_collect_cycles)
 
 	RETURN_LONG(gc_collect_cycles());
 }
-/* }}} */
 
 /* Returns status of the circular reference collector */
 ZEND_FUNCTION(gc_enabled)
@@ -101,7 +94,6 @@ ZEND_FUNCTION(gc_enabled)
 
 	RETURN_BOOL(gc_enabled());
 }
-/* }}} */
 
 /* Activates the circular reference collector */
 ZEND_FUNCTION(gc_enable)
@@ -114,7 +106,6 @@ ZEND_FUNCTION(gc_enable)
 	zend_alter_ini_entry_chars(key, "1", sizeof("1")-1, ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
 	zend_string_release_ex(key, 0);
 }
-/* }}} */
 
 /* Deactivates the circular reference collector */
 ZEND_FUNCTION(gc_disable)
@@ -127,7 +118,6 @@ ZEND_FUNCTION(gc_disable)
 	zend_alter_ini_entry_chars(key, "0", sizeof("0")-1, ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
 	zend_string_release_ex(key, 0);
 }
-/* }}} */
 
 /* Returns current GC statistics */
 ZEND_FUNCTION(gc_status)
@@ -145,7 +135,6 @@ ZEND_FUNCTION(gc_status)
 	add_assoc_long_ex(return_value, "threshold", sizeof("threshold")-1, (long)status.threshold);
 	add_assoc_long_ex(return_value, "roots", sizeof("roots")-1, (long)status.num_roots);
 }
-/* }}} */
 
 /* Get the number of arguments that were passed to the function */
 ZEND_FUNCTION(func_num_args)
@@ -165,7 +154,6 @@ ZEND_FUNCTION(func_num_args)
 
 	RETURN_LONG(ZEND_CALL_NUM_ARGS(ex));
 }
-/* }}} */
 
 /* Get the $arg_num'th argument that was passed to the function */
 ZEND_FUNCTION(func_get_arg)
@@ -211,7 +199,6 @@ ZEND_FUNCTION(func_get_arg)
 		ZVAL_COPY_DEREF(return_value, arg);
 	}
 }
-/* }}} */
 
 /* Get an array of the arguments that were passed to the function */
 ZEND_FUNCTION(func_get_args)
@@ -278,7 +265,6 @@ ZEND_FUNCTION(func_get_args)
 		RETURN_EMPTY_ARRAY();
 	}
 }
-/* }}} */
 
 /* Get string length
    Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
@@ -292,7 +278,6 @@ ZEND_FUNCTION(strlen)
 
 	RETVAL_LONG(ZSTR_LEN(s));
 }
-/* }}} */
 
 /* Binary safe string comparison */
 ZEND_FUNCTION(strcmp)
@@ -306,7 +291,6 @@ ZEND_FUNCTION(strcmp)
 
 	RETURN_LONG(zend_binary_strcmp(ZSTR_VAL(s1), ZSTR_LEN(s1), ZSTR_VAL(s2), ZSTR_LEN(s2)));
 }
-/* }}} */
 
 /* Binary safe string comparison */
 ZEND_FUNCTION(strncmp)
@@ -327,7 +311,6 @@ ZEND_FUNCTION(strncmp)
 
 	RETURN_LONG(zend_binary_strncmp(ZSTR_VAL(s1), ZSTR_LEN(s1), ZSTR_VAL(s2), ZSTR_LEN(s2), len));
 }
-/* }}} */
 
 /* Binary safe case-insensitive string comparison */
 ZEND_FUNCTION(strcasecmp)
@@ -341,7 +324,6 @@ ZEND_FUNCTION(strcasecmp)
 
 	RETURN_LONG(zend_binary_strcasecmp(ZSTR_VAL(s1), ZSTR_LEN(s1), ZSTR_VAL(s2), ZSTR_LEN(s2)));
 }
-/* }}} */
 
 /* Binary safe string comparison */
 ZEND_FUNCTION(strncasecmp)
@@ -362,7 +344,6 @@ ZEND_FUNCTION(strncasecmp)
 
 	RETURN_LONG(zend_binary_strncasecmp(ZSTR_VAL(s1), ZSTR_LEN(s1), ZSTR_VAL(s2), ZSTR_LEN(s2), len));
 }
-/* }}} */
 
 /* Return the current error_reporting level, and if an argument was passed - change to the new level */
 ZEND_FUNCTION(error_reporting)
@@ -418,9 +399,8 @@ ZEND_FUNCTION(error_reporting)
 
 	RETVAL_LONG(old_error_reporting);
 }
-/* }}} */
 
-static int validate_constant_array(HashTable *ht) /* {{{ */
+static int validate_constant_array(HashTable *ht)
 {
 	int ret = 1;
 	zval *val;
@@ -450,9 +430,8 @@ static int validate_constant_array(HashTable *ht) /* {{{ */
 	GC_UNPROTECT_RECURSION(ht);
 	return ret;
 }
-/* }}} */
 
-static void copy_constant_array(zval *dst, zval *src) /* {{{ */
+static void copy_constant_array(zval *dst, zval *src)
 {
 	zend_string *key;
 	zend_ulong idx;
@@ -476,7 +455,6 @@ static void copy_constant_array(zval *dst, zval *src) /* {{{ */
 		}
 	} ZEND_HASH_FOREACH_END();
 }
-/* }}} */
 
 /* Define a new constant */
 ZEND_FUNCTION(define)
@@ -550,7 +528,6 @@ register_constant:
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Check whether a constant exists
    Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
@@ -568,7 +545,6 @@ ZEND_FUNCTION(defined)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Retrieves the class name */
 ZEND_FUNCTION(get_class)
@@ -592,7 +568,6 @@ ZEND_FUNCTION(get_class)
 
 	RETURN_STR_COPY(Z_OBJCE_P(obj)->name);
 }
-/* }}} */
 
 /* Retrieves the "Late Static Binding" class name */
 ZEND_FUNCTION(get_called_class)
@@ -609,7 +584,6 @@ ZEND_FUNCTION(get_called_class)
 
 	RETURN_STR_COPY(called_scope->name);
 }
-/* }}} */
 
 /* Retrieves the parent class name for object or class or current scope or false if not in a scope. */
 ZEND_FUNCTION(get_parent_class)
@@ -642,9 +616,8 @@ ZEND_FUNCTION(get_parent_class)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
-static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool only_subclass) /* {{{ */
+static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool only_subclass)
 {
 	zval *obj;
 	zend_string *class_name;
@@ -694,23 +667,20 @@ static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool only_subclass) /* 
 
 	RETURN_BOOL(retval);
 }
-/* }}} */
 
 /* Returns true if the object has this class as one of its parents */
 ZEND_FUNCTION(is_subclass_of)
 {
 	is_a_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
-/* }}} */
 
 /* Returns true if the first argument is an object and is this class or has this class as one of its parents, */
 ZEND_FUNCTION(is_a)
 {
 	is_a_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
-/* }}} */
 
-/* {{{ add_class_vars */
+/* add_class_vars */
 static void add_class_vars(zend_class_entry *scope, zend_class_entry *ce, int statics, zval *return_value)
 {
 	zend_property_info *prop_info;
@@ -755,7 +725,6 @@ static void add_class_vars(zend_class_entry *scope, zend_class_entry *ce, int st
 		zend_hash_add_new(Z_ARRVAL_P(return_value), key, prop);
 	} ZEND_HASH_FOREACH_END();
 }
-/* }}} */
 
 /* Returns an array of default properties of the class. */
 ZEND_FUNCTION(get_class_vars)
@@ -782,7 +751,6 @@ ZEND_FUNCTION(get_class_vars)
 		add_class_vars(scope, ce, 1, return_value);
 	}
 }
-/* }}} */
 
 /* Returns an array of object properties */
 ZEND_FUNCTION(get_object_vars)
@@ -852,7 +820,6 @@ ZEND_FUNCTION(get_object_vars)
 		} ZEND_HASH_FOREACH_END();
 	}
 }
-/* }}} */
 
 /* Returns an array of mangled object properties. Does not respect property visibility. */
 ZEND_FUNCTION(get_mangled_object_vars)
@@ -876,9 +843,8 @@ ZEND_FUNCTION(get_mangled_object_vars)
 		 GC_IS_RECURSIVE(properties)));
 	RETURN_ARR(properties);
 }
-/* }}} */
 
-static int same_name(zend_string *key, zend_string *name) /* {{{ */
+static int same_name(zend_string *key, zend_string *name)
 {
 	zend_string *lcname;
 	int ret;
@@ -894,7 +860,6 @@ static int same_name(zend_string *key, zend_string *name) /* {{{ */
 	zend_string_release_ex(lcname, 0);
 	return ret;
 }
-/* }}} */
 
 /* Returns an array of method names for class or class instance. */
 ZEND_FUNCTION(get_class_methods)
@@ -935,7 +900,6 @@ ZEND_FUNCTION(get_class_methods)
 		}
 	} ZEND_HASH_FOREACH_END();
 }
-/* }}} */
 
 /* Checks if the class method exists */
 ZEND_FUNCTION(method_exists)
@@ -992,7 +956,6 @@ ZEND_FUNCTION(method_exists)
 	}
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* Checks if the object or class has a property */
 ZEND_FUNCTION(property_exists)
@@ -1031,9 +994,8 @@ ZEND_FUNCTION(property_exists)
 	}
 	RETURN_FALSE;
 }
-/* }}} */
 
-static inline void class_exists_impl(INTERNAL_FUNCTION_PARAMETERS, int flags, int skip_flags) /* {{{ */
+static inline void class_exists_impl(INTERNAL_FUNCTION_PARAMETERS, int flags, int skip_flags)
 {
 	zend_string *name;
 	zend_string *lcname;
@@ -1067,28 +1029,24 @@ static inline void class_exists_impl(INTERNAL_FUNCTION_PARAMETERS, int flags, in
 		RETURN_FALSE;
 	}
 }
-/* {{{ */
 
 /* Checks if the class exists */
 ZEND_FUNCTION(class_exists)
 {
 	class_exists_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_LINKED, ZEND_ACC_INTERFACE | ZEND_ACC_TRAIT);
 }
-/* }}} */
 
 /* Checks if the class exists */
 ZEND_FUNCTION(interface_exists)
 {
 	class_exists_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_LINKED|ZEND_ACC_INTERFACE, 0);
 }
-/* }}} */
 
 /* Checks if the trait exists */
 ZEND_FUNCTION(trait_exists)
 {
 	class_exists_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_TRAIT, 0);
 }
-/* }}} */
 
 /* Checks if the function exists */
 ZEND_FUNCTION(function_exists)
@@ -1114,7 +1072,6 @@ ZEND_FUNCTION(function_exists)
 
 	RETURN_BOOL(exists);
 }
-/* }}} */
 
 /* Creates an alias for user defined class */
 ZEND_FUNCTION(class_alias)
@@ -1148,7 +1105,6 @@ ZEND_FUNCTION(class_alias)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Returns an array with the file names that were include_once()'d */
 ZEND_FUNCTION(get_included_files)
@@ -1164,7 +1120,6 @@ ZEND_FUNCTION(get_included_files)
 		}
 	} ZEND_HASH_FOREACH_END();
 }
-/* }}} */
 
 /* Generates a user-level error/warning/notice message */
 ZEND_FUNCTION(trigger_error)
@@ -1194,7 +1149,6 @@ ZEND_FUNCTION(trigger_error)
 	// TODO Change to void
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Sets a user-defined error handler function.  Returns the previously defined error handler, or false on error */
 ZEND_FUNCTION(set_error_handler)
@@ -1230,7 +1184,6 @@ ZEND_FUNCTION(set_error_handler)
 	ZVAL_COPY(&EG(user_error_handler), error_handler);
 	EG(user_error_handler_error_reporting) = (int)error_type;
 }
-/* }}} */
 
 /* Restores the previously defined error handler function */
 ZEND_FUNCTION(restore_error_handler)
@@ -1259,7 +1212,6 @@ ZEND_FUNCTION(restore_error_handler)
 	// TODO Change to void
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Sets a user-defined exception handler function. Returns the previously defined exception handler, or false on error */
 ZEND_FUNCTION(set_exception_handler)
@@ -1292,7 +1244,6 @@ ZEND_FUNCTION(set_exception_handler)
 
 	ZVAL_COPY(&EG(user_exception_handler), exception_handler);
 }
-/* }}} */
 
 /* Restores the previously defined exception handler function */
 ZEND_FUNCTION(restore_exception_handler)
@@ -1313,9 +1264,8 @@ ZEND_FUNCTION(restore_exception_handler)
 	// TODO Change to void
 	RETURN_TRUE;
 }
-/* }}} */
 
-static void copy_class_or_interface_name(zval *array, zend_string *key, zend_class_entry *ce) /* {{{ */
+static void copy_class_or_interface_name(zval *array, zend_string *key, zend_class_entry *ce)
 {
 	if ((ce->refcount == 1 && !(ce->ce_flags & ZEND_ACC_IMMUTABLE)) ||
 		same_name(key, ce->name)) {
@@ -1323,9 +1273,8 @@ static void copy_class_or_interface_name(zval *array, zend_string *key, zend_cla
 	}
 	add_next_index_str(array, zend_string_copy(key));
 }
-/* }}} */
 
-static inline void get_declared_class_impl(INTERNAL_FUNCTION_PARAMETERS, int flags, int skip_flags) /* {{{ */
+static inline void get_declared_class_impl(INTERNAL_FUNCTION_PARAMETERS, int flags, int skip_flags)
 {
 	zend_string *key;
 	zend_class_entry *ce;
@@ -1342,28 +1291,24 @@ static inline void get_declared_class_impl(INTERNAL_FUNCTION_PARAMETERS, int fla
 		}
 	} ZEND_HASH_FOREACH_END();
 }
-/* {{{ */
 
 /* Returns an array of all declared traits. */
 ZEND_FUNCTION(get_declared_traits)
 {
 	get_declared_class_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_TRAIT, 0);
 }
-/* }}} */
 
 /* Returns an array of all declared classes. */
 ZEND_FUNCTION(get_declared_classes)
 {
 	get_declared_class_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_LINKED, ZEND_ACC_INTERFACE | ZEND_ACC_TRAIT);
 }
-/* }}} */
 
 /* Returns an array of all declared interfaces. */
 ZEND_FUNCTION(get_declared_interfaces)
 {
 	get_declared_class_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_INTERFACE, 0);
 }
-/* }}} */
 
 /* Returns an array of all defined functions */
 ZEND_FUNCTION(get_defined_functions)
@@ -1399,7 +1344,6 @@ ZEND_FUNCTION(get_defined_functions)
 	zend_hash_str_add_new(Z_ARRVAL_P(return_value), "internal", sizeof("internal")-1, &internal);
 	zend_hash_str_add_new(Z_ARRVAL_P(return_value), "user", sizeof("user")-1, &user);
 }
-/* }}} */
 
 /* Returns an associative array of names and values of all currently defined variable names (variables in the current scope) */
 ZEND_FUNCTION(get_defined_vars)
@@ -1419,7 +1363,6 @@ ZEND_FUNCTION(get_defined_vars)
 
 	RETURN_ARR(zend_array_dup(symbol_table));
 }
-/* }}} */
 
 #if ZEND_DEBUG && defined(ZTS)
 ZEND_FUNCTION(zend_thread_id)
@@ -1447,7 +1390,6 @@ ZEND_FUNCTION(get_resource_type)
 		RETURN_STRING("Unknown");
 	}
 }
-/* }}} */
 
 /* Get an array with all active resources */
 ZEND_FUNCTION(get_resources)
@@ -1494,14 +1436,12 @@ ZEND_FUNCTION(get_resources)
 		} ZEND_HASH_FOREACH_END();
 	}
 }
-/* }}} */
 
-static void add_zendext_info(zend_extension *ext, void *arg) /* {{{ */
+static void add_zendext_info(zend_extension *ext, void *arg)
 {
 	zval *name_array = (zval *)arg;
 	add_next_index_string(name_array, ext->name);
 }
-/* }}} */
 
 /* Return an array containing names of loaded extensions */
 ZEND_FUNCTION(get_loaded_extensions)
@@ -1524,7 +1464,6 @@ ZEND_FUNCTION(get_loaded_extensions)
 		} ZEND_HASH_FOREACH_END();
 	}
 }
-/* }}} */
 
 /* Return an array containing the names and values of all defined constants */
 ZEND_FUNCTION(get_defined_constants)
@@ -1595,9 +1534,8 @@ ZEND_FUNCTION(get_defined_constants)
 		} ZEND_HASH_FOREACH_END();
 	}
 }
-/* }}} */
 
-static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /* {{{ */
+static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array)
 {
 	uint32_t num_args = ZEND_CALL_NUM_ARGS(call);
 
@@ -1670,9 +1608,8 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 		ZVAL_EMPTY_ARRAY(arg_array);
 	}
 }
-/* }}} */
 
-void debug_print_backtrace_args(zval *arg_array) /* {{{ */
+void debug_print_backtrace_args(zval *arg_array)
 {
 	zval *tmp;
 	int i = 0;
@@ -1684,9 +1621,8 @@ void debug_print_backtrace_args(zval *arg_array) /* {{{ */
 		zend_print_flat_zval_r(tmp);
 	} ZEND_HASH_FOREACH_END();
 }
-/* }}} */
 
-static inline zend_bool skip_internal_handler(zend_execute_data *skip) /* {{{ */
+static inline zend_bool skip_internal_handler(zend_execute_data *skip)
 {
 	return !(skip->func && ZEND_USER_CODE(skip->func->common.type))
 			&& skip->prev_execute_data
@@ -1698,7 +1634,6 @@ static inline zend_bool skip_internal_handler(zend_execute_data *skip) /* {{{ */
 			&& skip->prev_execute_data->opline->opcode != ZEND_DO_FCALL_BY_NAME
 			&& skip->prev_execute_data->opline->opcode != ZEND_INCLUDE_OR_EVAL;
 }
-/* {{{ */
 
 ZEND_FUNCTION(debug_print_backtrace)
 {
@@ -1881,9 +1816,8 @@ ZEND_FUNCTION(debug_print_backtrace)
 	}
 }
 
-/* }}} */
 
-ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int options, int limit) /* {{{ */
+ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int options, int limit)
 {
 	zend_execute_data *ptr, *skip, *call = NULL;
 	zend_object *object;
@@ -2084,7 +2018,6 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 		ptr = skip->prev_execute_data;
 	}
 }
-/* }}} */
 
 /* Return backtrace as array */
 ZEND_FUNCTION(debug_backtrace)
@@ -2098,7 +2031,6 @@ ZEND_FUNCTION(debug_backtrace)
 
 	zend_fetch_debug_backtrace(return_value, 1, options, limit);
 }
-/* }}} */
 
 /* Returns true if the named extension is loaded */
 ZEND_FUNCTION(extension_loaded)
@@ -2118,7 +2050,6 @@ ZEND_FUNCTION(extension_loaded)
 	}
 	zend_string_release_ex(lcname, 0);
 }
-/* }}} */
 
 /* Returns an array with the names of functions belonging to the named extension */
 ZEND_FUNCTION(get_extension_funcs)
@@ -2167,4 +2098,4 @@ ZEND_FUNCTION(get_extension_funcs)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
+

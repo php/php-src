@@ -26,7 +26,7 @@
 #include "ext/standard/basic_functions.h"
 
 
-/* {{{ php_mysqlnd_free_field_metadata */
+/* php_mysqlnd_free_field_metadata */
 static void
 php_mysqlnd_free_field_metadata(MYSQLND_FIELD *meta)
 {
@@ -38,9 +38,8 @@ php_mysqlnd_free_field_metadata(MYSQLND_FIELD *meta)
 		}
 	}
 }
-/* }}} */
 
-/* {{{ mysqlnd_res_meta::read_metadata */
+/* mysqlnd_res_meta::read_metadata */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const meta, MYSQLND_CONN_DATA * conn, MYSQLND_RES * result)
 {
@@ -86,10 +85,8 @@ MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const met
 
 	DBG_RETURN(PASS);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_res_meta::free */
+/* mysqlnd_res_meta::free */
 static void
 MYSQLND_METHOD(mysqlnd_res_meta, free)(MYSQLND_RES_METADATA * meta)
 {
@@ -110,10 +107,8 @@ MYSQLND_METHOD(mysqlnd_res_meta, free)(MYSQLND_RES_METADATA * meta)
 
 	DBG_VOID_RETURN;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_res::clone_metadata */
+/* mysqlnd_res::clone_metadata */
 static MYSQLND_RES_METADATA *
 MYSQLND_METHOD(mysqlnd_res_meta, clone_metadata)(MYSQLND_RES * result, const MYSQLND_RES_METADATA * const meta)
 {
@@ -203,10 +198,8 @@ oom:
 	}
 	DBG_RETURN(NULL);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_res_meta::fetch_field */
+/* mysqlnd_res_meta::fetch_field */
 static const MYSQLND_FIELD *
 MYSQLND_METHOD(mysqlnd_res_meta, fetch_field)(MYSQLND_RES_METADATA * const meta)
 {
@@ -220,10 +213,8 @@ MYSQLND_METHOD(mysqlnd_res_meta, fetch_field)(MYSQLND_RES_METADATA * const meta)
 		meta->fields[meta->current_field].max_length);
 	DBG_RETURN(&meta->fields[meta->current_field++]);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_res_meta::fetch_field_direct */
+/* mysqlnd_res_meta::fetch_field_direct */
 static const MYSQLND_FIELD *
 MYSQLND_METHOD(mysqlnd_res_meta, fetch_field_direct)(const MYSQLND_RES_METADATA * const meta, const MYSQLND_FIELD_OFFSET fieldnr)
 {
@@ -234,29 +225,23 @@ MYSQLND_METHOD(mysqlnd_res_meta, fetch_field_direct)(const MYSQLND_RES_METADATA 
 		meta->fields[meta->current_field].max_length);
 	DBG_RETURN(&meta->fields[fieldnr]);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_res_meta::fetch_fields */
+/* mysqlnd_res_meta::fetch_fields */
 static const MYSQLND_FIELD *
 MYSQLND_METHOD(mysqlnd_res_meta, fetch_fields)(MYSQLND_RES_METADATA * const meta)
 {
 	DBG_ENTER("mysqlnd_res_meta::fetch_fields");
 	DBG_RETURN(meta->fields);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_res_meta::field_tell */
+/* mysqlnd_res_meta::field_tell */
 static MYSQLND_FIELD_OFFSET
 MYSQLND_METHOD(mysqlnd_res_meta, field_tell)(const MYSQLND_RES_METADATA * const meta)
 {
 	return meta->current_field;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_res_meta::field_seek */
+/* mysqlnd_res_meta::field_seek */
 static MYSQLND_FIELD_OFFSET
 MYSQLND_METHOD(mysqlnd_res_meta, field_seek)(MYSQLND_RES_METADATA * const meta, const MYSQLND_FIELD_OFFSET field_offset)
 {
@@ -266,7 +251,6 @@ MYSQLND_METHOD(mysqlnd_res_meta, field_seek)(MYSQLND_RES_METADATA * const meta, 
 	meta->current_field = field_offset;
 	DBG_RETURN(return_value);
 }
-/* }}} */
 
 static
 MYSQLND_CLASS_METHODS_START(mysqlnd_res_meta)
@@ -281,7 +265,7 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_res_meta)
 MYSQLND_CLASS_METHODS_END;
 
 
-/* {{{ mysqlnd_result_meta_init */
+/* mysqlnd_result_meta_init */
 PHPAPI MYSQLND_RES_METADATA *
 mysqlnd_result_meta_init(MYSQLND_RES *result, unsigned int field_count)
 {
@@ -304,19 +288,15 @@ mysqlnd_result_meta_init(MYSQLND_RES *result, unsigned int field_count)
 	} while (0);
 	DBG_RETURN(NULL);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_res_meta_get_methods */
+/* mysqlnd_res_meta_get_methods */
 PHPAPI struct st_mysqlnd_res_meta_methods *
 mysqlnd_result_metadata_get_methods()
 {
 	return &mysqlnd_mysqlnd_res_meta_methods;
 }
-/* }}} */
 
-
-/* {{{ _mysqlnd_plugin_get_plugin_result_metadata_data */
+/* _mysqlnd_plugin_get_plugin_result_metadata_data */
 PHPAPI void **
 _mysqlnd_plugin_get_plugin_result_metadata_data(const MYSQLND_RES_METADATA * meta, unsigned int plugin_id)
 {
@@ -327,4 +307,4 @@ _mysqlnd_plugin_get_plugin_result_metadata_data(const MYSQLND_RES_METADATA * met
 	}
 	DBG_RETURN((void *)((char *)meta + sizeof(MYSQLND_RES_METADATA) + plugin_id * sizeof(void *)));
 }
-/* }}} */
+

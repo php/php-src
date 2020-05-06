@@ -20,7 +20,7 @@
 #include "php.h"
 #include "base64.h"
 
-/* {{{ base64 tables */
+/* base64 tables */
 static const char base64_table[] = {
 	'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
 	'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
@@ -49,7 +49,6 @@ static const short base64_reverse_table[256] = {
 	-2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2,
 	-2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2
 };
-/* }}} */
 
 #ifdef __aarch64__
 #include <arm_neon.h>
@@ -120,7 +119,7 @@ static zend_always_inline unsigned char *neon_base64_encode(const unsigned char 
 }
 #endif /* __aarch64__ */
 
-static zend_always_inline unsigned char *php_base64_encode_impl(const unsigned char *in, size_t inl, unsigned char *out) /* {{{ */
+static zend_always_inline unsigned char *php_base64_encode_impl(const unsigned char *in, size_t inl, unsigned char *out)
 {
 #ifdef __aarch64__
 	if (inl >= 16 * 3) {
@@ -159,7 +158,6 @@ static zend_always_inline unsigned char *php_base64_encode_impl(const unsigned c
 
 	return out;
 }
-/* }}} */
 
 #ifdef __aarch64__
 static zend_always_inline uint8x16_t decode_fromascii(const uint8x16_t input, uint8x16_t *error, const uint8x16x2_t shiftLUT, const uint8x16x2_t maskLUT, const uint8x16x2_t bitposLUT) {
@@ -243,7 +241,7 @@ static zend_always_inline size_t neon_base64_decode(const unsigned char *in, siz
 }
 #endif /* __aarch64__ */
 
-static zend_always_inline int php_base64_decode_impl(const unsigned char *in, size_t inl, unsigned char *out, size_t *outl, zend_bool strict) /* {{{ */
+static zend_always_inline int php_base64_decode_impl(const unsigned char *in, size_t inl, unsigned char *out, size_t *outl, zend_bool strict)
 {
 	int ch;
 	size_t i = 0, padding = 0, j = *outl;
@@ -321,9 +319,8 @@ static zend_always_inline int php_base64_decode_impl(const unsigned char *in, si
 fail:
 	return 0;
 }
-/* }}} */
 
-/* {{{ php_base64_encode */
+/* php_base64_encode */
 
 #if ZEND_INTRIN_AVX2_NATIVE
 # undef ZEND_INTRIN_SSSE3_NATIVE
@@ -668,7 +665,6 @@ zend_string *php_base64_encode_ssse3(const unsigned char *str, size_t length)
 # endif
 #endif /* ZEND_INTRIN_AVX2_NATIVE || ZEND_INTRIN_AVX2_RESOLVER || ZEND_INTRIN_SSSE3_NATIVE || ZEND_INTRIN_SSSE3_RESOLVER */
 
-/* }}} */
 
 #if ZEND_INTRIN_AVX2_NATIVE || ZEND_INTRIN_AVX2_RESOLVER
 # if ZEND_INTRIN_AVX2_RESOLVER && defined(HAVE_FUNC_ATTRIBUTE_TARGET)
@@ -923,7 +919,6 @@ PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, size_t length
 	return result;
 }
 #endif
-/* }}} */
 
 /* Encodes string using MIME base64 algorithm */
 PHP_FUNCTION(base64_encode)
@@ -939,7 +934,6 @@ PHP_FUNCTION(base64_encode)
 	result = php_base64_encode((unsigned char*)str, str_len);
 	RETURN_STR(result);
 }
-/* }}} */
 
 /* Decodes string using MIME base64 algorithm */
 PHP_FUNCTION(base64_decode)
@@ -962,4 +956,4 @@ PHP_FUNCTION(base64_decode)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
+

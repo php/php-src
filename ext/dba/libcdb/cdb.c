@@ -40,7 +40,7 @@
 # define EPROTO -15  /* cdb 0.75's default for PROTOless systems */
 #endif
 
-/* {{{ cdb_match */
+/* cdb_match */
 static int cdb_match(struct cdb *c, char *key, unsigned int len, uint32 pos)
 {
 	char buf[32];
@@ -60,9 +60,8 @@ static int cdb_match(struct cdb *c, char *key, unsigned int len, uint32 pos)
 	}
 	return 1;
 }
-/* }}} */
 
-/* {{{ cdb_hash */
+/* cdb_hash */
 uint32 cdb_hash(char *buf, unsigned int len)
 {
 	uint32 h;
@@ -74,31 +73,27 @@ uint32 cdb_hash(char *buf, unsigned int len)
 	}
 	return h;
 }
-/* }}} */
 
-/* {{{ cdb_free */
+/* cdb_free */
 void cdb_free(struct cdb *c)
 {
 }
-/* }}} */
 
-/* {{{ cdb_findstart */
+/* cdb_findstart */
 void cdb_findstart(struct cdb *c)
 {
 	c->loop = 0;
 }
-/* }}} */
 
-/* {{{ cdb_init */
+/* cdb_init */
 void cdb_init(struct cdb *c, php_stream *fp)
 {
 	cdb_free(c);
 	cdb_findstart(c);
 	c->fp = fp;
 }
-/* }}} */
 
-/* {{{ cdb_read */
+/* cdb_read */
 int cdb_read(struct cdb *c, char *buf, unsigned int len, uint32 pos)
 {
 	if (php_stream_seek(c->fp, pos, SEEK_SET) == -1) {
@@ -121,9 +116,8 @@ int cdb_read(struct cdb *c, char *buf, unsigned int len, uint32 pos)
 	}
 	return 0;
 }
-/* }}} */
 
-/* {{{ cdb_findnext */
+/* cdb_findnext */
 int cdb_findnext(struct cdb *c, char *key, unsigned int len)
 {
 	char buf[8];
@@ -174,19 +168,17 @@ int cdb_findnext(struct cdb *c, char *key, unsigned int len)
 
 	return 0;
 }
-/* }}} */
 
-/* {{{ cdb_find */
+/* cdb_find */
 int cdb_find(struct cdb *c, char *key, unsigned int len)
 {
 	cdb_findstart(c);
 	return cdb_findnext(c, key, len);
 }
-/* }}} */
 
-/* {{{ cdb_version */
+/* cdb_version */
 char *cdb_version()
 {
 	return "0.75, $Id$";
 }
-/* }}} */
+

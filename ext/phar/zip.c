@@ -39,7 +39,7 @@ static inline void phar_write_16(char buffer[2], uint32_t value)
 # define PHAR_SET_32(var, value) phar_write_32(var, (uint32_t) (value));
 # define PHAR_SET_16(var, value) phar_write_16(var, (uint16_t) (value));
 
-static int phar_zip_process_extra(php_stream *fp, phar_entry_info *entry, uint16_t len) /* {{{ */
+static int phar_zip_process_extra(php_stream *fp, phar_entry_info *entry, uint16_t len)
 {
 	union {
 		phar_zip_extra_field_header header;
@@ -85,7 +85,6 @@ static int phar_zip_process_extra(php_stream *fp, phar_entry_info *entry, uint16
 
 	return SUCCESS;
 }
-/* }}} */
 
 /*
   extracted from libzip
@@ -120,7 +119,7 @@ static int phar_zip_process_extra(php_stream *fp, phar_entry_info *entry, uint16
   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-static time_t phar_zip_d2u_time(char *cdtime, char *cddate) /* {{{ */
+static time_t phar_zip_d2u_time(char *cdtime, char *cddate)
 {
 	int dtime = PHAR_GET_16(cdtime), ddate = PHAR_GET_16(cddate);
 	struct tm *tm, tmbuf;
@@ -139,9 +138,8 @@ static time_t phar_zip_d2u_time(char *cdtime, char *cddate) /* {{{ */
 
 	return mktime(tm);
 }
-/* }}} */
 
-static void phar_zip_u2d_time(time_t time, char *dtime, char *ddate) /* {{{ */
+static void phar_zip_u2d_time(time_t time, char *dtime, char *ddate)
 {
 	uint16_t ctime, cdate;
 	struct tm *tm, tmbuf;
@@ -159,7 +157,6 @@ static void phar_zip_u2d_time(time_t time, char *dtime, char *ddate) /* {{{ */
 	PHAR_SET_16(dtime, ctime);
 	PHAR_SET_16(ddate, cdate);
 }
-/* }}} */
 
 /**
  * Does not check for a previously opened phar in the cache.
@@ -170,7 +167,7 @@ static void phar_zip_u2d_time(time_t time, char *dtime, char *ddate) /* {{{ */
  * This is used by phar_open_from_fp to process a zip-based phar, but can be called
  * directly.
  */
-int phar_parse_zipfile(php_stream *fp, char *fname, size_t fname_len, char *alias, size_t alias_len, phar_archive_data** pphar, char **error) /* {{{ */
+int phar_parse_zipfile(php_stream *fp, char *fname, size_t fname_len, char *alias, size_t alias_len, phar_archive_data** pphar, char **error)
 {
 	phar_zip_dir_end locator;
 	char buf[sizeof(locator) + 65536];
@@ -744,12 +741,11 @@ foundit:
 
 	return SUCCESS;
 }
-/* }}} */
 
 /**
  * Create or open a zip-based phar for writing
  */
-int phar_open_or_create_zip(char *fname, size_t fname_len, char *alias, size_t alias_len, int is_data, uint32_t options, phar_archive_data** pphar, char **error) /* {{{ */
+int phar_open_or_create_zip(char *fname, size_t fname_len, char *alias, size_t alias_len, int is_data, uint32_t options, phar_archive_data** pphar, char **error)
 {
 	phar_archive_data *phar;
 	int ret = phar_create_or_parse_filename(fname, fname_len, alias, alias_len, is_data, options, &phar, error);
@@ -782,7 +778,6 @@ int phar_open_or_create_zip(char *fname, size_t fname_len, char *alias, size_t a
 
 	return FAILURE;
 }
-/* }}} */
 
 struct _phar_zip_pass {
 	php_stream *filefp;
@@ -793,7 +788,7 @@ struct _phar_zip_pass {
 	char **error;
 };
 /* perform final modification of zip contents for each file in the manifest before saving */
-static int phar_zip_changed_apply_int(phar_entry_info *entry, void *arg) /* {{{ */
+static int phar_zip_changed_apply_int(phar_entry_info *entry, void *arg)
 {
 	phar_zip_file_header local;
 	phar_zip_unix3 perms;
@@ -1101,16 +1096,14 @@ continue_dir:
 
 	return ZEND_HASH_APPLY_KEEP;
 }
-/* }}} */
 
-static int phar_zip_changed_apply(zval *zv, void *arg) /* {{{ */
+static int phar_zip_changed_apply(zval *zv, void *arg)
 {
 	return phar_zip_changed_apply_int(Z_PTR_P(zv), arg);
 }
-/* }}} */
 
 static int phar_zip_applysignature(phar_archive_data *phar, struct _phar_zip_pass *pass,
-				   smart_str *metadata) /* {{{ */
+				   smart_str *metadata)
 {
 	/* add signature for executable tars or tars explicitly set with setSignatureAlgorithm */
 	if (!phar->is_data || phar->sig_flags) {
@@ -1184,9 +1177,8 @@ static int phar_zip_applysignature(phar_archive_data *phar, struct _phar_zip_pas
 	} /* signature */
 	return SUCCESS;
 }
-/* }}} */
 
-int phar_zip_flush(phar_archive_data *phar, char *user_stub, zend_long len, int defaultstub, char **error) /* {{{ */
+int phar_zip_flush(phar_archive_data *phar, char *user_stub, zend_long len, int defaultstub, char **error)
 {
 	char *pos;
 	smart_str main_metadata_str = {0};
@@ -1539,4 +1531,4 @@ nocentralerror:
 	}
 	return EOF;
 }
-/* }}} */
+

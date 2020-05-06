@@ -27,7 +27,7 @@ static ZEND_COLD void undef_result_after_exception() {
 	}
 }
 
-static zend_never_inline zend_function* ZEND_FASTCALL _zend_jit_init_func_run_time_cache(const zend_op_array *op_array) /* {{{ */
+static zend_never_inline zend_function* ZEND_FASTCALL _zend_jit_init_func_run_time_cache(const zend_op_array *op_array)
 {
 	void **run_time_cache;
 
@@ -36,9 +36,8 @@ static zend_never_inline zend_function* ZEND_FASTCALL _zend_jit_init_func_run_ti
 	ZEND_MAP_PTR_SET(op_array->run_time_cache, run_time_cache);
 	return (zend_function*)op_array;
 }
-/* }}} */
 
-static zend_never_inline zend_op_array* ZEND_FASTCALL zend_jit_init_func_run_time_cache_helper(zend_op_array *op_array) /* {{{ */
+static zend_never_inline zend_op_array* ZEND_FASTCALL zend_jit_init_func_run_time_cache_helper(zend_op_array *op_array)
 {
 	void **run_time_cache;
 
@@ -49,7 +48,6 @@ static zend_never_inline zend_op_array* ZEND_FASTCALL zend_jit_init_func_run_tim
 	}
 	return op_array;
 }
-/* }}} */
 
 static zend_function* ZEND_FASTCALL zend_jit_find_func_helper(zend_string *name)
 {

@@ -12,7 +12,7 @@
    +----------------------------------------------------------------------+
  */
 
-/* {{{ includes */
+/* includes */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -32,9 +32,8 @@
 
 ZEND_EXTERN_MODULE_GLOBALS( intl )
 
-/* }}} */
 
-/* {{{ grapheme_close_global_iterator - clean up */
+/* grapheme_close_global_iterator - clean up */
 void
 grapheme_close_global_iterator( void )
 {
@@ -44,9 +43,8 @@ grapheme_close_global_iterator( void )
 		ubrk_close(global_break_iterator);
 	}
 }
-/* }}} */
 
-/* {{{ grapheme_substr_ascii f='from' - starting point, l='length' */
+/* grapheme_substr_ascii f='from' - starting point, l='length' */
 void grapheme_substr_ascii(char *str, size_t str_len, int32_t f, int32_t l, char **sub_str, int32_t *sub_str_len)
 {
 	int32_t str_len2 = (int32_t)str_len; /* in order to avoid signed/unsigned problems */
@@ -105,7 +103,6 @@ void grapheme_substr_ascii(char *str, size_t str_len, int32_t f, int32_t l, char
 
     return;
 }
-/* }}} */
 
 #define STRPOS_CHECK_STATUS(status, error) 							\
 	if ( U_FAILURE( (status) ) ) { 									\
@@ -127,7 +124,7 @@ void grapheme_substr_ascii(char *str, size_t str_len, int32_t f, int32_t l, char
 	}
 
 
-/* {{{ grapheme_strpos_utf16 - strrpos using utf16*/
+/* grapheme_strpos_utf16 - strrpos using utf16*/
 int32_t grapheme_strpos_utf16(char *haystack, size_t haystack_len, char *needle, size_t needle_len, int32_t offset, int32_t *puchar_pos, int f_ignore_case, int last)
 {
 	UChar *uhaystack = NULL, *uneedle = NULL;
@@ -213,9 +210,8 @@ int32_t grapheme_strpos_utf16(char *haystack, size_t haystack_len, char *needle,
 	return ret_pos;
 }
 
-/* }}} */
 
-/* {{{ grapheme_ascii_check: ASCII check */
+/* grapheme_ascii_check: ASCII check */
 zend_long grapheme_ascii_check(const unsigned char *day, size_t len)
 {
 	int ret_len = len;
@@ -227,9 +223,8 @@ zend_long grapheme_ascii_check(const unsigned char *day, size_t len)
 	return ret_len;
 }
 
-/* }}} */
 
-/* {{{ grapheme_split_string: find and optionally return grapheme boundaries */
+/* grapheme_split_string: find and optionally return grapheme boundaries */
 int32_t grapheme_split_string(const UChar *text, int32_t text_length, int boundary_array[], int boundary_array_len )
 {
 	unsigned char u_break_iterator_buffer[U_BRK_SAFECLONE_BUFFERSIZE];
@@ -265,9 +260,8 @@ int32_t grapheme_split_string(const UChar *text, int32_t text_length, int bounda
 
 	return ret_len;
 }
-/* }}} */
 
-/* {{{ grapheme_count_graphemes */
+/* grapheme_count_graphemes */
 int32_t grapheme_count_graphemes(UBreakIterator *bi, UChar *string, int32_t string_len)
 {
 	int ret_len = 0;
@@ -288,10 +282,8 @@ int32_t grapheme_count_graphemes(UBreakIterator *bi, UChar *string, int32_t stri
 
 	return ret_len;
 }
-/* }}} */
 
-
-/* {{{ 	grapheme_get_haystack_offset - bump the haystack pointer based on the grapheme count offset */
+/* 	grapheme_get_haystack_offset - bump the haystack pointer based on the grapheme count offset */
 int32_t grapheme_get_haystack_offset(UBreakIterator* bi, int32_t offset)
 {
 	int32_t pos;
@@ -329,9 +321,8 @@ int32_t grapheme_get_haystack_offset(UBreakIterator* bi, int32_t offset)
 
 	return pos;
 }
-/* }}} */
 
-/* {{{ grapheme_strrpos_ascii: borrowed from the php ext/standard/string.c */
+/* grapheme_strrpos_ascii: borrowed from the php ext/standard/string.c */
  zend_long
 grapheme_strrpos_ascii(char *haystack, size_t haystack_len, char *needle, size_t needle_len, int32_t offset)
 {
@@ -370,9 +361,8 @@ grapheme_strrpos_ascii(char *haystack, size_t haystack_len, char *needle, size_t
 	return -1;
 }
 
-/* }}} */
 
-/* {{{ grapheme_get_break_iterator: get a clone of the global character break iterator */
+/* grapheme_get_break_iterator: get a clone of the global character break iterator */
 UBreakIterator* grapheme_get_break_iterator(void *stack_buffer, UErrorCode *status )
 {
 	int32_t buffer_size;
@@ -394,4 +384,4 @@ UBreakIterator* grapheme_get_break_iterator(void *stack_buffer, UErrorCode *stat
 
 	return ubrk_safeClone(global_break_iterator, stack_buffer, &buffer_size, status);
 }
-/* }}} */
+

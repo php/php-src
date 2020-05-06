@@ -80,7 +80,7 @@ PHP_FUNCTION(stream_socket_pair)
 	add_next_index_resource(return_value, s1->res);
 	add_next_index_resource(return_value, s2->res);
 }
-/* }}} */
+
 #endif
 
 /* Open a client connection to a remote address */
@@ -169,7 +169,6 @@ PHP_FUNCTION(stream_socket_client)
 	php_stream_to_zval(stream, return_value);
 
 }
-/* }}} */
 
 /* Create a server socket bound to localaddress */
 PHP_FUNCTION(stream_socket_server)
@@ -233,7 +232,6 @@ PHP_FUNCTION(stream_socket_server)
 
 	php_stream_to_zval(stream, return_value);
 }
-/* }}} */
 
 /* Accept a client connection from a server socket */
 PHP_FUNCTION(stream_socket_accept)
@@ -288,7 +286,6 @@ PHP_FUNCTION(stream_socket_accept)
 		zend_string_release_ex(errstr, 0);
 	}
 }
-/* }}} */
 
 /* Returns either the locally bound or remote name for a socket stream */
 PHP_FUNCTION(stream_socket_get_name)
@@ -319,7 +316,6 @@ PHP_FUNCTION(stream_socket_get_name)
 
 	RETVAL_STR(name);
 }
-/* }}} */
 
 /* Send data to a socket stream.  If target_addr is specified it must be in dotted quad (or [ipv6]) format */
 PHP_FUNCTION(stream_socket_sendto)
@@ -351,7 +347,6 @@ PHP_FUNCTION(stream_socket_sendto)
 
 	RETURN_LONG(php_stream_xport_sendto(stream, data, datalen, (int)flags, target_addr_len ? &sa : NULL, sl));
 }
-/* }}} */
 
 /* Receives data from a socket stream */
 PHP_FUNCTION(stream_socket_recvfrom)
@@ -401,7 +396,6 @@ PHP_FUNCTION(stream_socket_recvfrom)
 	zend_string_efree(read_buf);
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* Reads all remaining bytes (or up to maxlen bytes) from a stream and returns them as a string. */
 PHP_FUNCTION(stream_get_contents)
@@ -451,7 +445,6 @@ PHP_FUNCTION(stream_get_contents)
 		RETURN_EMPTY_STRING();
 	}
 }
-/* }}} */
 
 /* Reads up to maxlen bytes from source stream and writes them to dest stream. */
 PHP_FUNCTION(stream_copy_to_stream)
@@ -485,7 +478,6 @@ PHP_FUNCTION(stream_copy_to_stream)
 	}
 	RETURN_LONG(len);
 }
-/* }}} */
 
 /* Retrieves header/meta data from streams/file pointers */
 PHP_FUNCTION(stream_get_meta_data)
@@ -541,7 +533,6 @@ PHP_FUNCTION(stream_get_meta_data)
 	}
 
 }
-/* }}} */
 
 /* Retrieves list of registered socket transports */
 PHP_FUNCTION(stream_get_transports)
@@ -560,7 +551,6 @@ PHP_FUNCTION(stream_get_transports)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Retrieves list of registered stream wrappers */
 PHP_FUNCTION(stream_get_wrappers)
@@ -582,9 +572,8 @@ PHP_FUNCTION(stream_get_wrappers)
 	}
 
 }
-/* }}} */
 
-/* {{{ stream_select related functions */
+/* stream_select related functions */
 static int stream_array_to_fd_set(zval *stream_array, fd_set *fds, php_socket_t *max_fd)
 {
 	zval *elem;
@@ -721,7 +710,6 @@ static int stream_array_emulate_read_fd_set(zval *stream_array)
 
 	return ret;
 }
-/* }}} */
 
 /* Runs the select() system call on the sets of streams with a timeout specified by tv_sec and tv_usec */
 PHP_FUNCTION(stream_select)
@@ -824,9 +812,8 @@ PHP_FUNCTION(stream_select)
 
 	RETURN_LONG(retval);
 }
-/* }}} */
 
-/* {{{ stream_context related functions */
+/* stream_context related functions */
 static void user_space_stream_notifier(php_stream_context *context, int notifycode, int severity,
 		char *xmsg, int xcode, size_t bytes_sofar, size_t bytes_max, void * ptr)
 {
@@ -943,7 +930,6 @@ static php_stream_context *decode_context_param(zval *contextresource)
 
 	return context;
 }
-/* }}} */
 
 /* Retrieve options for a stream/wrapper/context */
 PHP_FUNCTION(stream_context_get_options)
@@ -963,7 +949,6 @@ PHP_FUNCTION(stream_context_get_options)
 
 	ZVAL_COPY(return_value, &context->options);
 }
-/* }}} */
 
 /* Set an option for a wrapper */
 PHP_FUNCTION(stream_context_set_option)
@@ -1007,7 +992,6 @@ PHP_FUNCTION(stream_context_set_option)
 		RETURN_BOOL(php_stream_context_set_option(context, wrappername, optionname, zvalue) == SUCCESS);
 	}
 }
-/* }}} */
 
 /* Set parameters for a file context */
 PHP_FUNCTION(stream_context_set_params)
@@ -1028,7 +1012,6 @@ PHP_FUNCTION(stream_context_set_params)
 
 	RETVAL_BOOL(parse_context_params(context, params) == SUCCESS);
 }
-/* }}} */
 
 /* Get parameters of a file context */
 PHP_FUNCTION(stream_context_get_params)
@@ -1054,7 +1037,6 @@ PHP_FUNCTION(stream_context_get_params)
 	Z_TRY_ADDREF(context->options);
 	add_assoc_zval_ex(return_value, "options", sizeof("options")-1, &context->options);
 }
-/* }}} */
 
 /* Get a handle on the default file/stream context and optionally set parameters */
 PHP_FUNCTION(stream_context_get_default)
@@ -1080,7 +1062,6 @@ PHP_FUNCTION(stream_context_get_default)
 
 	php_stream_context_to_zval(context, return_value);
 }
-/* }}} */
 
 /* Set default file/stream context, returns the context as a resource */
 PHP_FUNCTION(stream_context_set_default)
@@ -1103,7 +1084,6 @@ PHP_FUNCTION(stream_context_set_default)
 
 	php_stream_context_to_zval(context, return_value);
 }
-/* }}} */
 
 /* Create a file context and optionally set parameters */
 PHP_FUNCTION(stream_context_create)
@@ -1129,9 +1109,8 @@ PHP_FUNCTION(stream_context_create)
 
 	RETURN_RES(context->res);
 }
-/* }}} */
 
-/* {{{ streams filter functions */
+/* streams filter functions */
 static void apply_filter_to_stream(int append, INTERNAL_FUNCTION_PARAMETERS)
 {
 	zval *zstream;
@@ -1209,21 +1188,18 @@ static void apply_filter_to_stream(int append, INTERNAL_FUNCTION_PARAMETERS)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Prepend a filter to a stream */
 PHP_FUNCTION(stream_filter_prepend)
 {
 	apply_filter_to_stream(0, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
-/* }}} */
 
 /* Append a filter to a stream */
 PHP_FUNCTION(stream_filter_append)
 {
 	apply_filter_to_stream(1, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
-/* }}} */
 
 /* Flushes any data in the filter's internal buffer, removes it from the chain, and frees the resource */
 PHP_FUNCTION(stream_filter_remove)
@@ -1253,7 +1229,6 @@ PHP_FUNCTION(stream_filter_remove)
 		RETURN_TRUE;
 	}
 }
-/* }}} */
 
 /* Read up to maxlen bytes from a stream or until the ending string is found */
 PHP_FUNCTION(stream_get_line)
@@ -1289,7 +1264,6 @@ PHP_FUNCTION(stream_get_line)
 	}
 }
 
-/* }}} */
 
 /* Set blocking/non-blocking mode on a socket or stream */
 PHP_FUNCTION(stream_set_blocking)
@@ -1312,7 +1286,6 @@ PHP_FUNCTION(stream_set_blocking)
 	RETURN_TRUE;
 }
 
-/* }}} */
 
 /* Set timeout on stream read to seconds + microseonds */
 #if HAVE_SYS_TIME_H || defined(PHP_WIN32)
@@ -1360,7 +1333,6 @@ PHP_FUNCTION(stream_set_timeout)
 	RETURN_FALSE;
 }
 #endif /* HAVE_SYS_TIME_H || defined(PHP_WIN32) */
-/* }}} */
 
 /* Set file write buffer */
 PHP_FUNCTION(stream_set_write_buffer)
@@ -1389,7 +1361,6 @@ PHP_FUNCTION(stream_set_write_buffer)
 
 	RETURN_LONG(ret == 0 ? 0 : EOF);
 }
-/* }}} */
 
 /* Set the stream chunk size */
 PHP_FUNCTION(stream_set_chunk_size)
@@ -1423,7 +1394,6 @@ PHP_FUNCTION(stream_set_chunk_size)
 
 	RETURN_LONG(ret > 0 ? (zend_long)ret : (zend_long)EOF);
 }
-/* }}} */
 
 /* Set file read buffer */
 PHP_FUNCTION(stream_set_read_buffer)
@@ -1452,7 +1422,6 @@ PHP_FUNCTION(stream_set_read_buffer)
 
 	RETURN_LONG(ret == 0 ? 0 : EOF);
 }
-/* }}} */
 
 /* Enable or disable a specific kind of crypto on the stream */
 PHP_FUNCTION(stream_socket_enable_crypto)
@@ -1506,7 +1475,6 @@ PHP_FUNCTION(stream_socket_enable_crypto)
 			RETURN_TRUE;
 	}
 }
-/* }}} */
 
 /* Determine what file will be opened by calls to fopen() with a relative path */
 PHP_FUNCTION(stream_resolve_include_path)
@@ -1526,7 +1494,6 @@ PHP_FUNCTION(stream_resolve_include_path)
 	}
 	RETURN_FALSE;
 }
-/* }}} */
 
 PHP_FUNCTION(stream_is_local)
 {
@@ -1558,7 +1525,6 @@ PHP_FUNCTION(stream_is_local)
 
 	RETURN_BOOL(wrapper->is_url==0);
 }
-/* }}} */
 
 /* Tells whether the stream supports locking through flock(). */
 PHP_FUNCTION(stream_supports_lock)
@@ -1704,5 +1670,5 @@ PHP_FUNCTION(stream_socket_shutdown)
 
 	RETURN_BOOL(php_stream_xport_shutdown(stream, (stream_shutdown_t)how) == 0);
 }
-/* }}} */
+
 #endif

@@ -49,7 +49,7 @@ void zend_optimizer_collect_constant(zend_optimizer_ctx *ctx, zval *name, zval* 
 	zend_hash_add(ctx->constants, Z_STR_P(name), &val);
 }
 
-int zend_optimizer_eval_binary_op(zval *result, zend_uchar opcode, zval *op1, zval *op2) /* {{{ */
+int zend_optimizer_eval_binary_op(zval *result, zend_uchar opcode, zval *op1, zval *op2)
 {
 	binary_op_type binary_op = get_binary_op(opcode);
 	int er, ret;
@@ -65,9 +65,8 @@ int zend_optimizer_eval_binary_op(zval *result, zend_uchar opcode, zval *op1, zv
 
 	return ret;
 }
-/* }}} */
 
-int zend_optimizer_eval_unary_op(zval *result, zend_uchar opcode, zval *op1) /* {{{ */
+int zend_optimizer_eval_unary_op(zval *result, zend_uchar opcode, zval *op1)
 {
 	unary_op_type unary_op = get_unary_op(opcode);
 
@@ -85,9 +84,8 @@ int zend_optimizer_eval_unary_op(zval *result, zend_uchar opcode, zval *op1) /* 
 		return SUCCESS;
 	}
 }
-/* }}} */
 
-int zend_optimizer_eval_cast(zval *result, uint32_t type, zval *op1) /* {{{ */
+int zend_optimizer_eval_cast(zval *result, uint32_t type, zval *op1)
 {
 	switch (type) {
 		case IS_NULL:
@@ -117,9 +115,8 @@ int zend_optimizer_eval_cast(zval *result, uint32_t type, zval *op1) /* {{{ */
 	}
 	return FAILURE;
 }
-/* }}} */
 
-int zend_optimizer_eval_strlen(zval *result, zval *op1) /* {{{ */
+int zend_optimizer_eval_strlen(zval *result, zval *op1)
 {
 	if (Z_TYPE_P(op1) != IS_STRING) {
 		return FAILURE;
@@ -127,7 +124,6 @@ int zend_optimizer_eval_strlen(zval *result, zval *op1) /* {{{ */
 	ZVAL_LONG(result, Z_STRLEN_P(op1));
 	return SUCCESS;
 }
-/* }}} */
 
 int zend_optimizer_get_collected_constant(HashTable *constants, zval *name, zval* value)
 {

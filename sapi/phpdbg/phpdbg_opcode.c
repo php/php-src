@@ -25,17 +25,17 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
-static inline const char *phpdbg_decode_opcode(zend_uchar opcode) /* {{{ */
+static inline const char *phpdbg_decode_opcode(zend_uchar opcode)
 {
 	const char *ret = zend_get_opcode_name(opcode);
 	if (ret) {
 		return ret + 5; /* Skip ZEND_ prefix */
 	}
 	return "UNKNOWN";
-} /* }}} */
+}
 
 static inline char *phpdbg_decode_op(
-		zend_op_array *ops, const zend_op *opline, const znode_op *op, uint32_t type) /* {{{ */
+		zend_op_array *ops, const zend_op *opline, const znode_op *op, uint32_t type)
 {
 	char *decode = NULL;
 
@@ -59,7 +59,7 @@ static inline char *phpdbg_decode_op(
 		} break;
 	}
 	return decode;
-} /* }}} */
+}
 
 char *phpdbg_decode_input_op(
 		zend_op_array *ops, const zend_op *opline, znode_op op, zend_uchar op_type,
@@ -87,7 +87,7 @@ char *phpdbg_decode_input_op(
 	return result;
 }
 
-char *phpdbg_decode_opline(zend_op_array *ops, zend_op *opline) /*{{{ */
+char *phpdbg_decode_opline(zend_op_array *ops, zend_op *opline)
 {
 	const char *opcode_name = phpdbg_decode_opcode(opline->opcode);
 	uint32_t flags = zend_get_opcode_flags(opline->opcode);
@@ -139,9 +139,9 @@ char *phpdbg_decode_opline(zend_op_array *ops, zend_op *opline) /*{{{ */
 		efree(decode[3]);
 
 	return result;
-} /* }}} */
+}
 
-void phpdbg_print_opline_ex(zend_execute_data *execute_data, zend_bool ignore_flags) /* {{{ */
+void phpdbg_print_opline_ex(zend_execute_data *execute_data, zend_bool ignore_flags)
 {
 	/* force out a line while stepping so the user knows what is happening */
 	if (ignore_flags ||
@@ -184,9 +184,9 @@ void phpdbg_print_opline_ex(zend_execute_data *execute_data, zend_bool ignore_fl
 		PHPDBG_G(oplog_cur)->next = cur;
 		PHPDBG_G(oplog_cur) = cur;
 	}
-} /* }}} */
+}
 
-void phpdbg_print_opline(zend_execute_data *execute_data, zend_bool ignore_flags) /* {{{ */
+void phpdbg_print_opline(zend_execute_data *execute_data, zend_bool ignore_flags)
 {
 	phpdbg_print_opline_ex(execute_data, ignore_flags);
-} /* }}} */
+}

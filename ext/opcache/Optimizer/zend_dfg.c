@@ -20,7 +20,7 @@
 #include "zend_compile.h"
 #include "zend_dfg.h"
 
-static zend_always_inline void _zend_dfg_add_use_def_op(const zend_op_array *op_array, const zend_op *opline, uint32_t build_flags, zend_bitset use, zend_bitset def) /* {{{ */
+static zend_always_inline void _zend_dfg_add_use_def_op(const zend_op_array *op_array, const zend_op *opline, uint32_t build_flags, zend_bitset use, zend_bitset def)
 {
 	uint32_t var_num;
 	const zend_op *next;
@@ -240,15 +240,13 @@ add_op1_def:
 		zend_bitset_incl(def, EX_VAR_TO_NUM(opline->result.var));
 	}
 }
-/* }}} */
 
-void zend_dfg_add_use_def_op(const zend_op_array *op_array, const zend_op *opline, uint32_t build_flags, zend_bitset use, zend_bitset def) /* {{{ */
+void zend_dfg_add_use_def_op(const zend_op_array *op_array, const zend_op *opline, uint32_t build_flags, zend_bitset use, zend_bitset def)
 {
 	_zend_dfg_add_use_def_op(op_array, opline, build_flags, use, def);
 }
-/* }}} */
 
-int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg *dfg, uint32_t build_flags) /* {{{ */
+int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg *dfg, uint32_t build_flags)
 {
 	int set_size;
 	zend_basic_block *blocks = cfg->blocks;
@@ -330,4 +328,4 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 
 	return SUCCESS;
 }
-/* }}} */
+

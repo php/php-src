@@ -39,7 +39,7 @@ static struct fpm_array_s sockets_list;
 
 enum { FPM_GET_USE_SOCKET = 1, FPM_STORE_SOCKET = 2, FPM_STORE_USE_SOCKET = 3 };
 
-static void fpm_sockets_cleanup(int which, void *arg) /* {{{ */
+static void fpm_sockets_cleanup(int which, void *arg)
 {
 	unsigned i;
 	unsigned socket_set_count = 0;
@@ -94,9 +94,8 @@ static void fpm_sockets_cleanup(int which, void *arg) /* {{{ */
 
 	fpm_array_free(&sockets_list);
 }
-/* }}} */
 
-static void *fpm_get_in_addr(struct sockaddr *sa) /* {{{ */
+static void *fpm_get_in_addr(struct sockaddr *sa)
 {
     if (sa->sa_family == AF_INET) {
         return &(((struct sockaddr_in*)sa)->sin_addr);
@@ -104,9 +103,8 @@ static void *fpm_get_in_addr(struct sockaddr *sa) /* {{{ */
 
     return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
-/* }}} */
 
-static int fpm_get_in_port(struct sockaddr *sa) /* {{{ */
+static int fpm_get_in_port(struct sockaddr *sa)
 {
     if (sa->sa_family == AF_INET) {
         return ntohs(((struct sockaddr_in*)sa)->sin_port);
@@ -114,9 +112,8 @@ static int fpm_get_in_port(struct sockaddr *sa) /* {{{ */
 
     return ntohs(((struct sockaddr_in6*)sa)->sin6_port);
 }
-/* }}} */
 
-static int fpm_sockets_hash_op(int sock, struct sockaddr *sa, char *key, int type, int op) /* {{{ */
+static int fpm_sockets_hash_op(int sock, struct sockaddr *sa, char *key, int type, int op)
 {
 	if (key == NULL) {
 		switch (type) {
@@ -179,9 +176,8 @@ static int fpm_sockets_hash_op(int sock, struct sockaddr *sa, char *key, int typ
 	}
 	return -1;
 }
-/* }}} */
 
-static int fpm_sockets_new_listening_socket(struct fpm_worker_pool_s *wp, struct sockaddr *sa, int socklen) /* {{{ */
+static int fpm_sockets_new_listening_socket(struct fpm_worker_pool_s *wp, struct sockaddr *sa, int socklen)
 {
 	int flags = 1;
 	int sock;
@@ -236,9 +232,8 @@ static int fpm_sockets_new_listening_socket(struct fpm_worker_pool_s *wp, struct
 
 	return sock;
 }
-/* }}} */
 
-static int fpm_sockets_get_listening_socket(struct fpm_worker_pool_s *wp, struct sockaddr *sa, int socklen) /* {{{ */
+static int fpm_sockets_get_listening_socket(struct fpm_worker_pool_s *wp, struct sockaddr *sa, int socklen)
 {
 	int sock;
 
@@ -252,9 +247,8 @@ static int fpm_sockets_get_listening_socket(struct fpm_worker_pool_s *wp, struct
 
 	return sock;
 }
-/* }}} */
 
-enum fpm_address_domain fpm_sockets_domain_from_address(char *address) /* {{{ */
+enum fpm_address_domain fpm_sockets_domain_from_address(char *address)
 {
 	if (strchr(address, ':')) {
 		return FPM_AF_INET;
@@ -265,9 +259,8 @@ enum fpm_address_domain fpm_sockets_domain_from_address(char *address) /* {{{ */
 	}
 	return FPM_AF_UNIX;
 }
-/* }}} */
 
-static int fpm_socket_af_inet_socket_by_addr(struct fpm_worker_pool_s *wp, const char *addr, const char *port) /* {{{ */
+static int fpm_socket_af_inet_socket_by_addr(struct fpm_worker_pool_s *wp, const char *addr, const char *port)
 {
 	struct addrinfo hints, *servinfo, *p;
 	char tmpbuf[INET6_ADDRSTRLEN];
@@ -298,9 +291,8 @@ static int fpm_socket_af_inet_socket_by_addr(struct fpm_worker_pool_s *wp, const
 
 	return sock;
 }
-/* }}} */
 
-static int fpm_socket_af_inet_listening_socket(struct fpm_worker_pool_s *wp) /* {{{ */
+static int fpm_socket_af_inet_listening_socket(struct fpm_worker_pool_s *wp)
 {
 	char *dup_address = strdup(wp->config->listen_address);
 	char *port_str = strrchr(dup_address, ':');
@@ -356,9 +348,8 @@ static int fpm_socket_af_inet_listening_socket(struct fpm_worker_pool_s *wp) /* 
 
 	return sock;
 }
-/* }}} */
 
-static int fpm_socket_af_unix_listening_socket(struct fpm_worker_pool_s *wp) /* {{{ */
+static int fpm_socket_af_unix_listening_socket(struct fpm_worker_pool_s *wp)
 {
 	struct sockaddr_un sa_un;
 
@@ -367,9 +358,8 @@ static int fpm_socket_af_unix_listening_socket(struct fpm_worker_pool_s *wp) /* 
 	sa_un.sun_family = AF_UNIX;
 	return fpm_sockets_get_listening_socket(wp, (struct sockaddr *) &sa_un, sizeof(struct sockaddr_un));
 }
-/* }}} */
 
-int fpm_sockets_init_main() /* {{{ */
+int fpm_sockets_init_main()
 {
 	unsigned i, lq_len;
 	struct fpm_worker_pool_s *wp;
@@ -472,7 +462,6 @@ int fpm_sockets_init_main() /* {{{ */
 	}
 	return 0;
 }
-/* }}} */
 
 #if HAVE_FPM_LQ
 
@@ -558,7 +547,7 @@ int fpm_socket_get_listening_queue(int sock, unsigned *cur_lq, unsigned *max_lq)
 
 #endif
 
-int fpm_socket_unix_test_connect(struct sockaddr_un *sock, size_t socklen) /* {{{ */
+int fpm_socket_unix_test_connect(struct sockaddr_un *sock, size_t socklen)
 {
 	int fd;
 
@@ -578,4 +567,4 @@ int fpm_socket_unix_test_connect(struct sockaddr_un *sock, size_t socklen) /* {{
 	close(fd);
 	return 0;
 }
-/* }}} */
+

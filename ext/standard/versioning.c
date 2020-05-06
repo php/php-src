@@ -22,7 +22,7 @@
 #include "php.h"
 #include "php_versioning.h"
 
-/* {{{ php_canonicalize_version() */
+/* php_canonicalize_version() */
 
 PHPAPI char *
 php_canonicalize_version(const char *version)
@@ -72,8 +72,8 @@ php_canonicalize_version(const char *version)
     return buf;
 }
 
-/* }}} */
-/* {{{ compare_special_version_forms() */
+
+/* compare_special_version_forms() */
 
 typedef struct {
 	const char *name;
@@ -114,8 +114,8 @@ compare_special_version_forms(char *form1, char *form2)
 	return ZEND_NORMALIZE_BOOL(found1 - found2);
 }
 
-/* }}} */
-/* {{{ php_version_compare() */
+
+/* php_version_compare() */
 
 PHPAPI int
 php_version_compare(const char *orig_ver1, const char *orig_ver2)
@@ -198,7 +198,7 @@ php_version_compare(const char *orig_ver1, const char *orig_ver2)
 	return compare;
 }
 
-/* }}} */
+
 /* Compares two "PHP-standardized" version number strings */
 
 PHP_FUNCTION(version_compare)
@@ -240,4 +240,4 @@ PHP_FUNCTION(version_compare)
 	zend_argument_value_error(3, "must be a valid comparison operator");
 }
 
-/* }}} */
+

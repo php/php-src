@@ -66,7 +66,7 @@ static int le_result, le_conn, le_pconn;
 PHP_ODBC_API ZEND_DECLARE_MODULE_GLOBALS(odbc)
 static PHP_GINIT_FUNCTION(odbc);
 
-/* {{{ odbc_module_entry
+/* odbc_module_entry
  */
 zend_module_entry odbc_module_entry = {
 	STANDARD_MODULE_HEADER,
@@ -84,7 +84,6 @@ zend_module_entry odbc_module_entry = {
 	NULL,
 	STANDARD_MODULE_PROPERTIES_EX
 };
-/* }}} */
 
 #ifdef COMPILE_DL_ODBC
 #ifdef ZTS
@@ -93,7 +92,7 @@ ZEND_TSRMLS_CACHE_DEFINE()
 ZEND_GET_MODULE(odbc)
 #endif
 
-/* {{{ _free_odbc_result
+/* _free_odbc_result
  */
 static void _free_odbc_result(zend_resource *rsrc)
 {
@@ -127,9 +126,8 @@ static void _free_odbc_result(zend_resource *rsrc)
 		efree(res);
 	}
 }
-/* }}} */
 
-/* {{{ safe_odbc_disconnect
+/* safe_odbc_disconnect
  * disconnect, and if it fails, then issue a rollback for any pending transaction (lurcher)
  */
 static void safe_odbc_disconnect( void *handle )
@@ -143,9 +141,8 @@ static void safe_odbc_disconnect( void *handle )
 		SQLDisconnect( handle );
 	}
 }
-/* }}} */
 
-/* {{{ _close_odbc_conn
+/* _close_odbc_conn
  */
 static void _close_odbc_conn(zend_resource *rsrc)
 {
@@ -172,9 +169,8 @@ static void _close_odbc_conn(zend_resource *rsrc)
 	efree(conn);
 	ODBCG(num_links)--;
 }
-/* }}} */
 
-/* {{{ void _close_odbc_pconn
+/* void _close_odbc_pconn
  */
 static void _close_odbc_pconn(zend_resource *rsrc)
 {
@@ -202,9 +198,8 @@ static void _close_odbc_pconn(zend_resource *rsrc)
 	ODBCG(num_links)--;
 	ODBCG(num_persistent)--;
 }
-/* }}} */
 
-/* {{{ PHP_INI_DISP(display_link_nums)
+/* PHP_INI_DISP(display_link_nums)
  */
 static PHP_INI_DISP(display_link_nums)
 {
@@ -226,9 +221,8 @@ static PHP_INI_DISP(display_link_nums)
 		}
 	}
 }
-/* }}} */
 
-/* {{{ PHP_INI_DISP(display_defPW)
+/* PHP_INI_DISP(display_defPW)
  */
 static PHP_INI_DISP(display_defPW)
 {
@@ -256,9 +250,8 @@ static PHP_INI_DISP(display_defPW)
 		}
 	}
 }
-/* }}} */
 
-/* {{{ PHP_INI_DISP(display_binmode)
+/* PHP_INI_DISP(display_binmode)
  */
 static PHP_INI_DISP(display_binmode)
 {
@@ -286,9 +279,8 @@ static PHP_INI_DISP(display_binmode)
 		}
 	}
 }
-/* }}} */
 
-/* {{{ PHP_INI_DISP(display_lrl)
+/* PHP_INI_DISP(display_lrl)
  */
 static PHP_INI_DISP(display_lrl)
 {
@@ -310,10 +302,8 @@ static PHP_INI_DISP(display_lrl)
 		}
 	}
 }
-/* }}} */
 
-
-/* {{{ PHP_INI_DISP(display_cursortype)
+/* PHP_INI_DISP(display_cursortype)
  */
 static PHP_INI_DISP(display_cursortype)
 {
@@ -353,9 +343,8 @@ static PHP_INI_DISP(display_cursortype)
 	}
 }
 
-/* }}} */
 
-/* {{{ PHP_INI_BEGIN
+/* PHP_INI_BEGIN
  */
 PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("odbc.allow_persistent", "1", PHP_INI_SYSTEM, OnUpdateLong,
@@ -379,7 +368,6 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY_EX("odbc.default_cursortype", "3", PHP_INI_ALL, OnUpdateLong,
 			default_cursortype, zend_odbc_globals, odbc_globals, display_cursortype)
 PHP_INI_END()
-/* }}} */
 
 static PHP_GINIT_FUNCTION(odbc)
 {
@@ -389,7 +377,7 @@ static PHP_GINIT_FUNCTION(odbc)
 	odbc_globals->num_persistent = 0;
 }
 
-/* {{{ PHP_MINIT_FUNCTION */
+/* PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(odbc)
 {
 #ifdef SQLANY_BUG
@@ -492,9 +480,8 @@ PHP_MINIT_FUNCTION(odbc)
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_RINIT_FUNCTION */
+/* PHP_RINIT_FUNCTION */
 PHP_RINIT_FUNCTION(odbc)
 {
 	ODBCG(defConn) = -1;
@@ -503,24 +490,21 @@ PHP_RINIT_FUNCTION(odbc)
 	memset(ODBCG(lasterrormsg), '\0', SQL_MAX_MESSAGE_LENGTH);
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_RSHUTDOWN_FUNCTION */
+/* PHP_RSHUTDOWN_FUNCTION */
 PHP_RSHUTDOWN_FUNCTION(odbc)
 {
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_MSHUTDOWN_FUNCTION */
+/* PHP_MSHUTDOWN_FUNCTION */
 PHP_MSHUTDOWN_FUNCTION(odbc)
 {
 	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION */
+/* PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(odbc)
 {
 	char buf[32];
@@ -546,9 +530,8 @@ PHP_MINFO_FUNCTION(odbc)
 	DISPLAY_INI_ENTRIES();
 
 }
-/* }}} */
 
-/* {{{ odbc_sql_error */
+/* odbc_sql_error */
 void odbc_sql_error(ODBC_SQL_ERROR_PARAMS)
 {
 	SQLINTEGER	error;        /* Not used */
@@ -589,9 +572,8 @@ void odbc_sql_error(ODBC_SQL_ERROR_PARAMS)
 	}
 	*/
 }
-/* }}} */
 
-/* {{{ php_odbc_fetch_attribs */
+/* php_odbc_fetch_attribs */
 void php_odbc_fetch_attribs(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
 	odbc_result *result;
@@ -614,9 +596,8 @@ void php_odbc_fetch_attribs(INTERNAL_FUNCTION_PARAMETERS, int mode)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
-/* {{{ odbc_bindcols */
+/* odbc_bindcols */
 int odbc_bindcols(odbc_result *result)
 {
 	RETCODE rc;
@@ -727,9 +708,8 @@ int odbc_bindcols(odbc_result *result)
 	}
 	return 1;
 }
-/* }}} */
 
-/* {{{ odbc_transact */
+/* odbc_transact */
 void odbc_transact(INTERNAL_FUNCTION_PARAMETERS, int type)
 {
 	odbc_connection *conn;
@@ -752,9 +732,8 @@ void odbc_transact(INTERNAL_FUNCTION_PARAMETERS, int type)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
-/* {{{ _close_pconn_with_res */
+/* _close_pconn_with_res */
 static int _close_pconn_with_res(zend_resource *le, zend_resource *res)
 {
 	if (le->type == le_pconn && (((odbc_connection *)(le->ptr))->res == res)){
@@ -763,9 +742,8 @@ static int _close_pconn_with_res(zend_resource *le, zend_resource *res)
 		return 0;
 	}
 }
-/* }}} */
 
-/* {{{ odbc_column_lengths */
+/* odbc_column_lengths */
 void odbc_column_lengths(INTERNAL_FUNCTION_PARAMETERS, int type)
 {
 	odbc_result *result;
@@ -810,7 +788,6 @@ void odbc_column_lengths(INTERNAL_FUNCTION_PARAMETERS, int type)
 
 	RETURN_LONG(len);
 }
-/* }}} */
 
 /* Main User Functions */
 
@@ -844,21 +821,18 @@ PHP_FUNCTION(odbc_close_all)
 		}
 	} ZEND_HASH_FOREACH_END();
 }
-/* }}} */
 
 /* Handle binary column data */
 PHP_FUNCTION(odbc_binmode)
 {
 	php_odbc_fetch_attribs(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
-/* }}} */
 
 /* Handle LONG columns */
 PHP_FUNCTION(odbc_longreadlen)
 {
 	php_odbc_fetch_attribs(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
-/* }}} */
 
 /* Prepares a statement for execution */
 PHP_FUNCTION(odbc_prepare)
@@ -958,7 +932,6 @@ PHP_FUNCTION(odbc_prepare)
 
 	RETURN_RES(zend_register_resource(result, le_result));
 }
-/* }}} */
 
 /*
  * Execute prepared SQL statement. Supports only input parameters.
@@ -1173,7 +1146,6 @@ PHP_FUNCTION(odbc_execute)
 		}
 	}
 }
-/* }}} */
 
 /* Get cursor name */
 PHP_FUNCTION(odbc_cursor)
@@ -1230,7 +1202,6 @@ PHP_FUNCTION(odbc_cursor)
 		RETVAL_FALSE;
 	}
 }
-/* }}} */
 
 #ifdef HAVE_SQLDATASOURCES
 /* Return information about the currently connected data source */
@@ -1289,7 +1260,7 @@ PHP_FUNCTION(odbc_data_source)
 	add_assoc_string_ex(return_value, "description", sizeof("description")-1, desc);
 
 }
-/* }}} */
+
 #endif /* HAVE_SQLDATASOURCES */
 
 /* Prepare and execute an SQL statement */
@@ -1373,13 +1344,12 @@ PHP_FUNCTION(odbc_exec)
 	result->fetched = 0;
 	RETURN_RES(zend_register_resource(result, le_result));
 }
-/* }}} */
 
 #ifdef PHP_ODBC_HAVE_FETCH_HASH
 #define ODBC_NUM  1
 #define ODBC_OBJECT  2
 
-/* {{{ php_odbc_fetch_hash */
+/* php_odbc_fetch_hash */
 static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 {
 	int i;
@@ -1507,8 +1477,6 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 		efree(buf);
 	}
 }
-/* }}} */
-
 
 /* Fetch a result row as an object */
 PHP_FUNCTION(odbc_fetch_object)
@@ -1518,14 +1486,13 @@ PHP_FUNCTION(odbc_fetch_object)
 		object_and_properties_init(return_value, ZEND_STANDARD_CLASS_DEF_PTR, Z_ARRVAL_P(return_value));
 	}
 }
-/* }}} */
 
 /* Fetch a result row as an associative array */
 PHP_FUNCTION(odbc_fetch_array)
 {
 	php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, ODBC_OBJECT);
 }
-/* }}} */
+
 #endif
 
 /* Fetch one result row into an array */
@@ -1647,7 +1614,6 @@ PHP_FUNCTION(odbc_fetch_into)
 	if (buf) efree(buf);
 	RETURN_LONG(result->numcols);
 }
-/* }}} */
 
 #if defined(HAVE_SOLID) || defined(HAVE_SOLID_30) || defined(HAVE_SOLID_35)
 PHP_FUNCTION(solid_fetch_prev)
@@ -1680,7 +1646,6 @@ PHP_FUNCTION(solid_fetch_prev)
 	RETURN_TRUE;
 }
 #endif
-/* }}} */
 
 /* Fetch a row */
 PHP_FUNCTION(odbc_fetch_row)
@@ -1733,7 +1698,6 @@ PHP_FUNCTION(odbc_fetch_row)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Get result data */
 PHP_FUNCTION(odbc_result)
@@ -1923,7 +1887,6 @@ PHP_FUNCTION(odbc_result)
 	}
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Print result as HTML table */
 PHP_FUNCTION(odbc_result_all)
@@ -2047,7 +2010,6 @@ PHP_FUNCTION(odbc_result_all)
 	if (buf) efree(buf);
 	RETURN_LONG(result->fetched);
 }
-/* }}} */
 
 /* Free resources associated with a result */
 PHP_FUNCTION(odbc_free_result)
@@ -2078,23 +2040,20 @@ PHP_FUNCTION(odbc_free_result)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Connect to a datasource */
 PHP_FUNCTION(odbc_connect)
 {
 	odbc_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
-/* }}} */
 
 /* Establish a persistent connection to a datasource */
 PHP_FUNCTION(odbc_pconnect)
 {
 	odbc_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
-/* }}} */
 
-/* {{{ odbc_sqlconnect */
+/* odbc_sqlconnect */
 int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int cur_opt, int persistent)
 {
 	RETCODE rc;
@@ -2172,7 +2131,6 @@ int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int 
 /*	(*conn)->open = 1;*/
 	return TRUE;
 }
-/* }}} */
 
 /* Persistent connections: two list-types le_pconn, le_conn and a plist
  * where hashed connection info is stored together with index pointer to
@@ -2187,7 +2145,7 @@ int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int 
  * "globals" in this module should actually be per-connection variables.  I
  * simply fixed things to get them working for now.  Shane
  */
-/* {{{ odbc_do_connect */
+/* odbc_do_connect */
 void odbc_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
 	char *db, *uid, *pwd;
@@ -2341,7 +2299,6 @@ try_and_get_another_connection:
 	}
 	efree(hashed_details);
 }
-/* }}} */
 
 /* Close an ODBC connection */
 PHP_FUNCTION(odbc_close)
@@ -2379,7 +2336,6 @@ PHP_FUNCTION(odbc_close)
 		zend_hash_apply_with_argument(&EG(persistent_list),	(apply_func_arg_t) _close_pconn_with_res, (void *) Z_RES_P(pv_conn));
 	}
 }
-/* }}} */
 
 /* Get number of rows in a result */
 PHP_FUNCTION(odbc_num_rows)
@@ -2399,7 +2355,6 @@ PHP_FUNCTION(odbc_num_rows)
 	SQLRowCount(result->stmt, &rows);
 	RETURN_LONG(rows);
 }
-/* }}} */
 
 #if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30)
 /* Checks if multiple results are available */
@@ -2450,7 +2405,7 @@ PHP_FUNCTION(odbc_next_result)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
+
 #endif
 
 /* Get number of columns in a result */
@@ -2469,7 +2424,6 @@ PHP_FUNCTION(odbc_num_fields)
 
 	RETURN_LONG(result->numcols);
 }
-/* }}} */
 
 /* Get a column name */
 PHP_FUNCTION(odbc_field_name)
@@ -2503,7 +2457,6 @@ PHP_FUNCTION(odbc_field_name)
 
 	RETURN_STRING(result->values[pv_num - 1].name);
 }
-/* }}} */
 
 /* Get the datatype of a column */
 PHP_FUNCTION(odbc_field_type)
@@ -2540,21 +2493,18 @@ PHP_FUNCTION(odbc_field_type)
 	PHP_ODBC_SQLCOLATTRIBUTE(result->stmt, (SQLUSMALLINT)pv_num, SQL_COLUMN_TYPE_NAME, tmp, 31, &tmplen, NULL);
 	RETURN_STRING(tmp);
 }
-/* }}} */
 
 /* Get the length (precision) of a column */
 PHP_FUNCTION(odbc_field_len)
 {
 	odbc_column_lengths(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
-/* }}} */
 
 /* Get the scale of a column */
 PHP_FUNCTION(odbc_field_scale)
 {
 	odbc_column_lengths(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
-/* }}} */
 
 /* Return column number */
 PHP_FUNCTION(odbc_field_num)
@@ -2589,7 +2539,6 @@ PHP_FUNCTION(odbc_field_num)
 	}
 	RETURN_LONG(field_ind);
 }
-/* }}} */
 
 /* Toggle autocommit mode or get status */
 /* There can be problems with pconnections!*/
@@ -2626,23 +2575,20 @@ PHP_FUNCTION(odbc_autocommit)
 		RETVAL_LONG((zend_long)status);
 	}
 }
-/* }}} */
 
 /* Commit an ODBC transaction */
 PHP_FUNCTION(odbc_commit)
 {
 	odbc_transact(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
-/* }}} */
 
 /* Rollback a transaction */
 PHP_FUNCTION(odbc_rollback)
 {
 	odbc_transact(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
-/* }}} */
 
-/* {{{ php_odbc_lasterror */
+/* php_odbc_lasterror */
 static void php_odbc_lasterror(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
 	odbc_connection *conn;
@@ -2672,21 +2618,18 @@ static void php_odbc_lasterror(INTERNAL_FUNCTION_PARAMETERS, int mode)
 
 	RETURN_STRING(ret);
 }
-/* }}} */
 
 /* Get the last error code */
 PHP_FUNCTION(odbc_error)
 {
 	php_odbc_lasterror(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
-/* }}} */
 
 /* Get the last error message */
 PHP_FUNCTION(odbc_errormsg)
 {
 	php_odbc_lasterror(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
-/* }}} */
 
 /* Sets connection or statement options */
 /* This one has to be used carefully. We can't allow to set connection options for
@@ -2743,7 +2686,6 @@ PHP_FUNCTION(odbc_setoption)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /*
  * metadata functions
@@ -2815,7 +2757,6 @@ PHP_FUNCTION(odbc_tables)
 	result->fetched = 0;
 	RETURN_RES(zend_register_resource(result, le_result));
 }
-/* }}} */
 
 /* Returns a result identifier that can be used to fetch a list of column names in specified tables */
 PHP_FUNCTION(odbc_columns)
@@ -2885,7 +2826,6 @@ PHP_FUNCTION(odbc_columns)
 	result->fetched = 0;
 	RETURN_RES(zend_register_resource(result, le_result));
 }
-/* }}} */
 
 #if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35)
 /* Returns a result identifier that can be used to fetch a list of columns and associated privileges for the specified table */
@@ -2949,7 +2889,7 @@ PHP_FUNCTION(odbc_columnprivileges)
 	result->fetched = 0;
 	RETURN_RES(zend_register_resource(result, le_result));
 }
-/* }}} */
+
 #endif /* HAVE_DBMAKER || HAVE_SOLID*/
 
 #if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35)
@@ -3028,7 +2968,7 @@ PHP_FUNCTION(odbc_foreignkeys)
 	result->fetched = 0;
 	RETURN_RES(zend_register_resource(result, le_result));
 }
-/* }}} */
+
 #endif /* HAVE_SOLID */
 
 /* Returns a result identifier containing information about data types supported by the data source */
@@ -3089,7 +3029,6 @@ PHP_FUNCTION(odbc_gettypeinfo)
 	result->fetched = 0;
 	RETURN_RES(zend_register_resource(result, le_result));
 }
-/* }}} */
 
 /* Returns a result identifier listing the column names that comprise the primary key for a table */
 PHP_FUNCTION(odbc_primarykeys)
@@ -3150,7 +3089,6 @@ PHP_FUNCTION(odbc_primarykeys)
 	result->fetched = 0;
 	RETURN_RES(zend_register_resource(result, le_result));
 }
-/* }}} */
 
 #if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35)
 /* Returns a result identifier containing the list of input and output parameters, as well as the columns that make up the result set for the specified procedures */
@@ -3218,7 +3156,7 @@ PHP_FUNCTION(odbc_procedurecolumns)
 	result->fetched = 0;
 	RETURN_RES(zend_register_resource(result, le_result));
 }
-/* }}} */
+
 #endif /* HAVE_SOLID */
 
 #if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35)
@@ -3285,7 +3223,7 @@ PHP_FUNCTION(odbc_procedures)
 	result->fetched = 0;
 	RETURN_RES(zend_register_resource(result, le_result));
 }
-/* }}} */
+
 #endif /* HAVE_SOLID */
 
 /* Returns a result identifier containing either the optimal set of columns that uniquely identifies a row in the table or columns that are automatically updated when any value in the row is updated by a transaction */
@@ -3357,7 +3295,6 @@ PHP_FUNCTION(odbc_specialcolumns)
 	result->fetched = 0;
 	RETURN_RES(zend_register_resource(result, le_result));
 }
-/* }}} */
 
 /* Returns a result identifier that contains statistics about a single table and the indexes associated with the table */
 PHP_FUNCTION(odbc_statistics)
@@ -3426,7 +3363,6 @@ PHP_FUNCTION(odbc_statistics)
 	result->fetched = 0;
 	RETURN_RES(zend_register_resource(result, le_result));
 }
-/* }}} */
 
 #if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35)
 /* Returns a result identifier containing a list of tables and the privileges associated with each table */
@@ -3488,7 +3424,7 @@ PHP_FUNCTION(odbc_tableprivileges)
 	result->fetched = 0;
 	RETURN_RES(zend_register_resource(result, le_result));
 }
-/* }}} */
+
 #endif /* HAVE_DBMAKER */
 
 #endif /* HAVE_UODBC */

@@ -64,7 +64,7 @@ int php_com_wrapper_minit(INIT_FUNC_ARGS)
 }
 
 
-/* {{{ trace */
+/* trace */
 static inline void trace(char *fmt, ...)
 {
 	va_list ap;
@@ -80,7 +80,6 @@ static inline void trace(char *fmt, ...)
 
 	va_end(ap);
 }
-/* }}} */
 
 #define FETCH_DISP(methname)																			\
 	php_dispatchex *disp = (php_dispatchex*)This; 														\

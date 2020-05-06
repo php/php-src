@@ -235,7 +235,7 @@ static zend_constant *zend_get_halt_offset_constant(const char *name, size_t nam
 	}
 }
 
-ZEND_API zend_constant *_zend_get_special_const(const char *name, size_t len) /* {{{ */
+ZEND_API zend_constant *_zend_get_special_const(const char *name, size_t len)
 {
 	if (len == 4) {
 		if ((name[0] == 'n' || name[0] == 'N') &&
@@ -264,9 +264,8 @@ ZEND_API zend_constant *_zend_get_special_const(const char *name, size_t len) /*
 	}
 	return NULL;
 }
-/* }}} */
 
-ZEND_API int zend_verify_const_access(zend_class_constant *c, zend_class_entry *scope) /* {{{ */
+ZEND_API int zend_verify_const_access(zend_class_constant *c, zend_class_entry *scope)
 {
 	if (Z_ACCESS_FLAGS(c->value) & ZEND_ACC_PUBLIC) {
 		return 1;
@@ -277,7 +276,6 @@ ZEND_API int zend_verify_const_access(zend_class_constant *c, zend_class_entry *
 		return zend_check_protected(c->ce, scope);
 	}
 }
-/* }}} */
 
 static zend_constant *zend_get_constant_str_impl(const char *name, size_t name_len)
 {

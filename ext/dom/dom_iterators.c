@@ -39,7 +39,7 @@ struct _notationIterator {
 };
 
 #if LIBXML_VERSION >= 20908
-static void itemHashScanner (void *payload, void *data, const xmlChar *name) /* {{{ */
+static void itemHashScanner (void *payload, void *data, const xmlChar *name)
 #else
 static void itemHashScanner (void *payload, void *data, xmlChar *name)
 #endif
@@ -54,9 +54,8 @@ static void itemHashScanner (void *payload, void *data, xmlChar *name)
 		}
 	}
 }
-/* }}} */
 
-xmlNodePtr create_notation(const xmlChar *name, const xmlChar *ExternalID, const xmlChar *SystemID) /* {{{ */
+xmlNodePtr create_notation(const xmlChar *name, const xmlChar *ExternalID, const xmlChar *SystemID)
 {
 	xmlEntityPtr ret;
 
@@ -78,9 +77,8 @@ xmlNodePtr create_notation(const xmlChar *name, const xmlChar *ExternalID, const
 	ret->prev = NULL;
 	return((xmlNodePtr) ret);
 }
-/* }}} */
 
-xmlNode *php_dom_libxml_hash_iter(xmlHashTable *ht, int index) /* {{{ */
+xmlNode *php_dom_libxml_hash_iter(xmlHashTable *ht, int index)
 {
 	xmlNode *nodep = NULL;
 	nodeIterator *iter;
@@ -99,9 +97,8 @@ xmlNode *php_dom_libxml_hash_iter(xmlHashTable *ht, int index) /* {{{ */
 		return NULL;
 	}
 }
-/* }}} */
 
-xmlNode *php_dom_libxml_notation_iter(xmlHashTable *ht, int index) /* {{{ */
+xmlNode *php_dom_libxml_notation_iter(xmlHashTable *ht, int index)
 {
 	notationIterator *iter;
 	xmlNotation *notep = NULL;
@@ -120,18 +117,16 @@ xmlNode *php_dom_libxml_notation_iter(xmlHashTable *ht, int index) /* {{{ */
 		return NULL;
 	}
 }
-/* }}} */
 
-static void php_dom_iterator_dtor(zend_object_iterator *iter) /* {{{ */
+static void php_dom_iterator_dtor(zend_object_iterator *iter)
 {
 	php_dom_iterator *iterator = (php_dom_iterator *)iter;
 
 	zval_ptr_dtor(&iterator->intern.data);
 	zval_ptr_dtor(&iterator->curobj);
 }
-/* }}} */
 
-static int php_dom_iterator_valid(zend_object_iterator *iter) /* {{{ */
+static int php_dom_iterator_valid(zend_object_iterator *iter)
 {
 
 	php_dom_iterator *iterator = (php_dom_iterator *)iter;
@@ -142,17 +137,15 @@ static int php_dom_iterator_valid(zend_object_iterator *iter) /* {{{ */
 		return FAILURE;
 	}
 }
-/* }}} */
 
-zval *php_dom_iterator_current_data(zend_object_iterator *iter) /* {{{ */
+zval *php_dom_iterator_current_data(zend_object_iterator *iter)
 {
 	php_dom_iterator *iterator = (php_dom_iterator *)iter;
 
 	return &iterator->curobj;
 }
-/* }}} */
 
-static void php_dom_iterator_current_key(zend_object_iterator *iter, zval *key) /* {{{ */
+static void php_dom_iterator_current_key(zend_object_iterator *iter, zval *key)
 {
 	php_dom_iterator *iterator = (php_dom_iterator *)iter;
 	zval *object = &iterator->intern.data;
@@ -170,9 +163,8 @@ static void php_dom_iterator_current_key(zend_object_iterator *iter, zval *key) 
 		}
 	}
 }
-/* }}} */
 
-static void php_dom_iterator_move_forward(zend_object_iterator *iter) /* {{{ */
+static void php_dom_iterator_move_forward(zend_object_iterator *iter)
 {
 	zval *object;
 	xmlNodePtr curnode = NULL, basenode;
@@ -241,7 +233,6 @@ err:
 		php_dom_create_object(curnode, &iterator->curobj, objmap->baseobj);
 	}
 }
-/* }}} */
 
 static const zend_object_iterator_funcs php_dom_iterator_funcs = {
 	php_dom_iterator_dtor,
@@ -253,7 +244,7 @@ static const zend_object_iterator_funcs php_dom_iterator_funcs = {
 	NULL
 };
 
-zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, int by_ref) /* {{{ */
+zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, int by_ref)
 {
 	dom_object *intern;
 	dom_nnodemap_object *objmap;
@@ -323,6 +314,5 @@ err:
 
 	return &iterator->intern;
 }
-/* }}} */
 
 #endif

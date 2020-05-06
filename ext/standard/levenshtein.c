@@ -22,7 +22,7 @@
 
 #define LEVENSHTEIN_MAX_LENGTH 255
 
-/* {{{ reference_levdist
+/* reference_levdist
  * reference implementation, only optimized for memory usage, not speed */
 static zend_long reference_levdist(const char *s1, size_t l1, const char *s2, size_t l2, zend_long cost_ins, zend_long cost_rep, zend_long cost_del )
 {
@@ -72,9 +72,8 @@ static zend_long reference_levdist(const char *s1, size_t l1, const char *s2, si
 
 	return c0;
 }
-/* }}} */
 
-/* {{{ custom_levdist
+/* custom_levdist
  */
 static int custom_levdist(char *str1, char *str2, char *callback_name)
 {
@@ -83,7 +82,6 @@ static int custom_levdist(char *str1, char *str2, char *callback_name)
 
 	return -1;
 }
-/* }}} */
 
 /* Calculate Levenshtein distance between two strings */
 PHP_FUNCTION(levenshtein)
@@ -127,4 +125,4 @@ PHP_FUNCTION(levenshtein)
 
 	RETURN_LONG(distance);
 }
-/* }}} */
+

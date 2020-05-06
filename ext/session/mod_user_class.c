@@ -58,7 +58,6 @@ PHP_METHOD(SessionHandler, open)
 
 	RETVAL_BOOL(SUCCESS == ret);
 }
-/* }}} */
 
 /* Wraps the old close handler */
 PHP_METHOD(SessionHandler, close)
@@ -82,7 +81,6 @@ PHP_METHOD(SessionHandler, close)
 
 	RETVAL_BOOL(SUCCESS == ret);
 }
-/* }}} */
 
 /* Wraps the old read handler */
 PHP_METHOD(SessionHandler, read)
@@ -102,7 +100,6 @@ PHP_METHOD(SessionHandler, read)
 
 	RETURN_STR(val);
 }
-/* }}} */
 
 /* Wraps the old write handler */
 PHP_METHOD(SessionHandler, write)
@@ -117,7 +114,6 @@ PHP_METHOD(SessionHandler, write)
 
 	RETURN_BOOL(SUCCESS == PS(default_mod)->s_write(&PS(mod_data), key, val, PS(gc_maxlifetime)));
 }
-/* }}} */
 
 /* Wraps the old destroy handler */
 PHP_METHOD(SessionHandler, destroy)
@@ -132,7 +128,6 @@ PHP_METHOD(SessionHandler, destroy)
 
 	RETURN_BOOL(SUCCESS == PS(default_mod)->s_destroy(&PS(mod_data), key));
 }
-/* }}} */
 
 /* Wraps the old gc handler */
 PHP_METHOD(SessionHandler, gc)
@@ -151,7 +146,6 @@ PHP_METHOD(SessionHandler, gc)
 	}
 	RETURN_LONG(nrdels);
 }
-/* }}} */
 
 /* Wraps the old create_sid handler */
 PHP_METHOD(SessionHandler, create_sid)
@@ -168,4 +162,4 @@ PHP_METHOD(SessionHandler, create_sid)
 
 	RETURN_STR(id);
 }
-/* }}} */
+

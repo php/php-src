@@ -47,7 +47,7 @@ static const size_t DEF_SORT_KEYS_INDX_BUF_INCREMENT = 1048576;
 
 static const size_t DEF_UTF16_BUF_SIZE = 1024;
 
-/* {{{ collator_regular_compare_function */
+/* collator_regular_compare_function */
 static int collator_regular_compare_function(zval *result, zval *op1, zval *op2)
 {
 	Collator_object* co = NULL;
@@ -141,9 +141,8 @@ cleanup:
 
 	return rc;
 }
-/* }}} */
 
-/* {{{ collator_numeric_compare_function
+/* collator_numeric_compare_function
  * Convert input args to double and compare it.
  */
 static int collator_numeric_compare_function(zval *result, zval *op1, zval *op2)
@@ -173,9 +172,8 @@ static int collator_numeric_compare_function(zval *result, zval *op1, zval *op2)
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ collator_icu_compare_function
+/* collator_icu_compare_function
  * Direct use of ucol_strcoll.
 */
 static int collator_icu_compare_function(zval *result, zval *op1, zval *op2)
@@ -203,9 +201,8 @@ static int collator_icu_compare_function(zval *result, zval *op1, zval *op2)
 
 	return rc;
 }
-/* }}} */
 
-/* {{{ collator_compare_func
+/* collator_compare_func
  * Taken from PHP7 source (array_data_compare).
  */
 static int collator_compare_func(Bucket *f, Bucket *s)
@@ -236,9 +233,8 @@ static int collator_compare_func(Bucket *f, Bucket *s)
 
 	return 0;
 }
-/* }}} */
 
-/* {{{ collator_cmp_sort_keys
+/* collator_cmp_sort_keys
  * Compare sort keys
  */
 static int collator_cmp_sort_keys( const void *p1, const void *p2 )
@@ -248,9 +244,8 @@ static int collator_cmp_sort_keys( const void *p1, const void *p2 )
 
 	return strcmp( key1, key2 );
 }
-/* }}} */
 
-/* {{{ collator_get_compare_function
+/* collator_get_compare_function
  * Choose compare function according to sort flags.
  */
 static collator_compare_func_t collator_get_compare_function( const zend_long sort_flags )
@@ -275,9 +270,8 @@ static collator_compare_func_t collator_get_compare_function( const zend_long so
 
 	return func;
 }
-/* }}} */
 
-/* {{{ collator_sort_internal
+/* collator_sort_internal
  * Common code shared by collator_sort() and collator_asort() API functions.
  */
 static void collator_sort_internal( int renumber, INTERNAL_FUNCTION_PARAMETERS )
@@ -324,31 +318,23 @@ static void collator_sort_internal( int renumber, INTERNAL_FUNCTION_PARAMETERS )
 
 	RETURN_TRUE;
 }
-/* }}} */
 
-/* Sort array using specified collator. }}} */
-/* Sort array using specified collator.
- */
+/* Sort array using specified collator. */
 PHP_FUNCTION( collator_sort )
 {
 	collator_sort_internal( TRUE, INTERNAL_FUNCTION_PARAM_PASSTHRU );
 }
-/* }}} */
 
-static void collator_sortkey_swap(collator_sort_key_index_t *p, collator_sort_key_index_t *q) /* {{{ */
+static void collator_sortkey_swap(collator_sort_key_index_t *p, collator_sort_key_index_t *q)
 {
 	collator_sort_key_index_t t;
 	t = *p;
 	*p = *q;
 	*q = t;
 }
-/* }}} */
 
 /* Equivalent to standard PHP sort using Collator.
- * Uses ICU ucol_getSortKey for performance. }}} */
-/* Equivalent to standard PHP sort using Collator.
- * Uses ICU ucol_getSortKey for performance.
- */
+ * Uses ICU ucol_getSortKey for performance. */
 PHP_FUNCTION( collator_sort_with_sort_keys )
 {
 	zval*       array                = NULL;
@@ -511,18 +497,13 @@ PHP_FUNCTION( collator_sort_with_sort_keys )
 
 	RETURN_TRUE;
 }
-/* }}} */
 
-/* Sort array using specified collator, maintaining index association. }}} */
-/* Sort array using specified collator, maintaining index association.
- */
+/* Sort array using specified collator, maintaining index association. */
 PHP_FUNCTION( collator_asort )
 {
 	collator_sort_internal( FALSE, INTERNAL_FUNCTION_PARAM_PASSTHRU );
 }
-/* }}} */
 
-/* Get a sort key for a string from a Collator. }}} */
 /* Get a sort key for a string from a Collator. */
 PHP_FUNCTION( collator_get_sort_key )
 {
@@ -589,4 +570,4 @@ PHP_FUNCTION( collator_get_sort_key )
 	ZSTR_LEN(key_str) = key_len - 1;
 	RETVAL_NEW_STR(key_str);
 }
-/* }}} */
+

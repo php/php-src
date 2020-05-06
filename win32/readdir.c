@@ -25,7 +25,7 @@ extern "C" {
 #endif
 
 DIR *opendir(const char *dir)
-{/*{{{*/
+{
 	DIR *dp;
 	wchar_t *filespecw, *resolvedw;
 	HANDLE handle;
@@ -93,10 +93,10 @@ DIR *opendir(const char *dir)
 	free(resolvedw);
 
 	return dp;
-}/*}}}*/
+}
 
 struct dirent *readdir(DIR *dp)
-{/*{{{*/
+{
 	char *_tmp;
 	size_t reclen;
 
@@ -125,10 +125,10 @@ struct dirent *readdir(DIR *dp)
 	dp->dent.d_off = dp->offset;
 
 	return &(dp->dent);
-}/*}}}*/
+}
 
 int closedir(DIR *dp)
-{/*{{{*/
+{
 	if (!dp)
 		return 0;
 	/* It is valid to scan an empty directory but we have an invalid
@@ -142,10 +142,10 @@ int closedir(DIR *dp)
 		free(dp);
 
 	return 0;
-}/*}}}*/
+}
 
 int rewinddir(DIR *dp)
-{/*{{{*/
+{
 	/* Re-set to the beginning */
 	wchar_t *filespecw;
 	HANDLE handle;
@@ -194,7 +194,7 @@ int rewinddir(DIR *dp)
 	dp->handle = handle;
 
 	return 0;
-}/*}}}*/
+}
 
 #ifdef __cplusplus
 }

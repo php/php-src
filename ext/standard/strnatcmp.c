@@ -29,7 +29,7 @@
 #include "php.h"
 #include "php_string.h"
 
-/* {{{ compare_right
+/* compare_right
  */
 static int
 compare_right(char const **a, char const *aend, char const **b, char const *bend)
@@ -59,9 +59,8 @@ compare_right(char const **a, char const *aend, char const **b, char const *bend
 
      return 0;
 }
-/* }}} */
 
-/* {{{ compare_left
+/* compare_left
  */
 static int
 compare_left(char const **a, char const *aend, char const **b, char const *bend)
@@ -84,9 +83,8 @@ compare_left(char const **a, char const *aend, char const **b, char const *bend)
 
      return 0;
 }
-/* }}} */
 
-/* {{{ strnatcmp_ex
+/* strnatcmp_ex
  */
 PHPAPI int strnatcmp_ex(char const *a, size_t a_len, char const *b, size_t b_len, int fold_case)
 {
@@ -171,4 +169,4 @@ PHPAPI int strnatcmp_ex(char const *a, size_t a_len, char const *b, size_t b_len
 			return 1;
 	}
 }
-/* }}} */
+

@@ -120,11 +120,10 @@ PHP_FUNCTION(easter_date)
 {
 	_cal_easter(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
-/* }}} */
 
 /* Return the number of days after March 21 that Easter falls on for a given year (defaults to current year) */
 PHP_FUNCTION(easter_days)
 {
 	_cal_easter(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
-/* }}} */
+

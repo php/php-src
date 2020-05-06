@@ -25,7 +25,7 @@
 #define OPTERRARG (3)
 
 // Print error message to stderr and return -2 to distinguish it from '?' command line option.
-static int php_opt_error(int argc, char * const *argv, int oint, int optchr, int err, int show_err) /* {{{ */
+static int php_opt_error(int argc, char * const *argv, int oint, int optchr, int err, int show_err)
 {
 	if (show_err)
 	{
@@ -48,11 +48,10 @@ static int php_opt_error(int argc, char * const *argv, int oint, int optchr, int
 	}
 	return PHP_GETOPT_INVALID_ARG;
 }
-/* }}} */
 
 PHPAPI int php_optidx = -1;
 
-PHPAPI int php_getopt(int argc, char* const *argv, const opt_struct opts[], char **optarg, int *optind, int show_err, int arg_start) /* {{{ */
+PHPAPI int php_getopt(int argc, char* const *argv, const opt_struct opts[], char **optarg, int *optind, int show_err, int arg_start)
 {
 	static int optchr = 0;
 	static int dash = 0; /* have already seen the - */
@@ -192,4 +191,4 @@ PHPAPI int php_getopt(int argc, char* const *argv, const opt_struct opts[], char
 	assert(0);
 	return(0);	/* never reached */
 }
-/* }}} */
+

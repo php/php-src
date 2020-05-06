@@ -75,7 +75,7 @@ static void safe_php_register_variable(char *var, char *strval, size_t val_len, 
 #define UPLOAD_ERROR_F    7  /* Failed to write file to disk */
 #define UPLOAD_ERROR_X    8  /* File upload stopped by extension */
 
-void php_rfc1867_register_constants(void) /* {{{ */
+void php_rfc1867_register_constants(void)
 {
 	REGISTER_MAIN_LONG_CONSTANT("UPLOAD_ERR_OK",         UPLOAD_ERROR_OK, CONST_CS | CONST_PERSISTENT);
 	REGISTER_MAIN_LONG_CONSTANT("UPLOAD_ERR_INI_SIZE",   UPLOAD_ERROR_A,  CONST_CS | CONST_PERSISTENT);
@@ -86,9 +86,8 @@ void php_rfc1867_register_constants(void) /* {{{ */
 	REGISTER_MAIN_LONG_CONSTANT("UPLOAD_ERR_CANT_WRITE", UPLOAD_ERROR_F,  CONST_CS | CONST_PERSISTENT);
 	REGISTER_MAIN_LONG_CONSTANT("UPLOAD_ERR_EXTENSION",  UPLOAD_ERROR_X,  CONST_CS | CONST_PERSISTENT);
 }
-/* }}} */
 
-static void normalize_protected_variable(char *varname) /* {{{ */
+static void normalize_protected_variable(char *varname)
 {
 	char *s = varname, *index = NULL, *indexend = NULL, *p;
 
@@ -144,56 +143,49 @@ static void normalize_protected_variable(char *varname) /* {{{ */
 	}
 	*s = '\0';
 }
-/* }}} */
 
-static void add_protected_variable(char *varname) /* {{{ */
+static void add_protected_variable(char *varname)
 {
 	normalize_protected_variable(varname);
 	zend_hash_str_add_empty_element(&PG(rfc1867_protected_variables), varname, strlen(varname));
 }
-/* }}} */
 
-static zend_bool is_protected_variable(char *varname) /* {{{ */
+static zend_bool is_protected_variable(char *varname)
 {
 	normalize_protected_variable(varname);
 	return zend_hash_str_exists(&PG(rfc1867_protected_variables), varname, strlen(varname));
 }
-/* }}} */
 
-static void safe_php_register_variable(char *var, char *strval, size_t val_len, zval *track_vars_array, zend_bool override_protection) /* {{{ */
+static void safe_php_register_variable(char *var, char *strval, size_t val_len, zval *track_vars_array, zend_bool override_protection)
 {
 	if (override_protection || !is_protected_variable(var)) {
 		php_register_variable_safe(var, strval, val_len, track_vars_array);
 	}
 }
-/* }}} */
 
-static void safe_php_register_variable_ex(char *var, zval *val, zval *track_vars_array, zend_bool override_protection) /* {{{ */
+static void safe_php_register_variable_ex(char *var, zval *val, zval *track_vars_array, zend_bool override_protection)
 {
 	if (override_protection || !is_protected_variable(var)) {
 		php_register_variable_ex(var, val, track_vars_array);
 	}
 }
-/* }}} */
 
-static void register_http_post_files_variable(char *strvar, char *val, zval *http_post_files, zend_bool override_protection) /* {{{ */
+static void register_http_post_files_variable(char *strvar, char *val, zval *http_post_files, zend_bool override_protection)
 {
 	safe_php_register_variable(strvar, val, strlen(val), http_post_files, override_protection);
 }
-/* }}} */
 
-static void register_http_post_files_variable_ex(char *var, zval *val, zval *http_post_files, zend_bool override_protection) /* {{{ */
+static void register_http_post_files_variable_ex(char *var, zval *val, zval *http_post_files, zend_bool override_protection)
 {
 	safe_php_register_variable_ex(var, val, http_post_files, override_protection);
 }
-/* }}} */
 
 static void free_filename(zval *el) {
 	zend_string *filename = Z_STR_P(el);
 	zend_string_release_ex(filename, 0);
 }
 
-PHPAPI void destroy_uploaded_files_hash(void) /* {{{ */
+PHPAPI void destroy_uploaded_files_hash(void)
 {
 	zval *el;
 
@@ -204,9 +196,8 @@ PHPAPI void destroy_uploaded_files_hash(void) /* {{{ */
 	zend_hash_destroy(SG(rfc1867_uploaded_files));
 	FREE_HASHTABLE(SG(rfc1867_uploaded_files));
 }
-/* }}} */
 
-/* {{{ Following code is based on apache_multipart_buffer.c from libapreq-0.33 package. */
+/* Following code is based on apache_multipart_buffer.c from libapreq-0.33 package. */
 
 #define FILLUNIT (1024 * 5)
 
@@ -668,14 +659,13 @@ static char *multipart_buffer_read_body(multipart_buffer *self, size_t *len)
 
 	return out;
 }
-/* }}} */
 
 /*
  * The combined READER/HANDLER
  *
  */
 
-SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
+SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 {
 	char *boundary, *s = NULL, *boundary_end = NULL, *start_arr = NULL, *array_index = NULL;
 	char *lbuf = NULL, *abuf = NULL;
@@ -1311,7 +1301,6 @@ fileupload_done:
 	if (mbuff->buffer) efree(mbuff->buffer);
 	if (mbuff) efree(mbuff);
 }
-/* }}} */
 
 SAPI_API void php_rfc1867_set_multibyte_callbacks(
 					php_rfc1867_encoding_translation_t encoding_translation,
@@ -1319,7 +1308,7 @@ SAPI_API void php_rfc1867_set_multibyte_callbacks(
 					php_rfc1867_set_input_encoding_t set_input_encoding,
 					php_rfc1867_getword_t getword,
 					php_rfc1867_getword_conf_t getword_conf,
-					php_rfc1867_basename_t basename) /* {{{ */
+					php_rfc1867_basename_t basename)
 {
 	php_rfc1867_encoding_translation = encoding_translation;
 	php_rfc1867_get_detect_order = get_detect_order;
@@ -1328,4 +1317,4 @@ SAPI_API void php_rfc1867_set_multibyte_callbacks(
 	php_rfc1867_getword_conf = getword_conf;
 	php_rfc1867_basename = basename;
 }
-/* }}} */
+

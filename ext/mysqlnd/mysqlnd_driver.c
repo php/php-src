@@ -51,7 +51,7 @@ static struct st_mysqlnd_plugin_core mysqlnd_plugin_core =
 };
 
 
-/* {{{ mysqlnd_library_end */
+/* mysqlnd_library_end */
 PHPAPI void mysqlnd_library_end(void)
 {
 	if (mysqlnd_library_initted == TRUE) {
@@ -62,10 +62,8 @@ PHPAPI void mysqlnd_library_end(void)
 		mysqlnd_reverse_api_end();
 	}
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_library_init */
+/* mysqlnd_library_init */
 PHPAPI void mysqlnd_library_init(void)
 {
 	if (mysqlnd_library_initted == FALSE) {
@@ -89,10 +87,8 @@ PHPAPI void mysqlnd_library_init(void)
 		mysqlnd_reverse_api_init();
 	}
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_object_factory::get_connection */
+/* mysqlnd_object_factory::get_connection */
 static MYSQLND *
 MYSQLND_METHOD(mysqlnd_object_factory, get_connection)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) *factory, const zend_bool persistent)
 {
@@ -150,10 +146,8 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_connection)(MYSQLND_CLASS_METHODS_TYP
 
 	DBG_RETURN(new_object);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_object_factory::clone_connection_object */
+/* mysqlnd_object_factory::clone_connection_object */
 static MYSQLND *
 MYSQLND_METHOD(mysqlnd_object_factory, clone_connection_object)(MYSQLND * to_be_cloned)
 {
@@ -179,10 +173,8 @@ MYSQLND_METHOD(mysqlnd_object_factory, clone_connection_object)(MYSQLND * to_be_
 	}
 	DBG_RETURN(new_object);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_object_factory::get_prepared_statement */
+/* mysqlnd_object_factory::get_prepared_statement */
 static MYSQLND_STMT *
 MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement)(MYSQLND_CONN_DATA * const conn)
 {
@@ -236,10 +228,8 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement)(MYSQLND_CONN_DATA
 	}
 	DBG_RETURN(NULL);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_object_factory::get_pfc */
+/* mysqlnd_object_factory::get_pfc */
 static MYSQLND_PFC *
 MYSQLND_METHOD(mysqlnd_object_factory, get_pfc)(const zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info)
 {
@@ -261,10 +251,8 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_pfc)(const zend_bool persistent, MYSQ
 	}
 	DBG_RETURN(pfc);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_object_factory::get_vio */
+/* mysqlnd_object_factory::get_vio */
 static MYSQLND_VIO *
 MYSQLND_METHOD(mysqlnd_object_factory, get_vio)(const zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info)
 {
@@ -286,10 +274,8 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_vio)(const zend_bool persistent, MYSQ
 	}
 	DBG_RETURN(vio);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_object_factory::get_protocol_payload_decoder_factory */
+/* mysqlnd_object_factory::get_protocol_payload_decoder_factory */
 static MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY *
 MYSQLND_METHOD(mysqlnd_object_factory, get_protocol_payload_decoder_factory)(MYSQLND_CONN_DATA * conn, const zend_bool persistent)
 {
@@ -306,8 +292,6 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_protocol_payload_decoder_factory)(MYS
 
 	DBG_RETURN(ret);
 }
-/* }}} */
-
 
 PHPAPI MYSQLND_CLASS_METHODS_START(mysqlnd_object_factory)
 	MYSQLND_METHOD(mysqlnd_object_factory, get_connection),

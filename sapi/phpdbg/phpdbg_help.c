@@ -25,7 +25,7 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
-/* {{{ Commands Table */
+/* Commands Table */
 #define PHPDBG_COMMAND_HELP_D(name, tip, alias, action) \
 	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, action, &phpdbg_prompt_commands[16], 0, NULL, (zend_bool) 0}
 
@@ -36,9 +36,9 @@ const phpdbg_command_t phpdbg_help_commands[] = {
 	PHPDBG_COMMAND_HELP_D(phpdbginit, "phpdbginit file format", 0, NULL),
 	PHPDBG_COMMAND_HELP_D(syntax,     "syntax overview", 0, NULL),
 	PHPDBG_END_COMMAND
-};  /* }}} */
+};
 
-/* {{{ pretty_print.  Formatting escapes and wrapping text in a string before printing it. */
+/* pretty_print.  Formatting escapes and wrapping text in a string before printing it. */
 void pretty_print(char *text)
 {
 	char *new, *p, *q;
@@ -137,9 +137,9 @@ void pretty_print(char *text)
 
 	phpdbg_out("%s\n", new);
 	efree(new);
-}  /* }}} */
+}
 
-/* {{{ summary_print.  Print a summary line giving, the command, its alias and tip */
+/* summary_print.  Print a summary line giving, the command, its alias and tip */
 void summary_print(phpdbg_command_t const * const cmd)
 {
 	char *summary;
@@ -148,7 +148,7 @@ void summary_print(phpdbg_command_t const * const cmd)
 	efree(summary);
 }
 
-/* {{{ get_help. Retries and formats text from the phpdbg help text table */
+/* get_help. Retries and formats text from the phpdbg help text table */
 static char *get_help(const char * const key)
 {
 	phpdbg_help_text_t *p;
@@ -163,9 +163,9 @@ static char *get_help(const char * const key)
 		}
 	}
 	return "";   /* return empty string to denote no match found */
-} /* }}} */
+}
 
-/* {{{ get_command.  Return number of matching commands from a command table.
+/* get_command.  Return number of matching commands from a command table.
  * Unlike the command parser, the help search is sloppy that is partial matches can occur
  *   * Any single character key is taken as an alias.
  *   * Other keys are matched again the table on the first len characters.
@@ -205,9 +205,9 @@ static int get_command(
 
 	return num_matches;
 
-} /* }}} */
+}
 
-void phpdbg_do_help_cmd(char *type) { /* {{{ */
+void phpdbg_do_help_cmd(char *type) {
 	char *help;
 
 	if (!type) {
@@ -225,9 +225,9 @@ void phpdbg_do_help_cmd(char *type) { /* {{{ */
 	}
 
 	pretty_print(help);
-} /* }}} */
+}
 
-PHPDBG_COMMAND(help) /* {{{ */
+PHPDBG_COMMAND(help)
 {
 	phpdbg_command_t const *cmd;
 	int n;
@@ -275,9 +275,9 @@ PHPDBG_COMMAND(help) /* {{{ */
 
 	return FAILURE;
 
-} /* }}} */
+}
 
-PHPDBG_HELP(aliases) /* {{{ */
+PHPDBG_HELP(aliases)
 {
 	const phpdbg_command_t *c, *c_sub;
 	int len;
@@ -320,10 +320,10 @@ PHPDBG_HELP(aliases) /* {{{ */
 
 	pretty_print(get_help("aliases!"));
 	return SUCCESS;
-} /* }}} */
+}
 
 
-/* {{{ Help Text Table
+/* Help Text Table
  * Contains help text entries keyed by a lowercase ascii key.
  * Text is in ascii and enriched by a simple markup:
  *   ** toggles bold font emphasis.
@@ -1030,4 +1030,4 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "                If phpdbg could not handle that segfault, the same segfault is triggered again and this time phpdbg will abort."
 },
 {NULL, NULL /* end of table marker */}
-};  /* }}} */
+};

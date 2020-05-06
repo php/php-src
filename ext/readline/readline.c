@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-/* {{{ includes & prototypes */
+/* includes & prototypes */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -52,9 +52,8 @@ PHP_MSHUTDOWN_FUNCTION(readline);
 PHP_RSHUTDOWN_FUNCTION(readline);
 PHP_MINFO_FUNCTION(readline);
 
-/* }}} */
 
-/* {{{ module stuff */
+/* module stuff */
 zend_module_entry readline_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"readline",
@@ -110,7 +109,6 @@ PHP_MINFO_FUNCTION(readline)
 	PHP_MINFO(cli_readline)(ZEND_MODULE_INFO_FUNC_ARGS_PASSTHRU);
 }
 
-/* }}} */
 
 /* Reads a line */
 PHP_FUNCTION(readline)
@@ -133,7 +131,6 @@ PHP_FUNCTION(readline)
 	}
 }
 
-/* }}} */
 
 #define SAFE_STRING(s) ((s)?(char*)(s):"")
 
@@ -267,7 +264,7 @@ PHP_FUNCTION(readline_info)
 	}
 }
 
-/* }}} */
+
 /* Adds a line to the history */
 PHP_FUNCTION(readline_add_history)
 {
@@ -283,7 +280,7 @@ PHP_FUNCTION(readline_add_history)
 	RETURN_TRUE;
 }
 
-/* }}} */
+
 /* Clears the history */
 PHP_FUNCTION(readline_clear_history)
 {
@@ -301,7 +298,6 @@ PHP_FUNCTION(readline_clear_history)
 	RETURN_TRUE;
 }
 
-/* }}} */
 
 #ifdef HAVE_HISTORY_LIST
 /* Lists the history */
@@ -354,7 +350,7 @@ PHP_FUNCTION(readline_list_history)
 	}
 #endif
 }
-/* }}} */
+
 #endif
 
 /* Reads the history */
@@ -380,7 +376,7 @@ PHP_FUNCTION(readline_read_history)
 	}
 }
 
-/* }}} */
+
 /* Writes the history */
 PHP_FUNCTION(readline_write_history)
 {
@@ -402,7 +398,7 @@ PHP_FUNCTION(readline_write_history)
 	}
 }
 
-/* }}} */
+
 /* Readline completion function? */
 
 static char *_readline_command_generator(const char *text, int state)
@@ -495,7 +491,6 @@ PHP_FUNCTION(readline_completion_function)
 	RETURN_TRUE;
 }
 
-/* }}} */
 
 #if HAVE_RL_CALLBACK_READ_CHAR
 
@@ -543,7 +538,6 @@ PHP_FUNCTION(readline_callback_handler_install)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Informs the readline callback interface that a character is ready for input */
 PHP_FUNCTION(readline_callback_read_char)
@@ -556,7 +550,6 @@ PHP_FUNCTION(readline_callback_read_char)
 		rl_callback_read_char();
 	}
 }
-/* }}} */
 
 /* Removes a previously installed callback handler and restores terminal settings */
 PHP_FUNCTION(readline_callback_handler_remove)
@@ -573,7 +566,6 @@ PHP_FUNCTION(readline_callback_handler_remove)
 	}
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* Ask readline to redraw the display */
 PHP_FUNCTION(readline_redisplay)
@@ -589,7 +581,6 @@ PHP_FUNCTION(readline_redisplay)
 #endif
 	rl_redisplay();
 }
-/* }}} */
 
 #endif
 
@@ -603,7 +594,6 @@ PHP_FUNCTION(readline_on_new_line)
 
 	rl_on_new_line();
 }
-/* }}} */
 
 #endif
 

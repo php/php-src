@@ -23,9 +23,7 @@
 
 #include <unicode/ustring.h>
 
-/* Get formatter pattern. }}} */
-/* Get formatter pattern.
- */
+/* Get formatter pattern. */
 PHP_FUNCTION( msgfmt_get_pattern )
 {
 	MSG_FORMAT_METHOD_INIT_VARS;
@@ -45,11 +43,8 @@ PHP_FUNCTION( msgfmt_get_pattern )
 
 	RETURN_FALSE;
 }
-/* }}} */
 
-/* Set formatter pattern. }}} */
-/* Set formatter pattern.
- */
+/* Set formatter pattern. */
 PHP_FUNCTION( msgfmt_set_pattern )
 {
 	char*       value = NULL;
@@ -100,11 +95,8 @@ PHP_FUNCTION( msgfmt_set_pattern )
 
 	RETURN_TRUE;
 }
-/* }}} */
 
-/* Get formatter locale. }}} */
-/* Get formatter locale.
- */
+/* Get formatter locale. */
 PHP_FUNCTION( msgfmt_get_locale )
 {
 	char *loc;
@@ -123,4 +115,4 @@ PHP_FUNCTION( msgfmt_get_locale )
 	loc = (char *)umsg_getLocale(MSG_FORMAT_OBJECT(mfo));
 	RETURN_STRING(loc);
 }
-/* }}} */
+

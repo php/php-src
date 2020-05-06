@@ -25,7 +25,7 @@ zend_class_entry *Locale_ce_ptr = NULL;
  * 'Locale' class registration structures & functions
  */
 
-/* {{{ locale_register_Locale_class
+/* locale_register_Locale_class
  * Initialize 'Locale' class
  */
 void locale_register_Locale_class( void )
@@ -45,4 +45,4 @@ void locale_register_Locale_class( void )
 		return;
 	}
 }
-/* }}} */
+

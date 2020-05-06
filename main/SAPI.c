@@ -131,7 +131,6 @@ PHP_FUNCTION(header_register_callback)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 static void sapi_run_header_callback(zval *callback)
 {
@@ -1100,7 +1099,7 @@ SAPI_API void sapi_terminate_process(void) {
 	}
 }
 
-SAPI_API void sapi_add_request_header(char *var, unsigned int var_len, char *val, unsigned int val_len, void *arg) /* {{{ */
+SAPI_API void sapi_add_request_header(char *var, unsigned int var_len, char *val, unsigned int val_len, void *arg)
 {
 	zval *return_value = (zval*)arg;
 	char *str = NULL;
@@ -1148,4 +1147,4 @@ SAPI_API void sapi_add_request_header(char *var, unsigned int var_len, char *val
 		free_alloca(var, use_heap);
 	}
 }
-/* }}} */
+

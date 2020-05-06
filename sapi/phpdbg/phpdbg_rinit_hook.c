@@ -25,11 +25,11 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("phpdbg.path", "", PHP_INI_SYSTEM | PHP_INI_PERDIR, OnUpdateString, path, zend_phpdbg_webhelper_globals, phpdbg_webhelper_globals)
 PHP_INI_END()
 
-static inline void php_phpdbg_webhelper_globals_ctor(zend_phpdbg_webhelper_globals *pg) /* {{{ */
+static inline void php_phpdbg_webhelper_globals_ctor(zend_phpdbg_webhelper_globals *pg)
 {
-} /* }}} */
+}
 
-static PHP_MINIT_FUNCTION(phpdbg_webhelper) /* {{{ */
+static PHP_MINIT_FUNCTION(phpdbg_webhelper)
 {
 	if (!strcmp(sapi_module.name, PHPDBG_NAME)) {
 		return SUCCESS;
@@ -39,9 +39,9 @@ static PHP_MINIT_FUNCTION(phpdbg_webhelper) /* {{{ */
 	REGISTER_INI_ENTRIES();
 
 	return SUCCESS;
-} /* }}} */
+}
 
-static PHP_RINIT_FUNCTION(phpdbg_webhelper) /* {{{ */
+static PHP_RINIT_FUNCTION(phpdbg_webhelper)
 {
 	zval cookies = PG(http_globals)[TRACK_VARS_COOKIE];
 	zval *auth;
@@ -87,7 +87,7 @@ static PHP_RINIT_FUNCTION(phpdbg_webhelper) /* {{{ */
 #endif
 
 	return SUCCESS;
-} /* }}} */
+}
 
 zend_module_entry phpdbg_webhelper_module_entry = {
 	STANDARD_MODULE_HEADER,

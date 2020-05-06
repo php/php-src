@@ -90,7 +90,7 @@
 ZEND_DECLARE_MODULE_GLOBALS(pgsql)
 static PHP_GINIT_FUNCTION(pgsql);
 
-/* {{{ arginfo */
+/* arginfo */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_connect, 0, 0, 1)
 	ZEND_ARG_INFO(0, connection_string)
 	ZEND_ARG_INFO(0, connect_type)
@@ -580,9 +580,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_select, 0, 0, 3)
 	ZEND_ARG_INFO(0, options)
 	ZEND_ARG_INFO(0, result_type)
 ZEND_END_ARG_INFO()
-/* }}} */
 
-/* {{{ pgsql_functions[]
+/* pgsql_functions[]
  */
 static const zend_function_entry pgsql_functions[] = {
 	/* connection functions */
@@ -746,9 +745,8 @@ static const zend_function_entry pgsql_functions[] = {
 #endif
 	PHP_FE_END
 };
-/* }}} */
 
-/* {{{ pgsql_module_entry
+/* pgsql_module_entry
  */
 zend_module_entry pgsql_module_entry = {
 	STANDARD_MODULE_HEADER,
@@ -766,7 +764,6 @@ zend_module_entry pgsql_module_entry = {
 	NULL,
 	STANDARD_MODULE_PROPERTIES_EX
 };
-/* }}} */
 
 #ifdef COMPILE_DL_PGSQL
 #ifdef ZTS
@@ -798,7 +795,7 @@ static int le_link, le_plink, le_result, le_lofp, le_string;
 #define PGSQLfree(a) efree(a)
 
 /* emulate libpq's PQescapeInternal() 9.0 or later */
-static char *php_pgsql_PQescapeInternal(PGconn *conn, const char *str, size_t len, int escape_literal, int safe) /* {{{ */
+static char *php_pgsql_PQescapeInternal(PGconn *conn, const char *str, size_t len, int escape_literal, int safe)
 {
 	char *result, *rp, *s;
 
@@ -872,10 +869,10 @@ static char *php_pgsql_PQescapeInternal(PGconn *conn, const char *str, size_t le
 
 	return result;
 }
-/* }}} */
+
 #endif
 
-/* {{{ _php_pgsql_trim_message */
+/* _php_pgsql_trim_message */
 static char * _php_pgsql_trim_message(const char *message, size_t *len)
 {
 	register size_t i = strlen(message);
@@ -891,14 +888,12 @@ static char * _php_pgsql_trim_message(const char *message, size_t *len)
 	}
 	return estrndup(message, i);
 }
-/* }}} */
 
-/* {{{ _php_pgsql_trim_result */
+/* _php_pgsql_trim_result */
 static inline char * _php_pgsql_trim_result(PGconn * pgsql, char **buf)
 {
 	return *buf = _php_pgsql_trim_message(PQerrorMessage(pgsql), NULL);
 }
-/* }}} */
 
 #define PQErrorMessageTrim(pgsql, buf) _php_pgsql_trim_result(pgsql, buf)
 
@@ -908,7 +903,7 @@ static inline char * _php_pgsql_trim_result(PGconn * pgsql, char **buf)
 		efree(msgbuf);													\
 } \
 
-/* {{{ php_pgsql_set_default_link
+/* php_pgsql_set_default_link
  */
 static void php_pgsql_set_default_link(zend_resource *res)
 {
@@ -920,9 +915,8 @@ static void php_pgsql_set_default_link(zend_resource *res)
 
 	PGG(default_link) = res;
 }
-/* }}} */
 
-/* {{{ _close_pgsql_link
+/* _close_pgsql_link
  */
 static void _close_pgsql_link(zend_resource *rsrc)
 {
@@ -943,9 +937,8 @@ static void _close_pgsql_link(zend_resource *rsrc)
 		zend_hash_del(&EG(regular_list), Z_STR_P(hash));
 	}
 }
-/* }}} */
 
-/* {{{ _close_pgsql_plink
+/* _close_pgsql_plink
  */
 static void _close_pgsql_plink(zend_resource *rsrc)
 {
@@ -959,9 +952,8 @@ static void _close_pgsql_plink(zend_resource *rsrc)
 	PGG(num_persistent)--;
 	PGG(num_links)--;
 }
-/* }}} */
 
-/* {{{ _php_pgsql_notice_handler
+/* _php_pgsql_notice_handler
  */
 static void _php_pgsql_notice_handler(void *resource_id, const char *message)
 {
@@ -985,9 +977,8 @@ static void _php_pgsql_notice_handler(void *resource_id, const char *message)
 		efree(trimed_message);
 	}
 }
-/* }}} */
 
-/* {{{ _rollback_transactions
+/* _rollback_transactions
  */
 static int _rollback_transactions(zval *el)
 {
@@ -1027,18 +1018,16 @@ static int _rollback_transactions(zval *el)
 
 	return 0;
 }
-/* }}} */
 
-/* {{{ _free_ptr
+/* _free_ptr
  */
 static void _free_ptr(zend_resource *rsrc)
 {
 	pgLofp *lofp = (pgLofp *)rsrc->ptr;
 	efree(lofp);
 }
-/* }}} */
 
-/* {{{ _free_result
+/* _free_result
  */
 static void _free_result(zend_resource *rsrc)
 {
@@ -1047,9 +1036,8 @@ static void _free_result(zend_resource *rsrc)
 	PQclear(pg_result->result);
 	efree(pg_result);
 }
-/* }}} */
 
-static int _php_pgsql_detect_identifier_escape(const char *identifier, size_t len) /* {{{ */
+static int _php_pgsql_detect_identifier_escape(const char *identifier, size_t len)
 {
 	/* Handle edge case. Cannot be a escaped string */
 	if (len <= 2) {
@@ -1071,9 +1059,8 @@ static int _php_pgsql_detect_identifier_escape(const char *identifier, size_t le
 	/* Escaped properly */
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_INI
+/* PHP_INI
  */
 PHP_INI_BEGIN()
 STD_PHP_INI_BOOLEAN( "pgsql.allow_persistent",      "1",  PHP_INI_SYSTEM, OnUpdateBool, allow_persistent,      zend_pgsql_globals, pgsql_globals)
@@ -1083,9 +1070,8 @@ STD_PHP_INI_BOOLEAN( "pgsql.auto_reset_persistent", "0",  PHP_INI_SYSTEM, OnUpda
 STD_PHP_INI_BOOLEAN( "pgsql.ignore_notice",         "0",  PHP_INI_ALL,    OnUpdateBool, ignore_notices,        zend_pgsql_globals, pgsql_globals)
 STD_PHP_INI_BOOLEAN( "pgsql.log_notice",            "0",  PHP_INI_ALL,    OnUpdateBool, log_notices,           zend_pgsql_globals, pgsql_globals)
 PHP_INI_END()
-/* }}} */
 
-/* {{{ PHP_GINIT_FUNCTION
+/* PHP_GINIT_FUNCTION
  */
 static PHP_GINIT_FUNCTION(pgsql)
 {
@@ -1097,9 +1083,8 @@ static PHP_GINIT_FUNCTION(pgsql)
 	zend_hash_init_ex(&pgsql_globals->notices, 0, NULL, ZVAL_PTR_DTOR, 1, 0);
 	zend_hash_init_ex(&pgsql_globals->hashes, 0, NULL, ZVAL_PTR_DTOR, 1, 0);
 }
-/* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION
+/* PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(pgsql)
 {
@@ -1222,9 +1207,8 @@ PHP_MINIT_FUNCTION(pgsql)
 	REGISTER_LONG_CONSTANT("PGSQL_DML_STRING", PGSQL_DML_STRING, CONST_CS | CONST_PERSISTENT);
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_MSHUTDOWN_FUNCTION
+/* PHP_MSHUTDOWN_FUNCTION
  */
 PHP_MSHUTDOWN_FUNCTION(pgsql)
 {
@@ -1234,9 +1218,8 @@ PHP_MSHUTDOWN_FUNCTION(pgsql)
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_RINIT_FUNCTION
+/* PHP_RINIT_FUNCTION
  */
 PHP_RINIT_FUNCTION(pgsql)
 {
@@ -1244,9 +1227,8 @@ PHP_RINIT_FUNCTION(pgsql)
 	PGG(num_links) = PGG(num_persistent);
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_RSHUTDOWN_FUNCTION
+/* PHP_RSHUTDOWN_FUNCTION
  */
 PHP_RSHUTDOWN_FUNCTION(pgsql)
 {
@@ -1257,9 +1239,8 @@ PHP_RSHUTDOWN_FUNCTION(pgsql)
 	zend_hash_apply(&EG(persistent_list), (apply_func_t) _rollback_transactions);
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
+/* PHP_MINFO_FUNCTION
  */
 PHP_MINFO_FUNCTION(pgsql)
 {
@@ -1289,9 +1270,8 @@ PHP_MINFO_FUNCTION(pgsql)
 
 	DISPLAY_INI_ENTRIES();
 }
-/* }}} */
 
-/* {{{ php_pgsql_do_connect
+/* php_pgsql_do_connect
  */
 static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
@@ -1530,14 +1510,12 @@ err:
 	smart_str_free(&str);
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* Open a PostgreSQL connection */
 PHP_FUNCTION(pg_connect)
 {
 	php_pgsql_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,0);
 }
-/* }}} */
 
 /* Poll the status of an in-progress async PostgreSQL connection attempt*/
 PHP_FUNCTION(pg_connect_poll)
@@ -1558,14 +1536,12 @@ PHP_FUNCTION(pg_connect_poll)
 
 	RETURN_LONG(ret);
 }
-/* }}} */
 
 /* Open a persistent PostgreSQL connection */
 PHP_FUNCTION(pg_pconnect)
 {
 	php_pgsql_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,1);
 }
-/* }}} */
 
 /* Close a PostgreSQL connection */
 PHP_FUNCTION(pg_close)
@@ -1598,7 +1574,6 @@ PHP_FUNCTION(pg_close)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 #define PHP_PG_DBNAME 1
 #define PHP_PG_ERROR_MESSAGE 2
@@ -1608,7 +1583,7 @@ PHP_FUNCTION(pg_close)
 #define PHP_PG_HOST 6
 #define PHP_PG_VERSION 7
 
-/* {{{ php_pgsql_get_link_info
+/* php_pgsql_get_link_info
  */
 static void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 {
@@ -1693,56 +1668,48 @@ static void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type
 		RETURN_EMPTY_STRING();
 	}
 }
-/* }}} */
 
 /* Get the database name */
 PHP_FUNCTION(pg_dbname)
 {
 	php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_PG_DBNAME);
 }
-/* }}} */
 
 /* Get the error message string */
 PHP_FUNCTION(pg_last_error)
 {
 	php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_PG_ERROR_MESSAGE);
 }
-/* }}} */
 
 /* Get the options associated with the connection */
 PHP_FUNCTION(pg_options)
 {
 	php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_PG_OPTIONS);
 }
-/* }}} */
 
 /* Return the port number associated with the connection */
 PHP_FUNCTION(pg_port)
 {
 	php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_PG_PORT);
 }
-/* }}} */
 
 /* Return the tty name associated with the connection */
 PHP_FUNCTION(pg_tty)
 {
 	php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_PG_TTY);
 }
-/* }}} */
 
 /* Returns the host name associated with the connection */
 PHP_FUNCTION(pg_host)
 {
 	php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_PG_HOST);
 }
-/* }}} */
 
 /* Returns an array with client, protocol and server version (when available) */
 PHP_FUNCTION(pg_version)
 {
 	php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_PG_VERSION);
 }
-/* }}} */
 
 #if HAVE_PQPARAMETERSTATUS
 /* Returns the value of a server parameter */
@@ -1776,7 +1743,7 @@ PHP_FUNCTION(pg_parameter_status)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
+
 #endif
 
 /* Ping database. If connection is bad, try to reconnect. */
@@ -1813,7 +1780,6 @@ PHP_FUNCTION(pg_ping)
 	}
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* Execute a query */
 PHP_FUNCTION(pg_query)
@@ -1893,10 +1859,9 @@ PHP_FUNCTION(pg_query)
 			break;
 	}
 }
-/* }}} */
 
 #if HAVE_PQEXECPARAMS || HAVE_PQEXECPREPARED || HAVE_PQSENDQUERYPARAMS || HAVE_PQSENDQUERYPREPARED
-/* {{{ _php_pgsql_free_params */
+/* _php_pgsql_free_params */
 static void _php_pgsql_free_params(char **params, int num_params)
 {
 	if (num_params > 0) {
@@ -1909,7 +1874,7 @@ static void _php_pgsql_free_params(char **params, int num_params)
 		efree(params);
 	}
 }
-/* }}} */
+
 #endif
 
 #if HAVE_PQEXECPARAMS
@@ -2027,7 +1992,7 @@ PHP_FUNCTION(pg_query_params)
 			break;
 	}
 }
-/* }}} */
+
 #endif
 
 #if HAVE_PQPREPARE
@@ -2110,7 +2075,7 @@ PHP_FUNCTION(pg_prepare)
 			break;
 	}
 }
-/* }}} */
+
 #endif
 
 #if HAVE_PQEXECPREPARED
@@ -2222,14 +2187,14 @@ PHP_FUNCTION(pg_execute)
 			break;
 	}
 }
-/* }}} */
+
 #endif
 
 #define PHP_PG_NUM_ROWS 1
 #define PHP_PG_NUM_FIELDS 2
 #define PHP_PG_CMD_TUPLES 3
 
-/* {{{ php_pgsql_get_result_info
+/* php_pgsql_get_result_info
  */
 static void php_pgsql_get_result_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 {
@@ -2266,21 +2231,18 @@ static void php_pgsql_get_result_info(INTERNAL_FUNCTION_PARAMETERS, int entry_ty
 			RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Return the number of rows in the result */
 PHP_FUNCTION(pg_num_rows)
 {
 	php_pgsql_get_result_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_PG_NUM_ROWS);
 }
-/* }}} */
 
 /* Return the number of fields in the result */
 PHP_FUNCTION(pg_num_fields)
 {
 	php_pgsql_get_result_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_PG_NUM_FIELDS);
 }
-/* }}} */
 
 #if HAVE_PQCMDTUPLES
 /* Returns the number of affected tuples */
@@ -2288,7 +2250,7 @@ PHP_FUNCTION(pg_affected_rows)
 {
 	php_pgsql_get_result_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_PG_CMD_TUPLES);
 }
-/* }}} */
+
 #endif
 
 /* Returns the last notice set by the backend */
@@ -2341,9 +2303,8 @@ PHP_FUNCTION(pg_last_notice)
 	}
 	RETURN_FALSE;
 }
-/* }}} */
 
-/* {{{ get_field_name
+/* get_field_name
  */
 static char *get_field_name(PGconn *pgsql, Oid oid, HashTable *list)
 {
@@ -2402,7 +2363,6 @@ static char *get_field_name(PGconn *pgsql, Oid oid, HashTable *list)
 	smart_str_free(&str);
 	return ret;
 }
-/* }}} */
 
 #ifdef HAVE_PQFTABLE
 /* Returns the name of the table field belongs to, or table's oid if oid_only is true */
@@ -2492,7 +2452,7 @@ PHP_FUNCTION(pg_field_table)
 	}
 
 }
-/* }}} */
+
 #endif
 
 #define PHP_PG_FIELD_NAME 1
@@ -2500,7 +2460,7 @@ PHP_FUNCTION(pg_field_table)
 #define PHP_PG_FIELD_TYPE 3
 #define PHP_PG_FIELD_TYPE_OID 4
 
-/* {{{ php_pgsql_get_field_info
+/* php_pgsql_get_field_info
  */
 static void php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 {
@@ -2558,35 +2518,30 @@ static void php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_typ
 			RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Returns the name of the field */
 PHP_FUNCTION(pg_field_name)
 {
 	php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_PG_FIELD_NAME);
 }
-/* }}} */
 
 /* Returns the internal size of the field */
 PHP_FUNCTION(pg_field_size)
 {
 	php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_PG_FIELD_SIZE);
 }
-/* }}} */
 
 /* Returns the type name for the given field */
 PHP_FUNCTION(pg_field_type)
 {
 	php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_PG_FIELD_TYPE);
 }
-/* }}} */
 
 /* Returns the type oid for the given field */
 PHP_FUNCTION(pg_field_type_oid)
 {
 	php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_PG_FIELD_TYPE_OID);
 }
-/* }}} */
 
 /* Returns the field number of the named field */
 PHP_FUNCTION(pg_field_num)
@@ -2609,7 +2564,6 @@ PHP_FUNCTION(pg_field_num)
 
 	RETURN_LONG(PQfnumber(pgsql_result, field));
 }
-/* }}} */
 
 /* Returns values from a result identifier */
 PHP_FUNCTION(pg_fetch_result)
@@ -2677,9 +2631,8 @@ PHP_FUNCTION(pg_fetch_result)
 				PQgetlength(pgsql_result, pgsql_row, field_offset));
 	}
 }
-/* }}} */
 
-/* {{{ void php_pgsql_fetch_hash */
+/* void php_pgsql_fetch_hash */
 static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_type, int into_object)
 {
 	zval                *result, *zrow = NULL;
@@ -2833,14 +2786,12 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 		}
 	}
 }
-/* }}} */
 
 /* Get a row as an enumerated array */
 PHP_FUNCTION(pg_fetch_row)
 {
 	php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, PGSQL_NUM, 0);
 }
-/* }}} */
 
 /* Fetch a row as an assoc array */
 PHP_FUNCTION(pg_fetch_assoc)
@@ -2851,14 +2802,12 @@ PHP_FUNCTION(pg_fetch_assoc)
 		WRONG_PARAM_COUNT;
 	php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, PGSQL_ASSOC, 0);
 }
-/* }}} */
 
 /* Fetch a row as an array */
 PHP_FUNCTION(pg_fetch_array)
 {
 	php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, PGSQL_BOTH, 0);
 }
-/* }}} */
 
 /* Fetch a row as an object */
 PHP_FUNCTION(pg_fetch_object)
@@ -2867,7 +2816,6 @@ PHP_FUNCTION(pg_fetch_object)
 	   must be allowed for compatibility */
 	php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, PGSQL_ASSOC, 1);
 }
-/* }}} */
 
 /* Fetch all rows into array */
 PHP_FUNCTION(pg_fetch_all)
@@ -2897,7 +2845,6 @@ PHP_FUNCTION(pg_fetch_all)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Fetch all rows into array */
 PHP_FUNCTION(pg_fetch_all_columns)
@@ -2939,7 +2886,6 @@ PHP_FUNCTION(pg_fetch_all_columns)
 		}
 	}
 }
-/* }}} */
 
 /* Set internal row offset */
 PHP_FUNCTION(pg_result_seek)
@@ -2964,12 +2910,11 @@ PHP_FUNCTION(pg_result_seek)
 	pg_result->row = (int)row;
 	RETURN_TRUE;
 }
-/* }}} */
 
 #define PHP_PG_DATA_LENGTH 1
 #define PHP_PG_DATA_ISNULL 2
 
-/* {{{ php_pgsql_data_info
+/* php_pgsql_data_info
  */
 static void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 {
@@ -3038,21 +2983,18 @@ static void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 			break;
 	}
 }
-/* }}} */
 
 /* Returns the printed length */
 PHP_FUNCTION(pg_field_prtlen)
 {
 	php_pgsql_data_info(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_PG_DATA_LENGTH);
 }
-/* }}} */
 
 /* Test if a field is NULL */
 PHP_FUNCTION(pg_field_is_null)
 {
 	php_pgsql_data_info(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_PG_DATA_ISNULL);
 }
-/* }}} */
 
 /* Free result memory */
 PHP_FUNCTION(pg_free_result)
@@ -3071,7 +3013,6 @@ PHP_FUNCTION(pg_free_result)
 	zend_list_close(Z_RES_P(result));
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Returns the last object identifier */
 PHP_FUNCTION(pg_last_oid)
@@ -3106,7 +3047,6 @@ PHP_FUNCTION(pg_last_oid)
 	RETURN_EMPTY_STRING();
 #endif
 }
-/* }}} */
 
 /* Enable tracing a PostgreSQL connection */
 PHP_FUNCTION(pg_trace)
@@ -3149,7 +3089,6 @@ PHP_FUNCTION(pg_trace)
 	PQtrace(pgsql, fp);
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Disable tracing of a PostgreSQL connection */
 PHP_FUNCTION(pg_untrace)
@@ -3177,7 +3116,6 @@ PHP_FUNCTION(pg_untrace)
 	PQuntrace(pgsql);
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Create a large object */
 PHP_FUNCTION(pg_lo_create)
@@ -3253,7 +3191,6 @@ PHP_FUNCTION(pg_lo_create)
 
 	PGSQL_RETURN_OID(pgsql_oid);
 }
-/* }}} */
 
 /* Delete a large object */
 PHP_FUNCTION(pg_lo_unlink)
@@ -3323,7 +3260,6 @@ PHP_FUNCTION(pg_lo_unlink)
 	}
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Open a large object and return fd */
 PHP_FUNCTION(pg_lo_open)
@@ -3444,7 +3380,6 @@ PHP_FUNCTION(pg_lo_open)
 		RETURN_RES(zend_register_resource(pgsql_lofp, le_lofp));
 	}
 }
-/* }}} */
 
 /* Close a large object */
 PHP_FUNCTION(pg_lo_close)
@@ -3470,7 +3405,6 @@ PHP_FUNCTION(pg_lo_close)
 	zend_list_close(Z_RES_P(pgsql_lofp));
 	return;
 }
-/* }}} */
 
 #define PGSQL_LO_READ_BUF_SIZE  8192
 
@@ -3506,7 +3440,6 @@ PHP_FUNCTION(pg_lo_read)
 	ZSTR_VAL(buf)[ZSTR_LEN(buf)] = '\0';
 	RETURN_NEW_STR(buf);
 }
-/* }}} */
 
 /* Write a large object */
 PHP_FUNCTION(pg_lo_write)
@@ -3548,7 +3481,6 @@ PHP_FUNCTION(pg_lo_write)
 
 	RETURN_LONG(nbytes);
 }
-/* }}} */
 
 /* Read a large object and send straight to browser */
 PHP_FUNCTION(pg_lo_read_all)
@@ -3574,7 +3506,6 @@ PHP_FUNCTION(pg_lo_read_all)
 	}
 	RETURN_LONG(tbytes);
 }
-/* }}} */
 
 /* Import large object direct from filesystem */
 PHP_FUNCTION(pg_lo_import)
@@ -3660,7 +3591,6 @@ PHP_FUNCTION(pg_lo_import)
 	}
 	PGSQL_RETURN_OID(returned_oid);
 }
-/* }}} */
 
 /* Export large object direct to filesystem */
 PHP_FUNCTION(pg_lo_export)
@@ -3754,7 +3684,6 @@ PHP_FUNCTION(pg_lo_export)
 	}
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Seeks position of large object */
 PHP_FUNCTION(pg_lo_seek)
@@ -3791,7 +3720,6 @@ PHP_FUNCTION(pg_lo_seek)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Returns current position of large object */
 PHP_FUNCTION(pg_lo_tell)
@@ -3820,7 +3748,6 @@ PHP_FUNCTION(pg_lo_tell)
 #endif
 	RETURN_LONG(offset);
 }
-/* }}} */
 
 #if HAVE_PG_LO_TRUNCATE
 /* Truncate large object to size */
@@ -3855,7 +3782,7 @@ PHP_FUNCTION(pg_lo_truncate)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
+
 #endif
 
 #if HAVE_PQSETERRORVERBOSITY
@@ -3891,7 +3818,7 @@ PHP_FUNCTION(pg_set_error_verbosity)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
+
 #endif
 
 #ifdef HAVE_PQCLIENTENCODING
@@ -3924,7 +3851,6 @@ PHP_FUNCTION(pg_set_client_encoding)
 
 	RETURN_LONG(PQsetClientEncoding(pgsql, encoding));
 }
-/* }}} */
 
 /* Get the current client encoding */
 PHP_FUNCTION(pg_client_encoding)
@@ -3953,7 +3879,7 @@ PHP_FUNCTION(pg_client_encoding)
 
 	RETURN_STRING((char *) pg_encoding_to_char(PQclientEncoding(pgsql)));
 }
-/* }}} */
+
 #endif
 
 #if !HAVE_PQGETCOPYDATA
@@ -3992,7 +3918,6 @@ PHP_FUNCTION(pg_end_copy)
 	}
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Send null-terminated string to backend server*/
 PHP_FUNCTION(pg_put_line)
@@ -4028,7 +3953,6 @@ PHP_FUNCTION(pg_put_line)
 	}
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Copy table to array */
 PHP_FUNCTION(pg_copy_to)
@@ -4164,7 +4088,6 @@ PHP_FUNCTION(pg_copy_to)
 			break;
 	}
 }
-/* }}} */
 
 /* Copy table from array */
 PHP_FUNCTION(pg_copy_from)
@@ -4298,7 +4221,6 @@ PHP_FUNCTION(pg_copy_from)
 			break;
 	}
 }
-/* }}} */
 
 #ifdef HAVE_PQESCAPE
 /* Escape string for text/char type */
@@ -4342,7 +4264,6 @@ PHP_FUNCTION(pg_escape_string)
 	to = zend_string_truncate(to, ZSTR_LEN(to), 0);
 	RETURN_NEW_STR(to);
 }
-/* }}} */
 
 /* Escape binary for bytea type  */
 PHP_FUNCTION(pg_escape_bytea)
@@ -4384,7 +4305,6 @@ PHP_FUNCTION(pg_escape_bytea)
 	RETVAL_STRINGL(to, to_len-1); /* to_len includes additional '\0' */
 	PQfreemem(to);
 }
-/* }}} */
 
 #if !HAVE_PQUNESCAPEBYTEA
 /* PQunescapeBytea() from PostgreSQL 7.3 to provide bytea unescape feature to 7.2 users.
@@ -4410,7 +4330,7 @@ PHP_FUNCTION(pg_escape_bytea)
  *		5	\'
  *		6	\\
  */
-static unsigned char * php_pgsql_unescape_bytea(unsigned char *strtext, size_t *retbuflen) /* {{{ */
+static unsigned char * php_pgsql_unescape_bytea(unsigned char *strtext, size_t *retbuflen)
 {
 	size_t     buflen;
 	unsigned char *buffer,
@@ -4490,7 +4410,7 @@ static unsigned char * php_pgsql_unescape_bytea(unsigned char *strtext, size_t *
 	*retbuflen = buflen;
 	return buffer;
 }
-/* }}} */
+
 #endif
 
 /* Unescape binary for bytea type  */
@@ -4518,11 +4438,11 @@ PHP_FUNCTION(pg_unescape_bytea)
 	RETVAL_STRINGL(to, to_len);
 	efree(to);
 }
-/* }}} */
+
 #endif
 
 #ifdef HAVE_PQESCAPE
-static void php_pgsql_escape_internal(INTERNAL_FUNCTION_PARAMETERS, int escape_literal) /* {{{ */ {
+static void php_pgsql_escape_internal(INTERNAL_FUNCTION_PARAMETERS, int escape_literal) {
 	char *from = NULL;
 	zval *pgsql_link = NULL;
 	PGconn *pgsql;
@@ -4569,21 +4489,19 @@ static void php_pgsql_escape_internal(INTERNAL_FUNCTION_PARAMETERS, int escape_l
 	RETVAL_STRING(tmp);
 	PGSQLfree(tmp);
 }
-/* }}} */
 
 /* Escape parameter as string literal (i.e. parameter)	*/
 PHP_FUNCTION(pg_escape_literal)
 {
 	php_pgsql_escape_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
-/* }}} */
 
 /* Escape identifier (i.e. table name, field name)	*/
 PHP_FUNCTION(pg_escape_identifier)
 {
 	php_pgsql_escape_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
-/* }}} */
+
 #endif
 
 /* Get error message associated with result */
@@ -4610,7 +4528,6 @@ PHP_FUNCTION(pg_result_error)
 	err = (char *)PQresultErrorMessage(pgsql_result);
 	RETURN_STRING(err);
 }
-/* }}} */
 
 #if HAVE_PQRESULTERRORFIELD
 /* Get error message field associated with result */
@@ -4655,7 +4572,7 @@ PHP_FUNCTION(pg_result_error_field)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
+
 #endif
 
 /* Get connection status */
@@ -4676,7 +4593,6 @@ PHP_FUNCTION(pg_connection_status)
 	RETURN_LONG(PQstatus(pgsql));
 }
 
-/* }}} */
 
 #if HAVE_PGTRANSACTIONSTATUS
 /* Get transaction status */
@@ -4698,7 +4614,6 @@ PHP_FUNCTION(pg_transaction_status)
 }
 #endif
 
-/* }}} */
 
 /* Reset connection (reconnect) */
 PHP_FUNCTION(pg_connection_reset)
@@ -4721,12 +4636,11 @@ PHP_FUNCTION(pg_connection_reset)
 	}
 	RETURN_TRUE;
 }
-/* }}} */
 
 #define PHP_PG_ASYNC_IS_BUSY		1
 #define PHP_PG_ASYNC_REQUEST_CANCEL 2
 
-/* {{{ php_pgsql_flush_query
+/* php_pgsql_flush_query
  */
 static int php_pgsql_flush_query(PGconn *pgsql)
 {
@@ -4744,9 +4658,8 @@ static int php_pgsql_flush_query(PGconn *pgsql)
 	PQ_SETNONBLOCKING(pgsql, 0);
 	return leftover;
 }
-/* }}} */
 
-/* {{{ php_pgsql_do_async
+/* php_pgsql_do_async
  */
 static void php_pgsql_do_async(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 {
@@ -4787,23 +4700,20 @@ static void php_pgsql_do_async(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	}
 	convert_to_boolean_ex(return_value);
 }
-/* }}} */
 
 /* Cancel request */
 PHP_FUNCTION(pg_cancel_query)
 {
 	php_pgsql_do_async(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_PG_ASYNC_REQUEST_CANCEL);
 }
-/* }}} */
 
 /* Get connection is busy or not */
 PHP_FUNCTION(pg_connection_busy)
 {
 	php_pgsql_do_async(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_PG_ASYNC_IS_BUSY);
 }
-/* }}} */
 
-static int _php_pgsql_link_has_results(PGconn *pgsql) /* {{{ */
+static int _php_pgsql_link_has_results(PGconn *pgsql)
 {
 	PGresult *result;
 	while ((result = PQgetResult(pgsql))) {
@@ -4812,7 +4722,6 @@ static int _php_pgsql_link_has_results(PGconn *pgsql) /* {{{ */
 	}
 	return 0;
 }
-/* }}} */
 
 /* Send asynchronous query */
 PHP_FUNCTION(pg_send_query)
@@ -4881,7 +4790,6 @@ PHP_FUNCTION(pg_send_query)
 		RETURN_LONG(0);
 	}
 }
-/* }}} */
 
 #if HAVE_PQSENDQUERYPARAMS
 /* Send asynchronous parameterized query */
@@ -4977,7 +4885,7 @@ PHP_FUNCTION(pg_send_query_params)
 		RETURN_LONG(0);
 	}
 }
-/* }}} */
+
 #endif
 
 #if HAVE_PQSENDPREPARE
@@ -5048,7 +4956,7 @@ PHP_FUNCTION(pg_send_prepare)
 		RETURN_LONG(0);
 	}
 }
-/* }}} */
+
 #endif
 
 #if HAVE_PQSENDQUERYPREPARED
@@ -5147,7 +5055,7 @@ PHP_FUNCTION(pg_send_execute)
 		RETURN_LONG(0);
 	}
 }
-/* }}} */
+
 #endif
 
 /* Get asynchronous query result */
@@ -5177,7 +5085,6 @@ PHP_FUNCTION(pg_get_result)
 	pg_result->row = 0;
 	RETURN_RES(zend_register_resource(pg_result, le_result));
 }
-/* }}} */
 
 /* Get status of query result */
 PHP_FUNCTION(pg_result_status)
@@ -5210,7 +5117,6 @@ PHP_FUNCTION(pg_result_status)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Get asynchronous notification */
 PHP_FUNCTION(pg_get_notify)
@@ -5269,7 +5175,6 @@ PHP_FUNCTION(pg_get_notify)
 	}
 	PQfreemem(pgsql_notify);
 }
-/* }}} */
 
 /* Get backend(server) pid */
 PHP_FUNCTION(pg_get_pid)
@@ -5288,33 +5193,28 @@ PHP_FUNCTION(pg_get_pid)
 
 	RETURN_LONG(PQbackendPID(pgsql));
 }
-/* }}} */
 
-static ssize_t php_pgsql_fd_write(php_stream *stream, const char *buf, size_t count) /* {{{ */
+static ssize_t php_pgsql_fd_write(php_stream *stream, const char *buf, size_t count)
 {
 	return -1;
 }
-/* }}} */
 
-static ssize_t php_pgsql_fd_read(php_stream *stream, char *buf, size_t count) /* {{{ */
+static ssize_t php_pgsql_fd_read(php_stream *stream, char *buf, size_t count)
 {
 	return -1;
 }
-/* }}} */
 
-static int php_pgsql_fd_close(php_stream *stream, int close_handle) /* {{{ */
+static int php_pgsql_fd_close(php_stream *stream, int close_handle)
 {
 	return EOF;
 }
-/* }}} */
 
-static int php_pgsql_fd_flush(php_stream *stream) /* {{{ */
+static int php_pgsql_fd_flush(php_stream *stream)
 {
 	return FAILURE;
 }
-/* }}} */
 
-static int php_pgsql_fd_set_option(php_stream *stream, int option, int value, void *ptrparam) /* {{{ */
+static int php_pgsql_fd_set_option(php_stream *stream, int option, int value, void *ptrparam)
 {
 	PGconn *pgsql = (PGconn *) stream->abstract;
 	switch (option) {
@@ -5324,9 +5224,8 @@ static int php_pgsql_fd_set_option(php_stream *stream, int option, int value, vo
 			return FAILURE;
 	}
 }
-/* }}} */
 
-static int php_pgsql_fd_cast(php_stream *stream, int cast_as, void **ret) /* {{{ */
+static int php_pgsql_fd_cast(php_stream *stream, int cast_as, void **ret)
 {
 	PGconn *pgsql = (PGconn *) stream->abstract;
 
@@ -5347,7 +5246,6 @@ static int php_pgsql_fd_cast(php_stream *stream, int cast_as, void **ret) /* {{{
 			return FAILURE;
 	}
 }
-/* }}} */
 
 /* Get a read-only handle to the socket underlying the pgsql connection */
 PHP_FUNCTION(pg_socket)
@@ -5373,7 +5271,6 @@ PHP_FUNCTION(pg_socket)
 
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* Reads input on the connection */
 PHP_FUNCTION(pg_consume_input)
@@ -5391,7 +5288,6 @@ PHP_FUNCTION(pg_consume_input)
 
 	RETURN_BOOL(PQconsumeInput(pgsql));
 }
-/* }}} */
 
 /* Flush outbound query data on the connection */
 PHP_FUNCTION(pg_flush)
@@ -5428,9 +5324,8 @@ PHP_FUNCTION(pg_flush)
 		default: RETURN_FALSE;
 	}
 }
-/* }}} */
 
-/* {{{ php_pgsql_meta_data
+/* php_pgsql_meta_data
  * TODO: Add meta_data cache for better performance
  */
 PHP_PGSQL_API int php_pgsql_meta_data(PGconn *pg_link, const char *table_name, zval *meta, zend_bool extended)
@@ -5542,7 +5437,6 @@ PHP_PGSQL_API int php_pgsql_meta_data(PGconn *pg_link, const char *table_name, z
 	return SUCCESS;
 }
 
-/* }}} */
 
 /* Get meta_data */
 PHP_FUNCTION(pg_meta_data)
@@ -5568,9 +5462,8 @@ PHP_FUNCTION(pg_meta_data)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
-/* {{{ php_pgsql_get_data_type
+/* php_pgsql_get_data_type
  */
 static php_pgsql_data_type php_pgsql_get_data_type(const char *type_name, size_t len)
 {
@@ -5658,9 +5551,8 @@ static php_pgsql_data_type php_pgsql_get_data_type(const char *type_name, size_t
 
 	return PG_UNKNOWN;
 }
-/* }}} */
 
-/* {{{ php_pgsql_convert_match
+/* php_pgsql_convert_match
  * test field value with regular expression specified.
  */
 static int php_pgsql_convert_match(const char *str, size_t str_len, const char *regex , size_t regex_len, int icase)
@@ -5712,9 +5604,8 @@ static int php_pgsql_convert_match(const char *str, size_t str_len, const char *
 	return SUCCESS;
 }
 
-/* }}} */
 
-/* {{{ php_pgsql_add_quote
+/* php_pgsql_add_quote
  * add quotes around string.
  */
 static int php_pgsql_add_quotes(zval *src, zend_bool should_free)
@@ -5737,7 +5628,6 @@ static int php_pgsql_add_quotes(zval *src, zend_bool should_free)
 
 	return SUCCESS;
 }
-/* }}} */
 
 #define PGSQL_CONV_CHECK_IGNORE() \
 	if (!err && Z_TYPE(new_val) == IS_STRING && !strcmp(Z_STRVAL(new_val), "NULL")) { \
@@ -5753,7 +5643,7 @@ static int php_pgsql_add_quotes(zval *src, zend_bool should_free)
 		} \
 	}
 
-/* {{{ php_pgsql_convert
+/* php_pgsql_convert
  * check and convert array values (fieldname=>value pair) for sql
  */
 PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval *values, zval *result, zend_ulong opt)
@@ -6412,7 +6302,6 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 	}
 	return SUCCESS;
 }
-/* }}} */
 
 /* Check and convert values for PostgreSQL SQL statement */
 PHP_FUNCTION(pg_convert)
@@ -6449,9 +6338,8 @@ PHP_FUNCTION(pg_convert)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
-static int do_exec(smart_str *querystr, ExecStatusType expect, PGconn *pg_link, zend_ulong opt) /* {{{ */
+static int do_exec(smart_str *querystr, ExecStatusType expect, PGconn *pg_link, zend_ulong opt)
 {
 	if (opt & PGSQL_DML_ASYNC) {
 		if (PQsendQuery(pg_link, ZSTR_VAL(querystr->s))) {
@@ -6473,9 +6361,8 @@ static int do_exec(smart_str *querystr, ExecStatusType expect, PGconn *pg_link, 
 
 	return -1;
 }
-/* }}} */
 
-static inline void build_tablename(smart_str *querystr, PGconn *pg_link, const char *table) /* {{{ */
+static inline void build_tablename(smart_str *querystr, PGconn *pg_link, const char *table)
 {
 	size_t table_len = strlen(table);
 
@@ -6504,9 +6391,8 @@ static inline void build_tablename(smart_str *querystr, PGconn *pg_link, const c
 		}
 	}
 }
-/* }}} */
 
-/* {{{ php_pgsql_insert
+/* php_pgsql_insert
  */
 PHP_PGSQL_API int php_pgsql_insert(PGconn *pg_link, const char *table, zval *var_array, zend_ulong opt, zend_string **sql)
 {
@@ -6620,7 +6506,6 @@ cleanup:
 	}
 	return ret;
 }
-/* }}} */
 
 /* Insert values (filed=>value) to table */
 PHP_FUNCTION(pg_insert)
@@ -6704,9 +6589,8 @@ PHP_FUNCTION(pg_insert)
 	}
 	RETURN_TRUE;
 }
-/* }}} */
 
-static inline int build_assignment_string(PGconn *pg_link, smart_str *querystr, HashTable *ht, int where_cond, const char *pad, int pad_len, zend_ulong opt) /* {{{ */
+static inline int build_assignment_string(PGconn *pg_link, smart_str *querystr, HashTable *ht, int where_cond, const char *pad, int pad_len, zend_ulong opt)
 {
 	zend_string *fld;
 	zval *val;
@@ -6765,9 +6649,8 @@ static inline int build_assignment_string(PGconn *pg_link, smart_str *querystr, 
 
 	return 0;
 }
-/* }}} */
 
-/* {{{ php_pgsql_update
+/* php_pgsql_update
  */
 PHP_PGSQL_API int php_pgsql_update(PGconn *pg_link, const char *table, zval *var_array, zval *ids_array, zend_ulong opt, zend_string **sql)
 {
@@ -6833,7 +6716,6 @@ cleanup:
 	}
 	return ret;
 }
-/* }}} */
 
 /* Update table using values (field=>value) and ids (id=>value) */
 PHP_FUNCTION(pg_update)
@@ -6870,9 +6752,8 @@ PHP_FUNCTION(pg_update)
 	}
 	RETURN_TRUE;
 }
-/* }}} */
 
-/* {{{ php_pgsql_delete
+/* php_pgsql_delete
  */
 PHP_PGSQL_API int php_pgsql_delete(PGconn *pg_link, const char *table, zval *ids_array, zend_ulong opt, zend_string **sql)
 {
@@ -6924,7 +6805,6 @@ cleanup:
 	}
 	return ret;
 }
-/* }}} */
 
 /* Delete records has ids (id=>value) */
 PHP_FUNCTION(pg_delete)
@@ -6961,9 +6841,8 @@ PHP_FUNCTION(pg_delete)
 	}
 	RETURN_TRUE;
 }
-/* }}} */
 
-/* {{{ php_pgsql_result2array
+/* php_pgsql_result2array
  */
 PHP_PGSQL_API int php_pgsql_result2array(PGresult *pg_result, zval *ret_array, long result_type)
 {
@@ -7005,9 +6884,8 @@ PHP_PGSQL_API int php_pgsql_result2array(PGresult *pg_result, zval *ret_array, l
 	}
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ php_pgsql_select
+/* php_pgsql_select
  */
  PHP_PGSQL_API int php_pgsql_select(PGconn *pg_link, const char *table, zval *ids_array, zval *ret_array, zend_ulong opt, long result_type, zend_string **sql)
 {
@@ -7063,7 +6941,6 @@ cleanup:
 	}
 	return ret;
 }
-/* }}} */
 
 /* Select records that has ids (id=>value) */
 PHP_FUNCTION(pg_select)
@@ -7108,6 +6985,5 @@ PHP_FUNCTION(pg_select)
 	}
 	return;
 }
-/* }}} */
 
 #endif

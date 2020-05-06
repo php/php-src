@@ -39,7 +39,7 @@
 #define PHP_DNS_ANY    0x10000000
 #define PHP_DNS_ALL    (PHP_DNS_A|PHP_DNS_NS|PHP_DNS_CNAME|PHP_DNS_SOA|PHP_DNS_PTR|PHP_DNS_HINFO|PHP_DNS_MX|PHP_DNS_TXT|PHP_DNS_A6|PHP_DNS_SRV|PHP_DNS_NAPTR|PHP_DNS_AAAA)
 
-PHP_FUNCTION(dns_get_mx) /* {{{ */
+PHP_FUNCTION(dns_get_mx)
 {
 	char *hostname;
 	size_t hostname_len;
@@ -89,7 +89,6 @@ cleanup:
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Check DNS records corresponding to a given Internet host name or IP address */
 PHP_FUNCTION(dns_check_record)
@@ -137,9 +136,8 @@ PHP_FUNCTION(dns_check_record)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
-/* {{{ php_parserr */
+/* php_parserr */
 static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw, zval *subarray)
 {
 	int type;
@@ -341,7 +339,6 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw,
 	}
 
 }
-/* }}} */
 
 /* Get any Resource Record corresponding to a given Internet host name */
 PHP_FUNCTION(dns_get_record)
@@ -505,7 +502,6 @@ PHP_FUNCTION(dns_get_record)
 		}
 	}
 }
-/* }}} */
 
 PHP_MINIT_FUNCTION(dns) {
 	REGISTER_LONG_CONSTANT("DNS_A",     PHP_DNS_A,     CONST_CS | CONST_PERSISTENT);

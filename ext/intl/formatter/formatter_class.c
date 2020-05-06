@@ -30,7 +30,7 @@ static zend_object_handlers NumberFormatter_handlers;
  * Auxiliary functions needed by objects of 'NumberFormatter' class
  */
 
-/* {{{ NumberFormatter_objects_free */
+/* NumberFormatter_objects_free */
 void NumberFormatter_object_free( zend_object *object )
 {
 	NumberFormatter_object* nfo = php_intl_number_format_fetch_object(object);
@@ -39,9 +39,8 @@ void NumberFormatter_object_free( zend_object *object )
 
 	formatter_data_free( &nfo->nf_data );
 }
-/* }}} */
 
-/* {{{ NumberFormatter_object_create */
+/* NumberFormatter_object_create */
 zend_object *NumberFormatter_object_create(zend_class_entry *ce)
 {
 	NumberFormatter_object*     intern;
@@ -55,9 +54,8 @@ zend_object *NumberFormatter_object_create(zend_class_entry *ce)
 
 	return &intern->zo;
 }
-/* }}} */
 
-/* {{{ NumberFormatter_object_clone */
+/* NumberFormatter_object_clone */
 zend_object *NumberFormatter_object_clone(zend_object *object)
 {
 	NumberFormatter_object *nfo, *new_nfo;
@@ -83,13 +81,12 @@ zend_object *NumberFormatter_object_clone(zend_object *object)
 	}
 	return new_obj;
 }
-/* }}} */
 
 /*
  * 'NumberFormatter' class registration structures & functions
  */
 
-/* {{{ formatter_register_class
+/* formatter_register_class
  * Initialize 'NumberFormatter' class
  */
 void formatter_register_class( void )
@@ -109,4 +106,4 @@ void formatter_register_class( void )
 	NumberFormatter_handlers.clone_obj = NumberFormatter_object_clone;
 	NumberFormatter_handlers.free_obj = NumberFormatter_object_free;
 }
-/* }}} */
+

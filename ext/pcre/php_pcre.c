@@ -86,12 +86,12 @@ static MUTEX_T pcre_mt = NULL;
 ZEND_TLS HashTable char_tables;
 
 static void php_pcre_free_char_table(zval *data)
-{/*{{{*/
+{
 	void *ptr = Z_PTR_P(data);
 	pefree(ptr, 1);
-}/*}}}*/
+}
 
-static void pcre_handle_exec_error(int pcre_code) /* {{{ */
+static void pcre_handle_exec_error(int pcre_code)
 {
 	int preg_code = 0;
 
@@ -125,9 +125,8 @@ static void pcre_handle_exec_error(int pcre_code) /* {{{ */
 
 	PCRE_G(error_code) = preg_code;
 }
-/* }}} */
 
-static const char *php_pcre_get_error_msg(php_pcre_error_code error_code) /* {{{ */
+static const char *php_pcre_get_error_msg(php_pcre_error_code error_code)
 {
     switch (error_code) {
         case PHP_PCRE_NO_ERROR:
@@ -152,41 +151,38 @@ static const char *php_pcre_get_error_msg(php_pcre_error_code error_code) /* {{{
             return "Unknown error";
     }
 }
-/* }}} */
 
-static void php_free_pcre_cache(zval *data) /* {{{ */
+static void php_free_pcre_cache(zval *data)
 {
 	pcre_cache_entry *pce = (pcre_cache_entry *) Z_PTR_P(data);
 	if (!pce) return;
 	pcre2_code_free(pce->re);
 	free(pce);
 }
-/* }}} */
 
-static void php_efree_pcre_cache(zval *data) /* {{{ */
+static void php_efree_pcre_cache(zval *data)
 {
 	pcre_cache_entry *pce = (pcre_cache_entry *) Z_PTR_P(data);
 	if (!pce) return;
 	pcre2_code_free(pce->re);
 	efree(pce);
 }
-/* }}} */
 
 static void *php_pcre_malloc(PCRE2_SIZE size, void *data)
-{/*{{{*/
+{
 	void *p = pemalloc(size, 1);
 	return p;
-}/*}}}*/
+}
 
 static void php_pcre_free(void *block, void *data)
-{/*{{{*/
+{
 	pefree(block, 1);
-}/*}}}*/
+}
 
 #define PHP_PCRE_PREALLOC_MDATA_SIZE 32
 
 static void php_pcre_init_pcre2(uint8_t jit)
-{/*{{{*/
+{
 	if (!gctx) {
 		gctx = pcre2_general_context_create(php_pcre_malloc, php_pcre_free, NULL);
 		if (!gctx) {
@@ -230,10 +226,10 @@ static void php_pcre_init_pcre2(uint8_t jit)
 	}
 
 	pcre2_init_ok = 1;
-}/*}}}*/
+}
 
 static void php_pcre_shutdown_pcre2(void)
-{/*{{{*/
+{
 	if (gctx) {
 		pcre2_general_context_free(gctx);
 		gctx = NULL;
@@ -264,9 +260,9 @@ static void php_pcre_shutdown_pcre2(void)
 	}
 
 	pcre2_init_ok = 0;
-}/*}}}*/
+}
 
-static PHP_GINIT_FUNCTION(pcre) /* {{{ */
+static PHP_GINIT_FUNCTION(pcre)
 {
 	php_pcre_mutex_alloc();
 
@@ -289,9 +285,8 @@ static PHP_GINIT_FUNCTION(pcre) /* {{{ */
 	php_pcre_init_pcre2(1);
 	zend_hash_init(&char_tables, 1, NULL, php_pcre_free_char_table, 1);
 }
-/* }}} */
 
-static PHP_GSHUTDOWN_FUNCTION(pcre) /* {{{ */
+static PHP_GSHUTDOWN_FUNCTION(pcre)
 {
 	if (!pcre_globals->per_request_cache) {
 		zend_hash_destroy(&pcre_globals->pcre_cache);
@@ -301,31 +296,30 @@ static PHP_GSHUTDOWN_FUNCTION(pcre) /* {{{ */
 	zend_hash_destroy(&char_tables);
 	php_pcre_mutex_free();
 }
-/* }}} */
 
 static PHP_INI_MH(OnUpdateBacktrackLimit)
-{/*{{{*/
+{
 	OnUpdateLong(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 	if (mctx) {
 		pcre2_set_match_limit(mctx, (uint32_t)PCRE_G(backtrack_limit));
 	}
 
 	return SUCCESS;
-}/*}}}*/
+}
 
 static PHP_INI_MH(OnUpdateRecursionLimit)
-{/*{{{*/
+{
 	OnUpdateLong(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 	if (mctx) {
 		pcre2_set_depth_limit(mctx, (uint32_t)PCRE_G(recursion_limit));
 	}
 
 	return SUCCESS;
-}/*}}}*/
+}
 
 #ifdef HAVE_PCRE_JIT_SUPPORT
 static PHP_INI_MH(OnUpdateJit)
-{/*{{{*/
+{
 	OnUpdateBool(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 	if (PCRE_G(jit) && jit_stack) {
 		pcre2_jit_stack_assign(mctx, NULL, jit_stack);
@@ -334,7 +328,7 @@ static PHP_INI_MH(OnUpdateJit)
 	}
 
 	return SUCCESS;
-}/*}}}*/
+}
 #endif
 
 PHP_INI_BEGIN()
@@ -346,7 +340,7 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 
 static char *_pcre2_config_str(uint32_t what)
-{/*{{{*/
+{
 	int len = pcre2_config(what, NULL);
 	char *ret = (char *) malloc(len + 1);
 
@@ -357,9 +351,9 @@ static char *_pcre2_config_str(uint32_t what)
 	}
 
 	return ret;
-}/*}}}*/
+}
 
-/* {{{ PHP_MINFO_FUNCTION(pcre) */
+/* PHP_MINFO_FUNCTION(pcre) */
 static PHP_MINFO_FUNCTION(pcre)
 {
 #ifdef HAVE_PCRE_JIT_SUPPORT
@@ -398,9 +392,8 @@ static PHP_MINFO_FUNCTION(pcre)
 
 	DISPLAY_INI_ENTRIES();
 }
-/* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION(pcre) */
+/* PHP_MINIT_FUNCTION(pcre) */
 static PHP_MINIT_FUNCTION(pcre)
 {
 	char *version;
@@ -447,18 +440,16 @@ static PHP_MINIT_FUNCTION(pcre)
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_MSHUTDOWN_FUNCTION(pcre) */
+/* PHP_MSHUTDOWN_FUNCTION(pcre) */
 static PHP_MSHUTDOWN_FUNCTION(pcre)
 {
 	UNREGISTER_INI_ENTRIES();
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_RINIT_FUNCTION(pcre) */
+/* PHP_RINIT_FUNCTION(pcre) */
 static PHP_RINIT_FUNCTION(pcre)
 {
 #ifdef HAVE_PCRE_JIT_SUPPORT
@@ -482,7 +473,6 @@ static PHP_RINIT_FUNCTION(pcre)
 
 	return SUCCESS;
 }
-/* }}} */
 
 static PHP_RSHUTDOWN_FUNCTION(pcre)
 {
@@ -497,7 +487,7 @@ static PHP_RSHUTDOWN_FUNCTION(pcre)
 	return SUCCESS;
 }
 
-/* {{{ static pcre_clean_cache */
+/* static pcre_clean_cache */
 static int pcre_clean_cache(zval *data, void *arg)
 {
 	pcre_cache_entry *pce = (pcre_cache_entry *) Z_PTR_P(data);
@@ -510,7 +500,6 @@ static int pcre_clean_cache(zval *data, void *arg)
 		return ZEND_HASH_APPLY_KEEP;
 	}
 }
-/* }}} */
 
 static void free_subpats_table(zend_string **subpat_names, uint32_t num_subpats) {
 	uint32_t i;
@@ -522,7 +511,7 @@ static void free_subpats_table(zend_string **subpat_names, uint32_t num_subpats)
 	efree(subpat_names);
 }
 
-/* {{{ static make_subpats_table */
+/* static make_subpats_table */
 static zend_string **make_subpats_table(uint32_t num_subpats, pcre_cache_entry *pce)
 {
 	uint32_t name_cnt = pce->name_count, name_size, ni = 0;
@@ -551,9 +540,8 @@ static zend_string **make_subpats_table(uint32_t num_subpats, pcre_cache_entry *
 	}
 	return subpat_names;
 }
-/* }}} */
 
-/* {{{ static calculate_unit_length */
+/* static calculate_unit_length */
 /* Calculates the byte length of the next character. Assumes valid UTF-8 for PCRE2_UTF. */
 static zend_always_inline size_t calculate_unit_length(pcre_cache_entry *pce, char *start)
 {
@@ -570,9 +558,8 @@ static zend_always_inline size_t calculate_unit_length(pcre_cache_entry *pce, ch
 	}
 	return unit_len;
 }
-/* }}} */
 
-/* {{{ pcre_get_compiled_regex_cache
+/* pcre_get_compiled_regex_cache
  */
 PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, int locale_aware)
 {
@@ -874,17 +861,15 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, in
 
 	return ret;
 }
-/* }}} */
 
-/* {{{ pcre_get_compiled_regex_cache
+/* pcre_get_compiled_regex_cache
  */
 PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 {
 	return pcre_get_compiled_regex_cache_ex(regex, 1);
 }
-/* }}} */
 
-/* {{{ pcre_get_compiled_regex
+/* pcre_get_compiled_regex
  */
 PHPAPI pcre2_code *pcre_get_compiled_regex(zend_string *regex, uint32_t *capture_count)
 {
@@ -896,9 +881,8 @@ PHPAPI pcre2_code *pcre_get_compiled_regex(zend_string *regex, uint32_t *capture
 
 	return pce ? pce->re : NULL;
 }
-/* }}} */
 
-/* {{{ pcre_get_compiled_regex_ex
+/* pcre_get_compiled_regex_ex
  */
 PHPAPI pcre2_code* pcre_get_compiled_regex_ex(zend_string *regex, uint32_t *capture_count, uint32_t *preg_options, uint32_t *compile_options)
 {
@@ -916,12 +900,11 @@ PHPAPI pcre2_code* pcre_get_compiled_regex_ex(zend_string *regex, uint32_t *capt
 
 	return pce ? pce->re : NULL;
 }
-/* }}} */
 
 /* XXX For the cases where it's only about match yes/no and no capture
 		required, perhaps just a minimum sized data would suffice. */
 PHPAPI pcre2_match_data *php_pcre_create_match_data(uint32_t capture_count, pcre2_code *re)
-{/*{{{*/
+{
 
 	assert(NULL != re);
 
@@ -940,16 +923,16 @@ PHPAPI pcre2_match_data *php_pcre_create_match_data(uint32_t capture_count, pcre
 	}
 
 	return pcre2_match_data_create_from_pattern(re, gctx);
-}/*}}}*/
+}
 
 PHPAPI void php_pcre_free_match_data(pcre2_match_data *match_data)
-{/*{{{*/
+{
 	if (UNEXPECTED(match_data != mdata)) {
 		pcre2_match_data_free(match_data);
 	} else {
 		mdata_used = 0;
 	}
-}/*}}}*/
+}
 
 static void init_unmatched_null_pair() {
 	zval val1, val2;
@@ -1004,7 +987,7 @@ static inline void add_named(
 	Z_TRY_ADDREF_P(val);
 }
 
-/* {{{ add_offset_pair */
+/* add_offset_pair */
 static inline void add_offset_pair(
 		zval *result, const char *subject, PCRE2_SIZE start_offset, PCRE2_SIZE end_offset,
 		zend_string *name, uint32_t unmatched_as_null)
@@ -1036,7 +1019,6 @@ static inline void add_offset_pair(
 	}
 	zend_hash_next_index_insert(Z_ARRVAL_P(result), &match_pair);
 }
-/* }}} */
 
 static void populate_subpat_array(
 		zval *subpats, char *subject, PCRE2_SIZE *offsets, zend_string **subpat_names,
@@ -1106,7 +1088,7 @@ static void populate_subpat_array(
 	}
 }
 
-static void php_do_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global) /* {{{ */
+static void php_do_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 {
 	/* parameters */
 	zend_string		 *regex;			/* Regular expression */
@@ -1135,7 +1117,6 @@ static void php_do_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global) /* {{{ *
 		global, ZEND_NUM_ARGS() >= 4, flags, start_offset);
 	pce->refcount--;
 }
-/* }}} */
 
 static zend_always_inline zend_bool is_known_valid_utf8(
 		zend_string *subject_str, PCRE2_SIZE start_offset) {
@@ -1153,7 +1134,7 @@ static zend_always_inline zend_bool is_known_valid_utf8(
 	return (ZSTR_VAL(subject_str)[start_offset] & 0xc0) != 0x80;
 }
 
-/* {{{ php_pcre_match_impl() */
+/* php_pcre_match_impl() */
 PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, zend_string *subject_str, zval *return_value,
 	zval *subpats, int global, int use_flags, zend_long flags, zend_off_t start_offset)
 {
@@ -1473,23 +1454,20 @@ error:
 		RETVAL_FALSE;
 	}
 }
-/* }}} */
 
 /* Perform a Perl-style regular expression match */
 PHP_FUNCTION(preg_match)
 {
 	php_do_pcre_match(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
-/* }}} */
 
 /* Perform a Perl-style global regular expression match */
 PHP_FUNCTION(preg_match_all)
 {
 	php_do_pcre_match(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
-/* }}} */
 
-/* {{{ preg_get_backref
+/* preg_get_backref
  */
 static int preg_get_backref(char **str, int *backref)
 {
@@ -1526,9 +1504,8 @@ static int preg_get_backref(char **str, int *backref)
 	*str = walk;
 	return 1;
 }
-/* }}} */
 
-/* {{{ preg_do_repl_func
+/* preg_do_repl_func
  */
 static zend_string *preg_do_repl_func(zend_fcall_info *fci, zend_fcall_info_cache *fcc, char *subject, PCRE2_SIZE *offsets, zend_string **subpat_names, uint32_t num_subpats, int count, const PCRE2_SPTR mark, zend_long flags)
 {
@@ -1563,9 +1540,8 @@ static zend_string *preg_do_repl_func(zend_fcall_info *fci, zend_fcall_info_cach
 
 	return result_str;
 }
-/* }}} */
 
-/* {{{ php_pcre_replace
+/* php_pcre_replace
  */
 PHPAPI zend_string *php_pcre_replace(zend_string *regex,
 							  zend_string *subject_str,
@@ -1592,9 +1568,8 @@ PHPAPI zend_string *php_pcre_replace(zend_string *regex,
 
 	return result;
 }
-/* }}} */
 
-/* {{{ php_pcre_replace_impl() */
+/* php_pcre_replace_impl() */
 PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *subject_str, char *subject, size_t subject_len, zend_string *replace_str, size_t limit, size_t *replace_count)
 {
 	uint32_t		 options;			/* Execution options */
@@ -1834,9 +1809,8 @@ error:
 
 	return result;
 }
-/* }}} */
 
-/* {{{ php_pcre_replace_func_impl() */
+/* php_pcre_replace_func_impl() */
 static zend_string *php_pcre_replace_func_impl(pcre_cache_entry *pce, zend_string *subject_str, char *subject, size_t subject_len, zend_fcall_info *fci, zend_fcall_info_cache *fcc, size_t limit, size_t *replace_count, zend_long flags)
 {
 	uint32_t		 options;			/* Execution options */
@@ -2049,9 +2023,8 @@ error:
 
 	return result;
 }
-/* }}} */
 
-/* {{{ php_pcre_replace_func
+/* php_pcre_replace_func
  */
 static zend_always_inline zend_string *php_pcre_replace_func(zend_string *regex,
 							  zend_string *subject_str,
@@ -2073,9 +2046,8 @@ static zend_always_inline zend_string *php_pcre_replace_func(zend_string *regex,
 
 	return result;
 }
-/* }}} */
 
-/* {{{ php_pcre_replace_array
+/* php_pcre_replace_array
  */
 static zend_string *php_pcre_replace_array(HashTable *regex, zval *replace, zend_string *subject_str, size_t limit, size_t *replace_count)
 {
@@ -2157,9 +2129,8 @@ static zend_string *php_pcre_replace_array(HashTable *regex, zval *replace, zend
 
 	return subject_str;
 }
-/* }}} */
 
-/* {{{ php_replace_in_subject
+/* php_replace_in_subject
  */
 static zend_always_inline zend_string *php_replace_in_subject(zval *regex, zval *replace, zval *subject, size_t limit, size_t *replace_count)
 {
@@ -2184,9 +2155,8 @@ static zend_always_inline zend_string *php_replace_in_subject(zval *regex, zval 
 	}
 	return result;
 }
-/* }}} */
 
-/* {{{ php_replace_in_subject_func
+/* php_replace_in_subject_func
  */
 static zend_string *php_replace_in_subject_func(zval *regex, zend_fcall_info *fci, zend_fcall_info_cache *fcc, zval *subject, size_t limit, size_t *replace_count, zend_long flags)
 {
@@ -2224,9 +2194,8 @@ static zend_string *php_replace_in_subject_func(zval *regex, zend_fcall_info *fc
 		return subject_str;
 	}
 }
-/* }}} */
 
-/* {{{ preg_replace_func_impl
+/* preg_replace_func_impl
  */
 static size_t preg_replace_func_impl(zval *return_value, zval *regex, zend_fcall_info *fci, zend_fcall_info_cache *fcc, zval *subject, zend_long limit_val, zend_long flags)
 {
@@ -2272,9 +2241,8 @@ static size_t preg_replace_func_impl(zval *return_value, zval *regex, zend_fcall
 
 	return replace_count;
 }
-/* }}} */
 
-/* {{{ preg_replace_common
+/* preg_replace_common
  */
 static void preg_replace_common(INTERNAL_FUNCTION_PARAMETERS, int is_filter)
 {
@@ -2360,14 +2328,12 @@ static void preg_replace_common(INTERNAL_FUNCTION_PARAMETERS, int is_filter)
 		ZEND_TRY_ASSIGN_REF_LONG(zcount, replace_count);
 	}
 }
-/* }}} */
 
 /* Perform Perl-style regular expression replacement. */
 PHP_FUNCTION(preg_replace)
 {
 	preg_replace_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
-/* }}} */
 
 /* Perform Perl-style regular expression replacement using replacement callback. */
 PHP_FUNCTION(preg_replace_callback)
@@ -2406,7 +2372,6 @@ PHP_FUNCTION(preg_replace_callback)
 		ZEND_TRY_ASSIGN_REF_LONG(zcount, replace_count);
 	}
 }
-/* }}} */
 
 /* Perform Perl-style regular expression replacement using replacement callback. */
 PHP_FUNCTION(preg_replace_callback_array)
@@ -2473,14 +2438,12 @@ PHP_FUNCTION(preg_replace_callback_array)
 		ZEND_TRY_ASSIGN_REF_LONG(zcount, replace_count);
 	}
 }
-/* }}} */
 
 /* Perform Perl-style regular expression replacement and only return matches. */
 PHP_FUNCTION(preg_filter)
 {
 	preg_replace_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
-/* }}} */
 
 /* Split string into an array using a perl-style regular expression as a delimiter */
 PHP_FUNCTION(preg_split)
@@ -2509,9 +2472,8 @@ PHP_FUNCTION(preg_split)
 	php_pcre_split_impl(pce, subject, return_value, limit_val, flags);
 	pce->refcount--;
 }
-/* }}} */
 
-/* {{{ php_pcre_split
+/* php_pcre_split
  */
 PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, zend_string *subject_str, zval *return_value,
 	zend_long limit_val, zend_long flags)
@@ -2700,7 +2662,6 @@ last:
 		}
 	}
 }
-/* }}} */
 
 /* Quote regular expression characters plus an optional character */
 PHP_FUNCTION(preg_quote)
@@ -2836,7 +2797,6 @@ PHP_FUNCTION(preg_quote)
 
 	RETURN_NEW_STR(out_str);
 }
-/* }}} */
 
 /* Searches array and returns entries which match regex */
 PHP_FUNCTION(preg_grep)
@@ -2863,9 +2823,8 @@ PHP_FUNCTION(preg_grep)
 	php_pcre_grep_impl(pce, input, return_value, flags);
 	pce->refcount--;
 }
-/* }}} */
 
-PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return_value, zend_long flags) /* {{{ */
+PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return_value, zend_long flags)
 {
 	zval            *entry;             /* An entry in the input array */
 	uint32_t		 num_subpats;		/* Number of captured subpatterns */
@@ -2952,7 +2911,6 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 		pcre2_match_data_free(match_data);
 	}
 }
-/* }}} */
 
 /* Returns the error code of the last regexp execution. */
 PHP_FUNCTION(preg_last_error)
@@ -2961,7 +2919,6 @@ PHP_FUNCTION(preg_last_error)
 
 	RETURN_LONG(PCRE_G(error_code));
 }
-/* }}} */
 
 /* Returns the error message of the last regexp execution. */
 PHP_FUNCTION(preg_last_error_msg)
@@ -2970,9 +2927,8 @@ PHP_FUNCTION(preg_last_error_msg)
 
     RETURN_STRING(php_pcre_get_error_msg(PCRE_G(error_code)));
 }
-/* }}} */
 
-/* {{{ module definition structures */
+/* module definition structures */
 
 zend_module_entry pcre_module_entry = {
 	STANDARD_MODULE_HEADER,
@@ -2995,38 +2951,37 @@ zend_module_entry pcre_module_entry = {
 ZEND_GET_MODULE(pcre)
 #endif
 
-/* }}} */
 
 PHPAPI pcre2_match_context *php_pcre_mctx(void)
-{/*{{{*/
+{
 	return mctx;
-}/*}}}*/
+}
 
 PHPAPI pcre2_general_context *php_pcre_gctx(void)
-{/*{{{*/
+{
 	return gctx;
-}/*}}}*/
+}
 
 PHPAPI pcre2_compile_context *php_pcre_cctx(void)
-{/*{{{*/
+{
 	return cctx;
-}/*}}}*/
+}
 
 PHPAPI void php_pcre_pce_incref(pcre_cache_entry *pce)
-{/*{{{*/
+{
 	assert(NULL != pce);
 	pce->refcount++;
-}/*}}}*/
+}
 
 PHPAPI void php_pcre_pce_decref(pcre_cache_entry *pce)
-{/*{{{*/
+{
 	assert(NULL != pce);
 	assert(0 != pce->refcount);
 	pce->refcount--;
-}/*}}}*/
+}
 
 PHPAPI pcre2_code *php_pcre_pce_re(pcre_cache_entry *pce)
-{/*{{{*/
+{
 	assert(NULL != pce);
 	return pce->re;
-}/*}}}*/
+}

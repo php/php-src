@@ -29,25 +29,22 @@
 #include "php_fopen_wrappers.h"
 #include "SAPI.h"
 
-static ssize_t php_stream_output_write(php_stream *stream, const char *buf, size_t count) /* {{{ */
+static ssize_t php_stream_output_write(php_stream *stream, const char *buf, size_t count)
 {
 	PHPWRITE(buf, count);
 	return count;
 }
-/* }}} */
 
-static ssize_t php_stream_output_read(php_stream *stream, char *buf, size_t count) /* {{{ */
+static ssize_t php_stream_output_read(php_stream *stream, char *buf, size_t count)
 {
 	stream->eof = 1;
 	return -1;
 }
-/* }}} */
 
-static int php_stream_output_close(php_stream *stream, int close_handle) /* {{{ */
+static int php_stream_output_close(php_stream *stream, int close_handle)
 {
 	return 0;
 }
-/* }}} */
 
 const php_stream_ops php_stream_output_ops = {
 	php_stream_output_write,
@@ -61,19 +58,17 @@ const php_stream_ops php_stream_output_ops = {
 	NULL  /* set_option */
 };
 
-typedef struct php_stream_input { /* {{{ */
+typedef struct php_stream_input {
 	php_stream *body;
 	zend_off_t position;
 } php_stream_input_t;
-/* }}} */
 
-static ssize_t php_stream_input_write(php_stream *stream, const char *buf, size_t count) /* {{{ */
+static ssize_t php_stream_input_write(php_stream *stream, const char *buf, size_t count)
 {
 	return -1;
 }
-/* }}} */
 
-static ssize_t php_stream_input_read(php_stream *stream, char *buf, size_t count) /* {{{ */
+static ssize_t php_stream_input_read(php_stream *stream, char *buf, size_t count)
 {
 	php_stream_input_t *input = stream->abstract;
 	ssize_t read;
@@ -103,24 +98,21 @@ static ssize_t php_stream_input_read(php_stream *stream, char *buf, size_t count
 
 	return read;
 }
-/* }}} */
 
-static int php_stream_input_close(php_stream *stream, int close_handle) /* {{{ */
+static int php_stream_input_close(php_stream *stream, int close_handle)
 {
 	efree(stream->abstract);
 	stream->abstract = NULL;
 
 	return 0;
 }
-/* }}} */
 
-static int php_stream_input_flush(php_stream *stream) /* {{{ */
+static int php_stream_input_flush(php_stream *stream)
 {
 	return -1;
 }
-/* }}} */
 
-static int php_stream_input_seek(php_stream *stream, zend_off_t offset, int whence, zend_off_t *newoffset) /* {{{ */
+static int php_stream_input_seek(php_stream *stream, zend_off_t offset, int whence, zend_off_t *newoffset)
 {
 	php_stream_input_t *input = stream->abstract;
 
@@ -132,7 +124,6 @@ static int php_stream_input_seek(php_stream *stream, zend_off_t offset, int when
 
 	return -1;
 }
-/* }}} */
 
 const php_stream_ops php_stream_input_ops = {
 	php_stream_input_write,
@@ -146,7 +137,7 @@ const php_stream_ops php_stream_input_ops = {
 	NULL  /* set_option */
 };
 
-static void php_stream_apply_filter_list(php_stream *stream, char *filterlist, int read_chain, int write_chain) /* {{{ */
+static void php_stream_apply_filter_list(php_stream *stream, char *filterlist, int read_chain, int write_chain)
 {
 	char *p, *token = NULL;
 	php_stream_filter *temp_filter;
@@ -171,10 +162,9 @@ static void php_stream_apply_filter_list(php_stream *stream, char *filterlist, i
 		p = php_strtok_r(NULL, "|", &token);
 	}
 }
-/* }}} */
 
 php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *path, const char *mode, int options,
-									 zend_string **opened_path, php_stream_context *context STREAMS_DC) /* {{{ */
+									 zend_string **opened_path, php_stream_context *context STREAMS_DC)
 {
 	int fd = -1;
 	int mode_rw = 0;
@@ -423,7 +413,6 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 #endif
 	return stream;
 }
-/* }}} */
 
 static const php_stream_wrapper_ops php_stdio_wops = {
 	php_stream_url_wrap_php,

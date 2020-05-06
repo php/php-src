@@ -19,7 +19,7 @@
 
 #include "phar_internal.h"
 
-static uint32_t phar_tar_number(char *buf, size_t len) /* {{{ */
+static uint32_t phar_tar_number(char *buf, size_t len)
 {
 	uint32_t num = 0;
 	size_t i = 0;
@@ -35,7 +35,6 @@ static uint32_t phar_tar_number(char *buf, size_t len) /* {{{ */
 
 	return num;
 }
-/* }}} */
 
 /* adapted from format_octal() in libarchive
  *
@@ -62,7 +61,7 @@ static uint32_t phar_tar_number(char *buf, size_t len) /* {{{ */
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-static int phar_tar_octal(char *buf, uint32_t val, int len) /* {{{ */
+static int phar_tar_octal(char *buf, uint32_t val, int len)
 {
 	char *p = buf;
 	int s = len;
@@ -82,9 +81,8 @@ static int phar_tar_octal(char *buf, uint32_t val, int len) /* {{{ */
 
 	return FAILURE;
 }
-/* }}} */
 
-static uint32_t phar_tar_checksum(char *buf, size_t len) /* {{{ */
+static uint32_t phar_tar_checksum(char *buf, size_t len)
 {
 	uint32_t sum = 0;
 	char *end = buf + len;
@@ -95,9 +93,8 @@ static uint32_t phar_tar_checksum(char *buf, size_t len) /* {{{ */
 	}
 	return sum;
 }
-/* }}} */
 
-int phar_is_tar(char *buf, char *fname) /* {{{ */
+int phar_is_tar(char *buf, char *fname)
 {
 	tar_header *header = (tar_header *) buf;
 	uint32_t checksum = phar_tar_number(header->checksum, sizeof(header->checksum));
@@ -122,9 +119,8 @@ int phar_is_tar(char *buf, char *fname) /* {{{ */
 	}
 	return ret;
 }
-/* }}} */
 
-int phar_open_or_create_tar(char *fname, size_t fname_len, char *alias, size_t alias_len, int is_data, uint32_t options, phar_archive_data** pphar, char **error) /* {{{ */
+int phar_open_or_create_tar(char *fname, size_t fname_len, char *alias, size_t alias_len, int is_data, uint32_t options, phar_archive_data** pphar, char **error)
 {
 	phar_archive_data *phar;
 	int ret = phar_create_or_parse_filename(fname, fname_len, alias, alias_len, is_data, options, &phar, error);
@@ -156,9 +152,8 @@ int phar_open_or_create_tar(char *fname, size_t fname_len, char *alias, size_t a
 	}
 	return FAILURE;
 }
-/* }}} */
 
-static int phar_tar_process_metadata(phar_entry_info *entry, php_stream *fp) /* {{{ */
+static int phar_tar_process_metadata(phar_entry_info *entry, php_stream *fp)
 {
 	char *metadata;
 	size_t save = php_stream_tell(fp), read;
@@ -201,7 +196,6 @@ static int phar_tar_process_metadata(phar_entry_info *entry, php_stream *fp) /* 
 	php_stream_seek(fp, save, SEEK_SET);
 	return SUCCESS;
 }
-/* }}} */
 
 #if !HAVE_STRNLEN
 static size_t strnlen(const char *s, size_t maxlen) {
@@ -210,7 +204,7 @@ static size_t strnlen(const char *s, size_t maxlen) {
 }
 #endif
 
-int phar_parse_tarfile(php_stream* fp, char *fname, size_t fname_len, char *alias, size_t alias_len, phar_archive_data** pphar, int is_data, uint32_t compression, char **error) /* {{{ */
+int phar_parse_tarfile(php_stream* fp, char *fname, size_t fname_len, char *alias, size_t alias_len, phar_archive_data** pphar, int is_data, uint32_t compression, char **error)
 {
 	char buf[512], *actual_alias = NULL, *p;
 	phar_entry_info entry = {0};
@@ -695,7 +689,6 @@ next:
 
 	return SUCCESS;
 }
-/* }}} */
 
 struct _phar_pass_tar_info {
 	php_stream *old;
@@ -705,7 +698,7 @@ struct _phar_pass_tar_info {
 	char **error;
 };
 
-static int phar_tar_writeheaders_int(phar_entry_info *entry, void *argument) /* {{{ */
+static int phar_tar_writeheaders_int(phar_entry_info *entry, void *argument)
 {
 	tar_header header;
 	size_t pos;
@@ -856,15 +849,13 @@ static int phar_tar_writeheaders_int(phar_entry_info *entry, void *argument) /* 
 	entry->offset = entry->offset_abs = pos;
 	return ZEND_HASH_APPLY_KEEP;
 }
-/* }}} */
 
-static int phar_tar_writeheaders(zval *zv, void *argument) /* {{{ */
+static int phar_tar_writeheaders(zval *zv, void *argument)
 {
 	return phar_tar_writeheaders_int(Z_PTR_P(zv), argument);
 }
-/* }}} */
 
-int phar_tar_setmetadata(zval *metadata, phar_entry_info *entry, char **error) /* {{{ */
+int phar_tar_setmetadata(zval *metadata, phar_entry_info *entry, char **error)
 {
 	php_serialize_data_t metadata_hash;
 
@@ -898,9 +889,8 @@ int phar_tar_setmetadata(zval *metadata, phar_entry_info *entry, char **error) /
 
 	return ZEND_HASH_APPLY_KEEP;
 }
-/* }}} */
 
-static int phar_tar_setupmetadata(zval *zv, void *argument) /* {{{ */
+static int phar_tar_setupmetadata(zval *zv, void *argument)
 {
 	int lookfor_len;
 	struct _phar_pass_tar_info *i = (struct _phar_pass_tar_info *)argument;
@@ -954,9 +944,8 @@ static int phar_tar_setupmetadata(zval *zv, void *argument) /* {{{ */
 
 	return phar_tar_setmetadata(&entry->metadata, metadata, error);
 }
-/* }}} */
 
-int phar_tar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int defaultstub, char **error) /* {{{ */
+int phar_tar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int defaultstub, char **error)
 {
 	phar_entry_info entry = {0};
 	static const char newstub[] = "<?php // tar-based phar archive stub file\n__HALT_COMPILER();";
@@ -1371,4 +1360,4 @@ nostub:
 	}
 	return EOF;
 }
-/* }}} */
+

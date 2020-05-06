@@ -91,23 +91,22 @@
 # endif
 #endif
 
-/* {{{ remote console headers */
+/* remote console headers */
 #ifndef _WIN32
 #	include <sys/socket.h>
 #	include <sys/un.h>
 #	include <sys/select.h>
 #	include <sys/types.h>
 #	include <netdb.h>
-#endif /* }}} */
+#endif
 
-/* {{{ strings */
+/* strings */
 #define PHPDBG_NAME "phpdbg"
 #define PHPDBG_AUTHORS "Felipe Pena, Joe Watkins and Bob Weinand" /* Ordered by last name */
 #define PHPDBG_ISSUES "http://bugs.php.net/report.php"
 #define PHPDBG_VERSION PHP_VERSION
 #define PHPDBG_INIT_FILENAME ".phpdbginit"
 #define PHPDBG_DEFAULT_PROMPT "prompt>"
-/* }}} */
 
 /* Hey, apple. One shouldn't define *functions* from the standard C library as macros. */
 #ifdef memcpy
@@ -148,7 +147,7 @@ int phpdbg_do_parse(phpdbg_param_t *stack, char *input);
  BEGIN: DO NOT CHANGE DO NOT CHANGE DO NOT CHANGE
 */
 
-/* {{{ flags */
+/* flags */
 #define PHPDBG_HAS_FILE_BP            (1ULL<<1)
 #define PHPDBG_HAS_PENDING_FILE_BP    (1ULL<<2)
 #define PHPDBG_HAS_SYM_BP             (1ULL<<3)
@@ -158,7 +157,7 @@ int phpdbg_do_parse(phpdbg_param_t *stack, char *input);
 #define PHPDBG_HAS_OPCODE_BP          (1ULL<<7)
 #define PHPDBG_HAS_FUNCTION_OPLINE_BP (1ULL<<8)
 #define PHPDBG_HAS_METHOD_OPLINE_BP   (1ULL<<9)
-#define PHPDBG_HAS_FILE_OPLINE_BP     (1ULL<<10) /* }}} */
+#define PHPDBG_HAS_FILE_OPLINE_BP     (1ULL<<10)
 
 /*
  END: DO NOT CHANGE DO NOT CHANGE DO NOT CHANGE
@@ -209,13 +208,13 @@ int phpdbg_do_parse(phpdbg_param_t *stack, char *input);
 #	define PHPDBG_DEFAULT_FLAGS (PHPDBG_IS_QUIET | PHPDBG_IS_COLOURED | PHPDBG_IS_BP_ENABLED | PHPDBG_HAS_PAGINATION)
 #else
 #	define PHPDBG_DEFAULT_FLAGS (PHPDBG_IS_QUIET | PHPDBG_IS_BP_ENABLED | PHPDBG_HAS_PAGINATION)
-#endif /* }}} */
+#endif
 
-/* {{{ output descriptors */
+/* output descriptors */
 #define PHPDBG_STDIN 			0
 #define PHPDBG_STDOUT			1
 #define PHPDBG_STDERR			2
-#define PHPDBG_IO_FDS 			3 /* }}} */
+#define PHPDBG_IO_FDS 			3
 
 #define phpdbg_try_access \
 	{                                                            \
@@ -235,7 +234,7 @@ int phpdbg_do_parse(phpdbg_param_t *stack, char *input);
 
 void phpdbg_register_file_handles(void);
 
-/* {{{ structs */
+/* structs */
 ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	HashTable bp[PHPDBG_BREAK_TABLES];           /* break points */
 	HashTable registered;                        /* registered */
@@ -327,7 +326,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	struct win32_sigio_watcher_data swd;
 #endif
 	long lines;                                  /* max number of lines to display */
-ZEND_END_MODULE_GLOBALS(phpdbg) /* }}} */
+ZEND_END_MODULE_GLOBALS(phpdbg)
 
 #endif
 

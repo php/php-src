@@ -22,7 +22,7 @@
 #include "intl_common.h"
 #include "intl_convert.h"
 
-/* {{{ intl_convert_utf8_to_utf16
+/* intl_convert_utf8_to_utf16
  * Convert given string from UTF-8 to UTF-16 to *target buffer.
  *
  * It *target is NULL then we allocate a large enough buffer,
@@ -102,9 +102,8 @@ void intl_convert_utf8_to_utf16(
 	*target     = dst_buf;
 	*target_len = dst_len;
 }
-/* }}} */
 
-/* {{{ intl_convert_utf16_to_utf8
+/* intl_convert_utf16_to_utf8
  * Convert given string from UTF-16 to UTF-8.
  *
  * @param source      String to convert.
@@ -149,4 +148,4 @@ zend_string* intl_convert_utf16_to_utf8(
 	ZSTR_VAL(dst)[dst_len] = 0;
 	return dst;
 }
-/* }}} */
+

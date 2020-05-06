@@ -19,7 +19,7 @@
    +----------------------------------------------------------------------+
 */
 
-/* {{{ includes */
+/* includes */
 
 #include "php.h"
 #include "php_globals.h"
@@ -110,13 +110,12 @@ php_file_globals file_globals;
 # include <fnmatch.h>
 #endif
 
-/* }}} */
 
 #define PHP_STREAM_TO_ZVAL(stream, arg) \
 	ZEND_ASSERT(Z_TYPE_P(arg) == IS_RESOURCE); \
 	php_stream_from_res(stream, Z_RES_P(arg));
 
-/* {{{ ZTS-stuff / Globals / Prototypes */
+/* ZTS-stuff / Globals / Prototypes */
 
 /* sharing globals is *evil* */
 static int le_stream_context = FAILURE;
@@ -125,9 +124,8 @@ PHPAPI int php_le_stream_context(void)
 {
 	return le_stream_context;
 }
-/* }}} */
 
-/* {{{ Module-Stuff
+/* Module-Stuff
 */
 static ZEND_RSRC_DTOR_FUNC(file_context_dtor)
 {
@@ -315,16 +313,14 @@ PHP_MINIT_FUNCTION(file)
 
 	return SUCCESS;
 }
-/* }}} */
 
-PHP_MSHUTDOWN_FUNCTION(file) /* {{{ */
+PHP_MSHUTDOWN_FUNCTION(file)
 {
 #ifndef ZTS
 	file_globals_dtor(&file_globals);
 #endif
 	return SUCCESS;
 }
-/* }}} */
 
 static int flock_values[] = { LOCK_SH, LOCK_EX, LOCK_UN };
 
@@ -365,7 +361,6 @@ PHP_FUNCTION(flock)
 	}
 	RETURN_TRUE;
 }
-/* }}} */
 
 #define PHP_META_UNSAFE ".\\+*?[^]$() "
 
@@ -511,7 +506,6 @@ PHP_FUNCTION(get_meta_tags)
 	if (name) efree(name);
 	php_stream_close(md.stream);
 }
-/* }}} */
 
 /* Read the entire file into a string */
 PHP_FUNCTION(file_get_contents)
@@ -568,7 +562,6 @@ PHP_FUNCTION(file_get_contents)
 
 	php_stream_close(stream);
 }
-/* }}} */
 
 /* Write/Create a file with contents data and return the number of bytes written */
 PHP_FUNCTION(file_put_contents)
@@ -707,7 +700,6 @@ PHP_FUNCTION(file_put_contents)
 
 	RETURN_LONG(numbytes);
 }
-/* }}} */
 
 #define PHP_FILE_BUF_SIZE	80
 
@@ -804,7 +796,6 @@ parse_eol:
 	}
 	php_stream_close(stream);
 }
-/* }}} */
 
 /* Create a unique filename in a directory */
 PHP_FUNCTION(tempnam)
@@ -837,7 +828,6 @@ PHP_FUNCTION(tempnam)
 	}
 	zend_string_release_ex(p, 0);
 }
-/* }}} */
 
 /* Create a temporary file that will be deleted automatically after use */
 PHP_FUNCTION(tmpfile)
@@ -854,7 +844,6 @@ PHP_FUNCTION(tmpfile)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Open a file or a URL and return a file pointer */
 PHP_FUNCTION(fopen)
@@ -884,7 +873,6 @@ PHP_FUNCTION(fopen)
 
 	php_stream_to_zval(stream, return_value);
 }
-/* }}} */
 
 /* Close an open file pointer */
 PHPAPI PHP_FUNCTION(fclose)
@@ -909,7 +897,6 @@ PHPAPI PHP_FUNCTION(fclose)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Execute a command and open either a read or a write pipe to it */
 PHP_FUNCTION(popen)
@@ -953,7 +940,6 @@ PHP_FUNCTION(popen)
 
 	efree(posix_mode);
 }
-/* }}} */
 
 /* Close a file pointer opened by popen() */
 PHP_FUNCTION(pclose)
@@ -972,7 +958,6 @@ PHP_FUNCTION(pclose)
 	FG(pclose_wait) = 0;
 	RETURN_LONG(FG(pclose_ret));
 }
-/* }}} */
 
 /* Test for end-of-file on a file pointer */
 PHPAPI PHP_FUNCTION(feof)
@@ -992,7 +977,6 @@ PHPAPI PHP_FUNCTION(feof)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Get a line from file pointer */
 PHPAPI PHP_FUNCTION(fgets)
@@ -1043,7 +1027,6 @@ PHPAPI PHP_FUNCTION(fgets)
 		RETURN_NEW_STR(str);
 	}
 }
-/* }}} */
 
 /* Get a character from file pointer */
 PHPAPI PHP_FUNCTION(fgetc)
@@ -1070,7 +1053,6 @@ PHPAPI PHP_FUNCTION(fgetc)
 		RETURN_STRINGL(buf, 1);
 	}
 }
-/* }}} */
 
 /* Implements a mostly ANSI compatible fscanf() */
 PHP_FUNCTION(fscanf)
@@ -1111,7 +1093,6 @@ PHP_FUNCTION(fscanf)
 		WRONG_PARAM_COUNT;
 	}
 }
-/* }}} */
 
 /* Binary-safe file write */
 PHPAPI PHP_FUNCTION(fwrite)
@@ -1152,7 +1133,6 @@ PHPAPI PHP_FUNCTION(fwrite)
 
 	RETURN_LONG(ret);
 }
-/* }}} */
 
 /* Flushes output */
 PHPAPI PHP_FUNCTION(fflush)
@@ -1173,7 +1153,6 @@ PHPAPI PHP_FUNCTION(fflush)
 	}
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Rewind the position of a file pointer */
 PHPAPI PHP_FUNCTION(rewind)
@@ -1192,7 +1171,6 @@ PHPAPI PHP_FUNCTION(rewind)
 	}
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Get file pointer's read/write position */
 PHPAPI PHP_FUNCTION(ftell)
@@ -1213,7 +1191,6 @@ PHPAPI PHP_FUNCTION(ftell)
 	}
 	RETURN_LONG(ret);
 }
-/* }}} */
 
 /* Seek on a file pointer */
 PHPAPI PHP_FUNCTION(fseek)
@@ -1233,9 +1210,8 @@ PHPAPI PHP_FUNCTION(fseek)
 
 	RETURN_LONG(php_stream_seek(stream, offset, (int) whence));
 }
-/* }}} */
 
-/* {{{ php_mkdir
+/* php_mkdir
 */
 
 /* DEPRECATED APIs: Use php_stream_mkdir() instead */
@@ -1258,7 +1234,6 @@ PHPAPI int php_mkdir(const char *dir, zend_long mode)
 {
 	return php_mkdir_ex(dir, mode, REPORT_ERRORS);
 }
-/* }}} */
 
 /* Create a directory */
 PHP_FUNCTION(mkdir)
@@ -1282,7 +1257,6 @@ PHP_FUNCTION(mkdir)
 
 	RETURN_BOOL(php_stream_mkdir(dir, (int)mode, (recursive ? PHP_STREAM_MKDIR_RECURSIVE : 0) | REPORT_ERRORS, context));
 }
-/* }}} */
 
 /* Remove a directory */
 PHP_FUNCTION(rmdir)
@@ -1302,7 +1276,6 @@ PHP_FUNCTION(rmdir)
 
 	RETURN_BOOL(php_stream_rmdir(dir, REPORT_ERRORS, context));
 }
-/* }}} */
 
 /* Output a file or a URL */
 PHP_FUNCTION(readfile)
@@ -1333,7 +1306,6 @@ PHP_FUNCTION(readfile)
 
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* Return or change the umask */
 PHP_FUNCTION(umask)
@@ -1360,7 +1332,6 @@ PHP_FUNCTION(umask)
 
 	RETURN_LONG(oldumask);
 }
-/* }}} */
 
 /* Output all remaining data from a file pointer */
 PHPAPI PHP_FUNCTION(fpassthru)
@@ -1378,7 +1349,6 @@ PHPAPI PHP_FUNCTION(fpassthru)
 	size = php_stream_passthru(stream);
 	RETURN_LONG(size);
 }
-/* }}} */
 
 /* Rename a file */
 PHP_FUNCTION(rename)
@@ -1417,7 +1387,6 @@ PHP_FUNCTION(rename)
 
 	RETURN_BOOL(wrapper->wops->rename(wrapper, old_name, new_name, 0, context));
 }
-/* }}} */
 
 /* Delete a file */
 PHP_FUNCTION(unlink)
@@ -1449,7 +1418,6 @@ PHP_FUNCTION(unlink)
 	}
 	RETURN_BOOL(wrapper->wops->unlink(wrapper, filename, REPORT_ERRORS, context));
 }
-/* }}} */
 
 /* Truncate file to 'size' length */
 PHP_FUNCTION(ftruncate)
@@ -1477,7 +1445,6 @@ PHP_FUNCTION(ftruncate)
 
 	RETURN_BOOL(0 == php_stream_truncate_set_size(stream, size));
 }
-/* }}} */
 
 /* Stat() on a filehandle */
 PHP_FUNCTION(fstat)
@@ -1559,7 +1526,6 @@ PHP_FUNCTION(fstat)
 	zend_hash_str_add_new(Z_ARRVAL_P(return_value), stat_sb_names[11], strlen(stat_sb_names[11]), &stat_blksize);
 	zend_hash_str_add_new(Z_ARRVAL_P(return_value), stat_sb_names[12], strlen(stat_sb_names[12]), &stat_blocks);
 }
-/* }}} */
 
 /* Copy a file */
 PHP_FUNCTION(copy)
@@ -1588,25 +1554,22 @@ PHP_FUNCTION(copy)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
-/* {{{ php_copy_file
+/* php_copy_file
  */
 PHPAPI int php_copy_file(const char *src, const char *dest)
 {
 	return php_copy_file_ctx(src, dest, 0, NULL);
 }
-/* }}} */
 
-/* {{{ php_copy_file_ex
+/* php_copy_file_ex
  */
 PHPAPI int php_copy_file_ex(const char *src, const char *dest, int src_flg)
 {
 	return php_copy_file_ctx(src, dest, src_flg, NULL);
 }
-/* }}} */
 
-/* {{{ php_copy_file_ctx
+/* php_copy_file_ctx
  */
 PHPAPI int php_copy_file_ctx(const char *src, const char *dest, int src_flg, php_stream_context *ctx)
 {
@@ -1698,7 +1661,6 @@ safe_to_copy:
 	}
 	return ret;
 }
-/* }}} */
 
 /* Binary-safe file read */
 PHPAPI PHP_FUNCTION(fread)
@@ -1728,9 +1690,8 @@ PHPAPI PHP_FUNCTION(fread)
 
 	RETURN_STR(str);
 }
-/* }}} */
 
-static const char *php_fgetcsv_lookup_trailing_spaces(const char *ptr, size_t len) /* {{{ */
+static const char *php_fgetcsv_lookup_trailing_spaces(const char *ptr, size_t len)
 {
 	int inc_len;
 	unsigned char last_chars[2] = { 0, 0 };
@@ -1766,7 +1727,6 @@ quit_loop:
 	}
 	return ptr;
 }
-/* }}} */
 
 #define FPUTCSV_FLD_CHK(c) memchr(ZSTR_VAL(field_str), c, ZSTR_LEN(field_str))
 
@@ -1835,9 +1795,8 @@ PHP_FUNCTION(fputcsv)
 	}
 	RETURN_LONG(ret);
 }
-/* }}} */
 
-/* {{{ PHPAPI size_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, int escape_char) */
+/* PHPAPI size_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, int escape_char) */
 PHPAPI ssize_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, int escape_char)
 {
 	int count, i = 0;
@@ -1896,7 +1855,6 @@ PHPAPI ssize_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, cha
 
 	return ret;
 }
-/* }}} */
 
 /* Get line from file pointer and parse for CSV fields */
 PHP_FUNCTION(fgetcsv)
@@ -1994,9 +1952,8 @@ PHP_FUNCTION(fgetcsv)
 
 	php_fgetcsv(stream, delimiter, enclosure, escape, buf_len, buf, return_value);
 }
-/* }}} */
 
-PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int escape_char, size_t buf_len, char *buf, zval *return_value) /* {{{ */
+PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int escape_char, size_t buf_len, char *buf, zval *return_value)
 {
 	char *temp, *tptr, *bptr, *line_end, *limit;
 	size_t temp_len, line_end_len;
@@ -2255,7 +2212,6 @@ out:
 		efree(buf);
 	}
 }
-/* }}} */
 
 /* Return the resolved path */
 PHP_FUNCTION(realpath)
@@ -2283,12 +2239,11 @@ PHP_FUNCTION(realpath)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* See http://www.w3.org/TR/html4/intro/sgmltut.html#h-3.2.2 */
 #define PHP_META_HTML401_CHARS "-_.:"
 
-/* {{{ php_next_meta_token
+/* php_next_meta_token
    Tokenizes an HTML file for get_meta_tags */
 php_meta_tags_token php_next_meta_token(php_meta_tags_data *md)
 {
@@ -2390,7 +2345,6 @@ php_meta_tags_token php_next_meta_token(php_meta_tags_data *md)
 
 	return TOK_EOF;
 }
-/* }}} */
 
 #ifdef HAVE_FNMATCH
 /* Match filename against pattern */
@@ -2418,7 +2372,7 @@ PHP_FUNCTION(fnmatch)
 
 	RETURN_BOOL( ! fnmatch( pattern, filename, (int)flags ));
 }
-/* }}} */
+
 #endif
 
 /* Returns directory path used for temporary files */
@@ -2428,4 +2382,4 @@ PHP_FUNCTION(sys_get_temp_dir)
 
 	RETURN_STRING((char *)php_get_temporary_directory());
 }
-/* }}} */
+

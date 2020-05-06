@@ -22,7 +22,6 @@
 #include "formatter_class.h"
 #include "intl_convert.h"
 
-/* {{{ */
 static int numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 {
 	const char* locale;
@@ -64,11 +63,8 @@ static int numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	INTL_CTOR_CHECK_STATUS(nfo, "numfmt_create: number formatter creation failed");
 	return SUCCESS;
 }
-/* }}} */
 
-/* Create number formatter. }}} */
-/* Create number formatter.
- */
+/* Create number formatter. */
 PHP_FUNCTION( numfmt_create )
 {
 	object_init_ex( return_value, NumberFormatter_ce_ptr );
@@ -77,7 +73,6 @@ PHP_FUNCTION( numfmt_create )
 		RETURN_NULL();
 	}
 }
-/* }}} */
 
 /* NumberFormatter object constructor.
  */
@@ -94,11 +89,8 @@ PHP_METHOD( NumberFormatter, __construct )
 	}
 	zend_restore_error_handling(&error_handling);
 }
-/* }}} */
 
-/* Get formatter's last error code. }}} */
-/* Get formatter's last error code.
- */
+/* Get formatter's last error code. */
 PHP_FUNCTION( numfmt_get_error_code )
 {
 	FORMATTER_METHOD_INIT_VARS
@@ -115,11 +107,8 @@ PHP_FUNCTION( numfmt_get_error_code )
 	/* Return formatter's last error code. */
 	RETURN_LONG( INTL_DATA_ERROR_CODE(nfo) );
 }
-/* }}} */
 
-/* Get text description for formatter's last error code. }}} */
-/* Get text description for formatter's last error code.
- */
+/* Get text description for formatter's last error code. */
 PHP_FUNCTION( numfmt_get_error_message )
 {
 	zend_string *message = NULL;
@@ -138,4 +127,4 @@ PHP_FUNCTION( numfmt_get_error_message )
 	message = intl_error_get_message( INTL_DATA_ERROR_P(nfo) );
 	RETURN_STR(message);
 }
-/* }}} */
+

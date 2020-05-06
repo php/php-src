@@ -16,7 +16,7 @@
 	ZEND_PARSE_PARAMETERS_END()
 #endif
 
-/* {{{ void test1()
+/* void test1()
  */
 PHP_FUNCTION(test1)
 {
@@ -24,9 +24,8 @@ PHP_FUNCTION(test1)
 
 	php_printf("The extension %s is loaded and working!\r\n", "%EXTNAME%");
 }
-/* }}} */
 
-/* {{{ string test2( [ string $var ] )
+/* string test2( [ string $var ] )
  */
 PHP_FUNCTION(test2)
 {
@@ -43,9 +42,8 @@ PHP_FUNCTION(test2)
 
 	RETURN_STR(retval);
 }
-/* }}}*/
 
-/* {{{ PHP_RINIT_FUNCTION
+/* PHP_RINIT_FUNCTION
  */
 PHP_RINIT_FUNCTION(%EXTNAME%)
 {
@@ -55,9 +53,8 @@ PHP_RINIT_FUNCTION(%EXTNAME%)
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
+/* PHP_MINFO_FUNCTION
  */
 PHP_MINFO_FUNCTION(%EXTNAME%)
 {
@@ -65,9 +62,8 @@ PHP_MINFO_FUNCTION(%EXTNAME%)
 	php_info_print_table_header(2, "%EXTNAME% support", "enabled");
 	php_info_print_table_end();
 }
-/* }}} */
 
-/* {{{ %EXTNAME%_module_entry
+/* %EXTNAME%_module_entry
  */
 zend_module_entry %EXTNAME%_module_entry = {
 	STANDARD_MODULE_HEADER,
@@ -81,7 +77,6 @@ zend_module_entry %EXTNAME%_module_entry = {
 	PHP_%EXTNAMECAPS%_VERSION,		/* Version */
 	STANDARD_MODULE_PROPERTIES
 };
-/* }}} */
 
 #ifdef COMPILE_DL_%EXTNAMECAPS%
 # ifdef ZTS

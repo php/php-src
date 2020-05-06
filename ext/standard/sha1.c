@@ -52,8 +52,6 @@ PHP_FUNCTION(sha1)
 
 }
 
-/* }}} */
-
 
 /* Calculate the sha1 hash of given filename */
 PHP_FUNCTION(sha1_file)
@@ -95,8 +93,6 @@ PHP_FUNCTION(sha1_file)
 		make_digest_ex(Z_STRVAL_P(return_value), digest, 20);
 	}
 }
-/* }}} */
-
 
 static void SHA1Transform(uint32_t[5], const unsigned char[64]);
 static void SHA1Encode(unsigned char *, uint32_t *, unsigned int);
@@ -149,7 +145,7 @@ static const unsigned char PADDING[64] =
   }
 
 
-/* {{{ PHP_SHA1Init
+/* PHP_SHA1Init
  * SHA1 initialization. Begins an SHA1 operation, writing a new context.
  */
 PHPAPI void PHP_SHA1Init(PHP_SHA1_CTX * context)
@@ -163,9 +159,8 @@ PHPAPI void PHP_SHA1Init(PHP_SHA1_CTX * context)
 	context->state[3] = 0x10325476;
 	context->state[4] = 0xc3d2e1f0;
 }
-/* }}} */
 
-/* {{{ PHP_SHA1Update
+/* PHP_SHA1Update
    SHA1 block update operation. Continues an SHA1 message-digest
    operation, processing another message block, and updating the
    context.
@@ -205,9 +200,8 @@ PHPAPI void PHP_SHA1Update(PHP_SHA1_CTX * context, const unsigned char *input,
 		((unsigned char*) & context->buffer[index], (unsigned char*) & input[i],
 		 inputLen - i);
 }
-/* }}} */
 
-/* {{{ PHP_SHA1Final
+/* PHP_SHA1Final
    SHA1 finalization. Ends an SHA1 message-digest operation, writing the
    the message digest and zeroizing the context.
  */
@@ -242,9 +236,8 @@ PHPAPI void PHP_SHA1Final(unsigned char digest[20], PHP_SHA1_CTX * context)
 	 */
 	ZEND_SECURE_ZERO((unsigned char*) context, sizeof(*context));
 }
-/* }}} */
 
-/* {{{ SHA1Transform
+/* SHA1Transform
  * SHA1 basic transformation. Transforms state based on block.
  */
 static void SHA1Transform(state, block)
@@ -353,9 +346,8 @@ const unsigned char block[64];
 	/* Zeroize sensitive information. */
 	ZEND_SECURE_ZERO((unsigned char*) x, sizeof(x));
 }
-/* }}} */
 
-/* {{{ SHA1Encode
+/* SHA1Encode
    Encodes input (uint32_t) into output (unsigned char). Assumes len is
    a multiple of 4.
  */
@@ -373,9 +365,8 @@ unsigned int len;
 		output[j + 3] = (unsigned char) (input[i] & 0xff);
 	}
 }
-/* }}} */
 
-/* {{{ SHA1Decode
+/* SHA1Decode
    Decodes input (unsigned char) into output (uint32_t). Assumes len is
    a multiple of 4.
  */
@@ -390,4 +381,4 @@ unsigned int len;
 		output[i] = ((uint32_t) input[j + 3]) | (((uint32_t) input[j + 2]) << 8) |
 			(((uint32_t) input[j + 1]) << 16) | (((uint32_t) input[j]) << 24);
 }
-/* }}} */
+

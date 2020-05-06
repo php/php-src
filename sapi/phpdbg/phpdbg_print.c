@@ -37,7 +37,7 @@ const phpdbg_command_t phpdbg_print_commands[] = {
 	PHPDBG_END_COMMAND
 };
 
-PHPDBG_PRINT(opline) /* {{{ */
+PHPDBG_PRINT(opline)
 {
 	if (PHPDBG_G(in_execution) && EG(current_execute_data)) {
 		phpdbg_print_opline(phpdbg_user_execute_data(EG(current_execute_data)), 1);
@@ -46,9 +46,9 @@ PHPDBG_PRINT(opline) /* {{{ */
 	}
 
 	return SUCCESS;
-} /* }}} */
+}
 
-static inline void phpdbg_print_function_helper(zend_function *method) /* {{{ */
+static inline void phpdbg_print_function_helper(zend_function *method)
 {
 	switch (method->type) {
 		case ZEND_USER_FUNCTION: {
@@ -98,9 +98,9 @@ static inline void phpdbg_print_function_helper(zend_function *method) /* {{{ */
 			}
 		}
 	}
-} /* }}} */
+}
 
-PHPDBG_PRINT(exec) /* {{{ */
+PHPDBG_PRINT(exec)
 {
 	if (PHPDBG_G(exec)) {
 		if (!PHPDBG_G(ops) && !(PHPDBG_G(flags) & PHPDBG_IN_SIGNAL_HANDLER)) {
@@ -117,9 +117,9 @@ PHPDBG_PRINT(exec) /* {{{ */
 	}
 
 return SUCCESS;
-} /* }}} */
+}
 
-PHPDBG_PRINT(stack) /* {{{ */
+PHPDBG_PRINT(stack)
 {
 	if (PHPDBG_G(in_execution) && EG(current_execute_data)) {
 		zend_op_array *ops = &phpdbg_user_execute_data(EG(current_execute_data))->func->op_array;
@@ -142,9 +142,9 @@ PHPDBG_PRINT(stack) /* {{{ */
 	}
 
 	return SUCCESS;
-} /* }}} */
+}
 
-PHPDBG_PRINT(class) /* {{{ */
+PHPDBG_PRINT(class)
 {
 	zend_class_entry *ce;
 
@@ -176,9 +176,9 @@ PHPDBG_PRINT(class) /* {{{ */
 	}
 
 	return SUCCESS;
-} /* }}} */
+}
 
-PHPDBG_PRINT(method) /* {{{ */
+PHPDBG_PRINT(method)
 {
 	zend_class_entry *ce;
 
@@ -204,9 +204,9 @@ PHPDBG_PRINT(method) /* {{{ */
 	}
 
 	return SUCCESS;
-} /* }}} */
+}
 
-PHPDBG_PRINT(func) /* {{{ */
+PHPDBG_PRINT(func)
 {
 	HashTable *func_table = EG(function_table);
 	zend_function* fbc;
@@ -255,7 +255,7 @@ PHPDBG_PRINT(func) /* {{{ */
 	efree(lcname);
 
 	return SUCCESS;
-} /* }}} */
+}
 
 void phpdbg_print_opcodes_main() {
 	phpdbg_out("function name: (null)\n");

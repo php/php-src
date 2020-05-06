@@ -15,16 +15,15 @@
    +----------------------------------------------------------------------+
  */
 
-/* {{{ includes */
+/* includes */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #include "php.h"
-/* }}} */
 
 #if HAVE_MBSTRING
-/* {{{ typedefs */
+/* typedefs */
 typedef struct _php_mb_encoding_handler_info_t {
 	const char *separator;
 	const mbfl_encoding *to_encoding;
@@ -36,13 +35,11 @@ typedef struct _php_mb_encoding_handler_info_t {
 	enum mbfl_no_language from_language;
 } php_mb_encoding_handler_info_t;
 
-/* }}}*/
-
-/* {{{ prototypes */
+/* prototypes */
 SAPI_POST_HANDLER_FUNC(php_mb_post_handler);
 MBSTRING_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data);
 
 int _php_mb_enable_encoding_translation(int flag);
 const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_info_t *info, zval *arg, char *res);
-/* }}} */
+
 #endif /* HAVE_MBSTRING */

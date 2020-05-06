@@ -62,7 +62,6 @@ PHP_FUNCTION(curl_multi_init)
 
 	RETURN_RES(zend_register_resource(mh, le_curl_multi_handle));
 }
-/* }}} */
 
 /* Add a normal cURL handle to a cURL multi handle */
 PHP_FUNCTION(curl_multi_add_handle)
@@ -98,9 +97,8 @@ PHP_FUNCTION(curl_multi_add_handle)
 
 	RETURN_LONG((zend_long) error);
 }
-/* }}} */
 
-void _php_curl_multi_cleanup_list(void *data) /* {{{ */
+void _php_curl_multi_cleanup_list(void *data)
 {
 	zval *z_ch = (zval *)data;
 	php_curl *ch;
@@ -117,19 +115,17 @@ void _php_curl_multi_cleanup_list(void *data) /* {{{ */
 
 	zend_list_delete(Z_RES_P(z_ch));
 }
-/* }}} */
 
 /* Used internally as comparison routine passed to zend_list_del_element */
-static int curl_compare_resources( zval *z1, zval *z2 ) /* {{{ */
+static int curl_compare_resources( zval *z1, zval *z2 )
 {
 	return (Z_TYPE_P(z1) == Z_TYPE_P(z2) &&
 			Z_TYPE_P(z1) == IS_RESOURCE &&
 			Z_RES_P(z1) == Z_RES_P(z2));
 }
-/* }}} */
 
 /* Used to find the php_curl resource for a given curl easy handle */
-static zval *_php_curl_multi_find_easy_handle(php_curlm *mh, CURL *easy) /* {{{ */
+static zval *_php_curl_multi_find_easy_handle(php_curlm *mh, CURL *easy)
 {
 	php_curl 			*tmp_ch;
 	zend_llist_position pos;
@@ -149,7 +145,6 @@ static zval *_php_curl_multi_find_easy_handle(php_curlm *mh, CURL *easy) /* {{{ 
 
 	return NULL;
 }
-/* }}} */
 
 /* Remove a multi handle from a set of cURL handles */
 PHP_FUNCTION(curl_multi_remove_handle)
@@ -180,7 +175,6 @@ PHP_FUNCTION(curl_multi_remove_handle)
 	zend_llist_del_element(&mh->easyh, z_ch, (int (*)(void *, void *))curl_compare_resources);
 
 }
-/* }}} */
 
 /* Get all the sockets associated with the cURL extension, which can then be "selected" */
 PHP_FUNCTION(curl_multi_select)
@@ -209,7 +203,6 @@ PHP_FUNCTION(curl_multi_select)
 
 	RETURN_LONG(numfds);
 }
-/* }}} */
 
 /* Run the sub-connections of the current cURL handle */
 PHP_FUNCTION(curl_multi_exec)
@@ -252,7 +245,6 @@ PHP_FUNCTION(curl_multi_exec)
 	SAVE_CURLM_ERROR(mh, error);
 	RETURN_LONG((zend_long) error);
 }
-/* }}} */
 
 /* Return the content of a cURL handle if CURLOPT_RETURNTRANSFER is set */
 PHP_FUNCTION(curl_multi_getcontent)
@@ -278,7 +270,6 @@ PHP_FUNCTION(curl_multi_getcontent)
 
 	RETURN_NULL();
 }
-/* }}} */
 
 /* Get information about the current transfers */
 PHP_FUNCTION(curl_multi_info_read)
@@ -337,7 +328,6 @@ PHP_FUNCTION(curl_multi_info_read)
 		}
 	}
 }
-/* }}} */
 
 /* Close a set of cURL handles */
 PHP_FUNCTION(curl_multi_close)
@@ -355,9 +345,8 @@ PHP_FUNCTION(curl_multi_close)
 
 	zend_list_close(Z_RES_P(z_mh));
 }
-/* }}} */
 
-void _php_curl_multi_close(zend_resource *rsrc) /* {{{ */
+void _php_curl_multi_close(zend_resource *rsrc)
 {
 	php_curlm *mh = (php_curlm *)rsrc->ptr;
 	if (mh) {
@@ -388,7 +377,6 @@ void _php_curl_multi_close(zend_resource *rsrc) /* {{{ */
 		rsrc->ptr = NULL;
 	}
 }
-/* }}} */
 
 /* Return an integer containing the last multi curl error number */
 PHP_FUNCTION(curl_multi_errno)
@@ -406,7 +394,6 @@ PHP_FUNCTION(curl_multi_errno)
 
 	RETURN_LONG(mh->err.no);
 }
-/* }}} */
 
 /* return string describing error code */
 PHP_FUNCTION(curl_multi_strerror)
@@ -425,11 +412,10 @@ PHP_FUNCTION(curl_multi_strerror)
 		RETURN_NULL();
 	}
 }
-/* }}} */
 
 #if LIBCURL_VERSION_NUM >= 0x072C00 /* Available since 7.44.0 */
 
-static int _php_server_push_callback(CURL *parent_ch, CURL *easy, size_t num_headers, struct curl_pushheaders *push_headers, void *userp) /* {{{ */
+static int _php_server_push_callback(CURL *parent_ch, CURL *easy, size_t num_headers, struct curl_pushheaders *push_headers, void *userp)
 {
 	php_curl 				*ch;
 	php_curl 				*parent;
@@ -499,11 +485,10 @@ static int _php_server_push_callback(CURL *parent_ch, CURL *easy, size_t num_hea
 
 	return rval;
 }
-/* }}} */
 
 #endif
 
-static int _php_curl_multi_setopt(php_curlm *mh, zend_long option, zval *zvalue, zval *return_value) /* {{{ */
+static int _php_curl_multi_setopt(php_curlm *mh, zend_long option, zval *zvalue, zval *return_value)
 {
 	CURLMcode error = CURLM_OK;
 
@@ -558,7 +543,6 @@ static int _php_curl_multi_setopt(php_curlm *mh, zend_long option, zval *zvalue,
 
 	return error != CURLM_OK;
 }
-/* }}} */
 
 /* Set an option for the curl multi handle */
 PHP_FUNCTION(curl_multi_setopt)
@@ -583,6 +567,5 @@ PHP_FUNCTION(curl_multi_setopt)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 #endif

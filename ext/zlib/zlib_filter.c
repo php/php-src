@@ -17,7 +17,7 @@
 #include "php.h"
 #include "php_zlib.h"
 
-/* {{{ data structure */
+/* data structure */
 
 /* Passed as opaque in malloc callbacks */
 typedef struct _php_zlib_filter_data {
@@ -30,9 +30,8 @@ typedef struct _php_zlib_filter_data {
 	zend_bool finished;
 } php_zlib_filter_data;
 
-/* }}} */
 
-/* {{{ Memory management wrappers */
+/* Memory management wrappers */
 
 static voidpf php_zlib_alloc(voidpf opaque, uInt items, uInt size)
 {
@@ -43,9 +42,8 @@ static void php_zlib_free(voidpf opaque, voidpf address)
 {
 	pefree((void*)address, ((php_zlib_filter_data*)opaque)->persistent);
 }
-/* }}} */
 
-/* {{{ zlib.inflate filter implementation */
+/* zlib.inflate filter implementation */
 
 static php_stream_filter_status_t php_zlib_inflate_filter(
 	php_stream *stream,
@@ -161,9 +159,8 @@ static const php_stream_filter_ops php_zlib_inflate_ops = {
 	php_zlib_inflate_dtor,
 	"zlib.inflate"
 };
-/* }}} */
 
-/* {{{ zlib.deflate filter implementation */
+/* zlib.deflate filter implementation */
 
 static php_stream_filter_status_t php_zlib_deflate_filter(
 	php_stream *stream,
@@ -271,9 +268,8 @@ static const php_stream_filter_ops php_zlib_deflate_ops = {
 	"zlib.deflate"
 };
 
-/* }}} */
 
-/* {{{ zlib.* common factory */
+/* zlib.* common factory */
 
 static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *filterparams, uint8_t persistent)
 {
@@ -413,4 +409,4 @@ factory_setlevel:
 const php_stream_filter_factory php_zlib_filter_factory = {
 	php_zlib_filter_create
 };
-/* }}} */
+

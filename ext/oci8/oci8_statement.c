@@ -43,7 +43,7 @@ typedef ub8 oci_phpsized_int;
 typedef ub4 oci_phpsized_int;
 #endif
 
-/* {{{ php_oci_statement_create()
+/* php_oci_statement_create()
  Create statemend handle and allocate necessary resources */
 php_oci_statement *php_oci_statement_create(php_oci_connection *connection, char *query, int query_len)
 {
@@ -123,9 +123,8 @@ php_oci_statement *php_oci_statement_create(php_oci_connection *connection, char
 
 	return statement;
 }
-/* }}} */
 
-/* {{{ php_oci_get_implicit_resultset()
+/* php_oci_get_implicit_resultset()
    Fetch implicit result set statement resource */
 php_oci_statement *php_oci_get_implicit_resultset(php_oci_statement *statement)
 {
@@ -182,9 +181,8 @@ php_oci_statement *php_oci_get_implicit_resultset(php_oci_statement *statement)
 	}
 #endif /* OCI_MAJOR_VERSION < 12 */
 }
-/* }}} */
 
-/* {{{ php_oci_statement_set_prefetch()
+/* php_oci_statement_set_prefetch()
  Set prefetch buffer size for the statement */
 int php_oci_statement_set_prefetch(php_oci_statement *statement, ub4 prefetch )
 {
@@ -206,9 +204,8 @@ int php_oci_statement_set_prefetch(php_oci_statement *statement, ub4 prefetch )
 	statement->errcode = 0; /* retain backwards compat with OCI8 1.4 */
 	return 0;
 }
-/* }}} */
 
-/* {{{ php_oci_cleanup_pre_fetch()
+/* php_oci_cleanup_pre_fetch()
    Helper function to cleanup ref-cursors and descriptors from the previous row */
 int php_oci_cleanup_pre_fetch(zval *data)
 {
@@ -240,9 +237,8 @@ int php_oci_cleanup_pre_fetch(zval *data)
 	return ZEND_HASH_APPLY_KEEP;
 
 }
-/* }}} */
 
-/* {{{ php_oci_statement_fetch()
+/* php_oci_statement_fetch()
  Fetch a row from the statement */
 int php_oci_statement_fetch(php_oci_statement *statement, ub4 nrows)
 {
@@ -386,9 +382,8 @@ int php_oci_statement_fetch(php_oci_statement *statement, ub4 nrows)
 
 	return 1;
 }
-/* }}} */
 
-/* {{{ php_oci_statement_get_column()
+/* php_oci_statement_get_column()
  Get column from the result set */
 php_oci_out_column *php_oci_statement_get_column(php_oci_statement *statement, zend_long column_index, char *column_name, int column_name_len)
 {
@@ -417,9 +412,8 @@ php_oci_out_column *php_oci_statement_get_column(php_oci_statement *statement, z
 
 	return NULL;
 }
-/* }}} */
 
-/* {{{ php_oci_define_callback() */
+/* php_oci_define_callback() */
 sb4 php_oci_define_callback(dvoid *ctx, OCIDefine *define, ub4 iter, dvoid **bufpp, ub4 **alenpp, ub1 *piecep, dvoid **indpp, ub2 **rcpp)
 {
 	php_oci_out_column *outcol = (php_oci_out_column *)ctx;
@@ -485,9 +479,8 @@ sb4 php_oci_define_callback(dvoid *ctx, OCIDefine *define, ub4 iter, dvoid **buf
 	}
 	return OCI_ERROR;
 }
-/* }}} */
 
-/* {{{ php_oci_statement_execute()
+/* php_oci_statement_execute()
  Execute statement */
 int php_oci_statement_execute(php_oci_statement *statement, ub4 mode)
 {
@@ -851,17 +844,15 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode)
 
 	return 0;
 }
-/* }}} */
 
-/* {{{ php_oci_statement_cancel()
+/* php_oci_statement_cancel()
  Cancel statement */
 int php_oci_statement_cancel(php_oci_statement *statement)
 {
 	return php_oci_statement_fetch(statement, 0);
 }
-/* }}} */
 
-/* {{{ php_oci_statement_free()
+/* php_oci_statement_free()
  Destroy statement handle and free associated resources */
 void php_oci_statement_free(php_oci_statement *statement)
 {
@@ -907,9 +898,8 @@ void php_oci_statement_free(php_oci_statement *statement)
 
 	OCI_G(num_statements)--;
 }
-/* }}} */
 
-/* {{{ php_oci_bind_pre_exec()
+/* php_oci_bind_pre_exec()
  Helper function */
 int php_oci_bind_pre_exec(zval *data, void *result)
 {
@@ -968,9 +958,8 @@ int php_oci_bind_pre_exec(zval *data, void *result)
 
 	return 0;
 }
-/* }}} */
 
-/* {{{ php_oci_bind_post_exec()
+/* php_oci_bind_post_exec()
  Helper function */
 int php_oci_bind_post_exec(zval *data)
 {
@@ -1099,9 +1088,8 @@ int php_oci_bind_post_exec(zval *data)
 
 	return 0;
 }
-/* }}} */
 
-/* {{{ php_oci_bind_by_name()
+/* php_oci_bind_by_name()
  Bind zval to the given placeholder */
 int php_oci_bind_by_name(php_oci_statement *statement, char *name, size_t name_len, zval *var, zend_long maxlength, ub2 type)
 {
@@ -1358,9 +1346,8 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, size_t name_l
 	statement->errcode = 0; /* retain backwards compat with OCI8 1.4 */
 	return 0;
 }
-/* }}} */
 
-/* {{{ php_oci_bind_in_callback()
+/* php_oci_bind_in_callback()
  Callback used when binding LOBs and VARCHARs */
 sb4 php_oci_bind_in_callback(
 					dvoid *ictxp,	  /* context pointer */
@@ -1422,9 +1409,8 @@ sb4 php_oci_bind_in_callback(
 
 	return OCI_CONTINUE;
 }
-/* }}} */
 
-/* {{{ php_oci_bind_out_callback()
+/* php_oci_bind_out_callback()
  Callback used when binding LOBs and VARCHARs */
 sb4 php_oci_bind_out_callback(
 					dvoid *octxp,	   /* context pointer */
@@ -1510,9 +1496,8 @@ sb4 php_oci_bind_out_callback(
 
 	return retval;
 }
-/* }}} */
 
-/* {{{ php_oci_statement_get_column_helper()
+/* php_oci_statement_get_column_helper()
  Helper function to get column by name and index */
 php_oci_out_column *php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAMETERS, int need_data)
 {
@@ -1553,9 +1538,8 @@ php_oci_out_column *php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAME
 	}
 	return column;
 }
-/* }}} */
 
-/* {{{ php_oci_statement_get_type()
+/* php_oci_statement_get_type()
  Return type of the statement */
 int php_oci_statement_get_type(php_oci_statement *statement, ub2 *type)
 {
@@ -1576,9 +1560,8 @@ int php_oci_statement_get_type(php_oci_statement *statement, ub2 *type)
 
 	return 0;
 }
-/* }}} */
 
-/* {{{ php_oci_statement_get_numrows()
+/* php_oci_statement_get_numrows()
  Get the number of rows fetched to the clientside (NOT the number of rows in the result set) */
 int php_oci_statement_get_numrows(php_oci_statement *statement, ub4 *numrows)
 {
@@ -1599,9 +1582,8 @@ int php_oci_statement_get_numrows(php_oci_statement *statement, ub4 *numrows)
 
 	return 0;
 }
-/* }}} */
 
-/* {{{ php_oci_bind_array_by_name()
+/* php_oci_bind_array_by_name()
  Bind arrays to PL/SQL types */
 int php_oci_bind_array_by_name(php_oci_statement *statement, char *name, size_t name_len, zval *var, zend_long max_table_length, zend_long maxlength, zend_long type)
 {
@@ -1725,9 +1707,8 @@ int php_oci_bind_array_by_name(php_oci_statement *statement, char *name, size_t 
 	statement->errcode = 0; /* retain backwards compat with OCI8 1.4 */
 	return 0;
 }
-/* }}} */
 
-/* {{{ php_oci_bind_array_helper_string()
+/* php_oci_bind_array_helper_string()
  Bind arrays to PL/SQL types */
 php_oci_bind *php_oci_bind_array_helper_string(zval *var, zend_long max_table_length, zend_long maxlength)
 {
@@ -1814,9 +1795,8 @@ php_oci_bind *php_oci_bind_array_helper_string(zval *var, zend_long max_table_le
 
 	return bind;
 }
-/* }}} */
 
-/* {{{ php_oci_bind_array_helper_number()
+/* php_oci_bind_array_helper_number()
  Bind arrays to PL/SQL types */
 php_oci_bind *php_oci_bind_array_helper_number(zval *var, zend_long max_table_length)
 {
@@ -1855,9 +1835,8 @@ php_oci_bind *php_oci_bind_array_helper_number(zval *var, zend_long max_table_le
 
 	return bind;
 }
-/* }}} */
 
-/* {{{ php_oci_bind_array_helper_double()
+/* php_oci_bind_array_helper_double()
  Bind arrays to PL/SQL types */
 php_oci_bind *php_oci_bind_array_helper_double(zval *var, zend_long max_table_length)
 {
@@ -1896,9 +1875,8 @@ php_oci_bind *php_oci_bind_array_helper_double(zval *var, zend_long max_table_le
 
 	return bind;
 }
-/* }}} */
 
-/* {{{ php_oci_bind_array_helper_date()
+/* php_oci_bind_array_helper_date()
  Bind arrays to PL/SQL types */
 php_oci_bind *php_oci_bind_array_helper_date(zval *var, zend_long max_table_length, php_oci_connection *connection)
 {
@@ -1972,6 +1950,5 @@ php_oci_bind *php_oci_bind_array_helper_date(zval *var, zend_long max_table_leng
 
 	return bind;
 }
-/* }}} */
 
 #endif /* HAVE_OCI8 */

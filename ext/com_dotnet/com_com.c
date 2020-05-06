@@ -25,7 +25,7 @@
 #include "php_com_dotnet_internal.h"
 #include "Zend/zend_exceptions.h"
 
-/* {{{ com_create_instance - ctor for COM class */
+/* com_create_instance - ctor for COM class */
 PHP_METHOD(com, __construct)
 {
 	zval *object = getThis();
@@ -280,7 +280,6 @@ PHP_METHOD(com, __construct)
 	}
 
 }
-/* }}} */
 
 /* Returns a handle to an already running instance of a COM object */
 PHP_FUNCTION(com_get_active_object)
@@ -331,7 +330,6 @@ PHP_FUNCTION(com_get_active_object)
 	}
 	efree(module);
 }
-/* }}} */
 
 /* Performs an Invoke on the given com object.
  * returns a failure code and creates an exception if there was an error */
@@ -682,7 +680,6 @@ PHP_FUNCTION(com_create_guid)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Connect events from a COM object to a PHP object */
 PHP_FUNCTION(com_event_sink)
@@ -741,7 +738,6 @@ PHP_FUNCTION(com_event_sink)
 	}
 
 }
-/* }}} */
 
 /* Print out a PHP class definition for a dispatchable interface */
 PHP_FUNCTION(com_print_typeinfo)
@@ -777,7 +773,6 @@ PHP_FUNCTION(com_print_typeinfo)
 	}
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* Process COM messages, sleeping for up to timeoutms milliseconds */
 PHP_FUNCTION(com_message_pump)
@@ -804,7 +799,6 @@ PHP_FUNCTION(com_message_pump)
 		RETVAL_FALSE;
 	}
 }
-/* }}} */
 
 /* Loads a Typelibrary and registers its constants */
 PHP_FUNCTION(com_load_typelib)
@@ -840,4 +834,4 @@ PHP_FUNCTION(com_load_typelib)
 		pTL = NULL;
 	}
 }
-/* }}} */
+

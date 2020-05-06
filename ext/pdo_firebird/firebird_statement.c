@@ -31,7 +31,7 @@
 #define RECORD_ERROR(stmt) _firebird_error(NULL, stmt,  __FILE__, __LINE__)
 
 /* free the allocated space for passing field values to the db and back */
-static void free_sqlda(XSQLDA const *sqlda) /* {{{ */
+static void free_sqlda(XSQLDA const *sqlda)
 {
 	int i;
 
@@ -43,10 +43,9 @@ static void free_sqlda(XSQLDA const *sqlda) /* {{{ */
 		}
 	}
 }
-/* }}} */
 
 /* called by PDO to clean up a statement handle */
-static int firebird_stmt_dtor(pdo_stmt_t *stmt) /* {{{ */
+static int firebird_stmt_dtor(pdo_stmt_t *stmt)
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 	int result = 1, i;
@@ -79,10 +78,9 @@ static int firebird_stmt_dtor(pdo_stmt_t *stmt) /* {{{ */
 
 	return result;
 }
-/* }}} */
 
 /* called by PDO to execute a prepared query */
-static int firebird_stmt_execute(pdo_stmt_t *stmt) /* {{{ */
+static int firebird_stmt_execute(pdo_stmt_t *stmt)
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 	pdo_firebird_db_handle *H = S->H;
@@ -163,10 +161,9 @@ static int firebird_stmt_execute(pdo_stmt_t *stmt) /* {{{ */
 
 	return 0;
 }
-/* }}} */
 
 /* called by PDO to fetch the next row from a statement */
-static int firebird_stmt_fetch(pdo_stmt_t *stmt, /* {{{ */
+static int firebird_stmt_fetch(pdo_stmt_t *stmt,
 	enum pdo_fetch_orientation ori, zend_long offset)
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
@@ -193,10 +190,9 @@ static int firebird_stmt_fetch(pdo_stmt_t *stmt, /* {{{ */
 	}
 	return 0;
 }
-/* }}} */
 
 /* called by PDO to retrieve information about the fields being returned */
-static int firebird_stmt_describe(pdo_stmt_t *stmt, int colno) /* {{{ */
+static int firebird_stmt_describe(pdo_stmt_t *stmt, int colno)
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 	struct pdo_column_data *col = &stmt->columns[colno];
@@ -243,7 +239,6 @@ static int firebird_stmt_describe(pdo_stmt_t *stmt, int colno) /* {{{ */
 
 	return 1;
 }
-/* }}} */
 
 #define FETCH_BUF(buf,type,len,lenvar) ((buf) = (buf) ? (buf) : \
 	emalloc((len) ? (len * sizeof(type)) : ((*(unsigned long*)lenvar) = sizeof(type))))
@@ -251,7 +246,7 @@ static int firebird_stmt_describe(pdo_stmt_t *stmt, int colno) /* {{{ */
 #define CHAR_BUF_LEN 24
 
 /* fetch a blob into a fetch buffer */
-static int firebird_fetch_blob(pdo_stmt_t *stmt, int colno, char **ptr, /* {{{ */
+static int firebird_fetch_blob(pdo_stmt_t *stmt, int colno, char **ptr,
 	zend_ulong *len, ISC_QUAD *blob_id)
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
@@ -326,9 +321,8 @@ fetch_blob_end:
 	}
 	return result;
 }
-/* }}} */
 
-static int firebird_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,  /* {{{ */
+static int firebird_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 	zend_ulong *len, int *caller_frees)
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
@@ -456,7 +450,6 @@ static int firebird_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,  /* {{
 	}
 	return 1;
 }
-/* }}} */
 
 static int firebird_bind_blob(pdo_stmt_t *stmt, ISC_QUAD *blob_id, zval *param)
 {
@@ -500,7 +493,7 @@ static int firebird_bind_blob(pdo_stmt_t *stmt, ISC_QUAD *blob_id, zval *param)
 	return result;
 }
 
-static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *param, /* {{{ */
+static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *param,
 	enum pdo_param_event event_type)
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
@@ -772,9 +765,8 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 	}
 	return 1;
 }
-/* }}} */
 
-static int firebird_stmt_set_attribute(pdo_stmt_t *stmt, zend_long attr, zval *val) /* {{{ */
+static int firebird_stmt_set_attribute(pdo_stmt_t *stmt, zend_long attr, zval *val)
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 
@@ -795,9 +787,8 @@ static int firebird_stmt_set_attribute(pdo_stmt_t *stmt, zend_long attr, zval *v
 	}
 	return 1;
 }
-/* }}} */
 
-static int firebird_stmt_get_attribute(pdo_stmt_t *stmt, zend_long attr, zval *val) /* {{{ */
+static int firebird_stmt_get_attribute(pdo_stmt_t *stmt, zend_long attr, zval *val)
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 
@@ -814,9 +805,8 @@ static int firebird_stmt_get_attribute(pdo_stmt_t *stmt, zend_long attr, zval *v
 	}
 	return 1;
 }
-/* }}} */
 
-static int firebird_stmt_cursor_closer(pdo_stmt_t *stmt) /* {{{ */
+static int firebird_stmt_cursor_closer(pdo_stmt_t *stmt)
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 
@@ -829,10 +819,8 @@ static int firebird_stmt_cursor_closer(pdo_stmt_t *stmt) /* {{{ */
 	S->cursor_open = 0;
 	return 1;
 }
-/* }}} */
 
-
-const struct pdo_stmt_methods firebird_stmt_methods = { /* {{{ */
+const struct pdo_stmt_methods firebird_stmt_methods = {
 	firebird_stmt_dtor,
 	firebird_stmt_execute,
 	firebird_stmt_fetch,
@@ -845,4 +833,4 @@ const struct pdo_stmt_methods firebird_stmt_methods = { /* {{{ */
 	NULL, /* next_rowset_func */
 	firebird_stmt_cursor_closer
 };
-/* }}} */
+

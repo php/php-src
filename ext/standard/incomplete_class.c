@@ -28,7 +28,7 @@
 
 static zend_object_handlers php_incomplete_object_handlers;
 
-/* {{{ incomplete_class_message
+/* incomplete_class_message
  */
 static void incomplete_class_message(zend_object *object, int error_type)
 {
@@ -43,9 +43,8 @@ static void incomplete_class_message(zend_object *object, int error_type)
 		php_error_docref(NULL, error_type, INCOMPLETE_CLASS_MSG, "unknown");
 	}
 }
-/* }}} */
 
-static zval *incomplete_class_get_property(zend_object *object, zend_string *member, int type, void **cache_slot, zval *rv) /* {{{ */
+static zval *incomplete_class_get_property(zend_object *object, zend_string *member, int type, void **cache_slot, zval *rv)
 {
 	incomplete_class_message(object, E_NOTICE);
 
@@ -56,43 +55,37 @@ static zval *incomplete_class_get_property(zend_object *object, zend_string *mem
 		return &EG(uninitialized_zval);
 	}
 }
-/* }}} */
 
-static zval *incomplete_class_write_property(zend_object *object, zend_string *member, zval *value, void **cache_slot) /* {{{ */
+static zval *incomplete_class_write_property(zend_object *object, zend_string *member, zval *value, void **cache_slot)
 {
 	incomplete_class_message(object, E_NOTICE);
 	return value;
 }
-/* }}} */
 
-static zval *incomplete_class_get_property_ptr_ptr(zend_object *object, zend_string *member, int type, void **cache_slot) /* {{{ */
+static zval *incomplete_class_get_property_ptr_ptr(zend_object *object, zend_string *member, int type, void **cache_slot)
 {
 	incomplete_class_message(object, E_NOTICE);
 	return &EG(error_zval);
 }
-/* }}} */
 
-static void incomplete_class_unset_property(zend_object *object, zend_string *member, void **cache_slot) /* {{{ */
+static void incomplete_class_unset_property(zend_object *object, zend_string *member, void **cache_slot)
 {
 	incomplete_class_message(object, E_NOTICE);
 }
-/* }}} */
 
-static int incomplete_class_has_property(zend_object *object, zend_string *member, int check_empty, void **cache_slot) /* {{{ */
+static int incomplete_class_has_property(zend_object *object, zend_string *member, int check_empty, void **cache_slot)
 {
 	incomplete_class_message(object, E_NOTICE);
 	return 0;
 }
-/* }}} */
 
-static zend_function *incomplete_class_get_method(zend_object **object, zend_string *method, const zval *key) /* {{{ */
+static zend_function *incomplete_class_get_method(zend_object **object, zend_string *method, const zval *key)
 {
 	incomplete_class_message(*object, E_ERROR);
 	return NULL;
 }
-/* }}} */
 
-/* {{{ php_create_incomplete_class
+/* php_create_incomplete_class
  */
 static zend_object *php_create_incomplete_object(zend_class_entry *class_type)
 {
@@ -127,9 +120,8 @@ PHPAPI zend_class_entry *php_create_incomplete_class(void)
 
 	return incomplete_class_entry;
 }
-/* }}} */
 
-/* {{{ php_lookup_class_name
+/* php_lookup_class_name
  */
 PHPAPI zend_string *php_lookup_class_name(zend_object *object)
 {
@@ -143,9 +135,8 @@ PHPAPI zend_string *php_lookup_class_name(zend_object *object)
 
 	return NULL;
 }
-/* }}} */
 
-/* {{{ php_store_class_name
+/* php_store_class_name
  */
 PHPAPI void php_store_class_name(zval *object, const char *name, size_t len)
 {
@@ -155,4 +146,4 @@ PHPAPI void php_store_class_name(zval *object, const char *name, size_t len)
 	ZVAL_STRINGL(&val, name, len);
 	zend_hash_str_update(Z_OBJPROP_P(object), MAGIC_MEMBER, sizeof(MAGIC_MEMBER)-1, &val);
 }
-/* }}} */
+

@@ -56,7 +56,6 @@ ZEND_METHOD(CURLFile, __construct)
 	return_value = ZEND_THIS;
 	curlfile_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
-/* }}} */
 
 /* Create the CURLFile object */
 PHP_FUNCTION(curl_file_create)
@@ -64,7 +63,6 @@ PHP_FUNCTION(curl_file_create)
     object_init_ex( return_value, curl_CURLFile_class );
     curlfile_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
-/* }}} */
 
 static void curlfile_get_property(char *name, size_t name_len, INTERNAL_FUNCTION_PARAMETERS)
 {
@@ -91,35 +89,30 @@ ZEND_METHOD(CURLFile, getFilename)
 {
 	curlfile_get_property("name", sizeof("name")-1, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
-/* }}} */
 
 /* Get MIME type */
 ZEND_METHOD(CURLFile, getMimeType)
 {
 	curlfile_get_property("mime", sizeof("mime")-1, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
-/* }}} */
 
 /* Get file name for POST */
 ZEND_METHOD(CURLFile, getPostFilename)
 {
 	curlfile_get_property("postname", sizeof("postname")-1, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
-/* }}} */
 
 /* Set MIME type */
 ZEND_METHOD(CURLFile, setMimeType)
 {
 	curlfile_set_property("mime", sizeof("mime")-1, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
-/* }}} */
 
 /* Set file name for POST */
 ZEND_METHOD(CURLFile, setPostFilename)
 {
 	curlfile_set_property("postname", sizeof("postname")-1, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
-/* }}} */
 
 void curlfile_register_class(void)
 {

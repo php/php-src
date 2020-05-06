@@ -32,7 +32,7 @@
 #include "basic_functions.h"
 #include "php_ext_syslog.h"
 
-/* {{{ PHP_MINIT_FUNCTION
+/* PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(syslog)
 {
@@ -95,7 +95,6 @@ PHP_MINIT_FUNCTION(syslog)
 
 	return SUCCESS;
 }
-/* }}} */
 
 PHP_RINIT_FUNCTION(syslog)
 {
@@ -155,7 +154,6 @@ PHP_FUNCTION(openlog)
 	php_openlog(BG(syslog_device), option, facility);
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Close connection to system logger */
 PHP_FUNCTION(closelog)
@@ -169,7 +167,6 @@ PHP_FUNCTION(closelog)
 	}
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Generate a system log message */
 PHP_FUNCTION(syslog)
@@ -186,6 +183,5 @@ PHP_FUNCTION(syslog)
 	php_syslog(priority, "%s", message);
 	RETURN_TRUE;
 }
-/* }}} */
 
 #endif

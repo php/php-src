@@ -18,7 +18,7 @@
 #ifndef PHP_IMAGE_H
 #define PHP_IMAGE_H
 
-/* {{{ enum image_filetype
+/* enum image_filetype
    This enum is used to have ext/standard/image.c and ext/exif/exif.c use
    the same constants for file types.
 */
@@ -46,7 +46,6 @@ typedef enum
 /* WHEN EXTENDING: PLEASE ALSO REGISTER IN image.c:PHP_MINIT_FUNCTION(imagetypes) */
   IMAGE_FILETYPE_COUNT
 } image_filetype;
-/* }}} */
 
 PHP_MINIT_FUNCTION(imagetypes);
 

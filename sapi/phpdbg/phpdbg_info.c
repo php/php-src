@@ -42,7 +42,7 @@ const phpdbg_command_t phpdbg_info_commands[] = {
 	PHPDBG_END_COMMAND
 };
 
-PHPDBG_INFO(break) /* {{{ */
+PHPDBG_INFO(break)
 {
 	phpdbg_print_breakpoints(PHPDBG_BREAK_FILE);
 	phpdbg_print_breakpoints(PHPDBG_BREAK_SYM);
@@ -55,9 +55,9 @@ PHPDBG_INFO(break) /* {{{ */
 	phpdbg_print_breakpoints(PHPDBG_BREAK_OPCODE);
 
 	return SUCCESS;
-} /* }}} */
+}
 
-PHPDBG_INFO(files) /* {{{ */
+PHPDBG_INFO(files)
 {
 	zend_string *fname;
 
@@ -77,9 +77,9 @@ PHPDBG_INFO(files) /* {{{ */
 	} phpdbg_end_try_access();
 
 	return SUCCESS;
-} /* }}} */
+}
 
-PHPDBG_INFO(error) /* {{{ */
+PHPDBG_INFO(error)
 {
 	if (PG(last_error_message)) {
 		phpdbg_try_access {
@@ -91,9 +91,9 @@ PHPDBG_INFO(error) /* {{{ */
 		phpdbg_notice("lasterror", "error=\"\"", "No error found!");
 	}
 	return SUCCESS;
-} /* }}} */
+}
 
-PHPDBG_INFO(constants) /* {{{ */
+PHPDBG_INFO(constants)
 {
 	HashTable consts;
 	zend_constant *data;
@@ -155,7 +155,7 @@ PHPDBG_INFO(constants) /* {{{ */
 	}
 
 	return SUCCESS;
-} /* }}} */
+}
 
 static int phpdbg_arm_auto_global(zval *ptrzv) {
 	zend_auto_global *auto_global = Z_PTR_P(ptrzv);
@@ -289,19 +289,19 @@ retry_switch:
 	zend_hash_destroy(&vars);
 
 	return SUCCESS;
-} /* }}} */
+}
 
-PHPDBG_INFO(vars) /* {{{ */
+PHPDBG_INFO(vars)
 {
 	return phpdbg_print_symbols(0);
 }
 
-PHPDBG_INFO(globals) /* {{{ */
+PHPDBG_INFO(globals)
 {
 	return phpdbg_print_symbols(1);
 }
 
-PHPDBG_INFO(literal) /* {{{ */
+PHPDBG_INFO(literal)
 {
 	/* literals are assumed to not be manipulated during executing of their op_array and as such async safe */
 	zend_bool in_executor = PHPDBG_G(in_execution) && EG(current_execute_data) && EG(current_execute_data)->func;
@@ -336,9 +336,9 @@ PHPDBG_INFO(literal) /* {{{ */
 	}
 
 	return SUCCESS;
-} /* }}} */
+}
 
-PHPDBG_INFO(memory) /* {{{ */
+PHPDBG_INFO(memory)
 {
 	size_t used, real, peak_used, peak_real;
 	zend_mm_heap *orig_heap = NULL;
@@ -369,17 +369,17 @@ PHPDBG_INFO(memory) /* {{{ */
 		phpdbg_error("inactive", "type=\"memory_manager\"", "Memory Manager Disabled!");
 	}
 	return SUCCESS;
-} /* }}} */
+}
 
-static inline void phpdbg_print_class_name(zend_class_entry *ce) /* {{{ */
+static inline void phpdbg_print_class_name(zend_class_entry *ce)
 {
 	const char *visibility = ce->type == ZEND_USER_CLASS ? "User" : "Internal";
 	const char *type = (ce->ce_flags & ZEND_ACC_INTERFACE) ? "Interface" : (ce->ce_flags & ZEND_ACC_ABSTRACT) ? "Abstract Class" : "Class";
 
 	phpdbg_writeln("class", "type=\"%s\" flags=\"%s\" name=\"%.*s\" methodcount=\"%d\"", "%s %s %.*s (%d)", visibility, type, (int) ZSTR_LEN(ce->name), ZSTR_VAL(ce->name), zend_hash_num_elements(&ce->function_table));
-} /* }}} */
+}
 
-PHPDBG_INFO(classes) /* {{{ */
+PHPDBG_INFO(classes)
 {
 	zend_class_entry *ce;
 	HashTable classes;
@@ -423,9 +423,9 @@ PHPDBG_INFO(classes) /* {{{ */
 	zend_hash_destroy(&classes);
 
 	return SUCCESS;
-} /* }}} */
+}
 
-PHPDBG_INFO(funcs) /* {{{ */
+PHPDBG_INFO(funcs)
 {
 	zend_function *zf;
 	HashTable functions;
@@ -459,4 +459,4 @@ PHPDBG_INFO(funcs) /* {{{ */
 	zend_hash_destroy(&functions);
 
 	return SUCCESS;
-} /* }}} */
+}

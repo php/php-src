@@ -79,4 +79,4 @@ PHP_FUNCTION(uniqid)
 	RETURN_STR(uniqid);
 }
 #endif
-/* }}} */
+

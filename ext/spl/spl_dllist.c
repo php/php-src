@@ -102,30 +102,27 @@ struct _spl_dllist_it {
 	int                    flags;
 };
 
-static inline spl_dllist_object *spl_dllist_from_obj(zend_object *obj) /* {{{ */ {
+static inline spl_dllist_object *spl_dllist_from_obj(zend_object *obj) {
 	return (spl_dllist_object*)((char*)(obj) - XtOffsetOf(spl_dllist_object, std));
 }
-/* }}} */
 
 #define Z_SPLDLLIST_P(zv)  spl_dllist_from_obj(Z_OBJ_P((zv)))
 
-/* {{{  spl_ptr_llist */
-static void spl_ptr_llist_zval_dtor(spl_ptr_llist_element *elem) { /* {{{ */
+/*  spl_ptr_llist */
+static void spl_ptr_llist_zval_dtor(spl_ptr_llist_element *elem) {
 	if (!Z_ISUNDEF(elem->data)) {
 		zval_ptr_dtor(&elem->data);
 		ZVAL_UNDEF(&elem->data);
 	}
 }
-/* }}} */
 
-static void spl_ptr_llist_zval_ctor(spl_ptr_llist_element *elem) { /* {{{ */
+static void spl_ptr_llist_zval_ctor(spl_ptr_llist_element *elem) {
 	if (Z_REFCOUNTED(elem->data)) {
 		Z_ADDREF(elem->data);
 	}
 }
-/* }}} */
 
-static spl_ptr_llist *spl_ptr_llist_init(spl_ptr_llist_ctor_func ctor, spl_ptr_llist_dtor_func dtor) /* {{{ */
+static spl_ptr_llist *spl_ptr_llist_init(spl_ptr_llist_ctor_func ctor, spl_ptr_llist_dtor_func dtor)
 {
 	spl_ptr_llist *llist = emalloc(sizeof(spl_ptr_llist));
 
@@ -137,15 +134,13 @@ static spl_ptr_llist *spl_ptr_llist_init(spl_ptr_llist_ctor_func ctor, spl_ptr_l
 
 	return llist;
 }
-/* }}} */
 
-static zend_long spl_ptr_llist_count(spl_ptr_llist *llist) /* {{{ */
+static zend_long spl_ptr_llist_count(spl_ptr_llist *llist)
 {
 	return (zend_long)llist->count;
 }
-/* }}} */
 
-static void spl_ptr_llist_destroy(spl_ptr_llist *llist) /* {{{ */
+static void spl_ptr_llist_destroy(spl_ptr_llist *llist)
 {
 	spl_ptr_llist_element   *current = llist->head, *next;
 	spl_ptr_llist_dtor_func  dtor    = llist->dtor;
@@ -161,9 +156,8 @@ static void spl_ptr_llist_destroy(spl_ptr_llist *llist) /* {{{ */
 
 	efree(llist);
 }
-/* }}} */
 
-static spl_ptr_llist_element *spl_ptr_llist_offset(spl_ptr_llist *llist, zend_long offset, int backward) /* {{{ */
+static spl_ptr_llist_element *spl_ptr_llist_offset(spl_ptr_llist *llist, zend_long offset, int backward)
 {
 
 	spl_ptr_llist_element *current;
@@ -186,9 +180,8 @@ static spl_ptr_llist_element *spl_ptr_llist_offset(spl_ptr_llist *llist, zend_lo
 
 	return current;
 }
-/* }}} */
 
-static void spl_ptr_llist_unshift(spl_ptr_llist *llist, zval *data) /* {{{ */
+static void spl_ptr_llist_unshift(spl_ptr_llist *llist, zval *data)
 {
 	spl_ptr_llist_element *elem = emalloc(sizeof(spl_ptr_llist_element));
 
@@ -210,9 +203,8 @@ static void spl_ptr_llist_unshift(spl_ptr_llist *llist, zval *data) /* {{{ */
 		llist->ctor(elem);
 	}
 }
-/* }}} */
 
-static void spl_ptr_llist_push(spl_ptr_llist *llist, zval *data) /* {{{ */
+static void spl_ptr_llist_push(spl_ptr_llist *llist, zval *data)
 {
 	spl_ptr_llist_element *elem = emalloc(sizeof(spl_ptr_llist_element));
 
@@ -234,9 +226,8 @@ static void spl_ptr_llist_push(spl_ptr_llist *llist, zval *data) /* {{{ */
 		llist->ctor(elem);
 	}
 }
-/* }}} */
 
-static void spl_ptr_llist_pop(spl_ptr_llist *llist, zval *ret) /* {{{ */
+static void spl_ptr_llist_pop(spl_ptr_llist *llist, zval *ret)
 {
 	spl_ptr_llist_element    *tail = llist->tail;
 
@@ -264,9 +255,8 @@ static void spl_ptr_llist_pop(spl_ptr_llist *llist, zval *ret) /* {{{ */
 
 	SPL_LLIST_DELREF(tail);
 }
-/* }}} */
 
-static zval *spl_ptr_llist_last(spl_ptr_llist *llist) /* {{{ */
+static zval *spl_ptr_llist_last(spl_ptr_llist *llist)
 {
 	spl_ptr_llist_element *tail = llist->tail;
 
@@ -276,9 +266,8 @@ static zval *spl_ptr_llist_last(spl_ptr_llist *llist) /* {{{ */
 		return &tail->data;
 	}
 }
-/* }}} */
 
-static zval *spl_ptr_llist_first(spl_ptr_llist *llist) /* {{{ */
+static zval *spl_ptr_llist_first(spl_ptr_llist *llist)
 {
 	spl_ptr_llist_element *head = llist->head;
 
@@ -288,9 +277,8 @@ static zval *spl_ptr_llist_first(spl_ptr_llist *llist) /* {{{ */
 		return &head->data;
 	}
 }
-/* }}} */
 
-static void spl_ptr_llist_shift(spl_ptr_llist *llist, zval *ret) /* {{{ */
+static void spl_ptr_llist_shift(spl_ptr_llist *llist, zval *ret)
 {
 	spl_ptr_llist_element   *head = llist->head;
 
@@ -317,9 +305,8 @@ static void spl_ptr_llist_shift(spl_ptr_llist *llist, zval *ret) /* {{{ */
 
 	SPL_LLIST_DELREF(head);
 }
-/* }}} */
 
-static void spl_ptr_llist_copy(spl_ptr_llist *from, spl_ptr_llist *to) /* {{{ */
+static void spl_ptr_llist_copy(spl_ptr_llist *from, spl_ptr_llist *to)
 {
 	spl_ptr_llist_element *current = from->head, *next;
 //???	spl_ptr_llist_ctor_func ctor = from->ctor;
@@ -338,11 +325,9 @@ static void spl_ptr_llist_copy(spl_ptr_llist *from, spl_ptr_llist *to) /* {{{ */
 	}
 
 }
-/* }}} */
 
-/* }}} */
 
-static void spl_dllist_object_free_storage(zend_object *object) /* {{{ */
+static void spl_dllist_object_free_storage(zend_object *object)
 {
 	spl_dllist_object *intern = spl_dllist_from_obj(object);
 	zval tmp;
@@ -357,11 +342,10 @@ static void spl_dllist_object_free_storage(zend_object *object) /* {{{ */
 	spl_ptr_llist_destroy(intern->llist);
 	SPL_LLIST_CHECK_DELREF(intern->traverse_pointer);
 }
-/* }}} */
 
 zend_object_iterator *spl_dllist_get_iterator(zend_class_entry *ce, zval *object, int by_ref);
 
-static zend_object *spl_dllist_object_new_ex(zend_class_entry *class_type, zend_object *orig, int clone_orig) /* {{{ */
+static zend_object *spl_dllist_object_new_ex(zend_class_entry *class_type, zend_object *orig, int clone_orig)
 {
 	spl_dllist_object *intern;
 	zend_class_entry  *parent = class_type;
@@ -443,15 +427,13 @@ static zend_object *spl_dllist_object_new_ex(zend_class_entry *class_type, zend_
 
 	return &intern->std;
 }
-/* }}} */
 
-static zend_object *spl_dllist_object_new(zend_class_entry *class_type) /* {{{ */
+static zend_object *spl_dllist_object_new(zend_class_entry *class_type)
 {
 	return spl_dllist_object_new_ex(class_type, NULL, 0);
 }
-/* }}} */
 
-static zend_object *spl_dllist_object_clone(zend_object *old_object) /* {{{ */
+static zend_object *spl_dllist_object_clone(zend_object *old_object)
 {
 	zend_object *new_object = spl_dllist_object_new_ex(old_object->ce, old_object, 1);
 
@@ -459,9 +441,8 @@ static zend_object *spl_dllist_object_clone(zend_object *old_object) /* {{{ */
 
 	return new_object;
 }
-/* }}} */
 
-static int spl_dllist_object_count_elements(zend_object *object, zend_long *count) /* {{{ */
+static int spl_dllist_object_count_elements(zend_object *object, zend_long *count)
 {
 	spl_dllist_object *intern = spl_dllist_from_obj(object);
 
@@ -480,9 +461,8 @@ static int spl_dllist_object_count_elements(zend_object *object, zend_long *coun
 	*count = spl_ptr_llist_count(intern->llist);
 	return SUCCESS;
 }
-/* }}} */
 
-static inline HashTable* spl_dllist_object_get_debug_info(zend_object *obj) /* {{{{ */
+static inline HashTable* spl_dllist_object_get_debug_info(zend_object *obj) /*{ */
 {
 	spl_dllist_object     *intern  = spl_dllist_from_obj(obj);
 	spl_ptr_llist_element *current = intern->llist->head, *next;
@@ -523,9 +503,8 @@ static inline HashTable* spl_dllist_object_get_debug_info(zend_object *obj) /* {
 
 	return debug_info;
 }
-/* }}}} */
 
-static HashTable *spl_dllist_object_get_gc(zend_object *obj, zval **gc_data, int *gc_data_count) /* {{{ */
+static HashTable *spl_dllist_object_get_gc(zend_object *obj, zval **gc_data, int *gc_data_count)
 {
 	spl_dllist_object *intern = spl_dllist_from_obj(obj);
 	zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
@@ -539,7 +518,6 @@ static HashTable *spl_dllist_object_get_gc(zend_object *obj, zval **gc_data, int
 	zend_get_gc_buffer_use(gc_buffer, gc_data, gc_data_count);
 	return zend_std_get_properties(obj);
 }
-/* }}} */
 
 /* Push $value on the SplDoublyLinkedList */
 PHP_METHOD(SplDoublyLinkedList, push)
@@ -554,7 +532,6 @@ PHP_METHOD(SplDoublyLinkedList, push)
 	intern = Z_SPLDLLIST_P(ZEND_THIS);
 	spl_ptr_llist_push(intern->llist, value);
 }
-/* }}} */
 
 /* Unshift $value on the SplDoublyLinkedList */
 PHP_METHOD(SplDoublyLinkedList, unshift)
@@ -569,7 +546,6 @@ PHP_METHOD(SplDoublyLinkedList, unshift)
 	intern = Z_SPLDLLIST_P(ZEND_THIS);
 	spl_ptr_llist_unshift(intern->llist, value);
 }
-/* }}} */
 
 /* Pop an element out of the SplDoublyLinkedList */
 PHP_METHOD(SplDoublyLinkedList, pop)
@@ -588,7 +564,6 @@ PHP_METHOD(SplDoublyLinkedList, pop)
 		RETURN_THROWS();
 	}
 }
-/* }}} */
 
 /* Shift an element out of the SplDoublyLinkedList */
 PHP_METHOD(SplDoublyLinkedList, shift)
@@ -607,7 +582,6 @@ PHP_METHOD(SplDoublyLinkedList, shift)
 		RETURN_THROWS();
 	}
 }
-/* }}} */
 
 /* Peek at the top element of the SplDoublyLinkedList */
 PHP_METHOD(SplDoublyLinkedList, top)
@@ -629,7 +603,6 @@ PHP_METHOD(SplDoublyLinkedList, top)
 
 	ZVAL_COPY_DEREF(return_value, value);
 }
-/* }}} */
 
 /* Peek at the bottom element of the SplDoublyLinkedList */
 PHP_METHOD(SplDoublyLinkedList, bottom)
@@ -651,7 +624,6 @@ PHP_METHOD(SplDoublyLinkedList, bottom)
 
 	ZVAL_COPY_DEREF(return_value, value);
 }
-/* }}} */
 
 /* Return the number of elements in the datastructure. */
 PHP_METHOD(SplDoublyLinkedList, count)
@@ -666,7 +638,6 @@ PHP_METHOD(SplDoublyLinkedList, count)
 	count = spl_ptr_llist_count(intern->llist);
 	RETURN_LONG(count);
 }
-/* }}} */
 
 /* Return true if the SplDoublyLinkedList is empty. */
 PHP_METHOD(SplDoublyLinkedList, isEmpty)
@@ -680,7 +651,6 @@ PHP_METHOD(SplDoublyLinkedList, isEmpty)
 	spl_dllist_object_count_elements(Z_OBJ_P(ZEND_THIS), &count);
 	RETURN_BOOL(count == 0);
 }
-/* }}} */
 
 /* Set the mode of iteration */
 PHP_METHOD(SplDoublyLinkedList, setIteratorMode)
@@ -704,7 +674,6 @@ PHP_METHOD(SplDoublyLinkedList, setIteratorMode)
 
 	RETURN_LONG(intern->flags);
 }
-/* }}} */
 
 /* Return the mode of iteration */
 PHP_METHOD(SplDoublyLinkedList, getIteratorMode)
@@ -719,7 +688,6 @@ PHP_METHOD(SplDoublyLinkedList, getIteratorMode)
 
 	RETURN_LONG(intern->flags);
 }
-/* }}} */
 
 /* Returns whether the requested $index exists. */
 PHP_METHOD(SplDoublyLinkedList, offsetExists)
@@ -736,7 +704,7 @@ PHP_METHOD(SplDoublyLinkedList, offsetExists)
 	index  = spl_offset_convert_to_long(zindex);
 
 	RETURN_BOOL(index >= 0 && index < intern->llist->count);
-} /* }}} */
+}
 
 /* Returns the value at the specified $index. */
 PHP_METHOD(SplDoublyLinkedList, offsetGet)
@@ -767,7 +735,7 @@ PHP_METHOD(SplDoublyLinkedList, offsetGet)
 	} else {
 		zend_throw_exception(spl_ce_OutOfRangeException, "Offset invalid", 0);
 	}
-} /* }}} */
+}
 
 /* Sets the value at the specified $index to $newval. */
 PHP_METHOD(SplDoublyLinkedList, offsetSet)
@@ -819,7 +787,7 @@ PHP_METHOD(SplDoublyLinkedList, offsetSet)
 			RETURN_THROWS();
 		}
 	}
-} /* }}} */
+}
 
 /* Unsets the value at the specified $index. */
 PHP_METHOD(SplDoublyLinkedList, offsetUnset)
@@ -883,9 +851,9 @@ PHP_METHOD(SplDoublyLinkedList, offsetUnset)
 		zend_throw_exception(spl_ce_OutOfRangeException, "Offset invalid", 0);
 		RETURN_THROWS();
 	}
-} /* }}} */
+}
 
-static void spl_dllist_it_dtor(zend_object_iterator *iter) /* {{{ */
+static void spl_dllist_it_dtor(zend_object_iterator *iter)
 {
 	spl_dllist_it *iterator = (spl_dllist_it *)iter;
 
@@ -894,9 +862,8 @@ static void spl_dllist_it_dtor(zend_object_iterator *iter) /* {{{ */
 	zend_user_it_invalidate_current(iter);
 	zval_ptr_dtor(&iterator->intern.it.data);
 }
-/* }}} */
 
-static void spl_dllist_it_helper_rewind(spl_ptr_llist_element **traverse_pointer_ptr, int *traverse_position_ptr, spl_ptr_llist *llist, int flags) /* {{{ */
+static void spl_dllist_it_helper_rewind(spl_ptr_llist_element **traverse_pointer_ptr, int *traverse_position_ptr, spl_ptr_llist *llist, int flags)
 {
 	SPL_LLIST_CHECK_DELREF(*traverse_pointer_ptr);
 
@@ -910,9 +877,8 @@ static void spl_dllist_it_helper_rewind(spl_ptr_llist_element **traverse_pointer
 
 	SPL_LLIST_CHECK_ADDREF(*traverse_pointer_ptr);
 }
-/* }}} */
 
-static void spl_dllist_it_helper_move_forward(spl_ptr_llist_element **traverse_pointer_ptr, int *traverse_position_ptr, spl_ptr_llist *llist, int flags) /* {{{ */
+static void spl_dllist_it_helper_move_forward(spl_ptr_llist_element **traverse_pointer_ptr, int *traverse_position_ptr, spl_ptr_llist *llist, int flags)
 {
 	if (*traverse_pointer_ptr) {
 		spl_ptr_llist_element *old = *traverse_pointer_ptr;
@@ -944,9 +910,8 @@ static void spl_dllist_it_helper_move_forward(spl_ptr_llist_element **traverse_p
 		SPL_LLIST_CHECK_ADDREF(*traverse_pointer_ptr);
 	}
 }
-/* }}} */
 
-static void spl_dllist_it_rewind(zend_object_iterator *iter) /* {{{ */
+static void spl_dllist_it_rewind(zend_object_iterator *iter)
 {
 	spl_dllist_it *iterator = (spl_dllist_it *)iter;
 	spl_dllist_object *object = Z_SPLDLLIST_P(&iter->data);
@@ -954,18 +919,16 @@ static void spl_dllist_it_rewind(zend_object_iterator *iter) /* {{{ */
 
 	spl_dllist_it_helper_rewind(&iterator->traverse_pointer, &iterator->traverse_position, llist, object->flags);
 }
-/* }}} */
 
-static int spl_dllist_it_valid(zend_object_iterator *iter) /* {{{ */
+static int spl_dllist_it_valid(zend_object_iterator *iter)
 {
 	spl_dllist_it         *iterator = (spl_dllist_it *)iter;
 	spl_ptr_llist_element *element  = iterator->traverse_pointer;
 
 	return (element != NULL ? SUCCESS : FAILURE);
 }
-/* }}} */
 
-static zval *spl_dllist_it_get_current_data(zend_object_iterator *iter) /* {{{ */
+static zval *spl_dllist_it_get_current_data(zend_object_iterator *iter)
 {
 	spl_dllist_it         *iterator = (spl_dllist_it *)iter;
 	spl_ptr_llist_element *element  = iterator->traverse_pointer;
@@ -976,17 +939,15 @@ static zval *spl_dllist_it_get_current_data(zend_object_iterator *iter) /* {{{ *
 
 	return &element->data;
 }
-/* }}} */
 
-static void spl_dllist_it_get_current_key(zend_object_iterator *iter, zval *key) /* {{{ */
+static void spl_dllist_it_get_current_key(zend_object_iterator *iter, zval *key)
 {
 	spl_dllist_it *iterator = (spl_dllist_it *)iter;
 
 	ZVAL_LONG(key, iterator->traverse_position);
 }
-/* }}} */
 
-static void spl_dllist_it_move_forward(zend_object_iterator *iter) /* {{{ */
+static void spl_dllist_it_move_forward(zend_object_iterator *iter)
 {
 	spl_dllist_it *iterator = (spl_dllist_it *)iter;
 	spl_dllist_object *object = Z_SPLDLLIST_P(&iter->data);
@@ -995,7 +956,6 @@ static void spl_dllist_it_move_forward(zend_object_iterator *iter) /* {{{ */
 
 	spl_dllist_it_helper_move_forward(&iterator->traverse_pointer, &iterator->traverse_position, object->llist, object->flags);
 }
-/* }}} */
 
 /* Return current array key */
 PHP_METHOD(SplDoublyLinkedList, key)
@@ -1008,7 +968,6 @@ PHP_METHOD(SplDoublyLinkedList, key)
 
 	RETURN_LONG(intern->traverse_position);
 }
-/* }}} */
 
 /* Move to next entry */
 PHP_METHOD(SplDoublyLinkedList, prev)
@@ -1021,7 +980,6 @@ PHP_METHOD(SplDoublyLinkedList, prev)
 
 	spl_dllist_it_helper_move_forward(&intern->traverse_pointer, &intern->traverse_position, intern->llist, intern->flags ^ SPL_DLLIST_IT_LIFO);
 }
-/* }}} */
 
 /* Move to next entry */
 PHP_METHOD(SplDoublyLinkedList, next)
@@ -1034,7 +992,6 @@ PHP_METHOD(SplDoublyLinkedList, next)
 
 	spl_dllist_it_helper_move_forward(&intern->traverse_pointer, &intern->traverse_position, intern->llist, intern->flags);
 }
-/* }}} */
 
 /* Check whether the datastructure contains more entries */
 PHP_METHOD(SplDoublyLinkedList, valid)
@@ -1047,7 +1004,6 @@ PHP_METHOD(SplDoublyLinkedList, valid)
 
 	RETURN_BOOL(intern->traverse_pointer != NULL);
 }
-/* }}} */
 
 /* Rewind the datastructure back to the start */
 PHP_METHOD(SplDoublyLinkedList, rewind)
@@ -1060,7 +1016,6 @@ PHP_METHOD(SplDoublyLinkedList, rewind)
 
 	spl_dllist_it_helper_rewind(&intern->traverse_pointer, &intern->traverse_position, intern->llist, intern->flags);
 }
-/* }}} */
 
 /* Return current datastructure entry */
 PHP_METHOD(SplDoublyLinkedList, current)
@@ -1080,7 +1035,6 @@ PHP_METHOD(SplDoublyLinkedList, current)
 		ZVAL_COPY_DEREF(return_value, value);
 	}
 }
-/* }}} */
 
 /* Serializes storage */
 PHP_METHOD(SplDoublyLinkedList, serialize)
@@ -1117,7 +1071,7 @@ PHP_METHOD(SplDoublyLinkedList, serialize)
 	PHP_VAR_SERIALIZE_DESTROY(var_hash);
 
 	RETURN_NEW_STR(buf.s);
-} /* }}} */
+}
 
 /* Unserializes storage */
 PHP_METHOD(SplDoublyLinkedList, unserialize)
@@ -1178,7 +1132,7 @@ error:
 	zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Error at offset %zd of %zd bytes", ((char*)p - buf), buf_len);
 	RETURN_THROWS();
 
-} /* }}} */
+}
 
 PHP_METHOD(SplDoublyLinkedList, __serialize)
 {
@@ -1209,7 +1163,7 @@ PHP_METHOD(SplDoublyLinkedList, __serialize)
 	ZVAL_ARR(&tmp, zend_std_get_properties(&intern->std));
 	Z_TRY_ADDREF(tmp);
 	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &tmp);
-} /* }}} */
+}
 
 PHP_METHOD(SplDoublyLinkedList, __unserialize) {
 	spl_dllist_object *intern = Z_SPLDLLIST_P(ZEND_THIS);
@@ -1238,7 +1192,7 @@ PHP_METHOD(SplDoublyLinkedList, __unserialize) {
 	} ZEND_HASH_FOREACH_END();
 
 	object_properties_load(&intern->std, Z_ARRVAL_P(members_zv));
-} /* }}} */
+}
 
 /* Inserts a new entry before the specified $index consisting of $newval. */
 PHP_METHOD(SplDoublyLinkedList, add)
@@ -1291,7 +1245,7 @@ PHP_METHOD(SplDoublyLinkedList, add)
 			intern->llist->ctor(elem);
 		}
 	}
-} /* }}} */
+}
 
 PHP_METHOD(SplDoublyLinkedList, __debugInfo)
 {
@@ -1300,9 +1254,9 @@ PHP_METHOD(SplDoublyLinkedList, __debugInfo)
 	}
 
 	RETURN_ARR(spl_dllist_object_get_debug_info(Z_OBJ_P(ZEND_THIS)));
-} /* }}} */
+}
 
-/* {{{ iterator handler table */
+/* iterator handler table */
 static const zend_object_iterator_funcs spl_dllist_it_funcs = {
 	spl_dllist_it_dtor,
 	spl_dllist_it_valid,
@@ -1311,9 +1265,9 @@ static const zend_object_iterator_funcs spl_dllist_it_funcs = {
 	spl_dllist_it_move_forward,
 	spl_dllist_it_rewind,
 	NULL
-}; /* }}} */
+};
 
-zend_object_iterator *spl_dllist_get_iterator(zend_class_entry *ce, zval *object, int by_ref) /* {{{ */
+zend_object_iterator *spl_dllist_get_iterator(zend_class_entry *ce, zval *object, int by_ref)
 {
 	spl_dllist_it *iterator;
 	spl_dllist_object *dllist_object = Z_SPLDLLIST_P(object);
@@ -1340,9 +1294,8 @@ zend_object_iterator *spl_dllist_get_iterator(zend_class_entry *ce, zval *object
 
 	return &iterator->intern.it;
 }
-/* }}} */
 
-PHP_MINIT_FUNCTION(spl_dllist) /* {{{ */
+PHP_MINIT_FUNCTION(spl_dllist)
 {
 	REGISTER_SPL_STD_CLASS_EX(SplDoublyLinkedList, spl_dllist_object_new, class_SplDoublyLinkedList_methods);
 	memcpy(&spl_handler_SplDoublyLinkedList, &std_object_handlers, sizeof(zend_object_handlers));
@@ -1374,4 +1327,4 @@ PHP_MINIT_FUNCTION(spl_dllist) /* {{{ */
 
 	return SUCCESS;
 }
-/* }}} */
+

@@ -67,7 +67,6 @@ IC_METHOD(chr) {
 	buffer[buffer_len] = 0;
 	RETURN_STRINGL(buffer, buffer_len);
 }
-/* }}} */
 
 /* Converts a UTf-8 encoded codepoint to its integer U32 value
  * Acts as an identity function when passed a valid integer codepoint
@@ -86,7 +85,6 @@ IC_METHOD(ord) {
 
 	RETURN_LONG(cp);
 }
-/* }}} */
 
 IC_METHOD(hasBinaryProperty) {
 	UChar32 cp;
@@ -103,7 +101,6 @@ IC_METHOD(hasBinaryProperty) {
 
 	RETURN_BOOL(u_hasBinaryProperty(cp, (UProperty)prop));
 }
-/* }}} */
 
 IC_METHOD(getIntPropertyValue) {
 	UChar32 cp;
@@ -120,7 +117,6 @@ IC_METHOD(getIntPropertyValue) {
 
 	RETURN_LONG(u_getIntPropertyValue(cp, (UProperty)prop));
 }
-/* }}} */
 
 IC_METHOD(getIntPropertyMinValue) {
 	zend_long prop;
@@ -131,7 +127,6 @@ IC_METHOD(getIntPropertyMinValue) {
 
 	RETURN_LONG(u_getIntPropertyMinValue((UProperty)prop));
 }
-/* }}} */
 
 IC_METHOD(getIntPropertyMaxValue) {
 	zend_long prop;
@@ -142,7 +137,6 @@ IC_METHOD(getIntPropertyMaxValue) {
 
 	RETURN_LONG(u_getIntPropertyMaxValue((UProperty)prop));
 }
-/* }}} */
 
 IC_METHOD(getNumericValue) {
 	UChar32 cp;
@@ -158,7 +152,6 @@ IC_METHOD(getNumericValue) {
 
 	RETURN_DOUBLE(u_getNumericValue(cp));
 }
-/* }}} */
 
 typedef struct _enumCharType_data {
 	zend_fcall_info fci;
@@ -199,7 +192,6 @@ IC_METHOD(enumCharTypes) {
 	}
 	u_enumCharTypes((UCharEnumTypeRange*)enumCharType_callback, &context);
 }
-/* }}} */
 
 IC_METHOD(getBlockCode) {
 	UChar32 cp;
@@ -215,7 +207,6 @@ IC_METHOD(getBlockCode) {
 
 	RETURN_LONG(ublock_getCode(cp));
 }
-/* }}} */
 
 IC_METHOD(charName) {
 	UChar32 cp;
@@ -243,7 +234,6 @@ IC_METHOD(charName) {
 	}
 	RETURN_NEW_STR(buffer);
 }
-/* }}} */
 
 IC_METHOD(charFromName) {
 	char *name;
@@ -260,9 +250,8 @@ IC_METHOD(charFromName) {
 	INTL_CHECK_STATUS_OR_NULL(error, NULL);
 	RETURN_LONG(ret);
 }
-/* }}} */
 
-/* {{{ void void IntlChar::enumCharNames(int|string $start, int|string $limit, callable $callback, int $nameChoice = IntlChar::UNICODE_CHAR_NAME) */
+/* void void IntlChar::enumCharNames(int|string $start, int|string $limit, callable $callback, int $nameChoice = IntlChar::UNICODE_CHAR_NAME) */
 typedef struct _enumCharNames_data {
 	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache;
@@ -311,7 +300,6 @@ IC_METHOD(enumCharNames) {
 	u_enumCharNames(start, limit, (UEnumCharNamesFn*)enumCharNames_callback, &context, nameChoice, &error);
 	INTL_CHECK_STATUS(error, NULL);
 }
-/* }}} */
 
 IC_METHOD(getPropertyName) {
 	zend_long property;
@@ -331,7 +319,6 @@ IC_METHOD(getPropertyName) {
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 IC_METHOD(getPropertyEnum) {
 	char *alias;
@@ -343,7 +330,6 @@ IC_METHOD(getPropertyEnum) {
 
 	RETURN_LONG(u_getPropertyEnum(alias));
 }
-/* }}} */
 
 IC_METHOD(getPropertyValueName) {
 	zend_long property, value, nameChoice = U_LONG_PROPERTY_NAME;
@@ -362,7 +348,6 @@ IC_METHOD(getPropertyValueName) {
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 IC_METHOD(getPropertyValueEnum) {
 	zend_long property;
@@ -375,7 +360,6 @@ IC_METHOD(getPropertyValueEnum) {
 
 	RETURN_LONG(u_getPropertyValueEnum((UProperty)property, name));
 }
-/* }}} */
 
 IC_METHOD(foldCase) {
 	UChar32 cp, ret;
@@ -401,7 +385,6 @@ IC_METHOD(foldCase) {
 		RETURN_LONG(ret);
 	}
 }
-/* }}} */
 
 IC_METHOD(digit) {
 	UChar32 cp;
@@ -425,7 +408,6 @@ IC_METHOD(digit) {
 	}
 	RETURN_LONG(ret);
 }
-/* }}} */
 
 IC_METHOD(forDigit) {
 	zend_long digit, radix = 10;
@@ -436,7 +418,6 @@ IC_METHOD(forDigit) {
 
 	RETURN_LONG(u_forDigit(digit, radix));
 }
-/* }}} */
 
 IC_METHOD(charAge) {
 	UChar32 cp;
@@ -458,7 +439,6 @@ IC_METHOD(charAge) {
 		add_next_index_long(return_value, version[i]);
 	}
 }
-/* }}} */
 
 IC_METHOD(getUnicodeVersion) {
 	UVersionInfo version;
@@ -474,7 +454,6 @@ IC_METHOD(getUnicodeVersion) {
 		add_next_index_long(return_value, version[i]);
 	}
 }
-/* }}} */
 
 IC_METHOD(getFC_NFKC_Closure) {
 	UChar32 cp;
@@ -510,7 +489,6 @@ IC_METHOD(getFC_NFKC_Closure) {
 	efree(closure);
 	RETVAL_NEW_STR(u8str);
 }
-/* }}} */
 
 #define IC_BOOL_METHOD_CHAR(name) \
 IC_METHOD(name) { \
@@ -548,7 +526,6 @@ IC_BOOL_METHOD_CHAR(isIDIgnorable)
 IC_BOOL_METHOD_CHAR(isJavaIDStart)
 IC_BOOL_METHOD_CHAR(isJavaIDPart)
 #undef IC_BOOL_METHOD_CHAR
-/* }}} */
 
 #define IC_INT_METHOD_CHAR(name) \
 IC_METHOD(name) { \
@@ -562,7 +539,6 @@ IC_INT_METHOD_CHAR(charType)
 IC_INT_METHOD_CHAR(getCombiningClass)
 IC_INT_METHOD_CHAR(charDigitValue)
 #undef IC_INT_METHOD_CHAR
-/* }}} */
 
 /* Returns a utf-8 character if codepoint was passed as a utf-8 sequence
  * Returns an int otherwise
@@ -591,7 +567,6 @@ IC_CHAR_METHOD_CHAR(totitle)
 IC_CHAR_METHOD_CHAR(getBidiPairedBracket)
 #endif /* ICU >= 52 */
 #undef IC_CHAR_METHOD_CHAR
-/* }}} */
 
 int php_uchar_minit(INIT_FUNC_ARGS) {
 	zend_class_entry tmp, *ce;

@@ -52,7 +52,7 @@ static int kfd = 0;
 /*
  * Return the module configuration
  */
-struct fpm_event_module_s *fpm_event_kqueue_module() /* {{{ */
+struct fpm_event_module_s *fpm_event_kqueue_module()
 {
 #if HAVE_KQUEUE
 	return &kqueue_module;
@@ -60,14 +60,13 @@ struct fpm_event_module_s *fpm_event_kqueue_module() /* {{{ */
 	return NULL;
 #endif /* HAVE_KQUEUE */
 }
-/* }}} */
 
 #if HAVE_KQUEUE
 
 /*
  * init kqueue and stuff
  */
-static int fpm_event_kqueue_init(int max) /* {{{ */
+static int fpm_event_kqueue_init(int max)
 {
 	if (max < 1) {
 		return 0;
@@ -91,12 +90,11 @@ static int fpm_event_kqueue_init(int max) /* {{{ */
 
 	return 0;
 }
-/* }}} */
 
 /*
  * release kqueue stuff
  */
-static int fpm_event_kqueue_clean() /* {{{ */
+static int fpm_event_kqueue_clean()
 {
 	if (kevents) {
 		free(kevents);
@@ -107,12 +105,11 @@ static int fpm_event_kqueue_clean() /* {{{ */
 
 	return 0;
 }
-/* }}} */
 
 /*
  * wait for events or timeout
  */
-static int fpm_event_kqueue_wait(struct fpm_event_queue_s *queue, unsigned long int timeout) /* {{{ */
+static int fpm_event_kqueue_wait(struct fpm_event_queue_s *queue, unsigned long int timeout)
 {
 	struct timespec t;
 	int ret, i;
@@ -149,12 +146,11 @@ static int fpm_event_kqueue_wait(struct fpm_event_queue_s *queue, unsigned long 
 
 	return ret;
 }
-/* }}} */
 
 /*
  * Add a FD to to kevent queue
  */
-static int fpm_event_kqueue_add(struct fpm_event_s *ev) /* {{{ */
+static int fpm_event_kqueue_add(struct fpm_event_s *ev)
 {
 	struct kevent k;
 	int flags = EV_ADD;
@@ -174,12 +170,11 @@ static int fpm_event_kqueue_add(struct fpm_event_s *ev) /* {{{ */
 	ev->index = ev->fd;
 	return 0;
 }
-/* }}} */
 
 /*
  * Remove a FD from the kevent queue
  */
-static int fpm_event_kqueue_remove(struct fpm_event_s *ev) /* {{{ */
+static int fpm_event_kqueue_remove(struct fpm_event_s *ev)
 {
 	struct kevent k;
 	int flags = EV_DELETE;
@@ -199,6 +194,5 @@ static int fpm_event_kqueue_remove(struct fpm_event_s *ev) /* {{{ */
 	ev->index = -1;
 	return 0;
 }
-/* }}} */
 
 #endif /* HAVE_KQUEUE */

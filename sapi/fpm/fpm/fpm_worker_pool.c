@@ -26,7 +26,7 @@ void fpm_worker_pool_free_limit_extensions(char **limit_extensions) {
 	free(limit_extensions);
 }
 
-void fpm_worker_pool_free(struct fpm_worker_pool_s *wp) /* {{{ */
+void fpm_worker_pool_free(struct fpm_worker_pool_s *wp)
 {
 	if (wp->config) {
 		free(wp->config);
@@ -43,9 +43,8 @@ void fpm_worker_pool_free(struct fpm_worker_pool_s *wp) /* {{{ */
 	fpm_unix_free_socket_premissions(wp);
 	free(wp);
 }
-/* }}} */
 
-static void fpm_worker_pool_cleanup(int which, void *arg) /* {{{ */
+static void fpm_worker_pool_cleanup(int which, void *arg)
 {
 	struct fpm_worker_pool_s *wp, *wp_next;
 
@@ -60,9 +59,8 @@ static void fpm_worker_pool_cleanup(int which, void *arg) /* {{{ */
 	}
 	fpm_worker_all_pools = NULL;
 }
-/* }}} */
 
-struct fpm_worker_pool_s *fpm_worker_pool_alloc() /* {{{ */
+struct fpm_worker_pool_s *fpm_worker_pool_alloc()
 {
 	struct fpm_worker_pool_s *ret;
 
@@ -77,13 +75,12 @@ struct fpm_worker_pool_s *fpm_worker_pool_alloc() /* {{{ */
 	ret->log_fd = -1;
 	return ret;
 }
-/* }}} */
 
-int fpm_worker_pool_init_main() /* {{{ */
+int fpm_worker_pool_init_main()
 {
 	if (0 > fpm_cleanup_add(FPM_CLEANUP_ALL, fpm_worker_pool_cleanup, 0)) {
 		return -1;
 	}
 	return 0;
 }
-/* }}} */
+

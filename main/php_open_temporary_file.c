@@ -47,7 +47,7 @@
 #define P_tmpdir ""
 #endif
 
-/* {{{ php_do_open_temporary_file */
+/* php_do_open_temporary_file */
 
 /* Loosely based on a tempnam() implementation by UCLA */
 
@@ -196,7 +196,6 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, zend_st
 	efree(new_state.cwd);
 	return fd;
 }
-/* }}} */
 
 /*
  *  Determine where to place temporary files.
@@ -276,7 +275,7 @@ PHPAPI const char* php_get_temporary_directory(void)
 #endif
 }
 
-/* {{{ php_open_temporary_file
+/* php_open_temporary_file
  *
  * Unlike tempnam(), the supplied dir argument takes precedence
  * over the TMPDIR environment variable
@@ -339,4 +338,4 @@ PHPAPI FILE *php_open_temporary_file(const char *dir, const char *pfx, zend_stri
 
 	return fp;
 }
-/* }}} */
+

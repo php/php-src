@@ -145,7 +145,7 @@ typedef struct _php_userstream_data php_userstream_data_t;
 #define USERSTREAM_TRUNCATE	"stream_truncate"
 #define USERSTREAM_METADATA	"stream_metadata"
 
-/* {{{ class should have methods like these:
+/* class should have methods like these:
 
 	function stream_open($path, $mode, $options, &$opened_path)
 	{
@@ -274,8 +274,7 @@ typedef struct _php_userstream_data php_userstream_data_t;
 	{
 		return true / false;
 	}
-
-	}}} **/
+*/
 
 static void user_stream_create_object(struct php_user_stream_wrapper *uwrap, php_stream_context *context, zval *object)
 {
@@ -528,7 +527,6 @@ PHP_FUNCTION(stream_wrapper_register)
 	zend_list_delete(rsrc);
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* Unregister a wrapper for the life of the current request. */
 PHP_FUNCTION(stream_wrapper_unregister)
@@ -547,7 +545,6 @@ PHP_FUNCTION(stream_wrapper_unregister)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Restore the original protocol handler, overriding if necessary */
 PHP_FUNCTION(stream_wrapper_restore)
@@ -581,7 +578,6 @@ PHP_FUNCTION(stream_wrapper_restore)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 static ssize_t php_userstreamop_write(php_stream *stream, const char *buf, size_t count)
 {

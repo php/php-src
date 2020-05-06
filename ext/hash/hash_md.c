@@ -59,7 +59,7 @@ static const unsigned char PADDING[64] =
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
-/* {{{ Encode
+/* Encode
    Encodes input (uint32_t) into output (unsigned char). Assumes len is
    a multiple of 4.
  */
@@ -74,9 +74,8 @@ static void Encode(unsigned char *output, uint32_t *input, unsigned int len)
 		output[j + 3] = (unsigned char) ((input[i] >> 24) & 0xff);
 	}
 }
-/* }}} */
 
-/* {{{ Decode
+/* Decode
    Decodes input (unsigned char) into output (uint32_t). Assumes len is
    a multiple of 4.
  */
@@ -88,7 +87,6 @@ static void Decode(uint32_t *output, const unsigned char *input, unsigned int le
 		output[i] = ((uint32_t) input[j]) | (((uint32_t) input[j + 1]) << 8) |
 			(((uint32_t) input[j + 2]) << 16) | (((uint32_t) input[j + 3]) << 24);
 }
-/* }}} */
 
 /* MD4 */
 
@@ -168,7 +166,7 @@ static void MD4Transform(uint32_t state[4], const unsigned char block[64])
 	state[3] += d;
 }
 
-/* {{{ PHP_MD4Init
+/* PHP_MD4Init
  * MD4 initialization. Begins an MD4 operation, writing a new context.
  */
 PHP_HASH_API void PHP_MD4Init(PHP_MD4_CTX * context)
@@ -181,9 +179,8 @@ PHP_HASH_API void PHP_MD4Init(PHP_MD4_CTX * context)
 	context->state[2] = 0x98badcfe;
 	context->state[3] = 0x10325476;
 }
-/* }}} */
 
-/* {{{ PHP_MD4Update
+/* PHP_MD4Update
    MD4 block update operation. Continues an MD4 message-digest
    operation, processing another message block, and updating the
    context.
@@ -221,9 +218,8 @@ PHP_HASH_API void PHP_MD4Update(PHP_MD4_CTX * context, const unsigned char *inpu
 	/* Buffer remaining input */
 	memcpy((unsigned char*) & context->buffer[index], (unsigned char*) & input[i], inputLen - i);
 }
-/* }}} */
 
-/* {{{ PHP_MD4Final
+/* PHP_MD4Final
    MD4 finalization. Ends an MD4 message-digest operation, writing the
    the message digest and zeroizing the context.
  */
@@ -251,7 +247,6 @@ PHP_HASH_API void PHP_MD4Final(unsigned char digest[16], PHP_MD4_CTX * context)
 	 */
 	ZEND_SECURE_ZERO((unsigned char*) context, sizeof(*context));
 }
-/* }}} */
 
 /* MD2 */
 

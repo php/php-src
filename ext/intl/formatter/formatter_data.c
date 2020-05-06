@@ -18,7 +18,7 @@
 
 #include "formatter_data.h"
 
-/* {{{ void formatter_data_init( formatter_data* nf_data )
+/* void formatter_data_init( formatter_data* nf_data )
  * Initialize internals of formatter_data.
  */
 void formatter_data_init( formatter_data* nf_data )
@@ -29,9 +29,8 @@ void formatter_data_init( formatter_data* nf_data )
 	nf_data->unum                = NULL;
 	intl_error_reset( &nf_data->error );
 }
-/* }}} */
 
-/* {{{ void formatter_data_free( formatter_data* nf_data )
+/* void formatter_data_free( formatter_data* nf_data )
  * Clean up mem allocted by internals of formatter_data
  */
 void formatter_data_free( formatter_data* nf_data )
@@ -45,9 +44,8 @@ void formatter_data_free( formatter_data* nf_data )
 	nf_data->unum = NULL;
 	intl_error_reset( &nf_data->error );
 }
-/* }}} */
 
-/* {{{ formatter_data* formatter_data_create()
+/* formatter_data* formatter_data_create()
  * Alloc mem for formatter_data and initialize it with default values.
  */
 formatter_data* formatter_data_create( void )
@@ -58,4 +56,4 @@ formatter_data* formatter_data_create( void )
 
 	return nf_data;
 }
-/* }}} */
+

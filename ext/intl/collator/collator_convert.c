@@ -31,7 +31,7 @@
 			return retval;                       \
 	}
 
-/* {{{ collator_convert_hash_item_from_utf8_to_utf16 */
+/* collator_convert_hash_item_from_utf8_to_utf16 */
 static void collator_convert_hash_item_from_utf8_to_utf16(
 	HashTable* hash, zval *hashData, zend_string *hashKey, zend_ulong hashIndex,
 	UErrorCode* status )
@@ -70,9 +70,8 @@ static void collator_convert_hash_item_from_utf8_to_utf16(
 		zend_hash_index_update( hash, hashIndex, &znew_val);
 	}
 }
-/* }}} */
 
-/* {{{ collator_convert_hash_item_from_utf16_to_utf8 */
+/* collator_convert_hash_item_from_utf16_to_utf8 */
 static void collator_convert_hash_item_from_utf16_to_utf8(
 	HashTable* hash, zval * hashData, zend_string* hashKey, zend_ulong hashIndex,
 	UErrorCode* status )
@@ -107,9 +106,8 @@ static void collator_convert_hash_item_from_utf16_to_utf8(
 		zend_hash_index_update( hash, hashIndex, &znew_val);
 	}
 }
-/* }}} */
 
-/* {{{ collator_convert_hash_from_utf8_to_utf16
+/* collator_convert_hash_from_utf8_to_utf16
  *  Convert values of the given hash from UTF-8 encoding to UTF-16LE.
  */
 void collator_convert_hash_from_utf8_to_utf16( HashTable* hash, UErrorCode* status )
@@ -126,9 +124,8 @@ void collator_convert_hash_from_utf8_to_utf16( HashTable* hash, UErrorCode* stat
 			return;
 	} ZEND_HASH_FOREACH_END();
 }
-/* }}} */
 
-/* {{{ collator_convert_hash_from_utf16_to_utf8
+/* collator_convert_hash_from_utf16_to_utf8
  * Convert values of the given hash from UTF-16LE encoding to UTF-8.
  */
 void collator_convert_hash_from_utf16_to_utf8( HashTable* hash, UErrorCode* status )
@@ -146,9 +143,8 @@ void collator_convert_hash_from_utf16_to_utf8( HashTable* hash, UErrorCode* stat
 		}
 	} ZEND_HASH_FOREACH_END();
 }
-/* }}} */
 
-/* {{{ collator_convert_zstr_utf16_to_utf8
+/* collator_convert_zstr_utf16_to_utf8
  *
  * Convert string from utf16 to utf8.
  *
@@ -172,9 +168,8 @@ zval* collator_convert_zstr_utf16_to_utf8( zval* utf16_zval, zval *rv )
 	}
 	return rv;
 }
-/* }}} */
 
-/* {{{ collator_convert_zstr_utf8_to_utf16
+/* collator_convert_zstr_utf8_to_utf16
  *
  * Convert string from utf8 to utf16.
  *
@@ -205,9 +200,8 @@ zval* collator_convert_zstr_utf8_to_utf16( zval* utf8_zval, zval *rv )
 
 	return zstr;
 }
-/* }}} */
 
-/* {{{ collator_convert_object_to_string
+/* collator_convert_object_to_string
  * Convert object to UTF16-encoded string.
  */
 zval* collator_convert_object_to_string( zval* obj, zval *rv )
@@ -261,9 +255,8 @@ zval* collator_convert_object_to_string( zval* obj, zval *rv )
 
 	return zstr;
 }
-/* }}} */
 
-/* {{{ collator_convert_string_to_number
+/* collator_convert_string_to_number
  *
  * Convert string to number.
  *
@@ -285,9 +278,8 @@ zval* collator_convert_string_to_number( zval* str, zval *rv )
 
 	return num;
 }
-/* }}} */
 
-/* {{{ collator_convert_string_to_double
+/* collator_convert_string_to_double
  *
  * Convert string to double.
  *
@@ -305,9 +297,8 @@ zval* collator_convert_string_to_double( zval* str, zval *rv )
 
 	return num;
 }
-/* }}} */
 
-/* {{{ collator_convert_string_to_number_if_possible
+/* collator_convert_string_to_number_if_possible
  *
  * Convert string to numer.
  *
@@ -342,9 +333,8 @@ zval* collator_convert_string_to_number_if_possible( zval* str, zval *rv )
 
 	return rv;
 }
-/* }}} */
 
-/* {{{ collator_make_printable_zval
+/* collator_make_printable_zval
  *
  * Returns string from input zval.
  *
@@ -379,9 +369,8 @@ zval* collator_make_printable_zval( zval* arg, zval *rv)
 
 	return str;
 }
-/* }}} */
 
-/* {{{ collator_normalize_sort_argument
+/* collator_normalize_sort_argument
  *
  * Normalize argument to use in sort's compare function.
  *
@@ -416,4 +405,4 @@ zval* collator_normalize_sort_argument( zval* arg, zval *rv )
 
 	return n_arg;
 }
-/* }}} */
+

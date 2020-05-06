@@ -89,7 +89,7 @@ ZEND_TSRMLS_CACHE_EXTERN()
 #define ICONV_CSNMAXLEN 64
 #endif
 
-/* {{{ typedef enum php_iconv_err_t */
+/* typedef enum php_iconv_err_t */
 typedef enum _php_iconv_err_t {
 	PHP_ICONV_ERR_SUCCESS           = SUCCESS,
 	PHP_ICONV_ERR_CONVERTER         = 1,
@@ -101,7 +101,6 @@ typedef enum _php_iconv_err_t {
 	PHP_ICONV_ERR_MALFORMED         = 7,
 	PHP_ICONV_ERR_ALLOC             = 8
 } php_iconv_err_t;
-/* }}} */
 
 PHP_ICONV_API php_iconv_err_t php_iconv_string(const char * in_p, size_t in_len, zend_string **out, const char *out_charset, const char *in_charset);
 

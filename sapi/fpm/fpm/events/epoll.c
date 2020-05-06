@@ -46,7 +46,7 @@ static int epollfd = -1;
 
 #endif /* HAVE_EPOLL */
 
-struct fpm_event_module_s *fpm_event_epoll_module() /* {{{ */
+struct fpm_event_module_s *fpm_event_epoll_module()
 {
 #if HAVE_EPOLL
 	return &epoll_module;
@@ -54,14 +54,13 @@ struct fpm_event_module_s *fpm_event_epoll_module() /* {{{ */
 	return NULL;
 #endif /* HAVE_EPOLL */
 }
-/* }}} */
 
 #if HAVE_EPOLL
 
 /*
  * Init the module
  */
-static int fpm_event_epoll_init(int max) /* {{{ */
+static int fpm_event_epoll_init(int max)
 {
 	if (max < 1) {
 		return 0;
@@ -87,12 +86,11 @@ static int fpm_event_epoll_init(int max) /* {{{ */
 
 	return 0;
 }
-/* }}} */
 
 /*
  * Clean the module
  */
-static int fpm_event_epoll_clean() /* {{{ */
+static int fpm_event_epoll_clean()
 {
 	/* free epollfds */
 	if (epollfds) {
@@ -108,12 +106,11 @@ static int fpm_event_epoll_clean() /* {{{ */
 
 	return 0;
 }
-/* }}} */
 
 /*
  * wait for events or timeout
  */
-static int fpm_event_epoll_wait(struct fpm_event_queue_s *queue, unsigned long int timeout) /* {{{ */
+static int fpm_event_epoll_wait(struct fpm_event_queue_s *queue, unsigned long int timeout)
 {
 	int ret, i;
 
@@ -150,12 +147,11 @@ static int fpm_event_epoll_wait(struct fpm_event_queue_s *queue, unsigned long i
 
 	return ret;
 }
-/* }}} */
 
 /*
  * Add a FD to the fd set
  */
-static int fpm_event_epoll_add(struct fpm_event_s *ev) /* {{{ */
+static int fpm_event_epoll_add(struct fpm_event_s *ev)
 {
 	struct epoll_event e;
 
@@ -182,12 +178,11 @@ static int fpm_event_epoll_add(struct fpm_event_s *ev) /* {{{ */
 	ev->index = ev->fd;
 	return 0;
 }
-/* }}} */
 
 /*
  * Remove a FD from the fd set
  */
-static int fpm_event_epoll_remove(struct fpm_event_s *ev) /* {{{ */
+static int fpm_event_epoll_remove(struct fpm_event_s *ev)
 {
 	struct epoll_event e;
 
@@ -210,6 +205,5 @@ static int fpm_event_epoll_remove(struct fpm_event_s *ev) /* {{{ */
 	ev->index = -1;
 	return 0;
 }
-/* }}} */
 
 #endif /* HAVE_EPOLL */

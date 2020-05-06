@@ -145,7 +145,6 @@ PHP_FUNCTION(ftp_connect)
 
 	RETURN_RES(zend_register_resource(ftp, le_ftpbuf));
 }
-/* }}} */
 
 #ifdef HAVE_FTP_SSL
 /* Opens a FTP-SSL stream */
@@ -179,7 +178,7 @@ PHP_FUNCTION(ftp_ssl_connect)
 
 	RETURN_RES(zend_register_resource(ftp, le_ftpbuf));
 }
-/* }}} */
+
 #endif
 
 /* Logs into the FTP server */
@@ -206,7 +205,6 @@ PHP_FUNCTION(ftp_login)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Returns the present working directory */
 PHP_FUNCTION(ftp_pwd)
@@ -230,7 +228,6 @@ PHP_FUNCTION(ftp_pwd)
 
 	RETURN_STRING((char*) pwd);
 }
-/* }}} */
 
 /* Changes to the parent directory */
 PHP_FUNCTION(ftp_cdup)
@@ -253,7 +250,6 @@ PHP_FUNCTION(ftp_cdup)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Changes directories */
 PHP_FUNCTION(ftp_chdir)
@@ -279,7 +275,6 @@ PHP_FUNCTION(ftp_chdir)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Requests execution of a program on the FTP server */
 PHP_FUNCTION(ftp_exec)
@@ -305,7 +300,6 @@ PHP_FUNCTION(ftp_exec)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Sends a literal command to the FTP server */
 PHP_FUNCTION(ftp_raw)
@@ -326,7 +320,6 @@ PHP_FUNCTION(ftp_raw)
 	/* execute arbitrary ftp command */
 	ftp_raw(ftp, cmd, cmd_len, return_value);
 }
-/* }}} */
 
 /* Creates a directory and returns the absolute path for the new directory or false on error */
 PHP_FUNCTION(ftp_mkdir)
@@ -353,7 +346,6 @@ PHP_FUNCTION(ftp_mkdir)
 
 	RETURN_STR(tmp);
 }
-/* }}} */
 
 /* Removes a directory */
 PHP_FUNCTION(ftp_rmdir)
@@ -379,7 +371,6 @@ PHP_FUNCTION(ftp_rmdir)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Sets permissions on a file */
 PHP_FUNCTION(ftp_chmod)
@@ -405,7 +396,6 @@ PHP_FUNCTION(ftp_chmod)
 
 	RETURN_LONG(mode);
 }
-/* }}} */
 
 /* Attempt to allocate space on the remote FTP server */
 PHP_FUNCTION(ftp_alloc)
@@ -435,7 +425,6 @@ PHP_FUNCTION(ftp_alloc)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Returns an array of filenames in the given directory */
 PHP_FUNCTION(ftp_nlist)
@@ -464,7 +453,6 @@ PHP_FUNCTION(ftp_nlist)
 	}
 	efree(nlist);
 }
-/* }}} */
 
 /* Returns a detailed listing of a directory as an array of output lines */
 PHP_FUNCTION(ftp_rawlist)
@@ -494,7 +482,6 @@ PHP_FUNCTION(ftp_rawlist)
 	}
 	efree(llist);
 }
-/* }}} */
 
 /* Returns a detailed listing of a directory as an array of parsed output lines */
 PHP_FUNCTION(ftp_mlsd)
@@ -530,7 +517,6 @@ PHP_FUNCTION(ftp_mlsd)
 
 	efree(llist);
 }
-/* }}} */
 
 /* Returns the system type identifier */
 PHP_FUNCTION(ftp_systype)
@@ -554,7 +540,6 @@ PHP_FUNCTION(ftp_systype)
 
 	RETURN_STRING((char*) syst);
 }
-/* }}} */
 
 /* Retrieves a file from the FTP server and writes it to an open file */
 PHP_FUNCTION(ftp_fget)
@@ -599,7 +584,6 @@ PHP_FUNCTION(ftp_fget)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Retrieves a file from the FTP server asynchronly and writes it to an open file */
 PHP_FUNCTION(ftp_nb_fget)
@@ -648,7 +632,6 @@ PHP_FUNCTION(ftp_nb_fget)
 
 	RETURN_LONG(ret);
 }
-/* }}} */
 
 /* Turns passive mode on or off */
 PHP_FUNCTION(ftp_pasv)
@@ -671,7 +654,6 @@ PHP_FUNCTION(ftp_pasv)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Retrieves a file from the FTP server and writes it to a local file */
 PHP_FUNCTION(ftp_get)
@@ -735,7 +717,6 @@ PHP_FUNCTION(ftp_get)
 	php_stream_close(outstream);
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Retrieves a file from the FTP server nbhronly and writes it to a local file */
 PHP_FUNCTION(ftp_nb_get)
@@ -807,7 +788,6 @@ PHP_FUNCTION(ftp_nb_get)
 
 	RETURN_LONG(ret);
 }
-/* }}} */
 
 /* Continues retrieving/sending a file nbronously */
 PHP_FUNCTION(ftp_nb_continue)
@@ -846,7 +826,6 @@ PHP_FUNCTION(ftp_nb_continue)
 
 	RETURN_LONG(ret);
 }
-/* }}} */
 
 /* Stores a file from an open file to the FTP server */
 PHP_FUNCTION(ftp_fput)
@@ -894,7 +873,6 @@ PHP_FUNCTION(ftp_fput)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Stores a file from an open file to the FTP server nbronly */
 PHP_FUNCTION(ftp_nb_fput)
@@ -947,8 +925,6 @@ PHP_FUNCTION(ftp_nb_fput)
 
 	RETURN_LONG(ret);
 }
-/* }}} */
-
 
 /* Stores a file on the FTP server */
 PHP_FUNCTION(ftp_put)
@@ -1001,7 +977,6 @@ PHP_FUNCTION(ftp_put)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Append content of a file a another file on the FTP server */
 PHP_FUNCTION(ftp_append)
@@ -1036,7 +1011,6 @@ PHP_FUNCTION(ftp_append)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Stores a file on the FTP server */
 PHP_FUNCTION(ftp_nb_put)
@@ -1097,7 +1071,6 @@ PHP_FUNCTION(ftp_nb_put)
 
 	RETURN_LONG(ret);
 }
-/* }}} */
 
 /* Returns the size of the file, or -1 on error */
 PHP_FUNCTION(ftp_size)
@@ -1118,7 +1091,6 @@ PHP_FUNCTION(ftp_size)
 	/* get file size */
 	RETURN_LONG(ftp_size(ftp, file, file_len));
 }
-/* }}} */
 
 /* Returns the last modification time of the file, or -1 on error */
 PHP_FUNCTION(ftp_mdtm)
@@ -1139,7 +1111,6 @@ PHP_FUNCTION(ftp_mdtm)
 	/* get file mod time */
 	RETURN_LONG(ftp_mdtm(ftp, file, file_len));
 }
-/* }}} */
 
 /* Renames the given file to a new path */
 PHP_FUNCTION(ftp_rename)
@@ -1165,7 +1136,6 @@ PHP_FUNCTION(ftp_rename)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Deletes a file */
 PHP_FUNCTION(ftp_delete)
@@ -1191,7 +1161,6 @@ PHP_FUNCTION(ftp_delete)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Sends a SITE command to the server */
 PHP_FUNCTION(ftp_site)
@@ -1217,7 +1186,6 @@ PHP_FUNCTION(ftp_site)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Closes the FTP stream */
 PHP_FUNCTION(ftp_close)
@@ -1237,7 +1205,6 @@ PHP_FUNCTION(ftp_close)
 
 	RETURN_BOOL(zend_list_close(Z_RES_P(z_ftp)) == SUCCESS);
 }
-/* }}} */
 
 /* Sets an FTP option */
 PHP_FUNCTION(ftp_set_option)
@@ -1292,7 +1259,6 @@ PHP_FUNCTION(ftp_set_option)
 			break;
 	}
 }
-/* }}} */
 
 /* Gets an FTP option */
 PHP_FUNCTION(ftp_get_option)
@@ -1325,6 +1291,5 @@ PHP_FUNCTION(ftp_get_option)
 			break;
 	}
 }
-/* }}} */
 
 #endif /* HAVE_FTP */

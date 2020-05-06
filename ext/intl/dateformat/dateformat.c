@@ -21,7 +21,7 @@
 #include "dateformat_class.h"
 #include "dateformat.h"
 
-/* {{{ dateformat_register_constants
+/* dateformat_register_constants
  * Register constants common for the both (OO and procedural)
  * APIs.
  */
@@ -64,11 +64,8 @@ void dateformat_register_constants( INIT_FUNC_ARGS )
 	#undef DATEFORMATTER_EXPOSE_CLASS_CONST
 	#undef DATEFORMATTER_EXPOSE_CONST
 }
-/* }}} */
 
-/* Get formatter's last error code. }}} */
-/* Get formatter's last error code.
- */
+/* Get formatter's last error code. */
 PHP_FUNCTION( datefmt_get_error_code )
 {
 	DATE_FORMAT_METHOD_INIT_VARS;
@@ -85,11 +82,8 @@ PHP_FUNCTION( datefmt_get_error_code )
 	/* Return formatter's last error code. */
 	RETURN_LONG( INTL_DATA_ERROR_CODE(dfo) );
 }
-/* }}} */
 
-/* Get text description for formatter's last error code. }}} */
-/* Get text description for formatter's last error code.
- */
+/* Get text description for formatter's last error code. */
 PHP_FUNCTION( datefmt_get_error_message )
 {
 	zend_string *message = NULL;
@@ -108,4 +102,4 @@ PHP_FUNCTION( datefmt_get_error_message )
 	message = intl_error_get_message( INTL_DATA_ERROR_P(dfo) );
 	RETURN_STR( message);
 }
-/* }}} */
+

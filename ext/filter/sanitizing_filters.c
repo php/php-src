@@ -18,11 +18,10 @@
 #include "filter_private.h"
 #include "zend_smart_str.h"
 
-/* {{{ STRUCTS */
+/* STRUCTS */
 typedef unsigned long filter_map[256];
-/* }}} */
 
-/* {{{ HELPER FUNCTIONS */
+/* HELPER FUNCTIONS */
 static void php_filter_encode_html(zval *value, const unsigned char *chars)
 {
 	smart_str str = {0};
@@ -124,9 +123,8 @@ static void php_filter_strip(zval *value, zend_long flags)
 	zval_ptr_dtor(value);
 	ZVAL_NEW_STR(value, buf);
 }
-/* }}} */
 
-/* {{{ FILTER MAP HELPERS */
+/* FILTER MAP HELPERS */
 static void filter_map_init(filter_map *map)
 {
 	memset(map, 0, sizeof(filter_map));
@@ -163,9 +161,8 @@ static void filter_map_apply(zval *value, filter_map *map)
 	zval_ptr_dtor(value);
 	ZVAL_NEW_STR(value, buf);
 }
-/* }}} */
 
-/* {{{ php_filter_string */
+/* php_filter_string */
 void php_filter_string(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	size_t new_len;
@@ -207,9 +204,8 @@ void php_filter_string(PHP_INPUT_FILTER_PARAM_DECL)
 		return;
 	}
 }
-/* }}} */
 
-/* {{{ php_filter_encoded */
+/* php_filter_encoded */
 void php_filter_encoded(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	/* apply strip_high and strip_low filters */
@@ -217,9 +213,8 @@ void php_filter_encoded(PHP_INPUT_FILTER_PARAM_DECL)
 	/* urlencode */
 	php_filter_encode_url(value, (unsigned char *)DEFAULT_URL_ENCODE, sizeof(DEFAULT_URL_ENCODE)-1, flags & FILTER_FLAG_ENCODE_HIGH, flags & FILTER_FLAG_ENCODE_LOW, 1);
 }
-/* }}} */
 
-/* {{{ php_filter_special_chars */
+/* php_filter_special_chars */
 void php_filter_special_chars(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	unsigned char enc[256] = {0};
@@ -238,9 +233,8 @@ void php_filter_special_chars(PHP_INPUT_FILTER_PARAM_DECL)
 
 	php_filter_encode_html(value, enc);
 }
-/* }}} */
 
-/* {{{ php_filter_full_special_chars */
+/* php_filter_full_special_chars */
 void php_filter_full_special_chars(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	zend_string *buf;
@@ -255,9 +249,8 @@ void php_filter_full_special_chars(PHP_INPUT_FILTER_PARAM_DECL)
 	zval_ptr_dtor(value);
 	ZVAL_STR(value, buf);
 }
-/* }}} */
 
-/* {{{ php_filter_unsafe_raw */
+/* php_filter_unsafe_raw */
 void php_filter_unsafe_raw(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	/* Only if no flags are set (optimization) */
@@ -282,9 +275,8 @@ void php_filter_unsafe_raw(PHP_INPUT_FILTER_PARAM_DECL)
 		ZVAL_NULL(value);
 	}
 }
-/* }}} */
 
-/* {{{ php_filter_email */
+/* php_filter_email */
 #define SAFE        "$-_.+"
 #define EXTRA       "!*'(),"
 #define NATIONAL    "{}|\\^~[]`"
@@ -301,9 +293,8 @@ void php_filter_email(PHP_INPUT_FILTER_PARAM_DECL)
 	filter_map_update(&map, 1, allowed_list);
 	filter_map_apply(value, &map);
 }
-/* }}} */
 
-/* {{{ php_filter_url */
+/* php_filter_url */
 void php_filter_url(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	/* Strip all chars not part of section 5 of
@@ -315,9 +306,8 @@ void php_filter_url(PHP_INPUT_FILTER_PARAM_DECL)
 	filter_map_update(&map, 1, allowed_list);
 	filter_map_apply(value, &map);
 }
-/* }}} */
 
-/* {{{ php_filter_number_int */
+/* php_filter_number_int */
 void php_filter_number_int(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	/* strip everything [^0-9+-] */
@@ -328,9 +318,8 @@ void php_filter_number_int(PHP_INPUT_FILTER_PARAM_DECL)
 	filter_map_update(&map, 1, allowed_list);
 	filter_map_apply(value, &map);
 }
-/* }}} */
 
-/* {{{ php_filter_number_float */
+/* php_filter_number_float */
 void php_filter_number_float(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	/* strip everything [^0-9+-] */
@@ -352,9 +341,8 @@ void php_filter_number_float(PHP_INPUT_FILTER_PARAM_DECL)
 	}
 	filter_map_apply(value, &map);
 }
-/* }}} */
 
-/* {{{ php_filter_add_slashes */
+/* php_filter_add_slashes */
 void php_filter_add_slashes(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	zend_string *buf = php_addslashes(Z_STR_P(value));
@@ -362,4 +350,4 @@ void php_filter_add_slashes(PHP_INPUT_FILTER_PARAM_DECL)
 	zval_ptr_dtor(value);
 	ZVAL_STR(value, buf);
 }
-/* }}} */
+

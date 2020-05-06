@@ -45,7 +45,7 @@ const phpdbg_command_t phpdbg_set_commands[] = {
 	PHPDBG_END_COMMAND
 };
 
-PHPDBG_SET(prompt) /* {{{ */
+PHPDBG_SET(prompt)
 {
 	if (!param || param->type == EMPTY_PARAM) {
 		phpdbg_writeln("setprompt", "str=\"%s\"", "Current prompt: %s", phpdbg_get_prompt());
@@ -54,9 +54,9 @@ PHPDBG_SET(prompt) /* {{{ */
 	}
 
 	return SUCCESS;
-} /* }}} */
+}
 
-PHPDBG_SET(pagination) /* {{{ */
+PHPDBG_SET(pagination)
 {
 	if (!param || param->type == EMPTY_PARAM) {
 		phpdbg_writeln("setpagination", "active=\"%s\"", "Pagination %s", PHPDBG_G(flags) & PHPDBG_HAS_PAGINATION ? "on" : "off");
@@ -74,9 +74,9 @@ PHPDBG_SET(pagination) /* {{{ */
 	}
 
 	return SUCCESS;
-} /* }}} */
+}
 
-PHPDBG_SET(lines) /* {{{ */
+PHPDBG_SET(lines)
 {
 	if (!param || param->type == EMPTY_PARAM) {
 		phpdbg_writeln("setlines", "active=\"%s\"", "Lines %ld", PHPDBG_G(lines));
@@ -90,9 +90,9 @@ PHPDBG_SET(lines) /* {{{ */
 	}
 
 	return SUCCESS;
-} /* }}} */
+}
 
-PHPDBG_SET(break) /* {{{ */
+PHPDBG_SET(break)
 {
 	switch (param->type) {
 		case NUMERIC_PARAM: {
@@ -117,9 +117,9 @@ PHPDBG_SET(break) /* {{{ */
 	}
 
 	return SUCCESS;
-} /* }}} */
+}
 
-PHPDBG_SET(breaks) /* {{{ */
+PHPDBG_SET(breaks)
 {
 	if (!param || param->type == EMPTY_PARAM) {
 		phpdbg_writeln("setbreaks", "active=\"%s\"", "Breakpoints %s",PHPDBG_G(flags) & PHPDBG_IS_BP_ENABLED ? "on" : "off");
@@ -137,10 +137,10 @@ PHPDBG_SET(breaks) /* {{{ */
 	}
 
 	return SUCCESS;
-} /* }}} */
+}
 
 #ifndef _WIN32
-PHPDBG_SET(color) /* {{{ */
+PHPDBG_SET(color)
 {
 	const phpdbg_color_t *color = phpdbg_get_color(param->next->str, param->next->len);
 
@@ -174,9 +174,9 @@ PHPDBG_SET(color) /* {{{ */
 	}
 
 	return SUCCESS;
-} /* }}} */
+}
 
-PHPDBG_SET(colors) /* {{{ */
+PHPDBG_SET(colors)
 {
 	if (!param || param->type == EMPTY_PARAM) {
 		phpdbg_writeln("setcolors", "active=\"%s\"", "Colors %s", PHPDBG_G(flags) & PHPDBG_IS_COLOURED ? "on" : "off");
@@ -194,10 +194,10 @@ PHPDBG_SET(colors) /* {{{ */
 	}
 
 	return SUCCESS;
-} /* }}} */
+}
 #endif
 
-PHPDBG_SET(oplog) /* {{{ */
+PHPDBG_SET(oplog)
 {
 	if (!param || param->type == EMPTY_PARAM) {
 		phpdbg_notice("setoplog", "active=\"%s\"", "Oplog %s", PHPDBG_G(oplog) ? "on" : "off");
@@ -224,9 +224,9 @@ PHPDBG_SET(oplog) /* {{{ */
 	}
 
 	return SUCCESS;
-} /* }}} */
+}
 
-PHPDBG_SET(quiet) /* {{{ */
+PHPDBG_SET(quiet)
 {
 	if (!param || param->type == EMPTY_PARAM) {
 		phpdbg_writeln("setquiet", "active=\"%s\"", "Quietness %s", PHPDBG_G(flags) & PHPDBG_IS_QUIET ? "on" : "off");
@@ -243,9 +243,9 @@ PHPDBG_SET(quiet) /* {{{ */
 	}
 
 	return SUCCESS;
-} /* }}} */
+}
 
-PHPDBG_SET(stepping) /* {{{ */
+PHPDBG_SET(stepping)
 {
 	if (!param || param->type == EMPTY_PARAM) {
 		phpdbg_writeln("setstepping", "type=\"%s\"", "Stepping %s", PHPDBG_G(flags) & PHPDBG_STEP_OPCODE ? "opcode" : "line");
@@ -264,9 +264,9 @@ PHPDBG_SET(stepping) /* {{{ */
 	}
 
 	return SUCCESS;
-} /* }}} */
+}
 
-PHPDBG_SET(refcount) /* {{{ */
+PHPDBG_SET(refcount)
 {
 	if (!param || param->type == EMPTY_PARAM) {
 		phpdbg_writeln("setrefcount", "active=\"%s\"", "Showing refcounts %s", PHPDBG_G(flags) & PHPDBG_IS_QUIET ? "on" : "off");
@@ -283,4 +283,4 @@ PHPDBG_SET(refcount) /* {{{ */
 	}
 
 	return SUCCESS;
-} /* }}} */
+}

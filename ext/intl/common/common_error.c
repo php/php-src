@@ -31,7 +31,6 @@ PHP_FUNCTION( intl_get_error_code )
 
 	RETURN_LONG( intl_error_get_code( NULL ) );
 }
-/* }}} */
 
 /* Get text description of the last occurred error.
  */
@@ -43,7 +42,6 @@ PHP_FUNCTION( intl_get_error_message )
 
 	RETURN_STR(intl_error_get_message( NULL ));
 }
-/* }}} */
 
 /* Check whether the given error code indicates a failure.
  * Returns true if it does, and false if the code
@@ -62,7 +60,6 @@ PHP_FUNCTION( intl_is_failure )
 
 	RETURN_BOOL( U_FAILURE( err_code ) );
 }
-/* }}} */
 
 /* Return a string for a given error code.
  * The string will be the same as the name of the error code constant.
@@ -80,9 +77,8 @@ PHP_FUNCTION( intl_error_name )
 
 	RETURN_STRING( (char*)u_errorName( err_code ) );
 }
-/* }}} */
 
-/* {{{ intl_expose_icu_error_codes
+/* intl_expose_icu_error_codes
  * Expose ICU error codes
  */
 void intl_expose_icu_error_codes( INIT_FUNC_ARGS )
@@ -249,4 +245,4 @@ void intl_expose_icu_error_codes( INIT_FUNC_ARGS )
 
 	#undef INTL_EXPOSE_CONST
 }
-/* }}} */
+

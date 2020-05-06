@@ -108,7 +108,7 @@ int php_le_pmysqli(void)
 }
 
 #ifndef MYSQLI_USE_MYSQLND
-/* {{{ php_free_stmt_bind_buffer */
+/* php_free_stmt_bind_buffer */
 void php_free_stmt_bind_buffer(BIND_BUFFER bbuf, int type)
 {
 	unsigned int i;
@@ -145,10 +145,10 @@ void php_free_stmt_bind_buffer(BIND_BUFFER bbuf, int type)
 
 	bbuf.var_cnt = 0;
 }
-/* }}} */
+
 #endif
 
-/* {{{ php_clear_stmt_bind */
+/* php_clear_stmt_bind */
 void php_clear_stmt_bind(MY_STMT *stmt)
 {
 	if (stmt->stmt) {
@@ -177,9 +177,8 @@ void php_clear_stmt_bind(MY_STMT *stmt)
 	}
 	efree(stmt);
 }
-/* }}} */
 
-/* {{{ php_clear_mysql */
+/* php_clear_mysql */
 void php_clear_mysql(MY_MYSQL *mysql) {
 	if (mysql->hash_key) {
 		zend_string_release_ex(mysql->hash_key, 0);
@@ -190,9 +189,8 @@ void php_clear_mysql(MY_MYSQL *mysql) {
 		ZVAL_UNDEF(&mysql->li_read);
 	}
 }
-/* }}} */
 
-/* {{{ mysqli_objects_free_storage
+/* mysqli_objects_free_storage
  */
 static void mysqli_objects_free_storage(zend_object	*object)
 {
@@ -204,11 +202,10 @@ static void mysqli_objects_free_storage(zend_object	*object)
 	}
 	zend_object_std_dtor(&intern->zo);
 }
-/* }}} */
 
 /* mysqli_link_free_storage partly doubles the work of PHP_FUNCTION(mysqli_close) */
 
-/* {{{ mysqli_link_free_storage
+/* mysqli_link_free_storage
  */
 static void mysqli_link_free_storage(zend_object *object)
 {
@@ -226,16 +223,14 @@ static void mysqli_link_free_storage(zend_object *object)
 	}
 	mysqli_objects_free_storage(object);
 }
-/* }}} */
 
-/* {{{ mysql_driver_free_storage */
+/* mysql_driver_free_storage */
 static void mysqli_driver_free_storage(zend_object *object)
 {
 	mysqli_objects_free_storage(object);
 }
-/* }}} */
 
-/* {{{ mysqli_stmt_free_storage
+/* mysqli_stmt_free_storage
  */
 static void mysqli_stmt_free_storage(zend_object *object)
 {
@@ -248,9 +243,8 @@ static void mysqli_stmt_free_storage(zend_object *object)
 	}
 	mysqli_objects_free_storage(object);
 }
-/* }}} */
 
-/* {{{ mysqli_result_free_storage
+/* mysqli_result_free_storage
  */
 static void mysqli_result_free_storage(zend_object *object)
 {
@@ -262,9 +256,8 @@ static void mysqli_result_free_storage(zend_object *object)
 	}
 	mysqli_objects_free_storage(object);
 }
-/* }}} */
 
-/* {{{ mysqli_warning_free_storage
+/* mysqli_warning_free_storage
  */
 static void mysqli_warning_free_storage(zend_object *object)
 {
@@ -277,9 +270,8 @@ static void mysqli_warning_free_storage(zend_object *object)
 	}
 	mysqli_objects_free_storage(object);
 }
-/* }}} */
 
-/* {{{ mysqli_read_na */
+/* mysqli_read_na */
 static int mysqli_read_na(mysqli_object *obj, zval *retval, zend_bool quiet)
 {
 	if (!quiet) {
@@ -288,18 +280,16 @@ static int mysqli_read_na(mysqli_object *obj, zval *retval, zend_bool quiet)
 
 	return FAILURE;
 }
-/* }}} */
 
-/* {{{ mysqli_write_na */
+/* mysqli_write_na */
 static int mysqli_write_na(mysqli_object *obj, zval *newval)
 {
 	zend_throw_error(NULL, "Cannot write property");
 
 	return FAILURE;
 }
-/* }}} */
 
-/* {{{ mysqli_read_property */
+/* mysqli_read_property */
 zval *mysqli_read_property(zend_object *object, zend_string *name, int type, void **cache_slot, zval *rv)
 {
 	zval *retval;
@@ -324,9 +314,8 @@ zval *mysqli_read_property(zend_object *object, zend_string *name, int type, voi
 
 	return retval;
 }
-/* }}} */
 
-/* {{{ mysqli_write_property */
+/* mysqli_write_property */
 zval *mysqli_write_property(zend_object *object, zend_string *name, zval *value, void **cache_slot)
 {
 	mysqli_object *obj;
@@ -346,9 +335,8 @@ zval *mysqli_write_property(zend_object *object, zend_string *name, zval *value,
 
 	return value;
 }
-/* }}} */
 
-/* {{{ void mysqli_add_property(HashTable *h, char *pname, mysqli_read_t r_func, mysqli_write_t w_func) */
+/* void mysqli_add_property(HashTable *h, char *pname, mysqli_read_t r_func, mysqli_write_t w_func) */
 void mysqli_add_property(HashTable *h, const char *pname, size_t pname_len, mysqli_read_t r_func, mysqli_write_t w_func) {
 	mysqli_prop_handler	p;
 
@@ -358,9 +346,8 @@ void mysqli_add_property(HashTable *h, const char *pname, size_t pname_len, mysq
 	zend_hash_add_mem(h, p.name, &p, sizeof(mysqli_prop_handler));
 	zend_string_release_ex(p.name, 1);
 }
-/* }}} */
 
-static int mysqli_object_has_property(zend_object *object, zend_string *name, int has_set_exists, void **cache_slot) /* {{{ */
+static int mysqli_object_has_property(zend_object *object, zend_string *name, int has_set_exists, void **cache_slot)
 {
 	mysqli_object *obj = php_mysqli_fetch_object(object);
 	mysqli_prop_handler	*p;
@@ -397,7 +384,7 @@ static int mysqli_object_has_property(zend_object *object, zend_string *name, in
 	}
 
 	return ret;
-} /* }}} */
+}
 
 HashTable *mysqli_object_get_debug_info(zend_object *object, int *is_temp)
 {
@@ -421,7 +408,7 @@ HashTable *mysqli_object_get_debug_info(zend_object *object, int *is_temp)
 	return retval;
 }
 
-/* {{{ mysqli_objects_new
+/* mysqli_objects_new
  */
 PHP_MYSQLI_EXPORT(zend_object *) mysqli_objects_new(zend_class_entry *class_type)
 {
@@ -460,7 +447,6 @@ PHP_MYSQLI_EXPORT(zend_object *) mysqli_objects_new(zend_class_entry *class_type
 
 	return &intern->zo;
 }
-/* }}} */
 
 #ifdef MYSQLI_USE_MYSQLND
 #include "ext/mysqlnd/mysqlnd_reverse_api.h"
@@ -487,7 +473,7 @@ static const MYSQLND_REVERSE_API mysqli_reverse_api = {
 };
 #endif
 
-/* {{{ PHP_INI_BEGIN
+/* PHP_INI_BEGIN
 */
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY_EX("mysqli.max_links",			"-1",	PHP_INI_SYSTEM,		OnUpdateLong,		max_links,			zend_mysqli_globals,		mysqli_globals, display_link_numbers)
@@ -506,9 +492,8 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("mysqli.reconnect",				"0",	PHP_INI_SYSTEM,		OnUpdateLong,		reconnect,			zend_mysqli_globals,		mysqli_globals)
 	STD_PHP_INI_BOOLEAN("mysqli.allow_local_infile",	"0",	PHP_INI_SYSTEM,		OnUpdateLong,		allow_local_infile,	zend_mysqli_globals,		mysqli_globals)
 PHP_INI_END()
-/* }}} */
 
-/* {{{ PHP_GINIT_FUNCTION
+/* PHP_GINIT_FUNCTION
  */
 static PHP_GINIT_FUNCTION(mysqli)
 {
@@ -533,9 +518,8 @@ static PHP_GINIT_FUNCTION(mysqli)
 	mysqli_globals->embedded = 0;
 	mysqli_globals->rollback_on_cached_plink = FALSE;
 }
-/* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION
+/* PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(mysqli)
 {
@@ -838,9 +822,8 @@ PHP_MINIT_FUNCTION(mysqli)
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_MSHUTDOWN_FUNCTION
+/* PHP_MSHUTDOWN_FUNCTION
  */
 PHP_MSHUTDOWN_FUNCTION(mysqli)
 {
@@ -869,9 +852,8 @@ PHP_MSHUTDOWN_FUNCTION(mysqli)
 	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_RINIT_FUNCTION
+/* PHP_RINIT_FUNCTION
  */
 PHP_RINIT_FUNCTION(mysqli)
 {
@@ -886,13 +868,12 @@ PHP_RINIT_FUNCTION(mysqli)
 
 	return SUCCESS;
 }
-/* }}} */
 
 #if defined(A0) && defined(MYSQLI_USE_MYSQLND)
 static void php_mysqli_persistent_helper_for_every(void *p)
 {
 	mysqlnd_end_psession((MYSQLND *) p);
-} /* }}} */
+}
 
 
 static int php_mysqli_persistent_helper_once(zend_rsrc_list_entry *le)
@@ -902,11 +883,11 @@ static int php_mysqli_persistent_helper_once(zend_rsrc_list_entry *le)
 		zend_ptr_stack_apply(&plist->free_links, php_mysqli_persistent_helper_for_every);
 	}
 	return ZEND_HASH_APPLY_KEEP;
-} /* }}} */
+}
 #endif
 
 
-/* {{{ PHP_RSHUTDOWN_FUNCTION
+/* PHP_RSHUTDOWN_FUNCTION
  */
 PHP_RSHUTDOWN_FUNCTION(mysqli)
 {
@@ -924,10 +905,8 @@ PHP_RSHUTDOWN_FUNCTION(mysqli)
 #endif
 	return SUCCESS;
 }
-/* }}} */
 
-
-/* {{{ PHP_MINFO_FUNCTION
+/* PHP_MINFO_FUNCTION
  */
 PHP_MINFO_FUNCTION(mysqli)
 {
@@ -950,8 +929,6 @@ PHP_MINFO_FUNCTION(mysqli)
 
 	DISPLAY_INI_ENTRIES();
 }
-/* }}} */
-
 
 /* Dependencies */
 static const  zend_module_dep mysqli_deps[] = {
@@ -962,7 +939,7 @@ static const  zend_module_dep mysqli_deps[] = {
 	ZEND_MOD_END
 };
 
-/* {{{ mysqli_module_entry
+/* mysqli_module_entry
  */
 zend_module_entry mysqli_module_entry = {
 	STANDARD_MODULE_HEADER_EX, NULL,
@@ -981,7 +958,6 @@ zend_module_entry mysqli_module_entry = {
 	NULL,
 	STANDARD_MODULE_PROPERTIES_EX
 };
-/* }}} */
 
 #ifdef COMPILE_DL_MYSQLI
 #ifdef ZTS
@@ -991,7 +967,7 @@ ZEND_GET_MODULE(mysqli)
 #endif
 
 
-/* {{{ mixed mysqli_stmt_construct()
+/* mixed mysqli_stmt_construct()
 constructor for statement object.
 Parameters:
   object -> mysqli_stmt_init
@@ -1032,9 +1008,8 @@ PHP_FUNCTION(mysqli_stmt_construct)
 
 	MYSQLI_REGISTER_RESOURCE_EX(mysqli_resource, getThis());
 }
-/* }}} */
 
-/* {{{ mixed mysqli_result_construct()
+/* mixed mysqli_result_construct()
 constructor for result object.
 Parameters:
   object [, mode] -> mysqli_store/use_result
@@ -1085,9 +1060,8 @@ PHP_FUNCTION(mysqli_result_construct)
 
 	MYSQLI_REGISTER_RESOURCE_EX(mysqli_resource, getThis());
 }
-/* }}} */
 
-/* {{{ php_mysqli_fetch_into_hash_aux
+/* php_mysqli_fetch_into_hash_aux
  */
 void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, zend_long fetchtype)
 {
@@ -1158,9 +1132,8 @@ void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, zend
 	mysqlnd_fetch_into(result, ((fetchtype & MYSQLI_NUM)? MYSQLND_FETCH_NUM:0) | ((fetchtype & MYSQLI_ASSOC)? MYSQLND_FETCH_ASSOC:0), return_value, MYSQLND_MYSQLI);
 #endif
 }
-/* }}} */
 
-/* {{{ php_mysqli_fetch_into_hash
+/* php_mysqli_fetch_into_hash
  */
 void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags, int into_object)
 {
@@ -1264,4 +1237,4 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 		}
 	}
 }
-/* }}} */
+

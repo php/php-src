@@ -32,7 +32,7 @@
  * June 2005
  */
 
-static zend_always_inline void union_find_init(int *parent, int *size, int count) /* {{{ */
+static zend_always_inline void union_find_init(int *parent, int *size, int count)
 {
 	int i;
 
@@ -41,9 +41,8 @@ static zend_always_inline void union_find_init(int *parent, int *size, int count
 		size[i] = 1;
 	}
 }
-/* }}} */
 
-static zend_always_inline int union_find_root(int *parent, int i) /* {{{ */
+static zend_always_inline int union_find_root(int *parent, int i)
 {
 	int p = parent[i];
 
@@ -55,9 +54,8 @@ static zend_always_inline int union_find_root(int *parent, int i) /* {{{ */
 	}
 	return i;
 }
-/* }}} */
 
-static zend_always_inline void union_find_unite(int *parent, int *size, int i, int j) /* {{{ */
+static zend_always_inline void union_find_unite(int *parent, int *size, int i, int j)
 {
 	int r1 = union_find_root(parent, i);
 	int r2 = union_find_root(parent, j);
@@ -72,9 +70,8 @@ static zend_always_inline void union_find_unite(int *parent, int *size, int i, i
 		}
 	}
 }
-/* }}} */
 
-static int zend_build_equi_escape_sets(int *parent, zend_op_array *op_array, zend_ssa *ssa) /* {{{ */
+static int zend_build_equi_escape_sets(int *parent, zend_op_array *op_array, zend_ssa *ssa)
 {
 	zend_ssa_var *ssa_vars = ssa->vars;
 	int ssa_vars_count = ssa->vars_count;
@@ -146,9 +143,8 @@ static int zend_build_equi_escape_sets(int *parent, zend_op_array *op_array, zen
 
 	return SUCCESS;
 }
-/* }}} */
 
-static inline zend_class_entry *get_class_entry(const zend_script *script, zend_string *lcname) /* {{{ */
+static inline zend_class_entry *get_class_entry(const zend_script *script, zend_string *lcname)
 {
 	zend_class_entry *ce = script ? zend_hash_find_ptr(&script->class_table, lcname) : NULL;
 	if (ce) {
@@ -162,9 +158,8 @@ static inline zend_class_entry *get_class_entry(const zend_script *script, zend_
 
 	return NULL;
 }
-/* }}} */
 
-static int is_allocation_def(zend_op_array *op_array, zend_ssa *ssa, int def, int var, const zend_script *script) /* {{{ */
+static int is_allocation_def(zend_op_array *op_array, zend_ssa *ssa, int def, int var, const zend_script *script)
 {
 	zend_ssa_op *ssa_op = ssa->ops + def;
 	zend_op *opline = op_array->opcodes + def;
@@ -226,9 +221,8 @@ static int is_allocation_def(zend_op_array *op_array, zend_ssa *ssa, int def, in
 
     return 0;
 }
-/* }}} */
 
-static int is_local_def(zend_op_array *op_array, zend_ssa *ssa, int def, int var, const zend_script *script) /* {{{ */
+static int is_local_def(zend_op_array *op_array, zend_ssa *ssa, int def, int var, const zend_script *script)
 {
 	zend_ssa_op *op = ssa->ops + def;
 	zend_op *opline = op_array->opcodes + def;
@@ -269,9 +263,8 @@ static int is_local_def(zend_op_array *op_array, zend_ssa *ssa, int def, int var
 
 	return 0;
 }
-/* }}} */
 
-static int is_escape_use(zend_op_array *op_array, zend_ssa *ssa, int use, int var) /* {{{ */
+static int is_escape_use(zend_op_array *op_array, zend_ssa *ssa, int use, int var)
 {
 	zend_ssa_op *ssa_op = ssa->ops + use;
 	zend_op *opline = op_array->opcodes + use;
@@ -380,9 +373,8 @@ static int is_escape_use(zend_op_array *op_array, zend_ssa *ssa, int use, int va
 
 	return 0;
 }
-/* }}} */
 
-int zend_ssa_escape_analysis(const zend_script *script, zend_op_array *op_array, zend_ssa *ssa) /* {{{ */
+int zend_ssa_escape_analysis(const zend_script *script, zend_op_array *op_array, zend_ssa *ssa)
 {
 	zend_ssa_var *ssa_vars = ssa->vars;
 	int ssa_vars_count = ssa->vars_count;
@@ -536,4 +528,4 @@ int zend_ssa_escape_analysis(const zend_script *script, zend_op_array *op_array,
 
 	return SUCCESS;
 }
-/* }}} */
+

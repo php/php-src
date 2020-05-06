@@ -38,7 +38,7 @@
 #	define pdo_mysql_init(persistent) mysql_init(NULL)
 #endif
 
-/* {{{ _pdo_mysql_error */
+/* _pdo_mysql_error */
 int _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int line)
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
@@ -107,9 +107,8 @@ int _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int lin
 
 	PDO_DBG_RETURN(einfo->errcode);
 }
-/* }}} */
 
-/* {{{ pdo_mysql_fetch_error_func */
+/* pdo_mysql_fetch_error_func */
 static int pdo_mysql_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info)
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
@@ -131,9 +130,8 @@ static int pdo_mysql_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *in
 
 	PDO_DBG_RETURN(1);
 }
-/* }}} */
 
-/* {{{ mysql_handle_closer */
+/* mysql_handle_closer */
 static int mysql_handle_closer(pdo_dbh_t *dbh)
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
@@ -152,9 +150,8 @@ static int mysql_handle_closer(pdo_dbh_t *dbh)
 	}
 	PDO_DBG_RETURN(0);
 }
-/* }}} */
 
-/* {{{ mysql_handle_preparer */
+/* mysql_handle_preparer */
 static int mysql_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len, pdo_stmt_t *stmt, zval *driver_options)
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
@@ -244,9 +241,8 @@ end:
 
 	PDO_DBG_RETURN(1);
 }
-/* }}} */
 
-/* {{{ mysql_handle_doer */
+/* mysql_handle_doer */
 static zend_long mysql_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sql_len)
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
@@ -279,9 +275,8 @@ static zend_long mysql_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sql_l
 		}
 	}
 }
-/* }}} */
 
-/* {{{ pdo_mysql_last_insert_id */
+/* pdo_mysql_last_insert_id */
 static char *pdo_mysql_last_insert_id(pdo_dbh_t *dbh, const char *name, size_t *len)
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
@@ -290,9 +285,8 @@ static char *pdo_mysql_last_insert_id(pdo_dbh_t *dbh, const char *name, size_t *
 	*len = strlen(id);
 	PDO_DBG_RETURN(id);
 }
-/* }}} */
 
-/* {{{ mysql_handle_quoter */
+/* mysql_handle_quoter */
 static int mysql_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unquotedlen, char **quoted, size_t *quotedlen, enum pdo_param_type paramtype )
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
@@ -329,36 +323,32 @@ static int mysql_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unqu
 	PDO_DBG_INF_FMT("quoted=%.*s", (int)*quotedlen, *quoted);
 	PDO_DBG_RETURN(1);
 }
-/* }}} */
 
-/* {{{ mysql_handle_begin */
+/* mysql_handle_begin */
 static int mysql_handle_begin(pdo_dbh_t *dbh)
 {
 	PDO_DBG_ENTER("mysql_handle_quoter");
 	PDO_DBG_INF_FMT("dbh=%p", dbh);
 	PDO_DBG_RETURN(0 <= mysql_handle_doer(dbh, ZEND_STRL("START TRANSACTION")));
 }
-/* }}} */
 
-/* {{{ mysql_handle_commit */
+/* mysql_handle_commit */
 static int mysql_handle_commit(pdo_dbh_t *dbh)
 {
 	PDO_DBG_ENTER("mysql_handle_commit");
 	PDO_DBG_INF_FMT("dbh=%p", dbh);
 	PDO_DBG_RETURN(0 == mysql_commit(((pdo_mysql_db_handle *)dbh->driver_data)->server));
 }
-/* }}} */
 
-/* {{{ mysql_handle_rollback */
+/* mysql_handle_rollback */
 static int mysql_handle_rollback(pdo_dbh_t *dbh)
 {
 	PDO_DBG_ENTER("mysql_handle_rollback");
 	PDO_DBG_INF_FMT("dbh=%p", dbh);
 	PDO_DBG_RETURN(0 <= mysql_rollback(((pdo_mysql_db_handle *)dbh->driver_data)->server));
 }
-/* }}} */
 
-/* {{{ mysql_handle_autocommit */
+/* mysql_handle_autocommit */
 static inline int mysql_handle_autocommit(pdo_dbh_t *dbh)
 {
 	PDO_DBG_ENTER("mysql_handle_autocommit");
@@ -366,9 +356,8 @@ static inline int mysql_handle_autocommit(pdo_dbh_t *dbh)
 	PDO_DBG_INF_FMT("dbh->autocommit=%d", dbh->auto_commit);
 	PDO_DBG_RETURN(0 <= mysql_autocommit(((pdo_mysql_db_handle *)dbh->driver_data)->server, dbh->auto_commit));
 }
-/* }}} */
 
-/* {{{ pdo_mysql_set_attribute */
+/* pdo_mysql_set_attribute */
 static int pdo_mysql_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 {
 	zend_long lval = zval_get_long(val);
@@ -421,9 +410,8 @@ static int pdo_mysql_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 			PDO_DBG_RETURN(0);
 	}
 }
-/* }}} */
 
-/* {{{ pdo_mysql_get_attribute */
+/* pdo_mysql_get_attribute */
 static int pdo_mysql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_value)
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
@@ -496,9 +484,8 @@ static int pdo_mysql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_
 
 	PDO_DBG_RETURN(1);
 }
-/* }}} */
 
-/* {{{ pdo_mysql_check_liveness */
+/* pdo_mysql_check_liveness */
 static int pdo_mysql_check_liveness(pdo_dbh_t *dbh)
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
@@ -511,9 +498,8 @@ static int pdo_mysql_check_liveness(pdo_dbh_t *dbh)
 	}
 	PDO_DBG_RETURN(SUCCESS);
 }
-/* }}} */
 
-/* {{{ pdo_mysql_request_shutdown */
+/* pdo_mysql_request_shutdown */
 static void pdo_mysql_request_shutdown(pdo_dbh_t *dbh)
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
@@ -526,9 +512,8 @@ static void pdo_mysql_request_shutdown(pdo_dbh_t *dbh)
 	}
 #endif
 }
-/* }}} */
 
-/* {{{ mysql_methods */
+/* mysql_methods */
 static const struct pdo_dbh_methods mysql_methods = {
 	mysql_handle_closer,
 	mysql_handle_preparer,
@@ -546,7 +531,6 @@ static const struct pdo_dbh_methods mysql_methods = {
 	pdo_mysql_request_shutdown,
 	NULL
 };
-/* }}} */
 
 #ifdef PHP_WIN32
 # define PDO_DEFAULT_MYSQL_UNIX_ADDR	NULL
@@ -554,7 +538,7 @@ static const struct pdo_dbh_methods mysql_methods = {
 # define PDO_DEFAULT_MYSQL_UNIX_ADDR	PDO_MYSQL_G(default_socket)
 #endif
 
-/* {{{ pdo_mysql_handle_factory */
+/* pdo_mysql_handle_factory */
 static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 {
 	pdo_mysql_db_handle *H;
@@ -856,7 +840,6 @@ cleanup:
 
 	PDO_DBG_RETURN(ret);
 }
-/* }}} */
 
 const pdo_driver_t pdo_mysql_driver = {
 	PDO_DRIVER_HEADER(mysql),

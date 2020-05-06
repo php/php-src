@@ -63,7 +63,7 @@ struct php_bz2_stream_data_t {
 	php_stream *stream;
 };
 
-/* {{{ BZip2 stream implementation */
+/* BZip2 stream implementation */
 
 static ssize_t php_bz2iop_read(php_stream *stream, char *buf, size_t count)
 {
@@ -146,7 +146,6 @@ static int php_bz2iop_flush(php_stream *stream)
 	struct php_bz2_stream_data_t *self = (struct php_bz2_stream_data_t *)stream->abstract;
 	return BZ2_bzflush(self->bz_file);
 }
-/* }}} */
 
 const php_stream_ops php_stream_bz2io_ops = {
 	php_bz2iop_write, php_bz2iop_read,
@@ -158,7 +157,7 @@ const php_stream_ops php_stream_bz2io_ops = {
 	NULL  /* set_option */
 };
 
-/* {{{ Bzip2 stream openers */
+/* Bzip2 stream openers */
 PHP_BZ2_API php_stream *_php_stream_bz2open_from_BZFILE(BZFILE *bz,
 														const char *mode, php_stream *innerstream STREAMS_DC)
 {
@@ -252,7 +251,6 @@ PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper,
 	return NULL;
 }
 
-/* }}} */
 
 static const php_stream_wrapper_ops bzip2_stream_wops = {
 	_php_stream_bz2open,
@@ -326,7 +324,6 @@ PHP_FUNCTION(bzread)
 	}
 	RETURN_STR(data);
 }
-/* }}} */
 
 /* Opens a new BZip2 stream */
 PHP_FUNCTION(bzopen)
@@ -416,28 +413,24 @@ PHP_FUNCTION(bzopen)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Returns the error number */
 PHP_FUNCTION(bzerrno)
 {
 	php_bz2_error(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_BZ_ERRNO);
 }
-/* }}} */
 
 /* Returns the error string */
 PHP_FUNCTION(bzerrstr)
 {
 	php_bz2_error(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_BZ_ERRSTR);
 }
-/* }}} */
 
 /* Returns the error number and error string in an associative array */
 PHP_FUNCTION(bzerror)
 {
 	php_bz2_error(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_BZ_ERRBOTH);
 }
-/* }}} */
 
 /* Compresses a string into BZip2 encoded data */
 PHP_FUNCTION(bzcompress)
@@ -487,7 +480,6 @@ PHP_FUNCTION(bzcompress)
 		RETURN_NEW_STR(dest);
 	}
 }
-/* }}} */
 
 /* Decompresses BZip2 compressed data */
 PHP_FUNCTION(bzdecompress)
@@ -559,9 +551,8 @@ PHP_FUNCTION(bzdecompress)
 
 	BZ2_bzDecompressEnd(&bzs);
 }
-/* }}} */
 
-/* {{{ php_bz2_error()
+/* php_bz2_error()
    The central error handling interface, does the work for bzerrno, bzerrstr and bzerror */
 static void php_bz2_error(INTERNAL_FUNCTION_PARAMETERS, int opt)
 {
@@ -602,6 +593,5 @@ static void php_bz2_error(INTERNAL_FUNCTION_PARAMETERS, int opt)
 			break;
 	}
 }
-/* }}} */
 
 #endif

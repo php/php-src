@@ -30,7 +30,7 @@
 /*
 *  Converting HEX char to INT value
 */
-static char php_hex2int(int c) /* {{{ */
+static char php_hex2int(int c)
 {
 	if (isdigit(c)) {
 		return c - '0';
@@ -45,9 +45,8 @@ static char php_hex2int(int c) /* {{{ */
 		return -1;
 	}
 }
-/* }}} */
 
-PHPAPI zend_string *php_quot_print_decode(const unsigned char *str, size_t length, int replace_us_by_ws) /* {{{ */
+PHPAPI zend_string *php_quot_print_decode(const unsigned char *str, size_t length, int replace_us_by_ws)
 {
 	register size_t i;
 	register unsigned const char *p1;
@@ -137,11 +136,10 @@ PHPAPI zend_string *php_quot_print_decode(const unsigned char *str, size_t lengt
 	ZSTR_LEN(retval) = decoded_len;
 	return retval;
 }
-/* }}} */
 
 #define PHP_QPRINT_MAXL 75
 
-PHPAPI zend_string *php_quot_print_encode(const unsigned char *str, size_t length) /* {{{ */
+PHPAPI zend_string *php_quot_print_encode(const unsigned char *str, size_t length)
 {
 	zend_ulong lp = 0;
 	unsigned char c, *d;
@@ -186,7 +184,6 @@ PHPAPI zend_string *php_quot_print_encode(const unsigned char *str, size_t lengt
 	ret = zend_string_truncate(ret, d - (unsigned char*)ZSTR_VAL(ret), 0);
 	return ret;
 }
-/* }}} */
 
 /*
 *
@@ -254,7 +251,6 @@ PHP_FUNCTION(quoted_printable_decode)
 
 	RETVAL_NEW_STR(str_out);
 }
-/* }}} */
 
 PHP_FUNCTION(quoted_printable_encode)
 {
@@ -272,4 +268,4 @@ PHP_FUNCTION(quoted_printable_encode)
 	new_str = php_quot_print_encode((unsigned char *)ZSTR_VAL(str), ZSTR_LEN(str));
 	RETURN_STR(new_str);
 }
-/* }}} */
+

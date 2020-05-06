@@ -26,20 +26,18 @@
 #include "php_pdo_firebird.h"
 #include "php_pdo_firebird_int.h"
 
-static const zend_function_entry pdo_firebird_functions[] = { /* {{{ */
+static const zend_function_entry pdo_firebird_functions[] = {
 	PHP_FE_END
 };
-/* }}} */
 
-/* {{{ pdo_firebird_deps
+/* pdo_firebird_deps
  */
 static const zend_module_dep pdo_firebird_deps[] = {
 	ZEND_MOD_REQUIRED("pdo")
 	ZEND_MOD_END
 };
-/* }}} */
 
-zend_module_entry pdo_firebird_module_entry = { /* {{{ */
+zend_module_entry pdo_firebird_module_entry = {
 	STANDARD_MODULE_HEADER_EX, NULL,
 	pdo_firebird_deps,
 	"PDO_Firebird",
@@ -52,13 +50,12 @@ zend_module_entry pdo_firebird_module_entry = { /* {{{ */
 	PHP_PDO_FIREBIRD_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
-/* }}} */
 
 #ifdef COMPILE_DL_PDO_FIREBIRD
 ZEND_GET_MODULE(pdo_firebird)
 #endif
 
-PHP_MINIT_FUNCTION(pdo_firebird) /* {{{ */
+PHP_MINIT_FUNCTION(pdo_firebird)
 {
 	REGISTER_PDO_CLASS_CONST_LONG("FB_ATTR_DATE_FORMAT", (zend_long) PDO_FB_ATTR_DATE_FORMAT);
 	REGISTER_PDO_CLASS_CONST_LONG("FB_ATTR_TIME_FORMAT", (zend_long) PDO_FB_ATTR_TIME_FORMAT);
@@ -68,17 +65,15 @@ PHP_MINIT_FUNCTION(pdo_firebird) /* {{{ */
 
 	return SUCCESS;
 }
-/* }}} */
 
-PHP_MSHUTDOWN_FUNCTION(pdo_firebird) /* {{{ */
+PHP_MSHUTDOWN_FUNCTION(pdo_firebird)
 {
 	php_pdo_unregister_driver(&pdo_firebird_driver);
 
 	return SUCCESS;
 }
-/* }}} */
 
-PHP_MINFO_FUNCTION(pdo_firebird) /* {{{ */
+PHP_MINFO_FUNCTION(pdo_firebird)
 {
 	char version[64];
 	isc_get_client_version(version);
@@ -88,4 +83,4 @@ PHP_MINFO_FUNCTION(pdo_firebird) /* {{{ */
 	php_info_print_table_row(2, "Client Library Version", version);
 	php_info_print_table_end();
 }
-/* }}} */
+

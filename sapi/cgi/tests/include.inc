@@ -1,6 +1,6 @@
 <?php
 
-function get_cgi_path() /* {{{ */
+function get_cgi_path()
 {
     $php = getenv("TEST_PHP_EXECUTABLE");
 
@@ -48,9 +48,8 @@ function get_cgi_path() /* {{{ */
     /* uhm? what's that then? */
     return false;
 }
-/* }}} */
 
-function reset_env_vars() /* {{{ */
+function reset_env_vars()
 {
     putenv("REDIRECT_STATUS");
     putenv("QUERY_STRING");
@@ -61,6 +60,5 @@ function reset_env_vars() /* {{{ */
     putenv("GATEWAY_INTERFACE");
     putenv("REQUEST_METHOD");
 }
-/* }}} */
 
 ?>

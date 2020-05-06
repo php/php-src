@@ -85,7 +85,7 @@ static const MYSQLND_REVERSE_API pdo_mysql_reverse_api = {
 #endif
 
 
-/* {{{ PHP_INI_BEGIN
+/* PHP_INI_BEGIN
 */
 PHP_INI_BEGIN()
 #ifndef PHP_WIN32
@@ -95,11 +95,10 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("pdo_mysql.debug",	NULL, PHP_INI_SYSTEM, OnUpdateString, debug, zend_pdo_mysql_globals, pdo_mysql_globals)
 #endif
 PHP_INI_END()
-/* }}} */
 
 /* true global environment */
 
-/* {{{ PHP_MINIT_FUNCTION
+/* PHP_MINIT_FUNCTION
  */
 static PHP_MINIT_FUNCTION(pdo_mysql)
 {
@@ -136,9 +135,8 @@ static PHP_MINIT_FUNCTION(pdo_mysql)
 
 	return php_pdo_register_driver(&pdo_mysql_driver);
 }
-/* }}} */
 
-/* {{{ PHP_MSHUTDOWN_FUNCTION
+/* PHP_MSHUTDOWN_FUNCTION
  */
 static PHP_MSHUTDOWN_FUNCTION(pdo_mysql)
 {
@@ -149,9 +147,8 @@ static PHP_MSHUTDOWN_FUNCTION(pdo_mysql)
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
+/* PHP_MINFO_FUNCTION
  */
 static PHP_MINFO_FUNCTION(pdo_mysql)
 {
@@ -166,11 +163,9 @@ static PHP_MINFO_FUNCTION(pdo_mysql)
 	DISPLAY_INI_ENTRIES();
 #endif
 }
-/* }}} */
-
 
 #if PDO_USE_MYSQLND && PDO_DBG_ENABLED
-/* {{{ PHP_RINIT_FUNCTION
+/* PHP_RINIT_FUNCTION
  */
 static PHP_RINIT_FUNCTION(pdo_mysql)
 {
@@ -185,9 +180,8 @@ static PHP_RINIT_FUNCTION(pdo_mysql)
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_RSHUTDOWN_FUNCTION
+/* PHP_RSHUTDOWN_FUNCTION
  */
 static PHP_RSHUTDOWN_FUNCTION(pdo_mysql)
 {
@@ -201,10 +195,10 @@ static PHP_RSHUTDOWN_FUNCTION(pdo_mysql)
 
 	return SUCCESS;
 }
-/* }}} */
+
 #endif
 
-/* {{{ PHP_GINIT_FUNCTION
+/* PHP_GINIT_FUNCTION
  */
 static PHP_GINIT_FUNCTION(pdo_mysql)
 {
@@ -219,15 +213,13 @@ ZEND_TSRMLS_CACHE_UPDATE();
 	pdo_mysql_globals->dbg = NULL;	/* The DBG object*/
 #endif
 }
-/* }}} */
 
-/* {{{ pdo_mysql_functions[] */
+/* pdo_mysql_functions[] */
 static const zend_function_entry pdo_mysql_functions[] = {
 	PHP_FE_END
 };
-/* }}} */
 
-/* {{{ pdo_mysql_deps[] */
+/* pdo_mysql_deps[] */
 static const zend_module_dep pdo_mysql_deps[] = {
 	ZEND_MOD_REQUIRED("pdo")
 #ifdef PDO_USE_MYSQLND
@@ -235,9 +227,8 @@ static const zend_module_dep pdo_mysql_deps[] = {
 #endif
 	ZEND_MOD_END
 };
-/* }}} */
 
-/* {{{ pdo_mysql_module_entry */
+/* pdo_mysql_module_entry */
 zend_module_entry pdo_mysql_module_entry = {
 	STANDARD_MODULE_HEADER_EX, NULL,
 	pdo_mysql_deps,
@@ -260,4 +251,4 @@ zend_module_entry pdo_mysql_module_entry = {
 	NULL,
 	STANDARD_MODULE_PROPERTIES_EX
 };
-/* }}} */
+

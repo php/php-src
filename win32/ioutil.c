@@ -72,7 +72,7 @@ typedef HRESULT (__stdcall *MyPathCchCanonicalizeEx)(wchar_t *pszPathOut, size_t
 static MyPathCchCanonicalizeEx canonicalize_path_w = NULL;
 
 PW32IO BOOL php_win32_ioutil_posix_to_open_opts(int flags, mode_t mode, php_ioutil_open_opts *opts)
-{/*{{{*/
+{
 	int current_umask;
 
 	opts->attributes = 0;
@@ -182,10 +182,10 @@ PW32IO BOOL php_win32_ioutil_posix_to_open_opts(int flags, mode_t mode, php_iout
 einval:
 	_set_errno(EINVAL);
 	return 0;
-}/*}}}*/
+}
 
 PW32IO int php_win32_ioutil_open_w(const wchar_t *path, int flags, ...)
-{/*{{{*/
+{
 	php_ioutil_open_opts open_opts;
 	HANDLE file;
 	int fd;
@@ -256,10 +256,10 @@ PW32IO int php_win32_ioutil_open_w(const wchar_t *path, int flags, ...)
 	einval:
 		_set_errno(EINVAL);
 		return -1;
-}/*}}}*/
+}
 
 PW32IO int php_win32_ioutil_close(int fd)
-{/*{{{*/
+{
 	int result = -1;
 
 	if (-1 == fd) {
@@ -281,10 +281,10 @@ PW32IO int php_win32_ioutil_close(int fd)
 	}
 
 	return result;
-}/*}}}*/
+}
 
 PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode)
-{/*{{{*/
+{
 	size_t path_len;
 	const wchar_t *my_path;
 
@@ -363,10 +363,10 @@ PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode)
 	}
 
 	return 0;
-}/*}}}*/
+}
 
 PW32IO int php_win32_ioutil_unlink_w(const wchar_t *path)
-{/*{{{*/
+{
 	DWORD err = 0;
 	HANDLE h;
 	BY_HANDLE_FILE_INFORMATION info;
@@ -434,10 +434,10 @@ PW32IO int php_win32_ioutil_unlink_w(const wchar_t *path)
 	CloseHandle(h);
 
 	return 0;
-}/*}}}*/
+}
 
 PW32IO int php_win32_ioutil_rmdir_w(const wchar_t *path)
-{/*{{{*/
+{
 	int ret = 0;
 
 	PHP_WIN32_IOUTIL_CHECK_PATH_W(path, -1, 0)
@@ -449,10 +449,10 @@ PW32IO int php_win32_ioutil_rmdir_w(const wchar_t *path)
 	}
 
 	return ret;
-}/*}}}*/
+}
 
 PW32IO int php_win32_ioutil_chdir_w(const wchar_t *path)
-{/*{{{*/
+{
 	int ret = 0;
 
 	if (!SetCurrentDirectoryW(path)) {
@@ -462,10 +462,10 @@ PW32IO int php_win32_ioutil_chdir_w(const wchar_t *path)
 	}
 
 	return ret;
-}/*}}}*/
+}
 
 PW32IO int php_win32_ioutil_rename_w(const wchar_t *oldname, const wchar_t *newname)
-{/*{{{*/
+{
 	int ret = 0;
 
 	PHP_WIN32_IOUTIL_CHECK_PATH_W(oldname, -1, 0)
@@ -479,10 +479,10 @@ PW32IO int php_win32_ioutil_rename_w(const wchar_t *oldname, const wchar_t *newn
 	}
 
 	return ret;
-}/*}}}*/
+}
 
 PW32IO wchar_t *php_win32_ioutil_getcwd_w(wchar_t *buf, size_t len)
-{/*{{{*/
+{
 	DWORD err = 0;
 	wchar_t *tmp_buf = NULL;
 	DWORD tmp_len = (DWORD)len;
@@ -515,11 +515,11 @@ PW32IO wchar_t *php_win32_ioutil_getcwd_w(wchar_t *buf, size_t len)
 	}
 
 	return (wchar_t *)buf;
-}/*}}}*/
+}
 
 /* based on zend_dirname(). */
 PW32IO size_t php_win32_ioutil_dirname(char *path, size_t len)
-{/*{{{*/
+{
 	char *ret = NULL, *start;
 	size_t ret_len, len_adjust = 0, pathw_len;
 	wchar_t *endw, *pathw, *startw;
@@ -595,11 +595,11 @@ PW32IO size_t php_win32_ioutil_dirname(char *path, size_t len)
 	free(startw);
 
 	return ret_len;
-}/*}}}*/
+}
 
 /* Partial normalization can still be acceptable, explicit fail has to be caught. */
 PW32IO php_win32_ioutil_normalization_result php_win32_ioutil_normalize_path_w(wchar_t **buf, size_t len, size_t *new_len)
-{/*{{{*/
+{
 	wchar_t *idx = *buf, canonicalw[MAXPATHLEN], _tmp[MAXPATHLEN], *pos = _tmp;
 	size_t ret_len = len;
 
@@ -641,15 +641,15 @@ PW32IO php_win32_ioutil_normalization_result php_win32_ioutil_normalize_path_w(w
 	*new_len = ret_len;
 
 	return PHP_WIN32_IOUTIL_NORM_OK;
-}/*}}}*/
+}
 
 static HRESULT __stdcall MyPathCchCanonicalizeExFallback(wchar_t *pszPathOut, size_t cchPathOut, const wchar_t *pszPathIn, unsigned long dwFlags)
-{/*{{{*/
+{
 	return -42;
-}/*}}}*/
+}
 
 BOOL php_win32_ioutil_init(void)
-{/*{{{*/
+{
 	HMODULE hMod = GetModuleHandle("api-ms-win-core-path-l1-1-0");
 
 	if (hMod) {
@@ -662,10 +662,10 @@ BOOL php_win32_ioutil_init(void)
 	}
 
 	return TRUE;
-}/*}}}*/
+}
 
 PW32IO int php_win32_ioutil_access_w(const wchar_t *path, mode_t mode)
-{/*{{{*/
+{
 	DWORD attr;
 
 	if ((mode & X_OK) == X_OK) {
@@ -690,10 +690,10 @@ PW32IO int php_win32_ioutil_access_w(const wchar_t *path, mode_t mode)
 	}
 
 	return 0;
-}/*}}}*/
+}
 
 PW32IO FILE *php_win32_ioutil_fopen_w(const wchar_t *path, const wchar_t *mode)
-{/*{{{*/
+{
 	FILE *ret;
 	char modea[16] = {0};
 	int err = 0, fd, flags, i = 0;
@@ -726,10 +726,10 @@ PW32IO FILE *php_win32_ioutil_fopen_w(const wchar_t *path, const wchar_t *mode)
 	}
 
 	return ret;
-}/*}}}*/
+}
 
 static size_t php_win32_ioutil_realpath_h(HANDLE *h, wchar_t **resolved)
-{/*{{{*/
+{
 	wchar_t ret[PHP_WIN32_IOUTIL_MAXPATHLEN], *ret_real;
 	DWORD ret_len, ret_real_len;
 
@@ -765,15 +765,15 @@ static size_t php_win32_ioutil_realpath_h(HANDLE *h, wchar_t **resolved)
 	memmove(*resolved, ret_real, (ret_real_len+1)*sizeof(wchar_t));
 
 	return ret_real_len;
-}/*}}}*/
+}
 
 PW32IO wchar_t *php_win32_ioutil_realpath_w(const wchar_t *path, wchar_t *resolved)
-{/*{{{*/
+{
 	return php_win32_ioutil_realpath_w_ex0(path, resolved, NULL);
-}/*}}}*/
+}
 
 PW32IO wchar_t *php_win32_ioutil_realpath_w_ex0(const wchar_t *path, wchar_t *resolved, PBY_HANDLE_FILE_INFORMATION info)
-{/*{{{*/
+{
 	HANDLE h;
 	size_t ret_len;
 
@@ -810,15 +810,15 @@ PW32IO wchar_t *php_win32_ioutil_realpath_w_ex0(const wchar_t *path, wchar_t *re
 	CloseHandle(h);
 
 	return resolved;
-}/*}}}*/
+}
 
 PW32IO char *realpath(const char *path, char *resolved)
-{/*{{{*/
+{
 	return php_win32_ioutil_realpath(path, resolved);
-}/*}}}*/
+}
 
 PW32IO int php_win32_ioutil_symlink_w(const wchar_t *target, const wchar_t *link)
-{/*{{{*/
+{
 	DWORD attr;
 	BOOLEAN res;
 
@@ -834,10 +834,10 @@ PW32IO int php_win32_ioutil_symlink_w(const wchar_t *target, const wchar_t *link
 	}
 
 	return 0;
-}/*}}}*/
+}
 
 PW32IO int php_win32_ioutil_link_w(const wchar_t *target, const wchar_t *link)
-{/*{{{*/
+{
 	BOOL res;
 
 	res = CreateHardLinkW(link, target, NULL);
@@ -847,7 +847,7 @@ PW32IO int php_win32_ioutil_link_w(const wchar_t *target, const wchar_t *link)
 	}
 
 	return 0;
-}/*}}}*/
+}
 
 #define FILETIME_TO_UINT(filetime)                                          \
    (*((uint64_t*) &(filetime)) - 116444736000000000ULL)
@@ -856,7 +856,7 @@ PW32IO int php_win32_ioutil_link_w(const wchar_t *target, const wchar_t *link)
    (time_t)(FILETIME_TO_UINT(filetime) / 10000000ULL)
 
 static int php_win32_ioutil_fstat_int(HANDLE h, php_win32_ioutil_stat_t *buf, const wchar_t *pathw, size_t pathw_len, PBY_HANDLE_FILE_INFORMATION dp)
-{/*{{{*/
+{
 	BY_HANDLE_FILE_INFORMATION d;
 	PBY_HANDLE_FILE_INFORMATION data;
 	LARGE_INTEGER t;
@@ -968,10 +968,10 @@ static int php_win32_ioutil_fstat_int(HANDLE h, php_win32_ioutil_stat_t *buf, co
 	buf->st_mtime = FILETIME_TO_TIME_T(data->ftLastWriteTime);
 
 	return 0;
-}/*}}}*/
+}
 
 PW32IO int php_win32_ioutil_stat_ex_w(const wchar_t *path, size_t path_len, php_win32_ioutil_stat_t *buf, int lstat)
-{/*{{{*/
+{
 	BY_HANDLE_FILE_INFORMATION data;
 	HANDLE hLink = NULL;
 	DWORD flags_and_attrs = lstat ? FILE_FLAG_BACKUP_SEMANTICS|FILE_FLAG_OPEN_REPARSE_POINT : FILE_FLAG_BACKUP_SEMANTICS;
@@ -1018,15 +1018,15 @@ PW32IO int php_win32_ioutil_stat_ex_w(const wchar_t *path, size_t path_len, php_
 
 	return ret;
 
-}/*}}}*/
+}
 
 PW32IO int php_win32_ioutil_fstat(int fd, php_win32_ioutil_stat_t *buf)
-{/*{{{*/
+{
 	return php_win32_ioutil_fstat_int((HANDLE)_get_osfhandle(fd), buf, NULL, 0, NULL);
-}/*}}}*/
+}
 
 static ssize_t php_win32_ioutil_readlink_int(HANDLE h, wchar_t *buf, size_t buf_len)
-{/*{{{*/
+{
 	char buffer[MAXIMUM_REPARSE_DATA_BUFFER_SIZE];
 	PHP_WIN32_IOUTIL_REPARSE_DATA_BUFFER *reparse_data = (PHP_WIN32_IOUTIL_REPARSE_DATA_BUFFER*) buffer;
 	wchar_t* reparse_target;
@@ -1138,10 +1138,10 @@ static ssize_t php_win32_ioutil_readlink_int(HANDLE h, wchar_t *buf, size_t buf_
 	buf[reparse_target_len] = L'\0';
 
 	return reparse_target_len;
-}/*}}}*/
+}
 
 PW32IO ssize_t php_win32_ioutil_readlink_w(const wchar_t *path, wchar_t *buf, size_t buf_len)
-{/*{{{*/
+{
 	HANDLE h;
 	ssize_t ret;
 
@@ -1208,4 +1208,4 @@ PW32IO ssize_t php_win32_ioutil_readlink_w(const wchar_t *path, wchar_t *buf, si
 	CloseHandle(h);
 
 	return ret;
-}/*}}}*/
+}

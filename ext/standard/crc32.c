@@ -94,4 +94,4 @@ PHP_FUNCTION(crc32)
 	}
 	RETURN_LONG(crc^0xFFFFFFFF);
 }
-/* }}} */
+

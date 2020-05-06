@@ -47,7 +47,6 @@
 static const char hexchars[] = "0123456789abcdef";
 static const char HEXCHARS[] = "0123456789ABCDEF";
 
-/* php_spintf_appendchar() {{{ */
 inline static void
 php_sprintf_appendchar(zend_string **buffer, size_t *pos, char add)
 {
@@ -58,9 +57,7 @@ php_sprintf_appendchar(zend_string **buffer, size_t *pos, char add)
 	PRINTF_DEBUG(("sprintf: appending '%c', pos=\n", add, *pos));
 	ZSTR_VAL(*buffer)[(*pos)++] = add;
 }
-/* }}} */
 
-/* php_spintf_appendchar() {{{ */
 inline static void
 php_sprintf_appendchars(zend_string **buffer, size_t *pos, char *add, size_t len)
 {
@@ -77,9 +74,7 @@ php_sprintf_appendchars(zend_string **buffer, size_t *pos, char *add, size_t len
 	memcpy(ZSTR_VAL(*buffer) + (*pos), add, len);
 	*pos += len;
 }
-/* }}} */
 
-/* php_spintf_appendstring() {{{ */
 inline static void
 php_sprintf_appendstring(zend_string **buffer, size_t *pos, char *add,
 						   size_t min_width, size_t max_width, char padding,
@@ -134,9 +129,7 @@ php_sprintf_appendstring(zend_string **buffer, size_t *pos, char *add,
 		}
 	}
 }
-/* }}} */
 
-/* php_spintf_appendint() {{{ */
 inline static void
 php_sprintf_appendint(zend_string **buffer, size_t *pos, zend_long number,
 						size_t width, char padding, size_t alignment,
@@ -178,9 +171,7 @@ php_sprintf_appendint(zend_string **buffer, size_t *pos, zend_long number,
 							 padding, alignment, (NUM_BUF_SIZE - 1) - i,
 							 neg, 0, always_sign);
 }
-/* }}} */
 
-/* php_spintf_appenduint() {{{ */
 inline static void
 php_sprintf_appenduint(zend_string **buffer, size_t *pos,
 					   zend_ulong number,
@@ -210,9 +201,7 @@ php_sprintf_appenduint(zend_string **buffer, size_t *pos,
 	php_sprintf_appendstring(buffer, pos, &numbuf[i], width, 0,
 							 padding, alignment, (NUM_BUF_SIZE - 1) - i, 0, 0, 0);
 }
-/* }}} */
 
-/* php_spintf_appenddouble() {{{ */
 inline static void
 php_sprintf_appenddouble(zend_string **buffer, size_t *pos,
 						 double number,
@@ -308,9 +297,7 @@ php_sprintf_appenddouble(zend_string **buffer, size_t *pos,
 	php_sprintf_appendstring(buffer, pos, s, width, 0, padding,
 							 alignment, s_len, is_negative, 0, always_sign);
 }
-/* }}} */
 
-/* php_spintf_appendd2n() {{{ */
 inline static void
 php_sprintf_append2n(zend_string **buffer, size_t *pos, zend_long number,
 					 size_t width, char padding, size_t alignment, int n,
@@ -339,9 +326,7 @@ php_sprintf_append2n(zend_string **buffer, size_t *pos, zend_long number,
 							 padding, alignment, (NUM_BUF_SIZE - 1) - i,
 							 0, expprec, 0);
 }
-/* }}} */
 
-/* php_spintf_getnumber() {{{ */
 inline static int
 php_sprintf_getnumber(char **buffer, size_t *len)
 {
@@ -362,10 +347,8 @@ php_sprintf_getnumber(char **buffer, size_t *len)
 		return (int) num;
 	}
 }
-/* }}} */
 
-/* php_formatted_print() {{{
- * New sprintf implementation for PHP.
+/* New sprintf implementation for PHP.
  *
  * Modifiers:
  *
@@ -648,9 +631,7 @@ fail:
 	zend_string_efree(result);
 	return NULL;
 }
-/* }}} */
 
-/* php_formatted_print_get_array() {{{ */
 static zval*
 php_formatted_print_get_array(zval *array, int *argc)
 {
@@ -672,7 +653,6 @@ php_formatted_print_get_array(zval *array, int *argc)
 	*argc = n;
 	return args;
 }
-/* }}} */
 
 /* Return a formatted string */
 PHP_FUNCTION(sprintf)
@@ -694,7 +674,6 @@ PHP_FUNCTION(sprintf)
 	}
 	RETVAL_STR(result);
 }
-/* }}} */
 
 /* Return a formatted string */
 PHP_FUNCTION(vsprintf)
@@ -719,7 +698,6 @@ PHP_FUNCTION(vsprintf)
 	}
 	RETVAL_STR(result);
 }
-/* }}} */
 
 /* Output a formatted string */
 PHP_FUNCTION(printf)
@@ -744,7 +722,6 @@ PHP_FUNCTION(printf)
 	zend_string_efree(result);
 	RETURN_LONG(rlen);
 }
-/* }}} */
 
 /* Output a formatted string */
 PHP_FUNCTION(vprintf)
@@ -772,7 +749,6 @@ PHP_FUNCTION(vprintf)
 	zend_string_efree(result);
 	RETURN_LONG(rlen);
 }
-/* }}} */
 
 /* Output a formatted string into a stream */
 PHP_FUNCTION(fprintf)
@@ -806,7 +782,6 @@ PHP_FUNCTION(fprintf)
 	RETVAL_LONG(ZSTR_LEN(result));
 	zend_string_efree(result);
 }
-/* }}} */
 
 /* Output a formatted string into a stream */
 PHP_FUNCTION(vfprintf)
@@ -843,4 +818,4 @@ PHP_FUNCTION(vfprintf)
 	RETVAL_LONG(ZSTR_LEN(result));
 	zend_string_efree(result);
 }
-/* }}} */
+

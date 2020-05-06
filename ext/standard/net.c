@@ -305,4 +305,4 @@ PHP_FUNCTION(net_get_interfaces) {
 	RETURN_FALSE;
 #endif
 }
-/* }}} */
+

@@ -58,7 +58,7 @@ static zend_bool will_rejoin(
 	return 0;
 }
 
-static zend_bool needs_pi(const zend_op_array *op_array, zend_dfg *dfg, zend_ssa *ssa, int from, int to, int var) /* {{{ */
+static zend_bool needs_pi(const zend_op_array *op_array, zend_dfg *dfg, zend_ssa *ssa, int from, int to, int var)
 {
 	zend_basic_block *from_block, *to_block;
 	int other_successor;
@@ -88,11 +88,10 @@ static zend_bool needs_pi(const zend_op_array *op_array, zend_dfg *dfg, zend_ssa
 		? from_block->successors[1] : from_block->successors[0];
 	return !will_rejoin(&ssa->cfg, dfg, to_block, other_successor, from, var);
 }
-/* }}} */
 
 static zend_ssa_phi *add_pi(
 		zend_arena **arena, const zend_op_array *op_array, zend_dfg *dfg, zend_ssa *ssa,
-		int from, int to, int var) /* {{{ */
+		int from, int to, int var)
 {
 	zend_ssa_phi *phi;
 	if (!needs_pi(op_array, dfg, ssa, from, to, var)) {
@@ -127,11 +126,10 @@ static zend_ssa_phi *add_pi(
 
 	return phi;
 }
-/* }}} */
 
 static void pi_range(
 		zend_ssa_phi *phi, int min_var, int max_var, zend_long min, zend_long max,
-		char underflow, char overflow, char negative) /* {{{ */
+		char underflow, char overflow, char negative)
 {
 	zend_ssa_range_constraint *constraint = &phi->constraint.range;
 	constraint->min_var = min_var;
@@ -145,7 +143,6 @@ static void pi_range(
 	constraint->negative = negative ? NEG_INIT : NEG_NONE;
 	phi->has_range_constraint = 1;
 }
-/* }}} */
 
 static inline void pi_range_equals(zend_ssa_phi *phi, int var, zend_long val) {
 	pi_range(phi, var, var, val, val, 0, 0, 0);
@@ -183,7 +180,7 @@ static inline uint32_t mask_for_type_check(uint32_t type) {
 
 /* We can interpret $a + 5 == 0 as $a = 0 - 5, i.e. shift the adjustment to the other operand.
  * This negated adjustment is what is written into the "adjustment" parameter. */
-static int find_adjusted_tmp_var(const zend_op_array *op_array, uint32_t build_flags, zend_op *opline, uint32_t var_num, zend_long *adjustment) /* {{{ */
+static int find_adjusted_tmp_var(const zend_op_array *op_array, uint32_t build_flags, zend_op *opline, uint32_t var_num, zend_long *adjustment)
 {
 	zend_op *op = opline;
 	zval *zv;
@@ -233,7 +230,6 @@ static int find_adjusted_tmp_var(const zend_op_array *op_array, uint32_t build_f
 	}
 	return -1;
 }
-/* }}} */
 
 /* e-SSA construction: Pi placement (Pi is actually a Phi with single
  * source and constraint).
@@ -241,7 +237,7 @@ static int find_adjusted_tmp_var(const zend_op_array *op_array, uint32_t build_f
  */
 static void place_essa_pis(
 		zend_arena **arena, const zend_script *script, const zend_op_array *op_array,
-		uint32_t build_flags, zend_ssa *ssa, zend_dfg *dfg) /* {{{ */ {
+		uint32_t build_flags, zend_ssa *ssa, zend_dfg *dfg) {
 	zend_basic_block *blocks = ssa->cfg.blocks;
 	int j, blocks_count = ssa->cfg.blocks_count;
 	for (j = 0; j < blocks_count; j++) {
@@ -535,9 +531,8 @@ static void place_essa_pis(
 		}
 	}
 }
-/* }}} */
 
-static zend_always_inline int _zend_ssa_rename_op(const zend_op_array *op_array, const zend_op *opline, uint32_t k, uint32_t build_flags, int ssa_vars_count, zend_ssa_op *ssa_ops, int *var) /* {{{ */
+static zend_always_inline int _zend_ssa_rename_op(const zend_op_array *op_array, const zend_op *opline, uint32_t k, uint32_t build_flags, int ssa_vars_count, zend_ssa_op *ssa_ops, int *var)
 {
 	const zend_op *next;
 
@@ -758,15 +753,13 @@ add_op1_def:
 
 	return ssa_vars_count;
 }
-/* }}} */
 
-int zend_ssa_rename_op(const zend_op_array *op_array, const zend_op *opline, uint32_t k, uint32_t build_flags, int ssa_vars_count, zend_ssa_op *ssa_ops, int *var) /* {{{ */
+int zend_ssa_rename_op(const zend_op_array *op_array, const zend_op *opline, uint32_t k, uint32_t build_flags, int ssa_vars_count, zend_ssa_op *ssa_ops, int *var)
 {
 	return _zend_ssa_rename_op(op_array, opline, k, build_flags, ssa_vars_count, ssa_ops, var);
 }
-/* }}} */
 
-static int zend_ssa_rename(const zend_op_array *op_array, uint32_t build_flags, zend_ssa *ssa, int *var, int n) /* {{{ */
+static int zend_ssa_rename(const zend_op_array *op_array, uint32_t build_flags, zend_ssa *ssa, int *var, int n)
 {
 	zend_basic_block *blocks = ssa->cfg.blocks;
 	zend_ssa_block *ssa_blocks = ssa->blocks;
@@ -881,9 +874,8 @@ static int zend_ssa_rename(const zend_op_array *op_array, uint32_t build_flags, 
 
 	return SUCCESS;
 }
-/* }}} */
 
-int zend_build_ssa(zend_arena **arena, const zend_script *script, const zend_op_array *op_array, uint32_t build_flags, zend_ssa *ssa) /* {{{ */
+int zend_build_ssa(zend_arena **arena, const zend_script *script, const zend_op_array *op_array, uint32_t build_flags, zend_ssa *ssa)
 {
 	zend_basic_block *blocks = ssa->cfg.blocks;
 	zend_ssa_block *ssa_blocks;
@@ -1032,9 +1024,8 @@ int zend_build_ssa(zend_arena **arena, const zend_script *script, const zend_op_
 
 	return SUCCESS;
 }
-/* }}} */
 
-int zend_ssa_compute_use_def_chains(zend_arena **arena, const zend_op_array *op_array, zend_ssa *ssa) /* {{{ */
+int zend_ssa_compute_use_def_chains(zend_arena **arena, const zend_op_array *op_array, zend_ssa *ssa)
 {
 	zend_ssa_var *ssa_vars;
 	int i;
@@ -1152,9 +1143,8 @@ int zend_ssa_compute_use_def_chains(zend_arena **arena, const zend_op_array *op_
 
 	return SUCCESS;
 }
-/* }}} */
 
-int zend_ssa_unlink_use_chain(zend_ssa *ssa, int op, int var) /* {{{ */
+int zend_ssa_unlink_use_chain(zend_ssa *ssa, int op, int var)
 {
 	if (ssa->vars[var].use_chain == op) {
 		ssa->vars[var].use_chain = zend_ssa_next_use(ssa->ops, var, op);
@@ -1193,9 +1183,8 @@ int zend_ssa_unlink_use_chain(zend_ssa *ssa, int op, int var) /* {{{ */
 		return 0;
 	}
 }
-/* }}} */
 
-void zend_ssa_remove_instr(zend_ssa *ssa, zend_op *opline, zend_ssa_op *ssa_op) /* {{{ */
+void zend_ssa_remove_instr(zend_ssa *ssa, zend_op *opline, zend_ssa_op *ssa_op)
 {
 	if (ssa_op->result_use >= 0) {
 		zend_ssa_unlink_use_chain(ssa, ssa_op - ssa->ops, ssa_op->result_use);
@@ -1224,9 +1213,8 @@ void zend_ssa_remove_instr(zend_ssa *ssa, zend_op *opline, zend_ssa_op *ssa_op) 
 
 	MAKE_NOP(opline);
 }
-/* }}} */
 
-static inline zend_ssa_phi **zend_ssa_next_use_phi_ptr(zend_ssa *ssa, int var, zend_ssa_phi *p) /* {{{ */
+static inline zend_ssa_phi **zend_ssa_next_use_phi_ptr(zend_ssa *ssa, int var, zend_ssa_phi *p)
 {
 	if (p->pi >= 0) {
 		return &p->use_chains[0];
@@ -1241,11 +1229,10 @@ static inline zend_ssa_phi **zend_ssa_next_use_phi_ptr(zend_ssa *ssa, int var, z
 	ZEND_ASSERT(0);
 	return NULL;
 }
-/* }}} */
 
 /* May be called even if source is not used in the phi (useful when removing uses in a phi
  * with multiple identical operands) */
-static inline void zend_ssa_remove_use_of_phi_source(zend_ssa *ssa, zend_ssa_phi *phi, int source, zend_ssa_phi *next_use_phi) /* {{{ */
+static inline void zend_ssa_remove_use_of_phi_source(zend_ssa *ssa, zend_ssa_phi *phi, int source, zend_ssa_phi *next_use_phi)
 {
 	zend_ssa_phi **cur = &ssa->vars[source].phi_use_chain;
 	while (*cur && *cur != phi) {
@@ -1255,18 +1242,16 @@ static inline void zend_ssa_remove_use_of_phi_source(zend_ssa *ssa, zend_ssa_phi
 		*cur = next_use_phi;
 	}
 }
-/* }}} */
 
-static void zend_ssa_remove_uses_of_phi_sources(zend_ssa *ssa, zend_ssa_phi *phi) /* {{{ */
+static void zend_ssa_remove_uses_of_phi_sources(zend_ssa *ssa, zend_ssa_phi *phi)
 {
 	int source;
 	FOREACH_PHI_SOURCE(phi, source) {
 		zend_ssa_remove_use_of_phi_source(ssa, phi, source, zend_ssa_next_use_phi(ssa, source, phi));
 	} FOREACH_PHI_SOURCE_END();
 }
-/* }}} */
 
-static void zend_ssa_remove_phi_from_block(zend_ssa *ssa, zend_ssa_phi *phi) /* {{{ */
+static void zend_ssa_remove_phi_from_block(zend_ssa *ssa, zend_ssa_phi *phi)
 {
 	zend_ssa_block *block = &ssa->blocks[phi->block];
 	zend_ssa_phi **cur = &block->phis;
@@ -1276,9 +1261,8 @@ static void zend_ssa_remove_phi_from_block(zend_ssa *ssa, zend_ssa_phi *phi) /* 
 	}
 	*cur = (*cur)->next;
 }
-/* }}} */
 
-static inline void zend_ssa_remove_defs_of_instr(zend_ssa *ssa, zend_ssa_op *ssa_op) /* {{{ */
+static inline void zend_ssa_remove_defs_of_instr(zend_ssa *ssa, zend_ssa_op *ssa_op)
 {
 	if (ssa_op->op1_def >= 0) {
 		zend_ssa_remove_uses_of_var(ssa, ssa_op->op1_def);
@@ -1293,9 +1277,8 @@ static inline void zend_ssa_remove_defs_of_instr(zend_ssa *ssa, zend_ssa_op *ssa
 		zend_ssa_remove_result_def(ssa, ssa_op);
 	}
 }
-/* }}} */
 
-static inline void zend_ssa_remove_phi_source(zend_ssa *ssa, zend_ssa_phi *phi, int pred_offset, int predecessors_count) /* {{{ */
+static inline void zend_ssa_remove_phi_source(zend_ssa *ssa, zend_ssa_phi *phi, int pred_offset, int predecessors_count)
 {
 	int j, var_num = phi->sources[pred_offset];
 	zend_ssa_phi *next_phi = phi->use_chains[pred_offset];
@@ -1326,9 +1309,8 @@ static inline void zend_ssa_remove_phi_source(zend_ssa *ssa, zend_ssa_phi *phi, 
 	/* Variable only used in one operand, remove the phi from the use chain. */
 	zend_ssa_remove_use_of_phi_source(ssa, phi, var_num, next_phi);
 }
-/* }}} */
 
-void zend_ssa_remove_phi(zend_ssa *ssa, zend_ssa_phi *phi) /* {{{ */
+void zend_ssa_remove_phi(zend_ssa *ssa, zend_ssa_phi *phi)
 {
 	ZEND_ASSERT(phi->ssa_var >= 0);
 	ZEND_ASSERT(ssa->vars[phi->ssa_var].use_chain < 0
@@ -1338,9 +1320,8 @@ void zend_ssa_remove_phi(zend_ssa *ssa, zend_ssa_phi *phi) /* {{{ */
 	ssa->vars[phi->ssa_var].definition_phi = NULL;
 	phi->ssa_var = -1;
 }
-/* }}} */
 
-void zend_ssa_remove_uses_of_var(zend_ssa *ssa, int var_num) /* {{{ */
+void zend_ssa_remove_uses_of_var(zend_ssa *ssa, int var_num)
 {
 	zend_ssa_var *var = &ssa->vars[var_num];
 	zend_ssa_phi *phi;
@@ -1371,9 +1352,8 @@ void zend_ssa_remove_uses_of_var(zend_ssa *ssa, int var_num) /* {{{ */
 	} FOREACH_USE_END();
 	var->use_chain = -1;
 }
-/* }}} */
 
-void zend_ssa_remove_predecessor(zend_ssa *ssa, int from, int to) /* {{{ */
+void zend_ssa_remove_predecessor(zend_ssa *ssa, int from, int to)
 {
 	zend_basic_block *next_block = &ssa->cfg.blocks[to];
 	zend_ssa_block *next_ssa_block = &ssa->blocks[to];
@@ -1417,9 +1397,8 @@ void zend_ssa_remove_predecessor(zend_ssa *ssa, int from, int to) /* {{{ */
 		memmove(predecessors, predecessors + 1, (next_block->predecessors_count - pred_offset) * sizeof(uint32_t));
 	}
 }
-/* }}} */
 
-void zend_ssa_remove_block(zend_op_array *op_array, zend_ssa *ssa, int i) /* {{{ */
+void zend_ssa_remove_block(zend_op_array *op_array, zend_ssa *ssa, int i)
 {
 	zend_basic_block *block = &ssa->cfg.blocks[i];
 	zend_ssa_block *ssa_block = &ssa->blocks[i];
@@ -1490,9 +1469,8 @@ void zend_ssa_remove_block(zend_op_array *op_array, zend_ssa *ssa, int i) /* {{{
 	block->children = -1;
 	block->next_child = -1;
 }
-/* }}} */
 
-static void propagate_phi_type_widening(zend_ssa *ssa, int var) /* {{{ */
+static void propagate_phi_type_widening(zend_ssa *ssa, int var)
 {
 	zend_ssa_phi *phi;
 	FOREACH_PHI_USE(&ssa->vars[var], phi) {
@@ -1502,9 +1480,8 @@ static void propagate_phi_type_widening(zend_ssa *ssa, int var) /* {{{ */
 		}
 	} FOREACH_PHI_USE_END();
 }
-/* }}} */
 
-void zend_ssa_rename_var_uses(zend_ssa *ssa, int old, int new, zend_bool update_types) /* {{{ */
+void zend_ssa_rename_var_uses(zend_ssa *ssa, int old, int new, zend_bool update_types)
 {
 	zend_ssa_var *old_var = &ssa->vars[old];
 	zend_ssa_var *new_var = &ssa->vars[new];
@@ -1619,4 +1596,4 @@ void zend_ssa_rename_var_uses(zend_ssa *ssa, int old, int new, zend_bool update_
 	} FOREACH_PHI_USE_END();
 	old_var->phi_use_chain = NULL;
 }
-/* }}} */
+

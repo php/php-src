@@ -399,9 +399,8 @@ PHP_FUNCTION(stream_bucket_make_writeable)
 		add_property_long(return_value, "datalen", bucket->buflen);
 	}
 }
-/* }}} */
 
-/* {{{ php_stream_bucket_attach */
+/* php_stream_bucket_attach */
 static void php_stream_bucket_attach(int append, INTERNAL_FUNCTION_PARAMETERS)
 {
 	zval *zbrigade, *zobject;
@@ -451,21 +450,18 @@ static void php_stream_bucket_attach(int append, INTERNAL_FUNCTION_PARAMETERS)
 		bucket->refcount++;
 	}
 }
-/* }}} */
 
 /* Prepend bucket to brigade */
 PHP_FUNCTION(stream_bucket_prepend)
 {
 	php_stream_bucket_attach(0, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
-/* }}} */
 
 /* Append bucket to brigade */
 PHP_FUNCTION(stream_bucket_append)
 {
 	php_stream_bucket_attach(1, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
-/* }}} */
 
 /* Create a new bucket for use on the current stream */
 PHP_FUNCTION(stream_bucket_new)
@@ -501,7 +497,6 @@ PHP_FUNCTION(stream_bucket_new)
 	add_property_stringl(return_value, "data", bucket->buf, bucket->buflen);
 	add_property_long(return_value, "datalen", bucket->buflen);
 }
-/* }}} */
 
 /* Returns a list of registered filters */
 PHP_FUNCTION(stream_get_filters)
@@ -524,7 +519,6 @@ PHP_FUNCTION(stream_get_filters)
 	}
 	/* It's okay to return an empty array if no filters are registered */
 }
-/* }}} */
 
 /* Registers a custom filter handler class */
 PHP_FUNCTION(stream_filter_register)
@@ -564,4 +558,4 @@ PHP_FUNCTION(stream_filter_register)
 		RETVAL_FALSE;
 	}
 }
-/* }}} */
+

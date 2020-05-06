@@ -15,7 +15,7 @@
    +----------------------------------------------------------------------+
  */
 
-/* {{{ includes */
+/* includes */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -28,13 +28,12 @@
 
 #include "intl_error.h"
 #include "intl_convert.h"
-/* }}} */
 
 enum {
 	INTL_IDN_VARIANT_UTS46 = 1
 };
 
-/* {{{ grapheme_register_constants
+/* grapheme_register_constants
  * Register API constants
  */
 void idn_register_constants( INIT_FUNC_ARGS )
@@ -87,7 +86,6 @@ void idn_register_constants( INIT_FUNC_ARGS )
 	REGISTER_LONG_CONSTANT("IDNA_ERROR_BIDI", UIDNA_ERROR_BIDI, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IDNA_ERROR_CONTEXTJ", UIDNA_ERROR_CONTEXTJ, CONST_CS | CONST_PERSISTENT);
 }
-/* }}} */
 
 enum {
 	INTL_IDN_TO_ASCII = 0,
@@ -216,12 +214,10 @@ PHP_FUNCTION(idn_to_ascii)
 {
 	php_intl_idn_handoff(INTERNAL_FUNCTION_PARAM_PASSTHRU, INTL_IDN_TO_ASCII);
 }
-/* }}} */
-
 
 /* Converts an ASCII representation of the domain to Unicode (UTF-8), as defined in the IDNA RFC */
 PHP_FUNCTION(idn_to_utf8)
 {
 	php_intl_idn_handoff(INTERNAL_FUNCTION_PARAM_PASSTHRU, INTL_IDN_TO_UTF8);
 }
-/* }}} */
+

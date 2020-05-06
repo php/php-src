@@ -48,7 +48,6 @@ PHP_METHOD(DOMImplementation, hasFeature)
 		RETURN_FALSE;
 	}
 }
-/* }}} end dom_domimplementation_has_feature */
 
 /* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Level-2-Core-DOM-createDocType
 Since: DOM Level 2
@@ -109,7 +108,6 @@ PHP_METHOD(DOMImplementation, createDocumentType)
 
 	DOM_RET_OBJ((xmlNodePtr) doctype, &ret, NULL);
 }
-/* }}} end dom_domimplementation_create_document_type */
 
 /* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Level-2-Core-DOM-createDocument
 Since: DOM Level 2
@@ -213,7 +211,6 @@ PHP_METHOD(DOMImplementation, createDocument)
 		php_libxml_increment_doc_ref((php_libxml_node_object *)doctobj, docp);
 	}
 }
-/* }}} end dom_domimplementation_create_document */
 
 /* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMImplementation3-getFeature
 Since: DOM Level 3
@@ -229,6 +226,5 @@ PHP_METHOD(DOMImplementation, getFeature)
 
 	DOM_NOT_IMPLEMENTED();
 }
-/* }}} end dom_domimplementation_get_feature */
 
 #endif

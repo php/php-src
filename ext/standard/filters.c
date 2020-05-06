@@ -25,7 +25,7 @@
 #include "ext/standard/php_string.h"
 #include "zend_smart_str.h"
 
-/* {{{ rot13 stream filter implementation */
+/* rot13 stream filter implementation */
 static const char rot13_from[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 static const char rot13_to[] = "nopqrstuvwxyzabcdefghijklmNOPQRSTUVWXYZABCDEFGHIJKLM";
 
@@ -71,9 +71,8 @@ static php_stream_filter *strfilter_rot13_create(const char *filtername, zval *f
 static const php_stream_filter_factory strfilter_rot13_factory = {
 	strfilter_rot13_create
 };
-/* }}} */
 
-/* {{{ string.toupper / string.tolower stream filter implementation */
+/* string.toupper / string.tolower stream filter implementation */
 static const char lowercase[] = "abcdefghijklmnopqrstuvwxyz";
 static const char uppercase[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
@@ -162,9 +161,8 @@ static const php_stream_filter_factory strfilter_toupper_factory = {
 static const php_stream_filter_factory strfilter_tolower_factory = {
 	strfilter_tolower_create
 };
-/* }}} */
 
-/* {{{ base64 / quoted_printable stream filter implementation */
+/* base64 / quoted_printable stream filter implementation */
 
 typedef enum _php_conv_err_t {
 	PHP_CONV_ERR_SUCCESS = SUCCESS,
@@ -191,7 +189,7 @@ struct _php_conv {
 #define php_conv_convert(a, b, c, d, e) ((php_conv *)(a))->convert_op((php_conv *)(a), (b), (c), (d), (e))
 #define php_conv_dtor(a) ((php_conv *)a)->dtor((a))
 
-/* {{{ php_conv_base64_encode */
+/* php_conv_base64_encode */
 typedef struct _php_conv_base64_encode {
 	php_conv _super;
 
@@ -440,9 +438,8 @@ out:
 	return err;
 }
 
-/* }}} */
 
-/* {{{ php_conv_base64_decode */
+/* php_conv_base64_decode */
 typedef struct _php_conv_base64_decode {
 	php_conv _super;
 
@@ -602,9 +599,8 @@ static php_conv_err_t php_conv_base64_decode_convert(php_conv_base64_decode *ins
 	return err;
 }
 #undef bmask
-/* }}} */
 
-/* {{{ php_conv_qprint_encode */
+/* php_conv_qprint_encode */
 typedef struct _php_conv_qprint_encode {
 	php_conv _super;
 
@@ -855,9 +851,8 @@ static php_conv_err_t php_conv_qprint_encode_ctor(php_conv_qprint_encode *inst, 
 	inst->lb_cnt = inst->lb_ptr = 0;
 	return PHP_CONV_ERR_SUCCESS;
 }
-/* }}} */
 
-/* {{{ php_conv_qprint_decode */
+/* php_conv_qprint_decode */
 typedef struct _php_conv_qprint_decode {
 	php_conv _super;
 
@@ -1067,7 +1062,6 @@ static php_conv_err_t php_conv_qprint_decode_ctor(php_conv_qprint_decode *inst, 
 	inst->persistent = persistent;
 	return PHP_CONV_ERR_SUCCESS;
 }
-/* }}} */
 
 typedef struct _php_convert_filter {
 	php_conv *cd;
@@ -1330,7 +1324,7 @@ static void php_convert_filter_dtor(php_convert_filter *inst)
 	}
 }
 
-/* {{{ strfilter_convert_append_bucket */
+/* strfilter_convert_append_bucket */
 static int strfilter_convert_append_bucket(
 		php_convert_filter *inst,
 		php_stream *stream, php_stream_filter *filter,
@@ -1510,7 +1504,6 @@ out_failure:
 	pefree(out_buf, persistent);
 	return FAILURE;
 }
-/* }}} */
 
 static php_stream_filter_status_t strfilter_convert_filter(
 	php_stream *stream,
@@ -1622,9 +1615,8 @@ out:
 static const php_stream_filter_factory strfilter_convert_factory = {
 	strfilter_convert_create
 };
-/* }}} */
 
-/* {{{ consumed filter implementation */
+/* consumed filter implementation */
 typedef struct _php_consumed_filter_data {
 	size_t consumed;
 	zend_off_t offset;
@@ -1700,9 +1692,8 @@ static const php_stream_filter_factory consumed_filter_factory = {
 	consumed_filter_create
 };
 
-/* }}} */
 
-/* {{{ chunked filter implementation */
+/* chunked filter implementation */
 typedef enum _php_chunked_filter_state {
 	CHUNK_SIZE_START,
 	CHUNK_SIZE,
@@ -1903,7 +1894,6 @@ static php_stream_filter *chunked_filter_create(const char *filtername, zval *fi
 static const php_stream_filter_factory chunked_filter_factory = {
 	chunked_filter_create
 };
-/* }}} */
 
 static const struct {
 	const php_stream_filter_ops *ops;
@@ -1919,7 +1909,7 @@ static const struct {
 	{ NULL, NULL }
 };
 
-/* {{{ filter MINIT and MSHUTDOWN */
+/* filter MINIT and MSHUTDOWN */
 PHP_MINIT_FUNCTION(standard_filters)
 {
 	int i;
@@ -1944,4 +1934,4 @@ PHP_MSHUTDOWN_FUNCTION(standard_filters)
 	}
 	return SUCCESS;
 }
-/* }}} */
+

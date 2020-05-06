@@ -260,13 +260,12 @@ zend_module_entry gd_module_entry = {
 ZEND_GET_MODULE(gd)
 #endif
 
-/* {{{ PHP_INI_BEGIN */
+/* PHP_INI_BEGIN */
 PHP_INI_BEGIN()
 	PHP_INI_ENTRY("gd.jpeg_ignore_warning", "1", PHP_INI_ALL, NULL)
 PHP_INI_END()
-/* }}} */
 
-/* {{{ php_free_gd_font
+/* php_free_gd_font
  */
 static void php_free_gd_font(zend_resource *rsrc)
 {
@@ -278,9 +277,8 @@ static void php_free_gd_font(zend_resource *rsrc)
 
 	efree(fp);
 }
-/* }}} */
 
-/* {{{ php_gd_error_method
+/* php_gd_error_method
  */
 void php_gd_error_method(int type, const char *format, va_list args)
 {
@@ -300,9 +298,8 @@ void php_gd_error_method(int type, const char *format, va_list args)
 	}
 	php_verror(NULL, "", type, format, args);
 }
-/* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION
+/* PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(gd)
 {
@@ -442,9 +439,8 @@ PHP_MINIT_FUNCTION(gd)
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_MSHUTDOWN_FUNCTION
+/* PHP_MSHUTDOWN_FUNCTION
  */
 PHP_MSHUTDOWN_FUNCTION(gd)
 {
@@ -454,9 +450,8 @@ PHP_MSHUTDOWN_FUNCTION(gd)
 	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_RSHUTDOWN_FUNCTION
+/* PHP_RSHUTDOWN_FUNCTION
  */
 PHP_RSHUTDOWN_FUNCTION(gd)
 {
@@ -465,7 +460,6 @@ PHP_RSHUTDOWN_FUNCTION(gd)
 #endif
 	return SUCCESS;
 }
-/* }}} */
 
 #if defined(HAVE_GD_BUNDLED)
 #define PHP_GD_VERSION_STRING "bundled (2.1.0 compatible)"
@@ -473,7 +467,7 @@ PHP_RSHUTDOWN_FUNCTION(gd)
 # define PHP_GD_VERSION_STRING GD_VERSION_STRING
 #endif
 
-/* {{{ PHP_MINFO_FUNCTION
+/* PHP_MINFO_FUNCTION
  */
 PHP_MINFO_FUNCTION(gd)
 {
@@ -555,7 +549,6 @@ PHP_MINFO_FUNCTION(gd)
 	php_info_print_table_end();
 	DISPLAY_INI_ENTRIES();
 }
-/* }}} */
 
 PHP_FUNCTION(gd_info)
 {
@@ -613,7 +606,6 @@ PHP_FUNCTION(gd_info)
 	add_assoc_bool(return_value, "JIS-mapped Japanese Font Support", 0);
 #endif
 }
-/* }}} */
 
 #define FLIPWORD(a) (((a & 0xff000000) >> 24) | ((a & 0x00ff0000) >> 8) | ((a & 0x0000ff00) << 8) | ((a & 0x000000ff) << 24))
 
@@ -718,7 +710,6 @@ PHP_FUNCTION(imageloadfont)
 	 */
 	RETURN_LONG(Z_RES_HANDLE_P(ind) + 5);
 }
-/* }}} */
 
 /* Set the line drawing styles for use with imageline and IMG_COLOR_STYLED. */
 PHP_FUNCTION(imagesetstyle)
@@ -754,7 +745,6 @@ PHP_FUNCTION(imagesetstyle)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Create a new true color image */
 PHP_FUNCTION(imagecreatetruecolor)
@@ -784,7 +774,6 @@ PHP_FUNCTION(imagecreatetruecolor)
 
 	php_gd_assign_libgdimageptr_as_extgdimage(return_value, im);
 }
-/* }}} */
 
 /* return true if the image uses truecolor */
 PHP_FUNCTION(imageistruecolor)
@@ -800,7 +789,6 @@ PHP_FUNCTION(imageistruecolor)
 
 	RETURN_BOOL(im->trueColor);
 }
-/* }}} */
 
 /* Convert a true color image to a palette based image with a number of colors, optionally using dithering. */
 PHP_FUNCTION(imagetruecolortopalette)
@@ -828,7 +816,6 @@ PHP_FUNCTION(imagetruecolortopalette)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Convert a palette based image to a true color image. */
 PHP_FUNCTION(imagepalettetotruecolor)
@@ -848,7 +835,6 @@ PHP_FUNCTION(imagepalettetotruecolor)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Makes the colors of the palette version of an image more closely match the true color version */
 PHP_FUNCTION(imagecolormatch)
@@ -886,7 +872,6 @@ PHP_FUNCTION(imagecolormatch)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Set line thickness for drawing lines, ellipses, rectangles, polygons etc. */
 PHP_FUNCTION(imagesetthickness)
@@ -905,7 +890,6 @@ PHP_FUNCTION(imagesetthickness)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Draw an ellipse */
 PHP_FUNCTION(imagefilledellipse)
@@ -923,7 +907,6 @@ PHP_FUNCTION(imagefilledellipse)
 	gdImageFilledEllipse(im, cx, cy, w, h, color);
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Draw a filled partial ellipse */
 PHP_FUNCTION(imagefilledarc)
@@ -953,7 +936,6 @@ PHP_FUNCTION(imagefilledarc)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Turn alpha blending mode on or off for the given image */
 PHP_FUNCTION(imagealphablending)
@@ -972,7 +954,6 @@ PHP_FUNCTION(imagealphablending)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Include alpha channel to a saved image */
 PHP_FUNCTION(imagesavealpha)
@@ -991,7 +972,6 @@ PHP_FUNCTION(imagesavealpha)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Set the alpha blending flag to use the bundled libgd layering effects */
 PHP_FUNCTION(imagelayereffect)
@@ -1010,7 +990,6 @@ PHP_FUNCTION(imagelayereffect)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 #define CHECK_RGBA_RANGE(component, name, argument_number) \
 	if (component < 0 || component > gd##name##Max) { \
@@ -1043,7 +1022,6 @@ PHP_FUNCTION(imagecolorallocatealpha)
 	}
 	RETURN_LONG((zend_long)ct);
 }
-/* }}} */
 
 /* Resolve/Allocate a colour with an alpha level.  Works for true colour and palette based images */
 PHP_FUNCTION(imagecolorresolvealpha)
@@ -1065,7 +1043,6 @@ PHP_FUNCTION(imagecolorresolvealpha)
 
 	RETURN_LONG(gdImageColorResolveAlpha(im, red, green, blue, alpha));
 }
-/* }}} */
 
 /* Find the closest matching colour with alpha transparency */
 PHP_FUNCTION(imagecolorclosestalpha)
@@ -1087,7 +1064,6 @@ PHP_FUNCTION(imagecolorclosestalpha)
 
 	RETURN_LONG(gdImageColorClosestAlpha(im, red, green, blue, alpha));
 }
-/* }}} */
 
 /* Find exact match for colour with transparency */
 PHP_FUNCTION(imagecolorexactalpha)
@@ -1109,7 +1085,6 @@ PHP_FUNCTION(imagecolorexactalpha)
 
 	RETURN_LONG(gdImageColorExactAlpha(im, red, green, blue, alpha));
 }
-/* }}} */
 
 /* Copy and resize part of an image using resampling to help ensure clarity */
 PHP_FUNCTION(imagecopyresampled)
@@ -1139,7 +1114,6 @@ PHP_FUNCTION(imagecopyresampled)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 #ifdef PHP_WIN32
 /* Grab a window or its client area using a windows handle (HWND property in COM instance) */
@@ -1209,7 +1183,6 @@ PHP_FUNCTION(imagegrabwindow)
 
 	php_gd_assign_libgdimageptr_as_extgdimage(return_value, im);
 }
-/* }}} */
 
 /* Grab a screenshot */
 PHP_FUNCTION(imagegrabscreen)
@@ -1265,7 +1238,7 @@ PHP_FUNCTION(imagegrabscreen)
 
 	php_gd_assign_libgdimageptr_as_extgdimage(return_value, im);
 }
-/* }}} */
+
 #endif /* PHP_WIN32 */
 
 /* Rotate an image using a custom angle */
@@ -1290,7 +1263,6 @@ PHP_FUNCTION(imagerotate)
 
 	php_gd_assign_libgdimageptr_as_extgdimage(return_value, im_dst);
 }
-/* }}} */
 
 /* Set the tile image to $tile when filling $image with the "IMG_COLOR_TILED" color */
 PHP_FUNCTION(imagesettile)
@@ -1309,7 +1281,6 @@ PHP_FUNCTION(imagesettile)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Set the brush image to $brush when filling $image with the "IMG_COLOR_BRUSHED" color */
 PHP_FUNCTION(imagesetbrush)
@@ -1328,7 +1299,6 @@ PHP_FUNCTION(imagesetbrush)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Create a new image */
 PHP_FUNCTION(imagecreate)
@@ -1358,7 +1328,6 @@ PHP_FUNCTION(imagecreate)
 
 	php_gd_assign_libgdimageptr_as_extgdimage(return_value, im);
 }
-/* }}} */
 
 /* Return the types of images supported in a bitfield - 1=GIF, 2=JPEG, 4=PNG, 8=WBMP, 16=XPM */
 PHP_FUNCTION(imagetypes)
@@ -1391,9 +1360,8 @@ PHP_FUNCTION(imagetypes)
 
 	RETURN_LONG(ret);
 }
-/* }}} */
 
-/* {{{ _php_ctx_getmbi
+/* _php_ctx_getmbi
  */
 
 static int _php_ctx_getmbi(gdIOCtx *ctx)
@@ -1410,9 +1378,8 @@ static int _php_ctx_getmbi(gdIOCtx *ctx)
 
 	return mbi;
 }
-/* }}} */
 
-/* {{{ _php_image_type
+/* _php_image_type
  */
 static const char php_sig_gd2[3] = {'g', 'd', '2'};
 
@@ -1451,9 +1418,8 @@ static int _php_image_type (char data[12])
 	}
 	return -1;
 }
-/* }}} */
 
-/* {{{ _php_image_create_from_string
+/* _php_image_create_from_string
  */
 gdImagePtr _php_image_create_from_string(zend_string *data, char *tn, gdImagePtr (*ioctx_func_p)())
 {
@@ -1477,7 +1443,6 @@ gdImagePtr _php_image_create_from_string(zend_string *data, char *tn, gdImagePtr
 
 	return im;
 }
-/* }}} */
 
 /* Create a new image from the image stream in the string */
 PHP_FUNCTION(imagecreatefromstring)
@@ -1556,9 +1521,8 @@ PHP_FUNCTION(imagecreatefromstring)
 
 	php_gd_assign_libgdimageptr_as_extgdimage(return_value, im);
 }
-/* }}} */
 
-/* {{{ _php_image_create_from
+/* _php_image_create_from
  */
 static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, gdImagePtr (*func_p)(), gdImagePtr (*ioctx_func_p)())
 {
@@ -1682,14 +1646,12 @@ out_err:
 	RETURN_FALSE;
 
 }
-/* }}} */
 
 /* Create a new image from GIF file or URL */
 PHP_FUNCTION(imagecreatefromgif)
 {
 	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GIF, "GIF", gdImageCreateFromGif, gdImageCreateFromGifCtx);
 }
-/* }}} */
 
 #ifdef HAVE_GD_JPG
 /* Create a new image from JPEG file or URL */
@@ -1697,7 +1659,7 @@ PHP_FUNCTION(imagecreatefromjpeg)
 {
 	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_JPG, "JPEG", gdImageCreateFromJpeg, gdImageCreateFromJpegCtx);
 }
-/* }}} */
+
 #endif /* HAVE_GD_JPG */
 
 #ifdef HAVE_GD_PNG
@@ -1706,7 +1668,7 @@ PHP_FUNCTION(imagecreatefrompng)
 {
 	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_PNG, "PNG", gdImageCreateFromPng, gdImageCreateFromPngCtx);
 }
-/* }}} */
+
 #endif /* HAVE_GD_PNG */
 
 #ifdef HAVE_GD_WEBP
@@ -1715,7 +1677,7 @@ PHP_FUNCTION(imagecreatefromwebp)
 {
 	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_WEBP, "WEBP", gdImageCreateFromWebp, gdImageCreateFromWebpCtx);
 }
-/* }}} */
+
 #endif /* HAVE_GD_WEBP */
 
 /* Create a new image from XBM file or URL */
@@ -1723,7 +1685,6 @@ PHP_FUNCTION(imagecreatefromxbm)
 {
 	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_XBM, "XBM", gdImageCreateFromXbm, NULL);
 }
-/* }}} */
 
 #if defined(HAVE_GD_XPM)
 /* Create a new image from XPM file or URL */
@@ -1731,7 +1692,7 @@ PHP_FUNCTION(imagecreatefromxpm)
 {
 	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_XPM, "XPM", gdImageCreateFromXpm, NULL);
 }
-/* }}} */
+
 #endif
 
 /* Create a new image from WBMP file or URL */
@@ -1739,28 +1700,24 @@ PHP_FUNCTION(imagecreatefromwbmp)
 {
 	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_WBM, "WBMP", gdImageCreateFromWBMP, gdImageCreateFromWBMPCtx);
 }
-/* }}} */
 
 /* Create a new image from GD file or URL */
 PHP_FUNCTION(imagecreatefromgd)
 {
 	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GD, "GD", gdImageCreateFromGd, gdImageCreateFromGdCtx);
 }
-/* }}} */
 
 /* Create a new image from GD2 file or URL */
 PHP_FUNCTION(imagecreatefromgd2)
 {
 	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GD2, "GD2", gdImageCreateFromGd2, gdImageCreateFromGd2Ctx);
 }
-/* }}} */
 
 /* Create a new image from a given part of GD2 file or URL */
 PHP_FUNCTION(imagecreatefromgd2part)
 {
 	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GD2PART, "GD2", gdImageCreateFromGd2Part, gdImageCreateFromGd2PartCtx);
 }
-/* }}} */
 
 #if defined(HAVE_GD_BMP)
 /* Create a new image from BMP file or URL */
@@ -1768,7 +1725,7 @@ PHP_FUNCTION(imagecreatefrombmp)
 {
 	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_BMP, "BMP", gdImageCreateFromBmp, gdImageCreateFromBmpCtx);
 }
-/* }}} */
+
 #endif
 
 #if defined(HAVE_GD_TGA)
@@ -1777,10 +1734,10 @@ PHP_FUNCTION(imagecreatefromtga)
 {
 	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_TGA, "TGA", gdImageCreateFromTga, gdImageCreateFromTgaCtx);
 }
-/* }}} */
+
 #endif
 
-/* {{{ _php_image_output
+/* _php_image_output
  */
 static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, void (*func_p)())
 {
@@ -1874,21 +1831,18 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 	}
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Output XBM image to browser or file */
 PHP_FUNCTION(imagexbm)
 {
 	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_XBM, "XBM", gdImageXbmCtx);
 }
-/* }}} */
 
 /* Output GIF image to browser or file */
 PHP_FUNCTION(imagegif)
 {
 	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GIF, "GIF", gdImageGifCtx);
 }
-/* }}} */
 
 #ifdef HAVE_GD_PNG
 /* Output PNG image to browser or file */
@@ -1896,7 +1850,7 @@ PHP_FUNCTION(imagepng)
 {
 	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_PNG, "PNG", gdImagePngCtxEx);
 }
-/* }}} */
+
 #endif /* HAVE_GD_PNG */
 
 
@@ -1906,7 +1860,7 @@ PHP_FUNCTION(imagewebp)
 {
 	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_WEBP, "WEBP", gdImageWebpCtx);
 }
-/* }}} */
+
 #endif /* HAVE_GD_WEBP */
 
 
@@ -1916,7 +1870,7 @@ PHP_FUNCTION(imagejpeg)
 {
 	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_JPG, "JPEG", gdImageJpegCtx);
 }
-/* }}} */
+
 #endif /* HAVE_GD_JPG */
 
 /* Output WBMP image to browser or file */
@@ -1924,21 +1878,18 @@ PHP_FUNCTION(imagewbmp)
 {
 	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_WBM, "WBMP", gdImageWBMPCtx);
 }
-/* }}} */
 
 /* Output GD image to browser or file */
 PHP_FUNCTION(imagegd)
 {
 	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GD, "GD", gdImageGd);
 }
-/* }}} */
 
 /* Output GD2 image to browser or file */
 PHP_FUNCTION(imagegd2)
 {
 	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GD2, "GD2", gdImageGd2);
 }
-/* }}} */
 
 #ifdef HAVE_GD_BMP
 /* Output BMP image to browser or file */
@@ -1946,7 +1897,7 @@ PHP_FUNCTION(imagebmp)
 {
 	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_BMP, "BMP", gdImageBmpCtx);
 }
-/* }}} */
+
 #endif
 
 /* Destroy an image - No effect as of PHP 8.0 */
@@ -1961,7 +1912,6 @@ PHP_FUNCTION(imagedestroy)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Allocate a color for an image */
 PHP_FUNCTION(imagecolorallocate)
@@ -1987,7 +1937,6 @@ PHP_FUNCTION(imagecolorallocate)
 	}
 	RETURN_LONG(ct);
 }
-/* }}} */
 
 /* Copy the palette from the src image onto the dst image */
 PHP_FUNCTION(imagepalettecopy)
@@ -2004,7 +1953,6 @@ PHP_FUNCTION(imagepalettecopy)
 
 	gdImagePaletteCopy(dst, src);
 }
-/* }}} */
 
 /* Get the index of the color of a pixel */
 PHP_FUNCTION(imagecolorat)
@@ -2037,7 +1985,6 @@ PHP_FUNCTION(imagecolorat)
 		}
 	}
 }
-/* }}} */
 
 /* Get the index of the closest color to the specified color */
 PHP_FUNCTION(imagecolorclosest)
@@ -2058,7 +2005,6 @@ PHP_FUNCTION(imagecolorclosest)
 
 	RETURN_LONG(gdImageColorClosest(im, red, green, blue));
 }
-/* }}} */
 
 /* Get the index of the color which has the hue, white and blackness nearest to the given color */
 PHP_FUNCTION(imagecolorclosesthwb)
@@ -2079,7 +2025,6 @@ PHP_FUNCTION(imagecolorclosesthwb)
 
 	RETURN_LONG(gdImageColorClosestHWB(im, red, green, blue));
 }
-/* }}} */
 
 /* De-allocate a color for an image */
 PHP_FUNCTION(imagecolordeallocate)
@@ -2110,7 +2055,6 @@ PHP_FUNCTION(imagecolordeallocate)
 		RETURN_THROWS();
 	}
 }
-/* }}} */
 
 /* Get the index of the specified color or its closest possible alternative */
 PHP_FUNCTION(imagecolorresolve)
@@ -2131,7 +2075,6 @@ PHP_FUNCTION(imagecolorresolve)
 
 	RETURN_LONG(gdImageColorResolve(im, red, green, blue));
 }
-/* }}} */
 
 /* Get the index of the specified color */
 PHP_FUNCTION(imagecolorexact)
@@ -2152,7 +2095,6 @@ PHP_FUNCTION(imagecolorexact)
 
 	RETURN_LONG(gdImageColorExact(im, red, green, blue));
 }
-/* }}} */
 
 /* Set the color for the specified palette index */
 PHP_FUNCTION(imagecolorset)
@@ -2183,7 +2125,6 @@ PHP_FUNCTION(imagecolorset)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Get the colors for an index */
 PHP_FUNCTION(imagecolorsforindex)
@@ -2213,7 +2154,6 @@ PHP_FUNCTION(imagecolorsforindex)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Apply a gamma correction to a GD image */
 PHP_FUNCTION(imagegammacorrect)
@@ -2268,7 +2208,6 @@ PHP_FUNCTION(imagegammacorrect)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Set a single pixel */
 PHP_FUNCTION(imagesetpixel)
@@ -2289,7 +2228,6 @@ PHP_FUNCTION(imagesetpixel)
 	gdImageSetPixel(im, x, y, col);
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Draw a line */
 PHP_FUNCTION(imageline)
@@ -2311,7 +2249,6 @@ PHP_FUNCTION(imageline)
 	gdImageLine(im, x1, y1, x2, y2, col);
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Draw a dashed line */
 PHP_FUNCTION(imagedashedline)
@@ -2329,7 +2266,6 @@ PHP_FUNCTION(imagedashedline)
 	gdImageDashedLine(im, x1, y1, x2, y2, col);
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Draw a rectangle */
 PHP_FUNCTION(imagerectangle)
@@ -2347,7 +2283,6 @@ PHP_FUNCTION(imagerectangle)
 	gdImageRectangle(im, x1, y1, x2, y2, col);
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Draw a filled rectangle */
 PHP_FUNCTION(imagefilledrectangle)
@@ -2364,7 +2299,6 @@ PHP_FUNCTION(imagefilledrectangle)
 	gdImageFilledRectangle(im, x1, y1, x2, y2, col);
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Draw a partial ellipse */
 PHP_FUNCTION(imagearc)
@@ -2393,7 +2327,6 @@ PHP_FUNCTION(imagearc)
 	gdImageArc(im, cx, cy, w, h, st, e, col);
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Draw an ellipse */
 PHP_FUNCTION(imageellipse)
@@ -2411,7 +2344,6 @@ PHP_FUNCTION(imageellipse)
 	gdImageEllipse(im, cx, cy, w, h, color);
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Flood fill to specific color */
 PHP_FUNCTION(imagefilltoborder)
@@ -2429,7 +2361,6 @@ PHP_FUNCTION(imagefilltoborder)
 	gdImageFillToBorder(im, x, y, border, col);
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Flood fill */
 PHP_FUNCTION(imagefill)
@@ -2447,7 +2378,6 @@ PHP_FUNCTION(imagefill)
 	gdImageFill(im, x, y, col);
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Find out the number of colors in an image's palette */
 PHP_FUNCTION(imagecolorstotal)
@@ -2463,7 +2393,6 @@ PHP_FUNCTION(imagecolorstotal)
 
 	RETURN_LONG(gdImageColorsTotal(im));
 }
-/* }}} */
 
 /* Define a color as transparent */
 PHP_FUNCTION(imagecolortransparent)
@@ -2485,7 +2414,6 @@ PHP_FUNCTION(imagecolortransparent)
 
 	RETURN_LONG(gdImageGetTransparent(im));
 }
-/* }}} */
 
 /* Enable or disable interlace */
 PHP_FUNCTION(imageinterlace)
@@ -2507,9 +2435,8 @@ PHP_FUNCTION(imageinterlace)
 
 	RETURN_LONG(gdImageGetInterlaced(im));
 }
-/* }}} */
 
-/* {{{ php_imagepolygon
+/* php_imagepolygon
    arg = -1 open polygon
    arg = 0  normal polygon
    arg = 1  filled polygon */
@@ -2582,30 +2509,26 @@ static void php_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled)
 	efree(points);
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Draw a polygon */
 PHP_FUNCTION(imagepolygon)
 {
 	php_imagepolygon(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
-/* }}} */
 
 /* Draw a polygon */
 PHP_FUNCTION(imageopenpolygon)
 {
 	php_imagepolygon(INTERNAL_FUNCTION_PARAM_PASSTHRU, -1);
 }
-/* }}} */
 
 /* Draw a filled polygon */
 PHP_FUNCTION(imagefilledpolygon)
 {
 	php_imagepolygon(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
-/* }}} */
 
-/* {{{ php_find_gd_font
+/* php_find_gd_font
  */
 static gdFontPtr php_find_gd_font(int size)
 {
@@ -2644,9 +2567,8 @@ static gdFontPtr php_find_gd_font(int size)
 
 	return font;
 }
-/* }}} */
 
-/* {{{ php_imagefontsize
+/* php_imagefontsize
  * arg = 0  ImageFontWidth
  * arg = 1  ImageFontHeight
  */
@@ -2662,23 +2584,20 @@ static void php_imagefontsize(INTERNAL_FUNCTION_PARAMETERS, int arg)
 	font = php_find_gd_font(SIZE);
 	RETURN_LONG(arg ? font->h : font->w);
 }
-/* }}} */
 
 /* Get font width */
 PHP_FUNCTION(imagefontwidth)
 {
 	php_imagefontsize(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
-/* }}} */
 
 /* Get font height */
 PHP_FUNCTION(imagefontheight)
 {
 	php_imagefontsize(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
-/* }}} */
 
-/* {{{ php_gdimagecharup
+/* php_gdimagecharup
  * workaround for a bug in gd 1.2 */
 static void php_gdimagecharup(gdImagePtr im, gdFontPtr f, int x, int y, int c, int color)
 {
@@ -2702,9 +2621,8 @@ static void php_gdimagecharup(gdImagePtr im, gdFontPtr f, int x, int y, int c, i
 		cx++;
 	}
 }
-/* }}} */
 
-/* {{{ php_imagechar
+/* php_imagechar
  * arg = 0  ImageChar
  * arg = 1  ImageCharUp
  * arg = 2  ImageString
@@ -2769,35 +2687,30 @@ static void php_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	}
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Draw a character */
 PHP_FUNCTION(imagechar)
 {
 	php_imagechar(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
-/* }}} */
 
 /* Draw a character rotated 90 degrees counter-clockwise */
 PHP_FUNCTION(imagecharup)
 {
 	php_imagechar(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
-/* }}} */
 
 /* Draw a string horizontally */
 PHP_FUNCTION(imagestring)
 {
 	php_imagechar(INTERNAL_FUNCTION_PARAM_PASSTHRU, 2);
 }
-/* }}} */
 
 /* Draw a string vertically - rotated 90 degrees counter-clockwise */
 PHP_FUNCTION(imagestringup)
 {
 	php_imagechar(INTERNAL_FUNCTION_PARAM_PASSTHRU, 3);
 }
-/* }}} */
 
 /* Copy part of an image */
 PHP_FUNCTION(imagecopy)
@@ -2824,7 +2737,6 @@ PHP_FUNCTION(imagecopy)
 	gdImageCopy(im_dst, im_src, dstX, dstY, srcX, srcY, srcW, srcH);
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Merge one part of an image with another */
 PHP_FUNCTION(imagecopymerge)
@@ -2852,7 +2764,6 @@ PHP_FUNCTION(imagecopymerge)
 	gdImageCopyMerge(im_dst, im_src, dstX, dstY, srcX, srcY, srcW, srcH, pct);
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Merge one part of an image with another */
 PHP_FUNCTION(imagecopymergegray)
@@ -2880,7 +2791,6 @@ PHP_FUNCTION(imagecopymergegray)
 	gdImageCopyMergeGray(im_dst, im_src, dstX, dstY, srcX, srcY, srcW, srcH, pct);
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Copy and resize part of an image */
 PHP_FUNCTION(imagecopyresized)
@@ -2929,7 +2839,6 @@ PHP_FUNCTION(imagecopyresized)
 	gdImageCopyResized(im_dst, im_src, dstX, dstY, srcX, srcY, dstW, dstH, srcW, srcH);
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Get image width */
 PHP_FUNCTION(imagesx)
@@ -2945,7 +2854,6 @@ PHP_FUNCTION(imagesx)
 
 	RETURN_LONG(gdImageSX(im));
 }
-/* }}} */
 
 /* Get image height */
 PHP_FUNCTION(imagesy)
@@ -2961,7 +2869,6 @@ PHP_FUNCTION(imagesy)
 
 	RETURN_LONG(gdImageSY(im));
 }
-/* }}} */
 
 /* Set the clipping rectangle. */
 PHP_FUNCTION(imagesetclip)
@@ -2979,7 +2886,6 @@ PHP_FUNCTION(imagesetclip)
 	gdImageSetClip(im, x1, y1, x2, y2);
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Get the clipping rectangle. */
 PHP_FUNCTION(imagegetclip)
@@ -3002,7 +2908,6 @@ PHP_FUNCTION(imagegetclip)
 	add_next_index_long(return_value, x2);
 	add_next_index_long(return_value, y2);
 }
-/* }}} */
 
 #define TTFTEXT_DRAW 0
 #define TTFTEXT_BBOX 1
@@ -3013,30 +2918,26 @@ PHP_FUNCTION(imageftbbox)
 {
 	php_imagettftext_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, TTFTEXT_BBOX, 1);
 }
-/* }}} */
 
 /* Write text to the image using fonts via freetype2 */
 PHP_FUNCTION(imagefttext)
 {
 	php_imagettftext_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, TTFTEXT_DRAW, 1);
 }
-/* }}} */
 
 /* Give the bounding box of a text using TrueType fonts */
 PHP_FUNCTION(imagettfbbox)
 {
 	php_imagettftext_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, TTFTEXT_BBOX, 0);
 }
-/* }}} */
 
 /* Write text to the image using a TrueType font */
 PHP_FUNCTION(imagettftext)
 {
 	php_imagettftext_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, TTFTEXT_DRAW, 0);
 }
-/* }}} */
 
-/* {{{ php_imagettftext_common
+/* php_imagettftext_common
  */
 static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int extended)
 {
@@ -3115,7 +3016,7 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 		add_next_index_long(return_value, brect[i]);
 	}
 }
-/* }}} */
+
 #endif /* HAVE_GD_FREETYPE */
 
 /* Section Filters */
@@ -3374,7 +3275,6 @@ PHP_FUNCTION(imagefilter)
 		filters[filtertype](INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	}
 }
-/* }}} */
 
 /* Apply a 3x3 convolution matrix, using coefficient div and offset */
 PHP_FUNCTION(imageconvolution)
@@ -3423,7 +3323,7 @@ PHP_FUNCTION(imageconvolution)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
+
 /* End section: Filters */
 
 /* Flip an image (in place) horizontally, vertically or both directions. */
@@ -3459,7 +3359,6 @@ PHP_FUNCTION(imageflip)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Should antialiased functions used or not*/
 PHP_FUNCTION(imageantialias)
@@ -3479,7 +3378,6 @@ PHP_FUNCTION(imageantialias)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Crop an image using the given coordinates and size, x, y, width and height. */
 PHP_FUNCTION(imagecrop)
@@ -3533,7 +3431,6 @@ PHP_FUNCTION(imagecrop)
 
 	php_gd_assign_libgdimageptr_as_extgdimage(return_value, im_crop);
 }
-/* }}} */
 
 /* Crop an image automatically using one of the available modes. */
 PHP_FUNCTION(imagecropauto)
@@ -3579,7 +3476,6 @@ PHP_FUNCTION(imagecropauto)
 
 	php_gd_assign_libgdimageptr_as_extgdimage(return_value, im_crop);
 }
-/* }}} */
 
 /* Scale an image using the given new width and height. */
 PHP_FUNCTION(imagescale)
@@ -3633,7 +3529,6 @@ PHP_FUNCTION(imagescale)
 
 	php_gd_assign_libgdimageptr_as_extgdimage(return_value, im_scaled);
 }
-/* }}} */
 
 /* Return an image containing the affine tramsformed src image, using an optional clipping area */
 PHP_FUNCTION(imageaffine)
@@ -3721,7 +3616,6 @@ PHP_FUNCTION(imageaffine)
 
 	php_gd_assign_libgdimageptr_as_extgdimage(return_value, dst);
 }
-/* }}} */
 
 /* Return an image containing the affine tramsformed src image, using an optional clipping area */
 PHP_FUNCTION(imageaffinematrixget)
@@ -3802,7 +3696,7 @@ PHP_FUNCTION(imageaffinematrixget)
 			add_index_double(return_value, i, affine[i]);
 		}
 	}
-} /* }}} */
+}
 
 /* Concat two matrices (as in doing many ops in one go) */
 PHP_FUNCTION(imageaffinematrixconcat)
@@ -3874,7 +3768,7 @@ PHP_FUNCTION(imageaffinematrixconcat)
 	for (i = 0; i < 6; i++) {
 		add_index_double(return_value, i, mr[i]);
 	}
-} /* }}} */
+}
 
 /* Get the default interpolation method. */
 PHP_FUNCTION(imagegetinterpolation)
@@ -3893,7 +3787,6 @@ PHP_FUNCTION(imagegetinterpolation)
 	RETURN_LONG(im->interpolation_id);
 #endif
 }
-/* }}} */
 
 /* Set the default interpolation method, passing -1 or 0 sets it to the libgd default (bilinear). */
 PHP_FUNCTION(imagesetinterpolation)
@@ -3913,7 +3806,6 @@ PHP_FUNCTION(imagesetinterpolation)
 	}
 	RETURN_BOOL(gdImageSetInterpolationMethod(im, (gdInterpolationMethod) method));
 }
-/* }}} */
 
 /* Get or set the resolution of the image in DPI. */
 PHP_FUNCTION(imageresolution)
@@ -3941,8 +3833,6 @@ PHP_FUNCTION(imageresolution)
 			add_next_index_long(return_value, gdImageResolutionY(im));
 	}
 }
-/* }}} */
-
 
 /*********************************************************
  *
@@ -3954,7 +3844,7 @@ PHP_FUNCTION(imageresolution)
 
 #define CTX_PUTC(c,ctx) ctx->putC(ctx, c)
 
-static void _php_image_output_putc(struct gdIOCtx *ctx, int c) /* {{{ */
+static void _php_image_output_putc(struct gdIOCtx *ctx, int c)
 {
 	/* without the following downcast, the write will fail
 	 * (i.e., will write a zero byte) for all
@@ -3962,33 +3852,33 @@ static void _php_image_output_putc(struct gdIOCtx *ctx, int c) /* {{{ */
 	 */
 	unsigned char ch = (unsigned char) c;
 	php_write(&ch, 1);
-} /* }}} */
+}
 
-static int _php_image_output_putbuf(struct gdIOCtx *ctx, const void* buf, int l) /* {{{ */
+static int _php_image_output_putbuf(struct gdIOCtx *ctx, const void* buf, int l)
 {
 	return php_write((void *)buf, l);
-} /* }}} */
+}
 
-static void _php_image_output_ctxfree(struct gdIOCtx *ctx) /* {{{ */
+static void _php_image_output_ctxfree(struct gdIOCtx *ctx)
 {
 	if(ctx) {
 		efree(ctx);
 	}
-} /* }}} */
+}
 
-static void _php_image_stream_putc(struct gdIOCtx *ctx, int c) /* {{{ */ {
+static void _php_image_stream_putc(struct gdIOCtx *ctx, int c) {
 	char ch = (char) c;
 	php_stream * stream = (php_stream *)ctx->data;
 	php_stream_write(stream, &ch, 1);
-} /* }}} */
+}
 
-static int _php_image_stream_putbuf(struct gdIOCtx *ctx, const void* buf, int l) /* {{{ */
+static int _php_image_stream_putbuf(struct gdIOCtx *ctx, const void* buf, int l)
 {
 	php_stream * stream = (php_stream *)ctx->data;
 	return php_stream_write(stream, (void *)buf, l);
-} /* }}} */
+}
 
-static void _php_image_stream_ctxfree(struct gdIOCtx *ctx) /* {{{ */
+static void _php_image_stream_ctxfree(struct gdIOCtx *ctx)
 {
 	if(ctx->data) {
 		ctx->data = NULL;
@@ -3996,9 +3886,9 @@ static void _php_image_stream_ctxfree(struct gdIOCtx *ctx) /* {{{ */
 	if(ctx) {
 		efree(ctx);
 	}
-} /* }}} */
+}
 
-static void _php_image_stream_ctxfreeandclose(struct gdIOCtx *ctx) /* {{{ */
+static void _php_image_stream_ctxfreeandclose(struct gdIOCtx *ctx)
 {
 
 	if(ctx->data) {
@@ -4008,9 +3898,9 @@ static void _php_image_stream_ctxfreeandclose(struct gdIOCtx *ctx) /* {{{ */
 	if(ctx) {
 		efree(ctx);
 	}
-} /* }}} */
+}
 
-/* {{{ _php_image_output_ctx */
+/* _php_image_output_ctx */
 static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, void (*func_p)())
 {
 	zval *imgind;
@@ -4146,4 +4036,4 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 
 	RETURN_TRUE;
 }
-/* }}} */
+

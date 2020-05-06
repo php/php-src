@@ -34,7 +34,7 @@ static int php_json_escape_string(
 		smart_str *buf,	const char *s, size_t len,
 		int options, php_json_encoder *encoder);
 
-static int php_json_determine_array_type(zval *val) /* {{{ */
+static int php_json_determine_array_type(zval *val)
 {
 	int i;
 	HashTable *myht = Z_ARRVAL_P(val);
@@ -63,19 +63,17 @@ static int php_json_determine_array_type(zval *val) /* {{{ */
 
 	return PHP_JSON_OUTPUT_ARRAY;
 }
-/* }}} */
 
-/* {{{ Pretty printing support functions */
+/* Pretty printing support functions */
 
-static inline void php_json_pretty_print_char(smart_str *buf, int options, char c) /* {{{ */
+static inline void php_json_pretty_print_char(smart_str *buf, int options, char c)
 {
 	if (options & PHP_JSON_PRETTY_PRINT) {
 		smart_str_appendc(buf, c);
 	}
 }
-/* }}} */
 
-static inline void php_json_pretty_print_indent(smart_str *buf, int options, php_json_encoder *encoder) /* {{{ */
+static inline void php_json_pretty_print_indent(smart_str *buf, int options, php_json_encoder *encoder)
 {
 	int i;
 
@@ -85,17 +83,14 @@ static inline void php_json_pretty_print_indent(smart_str *buf, int options, php
 		}
 	}
 }
-/* }}} */
 
-/* }}} */
 
-static inline int php_json_is_valid_double(double d) /* {{{ */
+static inline int php_json_is_valid_double(double d)
 {
 	return !zend_isinf(d) && !zend_isnan(d);
 }
-/* }}} */
 
-static inline void php_json_encode_double(smart_str *buf, double d, int options) /* {{{ */
+static inline void php_json_encode_double(smart_str *buf, double d, int options)
 {
 	size_t len;
 	char num[PHP_DOUBLE_MAX_LENGTH];
@@ -109,7 +104,6 @@ static inline void php_json_encode_double(smart_str *buf, double d, int options)
 	}
 	smart_str_appendl(buf, num, len);
 }
-/* }}} */
 
 #define PHP_JSON_HASH_PROTECT_RECURSION(_tmp_ht) \
 	do { \
@@ -125,7 +119,7 @@ static inline void php_json_encode_double(smart_str *buf, double d, int options)
 		} \
 	} while (0)
 
-static int php_json_encode_array(smart_str *buf, zval *val, int options, php_json_encoder *encoder) /* {{{ */
+static int php_json_encode_array(smart_str *buf, zval *val, int options, php_json_encoder *encoder)
 {
 	int i, r, need_comma = 0;
 	HashTable *myht, *prop_ht;
@@ -250,11 +244,10 @@ static int php_json_encode_array(smart_str *buf, zval *val, int options, php_jso
 	zend_release_properties(prop_ht);
 	return SUCCESS;
 }
-/* }}} */
 
 static int php_json_escape_string(
 		smart_str *buf, const char *s, size_t len,
-		int options, php_json_encoder *encoder) /* {{{ */
+		int options, php_json_encoder *encoder)
 {
 	int status;
 	unsigned int us;
@@ -464,9 +457,8 @@ static int php_json_escape_string(
 
 	return SUCCESS;
 }
-/* }}} */
 
-static int php_json_encode_serializable_object(smart_str *buf, zval *val, int options, php_json_encoder *encoder) /* {{{ */
+static int php_json_encode_serializable_object(smart_str *buf, zval *val, int options, php_json_encoder *encoder)
 {
 	zend_class_entry *ce = Z_OBJCE_P(val);
 	HashTable* myht = Z_OBJPROP_P(val);
@@ -526,9 +518,8 @@ static int php_json_encode_serializable_object(smart_str *buf, zval *val, int op
 
 	return return_code;
 }
-/* }}} */
 
-int php_json_encode_zval(smart_str *buf, zval *val, int options, php_json_encoder *encoder) /* {{{ */
+int php_json_encode_zval(smart_str *buf, zval *val, int options, php_json_encoder *encoder)
 {
 again:
 	switch (Z_TYPE_P(val))
@@ -590,4 +581,4 @@ again:
 
 	return SUCCESS;
 }
-/* }}} */
+

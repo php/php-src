@@ -172,15 +172,14 @@ void php_register_signal_constants(INIT_FUNC_ARGS)
 	REGISTER_LONG_CONSTANT("PRIO_PROCESS", PRIO_PROCESS, CONST_CS | CONST_PERSISTENT);
 #endif
 
-	/* {{{ "how" argument for sigprocmask */
+	/* "how" argument for sigprocmask */
 #ifdef HAVE_SIGPROCMASK
 	REGISTER_LONG_CONSTANT("SIG_BLOCK",   SIG_BLOCK, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SIG_UNBLOCK", SIG_UNBLOCK, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SIG_SETMASK", SIG_SETMASK, CONST_CS | CONST_PERSISTENT);
 #endif
-	/* }}} */
 
-	/* {{{ si_code */
+	/* si_code */
 #if HAVE_SIGWAITINFO && HAVE_SIGTIMEDWAIT
 	REGISTER_LONG_CONSTANT("SI_USER",    SI_USER,    CONST_CS | CONST_PERSISTENT);
 #ifdef SI_NOINFO
@@ -315,7 +314,6 @@ void php_register_signal_constants(INIT_FUNC_ARGS)
 	REGISTER_LONG_CONSTANT("BUS_OBJERR", BUS_OBJERR, CONST_CS | CONST_PERSISTENT);
 #endif
 #endif /* HAVE_SIGWAITINFO && HAVE_SIGTIMEDWAIT */
-	/* }}} */
 
 	/* unshare(/clone) constants */
 #ifdef HAVE_UNSHARE
@@ -490,7 +488,6 @@ PHP_FUNCTION(pcntl_fork)
 
 	RETURN_LONG((zend_long) id);
 }
-/* }}} */
 
 /* Set an alarm clock for delivery of a signal*/
 PHP_FUNCTION(pcntl_alarm)
@@ -503,7 +500,6 @@ PHP_FUNCTION(pcntl_alarm)
 
 	RETURN_LONG((zend_long) alarm(seconds));
 }
-/* }}} */
 
 #define PHP_RUSAGE_PARA(from, to, field) \
 	add_assoc_long(to, #field, from.field)
@@ -585,7 +581,6 @@ PHP_FUNCTION(pcntl_waitpid)
 
 	RETURN_LONG((zend_long) child_id);
 }
-/* }}} */
 
 /* Waits on or returns the status of a forked child as defined by the waitpid() system call */
 PHP_FUNCTION(pcntl_wait)
@@ -634,7 +629,6 @@ PHP_FUNCTION(pcntl_wait)
 
 	RETURN_LONG((zend_long) child_id);
 }
-/* }}} */
 
 #undef PHP_RUSAGE_PARA
 #undef PHP_RUSAGE_SPECIAL
@@ -659,7 +653,6 @@ PHP_FUNCTION(pcntl_wifexited)
 
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* Returns true if the child status code represents a stopped process (WUNTRACED must have been used with waitpid) */
 PHP_FUNCTION(pcntl_wifstopped)
@@ -679,7 +672,6 @@ PHP_FUNCTION(pcntl_wifstopped)
 
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* Returns true if the child status code represents a process that was terminated due to a signal */
 PHP_FUNCTION(pcntl_wifsignaled)
@@ -699,7 +691,7 @@ PHP_FUNCTION(pcntl_wifsignaled)
 
 	RETURN_FALSE;
 }
-/* }}} */
+
 /* Returns true if the child status code represents a process that was resumed due to a SIGCONT signal */
 PHP_FUNCTION(pcntl_wifcontinued)
 {
@@ -717,8 +709,6 @@ PHP_FUNCTION(pcntl_wifcontinued)
 #endif
 	RETURN_FALSE;
 }
-/* }}} */
-
 
 /* Returns the status code of a child's exit */
 PHP_FUNCTION(pcntl_wexitstatus)
@@ -736,7 +726,6 @@ PHP_FUNCTION(pcntl_wexitstatus)
 	RETURN_FALSE;
 #endif
 }
-/* }}} */
 
 /* Returns the number of the signal that terminated the process who's status code is passed  */
 PHP_FUNCTION(pcntl_wtermsig)
@@ -754,7 +743,6 @@ PHP_FUNCTION(pcntl_wtermsig)
 	RETURN_FALSE;
 #endif
 }
-/* }}} */
 
 /* Returns the number of the signal that caused the process to stop who's status code is passed */
 PHP_FUNCTION(pcntl_wstopsig)
@@ -772,7 +760,6 @@ PHP_FUNCTION(pcntl_wstopsig)
 	RETURN_FALSE;
 #endif
 }
-/* }}} */
 
 /* Executes specified program in current process space as defined by exec(2) */
 PHP_FUNCTION(pcntl_exec)
@@ -877,7 +864,6 @@ PHP_FUNCTION(pcntl_exec)
 
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* Assigns a system signal handler to a PHP function */
 PHP_FUNCTION(pcntl_signal)
@@ -953,7 +939,6 @@ PHP_FUNCTION(pcntl_signal)
 	}
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Gets signal handler */
 PHP_FUNCTION(pcntl_signal_get_handler)
@@ -987,7 +972,6 @@ PHP_FUNCTION(pcntl_signal_dispatch)
 	pcntl_signal_dispatch();
 	RETURN_TRUE;
 }
-/* }}} */
 
 #ifdef HAVE_SIGPROCMASK
 /* Examine and change blocked signals */
@@ -1038,12 +1022,12 @@ PHP_FUNCTION(pcntl_sigprocmask)
 
 	RETURN_TRUE;
 }
-/* }}} */
+
 #endif
 
 #ifdef HAVE_STRUCT_SIGINFO_T
 # if HAVE_SIGWAITINFO && HAVE_SIGTIMEDWAIT
-static void pcntl_sigwaitinfo(INTERNAL_FUNCTION_PARAMETERS, int timedwait) /* {{{ */
+static void pcntl_sigwaitinfo(INTERNAL_FUNCTION_PARAMETERS, int timedwait)
 {
 	zval            *user_set, *user_signo, *user_siginfo = NULL;
 	zend_long             tv_sec = 0, tv_nsec = 0;
@@ -1099,24 +1083,22 @@ static void pcntl_sigwaitinfo(INTERNAL_FUNCTION_PARAMETERS, int timedwait) /* {{
 	pcntl_siginfo_to_zval(signo, &siginfo, user_siginfo);
 	RETURN_LONG(signo);
 }
-/* }}} */
 
 /* Synchronously wait for queued signals */
 PHP_FUNCTION(pcntl_sigwaitinfo)
 {
 	pcntl_sigwaitinfo(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
-/* }}} */
 
 /* Wait for queued signals */
 PHP_FUNCTION(pcntl_sigtimedwait)
 {
 	pcntl_sigwaitinfo(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
-/* }}} */
+
 # endif
 
-static void pcntl_siginfo_to_zval(int signo, siginfo_t *siginfo, zval *user_siginfo) /* {{{ */
+static void pcntl_siginfo_to_zval(int signo, siginfo_t *siginfo, zval *user_siginfo)
 {
 	if (signo > 0 && user_siginfo) {
 		user_siginfo = zend_try_array_init(user_siginfo);
@@ -1169,7 +1151,7 @@ static void pcntl_siginfo_to_zval(int signo, siginfo_t *siginfo, zval *user_sigi
 #endif
 	}
 }
-/* }}} */
+
 #endif
 
 #ifdef HAVE_GETPRIORITY
@@ -1207,7 +1189,7 @@ PHP_FUNCTION(pcntl_getpriority)
 
 	RETURN_LONG(pri);
 }
-/* }}} */
+
 #endif
 
 #ifdef HAVE_SETPRIORITY
@@ -1246,7 +1228,7 @@ PHP_FUNCTION(pcntl_setpriority)
 
 	RETURN_TRUE;
 }
-/* }}} */
+
 #endif
 
 /* Retrieve the error number set by the last pcntl function which failed. */
@@ -1258,7 +1240,6 @@ PHP_FUNCTION(pcntl_get_last_error)
 
 	RETURN_LONG(PCNTL_G(last_error));
 }
-/* }}} */
 
 /* Retrieve the system error message associated with the given errno. */
 PHP_FUNCTION(pcntl_strerror)
@@ -1271,7 +1252,6 @@ PHP_FUNCTION(pcntl_strerror)
 
 	RETURN_STRING(strerror(error));
 }
-/* }}} */
 
 /* Our custom signal handler that calls the appropriate php_function */
 #ifdef HAVE_STRUCT_SIGINFO_T
@@ -1389,7 +1369,6 @@ PHP_FUNCTION(pcntl_async_signals)
 	RETVAL_BOOL(PCNTL_G(async_signals));
 	PCNTL_G(async_signals) = on;
 }
-/* }}} */
 
 #ifdef HAVE_UNSHARE
 /* disassociate parts of the process execution context */
@@ -1440,7 +1419,7 @@ PHP_FUNCTION(pcntl_unshare)
 
 	RETURN_TRUE;
 }
-/* }}} */
+
 #endif
 
 static void pcntl_interrupt_function(zend_execute_data *execute_data)

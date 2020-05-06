@@ -9,7 +9,7 @@
  *
  * Phar Command
  */
-// {{{ class PharCommand extends CLICommand
+
 /**
  * PharCommand class
  *
@@ -24,13 +24,11 @@
  */
 class PharCommand extends CLICommand
 {
-    // {{{ public function cli_get_SP2
     public function cli_get_SP2($l1, $arg_inf)
     {
         return str_repeat(' ', $l1 + 2 + 4 + 9);
     }
-    // }}}
-    // {{{ public function cli_get_SP3
+
     /**
      * Cli Get SP3
      *
@@ -43,8 +41,7 @@ class PharCommand extends CLICommand
     {
         return str_repeat(' ', $l1 + 2 + 4 + 9 + 2 + $l2 + 2);
     }
-    // }}}
-    // {{{ static function phar_args
+
     /**
      * Phar arguments
      *
@@ -181,8 +178,7 @@ class PharCommand extends CLICommand
         }
         return $args;
     }
-    // }}}
-    // {{{ static function strEndsWith
+
     /**
      * String Ends With
      *
@@ -197,8 +193,7 @@ class PharCommand extends CLICommand
     {
         return substr($haystack, -strlen($needle)) == $needle;
     }
-    // }}}
-    // {{{ static function cli_arg_typ_loader
+
     /**
      * Argument type loader
      *
@@ -263,8 +258,7 @@ class PharCommand extends CLICommand
         }
         return self::cli_arg_typ_file($arg);
     }
-    // }}}
-    // {{{ static function cli_arg_typ_pharnew
+
     /**
      * Argument type new phar
      *
@@ -281,8 +275,7 @@ class PharCommand extends CLICommand
         }
         return $arg;
     }
-    // }}}
-    // {{{ static function cli_arg_typ_pharfile
+
     /**
      * Argument type existing Phar file
      *
@@ -308,8 +301,7 @@ class PharCommand extends CLICommand
             self::error("Exception while opening phar '$arg':\n" . $e->getMessage() . "\n");
         }
     }
-    // }}}
-    // {{{ static function cli_arg_typ_pharurl
+
     /**
      * Argument type Phar url-like
      *
@@ -329,8 +321,7 @@ class PharCommand extends CLICommand
     {
         return 'phar://' . self::cli_arg_typ_pharfile($arg, $cfg, $key);
     }
-    // }}}
-    // {{{ static function cli_arg_typ_phar
+
     /**
      * Cli argument type phar
      *
@@ -345,8 +336,7 @@ class PharCommand extends CLICommand
             self::error("Exception while opening phar '$argv':\n" . $e->getMessage() . "\n");
         }
     }
-    // }}}
-    // {{{ static function cli_arg_typ_entry
+
     /**
      * Argument type Entry name
      *
@@ -358,8 +348,7 @@ class PharCommand extends CLICommand
         // no further check atm, maybe check for no '/' at beginning
         return $arg;
     }
-    // }}}
-    // {{{ static function cli_arg_typ_compalg
+
     /**
      * Argument type compression algorithm
      *
@@ -385,8 +374,7 @@ class PharCommand extends CLICommand
         }
         return $arg;
     }
-    // }}}
-    // {{{ static function cli_arg_typ_privkey
+
     /**
      * Argument type private key (for OpenSSL signing)
      *
@@ -406,8 +394,7 @@ class PharCommand extends CLICommand
         }
         return $arg;
     }
-    // }}}
-    // {{{ static function phar_check_hash
+
     /**
      * Check whether hash method is valid.
      *
@@ -431,8 +418,7 @@ class PharCommand extends CLICommand
                 return Phar::OPENSSL;
         }
     }
-    // }}}
-    // {{{ static function cli_cmd_inf_pack
+
     /**
      * Information pack
      *
@@ -446,8 +432,7 @@ class PharCommand extends CLICommand
                "To create an archive that contains PEAR class PHP_Archive " .
                "then point -p argument to PHP/Archive.php.\n";
     }
-    // }}}
-    // {{{ static function cli_cmd_arg_pack
+
     /**
      * Pack a new phar infos
      *
@@ -466,8 +451,7 @@ class PharCommand extends CLICommand
 
         return $args;
     }
-    // }}}
-    // {{{ function phar_set_stub_begin
+
     /**
      * Set the stub
      */
@@ -525,8 +509,7 @@ class PharCommand extends CLICommand
         }
         return NULL;
     }
-    // }}}
-    // {{{ function phar_set_stub_end
+
     /**
      * Set stub end
      */
@@ -540,8 +523,7 @@ class PharCommand extends CLICommand
             }
         }
     }
-    // }}}
-    // {{{ function cli_cmd_run_pack
+
     /**
      * Pack a new Phar
      *
@@ -610,8 +592,7 @@ class PharCommand extends CLICommand
         $phar->stopBuffering();
         exit(0);
     }
-    // }}}
-    // {{{ static function phar_add
+
     /**
      * Add files to a phar archive.
      *
@@ -652,8 +633,7 @@ class PharCommand extends CLICommand
             self::error("Unable to complete operation on file '$file'\n" . $e->getMessage() . "\n");
         }
     }
-    // }}}
-    // {{{ static function phar_add_file
+
     /**
      * Add a phar file
      *
@@ -696,8 +676,7 @@ class PharCommand extends CLICommand
                 break;
         }
     }
-    // }}}
-    // {{{ public function phar_dir_echo
+
     /**
      * Echo directory
      *
@@ -708,8 +687,7 @@ class PharCommand extends CLICommand
     {
         echo "$f\n";
     }
-    // }}}
-    // {{{ public function phar_dir_operation
+
     /**
      * Directory operations
      *
@@ -739,7 +717,7 @@ class PharCommand extends CLICommand
         }
         return $any;
     }
-    // {{{ static function cli_cmd_inf_list
+
     /**
      * Cli Command Info List
      *
@@ -749,8 +727,7 @@ class PharCommand extends CLICommand
     {
         return "List contents of a PHAR archive.";
     }
-    // }}}
-    // {{{ static function cli_cmd_arg_list
+
     /**
      * Cli Command Argument List
      *
@@ -760,8 +737,7 @@ class PharCommand extends CLICommand
     {
         return self::phar_args('Fix', 'pharurl');
     }
-    // }}}
-    // {{{ public function cli_cmd_run_list
+
     /**
      * Cli Command Run List
      *
@@ -775,8 +751,7 @@ class PharCommand extends CLICommand
                 array($this, 'phar_dir_echo')
             );
     }
-    // }}}
-    // {{{ static function cli_command_inf_tree
+
     /**
      * Cli Command Inf Tree
      *
@@ -786,8 +761,7 @@ class PharCommand extends CLICommand
     {
         return "Get a directory tree for a PHAR archive.";
     }
-    // }}}
-    // {{{ static function cli_cmd_arg_tree
+
     /**
      * Cli Command Argument Tree
      *
@@ -797,8 +771,7 @@ class PharCommand extends CLICommand
     {
         return self::phar_args('Fix', 'pharurl');
     }
-    // }}}
-    // {{{ public function cli_cmd_run_tree
+
     /**
      * Cli Command Run Tree
      *
@@ -819,8 +792,7 @@ class PharCommand extends CLICommand
             echo "|-<root directory>\n";
         }
     }
-    // }}}
-    // {{{ cli_cmd_inf_extract
+
     /**
      * Cli Command Inf Extract
      *
@@ -830,8 +802,7 @@ class PharCommand extends CLICommand
     {
         return "Extract a PHAR package to a directory.";
     }
-    // }}}
-    // {{{ static function cli_cmd_arg_extract
+
     /**
      * Cli Command Arguments Extract
      *
@@ -851,8 +822,7 @@ class PharCommand extends CLICommand
 
         return $args;
     }
-    // }}}
-    // {{{ public function cli_cmd_run_extract
+
     /**
      * Run Extract
      *
@@ -885,8 +855,7 @@ class PharCommand extends CLICommand
             array($blen, $dir)
         );
     }
-    // }}}
-    // {{{ public function phar_dir_extract
+
     /**
      * Extract to a directory
      *
@@ -920,8 +889,7 @@ class PharCommand extends CLICommand
             echo " ...ok\n";
         }
     }
-    // }}}
-    // {{{ static function cli_cmd_inf_delete
+
     /**
      * Delete an entry from a phar information.
      *
@@ -931,8 +899,7 @@ class PharCommand extends CLICommand
     {
         return 'Delete entry from a PHAR archive';
     }
-    // }}}
-    // {{{ static function cli_cmd_arg_delete
+
     /**
      * The cli command argument for deleting.
      *
@@ -942,8 +909,7 @@ class PharCommand extends CLICommand
     {
         return self::phar_args('FE', 'phar');
     }
-    // }}}
-    // {{{ public function cli_cmd_run_delete
+
     /**
      * Deleting execution
      *
@@ -958,8 +924,7 @@ class PharCommand extends CLICommand
         unset($phar[$entry]);
         $phar->stopBuffering();
     }
-    // }}}
-    // {{{ static function cli_cmd_inf_add
+
     /**
      * Client comment add file information
      *
@@ -969,8 +934,7 @@ class PharCommand extends CLICommand
     {
         return "Add entries to a PHAR package.";
     }
-    // }}}
-    // {{{ static function cli_cmd_arg_add
+
     /**
      * Add a file arguments
      */
@@ -985,8 +949,7 @@ class PharCommand extends CLICommand
         );
         return $args;
     }
-    // }}}
-    // {{{ public functio cli_cmd_run_add
+
     /**
      * Add a file
      *
@@ -1014,8 +977,7 @@ class PharCommand extends CLICommand
         $phar->stopBuffering();
         exit(0);
     }
-    // }}}
-    // {{{ public function cli_cmd_inf_stub_set
+
     /**
      * Set the stup of a phar file.
      *
@@ -1026,8 +988,7 @@ class PharCommand extends CLICommand
         return "Set the stub of a PHAR file. " .
                "If no input file is specified as stub then stdin is being used.";
     }
-    // }}}
-    // {{{ public function cli_cmd_arg_stub_set
+
     /**
      * Set the argument stub
      *
@@ -1039,8 +1000,7 @@ class PharCommand extends CLICommand
         $args['s']['val'] = 'php://stdin';
         return $args;
     }
-    // }}}
-    // {{{ public function cli_cmd_run_stub_set
+
     /**
      * Cli Command run stub set
      *
@@ -1056,8 +1016,7 @@ class PharCommand extends CLICommand
         $this->phar_set_stub_begin($phar, $stub, $loader, $hashbang);
         $this->phar_set_stub_end($phar, $stub, $loader);
     }
-    // }}}
-    // {{{ public function cli_cmd_inf_stub_get
+
     /**
      * Get the command stub infos.
      *
@@ -1068,8 +1027,7 @@ class PharCommand extends CLICommand
         return "Get the stub of a PHAR file. " .
                "If no output file is specified as stub then stdout is being used.";
     }
-    // }}}
-    // {{{ public function cli_cmd_arg_stub_get
+
     /**
      * Get the argument stub
      *
@@ -1081,8 +1039,7 @@ class PharCommand extends CLICommand
         $args['s']['val'] = 'php://stdin';
         return $args;
     }
-    // }}}
-    // {{{ public function cli_cmd_run_stub_get
+
     /**
      * Cli Command Run Stub
      *
@@ -1098,8 +1055,7 @@ class PharCommand extends CLICommand
 
         file_put_contents($stub, $phar->getStub());
     }
-    // }}}
-    // {{{ public function cli_cmd_inf_compress
+
     /**
      * Cli Command Inf Compress
      *
@@ -1111,8 +1067,7 @@ class PharCommand extends CLICommand
     {
         return "Compress or uncompress all files or a selected entry.";
     }
-    // }}}
-    // {{{ public function cli_cmd_arg_cmpress
+
     /**
      * Cli Command Arg Compress
      *
@@ -1122,8 +1077,7 @@ class PharCommand extends CLICommand
     {
         return self::phar_args('FCe', 'phar');
     }
-    // }}}
-    // {{{ public function cli_cmd_run_compress
+
     /**
      * Cli Command Run Compress
      *
@@ -1160,8 +1114,7 @@ class PharCommand extends CLICommand
                 break;
         }
     }
-    // }}}
-    // {{{ public function cli_cmd_inf_sign
+
     /**
      * Cli Command Info Signature
      *
@@ -1171,8 +1124,7 @@ class PharCommand extends CLICommand
     {
         return "Set signature hash algorithm.";
     }
-    // }}}
-    // {{{ public function cli_cmd_arg_sign
+
     /**
      * Cli Command Argument Sign
      *
@@ -1182,8 +1134,7 @@ class PharCommand extends CLICommand
     {
         return self::phar_args('FHy', 'phar');
     }
-    // }}}
-    // {{{ public function cli_cmd_run_sign
+
     /**
      * Cli Command Run Signature
      *
@@ -1199,8 +1150,7 @@ class PharCommand extends CLICommand
 
         $phar->setSignatureAlgorithm($hash, $privkey);
     }
-    // }}}
-    // {{{ public function cli_cmd_inf_meta_set
+
     /**
      * Cli Command Inf Meta Set
      *
@@ -1216,8 +1166,7 @@ class PharCommand extends CLICommand
                "metadata is present and a flat value then the return value is 1. Also using -k " .
                "the input is been taken directly rather then being serialized.";
     }
-    // }}}
-    // {{{ public function cli_cmd_arg_meta_set
+
     /**
      * Cli Command Argument Meta Set
      *
@@ -1227,8 +1176,7 @@ class PharCommand extends CLICommand
     {
         return self::phar_args('FekM', 'phar');
     }
-    // }}}
-    // {{{ public function cli_cmd_run_met_set
+
     /**
      * Cli Command Run Metaset
      *
@@ -1277,8 +1225,7 @@ class PharCommand extends CLICommand
         }
         $phar->stopBuffering();
     }
-    // }}}
-    // {{{ public function cli_cmd_inf_met_get
+
     /**
      * Cli Command Inf Metaget
      *
@@ -1293,8 +1240,7 @@ class PharCommand extends CLICommand
                "rather than using serialize. If that index does not exist or no meta data is " .
                "present then the return value is 1.";
     }
-    // }}}
-    // {{{ public function cli_cmd_arg_meta_get
+
     /**
      * Cli Command arg metaget
      *
@@ -1304,8 +1250,7 @@ class PharCommand extends CLICommand
     {
         return self::phar_args('Fek', 'phar');
     }
-    // }}}
-    // {{{ public function cli_cmd_run_meta_get
+
     /**
      * Cli Command Run Metaget
      *
@@ -1347,8 +1292,7 @@ class PharCommand extends CLICommand
             }
         }
     }
-    // }}}
-    // {{{ public function cli_cmd_inf_meta_del
+
     /**
      * Cli Command Inf Metadel
      *
@@ -1361,8 +1305,7 @@ class PharCommand extends CLICommand
                "and the given index is being deleted.\n" .
                "If something was deleted the return value is 0 otherwise it is 1.";
     }
-    // }}}
-    // {{{ public function cli_cmd_arg_meta_del
+
     /**
      * CliC ommand Arg Metadelete
      *
@@ -1372,8 +1315,7 @@ class PharCommand extends CLICommand
     {
         return self::phar_args('Fek', 'phar');
     }
-    // }}}
-    // {{{ public function cli_cmd_run_meta_del
+
     /**
      * Cli Command Run MetaDel
      *
@@ -1423,8 +1365,7 @@ class PharCommand extends CLICommand
             }
         }
     }
-    // }}}
-    // {{{ public function cli_cmd_inf_info
+
     /**
      * CLi Command Inf Info
      *
@@ -1435,8 +1376,7 @@ class PharCommand extends CLICommand
         return "Get information about a PHAR package.\n" .
                "By using -k it is possible to return a single value.";
     }
-    // }}}
-    // {{{ public function cli_cmd_arg_info
+
     /**
      * Cli Command Arg Infos
      *
@@ -1446,8 +1386,7 @@ class PharCommand extends CLICommand
     {
         return self::phar_args('Fk', 'phar');
     }
-    // }}}
-    // {{{ public function cli_cmd_run_info
+
     /**
      * Cli Command Run Info
      *
@@ -1532,8 +1471,7 @@ class PharCommand extends CLICommand
             echo $which . ':' . str_repeat(' ', $l + 1 - strlen($which)) . $val . "\n";
         }
     }
-    // }}}
-    // {{{ public function cli_cmd_inf_version
+
     /**
      * CLi Command Inf Version
      *
@@ -1543,8 +1481,7 @@ class PharCommand extends CLICommand
     {
         return "Get information about the PHAR environment and the tool version.";
     }
-    // }}}
-    // {{{ public function cli_cmd_arg_version
+
     /**
      * Cli Command Arg Version
      *
@@ -1554,8 +1491,7 @@ class PharCommand extends CLICommand
     {
         return self::phar_args('', NULL);
     }
-    // }}}
-    // {{{ public function cli_cmd_run_info
+
     /**
      * Cli Command Run Info
      *
@@ -1589,7 +1525,6 @@ class PharCommand extends CLICommand
             printf("%-${klen}s  %s\n", $k.':', $v);
         }
     }
-    // }}}
 }
-// }}}
+
 ?>

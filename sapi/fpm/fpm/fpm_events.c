@@ -46,20 +46,18 @@ static struct fpm_event_queue_s *fpm_event_queue_timer = NULL;
 static struct fpm_event_queue_s *fpm_event_queue_fd = NULL;
 static struct fpm_event_s children_bury_timer;
 
-static void fpm_event_cleanup(int which, void *arg) /* {{{ */
+static void fpm_event_cleanup(int which, void *arg)
 {
 	fpm_event_queue_destroy(&fpm_event_queue_timer);
 	fpm_event_queue_destroy(&fpm_event_queue_fd);
 }
-/* }}} */
 
-static void fpm_postponed_children_bury(struct fpm_event_s *ev, short which, void *arg) /* {{{ */
+static void fpm_postponed_children_bury(struct fpm_event_s *ev, short which, void *arg)
 {
 	fpm_children_bury();
 }
-/* }}} */
 
-static void fpm_got_signal(struct fpm_event_s *ev, short which, void *arg) /* {{{ */
+static void fpm_got_signal(struct fpm_event_s *ev, short which, void *arg)
 {
 	char c;
 	int res, ret;
@@ -132,9 +130,8 @@ static void fpm_got_signal(struct fpm_event_s *ev, short which, void *arg) /* {{
 	} while (1);
 	return;
 }
-/* }}} */
 
-static struct fpm_event_s *fpm_event_queue_isset(struct fpm_event_queue_s *queue, struct fpm_event_s *ev) /* {{{ */
+static struct fpm_event_s *fpm_event_queue_isset(struct fpm_event_queue_s *queue, struct fpm_event_s *ev)
 {
 	if (!ev) {
 		return NULL;
@@ -149,9 +146,8 @@ static struct fpm_event_s *fpm_event_queue_isset(struct fpm_event_queue_s *queue
 
 	return NULL;
 }
-/* }}} */
 
-static int fpm_event_queue_add(struct fpm_event_queue_s **queue, struct fpm_event_s *ev) /* {{{ */
+static int fpm_event_queue_add(struct fpm_event_queue_s **queue, struct fpm_event_s *ev)
 {
 	struct fpm_event_queue_s *elt;
 
@@ -184,9 +180,8 @@ static int fpm_event_queue_add(struct fpm_event_queue_s **queue, struct fpm_even
 
 	return 0;
 }
-/* }}} */
 
-static int fpm_event_queue_del(struct fpm_event_queue_s **queue, struct fpm_event_s *ev) /* {{{ */
+static int fpm_event_queue_del(struct fpm_event_queue_s **queue, struct fpm_event_s *ev)
 {
 	struct fpm_event_queue_s *q;
 	if (!queue || !ev) {
@@ -220,9 +215,8 @@ static int fpm_event_queue_del(struct fpm_event_queue_s **queue, struct fpm_even
 	}
 	return -1;
 }
-/* }}} */
 
-static void fpm_event_queue_destroy(struct fpm_event_queue_s **queue) /* {{{ */
+static void fpm_event_queue_destroy(struct fpm_event_queue_s **queue)
 {
 	struct fpm_event_queue_s *q, *tmp;
 
@@ -243,9 +237,8 @@ static void fpm_event_queue_destroy(struct fpm_event_queue_s **queue) /* {{{ */
 	}
 	*queue = NULL;
 }
-/* }}} */
 
-int fpm_event_pre_init(char *machanism) /* {{{ */
+int fpm_event_pre_init(char *machanism)
 {
 	/* kqueue */
 	module = fpm_event_kqueue_module();
@@ -302,21 +295,18 @@ int fpm_event_pre_init(char *machanism) /* {{{ */
 	}
 	return -1;
 }
-/* }}} */
 
-const char *fpm_event_machanism_name() /* {{{ */
+const char *fpm_event_machanism_name()
 {
 	return module ? module->name : NULL;
 }
-/* }}} */
 
-int fpm_event_support_edge_trigger() /* {{{ */
+int fpm_event_support_edge_trigger()
 {
 	return module ? module->support_edge_trigger : 0;
 }
-/* }}} */
 
-int fpm_event_init_main() /* {{{ */
+int fpm_event_init_main()
 {
 	struct fpm_worker_pool_s *wp;
 	int max;
@@ -352,9 +342,8 @@ int fpm_event_init_main() /* {{{ */
 	}
 	return 0;
 }
-/* }}} */
 
-void fpm_event_loop(int err) /* {{{ */
+void fpm_event_loop(int err)
 {
 	static struct fpm_event_s signal_fd_event;
 
@@ -471,9 +460,8 @@ void fpm_event_loop(int err) /* {{{ */
 		}
 	}
 }
-/* }}} */
 
-void fpm_event_fire(struct fpm_event_s *ev) /* {{{ */
+void fpm_event_fire(struct fpm_event_s *ev)
 {
 	if (!ev || !ev->callback) {
 		return;
@@ -481,9 +469,8 @@ void fpm_event_fire(struct fpm_event_s *ev) /* {{{ */
 
 	(*ev->callback)( (struct fpm_event_s *) ev, ev->which, ev->arg);
 }
-/* }}} */
 
-int fpm_event_set(struct fpm_event_s *ev, int fd, int flags, void (*callback)(struct fpm_event_s *, short, void *), void *arg) /* {{{ */
+int fpm_event_set(struct fpm_event_s *ev, int fd, int flags, void (*callback)(struct fpm_event_s *, short, void *), void *arg)
 {
 	if (!ev || !callback || fd < -1) {
 		return -1;
@@ -495,9 +482,8 @@ int fpm_event_set(struct fpm_event_s *ev, int fd, int flags, void (*callback)(st
 	ev->flags = flags;
 	return 0;
 }
-/* }}} */
 
-int fpm_event_add(struct fpm_event_s *ev, unsigned long int frequency) /* {{{ */
+int fpm_event_add(struct fpm_event_s *ev, unsigned long int frequency)
 {
 	struct timeval now;
 	struct timeval tmp;
@@ -537,9 +523,8 @@ int fpm_event_add(struct fpm_event_s *ev, unsigned long int frequency) /* {{{ */
 
 	return 0;
 }
-/* }}} */
 
-int fpm_event_del(struct fpm_event_s *ev) /* {{{ */
+int fpm_event_del(struct fpm_event_s *ev)
 {
 	if (ev->index >= 0 && fpm_event_queue_del(&fpm_event_queue_fd, ev) != 0) {
 		return -1;
@@ -551,4 +536,4 @@ int fpm_event_del(struct fpm_event_s *ev) /* {{{ */
 
 	return 0;
 }
-/* }}} */
+

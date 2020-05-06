@@ -90,7 +90,6 @@ PHP_FUNCTION(readlink)
 
 	RETURN_STRINGL(buff, ret);
 }
-/* }}} */
 
 /* Returns the st_dev field of the UNIX C stat structure describing the link */
 PHP_FUNCTION(linkinfo)
@@ -123,7 +122,6 @@ PHP_FUNCTION(linkinfo)
 	efree(dirname);
 	RETURN_LONG((zend_long) sb.st_dev);
 }
-/* }}} */
 
 /* Create a symbolic link */
 PHP_FUNCTION(symlink)
@@ -181,7 +179,6 @@ PHP_FUNCTION(symlink)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Create a hard link */
 PHP_FUNCTION(link)
@@ -229,6 +226,5 @@ PHP_FUNCTION(link)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 #endif

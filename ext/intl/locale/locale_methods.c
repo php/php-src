@@ -99,7 +99,7 @@ static const char * const 	LOC_PREFERRED_GRANDFATHERED[]  = {
  * except for variant */
 #define isTerminator(a)  ((a==0)||(a=='.')||(a=='@'))
 
-/* {{{ return the offset of 'key' in the array 'list'.
+/* return the offset of 'key' in the array 'list'.
  * returns -1 if not present */
 static int16_t findOffset(const char* const* list, const char* key)
 {
@@ -114,7 +114,7 @@ static int16_t findOffset(const char* const* list, const char* key)
 	return -1;
 
 }
-/*}}}*/
+
 
 static char* getPreferredTag(const char* gf_tag)
 {
@@ -135,7 +135,7 @@ static char* getPreferredTag(const char* gf_tag)
 	return result;
 }
 
-/* {{{
+/*
 * returns the position of next token for lookup
 * or -1 if no token
 * strtokr equivalent search for token in reverse direction
@@ -163,9 +163,8 @@ static zend_off_t getStrrtokenPos(char* str, zend_off_t savedPos)
 	}
 	return result;
 }
-/* }}} */
 
-/* {{{
+/*
 * returns the position of a singleton if present
 * returns -1 if no singleton
 * strtok equivalent search for singleton
@@ -197,10 +196,9 @@ static zend_off_t getSingletonPos(const char* str)
 	}
 	return result;
 }
-/* }}} */
 
 /* Get default locale */
-/* }}} */
+
 /* Get default locale */
 PHP_NAMED_FUNCTION(zif_locale_get_default)
 {
@@ -211,10 +209,9 @@ PHP_NAMED_FUNCTION(zif_locale_get_default)
 	RETURN_STRING( intl_locale_get_default(  ) );
 }
 
-/* }}} */
 
 /* Set default locale */
-/* }}} */
+
 /* Set default locale */
 PHP_NAMED_FUNCTION(zif_locale_set_default)
 {
@@ -241,9 +238,8 @@ PHP_NAMED_FUNCTION(zif_locale_set_default)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
-/* {{{
+/*
 * Gets the value from ICU
 * common code shared by get_primary_language,get_script or get_region or get_variant
 * result = 0 if error, 1 if successful , -1 if no value
@@ -367,9 +363,8 @@ static zend_string* get_icu_value_internal( const char* loc_name , char* tag_nam
 	tag_value->len = strlen(tag_value->val);
 	return tag_value;
 }
-/* }}} */
 
-/* {{{
+/*
 * Gets the value from ICU , called when PHP userspace function is called
 * common code shared by get_primary_language,get_script or get_region or get_variant
 */
@@ -427,42 +422,26 @@ static void get_icu_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAMETERS)
 	}
 
 }
-/* }}} */
 
-/* gets the script for the $locale
- }}} */
-/* gets the script for the $locale
- */
+/* gets the script for the $locale */
 PHP_FUNCTION( locale_get_script )
 {
 	get_icu_value_src_php( LOC_SCRIPT_TAG , INTERNAL_FUNCTION_PARAM_PASSTHRU );
 }
-/* }}} */
 
-/* gets the region for the $locale
- }}} */
-/* gets the region for the $locale
- */
+/* gets the region for the $locale */
 PHP_FUNCTION( locale_get_region )
 {
 	get_icu_value_src_php( LOC_REGION_TAG , INTERNAL_FUNCTION_PARAM_PASSTHRU );
 }
-/* }}} */
 
-/* gets the primary language for the $locale
- }}} */
-/* gets the primary language for the $locale
- */
+/* gets the primary language for the $locale */
 PHP_FUNCTION(locale_get_primary_language )
 {
 	get_icu_value_src_php( LOC_LANG_TAG , INTERNAL_FUNCTION_PARAM_PASSTHRU );
 }
-/* }}} */
 
-
-/* {{{
- * common code shared by display_xyz functions to  get the value from ICU
- }}} */
+/* common code shared by display_xyz functions to  get the value from ICU */
 static void get_icu_disp_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAMETERS)
 {
 	const char* loc_name        	= NULL;
@@ -591,66 +570,38 @@ static void get_icu_disp_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAME
 
 	RETVAL_NEW_STR( u8str );
 }
-/* }}} */
 
-/* gets the name for the $locale in $in_locale or default_locale
- }}} */
-/* gets the name for the $locale in $in_locale or default_locale
-*/
+/* gets the name for the $locale in $in_locale or default_locale */
 PHP_FUNCTION(locale_get_display_name)
 {
     get_icu_disp_value_src_php( DISP_NAME , INTERNAL_FUNCTION_PARAM_PASSTHRU );
 }
-/* }}} */
 
-/* gets the language for the $locale in $in_locale or default_locale
- }}} */
-/* gets the language for the $locale in $in_locale or default_locale
-*/
+/* gets the language for the $locale in $in_locale or default_locale */
 PHP_FUNCTION(locale_get_display_language)
 {
     get_icu_disp_value_src_php( LOC_LANG_TAG , INTERNAL_FUNCTION_PARAM_PASSTHRU );
 }
-/* }}} */
 
-/* gets the script for the $locale in $in_locale or default_locale
- }}} */
-/* gets the script for the $locale in $in_locale or default_locale
-*/
+/* gets the script for the $locale in $in_locale or default_locale */
 PHP_FUNCTION(locale_get_display_script)
 {
     get_icu_disp_value_src_php( LOC_SCRIPT_TAG , INTERNAL_FUNCTION_PARAM_PASSTHRU );
 }
-/* }}} */
 
-/* gets the region for the $locale in $in_locale or default_locale
- }}} */
-/* gets the region for the $locale in $in_locale or default_locale
-*/
+/* gets the region for the $locale in $in_locale or default_locale */
 PHP_FUNCTION(locale_get_display_region)
 {
     get_icu_disp_value_src_php( LOC_REGION_TAG , INTERNAL_FUNCTION_PARAM_PASSTHRU );
 }
-/* }}} */
 
-/* {{{
-* gets the variant for the $locale in $in_locale or default_locale
- }}} */
-/* {{{
-* gets the variant for the $locale in $in_locale or default_locale
-*/
+/* gets the variant for the $locale in $in_locale or default_locale */
 PHP_FUNCTION(locale_get_display_variant)
 {
     get_icu_disp_value_src_php( LOC_VARIANT_TAG , INTERNAL_FUNCTION_PARAM_PASSTHRU );
 }
-/* }}} */
 
- /* * return an associative array containing keyword-value
- * pairs for this locale. The keys are keys to the array (doh!)
- * }}}*/
- /* * return an associative array containing keyword-value
- * pairs for this locale. The keys are keys to the array (doh!)
- */
+/* return an associative array containing keyword-value pairs for this locale. The keys are keys to the array (doh!) */
 PHP_FUNCTION( locale_get_keywords )
 {
     UEnumeration*   e        = NULL;
@@ -719,19 +670,13 @@ PHP_FUNCTION( locale_get_keywords )
 
     uenum_close( e );
 }
-/* }}} */
 
- /* * @return string the canonicalized locale
- * }}} */
- /* * @param string $locale	The locale string to canonicalize
- */
 PHP_FUNCTION(locale_canonicalize)
 {
 	get_icu_value_src_php( LOC_CANONICALIZE_TAG , INTERNAL_FUNCTION_PARAM_PASSTHRU );
 }
-/* }}} */
 
-/* {{{ append_key_value
+/* append_key_value
 * Internal function which is called from locale_compose
 * gets the value for the key_name and appends to the loc_name
 * returns 1 if successful , -1 if not found ,
@@ -757,9 +702,8 @@ static int append_key_value(smart_str* loc_name, HashTable* hash_arr, char* key_
 
 	return LOC_NOT_FOUND;
 }
-/* }}} */
 
-/* {{{ append_prefix , appends the prefix needed
+/* append_prefix , appends the prefix needed
 * e.g. private adds 'x'
 */
 static void add_prefix(smart_str* loc_name, char* key_name)
@@ -769,9 +713,8 @@ static void add_prefix(smart_str* loc_name, char* key_name)
 		smart_str_appendl(loc_name, PRIVATE_PREFIX , sizeof(PRIVATE_PREFIX)-1);
 	}
 }
-/* }}} */
 
-/* {{{ append_multiple_key_values
+/* append_multiple_key_values
 * Internal function which is called from locale_compose
 * gets the multiple values for the key_name and appends to the loc_name
 * used for 'variant','extlang','private'
@@ -844,9 +787,8 @@ static int append_multiple_key_values(smart_str* loc_name, HashTable* hash_arr, 
 
 	return SUCCESS;
 }
-/* }}} */
 
-/*{{{
+/*
 * If applicable sets error message and aborts locale_compose gracefully
 * returns 0  if locale_compose needs to be aborted
 * otherwise returns 1
@@ -862,13 +804,9 @@ static int handleAppendResult( int result, smart_str* loc_name)
 	}
 	return 1;
 }
-/* }}} */
 
 #define RETURN_SMART_STR(str) smart_str_0((str)); RETURN_NEW_STR((str)->s)
-/* Creates a locale by combining the parts of locale-ID passed
-* }}} */
-/* Creates a locale by combining the parts of locale-ID passed
-* }}} */
+/* Creates a locale by combining the parts of locale-ID passed */
 PHP_FUNCTION(locale_compose)
 {
 	smart_str      	loc_name_s = {0};
@@ -943,10 +881,8 @@ PHP_FUNCTION(locale_compose)
 
 	RETURN_SMART_STR(loc_name);
 }
-/* }}} */
 
-
-/*{{{
+/*
 * Parses the locale and returns private subtags  if existing
 * else returns NULL
 * e.g. for locale='en_US-x-prv1-prv2-prv3'
@@ -988,9 +924,8 @@ static zend_string* get_private_subtags(const char* loc_name)
 
 	return result;
 }
-/* }}} */
 
-/* {{{ code used by locale_parse
+/* code used by locale_parse
 */
 static int add_array_entry(const char* loc_name, zval* hash_arr, char* key_name)
 {
@@ -1049,12 +984,8 @@ static int add_array_entry(const char* loc_name, zval* hash_arr, char* key_name)
 	/*if( key_name != LOC_PRIVATE_TAG && key_value){*/
 	return cur_result;
 }
-/* }}} */
 
-/* parses a locale-id into an array the different parts of it
- }}} */
-/* parses a locale-id into an array the different parts of it
-*/
+/* parses a locale-id into an array the different parts of it */
 PHP_FUNCTION(locale_parse)
 {
     const char* loc_name        = NULL;
@@ -1090,12 +1021,8 @@ PHP_FUNCTION(locale_parse)
 		add_array_entry( loc_name , return_value , LOC_PRIVATE_TAG);
 	}
 }
-/* }}} */
 
-/* gets an array containing the list of variants, or null
- }}} */
-/* gets an array containing the list of variants, or null
-*/
+/* gets an array containing the list of variants, or null */
 PHP_FUNCTION(locale_get_all_variants)
 {
 	const char*  	loc_name        = NULL;
@@ -1146,11 +1073,8 @@ PHP_FUNCTION(locale_get_all_variants)
 
 
 }
-/* }}} */
 
-/*{{{
-* Converts to lower case and also replaces all hyphens with the underscore
-*/
+/* Converts to lower case and also replaces all hyphens with the underscore */
 static int strToMatch(const char* str ,char *retstr)
 {
 	char* 	anchor 	= NULL;
@@ -1179,11 +1103,10 @@ static int strToMatch(const char* str ,char *retstr)
 
     return(result);
 }
-/* }}} */
 
 /* Checks if a $langtag filter matches with $locale according to RFC 4647's basic filtering algorithm
 */
-/* }}} */
+
 /* Checks if a $langtag filter matches with $locale according to RFC 4647's basic filtering algorithm
 */
 PHP_FUNCTION(locale_filter_matches)
@@ -1341,7 +1264,6 @@ PHP_FUNCTION(locale_filter_matches)
 
 	}
 }
-/* }}} */
 
 static void array_cleanup( char* arr[] , int arr_size)
 {
@@ -1355,7 +1277,7 @@ static void array_cleanup( char* arr[] , int arr_size)
 }
 
 #define LOOKUP_CLEAN_RETURN(value)	array_cleanup(cur_arr, cur_arr_len); return (value)
-/* {{{
+/*
 * returns the lookup result to lookup_loc_range_src_php
 * internal function
 */
@@ -1459,12 +1381,11 @@ static zend_string* lookup_loc_range(const char* loc_range, HashTable* hash_arr,
 	efree(cur_loc_range);
 	LOOKUP_CLEAN_RETURN(NULL);
 }
-/* }}} */
 
 /* Searches the items in $langtag for the best match to the language
 * range
 */
-/* }}} */
+
 /* Searches the items in $langtag for the best match to the language
 * range
 */
@@ -1515,7 +1436,6 @@ PHP_FUNCTION(locale_lookup)
 
 	RETURN_STR(result_str);
 }
-/* }}} */
 
 /* Tries to find out best available locale based on HTTP "Accept-Language" header */
 PHP_FUNCTION(locale_accept_from_http)
@@ -1562,4 +1482,4 @@ PHP_FUNCTION(locale_accept_from_http)
 	}
 	RETURN_STRINGL(resultLocale, len);
 }
-/* }}} */
+

@@ -31,7 +31,7 @@
 #include "zend_smart_str.h"
 #include "php_ini.h"
 
-/* {{{ sysvshm_module_entry
+/* sysvshm_module_entry
  */
 zend_module_entry sysvshm_module_entry = {
 	STANDARD_MODULE_HEADER,
@@ -45,7 +45,6 @@ zend_module_entry sysvshm_module_entry = {
 	PHP_SYSVSHM_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
-/* }}} */
 
 #ifdef COMPILE_DL_SYSVSHM
 ZEND_GET_MODULE(sysvshm)
@@ -65,7 +64,7 @@ static int php_put_shm_data(sysvshm_chunk_head *ptr, zend_long key, const char *
 static zend_long php_check_shm_data(sysvshm_chunk_head *ptr, zend_long key);
 static int php_remove_shm_data(sysvshm_chunk_head *ptr, zend_long shm_varpos);
 
-/* {{{ php_release_sysvshm
+/* php_release_sysvshm
  */
 static void php_release_sysvshm(zend_resource *rsrc)
 {
@@ -73,9 +72,8 @@ static void php_release_sysvshm(zend_resource *rsrc)
 	shmdt((void *) shm_ptr->ptr);
 	efree(shm_ptr);
 }
-/* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION
+/* PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(sysvshm)
 {
@@ -86,9 +84,8 @@ PHP_MINIT_FUNCTION(sysvshm)
 	}
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
+/* PHP_MINFO_FUNCTION
  */
 PHP_MINFO_FUNCTION(sysvshm)
 {
@@ -96,7 +93,6 @@ PHP_MINFO_FUNCTION(sysvshm)
 	php_info_print_table_row(2, "sysvshm support", "enabled");
 	php_info_print_table_end();
 }
-/* }}} */
 
 /* Creates or open a shared memory segment */
 PHP_FUNCTION(shm_attach)
@@ -153,7 +149,6 @@ PHP_FUNCTION(shm_attach)
 
 	RETURN_RES(zend_register_resource(shm_list_ptr, php_sysvshm.le_shm));
 }
-/* }}} */
 
 /* Disconnects from shared memory segment */
 PHP_FUNCTION(shm_detach)
@@ -167,7 +162,6 @@ PHP_FUNCTION(shm_detach)
 	SHM_FETCH_RESOURCE(shm_list_ptr, shm_id);
 	RETURN_BOOL(SUCCESS == zend_list_close(Z_RES_P(shm_id)));
 }
-/* }}} */
 
 /* Removes shared memory from Unix systems */
 PHP_FUNCTION(shm_remove)
@@ -187,7 +181,6 @@ PHP_FUNCTION(shm_remove)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Inserts or updates a variable in shared memory */
 PHP_FUNCTION(shm_put_var)
@@ -226,7 +219,6 @@ PHP_FUNCTION(shm_put_var)
 	}
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Returns a variable from shared memory */
 PHP_FUNCTION(shm_get_var)
@@ -262,7 +254,6 @@ PHP_FUNCTION(shm_get_var)
 	}
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 }
-/* }}} */
 
 /* Checks whether a specific entry exists */
 PHP_FUNCTION(shm_has_var)
@@ -277,7 +268,6 @@ PHP_FUNCTION(shm_has_var)
 	SHM_FETCH_RESOURCE(shm_list_ptr, shm_id);
 	RETURN_BOOL(php_check_shm_data(shm_list_ptr->ptr, shm_key) >= 0);
 }
-/* }}} */
 
 /* Removes variable from shared memory */
 PHP_FUNCTION(shm_remove_var)
@@ -300,9 +290,8 @@ PHP_FUNCTION(shm_remove_var)
 	php_remove_shm_data((shm_list_ptr->ptr), shm_varpos);
 	RETURN_TRUE;
 }
-/* }}} */
 
-/* {{{ php_put_shm_data
+/* php_put_shm_data
  * inserts an ascii-string into shared memory */
 static int php_put_shm_data(sysvshm_chunk_head *ptr, zend_long key, const char *data, zend_long len)
 {
@@ -329,9 +318,8 @@ static int php_put_shm_data(sysvshm_chunk_head *ptr, zend_long key, const char *
 	ptr->free -= total_size;
 	return 0;
 }
-/* }}} */
 
-/* {{{ php_check_shm_data
+/* php_check_shm_data
  */
 static zend_long php_check_shm_data(sysvshm_chunk_head *ptr, zend_long key)
 {
@@ -356,9 +344,8 @@ static zend_long php_check_shm_data(sysvshm_chunk_head *ptr, zend_long key)
 	}
 	return -1;
 }
-/* }}} */
 
-/* {{{ php_remove_shm_data
+/* php_remove_shm_data
  */
 static int php_remove_shm_data(sysvshm_chunk_head *ptr, zend_long shm_varpos)
 {
@@ -376,6 +363,5 @@ static int php_remove_shm_data(sysvshm_chunk_head *ptr, zend_long shm_varpos)
 	}
 	return 0;
 }
-/* }}} */
 
 #endif /* HAVE_SYSVSHM */

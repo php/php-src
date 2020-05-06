@@ -32,7 +32,7 @@
 #endif
 
 
-/* {{{ FETCH_DOUBLE_OPTION(var_name, option_name) */
+/* FETCH_DOUBLE_OPTION(var_name, option_name) */
 #define FETCH_DOUBLE_OPTION(var_name, option_name) \
    	var_name = 0; \
 	var_name##_set = 0; \
@@ -42,9 +42,8 @@
 			var_name##_set = 1; \
 		} \
 	}
-/* }}} */
 
-/* {{{ FETCH_LONG_OPTION(var_name, option_name) */
+/* FETCH_LONG_OPTION(var_name, option_name) */
 #define FETCH_LONG_OPTION(var_name, option_name) \
    	var_name = 0; \
 	var_name##_set = 0; \
@@ -54,9 +53,8 @@
 			var_name##_set = 1; \
 		} \
 	}
-/* }}} */
 
-/* {{{ FETCH_STRING_OPTION(var_name, option_name) */
+/* FETCH_STRING_OPTION(var_name, option_name) */
 #define FETCH_STRING_OPTION(var_name, option_name) \
 	var_name = NULL; \
 	var_name##_set = 0; \
@@ -70,9 +68,8 @@
 			} \
 		} \
 	}
-/* }}} */
 
-/* {{{ FETCH_STR_OPTION(var_name, option_name) */
+/* FETCH_STR_OPTION(var_name, option_name) */
 #define FETCH_STR_OPTION(var_name, option_name) \
 	var_name = NULL; \
 	var_name##_set = 0; \
@@ -84,14 +81,13 @@
 			} \
 		} \
 	}
-/* }}} */
 
 #define FORMAT_IPV4    4
 #define FORMAT_IPV6    6
 
 static int _php_filter_validate_ipv6(char *str, size_t str_len);
 
-static int php_filter_parse_int(const char *str, size_t str_len, zend_long *ret) { /* {{{ */
+static int php_filter_parse_int(const char *str, size_t str_len, zend_long *ret) {
 	zend_long ctx_value;
 	int sign = 0, digit = 0;
 	const char *end = str + str_len;
@@ -141,9 +137,8 @@ static int php_filter_parse_int(const char *str, size_t str_len, zend_long *ret)
 	*ret = ctx_value;
 	return 1;
 }
-/* }}} */
 
-static int php_filter_parse_octal(const char *str, size_t str_len, zend_long *ret) { /* {{{ */
+static int php_filter_parse_octal(const char *str, size_t str_len, zend_long *ret) {
 	zend_ulong ctx_value = 0;
 	const char *end = str + str_len;
 
@@ -164,9 +159,8 @@ static int php_filter_parse_octal(const char *str, size_t str_len, zend_long *re
 	*ret = (zend_long)ctx_value;
 	return 1;
 }
-/* }}} */
 
-static int php_filter_parse_hex(const char *str, size_t str_len, zend_long *ret) { /* {{{ */
+static int php_filter_parse_hex(const char *str, size_t str_len, zend_long *ret) {
 	zend_ulong ctx_value = 0;
 	const char *end = str + str_len;
 	zend_ulong n;
@@ -191,9 +185,8 @@ static int php_filter_parse_hex(const char *str, size_t str_len, zend_long *ret)
 	*ret = (zend_long)ctx_value;
 	return 1;
 }
-/* }}} */
 
-void php_filter_int(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
+void php_filter_int(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	zval *option_val;
 	zend_long  min_range, max_range, option_flags;
@@ -257,9 +250,8 @@ void php_filter_int(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		return;
 	}
 }
-/* }}} */
 
-void php_filter_boolean(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
+void php_filter_boolean(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	char *str = Z_STRVAL_P(value);
 	size_t len = Z_STRLEN_P(value);
@@ -326,9 +318,8 @@ void php_filter_boolean(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		ZVAL_BOOL(value, ret);
 	}
 }
-/* }}} */
 
-void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
+void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	size_t len;
 	char *str, *end;
@@ -456,9 +447,8 @@ error:
 	}
 	efree(num);
 }
-/* }}} */
 
-void php_filter_validate_regexp(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
+void php_filter_validate_regexp(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	zval *option_val;
 	zend_string *regexp;
@@ -493,7 +483,7 @@ void php_filter_validate_regexp(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	}
 }
 
-static int _php_filter_validate_domain(char * domain, int len, zend_long flags) /* {{{ */
+static int _php_filter_validate_domain(char * domain, int len, zend_long flags)
 {
 	char *e, *s, *t;
 	size_t l;
@@ -543,17 +533,15 @@ static int _php_filter_validate_domain(char * domain, int len, zend_long flags) 
 
 	return 1;
 }
-/* }}} */
 
-void php_filter_validate_domain(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
+void php_filter_validate_domain(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	if (!_php_filter_validate_domain(Z_STRVAL_P(value), Z_STRLEN_P(value), flags)) {
 		RETURN_VALIDATION_FAILED
 	}
 }
-/* }}} */
 
-void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
+void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	php_url *url;
 	size_t old_len = Z_STRLEN_P(value);
@@ -610,9 +598,8 @@ bad_url:
 	}
 	php_url_free(url);
 }
-/* }}} */
 
-void php_filter_validate_email(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
+void php_filter_validate_email(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	/*
 	 * The regex below is based on a regex by Michael Rushton.
@@ -680,9 +667,8 @@ void php_filter_validate_email(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	}
 
 }
-/* }}} */
 
-static int _php_filter_validate_ipv4(char *str, size_t str_len, int *ip) /* {{{ */
+static int _php_filter_validate_ipv4(char *str, size_t str_len, int *ip)
 {
 	const char *end = str + str_len;
 	int num, m;
@@ -715,9 +701,8 @@ static int _php_filter_validate_ipv4(char *str, size_t str_len, int *ip) /* {{{ 
 	}
 	return 0;
 }
-/* }}} */
 
-static int _php_filter_validate_ipv6(char *str, size_t str_len) /* {{{ */
+static int _php_filter_validate_ipv6(char *str, size_t str_len)
 {
 	int compressed = 0;
 	int blocks = 0;
@@ -794,9 +779,8 @@ static int _php_filter_validate_ipv6(char *str, size_t str_len) /* {{{ */
 	}
 	return ((compressed && blocks <= 8) || blocks == 8);
 }
-/* }}} */
 
-void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
+void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	/* validates an ipv4 or ipv6 IP, based on the flag (4, 6, or both) add a
 	 * flag to throw out reserved ranges; multicast ranges... etc. If both
@@ -903,9 +887,8 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 			break;
 	}
 }
-/* }}} */
 
-void php_filter_validate_mac(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
+void php_filter_validate_mac(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	char *input = Z_STRVAL_P(value);
 	size_t input_len = Z_STRLEN_P(value);
@@ -965,4 +948,4 @@ void php_filter_validate_mac(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		}
 	}
 }
-/* }}} */
+

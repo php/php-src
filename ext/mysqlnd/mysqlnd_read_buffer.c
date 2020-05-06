@@ -21,16 +21,14 @@
 #include "mysqlnd_read_buffer.h"
 
 
-/* {{{ mysqlnd_read_buffer_is_empty */
+/* mysqlnd_read_buffer_is_empty */
 static zend_bool
 mysqlnd_read_buffer_is_empty(const MYSQLND_READ_BUFFER * const buffer)
 {
 	return buffer->len? FALSE:TRUE;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_read_buffer_read */
+/* mysqlnd_read_buffer_read */
 static void
 mysqlnd_read_buffer_read(MYSQLND_READ_BUFFER * buffer, const size_t count, zend_uchar * dest)
 {
@@ -40,19 +38,15 @@ mysqlnd_read_buffer_read(MYSQLND_READ_BUFFER * buffer, const size_t count, zend_
 		buffer->len -= count;
 	}
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_read_buffer_bytes_left */
+/* mysqlnd_read_buffer_bytes_left */
 static size_t
 mysqlnd_read_buffer_bytes_left(const MYSQLND_READ_BUFFER * const buffer)
 {
 	return buffer->len;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_read_buffer_free */
+/* mysqlnd_read_buffer_free */
 static void
 mysqlnd_read_buffer_free(MYSQLND_READ_BUFFER ** buffer)
 {
@@ -64,10 +58,8 @@ mysqlnd_read_buffer_free(MYSQLND_READ_BUFFER ** buffer)
 	}
 	DBG_VOID_RETURN;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_create_read_buffer */
+/* mysqlnd_create_read_buffer */
 PHPAPI MYSQLND_READ_BUFFER *
 mysqlnd_create_read_buffer(const size_t count)
 {
@@ -82,4 +74,4 @@ mysqlnd_create_read_buffer(const size_t count)
 	ret->offset = 0;
 	DBG_RETURN(ret);
 }
-/* }}} */
+

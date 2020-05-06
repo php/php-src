@@ -1319,7 +1319,7 @@ static int phpdbg_watchpoint_parse_symtables(char *input, size_t len, int (*call
 	return ret;
 }
 
-PHPDBG_WATCH(delete) /* {{{ */
+PHPDBG_WATCH(delete)
 {
 	phpdbg_watch_element *element;
 	switch (param->type) {
@@ -1336,7 +1336,7 @@ PHPDBG_WATCH(delete) /* {{{ */
 	}
 
 	return SUCCESS;
-} /* }}} */
+}
 
 int phpdbg_create_var_watchpoint(char *input, size_t len) {
 	if (phpdbg_rebuild_symtable() == FAILURE) {
@@ -1346,7 +1346,7 @@ int phpdbg_create_var_watchpoint(char *input, size_t len) {
 	return phpdbg_watchpoint_parse_symtables(input, len, phpdbg_create_simple_watchpoint);
 }
 
-PHPDBG_WATCH(recursive) /* {{{ */
+PHPDBG_WATCH(recursive)
 {
 	if (phpdbg_rebuild_symtable() == FAILURE) {
 		return SUCCESS;
@@ -1361,9 +1361,9 @@ PHPDBG_WATCH(recursive) /* {{{ */
 	}
 
 	return SUCCESS;
-} /* }}} */
+}
 
-PHPDBG_WATCH(array) /* {{{ */
+PHPDBG_WATCH(array)
 {
 	if (phpdbg_rebuild_symtable() == FAILURE) {
 		return SUCCESS;
@@ -1378,7 +1378,7 @@ PHPDBG_WATCH(array) /* {{{ */
 	}
 
 	return SUCCESS;
-} /* }}} */
+}
 
 
 void phpdbg_setup_watchpoints(void) {

@@ -23,7 +23,7 @@
 # define PDO_ODBC_TYPE	"Unknown"
 #endif
 
-/* {{{ Roll a dice, pick a header at random... */
+/* Roll a dice, pick a header at random... */
 #if HAVE_SQLCLI1_H
 # include <sqlcli1.h>
 # if defined(DB268K) && HAVE_LIBRARYMANAGER_H
@@ -95,9 +95,8 @@
 # include <odbcsdk.h>
 #endif
 
-/* }}} */
 
-/* {{{ Figure out the type for handles */
+/* Figure out the type for handles */
 #if !defined(HENV) && !defined(SQLHENV) && defined(SQLHANDLE)
 # define PDO_ODBC_HENV		SQLHANDLE
 # define PDO_ODBC_HDBC		SQLHANDLE
@@ -111,7 +110,6 @@
 # define PDO_ODBC_HDBC		HDBC
 # define PDO_ODBC_HSTMT		HSTMT
 #endif
-/* }}} */
 
 typedef struct {
 	char last_state[6];

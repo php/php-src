@@ -92,9 +92,9 @@ typedef struct {
 /* bits 1-6 */
 #define ENT_ENC_TO_UNI_STAGE2(k) ((k) & 0x3F)
 
-/* {{{ Mappings *to* Unicode for ISO-8859-1 */
+/* Mappings *to* Unicode for ISO-8859-1 */
 
-/* {{{ Stage 2 tables for ISO-8859-1 */
+/* Stage 2 tables for ISO-8859-1 */
 
 static const enc_to_uni_stage2 enc_to_uni_s2_iso88591_00 = { {
 	0x0000, 0x0001, 0x0002, 0x0003, 0x0004, 0x0005,
@@ -152,20 +152,17 @@ static const enc_to_uni_stage2 enc_to_uni_s2_iso88591_C0 = { {
 	0x00FC, 0x00FD, 0x00FE, 0x00FF,
 } };
 
-/* end of stage 2 tables for ISO-8859-1 }}} */
-
-/* {{{ Stage 1 table for ISO-8859-1 */
+/* Stage 1 table for ISO-8859-1 */
 static const enc_to_uni enc_to_uni_iso88591 = { {
 	&enc_to_uni_s2_iso88591_00,
 	&enc_to_uni_s2_iso88591_40,
 	&enc_to_uni_s2_iso88591_80,
 	&enc_to_uni_s2_iso88591_C0 }
 };
-/* end of stage 1 table for ISO-8859-1 }}} */
 
-/* {{{ Mappings *to* Unicode for ISO-8859-5 */
+/* Mappings *to* Unicode for ISO-8859-5 */
 
-/* {{{ Stage 2 tables for ISO-8859-5 */
+/* Stage 2 tables for ISO-8859-5 */
 
 static const enc_to_uni_stage2 enc_to_uni_s2_iso88595_80 = { {
 	0x0080, 0x0081, 0x0082, 0x0083, 0x0084, 0x0085,
@@ -195,20 +192,17 @@ static const enc_to_uni_stage2 enc_to_uni_s2_iso88595_C0 = { {
 	0x045C, 0x00A7, 0x045E, 0x045F,
 } };
 
-/* end of stage 2 tables for ISO-8859-5 }}} */
-
-/* {{{ Stage 1 table for ISO-8859-5 */
+/* Stage 1 table for ISO-8859-5 */
 static const enc_to_uni enc_to_uni_iso88595 = { {
 	&enc_to_uni_s2_iso88591_00,
 	&enc_to_uni_s2_iso88591_40,
 	&enc_to_uni_s2_iso88595_80,
 	&enc_to_uni_s2_iso88595_C0 }
 };
-/* end of stage 1 table for ISO-8859-5 }}} */
 
-/* {{{ Mappings *to* Unicode for ISO-8859-15 */
+/* Mappings *to* Unicode for ISO-8859-15 */
 
-/* {{{ Stage 2 tables for ISO-8859-15 */
+/* Stage 2 tables for ISO-8859-15 */
 
 static const enc_to_uni_stage2 enc_to_uni_s2_iso885915_80 = { {
 	0x0080, 0x0081, 0x0082, 0x0083, 0x0084, 0x0085,
@@ -224,20 +218,17 @@ static const enc_to_uni_stage2 enc_to_uni_s2_iso885915_80 = { {
 	0x0152, 0x0153, 0x0178, 0x00BF,
 } };
 
-/* end of stage 2 tables for ISO-8859-15 }}} */
-
-/* {{{ Stage 1 table for ISO-8859-15 */
+/* Stage 1 table for ISO-8859-15 */
 static const enc_to_uni enc_to_uni_iso885915 = { {
 	&enc_to_uni_s2_iso88591_00,
 	&enc_to_uni_s2_iso88591_40,
 	&enc_to_uni_s2_iso885915_80,
 	&enc_to_uni_s2_iso88591_C0 }
 };
-/* end of stage 1 table for ISO-8859-15 }}} */
 
-/* {{{ Mappings *to* Unicode for Windows-1252 */
+/* Mappings *to* Unicode for Windows-1252 */
 
-/* {{{ Stage 2 tables for Windows-1252 */
+/* Stage 2 tables for Windows-1252 */
 
 static const enc_to_uni_stage2 enc_to_uni_s2_win1252_80 = { {
 	0x20AC, 0xFFFF, 0x201A, 0x0192, 0x201E, 0x2026,
@@ -253,20 +244,17 @@ static const enc_to_uni_stage2 enc_to_uni_s2_win1252_80 = { {
 	0x00BC, 0x00BD, 0x00BE, 0x00BF,
 } };
 
-/* end of stage 2 tables for Windows-1252 }}} */
-
-/* {{{ Stage 1 table for Windows-1252 */
+/* Stage 1 table for Windows-1252 */
 static const enc_to_uni enc_to_uni_win1252 = { {
 	&enc_to_uni_s2_iso88591_00,
 	&enc_to_uni_s2_iso88591_40,
 	&enc_to_uni_s2_win1252_80,
 	&enc_to_uni_s2_iso88591_C0 }
 };
-/* end of stage 1 table for Windows-1252 }}} */
 
-/* {{{ Mappings *to* Unicode for Windows-1251 */
+/* Mappings *to* Unicode for Windows-1251 */
 
-/* {{{ Stage 2 tables for Windows-1251 */
+/* Stage 2 tables for Windows-1251 */
 
 static const enc_to_uni_stage2 enc_to_uni_s2_win1251_80 = { {
 	0x0402, 0x0403, 0x201A, 0x0453, 0x201E, 0x2026,
@@ -296,20 +284,17 @@ static const enc_to_uni_stage2 enc_to_uni_s2_win1251_C0 = { {
 	0x044C, 0x044D, 0x044E, 0x044F,
 } };
 
-/* end of stage 2 tables for Windows-1251 }}} */
-
-/* {{{ Stage 1 table for Windows-1251 */
+/* Stage 1 table for Windows-1251 */
 static const enc_to_uni enc_to_uni_win1251 = { {
 	&enc_to_uni_s2_iso88591_00,
 	&enc_to_uni_s2_iso88591_40,
 	&enc_to_uni_s2_win1251_80,
 	&enc_to_uni_s2_win1251_C0 }
 };
-/* end of stage 1 table for Windows-1251 }}} */
 
-/* {{{ Mappings *to* Unicode for KOI8-R */
+/* Mappings *to* Unicode for KOI8-R */
 
-/* {{{ Stage 2 tables for KOI8-R */
+/* Stage 2 tables for KOI8-R */
 
 static const enc_to_uni_stage2 enc_to_uni_s2_koi8r_80 = { {
 	0x2500, 0x2502, 0x250C, 0x2510, 0x2514, 0x2518,
@@ -339,20 +324,17 @@ static const enc_to_uni_stage2 enc_to_uni_s2_koi8r_C0 = { {
 	0x042D, 0x0429, 0x0427, 0x042A,
 } };
 
-/* end of stage 2 tables for KOI8-R }}} */
-
-/* {{{ Stage 1 table for KOI8-R */
+/* Stage 1 table for KOI8-R */
 static const enc_to_uni enc_to_uni_koi8r = { {
 	&enc_to_uni_s2_iso88591_00,
 	&enc_to_uni_s2_iso88591_40,
 	&enc_to_uni_s2_koi8r_80,
 	&enc_to_uni_s2_koi8r_C0 }
 };
-/* end of stage 1 table for KOI8-R }}} */
 
-/* {{{ Mappings *to* Unicode for CP-866 */
+/* Mappings *to* Unicode for CP-866 */
 
-/* {{{ Stage 2 tables for CP-866 */
+/* Stage 2 tables for CP-866 */
 
 static const enc_to_uni_stage2 enc_to_uni_s2_cp866_80 = { {
 	0x0410, 0x0411, 0x0412, 0x0413, 0x0414, 0x0415,
@@ -382,20 +364,17 @@ static const enc_to_uni_stage2 enc_to_uni_s2_cp866_C0 = { {
 	0x2116, 0x00A4, 0x25A0, 0x00A0,
 } };
 
-/* end of stage 2 tables for CP-866 }}} */
-
-/* {{{ Stage 1 table for CP-866 */
+/* Stage 1 table for CP-866 */
 static const enc_to_uni enc_to_uni_cp866 = { {
 	&enc_to_uni_s2_iso88591_00,
 	&enc_to_uni_s2_iso88591_40,
 	&enc_to_uni_s2_cp866_80,
 	&enc_to_uni_s2_cp866_C0 }
 };
-/* end of stage 1 table for CP-866 }}} */
 
-/* {{{ Mappings *to* Unicode for MacRoman */
+/* Mappings *to* Unicode for MacRoman */
 
-/* {{{ Stage 2 tables for MacRoman */
+/* Stage 2 tables for MacRoman */
 
 static const enc_to_uni_stage2 enc_to_uni_s2_macroman_00 = { {
 	0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
@@ -453,18 +432,15 @@ static const enc_to_uni_stage2 enc_to_uni_s2_macroman_C0 = { {
 	0x00B8, 0x02DD, 0x02DB, 0x02C7,
 } };
 
-/* end of stage 2 tables for MacRoman }}} */
-
-/* {{{ Stage 1 table for MacRoman */
+/* Stage 1 table for MacRoman */
 static const enc_to_uni enc_to_uni_macroman = { {
 	&enc_to_uni_s2_macroman_00,
 	&enc_to_uni_s2_macroman_40,
 	&enc_to_uni_s2_macroman_80,
 	&enc_to_uni_s2_macroman_C0 }
 };
-/* end of stage 1 table for MacRoman }}} */
 
-/* {{{ Index of tables for encoding conversion */
+/* Index of tables for encoding conversion */
 static const enc_to_uni *const enc_to_uni_index[cs_numelems] = {
 	NULL,
 	&enc_to_uni_iso88591,
@@ -476,7 +452,6 @@ static const enc_to_uni *const enc_to_uni_index[cs_numelems] = {
 	&enc_to_uni_macroman,
 	&enc_to_uni_koi8r,
 };
-/* }}} */
 
 /* Definitions for mappings *from* Unicode */
 
@@ -485,7 +460,7 @@ typedef struct {
 	unsigned char cs_code; /* currently, we only have maps to single-byte encodings */
 } uni_to_enc;
 
-/* {{{ Mappings *from* Unicode for ISO-8859-15 */
+/* Mappings *from* Unicode for ISO-8859-15 */
 static const uni_to_enc unimap_iso885915[] = {
 	{ 0x00A5, 0xA5 },	/* yen sign */
 	{ 0x00A7, 0xA7 },	/* section sign */
@@ -515,9 +490,9 @@ static const uni_to_enc unimap_iso885915[] = {
 	{ 0x017E, 0xB8 },	/* latin small letter z with caron */
 	{ 0x20AC, 0xA4 },	/* euro sign */
 };
-/* {{{ end of mappings *from* Unicode for ISO-8859-15 */
+/* end of mappings *from* Unicode for ISO-8859-15 */
 
-/* {{{ Mappings *from* Unicode for Windows-1252 */
+/* Mappings *from* Unicode for Windows-1252 */
 static const uni_to_enc unimap_win1252[] = {
 	{ 0x0152, 0x8C },	/* latin capital ligature oe */
 	{ 0x0153, 0x9C },	/* latin small ligature oe */
@@ -547,9 +522,9 @@ static const uni_to_enc unimap_win1252[] = {
 	{ 0x20AC, 0x80 },	/* euro sign */
 	{ 0x2122, 0x99 },	/* trade mark sign */
 };
-/* {{{ end of mappings *from* Unicode for Windows-1252 */
+/* end of mappings *from* Unicode for Windows-1252 */
 
-/* {{{ Mappings *from* Unicode for Windows-1251 */
+/* Mappings *from* Unicode for Windows-1251 */
 static const uni_to_enc unimap_win1251[] = {
 	{ 0x00A0, 0xA0 },	/* no-break space */
 	{ 0x00A4, 0xA4 },	/* currency sign */
@@ -679,9 +654,9 @@ static const uni_to_enc unimap_win1251[] = {
 	{ 0x2116, 0xB9 },	/* numero sign */
 	{ 0x2122, 0x99 },	/* trade mark sign */
 };
-/* {{{ end of mappings *from* Unicode for Windows-1251 */
+/* end of mappings *from* Unicode for Windows-1251 */
 
-/* {{{ Mappings *from* Unicode for KOI8-R */
+/* Mappings *from* Unicode for KOI8-R */
 static const uni_to_enc unimap_koi8r[] = {
 	{ 0x00A0, 0x9A },	/* no-break space */
 	{ 0x00A9, 0xBF },	/* copyright sign */
@@ -812,9 +787,9 @@ static const uni_to_enc unimap_koi8r[] = {
 	{ 0x2593, 0x92 },	/* dark shade */
 	{ 0x25A0, 0x94 },	/* black square */
 };
-/* {{{ end of mappings *from* Unicode for KOI8-R */
+/* end of mappings *from* Unicode for KOI8-R */
 
-/* {{{ Mappings *from* Unicode for CP-866 */
+/* Mappings *from* Unicode for CP-866 */
 static const uni_to_enc unimap_cp866[] = {
 	{ 0x00A0, 0xFF },	/* no-break space */
 	{ 0x00A4, 0xFD },	/* currency sign */
@@ -945,9 +920,9 @@ static const uni_to_enc unimap_cp866[] = {
 	{ 0x2593, 0xB2 },	/* dark shade */
 	{ 0x25A0, 0xFE },	/* black square */
 };
-/* {{{ end of mappings *from* Unicode for CP-866 */
+/* end of mappings *from* Unicode for CP-866 */
 
-/* {{{ Mappings *from* Unicode for MacRoman */
+/* Mappings *from* Unicode for MacRoman */
 static const uni_to_enc unimap_macroman[] = {
 	{ 0x00A0, 0xCA },	/* no-break space */
 	{ 0x00A1, 0xC1 },	/* inverted exclamation mark */
@@ -1078,7 +1053,7 @@ static const uni_to_enc unimap_macroman[] = {
 	{ 0xFB01, 0xDE },	/* latin small ligature fi */
 	{ 0xFB02, 0xDF },	/* latin small ligature fl */
 };
-/* {{{ end of mappings *from* Unicode for MacRoman */
+/* end of mappings *from* Unicode for MacRoman */
 
 /* HTML 5 has many more named entities.
  * Some of them map to two unicode code points, not one.
@@ -1135,9 +1110,9 @@ typedef struct {
 
 /* Replaced "GT" > "gt" and "QUOT" > "quot" for consistency's sake. */
 
-/* {{{ Start of HTML5 multi-stage table for codepoint -> entity */
+/* Start of HTML5 multi-stage table for codepoint -> entity */
 
-/* {{{ Start of double code point tables for HTML5 */
+/* Start of double code point tables for HTML5 */
 
 static const entity_multicodepoint_row multi_cp_html5_0003C[] = {
 	{ {"lt",                 	01,		 2} },
@@ -1394,9 +1369,7 @@ static const entity_multicodepoint_row multi_cp_html5_02AFD[] = {
 	{ {"nparsl",             	0x020E5,	 6} },
 };
 
-/* End of double code point tables }}} */
-
-/* {{{ Stage 3 Tables for HTML5 */
+/* Stage 3 Tables for HTML5 */
 
 static const entity_stage3_row empty_stage3_table[] = {
 	/* 64 elements */
@@ -2462,9 +2435,7 @@ static const entity_stage3_row stage3_table_html5_1D540[] = {
 	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
 };
 
-/* end of stage 3 Tables for HTML5 }}} */
-
-/* {{{ Stage 2 Tables for HTML5 */
+/* Stage 2 Tables for HTML5 */
 
 static const entity_stage2_row empty_stage2_table[] = {
 	empty_stage3_table, empty_stage3_table, empty_stage3_table, empty_stage3_table,
@@ -2560,8 +2531,6 @@ static const entity_stage2_row stage2_table_html5_1D000[] = {
 	empty_stage3_table, empty_stage3_table, empty_stage3_table, empty_stage3_table,
 };
 
-/* end of stage 2 tables for HTML5 }}} */
-
 static const entity_stage1_row entity_ms_table_html5[] = {
 	stage2_table_html5_00000,
 	empty_stage2_table,
@@ -2595,9 +2564,7 @@ static const entity_stage1_row entity_ms_table_html5[] = {
 	stage2_table_html5_1D000,
 };
 
-/* end of HTML5 multi-stage table for codepoint -> entity }}} */
-
-/* {{{ HTML5 hash table for entity -> codepoint */
+/* HTML5 hash table for entity -> codepoint */
 
 typedef struct {
 	const char *entity;
@@ -5323,11 +5290,9 @@ static const entity_ht ent_ht_html5 = {
 	ht_buckets_html5
 };
 
-/* end of HTML5 hash table for entity -> codepoint }}} */
+/* Start of HTML 4.01 multi-stage table for codepoint -> entity */
 
-/* {{{ Start of HTML 4.01 multi-stage table for codepoint -> entity */
-
-/* {{{ Stage 3 Tables for HTML 4.01 */
+/* Stage 3 Tables for HTML 4.01 */
 
 static const entity_stage3_row stage3_table_html4_00000[] = {
 	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
@@ -5728,9 +5693,7 @@ static const entity_stage3_row stage3_table_html4_02640[] = {
 	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
 };
 
-/* end of stage 3 Tables for HTML 4.01 }}} */
-
-/* {{{ Stage 2 Tables for HTML 4.01 */
+/* Stage 2 Tables for HTML 4.01 */
 
 static const entity_stage2_row stage2_table_html4_00000[] = {
 	stage3_table_html4_00000, empty_stage3_table, stage3_table_html4_00080, stage3_table_html4_000C0,
@@ -5770,8 +5733,6 @@ static const entity_stage2_row stage2_table_html4_02000[] = {
 	empty_stage3_table, empty_stage3_table, empty_stage3_table, empty_stage3_table,
 };
 
-/* end of stage 2 tables for HTML 4.01 }}} */
-
 static const entity_stage1_row entity_ms_table_html4[] = {
 	stage2_table_html4_00000,
 	empty_stage2_table,
@@ -5805,9 +5766,7 @@ static const entity_stage1_row entity_ms_table_html4[] = {
 	empty_stage2_table,
 };
 
-/* end of HTML 4.01 multi-stage table for codepoint -> entity }}} */
-
-/* {{{ HTML 4.01 hash table for entity -> codepoint */
+/* HTML 4.01 hash table for entity -> codepoint */
 
 static const entity_cp_map ht_bucket_html4_000[] = { {"gt", 2, 0x0003E, 0}, {NULL, 0, 0, 0} };
 static const entity_cp_map ht_bucket_html4_003[] = { {"Igrave", 6, 0x000CC, 0}, {"amp", 3, 0x00026, 0}, {NULL, 0, 0, 0} };
@@ -6139,9 +6098,7 @@ static const entity_ht ent_ht_html4 = {
 	ht_buckets_html4
 };
 
-/* end of HTML 4.01 hash table for entity -> codepoint }}} */
-
-/* {{{ Start of Basic entities (no apos) table for codepoint -> entity */
+/* Start of Basic entities (no apos) table for codepoint -> entity */
 
 static const entity_stage3_row stage3_table_be_noapos_00000[] = {
 	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
@@ -6162,7 +6119,7 @@ static const entity_stage3_row stage3_table_be_noapos_00000[] = {
 	{0, { {"lt", 2} } }, {0, { {NULL, 0} } }, {0, { {"gt", 2} } }, {0, { {NULL, 0} } },
 };
 
-/* {{{ Basic entities (no apos) hash table for entity -> codepoint */
+/* Basic entities (no apos) hash table for entity -> codepoint */
 
 static const entity_cp_map ht_bucket_be_noapos_000[] = { {"gt", 2, 0x0003E, 0}, {NULL, 0, 0, 0} };
 static const entity_cp_map ht_bucket_be_noapos_003[] = { {"amp", 3, 0x00026, 0}, {NULL, 0, 0, 0} };
@@ -6182,9 +6139,7 @@ static const entity_ht ent_ht_be_noapos = {
 	ht_buckets_be_noapos
 };
 
-/* end of Basic entities (no apos) hash table for entity -> codepoint }}} */
-
-/* {{{ Start of Basic entities (with apos) table for codepoint -> entity */
+/* Start of Basic entities (with apos) table for codepoint -> entity */
 
 static const entity_stage3_row stage3_table_be_apos_00000[] = {
 	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
@@ -6205,7 +6160,7 @@ static const entity_stage3_row stage3_table_be_apos_00000[] = {
 	{0, { {"lt", 2} } }, {0, { {NULL, 0} } }, {0, { {"gt", 2} } }, {0, { {NULL, 0} } },
 };
 
-/* {{{ Basic entities (with apos) hash table for entity -> codepoint */
+/* Basic entities (with apos) hash table for entity -> codepoint */
 
 static const entity_cp_map ht_bucket_be_apos_000[] = { {"gt", 2, 0x0003E, 0}, {NULL, 0, 0, 0} };
 static const entity_cp_map ht_bucket_be_apos_003[] = { {"amp", 3, 0x00026, 0}, {NULL, 0, 0, 0} };
@@ -6224,7 +6179,5 @@ static const entity_ht ent_ht_be_apos = {
 	0x10,
 	ht_buckets_be_apos
 };
-
-/* end of Basic entities (with apos) hash table for entity -> codepoint }}} */
 
 #endif /* HTML_TABLES_H */

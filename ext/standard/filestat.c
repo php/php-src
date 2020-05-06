@@ -81,15 +81,14 @@
 #include "basic_functions.h"
 #include "php_filestat.h"
 
-PHP_RINIT_FUNCTION(filestat) /* {{{ */
+PHP_RINIT_FUNCTION(filestat)
 {
 	BG(CurrentStatFile)=NULL;
 	BG(CurrentLStatFile)=NULL;
 	return SUCCESS;
 }
-/* }}} */
 
-PHP_RSHUTDOWN_FUNCTION(filestat) /* {{{ */
+PHP_RSHUTDOWN_FUNCTION(filestat)
 {
 	if (BG(CurrentStatFile)) {
 		efree (BG(CurrentStatFile));
@@ -101,10 +100,9 @@ PHP_RSHUTDOWN_FUNCTION(filestat) /* {{{ */
 	}
 	return SUCCESS;
 }
-/* }}} */
 
-static int php_disk_total_space(char *path, double *space) /* {{{ */
-#if defined(WINDOWS) /* {{{ */
+static int php_disk_total_space(char *path, double *space)
+#if defined(WINDOWS)
 {
 	ULARGE_INTEGER FreeBytesAvailableToCaller;
 	ULARGE_INTEGER TotalNumberOfBytes;
@@ -126,8 +124,8 @@ static int php_disk_total_space(char *path, double *space) /* {{{ */
 
 	return SUCCESS;
 }
-/* }}} */
-#elif defined(OS2) /* {{{ */
+
+#elif defined(OS2)
 {
 	double bytestotal = 0;
 	FSALLOCATE fsinfo;
@@ -140,8 +138,8 @@ static int php_disk_total_space(char *path, double *space) /* {{{ */
 	}
 	return FAILURE;
 }
-/* }}} */
-#else /* {{{ if !defined(OS2) && !defined(WINDOWS) */
+
+#else /* if !defined(OS2) && !defined(WINDOWS) */
 {
 	double bytestotal = 0;
 #if defined(HAVE_SYS_STATVFS_H) && defined(HAVE_STATVFS)
@@ -173,8 +171,7 @@ static int php_disk_total_space(char *path, double *space) /* {{{ */
 	return SUCCESS;
 }
 #endif
-/* }}} */
-/* }}} */
+
 
 /* Get total disk space for filesystem that path is on */
 PHP_FUNCTION(disk_total_space)
@@ -196,10 +193,9 @@ PHP_FUNCTION(disk_total_space)
 	}
 	RETURN_FALSE;
 }
-/* }}} */
 
-static int php_disk_free_space(char *path, double *space) /* {{{ */
-#if defined(WINDOWS) /* {{{ */
+static int php_disk_free_space(char *path, double *space)
+#if defined(WINDOWS)
 {
 	ULARGE_INTEGER FreeBytesAvailableToCaller;
 	ULARGE_INTEGER TotalNumberOfBytes;
@@ -220,8 +216,8 @@ static int php_disk_free_space(char *path, double *space) /* {{{ */
 
 	return SUCCESS;
 }
-/* }}} */
-#elif defined(OS2) /* {{{ */
+
+#elif defined(OS2)
 {
 	double bytesfree = 0;
 	FSALLOCATE fsinfo;
@@ -234,8 +230,8 @@ static int php_disk_free_space(char *path, double *space) /* {{{ */
 	}
 	return FAILURE;
 }
-/* }}} */
-#else /* {{{ if !defined(OS2) && !defined(WINDOWS) */
+
+#else /* if !defined(OS2) && !defined(WINDOWS) */
 {
 	double bytesfree = 0;
 #if defined(HAVE_SYS_STATVFS_H) && defined(HAVE_STATVFS)
@@ -266,8 +262,7 @@ static int php_disk_free_space(char *path, double *space) /* {{{ */
 	return SUCCESS;
 }
 #endif
-/* }}} */
-/* }}} */
+
 
 /* Get free disk space for filesystem that path is on */
 PHP_FUNCTION(disk_free_space)
@@ -289,7 +284,6 @@ PHP_FUNCTION(disk_free_space)
 	}
 	RETURN_FALSE;
 }
-/* }}} */
 
 #ifndef PHP_WIN32
 PHPAPI int php_get_gid_by_name(const char *name, gid_t *gid)
@@ -323,7 +317,7 @@ PHPAPI int php_get_gid_by_name(const char *name, gid_t *gid)
 }
 #endif
 
-static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
+static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp)
 {
 	char *filename;
 	size_t filename_len;
@@ -403,14 +397,12 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 	RETURN_TRUE;
 #endif
 }
-/* }}} */
 
 /* Change file group */
 PHP_FUNCTION(chgrp)
 {
 	php_do_chgrp(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
-/* }}} */
 
 /* Change symlink group */
 #if HAVE_LCHOWN
@@ -423,7 +415,6 @@ PHP_FUNCTION(lchgrp)
 # endif
 }
 #endif
-/* }}} */
 
 #ifndef PHP_WIN32
 PHPAPI uid_t php_get_uid_by_name(const char *name, uid_t *uid)
@@ -457,7 +448,7 @@ PHPAPI uid_t php_get_uid_by_name(const char *name, uid_t *uid)
 }
 #endif
 
-static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
+static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown)
 {
 	char *filename;
 	size_t filename_len;
@@ -538,15 +529,12 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 	RETURN_TRUE;
 #endif
 }
-/* }}} */
-
 
 /* Change file owner */
 PHP_FUNCTION(chown)
 {
 	php_do_chown(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
-/* }}} */
 
 /* Change file owner */
 #if HAVE_LCHOWN
@@ -560,7 +548,6 @@ PHP_FUNCTION(lchown)
 # endif
 }
 #endif
-/* }}} */
 
 /* Change file mode */
 PHP_FUNCTION(chmod)
@@ -605,7 +592,6 @@ PHP_FUNCTION(chmod)
 	}
 	RETURN_TRUE;
 }
-/* }}} */
 
 #if HAVE_UTIME
 /* Set modification time of file */
@@ -693,10 +679,10 @@ PHP_FUNCTION(touch)
 	}
 	RETURN_TRUE;
 }
-/* }}} */
+
 #endif
 
-/* {{{ php_clear_stat_cache()
+/* php_clear_stat_cache()
 */
 PHPAPI void php_clear_stat_cache(zend_bool clear_realpath_cache, const char *filename, size_t filename_len)
 {
@@ -719,7 +705,6 @@ PHPAPI void php_clear_stat_cache(zend_bool clear_realpath_cache, const char *fil
 		}
 	}
 }
-/* }}} */
 
 /* Clear file stat cache */
 PHP_FUNCTION(clearstatcache)
@@ -736,14 +721,13 @@ PHP_FUNCTION(clearstatcache)
 
 	php_clear_stat_cache(clear_realpath_cache, filename, filename_len);
 }
-/* }}} */
 
 #define IS_LINK_OPERATION(__t) ((__t) == FS_TYPE || (__t) == FS_IS_LINK || (__t) == FS_LSTAT)
 #define IS_EXISTS_CHECK(__t) ((__t) == FS_EXISTS  || (__t) == FS_IS_W || (__t) == FS_IS_R || (__t) == FS_IS_X || (__t) == FS_IS_FILE || (__t) == FS_IS_DIR || (__t) == FS_IS_LINK)
 #define IS_ABLE_CHECK(__t) ((__t) == FS_IS_R || (__t) == FS_IS_W || (__t) == FS_IS_X)
 #define IS_ACCESS_CHECK(__t) (IS_ABLE_CHECK(type) || (__t) == FS_EXISTS)
 
-/* {{{ php_stat
+/* php_stat
  */
 PHPAPI void php_stat(const char *filename, size_t filename_length, int type, zval *return_value)
 {
@@ -952,10 +936,9 @@ PHPAPI void php_stat(const char *filename, size_t filename_length, int type, zva
 	php_error_docref(NULL, E_WARNING, "Didn't understand stat call");
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* another quickie macro to make defining similar functions easier */
-/* {{{ FileFunction(name, funcnum) */
+/* FileFunction(name, funcnum) */
 #define FileFunction(name, funcnum) \
 ZEND_NAMED_FUNCTION(name) { \
 	char *filename; \
@@ -967,79 +950,60 @@ ZEND_NAMED_FUNCTION(name) { \
 	\
 	php_stat(filename, filename_len, funcnum, return_value); \
 }
-/* }}} */
 
 /* Get file permissions */
 FileFunction(PHP_FN(fileperms), FS_PERMS)
-/* }}} */
 
 /* Get file inode */
 FileFunction(PHP_FN(fileinode), FS_INODE)
-/* }}} */
 
 /* Get file size */
 FileFunction(PHP_FN(filesize), FS_SIZE)
-/* }}} */
 
 /* Get file owner */
 FileFunction(PHP_FN(fileowner), FS_OWNER)
-/* }}} */
 
 /* Get file group */
 FileFunction(PHP_FN(filegroup), FS_GROUP)
-/* }}} */
 
 /* Get last access time of file */
 FileFunction(PHP_FN(fileatime), FS_ATIME)
-/* }}} */
 
 /* Get last modification time of file */
 FileFunction(PHP_FN(filemtime), FS_MTIME)
-/* }}} */
 
 /* Get inode modification time of file */
 FileFunction(PHP_FN(filectime), FS_CTIME)
-/* }}} */
 
 /* Get file type */
 FileFunction(PHP_FN(filetype), FS_TYPE)
-/* }}} */
 
 /* Returns true if file can be written */
 FileFunction(PHP_FN(is_writable), FS_IS_W)
-/* }}} */
 
 /* Returns true if file can be read */
 FileFunction(PHP_FN(is_readable), FS_IS_R)
-/* }}} */
 
 /* Returns true if file is executable */
 FileFunction(PHP_FN(is_executable), FS_IS_X)
-/* }}} */
 
 /* Returns true if file is a regular file */
 FileFunction(PHP_FN(is_file), FS_IS_FILE)
-/* }}} */
 
 /* Returns true if file is directory */
 FileFunction(PHP_FN(is_dir), FS_IS_DIR)
-/* }}} */
 
 /* Returns true if file is symbolic link */
 FileFunction(PHP_FN(is_link), FS_IS_LINK)
-/* }}} */
 
 /* Returns true if filename exists */
 FileFunction(PHP_FN(file_exists), FS_EXISTS)
-/* }}} */
 
 /* Give information about a file or symbolic link */
 FileFunction(PHP_FN(lstat), FS_LSTAT)
-/* }}} */
 
 /* Give information about a file */
 FileFunction(PHP_FN(stat), FS_STAT)
-/* }}} */
 
 /* Get current size of realpath cache */
 PHP_FUNCTION(realpath_cache_size)

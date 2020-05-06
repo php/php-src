@@ -30,10 +30,10 @@ extern zend_module_entry phpdbg_webhelper_module_entry;
 # define PHPDBG_WG(v) (phpdbg_webhelper_globals.v)
 #endif
 
-/* {{{ structs */
+/* structs */
 ZEND_BEGIN_MODULE_GLOBALS(phpdbg_webhelper)
 	char *auth;
 	char *path;
-ZEND_END_MODULE_GLOBALS(phpdbg_webhelper) /* }}} */
+ZEND_END_MODULE_GLOBALS(phpdbg_webhelper)
 
 #endif /* PHPDBG_WEBHELPER_H */

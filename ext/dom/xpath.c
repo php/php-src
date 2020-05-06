@@ -32,7 +32,7 @@
 
 #if defined(LIBXML_XPATH_ENABLED)
 
-static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int type) /* {{{ */
+static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int type)
 {
 	zval retval;
 	int result, i;
@@ -195,19 +195,16 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs,
 		efree(fci.params);
 	}
 }
-/* }}} */
 
-static void dom_xpath_ext_function_string_php(xmlXPathParserContextPtr ctxt, int nargs) /* {{{ */
+static void dom_xpath_ext_function_string_php(xmlXPathParserContextPtr ctxt, int nargs)
 {
 	dom_xpath_ext_function_php(ctxt, nargs, 1);
 }
-/* }}} */
 
-static void dom_xpath_ext_function_object_php(xmlXPathParserContextPtr ctxt, int nargs) /* {{{ */
+static void dom_xpath_ext_function_object_php(xmlXPathParserContextPtr ctxt, int nargs)
 {
 	dom_xpath_ext_function_php(ctxt, nargs, 2);
 }
-/* }}} */
 
 PHP_METHOD(DOMXPath, __construct)
 {
@@ -252,9 +249,8 @@ PHP_METHOD(DOMXPath, __construct)
 		php_libxml_increment_doc_ref((php_libxml_node_object *) &intern->dom, docp);
 	}
 }
-/* }}} end DOMXPath::__construct */
 
-/* {{{ document DOMDocument*/
+/* document DOMDocument*/
 int dom_xpath_document_read(dom_object *obj, zval *retval)
 {
 	xmlDoc *docp = NULL;
@@ -267,9 +263,8 @@ int dom_xpath_document_read(dom_object *obj, zval *retval)
 	php_dom_create_object((xmlNodePtr) docp, retval, obj);
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ registerNodeNamespaces bool*/
+/* registerNodeNamespaces bool*/
 static inline dom_xpath_object *php_xpath_obj_from_dom_obj(dom_object *obj) {
 	return (dom_xpath_object*)((char*)(obj) - XtOffsetOf(dom_xpath_object, dom));
 }
@@ -287,7 +282,6 @@ int dom_xpath_register_node_ns_write(dom_object *obj, zval *newval)
 
 	return SUCCESS;
 }
-/* }}} */
 
 PHP_METHOD(DOMXPath, registerNamespace)
 {
@@ -315,18 +309,16 @@ PHP_METHOD(DOMXPath, registerNamespace)
 	}
 	RETURN_TRUE;
 }
-/* }}} */
 
-static void dom_xpath_iter(zval *baseobj, dom_object *intern) /* {{{ */
+static void dom_xpath_iter(zval *baseobj, dom_object *intern)
 {
 	dom_nnodemap_object *mapptr = (dom_nnodemap_object *) intern->ptr;
 
 	ZVAL_COPY_VALUE(&mapptr->baseobj_zv, baseobj);
 	mapptr->nodetype = DOM_NODESET;
 }
-/* }}} */
 
-static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
+static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type)
 {
 	zval *id, retval, *context = NULL;
 	xmlXPathContextPtr ctxp;
@@ -471,19 +463,16 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 
 	xmlXPathFreeObject(xpathobjp);
 }
-/* }}} */
 
 PHP_METHOD(DOMXPath, query)
 {
 	php_xpath_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_DOM_XPATH_QUERY);
 }
-/* }}} end dom_xpath_query */
 
 PHP_METHOD(DOMXPath, evaluate)
 {
 	php_xpath_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_DOM_XPATH_EVALUATE);
 }
-/* }}} end dom_xpath_evaluate */
 
 PHP_METHOD(DOMXPath, registerPhpFunctions)
 {
@@ -515,7 +504,6 @@ PHP_METHOD(DOMXPath, registerPhpFunctions)
 	}
 
 }
-/* }}} end dom_xpath_register_php_functions */
 
 #endif /* LIBXML_XPATH_ENABLED */
 

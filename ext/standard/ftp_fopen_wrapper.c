@@ -73,7 +73,7 @@ typedef struct _php_ftp_dirstream_data {
 	php_stream *dirstream;
 } php_ftp_dirstream_data;
 
-/* {{{ get_ftp_result
+/* get_ftp_result
  */
 static inline int get_ftp_result(php_stream *stream, char *buffer, size_t buffer_size)
 {
@@ -83,9 +83,8 @@ static inline int get_ftp_result(php_stream *stream, char *buffer, size_t buffer
 			 isdigit((int) buffer[2]) && buffer[3] == ' '));
 	return strtol(buffer, NULL, 10);
 }
-/* }}} */
 
-/* {{{ php_stream_ftp_stream_stat
+/* php_stream_ftp_stream_stat
  */
 static int php_stream_ftp_stream_stat(php_stream_wrapper *wrapper, php_stream *stream, php_stream_statbuf *ssb)
 {
@@ -93,9 +92,8 @@ static int php_stream_ftp_stream_stat(php_stream_wrapper *wrapper, php_stream *s
 	 * file's details from being used instead. */
 	return -1;
 }
-/* }}} */
 
-/* {{{ php_stream_ftp_stream_close
+/* php_stream_ftp_stream_close
  */
 static int php_stream_ftp_stream_close(php_stream_wrapper *wrapper, php_stream *stream)
 {
@@ -122,9 +120,8 @@ static int php_stream_ftp_stream_close(php_stream_wrapper *wrapper, php_stream *
 
 	return ret;
 }
-/* }}} */
 
-/* {{{ php_ftp_fopen_connect
+/* php_ftp_fopen_connect
  */
 static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, const char *path, const char *mode, int options,
 										 zend_string **opened_path, php_stream_context *context, php_stream **preuseid,
@@ -313,9 +310,8 @@ connect_errexit:
 
 	return NULL;
 }
-/* }}} */
 
-/* {{{ php_fopen_do_pasv
+/* php_fopen_do_pasv
  */
 static unsigned short php_fopen_do_pasv(php_stream *stream, char *ip, size_t ip_size, char **phoststart)
 {
@@ -404,9 +400,8 @@ static unsigned short php_fopen_do_pasv(php_stream *stream, char *ip, size_t ip_
 
 	return portno;
 }
-/* }}} */
 
-/* {{{ php_fopen_url_wrap_ftp
+/* php_fopen_url_wrap_ftp
  */
 php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, const char *path, const char *mode,
 									 int options, zend_string **opened_path, php_stream_context *context STREAMS_DC)
@@ -607,9 +602,8 @@ errexit:
 	}
 	return NULL;
 }
-/* }}} */
 
-/* {{{ php_ftp_dirsteam_read
+/* php_ftp_dirsteam_read
  */
 static ssize_t php_ftp_dirstream_read(php_stream *stream, char *buf, size_t count)
 {
@@ -648,9 +642,8 @@ static ssize_t php_ftp_dirstream_read(php_stream *stream, char *buf, size_t coun
 
 	return sizeof(php_stream_dirent);
 }
-/* }}} */
 
-/* {{{ php_ftp_dirstream_close
+/* php_ftp_dirstream_close
  */
 static int php_ftp_dirstream_close(php_stream *stream, int close_handle)
 {
@@ -670,7 +663,6 @@ static int php_ftp_dirstream_close(php_stream *stream, int close_handle)
 
 	return 0;
 }
-/* }}} */
 
 /* ftp dirstreams only need to support read and close operations,
    They can't be rewound because the underlying ftp stream can't be rewound. */
@@ -686,7 +678,7 @@ static const php_stream_ops php_ftp_dirstream_ops = {
 	NULL  /* set option */
 };
 
-/* {{{ php_stream_ftp_opendir
+/* php_stream_ftp_opendir
  */
 php_stream * php_stream_ftp_opendir(php_stream_wrapper *wrapper, const char *path, const char *mode, int options,
 									zend_string **opened_path, php_stream_context *context STREAMS_DC)
@@ -777,9 +769,8 @@ opendir_errexit:
 	}
 	return NULL;
 }
-/* }}} */
 
-/* {{{ php_stream_ftp_url_stat
+/* php_stream_ftp_url_stat
  */
 static int php_stream_ftp_url_stat(php_stream_wrapper *wrapper, const char *url, int flags, php_stream_statbuf *ssb, php_stream_context *context)
 {
@@ -900,9 +891,8 @@ stat_errexit:
 	}
 	return -1;
 }
-/* }}} */
 
-/* {{{ php_stream_ftp_unlink
+/* php_stream_ftp_unlink
  */
 static int php_stream_ftp_unlink(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context)
 {
@@ -950,9 +940,8 @@ unlink_errexit:
 	}
 	return 0;
 }
-/* }}} */
 
-/* {{{ php_stream_ftp_rename
+/* php_stream_ftp_rename
  */
 static int php_stream_ftp_rename(php_stream_wrapper *wrapper, const char *url_from, const char *url_to, int options, php_stream_context *context)
 {
@@ -1029,9 +1018,8 @@ rename_errexit:
 	}
 	return 0;
 }
-/* }}} */
 
-/* {{{ php_stream_ftp_mkdir
+/* php_stream_ftp_mkdir
  */
 static int php_stream_ftp_mkdir(php_stream_wrapper *wrapper, const char *url, int mode, int options, php_stream_context *context)
 {
@@ -1122,9 +1110,8 @@ mkdir_errexit:
 	}
 	return 0;
 }
-/* }}} */
 
-/* {{{ php_stream_ftp_rmdir
+/* php_stream_ftp_rmdir
  */
 static int php_stream_ftp_rmdir(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context)
 {
@@ -1172,7 +1159,6 @@ rmdir_errexit:
 	}
 	return 0;
 }
-/* }}} */
 
 static const php_stream_wrapper_ops ftp_stream_wops = {
 	php_stream_url_wrap_ftp,

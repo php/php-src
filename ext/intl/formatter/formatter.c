@@ -24,7 +24,7 @@
 #include "formatter_class.h"
 #include "formatter_format.h"
 
-/* {{{ formatter_register_constants
+/* formatter_register_constants
  * Register constants common for the both (OO and procedural)
  * APIs.
  */
@@ -131,4 +131,4 @@ void formatter_register_constants( INIT_FUNC_ARGS )
 	#undef FORMATTER_EXPOSE_CLASS_CONST
 	#undef FORMATTER_EXPOSE_CONST
 }
-/* }}} */
+

@@ -89,7 +89,7 @@ ZEND_TSRMLS_CACHE_DEFINE()
 ZEND_GET_MODULE(dba)
 #endif
 
-/* {{{ macromania */
+/* macromania */
 
 #define DBA_ID_PARS 											\
 	zval *id; 													\
@@ -98,7 +98,7 @@ ZEND_GET_MODULE(dba)
 
 /* these are used to get the standard arguments */
 
-/* {{{ php_dba_myke_key */
+/* php_dba_myke_key */
 static size_t php_dba_make_key(zval *key, char **key_str, char **key_free)
 {
 	if (Z_TYPE_P(key) == IS_ARRAY) {
@@ -139,7 +139,6 @@ static size_t php_dba_make_key(zval *key, char **key_str, char **key_free)
 		return len;
 	}
 }
-/* }}} */
 
 #define DBA_GET2 												\
 	zval *key;													\
@@ -218,9 +217,8 @@ static size_t php_dba_make_key(zval *key, char **key_str, char **key_free)
 		RETURN_FALSE; \
 	}
 
-/* }}} */
 
-/* {{{ globals */
+/* globals */
 
 static dba_handler handler[] = {
 #if DBA_GDBM
@@ -297,9 +295,8 @@ static dba_handler handler[] = {
 
 static int le_db;
 static int le_pdb;
-/* }}} */
 
-/* {{{ dba_fetch_resource
+/* dba_fetch_resource
 PHPAPI void dba_fetch_resource(dba_info **pinfo, zval **id)
 {
 	dba_info *info;
@@ -307,9 +304,8 @@ PHPAPI void dba_fetch_resource(dba_info **pinfo, zval **id)
 	*pinfo = info;
 }
 */
-/* }}} */
 
-/* {{{ dba_get_handler
+/* dba_get_handler
 PHPAPI dba_handler *dba_get_handler(const char* handler_name)
 {
 	dba_handler *hptr;
@@ -317,9 +313,8 @@ PHPAPI dba_handler *dba_get_handler(const char* handler_name)
 	return hptr;
 }
 */
-/* }}} */
 
-/* {{{ dba_close
+/* dba_close
  */
 static void dba_close(dba_info *info)
 {
@@ -348,9 +343,8 @@ static void dba_close(dba_info *info)
 	}
 	pefree(info, info->flags&DBA_PERSISTENT);
 }
-/* }}} */
 
-/* {{{ dba_close_rsrc
+/* dba_close_rsrc
  */
 static void dba_close_rsrc(zend_resource *rsrc)
 {
@@ -358,9 +352,8 @@ static void dba_close_rsrc(zend_resource *rsrc)
 
 	dba_close(info);
 }
-/* }}} */
 
-/* {{{ dba_close_pe_rsrc_deleter */
+/* dba_close_pe_rsrc_deleter */
 int dba_close_pe_rsrc_deleter(zval *el, void *pDba)
 {
 	if (Z_RES_P(el)->ptr == pDba) {
@@ -373,9 +366,8 @@ int dba_close_pe_rsrc_deleter(zval *el, void *pDba)
 		return ZEND_HASH_APPLY_KEEP;
 	}
 }
-/* }}} */
 
-/* {{{ dba_close_pe_rsrc */
+/* dba_close_pe_rsrc */
 static void dba_close_pe_rsrc(zend_resource *rsrc)
 {
 	dba_info *info = (dba_info *)rsrc->ptr;
@@ -383,9 +375,8 @@ static void dba_close_pe_rsrc(zend_resource *rsrc)
 	/* closes the resource by calling dba_close_rsrc() */
 	zend_hash_apply_with_argument(&EG(persistent_list), dba_close_pe_rsrc_deleter, info);
 }
-/* }}} */
 
-/* {{{ PHP_INI
+/* PHP_INI
  */
 ZEND_INI_MH(OnUpdateDefaultHandler)
 {
@@ -409,9 +400,8 @@ ZEND_INI_MH(OnUpdateDefaultHandler)
 PHP_INI_BEGIN()
     STD_PHP_INI_ENTRY("dba.default_handler", DBA_DEFAULT, PHP_INI_ALL, OnUpdateDefaultHandler, default_handler,    zend_dba_globals, dba_globals)
 PHP_INI_END()
-/* }}} */
 
-/* {{{ PHP_GINIT_FUNCTION
+/* PHP_GINIT_FUNCTION
  */
 static PHP_GINIT_FUNCTION(dba)
 {
@@ -421,9 +411,8 @@ static PHP_GINIT_FUNCTION(dba)
 	dba_globals->default_handler = "";
 	dba_globals->default_hptr    = NULL;
 }
-/* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION
+/* PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(dba)
 {
@@ -432,20 +421,18 @@ PHP_MINIT_FUNCTION(dba)
 	le_pdb = zend_register_list_destructors_ex(dba_close_pe_rsrc, dba_close_rsrc, "dba persistent", module_number);
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_MSHUTDOWN_FUNCTION
+/* PHP_MSHUTDOWN_FUNCTION
  */
 PHP_MSHUTDOWN_FUNCTION(dba)
 {
 	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
-/* }}} */
 
 #include "zend_smart_str.h"
 
-/* {{{ PHP_MINFO_FUNCTION
+/* PHP_MINFO_FUNCTION
  */
 PHP_MINFO_FUNCTION(dba)
 {
@@ -469,9 +456,8 @@ PHP_MINFO_FUNCTION(dba)
 	php_info_print_table_end();
 	DISPLAY_INI_ENTRIES();
 }
-/* }}} */
 
-/* {{{ php_dba_update
+/* php_dba_update
  */
 static void php_dba_update(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
@@ -504,11 +490,10 @@ static void php_dba_update(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	DBA_ID_DONE;
 	RETURN_FALSE;
 }
-/* }}} */
 
 #define FREENOW if(args) {int i; for (i=0; i<ac; i++) { zval_ptr_dtor(&args[i]); } efree(args);} if(key) efree(key)
 
-/* {{{ php_find_dbm
+/* php_find_dbm
  */
 dba_info *php_dba_find(const char* path)
 {
@@ -531,9 +516,8 @@ dba_info *php_dba_find(const char* path)
 
 	return NULL;
 }
-/* }}} */
 
-/* {{{ php_dba_open
+/* php_dba_open
  */
 static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
@@ -915,7 +899,7 @@ restart:
 	RETVAL_RES(zend_register_resource(info, (persistent ? le_pdb : le_db)));
 	FREENOW;
 }
-/* }}} */
+
 #undef FREENOW
 
 /* Opens path using the specified handler in mode persistently */
@@ -923,14 +907,12 @@ PHP_FUNCTION(dba_popen)
 {
 	php_dba_open(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
-/* }}} */
 
 /* Opens path using the specified handler in mode*/
 PHP_FUNCTION(dba_open)
 {
 	php_dba_open(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
-/* }}} */
 
 /* Closes database */
 PHP_FUNCTION(dba_close)
@@ -946,7 +928,6 @@ PHP_FUNCTION(dba_close)
 
 	zend_list_close(Z_RES_P(id));
 }
-/* }}} */
 
 /* Checks, if the specified key exists */
 PHP_FUNCTION(dba_exists)
@@ -960,7 +941,6 @@ PHP_FUNCTION(dba_exists)
 	DBA_ID_DONE;
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* Fetches the data associated with key */
 PHP_FUNCTION(dba_fetch)
@@ -1002,7 +982,6 @@ PHP_FUNCTION(dba_fetch)
 	DBA_ID_DONE;
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* Splits an inifile key into an array of the form array(0=>group,1=>value_name) but returns false if input is false or null */
 PHP_FUNCTION(dba_key_split)
@@ -1031,7 +1010,6 @@ PHP_FUNCTION(dba_key_split)
 		add_next_index_stringl(return_value, key, key_len);
 	}
 }
-/* }}} */
 
 /* Resets the internal key pointer and returns the first key */
 PHP_FUNCTION(dba_firstkey)
@@ -1057,7 +1035,6 @@ PHP_FUNCTION(dba_firstkey)
 
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* Returns the next key */
 PHP_FUNCTION(dba_nextkey)
@@ -1083,7 +1060,6 @@ PHP_FUNCTION(dba_nextkey)
 
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* Deletes the entry associated with key
    If inifile: remove all other key lines */
@@ -1101,7 +1077,6 @@ PHP_FUNCTION(dba_delete)
 	DBA_ID_DONE;
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* If not inifile: Insert value as key, return false, if key exists already
    If inifile: Add vakue as key (next instance of key) */
@@ -1109,7 +1084,6 @@ PHP_FUNCTION(dba_insert)
 {
 	php_dba_update(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
-/* }}} */
 
 /* Inserts value as key, replaces key, if key exists already
    If inifile: remove all other key lines */
@@ -1117,7 +1091,6 @@ PHP_FUNCTION(dba_replace)
 {
 	php_dba_update(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
-/* }}} */
 
 /* Optimizes (e.g. clean up, vacuum) database */
 PHP_FUNCTION(dba_optimize)
@@ -1139,7 +1112,6 @@ PHP_FUNCTION(dba_optimize)
 
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* Synchronizes database */
 PHP_FUNCTION(dba_sync)
@@ -1159,7 +1131,6 @@ PHP_FUNCTION(dba_sync)
 
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* List configured database handlers */
 PHP_FUNCTION(dba_handlers)
@@ -1184,7 +1155,6 @@ PHP_FUNCTION(dba_handlers)
 		}
  	}
 }
-/* }}} */
 
 /* List opened databases */
 PHP_FUNCTION(dba_list)
@@ -1210,6 +1180,5 @@ PHP_FUNCTION(dba_list)
 		}
 	}
 }
-/* }}} */
 
 #endif /* HAVE_DBA */

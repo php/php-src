@@ -24,7 +24,7 @@
 #include "mysqlnd_debug.h"
 
 
-/* {{{ mysqlnd_command::set_option */
+/* mysqlnd_command::set_option */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_command, set_option)(MYSQLND_CONN_DATA * const conn, const enum_mysqlnd_server_option option)
 {
@@ -49,10 +49,8 @@ MYSQLND_METHOD(mysqlnd_command, set_option)(MYSQLND_CONN_DATA * const conn, cons
 	}
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_command::debug */
+/* mysqlnd_command::debug */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_command, debug)(MYSQLND_CONN_DATA * const conn)
 {
@@ -76,10 +74,8 @@ MYSQLND_METHOD(mysqlnd_command, debug)(MYSQLND_CONN_DATA * const conn)
 
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_command::init_db */
+/* mysqlnd_command::init_db */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_command, init_db)(MYSQLND_CONN_DATA * const conn, const MYSQLND_CSTRING db)
 {
@@ -121,10 +117,8 @@ MYSQLND_METHOD(mysqlnd_command, init_db)(MYSQLND_CONN_DATA * const conn, const M
 
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_command::ping */
+/* mysqlnd_command::ping */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_command, ping)(MYSQLND_CONN_DATA * const conn)
 {
@@ -153,10 +147,8 @@ MYSQLND_METHOD(mysqlnd_command, ping)(MYSQLND_CONN_DATA * const conn)
 
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_command::statistics */
+/* mysqlnd_command::statistics */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_command, statistics)(MYSQLND_CONN_DATA * const conn, zend_string ** message)
 {
@@ -187,10 +179,8 @@ MYSQLND_METHOD(mysqlnd_command, statistics)(MYSQLND_CONN_DATA * const conn, zend
 
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_command::process_kill */
+/* mysqlnd_command::process_kill */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_command, process_kill)(MYSQLND_CONN_DATA * const conn, const unsigned int process_id, const zend_bool read_response)
 {
@@ -227,10 +217,8 @@ MYSQLND_METHOD(mysqlnd_command, process_kill)(MYSQLND_CONN_DATA * const conn, co
 
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_command::refresh */
+/* mysqlnd_command::refresh */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_command, refresh)(MYSQLND_CONN_DATA * const conn, const uint8_t options)
 {
@@ -256,10 +244,8 @@ MYSQLND_METHOD(mysqlnd_command, refresh)(MYSQLND_CONN_DATA * const conn, const u
 
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_command::shutdown */
+/* mysqlnd_command::shutdown */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_command, shutdown)(MYSQLND_CONN_DATA * const conn, const uint8_t level)
 {
@@ -285,10 +271,8 @@ MYSQLND_METHOD(mysqlnd_command, shutdown)(MYSQLND_CONN_DATA * const conn, const 
 
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_command::quit */
+/* mysqlnd_command::quit */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_command, quit)(MYSQLND_CONN_DATA * const conn)
 {
@@ -307,10 +291,8 @@ MYSQLND_METHOD(mysqlnd_command, quit)(MYSQLND_CONN_DATA * const conn)
 
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_command::query */
+/* mysqlnd_command::query */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_command, query)(MYSQLND_CONN_DATA * const conn, MYSQLND_CSTRING query)
 {
@@ -333,10 +315,8 @@ MYSQLND_METHOD(mysqlnd_command, query)(MYSQLND_CONN_DATA * const conn, MYSQLND_C
 
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_command::change_user */
+/* mysqlnd_command::change_user */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_command, change_user)(MYSQLND_CONN_DATA * const conn, const MYSQLND_CSTRING payload, const zend_bool silent)
 {
@@ -355,10 +335,8 @@ MYSQLND_METHOD(mysqlnd_command, change_user)(MYSQLND_CONN_DATA * const conn, con
 
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_command::reap_result */
+/* mysqlnd_command::reap_result */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_command, reap_result)(MYSQLND_CONN_DATA * const conn)
 {
@@ -375,10 +353,8 @@ MYSQLND_METHOD(mysqlnd_command, reap_result)(MYSQLND_CONN_DATA * const conn)
 
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_command::stmt_prepare */
+/* mysqlnd_command::stmt_prepare */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_command, stmt_prepare)(MYSQLND_CONN_DATA * const conn, const MYSQLND_CSTRING query)
 {
@@ -397,10 +373,8 @@ MYSQLND_METHOD(mysqlnd_command, stmt_prepare)(MYSQLND_CONN_DATA * const conn, co
 
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_command::stmt_execute */
+/* mysqlnd_command::stmt_execute */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_command, stmt_execute)(MYSQLND_CONN_DATA * conn, const MYSQLND_CSTRING payload)
 {
@@ -420,10 +394,8 @@ MYSQLND_METHOD(mysqlnd_command, stmt_execute)(MYSQLND_CONN_DATA * conn, const MY
 
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_command::stmt_fetch */
+/* mysqlnd_command::stmt_fetch */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_command, stmt_fetch)(MYSQLND_CONN_DATA * const conn, const MYSQLND_CSTRING payload)
 {
@@ -442,10 +414,8 @@ MYSQLND_METHOD(mysqlnd_command, stmt_fetch)(MYSQLND_CONN_DATA * const conn, cons
 
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_command::stmt_reset */
+/* mysqlnd_command::stmt_reset */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_command, stmt_reset)(MYSQLND_CONN_DATA * const conn, const zend_ulong stmt_id)
 {
@@ -471,10 +441,8 @@ MYSQLND_METHOD(mysqlnd_command, stmt_reset)(MYSQLND_CONN_DATA * const conn, cons
 
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_command::stmt_send_long_data */
+/* mysqlnd_command::stmt_send_long_data */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_command, stmt_send_long_data)(MYSQLND_CONN_DATA * const conn, const MYSQLND_CSTRING payload)
 {
@@ -493,10 +461,8 @@ MYSQLND_METHOD(mysqlnd_command, stmt_send_long_data)(MYSQLND_CONN_DATA * const c
 	/* COM_STMT_SEND_LONG_DATA - doesn't read result, the server doesn't send ACK */
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_command::stmt_close */
+/* mysqlnd_command::stmt_close */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_command, stmt_close)(MYSQLND_CONN_DATA * const conn, const zend_ulong stmt_id)
 {
@@ -517,10 +483,8 @@ MYSQLND_METHOD(mysqlnd_command, stmt_close)(MYSQLND_CONN_DATA * const conn, cons
 
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_command::enable_ssl */
+/* mysqlnd_command::enable_ssl */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_command, enable_ssl)(MYSQLND_CONN_DATA * const conn, const size_t client_capabilities, const size_t server_capabilities, const unsigned int charset_no)
 {
@@ -602,10 +566,8 @@ close_conn:
 	PACKET_FREE(&auth_packet);
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_command::handshake */
+/* mysqlnd_command::handshake */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_command, handshake)(MYSQLND_CONN_DATA * const conn, const MYSQLND_CSTRING username, const MYSQLND_CSTRING password, const MYSQLND_CSTRING database, const size_t client_flags)
 {
@@ -678,8 +640,6 @@ err:
 	PACKET_FREE(&greet_packet);
 	DBG_RETURN(FAIL);
 }
-/* }}} */
-
 
 MYSQLND_CLASS_METHODS_START(mysqlnd_command)
 	MYSQLND_METHOD(mysqlnd_command, set_option),

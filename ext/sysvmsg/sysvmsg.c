@@ -53,7 +53,7 @@ struct php_msgbuf {
 /* True global resources - no need for thread safety here */
 static int le_sysvmsg;
 
-/* {{{ sysvmsg_module_entry
+/* sysvmsg_module_entry
  */
 zend_module_entry sysvmsg_module_entry = {
 	STANDARD_MODULE_HEADER,
@@ -67,7 +67,6 @@ zend_module_entry sysvmsg_module_entry = {
 	PHP_SYSVMSG_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
-/* }}} */
 
 #ifdef COMPILE_DL_SYSVMSG
 ZEND_GET_MODULE(sysvmsg)
@@ -79,7 +78,7 @@ static void sysvmsg_release(zend_resource *rsrc)
 	efree(mq);
 }
 
-/* {{{ PHP_MINIT_FUNCTION
+/* PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(sysvmsg)
 {
@@ -91,9 +90,8 @@ PHP_MINIT_FUNCTION(sysvmsg)
 	REGISTER_LONG_CONSTANT("MSG_EXCEPT",     PHP_MSG_EXCEPT,     CONST_PERSISTENT|CONST_CS);
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
+/* PHP_MINFO_FUNCTION
  */
 PHP_MINFO_FUNCTION(sysvmsg)
 {
@@ -101,7 +99,6 @@ PHP_MINFO_FUNCTION(sysvmsg)
 	php_info_print_table_row(2, "sysvmsg support", "enabled");
 	php_info_print_table_end();
 }
-/* }}} */
 
 /* Set information for a message queue */
 PHP_FUNCTION(msg_set_queue)
@@ -141,7 +138,6 @@ PHP_FUNCTION(msg_set_queue)
 		}
 	}
 }
-/* }}} */
 
 /* Returns information about a message queue */
 PHP_FUNCTION(msg_stat_queue)
@@ -175,7 +171,6 @@ PHP_FUNCTION(msg_stat_queue)
 		add_assoc_long(return_value, "msg_lrpid",  stat.msg_lrpid);
 	}
 }
-/* }}} */
 
 /* Check whether a message queue exists */
 PHP_FUNCTION(msg_queue_exists)
@@ -192,7 +187,6 @@ PHP_FUNCTION(msg_queue_exists)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Attach to a message queue */
 PHP_FUNCTION(msg_get_queue)
@@ -220,7 +214,6 @@ PHP_FUNCTION(msg_get_queue)
 	}
 	ZVAL_COPY_VALUE(return_value, zend_list_insert(mq, le_sysvmsg));
 }
-/* }}} */
 
 /* Destroy the queue */
 PHP_FUNCTION(msg_remove_queue)
@@ -242,7 +235,6 @@ PHP_FUNCTION(msg_remove_queue)
 		RETVAL_FALSE;
 	}
 }
-/* }}} */
 
 /* Send a message of type msgtype (must be > 0) to a message queue */
 PHP_FUNCTION(msg_receive)
@@ -327,7 +319,6 @@ PHP_FUNCTION(msg_receive)
 	}
 	efree(messagebuffer);
 }
-/* }}} */
 
 /* Send a message of type msgtype (must be > 0) to a message queue */
 PHP_FUNCTION(msg_send)
@@ -414,4 +405,4 @@ PHP_FUNCTION(msg_send)
 		RETVAL_TRUE;
 	}
 }
-/* }}} */
+

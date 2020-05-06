@@ -54,11 +54,10 @@ PHP_METHOD(DOMDocumentFragment, __construct)
 	/* php_dom_set_object(intern, nodep); */
 	php_libxml_increment_node_ptr((php_libxml_node_object *)intern, nodep, (void *)intern);
 }
-/* }}} end DOMDocumentFragment::__construct */
 
 /* php_dom_xmlSetTreeDoc is a custom implementation of xmlSetTreeDoc
  needed for hack in appendXML due to libxml bug - no need to share this function */
-static void php_dom_xmlSetTreeDoc(xmlNodePtr tree, xmlDocPtr doc) /* {{{ */
+static void php_dom_xmlSetTreeDoc(xmlNodePtr tree, xmlDocPtr doc)
 {
     xmlAttrPtr prop;
 	xmlNodePtr cur;
@@ -88,7 +87,6 @@ static void php_dom_xmlSetTreeDoc(xmlNodePtr tree, xmlDocPtr doc) /* {{{ */
 		tree->doc = doc;
     }
 }
-/* }}} */
 
 PHP_METHOD(DOMDocumentFragment, appendXML) {
 	zval *id;
@@ -126,7 +124,6 @@ PHP_METHOD(DOMDocumentFragment, appendXML) {
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* URL: https://dom.spec.whatwg.org/#dom-parentnode-append
 Since: DOM Living Standard (DOM4)
@@ -147,7 +144,6 @@ PHP_METHOD(DOMDocumentFragment, append)
 
 	dom_parent_node_append(intern, args, argc);
 }
-/* }}} */
 
 /* URL: https://dom.spec.whatwg.org/#dom-parentnode-prepend
 Since: DOM Living Standard (DOM4)
@@ -168,6 +164,5 @@ PHP_METHOD(DOMDocumentFragment, prepend)
 
 	dom_parent_node_prepend(intern, args, argc);
 }
-/* }}} */
 
 #endif

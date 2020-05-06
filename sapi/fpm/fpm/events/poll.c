@@ -50,7 +50,7 @@ static int next_free_slot = 0;
 /*
  * return the module configuration
  */
-struct fpm_event_module_s *fpm_event_poll_module() /* {{{ */
+struct fpm_event_module_s *fpm_event_poll_module()
 {
 #if HAVE_POLL
 	return &poll_module;
@@ -58,14 +58,13 @@ struct fpm_event_module_s *fpm_event_poll_module() /* {{{ */
 	return NULL;
 #endif /* HAVE_POLL */
 }
-/* }}} */
 
 #if HAVE_POLL
 
 /*
  * Init the module
  */
-static int fpm_event_poll_init(int max) /* {{{ */
+static int fpm_event_poll_init(int max)
 {
 	int i;
 
@@ -99,12 +98,11 @@ static int fpm_event_poll_init(int max) /* {{{ */
 	npollfds = max;
 	return 0;
 }
-/* }}} */
 
 /*
  * Clean the module
  */
-static int fpm_event_poll_clean() /* {{{ */
+static int fpm_event_poll_clean()
 {
 	/* free pollfds */
 	if (pollfds) {
@@ -121,12 +119,11 @@ static int fpm_event_poll_clean() /* {{{ */
 	npollfds = 0;
 	return 0;
 }
-/* }}} */
 
 /*
  * wait for events or timeout
  */
-static int fpm_event_poll_wait(struct fpm_event_queue_s *queue, unsigned long int timeout) /* {{{ */
+static int fpm_event_poll_wait(struct fpm_event_queue_s *queue, unsigned long int timeout)
 {
 	int ret;
 	struct fpm_event_queue_s *q;
@@ -174,12 +171,11 @@ static int fpm_event_poll_wait(struct fpm_event_queue_s *queue, unsigned long in
 
 	return ret;
 }
-/* }}} */
 
 /*
  * Add a FD to the fd set
  */
-static int fpm_event_poll_add(struct fpm_event_s *ev) /* {{{ */
+static int fpm_event_poll_add(struct fpm_event_s *ev)
 {
 	int i;
 
@@ -219,12 +215,11 @@ static int fpm_event_poll_add(struct fpm_event_s *ev) /* {{{ */
 	zlog(ZLOG_ERROR, "poll: not enough space to add event (fd=%d)", ev->fd);
 	return -1;
 }
-/* }}} */
 
 /*
  * Remove a FD from the fd set
  */
-static int fpm_event_poll_remove(struct fpm_event_s *ev) /* {{{ */
+static int fpm_event_poll_remove(struct fpm_event_s *ev)
 {
 	int i;
 
@@ -267,6 +262,5 @@ static int fpm_event_poll_remove(struct fpm_event_s *ev) /* {{{ */
 	zlog(ZLOG_ERROR, "poll: unable to remove event: not found (fd=%d, index=%d)", ev->fd, ev->index);
 	return -1;
 }
-/* }}} */
 
 #endif /* HAVE_POLL */

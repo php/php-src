@@ -22,7 +22,7 @@
 
 #include <unicode/ustring.h>
 
-/* {{{ transliterator_register_constants
+/* transliterator_register_constants
  * Register constants common for both (OO and procedural) APIs.
  */
 void transliterator_register_constants( INIT_FUNC_ARGS )
@@ -45,4 +45,4 @@ void transliterator_register_constants( INIT_FUNC_ARGS )
 	#undef NORMALIZER_EXPOSE_CLASS_CONST
 	#undef NORMALIZER_EXPOSE_CONST
 }
-/* }}} */
+

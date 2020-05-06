@@ -15,7 +15,7 @@
    +----------------------------------------------------------------------+
  */
 
-/* {{{ includes
+/* includes
  */
 #include "php.h"
 #include "php_globals.h"
@@ -66,9 +66,8 @@
 #if defined(AF_UNIX)
 #include <sys/un.h>
 #endif
-/* }}} */
 
-/* {{{ OnUpdateBaseDir
+/* OnUpdateBaseDir
 Allows any change to open_basedir setting in during Startup and Shutdown events,
 or a tightening during activation/runtime/deactivation */
 PHPAPI ZEND_INI_MH(OnUpdateBaseDir)
@@ -116,9 +115,8 @@ PHPAPI ZEND_INI_MH(OnUpdateBaseDir)
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ php_check_specific_open_basedir
+/* php_check_specific_open_basedir
 	When open_basedir is not NULL, check if the given filename is located in
 	open_basedir. Returns -1 if error or not in the open_basedir, else 0.
 	When open_basedir is NULL, always return 0.
@@ -260,14 +258,13 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 		return -1;
 	}
 }
-/* }}} */
 
 PHPAPI int php_check_open_basedir(const char *path)
 {
 	return php_check_open_basedir_ex(path, 1);
 }
 
-/* {{{ php_check_open_basedir
+/* php_check_open_basedir
  */
 PHPAPI int php_check_open_basedir_ex(const char *path, int warn)
 {
@@ -314,9 +311,8 @@ PHPAPI int php_check_open_basedir_ex(const char *path, int warn)
 	/* Nothing to check... */
 	return 0;
 }
-/* }}} */
 
-/* {{{ php_fopen_and_set_opened_path
+/* php_fopen_and_set_opened_path
  */
 static FILE *php_fopen_and_set_opened_path(const char *path, const char *mode, zend_string **opened_path)
 {
@@ -336,9 +332,8 @@ static FILE *php_fopen_and_set_opened_path(const char *path, const char *mode, z
 	}
 	return fp;
 }
-/* }}} */
 
-/* {{{ php_fopen_primary_script
+/* php_fopen_primary_script
  */
 PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle)
 {
@@ -457,9 +452,8 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle)
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ php_resolve_path
+/* php_resolve_path
  * Returns the realpath for given filename according to include path
  */
 PHPAPI zend_string *php_resolve_path(const char *filename, size_t filename_length, const char *path)
@@ -609,9 +603,8 @@ PHPAPI zend_string *php_resolve_path(const char *filename, size_t filename_lengt
 
 	return NULL;
 }
-/* }}} */
 
-/* {{{ php_fopen_with_path
+/* php_fopen_with_path
  * Tries to open a file with a PATH-style list of directories.
  * If the filename starts with "." or "/", the path is ignored.
  */
@@ -693,9 +686,8 @@ PHPAPI FILE *php_fopen_with_path(const char *filename, const char *mode, const c
 	efree(pathbuf);
 	return NULL;
 }
-/* }}} */
 
-/* {{{ php_strip_url_passwd
+/* php_strip_url_passwd
  */
 PHPAPI char *php_strip_url_passwd(char *url)
 {
@@ -733,25 +725,22 @@ PHPAPI char *php_strip_url_passwd(char *url)
 	}
 	return url;
 }
-/* }}} */
 
-/* {{{ expand_filepath
+/* expand_filepath
  */
 PHPAPI char *expand_filepath(const char *filepath, char *real_path)
 {
 	return expand_filepath_ex(filepath, real_path, NULL, 0);
 }
-/* }}} */
 
-/* {{{ expand_filepath_ex
+/* expand_filepath_ex
  */
 PHPAPI char *expand_filepath_ex(const char *filepath, char *real_path, const char *relative_to, size_t relative_to_len)
 {
 	return expand_filepath_with_mode(filepath, real_path, relative_to, relative_to_len, CWD_FILEPATH);
 }
-/* }}} */
 
-/* {{{ expand_filepath_use_realpath
+/* expand_filepath_use_realpath
  */
 PHPAPI char *expand_filepath_with_mode(const char *filepath, char *real_path, const char *relative_to, size_t relative_to_len, int realpath_mode)
 {
@@ -825,4 +814,4 @@ PHPAPI char *expand_filepath_with_mode(const char *filepath, char *real_path, co
 
 	return real_path;
 }
-/* }}} */
+

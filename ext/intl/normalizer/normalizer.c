@@ -23,7 +23,7 @@
 #include <unicode/unorm.h>
 #include <unicode/ustring.h>
 
-/* {{{ normalizer_register_constants
+/* normalizer_register_constants
  * Register constants common for the both (OO and procedural)
  * APIs.
  */
@@ -57,4 +57,4 @@ void normalizer_register_constants( INIT_FUNC_ARGS )
 	#undef NORMALIZER_EXPOSE_CLASS_CONST
 	#undef NORMALIZER_EXPOSE_CONST
 }
-/* }}} */
+

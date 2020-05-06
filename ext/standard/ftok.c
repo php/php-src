@@ -60,5 +60,5 @@ PHP_FUNCTION(ftok)
 
 	RETURN_LONG(k);
 }
-/* }}} */
+
 #endif

@@ -29,7 +29,7 @@ int fpm_socket_get_listening_queue(int sock, unsigned *cur_lq, unsigned *max_lq)
 int fpm_socket_unix_test_connect(struct sockaddr_un *sock, size_t socklen);
 
 
-static inline int fd_set_blocked(int fd, int blocked) /* {{{ */
+static inline int fd_set_blocked(int fd, int blocked)
 {
 	int flags = fcntl(fd, F_GETFL);
 
@@ -44,6 +44,5 @@ static inline int fd_set_blocked(int fd, int blocked) /* {{{ */
 	}
 	return fcntl(fd, F_SETFL, flags);
 }
-/* }}} */
 
 #endif

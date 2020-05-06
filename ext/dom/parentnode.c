@@ -24,7 +24,7 @@
 #if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
 
-/* {{{ firstElementChild DomParentNode
+/* firstElementChild DomParentNode
 readonly=yes
 URL: https://www.w3.org/TR/dom/#dom-parentnode-firstelementchild
 */
@@ -55,9 +55,8 @@ int dom_parent_node_first_element_child_read(dom_object *obj, zval *retval)
 	php_dom_create_object(first, retval, obj);
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ lastElementChild DomParentNode
+/* lastElementChild DomParentNode
 readonly=yes
 URL: https://www.w3.org/TR/dom/#dom-parentnode-lastelementchild
 */
@@ -88,9 +87,8 @@ int dom_parent_node_last_element_child_read(dom_object *obj, zval *retval)
 	php_dom_create_object(last, retval, obj);
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ childElementCount DomParentNode
+/* childElementCount DomParentNode
 readonly=yes
 https://www.w3.org/TR/dom/#dom-parentnode-childelementcount
 */
@@ -122,7 +120,6 @@ int dom_parent_node_child_element_count(dom_object *obj, zval *retval)
 
 	return SUCCESS;
 }
-/* }}} */
 
 xmlNode* dom_zvals_to_fragment(php_libxml_ref_obj *document, xmlNode *contextNode, zval *nodes, int nodesc)
 {

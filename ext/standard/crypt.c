@@ -54,7 +54,7 @@
 #define DES_INVALID_SALT_ERROR "Supplied salt is not valid for DES. Possible bug in provided salt format."
 
 
-PHP_MINIT_FUNCTION(crypt) /* {{{ */
+PHP_MINIT_FUNCTION(crypt)
 {
 	REGISTER_LONG_CONSTANT("CRYPT_SALT_LENGTH", PHP_MAX_SALT_LEN, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CRYPT_STD_DES", 1, CONST_CS | CONST_PERSISTENT);
@@ -70,9 +70,8 @@ PHP_MINIT_FUNCTION(crypt) /* {{{ */
 
 	return SUCCESS;
 }
-/* }}} */
 
-PHP_MSHUTDOWN_FUNCTION(crypt) /* {{{ */
+PHP_MSHUTDOWN_FUNCTION(crypt)
 {
 #if PHP_USE_PHP_CRYPT_R
 	php_shutdown_crypt_r();
@@ -80,18 +79,16 @@ PHP_MSHUTDOWN_FUNCTION(crypt) /* {{{ */
 
 	return SUCCESS;
 }
-/* }}} */
 
 static unsigned char itoa64[] = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
-static void php_to64(char *s, int n) /* {{{ */
+static void php_to64(char *s, int n)
 {
 	while (--n >= 0) {
 		*s = itoa64[*s & 0x3f];
 		s++;
 	}
 }
-/* }}} */
 
 PHPAPI zend_string *php_crypt(const char *password, const int pass_len, const char *salt, int salt_len, zend_bool quiet)
 {
@@ -221,8 +218,6 @@ PHPAPI zend_string *php_crypt(const char *password, const int pass_len, const ch
 		return result;
 	}
 }
-/* }}} */
-
 
 /* Hash a string */
 PHP_FUNCTION(crypt)
@@ -271,4 +266,4 @@ PHP_FUNCTION(crypt)
 	}
 	RETURN_STR(result);
 }
-/* }}} */
+

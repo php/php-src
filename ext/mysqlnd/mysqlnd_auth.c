@@ -31,7 +31,7 @@ static const char * const mysqlnd_old_passwd  = "mysqlnd cannot connect to MySQL
 "flag from your my.cnf file";
 
 
-/* {{{ mysqlnd_run_authentication */
+/* mysqlnd_run_authentication */
 enum_func_status
 mysqlnd_run_authentication(
 			MYSQLND_CONN_DATA * const conn,
@@ -174,10 +174,8 @@ end:
 
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_switch_to_ssl_if_needed */
+/* mysqlnd_switch_to_ssl_if_needed */
 static enum_func_status
 mysqlnd_switch_to_ssl_if_needed(MYSQLND_CONN_DATA * const conn,
 								unsigned int charset_no,
@@ -199,10 +197,8 @@ mysqlnd_switch_to_ssl_if_needed(MYSQLND_CONN_DATA * const conn,
 	}
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_connect_run_authentication */
+/* mysqlnd_connect_run_authentication */
 enum_func_status
 mysqlnd_connect_run_authentication(
 			MYSQLND_CONN_DATA * const conn,
@@ -230,10 +226,8 @@ mysqlnd_connect_run_authentication(
 	}
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_auth_handshake */
+/* mysqlnd_auth_handshake */
 enum_func_status
 mysqlnd_auth_handshake(MYSQLND_CONN_DATA * conn,
 							  const char * const user,
@@ -361,10 +355,8 @@ end:
 	PACKET_FREE(&auth_resp_packet);
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_auth_change_user */
+/* mysqlnd_auth_change_user */
 enum_func_status
 mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
 								const char * const user,
@@ -524,14 +516,12 @@ end:
 	PACKET_FREE(&chg_user_resp);
 	DBG_RETURN(ret);
 }
-/* }}} */
-
 
 /******************************************* MySQL Native Password ***********************************/
 
 #include "ext/standard/sha1.h"
 
-/* {{{ php_mysqlnd_crypt */
+/* php_mysqlnd_crypt */
 static void
 php_mysqlnd_crypt(zend_uchar *buffer, const zend_uchar *s1, const zend_uchar *s2, size_t len)
 {
@@ -540,10 +530,8 @@ php_mysqlnd_crypt(zend_uchar *buffer, const zend_uchar *s1, const zend_uchar *s2
 		*buffer++= *s1++ ^ *s2++;
 	}
 }
-/* }}} */
 
-
-/* {{{ php_mysqlnd_scramble */
+/* php_mysqlnd_scramble */
 void php_mysqlnd_scramble(zend_uchar * const buffer, const zend_uchar * const scramble, const zend_uchar * const password, const size_t password_len)
 {
 	PHP_SHA1_CTX context;
@@ -569,10 +557,8 @@ void php_mysqlnd_scramble(zend_uchar * const buffer, const zend_uchar * const sc
 	/* let's crypt buffer now */
 	php_mysqlnd_crypt(buffer, (const zend_uchar *)buffer, (const zend_uchar *)sha1, SHA1_MAX_LENGTH);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_native_auth_get_auth_data */
+/* mysqlnd_native_auth_get_auth_data */
 static zend_uchar *
 mysqlnd_native_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self,
 								  size_t * auth_data_len,
@@ -604,8 +590,6 @@ mysqlnd_native_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self
 	}
 	DBG_RETURN(ret);
 }
-/* }}} */
-
 
 static struct st_mysqlnd_authentication_plugin mysqlnd_native_auth_plugin =
 {
@@ -633,7 +617,7 @@ static struct st_mysqlnd_authentication_plugin mysqlnd_native_auth_plugin =
 
 /******************************************* PAM Authentication ***********************************/
 
-/* {{{ mysqlnd_pam_auth_get_auth_data */
+/* mysqlnd_pam_auth_get_auth_data */
 static zend_uchar *
 mysqlnd_pam_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self,
 							   size_t * auth_data_len,
@@ -654,8 +638,6 @@ mysqlnd_pam_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self,
 
 	return ret;
 }
-/* }}} */
-
 
 static struct st_mysqlnd_authentication_plugin mysqlnd_pam_authentication_plugin =
 {
@@ -700,7 +682,7 @@ mysqlnd_xor_string(char * dst, const size_t dst_len, const char * xor_str, const
 
 typedef RSA * mysqlnd_rsa_t;
 
-/* {{{ mysqlnd_sha256_get_rsa_from_pem */
+/* mysqlnd_sha256_get_rsa_from_pem */
 static mysqlnd_rsa_t
 mysqlnd_sha256_get_rsa_from_pem(const char *buf, size_t len)
 {
@@ -709,9 +691,8 @@ mysqlnd_sha256_get_rsa_from_pem(const char *buf, size_t len)
 	BIO_free(bio);
 	return ret;
 }
-/* }}} */
 
-/* {{{ mysqlnd_sha256_public_encrypt */
+/* mysqlnd_sha256_public_encrypt */
 static zend_uchar *
 mysqlnd_sha256_public_encrypt(MYSQLND_CONN_DATA * conn, mysqlnd_rsa_t server_public_key, size_t passwd_len, size_t * auth_data_len, char *xor_str)
 {
@@ -738,7 +719,6 @@ mysqlnd_sha256_public_encrypt(MYSQLND_CONN_DATA * conn, mysqlnd_rsa_t server_pub
 	RSA_free(server_public_key);
 	DBG_RETURN(ret);
 }
-/* }}} */
 
 #else
 
@@ -747,7 +727,7 @@ mysqlnd_sha256_public_encrypt(MYSQLND_CONN_DATA * conn, mysqlnd_rsa_t server_pub
 
 typedef HANDLE mysqlnd_rsa_t;
 
-/* {{{ mysqlnd_sha256_get_rsa_from_pem */
+/* mysqlnd_sha256_get_rsa_from_pem */
 static mysqlnd_rsa_t
 mysqlnd_sha256_get_rsa_from_pem(const char *buf, size_t len)
 {
@@ -781,9 +761,8 @@ finish:
 	}
 	return (mysqlnd_rsa_t) ret;
 }
-/* }}} */
 
-/* {{{ mysqlnd_sha256_public_encrypt */
+/* mysqlnd_sha256_public_encrypt */
 static zend_uchar *
 mysqlnd_sha256_public_encrypt(MYSQLND_CONN_DATA * conn, mysqlnd_rsa_t server_public_key, size_t passwd_len, size_t * auth_data_len, char *xor_str)
 {
@@ -823,11 +802,10 @@ mysqlnd_sha256_public_encrypt(MYSQLND_CONN_DATA * conn, mysqlnd_rsa_t server_pub
 	BCryptDestroyKey((BCRYPT_KEY_HANDLE) server_public_key);
 	DBG_RETURN(ret);
 }
-/* }}} */
 
 #endif
 
-/* {{{ mysqlnd_sha256_get_rsa_key */
+/* mysqlnd_sha256_get_rsa_key */
 static mysqlnd_rsa_t
 mysqlnd_sha256_get_rsa_key(MYSQLND_CONN_DATA * conn,
 						   const MYSQLND_SESSION_OPTIONS * const session_options,
@@ -895,10 +873,8 @@ mysqlnd_sha256_get_rsa_key(MYSQLND_CONN_DATA * conn,
 	}
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_sha256_auth_get_auth_data */
+/* mysqlnd_sha256_auth_get_auth_data */
 static zend_uchar *
 mysqlnd_sha256_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self,
 								  size_t * auth_data_len,
@@ -938,8 +914,6 @@ mysqlnd_sha256_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self
 
 	DBG_RETURN(ret);
 }
-/* }}} */
-
 
 static struct st_mysqlnd_authentication_plugin mysqlnd_sha256_authentication_plugin =
 {
@@ -975,7 +949,7 @@ static struct st_mysqlnd_authentication_plugin mysqlnd_sha256_authentication_plu
 
 #define SHA256_LENGTH 32
 
-/* {{{ php_mysqlnd_scramble_sha2 */
+/* php_mysqlnd_scramble_sha2 */
 void php_mysqlnd_scramble_sha2(zend_uchar * const buffer, const zend_uchar * const scramble, const zend_uchar * const password, const size_t password_len)
 {
 	PHP_SHA256_CTX context;
@@ -1001,11 +975,10 @@ void php_mysqlnd_scramble_sha2(zend_uchar * const buffer, const zend_uchar * con
 	/* let's crypt buffer now */
 	php_mysqlnd_crypt(buffer, (const zend_uchar *)sha1, (const zend_uchar *)buffer, SHA256_LENGTH);
 }
-/* }}} */
 
 #ifndef PHP_WIN32
 
-/* {{{ mysqlnd_caching_sha2_public_encrypt */
+/* mysqlnd_caching_sha2_public_encrypt */
 static size_t
 mysqlnd_caching_sha2_public_encrypt(MYSQLND_CONN_DATA * conn, mysqlnd_rsa_t server_public_key, size_t passwd_len, unsigned char **crypted, char *xor_str)
 {
@@ -1030,11 +1003,10 @@ mysqlnd_caching_sha2_public_encrypt(MYSQLND_CONN_DATA * conn, mysqlnd_rsa_t serv
 	RSA_free(server_public_key);
 	DBG_RETURN(server_public_key_len);
 }
-/* }}} */
 
 #else
 
-/* {{{ mysqlnd_caching_sha2_public_encrypt */
+/* mysqlnd_caching_sha2_public_encrypt */
 static size_t
 mysqlnd_caching_sha2_public_encrypt(MYSQLND_CONN_DATA * conn, mysqlnd_rsa_t server_public_key, size_t passwd_len, unsigned char **crypted, char *xor_str)
 {
@@ -1072,11 +1044,10 @@ mysqlnd_caching_sha2_public_encrypt(MYSQLND_CONN_DATA * conn, mysqlnd_rsa_t serv
 	BCryptDestroyKey((BCRYPT_KEY_HANDLE) server_public_key);
 	DBG_RETURN(server_public_key_len);
 }
-/* }}} */
 
 #endif
 
-/* {{{ mysqlnd_native_auth_get_auth_data */
+/* mysqlnd_native_auth_get_auth_data */
 static zend_uchar *
 mysqlnd_caching_sha2_get_auth_data(struct st_mysqlnd_authentication_plugin * self,
 								   size_t * auth_data_len,
@@ -1110,7 +1081,6 @@ mysqlnd_caching_sha2_get_auth_data(struct st_mysqlnd_authentication_plugin * sel
 
 	DBG_RETURN(ret);
 }
-/* }}} */
 
 static mysqlnd_rsa_t
 mysqlnd_caching_sha2_get_key(MYSQLND_CONN_DATA *conn)
@@ -1181,7 +1151,7 @@ mysqlnd_caching_sha2_get_key(MYSQLND_CONN_DATA *conn)
 }
 
 
-/* {{{ mysqlnd_caching_sha2_get_and_use_key */
+/* mysqlnd_caching_sha2_get_and_use_key */
 static size_t
 mysqlnd_caching_sha2_get_and_use_key(MYSQLND_CONN_DATA *conn,
 		const zend_uchar * auth_plugin_data, const size_t auth_plugin_data_len,
@@ -1206,7 +1176,6 @@ mysqlnd_caching_sha2_get_and_use_key(MYSQLND_CONN_DATA *conn,
 	}
 	DBG_RETURN(0);
 }
-/* }}} */
 
 static int is_secure_transport(MYSQLND_CONN_DATA *conn) {
 	if (conn->vio->data->ssl) {
@@ -1216,7 +1185,7 @@ static int is_secure_transport(MYSQLND_CONN_DATA *conn) {
 	return strcmp(conn->vio->data->stream->ops->label, "unix_socket") == 0;
 }
 
-/* {{{ mysqlnd_caching_sha2_handle_server_response */
+/* mysqlnd_caching_sha2_handle_server_response */
 static enum_func_status
 mysqlnd_caching_sha2_handle_server_response(struct st_mysqlnd_authentication_plugin *self,
 		MYSQLND_CONN_DATA * conn,
@@ -1280,7 +1249,6 @@ mysqlnd_caching_sha2_handle_server_response(struct st_mysqlnd_authentication_plu
 
 	DBG_RETURN(PASS);
 }
-/* }}} */
 
 static struct st_mysqlnd_authentication_plugin mysqlnd_caching_sha2_auth_plugin =
 {
@@ -1307,7 +1275,7 @@ static struct st_mysqlnd_authentication_plugin mysqlnd_caching_sha2_auth_plugin 
 #endif
 
 
-/* {{{ mysqlnd_register_builtin_authentication_plugins */
+/* mysqlnd_register_builtin_authentication_plugins */
 void
 mysqlnd_register_builtin_authentication_plugins(void)
 {
@@ -1318,4 +1286,4 @@ mysqlnd_register_builtin_authentication_plugins(void)
 	mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_sha256_authentication_plugin);
 #endif
 }
-/* }}} */
+

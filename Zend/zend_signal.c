@@ -76,7 +76,7 @@ static int zend_sigs[] = { TIMEOUT_SIG, SIGHUP, SIGINT, SIGQUIT, SIGTERM, SIGUSR
 static zend_signal_entry_t global_orig_handlers[NSIG];
 static sigset_t            global_sigmask;
 
-/* {{{ zend_signal_handler_defer
+/* zend_signal_handler_defer
  *  Blocks signals if in critical section */
 void zend_signal_handler_defer(int signo, siginfo_t *siginfo, void *context)
 {
@@ -143,9 +143,9 @@ void zend_signal_handler_defer(int signo, siginfo_t *siginfo, void *context)
 	}
 
 	errno = errno_save;
-} /* }}} */
+}
 
-/* {{{ zend_signal_handler_unblock
+/* zend_signal_handler_unblock
  * Handle deferred signal from HANDLE_UNBLOCK_ALARMS */
 ZEND_API void zend_signal_handler_unblock(void)
 {
@@ -165,9 +165,8 @@ ZEND_API void zend_signal_handler_unblock(void)
 		SIGNAL_END_CRITICAL();
 	}
 }
-/* }}} */
 
-/* {{{ zend_signal_handler
+/* zend_signal_handler
  *  Call the previously registered handler for a signal
  */
 static void zend_signal_handler(int signo, siginfo_t *siginfo, void *context)
@@ -219,9 +218,9 @@ static void zend_signal_handler(int signo, siginfo_t *siginfo, void *context)
 	}
 
 	errno = errno_save;
-} /* }}} */
+}
 
-/* {{{ zend_sigaction
+/* zend_sigaction
  *  Register a signal handler that will be deferred in critical sections */
 ZEND_API int zend_sigaction(int signo, const struct sigaction *act, struct sigaction *oldact)
 {
@@ -262,9 +261,8 @@ ZEND_API int zend_sigaction(int signo, const struct sigaction *act, struct sigac
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ zend_signal
+/* zend_signal
  *  Register a signal handler that will be deferred in critical sections */
 ZEND_API int zend_signal(int signo, void (*handler)(int))
 {
@@ -277,9 +275,8 @@ ZEND_API int zend_signal(int signo, void (*handler)(int))
 
 	return zend_sigaction(signo, &sa, NULL);
 }
-/* }}} */
 
-/* {{{ zend_signal_register
+/* zend_signal_register
  *  Set a handler for a signal we want to defer.
  *  Previously set handler must have been saved before.
  */
@@ -310,9 +307,9 @@ static int zend_signal_register(int signo, void (*handler)(int, siginfo_t*, void
 		return SUCCESS;
 	}
 	return FAILURE;
-} /* }}} */
+}
 
-/* {{{ zend_signal_activate
+/* zend_signal_activate
  *  Install our signal handlers, per request */
 void zend_signal_activate(void)
 {
@@ -329,9 +326,9 @@ void zend_signal_activate(void)
 	SIGG(active) = 1;
 	SIGG(depth)  = 0;
 	SIGG(check)  = ZEND_DEBUG;
-} /* }}} */
+}
 
-/* {{{ zend_signal_deactivate
+/* zend_signal_deactivate
  * */
 void zend_signal_deactivate(void)
 {
@@ -369,9 +366,8 @@ void zend_signal_deactivate(void)
 		SIGG(ptail) = NULL;
 	}
 }
-/* }}} */
 
-static void zend_signal_globals_ctor(zend_signal_globals_t *zend_signal_globals) /* {{{ */
+static void zend_signal_globals_ctor(zend_signal_globals_t *zend_signal_globals)
 {
 	size_t x;
 
@@ -385,9 +381,8 @@ static void zend_signal_globals_ctor(zend_signal_globals_t *zend_signal_globals)
 		zend_signal_globals->pavail = queue;
 	}
 }
-/* }}} */
 
-void zend_signal_init(void) /* {{{ */
+void zend_signal_init(void)
 {
 	int signo;
 	struct sigaction sa;
@@ -405,9 +400,8 @@ void zend_signal_init(void) /* {{{ */
 		}
 	}
 }
-/* }}} */
 
-/* {{{ zend_signal_startup
+/* zend_signal_startup
  * alloc zend signal globals */
 ZEND_API void zend_signal_startup(void)
 {
@@ -442,7 +436,5 @@ ZEND_API void zend_signal_startup(void)
 
 	zend_signal_init();
 }
-/* }}} */
-
 
 #endif /* ZEND_SIGNALS */

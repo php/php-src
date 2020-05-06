@@ -21,7 +21,7 @@ static size_t fpm_env_argv_len = 0;
 
 #ifndef HAVE_SETENV
 # ifdef (__sparc__ || __sparc)
-int setenv(char *name, char *value, int clobber) /* {{{ */
+int setenv(char *name, char *value, int clobber)
 {
 	char   *malloc();
 	char   *getenv();
@@ -37,9 +37,9 @@ int setenv(char *name, char *value, int clobber) /* {{{ */
 	sprintf(cp, "%s=%s", name, value);
 	return putenv(cp);
 }
-/* }}} */
+
 # else
-int setenv(char *name, char *value, int overwrite) /* {{{ */
+int setenv(char *name, char *value, int overwrite)
 {
 	int name_len = strlen(name);
 	int value_len = strlen(value);
@@ -55,12 +55,12 @@ int setenv(char *name, char *value, int overwrite) /* {{{ */
 
 	return putenv(var);
 }
-/* }}} */
+
 # endif
 #endif
 
 #ifndef HAVE_CLEARENV
-void clearenv() /* {{{ */
+void clearenv()
 {
 	char **envp;
 	char *s;
@@ -79,11 +79,11 @@ void clearenv() /* {{{ */
 	}
 
 }
-/* }}} */
+
 #endif
 
 #ifndef HAVE_UNSETENV
-void unsetenv(const char *name) /* {{{ */
+void unsetenv(const char *name)
 {
 	if(getenv(name) != NULL) {
 		int ct = 0;
@@ -98,9 +98,8 @@ void unsetenv(const char *name) /* {{{ */
 		environ[ct-1] = NULL;
 	}
 }
-/* }}} */
 
-static char * nvmatch(char *s1, char *s2) /* {{{ */
+static char * nvmatch(char *s1, char *s2)
 {
 	while(*s1 == *s2++)
 	{
@@ -113,10 +112,10 @@ static char * nvmatch(char *s1, char *s2) /* {{{ */
 	}
 	return NULL;
 }
-/* }}} */
+
 #endif
 
-void fpm_env_setproctitle(char *title) /* {{{ */
+void fpm_env_setproctitle(char *title)
 {
 #if defined(HAVE_SETPROCTITLE_FAST)
 	setproctitle_fast("%s", title);
@@ -133,9 +132,8 @@ void fpm_env_setproctitle(char *title) /* {{{ */
 #endif
 #endif
 }
-/* }}} */
 
-int fpm_env_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
+int fpm_env_init_child(struct fpm_worker_pool_s *wp)
 {
 	struct key_value_s *kv;
 	char *title;
@@ -161,9 +159,8 @@ int fpm_env_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 
 	return 0;
 }
-/* }}} */
 
-static int fpm_env_conf_wp(struct fpm_worker_pool_s *wp) /* {{{ */
+static int fpm_env_conf_wp(struct fpm_worker_pool_s *wp)
 {
 	struct key_value_s *kv;
 
@@ -194,9 +191,8 @@ static int fpm_env_conf_wp(struct fpm_worker_pool_s *wp) /* {{{ */
 
 	return 0;
 }
-/* }}} */
 
-int fpm_env_init_main() /* {{{ */
+int fpm_env_init_main()
 {
 	struct fpm_worker_pool_s *wp;
 	char *title;
@@ -274,4 +270,4 @@ int fpm_env_init_main() /* {{{ */
 	efree(title);
 	return 0;
 }
-/* }}} */
+

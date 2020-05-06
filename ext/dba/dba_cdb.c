@@ -206,19 +206,18 @@ DBA_DELETE_FUNC(cdb)
 	return FAILURE; /* cdb doesn't support delete */
 }
 
-/* {{{ cdb_file_read */
+/* cdb_file_read */
 #if DBA_CDB_BUILTIN
 # define cdb_file_read(fildes, buf, size) php_stream_read(fildes, buf, size)
 #else
 # define cdb_file_read(fildes, buf, size) read(fildes, buf, size)
 #endif
-/* }}} */
 
 #define CREAD(n) do { \
 	if (cdb_file_read(cdb->file, buf, n) < n) return NULL; \
 } while (0)
 
-/* {{{ cdb_file_lseek
+/* cdb_file_lseek
  php_stream_seek does not return actual position */
 #if DBA_CDB_BUILTIN
 zend_off_t cdb_file_lseek(php_stream *fp, zend_off_t offset, int whence) {
@@ -230,7 +229,6 @@ zend_off_t cdb_file_lseek(int fd, zend_off_t offset, int whence) {
 	return lseek(fd, offset, whence);
 }
 #endif
-/* }}} */
 
 #define CSEEK(n) do { \
 	if (n >= cdb->eod) return NULL; \

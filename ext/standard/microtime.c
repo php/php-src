@@ -84,7 +84,6 @@ PHP_FUNCTION(microtime)
 {
 	_php_gettimeofday(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
-/* }}} */
 
 /* Returns the current time as array */
 PHP_FUNCTION(gettimeofday)
@@ -92,7 +91,6 @@ PHP_FUNCTION(gettimeofday)
 	_php_gettimeofday(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 #endif
-/* }}} */
 
 #ifdef HAVE_GETRUSAGE
 /* Returns an array of usage statistics */
@@ -149,4 +147,4 @@ PHP_FUNCTION(getrusage)
 }
 #endif /* HAVE_GETRUSAGE */
 
-/* }}} */
+

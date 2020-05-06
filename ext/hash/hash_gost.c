@@ -19,7 +19,7 @@
 #include "php_hash_gost.h"
 #include "php_hash_gost_tables.h"
 
-/* {{{ Gost()
+/* Gost()
  * derived from gost_compress() by Markku-Juhani Saarinen <mjos@ssh.fi>
  */
 
@@ -218,7 +218,6 @@ static inline void Gost(PHP_GOST_CTX *context, uint32_t data[8])
 	SHIFT16(h, v, u);
 	SHIFT61(h, v);
 }
-/* }}} */
 
 static inline void GostTransform(PHP_GOST_CTX *context, const unsigned char input[32])
 {

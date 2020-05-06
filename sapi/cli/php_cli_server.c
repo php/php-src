@@ -227,7 +227,7 @@ static void php_cli_server_log_response(php_cli_server_client *client, int statu
 
 ZEND_DECLARE_MODULE_GLOBALS(cli_server)
 
-/* {{{ static char php_cli_server_css[]
+/* static char php_cli_server_css[]
  * copied from ext/standard/info.c
  */
 static const char php_cli_server_css[] = "<style>\n" \
@@ -236,7 +236,6 @@ static const char php_cli_server_css[] = "<style>\n" \
 										"h1, p { padding-left: 10px; }\n" \
 										"code.url { background-color: #eeeeee; font-family:monospace; padding:0 2px;}\n" \
 										"</style>\n";
-/* }}} */
 
 #ifdef PHP_WIN32
 int php_cli_server_get_system_time(char *buf) {
@@ -268,17 +267,17 @@ int php_cli_server_get_system_time(char *buf) {
 }
 #endif
 
-static void char_ptr_dtor_p(zval *zv) /* {{{ */
+static void char_ptr_dtor_p(zval *zv)
 {
 	pefree(Z_PTR_P(zv), 1);
-} /* }}} */
+}
 
-static char *get_last_error() /* {{{ */
+static char *get_last_error()
 {
 	return pestrdup(strerror(errno), 1);
-} /* }}} */
+}
 
-static int status_comp(const void *a, const void *b) /* {{{ */
+static int status_comp(const void *a, const void *b)
 {
 	const http_response_status_code_pair *pa = (const http_response_status_code_pair *) a;
 	const http_response_status_code_pair *pb = (const http_response_status_code_pair *) b;
@@ -290,9 +289,9 @@ static int status_comp(const void *a, const void *b) /* {{{ */
 	}
 
 	return 0;
-} /* }}} */
+}
 
-static const char *get_status_string(int code) /* {{{ */
+static const char *get_status_string(int code)
 {
 	http_response_status_code_pair needle = {code, NULL},
 		*result = NULL;
@@ -308,9 +307,9 @@ static const char *get_status_string(int code) /* {{{ */
 	 * 2616 requires a reason phrase. This is basically what a lot of other Web
 	 * servers do in this case anyway. */
 	return "Unknown Status Code";
-} /* }}} */
+}
 
-static const char *get_template_string(int code) /* {{{ */
+static const char *get_template_string(int code)
 {
 	size_t e = (sizeof(template_map) / sizeof(php_cli_server_http_response_status_code_pair));
 	size_t s = 0;
@@ -327,9 +326,9 @@ static const char *get_template_string(int code) /* {{{ */
 		}
 	}
 	return NULL;
-} /* }}} */
+}
 
-static void append_http_status_line(smart_str *buffer, int protocol_version, int response_code, int persistent) /* {{{ */
+static void append_http_status_line(smart_str *buffer, int protocol_version, int response_code, int persistent)
 {
 	if (!response_code) {
 		response_code = 200;
@@ -344,9 +343,9 @@ static void append_http_status_line(smart_str *buffer, int protocol_version, int
 	smart_str_appendc_ex(buffer, ' ', persistent);
 	smart_str_appends_ex(buffer, get_status_string(response_code), persistent);
 	smart_str_appendl_ex(buffer, "\r\n", 2, persistent);
-} /* }}} */
+}
 
-static void append_essential_headers(smart_str* buffer, php_cli_server_client *client, int persistent) /* {{{ */
+static void append_essential_headers(smart_str* buffer, php_cli_server_client *client, int persistent)
 {
 	char *val;
 	struct timeval tv = {0};
@@ -366,14 +365,14 @@ static void append_essential_headers(smart_str* buffer, php_cli_server_client *c
 	}
 
 	smart_str_appendl_ex(buffer, "Connection: close\r\n", sizeof("Connection: close\r\n") - 1, persistent);
-} /* }}} */
+}
 
-static const char *get_mime_type(const php_cli_server *server, const char *ext, size_t ext_len) /* {{{ */
+static const char *get_mime_type(const php_cli_server *server, const char *ext, size_t ext_len)
 {
 	return (const char*)zend_hash_str_find_ptr(&server->extension_mime_types, ext, ext_len);
-} /* }}} */
+}
 
-PHP_FUNCTION(apache_request_headers) /* {{{ */
+PHP_FUNCTION(apache_request_headers)
 {
 	php_cli_server_client *client;
 	HashTable *headers;
@@ -395,9 +394,8 @@ PHP_FUNCTION(apache_request_headers) /* {{{ */
 		zend_symtable_update(Z_ARRVAL_P(return_value), key, &tmp);
 	} ZEND_HASH_FOREACH_END();
 }
-/* }}} */
 
-static void add_response_header(sapi_header_struct *h, zval *return_value) /* {{{ */
+static void add_response_header(sapi_header_struct *h, zval *return_value)
 {
 	char *s, *p;
 	ptrdiff_t  len;
@@ -423,9 +421,8 @@ static void add_response_header(sapi_header_struct *h, zval *return_value) /* {{
 		}
 	}
 }
-/* }}} */
 
-PHP_FUNCTION(apache_response_headers) /* {{{ */
+PHP_FUNCTION(apache_response_headers)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
@@ -434,9 +431,8 @@ PHP_FUNCTION(apache_response_headers) /* {{{ */
 	array_init(return_value);
 	zend_llist_apply_with_argument(&SG(sapi_headers).headers, (llist_apply_with_arg_func_t)add_response_header, return_value);
 }
-/* }}} */
 
-/* {{{ cli_server module
+/* cli_server module
  */
 
 static void cli_server_init_globals(zend_cli_server_globals *cg)
@@ -478,7 +474,6 @@ zend_module_entry cli_server_module_entry = {
 	PHP_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
-/* }}} */
 
 ZEND_BEGIN_ARG_INFO(arginfo_no_args, 0)
 ZEND_END_ARG_INFO()
@@ -492,7 +487,7 @@ const zend_function_entry server_additional_functions[] = {
 	PHP_FE_END
 };
 
-static int sapi_cli_server_startup(sapi_module_struct *sapi_module) /* {{{ */
+static int sapi_cli_server_startup(sapi_module_struct *sapi_module)
 {
 	char *workers;
 
@@ -546,18 +541,18 @@ static int sapi_cli_server_startup(sapi_module_struct *sapi_module) /* {{{ */
 	}
 
 	return SUCCESS;
-} /* }}} */
+}
 
-static size_t sapi_cli_server_ub_write(const char *str, size_t str_length) /* {{{ */
+static size_t sapi_cli_server_ub_write(const char *str, size_t str_length)
 {
 	php_cli_server_client *client = SG(server_context);
 	if (!client) {
 		return 0;
 	}
 	return php_cli_server_client_send_through(client, str, str_length);
-} /* }}} */
+}
 
-static void sapi_cli_server_flush(void *server_context) /* {{{ */
+static void sapi_cli_server_flush(void *server_context)
 {
 	php_cli_server_client *client = server_context;
 
@@ -574,14 +569,13 @@ static void sapi_cli_server_flush(void *server_context) /* {{{ */
 		sapi_send_headers();
 		SG(headers_sent) = 1;
 	}
-} /* }}} */
+}
 
-static int sapi_cli_server_discard_headers(sapi_headers_struct *sapi_headers) /* {{{ */{
+static int sapi_cli_server_discard_headers(sapi_headers_struct *sapi_headers) {
 	return SAPI_HEADER_SENT_SUCCESSFULLY;
 }
-/* }}} */
 
-static int sapi_cli_server_send_headers(sapi_headers_struct *sapi_headers) /* {{{ */
+static int sapi_cli_server_send_headers(sapi_headers_struct *sapi_headers)
 {
 	php_cli_server_client *client = SG(server_context);
 	smart_str buffer = { 0 };
@@ -616,9 +610,8 @@ static int sapi_cli_server_send_headers(sapi_headers_struct *sapi_headers) /* {{
 	smart_str_free(&buffer);
 	return SAPI_HEADER_SENT_SUCCESSFULLY;
 }
-/* }}} */
 
-static char *sapi_cli_server_read_cookies(void) /* {{{ */
+static char *sapi_cli_server_read_cookies(void)
 {
 	php_cli_server_client *client = SG(server_context);
 	char *val;
@@ -626,9 +619,9 @@ static char *sapi_cli_server_read_cookies(void) /* {{{ */
 		return NULL;
 	}
 	return val;
-} /* }}} */
+}
 
-static size_t sapi_cli_server_read_post(char *buf, size_t count_bytes) /* {{{ */
+static size_t sapi_cli_server_read_post(char *buf, size_t count_bytes)
 {
 	php_cli_server_client *client = SG(server_context);
 	if (client->request.content) {
@@ -639,9 +632,9 @@ static size_t sapi_cli_server_read_post(char *buf, size_t count_bytes) /* {{{ */
 		return nbytes_copied;
 	}
 	return 0;
-} /* }}} */
+}
 
-static void sapi_cli_server_register_variable(zval *track_vars_array, const char *key, const char *val) /* {{{ */
+static void sapi_cli_server_register_variable(zval *track_vars_array, const char *key, const char *val)
 {
 	char *new_val = (char *)val;
 	size_t new_val_len;
@@ -653,9 +646,9 @@ static void sapi_cli_server_register_variable(zval *track_vars_array, const char
 	if (sapi_module.input_filter(PARSE_SERVER, (char*)key, &new_val, strlen(val), &new_val_len)) {
 		php_register_variable_safe((char *)key, new_val, new_val_len, track_vars_array);
 	}
-} /* }}} */
+}
 
-static int sapi_cli_server_register_entry_cb(char **entry, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */ {
+static int sapi_cli_server_register_entry_cb(char **entry, int num_args, va_list args, zend_hash_key *hash_key) {
 	zval *track_vars_array = va_arg(args, zval *);
 	if (hash_key->key) {
 		char *real_key, *key;
@@ -679,9 +672,8 @@ static int sapi_cli_server_register_entry_cb(char **entry, int num_args, va_list
 
 	return ZEND_HASH_APPLY_KEEP;
 }
-/* }}} */
 
-static void sapi_cli_server_register_variables(zval *track_vars_array) /* {{{ */
+static void sapi_cli_server_register_variables(zval *track_vars_array)
 {
 	php_cli_server_client *client = SG(server_context);
 	sapi_cli_server_register_variable(track_vars_array, "DOCUMENT_ROOT", client->server->document_root);
@@ -746,9 +738,9 @@ static void sapi_cli_server_register_variables(zval *track_vars_array) /* {{{ */
 		sapi_cli_server_register_variable(track_vars_array, "QUERY_STRING", client->request.query_string);
 	}
 	zend_hash_apply_with_arguments(&client->request.headers, (apply_func_args_t)sapi_cli_server_register_entry_cb, 1, track_vars_array);
-} /* }}} */
+}
 
-static void sapi_cli_server_log_write(int type, char *msg) /* {{{ */
+static void sapi_cli_server_log_write(int type, char *msg)
 {
 	char buf[52];
 
@@ -775,14 +767,14 @@ static void sapi_cli_server_log_write(int type, char *msg) /* {{{ */
 #else
 	fprintf(stderr, "[%s] %s\n", buf, msg);
 #endif
-} /* }}} */
+}
 
-static void sapi_cli_server_log_message(char *msg, int syslog_type_int) /* {{{ */
+static void sapi_cli_server_log_message(char *msg, int syslog_type_int)
 {
 	sapi_cli_server_log_write(PHP_CLI_SERVER_LOG_MESSAGE, msg);
-} /* }}} */
+}
 
-/* {{{ sapi_module_struct cli_server_sapi_module
+/* sapi_module_struct cli_server_sapi_module
  */
 sapi_module_struct cli_server_sapi_module = {
 	"cli-server",							/* name */
@@ -814,17 +806,17 @@ sapi_module_struct cli_server_sapi_module = {
 	NULL,							/* Child terminate */
 
 	STANDARD_SAPI_MODULE_PROPERTIES
-}; /* }}} */
+};
 
-static int php_cli_server_poller_ctor(php_cli_server_poller *poller) /* {{{ */
+static int php_cli_server_poller_ctor(php_cli_server_poller *poller)
 {
 	FD_ZERO(&poller->rfds);
 	FD_ZERO(&poller->wfds);
 	poller->max_fd = -1;
 	return SUCCESS;
-} /* }}} */
+}
 
-static void php_cli_server_poller_add(php_cli_server_poller *poller, int mode, php_socket_t fd) /* {{{ */
+static void php_cli_server_poller_add(php_cli_server_poller *poller, int mode, php_socket_t fd)
 {
 	if (mode & POLLIN) {
 		PHP_SAFE_FD_SET(fd, &poller->rfds);
@@ -835,9 +827,9 @@ static void php_cli_server_poller_add(php_cli_server_poller *poller, int mode, p
 	if (fd > poller->max_fd) {
 		poller->max_fd = fd;
 	}
-} /* }}} */
+}
 
-static void php_cli_server_poller_remove(php_cli_server_poller *poller, int mode, php_socket_t fd) /* {{{ */
+static void php_cli_server_poller_remove(php_cli_server_poller *poller, int mode, php_socket_t fd)
 {
 	if (mode & POLLIN) {
 		PHP_SAFE_FD_CLR(fd, &poller->rfds);
@@ -856,16 +848,16 @@ static void php_cli_server_poller_remove(php_cli_server_poller *poller, int mode
 		poller->max_fd = fd;
 	}
 #endif
-} /* }}} */
+}
 
-static int php_cli_server_poller_poll(php_cli_server_poller *poller, struct timeval *tv) /* {{{ */
+static int php_cli_server_poller_poll(php_cli_server_poller *poller, struct timeval *tv)
 {
 	memmove(&poller->active.rfds, &poller->rfds, sizeof(poller->rfds));
 	memmove(&poller->active.wfds, &poller->wfds, sizeof(poller->wfds));
 	return php_select(poller->max_fd + 1, &poller->active.rfds, &poller->active.wfds, NULL, tv);
-} /* }}} */
+}
 
-static int php_cli_server_poller_iter_on_active(php_cli_server_poller *poller, void *opaque, int(*callback)(void *, php_socket_t fd, int events)) /* {{{ */
+static int php_cli_server_poller_iter_on_active(php_cli_server_poller *poller, void *opaque, int(*callback)(void *, php_socket_t fd, int events))
 {
 	int retval = SUCCESS;
 #ifdef PHP_WIN32
@@ -926,9 +918,9 @@ static int php_cli_server_poller_iter_on_active(php_cli_server_poller *poller, v
 	}
 #endif
 	return retval;
-} /* }}} */
+}
 
-static size_t php_cli_server_chunk_size(const php_cli_server_chunk *chunk) /* {{{ */
+static size_t php_cli_server_chunk_size(const php_cli_server_chunk *chunk)
 {
 	switch (chunk->type) {
 	case PHP_CLI_SERVER_CHUNK_HEAP:
@@ -937,9 +929,9 @@ static size_t php_cli_server_chunk_size(const php_cli_server_chunk *chunk) /* {{
 		return chunk->data.immortal.len;
 	}
 	return 0;
-} /* }}} */
+}
 
-static void php_cli_server_chunk_dtor(php_cli_server_chunk *chunk) /* {{{ */
+static void php_cli_server_chunk_dtor(php_cli_server_chunk *chunk)
 {
 	switch (chunk->type) {
 	case PHP_CLI_SERVER_CHUNK_HEAP:
@@ -950,9 +942,9 @@ static void php_cli_server_chunk_dtor(php_cli_server_chunk *chunk) /* {{{ */
 	case PHP_CLI_SERVER_CHUNK_IMMORTAL:
 		break;
 	}
-} /* }}} */
+}
 
-static void php_cli_server_buffer_dtor(php_cli_server_buffer *buffer) /* {{{ */
+static void php_cli_server_buffer_dtor(php_cli_server_buffer *buffer)
 {
 	php_cli_server_chunk *chunk, *next;
 	for (chunk = buffer->first; chunk; chunk = next) {
@@ -960,15 +952,15 @@ static void php_cli_server_buffer_dtor(php_cli_server_buffer *buffer) /* {{{ */
 		php_cli_server_chunk_dtor(chunk);
 		pefree(chunk, 1);
 	}
-} /* }}} */
+}
 
-static void php_cli_server_buffer_ctor(php_cli_server_buffer *buffer) /* {{{ */
+static void php_cli_server_buffer_ctor(php_cli_server_buffer *buffer)
 {
 	buffer->first = NULL;
 	buffer->last = NULL;
-} /* }}} */
+}
 
-static void php_cli_server_buffer_append(php_cli_server_buffer *buffer, php_cli_server_chunk *chunk) /* {{{ */
+static void php_cli_server_buffer_append(php_cli_server_buffer *buffer, php_cli_server_chunk *chunk)
 {
 	php_cli_server_chunk *last;
 	for (last = chunk; last->next; last = last->next);
@@ -978,9 +970,9 @@ static void php_cli_server_buffer_append(php_cli_server_buffer *buffer, php_cli_
 		buffer->last->next = chunk;
 	}
 	buffer->last = last;
-} /* }}} */
+}
 
-static void php_cli_server_buffer_prepend(php_cli_server_buffer *buffer, php_cli_server_chunk *chunk) /* {{{ */
+static void php_cli_server_buffer_prepend(php_cli_server_buffer *buffer, php_cli_server_chunk *chunk)
 {
 	php_cli_server_chunk *last;
 	for (last = chunk; last->next; last = last->next);
@@ -989,9 +981,9 @@ static void php_cli_server_buffer_prepend(php_cli_server_buffer *buffer, php_cli
 		buffer->last = last;
 	}
 	buffer->first = chunk;
-} /* }}} */
+}
 
-static size_t php_cli_server_buffer_size(const php_cli_server_buffer *buffer) /* {{{ */
+static size_t php_cli_server_buffer_size(const php_cli_server_buffer *buffer)
 {
 	php_cli_server_chunk *chunk;
 	size_t retval = 0;
@@ -999,9 +991,9 @@ static size_t php_cli_server_buffer_size(const php_cli_server_buffer *buffer) /*
 		retval += php_cli_server_chunk_size(chunk);
 	}
 	return retval;
-} /* }}} */
+}
 
-static php_cli_server_chunk *php_cli_server_chunk_immortal_new(const char *buf, size_t len) /* {{{ */
+static php_cli_server_chunk *php_cli_server_chunk_immortal_new(const char *buf, size_t len)
 {
 	php_cli_server_chunk *chunk = pemalloc(sizeof(php_cli_server_chunk), 1);
 
@@ -1010,9 +1002,9 @@ static php_cli_server_chunk *php_cli_server_chunk_immortal_new(const char *buf, 
 	chunk->data.immortal.p = buf;
 	chunk->data.immortal.len = len;
 	return chunk;
-} /* }}} */
+}
 
-static php_cli_server_chunk *php_cli_server_chunk_heap_new(void *block, char *buf, size_t len) /* {{{ */
+static php_cli_server_chunk *php_cli_server_chunk_heap_new(void *block, char *buf, size_t len)
 {
 	php_cli_server_chunk *chunk = pemalloc(sizeof(php_cli_server_chunk), 1);
 
@@ -1022,9 +1014,9 @@ static php_cli_server_chunk *php_cli_server_chunk_heap_new(void *block, char *bu
 	chunk->data.heap.p = buf;
 	chunk->data.heap.len = len;
 	return chunk;
-} /* }}} */
+}
 
-static php_cli_server_chunk *php_cli_server_chunk_heap_new_self_contained(size_t len) /* {{{ */
+static php_cli_server_chunk *php_cli_server_chunk_heap_new_self_contained(size_t len)
 {
 	php_cli_server_chunk *chunk = pemalloc(sizeof(php_cli_server_chunk) + len, 1);
 
@@ -1034,19 +1026,19 @@ static php_cli_server_chunk *php_cli_server_chunk_heap_new_self_contained(size_t
 	chunk->data.heap.p = (char *)(chunk + 1);
 	chunk->data.heap.len = len;
 	return chunk;
-} /* }}} */
+}
 
-static void php_cli_server_content_sender_dtor(php_cli_server_content_sender *sender) /* {{{ */
+static void php_cli_server_content_sender_dtor(php_cli_server_content_sender *sender)
 {
 	php_cli_server_buffer_dtor(&sender->buffer);
-} /* }}} */
+}
 
-static void php_cli_server_content_sender_ctor(php_cli_server_content_sender *sender) /* {{{ */
+static void php_cli_server_content_sender_ctor(php_cli_server_content_sender *sender)
 {
 	php_cli_server_buffer_ctor(&sender->buffer);
-} /* }}} */
+}
 
-static int php_cli_server_content_sender_send(php_cli_server_content_sender *sender, php_socket_t fd, size_t *nbytes_sent_total) /* {{{ */
+static int php_cli_server_content_sender_send(php_cli_server_content_sender *sender, php_socket_t fd, size_t *nbytes_sent_total)
 {
 	php_cli_server_chunk *chunk, *next;
 	size_t _nbytes_sent_total = 0;
@@ -1117,9 +1109,9 @@ static int php_cli_server_content_sender_send(php_cli_server_content_sender *sen
 	}
 	*nbytes_sent_total = _nbytes_sent_total;
 	return 0;
-} /* }}} */
+}
 
-static int php_cli_server_content_sender_pull(php_cli_server_content_sender *sender, int fd, size_t *nbytes_read) /* {{{ */
+static int php_cli_server_content_sender_pull(php_cli_server_content_sender *sender, int fd, size_t *nbytes_read)
 {
 #ifdef PHP_WIN32
 	int _nbytes_read;
@@ -1147,19 +1139,19 @@ static int php_cli_server_content_sender_pull(php_cli_server_content_sender *sen
 	php_cli_server_buffer_append(&sender->buffer, chunk);
 	*nbytes_read = _nbytes_read;
 	return 0;
-} /* }}} */
+}
 
 #if HAVE_UNISTD_H
-static int php_cli_is_output_tty() /* {{{ */
+static int php_cli_is_output_tty()
 {
 	if (php_cli_output_is_tty == OUTPUT_NOT_CHECKED) {
 		php_cli_output_is_tty = isatty(STDOUT_FILENO);
 	}
 	return php_cli_output_is_tty;
-} /* }}} */
+}
 #endif
 
-static void php_cli_server_log_response(php_cli_server_client *client, int status, const char *message) /* {{{ */
+static void php_cli_server_log_response(php_cli_server_client *client, int status, const char *message)
 {
 	int color = 0, effective_status = status;
 	char *basic_buf, *message_buf = "", *error_buf = "";
@@ -1237,9 +1229,9 @@ static void php_cli_server_log_response(php_cli_server_client *client, int statu
 	if (append_error_message) {
 		efree(error_buf);
 	}
-} /* }}} */
+}
 
-static void php_cli_server_logf(int type, const char *format, ...) /* {{{ */
+static void php_cli_server_logf(int type, const char *format, ...)
 {
 	char *buf = NULL;
 	va_list ap;
@@ -1259,9 +1251,9 @@ static void php_cli_server_logf(int type, const char *format, ...) /* {{{ */
 	sapi_cli_server_log_write(type, buf);
 
 	efree(buf);
-} /* }}} */
+}
 
-static php_socket_t php_network_listen_socket(const char *host, int *port, int socktype, int *af, socklen_t *socklen, zend_string **errstr) /* {{{ */
+static php_socket_t php_network_listen_socket(const char *host, int *port, int socktype, int *af, socklen_t *socklen, zend_string **errstr)
 {
 	php_socket_t retval = SOCK_ERR;
 	int err = 0;
@@ -1376,9 +1368,9 @@ out:
 		return SOCK_ERR;
 	}
 	return retval;
-} /* }}} */
+}
 
-static int php_cli_server_request_ctor(php_cli_server_request *req) /* {{{ */
+static int php_cli_server_request_ctor(php_cli_server_request *req)
 {
 	req->protocol_version = 0;
 	req->request_uri = NULL;
@@ -1398,9 +1390,9 @@ static int php_cli_server_request_ctor(php_cli_server_request *req) /* {{{ */
 	req->ext = NULL;
 	req->ext_len = 0;
 	return SUCCESS;
-} /* }}} */
+}
 
-static void php_cli_server_request_dtor(php_cli_server_request *req) /* {{{ */
+static void php_cli_server_request_dtor(php_cli_server_request *req)
 {
 	if (req->request_uri) {
 		pefree(req->request_uri, 1);
@@ -1422,9 +1414,9 @@ static void php_cli_server_request_dtor(php_cli_server_request *req) /* {{{ */
 	if (req->content) {
 		pefree(req->content, 1);
 	}
-} /* }}} */
+}
 
-static void php_cli_server_request_translate_vpath(php_cli_server_request *request, const char *document_root, size_t document_root_len) /* {{{ */
+static void php_cli_server_request_translate_vpath(php_cli_server_request *request, const char *document_root, size_t document_root_len)
 {
 	zend_stat_t sb;
 	static const char *index_files[] = { "index.php", "index.html", NULL };
@@ -1526,9 +1518,9 @@ static void php_cli_server_request_translate_vpath(php_cli_server_request *reque
 	}
 #endif
 	request->sb = sb;
-} /* }}} */
+}
 
-static void normalize_vpath(char **retval, size_t *retval_len, const char *vpath, size_t vpath_len, int persistent) /* {{{ */
+static void normalize_vpath(char **retval, size_t *retval_len, const char *vpath, size_t vpath_len, int persistent)
 {
 	char *decoded_vpath = NULL;
 	char *decoded_vpath_end;
@@ -1607,9 +1599,9 @@ static void normalize_vpath(char **retval, size_t *retval_len, const char *vpath
 	*decoded_vpath_end = '\0';
 	*retval = decoded_vpath;
 	*retval_len = decoded_vpath_end - decoded_vpath;
-} /* }}} */
+}
 
-/* {{{ php_cli_server_client_read_request */
+/* php_cli_server_client_read_request */
 static int php_cli_server_client_read_request_on_message_begin(php_http_parser *parser)
 {
 	return 0;
@@ -1849,9 +1841,8 @@ static int php_cli_server_client_read_request(php_cli_server_client *client, cha
 	}
 	return client->request_read ? 1: 0;
 }
-/* }}} */
 
-static size_t php_cli_server_client_send_through(php_cli_server_client *client, const char *str, size_t str_len) /* {{{ */
+static size_t php_cli_server_client_send_through(php_cli_server_client *client, const char *str, size_t str_len)
 {
 	struct timeval tv = { 10, 0 };
 #ifdef PHP_WIN32
@@ -1891,9 +1882,9 @@ static size_t php_cli_server_client_send_through(php_cli_server_client *client, 
 	} while (nbytes_left > 0);
 
 	return str_len;
-} /* }}} */
+}
 
-static void php_cli_server_client_populate_request_info(const php_cli_server_client *client, sapi_request_info *request_info) /* {{{ */
+static void php_cli_server_client_populate_request_info(const php_cli_server_client *client, sapi_request_info *request_info)
 {
 	char *val;
 
@@ -1907,13 +1898,13 @@ static void php_cli_server_client_populate_request_info(const php_cli_server_cli
 	if (NULL != (val = zend_hash_str_find_ptr(&client->request.headers, "content-type", sizeof("content-type")-1))) {
 		request_info->content_type = val;
 	}
-} /* }}} */
+}
 
-static void destroy_request_info(sapi_request_info *request_info) /* {{{ */
+static void destroy_request_info(sapi_request_info *request_info)
 {
-} /* }}} */
+}
 
-static int php_cli_server_client_ctor(php_cli_server_client *client, php_cli_server *server, php_socket_t client_sock, struct sockaddr *addr, socklen_t addr_len) /* {{{ */
+static int php_cli_server_client_ctor(php_cli_server_client *client, php_cli_server *server, php_socket_t client_sock, struct sockaddr *addr, socklen_t addr_len)
 {
 	client->server = server;
 	client->sock = client_sock;
@@ -1944,9 +1935,9 @@ static int php_cli_server_client_ctor(php_cli_server_client *client, php_cli_ser
 	client->content_sender_initialized = 0;
 	client->file_fd = -1;
 	return SUCCESS;
-} /* }}} */
+}
 
-static void php_cli_server_client_dtor(php_cli_server_client *client) /* {{{ */
+static void php_cli_server_client_dtor(php_cli_server_client *client)
 {
 	php_cli_server_request_dtor(&client->request);
 	if (client->file_fd >= 0) {
@@ -1958,16 +1949,16 @@ static void php_cli_server_client_dtor(php_cli_server_client *client) /* {{{ */
 	if (client->content_sender_initialized) {
 		php_cli_server_content_sender_dtor(&client->content_sender);
 	}
-} /* }}} */
+}
 
-static void php_cli_server_close_connection(php_cli_server *server, php_cli_server_client *client) /* {{{ */
+static void php_cli_server_close_connection(php_cli_server *server, php_cli_server_client *client)
 {
 	php_cli_server_logf(PHP_CLI_SERVER_LOG_MESSAGE, "%s Closing", client->addr_str);
 
 	zend_hash_index_del(&server->clients, client->sock);
-} /* }}} */
+}
 
-static int php_cli_server_send_error_page(php_cli_server *server, php_cli_server_client *client, int status) /* {{{ */
+static int php_cli_server_send_error_page(php_cli_server *server, php_cli_server_client *client, int status)
 {
 	zend_string *escaped_request_uri = NULL;
 	const char *status_string = get_status_string(status);
@@ -2060,9 +2051,9 @@ fail:
 	}
 	zend_string_free(escaped_request_uri);
 	return FAILURE;
-} /* }}} */
+}
 
-static int php_cli_server_dispatch_script(php_cli_server *server, php_cli_server_client *client) /* {{{ */
+static int php_cli_server_dispatch_script(php_cli_server *server, php_cli_server_client *client)
 {
 	if (strlen(client->request.path_translated) != client->request.path_translated_len) {
 		/* can't handle paths that contain nul bytes */
@@ -2078,9 +2069,9 @@ static int php_cli_server_dispatch_script(php_cli_server *server, php_cli_server
 
 	php_cli_server_log_response(client, SG(sapi_headers).http_response_code, NULL);
 	return SUCCESS;
-} /* }}} */
+}
 
-static int php_cli_server_begin_send_static(php_cli_server *server, php_cli_server_client *client) /* {{{ */
+static int php_cli_server_begin_send_static(php_cli_server *server, php_cli_server_client *client)
 {
 	int fd;
 	int status = 200;
@@ -2150,9 +2141,8 @@ static int php_cli_server_begin_send_static(php_cli_server *server, php_cli_serv
 	php_cli_server_poller_add(&server->poller, POLLOUT, client->sock);
 	return SUCCESS;
 }
-/* }}} */
 
-static int php_cli_server_request_startup(php_cli_server *server, php_cli_server_client *client) { /* {{{ */
+static int php_cli_server_request_startup(php_cli_server *server, php_cli_server_client *client) {
 	char *auth;
 	php_cli_server_client_populate_request_info(client, &SG(request_info));
 	if (NULL != (auth = zend_hash_str_find_ptr(&client->request.headers, "authorization", sizeof("authorization")-1))) {
@@ -2168,9 +2158,8 @@ static int php_cli_server_request_startup(php_cli_server *server, php_cli_server
 
 	return SUCCESS;
 }
-/* }}} */
 
-static int php_cli_server_request_shutdown(php_cli_server *server, php_cli_server_client *client) { /* {{{ */
+static int php_cli_server_request_shutdown(php_cli_server *server, php_cli_server_client *client) {
 	php_request_shutdown(0);
 	php_cli_server_close_connection(server, client);
 	destroy_request_info(&SG(request_info));
@@ -2178,9 +2167,8 @@ static int php_cli_server_request_shutdown(php_cli_server *server, php_cli_serve
 	SG(rfc1867_uploaded_files) = NULL;
 	return SUCCESS;
 }
-/* }}} */
 
-static int php_cli_server_dispatch_router(php_cli_server *server, php_cli_server_client *client) /* {{{ */
+static int php_cli_server_dispatch_router(php_cli_server *server, php_cli_server_client *client)
 {
 	int decline = 0;
 	zend_file_handle zfd;
@@ -2213,9 +2201,8 @@ static int php_cli_server_dispatch_router(php_cli_server *server, php_cli_server
 
 	return decline;
 }
-/* }}} */
 
-static int php_cli_server_dispatch(php_cli_server *server, php_cli_server_client *client) /* {{{ */
+static int php_cli_server_dispatch(php_cli_server *server, php_cli_server_client *client)
 {
 	int is_static_file  = 0;
 
@@ -2273,9 +2260,8 @@ static int php_cli_server_dispatch(php_cli_server *server, php_cli_server_client
 	destroy_request_info(&SG(request_info));
 	return SUCCESS;
 }
-/* }}} */
 
-static int php_cli_server_mime_type_ctor(php_cli_server *server, const php_cli_server_ext_mime_type_pair *mime_type_map) /* {{{ */
+static int php_cli_server_mime_type_ctor(php_cli_server *server, const php_cli_server_ext_mime_type_pair *mime_type_map)
 {
 	const php_cli_server_ext_mime_type_pair *pair;
 
@@ -2287,9 +2273,9 @@ static int php_cli_server_mime_type_ctor(php_cli_server *server, const php_cli_s
 	}
 
 	return SUCCESS;
-} /* }}} */
+}
 
-static void php_cli_server_dtor(php_cli_server *server) /* {{{ */
+static void php_cli_server_dtor(php_cli_server *server)
 {
 	zend_hash_destroy(&server->clients);
 	zend_hash_destroy(&server->extension_mime_types);
@@ -2331,9 +2317,9 @@ static void php_cli_server_dtor(php_cli_server *server) /* {{{ */
 		free(php_cli_server_workers);
 	}
 #endif
-} /* }}} */
+}
 
-static void php_cli_server_client_dtor_wrapper(zval *zv) /* {{{ */
+static void php_cli_server_client_dtor_wrapper(zval *zv)
 {
 	php_cli_server_client *p = Z_PTR_P(zv);
 
@@ -2342,9 +2328,9 @@ static void php_cli_server_client_dtor_wrapper(zval *zv) /* {{{ */
 	php_cli_server_poller_remove(&p->server->poller, POLLIN | POLLOUT, p->sock);
 	php_cli_server_client_dtor(p);
 	pefree(p, 1);
-} /* }}} */
+}
 
-static int php_cli_server_ctor(php_cli_server *server, const char *addr, const char *document_root, const char *router) /* {{{ */
+static int php_cli_server_ctor(php_cli_server *server, const char *addr, const char *document_root, const char *router)
 {
 	int retval = SUCCESS;
 	char *host = NULL;
@@ -2463,9 +2449,9 @@ out:
 		}
 	}
 	return retval;
-} /* }}} */
+}
 
-static int php_cli_server_recv_event_read_request(php_cli_server *server, php_cli_server_client *client) /* {{{ */
+static int php_cli_server_recv_event_read_request(php_cli_server *server, php_cli_server_client *client)
 {
 	char *errstr = NULL;
 	int status = php_cli_server_client_read_request(client, &errstr);
@@ -2491,9 +2477,9 @@ static int php_cli_server_recv_event_read_request(php_cli_server *server, php_cl
 	}
 
 	return SUCCESS;
-} /* }}} */
+}
 
-static int php_cli_server_send_event(php_cli_server *server, php_cli_server_client *client) /* {{{ */
+static int php_cli_server_send_event(php_cli_server *server, php_cli_server_client *client)
 {
 	if (client->content_sender_initialized) {
 		if (client->file_fd >= 0 && !client->content_sender.buffer.first) {
@@ -2521,7 +2507,6 @@ static int php_cli_server_send_event(php_cli_server *server, php_cli_server_clie
 	}
 	return SUCCESS;
 }
-/* }}} */
 
 typedef struct php_cli_server_do_event_for_each_fd_callback_params {
 	php_cli_server *server;
@@ -2529,7 +2514,7 @@ typedef struct php_cli_server_do_event_for_each_fd_callback_params {
 	int(*whandler)(php_cli_server*, php_cli_server_client*);
 } php_cli_server_do_event_for_each_fd_callback_params;
 
-static int php_cli_server_do_event_for_each_fd_callback(void *_params, php_socket_t fd, int event) /* {{{ */
+static int php_cli_server_do_event_for_each_fd_callback(void *_params, php_socket_t fd, int event)
 {
 	php_cli_server_do_event_for_each_fd_callback_params *params = _params;
 	php_cli_server *server = params->server;
@@ -2579,9 +2564,9 @@ static int php_cli_server_do_event_for_each_fd_callback(void *_params, php_socke
 		}
 	}
 	return SUCCESS;
-} /* }}} */
+}
 
-static void php_cli_server_do_event_for_each_fd(php_cli_server *server, int(*rhandler)(php_cli_server*, php_cli_server_client*), int(*whandler)(php_cli_server*, php_cli_server_client*)) /* {{{ */
+static void php_cli_server_do_event_for_each_fd(php_cli_server *server, int(*rhandler)(php_cli_server*, php_cli_server_client*), int(*whandler)(php_cli_server*, php_cli_server_client*))
 {
 	php_cli_server_do_event_for_each_fd_callback_params params = {
 		server,
@@ -2590,9 +2575,9 @@ static void php_cli_server_do_event_for_each_fd(php_cli_server *server, int(*rha
 	};
 
 	php_cli_server_poller_iter_on_active(&server->poller, &params, php_cli_server_do_event_for_each_fd_callback);
-} /* }}} */
+}
 
-static int php_cli_server_do_event_loop(php_cli_server *server) /* {{{ */
+static int php_cli_server_do_event_loop(php_cli_server *server)
 {
 	int retval = SUCCESS;
 	while (server->is_running) {
@@ -2619,17 +2604,16 @@ static int php_cli_server_do_event_loop(php_cli_server *server) /* {{{ */
 	}
 out:
 	return retval;
-} /* }}} */
+}
 
 static php_cli_server server;
 
-static void php_cli_server_sigint_handler(int sig) /* {{{ */
+static void php_cli_server_sigint_handler(int sig)
 {
 	server.is_running = 0;
 }
-/* }}} */
 
-int do_cli_server(int argc, char **argv) /* {{{ */
+int do_cli_server(int argc, char **argv)
 {
 	char *php_optarg = NULL;
 	int php_optind = 1;
@@ -2730,4 +2714,4 @@ int do_cli_server(int argc, char **argv) /* {{{ */
 	php_cli_server_do_event_loop(&server);
 	php_cli_server_dtor(&server);
 	return 0;
-} /* }}} */
+}

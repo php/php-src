@@ -22,7 +22,7 @@
 static int fd_stdout[2];
 static int fd_stderr[2];
 
-int fpm_stdio_init_main() /* {{{ */
+int fpm_stdio_init_main()
 {
 	int fd = open("/dev/null", O_RDWR);
 
@@ -39,9 +39,8 @@ int fpm_stdio_init_main() /* {{{ */
 	close(fd);
 	return 0;
 }
-/* }}} */
 
-static inline int fpm_use_error_log() {  /* {{{ */
+static inline int fpm_use_error_log() {
 	/*
 	 * the error_log is NOT used when running in foreground
 	 * and from a tty (user looking at output).
@@ -59,8 +58,8 @@ static inline int fpm_use_error_log() {  /* {{{ */
 	return 0;
 }
 
-/* }}} */
-int fpm_stdio_init_final() /* {{{ */
+
+int fpm_stdio_init_final()
 {
 	if (fpm_use_error_log()) {
 		/* prevent duping if logging to syslog */
@@ -82,9 +81,8 @@ int fpm_stdio_init_final() /* {{{ */
 	zlog_set_launched();
 	return 0;
 }
-/* }}} */
 
-int fpm_stdio_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
+int fpm_stdio_init_child(struct fpm_worker_pool_s *wp)
 {
 #ifdef HAVE_SYSLOG_H
 	if (fpm_globals.error_log_fd == ZLOG_SYSLOG) {
@@ -104,17 +102,15 @@ int fpm_stdio_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 
 	return 0;
 }
-/* }}} */
 
 #define FPM_STDIO_CMD_FLUSH "\0fscf"
 
-int fpm_stdio_flush_child() /* {{{ */
+int fpm_stdio_flush_child()
 {
 	return write(STDERR_FILENO, FPM_STDIO_CMD_FLUSH, sizeof(FPM_STDIO_CMD_FLUSH));
 }
-/* }}} */
 
-static void fpm_stdio_child_said(struct fpm_event_s *ev, short which, void *arg) /* {{{ */
+static void fpm_stdio_child_said(struct fpm_event_s *ev, short which, void *arg)
 {
 	static const int max_buf_size = 1024;
 	int fd = ev->fd;
@@ -231,9 +227,8 @@ stdio_read:
 		}
 	}
 }
-/* }}} */
 
-int fpm_stdio_prepare_pipes(struct fpm_child_s *child) /* {{{ */
+int fpm_stdio_prepare_pipes(struct fpm_child_s *child)
 {
 	if (0 == child->wp->config->catch_workers_output) { /* not required */
 		return 0;
@@ -261,9 +256,8 @@ int fpm_stdio_prepare_pipes(struct fpm_child_s *child) /* {{{ */
 	}
 	return 0;
 }
-/* }}} */
 
-int fpm_stdio_parent_use_pipes(struct fpm_child_s *child) /* {{{ */
+int fpm_stdio_parent_use_pipes(struct fpm_child_s *child)
 {
 	if (0 == child->wp->config->catch_workers_output) { /* not required */
 		return 0;
@@ -282,9 +276,8 @@ int fpm_stdio_parent_use_pipes(struct fpm_child_s *child) /* {{{ */
 	fpm_event_add(&child->ev_stderr, 0);
 	return 0;
 }
-/* }}} */
 
-int fpm_stdio_discard_pipes(struct fpm_child_s *child) /* {{{ */
+int fpm_stdio_discard_pipes(struct fpm_child_s *child)
 {
 	if (0 == child->wp->config->catch_workers_output) { /* not required */
 		return 0;
@@ -297,9 +290,8 @@ int fpm_stdio_discard_pipes(struct fpm_child_s *child) /* {{{ */
 	close(fd_stderr[0]);
 	return 0;
 }
-/* }}} */
 
-void fpm_stdio_child_use_pipes(struct fpm_child_s *child) /* {{{ */
+void fpm_stdio_child_use_pipes(struct fpm_child_s *child)
 {
 	if (child->wp->config->catch_workers_output) {
 		dup2(fd_stdout[1], STDOUT_FILENO);
@@ -311,9 +303,8 @@ void fpm_stdio_child_use_pipes(struct fpm_child_s *child) /* {{{ */
 		dup2(STDOUT_FILENO, STDERR_FILENO);
 	}
 }
-/* }}} */
 
-int fpm_stdio_open_error_log(int reopen) /* {{{ */
+int fpm_stdio_open_error_log(int reopen)
 {
 	int fd;
 
@@ -353,4 +344,4 @@ int fpm_stdio_open_error_log(int reopen) /* {{{ */
 	}
 	return 0;
 }
-/* }}} */
+

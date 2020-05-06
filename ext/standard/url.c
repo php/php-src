@@ -24,7 +24,7 @@
 #include "url.h"
 #include "file.h"
 
-/* {{{ free_url
+/* free_url
  */
 PHPAPI void php_url_free(php_url *theurl)
 {
@@ -44,9 +44,8 @@ PHPAPI void php_url_free(php_url *theurl)
 		zend_string_release_ex(theurl->fragment, 0);
 	efree(theurl);
 }
-/* }}} */
 
-/* {{{ php_replace_controlchars
+/* php_replace_controlchars
  */
 PHPAPI char *php_replace_controlchars_ex(char *str, size_t len)
 {
@@ -67,7 +66,6 @@ PHPAPI char *php_replace_controlchars_ex(char *str, size_t len)
 
 	return (str);
 }
-/* }}} */
 
 PHPAPI char *php_replace_controlchars(char *str)
 {
@@ -79,7 +77,7 @@ PHPAPI php_url *php_url_parse(char const *str)
 	return php_url_parse_ex(str, strlen(str));
 }
 
-/* {{{ php_url_parse
+/* php_url_parse
  */
 PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
 {
@@ -310,7 +308,6 @@ PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
 
 	return ret;
 }
-/* }}} */
 
 /* Parse a URL and return its components */
 PHP_FUNCTION(parse_url)
@@ -405,9 +402,8 @@ PHP_FUNCTION(parse_url)
 done:
 	php_url_free(resource);
 }
-/* }}} */
 
-/* {{{ php_htoi
+/* php_htoi
  */
 static int php_htoi(char *s)
 {
@@ -426,7 +422,6 @@ static int php_htoi(char *s)
 
 	return (value);
 }
-/* }}} */
 
 /* rfc1738:
 
@@ -443,7 +438,7 @@ static int php_htoi(char *s)
 
 static unsigned char hexchars[] = "0123456789ABCDEF";
 
-/* {{{ php_url_encode
+/* php_url_encode
  */
 PHPAPI zend_string *php_url_encode(char const *s, size_t len)
 {
@@ -480,7 +475,6 @@ PHPAPI zend_string *php_url_encode(char const *s, size_t len)
 
 	return start;
 }
-/* }}} */
 
 /* URL-encodes string */
 PHP_FUNCTION(urlencode)
@@ -493,7 +487,6 @@ PHP_FUNCTION(urlencode)
 
 	RETURN_STR(php_url_encode(ZSTR_VAL(in_str), ZSTR_LEN(in_str)));
 }
-/* }}} */
 
 /* Decodes URL-encoded string */
 PHP_FUNCTION(urldecode)
@@ -509,9 +502,8 @@ PHP_FUNCTION(urldecode)
 
     RETURN_NEW_STR(out_str);
 }
-/* }}} */
 
-/* {{{ php_url_decode
+/* php_url_decode
  */
 PHPAPI size_t php_url_decode(char *str, size_t len)
 {
@@ -536,9 +528,8 @@ PHPAPI size_t php_url_decode(char *str, size_t len)
 	*dest = '\0';
 	return dest - str;
 }
-/* }}} */
 
-/* {{{ php_raw_url_encode
+/* php_raw_url_encode
  */
 PHPAPI zend_string *php_raw_url_encode(char const *s, size_t len)
 {
@@ -566,7 +557,6 @@ PHPAPI zend_string *php_raw_url_encode(char const *s, size_t len)
 
 	return str;
 }
-/* }}} */
 
 /* URL-encodes string */
 PHP_FUNCTION(rawurlencode)
@@ -579,7 +569,6 @@ PHP_FUNCTION(rawurlencode)
 
 	RETURN_STR(php_raw_url_encode(ZSTR_VAL(in_str), ZSTR_LEN(in_str)));
 }
-/* }}} */
 
 /* Decodes URL-encodes string */
 PHP_FUNCTION(rawurldecode)
@@ -595,9 +584,8 @@ PHP_FUNCTION(rawurldecode)
 
     RETURN_NEW_STR(out_str);
 }
-/* }}} */
 
-/* {{{ php_raw_url_decode
+/* php_raw_url_decode
  */
 PHPAPI size_t php_raw_url_decode(char *str, size_t len)
 {
@@ -619,7 +607,6 @@ PHPAPI size_t php_raw_url_decode(char *str, size_t len)
 	*dest = '\0';
 	return dest - str;
 }
-/* }}} */
 
 /* fetches all the headers sent by the server in response to a HTTP request */
 PHP_FUNCTION(get_headers)
@@ -687,4 +674,4 @@ no_name_header:
 
 	php_stream_close(stream);
 }
-/* }}} */
+

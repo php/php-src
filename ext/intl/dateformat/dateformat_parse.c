@@ -25,7 +25,7 @@
 #include "dateformat_class.h"
 #include "dateformat_data.h"
 
-/* {{{
+/*
  * Internal function which calls the udat_parse
  * param int store_error acts like a boolean
  *	if set to 1 - store any error encountered  in the parameter parse_error
@@ -57,7 +57,6 @@ static void internal_parse_to_timestamp(IntlDateFormatter_object *dfo, char* tex
 		ZVAL_LONG(return_value, (zend_long)result);
 	}
 }
-/* }}} */
 
 static void add_to_localtime_arr( IntlDateFormatter_object *dfo, zval* return_value, const UCalendar *parsed_calendar, zend_long calendar_field, char* key_name)
 {
@@ -75,7 +74,7 @@ static void add_to_localtime_arr( IntlDateFormatter_object *dfo, zval* return_va
 	}
 }
 
-/* {{{
+/*
  * Internal function which calls the udat_parseCalendar
 */
 static void internal_parse_to_localtime(IntlDateFormatter_object *dfo, char* text_to_parse, size_t text_len, int32_t *parse_pos, zval *return_value)
@@ -115,11 +114,8 @@ static void internal_parse_to_localtime(IntlDateFormatter_object *dfo, char* tex
 	INTL_METHOD_CHECK_STATUS( dfo, "Date parsing - localtime failed : while checking if currently in DST." );
 	add_assoc_long( return_value, CALENDAR_ISDST,isInDST==1);
 }
-/* }}} */
 
-
-/* Parse the string $value starting at parse_pos to a Unix timestamp -int }}}*/
-/* Parse the string $value starting at parse_pos to a Unix timestamp -int }}}*/
+/* Parse the string $value starting at parse_pos to a Unix timestamp -int */
 PHP_FUNCTION(datefmt_parse)
 {
 	char*           text_to_parse = NULL;
@@ -158,10 +154,8 @@ PHP_FUNCTION(datefmt_parse)
 		ZVAL_LONG(z_parse_pos, parse_pos);
 	}
 }
-/* }}} */
 
-/* Parse the string $value to a localtime array  }}}*/
-/* Parse the string $value to a localtime array  }}}*/
+/* Parse the string $value to a localtime array */
 PHP_FUNCTION(datefmt_localtime)
 {
 	char*           text_to_parse = NULL;
@@ -200,4 +194,4 @@ PHP_FUNCTION(datefmt_localtime)
 		ZVAL_LONG(z_parse_pos, parse_pos);
 	}
 }
-/* }}} */
+

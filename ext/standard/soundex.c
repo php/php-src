@@ -100,4 +100,4 @@ PHP_FUNCTION(soundex)
 
 	RETURN_STRINGL(soundex, _small);
 }
-/* }}} */
+

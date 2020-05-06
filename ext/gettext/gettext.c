@@ -90,7 +90,6 @@ PHP_FUNCTION(textdomain)
 
 	RETURN_STRING(retval);
 }
-/* }}} */
 
 /* Return the translation of msgid for the current domain, or msgid unaltered if a translation does not exist */
 PHP_FUNCTION(gettext)
@@ -111,7 +110,6 @@ PHP_FUNCTION(gettext)
 		RETURN_STR_COPY(msgid);
 	}
 }
-/* }}} */
 
 /* Return the translation of msgid for domain_name, or msgid unaltered if a translation does not exist */
 PHP_FUNCTION(dgettext)
@@ -134,7 +132,6 @@ PHP_FUNCTION(dgettext)
 		RETURN_STR_COPY(msgid);
 	}
 }
-/* }}} */
 
 /* Return the translation of msgid for domain_name and category, or msgid unaltered if a translation does not exist */
 PHP_FUNCTION(dcgettext)
@@ -158,7 +155,6 @@ PHP_FUNCTION(dcgettext)
 		RETURN_STR_COPY(msgid);
 	}
 }
-/* }}} */
 
 /* Bind to the text domain domain_name, looking for translations in dir. Returns the current domain */
 PHP_FUNCTION(bindtextdomain)
@@ -190,7 +186,6 @@ PHP_FUNCTION(bindtextdomain)
 
 	RETURN_STRING(retval);
 }
-/* }}} */
 
 #if HAVE_NGETTEXT
 /* Plural version of gettext() */
@@ -212,7 +207,7 @@ PHP_FUNCTION(ngettext)
 	ZEND_ASSERT(msgstr);
 	RETURN_STRING(msgstr);
 }
-/* }}} */
+
 #endif
 
 #if HAVE_DNGETTEXT
@@ -237,7 +232,7 @@ PHP_FUNCTION(dngettext)
 	ZEND_ASSERT(msgstr);
 	RETURN_STRING(msgstr);
 }
-/* }}} */
+
 #endif
 
 #if HAVE_DCNGETTEXT
@@ -264,7 +259,7 @@ PHP_FUNCTION(dcngettext)
 	ZEND_ASSERT(msgstr);
 	RETURN_STRING(msgstr);
 }
-/* }}} */
+
 #endif
 
 #if HAVE_BIND_TEXTDOMAIN_CODESET
@@ -288,7 +283,7 @@ PHP_FUNCTION(bind_textdomain_codeset)
 	}
 	RETURN_STRING(retval);
 }
-/* }}} */
+
 #endif
 
 

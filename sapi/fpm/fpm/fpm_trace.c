@@ -6,7 +6,7 @@
 
 #include "fpm_trace.h"
 
-int fpm_trace_get_strz(char *buf, size_t sz, long addr) /* {{{ */
+int fpm_trace_get_strz(char *buf, size_t sz, long addr)
 {
 	int i;
 	long l = addr;
@@ -30,4 +30,4 @@ int fpm_trace_get_strz(char *buf, size_t sz, long addr) /* {{{ */
 		i = 0;
 	}
 }
-/* }}} */
+

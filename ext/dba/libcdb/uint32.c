@@ -24,7 +24,7 @@
 
 #include "uint32.h"
 
-/* {{{ uint32_pack */
+/* uint32_pack */
 void uint32_pack(char *out, uint32 in)
 {
 	out[0] = in&0xff; in>>=8;
@@ -32,9 +32,8 @@ void uint32_pack(char *out, uint32 in)
 	out[2] = in&0xff; in>>=8;
 	out[3] = in&0xff;
 }
-/* }}} */
 
-/* {{{ uint32_unpack */
+/* uint32_unpack */
 void uint32_unpack(const char *in, uint32 *out)
 {
 	*out = (((uint32)(unsigned char)in[3])<<24) |
@@ -42,4 +41,4 @@ void uint32_unpack(const char *in, uint32 *out)
 	       (((uint32)(unsigned char)in[1])<<8) |
 	       (((uint32)(unsigned char)in[0]));
 }
-/* }}} */
+

@@ -31,7 +31,7 @@
 #include "Zend/zend_exceptions.h"
 #include "com_persist_arginfo.h"
 
-/* {{{ expose php_stream as a COM IStream */
+/* expose php_stream as a COM IStream */
 
 typedef struct {
 	CONST_VTBL struct IStreamVtbl *lpVtbl;
@@ -255,7 +255,6 @@ static void istream_destructor(php_istream *stm)
 
 	CoTaskMemFree(stm);
 }
-/* }}} */
 
 PHP_COM_DOTNET_API IStream *php_com_wrapper_export_stream(php_stream *stream)
 {
@@ -355,8 +354,6 @@ CPH_METHOD(GetCurFileName)
 		php_com_throw_exception(res, NULL);
 	}
 }
-/* }}} */
-
 
 /* Persist object data to file, via IPersistFile::Save */
 CPH_METHOD(SaveToFile)
@@ -417,7 +414,6 @@ CPH_METHOD(SaveToFile)
 		php_com_throw_exception(res, NULL);
 	}
 }
-/* }}} */
 
 /* Load object data from file, via IPersistFile::Load */
 CPH_METHOD(LoadFromFile)
@@ -461,7 +457,6 @@ CPH_METHOD(LoadFromFile)
 		php_com_throw_exception(res, NULL);
 	}
 }
-/* }}} */
 
 /* Gets maximum stream size required to store the object data, via IPersistStream::GetSizeMax (or IPersistStreamInit::GetSizeMax) */
 CPH_METHOD(GetMaxStreamSize)
@@ -496,7 +491,6 @@ CPH_METHOD(GetMaxStreamSize)
 		RETURN_LONG((zend_long)size.QuadPart);
 	}
 }
-/* }}} */
 
 /* Initializes the object to a default state, via IPersistStreamInit::InitNew */
 CPH_METHOD(InitNew)
@@ -523,7 +517,6 @@ CPH_METHOD(InitNew)
 		php_com_throw_exception(res, NULL);
 	}
 }
-/* }}} */
 
 /* Initializes an object from the stream where it was previously saved, via IPersistStream::Load or OleLoadFromStream */
 CPH_METHOD(LoadFromStream)
@@ -581,7 +574,6 @@ CPH_METHOD(LoadFromStream)
 		RETURN_THROWS();
 	}
 }
-/* }}} */
 
 /* Saves the object to a stream, via IPersistStream::Save */
 CPH_METHOD(SaveToStream)
@@ -630,7 +622,6 @@ CPH_METHOD(SaveToStream)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Creates a persistence helper object, usually associated with a com_object */
 CPH_METHOD(__construct)
@@ -660,10 +651,6 @@ CPH_METHOD(__construct)
 	IUnknown_AddRef(helper->unk);
 	helper->codepage = obj->code_page;
 }
-/* }}} */
-
-
-
 
 static const zend_function_entry com_persist_helper_methods[] = {
 	CPH_ME(__construct, arginfo_class_COMPersistHelper___construct)

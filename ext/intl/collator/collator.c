@@ -24,7 +24,7 @@
 #include <unicode/ucol.h>
 #include <unicode/ustring.h>
 
-/* {{{ collator_register_constants
+/* collator_register_constants
  * Register constants common for the both (OO and procedural)
  * APIs.
  */
@@ -82,4 +82,4 @@ void collator_register_constants( INIT_FUNC_ARGS )
 	#undef COLLATOR_EXPOSE_CLASS_CONST
 	#undef COLLATOR_EXPOSE_CONST
 }
-/* }}} */
+

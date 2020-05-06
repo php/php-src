@@ -72,7 +72,7 @@
 #define M_APP14 0xee
 #define M_APP15 0xef
 
-/* {{{ php_iptc_put1
+/* php_iptc_put1
  */
 static int php_iptc_put1(FILE *fp, int spool, unsigned char c, unsigned char **spoolbuf)
 {
@@ -83,9 +83,8 @@ static int php_iptc_put1(FILE *fp, int spool, unsigned char c, unsigned char **s
 
   	return c;
 }
-/* }}} */
 
-/* {{{ php_iptc_get1
+/* php_iptc_get1
  */
 static int php_iptc_get1(FILE *fp, int spool, unsigned char **spoolbuf)
 {
@@ -105,9 +104,8 @@ static int php_iptc_get1(FILE *fp, int spool, unsigned char **spoolbuf)
 
 	return c;
 }
-/* }}} */
 
-/* {{{ php_iptc_read_remaining
+/* php_iptc_read_remaining
  */
 static int php_iptc_read_remaining(FILE *fp, int spool, unsigned char **spoolbuf)
 {
@@ -115,9 +113,8 @@ static int php_iptc_read_remaining(FILE *fp, int spool, unsigned char **spoolbuf
 
 	return M_EOI;
 }
-/* }}} */
 
-/* {{{ php_iptc_skip_variable
+/* php_iptc_skip_variable
  */
 static int php_iptc_skip_variable(FILE *fp, int spool, unsigned char **spoolbuf)
 {
@@ -137,9 +134,8 @@ static int php_iptc_skip_variable(FILE *fp, int spool, unsigned char **spoolbuf)
 
 	return 0;
 }
-/* }}} */
 
-/* {{{ php_iptc_next_marker
+/* php_iptc_next_marker
  */
 static int php_iptc_next_marker(FILE *fp, int spool, unsigned char **spoolbuf)
 {
@@ -168,7 +164,6 @@ static int php_iptc_next_marker(FILE *fp, int spool, unsigned char **spoolbuf)
 
     return (unsigned int) c;
 }
-/* }}} */
 
 static char psheader[] = "\xFF\xED\0\0Photoshop 3.0\08BIM\x04\x04\0\0\0\0";
 
@@ -300,7 +295,6 @@ PHP_FUNCTION(iptcembed)
 		RETURN_TRUE;
 	}
 }
-/* }}} */
 
 /* Parse binary IPTC-data into associative array */
 PHP_FUNCTION(iptcparse)
@@ -374,4 +368,4 @@ PHP_FUNCTION(iptcparse)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
+

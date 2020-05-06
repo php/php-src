@@ -198,7 +198,7 @@ enum pdo_null_handling {
 	PDO_NULL_TO_STRING = 2
 };
 
-/* {{{ utils for reading attributes set as driver_options */
+/* utils for reading attributes set as driver_options */
 static inline zend_long pdo_attr_lval(zval *options, enum pdo_attribute_type option_name, zend_long defval)
 {
 	zval *v;
@@ -217,7 +217,6 @@ static inline zend_string *pdo_attr_strval(zval *options, enum pdo_attribute_typ
 	}
 	return defval ? zend_string_copy(defval) : NULL;
 }
-/* }}} */
 
 /* This structure is registered with PDO when a PDO driver extension is
  * initialized */
@@ -241,7 +240,7 @@ typedef struct {
 
 } pdo_driver_t;
 
-/* {{{ methods for a database handle */
+/* methods for a database handle */
 
 /* close or otherwise disconnect the database */
 typedef int (*pdo_dbh_close_func)(pdo_dbh_t *dbh);
@@ -318,9 +317,8 @@ struct pdo_dbh_methods {
 	pdo_dbh_txn_func		in_transaction;
 };
 
-/* }}} */
 
-/* {{{ methods for a statement handle */
+/* methods for a statement handle */
 
 /* free the statement handle */
 typedef int (*pdo_stmt_dtor_func)(pdo_stmt_t *stmt);
@@ -421,7 +419,6 @@ struct pdo_stmt_methods {
 	pdo_stmt_cursor_closer_func 	cursor_closer;
 };
 
-/* }}} */
 
 enum pdo_placeholder_support {
 	PDO_PLACEHOLDER_NONE=0,

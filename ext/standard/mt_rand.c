@@ -91,7 +91,7 @@
 #define twist(m,u,v)  (m ^ (mixBits(u,v)>>1) ^ ((uint32_t)(-(int32_t)(loBit(v))) & 0x9908b0dfU))
 #define twist_php(m,u,v)  (m ^ (mixBits(u,v)>>1) ^ ((uint32_t)(-(int32_t)(loBit(u))) & 0x9908b0dfU))
 
-/* {{{ php_mt_initialize
+/* php_mt_initialize
  */
 static inline void php_mt_initialize(uint32_t seed, uint32_t *state)
 {
@@ -110,9 +110,8 @@ static inline void php_mt_initialize(uint32_t seed, uint32_t *state)
 		r++;
 	}
 }
-/* }}} */
 
-/* {{{ php_mt_reload
+/* php_mt_reload
  */
 static inline void php_mt_reload(void)
 {
@@ -140,9 +139,8 @@ static inline void php_mt_reload(void)
 	BG(left) = N;
 	BG(next) = state;
 }
-/* }}} */
 
-/* {{{ php_mt_srand
+/* php_mt_srand
  */
 PHPAPI void php_mt_srand(uint32_t seed)
 {
@@ -153,9 +151,8 @@ PHPAPI void php_mt_srand(uint32_t seed)
 	/* Seed only once */
 	BG(mt_rand_is_seeded) = 1;
 }
-/* }}} */
 
-/* {{{ php_mt_rand
+/* php_mt_rand
  */
 PHPAPI uint32_t php_mt_rand(void)
 {
@@ -179,7 +176,6 @@ PHPAPI uint32_t php_mt_rand(void)
 	s1 ^= (s1 << 15) & 0xefc60000U;
 	return ( s1 ^ (s1 >> 18) );
 }
-/* }}} */
 
 /* Seeds Mersenne Twister random number generator */
 PHP_FUNCTION(mt_srand)
@@ -206,7 +202,6 @@ PHP_FUNCTION(mt_srand)
 
 	php_mt_srand(seed);
 }
-/* }}} */
 
 static uint32_t rand_range32(uint32_t umax) {
 	uint32_t result, limit;
@@ -270,7 +265,7 @@ static uint64_t rand_range64(uint64_t umax) {
 }
 #endif
 
-/* {{{ php_mt_rand_range
+/* php_mt_rand_range
  */
 PHPAPI zend_long php_mt_rand_range(zend_long min, zend_long max)
 {
@@ -284,9 +279,8 @@ PHPAPI zend_long php_mt_rand_range(zend_long min, zend_long max)
 
 	return (zend_long) (rand_range32(umax) + min);
 }
-/* }}} */
 
-/* {{{ php_mt_rand_common
+/* php_mt_rand_common
  * rand() allows min > max, mt_rand does not */
 PHPAPI zend_long php_mt_rand_common(zend_long min, zend_long max)
 {
@@ -303,7 +297,6 @@ PHPAPI zend_long php_mt_rand_common(zend_long min, zend_long max)
 
 	return n;
 }
-/* }}} */
 
 /* Returns a random number from Mersenne Twister */
 PHP_FUNCTION(mt_rand)
@@ -329,7 +322,6 @@ PHP_FUNCTION(mt_rand)
 
 	RETURN_LONG(php_mt_rand_common(min, max));
 }
-/* }}} */
 
 /* Returns the maximum value a random number from Mersenne Twister can have */
 PHP_FUNCTION(mt_getrandmax)
@@ -342,7 +334,6 @@ PHP_FUNCTION(mt_getrandmax)
 	 */
   	RETURN_LONG(PHP_MT_RAND_MAX); /* 2^^31 */
 }
-/* }}} */
 
 PHP_MINIT_FUNCTION(mt_rand)
 {

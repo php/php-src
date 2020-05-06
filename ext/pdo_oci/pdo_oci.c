@@ -29,13 +29,12 @@
 #include <TSRM/TSRM.h>
 #endif
 
-/* {{{ pdo_oci_functions[] */
+/* pdo_oci_functions[] */
 static const zend_function_entry pdo_oci_functions[] = {
 	PHP_FE_END
 };
-/* }}} */
 
-/* {{{ pdo_oci_module_entry */
+/* pdo_oci_module_entry */
 
 static const zend_module_dep pdo_oci_deps[] = {
 	ZEND_MOD_REQUIRED("pdo")
@@ -55,7 +54,6 @@ zend_module_entry pdo_oci_module_entry = {
 	PHP_PDO_OCI_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
-/* }}} */
 
 #ifdef COMPILE_DL_PDO_OCI
 ZEND_GET_MODULE(pdo_oci)
@@ -84,7 +82,7 @@ OCIEnv *pdo_oci_Env = NULL;
 static MUTEX_T pdo_oci_env_mutex;
 #endif
 
-/* {{{ PHP_MINIT_FUNCTION
+/* PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(pdo_oci)
 {
@@ -105,9 +103,8 @@ PHP_MINIT_FUNCTION(pdo_oci)
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_RINIT_FUNCTION
+/* PHP_RINIT_FUNCTION
  */
 PHP_RINIT_FUNCTION(pdo_oci)
 {
@@ -130,9 +127,8 @@ PHP_RINIT_FUNCTION(pdo_oci)
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_MSHUTDOWN_FUNCTION
+/* PHP_MSHUTDOWN_FUNCTION
  */
 PHP_MSHUTDOWN_FUNCTION(pdo_oci)
 {
@@ -148,9 +144,8 @@ PHP_MSHUTDOWN_FUNCTION(pdo_oci)
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
+/* PHP_MINFO_FUNCTION
  */
 PHP_MINFO_FUNCTION(pdo_oci)
 {
@@ -158,4 +153,4 @@ PHP_MINFO_FUNCTION(pdo_oci)
 	php_info_print_table_header(2, "PDO Driver for OCI 8 and later", "enabled");
 	php_info_print_table_end();
 }
-/* }}} */
+

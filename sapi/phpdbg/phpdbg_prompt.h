@@ -19,7 +19,7 @@
 #ifndef PHPDBG_PROMPT_H
 #define PHPDBG_PROMPT_H
 
-/* {{{ */
+/* */
 void phpdbg_string_init(char *buffer);
 void phpdbg_init(char *init_file, size_t init_file_len, zend_bool use_default);
 void phpdbg_try_file_init(char *init_file, size_t init_file_len, zend_bool free_init);
@@ -27,9 +27,8 @@ int phpdbg_interactive(zend_bool allow_async_unsafe, char *input);
 int phpdbg_compile(void);
 int phpdbg_compile_stdin(zend_string *code);
 void phpdbg_force_interruption(void);
-/* }}} */
 
-/* {{{ phpdbg command handlers */
+/* phpdbg command handlers */
 PHPDBG_COMMAND(exec);
 PHPDBG_COMMAND(stdin);
 PHPDBG_COMMAND(step);
@@ -59,10 +58,10 @@ PHPDBG_COMMAND(quit);
 PHPDBG_COMMAND(watch);
 PHPDBG_COMMAND(next);
 PHPDBG_COMMAND(eol);
-PHPDBG_COMMAND(wait); /* }}} */
+PHPDBG_COMMAND(wait);
 
-/* {{{ prompt commands */
-extern const phpdbg_command_t phpdbg_prompt_commands[]; /* }}} */
+/* prompt commands */
+extern const phpdbg_command_t phpdbg_prompt_commands[];
 
 void phpdbg_execute_ex(zend_execute_data *execute_data);
 

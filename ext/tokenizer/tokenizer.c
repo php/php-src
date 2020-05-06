@@ -44,7 +44,7 @@ void tokenizer_token_get_all_register_constants(INIT_FUNC_ARGS) {
 	REGISTER_LONG_CONSTANT("TOKEN_PARSE", TOKEN_PARSE, CONST_CS|CONST_PERSISTENT);
 }
 
-/* {{{ tokenizer_module_entry
+/* tokenizer_module_entry
  */
 zend_module_entry tokenizer_module_entry = {
 	STANDARD_MODULE_HEADER,
@@ -58,7 +58,6 @@ zend_module_entry tokenizer_module_entry = {
 	PHP_TOKENIZER_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
-/* }}} */
 
 #ifdef COMPILE_DL_TOKENIZER
 ZEND_GET_MODULE(tokenizer)
@@ -249,7 +248,7 @@ PHP_METHOD(PhpToken, __toString)
 	RETURN_STR_COPY(text);
 }
 
-/* {{{ PHP_MINIT_FUNCTION
+/* PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(tokenizer)
 {
@@ -287,9 +286,8 @@ PHP_MINIT_FUNCTION(tokenizer)
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
+/* PHP_MINFO_FUNCTION
  */
 PHP_MINFO_FUNCTION(tokenizer)
 {
@@ -297,7 +295,6 @@ PHP_MINFO_FUNCTION(tokenizer)
 	php_info_print_table_row(2, "Tokenizer Support", "enabled");
 	php_info_print_table_end();
 }
-/* }}} */
 
 static zend_string *make_str(unsigned char *text, size_t leng, HashTable *interned_strings) {
 	if (leng == 1) {
@@ -518,7 +515,6 @@ static zend_bool tokenize_common(
 	}
 }
 
-/* }}} */
 
 PHP_FUNCTION(token_get_all)
 {
@@ -535,7 +531,6 @@ PHP_FUNCTION(token_get_all)
 		RETURN_THROWS();
 	}
 }
-/* }}} */
 
 PHP_FUNCTION(token_name)
 {
@@ -551,4 +546,4 @@ PHP_FUNCTION(token_name)
 	}
 	RETURN_STRING(token_name);
 }
-/* }}} */
+

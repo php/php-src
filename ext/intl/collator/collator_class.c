@@ -29,7 +29,7 @@ static zend_object_handlers Collator_handlers;
  * Auxiliary functions needed by objects of 'Collator' class
  */
 
-/* {{{ Collator_objects_free */
+/* Collator_objects_free */
 void Collator_objects_free(zend_object *object )
 {
 	Collator_object* co = php_intl_collator_fetch_object(object);
@@ -38,9 +38,8 @@ void Collator_objects_free(zend_object *object )
 
 	collator_object_destroy(co );
 }
-/* }}} */
 
-/* {{{ Collator_object_create */
+/* Collator_object_create */
 zend_object *Collator_object_create(zend_class_entry *ce )
 {
 	Collator_object *intern = zend_object_alloc(sizeof(Collator_object), ce);
@@ -52,13 +51,12 @@ zend_object *Collator_object_create(zend_class_entry *ce )
 
 	return &intern->zo;
 }
-/* }}} */
 
 /*
  * 'Collator' class registration structures & functions
  */
 
-/* {{{ collator_register_Collator_class
+/* collator_register_Collator_class
  * Initialize 'Collator' class
  */
 void collator_register_Collator_class( void )
@@ -87,9 +85,8 @@ void collator_register_Collator_class( void )
 		return;
 	}
 }
-/* }}} */
 
-/* {{{ void collator_object_init( Collator_object* co )
+/* void collator_object_init( Collator_object* co )
  * Initialize internals of Collator_object.
  * Must be called before any other call to 'collator_object_...' functions.
  */
@@ -100,9 +97,8 @@ void collator_object_init( Collator_object* co )
 
 	intl_error_init( COLLATOR_ERROR_P( co ) );
 }
-/* }}} */
 
-/* {{{ void collator_object_destroy( Collator_object* co )
+/* void collator_object_destroy( Collator_object* co )
  * Clean up mem allocted by internals of Collator_object
  */
 void collator_object_destroy( Collator_object* co )
@@ -118,4 +114,4 @@ void collator_object_destroy( Collator_object* co )
 
 	intl_error_reset( COLLATOR_ERROR_P( co ) );
 }
-/* }}} */
+

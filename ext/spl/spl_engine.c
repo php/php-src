@@ -29,14 +29,13 @@
 
 #include "spl_array.h"
 
-/* {{{ spl_instantiate */
+/* spl_instantiate */
 PHPAPI void spl_instantiate(zend_class_entry *pce, zval *object)
 {
 	object_init_ex(object, pce);
 }
-/* }}} */
 
-PHPAPI zend_long spl_offset_convert_to_long(zval *offset) /* {{{ */
+PHPAPI zend_long spl_offset_convert_to_long(zval *offset)
 {
 	zend_ulong idx;
 
@@ -63,4 +62,4 @@ try_again:
 	}
 	return -1;
 }
-/* }}} */
+

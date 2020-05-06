@@ -173,14 +173,13 @@ const opt_struct OPTIONS[] = {
 	{'-', 0, NULL} /* end of args */
 };
 
-static int module_name_cmp(Bucket *f, Bucket *s) /* {{{ */
+static int module_name_cmp(Bucket *f, Bucket *s)
 {
 	return strcasecmp(((zend_module_entry *)Z_PTR(f->val))->name,
 				  ((zend_module_entry *)Z_PTR(s->val))->name);
 }
-/* }}} */
 
-static void print_modules(void) /* {{{ */
+static void print_modules(void)
 {
 	HashTable sorted_registry;
 	zend_module_entry *module;
@@ -193,23 +192,20 @@ static void print_modules(void) /* {{{ */
 	} ZEND_HASH_FOREACH_END();
 	zend_hash_destroy(&sorted_registry);
 }
-/* }}} */
 
-static void print_extension_info(zend_extension *ext) /* {{{ */
+static void print_extension_info(zend_extension *ext)
 {
 	php_printf("%s\n", ext->name);
 }
-/* }}} */
 
-static int extension_name_cmp(const zend_llist_element **f, const zend_llist_element **s) /* {{{ */
+static int extension_name_cmp(const zend_llist_element **f, const zend_llist_element **s)
 {
 	zend_extension *fe = (zend_extension*)(*f)->data;
 	zend_extension *se = (zend_extension*)(*s)->data;
 	return strcmp(fe->name, se->name);
 }
-/* }}} */
 
-static void print_extensions(void) /* {{{ */
+static void print_extensions(void)
 {
 	zend_llist sorted_exts;
 
@@ -219,7 +215,6 @@ static void print_extensions(void) /* {{{ */
 	zend_llist_apply(&sorted_exts, (llist_apply_func_t) print_extension_info);
 	zend_llist_destroy(&sorted_exts);
 }
-/* }}} */
 
 #ifndef STDOUT_FILENO
 #define STDOUT_FILENO 1
@@ -246,7 +241,7 @@ static inline int sapi_cli_select(php_socket_t fd)
 	return ret != -1;
 }
 
-PHP_CLI_API ssize_t sapi_cli_single_write(const char *str, size_t str_length) /* {{{ */
+PHP_CLI_API ssize_t sapi_cli_single_write(const char *str, size_t str_length)
 {
 	ssize_t ret;
 
@@ -263,9 +258,8 @@ PHP_CLI_API ssize_t sapi_cli_single_write(const char *str, size_t str_length) /*
 #endif
 	return ret;
 }
-/* }}} */
 
-static size_t sapi_cli_ub_write(const char *str, size_t str_length) /* {{{ */
+static size_t sapi_cli_ub_write(const char *str, size_t str_length)
 {
 	const char *ptr = str;
 	size_t remaining = str_length;
@@ -299,9 +293,8 @@ static size_t sapi_cli_ub_write(const char *str, size_t str_length) /* {{{ */
 
 	return (ptr - str);
 }
-/* }}} */
 
-static void sapi_cli_flush(void *server_context) /* {{{ */
+static void sapi_cli_flush(void *server_context)
 {
 	/* Ignore EBADF here, it's caused by the fact that STDIN/STDOUT/STDERR streams
 	 * are/could be closed before fflush() is called.
@@ -312,12 +305,11 @@ static void sapi_cli_flush(void *server_context) /* {{{ */
 #endif
 	}
 }
-/* }}} */
 
 static char *php_self = "";
 static char *script_filename = "";
 
-static void sapi_cli_register_variables(zval *track_vars_array) /* {{{ */
+static void sapi_cli_register_variables(zval *track_vars_array)
 {
 	size_t len;
 	char   *docroot = "";
@@ -349,18 +341,16 @@ static void sapi_cli_register_variables(zval *track_vars_array) /* {{{ */
 		php_register_variable("DOCUMENT_ROOT", docroot, track_vars_array);
 	}
 }
-/* }}} */
 
-static void sapi_cli_log_message(char *message, int syslog_type_int) /* {{{ */
+static void sapi_cli_log_message(char *message, int syslog_type_int)
 {
 	fprintf(stderr, "%s\n", message);
 #ifdef PHP_WIN32
 	fflush(stderr);
 #endif
 }
-/* }}} */
 
-static int sapi_cli_deactivate(void) /* {{{ */
+static int sapi_cli_deactivate(void)
 {
 	fflush(stdout);
 	if(SG(request_info).argv0) {
@@ -369,43 +359,37 @@ static int sapi_cli_deactivate(void) /* {{{ */
 	}
 	return SUCCESS;
 }
-/* }}} */
 
-static char* sapi_cli_read_cookies(void) /* {{{ */
+static char* sapi_cli_read_cookies(void)
 {
 	return NULL;
 }
-/* }}} */
 
-static int sapi_cli_header_handler(sapi_header_struct *h, sapi_header_op_enum op, sapi_headers_struct *s) /* {{{ */
+static int sapi_cli_header_handler(sapi_header_struct *h, sapi_header_op_enum op, sapi_headers_struct *s)
 {
 	return 0;
 }
-/* }}} */
 
-static int sapi_cli_send_headers(sapi_headers_struct *sapi_headers) /* {{{ */
+static int sapi_cli_send_headers(sapi_headers_struct *sapi_headers)
 {
 	/* We do nothing here, this function is needed to prevent that the fallback
 	 * header handling is called. */
 	return SAPI_HEADER_SENT_SUCCESSFULLY;
 }
-/* }}} */
 
-static void sapi_cli_send_header(sapi_header_struct *sapi_header, void *server_context) /* {{{ */
+static void sapi_cli_send_header(sapi_header_struct *sapi_header, void *server_context)
 {
 }
-/* }}} */
 
-static int php_cli_startup(sapi_module_struct *sapi_module) /* {{{ */
+static int php_cli_startup(sapi_module_struct *sapi_module)
 {
 	if (php_module_startup(sapi_module, NULL, 0)==FAILURE) {
 		return FAILURE;
 	}
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ sapi_cli_ini_defaults */
+/* sapi_cli_ini_defaults */
 
 /* overwritable ini defaults must be set in sapi_cli_ini_defaults() */
 #define INI_DEFAULT(name,value)\
@@ -418,9 +402,8 @@ static void sapi_cli_ini_defaults(HashTable *configuration_hash)
 	INI_DEFAULT("report_zend_debug", "0");
 	INI_DEFAULT("display_errors", "1");
 }
-/* }}} */
 
-/* {{{ sapi_module_struct cli_sapi_module
+/* sapi_module_struct cli_sapi_module
  */
 static sapi_module_struct cli_sapi_module = {
 	"cli",							/* name */
@@ -453,13 +436,11 @@ static sapi_module_struct cli_sapi_module = {
 
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
-/* }}} */
 
-/* {{{ arginfo ext/standard/dl.c */
+/* arginfo ext/standard/dl.c */
 ZEND_BEGIN_ARG_INFO(arginfo_dl, 0)
 	ZEND_ARG_INFO(0, extension_filename)
 ZEND_END_ARG_INFO()
-/* }}} */
 
 static const zend_function_entry additional_functions[] = {
 	ZEND_FE(dl, arginfo_dl)
@@ -468,7 +449,7 @@ static const zend_function_entry additional_functions[] = {
 	PHP_FE_END
 };
 
-/* {{{ php_cli_usage
+/* php_cli_usage
  */
 static void php_cli_usage(char *argv0)
 {
@@ -529,11 +510,10 @@ static void php_cli_usage(char *argv0)
 				"\n"
 				, prog, prog, prog, prog, prog, prog, prog);
 }
-/* }}} */
 
 static php_stream *s_in_process = NULL;
 
-static void cli_register_file_handles(void) /* {{{ */
+static void cli_register_file_handles(void)
 {
 	php_stream *s_in, *s_out, *s_err;
 	php_stream_context *sc_in=NULL, *sc_out=NULL, *sc_err=NULL;
@@ -574,12 +554,9 @@ static void cli_register_file_handles(void) /* {{{ */
 	ec.name = zend_string_init_interned("STDERR", sizeof("STDERR")-1, 0);
 	zend_register_constant(&ec);
 }
-/* }}} */
 
 static const char *param_mode_conflict = "Either execute direct code, process stdin or use a file.\n";
 
-/* {{{ cli_seek_file_begin
- */
 static int cli_seek_file_begin(zend_file_handle *file_handle, char *script_file)
 {
 	FILE *fp = VCWD_FOPEN(script_file, "rb");
@@ -591,9 +568,7 @@ static int cli_seek_file_begin(zend_file_handle *file_handle, char *script_file)
 	zend_stream_init_fp(file_handle, fp, script_file);
 	return SUCCESS;
 }
-/* }}} */
 
-/*{{{ php_cli_win32_ctrl_handler */
 #if defined(PHP_WIN32)
 BOOL WINAPI php_cli_win32_ctrl_handler(DWORD sig)
 {
@@ -602,9 +577,9 @@ BOOL WINAPI php_cli_win32_ctrl_handler(DWORD sig)
 	return FALSE;
 }
 #endif
-/*}}}*/
 
-static int do_cli(int argc, char **argv) /* {{{ */
+
+static int do_cli(int argc, char **argv)
 {
 	int c;
 	zend_file_handle file_handle;
@@ -1135,9 +1110,8 @@ err:
 	exit_status = 1;
 	goto out;
 }
-/* }}} */
 
-/* {{{ main
+/* main
  */
 #ifdef PHP_CLI_WIN32_NO_CONSOLE
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
@@ -1387,4 +1361,4 @@ out:
 	cleanup_ps_args(argv);
 	exit(exit_status);
 }
-/* }}} */
+

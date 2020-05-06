@@ -34,7 +34,6 @@ PHP_FUNCTION(gettype)
 		RETURN_STRING("unknown type");
 	}
 }
-/* }}} */
 
 /* Returns the type of the variable resolving class names */
 PHP_FUNCTION(get_debug_type)
@@ -78,8 +77,6 @@ PHP_FUNCTION(get_debug_type)
 			RETURN_INTERNED_STR(ZSTR_KNOWN(ZEND_STR_UNKNOWN));
 	}
 }
-/* }}} */
-
 
 /* Set the type of the variable */
 PHP_FUNCTION(settype)
@@ -137,7 +134,6 @@ PHP_FUNCTION(settype)
 	}
 	RETVAL_TRUE;
 }
-/* }}} */
 
 /* Get the integer value of a variable using the optional base for the conversion */
 PHP_FUNCTION(intval)
@@ -196,7 +192,6 @@ PHP_FUNCTION(intval)
 
 	RETVAL_LONG(ZEND_STRTOL(Z_STRVAL_P(num), NULL, base));
 }
-/* }}} */
 
 /* Get the float value of a variable */
 PHP_FUNCTION(floatval)
@@ -209,7 +204,6 @@ PHP_FUNCTION(floatval)
 
 	RETURN_DOUBLE(zval_get_double(num));
 }
-/* }}} */
 
 /* Get the boolean value of a variable */
 PHP_FUNCTION(boolval)
@@ -222,7 +216,6 @@ PHP_FUNCTION(boolval)
 
 	RETURN_BOOL(zend_is_true(value));
 }
-/* }}} */
 
 /* Get the string value of a variable */
 PHP_FUNCTION(strval)
@@ -235,7 +228,6 @@ PHP_FUNCTION(strval)
 
 	RETVAL_STR(zval_get_string(value));
 }
-/* }}} */
 
 static inline void php_is_type(INTERNAL_FUNCTION_PARAMETERS, int type)
 {
@@ -265,7 +257,6 @@ PHP_FUNCTION(is_null)
 {
 	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_NULL);
 }
-/* }}} */
 
 /* Returns true if variable is a resource
    Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
@@ -273,7 +264,6 @@ PHP_FUNCTION(is_resource)
 {
 	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_RESOURCE);
 }
-/* }}} */
 
 /* Returns true if variable is a boolean
    Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
@@ -287,7 +277,6 @@ PHP_FUNCTION(is_bool)
 
 	RETURN_BOOL(Z_TYPE_P(arg) == IS_FALSE || Z_TYPE_P(arg) == IS_TRUE);
 }
-/* }}} */
 
 /* Returns true if variable is an integer
    Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
@@ -295,7 +284,6 @@ PHP_FUNCTION(is_int)
 {
 	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_LONG);
 }
-/* }}} */
 
 /* Returns true if variable is float point
    Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
@@ -303,7 +291,6 @@ PHP_FUNCTION(is_float)
 {
 	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_DOUBLE);
 }
-/* }}} */
 
 /* Returns true if variable is a string
    Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
@@ -311,7 +298,6 @@ PHP_FUNCTION(is_string)
 {
 	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_STRING);
 }
-/* }}} */
 
 /* Returns true if variable is an array
    Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
@@ -319,7 +305,6 @@ PHP_FUNCTION(is_array)
 {
 	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_ARRAY);
 }
-/* }}} */
 
 /* Returns true if variable is an object
    Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
@@ -327,7 +312,6 @@ PHP_FUNCTION(is_object)
 {
 	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_OBJECT);
 }
-/* }}} */
 
 /* Returns true if value is a number or a numeric string */
 PHP_FUNCTION(is_numeric)
@@ -357,7 +341,6 @@ PHP_FUNCTION(is_numeric)
 			break;
 	}
 }
-/* }}} */
 
 /* Returns true if value is a scalar */
 PHP_FUNCTION(is_scalar)
@@ -382,7 +365,6 @@ PHP_FUNCTION(is_scalar)
 			break;
 	}
 }
-/* }}} */
 
 /* Returns true if var is callable. */
 PHP_FUNCTION(is_callable)
@@ -417,7 +399,6 @@ PHP_FUNCTION(is_callable)
 
 	RETURN_BOOL(retval);
 }
-/* }}} */
 
 /* Returns true if var is iterable (array or instance of Traversable). */
 PHP_FUNCTION(is_iterable)
@@ -430,7 +411,6 @@ PHP_FUNCTION(is_iterable)
 
 	RETURN_BOOL(zend_is_iterable(var));
 }
-/* }}} */
 
 /* Returns true if var is countable (array or instance of Countable). */
 PHP_FUNCTION(is_countable)
@@ -443,4 +423,4 @@ PHP_FUNCTION(is_countable)
 
 	RETURN_BOOL(zend_is_countable(var));
 }
-/* }}} */
+

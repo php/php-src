@@ -28,7 +28,6 @@
 #define Z_ADDREF_P(z) ((z)->refcount++)
 #endif
 
-/* {{{ */
 static void msgfmt_do_format(MessageFormatter_object *mfo, zval *args, zval *return_value)
 {
 	UChar* formatted = NULL;
@@ -45,11 +44,8 @@ static void msgfmt_do_format(MessageFormatter_object *mfo, zval *args, zval *ret
 		INTL_METHOD_RETVAL_UTF8(mfo, formatted, formatted_len, 1);
 	}
 }
-/* }}} */
 
-/* Format a message. }}} */
-/* Format a message.
- */
+/* Format a message. */
 PHP_FUNCTION( msgfmt_format )
 {
 	zval *args;
@@ -68,7 +64,6 @@ PHP_FUNCTION( msgfmt_format )
 
 	msgfmt_do_format(mfo, args, return_value);
 }
-/* }}} */
 
 /* Format a message. */
 PHP_FUNCTION( msgfmt_format_message )
@@ -132,4 +127,4 @@ PHP_FUNCTION( msgfmt_format_message )
 	/* drop the temporary formatter */
 	msgformat_data_free(&mfo->mf_data);
 }
-/* }}} */
+

@@ -64,13 +64,12 @@ struct _zend_mb_regex_globals {
 
 #define MBREX(g) (MBSTRG(mb_regex_globals)->g)
 
-/* {{{ static void php_mb_regex_free_cache() */
+/* static void php_mb_regex_free_cache() */
 static void php_mb_regex_free_cache(zval *el) {
 	onig_free((php_mb_regex_t *)Z_PTR_P(el));
 }
-/* }}} */
 
-/* {{{ _php_mb_regex_globals_ctor */
+/* _php_mb_regex_globals_ctor */
 static int _php_mb_regex_globals_ctor(zend_mb_regex_globals *pglobals)
 {
 	pglobals->default_mbctype = ONIG_ENCODING_UTF8;
@@ -84,15 +83,13 @@ static int _php_mb_regex_globals_ctor(zend_mb_regex_globals *pglobals)
 	pglobals->regex_default_syntax = ONIG_SYNTAX_RUBY;
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ _php_mb_regex_globals_dtor */
+/* _php_mb_regex_globals_dtor */
 static void _php_mb_regex_globals_dtor(zend_mb_regex_globals *pglobals)
 {
 }
-/* }}} */
 
-/* {{{ php_mb_regex_globals_alloc */
+/* php_mb_regex_globals_alloc */
 zend_mb_regex_globals *php_mb_regex_globals_alloc(void)
 {
 	zend_mb_regex_globals *pglobals = pemalloc(
@@ -103,9 +100,8 @@ zend_mb_regex_globals *php_mb_regex_globals_alloc(void)
 	}
 	return pglobals;
 }
-/* }}} */
 
-/* {{{ php_mb_regex_globals_free */
+/* php_mb_regex_globals_free */
 void php_mb_regex_globals_free(zend_mb_regex_globals *pglobals)
 {
 	if (!pglobals) {
@@ -114,9 +110,8 @@ void php_mb_regex_globals_free(zend_mb_regex_globals *pglobals)
 	_php_mb_regex_globals_dtor(pglobals);
 	pefree(pglobals, 1);
 }
-/* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION(mb_regex) */
+/* PHP_MINIT_FUNCTION(mb_regex) */
 PHP_MINIT_FUNCTION(mb_regex)
 {
 	char version[256];
@@ -128,26 +123,23 @@ PHP_MINIT_FUNCTION(mb_regex)
 	REGISTER_STRING_CONSTANT("MB_ONIGURUMA_VERSION", version, CONST_CS | CONST_PERSISTENT);
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_MSHUTDOWN_FUNCTION(mb_regex) */
+/* PHP_MSHUTDOWN_FUNCTION(mb_regex) */
 PHP_MSHUTDOWN_FUNCTION(mb_regex)
 {
 	onig_end();
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_RINIT_FUNCTION(mb_regex) */
+/* PHP_RINIT_FUNCTION(mb_regex) */
 PHP_RINIT_FUNCTION(mb_regex)
 {
 	if (!MBSTRG(mb_regex_globals)) return FAILURE;
 	zend_hash_init(&MBREX(ht_rc), 0, NULL, php_mb_regex_free_cache, 0);
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_RSHUTDOWN_FUNCTION(mb_regex) */
+/* PHP_RSHUTDOWN_FUNCTION(mb_regex) */
 PHP_RSHUTDOWN_FUNCTION(mb_regex)
 {
 	MBREX(current_mbctype) = MBREX(default_mbctype);
@@ -168,9 +160,8 @@ PHP_RSHUTDOWN_FUNCTION(mb_regex)
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION(mb_regex) */
+/* PHP_MINFO_FUNCTION(mb_regex) */
 PHP_MINFO_FUNCTION(mb_regex)
 {
 	char buf[32];
@@ -183,13 +174,12 @@ PHP_MINFO_FUNCTION(mb_regex)
 	php_info_print_table_row(2, "Multibyte regex (oniguruma) version", buf);
 	php_info_print_table_end();
 }
-/* }}} */
 
 /*
  * encoding name resolver
  */
 
-/* {{{ encoding name map */
+/* encoding name map */
 typedef struct _php_mb_regex_enc_name_map_t {
 	const char *names;
 	OnigEncoding code;
@@ -372,9 +362,8 @@ static const php_mb_regex_enc_name_map_t enc_name_map[] = {
 #endif
 	{ NULL, ONIG_ENCODING_UNDEF }
 };
-/* }}} */
 
-/* {{{ php_mb_regex_name2mbctype */
+/* php_mb_regex_name2mbctype */
 static OnigEncoding _php_mb_regex_name2mbctype(const char *pname)
 {
 	const char *p;
@@ -394,9 +383,8 @@ static OnigEncoding _php_mb_regex_name2mbctype(const char *pname)
 
 	return ONIG_ENCODING_UNDEF;
 }
-/* }}} */
 
-/* {{{ php_mb_regex_mbctype2name */
+/* php_mb_regex_mbctype2name */
 static const char *_php_mb_regex_mbctype2name(OnigEncoding mbctype)
 {
 	const php_mb_regex_enc_name_map_t *mapping;
@@ -409,9 +397,8 @@ static const char *_php_mb_regex_mbctype2name(OnigEncoding mbctype)
 
 	return NULL;
 }
-/* }}} */
 
-/* {{{ php_mb_regex_set_mbctype */
+/* php_mb_regex_set_mbctype */
 int php_mb_regex_set_mbctype(const char *encname)
 {
 	OnigEncoding mbctype = _php_mb_regex_name2mbctype(encname);
@@ -422,9 +409,8 @@ int php_mb_regex_set_mbctype(const char *encname)
 	MBREX(current_mbctype_mbfl_encoding) = mbfl_name2encoding(encname);
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ php_mb_regex_set_default_mbctype */
+/* php_mb_regex_set_default_mbctype */
 int php_mb_regex_set_default_mbctype(const char *encname)
 {
 	OnigEncoding mbctype = _php_mb_regex_name2mbctype(encname);
@@ -434,33 +420,29 @@ int php_mb_regex_set_default_mbctype(const char *encname)
 	MBREX(default_mbctype) = mbctype;
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ php_mb_regex_get_mbctype */
+/* php_mb_regex_get_mbctype */
 const char *php_mb_regex_get_mbctype(void)
 {
 	return _php_mb_regex_mbctype2name(MBREX(current_mbctype));
 }
-/* }}} */
 
-/* {{{ php_mb_regex_get_mbctype_encoding */
+/* php_mb_regex_get_mbctype_encoding */
 const mbfl_encoding *php_mb_regex_get_mbctype_encoding(void)
 {
 	return MBREX(current_mbctype_mbfl_encoding);
 }
-/* }}} */
 
-/* {{{ php_mb_regex_get_default_mbctype */
+/* php_mb_regex_get_default_mbctype */
 const char *php_mb_regex_get_default_mbctype(void)
 {
 	return _php_mb_regex_mbctype2name(MBREX(default_mbctype));
 }
-/* }}} */
 
 /*
  * regex cache
  */
-/* {{{ php_mbregex_compile_pattern */
+/* php_mbregex_compile_pattern */
 static php_mb_regex_t *php_mbregex_compile_pattern(const char *pattern, size_t patlen, OnigOptionType options, OnigSyntaxType *syntax)
 {
 	int err_code = 0;
@@ -492,9 +474,8 @@ static php_mb_regex_t *php_mbregex_compile_pattern(const char *pattern, size_t p
 	}
 	return retval;
 }
-/* }}} */
 
-/* {{{ _php_mb_regex_get_option_string */
+/* _php_mb_regex_get_option_string */
 static size_t _php_mb_regex_get_option_string(char *str, size_t len, OnigOptionType option, OnigSyntaxType *syntax)
 {
 	size_t len_left = len;
@@ -597,9 +578,8 @@ static size_t _php_mb_regex_get_option_string(char *str, size_t len, OnigOptionT
 
 	return 0;
 }
-/* }}} */
 
-/* {{{ _php_mb_regex_init_options */
+/* _php_mb_regex_init_options */
 static void
 _php_mb_regex_init_options(const char *parg, size_t narg, OnigOptionType *option, OnigSyntaxType **syntax, int *eval)
 {
@@ -669,23 +649,20 @@ _php_mb_regex_init_options(const char *parg, size_t narg, OnigOptionType *option
 		if (option != NULL) *option|=optm;
 	}
 }
-/* }}} */
-
 
 /*
  * Callbacks for named subpatterns
  */
 
-/* {{{ struct mb_ereg_groups_iter_arg */
+/* struct mb_ereg_groups_iter_arg */
 typedef struct mb_regex_groups_iter_args {
 	zval		*groups;
 	char		*search_str;
 	size_t		search_len;
 	OnigRegion	*region;
 } mb_regex_groups_iter_args;
-/* }}} */
 
-/* {{{ mb_ereg_groups_iter */
+/* mb_ereg_groups_iter */
 static int
 mb_regex_groups_iter(const OnigUChar* name, const OnigUChar* name_end, int ngroup_num, int* group_nums, regex_t* reg, void* parg)
 {
@@ -707,12 +684,11 @@ mb_regex_groups_iter(const OnigUChar* name, const OnigUChar* name_end, int ngrou
 
 	return 0;
 }
-/* }}} */
 
 /*
  * Helper for _php_mb_regex_ereg_replace_exec
  */
-/* {{{ mb_regex_substitute */
+/* mb_regex_substitute */
 static inline void mb_regex_substitute(
 	smart_str *pbuf,
 	const char *subject,
@@ -840,7 +816,6 @@ static inline void mb_regex_substitute(
 		smart_str_appendl(pbuf, p, eos - p);
 	}
 }
-/* }}} */
 
 /*
  * php functions
@@ -871,9 +846,8 @@ PHP_FUNCTION(mb_regex_encoding)
 		RETURN_TRUE;
 	}
 }
-/* }}} */
 
-/* {{{ _php_mb_onig_search */
+/* _php_mb_onig_search */
 static int _php_mb_onig_search(regex_t* reg, const OnigUChar* str, const OnigUChar* end, const OnigUChar* start,
                    const OnigUChar* range, OnigRegion* region, OnigOptionType option) {
 	OnigMatchParam *mp = onig_new_match_param();
@@ -890,10 +864,8 @@ static int _php_mb_onig_search(regex_t* reg, const OnigUChar* str, const OnigUCh
 	onig_free_match_param(mp);
 	return err;
 }
-/* }}} */
 
-
-/* {{{ _php_mb_regex_ereg_exec */
+/* _php_mb_regex_ereg_exec */
 static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 {
 	zval *array = NULL;
@@ -979,23 +951,20 @@ out:
 		onig_region_free(regs, 1);
 	}
 }
-/* }}} */
 
 /* Regular expression match for multibyte string */
 PHP_FUNCTION(mb_ereg)
 {
 	_php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
-/* }}} */
 
 /* Case-insensitive regular expression match for multibyte string */
 PHP_FUNCTION(mb_eregi)
 {
 	_php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
-/* }}} */
 
-/* {{{ _php_mb_regex_ereg_replace_exec */
+/* _php_mb_regex_ereg_replace_exec */
 static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOptionType options, int is_callable)
 {
 	char *arg_pattern;
@@ -1173,28 +1142,24 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 		RETVAL_EMPTY_STRING();
 	}
 }
-/* }}} */
 
 /* Replace regular expression for multibyte string */
 PHP_FUNCTION(mb_ereg_replace)
 {
 	_php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0, 0);
 }
-/* }}} */
 
 /* Case insensitive replace regular expression for multibyte string */
 PHP_FUNCTION(mb_eregi_replace)
 {
 	_php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, ONIG_OPTION_IGNORECASE, 0);
 }
-/* }}} */
 
 /* regular expression for multibyte string using replacement callback */
 PHP_FUNCTION(mb_ereg_replace_callback)
 {
 	_php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0, 1);
 }
-/* }}} */
 
 /* split multibyte string into array by regular expression */
 PHP_FUNCTION(mb_split)
@@ -1276,7 +1241,6 @@ PHP_FUNCTION(mb_split)
 		add_next_index_stringl(return_value, "", 0);
 	}
 }
-/* }}} */
 
 /* Regular expression match for multibyte string */
 PHP_FUNCTION(mb_ereg_match)
@@ -1336,10 +1300,9 @@ PHP_FUNCTION(mb_ereg_match)
 		RETVAL_FALSE;
 	}
 }
-/* }}} */
 
 /* regex search */
-/* {{{ _php_mb_regex_ereg_search_exec */
+/* _php_mb_regex_ereg_search_exec */
 static void
 _php_mb_regex_ereg_search_exec(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
@@ -1453,28 +1416,24 @@ _php_mb_regex_ereg_search_exec(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		MBREX(search_regs) = (OnigRegion *)NULL;
 	}
 }
-/* }}} */
 
 /* Regular expression search for multibyte string */
 PHP_FUNCTION(mb_ereg_search)
 {
 	_php_mb_regex_ereg_search_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
-/* }}} */
 
 /* Regular expression search for multibyte string */
 PHP_FUNCTION(mb_ereg_search_pos)
 {
 	_php_mb_regex_ereg_search_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
-/* }}} */
 
 /* Regular expression search for multibyte string */
 PHP_FUNCTION(mb_ereg_search_regs)
 {
 	_php_mb_regex_ereg_search_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, 2);
 }
-/* }}} */
 
 /* Initialize string and regular expression for search. */
 PHP_FUNCTION(mb_ereg_search_init)
@@ -1532,7 +1491,6 @@ PHP_FUNCTION(mb_ereg_search_init)
 		MBREX(search_regs) = NULL;
 	}
 }
-/* }}} */
 
 /* Get matched substring of the last time */
 PHP_FUNCTION(mb_ereg_search_getregs)
@@ -1574,7 +1532,6 @@ PHP_FUNCTION(mb_ereg_search_getregs)
 		RETVAL_FALSE;
 	}
 }
-/* }}} */
 
 /* Get search start position */
 PHP_FUNCTION(mb_ereg_search_getpos)
@@ -1585,7 +1542,6 @@ PHP_FUNCTION(mb_ereg_search_getpos)
 
 	RETVAL_LONG(MBREX(search_pos));
 }
-/* }}} */
 
 /* Set search start position */
 PHP_FUNCTION(mb_ereg_search_setpos)
@@ -1610,9 +1566,8 @@ PHP_FUNCTION(mb_ereg_search_setpos)
 	MBREX(search_pos) = position;
 	RETURN_TRUE;
 }
-/* }}} */
 
-/* {{{ php_mb_regex_set_options */
+/* php_mb_regex_set_options */
 static void _php_mb_regex_set_options(OnigOptionType options, OnigSyntaxType *syntax, OnigOptionType *prev_options, OnigSyntaxType **prev_syntax)
 {
 	if (prev_options != NULL) {
@@ -1624,7 +1579,6 @@ static void _php_mb_regex_set_options(OnigOptionType options, OnigSyntaxType *sy
 	MBREX(regex_default_options) = options;
 	MBREX(regex_default_syntax) = syntax;
 }
-/* }}} */
 
 /* Set or get the default options for mbregex functions */
 PHP_FUNCTION(mb_regex_set_options)
@@ -1654,6 +1608,5 @@ PHP_FUNCTION(mb_regex_set_options)
 
 	RETVAL_STRING(buf);
 }
-/* }}} */
 
 #endif	/* HAVE_MBREGEX */

@@ -26,7 +26,7 @@ static zend_object_handlers Spoofchecker_handlers;
  * Auxiliary functions needed by objects of 'Spoofchecker' class
  */
 
-/* {{{ Spoofchecker_objects_free */
+/* Spoofchecker_objects_free */
 void Spoofchecker_objects_free(zend_object *object)
 {
 	Spoofchecker_object* co = php_intl_spoofchecker_fetch_object(object);
@@ -35,9 +35,8 @@ void Spoofchecker_objects_free(zend_object *object)
 
 	spoofchecker_object_destroy(co);
 }
-/* }}} */
 
-/* {{{ Spoofchecker_object_create */
+/* Spoofchecker_object_create */
 zend_object *Spoofchecker_object_create(zend_class_entry *ce)
 {
 	Spoofchecker_object*     intern;
@@ -51,17 +50,16 @@ zend_object *Spoofchecker_object_create(zend_class_entry *ce)
 
 	return &intern->zo;
 }
-/* }}} */
 
 /*
  * 'Spoofchecker' class registration structures & functions
  */
 
-/* {{{ Spoofchecker_class_functions
+/* Spoofchecker_class_functions
  * Every 'Spoofchecker' class method has an entry in this table
  */
 
-static zend_object *spoofchecker_clone_obj(zend_object *object) /* {{{ */
+static zend_object *spoofchecker_clone_obj(zend_object *object)
 {
 	zend_object *new_obj_val;
 	Spoofchecker_object *sfo, *new_sfo;
@@ -83,9 +81,8 @@ static zend_object *spoofchecker_clone_obj(zend_object *object) /* {{{ */
 	}
 	return new_obj_val;
 }
-/* }}} */
 
-/* {{{ spoofchecker_register_Spoofchecker_class
+/* spoofchecker_register_Spoofchecker_class
  * Initialize 'Spoofchecker' class
  */
 void spoofchecker_register_Spoofchecker_class(void)
@@ -103,9 +100,8 @@ void spoofchecker_register_Spoofchecker_class(void)
 	Spoofchecker_handlers.clone_obj = spoofchecker_clone_obj;
 	Spoofchecker_handlers.free_obj = Spoofchecker_objects_free;
 }
-/* }}} */
 
-/* {{{ void spoofchecker_object_init( Spoofchecker_object* co )
+/* void spoofchecker_object_init( Spoofchecker_object* co )
  * Initialize internals of Spoofchecker_object.
  * Must be called before any other call to 'spoofchecker_object_...' functions.
  */
@@ -117,9 +113,8 @@ void spoofchecker_object_init(Spoofchecker_object* co)
 
 	intl_error_init(SPOOFCHECKER_ERROR_P(co));
 }
-/* }}} */
 
-/* {{{ void spoofchecker_object_destroy( Spoofchecker_object* co )
+/* void spoofchecker_object_destroy( Spoofchecker_object* co )
  * Clean up mem allocted by internals of Spoofchecker_object
  */
 void spoofchecker_object_destroy(Spoofchecker_object* co)
@@ -135,4 +130,4 @@ void spoofchecker_object_destroy(Spoofchecker_object* co)
 
 	intl_error_reset(SPOOFCHECKER_ERROR_P(co));
 }
-/* }}} */
+

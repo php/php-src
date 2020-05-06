@@ -31,7 +31,7 @@ PHPAPI int php_file_le_pstream(void);
 PHPAPI int php_file_le_stream_filter(void);
 END_EXTERN_C()
 
-/* {{{ Streams memory debugging stuff */
+/* Streams memory debugging stuff */
 
 #if ZEND_DEBUG
 /* these have more of a dependency on the definitions of the zend macros than
@@ -79,7 +79,6 @@ END_EXTERN_C()
 
 #define php_stream_make_seekable_rel(origstream, newstream, flags) _php_stream_make_seekable((origstream), (newstream), (flags) STREAMS_REL_CC)
 
-/* }}} */
 
 /* The contents of the php_stream_ops and php_stream should only be accessed
  * using the functions/macros in this header.

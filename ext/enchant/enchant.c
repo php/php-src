@@ -58,7 +58,7 @@ static int le_enchant_dict;
 #define PHP_ENCHANT_MYSPELL 1
 #define PHP_ENCHANT_ISPELL 2
 
-/* {{{ enchant_module_entry
+/* enchant_module_entry
  */
 zend_module_entry enchant_module_entry = {
 	STANDARD_MODULE_HEADER,
@@ -72,7 +72,6 @@ zend_module_entry enchant_module_entry = {
 	PHP_ENCHANT_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
-/* }}} */
 
 #ifdef COMPILE_DL_ENCHANT
 ZEND_GET_MODULE(enchant)
@@ -82,7 +81,7 @@ static void
 enumerate_providers_fn (const char * const name,
                         const char * const desc,
                         const char * const file,
-                        void * ud) /* {{{ */
+                        void * ud)
 {
 	zval *zdesc = (zval *) ud;
 	zval tmp_array;
@@ -99,14 +98,13 @@ enumerate_providers_fn (const char * const name,
 
 	add_next_index_zval(zdesc, &tmp_array);
 }
-/* }}} */
 
 static void
 describe_dict_fn (const char * const lang,
                   const char * const name,
                   const char * const desc,
                   const char * const file,
-                  void * ud) /* {{{ */
+                  void * ud)
 {
 	zval *zdesc = (zval *) ud;
 	array_init(zdesc);
@@ -115,11 +113,10 @@ describe_dict_fn (const char * const lang,
 	add_assoc_string(zdesc, "desc", (char *)desc);
 	add_assoc_string(zdesc, "file", (char *)file);
 }
-/* }}} */
 
 static void php_enchant_list_dicts_fn( const char * const lang_tag,
 	   	const char * const provider_name, const char * const provider_desc,
-		const char * const provider_file, void * ud) /* {{{ */
+		const char * const provider_file, void * ud)
 {
 	zval *zdesc = (zval *) ud;
 	zval tmp_array;
@@ -136,9 +133,8 @@ static void php_enchant_list_dicts_fn( const char * const lang_tag,
 	add_next_index_zval(zdesc, &tmp_array);
 
 }
-/* }}} */
 
-static void php_enchant_broker_free(zend_resource *rsrc) /* {{{ */
+static void php_enchant_broker_free(zend_resource *rsrc)
 {
 	if (rsrc->ptr) {
 		enchant_broker *broker = (enchant_broker *)rsrc->ptr;
@@ -167,9 +163,8 @@ static void php_enchant_broker_free(zend_resource *rsrc) /* {{{ */
 		}
 	}
 }
-/* }}} */
 
-static void php_enchant_dict_free(zend_resource *rsrc) /* {{{ */
+static void php_enchant_dict_free(zend_resource *rsrc)
 
 {
 	if (rsrc->ptr) {
@@ -187,9 +182,8 @@ static void php_enchant_dict_free(zend_resource *rsrc) /* {{{ */
 		}
 	}
 }
-/* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION
+/* PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(enchant)
 {
@@ -202,26 +196,23 @@ PHP_MINIT_FUNCTION(enchant)
 #endif
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_MSHUTDOWN_FUNCTION
+/* PHP_MSHUTDOWN_FUNCTION
  */
 PHP_MSHUTDOWN_FUNCTION(enchant)
 {
 	return SUCCESS;
 }
-/* }}} */
 
 static void __enumerate_providers_fn (const char * const name,
                         const char * const desc,
                         const char * const file,
-                        void * ud) /* {{{ */
+                        void * ud)
 {
 	php_info_print_table_row(3, name, desc, file);
 }
-/* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
+/* PHP_MINFO_FUNCTION
  */
 PHP_MINFO_FUNCTION(enchant)
 {
@@ -242,7 +233,6 @@ PHP_MINFO_FUNCTION(enchant)
 	php_info_print_table_end();
 	enchant_broker_free(pbroker);
 }
-/* }}} */
 
 #define PHP_ENCHANT_GET_BROKER	\
 	pbroker = (enchant_broker *)zend_fetch_resource(Z_RES_P(broker), "enchant_broker", le_enchant_broker); \
@@ -281,7 +271,6 @@ PHP_FUNCTION(enchant_broker_init)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Destroys the broker object and its dictionaries */
 PHP_FUNCTION(enchant_broker_free)
@@ -297,7 +286,6 @@ PHP_FUNCTION(enchant_broker_free)
 	zend_list_close(Z_RES_P(broker));
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Returns the last error of the broker */
 PHP_FUNCTION(enchant_broker_get_error)
@@ -318,7 +306,6 @@ PHP_FUNCTION(enchant_broker_get_error)
 	}
 	RETURN_FALSE;
 }
-/* }}} */
 
 #if HAVE_ENCHANT_BROKER_SET_PARAM
 /* Set the directory path for a given backend, works with ispell and myspell */
@@ -357,8 +344,6 @@ PHP_FUNCTION(enchant_broker_set_dict_path)
 			RETURN_FALSE;
 	}
 }
-/* }}} */
-
 
 /* Get the directory path for a given backend, works with ispell and myspell */
 PHP_FUNCTION(enchant_broker_get_dict_path)
@@ -396,22 +381,20 @@ PHP_FUNCTION(enchant_broker_get_dict_path)
 
 	RETURN_STRING(value);
 }
-/* }}} */
+
 #else
 /* Set the directory path for a given backend, works with ispell and myspell */
 PHP_FUNCTION(enchant_broker_set_dict_path)
 {
 	RETURN_FALSE;
 }
-/* }}} */
-
 
 /* Get the directory path for a given backend, works with ispell and myspell */
 PHP_FUNCTION(enchant_broker_get_dict_path)
 {
 	RETURN_FALSE;
 }
-/* }}} */
+
 #endif
 
 /* Lists the dictionaries available for the given broker */
@@ -428,7 +411,6 @@ PHP_FUNCTION(enchant_broker_list_dicts)
 
 	enchant_broker_list_dicts(pbroker->pbroker, php_enchant_list_dicts_fn, (void *)return_value);
 }
-/* }}} */
 
 /* create a new dictionary using tag, the non-empty language tag you wish to request
 	a dictionary for ("en_US", "de_DE", ...) */
@@ -476,7 +458,6 @@ PHP_FUNCTION(enchant_broker_request_dict)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* creates a dictionary using a PWL file. A PWL file is personal word file one word per line. It must exist before the call.*/
 PHP_FUNCTION(enchant_broker_request_pwl_dict)
@@ -522,7 +503,6 @@ PHP_FUNCTION(enchant_broker_request_pwl_dict)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Free the dictionary resource */
 PHP_FUNCTION(enchant_broker_free_dict)
@@ -539,7 +519,6 @@ PHP_FUNCTION(enchant_broker_free_dict)
 	zend_list_close(Z_RES_P(dict));
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Whether a dictionary exists or not. Using non-empty tag */
 PHP_FUNCTION(enchant_broker_dict_exists)
@@ -557,7 +536,6 @@ PHP_FUNCTION(enchant_broker_dict_exists)
 
 	RETURN_BOOL(enchant_broker_dict_exists(pbroker->pbroker, tag));
 }
-/* }}} */
 
 /* Declares a preference of dictionaries to use for the language
 	described/referred to by 'tag'. The ordering is a comma delimited
@@ -583,7 +561,6 @@ PHP_FUNCTION(enchant_broker_set_ordering)
 	enchant_broker_set_ordering(pbroker->pbroker, ptag, pordering);
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Enumerates the Enchant providers and tells you some rudimentary information about them. The same info is provided through phpinfo() */
 PHP_FUNCTION(enchant_broker_describe)
@@ -600,7 +577,6 @@ PHP_FUNCTION(enchant_broker_describe)
 
 	enchant_broker_describe(pbroker->pbroker, describetozval, (void *)return_value);
 }
-/* }}} */
 
 /* If the word is correctly spelled return true, otherwise return false, if suggestions variable
     is provided, fill it with spelling alternatives. */
@@ -646,7 +622,6 @@ PHP_FUNCTION(enchant_dict_quick_check)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* If the word is correctly spelled return true, otherwise return false */
 PHP_FUNCTION(enchant_dict_check)
@@ -664,7 +639,6 @@ PHP_FUNCTION(enchant_dict_check)
 
 	RETURN_BOOL(!enchant_dict_check(pdict->pdict, word, wordlen));
 }
-/* }}} */
 
 /* Will return a list of values if any of those pre-conditions are not met.*/
 PHP_FUNCTION(enchant_dict_suggest)
@@ -694,7 +668,6 @@ PHP_FUNCTION(enchant_dict_suggest)
 		enchant_dict_free_string_list(pdict->pdict, suggs);
 	}
 }
-/* }}} */
 
 /* add 'word' to personal word list */
 PHP_FUNCTION(enchant_dict_add)
@@ -712,7 +685,6 @@ PHP_FUNCTION(enchant_dict_add)
 
 	enchant_dict_add(pdict->pdict, word, wordlen);
 }
-/* }}} */
 
 /* add 'word' to this spell-checking session */
 PHP_FUNCTION(enchant_dict_add_to_session)
@@ -730,7 +702,6 @@ PHP_FUNCTION(enchant_dict_add_to_session)
 
 	enchant_dict_add_to_session(pdict->pdict, word, wordlen);
 }
-/* }}} */
 
 /* whether or not 'word' exists in this spelling-session */
 PHP_FUNCTION(enchant_dict_is_added)
@@ -748,7 +719,6 @@ PHP_FUNCTION(enchant_dict_is_added)
 
 	RETURN_BOOL(enchant_dict_is_added(pdict->pdict, word, wordlen));
 }
-/* }}} */
 
 /* add a correction for 'mis' using 'cor'.
 	Notes that you replaced @mis with @cor, so it's possibly more likely
@@ -770,7 +740,6 @@ PHP_FUNCTION(enchant_dict_store_replacement)
 
 	enchant_dict_store_replacement(pdict->pdict, mis, mislen, cor, corlen);
 }
-/* }}} */
 
 /* Returns the last error of the current spelling-session */
 PHP_FUNCTION(enchant_dict_get_error)
@@ -792,7 +761,6 @@ PHP_FUNCTION(enchant_dict_get_error)
 
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* Describes an individual dictionary 'dict' */
 PHP_FUNCTION(enchant_dict_describe)
@@ -808,4 +776,4 @@ PHP_FUNCTION(enchant_dict_describe)
 
 	enchant_dict_describe(pdict->pdict, describe_dict_fn, (void *)return_value);
 }
-/* }}} */
+

@@ -64,6 +64,5 @@ PHP_METHOD(DOMEntityReference, __construct)
 		php_libxml_increment_node_ptr((php_libxml_node_object *)intern, node, (void *)intern);
 	}
 }
-/* }}} end DOMEntityReference::__construct */
 
 #endif

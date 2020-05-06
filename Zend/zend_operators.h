@@ -130,7 +130,6 @@ static zend_always_inline zend_long zend_dval_to_lval_cap(double d)
 	}
 	return (zend_long)d;
 }
-/* }}} */
 
 #define ZEND_IS_DIGIT(c) ((c) >= '0' && (c) <= '9')
 #define ZEND_IS_XDIGIT(c) (((c) >= 'A' && (c) <= 'F') || ((c) >= 'a' && (c) <= 'f'))
@@ -942,7 +941,7 @@ static zend_always_inline char *zend_print_long_to_buf(char *buf, zend_long num)
 
 ZEND_API zend_string* ZEND_FASTCALL zend_long_to_str(zend_long num);
 
-static zend_always_inline void zend_unwrap_reference(zval *op) /* {{{ */
+static zend_always_inline void zend_unwrap_reference(zval *op)
 {
 	if (Z_REFCOUNT_P(op) == 1) {
 		ZVAL_UNREF(op);
@@ -951,8 +950,6 @@ static zend_always_inline void zend_unwrap_reference(zval *op) /* {{{ */
 		ZVAL_COPY(op, Z_REFVAL_P(op));
 	}
 }
-/* }}} */
-
 
 END_EXTERN_C()
 

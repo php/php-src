@@ -42,7 +42,7 @@ struct php_zip_stream_data_t {
 	struct php_zip_stream_data_t *self = (struct php_zip_stream_data_t *) stream->abstract;
 
 
-/* {{{ php_zip_ops_read */
+/* php_zip_ops_read */
 static ssize_t php_zip_ops_read(php_stream *stream, char *buf, size_t count)
 {
 	ssize_t n = 0;
@@ -75,9 +75,8 @@ static ssize_t php_zip_ops_read(php_stream *stream, char *buf, size_t count)
 	}
 	return n;
 }
-/* }}} */
 
-/* {{{ php_zip_ops_write */
+/* php_zip_ops_write */
 static ssize_t php_zip_ops_write(php_stream *stream, const char *buf, size_t count)
 {
 	if (!stream) {
@@ -86,9 +85,8 @@ static ssize_t php_zip_ops_write(php_stream *stream, const char *buf, size_t cou
 
 	return count;
 }
-/* }}} */
 
-/* {{{ php_zip_ops_close */
+/* php_zip_ops_close */
 static int php_zip_ops_close(php_stream *stream, int close_handle)
 {
 	STREAM_DATA_FROM_STREAM();
@@ -107,9 +105,8 @@ static int php_zip_ops_close(php_stream *stream, int close_handle)
 	stream->abstract = NULL;
 	return EOF;
 }
-/* }}} */
 
-/* {{{ php_zip_ops_flush */
+/* php_zip_ops_flush */
 static int php_zip_ops_flush(php_stream *stream)
 {
 	if (!stream) {
@@ -118,9 +115,8 @@ static int php_zip_ops_flush(php_stream *stream)
 
 	return 0;
 }
-/* }}} */
 
-static int php_zip_ops_stat(php_stream *stream, php_stream_statbuf *ssb) /* {{{ */
+static int php_zip_ops_stat(php_stream *stream, php_stream_statbuf *ssb)
 {
 	struct zip_stat sb;
 	const char *path = stream->orig_path;
@@ -195,7 +191,6 @@ static int php_zip_ops_stat(php_stream *stream, php_stream_statbuf *ssb) /* {{{ 
 	zend_string_release_ex(file_basename, 0);
 	return 0;
 }
-/* }}} */
 
 const php_stream_ops php_stream_zipio_ops = {
 	php_zip_ops_write, php_zip_ops_read,
@@ -207,7 +202,7 @@ const php_stream_ops php_stream_zipio_ops = {
 	NULL  /* set_option */
 };
 
-/* {{{ php_stream_zip_open */
+/* php_stream_zip_open */
 php_stream *php_stream_zip_open(const char *filename, const char *path, const char *mode STREAMS_DC)
 {
 	struct zip_file *zf = NULL;
@@ -254,9 +249,8 @@ php_stream *php_stream_zip_open(const char *filename, const char *path, const ch
 	}
 
 }
-/* }}} */
 
-/* {{{ php_stream_zip_opener */
+/* php_stream_zip_opener */
 php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper,
 											const char *path,
 											const char *mode,
@@ -344,7 +338,6 @@ php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper,
 		return stream;
 	}
 }
-/* }}} */
 
 static const php_stream_wrapper_ops zip_stream_wops = {
 	php_stream_zip_opener,

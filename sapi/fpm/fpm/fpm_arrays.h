@@ -13,7 +13,7 @@ struct fpm_array_s {
 	size_t allocated;
 };
 
-static inline struct fpm_array_s *fpm_array_init(struct fpm_array_s *a, unsigned int sz, unsigned int initial_num) /* {{{ */
+static inline struct fpm_array_s *fpm_array_init(struct fpm_array_s *a, unsigned int sz, unsigned int initial_num)
 {
 	void *allocated = 0;
 
@@ -41,9 +41,8 @@ static inline struct fpm_array_s *fpm_array_init(struct fpm_array_s *a, unsigned
 
 	return a;
 }
-/* }}} */
 
-static inline void *fpm_array_item(struct fpm_array_s *a, unsigned int n) /* {{{ */
+static inline void *fpm_array_item(struct fpm_array_s *a, unsigned int n)
 {
 	char *ret;
 
@@ -51,15 +50,13 @@ static inline void *fpm_array_item(struct fpm_array_s *a, unsigned int n) /* {{{
 
 	return ret;
 }
-/* }}} */
 
-static inline void *fpm_array_item_last(struct fpm_array_s *a) /* {{{ */
+static inline void *fpm_array_item_last(struct fpm_array_s *a)
 {
 	return fpm_array_item(a, a->used - 1);
 }
-/* }}} */
 
-static inline int fpm_array_item_remove(struct fpm_array_s *a, unsigned int n) /* {{{ */
+static inline int fpm_array_item_remove(struct fpm_array_s *a, unsigned int n)
 {
 	int ret = -1;
 
@@ -76,9 +73,8 @@ static inline int fpm_array_item_remove(struct fpm_array_s *a, unsigned int n) /
 
 	return ret;
 }
-/* }}} */
 
-static inline void *fpm_array_push(struct fpm_array_s *a) /* {{{ */
+static inline void *fpm_array_push(struct fpm_array_s *a)
 {
 	void *ret;
 
@@ -100,15 +96,13 @@ static inline void *fpm_array_push(struct fpm_array_s *a) /* {{{ */
 
 	return ret;
 }
-/* }}} */
 
-static inline void fpm_array_free(struct fpm_array_s *a) /* {{{ */
+static inline void fpm_array_free(struct fpm_array_s *a)
 {
 	free(a->data);
 	a->data = 0;
 	a->sz = 0;
 	a->used = a->allocated = 0;
 }
-/* }}} */
 
 #endif

@@ -118,7 +118,7 @@ static cwd_state main_cwd_state; /* True global */
 # define CWD_STATE_FREE_ERR(state) CWD_STATE_FREE(state)
 #endif
 
-static int php_is_dir_ok(const cwd_state *state)  /* {{{ */
+static int php_is_dir_ok(const cwd_state *state)
 {
 	zend_stat_t buf;
 
@@ -127,9 +127,8 @@ static int php_is_dir_ok(const cwd_state *state)  /* {{{ */
 
 	return (1);
 }
-/* }}} */
 
-static int php_is_file_ok(const cwd_state *state)  /* {{{ */
+static int php_is_file_ok(const cwd_state *state)
 {
 	zend_stat_t buf;
 
@@ -138,9 +137,8 @@ static int php_is_file_ok(const cwd_state *state)  /* {{{ */
 
 	return (1);
 }
-/* }}} */
 
-static void cwd_globals_ctor(virtual_cwd_globals *cwd_g) /* {{{ */
+static void cwd_globals_ctor(virtual_cwd_globals *cwd_g)
 {
 	CWD_STATE_COPY(&cwd_g->cwd, &main_cwd_state);
 	cwd_g->realpath_cache_size = 0;
@@ -148,15 +146,13 @@ static void cwd_globals_ctor(virtual_cwd_globals *cwd_g) /* {{{ */
 	cwd_g->realpath_cache_ttl = REALPATH_CACHE_TTL;
 	memset(cwd_g->realpath_cache, 0, sizeof(cwd_g->realpath_cache));
 }
-/* }}} */
 
-static void cwd_globals_dtor(virtual_cwd_globals *cwd_g) /* {{{ */
+static void cwd_globals_dtor(virtual_cwd_globals *cwd_g)
 {
 	realpath_cache_clean();
 }
-/* }}} */
 
-void virtual_cwd_main_cwd_init(uint8_t reinit) /* {{{ */
+void virtual_cwd_main_cwd_init(uint8_t reinit)
 {
 	char cwd[MAXPATHLEN];
 	char *result;
@@ -184,9 +180,8 @@ void virtual_cwd_main_cwd_init(uint8_t reinit) /* {{{ */
 #endif
 	main_cwd_state.cwd = strdup(cwd);
 }
-/* }}} */
 
-CWD_API void virtual_cwd_startup(void) /* {{{ */
+CWD_API void virtual_cwd_startup(void)
 {
 	virtual_cwd_main_cwd_init(0);
 #ifdef ZTS
@@ -199,9 +194,8 @@ CWD_API void virtual_cwd_startup(void) /* {{{ */
 	cwd_mutex = tsrm_mutex_alloc();
 #endif
 }
-/* }}} */
 
-CWD_API void virtual_cwd_shutdown(void) /* {{{ */
+CWD_API void virtual_cwd_shutdown(void)
 {
 #ifndef ZTS
 	cwd_globals_dtor(&cwd_globals);
@@ -212,18 +206,16 @@ CWD_API void virtual_cwd_shutdown(void) /* {{{ */
 
 	free(main_cwd_state.cwd); /* Don't use CWD_STATE_FREE because the non global states will probably use emalloc()/efree() */
 }
-/* }}} */
 
-CWD_API int virtual_cwd_activate(void) /* {{{ */
+CWD_API int virtual_cwd_activate(void)
 {
 	if (CWDG(cwd).cwd == NULL) {
 		CWD_STATE_COPY(&CWDG(cwd), &main_cwd_state);
 	}
 	return 0;
 }
-/* }}} */
 
-CWD_API int virtual_cwd_deactivate(void) /* {{{ */
+CWD_API int virtual_cwd_deactivate(void)
 {
 	if (CWDG(cwd).cwd != NULL) {
 		CWD_STATE_FREE(&CWDG(cwd));
@@ -231,9 +223,8 @@ CWD_API int virtual_cwd_deactivate(void) /* {{{ */
 	}
 	return 0;
 }
-/* }}} */
 
-CWD_API char *virtual_getcwd_ex(size_t *length) /* {{{ */
+CWD_API char *virtual_getcwd_ex(size_t *length)
 {
 	cwd_state *state;
 
@@ -271,10 +262,9 @@ CWD_API char *virtual_getcwd_ex(size_t *length) /* {{{ */
 	*length = state->cwd_length;
 	return estrdup(state->cwd);
 }
-/* }}} */
 
 /* Same semantics as UNIX getcwd() */
-CWD_API char *virtual_getcwd(char *buf, size_t size) /* {{{ */
+CWD_API char *virtual_getcwd(char *buf, size_t size)
 {
 	size_t length;
 	char *cwd;
@@ -296,10 +286,9 @@ CWD_API char *virtual_getcwd(char *buf, size_t size) /* {{{ */
 	efree(cwd);
 	return buf;
 }
-/* }}} */
 
 #ifdef ZEND_WIN32
-static inline zend_ulong realpath_cache_key(const char *path, size_t path_len) /* {{{ */
+static inline zend_ulong realpath_cache_key(const char *path, size_t path_len)
 {
 	register zend_ulong h;
 	size_t bucket_key_len;
@@ -321,9 +310,9 @@ static inline zend_ulong realpath_cache_key(const char *path, size_t path_len) /
 	}
 	return h;
 }
-/* }}} */
+
 #else
-static inline zend_ulong realpath_cache_key(const char *path, size_t path_len) /* {{{ */
+static inline zend_ulong realpath_cache_key(const char *path, size_t path_len)
 {
 	register zend_ulong h;
 	const char *e = path + path_len;
@@ -335,10 +324,10 @@ static inline zend_ulong realpath_cache_key(const char *path, size_t path_len) /
 
 	return h;
 }
-/* }}} */
+
 #endif /* defined(ZEND_WIN32) */
 
-CWD_API void realpath_cache_clean(void) /* {{{ */
+CWD_API void realpath_cache_clean(void)
 {
 	uint32_t i;
 
@@ -353,9 +342,8 @@ CWD_API void realpath_cache_clean(void) /* {{{ */
 	}
 	CWDG(realpath_cache_size) = 0;
 }
-/* }}} */
 
-CWD_API void realpath_cache_del(const char *path, size_t path_len) /* {{{ */
+CWD_API void realpath_cache_del(const char *path, size_t path_len)
 {
 	zend_ulong key = realpath_cache_key(path, path_len);
 	zend_ulong n = key % (sizeof(CWDG(realpath_cache)) / sizeof(CWDG(realpath_cache)[0]));
@@ -381,9 +369,8 @@ CWD_API void realpath_cache_del(const char *path, size_t path_len) /* {{{ */
 		}
 	}
 }
-/* }}} */
 
-static inline void realpath_cache_add(const char *path, size_t path_len, const char *realpath, size_t realpath_len, int is_dir, time_t t) /* {{{ */
+static inline void realpath_cache_add(const char *path, size_t path_len, const char *realpath, size_t realpath_len, int is_dir, time_t t)
 {
 	zend_long size = sizeof(realpath_cache_bucket) + path_len + 1;
 	int same = 1;
@@ -427,9 +414,8 @@ static inline void realpath_cache_add(const char *path, size_t path_len, const c
 		CWDG(realpath_cache_size) += size;
 	}
 }
-/* }}} */
 
-static inline realpath_cache_bucket* realpath_cache_find(const char *path, size_t path_len, time_t t) /* {{{ */
+static inline realpath_cache_bucket* realpath_cache_find(const char *path, size_t path_len, time_t t)
 {
 	zend_ulong key = realpath_cache_key(path, path_len);
 	zend_ulong n = key % (sizeof(CWDG(realpath_cache)) / sizeof(CWDG(realpath_cache)[0]));
@@ -456,13 +442,11 @@ static inline realpath_cache_bucket* realpath_cache_find(const char *path, size_
 	}
 	return NULL;
 }
-/* }}} */
 
-CWD_API realpath_cache_bucket* realpath_cache_lookup(const char *path, size_t path_len, time_t t) /* {{{ */
+CWD_API realpath_cache_bucket* realpath_cache_lookup(const char *path, size_t path_len, time_t t)
 {
 	return realpath_cache_find(path, path_len, t);
 }
-/* }}} */
 
 CWD_API zend_long realpath_cache_size(void)
 {
@@ -483,7 +467,7 @@ CWD_API realpath_cache_bucket** realpath_cache_get_buckets(void)
 #undef LINK_MAX
 #define LINK_MAX 32
 
-static size_t tsrm_realpath_r(char *path, size_t start, size_t len, int *ll, time_t *t, int use_realpath, int is_dir, int *link_is_dir) /* {{{ */
+static size_t tsrm_realpath_r(char *path, size_t start, size_t len, int *ll, time_t *t, int use_realpath, int is_dir, int *link_is_dir)
 {
 	size_t i, j;
 	int directory = 0, save;
@@ -976,11 +960,10 @@ retry:
 		return j;
 	}
 }
-/* }}} */
 
 /* Resolve path relatively to state and put the real path into state */
 /* returns 0 for ok, 1 for error */
-CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func verify_path, int use_realpath) /* {{{ */
+CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func verify_path, int use_realpath)
 {
 	size_t path_length = strlen(path);
 	char resolved_path[MAXPATHLEN] = {0};
@@ -1159,15 +1142,13 @@ verify:
 #endif
 	return (ret);
 }
-/* }}} */
 
-CWD_API int virtual_chdir(const char *path) /* {{{ */
+CWD_API int virtual_chdir(const char *path)
 {
 	return virtual_file_ex(&CWDG(cwd), path, php_is_dir_ok, CWD_REALPATH)?-1:0;
 }
-/* }}} */
 
-CWD_API int virtual_chdir_file(const char *path, int (*p_chdir)(const char *path)) /* {{{ */
+CWD_API int virtual_chdir_file(const char *path, int (*p_chdir)(const char *path))
 {
 	size_t length = strlen(path);
 	char *temp;
@@ -1199,9 +1180,8 @@ CWD_API int virtual_chdir_file(const char *path, int (*p_chdir)(const char *path
 	free_alloca(temp, use_heap);
 	return retval;
 }
-/* }}} */
 
-CWD_API char *virtual_realpath(const char *path, char *real_path) /* {{{ */
+CWD_API char *virtual_realpath(const char *path, char *real_path)
 {
 	cwd_state new_state;
 	char *retval;
@@ -1236,9 +1216,8 @@ CWD_API char *virtual_realpath(const char *path, char *real_path) /* {{{ */
 	CWD_STATE_FREE(&new_state);
 	return retval;
 }
-/* }}} */
 
-CWD_API int virtual_filepath_ex(const char *path, char **filepath, verify_path_func verify_path) /* {{{ */
+CWD_API int virtual_filepath_ex(const char *path, char **filepath, verify_path_func verify_path)
 {
 	cwd_state new_state;
 	int retval;
@@ -1251,15 +1230,13 @@ CWD_API int virtual_filepath_ex(const char *path, char **filepath, verify_path_f
 	return retval;
 
 }
-/* }}} */
 
-CWD_API int virtual_filepath(const char *path, char **filepath) /* {{{ */
+CWD_API int virtual_filepath(const char *path, char **filepath)
 {
 	return virtual_filepath_ex(path, filepath, php_is_file_ok);
 }
-/* }}} */
 
-CWD_API FILE *virtual_fopen(const char *path, const char *mode) /* {{{ */
+CWD_API FILE *virtual_fopen(const char *path, const char *mode)
 {
 	cwd_state new_state;
 	FILE *f;
@@ -1284,9 +1261,8 @@ CWD_API FILE *virtual_fopen(const char *path, const char *mode) /* {{{ */
 
 	return f;
 }
-/* }}} */
 
-CWD_API int virtual_access(const char *pathname, int mode) /* {{{ */
+CWD_API int virtual_access(const char *pathname, int mode)
 {
 	cwd_state new_state;
 	int ret;
@@ -1307,10 +1283,9 @@ CWD_API int virtual_access(const char *pathname, int mode) /* {{{ */
 
 	return ret;
 }
-/* }}} */
 
 #if HAVE_UTIME
-CWD_API int virtual_utime(const char *filename, struct utimbuf *buf) /* {{{ */
+CWD_API int virtual_utime(const char *filename, struct utimbuf *buf)
 {
 	cwd_state new_state;
 	int ret;
@@ -1330,10 +1305,10 @@ CWD_API int virtual_utime(const char *filename, struct utimbuf *buf) /* {{{ */
 	CWD_STATE_FREE_ERR(&new_state);
 	return ret;
 }
-/* }}} */
+
 #endif
 
-CWD_API int virtual_chmod(const char *filename, mode_t mode) /* {{{ */
+CWD_API int virtual_chmod(const char *filename, mode_t mode)
 {
 	cwd_state new_state;
 	int ret;
@@ -1365,10 +1340,9 @@ CWD_API int virtual_chmod(const char *filename, mode_t mode) /* {{{ */
 	CWD_STATE_FREE_ERR(&new_state);
 	return ret;
 }
-/* }}} */
 
 #if !defined(ZEND_WIN32)
-CWD_API int virtual_chown(const char *filename, uid_t owner, gid_t group, int link) /* {{{ */
+CWD_API int virtual_chown(const char *filename, uid_t owner, gid_t group, int link)
 {
 	cwd_state new_state;
 	int ret;
@@ -1392,10 +1366,10 @@ CWD_API int virtual_chown(const char *filename, uid_t owner, gid_t group, int li
 	CWD_STATE_FREE_ERR(&new_state);
 	return ret;
 }
-/* }}} */
+
 #endif
 
-CWD_API int virtual_open(const char *path, int flags, ...) /* {{{ */
+CWD_API int virtual_open(const char *path, int flags, ...)
 {
 	cwd_state new_state;
 	int f;
@@ -1429,9 +1403,8 @@ CWD_API int virtual_open(const char *path, int flags, ...) /* {{{ */
 	CWD_STATE_FREE_ERR(&new_state);
 	return f;
 }
-/* }}} */
 
-CWD_API int virtual_creat(const char *path, mode_t mode) /* {{{ */
+CWD_API int virtual_creat(const char *path, mode_t mode)
 {
 	cwd_state new_state;
 	int f;
@@ -1447,9 +1420,8 @@ CWD_API int virtual_creat(const char *path, mode_t mode) /* {{{ */
 	CWD_STATE_FREE_ERR(&new_state);
 	return f;
 }
-/* }}} */
 
-CWD_API int virtual_rename(const char *oldname, const char *newname) /* {{{ */
+CWD_API int virtual_rename(const char *oldname, const char *newname)
 {
 	cwd_state old_state;
 	cwd_state new_state;
@@ -1484,9 +1456,8 @@ CWD_API int virtual_rename(const char *oldname, const char *newname) /* {{{ */
 
 	return retval;
 }
-/* }}} */
 
-CWD_API int virtual_stat(const char *path, zend_stat_t *buf) /* {{{ */
+CWD_API int virtual_stat(const char *path, zend_stat_t *buf)
 {
 	cwd_state new_state;
 	int retval;
@@ -1502,9 +1473,8 @@ CWD_API int virtual_stat(const char *path, zend_stat_t *buf) /* {{{ */
 	CWD_STATE_FREE_ERR(&new_state);
 	return retval;
 }
-/* }}} */
 
-CWD_API int virtual_lstat(const char *path, zend_stat_t *buf) /* {{{ */
+CWD_API int virtual_lstat(const char *path, zend_stat_t *buf)
 {
 	cwd_state new_state;
 	int retval;
@@ -1520,9 +1490,8 @@ CWD_API int virtual_lstat(const char *path, zend_stat_t *buf) /* {{{ */
 	CWD_STATE_FREE_ERR(&new_state);
 	return retval;
 }
-/* }}} */
 
-CWD_API int virtual_unlink(const char *path) /* {{{ */
+CWD_API int virtual_unlink(const char *path)
 {
 	cwd_state new_state;
 	int retval;
@@ -1542,9 +1511,8 @@ CWD_API int virtual_unlink(const char *path) /* {{{ */
 	CWD_STATE_FREE_ERR(&new_state);
 	return retval;
 }
-/* }}} */
 
-CWD_API int virtual_mkdir(const char *pathname, mode_t mode) /* {{{ */
+CWD_API int virtual_mkdir(const char *pathname, mode_t mode)
 {
 	cwd_state new_state;
 	int retval;
@@ -1563,9 +1531,8 @@ CWD_API int virtual_mkdir(const char *pathname, mode_t mode) /* {{{ */
 	CWD_STATE_FREE_ERR(&new_state);
 	return retval;
 }
-/* }}} */
 
-CWD_API int virtual_rmdir(const char *pathname) /* {{{ */
+CWD_API int virtual_rmdir(const char *pathname)
 {
 	cwd_state new_state;
 	int retval;
@@ -1584,13 +1551,12 @@ CWD_API int virtual_rmdir(const char *pathname) /* {{{ */
 	CWD_STATE_FREE_ERR(&new_state);
 	return retval;
 }
-/* }}} */
 
 #ifdef ZEND_WIN32
 DIR *opendir(const char *name);
 #endif
 
-CWD_API DIR *virtual_opendir(const char *pathname) /* {{{ */
+CWD_API DIR *virtual_opendir(const char *pathname)
 {
 	cwd_state new_state;
 	DIR *retval;
@@ -1606,16 +1572,15 @@ CWD_API DIR *virtual_opendir(const char *pathname) /* {{{ */
 	CWD_STATE_FREE_ERR(&new_state);
 	return retval;
 }
-/* }}} */
 
 #ifdef ZEND_WIN32
-CWD_API FILE *virtual_popen(const char *command, const char *type) /* {{{ */
+CWD_API FILE *virtual_popen(const char *command, const char *type)
 {
 	return popen_ex(command, type, CWDG(cwd).cwd, NULL);
 }
-/* }}} */
+
 #else /* Unix */
-CWD_API FILE *virtual_popen(const char *command, const char *type) /* {{{ */
+CWD_API FILE *virtual_popen(const char *command, const char *type)
 {
 	size_t command_length;
 	int dir_length, extra = 0;
@@ -1669,10 +1634,10 @@ CWD_API FILE *virtual_popen(const char *command, const char *type) /* {{{ */
 	efree(command_line);
 	return retval;
 }
-/* }}} */
+
 #endif
 
-CWD_API char *tsrm_realpath(const char *path, char *real_path) /* {{{ */
+CWD_API char *tsrm_realpath(const char *path, char *real_path)
 {
 	cwd_state new_state;
 	char cwd[MAXPATHLEN];
@@ -1710,4 +1675,4 @@ CWD_API char *tsrm_realpath(const char *path, char *real_path) /* {{{ */
 		return new_state.cwd;
 	}
 }
-/* }}} */
+

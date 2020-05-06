@@ -43,7 +43,7 @@
  * ret = 1  key already exists - nothing done
  */
 
-/* {{{ flatfile_store
+/* flatfile_store
  */
 int flatfile_store(flatfile *dba, datum key_datum, datum value_datum, int mode) {
 	if (mode == FLATFILE_INSERT) {
@@ -77,9 +77,8 @@ int flatfile_store(flatfile *dba, datum key_datum, datum value_datum, int mode) 
 	php_stream_flush(dba->fp);
 	return 0;
 }
-/* }}} */
 
-/* {{{ flatfile_fetch
+/* flatfile_fetch
  */
 datum flatfile_fetch(flatfile *dba, datum key_datum) {
 	datum value_datum = {NULL, 0};
@@ -97,9 +96,8 @@ datum flatfile_fetch(flatfile *dba, datum key_datum) {
 	}
 	return value_datum;
 }
-/* }}} */
 
-/* {{{ flatfile_delete
+/* flatfile_delete
  */
 int flatfile_delete(flatfile *dba, datum key_datum) {
 	char *key = key_datum.dptr;
@@ -149,9 +147,8 @@ int flatfile_delete(flatfile *dba, datum key_datum) {
 	efree(buf);
 	return FAILURE;
 }
-/* }}} */
 
-/* {{{ flatfile_findkey
+/* flatfile_findkey
  */
 int flatfile_findkey(flatfile *dba, datum key_datum) {
 	size_t buf_size = FLATFILE_BLOCK_SIZE;
@@ -192,9 +189,8 @@ int flatfile_findkey(flatfile *dba, datum key_datum) {
 	efree(buf);
 	return ret;
 }
-/* }}} */
 
-/* {{{ flatfile_firstkey
+/* flatfile_firstkey
  */
 datum flatfile_firstkey(flatfile *dba) {
 	datum res;
@@ -235,9 +231,8 @@ datum flatfile_firstkey(flatfile *dba) {
 	res.dsize = 0;
 	return res;
 }
-/* }}} */
 
-/* {{{ flatfile_nextkey
+/* flatfile_nextkey
  */
 datum flatfile_nextkey(flatfile *dba) {
 	datum res;
@@ -279,11 +274,10 @@ datum flatfile_nextkey(flatfile *dba) {
 	res.dsize = 0;
 	return res;
 }
-/* }}} */
 
-/* {{{ flatfile_version */
+/* flatfile_version */
 char *flatfile_version()
 {
 	return "1.0, $Id$";
 }
-/* }}} */
+

@@ -55,6 +55,5 @@ PHP_METHOD(DOMCdataSection, __construct)
 	}
 	php_libxml_increment_node_ptr((php_libxml_node_object *)intern, nodep, (void *)intern);
 }
-/* }}} end DOMCdataSection::__construct */
 
 #endif

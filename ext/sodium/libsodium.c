@@ -88,7 +88,6 @@ zend_module_entry sodium_module_entry = {
 	PHP_SODIUM_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
-/* }}} */
 
 #ifdef COMPILE_DL_SODIUM
 ZEND_GET_MODULE(sodium)

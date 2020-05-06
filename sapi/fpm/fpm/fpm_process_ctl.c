@@ -35,7 +35,7 @@ static const char *fpm_state_names[] = {
 static int saved_argc;
 static char **saved_argv;
 
-static void fpm_pctl_cleanup(int which, void *arg) /* {{{ */
+static void fpm_pctl_cleanup(int which, void *arg)
 {
 	int i;
 	if (which != FPM_CLEANUP_PARENT_EXEC) {
@@ -45,25 +45,22 @@ static void fpm_pctl_cleanup(int which, void *arg) /* {{{ */
 		free(saved_argv);
 	}
 }
-/* }}} */
 
 static struct fpm_event_s pctl_event;
 
-static void fpm_pctl_action(struct fpm_event_s *ev, short which, void *arg) /* {{{ */
+static void fpm_pctl_action(struct fpm_event_s *ev, short which, void *arg)
 {
 	fpm_pctl(FPM_PCTL_STATE_UNSPECIFIED, FPM_PCTL_ACTION_TIMEOUT);
 }
-/* }}} */
 
-static int fpm_pctl_timeout_set(int sec) /* {{{ */
+static int fpm_pctl_timeout_set(int sec)
 {
 	fpm_event_set_timer(&pctl_event, 0, &fpm_pctl_action, NULL);
 	fpm_event_add(&pctl_event, sec * 1000);
 	return 0;
 }
-/* }}} */
 
-static void fpm_pctl_exit() /* {{{ */
+static void fpm_pctl_exit()
 {
 	zlog(ZLOG_NOTICE, "exiting, bye-bye!");
 
@@ -71,11 +68,10 @@ static void fpm_pctl_exit() /* {{{ */
 	fpm_cleanups_run(FPM_CLEANUP_PARENT_EXIT_MAIN);
 	exit(FPM_EXIT_OK);
 }
-/* }}} */
 
 #define optional_arg(c) (saved_argc > c ? ", \"" : ""), (saved_argc > c ? saved_argv[c] : ""), (saved_argc > c ? "\"" : "")
 
-static void fpm_pctl_exec() /* {{{ */
+static void fpm_pctl_exec()
 {
 	zlog(ZLOG_DEBUG, "Blocking some signals before reexec");
 	if (0 > fpm_signals_block()) {
@@ -104,9 +100,8 @@ static void fpm_pctl_exec() /* {{{ */
 	zlog(ZLOG_SYSERROR, "failed to reload: execvp() failed");
 	exit(FPM_EXIT_SOFTWARE);
 }
-/* }}} */
 
-static void fpm_pctl_action_last() /* {{{ */
+static void fpm_pctl_action_last()
 {
 	switch (fpm_state) {
 		case FPM_PCTL_STATE_RELOADING:
@@ -119,9 +114,8 @@ static void fpm_pctl_action_last() /* {{{ */
 			break;
 	}
 }
-/* }}} */
 
-int fpm_pctl_kill(pid_t pid, int how) /* {{{ */
+int fpm_pctl_kill(pid_t pid, int how)
 {
 	int s = 0;
 
@@ -143,9 +137,8 @@ int fpm_pctl_kill(pid_t pid, int how) /* {{{ */
 	}
 	return kill(pid, s);
 }
-/* }}} */
 
-void fpm_pctl_kill_all(int signo) /* {{{ */
+void fpm_pctl_kill_all(int signo)
 {
 	struct fpm_worker_pool_s *wp;
 	int alive_children = 0;
@@ -170,9 +163,8 @@ void fpm_pctl_kill_all(int signo) /* {{{ */
 		zlog(ZLOG_DEBUG, "%d child(ren) still alive", alive_children);
 	}
 }
-/* }}} */
 
-static void fpm_pctl_action_next() /* {{{ */
+static void fpm_pctl_action_next()
 {
 	int sig, timeout;
 
@@ -200,9 +192,8 @@ static void fpm_pctl_action_next() /* {{{ */
 	fpm_signal_sent = sig;
 	fpm_pctl_timeout_set(timeout);
 }
-/* }}} */
 
-void fpm_pctl(int new_state, int action) /* {{{ */
+void fpm_pctl(int new_state, int action)
 {
 	switch (action) {
 		case FPM_PCTL_ACTION_SET :
@@ -242,15 +233,13 @@ void fpm_pctl(int new_state, int action) /* {{{ */
 
 	}
 }
-/* }}} */
 
-int fpm_pctl_can_spawn_children() /* {{{ */
+int fpm_pctl_can_spawn_children()
 {
 	return fpm_state == FPM_PCTL_STATE_NORMAL;
 }
-/* }}} */
 
-int fpm_pctl_child_exited() /* {{{ */
+int fpm_pctl_child_exited()
 {
 	if (fpm_state == FPM_PCTL_STATE_NORMAL) {
 		return 0;
@@ -261,9 +250,8 @@ int fpm_pctl_child_exited() /* {{{ */
 	}
 	return 0;
 }
-/* }}} */
 
-int fpm_pctl_init_main() /* {{{ */
+int fpm_pctl_init_main()
 {
 	int i;
 
@@ -289,9 +277,8 @@ int fpm_pctl_init_main() /* {{{ */
 	}
 	return 0;
 }
-/* }}} */
 
-static void fpm_pctl_check_request_timeout(struct timeval *now) /* {{{ */
+static void fpm_pctl_check_request_timeout(struct timeval *now)
 {
 	struct fpm_worker_pool_s *wp;
 
@@ -308,9 +295,8 @@ static void fpm_pctl_check_request_timeout(struct timeval *now) /* {{{ */
 		}
 	}
 }
-/* }}} */
 
-static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now) /* {{{ */
+static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now)
 {
 	struct fpm_worker_pool_s *wp;
 
@@ -439,9 +425,8 @@ static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now) /* {{{
 		wp->idle_spawn_rate = 1;
 	}
 }
-/* }}} */
 
-void fpm_pctl_heartbeat(struct fpm_event_s *ev, short which, void *arg) /* {{{ */
+void fpm_pctl_heartbeat(struct fpm_event_s *ev, short which, void *arg)
 {
 	static struct fpm_event_s heartbeat;
 	struct timeval now;
@@ -464,9 +449,8 @@ void fpm_pctl_heartbeat(struct fpm_event_s *ev, short which, void *arg) /* {{{ *
 	fpm_event_set_timer(&heartbeat, FPM_EV_PERSIST, &fpm_pctl_heartbeat, NULL);
 	fpm_event_add(&heartbeat, fpm_globals.heartbeat);
 }
-/* }}} */
 
-void fpm_pctl_perform_idle_server_maintenance_heartbeat(struct fpm_event_s *ev, short which, void *arg) /* {{{ */
+void fpm_pctl_perform_idle_server_maintenance_heartbeat(struct fpm_event_s *ev, short which, void *arg)
 {
 	static struct fpm_event_s heartbeat;
 	struct timeval now;
@@ -494,9 +478,8 @@ void fpm_pctl_perform_idle_server_maintenance_heartbeat(struct fpm_event_s *ev, 
 	fpm_event_set_timer(&heartbeat, FPM_EV_PERSIST, &fpm_pctl_perform_idle_server_maintenance_heartbeat, NULL);
 	fpm_event_add(&heartbeat, FPM_IDLE_SERVER_MAINTENANCE_HEARTBEAT);
 }
-/* }}} */
 
-void fpm_pctl_on_socket_accept(struct fpm_event_s *ev, short which, void *arg) /* {{{ */
+void fpm_pctl_on_socket_accept(struct fpm_event_s *ev, short which, void *arg)
 {
 	struct fpm_worker_pool_s *wp = (struct fpm_worker_pool_s *)arg;
 	struct fpm_child_s *child;
@@ -538,4 +521,4 @@ void fpm_pctl_on_socket_accept(struct fpm_event_s *ev, short which, void *arg) /
 
 	zlog(ZLOG_DEBUG, "[pool %s] got accept without idle child available .... I forked", wp->config->name);
 }
-/* }}} */
+

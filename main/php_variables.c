@@ -591,7 +591,7 @@ zend_bool php_std_auto_global_callback(char *name, uint32_t name_len)
 	return 0; /* don't rearm */
 }
 
-/* {{{ php_build_argv
+/* php_build_argv
  */
 PHPAPI void php_build_argv(char *s, zval *track_vars_array)
 {
@@ -655,9 +655,8 @@ PHPAPI void php_build_argv(char *s, zval *track_vars_array)
 	}
 	zval_ptr_dtor_nogc(&arr);
 }
-/* }}} */
 
-/* {{{ php_register_server_variables
+/* php_register_server_variables
  */
 static inline void php_register_server_variables(void)
 {
@@ -694,9 +693,8 @@ static inline void php_register_server_variables(void)
 	ZVAL_LONG(&tmp, zend_dval_to_lval(Z_DVAL(tmp)));
 	php_register_variable_quick("REQUEST_TIME", sizeof("REQUEST_TIME")-1, &tmp, ht);
 }
-/* }}} */
 
-/* {{{ php_autoglobal_merge
+/* php_autoglobal_merge
  */
 static void php_autoglobal_merge(HashTable *dest, HashTable *src)
 {
@@ -727,9 +725,8 @@ static void php_autoglobal_merge(HashTable *dest, HashTable *src)
 		}
 	} ZEND_HASH_FOREACH_END();
 }
-/* }}} */
 
-/* {{{ php_hash_environment
+/* php_hash_environment
  */
 PHPAPI int php_hash_environment(void)
 {
@@ -740,7 +737,6 @@ PHPAPI int php_hash_environment(void)
 	}
 	return SUCCESS;
 }
-/* }}} */
 
 static zend_bool php_auto_globals_create_get(zend_string *name)
 {

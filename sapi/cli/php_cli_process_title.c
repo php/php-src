@@ -41,7 +41,6 @@ PHP_FUNCTION(cli_set_process_title)
     php_error_docref(NULL, E_WARNING, "cli_set_process_title had an error: %s", ps_title_errno(rc));
     RETURN_FALSE;
 }
-/* }}} */
 
 /* Return a string with the current process title. NULL if error. */
 PHP_FUNCTION(cli_get_process_title)
@@ -62,4 +61,4 @@ PHP_FUNCTION(cli_get_process_title)
 
         RETURN_STRINGL(title, length);
 }
-/* }}} */
+

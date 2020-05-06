@@ -265,11 +265,10 @@ void zend_ffi_expr_sizeof_type(zend_ffi_val *val, zend_ffi_dcl *dcl);
 void zend_ffi_expr_alignof_val(zend_ffi_val *val);
 void zend_ffi_expr_alignof_type(zend_ffi_val *val, zend_ffi_dcl *dcl);
 
-static zend_always_inline void zend_ffi_val_error(zend_ffi_val *val) /* {{{ */
+static zend_always_inline void zend_ffi_val_error(zend_ffi_val *val)
 {
 	val->kind = ZEND_FFI_VAL_ERROR;
 }
-/* }}} */
 
 void zend_ffi_val_number(zend_ffi_val *val, int base, const char *str, size_t str_len);
 void zend_ffi_val_float_number(zend_ffi_val *val, const char *str, size_t str_len);

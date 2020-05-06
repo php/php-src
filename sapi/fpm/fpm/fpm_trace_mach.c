@@ -18,7 +18,7 @@ static vm_offset_t target_page_base;
 static vm_offset_t local_page;
 static mach_msg_type_number_t local_size;
 
-static void fpm_mach_vm_deallocate() /* {{{ */
+static void fpm_mach_vm_deallocate()
 {
 	if (local_page) {
 		mach_vm_deallocate(mach_task_self(), local_page, local_size);
@@ -27,9 +27,8 @@ static void fpm_mach_vm_deallocate() /* {{{ */
 		local_size = 0;
 	}
 }
-/* }}} */
 
-static int fpm_mach_vm_read_page(vm_offset_t page) /* {{{ */
+static int fpm_mach_vm_read_page(vm_offset_t page)
 {
 	kern_return_t kr;
 
@@ -40,9 +39,8 @@ static int fpm_mach_vm_read_page(vm_offset_t page) /* {{{ */
 	}
 	return 0;
 }
-/* }}} */
 
-int fpm_trace_signal(pid_t pid) /* {{{ */
+int fpm_trace_signal(pid_t pid)
 {
 	if (0 > fpm_pctl_kill(pid, FPM_PCTL_STOP)) {
 		zlog(ZLOG_SYSERROR, "failed to send SIGSTOP to %d", pid);
@@ -50,9 +48,8 @@ int fpm_trace_signal(pid_t pid) /* {{{ */
 	}
 	return 0;
 }
-/* }}} */
 
-int fpm_trace_ready(pid_t pid) /* {{{ */
+int fpm_trace_ready(pid_t pid)
 {
 	kern_return_t kr;
 
@@ -68,17 +65,15 @@ int fpm_trace_ready(pid_t pid) /* {{{ */
 	}
 	return 0;
 }
-/* }}} */
 
-int fpm_trace_close(pid_t pid) /* {{{ */
+int fpm_trace_close(pid_t pid)
 {
 	fpm_mach_vm_deallocate();
 	target = 0;
 	return 0;
 }
-/* }}} */
 
-int fpm_trace_get_long(long addr, long *data) /* {{{ */
+int fpm_trace_get_long(long addr, long *data)
 {
 	size_t offset = ((uintptr_t) (addr) % fpm_pagesize);
 	vm_offset_t base = (uintptr_t) (addr) - offset;
@@ -92,4 +87,4 @@ int fpm_trace_get_long(long addr, long *data) /* {{{ */
 	*data = * (long *) (local_page + offset);
 	return 0;
 }
-/* }}} */
+

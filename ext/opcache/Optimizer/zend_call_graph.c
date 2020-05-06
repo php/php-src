@@ -256,7 +256,7 @@ static void zend_sort_op_arrays(zend_call_graph *call_graph)
 	// TODO: perform topological sort of cyclic call graph
 }
 
-int zend_build_call_graph(zend_arena **arena, zend_script *script, zend_call_graph *call_graph) /* {{{ */
+int zend_build_call_graph(zend_arena **arena, zend_script *script, zend_call_graph *call_graph)
 {
 	call_graph->op_arrays_count = 0;
 	if (zend_foreach_op_array(call_graph, script, zend_op_array_calc) != SUCCESS) {
@@ -271,9 +271,8 @@ int zend_build_call_graph(zend_arena **arena, zend_script *script, zend_call_gra
 
 	return SUCCESS;
 }
-/* }}} */
 
-void zend_analyze_call_graph(zend_arena **arena, zend_script *script, zend_call_graph *call_graph) /* {{{ */
+void zend_analyze_call_graph(zend_arena **arena, zend_script *script, zend_call_graph *call_graph)
 {
 	int i;
 
@@ -283,9 +282,8 @@ void zend_analyze_call_graph(zend_arena **arena, zend_script *script, zend_call_
 	zend_analyze_recursion(call_graph);
 	zend_sort_op_arrays(call_graph);
 }
-/* }}} */
 
-zend_call_info **zend_build_call_map(zend_arena **arena, zend_func_info *info, const zend_op_array *op_array) /* {{{ */
+zend_call_info **zend_build_call_map(zend_arena **arena, zend_func_info *info, const zend_op_array *op_array)
 {
 	zend_call_info **map, *call;
 	if (!info->callee_info) {
@@ -308,4 +306,4 @@ zend_call_info **zend_build_call_map(zend_arena **arena, zend_func_info *info, c
 	}
 	return map;
 }
-/* }}} */
+

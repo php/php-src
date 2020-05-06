@@ -44,7 +44,6 @@ PHP_FUNCTION(metaphone)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /*
    this is now the original code by Michael G Schwern:
@@ -159,7 +158,7 @@ static char Lookahead(char *word, int how_far)
 /* Note is a letter is a 'break' in the word */
 #define Isbreak(c)  (!isalpha(c))
 
-/* {{{ metaphone
+/* metaphone
  */
 static int metaphone(unsigned char *word, size_t word_len, zend_long max_phonemes, zend_string **phoned_word, int traditional)
 {
@@ -465,4 +464,4 @@ static int metaphone(unsigned char *word, size_t word_len, zend_long max_phoneme
 
 	return 0;
 }								/* END metaphone */
-/* }}} */
+

@@ -31,7 +31,7 @@ static zend_object_handlers zend_generator_handlers;
 
 static zend_object *zend_generator_create(zend_class_entry *class_type);
 
-ZEND_API void zend_generator_restore_call_stack(zend_generator *generator) /* {{{ */
+ZEND_API void zend_generator_restore_call_stack(zend_generator *generator)
 {
 	zend_execute_data *call, *new_call, *prev_call = NULL;
 
@@ -52,9 +52,8 @@ ZEND_API void zend_generator_restore_call_stack(zend_generator *generator) /* {{
 	efree(generator->frozen_call_stack);
 	generator->frozen_call_stack = NULL;
 }
-/* }}} */
 
-ZEND_API zend_execute_data* zend_generator_freeze_call_stack(zend_execute_data *execute_data) /* {{{ */
+ZEND_API zend_execute_data* zend_generator_freeze_call_stack(zend_execute_data *execute_data)
 {
 	size_t used_stack;
 	zend_execute_data *call, *new_call, *prev_call = NULL;
@@ -91,10 +90,9 @@ ZEND_API zend_execute_data* zend_generator_freeze_call_stack(zend_execute_data *
 
 	return prev_call;
 }
-/* }}} */
 
 static void zend_generator_cleanup_unfinished_execution(
-		zend_generator *generator, zend_execute_data *execute_data, uint32_t catch_op_num) /* {{{ */
+		zend_generator *generator, zend_execute_data *execute_data, uint32_t catch_op_num)
 {
 	zend_op_array *op_array = &execute_data->func->op_array;
 	if (execute_data->opline != op_array->opcodes) {
@@ -112,9 +110,8 @@ static void zend_generator_cleanup_unfinished_execution(
 		zend_cleanup_unfinished_execution(execute_data, op_num, catch_op_num);
 	}
 }
-/* }}} */
 
-ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished_execution) /* {{{ */
+ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished_execution)
 {
 	if (EXPECTED(generator->execute_data)) {
 		zend_execute_data *execute_data = generator->execute_data;
@@ -155,11 +152,10 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 		efree(execute_data);
 	}
 }
-/* }}} */
 
 static zend_generator *zend_generator_get_child(zend_generator_node *node, zend_generator *leaf);
 
-static void zend_generator_dtor_storage(zend_object *object) /* {{{ */
+static void zend_generator_dtor_storage(zend_object *object)
 {
 	zend_generator *generator = (zend_generator*) object;
 	zend_execute_data *ex = generator->execute_data;
@@ -244,9 +240,8 @@ static void zend_generator_dtor_storage(zend_object *object) /* {{{ */
 		try_catch_offset--;
 	}
 }
-/* }}} */
 
-static void zend_generator_free_storage(zend_object *object) /* {{{ */
+static void zend_generator_free_storage(zend_object *object)
 {
 	zend_generator *generator = (zend_generator*) object;
 
@@ -271,9 +266,8 @@ static void zend_generator_free_storage(zend_object *object) /* {{{ */
 		zend_iterator_dtor(generator->iterator);
 	}
 }
-/* }}} */
 
-static HashTable *zend_generator_get_gc(zend_object *object, zval **table, int *n) /* {{{ */
+static HashTable *zend_generator_get_gc(zend_object *object, zval **table, int *n)
 {
 	zend_generator *generator = (zend_generator*)object;
 	zend_execute_data *execute_data = generator->execute_data;
@@ -349,9 +343,8 @@ static HashTable *zend_generator_get_gc(zend_object *object, zval **table, int *
 		return NULL;
 	}
 }
-/* }}} */
 
-static zend_object *zend_generator_create(zend_class_entry *class_type) /* {{{ */
+static zend_object *zend_generator_create(zend_class_entry *class_type)
 {
 	zend_generator *generator;
 
@@ -374,15 +367,13 @@ static zend_object *zend_generator_create(zend_class_entry *class_type) /* {{{ *
 
 	return (zend_object*)generator;
 }
-/* }}} */
 
-static ZEND_COLD zend_function *zend_generator_get_constructor(zend_object *object) /* {{{ */
+static ZEND_COLD zend_function *zend_generator_get_constructor(zend_object *object)
 {
 	zend_throw_error(NULL, "The \"Generator\" class is reserved for internal use and cannot be manually instantiated");
 
 	return NULL;
 }
-/* }}} */
 
 ZEND_API zend_execute_data *zend_generator_check_placeholder_frame(zend_execute_data *ptr)
 {
@@ -625,7 +616,7 @@ ZEND_API zend_generator *zend_generator_update_current(zend_generator *generator
 	return root;
 }
 
-static int zend_generator_get_next_delegated_value(zend_generator *generator) /* {{{ */
+static int zend_generator_get_next_delegated_value(zend_generator *generator)
 {
 	zval *value;
 	if (Z_TYPE(generator->values) == IS_ARRAY) {
@@ -704,9 +695,8 @@ failure:
 	ZVAL_UNDEF(&generator->values);
 	return FAILURE;
 }
-/* }}} */
 
-ZEND_API void zend_generator_resume(zend_generator *orig_generator) /* {{{ */
+ZEND_API void zend_generator_resume(zend_generator *orig_generator)
 {
 	zend_generator *generator = zend_generator_get_current(orig_generator);
 
@@ -806,18 +796,16 @@ try_again:
 
 	orig_generator->flags &= ~ZEND_GENERATOR_DO_INIT;
 }
-/* }}} */
 
-static inline void zend_generator_ensure_initialized(zend_generator *generator) /* {{{ */
+static inline void zend_generator_ensure_initialized(zend_generator *generator)
 {
 	if (UNEXPECTED(Z_TYPE(generator->value) == IS_UNDEF) && EXPECTED(generator->execute_data) && EXPECTED(generator->node.parent == NULL)) {
 		zend_generator_resume(generator);
 		generator->flags |= ZEND_GENERATOR_AT_FIRST_YIELD;
 	}
 }
-/* }}} */
 
-static inline void zend_generator_rewind(zend_generator *generator) /* {{{ */
+static inline void zend_generator_rewind(zend_generator *generator)
 {
 	zend_generator_ensure_initialized(generator);
 
@@ -825,7 +813,6 @@ static inline void zend_generator_rewind(zend_generator *generator) /* {{{ */
 		zend_throw_exception(NULL, "Cannot rewind a generator that was already run", 0);
 	}
 }
-/* }}} */
 
 /* Rewind the generator */
 ZEND_METHOD(Generator, rewind)
@@ -838,7 +825,6 @@ ZEND_METHOD(Generator, rewind)
 
 	zend_generator_rewind(generator);
 }
-/* }}} */
 
 /* Check whether the generator is valid */
 ZEND_METHOD(Generator, valid)
@@ -855,7 +841,6 @@ ZEND_METHOD(Generator, valid)
 
 	RETURN_BOOL(EXPECTED(generator->execute_data != NULL));
 }
-/* }}} */
 
 /* Get the current value */
 ZEND_METHOD(Generator, current)
@@ -875,7 +860,6 @@ ZEND_METHOD(Generator, current)
 		ZVAL_COPY_DEREF(return_value, value);
 	}
 }
-/* }}} */
 
 /* Get the current key */
 ZEND_METHOD(Generator, key)
@@ -895,7 +879,6 @@ ZEND_METHOD(Generator, key)
 		ZVAL_COPY_DEREF(return_value, key);
 	}
 }
-/* }}} */
 
 /* Advances the generator */
 ZEND_METHOD(Generator, next)
@@ -910,7 +893,6 @@ ZEND_METHOD(Generator, next)
 
 	zend_generator_resume(generator);
 }
-/* }}} */
 
 /* Sends a value to the generator */
 ZEND_METHOD(Generator, send)
@@ -946,7 +928,6 @@ ZEND_METHOD(Generator, send)
 		ZVAL_COPY_DEREF(return_value, value);
 	}
 }
-/* }}} */
 
 /* Throws an exception into the generator */
 ZEND_METHOD(Generator, throw)
@@ -983,7 +964,6 @@ ZEND_METHOD(Generator, throw)
 		zend_throw_exception_object(exception);
 	}
 }
-/* }}} */
 
 /* Retrieves the return value of the generator */
 ZEND_METHOD(Generator, getReturn)
@@ -1008,19 +988,17 @@ ZEND_METHOD(Generator, getReturn)
 
 	ZVAL_COPY(return_value, &generator->retval);
 }
-/* }}} */
 
 /* get_iterator implementation */
 
-static void zend_generator_iterator_dtor(zend_object_iterator *iterator) /* {{{ */
+static void zend_generator_iterator_dtor(zend_object_iterator *iterator)
 {
 	zend_generator *generator = (zend_generator*)Z_OBJ(iterator->data);
 	generator->iterator = NULL;
 	zval_ptr_dtor(&iterator->data);
 }
-/* }}} */
 
-static int zend_generator_iterator_valid(zend_object_iterator *iterator) /* {{{ */
+static int zend_generator_iterator_valid(zend_object_iterator *iterator)
 {
 	zend_generator *generator = (zend_generator*)Z_OBJ(iterator->data);
 
@@ -1030,9 +1008,8 @@ static int zend_generator_iterator_valid(zend_object_iterator *iterator) /* {{{ 
 
 	return generator->execute_data ? SUCCESS : FAILURE;
 }
-/* }}} */
 
-static zval *zend_generator_iterator_get_data(zend_object_iterator *iterator) /* {{{ */
+static zval *zend_generator_iterator_get_data(zend_object_iterator *iterator)
 {
 	zend_generator *generator = (zend_generator*)Z_OBJ(iterator->data), *root;
 
@@ -1042,9 +1019,8 @@ static zval *zend_generator_iterator_get_data(zend_object_iterator *iterator) /*
 
 	return &root->value;
 }
-/* }}} */
 
-static void zend_generator_iterator_get_key(zend_object_iterator *iterator, zval *key) /* {{{ */
+static void zend_generator_iterator_get_key(zend_object_iterator *iterator, zval *key)
 {
 	zend_generator *generator = (zend_generator*)Z_OBJ(iterator->data), *root;
 
@@ -1060,9 +1036,8 @@ static void zend_generator_iterator_get_key(zend_object_iterator *iterator, zval
 		ZVAL_NULL(key);
 	}
 }
-/* }}} */
 
-static void zend_generator_iterator_move_forward(zend_object_iterator *iterator) /* {{{ */
+static void zend_generator_iterator_move_forward(zend_object_iterator *iterator)
 {
 	zend_generator *generator = (zend_generator*)Z_OBJ(iterator->data);
 
@@ -1070,15 +1045,13 @@ static void zend_generator_iterator_move_forward(zend_object_iterator *iterator)
 
 	zend_generator_resume(generator);
 }
-/* }}} */
 
-static void zend_generator_iterator_rewind(zend_object_iterator *iterator) /* {{{ */
+static void zend_generator_iterator_rewind(zend_object_iterator *iterator)
 {
 	zend_generator *generator = (zend_generator*)Z_OBJ(iterator->data);
 
 	zend_generator_rewind(generator);
 }
-/* }}} */
 
 static const zend_object_iterator_funcs zend_generator_iterator_functions = {
 	zend_generator_iterator_dtor,
@@ -1090,7 +1063,7 @@ static const zend_object_iterator_funcs zend_generator_iterator_functions = {
 	NULL
 };
 
-zend_object_iterator *zend_generator_get_iterator(zend_class_entry *ce, zval *object, int by_ref) /* {{{ */
+zend_object_iterator *zend_generator_get_iterator(zend_class_entry *ce, zval *object, int by_ref)
 {
 	zend_object_iterator *iterator;
 	zend_generator *generator = (zend_generator*)Z_OBJ_P(object);
@@ -1115,9 +1088,8 @@ zend_object_iterator *zend_generator_get_iterator(zend_class_entry *ce, zval *ob
 
 	return iterator;
 }
-/* }}} */
 
-void zend_register_generator_ce(void) /* {{{ */
+void zend_register_generator_ce(void)
 {
 	zend_class_entry ce;
 
@@ -1142,4 +1114,4 @@ void zend_register_generator_ce(void) /* {{{ */
 	INIT_CLASS_ENTRY(ce, "ClosedGeneratorException", NULL);
 	zend_ce_ClosedGeneratorException = zend_register_internal_class_ex(&ce, zend_ce_exception);
 }
-/* }}} */
+

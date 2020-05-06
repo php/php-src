@@ -30,7 +30,7 @@ static const unsigned char PADDING[128] =
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
-/* {{{ SHAEncode32
+/* SHAEncode32
    Encodes input (uint32_t) into output (unsigned char). Assumes len is
    a multiple of 4.
  */
@@ -45,10 +45,8 @@ static void SHAEncode32(unsigned char *output, uint32_t *input, unsigned int len
 		output[j + 3] = (unsigned char) (input[i] & 0xff);
 	}
 }
-/* }}} */
 
-
-/* {{{ SHADecode32
+/* SHADecode32
    Decodes input (unsigned char) into output (uint32_t). Assumes len is
    a multiple of 4.
  */
@@ -60,7 +58,6 @@ static void SHADecode32(uint32_t *output, const unsigned char *input, unsigned i
 		output[i] = ((uint32_t) input[j + 3]) | (((uint32_t) input[j + 2]) << 8) |
 			(((uint32_t) input[j + 1]) << 16) | (((uint32_t) input[j]) << 24);
 }
-/* }}} */
 
 const php_hash_ops php_hash_sha1_ops = {
 	(php_hash_init_func_t) PHP_SHA1Init,
@@ -124,7 +121,7 @@ static const uint32_t SHA256_K[64] = {
 	0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
 	0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2 };
 
-/* {{{ PHP_SHA256Init
+/* PHP_SHA256Init
  * SHA256 initialization. Begins an SHA256 operation, writing a new context.
  */
 PHP_HASH_API void PHP_SHA256Init(PHP_SHA256_CTX * context)
@@ -141,9 +138,8 @@ PHP_HASH_API void PHP_SHA256Init(PHP_SHA256_CTX * context)
 	context->state[6] = 0x1f83d9ab;
 	context->state[7] = 0x5be0cd19;
 }
-/* }}} */
 
-/* {{{ SHA256Transform
+/* SHA256Transform
  * SHA256 basic transformation. Transforms state based on block.
  */
 static void SHA256Transform(uint32_t state[8], const unsigned char block[64])
@@ -182,9 +178,8 @@ static void SHA256Transform(uint32_t state[8], const unsigned char block[64])
 	/* Zeroize sensitive information. */
 	ZEND_SECURE_ZERO((unsigned char*) x, sizeof(x));
 }
-/* }}} */
 
-/* {{{ PHP_SHA224Init
+/* PHP_SHA224Init
  * SHA224 initialization. Begins an SHA224 operation, writing a new context.
  */
 PHP_HASH_API void PHP_SHA224Init(PHP_SHA224_CTX * context)
@@ -201,9 +196,8 @@ PHP_HASH_API void PHP_SHA224Init(PHP_SHA224_CTX * context)
 	context->state[6] = 0x64f98fa7;
 	context->state[7] = 0xbefa4fa4;
 }
-/* }}} */
 
-/* {{{ PHP_SHA224Update
+/* PHP_SHA224Update
    SHA224 block update operation. Continues an SHA224 message-digest
    operation, processing another message block, and updating the
    context.
@@ -241,9 +235,8 @@ PHP_HASH_API void PHP_SHA224Update(PHP_SHA224_CTX * context, const unsigned char
 	/* Buffer remaining input */
 	memcpy((unsigned char*) & context->buffer[index], (unsigned char*) & input[i], inputLen - i);
 }
-/* }}} */
 
-/* {{{ PHP_SHA224Final
+/* PHP_SHA224Final
    SHA224 finalization. Ends an SHA224 message-digest operation, writing the
    the message digest and zeroizing the context.
  */
@@ -278,9 +271,8 @@ PHP_HASH_API void PHP_SHA224Final(unsigned char digest[28], PHP_SHA224_CTX * con
 	 */
 	ZEND_SECURE_ZERO((unsigned char*) context, sizeof(*context));
 }
-/* }}} */
 
-/* {{{ PHP_SHA256Update
+/* PHP_SHA256Update
    SHA256 block update operation. Continues an SHA256 message-digest
    operation, processing another message block, and updating the
    context.
@@ -318,9 +310,8 @@ PHP_HASH_API void PHP_SHA256Update(PHP_SHA256_CTX * context, const unsigned char
 	/* Buffer remaining input */
 	memcpy((unsigned char*) & context->buffer[index], (unsigned char*) & input[i], inputLen - i);
 }
-/* }}} */
 
-/* {{{ PHP_SHA256Final
+/* PHP_SHA256Final
    SHA256 finalization. Ends an SHA256 message-digest operation, writing the
    the message digest and zeroizing the context.
  */
@@ -355,7 +346,6 @@ PHP_HASH_API void PHP_SHA256Final(unsigned char digest[32], PHP_SHA256_CTX * con
 	 */
 	ZEND_SECURE_ZERO((unsigned char*) context, sizeof(*context));
 }
-/* }}} */
 
 /* sha384/sha512 */
 
@@ -394,7 +384,7 @@ static const uint64_t SHA512_K[128] = {
 	L64(0x28db77f523047d84), L64(0x32caab7b40c72493), L64(0x3c9ebe0a15c9bebc), L64(0x431d67c49c100d4c),
 	L64(0x4cc5d4becb3e42b6), L64(0x597f299cfc657e2a), L64(0x5fcb6fab3ad6faec), L64(0x6c44198c4a475817) };
 
-/* {{{ SHAEncode64
+/* SHAEncode64
    Encodes input (uint64_t) into output (unsigned char). Assumes len is
    a multiple of 8.
  */
@@ -413,10 +403,8 @@ static void SHAEncode64(unsigned char *output, uint64_t *input, unsigned int len
 		output[j + 7] = (unsigned char) (input[i] & 0xff);
 	}
 }
-/* }}} */
 
-
-/* {{{ SHADecode64
+/* SHADecode64
    Decodes input (unsigned char) into output (uint64_t). Assumes len is
    a multiple of 8.
  */
@@ -431,9 +419,8 @@ static void SHADecode64(uint64_t *output, const unsigned char *input, unsigned i
 			(((uint64_t) input[j + 3]) << 32) | (((uint64_t) input[j + 2]) << 40) |
 			(((uint64_t) input[j + 1]) << 48) | (((uint64_t) input[j]) << 56);
 }
-/* }}} */
 
-/* {{{ PHP_SHA384Init
+/* PHP_SHA384Init
  * SHA384 initialization. Begins an SHA384 operation, writing a new context.
  */
 PHP_HASH_API void PHP_SHA384Init(PHP_SHA384_CTX * context)
@@ -450,9 +437,8 @@ PHP_HASH_API void PHP_SHA384Init(PHP_SHA384_CTX * context)
 	context->state[6] = L64(0xdb0c2e0d64f98fa7);
 	context->state[7] = L64(0x47b5481dbefa4fa4);
 }
-/* }}} */
 
-/* {{{ SHA512Transform
+/* SHA512Transform
  * SHA512 basic transformation. Transforms state based on block.
  * SHA384 uses the exact same algorithm
  */
@@ -492,9 +478,8 @@ static void SHA512Transform(uint64_t state[8], const unsigned char block[128])
 	/* Zeroize sensitive information. */
 	ZEND_SECURE_ZERO((unsigned char*) x, sizeof(x));
 }
-/* }}} */
 
-/* {{{ PHP_SHA384Update
+/* PHP_SHA384Update
    SHA384 block update operation. Continues an SHA384 message-digest
    operation, processing another message block, and updating the
    context.
@@ -530,9 +515,8 @@ PHP_HASH_API void PHP_SHA384Update(PHP_SHA384_CTX * context, const unsigned char
 	/* Buffer remaining input */
 	memcpy((unsigned char*) & context->buffer[index], (unsigned char*) & input[i], inputLen - i);
 }
-/* }}} */
 
-/* {{{ PHP_SHA384Final
+/* PHP_SHA384Final
    SHA384 finalization. Ends an SHA384 message-digest operation, writing the
    the message digest and zeroizing the context.
  */
@@ -575,7 +559,6 @@ PHP_HASH_API void PHP_SHA384Final(unsigned char digest[48], PHP_SHA384_CTX * con
 	 */
 	ZEND_SECURE_ZERO((unsigned char*) context, sizeof(*context));
 }
-/* }}} */
 
 const php_hash_ops php_hash_sha384_ops = {
 	(php_hash_init_func_t) PHP_SHA384Init,
@@ -588,7 +571,7 @@ const php_hash_ops php_hash_sha384_ops = {
 	1
 };
 
-/* {{{ PHP_SHA512Init
+/* PHP_SHA512Init
  * SHA512 initialization. Begins an SHA512 operation, writing a new context.
  */
 PHP_HASH_API void PHP_SHA512Init(PHP_SHA512_CTX * context)
@@ -605,9 +588,8 @@ PHP_HASH_API void PHP_SHA512Init(PHP_SHA512_CTX * context)
 	context->state[6] = L64(0x1f83d9abfb41bd6b);
 	context->state[7] = L64(0x5be0cd19137e2179);
 }
-/* }}} */
 
-/* {{{ PHP_SHA512_256Init
+/* PHP_SHA512_256Init
  * SHA512/245 initialization. Identical algorithm to SHA512, using alternate initval and truncation
  */
 PHP_HASH_API void PHP_SHA512_256Init(PHP_SHA512_CTX * context)
@@ -623,9 +605,8 @@ PHP_HASH_API void PHP_SHA512_256Init(PHP_SHA512_CTX * context)
 	context->state[6] = L64(0x2B0199FC2C85B8AA);
 	context->state[7] = L64(0x0EB72DDC81C52CA2);
 }
-/* }}} */
 
-/* {{{ PHP_SHA512_224Init
+/* PHP_SHA512_224Init
  * SHA512/224 initialization. Identical algorithm to SHA512, using alternate initval and truncation
  */
 PHP_HASH_API void PHP_SHA512_224Init(PHP_SHA512_CTX * context)
@@ -641,9 +622,8 @@ PHP_HASH_API void PHP_SHA512_224Init(PHP_SHA512_CTX * context)
 	context->state[6] = L64(0x3F9D85A86A1D36C8);
 	context->state[7] = L64(0x1112E6AD91D692A1);
 }
-/* }}} */
 
-/* {{{ PHP_SHA512Update
+/* PHP_SHA512Update
    SHA512 block update operation. Continues an SHA512 message-digest
    operation, processing another message block, and updating the
    context.
@@ -681,9 +661,8 @@ PHP_HASH_API void PHP_SHA512Update(PHP_SHA512_CTX * context, const unsigned char
 	/* Buffer remaining input */
 	memcpy((unsigned char*) & context->buffer[index], (unsigned char*) & input[i], inputLen - i);
 }
-/* }}} */
 
-/* {{{ PHP_SHA512Final
+/* PHP_SHA512Final
    SHA512 finalization. Ends an SHA512 message-digest operation, writing the
    the message digest and zeroizing the context.
  */
@@ -726,9 +705,8 @@ PHP_HASH_API void PHP_SHA512Final(unsigned char digest[64], PHP_SHA512_CTX * con
 	 */
 	ZEND_SECURE_ZERO((unsigned char*) context, sizeof(*context));
 }
-/* }}} */
 
-/* {{{ PHP_SHA512_256Final
+/* PHP_SHA512_256Final
    SHA512/256 finalization. Identical to SHA512Final, but with truncation
  */
 PHP_HASH_API void PHP_SHA512_256Final(unsigned char digest[32], PHP_SHA512_CTX * context)
@@ -737,9 +715,8 @@ PHP_HASH_API void PHP_SHA512_256Final(unsigned char digest[32], PHP_SHA512_CTX *
 	PHP_SHA512Final(full_digest, context);
 	memcpy(digest, full_digest, 32);
 }
-/* }}} */
 
-/* {{{ PHP_SHA512_224Final
+/* PHP_SHA512_224Final
    SHA512/224 finalization. Identical to SHA512Final, but with truncation
  */
 PHP_HASH_API void PHP_SHA512_224Final(unsigned char digest[28], PHP_SHA512_CTX * context)
@@ -748,7 +725,6 @@ PHP_HASH_API void PHP_SHA512_224Final(unsigned char digest[28], PHP_SHA512_CTX *
 	PHP_SHA512Final(full_digest, context);
 	memcpy(digest, full_digest, 28);
 }
-/* }}} */
 
 const php_hash_ops php_hash_sha512_ops = {
 	(php_hash_init_func_t) PHP_SHA512Init,

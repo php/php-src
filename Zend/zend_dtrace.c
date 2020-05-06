@@ -26,7 +26,7 @@ ZEND_API zend_op_array *(*zend_dtrace_compile_file)(zend_file_handle *file_handl
 ZEND_API void (*zend_dtrace_execute)(zend_op_array *op_array);
 ZEND_API void (*zend_dtrace_execute_internal)(zend_execute_data *execute_data, zval *return_value);
 
-/* PHP DTrace probes {{{ */
+/* PHP DTrace probes */
 static inline const char *dtrace_get_executed_filename(void)
 {
 	zend_execute_data *ex = EG(current_execute_data);
@@ -109,6 +109,5 @@ ZEND_API void dtrace_execute_internal(zend_execute_data *execute_data, zval *ret
 	}
 }
 
-/* }}} */
 
 #endif /* HAVE_DTRACE */

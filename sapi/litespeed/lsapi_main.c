@@ -92,7 +92,7 @@ static void init_sapi_from_env(sapi_module_struct *sapi_module)
         sapi_module->php_ini_path_override = p;
 }
 
-/* {{{ php_lsapi_startup
+/* php_lsapi_startup
  */
 static int php_lsapi_startup(sapi_module_struct *sapi_module)
 {
@@ -102,9 +102,8 @@ static int php_lsapi_startup(sapi_module_struct *sapi_module)
     argv0 = sapi_module->executable_location;
     return SUCCESS;
 }
-/* }}} */
 
-/* {{{ sapi_lsapi_ini_defaults */
+/* sapi_lsapi_ini_defaults */
 
 /* overwritable ini defaults must be set in sapi_cli_ini_defaults() */
 #define INI_DEFAULT(name,value)\
@@ -127,10 +126,8 @@ static void sapi_lsapi_ini_defaults(HashTable *configuration_hash)
 #endif
 
 }
-/* }}} */
 
-
-/* {{{ sapi_lsapi_ub_write
+/* sapi_lsapi_ub_write
  */
 static size_t sapi_lsapi_ub_write(const char *str, size_t str_length)
 {
@@ -156,10 +153,8 @@ static size_t sapi_lsapi_ub_write(const char *str, size_t str_length)
     }
     return str_length;
 }
-/* }}} */
 
-
-/* {{{ sapi_lsapi_flush
+/* sapi_lsapi_flush
  */
 static void sapi_lsapi_flush(void * server_context)
 {
@@ -169,10 +164,8 @@ static void sapi_lsapi_flush(void * server_context)
         }
     }
 }
-/* }}} */
 
-
-/* {{{ sapi_lsapi_deactivate
+/* sapi_lsapi_deactivate
  */
 static int sapi_lsapi_deactivate(void)
 {
@@ -183,12 +176,8 @@ static int sapi_lsapi_deactivate(void)
 
     return SUCCESS;
 }
-/* }}} */
 
-
-
-
-/* {{{ sapi_lsapi_getenv
+/* sapi_lsapi_getenv
  */
 static char *sapi_lsapi_getenv( char * name, size_t name_len )
 {
@@ -198,8 +187,6 @@ static char *sapi_lsapi_getenv( char * name, size_t name_len )
         return getenv( name );
     }
 }
-/* }}} */
-
 
 static int add_variable( const char * pKey, int keyLen, const char * pValue, int valLen,
                          void * arg )
@@ -259,7 +246,7 @@ static void litespeed_php_import_environment_variables(zval *array_ptr)
     }
 }
 
-/* {{{ sapi_lsapi_register_variables
+/* sapi_lsapi_register_variables
  */
 static void sapi_lsapi_register_variables(zval *track_vars_array)
 {
@@ -284,10 +271,8 @@ static void sapi_lsapi_register_variables(zval *track_vars_array)
 
     }
 }
-/* }}} */
 
-
-/* {{{ sapi_lsapi_read_post
+/* sapi_lsapi_read_post
  */
 static size_t sapi_lsapi_read_post(char *buffer, size_t count_bytes)
 {
@@ -298,12 +283,8 @@ static size_t sapi_lsapi_read_post(char *buffer, size_t count_bytes)
         return 0;
     }
 }
-/* }}} */
 
-
-
-
-/* {{{ sapi_lsapi_read_cookies
+/* sapi_lsapi_read_cookies
  */
 static char *sapi_lsapi_read_cookies(void)
 {
@@ -313,8 +294,6 @@ static char *sapi_lsapi_read_cookies(void)
         return NULL;
     }
 }
-/* }}} */
-
 
 typedef struct _http_error {
   int code;
@@ -462,7 +441,7 @@ static int sapi_lsapi_send_headers_like_cgi(sapi_headers_struct *sapi_headers)
 static int mod_lsapi_mode = 0;
 
 
-/* {{{ sapi_lsapi_send_headers
+/* sapi_lsapi_send_headers
  */
 static int sapi_lsapi_send_headers(sapi_headers_struct *sapi_headers)
 {
@@ -503,10 +482,8 @@ static int sapi_lsapi_send_headers(sapi_headers_struct *sapi_headers)
 
 
 }
-/* }}} */
 
-
-/* {{{ sapi_lsapi_send_headers
+/* sapi_lsapi_send_headers
  */
 static void sapi_lsapi_log_message(char *message, int syslog_type_int)
 {
@@ -522,7 +499,6 @@ static void sapi_lsapi_log_message(char *message, int syslog_type_int)
     }
     LSAPI_Write_Stderr( message, len);
 }
-/* }}} */
 
 /* Set to 1 to turn on log messages useful during development:
  */
@@ -596,7 +572,7 @@ static int sapi_lsapi_activate()
     }
     return SUCCESS;
 }
-/* {{{ sapi_module_struct cgi_sapi_module
+/* sapi_module_struct cgi_sapi_module
  */
 static sapi_module_struct lsapi_sapi_module =
 {
@@ -631,7 +607,6 @@ static sapi_module_struct lsapi_sapi_module =
     STANDARD_SAPI_MODULE_PROPERTIES
 
 };
-/* }}} */
 
 static void init_request_info( void )
 {
@@ -1615,10 +1590,9 @@ int main( int argc, char * argv[] )
 
 /*   LiteSpeed PHP module starts here */
 
-/* {{{ arginfo */
+/* arginfo */
 ZEND_BEGIN_ARG_INFO(arginfo_litespeed__void, 0)
 ZEND_END_ARG_INFO()
-/* }}} */
 
 PHP_FUNCTION(litespeed_request_headers);
 PHP_FUNCTION(litespeed_response_headers);
@@ -1705,9 +1679,6 @@ PHP_FUNCTION(litespeed_request_headers)
     LSAPI_ForeachOrgHeader( add_associate_array, return_value );
 
 }
-/* }}} */
-
-
 
 /* Fetch all HTTP response headers */
 PHP_FUNCTION(litespeed_response_headers)
@@ -1748,8 +1719,6 @@ PHP_FUNCTION(litespeed_response_headers)
     }
 }
 
-/* }}} */
-
 
 /* Fetch all loaded module names  */
 PHP_FUNCTION(apache_get_modules)
@@ -1770,8 +1739,6 @@ PHP_FUNCTION(apache_get_modules)
         ++name;
     }
 }
-/* }}} */
-
 
 /* Flushes all response data to the client */
 PHP_FUNCTION(litespeed_finish_request)
@@ -1788,4 +1755,4 @@ PHP_FUNCTION(litespeed_finish_request)
     }
     RETURN_FALSE;
 }
-/* }}} */
+

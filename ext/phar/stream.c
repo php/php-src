@@ -57,7 +57,7 @@ const php_stream_wrapper php_stream_phar_wrapper = {
 /**
  * Open a phar file for streams API
  */
-php_url* phar_parse_url(php_stream_wrapper *wrapper, const char *filename, const char *mode, int options) /* {{{ */
+php_url* phar_parse_url(php_stream_wrapper *wrapper, const char *filename, const char *mode, int options)
 {
 	php_url *resource;
 	char *arch = NULL, *entry = NULL, *error;
@@ -153,12 +153,11 @@ php_url* phar_parse_url(php_stream_wrapper *wrapper, const char *filename, const
 	}
 	return resource;
 }
-/* }}} */
 
 /**
  * used for fopen('phar://...') and company
  */
-static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const char *path, const char *mode, int options, zend_string **opened_path, php_stream_context *context STREAMS_DC) /* {{{ */
+static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const char *path, const char *mode, int options, zend_string **opened_path, php_stream_context *context STREAMS_DC)
 {
 	phar_archive_data *phar;
 	phar_entry_data *idata;
@@ -342,12 +341,11 @@ phar_stub:
 	fpf = php_stream_alloc(&phar_ops, idata, NULL, mode);
 	return fpf;
 }
-/* }}} */
 
 /**
  * Used for fclose($fp) where $fp is a phar archive
  */
-static int phar_stream_close(php_stream *stream, int close_handle) /* {{{ */
+static int phar_stream_close(php_stream *stream, int close_handle)
 {
 	/* for some reasons phar needs to be flushed even if there is no write going on */
 	phar_stream_flush(stream);
@@ -356,12 +354,11 @@ static int phar_stream_close(php_stream *stream, int close_handle) /* {{{ */
 
 	return 0;
 }
-/* }}} */
 
 /**
  * used for fread($fp) and company on a fopen()ed phar file handle
  */
-static ssize_t phar_stream_read(php_stream *stream, char *buf, size_t count) /* {{{ */
+static ssize_t phar_stream_read(php_stream *stream, char *buf, size_t count)
 {
 	phar_entry_data *data = (phar_entry_data *)stream->abstract;
 	size_t got;
@@ -387,12 +384,11 @@ static ssize_t phar_stream_read(php_stream *stream, char *buf, size_t count) /* 
 
 	return got;
 }
-/* }}} */
 
 /**
  * Used for fseek($fp) on a phar file handle
  */
-static int phar_stream_seek(php_stream *stream, zend_off_t offset, int whence, zend_off_t *newoffset) /* {{{ */
+static int phar_stream_seek(php_stream *stream, zend_off_t offset, int whence, zend_off_t *newoffset)
 {
 	phar_entry_data *data = (phar_entry_data *)stream->abstract;
 	phar_entry_info *entry;
@@ -431,12 +427,11 @@ static int phar_stream_seek(php_stream *stream, zend_off_t offset, int whence, z
 	data->position = *newoffset;
 	return res;
 }
-/* }}} */
 
 /**
  * Used for writing to a phar file
  */
-static ssize_t phar_stream_write(php_stream *stream, const char *buf, size_t count) /* {{{ */
+static ssize_t phar_stream_write(php_stream *stream, const char *buf, size_t count)
 {
 	phar_entry_data *data = (phar_entry_data *) stream->abstract;
 
@@ -454,12 +449,11 @@ static ssize_t phar_stream_write(php_stream *stream, const char *buf, size_t cou
 	data->internal_file->is_modified = 1;
 	return count;
 }
-/* }}} */
 
 /**
  * Used to save work done on a writeable phar
  */
-static int phar_stream_flush(php_stream *stream) /* {{{ */
+static int phar_stream_flush(php_stream *stream)
 {
 	char *error;
 	int ret;
@@ -477,9 +471,8 @@ static int phar_stream_flush(php_stream *stream) /* {{{ */
 		return EOF;
 	}
 }
-/* }}} */
 
- /* {{{ phar_dostat */
+/* phar_dostat */
 /**
  * stat an opened phar file handle stream, used by phar_stat()
  */
@@ -528,12 +521,11 @@ void phar_dostat(phar_archive_data *phar, phar_entry_info *data, php_stream_stat
 	ssb->sb.st_blocks = -1;
 #endif
 }
-/* }}}*/
 
 /**
  * Stat an opened phar file handle
  */
-static int phar_stream_stat(php_stream *stream, php_stream_statbuf *ssb) /* {{{ */
+static int phar_stream_stat(php_stream *stream, php_stream_statbuf *ssb)
 {
 	phar_entry_data *data = (phar_entry_data *)stream->abstract;
 
@@ -545,13 +537,12 @@ static int phar_stream_stat(php_stream *stream, php_stream_statbuf *ssb) /* {{{ 
 	phar_dostat(data->phar, data->internal_file, ssb, 0);
 	return 0;
 }
-/* }}} */
 
 /**
  * Stream wrapper stat implementation of stat()
  */
 static int phar_wrapper_stat(php_stream_wrapper *wrapper, const char *url, int flags,
-				  php_stream_statbuf *ssb, php_stream_context *context) /* {{{ */
+				  php_stream_statbuf *ssb, php_stream_context *context)
 {
 	php_url *resource = NULL;
 	char *internal_file, *error;
@@ -654,12 +645,11 @@ free_resource:
 	php_url_free(resource);
 	return FAILURE;
 }
-/* }}} */
 
 /**
  * Unlink a file within a phar archive
  */
-static int phar_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context) /* {{{ */
+static int phar_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context)
 {
 	php_url *resource;
 	char *internal_file, *error;
@@ -731,9 +721,8 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int
 	}
 	return 1;
 }
-/* }}} */
 
-static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from, const char *url_to, int options, php_stream_context *context) /* {{{ */
+static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from, const char *url_to, int options, php_stream_context *context)
 {
 	php_url *resource_from, *resource_to;
 	char *error;
@@ -966,4 +955,4 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 
 	return 1;
 }
-/* }}} */
+

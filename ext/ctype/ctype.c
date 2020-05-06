@@ -31,9 +31,8 @@
 
 static PHP_MINFO_FUNCTION(ctype);
 
-/* }}} */
 
-/* {{{ ctype_module_entry
+/* ctype_module_entry
  */
 zend_module_entry ctype_module_entry = {
 	STANDARD_MODULE_HEADER,
@@ -47,13 +46,12 @@ zend_module_entry ctype_module_entry = {
     PHP_CTYPE_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
-/* }}} */
 
 #ifdef COMPILE_DL_CTYPE
 ZEND_GET_MODULE(ctype)
 #endif
 
-/* {{{ PHP_MINFO_FUNCTION
+/* PHP_MINFO_FUNCTION
  */
 static PHP_MINFO_FUNCTION(ctype)
 {
@@ -61,9 +59,8 @@ static PHP_MINFO_FUNCTION(ctype)
 	php_info_print_table_row(2, "ctype functions", "enabled");
 	php_info_print_table_end();
 }
-/* }}} */
 
-/* {{{ ctype
+/* ctype
  */
 #define CTYPE(iswhat, allow_digits, allow_minus) \
 	zval *c; \
@@ -95,83 +92,71 @@ static PHP_MINFO_FUNCTION(ctype)
 		RETURN_FALSE; \
 	} \
 
-/* }}} */
 
 /* Checks for alphanumeric character(s) */
 PHP_FUNCTION(ctype_alnum)
 {
 	CTYPE(isalnum, 1, 0);
 }
-/* }}} */
 
 /* Checks for alphabetic character(s) */
 PHP_FUNCTION(ctype_alpha)
 {
 	CTYPE(isalpha, 0, 0);
 }
-/* }}} */
 
 /* Checks for control character(s) */
 PHP_FUNCTION(ctype_cntrl)
 {
 	CTYPE(iscntrl, 0, 0);
 }
-/* }}} */
 
 /* Checks for numeric character(s) */
 PHP_FUNCTION(ctype_digit)
 {
 	CTYPE(isdigit, 1, 0);
 }
-/* }}} */
 
 /* Checks for lowercase character(s)  */
 PHP_FUNCTION(ctype_lower)
 {
 	CTYPE(islower, 0, 0);
 }
-/* }}} */
 
 /* Checks for any printable character(s) except space */
 PHP_FUNCTION(ctype_graph)
 {
 	CTYPE(isgraph, 1, 1);
 }
-/* }}} */
 
 /* Checks for printable character(s) */
 PHP_FUNCTION(ctype_print)
 {
 	CTYPE(isprint, 1, 1);
 }
-/* }}} */
 
 /* Checks for any printable character which is not whitespace or an alphanumeric character */
 PHP_FUNCTION(ctype_punct)
 {
 	CTYPE(ispunct, 0, 0);
 }
-/* }}} */
 
 /* Checks for whitespace character(s)*/
 PHP_FUNCTION(ctype_space)
 {
 	CTYPE(isspace, 0, 0);
 }
-/* }}} */
 
 /* Checks for uppercase character(s) */
 PHP_FUNCTION(ctype_upper)
 {
 	CTYPE(isupper, 0, 0);
 }
-/* }}} */
 
 /* Checks for character(s) representing a hexadecimal digit */
 PHP_FUNCTION(ctype_xdigit)
 {
 	CTYPE(isxdigit, 1, 0);
 }
-/* }}} */
 
 #endif	/* HAVE_CTYPE */

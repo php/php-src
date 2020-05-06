@@ -23,7 +23,7 @@
 #include "ext/standard/info.h"
 #include "php_spl.h"
 
-/* {{{ spl_register_interface */
+/* spl_register_interface */
 void spl_register_interface(zend_class_entry ** ppce, char * class_name, const zend_function_entry * functions)
 {
 	zend_class_entry ce;
@@ -31,9 +31,8 @@ void spl_register_interface(zend_class_entry ** ppce, char * class_name, const z
 	INIT_CLASS_ENTRY_EX(ce, class_name, strlen(class_name), functions);
 	*ppce = zend_register_internal_interface(&ce);
 }
-/* }}} */
 
-/* {{{ spl_register_std_class */
+/* spl_register_std_class */
 PHPAPI void spl_register_std_class(zend_class_entry ** ppce, char * class_name, void * obj_ctor, const zend_function_entry * function_list)
 {
 	zend_class_entry ce;
@@ -46,9 +45,8 @@ PHPAPI void spl_register_std_class(zend_class_entry ** ppce, char * class_name, 
 		(*ppce)->create_object = obj_ctor;
 	}
 }
-/* }}} */
 
-/* {{{ spl_register_sub_class */
+/* spl_register_sub_class */
 PHPAPI void spl_register_sub_class(zend_class_entry ** ppce, zend_class_entry * parent_ce, char * class_name, void *obj_ctor, const zend_function_entry * function_list)
 {
 	zend_class_entry ce;
@@ -63,16 +61,14 @@ PHPAPI void spl_register_sub_class(zend_class_entry ** ppce, zend_class_entry * 
 		(*ppce)->create_object = parent_ce->create_object;
 	}
 }
-/* }}} */
 
-/* {{{ spl_register_property */
+/* spl_register_property */
 void spl_register_property( zend_class_entry * class_entry, char *prop_name, int prop_name_len, int prop_flags)
 {
 	zend_declare_property_null(class_entry, prop_name, prop_name_len, prop_flags);
 }
-/* }}} */
 
-/* {{{ spl_add_class_name */
+/* spl_add_class_name */
 void spl_add_class_name(zval *list, zend_class_entry *pce, int allow, int ce_flags)
 {
 	if (!allow || (allow > 0 && pce->ce_flags & ce_flags) || (allow < 0 && !(pce->ce_flags & ce_flags))) {
@@ -85,9 +81,8 @@ void spl_add_class_name(zval *list, zend_class_entry *pce, int allow, int ce_fla
 		}
 	}
 }
-/* }}} */
 
-/* {{{ spl_add_interfaces */
+/* spl_add_interfaces */
 void spl_add_interfaces(zval *list, zend_class_entry * pce, int allow, int ce_flags)
 {
 	uint32_t num_interfaces;
@@ -99,9 +94,8 @@ void spl_add_interfaces(zval *list, zend_class_entry * pce, int allow, int ce_fl
 		}
 	}
 }
-/* }}} */
 
-/* {{{ spl_add_traits */
+/* spl_add_traits */
 void spl_add_traits(zval *list, zend_class_entry * pce, int allow, int ce_flags)
 {
 	uint32_t num_traits;
@@ -114,10 +108,8 @@ void spl_add_traits(zval *list, zend_class_entry * pce, int allow, int ce_flags)
 		spl_add_class_name(list, trait, allow, ce_flags);
 	}
 }
-/* }}} */
 
-
-/* {{{ spl_add_classes */
+/* spl_add_classes */
 int spl_add_classes(zend_class_entry *pce, zval *list, int sub, int allow, int ce_flags)
 {
 	if (!pce) {
@@ -133,10 +125,9 @@ int spl_add_classes(zend_class_entry *pce, zval *list, int sub, int allow, int c
 	}
 	return 0;
 }
-/* }}} */
 
-zend_string * spl_gen_private_prop_name(zend_class_entry *ce, char *prop_name, int prop_len) /* {{{ */
+zend_string * spl_gen_private_prop_name(zend_class_entry *ce, char *prop_name, int prop_len)
 {
 	return zend_mangle_property_name(ZSTR_VAL(ce->name), ZSTR_LEN(ce->name), prop_name, prop_len, 0);
 }
-/* }}} */
+

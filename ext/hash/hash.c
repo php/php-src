@@ -83,7 +83,7 @@ static struct mhash_bc_entry mhash_to_hash[MHASH_NUM_ALGOS] = {
 
 /* Hash Registry Access */
 
-PHP_HASH_API const php_hash_ops *php_hash_fetch_ops(zend_string *algo) /* {{{ */
+PHP_HASH_API const php_hash_ops *php_hash_fetch_ops(zend_string *algo)
 {
 	zend_string *lower = zend_string_tolower(algo);
 	php_hash_ops *ops = zend_hash_find_ptr(&php_hash_hashtable, lower);
@@ -91,29 +91,26 @@ PHP_HASH_API const php_hash_ops *php_hash_fetch_ops(zend_string *algo) /* {{{ */
 
 	return ops;
 }
-/* }}} */
 
-PHP_HASH_API void php_hash_register_algo(const char *algo, const php_hash_ops *ops) /* {{{ */
+PHP_HASH_API void php_hash_register_algo(const char *algo, const php_hash_ops *ops)
 {
 	size_t algo_len = strlen(algo);
 	char *lower = zend_str_tolower_dup(algo, algo_len);
 	zend_hash_add_ptr(&php_hash_hashtable, zend_string_init_interned(lower, algo_len, 1), (void *) ops);
 	efree(lower);
 }
-/* }}} */
 
-PHP_HASH_API int php_hash_copy(const void *ops, void *orig_context, void *dest_context) /* {{{ */
+PHP_HASH_API int php_hash_copy(const void *ops, void *orig_context, void *dest_context)
 {
 	php_hash_ops *hash_ops = (php_hash_ops *)ops;
 
 	memcpy(dest_context, orig_context, hash_ops->context_size);
 	return SUCCESS;
 }
-/* }}} */
 
 /* Userspace */
 
-static void php_hash_do_hash(INTERNAL_FUNCTION_PARAMETERS, int isfilename, zend_bool raw_output_default) /* {{{ */
+static void php_hash_do_hash(INTERNAL_FUNCTION_PARAMETERS, int isfilename, zend_bool raw_output_default)
 {
 	zend_string *digest, *algo;
 	char *data;
@@ -182,7 +179,6 @@ static void php_hash_do_hash(INTERNAL_FUNCTION_PARAMETERS, int isfilename, zend_
 		RETURN_NEW_STR(hex_digest);
 	}
 }
-/* }}} */
 
 /* Generate a hash of a given input string
 Returns lowercase hexits by default */
@@ -190,7 +186,6 @@ PHP_FUNCTION(hash)
 {
 	php_hash_do_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0, 0);
 }
-/* }}} */
 
 /* Generate a hash of a given file
 Returns lowercase hexits by default */
@@ -198,7 +193,6 @@ PHP_FUNCTION(hash_file)
 {
 	php_hash_do_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1, 0);
 }
-/* }}} */
 
 static inline void php_hash_string_xor_char(unsigned char *out, const unsigned char *in, const unsigned char xor_with, const size_t length) {
 	size_t i;
@@ -235,7 +229,7 @@ static inline void php_hash_hmac_round(unsigned char *final, const php_hash_ops 
 	ops->hash_final(final, context);
 }
 
-static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename, zend_bool raw_output_default) /* {{{ */
+static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename, zend_bool raw_output_default)
 {
 	zend_string *digest, *algo;
 	char *data, *key;
@@ -318,7 +312,6 @@ static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename, 
 		RETURN_NEW_STR(hex_digest);
 	}
 }
-/* }}} */
 
 /* Generate a hash of a given input string with a key using HMAC
 Returns lowercase hexits by default */
@@ -326,7 +319,6 @@ PHP_FUNCTION(hash_hmac)
 {
 	php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0, 0);
 }
-/* }}} */
 
 /* Generate a hash of a given file with a key using HMAC
 Returns lowercase hexits by default */
@@ -334,7 +326,6 @@ PHP_FUNCTION(hash_hmac_file)
 {
 	php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1, 0);
 }
-/* }}} */
 
 /* Initialize a hashing context */
 PHP_FUNCTION(hash_init)
@@ -403,7 +394,6 @@ PHP_FUNCTION(hash_init)
 		hash->key = (unsigned char *) K;
 	}
 }
-/* }}} */
 
 #define PHP_HASHCONTEXT_VERIFY(hash) { \
 	if (!hash->context) { \
@@ -429,7 +419,6 @@ PHP_FUNCTION(hash_update)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Pump data into the hashing algorithm from an open stream */
 PHP_FUNCTION(hash_update_stream)
@@ -466,7 +455,6 @@ PHP_FUNCTION(hash_update_stream)
 
 	RETURN_LONG(didread);
 }
-/* }}} */
 
 /* Pump data into the hashing algorithm from a file */
 PHP_FUNCTION(hash_update_file)
@@ -500,7 +488,6 @@ PHP_FUNCTION(hash_update_file)
 
 	RETURN_BOOL(n >= 0);
 }
-/* }}} */
 
 /* Output resulting digest */
 PHP_FUNCTION(hash_final)
@@ -558,7 +545,6 @@ PHP_FUNCTION(hash_final)
 		RETURN_NEW_STR(hex_digest);
 	}
 }
-/* }}} */
 
 /* Copy hash object */
 PHP_FUNCTION(hash_copy)
@@ -578,7 +564,6 @@ PHP_FUNCTION(hash_copy)
 		RETURN_THROWS();
 	}
 }
-/* }}} */
 
 /* Return a list of registered hashing algorithms */
 PHP_FUNCTION(hash_algos)
@@ -594,7 +579,6 @@ PHP_FUNCTION(hash_algos)
 		add_next_index_str(return_value, zend_string_copy(str));
 	} ZEND_HASH_FOREACH_END();
 }
-/* }}} */
 
 /* Return a list of registered hashing algorithms suitable for hash_hmac() */
 PHP_FUNCTION(hash_hmac_algos)
@@ -613,7 +597,6 @@ PHP_FUNCTION(hash_hmac_algos)
 		}
 	} ZEND_HASH_FOREACH_END();
 }
-/* }}} */
 
 /* RFC5869 HMAC-based key derivation function */
 PHP_FUNCTION(hash_hkdf)
@@ -829,7 +812,6 @@ PHP_FUNCTION(hash_pbkdf2)
 	efree(result);
 	RETURN_NEW_STR(returnval);
 }
-/* }}} */
 
 /* Compares two strings using the same time whether they're equal or not.
    A difference in length will leak */
@@ -869,13 +851,11 @@ PHP_FUNCTION(hash_equals)
 
 	RETURN_BOOL(0 == result);
 }
-/* }}} */
 
 PHP_METHOD(HashContext, __construct) {
 	/* Normally unreachable as private/final */
 	zend_throw_exception(zend_ce_error, "Illegal call to private/final constructor", 0);
 }
-/* }}} */
 
 /* Module Housekeeping */
 
@@ -955,7 +935,6 @@ PHP_FUNCTION(mhash)
 		WRONG_PARAM_COUNT;
 	}
 }
-/* }}} */
 
 /* Gets the name of hash */
 PHP_FUNCTION(mhash_get_hash_name)
@@ -974,7 +953,6 @@ PHP_FUNCTION(mhash_get_hash_name)
 	}
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* Gets the number of available hashes */
 PHP_FUNCTION(mhash_count)
@@ -984,7 +962,6 @@ PHP_FUNCTION(mhash_count)
 	}
 	RETURN_LONG(MHASH_NUM_ALGOS - 1);
 }
-/* }}} */
 
 /* Gets the block size of hash */
 PHP_FUNCTION(mhash_get_block_size)
@@ -1006,7 +983,6 @@ PHP_FUNCTION(mhash_get_block_size)
 		}
 	}
 }
-/* }}} */
 
 #define SALT_SIZE 8
 
@@ -1081,13 +1057,12 @@ PHP_FUNCTION(mhash_keygen_s2k)
 		}
 	}
 }
-/* }}} */
 
 #endif
 
 /* ----------------------------------------------------------------------- */
 
-/* {{{ php_hashcontext_create */
+/* php_hashcontext_create */
 static zend_object* php_hashcontext_create(zend_class_entry *ce) {
 	php_hashcontext_object *objval = zend_object_alloc(sizeof(php_hashcontext_object), ce);
 	zend_object *zobj = &objval->std;
@@ -1098,9 +1073,8 @@ static zend_object* php_hashcontext_create(zend_class_entry *ce) {
 
 	return zobj;
 }
-/* }}} */
 
-/* {{{ php_hashcontext_dtor */
+/* php_hashcontext_dtor */
 static void php_hashcontext_dtor(zend_object *obj) {
 	php_hashcontext_object *hash = php_hashcontext_from_object(obj);
 
@@ -1119,9 +1093,8 @@ static void php_hashcontext_dtor(zend_object *obj) {
 		hash->key = NULL;
 	}
 }
-/* }}} */
 
-/* {{{ php_hashcontext_clone */
+/* php_hashcontext_clone */
 static zend_object *php_hashcontext_clone(zend_object *zobj) {
 	php_hashcontext_object *oldobj = php_hashcontext_from_object(zobj);
 	zend_object *znew = php_hashcontext_create(zobj->ce);
@@ -1147,9 +1120,8 @@ static zend_object *php_hashcontext_clone(zend_object *zobj) {
 
 	return znew;
 }
-/* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION
+/* PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(hash)
 {
@@ -1235,9 +1207,8 @@ PHP_MINIT_FUNCTION(hash)
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_MSHUTDOWN_FUNCTION
+/* PHP_MSHUTDOWN_FUNCTION
  */
 PHP_MSHUTDOWN_FUNCTION(hash)
 {
@@ -1245,9 +1216,8 @@ PHP_MSHUTDOWN_FUNCTION(hash)
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
+/* PHP_MINFO_FUNCTION
  */
 PHP_MINFO_FUNCTION(hash)
 {
@@ -1273,9 +1243,8 @@ PHP_MINFO_FUNCTION(hash)
 #endif
 
 }
-/* }}} */
 
-/* {{{ hash_module_entry
+/* hash_module_entry
  */
 zend_module_entry hash_module_entry = {
 	STANDARD_MODULE_HEADER,
@@ -1289,4 +1258,4 @@ zend_module_entry hash_module_entry = {
 	PHP_HASH_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
-/* }}} */
+

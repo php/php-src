@@ -22,7 +22,7 @@
 #include "TSRM.h"
 #include "zend_generators.h"
 
-/* {{{ Command and Parameter */
+/* Command and Parameter */
 enum {
 	NO_ARG = 0,
 	REQUIRED_ARG,
@@ -98,9 +98,8 @@ struct _phpdbg_command_t {
 	const phpdbg_command_t *parent;     /* Parent Command */
 	zend_bool flags;                    /* General flags */
 };
-/* }}} */
 
-/* {{{ misc */
+/* misc */
 #define PHPDBG_STRL(s) s, sizeof(s)-1
 #define PHPDBG_MAX_CMD 500
 #define PHPDBG_FRAME(v) (PHPDBG_G(frame).v)
@@ -111,7 +110,6 @@ typedef struct {
 	zend_generator *generator;
 	zend_execute_data *execute_data;
 } phpdbg_frame_t;
-/* }}} */
 
 /*
 * Workflow:

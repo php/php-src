@@ -36,7 +36,7 @@
 #include "php_oci8.h"
 #include "php_oci8_int.h"
 
-/* {{{ php_oci_collection_create()
+/* php_oci_collection_create()
  Create and return connection handle */
 php_oci_collection *php_oci_collection_create(php_oci_connection *connection, char *tdo, int tdo_len, char *schema, int schema_len)
 {
@@ -235,9 +235,8 @@ CLEANUP:
 	php_oci_collection_close(collection);
 	return NULL;
 }
-/* }}} */
 
-/* {{{ php_oci_collection_size()
+/* php_oci_collection_size()
  Return size of the collection */
 int php_oci_collection_size(php_oci_collection *collection, sb4 *size)
 {
@@ -254,9 +253,8 @@ int php_oci_collection_size(php_oci_collection *collection, sb4 *size)
 	connection->errcode = 0; /* retain backwards compat with OCI8 1.4 */
 	return 0;
 }
-/* }}} */
 
-/* {{{ php_oci_collection_max()
+/* php_oci_collection_max()
  Return max number of elements in the collection */
 int php_oci_collection_max(php_oci_collection *collection, zend_long *max)
 {
@@ -267,9 +265,8 @@ int php_oci_collection_max(php_oci_collection *collection, zend_long *max)
 	/* error handling is not necessary here? */
 	return 0;
 }
-/* }}} */
 
-/* {{{ php_oci_collection_trim()
+/* php_oci_collection_trim()
  Trim collection to the given number of elements */
 int php_oci_collection_trim(php_oci_collection *collection, zend_long trim_size)
 {
@@ -286,9 +283,8 @@ int php_oci_collection_trim(php_oci_collection *collection, zend_long trim_size)
 	connection->errcode = 0; /* retain backwards compat with OCI8 1.4 */
 	return 0;
 }
-/* }}} */
 
-/* {{{ php_oci_collection_append_null()
+/* php_oci_collection_append_null()
  Append NULL element to the end of the collection */
 int php_oci_collection_append_null(php_oci_collection *collection)
 {
@@ -307,9 +303,8 @@ int php_oci_collection_append_null(php_oci_collection *collection)
 	connection->errcode = 0; /* retain backwards compat with OCI8 1.4 */
 	return 0;
 }
-/* }}} */
 
-/* {{{ php_oci_collection_append_date()
+/* php_oci_collection_append_date()
  Append DATE element to the end of the collection (use "DD-MON-YY" format) */
 int php_oci_collection_append_date(php_oci_collection *collection, char *date, int date_len)
 {
@@ -347,9 +342,8 @@ int php_oci_collection_append_date(php_oci_collection *collection, char *date, i
 	connection->errcode = 0; /* retain backwards compat with OCI8 1.4 */
 	return 0;
 }
-/* }}} */
 
-/* {{{ php_oci_collection_append_number()
+/* php_oci_collection_append_number()
  Append NUMBER to the end of the collection */
 int php_oci_collection_append_number(php_oci_collection *collection, char *number, int number_len)
 {
@@ -388,9 +382,8 @@ int php_oci_collection_append_number(php_oci_collection *collection, char *numbe
 	connection->errcode = 0; /* retain backwards compat with OCI8 1.4 */
 	return 0;
 }
-/* }}} */
 
-/* {{{ php_oci_collection_append_string()
+/* php_oci_collection_append_string()
  Append STRING to the end of the collection */
 int php_oci_collection_append_string(php_oci_collection *collection, char *element, int element_len)
 {
@@ -426,9 +419,8 @@ int php_oci_collection_append_string(php_oci_collection *collection, char *eleme
 	connection->errcode = 0; /* retain backwards compat with OCI8 1.4 */
 	return 0;
 }
-/* }}} */
 
-/* {{{ php_oci_collection_append()
+/* php_oci_collection_append()
  Append wrapper. Appends any supported element to the end of the collection */
 int php_oci_collection_append(php_oci_collection *collection, char *element, int element_len)
 {
@@ -467,9 +459,8 @@ int php_oci_collection_append(php_oci_collection *collection, char *element, int
 	/* never reached */
 	return 1;
 }
-/* }}} */
 
-/* {{{ php_oci_collection_element_get()
+/* php_oci_collection_element_get()
  Get the element with the given index */
 int php_oci_collection_element_get(php_oci_collection *collection, zend_long index, zval *result_element)
 {
@@ -578,9 +569,8 @@ int php_oci_collection_element_get(php_oci_collection *collection, zend_long ind
 	/* never reached */
 	return 1;
 }
-/* }}} */
 
-/* {{{ php_oci_collection_element_set_null()
+/* php_oci_collection_element_set_null()
  Set the element with the given index to NULL */
 int php_oci_collection_element_set_null(php_oci_collection *collection, zend_long index)
 {
@@ -599,9 +589,8 @@ int php_oci_collection_element_set_null(php_oci_collection *collection, zend_lon
 	connection->errcode = 0; /* retain backwards compat with OCI8 1.4 */
 	return 0;
 }
-/* }}} */
 
-/* {{{ php_oci_collection_element_set_date()
+/* php_oci_collection_element_set_date()
  Change element's value to the given DATE */
 int php_oci_collection_element_set_date(php_oci_collection *collection, zend_long index, char *date, int date_len)
 {
@@ -640,9 +629,8 @@ int php_oci_collection_element_set_date(php_oci_collection *collection, zend_lon
 	connection->errcode = 0; /* retain backwards compat with OCI8 1.4 */
 	return 0;
 }
-/* }}} */
 
-/* {{{ php_oci_collection_element_set_number()
+/* php_oci_collection_element_set_number()
  Change element's value to the given NUMBER */
 int php_oci_collection_element_set_number(php_oci_collection *collection, zend_long index, char *number, int number_len)
 {
@@ -682,9 +670,8 @@ int php_oci_collection_element_set_number(php_oci_collection *collection, zend_l
 	connection->errcode = 0; /* retain backwards compat with OCI8 1.4 */
 	return 0;
 }
-/* }}} */
 
-/* {{{ php_oci_collection_element_set_string()
+/* php_oci_collection_element_set_string()
  Change element's value to the given string */
 int php_oci_collection_element_set_string(php_oci_collection *collection, zend_long index, char *element, int element_len)
 {
@@ -721,9 +708,8 @@ int php_oci_collection_element_set_string(php_oci_collection *collection, zend_l
 	connection->errcode = 0; /* retain backwards compat with OCI8 1.4 */
 	return 0;
 }
-/* }}} */
 
-/* {{{ php_oci_collection_element_set()
+/* php_oci_collection_element_set()
  Collection element setter */
 int php_oci_collection_element_set(php_oci_collection *collection, zend_long index, char *value, int value_len)
 {
@@ -762,9 +748,8 @@ int php_oci_collection_element_set(php_oci_collection *collection, zend_long ind
 	/* never reached */
 	return 1;
 }
-/* }}} */
 
-/* {{{ php_oci_collection_assign()
+/* php_oci_collection_assign()
  Assigns a value to the collection from another collection */
 int php_oci_collection_assign(php_oci_collection *collection_dest, php_oci_collection *collection_from)
 {
@@ -781,9 +766,8 @@ int php_oci_collection_assign(php_oci_collection *collection_dest, php_oci_colle
 	connection->errcode = 0; /* retain backwards compat with OCI8 1.4 */
 	return 0;
 }
-/* }}} */
 
-/* {{{ php_oci_collection_close()
+/* php_oci_collection_close()
  Destroy collection and all associated resources */
 void php_oci_collection_close(php_oci_collection *collection)
 {
@@ -805,6 +789,5 @@ void php_oci_collection_close(php_oci_collection *collection)
 	efree(collection);
 	return;
 }
-/* }}} */
 
 #endif /* HAVE_OCI8 */

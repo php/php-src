@@ -109,7 +109,7 @@
 #include "zend_smart_str.h"
 #include "zend_smart_string.h"
 
-/* {{{ macros */
+/* macros */
 
 #define INS_CHAR(xbuf, ch, is_char) do { \
 	if ((is_char)) { \
@@ -173,7 +173,6 @@
 		}												\
 } while (0)
 
-/* }}} */
 
 #if !HAVE_STRNLEN
 static size_t strnlen(const char *s, size_t maxlen) {
@@ -185,7 +184,7 @@ static size_t strnlen(const char *s, size_t maxlen) {
 /*
  * Do format conversion placing the output in buffer
  */
-static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt, va_list ap) /* {{{ */
+static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt, va_list ap)
 {
 	char *s = NULL;
 	size_t s_len;
@@ -789,16 +788,14 @@ skip_output:
 	}
 	return;
 }
-/* }}} */
 
-PHPAPI void php_printf_to_smart_string(smart_string *buf, const char *format, va_list ap) /* {{{ */
+PHPAPI void php_printf_to_smart_string(smart_string *buf, const char *format, va_list ap)
 {
 	xbuf_format_converter(buf, 1, format, ap);
 }
-/* }}} */
 
-PHPAPI void php_printf_to_smart_str(smart_str *buf, const char *format, va_list ap) /* {{{ */
+PHPAPI void php_printf_to_smart_str(smart_str *buf, const char *format, va_list ap)
 {
 	xbuf_format_converter(buf, 0, format, ap);
 }
-/* }}} */
+

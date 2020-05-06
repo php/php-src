@@ -28,7 +28,7 @@
 #endif
 
 
-/* {{{ mysqlnd_pfc::reset */
+/* mysqlnd_pfc::reset */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_pfc, reset)(MYSQLND_PFC * const pfc, MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info)
 {
@@ -36,8 +36,6 @@ MYSQLND_METHOD(mysqlnd_pfc, reset)(MYSQLND_PFC * const pfc, MYSQLND_STATS * cons
 	pfc->data->packet_no = pfc->data->compressed_envelope_packet_no = 0;
 	DBG_RETURN(PASS);
 }
-/* }}} */
-
 
 /* We assume that MYSQLND_HEADER_SIZE is 4 bytes !! */
 #define COPY_HEADER(T,A)  do { \
@@ -49,7 +47,7 @@ MYSQLND_METHOD(mysqlnd_pfc, reset)(MYSQLND_PFC * const pfc, MYSQLND_STATS * cons
 #define RESTORE_HEADER_SIZE(buffer, safe_storage) STORE_HEADER_SIZE((safe_storage), (buffer))
 
 
-/* {{{ mysqlnd_pfc::send */
+/* mysqlnd_pfc::send */
 /*
   IMPORTANT : It's expected that buffer has place in the beginning for MYSQLND_HEADER_SIZE !!!!
 			  This is done for performance reasons in the caller of this function.
@@ -180,12 +178,10 @@ MYSQLND_METHOD(mysqlnd_pfc, send)(MYSQLND_PFC * const pfc, MYSQLND_VIO * const v
 	}
 	DBG_RETURN(bytes_sent);
 }
-/* }}} */
-
 
 #ifdef MYSQLND_COMPRESSION_ENABLED
 
-/* {{{ mysqlnd_pfc::read_compressed_packet_from_stream_and_fill_read_buffer */
+/* mysqlnd_pfc::read_compressed_packet_from_stream_and_fill_read_buffer */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_pfc, read_compressed_packet_from_stream_and_fill_read_buffer)
 		(MYSQLND_PFC * pfc, MYSQLND_VIO * vio, size_t net_payload_size, MYSQLND_STATS * conn_stats, MYSQLND_ERROR_INFO * error_info)
@@ -230,11 +226,11 @@ end:
 	}
 	DBG_RETURN(retval);
 }
-/* }}} */
+
 #endif /* MYSQLND_COMPRESSION_ENABLED */
 
 
-/* {{{ mysqlnd_pfc::decode */
+/* mysqlnd_pfc::decode */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_pfc, decode)(zend_uchar * uncompressed_data, const size_t uncompressed_data_len,
 									const zend_uchar * const compressed_data, const size_t compressed_data_len)
@@ -255,10 +251,8 @@ MYSQLND_METHOD(mysqlnd_pfc, decode)(zend_uchar * uncompressed_data, const size_t
 	DBG_RETURN(FAIL);
 #endif
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_pfc::encode */
+/* mysqlnd_pfc::encode */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_pfc, encode)(zend_uchar * compress_buffer, size_t * compress_buffer_len,
 									const zend_uchar * const uncompressed_data, const size_t uncompressed_data_len)
@@ -282,10 +276,8 @@ MYSQLND_METHOD(mysqlnd_pfc, encode)(zend_uchar * compress_buffer, size_t * compr
 	DBG_RETURN(FAIL);
 #endif
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_pfc::receive */
+/* mysqlnd_pfc::receive */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_pfc, receive)(MYSQLND_PFC * const pfc, MYSQLND_VIO * const vio, zend_uchar * const buffer, const size_t count,
 									 MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info)
@@ -348,10 +340,8 @@ MYSQLND_METHOD(mysqlnd_pfc, receive)(MYSQLND_PFC * const pfc, MYSQLND_VIO * cons
 #endif /* MYSQLND_COMPRESSION_ENABLED */
 	DBG_RETURN(vio->data->m.network_read(vio, p, to_read, conn_stats, error_info));
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_pfc::set_client_option */
+/* mysqlnd_pfc::set_client_option */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_pfc, set_client_option)(MYSQLND_PFC * const pfc, enum_mysqlnd_client_option option, const char * const value)
 {
@@ -388,10 +378,8 @@ MYSQLND_METHOD(mysqlnd_pfc, set_client_option)(MYSQLND_PFC * const pfc, enum_mys
 	}
 	DBG_RETURN(PASS);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_pfc::free_contents */
+/* mysqlnd_pfc::free_contents */
 static void
 MYSQLND_METHOD(mysqlnd_pfc, free_contents)(MYSQLND_PFC * pfc)
 {
@@ -409,10 +397,8 @@ MYSQLND_METHOD(mysqlnd_pfc, free_contents)(MYSQLND_PFC * pfc)
 
 	DBG_VOID_RETURN;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_pfc::init */
+/* mysqlnd_pfc::init */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_pfc, init)(MYSQLND_PFC * const pfc, MYSQLND_STATS * const stats, MYSQLND_ERROR_INFO * const error_info)
 {
@@ -424,10 +410,8 @@ MYSQLND_METHOD(mysqlnd_pfc, init)(MYSQLND_PFC * const pfc, MYSQLND_STATS * const
 
 	DBG_RETURN(PASS);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_pfc::dtor */
+/* mysqlnd_pfc::dtor */
 static void
 MYSQLND_METHOD(mysqlnd_pfc, dtor)(MYSQLND_PFC * const pfc, MYSQLND_STATS * const stats, MYSQLND_ERROR_INFO * const error_info)
 {
@@ -445,8 +429,6 @@ MYSQLND_METHOD(mysqlnd_pfc, dtor)(MYSQLND_PFC * const pfc, MYSQLND_STATS * const
 	}
 	DBG_VOID_RETURN;
 }
-/* }}} */
-
 
 MYSQLND_CLASS_METHODS_START(mysqlnd_protocol_packet_frame_codec)
 	MYSQLND_METHOD(mysqlnd_pfc, init),
@@ -471,7 +453,7 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_protocol_packet_frame_codec)
 MYSQLND_CLASS_METHODS_END;
 
 
-/* {{{ mysqlnd_pfc_init */
+/* mysqlnd_pfc_init */
 PHPAPI MYSQLND_PFC *
 mysqlnd_pfc_init(const zend_bool persistent, MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) *object_factory, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info)
 {
@@ -481,10 +463,8 @@ mysqlnd_pfc_init(const zend_bool persistent, MYSQLND_CLASS_METHODS_TYPE(mysqlnd_
 	pfc = factory->get_protocol_frame_codec(persistent, stats, error_info);
 	DBG_RETURN(pfc);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_pfc_free */
+/* mysqlnd_pfc_free */
 PHPAPI void
 mysqlnd_pfc_free(MYSQLND_PFC * const pfc, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info)
 {
@@ -494,4 +474,4 @@ mysqlnd_pfc_free(MYSQLND_PFC * const pfc, MYSQLND_STATS * stats, MYSQLND_ERROR_I
 	}
 	DBG_VOID_RETURN;
 }
-/* }}} */
+

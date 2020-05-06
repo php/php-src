@@ -48,7 +48,6 @@ PHP_METHOD(Spoofchecker, isSuspicious)
 	}
 	RETVAL_BOOL(ret != 0);
 }
-/* }}} */
 
 /* Checks if a given text contains any confusable characters
  */
@@ -82,7 +81,6 @@ PHP_METHOD(Spoofchecker, areConfusable)
 	}
 	RETVAL_BOOL(ret != 0);
 }
-/* }}} */
 
 /* Locales to use when running checks
  */
@@ -105,7 +103,6 @@ PHP_METHOD(Spoofchecker, setAllowedLocales)
 		return;
 	}
 }
-/* }}} */
 
 /* Set the checks to run
  */
@@ -126,7 +123,6 @@ PHP_METHOD(Spoofchecker, setChecks)
 		php_error_docref(NULL, E_WARNING, "(%d) %s", SPOOFCHECKER_ERROR_CODE(co), u_errorName(SPOOFCHECKER_ERROR_CODE(co)));
 	}
 }
-/* }}} */
 
 #if U_ICU_VERSION_MAJOR_NUM >= 58
 /* Set the loosest restriction level allowed for strings.
@@ -154,5 +150,5 @@ PHP_METHOD(Spoofchecker, setRestrictionLevel)
 
 	uspoof_setRestrictionLevel(co->uspoof, (URestrictionLevel)level);
 }
-/* }}} */
+
 #endif

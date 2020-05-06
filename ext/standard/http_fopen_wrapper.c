@@ -117,7 +117,7 @@ static zend_bool check_has_header(const char *headers, const char *header) {
 static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 		const char *path, const char *mode, int options, zend_string **opened_path,
 		php_stream_context *context, int redirect_max, int flags,
-		zval *response_header STREAMS_DC) /* {{{ */
+		zval *response_header STREAMS_DC)
 {
 	php_stream *stream = NULL;
 	php_url *resource = NULL;
@@ -966,9 +966,8 @@ out:
 
 	return stream;
 }
-/* }}} */
 
-php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, const char *path, const char *mode, int options, zend_string **opened_path, php_stream_context *context STREAMS_DC) /* {{{ */
+php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, const char *path, const char *mode, int options, zend_string **opened_path, php_stream_context *context STREAMS_DC)
 {
 	php_stream *stream;
 	zval headers;
@@ -987,16 +986,14 @@ php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, const char *pa
 
 	return stream;
 }
-/* }}} */
 
-static int php_stream_http_stream_stat(php_stream_wrapper *wrapper, php_stream *stream, php_stream_statbuf *ssb) /* {{{ */
+static int php_stream_http_stream_stat(php_stream_wrapper *wrapper, php_stream *stream, php_stream_statbuf *ssb)
 {
 	/* one day, we could fill in the details based on Date: and Content-Length:
 	 * headers.  For now, we return with a failure code to prevent the underlying
 	 * file's details from being used instead. */
 	return -1;
 }
-/* }}} */
 
 static const php_stream_wrapper_ops http_stream_wops = {
 	php_stream_url_wrap_http,

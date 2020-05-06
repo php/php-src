@@ -24,7 +24,7 @@
 
 PHP_WIN32_IPC_API key_t
 ftok(const char *pathname, int proj_id)
-{/*{{{*/
+{
 	HANDLE fh;
 	struct _stat st;
 	BY_HANDLE_FILE_INFORMATION bhfi;
@@ -57,4 +57,4 @@ ftok(const char *pathname, int proj_id)
 	PHP_WIN32_IOUTIL_CLEANUP_W()
 
 	return ret;
-}/*}}}*/
+}

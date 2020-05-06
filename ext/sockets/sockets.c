@@ -133,15 +133,14 @@ ZEND_GET_MODULE(sockets)
 /* inet_ntop should be used instead of inet_ntoa */
 int inet_ntoa_lock = 0;
 
-PHP_SOCKETS_API int php_sockets_le_socket(void) /* {{{ */
+PHP_SOCKETS_API int php_sockets_le_socket(void)
 {
 	return le_socket;
 }
-/* }}} */
 
 /* allocating function to make programming errors due to uninitialized fields
  * less likely */
-PHP_SOCKETS_API php_socket *php_create_socket(void) /* {{{ */
+PHP_SOCKETS_API php_socket *php_create_socket(void)
 {
 	php_socket *php_sock = emalloc(sizeof(php_socket));
 
@@ -153,9 +152,8 @@ PHP_SOCKETS_API php_socket *php_create_socket(void) /* {{{ */
 
 	return php_sock;
 }
-/* }}} */
 
-PHP_SOCKETS_API void php_destroy_socket(zend_resource *rsrc) /* {{{ */
+PHP_SOCKETS_API void php_destroy_socket(zend_resource *rsrc)
 {
 	php_socket *php_sock = rsrc->ptr;
 
@@ -168,9 +166,8 @@ PHP_SOCKETS_API void php_destroy_socket(zend_resource *rsrc) /* {{{ */
 	}
 	efree(php_sock);
 }
-/* }}} */
 
-PHP_SOCKETS_API void php_destroy_addrinfo(zend_resource *rsrc) /* {{{ */
+PHP_SOCKETS_API void php_destroy_addrinfo(zend_resource *rsrc)
 {
 	struct addrinfo *addr = rsrc->ptr;
 	efree(addr->ai_addr);
@@ -179,9 +176,8 @@ PHP_SOCKETS_API void php_destroy_addrinfo(zend_resource *rsrc) /* {{{ */
 	}
 	efree(addr);
 }
-/* }}} */
 
-static int php_open_listen_sock(php_socket **php_sock, int port, int backlog) /* {{{ */
+static int php_open_listen_sock(php_socket **php_sock, int port, int backlog)
 {
 	struct sockaddr_in  la;
 	struct hostent		*hp;
@@ -229,9 +225,8 @@ static int php_open_listen_sock(php_socket **php_sock, int port, int backlog) /*
 
 	return 1;
 }
-/* }}} */
 
-static int php_accept_connect(php_socket *in_sock, php_socket **new_sock, struct sockaddr *la, socklen_t *la_len) /* {{{ */
+static int php_accept_connect(php_socket *in_sock, php_socket **new_sock, struct sockaddr *la, socklen_t *la_len)
 {
 	php_socket	*out_sock = php_create_socket();
 
@@ -251,9 +246,8 @@ static int php_accept_connect(php_socket *in_sock, php_socket **new_sock, struct
 
 	return 1;
 }
-/* }}} */
 
-/* {{{ php_read -- wrapper around read() so that it only reads to a \r or \n. */
+/* php_read -- wrapper around read() so that it only reads to a \r or \n. */
 static int php_read(php_socket *sock, void *buf, size_t maxlen, int flags)
 {
 	int m = 0;
@@ -316,9 +310,8 @@ static int php_read(php_socket *sock, void *buf, size_t maxlen, int flags)
 
 	return n;
 }
-/* }}} */
 
-char *sockets_strerror(int error) /* {{{ */
+char *sockets_strerror(int error)
 {
 	const char *buf;
 
@@ -361,17 +354,16 @@ char *sockets_strerror(int error) /* {{{ */
 
 	return (buf ? (char *) buf : "");
 }
-/* }}} */
 
 #ifdef PHP_WIN32
 static void sockets_destroy_wsa_info(zval *data)
-{/*{{{*/
+{
 	HANDLE h = (HANDLE)Z_PTR_P(data);
 	CloseHandle(h);
-}/*}}}*/
+}
 #endif
 
-/* {{{ PHP_GINIT_FUNCTION */
+/* PHP_GINIT_FUNCTION */
 static PHP_GINIT_FUNCTION(sockets)
 {
 #if defined(COMPILE_DL_SOCKETS) && defined(ZTS)
@@ -384,18 +376,16 @@ static PHP_GINIT_FUNCTION(sockets)
 	zend_hash_init(&sockets_globals->wsa_info, 0, NULL, sockets_destroy_wsa_info, 1);
 #endif
 }
-/* }}} */
 
-/* {{{ PHP_GSHUTDOWN_FUNCTION */
+/* PHP_GSHUTDOWN_FUNCTION */
 static PHP_GSHUTDOWN_FUNCTION(sockets)
 {
 #ifdef PHP_WIN32
 	zend_hash_destroy(&sockets_globals->wsa_info);
 #endif
 }
-/* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION
+/* PHP_MINIT_FUNCTION
  */
 static PHP_MINIT_FUNCTION(sockets)
 {
@@ -552,9 +542,8 @@ static PHP_MINIT_FUNCTION(sockets)
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_MSHUTDOWN_FUNCTION
+/* PHP_MSHUTDOWN_FUNCTION
  */
 static PHP_MSHUTDOWN_FUNCTION(sockets)
 {
@@ -562,9 +551,8 @@ static PHP_MSHUTDOWN_FUNCTION(sockets)
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
+/* PHP_MINFO_FUNCTION
  */
 static PHP_MINFO_FUNCTION(sockets)
 {
@@ -572,9 +560,8 @@ static PHP_MINFO_FUNCTION(sockets)
 	php_info_print_table_row(2, "Sockets Support", "enabled");
 	php_info_print_table_end();
 }
-/* }}} */
 
-/* {{{ PHP_RSHUTDOWN_FUNCTION */
+/* PHP_RSHUTDOWN_FUNCTION */
 static PHP_RSHUTDOWN_FUNCTION(sockets)
 {
 	if (SOCKETS_G(strerror_buf)) {
@@ -584,9 +571,8 @@ static PHP_RSHUTDOWN_FUNCTION(sockets)
 
 	return SUCCESS;
 }
-/* }}} */
 
-static int php_sock_array_to_fd_set(zval *sock_array, fd_set *fds, PHP_SOCKET *max_fd) /* {{{ */
+static int php_sock_array_to_fd_set(zval *sock_array, fd_set *fds, PHP_SOCKET *max_fd)
 {
 	zval		*element;
 	php_socket	*php_sock;
@@ -608,9 +594,8 @@ static int php_sock_array_to_fd_set(zval *sock_array, fd_set *fds, PHP_SOCKET *m
 
 	return num ? 1 : 0;
 }
-/* }}} */
 
-static int php_sock_array_from_fd_set(zval *sock_array, fd_set *fds) /* {{{ */
+static int php_sock_array_from_fd_set(zval *sock_array, fd_set *fds)
 {
 	zval		*element;
 	zval		*dest_element;
@@ -649,7 +634,6 @@ static int php_sock_array_from_fd_set(zval *sock_array, fd_set *fds) /* {{{ */
 
 	return num ? 1 : 0;
 }
-/* }}} */
 
 /* Runs the select() system call on the sets mentioned with a timeout specified by tv_sec and tv_usec */
 PHP_FUNCTION(socket_select)
@@ -726,7 +710,6 @@ PHP_FUNCTION(socket_select)
 
 	RETURN_LONG(retval);
 }
-/* }}} */
 
 /* Opens a socket on port to accept connections */
 PHP_FUNCTION(socket_create_listen)
@@ -747,7 +730,6 @@ PHP_FUNCTION(socket_create_listen)
 
 	RETURN_RES(zend_register_resource(php_sock, le_socket));
 }
-/* }}} */
 
 /* Accepts a connection on the listening socket fd */
 PHP_FUNCTION(socket_accept)
@@ -771,7 +753,6 @@ PHP_FUNCTION(socket_accept)
 
 	RETURN_RES(zend_register_resource(new_sock, le_socket));
 }
-/* }}} */
 
 /* Sets nonblocking mode on a socket resource */
 PHP_FUNCTION(socket_set_nonblock)
@@ -808,7 +789,6 @@ PHP_FUNCTION(socket_set_nonblock)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Sets blocking mode on a socket resource */
 PHP_FUNCTION(socket_set_block)
@@ -847,7 +827,6 @@ PHP_FUNCTION(socket_set_block)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Sets the maximum number of connections allowed to be waited for on the socket specified by fd */
 PHP_FUNCTION(socket_listen)
@@ -870,7 +849,6 @@ PHP_FUNCTION(socket_listen)
 	}
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Closes a file descriptor */
 PHP_FUNCTION(socket_close)
@@ -899,7 +877,6 @@ PHP_FUNCTION(socket_close)
 	}
 	zend_list_close(Z_RES_P(arg1));
 }
-/* }}} */
 
 /* Writes the buffer to the socket resource, length is optional */
 PHP_FUNCTION(socket_write)
@@ -941,7 +918,6 @@ PHP_FUNCTION(socket_write)
 
 	RETURN_LONG(retval);
 }
-/* }}} */
 
 /* Reads a maximum of length bytes from socket */
 PHP_FUNCTION(socket_read)
@@ -1000,7 +976,6 @@ PHP_FUNCTION(socket_read)
 
 	RETURN_NEW_STR(tmpbuf);
 }
-/* }}} */
 
 /* Queries the remote side of the given socket which may either result in host/port or in a UNIX filesystem path, dependent on its type. */
 PHP_FUNCTION(socket_getsockname)
@@ -1073,7 +1048,6 @@ PHP_FUNCTION(socket_getsockname)
 			RETURN_THROWS();
 	}
 }
-/* }}} */
 
 /* Queries the remote side of the given socket which may either result in host/port or in a UNIX filesystem path, dependent on its type. */
 PHP_FUNCTION(socket_getpeername)
@@ -1149,7 +1123,6 @@ PHP_FUNCTION(socket_getpeername)
 			RETURN_THROWS();
 	}
 }
-/* }}} */
 
 /* Creates an endpoint for communication in the domain specified by domain, of type specified by type */
 PHP_FUNCTION(socket_create)
@@ -1194,7 +1167,6 @@ PHP_FUNCTION(socket_create)
 
 	RETURN_RES(zend_register_resource(php_sock, le_socket));
 }
-/* }}} */
 
 /* Opens a connection to addr:port on the socket specified by socket */
 PHP_FUNCTION(socket_connect)
@@ -1283,7 +1255,6 @@ PHP_FUNCTION(socket_connect)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Returns a string describing an error */
 PHP_FUNCTION(socket_strerror)
@@ -1296,7 +1267,6 @@ PHP_FUNCTION(socket_strerror)
 
 	RETURN_STRING(sockets_strerror(arg1));
 }
-/* }}} */
 
 /* Binds an open socket to a listening port, port is only specified in AF_INET family. */
 PHP_FUNCTION(socket_bind)
@@ -1378,7 +1348,6 @@ PHP_FUNCTION(socket_bind)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Receives data from a connected socket */
 PHP_FUNCTION(socket_recv)
@@ -1420,7 +1389,6 @@ PHP_FUNCTION(socket_recv)
 
 	RETURN_LONG(retval);
 }
-/* }}} */
 
 /* Sends data to a connected socket */
 PHP_FUNCTION(socket_send)
@@ -1453,7 +1421,6 @@ PHP_FUNCTION(socket_send)
 
 	RETURN_LONG(retval);
 }
-/* }}} */
 
 /* Receives data from a socket, connected or not */
 PHP_FUNCTION(socket_recvfrom)
@@ -1570,7 +1537,6 @@ PHP_FUNCTION(socket_recvfrom)
 
 	RETURN_LONG(retval);
 }
-/* }}} */
 
 /* Sends a message to a socket, whether it is connected or not */
 PHP_FUNCTION(socket_sendto)
@@ -1654,7 +1620,6 @@ PHP_FUNCTION(socket_sendto)
 
 	RETURN_LONG(retval);
 }
-/* }}} */
 
 /* Gets socket options for the socket */
 PHP_FUNCTION(socket_get_option)
@@ -1763,7 +1728,6 @@ PHP_FUNCTION(socket_get_option)
 			break;
 	}
 }
-/* }}} */
 
 /* Sets socket options for the socket */
 PHP_FUNCTION(socket_set_option)
@@ -1907,7 +1871,6 @@ default_case:
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 #ifdef HAVE_SOCKETPAIR
 /* Creates a pair of indistinguishable sockets and stores them in fds. */
@@ -1972,7 +1935,7 @@ PHP_FUNCTION(socket_create_pair)
 
 	RETURN_TRUE;
 }
-/* }}} */
+
 #endif
 
 #ifdef HAVE_SHUTDOWN
@@ -1998,7 +1961,7 @@ PHP_FUNCTION(socket_shutdown)
 
 	RETURN_TRUE;
 }
-/* }}} */
+
 #endif
 
 /* Returns the last socket error (either the last used or the provided socket resource) */
@@ -2020,7 +1983,6 @@ PHP_FUNCTION(socket_last_error)
 		RETVAL_LONG(SOCKETS_G(last_error));
 	}
 }
-/* }}} */
 
 /* Clears the error on the socket or the last error code. */
 PHP_FUNCTION(socket_clear_error)
@@ -2043,7 +2005,6 @@ PHP_FUNCTION(socket_clear_error)
 
 	return;
 }
-/* }}} */
 
 php_socket *socket_import_file_descriptor(PHP_SOCKET socket)
 {
@@ -2135,7 +2096,6 @@ PHP_FUNCTION(socket_import_stream)
 
 	RETURN_RES(zend_register_resource(retsock, le_socket));
 }
-/* }}} */
 
 /* Exports a socket extension resource into a stream that encapsulates a socket. */
 PHP_FUNCTION(socket_export_stream)
@@ -2231,7 +2191,6 @@ PHP_FUNCTION(socket_export_stream)
 
 	RETURN_COPY(&socket->zstream);
 }
-/* }}} */
 
 /* Gets array with contents of getaddrinfo about the given hostname. */
 PHP_FUNCTION(socket_addrinfo_lookup)
@@ -2292,7 +2251,6 @@ PHP_FUNCTION(socket_addrinfo_lookup)
 
 	freeaddrinfo(result);
 }
-/* }}} */
 
 /* Creates and binds to a socket from a given addrinfo resource */
 PHP_FUNCTION(socket_addrinfo_bind)
@@ -2357,7 +2315,6 @@ PHP_FUNCTION(socket_addrinfo_bind)
 
 	RETURN_RES(zend_register_resource(php_sock, le_socket));
 }
-/* }}} */
 
 /* Creates and connects to a socket from a given addrinfo resource */
 PHP_FUNCTION(socket_addrinfo_connect)
@@ -2422,7 +2379,6 @@ PHP_FUNCTION(socket_addrinfo_connect)
 
 	RETURN_RES(zend_register_resource(php_sock, le_socket));
 }
-/* }}} */
 
 /* Creates and connects to a socket from a given addrinfo resource */
 PHP_FUNCTION(socket_addrinfo_explain)
@@ -2476,7 +2432,6 @@ PHP_FUNCTION(socket_addrinfo_explain)
 
 	add_assoc_zval(return_value, "ai_addr", &sockaddr);
 }
-/* }}} */
 
 #ifdef PHP_WIN32
 
@@ -2533,7 +2488,6 @@ PHP_FUNCTION(socket_wsaprotocol_info_export)
 
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* Imports the network socket information using the supplied id and creates a new socket on its base. */
 PHP_FUNCTION(socket_wsaprotocol_info_import)
@@ -2591,7 +2545,6 @@ PHP_FUNCTION(socket_wsaprotocol_info_import)
 
 	RETURN_RES(zend_register_resource(php_sock, le_socket));
 }
-/* }}} */
 
 /* Frees the exported info and corresponding resources using the supplied id. */
 PHP_FUNCTION(socket_wsaprotocol_info_release)
@@ -2605,5 +2558,5 @@ PHP_FUNCTION(socket_wsaprotocol_info_release)
 
 	RETURN_BOOL(SUCCESS == zend_hash_str_del(&(SOCKETS_G(wsa_info)), id, id_len));
 }
-/* }}} */
+
 #endif

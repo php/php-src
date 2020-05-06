@@ -24,17 +24,15 @@
 #include "ext/standard/info.h"
 #include "zend_smart_str.h"
 
-/* {{{ mysqlnd_functions[]
+/* mysqlnd_functions[]
  *
  * Every user visible function must have an entry in mysqlnd_functions[].
  */
 static zend_function_entry mysqlnd_functions[] = {
 	PHP_FE_END
 };
-/* }}} */
 
-
-/* {{{ mysqlnd_minfo_print_hash */
+/* mysqlnd_minfo_print_hash */
 PHPAPI void
 mysqlnd_minfo_print_hash(zval *values)
 {
@@ -46,10 +44,8 @@ mysqlnd_minfo_print_hash(zval *values)
 		php_info_print_table_row(2, ZSTR_VAL(string_key), Z_STRVAL_P(values_entry));
 	} ZEND_HASH_FOREACH_END();
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_minfo_dump_loaded_plugins */
+/* mysqlnd_minfo_dump_loaded_plugins */
 static int
 mysqlnd_minfo_dump_loaded_plugins(zval *el, void * buf)
 {
@@ -63,10 +59,8 @@ mysqlnd_minfo_dump_loaded_plugins(zval *el, void * buf)
 	}
 	return ZEND_HASH_APPLY_KEEP;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_minfo_dump_api_plugins */
+/* mysqlnd_minfo_dump_api_plugins */
 static void
 mysqlnd_minfo_dump_api_plugins(smart_str * buffer)
 {
@@ -80,10 +74,8 @@ mysqlnd_minfo_dump_api_plugins(smart_str * buffer)
 		smart_str_appends(buffer, ext->module->name);
 	} ZEND_HASH_FOREACH_END();
 }
-/* }}} */
 
-
-/* {{{ PHP_MINFO_FUNCTION
+/* PHP_MINFO_FUNCTION
  */
 PHP_MINFO_FUNCTION(mysqlnd)
 {
@@ -137,13 +129,11 @@ PHP_MINFO_FUNCTION(mysqlnd)
 
 	php_info_print_table_end();
 }
-/* }}} */
-
 
 PHPAPI ZEND_DECLARE_MODULE_GLOBALS(mysqlnd)
 
 
-/* {{{ PHP_GINIT_FUNCTION
+/* PHP_GINIT_FUNCTION
  */
 static PHP_GINIT_FUNCTION(mysqlnd)
 {
@@ -170,10 +160,8 @@ static PHP_GINIT_FUNCTION(mysqlnd)
 	mysqlnd_globals->sha256_server_public_key = NULL;
 	mysqlnd_globals->fetch_data_copy = FALSE;
 }
-/* }}} */
 
-
-/* {{{ PHP_INI_MH
+/* PHP_INI_MH
  */
 static PHP_INI_MH(OnUpdateNetCmdBufferSize)
 {
@@ -187,10 +175,8 @@ static PHP_INI_MH(OnUpdateNetCmdBufferSize)
 
 	return SUCCESS;
 }
-/* }}} */
 
-
-/* {{{ PHP_INI_BEGIN
+/* PHP_INI_BEGIN
 */
 PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("mysqlnd.collect_statistics",	"1", 	PHP_INI_ALL,	OnUpdateBool,	collect_statistics, zend_mysqlnd_globals, mysqlnd_globals)
@@ -214,10 +200,8 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("mysqlnd.debug_realloc_fail_threshold","-1",   PHP_INI_SYSTEM,	OnUpdateLong,	debug_realloc_fail_threshold,	zend_mysqlnd_globals,		mysqlnd_globals)
 #endif
 PHP_INI_END()
-/* }}} */
 
-
-/* {{{ PHP_MINIT_FUNCTION
+/* PHP_MINIT_FUNCTION
  */
 static PHP_MINIT_FUNCTION(mysqlnd)
 {
@@ -226,10 +210,8 @@ static PHP_MINIT_FUNCTION(mysqlnd)
 	mysqlnd_library_init();
 	return SUCCESS;
 }
-/* }}} */
 
-
-/* {{{ PHP_MSHUTDOWN_FUNCTION
+/* PHP_MSHUTDOWN_FUNCTION
  */
 static PHP_MSHUTDOWN_FUNCTION(mysqlnd)
 {
@@ -238,11 +220,9 @@ static PHP_MSHUTDOWN_FUNCTION(mysqlnd)
 	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
-/* }}} */
-
 
 #if PHP_DEBUG
-/* {{{ PHP_RINIT_FUNCTION
+/* PHP_RINIT_FUNCTION
  */
 static PHP_RINIT_FUNCTION(mysqlnd)
 {
@@ -263,12 +243,12 @@ static PHP_RINIT_FUNCTION(mysqlnd)
 	}
 	return SUCCESS;
 }
-/* }}} */
+
 #endif
 
 
 #if PHP_DEBUG
-/* {{{ PHP_RSHUTDOWN_FUNCTION
+/* PHP_RSHUTDOWN_FUNCTION
  */
 static PHP_RSHUTDOWN_FUNCTION(mysqlnd)
 {
@@ -287,7 +267,7 @@ static PHP_RSHUTDOWN_FUNCTION(mysqlnd)
 	}
 	return SUCCESS;
 }
-/* }}} */
+
 #endif
 
 
@@ -296,7 +276,7 @@ static const zend_module_dep mysqlnd_deps[] = {
 	ZEND_MOD_END
 };
 
-/* {{{ mysqlnd_module_entry
+/* mysqlnd_module_entry
  */
 zend_module_entry mysqlnd_module_entry = {
 	STANDARD_MODULE_HEADER_EX,
@@ -324,13 +304,12 @@ zend_module_entry mysqlnd_module_entry = {
 	NULL,
 	STANDARD_MODULE_PROPERTIES_EX
 };
-/* }}} */
 
-/* {{{ COMPILE_DL_MYSQLND */
+/* COMPILE_DL_MYSQLND */
 #ifdef COMPILE_DL_MYSQLND
 #ifdef ZTS
 ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 ZEND_GET_MODULE(mysqlnd)
 #endif
-/* }}} */
+

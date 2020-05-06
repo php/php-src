@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
  */
 
-/* {{{ includes/startup/misc */
+/* includes/startup/misc */
 
 #include "php.h"
 #include "fopen_wrappers.h"
@@ -187,9 +187,8 @@ PHP_MINIT_FUNCTION(dir)
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ internal functions */
+/* internal functions */
 static void _php_do_opendir(INTERNAL_FUNCTION_PARAMETERS, int createobject)
 {
 	char *dirname;
@@ -225,21 +224,18 @@ static void _php_do_opendir(INTERNAL_FUNCTION_PARAMETERS, int createobject)
 		php_stream_to_zval(dirp, return_value);
 	}
 }
-/* }}} */
 
 /* Open a directory and return a dir_handle */
 PHP_FUNCTION(opendir)
 {
 	_php_do_opendir(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
-/* }}} */
 
 /* Directory class with properties, handle and class and methods read, rewind and close */
 PHP_FUNCTION(getdir)
 {
 	_php_do_opendir(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
-/* }}} */
 
 /* Close directory connection identified by the dir_handle */
 PHP_FUNCTION(closedir)
@@ -262,7 +258,6 @@ PHP_FUNCTION(closedir)
 		php_set_default_dir(NULL);
 	}
 }
-/* }}} */
 
 #if defined(HAVE_CHROOT) && !defined(ZTS) && ENABLE_CHROOT_FUNC
 /* Change root directory */
@@ -293,7 +288,7 @@ PHP_FUNCTION(chroot)
 
 	RETURN_TRUE;
 }
-/* }}} */
+
 #endif
 
 /* Change the current directory */
@@ -328,7 +323,6 @@ PHP_FUNCTION(chdir)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Gets the current directory */
 PHP_FUNCTION(getcwd)
@@ -350,7 +344,6 @@ PHP_FUNCTION(getcwd)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Rewind dir_handle back to the start */
 PHP_FUNCTION(rewinddir)
@@ -367,7 +360,6 @@ PHP_FUNCTION(rewinddir)
 
 	php_stream_rewinddir(dirp);
 }
-/* }}} */
 
 /* Read directory entry from dir_handle */
 PHP_FUNCTION(readdir)
@@ -388,7 +380,6 @@ PHP_FUNCTION(readdir)
 	}
 	RETURN_FALSE;
 }
-/* }}} */
 
 #ifdef HAVE_GLOB
 /* Find pathnames matching a pattern */
@@ -520,7 +511,7 @@ no_results:
 		RETURN_FALSE;
 	}
 }
-/* }}} */
+
 #endif
 
 /* List files & directories inside the specified path */
@@ -572,4 +563,4 @@ PHP_FUNCTION(scandir)
 		efree(namelist);
 	}
 }
-/* }}} */
+

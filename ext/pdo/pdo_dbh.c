@@ -36,7 +36,7 @@
 
 static int pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value);
 
-void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *sqlstate, const char *supp) /* {{{ */
+void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *sqlstate, const char *supp)
 {
 	pdo_error_type *pdo_err = &dbh->error_code;
 	char *message = NULL;
@@ -94,9 +94,8 @@ void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *sqlstate
 		efree(message);
 	}
 }
-/* }}} */
 
-PDO_API void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt) /* {{{ */
+PDO_API void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt)
 {
 	pdo_error_type *pdo_err = &dbh->error_code;
 	const char *msg = "<<Unknown>>";
@@ -174,9 +173,8 @@ PDO_API void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt) /* {{{ */
 		efree(supp);
 	}
 }
-/* }}} */
 
-static char *dsn_from_uri(char *uri, char *buf, size_t buflen) /* {{{ */
+static char *dsn_from_uri(char *uri, char *buf, size_t buflen)
 {
 	php_stream *stream;
 	char *dsn = NULL;
@@ -188,7 +186,6 @@ static char *dsn_from_uri(char *uri, char *buf, size_t buflen) /* {{{ */
 	}
 	return dsn;
 }
-/* }}} */
 
 PHP_METHOD(PDO, __construct)
 {
@@ -392,9 +389,8 @@ options:
 		zend_throw_exception(pdo_exception_ce, "Constructor failed", 0);
 	}
 }
-/* }}} */
 
-static zval *pdo_stmt_instantiate(pdo_dbh_t *dbh, zval *object, zend_class_entry *dbstmt_ce, zval *ctor_args) /* {{{ */
+static zval *pdo_stmt_instantiate(pdo_dbh_t *dbh, zval *object, zend_class_entry *dbstmt_ce, zval *ctor_args)
 {
 	if (!Z_ISUNDEF_P(ctor_args)) {
 		if (Z_TYPE_P(ctor_args) != IS_ARRAY) {
@@ -412,9 +408,9 @@ static zval *pdo_stmt_instantiate(pdo_dbh_t *dbh, zval *object, zend_class_entry
 	}
 
 	return object;
-} /* }}} */
+}
 
-static void pdo_stmt_construct(zend_execute_data *execute_data, pdo_stmt_t *stmt, zval *object, zend_class_entry *dbstmt_ce, zval *ctor_args) /* {{{ */
+static void pdo_stmt_construct(zend_execute_data *execute_data, pdo_stmt_t *stmt, zval *object, zend_class_entry *dbstmt_ce, zval *ctor_args)
 {
 	zval query_string;
 	zend_string *key;
@@ -451,7 +447,6 @@ static void pdo_stmt_construct(zend_execute_data *execute_data, pdo_stmt_t *stmt
 		zend_fcall_info_args_clear(&fci, 1);
 	}
 }
-/* }}} */
 
 /* Prepares a statement for execution and returns a statement object */
 PHP_METHOD(PDO, prepare)
@@ -550,7 +545,6 @@ PHP_METHOD(PDO, prepare)
 
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* Initiates a transaction */
 PHP_METHOD(PDO, beginTransaction)
@@ -581,7 +575,6 @@ PHP_METHOD(PDO, beginTransaction)
 	PDO_HANDLE_DBH_ERR();
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* Commit a transaction */
 PHP_METHOD(PDO, commit)
@@ -605,7 +598,6 @@ PHP_METHOD(PDO, commit)
 	PDO_HANDLE_DBH_ERR();
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* roll back a transaction */
 PHP_METHOD(PDO, rollBack)
@@ -629,7 +621,6 @@ PHP_METHOD(PDO, rollBack)
 	PDO_HANDLE_DBH_ERR();
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* determine if inside a transaction */
 PHP_METHOD(PDO, inTransaction)
@@ -646,9 +637,8 @@ PHP_METHOD(PDO, inTransaction)
 
 	RETURN_BOOL(dbh->methods->in_transaction(dbh));
 }
-/* }}} */
 
-static int pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value) /* {{{ */
+static int pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value)
 {
 	zend_long lval;
 
@@ -800,7 +790,6 @@ fail:
 	}
 	return FAILURE;
 }
-/* }}} */
 
 /* Set an attribute */
 PHP_METHOD(PDO, setAttribute)
@@ -822,7 +811,6 @@ PHP_METHOD(PDO, setAttribute)
  	}
  	RETURN_FALSE;
 }
-/* }}} */
 
 /* Get an attribute */
 PHP_METHOD(PDO, getAttribute)
@@ -886,7 +874,6 @@ PHP_METHOD(PDO, getAttribute)
 			return;
 	}
 }
-/* }}} */
 
 /* Execute a statement that does not return a row set, returning the number of affected rows */
 PHP_METHOD(PDO, exec)
@@ -914,7 +901,6 @@ PHP_METHOD(PDO, exec)
 		RETURN_LONG(ret);
 	}
 }
-/* }}} */
 
 /* Returns the id of the last row that we affected on this connection. Some databases require a sequence or table name to be passed in. Not always meaningful. */
 PHP_METHOD(PDO, lastInsertId)
@@ -947,7 +933,6 @@ PHP_METHOD(PDO, lastInsertId)
 		}
 	}
 }
-/* }}} */
 
 /* Fetch the error code associated with the last operation on the database handle */
 PHP_METHOD(PDO, errorCode)
@@ -972,7 +957,6 @@ PHP_METHOD(PDO, errorCode)
 	 */
 	RETURN_STRING(dbh->error_code);
 }
-/* }}} */
 
 /* Fetch extended error information associated with the last operation on the database handle */
 PHP_METHOD(PDO, errorInfo)
@@ -1018,7 +1002,6 @@ fill_array:
 		}
 	}
 }
-/* }}} */
 
 /* Prepare and execute $sql; returns the statement object for iteration */
 PHP_METHOD(PDO, query)
@@ -1098,7 +1081,6 @@ PHP_METHOD(PDO, query)
 
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* quotes string for use in a query. The optional paramtype acts as a hint for drivers that have alternate quoting styles. The default value is PDO_PARAM_STR */
 PHP_METHOD(PDO, quote)
@@ -1131,7 +1113,6 @@ PHP_METHOD(PDO, quote)
 	PDO_HANDLE_DBH_ERR();
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* Return array of available PDO drivers */
 PHP_METHOD(PDO, getAvailableDrivers)
@@ -1146,27 +1127,24 @@ PHP_METHOD(PDO, getAvailableDrivers)
 		add_next_index_stringl(return_value, (char*)pdriver->driver_name, pdriver->driver_name_len);
 	} ZEND_HASH_FOREACH_END();
 }
-/* }}} */
 
-static void cls_method_dtor(zval *el) /* {{{ */ {
+static void cls_method_dtor(zval *el) {
 	zend_function *func = (zend_function*)Z_PTR_P(el);
 	if (func->common.function_name) {
 		zend_string_release_ex(func->common.function_name, 0);
 	}
 	efree(func);
 }
-/* }}} */
 
-static void cls_method_pdtor(zval *el) /* {{{ */ {
+static void cls_method_pdtor(zval *el) {
 	zend_function *func = (zend_function*)Z_PTR_P(el);
 	if (func->common.function_name) {
 		zend_string_release_ex(func->common.function_name, 1);
 	}
 	pefree(func, 1);
 }
-/* }}} */
 
-/* {{{ overloaded object handlers for PDO class */
+/* overloaded object handlers for PDO class */
 int pdo_hash_methods(pdo_dbh_object_t *dbh_obj, int kind)
 {
 	const zend_function_entry *funcs;
@@ -1463,9 +1441,8 @@ zend_object *pdo_dbh_new(zend_class_entry *ce)
 	return &dbh->std;
 }
 
-/* }}} */
 
-ZEND_RSRC_DTOR_FUNC(php_pdo_pdbh_dtor) /* {{{ */
+ZEND_RSRC_DTOR_FUNC(php_pdo_pdbh_dtor)
 {
 	if (res->ptr) {
 		pdo_dbh_t *dbh = (pdo_dbh_t*)res->ptr;
@@ -1473,4 +1450,4 @@ ZEND_RSRC_DTOR_FUNC(php_pdo_pdbh_dtor) /* {{{ */
 		res->ptr = NULL;
 	}
 }
-/* }}} */
+

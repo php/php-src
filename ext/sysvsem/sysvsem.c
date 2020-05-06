@@ -47,7 +47,7 @@ union semun {
 
 #endif
 
-/* {{{ sysvsem_module_entry
+/* sysvsem_module_entry
  */
 zend_module_entry sysvsem_module_entry = {
 	STANDARD_MODULE_HEADER,
@@ -61,7 +61,6 @@ zend_module_entry sysvsem_module_entry = {
 	PHP_SYSVSEM_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
-/* }}} */
 
 #ifdef COMPILE_DL_SYSVSEM
 ZEND_GET_MODULE(sysvsem)
@@ -147,9 +146,8 @@ static void sysvsem_free_obj(zend_object *object)
 
 	zend_object_std_dtor(&sem_ptr->std);
 }
-/* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION
+/* PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(sysvsem)
 {
@@ -169,9 +167,8 @@ PHP_MINIT_FUNCTION(sysvsem)
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
+/* PHP_MINFO_FUNCTION
  */
 PHP_MINFO_FUNCTION(sysvsem)
 {
@@ -179,7 +176,6 @@ PHP_MINFO_FUNCTION(sysvsem)
 	php_info_print_table_row(2, "sysvsem support", "enabled");
 	php_info_print_table_end();
 }
-/* }}} */
 
 #define SETVAL_WANTS_PTR
 
@@ -294,9 +290,8 @@ PHP_FUNCTION(sem_get)
 	sem_ptr->count = 0;
 	sem_ptr->auto_release = auto_release;
 }
-/* }}} */
 
-/* {{{ php_sysvsem_semop
+/* php_sysvsem_semop
  */
 static void php_sysvsem_semop(INTERNAL_FUNCTION_PARAMETERS, int acquire)
 {
@@ -338,21 +333,18 @@ static void php_sysvsem_semop(INTERNAL_FUNCTION_PARAMETERS, int acquire)
 	sem_ptr->count -= acquire ? -1 : 1;
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Acquires the semaphore with the given id, blocking if necessary */
 PHP_FUNCTION(sem_acquire)
 {
 	php_sysvsem_semop(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
-/* }}} */
 
 /* Releases the semaphore with the given id */
 PHP_FUNCTION(sem_release)
 {
 	php_sysvsem_semop(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
-/* }}} */
 
 /* Removes semaphore from Unix systems */
 
@@ -403,6 +395,5 @@ PHP_FUNCTION(sem_remove)
 	RETURN_TRUE;
 }
 
-/* }}} */
 
 #endif /* HAVE_SYSVSEM */

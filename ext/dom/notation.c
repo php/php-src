@@ -30,9 +30,9 @@
 * Since:
 */
 
-/* {{{ attribute protos, not implemented yet */
+/* attribute protos, not implemented yet */
 
-/* {{{ publicId	string
+/* publicId	string
 readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-54F2B4D0
 Since:
@@ -55,9 +55,8 @@ int dom_notation_public_id_read(dom_object *obj, zval *retval)
 	return SUCCESS;
 }
 
-/* }}} */
 
-/* {{{ systemId	string
+/* systemId	string
 readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-E8AAB1D0
 Since:
@@ -80,8 +79,6 @@ int dom_notation_system_id_read(dom_object *obj, zval *retval)
 	return SUCCESS;
 }
 
-/* }}} */
 
-/* }}} */
 
 #endif

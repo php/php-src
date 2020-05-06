@@ -27,7 +27,7 @@
 #include "mysqlnd_debug.h"
 #include "mysqlnd_ext_plugin.h"
 
-/* {{{ mysqlnd_result_buffered_zval::initialize_result_set_rest */
+/* mysqlnd_result_buffered_zval::initialize_result_set_rest */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_result_buffered_zval, initialize_result_set_rest)(MYSQLND_RES_BUFFERED * const result,
 																		 MYSQLND_RES_METADATA * const meta,
@@ -79,10 +79,8 @@ MYSQLND_METHOD(mysqlnd_result_buffered_zval, initialize_result_set_rest)(MYSQLND
 	}
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_result_buffered_c::initialize_result_set_rest */
+/* mysqlnd_result_buffered_c::initialize_result_set_rest */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_result_buffered_c, initialize_result_set_rest)(MYSQLND_RES_BUFFERED * const result,
 																	  MYSQLND_RES_METADATA * const meta,
@@ -137,10 +135,8 @@ MYSQLND_METHOD(mysqlnd_result_buffered_c, initialize_result_set_rest)(MYSQLND_RE
 	}
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_result_unbuffered::free_last_data */
+/* mysqlnd_result_unbuffered::free_last_data */
 static void
 MYSQLND_METHOD(mysqlnd_result_unbuffered, free_last_data)(MYSQLND_RES_UNBUFFERED * unbuf, MYSQLND_STATS * const global_stats)
 {
@@ -171,10 +167,8 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, free_last_data)(MYSQLND_RES_UNBUFFERED
 
 	DBG_VOID_RETURN;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_result_unbuffered::free_result */
+/* mysqlnd_result_unbuffered::free_result */
 static void
 MYSQLND_METHOD(mysqlnd_result_unbuffered, free_result)(MYSQLND_RES_UNBUFFERED * const result, MYSQLND_STATS * const global_stats)
 {
@@ -190,10 +184,8 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, free_result)(MYSQLND_RES_UNBUFFERED * 
 
 	DBG_VOID_RETURN;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_result_buffered_zval::free_result */
+/* mysqlnd_result_buffered_zval::free_result */
 static void
 MYSQLND_METHOD(mysqlnd_result_buffered_zval, free_result)(MYSQLND_RES_BUFFERED_ZVAL * const set)
 {
@@ -221,10 +213,8 @@ MYSQLND_METHOD(mysqlnd_result_buffered_zval, free_result)(MYSQLND_RES_BUFFERED_Z
 	set->data_cursor = NULL;
 	DBG_VOID_RETURN;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_result_buffered_c::free_result */
+/* mysqlnd_result_buffered_c::free_result */
 static void
 MYSQLND_METHOD(mysqlnd_result_buffered_c, free_result)(MYSQLND_RES_BUFFERED_C * const set)
 {
@@ -233,10 +223,8 @@ MYSQLND_METHOD(mysqlnd_result_buffered_c, free_result)(MYSQLND_RES_BUFFERED_C * 
 	set->initialized = NULL;
 	DBG_VOID_RETURN;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_result_buffered::free_result */
+/* mysqlnd_result_buffered::free_result */
 static void
 MYSQLND_METHOD(mysqlnd_result_buffered, free_result)(MYSQLND_RES_BUFFERED * const set)
 {
@@ -259,10 +247,8 @@ MYSQLND_METHOD(mysqlnd_result_buffered, free_result)(MYSQLND_RES_BUFFERED * cons
 
 	DBG_VOID_RETURN;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_res::free_result_buffers */
+/* mysqlnd_res::free_result_buffers */
 static void
 MYSQLND_METHOD(mysqlnd_res, free_result_buffers)(MYSQLND_RES * result)
 {
@@ -288,10 +274,8 @@ MYSQLND_METHOD(mysqlnd_res, free_result_buffers)(MYSQLND_RES * result)
 
 	DBG_VOID_RETURN;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_res::free_result_contents_internal */
+/* mysqlnd_res::free_result_contents_internal */
 static
 void MYSQLND_METHOD(mysqlnd_res, free_result_contents_internal)(MYSQLND_RES * result)
 {
@@ -308,10 +292,8 @@ void MYSQLND_METHOD(mysqlnd_res, free_result_contents_internal)(MYSQLND_RES * re
 
 	DBG_VOID_RETURN;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_res::free_result_internal */
+/* mysqlnd_res::free_result_internal */
 static
 void MYSQLND_METHOD(mysqlnd_res, free_result_internal)(MYSQLND_RES * result)
 {
@@ -322,10 +304,8 @@ void MYSQLND_METHOD(mysqlnd_res, free_result_internal)(MYSQLND_RES * result)
 
 	DBG_VOID_RETURN;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_res::read_result_metadata */
+/* mysqlnd_res::read_result_metadata */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_res, read_result_metadata)(MYSQLND_RES * result, MYSQLND_CONN_DATA * conn)
 {
@@ -368,10 +348,8 @@ MYSQLND_METHOD(mysqlnd_res, read_result_metadata)(MYSQLND_RES * result, MYSQLND_
 
 	DBG_RETURN(PASS);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_query_read_result_set_header */
+/* mysqlnd_query_read_result_set_header */
 enum_func_status
 mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 {
@@ -557,10 +535,8 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 	DBG_INF(ret == PASS? "PASS":"FAIL");
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_result_buffered::fetch_lengths */
+/* mysqlnd_result_buffered::fetch_lengths */
 /*
   Do lazy initialization for buffered results. As PHP strings have
   length inside, this function makes not much sense in the context
@@ -589,10 +565,8 @@ MYSQLND_METHOD(mysqlnd_result_buffered_zval, fetch_lengths)(const MYSQLND_RES_BU
 	DBG_INF("non NULL");
 	DBG_RETURN(result->lengths);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_result_buffered_c::fetch_lengths */
+/* mysqlnd_result_buffered_c::fetch_lengths */
 /*
   Do lazy initialization for buffered results. As PHP strings have
   length inside, this function makes not much sense in the context
@@ -612,20 +586,16 @@ MYSQLND_METHOD(mysqlnd_result_buffered_c, fetch_lengths)(const MYSQLND_RES_BUFFE
 	DBG_INF("non NULL");
 	DBG_RETURN(result->lengths);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_result_unbuffered::fetch_lengths */
+/* mysqlnd_result_unbuffered::fetch_lengths */
 static const size_t *
 MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_lengths)(const MYSQLND_RES_UNBUFFERED * const result)
 {
 	/* simulate output of libmysql */
 	return (result->last_row_data || result->eof_reached)? result->lengths : NULL;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_res::fetch_lengths */
+/* mysqlnd_res::fetch_lengths */
 static const size_t *
 MYSQLND_METHOD(mysqlnd_res, fetch_lengths)(const MYSQLND_RES * const result)
 {
@@ -639,10 +609,8 @@ MYSQLND_METHOD(mysqlnd_res, fetch_lengths)(const MYSQLND_RES * const result)
 					);
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_result_unbuffered::fetch_row_c */
+/* mysqlnd_result_unbuffered::fetch_row_c */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row_c)(MYSQLND_RES * result, void * param, unsigned int flags, zend_bool * fetched_anything)
 {
@@ -769,10 +737,8 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row_c)(MYSQLND_RES * result, voi
 	DBG_INF_FMT("ret=%s fetched=%u", ret == PASS? "PASS":"FAIL", *fetched_anything);
 	DBG_RETURN(PASS);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_result_unbuffered::fetch_row */
+/* mysqlnd_result_unbuffered::fetch_row */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row)(MYSQLND_RES * result, void * param, const unsigned int flags, zend_bool * fetched_anything)
 {
@@ -907,10 +873,8 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row)(MYSQLND_RES * result, void 
 	DBG_INF_FMT("ret=%s fetched=%u", ret == PASS? "PASS":"FAIL", *fetched_anything);
 	DBG_RETURN(PASS);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_res::use_result */
+/* mysqlnd_res::use_result */
 static MYSQLND_RES *
 MYSQLND_METHOD(mysqlnd_res, use_result)(MYSQLND_RES * const result, const zend_bool ps)
 {
@@ -953,10 +917,8 @@ oom:
 	SET_OOM_ERROR(conn->error_info);
 	DBG_RETURN(NULL);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_result_buffered::fetch_row_c */
+/* mysqlnd_result_buffered::fetch_row_c */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_result_buffered, fetch_row_c)(MYSQLND_RES * result, void * param, unsigned int flags, zend_bool * const fetched_anything)
 {
@@ -1046,10 +1008,8 @@ MYSQLND_METHOD(mysqlnd_result_buffered, fetch_row_c)(MYSQLND_RES * result, void 
 	DBG_INF_FMT("ret=PASS fetched=%u", *fetched_anything);
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_result_buffered_zval::fetch_row */
+/* mysqlnd_result_buffered_zval::fetch_row */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_result_buffered_zval, fetch_row)(MYSQLND_RES * result, void * param, const unsigned int flags, zend_bool * const fetched_anything)
 {
@@ -1133,10 +1093,8 @@ MYSQLND_METHOD(mysqlnd_result_buffered_zval, fetch_row)(MYSQLND_RES * result, vo
 	DBG_INF_FMT("ret=PASS fetched=%u", *fetched_anything);
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_result_buffered_c::fetch_row */
+/* mysqlnd_result_buffered_c::fetch_row */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_result_buffered_c, fetch_row)(MYSQLND_RES * result, void * param, const unsigned int flags, zend_bool * fetched_anything)
 {
@@ -1241,10 +1199,8 @@ MYSQLND_METHOD(mysqlnd_result_buffered_c, fetch_row)(MYSQLND_RES * result, void 
 	DBG_INF_FMT("ret=PASS fetched=%u", *fetched_anything);
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_res::fetch_row */
+/* mysqlnd_res::fetch_row */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_res, fetch_row)(MYSQLND_RES * result, void * param, const unsigned int flags, zend_bool *fetched_anything)
 {
@@ -1255,10 +1211,8 @@ MYSQLND_METHOD(mysqlnd_res, fetch_row)(MYSQLND_RES * result, void * param, const
 	*fetched_anything = FALSE;
 	return PASS;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_res::store_result_fetch_data */
+/* mysqlnd_res::store_result_fetch_data */
 enum_func_status
 MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const conn, MYSQLND_RES * result,
 													MYSQLND_RES_METADATA * meta,
@@ -1387,10 +1341,8 @@ end:
 	DBG_INF_FMT("rows=%llu", (unsigned long long)result->stored_data->row_count);
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_res::store_result */
+/* mysqlnd_res::store_result */
 static MYSQLND_RES *
 MYSQLND_METHOD(mysqlnd_res, store_result)(MYSQLND_RES * result,
 										  MYSQLND_CONN_DATA * const conn,
@@ -1465,10 +1417,8 @@ MYSQLND_METHOD(mysqlnd_res, store_result)(MYSQLND_RES * result,
 
 	DBG_RETURN(result);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_res::skip_result */
+/* mysqlnd_res::skip_result */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_res, skip_result)(MYSQLND_RES * const result)
 {
@@ -1494,10 +1444,8 @@ MYSQLND_METHOD(mysqlnd_res, skip_result)(MYSQLND_RES * const result)
 	}
 	DBG_RETURN(PASS);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_res::free_result */
+/* mysqlnd_res::free_result */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_res, free_result)(MYSQLND_RES * result, const zend_bool implicit)
 {
@@ -1510,10 +1458,8 @@ MYSQLND_METHOD(mysqlnd_res, free_result)(MYSQLND_RES * result, const zend_bool i
 	result->m.free_result_internal(result);
 	DBG_RETURN(PASS);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_res::data_seek */
+/* mysqlnd_res::data_seek */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_res, data_seek)(MYSQLND_RES * const result, const uint64_t row)
 {
@@ -1522,10 +1468,8 @@ MYSQLND_METHOD(mysqlnd_res, data_seek)(MYSQLND_RES * const result, const uint64_
 
 	DBG_RETURN(result->stored_data? result->stored_data->m.data_seek(result->stored_data, row) : FAIL);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_result_buffered_zval::data_seek */
+/* mysqlnd_result_buffered_zval::data_seek */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_result_buffered_zval, data_seek)(MYSQLND_RES_BUFFERED * const result, const uint64_t row)
 {
@@ -1540,10 +1484,8 @@ MYSQLND_METHOD(mysqlnd_result_buffered_zval, data_seek)(MYSQLND_RES_BUFFERED * c
 	}
 	DBG_RETURN(PASS);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_result_buffered_c::data_seek */
+/* mysqlnd_result_buffered_c::data_seek */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_result_buffered_c, data_seek)(MYSQLND_RES_BUFFERED * const result, const uint64_t row)
 {
@@ -1558,29 +1500,23 @@ MYSQLND_METHOD(mysqlnd_result_buffered_c, data_seek)(MYSQLND_RES_BUFFERED * cons
 	}
 	DBG_RETURN(PASS);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_result_unbuffered::num_rows */
+/* mysqlnd_result_unbuffered::num_rows */
 static uint64_t
 MYSQLND_METHOD(mysqlnd_result_unbuffered, num_rows)(const MYSQLND_RES_UNBUFFERED * const result)
 {
 	/* Be compatible with libmysql. We count row_count, but will return 0 */
 	return result->eof_reached? result->row_count : 0;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_result_buffered::num_rows */
+/* mysqlnd_result_buffered::num_rows */
 static uint64_t
 MYSQLND_METHOD(mysqlnd_result_buffered, num_rows)(const MYSQLND_RES_BUFFERED * const result)
 {
 	return result->row_count;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_res::num_rows */
+/* mysqlnd_res::num_rows */
 static uint64_t
 MYSQLND_METHOD(mysqlnd_res, num_rows)(const MYSQLND_RES * const result)
 {
@@ -1588,19 +1524,15 @@ MYSQLND_METHOD(mysqlnd_res, num_rows)(const MYSQLND_RES * const result)
 			result->stored_data->m.num_rows(result->stored_data) :
 			(result->unbuf? result->unbuf->m.num_rows(result->unbuf) : 0);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_res::num_fields */
+/* mysqlnd_res::num_fields */
 static unsigned int
 MYSQLND_METHOD(mysqlnd_res, num_fields)(const MYSQLND_RES * const result)
 {
 	return result->field_count;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_res::fetch_field */
+/* mysqlnd_res::fetch_field */
 static const MYSQLND_FIELD *
 MYSQLND_METHOD(mysqlnd_res, fetch_field)(MYSQLND_RES * const result)
 {
@@ -1634,10 +1566,8 @@ MYSQLND_METHOD(mysqlnd_res, fetch_field)(MYSQLND_RES * const result)
 	} while (0);
 	DBG_RETURN(NULL);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_res::fetch_field_direct */
+/* mysqlnd_res::fetch_field_direct */
 static const MYSQLND_FIELD *
 MYSQLND_METHOD(mysqlnd_res, fetch_field_direct)(MYSQLND_RES * const result, const MYSQLND_FIELD_OFFSET fieldnr)
 {
@@ -1672,10 +1602,8 @@ MYSQLND_METHOD(mysqlnd_res, fetch_field_direct)(MYSQLND_RES * const result, cons
 
 	DBG_RETURN(NULL);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_res::fetch_field */
+/* mysqlnd_res::fetch_field */
 static const MYSQLND_FIELD *
 MYSQLND_METHOD(mysqlnd_res, fetch_fields)(MYSQLND_RES * const result)
 {
@@ -1698,28 +1626,22 @@ MYSQLND_METHOD(mysqlnd_res, fetch_fields)(MYSQLND_RES * const result)
 	} while (0);
 	DBG_RETURN(NULL);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_res::field_seek */
+/* mysqlnd_res::field_seek */
 static MYSQLND_FIELD_OFFSET
 MYSQLND_METHOD(mysqlnd_res, field_seek)(MYSQLND_RES * const result, const MYSQLND_FIELD_OFFSET field_offset)
 {
 	return result->meta? result->meta->m->field_seek(result->meta, field_offset) : 0;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_res::field_tell */
+/* mysqlnd_res::field_tell */
 static MYSQLND_FIELD_OFFSET
 MYSQLND_METHOD(mysqlnd_res, field_tell)(const MYSQLND_RES * const result)
 {
 	return result->meta? result->meta->m->field_tell(result->meta) : 0;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_res::fetch_into */
+/* mysqlnd_res::fetch_into */
 static void
 MYSQLND_METHOD(mysqlnd_res, fetch_into)(MYSQLND_RES * result, const unsigned int flags,
 										zval *return_value,
@@ -1761,10 +1683,8 @@ MYSQLND_METHOD(mysqlnd_res, fetch_into)(MYSQLND_RES * result, const unsigned int
 	*/
 	DBG_VOID_RETURN;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_res::fetch_row_c */
+/* mysqlnd_res::fetch_row_c */
 static MYSQLND_ROW_C
 MYSQLND_METHOD(mysqlnd_res, fetch_row_c)(MYSQLND_RES * result)
 {
@@ -1782,10 +1702,8 @@ MYSQLND_METHOD(mysqlnd_res, fetch_row_c)(MYSQLND_RES * result)
 	}
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_res::fetch_all */
+/* mysqlnd_res::fetch_all */
 static void
 MYSQLND_METHOD(mysqlnd_res, fetch_all)(MYSQLND_RES * result, const unsigned int flags, zval *return_value ZEND_FILE_LINE_DC)
 {
@@ -1818,10 +1736,8 @@ MYSQLND_METHOD(mysqlnd_res, fetch_all)(MYSQLND_RES * result, const unsigned int 
 
 	DBG_VOID_RETURN;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_res::fetch_field_data */
+/* mysqlnd_res::fetch_field_data */
 static void
 MYSQLND_METHOD(mysqlnd_res, fetch_field_data)(MYSQLND_RES * result, const unsigned int offset, zval *return_value)
 {
@@ -1854,8 +1770,6 @@ MYSQLND_METHOD(mysqlnd_res, fetch_field_data)(MYSQLND_RES * result, const unsign
 
 	DBG_VOID_RETURN;
 }
-/* }}} */
-
 
 MYSQLND_CLASS_METHODS_START(mysqlnd_res)
 	MYSQLND_METHOD(mysqlnd_res, fetch_row),
@@ -1911,7 +1825,7 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_result_buffered)
 MYSQLND_CLASS_METHODS_END;
 
 
-/* {{{ mysqlnd_result_init */
+/* mysqlnd_result_init */
 PHPAPI MYSQLND_RES *
 mysqlnd_result_init(const unsigned int field_count)
 {
@@ -1937,10 +1851,8 @@ mysqlnd_result_init(const unsigned int field_count)
 
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_result_unbuffered_init */
+/* mysqlnd_result_unbuffered_init */
 PHPAPI MYSQLND_RES_UNBUFFERED *
 mysqlnd_result_unbuffered_init(MYSQLND_RES *result, const unsigned int field_count, const zend_bool ps)
 {
@@ -1971,10 +1883,8 @@ mysqlnd_result_unbuffered_init(MYSQLND_RES *result, const unsigned int field_cou
 
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_result_buffered_zval_init */
+/* mysqlnd_result_buffered_zval_init */
 PHPAPI MYSQLND_RES_BUFFERED_ZVAL *
 mysqlnd_result_buffered_zval_init(MYSQLND_RES * result, const unsigned int field_count, const zend_bool ps)
 {
@@ -2012,10 +1922,8 @@ mysqlnd_result_buffered_zval_init(MYSQLND_RES * result, const unsigned int field
 	ret->m.initialize_result_set_rest = MYSQLND_METHOD(mysqlnd_result_buffered_zval, initialize_result_set_rest);
 	DBG_RETURN(ret);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_result_buffered_c_init */
+/* mysqlnd_result_buffered_c_init */
 PHPAPI MYSQLND_RES_BUFFERED_C *
 mysqlnd_result_buffered_c_init(MYSQLND_RES * result, const unsigned int field_count, const zend_bool ps)
 {
@@ -2054,4 +1962,4 @@ mysqlnd_result_buffered_c_init(MYSQLND_RES * result, const unsigned int field_co
 
 	DBG_RETURN(ret);
 }
-/* }}} */
+

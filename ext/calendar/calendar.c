@@ -198,7 +198,6 @@ PHP_FUNCTION(cal_info)
 
 	_php_cal_info(cal, return_value);
 }
-/* }}} */
 
 /* Returns the number of days in a month for a given year and calendar */
 PHP_FUNCTION(cal_days_in_month)
@@ -245,7 +244,6 @@ PHP_FUNCTION(cal_days_in_month)
 
 	RETURN_LONG(sdn_next - sdn_start);
 }
-/* }}} */
 
 /* Converts from a supported calendar to Julian Day Count */
 PHP_FUNCTION(cal_to_jd)
@@ -263,7 +261,6 @@ PHP_FUNCTION(cal_to_jd)
 
 	RETURN_LONG(cal_conversion_table[cal].to_jd(year, month, day));
 }
-/* }}} */
 
 /* Converts from Julian Day Count to a supported calendar and return extended information */
 PHP_FUNCTION(cal_from_jd)
@@ -314,7 +311,6 @@ PHP_FUNCTION(cal_from_jd)
 		add_assoc_string(return_value, "monthname", calendar->month_name_long[month]);
 	}
 }
-/* }}} */
 
 /* Converts a julian day count to a gregorian calendar date */
 PHP_FUNCTION(jdtogregorian)
@@ -330,7 +326,6 @@ PHP_FUNCTION(jdtogregorian)
 
 	RETURN_NEW_STR(zend_strpprintf(0, "%i/%i/%i", month, day, year));
 }
-/* }}} */
 
 /* Converts a gregorian calendar date to julian day count */
 PHP_FUNCTION(gregoriantojd)
@@ -343,7 +338,6 @@ PHP_FUNCTION(gregoriantojd)
 
 	RETURN_LONG(GregorianToSdn(year, month, day));
 }
-/* }}} */
 
 /* Convert a julian day count to a julian calendar date */
 PHP_FUNCTION(jdtojulian)
@@ -359,7 +353,6 @@ PHP_FUNCTION(jdtojulian)
 
 	RETURN_NEW_STR(zend_strpprintf(0, "%i/%i/%i", month, day, year));
 }
-/* }}} */
 
 /* Converts a julian calendar date to julian day count */
 PHP_FUNCTION(juliantojd)
@@ -372,9 +365,8 @@ PHP_FUNCTION(juliantojd)
 
 	RETURN_LONG(JulianToSdn(year, month, day));
 }
-/* }}} */
 
-/* {{{ heb_number_to_chars*/
+/* heb_number_to_chars*/
 /*
 caution: the Hebrew format produces non unique result.
 for example both: year '5' and year '5000' produce 'ה'.
@@ -468,7 +460,6 @@ static char *heb_number_to_chars(int n, int fl, char **ret)
 	p = *ret;
 	return p;
 }
-/* }}} */
 
 /* Converts a julian day count to a jewish calendar date */
 PHP_FUNCTION(jdtojewish)
@@ -501,7 +492,6 @@ PHP_FUNCTION(jdtojewish)
 		}
 	}
 }
-/* }}} */
 
 /* Converts a jewish calendar date to a julian day count */
 PHP_FUNCTION(jewishtojd)
@@ -514,7 +504,6 @@ PHP_FUNCTION(jewishtojd)
 
 	RETURN_LONG(JewishToSdn(year, month, day));
 }
-/* }}} */
 
 /* Converts a julian day count to a french republic calendar date */
 PHP_FUNCTION(jdtofrench)
@@ -530,7 +519,6 @@ PHP_FUNCTION(jdtofrench)
 
 	RETURN_NEW_STR(zend_strpprintf(0, "%i/%i/%i", month, day, year));
 }
-/* }}} */
 
 /* Converts a french republic calendar date to julian day count */
 PHP_FUNCTION(frenchtojd)
@@ -543,7 +531,6 @@ PHP_FUNCTION(frenchtojd)
 
 	RETURN_LONG(FrenchToSdn(year, month, day));
 }
-/* }}} */
 
 /* Returns name or number of day of week from julian day count */
 PHP_FUNCTION(jddayofweek)
@@ -573,7 +560,6 @@ PHP_FUNCTION(jddayofweek)
 		break;
 	}
 }
-/* }}} */
 
 /* Returns name of month for julian day count */
 PHP_FUNCTION(jdmonthname)
@@ -616,4 +602,4 @@ PHP_FUNCTION(jdmonthname)
 
 	RETURN_STRING(monthname);
 }
-/* }}} */
+

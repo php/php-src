@@ -28,7 +28,7 @@ static zend_object_handlers MessageFormatter_handlers;
  * Auxiliary functions needed by objects of 'MessageFormatter' class
  */
 
-/* {{{ MessageFormatter_objects_free */
+/* MessageFormatter_objects_free */
 void MessageFormatter_object_free( zend_object *object )
 {
 	MessageFormatter_object* mfo = php_intl_messageformatter_fetch_object(object);
@@ -37,9 +37,8 @@ void MessageFormatter_object_free( zend_object *object )
 
 	msgformat_data_free( &mfo->mf_data );
 }
-/* }}} */
 
-/* {{{ MessageFormatter_object_create */
+/* MessageFormatter_object_create */
 zend_object *MessageFormatter_object_create(zend_class_entry *ce)
 {
 	MessageFormatter_object*     intern;
@@ -53,9 +52,8 @@ zend_object *MessageFormatter_object_create(zend_class_entry *ce)
 
 	return &intern->zo;
 }
-/* }}} */
 
-/* {{{ MessageFormatter_object_clone */
+/* MessageFormatter_object_clone */
 zend_object *MessageFormatter_object_clone(zend_object *object)
 {
 	MessageFormatter_object *mfo, *new_mfo;
@@ -82,13 +80,12 @@ zend_object *MessageFormatter_object_clone(zend_object *object)
 	}
 	return new_obj;
 }
-/* }}} */
 
 /*
  * 'MessageFormatter' class registration structures & functions
  */
 
-/* {{{ msgformat_register_class
+/* msgformat_register_class
  * Initialize 'MessageFormatter' class
  */
 void msgformat_register_class( void )
@@ -106,4 +103,4 @@ void msgformat_register_class( void )
 	MessageFormatter_handlers.clone_obj = MessageFormatter_object_clone;
 	MessageFormatter_handlers.free_obj = MessageFormatter_object_free;
 }
-/* }}} */
+

@@ -42,7 +42,7 @@ static inline const char *phpdbg_command_name(const phpdbg_command_t *command, c
 	return buffer;
 }
 
-PHPDBG_API const char *phpdbg_get_param_type(const phpdbg_param_t *param) /* {{{ */
+PHPDBG_API const char *phpdbg_get_param_type(const phpdbg_param_t *param)
 {
 	switch (param->type) {
 		case STACK_PARAM:
@@ -68,7 +68,7 @@ PHPDBG_API const char *phpdbg_get_param_type(const phpdbg_param_t *param) /* {{{
 	}
 }
 
-PHPDBG_API void phpdbg_clear_param(phpdbg_param_t *param) /* {{{ */
+PHPDBG_API void phpdbg_clear_param(phpdbg_param_t *param)
 {
 	if (param) {
 		switch (param->type) {
@@ -87,9 +87,9 @@ PHPDBG_API void phpdbg_clear_param(phpdbg_param_t *param) /* {{{ */
 		}
 	}
 
-} /* }}} */
+}
 
-PHPDBG_API char* phpdbg_param_tostring(const phpdbg_param_t *param, char **pointer) /* {{{ */
+PHPDBG_API char* phpdbg_param_tostring(const phpdbg_param_t *param, char **pointer)
 {
 	switch (param->type) {
 		case STR_PARAM:
@@ -129,9 +129,9 @@ PHPDBG_API char* phpdbg_param_tostring(const phpdbg_param_t *param, char **point
 	}
 
 	return *pointer;
-} /* }}} */
+}
 
-PHPDBG_API void phpdbg_copy_param(const phpdbg_param_t* src, phpdbg_param_t* dest) /* {{{ */
+PHPDBG_API void phpdbg_copy_param(const phpdbg_param_t* src, phpdbg_param_t* dest)
 {
 	switch ((dest->type = src->type)) {
 		case STACK_PARAM:
@@ -187,9 +187,9 @@ PHPDBG_API void phpdbg_copy_param(const phpdbg_param_t* src, phpdbg_param_t* des
 			/* not yet */
 		}
 	}
-} /* }}} */
+}
 
-PHPDBG_API zend_ulong phpdbg_hash_param(const phpdbg_param_t *param) /* {{{ */
+PHPDBG_API zend_ulong phpdbg_hash_param(const phpdbg_param_t *param)
 {
 	zend_ulong hash = param->type;
 
@@ -242,9 +242,9 @@ PHPDBG_API zend_ulong phpdbg_hash_param(const phpdbg_param_t *param) /* {{{ */
 	}
 
 	return hash;
-} /* }}} */
+}
 
-PHPDBG_API zend_bool phpdbg_match_param(const phpdbg_param_t *l, const phpdbg_param_t *r) /* {{{ */
+PHPDBG_API zend_bool phpdbg_match_param(const phpdbg_param_t *l, const phpdbg_param_t *r)
 {
 	if (l && r) {
 		if (l->type == r->type) {
@@ -316,9 +316,8 @@ PHPDBG_API zend_bool phpdbg_match_param(const phpdbg_param_t *l, const phpdbg_pa
 		}
 	}
 	return 0;
-} /* }}} */
+}
 
-/* {{{ */
 PHPDBG_API void phpdbg_param_debug(const phpdbg_param_t *param, const char *msg) {
 	if (param && param->type) {
 		switch (param->type) {
@@ -367,9 +366,8 @@ PHPDBG_API void phpdbg_param_debug(const phpdbg_param_t *param, const char *msg)
 			}
 		}
 	}
-} /* }}} */
+}
 
-/* {{{ */
 PHPDBG_API void phpdbg_stack_free(phpdbg_param_t *stack) {
 	if (stack && stack->next) {
 		phpdbg_param_t *remove = stack->next;
@@ -426,9 +424,8 @@ PHPDBG_API void phpdbg_stack_free(phpdbg_param_t *stack) {
 
 
 	stack->next = NULL;
-} /* }}} */
+}
 
-/* {{{ */
 PHPDBG_API void phpdbg_stack_push(phpdbg_param_t *stack, phpdbg_param_t *param) {
 	phpdbg_param_t *next = calloc(1, sizeof(phpdbg_param_t));
 
@@ -451,9 +448,8 @@ PHPDBG_API void phpdbg_stack_push(phpdbg_param_t *stack, phpdbg_param_t *param) 
 	}
 
 	stack->len++;
-} /* }}} */
+}
 
-/* {{{ */
 PHPDBG_API void phpdbg_stack_separate(phpdbg_param_t *param) {
 	phpdbg_param_t *stack = calloc(1, sizeof(phpdbg_param_t));
 
@@ -461,7 +457,7 @@ PHPDBG_API void phpdbg_stack_separate(phpdbg_param_t *param) {
 	stack->next = param->next;
 	param->next = stack;
 	stack->top = param->top;
-} /* }}} */
+}
 
 PHPDBG_API int phpdbg_stack_verify(const phpdbg_command_t *command, phpdbg_param_t **stack) {
 	if (command) {
@@ -566,7 +562,6 @@ PHPDBG_API int phpdbg_stack_verify(const phpdbg_command_t *command, phpdbg_param
 	return SUCCESS;
 }
 
-/* {{{ */
 PHPDBG_API const phpdbg_command_t *phpdbg_stack_resolve(const phpdbg_command_t *commands, const phpdbg_command_t *parent, phpdbg_param_t **top) {
 	const phpdbg_command_t *command = commands;
 	phpdbg_param_t *name = *top;
@@ -657,7 +652,7 @@ PHPDBG_API const phpdbg_command_t *phpdbg_stack_resolve(const phpdbg_command_t *
 	}
 
 	return NULL;
-} /* }}} */
+}
 
 static int phpdbg_internal_stack_execute(phpdbg_param_t *stack, zend_bool allow_async_unsafe) {
 	const phpdbg_command_t *handler = NULL;
@@ -709,9 +704,8 @@ static int phpdbg_internal_stack_execute(phpdbg_param_t *stack, zend_bool allow_
 	}
 
 	return SUCCESS;
-} /* }}} */
+}
 
-/* {{{ */
 PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, zend_bool allow_async_unsafe) {
 	phpdbg_param_t *top = stack;
 
@@ -735,9 +729,9 @@ PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, zend_bool allow_async
 	} while ((top = top->next));
 
 	return SUCCESS;
-} /* }}} */
+}
 
-PHPDBG_API char *phpdbg_read_input(char *buffered) /* {{{ */
+PHPDBG_API char *phpdbg_read_input(char *buffered)
 {
 	char buf[PHPDBG_MAX_CMD];
 	char *cmd = NULL;
@@ -806,12 +800,12 @@ PHPDBG_API char *phpdbg_read_input(char *buffered) /* {{{ */
 	}
 
 	return buffer;
-} /* }}} */
+}
 
-PHPDBG_API void phpdbg_destroy_input(char **input) /*{{{ */
+PHPDBG_API void phpdbg_destroy_input(char **input)
 {
 	efree(*input);
-} /* }}} */
+}
 
 PHPDBG_API int phpdbg_ask_user_permission(const char *question) {
 	if (!(PHPDBG_G(flags) & PHPDBG_WRITE_XML)) {

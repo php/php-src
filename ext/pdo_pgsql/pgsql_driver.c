@@ -63,7 +63,7 @@ static zend_string* _pdo_pgsql_escape_credentials(char *str)
 	return NULL;
 }
 
-int _pdo_pgsql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, int errcode, const char *sqlstate, const char *msg, const char *file, int line) /* {{{ */
+int _pdo_pgsql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, int errcode, const char *sqlstate, const char *msg, const char *file, int line)
 {
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 	pdo_error_type *pdo_err = stmt ? &stmt->error_code : &dbh->error_code;
@@ -100,15 +100,13 @@ int _pdo_pgsql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, int errcode, const char *
 
 	return errcode;
 }
-/* }}} */
 
-static void _pdo_pgsql_notice(pdo_dbh_t *dbh, const char *message) /* {{{ */
+static void _pdo_pgsql_notice(pdo_dbh_t *dbh, const char *message)
 {
 /*	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data; */
 }
-/* }}} */
 
-static int pdo_pgsql_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info) /* {{{ */
+static int pdo_pgsql_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info)
 {
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 	pdo_pgsql_error_info *einfo = &H->einfo;
@@ -120,9 +118,8 @@ static int pdo_pgsql_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *in
 
 	return 1;
 }
-/* }}} */
 
-/* {{{ pdo_pgsql_create_lob_stream */
+/* pdo_pgsql_create_lob_stream */
 static ssize_t pgsql_lob_write(php_stream *stream, const char *buf, size_t count)
 {
 	struct pdo_pgsql_lob_self *self = (struct pdo_pgsql_lob_self*)stream->abstract;
@@ -198,9 +195,8 @@ php_stream *pdo_pgsql_create_lob_stream(zval *dbh, int lfd, Oid oid)
 	efree(self);
 	return NULL;
 }
-/* }}} */
 
-static int pgsql_handle_closer(pdo_dbh_t *dbh) /* {{{ */
+static int pgsql_handle_closer(pdo_dbh_t *dbh)
 {
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 	if (H) {
@@ -217,7 +213,6 @@ static int pgsql_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 	}
 	return 0;
 }
-/* }}} */
 
 static int pgsql_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len, pdo_stmt_t *stmt, zval *driver_options)
 {
@@ -468,7 +463,6 @@ static int pdo_pgsql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_
 	return 1;
 }
 
-/* {{{ */
 static int pdo_pgsql_check_liveness(pdo_dbh_t *dbh)
 {
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
@@ -477,7 +471,6 @@ static int pdo_pgsql_check_liveness(pdo_dbh_t *dbh)
 	}
 	return (PQstatus(H->server) == CONNECTION_OK) ? SUCCESS : FAILURE;
 }
-/* }}} */
 
 static int pgsql_handle_in_transaction(pdo_dbh_t *dbh)
 {
@@ -639,7 +632,6 @@ static PHP_METHOD(PDO, pgsqlCopyFromArray)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Returns true if the copy worked fine or false if error */
 static PHP_METHOD(PDO, pgsqlCopyFromFile)
@@ -736,8 +728,6 @@ static PHP_METHOD(PDO, pgsqlCopyFromFile)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
-
 
 /* Returns true if the copy worked fine or false if error */
 static PHP_METHOD(PDO, pgsqlCopyToFile)
@@ -831,7 +821,6 @@ static PHP_METHOD(PDO, pgsqlCopyToFile)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Returns true if the copy worked fine or false if error */
 static PHP_METHOD(PDO, pgsqlCopyToArray)
@@ -906,8 +895,6 @@ static PHP_METHOD(PDO, pgsqlCopyToArray)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
-
 
 /* Creates a new large object, returning its identifier.  Must be called inside a transaction. */
 static PHP_METHOD(PDO, pgsqlLOBCreate)
@@ -935,7 +922,6 @@ static PHP_METHOD(PDO, pgsqlLOBCreate)
 	PDO_HANDLE_DBH_ERR();
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* Opens an existing large object stream.  Must be called inside a transaction. */
 static PHP_METHOD(PDO, pgsqlLOBOpen)
@@ -986,7 +972,6 @@ static PHP_METHOD(PDO, pgsqlLOBOpen)
 	PDO_HANDLE_DBH_ERR();
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* Deletes the large object identified by oid.  Must be called inside a transaction. */
 static PHP_METHOD(PDO, pgsqlLOBUnlink)
@@ -1021,7 +1006,6 @@ static PHP_METHOD(PDO, pgsqlLOBUnlink)
 	PDO_HANDLE_DBH_ERR();
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* Get asynchronous notification */
 static PHP_METHOD(PDO, pgsqlGetNotify)
@@ -1101,7 +1085,6 @@ static PHP_METHOD(PDO, pgsqlGetNotify)
 
 	PQfreemem(pgsql_notify);
 }
-/* }}} */
 
 /* Get backend(server) pid */
 static PHP_METHOD(PDO, pgsqlGetPid)
@@ -1118,8 +1101,6 @@ static PHP_METHOD(PDO, pgsqlGetPid)
 
 	RETURN_LONG(PQbackendPID(H->server));
 }
-/* }}} */
-
 
 static const zend_function_entry dbh_methods[] = {
 	PHP_ME(PDO, pgsqlLOBCreate, NULL, ZEND_ACC_PUBLIC)
@@ -1179,7 +1160,7 @@ static const struct pdo_dbh_methods pgsql_methods = {
 	pgsql_handle_in_transaction,
 };
 
-static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ */
+static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 {
 	pdo_pgsql_db_handle *H;
 	int ret = 0;
@@ -1256,7 +1237,6 @@ cleanup:
 
 	return ret;
 }
-/* }}} */
 
 const pdo_driver_t pdo_pgsql_driver = {
 	PDO_DRIVER_HEADER(pgsql),

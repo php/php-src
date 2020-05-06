@@ -100,10 +100,9 @@ struct _spl_filesystem_object {
 	zend_object        std;
 };
 
-static inline spl_filesystem_object *spl_filesystem_from_obj(zend_object *obj) /* {{{ */ {
+static inline spl_filesystem_object *spl_filesystem_from_obj(zend_object *obj) /* */ {
 	return (spl_filesystem_object*)((char*)(obj) - XtOffsetOf(spl_filesystem_object, std));
 }
-/* }}} */
 
 #define Z_SPLFILESYSTEM_P(zv)  spl_filesystem_from_obj(Z_OBJ_P((zv)))
 

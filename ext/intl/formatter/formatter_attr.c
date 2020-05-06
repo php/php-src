@@ -22,9 +22,7 @@
 
 #include <unicode/ustring.h>
 
-/* Get formatter attribute value. }}} */
-/* Get formatter attribute value.
- */
+/* Get formatter attribute value. */
 PHP_FUNCTION( numfmt_get_attribute )
 {
 	zend_long attribute, value;
@@ -84,11 +82,8 @@ PHP_FUNCTION( numfmt_get_attribute )
 
 	INTL_METHOD_CHECK_STATUS( nfo, "Error getting attribute value" );
 }
-/* }}} */
 
-/* Get formatter attribute value. }}} */
-/* Get formatter attribute value.
- */
+/* Get formatter attribute value.*/
 PHP_FUNCTION( numfmt_get_text_attribute )
 {
 	zend_long   attribute;
@@ -123,11 +118,8 @@ PHP_FUNCTION( numfmt_get_text_attribute )
 
 	INTL_METHOD_RETVAL_UTF8( nfo, value, length, ( value != value_buf ) );
 }
-/* }}} */
 
-/* Get formatter attribute value. }}} */
-/* Get formatter attribute value.
- */
+/* Get formatter attribute value. */
 PHP_FUNCTION( numfmt_set_attribute )
 {
 	zend_long attribute;
@@ -178,11 +170,8 @@ PHP_FUNCTION( numfmt_set_attribute )
 
 	RETURN_TRUE;
 }
-/* }}} */
 
-/* Get formatter attribute value. }}} */
-/* Get formatter attribute value.
- */
+/* Get formatter attribute value. */
 PHP_FUNCTION( numfmt_set_text_attribute )
 {
 	int32_t slength = 0;
@@ -215,11 +204,8 @@ PHP_FUNCTION( numfmt_set_text_attribute )
 
 	RETURN_TRUE;
 }
-/* }}} */
 
-/* Get formatter symbol value. }}} */
-/* Get formatter symbol value.
- */
+/* Get formatter symbol value. */
 PHP_FUNCTION( numfmt_get_symbol )
 {
 	zend_long symbol;
@@ -258,11 +244,8 @@ PHP_FUNCTION( numfmt_get_symbol )
 
 	INTL_METHOD_RETVAL_UTF8( nfo, value, length, ( value_buf != value ) );
 }
-/* }}} */
 
-/* Set formatter symbol value. }}} */
-/* Set formatter symbol value.
- */
+/* Set formatter symbol value. */
 PHP_FUNCTION( numfmt_set_symbol )
 {
 	zend_long  symbol;
@@ -300,11 +283,8 @@ PHP_FUNCTION( numfmt_set_symbol )
 
 	RETURN_TRUE;
 }
-/* }}} */
 
-/* Get formatter pattern. }}} */
-/* Get formatter pattern.
- */
+/* Get formatter pattern. */
 PHP_FUNCTION( numfmt_get_pattern )
 {
 	UChar   value_buf[64];
@@ -337,11 +317,8 @@ PHP_FUNCTION( numfmt_get_pattern )
 
 	INTL_METHOD_RETVAL_UTF8( nfo, value, length, ( value != value_buf ) );
 }
-/* }}} */
 
-/* Set formatter pattern. }}} */
-/* Set formatter pattern.
- */
+/* Set formatter pattern. */
 PHP_FUNCTION( numfmt_set_pattern )
 {
 	char*       value = NULL;
@@ -372,11 +349,8 @@ PHP_FUNCTION( numfmt_set_pattern )
 
 	RETURN_TRUE;
 }
-/* }}} */
 
-/* Get formatter locale. }}} */
-/* Get formatter locale.
- */
+/* Get formatter locale. */
 PHP_FUNCTION( numfmt_get_locale )
 {
 	zend_long type = ULOC_ACTUAL_LOCALE;
@@ -397,4 +371,4 @@ PHP_FUNCTION( numfmt_get_locale )
 	INTL_METHOD_CHECK_STATUS( nfo, "Error getting locale" );
 	RETURN_STRING(loc);
 }
-/* }}} */
+

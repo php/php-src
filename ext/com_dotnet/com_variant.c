@@ -431,7 +431,7 @@ PHP_COM_DOTNET_API int php_com_copy_variant(VARIANT *dstvar, VARIANT *srcvar)
 	return ret;
 }
 
-/* {{{ com_variant_create_instance - ctor for new VARIANT() */
+/* com_variant_create_instance - ctor for new VARIANT() */
 PHP_METHOD(variant, __construct)
 {
 	/* VARTYPE == unsigned short */ zend_long vt = VT_EMPTY;
@@ -500,7 +500,6 @@ PHP_METHOD(variant, __construct)
 		obj->typeinfo = NULL;
 	}
 }
-/* }}} */
 
 /* Assigns a new value for a variant object */
 PHP_FUNCTION(variant_set)
@@ -532,7 +531,6 @@ PHP_FUNCTION(variant_set)
 	/* remember we modified this variant */
 	obj->modified = 1;
 }
-/* }}} */
 
 enum variant_binary_opcode {
 	VOP_ADD, VOP_CAT, VOP_SUB, VOP_MUL, VOP_AND, VOP_DIV,
@@ -544,7 +542,7 @@ enum variant_unary_opcode {
 	VOP_ABS, VOP_FIX, VOP_INT, VOP_NEG, VOP_NOT
 };
 
-static void variant_binary_operation(enum variant_binary_opcode op, INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
+static void variant_binary_operation(enum variant_binary_opcode op, INTERNAL_FUNCTION_PARAMETERS)
 {
 	VARIANT vres;
 	VARIANT left_val, right_val;
@@ -646,100 +644,86 @@ static void variant_binary_operation(enum variant_binary_opcode op, INTERNAL_FUN
 	VariantClear(&left_val);
 	VariantClear(&right_val);
 }
-/* }}} */
 
 /* "Adds" two variant values together and returns the result */
 PHP_FUNCTION(variant_add)
 {
 	variant_binary_operation(VOP_ADD, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
-/* }}} */
 
 /* concatenates two variant values together and returns the result */
 PHP_FUNCTION(variant_cat)
 {
 	variant_binary_operation(VOP_CAT, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
-/* }}} */
 
 /* subtracts the value of the right variant from the left variant value and returns the result */
 PHP_FUNCTION(variant_sub)
 {
 	variant_binary_operation(VOP_SUB, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
-/* }}} */
 
 /* multiplies the values of the two variants and returns the result */
 PHP_FUNCTION(variant_mul)
 {
 	variant_binary_operation(VOP_MUL, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
-/* }}} */
 
 /* performs a bitwise AND operation between two variants and returns the result */
 PHP_FUNCTION(variant_and)
 {
 	variant_binary_operation(VOP_AND, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
-/* }}} */
 
 /* Returns the result from dividing two variants */
 PHP_FUNCTION(variant_div)
 {
 	variant_binary_operation(VOP_DIV, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
-/* }}} */
 
 /* Performs a bitwise equivalence on two variants */
 PHP_FUNCTION(variant_eqv)
 {
 	variant_binary_operation(VOP_EQV, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
-/* }}} */
 
 /* Converts variants to integers and then returns the result from dividing them */
 PHP_FUNCTION(variant_idiv)
 {
 	variant_binary_operation(VOP_IDIV, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
-/* }}} */
 
 /* Performs a bitwise implication on two variants */
 PHP_FUNCTION(variant_imp)
 {
 	variant_binary_operation(VOP_IMP, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
-/* }}} */
 
 /* Divides two variants and returns only the remainder */
 PHP_FUNCTION(variant_mod)
 {
 	variant_binary_operation(VOP_MOD, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
-/* }}} */
 
 /* Performs a logical disjunction on two variants */
 PHP_FUNCTION(variant_or)
 {
 	variant_binary_operation(VOP_OR, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
-/* }}} */
 
 /* Returns the result of performing the power function with two variants */
 PHP_FUNCTION(variant_pow)
 {
 	variant_binary_operation(VOP_POW, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
-/* }}} */
 
 /* Performs a logical exclusion on two variants */
 PHP_FUNCTION(variant_xor)
 {
 	variant_binary_operation(VOP_XOR, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
-/* }}} */
 
-static void variant_unary_operation(enum variant_unary_opcode op, INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
+static void variant_unary_operation(enum variant_unary_opcode op, INTERNAL_FUNCTION_PARAMETERS)
 {
 	VARIANT vres;
 	VARIANT left_val;
@@ -793,42 +777,36 @@ static void variant_unary_operation(enum variant_unary_opcode op, INTERNAL_FUNCT
 	VariantClear(&vres);
 	VariantClear(&left_val);
 }
-/* }}} */
 
 /* Returns the absolute value of a variant */
 PHP_FUNCTION(variant_abs)
 {
 	variant_unary_operation(VOP_ABS, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
-/* }}} */
 
 /* Returns the integer part ? of a variant */
 PHP_FUNCTION(variant_fix)
 {
 	variant_unary_operation(VOP_FIX, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
-/* }}} */
 
 /* Returns the integer portion of a variant */
 PHP_FUNCTION(variant_int)
 {
 	variant_unary_operation(VOP_INT, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
-/* }}} */
 
 /* Performs logical negation on a variant */
 PHP_FUNCTION(variant_neg)
 {
 	variant_unary_operation(VOP_NEG, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
-/* }}} */
 
 /* Performs bitwise not negation on a variant */
 PHP_FUNCTION(variant_not)
 {
 	variant_unary_operation(VOP_NOT, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
-/* }}} */
 
 /* Rounds a variant to the specified number of decimal places */
 PHP_FUNCTION(variant_round)
@@ -863,7 +841,6 @@ PHP_FUNCTION(variant_round)
 	VariantClear(&vres);
 	VariantClear(&left_val);
 }
-/* }}} */
 
 /* Compares two variants */
 PHP_FUNCTION(variant_cmp)
@@ -920,7 +897,6 @@ PHP_FUNCTION(variant_cmp)
 	VariantClear(&left_val);
 	VariantClear(&right_val);
 }
-/* }}} */
 
 /* Converts a variant date/time value to unix timestamp */
 PHP_FUNCTION(variant_date_to_timestamp)
@@ -958,7 +934,6 @@ PHP_FUNCTION(variant_date_to_timestamp)
 
 	VariantClear(&vres);
 }
-/* }}} */
 
 /* Returns a variant date representation of a unix timestamp */
 PHP_FUNCTION(variant_date_from_timestamp)
@@ -1006,7 +981,6 @@ PHP_FUNCTION(variant_date_from_timestamp)
 
 	VariantClear(&res);
 }
-/* }}} */
 
 /* Returns the VT_XXX type code for a variant */
 PHP_FUNCTION(variant_get_type)
@@ -1022,7 +996,6 @@ PHP_FUNCTION(variant_get_type)
 
 	RETURN_LONG(V_VT(&obj->v));
 }
-/* }}} */
 
 /* Convert a variant into another type.  Variant is modified "in-place" */
 PHP_FUNCTION(variant_set_type)
@@ -1056,7 +1029,6 @@ PHP_FUNCTION(variant_set_type)
 		efree(msg);
 	}
 }
-/* }}} */
 
 /* Convert a variant into a new variant object of another type */
 PHP_FUNCTION(variant_cast)
@@ -1091,4 +1063,4 @@ PHP_FUNCTION(variant_cast)
 
 	VariantClear(&vres);
 }
-/* }}} */
+

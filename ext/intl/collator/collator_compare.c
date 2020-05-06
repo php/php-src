@@ -21,9 +21,7 @@
 #include "collator_class.h"
 #include "intl_convert.h"
 
-/* Compare two strings. }}} */
-/* Compare two strings.
- */
+/* Compare two strings. */
 PHP_FUNCTION( collator_compare )
 {
 	char*            str1      = NULL;
@@ -113,4 +111,4 @@ PHP_FUNCTION( collator_compare )
 	/* Return result of the comparison. */
 	RETURN_LONG( result );
 }
-/* }}} */
+

@@ -20,7 +20,7 @@
 
 #define URL_DEFAULT_ARG_SEP "&"
 
-/* {{{ php_url_encode_hash */
+/* php_url_encode_hash */
 PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				const char *num_prefix, size_t num_prefix_len,
 				const char *key_prefix, size_t key_prefix_len,
@@ -226,7 +226,6 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 
 	return SUCCESS;
 }
-/* }}} */
 
 /* Generates a form-encoded query string from an associative array or object. */
 PHP_FUNCTION(http_build_query)
@@ -260,4 +259,4 @@ PHP_FUNCTION(http_build_query)
 
 	RETURN_NEW_STR(formstr.s);
 }
-/* }}} */
+

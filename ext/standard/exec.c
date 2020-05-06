@@ -54,7 +54,7 @@
 
 static size_t cmd_max_len;
 
-/* {{{ PHP_MINIT_FUNCTION(exec) */
+/* PHP_MINIT_FUNCTION(exec) */
 PHP_MINIT_FUNCTION(exec)
 {
 #ifdef _SC_ARG_MAX
@@ -79,7 +79,6 @@ PHP_MINIT_FUNCTION(exec)
 
 	return SUCCESS;
 }
-/* }}} */
 
 static size_t strip_trailing_whitespace(char *buf, size_t bufl) {
 	size_t l = bufl;
@@ -104,7 +103,7 @@ static size_t handle_line(int type, zval *array, char *buf, size_t bufl) {
 	return bufl;
 }
 
-/* {{{ php_exec
+/* php_exec
  * If type==0, only last line of output is returned (exec)
  * If type==1, all lines will be printed and last lined returned (system)
  * If type==2, all lines will be saved to given array (exec with &$array)
@@ -201,9 +200,8 @@ err:
 	RETVAL_FALSE;
 	goto done;
 }
-/* }}} */
 
-static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
+static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
 	char *cmd;
 	size_t cmd_len;
@@ -247,30 +245,26 @@ static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 		ZEND_TRY_ASSIGN_REF_LONG(ret_code, ret);
 	}
 }
-/* }}} */
 
 /* Execute an external program */
 PHP_FUNCTION(exec)
 {
 	php_exec_ex(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
-/* }}} */
 
 /* Execute an external program and display output */
 PHP_FUNCTION(system)
 {
 	php_exec_ex(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
-/* }}} */
 
 /* Execute an external program and display raw output */
 PHP_FUNCTION(passthru)
 {
 	php_exec_ex(INTERNAL_FUNCTION_PARAM_PASSTHRU, 3);
 }
-/* }}} */
 
-/* {{{ php_escape_shell_cmd
+/* php_escape_shell_cmd
    Escape all chars that could possibly be used to
    break out of a shell command
 
@@ -382,9 +376,8 @@ PHPAPI zend_string *php_escape_shell_cmd(char *str)
 
 	return cmd;
 }
-/* }}} */
 
-/* {{{ php_escape_shell_arg
+/* php_escape_shell_arg
  */
 PHPAPI zend_string *php_escape_shell_arg(char *str)
 {
@@ -467,7 +460,6 @@ PHPAPI zend_string *php_escape_shell_arg(char *str)
 	ZSTR_LEN(cmd) = y;
 	return cmd;
 }
-/* }}} */
 
 /* Escape shell metacharacters */
 PHP_FUNCTION(escapeshellcmd)
@@ -489,7 +481,6 @@ PHP_FUNCTION(escapeshellcmd)
 		RETVAL_EMPTY_STRING();
 	}
 }
-/* }}} */
 
 /* Quote and escape an argument for use in a shell command */
 PHP_FUNCTION(escapeshellarg)
@@ -508,7 +499,6 @@ PHP_FUNCTION(escapeshellarg)
 
 	RETVAL_STR(php_escape_shell_arg(argument));
 }
-/* }}} */
 
 /* Execute command via shell and return complete output as string */
 PHP_FUNCTION(shell_exec)
@@ -549,7 +539,6 @@ PHP_FUNCTION(shell_exec)
 		RETVAL_STR(ret);
 	}
 }
-/* }}} */
 
 #ifdef HAVE_NICE
 /* Change the priority of the current process */
@@ -576,5 +565,5 @@ PHP_FUNCTION(proc_nice)
 
 	RETURN_TRUE;
 }
-/* }}} */
+
 #endif

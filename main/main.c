@@ -16,7 +16,7 @@
    +----------------------------------------------------------------------+
 */
 
-/* {{{ includes
+/* includes
  */
 
 #define ZEND_INCLUDE_FULL_WINDOWS_HEADERS
@@ -82,7 +82,6 @@
 #include "rfc1867.h"
 
 #include "ext/standard/html_tables.h"
-/* }}} */
 
 PHPAPI int (*php_register_internal_extensions_func)(void) = php_register_internal_extensions;
 
@@ -120,7 +119,7 @@ static char *get_safe_charset_hint(void) {
 	return lastCodeset;
 }
 
-/* {{{ PHP_INI_MH
+/* PHP_INI_MH
  */
 static PHP_INI_MH(OnSetFacility)
 {
@@ -255,9 +254,8 @@ static PHP_INI_MH(OnSetFacility)
 
 	return FAILURE;
 }
-/* }}} */
 
-/* {{{ PHP_INI_MH
+/* PHP_INI_MH
  */
 static PHP_INI_MH(OnSetPrecision)
 {
@@ -271,9 +269,8 @@ static PHP_INI_MH(OnSetPrecision)
 		return FAILURE;
 	}
 }
-/* }}} */
 
-/* {{{ PHP_INI_MH
+/* PHP_INI_MH
  */
 static PHP_INI_MH(OnSetSerializePrecision)
 {
@@ -287,10 +284,8 @@ static PHP_INI_MH(OnSetSerializePrecision)
 		return FAILURE;
 	}
 }
-/* }}} */
 
-
-/* {{{ PHP_INI_MH
+/* PHP_INI_MH
  */
 static PHP_INI_MH(OnChangeMemoryLimit)
 {
@@ -301,9 +296,8 @@ static PHP_INI_MH(OnChangeMemoryLimit)
 	}
 	return zend_set_memory_limit(PG(memory_limit));
 }
-/* }}} */
 
-/* {{{ PHP_INI_MH
+/* PHP_INI_MH
  */
 static PHP_INI_MH(OnSetLogFilter)
 {
@@ -328,9 +322,8 @@ static PHP_INI_MH(OnSetLogFilter)
 
 	return FAILURE;
 }
-/* }}} */
 
-/* {{{ php_disable_functions
+/* php_disable_functions
  */
 static void php_disable_functions(void)
 {
@@ -366,9 +359,8 @@ static void php_disable_functions(void)
 		zend_disable_function(s, e-s);
 	}
 }
-/* }}} */
 
-/* {{{ php_disable_classes
+/* php_disable_classes
  */
 static void php_disable_classes(void)
 {
@@ -402,9 +394,8 @@ static void php_disable_classes(void)
 		zend_disable_class(s, e-s);
 	}
 }
-/* }}} */
 
-/* {{{ php_binary_init
+/* php_binary_init
  */
 static void php_binary_init(void)
 {
@@ -452,9 +443,8 @@ static void php_binary_init(void)
 #endif
 	PG(php_binary) = binary_location;
 }
-/* }}} */
 
-/* {{{ PHP_INI_MH
+/* PHP_INI_MH
  */
 static PHP_INI_MH(OnUpdateTimeout)
 {
@@ -468,9 +458,8 @@ static PHP_INI_MH(OnUpdateTimeout)
 	zend_set_timeout(EG(timeout_seconds), 0);
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ php_get_display_errors_mode() helper function
+/* php_get_display_errors_mode() helper function
  */
 static int php_get_display_errors_mode(char *value, size_t value_length)
 {
@@ -499,9 +488,8 @@ static int php_get_display_errors_mode(char *value, size_t value_length)
 
 	return mode;
 }
-/* }}} */
 
-/* {{{ PHP_INI_MH
+/* PHP_INI_MH
  */
 static PHP_INI_MH(OnUpdateDisplayErrors)
 {
@@ -509,9 +497,8 @@ static PHP_INI_MH(OnUpdateDisplayErrors)
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_INI_DISP
+/* PHP_INI_DISP
  */
 static PHP_INI_DISP(display_errors_mode)
 {
@@ -557,7 +544,6 @@ static PHP_INI_DISP(display_errors_mode)
 			break;
 	}
 }
-/* }}} */
 
 PHPAPI const char *php_get_internal_encoding() {
 	if (PG(internal_encoding) && PG(internal_encoding)[0]) {
@@ -588,7 +574,7 @@ PHPAPI const char *php_get_output_encoding() {
 
 PHPAPI void (*php_internal_encoding_changed)(void) = NULL;
 
-/* {{{ PHP_INI_MH
+/* PHP_INI_MH
  */
 static PHP_INI_MH(OnUpdateDefaultCharset)
 {
@@ -603,9 +589,8 @@ static PHP_INI_MH(OnUpdateDefaultCharset)
 	}
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_INI_MH
+/* PHP_INI_MH
  */
 static PHP_INI_MH(OnUpdateInternalEncoding)
 {
@@ -620,9 +605,8 @@ static PHP_INI_MH(OnUpdateInternalEncoding)
 	}
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_INI_MH
+/* PHP_INI_MH
  */
 static PHP_INI_MH(OnUpdateInputEncoding)
 {
@@ -637,9 +621,8 @@ static PHP_INI_MH(OnUpdateInputEncoding)
 	}
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_INI_MH
+/* PHP_INI_MH
  */
 static PHP_INI_MH(OnUpdateOutputEncoding)
 {
@@ -654,9 +637,8 @@ static PHP_INI_MH(OnUpdateOutputEncoding)
 	}
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_INI_MH
+/* PHP_INI_MH
  */
 static PHP_INI_MH(OnUpdateErrorLog)
 {
@@ -669,9 +651,8 @@ static PHP_INI_MH(OnUpdateErrorLog)
 	OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_INI_MH
+/* PHP_INI_MH
  */
 static PHP_INI_MH(OnUpdateMailLog)
 {
@@ -684,9 +665,8 @@ static PHP_INI_MH(OnUpdateMailLog)
 	OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_INI_MH
+/* PHP_INI_MH
  */
 static PHP_INI_MH(OnChangeMailForceExtra)
 {
@@ -696,7 +676,6 @@ static PHP_INI_MH(OnChangeMailForceExtra)
 	}
 	return SUCCESS;
 }
-/* }}} */
 
 /* defined in browscap.c */
 PHP_INI_MH(OnChangeBrowscap);
@@ -719,7 +698,7 @@ PHP_INI_MH(OnChangeBrowscap);
 # define DEFAULT_SENDMAIL_PATH "/usr/sbin/sendmail -t -i"
 #endif
 
-/* {{{ PHP_INI
+/* PHP_INI
  */
 PHP_INI_BEGIN()
 	PHP_INI_ENTRY_EX("highlight.comment",		HL_COMMENT_COLOR,	PHP_INI_ALL,	NULL,			php_ini_color_displayer_cb)
@@ -817,7 +796,6 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("syslog.ident",		"php",			PHP_INI_SYSTEM,		OnUpdateString,		syslog_ident,		php_core_globals,		core_globals)
 	STD_PHP_INI_ENTRY("syslog.filter",		"no-ctrl",		PHP_INI_ALL,		OnSetLogFilter,		syslog_filter,		php_core_globals, 		core_globals)
 PHP_INI_END()
-/* }}} */
 
 /* True globals (no need for thread safety */
 /* But don't make them a single int bitfield */
@@ -825,29 +803,26 @@ static int module_initialized = 0;
 static int module_startup = 1;
 static int module_shutdown = 0;
 
-/* {{{ php_during_module_startup */
+/* php_during_module_startup */
 static int php_during_module_startup(void)
 {
 	return module_startup;
 }
-/* }}} */
 
-/* {{{ php_during_module_shutdown */
+/* php_during_module_shutdown */
 static int php_during_module_shutdown(void)
 {
 	return module_shutdown;
 }
-/* }}} */
 
-/* {{{ php_get_module_initialized
+/* php_get_module_initialized
  */
 PHPAPI int php_get_module_initialized(void)
 {
 	return module_initialized;
 }
-/* }}} */
 
-/* {{{ php_log_err_with_severity
+/* php_log_err_with_severity
  */
 PHPAPI ZEND_COLD void php_log_err_with_severity(char *log_message, int syslog_type_int)
 {
@@ -908,17 +883,15 @@ PHPAPI ZEND_COLD void php_log_err_with_severity(char *log_message, int syslog_ty
 	}
 	PG(in_error_log) = 0;
 }
-/* }}} */
 
-/* {{{ php_write
+/* php_write
    wrapper for modules to use PHPWRITE */
 PHPAPI size_t php_write(void *buf, size_t size)
 {
 	return PHPWRITE(buf, size);
 }
-/* }}} */
 
-/* {{{ php_printf
+/* php_printf
  */
 PHPAPI size_t php_printf(const char *format, ...)
 {
@@ -935,9 +908,8 @@ PHPAPI size_t php_printf(const char *format, ...)
 
 	return ret;
 }
-/* }}} */
 
-/* {{{ php_verror */
+/* php_verror */
 /* php_verror is called from php_error_docref<n> functions.
  * Its purpose is to unify error messages and automatically generate clickable
  * html error messages if corresponding ini setting (html_errors) is activated.
@@ -1123,9 +1095,8 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 	php_error(type, "%s", message);
 	efree(message);
 }
-/* }}} */
 
-/* {{{ php_error_docref */
+/* php_error_docref */
 /* Generate an error which links to docref or the php.net documentation if docref is NULL */
 PHPAPI ZEND_COLD void php_error_docref(const char *docref, int type, const char *format, ...)
 {
@@ -1135,9 +1106,8 @@ PHPAPI ZEND_COLD void php_error_docref(const char *docref, int type, const char 
 	php_verror(docref, "", type, format, args);
 	va_end(args);
 }
-/* }}} */
 
-/* {{{ php_error_docref1 */
+/* php_error_docref1 */
 /* See: CODING_STANDARDS.md for details. */
 PHPAPI ZEND_COLD void php_error_docref1(const char *docref, const char *param1, int type, const char *format, ...)
 {
@@ -1147,9 +1117,8 @@ PHPAPI ZEND_COLD void php_error_docref1(const char *docref, const char *param1, 
 	php_verror(docref, param1, type, format, args);
 	va_end(args);
 }
-/* }}} */
 
-/* {{{ php_error_docref2 */
+/* php_error_docref2 */
 /* See: CODING_STANDARDS.md for details. */
 PHPAPI ZEND_COLD void php_error_docref2(const char *docref, const char *param1, const char *param2, int type, const char *format, ...)
 {
@@ -1164,7 +1133,6 @@ PHPAPI ZEND_COLD void php_error_docref2(const char *docref, const char *param1, 
 		efree(params);
 	}
 }
-/* }}} */
 
 #ifdef PHP_WIN32
 PHPAPI ZEND_COLD void php_win32_docref2_from_error(DWORD error, const char *param1, const char *param2) {
@@ -1181,14 +1149,13 @@ PHPAPI ZEND_COLD void php_win32_docref2_from_error(DWORD error, const char *para
 }
 #endif
 
-/* {{{ php_html_puts */
+/* php_html_puts */
 PHPAPI void php_html_puts(const char *str, size_t size)
 {
 	zend_html_puts(str, size);
 }
-/* }}} */
 
-/* {{{ php_error_cb
+/* php_error_cb
  extended error handling function */
 static ZEND_COLD void php_error_cb(int orig_type, const char *error_filename, const uint32_t error_lineno, const char *format, va_list args)
 {
@@ -1416,9 +1383,8 @@ static ZEND_COLD void php_error_cb(int orig_type, const char *error_filename, co
 
 	efree(buffer);
 }
-/* }}} */
 
-/* {{{ php_get_current_user
+/* php_get_current_user
  */
 PHPAPI char *php_get_current_user(void)
 {
@@ -1485,7 +1451,6 @@ PHPAPI char *php_get_current_user(void)
 #endif
 	}
 }
-/* }}} */
 
 /* Sets the maximum time a script can run */
 PHP_FUNCTION(set_time_limit)
@@ -1510,23 +1475,20 @@ PHP_FUNCTION(set_time_limit)
 	zend_string_release_ex(key, 0);
 	efree(new_timeout_str);
 }
-/* }}} */
 
-/* {{{ php_fopen_wrapper_for_zend
+/* php_fopen_wrapper_for_zend
  */
 static FILE *php_fopen_wrapper_for_zend(const char *filename, zend_string **opened_path)
 {
 	return php_stream_open_wrapper_as_file((char *)filename, "rb", USE_PATH|IGNORE_URL_WIN|REPORT_ERRORS|STREAM_OPEN_FOR_INCLUDE, opened_path);
 }
-/* }}} */
 
-static void php_zend_stream_closer(void *handle) /* {{{ */
+static void php_zend_stream_closer(void *handle)
 {
 	php_stream_close((php_stream*)handle);
 }
-/* }}} */
 
-static size_t php_zend_stream_fsizer(void *handle) /* {{{ */
+static size_t php_zend_stream_fsizer(void *handle)
 {
 	php_stream *stream = handle;
 	php_stream_statbuf ssb;
@@ -1542,15 +1504,13 @@ static size_t php_zend_stream_fsizer(void *handle) /* {{{ */
 	}
 	return 0;
 }
-/* }}} */
 
-static int php_stream_open_for_zend(const char *filename, zend_file_handle *handle) /* {{{ */
+static int php_stream_open_for_zend(const char *filename, zend_file_handle *handle)
 {
 	return php_stream_open_for_zend_ex(filename, handle, USE_PATH|REPORT_ERRORS|STREAM_OPEN_FOR_INCLUDE);
 }
-/* }}} */
 
-PHPAPI int php_stream_open_for_zend_ex(const char *filename, zend_file_handle *handle, int mode) /* {{{ */
+PHPAPI int php_stream_open_for_zend_ex(const char *filename, zend_file_handle *handle, int mode)
 {
 	zend_string *opened_path;
 	php_stream *stream = php_stream_open_wrapper((char *)filename, "rb", mode, &opened_path);
@@ -1573,23 +1533,20 @@ PHPAPI int php_stream_open_for_zend_ex(const char *filename, zend_file_handle *h
 	}
 	return FAILURE;
 }
-/* }}} */
 
-static zend_string *php_resolve_path_for_zend(const char *filename, size_t filename_len) /* {{{ */
+static zend_string *php_resolve_path_for_zend(const char *filename, size_t filename_len)
 {
 	return php_resolve_path(filename, filename_len, PG(include_path));
 }
-/* }}} */
 
-/* {{{ php_get_configuration_directive_for_zend
+/* php_get_configuration_directive_for_zend
  */
 static zval *php_get_configuration_directive_for_zend(zend_string *name)
 {
 	return cfg_get_entry_ex(name);
 }
-/* }}} */
 
-/* {{{ php_free_request_globals
+/* php_free_request_globals
  */
 static void php_free_request_globals(void)
 {
@@ -1606,9 +1563,8 @@ static void php_free_request_globals(void)
 		PG(php_sys_temp_dir) = NULL;
 	}
 }
-/* }}} */
 
-/* {{{ php_message_handler_for_zend
+/* php_message_handler_for_zend
  */
 static ZEND_COLD void php_message_handler_for_zend(zend_long message, const void *data)
 {
@@ -1701,8 +1657,6 @@ static ZEND_COLD void php_message_handler_for_zend(zend_long message, const void
 			break;
 	}
 }
-/* }}} */
-
 
 void php_on_timeout(int seconds)
 {
@@ -1710,7 +1664,7 @@ void php_on_timeout(int seconds)
 }
 
 #if PHP_SIGCHILD
-/* {{{ sigchld_handler
+/* sigchld_handler
  */
 static void sigchld_handler(int apar)
 {
@@ -1721,10 +1675,10 @@ static void sigchld_handler(int apar)
 
 	errno = errno_save;
 }
-/* }}} */
+
 #endif
 
-/* {{{ php_request_startup
+/* php_request_startup
  */
 int php_request_startup(void)
 {
@@ -1807,9 +1761,8 @@ int php_request_startup(void)
 
 	return retval;
 }
-/* }}} */
 
-/* {{{ php_request_shutdown
+/* php_request_shutdown
  */
 void php_request_shutdown(void *dummy)
 {
@@ -1928,9 +1881,8 @@ void php_request_shutdown(void *dummy)
 	DTRACE_REQUEST_SHUTDOWN(SAFE_FILENAME(SG(request_info).path_translated), SAFE_FILENAME(SG(request_info).request_uri), (char *)SAFE_FILENAME(SG(request_info).request_method));
 #endif /* HAVE_DTRACE */
 }
-/* }}} */
 
-/* {{{ php_com_initialize
+/* php_com_initialize
  */
 PHPAPI void php_com_initialize(void)
 {
@@ -1942,20 +1894,19 @@ PHPAPI void php_com_initialize(void)
 	}
 #endif
 }
-/* }}} */
 
 #ifdef ZTS
-/* {{{ core_globals_ctor
+/* core_globals_ctor
  */
 static void core_globals_ctor(php_core_globals *core_globals)
 {
 	memset(core_globals, 0, sizeof(*core_globals));
 	php_startup_ticks();
 }
-/* }}} */
+
 #endif
 
-/* {{{ core_globals_dtor
+/* core_globals_dtor
  */
 static void core_globals_dtor(php_core_globals *core_globals)
 {
@@ -1977,17 +1928,15 @@ static void core_globals_dtor(php_core_globals *core_globals)
 
 	php_shutdown_ticks();
 }
-/* }}} */
 
-PHP_MINFO_FUNCTION(php_core) { /* {{{ */
+PHP_MINFO_FUNCTION(php_core) {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "PHP Version", PHP_VERSION);
 	php_info_print_table_end();
 	DISPLAY_INI_ENTRIES();
 }
-/* }}} */
 
-/* {{{ php_register_extensions
+/* php_register_extensions
  */
 int php_register_extensions(zend_module_entry * const * ptr, int count)
 {
@@ -2020,7 +1969,6 @@ static int php_register_extensions_bc(zend_module_entry *ptr, int count)
 	}
 	return SUCCESS;
 }
-/* }}} */
 
 #ifdef PHP_WIN32
 static _invalid_parameter_handler old_invalid_parameter_handler;
@@ -2055,7 +2003,7 @@ void dummy_invalid_parameter_handler(
 }
 #endif
 
-/* {{{ php_module_startup
+/* php_module_startup
  */
 int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_modules, uint32_t num_additional_modules)
 {
@@ -2403,18 +2351,16 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	/* we're done */
 	return retval;
 }
-/* }}} */
 
-/* {{{ php_module_shutdown_wrapper
+/* php_module_shutdown_wrapper
  */
 int php_module_shutdown_wrapper(sapi_module_struct *sapi_globals)
 {
 	php_module_shutdown();
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ php_module_shutdown
+/* php_module_shutdown
  */
 void php_module_shutdown(void)
 {
@@ -2489,9 +2435,8 @@ void php_module_shutdown(void)
 	}
 #endif
 }
-/* }}} */
 
-/* {{{ php_execute_script
+/* php_execute_script
  */
 PHPAPI int php_execute_script(zend_file_handle *primary_file)
 {
@@ -2602,9 +2547,8 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file)
 #endif
 	return retval;
 }
-/* }}} */
 
-/* {{{ php_execute_simple_script
+/* php_execute_simple_script
  */
 PHPAPI int php_execute_simple_script(zend_file_handle *primary_file, zval *ret)
 {
@@ -2639,9 +2583,8 @@ PHPAPI int php_execute_simple_script(zend_file_handle *primary_file, zval *ret)
 	free_alloca(old_cwd, use_heap);
 	return EG(exit_status);
 }
-/* }}} */
 
-/* {{{ php_handle_aborted_connection
+/* php_handle_aborted_connection
  */
 PHPAPI void php_handle_aborted_connection(void)
 {
@@ -2653,9 +2596,8 @@ PHPAPI void php_handle_aborted_connection(void)
 		zend_bailout();
 	}
 }
-/* }}} */
 
-/* {{{ php_handle_auth_data
+/* php_handle_auth_data
  */
 PHPAPI int php_handle_auth_data(const char *auth)
 {
@@ -2695,9 +2637,8 @@ PHPAPI int php_handle_auth_data(const char *auth)
 
 	return ret;
 }
-/* }}} */
 
-/* {{{ php_lint_script
+/* php_lint_script
  */
 PHPAPI int php_lint_script(zend_file_handle *file)
 {
@@ -2720,10 +2661,9 @@ PHPAPI int php_lint_script(zend_file_handle *file)
 
 	return retval;
 }
-/* }}} */
 
 #ifdef ZTS
-/* {{{ php_reserve_tsrm_memory
+/* php_reserve_tsrm_memory
  */
 PHPAPI void php_reserve_tsrm_memory(void)
 {
@@ -2742,9 +2682,8 @@ PHPAPI void php_reserve_tsrm_memory(void)
 		TSRM_ALIGNED_SIZE(sizeof(sapi_globals_struct))
 	);
 }
-/* }}} */
 
-/* {{{ php_tsrm_startup
+/* php_tsrm_startup
  */
 PHPAPI int php_tsrm_startup(void)
 {
@@ -2753,5 +2692,5 @@ PHPAPI int php_tsrm_startup(void)
 	(void)ts_resource(0);
 	return ret;
 }
-/* }}} */
+
 #endif

@@ -40,7 +40,7 @@ const php_stream_ops phar_dir_ops = {
 /**
  * Used for closedir($fp) where $fp is an opendir('phar://...') directory handle
  */
-static int phar_dir_close(php_stream *stream, int close_handle)  /* {{{ */
+static int phar_dir_close(php_stream *stream, int close_handle)
 {
 	HashTable *data = (HashTable *)stream->abstract;
 
@@ -52,12 +52,11 @@ static int phar_dir_close(php_stream *stream, int close_handle)  /* {{{ */
 
 	return 0;
 }
-/* }}} */
 
 /**
  * Used for seeking on a phar directory handle
  */
-static int phar_dir_seek(php_stream *stream, zend_off_t offset, int whence, zend_off_t *newoffset) /* {{{ */
+static int phar_dir_seek(php_stream *stream, zend_off_t offset, int whence, zend_off_t *newoffset)
 {
 	HashTable *data = (HashTable *)stream->abstract;
 
@@ -84,12 +83,11 @@ static int phar_dir_seek(php_stream *stream, zend_off_t offset, int whence, zend
 		return 0;
 	}
 }
-/* }}} */
 
 /**
  * Used for readdir() on an opendir()ed phar directory handle
  */
-static ssize_t phar_dir_read(php_stream *stream, char *buf, size_t count) /* {{{ */
+static ssize_t phar_dir_read(php_stream *stream, char *buf, size_t count)
 {
 	size_t to_read;
 	HashTable *data = (HashTable *)stream->abstract;
@@ -113,25 +111,22 @@ static ssize_t phar_dir_read(php_stream *stream, char *buf, size_t count) /* {{{
 
 	return sizeof(php_stream_dirent);
 }
-/* }}} */
 
 /**
  * Dummy: Used for writing to a phar directory (i.e. not used)
  */
-static ssize_t phar_dir_write(php_stream *stream, const char *buf, size_t count) /* {{{ */
+static ssize_t phar_dir_write(php_stream *stream, const char *buf, size_t count)
 {
 	return -1;
 }
-/* }}} */
 
 /**
  * Dummy: Used for flushing writes to a phar directory (i.e. not used)
  */
-static int phar_dir_flush(php_stream *stream) /* {{{ */
+static int phar_dir_flush(php_stream *stream)
 {
 	return EOF;
 }
-/* }}} */
 
 /**
  * add an empty element with a char * key to a hash table, avoiding duplicates
@@ -139,7 +134,7 @@ static int phar_dir_flush(php_stream *stream) /* {{{ */
  * This is used to get a unique listing of virtual directories within a phar,
  * for iterating over opendir()ed phar directories.
  */
-static int phar_add_empty(HashTable *ht, char *arKey, uint32_t nKeyLength)  /* {{{ */
+static int phar_add_empty(HashTable *ht, char *arKey, uint32_t nKeyLength)
 {
 	zval dummy;
 
@@ -147,25 +142,23 @@ static int phar_add_empty(HashTable *ht, char *arKey, uint32_t nKeyLength)  /* {
 	zend_hash_str_update(ht, arKey, nKeyLength, &dummy);
 	return SUCCESS;
 }
-/* }}} */
 
 /**
  * Used for sorting directories alphabetically
  */
-static int phar_compare_dir_name(Bucket *f, Bucket *s)  /* {{{ */
+static int phar_compare_dir_name(Bucket *f, Bucket *s)
 {
 	int result = zend_binary_strcmp(
 		ZSTR_VAL(f->key), ZSTR_LEN(f->key), ZSTR_VAL(s->key), ZSTR_LEN(s->key));
 	return ZEND_NORMALIZE_BOOL(result);
 }
-/* }}} */
 
 /**
  * Create a opendir() directory stream handle by iterating over each of the
  * files in a phar and retrieving its relative path.  From this, construct
  * a list of files/directories that are "in" the directory represented by dir
  */
-static php_stream *phar_make_dirstream(char *dir, HashTable *manifest) /* {{{ */
+static php_stream *phar_make_dirstream(char *dir, HashTable *manifest)
 {
 	HashTable *data;
 	size_t dirlen = strlen(dir);
@@ -280,12 +273,11 @@ PHAR_ADD_ENTRY:
 		return php_stream_alloc(&phar_dir_ops, data, NULL, "r");
 	}
 }
-/* }}}*/
 
 /**
  * Open a directory handle within a phar archive
  */
-php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path, const char *mode, int options, zend_string **opened_path, php_stream_context *context STREAMS_DC) /* {{{ */
+php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path, const char *mode, int options, zend_string **opened_path, php_stream_context *context STREAMS_DC)
 {
 	php_url *resource = NULL;
 	php_stream *ret;
@@ -388,12 +380,11 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path,
 	php_url_free(resource);
 	return NULL;
 }
-/* }}} */
 
 /**
  * Make a new directory within a phar archive
  */
-int phar_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url_from, int mode, int options, php_stream_context *context) /* {{{ */
+int phar_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url_from, int mode, int options, php_stream_context *context)
 {
 	phar_entry_info entry, *e;
 	phar_archive_data *phar = NULL;
@@ -520,12 +511,11 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url_from, int mo
 	phar_add_virtual_dirs(phar, entry.filename, entry.filename_len);
 	return 1;
 }
-/* }}} */
 
 /**
  * Remove a directory within a phar archive
  */
-int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context) /* {{{ */
+int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context)
 {
 	phar_entry_info *entry;
 	phar_archive_data *phar = NULL;
@@ -650,4 +640,4 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 	php_url_free(resource);
 	return 1;
 }
-/* }}} */
+

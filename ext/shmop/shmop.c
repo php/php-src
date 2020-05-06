@@ -46,7 +46,7 @@ php_shmop_globals shmop_globals;
 
 int shm_type;
 
-/* {{{ shmop_module_entry
+/* shmop_module_entry
  */
 zend_module_entry shmop_module_entry = {
 	STANDARD_MODULE_HEADER,
@@ -60,13 +60,12 @@ zend_module_entry shmop_module_entry = {
 	PHP_SHMOP_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
-/* }}} */
 
 #ifdef COMPILE_DL_SHMOP
 ZEND_GET_MODULE(shmop)
 #endif
 
-/* {{{ rsclean
+/* rsclean
  */
 static void rsclean(zend_resource *rsrc)
 {
@@ -75,9 +74,8 @@ static void rsclean(zend_resource *rsrc)
 	shmdt(shmop->addr);
 	efree(shmop);
 }
-/* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION
+/* PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(shmop)
 {
@@ -85,9 +83,8 @@ PHP_MINIT_FUNCTION(shmop)
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
+/* PHP_MINFO_FUNCTION
  */
 PHP_MINFO_FUNCTION(shmop)
 {
@@ -95,7 +92,6 @@ PHP_MINFO_FUNCTION(shmop)
 	php_info_print_table_row(2, "shmop support", "enabled");
 	php_info_print_table_end();
 }
-/* }}} */
 
 /* gets and attaches a shared memory segment */
 PHP_FUNCTION(shmop_open)
@@ -180,7 +176,6 @@ err:
 	efree(shmop);
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* reads from a shm segment */
 PHP_FUNCTION(shmop_read)
@@ -217,7 +212,6 @@ PHP_FUNCTION(shmop_read)
 
 	RETURN_NEW_STR(return_string);
 }
-/* }}} */
 
 /* closes a shared memory segment */
 PHP_FUNCTION(shmop_close)
@@ -236,7 +230,6 @@ PHP_FUNCTION(shmop_close)
 
 	zend_list_close(Z_RES_P(shmid));
 }
-/* }}} */
 
 /* returns the shm size */
 PHP_FUNCTION(shmop_size)
@@ -254,7 +247,6 @@ PHP_FUNCTION(shmop_size)
 
 	RETURN_LONG(shmop->size);
 }
-/* }}} */
 
 /* writes to a shared memory segment */
 PHP_FUNCTION(shmop_write)
@@ -288,7 +280,6 @@ PHP_FUNCTION(shmop_write)
 
 	RETURN_LONG(writesize);
 }
-/* }}} */
 
 /* mark segment for deletion */
 PHP_FUNCTION(shmop_delete)
@@ -311,6 +302,5 @@ PHP_FUNCTION(shmop_delete)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 #endif	/* HAVE_SHMOP */

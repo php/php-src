@@ -72,7 +72,7 @@
 #define STR_STRSPN				0
 #define STR_STRCSPN				1
 
-/* {{{ register_string_constants
+/* register_string_constants
  */
 void register_string_constants(INIT_FUNC_ARGS)
 {
@@ -97,7 +97,6 @@ void register_string_constants(INIT_FUNC_ARGS)
 # endif
 
 }
-/* }}} */
 
 int php_tag_find(char *tag, size_t len, const char *set);
 
@@ -109,7 +108,7 @@ ZEND_SET_ALIGNED(16, static char hexconvtab[]) = "0123456789abcdef";
 static MUTEX_T locale_mutex = NULL;
 #endif
 
-/* {{{ php_bin2hex
+/* php_bin2hex
  */
 static zend_string *php_bin2hex(const unsigned char *old, const size_t oldlen)
 {
@@ -126,9 +125,8 @@ static zend_string *php_bin2hex(const unsigned char *old, const size_t oldlen)
 
 	return result;
 }
-/* }}} */
 
-/* {{{ php_hex2bin
+/* php_hex2bin
  */
 static zend_string *php_hex2bin(const unsigned char *old, const size_t oldlen)
 {
@@ -165,9 +163,8 @@ static zend_string *php_hex2bin(const unsigned char *old, const size_t oldlen)
 
 	return str;
 }
-/* }}} */
 
-/* {{{ localeconv_r
+/* localeconv_r
  * glibc's localeconv is not reentrant, so lets make it so ... sorta */
 PHPAPI struct lconv *localeconv_r(struct lconv *out)
 {
@@ -198,19 +195,17 @@ PHPAPI struct lconv *localeconv_r(struct lconv *out)
 
 	return out;
 }
-/* }}} */
 
 #ifdef ZTS
-/* {{{ PHP_MINIT_FUNCTION
+/* PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(localeconv)
 {
 	locale_mutex = tsrm_mutex_alloc();
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_MSHUTDOWN_FUNCTION
+/* PHP_MSHUTDOWN_FUNCTION
  */
 PHP_MSHUTDOWN_FUNCTION(localeconv)
 {
@@ -218,7 +213,7 @@ PHP_MSHUTDOWN_FUNCTION(localeconv)
 	locale_mutex = NULL;
 	return SUCCESS;
 }
-/* }}} */
+
 #endif
 
 /* Converts the binary representation of data to hex */
@@ -235,7 +230,6 @@ PHP_FUNCTION(bin2hex)
 
 	RETURN_STR(result);
 }
-/* }}} */
 
 /* Converts the hex representation of data to binary */
 PHP_FUNCTION(hex2bin)
@@ -260,9 +254,8 @@ PHP_FUNCTION(hex2bin)
 
 	RETVAL_STR(result);
 }
-/* }}} */
 
-static void php_spn_common_handler(INTERNAL_FUNCTION_PARAMETERS, int behavior) /* {{{ */
+static void php_spn_common_handler(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 {
 	zend_string *s11, *s22;
 	zend_long start = 0, len = 0;
@@ -318,23 +311,20 @@ static void php_spn_common_handler(INTERNAL_FUNCTION_PARAMETERS, int behavior) /
 	}
 
 }
-/* }}} */
 
 /* Finds length of initial segment consisting entirely of characters found in mask. If start or/and length is provided works like strspn(substr($s,$start,$len),$good_chars) */
 PHP_FUNCTION(strspn)
 {
 	php_spn_common_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU, STR_STRSPN);
 }
-/* }}} */
 
 /* Finds length of initial segment consisting entirely of characters not found in mask. If start or/and length is provide works like strcspn(substr($s,$start,$len),$bad_chars) */
 PHP_FUNCTION(strcspn)
 {
 	php_spn_common_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU, STR_STRCSPN);
 }
-/* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION(nl_langinfo) */
+/* PHP_MINIT_FUNCTION(nl_langinfo) */
 #if HAVE_NL_LANGINFO
 PHP_MINIT_FUNCTION(nl_langinfo)
 {
@@ -502,7 +492,6 @@ PHP_MINIT_FUNCTION(nl_langinfo)
 #undef REGISTER_NL_LANGINFO_CONSTANT
 	return SUCCESS;
 }
-/* }}} */
 
 /* Query language and locale information */
 PHP_FUNCTION(nl_langinfo)
@@ -514,7 +503,7 @@ PHP_FUNCTION(nl_langinfo)
 		Z_PARAM_LONG(item)
 	ZEND_PARSE_PARAMETERS_END();
 
-	switch(item) { /* {{{ */
+	switch(item) {
 #ifdef ABDAY_1
 		case ABDAY_1:
 		case ABDAY_2:
@@ -678,7 +667,6 @@ PHP_FUNCTION(nl_langinfo)
 			php_error_docref(NULL, E_WARNING, "Item '" ZEND_LONG_FMT "' is not valid", item);
 			RETURN_FALSE;
 	}
-	/* }}} */
 
 	value = nl_langinfo(item);
 	if (value == NULL) {
@@ -688,7 +676,6 @@ PHP_FUNCTION(nl_langinfo)
 	}
 }
 #endif
-/* }}} */
 
 /* Compares two strings using the current locale */
 PHP_FUNCTION(strcoll)
@@ -703,9 +690,8 @@ PHP_FUNCTION(strcoll)
 	RETURN_LONG(strcoll((const char *) ZSTR_VAL(s1),
 	                    (const char *) ZSTR_VAL(s2)));
 }
-/* }}} */
 
-/* {{{ php_charmask
+/* php_charmask
  * Fills a 256-byte bytemask with input. You can specify a range like 'a..z',
  * it needs to be incrementing.
  * Returns: FAILURE/SUCCESS whether the input was correct (i.e. no range errors)
@@ -751,9 +737,8 @@ static inline int php_charmask(const unsigned char *input, size_t len, char *mas
 	}
 	return result;
 }
-/* }}} */
 
-/* {{{ php_trim_int()
+/* php_trim_int()
  * mode 1 : trim left
  * mode 2 : trim right
  * mode 3 : trim left and right
@@ -843,9 +828,8 @@ static zend_always_inline zend_string *php_trim_int(zend_string *str, char *what
 		return zend_string_init(start, end - start, 0);
 	}
 }
-/* }}} */
 
-/* {{{ php_trim_int()
+/* php_trim_int()
  * mode 1 : trim left
  * mode 2 : trim right
  * mode 3 : trim left and right
@@ -855,9 +839,8 @@ PHPAPI zend_string *php_trim(zend_string *str, char *what, size_t what_len, int 
 {
 	return php_trim_int(str, what, what_len, mode);
 }
-/* }}} */
 
-/* {{{ php_do_trim
+/* php_do_trim
  * Base for trim(), rtrim() and ltrim() functions.
  */
 static zend_always_inline void php_do_trim(INTERNAL_FUNCTION_PARAMETERS, int mode)
@@ -873,28 +856,24 @@ static zend_always_inline void php_do_trim(INTERNAL_FUNCTION_PARAMETERS, int mod
 
 	ZVAL_STR(return_value, php_trim_int(str, (what ? ZSTR_VAL(what) : NULL), (what ? ZSTR_LEN(what) : 0), mode));
 }
-/* }}} */
 
 /* Strips whitespace from the beginning and end of a string */
 PHP_FUNCTION(trim)
 {
 	php_do_trim(INTERNAL_FUNCTION_PARAM_PASSTHRU, 3);
 }
-/* }}} */
 
 /* Removes trailing whitespace */
 PHP_FUNCTION(rtrim)
 {
 	php_do_trim(INTERNAL_FUNCTION_PARAM_PASSTHRU, 2);
 }
-/* }}} */
 
 /* Strips whitespace from the beginning of a string */
 PHP_FUNCTION(ltrim)
 {
 	php_do_trim(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
-/* }}} */
 
 /* Wraps buffer to selected number of characters using string break char */
 PHP_FUNCTION(wordwrap)
@@ -1037,9 +1016,8 @@ PHP_FUNCTION(wordwrap)
 		RETURN_NEW_STR(newtext);
 	}
 }
-/* }}} */
 
-/* {{{ php_explode
+/* php_explode
  */
 PHPAPI void php_explode(const zend_string *delim, zend_string *str, zval *return_value, zend_long limit)
 {
@@ -1073,9 +1051,8 @@ PHPAPI void php_explode(const zend_string *delim, zend_string *str, zval *return
 		}
 	}
 }
-/* }}} */
 
-/* {{{ php_explode_negative_limit
+/* php_explode_negative_limit
  */
 PHPAPI void php_explode_negative_limit(const zend_string *delim, zend_string *str, zval *return_value, zend_long limit)
 {
@@ -1115,7 +1092,6 @@ PHPAPI void php_explode_negative_limit(const zend_string *delim, zend_string *st
 	}
 #undef EXPLODE_ALLOC_STEP
 }
-/* }}} */
 
 /* Splits a string on string separator and return array of components. If limit is positive only limit number of components is returned. If limit is negative all components except the last abs(limit) are returned. */
 PHP_FUNCTION(explode)
@@ -1155,12 +1131,10 @@ PHP_FUNCTION(explode)
 		zend_hash_index_add_new(Z_ARRVAL_P(return_value), 0, &tmp);
 	}
 }
-/* }}} */
 
 /* An alias for implode */
-/* }}} */
 
-/* {{{ php_implode
+/* php_implode
  */
 PHPAPI void php_implode(const zend_string *glue, HashTable *pieces, zval *return_value)
 {
@@ -1246,7 +1220,6 @@ PHPAPI void php_implode(const zend_string *glue, HashTable *pieces, zval *return
 	free_alloca(strings, use_heap);
 	RETURN_NEW_STR(str);
 }
-/* }}} */
 
 /* Joins array elements placing glue string between items and return one string */
 PHP_FUNCTION(implode)
@@ -1278,7 +1251,6 @@ PHP_FUNCTION(implode)
 
 	php_implode(arg1_str, pieces, return_value);
 }
-/* }}} */
 
 #define STRTOK_TABLE(p) BG(strtok_table)[(unsigned char) *p]
 
@@ -1356,9 +1328,8 @@ restore:
 		STRTOK_TABLE(token++) = 0;
 	}
 }
-/* }}} */
 
-/* {{{ php_strtoupper
+/* php_strtoupper
  */
 PHPAPI char *php_strtoupper(char *s, size_t len)
 {
@@ -1374,9 +1345,8 @@ PHPAPI char *php_strtoupper(char *s, size_t len)
 	}
 	return s;
 }
-/* }}} */
 
-/* {{{ php_string_toupper
+/* php_string_toupper
  */
 PHPAPI zend_string *php_string_toupper(zend_string *s)
 {
@@ -1407,7 +1377,6 @@ PHPAPI zend_string *php_string_toupper(zend_string *s)
 	}
 	return zend_string_copy(s);
 }
-/* }}} */
 
 /* Makes a string uppercase */
 PHP_FUNCTION(strtoupper)
@@ -1420,9 +1389,8 @@ PHP_FUNCTION(strtoupper)
 
 	RETURN_STR(php_string_toupper(arg));
 }
-/* }}} */
 
-/* {{{ php_strtolower
+/* php_strtolower
  */
 PHPAPI char *php_strtolower(char *s, size_t len)
 {
@@ -1438,9 +1406,8 @@ PHPAPI char *php_strtolower(char *s, size_t len)
 	}
 	return s;
 }
-/* }}} */
 
-/* {{{ php_string_tolower
+/* php_string_tolower
  */
 PHPAPI zend_string *php_string_tolower(zend_string *s)
 {
@@ -1475,7 +1442,6 @@ PHPAPI zend_string *php_string_tolower(zend_string *s)
 		return zend_string_copy(s);
 	}
 }
-/* }}} */
 
 /* Makes a string lowercase */
 PHP_FUNCTION(strtolower)
@@ -1488,9 +1454,8 @@ PHP_FUNCTION(strtolower)
 
 	RETURN_STR(php_string_tolower(str));
 }
-/* }}} */
 
-/* {{{ php_basename
+/* php_basename
  */
 PHPAPI zend_string *php_basename(const char *s, size_t len, char *suffix, size_t suffix_len)
 {
@@ -1563,7 +1528,6 @@ quit_loop:
 
 	return zend_string_init(basename_start, basename_end - basename_start, 0);
 }
-/* }}} */
 
 /* Returns the filename component of the path */
 PHP_FUNCTION(basename)
@@ -1579,15 +1543,13 @@ PHP_FUNCTION(basename)
 
 	RETURN_STR(php_basename(string, string_len, suffix, suffix_len));
 }
-/* }}} */
 
-/* {{{ php_dirname
+/* php_dirname
    Returns directory name component of path */
 PHPAPI size_t php_dirname(char *path, size_t len)
 {
 	return zend_dirname(path, len);
 }
-/* }}} */
 
 /* Returns the directory name component of the path */
 PHP_FUNCTION(dirname)
@@ -1629,7 +1591,6 @@ PHP_FUNCTION(dirname)
 
 	RETURN_NEW_STR(ret);
 }
-/* }}} */
 
 /* Returns information about a certain string */
 PHP_FUNCTION(pathinfo)
@@ -1712,9 +1673,8 @@ PHP_FUNCTION(pathinfo)
 		zval_ptr_dtor(&tmp);
 	}
 }
-/* }}} */
 
-/* {{{ php_stristr
+/* php_stristr
    case insensitive strstr */
 PHPAPI char *php_stristr(char *s, char *t, size_t s_len, size_t t_len)
 {
@@ -1722,9 +1682,8 @@ PHPAPI char *php_stristr(char *s, char *t, size_t s_len, size_t t_len)
 	php_strtolower(t, t_len);
 	return (char*)php_memnstr(s, t, t_len, s + s_len);
 }
-/* }}} */
 
-/* {{{ php_strspn
+/* php_strspn
  */
 PHPAPI size_t php_strspn(char *s1, char *s2, char *s1_end, char *s2_end)
 {
@@ -1740,9 +1699,8 @@ cont:
 	}
 	return (p - s1);
 }
-/* }}} */
 
-/* {{{ php_strcspn
+/* php_strcspn
  */
 PHPAPI size_t php_strcspn(char *s1, char *s2, char *s1_end, char *s2_end)
 {
@@ -1760,7 +1718,6 @@ PHPAPI size_t php_strcspn(char *s1, char *s2, char *s1_end, char *s2_end)
 	}
 	/* NOTREACHED */
 }
-/* }}} */
 
 /* Finds first occurrence of a string within another, case insensitive */
 PHP_FUNCTION(stristr)
@@ -1797,7 +1754,6 @@ PHP_FUNCTION(stristr)
 
 	efree(haystack_dup);
 }
-/* }}} */
 
 /* Finds first occurrence of a string within another */
 PHP_FUNCTION(strstr)
@@ -1826,7 +1782,6 @@ PHP_FUNCTION(strstr)
 	}
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* Checks if a string contains another */
 PHP_FUNCTION(str_contains)
@@ -1840,7 +1795,6 @@ PHP_FUNCTION(str_contains)
 
 	RETURN_BOOL(php_memnstr(ZSTR_VAL(haystack), ZSTR_VAL(needle), ZSTR_LEN(needle), ZSTR_VAL(haystack) + ZSTR_LEN(haystack)));
 }
-/* }}} */
 
 /* Checks if haystack starts with needle */
 PHP_FUNCTION(str_starts_with)
@@ -1879,7 +1833,6 @@ PHP_FUNCTION(str_ends_with)
 }
 
 /* An alias for strstr */
-/* }}} */
 
 /* Finds position of first occurrence of a string within another */
 PHP_FUNCTION(strpos)
@@ -1913,7 +1866,6 @@ PHP_FUNCTION(strpos)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Finds position of first occurrence of a string within another, case insensitive */
 PHP_FUNCTION(stripos)
@@ -1956,7 +1908,6 @@ PHP_FUNCTION(stripos)
 	zend_string_release_ex(haystack_dup, 0);
 	zend_string_release_ex(needle_dup, 0);
 }
-/* }}} */
 
 /* Finds position of last occurrence of a string within another string */
 PHP_FUNCTION(strrpos)
@@ -2000,7 +1951,6 @@ PHP_FUNCTION(strrpos)
 
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* Finds position of last occurrence of a string within another string */
 PHP_FUNCTION(strripos)
@@ -2083,7 +2033,6 @@ PHP_FUNCTION(strripos)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Finds the last occurrence of a character in a string within another */
 PHP_FUNCTION(strrchr)
@@ -2105,9 +2054,8 @@ PHP_FUNCTION(strrchr)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
-/* {{{ php_chunk_split
+/* php_chunk_split
  */
 static zend_string *php_chunk_split(const char *src, size_t srclen, const char *end, size_t endlen, size_t chunklen)
 {
@@ -2147,7 +2095,6 @@ static zend_string *php_chunk_split(const char *src, size_t srclen, const char *
 
 	return dest;
 }
-/* }}} */
 
 /* Returns split line */
 PHP_FUNCTION(chunk_split)
@@ -2187,7 +2134,6 @@ PHP_FUNCTION(chunk_split)
 
 	RETURN_STR(result);
 }
-/* }}} */
 
 /* Returns part of a string */
 PHP_FUNCTION(substr)
@@ -2262,7 +2208,6 @@ truncate_len:
 
 	RETURN_STRINGL(ZSTR_VAL(str) + f, l);
 }
-/* }}} */
 
 /* Replaces part of a string with another string */
 PHP_FUNCTION(substr_replace)
@@ -2516,7 +2461,6 @@ PHP_FUNCTION(substr_replace)
 		} ZEND_HASH_FOREACH_END();
 	} /* if */
 }
-/* }}} */
 
 /* Quotes meta characters */
 PHP_FUNCTION(quotemeta)
@@ -2564,7 +2508,6 @@ PHP_FUNCTION(quotemeta)
 
 	RETURN_NEW_STR(zend_string_truncate(str, q - ZSTR_VAL(str), 0));
 }
-/* }}} */
 
 /* Returns ASCII value of character
    Warning: This function is special-cased by zend_compile.c and so is bypassed for constant string argument */
@@ -2578,7 +2521,6 @@ PHP_FUNCTION(ord)
 
 	RETURN_LONG((unsigned char) ZSTR_VAL(str)[0]);
 }
-/* }}} */
 
 /* Converts ASCII code to a character
    Warning: This function is special-cased by zend_compile.c and so is bypassed for constant integer argument */
@@ -2593,9 +2535,8 @@ PHP_FUNCTION(chr)
 	c &= 0xff;
 	ZVAL_INTERNED_STR(return_value, ZSTR_CHAR(c));
 }
-/* }}} */
 
-/* {{{ php_ucfirst
+/* php_ucfirst
    Uppercase the first character of the word in a native string */
 static zend_string* php_ucfirst(zend_string *str)
 {
@@ -2608,7 +2549,6 @@ static zend_string* php_ucfirst(zend_string *str)
 		return s;
 	}
 }
-/* }}} */
 
 /* Makes a string's first character uppercase */
 PHP_FUNCTION(ucfirst)
@@ -2625,9 +2565,8 @@ PHP_FUNCTION(ucfirst)
 
 	RETURN_STR(php_ucfirst(str));
 }
-/* }}} */
 
-/* {{{
+/*
    Lowercase the first character of the word in a native string */
 static zend_string* php_lcfirst(zend_string *str)
 {
@@ -2640,7 +2579,6 @@ static zend_string* php_lcfirst(zend_string *str)
 		return s;
 	}
 }
-/* }}} */
 
 /* Make a string's first character lowercase */
 PHP_FUNCTION(lcfirst)
@@ -2657,7 +2595,6 @@ PHP_FUNCTION(lcfirst)
 
 	RETURN_STR(php_lcfirst(str));
 }
-/* }}} */
 
 /* Uppercase the first character of every word in a string */
 PHP_FUNCTION(ucwords)
@@ -2691,9 +2628,8 @@ PHP_FUNCTION(ucwords)
 		}
 	}
 }
-/* }}} */
 
-/* {{{ php_strtr
+/* php_strtr
  */
 PHPAPI char *php_strtr(char *str, size_t len, const char *str_from, const char *str_to, size_t trlen)
 {
@@ -2726,9 +2662,8 @@ PHPAPI char *php_strtr(char *str, size_t len, const char *str_from, const char *
 
 	return str;
 }
-/* }}} */
 
-/* {{{ php_strtr_ex
+/* php_strtr_ex
  */
 static zend_string *php_strtr_ex(zend_string *str, const char *str_from, const char *str_to, size_t trlen)
 {
@@ -2782,9 +2717,8 @@ static zend_string *php_strtr_ex(zend_string *str, const char *str_from, const c
 	ZSTR_VAL(new_str)[ZSTR_LEN(new_str)] = 0;
 	return new_str;
 }
-/* }}} */
 
-/* {{{ php_strtr_array */
+/* php_strtr_array */
 static void php_strtr_array(zval *return_value, zend_string *input, HashTable *pats)
 {
 	const char *str = ZSTR_VAL(input);
@@ -2920,9 +2854,8 @@ static void php_strtr_array(zval *return_value, zend_string *input, HashTable *p
 	}
 	efree(num_bitset);
 }
-/* }}} */
 
-/* {{{ php_char_to_str_ex
+/* php_char_to_str_ex
  */
 static zend_string* php_char_to_str_ex(zend_string *str, char from, char *to, size_t to_len, int case_sensitivity, zend_long *replace_count)
 {
@@ -2992,9 +2925,8 @@ static zend_string* php_char_to_str_ex(zend_string *str, char from, char *to, si
 	*target = 0;
 	return result;
 }
-/* }}} */
 
-/* {{{ php_str_to_str_ex
+/* php_str_to_str_ex
  */
 static zend_string *php_str_to_str_ex(zend_string *haystack,
 	const char *needle, size_t needle_len, const char *str, size_t str_len, zend_long *replace_count)
@@ -3074,9 +3006,8 @@ nothing_todo:
 		return new_str;
 	}
 }
-/* }}} */
 
-/* {{{ php_str_to_str_i_ex
+/* php_str_to_str_i_ex
  */
 static zend_string *php_str_to_str_i_ex(zend_string *haystack, const char *lc_haystack,
 	zend_string *needle, const char *str, size_t str_len, zend_long *replace_count)
@@ -3169,9 +3100,8 @@ nothing_todo:
 		return new_str;
 	}
 }
-/* }}} */
 
-/* {{{ php_str_to_str
+/* php_str_to_str
  */
 PHPAPI zend_string *php_str_to_str(const char *haystack, size_t length, const char *needle, size_t needle_len, const char *str, size_t str_len)
 {
@@ -3242,7 +3172,6 @@ PHPAPI zend_string *php_str_to_str(const char *haystack, size_t length, const ch
 		return new_str;
 	}
 }
-/* }}} */
 
 /* Translates characters in str using given translation tables */
 PHP_FUNCTION(strtr)
@@ -3317,7 +3246,6 @@ PHP_FUNCTION(strtr)
 				  MIN(ZSTR_LEN(from_str), to_len)));
 	}
 }
-/* }}} */
 
 /* Reverse a string */
 #if ZEND_INTRIN_SSSE3_NATIVE
@@ -3378,9 +3306,8 @@ PHP_FUNCTION(strrev)
 
 	RETVAL_NEW_STR(n);
 }
-/* }}} */
 
-/* {{{ php_similar_str
+/* php_similar_str
  */
 static void php_similar_str(const char *txt1, size_t len1, const char *txt2, size_t len2, size_t *pos1, size_t *pos2, size_t *max, size_t *count)
 {
@@ -3403,9 +3330,8 @@ static void php_similar_str(const char *txt1, size_t len1, const char *txt2, siz
 		}
 	}
 }
-/* }}} */
 
-/* {{{ php_similar_char
+/* php_similar_char
  */
 static size_t php_similar_char(const char *txt1, size_t len1, const char *txt2, size_t len2)
 {
@@ -3426,7 +3352,6 @@ static size_t php_similar_char(const char *txt1, size_t len1, const char *txt2, 
 
 	return sum;
 }
-/* }}} */
 
 /* Calculates the similarity between two strings */
 PHP_FUNCTION(similar_text)
@@ -3459,7 +3384,6 @@ PHP_FUNCTION(similar_text)
 
 	RETURN_LONG(sim);
 }
-/* }}} */
 
 /* Escapes all chars mentioned in charlist with backslash. It creates octal representations if asked to backslash characters with 8th bit set or with ASCII<32 (except '\n', '\r', '\t' etc...) */
 PHP_FUNCTION(addcslashes)
@@ -3481,7 +3405,6 @@ PHP_FUNCTION(addcslashes)
 
 	RETURN_STR(php_addcslashes_str(ZSTR_VAL(str), ZSTR_LEN(str), ZSTR_VAL(what), ZSTR_LEN(what)));
 }
-/* }}} */
 
 /* Escapes single quote, double quotes and backslash characters in a string with backslashes */
 PHP_FUNCTION(addslashes)
@@ -3498,7 +3421,6 @@ PHP_FUNCTION(addslashes)
 
 	RETURN_STR(php_addslashes(str));
 }
-/* }}} */
 
 /* Strips backslashes from a string. Uses C-style conventions */
 PHP_FUNCTION(stripcslashes)
@@ -3512,7 +3434,6 @@ PHP_FUNCTION(stripcslashes)
 	ZVAL_STRINGL(return_value, ZSTR_VAL(str), ZSTR_LEN(str));
 	php_stripcslashes(Z_STR_P(return_value));
 }
-/* }}} */
 
 /* Strips backslashes from a string */
 PHP_FUNCTION(stripslashes)
@@ -3526,9 +3447,8 @@ PHP_FUNCTION(stripslashes)
 	ZVAL_STRINGL(return_value, ZSTR_VAL(str), ZSTR_LEN(str));
 	php_stripslashes(Z_STR_P(return_value));
 }
-/* }}} */
 
-/* {{{ php_stripcslashes
+/* php_stripcslashes
  */
 PHPAPI void php_stripcslashes(zend_string *str)
 {
@@ -3590,9 +3510,8 @@ PHPAPI void php_stripcslashes(zend_string *str)
 
 	ZSTR_LEN(str) = nlen;
 }
-/* }}} */
 
-/* {{{ php_addcslashes_str
+/* php_addcslashes_str
  */
 PHPAPI zend_string *php_addcslashes_str(const char *str, size_t len, char *what, size_t wlength)
 {
@@ -3633,17 +3552,15 @@ PHPAPI zend_string *php_addcslashes_str(const char *str, size_t len, char *what,
 	}
 	return new_str;
 }
-/* }}} */
 
-/* {{{ php_addcslashes
+/* php_addcslashes
  */
 PHPAPI zend_string *php_addcslashes(zend_string *str, char *what, size_t wlength)
 {
 	return php_addcslashes_str(ZSTR_VAL(str), ZSTR_LEN(str), what, wlength);
 }
-/* }}} */
 
-/* {{{ php_addslashes */
+/* php_addslashes */
 
 #if ZEND_INTRIN_SSE4_2_NATIVE
 # include <nmmintrin.h>
@@ -3695,7 +3612,7 @@ PHPAPI void php_stripslashes(zend_string *str) {
 	php_stripslashes_ptr(str);
 }
 
-/* {{{ PHP_MINIT_FUNCTION
+/* PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(string_intrin)
 {
@@ -3708,13 +3625,13 @@ PHP_MINIT_FUNCTION(string_intrin)
 	}
 	return SUCCESS;
 }
-/* }}} */
+
 # endif
 #endif
 
 #if ZEND_INTRIN_SSE4_2_NATIVE || ZEND_INTRIN_SSE4_2_RESOLVER
 # if ZEND_INTRIN_SSE4_2_NATIVE
-PHPAPI zend_string *php_addslashes(zend_string *str) /* {{{ */
+PHPAPI zend_string *php_addslashes(zend_string *str)
 # elif ZEND_INTRIN_SSE4_2_RESOLVER
 zend_string *php_addslashes_sse42(zend_string *str)
 # endif
@@ -3851,7 +3768,7 @@ do_escape:
 
 	return new_str;
 }
-/* }}} */
+
 #endif
 
 #ifdef __aarch64__
@@ -3894,7 +3811,7 @@ static zend_always_inline char *aarch64_add_slashes(quad_word res, const char *s
 
 #if !ZEND_INTRIN_SSE4_2_NATIVE
 # if ZEND_INTRIN_SSE4_2_RESOLVER
-zend_string *php_addslashes_default(zend_string *str) /* {{{ */
+zend_string *php_addslashes_default(zend_string *str)
 # else
 PHPAPI zend_string *php_addslashes(zend_string *str)
 # endif
@@ -3993,10 +3910,9 @@ do_escape:
 	return new_str;
 }
 #endif
-/* }}} */
-/* }}} */
 
-/* {{{ php_stripslashes
+
+/* php_stripslashes
  *
  * be careful, this edits the string in-place */
 static zend_always_inline char *php_stripslashes_impl(const char *str, char *out, size_t len)
@@ -4114,7 +4030,7 @@ void php_stripslashes_sse42(zend_string *str)
 
 #if !ZEND_INTRIN_SSE4_2_NATIVE
 # if ZEND_INTRIN_SSE4_2_RESOLVER
-void php_stripslashes_default(zend_string *str) /* {{{ */
+void php_stripslashes_default(zend_string *str)
 # else
 PHPAPI void php_stripslashes(zend_string *str)
 # endif
@@ -4125,9 +4041,8 @@ PHPAPI void php_stripslashes(zend_string *str)
 		ZSTR_VAL(str)[ZSTR_LEN(str)] = '\0';
 	}
 }
-/* }}} */
+
 #endif
-/* }}} */
 
 #define _HEB_BLOCK_TYPE_ENG 1
 #define _HEB_BLOCK_TYPE_HEB 2
@@ -4135,7 +4050,7 @@ PHPAPI void php_stripslashes(zend_string *str)
 #define _isblank(c)   (((((unsigned char) c) == ' '  || ((unsigned char) c) == '\t')) ? 1 : 0)
 #define _isnewline(c) (((((unsigned char) c) == '\n' || ((unsigned char) c) == '\r')) ? 1 : 0)
 
-/* {{{ php_str_replace_in_subject
+/* php_str_replace_in_subject
  */
 static zend_long php_str_replace_in_subject(zval *search, zval *replace, zend_string *subject_str, zval *result, int case_sensitivity)
 {
@@ -4290,9 +4205,8 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zend_st
 	}
 	return replace_count;
 }
-/* }}} */
 
-/* {{{ php_str_replace_common
+/* php_str_replace_common
  */
 static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensitivity)
 {
@@ -4354,21 +4268,18 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensit
 		ZEND_TRY_ASSIGN_REF_LONG(zcount, count);
 	}
 }
-/* }}} */
 
 /* Replaces all occurrences of search in haystack with replace */
 PHP_FUNCTION(str_replace)
 {
 	php_str_replace_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
-/* }}} */
 
 /* Replaces all occurrences of search in haystack with replace / case-insensitive */
 PHP_FUNCTION(str_ireplace)
 {
 	php_str_replace_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
-/* }}} */
 
 /* Converts logical Hebrew text to visual text */
 PHP_FUNCTION(hebrev)
@@ -4533,7 +4444,6 @@ PHP_FUNCTION(hebrev)
 
 	RETURN_NEW_STR(broken_str);
 }
-/* }}} */
 
 /* Converts newlines to HTML line breaks */
 PHP_FUNCTION(nl2br)
@@ -4615,7 +4525,6 @@ PHP_FUNCTION(nl2br)
 
 	RETURN_NEW_STR(result);
 }
-/* }}} */
 
 /* Strips HTML and PHP tags from a string */
 PHP_FUNCTION(strip_tags)
@@ -4663,7 +4572,6 @@ PHP_FUNCTION(strip_tags)
 	smart_str_free(&tags_ss);
 	RETURN_NEW_STR(buf);
 }
-/* }}} */
 
 /* Set locale information */
 PHP_FUNCTION(setlocale)
@@ -4775,7 +4683,6 @@ PHP_FUNCTION(setlocale)
 
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* Parses GET/POST/COOKIE data and sets global variables */
 PHP_FUNCTION(parse_str)
@@ -4798,11 +4705,10 @@ PHP_FUNCTION(parse_str)
 	res = estrndup(arg, arglen);
 	sapi_module.treat_data(PARSE_STRING, res, arrayArg);
 }
-/* }}} */
 
 #define PHP_TAG_BUF_SIZE 1023
 
-/* {{{ php_tag_find
+/* php_tag_find
  *
  * Check if tag is in a set of tags
  *
@@ -4865,15 +4771,13 @@ int php_tag_find(char *tag, size_t len, const char *set) {
 	efree(norm);
 	return done;
 }
-/* }}} */
 
-PHPAPI size_t php_strip_tags(char *rbuf, size_t len, const char *allow, size_t allow_len) /* {{{ */
+PHPAPI size_t php_strip_tags(char *rbuf, size_t len, const char *allow, size_t allow_len)
 {
 	return php_strip_tags_ex(rbuf, len, allow, allow_len, 0);
 }
-/* }}} */
 
-/* {{{ php_strip_tags
+/* php_strip_tags
 
 	A simple little state-machine to strip out html and php tags
 
@@ -5214,7 +5118,6 @@ finish:
 
 	return (size_t)(rp - rbuf);
 }
-/* }}} */
 
 /* Parse a CSV string into an array */
 PHP_FUNCTION(str_getcsv)
@@ -5241,7 +5144,6 @@ PHP_FUNCTION(str_getcsv)
 
 	php_fgetcsv(NULL, delim, enc, esc, ZSTR_LEN(str), ZSTR_VAL(str), return_value);
 }
-/* }}} */
 
 /* Returns the input string repeat mult times */
 PHP_FUNCTION(str_repeat)
@@ -5293,7 +5195,6 @@ PHP_FUNCTION(str_repeat)
 
 	RETURN_NEW_STR(result);
 }
-/* }}} */
 
 /* Returns info about what characters are used in input */
 PHP_FUNCTION(count_chars)
@@ -5363,9 +5264,8 @@ PHP_FUNCTION(count_chars)
 		RETURN_STRINGL(retstr, retlen);
 	}
 }
-/* }}} */
 
-/* {{{ php_strnatcmp
+/* php_strnatcmp
  */
 static void php_strnatcmp(INTERNAL_FUNCTION_PARAMETERS, int fold_case)
 {
@@ -5380,9 +5280,8 @@ static void php_strnatcmp(INTERNAL_FUNCTION_PARAMETERS, int fold_case)
 							 ZSTR_VAL(s2), ZSTR_LEN(s2),
 							 fold_case));
 }
-/* }}} */
 
-PHPAPI int string_natural_compare_function_ex(zval *result, zval *op1, zval *op2, zend_bool case_insensitive) /* {{{ */
+PHPAPI int string_natural_compare_function_ex(zval *result, zval *op1, zval *op2, zend_bool case_insensitive)
 {
 	zend_string *tmp_str1, *tmp_str2;
 	zend_string *str1 = zval_get_tmp_string(op1, &tmp_str1);
@@ -5394,26 +5293,22 @@ PHPAPI int string_natural_compare_function_ex(zval *result, zval *op1, zval *op2
 	zend_tmp_string_release(tmp_str2);
 	return SUCCESS;
 }
-/* }}} */
 
-PHPAPI int string_natural_case_compare_function(zval *result, zval *op1, zval *op2) /* {{{ */
+PHPAPI int string_natural_case_compare_function(zval *result, zval *op1, zval *op2)
 {
 	return string_natural_compare_function_ex(result, op1, op2, 1);
 }
-/* }}} */
 
-PHPAPI int string_natural_compare_function(zval *result, zval *op1, zval *op2) /* {{{ */
+PHPAPI int string_natural_compare_function(zval *result, zval *op1, zval *op2)
 {
 	return string_natural_compare_function_ex(result, op1, op2, 0);
 }
-/* }}} */
 
 /* Returns the result of string comparison using 'natural' algorithm */
 PHP_FUNCTION(strnatcmp)
 {
 	php_strnatcmp(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
-/* }}} */
 
 /* Returns numeric formatting information based on the current locale */
 PHP_FUNCTION(localeconv)
@@ -5467,14 +5362,12 @@ PHP_FUNCTION(localeconv)
 	zend_hash_str_update(Z_ARRVAL_P(return_value), "grouping", sizeof("grouping")-1, &grouping);
 	zend_hash_str_update(Z_ARRVAL_P(return_value), "mon_grouping", sizeof("mon_grouping")-1, &mon_grouping);
 }
-/* }}} */
 
 /* Returns the result of case-insensitive string comparison using 'natural' algorithm */
 PHP_FUNCTION(strnatcasecmp)
 {
 	php_strnatcmp(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
-/* }}} */
 
 /* Returns the number of times a substring occurs in the string */
 PHP_FUNCTION(substr_count)
@@ -5540,7 +5433,6 @@ PHP_FUNCTION(substr_count)
 
 	RETURN_LONG(count);
 }
-/* }}} */
 
 /* Returns input string padded on the left or right to specified length with pad_string */
 PHP_FUNCTION(str_pad)
@@ -5619,7 +5511,6 @@ PHP_FUNCTION(str_pad)
 
 	RETURN_NEW_STR(result);
 }
-/* }}} */
 
 /* Implements an ANSI C compatible sscanf */
 PHP_FUNCTION(sscanf)
@@ -5641,9 +5532,7 @@ PHP_FUNCTION(sscanf)
 		WRONG_PARAM_COUNT;
 	}
 }
-/* }}} */
 
-/* static zend_string *php_str_rot13(zend_string *str) {{{ */
 #ifdef __SSE2__
 #include <emmintrin.h>
 #endif
@@ -5737,7 +5626,6 @@ static zend_string *php_str_rot13(zend_string *str)
 
 	return ret;
 }
-/* }}} */
 
 /* Perform the rot13 transform on a string */
 PHP_FUNCTION(str_rot13)
@@ -5750,9 +5638,8 @@ PHP_FUNCTION(str_rot13)
 
 	RETURN_STR(php_str_rot13(arg));
 }
-/* }}} */
 
-static void php_string_shuffle(char *str, zend_long len) /* {{{ */
+static void php_string_shuffle(char *str, zend_long len)
 {
 	zend_long n_elems, rnd_idx, n_left;
 	char temp;
@@ -5775,7 +5662,6 @@ static void php_string_shuffle(char *str, zend_long len) /* {{{ */
 		}
 	}
 }
-/* }}} */
 
 /* Shuffles string. One permutation of all possible is created */
 PHP_FUNCTION(str_shuffle)
@@ -5791,8 +5677,6 @@ PHP_FUNCTION(str_shuffle)
 		php_string_shuffle(Z_STRVAL_P(return_value), (zend_long) Z_STRLEN_P(return_value));
 	}
 }
-/* }}} */
-
 
 /* Counts the number of words inside a string. If format of 1 is specified,
    	then the function will return an array containing all the words
@@ -5880,7 +5764,6 @@ PHP_FUNCTION(str_word_count)
 	}
 }
 
-/* }}} */
 
 /* Convert a string to an array. If split_length is specified, break the string down into chunks each split_length characters long. */
 PHP_FUNCTION(str_split)
@@ -5921,7 +5804,6 @@ PHP_FUNCTION(str_split)
 		add_next_index_stringl(return_value, p, (ZSTR_VAL(str) + ZSTR_LEN(str) - p));
 	}
 }
-/* }}} */
 
 /* Search a string for any of a set of characters */
 PHP_FUNCTION(strpbrk)
@@ -5949,7 +5831,6 @@ PHP_FUNCTION(strpbrk)
 
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* Binary safe optionally case insensitive comparison of 2 strings from an offset, up to length characters */
 PHP_FUNCTION(substr_compare)
@@ -5996,9 +5877,7 @@ PHP_FUNCTION(substr_compare)
 		RETURN_LONG(zend_binary_strncasecmp_l(ZSTR_VAL(s1) + offset, (ZSTR_LEN(s1) - offset), ZSTR_VAL(s2), ZSTR_LEN(s2), cmp_len));
 	}
 }
-/* }}} */
 
-/* {{{ */
 static zend_string *php_utf8_encode(const char *s, size_t len)
 {
 	size_t pos = len;
@@ -6026,9 +5905,7 @@ static zend_string *php_utf8_encode(const char *s, size_t len)
 	str = zend_string_truncate(str, ZSTR_LEN(str), 0);
 	return str;
 }
-/* }}} */
 
-/* {{{ */
 static zend_string *php_utf8_decode(const char *s, size_t len)
 {
 	size_t pos = 0;
@@ -6057,8 +5934,6 @@ static zend_string *php_utf8_decode(const char *s, size_t len)
 
 	return str;
 }
-/* }}} */
-
 
 /* Encodes an ISO-8859-1 string to UTF-8 */
 PHP_FUNCTION(utf8_encode)
@@ -6072,7 +5947,6 @@ PHP_FUNCTION(utf8_encode)
 
 	RETURN_STR(php_utf8_encode(arg, arg_len));
 }
-/* }}} */
 
 /* Converts a UTF-8 encoded string to ISO-8859-1 */
 PHP_FUNCTION(utf8_decode)
@@ -6086,4 +5960,4 @@ PHP_FUNCTION(utf8_decode)
 
 	RETURN_STR(php_utf8_decode(arg, arg_len));
 }
-/* }}} */
+

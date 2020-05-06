@@ -178,7 +178,7 @@ typedef struct _php_openssl_netstream_data_t {
 
 /* it doesn't matter that we do some hash traversal here, since it is done only
  * in an error condition arising from a network connection problem */
-static int php_openssl_is_http_stream_talking_to_iis(php_stream *stream) /* {{{ */
+static int php_openssl_is_http_stream_talking_to_iis(php_stream *stream)
 {
 	if (Z_TYPE(stream->wrapperdata) == IS_ARRAY &&
 		stream->wrapper &&
@@ -200,9 +200,8 @@ static int php_openssl_is_http_stream_talking_to_iis(php_stream *stream) /* {{{ 
 	}
 	return 0;
 }
-/* }}} */
 
-static int php_openssl_handle_ssl_error(php_stream *stream, int nr_bytes, zend_bool is_init) /* {{{ */
+static int php_openssl_handle_ssl_error(php_stream *stream, int nr_bytes, zend_bool is_init)
 {
 	php_openssl_netstream_data_t *sslsock = (php_openssl_netstream_data_t*)stream->abstract;
 	int err = SSL_get_error(sslsock->ssl_handle, nr_bytes);
@@ -286,9 +285,8 @@ static int php_openssl_handle_ssl_error(php_stream *stream, int nr_bytes, zend_b
 	}
 	return retry;
 }
-/* }}} */
 
-static int verify_callback(int preverify_ok, X509_STORE_CTX *ctx) /* {{{ */
+static int verify_callback(int preverify_ok, X509_STORE_CTX *ctx)
 {
 	php_stream *stream;
 	SSL *ssl;
@@ -324,7 +322,6 @@ static int verify_callback(int preverify_ok, X509_STORE_CTX *ctx) /* {{{ */
 
 	return ret;
 }
-/* }}} */
 
 static int php_openssl_x509_fingerprint_cmp(X509 *peer, const char *method, const char *expected)
 {
@@ -384,7 +381,7 @@ static zend_bool php_openssl_x509_fingerprint_match(X509 *peer, zval *val)
 	return 0;
 }
 
-static zend_bool php_openssl_matches_wildcard_name(const char *subjectname, const char *certname) /* {{{ */
+static zend_bool php_openssl_matches_wildcard_name(const char *subjectname, const char *certname)
 {
 	char *wildcard = NULL;
 	ptrdiff_t prefix_len;
@@ -417,9 +414,8 @@ static zend_bool php_openssl_matches_wildcard_name(const char *subjectname, cons
 
 	return 0;
 }
-/* }}} */
 
-static zend_bool php_openssl_matches_san_list(X509 *peer, const char *subject_name) /* {{{ */
+static zend_bool php_openssl_matches_san_list(X509 *peer, const char *subject_name)
 {
 	int i, len;
 	unsigned char *cert_name = NULL;
@@ -477,9 +473,8 @@ static zend_bool php_openssl_matches_san_list(X509 *peer, const char *subject_na
 
 	return 0;
 }
-/* }}} */
 
-static zend_bool php_openssl_matches_common_name(X509 *peer, const char *subject_name) /* {{{ */
+static zend_bool php_openssl_matches_common_name(X509 *peer, const char *subject_name)
 {
 	char buf[1024];
 	X509_NAME *cert_name;
@@ -503,9 +498,8 @@ static zend_bool php_openssl_matches_common_name(X509 *peer, const char *subject
 
 	return is_match;
 }
-/* }}} */
 
-static int php_openssl_apply_peer_verification_policy(SSL *ssl, X509 *peer, php_stream *stream) /* {{{ */
+static int php_openssl_apply_peer_verification_policy(SSL *ssl, X509 *peer, php_stream *stream)
 {
 	zval *val = NULL;
 	zval *peer_fingerprint;
@@ -597,9 +591,8 @@ static int php_openssl_apply_peer_verification_policy(SSL *ssl, X509 *peer, php_
 
 	return SUCCESS;
 }
-/* }}} */
 
-static int php_openssl_passwd_callback(char *buf, int num, int verify, void *data) /* {{{ */
+static int php_openssl_passwd_callback(char *buf, int num, int verify, void *data)
 {
 	php_stream *stream = (php_stream *)data;
 	zval *val = NULL;
@@ -616,11 +609,10 @@ static int php_openssl_passwd_callback(char *buf, int num, int verify, void *dat
 	}
 	return 0;
 }
-/* }}} */
 
 #ifdef PHP_WIN32
 #define RETURN_CERT_VERIFY_FAILURE(code) X509_STORE_CTX_set_error(x509_store_ctx, code); return 0;
-static int php_openssl_win_cert_verify_callback(X509_STORE_CTX *x509_store_ctx, void *arg) /* {{{ */
+static int php_openssl_win_cert_verify_callback(X509_STORE_CTX *x509_store_ctx, void *arg)
 {
 	PCCERT_CONTEXT cert_ctx = NULL;
 	PCCERT_CHAIN_CONTEXT cert_chain_ctx = NULL;
@@ -790,10 +782,10 @@ static int php_openssl_win_cert_verify_callback(X509_STORE_CTX *x509_store_ctx, 
 
 	return 1;
 }
-/* }}} */
+
 #endif
 
-static long php_openssl_load_stream_cafile(X509_STORE *cert_store, const char *cafile) /* {{{ */
+static long php_openssl_load_stream_cafile(X509_STORE *cert_store, const char *cafile)
 {
 	php_stream *stream;
 	X509 *cert;
@@ -872,9 +864,8 @@ static long php_openssl_load_stream_cafile(X509_STORE *cert_store, const char *c
 
 	return certs_added;
 }
-/* }}} */
 
-static int php_openssl_enable_peer_verification(SSL_CTX *ctx, php_stream *stream) /* {{{ */
+static int php_openssl_enable_peer_verification(SSL_CTX *ctx, php_stream *stream)
 {
 	zval *val = NULL;
 	char *cafile = NULL;
@@ -927,15 +918,13 @@ static int php_openssl_enable_peer_verification(SSL_CTX *ctx, php_stream *stream
 
 	return SUCCESS;
 }
-/* }}} */
 
-static void php_openssl_disable_peer_verification(SSL_CTX *ctx, php_stream *stream) /* {{{ */
+static void php_openssl_disable_peer_verification(SSL_CTX *ctx, php_stream *stream)
 {
 	SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, NULL);
 }
-/* }}} */
 
-static int php_openssl_set_local_cert(SSL_CTX *ctx, php_stream *stream) /* {{{ */
+static int php_openssl_set_local_cert(SSL_CTX *ctx, php_stream *stream)
 {
 	zval *val = NULL;
 	char *certfile = NULL;
@@ -980,10 +969,9 @@ static int php_openssl_set_local_cert(SSL_CTX *ctx, php_stream *stream) /* {{{ *
 
 	return SUCCESS;
 }
-/* }}} */
 
 #if PHP_OPENSSL_API_VERSION < 0x10100
-static int php_openssl_get_crypto_method_ctx_flags(int method_flags) /* {{{ */
+static int php_openssl_get_crypto_method_ctx_flags(int method_flags)
 {
 	int ssl_ctx_options = SSL_OP_ALL;
 
@@ -1018,10 +1006,10 @@ static int php_openssl_get_crypto_method_ctx_flags(int method_flags) /* {{{ */
 
 	return ssl_ctx_options;
 }
-/* }}} */
+
 #endif
 
-static inline int php_openssl_get_min_proto_version_flag(int flags) /* {{{ */
+static inline int php_openssl_get_min_proto_version_flag(int flags)
 {
 	int ver;
 	for (ver = PHP_OPENSSL_MIN_PROTO_VERSION; ver <= PHP_OPENSSL_MAX_PROTO_VERSION; ver <<= 1) {
@@ -1031,9 +1019,8 @@ static inline int php_openssl_get_min_proto_version_flag(int flags) /* {{{ */
 	}
 	return PHP_OPENSSL_MAX_PROTO_VERSION;
 }
-/* }}} */
 
-static inline int php_openssl_get_max_proto_version_flag(int flags) /* {{{ */
+static inline int php_openssl_get_max_proto_version_flag(int flags)
 {
 	int ver;
 	for (ver = PHP_OPENSSL_MAX_PROTO_VERSION; ver >= PHP_OPENSSL_MIN_PROTO_VERSION; ver >>= 1) {
@@ -1043,10 +1030,9 @@ static inline int php_openssl_get_max_proto_version_flag(int flags) /* {{{ */
 	}
 	return STREAM_CRYPTO_METHOD_TLSv1_3;
 }
-/* }}} */
 
 #if PHP_OPENSSL_API_VERSION >= 0x10100
-static inline int php_openssl_map_proto_version(int flag) /* {{{ */
+static inline int php_openssl_map_proto_version(int flag)
 {
 	switch (flag) {
 #ifdef HAVE_TLS13
@@ -1067,22 +1053,20 @@ static inline int php_openssl_map_proto_version(int flag) /* {{{ */
 			return TLS1_2_VERSION;
 	}
 }
-/* }}} */
 
-static int php_openssl_get_min_proto_version(int flags) /* {{{ */
+static int php_openssl_get_min_proto_version(int flags)
 {
 	return php_openssl_map_proto_version(php_openssl_get_min_proto_version_flag(flags));
 }
-/* }}} */
 
-static int php_openssl_get_max_proto_version(int flags) /* {{{ */
+static int php_openssl_get_max_proto_version(int flags)
 {
 	return php_openssl_map_proto_version(php_openssl_get_max_proto_version_flag(flags));
 }
-/* }}} */
+
 #endif
 
-static int php_openssl_get_proto_version_flags(int flags, int min, int max) /* {{{ */
+static int php_openssl_get_proto_version_flags(int flags, int min, int max)
 {
 	int ver;
 
@@ -1105,9 +1089,8 @@ static int php_openssl_get_proto_version_flags(int flags, int min, int max) /* {
 
 	return flags;
 }
-/* }}} */
 
-static void php_openssl_limit_handshake_reneg(const SSL *ssl) /* {{{ */
+static void php_openssl_limit_handshake_reneg(const SSL *ssl)
 {
 	php_stream *stream;
 	php_openssl_netstream_data_t *sslsock;
@@ -1166,18 +1149,16 @@ static void php_openssl_limit_handshake_reneg(const SSL *ssl) /* {{{ */
 		}
 	}
 }
-/* }}} */
 
-static void php_openssl_info_callback(const SSL *ssl, int where, int ret) /* {{{ */
+static void php_openssl_info_callback(const SSL *ssl, int where, int ret)
 {
 	/* Rate-limit client-initiated handshake renegotiation to prevent DoS */
 	if (where & SSL_CB_HANDSHAKE_START) {
 		php_openssl_limit_handshake_reneg(ssl);
 	}
 }
-/* }}} */
 
-static void php_openssl_init_server_reneg_limit(php_stream *stream, php_openssl_netstream_data_t *sslsock) /* {{{ */
+static void php_openssl_init_server_reneg_limit(php_stream *stream, php_openssl_netstream_data_t *sslsock)
 {
 	zval *val;
 	zend_long limit = OPENSSL_DEFAULT_RENEG_LIMIT;
@@ -1212,7 +1193,6 @@ static void php_openssl_init_server_reneg_limit(php_stream *stream, php_openssl_
 
 	SSL_set_info_callback(sslsock->ssl_handle, php_openssl_info_callback);
 }
-/* }}} */
 
 #if PHP_OPENSSL_API_VERSION < 0x10100
 static RSA *php_openssl_tmp_rsa_cb(SSL *s, int is_export, int keylength)
@@ -1238,7 +1218,7 @@ static RSA *php_openssl_tmp_rsa_cb(SSL *s, int is_export, int keylength)
 }
 #endif
 
-static int php_openssl_set_server_dh_param(php_stream * stream, SSL_CTX *ctx) /* {{{ */
+static int php_openssl_set_server_dh_param(php_stream * stream, SSL_CTX *ctx)
 {
 	DH *dh;
 	BIO* bio;
@@ -1284,10 +1264,9 @@ static int php_openssl_set_server_dh_param(php_stream * stream, SSL_CTX *ctx) /*
 
 	return SUCCESS;
 }
-/* }}} */
 
 #if defined(HAVE_ECDH) && PHP_OPENSSL_API_VERSION < 0x10100
-static int php_openssl_set_server_ecdh_curve(php_stream *stream, SSL_CTX *ctx) /* {{{ */
+static int php_openssl_set_server_ecdh_curve(php_stream *stream, SSL_CTX *ctx)
 {
 	zval *zvcurve;
 	int curve_nid;
@@ -1324,10 +1303,10 @@ static int php_openssl_set_server_ecdh_curve(php_stream *stream, SSL_CTX *ctx) /
 
 	return SUCCESS;
 }
-/* }}} */
+
 #endif
 
-static int php_openssl_set_server_specific_opts(php_stream *stream, SSL_CTX *ctx) /* {{{ */
+static int php_openssl_set_server_specific_opts(php_stream *stream, SSL_CTX *ctx)
 {
 	zval *zv;
 	long ssl_ctx_options = SSL_CTX_get_options(ctx);
@@ -1361,10 +1340,9 @@ static int php_openssl_set_server_specific_opts(php_stream *stream, SSL_CTX *ctx
 
 	return SUCCESS;
 }
-/* }}} */
 
 #ifdef HAVE_TLS_SNI
-static int php_openssl_server_sni_callback(SSL *ssl_handle, int *al, void *arg) /* {{{ */
+static int php_openssl_server_sni_callback(SSL *ssl_handle, int *al, void *arg)
 {
 	php_stream *stream;
 	php_openssl_netstream_data_t *sslsock;
@@ -1393,9 +1371,8 @@ static int php_openssl_server_sni_callback(SSL *ssl_handle, int *al, void *arg) 
 
 	return SSL_TLSEXT_ERR_NOACK;
 }
-/* }}} */
 
-static SSL_CTX *php_openssl_create_sni_server_ctx(char *cert_path, char *key_path)  /* {{{ */
+static SSL_CTX *php_openssl_create_sni_server_ctx(char *cert_path, char *key_path)
 {
 	/* The hello method is not inherited by SSL structs when assigning a new context
 	 * inside the SNI callback, so the just use SSLv23 */
@@ -1421,9 +1398,8 @@ static SSL_CTX *php_openssl_create_sni_server_ctx(char *cert_path, char *key_pat
 
 	return ctx;
 }
-/* }}} */
 
-static int php_openssl_enable_server_sni(php_stream *stream, php_openssl_netstream_data_t *sslsock)  /* {{{ */
+static int php_openssl_enable_server_sni(php_stream *stream, php_openssl_netstream_data_t *sslsock)
 {
 	zval *val;
 	zval *current;
@@ -1548,9 +1524,8 @@ static int php_openssl_enable_server_sni(php_stream *stream, php_openssl_netstre
 
 	return SUCCESS;
 }
-/* }}} */
 
-static void php_openssl_enable_client_sni(php_stream *stream, php_openssl_netstream_data_t *sslsock) /* {{{ */
+static void php_openssl_enable_client_sni(php_stream *stream, php_openssl_netstream_data_t *sslsock)
 {
 	zval *val;
 	char *sni_server_name;
@@ -1568,7 +1543,7 @@ static void php_openssl_enable_client_sni(php_stream *stream, php_openssl_netstr
 		SSL_set_tlsext_host_name(sslsock->ssl_handle, sni_server_name);
 	}
 }
-/* }}} */
+
 #endif
 
 #ifdef HAVE_TLS_ALPN
@@ -1580,7 +1555,7 @@ static void php_openssl_enable_client_sni(php_stream *stream, php_openssl_netstr
  *
  *   returns: an emalloced buffer or NULL on failure.
  */
-static unsigned char *php_openssl_alpn_protos_parse(unsigned short *outlen, const char *in) /* {{{ */
+static unsigned char *php_openssl_alpn_protos_parse(unsigned short *outlen, const char *in)
 {
 	size_t len;
 	unsigned char *out;
@@ -1610,11 +1585,10 @@ static unsigned char *php_openssl_alpn_protos_parse(unsigned short *outlen, cons
 
 	return out;
 }
-/* }}} */
 
 static int php_openssl_server_alpn_callback(SSL *ssl_handle,
 		const unsigned char **out, unsigned char *outlen,
-		const unsigned char *in, unsigned int inlen, void *arg) /* {{{ */
+		const unsigned char *in, unsigned int inlen, void *arg)
 {
 	php_openssl_netstream_data_t *sslsock = arg;
 
@@ -1624,13 +1598,12 @@ static int php_openssl_server_alpn_callback(SSL *ssl_handle,
 
 	return SSL_TLSEXT_ERR_OK;
 }
-/* }}} */
 
 #endif
 
 int php_openssl_setup_crypto(php_stream *stream,
 		php_openssl_netstream_data_t *sslsock,
-		php_stream_xport_crypto_param *cparam) /* {{{ */
+		php_stream_xport_crypto_param *cparam)
 {
 	const SSL_METHOD *method;
 	int ssl_ctx_options;
@@ -1818,10 +1791,9 @@ int php_openssl_setup_crypto(php_stream *stream,
 
 	return SUCCESS;
 }
-/* }}} */
 
 static int php_openssl_capture_peer_certs(php_stream *stream,
-		php_openssl_netstream_data_t *sslsock, X509 *peer_cert) /* {{{ */
+		php_openssl_netstream_data_t *sslsock, X509 *peer_cert)
 {
 	zval *val, zcert;
 	int cert_captured = 0;
@@ -1865,11 +1837,10 @@ static int php_openssl_capture_peer_certs(php_stream *stream,
 
 	return cert_captured;
 }
-/* }}} */
 
 static int php_openssl_enable_crypto(php_stream *stream,
 		php_openssl_netstream_data_t *sslsock,
-		php_stream_xport_crypto_param *cparam) /* {{{ */
+		php_stream_xport_crypto_param *cparam)
 {
 	int n;
 	int retry = 1;
@@ -1997,19 +1968,16 @@ static int php_openssl_enable_crypto(php_stream *stream,
 
 	return -1;
 }
-/* }}} */
 
-static ssize_t php_openssl_sockop_read(php_stream *stream, char *buf, size_t count) /* {{{ */
+static ssize_t php_openssl_sockop_read(php_stream *stream, char *buf, size_t count)
 {
 	return php_openssl_sockop_io( 1, stream, buf, count );
 }
-/* }}} */
 
-static ssize_t php_openssl_sockop_write(php_stream *stream, const char *buf, size_t count) /* {{{ */
+static ssize_t php_openssl_sockop_write(php_stream *stream, const char *buf, size_t count)
 {
 	return php_openssl_sockop_io( 0, stream, (char*)buf, count );
 }
-/* }}} */
 
 /**
  * Factored out common functionality (blocking, timeout, loop management) for read and write.
@@ -2017,7 +1985,7 @@ static ssize_t php_openssl_sockop_write(php_stream *stream, const char *buf, siz
  * for the duration of the operation, using select to do our waits. If we time out, or we have an error
  * report that back to PHP
  */
-static ssize_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, size_t count) /* {{{ */
+static ssize_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, size_t count)
 {
 	php_openssl_netstream_data_t *sslsock = (php_openssl_netstream_data_t*)stream->abstract;
 
@@ -2179,9 +2147,8 @@ static ssize_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, si
 		return nr_bytes;
 	}
 }
-/* }}} */
 
-static struct timeval php_openssl_subtract_timeval(struct timeval a, struct timeval b) /* {{{ */
+static struct timeval php_openssl_subtract_timeval(struct timeval a, struct timeval b)
 {
 	struct timeval difference;
 
@@ -2195,7 +2162,6 @@ static struct timeval php_openssl_subtract_timeval(struct timeval a, struct time
 
 	return difference;
 }
-/* }}} */
 
 static int php_openssl_compare_timeval( struct timeval a, struct timeval b )
 {
@@ -2208,7 +2174,7 @@ static int php_openssl_compare_timeval( struct timeval a, struct timeval b )
 	}
 }
 
-static int php_openssl_sockop_close(php_stream *stream, int close_handle) /* {{{ */
+static int php_openssl_sockop_close(php_stream *stream, int close_handle)
 {
 	php_openssl_netstream_data_t *sslsock = (php_openssl_netstream_data_t*)stream->abstract;
 #ifdef PHP_WIN32
@@ -2281,22 +2247,19 @@ static int php_openssl_sockop_close(php_stream *stream, int close_handle) /* {{{
 
 	return 0;
 }
-/* }}} */
 
-static int php_openssl_sockop_flush(php_stream *stream) /* {{{ */
+static int php_openssl_sockop_flush(php_stream *stream)
 {
 	return php_stream_socket_ops.flush(stream);
 }
-/* }}} */
 
-static int php_openssl_sockop_stat(php_stream *stream, php_stream_statbuf *ssb) /* {{{ */
+static int php_openssl_sockop_stat(php_stream *stream, php_stream_statbuf *ssb)
 {
 	return php_stream_socket_ops.stat(stream, ssb);
 }
-/* }}} */
 
 static inline int php_openssl_tcp_sockop_accept(php_stream *stream, php_openssl_netstream_data_t *sock,
-		php_stream_xport_param *xparam STREAMS_DC)  /* {{{ */
+		php_stream_xport_param *xparam STREAMS_DC)
 {
 	int clisock;
 	zend_bool nodelay = 0;
@@ -2358,9 +2321,8 @@ static inline int php_openssl_tcp_sockop_accept(php_stream *stream, php_openssl_
 
 	return xparam->outputs.client == NULL ? -1 : 0;
 }
-/* }}} */
 
-static int php_openssl_sockop_set_option(php_stream *stream, int option, int value, void *ptrparam)  /* {{{ */
+static int php_openssl_sockop_set_option(php_stream *stream, int option, int value, void *ptrparam)
 {
 	php_openssl_netstream_data_t *sslsock = (php_openssl_netstream_data_t*)stream->abstract;
 	php_stream_xport_crypto_param *cparam = (php_stream_xport_crypto_param *)ptrparam;
@@ -2525,9 +2487,8 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 
 	return php_stream_socket_ops.set_option(stream, option, value, ptrparam);
 }
-/* }}} */
 
-static int php_openssl_sockop_cast(php_stream *stream, int castas, void **ret)  /* {{{ */
+static int php_openssl_sockop_cast(php_stream *stream, int castas, void **ret)
 {
 	php_openssl_netstream_data_t *sslsock = (php_openssl_netstream_data_t*)stream->abstract;
 
@@ -2573,7 +2534,6 @@ static int php_openssl_sockop_cast(php_stream *stream, int castas, void **ret)  
 			return FAILURE;
 	}
 }
-/* }}} */
 
 const php_stream_ops php_openssl_socket_ops = {
 	php_openssl_sockop_write, php_openssl_sockop_read,
@@ -2586,7 +2546,7 @@ const php_stream_ops php_openssl_socket_ops = {
 };
 
 static zend_long php_openssl_get_crypto_method(
-		php_stream_context *ctx, zend_long crypto_method)  /* {{{ */
+		php_stream_context *ctx, zend_long crypto_method)
 {
 	zval *val;
 
@@ -2597,10 +2557,9 @@ static zend_long php_openssl_get_crypto_method(
 
 	return crypto_method;
 }
-/* }}} */
 
 static char *php_openssl_get_url_name(const char *resourcename,
-		size_t resourcenamelen, int is_persistent)  /* {{{ */
+		size_t resourcenamelen, int is_persistent)
 {
 	php_url *url;
 
@@ -2634,13 +2593,12 @@ static char *php_openssl_get_url_name(const char *resourcename,
 	php_url_free(url);
 	return NULL;
 }
-/* }}} */
 
 php_stream *php_openssl_ssl_socket_factory(const char *proto, size_t protolen,
 		const char *resourcename, size_t resourcenamelen,
 		const char *persistent_id, int options, int flags,
 		struct timeval *timeout,
-		php_stream_context *context STREAMS_DC) /* {{{ */
+		php_stream_context *context STREAMS_DC)
 {
 	php_stream *stream = NULL;
 	php_openssl_netstream_data_t *sslsock = NULL;
@@ -2734,4 +2692,4 @@ php_stream *php_openssl_ssl_socket_factory(const char *proto, size_t protolen,
 
 	return stream;
 }
-/* }}} */
+

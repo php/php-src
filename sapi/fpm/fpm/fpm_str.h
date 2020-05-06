@@ -3,7 +3,7 @@
 #ifndef FPM_STR_H
 #define FPM_STR_H 1
 
-static inline char *str_purify_filename(char *dst, char *src, size_t size) /* {{{ */
+static inline char *str_purify_filename(char *dst, char *src, size_t size)
 {
 	char *d, *end;
 
@@ -22,6 +22,5 @@ static inline char *str_purify_filename(char *dst, char *src, size_t size) /* {{
 
 	return d;
 }
-/* }}} */
 
 #endif

@@ -139,7 +139,7 @@ const char *fpm_signal_names[NSIG + 1] = {
 #endif
 };
 
-static void sig_soft_quit(int signo) /* {{{ */
+static void sig_soft_quit(int signo)
 {
 	int saved_errno = errno;
 
@@ -151,9 +151,8 @@ static void sig_soft_quit(int signo) /* {{{ */
 	fpm_php_soft_quit();
 	errno = saved_errno;
 }
-/* }}} */
 
-static void sig_handler(int signo) /* {{{ */
+static void sig_handler(int signo)
 {
 	static const char sig_chars[NSIG + 1] = {
 		[SIGTERM] = 'T',
@@ -180,9 +179,8 @@ static void sig_handler(int signo) /* {{{ */
 	zend_quiet_write(sp[1], &s, sizeof(s));
 	errno = saved_errno;
 }
-/* }}} */
 
-int fpm_signals_init_main() /* {{{ */
+int fpm_signals_init_main()
 {
 	struct sigaction act;
 
@@ -222,9 +220,8 @@ int fpm_signals_init_main() /* {{{ */
 	}
 	return 0;
 }
-/* }}} */
 
-int fpm_signals_init_child() /* {{{ */
+int fpm_signals_init_child()
 {
 	struct sigaction act, act_dfl;
 
@@ -257,15 +254,13 @@ int fpm_signals_init_child() /* {{{ */
 	}
 	return 0;
 }
-/* }}} */
 
-int fpm_signals_get_fd() /* {{{ */
+int fpm_signals_get_fd()
 {
 	return sp[0];
 }
-/* }}} */
 
-int fpm_signals_init_mask() /* {{{ */
+int fpm_signals_init_mask()
 {
 	/* Subset of signals from fpm_signals_init_main() and fpm_got_signal()
 		blocked to avoid unexpected death during early init
@@ -298,9 +293,8 @@ int fpm_signals_init_mask() /* {{{ */
 	}
 	return 0;
 }
-/* }}} */
 
-int fpm_signals_block() /* {{{ */
+int fpm_signals_block()
 {
 	if (0 > sigprocmask(SIG_BLOCK, &block_sigset, NULL)) {
 		zlog(ZLOG_SYSERROR, "failed to block signals");
@@ -308,9 +302,8 @@ int fpm_signals_block() /* {{{ */
 	}
 	return 0;
 }
-/* }}} */
 
-int fpm_signals_child_block() /* {{{ */
+int fpm_signals_child_block()
 {
 	if (0 > sigprocmask(SIG_BLOCK, &child_block_sigset, NULL)) {
 		zlog(ZLOG_SYSERROR, "failed to block child signals");
@@ -318,9 +311,8 @@ int fpm_signals_child_block() /* {{{ */
 	}
 	return 0;
 }
-/* }}} */
 
-int fpm_signals_unblock() /* {{{ */
+int fpm_signals_unblock()
 {
 	/* Ensure that during reload after upgrade all signals are unblocked.
 		block_sigset could have different value before execve() */
@@ -332,4 +324,4 @@ int fpm_signals_unblock() /* {{{ */
 	}
 	return 0;
 }
-/* }}} */
+

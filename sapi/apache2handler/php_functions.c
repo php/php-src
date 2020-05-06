@@ -102,7 +102,6 @@ PHP_FUNCTION(virtual)
 	ap_destroy_sub_req(rr);
 	RETURN_TRUE;
 }
-/* }}} */
 
 #define ADD_LONG(name) \
 		add_property_long(return_value, #name, rr->name)
@@ -185,7 +184,6 @@ PHP_FUNCTION(apache_request_headers)
 		add_assoc_string(return_value, key, val);
 	APR_ARRAY_FOREACH_CLOSE()
 }
-/* }}} */
 
 /* Fetch all HTTP response headers */
 PHP_FUNCTION(apache_response_headers)
@@ -208,7 +206,6 @@ PHP_FUNCTION(apache_response_headers)
 		add_assoc_string(return_value, key, val);
 	APR_ARRAY_FOREACH_CLOSE()
 }
-/* }}} */
 
 /* Get and set Apache request notes */
 PHP_FUNCTION(apache_note)
@@ -236,8 +233,6 @@ PHP_FUNCTION(apache_note)
 
 	RETURN_FALSE;
 }
-/* }}} */
-
 
 /* Set an Apache subprocess_env variable */
 /*
@@ -270,7 +265,6 @@ PHP_FUNCTION(apache_setenv)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Get an Apache subprocess_env variable */
 /*
@@ -309,7 +303,6 @@ PHP_FUNCTION(apache_getenv)
 
 	RETURN_FALSE;
 }
-/* }}} */
 
 static char *php_apache_get_version()
 {
@@ -331,7 +324,6 @@ PHP_FUNCTION(apache_get_version)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Get a list of loaded Apache modules */
 PHP_FUNCTION(apache_get_modules)
@@ -350,7 +342,6 @@ PHP_FUNCTION(apache_get_modules)
 		}
 	}
 }
-/* }}} */
 
 PHP_MINFO_FUNCTION(apache)
 {

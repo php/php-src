@@ -35,12 +35,12 @@
 #include "cdb_make.h"
 #include "uint32.h"
 
-/* {{{ cdb_make_write */
+/* cdb_make_write */
 static int cdb_make_write(struct cdb_make *c, char *buf, uint32 sz) {
 	return php_stream_write(c->fp, buf, sz) == sz ? 0 : -1;
 }
 
-/* {{{ cdb_posplus */
+/* cdb_posplus */
 static int cdb_posplus(struct cdb_make *c, uint32 len)
 {
 	uint32 newpos = c->pos + len;
@@ -51,9 +51,8 @@ static int cdb_posplus(struct cdb_make *c, uint32 len)
 	c->pos = newpos;
 	return 0;
 }
-/* }}} */
 
-/* {{{ cdb_make_start */
+/* cdb_make_start */
 int cdb_make_start(struct cdb_make *c, php_stream * f)
 {
 	c->head = 0;
@@ -68,9 +67,8 @@ int cdb_make_start(struct cdb_make *c, php_stream * f)
 	}
 	return php_stream_tell(c->fp);
 }
-/* }}} */
 
-/* {{{ cdb_make_addend */
+/* cdb_make_addend */
 int cdb_make_addend(struct cdb_make *c, unsigned int keylen, unsigned int datalen, uint32 h)
 {
 	struct cdb_hplist *head;
@@ -96,9 +94,8 @@ int cdb_make_addend(struct cdb_make *c, unsigned int keylen, unsigned int datale
 		return -1;
 	return 0;
 }
-/* }}} */
 
-/* {{{ cdb_make_addbegin */
+/* cdb_make_addbegin */
 int cdb_make_addbegin(struct cdb_make *c, unsigned int keylen, unsigned int datalen)
 {
 	char buf[8];
@@ -119,7 +116,7 @@ int cdb_make_addbegin(struct cdb_make *c, unsigned int keylen, unsigned int data
 	return 0;
 }
 
-/* {{{ cdb_make_add */
+/* cdb_make_add */
 int cdb_make_add(struct cdb_make *c,char *key,unsigned int keylen,char *data,unsigned int datalen)
 {
 	if (cdb_make_addbegin(c, keylen, datalen) == -1)
@@ -130,9 +127,8 @@ int cdb_make_add(struct cdb_make *c,char *key,unsigned int keylen,char *data,uns
 		return -1;
 	return cdb_make_addend(c, keylen, datalen, cdb_hash(key, keylen));
 }
-/* }}} */
 
-/* {{{ cdb_make_finish */
+/* cdb_make_finish */
 int cdb_make_finish(struct cdb_make *c)
 {
 	char buf[8];
@@ -233,9 +229,8 @@ int cdb_make_finish(struct cdb_make *c)
 		return -1;
 	return php_stream_flush(c->fp);
 }
-/* }}} */
 
-/* {{{ cdb_make_version */
+/* cdb_make_version */
 char *cdb_make_version()
 {
 	return "0.75, $Id$";

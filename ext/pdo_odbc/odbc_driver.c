@@ -52,7 +52,7 @@ static int pdo_odbc_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *inf
 }
 
 
-void pdo_odbc_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, PDO_ODBC_HSTMT statement, char *what, const char *file, int line) /* {{{ */
+void pdo_odbc_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, PDO_ODBC_HSTMT statement, char *what, const char *file, int line)
 {
 	SQLRETURN rc;
 	SQLSMALLINT	errmsgsize = 0;
@@ -118,7 +118,6 @@ void pdo_odbc_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, PDO_ODBC_HSTMT statement, 
 	}
 
 }
-/* }}} */
 
 static int odbc_handle_closer(pdo_dbh_t *dbh)
 {
@@ -384,7 +383,7 @@ static const struct pdo_dbh_methods odbc_methods = {
 	NULL,	/* check_liveness */
 };
 
-static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ */
+static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 {
 	pdo_odbc_db_handle *H;
 	RETCODE rc;
@@ -472,7 +471,6 @@ fail:
 	dbh->methods = &odbc_methods;
 	return 0;
 }
-/* }}} */
 
 const pdo_driver_t pdo_odbc_driver = {
 	PDO_DRIVER_HEADER(odbc),

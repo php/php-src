@@ -3308,7 +3308,7 @@ ZEND_API void execute_internal(zend_execute_data *execute_data, zval *return_val
 	execute_data->func->internal_function.handler(execute_data, return_value);
 }
 
-ZEND_API void zend_clean_and_cache_symbol_table(zend_array *symbol_table) /* {{{ */
+ZEND_API void zend_clean_and_cache_symbol_table(zend_array *symbol_table)
 {
 	if (EG(symtable_cache_ptr) >= EG(symtable_cache_limit)) {
 		zend_array_destroy(symbol_table);
@@ -3319,9 +3319,8 @@ ZEND_API void zend_clean_and_cache_symbol_table(zend_array *symbol_table) /* {{{
 		*(EG(symtable_cache_ptr)++) = symbol_table;
 	}
 }
-/* }}} */
 
-static zend_always_inline void i_free_compiled_variables(zend_execute_data *execute_data) /* {{{ */
+static zend_always_inline void i_free_compiled_variables(zend_execute_data *execute_data)
 {
 	zval *cv = EX_VAR_NUM(0);
 	int count = EX(func)->op_array.last_var;
@@ -3331,13 +3330,11 @@ static zend_always_inline void i_free_compiled_variables(zend_execute_data *exec
 		count--;
 	}
 }
-/* }}} */
 
-ZEND_API void zend_free_compiled_variables(zend_execute_data *execute_data) /* {{{ */
+ZEND_API void zend_free_compiled_variables(zend_execute_data *execute_data)
 {
 	i_free_compiled_variables(execute_data);
 }
-/* }}} */
 
 #define ZEND_VM_INTERRUPT_CHECK() do { \
 		if (UNEXPECTED(EG(vm_interrupt))) { \
@@ -3439,7 +3436,7 @@ static zend_always_inline void zend_init_cvs(uint32_t first, uint32_t last EXECU
 	}
 }
 
-static zend_always_inline void i_init_func_execute_data(zend_op_array *op_array, zval *return_value, zend_bool may_be_trampoline EXECUTE_DATA_DC) /* {{{ */
+static zend_always_inline void i_init_func_execute_data(zend_op_array *op_array, zval *return_value, zend_bool may_be_trampoline EXECUTE_DATA_DC)
 {
 	uint32_t first_extra_arg, num_args;
 	ZEND_ASSERT(EX(func) == (zend_function*)op_array);
@@ -3475,9 +3472,8 @@ static zend_always_inline void i_init_func_execute_data(zend_op_array *op_array,
 
 	EG(current_execute_data) = execute_data;
 }
-/* }}} */
 
-static zend_always_inline void init_func_run_time_cache_i(zend_op_array *op_array) /* {{{ */
+static zend_always_inline void init_func_run_time_cache_i(zend_op_array *op_array)
 {
 	void **run_time_cache;
 
@@ -3486,15 +3482,13 @@ static zend_always_inline void init_func_run_time_cache_i(zend_op_array *op_arra
 	memset(run_time_cache, 0, op_array->cache_size);
 	ZEND_MAP_PTR_SET(op_array->run_time_cache, run_time_cache);
 }
-/* }}} */
 
-static zend_never_inline void ZEND_FASTCALL init_func_run_time_cache(zend_op_array *op_array) /* {{{ */
+static zend_never_inline void ZEND_FASTCALL init_func_run_time_cache(zend_op_array *op_array)
 {
 	init_func_run_time_cache_i(op_array);
 }
-/* }}} */
 
-ZEND_API zend_function * ZEND_FASTCALL zend_fetch_function(zend_string *name) /* {{{ */
+ZEND_API zend_function * ZEND_FASTCALL zend_fetch_function(zend_string *name)
 {
 	zval *zv = zend_hash_find(EG(function_table), name);
 
@@ -3507,9 +3501,9 @@ ZEND_API zend_function * ZEND_FASTCALL zend_fetch_function(zend_string *name) /*
 		return fbc;
 	}
 	return NULL;
-} /* }}} */
+}
 
-ZEND_API zend_function * ZEND_FASTCALL zend_fetch_function_str(const char *name, size_t len) /* {{{ */
+ZEND_API zend_function * ZEND_FASTCALL zend_fetch_function_str(const char *name, size_t len)
 {
 	zval *zv = zend_hash_str_find(EG(function_table), name, len);
 
@@ -3522,16 +3516,16 @@ ZEND_API zend_function * ZEND_FASTCALL zend_fetch_function_str(const char *name,
 		return fbc;
 	}
 	return NULL;
-} /* }}} */
+}
 
-ZEND_API void ZEND_FASTCALL zend_init_func_run_time_cache(zend_op_array *op_array) /* {{{ */
+ZEND_API void ZEND_FASTCALL zend_init_func_run_time_cache(zend_op_array *op_array)
 {
 	if (!RUN_TIME_CACHE(op_array)) {
 		init_func_run_time_cache_i(op_array);
 	}
-} /* }}} */
+}
 
-static zend_always_inline void i_init_code_execute_data(zend_execute_data *execute_data, zend_op_array *op_array, zval *return_value) /* {{{ */
+static zend_always_inline void i_init_code_execute_data(zend_execute_data *execute_data, zend_op_array *op_array, zval *return_value)
 {
 	ZEND_ASSERT(EX(func) == (zend_function*)op_array);
 
@@ -3555,9 +3549,8 @@ static zend_always_inline void i_init_code_execute_data(zend_execute_data *execu
 
 	EG(current_execute_data) = execute_data;
 }
-/* }}} */
 
-ZEND_API void zend_init_func_execute_data(zend_execute_data *ex, zend_op_array *op_array, zval *return_value) /* {{{ */
+ZEND_API void zend_init_func_execute_data(zend_execute_data *ex, zend_op_array *op_array, zval *return_value)
 {
 #if defined(ZEND_VM_FP_GLOBAL_REG) && ((ZEND_VM_KIND == ZEND_VM_KIND_CALL) || (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID))
 	zend_execute_data *orig_execute_data = execute_data;
@@ -3585,16 +3578,14 @@ ZEND_API void zend_init_func_execute_data(zend_execute_data *ex, zend_op_array *
 	execute_data = orig_execute_data;
 #endif
 }
-/* }}} */
 
-ZEND_API void zend_init_code_execute_data(zend_execute_data *execute_data, zend_op_array *op_array, zval *return_value) /* {{{ */
+ZEND_API void zend_init_code_execute_data(zend_execute_data *execute_data, zend_op_array *op_array, zval *return_value)
 {
 	EX(prev_execute_data) = EG(current_execute_data);
 	i_init_code_execute_data(execute_data, op_array, return_value);
 }
-/* }}} */
 
-ZEND_API void zend_init_execute_data(zend_execute_data *execute_data, zend_op_array *op_array, zval *return_value) /* {{{ */
+ZEND_API void zend_init_execute_data(zend_execute_data *execute_data, zend_op_array *op_array, zval *return_value)
 {
 	if (EX_CALL_INFO() & ZEND_CALL_HAS_SYMBOL_TABLE) {
 		zend_init_code_execute_data(execute_data, op_array, return_value);
@@ -3602,9 +3593,8 @@ ZEND_API void zend_init_execute_data(zend_execute_data *execute_data, zend_op_ar
 		zend_init_func_execute_data(execute_data, op_array, return_value);
 	}
 }
-/* }}} */
 
-static zend_execute_data *zend_vm_stack_copy_call_frame(zend_execute_data *call, uint32_t passed_args, uint32_t additional_args) /* {{{ */
+static zend_execute_data *zend_vm_stack_copy_call_frame(zend_execute_data *call, uint32_t passed_args, uint32_t additional_args)
 {
 	zend_execute_data *new_call;
 	int used_stack = (EG(vm_stack_top) - (zval*)call) + additional_args;
@@ -3638,9 +3628,8 @@ static zend_execute_data *zend_vm_stack_copy_call_frame(zend_execute_data *call,
 
 	return new_call;
 }
-/* }}} */
 
-static zend_always_inline void zend_vm_stack_extend_call_frame(zend_execute_data **call, uint32_t passed_args, uint32_t additional_args) /* {{{ */
+static zend_always_inline void zend_vm_stack_extend_call_frame(zend_execute_data **call, uint32_t passed_args, uint32_t additional_args)
 {
 	if (EXPECTED((uint32_t)(EG(vm_stack_end) - EG(vm_stack_top)) > additional_args)) {
 		EG(vm_stack_top) += additional_args;
@@ -3648,9 +3637,8 @@ static zend_always_inline void zend_vm_stack_extend_call_frame(zend_execute_data
 		*call = zend_vm_stack_copy_call_frame(*call, passed_args, additional_args);
 	}
 }
-/* }}} */
 
-static zend_always_inline zend_generator *zend_get_running_generator(EXECUTE_DATA_D) /* {{{ */
+static zend_always_inline zend_generator *zend_get_running_generator(EXECUTE_DATA_D)
 {
 	/* The generator object is stored in EX(return_value) */
 	zend_generator *generator = (zend_generator *) EX(return_value);
@@ -3658,9 +3646,8 @@ static zend_always_inline zend_generator *zend_get_running_generator(EXECUTE_DAT
 	 * That's the one we're interested in. */
 	return generator;
 }
-/* }}} */
 
-static void cleanup_unfinished_calls(zend_execute_data *execute_data, uint32_t op_num) /* {{{ */
+static void cleanup_unfinished_calls(zend_execute_data *execute_data, uint32_t op_num)
 {
 	if (UNEXPECTED(EX(call))) {
 		zend_execute_data *call = EX(call);
@@ -3782,9 +3769,8 @@ static void cleanup_unfinished_calls(zend_execute_data *execute_data, uint32_t o
 		} while (call);
 	}
 }
-/* }}} */
 
-static const zend_live_range *find_live_range(const zend_op_array *op_array, uint32_t op_num, uint32_t var_num) /* {{{ */
+static const zend_live_range *find_live_range(const zend_op_array *op_array, uint32_t op_num, uint32_t var_num)
 {
 	int i;
 	for (i = 0; i < op_array->last_live_range; i++) {
@@ -3796,9 +3782,8 @@ static const zend_live_range *find_live_range(const zend_op_array *op_array, uin
 	}
 	return NULL;
 }
-/* }}} */
 
-static void cleanup_live_vars(zend_execute_data *execute_data, uint32_t op_num, uint32_t catch_op_num) /* {{{ */
+static void cleanup_live_vars(zend_execute_data *execute_data, uint32_t op_num, uint32_t catch_op_num)
 {
 	int i;
 
@@ -3853,7 +3838,6 @@ static void cleanup_live_vars(zend_execute_data *execute_data, uint32_t op_num, 
 		}
 	}
 }
-/* }}} */
 
 ZEND_API void zend_cleanup_unfinished_execution(zend_execute_data *execute_data, uint32_t op_num, uint32_t catch_op_num) {
 	cleanup_unfinished_calls(execute_data, op_num);
@@ -3861,7 +3845,7 @@ ZEND_API void zend_cleanup_unfinished_execution(zend_execute_data *execute_data,
 }
 
 #if ZEND_VM_SPEC
-static void zend_swap_operands(zend_op *op) /* {{{ */
+static void zend_swap_operands(zend_op *op)
 {
 	znode_op     tmp;
 	zend_uchar   tmp_type;
@@ -3873,10 +3857,10 @@ static void zend_swap_operands(zend_op *op) /* {{{ */
 	op->op2      = tmp;
 	op->op2_type = tmp_type;
 }
-/* }}} */
+
 #endif
 
-static zend_never_inline zend_execute_data *zend_init_dynamic_call_string(zend_string *function, uint32_t num_args) /* {{{ */
+static zend_never_inline zend_execute_data *zend_init_dynamic_call_string(zend_string *function, uint32_t num_args)
 {
 	zend_function *fbc;
 	zval *func;
@@ -3950,9 +3934,8 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_string(zend_s
 	return zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_DYNAMIC,
 		fbc, num_args, called_scope);
 }
-/* }}} */
 
-static zend_never_inline zend_execute_data *zend_init_dynamic_call_object(zend_object *function, uint32_t num_args) /* {{{ */
+static zend_never_inline zend_execute_data *zend_init_dynamic_call_object(zend_object *function, uint32_t num_args)
 {
 	zend_function *fbc;
 	void *object_or_called_scope;
@@ -3992,9 +3975,8 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_object(zend_o
 	return zend_vm_stack_push_call_frame(call_info,
 		fbc, num_args, object_or_called_scope);
 }
-/* }}} */
 
-static zend_never_inline zend_execute_data *zend_init_dynamic_call_array(zend_array *function, uint32_t num_args) /* {{{ */
+static zend_never_inline zend_execute_data *zend_init_dynamic_call_array(zend_array *function, uint32_t num_args)
 {
 	zend_function *fbc;
 	void *object_or_called_scope;
@@ -4077,11 +4059,10 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_array(zend_ar
 	return zend_vm_stack_push_call_frame(call_info,
 		fbc, num_args, object_or_called_scope);
 }
-/* }}} */
 
 #define ZEND_FAKE_OP_ARRAY ((zend_op_array*)(zend_intptr_t)-1)
 
-static zend_never_inline zend_op_array* ZEND_FASTCALL zend_include_or_eval(zval *inc_filename, int type) /* {{{ */
+static zend_never_inline zend_op_array* ZEND_FASTCALL zend_include_or_eval(zval *inc_filename, int type)
 {
 	zend_op_array *new_op_array = NULL;
 	zval tmp_inc_filename;
@@ -4173,9 +4154,8 @@ already_compiled:
 	}
 	return new_op_array;
 }
-/* }}} */
 
-static zend_never_inline zend_bool ZEND_FASTCALL zend_fe_reset_iterator(zval *array_ptr, int by_ref OPLINE_DC EXECUTE_DATA_DC) /* {{{ */
+static zend_never_inline zend_bool ZEND_FASTCALL zend_fe_reset_iterator(zval *array_ptr, int by_ref OPLINE_DC EXECUTE_DATA_DC)
 {
 	zend_class_entry *ce = Z_OBJCE_P(array_ptr);
 	zend_object_iterator *iter = ce->get_iterator(ce, array_ptr, by_ref);
@@ -4216,10 +4196,9 @@ static zend_never_inline zend_bool ZEND_FASTCALL zend_fe_reset_iterator(zval *ar
 
 	return is_empty;
 }
-/* }}} */
 
 static zend_always_inline int _zend_quick_get_constant(
-		const zval *key, uint32_t flags, int check_defined_only OPLINE_DC EXECUTE_DATA_DC) /* {{{ */
+		const zval *key, uint32_t flags, int check_defined_only OPLINE_DC EXECUTE_DATA_DC)
 {
 	zval *zv;
 	zend_constant *c = NULL;
@@ -4255,23 +4234,22 @@ static zend_always_inline int _zend_quick_get_constant(
 	CACHE_PTR(opline->extended_value, c);
 	return SUCCESS;
 }
-/* }}} */
 
 static zend_never_inline void ZEND_FASTCALL zend_quick_get_constant(
-		const zval *key, uint32_t flags OPLINE_DC EXECUTE_DATA_DC) /* {{{ */
+		const zval *key, uint32_t flags OPLINE_DC EXECUTE_DATA_DC)
 {
 	_zend_quick_get_constant(key, flags, 0 OPLINE_CC EXECUTE_DATA_CC);
-} /* }}} */
+}
 
 static zend_never_inline int ZEND_FASTCALL zend_quick_check_constant(
-		const zval *key OPLINE_DC EXECUTE_DATA_DC) /* {{{ */
+		const zval *key OPLINE_DC EXECUTE_DATA_DC)
 {
 	return _zend_quick_get_constant(key, 0, 1 OPLINE_CC EXECUTE_DATA_CC);
-} /* }}} */
+}
 
 #if defined(ZEND_VM_IP_GLOBAL_REG) && ((ZEND_VM_KIND == ZEND_VM_KIND_CALL) || (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID))
 /* Special versions of functions that sets EX(opline) before calling zend_vm_stack_extend() */
-static zend_always_inline zend_execute_data *_zend_vm_stack_push_call_frame_ex(uint32_t used_stack, uint32_t call_info, zend_function *func, uint32_t num_args, void *object_or_called_scope) /* {{{ */
+static zend_always_inline zend_execute_data *_zend_vm_stack_push_call_frame_ex(uint32_t used_stack, uint32_t call_info, zend_function *func, uint32_t num_args, void *object_or_called_scope)
 {
 	zend_execute_data *call = (zend_execute_data*)EG(vm_stack_top);
 
@@ -4288,15 +4266,15 @@ static zend_always_inline zend_execute_data *_zend_vm_stack_push_call_frame_ex(u
 		zend_vm_init_call_frame(call, call_info, func, num_args, object_or_called_scope);
 		return call;
 	}
-} /* }}} */
+}
 
-static zend_always_inline zend_execute_data *_zend_vm_stack_push_call_frame(uint32_t call_info, zend_function *func, uint32_t num_args, void *object_or_called_scope) /* {{{ */
+static zend_always_inline zend_execute_data *_zend_vm_stack_push_call_frame(uint32_t call_info, zend_function *func, uint32_t num_args, void *object_or_called_scope)
 {
 	uint32_t used_stack = zend_vm_calc_used_stack(num_args, func);
 
 	return _zend_vm_stack_push_call_frame_ex(used_stack, call_info,
 		func, num_args, object_or_called_scope);
-} /* }}} */
+}
 #else
 # define _zend_vm_stack_push_call_frame_ex zend_vm_stack_push_call_frame_ex
 # define _zend_vm_stack_push_call_frame    zend_vm_stack_push_call_frame

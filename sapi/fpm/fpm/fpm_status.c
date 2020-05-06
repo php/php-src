@@ -20,7 +20,7 @@ static char *fpm_status_ping_uri = NULL;
 static char *fpm_status_ping_response = NULL;
 
 
-int fpm_status_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
+int fpm_status_init_child(struct fpm_worker_pool_s *wp)
 {
 	if (!wp || !wp->config) {
 		zlog(ZLOG_ERROR, "unable to init fpm_status because conf structure is NULL");
@@ -42,7 +42,6 @@ int fpm_status_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 
 	return 0;
 }
-/* }}} */
 
 int fpm_status_export_to_zval(zval *status)
 {
@@ -139,9 +138,8 @@ int fpm_status_export_to_zval(zval *status)
 	add_assoc_zval(status, "procs", &fpm_proc_stats);
 	return 0;
 }
-/* }}} */
 
-int fpm_status_handle_request(void) /* {{{ */
+int fpm_status_handle_request(void)
 {
 	struct fpm_scoreboard_s scoreboard, *scoreboard_p;
 	struct fpm_scoreboard_proc_s proc;
@@ -573,4 +571,4 @@ int fpm_status_handle_request(void) /* {{{ */
 
 	return 0;
 }
-/* }}} */
+

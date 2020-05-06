@@ -33,7 +33,7 @@
 
 
 #if !defined(MYSQLI_USE_MYSQLND)
-/* {{{ mysqli_tx_cor_options_to_string */
+/* mysqli_tx_cor_options_to_string */
 static void mysqli_tx_cor_options_to_string(const MYSQL * const conn, smart_str * str, const uint32_t mode)
 {
 	if (mode & TRANS_COR_AND_CHAIN && !(mode & TRANS_COR_AND_NO_CHAIN)) {
@@ -61,9 +61,8 @@ static void mysqli_tx_cor_options_to_string(const MYSQL * const conn, smart_str 
 	}
 	smart_str_0(str);
 }
-/* }}} */
 
-/* {{{ mysqlnd_escape_string_for_tx_name_in_comment */
+/* mysqlnd_escape_string_for_tx_name_in_comment */
 char *
 mysqli_escape_string_for_tx_name_in_comment(const char * const name)
 {
@@ -102,9 +101,8 @@ mysqli_escape_string_for_tx_name_in_comment(const char * const name)
 	}
 	return ret;
 }
-/* }}} */
 
-/* {{{ mysqli_commit_or_rollback_libmysql */
+/* mysqli_commit_or_rollback_libmysql */
 static int mysqli_commit_or_rollback_libmysql(MYSQL * conn, zend_bool commit, const uint32_t mode, const char * const name)
 {
 	int ret;
@@ -130,7 +128,7 @@ static int mysqli_commit_or_rollback_libmysql(MYSQL * conn, zend_bool commit, co
 	}
 	return ret;
 }
-/* }}} */
+
 #endif
 
 /* Get number of affected rows in previous MySQL operation */
@@ -152,7 +150,6 @@ PHP_FUNCTION(mysqli_affected_rows)
 	}
 	MYSQLI_RETURN_LONG_INT(rc);
 }
-/* }}} */
 
 /* Turn auto commit on or of */
 PHP_FUNCTION(mysqli_autocommit)
@@ -171,9 +168,8 @@ PHP_FUNCTION(mysqli_autocommit)
 	}
 	RETURN_TRUE;
 }
-/* }}} */
 
-/* {{{ mysqli_stmt_bind_param_do_bind */
+/* mysqli_stmt_bind_param_do_bind */
 #ifndef MYSQLI_USE_MYSQLND
 static
 int mysqli_stmt_bind_param_do_bind(MY_STMT *stmt, unsigned int argc, unsigned int num_vars,
@@ -307,7 +303,6 @@ end:
 	return ret;
 }
 #endif
-/* }}} */
 
 /* Bind variables to a prepared statement as parameters */
 PHP_FUNCTION(mysqli_stmt_bind_param)
@@ -372,9 +367,8 @@ PHP_FUNCTION(mysqli_stmt_bind_param)
 
 	RETURN_BOOL(!rc);
 }
-/* }}} */
 
-/* {{{ mysqli_stmt_bind_result_do_bind */
+/* mysqli_stmt_bind_result_do_bind */
 #ifndef MYSQLI_USE_MYSQLND
 /* TODO:
    do_alloca, free_alloca
@@ -569,7 +563,6 @@ mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval *args, unsigned int argc)
 	return FAIL;
 }
 #endif
-/* }}} */
 
 /* Bind variables to a prepared statement for result storage */
 PHP_FUNCTION(mysqli_stmt_bind_result)
@@ -594,7 +587,6 @@ PHP_FUNCTION(mysqli_stmt_bind_result)
 	rc = mysqli_stmt_bind_result_do_bind(stmt, args, argc);
 	RETURN_BOOL(!rc);
 }
-/* }}} */
 
 /* Change logged-in user of the active connection */
 PHP_FUNCTION(mysqli_change_user)
@@ -640,7 +632,6 @@ PHP_FUNCTION(mysqli_change_user)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Returns the name of the character set used for this connection */
 PHP_FUNCTION(mysqli_character_set_name)
@@ -659,9 +650,8 @@ PHP_FUNCTION(mysqli_character_set_name)
 		RETURN_STRING(cs_name);
 	}
 }
-/* }}} */
 
-/* {{{ php_mysqli_close */
+/* php_mysqli_close */
 void php_mysqli_close(MY_MYSQL * mysql, int close_type, int resource_status)
 {
 	if (resource_status > MYSQLI_STATUS_INITIALIZED) {
@@ -700,7 +690,6 @@ void php_mysqli_close(MY_MYSQL * mysql, int close_type, int resource_status)
 
 	php_clear_mysql(mysql);
 }
-/* }}} */
 
 /* Close connection */
 PHP_FUNCTION(mysqli_close)
@@ -721,7 +710,6 @@ PHP_FUNCTION(mysqli_close)
 	efree(mysql);
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Commit outstanding actions and close transaction */
 PHP_FUNCTION(mysqli_commit)
@@ -746,7 +734,6 @@ PHP_FUNCTION(mysqli_commit)
 	}
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Move internal result pointer */
 PHP_FUNCTION(mysqli_data_seek)
@@ -773,7 +760,6 @@ PHP_FUNCTION(mysqli_data_seek)
 	mysql_data_seek(result, offset);
 	RETURN_TRUE;
 }
-/* }}} */
 
 PHP_FUNCTION(mysqli_debug)
 {
@@ -787,7 +773,6 @@ PHP_FUNCTION(mysqli_debug)
 	mysql_debug(debug);
 	RETURN_TRUE;
 }
-/* }}} */
 
 PHP_FUNCTION(mysqli_dump_debug_info)
 {
@@ -801,7 +786,6 @@ PHP_FUNCTION(mysqli_dump_debug_info)
 
 	RETURN_BOOL(!mysql_dump_debug_info(mysql->mysql));
 }
-/* }}} */
 
 /* Returns the numerical value of the error message from previous MySQL operation */
 PHP_FUNCTION(mysqli_errno)
@@ -815,7 +799,6 @@ PHP_FUNCTION(mysqli_errno)
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 	RETURN_LONG(mysql_errno(mysql->mysql));
 }
-/* }}} */
 
 /* Returns the text of the error message from previous MySQL operation */
 PHP_FUNCTION(mysqli_error)
@@ -833,7 +816,6 @@ PHP_FUNCTION(mysqli_error)
 		RETURN_STRING(err);
 	}
 }
-/* }}} */
 
 /* Execute a prepared statement */
 PHP_FUNCTION(mysqli_stmt_execute)
@@ -914,10 +896,9 @@ PHP_FUNCTION(mysqli_stmt_execute)
 		php_mysqli_report_index(stmt->query, mysqli_stmt_server_status(stmt->stmt));
 	}
 }
-/* }}} */
 
 #ifndef MYSQLI_USE_MYSQLND
-/* {{{ void mysqli_stmt_fetch_libmysql
+/* void mysqli_stmt_fetch_libmysql
    Fetch results from a prepared statement into the bound variables */
 void mysqli_stmt_fetch_libmysql(INTERNAL_FUNCTION_PARAMETERS)
 {
@@ -1080,9 +1061,9 @@ void mysqli_stmt_fetch_libmysql(INTERNAL_FUNCTION_PARAMETERS)
 		break;
 	}
 }
-/* }}} */
+
 #else
-/* {{{ mixed mysqli_stmt_fetch_mysqlnd */
+/* mixed mysqli_stmt_fetch_mysqlnd */
 void mysqli_stmt_fetch_mysqlnd(INTERNAL_FUNCTION_PARAMETERS)
 {
 	MY_STMT		*stmt;
@@ -1103,7 +1084,6 @@ void mysqli_stmt_fetch_mysqlnd(INTERNAL_FUNCTION_PARAMETERS)
 	}
 }
 #endif
-/* }}} */
 
 /* Fetch results from a prepared statement into the bound variables */
 PHP_FUNCTION(mysqli_stmt_fetch)
@@ -1114,9 +1094,8 @@ PHP_FUNCTION(mysqli_stmt_fetch)
 	mysqli_stmt_fetch_mysqlnd(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 #endif
 }
-/* }}} */
 
-/* {{{  php_add_field_properties */
+/*  php_add_field_properties */
 static void php_add_field_properties(zval *value, const MYSQL_FIELD *field)
 {
 #ifdef MYSQLI_USE_MYSQLND
@@ -1144,7 +1123,6 @@ static void php_add_field_properties(zval *value, const MYSQL_FIELD *field)
 	add_property_long(value, "type", field->type);
 	add_property_long(value, "decimals", field->decimals);
 }
-/* }}} */
 
 /* Get column information from a result and return as an object */
 PHP_FUNCTION(mysqli_fetch_field)
@@ -1166,7 +1144,6 @@ PHP_FUNCTION(mysqli_fetch_field)
 	object_init(return_value);
 	php_add_field_properties(return_value, field);
 }
-/* }}} */
 
 /* Return array of objects containing field meta-data */
 PHP_FUNCTION(mysqli_fetch_fields)
@@ -1195,7 +1172,6 @@ PHP_FUNCTION(mysqli_fetch_fields)
 		add_index_zval(return_value, i, &obj);
 	}
 }
-/* }}} */
 
 /* Fetch meta-data for a single field */
 PHP_FUNCTION(mysqli_fetch_field_direct)
@@ -1223,7 +1199,6 @@ PHP_FUNCTION(mysqli_fetch_field_direct)
 	object_init(return_value);
 	php_add_field_properties(return_value, field);
 }
-/* }}} */
 
 /* Get the length of each output in a result */
 PHP_FUNCTION(mysqli_fetch_lengths)
@@ -1254,14 +1229,12 @@ PHP_FUNCTION(mysqli_fetch_lengths)
 		add_index_long(return_value, i, ret[i]);
 	}
 }
-/* }}} */
 
 /* Get a result row as an enumerated array */
 PHP_FUNCTION(mysqli_fetch_row)
 {
 	php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MYSQLI_NUM, 0);
 }
-/* }}} */
 
 /* Fetch the number of fields returned by the last query for the given link
 */
@@ -1277,7 +1250,6 @@ PHP_FUNCTION(mysqli_field_count)
 
 	RETURN_LONG(mysql_field_count(mysql->mysql));
 }
-/* }}} */
 
 /* Set result pointer to a specified field offset
 */
@@ -1300,7 +1272,6 @@ PHP_FUNCTION(mysqli_field_seek)
 	mysql_field_seek(result, fieldnr);
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Get current field offset of result pointer */
 PHP_FUNCTION(mysqli_field_tell)
@@ -1315,7 +1286,6 @@ PHP_FUNCTION(mysqli_field_tell)
 
 	RETURN_LONG(mysql_field_tell(result));
 }
-/* }}} */
 
 /* Free query result memory for the given result handle */
 PHP_FUNCTION(mysqli_free_result)
@@ -1331,7 +1301,6 @@ PHP_FUNCTION(mysqli_free_result)
 	mysqli_free_result(result, FALSE);
 	MYSQLI_CLEAR_RESOURCE(mysql_result);
 }
-/* }}} */
 
 /* Get MySQL client info */
 PHP_FUNCTION(mysqli_get_client_info)
@@ -1353,7 +1322,6 @@ PHP_FUNCTION(mysqli_get_client_info)
 		RETURN_STRING(info);
 	}
 }
-/* }}} */
 
 /* Get MySQL client info */
 PHP_FUNCTION(mysqli_get_client_version)
@@ -1364,7 +1332,6 @@ PHP_FUNCTION(mysqli_get_client_version)
 
 	RETURN_LONG((zend_long)mysql_get_client_version());
 }
-/* }}} */
 
 /* Get MySQL host info */
 PHP_FUNCTION(mysqli_get_host_info)
@@ -1382,7 +1349,6 @@ PHP_FUNCTION(mysqli_get_host_info)
 	RETURN_STRING((mysql->mysql->data->host_info) ? mysql->mysql->data->host_info : "");
 #endif
 }
-/* }}} */
 
 /* Get MySQL protocol information */
 PHP_FUNCTION(mysqli_get_proto_info)
@@ -1396,7 +1362,6 @@ PHP_FUNCTION(mysqli_get_proto_info)
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 	RETURN_LONG(mysql_get_proto_info(mysql->mysql));
 }
-/* }}} */
 
 /* Get MySQL server info */
 PHP_FUNCTION(mysqli_get_server_info)
@@ -1415,7 +1380,6 @@ PHP_FUNCTION(mysqli_get_server_info)
 		RETURN_STRING(info);
 	}
 }
-/* }}} */
 
 /* Return the MySQL version for the server referenced by the given link */
 PHP_FUNCTION(mysqli_get_server_version)
@@ -1430,7 +1394,6 @@ PHP_FUNCTION(mysqli_get_server_version)
 
 	RETURN_LONG(mysql_get_server_version(mysql->mysql));
 }
-/* }}} */
 
 /* Get information about the most recent query */
 PHP_FUNCTION(mysqli_info)
@@ -1449,9 +1412,8 @@ PHP_FUNCTION(mysqli_info)
 		RETURN_STRING(info);
 	}
 }
-/* }}} */
 
-/* {{{ php_mysqli_init() */
+/* php_mysqli_init() */
 void php_mysqli_init(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_method)
 {
 	MYSQLI_RESOURCE *mysqli_resource;
@@ -1491,21 +1453,18 @@ void php_mysqli_init(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_method)
 		(Z_MYSQLI_P(getThis()))->ptr = mysqli_resource;
 	}
 }
-/* }}} */
 
 /* Initialize mysqli and return a resource for use with mysql_real_connect */
 PHP_FUNCTION(mysqli_init)
 {
 	php_mysqli_init(INTERNAL_FUNCTION_PARAM_PASSTHRU, FALSE);
 }
-/* }}} */
 
 /* Initialize mysqli and return a resource for use with mysql_real_connect */
 PHP_FUNCTION(mysqli_init_method)
 {
 	php_mysqli_init(INTERNAL_FUNCTION_PARAM_PASSTHRU, TRUE);
 }
-/* }}} */
 
 /* Get the ID generated from the previous INSERT operation */
 PHP_FUNCTION(mysqli_insert_id)
@@ -1521,7 +1480,6 @@ PHP_FUNCTION(mysqli_insert_id)
 	rc = mysql_insert_id(mysql->mysql);
 	MYSQLI_RETURN_LONG_INT(rc)
 }
-/* }}} */
 
 /* Kill a mysql process on the server */
 PHP_FUNCTION(mysqli_kill)
@@ -1546,7 +1504,6 @@ PHP_FUNCTION(mysqli_kill)
 	}
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* check if there any more query results from a multi query */
 PHP_FUNCTION(mysqli_more_results)
@@ -1561,7 +1518,6 @@ PHP_FUNCTION(mysqli_more_results)
 
 	RETURN_BOOL(mysql_more_results(mysql->mysql));
 }
-/* }}} */
 
 /* read next result from multi_query */
 PHP_FUNCTION(mysqli_next_result) {
@@ -1575,7 +1531,6 @@ PHP_FUNCTION(mysqli_next_result) {
 
 	RETURN_BOOL(!mysql_next_result(mysql->mysql));
 }
-/* }}} */
 
 #if defined(HAVE_STMT_NEXT_RESULT) && defined(MYSQLI_USE_MYSQLND)
 /* check if there any more query results from a multi query */
@@ -1591,7 +1546,6 @@ PHP_FUNCTION(mysqli_stmt_more_results)
 
 	RETURN_BOOL(mysqlnd_stmt_more_results(stmt->stmt));
 }
-/* }}} */
 
 /* read next result from multi_query */
 PHP_FUNCTION(mysqli_stmt_next_result) {
@@ -1605,7 +1559,7 @@ PHP_FUNCTION(mysqli_stmt_next_result) {
 
 	RETURN_BOOL(!mysql_stmt_next_result(stmt->stmt));
 }
-/* }}} */
+
 #endif
 
 /* Get number of fields in result */
@@ -1621,7 +1575,6 @@ PHP_FUNCTION(mysqli_num_fields)
 
 	RETURN_LONG(mysql_num_fields(result));
 }
-/* }}} */
 
 /* Get number of rows in result */
 PHP_FUNCTION(mysqli_num_rows)
@@ -1641,9 +1594,8 @@ PHP_FUNCTION(mysqli_num_rows)
 
 	MYSQLI_RETURN_LONG_INT(mysql_num_rows(result));
 }
-/* }}} */
 
-/* {{{ mysqli_options_get_option_zval_type */
+/* mysqli_options_get_option_zval_type */
 static int mysqli_options_get_option_zval_type(int option)
 {
 	switch (option) {
@@ -1706,7 +1658,6 @@ static int mysqli_options_get_option_zval_type(int option)
 			return IS_NULL;
 	}
 }
-/* }}} */
 
 /* Set options */
 PHP_FUNCTION(mysqli_options)
@@ -1761,7 +1712,6 @@ PHP_FUNCTION(mysqli_options)
 
 	RETURN_BOOL(!ret);
 }
-/* }}} */
 
 /* Ping a server connection or reconnect if there is no connection */
 PHP_FUNCTION(mysqli_ping)
@@ -1779,7 +1729,6 @@ PHP_FUNCTION(mysqli_ping)
 
 	RETURN_BOOL(!rc);
 }
-/* }}} */
 
 /* Prepare a SQL statement for execution */
 PHP_FUNCTION(mysqli_prepare)
@@ -1862,14 +1811,12 @@ PHP_FUNCTION(mysqli_prepare)
 	mysqli_resource->status = MYSQLI_STATUS_VALID;
 	MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_stmt_class_entry);
 }
-/* }}} */
 
 /* Open a connection to a mysql server */
 PHP_FUNCTION(mysqli_real_connect)
 {
 	mysqli_common_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, TRUE, FALSE);
 }
-/* }}} */
 
 /* Binary-safe version of mysql_query() */
 PHP_FUNCTION(mysqli_real_query)
@@ -1899,7 +1846,6 @@ PHP_FUNCTION(mysqli_real_query)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Escapes special characters in a string for use in a SQL statement, taking into account the current charset of the connection */
 PHP_FUNCTION(mysqli_real_escape_string) {
@@ -1920,7 +1866,6 @@ PHP_FUNCTION(mysqli_real_escape_string) {
 
 	RETURN_NEW_STR(newstr);
 }
-/* }}} */
 
 /* Undo actions from current transaction */
 PHP_FUNCTION(mysqli_rollback)
@@ -1945,7 +1890,6 @@ PHP_FUNCTION(mysqli_rollback)
 	}
 	RETURN_TRUE;
 }
-/* }}} */
 
 PHP_FUNCTION(mysqli_stmt_send_long_data)
 {
@@ -1969,7 +1913,6 @@ PHP_FUNCTION(mysqli_stmt_send_long_data)
 	}
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Return the number of rows affected in the last query for the given link. */
 PHP_FUNCTION(mysqli_stmt_affected_rows)
@@ -1989,7 +1932,6 @@ PHP_FUNCTION(mysqli_stmt_affected_rows)
 	}
 	MYSQLI_RETURN_LONG_INT(rc)
 }
-/* }}} */
 
 /* Close statement */
 PHP_FUNCTION(mysqli_stmt_close)
@@ -2008,7 +1950,6 @@ PHP_FUNCTION(mysqli_stmt_close)
 	MYSQLI_CLEAR_RESOURCE(mysql_stmt);
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Move internal result pointer */
 PHP_FUNCTION(mysqli_stmt_data_seek)
@@ -2029,7 +1970,6 @@ PHP_FUNCTION(mysqli_stmt_data_seek)
 
 	mysql_stmt_data_seek(stmt->stmt, offset);
 }
-/* }}} */
 
 /* Return the number of result columns for the given statement */
 PHP_FUNCTION(mysqli_stmt_field_count)
@@ -2044,7 +1984,6 @@ PHP_FUNCTION(mysqli_stmt_field_count)
 
 	RETURN_LONG(mysql_stmt_field_count(stmt->stmt));
 }
-/* }}} */
 
 /* Free stored result memory for the given statement handle */
 PHP_FUNCTION(mysqli_stmt_free_result)
@@ -2060,7 +1999,6 @@ PHP_FUNCTION(mysqli_stmt_free_result)
 
 	mysql_stmt_free_result(stmt->stmt);
 }
-/* }}} */
 
 /* Get the ID generated from the previous INSERT operation */
 PHP_FUNCTION(mysqli_stmt_insert_id)
@@ -2076,7 +2014,6 @@ PHP_FUNCTION(mysqli_stmt_insert_id)
 	rc = mysql_stmt_insert_id(stmt->stmt);
 	MYSQLI_RETURN_LONG_INT(rc)
 }
-/* }}} */
 
 /* Return the number of parameter for the given statement */
 PHP_FUNCTION(mysqli_stmt_param_count)
@@ -2091,7 +2028,6 @@ PHP_FUNCTION(mysqli_stmt_param_count)
 
 	RETURN_LONG(mysql_stmt_param_count(stmt->stmt));
 }
-/* }}} */
 
 /* reset a prepared statement */
 PHP_FUNCTION(mysqli_stmt_reset)
@@ -2110,7 +2046,6 @@ PHP_FUNCTION(mysqli_stmt_reset)
 	}
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Return the number of rows in statements result set */
 PHP_FUNCTION(mysqli_stmt_num_rows)
@@ -2128,7 +2063,6 @@ PHP_FUNCTION(mysqli_stmt_num_rows)
 	rc = mysql_stmt_num_rows(stmt->stmt);
 	MYSQLI_RETURN_LONG_INT(rc)
 }
-/* }}} */
 
 /* Select a MySQL database */
 PHP_FUNCTION(mysqli_select_db)
@@ -2149,7 +2083,6 @@ PHP_FUNCTION(mysqli_select_db)
 	}
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Returns the SQLSTATE error from previous MySQL operation */
 PHP_FUNCTION(mysqli_sqlstate)
@@ -2167,7 +2100,6 @@ PHP_FUNCTION(mysqli_sqlstate)
 		RETURN_STRING(state);
 	}
 }
-/* }}} */
 
 PHP_FUNCTION(mysqli_ssl_set)
 {
@@ -2191,7 +2123,6 @@ PHP_FUNCTION(mysqli_ssl_set)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Get current system status */
 PHP_FUNCTION(mysqli_stat)
@@ -2223,7 +2154,6 @@ PHP_FUNCTION(mysqli_stat)
 	}
 }
 
-/* }}} */
 
 /* Flush tables or caches, or reset replication server information */
 PHP_FUNCTION(mysqli_refresh)
@@ -2242,7 +2172,6 @@ PHP_FUNCTION(mysqli_refresh)
 	RETURN_BOOL(!mysql_refresh(mysql->mysql, options));
 #endif
 }
-/* }}} */
 
 PHP_FUNCTION(mysqli_stmt_attr_set)
 {
@@ -2287,7 +2216,6 @@ PHP_FUNCTION(mysqli_stmt_attr_set)
 	}
 	RETURN_TRUE;
 }
-/* }}} */
 
 PHP_FUNCTION(mysqli_stmt_attr_get)
 {
@@ -2312,7 +2240,6 @@ PHP_FUNCTION(mysqli_stmt_attr_get)
 #endif
 	RETURN_LONG((unsigned long)value);
 }
-/* }}} */
 
 PHP_FUNCTION(mysqli_stmt_errno)
 {
@@ -2326,7 +2253,6 @@ PHP_FUNCTION(mysqli_stmt_errno)
 
 	RETURN_LONG(mysql_stmt_errno(stmt->stmt));
 }
-/* }}} */
 
 PHP_FUNCTION(mysqli_stmt_error)
 {
@@ -2344,7 +2270,6 @@ PHP_FUNCTION(mysqli_stmt_error)
 		RETURN_STRING(err);
 	}
 }
-/* }}} */
 
 /* Initialize statement object
 */
@@ -2375,7 +2300,6 @@ PHP_FUNCTION(mysqli_stmt_init)
 	mysqli_resource->ptr = (void *)stmt;
 	MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_stmt_class_entry);
 }
-/* }}} */
 
 /* prepare server side statement with query
 */
@@ -2399,7 +2323,6 @@ PHP_FUNCTION(mysqli_stmt_prepare)
 	MYSQLI_SET_STATUS(mysql_stmt, MYSQLI_STATUS_VALID);
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* return result set from statement */
 PHP_FUNCTION(mysqli_stmt_result_metadata)
@@ -2424,7 +2347,6 @@ PHP_FUNCTION(mysqli_stmt_result_metadata)
 	mysqli_resource->status = MYSQLI_STATUS_VALID;
 	MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_result_class_entry);
 }
-/* }}} */
 
 PHP_FUNCTION(mysqli_stmt_store_result)
 {
@@ -2471,7 +2393,6 @@ PHP_FUNCTION(mysqli_stmt_store_result)
 	}
 	RETURN_TRUE;
 }
-/* }}} */
 
 PHP_FUNCTION(mysqli_stmt_sqlstate)
 {
@@ -2489,7 +2410,6 @@ PHP_FUNCTION(mysqli_stmt_sqlstate)
 		RETURN_STRING(state);
 	}
 }
-/* }}} */
 
 /* Buffer result set on client */
 PHP_FUNCTION(mysqli_store_result)
@@ -2523,7 +2443,6 @@ PHP_FUNCTION(mysqli_store_result)
 	mysqli_resource->status = MYSQLI_STATUS_VALID;
 	MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_result_class_entry);
 }
-/* }}} */
 
 /* Return the current thread ID */
 PHP_FUNCTION(mysqli_thread_id)
@@ -2538,7 +2457,6 @@ PHP_FUNCTION(mysqli_thread_id)
 
 	RETURN_LONG((zend_long) mysql_thread_id(mysql->mysql));
 }
-/* }}} */
 
 /* Return whether thread safety is given or not */
 PHP_FUNCTION(mysqli_thread_safe)
@@ -2549,7 +2467,6 @@ PHP_FUNCTION(mysqli_thread_safe)
 
 	RETURN_BOOL(mysql_thread_safe());
 }
-/* }}} */
 
 /* Directly retrieve query results - do not buffer results on client side */
 PHP_FUNCTION(mysqli_use_result)
@@ -2577,7 +2494,6 @@ PHP_FUNCTION(mysqli_use_result)
 	mysqli_resource->status = MYSQLI_STATUS_VALID;
 	MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_result_class_entry);
 }
-/* }}} */
 
 /* Return number of warnings from the last query for the given link */
 PHP_FUNCTION(mysqli_warning_count)
@@ -2592,4 +2508,4 @@ PHP_FUNCTION(mysqli_warning_count)
 
 	RETURN_LONG(mysql_warning_count(mysql->mysql));
 }
-/* }}} */
+

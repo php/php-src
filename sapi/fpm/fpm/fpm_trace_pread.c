@@ -17,7 +17,7 @@
 
 static int mem_file = -1;
 
-int fpm_trace_signal(pid_t pid) /* {{{ */
+int fpm_trace_signal(pid_t pid)
 {
 	if (0 > fpm_pctl_kill(pid, FPM_PCTL_STOP)) {
 		zlog(ZLOG_SYSERROR, "failed to send SIGSTOP to %d", pid);
@@ -25,9 +25,8 @@ int fpm_trace_signal(pid_t pid) /* {{{ */
 	}
 	return 0;
 }
-/* }}} */
 
-int fpm_trace_ready(pid_t pid) /* {{{ */
+int fpm_trace_ready(pid_t pid)
 {
 	char buf[128];
 
@@ -39,17 +38,15 @@ int fpm_trace_ready(pid_t pid) /* {{{ */
 	}
 	return 0;
 }
-/* }}} */
 
-int fpm_trace_close(pid_t pid) /* {{{ */
+int fpm_trace_close(pid_t pid)
 {
 	close(mem_file);
 	mem_file = -1;
 	return 0;
 }
-/* }}} */
 
-int fpm_trace_get_long(long addr, long *data) /* {{{ */
+int fpm_trace_get_long(long addr, long *data)
 {
 	if (sizeof(*data) != pread(mem_file, (void *) data, sizeof(*data), (uintptr_t) addr)) {
 		zlog(ZLOG_SYSERROR, "pread() failed");
@@ -57,4 +54,4 @@ int fpm_trace_get_long(long addr, long *data) /* {{{ */
 	}
 	return 0;
 }
-/* }}} */
+

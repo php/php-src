@@ -58,9 +58,8 @@ PHP_METHOD(DOMText, __construct)
 		php_libxml_increment_node_ptr((php_libxml_node_object *)intern, nodep, (void *)intern);
 	}
 }
-/* }}} end DOMText::__construct */
 
-/* {{{ wholeText	string
+/* wholeText	string
 readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Text3-wholeText
 Since: DOM Level 3
@@ -98,7 +97,6 @@ int dom_text_whole_text_read(dom_object *obj, zval *retval)
 	return SUCCESS;
 }
 
-/* }}} */
 
 /* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-38853C1D
 Since:
@@ -159,7 +157,6 @@ PHP_METHOD(DOMText, splitText)
 
 	php_dom_create_object(nnode, return_value, intern);
 }
-/* }}} end dom_text_split_text */
 
 /* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Text3-isWhitespaceInElementContent
 Since: DOM Level 3
@@ -182,6 +179,5 @@ PHP_METHOD(DOMText, isWhitespaceInElementContent)
 		RETURN_FALSE;
 	}
 }
-/* }}} end dom_text_is_whitespace_in_element_content */
 
 #endif

@@ -53,7 +53,7 @@ FILE *fopencookie(void *cookie, const char *mode, COOKIE_IO_FUNCTIONS_T *funcs)
 # define PHP_STREAM_COOKIE_FUNCTIONS	stream_cookie_functions
 #endif
 
-/* {{{ STDIO with fopencookie */
+/* STDIO with fopencookie */
 #if defined(PHP_EMULATE_FOPENCOOKIE)
 /* use our fopencookie emulation */
 static int stream_cookie_reader(void *cookie, char *buffer, int size)
@@ -139,9 +139,8 @@ static COOKIE_IO_FUNCTIONS_T stream_cookie_functions =
 #else
 /* TODO: use socketpair() to emulate fopencookie, as suggested by Hartmut ? */
 #endif
-/* }}} */
 
-/* {{{ php_stream_mode_sanitize_fdopen_fopencookie
+/* php_stream_mode_sanitize_fdopen_fopencookie
  * Result should have at least size 5, e.g. to write wbx+\0 */
 void php_stream_mode_sanitize_fdopen_fopencookie(php_stream *stream, char *result)
 {
@@ -183,9 +182,8 @@ void php_stream_mode_sanitize_fdopen_fopencookie(php_stream *stream, char *resul
 
 	result[res_curs] = '\0';
 }
-/* }}} */
 
-/* {{{ php_stream_cast */
+/* php_stream_cast */
 PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show_err)
 {
 	int flags = castas & PHP_STREAM_CAST_MASK;
@@ -337,9 +335,8 @@ exit_success:
 	return SUCCESS;
 
 }
-/* }}} */
 
-/* {{{ php_stream_open_wrapper_as_file */
+/* php_stream_open_wrapper_as_file */
 PHPAPI FILE * _php_stream_open_wrapper_as_file(char *path, char *mode, int options, zend_string **opened_path STREAMS_DC)
 {
 	FILE *fp = NULL;
@@ -360,9 +357,8 @@ PHPAPI FILE * _php_stream_open_wrapper_as_file(char *path, char *mode, int optio
 	}
 	return fp;
 }
-/* }}} */
 
-/* {{{ php_stream_make_seekable */
+/* php_stream_make_seekable */
 PHPAPI int _php_stream_make_seekable(php_stream *origstream, php_stream **newstream, int flags STREAMS_DC)
 {
 	if (newstream == NULL) {
@@ -403,4 +399,4 @@ PHPAPI int _php_stream_make_seekable(php_stream *origstream, php_stream **newstr
 
 	return PHP_STREAM_RELEASED;
 }
-/* }}} */
+

@@ -489,14 +489,13 @@ static inline void phar_unixify_path_separators(char *path, size_t path_len)
 /**
  * validate an alias, returns 1 for success, 0 for failure
  */
-static inline int phar_validate_alias(const char *alias, size_t alias_len) /* {{{ */
+static inline int phar_validate_alias(const char *alias, size_t alias_len)
 {
 	return !(memchr(alias, '/', alias_len) || memchr(alias, '\\', alias_len) || memchr(alias, ':', alias_len) ||
 		memchr(alias, ';', alias_len) || memchr(alias, '\n', alias_len) || memchr(alias, '\r', alias_len));
 }
-/* }}} */
 
-static inline void phar_set_inode(phar_entry_info *entry) /* {{{ */
+static inline void phar_set_inode(phar_entry_info *entry)
 {
 	char tmp[MAXPATHLEN];
 	size_t tmp_len;
@@ -514,7 +513,6 @@ static inline void phar_set_inode(phar_entry_info *entry) /* {{{ */
 
 	entry->inode = (unsigned short) zend_hash_func(tmp, tmp_len);
 }
-/* }}} */
 
 void phar_request_initialize(void);
 

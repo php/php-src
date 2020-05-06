@@ -43,7 +43,6 @@ PHP_FUNCTION(curl_share_init)
 
 	RETURN_RES(zend_register_resource(sh, le_curl_share_handle));
 }
-/* }}} */
 
 /* Close a set of cURL handles */
 PHP_FUNCTION(curl_share_close)
@@ -61,9 +60,8 @@ PHP_FUNCTION(curl_share_close)
 
 	zend_list_close(Z_RES_P(z_sh));
 }
-/* }}} */
 
-static int _php_curl_share_setopt(php_curlsh *sh, zend_long option, zval *zvalue, zval *return_value) /* {{{ */
+static int _php_curl_share_setopt(php_curlsh *sh, zend_long option, zval *zvalue, zval *return_value)
 {
 	CURLSHcode error = CURLSHE_OK;
 
@@ -83,7 +81,6 @@ static int _php_curl_share_setopt(php_curlsh *sh, zend_long option, zval *zvalue
 
 	return error != CURLSHE_OK;
 }
-/* }}} */
 
 /* Set an option for a cURL transfer */
 PHP_FUNCTION(curl_share_setopt)
@@ -108,9 +105,8 @@ PHP_FUNCTION(curl_share_setopt)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
-void _php_curl_share_close(zend_resource *rsrc) /* {{{ */
+void _php_curl_share_close(zend_resource *rsrc)
 {
 	php_curlsh *sh = (php_curlsh *)rsrc->ptr;
 	if (sh) {
@@ -119,7 +115,6 @@ void _php_curl_share_close(zend_resource *rsrc) /* {{{ */
 		rsrc->ptr = NULL;
 	}
 }
-/* }}} */
 
 /* Return an integer containing the last share curl error number */
 PHP_FUNCTION(curl_share_errno)
@@ -137,8 +132,6 @@ PHP_FUNCTION(curl_share_errno)
 
 	RETURN_LONG(sh->err.no);
 }
-/* }}} */
-
 
 /* return string describing error code */
 PHP_FUNCTION(curl_share_strerror)
@@ -157,6 +150,5 @@ PHP_FUNCTION(curl_share_strerror)
 		RETURN_NULL();
 	}
 }
-/* }}} */
 
 #endif

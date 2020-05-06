@@ -47,7 +47,7 @@ static int pfd = -1;
 
 #endif /* HAVE_PORT */
 
-struct fpm_event_module_s *fpm_event_port_module() /* {{{ */
+struct fpm_event_module_s *fpm_event_port_module()
 {
 #if HAVE_PORT
 	return &port_module;
@@ -55,14 +55,13 @@ struct fpm_event_module_s *fpm_event_port_module() /* {{{ */
 	return NULL;
 #endif /* HAVE_PORT */
 }
-/* }}} */
 
 #if HAVE_PORT
 
 /*
  * Init the module
  */
-static int fpm_event_port_init(int max) /* {{{ */
+static int fpm_event_port_init(int max)
 {
 	/* open port */
 	pfd = port_create();
@@ -85,12 +84,11 @@ static int fpm_event_port_init(int max) /* {{{ */
 	nevents = max;
 	return 0;
 }
-/* }}} */
 
 /*
  * Clean the module
  */
-static int fpm_event_port_clean() /* {{{ */
+static int fpm_event_port_clean()
 {
 	if (pfd > -1) {
 		close(pfd);
@@ -105,12 +103,11 @@ static int fpm_event_port_clean() /* {{{ */
 	nevents = 0;
 	return 0;
 }
-/* }}} */
 
 /*
  * wait for events or timeout
  */
-static int fpm_event_port_wait(struct fpm_event_queue_s *queue, unsigned long int timeout) /* {{{ */
+static int fpm_event_port_wait(struct fpm_event_queue_s *queue, unsigned long int timeout)
 {
 	int ret, i, nget;
 	timespec_t t;
@@ -148,12 +145,11 @@ static int fpm_event_port_wait(struct fpm_event_queue_s *queue, unsigned long in
 	}
 	return nget;
 }
-/* }}} */
 
 /*
  * Add a FD to the fd set
  */
-static int fpm_event_port_add(struct fpm_event_s *ev) /* {{{ */
+static int fpm_event_port_add(struct fpm_event_s *ev)
 {
 	/* add the event to port */
 	if (port_associate(pfd, PORT_SOURCE_FD, ev->fd, POLLIN, (void *)ev) < 0) {
@@ -162,12 +158,11 @@ static int fpm_event_port_add(struct fpm_event_s *ev) /* {{{ */
 	}
 	return 0;
 }
-/* }}} */
 
 /*
  * Remove a FD from the fd set
  */
-static int fpm_event_port_remove(struct fpm_event_s *ev) /* {{{ */
+static int fpm_event_port_remove(struct fpm_event_s *ev)
 {
 	/* remove the event from port */
 	if (port_dissociate(pfd, PORT_SOURCE_FD, ev->fd) < 0) {
@@ -176,6 +171,5 @@ static int fpm_event_port_remove(struct fpm_event_s *ev) /* {{{ */
 	}
 	return 0;
 }
-/* }}} */
 
 #endif /* HAVE_PORT */

@@ -38,7 +38,7 @@
 ZEND_DECLARE_MODULE_GLOBALS(gmp)
 static ZEND_GINIT_FUNCTION(gmp);
 
-/* {{{ gmp_module_entry
+/* gmp_module_entry
  */
 zend_module_entry gmp_module_entry = {
 	STANDARD_MODULE_HEADER,
@@ -56,7 +56,6 @@ zend_module_entry gmp_module_entry = {
 	NULL,
 	STANDARD_MODULE_PROPERTIES_EX
 };
-/* }}} */
 
 #ifdef COMPILE_DL_GMP
 #ifdef ZTS
@@ -236,16 +235,15 @@ static void gmp_mpz_gcd_ui(mpz_ptr a, mpz_srcptr b, gmp_ulong c) {
 #define gmp_unary_op(op)         _gmp_unary_op(INTERNAL_FUNCTION_PARAM_PASSTHRU, op)
 #define gmp_unary_opl(op)         _gmp_unary_opl(INTERNAL_FUNCTION_PARAM_PASSTHRU, op)
 
-static void gmp_free_object_storage(zend_object *obj) /* {{{ */
+static void gmp_free_object_storage(zend_object *obj)
 {
 	gmp_object *intern = GET_GMP_OBJECT_FROM_OBJ(obj);
 
 	mpz_clear(intern->num);
 	zend_object_std_dtor(&intern->std);
 }
-/* }}} */
 
-static inline zend_object *gmp_create_object_ex(zend_class_entry *ce, mpz_ptr *gmpnum_target) /* {{{ */
+static inline zend_object *gmp_create_object_ex(zend_class_entry *ce, mpz_ptr *gmpnum_target)
 {
 	gmp_object *intern = emalloc(sizeof(gmp_object) + zend_object_properties_size(ce));
 
@@ -258,22 +256,19 @@ static inline zend_object *gmp_create_object_ex(zend_class_entry *ce, mpz_ptr *g
 
 	return &intern->std;
 }
-/* }}} */
 
-static zend_object *gmp_create_object(zend_class_entry *ce) /* {{{ */
+static zend_object *gmp_create_object(zend_class_entry *ce)
 {
 	mpz_ptr gmpnum_dummy;
 	return gmp_create_object_ex(ce, &gmpnum_dummy);
 }
-/* }}} */
 
-static inline void gmp_create(zval *target, mpz_ptr *gmpnum_target) /* {{{ */
+static inline void gmp_create(zval *target, mpz_ptr *gmpnum_target)
 {
 	ZVAL_OBJ(target, gmp_create_object_ex(gmp_ce, gmpnum_target));
 }
-/* }}} */
 
-static int gmp_cast_object(zend_object *readobj, zval *writeobj, int type) /* {{{ */
+static int gmp_cast_object(zend_object *readobj, zval *writeobj, int type)
 {
 	mpz_ptr gmpnum;
 	switch (type) {
@@ -301,9 +296,8 @@ static int gmp_cast_object(zend_object *readobj, zval *writeobj, int type) /* {{
 		return FAILURE;
 	}
 }
-/* }}} */
 
-static HashTable *gmp_get_debug_info(zend_object *obj, int *is_temp) /* {{{ */
+static HashTable *gmp_get_debug_info(zend_object *obj, int *is_temp)
 {
 	HashTable *ht, *props = zend_std_get_properties(obj);
 	mpz_ptr gmpnum = GET_GMP_OBJECT_FROM_OBJ(obj)->num;
@@ -317,9 +311,8 @@ static HashTable *gmp_get_debug_info(zend_object *obj, int *is_temp) /* {{{ */
 
 	return ht;
 }
-/* }}} */
 
-static zend_object *gmp_clone_obj(zend_object *obj) /* {{{ */
+static zend_object *gmp_clone_obj(zend_object *obj)
 {
 	gmp_object *old_object = GET_GMP_OBJECT_FROM_OBJ(obj);
 	gmp_object *new_object = GET_GMP_OBJECT_FROM_OBJ(gmp_create_object(obj->ce));
@@ -330,7 +323,6 @@ static zend_object *gmp_clone_obj(zend_object *obj) /* {{{ */
 
 	return &new_object->std;
 }
-/* }}} */
 
 static void shift_operator_helper(gmp_binary_ui_op_t op, zval *return_value, zval *op1, zval *op2) {
 	zend_long shift = zval_get_long(op2);
@@ -362,7 +354,7 @@ static void shift_operator_helper(gmp_binary_ui_op_t op, zval *return_value, zva
 	gmp_zval_unary_op(result, op1, op); \
 	return SUCCESS;
 
-static int gmp_do_operation_ex(zend_uchar opcode, zval *result, zval *op1, zval *op2) /* {{{ */
+static int gmp_do_operation_ex(zend_uchar opcode, zval *result, zval *op1, zval *op2)
 {
 	switch (opcode) {
 	case ZEND_ADD:
@@ -397,9 +389,8 @@ static int gmp_do_operation_ex(zend_uchar opcode, zval *result, zval *op1, zval 
 		return FAILURE;
 	}
 }
-/* }}} */
 
-static int gmp_do_operation(zend_uchar opcode, zval *result, zval *op1, zval *op2) /* {{{ */
+static int gmp_do_operation(zend_uchar opcode, zval *result, zval *op1, zval *op2)
 {
 	zval op1_copy;
 	int retval;
@@ -417,9 +408,8 @@ static int gmp_do_operation(zend_uchar opcode, zval *result, zval *op1, zval *op
 
 	return retval;
 }
-/* }}} */
 
-static int gmp_compare(zval *op1, zval *op2) /* {{{ */
+static int gmp_compare(zval *op1, zval *op2)
 {
 	zval result;
 
@@ -429,9 +419,8 @@ static int gmp_compare(zval *op1, zval *op2) /* {{{ */
 	}
 	return Z_LVAL(result);
 }
-/* }}} */
 
-static int gmp_serialize(zval *object, unsigned char **buffer, size_t *buf_len, zend_serialize_data *data) /* {{{ */
+static int gmp_serialize(zval *object, unsigned char **buffer, size_t *buf_len, zend_serialize_data *data)
 {
 	mpz_ptr gmpnum = GET_GMP_FROM_ZVAL(object);
 	smart_str buf = {0};
@@ -454,9 +443,8 @@ static int gmp_serialize(zval *object, unsigned char **buffer, size_t *buf_len, 
 
 	return SUCCESS;
 }
-/* }}} */
 
-static int gmp_unserialize(zval *object, zend_class_entry *ce, const unsigned char *buf, size_t buf_len, zend_unserialize_data *data) /* {{{ */
+static int gmp_unserialize(zval *object, zend_class_entry *ce, const unsigned char *buf, size_t buf_len, zend_unserialize_data *data)
 {
 	mpz_ptr gmpnum;
 	const unsigned char *p, *max;
@@ -502,9 +490,8 @@ exit:
 	PHP_VAR_UNSERIALIZE_DESTROY(unserialize_data);
 	return retval;
 }
-/* }}} */
 
-/* {{{ ZEND_GINIT_FUNCTION
+/* ZEND_GINIT_FUNCTION
  */
 static ZEND_GINIT_FUNCTION(gmp)
 {
@@ -513,9 +500,8 @@ static ZEND_GINIT_FUNCTION(gmp)
 #endif
 	gmp_globals->rand_initialized = 0;
 }
-/* }}} */
 
-/* {{{ ZEND_MINIT_FUNCTION
+/* ZEND_MINIT_FUNCTION
  */
 ZEND_MINIT_FUNCTION(gmp)
 {
@@ -551,9 +537,8 @@ ZEND_MINIT_FUNCTION(gmp)
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ ZEND_RSHUTDOWN_FUNCTION
+/* ZEND_RSHUTDOWN_FUNCTION
  */
 ZEND_MODULE_DEACTIVATE_D(gmp)
 {
@@ -564,9 +549,8 @@ ZEND_MODULE_DEACTIVATE_D(gmp)
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ ZEND_MINFO_FUNCTION
+/* ZEND_MINFO_FUNCTION
  */
 ZEND_MODULE_INFO_D(gmp)
 {
@@ -579,10 +563,8 @@ ZEND_MODULE_INFO_D(gmp)
 #endif
 	php_info_print_table_end();
 }
-/* }}} */
 
-
-/* {{{ convert_to_gmp
+/* convert_to_gmp
  * Convert zval to be gmp number */
 static int convert_to_gmp(mpz_t gmpnumber, zval *val, zend_long base)
 {
@@ -623,9 +605,8 @@ static int convert_to_gmp(mpz_t gmpnumber, zval *val, zend_long base)
 		return FAILURE;
 	}
 }
-/* }}} */
 
-static void gmp_strval(zval *result, mpz_t gmpnum, int base) /* {{{ */
+static void gmp_strval(zval *result, mpz_t gmpnum, int base)
 {
 	size_t num_len;
 	zend_string *str;
@@ -654,9 +635,8 @@ static void gmp_strval(zval *result, mpz_t gmpnum, int base) /* {{{ */
 
 	ZVAL_NEW_STR(result, str);
 }
-/* }}} */
 
-static void gmp_cmp(zval *return_value, zval *a_arg, zval *b_arg) /* {{{ */
+static void gmp_cmp(zval *return_value, zval *a_arg, zval *b_arg)
 {
 	mpz_ptr gmpnum_a, gmpnum_b;
 	gmp_temp_t temp_a, temp_b;
@@ -683,9 +663,8 @@ static void gmp_cmp(zval *return_value, zval *a_arg, zval *b_arg) /* {{{ */
 
 	RETURN_LONG(res);
 }
-/* }}} */
 
-/* {{{ gmp_zval_binary_ui_op
+/* gmp_zval_binary_ui_op
    Execute GMP binary operation.
 */
 static inline void gmp_zval_binary_ui_op(zval *return_value, zval *a_arg, zval *b_arg, gmp_binary_op_t gmp_op, gmp_binary_ui_op_t gmp_ui_op, int check_b_zero)
@@ -729,9 +708,8 @@ static inline void gmp_zval_binary_ui_op(zval *return_value, zval *a_arg, zval *
 	FREE_GMP_TEMP(temp_a);
 	FREE_GMP_TEMP(temp_b);
 }
-/* }}} */
 
-/* {{{ gmp_zval_binary_ui_op2
+/* gmp_zval_binary_ui_op2
    Execute GMP binary operation which returns 2 values.
 */
 static inline void gmp_zval_binary_ui_op2(zval *return_value, zval *a_arg, zval *b_arg, gmp_binary_op2_t gmp_op, gmp_binary_ui_op2_t gmp_ui_op, int check_b_zero)
@@ -781,9 +759,8 @@ static inline void gmp_zval_binary_ui_op2(zval *return_value, zval *a_arg, zval 
 	FREE_GMP_TEMP(temp_a);
 	FREE_GMP_TEMP(temp_b);
 }
-/* }}} */
 
-/* {{{ _gmp_binary_ui_op
+/* _gmp_binary_ui_op
  */
 static inline void _gmp_binary_ui_op(INTERNAL_FUNCTION_PARAMETERS, gmp_binary_op_t gmp_op, gmp_binary_ui_op_t gmp_ui_op, int check_b_zero)
 {
@@ -795,11 +772,10 @@ static inline void _gmp_binary_ui_op(INTERNAL_FUNCTION_PARAMETERS, gmp_binary_op
 
 	gmp_zval_binary_ui_op(return_value, a_arg, b_arg, gmp_op, gmp_ui_op, check_b_zero);
 }
-/* }}} */
 
 /* Unary operations */
 
-/* {{{ gmp_zval_unary_op
+/* gmp_zval_unary_op
  */
 static inline void gmp_zval_unary_op(zval *return_value, zval *a_arg, gmp_unary_op_t gmp_op)
 {
@@ -813,9 +789,8 @@ static inline void gmp_zval_unary_op(zval *return_value, zval *a_arg, gmp_unary_
 
 	FREE_GMP_TEMP(temp_a);
 }
-/* }}} */
 
-/* {{{ gmp_zval_unary_ui_op
+/* gmp_zval_unary_ui_op
  */
 static inline void gmp_zval_unary_ui_op(zval *return_value, zval *a_arg, gmp_unary_ui_op_t gmp_op)
 {
@@ -824,9 +799,8 @@ static inline void gmp_zval_unary_ui_op(zval *return_value, zval *a_arg, gmp_una
 	INIT_GMP_RETVAL(gmpnum_result);
 	gmp_op(gmpnum_result, zval_get_long(a_arg));
 }
-/* }}} */
 
-/* {{{ _gmp_unary_op
+/* _gmp_unary_op
  */
 static inline void _gmp_unary_op(INTERNAL_FUNCTION_PARAMETERS, gmp_unary_op_t gmp_op)
 {
@@ -838,9 +812,8 @@ static inline void _gmp_unary_op(INTERNAL_FUNCTION_PARAMETERS, gmp_unary_op_t gm
 
 	gmp_zval_unary_op(return_value, a_arg, gmp_op);
 }
-/* }}} */
 
-/* {{{ _gmp_unary_opl
+/* _gmp_unary_opl
  */
 static inline void _gmp_unary_opl(INTERNAL_FUNCTION_PARAMETERS, gmp_unary_opl_t gmp_op)
 {
@@ -856,7 +829,6 @@ static inline void _gmp_unary_opl(INTERNAL_FUNCTION_PARAMETERS, gmp_unary_opl_t 
 	RETVAL_LONG(gmp_op(gmpnum_a));
 	FREE_GMP_TEMP(temp_a);
 }
-/* }}} */
 
 /* Initializes GMP number */
 ZEND_FUNCTION(gmp_init)
@@ -880,7 +852,6 @@ ZEND_FUNCTION(gmp_init)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 int gmp_import_export_validate(zend_long size, zend_long options, int *order, int *endian)
 {
@@ -952,7 +923,6 @@ ZEND_FUNCTION(gmp_import)
 
 	mpz_import(gmpnumber, data_len / size, order, size, endian, 0, data);
 }
-/* }}} */
 
 /* Exports a GMP number to a binary string */
 ZEND_FUNCTION(gmp_export)
@@ -989,7 +959,6 @@ ZEND_FUNCTION(gmp_export)
 
 	FREE_GMP_TEMP(temp_a);
 }
-/* }}} */
 
 /* Gets signed long value of GMP number */
 ZEND_FUNCTION(gmp_intval)
@@ -1006,7 +975,6 @@ ZEND_FUNCTION(gmp_intval)
 		RETVAL_LONG(zval_get_long(gmpnumber_arg));
 	}
 }
-/* }}} */
 
 /* Gets string representation of GMP number  */
 ZEND_FUNCTION(gmp_strval)
@@ -1033,28 +1001,24 @@ ZEND_FUNCTION(gmp_strval)
 
 	FREE_GMP_TEMP(temp_a);
 }
-/* }}} */
 
 /* Add a and b */
 ZEND_FUNCTION(gmp_add)
 {
 	gmp_binary_ui_op(mpz_add, mpz_add_ui);
 }
-/* }}} */
 
 /* Subtract b from a */
 ZEND_FUNCTION(gmp_sub)
 {
 	gmp_binary_ui_op(mpz_sub, mpz_sub_ui);
 }
-/* }}} */
 
 /* Multiply a and b */
 ZEND_FUNCTION(gmp_mul)
 {
 	gmp_binary_ui_op(mpz_mul, mpz_mul_ui);
 }
-/* }}} */
 
 /* Divide a by b, returns quotient and reminder */
 ZEND_FUNCTION(gmp_div_qr)
@@ -1081,7 +1045,6 @@ ZEND_FUNCTION(gmp_div_qr)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Divide a by b, returns reminder only */
 ZEND_FUNCTION(gmp_div_r)
@@ -1108,7 +1071,6 @@ ZEND_FUNCTION(gmp_div_r)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Divide a by b, returns quotient only */
 ZEND_FUNCTION(gmp_div_q)
@@ -1136,35 +1098,30 @@ ZEND_FUNCTION(gmp_div_q)
 	}
 
 }
-/* }}} */
 
 /* Computes a modulo b */
 ZEND_FUNCTION(gmp_mod)
 {
 	gmp_binary_ui_op_no_zero(mpz_mod, gmp_mpz_mod_ui);
 }
-/* }}} */
 
 /* Divide a by b using exact division algorithm */
 ZEND_FUNCTION(gmp_divexact)
 {
 	gmp_binary_ui_op_no_zero(mpz_divexact, NULL);
 }
-/* }}} */
 
 /* Negates a number */
 ZEND_FUNCTION(gmp_neg)
 {
 	gmp_unary_op(mpz_neg);
 }
-/* }}} */
 
 /* Calculates absolute value */
 ZEND_FUNCTION(gmp_abs)
 {
 	gmp_unary_op(mpz_abs);
 }
-/* }}} */
 
 /* Calculates factorial function */
 ZEND_FUNCTION(gmp_fact)
@@ -1199,7 +1156,6 @@ ZEND_FUNCTION(gmp_fact)
 
 	gmp_zval_unary_ui_op(return_value, a_arg, mpz_fac_ui);
 }
-/* }}} */
 
 /* Calculates binomial coefficient */
 ZEND_FUNCTION(gmp_binomial)
@@ -1228,7 +1184,6 @@ ZEND_FUNCTION(gmp_binomial)
 		FREE_GMP_TEMP(temp_n);
 	}
 }
-/* }}} */
 
 /* Raise base to power exp */
 ZEND_FUNCTION(gmp_pow)
@@ -1258,7 +1213,6 @@ ZEND_FUNCTION(gmp_pow)
 		FREE_GMP_TEMP(temp_base);
 	}
 }
-/* }}} */
 
 /* Raise base to power exp and take result modulo mod */
 ZEND_FUNCTION(gmp_powm)
@@ -1307,7 +1261,6 @@ ZEND_FUNCTION(gmp_powm)
 	FREE_GMP_TEMP(temp_base);
 	FREE_GMP_TEMP(temp_mod);
 }
-/* }}} */
 
 /* Takes integer part of square root of a */
 ZEND_FUNCTION(gmp_sqrt)
@@ -1332,7 +1285,6 @@ ZEND_FUNCTION(gmp_sqrt)
 	mpz_sqrt(gmpnum_result, gmpnum_a);
 	FREE_GMP_TEMP(temp_a);
 }
-/* }}} */
 
 /* Square root with remainder */
 ZEND_FUNCTION(gmp_sqrtrem)
@@ -1364,7 +1316,6 @@ ZEND_FUNCTION(gmp_sqrtrem)
 	mpz_sqrtrem(gmpnum_result1, gmpnum_result2, gmpnum_a);
 	FREE_GMP_TEMP(temp_a);
 }
-/* }}} */
 
 /* Takes integer part of nth root */
 ZEND_FUNCTION(gmp_root)
@@ -1395,7 +1346,6 @@ ZEND_FUNCTION(gmp_root)
 	mpz_root(gmpnum_result, gmpnum_a, (gmp_ulong) nth);
 	FREE_GMP_TEMP(temp_a);
 }
-/* }}} */
 
 /* Calculates integer part of nth root and remainder */
 ZEND_FUNCTION(gmp_rootrem)
@@ -1442,7 +1392,6 @@ ZEND_FUNCTION(gmp_rootrem)
 
 	FREE_GMP_TEMP(temp_a);
 }
-/* }}} */
 
 /* Checks if a is an exact square */
 ZEND_FUNCTION(gmp_perfect_square)
@@ -1460,7 +1409,6 @@ ZEND_FUNCTION(gmp_perfect_square)
 	RETVAL_BOOL((mpz_perfect_square_p(gmpnum_a) != 0));
 	FREE_GMP_TEMP(temp_a);
 }
-/* }}} */
 
 /* Checks if a is a perfect power */
 ZEND_FUNCTION(gmp_perfect_power)
@@ -1478,7 +1426,6 @@ ZEND_FUNCTION(gmp_perfect_power)
 	RETVAL_BOOL((mpz_perfect_power_p(gmpnum_a) != 0));
 	FREE_GMP_TEMP(temp_a);
 }
-/* }}} */
 
 /* Checks if a is "probably prime" */
 ZEND_FUNCTION(gmp_prob_prime)
@@ -1497,21 +1444,18 @@ ZEND_FUNCTION(gmp_prob_prime)
 	RETVAL_LONG(mpz_probab_prime_p(gmpnum_a, (int)reps));
 	FREE_GMP_TEMP(temp_a);
 }
-/* }}} */
 
 /* Computes greatest common denominator (gcd) of a and b */
 ZEND_FUNCTION(gmp_gcd)
 {
 	gmp_binary_ui_op(mpz_gcd, gmp_mpz_gcd_ui);
 }
-/* }}} */
 
 /* Computes least common multiple (lcm) of a and b */
 ZEND_FUNCTION(gmp_lcm)
 {
 	gmp_binary_ui_op(mpz_lcm, mpz_lcm_ui);
 }
-/* }}} */
 
 /* Computes G, S, and T, such that AS + BT = G = `gcd' (A, B) */
 ZEND_FUNCTION(gmp_gcdext)
@@ -1541,7 +1485,6 @@ ZEND_FUNCTION(gmp_gcdext)
 	FREE_GMP_TEMP(temp_a);
 	FREE_GMP_TEMP(temp_b);
 }
-/* }}} */
 
 /* Computes the inverse of a modulo b */
 ZEND_FUNCTION(gmp_invert)
@@ -1567,7 +1510,6 @@ ZEND_FUNCTION(gmp_invert)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Computes Jacobi symbol */
 ZEND_FUNCTION(gmp_jacobi)
@@ -1588,7 +1530,6 @@ ZEND_FUNCTION(gmp_jacobi)
 	FREE_GMP_TEMP(temp_a);
 	FREE_GMP_TEMP(temp_b);
 }
-/* }}} */
 
 /* Computes Legendre symbol */
 ZEND_FUNCTION(gmp_legendre)
@@ -1609,7 +1550,6 @@ ZEND_FUNCTION(gmp_legendre)
 	FREE_GMP_TEMP(temp_a);
 	FREE_GMP_TEMP(temp_b);
 }
-/* }}} */
 
 /* Computes the Kronecker symbol */
 ZEND_FUNCTION(gmp_kronecker)
@@ -1652,7 +1592,6 @@ ZEND_FUNCTION(gmp_kronecker)
 
 	RETURN_LONG(result);
 }
-/* }}} */
 
 /* Compares two numbers */
 ZEND_FUNCTION(gmp_cmp)
@@ -1665,7 +1604,6 @@ ZEND_FUNCTION(gmp_cmp)
 
 	gmp_cmp(return_value, a_arg, b_arg);
 }
-/* }}} */
 
 /* Gets the sign of the number */
 ZEND_FUNCTION(gmp_sign)
@@ -1684,7 +1622,6 @@ ZEND_FUNCTION(gmp_sign)
 	RETVAL_LONG(mpz_sgn(gmpnum_a));
 	FREE_GMP_TEMP(temp_a);
 }
-/* }}} */
 
 static void gmp_init_random(void)
 {
@@ -1723,7 +1660,6 @@ ZEND_FUNCTION(gmp_random_seed)
 		FREE_GMP_TEMP(temp_a);
 	}
 }
-/* }}} */
 
 /* Gets a random number in the range 0 to (2 ** n) - 1 */
 ZEND_FUNCTION(gmp_random_bits)
@@ -1745,7 +1681,6 @@ ZEND_FUNCTION(gmp_random_bits)
 
 	mpz_urandomb(gmpnum_result, GMPG(rand_state), bits);
 }
-/* }}} */
 
 /* Gets a random number in the range min to max */
 ZEND_FUNCTION(gmp_random_range)
@@ -1812,42 +1747,36 @@ ZEND_FUNCTION(gmp_random_range)
 		FREE_GMP_TEMP(temp_a);
 	}
 }
-/* }}} */
 
 /* Calculates logical AND of a and b */
 ZEND_FUNCTION(gmp_and)
 {
 	gmp_binary_op(mpz_and);
 }
-/* }}} */
 
 /* Calculates logical OR of a and b */
 ZEND_FUNCTION(gmp_or)
 {
 	gmp_binary_op(mpz_ior);
 }
-/* }}} */
 
 /* Calculates one's complement of a */
 ZEND_FUNCTION(gmp_com)
 {
 	gmp_unary_op(mpz_com);
 }
-/* }}} */
 
 /* Finds next prime of a */
 ZEND_FUNCTION(gmp_nextprime)
 {
    gmp_unary_op(mpz_nextprime);
 }
-/* }}} */
 
 /* Calculates logical exclusive OR of a and b */
 ZEND_FUNCTION(gmp_xor)
 {
 	gmp_binary_op(mpz_xor);
 }
-/* }}} */
 
 /* Sets or clear bit in a */
 ZEND_FUNCTION(gmp_setbit)
@@ -1878,7 +1807,6 @@ ZEND_FUNCTION(gmp_setbit)
 		mpz_clrbit(gmpnum_a, index);
 	}
 }
-/* }}} */
 
 /* Clears bit in a */
 ZEND_FUNCTION(gmp_clrbit)
@@ -1899,7 +1827,6 @@ ZEND_FUNCTION(gmp_clrbit)
 	gmpnum_a = GET_GMP_FROM_ZVAL(a_arg);
 	mpz_clrbit(gmpnum_a, index);
 }
-/* }}} */
 
 /* Tests if bit is set in a */
 ZEND_FUNCTION(gmp_testbit)
@@ -1922,14 +1849,12 @@ ZEND_FUNCTION(gmp_testbit)
 	RETVAL_BOOL(mpz_tstbit(gmpnum_a, index));
 	FREE_GMP_TEMP(temp_a);
 }
-/* }}} */
 
 /* Calculates the population count of a */
 ZEND_FUNCTION(gmp_popcount)
 {
 	gmp_unary_opl(mpz_popcount);
 }
-/* }}} */
 
 /* Calculates hamming distance between a and b */
 ZEND_FUNCTION(gmp_hamdist)
@@ -1950,7 +1875,6 @@ ZEND_FUNCTION(gmp_hamdist)
 	FREE_GMP_TEMP(temp_a);
 	FREE_GMP_TEMP(temp_b);
 }
-/* }}} */
 
 /* Finds first zero bit */
 ZEND_FUNCTION(gmp_scan0)
@@ -1974,7 +1898,6 @@ ZEND_FUNCTION(gmp_scan0)
 	RETVAL_LONG(mpz_scan0(gmpnum_a, start));
 	FREE_GMP_TEMP(temp_a);
 }
-/* }}} */
 
 /* Finds first non-zero bit */
 ZEND_FUNCTION(gmp_scan1)
@@ -1998,4 +1921,4 @@ ZEND_FUNCTION(gmp_scan1)
 	RETVAL_LONG(mpz_scan1(gmpnum_a, start));
 	FREE_GMP_TEMP(temp_a);
 }
-/* }}} */
+

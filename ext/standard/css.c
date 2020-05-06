@@ -17,7 +17,7 @@
 #include "php.h"
 #include "info.h"
 
-PHPAPI ZEND_COLD void php_info_print_css(void) /* {{{ */
+PHPAPI ZEND_COLD void php_info_print_css(void)
 {
 	PUTS("body {background-color: #fff; color: #222; font-family: sans-serif;}\n");
 	PUTS("pre {margin: 0; font-family: monospace;}\n");
@@ -39,4 +39,4 @@ PHPAPI ZEND_COLD void php_info_print_css(void) /* {{{ */
 	PUTS("img {float: right; border: 0;}\n");
 	PUTS("hr {width: 934px; background-color: #ccc; border: 0; height: 1px;}\n");
 }
-/* }}} */
+

@@ -25,7 +25,7 @@ zend_class_entry *Normalizer_ce_ptr = NULL;
  * 'Normalizer' class registration structures & functions
  */
 
-/* {{{ normalizer_register_Normalizer_class
+/* normalizer_register_Normalizer_class
  * Initialize 'Normalizer' class
  */
 void normalizer_register_Normalizer_class( void )
@@ -46,4 +46,4 @@ void normalizer_register_Normalizer_class( void )
 		return;
 	}
 }
-/* }}} */
+

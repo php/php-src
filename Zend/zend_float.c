@@ -20,7 +20,7 @@
 #include "zend_compile.h"
 #include "zend_float.h"
 
-ZEND_API void zend_init_fpu(void) /* {{{ */
+ZEND_API void zend_init_fpu(void)
 {
 #if XPFPA_HAVE_CW
 	XPFPA_DECLARE
@@ -34,9 +34,8 @@ ZEND_API void zend_init_fpu(void) /* {{{ */
 	EG(saved_fpu_cw_ptr) = NULL;
 #endif
 }
-/* }}} */
 
-ZEND_API void zend_shutdown_fpu(void) /* {{{ */
+ZEND_API void zend_shutdown_fpu(void)
 {
 #if XPFPA_HAVE_CW
 	if (EG(saved_fpu_cw_ptr)) {
@@ -45,12 +44,11 @@ ZEND_API void zend_shutdown_fpu(void) /* {{{ */
 #endif
 	EG(saved_fpu_cw_ptr) = NULL;
 }
-/* }}} */
 
-ZEND_API void zend_ensure_fpu_mode(void) /* {{{ */
+ZEND_API void zend_ensure_fpu_mode(void)
 {
 	XPFPA_DECLARE
 
 	XPFPA_SWITCH_DOUBLE();
 }
-/* }}} */
+

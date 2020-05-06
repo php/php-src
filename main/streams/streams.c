@@ -30,7 +30,7 @@
 #include <fcntl.h>
 #include "php_streams_int.h"
 
-/* {{{ resource and registration code */
+/* resource and registration code */
 /* Global wrapper hash, copied to FG(stream_wrappers) on registration of volatile wrapper */
 static HashTable url_stream_wrappers_hash;
 static int le_stream = FAILURE; /* true global */
@@ -136,7 +136,6 @@ PHPAPI int php_stream_from_persistent_id(const char *persistent_id, php_stream *
 	return PHP_STREAM_PERSISTENT_NOT_EXIST;
 }
 
-/* }}} */
 
 static zend_llist *php_get_wrapper_errors_list(php_stream_wrapper *wrapper)
 {
@@ -147,7 +146,7 @@ static zend_llist *php_get_wrapper_errors_list(php_stream_wrapper *wrapper)
     }
 }
 
-/* {{{ wrapper error reporting */
+/* wrapper error reporting */
 void php_stream_display_wrapper_errors(php_stream_wrapper *wrapper, const char *path, const char *caption)
 {
 	char *tmp;
@@ -270,10 +269,9 @@ PHPAPI void php_stream_wrapper_log_error(const php_stream_wrapper *wrapper, int 
 }
 
 
-/* }}} */
 
 /* allocate a new stream for a particular ops */
-PHPAPI php_stream *_php_stream_alloc(const php_stream_ops *ops, void *abstract, const char *persistent_id, const char *mode STREAMS_DC) /* {{{ */
+PHPAPI php_stream *_php_stream_alloc(const php_stream_ops *ops, void *abstract, const char *persistent_id, const char *mode STREAMS_DC)
 {
 	php_stream *ret;
 
@@ -323,14 +321,12 @@ fprintf(stderr, "stream_alloc: %s:%p persistent=%s\n", ops->label, ret, persiste
 
 	return ret;
 }
-/* }}} */
 
-PHPAPI int _php_stream_free_enclosed(php_stream *stream_enclosed, int close_options) /* {{{ */
+PHPAPI int _php_stream_free_enclosed(php_stream *stream_enclosed, int close_options)
 {
 	return php_stream_free(stream_enclosed,
 		close_options | PHP_STREAM_FREE_IGNORE_ENCLOSING);
 }
-/* }}} */
 
 #if STREAM_DEBUG
 static const char *_php_stream_pretty_free_options(int close_options, char *out)
@@ -360,7 +356,7 @@ static int _php_stream_free_persistent(zval *zv, void *pStream)
 }
 
 
-PHPAPI int _php_stream_free(php_stream *stream, int close_options) /* {{{ */
+PHPAPI int _php_stream_free(php_stream *stream, int close_options)
 {
 	int ret = 1;
 	int preserve_handle = close_options & PHP_STREAM_FREE_PRESERVE_HANDLE ? 1 : 0;
@@ -531,9 +527,8 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 
 	return ret;
 }
-/* }}} */
 
-/* {{{ generic stream operations */
+/* generic stream operations */
 
 PHPAPI int _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 {
@@ -1650,9 +1645,8 @@ PHPAPI size_t _php_stream_copy_to_stream(php_stream *src, php_stream *dest, size
 	}
 	return len;
 }
-/* }}} */
 
-/* {{{ wrapper init and registration */
+/* wrapper init and registration */
 
 static void stream_resource_regular_dtor(zend_resource *rsrc)
 {
@@ -1790,9 +1784,8 @@ PHPAPI int php_unregister_url_stream_wrapper_volatile(zend_string *protocol)
 
 	return zend_hash_del(FG(stream_wrappers), protocol);
 }
-/* }}} */
 
-/* {{{ php_stream_locate_url_wrapper */
+/* php_stream_locate_url_wrapper */
 PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const char **path_for_open, int options)
 {
 	HashTable *wrapper_hash = (FG(stream_wrappers) ? FG(stream_wrappers) : &url_stream_wrappers_hash);
@@ -1920,9 +1913,8 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const
 
 	return wrapper;
 }
-/* }}} */
 
-/* {{{ _php_stream_mkdir
+/* _php_stream_mkdir
  */
 PHPAPI int _php_stream_mkdir(const char *path, int mode, int options, php_stream_context *context)
 {
@@ -1935,9 +1927,8 @@ PHPAPI int _php_stream_mkdir(const char *path, int mode, int options, php_stream
 
 	return wrapper->wops->stream_mkdir(wrapper, path, mode, options, context);
 }
-/* }}} */
 
-/* {{{ _php_stream_rmdir
+/* _php_stream_rmdir
  */
 PHPAPI int _php_stream_rmdir(const char *path, int options, php_stream_context *context)
 {
@@ -1950,9 +1941,8 @@ PHPAPI int _php_stream_rmdir(const char *path, int options, php_stream_context *
 
 	return wrapper->wops->stream_rmdir(wrapper, path, options, context);
 }
-/* }}} */
 
-/* {{{ _php_stream_stat_path */
+/* _php_stream_stat_path */
 PHPAPI int _php_stream_stat_path(const char *path, int flags, php_stream_statbuf *ssb, php_stream_context *context)
 {
 	php_stream_wrapper *wrapper = NULL;
@@ -2001,9 +1991,8 @@ PHPAPI int _php_stream_stat_path(const char *path, int flags, php_stream_statbuf
 	}
 	return -1;
 }
-/* }}} */
 
-/* {{{ php_stream_opendir */
+/* php_stream_opendir */
 PHPAPI php_stream *_php_stream_opendir(const char *path, int options,
 		php_stream_context *context STREAMS_DC)
 {
@@ -2038,9 +2027,8 @@ PHPAPI php_stream *_php_stream_opendir(const char *path, int options,
 
 	return stream;
 }
-/* }}} */
 
-/* {{{ _php_stream_readdir */
+/* _php_stream_readdir */
 PHPAPI php_stream_dirent *_php_stream_readdir(php_stream *dirstream, php_stream_dirent *ent)
 {
 
@@ -2050,9 +2038,8 @@ PHPAPI php_stream_dirent *_php_stream_readdir(php_stream *dirstream, php_stream_
 
 	return NULL;
 }
-/* }}} */
 
-/* {{{ php_stream_open_wrapper_ex */
+/* php_stream_open_wrapper_ex */
 PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mode, int options,
 		zend_string **opened_path, php_stream_context *context STREAMS_DC)
 {
@@ -2198,9 +2185,8 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 	}
 	return stream;
 }
-/* }}} */
 
-/* {{{ context API */
+/* context API */
 PHPAPI php_stream_context *php_stream_context_set(php_stream *stream, php_stream_context *context)
 {
 	php_stream_context *oldcontext = PHP_STREAM_CONTEXT(stream);
@@ -2292,25 +2278,22 @@ PHPAPI int php_stream_context_set_option(php_stream_context *context,
 	zend_hash_str_update(Z_ARRVAL_P(wrapperhash), optionname, strlen(optionname), optionvalue);
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ php_stream_dirent_alphasort
+/* php_stream_dirent_alphasort
  */
 PHPAPI int php_stream_dirent_alphasort(const zend_string **a, const zend_string **b)
 {
 	return strcoll(ZSTR_VAL(*a), ZSTR_VAL(*b));
 }
-/* }}} */
 
-/* {{{ php_stream_dirent_alphasortr
+/* php_stream_dirent_alphasortr
  */
 PHPAPI int php_stream_dirent_alphasortr(const zend_string **a, const zend_string **b)
 {
 	return strcoll(ZSTR_VAL(*b), ZSTR_VAL(*a));
 }
-/* }}} */
 
-/* {{{ php_stream_scandir
+/* php_stream_scandir
  */
 PHPAPI int _php_stream_scandir(const char *dirname, zend_string **namelist[], int flags, php_stream_context *context,
 			  int (*compare) (const zend_string **a, const zend_string **b))
@@ -2365,4 +2348,4 @@ PHPAPI int _php_stream_scandir(const char *dirname, zend_string **namelist[], in
 	}
 	return nfiles;
 }
-/* }}} */
+

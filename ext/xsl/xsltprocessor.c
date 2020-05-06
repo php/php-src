@@ -23,7 +23,7 @@
 #include "php_xsl.h"
 #include "ext/libxml/php_libxml.h"
 
-/* {{{ php_xsl_xslt_string_to_xpathexpr()
+/* php_xsl_xslt_string_to_xpathexpr()
    Translates a string to a XPath Expression */
 static char *php_xsl_xslt_string_to_xpathexpr(const char *str)
 {
@@ -47,9 +47,8 @@ static char *php_xsl_xslt_string_to_xpathexpr(const char *str)
 	}
 	return (char *) value;
 }
-/* }}} */
 
-/* {{{ php_xsl_xslt_make_params()
+/* php_xsl_xslt_make_params()
    Translates a PHP array to a libxslt parameters array */
 static char **php_xsl_xslt_make_params(HashTable *parht, int xpath_params)
 {
@@ -94,9 +93,8 @@ static char **php_xsl_xslt_make_params(HashTable *parht, int xpath_params)
 
 	return params;
 }
-/* }}} */
 
-static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int type) /* {{{ */
+static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int type)
 {
 	xsltTransformContextPtr tctxt;
 	zval *args = NULL;
@@ -296,19 +294,16 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 		efree(args);
 	}
 }
-/* }}} */
 
-void xsl_ext_function_string_php(xmlXPathParserContextPtr ctxt, int nargs) /* {{{ */
+void xsl_ext_function_string_php(xmlXPathParserContextPtr ctxt, int nargs)
 {
 	xsl_ext_function_php(ctxt, nargs, 1);
 }
-/* }}} */
 
-void xsl_ext_function_object_php(xmlXPathParserContextPtr ctxt, int nargs) /* {{{ */
+void xsl_ext_function_object_php(xmlXPathParserContextPtr ctxt, int nargs)
 {
 	xsl_ext_function_php(ctxt, nargs, 2);
 }
-/* }}} */
 
 /* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#
 Since:
@@ -393,9 +388,8 @@ PHP_METHOD(XSLTProcessor, importStylesheet)
 	php_xsl_set_object(id, sheetp);
 	RETVAL_TRUE;
 }
-/* }}} end XSLTProcessor::importStylesheet */
 
-static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStylesheetPtr style, zval *docp) /* {{{ */
+static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStylesheetPtr style, zval *docp)
 {
 	xmlDocPtr newdocp = NULL;
 	xmlDocPtr doc = NULL;
@@ -534,7 +528,6 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 	return newdocp;
 
 }
-/* }}} */
 
 /* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#
 Since:
@@ -590,7 +583,6 @@ PHP_METHOD(XSLTProcessor, transformToDoc)
 	}
 
 }
-/* }}} end XSLTProcessor::transformToDoc */
 
 PHP_METHOD(XSLTProcessor, transformToUri)
 {
@@ -620,7 +612,6 @@ PHP_METHOD(XSLTProcessor, transformToUri)
 
 	RETVAL_LONG(ret);
 }
-/* }}} end XSLTProcessor::transformToUri */
 
 PHP_METHOD(XSLTProcessor, transformToXml)
 {
@@ -656,7 +647,6 @@ PHP_METHOD(XSLTProcessor, transformToXml)
 		RETURN_FALSE;
 	}
 }
-/* }}} end XSLTProcessor::transformToXml */
 
 PHP_METHOD(XSLTProcessor, setParameter)
 {
@@ -699,7 +689,6 @@ PHP_METHOD(XSLTProcessor, setParameter)
 	}
 
 }
-/* }}} end XSLTProcessor::setParameter */
 
 PHP_METHOD(XSLTProcessor, getParameter)
 {
@@ -720,7 +709,6 @@ PHP_METHOD(XSLTProcessor, getParameter)
 		RETURN_FALSE;
 	}
 }
-/* }}} end XSLTProcessor::getParameter */
 
 PHP_METHOD(XSLTProcessor, removeParameter)
 {
@@ -740,7 +728,6 @@ PHP_METHOD(XSLTProcessor, removeParameter)
 		RETURN_FALSE;
 	}
 }
-/* }}} end XSLTProcessor::removeParameter */
 
 PHP_METHOD(XSLTProcessor, registerPHPFunctions)
 {
@@ -777,7 +764,6 @@ PHP_METHOD(XSLTProcessor, registerPHPFunctions)
 		intern->registerPhpFunctions = 1;
 	}
 }
-/* }}} end XSLTProcessor::registerPHPFunctions(); */
 
 PHP_METHOD(XSLTProcessor, setProfiling)
 {
@@ -802,7 +788,6 @@ PHP_METHOD(XSLTProcessor, setProfiling)
 
 	RETURN_TRUE;
 }
-/* }}} end XSLTProcessor::setProfiling */
 
 PHP_METHOD(XSLTProcessor, setSecurityPrefs)
 {
@@ -820,7 +805,6 @@ PHP_METHOD(XSLTProcessor, setSecurityPrefs)
 	intern->securityPrefsSet = 1;
 	RETURN_LONG(oldSecurityPrefs);
 }
-/* }}} end XSLTProcessor::setSecurityPrefs */
 
 PHP_METHOD(XSLTProcessor, getSecurityPrefs)
 {
@@ -835,7 +819,6 @@ PHP_METHOD(XSLTProcessor, getSecurityPrefs)
 
 	RETURN_LONG(intern->securityPrefs);
 }
-/* }}} end XSLTProcessor::getSecurityPrefs */
 
 PHP_METHOD(XSLTProcessor, hasExsltSupport)
 {
@@ -849,4 +832,3 @@ PHP_METHOD(XSLTProcessor, hasExsltSupport)
 	RETURN_FALSE;
 #endif
 }
-/* }}} end XSLTProcessor::hasExsltSupport(); */

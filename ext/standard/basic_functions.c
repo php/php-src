@@ -120,13 +120,12 @@ typedef struct _user_tick_function_entry {
 static void user_shutdown_function_dtor(zval *zv);
 static void user_tick_function_dtor(user_tick_function_entry *tick_function_entry);
 
-static const zend_module_dep standard_deps[] = { /* {{{ */
+static const zend_module_dep standard_deps[] = {
 	ZEND_MOD_OPTIONAL("session")
 	ZEND_MOD_END
 };
-/* }}} */
 
-zend_module_entry basic_functions_module = { /* {{{ */
+zend_module_entry basic_functions_module = {
 	STANDARD_MODULE_HEADER_EX,
 	NULL,
 	standard_deps,
@@ -140,10 +139,9 @@ zend_module_entry basic_functions_module = { /* {{{ */
 	PHP_STANDARD_VERSION,		/* extension version */
 	STANDARD_MODULE_PROPERTIES
 };
-/* }}} */
 
 #if defined(HAVE_PUTENV)
-static void php_putenv_destructor(zval *zv) /* {{{ */
+static void php_putenv_destructor(zval *zv)
 {
 	putenv_entry *pe = Z_PTR_P(zv);
 
@@ -190,10 +188,10 @@ static void php_putenv_destructor(zval *zv) /* {{{ */
 	efree(pe->key);
 	efree(pe);
 }
-/* }}} */
+
 #endif
 
-static void basic_globals_ctor(php_basic_globals *basic_globals_p) /* {{{ */
+static void basic_globals_ctor(php_basic_globals *basic_globals_p)
 {
 	BG(mt_rand_is_seeded) = 0;
 	BG(mt_rand_mode) = MT_RAND_MT19937;
@@ -224,9 +222,8 @@ static void basic_globals_ctor(php_basic_globals *basic_globals_p) /* {{{ */
 	BG(page_uid) = -1;
 	BG(page_gid) = -1;
 }
-/* }}} */
 
-static void basic_globals_dtor(php_basic_globals *basic_globals_p) /* {{{ */
+static void basic_globals_dtor(php_basic_globals *basic_globals_p)
 {
 	if (basic_globals_p->url_adapt_session_ex.tags) {
 		zend_hash_destroy(basic_globals_p->url_adapt_session_ex.tags);
@@ -240,19 +237,16 @@ static void basic_globals_dtor(php_basic_globals *basic_globals_p) /* {{{ */
 	zend_hash_destroy(&basic_globals_p->url_adapt_session_hosts_ht);
 	zend_hash_destroy(&basic_globals_p->url_adapt_output_hosts_ht);
 }
-/* }}} */
 
-PHPAPI double php_get_nan(void) /* {{{ */
+PHPAPI double php_get_nan(void)
 {
 	return ZEND_NAN;
 }
-/* }}} */
 
-PHPAPI double php_get_inf(void) /* {{{ */
+PHPAPI double php_get_inf(void)
 {
 	return ZEND_INFINITY;
 }
-/* }}} */
 
 #define BASIC_MINIT_SUBMODULE(module) \
 	if (PHP_MINIT(module)(INIT_FUNC_ARGS_PASSTHRU) != SUCCESS) {\
@@ -271,7 +265,7 @@ PHPAPI double php_get_inf(void) /* {{{ */
 #define BASIC_MSHUTDOWN_SUBMODULE(module) \
 	PHP_MSHUTDOWN(module)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
 
-PHP_MINIT_FUNCTION(basic) /* {{{ */
+PHP_MINIT_FUNCTION(basic)
 {
 #ifdef ZTS
 	ts_allocate_id(&basic_globals_id, sizeof(php_basic_globals), (ts_allocate_ctor) basic_globals_ctor, (ts_allocate_dtor) basic_globals_dtor);
@@ -409,9 +403,8 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 
 	return SUCCESS;
 }
-/* }}} */
 
-PHP_MSHUTDOWN_FUNCTION(basic) /* {{{ */
+PHP_MSHUTDOWN_FUNCTION(basic)
 {
 #ifdef HAVE_SYSLOG_H
 	PHP_MSHUTDOWN(syslog)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
@@ -447,9 +440,8 @@ PHP_MSHUTDOWN_FUNCTION(basic) /* {{{ */
 
 	return SUCCESS;
 }
-/* }}} */
 
-PHP_RINIT_FUNCTION(basic) /* {{{ */
+PHP_RINIT_FUNCTION(basic)
 {
 	memset(BG(strtok_table), 0, 256);
 
@@ -493,9 +485,8 @@ PHP_RINIT_FUNCTION(basic) /* {{{ */
 
 	return SUCCESS;
 }
-/* }}} */
 
-PHP_RSHUTDOWN_FUNCTION(basic) /* {{{ */
+PHP_RSHUTDOWN_FUNCTION(basic)
 {
 	zval_ptr_dtor(&BG(strtok_zval));
 	ZVAL_UNDEF(&BG(strtok_zval));
@@ -552,9 +543,8 @@ PHP_RSHUTDOWN_FUNCTION(basic) /* {{{ */
  	BG(page_gid) = -1;
 	return SUCCESS;
 }
-/* }}} */
 
-PHP_MINFO_FUNCTION(basic) /* {{{ */
+PHP_MINFO_FUNCTION(basic)
 {
 	php_info_print_table_start();
 	BASIC_MINFO_SUBMODULE(dl)
@@ -562,7 +552,6 @@ PHP_MINFO_FUNCTION(basic) /* {{{ */
 	php_info_print_table_end();
 	BASIC_MINFO_SUBMODULE(assert)
 }
-/* }}} */
 
 /* Given the name of a constant this function will return the constant's associated value */
 PHP_FUNCTION(constant)
@@ -588,7 +577,6 @@ PHP_FUNCTION(constant)
 		}
 	}
 }
-/* }}} */
 
 #ifdef HAVE_INET_NTOP
 /* Converts a packed inet address to a human readable IP address string */
@@ -618,7 +606,7 @@ PHP_FUNCTION(inet_ntop)
 
 	RETURN_STRING(buffer);
 }
-/* }}} */
+
 #endif /* HAVE_INET_NTOP */
 
 #ifdef HAVE_INET_PTON
@@ -653,7 +641,7 @@ PHP_FUNCTION(inet_pton)
 
 	RETURN_STRINGL(buffer, af == AF_INET ? 4 : 16);
 }
-/* }}} */
+
 #endif /* HAVE_INET_PTON */
 
 /* Converts a string containing an (IPv4) Internet Protocol dotted address into a proper address */
@@ -691,7 +679,6 @@ PHP_FUNCTION(ip2long)
 	RETURN_LONG(ntohl(ip));
 #endif
 }
-/* }}} */
 
 /* Converts an (IPv4) Internet network address into a string in Internet standard dotted format */
 PHP_FUNCTION(long2ip)
@@ -721,7 +708,6 @@ PHP_FUNCTION(long2ip)
 	RETURN_STRING(inet_ntoa(myaddr));
 #endif
 }
-/* }}} */
 
 /********************
  * System Functions *
@@ -821,7 +807,6 @@ PHP_FUNCTION(getenv)
 #endif
 	RETURN_FALSE;
 }
-/* }}} */
 
 #ifdef HAVE_PUTENV
 /* Set the value of an environment variable */
@@ -944,10 +929,10 @@ PHP_FUNCTION(putenv)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
+
 #endif
 
-/* {{{ free_argv()
+/* free_argv()
    Free the memory allocated to an argv array. */
 static void free_argv(char **argv, int argc)
 {
@@ -962,9 +947,8 @@ static void free_argv(char **argv, int argc)
 		efree(argv);
 	}
 }
-/* }}} */
 
-/* {{{ free_longopts()
+/* free_longopts()
    Free the memory allocated to an longopt array. */
 static void free_longopts(opt_struct *longopts)
 {
@@ -978,9 +962,8 @@ static void free_longopts(opt_struct *longopts)
 		}
 	}
 }
-/* }}} */
 
-/* {{{ parse_opts()
+/* parse_opts()
    Convert the typical getopt input characters to the php_getopt struct array */
 static int parse_opts(char * opts, opt_struct ** result)
 {
@@ -1018,7 +1001,6 @@ static int parse_opts(char * opts, opt_struct ** result)
 	}
 	return count;
 }
-/* }}} */
 
 /* Get options from the command line argument list */
 PHP_FUNCTION(getopt)
@@ -1199,7 +1181,6 @@ PHP_FUNCTION(getopt)
 	efree(orig_opts);
 	free_argv(argv, argc);
 }
-/* }}} */
 
 /* Flush the output buffer */
 PHP_FUNCTION(flush)
@@ -1208,7 +1189,6 @@ PHP_FUNCTION(flush)
 
 	sapi_flush();
 }
-/* }}} */
 
 /* Delay for a given number of seconds */
 PHP_FUNCTION(sleep)
@@ -1226,7 +1206,6 @@ PHP_FUNCTION(sleep)
 
 	RETURN_LONG(php_sleep((unsigned int)num));
 }
-/* }}} */
 
 /* Delay for a given number of micro seconds */
 PHP_FUNCTION(usleep)
@@ -1250,7 +1229,6 @@ PHP_FUNCTION(usleep)
 	}
 #endif
 }
-/* }}} */
 
 #if HAVE_NANOSLEEP
 /* Delay for a number of seconds and nano seconds */
@@ -1289,7 +1267,6 @@ PHP_FUNCTION(time_nanosleep)
 
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* Make the script sleep until the specified time */
 PHP_FUNCTION(time_sleep_until)
@@ -1330,7 +1307,7 @@ PHP_FUNCTION(time_sleep_until)
 
 	RETURN_TRUE;
 }
-/* }}} */
+
 #endif
 
 /* Get the name of the owner of the current PHP script */
@@ -1340,11 +1317,10 @@ PHP_FUNCTION(get_current_user)
 
 	RETURN_STRING(php_get_current_user());
 }
-/* }}} */
 
 static void add_config_entries(HashTable *hash, zval *return_value);
 
-/* {{{ add_config_entry
+/* add_config_entry
  */
 static void add_config_entry(zend_ulong h, zend_string *key, zval *entry, zval *retval)
 {
@@ -1370,11 +1346,10 @@ static void add_config_entry(zend_ulong h, zend_string *key, zval *entry, zval *
 		zend_hash_update(Z_ARRVAL_P(retval), key, &tmp);
 	}
 }
-/* }}} */
 
-/* {{{ add_config_entries
+/* add_config_entries
  */
-static void add_config_entries(HashTable *hash, zval *return_value) /* {{{ */
+static void add_config_entries(HashTable *hash, zval *return_value)
 {
 	zend_ulong h;
 	zend_string *key;
@@ -1384,7 +1359,6 @@ static void add_config_entries(HashTable *hash, zval *return_value) /* {{{ */
 		add_config_entry(h, key, zv, return_value);
 	ZEND_HASH_FOREACH_END();
 }
-/* }}} */
 
 /* Get the value of a PHP configuration option */
 PHP_FUNCTION(get_cfg_var)
@@ -1411,7 +1385,6 @@ PHP_FUNCTION(get_cfg_var)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /*
 	1st arg = error message
@@ -1453,16 +1426,14 @@ PHP_FUNCTION(error_log)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* For BC (not binary-safe!) */
-PHPAPI int _php_error_log(int opt_err, char *message, char *opt, char *headers) /* {{{ */
+PHPAPI int _php_error_log(int opt_err, char *message, char *opt, char *headers)
 {
 	return _php_error_log_ex(opt_err, message, (opt_err == 3) ? strlen(message) : 0, opt, headers);
 }
-/* }}} */
 
-PHPAPI int _php_error_log_ex(int opt_err, char *message, size_t message_len, char *opt, char *headers) /* {{{ */
+PHPAPI int _php_error_log_ex(int opt_err, char *message, size_t message_len, char *opt, char *headers)
 {
 	php_stream *stream = NULL;
 	size_t nbytes;
@@ -1506,7 +1477,6 @@ PHPAPI int _php_error_log_ex(int opt_err, char *message, size_t message_len, cha
 	}
 	return SUCCESS;
 }
-/* }}} */
 
 /* Get the last occurred error as associative array. Returns NULL if there hasn't been an error yet. */
 PHP_FUNCTION(error_get_last)
@@ -1521,7 +1491,6 @@ PHP_FUNCTION(error_get_last)
 		add_assoc_long_ex(return_value, "line", sizeof("line")-1, PG(last_error_lineno));
 	}
 }
-/* }}} */
 
 /* Clear the last occurred error. */
 PHP_FUNCTION(error_clear_last)
@@ -1541,7 +1510,6 @@ PHP_FUNCTION(error_clear_last)
 		}
 	}
 }
-/* }}} */
 
 /* Call a user function which is the first parameter
    Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
@@ -1565,7 +1533,6 @@ PHP_FUNCTION(call_user_func)
 		ZVAL_COPY_VALUE(return_value, &retval);
 	}
 }
-/* }}} */
 
 /* Call a user function which is the first parameter with the arguments contained in array
    Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
@@ -1592,7 +1559,6 @@ PHP_FUNCTION(call_user_func_array)
 
 	zend_fcall_info_args_clear(&fci, 1);
 }
-/* }}} */
 
 /* Call a user function which is the first parameter */
 PHP_FUNCTION(forward_static_call)
@@ -1627,7 +1593,6 @@ PHP_FUNCTION(forward_static_call)
 		ZVAL_COPY_VALUE(return_value, &retval);
 	}
 }
-/* }}} */
 
 /* Call a static method which is the first parameter with the arguments contained in array */
 PHP_FUNCTION(forward_static_call_array)
@@ -1660,9 +1625,8 @@ PHP_FUNCTION(forward_static_call_array)
 
 	zend_fcall_info_args_clear(&fci, 1);
 }
-/* }}} */
 
-void user_shutdown_function_dtor(zval *zv) /* {{{ */
+void user_shutdown_function_dtor(zval *zv)
 {
 	int i;
 	php_shutdown_function_entry *shutdown_function_entry = Z_PTR_P(zv);
@@ -1673,9 +1637,8 @@ void user_shutdown_function_dtor(zval *zv) /* {{{ */
 	efree(shutdown_function_entry->arguments);
 	efree(shutdown_function_entry);
 }
-/* }}} */
 
-void user_tick_function_dtor(user_tick_function_entry *tick_function_entry) /* {{{ */
+void user_tick_function_dtor(user_tick_function_entry *tick_function_entry)
 {
 	int i;
 
@@ -1684,9 +1647,8 @@ void user_tick_function_dtor(user_tick_function_entry *tick_function_entry) /* {
 	}
 	efree(tick_function_entry->arguments);
 }
-/* }}} */
 
-static int user_shutdown_function_call(zval *zv) /* {{{ */
+static int user_shutdown_function_call(zval *zv)
 {
     php_shutdown_function_entry *shutdown_function_entry = Z_PTR_P(zv);
 	zval retval;
@@ -1709,9 +1671,8 @@ static int user_shutdown_function_call(zval *zv) /* {{{ */
 	}
 	return 0;
 }
-/* }}} */
 
-static void user_tick_function_call(user_tick_function_entry *tick_fe) /* {{{ */
+static void user_tick_function_call(user_tick_function_entry *tick_fe)
 {
 	zval retval;
 	zval *function = &tick_fe->arguments[0];
@@ -1747,15 +1708,13 @@ static void user_tick_function_call(user_tick_function_entry *tick_fe) /* {{{ */
 		tick_fe->calling = 0;
 	}
 }
-/* }}} */
 
-static void run_user_tick_functions(int tick_count, void *arg) /* {{{ */
+static void run_user_tick_functions(int tick_count, void *arg)
 {
 	zend_llist_apply(BG(user_tick_functions), (llist_apply_func_t) user_tick_function_call);
 }
-/* }}} */
 
-static int user_tick_function_compare(user_tick_function_entry * tick_fe1, user_tick_function_entry * tick_fe2) /* {{{ */
+static int user_tick_function_compare(user_tick_function_entry * tick_fe1, user_tick_function_entry * tick_fe2)
 {
 	zval *func1 = &tick_fe1->arguments[0];
 	zval *func2 = &tick_fe2->arguments[0];
@@ -1777,9 +1736,8 @@ static int user_tick_function_compare(user_tick_function_entry * tick_fe1, user_
 	}
 	return ret;
 }
-/* }}} */
 
-PHPAPI void php_call_shutdown_functions(void) /* {{{ */
+PHPAPI void php_call_shutdown_functions(void)
 {
 	if (BG(user_shutdown_function_names)) {
 		zend_try {
@@ -1788,9 +1746,8 @@ PHPAPI void php_call_shutdown_functions(void) /* {{{ */
 		zend_end_try();
 	}
 }
-/* }}} */
 
-PHPAPI void php_free_shutdown_functions(void) /* {{{ */
+PHPAPI void php_free_shutdown_functions(void)
 {
 	if (BG(user_shutdown_function_names))
 		zend_try {
@@ -1803,7 +1760,6 @@ PHPAPI void php_free_shutdown_functions(void) /* {{{ */
 			BG(user_shutdown_function_names) = NULL;
 		} zend_end_try();
 }
-/* }}} */
 
 /* Register a user-level function to be called on request termination */
 PHP_FUNCTION(register_shutdown_function)
@@ -1844,9 +1800,8 @@ PHP_FUNCTION(register_shutdown_function)
 		zend_hash_next_index_insert_mem(BG(user_shutdown_function_names), &shutdown_function_entry, sizeof(php_shutdown_function_entry));
 	}
 }
-/* }}} */
 
-PHPAPI zend_bool register_user_shutdown_function(char *function_name, size_t function_len, php_shutdown_function_entry *shutdown_function_entry) /* {{{ */
+PHPAPI zend_bool register_user_shutdown_function(char *function_name, size_t function_len, php_shutdown_function_entry *shutdown_function_entry)
 {
 	if (!BG(user_shutdown_function_names)) {
 		ALLOC_HASHTABLE(BG(user_shutdown_function_names));
@@ -1856,9 +1811,8 @@ PHPAPI zend_bool register_user_shutdown_function(char *function_name, size_t fun
 	zend_hash_str_update_mem(BG(user_shutdown_function_names), function_name, function_len, shutdown_function_entry, sizeof(php_shutdown_function_entry));
 	return 1;
 }
-/* }}} */
 
-PHPAPI zend_bool remove_user_shutdown_function(char *function_name, size_t function_len) /* {{{ */
+PHPAPI zend_bool remove_user_shutdown_function(char *function_name, size_t function_len)
 {
 	if (BG(user_shutdown_function_names)) {
 		return zend_hash_str_del(BG(user_shutdown_function_names), function_name, function_len) != FAILURE;
@@ -1866,9 +1820,8 @@ PHPAPI zend_bool remove_user_shutdown_function(char *function_name, size_t funct
 
 	return 0;
 }
-/* }}} */
 
-PHPAPI zend_bool append_user_shutdown_function(php_shutdown_function_entry shutdown_function_entry) /* {{{ */
+PHPAPI zend_bool append_user_shutdown_function(php_shutdown_function_entry shutdown_function_entry)
 {
 	if (!BG(user_shutdown_function_names)) {
 		ALLOC_HASHTABLE(BG(user_shutdown_function_names));
@@ -1877,9 +1830,8 @@ PHPAPI zend_bool append_user_shutdown_function(php_shutdown_function_entry shutd
 
 	return zend_hash_next_index_insert_mem(BG(user_shutdown_function_names), &shutdown_function_entry, sizeof(php_shutdown_function_entry)) != NULL;
 }
-/* }}} */
 
-ZEND_API void php_get_highlight_struct(zend_syntax_highlighter_ini *syntax_highlighter_ini) /* {{{ */
+ZEND_API void php_get_highlight_struct(zend_syntax_highlighter_ini *syntax_highlighter_ini)
 {
 	syntax_highlighter_ini->highlight_comment = INI_STR("highlight.comment");
 	syntax_highlighter_ini->highlight_default = INI_STR("highlight.default");
@@ -1887,7 +1839,6 @@ ZEND_API void php_get_highlight_struct(zend_syntax_highlighter_ini *syntax_highl
 	syntax_highlighter_ini->highlight_keyword = INI_STR("highlight.keyword");
 	syntax_highlighter_ini->highlight_string  = INI_STR("highlight.string");
 }
-/* }}} */
 
 /* Syntax highlight a source file */
 PHP_FUNCTION(highlight_file)
@@ -1930,7 +1881,6 @@ PHP_FUNCTION(highlight_file)
 		RETURN_TRUE;
 	}
 }
-/* }}} */
 
 /* Return source with stripped comments and whitespace */
 PHP_FUNCTION(php_strip_whitespace)
@@ -1962,7 +1912,6 @@ PHP_FUNCTION(php_strip_whitespace)
 	php_output_get_contents(return_value);
 	php_output_discard();
 }
-/* }}} */
 
 /* Syntax highlight a string or optionally return it */
 PHP_FUNCTION(highlight_string)
@@ -2012,7 +1961,6 @@ PHP_FUNCTION(highlight_string)
 		RETURN_TRUE;
 	}
 }
-/* }}} */
 
 /* Get a configuration option */
 PHP_FUNCTION(ini_get)
@@ -2041,7 +1989,6 @@ PHP_FUNCTION(ini_get)
 		ZVAL_NEW_STR(return_value, zend_string_init(ZSTR_VAL(val), ZSTR_LEN(val), 0));
 	}
 }
-/* }}} */
 
 /* Get all configuration options */
 PHP_FUNCTION(ini_get_all)
@@ -2112,9 +2059,8 @@ PHP_FUNCTION(ini_get_all)
 		}
 	} ZEND_HASH_FOREACH_END();
 }
-/* }}} */
 
-static int php_ini_check_path(char *option_name, size_t option_len, char *new_option_name, size_t new_option_len) /* {{{ */
+static int php_ini_check_path(char *option_name, size_t option_len, char *new_option_name, size_t new_option_len)
 {
 	if (option_len + 1 != new_option_len) {
 		return 0;
@@ -2122,7 +2068,6 @@ static int php_ini_check_path(char *option_name, size_t option_len, char *new_op
 
 	return !strncmp(option_name, new_option_name, option_len);
 }
-/* }}} */
 
 /* Set a configuration option, returns false on error and the old value of the configuration option on success */
 PHP_FUNCTION(ini_set)
@@ -2177,7 +2122,6 @@ PHP_FUNCTION(ini_set)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Restore the value of a configuration option specified by varname */
 PHP_FUNCTION(ini_restore)
@@ -2190,7 +2134,6 @@ PHP_FUNCTION(ini_restore)
 
 	zend_restore_ini_entry(varname, PHP_INI_STAGE_RUNTIME);
 }
-/* }}} */
 
 /* Sets the include_path configuration option */
 PHP_FUNCTION(set_include_path)
@@ -2219,7 +2162,6 @@ PHP_FUNCTION(set_include_path)
 	}
 	zend_string_release_ex(key, 0);
 }
-/* }}} */
 
 /* Get the current include_path configuration option */
 PHP_FUNCTION(get_include_path)
@@ -2236,7 +2178,6 @@ PHP_FUNCTION(get_include_path)
 
 	RETURN_STRING(str);
 }
-/* }}} */
 
 /* Prints out or returns information about the specified variable */
 PHP_FUNCTION(print_r)
@@ -2257,7 +2198,6 @@ PHP_FUNCTION(print_r)
 		RETURN_TRUE;
 	}
 }
-/* }}} */
 
 /* Returns true if client disconnected */
 PHP_FUNCTION(connection_aborted)
@@ -2266,7 +2206,6 @@ PHP_FUNCTION(connection_aborted)
 
 	RETURN_LONG(PG(connection_status) & PHP_CONNECTION_ABORTED);
 }
-/* }}} */
 
 /* Returns the connection status bitfield */
 PHP_FUNCTION(connection_status)
@@ -2275,7 +2214,6 @@ PHP_FUNCTION(connection_status)
 
 	RETURN_LONG(PG(connection_status));
 }
-/* }}} */
 
 /* Set whether we want to ignore a user abort event or not */
 PHP_FUNCTION(ignore_user_abort)
@@ -2298,7 +2236,6 @@ PHP_FUNCTION(ignore_user_abort)
 
 	RETURN_LONG(old_setting);
 }
-/* }}} */
 
 #if HAVE_GETSERVBYNAME
 /* Returns port associated with service. Protocol must be "tcp" or "udp" */
@@ -2339,7 +2276,7 @@ PHP_FUNCTION(getservbyname)
 
 	RETURN_LONG(ntohs(serv->s_port));
 }
-/* }}} */
+
 #endif
 
 #if HAVE_GETSERVBYPORT
@@ -2364,7 +2301,7 @@ PHP_FUNCTION(getservbyport)
 
 	RETURN_STRING(serv->s_name);
 }
-/* }}} */
+
 #endif
 
 #if HAVE_GETPROTOBYNAME
@@ -2387,7 +2324,7 @@ PHP_FUNCTION(getprotobyname)
 
 	RETURN_LONG(ent->p_proto);
 }
-/* }}} */
+
 #endif
 
 #if HAVE_GETPROTOBYNUMBER
@@ -2409,7 +2346,7 @@ PHP_FUNCTION(getprotobynumber)
 
 	RETURN_STRING(ent->p_name);
 }
-/* }}} */
+
 #endif
 
 /* Registers a tick callback function */
@@ -2462,7 +2399,6 @@ PHP_FUNCTION(register_tick_function)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Unregisters a tick callback function */
 PHP_FUNCTION(unregister_tick_function)
@@ -2488,7 +2424,6 @@ PHP_FUNCTION(unregister_tick_function)
 	zend_llist_del_element(BG(user_tick_functions), &tick_fe, (int (*)(void *, void *)) user_tick_function_compare);
 	efree(tick_fe.arguments);
 }
-/* }}} */
 
 /* Check if file was created by rfc1867 upload */
 PHP_FUNCTION(is_uploaded_file)
@@ -2510,7 +2445,6 @@ PHP_FUNCTION(is_uploaded_file)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Move a file if and only if it was created by an upload */
 PHP_FUNCTION(move_uploaded_file)
@@ -2565,9 +2499,8 @@ PHP_FUNCTION(move_uploaded_file)
 
 	RETURN_BOOL(successful);
 }
-/* }}} */
 
-/* {{{ php_simple_ini_parser_cb
+/* php_simple_ini_parser_cb
  */
 static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callback_type, zval *arr)
 {
@@ -2622,9 +2555,8 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int cal
 			break;
 	}
 }
-/* }}} */
 
-/* {{{ php_ini_parser_cb_with_sections
+/* php_ini_parser_cb_with_sections
  */
 static void php_ini_parser_cb_with_sections(zval *arg1, zval *arg2, zval *arg3, int callback_type, zval *arr)
 {
@@ -2643,7 +2575,6 @@ static void php_ini_parser_cb_with_sections(zval *arg1, zval *arg2, zval *arg3, 
 		php_simple_ini_parser_cb(arg1, arg2, arg3, callback_type, active_arr);
 	}
 }
-/* }}} */
 
 /* Parse configuration file */
 PHP_FUNCTION(parse_ini_file)
@@ -2684,7 +2615,6 @@ PHP_FUNCTION(parse_ini_file)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Parse configuration string */
 PHP_FUNCTION(parse_ini_string)
@@ -2726,12 +2656,11 @@ PHP_FUNCTION(parse_ini_string)
 	}
 	efree(string);
 }
-/* }}} */
 
 #if ZEND_DEBUG
 /* This function returns an array of ALL valid ini options with values and
  *  is not the same as ini_get_all() which returns only registered ini options. Only useful for devs to debug php.ini scanner/parser! */
-PHP_FUNCTION(config_get_hash) /* {{{ */
+PHP_FUNCTION(config_get_hash)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -2740,7 +2669,7 @@ PHP_FUNCTION(config_get_hash) /* {{{ */
 	array_init(return_value);
 	add_config_entries(hash, return_value);
 }
-/* }}} */
+
 #endif
 
 #ifdef HAVE_GETLOADAVG
@@ -2759,5 +2688,5 @@ PHP_FUNCTION(sys_getloadavg)
 		add_index_double(return_value, 2, load[2]);
 	}
 }
-/* }}} */
+
 #endif

@@ -26,21 +26,19 @@
 #include "php_rand.h"
 #include "php_mt_rand.h"
 
-/* {{{ php_srand
+/* php_srand
  */
 PHPAPI void php_srand(zend_long seed)
 {
 	php_mt_srand(seed);
 }
-/* }}} */
 
-/* {{{ php_rand
+/* php_rand
  */
 PHPAPI zend_long php_rand(void)
 {
 	return php_mt_rand();
 }
-/* }}} */
 
 /* Returns a random number from Mersenne Twister */
 PHP_FUNCTION(rand)
@@ -64,4 +62,4 @@ PHP_FUNCTION(rand)
 
 	RETURN_LONG(php_mt_rand_common(min, max));
 }
-/* }}} */
+

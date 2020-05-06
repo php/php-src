@@ -14,12 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-/* {{{ includes */
+/* includes */
 #include "php.h"
 #include "php_assert.h"
 #include "php_ini.h"
 #include "zend_exceptions.h"
-/* }}} */
 
 ZEND_BEGIN_MODULE_GLOBALS(assert)
 	zval callback;
@@ -46,7 +45,7 @@ enum {
 	ASSERT_EXCEPTION
 };
 
-static PHP_INI_MH(OnChangeCallback) /* {{{ */
+static PHP_INI_MH(OnChangeCallback)
 {
 	if (EG(current_execute_data)) {
 		if (Z_TYPE(ASSERTG(callback)) != IS_UNDEF) {
@@ -70,7 +69,6 @@ static PHP_INI_MH(OnChangeCallback) /* {{{ */
 	}
 	return SUCCESS;
 }
-/* }}} */
 
 PHP_INI_BEGIN()
 	 STD_PHP_INI_ENTRY("assert.active",		"1",	PHP_INI_ALL,	OnUpdateBool,		active,	 			zend_assert_globals,		assert_globals)
@@ -80,14 +78,13 @@ PHP_INI_BEGIN()
 	 STD_PHP_INI_ENTRY("assert.exception",	"0",	PHP_INI_ALL,	OnUpdateBool,		exception, 			zend_assert_globals,		assert_globals)
 PHP_INI_END()
 
-static void php_assert_init_globals(zend_assert_globals *assert_globals_p) /* {{{ */
+static void php_assert_init_globals(zend_assert_globals *assert_globals_p)
 {
 	ZVAL_UNDEF(&assert_globals_p->callback);
 	assert_globals_p->cb = NULL;
 }
-/* }}} */
 
-PHP_MINIT_FUNCTION(assert) /* {{{ */
+PHP_MINIT_FUNCTION(assert)
 {
 	zend_class_entry ce;
 
@@ -106,9 +103,8 @@ PHP_MINIT_FUNCTION(assert) /* {{{ */
 
 	return SUCCESS;
 }
-/* }}} */
 
-PHP_MSHUTDOWN_FUNCTION(assert) /* {{{ */
+PHP_MSHUTDOWN_FUNCTION(assert)
 {
 	if (ASSERTG(cb)) {
 		pefree(ASSERTG(cb), 1);
@@ -116,9 +112,8 @@ PHP_MSHUTDOWN_FUNCTION(assert) /* {{{ */
 	}
 	return SUCCESS;
 }
-/* }}} */
 
-PHP_RSHUTDOWN_FUNCTION(assert) /* {{{ */
+PHP_RSHUTDOWN_FUNCTION(assert)
 {
 	if (Z_TYPE(ASSERTG(callback)) != IS_UNDEF) {
 		zval_ptr_dtor(&ASSERTG(callback));
@@ -127,13 +122,11 @@ PHP_RSHUTDOWN_FUNCTION(assert) /* {{{ */
 
 	return SUCCESS;
 }
-/* }}} */
 
-PHP_MINFO_FUNCTION(assert) /* {{{ */
+PHP_MINFO_FUNCTION(assert)
 {
 	DISPLAY_INI_ENTRIES();
 }
-/* }}} */
 
 /* Checks if assertion is false */
 PHP_FUNCTION(assert)
@@ -215,7 +208,6 @@ PHP_FUNCTION(assert)
 
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* Set/get the various assert flags */
 PHP_FUNCTION(assert_options)
@@ -318,4 +310,4 @@ PHP_FUNCTION(assert_options)
 
 	return;
 }
-/* }}} */
+

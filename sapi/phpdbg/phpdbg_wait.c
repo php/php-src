@@ -333,7 +333,7 @@ void phpdbg_webdata_decompress(char *msg, int len) {
 	/* ??? */
 }
 
-PHPDBG_COMMAND(wait) /* {{{ */
+PHPDBG_COMMAND(wait)
 {
 #ifndef PHP_WIN32
 	struct sockaddr_un local, remote;
@@ -404,4 +404,4 @@ PHPDBG_COMMAND(wait) /* {{{ */
 #endif
 
 	return SUCCESS;
-} /* }}} */
+}

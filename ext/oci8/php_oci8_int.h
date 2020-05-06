@@ -27,7 +27,7 @@
 # ifndef PHP_OCI8_INT_H
 #  define PHP_OCI8_INT_H
 
-/* {{{ misc defines */
+/* misc defines */
 # if (defined(__osf__) && defined(__alpha))
 #  ifndef A_OSF
 #	define A_OSF
@@ -50,7 +50,6 @@
 #if defined(max)
 #undef max
 #endif
-/* }}} */
 
 #include "ext/standard/php_string.h"
 #include <oci.h>
@@ -66,7 +65,7 @@ extern int le_session;
 extern zend_class_entry *oci_lob_class_entry_ptr;
 extern zend_class_entry *oci_coll_class_entry_ptr;
 
-/* {{{ constants */
+/* constants */
 #define PHP_OCI_SEEK_SET 0
 #define PHP_OCI_SEEK_CUR 1
 #define PHP_OCI_SEEK_END 2
@@ -119,9 +118,8 @@ extern zend_class_entry *oci_coll_class_entry_ptr;
  */
 #define PHP_OCI8_DRIVER_NAME     "PHP OCI8 : " PHP_OCI8_VERSION
 
-/* }}} */
 
-/* {{{ php_oci_spool */
+/* php_oci_spool */
 typedef struct {
 	zend_resource *id;					/* resource id */
 	OCIEnv		 *env;					/* env of this session pool */
@@ -131,9 +129,8 @@ typedef struct {
 	unsigned int  poolname_len;			/* length of session pool name */
 	zend_string	 *spool_hash_key;		/* Hash key for session pool in plist */
 } php_oci_spool;
-/* }}} */
 
-/* {{{ php_oci_connection */
+/* php_oci_connection */
 typedef struct {
 	zend_resource  *id;							/* resource ID */
 	OCIEnv		   *env;						/* private env handle */
@@ -165,9 +162,8 @@ typedef struct {
 
 	zval		    taf_callback;				/* The Oracle TAF callback function in the userspace */
 } php_oci_connection;
-/* }}} */
 
-/* {{{ php_oci_descriptor */
+/* php_oci_descriptor */
 typedef struct {
 	zend_resource		*id;
 	zend_ulong				 index;		            /* descriptors hash table index */
@@ -182,17 +178,15 @@ typedef struct {
 	ub2					 charset_id;			/* charset ID */
 	unsigned			 is_open:1;				/* helps to determine if lob is open or not */
 } php_oci_descriptor;
-/* }}} */
 
-/* {{{ php_oci_lob_ctx */
+/* php_oci_lob_ctx */
 typedef struct {
 	char			   **lob_data;				/* address of pointer to LOB data */
 	ub4					*lob_len;				/* address of LOB length variable (bytes) */
 	ub4					 alloc_len;
 } php_oci_lob_ctx;
-/* }}} */
 
-/* {{{ php_oci_collection */
+/* php_oci_collection */
 typedef struct {
 	zend_resource		*id;
 	php_oci_connection	*connection;			/* parent connection handle */
@@ -203,18 +197,16 @@ typedef struct {
 	OCITypeCode			 element_typecode;		/* element's typecode handle */
 	OCIColl				*collection;			/* collection handle */
 } php_oci_collection;
-/* }}} */
 
-/* {{{ php_oci_define */
+/* php_oci_define */
 typedef struct {
 	zval		 val;			/* zval used in define */
 	text		*name;			/* placeholder's name */
 	ub4			 name_len;		/* placeholder's name length */
 	ub4			 type;			/* define type */
 } php_oci_define;
-/* }}} */
 
-/* {{{ php_oci_statement */
+/* php_oci_statement */
 typedef struct {
 	zend_resource		*id;
 	zend_resource	 	*parent_stmtid;			/* parent statement id */
@@ -237,9 +229,8 @@ typedef struct {
 	ub2					 stmttype;				/* statement type */
 	ub4                  prefetch_count;        /* current prefetch count */
 } php_oci_statement;
-/* }}} */
 
-/* {{{ php_oci_bind */
+/* php_oci_bind */
 typedef struct {
 	OCIBind				*bind;					/* bind handle */
 	zval				val;					/* value */
@@ -260,9 +251,8 @@ typedef struct {
 	ub2					 retcode;
 	ub4					 dummy_len;				/* a dummy var to store alenpp value in bind OUT callback */
 } php_oci_bind;
-/* }}} */
 
-/* {{{ php_oci_out_column */
+/* php_oci_out_column */
 typedef struct {
 	php_oci_statement	*statement;				/* statement handle. used when fetching REFCURSORS */
 	php_oci_statement	*nested_statement;		/* statement handle. used when fetching REFCURSORS */
@@ -290,9 +280,8 @@ typedef struct {
 	ub2					 charset_id;			/* charset ID */
 	ub4					 chunk_size;			/* LOB chunk size */
 } php_oci_out_column;
-/* }}} */
 
-/* {{{ macros */
+/* macros */
 
 #define PHP_OCI_CALL(func, params)								\
 	do {																\
@@ -407,11 +396,10 @@ typedef struct {
 #define PHP_OCI_ZVAL_TO_COLLECTION_EX(zval, collection) \
 	PHP_OCI_FETCH_RESOURCE_EX(zval, collection, php_oci_collection *, "oci8 collection", le_collection)
 
-/* }}} */
 
 /* PROTOS */
 
-/* {{{ main prototypes */
+/* main prototypes */
 
 void php_oci_column_hash_dtor(zval *data);
 void php_oci_define_hash_dtor(zval *data);
@@ -433,9 +421,8 @@ void php_oci_fetch_row(INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_args
 int php_oci_column_to_zval(php_oci_out_column *column, zval *value, int mode);
 void php_oci_dtrace_check_connection(php_oci_connection *connection, sb4 errcode, ub4 serverStatus);
 
-/* }}} */
 
-/* {{{ lob related prototypes */
+/* lob related prototypes */
 
 php_oci_descriptor *php_oci_lob_create(php_oci_connection *connection, zend_long type);
 int php_oci_lob_get_length(php_oci_descriptor *descriptor, ub4 *length);
@@ -455,9 +442,8 @@ int php_oci_lob_truncate(php_oci_descriptor *descriptor, zend_long new_lob_lengt
 int php_oci_lob_erase(php_oci_descriptor *descriptor, zend_long offset, ub4 length, ub4 *bytes_erased);
 int php_oci_lob_is_equal(php_oci_descriptor *descriptor_first, php_oci_descriptor *descriptor_second, boolean *result);
 sb4 php_oci_lob_callback(dvoid *ctxp, CONST dvoid *bufxp, oraub8 len, ub1 piece, dvoid **changed_bufpp, oraub8 *changed_lenp);
-/* }}} */
 
-/* {{{ collection related prototypes */
+/* collection related prototypes */
 
 php_oci_collection *php_oci_collection_create(php_oci_connection *connection, char *tdo, int tdo_len, char *schema, int schema_len);
 int php_oci_collection_size(php_oci_collection *collection, sb4 *size);
@@ -478,9 +464,8 @@ int php_oci_collection_append_number(php_oci_collection *collection, char *numbe
 int php_oci_collection_append_string(php_oci_collection *collection, char *element, int element_len);
 
 
-/* }}} */
 
-/* {{{ statement related prototypes */
+/* statement related prototypes */
 
 php_oci_statement *php_oci_statement_create(php_oci_connection *connection, char *query, int query_len);
 php_oci_statement *php_oci_get_implicit_resultset(php_oci_statement *statement);
@@ -505,9 +490,8 @@ php_oci_bind *php_oci_bind_array_helper_double(zval *var, zend_long max_table_le
 php_oci_bind *php_oci_bind_array_helper_string(zval *var, zend_long max_table_length, zend_long maxlength);
 php_oci_bind *php_oci_bind_array_helper_date(zval *var, zend_long max_table_length, php_oci_connection *connection);
 
-/* }}} */
 
-ZEND_BEGIN_MODULE_GLOBALS(oci) /* {{{ Module globals */
+ZEND_BEGIN_MODULE_GLOBALS(oci) /* Module globals */
 	sb4			 errcode;						/* global last ORA- error number. Used when connect fails, for example */
 	OCIError	*err;							/* global error handle */
 
@@ -530,14 +514,13 @@ ZEND_BEGIN_MODULE_GLOBALS(oci) /* {{{ Module globals */
 	char		*connection_class;
 	zend_bool	 events;
 	char		*edition;
-ZEND_END_MODULE_GLOBALS(oci) /* }}} */
+ZEND_END_MODULE_GLOBALS(oci)
 
-/* {{{ transparent failover related prototypes */
+/* transparent failover related prototypes */
 
 int php_oci_register_taf_callback(php_oci_connection *connection, zval *callback);
 int php_oci_unregister_taf_callback(php_oci_connection *connection);
 
-/* }}} */
 
 #ifdef ZTS
 #define OCI_G(v) TSRMG(oci_globals_id, zend_oci_globals *, v)

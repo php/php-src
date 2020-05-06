@@ -53,9 +53,9 @@ main (int argc, char **argv)
   CompareImages ("Initial Versions", ref, im);
 
 
-  /* */
+
   /* Send to PNG File then Ptr */
-  /* */
+
   snprintf (of, sizeof(of), "%s.png", argv[1]);
   out = fopen (of, "wb");
   gdImagePng (im, out);
@@ -85,9 +85,9 @@ main (int argc, char **argv)
   ctx->gd_free (ctx);
 
 
-  /* */
+
   /* Send to GD2 File then Ptr */
-  /* */
+
   snprintf (of, sizeof(of), "%s.gd2", argv[1]);
   out = fopen (of, "wb");
   gdImageGd2 (im, out, 128, 2);
@@ -120,9 +120,9 @@ main (int argc, char **argv)
   ctx->gd_free (ctx);
 
 
-  /* */
+
   /* Send to GD File then Ptr */
-  /* */
+
   snprintf (of, sizeof(of), "%s.gd", argv[1]);
   out = fopen (of, "wb");
   gdImageGd (im, out);
@@ -202,9 +202,9 @@ main (int argc, char **argv)
 
   unlink (of);
 
-  /* */
+
   /*  Test Extraction */
-  /* */
+
   in = fopen ("test/gdtest_200_300_150_100.png", "rb");
   if (!in)
     {
@@ -229,9 +229,9 @@ main (int argc, char **argv)
   gdImageDestroy (im2);
   gdImageDestroy (im3);
 
-  /* */
+
   /*  Copy Blend */
-  /* */
+
   in = fopen ("test/gdtest.png", "rb");
   if (!in)
     {

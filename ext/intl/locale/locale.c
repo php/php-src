@@ -23,7 +23,7 @@
 #include <unicode/uloc.h>
 #include <unicode/ustring.h>
 
-/* {{{ locale_register_constants
+/* locale_register_constants
  * Register constants common for the both (OO and procedural)
  * APIs.
  */
@@ -56,4 +56,4 @@ void locale_register_constants( INIT_FUNC_ARGS )
 	#undef LOCALE_EXPOSE_CLASS_CONST
 	#undef LOCALE_EXPOSE_CONST
 }
-/* }}} */
+

@@ -21,7 +21,7 @@
 #define PHAR_FUNC(name) \
 	static PHP_NAMED_FUNCTION(name)
 
-PHAR_FUNC(phar_opendir) /* {{{ */
+PHAR_FUNC(phar_opendir)
 {
 	char *filename;
 	size_t filename_len;
@@ -87,9 +87,8 @@ skip_phar:
 	PHAR_G(orig_opendir)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	return;
 }
-/* }}} */
 
-PHAR_FUNC(phar_file_get_contents) /* {{{ */
+PHAR_FUNC(phar_file_get_contents)
 {
 	char *filename;
 	size_t filename_len;
@@ -222,9 +221,8 @@ skip_phar:
 	PHAR_G(orig_file_get_contents)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	return;
 }
-/* }}} */
 
-PHAR_FUNC(phar_readfile) /* {{{ */
+PHAR_FUNC(phar_readfile)
 {
 	char *filename;
 	size_t filename_len;
@@ -323,9 +321,8 @@ skip_phar:
 	return;
 
 }
-/* }}} */
 
-PHAR_FUNC(phar_fopen) /* {{{ */
+PHAR_FUNC(phar_fopen)
 {
 	char *filename, *mode;
 	size_t filename_len, mode_len;
@@ -425,14 +422,13 @@ skip_phar:
 	PHAR_G(orig_fopen)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	return;
 }
-/* }}} */
 
 #define IS_LINK_OPERATION(__t) ((__t) == FS_TYPE || (__t) == FS_IS_LINK || (__t) == FS_LSTAT)
 #define IS_EXISTS_CHECK(__t) ((__t) == FS_EXISTS  || (__t) == FS_IS_W || (__t) == FS_IS_R || (__t) == FS_IS_X || (__t) == FS_IS_FILE || (__t) == FS_IS_DIR || (__t) == FS_IS_LINK)
 #define IS_ABLE_CHECK(__t) ((__t) == FS_IS_R || (__t) == FS_IS_W || (__t) == FS_IS_X)
 #define IS_ACCESS_CHECK(__t) (IS_ABLE_CHECK(type) || (__t) == FS_EXISTS)
 
-/* {{{ php_stat
+/* php_stat
  */
 static void phar_fancy_stat(zend_stat_t *stat_sb, int type, zval *return_value)
 {
@@ -581,9 +577,8 @@ static void phar_fancy_stat(zend_stat_t *stat_sb, int type, zval *return_value)
 	php_error_docref(NULL, E_WARNING, "Didn't understand stat call");
 	RETURN_FALSE;
 }
-/* }}} */
 
-static void phar_file_stat(const char *filename, size_t filename_length, int type, zif_handler orig_stat_func, INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
+static void phar_file_stat(const char *filename, size_t filename_length, int type, zif_handler orig_stat_func, INTERNAL_FUNCTION_PARAMETERS)
 {
 	if (!filename_length) {
 		RETURN_FALSE;
@@ -754,7 +749,6 @@ skip_phar:
 	orig_stat_func(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	return;
 }
-/* }}} */
 
 #define PharFileFunction(fname, funcnum, orig) \
 ZEND_NAMED_FUNCTION(fname) { \
@@ -771,65 +765,50 @@ ZEND_NAMED_FUNCTION(fname) { \
 		phar_file_stat(filename, filename_len, funcnum, PHAR_G(orig), INTERNAL_FUNCTION_PARAM_PASSTHRU); \
 	} \
 }
-/* }}} */
 
 /* Get file permissions */
 PharFileFunction(phar_fileperms, FS_PERMS, orig_fileperms)
-/* }}} */
 
 /* Get file inode */
 PharFileFunction(phar_fileinode, FS_INODE, orig_fileinode)
-/* }}} */
 
 /* Get file size */
 PharFileFunction(phar_filesize, FS_SIZE, orig_filesize)
-/* }}} */
 
 /* Get file owner */
 PharFileFunction(phar_fileowner, FS_OWNER, orig_fileowner)
-/* }}} */
 
 /* Get file group */
 PharFileFunction(phar_filegroup, FS_GROUP, orig_filegroup)
-/* }}} */
 
 /* Get last access time of file */
 PharFileFunction(phar_fileatime, FS_ATIME, orig_fileatime)
-/* }}} */
 
 /* Get last modification time of file */
 PharFileFunction(phar_filemtime, FS_MTIME, orig_filemtime)
-/* }}} */
 
 /* Get inode modification time of file */
 PharFileFunction(phar_filectime, FS_CTIME, orig_filectime)
-/* }}} */
 
 /* Get file type */
 PharFileFunction(phar_filetype, FS_TYPE, orig_filetype)
-/* }}} */
 
 /* Returns true if file can be written */
 PharFileFunction(phar_is_writable, FS_IS_W, orig_is_writable)
-/* }}} */
 
 /* Returns true if file can be read */
 PharFileFunction(phar_is_readable, FS_IS_R, orig_is_readable)
-/* }}} */
 
 /* Returns true if file is executable */
 PharFileFunction(phar_is_executable, FS_IS_X, orig_is_executable)
-/* }}} */
 
 /* Returns true if filename exists */
 PharFileFunction(phar_file_exists, FS_EXISTS, orig_file_exists)
-/* }}} */
 
 /* Returns true if file is directory */
 PharFileFunction(phar_is_dir, FS_IS_DIR, orig_is_dir)
-/* }}} */
 
-PHAR_FUNC(phar_is_file) /* {{{ */
+PHAR_FUNC(phar_is_file)
 {
 	char *filename;
 	size_t filename_len;
@@ -894,9 +873,8 @@ skip_phar:
 	PHAR_G(orig_is_file)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	return;
 }
-/* }}} */
 
-PHAR_FUNC(phar_is_link) /* {{{ */
+PHAR_FUNC(phar_is_link)
 {
 	char *filename;
 	size_t filename_len;
@@ -959,17 +937,14 @@ skip_phar:
 	PHAR_G(orig_is_link)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	return;
 }
-/* }}} */
 
 /* Give information about a file or symbolic link */
 PharFileFunction(phar_lstat, FS_LSTAT, orig_lstat)
-/* }}} */
 
 /* Give information about a file */
 PharFileFunction(phar_stat, FS_STAT, orig_stat)
-/* }}} */
 
-/* {{{ void phar_intercept_functions(void) */
+/* void phar_intercept_functions(void) */
 void phar_intercept_functions(void)
 {
 	if (!PHAR_G(request_init)) {
@@ -978,16 +953,14 @@ void phar_intercept_functions(void)
 	}
 	PHAR_G(intercepted) = 1;
 }
-/* }}} */
 
-/* {{{ void phar_release_functions(void) */
+/* void phar_release_functions(void) */
 void phar_release_functions(void)
 {
 	PHAR_G(intercepted) = 0;
 }
-/* }}} */
 
-/* {{{ void phar_intercept_functions_init(void) */
+/* void phar_intercept_functions_init(void) */
 #define PHAR_INTERCEPT(func) \
 	PHAR_G(orig_##func) = NULL; \
 	if (NULL != (orig = zend_hash_str_find_ptr(CG(function_table), #func, sizeof(#func)-1))) { \
@@ -1023,9 +996,8 @@ void phar_intercept_functions_init(void)
 	PHAR_INTERCEPT(readfile);
 	PHAR_G(intercepted) = 0;
 }
-/* }}} */
 
-/* {{{ void phar_intercept_functions_shutdown(void) */
+/* void phar_intercept_functions_shutdown(void) */
 #define PHAR_RELEASE(func) \
 	if (PHAR_G(orig_##func) && NULL != (orig = zend_hash_str_find_ptr(CG(function_table), #func, sizeof(#func)-1))) { \
 		orig->internal_function.handler = PHAR_G(orig_##func); \
@@ -1059,7 +1031,6 @@ void phar_intercept_functions_shutdown(void)
 	PHAR_RELEASE(readfile);
 	PHAR_G(intercepted) = 0;
 }
-/* }}} */
 
 static struct _phar_orig_functions {
 	zif_handler orig_fopen;
@@ -1086,7 +1057,7 @@ static struct _phar_orig_functions {
 	zif_handler orig_stat;
 } phar_orig_functions = {0};
 
-void phar_save_orig_functions(void) /* {{{ */
+void phar_save_orig_functions(void)
 {
 	phar_orig_functions.orig_fopen             = PHAR_G(orig_fopen);
 	phar_orig_functions.orig_file_get_contents = PHAR_G(orig_file_get_contents);
@@ -1111,9 +1082,8 @@ void phar_save_orig_functions(void) /* {{{ */
 	phar_orig_functions.orig_readfile          = PHAR_G(orig_readfile);
 	phar_orig_functions.orig_stat              = PHAR_G(orig_stat);
 }
-/* }}} */
 
-void phar_restore_orig_functions(void) /* {{{ */
+void phar_restore_orig_functions(void)
 {
 	PHAR_G(orig_fopen)             = phar_orig_functions.orig_fopen;
 	PHAR_G(orig_file_get_contents) = phar_orig_functions.orig_file_get_contents;
@@ -1138,4 +1108,4 @@ void phar_restore_orig_functions(void) /* {{{ */
 	PHAR_G(orig_readfile)          = phar_orig_functions.orig_readfile;
 	PHAR_G(orig_stat)              = phar_orig_functions.orig_stat;
 }
-/* }}} */
+

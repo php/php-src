@@ -90,7 +90,7 @@ static const short M6[32] = {	6, 5, 4, 3, 2, 1, 0, 7, 6, 5, 4, 3, 2, 1, 0, 7,
 static const short M7[32] = {	7, 6, 5, 4, 3, 2, 1, 0, 7, 6, 5, 4, 3, 2, 1, 0,
 						7, 6, 5, 4, 3, 2, 1, 0, 7, 6, 5, 4, 3, 2, 1, 0 };
 
-/* {{{ Encode
+/* Encode
    Encodes input (uint32_t) into output (unsigned char). Assumes len is
    a multiple of 4.
  */
@@ -105,9 +105,8 @@ static void Encode(unsigned char *output, uint32_t *input, unsigned int len)
 		output[j + 3] = (unsigned char) ((input[i] >> 24) & 0xff);
 	}
 }
-/* }}} */
 
-/* {{{ Decode
+/* Decode
    Decodes input (unsigned char) into output (uint32_t). Assumes len is
    a multiple of 4.
  */
@@ -120,7 +119,6 @@ static void Decode(uint32_t *output, const unsigned char *input, unsigned int le
 			(((uint32_t) input[j + 2]) << 16) | (((uint32_t) input[j + 3]) << 24);
 	}
 }
-/* }}} */
 
 #define F1(x6,x5,x4,x3,x2,x1,x0)	( ((x1) & (x4)) ^ ((x2) & (x5)) ^ ((x3) & (x6)) ^ ((x0) & (x1)) ^ (x0) )
 #define F2(x6,x5,x4,x3,x2,x1,x0)	( ((x1) & (x2) & (x3)) ^ ((x2) & (x4) & (x5)) ^ ((x1) & (x2)) ^ ((x1) & (x4)) ^ \
@@ -135,7 +133,7 @@ static void Decode(uint32_t *output, const unsigned char *input, unsigned int le
 #define ROTR(x,n)	(((x) >> (n)) | ((x) << (32 - (n))))
 
 
-/* {{{ PHP_3HAVALTransform
+/* PHP_3HAVALTransform
  */
 static void PHP_3HAVALTransform(uint32_t state[8], const unsigned char block[128])
 {
@@ -167,9 +165,8 @@ static void PHP_3HAVALTransform(uint32_t state[8], const unsigned char block[128
 	/* Zeroize sensitive information. */
 	ZEND_SECURE_ZERO((unsigned char*) x, sizeof(x));
 }
-/* }}} */
 
-/* {{{ PHP_4HAVALTransform
+/* PHP_4HAVALTransform
  */
 static void PHP_4HAVALTransform(uint32_t state[8], const unsigned char block[128])
 {
@@ -204,9 +201,8 @@ static void PHP_4HAVALTransform(uint32_t state[8], const unsigned char block[128
 	/* Zeroize sensitive information. */
 	ZEND_SECURE_ZERO((unsigned char*) x, sizeof(x));
 }
-/* }}} */
 
-/* {{{ PHP_5HAVALTransform
+/* PHP_5HAVALTransform
  */
 static void PHP_5HAVALTransform(uint32_t state[8], const unsigned char block[128])
 {
@@ -243,7 +239,6 @@ static void PHP_5HAVALTransform(uint32_t state[8], const unsigned char block[128
 	/* Zeroize sensitive information. */
 	ZEND_SECURE_ZERO((unsigned char*) x, sizeof(x));
 }
-/* }}} */
 
 #define PHP_HASH_HAVAL_INIT(p,b) \
 const php_hash_ops php_hash_##p##haval##b##_ops = { \
@@ -276,7 +271,7 @@ PHP_HASH_HAVAL_INIT(5,192)
 PHP_HASH_HAVAL_INIT(5,224)
 PHP_HASH_HAVAL_INIT(5,256)
 
-/* {{{ PHP_HAVALUpdate
+/* PHP_HAVALUpdate
  */
 PHP_HASH_API void PHP_HAVALUpdate(PHP_HAVAL_CTX *context, const unsigned char *input, size_t inputLen)
 {
@@ -310,11 +305,10 @@ PHP_HASH_API void PHP_HAVALUpdate(PHP_HAVAL_CTX *context, const unsigned char *i
 	/* Buffer remaining input */
 	memcpy((unsigned char*) &context->buffer[index], (unsigned char*) &input[i], inputLen - i);
 }
-/* }}} */
 
 #define PHP_HASH_HAVAL_VERSION	0x01
 
-/* {{{ PHP_HAVAL128Final
+/* PHP_HAVAL128Final
  */
 PHP_HASH_API void PHP_HAVAL128Final(unsigned char *digest, PHP_HAVAL_CTX * context)
 {
@@ -366,9 +360,8 @@ PHP_HASH_API void PHP_HAVAL128Final(unsigned char *digest, PHP_HAVAL_CTX * conte
 	 */
 	ZEND_SECURE_ZERO((unsigned char*) context, sizeof(*context));
 }
-/* }}} */
 
-/* {{{ PHP_HAVAL160Final
+/* PHP_HAVAL160Final
  */
 PHP_HASH_API void PHP_HAVAL160Final(unsigned char *digest, PHP_HAVAL_CTX * context)
 {
@@ -420,9 +413,8 @@ PHP_HASH_API void PHP_HAVAL160Final(unsigned char *digest, PHP_HAVAL_CTX * conte
 	 */
 	ZEND_SECURE_ZERO((unsigned char*) context, sizeof(*context));
 }
-/* }}} */
 
-/* {{{ PHP_HAVAL192Final
+/* PHP_HAVAL192Final
  */
 PHP_HASH_API void PHP_HAVAL192Final(unsigned char *digest, PHP_HAVAL_CTX * context)
 {
@@ -460,9 +452,8 @@ PHP_HASH_API void PHP_HAVAL192Final(unsigned char *digest, PHP_HAVAL_CTX * conte
 	 */
 	ZEND_SECURE_ZERO((unsigned char*) context, sizeof(*context));
 }
-/* }}} */
 
-/* {{{ PHP_HAVAL224Final
+/* PHP_HAVAL224Final
  */
 PHP_HASH_API void PHP_HAVAL224Final(unsigned char *digest, PHP_HAVAL_CTX * context)
 {
@@ -501,9 +492,8 @@ PHP_HASH_API void PHP_HAVAL224Final(unsigned char *digest, PHP_HAVAL_CTX * conte
 	 */
 	ZEND_SECURE_ZERO((unsigned char*) context, sizeof(*context));
 }
-/* }}} */
 
-/* {{{ PHP_HAVAL256Final
+/* PHP_HAVAL256Final
  */
 PHP_HASH_API void PHP_HAVAL256Final(unsigned char *digest, PHP_HAVAL_CTX * context)
 {
@@ -535,4 +525,4 @@ PHP_HASH_API void PHP_HAVAL256Final(unsigned char *digest, PHP_HAVAL_CTX * conte
 	 */
 	ZEND_SECURE_ZERO((unsigned char*) context, sizeof(*context));
 }
-/* }}} */
+

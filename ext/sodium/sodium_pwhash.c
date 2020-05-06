@@ -170,7 +170,7 @@ static const php_password_algo sodium_algo_argon2id = {
 	NULL,
 };
 
-PHP_MINIT_FUNCTION(sodium_password_hash) /* {{{ */ {
+PHP_MINIT_FUNCTION(sodium_password_hash) {
 	zend_string *argon2i = zend_string_init("argon2i", strlen("argon2i"), 1);
 
 	if (php_password_algo_find(argon2i)) {
@@ -198,7 +198,5 @@ PHP_MINIT_FUNCTION(sodium_password_hash) /* {{{ */ {
 
 	return SUCCESS;
 }
-/* }}} */
-
 
 #endif /* HAVE_SODIUM_PASSWORD_HASH */

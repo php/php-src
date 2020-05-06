@@ -21,7 +21,7 @@
 #include "mysqlnd_priv.h"
 #include "mysqlnd_debug.h"
 
-/* {{{ mysqlnd_local_infile_init */
+/* mysqlnd_local_infile_init */
 static
 int mysqlnd_local_infile_init(void ** ptr, const char * const filename)
 {
@@ -57,10 +57,8 @@ int mysqlnd_local_infile_init(void ** ptr, const char * const filename)
 
 	DBG_RETURN(0);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_local_infile_read */
+/* mysqlnd_local_infile_read */
 static
 int mysqlnd_local_infile_read(void * ptr, zend_uchar * buf, unsigned int buf_len)
 {
@@ -78,10 +76,8 @@ int mysqlnd_local_infile_read(void * ptr, zend_uchar * buf, unsigned int buf_len
 
 	DBG_RETURN(count);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_local_infile_error */
+/* mysqlnd_local_infile_error */
 static
 int	mysqlnd_local_infile_error(void * ptr, char *error_buf, unsigned int error_buf_len)
 {
@@ -99,10 +95,8 @@ int	mysqlnd_local_infile_error(void * ptr, char *error_buf, unsigned int error_b
 	DBG_INF_FMT("no info, %d", CR_UNKNOWN_ERROR);
 	DBG_RETURN(CR_UNKNOWN_ERROR);
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_local_infile_end */
+/* mysqlnd_local_infile_end */
 static
 void mysqlnd_local_infile_end(void * ptr)
 {
@@ -117,10 +111,8 @@ void mysqlnd_local_infile_end(void * ptr)
 		mnd_efree(info);
 	}
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_local_infile_default */
+/* mysqlnd_local_infile_default */
 PHPAPI void
 mysqlnd_local_infile_default(MYSQLND_CONN_DATA * conn)
 {
@@ -129,13 +121,11 @@ mysqlnd_local_infile_default(MYSQLND_CONN_DATA * conn)
 	conn->infile.local_infile_error = mysqlnd_local_infile_error;
 	conn->infile.local_infile_end = mysqlnd_local_infile_end;
 }
-/* }}} */
-
 
 static const char *lost_conn = "Lost connection to MySQL server during LOAD DATA of a local file";
 
 
-/* {{{ mysqlnd_handle_local_infile */
+/* mysqlnd_handle_local_infile */
 enum_func_status
 mysqlnd_handle_local_infile(MYSQLND_CONN_DATA * conn, const char * const filename, zend_bool * is_warning)
 {
@@ -227,4 +217,4 @@ infile_error:
 	DBG_INF_FMT("%s", result == PASS? "PASS":"FAIL");
 	DBG_RETURN(result);
 }
-/* }}} */
+

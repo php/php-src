@@ -115,7 +115,7 @@ static void	ReleaseCharSet(CharSet *cset);
 static inline void scan_set_error_return(int numVars, zval *return_value);
 
 
-/* {{{ BuildCharSet
+/* BuildCharSet
  *----------------------------------------------------------------------
  *
  * BuildCharSet --
@@ -216,9 +216,8 @@ static char * BuildCharSet(CharSet *cset, char *format)
 	}
 	return format;
 }
-/* }}} */
 
-/* {{{ CharInSet
+/* CharInSet
  *----------------------------------------------------------------------
  *
  * CharInSet --
@@ -255,9 +254,8 @@ static int CharInSet(CharSet *cset, int c)
 	}
 	return (cset->exclude ? !match : match);
 }
-/* }}} */
 
-/* {{{ ReleaseCharSet
+/* ReleaseCharSet
  *----------------------------------------------------------------------
  *
  * ReleaseCharSet --
@@ -279,9 +277,8 @@ static void ReleaseCharSet(CharSet *cset)
 		efree((char *)cset->ranges);
 	}
 }
-/* }}} */
 
-/* {{{ ValidateFormat
+/* ValidateFormat
  *----------------------------------------------------------------------
  *
  * ValidateFormat --
@@ -554,9 +551,8 @@ error:
 	return SCAN_ERROR_INVALID_FORMAT;
 #undef STATIC_LIST_SIZE
 }
-/* }}} */
 
-/* {{{ php_sscanf_internal
+/* php_sscanf_internal
  * This is the internal function which does processing on behalf of
  * both sscanf() and fscanf()
  *
@@ -1176,10 +1172,9 @@ done:
 	}
 	return result;
 }
-/* }}} */
 
 /* the compiler choked when i tried to make this a macro    */
-static inline void scan_set_error_return(int numVars, zval *return_value) /* {{{ */
+static inline void scan_set_error_return(int numVars, zval *return_value)
 {
 	if (numVars) {
 		ZVAL_LONG(return_value, SCAN_ERROR_EOF);  /* EOF marker */
@@ -1188,4 +1183,4 @@ static inline void scan_set_error_return(int numVars, zval *return_value) /* {{{
 		convert_to_null(return_value);
 	}
 }
-/* }}} */
+

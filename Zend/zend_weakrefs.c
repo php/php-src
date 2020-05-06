@@ -613,7 +613,7 @@ ZEND_METHOD(WeakMap, count)
 	RETURN_LONG(count);
 }
 
-void zend_register_weakref_ce(void) /* {{{ */
+void zend_register_weakref_ce(void)
 {
 	zend_class_entry ce;
 
@@ -666,5 +666,4 @@ void zend_register_weakref_ce(void) /* {{{ */
 	zend_weakmap_handlers.unset_property = zend_weakref_no_unset;
 	zend_weakmap_handlers.get_property_ptr_ptr = zend_weakref_no_read_ptr;
 }
-/* }}} */
 

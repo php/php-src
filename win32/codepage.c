@@ -32,7 +32,7 @@ ZEND_TLS const struct php_win32_cp *orig_in_cp = NULL;
 #include "cp_enc_map.c"
 
 __forceinline static wchar_t *php_win32_cp_to_w_int(const char* in, size_t in_len, size_t *out_len, UINT cp, DWORD flags)
-{/*{{{*/
+{
 	wchar_t *ret;
 	int ret_len, tmp_len;
 
@@ -73,26 +73,26 @@ __forceinline static wchar_t *php_win32_cp_to_w_int(const char* in, size_t in_le
 	}
 
 	return ret;
-}/*}}}*/
+}
 
 PW32CP wchar_t *php_win32_cp_conv_utf8_to_w(const char* in, size_t in_len, size_t *out_len)
-{/*{{{*/
+{
 	return php_win32_cp_to_w_int(in, in_len, out_len, CP_UTF8, MB_ERR_INVALID_CHARS);
-}/*}}}*/
+}
 
 PW32CP wchar_t *php_win32_cp_conv_cur_to_w(const char* in, size_t in_len, size_t *out_len)
-{/*{{{*/
+{
 	wchar_t *ret;
 
 	ret = php_win32_cp_to_w_int(in, in_len, out_len, cur_cp->id, cur_cp->from_w_fl);
 
 	return ret;
-}/*}}}*/
+}
 
 PW32CP wchar_t *php_win32_cp_conv_to_w(DWORD cp, DWORD flags, const char* in, size_t in_len, size_t *out_len)
-{/*{{{*/
+{
 	return php_win32_cp_to_w_int(in, in_len, out_len, cp, flags);
-}/*}}}*/
+}
 
 #define ASCII_FAIL_RETURN() \
 	if (PHP_WIN32_CP_IGNORE_LEN_P != out_len) { \
@@ -100,7 +100,7 @@ PW32CP wchar_t *php_win32_cp_conv_to_w(DWORD cp, DWORD flags, const char* in, si
 	} \
 	return NULL;
 PW32CP wchar_t *php_win32_cp_conv_ascii_to_w(const char* in, size_t in_len, size_t *out_len)
-{/*{{{*/
+{
 	wchar_t *ret, *ret_idx;
 	const char *idx = in, *end;
 	char ch_err = 0;
@@ -204,11 +204,11 @@ PW32CP wchar_t *php_win32_cp_conv_ascii_to_w(const char* in, size_t in_len, size
 	}
 
 	return ret;
-}/*}}}*/
+}
 #undef ASCII_FAIL_RETURN
 
 __forceinline static char *php_win32_cp_from_w_int(const wchar_t* in, size_t in_len, size_t *out_len, UINT cp, DWORD flags)
-{/*{{{*/
+{
 	int r;
 	int target_len, tmp_len;
 	char* target;
@@ -250,30 +250,30 @@ __forceinline static char *php_win32_cp_from_w_int(const wchar_t* in, size_t in_
 	}
 
 	return target;
-}/*}}}*/
+}
 
 PW32CP char *php_win32_cp_conv_w_to_utf8(const wchar_t* in, size_t in_len, size_t *out_len)
-{/*{{{*/
+{
 	return php_win32_cp_from_w_int(in, in_len, out_len, CP_UTF8, WC_ERR_INVALID_CHARS);
-}/*}}}*/
+}
 
 PW32CP char *php_win32_cp_conv_w_to_cur(const wchar_t* in, size_t in_len, size_t *out_len)
-{/*{{{*/
+{
 	char *ret;
 
 	ret = php_win32_cp_from_w_int(in, in_len, out_len, cur_cp->id, cur_cp->from_w_fl);
 
 	return ret;
-}/*}}}*/
+}
 
 PW32CP char *php_win32_cp_conv_from_w(DWORD cp, DWORD flags, const wchar_t* in, size_t in_len, size_t *out_len)
-{/*{{{*/
+{
 	return php_win32_cp_from_w_int(in, in_len, out_len, cp, flags);
-}/*}}}*/
+}
 
 /* This is only usable after the startup phase*/
 __forceinline static char *php_win32_cp_get_enc(void)
-{/*{{{*/
+{
 	char *enc = NULL;
 	const zend_encoding *zenc;
 
@@ -289,20 +289,20 @@ __forceinline static char *php_win32_cp_get_enc(void)
 	}
 
 	return enc;
-}/*}}}*/
+}
 
 PW32CP const struct php_win32_cp *php_win32_cp_get_current(void)
-{/*{{{*/
+{
 	return cur_cp;
-}/*}}}*/
+}
 
 PW32CP const struct php_win32_cp *php_win32_cp_get_orig(void)
-{/*{{{*/
+{
 	return orig_cp;
-}/*}}}*/
+}
 
 PW32CP const struct php_win32_cp *php_win32_cp_get_by_id(DWORD id)
-{/*{{{*/
+{
 	size_t i;
 
 	if (id < php_win32_cp_map[0].id) {
@@ -325,10 +325,10 @@ PW32CP const struct php_win32_cp *php_win32_cp_get_by_id(DWORD id)
 	SET_ERRNO_FROM_WIN32_CODE(ERROR_NOT_FOUND);
 
 	return NULL;
-}/*}}}*/
+}
 
 PW32CP const struct php_win32_cp *php_win32_cp_get_by_enc(const char *enc)
-{/*{{{*/
+{
 	size_t enc_len = 0, i;
 
 	if (!enc || !enc[0]) {
@@ -368,10 +368,10 @@ PW32CP const struct php_win32_cp *php_win32_cp_get_by_enc(const char *enc)
 	}
 
 	return php_win32_cp_get_by_id(GetACP());
-}/*}}}*/
+}
 
 PW32CP const struct php_win32_cp *php_win32_cp_set_by_id(DWORD id)
-{/*{{{*/
+{
 	const struct php_win32_cp *tmp;
 	if (!IsValidCodePage(id)) {
 		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
@@ -384,15 +384,15 @@ PW32CP const struct php_win32_cp *php_win32_cp_set_by_id(DWORD id)
 	}
 
 	return cur_cp;
-}/*}}}*/
+}
 
 PW32CP BOOL php_win32_cp_use_unicode(void)
-{/*{{{*/
+{
 	return 65001 == cur_cp->id;
-}/*}}}*/
+}
 
 PW32CP wchar_t *php_win32_cp_env_any_to_w(const char* env)
-{/*{{{*/
+{
 	wchar_t *envw = NULL, ew[32760];
 	char *cur = (char *)env, *prev;
 	size_t bin_len = 0;
@@ -429,10 +429,10 @@ PW32CP wchar_t *php_win32_cp_env_any_to_w(const char* env)
 	envw[bin_len + 2] = L'\0';
 
 	return envw;
-}/*}}}*/
+}
 
 static BOOL php_win32_cp_cli_io_setup(void)
-{/*{{{*/
+{
 	BOOL ret = TRUE;
 
 	if (PG(input_encoding) && PG(input_encoding)[0]) {
@@ -458,10 +458,10 @@ static BOOL php_win32_cp_cli_io_setup(void)
 	}
 
 	return ret;
-}/*}}}*/
+}
 
 PW32CP const struct php_win32_cp *php_win32_cp_do_setup(const char *enc)
-{/*{{{*/
+{
 	if (!enc) {
 		enc = php_win32_cp_get_enc();
 	}
@@ -487,10 +487,10 @@ PW32CP const struct php_win32_cp *php_win32_cp_do_setup(const char *enc)
 	}
 
 	return cur_cp;
-}/*}}}*/
+}
 
 PW32CP const struct php_win32_cp *php_win32_cp_do_update(const char *enc)
-{/*{{{*/
+{
 	if (!enc) {
 		enc = php_win32_cp_get_enc();
 	}
@@ -501,16 +501,16 @@ PW32CP const struct php_win32_cp *php_win32_cp_do_update(const char *enc)
 	}
 
 	return cur_cp;
-}/*}}}*/
+}
 
 PW32CP const struct php_win32_cp *php_win32_cp_shutdown(void)
-{/*{{{*/
+{
 	return orig_cp;
-}/*}}}*/
+}
 
 /* php_win32_cp_setup() needs to have run before! */
 PW32CP const struct php_win32_cp *php_win32_cp_cli_do_setup(DWORD id)
-{/*{{{*/
+{
 	const struct php_win32_cp *cp;
 
 	if (!orig_cp) {
@@ -532,10 +532,10 @@ PW32CP const struct php_win32_cp *php_win32_cp_cli_do_setup(DWORD id)
 	}
 
 	return cp;
-}/*}}}*/
+}
 
 PW32CP const struct php_win32_cp *php_win32_cp_cli_do_restore(DWORD id)
-{/*{{{*/
+{
 	BOOL cli_io_restored = TRUE;
 
 	if (orig_in_cp) {
@@ -551,7 +551,7 @@ PW32CP const struct php_win32_cp *php_win32_cp_cli_do_restore(DWORD id)
 	}
 
 	return NULL;
-}/*}}}*/
+}
 
 /* Userspace functions, see basic_functions.* for arginfo and decls. */
 
@@ -582,7 +582,6 @@ PHP_FUNCTION(sapi_windows_cp_set)
 
 	RETURN_BOOL(cp->id == id);
 }
-/* }}} */
 
 /* Get process codepage. */
 PHP_FUNCTION(sapi_windows_cp_get)
@@ -603,8 +602,6 @@ PHP_FUNCTION(sapi_windows_cp_get)
 		RETURN_LONG(cp->id);
 	}
 }
-/* }}} */
-
 
 /* Indicates whether the codepage is UTF-8 compatible. */
 PHP_FUNCTION(sapi_windows_cp_is_utf8)
@@ -615,7 +612,6 @@ PHP_FUNCTION(sapi_windows_cp_is_utf8)
 
 	RETURN_BOOL(php_win32_cp_use_unicode());
 }
-/* }}} */
 
 /* Convert string from one codepage to another. */
 PHP_FUNCTION(sapi_windows_cp_conv)
@@ -697,6 +693,5 @@ PHP_FUNCTION(sapi_windows_cp_conv)
 	free(tmpw);
 	free(ret);
 }
-/* }}} */
 
-/* }}} */
+

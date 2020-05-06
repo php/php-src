@@ -23,7 +23,7 @@
 
 #define QSORT_STACK_SIZE (sizeof(size_t) * CHAR_BIT)
 
-ZEND_API void zend_qsort(void *base, size_t nmemb, size_t siz, compare_func_t compare, swap_func_t swp) /* {{{ */
+ZEND_API void zend_qsort(void *base, size_t nmemb, size_t siz, compare_func_t compare, swap_func_t swp)
 {
 	void           *begin_stack[QSORT_STACK_SIZE];
 	void           *end_stack[QSORT_STACK_SIZE];
@@ -86,16 +86,14 @@ ZEND_API void zend_qsort(void *base, size_t nmemb, size_t siz, compare_func_t co
 		}
 	}
 }
-/* }}} */
 
-static inline void zend_sort_2(void *a, void *b, compare_func_t cmp, swap_func_t swp) /* {{{ */ {
+static inline void zend_sort_2(void *a, void *b, compare_func_t cmp, swap_func_t swp) {
 	if (cmp(a, b) > 0) {
 		swp(a, b);
 	}
 }
-/* }}} */
 
-static inline void zend_sort_3(void *a, void *b, void *c, compare_func_t cmp, swap_func_t swp) /* {{{ */ {
+static inline void zend_sort_3(void *a, void *b, void *c, compare_func_t cmp, swap_func_t swp) {
 	if (!(cmp(a, b) > 0)) {
 		if (!(cmp(b, c) > 0)) {
 			return;
@@ -115,9 +113,8 @@ static inline void zend_sort_3(void *a, void *b, void *c, compare_func_t cmp, sw
 		swp(b, c);
 	}
 }
-/* }}} */
 
-static void zend_sort_4(void *a, void *b, void *c, void *d, compare_func_t cmp, swap_func_t swp) /* {{{ */ {
+static void zend_sort_4(void *a, void *b, void *c, void *d, compare_func_t cmp, swap_func_t swp) {
 	zend_sort_3(a, b, c, cmp, swp);
 	if (cmp(c, d) > 0) {
 		swp(c, d);
@@ -129,9 +126,8 @@ static void zend_sort_4(void *a, void *b, void *c, void *d, compare_func_t cmp, 
 		}
 	}
 }
-/* }}} */
 
-static void zend_sort_5(void *a, void *b, void *c, void *d, void *e, compare_func_t cmp, swap_func_t swp) /* {{{ */ {
+static void zend_sort_5(void *a, void *b, void *c, void *d, void *e, compare_func_t cmp, swap_func_t swp) {
 	zend_sort_4(a, b, c, d, cmp, swp);
 	if (cmp(d, e) > 0) {
 		swp(d, e);
@@ -146,9 +142,8 @@ static void zend_sort_5(void *a, void *b, void *c, void *d, void *e, compare_fun
 		}
 	}
 }
-/* }}} */
 
-ZEND_API void zend_insert_sort(void *base, size_t nmemb, size_t siz, compare_func_t cmp, swap_func_t swp) /* {{{ */{
+ZEND_API void zend_insert_sort(void *base, size_t nmemb, size_t siz, compare_func_t cmp, swap_func_t swp) {
 	switch (nmemb) {
 		case 0:
 		case 1:
@@ -227,9 +222,8 @@ ZEND_API void zend_insert_sort(void *base, size_t nmemb, size_t siz, compare_fun
 			break;
 	}
 }
-/* }}} */
 
-/* {{{ ZEND_API void zend_sort(void *base, size_t nmemb, size_t siz, compare_func_t cmp, swap_func_t swp)
+/* ZEND_API void zend_sort(void *base, size_t nmemb, size_t siz, compare_func_t cmp, swap_func_t swp)
  *
  * Derived from LLVM's libc++ implementation of std::sort.
  *
@@ -371,4 +365,4 @@ done:
 		}
 	}
 }
-/* }}} */
+

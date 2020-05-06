@@ -21,7 +21,7 @@
 #include "php.h"
 #include "php_bz2.h"
 
-/* {{{ data structure */
+/* data structure */
 
 enum strm_status {
     PHP_BZ2_UNINITIALIZED,
@@ -43,9 +43,8 @@ typedef struct _php_bz2_filter_data {
 	int persistent;
 } php_bz2_filter_data;
 
-/* }}} */
 
-/* {{{ Memory management wrappers */
+/* Memory management wrappers */
 
 static void *php_bz2_alloc(void *opaque, int items, int size)
 {
@@ -56,9 +55,8 @@ static void php_bz2_free(void *opaque, void *address)
 {
 	pefree((void *)address, ((php_bz2_filter_data*)opaque)->persistent);
 }
-/* }}} */
 
-/* {{{ bzip2.decompress filter implementation */
+/* bzip2.decompress filter implementation */
 
 static php_stream_filter_status_t php_bz2_decompress_filter(
 	php_stream *stream,
@@ -195,9 +193,8 @@ static const php_stream_filter_ops php_bz2_decompress_ops = {
 	php_bz2_decompress_dtor,
 	"bzip2.decompress"
 };
-/* }}} */
 
-/* {{{ bzip2.compress filter implementation */
+/* bzip2.compress filter implementation */
 
 static php_stream_filter_status_t php_bz2_compress_filter(
 	php_stream *stream,
@@ -300,9 +297,8 @@ static const php_stream_filter_ops php_bz2_compress_ops = {
 	"bzip2.compress"
 };
 
-/* }}} */
 
-/* {{{ bzip2.* common factory */
+/* bzip2.* common factory */
 
 static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *filterparams, uint8_t persistent)
 {
@@ -399,4 +395,4 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 const php_stream_filter_factory php_bz2_filter_factory = {
 	php_bz2_filter_create
 };
-/* }}} */
+

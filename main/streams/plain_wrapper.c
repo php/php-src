@@ -117,7 +117,7 @@ PHPAPI int php_stream_parse_fopen_modes(const char *mode, int *open_flags)
 }
 
 
-/* {{{ ------- STDIO stream implementation -------*/
+/* ------- STDIO stream implementation -------*/
 
 typedef struct {
 	FILE *file;
@@ -937,9 +937,8 @@ PHPAPI php_stream_ops	php_stream_stdio_ops = {
 	php_stdiop_stat,
 	php_stdiop_set_option
 };
-/* }}} */
 
-/* {{{ plain files opendir/readdir implementation */
+/* plain files opendir/readdir implementation */
 static ssize_t php_plain_files_dirstream_read(php_stream *stream, char *buf, size_t count)
 {
 	DIR *dir = (DIR*)stream->abstract;
@@ -1015,9 +1014,8 @@ static php_stream *php_plain_files_dir_opener(php_stream_wrapper *wrapper, const
 
 	return stream;
 }
-/* }}} */
 
-/* {{{ php_stream_fopen */
+/* php_stream_fopen */
 PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, zend_string **opened_path, int options STREAMS_DC)
 {
 	char realpath[MAXPATHLEN];
@@ -1117,8 +1115,6 @@ PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, zen
 	}
 	return NULL;
 }
-/* }}} */
-
 
 static php_stream *php_plain_files_stream_opener(php_stream_wrapper *wrapper, const char *path, const char *mode,
 		int options, zend_string **opened_path, php_stream_context *context STREAMS_DC)
@@ -1497,7 +1493,7 @@ PHPAPI /*const*/ php_stream_wrapper php_plain_files_wrapper = {
 	0
 };
 
-/* {{{ php_stream_fopen_with_path */
+/* php_stream_fopen_with_path */
 PHPAPI php_stream *_php_stream_fopen_with_path(const char *filename, const char *mode, const char *path, zend_string **opened_path, int options STREAMS_DC)
 {
 	/* code ripped off from fopen_wrappers.c */
@@ -1636,4 +1632,4 @@ stream_skip:
 	return NULL;
 
 }
-/* }}} */
+

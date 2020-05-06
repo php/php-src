@@ -62,9 +62,8 @@ PHP_METHOD(DOMProcessingInstruction, __construct)
 	}
 	php_libxml_increment_node_ptr((php_libxml_node_object *)intern, nodep, (void *)intern);
 }
-/* }}} end DOMProcessingInstruction::__construct */
 
-/* {{{ target	string
+/* target	string
 readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-1478689192
 Since:
@@ -83,9 +82,8 @@ int dom_processinginstruction_target_read(dom_object *obj, zval *retval)
 	return SUCCESS;
 }
 
-/* }}} */
 
-/* {{{ data	string
+/* data	string
 readonly=no
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-837822393
 Since:
@@ -133,6 +131,5 @@ int dom_processinginstruction_data_write(dom_object *obj, zval *newval)
 	return SUCCESS;
 }
 
-/* }}} */
 
 #endif

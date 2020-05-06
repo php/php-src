@@ -19,13 +19,12 @@
 #include "php.h"
 #include "md5.h"
 
-PHPAPI void make_digest(char *md5str, const unsigned char *digest) /* {{{ */
+PHPAPI void make_digest(char *md5str, const unsigned char *digest)
 {
 	make_digest_ex(md5str, digest, 16);
 }
-/* }}} */
 
-PHPAPI void make_digest_ex(char *md5str, const unsigned char *digest, int len) /* {{{ */
+PHPAPI void make_digest_ex(char *md5str, const unsigned char *digest, int len)
 {
 	static const char hexits[17] = "0123456789abcdef";
 	int i;
@@ -36,7 +35,6 @@ PHPAPI void make_digest_ex(char *md5str, const unsigned char *digest, int len) /
 	}
 	md5str[len * 2] = '\0';
 }
-/* }}} */
 
 /* Calculate the md5 hash of a string */
 PHP_FUNCTION(md5)
@@ -63,7 +61,6 @@ PHP_FUNCTION(md5)
 	}
 
 }
-/* }}} */
 
 /* Calculate the md5 hash of given filename */
 PHP_FUNCTION(md5_file)
@@ -113,7 +110,6 @@ PHP_FUNCTION(md5_file)
 		make_digest_ex(Z_STRVAL_P(return_value), digest, 16);
 	}
 }
-/* }}} */
 
 /*
  * This is an OpenSSL-compatible implementation of the RSA Data Security,

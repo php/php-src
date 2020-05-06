@@ -22,7 +22,7 @@
 #include <unicode/uspoof.h>
 
 
-/* {{{ spoofchecker_register_constants
+/* spoofchecker_register_constants
  * Register constants
  */
 void spoofchecker_register_constants(INIT_FUNC_ARGS)
@@ -54,4 +54,4 @@ void spoofchecker_register_constants(INIT_FUNC_ARGS)
 
 	#undef SPOOFCHECKER_EXPOSE_CLASS_CONST
 }
-/* }}} */
+

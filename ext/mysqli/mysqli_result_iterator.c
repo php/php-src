@@ -39,7 +39,6 @@ typedef struct {
 } php_mysqli_result_iterator;
 
 
-/* {{{ */
 zend_object_iterator *php_mysqli_result_get_iterator(zend_class_entry *ce, zval *object, int by_ref)
 {
 	php_mysqli_result_iterator *iterator;
@@ -58,9 +57,7 @@ zend_object_iterator *php_mysqli_result_get_iterator(zend_class_entry *ce, zval 
 
 	return &iterator->intern;
 }
-/* }}} */
 
-/* {{{ */
 static void php_mysqli_result_iterator_dtor(zend_object_iterator *iter)
 {
 	php_mysqli_result_iterator *iterator = (php_mysqli_result_iterator*)iter;
@@ -69,27 +66,21 @@ static void php_mysqli_result_iterator_dtor(zend_object_iterator *iter)
 	zval_ptr_dtor(&iterator->intern.data);
 	zval_ptr_dtor(&iterator->current_row);
 }
-/* }}} */
 
-/* {{{ */
 static int php_mysqli_result_iterator_valid(zend_object_iterator *iter)
 {
 	php_mysqli_result_iterator *iterator = (php_mysqli_result_iterator*) iter;
 
 	return Z_TYPE(iterator->current_row) == IS_ARRAY ? SUCCESS : FAILURE;
 }
-/* }}} */
 
-/* {{{ */
 static zval *php_mysqli_result_iterator_current_data(zend_object_iterator *iter)
 {
 	php_mysqli_result_iterator *iterator = (php_mysqli_result_iterator*) iter;
 
 	return &iterator->current_row;
 }
-/* }}} */
 
-/* {{{ */
 static void php_mysqli_result_iterator_move_forward(zend_object_iterator *iter)
 {
 
@@ -105,9 +96,7 @@ static void php_mysqli_result_iterator_move_forward(zend_object_iterator *iter)
 		iterator->row_num++;
 	}
 }
-/* }}} */
 
-/* {{{ */
 static void php_mysqli_result_iterator_rewind(zend_object_iterator *iter)
 {
 	php_mysqli_result_iterator *iterator = (php_mysqli_result_iterator*) iter;
@@ -131,18 +120,16 @@ static void php_mysqli_result_iterator_rewind(zend_object_iterator *iter)
 	iterator->row_num = -1;
 	php_mysqli_result_iterator_move_forward(iter);
 }
-/* }}} */
 
-/* {{{ php_mysqli_result_iterator_current_key */
+/* php_mysqli_result_iterator_current_key */
 static void php_mysqli_result_iterator_current_key(zend_object_iterator *iter, zval *key)
 {
 	php_mysqli_result_iterator *iterator = (php_mysqli_result_iterator*) iter;
 
 	ZVAL_LONG(key, iterator->row_num);
 }
-/* }}} */
 
-/* {{{ php_mysqli_result_iterator_funcs */
+/* php_mysqli_result_iterator_funcs */
 const zend_object_iterator_funcs php_mysqli_result_iterator_funcs = {
 	php_mysqli_result_iterator_dtor,
 	php_mysqli_result_iterator_valid,
@@ -152,4 +139,4 @@ const zend_object_iterator_funcs php_mysqli_result_iterator_funcs = {
 	php_mysqli_result_iterator_rewind,
 	NULL
 };
-/* }}} */
+

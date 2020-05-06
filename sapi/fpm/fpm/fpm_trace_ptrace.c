@@ -24,7 +24,7 @@
 
 static pid_t traced_pid;
 
-int fpm_trace_signal(pid_t pid) /* {{{ */
+int fpm_trace_signal(pid_t pid)
 {
 	if (0 > ptrace(PTRACE_ATTACH, pid, 0, 0)) {
 		zlog(ZLOG_SYSERROR, "failed to ptrace(ATTACH) child %d", pid);
@@ -32,16 +32,14 @@ int fpm_trace_signal(pid_t pid) /* {{{ */
 	}
 	return 0;
 }
-/* }}} */
 
-int fpm_trace_ready(pid_t pid) /* {{{ */
+int fpm_trace_ready(pid_t pid)
 {
 	traced_pid = pid;
 	return 0;
 }
-/* }}} */
 
-int fpm_trace_close(pid_t pid) /* {{{ */
+int fpm_trace_close(pid_t pid)
 {
 	if (0 > ptrace(PTRACE_DETACH, pid, (void *) 1, 0)) {
 		zlog(ZLOG_SYSERROR, "failed to ptrace(DETACH) child %d", pid);
@@ -50,9 +48,8 @@ int fpm_trace_close(pid_t pid) /* {{{ */
 	traced_pid = 0;
 	return 0;
 }
-/* }}} */
 
-int fpm_trace_get_long(long addr, long *data) /* {{{ */
+int fpm_trace_get_long(long addr, long *data)
 {
 #ifdef PT_IO
 	struct ptrace_io_desc ptio = {
@@ -76,4 +73,4 @@ int fpm_trace_get_long(long addr, long *data) /* {{{ */
 #endif
 	return 0;
 }
-/* }}} */
+

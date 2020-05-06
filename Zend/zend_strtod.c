@@ -552,7 +552,7 @@ static MUTEX_T dtoa_mutex;
 static MUTEX_T pow5mult_mutex;
 #endif /* ZTS */
 
-ZEND_API int zend_startup_strtod(void) /* {{{ */
+ZEND_API int zend_startup_strtod(void)
 {
 #ifdef ZTS
 	dtoa_mutex = tsrm_mutex_alloc();
@@ -560,8 +560,8 @@ ZEND_API int zend_startup_strtod(void) /* {{{ */
 #endif
 	return 1;
 }
-/* }}} */
-ZEND_API int zend_shutdown_strtod(void) /* {{{ */
+
+ZEND_API int zend_shutdown_strtod(void)
 {
 	destroy_freelist();
 #ifdef ZTS
@@ -573,9 +573,8 @@ ZEND_API int zend_shutdown_strtod(void) /* {{{ */
 #endif
 	return 1;
 }
-/* }}} */
 
- static Bigint *
+static Bigint *
 Balloc
 #ifdef KR_headers
 	(k) int k;

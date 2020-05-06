@@ -96,23 +96,19 @@ void *fs_get(size_t size);
 ZEND_DECLARE_MODULE_GLOBALS(imap)
 static PHP_GINIT_FUNCTION(imap);
 
-/* {{{ imap dependencies */
+/* imap dependencies */
 static const zend_module_dep imap_deps[] = {
 	ZEND_MOD_REQUIRED("standard")
 	ZEND_MOD_END
 };
-/* }}} */
 
-
-/* {{{ PHP_INI
+/* PHP_INI
  */
 PHP_INI_BEGIN()
 STD_PHP_INI_BOOLEAN("imap.enable_insecure_rsh", "0", PHP_INI_SYSTEM, OnUpdateBool, enable_rsh, zend_imap_globals, imap_globals)
 PHP_INI_END()
-/* }}} */
 
-
-/* {{{ imap_module_entry
+/* imap_module_entry
  */
 zend_module_entry imap_module_entry = {
 	STANDARD_MODULE_HEADER_EX, NULL,
@@ -131,7 +127,6 @@ zend_module_entry imap_module_entry = {
 	NULL,
 	STANDARD_MODULE_PROPERTIES_EX
 };
-/* }}} */
 
 #ifdef COMPILE_DL_IMAP
 #ifdef ZTS
@@ -149,7 +144,7 @@ static int le_imap;
 		RETURN_FALSE;	\
 	}	\
 
-/* {{{ mail_close_it
+/* mail_close_it
  */
 static void mail_close_it(zend_resource *rsrc)
 {
@@ -171,9 +166,8 @@ static void mail_close_it(zend_resource *rsrc)
 
 	efree(imap_le_struct);
 }
-/* }}} */
 
-/* {{{ add_assoc_object
+/* add_assoc_object
  */
 static zval *add_assoc_object(zval *arg, char *key, zval *tmp)
 {
@@ -186,9 +180,8 @@ static zval *add_assoc_object(zval *arg, char *key, zval *tmp)
 	}
 	return zend_hash_str_update(symtable, key, strlen(key), tmp);
 }
-/* }}} */
 
-/* {{{ add_next_index_object
+/* add_next_index_object
  */
 static inline zval *add_next_index_object(zval *arg, zval *tmp)
 {
@@ -202,9 +195,8 @@ static inline zval *add_next_index_object(zval *arg, zval *tmp)
 
 	return zend_hash_next_index_insert(symtable, tmp);
 }
-/* }}} */
 
-/* {{{ mail_newfolderobjectlist
+/* mail_newfolderobjectlist
  *
  * Mail instantiate FOBJECTLIST
  * Returns: new FOBJECTLIST list
@@ -214,9 +206,8 @@ FOBJECTLIST *mail_newfolderobjectlist(void)
 {
 	return (FOBJECTLIST *) memset(fs_get(sizeof(FOBJECTLIST)), 0, sizeof(FOBJECTLIST));
 }
-/* }}} */
 
-/* {{{ mail_free_foblist
+/* mail_free_foblist
  *
  * Mail garbage collect FOBJECTLIST
  * Accepts: pointer to FOBJECTLIST pointer
@@ -238,9 +229,8 @@ void mail_free_foblist(FOBJECTLIST **foblist, FOBJECTLIST **tail)
 	*tail = NIL;
 	*foblist = NIL;
 }
-/* }}} */
 
-/* {{{ mail_newerrorlist
+/* mail_newerrorlist
  *
  * Mail instantiate ERRORLIST
  * Returns: new ERRORLIST list
@@ -250,9 +240,8 @@ ERRORLIST *mail_newerrorlist(void)
 {
 	return (ERRORLIST *) memset(fs_get(sizeof(ERRORLIST)), 0, sizeof(ERRORLIST));
 }
-/* }}} */
 
-/* {{{ mail_free_errorlist
+/* mail_free_errorlist
  *
  * Mail garbage collect FOBJECTLIST
  * Accepts: pointer to FOBJECTLIST pointer
@@ -268,9 +257,8 @@ void mail_free_errorlist(ERRORLIST **errlist)
 		fs_give((void **) errlist);	/* return string to free storage */
 	}
 }
-/* }}} */
 
-/* {{{ mail_newmessagelist
+/* mail_newmessagelist
  *
  * Mail instantiate MESSAGELIST
  * Returns: new MESSAGELIST list
@@ -280,9 +268,8 @@ MESSAGELIST *mail_newmessagelist(void)
 {
 	return (MESSAGELIST *) memset(fs_get(sizeof(MESSAGELIST)), 0, sizeof(MESSAGELIST));
 }
-/* }}} */
 
-/* {{{ mail_free_messagelist
+/* mail_free_messagelist
  *
  * Mail garbage collect MESSAGELIST
  * Accepts: pointer to MESSAGELIST pointer
@@ -300,10 +287,9 @@ void mail_free_messagelist(MESSAGELIST **msglist, MESSAGELIST **tail)
 	*tail = NIL;
 	*msglist = NIL;
 }
-/* }}} */
 
 #if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
-/* {{{ mail_getquota
+/* mail_getquota
  *
  * Mail GET_QUOTA callback
  * Called via the mail_parameter function in c-client:src/c-client/mail.c
@@ -331,9 +317,8 @@ void mail_getquota(MAILSTREAM *stream, char *qroot, QUOTALIST *qlist)
 		add_assoc_zval_ex(return_value, qlist->name, strlen(qlist->name), &t_map);
 	}
 }
-/* }}} */
 
-/* {{{ mail_getquota
+/* mail_getquota
  *
  * Mail GET_ACL callback
  * Called via the mail_parameter function in c-client:src/c-client/mail.c
@@ -346,10 +331,10 @@ void mail_getacl(MAILSTREAM *stream, char *mailbox, ACLLIST *alist)
 		add_assoc_stringl(IMAPG(imap_acl_list), alist->identifier, alist->rights, strlen(alist->rights));
 	}
 }
-/* }}} */
+
 #endif
 
-/* {{{ PHP_GINIT_FUNCTION
+/* PHP_GINIT_FUNCTION
  */
 static PHP_GINIT_FUNCTION(imap)
 {
@@ -380,9 +365,8 @@ static PHP_GINIT_FUNCTION(imap)
 #endif
 	imap_globals->gets_stream = NIL;
 }
-/* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION
+/* PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(imap)
 {
@@ -616,9 +600,8 @@ PHP_MINIT_FUNCTION(imap)
 	le_imap = zend_register_list_destructors_ex(mail_close_it, NULL, "imap", module_number);
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_RINIT_FUNCTION
+/* PHP_RINIT_FUNCTION
  */
 PHP_RINIT_FUNCTION(imap)
 {
@@ -627,9 +610,8 @@ PHP_RINIT_FUNCTION(imap)
 	IMAPG(gets_stream) = NIL;
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_RSHUTDOWN_FUNCTION
+/* PHP_RSHUTDOWN_FUNCTION
  */
 PHP_RSHUTDOWN_FUNCTION(imap)
 {
@@ -663,7 +645,6 @@ PHP_RSHUTDOWN_FUNCTION(imap)
 	}
 	return SUCCESS;
 }
-/* }}} */
 
 #if !defined(CCLIENTVERSION)
 #if HAVE_IMAP2007e
@@ -687,7 +668,7 @@ PHP_RSHUTDOWN_FUNCTION(imap)
 #endif
 #endif
 
-/* {{{ PHP_MINFO_FUNCTION
+/* PHP_MINFO_FUNCTION
  */
 PHP_MINFO_FUNCTION(imap)
 {
@@ -703,9 +684,8 @@ PHP_MINFO_FUNCTION(imap)
 
 	DISPLAY_INI_ENTRIES();
 }
-/* }}} */
 
-/* {{{ imap_do_open
+/* imap_do_open
  */
 static void php_imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
@@ -814,14 +794,12 @@ static void php_imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 	RETURN_RES(zend_register_resource(imap_le_struct, le_imap));
 }
-/* }}} */
 
 /* Open an IMAP stream to a mailbox */
 PHP_FUNCTION(imap_open)
 {
 	php_imap_do_open(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
-/* }}} */
 
 /* Reopen an IMAP stream to a new mailbox */
 PHP_FUNCTION(imap_reopen)
@@ -867,7 +845,6 @@ PHP_FUNCTION(imap_reopen)
 	}
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Append a new message to a specified mailbox */
 PHP_FUNCTION(imap_append)
@@ -916,7 +893,6 @@ PHP_FUNCTION(imap_append)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Gives the number of messages in the current mailbox */
 PHP_FUNCTION(imap_num_msg)
@@ -934,7 +910,6 @@ PHP_FUNCTION(imap_num_msg)
 
 	RETURN_LONG(imap_le_struct->imap_stream->nmsgs);
 }
-/* }}} */
 
 /* Check if the IMAP stream is still active */
 PHP_FUNCTION(imap_ping)
@@ -952,7 +927,6 @@ PHP_FUNCTION(imap_ping)
 
 	RETURN_BOOL(mail_ping(imap_le_struct->imap_stream));
 }
-/* }}} */
 
 /* Gives the number of recent messages in current mailbox */
 PHP_FUNCTION(imap_num_recent)
@@ -970,7 +944,6 @@ PHP_FUNCTION(imap_num_recent)
 
 	RETURN_LONG(imap_le_struct->imap_stream->recent);
 }
-/* }}} */
 
 #if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
 /* Returns the quota set to the mailbox account qroot */
@@ -999,7 +972,6 @@ PHP_FUNCTION(imap_get_quota)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Returns the quota set to the mailbox account mbox */
 PHP_FUNCTION(imap_get_quotaroot)
@@ -1027,7 +999,6 @@ PHP_FUNCTION(imap_get_quotaroot)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Will set the quota for qroot mailbox */
 PHP_FUNCTION(imap_set_quota)
@@ -1052,7 +1023,6 @@ PHP_FUNCTION(imap_set_quota)
 
 	RETURN_BOOL(imap_setquota(imap_le_struct->imap_stream, ZSTR_VAL(qroot), &limits));
 }
-/* }}} */
 
 /* Sets the ACL for a given mailbox */
 PHP_FUNCTION(imap_setacl)
@@ -1071,7 +1041,6 @@ PHP_FUNCTION(imap_setacl)
 
 	RETURN_BOOL(imap_setacl(imap_le_struct->imap_stream, ZSTR_VAL(mailbox), ZSTR_VAL(id), ZSTR_VAL(rights)));
 }
-/* }}} */
 
 /* Gets the ACL for a given mailbox */
 PHP_FUNCTION(imap_getacl)
@@ -1103,7 +1072,7 @@ PHP_FUNCTION(imap_getacl)
 
 	IMAPG(imap_acl_list) = NIL;
 }
-/* }}} */
+
 #endif /* HAVE_IMAP2000 || HAVE_IMAP2001 */
 
 /* Permanently delete all messages marked for deletion */
@@ -1124,7 +1093,6 @@ PHP_FUNCTION(imap_expunge)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* This function garbage collects (purges) the cache of entries of a specific type. */
 PHP_FUNCTION(imap_gc)
@@ -1150,7 +1118,6 @@ PHP_FUNCTION(imap_gc)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Close an IMAP stream */
 PHP_FUNCTION(imap_close)
@@ -1189,7 +1156,6 @@ PHP_FUNCTION(imap_close)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Returns headers for all messages in a mailbox */
 PHP_FUNCTION(imap_headers)
@@ -1240,7 +1206,6 @@ PHP_FUNCTION(imap_headers)
 		add_next_index_string(return_value, tmp);
 	}
 }
-/* }}} */
 
 /* Read the message body */
 PHP_FUNCTION(imap_body)
@@ -1285,7 +1250,6 @@ PHP_FUNCTION(imap_body)
 		RETVAL_STRINGL(body, body_len);
 	}
 }
-/* }}} */
 
 /* Copy specified message to a mailbox */
 PHP_FUNCTION(imap_mail_copy)
@@ -1310,7 +1274,6 @@ PHP_FUNCTION(imap_mail_copy)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Move specified message to a mailbox */
 PHP_FUNCTION(imap_mail_move)
@@ -1335,7 +1298,6 @@ PHP_FUNCTION(imap_mail_move)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Create a new mailbox */
 PHP_FUNCTION(imap_createmailbox)
@@ -1358,7 +1320,6 @@ PHP_FUNCTION(imap_createmailbox)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Rename a mailbox */
 PHP_FUNCTION(imap_renamemailbox)
@@ -1381,7 +1342,6 @@ PHP_FUNCTION(imap_renamemailbox)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Delete a mailbox */
 PHP_FUNCTION(imap_deletemailbox)
@@ -1404,7 +1364,6 @@ PHP_FUNCTION(imap_deletemailbox)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Read the list of mailboxes */
 PHP_FUNCTION(imap_list)
@@ -1441,7 +1400,6 @@ PHP_FUNCTION(imap_list)
 	IMAPG(imap_folders) = IMAPG(imap_folders_tail) = NIL;
 }
 
-/* }}} */
 
 /* Reads the list of mailboxes and returns a full array of objects containing name, attributes, and delimiter */
 /* Author: CJH */
@@ -1491,7 +1449,6 @@ PHP_FUNCTION(imap_getmailboxes)
 	efree(delim);
 	IMAPG(folderlist_style) = FLIST_ARRAY;		/* reset to default */
 }
-/* }}} */
 
 /* Read list of mailboxes containing a certain string */
 PHP_FUNCTION(imap_listscan)
@@ -1525,7 +1482,6 @@ PHP_FUNCTION(imap_listscan)
 	IMAPG(imap_folders) = IMAPG(imap_folders_tail) = NIL;
 }
 
-/* }}} */
 
 /* Get mailbox properties */
 PHP_FUNCTION(imap_check)
@@ -1558,7 +1514,6 @@ PHP_FUNCTION(imap_check)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Mark a message for deletion */
 PHP_FUNCTION(imap_delete)
@@ -1583,7 +1538,6 @@ PHP_FUNCTION(imap_delete)
 	mail_setflag_full(imap_le_struct->imap_stream, Z_STRVAL_P(sequence), "\\DELETED", (argc == 3 ? flags : NIL));
 	RETVAL_TRUE;
 }
-/* }}} */
 
 /* Remove the delete flag from a message */
 PHP_FUNCTION(imap_undelete)
@@ -1608,7 +1562,6 @@ PHP_FUNCTION(imap_undelete)
 	mail_clearflag_full(imap_le_struct->imap_stream, Z_STRVAL_P(sequence), "\\DELETED", (argc == 3 ? flags : NIL));
 	RETVAL_TRUE;
 }
-/* }}} */
 
 /* Read the headers of the message */
 PHP_FUNCTION(imap_headerinfo)
@@ -1692,7 +1645,6 @@ PHP_FUNCTION(imap_headerinfo)
 		add_property_string(return_value, "fetchsubject", fulladdress);
 	}
 }
-/* }}} */
 
 /* Parse a set of mail headers contained in a string, and return an object similar to imap_headerinfo() */
 PHP_FUNCTION(imap_rfc822_parse_headers)
@@ -1716,7 +1668,6 @@ PHP_FUNCTION(imap_rfc822_parse_headers)
 	_php_make_header_object(return_value, en);
 	mail_free_envelope(&en);
 }
-/* }}} */
 
 /* KMLANG */
 /* Return a list of subscribed mailboxes */
@@ -1753,7 +1704,6 @@ PHP_FUNCTION(imap_lsub)
 	mail_free_stringlist (&IMAPG(imap_sfolders));
 	IMAPG(imap_sfolders) = IMAPG(imap_sfolders_tail) = NIL;
 }
-/* }}} */
 
 /* Return a list of subscribed mailboxes, in the same format as imap_getmailboxes() */
 /* Author: CJH */
@@ -1803,7 +1753,6 @@ PHP_FUNCTION(imap_getsubscribed)
 	efree(delim);
 	IMAPG(folderlist_style) = FLIST_ARRAY; /* reset to default */
 }
-/* }}} */
 
 /* Subscribe to a mailbox */
 PHP_FUNCTION(imap_subscribe)
@@ -1826,7 +1775,6 @@ PHP_FUNCTION(imap_subscribe)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Unsubscribe from a mailbox */
 PHP_FUNCTION(imap_unsubscribe)
@@ -1849,7 +1797,6 @@ PHP_FUNCTION(imap_unsubscribe)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Read the full structure of a message */
 PHP_FUNCTION(imap_fetchstructure)
@@ -1898,7 +1845,6 @@ PHP_FUNCTION(imap_fetchstructure)
 
 	_php_imap_add_body(return_value, body);
 }
-/* }}} */
 
 /* Get a specific body section */
 PHP_FUNCTION(imap_fetchbody)
@@ -1937,8 +1883,6 @@ PHP_FUNCTION(imap_fetchbody)
 	}
 	RETVAL_STRINGL(body, len);
 }
-
-/* }}} */
 
 
 /* Get a specific body section's MIME headers */
@@ -1979,7 +1923,6 @@ PHP_FUNCTION(imap_fetchmime)
 	RETVAL_STRINGL(body, len);
 }
 
-/* }}} */
 
 /* Save a specific body section to a file */
 PHP_FUNCTION(imap_savebody)
@@ -2035,7 +1978,6 @@ PHP_FUNCTION(imap_savebody)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Decode BASE64 encoded text */
 PHP_FUNCTION(imap_base64)
@@ -2057,7 +1999,6 @@ PHP_FUNCTION(imap_base64)
 	RETVAL_STRINGL(decode, newlength);
 	fs_give((void**) &decode);
 }
-/* }}} */
 
 /* Convert a quoted-printable string to an 8-bit string */
 PHP_FUNCTION(imap_qprint)
@@ -2079,7 +2020,6 @@ PHP_FUNCTION(imap_qprint)
 	RETVAL_STRINGL(decode, newlength);
 	fs_give((void**) &decode);
 }
-/* }}} */
 
 /* Convert an 8-bit string to a quoted-printable string */
 PHP_FUNCTION(imap_8bit)
@@ -2101,7 +2041,6 @@ PHP_FUNCTION(imap_8bit)
 	RETVAL_STRINGL(decode, newlength);
 	fs_give((void**) &decode);
 }
-/* }}} */
 
 /* Convert an 8bit string to a base64 string */
 PHP_FUNCTION(imap_binary)
@@ -2123,7 +2062,6 @@ PHP_FUNCTION(imap_binary)
 	RETVAL_STRINGL(decode, newlength);
 	fs_give((void**) &decode);
 }
-/* }}} */
 
 /* Returns info about the current mailbox */
 PHP_FUNCTION(imap_mailboxmsginfo)
@@ -2168,7 +2106,6 @@ PHP_FUNCTION(imap_mailboxmsginfo)
 	add_property_string(return_value, "Mailbox", imap_le_struct->imap_stream->mailbox);
 	add_property_long(return_value, "Recent", imap_le_struct->imap_stream->recent);
 }
-/* }}} */
 
 /* Returns a properly formatted email address given the mailbox, host, and personal info */
 PHP_FUNCTION(imap_rfc822_write_address)
@@ -2206,7 +2143,6 @@ PHP_FUNCTION(imap_rfc822_write_address)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Parses an address string */
 PHP_FUNCTION(imap_rfc822_parse_adrlist)
@@ -2251,7 +2187,6 @@ PHP_FUNCTION(imap_rfc822_parse_adrlist)
 
 	mail_free_envelope(&env);
 }
-/* }}} */
 
 /* Convert a mime-encoded text to UTF-8 */
 PHP_FUNCTION(imap_utf8)
@@ -2283,9 +2218,8 @@ PHP_FUNCTION(imap_utf8)
 		free(src.data);
 	}
 }
-/* }}} */
 
-/* {{{ macros for the modified utf7 conversion functions
+/* macros for the modified utf7 conversion functions
  *
  * author: Andrew Skalski <askalski@chek.com>
  */
@@ -2303,7 +2237,6 @@ PHP_FUNCTION(imap_utf8)
 /* map the modified-base64 character `c' to its 64 bit value */
 #define UNB64(c)	((c) == '+' ? 62 : (c) == ',' ? 63 : (c) >= 'a' ? \
 					(c) - 71 : (c) >= 'A' ? (c) - 65 : (c) + 4)
-/* }}} */
 
 /* Decode a modified UTF-7 string */
 PHP_FUNCTION(imap_utf7_decode)
@@ -2441,7 +2374,6 @@ PHP_FUNCTION(imap_utf7_decode)
 
 	RETURN_STRINGL((char*)out, outlen);
 }
-/* }}} */
 
 /* Encode a string in modified UTF-7 */
 PHP_FUNCTION(imap_utf7_encode)
@@ -2551,7 +2483,6 @@ PHP_FUNCTION(imap_utf7_encode)
 
 	RETURN_STR(out);
 }
-/* }}} */
 
 #undef SPECIAL
 #undef B64CHAR
@@ -2559,7 +2490,7 @@ PHP_FUNCTION(imap_utf7_encode)
 #undef UNB64
 
 #ifdef HAVE_IMAP_MUTF7
-static void php_imap_mutf7(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
+static void php_imap_mutf7(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
 	zend_string *in;
 	unsigned char *out;
@@ -2584,21 +2515,19 @@ static void php_imap_mutf7(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 		RETURN_STRING((char *)out);
 	}
 }
-/* }}} */
 
 /* Encode a UTF-8 string to modified UTF-7 */
 PHP_FUNCTION(imap_utf8_to_mutf7)
 {
 	php_imap_mutf7(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
-/* }}} */
 
 /* Decode a modified UTF-7 string to UTF-8 */
 PHP_FUNCTION(imap_mutf7_to_utf8)
 {
 	php_imap_mutf7(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
-/* }}} */
+
 #endif
 
 /* Sets flags on messages */
@@ -2620,7 +2549,6 @@ PHP_FUNCTION(imap_setflag_full)
 	mail_setflag_full(imap_le_struct->imap_stream, ZSTR_VAL(sequence), ZSTR_VAL(flag), (flags ? flags : NIL));
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Clears flags on messages */
 PHP_FUNCTION(imap_clearflag_full)
@@ -2642,7 +2570,6 @@ PHP_FUNCTION(imap_clearflag_full)
 	mail_clearflag_full(imap_le_struct->imap_stream, ZSTR_VAL(sequence), ZSTR_VAL(flag), (argc == 4 ? flags : NIL));
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Sort an array of message headers, optionally including only messages that meet specified criteria. */
 PHP_FUNCTION(imap_sort)
@@ -2702,7 +2629,6 @@ PHP_FUNCTION(imap_sort)
 		fs_give ((void **) &slst);
 	}
 }
-/* }}} */
 
 /* Get the full unfiltered header for a message */
 PHP_FUNCTION(imap_fetchheader)
@@ -2738,7 +2664,6 @@ PHP_FUNCTION(imap_fetchheader)
 
 	RETVAL_STRING(mail_fetchheader_full(imap_le_struct->imap_stream, msgno, NIL, NIL, (argc == 3 ? flags : NIL)));
 }
-/* }}} */
 
 /* Get the unique message id associated with a standard sequential message number */
 PHP_FUNCTION(imap_uid)
@@ -2764,7 +2689,6 @@ PHP_FUNCTION(imap_uid)
 
 	RETURN_LONG(mail_uid(imap_le_struct->imap_stream, msgno));
 }
-/* }}} */
 
 /* Get the sequence number associated with a UID */
 PHP_FUNCTION(imap_msgno)
@@ -2783,7 +2707,6 @@ PHP_FUNCTION(imap_msgno)
 
 	RETURN_LONG(mail_msgno(imap_le_struct->imap_stream, msgno));
 }
-/* }}} */
 
 /* Get status info from a mailbox */
 PHP_FUNCTION(imap_status)
@@ -2824,7 +2747,6 @@ PHP_FUNCTION(imap_status)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Read the structure of a specified body section of a specific message */
 PHP_FUNCTION(imap_bodystruct)
@@ -2936,7 +2858,6 @@ PHP_FUNCTION(imap_bodystruct)
 	add_assoc_object(return_value, "parameters", &parametres);
 }
 
-/* }}} */
 
 /* Read an overview of the information in the headers of the given message sequence */
 PHP_FUNCTION(imap_fetch_overview)
@@ -3021,7 +2942,6 @@ PHP_FUNCTION(imap_fetch_overview)
 		}
 	}
 }
-/* }}} */
 
 /* Create a MIME message based on given envelope and body sections */
 PHP_FUNCTION(imap_mail_compose)
@@ -3418,9 +3338,8 @@ done:
 	mail_free_body(&topbod);
 	mail_free_envelope(&env);
 }
-/* }}} */
 
-/* {{{ _php_imap_mail
+/* _php_imap_mail
  */
 int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *cc, char *bcc, char* rpath)
 {
@@ -3578,7 +3497,6 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 #endif
 	return 1;
 }
-/* }}} */
 
 /* Send an email message */
 PHP_FUNCTION(imap_mail)
@@ -3616,7 +3534,6 @@ PHP_FUNCTION(imap_mail)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Return a list of messages matching the given criteria */
 PHP_FUNCTION(imap_search)
@@ -3664,7 +3581,6 @@ PHP_FUNCTION(imap_search)
 	mail_free_messagelist(&IMAPG(imap_messages), &IMAPG(imap_messages_tail));
 	efree(search_criteria);
 }
-/* }}} */
 
 /* Returns an array of all IMAP alerts that have been generated since the last page load or since the last imap_alerts() call, whichever came last. The alert stack is cleared after imap_alerts() is called. */
 /* Author: CJH */
@@ -3690,7 +3606,6 @@ PHP_FUNCTION(imap_alerts)
 	mail_free_stringlist(&IMAPG(imap_alertstack));
 	IMAPG(imap_alertstack) = NIL;
 }
-/* }}} */
 
 /* Returns an array of all IMAP errors generated since the last page load, or since the last imap_errors() call, whichever came last. The error stack is cleared after imap_errors() is called. */
 /* Author: CJH */
@@ -3716,7 +3631,6 @@ PHP_FUNCTION(imap_errors)
 	mail_free_errorlist(&IMAPG(imap_errorstack));
 	IMAPG(imap_errorstack) = NIL;
 }
-/* }}} */
 
 /* Returns the last error that was generated by an IMAP function. The error stack is NOT cleared after this call. */
 /* Author: CJH */
@@ -3740,7 +3654,6 @@ PHP_FUNCTION(imap_last_error)
 		cur = cur->next;
 	}
 }
-/* }}} */
 
 /* Decode mime header element in accordance with RFC 2047 and return array of objects containing 'charset' encoding and decoded 'text' */
 PHP_FUNCTION(imap_mime_header_decode)
@@ -3834,12 +3747,11 @@ PHP_FUNCTION(imap_mime_header_decode)
 	}
 	efree(charset);
 }
-/* }}} */
 
 /* Support Functions */
 
 #ifdef HAVE_RFC822_OUTPUT_ADDRESS_LIST
-/* {{{ _php_rfc822_soutr
+/* _php_rfc822_soutr
  */
 static long _php_rfc822_soutr (void *stream, char *string)
 {
@@ -3849,9 +3761,8 @@ static long _php_rfc822_soutr (void *stream, char *string)
 	smart_str_appendl(ret, string, len);
 	return LONGT;
 }
-/* }}} */
 
-/* {{{ _php_rfc822_write_address
+/* _php_rfc822_write_address
  */
 static zend_string* _php_rfc822_write_address(ADDRESS *addresslist)
 {
@@ -3869,11 +3780,10 @@ static zend_string* _php_rfc822_write_address(ADDRESS *addresslist)
 	smart_str_0(&ret);
 	return ret.s;
 }
-/* }}} */
 
 #else
 
-/* {{{ _php_rfc822_len
+/* _php_rfc822_len
  * Calculate string length based on imap's rfc822_cat function.
  */
 static int _php_rfc822_len(char *str)
@@ -3900,9 +3810,8 @@ static int _php_rfc822_len(char *str)
 
 	return len;
 }
-/* }}} */
 
-/* {{{ _php_imap_get_address_size
+/* _php_imap_get_address_size
  */
 static int _php_imap_address_size (ADDRESS *addresslist)
 {
@@ -3929,9 +3838,8 @@ static int _php_imap_address_size (ADDRESS *addresslist)
 	return ret;
 }
 
-/* }}} */
 
-/* {{{ _php_rfc822_write_address
+/* _php_rfc822_write_address
  */
 static zend_string* _php_rfc822_write_address(ADDRESS *addresslist)
 {
@@ -3945,9 +3853,9 @@ static zend_string* _php_rfc822_write_address(ADDRESS *addresslist)
 	rfc822_write_address(address, addresslist);
 	return zend_string_init(address, strlen(address), 0);
 }
-/* }}} */
+
 #endif
-/* {{{ _php_imap_parse_address
+/* _php_imap_parse_address
  */
 static zend_string* _php_imap_parse_address (ADDRESS *addresslist, zval *paddress)
 {
@@ -3970,9 +3878,8 @@ static zend_string* _php_imap_parse_address (ADDRESS *addresslist, zval *paddres
 	} while ((addresstmp = addresstmp->next));
 	return fulladdress;
 }
-/* }}} */
 
-/* {{{ _php_make_header_object
+/* _php_make_header_object
  */
 static void _php_make_header_object(zval *myzvalue, ENVELOPE *en)
 {
@@ -4055,9 +3962,8 @@ static void _php_make_header_object(zval *myzvalue, ENVELOPE *en)
 		add_assoc_object(myzvalue, "return_path", &paddress);
 	}
 }
-/* }}} */
 
-/* {{{ _php_imap_add_body
+/* _php_imap_add_body
  */
 void _php_imap_add_body(zval *arg, BODY *body)
 {
@@ -4168,10 +4074,9 @@ void _php_imap_add_body(zval *arg, BODY *body)
 		add_assoc_object(arg, "parts", &parametres);
 	}
 }
-/* }}} */
 
 /* imap_thread, stealing this from header cclient -rjs3 */
-/* {{{ build_thread_tree_helper
+/* build_thread_tree_helper
  */
 static void build_thread_tree_helper(THREADNODE *cur, zval *tree, long *numNodes, char *buf)
 {
@@ -4200,9 +4105,8 @@ static void build_thread_tree_helper(THREADNODE *cur, zval *tree, long *numNodes
 		add_assoc_long(tree, buf, 0);
 	}
 }
-/* }}} */
 
-/* {{{ build_thread_tree
+/* build_thread_tree
  */
 static int build_thread_tree(THREADNODE *top, zval **tree)
 {
@@ -4215,7 +4119,6 @@ static int build_thread_tree(THREADNODE *top, zval **tree)
 
 	return SUCCESS;
 }
-/* }}} */
 
 /* Return threaded by REFERENCES tree */
 PHP_FUNCTION(imap_thread)
@@ -4254,7 +4157,6 @@ PHP_FUNCTION(imap_thread)
 	}
 	mail_free_threadnode(&top);
 }
-/* }}} */
 
 /* Set or fetch imap timeout */
 PHP_FUNCTION(imap_timeout)
@@ -4312,10 +4214,9 @@ PHP_FUNCTION(imap_timeout)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 #define GETS_FETCH_SIZE 8196LU
-static char *php_mail_gets(readfn_t f, void *stream, unsigned long size, GETS_DATA *md) /* {{{ */
+static char *php_mail_gets(readfn_t f, void *stream, unsigned long size, GETS_DATA *md)
 {
 
 	/*	write to the gets stream if it is set,
@@ -4356,9 +4257,8 @@ static char *php_mail_gets(readfn_t f, void *stream, unsigned long size, GETS_DA
 		return buf;
 	}
 }
-/* }}} */
 
-/* {{{ Interfaces to C-client
+/* Interfaces to C-client
  */
 PHP_IMAP_EXPORT void mm_searched(MAILSTREAM *stream, unsigned long number)
 {
@@ -4583,4 +4483,4 @@ PHP_IMAP_EXPORT long mm_diskerror(MAILSTREAM *stream, long errcode, long serious
 PHP_IMAP_EXPORT void mm_fatal(char *str)
 {
 }
-/* }}} */
+

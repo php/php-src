@@ -40,7 +40,7 @@
 
 
 
-static int pdo_mysql_stmt_dtor(pdo_stmt_t *stmt) /* {{{ */
+static int pdo_mysql_stmt_dtor(pdo_stmt_t *stmt)
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 
@@ -109,9 +109,8 @@ static int pdo_mysql_stmt_dtor(pdo_stmt_t *stmt) /* {{{ */
 	efree(S);
 	PDO_DBG_RETURN(1);
 }
-/* }}} */
 
-static void pdo_mysql_stmt_set_row_count(pdo_stmt_t *stmt) /* {{{ */
+static void pdo_mysql_stmt_set_row_count(pdo_stmt_t *stmt)
 {
 	zend_long row_count;
 	pdo_mysql_stmt *S = stmt->driver_data;
@@ -120,9 +119,8 @@ static void pdo_mysql_stmt_set_row_count(pdo_stmt_t *stmt) /* {{{ */
 		stmt->row_count = row_count;
 	}
 }
-/* }}} */
 
-static int pdo_mysql_fill_stmt_from_result(pdo_stmt_t *stmt) /* {{{ */
+static int pdo_mysql_fill_stmt_from_result(pdo_stmt_t *stmt)
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 	pdo_mysql_db_handle *H = S->H;
@@ -153,10 +151,9 @@ static int pdo_mysql_fill_stmt_from_result(pdo_stmt_t *stmt) /* {{{ */
 
 	PDO_DBG_RETURN(1);
 }
-/* }}} */
 
 #ifndef PDO_USE_MYSQLND
-static int pdo_mysql_stmt_execute_prepared_libmysql(pdo_stmt_t *stmt) /* {{{ */
+static int pdo_mysql_stmt_execute_prepared_libmysql(pdo_stmt_t *stmt)
 {
 	pdo_mysql_stmt *S = stmt->driver_data;
 	pdo_mysql_db_handle *H = S->H;
@@ -263,11 +260,11 @@ static int pdo_mysql_stmt_execute_prepared_libmysql(pdo_stmt_t *stmt) /* {{{ */
 	pdo_mysql_stmt_set_row_count(stmt);
 	PDO_DBG_RETURN(1);
 }
-/* }}} */
+
 #endif
 
 #ifdef PDO_USE_MYSQLND
-static int pdo_mysql_stmt_execute_prepared_mysqlnd(pdo_stmt_t *stmt) /* {{{ */
+static int pdo_mysql_stmt_execute_prepared_mysqlnd(pdo_stmt_t *stmt)
 {
 	pdo_mysql_stmt *S = stmt->driver_data;
 	pdo_mysql_db_handle *H = S->H;
@@ -306,10 +303,10 @@ static int pdo_mysql_stmt_execute_prepared_mysqlnd(pdo_stmt_t *stmt) /* {{{ */
 	pdo_mysql_stmt_set_row_count(stmt);
 	PDO_DBG_RETURN(1);
 }
-/* }}} */
+
 #endif
 
-static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt) /* {{{ */
+static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt)
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 	pdo_mysql_db_handle *H = S->H;
@@ -333,9 +330,8 @@ static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt) /* {{{ */
 
 	PDO_DBG_RETURN(pdo_mysql_fill_stmt_from_result(stmt));
 }
-/* }}} */
 
-static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt) /* {{{ */
+static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt)
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 	pdo_mysql_db_handle *H = S->H;
@@ -432,8 +428,6 @@ static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt) /* {{{ */
 	}
 #endif
 }
-/* }}} */
-
 
 static const char * const pdo_param_event_names[] =
 {
@@ -447,7 +441,7 @@ static const char * const pdo_param_event_names[] =
 };
 
 
-static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *param, enum pdo_param_event event_type) /* {{{ */
+static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *param, enum pdo_param_event event_type)
 {
 	zval *parameter;
 #ifndef PDO_USE_MYSQLND
@@ -609,9 +603,8 @@ static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 
 	PDO_DBG_RETURN(1);
 }
-/* }}} */
 
-static int pdo_mysql_stmt_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori, zend_long offset) /* {{{ */
+static int pdo_mysql_stmt_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori, zend_long offset)
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 #if PDO_USE_MYSQLND
@@ -673,9 +666,8 @@ static int pdo_mysql_stmt_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori
 	S->current_lengths = mysql_fetch_lengths(S->result);
 	PDO_DBG_RETURN(1);
 }
-/* }}} */
 
-static int pdo_mysql_stmt_describe(pdo_stmt_t *stmt, int colno) /* {{{ */
+static int pdo_mysql_stmt_describe(pdo_stmt_t *stmt, int colno)
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 	struct pdo_column_data *cols = stmt->columns;
@@ -720,9 +712,8 @@ static int pdo_mysql_stmt_describe(pdo_stmt_t *stmt, int colno) /* {{{ */
 	}
 	PDO_DBG_RETURN(1);
 }
-/* }}} */
 
-static int pdo_mysql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, size_t *len, int *caller_frees) /* {{{ */
+static int pdo_mysql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, size_t *len, int *caller_frees)
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 
@@ -772,9 +763,9 @@ static int pdo_mysql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, size_
 	*ptr = S->current_data[colno];
 	*len = S->current_lengths[colno];
 	PDO_DBG_RETURN(1);
-} /* }}} */
+}
 
-static char *type_to_name_native(int type) /* {{{ */
+static char *type_to_name_native(int type)
 {
 #define PDO_MYSQL_NATIVE_TYPE_NAME(x)	case FIELD_TYPE_##x: return #x;
 
@@ -821,9 +812,9 @@ static char *type_to_name_native(int type) /* {{{ */
             return NULL;
     }
 #undef PDO_MYSQL_NATIVE_TYPE_NAME
-} /* }}} */
+}
 
-static int pdo_mysql_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_value) /* {{{ */
+static int pdo_mysql_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_value)
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 	const MYSQL_FIELD *F;
@@ -891,9 +882,9 @@ static int pdo_mysql_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *retu
 	add_assoc_string(return_value, "table", (char *) (F->table?F->table : ""));
 
 	PDO_DBG_RETURN(SUCCESS);
-} /* }}} */
+}
 
-static int pdo_mysql_stmt_cursor_closer(pdo_stmt_t *stmt) /* {{{ */
+static int pdo_mysql_stmt_cursor_closer(pdo_stmt_t *stmt)
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 
@@ -921,7 +912,6 @@ static int pdo_mysql_stmt_cursor_closer(pdo_stmt_t *stmt) /* {{{ */
 	}
 	PDO_DBG_RETURN(1);
 }
-/* }}} */
 
 const struct pdo_stmt_methods mysql_stmt_methods = {
 	pdo_mysql_stmt_dtor,

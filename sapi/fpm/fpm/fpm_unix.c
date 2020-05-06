@@ -34,7 +34,7 @@
 
 size_t fpm_pagesize;
 
-int fpm_unix_resolve_socket_premissions(struct fpm_worker_pool_s *wp) /* {{{ */
+int fpm_unix_resolve_socket_premissions(struct fpm_worker_pool_s *wp)
 {
 	struct fpm_worker_pool_config_s *c = wp->config;
 #ifdef HAVE_FPM_ACL
@@ -196,9 +196,8 @@ int fpm_unix_resolve_socket_premissions(struct fpm_worker_pool_s *wp) /* {{{ */
 
 	return 0;
 }
-/* }}} */
 
-int fpm_unix_set_socket_premissions(struct fpm_worker_pool_s *wp, const char *path) /* {{{ */
+int fpm_unix_set_socket_premissions(struct fpm_worker_pool_s *wp, const char *path)
 {
 #ifdef HAVE_FPM_ACL
 	if (wp->socket_acl) {
@@ -247,9 +246,8 @@ int fpm_unix_set_socket_premissions(struct fpm_worker_pool_s *wp, const char *pa
 	}
 	return 0;
 }
-/* }}} */
 
-int fpm_unix_free_socket_premissions(struct fpm_worker_pool_s *wp) /* {{{ */
+int fpm_unix_free_socket_premissions(struct fpm_worker_pool_s *wp)
 {
 #ifdef HAVE_FPM_ACL
 	if (wp->socket_acl) {
@@ -258,9 +256,8 @@ int fpm_unix_free_socket_premissions(struct fpm_worker_pool_s *wp) /* {{{ */
 #endif
 	return 0;
 }
-/* }}} */
 
-static int fpm_unix_conf_wp(struct fpm_worker_pool_s *wp) /* {{{ */
+static int fpm_unix_conf_wp(struct fpm_worker_pool_s *wp)
 {
 	struct passwd *pwd;
 	int is_root = !geteuid();
@@ -330,9 +327,8 @@ static int fpm_unix_conf_wp(struct fpm_worker_pool_s *wp) /* {{{ */
 	}
 	return 0;
 }
-/* }}} */
 
-int fpm_unix_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
+int fpm_unix_init_child(struct fpm_worker_pool_s *wp)
 {
 	int is_root = !geteuid();
 	int made_chroot = 0;
@@ -445,9 +441,8 @@ int fpm_unix_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 
 	return 0;
 }
-/* }}} */
 
-int fpm_unix_init_main() /* {{{ */
+int fpm_unix_init_main()
 {
 	struct fpm_worker_pool_s *wp;
 	int is_root = !geteuid();
@@ -584,4 +579,4 @@ int fpm_unix_init_main() /* {{{ */
 
 	return 0;
 }
-/* }}} */
+

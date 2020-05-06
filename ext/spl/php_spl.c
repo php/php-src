@@ -50,7 +50,7 @@ ZEND_DECLARE_MODULE_GLOBALS(spl)
 static zend_function *spl_autoload_fn = NULL;
 static zend_function *spl_autoload_call_fn = NULL;
 
-/* {{{ PHP_GINIT_FUNCTION
+/* PHP_GINIT_FUNCTION
  */
 static PHP_GINIT_FUNCTION(spl)
 {
@@ -58,7 +58,6 @@ static PHP_GINIT_FUNCTION(spl)
 	spl_globals->autoload_functions      = NULL;
 	spl_globals->autoload_running        = 0;
 }
-/* }}} */
 
 static zend_class_entry * spl_find_ce_by_name(zend_string *name, zend_bool autoload)
 {
@@ -111,7 +110,6 @@ PHP_FUNCTION(class_parents)
 		parent_class = parent_class->parent;
 	}
 }
-/* }}} */
 
 /* Return all classes and interfaces implemented by SPL */
 PHP_FUNCTION(class_implements)
@@ -139,7 +137,6 @@ PHP_FUNCTION(class_implements)
 	array_init(return_value);
 	spl_add_interfaces(return_value, ce, 1, ZEND_ACC_INTERFACE);
 }
-/* }}} */
 
 /* Return all traits used by a class. */
 PHP_FUNCTION(class_uses)
@@ -167,7 +164,6 @@ PHP_FUNCTION(class_uses)
 	array_init(return_value);
 	spl_add_traits(return_value, ce, 1, ZEND_ACC_TRAIT);
 }
-/* }}} */
 
 #define SPL_ADD_CLASS(class_name, z_list, sub, allow, ce_flags) \
 	spl_add_classes(spl_ce_ ## class_name, z_list, sub, allow, ce_flags)
@@ -240,9 +236,8 @@ PHP_FUNCTION(spl_classes)
 
 	SPL_LIST_CLASSES(return_value, 0, 0, 0)
 }
-/* }}} */
 
-static int spl_autoload(zend_string *class_name, zend_string *lc_name, const char *ext, int ext_len) /* {{{ */
+static int spl_autoload(zend_string *class_name, zend_string *lc_name, const char *ext, int ext_len)
 {
 	char *class_file;
 	int class_file_len;
@@ -298,7 +293,7 @@ static int spl_autoload(zend_string *class_name, zend_string *lc_name, const cha
 	}
 	efree(class_file);
 	return 0;
-} /* }}} */
+}
 
 /* Default autoloader implementation */
 PHP_FUNCTION(spl_autoload)
@@ -338,7 +333,7 @@ PHP_FUNCTION(spl_autoload)
 		pos_len = pos1? pos_len - pos1_len - 1 : 0;
 	}
 	zend_string_release(lc_name);
-} /* }}} */
+}
 
 /* Register and return default file extensions for spl_autoload */
 PHP_FUNCTION(spl_autoload_extensions)
@@ -362,7 +357,7 @@ PHP_FUNCTION(spl_autoload_extensions)
 		zend_string_addref(SPL_G(autoload_extensions));
 		RETURN_STR(SPL_G(autoload_extensions));
 	}
-} /* }}} */
+}
 
 typedef struct {
 	zend_function *func_ptr;
@@ -485,7 +480,7 @@ PHP_FUNCTION(spl_autoload_call)
 		zend_call_function(&fcall_info, &fcall_cache);
 		zval_ptr_dtor(&retval);
 	}
-} /* }}} */
+}
 
 #define HT_MOVE_TAIL_TO_HEAD(ht)						        \
 	do {												        \
@@ -667,7 +662,7 @@ skip:
 	}
 
 	RETURN_TRUE;
-} /* }}} */
+}
 
 /* Unregister given function as autoloader */
 PHP_FUNCTION(spl_autoload_unregister)
@@ -750,7 +745,7 @@ PHP_FUNCTION(spl_autoload_unregister)
 
 	zend_string_release_ex(lc_name, 0);
 	RETURN_BOOL(success == SUCCESS);
-} /* }}} */
+}
 
 /* Return all registered autoloader functions */
 PHP_FUNCTION(spl_autoload_functions)
@@ -800,7 +795,7 @@ PHP_FUNCTION(spl_autoload_functions)
 
 	array_init(return_value);
 	add_next_index_str(return_value, zend_string_copy(EG(autoload_func)->common.function_name));
-} /* }}} */
+}
 
 /* Return hash id for given object */
 PHP_FUNCTION(spl_object_hash)
@@ -813,7 +808,6 @@ PHP_FUNCTION(spl_object_hash)
 
 	RETURN_NEW_STR(php_spl_object_hash(obj));
 }
-/* }}} */
 
 /* Returns the integer object handle for the given object */
 PHP_FUNCTION(spl_object_id)
@@ -826,9 +820,8 @@ PHP_FUNCTION(spl_object_id)
 
 	RETURN_LONG((zend_long)Z_OBJ_HANDLE_P(obj));
 }
-/* }}} */
 
-PHPAPI zend_string *php_spl_object_hash(zval *obj) /* {{{*/
+PHPAPI zend_string *php_spl_object_hash(zval *obj)
 {
 	intptr_t hash_handle, hash_handlers;
 
@@ -843,18 +836,17 @@ PHPAPI zend_string *php_spl_object_hash(zval *obj) /* {{{*/
 
 	return strpprintf(32, "%016zx%016zx", hash_handle, hash_handlers);
 }
-/* }}} */
 
-static void spl_build_class_list_string(zval *entry, char **list) /* {{{ */
+static void spl_build_class_list_string(zval *entry, char **list)
 {
 	char *res;
 
 	spprintf(&res, 0, "%s, %s", *list, Z_STRVAL_P(entry));
 	efree(*list);
 	*list = res;
-} /* }}} */
+}
 
-/* {{{ PHP_MINFO(spl)
+/* PHP_MINFO(spl)
  */
 PHP_MINFO_FUNCTION(spl)
 {
@@ -886,9 +878,8 @@ PHP_MINFO_FUNCTION(spl)
 
 	php_info_print_table_end();
 }
-/* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION(spl)
+/* PHP_MINIT_FUNCTION(spl)
  */
 PHP_MINIT_FUNCTION(spl)
 {
@@ -907,17 +898,16 @@ PHP_MINIT_FUNCTION(spl)
 
 	return SUCCESS;
 }
-/* }}} */
 
-PHP_RINIT_FUNCTION(spl) /* {{{ */
+PHP_RINIT_FUNCTION(spl)
 {
 	SPL_G(autoload_extensions) = NULL;
 	SPL_G(autoload_functions) = NULL;
 	SPL_G(hash_mask_init) = 0;
 	return SUCCESS;
-} /* }}} */
+}
 
-PHP_RSHUTDOWN_FUNCTION(spl) /* {{{ */
+PHP_RSHUTDOWN_FUNCTION(spl)
 {
 	if (SPL_G(autoload_extensions)) {
 		zend_string_release_ex(SPL_G(autoload_extensions), 0);
@@ -932,9 +922,9 @@ PHP_RSHUTDOWN_FUNCTION(spl) /* {{{ */
 		SPL_G(hash_mask_init) = 0;
 	}
 	return SUCCESS;
-} /* }}} */
+}
 
-/* {{{ spl_module_entry
+/* spl_module_entry
  */
 zend_module_entry spl_module_entry = {
 	STANDARD_MODULE_HEADER,
@@ -952,4 +942,4 @@ zend_module_entry spl_module_entry = {
 	NULL,
 	STANDARD_MODULE_PROPERTIES_EX
 };
-/* }}} */
+

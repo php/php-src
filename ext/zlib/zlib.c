@@ -49,7 +49,7 @@ int le_inflate;
 
 ZEND_DECLARE_MODULE_GLOBALS(zlib)
 
-/* {{{ Memory management wrappers */
+/* Memory management wrappers */
 
 static voidpf php_zlib_alloc(voidpf opaque, uInt items, uInt size)
 {
@@ -60,9 +60,8 @@ static void php_zlib_free(voidpf opaque, voidpf address)
 {
 	efree((void*)address);
 }
-/* }}} */
 
-/* {{{ Incremental deflate/inflate resource destructors */
+/* Incremental deflate/inflate resource destructors */
 
 void deflate_rsrc_dtor(zend_resource *res)
 {
@@ -81,9 +80,8 @@ void inflate_rsrc_dtor(zend_resource *res)
 	efree(ctx);
 }
 
-/* }}} */
 
-/* {{{ php_zlib_output_conflict_check() */
+/* php_zlib_output_conflict_check() */
 static int php_zlib_output_conflict_check(const char *handler_name, size_t handler_name_len)
 {
 	if (php_output_get_level() > 0) {
@@ -96,9 +94,8 @@ static int php_zlib_output_conflict_check(const char *handler_name, size_t handl
 	}
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ php_zlib_output_encoding() */
+/* php_zlib_output_encoding() */
 static int php_zlib_output_encoding(void)
 {
 	zval *enc;
@@ -116,9 +113,8 @@ static int php_zlib_output_encoding(void)
 	}
 	return ZLIBG(compression_coding);
 }
-/* }}} */
 
-/* {{{ php_zlib_output_handler_ex() */
+/* php_zlib_output_handler_ex() */
 static int php_zlib_output_handler_ex(php_zlib_context *ctx, php_output_context *output_context)
 {
 	int flags = Z_SYNC_FLUSH;
@@ -201,9 +197,8 @@ static int php_zlib_output_handler_ex(php_zlib_context *ctx, php_output_context 
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ php_zlib_output_handler() */
+/* php_zlib_output_handler() */
 static int php_zlib_output_handler(void **handler_context, php_output_context *output_context)
 {
 	php_zlib_context *ctx = *(php_zlib_context **) handler_context;
@@ -260,9 +255,8 @@ static int php_zlib_output_handler(void **handler_context, php_output_context *o
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ php_zlib_output_handler_context_init() */
+/* php_zlib_output_handler_context_init() */
 static php_zlib_context *php_zlib_output_handler_context_init(void)
 {
 	php_zlib_context *ctx = (php_zlib_context *) ecalloc(1, sizeof(php_zlib_context));
@@ -270,9 +264,8 @@ static php_zlib_context *php_zlib_output_handler_context_init(void)
 	ctx->Z.zfree = php_zlib_free;
 	return ctx;
 }
-/* }}} */
 
-/* {{{ php_zlib_output_handler_context_dtor() */
+/* php_zlib_output_handler_context_dtor() */
 static void php_zlib_output_handler_context_dtor(void *opaq)
 {
 	php_zlib_context *ctx = (php_zlib_context *) opaq;
@@ -284,9 +277,8 @@ static void php_zlib_output_handler_context_dtor(void *opaq)
 		efree(ctx);
 	}
 }
-/* }}} */
 
-/* {{{ php_zlib_output_handler_init() */
+/* php_zlib_output_handler_init() */
 static php_output_handler *php_zlib_output_handler_init(const char *handler_name, size_t handler_name_len, size_t chunk_size, int flags)
 {
 	php_output_handler *h = NULL;
@@ -303,9 +295,8 @@ static php_output_handler *php_zlib_output_handler_init(const char *handler_name
 
 	return h;
 }
-/* }}} */
 
-/* {{{ php_zlib_output_compression_start() */
+/* php_zlib_output_compression_start() */
 static void php_zlib_output_compression_start(void)
 {
 	zval zoh;
@@ -330,9 +321,8 @@ static void php_zlib_output_compression_start(void)
 			break;
 	}
 }
-/* }}} */
 
-/* {{{ php_zlib_encode() */
+/* php_zlib_encode() */
 static zend_string *php_zlib_encode(const char *in_buf, size_t in_len, int encoding, int level)
 {
 	int status;
@@ -367,9 +357,8 @@ static zend_string *php_zlib_encode(const char *in_buf, size_t in_len, int encod
 	php_error_docref(NULL, E_WARNING, "%s", zError(status));
 	return NULL;
 }
-/* }}} */
 
-/* {{{ php_zlib_inflate_rounds() */
+/* php_zlib_inflate_rounds() */
 static inline int php_zlib_inflate_rounds(z_stream *Z, size_t max, char **buf, size_t *len)
 {
 	int status, round = 0;
@@ -416,9 +405,8 @@ static inline int php_zlib_inflate_rounds(z_stream *Z, size_t max, char **buf, s
 	}
 	return status;
 }
-/* }}} */
 
-/* {{{ php_zlib_decode() */
+/* php_zlib_decode() */
 static int php_zlib_decode(const char *in_buf, size_t in_len, char **out_buf, size_t *out_len, int encoding, size_t max_len)
 {
 	int status = Z_DATA_ERROR;
@@ -458,9 +446,8 @@ retry_raw_inflate:
 	php_error_docref(NULL, E_WARNING, "%s", zError(status));
 	return FAILURE;
 }
-/* }}} */
 
-/* {{{ php_zlib_cleanup_ob_gzhandler_mess() */
+/* php_zlib_cleanup_ob_gzhandler_mess() */
 static void php_zlib_cleanup_ob_gzhandler_mess(void)
 {
 	if (ZLIBG(ob_gzhandler)) {
@@ -469,7 +456,6 @@ static void php_zlib_cleanup_ob_gzhandler_mess(void)
 		ZLIBG(ob_gzhandler) = NULL;
 	}
 }
-/* }}} */
 
 /* Legacy hack */
 PHP_FUNCTION(ob_gzhandler)
@@ -535,7 +521,6 @@ PHP_FUNCTION(ob_gzhandler)
 		RETVAL_EMPTY_STRING();
 	}
 }
-/* }}} */
 
 /* Returns the coding type used for output compression */
 PHP_FUNCTION(zlib_get_coding_type)
@@ -552,7 +537,6 @@ PHP_FUNCTION(zlib_get_coding_type)
 			RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Read and uncompress entire .gz-file into an array */
 PHP_FUNCTION(gzfile)
@@ -592,7 +576,6 @@ PHP_FUNCTION(gzfile)
 	}
 	php_stream_close(stream);
 }
-/* }}} */
 
 /* Open a .gz-file and return a .gz-file pointer */
 PHP_FUNCTION(gzopen)
@@ -619,7 +602,6 @@ PHP_FUNCTION(gzopen)
 	}
 	php_stream_to_zval(stream, return_value);
 }
-/* }}} */
 
 /* Output a .gz-file */
 PHP_FUNCTION(readgzfile)
@@ -648,7 +630,6 @@ PHP_FUNCTION(readgzfile)
 	php_stream_close(stream);
 	RETURN_LONG(size);
 }
-/* }}} */
 
 #define PHP_ZLIB_ENCODE_FUNC(name, default_encoding) \
 PHP_FUNCTION(name) \
@@ -707,36 +688,28 @@ PHP_FUNCTION(name) \
 
 /* Compress data with the specified encoding */
 PHP_ZLIB_ENCODE_FUNC(zlib_encode, 0);
-/* }}} */
 
 /* Uncompress any raw/gzip/zlib encoded data */
 PHP_ZLIB_DECODE_FUNC(zlib_decode, PHP_ZLIB_ENCODING_ANY);
-/* }}} */
 
 /* NOTE: The naming of these userland functions was quite unlucky */
 /* Encode data with the raw deflate encoding */
 PHP_ZLIB_ENCODE_FUNC(gzdeflate, PHP_ZLIB_ENCODING_RAW);
-/* }}} */
 
 /* Encode data with the gzip encoding */
 PHP_ZLIB_ENCODE_FUNC(gzencode, PHP_ZLIB_ENCODING_GZIP);
-/* }}} */
 
 /* Encode data with the zlib encoding */
 PHP_ZLIB_ENCODE_FUNC(gzcompress, PHP_ZLIB_ENCODING_DEFLATE);
-/* }}} */
 
 /* Decode raw deflate encoded data */
 PHP_ZLIB_DECODE_FUNC(gzinflate, PHP_ZLIB_ENCODING_RAW);
-/* }}} */
 
 /* Decode gzip encoded data */
 PHP_ZLIB_DECODE_FUNC(gzdecode, PHP_ZLIB_ENCODING_GZIP);
-/* }}} */
 
 /* Decode zlib encoded data */
 PHP_ZLIB_DECODE_FUNC(gzuncompress, PHP_ZLIB_ENCODING_DEFLATE);
-/* }}} */
 
 static zend_bool zlib_create_dictionary_string(HashTable *options, char **dict, size_t *dictlen) {
 	zval *option_buffer;
@@ -884,7 +857,6 @@ PHP_FUNCTION(inflate_init)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Incrementally inflate encoded data in the specified context */
 PHP_FUNCTION(inflate_add)
@@ -1001,7 +973,6 @@ PHP_FUNCTION(inflate_add)
 		RETURN_STR(out);
 	}
 }
-/* }}} */
 
 /* Get decompression status, usually returns either ZLIB_OK or ZLIB_STREAM_END. */
 PHP_FUNCTION(inflate_get_status)
@@ -1020,7 +991,6 @@ PHP_FUNCTION(inflate_get_status)
 
 	RETURN_LONG(((php_zlib_context *) ctx)->status);
 }
-/* }}} */
 
 /* Get number of bytes read so far. */
 PHP_FUNCTION(inflate_get_read_len)
@@ -1039,7 +1009,6 @@ PHP_FUNCTION(inflate_get_read_len)
 
 	RETURN_LONG(ctx->total_in);
 }
-/* }}} */
 
 /* Initialize an incremental deflate context using the specified encoding */
 PHP_FUNCTION(deflate_init)
@@ -1132,7 +1101,6 @@ PHP_FUNCTION(deflate_init)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* Incrementally deflate data in the specified context */
 PHP_FUNCTION(deflate_add)
@@ -1217,7 +1185,6 @@ PHP_FUNCTION(deflate_add)
 			RETURN_FALSE;
 	}
 }
-/* }}} */
 
 #ifdef COMPILE_DL_ZLIB
 #ifdef ZTS
@@ -1226,7 +1193,7 @@ ZEND_TSRMLS_CACHE_DEFINE()
 ZEND_GET_MODULE(php_zlib)
 #endif
 
-/* {{{ OnUpdate_zlib_output_compression */
+/* OnUpdate_zlib_output_compression */
 static PHP_INI_MH(OnUpdate_zlib_output_compression)
 {
 	int int_value;
@@ -1268,9 +1235,8 @@ static PHP_INI_MH(OnUpdate_zlib_output_compression)
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ OnUpdate_zlib_output_handler */
+/* OnUpdate_zlib_output_handler */
 static PHP_INI_MH(OnUpdate_zlib_output_handler)
 {
 	if (stage == PHP_INI_STAGE_RUNTIME && (php_output_get_status() & PHP_OUTPUT_SENT)) {
@@ -1280,18 +1246,16 @@ static PHP_INI_MH(OnUpdate_zlib_output_handler)
 
 	return OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 }
-/* }}} */
 
-/* {{{ INI */
+/* INI */
 PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("zlib.output_compression",      "0", PHP_INI_ALL, OnUpdate_zlib_output_compression,       output_compression_default,       zend_zlib_globals, zlib_globals)
 	STD_PHP_INI_ENTRY("zlib.output_compression_level", "-1", PHP_INI_ALL, OnUpdateLong,                           output_compression_level, zend_zlib_globals, zlib_globals)
 	STD_PHP_INI_ENTRY("zlib.output_handler",             "", PHP_INI_ALL, OnUpdate_zlib_output_handler,           output_handler,           zend_zlib_globals, zlib_globals)
 PHP_INI_END()
 
-/* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION */
+/* PHP_MINIT_FUNCTION */
 static PHP_MINIT_FUNCTION(zlib)
 {
 	php_register_url_stream_wrapper("compress.zlib", &php_stream_gzip_wrapper);
@@ -1340,9 +1304,8 @@ static PHP_MINIT_FUNCTION(zlib)
 	REGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_MSHUTDOWN_FUNCTION */
+/* PHP_MSHUTDOWN_FUNCTION */
 static PHP_MSHUTDOWN_FUNCTION(zlib)
 {
 	php_unregister_url_stream_wrapper("zlib");
@@ -1352,9 +1315,8 @@ static PHP_MSHUTDOWN_FUNCTION(zlib)
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_RINIT_FUNCTION */
+/* PHP_RINIT_FUNCTION */
 static PHP_RINIT_FUNCTION(zlib)
 {
 	ZLIBG(compression_coding) = 0;
@@ -1365,9 +1327,8 @@ static PHP_RINIT_FUNCTION(zlib)
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_RSHUTDOWN_FUNCTION */
+/* PHP_RSHUTDOWN_FUNCTION */
 static PHP_RSHUTDOWN_FUNCTION(zlib)
 {
 	php_zlib_cleanup_ob_gzhandler_mess();
@@ -1375,9 +1336,8 @@ static PHP_RSHUTDOWN_FUNCTION(zlib)
 
     return SUCCESS;
 }
-/* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION */
+/* PHP_MINFO_FUNCTION */
 static PHP_MINFO_FUNCTION(zlib)
 {
 	php_info_print_table_start();
@@ -1390,9 +1350,8 @@ static PHP_MINFO_FUNCTION(zlib)
 
 	DISPLAY_INI_ENTRIES();
 }
-/* }}} */
 
-/* {{{ ZEND_MODULE_GLOBALS_CTOR */
+/* ZEND_MODULE_GLOBALS_CTOR */
 static PHP_GINIT_FUNCTION(zlib)
 {
 #if defined(COMPILE_DL_ZLIB) && defined(ZTS)
@@ -1401,9 +1360,8 @@ static PHP_GINIT_FUNCTION(zlib)
 	zlib_globals->ob_gzhandler = NULL;
     zlib_globals->handler_registered = 0;
 }
-/* }}} */
 
-/* {{{ php_zlib_module_entry */
+/* php_zlib_module_entry */
 zend_module_entry php_zlib_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"zlib",
@@ -1420,4 +1378,4 @@ zend_module_entry php_zlib_module_entry = {
 	NULL,
 	STANDARD_MODULE_PROPERTIES_EX
 };
-/* }}} */
+

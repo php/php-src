@@ -20,7 +20,7 @@ static float fpm_scoreboard_tick;
 #endif
 
 
-int fpm_scoreboard_init_main() /* {{{ */
+int fpm_scoreboard_init_main()
 {
 	struct fpm_worker_pool_s *wp;
 	unsigned int i;
@@ -74,9 +74,8 @@ int fpm_scoreboard_init_main() /* {{{ */
 	}
 	return 0;
 }
-/* }}} */
 
-void fpm_scoreboard_update(int idle, int active, int lq, int lq_len, int requests, int max_children_reached, int slow_rq, int action, struct fpm_scoreboard_s *scoreboard) /* {{{ */
+void fpm_scoreboard_update(int idle, int active, int lq, int lq_len, int requests, int max_children_reached, int slow_rq, int action, struct fpm_scoreboard_s *scoreboard)
 {
 	if (!scoreboard) {
 		scoreboard = fpm_scoreboard;
@@ -154,15 +153,13 @@ void fpm_scoreboard_update(int idle, int active, int lq, int lq_len, int request
 
 	fpm_unlock(scoreboard->lock);
 }
-/* }}} */
 
-struct fpm_scoreboard_s *fpm_scoreboard_get() /* {{{*/
+struct fpm_scoreboard_s *fpm_scoreboard_get()
 {
 	return fpm_scoreboard;
 }
-/* }}} */
 
-struct fpm_scoreboard_proc_s *fpm_scoreboard_proc_get(struct fpm_scoreboard_s *scoreboard, int child_index) /* {{{*/
+struct fpm_scoreboard_proc_s *fpm_scoreboard_proc_get(struct fpm_scoreboard_s *scoreboard, int child_index)
 {
 	if (!scoreboard) {
 		scoreboard = fpm_scoreboard;
@@ -182,9 +179,8 @@ struct fpm_scoreboard_proc_s *fpm_scoreboard_proc_get(struct fpm_scoreboard_s *s
 
 	return scoreboard->procs[child_index];
 }
-/* }}} */
 
-struct fpm_scoreboard_s *fpm_scoreboard_acquire(struct fpm_scoreboard_s *scoreboard, int nohang) /* {{{ */
+struct fpm_scoreboard_s *fpm_scoreboard_acquire(struct fpm_scoreboard_s *scoreboard, int nohang)
 {
 	struct fpm_scoreboard_s *s;
 
@@ -198,7 +194,6 @@ struct fpm_scoreboard_s *fpm_scoreboard_acquire(struct fpm_scoreboard_s *scorebo
 	}
 	return s;
 }
-/* }}} */
 
 void fpm_scoreboard_release(struct fpm_scoreboard_s *scoreboard) {
 	if (!scoreboard) {
@@ -208,7 +203,7 @@ void fpm_scoreboard_release(struct fpm_scoreboard_s *scoreboard) {
 	scoreboard->lock = 0;
 }
 
-struct fpm_scoreboard_proc_s *fpm_scoreboard_proc_acquire(struct fpm_scoreboard_s *scoreboard, int child_index, int nohang) /* {{{ */
+struct fpm_scoreboard_proc_s *fpm_scoreboard_proc_acquire(struct fpm_scoreboard_s *scoreboard, int child_index, int nohang)
 {
 	struct fpm_scoreboard_proc_s *proc;
 
@@ -223,9 +218,8 @@ struct fpm_scoreboard_proc_s *fpm_scoreboard_proc_acquire(struct fpm_scoreboard_
 
 	return proc;
 }
-/* }}} */
 
-void fpm_scoreboard_proc_release(struct fpm_scoreboard_proc_s *proc) /* {{{ */
+void fpm_scoreboard_proc_release(struct fpm_scoreboard_proc_s *proc)
 {
 	if (!proc) {
 		return;
@@ -234,7 +228,7 @@ void fpm_scoreboard_proc_release(struct fpm_scoreboard_proc_s *proc) /* {{{ */
 	proc->lock = 0;
 }
 
-void fpm_scoreboard_free(struct fpm_scoreboard_s *scoreboard) /* {{{ */
+void fpm_scoreboard_free(struct fpm_scoreboard_s *scoreboard)
 {
 	size_t scoreboard_size, scoreboard_nprocs_size;
 
@@ -248,9 +242,8 @@ void fpm_scoreboard_free(struct fpm_scoreboard_s *scoreboard) /* {{{ */
 
 	fpm_shm_free(scoreboard, scoreboard_size + scoreboard_nprocs_size);
 }
-/* }}} */
 
-void fpm_scoreboard_child_use(struct fpm_scoreboard_s *scoreboard, int child_index, pid_t pid) /* {{{ */
+void fpm_scoreboard_child_use(struct fpm_scoreboard_s *scoreboard, int child_index, pid_t pid)
 {
 	struct fpm_scoreboard_proc_s *proc;
 	fpm_scoreboard = scoreboard;
@@ -262,9 +255,8 @@ void fpm_scoreboard_child_use(struct fpm_scoreboard_s *scoreboard, int child_ind
 	proc->pid = pid;
 	proc->start_epoch = time(NULL);
 }
-/* }}} */
 
-void fpm_scoreboard_proc_free(struct fpm_scoreboard_s *scoreboard, int child_index) /* {{{ */
+void fpm_scoreboard_proc_free(struct fpm_scoreboard_s *scoreboard, int child_index)
 {
 	if (!scoreboard) {
 		return;
@@ -281,9 +273,8 @@ void fpm_scoreboard_proc_free(struct fpm_scoreboard_s *scoreboard, int child_ind
 	/* set this slot as free to avoid search on next alloc */
 	scoreboard->free_proc = child_index;
 }
-/* }}} */
 
-int fpm_scoreboard_proc_alloc(struct fpm_scoreboard_s *scoreboard, int *child_index) /* {{{ */
+int fpm_scoreboard_proc_alloc(struct fpm_scoreboard_s *scoreboard, int *child_index)
 {
 	int i = -1;
 
@@ -325,12 +316,11 @@ int fpm_scoreboard_proc_alloc(struct fpm_scoreboard_s *scoreboard, int *child_in
 
 	return 0;
 }
-/* }}} */
 
 #ifdef HAVE_TIMES
-float fpm_scoreboard_get_tick() /* {{{ */
+float fpm_scoreboard_get_tick()
 {
 	return fpm_scoreboard_tick;
 }
-/* }}} */
+
 #endif

@@ -53,7 +53,7 @@ static fd_set fds;
 /*
  * return the module configuration
  */
-struct fpm_event_module_s *fpm_event_select_module() /* {{{ */
+struct fpm_event_module_s *fpm_event_select_module()
 {
 #if HAVE_SELECT
 	return &select_module;
@@ -61,25 +61,22 @@ struct fpm_event_module_s *fpm_event_select_module() /* {{{ */
 	return NULL;
 #endif /* HAVE_SELECT */
 }
-/* }}} */
 
 #if HAVE_SELECT
 
 /*
  * Init the module
  */
-static int fpm_event_select_init(int max) /* {{{ */
+static int fpm_event_select_init(int max)
 {
 	FD_ZERO(&fds);
 	return 0;
 }
-/* }}} */
-
 
 /*
  * wait for events or timeout
  */
-static int fpm_event_select_wait(struct fpm_event_queue_s *queue, unsigned long int timeout) /* {{{ */
+static int fpm_event_select_wait(struct fpm_event_queue_s *queue, unsigned long int timeout)
 {
 	int ret;
 	struct fpm_event_queue_s *q;
@@ -130,12 +127,11 @@ static int fpm_event_select_wait(struct fpm_event_queue_s *queue, unsigned long 
 	return ret;
 
 }
-/* }}} */
 
 /*
  * Add a FD to the fd set
  */
-static int fpm_event_select_add(struct fpm_event_s *ev) /* {{{ */
+static int fpm_event_select_add(struct fpm_event_s *ev)
 {
 	/* check size limitation */
 	if (ev->fd >= FD_SETSIZE) {
@@ -151,12 +147,11 @@ static int fpm_event_select_add(struct fpm_event_s *ev) /* {{{ */
 
 	return 0;
 }
-/* }}} */
 
 /*
  * Remove a FD from the fd set
  */
-static int fpm_event_select_remove(struct fpm_event_s *ev) /* {{{ */
+static int fpm_event_select_remove(struct fpm_event_s *ev)
 {
 	/* remove the fd if it's in */
 	if (FD_ISSET(ev->fd, &fds)) {
@@ -166,6 +161,5 @@ static int fpm_event_select_remove(struct fpm_event_s *ev) /* {{{ */
 
 	return 0;
 }
-/* }}} */
 
 #endif /* HAVE_SELECT */

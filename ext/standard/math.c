@@ -29,7 +29,7 @@
 
 #include "basic_functions.h"
 
-/* {{{ php_intlog10abs
+/* php_intlog10abs
    Returns floor(log10(fabs(val))), uses fast binary search */
 static inline int php_intlog10abs(double value) {
 	int result;
@@ -72,9 +72,8 @@ static inline int php_intlog10abs(double value) {
 	}
 	return result;
 }
-/* }}} */
 
-/* {{{ php_intpow10
+/* php_intpow10
        Returns pow(10.0, (double)power), uses fast lookup table for exact powers */
 static inline double php_intpow10(int power) {
 	static const double powers[] = {
@@ -88,9 +87,8 @@ static inline double php_intpow10(int power) {
 	}
 	return powers[power];
 }
-/* }}} */
 
-/* {{{ php_round_helper
+/* php_round_helper
        Actually performs the rounding of a value to integer in a certain mode */
 static inline double php_round_helper(double value, int mode) {
 	double tmp_value;
@@ -115,9 +113,8 @@ static inline double php_round_helper(double value, int mode) {
 
 	return tmp_value;
 }
-/* }}} */
 
-/* {{{ _php_math_round */
+/* _php_math_round */
 /*
  * Rounds a number to a certain number of decimal places in a certain rounding
  * mode. For the specifics of the algorithm, see http://wiki.php.net/rfc/rounding
@@ -202,7 +199,6 @@ PHPAPI double _php_math_round(double value, int places, int mode) {
 
 	return tmp_value;
 }
-/* }}} */
 
 /* Return the absolute value of the number */
 PHP_FUNCTION(abs)
@@ -225,7 +221,6 @@ PHP_FUNCTION(abs)
 		ZEND_ASSERT(0 && "Unexpected type");
 	}
 }
-/* }}} */
 
 /* Returns the next highest integer value of the number */
 PHP_FUNCTION(ceil)
@@ -244,7 +239,6 @@ PHP_FUNCTION(ceil)
 		ZEND_ASSERT(0 && "Unexpected type");
 	}
 }
-/* }}} */
 
 /* Returns the next lowest integer value from the number */
 PHP_FUNCTION(floor)
@@ -263,7 +257,6 @@ PHP_FUNCTION(floor)
 		ZEND_ASSERT(0 && "Unexpected type");
 	}
 }
-/* }}} */
 
 /* Returns the number rounded to specified precision */
 PHP_FUNCTION(round)
@@ -310,7 +303,6 @@ PHP_FUNCTION(round)
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 }
-/* }}} */
 
 /* Returns the sine of the number in radians */
 PHP_FUNCTION(sin)
@@ -322,7 +314,6 @@ PHP_FUNCTION(sin)
 	ZEND_PARSE_PARAMETERS_END();
 	RETURN_DOUBLE(sin(num));
 }
-/* }}} */
 
 /* Returns the cosine of the number in radians */
 PHP_FUNCTION(cos)
@@ -334,7 +325,6 @@ PHP_FUNCTION(cos)
 	ZEND_PARSE_PARAMETERS_END();
 	RETURN_DOUBLE(cos(num));
 }
-/* }}} */
 
 /* Returns the tangent of the number in radians */
 PHP_FUNCTION(tan)
@@ -346,7 +336,6 @@ PHP_FUNCTION(tan)
 	ZEND_PARSE_PARAMETERS_END();
 	RETURN_DOUBLE(tan(num));
 }
-/* }}} */
 
 /* Returns the arc sine of the number in radians */
 PHP_FUNCTION(asin)
@@ -358,7 +347,6 @@ PHP_FUNCTION(asin)
 	ZEND_PARSE_PARAMETERS_END();
 	RETURN_DOUBLE(asin(num));
 }
-/* }}} */
 
 /* Return the arc cosine of the number in radians */
 PHP_FUNCTION(acos)
@@ -370,7 +358,6 @@ PHP_FUNCTION(acos)
 	ZEND_PARSE_PARAMETERS_END();
 	RETURN_DOUBLE(acos(num));
 }
-/* }}} */
 
 /* Returns the arc tangent of the number in radians */
 PHP_FUNCTION(atan)
@@ -382,7 +369,6 @@ PHP_FUNCTION(atan)
 	ZEND_PARSE_PARAMETERS_END();
 	RETURN_DOUBLE(atan(num));
 }
-/* }}} */
 
 /* Returns the arc tangent of y/x, with the resulting quadrant determined by the signs of y and x */
 PHP_FUNCTION(atan2)
@@ -395,7 +381,6 @@ PHP_FUNCTION(atan2)
 	ZEND_PARSE_PARAMETERS_END();
 	RETURN_DOUBLE(atan2(num1, num2));
 }
-/* }}} */
 
 /* Returns the hyperbolic sine of the number, defined as (exp(number) - exp(-number))/2 */
 PHP_FUNCTION(sinh)
@@ -407,7 +392,6 @@ PHP_FUNCTION(sinh)
 	ZEND_PARSE_PARAMETERS_END();
 	RETURN_DOUBLE(sinh(num));
 }
-/* }}} */
 
 /* Returns the hyperbolic cosine of the number, defined as (exp(number) + exp(-number))/2 */
 PHP_FUNCTION(cosh)
@@ -419,7 +403,6 @@ PHP_FUNCTION(cosh)
 	ZEND_PARSE_PARAMETERS_END();
 	RETURN_DOUBLE(cosh(num));
 }
-/* }}} */
 
 /* Returns the hyperbolic tangent of the number, defined as sinh(number)/cosh(number) */
 PHP_FUNCTION(tanh)
@@ -431,7 +414,6 @@ PHP_FUNCTION(tanh)
 	ZEND_PARSE_PARAMETERS_END();
 	RETURN_DOUBLE(tanh(num));
 }
-/* }}} */
 
 /* Returns the inverse hyperbolic sine of the number, i.e. the value whose hyperbolic sine is number */
 PHP_FUNCTION(asinh)
@@ -443,7 +425,6 @@ PHP_FUNCTION(asinh)
 	ZEND_PARSE_PARAMETERS_END();
 	RETURN_DOUBLE(asinh(num));
 }
-/* }}} */
 
 /* Returns the inverse hyperbolic cosine of the number, i.e. the value whose hyperbolic cosine is number */
 PHP_FUNCTION(acosh)
@@ -455,7 +436,6 @@ PHP_FUNCTION(acosh)
 	ZEND_PARSE_PARAMETERS_END();
 	RETURN_DOUBLE(acosh(num));
 }
-/* }}} */
 
 /* Returns the inverse hyperbolic tangent of the number, i.e. the value whose hyperbolic tangent is number */
 PHP_FUNCTION(atanh)
@@ -467,7 +447,6 @@ PHP_FUNCTION(atanh)
 	ZEND_PARSE_PARAMETERS_END();
 	RETURN_DOUBLE(atanh(num));
 }
-/* }}} */
 
 /* Returns an approximation of pi */
 PHP_FUNCTION(pi)
@@ -476,7 +455,6 @@ PHP_FUNCTION(pi)
 
 	RETURN_DOUBLE(M_PI);
 }
-/* }}} */
 
 /* Returns whether argument is finite */
 PHP_FUNCTION(is_finite)
@@ -488,7 +466,6 @@ PHP_FUNCTION(is_finite)
 	ZEND_PARSE_PARAMETERS_END();
 	RETURN_BOOL(zend_finite(dval));
 }
-/* }}} */
 
 /* Returns whether argument is infinite */
 PHP_FUNCTION(is_infinite)
@@ -500,7 +477,6 @@ PHP_FUNCTION(is_infinite)
 	ZEND_PARSE_PARAMETERS_END();
 	RETURN_BOOL(zend_isinf(dval));
 }
-/* }}} */
 
 /* Returns whether argument is not a number */
 PHP_FUNCTION(is_nan)
@@ -512,7 +488,6 @@ PHP_FUNCTION(is_nan)
 	ZEND_PARSE_PARAMETERS_END();
 	RETURN_BOOL(zend_isnan(dval));
 }
-/* }}} */
 
 /* Returns base raised to the power of exponent. Returns integer result when possible */
 PHP_FUNCTION(pow)
@@ -526,7 +501,6 @@ PHP_FUNCTION(pow)
 
 	pow_function(return_value, zbase, zexp);
 }
-/* }}} */
 
 /* Returns e raised to the power of the number */
 PHP_FUNCTION(exp)
@@ -539,7 +513,6 @@ PHP_FUNCTION(exp)
 
 	RETURN_DOUBLE(exp(num));
 }
-/* }}} */
 
 /* Returns exp(number) - 1, computed in a way that accurate even when the value of number is close to zero
 */
@@ -553,7 +526,6 @@ PHP_FUNCTION(expm1)
 
 	RETURN_DOUBLE(expm1(num));
 }
-/* }}} */
 
 /* Returns log(1 + number), computed in a way that accurate even when the value of number is close to zero
 */
@@ -567,7 +539,6 @@ PHP_FUNCTION(log1p)
 
 	RETURN_DOUBLE(log1p(num));
 }
-/* }}} */
 
 /* Returns the natural logarithm of the number, or the base log if base is specified */
 PHP_FUNCTION(log)
@@ -603,7 +574,6 @@ PHP_FUNCTION(log)
 
 	RETURN_DOUBLE(log(num) / log(base));
 }
-/* }}} */
 
 /* Returns the base-10 logarithm of the number */
 PHP_FUNCTION(log10)
@@ -616,7 +586,6 @@ PHP_FUNCTION(log10)
 
 	RETURN_DOUBLE(log10(num));
 }
-/* }}} */
 
 /* Returns the square root of the number */
 PHP_FUNCTION(sqrt)
@@ -629,7 +598,6 @@ PHP_FUNCTION(sqrt)
 
 	RETURN_DOUBLE(sqrt(num));
 }
-/* }}} */
 
 /* Returns sqrt(num1*num1 + num2*num2) */
 PHP_FUNCTION(hypot)
@@ -643,7 +611,6 @@ PHP_FUNCTION(hypot)
 
 	RETURN_DOUBLE(hypot(num1, num2));
 }
-/* }}} */
 
 /* Converts the number in degrees to the radian equivalent */
 PHP_FUNCTION(deg2rad)
@@ -655,7 +622,6 @@ PHP_FUNCTION(deg2rad)
 	ZEND_PARSE_PARAMETERS_END();
 	RETURN_DOUBLE((deg / 180.0) * M_PI);
 }
-/* }}} */
 
 /* Converts the radian number to the equivalent number in degrees */
 PHP_FUNCTION(rad2deg)
@@ -668,9 +634,8 @@ PHP_FUNCTION(rad2deg)
 
 	RETURN_DOUBLE((rad / M_PI) * 180);
 }
-/* }}} */
 
-/* {{{ _php_math_basetolong */
+/* _php_math_basetolong */
 /*
  * Convert a string representation of a base(2-36) number to a long.
  */
@@ -712,9 +677,8 @@ PHPAPI zend_long _php_math_basetolong(zval *arg, int base)
 
 	return num;
 }
-/* }}} */
 
-/* {{{ _php_math_basetozval */
+/* _php_math_basetozval */
 /*
  * Convert a string representation of a base(2-36) number to a zval.
  */
@@ -790,9 +754,8 @@ PHPAPI void _php_math_basetozval(zend_string *str, int base, zval *ret)
 		ZVAL_LONG(ret, num);
 	}
 }
-/* }}} */
 
-/* {{{ _php_math_longtobase */
+/* _php_math_longtobase */
 /*
  * Convert a long to a string containing a base(2-36) representation of
  * the number.
@@ -821,9 +784,8 @@ PHPAPI zend_string * _php_math_longtobase(zval *arg, int base)
 
 	return zend_string_init(ptr, end - ptr, 0);
 }
-/* }}} */
 
-/* {{{ _php_math_zvaltobase */
+/* _php_math_zvaltobase */
 /*
  * Convert a zval to a string containing a base(2-36) representation of
  * the number.
@@ -860,7 +822,6 @@ PHPAPI zend_string * _php_math_zvaltobase(zval *arg, int base)
 
 	return _php_math_longtobase(arg, base);
 }
-/* }}} */
 
 /* Returns the decimal equivalent of the binary number */
 PHP_FUNCTION(bindec)
@@ -873,7 +834,6 @@ PHP_FUNCTION(bindec)
 
 	_php_math_basetozval(arg, 2, return_value);
 }
-/* }}} */
 
 /* Returns the decimal equivalent of the hexadecimal number */
 PHP_FUNCTION(hexdec)
@@ -886,7 +846,6 @@ PHP_FUNCTION(hexdec)
 
 	_php_math_basetozval(arg, 16, return_value);
 }
-/* }}} */
 
 /* Returns the decimal equivalent of an octal string */
 PHP_FUNCTION(octdec)
@@ -899,7 +858,6 @@ PHP_FUNCTION(octdec)
 
 	_php_math_basetozval(arg, 8, return_value);
 }
-/* }}} */
 
 /* Returns a string containing a binary representation of the number */
 PHP_FUNCTION(decbin)
@@ -915,7 +873,6 @@ PHP_FUNCTION(decbin)
 	result = _php_math_longtobase(arg, 2);
 	RETURN_STR(result);
 }
-/* }}} */
 
 /* Returns a string containing an octal representation of the given number */
 PHP_FUNCTION(decoct)
@@ -931,7 +888,6 @@ PHP_FUNCTION(decoct)
 	result = _php_math_longtobase(arg, 8);
 	RETURN_STR(result);
 }
-/* }}} */
 
 /* Returns a string containing a hexadecimal representation of the given number */
 PHP_FUNCTION(dechex)
@@ -947,7 +903,6 @@ PHP_FUNCTION(dechex)
 	result = _php_math_longtobase(arg, 16);
 	RETURN_STR(result);
 }
-/* }}} */
 
 /* Converts a number in a string from any base <= 36 to any base <= 36 */
 PHP_FUNCTION(base_convert)
@@ -979,9 +934,8 @@ PHP_FUNCTION(base_convert)
 	result = _php_math_zvaltobase(&temp, (int)tobase);
 	RETVAL_STR(result);
 }
-/* }}} */
 
-/* {{{ _php_math_number_format
+/* _php_math_number_format
 */
 PHPAPI zend_string *_php_math_number_format(double d, int dec, char dec_point, char thousand_sep)
 {
@@ -1148,7 +1102,6 @@ PHP_FUNCTION(number_format)
 		WRONG_PARAM_COUNT;
 	}
 }
-/* }}} */
 
 /* Returns the remainder of dividing x by y as a float */
 PHP_FUNCTION(fmod)
@@ -1162,7 +1115,6 @@ PHP_FUNCTION(fmod)
 
 	RETURN_DOUBLE(fmod(num1, num2));
 }
-/* }}} */
 
 /* Perform floating-point division of dividend / divisor
    with IEEE-754 semantics for division by zero. */
@@ -1180,7 +1132,6 @@ PHP_FUNCTION(fdiv)
 
 	RETURN_DOUBLE(dividend / divisor);
 }
-/* }}} */
 
 /* Returns the integer quotient of the division of dividend by divisor */
 PHP_FUNCTION(intdiv)
@@ -1204,4 +1155,4 @@ PHP_FUNCTION(intdiv)
 
 	RETURN_LONG(dividend / divisor);
 }
-/* }}} */
+

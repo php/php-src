@@ -34,7 +34,7 @@
 #endif
 
 
-static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog) /* {{{ */
+static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog)
 {
 	int callers_limit = child->wp->config->request_slowlog_trace_depth;
 	pid_t pid = child->pid;
@@ -186,9 +186,8 @@ static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog) /* {{{ *
 
 	return 0;
 }
-/* }}} */
 
-void fpm_php_trace(struct fpm_child_s *child) /* {{{ */
+void fpm_php_trace(struct fpm_child_s *child)
 {
 	fpm_scoreboard_update(0, 0, 0, 0, 0, 0, 1, FPM_SCOREBOARD_ACTION_INC, child->wp->scoreboard);
 	FILE *slowlog;
@@ -223,6 +222,5 @@ done0:
 
 	zlog(ZLOG_NOTICE, "finished trace of %d", (int) child->pid);
 }
-/* }}} */
 
 #endif

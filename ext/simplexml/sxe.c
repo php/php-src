@@ -43,7 +43,6 @@ PHP_METHOD(SimpleXMLIterator, rewind)
 
 	php_sxe_rewind_iterator(Z_SXEOBJ_P(ZEND_THIS));
 }
-/* }}} */
 
 /* Check whether iteration is valid */
 PHP_METHOD(SimpleXMLIterator, valid)
@@ -56,7 +55,6 @@ PHP_METHOD(SimpleXMLIterator, valid)
 
 	RETURN_BOOL(!Z_ISUNDEF(sxe->iter.data));
 }
-/* }}} */
 
 /* Get current element */
 PHP_METHOD(SimpleXMLIterator, current)
@@ -75,7 +73,6 @@ PHP_METHOD(SimpleXMLIterator, current)
 	data = &sxe->iter.data;
 	ZVAL_COPY_DEREF(return_value, data);
 }
-/* }}} */
 
 /* Get name of current child element */
 PHP_METHOD(SimpleXMLIterator, key)
@@ -100,7 +97,6 @@ PHP_METHOD(SimpleXMLIterator, key)
 
 	RETURN_FALSE;
 }
-/* }}} */
 
 /* Move to next element */
 PHP_METHOD(SimpleXMLIterator, next)
@@ -111,7 +107,6 @@ PHP_METHOD(SimpleXMLIterator, next)
 
 	php_sxe_move_forward_iterator(Z_SXEOBJ_P(ZEND_THIS));
 }
-/* }}} */
 
 /* Check whether element has children (elements) */
 PHP_METHOD(SimpleXMLIterator, hasChildren)
@@ -138,7 +133,6 @@ PHP_METHOD(SimpleXMLIterator, hasChildren)
 	}
 	RETURN_BOOL(node ? 1 : 0);
 }
-/* }}} */
 
 /* Get child element iterator */
 PHP_METHOD(SimpleXMLIterator, getChildren)
@@ -158,7 +152,7 @@ PHP_METHOD(SimpleXMLIterator, getChildren)
 	ZVAL_COPY_DEREF(return_value, data);
 }
 
-PHP_MINIT_FUNCTION(sxe) /* {{{ */
+PHP_MINIT_FUNCTION(sxe)
 {
 	zend_class_entry *pce;
 	zend_class_entry sxi;
@@ -180,4 +174,4 @@ PHP_MINIT_FUNCTION(sxe) /* {{{ */
 
 	return SUCCESS;
 }
-/* }}} */
+

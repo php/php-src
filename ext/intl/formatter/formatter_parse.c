@@ -27,9 +27,7 @@
 
 #define ICU_LOCALE_BUG 1
 
-/* Parse a number. }}} */
-/* Parse a number.
- */
+/* Parse a number. */
 PHP_FUNCTION( numfmt_parse )
 {
 	zend_long type = FORMAT_TYPE_DOUBLE;
@@ -106,11 +104,8 @@ PHP_FUNCTION( numfmt_parse )
 
 	INTL_METHOD_CHECK_STATUS( nfo, "Number parsing failed" );
 }
-/* }}} */
 
-/* Parse a number as currency. }}} */
-/* Parse a number as currency.
- */
+/* Parse a number as currency. */
 PHP_FUNCTION( numfmt_parse_currency )
 {
 	double number;
@@ -161,4 +156,4 @@ PHP_FUNCTION( numfmt_parse_currency )
 
 	RETVAL_DOUBLE( number );
 }
-/* }}} */
+

@@ -108,7 +108,6 @@ ZEND_FUNCTION(zend_leak_bytes)
 
 	emalloc(leakbytes);
 }
-/* }}} */
 
 /* Leak a refcounted variable */
 ZEND_FUNCTION(zend_leak_variable)
@@ -126,17 +125,15 @@ ZEND_FUNCTION(zend_leak_variable)
 
 	Z_ADDREF_P(zv);
 }
-/* }}} */
 
-static zend_object *zend_test_class_new(zend_class_entry *class_type) /* {{{ */ {
+static zend_object *zend_test_class_new(zend_class_entry *class_type) {
 	zend_object *obj = zend_objects_new(class_type);
 	object_properties_init(obj, class_type);
 	obj->handlers = &zend_test_class_handlers;
 	return obj;
 }
-/* }}} */
 
-static zend_function *zend_test_class_method_get(zend_object **object, zend_string *name, const zval *key) /* {{{ */ {
+static zend_function *zend_test_class_method_get(zend_object **object, zend_string *name, const zval *key) {
 	zend_internal_function *fptr;
 
 	if (EXPECTED(EG(trampoline).common.function_name == NULL)) {
@@ -154,9 +151,8 @@ static zend_function *zend_test_class_method_get(zend_object **object, zend_stri
 
 	return (zend_function*)fptr;
 }
-/* }}} */
 
-static zend_function *zend_test_class_static_method_get(zend_class_entry *ce, zend_string *name) /* {{{ */ {
+static zend_function *zend_test_class_static_method_get(zend_class_entry *ce, zend_string *name) {
 	if (zend_string_equals_literal_ci(name, "test")) {
 		zend_internal_function *fptr;
 
@@ -177,23 +173,19 @@ static zend_function *zend_test_class_static_method_get(zend_class_entry *ce, ze
 	}
 	return zend_std_get_static_method(ce, name, NULL);
 }
-/* }}} */
 
-ZEND_METHOD(_ZendTestClass, __toString) /* {{{ */ {
+ZEND_METHOD(_ZendTestClass, __toString) {
 	RETURN_EMPTY_STRING();
 }
-/* }}} */
 
 /* Internal function returns bool, we return int. */
-ZEND_METHOD(_ZendTestClass, is_object) /* {{{ */ {
+ZEND_METHOD(_ZendTestClass, is_object) {
 	RETURN_LONG(42);
 }
-/* }}} */
 
-ZEND_METHOD(_ZendTestTrait, testMethod) /* {{{ */ {
+ZEND_METHOD(_ZendTestTrait, testMethod) {
 	RETURN_TRUE;
 }
-/* }}} */
 
 PHP_MINIT_FUNCTION(zend_test)
 {

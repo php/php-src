@@ -50,7 +50,7 @@
 ZEND_DECLARE_MODULE_GLOBALS(posix)
 static PHP_MINFO_FUNCTION(posix);
 
-/* {{{ PHP_MINFO_FUNCTION
+/* PHP_MINFO_FUNCTION
  */
 static PHP_MINFO_FUNCTION(posix)
 {
@@ -58,18 +58,16 @@ static PHP_MINFO_FUNCTION(posix)
 	php_info_print_table_row(2, "POSIX support", "enabled");
 	php_info_print_table_end();
 }
-/* }}} */
 
-static PHP_GINIT_FUNCTION(posix) /* {{{ */
+static PHP_GINIT_FUNCTION(posix)
 {
 #if defined(COMPILE_DL_POSIX) && defined(ZTS)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 	posix_globals->last_error = 0;
 }
-/* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION(posix)
+/* PHP_MINIT_FUNCTION(posix)
  */
 static PHP_MINIT_FUNCTION(posix)
 {
@@ -145,9 +143,8 @@ static PHP_MINIT_FUNCTION(posix)
 #endif
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ posix_module_entry
+/* posix_module_entry
  */
 zend_module_entry posix_module_entry = {
 	STANDARD_MODULE_HEADER,
@@ -165,7 +162,6 @@ zend_module_entry posix_module_entry = {
 	NULL,
 	STANDARD_MODULE_PROPERTIES_EX
 };
-/* }}} */
 
 #ifdef COMPILE_DL_POSIX
 #ifdef ZTS
@@ -207,63 +203,54 @@ PHP_FUNCTION(posix_kill)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Get the current process id (POSIX.1, 4.1.1) */
 PHP_FUNCTION(posix_getpid)
 {
 	PHP_POSIX_RETURN_LONG_FUNC(getpid);
 }
-/* }}} */
 
 /* Get the parent process id (POSIX.1, 4.1.1) */
 PHP_FUNCTION(posix_getppid)
 {
 	PHP_POSIX_RETURN_LONG_FUNC(getppid);
 }
-/* }}} */
 
 /* Get the current user id (POSIX.1, 4.2.1) */
 PHP_FUNCTION(posix_getuid)
 {
 	PHP_POSIX_RETURN_LONG_FUNC(getuid);
 }
-/* }}} */
 
 /* Get the current group id (POSIX.1, 4.2.1) */
 PHP_FUNCTION(posix_getgid)
 {
 	PHP_POSIX_RETURN_LONG_FUNC(getgid);
 }
-/* }}} */
 
 /* Get the current effective user id (POSIX.1, 4.2.1) */
 PHP_FUNCTION(posix_geteuid)
 {
 	PHP_POSIX_RETURN_LONG_FUNC(geteuid);
 }
-/* }}} */
 
 /* Get the current effective group id (POSIX.1, 4.2.1) */
 PHP_FUNCTION(posix_getegid)
 {
 	PHP_POSIX_RETURN_LONG_FUNC(getegid);
 }
-/* }}} */
 
 /* Set user id (POSIX.1, 4.2.2) */
 PHP_FUNCTION(posix_setuid)
 {
 	PHP_POSIX_SINGLE_ARG_FUNC(setuid);
 }
-/* }}} */
 
 /* Set group id (POSIX.1, 4.2.2) */
 PHP_FUNCTION(posix_setgid)
 {
 	PHP_POSIX_SINGLE_ARG_FUNC(setgid);
 }
-/* }}} */
 
 /* Set effective user id */
 #ifdef HAVE_SETEUID
@@ -272,7 +259,6 @@ PHP_FUNCTION(posix_seteuid)
 	PHP_POSIX_SINGLE_ARG_FUNC(seteuid);
 }
 #endif
-/* }}} */
 
 /* Set effective group id */
 #ifdef HAVE_SETEGID
@@ -281,7 +267,6 @@ PHP_FUNCTION(posix_setegid)
 	PHP_POSIX_SINGLE_ARG_FUNC(setegid);
 }
 #endif
-/* }}} */
 
 /* Get supplementary group id's (POSIX.1, 4.2.3) */
 #ifdef HAVE_GETGROUPS
@@ -305,7 +290,6 @@ PHP_FUNCTION(posix_getgroups)
 	}
 }
 #endif
-/* }}} */
 
 /* Get user name (POSIX.1, 4.2.4) */
 #ifdef HAVE_GETLOGIN
@@ -323,14 +307,12 @@ PHP_FUNCTION(posix_getlogin)
 	RETURN_STRING(p);
 }
 #endif
-/* }}} */
 
 /* Get current process group id (POSIX.1, 4.3.1) */
 PHP_FUNCTION(posix_getpgrp)
 {
 	PHP_POSIX_RETURN_LONG_FUNC(getpgrp);
 }
-/* }}} */
 
 /* Create session and set process group id (POSIX.1, 4.3.2) */
 #ifdef HAVE_SETSID
@@ -339,7 +321,6 @@ PHP_FUNCTION(posix_setsid)
 	PHP_POSIX_RETURN_LONG_FUNC(setsid);
 }
 #endif
-/* }}} */
 
 /* Set process group id for job control (POSIX.1, 4.3.3) */
 PHP_FUNCTION(posix_setpgid)
@@ -358,7 +339,6 @@ PHP_FUNCTION(posix_setpgid)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /* Get the process group id of the specified process (This is not a POSIX function, but a SVR4ism, so we compile conditionally) */
 #ifdef HAVE_GETPGID
@@ -377,7 +357,6 @@ PHP_FUNCTION(posix_getpgid)
 	RETURN_LONG(val);
 }
 #endif
-/* }}} */
 
 /* Get process group id of session leader (This is not a POSIX function, but a SVR4ism, so be compile conditionally) */
 #ifdef HAVE_GETSID
@@ -396,7 +375,6 @@ PHP_FUNCTION(posix_getsid)
 	RETURN_LONG(val);
 }
 #endif
-/* }}} */
 
 /* Get system name (POSIX.1, 4.4.1) */
 PHP_FUNCTION(posix_uname)
@@ -422,7 +400,6 @@ PHP_FUNCTION(posix_uname)
 	add_assoc_string(return_value, "domainname", u.domainname);
 #endif
 }
-/* }}} */
 
 /* POSIX.1, 4.5.1 time() - Get System Time
 							already covered by PHP
@@ -449,7 +426,6 @@ PHP_FUNCTION(posix_times)
 	add_assoc_long(return_value, "cutime",	t.tms_cutime);	/* user time of children */
 	add_assoc_long(return_value, "cstime",	t.tms_cstime);	/* system time of children */
 }
-/* }}} */
 
 /* POSIX.1, 4.6.1 getenv() - Environment Access
 							already covered by PHP
@@ -474,10 +450,9 @@ PHP_FUNCTION(posix_ctermid)
 	RETURN_STRING(buffer);
 }
 #endif
-/* }}} */
 
 /* Checks if the provides resource is a stream and if it provides a file descriptor */
-static int php_posix_stream_get_fd(zval *zfp, int *fd) /* {{{ */
+static int php_posix_stream_get_fd(zval *zfp, int *fd)
 {
 	php_stream *stream;
 
@@ -497,7 +472,6 @@ static int php_posix_stream_get_fd(zval *zfp, int *fd) /* {{{ */
 	}
 	return 1;
 }
-/* }}} */
 
 /* Determine terminal device name (POSIX.1, 4.7.2) */
 PHP_FUNCTION(posix_ttyname)
@@ -544,7 +518,6 @@ PHP_FUNCTION(posix_ttyname)
 #endif
 	RETURN_STRING(p);
 }
-/* }}} */
 
 /* Determine if filedesc is a tty (POSIX.1, 4.7.1) */
 PHP_FUNCTION(posix_isatty)
@@ -572,7 +545,6 @@ PHP_FUNCTION(posix_isatty)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /*
 	POSIX.1, 4.8.1 sysconf() - TODO
@@ -599,7 +571,6 @@ PHP_FUNCTION(posix_getcwd)
 
 	RETURN_STRING(buffer);
 }
-/* }}} */
 
 /*
 	POSIX.1, 5.3.x open(), creat(), umask()
@@ -633,7 +604,6 @@ PHP_FUNCTION(posix_mkfifo)
 	RETURN_TRUE;
 }
 #endif
-/* }}} */
 
 /* Make a special or ordinary file (POSIX.1) */
 #ifdef HAVE_MKNOD
@@ -684,11 +654,10 @@ PHP_FUNCTION(posix_mknod)
 	RETURN_TRUE;
 }
 #endif
-/* }}} */
 
 /* Takes a pointer to posix group and a pointer to an already initialized ZVAL
  * array container and fills the array with the posix group member data. */
-int php_posix_group_to_array(struct group *g, zval *array_group) /* {{{ */
+int php_posix_group_to_array(struct group *g, zval *array_group)
 {
 	zval array_members;
 	int count;
@@ -721,7 +690,6 @@ int php_posix_group_to_array(struct group *g, zval *array_group) /* {{{ */
 	add_assoc_long(array_group, "gid", g->gr_gid);
 	return 1;
 }
-/* }}} */
 
 /*
 	POSIX.1, 5.5.1 unlink()
@@ -765,7 +733,6 @@ PHP_FUNCTION(posix_access)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 /*
 	POSIX.1, 6.x most I/O functions already supported by PHP.
@@ -826,7 +793,6 @@ try_again:
 	efree(buf);
 #endif
 }
-/* }}} */
 
 /* Group database access (POSIX.1, 9.2.1) */
 PHP_FUNCTION(posix_getgrgid)
@@ -878,9 +844,8 @@ PHP_FUNCTION(posix_getgrgid)
 	efree(grbuf);
 #endif
 }
-/* }}} */
 
-int php_posix_passwd_to_array(struct passwd *pw, zval *return_value) /* {{{ */
+int php_posix_passwd_to_array(struct passwd *pw, zval *return_value)
 {
 	if (NULL == pw)
 		return 0;
@@ -896,7 +861,6 @@ int php_posix_passwd_to_array(struct passwd *pw, zval *return_value) /* {{{ */
 	add_assoc_string(return_value, "shell",     pw->pw_shell);
 	return 1;
 }
-/* }}} */
 
 /* User database access (POSIX.1, 9.2.2) */
 PHP_FUNCTION(posix_getpwnam)
@@ -944,7 +908,6 @@ PHP_FUNCTION(posix_getpwnam)
 	efree(buf);
 #endif
 }
-/* }}} */
 
 /* User database access (POSIX.1, 9.2.2) */
 PHP_FUNCTION(posix_getpwuid)
@@ -994,14 +957,12 @@ PHP_FUNCTION(posix_getpwuid)
 	efree(pwbuf);
 #endif
 }
-/* }}} */
-
 
 #ifdef HAVE_GETRLIMIT
 
 #define UNLIMITED_STRING "unlimited"
 
-/* {{{ posix_addlimit
+/* posix_addlimit
  */
 static int posix_addlimit(int limit, const char *name, zval *return_value) {
 	int result;
@@ -1032,9 +993,8 @@ static int posix_addlimit(int limit, const char *name, zval *return_value) {
 
 	return SUCCESS;
 }
-/* }}} */
 
-/* {{{ limits[]
+/* limits[]
  */
 static const struct limitlist {
 	int limit;
@@ -1090,8 +1050,6 @@ static const struct limitlist {
 
 	{ 0, NULL }
 };
-/* }}} */
-
 
 /* Get system resource consumption limits (This is not a POSIX function, but a BSDism and a SVR4ism. We compile conditionally) */
 PHP_FUNCTION(posix_getrlimit)
@@ -1109,7 +1067,6 @@ PHP_FUNCTION(posix_getrlimit)
 		}
 	}
 }
-/* }}} */
 
 #endif /* HAVE_GETRLIMIT */
 
@@ -1136,7 +1093,6 @@ PHP_FUNCTION(posix_setrlimit)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 #endif /* HAVE_SETRLIMIT */
 
@@ -1148,7 +1104,6 @@ PHP_FUNCTION(posix_get_last_error)
 
 	RETURN_LONG(POSIX_G(last_error));
 }
-/* }}} */
 
 /* Retrieve the system error message associated with the given errno. */
 PHP_FUNCTION(posix_strerror)
@@ -1161,7 +1116,6 @@ PHP_FUNCTION(posix_strerror)
 
 	RETURN_STRING(strerror(error));
 }
-/* }}} */
 
 #endif
 
@@ -1184,5 +1138,5 @@ PHP_FUNCTION(posix_initgroups)
 
 	RETURN_BOOL(!initgroups((const char *)name, basegid));
 }
-/* }}} */
+
 #endif

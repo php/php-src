@@ -1070,7 +1070,7 @@ static int phpdbg_process_print(int fd, int type, const char *tag, const char *m
 	}
 
 	return msgout ? msgoutlen : xmloutlen;
-} /* }}} */
+}
 
 PHPDBG_API int phpdbg_vprint(int type, int fd, const char *tag, const char *xmlfmt, const char *strfmt, va_list args) {
 	char *msg = NULL, *xml = NULL;
@@ -1263,7 +1263,7 @@ PHPDBG_API int phpdbg_out_internal(int fd, const char *fmt, ...) {
 }
 
 
-PHPDBG_API int phpdbg_rlog_internal(int fd, const char *fmt, ...) { /* {{{ */
+PHPDBG_API int phpdbg_rlog_internal(int fd, const char *fmt, ...) {
 	int rc = 0;
 
 	va_list args;
@@ -1295,4 +1295,4 @@ PHPDBG_API int phpdbg_rlog_internal(int fd, const char *fmt, ...) { /* {{{ */
 	va_end(args);
 
 	return rc;
-} /* }}} */
+}
