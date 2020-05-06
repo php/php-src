@@ -2489,9 +2489,6 @@ MBSTRING_API char *php_mb_convert_encoding(const char *input, size_t length, con
 	if (output_len) {
 		*output_len = 0;
 	}
-	if (!input) {
-		return NULL;
-	}
 
 	/* pre-conversion encoding */
 	ZEND_ASSERT(num_from_encodings >= 1);
@@ -2507,7 +2504,7 @@ MBSTRING_API char *php_mb_convert_encoding(const char *input, size_t length, con
 			&string, from_encodings, num_from_encodings, MBSTRG(strict_detection));
 		if (!from_encoding) {
 			php_error_docref(NULL, E_WARNING, "Unable to detect character encoding");
-			from_encoding = &mbfl_encoding_pass;
+			return NULL;
 		}
 	}
 
