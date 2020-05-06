@@ -1104,7 +1104,7 @@ ZEND_API int zend_eval_string_ex(const char *str, zval *retval_ptr, const char *
 
 static void zend_set_timeout_ex(zend_long seconds, int reset_signals);
 
-ZEND_API ZEND_NORETURN void ZEND_FASTCALL zend_timeout(int dummy) /* {{{ */
+ZEND_API ZEND_NORETURN void ZEND_FASTCALL zend_timeout(void) /* {{{ */
 {
 #if defined(PHP_WIN32)
 # ifndef ZTS

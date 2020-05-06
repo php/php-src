@@ -1612,8 +1612,7 @@ static int zend_jit_interrupt_handler_stub(dasm_State **Dst)
 	|	//if (EG(timed_out)) {
 	|	MEM_OP2_1_ZTS cmp, byte, executor_globals, timed_out, 0, r0
 	|	je >1
-	|	//zend_timeout(0);
-	|	xor FCARG1d, FCARG1d
+	|	//zend_timeout();
 	|	EXT_CALL zend_timeout, r0
 	|1:
 	|	//} else if (zend_interrupt_function) {

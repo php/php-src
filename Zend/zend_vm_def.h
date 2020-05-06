@@ -9208,7 +9208,7 @@ ZEND_VM_HELPER(zend_interrupt_helper, ANY, ANY)
 	EG(vm_interrupt) = 0;
 	SAVE_OPLINE();
 	if (EG(timed_out)) {
-		zend_timeout(0);
+		zend_timeout();
 	} else if (zend_interrupt_function) {
 		zend_interrupt_function(execute_data);
 		ZEND_VM_ENTER();
