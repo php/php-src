@@ -7725,7 +7725,7 @@ static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, cons
 	}
 }
 
-static int zend_jit_init_fcall_guard(dasm_State **Dst, const zend_op *opline, const zend_function *func)
+static int zend_jit_init_fcall_guard(dasm_State **Dst, const zend_op *opline, const zend_function *func, const zend_op *to_opline)
 {
 	int32_t exit_point;
 	const void *exit_addr;
@@ -7745,7 +7745,7 @@ static int zend_jit_init_fcall_guard(dasm_State **Dst, const zend_op *opline, co
 		return 0;
 	}
 
-	exit_point = zend_jit_trace_get_exit_point(opline, opline ? (opline+1) : NULL, NULL);
+	exit_point = zend_jit_trace_get_exit_point(opline, to_opline, NULL);
 	exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 	if (!exit_addr) {
 		return 0;

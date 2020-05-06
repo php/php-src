@@ -3569,7 +3569,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							goto jit_failure;
 						}
 						if ((p+1)->op == ZEND_JIT_TRACE_INIT_CALL) {
-							if (!zend_jit_init_fcall_guard(&dasm_state, opline, (p+1)->func)) {
+							if (!zend_jit_init_fcall_guard(&dasm_state, opline, (p+1)->func, opline+1)) {
 								goto jit_failure;
 							}
 						}
@@ -3581,7 +3581,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						if ((opline->op1_type != IS_CONST
 						  || opline->op2_type != IS_CONST)
 						 && (p+1)->op == ZEND_JIT_TRACE_INIT_CALL) {
-							if (!zend_jit_init_fcall_guard(&dasm_state, opline, (p+1)->func)) {
+							if (!zend_jit_init_fcall_guard(&dasm_state, opline, (p+1)->func, opline+1)) {
 								goto jit_failure;
 							}
 						}
@@ -3592,7 +3592,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						}
 						if (opline->op2_type != IS_CONST
 						 && (p+1)->op == ZEND_JIT_TRACE_INIT_CALL) {
-							if (!zend_jit_init_fcall_guard(&dasm_state, opline, (p+1)->func)) {
+							if (!zend_jit_init_fcall_guard(&dasm_state, opline, (p+1)->func, opline+1)) {
 								goto jit_failure;
 							}
 						}
@@ -3603,7 +3603,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						}
 						if (opline->op1_type != IS_CONST
 						 && (p+1)->op == ZEND_JIT_TRACE_INIT_CALL) {
-							if (!zend_jit_init_fcall_guard(&dasm_state, opline, (p+1)->func)) {
+							if (!zend_jit_init_fcall_guard(&dasm_state, opline, (p+1)->func, opline+1)) {
 								goto jit_failure;
 							}
 						}
@@ -3952,7 +3952,7 @@ done:
 						call_info = call_info->next_callee;
 					}
 				}
-				if (!skip_guard && !zend_jit_init_fcall_guard(&dasm_state, NULL, p->func)) {
+				if (!skip_guard && !zend_jit_init_fcall_guard(&dasm_state, NULL, p->func, ((zend_jit_trace_start_rec*)trace_buffer)->opline)) {
 					goto jit_failure;
 				}
 				frame->call_level++;
