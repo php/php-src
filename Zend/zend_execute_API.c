@@ -830,6 +830,17 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 			/* We must re-initialize function again */
 			fci_cache->function_handler = NULL;
 		}
+
+		/* This flag is regularly checked while running user functions, but not internal
+		 * So see whether interrupt flag was set while the function was running... */
+		if (EG(vm_interrupt)) {
+			EG(vm_interrupt) = 0;
+			if (EG(timed_out)) {
+				zend_timeout();
+			} else if (zend_interrupt_function) {
+				zend_interrupt_function(EG(current_execute_data));
+			}
+		}
 	}
 
 	zend_vm_stack_free_call_frame(call);
