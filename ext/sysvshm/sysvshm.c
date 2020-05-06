@@ -148,25 +148,20 @@ PHP_FUNCTION(shm_attach)
 		RETURN_FALSE;
   	}
 
-	object_init_ex(return_value, sysvshm_ce);
-
 	/* get the id from a specified key or create new shared memory */
 	if ((shm_id = shmget(shm_key, 0, 0)) < 0) {
 		if (shm_size < (zend_long)sizeof(sysvshm_chunk_head)) {
 			php_error_docref(NULL, E_WARNING, "Failed for key 0x" ZEND_XLONG_FMT ": memorysize too small", shm_key);
-			zval_ptr_dtor(return_value);
 			RETURN_FALSE;
 		}
 		if ((shm_id = shmget(shm_key, shm_size, shm_flag | IPC_CREAT | IPC_EXCL)) < 0) {
 			php_error_docref(NULL, E_WARNING, "Failed for key 0x" ZEND_XLONG_FMT ": %s", shm_key, strerror(errno));
-			zval_ptr_dtor(return_value);
 			RETURN_FALSE;
 		}
 	}
 
 	if ((shm_ptr = shmat(shm_id, NULL, 0)) == (void *) -1) {
 		php_error_docref(NULL, E_WARNING, "Failed for key 0x" ZEND_XLONG_FMT ": %s", shm_key, strerror(errno));
-		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
 	}
 
@@ -179,6 +174,8 @@ PHP_FUNCTION(shm_attach)
 		chunk_ptr->total = shm_size;
 		chunk_ptr->free = shm_size-chunk_ptr->end;
 	}
+
+	object_init_ex(return_value, sysvshm_ce);
 
 	shm_list_ptr = Z_SYSVSHM_P(return_value);
 
@@ -219,6 +216,9 @@ PHP_FUNCTION(shm_remove)
 		php_error_docref(NULL, E_WARNING, "Failed for key 0x%x, id " ZEND_LONG_FMT ": %s", shm_list_ptr->key, Z_LVAL_P(shm_id), strerror(errno));
 		RETURN_FALSE;
 	}
+
+	shmdt((void *) shm_list_ptr->ptr);
+	shm_list_ptr->ptr = NULL;
 
 	RETURN_TRUE;
 }
