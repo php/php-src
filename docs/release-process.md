@@ -10,7 +10,7 @@
 
  3. Ensure that the tests on Travis CI are green.
 
-    See: https://travis-ci.org/php/php-src/builds
+    See: https://travis-ci.org/github/php/php-src/builds
 
     It is recommended to do so a couple of days before the packaging day, to
     have enough time to investigate failures, communicate with the authors and
@@ -80,7 +80,7 @@
  1. Check Windows snapshot builder logs https://windows.php.net/downloads/snaps/
     the last revision.
 
- 2. Check the tests at https://travis-ci.org/php/php-src/builds.
+ 2. Check the tests at https://travis-ci.org/github/php/php-src/builds.
 
  3. Run the `scripts/dev/credits` script in php-src and commit the changes in
     the credits files in ext/standard.
@@ -217,7 +217,7 @@
     branch. Don't forget to update `NEWS` manually in an extra commit then.
 
  3. Commit those changes. Ensure the tests at
-    https://travis-ci.org/php/php-src/builds are still passing.
+    https://travis-ci.org/github/php/php-src/builds are still passing.
 
  4. Run the `scripts/dev/credits` script in php-src and commit the changes in
     the credits files in ext/standard.
