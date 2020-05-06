@@ -324,6 +324,14 @@ static zend_always_inline void zend_hash_iterators_update(HashTable *ht, HashPos
 	}
 }
 
+static zend_always_inline void zend_array_release(zend_array *array)
+{
+	if (!(GC_FLAGS(array) & IS_ARRAY_IMMUTABLE)) {
+		if (GC_DELREF(array) == 0) {
+			zend_array_destroy(array);
+		}
+	}
+}
 
 END_EXTERN_C()
 
