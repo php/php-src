@@ -237,7 +237,6 @@ struct _zend_executor_globals {
 	HashTable weakrefs;
 
 	zend_bool exception_ignore_args;
-	zend_bool debug_locale_sensitive_float_casts;
 
 	zend_get_gc_buffer get_gc_buffer;
 

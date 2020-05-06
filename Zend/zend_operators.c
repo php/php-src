@@ -642,15 +642,6 @@ try_again:
 
 			str = zend_strpprintf_unchecked(0, "%.*H", (int) EG(precision), dval);
 
-			if (EG(debug_locale_sensitive_float_casts)) {
-				zend_string *original_str = zend_strpprintf(0, "%.*G", (int) EG(precision), dval);
-
-				if (!zend_string_equals(str, original_str)) {
-					zend_error(E_WARNING, "Locale-independent float to string conversion");
-				}
-				zend_string_release(original_str);
-			}
-
 			ZVAL_NEW_STR(op, str);
 			break;
 		}
@@ -955,15 +946,6 @@ try_again:
 		}
 		case IS_DOUBLE: {
 			zend_string *str = zend_strpprintf_unchecked(0, "%.*H", (int) EG(precision), Z_DVAL_P(op));
-
-			if (EG(debug_locale_sensitive_float_casts)) {
-				zend_string *original_str = zend_strpprintf(0, "%.*G", (int) EG(precision), Z_DVAL_P(op));
-
-				if (!zend_string_equals(str, original_str)) {
-					zend_error(E_WARNING, "Locale-independent float to string conversion");
-				}
-				zend_string_release(original_str);
-			}
 
 			return str;
 		}
