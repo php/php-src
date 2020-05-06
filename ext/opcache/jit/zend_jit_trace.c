@@ -2464,9 +2464,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 	ssa = zend_jit_trace_build_tssa(trace_buffer, parent_trace, exit_num, script, op_arrays, &num_op_arrays);
 
 	if (!ssa) {
-		zend_arena_release(&CG(arena), checkpoint);
-		JIT_G(current_trace) = NULL;
-		return NULL;
+		goto jit_cleanup;
 	}
 
 	/* Register allocation */
@@ -4023,6 +4021,7 @@ jit_failure:
 		zend_string_release(name);
 	}
 
+jit_cleanup:
 	/* Clenup used op_arrays */
 	while (num_op_arrays > 0) {
 		op_array = op_arrays[--num_op_arrays];
