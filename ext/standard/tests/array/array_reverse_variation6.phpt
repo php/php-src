@@ -2,8 +2,7 @@
 Test array_reverse() function : usage variations - two dimensional arrays for 'array' argument
 --FILE--
 <?php
-/* Prototype  : array array_reverse(array $array [, bool $preserve_keys])
- * Description: Return input as a new array with the order of the entries reversed
+/* Description: Return input as a new array with the order of the entries reversed
  * Source code: ext/standard/array.c
 */
 

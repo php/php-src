@@ -6,8 +6,7 @@ require __DIR__ . '/../skipif_root.inc';
 ?>
 --FILE--
 <?php
-/* Prototype: bool is_readable ( string $filename );
-   Description: Tells whether the filename is readable.
+/* Description: Tells whether the filename is readable.
 */
 
 /* test is_executable() with invalid arguments */

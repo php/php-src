@@ -2,8 +2,7 @@
 Test substr_replace() function : error conditions
 --FILE--
 <?php
-/* Prototype  : mixed substr_replace  ( mixed $string  , string $replacement  , int $start  [, int $length  ] )
- * Description: Replace text within a portion of a string
+/* Description: Replace text within a portion of a string
  * Source code: ext/standard/string.c
 */
 

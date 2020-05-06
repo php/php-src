@@ -4,8 +4,7 @@ Testing floatval() and its alias doubleval() Functions
 precision = 14
 --FILE--
 <?php
-/* Prototype: float floatval( mixed $var );
- * Description: Returns the float value of var.
+/* Description: Returns the float value of var.
  */
 
 // different valid  float values

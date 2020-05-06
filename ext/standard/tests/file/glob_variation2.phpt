@@ -2,8 +2,7 @@
 Test glob() function with relative path
 --FILE--
 <?php
-/* Prototype: array glob ( string $pattern [, int $flags] );
-   Description: Find pathnames matching a pattern
+/* Description: Find pathnames matching a pattern
 */
 
 $file_path = __DIR__;

@@ -505,8 +505,7 @@ int dom_document_config_read(dom_object *obj, zval *retval)
 
 /* }}} */
 
-/* {{{ proto DOMElement dom_document_create_element(string tagName [, string value])
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-2141741547
+/* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-2141741547
 Since:
 */
 PHP_METHOD(DOMDocument, createElement)
@@ -540,8 +539,7 @@ PHP_METHOD(DOMDocument, createElement)
 }
 /* }}} end dom_document_create_element */
 
-/* {{{ proto DOMDocumentFragment dom_document_create_document_fragment()
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-35CB04B5
+/* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-35CB04B5
 Since:
 */
 PHP_METHOD(DOMDocument, createDocumentFragment)
@@ -568,8 +566,7 @@ PHP_METHOD(DOMDocument, createDocumentFragment)
 }
 /* }}} end dom_document_create_document_fragment */
 
-/* {{{ proto DOMText dom_document_create_text_node(string data)
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1975348127
+/* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1975348127
 Since:
 */
 PHP_METHOD(DOMDocument, createTextNode)
@@ -598,8 +595,7 @@ PHP_METHOD(DOMDocument, createTextNode)
 }
 /* }}} end dom_document_create_text_node */
 
-/* {{{ proto DOMComment dom_document_create_comment(string data)
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1334481328
+/* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1334481328
 Since:
 */
 PHP_METHOD(DOMDocument, createComment)
@@ -628,8 +624,7 @@ PHP_METHOD(DOMDocument, createComment)
 }
 /* }}} end dom_document_create_comment */
 
-/* {{{ proto DOMCdataSection dom_document_create_cdatasection(string data)
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-D26C0AF8
+/* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-D26C0AF8
 Since:
 */
 PHP_METHOD(DOMDocument, createCDATASection)
@@ -658,8 +653,7 @@ PHP_METHOD(DOMDocument, createCDATASection)
 }
 /* }}} end dom_document_create_cdatasection */
 
-/* {{{ proto DOMProcessingInstruction dom_document_create_processing_instruction(string target, string data)
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-135944439
+/* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-135944439
 Since:
 */
 PHP_METHOD(DOMDocument, createProcessingInstruction)
@@ -695,8 +689,7 @@ PHP_METHOD(DOMDocument, createProcessingInstruction)
 }
 /* }}} end dom_document_create_processing_instruction */
 
-/* {{{ proto DOMAttr dom_document_create_attribute(string name)
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1084891198
+/* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1084891198
 Since:
 */
 PHP_METHOD(DOMDocument, createAttribute)
@@ -731,8 +724,7 @@ PHP_METHOD(DOMDocument, createAttribute)
 }
 /* }}} end dom_document_create_attribute */
 
-/* {{{ proto DOMEntityReference dom_document_create_entity_reference(string name)
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-392B75AE
+/* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-392B75AE
 Since:
 */
 PHP_METHOD(DOMDocument, createEntityReference)
@@ -766,8 +758,7 @@ PHP_METHOD(DOMDocument, createEntityReference)
 }
 /* }}} end dom_document_create_entity_reference */
 
-/* {{{ proto DOMNodeList dom_document_get_elements_by_tag_name(string tagname)
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-A6C9094
+/* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-A6C9094
 Since:
 */
 PHP_METHOD(DOMDocument, getElementsByTagName)
@@ -793,8 +784,7 @@ PHP_METHOD(DOMDocument, getElementsByTagName)
 }
 /* }}} end dom_document_get_elements_by_tag_name */
 
-/* {{{ proto DOMNode dom_document_import_node(DOMNode importedNode, bool deep)
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Core-Document-importNode
+/* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Core-Document-importNode
 Since: DOM Level 2
 */
 PHP_METHOD(DOMDocument, importNode)
@@ -849,8 +839,7 @@ PHP_METHOD(DOMDocument, importNode)
 }
 /* }}} end dom_document_import_node */
 
-/* {{{ proto DOMElement dom_document_create_element_ns(string namespaceURI, string qualifiedName [,string value])
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-DocCrElNS
+/* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-DocCrElNS
 Since: DOM Level 2
 */
 PHP_METHOD(DOMDocument, createElementNS)
@@ -914,8 +903,7 @@ PHP_METHOD(DOMDocument, createElementNS)
 }
 /* }}} end dom_document_create_element_ns */
 
-/* {{{ proto DOMAttr dom_document_create_attribute_ns(string namespaceURI, string qualifiedName)
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-DocCrAttrNS
+/* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-DocCrAttrNS
 Since: DOM Level 2
 */
 PHP_METHOD(DOMDocument, createAttributeNS)
@@ -981,8 +969,7 @@ PHP_METHOD(DOMDocument, createAttributeNS)
 }
 /* }}} end dom_document_create_attribute_ns */
 
-/* {{{ proto DOMNodeList dom_document_get_elements_by_tag_name_ns(string namespaceURI, string localName)
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-getElBTNNS
+/* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-getElBTNNS
 Since: DOM Level 2
 */
 PHP_METHOD(DOMDocument, getElementsByTagNameNS)
@@ -1009,8 +996,7 @@ PHP_METHOD(DOMDocument, getElementsByTagNameNS)
 }
 /* }}} end dom_document_get_elements_by_tag_name_ns */
 
-/* {{{ proto DOMElement dom_document_get_element_by_id(string elementId)
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-getElBId
+/* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-getElBId
 Since: DOM Level 2
 */
 PHP_METHOD(DOMDocument, getElementById)
@@ -1041,8 +1027,7 @@ PHP_METHOD(DOMDocument, getElementById)
 }
 /* }}} end dom_document_get_element_by_id */
 
-/* {{{ proto DOMNode dom_document_adopt_node(DOMNode source)
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Document3-adoptNode
+/* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Document3-adoptNode
 Since: DOM Level 3
 */
 PHP_METHOD(DOMDocument, adoptNode)
@@ -1057,8 +1042,7 @@ PHP_METHOD(DOMDocument, adoptNode)
 }
 /* }}} end dom_document_adopt_node */
 
-/* {{{ proto void dom_document_normalize_document()
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Document3-normalizeDocument
+/* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Document3-normalizeDocument
 Since: DOM Level 3
 */
 PHP_METHOD(DOMDocument, normalizeDocument)
@@ -1078,7 +1062,6 @@ PHP_METHOD(DOMDocument, normalizeDocument)
 }
 /* }}} end dom_document_normalize_document */
 
-/* {{{ proto DOMDocument::__construct([string version], [string encoding]); */
 PHP_METHOD(DOMDocument, __construct)
 {
 	xmlDoc *docp = NULL, *olddoc;
@@ -1363,8 +1346,7 @@ static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode) {
 }
 /* }}} end dom_parser_document */
 
-/* {{{ proto DOMNode dom_document_load(string source [, int options])
-URL: http://www.w3.org/TR/DOM-Level-3-LS/load-save.html#LS-DocumentLS-load
+/* URL: http://www.w3.org/TR/DOM-Level-3-LS/load-save.html#LS-DocumentLS-load
 Since: DOM Level 3
 */
 PHP_METHOD(DOMDocument, load)
@@ -1373,8 +1355,7 @@ PHP_METHOD(DOMDocument, load)
 }
 /* }}} end dom_document_load */
 
-/* {{{ proto DOMNode dom_document_loadxml(string source [, int options])
-URL: http://www.w3.org/TR/DOM-Level-3-LS/load-save.html#LS-DocumentLS-loadXML
+/* URL: http://www.w3.org/TR/DOM-Level-3-LS/load-save.html#LS-DocumentLS-loadXML
 Since: DOM Level 3
 */
 PHP_METHOD(DOMDocument, loadXML)
@@ -1383,8 +1364,7 @@ PHP_METHOD(DOMDocument, loadXML)
 }
 /* }}} end dom_document_loadxml */
 
-/* {{{ proto int dom_document_save(string file)
-Convenience method to save to file
+/* Convenience method to save to file
 */
 PHP_METHOD(DOMDocument, save)
 {
@@ -1428,8 +1408,7 @@ PHP_METHOD(DOMDocument, save)
 }
 /* }}} end dom_document_save */
 
-/* {{{ proto string dom_document_savexml([node n])
-URL: http://www.w3.org/TR/DOM-Level-3-LS/load-save.html#LS-DocumentLS-saveXML
+/* URL: http://www.w3.org/TR/DOM-Level-3-LS/load-save.html#LS-DocumentLS-saveXML
 Since: DOM Level 3
 */
 PHP_METHOD(DOMDocument, saveXML)
@@ -1541,8 +1520,7 @@ static void php_dom_remove_xinclude_nodes(xmlNodePtr cur) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto int dom_document_xinclude([int options])
-   Substitutues xincludes in a DomDocument */
+/* Substitutues xincludes in a DomDocument */
 PHP_METHOD(DOMDocument, xinclude)
 {
 	zval *id;
@@ -1587,8 +1565,7 @@ PHP_METHOD(DOMDocument, xinclude)
 }
 /* }}} */
 
-/* {{{ proto bool dom_document_validate()
-Since: DOM extended
+/* Since: DOM extended
 */
 PHP_METHOD(DOMDocument, validate)
 {
@@ -1709,14 +1686,12 @@ static void _dom_document_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type
 }
 /* }}} */
 
-/* {{{ proto bool dom_document_schema_validate_file(string filename, int flags); */
 PHP_METHOD(DOMDocument, schemaValidate)
 {
 	_dom_document_schema_validate(INTERNAL_FUNCTION_PARAM_PASSTHRU, DOM_LOAD_FILE);
 }
 /* }}} end dom_document_schema_validate_file */
 
-/* {{{ proto bool dom_document_schema_validate(string source, int flags); */
 PHP_METHOD(DOMDocument, schemaValidateSource)
 {
 	_dom_document_schema_validate(INTERNAL_FUNCTION_PARAM_PASSTHRU, DOM_LOAD_STRING);
@@ -1803,14 +1778,12 @@ static void _dom_document_relaxNG_validate(INTERNAL_FUNCTION_PARAMETERS, int typ
 }
 /* }}} */
 
-/* {{{ proto bool dom_document_relaxNG_validate_file(string filename); */
 PHP_METHOD(DOMDocument, relaxNGValidate)
 {
 	_dom_document_relaxNG_validate(INTERNAL_FUNCTION_PARAM_PASSTHRU, DOM_LOAD_FILE);
 }
 /* }}} end dom_document_relaxNG_validate_file */
 
-/* {{{ proto bool dom_document_relaxNG_validate_xml(string source); */
 PHP_METHOD(DOMDocument, relaxNGValidateSource)
 {
 	_dom_document_relaxNG_validate(INTERNAL_FUNCTION_PARAM_PASSTHRU, DOM_LOAD_STRING);
@@ -1915,8 +1888,7 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto DOMNode dom_document_load_html_file(string source)
-Since: DOM extended
+/* Since: DOM extended
 */
 PHP_METHOD(DOMDocument, loadHTMLFile)
 {
@@ -1924,8 +1896,7 @@ PHP_METHOD(DOMDocument, loadHTMLFile)
 }
 /* }}} end dom_document_load_html_file */
 
-/* {{{ proto DOMNode dom_document_load_html(string source)
-Since: DOM extended
+/* Since: DOM extended
 */
 PHP_METHOD(DOMDocument, loadHTML)
 {
@@ -1933,8 +1904,7 @@ PHP_METHOD(DOMDocument, loadHTML)
 }
 /* }}} end dom_document_load_html */
 
-/* {{{ proto int dom_document_save_html_file(string file)
-Convenience method to save to file as html
+/* Convenience method to save to file as html
 */
 PHP_METHOD(DOMDocument, saveHTMLFile)
 {
@@ -1973,8 +1943,7 @@ PHP_METHOD(DOMDocument, saveHTMLFile)
 }
 /* }}} end dom_document_save_html_file */
 
-/* {{{ proto string dom_document_save_html()
-Convenience method to output as html
+/* Convenience method to output as html
 */
 PHP_METHOD(DOMDocument, saveHTML)
 {
@@ -2062,8 +2031,7 @@ PHP_METHOD(DOMDocument, saveHTML)
 
 #endif  /* defined(LIBXML_HTML_ENABLED) */
 
-/* {{{ proto bool DOMDocument::registerNodeClass(string baseclass, string extendedclass)
-   Register extended class used to create base node type */
+/* Register extended class used to create base node type */
 PHP_METHOD(DOMDocument, registerNodeClass)
 {
 	zval *id;
@@ -2086,8 +2054,7 @@ PHP_METHOD(DOMDocument, registerNodeClass)
 }
 /* }}} */
 
-/* {{{ proto void domdocument::append(string|DOMNode ...$nodes)
-URL: https://dom.spec.whatwg.org/#dom-parentnode-append
+/* URL: https://dom.spec.whatwg.org/#dom-parentnode-append
 Since: DOM Living Standard (DOM4)
 */
 PHP_METHOD(DOMDocument, append)
@@ -2108,8 +2075,7 @@ PHP_METHOD(DOMDocument, append)
 }
 /* }}} */
 
-/* {{{ proto void domdocument::prepend(string|DOMNode ...$nodes)
-URL: https://dom.spec.whatwg.org/#dom-parentnode-prepend
+/* URL: https://dom.spec.whatwg.org/#dom-parentnode-prepend
 Since: DOM Living Standard (DOM4)
 */
 PHP_METHOD(DOMDocument, prepend)

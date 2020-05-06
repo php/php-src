@@ -1487,8 +1487,7 @@ PHPAPI char *php_get_current_user(void)
 }
 /* }}} */
 
-/* {{{ proto bool set_time_limit(int seconds)
-   Sets the maximum time a script can run */
+/* Sets the maximum time a script can run */
 PHP_FUNCTION(set_time_limit)
 {
 	zend_long new_timeout;

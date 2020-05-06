@@ -8,8 +8,7 @@ if (PHP_INT_SIZE > 4) {
 ?>
 --FILE--
 <?php
-/* Prototype  : mixed var_export(mixed var [, bool return])
- * Description: Outputs or returns a string representation of a variable
+/* Description: Outputs or returns a string representation of a variable
  * Source code: ext/standard/var.c
  * Alias to functions:
  */

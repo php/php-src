@@ -20,10 +20,8 @@
 #include "php_intl.h"
 #include "collator_class.h"
 
-/* {{{ proto int Collator::getErrorCode( Collator $coll )
- * Get collator's last error code. }}} */
-/* {{{ proto int collator_get_error_code( Collator $coll )
- * Get collator's last error code.
+/* Get collator's last error code. }}} */
+/* Get collator's last error code.
  */
 PHP_FUNCTION( collator_get_error_code )
 {
@@ -46,10 +44,8 @@ PHP_FUNCTION( collator_get_error_code )
 }
 /* }}} */
 
-/* {{{ proto string Collator::getErrorMessage( Collator $coll )
- * Get text description for collator's last error code. }}} */
-/* {{{ proto string collator_get_error_message( Collator $coll )
- * Get text description for collator's last error code.
+/* Get text description for collator's last error code. }}} */
+/* Get text description for collator's last error code.
  */
 PHP_FUNCTION( collator_get_error_message )
 {

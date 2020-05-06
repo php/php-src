@@ -2,8 +2,7 @@
 Test strncasecmp() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : int strncasecmp ( string $str1, string $str2, int $len );
- * Description: Binary safe case-insensitive string comparison of the first n characters
+/* Description: Binary safe case-insensitive string comparison of the first n characters
  * Source code: Zend/zend_builtin_functions.c
 */
 

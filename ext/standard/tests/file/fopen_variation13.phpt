@@ -4,8 +4,7 @@ Test fopen() function : variation: use include path create a file (absolute)
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
-/* Prototype  : resource fopen(string filename, string mode [, bool use_include_path [, resource context]])
- * Description: Open a file or a URL and return a file pointer
+/* Description: Open a file or a URL and return a file pointer
  * Source code: ext/standard/file.c
  * Alias to functions:
  */

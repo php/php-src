@@ -66,10 +66,8 @@ static int numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 }
 /* }}} */
 
-/* {{{ proto NumberFormatter NumberFormatter::create( string $locale, int style[, string $pattern ] )
- * Create number formatter. }}} */
-/* {{{ proto NumberFormatter numfmt_create( string $locale, int style[, string $pattern ] )
- * Create number formatter.
+/* Create number formatter. }}} */
+/* Create number formatter.
  */
 PHP_FUNCTION( numfmt_create )
 {
@@ -81,8 +79,7 @@ PHP_FUNCTION( numfmt_create )
 }
 /* }}} */
 
-/* {{{ proto NumberFormatter::__construct( string $locale, int style[, string $pattern ] )
- * NumberFormatter object constructor.
+/* NumberFormatter object constructor.
  */
 PHP_METHOD( NumberFormatter, __construct )
 {
@@ -99,10 +96,8 @@ PHP_METHOD( NumberFormatter, __construct )
 }
 /* }}} */
 
-/* {{{ proto int NumberFormatter::getErrorCode()
- * Get formatter's last error code. }}} */
-/* {{{ proto int numfmt_get_error_code( NumberFormatter $nf )
- * Get formatter's last error code.
+/* Get formatter's last error code. }}} */
+/* Get formatter's last error code.
  */
 PHP_FUNCTION( numfmt_get_error_code )
 {
@@ -122,10 +117,8 @@ PHP_FUNCTION( numfmt_get_error_code )
 }
 /* }}} */
 
-/* {{{ proto string NumberFormatter::getErrorMessage( )
- * Get text description for formatter's last error code. }}} */
-/* {{{ proto string numfmt_get_error_message( NumberFormatter $nf )
- * Get text description for formatter's last error code.
+/* Get text description for formatter's last error code. }}} */
+/* Get text description for formatter's last error code.
  */
 PHP_FUNCTION( numfmt_get_error_message )
 {

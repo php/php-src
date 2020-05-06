@@ -520,8 +520,6 @@ static zend_bool tokenize_common(
 
 /* }}} */
 
-/* {{{ proto array token_get_all(string source [, int flags])
- */
 PHP_FUNCTION(token_get_all)
 {
 	zend_string *source;
@@ -539,8 +537,6 @@ PHP_FUNCTION(token_get_all)
 }
 /* }}} */
 
-/* {{{ proto string token_name(int type)
- */
 PHP_FUNCTION(token_name)
 {
 	zend_long type;

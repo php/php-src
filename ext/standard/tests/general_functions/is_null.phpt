@@ -2,8 +2,7 @@
 Test is_null() function
 --FILE--
 <?php
-/* Prototype: bool is_null ( mixed $var );
- * Description: Finds whether the given variable is NULL
+/* Description: Finds whether the given variable is NULL
  */
 
 echo "*** Testing is_null() with valid null values ***\n";

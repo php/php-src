@@ -34,8 +34,7 @@ PHP_SXE_API zend_class_entry *ce_SimpleXMLElement;
 
 #include "php_simplexml_exports.h"
 
-/* {{{ proto void SimpleXMLIterator::rewind()
- Rewind to first element */
+/* Rewind to first element */
 PHP_METHOD(SimpleXMLIterator, rewind)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -46,8 +45,7 @@ PHP_METHOD(SimpleXMLIterator, rewind)
 }
 /* }}} */
 
-/* {{{ proto bool SimpleXMLIterator::valid()
- Check whether iteration is valid */
+/* Check whether iteration is valid */
 PHP_METHOD(SimpleXMLIterator, valid)
 {
 	php_sxe_object *sxe = Z_SXEOBJ_P(ZEND_THIS);
@@ -60,8 +58,7 @@ PHP_METHOD(SimpleXMLIterator, valid)
 }
 /* }}} */
 
-/* {{{ proto SimpleXMLIterator SimpleXMLIterator::current()
- Get current element */
+/* Get current element */
 PHP_METHOD(SimpleXMLIterator, current)
 {
 	php_sxe_object *sxe = Z_SXEOBJ_P(ZEND_THIS);
@@ -80,8 +77,7 @@ PHP_METHOD(SimpleXMLIterator, current)
 }
 /* }}} */
 
-/* {{{ proto string SimpleXMLIterator::key()
- Get name of current child element */
+/* Get name of current child element */
 PHP_METHOD(SimpleXMLIterator, key)
 {
 	xmlNodePtr curnode;
@@ -106,8 +102,7 @@ PHP_METHOD(SimpleXMLIterator, key)
 }
 /* }}} */
 
-/* {{{ proto void SimpleXMLIterator::next()
- Move to next element */
+/* Move to next element */
 PHP_METHOD(SimpleXMLIterator, next)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -118,8 +113,7 @@ PHP_METHOD(SimpleXMLIterator, next)
 }
 /* }}} */
 
-/* {{{ proto bool SimpleXMLIterator::hasChildren()
- Check whether element has children (elements) */
+/* Check whether element has children (elements) */
 PHP_METHOD(SimpleXMLIterator, hasChildren)
 {
 	php_sxe_object *sxe = Z_SXEOBJ_P(ZEND_THIS);
@@ -146,8 +140,7 @@ PHP_METHOD(SimpleXMLIterator, hasChildren)
 }
 /* }}} */
 
-/* {{{ proto SimpleXMLIterator SimpleXMLIterator::getChildren()
- Get child element iterator */
+/* Get child element iterator */
 PHP_METHOD(SimpleXMLIterator, getChildren)
 {
 	php_sxe_object *sxe = Z_SXEOBJ_P(ZEND_THIS);

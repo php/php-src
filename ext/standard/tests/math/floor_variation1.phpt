@@ -4,8 +4,7 @@ Test floor() function : usage variations - different data types as $value arg
 precision=14
 --FILE--
 <?php
-/* Prototype  : float floor  ( float $value  )
- * Description: Round fractions down.
+/* Description: Round fractions down.
  * Source code: ext/standard/math.c
  */
 

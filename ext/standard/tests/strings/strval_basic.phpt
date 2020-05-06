@@ -2,8 +2,7 @@
 Test strval() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : string strval  ( mixed $var  )
- * Description: Get the string value of a variable.
+/* Description: Get the string value of a variable.
  * Source code: ext/standard/string.c
  */
 

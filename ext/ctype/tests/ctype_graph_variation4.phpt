@@ -4,8 +4,7 @@ Test ctype_graph() function : usage variations - octal and hexadecimal values
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-/* Prototype  : bool ctype_graph(mixed $c)
- * Description: Checks for any printable character(s) except space
+/* Description: Checks for any printable character(s) except space
  * Source code: ext/ctype/ctype.c
  */
 

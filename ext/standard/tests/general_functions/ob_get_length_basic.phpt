@@ -4,8 +4,7 @@ Test ob_get_length() function : basic functionality
 output_buffering=0
 --FILE--
 <?php
-/* Prototype  : int ob_get_length(void)
- * Description: Return the length of the output buffer
+/* Description: Return the length of the output buffer
  * Source code: main/output.c
  * Alias to functions:
  */

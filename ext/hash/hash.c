@@ -184,8 +184,7 @@ static void php_hash_do_hash(INTERNAL_FUNCTION_PARAMETERS, int isfilename, zend_
 }
 /* }}} */
 
-/* {{{ proto string hash(string algo, string data[, bool raw_output = false])
-Generate a hash of a given input string
+/* Generate a hash of a given input string
 Returns lowercase hexits by default */
 PHP_FUNCTION(hash)
 {
@@ -193,8 +192,7 @@ PHP_FUNCTION(hash)
 }
 /* }}} */
 
-/* {{{ proto string hash_file(string algo, string filename[, bool raw_output = false])
-Generate a hash of a given file
+/* Generate a hash of a given file
 Returns lowercase hexits by default */
 PHP_FUNCTION(hash_file)
 {
@@ -322,8 +320,7 @@ static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename, 
 }
 /* }}} */
 
-/* {{{ proto string hash_hmac(string algo, string data, string key[, bool raw_output = false])
-Generate a hash of a given input string with a key using HMAC
+/* Generate a hash of a given input string with a key using HMAC
 Returns lowercase hexits by default */
 PHP_FUNCTION(hash_hmac)
 {
@@ -331,8 +328,7 @@ PHP_FUNCTION(hash_hmac)
 }
 /* }}} */
 
-/* {{{ proto string hash_hmac_file(string algo, string filename, string key[, bool raw_output = false])
-Generate a hash of a given file with a key using HMAC
+/* Generate a hash of a given file with a key using HMAC
 Returns lowercase hexits by default */
 PHP_FUNCTION(hash_hmac_file)
 {
@@ -340,8 +336,7 @@ PHP_FUNCTION(hash_hmac_file)
 }
 /* }}} */
 
-/* {{{ proto HashContext hash_init(string algo[, int options, string key])
-Initialize a hashing context */
+/* Initialize a hashing context */
 PHP_FUNCTION(hash_init)
 {
 	zend_string *algo, *key = NULL;
@@ -417,8 +412,7 @@ PHP_FUNCTION(hash_init)
 	} \
 }
 
-/* {{{ proto bool hash_update(HashContext context, string data)
-Pump data into the hashing algorithm */
+/* Pump data into the hashing algorithm */
 PHP_FUNCTION(hash_update)
 {
 	zval *zhash;
@@ -437,8 +431,7 @@ PHP_FUNCTION(hash_update)
 }
 /* }}} */
 
-/* {{{ proto int hash_update_stream(HashContext context, resource handle[, int length])
-Pump data into the hashing algorithm from an open stream */
+/* Pump data into the hashing algorithm from an open stream */
 PHP_FUNCTION(hash_update_stream)
 {
 	zval *zhash, *zstream;
@@ -475,8 +468,7 @@ PHP_FUNCTION(hash_update_stream)
 }
 /* }}} */
 
-/* {{{ proto bool hash_update_file(HashContext context, string filename[, resource context])
-Pump data into the hashing algorithm from a file */
+/* Pump data into the hashing algorithm from a file */
 PHP_FUNCTION(hash_update_file)
 {
 	zval *zhash, *zcontext = NULL;
@@ -510,8 +502,7 @@ PHP_FUNCTION(hash_update_file)
 }
 /* }}} */
 
-/* {{{ proto string hash_final(HashContext context[, bool raw_output=false])
-Output resulting digest */
+/* Output resulting digest */
 PHP_FUNCTION(hash_final)
 {
 	zval *zhash;
@@ -569,8 +560,7 @@ PHP_FUNCTION(hash_final)
 }
 /* }}} */
 
-/* {{{ proto HashContext hash_copy(HashContext context)
-Copy hash object */
+/* Copy hash object */
 PHP_FUNCTION(hash_copy)
 {
 	zval *zhash;
@@ -590,8 +580,7 @@ PHP_FUNCTION(hash_copy)
 }
 /* }}} */
 
-/* {{{ proto array hash_algos(void)
-Return a list of registered hashing algorithms */
+/* Return a list of registered hashing algorithms */
 PHP_FUNCTION(hash_algos)
 {
 	zend_string *str;
@@ -607,8 +596,7 @@ PHP_FUNCTION(hash_algos)
 }
 /* }}} */
 
-/* {{{ proto array hash_hmac_algos(void)
-Return a list of registered hashing algorithms suitable for hash_hmac() */
+/* Return a list of registered hashing algorithms suitable for hash_hmac() */
 PHP_FUNCTION(hash_hmac_algos)
 {
 	zend_string *str;
@@ -627,8 +615,7 @@ PHP_FUNCTION(hash_hmac_algos)
 }
 /* }}} */
 
-/* {{{ proto string hash_hkdf(string algo, string ikm [, int length = 0, string info = '', string salt = ''])
-RFC5869 HMAC-based key derivation function */
+/* RFC5869 HMAC-based key derivation function */
 PHP_FUNCTION(hash_hkdf)
 {
 	zend_string *returnval, *ikm, *algo, *info = NULL, *salt = NULL;
@@ -720,8 +707,7 @@ PHP_FUNCTION(hash_hkdf)
 	RETURN_STR(returnval);
 }
 
-/* {{{ proto string hash_pbkdf2(string algo, string password, string salt, int iterations [, int length = 0, bool raw_output = false])
-Generate a PBKDF2 hash of the given password and salt
+/* Generate a PBKDF2 hash of the given password and salt
 Returns lowercase hexits by default */
 PHP_FUNCTION(hash_pbkdf2)
 {
@@ -845,8 +831,7 @@ PHP_FUNCTION(hash_pbkdf2)
 }
 /* }}} */
 
-/* {{{ proto bool hash_equals(string known_string, string user_string)
-   Compares two strings using the same time whether they're equal or not.
+/* Compares two strings using the same time whether they're equal or not.
    A difference in length will leak */
 PHP_FUNCTION(hash_equals)
 {
@@ -886,7 +871,6 @@ PHP_FUNCTION(hash_equals)
 }
 /* }}} */
 
-/* {{{ proto HashContext::__construct() */
 PHP_METHOD(HashContext, __construct) {
 	/* Normally unreachable as private/final */
 	zend_throw_exception(zend_ce_error, "Illegal call to private/final constructor", 0);
@@ -943,8 +927,7 @@ static void mhash_init(INIT_FUNC_ARGS)
 	/* TODO: this cause #69823 zend_register_internal_module(&mhash_module_entry); */
 }
 
-/* {{{ proto string mhash(int hash, string data [, string key])
-   Hash data with hash */
+/* Hash data with hash */
 PHP_FUNCTION(mhash)
 {
 	zval *z_algorithm;
@@ -974,8 +957,7 @@ PHP_FUNCTION(mhash)
 }
 /* }}} */
 
-/* {{{ proto string mhash_get_hash_name(int hash)
-   Gets the name of hash */
+/* Gets the name of hash */
 PHP_FUNCTION(mhash_get_hash_name)
 {
 	zend_long algorithm;
@@ -994,8 +976,7 @@ PHP_FUNCTION(mhash_get_hash_name)
 }
 /* }}} */
 
-/* {{{ proto int mhash_count(void)
-   Gets the number of available hashes */
+/* Gets the number of available hashes */
 PHP_FUNCTION(mhash_count)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1005,8 +986,7 @@ PHP_FUNCTION(mhash_count)
 }
 /* }}} */
 
-/* {{{ proto int mhash_get_block_size(int hash)
-   Gets the block size of hash */
+/* Gets the block size of hash */
 PHP_FUNCTION(mhash_get_block_size)
 {
 	zend_long algorithm;
@@ -1030,8 +1010,7 @@ PHP_FUNCTION(mhash_get_block_size)
 
 #define SALT_SIZE 8
 
-/* {{{ proto string mhash_keygen_s2k(int hash, string input_password, string salt, int bytes)
-   Generates a key using hash functions */
+/* Generates a key using hash functions */
 PHP_FUNCTION(mhash_keygen_s2k)
 {
 	zend_long algorithm, l_bytes;

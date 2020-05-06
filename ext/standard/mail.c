@@ -248,8 +248,7 @@ PHPAPI zend_string *php_mail_build_headers(HashTable *headers)
 }
 
 
-/* {{{ proto bool mail(string to, string subject, string message [, string additional_headers [, string additional_parameters]])
-   Send an email message */
+/* Send an email message */
 PHP_FUNCTION(mail)
 {
 	char *to=NULL, *message=NULL;

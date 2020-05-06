@@ -10,7 +10,6 @@ Test fopen and fclose() functions - usage variations - "r" mode
 */
 /*
  fclose() function:
- Prototype: bool fclose ( resource $handle );
  Description: Closes an open file pointer
 */
 

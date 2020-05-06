@@ -1204,8 +1204,7 @@ PHPAPI char * php_image_type_to_mime_type(int image_type)
 }
 /* }}} */
 
-/* {{{ proto string image_type_to_mime_type(int imagetype)
-   Get Mime-Type for image-type returned by getimagesize, exif_read_data, exif_thumbnail, exif_imagetype */
+/* Get Mime-Type for image-type returned by getimagesize, exif_read_data, exif_thumbnail, exif_imagetype */
 PHP_FUNCTION(image_type_to_mime_type)
 {
 	zend_long p_image_type;
@@ -1218,8 +1217,7 @@ PHP_FUNCTION(image_type_to_mime_type)
 }
 /* }}} */
 
-/* {{{ proto string|false image_type_to_extension(int imagetype [, bool include_dot])
-   Get file extension for image-type returned by getimagesize, exif_read_data, exif_thumbnail, exif_imagetype */
+/* Get file extension for image-type returned by getimagesize, exif_read_data, exif_thumbnail, exif_imagetype */
 PHP_FUNCTION(image_type_to_extension)
 {
 	zend_long image_type;
@@ -1513,16 +1511,14 @@ static void php_getimagesize_from_any(INTERNAL_FUNCTION_PARAMETERS, int mode) { 
 }
 /* }}} */
 
-/* {{{ proto array|false getimagesize(string imagefile [, array info])
-   Get the size of an image as 4-element array */
+/* Get the size of an image as 4-element array */
 PHP_FUNCTION(getimagesize)
 {
 	php_getimagesize_from_any(INTERNAL_FUNCTION_PARAM_PASSTHRU, FROM_PATH);
 }
 /* }}} */
 
-/* {{{ proto array|false getimagesizefromstring(string data [, array info])
-   Get the size of an image as 4-element array */
+/* Get the size of an image as 4-element array */
 PHP_FUNCTION(getimagesizefromstring)
 {
 	php_getimagesize_from_any(INTERNAL_FUNCTION_PARAM_PASSTHRU, FROM_DATA);

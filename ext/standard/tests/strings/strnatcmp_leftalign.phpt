@@ -4,8 +4,7 @@ Test strnatcmp() function : left align, whitespace, digits
 Sol Richardson <sr5732358@hotmail.com>
 --FILE--
 <?php
-/* Prototype  : int strnatcmp  ( string $str1  , string $str2  )
-* Description: String comparisons using a "natural order" algorithm
+/* Description: String comparisons using a "natural order" algorithm
 * Source code: ext/standard/string.c
 */
 

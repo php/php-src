@@ -3,8 +3,7 @@ Test fseek(), ftell() & rewind() functions : error conditions - rewind()
 --FILE--
 <?php
 
-/* Prototype: int fseek ( resource $handle, int $offset [, int $whence] );
-   Description: Seeks on a file pointer
+/* Description: Seeks on a file pointer
 
    Prototype: bool rewind ( resource $handle );
    Description: Rewind the position of a file pointer

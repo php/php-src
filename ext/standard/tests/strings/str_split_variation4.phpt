@@ -2,8 +2,7 @@
 Test str_split() function : usage variations - different single quoted strings for 'str' argument
 --FILE--
 <?php
-/* Prototype  : array str_split(string $str [, int $split_length])
- * Description: Convert a string to an array. If split_length is
+/* Description: Convert a string to an array. If split_length is
                 specified, break the string down into chunks each
                 split_length characters long.
  * Source code: ext/standard/string.c

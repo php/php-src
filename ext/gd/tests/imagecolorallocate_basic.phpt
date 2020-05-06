@@ -11,8 +11,7 @@ if(!function_exists('imagecreatetruecolor')) {
 ?>
 --FILE--
 <?php
-/* Prototype  : int imagecolorallocate(resource im, int red, int green, int blue)
- * Description: Allocate a color for an image
+/* Description: Allocate a color for an image
  * Source code: ext/gd/gd.c
  */
 

@@ -2,8 +2,7 @@
 Test array_unshift() function : usage variations - assoc. array with diff. keys for 'array' argument
 --FILE--
 <?php
-/* Prototype  : int array_unshift(array $array, mixed $var [, mixed ...])
- * Description: Pushes elements onto the beginning of the array
+/* Description: Pushes elements onto the beginning of the array
  * Source code: ext/standard/array.c
 */
 

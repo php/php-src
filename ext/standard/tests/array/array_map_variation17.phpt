@@ -2,8 +2,7 @@
 Test array_map() function : usage variations - unexpected values for 'callback' argument
 --FILE--
 <?php
-/* Prototype  : array array_map  ( callback $callback  , array $arr1  [, array $...  ] )
- * Description: Applies the callback to the elements of the given arrays
+/* Description: Applies the callback to the elements of the given arrays
  * Source code: ext/standard/array.c
  */
 

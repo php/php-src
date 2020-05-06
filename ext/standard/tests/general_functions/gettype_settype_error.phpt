@@ -2,8 +2,7 @@
 Test gettype() & settype() functions : error conditions
 --FILE--
 <?php
-/* Prototype: string gettype ( mixed $var );
-   Description: Returns the type of the PHP variable var
+/* Description: Returns the type of the PHP variable var
 
    Prototype: bool settype ( mixed &$var, string $type );
    Description: Set the type of variable var to type

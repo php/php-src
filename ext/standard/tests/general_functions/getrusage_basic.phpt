@@ -4,8 +4,7 @@ Test getrusage() function: basic test
 <?php if (!function_exists("getrusage")) print "skip"; ?>
 --FILE--
 <?php
-/* Prototype  :  array getrusage  ([ int $who  ] )
- * Description: Gets the current resource usages
+/* Description: Gets the current resource usages
  * Source code: ext/standard/microtime.c
  * Alias to functions:
  */

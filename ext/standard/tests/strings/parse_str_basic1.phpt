@@ -3,8 +3,7 @@ Test parse_str() function : basic functionality
 --FILE--
 <?php
 
-/* Prototype  : void parse_str  ( string $str , array &$arr )
- * Description: Parses the string into variables
+/* Description: Parses the string into variables
  * Source code: ext/standard/string.c
 */
 

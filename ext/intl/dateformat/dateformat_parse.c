@@ -118,10 +118,8 @@ static void internal_parse_to_localtime(IntlDateFormatter_object *dfo, char* tex
 /* }}} */
 
 
-/* {{{ proto int IntlDateFormatter::parse( string $text_to_parse  [, int $parse_pos] )
- * Parse the string $value starting at parse_pos to a Unix timestamp -int }}}*/
-/* {{{ proto int datefmt_parse( IntlDateFormatter $fmt, string $text_to_parse [, int $parse_pos] )
- * Parse the string $value starting at parse_pos to a Unix timestamp -int }}}*/
+/* Parse the string $value starting at parse_pos to a Unix timestamp -int }}}*/
+/* Parse the string $value starting at parse_pos to a Unix timestamp -int }}}*/
 PHP_FUNCTION(datefmt_parse)
 {
 	char*           text_to_parse = NULL;
@@ -162,10 +160,8 @@ PHP_FUNCTION(datefmt_parse)
 }
 /* }}} */
 
-/* {{{ proto int IntlDateFormatter::localtime( string $text_to_parse[, int $parse_pos] )
- * Parse the string $value to a localtime array  }}}*/
-/* {{{ proto int datefmt_localtime( IntlDateFormatter $fmt, string $text_to_parse[, int $parse_pos ])
- * Parse the string $value to a localtime array  }}}*/
+/* Parse the string $value to a localtime array  }}}*/
+/* Parse the string $value to a localtime array  }}}*/
 PHP_FUNCTION(datefmt_localtime)
 {
 	char*           text_to_parse = NULL;

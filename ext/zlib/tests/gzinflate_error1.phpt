@@ -8,8 +8,7 @@ if (!extension_loaded("zlib")) {
 ?>
 --FILE--
 <?php
-/* Prototype  : string gzinflate(string data [, int length])
- * Description: Unzip a gzip-compressed string
+/* Description: Unzip a gzip-compressed string
  * Source code: ext/zlib/zlib.c
  * Alias to functions:
  */

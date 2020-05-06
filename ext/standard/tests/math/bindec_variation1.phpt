@@ -6,8 +6,7 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 ?>
 --FILE--
 <?php
-/* Prototype  : number bindec  ( string $binary_string  )
- * Description: Returns the decimal equivalent of the binary number represented by the binary_string  argument.
+/* Description: Returns the decimal equivalent of the binary number represented by the binary_string  argument.
  * Source code: ext/standard/math.c
  */
 

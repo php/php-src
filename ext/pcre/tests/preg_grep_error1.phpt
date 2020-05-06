@@ -3,7 +3,6 @@ Test preg_grep() function : error conditions - bad regular expressions
 --FILE--
 <?php
 /*
-* proto array preg_grep(string regex, array input [, int flags])
 * Function is implemented in ext/pcre/php_pcre.c
 */
 /*

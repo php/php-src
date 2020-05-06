@@ -4,8 +4,7 @@ Test round() - basic function test for round()
 precision=14
 --FILE--
 <?php
-/* Prototype  : float round  ( float $val  [, int $precision  ] )
- * Description: Returns the rounded value of val  to specified precision (number of digits
+/* Description: Returns the rounded value of val  to specified precision (number of digits
  * after the decimal point)
  * Source code: ext/standard/math.c
  */

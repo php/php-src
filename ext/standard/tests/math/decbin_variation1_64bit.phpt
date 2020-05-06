@@ -8,8 +8,7 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 ?>
 --FILE--
 <?php
-/* Prototype  : string decbin  ( int $number  )
- * Description: Decimal to binary.
+/* Description: Decimal to binary.
  * Source code: ext/standard/math.c
  */
 

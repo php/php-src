@@ -2,8 +2,7 @@
 Test prev() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : mixed prev(array $array_arg)
- * Description: Move array argument's internal pointer to the previous element and return it
+/* Description: Move array argument's internal pointer to the previous element and return it
  * Source code: ext/standard/array.c
  */
 

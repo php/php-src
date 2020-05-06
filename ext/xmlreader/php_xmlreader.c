@@ -521,8 +521,7 @@ static void php_xmlreader_set_relaxng_schema(INTERNAL_FUNCTION_PARAMETERS, int t
 }
 /* }}} */
 
-/* {{{ proto bool XMLReader::close()
-Closes xmlreader - current frees resources until xmlTextReaderClose is fixed in libxml */
+/* Closes xmlreader - current frees resources until xmlTextReaderClose is fixed in libxml */
 PHP_METHOD(XMLReader, close)
 {
 	zval *id;
@@ -543,16 +542,14 @@ PHP_METHOD(XMLReader, close)
 }
 /* }}} */
 
-/* {{{ proto string XMLReader::getAttribute(string name)
-Get value of an attribute from current element */
+/* Get value of an attribute from current element */
 PHP_METHOD(XMLReader, getAttribute)
 {
 	php_xmlreader_string_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextReaderGetAttribute);
 }
 /* }}} */
 
-/* {{{ proto string XMLReader::getAttributeNo(int index)
-Get value of an attribute at index from current element */
+/* Get value of an attribute at index from current element */
 PHP_METHOD(XMLReader, getAttributeNo)
 {
 	zval *id;
@@ -577,8 +574,7 @@ PHP_METHOD(XMLReader, getAttributeNo)
 }
 /* }}} */
 
-/* {{{ proto string XMLReader::getAttributeNs(string name, string namespaceURI)
-Get value of a attribute via name and namespace from current element */
+/* Get value of a attribute via name and namespace from current element */
 PHP_METHOD(XMLReader, getAttributeNs)
 {
 	zval *id;
@@ -608,8 +604,7 @@ PHP_METHOD(XMLReader, getAttributeNs)
 }
 /* }}} */
 
-/* {{{ proto bool XMLReader::getParserProperty(int property)
-Indicates whether given property (one of the parser option constants) is set or not on parser */
+/* Indicates whether given property (one of the parser option constants) is set or not on parser */
 PHP_METHOD(XMLReader, getParserProperty)
 {
 	zval *id;
@@ -636,8 +631,7 @@ PHP_METHOD(XMLReader, getParserProperty)
 }
 /* }}} */
 
-/* {{{ proto bool XMLReader::isValid()
-Returns boolean indicating if parsed document is valid or not.
+/* Returns boolean indicating if parsed document is valid or not.
 Must set XMLREADER_LOADDTD or XMLREADER_VALIDATE parser option prior to the first call to read
 or this method will always return FALSE */
 PHP_METHOD(XMLReader, isValid)
@@ -646,16 +640,14 @@ PHP_METHOD(XMLReader, isValid)
 }
 /* }}} */
 
-/* {{{ proto string XMLReader::lookupNamespace(string prefix)
-Return namespaceURI for associated prefix on current node */
+/* Return namespaceURI for associated prefix on current node */
 PHP_METHOD(XMLReader, lookupNamespace)
 {
 	php_xmlreader_string_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextReaderLookupNamespace);
 }
 /* }}} */
 
-/* {{{ proto bool XMLReader::moveToAttribute(string name)
-Positions reader at specified attribute - Returns TRUE on success and FALSE on failure */
+/* Positions reader at specified attribute - Returns TRUE on success and FALSE on failure */
 PHP_METHOD(XMLReader, moveToAttribute)
 {
 	zval *id;
@@ -687,8 +679,7 @@ PHP_METHOD(XMLReader, moveToAttribute)
 }
 /* }}} */
 
-/* {{{ proto bool XMLReader::moveToAttributeNo(int index)
-Positions reader at attribute at specified index.
+/* Positions reader at attribute at specified index.
 Returns TRUE on success and FALSE on failure */
 PHP_METHOD(XMLReader, moveToAttributeNo)
 {
@@ -715,8 +706,7 @@ PHP_METHOD(XMLReader, moveToAttributeNo)
 }
 /* }}} */
 
-/* {{{ proto bool XMLReader::moveToAttributeNs(string name, string namespaceURI)
-Positions reader at attribute spcified by name and namespaceURI.
+/* Positions reader at attribute spcified by name and namespaceURI.
 Returns TRUE on success and FALSE on failure */
 PHP_METHOD(XMLReader, moveToAttributeNs)
 {
@@ -749,32 +739,28 @@ PHP_METHOD(XMLReader, moveToAttributeNs)
 }
 /* }}} */
 
-/* {{{ proto bool XMLReader::moveToElement()
-Moves the position of the current instance to the node that contains the current Attribute node. */
+/* Moves the position of the current instance to the node that contains the current Attribute node. */
 PHP_METHOD(XMLReader, moveToElement)
 {
 	php_xmlreader_no_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextReaderMoveToElement);
 }
 /* }}} */
 
-/* {{{ proto bool XMLReader::moveToFirstAttribute()
-Moves the position of the current instance to the first attribute associated with the current node. */
+/* Moves the position of the current instance to the first attribute associated with the current node. */
 PHP_METHOD(XMLReader, moveToFirstAttribute)
 {
 	php_xmlreader_no_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextReaderMoveToFirstAttribute);
 }
 /* }}} */
 
-/* {{{ proto bool XMLReader::moveToNextAttribute()
-Moves the position of the current instance to the next attribute associated with the current node. */
+/* Moves the position of the current instance to the next attribute associated with the current node. */
 PHP_METHOD(XMLReader, moveToNextAttribute)
 {
 	php_xmlreader_no_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextReaderMoveToNextAttribute);
 }
 /* }}} */
 
-/* {{{ proto bool XMLReader::read()
-Moves the position of the current instance to the next node in the stream. */
+/* Moves the position of the current instance to the next node in the stream. */
 PHP_METHOD(XMLReader, read)
 {
 	zval *id;
@@ -801,8 +787,7 @@ PHP_METHOD(XMLReader, read)
 }
 /* }}} */
 
-/* {{{ proto bool XMLReader::next([string localname])
-Moves the position of the current instance to the next node in the stream. */
+/* Moves the position of the current instance to the next node in the stream. */
 PHP_METHOD(XMLReader, next)
 {
 	zval *id;
@@ -837,8 +822,7 @@ PHP_METHOD(XMLReader, next)
 }
 /* }}} */
 
-/* {{{ proto bool XMLReader::open(string URI [, string encoding [, int options]])
-Sets the URI that the XMLReader will parse. */
+/* Sets the URI that the XMLReader will parse. */
 PHP_METHOD(XMLReader, open)
 {
 	zval *id;
@@ -901,32 +885,28 @@ PHP_METHOD(XMLReader, resetState)
 }
 */
 
-/* {{{ proto string XMLReader::readInnerXml()
-Reads the contents of the current node, including child nodes and markup. */
+/* Reads the contents of the current node, including child nodes and markup. */
 PHP_METHOD(XMLReader, readInnerXml)
 {
 	php_xmlreader_no_arg_string(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextReaderReadInnerXml);
 }
 /* }}} */
 
-/* {{{ proto bool XMLReader::readOuterXml()
-Reads the contents of the current node, including child nodes and markup. */
+/* Reads the contents of the current node, including child nodes and markup. */
 PHP_METHOD(XMLReader, readOuterXml)
 {
 	php_xmlreader_no_arg_string(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextReaderReadOuterXml);
 }
 /* }}} */
 
-/* {{{ proto bool XMLReader::readString()
-Reads the contents of an element or a text node as a string. */
+/* Reads the contents of an element or a text node as a string. */
 PHP_METHOD(XMLReader, readString)
 {
 	php_xmlreader_no_arg_string(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextReaderReadString);
 }
 /* }}} */
 
-/* {{{ proto bool XMLReader::setSchema(string filename)
-Use W3C XSD schema to validate the document as it is processed. Activation is only possible before the first Read(). */
+/* Use W3C XSD schema to validate the document as it is processed. Activation is only possible before the first Read(). */
 PHP_METHOD(XMLReader, setSchema)
 {
 #ifdef LIBXML_SCHEMAS_ENABLED
@@ -967,8 +947,7 @@ PHP_METHOD(XMLReader, setSchema)
 }
 /* }}} */
 
-/* {{{ proto bool XMLReader::setParserProperty(int property, bool value)
-Sets parser property (one of the parser option constants).
+/* Sets parser property (one of the parser option constants).
 Properties must be set after open() or XML() and before the first read() is called */
 PHP_METHOD(XMLReader, setParserProperty)
 {
@@ -997,16 +976,14 @@ PHP_METHOD(XMLReader, setParserProperty)
 }
 /* }}} */
 
-/* {{{ proto bool XMLReader::setRelaxNGSchema(string filename)
-Sets the string that the XMLReader will parse. */
+/* Sets the string that the XMLReader will parse. */
 PHP_METHOD(XMLReader, setRelaxNGSchema)
 {
 	php_xmlreader_set_relaxng_schema(INTERNAL_FUNCTION_PARAM_PASSTHRU, XMLREADER_LOAD_FILE);
 }
 /* }}} */
 
-/* {{{ proto bool XMLReader::setRelaxNGSchemaSource(string source)
-Sets the string that the XMLReader will parse. */
+/* Sets the string that the XMLReader will parse. */
 PHP_METHOD(XMLReader, setRelaxNGSchemaSource)
 {
 	php_xmlreader_set_relaxng_schema(INTERNAL_FUNCTION_PARAM_PASSTHRU, XMLREADER_LOAD_STRING);
@@ -1019,8 +996,7 @@ XMLPUBFUN int XMLCALL
 		    				 xmlSchemaPtr schema);
 */
 
-/* {{{ proto bool XMLReader::XML(string source [, string encoding [, int options]])
-Sets the string that the XMLReader will parse. */
+/* Sets the string that the XMLReader will parse. */
 PHP_METHOD(XMLReader, XML)
 {
 	zval *id;
@@ -1103,8 +1079,7 @@ PHP_METHOD(XMLReader, XML)
 }
 /* }}} */
 
-/* {{{ proto bool XMLReader::expand()
-Moves the position of the current instance to the next node in the stream. */
+/* Moves the position of the current instance to the next node in the stream. */
 PHP_METHOD(XMLReader, expand)
 {
 #ifdef HAVE_DOM

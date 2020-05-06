@@ -6,7 +6,6 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 <?php
 
 /*
- * proto int fwrite(resource fp, string str [, int length])
  * Function is implemented in ext/standard/file.c
  */
 

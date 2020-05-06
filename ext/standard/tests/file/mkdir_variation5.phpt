@@ -9,8 +9,7 @@ if(substr(PHP_OS, 0, 3) == "WIN")
 ?>
 --FILE--
 <?php
-/* Prototype  : bool mkdir(string pathname [, int mode [, bool recursive [, resource context]]])
- * Description: Create a directory
+/* Description: Create a directory
  * Source code: ext/standard/file.c
  * Alias to functions:
  */

@@ -1154,8 +1154,7 @@ ZEND_GET_MODULE(zip)
 #endif
 /* set macro */
 
-/* {{{ proto resource zip_open(string filename)
-Create new zip using source uri for output */
+/* Create new zip using source uri for output */
 static PHP_NAMED_FUNCTION(zif_zip_open)
 {
 	char resolved_path[MAXPATHLEN + 1];
@@ -1195,8 +1194,7 @@ static PHP_NAMED_FUNCTION(zif_zip_open)
 }
 /* }}} */
 
-/* {{{ proto void zip_close(resource zip)
-   Close a Zip archive */
+/* Close a Zip archive */
 static PHP_NAMED_FUNCTION(zif_zip_close)
 {
 	zval * zip;
@@ -1215,8 +1213,7 @@ static PHP_NAMED_FUNCTION(zif_zip_close)
 }
 /* }}} */
 
-/* {{{ proto resource zip_read(resource zip)
-   Returns the next file in the archive */
+/* Returns the next file in the archive */
 static PHP_NAMED_FUNCTION(zif_zip_read)
 {
 	zval *zip_dp;
@@ -1261,8 +1258,7 @@ static PHP_NAMED_FUNCTION(zif_zip_read)
 }
 /* }}} */
 
-/* {{{ proto bool zip_entry_open(resource zip_dp, resource zip_entry [, string mode])
-   Open a Zip File, pointed by the resource entry */
+/* Open a Zip File, pointed by the resource entry */
 /* Dummy function to follow the old API */
 static PHP_NAMED_FUNCTION(zif_zip_entry_open)
 {
@@ -1293,8 +1289,7 @@ static PHP_NAMED_FUNCTION(zif_zip_entry_open)
 }
 /* }}} */
 
-/* {{{ proto bool zip_entry_close(resource zip_ent)
-   Close a zip entry */
+/* Close a zip entry */
 static PHP_NAMED_FUNCTION(zif_zip_entry_close)
 {
 	zval * zip_entry;
@@ -1312,8 +1307,7 @@ static PHP_NAMED_FUNCTION(zif_zip_entry_close)
 }
 /* }}} */
 
-/* {{{ proto mixed zip_entry_read(resource zip_entry [, int len])
-   Read from an open directory entry */
+/* Read from an open directory entry */
 static PHP_NAMED_FUNCTION(zif_zip_entry_read)
 {
 	zval * zip_entry;
@@ -1406,40 +1400,35 @@ static void php_zip_entry_get_info(INTERNAL_FUNCTION_PARAMETERS, int opt) /* {{{
 }
 /* }}} */
 
-/* {{{ proto string zip_entry_name(resource zip_entry)
-   Return the name given a ZZip entry */
+/* Return the name given a ZZip entry */
 static PHP_NAMED_FUNCTION(zif_zip_entry_name)
 {
 	php_zip_entry_get_info(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
-/* {{{ proto int zip_entry_compressedsize(resource zip_entry)
-   Return the compressed size of a ZZip entry */
+/* Return the compressed size of a ZZip entry */
 static PHP_NAMED_FUNCTION(zif_zip_entry_compressedsize)
 {
 	php_zip_entry_get_info(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
-/* {{{ proto int zip_entry_filesize(resource zip_entry)
-   Return the actual filesize of a ZZip entry */
+/* Return the actual filesize of a ZZip entry */
 static PHP_NAMED_FUNCTION(zif_zip_entry_filesize)
 {
 	php_zip_entry_get_info(INTERNAL_FUNCTION_PARAM_PASSTHRU, 2);
 }
 /* }}} */
 
-/* {{{ proto string zip_entry_compressionmethod(resource zip_entry)
-   Return a string containing the compression method used on a particular entry */
+/* Return a string containing the compression method used on a particular entry */
 static PHP_NAMED_FUNCTION(zif_zip_entry_compressionmethod)
 {
 	php_zip_entry_get_info(INTERNAL_FUNCTION_PARAM_PASSTHRU, 3);
 }
 /* }}} */
 
-/* {{{ proto mixed ZipArchive::open(string source [, int flags])
-Create new zip using source uri for output, return TRUE on success or the error code */
+/* Create new zip using source uri for output, return TRUE on success or the error code */
 static ZIPARCHIVE_METHOD(open)
 {
 	struct zip *intern;
@@ -1510,8 +1499,7 @@ static ZIPARCHIVE_METHOD(open)
 }
 /* }}} */
 
-/* {{{ proto resource ZipArchive::setPassword(string password)
-Set the password for the active archive */
+/* Set the password for the active archive */
 static ZIPARCHIVE_METHOD(setPassword)
 {
 	struct zip *intern;
@@ -1538,8 +1526,7 @@ static ZIPARCHIVE_METHOD(setPassword)
 }
 /* }}} */
 
-/* {{{ proto bool ZipArchive::close()
-close the zip archive */
+/* close the zip archive */
 static ZIPARCHIVE_METHOD(close)
 {
 	struct zip *intern;
@@ -1590,8 +1577,7 @@ static ZIPARCHIVE_METHOD(close)
 }
 /* }}} */
 
-/* {{{ proto bool ZipArchive::count()
-close the zip archive */
+/* close the zip archive */
 static ZIPARCHIVE_METHOD(count)
 {
 	struct zip *intern;
@@ -1609,8 +1595,7 @@ static ZIPARCHIVE_METHOD(count)
 }
 /* }}} */
 
-/* {{{ proto string ZipArchive::getStatusString()
- * Returns the status error message, system and/or zip messages */
+/* Returns the status error message, system and/or zip messages */
 static ZIPARCHIVE_METHOD(getStatusString)
 {
 	zval *self = ZEND_THIS;
@@ -1653,8 +1638,7 @@ static ZIPARCHIVE_METHOD(getStatusString)
 }
 /* }}} */
 
-/* {{{ proto bool ZipArchive::addEmptyDir(string dirname [, bool flags = 0])
-Returns the index of the entry named filename in the archive */
+/* Returns the index of the entry named filename in the archive */
 static ZIPARCHIVE_METHOD(addEmptyDir)
 {
 	struct zip *intern;
@@ -1810,24 +1794,21 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 }
 /* }}} */
 
-/* {{{ proto bool ZipArchive::addGlob(string pattern[,int flags [, array options]])
-Add files matching the glob pattern. See php's glob for the pattern syntax. */
+/* Add files matching the glob pattern. See php's glob for the pattern syntax. */
 static ZIPARCHIVE_METHOD(addGlob)
 {
 	php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
-/* {{{ proto bool ZipArchive::addPattern(string pattern[, string path [, array options]])
-Add files matching the pcre pattern. See php's pcre for the pattern syntax. */
+/* Add files matching the pcre pattern. See php's pcre for the pattern syntax. */
 static ZIPARCHIVE_METHOD(addPattern)
 {
 	php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAM_PASSTHRU, 2);
 }
 /* }}} */
 
-/* {{{ proto bool ZipArchive::addFile(string filepath[, string entryname[, int start [, int length [, int flags = FL_OVERWRITE]]]])
-Add a file in a Zip archive using its path and the name to use. */
+/* Add a file in a Zip archive using its path and the name to use. */
 static ZIPARCHIVE_METHOD(addFile)
 {
 	zval *self = ZEND_THIS;
@@ -1861,8 +1842,7 @@ static ZIPARCHIVE_METHOD(addFile)
 }
 /* }}} */
 
-/* {{{ proto bool ZipArchive::replaceFile(string filepath, int index[, int start [, int length [, int flags = 0]]])
-Add a file in a Zip archive using its path and the name to use. */
+/* Add a file in a Zip archive using its path and the name to use. */
 static ZIPARCHIVE_METHOD(replaceFile)
 {
 	zval *self = ZEND_THIS;
@@ -1895,8 +1875,7 @@ static ZIPARCHIVE_METHOD(replaceFile)
 }
 /* }}} */
 
-/* {{{ proto bool ZipArchive::addFromString(string name, string content [, int flags = FL_OVERWRITE])
-Add a file using content and the entry name */
+/* Add a file using content and the entry name */
 static ZIPARCHIVE_METHOD(addFromString)
 {
 	struct zip *intern;
@@ -1945,8 +1924,7 @@ static ZIPARCHIVE_METHOD(addFromString)
 }
 /* }}} */
 
-/* {{{ proto array ZipArchive::statName(string filename[, int flags])
-Returns the information about a the zip entry filename */
+/* Returns the information about a the zip entry filename */
 static ZIPARCHIVE_METHOD(statName)
 {
 	struct zip *intern;
@@ -1967,8 +1945,7 @@ static ZIPARCHIVE_METHOD(statName)
 }
 /* }}} */
 
-/* {{{ proto resource ZipArchive::statIndex(int index[, int flags])
-Returns the zip entry information using its index */
+/* Returns the zip entry information using its index */
 static ZIPARCHIVE_METHOD(statIndex)
 {
 	struct zip *intern;
@@ -1991,8 +1968,7 @@ static ZIPARCHIVE_METHOD(statIndex)
 }
 /* }}} */
 
-/* {{{ proto int ZipArchive::locateName(string filename[, int flags])
-Returns the index of the entry named filename in the archive */
+/* Returns the index of the entry named filename in the archive */
 static ZIPARCHIVE_METHOD(locateName)
 {
 	struct zip *intern;
@@ -2021,8 +1997,7 @@ static ZIPARCHIVE_METHOD(locateName)
 }
 /* }}} */
 
-/* {{{ proto string ZipArchive::getNameIndex(int index [, int flags])
-Returns the name of the file at position index */
+/* Returns the name of the file at position index */
 static ZIPARCHIVE_METHOD(getNameIndex)
 {
 	struct zip *intern;
@@ -2047,8 +2022,7 @@ static ZIPARCHIVE_METHOD(getNameIndex)
 }
 /* }}} */
 
-/* {{{ proto bool ZipArchive::setArchiveComment(string comment)
-Set or remove (NULL/'') the comment of the archive */
+/* Set or remove (NULL/'') the comment of the archive */
 static ZIPARCHIVE_METHOD(setArchiveComment)
 {
 	struct zip *intern;
@@ -2075,8 +2049,7 @@ static ZIPARCHIVE_METHOD(setArchiveComment)
 }
 /* }}} */
 
-/* {{{ proto string ZipArchive::getArchiveComment([int flags])
-Returns the comment of an entry using its index */
+/* Returns the comment of an entry using its index */
 static ZIPARCHIVE_METHOD(getArchiveComment)
 {
 	struct zip *intern;
@@ -2099,8 +2072,7 @@ static ZIPARCHIVE_METHOD(getArchiveComment)
 }
 /* }}} */
 
-/* {{{ proto bool ZipArchive::setCommentName(string name, string comment)
-Set or remove (NULL/'') the comment of an entry using its Name */
+/* Set or remove (NULL/'') the comment of an entry using its Name */
 static ZIPARCHIVE_METHOD(setCommentName)
 {
 	struct zip *intern;
@@ -2133,8 +2105,7 @@ static ZIPARCHIVE_METHOD(setCommentName)
 }
 /* }}} */
 
-/* {{{ proto bool ZipArchive::setCommentIndex(int index, string comment)
-Set or remove (NULL/'') the comment of an entry using its index */
+/* Set or remove (NULL/'') the comment of an entry using its index */
 static ZIPARCHIVE_METHOD(setCommentIndex)
 {
 	struct zip *intern;
@@ -2164,8 +2135,7 @@ static ZIPARCHIVE_METHOD(setCommentIndex)
 /* those constants/functions are only available in libzip since 0.11.2 */
 #ifdef ZIP_OPSYS_DEFAULT
 
-/* {{{ proto bool ZipArchive::setExternalAttributesName(string name, int opsys, int attr [, int flags])
-Set external attributes for file in zip, using its name */
+/* Set external attributes for file in zip, using its name */
 static ZIPARCHIVE_METHOD(setExternalAttributesName)
 {
 	struct zip *intern;
@@ -2198,8 +2168,7 @@ static ZIPARCHIVE_METHOD(setExternalAttributesName)
 }
 /* }}} */
 
-/* {{{ proto bool ZipArchive::setExternalAttributesIndex(int index, int opsys, int attr [, int flags])
-Set external attributes for file in zip, using its index */
+/* Set external attributes for file in zip, using its index */
 static ZIPARCHIVE_METHOD(setExternalAttributesIndex)
 {
 	struct zip *intern;
@@ -2223,8 +2192,7 @@ static ZIPARCHIVE_METHOD(setExternalAttributesIndex)
 }
 /* }}} */
 
-/* {{{ proto bool ZipArchive::getExternalAttributesName(string name, int &opsys, int &attr [, int flags])
-Get external attributes for file in zip, using its name */
+/* Get external attributes for file in zip, using its name */
 static ZIPARCHIVE_METHOD(getExternalAttributesName)
 {
 	struct zip *intern;
@@ -2261,8 +2229,7 @@ static ZIPARCHIVE_METHOD(getExternalAttributesName)
 }
 /* }}} */
 
-/* {{{ proto bool ZipArchive::getExternalAttributesIndex(int index, int &opsys, int &attr [, int flags])
-Get external attributes for file in zip, using its index */
+/* Get external attributes for file in zip, using its index */
 static ZIPARCHIVE_METHOD(getExternalAttributesIndex)
 {
 	struct zip *intern;
@@ -2292,8 +2259,7 @@ static ZIPARCHIVE_METHOD(getExternalAttributesIndex)
 #endif /* ifdef ZIP_OPSYS_DEFAULT */
 
 #ifdef HAVE_ENCRYPTION
-/* {{{ proto bool ZipArchive::setEncryptionName(string name, int method, [string password])
-Set encryption method for file in zip, using its name */
+/* Set encryption method for file in zip, using its name */
 static ZIPARCHIVE_METHOD(setEncryptionName)
 {
 	struct zip *intern;
@@ -2326,8 +2292,7 @@ static ZIPARCHIVE_METHOD(setEncryptionName)
 }
 /* }}} */
 
-/* {{{ proto bool ZipArchive::setEncryptionIndex(int index, int method, [string password])
-Set encryption method for file in zip, using its index */
+/* Set encryption method for file in zip, using its index */
 static ZIPARCHIVE_METHOD(setEncryptionIndex)
 {
 	struct zip *intern;
@@ -2351,8 +2316,7 @@ static ZIPARCHIVE_METHOD(setEncryptionIndex)
 /* }}} */
 #endif
 
-/* {{{ proto string ZipArchive::getCommentName(string name[, int flags])
-Returns the comment of an entry using its name */
+/* Returns the comment of an entry using its name */
 static ZIPARCHIVE_METHOD(getCommentName)
 {
 	struct zip *intern;
@@ -2386,8 +2350,7 @@ static ZIPARCHIVE_METHOD(getCommentName)
 }
 /* }}} */
 
-/* {{{ proto string ZipArchive::getCommentIndex(int index[, int flags])
-Returns the comment of an entry using its index */
+/* Returns the comment of an entry using its index */
 static ZIPARCHIVE_METHOD(getCommentIndex)
 {
 	struct zip *intern;
@@ -2410,8 +2373,7 @@ static ZIPARCHIVE_METHOD(getCommentIndex)
 }
 /* }}} */
 
-/* {{{ proto bool ZipArchive::setCompressionName(string name, int comp_method[, int comp_flags])
-Set the compression of a file in zip, using its name */
+/* Set the compression of a file in zip, using its name */
 static ZIPARCHIVE_METHOD(setCompressionName)
  {
 	struct zip *intern;
@@ -2445,8 +2407,7 @@ static ZIPARCHIVE_METHOD(setCompressionName)
 }
 /* }}} */
 
-/* {{{ proto bool ZipArchive::setCompressionIndex(int index, int comp_method[, int comp_flags])
-Set the compression of a file in zip, using its index */
+/* Set the compression of a file in zip, using its index */
 static ZIPARCHIVE_METHOD(setCompressionIndex)
 {
 	struct zip *intern;
@@ -2470,8 +2431,7 @@ static ZIPARCHIVE_METHOD(setCompressionIndex)
 /* }}} */
 
 #ifdef HAVE_SET_MTIME
-/* {{{ proto bool ZipArchive::setMtimeName(string name, int timestamp[, int flags])
-Set the modification time of a file in zip, using its name */
+/* Set the modification time of a file in zip, using its name */
 static ZIPARCHIVE_METHOD(setMtimeName)
  {
 	struct zip *intern;
@@ -2505,8 +2465,7 @@ static ZIPARCHIVE_METHOD(setMtimeName)
 }
 /* }}} */
 
-/* {{{ proto bool ZipArchive::setMtimeIndex(int index, int timestamp[, int flags])
-Set the modification time of a file in zip, using its index */
+/* Set the modification time of a file in zip, using its index */
 static ZIPARCHIVE_METHOD(setMtimeIndex)
 {
 	struct zip *intern;
@@ -2530,8 +2489,7 @@ static ZIPARCHIVE_METHOD(setMtimeIndex)
 /* }}} */
 #endif
 
-/* {{{ proto bool ZipArchive::deleteIndex(int index)
-Delete a file using its index */
+/* Delete a file using its index */
 static ZIPARCHIVE_METHOD(deleteIndex)
 {
 	struct zip *intern;
@@ -2556,8 +2514,7 @@ static ZIPARCHIVE_METHOD(deleteIndex)
 }
 /* }}} */
 
-/* {{{ proto bool ZipArchive::deleteName(string name)
-Delete a file using its index */
+/* Delete a file using its index */
 static ZIPARCHIVE_METHOD(deleteName)
 {
 	struct zip *intern;
@@ -2584,8 +2541,7 @@ static ZIPARCHIVE_METHOD(deleteName)
 }
 /* }}} */
 
-/* {{{ proto bool ZipArchive::renameIndex(int index, string new_name)
-Rename an entry selected by its index to new_name */
+/* Rename an entry selected by its index to new_name */
 static ZIPARCHIVE_METHOD(renameIndex)
 {
 	struct zip *intern;
@@ -2617,8 +2573,7 @@ static ZIPARCHIVE_METHOD(renameIndex)
 }
 /* }}} */
 
-/* {{{ proto bool ZipArchive::renameName(string name, string new_name)
-Rename an entry selected by its name to new_name */
+/* Rename an entry selected by its name to new_name */
 static ZIPARCHIVE_METHOD(renameName)
 {
 	struct zip *intern;
@@ -2648,8 +2603,7 @@ static ZIPARCHIVE_METHOD(renameName)
 }
 /* }}} */
 
-/* {{{ proto bool ZipArchive::unchangeIndex(int index)
-Changes to the file at position index are reverted */
+/* Changes to the file at position index are reverted */
 static ZIPARCHIVE_METHOD(unchangeIndex)
 {
 	struct zip *intern;
@@ -2674,8 +2628,7 @@ static ZIPARCHIVE_METHOD(unchangeIndex)
 }
 /* }}} */
 
-/* {{{ proto bool ZipArchive::unchangeName(string name)
-Changes to the file named 'name' are reverted */
+/* Changes to the file named 'name' are reverted */
 static ZIPARCHIVE_METHOD(unchangeName)
 {
 	struct zip *intern;
@@ -2704,8 +2657,7 @@ static ZIPARCHIVE_METHOD(unchangeName)
 }
 /* }}} */
 
-/* {{{ proto bool ZipArchive::unchangeAll()
-All changes to files and global information in archive are reverted */
+/* All changes to files and global information in archive are reverted */
 static ZIPARCHIVE_METHOD(unchangeAll)
 {
 	struct zip *intern;
@@ -2725,8 +2677,7 @@ static ZIPARCHIVE_METHOD(unchangeAll)
 }
 /* }}} */
 
-/* {{{ proto bool ZipArchive::unchangeArchive()
-Revert all global changes to the archive archive.  For now, this only reverts archive comment changes. */
+/* Revert all global changes to the archive archive.  For now, this only reverts archive comment changes. */
 static ZIPARCHIVE_METHOD(unchangeArchive)
 {
 	struct zip *intern;
@@ -2746,8 +2697,7 @@ static ZIPARCHIVE_METHOD(unchangeArchive)
 }
 /* }}} */
 
-/* {{{ proto bool ZipArchive::extractTo(string pathto[, mixed files])
-Extract one or more file from a zip archive */
+/* Extract one or more file from a zip archive */
 /* TODO:
  * - allow index or array of indices
  * - replace path
@@ -2900,24 +2850,21 @@ static void php_zip_get_from(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto string ZipArchive::getFromName(string entryname[, int len [, int flags]])
-get the contents of an entry using its name */
+/* get the contents of an entry using its name */
 static ZIPARCHIVE_METHOD(getFromName)
 {
 	php_zip_get_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
-/* {{{ proto string ZipArchive::getFromIndex(int index[, int len [, int flags]])
-get the contents of an entry using its index */
+/* get the contents of an entry using its index */
 static ZIPARCHIVE_METHOD(getFromIndex)
 {
 	php_zip_get_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
-/* {{{ proto resource ZipArchive::getStream(string entryname)
-get a stream for an entry using its name */
+/* get a stream for an entry using its name */
 static ZIPARCHIVE_METHOD(getStream)
 {
 	struct zip *intern;
@@ -2962,8 +2909,7 @@ static void _php_zip_progress_callback(zip_t *arch, double state, void *ptr)
 	}
 }
 
-/* {{{ proto bool ZipArchive::registerProgressCallback(double rate, callable callback)
-register a progression callback: void callback(double state); */
+/* register a progression callback: void callback(double state); */
 static ZIPARCHIVE_METHOD(registerProgressCallback)
 {
 	struct zip *intern;
@@ -3021,8 +2967,7 @@ static int _php_zip_cancel_callback(zip_t *arch, void *ptr)
 	return retval;
 }
 
-/* {{{ proto bool ZipArchive::registerCancelCallback(callable callback)
-register a progression callback: int callback(double state); */
+/* register a progression callback: int callback(double state); */
 static ZIPARCHIVE_METHOD(registerCancelCallback)
 {
 	struct zip *intern;
@@ -3065,8 +3010,7 @@ static ZIPARCHIVE_METHOD(registerCancelCallback)
 #endif
 
 #ifdef HAVE_METHOD_SUPPORTED
-/* {{{ proto bool ZipArchive::isCompressionMethodSupported(int method, bool enc)
-check if a compression method is available in used libzip */
+/* check if a compression method is available in used libzip */
 static ZIPARCHIVE_METHOD(isCompressionMethodSupported)
 {
 	zend_long method;
@@ -3079,8 +3023,7 @@ static ZIPARCHIVE_METHOD(isCompressionMethodSupported)
 }
 /* }}} */
 
-/* {{{ proto bool ZipArchive::isEncryptionMethodSupported(int method, bool enc)
-check if a encryption method is available in used libzip */
+/* check if a encryption method is available in used libzip */
 static ZIPARCHIVE_METHOD(isEncryptionMethodSupported)
 {
 	zend_long method;

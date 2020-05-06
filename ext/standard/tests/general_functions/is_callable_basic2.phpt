@@ -2,13 +2,11 @@
 Test is_callable() function : usage variations - on objects
 --FILE--
 <?php
-/* Prototype: bool is_callable ( mixed $var [, bool $syntax_only [, string &$callable_name]] );
-   Description: Verify that the contents of a variable can be called as a function
+/* Description: Verify that the contents of a variable can be called as a function
                 In case of objects, $var = array($SomeObject, 'MethodName')
 */
 
-/* Prototype: void check_iscallable_objects( $methods );
-   Description: use is_callable() on given $method to check if the array
+/* Description: use is_callable() on given $method to check if the array
                 contains a valid method name;
                 returns true if valid function name, false otherwise
 */

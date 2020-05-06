@@ -5,8 +5,7 @@ Test exif_imagetype() function : error conditions
 --FILE--
 <?php
 
-/* Prototype  : int exif_imagetype  ( string $filename  )
- * Description: Determine the type of an image
+/* Description: Determine the type of an image
  * Source code: ext/exif/exif.c
 */
 

@@ -3,8 +3,7 @@ Test ord() function : basic functionality
 --FILE--
 <?php
 
-/* Prototype  : int ord  ( string $string  )
- * Description: Return ASCII value of character
+/* Description: Return ASCII value of character
  * Source code: ext/standard/string.c
 */
 

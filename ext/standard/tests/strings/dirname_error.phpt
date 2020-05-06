@@ -2,8 +2,7 @@
 Test dirname() function : error conditions
 --FILE--
 <?php
-/* Prototype: string dirname ( string $path );
-   Description: Returns directory name component of path.
+/* Description: Returns directory name component of path.
 */
 echo "*** Testing error conditions ***\n";
 

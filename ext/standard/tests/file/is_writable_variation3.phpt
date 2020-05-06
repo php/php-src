@@ -8,8 +8,7 @@ require __DIR__ . '/../skipif_root.inc';
 obscure_filename
 --FILE--
 <?php
-/* Prototype: bool is_writable ( string $filename );
-   Description: Tells whether the filename is writable.
+/* Description: Tells whether the filename is writable.
 
    is_writeable() is an alias of is_writable()
 */

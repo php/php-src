@@ -2,8 +2,7 @@
 Test is_array() function
 --FILE--
 <?php
-/* Prototype: bool is_array ( mixed $var );
- * Description: Finds whether the given variable is an array
+/* Description: Finds whether the given variable is an array
  */
 
 echo "*** Testing is_array() on different type of arrays ***\n";

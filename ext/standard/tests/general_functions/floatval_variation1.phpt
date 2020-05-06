@@ -2,8 +2,7 @@
 Testing floatval() and its alias doubleval() functions : usage variations - different data types as $y arg
 --FILE--
 <?php
-/* Prototype: float floatval( mixed $var );
- * Description: Returns the float value of var.
+/* Description: Returns the float value of var.
  */
 
 

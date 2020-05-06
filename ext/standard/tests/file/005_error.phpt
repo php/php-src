@@ -3,11 +3,9 @@ Test fileatime(), filemtime(), filectime() & touch() functions : error condition
 --FILE--
 <?php
 /*
-   Prototype: int fileatime ( string $filename );
    Description: Returns the time the file was last accessed, or FALSE
      in case of an error. The time is returned as a Unix timestamp.
 
-   Prototype: int filemtime ( string $filename );
    Description: Returns the time the file was last modified, or FALSE
      in case of an error.
 

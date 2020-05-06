@@ -5,8 +5,7 @@ Felix De Vliegher <felix.devliegher@gmail.com>
 --FILE--
 <?php
 date_default_timezone_set('UTC');
-/* Prototype  : void date_sub(DateTime object, DateInterval interval)
- * Description: Subtracts an interval from the current date in object.
+/* Description: Subtracts an interval from the current date in object.
  * Source code: ext/date/php_date.c
  * Alias to functions:
  */

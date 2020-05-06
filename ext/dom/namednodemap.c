@@ -71,8 +71,7 @@ int dom_namednodemap_length_read(dom_object *obj, zval *retval)
 
 /* }}} */
 
-/* {{{ proto DOMNode dom_namednodemap_get_named_item(string name);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1074577549
+/* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1074577549
 Since:
 */
 PHP_METHOD(DOMNamedNodeMap, getNamedItem)
@@ -127,8 +126,7 @@ PHP_METHOD(DOMNamedNodeMap, getNamedItem)
 }
 /* }}} end dom_namednodemap_get_named_item */
 
-/* {{{ proto DOMNode dom_namednodemap_item(int index);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-349467F9
+/* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-349467F9
 Since:
 */
 PHP_METHOD(DOMNamedNodeMap, item)
@@ -191,8 +189,7 @@ PHP_METHOD(DOMNamedNodeMap, item)
 }
 /* }}} end dom_namednodemap_item */
 
-/* {{{ proto DOMNode dom_namednodemap_get_named_item_ns(string namespaceURI, string localName);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-getNamedItemNS
+/* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-getNamedItemNS
 Since: DOM Level 2
 */
 PHP_METHOD(DOMNamedNodeMap, getNamedItemNS)
@@ -247,8 +244,6 @@ PHP_METHOD(DOMNamedNodeMap, getNamedItemNS)
 }
 /* }}} end dom_namednodemap_get_named_item_ns */
 
-/* {{{ proto int|bool dom_namednodemap_count();
-*/
 PHP_METHOD(DOMNamedNodeMap, count)
 {
 	zval *id;

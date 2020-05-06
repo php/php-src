@@ -216,8 +216,7 @@ PHP_JSON_API int php_json_decode_ex(zval *return_value, char *str, size_t str_le
 }
 /* }}} */
 
-/* {{{ proto string json_encode(mixed data [, int options[, int depth]])
-   Returns the JSON representation of a value */
+/* Returns the JSON representation of a value */
 PHP_FUNCTION(json_encode)
 {
 	zval *parameter;
@@ -259,8 +258,7 @@ PHP_FUNCTION(json_encode)
 }
 /* }}} */
 
-/* {{{ proto mixed json_decode(string json [, bool assoc [, int depth]])
-   Decodes the JSON representation into a PHP value */
+/* Decodes the JSON representation into a PHP value */
 PHP_FUNCTION(json_decode)
 {
 	char *str;
@@ -314,8 +312,7 @@ PHP_FUNCTION(json_decode)
 }
 /* }}} */
 
-/* {{{ proto int json_last_error()
-   Returns the error code of the last json_encode() or json_decode() call. */
+/* Returns the error code of the last json_encode() or json_decode() call. */
 PHP_FUNCTION(json_last_error)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -324,8 +321,7 @@ PHP_FUNCTION(json_last_error)
 }
 /* }}} */
 
-/* {{{ proto string json_last_error_msg()
-   Returns the error string of the last json_encode() or json_decode() call. */
+/* Returns the error string of the last json_encode() or json_decode() call. */
 PHP_FUNCTION(json_last_error_msg)
 {
 	ZEND_PARSE_PARAMETERS_NONE();

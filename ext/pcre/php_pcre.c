@@ -1475,16 +1475,14 @@ error:
 }
 /* }}} */
 
-/* {{{ proto int preg_match(string pattern, string subject [, array &subpatterns [, int flags [, int offset]]])
-   Perform a Perl-style regular expression match */
+/* Perform a Perl-style regular expression match */
 PHP_FUNCTION(preg_match)
 {
 	php_do_pcre_match(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
-/* {{{ proto int preg_match_all(string pattern, string subject [, array &subpatterns [, int flags [, int offset]]])
-   Perform a Perl-style global regular expression match */
+/* Perform a Perl-style global regular expression match */
 PHP_FUNCTION(preg_match_all)
 {
 	php_do_pcre_match(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
@@ -2364,16 +2362,14 @@ static void preg_replace_common(INTERNAL_FUNCTION_PARAMETERS, int is_filter)
 }
 /* }}} */
 
-/* {{{ proto mixed preg_replace(mixed regex, mixed replace, mixed subject [, int limit [, int &count]])
-   Perform Perl-style regular expression replacement. */
+/* Perform Perl-style regular expression replacement. */
 PHP_FUNCTION(preg_replace)
 {
 	preg_replace_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
-/* {{{ proto mixed preg_replace_callback(mixed regex, mixed callback, mixed subject [, int limit [, int &count]])
-   Perform Perl-style regular expression replacement using replacement callback. */
+/* Perform Perl-style regular expression replacement using replacement callback. */
 PHP_FUNCTION(preg_replace_callback)
 {
 	zval *regex, *replace, *subject, *zcount = NULL;
@@ -2412,8 +2408,7 @@ PHP_FUNCTION(preg_replace_callback)
 }
 /* }}} */
 
-/* {{{ proto mixed preg_replace_callback_array(array pattern, mixed subject [, int limit [, int &count]])
-   Perform Perl-style regular expression replacement using replacement callback. */
+/* Perform Perl-style regular expression replacement using replacement callback. */
 PHP_FUNCTION(preg_replace_callback_array)
 {
 	zval regex, zv, *replace, *subject, *pattern, *zcount = NULL;
@@ -2480,16 +2475,14 @@ PHP_FUNCTION(preg_replace_callback_array)
 }
 /* }}} */
 
-/* {{{ proto mixed preg_filter(mixed regex, mixed replace, mixed subject [, int limit [, int &count]])
-   Perform Perl-style regular expression replacement and only return matches. */
+/* Perform Perl-style regular expression replacement and only return matches. */
 PHP_FUNCTION(preg_filter)
 {
 	preg_replace_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
-/* {{{ proto array preg_split(string pattern, string subject [, int limit [, int flags]])
-   Split string into an array using a perl-style regular expression as a delimiter */
+/* Split string into an array using a perl-style regular expression as a delimiter */
 PHP_FUNCTION(preg_split)
 {
 	zend_string			*regex;			/* Regular expression */
@@ -2709,8 +2702,7 @@ last:
 }
 /* }}} */
 
-/* {{{ proto string preg_quote(string str [, string delim_char])
-   Quote regular expression characters plus an optional character */
+/* Quote regular expression characters plus an optional character */
 PHP_FUNCTION(preg_quote)
 {
 	zend_string *str;       		/* Input string argument */
@@ -2846,8 +2838,7 @@ PHP_FUNCTION(preg_quote)
 }
 /* }}} */
 
-/* {{{ proto array preg_grep(string regex, array input [, int flags])
-   Searches array and returns entries which match regex */
+/* Searches array and returns entries which match regex */
 PHP_FUNCTION(preg_grep)
 {
 	zend_string			*regex;			/* Regular expression */
@@ -2963,8 +2954,7 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 }
 /* }}} */
 
-/* {{{ proto int preg_last_error()
-   Returns the error code of the last regexp execution. */
+/* Returns the error code of the last regexp execution. */
 PHP_FUNCTION(preg_last_error)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -2973,8 +2963,7 @@ PHP_FUNCTION(preg_last_error)
 }
 /* }}} */
 
-/* {{{ proto string preg_last_error_msg()
-   Returns the error message of the last regexp execution. */
+/* Returns the error message of the last regexp execution. */
 PHP_FUNCTION(preg_last_error_msg)
 {
     ZEND_PARSE_PARAMETERS_NONE();

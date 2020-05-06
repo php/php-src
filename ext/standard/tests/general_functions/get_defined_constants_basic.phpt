@@ -2,8 +2,7 @@
 Test get_defined_constants() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : array get_defined_constants  ([ bool $categorize  ] )
- * Description:  Returns an associative array with the names of all the constants and their values
+/* Description:  Returns an associative array with the names of all the constants and their values
  * Source code: Zend/zend_builtin_functions.c
  */
 

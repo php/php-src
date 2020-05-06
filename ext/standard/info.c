@@ -1240,8 +1240,7 @@ void register_phpinfo_constants(INIT_FUNC_ARGS)
 }
 /* }}} */
 
-/* {{{ proto bool phpinfo([int what])
-   Output a page of useful information about PHP and the current request */
+/* Output a page of useful information about PHP and the current request */
 PHP_FUNCTION(phpinfo)
 {
 	zend_long flag = PHP_INFO_ALL;
@@ -1261,8 +1260,7 @@ PHP_FUNCTION(phpinfo)
 
 /* }}} */
 
-/* {{{ proto string|false phpversion([string extension])
-   Return the current PHP version */
+/* Return the current PHP version */
 PHP_FUNCTION(phpversion)
 {
 	char *ext_name = NULL;
@@ -1286,8 +1284,7 @@ PHP_FUNCTION(phpversion)
 }
 /* }}} */
 
-/* {{{ proto bool phpcredits([int flag])
-   Prints the list of people who've contributed to the PHP project */
+/* Prints the list of people who've contributed to the PHP project */
 PHP_FUNCTION(phpcredits)
 {
 	zend_long flag = PHP_CREDITS_ALL;
@@ -1302,8 +1299,7 @@ PHP_FUNCTION(phpcredits)
 }
 /* }}} */
 
-/* {{{ proto string|false php_sapi_name(void)
-   Return the current SAPI module name */
+/* Return the current SAPI module name */
 PHP_FUNCTION(php_sapi_name)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -1317,8 +1313,7 @@ PHP_FUNCTION(php_sapi_name)
 
 /* }}} */
 
-/* {{{ proto string php_uname([ string $mode = "a"])
-   Return information about the system PHP was built on */
+/* Return information about the system PHP was built on */
 PHP_FUNCTION(php_uname)
 {
 	char *mode = "a";
@@ -1334,8 +1329,7 @@ PHP_FUNCTION(php_uname)
 
 /* }}} */
 
-/* {{{ proto string|false php_ini_scanned_files(void)
-   Return comma-separated string of .ini files parsed from the additional ini dir */
+/* Return comma-separated string of .ini files parsed from the additional ini dir */
 PHP_FUNCTION(php_ini_scanned_files)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -1348,8 +1342,7 @@ PHP_FUNCTION(php_ini_scanned_files)
 }
 /* }}} */
 
-/* {{{ proto string|false php_ini_loaded_file(void)
-   Return the actual loaded ini filename */
+/* Return the actual loaded ini filename */
 PHP_FUNCTION(php_ini_loaded_file)
 {
 	ZEND_PARSE_PARAMETERS_NONE();

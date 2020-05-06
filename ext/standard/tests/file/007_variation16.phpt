@@ -4,8 +4,6 @@ Test fopen and fclose() functions - usage variations - "x+t" mode
 <?php
 /*
  fopen() function:
- Prototype: resource fopen(string $filename, string $mode
-                            [, bool $use_include_path [, resource $context]] );
  Description: Opens file or URL.
 */
 /*

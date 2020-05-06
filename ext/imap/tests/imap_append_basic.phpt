@@ -6,8 +6,7 @@ require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
-/* Prototype  : bool imap_append  ( resource $imap_stream  , string $mailbox  , string $message  [, string $options  ] )
- * Description: Append a string message to a specified mailbox.
+/* Description: Append a string message to a specified mailbox.
  * Source code: ext/imap/php_imap.c
  */
 

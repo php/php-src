@@ -2,8 +2,7 @@
 Test DateTime::format() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : public string DateTime::format  ( string $format  )
- * Description: Returns date formatted according to given format
+/* Description: Returns date formatted according to given format
  * Source code: ext/date/php_date.c
  * Alias to functions: date_format
  */

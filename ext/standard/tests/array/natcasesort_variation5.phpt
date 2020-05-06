@@ -2,8 +2,7 @@
 Test natcasesort() function : usage variations - different hex values
 --FILE--
 <?php
-/* Prototype  : bool natcasesort(array &$array_arg)
- * Description: Sort an array using case-insensitive natural sort
+/* Description: Sort an array using case-insensitive natural sort
  * Source code: ext/standard/array.c
  */
 

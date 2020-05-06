@@ -23,10 +23,8 @@
 #include <unicode/ustring.h>
 #include <unicode/udat.h>
 
-/* {{{ proto unicode IntlDateFormatter::getDateType( )
- * Get formatter datetype. }}} */
-/* {{{ proto string datefmt_get_datetype( IntlDateFormatter $mf )
- * Get formatter datetype.
+/* Get formatter datetype. }}} */
+/* Get formatter datetype.
  */
 PHP_FUNCTION( datefmt_get_datetype )
 {
@@ -47,10 +45,8 @@ PHP_FUNCTION( datefmt_get_datetype )
 }
 /* }}} */
 
-/* {{{ proto unicode IntlDateFormatter::getTimeType( )
- * Get formatter timetype. }}} */
-/* {{{ proto string datefmt_get_timetype( IntlDateFormatter $mf )
- * Get formatter timetype.
+/* Get formatter timetype. }}} */
+/* Get formatter timetype.
  */
 PHP_FUNCTION( datefmt_get_timetype )
 {
@@ -71,10 +67,8 @@ PHP_FUNCTION( datefmt_get_timetype )
 }
 /* }}} */
 
-/* {{{ proto string IntlDateFormatter::getPattern( )
- * Get formatter pattern. }}} */
-/* {{{ proto string datefmt_get_pattern( IntlDateFormatter $mf )
- * Get formatter pattern.
+/* Get formatter pattern. }}} */
+/* Get formatter pattern.
  */
 PHP_FUNCTION( datefmt_get_pattern )
 {
@@ -111,10 +105,8 @@ PHP_FUNCTION( datefmt_get_pattern )
 }
 /* }}} */
 
-/* {{{ proto bool IntlDateFormatter::setPattern( string $pattern )
- * Set formatter pattern. }}} */
-/* {{{ proto bool datefmt_set_pattern( IntlDateFormatter $mf, string $pattern )
- * Set formatter pattern.
+/* Set formatter pattern. }}} */
+/* Set formatter pattern.
  */
 PHP_FUNCTION( datefmt_set_pattern )
 {
@@ -151,10 +143,8 @@ PHP_FUNCTION( datefmt_set_pattern )
 }
 /* }}} */
 
-/* {{{ proto string IntlDateFormatter::getLocale()
- * Get formatter locale. }}} */
-/* {{{ proto string datefmt_get_locale(IntlDateFormatter $mf)
- * Get formatter locale.
+/* Get formatter locale. }}} */
+/* Get formatter locale.
  */
 PHP_FUNCTION( datefmt_get_locale )
 {
@@ -180,10 +170,8 @@ PHP_FUNCTION( datefmt_get_locale )
 }
 /* }}} */
 
-/* {{{ proto string IntlDateFormatter::isLenient()
- * Get formatter isLenient. }}} */
-/* {{{ proto string datefmt_isLenient(IntlDateFormatter $mf)
- * Get formatter locale.
+/* Get formatter isLenient. }}} */
+/* Get formatter locale.
  */
 PHP_FUNCTION( datefmt_is_lenient )
 {
@@ -205,10 +193,8 @@ PHP_FUNCTION( datefmt_is_lenient )
 }
 /* }}} */
 
-/* {{{ proto void IntlDateFormatter::setLenient()
- * Set formatter lenient. }}} */
-/* {{{ proto void datefmt_setLenient(IntlDateFormatter $mf)
- * Set formatter lenient.
+/* Set formatter lenient. }}} */
+/* Set formatter lenient.
  */
 PHP_FUNCTION( datefmt_set_lenient )
 {

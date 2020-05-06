@@ -506,8 +506,7 @@ static zval *php_filter_get_storage(zend_long arg)/* {{{ */
 }
 /* }}} */
 
-/* {{{ proto mixed filter_has_var(constant type, string variable_name)
- * Returns true if the variable with the name 'name' exists in source.
+/* Returns true if the variable with the name 'name' exists in source.
  */
 PHP_FUNCTION(filter_has_var)
 {
@@ -649,8 +648,7 @@ static void php_filter_array_handler(zval *input, zval *op, zval *return_value, 
 }
 /* }}} */
 
-/* {{{ proto mixed filter_input(constant type, string variable_name [, int filter [, mixed options]])
- * Returns the filtered variable 'name'* from source `type`.
+/* Returns the filtered variable 'name'* from source `type`.
  */
 PHP_FUNCTION(filter_input)
 {
@@ -705,8 +703,7 @@ PHP_FUNCTION(filter_input)
 }
 /* }}} */
 
-/* {{{ proto mixed filter_var(mixed variable [, int filter [, mixed options]])
- * Returns the filtered version of the variable.
+/* Returns the filtered version of the variable.
  */
 PHP_FUNCTION(filter_var)
 {
@@ -727,8 +724,7 @@ PHP_FUNCTION(filter_var)
 }
 /* }}} */
 
-/* {{{ proto mixed filter_input_array(constant type, [, mixed options [, bool add_empty]]])
- * Returns an array with all arguments defined in 'definition'.
+/* Returns an array with all arguments defined in 'definition'.
  */
 PHP_FUNCTION(filter_input_array)
 {
@@ -773,8 +769,7 @@ PHP_FUNCTION(filter_input_array)
 }
 /* }}} */
 
-/* {{{ proto mixed filter_var_array(array data, [, mixed options [, bool add_empty]]])
- * Returns an array with all arguments defined in 'definition'.
+/* Returns an array with all arguments defined in 'definition'.
  */
 PHP_FUNCTION(filter_var_array)
 {
@@ -793,8 +788,7 @@ PHP_FUNCTION(filter_var_array)
 }
 /* }}} */
 
-/* {{{ proto filter_list()
- * Returns a list of all supported filters */
+/* Returns a list of all supported filters */
 PHP_FUNCTION(filter_list)
 {
 	int i, size = sizeof(filter_list) / sizeof(filter_list_entry);
@@ -810,8 +804,7 @@ PHP_FUNCTION(filter_list)
 }
 /* }}} */
 
-/* {{{ proto filter_id(string filtername)
- * Returns the filter ID belonging to a named filter */
+/* Returns the filter ID belonging to a named filter */
 PHP_FUNCTION(filter_id)
 {
 	int i;

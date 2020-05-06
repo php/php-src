@@ -258,8 +258,7 @@ static zend_object *zend_error_exception_new(zend_class_entry *class_type) /* {{
 }
 /* }}} */
 
-/* {{{ proto Exception|Error Exception|Error::__clone()
-   Clone the exception object */
+/* Clone the exception object */
 ZEND_COLD ZEND_METHOD(Exception, __clone)
 {
 	/* Should never be executable */
@@ -267,8 +266,7 @@ ZEND_COLD ZEND_METHOD(Exception, __clone)
 }
 /* }}} */
 
-/* {{{ proto Exception|Error::__construct(string message, int code [, Throwable previous])
-   Exception constructor */
+/* Exception constructor */
 ZEND_METHOD(Exception, __construct)
 {
 	zend_string *message = NULL;
@@ -299,8 +297,7 @@ ZEND_METHOD(Exception, __construct)
 }
 /* }}} */
 
-/* {{{ proto Exception::__wakeup()
-   Exception unserialize checks */
+/* Exception unserialize checks */
 #define CHECK_EXC_TYPE(id, type) \
 	pvalue = zend_read_property_ex(i_get_exception_base(object), (object), ZSTR_KNOWN(id), 1, &value); \
 	if (Z_TYPE_P(pvalue) != IS_NULL && Z_TYPE_P(pvalue) != type) { \
@@ -326,8 +323,7 @@ ZEND_METHOD(Exception, __wakeup)
 }
 /* }}} */
 
-/* {{{ proto ErrorException::__construct(string message, int code, int severity [, string filename [, int lineno [, Throwable previous]]])
-   ErrorException constructor */
+/* ErrorException constructor */
 ZEND_METHOD(ErrorException, __construct)
 {
 	zend_string *message = NULL, *filename = NULL;
@@ -377,8 +373,7 @@ ZEND_METHOD(ErrorException, __construct)
 #define GET_PROPERTY_SILENT(object, id) \
 	zend_read_property_ex(i_get_exception_base(object), (object), ZSTR_KNOWN(id), 1, &rv)
 
-/* {{{ proto string Exception|Error::getFile()
-   Get the file in which the exception occurred */
+/* Get the file in which the exception occurred */
 ZEND_METHOD(Exception, getFile)
 {
 	zval *prop, rv;
@@ -391,8 +386,7 @@ ZEND_METHOD(Exception, getFile)
 }
 /* }}} */
 
-/* {{{ proto int Exception|Error::getLine()
-   Get the line in which the exception occurred */
+/* Get the line in which the exception occurred */
 ZEND_METHOD(Exception, getLine)
 {
 	zval *prop, rv;
@@ -405,8 +399,7 @@ ZEND_METHOD(Exception, getLine)
 }
 /* }}} */
 
-/* {{{ proto string Exception|Error::getMessage()
-   Get the exception message */
+/* Get the exception message */
 ZEND_METHOD(Exception, getMessage)
 {
 	zval *prop, rv;
@@ -419,8 +412,7 @@ ZEND_METHOD(Exception, getMessage)
 }
 /* }}} */
 
-/* {{{ proto int Exception|Error::getCode()
-   Get the exception code */
+/* Get the exception code */
 ZEND_METHOD(Exception, getCode)
 {
 	zval *prop, rv;
@@ -433,8 +425,7 @@ ZEND_METHOD(Exception, getCode)
 }
 /* }}} */
 
-/* {{{ proto array Exception|Error::getTrace()
-   Get the stack trace for the location in which the exception occurred */
+/* Get the stack trace for the location in which the exception occurred */
 ZEND_METHOD(Exception, getTrace)
 {
 	zval *prop, rv;
@@ -447,8 +438,7 @@ ZEND_METHOD(Exception, getTrace)
 }
 /* }}} */
 
-/* {{{ proto int ErrorException::getSeverity()
-   Get the exception severity */
+/* Get the exception severity */
 ZEND_METHOD(ErrorException, getSeverity)
 {
 	zval *prop, rv;
@@ -590,8 +580,7 @@ static void _build_trace_string(smart_str *str, HashTable *ht, uint32_t num) /* 
 }
 /* }}} */
 
-/* {{{ proto string Exception|Error::getTraceAsString()
-   Obtain the backtrace for the exception as a string (instead of an array) */
+/* Obtain the backtrace for the exception as a string (instead of an array) */
 ZEND_METHOD(Exception, getTraceAsString)
 {
 	zval *trace, *frame, rv;
@@ -629,8 +618,7 @@ ZEND_METHOD(Exception, getTraceAsString)
 }
 /* }}} */
 
-/* {{{ proto Throwable Exception|Error::getPrevious()
-   Return previous Throwable or NULL. */
+/* Return previous Throwable or NULL. */
 ZEND_METHOD(Exception, getPrevious)
 {
 	zval rv;
@@ -640,8 +628,7 @@ ZEND_METHOD(Exception, getPrevious)
 	ZVAL_COPY(return_value, GET_PROPERTY_SILENT(ZEND_THIS, ZEND_STR_PREVIOUS));
 } /* }}} */
 
-/* {{{ proto string Exception|Error::__toString()
-   Obtain the string representation of the Exception object */
+/* Obtain the string representation of the Exception object */
 ZEND_METHOD(Exception, __toString)
 {
 	zval trace, *exception;

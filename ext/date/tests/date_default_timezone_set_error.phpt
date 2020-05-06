@@ -2,8 +2,7 @@
 Test date_default_timezone_set() function : error variations
 --FILE--
 <?php
-/* Prototype  : bool date_default_timezone_set ( string $timezone_identifier )
- * Description:  Sets the default timezone used by all date/time functions in a script.
+/* Description:  Sets the default timezone used by all date/time functions in a script.
  * Source code: ext/standard/data/php_date.c
  */
 

@@ -11,8 +11,7 @@ if(!function_exists('gd_info')) {
 ?>
 --FILE--
 <?php
-/* Prototype  : array gd_info()
- * Description: Retrieve information about the currently installed GD library
+/* Description: Retrieve information about the currently installed GD library
  * Source code: ext/gd/gd.c
  */
 

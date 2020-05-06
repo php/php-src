@@ -2,8 +2,7 @@
 Test stripos() function : usage variations - unexpected inputs for 'haystack' and 'needle' arguments
 --FILE--
 <?php
-/* Prototype  : int stripos ( string $haystack, string $needle [, int $offset] );
- * Description: Find position of first occurrence of a case-insensitive string
+/* Description: Find position of first occurrence of a case-insensitive string
  * Source code: ext/standard/string.c
 */
 

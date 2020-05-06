@@ -205,8 +205,7 @@ PHP_MINFO_FUNCTION(fileinfo)
 }
 /* }}} */
 
-/* {{{ proto resource finfo_open([int options [, string arg]])
-   Create a new fileinfo resource. */
+/* Create a new fileinfo resource. */
 PHP_FUNCTION(finfo_open)
 {
 	zend_long options = MAGIC_NONE;
@@ -297,8 +296,7 @@ PHP_FUNCTION(finfo_open)
 }
 /* }}} */
 
-/* {{{ proto resource finfo_close(resource finfo)
-   Close fileinfo resource. */
+/* Close fileinfo resource. */
 PHP_FUNCTION(finfo_close)
 {
 	php_fileinfo *finfo;
@@ -318,8 +316,7 @@ PHP_FUNCTION(finfo_close)
 }
 /* }}} */
 
-/* {{{ proto bool finfo_set_flags(resource finfo, int options)
-   Set libmagic configuration options. */
+/* Set libmagic configuration options. */
 PHP_FUNCTION(finfo_set_flags)
 {
 	zend_long options;
@@ -518,24 +515,21 @@ clean:
 }
 /* }}} */
 
-/* {{{ proto string finfo_file(resource finfo, char *file_name [, int options [, resource context]])
-   Return information about a file. */
+/* Return information about a file. */
 PHP_FUNCTION(finfo_file)
 {
 	_php_finfo_get_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, FILEINFO_MODE_FILE, 0);
 }
 /* }}} */
 
-/* {{{ proto string finfo_buffer(resource finfo, char *string [, int options [, resource context]])
-   Return information about a string buffer. */
+/* Return information about a string buffer. */
 PHP_FUNCTION(finfo_buffer)
 {
 	_php_finfo_get_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, FILEINFO_MODE_BUFFER, 0);
 }
 /* }}} */
 
-/* {{{ proto string mime_content_type(string filename|resource stream)
-   Return content-type for file */
+/* Return content-type for file */
 PHP_FUNCTION(mime_content_type)
 {
 	_php_finfo_get_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, -1, 1);

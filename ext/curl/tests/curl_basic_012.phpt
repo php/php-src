@@ -6,8 +6,7 @@ TestFest 2009 - AFUP - Xavier Gorse <xgorse@elao.com>
 <?php include 'skipif.inc'; ?>
 --FILE--
 <?php
-/* Prototype  : bool curl_setopt(resource ch, int option, mixed value)
- * Description: Set an option for a cURL transfer
+/* Description: Set an option for a cURL transfer
  * Source code: ext/curl/interface.c
  * Alias to functions:
  */

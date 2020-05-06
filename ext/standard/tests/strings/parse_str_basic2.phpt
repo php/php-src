@@ -4,8 +4,7 @@ Test parse_str() function : non-default arg_separator.input specified
 arg_separator.input = "/"
 --FILE--
 <?php
-/* Prototype  : void parse_str  ( string $str  [, array &$arr  ] )
- * Description: Parses the string into variables
+/* Description: Parses the string into variables
  * Source code: ext/standard/string.c
 */
 

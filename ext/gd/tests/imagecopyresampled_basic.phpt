@@ -7,8 +7,7 @@ imagecopyresampled()
 --FILE--
 <?php
 
-/* Prototype  : bool imagecopyresampled  ( resource $dst_image  , resource $src_image  , int $dst_x  , int $dst_y  , int $src_x  , int $src_y  , int $dst_w  , int $dst_h  , int $src_w  , int $src_h  )
- * Description: Copy and resize part of an image with resampling.
+/* Description: Copy and resize part of an image with resampling.
  * Source code: ext/standard/image.c
  * Alias to functions:
  */

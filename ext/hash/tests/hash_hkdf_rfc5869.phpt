@@ -3,8 +3,7 @@ Hash: hash_hkdf() function: RFC 5869 test vectors
 --FILE--
 <?php
 
-/* Prototype  : string hkdf  ( string $algo  , string $ikm  [, int $length  , string $info = '' , string $salt = ''  ] )
- * Description: HMAC-based Key Derivation Function
+/* Description: HMAC-based Key Derivation Function
  * Source code: ext/hash/hash.c
 */
 

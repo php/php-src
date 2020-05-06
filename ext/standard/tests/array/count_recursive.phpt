@@ -2,8 +2,7 @@
 Test count() function
 --FILE--
 <?php
-/* Prototype: int count ( mixed $var [, int $mode] );
-   Description: Count elements in an array, or properties in an object
+/* Description: Count elements in an array, or properties in an object
 */
 
 echo "*** Testing basic functionality of count() function ***\n";

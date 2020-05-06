@@ -2,8 +2,7 @@
 Test array_intersect_uassoc() function : usage variation - Passing unexpected values to first argument
 --FILE--
 <?php
-/* Prototype  : array array_intersect_uassoc(array arr1, array arr2 [, array ...], callback key_compare_func)
- * Description: Computes the intersection of arrays with additional index check, compares indexes by a callback function
+/* Description: Computes the intersection of arrays with additional index check, compares indexes by a callback function
  * Source code: ext/standard/array.c
  */
 

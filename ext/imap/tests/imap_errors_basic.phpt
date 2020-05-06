@@ -6,8 +6,7 @@ require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
-/* Prototype  : array imap_errors  ( void  )
- * Description: Returns all of the IMAP errors that have occurred.
+/* Description: Returns all of the IMAP errors that have occurred.
  * Source code: ext/imap/php_imap.c
  */
 

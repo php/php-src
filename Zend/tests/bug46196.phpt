@@ -4,8 +4,7 @@ Test restore_error_handler() function : bug #46196
 Olivier Doucet
 --FILE--
 <?php
-/* Prototype  : void restore_error_handler(void)
- * Description: Restores the previously defined error handler function
+/* Description: Restores the previously defined error handler function
  * Source code: Zend/zend_builtin_functions.c
  * Alias to functions:
  */

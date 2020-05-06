@@ -2,8 +2,7 @@
 Test new DateTime() : basic functionality
 --FILE--
 <?php
-/* Prototype  : DateTime::__construct  ([ string $time="now"  [, DateTimeZone $timezone=NULL  ]] )
- * Description: Returns new DateTime object
+/* Description: Returns new DateTime object
  * Source code: ext/date/php_date.c
  * Alias to functions:
  */

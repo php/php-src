@@ -2,8 +2,7 @@
 Test array_slice() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : array array_slice(array $input, int $offset [, int $length [, bool $preserve_keys]])
- * Description: Returns elements specified by offset and length
+/* Description: Returns elements specified by offset and length
  * Source code: ext/standard/array.c
  */
 

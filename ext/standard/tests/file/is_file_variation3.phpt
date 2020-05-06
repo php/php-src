@@ -4,8 +4,7 @@ Test is_file() function: usage variations - invalid filenames
 obscure_filename
 --FILE--
 <?php
-/* Prototype: bool is_file ( string $filename );
-   Description: Tells whether the filename is a regular file
+/* Description: Tells whether the filename is a regular file
      Returns TRUE if the filename exists and is a regular file
 */
 

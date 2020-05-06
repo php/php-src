@@ -181,8 +181,7 @@ PHPAPI uint32_t php_mt_rand(void)
 }
 /* }}} */
 
-/* {{{ proto void mt_srand([int seed])
-   Seeds Mersenne Twister random number generator */
+/* Seeds Mersenne Twister random number generator */
 PHP_FUNCTION(mt_srand)
 {
 	zend_long seed = 0;
@@ -306,8 +305,7 @@ PHPAPI zend_long php_mt_rand_common(zend_long min, zend_long max)
 }
 /* }}} */
 
-/* {{{ proto int mt_rand([int min, int max])
-   Returns a random number from Mersenne Twister */
+/* Returns a random number from Mersenne Twister */
 PHP_FUNCTION(mt_rand)
 {
 	zend_long min;
@@ -333,8 +331,7 @@ PHP_FUNCTION(mt_rand)
 }
 /* }}} */
 
-/* {{{ proto int mt_getrandmax(void)
-   Returns the maximum value a random number from Mersenne Twister can have */
+/* Returns the maximum value a random number from Mersenne Twister can have */
 PHP_FUNCTION(mt_getrandmax)
 {
 	ZEND_PARSE_PARAMETERS_NONE();

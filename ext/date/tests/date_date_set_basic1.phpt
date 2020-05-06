@@ -2,8 +2,7 @@
 Test date_date_set() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : DateTime date_date_set  ( DateTime $object  , int $year  , int $month  , int $day  )
- * Description: Resets the current date of the DateTime object to a different date.
+/* Description: Resets the current date of the DateTime object to a different date.
  * Source code: ext/date/php_date.c
  * Alias to functions: DateTime::setDate
  */

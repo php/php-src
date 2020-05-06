@@ -343,8 +343,7 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 }
 /* }}} */
 
-/* {{{ proto bool PDOStatement::execute([array $bound_input_params])
-   Execute a prepared statement, optionally binding parameters */
+/* Execute a prepared statement, optionally binding parameters */
 PHP_METHOD(PDOStatement, execute)
 {
 	zval *input_params = NULL;
@@ -1166,8 +1165,7 @@ static int pdo_stmt_verify_mode(pdo_stmt_t *stmt, zend_long mode, int fetch_all)
 }
 /* }}} */
 
-/* {{{ proto mixed PDOStatement::fetch([int $how = PDO_FETCH_BOTH [, int $orientation [, int $offset]]])
-   Fetches the next row and returns it, or false if there are no more rows */
+/* Fetches the next row and returns it, or false if there are no more rows */
 PHP_METHOD(PDOStatement, fetch)
 {
 	zend_long how = PDO_FETCH_USE_DEFAULT;
@@ -1195,8 +1193,7 @@ PHP_METHOD(PDOStatement, fetch)
 }
 /* }}} */
 
-/* {{{ proto mixed PDOStatement::fetchObject([string class_name [, NULL|array ctor_args]])
-   Fetches the next row and returns it as an object. */
+/* Fetches the next row and returns it as an object. */
 PHP_METHOD(PDOStatement, fetchObject)
 {
 	zend_long how = PDO_FETCH_CLASS;
@@ -1262,8 +1259,7 @@ PHP_METHOD(PDOStatement, fetchObject)
 }
 /* }}} */
 
-/* {{{ proto string PDOStatement::fetchColumn([int column_number])
-   Returns a data of the specified column in the result set. */
+/* Returns a data of the specified column in the result set. */
 PHP_METHOD(PDOStatement, fetchColumn)
 {
 	zend_long col_n = 0;
@@ -1285,8 +1281,7 @@ PHP_METHOD(PDOStatement, fetchColumn)
 }
 /* }}} */
 
-/* {{{ proto array PDOStatement::fetchAll([int $how = PDO_FETCH_BOTH [, string class_name [, NULL|array ctor_args]]])
-   Returns an array of all of the results. */
+/* Returns an array of all of the results. */
 PHP_METHOD(PDOStatement, fetchAll)
 {
 	zend_long how = PDO_FETCH_USE_DEFAULT;
@@ -1491,8 +1486,7 @@ static int register_bound_param(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, 
 	return 1;
 } /* }}} */
 
-/* {{{ proto bool PDOStatement::bindValue(mixed $paramno, mixed $param [, int $type ])
-   bind an input parameter to the value of a PHP variable.  $paramno is the 1-based position of the placeholder in the SQL statement (but can be the parameter name for drivers that support named placeholders).  It should be called prior to execute(). */
+/* bind an input parameter to the value of a PHP variable.  $paramno is the 1-based position of the placeholder in the SQL statement (but can be the parameter name for drivers that support named placeholders).  It should be called prior to execute(). */
 PHP_METHOD(PDOStatement, bindValue)
 {
 	struct pdo_bound_param_data param;
@@ -1532,8 +1526,7 @@ PHP_METHOD(PDOStatement, bindValue)
 }
 /* }}} */
 
-/* {{{ proto bool PDOStatement::bindParam(mixed $paramno, mixed &$param [, int $type [, int $maxlen [, mixed $driverdata]]])
-   bind a parameter to a PHP variable.  $paramno is the 1-based position of the placeholder in the SQL statement (but can be the parameter name for drivers that support named placeholders).  This isn't supported by all drivers.  It should be called prior to execute(). */
+/* bind a parameter to a PHP variable.  $paramno is the 1-based position of the placeholder in the SQL statement (but can be the parameter name for drivers that support named placeholders).  This isn't supported by all drivers.  It should be called prior to execute(). */
 PHP_METHOD(PDOStatement, bindParam)
 {
 	PHP_STMT_GET_OBJ;
@@ -1541,8 +1534,7 @@ PHP_METHOD(PDOStatement, bindParam)
 }
 /* }}} */
 
-/* {{{ proto bool PDOStatement::bindColumn(mixed $column, mixed &$param [, int $type [, int $maxlen [, mixed $driverdata]]])
-   bind a column to a PHP variable.  On each row fetch $param will contain the value of the corresponding column.  $column is the 1-based offset of the column, or the column name.  For portability, don't call this before execute(). */
+/* bind a column to a PHP variable.  On each row fetch $param will contain the value of the corresponding column.  $column is the 1-based offset of the column, or the column name.  For portability, don't call this before execute(). */
 PHP_METHOD(PDOStatement, bindColumn)
 {
 	PHP_STMT_GET_OBJ;
@@ -1550,8 +1542,7 @@ PHP_METHOD(PDOStatement, bindColumn)
 }
 /* }}} */
 
-/* {{{ proto int PDOStatement::rowCount()
-   Returns the number of rows in a result set, or the number of rows affected by the last execute().  It is not always meaningful. */
+/* Returns the number of rows in a result set, or the number of rows affected by the last execute().  It is not always meaningful. */
 PHP_METHOD(PDOStatement, rowCount)
 {
 	PHP_STMT_GET_OBJ;
@@ -1562,8 +1553,7 @@ PHP_METHOD(PDOStatement, rowCount)
 }
 /* }}} */
 
-/* {{{ proto string PDOStatement::errorCode()
-   Fetch the error code associated with the last operation on the statement handle */
+/* Fetch the error code associated with the last operation on the statement handle */
 PHP_METHOD(PDOStatement, errorCode)
 {
 	PHP_STMT_GET_OBJ;
@@ -1578,8 +1568,7 @@ PHP_METHOD(PDOStatement, errorCode)
 }
 /* }}} */
 
-/* {{{ proto array PDOStatement::errorInfo()
-   Fetch extended error information associated with the last operation on the statement handle */
+/* Fetch extended error information associated with the last operation on the statement handle */
 PHP_METHOD(PDOStatement, errorInfo)
 {
 	int error_count;
@@ -1610,8 +1599,7 @@ PHP_METHOD(PDOStatement, errorInfo)
 }
 /* }}} */
 
-/* {{{ proto bool PDOStatement::setAttribute(long attribute, mixed value)
-   Set an attribute */
+/* Set an attribute */
 PHP_METHOD(PDOStatement, setAttribute)
 {
 	zend_long attr;
@@ -1642,8 +1630,7 @@ fail:
 }
 /* }}} */
 
-/* {{{ proto mixed PDOStatement::getAttribute(long attribute)
-   Get an attribute */
+/* Get an attribute */
 
 static int generic_stmt_attr_get(pdo_stmt_t *stmt, zval *return_value, zend_long attr)
 {
@@ -1694,8 +1681,7 @@ PHP_METHOD(PDOStatement, getAttribute)
 }
 /* }}} */
 
-/* {{{ proto int PDOStatement::columnCount()
-   Returns the number of columns in the result set */
+/* Returns the number of columns in the result set */
 PHP_METHOD(PDOStatement, columnCount)
 {
 	PHP_STMT_GET_OBJ;
@@ -1706,8 +1692,7 @@ PHP_METHOD(PDOStatement, columnCount)
 }
 /* }}} */
 
-/* {{{ proto array PDOStatement::getColumnMeta(int $column)
-   Returns meta data for a numbered column */
+/* Returns meta data for a numbered column */
 PHP_METHOD(PDOStatement, getColumnMeta)
 {
 	zend_long colno;
@@ -1746,8 +1731,7 @@ PHP_METHOD(PDOStatement, getColumnMeta)
 }
 /* }}} */
 
-/* {{{ proto bool PDOStatement::setFetchMode(int mode [, mixed* params])
-   Changes the default fetch mode for subsequent fetches (params have different meaning for different fetch modes) */
+/* Changes the default fetch mode for subsequent fetches (params have different meaning for different fetch modes) */
 
 int pdo_stmt_setup_fetch_mode(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, int skip)
 {
@@ -1928,8 +1912,7 @@ PHP_METHOD(PDOStatement, setFetchMode)
 }
 /* }}} */
 
-/* {{{ proto bool PDOStatement::nextRowset()
-   Advances to the next rowset in a multi-rowset statement handle. Returns true if it succeeded, false otherwise */
+/* Advances to the next rowset in a multi-rowset statement handle. Returns true if it succeeded, false otherwise */
 
 static int pdo_stmt_do_next_rowset(pdo_stmt_t *stmt)
 {
@@ -1981,8 +1964,7 @@ PHP_METHOD(PDOStatement, nextRowset)
 }
 /* }}} */
 
-/* {{{ proto bool PDOStatement::closeCursor()
-   Closes the cursor, leaving the statement ready for re-execution. */
+/* Closes the cursor, leaving the statement ready for re-execution. */
 PHP_METHOD(PDOStatement, closeCursor)
 {
 	PHP_STMT_GET_OBJ;
@@ -2018,8 +2000,7 @@ PHP_METHOD(PDOStatement, closeCursor)
 }
 /* }}} */
 
-/* {{{ proto void PDOStatement::debugDumpParams()
-   A utility for internals hackers to debug parameter internals */
+/* A utility for internals hackers to debug parameter internals */
 PHP_METHOD(PDOStatement, debugDumpParams)
 {
 	ZEND_PARSE_PARAMETERS_NONE();

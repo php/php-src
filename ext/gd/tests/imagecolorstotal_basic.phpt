@@ -12,8 +12,7 @@ if(!function_exists('imagecolorstotal') || !function_exists('imagecreatefromgif'
 ?>
 --FILE--
 <?php
-/* Prototype  : int imagecolorstotal  ( resource $image  )
- * Description: Find out the number of colors in an image's palette
+/* Description: Find out the number of colors in an image's palette
  * Source code: ext/gd/gd.c
  */
 

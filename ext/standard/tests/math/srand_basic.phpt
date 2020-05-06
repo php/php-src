@@ -2,8 +2,7 @@
 Test srand() - basic function test for srand()
 --FILE--
 <?php
-/* Prototype  : void srand  ([ int $seed  ] )
- * Description: Seed the random number generator.
+/* Description: Seed the random number generator.
  * Source code: ext/standard/rand.c
  */
 

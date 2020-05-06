@@ -2,8 +2,7 @@
 Test date() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : string date  ( string $format  [, int $timestamp  ] )
- * Description: Format a local time/date.
+/* Description: Format a local time/date.
  * Source code: ext/date/php_date.c
  */
 

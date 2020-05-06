@@ -1281,8 +1281,7 @@ PHP_MINFO_FUNCTION(mbstring)
 }
 /* }}} */
 
-/* {{{ proto string mb_language([string language])
-   Sets the current language or Returns the current language as a string */
+/* Sets the current language or Returns the current language as a string */
 PHP_FUNCTION(mb_language)
 {
 	zend_string *name = NULL;
@@ -1306,8 +1305,7 @@ PHP_FUNCTION(mb_language)
 }
 /* }}} */
 
-/* {{{ proto string mb_internal_encoding([string encoding])
-   Sets the current internal encoding or Returns the current internal encoding as a string */
+/* Sets the current internal encoding or Returns the current internal encoding as a string */
 PHP_FUNCTION(mb_internal_encoding)
 {
 	const char *name = NULL;
@@ -1335,8 +1333,7 @@ PHP_FUNCTION(mb_internal_encoding)
 }
 /* }}} */
 
-/* {{{ proto mixed mb_http_input([string type])
-   Returns the input encoding */
+/* Returns the input encoding */
 PHP_FUNCTION(mb_http_input)
 {
 	char *typ = NULL;
@@ -1430,8 +1427,7 @@ PHP_FUNCTION(mb_http_input)
 }
 /* }}} */
 
-/* {{{ proto string mb_http_output([string encoding])
-   Sets the current output_encoding or returns the current output_encoding as a string */
+/* Sets the current output_encoding or returns the current output_encoding as a string */
 PHP_FUNCTION(mb_http_output)
 {
 	const char *name = NULL;
@@ -1460,8 +1456,7 @@ PHP_FUNCTION(mb_http_output)
 }
 /* }}} */
 
-/* {{{ proto bool|array mb_detect_order([mixed encoding-list])
-   Sets the current detect_order or Return the current detect_order as a array */
+/* Sets the current detect_order or Return the current detect_order as a array */
 PHP_FUNCTION(mb_detect_order)
 {
 	zend_string *order_str = NULL;
@@ -1529,8 +1524,7 @@ static inline int php_mb_check_code_point(zend_long cp)
 	return 1;
 }
 
-/* {{{ proto mixed mb_substitute_character([mixed substchar])
-   Sets the current substitute_character or returns the current substitute_character */
+/* Sets the current substitute_character or returns the current substitute_character */
 PHP_FUNCTION(mb_substitute_character)
 {
 	zval *arg1 = NULL;
@@ -1587,8 +1581,7 @@ PHP_FUNCTION(mb_substitute_character)
 }
 /* }}} */
 
-/* {{{ proto string mb_preferred_mime_name(string encoding)
-   Return the preferred MIME name (charset) as a string */
+/* Return the preferred MIME name (charset) as a string */
 PHP_FUNCTION(mb_preferred_mime_name)
 {
 	enum mbfl_no_encoding no_encoding;
@@ -1618,8 +1611,7 @@ PHP_FUNCTION(mb_preferred_mime_name)
 #define IS_SJIS1(c) ((((c)>=0x81 && (c)<=0x9f) || ((c)>=0xe0 && (c)<=0xf5)) ? 1 : 0)
 #define IS_SJIS2(c) ((((c)>=0x40 && (c)<=0x7e) || ((c)>=0x80 && (c)<=0xfc)) ? 1 : 0)
 
-/* {{{ proto bool mb_parse_str(string encoded_string, array &result)
-   Parses GET/POST/COOKIE data and sets global variables */
+/* Parses GET/POST/COOKIE data and sets global variables */
 PHP_FUNCTION(mb_parse_str)
 {
 	zval *track_vars_array;
@@ -1659,8 +1651,7 @@ PHP_FUNCTION(mb_parse_str)
 }
 /* }}} */
 
-/* {{{ proto string mb_output_handler(string contents, int status)
-   Returns string in output buffer converted to the http_output encoding */
+/* Returns string in output buffer converted to the http_output encoding */
 PHP_FUNCTION(mb_output_handler)
 {
 	char *arg_string;
@@ -1764,8 +1755,7 @@ PHP_FUNCTION(mb_output_handler)
 }
 /* }}} */
 
-/* {{{ proto array mb_str_split(string str [, int split_length] [, string encoding])
- Convert a multibyte string to an array. If split_length is specified,
+/* Convert a multibyte string to an array. If split_length is specified,
  break the string down into chunks each split_length characters long. */
 
 /* structure to pass split params to the callback */
@@ -1928,8 +1918,7 @@ PHP_FUNCTION(mb_str_split)
 }
 /* }}} */
 
-/* {{{ proto int mb_strlen(string str [, string encoding])
-   Get character numbers of a string */
+/* Get character numbers of a string */
 PHP_FUNCTION(mb_strlen)
 {
 	size_t n;
@@ -1976,8 +1965,7 @@ static void handle_strpos_error(size_t error) {
 	}
 }
 
-/* {{{ proto int mb_strpos(string haystack, string needle [, int offset [, string encoding]])
-   Find position of first occurrence of a string within another */
+/* Find position of first occurrence of a string within another */
 PHP_FUNCTION(mb_strpos)
 {
 	int reverse = 0;
@@ -2006,8 +1994,7 @@ PHP_FUNCTION(mb_strpos)
 }
 /* }}} */
 
-/* {{{ proto int mb_strrpos(string haystack, string needle [, int offset [, string encoding]])
-   Find position of last occurrence of a string within another */
+/* Find position of last occurrence of a string within another */
 PHP_FUNCTION(mb_strrpos)
 {
 	mbfl_string haystack, needle;
@@ -2034,8 +2021,7 @@ PHP_FUNCTION(mb_strrpos)
 }
 /* }}} */
 
-/* {{{ proto int mb_stripos(string haystack, string needle [, int offset [, string encoding]])
-   Finds position of first occurrence of a string within another, case insensitive */
+/* Finds position of first occurrence of a string within another, case insensitive */
 PHP_FUNCTION(mb_stripos)
 {
 	size_t n = (size_t) -1;
@@ -2064,8 +2050,7 @@ PHP_FUNCTION(mb_stripos)
 }
 /* }}} */
 
-/* {{{ proto int mb_strripos(string haystack, string needle [, int offset [, string encoding]])
-   Finds position of last occurrence of a string within another, case insensitive */
+/* Finds position of last occurrence of a string within another, case insensitive */
 PHP_FUNCTION(mb_strripos)
 {
 	size_t n = (size_t) -1;
@@ -2149,32 +2134,28 @@ static void php_mb_strstr_variants(INTERNAL_FUNCTION_PARAMETERS, unsigned int va
 	}
 }
 
-/* {{{ proto string mb_strstr(string haystack, string needle[, bool part[, string encoding]])
-   Finds first occurrence of a string within another */
+/* Finds first occurrence of a string within another */
 PHP_FUNCTION(mb_strstr)
 {
 	php_mb_strstr_variants(INTERNAL_FUNCTION_PARAM_PASSTHRU, MB_STRSTR);
 }
 /* }}} */
 
-/* {{{ proto string mb_strrchr(string haystack, string needle[, bool part[, string encoding]])
-   Finds the last occurrence of a character in a string within another */
+/* Finds the last occurrence of a character in a string within another */
 PHP_FUNCTION(mb_strrchr)
 {
 	php_mb_strstr_variants(INTERNAL_FUNCTION_PARAM_PASSTHRU, MB_STRRCHR);
 }
 /* }}} */
 
-/* {{{ proto string mb_stristr(string haystack, string needle[, bool part[, string encoding]])
-   Finds first occurrence of a string within another, case insensitive */
+/* Finds first occurrence of a string within another, case insensitive */
 PHP_FUNCTION(mb_stristr)
 {
 	php_mb_strstr_variants(INTERNAL_FUNCTION_PARAM_PASSTHRU, MB_STRISTR);
 }
 /* }}} */
 
-/* {{{ proto string mb_strrichr(string haystack, string needle[, bool part[, string encoding]])
-   Finds the last occurrence of a character in a string within another, case insensitive */
+/* Finds the last occurrence of a character in a string within another, case insensitive */
 PHP_FUNCTION(mb_strrichr)
 {
 	php_mb_strstr_variants(INTERNAL_FUNCTION_PARAM_PASSTHRU, MB_STRRICHR);
@@ -2186,8 +2167,7 @@ PHP_FUNCTION(mb_strrichr)
 #undef MB_STRISTR
 #undef MB_STRRICHR
 
-/* {{{ proto int mb_substr_count(string haystack, string needle [, string encoding])
-   Count the number of substring occurrences */
+/* Count the number of substring occurrences */
 PHP_FUNCTION(mb_substr_count)
 {
 	size_t n;
@@ -2219,8 +2199,7 @@ PHP_FUNCTION(mb_substr_count)
 }
 /* }}} */
 
-/* {{{ proto string mb_substr(string str, int start [, int length [, string encoding]])
-   Returns part of a string */
+/* Returns part of a string */
 PHP_FUNCTION(mb_substr)
 {
 	char *str;
@@ -2283,8 +2262,7 @@ PHP_FUNCTION(mb_substr)
 }
 /* }}} */
 
-/* {{{ proto string mb_strcut(string str, int start [, int length [, string encoding]])
-   Returns part of a string */
+/* Returns part of a string */
 PHP_FUNCTION(mb_strcut)
 {
 	zend_string *encoding = NULL;
@@ -2340,8 +2318,7 @@ PHP_FUNCTION(mb_strcut)
 }
 /* }}} */
 
-/* {{{ proto int mb_strwidth(string str [, string encoding])
-   Gets terminal width of a string */
+/* Gets terminal width of a string */
 PHP_FUNCTION(mb_strwidth)
 {
 	size_t n;
@@ -2364,8 +2341,7 @@ PHP_FUNCTION(mb_strwidth)
 }
 /* }}} */
 
-/* {{{ proto string mb_strimwidth(string str, int start, int width [, string trimmarker [, string encoding]])
-   Trim the string in terminal width */
+/* Trim the string in terminal width */
 PHP_FUNCTION(mb_strimwidth)
 {
 	char *str, *trimmarker = NULL;
@@ -2589,8 +2565,7 @@ MBSTRING_API HashTable *php_mb_convert_encoding_recursive(HashTable *input, cons
 /* }}} */
 
 
-/* {{{ proto string mb_convert_encoding(string str, string to-encoding [, mixed from-encoding])
-   Returns converted string in desired encoding */
+/* Returns converted string in desired encoding */
 PHP_FUNCTION(mb_convert_encoding)
 {
 	zend_string *to_encoding_name;
@@ -2670,8 +2645,7 @@ static char *mbstring_convert_case(
 		MBSTRG(current_filter_illegal_mode), MBSTRG(current_filter_illegal_substchar));
 }
 
-/* {{{ proto string mb_convert_case(string source_string, int mode [, string encoding])
-   Returns a case-folded version of source_string */
+/* Returns a case-folded version of source_string */
 PHP_FUNCTION(mb_convert_case)
 {
 	zend_string *from_encoding = NULL;
@@ -2707,8 +2681,7 @@ PHP_FUNCTION(mb_convert_case)
 }
 /* }}} */
 
-/* {{{ proto string mb_strtoupper(string source_string [, string encoding])
- *  Returns a upper cased version of source_string
+/* *  Returns a upper cased version of source_string
  */
 PHP_FUNCTION(mb_strtoupper)
 {
@@ -2738,8 +2711,7 @@ PHP_FUNCTION(mb_strtoupper)
 }
 /* }}} */
 
-/* {{{ proto string mb_strtolower(string source_string [, string encoding])
- *  Returns a lower cased version of source_string
+/* *  Returns a lower cased version of source_string
  */
 PHP_FUNCTION(mb_strtolower)
 {
@@ -2769,8 +2741,7 @@ PHP_FUNCTION(mb_strtolower)
 }
 /* }}} */
 
-/* {{{ proto string mb_detect_encoding(string str [, mixed encoding_list [, bool strict]])
-   Encodings of the given string is returned (as a string) */
+/* Encodings of the given string is returned (as a string) */
 PHP_FUNCTION(mb_detect_encoding)
 {
 	char *str;
@@ -2837,8 +2808,7 @@ PHP_FUNCTION(mb_detect_encoding)
 }
 /* }}} */
 
-/* {{{ proto mixed mb_list_encodings()
-   Returns an array of all supported entity encodings */
+/* Returns an array of all supported entity encodings */
 PHP_FUNCTION(mb_list_encodings)
 {
 	const mbfl_encoding **encodings;
@@ -2858,8 +2828,7 @@ PHP_FUNCTION(mb_list_encodings)
 }
 /* }}} */
 
-/* {{{ proto array mb_encoding_aliases(string encoding)
-   Returns an array of the aliases of a given encoding name */
+/* Returns an array of the aliases of a given encoding name */
 PHP_FUNCTION(mb_encoding_aliases)
 {
 	const mbfl_encoding *encoding;
@@ -2884,8 +2853,7 @@ PHP_FUNCTION(mb_encoding_aliases)
 }
 /* }}} */
 
-/* {{{ proto string mb_encode_mimeheader(string str [, string charset [, string transfer-encoding [, string linefeed [, int indent]]]])
-   Converts the string to MIME "encoded-word" in the format of =?charset?(B|Q)?encoded_string?= */
+/* Converts the string to MIME "encoded-word" in the format of =?charset?(B|Q)?encoded_string?= */
 PHP_FUNCTION(mb_encode_mimeheader)
 {
 	const mbfl_encoding *charset, *transenc;
@@ -2937,8 +2905,7 @@ PHP_FUNCTION(mb_encode_mimeheader)
 }
 /* }}} */
 
-/* {{{ proto string mb_decode_mimeheader(string string)
-   Decodes the MIME "encoded-word" in the string */
+/* Decodes the MIME "encoded-word" in the string */
 PHP_FUNCTION(mb_decode_mimeheader)
 {
 	mbfl_string string, result, *ret;
@@ -2959,8 +2926,7 @@ PHP_FUNCTION(mb_decode_mimeheader)
 }
 /* }}} */
 
-/* {{{ proto string mb_convert_kana(string str [, string option] [, string encoding])
-   Conversion between full-width character and half-width character (Japanese) */
+/* Conversion between full-width character and half-width character (Japanese) */
 PHP_FUNCTION(mb_convert_kana)
 {
 	int opt;
@@ -3147,8 +3113,7 @@ static int mb_recursive_convert_variable(mbfl_buffer_converter *convd, zval *var
 	return 0;
 } /* }}} */
 
-/* {{{ proto string mb_convert_variables(string to-encoding, mixed from-encoding, mixed vars [, ...])
-   Converts the string resource in variables to desired encoding */
+/* Converts the string resource in variables to desired encoding */
 PHP_FUNCTION(mb_convert_variables)
 {
 	zval *args;
@@ -3333,16 +3298,14 @@ php_mb_numericentity_exec(INTERNAL_FUNCTION_PARAMETERS, int type)
 }
 /* }}} */
 
-/* {{{ proto string mb_encode_numericentity(string string, array convmap [, string encoding [, bool is_hex]])
-   Converts specified characters to HTML numeric entities */
+/* Converts specified characters to HTML numeric entities */
 PHP_FUNCTION(mb_encode_numericentity)
 {
 	php_mb_numericentity_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
-/* {{{ proto string mb_decode_numericentity(string string, array convmap [, string encoding])
-   Converts HTML numeric entities to character code */
+/* Converts HTML numeric entities to character code */
 PHP_FUNCTION(mb_decode_numericentity)
 {
 	php_mb_numericentity_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
@@ -3350,8 +3313,7 @@ PHP_FUNCTION(mb_decode_numericentity)
 /* }}} */
 /* }}} */
 
-/* {{{ proto int mb_send_mail(string to, string subject, string message [, string additional_headers [, string additional_parameters]])
- *  Sends an email message with MIME scheme
+/* *  Sends an email message with MIME scheme
  */
 
 #define SKIP_LONG_HEADER_SEP_MBSTRING(str, pos)										\
@@ -3823,8 +3785,7 @@ PHP_FUNCTION(mb_send_mail)
 #undef PHP_MBSTR_MAIL_MIME_HEADER4
 /* }}} */
 
-/* {{{ proto mixed mb_get_info([string type])
-   Returns the current settings of mbstring */
+/* Returns the current settings of mbstring */
 PHP_FUNCTION(mb_get_info)
 {
 	char *typ = NULL;
@@ -4087,8 +4048,7 @@ static int php_mb_check_encoding_recursive(HashTable *vars, const mbfl_encoding 
 }
 
 
-/* {{{ proto bool mb_check_encoding([mixed var[, string encoding]])
-   Check if the string is valid for the specified encoding */
+/* Check if the string is valid for the specified encoding */
 PHP_FUNCTION(mb_check_encoding)
 {
 	zend_string *input_str = NULL, *enc = NULL;
@@ -4177,7 +4137,6 @@ static inline zend_long php_mb_ord(const char *str, size_t str_len, zend_string 
 }
 
 
-/* {{{ proto int|false mb_ord([string str[, string encoding]]) */
 PHP_FUNCTION(mb_ord)
 {
 	char *str;
@@ -4294,7 +4253,6 @@ static inline zend_string *php_mb_chr(zend_long cp, zend_string *enc_name, uint3
 }
 
 
-/* {{{ proto string|false mb_chr([int cp[, string encoding]]) */
 PHP_FUNCTION(mb_chr)
 {
 	zend_long cp;
@@ -4316,7 +4274,6 @@ PHP_FUNCTION(mb_chr)
 }
 /* }}} */
 
-/* {{{ proto string mb_scrub([string str[, string encoding]]) */
 PHP_FUNCTION(mb_scrub)
 {
 	const mbfl_encoding *enc;

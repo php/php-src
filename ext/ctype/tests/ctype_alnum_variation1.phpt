@@ -4,8 +4,7 @@ Test ctype_alnum() function : usage variations - Different data types as $c arg
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-/* Prototype  : bool ctype_alnum(mixed $c)
- * Description: Checks for alphanumeric character(s)
+/* Description: Checks for alphanumeric character(s)
  * Source code: ext/ctype/ctype.c
  */
 

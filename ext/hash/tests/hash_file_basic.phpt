@@ -4,8 +4,7 @@ Hash: hash_file() function : basic functionality
 Felix De Vliegher <felix.devliegher@gmail.com>
 --FILE--
 <?php
-/* Prototype  : string hash_file(string algo, string filename[, bool raw_output = false])
- * Description: Generate a hash of a given file
+/* Description: Generate a hash of a given file
  * Source code: ext/hash/hash.c
  * Alias to functions:
  */

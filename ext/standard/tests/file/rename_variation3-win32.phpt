@@ -8,8 +8,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype: bool rename ( string $oldname, string $newname [, resource $context] );
-   Description: Renames a file or directory
+/* Description: Renames a file or directory
 */
 
 require __DIR__.'/file.inc';

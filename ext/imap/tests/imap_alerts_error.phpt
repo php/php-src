@@ -6,8 +6,7 @@ require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
-/* Prototype  : array imap_alerts(void)
- * Description: Returns an array of all IMAP alerts that have been generated since the last page load or since the last imap_alerts() call, whichever came last. The alert stack is cleared after imap_alerts() is called.
+/* Description: Returns an array of all IMAP alerts that have been generated since the last page load or since the last imap_alerts() call, whichever came last. The alert stack is cleared after imap_alerts() is called.
  * Source code: ext/imap/php_imap.c
  * Alias to functions:
  */

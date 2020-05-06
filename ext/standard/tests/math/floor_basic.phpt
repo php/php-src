@@ -4,8 +4,7 @@ Test floor() - basic function test for floor()
 precision=14
 --FILE--
 <?php
-/* Prototype  : float floor  ( float $value  )
- * Description: Round fractions down.
+/* Description: Round fractions down.
  * Source code: ext/standard/math.c
  */
 

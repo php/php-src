@@ -248,8 +248,7 @@ static void php_xmlwriter_end(INTERNAL_FUNCTION_PARAMETERS, xmlwriter_read_int_t
 	RETURN_FALSE;
 }
 
-/* {{{ proto bool xmlwriter_set_indent(XMLWriter xmlwriter, bool indent)
-Toggle indentation on/off - returns FALSE on error */
+/* Toggle indentation on/off - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_set_indent)
 {
 	xmlTextWriterPtr ptr;
@@ -273,32 +272,28 @@ PHP_FUNCTION(xmlwriter_set_indent)
 }
 /* }}} */
 
-/* {{{ proto bool xmlwriter_set_indent_string(XMLWriter xmlwriter, string indentString)
-Set string used for indenting - returns FALSE on error */
+/* Set string used for indenting - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_set_indent_string)
 {
 	php_xmlwriter_string_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterSetIndentString, NULL);
 }
 /* }}} */
 
-/* {{{ proto bool xmlwriter_start_attribute(XMLWriter xmlwriter, string name)
-Create start attribute - returns FALSE on error */
+/* Create start attribute - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_start_attribute)
 {
 	php_xmlwriter_string_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterStartAttribute, "Invalid Attribute Name");
 }
 /* }}} */
 
-/* {{{ proto bool xmlwriter_end_attribute(XMLWriter xmlwriter)
-End attribute - returns FALSE on error */
+/* End attribute - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_end_attribute)
 {
 	php_xmlwriter_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterEndAttribute);
 }
 /* }}} */
 
-/* {{{ proto bool xmlwriter_start_attribute_ns(XMLWriter xmlwriter, string prefix, string name, string uri)
-Create start namespaced attribute - returns FALSE on error */
+/* Create start namespaced attribute - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_start_attribute_ns)
 {
 	xmlTextWriterPtr ptr;
@@ -326,8 +321,7 @@ PHP_FUNCTION(xmlwriter_start_attribute_ns)
 }
 /* }}} */
 
-/* {{{ proto bool xmlwriter_write_attribute(XMLWriter xmlwriter, string name, string content)
-Write full attribute - returns FALSE on error */
+/* Write full attribute - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_write_attribute)
 {
 	xmlTextWriterPtr ptr;
@@ -355,8 +349,7 @@ PHP_FUNCTION(xmlwriter_write_attribute)
 }
 /* }}} */
 
-/* {{{ proto bool xmlwriter_write_attribute_ns(XMLWriter xmlwriter, string prefix, string name, string uri, string content)
-Write full namespaced attribute - returns FALSE on error */
+/* Write full namespaced attribute - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_write_attribute_ns)
 {
 	xmlTextWriterPtr ptr;
@@ -384,16 +377,14 @@ PHP_FUNCTION(xmlwriter_write_attribute_ns)
 }
 /* }}} */
 
-/* {{{ proto bool xmlwriter_start_element(XMLWriter xmlwriter, string name)
-Create start element tag - returns FALSE on error */
+/* Create start element tag - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_start_element)
 {
 	php_xmlwriter_string_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterStartElement, "Invalid Element Name");
 }
 /* }}} */
 
-/* {{{ proto bool xmlwriter_start_element_ns(XMLWriter xmlwriter, string prefix, string name, string uri)
-Create start namespaced element tag - returns FALSE on error */
+/* Create start namespaced element tag - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_start_element_ns)
 {
 	xmlTextWriterPtr ptr;
@@ -422,24 +413,21 @@ PHP_FUNCTION(xmlwriter_start_element_ns)
 }
 /* }}} */
 
-/* {{{ proto bool xmlwriter_end_element(XMLWriter xmlwriter)
-End current element - returns FALSE on error */
+/* End current element - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_end_element)
 {
 	php_xmlwriter_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterEndElement);
 }
 /* }}} */
 
-/* {{{ proto bool xmlwriter_full_end_element(XMLWriter xmlwriter)
-End current element - returns FALSE on error */
+/* End current element - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_full_end_element)
 {
 	php_xmlwriter_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterFullEndElement);
 }
 /* }}} */
 
-/* {{{ proto bool xmlwriter_write_element(XMLWriter xmlwriter, string name[, string content])
-Write full element tag - returns FALSE on error */
+/* Write full element tag - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_write_element)
 {
 	xmlTextWriterPtr ptr;
@@ -478,8 +466,7 @@ PHP_FUNCTION(xmlwriter_write_element)
 }
 /* }}} */
 
-/* {{{ proto bool xmlwriter_write_element_ns(XMLWriter xmlwriter, string prefix, string name, string uri[, string content])
-Write full namesapced element tag - returns FALSE on error */
+/* Write full namesapced element tag - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_write_element_ns)
 {
 	xmlTextWriterPtr ptr;
@@ -518,24 +505,21 @@ PHP_FUNCTION(xmlwriter_write_element_ns)
 }
 /* }}} */
 
-/* {{{ proto bool xmlwriter_start_pi(XMLWriter xmlwriter, string target)
-Create start PI tag - returns FALSE on error */
+/* Create start PI tag - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_start_pi)
 {
 	php_xmlwriter_string_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterStartPI, "Invalid PI Target");
 }
 /* }}} */
 
-/* {{{ proto bool xmlwriter_end_pi(XMLWriter xmlwriter)
-End current PI - returns FALSE on error */
+/* End current PI - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_end_pi)
 {
 	php_xmlwriter_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterEndPI);
 }
 /* }}} */
 
-/* {{{ proto bool xmlwriter_write_pi(XMLWriter xmlwriter, string target, string content)
-Write full PI tag - returns FALSE on error */
+/* Write full PI tag - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_write_pi)
 {
 	xmlTextWriterPtr ptr;
@@ -563,8 +547,7 @@ PHP_FUNCTION(xmlwriter_write_pi)
 }
 /* }}} */
 
-/* {{{ proto bool xmlwriter_start_cdata(XMLWriter xmlwriter)
-Create start CDATA tag - returns FALSE on error */
+/* Create start CDATA tag - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_start_cdata)
 {
 	xmlTextWriterPtr ptr;
@@ -587,40 +570,35 @@ PHP_FUNCTION(xmlwriter_start_cdata)
 }
 /* }}} */
 
-/* {{{ proto bool xmlwriter_end_cdata(XMLWriter xmlwriter)
-End current CDATA - returns FALSE on error */
+/* End current CDATA - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_end_cdata)
 {
 	php_xmlwriter_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterEndCDATA);
 }
 /* }}} */
 
-/* {{{ proto bool xmlwriter_write_cdata(XMLWriter xmlwriter, string content)
-Write full CDATA tag - returns FALSE on error */
+/* Write full CDATA tag - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_write_cdata)
 {
 	php_xmlwriter_string_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterWriteCDATA, NULL);
 }
 /* }}} */
 
-/* {{{ proto bool xmlwriter_write_raw(XMLWriter xmlwriter, string content)
-Write text - returns FALSE on error */
+/* Write text - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_write_raw)
 {
 	php_xmlwriter_string_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterWriteRaw, NULL);
 }
 /* }}} */
 
-/* {{{ proto bool xmlwriter_text(XMLWriter xmlwriter, string content)
-Write text - returns FALSE on error */
+/* Write text - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_text)
 {
 	php_xmlwriter_string_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterWriteString, NULL);
 }
 /* }}} */
 
-/* {{{ proto bool xmlwriter_start_comment(XMLWriter xmlwriter)
-Create start comment - returns FALSE on error */
+/* Create start comment - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_start_comment)
 {
 	xmlTextWriterPtr ptr;
@@ -643,24 +621,21 @@ PHP_FUNCTION(xmlwriter_start_comment)
 }
 /* }}} */
 
-/* {{{ proto bool xmlwriter_end_comment(XMLWriter xmlwriter)
-Create end comment - returns FALSE on error */
+/* Create end comment - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_end_comment)
 {
 	php_xmlwriter_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterEndComment);
 }
 /* }}} */
 
-/* {{{ proto bool xmlwriter_write_comment(XMLWriter xmlwriter, string content)
-Write full comment tag - returns FALSE on error */
+/* Write full comment tag - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_write_comment)
 {
 	php_xmlwriter_string_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterWriteComment, NULL);
 }
 /* }}} */
 
-/* {{{ proto bool xmlwriter_start_document(XMLWriter xmlwriter, string version, string encoding, string standalone)
-Create document tag - returns FALSE on error */
+/* Create document tag - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_start_document)
 {
 	xmlTextWriterPtr ptr;
@@ -685,16 +660,14 @@ PHP_FUNCTION(xmlwriter_start_document)
 }
 /* }}} */
 
-/* {{{ proto bool xmlwriter_end_document(XMLWriter xmlwriter)
-End current document - returns FALSE on error */
+/* End current document - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_end_document)
 {
 	php_xmlwriter_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterEndDocument);
 }
 /* }}} */
 
-/* {{{ proto bool xmlwriter_start_dtd(XMLWriter xmlwriter, string name, string pubid, string sysid)
-Create start DTD tag - returns FALSE on error */
+/* Create start DTD tag - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_start_dtd)
 {
 	xmlTextWriterPtr ptr;
@@ -719,16 +692,14 @@ PHP_FUNCTION(xmlwriter_start_dtd)
 }
 /* }}} */
 
-/* {{{ proto bool xmlwriter_end_dtd(XMLWriter xmlwriter)
-End current DTD - returns FALSE on error */
+/* End current DTD - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_end_dtd)
 {
 	php_xmlwriter_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterEndDTD);
 }
 /* }}} */
 
-/* {{{ proto bool xmlwriter_write_dtd(XMLWriter xmlwriter, string name, string pubid, string sysid, string subset)
-Write full DTD tag - returns FALSE on error */
+/* Write full DTD tag - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_write_dtd)
 {
 	xmlTextWriterPtr ptr;
@@ -753,24 +724,21 @@ PHP_FUNCTION(xmlwriter_write_dtd)
 }
 /* }}} */
 
-/* {{{ proto bool xmlwriter_start_dtd_element(XMLWriter xmlwriter, string name)
-Create start DTD element - returns FALSE on error */
+/* Create start DTD element - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_start_dtd_element)
 {
 	php_xmlwriter_string_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterStartDTDElement, "Invalid Element Name");
 }
 /* }}} */
 
-/* {{{ proto bool xmlwriter_end_dtd_element(XMLWriter xmlwriter)
-End current DTD element - returns FALSE on error */
+/* End current DTD element - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_end_dtd_element)
 {
 	php_xmlwriter_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterEndDTDElement);
 }
 /* }}} */
 
-/* {{{ proto bool xmlwriter_write_dtd_element(XMLWriter xmlwriter, string name, string content)
-Write full DTD element tag - returns FALSE on error */
+/* Write full DTD element tag - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_write_dtd_element)
 {
 	xmlTextWriterPtr ptr;
@@ -798,24 +766,21 @@ PHP_FUNCTION(xmlwriter_write_dtd_element)
 }
 /* }}} */
 
-/* {{{ proto bool xmlwriter_start_dtd_attlist(XMLWriter xmlwriter, string name)
-Create start DTD AttList - returns FALSE on error */
+/* Create start DTD AttList - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_start_dtd_attlist)
 {
 	php_xmlwriter_string_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterStartDTDAttlist, "Invalid Element Name");
 }
 /* }}} */
 
-/* {{{ proto bool xmlwriter_end_dtd_attlist(XMLWriter xmlwriter)
-End current DTD AttList - returns FALSE on error */
+/* End current DTD AttList - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_end_dtd_attlist)
 {
 	php_xmlwriter_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterEndDTDAttlist);
 }
 /* }}} */
 
-/* {{{ proto bool xmlwriter_write_dtd_attlist(XMLWriter xmlwriter, string name, string content)
-Write full DTD AttList tag - returns FALSE on error */
+/* Write full DTD AttList tag - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_write_dtd_attlist)
 {
 	xmlTextWriterPtr ptr;
@@ -843,8 +808,7 @@ PHP_FUNCTION(xmlwriter_write_dtd_attlist)
 }
 /* }}} */
 
-/* {{{ proto bool xmlwriter_start_dtd_entity(XMLWriter xmlwriter, string name, bool isparam)
-Create start DTD Entity - returns FALSE on error */
+/* Create start DTD Entity - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_start_dtd_entity)
 {
 	xmlTextWriterPtr ptr;
@@ -872,16 +836,14 @@ PHP_FUNCTION(xmlwriter_start_dtd_entity)
 }
 /* }}} */
 
-/* {{{ proto bool xmlwriter_end_dtd_entity(XMLWriter xmlwriter)
-End current DTD Entity - returns FALSE on error */
+/* End current DTD Entity - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_end_dtd_entity)
 {
 	php_xmlwriter_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextWriterEndDTDEntity);
 }
 /* }}} */
 
-/* {{{ proto bool xmlwriter_write_dtd_entity(XMLWriter xmlwriter, string name, string content [, bool pe [, string pubid [, string sysid [, string ndataid]]]])
-Write full DTD Entity tag - returns FALSE on error */
+/* Write full DTD Entity tag - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_write_dtd_entity)
 {
 	xmlTextWriterPtr ptr;
@@ -914,8 +876,7 @@ PHP_FUNCTION(xmlwriter_write_dtd_entity)
 }
 /* }}} */
 
-/* {{{ proto XMLWriter xmlwriter_open_uri(string source)
-Create new xmlwriter using source uri for output */
+/* Create new xmlwriter using source uri for output */
 PHP_FUNCTION(xmlwriter_open_uri)
 {
 	char *valid_file = NULL;
@@ -971,8 +932,7 @@ PHP_FUNCTION(xmlwriter_open_uri)
 }
 /* }}} */
 
-/* {{{ proto XMLWriter xmlwriter_open_memory()
-Create new xmlwriter using memory for string output */
+/* Create new xmlwriter using memory for string output */
 PHP_FUNCTION(xmlwriter_open_memory)
 {
 	xmlTextWriterPtr ptr;
@@ -1056,16 +1016,14 @@ static void php_xmlwriter_flush(INTERNAL_FUNCTION_PARAMETERS, int force_string) 
 }
 /* }}} */
 
-/* {{{ proto string xmlwriter_output_memory(XMLWriter xmlwriter [,bool flush])
-Output current buffer as string */
+/* Output current buffer as string */
 PHP_FUNCTION(xmlwriter_output_memory)
 {
 	php_xmlwriter_flush(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
-/* {{{ proto mixed xmlwriter_flush(XMLWriter xmlwriter [,bool empty])
-Output current buffer */
+/* Output current buffer */
 PHP_FUNCTION(xmlwriter_flush)
 {
 	php_xmlwriter_flush(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);

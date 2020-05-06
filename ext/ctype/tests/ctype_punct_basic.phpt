@@ -4,8 +4,7 @@ Test ctype_punct() function : basic functionality
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-/* Prototype  : bool ctype_punct(mixed $c)
- * Description: Checks for any printable character which is not whitespace
+/* Description: Checks for any printable character which is not whitespace
  * or an alphanumeric character
  * Source code: ext/ctype/ctype.c
  */

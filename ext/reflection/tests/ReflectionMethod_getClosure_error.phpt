@@ -2,8 +2,7 @@
 Test ReflectionMethod::getClosure() function : error functionality
 --FILE--
 <?php
-/* Prototype  : public mixed ReflectionFunction::getClosure()
- * Description: Returns a dynamically created closure for the method
+/* Description: Returns a dynamically created closure for the method
  * Source code: ext/reflection/php_reflection.c
  * Alias to functions:
  */

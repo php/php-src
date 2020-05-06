@@ -6,8 +6,7 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 ?>
 --FILE--
 <?php
-/* Prototype  : int vfprintf  ( resource $handle  , string $format , array $args  )
- * Description: Write a formatted string to a stream
+/* Description: Write a formatted string to a stream
  * Source code: ext/standard/formatted_print.c
 */
 

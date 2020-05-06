@@ -2,8 +2,7 @@
 Test gmstrftime() function : usage variation - Checking month related formats which was not supported on Windows before VC14.
 --FILE--
 <?php
-/* Prototype  : string gmstrftime(string format [, int timestamp])
- * Description: Format a GMT/UCT time/date according to locale settings
+/* Description: Format a GMT/UCT time/date according to locale settings
  * Source code: ext/date/php_date.c
  * Alias to functions:
  */

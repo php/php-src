@@ -80,8 +80,7 @@ static zend_class_entry * spl_find_ce_by_name(zend_string *name, zend_bool autol
 	return ce;
 }
 
-/* {{{ proto array class_parents(object instance [, bool autoload = true])
- Return an array containing the names of all parent classes */
+/* Return an array containing the names of all parent classes */
 PHP_FUNCTION(class_parents)
 {
 	zval *obj;
@@ -114,8 +113,7 @@ PHP_FUNCTION(class_parents)
 }
 /* }}} */
 
-/* {{{ proto array class_implements(mixed what [, bool autoload ])
- Return all classes and interfaces implemented by SPL */
+/* Return all classes and interfaces implemented by SPL */
 PHP_FUNCTION(class_implements)
 {
 	zval *obj;
@@ -143,8 +141,7 @@ PHP_FUNCTION(class_implements)
 }
 /* }}} */
 
-/* {{{ proto array class_uses(mixed what [, bool autoload ])
- Return all traits used by a class. */
+/* Return all traits used by a class. */
 PHP_FUNCTION(class_uses)
 {
 	zval *obj;
@@ -232,8 +229,7 @@ PHP_FUNCTION(class_uses)
 	SPL_ADD_CLASS(UnderflowException, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(UnexpectedValueException, z_list, sub, allow, ce_flags); \
 
-/* {{{ proto array spl_classes()
- Return an array containing the names of all clsses and interfaces defined in SPL */
+/* Return an array containing the names of all clsses and interfaces defined in SPL */
 PHP_FUNCTION(spl_classes)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -304,8 +300,7 @@ static int spl_autoload(zend_string *class_name, zend_string *lc_name, const cha
 	return 0;
 } /* }}} */
 
-/* {{{ proto void spl_autoload(string class_name [, string file_extensions])
- Default autoloader implementation */
+/* Default autoloader implementation */
 PHP_FUNCTION(spl_autoload)
 {
 	int pos_len, pos1_len;
@@ -345,8 +340,7 @@ PHP_FUNCTION(spl_autoload)
 	zend_string_release(lc_name);
 } /* }}} */
 
-/* {{{ proto string spl_autoload_extensions([string file_extensions])
- Register and return default file extensions for spl_autoload */
+/* Register and return default file extensions for spl_autoload */
 PHP_FUNCTION(spl_autoload_extensions)
 {
 	zend_string *file_exts = NULL;
@@ -394,8 +388,7 @@ static void autoload_func_info_dtor(zval *element)
 	efree(alfi);
 }
 
-/* {{{ proto void spl_autoload_call(string class_name)
- Try all registered autoload function to load the requested class */
+/* Try all registered autoload function to load the requested class */
 PHP_FUNCTION(spl_autoload_call)
 {
 	zend_string *class_name, *lc_name, *func_name;
@@ -503,8 +496,7 @@ PHP_FUNCTION(spl_autoload_call)
 		zend_hash_rehash(ht);						        	\
 	} while (0)
 
-/* {{{ proto bool spl_autoload_register([mixed autoload_function [, bool throw [, bool prepend]]])
- Register given function as autoloader */
+/* Register given function as autoloader */
 PHP_FUNCTION(spl_autoload_register)
 {
 	zend_string *func_name;
@@ -677,8 +669,7 @@ skip:
 	RETURN_TRUE;
 } /* }}} */
 
-/* {{{ proto bool spl_autoload_unregister(mixed autoload_function)
- Unregister given function as autoloader */
+/* Unregister given function as autoloader */
 PHP_FUNCTION(spl_autoload_unregister)
 {
 	zend_string *func_name = NULL;
@@ -761,8 +752,7 @@ PHP_FUNCTION(spl_autoload_unregister)
 	RETURN_BOOL(success == SUCCESS);
 } /* }}} */
 
-/* {{{ proto false|array spl_autoload_functions()
- Return all registered autoloader functions */
+/* Return all registered autoloader functions */
 PHP_FUNCTION(spl_autoload_functions)
 {
 	zend_function *fptr;
@@ -812,8 +802,7 @@ PHP_FUNCTION(spl_autoload_functions)
 	add_next_index_str(return_value, zend_string_copy(EG(autoload_func)->common.function_name));
 } /* }}} */
 
-/* {{{ proto string spl_object_hash(object obj)
- Return hash id for given object */
+/* Return hash id for given object */
 PHP_FUNCTION(spl_object_hash)
 {
 	zval *obj;
@@ -826,8 +815,7 @@ PHP_FUNCTION(spl_object_hash)
 }
 /* }}} */
 
-/* {{{ proto int spl_object_id(object obj)
- Returns the integer object handle for the given object */
+/* Returns the integer object handle for the given object */
 PHP_FUNCTION(spl_object_id)
 {
 	zval *obj;

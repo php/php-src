@@ -7,8 +7,7 @@ function_exists('mb_decode_mimeheader') or die("skip mb_decode_mimeheader() is n
 ?>
 --FILE--
 <?php
-/* Prototype  : string mb_decode_mimeheader(string string)
- * Description: Decodes the MIME "encoded-word" in the string
+/* Description: Decodes the MIME "encoded-word" in the string
  * Source code: ext/mbstring/mbstring.c
  * Alias to functions:
  */

@@ -2,8 +2,7 @@
 Test current() function : usage variations - referenced variables
 --FILE--
 <?php
-/* Prototype  : mixed current(array $array_arg)
- * Description: Return the element currently pointed to by the internal array pointer
+/* Description: Return the element currently pointed to by the internal array pointer
  * Source code: ext/standard/array.c
  * Alias to functions: pos
  */

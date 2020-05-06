@@ -3,8 +3,7 @@ Test quotemeta() function : basic functionality
 --FILE--
 <?php
 
-/* Prototype  : string quotemeta  ( string $str  )
- * Description: Quote meta characters
+/* Description: Quote meta characters
  * Source code: ext/standard/string.c
 */
 

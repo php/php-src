@@ -286,8 +286,7 @@ static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-/* {{{ proto mixed phpdbg_exec(string context)
-	Attempt to set the execution context for phpdbg
+/* Attempt to set the execution context for phpdbg
 	If the execution context was set previously it is returned
 	If the execution context was not set previously boolean true is returned
 	If the request to set the context fails, boolean false is returned, and an E_WARNING raised */
@@ -329,8 +328,7 @@ static PHP_FUNCTION(phpdbg_exec)
 	}
 } /* }}} */
 
-/* {{{ proto void phpdbg_break()
-    instructs phpdbg to insert a breakpoint at the next opcode */
+/* instructs phpdbg to insert a breakpoint at the next opcode */
 static PHP_FUNCTION(phpdbg_break_next)
 {
 	zend_execute_data *ex;
@@ -351,7 +349,6 @@ static PHP_FUNCTION(phpdbg_break_next)
 	phpdbg_set_breakpoint_opline_ex((phpdbg_opline_ptr_t) ex->opline + 1);
 } /* }}} */
 
-/* {{{ proto void phpdbg_break_file(string file, int line) */
 static PHP_FUNCTION(phpdbg_break_file)
 {
 	char *file;
@@ -365,7 +362,6 @@ static PHP_FUNCTION(phpdbg_break_file)
 	phpdbg_set_breakpoint_file(file, 0, line);
 } /* }}} */
 
-/* {{{ proto void phpdbg_break_method(string class, string method) */
 static PHP_FUNCTION(phpdbg_break_method)
 {
 	char *class, *method;
@@ -378,7 +374,6 @@ static PHP_FUNCTION(phpdbg_break_method)
 	phpdbg_set_breakpoint_method(class, method);
 } /* }}} */
 
-/* {{{ proto void phpdbg_break_function(string function) */
 static PHP_FUNCTION(phpdbg_break_function)
 {
 	char    *function;
@@ -391,8 +386,7 @@ static PHP_FUNCTION(phpdbg_break_function)
 	phpdbg_set_breakpoint_symbol(function, function_len);
 } /* }}} */
 
-/* {{{ proto void phpdbg_clear(void)
-   instructs phpdbg to clear breakpoints */
+/* instructs phpdbg to clear breakpoints */
 static PHP_FUNCTION(phpdbg_clear)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -410,7 +404,6 @@ static PHP_FUNCTION(phpdbg_clear)
 	zend_hash_clean(&PHPDBG_G(bp)[PHPDBG_BREAK_COND]);
 } /* }}} */
 
-/* {{{ proto void phpdbg_color(int element, string color) */
 static PHP_FUNCTION(phpdbg_color)
 {
 	zend_long element;
@@ -433,7 +426,6 @@ static PHP_FUNCTION(phpdbg_color)
 	}
 } /* }}} */
 
-/* {{{ proto void phpdbg_prompt(string prompt) */
 static PHP_FUNCTION(phpdbg_prompt)
 {
 	char *prompt = NULL;
@@ -446,7 +438,6 @@ static PHP_FUNCTION(phpdbg_prompt)
 	phpdbg_set_prompt(prompt);
 } /* }}} */
 
-/* {{{ proto void phpdbg_start_oplog() */
 static PHP_FUNCTION(phpdbg_start_oplog)
 {
 	phpdbg_oplog_list *prev;
@@ -523,7 +514,6 @@ static inline HashTable* phpdbg_add_empty_array(HashTable *ht, zend_string *name
 	return Z_ARR_P(ht_zv);
 }
 
-/* {{{ proto void phpdbg_get_executable() */
 static PHP_FUNCTION(phpdbg_get_executable)
 {
 	HashTable *options = NULL;
@@ -621,7 +611,6 @@ static PHP_FUNCTION(phpdbg_get_executable)
 	}
 }
 
-/* {{{ proto void phpdbg_end_oplog() */
 static PHP_FUNCTION(phpdbg_end_oplog)
 {
 	phpdbg_oplog_entry *cur;

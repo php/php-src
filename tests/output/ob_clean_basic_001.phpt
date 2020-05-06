@@ -2,8 +2,7 @@
 Test ob_clean() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : proto bool ob_clean(void)
- * Description: Clean (delete) the current output buffer
+/* Description: Clean (delete) the current output buffer
  * Source code: main/output.c
  * Alias to functions:
  */
@@ -29,7 +28,7 @@ echo "Done";
 
 -- Testing ob_clean() function with Zero arguments --
 
-Notice: ob_clean(): Failed to delete buffer. No buffer to delete in %s on line 12
+Notice: ob_clean(): Failed to delete buffer. No buffer to delete in %s on line %d
 bool(false)
 string(61) "bool(true)
 Ensure the buffer is still active after the clean."

@@ -2,8 +2,7 @@
 Test DateTimeZone::getTransitions() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : array DateTimeZone::getTransitions  ()
- * Description: Returns all transitions for the timezone
+/* Description: Returns all transitions for the timezone
  * Source code: ext/date/php_date.c
  * Alias to functions: timezone_transitions_get()
  */

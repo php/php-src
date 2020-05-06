@@ -3,8 +3,7 @@ Hash: hash_algos() function : basic functionality
 --FILE--
 <?php
 
-/* Prototype  : array hash_algos (void)
- * Description: Return a list of registered hashing algorithms
+/* Description: Return a list of registered hashing algorithms
  * Source code: ext/hash/hash.c
  * Alias to functions:
 */

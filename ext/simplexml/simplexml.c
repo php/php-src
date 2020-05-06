@@ -1312,8 +1312,7 @@ static int sxe_objects_compare(zval *object1, zval *object2) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto array SimpleXMLElement::xpath(string path)
-   Runs XPath query on the XML data */
+/* Runs XPath query on the XML data */
 SXE_METHOD(xpath)
 {
 	php_sxe_object    *sxe;
@@ -1404,8 +1403,7 @@ SXE_METHOD(xpath)
 }
 /* }}} */
 
-/* {{{ proto bool SimpleXMLElement::registerXPathNamespace(string prefix, string ns)
-   Creates a prefix/ns context for the next XPath query */
+/* Creates a prefix/ns context for the next XPath query */
 SXE_METHOD(registerXPathNamespace)
 {
 	php_sxe_object    *sxe;
@@ -1429,8 +1427,7 @@ SXE_METHOD(registerXPathNamespace)
 
 /* }}} */
 
-/* {{{ proto string SimpleXMLElement::asXML([string filename])
-   Return a well-formed XML string based on SimpleXML element */
+/* Return a well-formed XML string based on SimpleXML element */
 SXE_METHOD(asXML)
 {
 	php_sxe_object     *sxe;
@@ -1555,8 +1552,7 @@ static void sxe_add_namespaces(php_sxe_object *sxe, xmlNodePtr node, zend_bool r
 	}
 } /* }}} */
 
-/* {{{ proto string SimpleXMLElement::getNamespaces([bool recursve])
-   Return all namespaces in use */
+/* Return all namespaces in use */
 SXE_METHOD(getNamespaces)
 {
 	zend_bool           recursive = 0;
@@ -1604,8 +1600,7 @@ static void sxe_add_registered_namespaces(php_sxe_object *sxe, xmlNodePtr node, 
 }
 /* }}} */
 
-/* {{{ proto string SimpleXMLElement::getDocNamespaces([bool recursive [, bool from_root])
-   Return all namespaces registered with document */
+/* Return all namespaces registered with document */
 SXE_METHOD(getDocNamespaces)
 {
 	zend_bool           recursive = 0, from_root = 1;
@@ -1632,8 +1627,7 @@ SXE_METHOD(getDocNamespaces)
 }
 /* }}} */
 
-/* {{{ proto object SimpleXMLElement::children([string ns [, bool is_prefix]])
-   Finds children of given node */
+/* Finds children of given node */
 SXE_METHOD(children)
 {
 	php_sxe_object *sxe;
@@ -1660,8 +1654,7 @@ SXE_METHOD(children)
 }
 /* }}} */
 
-/* {{{ proto object SimpleXMLElement::getName()
-   Finds children of given node */
+/* Finds children of given node */
 SXE_METHOD(getName)
 {
 	php_sxe_object *sxe;
@@ -1685,8 +1678,7 @@ SXE_METHOD(getName)
 }
 /* }}} */
 
-/* {{{ proto array SimpleXMLElement::attributes([string ns [, bool is_prefix]])
-   Identifies an element's attributes */
+/* Identifies an element's attributes */
 SXE_METHOD(attributes)
 {
 	php_sxe_object *sxe;
@@ -1712,8 +1704,7 @@ SXE_METHOD(attributes)
 }
 /* }}} */
 
-/* {{{ proto void SimpleXMLElement::addChild(string qName [, string value [, string ns]])
-   Add Element with optional namespace information */
+/* Add Element with optional namespace information */
 SXE_METHOD(addChild)
 {
 	php_sxe_object *sxe;
@@ -1777,8 +1768,7 @@ SXE_METHOD(addChild)
 }
 /* }}} */
 
-/* {{{ proto void SimpleXMLElement::addAttribute(string qName, string value [,string ns])
-   Add Attribute with optional namespace information */
+/* Add Attribute with optional namespace information */
 SXE_METHOD(addAttribute)
 {
 	php_sxe_object *sxe;
@@ -1947,8 +1937,7 @@ static int sxe_object_cast(zend_object *readobj, zval *writeobj, int type)
 }
 /* }}} */
 
-/* {{{ proto object SimpleXMLElement::__toString()
-   Returns the string content */
+/* Returns the string content */
 SXE_METHOD(__toString)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -2007,8 +1996,7 @@ static int sxe_count_elements(zend_object *object, zend_long *count) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto int SimpleXMLElement::count()
- Get number of child elements */
+/* Get number of child elements */
 SXE_METHOD(count)
 {
 	zend_long count = 0;
@@ -2174,8 +2162,7 @@ sxe_object_new(zend_class_entry *ce)
 }
 /* }}} */
 
-/* {{{ proto simplemxml_element simplexml_load_file(string filename [, string class_name [, int options [, string ns [, bool is_prefix]]]])
-   Load a filename and return a simplexml_element object to allow for processing */
+/* Load a filename and return a simplexml_element object to allow for processing */
 PHP_FUNCTION(simplexml_load_file)
 {
 	php_sxe_object *sxe;
@@ -2220,8 +2207,7 @@ PHP_FUNCTION(simplexml_load_file)
 }
 /* }}} */
 
-/* {{{ proto simplemxml_element simplexml_load_string(string data [, string class_name [, int options [, string ns [, bool is_prefix]]]])
-   Load a string and return a simplexml_element object to allow for processing */
+/* Load a string and return a simplexml_element object to allow for processing */
 PHP_FUNCTION(simplexml_load_string)
 {
 	php_sxe_object *sxe;
@@ -2274,8 +2260,7 @@ PHP_FUNCTION(simplexml_load_string)
 }
 /* }}} */
 
-/* {{{ proto SimpleXMLElement::__construct(string data [, int options [, bool data_is_url [, string ns [, bool is_prefix]]]])
-   SimpleXMLElement constructor */
+/* SimpleXMLElement constructor */
 SXE_METHOD(__construct)
 {
 	php_sxe_object *sxe = Z_SXEOBJ_P(ZEND_THIS);
@@ -2527,8 +2512,7 @@ void *simplexml_export_node(zval *object) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto simplemxml_element simplexml_import_dom(domNode node [, string class_name])
-   Get a simplexml_element object from dom to allow for processing */
+/* Get a simplexml_element object from dom to allow for processing */
 PHP_FUNCTION(simplexml_import_dom)
 {
 	php_sxe_object *sxe;

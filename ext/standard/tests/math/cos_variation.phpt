@@ -5,7 +5,6 @@ serialize_precision = 10
 --FILE--
 <?php
 /*
- * proto float cos(float number)
  * Function is implemented in ext/standard/math.c
 */
 

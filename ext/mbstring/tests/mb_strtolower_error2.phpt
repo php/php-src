@@ -7,8 +7,7 @@ function_exists('mb_strtolower') or die("skip mb_strtolower() is not available i
 ?>
 --FILE--
 <?php
-/* Prototype  : string mb_strtolower(string $sourcestring [, string $encoding])
- * Description: Returns a lowercased version of $sourcestring
+/* Description: Returns a lowercased version of $sourcestring
  * Source code: ext/mbstring/mbstring.c
  */
 

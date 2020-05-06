@@ -2,8 +2,7 @@
 Test vprintf() function : usage variations - string formats with non-string values
 --FILE--
 <?php
-/* Prototype  : string vprintf(string format, array args)
- * Description: Return a formatted string
+/* Description: Return a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 

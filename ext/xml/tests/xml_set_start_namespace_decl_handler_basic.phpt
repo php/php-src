@@ -8,8 +8,7 @@ if (!extension_loaded("xml")) {
 ?>
 --FILE--
 <?php
-/* Prototype  : bool xml_set_start_namespace_decl_handler  ( resource $parser  , callback $handler  )
- * Description: Set up start namespace declaration handler.
+/* Description: Set up start namespace declaration handler.
  * Source code: ext/xml/xml.c
  * Alias to functions:
  */

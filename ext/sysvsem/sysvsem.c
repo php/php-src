@@ -187,8 +187,7 @@ PHP_MINFO_FUNCTION(sysvsem)
 #undef SETVAL_WANTS_PTR
 #endif
 
-/* {{{ proto Sysvsem sem_get(int key [, int max_acquire [, int perm [, int auto_release]])
-   Return an id for the semaphore with the given key, and allow max_acquire (default 1) processes to acquire it simultaneously */
+/* Return an id for the semaphore with the given key, and allow max_acquire (default 1) processes to acquire it simultaneously */
 PHP_FUNCTION(sem_get)
 {
 	zend_long key, max_acquire = 1, perm = 0666, auto_release = 1;
@@ -341,24 +340,21 @@ static void php_sysvsem_semop(INTERNAL_FUNCTION_PARAMETERS, int acquire)
 }
 /* }}} */
 
-/* {{{ proto bool sem_acquire(Sysvsem id)
-   Acquires the semaphore with the given id, blocking if necessary */
+/* Acquires the semaphore with the given id, blocking if necessary */
 PHP_FUNCTION(sem_acquire)
 {
 	php_sysvsem_semop(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
-/* {{{ proto bool sem_release(Sysvsem id)
-   Releases the semaphore with the given id */
+/* Releases the semaphore with the given id */
 PHP_FUNCTION(sem_release)
 {
 	php_sysvsem_semop(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
-/* {{{ proto bool sem_remove(Sysvsem id)
-   Removes semaphore from Unix systems */
+/* Removes semaphore from Unix systems */
 
 /*
  * contributed by Gavin Sherry gavin@linuxworld.com.au

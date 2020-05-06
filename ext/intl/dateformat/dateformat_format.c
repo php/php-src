@@ -143,10 +143,8 @@ static UDate internal_get_timestamp(IntlDateFormatter_object *dfo,
 }
 
 
-/* {{{ proto string IntlDateFormatter::format( [mixed]int $args or array $args )
- * Format the time value as a string. }}}*/
-/* {{{ proto string datefmt_format( [mixed]int $args or array $args )
- * Format the time value as a string. }}}*/
+/* Format the time value as a string. }}}*/
+/* Format the time value as a string. }}}*/
 PHP_FUNCTION(datefmt_format)
 {
 	UDate 		timestamp	= 0;

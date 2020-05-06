@@ -85,10 +85,8 @@ static int msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 }
 /* }}} */
 
-/* {{{ proto MessageFormatter MesssageFormatter::create( string $locale, string $pattern )
- * Create formatter. }}} */
-/* {{{ proto MessageFormatter msgfmt_create( string $locale, string $pattern )
- * Create formatter.
+/* Create formatter. }}} */
+/* Create formatter.
  */
 PHP_FUNCTION( msgfmt_create )
 {
@@ -100,8 +98,7 @@ PHP_FUNCTION( msgfmt_create )
 }
 /* }}} */
 
-/* {{{ proto MessageFormatter::__construct( string $locale, string $pattern )
- * MessageFormatter object constructor.
+/* MessageFormatter object constructor.
  */
 PHP_METHOD( MessageFormatter, __construct )
 {
@@ -118,10 +115,8 @@ PHP_METHOD( MessageFormatter, __construct )
 }
 /* }}} */
 
-/* {{{ proto int MessageFormatter::getErrorCode()
- * Get formatter's last error code. }}} */
-/* {{{ proto int msgfmt_get_error_code( MessageFormatter $nf )
- * Get formatter's last error code.
+/* Get formatter's last error code. }}} */
+/* Get formatter's last error code.
  */
 PHP_FUNCTION( msgfmt_get_error_code )
 {
@@ -142,10 +137,8 @@ PHP_FUNCTION( msgfmt_get_error_code )
 }
 /* }}} */
 
-/* {{{ proto string MessageFormatter::getErrorMessage( )
- * Get text description for formatter's last error code. }}} */
-/* {{{ proto string msgfmt_get_error_message( MessageFormatter $coll )
- * Get text description for formatter's last error code.
+/* Get text description for formatter's last error code. }}} */
+/* Get text description for formatter's last error code.
  */
 PHP_FUNCTION( msgfmt_get_error_message )
 {

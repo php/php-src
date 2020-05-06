@@ -2,8 +2,7 @@
 Test md5() function : basic functionality - with raw output
 --FILE--
 <?php
-/* Prototype  : string md5  ( string $str  [, bool $raw_output= false  ] )
- * Description: Calculate the md5 hash of a string
+/* Description: Calculate the md5 hash of a string
  * Source code: ext/standard/md5.c
 */
 

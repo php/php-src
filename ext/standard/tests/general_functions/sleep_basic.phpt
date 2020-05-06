@@ -6,8 +6,7 @@ if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 ?>
 --FILE--
 <?php
-/* Prototype  : int sleep  ( int $seconds  )
- * Description: Delays the program execution for the given number of seconds .
+/* Description: Delays the program execution for the given number of seconds .
  * Source code: ext/standard/basic_functions.c
  */
 

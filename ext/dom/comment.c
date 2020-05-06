@@ -30,7 +30,6 @@
 * Since:
 */
 
-/* {{{ proto DOMComment::__construct([string value]); */
 PHP_METHOD(DOMComment, __construct)
 {
 	xmlNodePtr nodep = NULL, oldnode = NULL;

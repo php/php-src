@@ -448,8 +448,7 @@ void *php_dom_export_node(zval *object) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto somNode dom_import_simplexml(sxeobject node)
-   Get a simplexml_element object from dom to allow for processing */
+/* Get a simplexml_element object from dom to allow for processing */
 PHP_FUNCTION(dom_import_simplexml)
 {
 	zval *node;

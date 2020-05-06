@@ -38,8 +38,7 @@
 #endif
 #endif /* defined(HAVE_LIBDL) */
 
-/* {{{ proto int dl(string extension_filename)
-   Load a PHP extension at runtime */
+/* Load a PHP extension at runtime */
 PHPAPI PHP_FUNCTION(dl)
 {
 	char *filename;

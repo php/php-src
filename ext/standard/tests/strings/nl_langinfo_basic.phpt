@@ -9,8 +9,7 @@ if( substr(PHP_OS, 0, 3) == 'WIN'){
 --FILE--
 <?php
 
-/* Prototype  : string nl_langinfo  ( int $item  )
- * Description: Query language and locale information
+/* Description: Query language and locale information
  * Source code: ext/standard/string.c
 */
 

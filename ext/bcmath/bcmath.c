@@ -151,8 +151,7 @@ static void php_str2num(bc_num *num, char *str)
 }
 /* }}} */
 
-/* {{{ proto string bcadd(string left_operand, string right_operand [, int scale])
-   Returns the sum of two arbitrary precision numbers */
+/* Returns the sum of two arbitrary precision numbers */
 PHP_FUNCTION(bcadd)
 {
 	zend_string *left, *right;
@@ -192,8 +191,7 @@ PHP_FUNCTION(bcadd)
 }
 /* }}} */
 
-/* {{{ proto string bcsub(string left_operand, string right_operand [, int scale])
-   Returns the difference between two arbitrary precision numbers */
+/* Returns the difference between two arbitrary precision numbers */
 PHP_FUNCTION(bcsub)
 {
 	zend_string *left, *right;
@@ -233,8 +231,7 @@ PHP_FUNCTION(bcsub)
 }
 /* }}} */
 
-/* {{{ proto string bcmul(string left_operand, string right_operand [, int scale])
-   Returns the multiplication of two arbitrary precision numbers */
+/* Returns the multiplication of two arbitrary precision numbers */
 PHP_FUNCTION(bcmul)
 {
 	zend_string *left, *right;
@@ -274,8 +271,7 @@ PHP_FUNCTION(bcmul)
 }
 /* }}} */
 
-/* {{{ proto string bcdiv(string left_operand, string right_operand [, int scale])
-   Returns the quotient of two arbitrary precision numbers (division) */
+/* Returns the quotient of two arbitrary precision numbers (division) */
 PHP_FUNCTION(bcdiv)
 {
 	zend_string *left, *right;
@@ -322,8 +318,7 @@ PHP_FUNCTION(bcdiv)
 }
 /* }}} */
 
-/* {{{ proto string bcmod(string left_operand, string right_operand [, int scale])
-   Returns the modulus of the two arbitrary precision operands */
+/* Returns the modulus of the two arbitrary precision operands */
 PHP_FUNCTION(bcmod)
 {
 	zend_string *left, *right;
@@ -369,8 +364,7 @@ PHP_FUNCTION(bcmod)
 }
 /* }}} */
 
-/* {{{ proto string bcpowmod(string x, string y, string mod [, int scale])
-   Returns the value of an arbitrary precision number raised to the power of another reduced by a modulus */
+/* Returns the value of an arbitrary precision number raised to the power of another reduced by a modulus */
 PHP_FUNCTION(bcpowmod)
 {
 	zend_string *left, *right, *modulus;
@@ -417,8 +411,7 @@ PHP_FUNCTION(bcpowmod)
 }
 /* }}} */
 
-/* {{{ proto string bcpow(string x, string y [, int scale])
-   Returns the value of an arbitrary precision number raised to the power of another */
+/* Returns the value of an arbitrary precision number raised to the power of another */
 PHP_FUNCTION(bcpow)
 {
 	zend_string *left, *right;
@@ -457,8 +450,7 @@ PHP_FUNCTION(bcpow)
 }
 /* }}} */
 
-/* {{{ proto string bcsqrt(string operand [, int scale])
-   Returns the square root of an arbitrary precision number */
+/* Returns the square root of an arbitrary precision number */
 PHP_FUNCTION(bcsqrt)
 {
 	zend_string *left;
@@ -496,8 +488,7 @@ PHP_FUNCTION(bcsqrt)
 }
 /* }}} */
 
-/* {{{ proto int bccomp(string left_operand, string right_operand [, int scale])
-   Compares two arbitrary precision numbers */
+/* Compares two arbitrary precision numbers */
 PHP_FUNCTION(bccomp)
 {
 	zend_string *left, *right;
@@ -539,8 +530,7 @@ PHP_FUNCTION(bccomp)
 }
 /* }}} */
 
-/* {{{ proto int bcscale([int scale])
-   Sets default scale parameter for all bc math functions */
+/* Sets default scale parameter for all bc math functions */
 PHP_FUNCTION(bcscale)
 {
 	zend_long old_scale, new_scale;

@@ -890,8 +890,7 @@ static PHP_MINFO_FUNCTION(libxml)
 }
 /* }}} */
 
-/* {{{ proto void libxml_set_streams_context(resource streams_context)
-   Set the streams context for the next libxml document load or write */
+/* Set the streams context for the next libxml document load or write */
 PHP_FUNCTION(libxml_set_streams_context)
 {
 	zval *arg;
@@ -908,8 +907,7 @@ PHP_FUNCTION(libxml_set_streams_context)
 }
 /* }}} */
 
-/* {{{ proto bool libxml_use_internal_errors([boolean use_errors])
-   Disable libxml errors and allow user to fetch error information as needed */
+/* Disable libxml errors and allow user to fetch error information as needed */
 PHP_FUNCTION(libxml_use_internal_errors)
 {
 	xmlStructuredErrorFunc current_handler;
@@ -949,8 +947,7 @@ PHP_FUNCTION(libxml_use_internal_errors)
 }
 /* }}} */
 
-/* {{{ proto object libxml_get_last_error()
-   Retrieve last error from libxml */
+/* Retrieve last error from libxml */
 PHP_FUNCTION(libxml_get_last_error)
 {
 	xmlErrorPtr error;
@@ -981,8 +978,7 @@ PHP_FUNCTION(libxml_get_last_error)
 }
 /* }}} */
 
-/* {{{ proto object libxml_get_errors()
-   Retrieve array of errors */
+/* Retrieve array of errors */
 PHP_FUNCTION(libxml_get_errors)
 {
 
@@ -1023,8 +1019,7 @@ PHP_FUNCTION(libxml_get_errors)
 }
 /* }}} */
 
-/* {{{ proto void libxml_clear_errors()
-   Clear last error from libxml */
+/* Clear last error from libxml */
 PHP_FUNCTION(libxml_clear_errors)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -1044,8 +1039,7 @@ PHP_LIBXML_API zend_bool php_libxml_disable_entity_loader(zend_bool disable) /* 
 	return old;
 } /* }}} */
 
-/* {{{ proto bool libxml_disable_entity_loader([boolean disable])
-   Disable/Enable ability to load external entities */
+/* Disable/Enable ability to load external entities */
 PHP_FUNCTION(libxml_disable_entity_loader)
 {
 	zend_bool disable = 1;
@@ -1059,8 +1053,7 @@ PHP_FUNCTION(libxml_disable_entity_loader)
 }
 /* }}} */
 
-/* {{{ proto void libxml_set_external_entity_loader(callback resolver_function)
-   Changes the default external entity loader */
+/* Changes the default external entity loader */
 PHP_FUNCTION(libxml_set_external_entity_loader)
 {
 	zend_fcall_info			fci;

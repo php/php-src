@@ -301,8 +301,7 @@ static PHP_MINFO_FUNCTION(bz2)
 	php_info_print_table_end();
 }
 
-/* {{{ proto string bzread(resource bz[, int length])
-   Reads up to length bytes from a BZip2 stream, or 1024 bytes if length is not specified */
+/* Reads up to length bytes from a BZip2 stream, or 1024 bytes if length is not specified */
 PHP_FUNCTION(bzread)
 {
 	zval *bz;
@@ -329,8 +328,7 @@ PHP_FUNCTION(bzread)
 }
 /* }}} */
 
-/* {{{ proto resource bzopen(string|int file|fp, string mode)
-   Opens a new BZip2 stream */
+/* Opens a new BZip2 stream */
 PHP_FUNCTION(bzopen)
 {
 	zval     *file;   /* The file to open */
@@ -420,32 +418,28 @@ PHP_FUNCTION(bzopen)
 }
 /* }}} */
 
-/* {{{ proto int bzerrno(resource bz)
-   Returns the error number */
+/* Returns the error number */
 PHP_FUNCTION(bzerrno)
 {
 	php_bz2_error(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_BZ_ERRNO);
 }
 /* }}} */
 
-/* {{{ proto string bzerrstr(resource bz)
-   Returns the error string */
+/* Returns the error string */
 PHP_FUNCTION(bzerrstr)
 {
 	php_bz2_error(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_BZ_ERRSTR);
 }
 /* }}} */
 
-/* {{{ proto array bzerror(resource bz)
-   Returns the error number and error string in an associative array */
+/* Returns the error number and error string in an associative array */
 PHP_FUNCTION(bzerror)
 {
 	php_bz2_error(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_BZ_ERRBOTH);
 }
 /* }}} */
 
-/* {{{ proto string bzcompress(string source [, int blocksize100k [, int workfactor]])
-   Compresses a string into BZip2 encoded data */
+/* Compresses a string into BZip2 encoded data */
 PHP_FUNCTION(bzcompress)
 {
 	char             *source;          /* Source data to compress */
@@ -495,8 +489,7 @@ PHP_FUNCTION(bzcompress)
 }
 /* }}} */
 
-/* {{{ proto string bzdecompress(string source [, int small])
-   Decompresses BZip2 compressed data */
+/* Decompresses BZip2 compressed data */
 PHP_FUNCTION(bzdecompress)
 {
 	char *source;

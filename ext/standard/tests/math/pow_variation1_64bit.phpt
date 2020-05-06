@@ -8,8 +8,7 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 ?>
 --FILE--
 <?php
-/* Prototype  : number pow  ( number $base  , number $exp  )
- * Description: Exponential expression.
+/* Description: Exponential expression.
  * Source code: ext/standard/math.c
  */
 

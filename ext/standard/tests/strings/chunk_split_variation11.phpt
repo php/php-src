@@ -2,8 +2,7 @@
 Test chunk_split() function : usage variations - different strings for 'ending' with heredoc 'str'
 --FILE--
 <?php
-/* Prototype  : string chunk_split(string $str [, int $chunklen [, string $ending]])
- * Description: Returns split line
+/* Description: Returns split line
  * Source code: ext/standard/string.c
  * Alias to functions: none
 */

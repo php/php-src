@@ -2,8 +2,7 @@
 Test join() function : usage variations - sub array as argument
 --FILE--
 <?php
-/* Prototype  : string join( string $glue, array $pieces )
- * Description: Join array elements with a string
+/* Description: Join array elements with a string
  * Source code: ext/standard/string.c
  * Alias of function: implode()
 */

@@ -3,8 +3,7 @@ Test rtrim() function : error conditions
 --FILE--
 <?php
 
-/* Prototype  : string rtrim  ( string $str  [, string $charlist  ] )
- * Description: Strip whitespace (or other characters) from the end of a string.
+/* Description: Strip whitespace (or other characters) from the end of a string.
  * Source code: ext/standard/string.c
 */
 

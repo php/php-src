@@ -2,8 +2,7 @@
 Test wordwrap() function : error conditions
 --FILE--
 <?php
-/* Prototype  : string wordwrap ( string $str [, int $width [, string $break [, bool $cut]]] )
- * Description: Wraps buffer to selected number of characters using string break char
+/* Description: Wraps buffer to selected number of characters using string break char
  * Source code: ext/standard/string.c
 */
 

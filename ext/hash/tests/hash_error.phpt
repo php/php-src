@@ -3,8 +3,7 @@ Hash: hash() function : error conditions
 --FILE--
 <?php
 
-/* Prototype  : string hash  ( string $algo  , string $data  [, bool $raw_output  ] )
- * Description: Generate a hash value (message digest)
+/* Description: Generate a hash value (message digest)
  * Source code: ext/hash/hash.c
  * Alias to functions:
 */

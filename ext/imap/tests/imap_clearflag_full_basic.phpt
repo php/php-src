@@ -6,8 +6,7 @@ require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
-/* Prototype  : bool imap_clearflag_full  ( resource $imap_stream  , string $sequence  , string $flag  [, string $options  ] )
- * Description: Clears flags on messages.
+/* Description: Clears flags on messages.
  * Source code: ext/imap/php_imap.c
  */
 

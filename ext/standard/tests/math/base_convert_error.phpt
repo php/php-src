@@ -2,8 +2,7 @@
 Test base_convert() function :  error conditions - incorrect input
 --FILE--
 <?php
-/* Prototype  : string base_convert  ( string $number  , int $frombase  , int $tobase  )
- * Description: Convert a number between arbitrary bases.
+/* Description: Convert a number between arbitrary bases.
  * Source code: ext/standard/math.c
  */
 

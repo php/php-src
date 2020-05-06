@@ -2,8 +2,7 @@
 Test readlink() and realpath() functions: usage variation - invalid args
 --FILE--
 <?php
-/* Prototype: string readlink ( string $path );
-   Description: Returns the target of a symbolic link
+/* Description: Returns the target of a symbolic link
 
    Prototype: string realpath ( string $path );
    Description: Returns canonicalized absolute pathname

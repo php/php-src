@@ -674,8 +674,7 @@ php_formatted_print_get_array(zval *array, int *argc)
 }
 /* }}} */
 
-/* {{{ proto string sprintf(string format [, mixed arg1 [, mixed ...]])
-   Return a formatted string */
+/* Return a formatted string */
 PHP_FUNCTION(sprintf)
 {
 	zend_string *result;
@@ -697,8 +696,7 @@ PHP_FUNCTION(sprintf)
 }
 /* }}} */
 
-/* {{{ proto string vsprintf(string format, array args)
-   Return a formatted string */
+/* Return a formatted string */
 PHP_FUNCTION(vsprintf)
 {
 	zend_string *result;
@@ -723,8 +721,7 @@ PHP_FUNCTION(vsprintf)
 }
 /* }}} */
 
-/* {{{ proto int printf(string format [, mixed arg1 [, mixed ...]])
-   Output a formatted string */
+/* Output a formatted string */
 PHP_FUNCTION(printf)
 {
 	zend_string *result;
@@ -749,8 +746,7 @@ PHP_FUNCTION(printf)
 }
 /* }}} */
 
-/* {{{ proto int vprintf(string format, array args)
-   Output a formatted string */
+/* Output a formatted string */
 PHP_FUNCTION(vprintf)
 {
 	zend_string *result;
@@ -778,8 +774,7 @@ PHP_FUNCTION(vprintf)
 }
 /* }}} */
 
-/* {{{ proto int fprintf(resource stream, string format [, mixed arg1 [, mixed ...]])
-   Output a formatted string into a stream */
+/* Output a formatted string into a stream */
 PHP_FUNCTION(fprintf)
 {
 	php_stream *stream;
@@ -813,8 +808,7 @@ PHP_FUNCTION(fprintf)
 }
 /* }}} */
 
-/* {{{ proto int vfprintf(resource stream, string format, array args)
-   Output a formatted string into a stream */
+/* Output a formatted string into a stream */
 PHP_FUNCTION(vfprintf)
 {
 	php_stream *stream;

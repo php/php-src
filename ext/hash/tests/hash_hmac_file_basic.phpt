@@ -4,8 +4,7 @@ Hash: hash_hmac_file() function : basic functionality
 <?php
 
 
-/* Prototype  : string hash_hmac_file ( string algo, string filename, string key [, bool raw_output] )
- * Description: Generate a keyed hash value using the HMAC method and the contents of a given file
+/* Description: Generate a keyed hash value using the HMAC method and the contents of a given file
  * Source code: ext/hash/hash.c
  * Alias to functions:
 */

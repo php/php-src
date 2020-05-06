@@ -8,8 +8,7 @@ if (!extension_loaded("xml")) {
 ?>
 --FILE--
 <?php
-/* Prototype  : proto bool xml_set_processing_instruction_handler  ( resource $parser  , callback $handler  )
- * Description: Sets the processing instruction (PI) handler function for the XML parser.
+/* Description: Sets the processing instruction (PI) handler function for the XML parser.
  * Source code: ext/xml/xml.c
  * Alias to functions:
  */

@@ -3,8 +3,7 @@ Test chr() function : usage variations - test values for $ascii argument
 --FILE--
 <?php
 
-/* Prototype  : string chr  ( int $ascii  )
- * Description: Return a specific character
+/* Description: Return a specific character
  * Source code: ext/standard/string.c
 */
 

@@ -920,24 +920,21 @@ PHPAPI int php_idate(char format, time_t ts, int localtime)
 }
 /* }}} */
 
-/* {{{ proto string date(string format [, int timestamp])
-   Format a local date/time */
+/* Format a local date/time */
 PHP_FUNCTION(date)
 {
 	php_date(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
-/* {{{ proto string gmdate(string format [, int timestamp])
-   Format a GMT date/time */
+/* Format a GMT date/time */
 PHP_FUNCTION(gmdate)
 {
 	php_date(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
-/* {{{ proto int idate(string format [, int timestamp])
-   Format a local time/date as integer */
+/* Format a local time/date as integer */
 PHP_FUNCTION(idate)
 {
 	zend_string *format;
@@ -1006,8 +1003,7 @@ PHPAPI zend_long php_parse_date(char *string, zend_long *now)
 }
 /* }}} */
 
-/* {{{ proto int strtotime(string time [, int now ])
-   Convert string representation of date and time to a timestamp */
+/* Convert string representation of date and time to a timestamp */
 PHP_FUNCTION(strtotime)
 {
 	zend_string *times;
@@ -1129,24 +1125,21 @@ PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 }
 /* }}} */
 
-/* {{{ proto int mktime(int hour [, int min [, int sec [, int mon [, int day [, int year]]]]])
-   Get UNIX timestamp for a date */
+/* Get UNIX timestamp for a date */
 PHP_FUNCTION(mktime)
 {
 	php_mktime(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
-/* {{{ proto int gmmktime(int hour [, int min [, int sec [, int mon [, int day [, int year]]]]])
-   Get UNIX timestamp for a GMT date */
+/* Get UNIX timestamp for a GMT date */
 PHP_FUNCTION(gmmktime)
 {
 	php_mktime(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
-/* {{{ proto bool checkdate(int month, int day, int year)
-   Returns true(1) if it is a valid date in gregorian calendar */
+/* Returns true(1) if it is a valid date in gregorian calendar */
 PHP_FUNCTION(checkdate)
 {
 	zend_long m, d, y;
@@ -1263,24 +1256,21 @@ PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 }
 /* }}} */
 
-/* {{{ proto string strftime(string format [, int timestamp])
-   Format a local time/date according to locale settings */
+/* Format a local time/date according to locale settings */
 PHP_FUNCTION(strftime)
 {
 	php_strftime(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
-/* {{{ proto string gmstrftime(string format [, int timestamp])
-   Format a GMT/UCT time/date according to locale settings */
+/* Format a GMT/UCT time/date according to locale settings */
 PHP_FUNCTION(gmstrftime)
 {
 	php_strftime(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
-/* {{{ proto int time(void)
-   Return current UNIX timestamp */
+/* Return current UNIX timestamp */
 PHP_FUNCTION(time)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -1289,8 +1279,7 @@ PHP_FUNCTION(time)
 }
 /* }}} */
 
-/* {{{ proto array localtime([int timestamp [, bool associative_array]])
-   Returns the results of the C system call localtime as an associative array if the associative_array argument is set to 1 other wise it is a regular array */
+/* Returns the results of the C system call localtime as an associative array if the associative_array argument is set to 1 other wise it is a regular array */
 PHP_FUNCTION(localtime)
 {
 	zend_long timestamp;
@@ -1343,8 +1332,7 @@ PHP_FUNCTION(localtime)
 }
 /* }}} */
 
-/* {{{ proto array getdate([int timestamp])
-   Get date/time information */
+/* Get date/time information */
 PHP_FUNCTION(getdate)
 {
 	zend_long timestamp;
@@ -2275,8 +2263,7 @@ PHPAPI int php_date_initialize(php_date_obj *dateobj, /*const*/ char *time_str, 
 	return 1;
 } /* }}} */
 
-/* {{{ proto DateTime date_create([string time[, DateTimeZone object]])
-   Returns new DateTime object
+/* Returns new DateTime object
 */
 PHP_FUNCTION(date_create)
 {
@@ -2298,8 +2285,7 @@ PHP_FUNCTION(date_create)
 }
 /* }}} */
 
-/* {{{ proto DateTime date_create_immutable([string time[, DateTimeZone object]])
-   Returns new DateTime object
+/* Returns new DateTime object
 */
 PHP_FUNCTION(date_create_immutable)
 {
@@ -2321,8 +2307,7 @@ PHP_FUNCTION(date_create_immutable)
 }
 /* }}} */
 
-/* {{{ proto DateTime date_create_from_format(string format, string time[, DateTimeZone object])
-   Returns new DateTime object formatted according to the specified format
+/* Returns new DateTime object formatted according to the specified format
 */
 PHP_FUNCTION(date_create_from_format)
 {
@@ -2345,8 +2330,7 @@ PHP_FUNCTION(date_create_from_format)
 }
 /* }}} */
 
-/* {{{ proto DateTime date_create_immutable_from_format(string format, string time[, DateTimeZone object])
-   Returns new DateTime object formatted according to the specified format
+/* Returns new DateTime object formatted according to the specified format
 */
 PHP_FUNCTION(date_create_immutable_from_format)
 {
@@ -2369,8 +2353,7 @@ PHP_FUNCTION(date_create_immutable_from_format)
 }
 /* }}} */
 
-/* {{{ proto DateTime::__construct([string time[, DateTimeZone object]])
-   Creates new DateTime object
+/* Creates new DateTime object
 */
 PHP_METHOD(DateTime, __construct)
 {
@@ -2391,8 +2374,7 @@ PHP_METHOD(DateTime, __construct)
 }
 /* }}} */
 
-/* {{{ proto DateTimeImmutable::__construct([string time[, DateTimeZone object]])
-   Creates new DateTimeImmutable object
+/* Creates new DateTimeImmutable object
 */
 PHP_METHOD(DateTimeImmutable, __construct)
 {
@@ -2413,8 +2395,7 @@ PHP_METHOD(DateTimeImmutable, __construct)
 }
 /* }}} */
 
-/* {{{ proto DateTime::createFromImmutable(DateTimeImmutable object)
-   Creates new DateTime object from an existing immutable DateTimeImmutable object.
+/* Creates new DateTime object from an existing immutable DateTimeImmutable object.
 */
 PHP_METHOD(DateTime, createFromImmutable)
 {
@@ -2434,8 +2415,7 @@ PHP_METHOD(DateTime, createFromImmutable)
 }
 /* }}} */
 
-/* {{{ proto DateTime::createFromInterface(DateTimeInterface object)
-   Creates new DateTime object from an existing DateTimeInterface object.
+/* Creates new DateTime object from an existing DateTimeInterface object.
 */
 PHP_METHOD(DateTime, createFromInterface)
 {
@@ -2455,8 +2435,7 @@ PHP_METHOD(DateTime, createFromInterface)
 }
 /* }}} */
 
-/* {{{ proto DateTimeImmutable::createFromMutable(DateTime object)
-   Creates new DateTimeImmutable object from an existing mutable DateTime object.
+/* Creates new DateTimeImmutable object from an existing mutable DateTime object.
 */
 PHP_METHOD(DateTimeImmutable, createFromMutable)
 {
@@ -2476,8 +2455,7 @@ PHP_METHOD(DateTimeImmutable, createFromMutable)
 }
 /* }}} */
 
-/* {{{ proto DateTimeImmutable::createFromInterface(DateTimeInterface object)
-   Creates new DateTimeImmutable object from an existing DateTimeInterface object.
+/* Creates new DateTimeImmutable object from an existing DateTimeInterface object.
 */
 PHP_METHOD(DateTimeImmutable, createFromInterface)
 {
@@ -2546,8 +2524,6 @@ static int php_date_initialize_from_hash(php_date_obj **dateobj, HashTable *myht
 	return 0;
 } /* }}} */
 
-/* {{{ proto DateTime::__set_state(array array)
-*/
 PHP_METHOD(DateTime, __set_state)
 {
 	php_date_obj     *dateobj;
@@ -2568,8 +2544,6 @@ PHP_METHOD(DateTime, __set_state)
 }
 /* }}} */
 
-/* {{{ proto DateTimeImmutable::__set_state(array array)
-*/
 PHP_METHOD(DateTimeImmutable, __set_state)
 {
 	php_date_obj     *dateobj;
@@ -2590,8 +2564,6 @@ PHP_METHOD(DateTimeImmutable, __set_state)
 }
 /* }}} */
 
-/* {{{ proto DateTime::__wakeup()
-*/
 PHP_METHOD(DateTime, __wakeup)
 {
 	zval             *object = ZEND_THIS;
@@ -2610,8 +2582,6 @@ PHP_METHOD(DateTime, __wakeup)
 }
 /* }}} */
 
-/* {{{ proto DateTimeImmutable::__wakeup()
-*/
 PHP_METHOD(DateTimeImmutable, __wakeup)
 {
 	zval             *object = ZEND_THIS;
@@ -2651,8 +2621,7 @@ static void zval_from_error_container(zval *z, timelib_error_container *error) /
 	add_assoc_zval(z, "errors", &element);
 } /* }}} */
 
-/* {{{ proto array date_get_last_errors()
-   Returns the warnings and errors found while parsing a date/time string.
+/* Returns the warnings and errors found while parsing a date/time string.
 */
 PHP_FUNCTION(date_get_last_errors)
 {
@@ -2741,8 +2710,7 @@ void php_date_do_return_parsed_time(INTERNAL_FUNCTION_PARAMETERS, timelib_time *
 	timelib_time_dtor(parsed_time);
 } /* }}} */
 
-/* {{{ proto array date_parse(string date)
-   Returns associative array with detailed info about given date
+/* Returns associative array with detailed info about given date
 */
 PHP_FUNCTION(date_parse)
 {
@@ -2759,8 +2727,7 @@ PHP_FUNCTION(date_parse)
 }
 /* }}} */
 
-/* {{{ proto array date_parse_from_format(string format, string date)
-   Returns associative array with detailed info about given date
+/* Returns associative array with detailed info about given date
 */
 PHP_FUNCTION(date_parse_from_format)
 {
@@ -2778,8 +2745,7 @@ PHP_FUNCTION(date_parse_from_format)
 }
 /* }}} */
 
-/* {{{ proto string date_format(DateTimeInterface object, string format)
-   Returns date formatted according to given format
+/* Returns date formatted according to given format
 */
 PHP_FUNCTION(date_format)
 {
@@ -2865,8 +2831,7 @@ static int php_date_modify(zval *object, char *modify, size_t modify_len) /* {{{
 	return 1;
 } /* }}} */
 
-/* {{{ proto DateTime date_modify(DateTime object, string modify)
-   Alters the timestamp.
+/* Alters the timestamp.
 */
 PHP_FUNCTION(date_modify)
 {
@@ -2887,8 +2852,6 @@ PHP_FUNCTION(date_modify)
 }
 /* }}} */
 
-/* {{{ proto DateTimeImmutable::modify()
-*/
 PHP_METHOD(DateTimeImmutable, modify)
 {
 	zval *object, new_object;
@@ -2926,8 +2889,7 @@ static void php_date_add(zval *object, zval *interval, zval *return_value) /* {{
 	dateobj->time = new_time;
 } /* }}} */
 
-/* {{{ proto DateTime date_add(DateTime object, DateInterval interval)
-   Adds an interval to the current date in object.
+/* Adds an interval to the current date in object.
 */
 PHP_FUNCTION(date_add)
 {
@@ -2944,8 +2906,6 @@ PHP_FUNCTION(date_add)
 }
 /* }}} */
 
-/* {{{ proto DateTimeImmutable::add()
-*/
 PHP_METHOD(DateTimeImmutable, add)
 {
 	zval *object, *interval, new_object;
@@ -2983,8 +2943,7 @@ static void php_date_sub(zval *object, zval *interval, zval *return_value) /* {{
 	dateobj->time = new_time;
 } /* }}} */
 
-/* {{{ proto DateTime date_sub(DateTime object, DateInterval interval)
-   Subtracts an interval to the current date in object.
+/* Subtracts an interval to the current date in object.
 */
 PHP_FUNCTION(date_sub)
 {
@@ -3001,8 +2960,6 @@ PHP_FUNCTION(date_sub)
 }
 /* }}} */
 
-/* {{{ proto DateTimeImmutable::sub()
-*/
 PHP_METHOD(DateTimeImmutable, sub)
 {
 	zval *object, *interval, new_object;
@@ -3039,8 +2996,7 @@ static void set_timezone_from_timelib_time(php_timezone_obj *tzobj, timelib_time
 }
 
 
-/* {{{ proto DateTimeZone date_timezone_get(DateTimeInterface object)
-   Return new DateTimeZone object relative to give DateTime
+/* Return new DateTimeZone object relative to give DateTime
 */
 PHP_FUNCTION(date_timezone_get)
 {
@@ -3086,8 +3042,7 @@ static void php_date_timezone_set(zval *object, zval *timezone_object, zval *ret
 	timelib_unixtime2local(dateobj->time, dateobj->time->sse);
 } /* }}} */
 
-/* {{{ proto DateTime date_timezone_set(DateTime object, DateTimeZone object)
-   Sets the timezone for the DateTime object.
+/* Sets the timezone for the DateTime object.
 */
 PHP_FUNCTION(date_timezone_set)
 {
@@ -3105,8 +3060,6 @@ PHP_FUNCTION(date_timezone_set)
 }
 /* }}} */
 
-/* {{{ proto DateTimeImmutable::setTimezone()
-*/
 PHP_METHOD(DateTimeImmutable, setTimezone)
 {
 	zval *object, new_object;
@@ -3124,8 +3077,7 @@ PHP_METHOD(DateTimeImmutable, setTimezone)
 }
 /* }}} */
 
-/* {{{ proto int date_offset_get(DateTimeInterface object)
-   Returns the DST offset.
+/* Returns the DST offset.
 */
 PHP_FUNCTION(date_offset_get)
 {
@@ -3173,8 +3125,7 @@ static void php_date_time_set(zval *object, zend_long h, zend_long i, zend_long 
 	timelib_update_from_sse(dateobj->time);
 } /* }}} */
 
-/* {{{ proto DateTime date_time_set(DateTime object, int hour, int minute[, int second[, int microseconds]])
-   Sets the time.
+/* Sets the time.
 */
 PHP_FUNCTION(date_time_set)
 {
@@ -3192,8 +3143,6 @@ PHP_FUNCTION(date_time_set)
 }
 /* }}} */
 
-/* {{{ proto DateTimeImmutable::setTime()
-*/
 PHP_METHOD(DateTimeImmutable, setTime)
 {
 	zval *object, new_object;
@@ -3223,8 +3172,7 @@ static void php_date_date_set(zval *object, zend_long y, zend_long m, zend_long 
 	timelib_update_ts(dateobj->time, NULL);
 } /* }}} */
 
-/* {{{ proto DateTime date_date_set(DateTime object, int year, int month, int day)
-   Sets the date.
+/* Sets the date.
 */
 PHP_FUNCTION(date_date_set)
 {
@@ -3242,8 +3190,6 @@ PHP_FUNCTION(date_date_set)
 }
 /* }}} */
 
-/* {{{ proto DateTimeImmutable::setDate()
-*/
 PHP_METHOD(DateTimeImmutable, setDate)
 {
 	zval *object, new_object;
@@ -3277,8 +3223,7 @@ static void php_date_isodate_set(zval *object, zend_long y, zend_long w, zend_lo
 	timelib_update_ts(dateobj->time, NULL);
 } /* }}} */
 
-/* {{{ proto DateTime date_isodate_set(DateTime object, int year, int week[, int day])
-   Sets the ISO date.
+/* Sets the ISO date.
 */
 PHP_FUNCTION(date_isodate_set)
 {
@@ -3296,8 +3241,6 @@ PHP_FUNCTION(date_isodate_set)
 }
 /* }}} */
 
-/* {{{ proto DateTimeImmutable::setISODate()
-*/
 PHP_METHOD(DateTimeImmutable, setISODate)
 {
 	zval *object, new_object;
@@ -3326,8 +3269,7 @@ static void php_date_timestamp_set(zval *object, zend_long timestamp, zval *retu
 	php_date_set_time_fraction(dateobj->time, 0);
 } /* }}} */
 
-/* {{{ proto DateTime date_timestamp_set(DateTime object, int unixTimestamp)
-   Sets the date and time based on an Unix timestamp.
+/* Sets the date and time based on an Unix timestamp.
 */
 PHP_FUNCTION(date_timestamp_set)
 {
@@ -3345,8 +3287,6 @@ PHP_FUNCTION(date_timestamp_set)
 }
 /* }}} */
 
-/* {{{ proto DateTimeImmutable::setTimestamp()
-*/
 PHP_METHOD(DateTimeImmutable, setTimestamp)
 {
 	zval *object, new_object;
@@ -3364,8 +3304,7 @@ PHP_METHOD(DateTimeImmutable, setTimestamp)
 }
 /* }}} */
 
-/* {{{ proto int date_timestamp_get(DateTimeInterface object)
-   Gets the Unix timestamp.
+/* Gets the Unix timestamp.
 */
 PHP_FUNCTION(date_timestamp_get)
 {
@@ -3390,8 +3329,7 @@ PHP_FUNCTION(date_timestamp_get)
 }
 /* }}} */
 
-/* {{{ proto DateInterval date_diff(DateTime object [, bool absolute])
-   Returns the difference between two DateTime objects.
+/* Returns the difference between two DateTime objects.
 */
 PHP_FUNCTION(date_diff)
 {
@@ -3445,8 +3383,7 @@ static int timezone_initialize(php_timezone_obj *tzobj, /*const*/ char *tz, size
 	}
 } /* }}} */
 
-/* {{{ proto DateTimeZone timezone_open(string timezone)
-   Returns new DateTimeZone object
+/* Returns new DateTimeZone object
 */
 PHP_FUNCTION(timezone_open)
 {
@@ -3465,8 +3402,7 @@ PHP_FUNCTION(timezone_open)
 }
 /* }}} */
 
-/* {{{ proto DateTimeZone::__construct(string timezone)
-   Creates new DateTimeZone object.
+/* Creates new DateTimeZone object.
 */
 PHP_METHOD(DateTimeZone, __construct)
 {
@@ -3507,8 +3443,7 @@ static int php_date_timezone_initialize_from_hash(zval **return_value, php_timez
 	return FAILURE;
 } /* }}} */
 
-/* {{{ proto DateTimeZone::__set_state(array array)
- *  */
+/* *  */
 PHP_METHOD(DateTimeZone, __set_state)
 {
 	php_timezone_obj *tzobj;
@@ -3530,8 +3465,7 @@ PHP_METHOD(DateTimeZone, __set_state)
 }
 /* }}} */
 
-/* {{{ proto DateTimeZone::__wakeup()
- *  */
+/* *  */
 PHP_METHOD(DateTimeZone, __wakeup)
 {
 	zval             *object = ZEND_THIS;
@@ -3550,8 +3484,7 @@ PHP_METHOD(DateTimeZone, __wakeup)
 }
 /* }}} */
 
-/* {{{ proto string timezone_name_get(DateTimeZone object)
-   Returns the name of the timezone.
+/* Returns the name of the timezone.
 */
 PHP_FUNCTION(timezone_name_get)
 {
@@ -3567,8 +3500,7 @@ PHP_FUNCTION(timezone_name_get)
 }
 /* }}} */
 
-/* {{{ proto string timezone_name_from_abbr(string abbr[, int gmtOffset[, int isdst]])
-   Returns the timezone name from abbreviation
+/* Returns the timezone name from abbreviation
 */
 PHP_FUNCTION(timezone_name_from_abbr)
 {
@@ -3594,8 +3526,7 @@ PHP_FUNCTION(timezone_name_from_abbr)
 }
 /* }}} */
 
-/* {{{ proto int timezone_offset_get(DateTimeZone object, DateTimeInterface datetime)
-   Returns the timezone offset.
+/* Returns the timezone offset.
 */
 PHP_FUNCTION(timezone_offset_get)
 {
@@ -3628,8 +3559,7 @@ PHP_FUNCTION(timezone_offset_get)
 }
 /* }}} */
 
-/* {{{ proto array timezone_transitions_get(DateTimeZone object [, int timestamp_begin [, int timestamp_end ]])
-   Returns numerically indexed array containing associative array for all transitions in the specified range for the timezone.
+/* Returns numerically indexed array containing associative array for all transitions in the specified range for the timezone.
 */
 PHP_FUNCTION(timezone_transitions_get)
 {
@@ -3709,8 +3639,7 @@ PHP_FUNCTION(timezone_transitions_get)
 }
 /* }}} */
 
-/* {{{ proto array timezone_location_get()
-   Returns location information for a timezone, including country code, latitude/longitude and comments
+/* Returns location information for a timezone, including country code, latitude/longitude and comments
 */
 PHP_FUNCTION(timezone_location_get)
 {
@@ -3895,8 +3824,7 @@ static zval *date_interval_get_property_ptr_ptr(zend_object *object, zend_string
 }
 /* }}} */
 
-/* {{{ proto DateInterval::__construct([string interval_spec])
-   Creates new DateInterval object.
+/* Creates new DateInterval object.
 */
 PHP_METHOD(DateInterval, __construct)
 {
@@ -4000,8 +3928,6 @@ static int php_date_interval_initialize_from_hash(zval **return_value, php_inter
 	return 0;
 } /* }}} */
 
-/* {{{ proto DateInterval::__set_state(array array)
-*/
 PHP_METHOD(DateInterval, __set_state)
 {
 	php_interval_obj *intobj;
@@ -4020,8 +3946,6 @@ PHP_METHOD(DateInterval, __set_state)
 }
 /* }}} */
 
-/* {{{ proto DateInterval::__wakeup()
-*/
 PHP_METHOD(DateInterval, __wakeup)
 {
 	zval             *object = ZEND_THIS;
@@ -4038,8 +3962,7 @@ PHP_METHOD(DateInterval, __wakeup)
 }
 /* }}} */
 
-/* {{{ proto DateInterval date_interval_create_from_date_string(string time)
-   Uses the normal date parsers and sets up a DateInterval from the relative parts of the parsed string
+/* Uses the normal date parsers and sets up a DateInterval from the relative parts of the parsed string
 */
 PHP_FUNCTION(date_interval_create_from_date_string)
 {
@@ -4142,8 +4065,7 @@ static zend_string *date_interval_format(char *format, size_t format_len, timeli
 }
 /* }}} */
 
-/* {{{ proto string date_interval_format(DateInterval object, string format)
-   Formats the interval.
+/* Formats the interval.
 */
 PHP_FUNCTION(date_interval_format)
 {
@@ -4189,8 +4111,7 @@ static int date_period_initialize(timelib_time **st, timelib_time **et, timelib_
 	return retval;
 } /* }}} */
 
-/* {{{ proto DatePeriod::__construct(DateTime $start, DateInterval $interval, int recurrences|DateTime $end)
-   Creates new DatePeriod object.
+/* Creates new DatePeriod object.
 */
 PHP_METHOD(DatePeriod, __construct)
 {
@@ -4280,8 +4201,7 @@ PHP_METHOD(DatePeriod, __construct)
 }
 /* }}} */
 
-/* {{{ proto DatePeriod::getStartDate()
-   Get start date.
+/* Get start date.
 */
 PHP_METHOD(DatePeriod, getStartDate)
 {
@@ -4305,8 +4225,7 @@ PHP_METHOD(DatePeriod, getStartDate)
 }
 /* }}} */
 
-/* {{{ proto DatePeriod::getEndDate()
-   Get end date.
+/* Get end date.
 */
 PHP_METHOD(DatePeriod, getEndDate)
 {
@@ -4334,8 +4253,7 @@ PHP_METHOD(DatePeriod, getEndDate)
 }
 /* }}} */
 
-/* {{{ proto DatePeriod::getDateInterval()
-   Get date interval.
+/* Get date interval.
 */
 PHP_METHOD(DatePeriod, getDateInterval)
 {
@@ -4353,8 +4271,7 @@ PHP_METHOD(DatePeriod, getDateInterval)
 }
 /* }}} */
 
-/* {{{ proto int DatePeriod::getRecurrences()
-   Get recurrences.
+/* Get recurrences.
 */
 PHP_METHOD(DatePeriod, getRecurrences)
 {
@@ -4388,8 +4305,7 @@ static int check_id_allowed(char *id, zend_long what) /* {{{ */
 	return 0;
 } /* }}} */
 
-/* {{{ proto array timezone_identifiers_list([long what[, string country]])
-   Returns numerically index array with all timezone identifiers.
+/* Returns numerically index array with all timezone identifiers.
 */
 PHP_FUNCTION(timezone_identifiers_list)
 {
@@ -4429,8 +4345,7 @@ PHP_FUNCTION(timezone_identifiers_list)
 }
 /* }}} */
 
-/* {{{ proto string timezone_version_get()
-   Returns the Olson database version number.
+/* Returns the Olson database version number.
 */
 PHP_FUNCTION(timezone_version_get)
 {
@@ -4443,8 +4358,7 @@ PHP_FUNCTION(timezone_version_get)
 }
 /* }}} */
 
-/* {{{ proto array timezone_abbreviations_list()
-   Returns associative array containing dst, offset and the timezone name
+/* Returns associative array containing dst, offset and the timezone name
 */
 PHP_FUNCTION(timezone_abbreviations_list)
 {
@@ -4480,8 +4394,7 @@ PHP_FUNCTION(timezone_abbreviations_list)
 }
 /* }}} */
 
-/* {{{ proto bool date_default_timezone_set(string timezone_identifier)
-   Sets the default timezone used by all date/time functions in a script */
+/* Sets the default timezone used by all date/time functions in a script */
 PHP_FUNCTION(date_default_timezone_set)
 {
 	char *zone;
@@ -4504,8 +4417,7 @@ PHP_FUNCTION(date_default_timezone_set)
 }
 /* }}} */
 
-/* {{{ proto string date_default_timezone_get()
-   Gets the default timezone used by all date/time functions in a script */
+/* Gets the default timezone used by all date/time functions in a script */
 PHP_FUNCTION(date_default_timezone_get)
 {
 	timelib_tzinfo *default_tz;
@@ -4605,24 +4517,21 @@ static void php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAMETERS, int calc_su
 }
 /* }}} */
 
-/* {{{ proto mixed date_sunrise(mixed time [, int format [, float latitude [, float longitude [, float zenith [, float gmt_offset]]]]])
-   Returns time of sunrise for a given day and location */
+/* Returns time of sunrise for a given day and location */
 PHP_FUNCTION(date_sunrise)
 {
 	php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
-/* {{{ proto mixed date_sunset(mixed time [, int format [, float latitude [, float longitude [, float zenith [, float gmt_offset]]]]])
-   Returns time of sunset for a given day and location */
+/* Returns time of sunset for a given day and location */
 PHP_FUNCTION(date_sunset)
 {
 	php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
-/* {{{ proto array date_sun_info(int time, float latitude, float longitude)
-   Returns an array with information about sun set/rise and twilight begin/end */
+/* Returns an array with information about sun set/rise and twilight begin/end */
 PHP_FUNCTION(date_sun_info)
 {
 	zend_long       time;
@@ -4879,8 +4788,6 @@ static int php_date_period_initialize_from_hash(php_period_obj *period_obj, Hash
 	return 1;
 } /* }}} */
 
-/* {{{ proto DatePeriod::__set_state(array array)
-*/
 PHP_METHOD(DatePeriod, __set_state)
 {
 	php_period_obj   *period_obj;
@@ -4901,8 +4808,6 @@ PHP_METHOD(DatePeriod, __set_state)
 }
 /* }}} */
 
-/* {{{ proto DatePeriod::__wakeup()
-*/
 PHP_METHOD(DatePeriod, __wakeup)
 {
 	zval             *object = ZEND_THIS;

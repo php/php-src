@@ -371,8 +371,7 @@ static void filter_item_dtor(zval *zv)
 	efree(fdat);
 }
 
-/* {{{ proto object|null stream_bucket_make_writeable(resource brigade)
-   Return a bucket object from the brigade for operating on */
+/* Return a bucket object from the brigade for operating on */
 PHP_FUNCTION(stream_bucket_make_writeable)
 {
 	zval *zbrigade, zbucket;
@@ -454,24 +453,21 @@ static void php_stream_bucket_attach(int append, INTERNAL_FUNCTION_PARAMETERS)
 }
 /* }}} */
 
-/* {{{ proto void stream_bucket_prepend(resource brigade, object bucket)
-   Prepend bucket to brigade */
+/* Prepend bucket to brigade */
 PHP_FUNCTION(stream_bucket_prepend)
 {
 	php_stream_bucket_attach(0, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
-/* {{{ proto void stream_bucket_append(resource brigade, object bucket)
-   Append bucket to brigade */
+/* Append bucket to brigade */
 PHP_FUNCTION(stream_bucket_append)
 {
 	php_stream_bucket_attach(1, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
-/* {{{ proto resource stream_bucket_new(resource stream, string buffer)
-   Create a new bucket for use on the current stream */
+/* Create a new bucket for use on the current stream */
 PHP_FUNCTION(stream_bucket_new)
 {
 	zval *zstream, zbucket;
@@ -507,8 +503,7 @@ PHP_FUNCTION(stream_bucket_new)
 }
 /* }}} */
 
-/* {{{ proto array stream_get_filters(void)
-   Returns a list of registered filters */
+/* Returns a list of registered filters */
 PHP_FUNCTION(stream_get_filters)
 {
 	zend_string *filter_name;
@@ -531,8 +526,7 @@ PHP_FUNCTION(stream_get_filters)
 }
 /* }}} */
 
-/* {{{ proto bool stream_filter_register(string filtername, string classname)
-   Registers a custom filter handler class */
+/* Registers a custom filter handler class */
 PHP_FUNCTION(stream_filter_register)
 {
 	zend_string *filtername, *classname;

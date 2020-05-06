@@ -3,8 +3,7 @@ Test count_chars() function : basic functionality
 --FILE--
 <?php
 
-/* Prototype  : mixed count_chars  ( string $string  [, int $mode  ] )
- * Description: Return information about characters used in a string
+/* Description: Return information about characters used in a string
  * Source code: ext/standard/string.c
 */
 

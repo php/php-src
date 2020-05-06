@@ -9,8 +9,7 @@ if(substr(PHP_OS, 0, 3) != "WIN")
 ?>
 --FILE--
 <?php
-/* Prototype: mixed pathinfo ( string $path [, int $options] );
-   Description: Returns information about a file path
+/* Description: Returns information about a file path
 */
 
 echo "*** Testing basic functions of pathinfo() ***\n";

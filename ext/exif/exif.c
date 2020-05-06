@@ -2756,8 +2756,7 @@ static char * exif_get_markername(int marker)
 #endif
 /* }}} */
 
-/* {{{ proto string exif_tagname(int index)
-	Get headername for index or false if not defined */
+/* Get headername for index or false if not defined */
 PHP_FUNCTION(exif_tagname)
 {
 	zend_long tag;
@@ -4454,8 +4453,7 @@ static int exif_read_from_file(image_info_type *ImageInfo, char *FileName, int r
 }
 /* }}} */
 
-/* {{{ proto array exif_read_data(mixed stream [, string sections_needed [, bool sub_arrays[, bool read_thumbnail]]])
-   Reads header data from an image and optionally reads the internal thumbnails */
+/* Reads header data from an image and optionally reads the internal thumbnails */
 PHP_FUNCTION(exif_read_data)
 {
 	zend_string *z_sections_needed = NULL;
@@ -4657,8 +4655,7 @@ PHP_FUNCTION(exif_read_data)
 }
 /* }}} */
 
-/* {{{ proto string exif_thumbnail(string filename [, &width, &height [, &imagetype]])
-   Reads the embedded thumbnail */
+/* Reads the embedded thumbnail */
 PHP_FUNCTION(exif_thumbnail)
 {
 	int ret, arg_c = ZEND_NUM_ARGS();
@@ -4740,8 +4737,7 @@ PHP_FUNCTION(exif_thumbnail)
 }
 /* }}} */
 
-/* {{{ proto int exif_imagetype(string imagefile)
-   Get the type of an image */
+/* Get the type of an image */
 PHP_FUNCTION(exif_imagetype)
 {
 	char *imagefile;

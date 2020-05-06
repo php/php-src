@@ -7,8 +7,7 @@ imagefilledpolygon()
 --FILE--
 <?php
 
-/* Prototype  : bool imagefilledpolygon  ( resource $image  , array $points  , int $num_points  , int $color  )
- * Description: Draws a filled polygon.
+/* Description: Draws a filled polygon.
  * Source code: ext/standard/image.c
  * Alias to functions:
  */

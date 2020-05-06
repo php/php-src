@@ -1693,8 +1693,7 @@ static int add_associate_array( const char * pKey, int keyLen, const char * pVal
 }
 
 
-/* {{{ proto array litespeed_request_headers(void)
-   Fetch all HTTP request headers */
+/* Fetch all HTTP request headers */
 PHP_FUNCTION(litespeed_request_headers)
 {
     /* TODO: */
@@ -1710,8 +1709,7 @@ PHP_FUNCTION(litespeed_request_headers)
 
 
 
-/* {{{ proto array litespeed_response_headers(void)
-   Fetch all HTTP response headers */
+/* Fetch all HTTP response headers */
 PHP_FUNCTION(litespeed_response_headers)
 {
     sapi_header_struct  *h;
@@ -1753,8 +1751,7 @@ PHP_FUNCTION(litespeed_response_headers)
 /* }}} */
 
 
-/* {{{ proto array apache_get_modules(void)
-   Fetch all loaded module names  */
+/* Fetch all loaded module names  */
 PHP_FUNCTION(apache_get_modules)
 {
     static const char * mod_names[] =
@@ -1776,8 +1773,7 @@ PHP_FUNCTION(apache_get_modules)
 /* }}} */
 
 
-/* {{{ proto array litespeed_finish_request(void)
-   Flushes all response data to the client */
+/* Flushes all response data to the client */
 PHP_FUNCTION(litespeed_finish_request)
 {
     if (ZEND_NUM_ARGS() > 0) {

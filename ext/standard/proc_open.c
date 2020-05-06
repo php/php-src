@@ -219,8 +219,7 @@ PHP_MINIT_FUNCTION(proc_open)
 }
 /* }}} */
 
-/* {{{ proto bool proc_terminate(resource process [, int signal])
-   kill a process opened by proc_open */
+/* kill a process opened by proc_open */
 PHP_FUNCTION(proc_terminate)
 {
 	zval *zproc;
@@ -253,8 +252,7 @@ PHP_FUNCTION(proc_terminate)
 }
 /* }}} */
 
-/* {{{ proto int|false proc_close(resource process)
-   close a process opened by proc_open */
+/* close a process opened by proc_open */
 PHP_FUNCTION(proc_close)
 {
 	zval *zproc;
@@ -275,8 +273,7 @@ PHP_FUNCTION(proc_close)
 }
 /* }}} */
 
-/* {{{ proto array|false proc_get_status(resource process)
-   get information about a process opened by proc_open */
+/* get information about a process opened by proc_open */
 PHP_FUNCTION(proc_get_status)
 {
 	zval *zproc;
@@ -831,8 +828,7 @@ static void efree_argv(char **argv)
 	}
 }
 
-/* {{{ proto resource|false proc_open(string|array command, array descriptorspec, array &pipes [, string cwd [, array env [, array other_options]]])
-   Run a process with more control over it's file descriptors */
+/* Run a process with more control over it's file descriptors */
 PHP_FUNCTION(proc_open)
 {
 	zval *command_zv;

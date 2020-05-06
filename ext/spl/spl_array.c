@@ -695,9 +695,7 @@ static int spl_array_has_dimension(zend_object *object, zval *offset, int check_
 	return spl_array_has_dimension_ex(1, object, offset, check_empty);
 } /* }}} */
 
-/* {{{ proto bool ArrayObject::offsetExists(mixed $index)
-       proto bool ArrayIterator::offsetExists(mixed $index)
-   Returns whether the requested $index exists. */
+/* Returns whether the requested $index exists. */
 PHP_METHOD(ArrayObject, offsetExists)
 {
 	zval *index;
@@ -707,9 +705,7 @@ PHP_METHOD(ArrayObject, offsetExists)
 	RETURN_BOOL(spl_array_has_dimension_ex(0, Z_OBJ_P(ZEND_THIS), index, 2));
 } /* }}} */
 
-/* {{{ proto mixed ArrayObject::offsetGet(mixed $index)
-       proto mixed ArrayIterator::offsetGet(mixed $index)
-   Returns the value at the specified $index. */
+/* Returns the value at the specified $index. */
 PHP_METHOD(ArrayObject, offsetGet)
 {
 	zval *value, *index;
@@ -722,9 +718,7 @@ PHP_METHOD(ArrayObject, offsetGet)
 	}
 } /* }}} */
 
-/* {{{ proto void ArrayObject::offsetSet(mixed $index, mixed $newval)
-       proto void ArrayIterator::offsetSet(mixed $index, mixed $newval)
-   Sets the value at the specified $index to $newval. */
+/* Sets the value at the specified $index to $newval. */
 PHP_METHOD(ArrayObject, offsetSet)
 {
 	zval *index, *value;
@@ -746,9 +740,7 @@ void spl_array_iterator_append(zval *object, zval *append_value) /* {{{ */
 	spl_array_write_dimension(Z_OBJ_P(object), NULL, append_value);
 } /* }}} */
 
-/* {{{ proto void ArrayObject::append(mixed $newval)
-       proto void ArrayIterator::append(mixed $newval)
-   Appends the value (cannot be called for objects). */
+/* Appends the value (cannot be called for objects). */
 PHP_METHOD(ArrayObject, append)
 {
 	zval *value;
@@ -759,9 +751,7 @@ PHP_METHOD(ArrayObject, append)
 	spl_array_iterator_append(ZEND_THIS, value);
 } /* }}} */
 
-/* {{{ proto void ArrayObject::offsetUnset(mixed $index)
-       proto void ArrayIterator::offsetUnset(mixed $index)
-   Unsets the value at the specified $index. */
+/* Unsets the value at the specified $index. */
 PHP_METHOD(ArrayObject, offsetUnset)
 {
 	zval *index;
@@ -771,9 +761,7 @@ PHP_METHOD(ArrayObject, offsetUnset)
 	spl_array_unset_dimension_ex(0, Z_OBJ_P(ZEND_THIS), index);
 } /* }}} */
 
-/* {{{ proto array ArrayObject::getArrayCopy()
-      proto array ArrayIterator::getArrayCopy()
-   Return a copy of the contained array */
+/* Return a copy of the contained array */
 PHP_METHOD(ArrayObject, getArrayCopy)
 {
 	zval *object = ZEND_THIS;
@@ -1183,8 +1171,7 @@ zend_object_iterator *spl_array_get_iterator(zend_class_entry *ce, zval *object,
 }
 /* }}} */
 
-/* {{{ proto ArrayObject::__construct([array|object ar = array() [, int flags = 0 [, string iterator_class = "ArrayIterator"]]])
-   Constructs a new array object from an array or object. */
+/* Constructs a new array object from an array or object. */
 PHP_METHOD(ArrayObject, __construct)
 {
 	zval *object = ZEND_THIS;
@@ -1213,8 +1200,7 @@ PHP_METHOD(ArrayObject, __construct)
 }
  /* }}} */
 
-/* {{{ proto ArrayIterator::__construct([array|object ar = array() [, int flags = 0]])
-   Constructs a new array iterator from an array or object. */
+/* Constructs a new array iterator from an array or object. */
 PHP_METHOD(ArrayIterator, __construct)
 {
 	zval *object = ZEND_THIS;
@@ -1238,8 +1224,7 @@ PHP_METHOD(ArrayIterator, __construct)
 }
  /* }}} */
 
-/* {{{ proto void ArrayObject::setIteratorClass(string iterator_class)
-   Set the class used in getIterator. */
+/* Set the class used in getIterator. */
 PHP_METHOD(ArrayObject, setIteratorClass)
 {
 	zval *object = ZEND_THIS;
@@ -1254,8 +1239,7 @@ PHP_METHOD(ArrayObject, setIteratorClass)
 }
 /* }}} */
 
-/* {{{ proto string ArrayObject::getIteratorClass()
-   Get the class used in getIterator. */
+/* Get the class used in getIterator. */
 PHP_METHOD(ArrayObject, getIteratorClass)
 {
 	zval *object = ZEND_THIS;
@@ -1270,8 +1254,7 @@ PHP_METHOD(ArrayObject, getIteratorClass)
 }
 /* }}} */
 
-/* {{{ proto int ArrayObject::getFlags()
-   Get flags */
+/* Get flags */
 PHP_METHOD(ArrayObject, getFlags)
 {
 	zval *object = ZEND_THIS;
@@ -1285,8 +1268,7 @@ PHP_METHOD(ArrayObject, getFlags)
 }
 /* }}} */
 
-/* {{{ proto void ArrayObject::setFlags(int flags)
-   Set flags */
+/* Set flags */
 PHP_METHOD(ArrayObject, setFlags)
 {
 	zval *object = ZEND_THIS;
@@ -1301,8 +1283,7 @@ PHP_METHOD(ArrayObject, setFlags)
 }
 /* }}} */
 
-/* {{{ proto Array|Object ArrayObject::exchangeArray(Array|Object input = array())
-   Replace the referenced array or object with a new one and return the old one (right now copy - to be changed) */
+/* Replace the referenced array or object with a new one and return the old one (right now copy - to be changed) */
 PHP_METHOD(ArrayObject, exchangeArray)
 {
 	zval *object = ZEND_THIS, *array;
@@ -1322,8 +1303,7 @@ PHP_METHOD(ArrayObject, exchangeArray)
 }
 /* }}} */
 
-/* {{{ proto ArrayIterator ArrayObject::getIterator()
-   Create a new iterator from a ArrayObject instance */
+/* Create a new iterator from a ArrayObject instance */
 PHP_METHOD(ArrayObject, getIterator)
 {
 	zval *object = ZEND_THIS;
@@ -1337,8 +1317,7 @@ PHP_METHOD(ArrayObject, getIterator)
 }
 /* }}} */
 
-/* {{{ proto void ArrayIterator::rewind()
-   Rewind array back to the start */
+/* Rewind array back to the start */
 PHP_METHOD(ArrayIterator, rewind)
 {
 	zval *object = ZEND_THIS;
@@ -1352,8 +1331,7 @@ PHP_METHOD(ArrayIterator, rewind)
 }
 /* }}} */
 
-/* {{{ proto void ArrayIterator::seek(int $position)
-   Seek to position. */
+/* Seek to position. */
 PHP_METHOD(ArrayIterator, seek)
 {
 	zend_long opos, position;
@@ -1421,9 +1399,7 @@ int spl_array_object_count_elements(zend_object *object, zend_long *count) /* {{
 	return SUCCESS;
 } /* }}} */
 
-/* {{{ proto int ArrayObject::count()
-       proto int ArrayIterator::count()
-   Return the number of elements in the Iterator. */
+/* Return the number of elements in the Iterator. */
 PHP_METHOD(ArrayObject, count)
 {
 	spl_array_object *intern = Z_SPLARRAY_P(ZEND_THIS);
@@ -1493,38 +1469,25 @@ PHP_METHOD(cname, fname) \
 	spl_array_method(INTERNAL_FUNCTION_PARAM_PASSTHRU, #fname, sizeof(#fname)-1, use_arg); \
 }
 
-/* {{{ proto int ArrayObject::asort([int $sort_flags = SORT_REGULAR ])
-       proto int ArrayIterator::asort([int $sort_flags = SORT_REGULAR ])
-   Sort the entries by values. */
+/* Sort the entries by values. */
 SPL_ARRAY_METHOD(ArrayObject, asort, SPL_ARRAY_METHOD_MAY_USER_ARG) /* }}} */
 
-/* {{{ proto int ArrayObject::ksort([int $sort_flags = SORT_REGULAR ])
-       proto int ArrayIterator::ksort([int $sort_flags = SORT_REGULAR ])
-   Sort the entries by key. */
+/* Sort the entries by key. */
 SPL_ARRAY_METHOD(ArrayObject, ksort, SPL_ARRAY_METHOD_MAY_USER_ARG) /* }}} */
 
-/* {{{ proto int ArrayObject::uasort(callback cmp_function)
-       proto int ArrayIterator::uasort(callback cmp_function)
-   Sort the entries by values user defined function. */
+/* Sort the entries by values user defined function. */
 SPL_ARRAY_METHOD(ArrayObject, uasort, SPL_ARRAY_METHOD_USE_ARG) /* }}} */
 
-/* {{{ proto int ArrayObject::uksort(callback cmp_function)
-       proto int ArrayIterator::uksort(callback cmp_function)
-   Sort the entries by key using user defined function. */
+/* Sort the entries by key using user defined function. */
 SPL_ARRAY_METHOD(ArrayObject, uksort, SPL_ARRAY_METHOD_USE_ARG) /* }}} */
 
-/* {{{ proto int ArrayObject::natsort()
-       proto int ArrayIterator::natsort()
-   Sort the entries by values using "natural order" algorithm. */
+/* Sort the entries by values using "natural order" algorithm. */
 SPL_ARRAY_METHOD(ArrayObject, natsort, SPL_ARRAY_METHOD_NO_ARG) /* }}} */
 
-/* {{{ proto int ArrayObject::natcasesort()
-       proto int ArrayIterator::natcasesort()
-   Sort the entries by key using case insensitive "natural order" algorithm. */
+/* Sort the entries by key using case insensitive "natural order" algorithm. */
 SPL_ARRAY_METHOD(ArrayObject, natcasesort, SPL_ARRAY_METHOD_NO_ARG) /* }}} */
 
-/* {{{ proto mixed|NULL ArrayIterator::current()
-   Return current array entry */
+/* Return current array entry */
 PHP_METHOD(ArrayIterator, current)
 {
 	zval *object = ZEND_THIS;
@@ -1549,8 +1512,7 @@ PHP_METHOD(ArrayIterator, current)
 }
 /* }}} */
 
-/* {{{ proto mixed|NULL ArrayIterator::key()
-   Return current array key */
+/* Return current array key */
 PHP_METHOD(ArrayIterator, key)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1569,8 +1531,7 @@ void spl_array_iterator_key(zval *object, zval *return_value) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto void ArrayIterator::next()
-   Move to next entry */
+/* Move to next entry */
 PHP_METHOD(ArrayIterator, next)
 {
 	zval *object = ZEND_THIS;
@@ -1585,8 +1546,7 @@ PHP_METHOD(ArrayIterator, next)
 }
 /* }}} */
 
-/* {{{ proto bool ArrayIterator::valid()
-   Check whether array contains more entries */
+/* Check whether array contains more entries */
 PHP_METHOD(ArrayIterator, valid)
 {
 	zval *object = ZEND_THIS;
@@ -1601,8 +1561,7 @@ PHP_METHOD(ArrayIterator, valid)
 }
 /* }}} */
 
-/* {{{ proto bool RecursiveArrayIterator::hasChildren()
-   Check whether current element has children (e.g. is an array) */
+/* Check whether current element has children (e.g. is an array) */
 PHP_METHOD(RecursiveArrayIterator, hasChildren)
 {
 	zval *object = ZEND_THIS, *entry;
@@ -1626,8 +1585,7 @@ PHP_METHOD(RecursiveArrayIterator, hasChildren)
 }
 /* }}} */
 
-/* {{{ proto object RecursiveArrayIterator::getChildren()
-   Create a sub iterator for the current element (same class as $this) */
+/* Create a sub iterator for the current element (same class as $this) */
 PHP_METHOD(RecursiveArrayIterator, getChildren)
 {
 	zval *object = ZEND_THIS, *entry, flags;
@@ -1663,8 +1621,7 @@ PHP_METHOD(RecursiveArrayIterator, getChildren)
 }
 /* }}} */
 
-/* {{{ proto string ArrayObject::serialize()
-   Serialize the object */
+/* Serialize the object */
 PHP_METHOD(ArrayObject, serialize)
 {
 	zval *object = ZEND_THIS;
@@ -1706,8 +1663,7 @@ PHP_METHOD(ArrayObject, serialize)
 	RETURN_NEW_STR(buf.s);
 } /* }}} */
 
-/* {{{ proto void ArrayObject::unserialize(string serialized)
- * unserialize the object
+/* unserialize the object
  */
 PHP_METHOD(ArrayObject, unserialize)
 {
@@ -1820,7 +1776,6 @@ outexcept:
 
 } /* }}} */
 
-/* {{{ proto array ArrayObject::__serialize() */
 PHP_METHOD(ArrayObject, __serialize)
 {
 	spl_array_object *intern = Z_SPLARRAY_P(ZEND_THIS);
@@ -1860,7 +1815,6 @@ PHP_METHOD(ArrayObject, __serialize)
 /* }}} */
 
 
-/* {{{ proto void ArrayObject::__unserialize(array data) */
 PHP_METHOD(ArrayObject, __unserialize)
 {
 	spl_array_object *intern = Z_SPLARRAY_P(ZEND_THIS);
@@ -1921,7 +1875,6 @@ PHP_METHOD(ArrayObject, __unserialize)
 }
 /* }}} */
 
-/* {{{ proto void Array::__debugInfo() */
 PHP_METHOD(ArrayObject, __debugInfo)
 {
 	if (zend_parse_parameters_none() == FAILURE) {

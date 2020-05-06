@@ -11,17 +11,14 @@ if (setlocale(LC_ALL, "en_US.utf8", "Ko_KR.utf8", "zh_CN.utf8") === false) {
 ?>
 --FILE--
 <?php
-/* Prototype  : string setlocale (int $category , string $locale [,string $..] )
-              : string setlocale(int $category , array $locale);
- * Description: Sets locale information.Returns the new current locale , or FALSE
+/* Description: Sets locale information.Returns the new current locale , or FALSE
                 if locale functionality is not implemented in this platform.
  * Source code: ext/standard/string.c
 */
 
 /* Test the setlocale() when multiple locales are provided as argument */
 
-/* Prototype  : array list_system_locales( void )
-   Description: To get the currently installed locle in this platform
+/* Description: To get the currently installed locle in this platform
    Arguments  : Nil
    Returns    : set of locale as array
 */

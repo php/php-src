@@ -2,8 +2,7 @@
 Test array_combine() function : usage variations - binary safe checking
 --FILE--
 <?php
-/* Prototype  : array array_combine(array $keys, array $values)
- * Description: Creates an array by using the elements of the first parameter as keys
+/* Description: Creates an array by using the elements of the first parameter as keys
  *              and the elements of the second as the corresponding values
  * Source code: ext/standard/array.c
 */

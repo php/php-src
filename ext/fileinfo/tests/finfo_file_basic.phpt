@@ -4,8 +4,7 @@ Test finfo_file() function : basic functionality
 <?php require_once(__DIR__ . '/skipif.inc'); ?>
 --FILE--
 <?php
-/* Prototype  : string finfo_file(resource finfo, char *file_name [, int options [, resource context]])
- * Description: Return information about a file.
+/* Description: Return information about a file.
  * Source code: ext/fileinfo/fileinfo.c
  * Alias to functions:
  */

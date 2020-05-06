@@ -471,8 +471,7 @@ static void php_zlib_cleanup_ob_gzhandler_mess(void)
 }
 /* }}} */
 
-/* {{{ proto string ob_gzhandler(string data, int flags)
-   Legacy hack */
+/* Legacy hack */
 PHP_FUNCTION(ob_gzhandler)
 {
 	char *in_str;
@@ -538,8 +537,7 @@ PHP_FUNCTION(ob_gzhandler)
 }
 /* }}} */
 
-/* {{{ proto string zlib_get_coding_type(void)
-   Returns the coding type used for output compression */
+/* Returns the coding type used for output compression */
 PHP_FUNCTION(zlib_get_coding_type)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -556,8 +554,7 @@ PHP_FUNCTION(zlib_get_coding_type)
 }
 /* }}} */
 
-/* {{{ proto array gzfile(string filename [, int use_include_path])
-   Read and uncompress entire .gz-file into an array */
+/* Read and uncompress entire .gz-file into an array */
 PHP_FUNCTION(gzfile)
 {
 	char *filename;
@@ -597,8 +594,7 @@ PHP_FUNCTION(gzfile)
 }
 /* }}} */
 
-/* {{{ proto resource gzopen(string filename, string mode [, int use_include_path])
-   Open a .gz-file and return a .gz-file pointer */
+/* Open a .gz-file and return a .gz-file pointer */
 PHP_FUNCTION(gzopen)
 {
 	char *filename;
@@ -625,8 +621,7 @@ PHP_FUNCTION(gzopen)
 }
 /* }}} */
 
-/* {{{ proto int readgzfile(string filename [, int use_include_path])
-   Output a .gz-file */
+/* Output a .gz-file */
 PHP_FUNCTION(readgzfile)
 {
 	char *filename;
@@ -710,44 +705,36 @@ PHP_FUNCTION(name) \
 	efree(out_buf); \
 }
 
-/* {{{ proto binary zlib_encode(binary data, int encoding[, int level = -1])
-   Compress data with the specified encoding */
+/* Compress data with the specified encoding */
 PHP_ZLIB_ENCODE_FUNC(zlib_encode, 0);
 /* }}} */
 
-/* {{{ proto binary zlib_decode(binary data[, int max_decoded_len])
-   Uncompress any raw/gzip/zlib encoded data */
+/* Uncompress any raw/gzip/zlib encoded data */
 PHP_ZLIB_DECODE_FUNC(zlib_decode, PHP_ZLIB_ENCODING_ANY);
 /* }}} */
 
 /* NOTE: The naming of these userland functions was quite unlucky */
-/* {{{ proto binary gzdeflate(binary data[, int level = -1[, int encoding = ZLIB_ENCODING_RAW])
-   Encode data with the raw deflate encoding */
+/* Encode data with the raw deflate encoding */
 PHP_ZLIB_ENCODE_FUNC(gzdeflate, PHP_ZLIB_ENCODING_RAW);
 /* }}} */
 
-/* {{{ proto binary gzencode(binary data[, int level = -1[, int encoding = ZLIB_ENCODING_GZIP])
-   Encode data with the gzip encoding */
+/* Encode data with the gzip encoding */
 PHP_ZLIB_ENCODE_FUNC(gzencode, PHP_ZLIB_ENCODING_GZIP);
 /* }}} */
 
-/* {{{ proto binary gzcompress(binary data[, int level = -1[, int encoding = ZLIB_ENCODING_DEFLATE])
-   Encode data with the zlib encoding */
+/* Encode data with the zlib encoding */
 PHP_ZLIB_ENCODE_FUNC(gzcompress, PHP_ZLIB_ENCODING_DEFLATE);
 /* }}} */
 
-/* {{{ proto binary gzinflate(binary data[, int max_decoded_len])
-   Decode raw deflate encoded data */
+/* Decode raw deflate encoded data */
 PHP_ZLIB_DECODE_FUNC(gzinflate, PHP_ZLIB_ENCODING_RAW);
 /* }}} */
 
-/* {{{ proto binary gzdecode(binary data[, int max_decoded_len])
-   Decode gzip encoded data */
+/* Decode gzip encoded data */
 PHP_ZLIB_DECODE_FUNC(gzdecode, PHP_ZLIB_ENCODING_GZIP);
 /* }}} */
 
-/* {{{ proto binary gzuncompress(binary data[, int max_decoded_len])
-   Decode zlib encoded data */
+/* Decode zlib encoded data */
 PHP_ZLIB_DECODE_FUNC(gzuncompress, PHP_ZLIB_ENCODING_DEFLATE);
 /* }}} */
 
@@ -826,8 +813,7 @@ static zend_bool zlib_create_dictionary_string(HashTable *options, char **dict, 
 	return 1;
 }
 
-/* {{{ proto resource inflate_init(int encoding)
-   Initialize an incremental inflate context with the specified encoding */
+/* Initialize an incremental inflate context with the specified encoding */
 PHP_FUNCTION(inflate_init)
 {
 	z_stream *ctx;
@@ -900,8 +886,7 @@ PHP_FUNCTION(inflate_init)
 }
 /* }}} */
 
-/* {{{ proto string inflate_add(resource context, string encoded_data[, int flush_mode = ZLIB_SYNC_FLUSH])
-   Incrementally inflate encoded data in the specified context */
+/* Incrementally inflate encoded data in the specified context */
 PHP_FUNCTION(inflate_add)
 {
 	zend_string *out;
@@ -1018,8 +1003,7 @@ PHP_FUNCTION(inflate_add)
 }
 /* }}} */
 
-/* {{{ proto bool inflate_get_status(resource context)
-   Get decompression status, usually returns either ZLIB_OK or ZLIB_STREAM_END. */
+/* Get decompression status, usually returns either ZLIB_OK or ZLIB_STREAM_END. */
 PHP_FUNCTION(inflate_get_status)
 {
 	zval *res;
@@ -1038,8 +1022,7 @@ PHP_FUNCTION(inflate_get_status)
 }
 /* }}} */
 
-/* {{{ proto bool inflate_get_read_len(resource context)
-   Get number of bytes read so far. */
+/* Get number of bytes read so far. */
 PHP_FUNCTION(inflate_get_read_len)
 {
 	zval *res;
@@ -1058,8 +1041,7 @@ PHP_FUNCTION(inflate_get_read_len)
 }
 /* }}} */
 
-/* {{{ proto resource deflate_init(int encoding[, array options])
-   Initialize an incremental deflate context using the specified encoding */
+/* Initialize an incremental deflate context using the specified encoding */
 PHP_FUNCTION(deflate_init)
 {
 	z_stream *ctx;
@@ -1152,8 +1134,7 @@ PHP_FUNCTION(deflate_init)
 }
 /* }}} */
 
-/* {{{ proto string deflate_add(resource context, string data[, int flush_mode = ZLIB_SYNC_FLUSH])
-   Incrementally deflate data in the specified context */
+/* Incrementally deflate data in the specified context */
 PHP_FUNCTION(deflate_add)
 {
 	zend_string *out;

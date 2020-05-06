@@ -918,24 +918,21 @@ restart:
 /* }}} */
 #undef FREENOW
 
-/* {{{ proto resource dba_popen(string path, string mode [, string handlername, string ...])
-   Opens path using the specified handler in mode persistently */
+/* Opens path using the specified handler in mode persistently */
 PHP_FUNCTION(dba_popen)
 {
 	php_dba_open(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
-/* {{{ proto resource dba_open(string path, string mode [, string handlername, string ...])
-   Opens path using the specified handler in mode*/
+/* Opens path using the specified handler in mode*/
 PHP_FUNCTION(dba_open)
 {
 	php_dba_open(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
-/* {{{ proto void dba_close(resource handle)
-   Closes database */
+/* Closes database */
 PHP_FUNCTION(dba_close)
 {
 	zval *id;
@@ -951,8 +948,7 @@ PHP_FUNCTION(dba_close)
 }
 /* }}} */
 
-/* {{{ proto bool dba_exists(string key, resource handle)
-   Checks, if the specified key exists */
+/* Checks, if the specified key exists */
 PHP_FUNCTION(dba_exists)
 {
 	DBA_ID_GET2;
@@ -966,8 +962,7 @@ PHP_FUNCTION(dba_exists)
 }
 /* }}} */
 
-/* {{{ proto string dba_fetch(string key, [int skip ,] resource handle)
-   Fetches the data associated with key */
+/* Fetches the data associated with key */
 PHP_FUNCTION(dba_fetch)
 {
 	char *val;
@@ -1009,8 +1004,7 @@ PHP_FUNCTION(dba_fetch)
 }
 /* }}} */
 
-/* {{{ proto array|false dba_key_split(string key)
-   Splits an inifile key into an array of the form array(0=>group,1=>value_name) but returns false if input is false or null */
+/* Splits an inifile key into an array of the form array(0=>group,1=>value_name) but returns false if input is false or null */
 PHP_FUNCTION(dba_key_split)
 {
 	zval *zkey;
@@ -1039,8 +1033,7 @@ PHP_FUNCTION(dba_key_split)
 }
 /* }}} */
 
-/* {{{ proto string dba_firstkey(resource handle)
-   Resets the internal key pointer and returns the first key */
+/* Resets the internal key pointer and returns the first key */
 PHP_FUNCTION(dba_firstkey)
 {
 	char *fkey;
@@ -1066,8 +1059,7 @@ PHP_FUNCTION(dba_firstkey)
 }
 /* }}} */
 
-/* {{{ proto string dba_nextkey(resource handle)
-   Returns the next key */
+/* Returns the next key */
 PHP_FUNCTION(dba_nextkey)
 {
 	char *nkey;
@@ -1093,8 +1085,7 @@ PHP_FUNCTION(dba_nextkey)
 }
 /* }}} */
 
-/* {{{ proto bool dba_delete(string key, resource handle)
-   Deletes the entry associated with key
+/* Deletes the entry associated with key
    If inifile: remove all other key lines */
 PHP_FUNCTION(dba_delete)
 {
@@ -1112,8 +1103,7 @@ PHP_FUNCTION(dba_delete)
 }
 /* }}} */
 
-/* {{{ proto bool dba_insert(string key, string value, resource handle)
-   If not inifile: Insert value as key, return false, if key exists already
+/* If not inifile: Insert value as key, return false, if key exists already
    If inifile: Add vakue as key (next instance of key) */
 PHP_FUNCTION(dba_insert)
 {
@@ -1121,8 +1111,7 @@ PHP_FUNCTION(dba_insert)
 }
 /* }}} */
 
-/* {{{ proto bool dba_replace(string key, string value, resource handle)
-   Inserts value as key, replaces key, if key exists already
+/* Inserts value as key, replaces key, if key exists already
    If inifile: remove all other key lines */
 PHP_FUNCTION(dba_replace)
 {
@@ -1130,8 +1119,7 @@ PHP_FUNCTION(dba_replace)
 }
 /* }}} */
 
-/* {{{ proto bool dba_optimize(resource handle)
-   Optimizes (e.g. clean up, vacuum) database */
+/* Optimizes (e.g. clean up, vacuum) database */
 PHP_FUNCTION(dba_optimize)
 {
 	zval *id;
@@ -1153,8 +1141,7 @@ PHP_FUNCTION(dba_optimize)
 }
 /* }}} */
 
-/* {{{ proto bool dba_sync(resource handle)
-   Synchronizes database */
+/* Synchronizes database */
 PHP_FUNCTION(dba_sync)
 {
 	zval *id;
@@ -1174,8 +1161,7 @@ PHP_FUNCTION(dba_sync)
 }
 /* }}} */
 
-/* {{{ proto array dba_handlers([bool full_info])
-   List configured database handlers */
+/* List configured database handlers */
 PHP_FUNCTION(dba_handlers)
 {
 	dba_handler *hptr;
@@ -1200,8 +1186,7 @@ PHP_FUNCTION(dba_handlers)
 }
 /* }}} */
 
-/* {{{ proto array dba_list()
-   List opened databases */
+/* List opened databases */
 PHP_FUNCTION(dba_list)
 {
 	zend_ulong numitems, i;

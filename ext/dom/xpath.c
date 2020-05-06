@@ -209,7 +209,6 @@ static void dom_xpath_ext_function_object_php(xmlXPathParserContextPtr ctxt, int
 }
 /* }}} */
 
-/* {{{ proto DOMXPath::__construct(DOMDocument doc) U */
 PHP_METHOD(DOMXPath, __construct)
 {
 	zval *doc;
@@ -290,7 +289,6 @@ int dom_xpath_register_node_ns_write(dom_object *obj, zval *newval)
 }
 /* }}} */
 
-/* {{{ proto bool dom_xpath_register_ns(string prefix, string uri) */
 PHP_METHOD(DOMXPath, registerNamespace)
 {
 	zval *id;
@@ -475,21 +473,18 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto DOMNodeList dom_xpath_query(string expr [,DOMNode context [, bool registerNodeNS]]) */
 PHP_METHOD(DOMXPath, query)
 {
 	php_xpath_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_DOM_XPATH_QUERY);
 }
 /* }}} end dom_xpath_query */
 
-/* {{{ proto mixed dom_xpath_evaluate(string expr [,DOMNode context [, bool registerNodeNS]]) */
 PHP_METHOD(DOMXPath, evaluate)
 {
 	php_xpath_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_DOM_XPATH_EVALUATE);
 }
 /* }}} end dom_xpath_evaluate */
 
-/* {{{ proto void dom_xpath_register_php_functions() */
 PHP_METHOD(DOMXPath, registerPhpFunctions)
 {
 	zval *id = ZEND_THIS;

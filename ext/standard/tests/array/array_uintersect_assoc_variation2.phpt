@@ -2,8 +2,7 @@
 Test array_uintersect_assoc() function : usage variation
 --FILE--
 <?php
-/* Prototype  : array array_uintersect_assoc(array arr1, array arr2 [, array ...], callback data_compare_func)
- * Description: U
+/* Description: U
  * Source code: ext/standard/array.c
  * Alias to functions:
  */

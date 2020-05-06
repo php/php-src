@@ -3,8 +3,7 @@ Test hebrev() function : basic functionality
 --FILE--
 <?php
 
-/* Prototype  : string hebrev  ( string $hebrew_text  [, int $max_chars_per_line  ] )
- * Description: Convert logical Hebrew text to visual text
+/* Description: Convert logical Hebrew text to visual text
  * Source code: ext/standard/string.c
 */
 

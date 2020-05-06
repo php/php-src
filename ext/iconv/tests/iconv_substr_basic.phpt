@@ -11,8 +11,7 @@ internal_encoding=ISO-8859-1
 output_encoding=ISO-8859-1
 --FILE--
 <?php
-/* Prototype  : string iconv_substr(string str, int offset, [int length, string charset])
- * Description: Returns part of a string
+/* Description: Returns part of a string
  * Source code: ext/iconv/iconv.c
  */
 

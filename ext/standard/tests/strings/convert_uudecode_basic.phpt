@@ -3,8 +3,7 @@ Test convert_uudecode() function : basic functionality
 --FILE--
 <?php
 
-/* Prototype  : string convert_uudecode  ( string $data  )
- * Description: Decode a uuencoded string
+/* Description: Decode a uuencoded string
  * Source code: ext/standard/uuencode.c
 */
 

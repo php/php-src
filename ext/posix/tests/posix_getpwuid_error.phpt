@@ -6,8 +6,7 @@ Test posix_getpwuid() function : error conditions
 ?>
 --FILE--
 <?php
-/* Prototype  : proto array posix_getpwuid(long uid)
- * Description: User database access (POSIX.1, 9.2.2)
+/* Description: User database access (POSIX.1, 9.2.2)
  * Source code: ext/posix/posix.c
  * Alias to functions:
  */

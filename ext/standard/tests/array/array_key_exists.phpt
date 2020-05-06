@@ -2,9 +2,7 @@
 Test array_key_exists() function
 --FILE--
 <?php
-/* Prototype:
- *  bool array_key_exists ( mixed $key, array $search );
- * Description:
+/* Description:
  *  Returns TRUE if the given key is set in the array.
  *  key can be any value possible for an array index.
  *  Also also works on objects.

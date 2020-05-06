@@ -7,11 +7,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 }
 --FILE--
 <?php
-/*
- Prototype   : int filesize ( string $filename );
- Description : Returns the size of the file in bytes, or FALSE
-   (and generates an error of level E_WARNING) in case of an error.
-*/
+/* Description : Returns the size of the file in bytes, or FALSE (and generates an error of level E_WARNING) in case of an error. */
 
 /* Testing filesize() with data written using different file modes and by creating holes in file */
 

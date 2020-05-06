@@ -2,8 +2,7 @@
 Test array_product() function : variation
 --FILE--
 <?php
-/* Prototype  : mixed array_product(array input)
- * Description: Returns the product of the array entries
+/* Description: Returns the product of the array entries
  * Source code: ext/standard/array.c
  * Alias to functions:
  */

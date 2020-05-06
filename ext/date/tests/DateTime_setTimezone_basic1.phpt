@@ -2,8 +2,7 @@
 Test DateTime::setTimezone() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : public DateTime DateTime::setTimezone  ( DateTimeZone $timezone  )
- * Description: Sets the time zone for the DateTime object
+/* Description: Sets the time zone for the DateTime object
  * Source code: ext/date/php_date.c
  * Alias to functions: date_timezone_set
  */

@@ -204,8 +204,7 @@ PHPAPI double _php_math_round(double value, int places, int mode) {
 }
 /* }}} */
 
-/* {{{ proto int|float abs(int|float number)
-   Return the absolute value of the number */
+/* Return the absolute value of the number */
 PHP_FUNCTION(abs)
 {
 	zval *value;
@@ -228,8 +227,7 @@ PHP_FUNCTION(abs)
 }
 /* }}} */
 
-/* {{{ proto float ceil(float number)
-   Returns the next highest integer value of the number */
+/* Returns the next highest integer value of the number */
 PHP_FUNCTION(ceil)
 {
 	zval *value;
@@ -248,8 +246,7 @@ PHP_FUNCTION(ceil)
 }
 /* }}} */
 
-/* {{{ proto float floor(float number)
-   Returns the next lowest integer value from the number */
+/* Returns the next lowest integer value from the number */
 PHP_FUNCTION(floor)
 {
 	zval *value;
@@ -268,8 +265,7 @@ PHP_FUNCTION(floor)
 }
 /* }}} */
 
-/* {{{ proto float round(float number [, int precision [, int mode]])
-   Returns the number rounded to specified precision */
+/* Returns the number rounded to specified precision */
 PHP_FUNCTION(round)
 {
 	zval *value;
@@ -316,8 +312,7 @@ PHP_FUNCTION(round)
 }
 /* }}} */
 
-/* {{{ proto float sin(float number)
-   Returns the sine of the number in radians */
+/* Returns the sine of the number in radians */
 PHP_FUNCTION(sin)
 {
 	double num;
@@ -329,8 +324,7 @@ PHP_FUNCTION(sin)
 }
 /* }}} */
 
-/* {{{ proto float cos(float number)
-   Returns the cosine of the number in radians */
+/* Returns the cosine of the number in radians */
 PHP_FUNCTION(cos)
 {
 	double num;
@@ -342,8 +336,7 @@ PHP_FUNCTION(cos)
 }
 /* }}} */
 
-/* {{{ proto float tan(float number)
-   Returns the tangent of the number in radians */
+/* Returns the tangent of the number in radians */
 PHP_FUNCTION(tan)
 {
 	double num;
@@ -355,8 +348,7 @@ PHP_FUNCTION(tan)
 }
 /* }}} */
 
-/* {{{ proto float asin(float number)
-   Returns the arc sine of the number in radians */
+/* Returns the arc sine of the number in radians */
 PHP_FUNCTION(asin)
 {
 	double num;
@@ -368,8 +360,7 @@ PHP_FUNCTION(asin)
 }
 /* }}} */
 
-/* {{{ proto float acos(float number)
-   Return the arc cosine of the number in radians */
+/* Return the arc cosine of the number in radians */
 PHP_FUNCTION(acos)
 {
 	double num;
@@ -381,8 +372,7 @@ PHP_FUNCTION(acos)
 }
 /* }}} */
 
-/* {{{ proto float atan(float number)
-   Returns the arc tangent of the number in radians */
+/* Returns the arc tangent of the number in radians */
 PHP_FUNCTION(atan)
 {
 	double num;
@@ -394,8 +384,7 @@ PHP_FUNCTION(atan)
 }
 /* }}} */
 
-/* {{{ proto float atan2(float y, float x)
-   Returns the arc tangent of y/x, with the resulting quadrant determined by the signs of y and x */
+/* Returns the arc tangent of y/x, with the resulting quadrant determined by the signs of y and x */
 PHP_FUNCTION(atan2)
 {
 	double num1, num2;
@@ -408,8 +397,7 @@ PHP_FUNCTION(atan2)
 }
 /* }}} */
 
-/* {{{ proto float sinh(float number)
-   Returns the hyperbolic sine of the number, defined as (exp(number) - exp(-number))/2 */
+/* Returns the hyperbolic sine of the number, defined as (exp(number) - exp(-number))/2 */
 PHP_FUNCTION(sinh)
 {
 	double num;
@@ -421,8 +409,7 @@ PHP_FUNCTION(sinh)
 }
 /* }}} */
 
-/* {{{ proto float cosh(float number)
-   Returns the hyperbolic cosine of the number, defined as (exp(number) + exp(-number))/2 */
+/* Returns the hyperbolic cosine of the number, defined as (exp(number) + exp(-number))/2 */
 PHP_FUNCTION(cosh)
 {
 	double num;
@@ -434,8 +421,7 @@ PHP_FUNCTION(cosh)
 }
 /* }}} */
 
-/* {{{ proto float tanh(float number)
-   Returns the hyperbolic tangent of the number, defined as sinh(number)/cosh(number) */
+/* Returns the hyperbolic tangent of the number, defined as sinh(number)/cosh(number) */
 PHP_FUNCTION(tanh)
 {
 	double num;
@@ -447,8 +433,7 @@ PHP_FUNCTION(tanh)
 }
 /* }}} */
 
-/* {{{ proto float asinh(float number)
-   Returns the inverse hyperbolic sine of the number, i.e. the value whose hyperbolic sine is number */
+/* Returns the inverse hyperbolic sine of the number, i.e. the value whose hyperbolic sine is number */
 PHP_FUNCTION(asinh)
 {
 	double num;
@@ -460,8 +445,7 @@ PHP_FUNCTION(asinh)
 }
 /* }}} */
 
-/* {{{ proto float acosh(float number)
-   Returns the inverse hyperbolic cosine of the number, i.e. the value whose hyperbolic cosine is number */
+/* Returns the inverse hyperbolic cosine of the number, i.e. the value whose hyperbolic cosine is number */
 PHP_FUNCTION(acosh)
 {
 	double num;
@@ -473,8 +457,7 @@ PHP_FUNCTION(acosh)
 }
 /* }}} */
 
-/* {{{ proto float atanh(float number)
-   Returns the inverse hyperbolic tangent of the number, i.e. the value whose hyperbolic tangent is number */
+/* Returns the inverse hyperbolic tangent of the number, i.e. the value whose hyperbolic tangent is number */
 PHP_FUNCTION(atanh)
 {
 	double num;
@@ -486,8 +469,7 @@ PHP_FUNCTION(atanh)
 }
 /* }}} */
 
-/* {{{ proto float pi(void)
-   Returns an approximation of pi */
+/* Returns an approximation of pi */
 PHP_FUNCTION(pi)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -496,8 +478,7 @@ PHP_FUNCTION(pi)
 }
 /* }}} */
 
-/* {{{ proto bool is_finite(float val)
-   Returns whether argument is finite */
+/* Returns whether argument is finite */
 PHP_FUNCTION(is_finite)
 {
 	double dval;
@@ -509,8 +490,7 @@ PHP_FUNCTION(is_finite)
 }
 /* }}} */
 
-/* {{{ proto bool is_infinite(float val)
-   Returns whether argument is infinite */
+/* Returns whether argument is infinite */
 PHP_FUNCTION(is_infinite)
 {
 	double dval;
@@ -522,8 +502,7 @@ PHP_FUNCTION(is_infinite)
 }
 /* }}} */
 
-/* {{{ proto bool is_nan(float val)
-   Returns whether argument is not a number */
+/* Returns whether argument is not a number */
 PHP_FUNCTION(is_nan)
 {
 	double dval;
@@ -535,8 +514,7 @@ PHP_FUNCTION(is_nan)
 }
 /* }}} */
 
-/* {{{ proto number pow(number base, number exponent)
-   Returns base raised to the power of exponent. Returns integer result when possible */
+/* Returns base raised to the power of exponent. Returns integer result when possible */
 PHP_FUNCTION(pow)
 {
 	zval *zbase, *zexp;
@@ -550,8 +528,7 @@ PHP_FUNCTION(pow)
 }
 /* }}} */
 
-/* {{{ proto float exp(float number)
-   Returns e raised to the power of the number */
+/* Returns e raised to the power of the number */
 PHP_FUNCTION(exp)
 {
 	double num;
@@ -564,8 +541,7 @@ PHP_FUNCTION(exp)
 }
 /* }}} */
 
-/* {{{ proto float expm1(float number)
-   Returns exp(number) - 1, computed in a way that accurate even when the value of number is close to zero
+/* Returns exp(number) - 1, computed in a way that accurate even when the value of number is close to zero
 */
 PHP_FUNCTION(expm1)
 {
@@ -579,8 +555,7 @@ PHP_FUNCTION(expm1)
 }
 /* }}} */
 
-/* {{{ proto float log1p(float number)
-   Returns log(1 + number), computed in a way that accurate even when the value of number is close to zero
+/* Returns log(1 + number), computed in a way that accurate even when the value of number is close to zero
 */
 PHP_FUNCTION(log1p)
 {
@@ -594,8 +569,7 @@ PHP_FUNCTION(log1p)
 }
 /* }}} */
 
-/* {{{ proto float log(float number, [float base])
-   Returns the natural logarithm of the number, or the base log if base is specified */
+/* Returns the natural logarithm of the number, or the base log if base is specified */
 PHP_FUNCTION(log)
 {
 	double num, base = 0;
@@ -631,8 +605,7 @@ PHP_FUNCTION(log)
 }
 /* }}} */
 
-/* {{{ proto float log10(float number)
-   Returns the base-10 logarithm of the number */
+/* Returns the base-10 logarithm of the number */
 PHP_FUNCTION(log10)
 {
 	double num;
@@ -645,8 +618,7 @@ PHP_FUNCTION(log10)
 }
 /* }}} */
 
-/* {{{ proto float sqrt(float number)
-   Returns the square root of the number */
+/* Returns the square root of the number */
 PHP_FUNCTION(sqrt)
 {
 	double num;
@@ -659,8 +631,7 @@ PHP_FUNCTION(sqrt)
 }
 /* }}} */
 
-/* {{{ proto float hypot(float num1, float num2)
-   Returns sqrt(num1*num1 + num2*num2) */
+/* Returns sqrt(num1*num1 + num2*num2) */
 PHP_FUNCTION(hypot)
 {
 	double num1, num2;
@@ -674,8 +645,7 @@ PHP_FUNCTION(hypot)
 }
 /* }}} */
 
-/* {{{ proto float deg2rad(float number)
-   Converts the number in degrees to the radian equivalent */
+/* Converts the number in degrees to the radian equivalent */
 PHP_FUNCTION(deg2rad)
 {
 	double deg;
@@ -687,8 +657,7 @@ PHP_FUNCTION(deg2rad)
 }
 /* }}} */
 
-/* {{{ proto float rad2deg(float number)
-   Converts the radian number to the equivalent number in degrees */
+/* Converts the radian number to the equivalent number in degrees */
 PHP_FUNCTION(rad2deg)
 {
 	double rad;
@@ -893,8 +862,7 @@ PHPAPI zend_string * _php_math_zvaltobase(zval *arg, int base)
 }
 /* }}} */
 
-/* {{{ proto int|float bindec(string binary_number)
-   Returns the decimal equivalent of the binary number */
+/* Returns the decimal equivalent of the binary number */
 PHP_FUNCTION(bindec)
 {
 	zend_string *arg;
@@ -907,8 +875,7 @@ PHP_FUNCTION(bindec)
 }
 /* }}} */
 
-/* {{{ proto int|flat hexdec(string hexadecimal_number)
-   Returns the decimal equivalent of the hexadecimal number */
+/* Returns the decimal equivalent of the hexadecimal number */
 PHP_FUNCTION(hexdec)
 {
 	zend_string *arg;
@@ -921,8 +888,7 @@ PHP_FUNCTION(hexdec)
 }
 /* }}} */
 
-/* {{{ proto int|float octdec(string octal_number)
-   Returns the decimal equivalent of an octal string */
+/* Returns the decimal equivalent of an octal string */
 PHP_FUNCTION(octdec)
 {
 	zend_string *arg;
@@ -935,8 +901,7 @@ PHP_FUNCTION(octdec)
 }
 /* }}} */
 
-/* {{{ proto string decbin(int decimal_number)
-   Returns a string containing a binary representation of the number */
+/* Returns a string containing a binary representation of the number */
 PHP_FUNCTION(decbin)
 {
 	zval *arg;
@@ -952,8 +917,7 @@ PHP_FUNCTION(decbin)
 }
 /* }}} */
 
-/* {{{ proto string decoct(int decimal_number)
-   Returns a string containing an octal representation of the given number */
+/* Returns a string containing an octal representation of the given number */
 PHP_FUNCTION(decoct)
 {
 	zval *arg;
@@ -969,8 +933,7 @@ PHP_FUNCTION(decoct)
 }
 /* }}} */
 
-/* {{{ proto string dechex(int decimal_number)
-   Returns a string containing a hexadecimal representation of the given number */
+/* Returns a string containing a hexadecimal representation of the given number */
 PHP_FUNCTION(dechex)
 {
 	zval *arg;
@@ -986,8 +949,7 @@ PHP_FUNCTION(dechex)
 }
 /* }}} */
 
-/* {{{ proto string|false base_convert(string number, int frombase, int tobase)
-   Converts a number in a string from any base <= 36 to any base <= 36 */
+/* Converts a number in a string from any base <= 36 to any base <= 36 */
 PHP_FUNCTION(base_convert)
 {
 	zval *number, temp;
@@ -1144,8 +1106,7 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, char *dec_poin
 	return res;
 }
 
-/* {{{ proto string number_format(float number [, int num_decimal_places [, string dec_separator, string thousands_separator]])
-   Formats a number with grouped thousands */
+/* Formats a number with grouped thousands */
 PHP_FUNCTION(number_format)
 {
 	double num;
@@ -1189,8 +1150,7 @@ PHP_FUNCTION(number_format)
 }
 /* }}} */
 
-/* {{{ proto float fmod(float x, float y)
-   Returns the remainder of dividing x by y as a float */
+/* Returns the remainder of dividing x by y as a float */
 PHP_FUNCTION(fmod)
 {
 	double num1, num2;
@@ -1204,8 +1164,7 @@ PHP_FUNCTION(fmod)
 }
 /* }}} */
 
-/* {{{ proto float fdiv(float dividend, float divisor)
-   Perform floating-point division of dividend / divisor
+/* Perform floating-point division of dividend / divisor
    with IEEE-754 semantics for division by zero. */
 #ifdef __clang__
 __attribute__((no_sanitize("float-divide-by-zero")))
@@ -1223,8 +1182,7 @@ PHP_FUNCTION(fdiv)
 }
 /* }}} */
 
-/* {{{ proto int intdiv(int dividend, int divisor)
-   Returns the integer quotient of the division of dividend by divisor */
+/* Returns the integer quotient of the division of dividend by divisor */
 PHP_FUNCTION(intdiv)
 {
 	zend_long dividend, divisor;

@@ -2,8 +2,7 @@
 Test array_filter() function : usage variations - 'input' argument with different false entries
 --FILE--
 <?php
-/* Prototype  : array array_filter(array $input [, callback $callback])
- * Description: Filters elements from the array via the callback.
+/* Description: Filters elements from the array via the callback.
  * Source code: ext/standard/array.c
 */
 

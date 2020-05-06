@@ -16,7 +16,6 @@ if (!have_innodb($link))
 --FILE--
 <?php
     require_once("connect.inc");
-     /* {{{ proto bool mysqli_release_savepoint(object link, string name) */
     $tmp    = NULL;
     $link   = NULL;
 

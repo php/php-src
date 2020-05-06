@@ -5,7 +5,6 @@ precision = 10
 --FILE--
 <?php
 /*
- * proto float acosh(float number)
  * Function is implemented in ext/standard/math.c
 */
 

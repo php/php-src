@@ -135,8 +135,7 @@ PHP_MINFO_FUNCTION(assert) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto int assert(string|bool assertion[, mixed description])
-   Checks if assertion is false */
+/* Checks if assertion is false */
 PHP_FUNCTION(assert)
 {
 	zval *assertion;
@@ -218,8 +217,7 @@ PHP_FUNCTION(assert)
 }
 /* }}} */
 
-/* {{{ proto mixed assert_options(int what [, mixed value])
-   Set/get the various assert flags */
+/* Set/get the various assert flags */
 PHP_FUNCTION(assert_options)
 {
 	zval *value = NULL;

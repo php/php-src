@@ -6,8 +6,7 @@ extension_loaded('imap') or die('skip imap extension not available in this build
 ?>
 --FILE--
 <?php
-/* Prototype  : string imap_8bit  ( string $string  )
- * Description: Convert an 8bit string to a quoted-printable string.
+/* Description: Convert an 8bit string to a quoted-printable string.
  * Source code: ext/imap/php_imap.c
  */
 

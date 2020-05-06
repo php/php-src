@@ -2,8 +2,7 @@
 Test array_intersect() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : array array_intersect(array $arr1, array $arr2 [, array $...])
- * Description: Returns the entries of arr1 that have values which are present in all the other arguments
+/* Description: Returns the entries of arr1 that have values which are present in all the other arguments
  * Source code: ext/standard/array.c
 */
 

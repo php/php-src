@@ -2,8 +2,7 @@
 Test array_shift() function : usage variations - position of internal pointer
 --FILE--
 <?php
-/* Prototype  : mixed array_shift(array &$stack)
- * Description: Pops an element off the beginning of the array
+/* Description: Pops an element off the beginning of the array
  * Source code: ext/standard/array.c
  */
 

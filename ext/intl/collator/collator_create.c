@@ -52,8 +52,7 @@ static int collator_ctor(INTERNAL_FUNCTION_PARAMETERS)
 }
 /* }}} */
 
-/* {{{ proto Collator collator_create( string $locale )
- * Create collator.
+/* Create collator.
  */
 PHP_FUNCTION( collator_create )
 {
@@ -65,8 +64,7 @@ PHP_FUNCTION( collator_create )
 }
 /* }}} */
 
-/* {{{ proto Collator::__construct( string $locale )
- * Collator object constructor.
+/* Collator object constructor.
  */
 PHP_METHOD( Collator, __construct )
 {

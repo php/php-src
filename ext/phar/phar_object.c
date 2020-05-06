@@ -388,8 +388,7 @@ static void phar_postprocess_ru_web(char *fname, size_t fname_len, char **entry,
 }
 /* }}} */
 
-/* {{{ proto void Phar::running([bool retphar = true])
- * return the name of the currently running phar archive.  If the optional parameter
+/* return the name of the currently running phar archive.  If the optional parameter
  * is set to true, return the phar:// URL to the currently running phar
  */
 PHP_METHOD(Phar, running)
@@ -423,8 +422,7 @@ PHP_METHOD(Phar, running)
 }
 /* }}} */
 
-/* {{{ proto void Phar::mount(string pharpath, string externalfile)
- * mount an external file or path to a location within the phar.  This maps
+/* mount an external file or path to a location within the phar.  This maps
  * an external file or directory to a location within the phar archive, allowing
  * reference to an external location as if it were within the phar archive.  This
  * is useful for writable temp files like databases
@@ -531,8 +529,7 @@ finish: ;
 }
 /* }}} */
 
-/* {{{ proto void Phar::webPhar([string alias, [string index, [string f404, [array mimetypes, [callback rewrites]]]]])
- * mapPhar for web-based phars. Reads the currently executed file (a phar)
+/* mapPhar for web-based phars. Reads the currently executed file (a phar)
  * and registers its manifest. When executed in the CLI or CGI command-line sapi,
  * this works exactly like mapPhar().  When executed by a web-based sapi, this
  * reads $_SERVER['REQUEST_URI'] (the actual original value) and parses out the
@@ -872,8 +869,7 @@ PHP_METHOD(Phar, webPhar)
 }
 /* }}} */
 
-/* {{{ proto void Phar::mungServer(array munglist)
- * Defines a list of up to 4 $_SERVER variables that should be modified for execution
+/* Defines a list of up to 4 $_SERVER variables that should be modified for execution
  * to mask the presence of the phar archive.  This should be used in conjunction with
  * Phar::webPhar(), and has no effect otherwise
  * SCRIPT_NAME, PHP_SELF, REQUEST_URI and SCRIPT_FILENAME
@@ -925,8 +921,7 @@ PHP_METHOD(Phar, mungServer)
 }
 /* }}} */
 
-/* {{{ proto void Phar::interceptFileFuncs()
- * instructs phar to intercept fopen, file_get_contents, opendir, and all of the stat-related functions
+/* instructs phar to intercept fopen, file_get_contents, opendir, and all of the stat-related functions
  * and return stat on files within the phar for relative paths
  *
  * Once called, this cannot be reversed, and continue until the end of the request.
@@ -942,8 +937,7 @@ PHP_METHOD(Phar, interceptFileFuncs)
 }
 /* }}} */
 
-/* {{{ proto array Phar::createDefaultStub([string indexfile[, string webindexfile]])
- * Return a stub that can be used to run a phar-based archive without the phar extension
+/* Return a stub that can be used to run a phar-based archive without the phar extension
  * indexfile is the CLI startup filename, which defaults to "index.php", webindexfile
  * is the web startup filename, and also defaults to "index.php"
  */
@@ -968,8 +962,7 @@ PHP_METHOD(Phar, createDefaultStub)
 }
 /* }}} */
 
-/* {{{ proto mixed Phar::mapPhar([string alias, [int dataoffset]])
- * Reads the currently executed file (a phar) and registers its manifest */
+/* Reads the currently executed file (a phar) and registers its manifest */
 PHP_METHOD(Phar, mapPhar)
 {
 	char *alias = NULL, *error;
@@ -990,8 +983,7 @@ PHP_METHOD(Phar, mapPhar)
 	}
 } /* }}} */
 
-/* {{{ proto mixed Phar::loadPhar(string filename [, string alias])
- * Loads any phar archive with an alias */
+/* Loads any phar archive with an alias */
 PHP_METHOD(Phar, loadPhar)
 {
 	char *fname, *alias = NULL, *error;
@@ -1011,8 +1003,7 @@ PHP_METHOD(Phar, loadPhar)
 	}
 } /* }}} */
 
-/* {{{ proto string Phar::apiVersion()
- * Returns the api version */
+/* Returns the api version */
 PHP_METHOD(Phar, apiVersion)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1022,8 +1013,7 @@ PHP_METHOD(Phar, apiVersion)
 }
 /* }}}*/
 
-/* {{{ proto bool Phar::canCompress([int method])
- * Returns whether phar extension supports compression using zlib/bzip2 */
+/* Returns whether phar extension supports compression using zlib/bzip2 */
 PHP_METHOD(Phar, canCompress)
 {
 	zend_long method = 0;
@@ -1056,8 +1046,7 @@ PHP_METHOD(Phar, canCompress)
 }
 /* }}} */
 
-/* {{{ proto bool Phar::canWrite()
- * Returns whether phar extension supports writing and creating phars */
+/* Returns whether phar extension supports writing and creating phars */
 PHP_METHOD(Phar, canWrite)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1067,8 +1056,7 @@ PHP_METHOD(Phar, canWrite)
 }
 /* }}} */
 
-/* {{{ proto bool Phar::isValidPharFilename(string filename[, bool executable = true])
- * Returns whether the given filename is a valid phar filename */
+/* Returns whether the given filename is a valid phar filename */
 PHP_METHOD(Phar, isValidPharFilename)
 {
 	char *fname;
@@ -1120,10 +1108,8 @@ static const spl_other_handler phar_spl_foreign_handler = {
 	phar_spl_foreign_clone
 };
 
-/* {{{ proto Phar::__construct(string fname [, int flags [, string alias]])
- * Construct a Phar archive object
+/* Construct a Phar archive object
  *
- * proto PharData::__construct(string fname [[, int flags [, string alias]], int file format = Phar::TAR])
  * Construct a PharData archive object
  *
  * This function is used as the constructor for both the Phar and PharData
@@ -1259,8 +1245,7 @@ PHP_METHOD(Phar, __construct)
 }
 /* }}} */
 
-/* {{{ proto array Phar::getSupportedSignatures()
- * Return array of supported signature types
+/* Return array of supported signature types
  */
 PHP_METHOD(Phar, getSupportedSignatures)
 {
@@ -1284,8 +1269,7 @@ PHP_METHOD(Phar, getSupportedSignatures)
 }
 /* }}} */
 
-/* {{{ proto array Phar::getSupportedCompression()
- * Return array of supported comparession algorithms
+/* Return array of supported comparession algorithms
  */
 PHP_METHOD(Phar, getSupportedCompression)
 {
@@ -1306,8 +1290,7 @@ PHP_METHOD(Phar, getSupportedCompression)
 }
 /* }}} */
 
-/* {{{ proto array Phar::unlinkArchive(string archive)
- * Completely remove a phar archive from memory and disk
+/* Completely remove a phar archive from memory and disk
  */
 PHP_METHOD(Phar, unlinkArchive)
 {
@@ -1381,8 +1364,7 @@ PHP_METHOD(Phar, unlinkArchive)
 		RETURN_THROWS(); \
 	}
 
-/* {{{ proto Phar::__destruct()
- * if persistent, remove from the cache
+/* if persistent, remove from the cache
  */
 PHP_METHOD(Phar, __destruct)
 {
@@ -1725,8 +1707,7 @@ after_open_fp:
 }
 /* }}} */
 
-/* {{{ proto array Phar::buildFromDirectory(string base_dir[, string regex])
- * Construct a phar archive from an existing directory, recursively.
+/* Construct a phar archive from an existing directory, recursively.
  * Optional second parameter is a regular expression for filtering directory contents.
  *
  * Return value is an array mapping phar index to actual files added.
@@ -1857,8 +1838,7 @@ PHP_METHOD(Phar, buildFromDirectory)
 }
 /* }}} */
 
-/* {{{ proto array Phar::buildFromIterator(Iterator iter[, string base_directory])
- * Construct a phar archive from an iterator.  The iterator must return a series of strings
+/* Construct a phar archive from an iterator.  The iterator must return a series of strings
  * that are full paths to files that should be added to the phar.  The iterator key should
  * be the path that the file will have within the phar archive.
  *
@@ -1923,8 +1903,7 @@ PHP_METHOD(Phar, buildFromIterator)
 }
 /* }}} */
 
-/* {{{ proto int Phar::count()
- * Returns the number of entries in the Phar archive
+/* Returns the number of entries in the Phar archive
  */
 PHP_METHOD(Phar, count)
 {
@@ -1940,8 +1919,7 @@ PHP_METHOD(Phar, count)
 }
 /* }}} */
 
-/* {{{ proto bool Phar::isFileFormat(int format)
- * Returns true if the phar archive is based on the tar/zip/phar file format depending
+/* Returns true if the phar archive is based on the tar/zip/phar file format depending
  * on whether Phar::TAR, Phar::ZIP or Phar::PHAR was passed in
  */
 PHP_METHOD(Phar, isFileFormat)
@@ -2376,8 +2354,7 @@ no_copy:
 }
 /* }}} */
 
-/* {{{ proto object Phar::convertToExecutable([int format[, int compression [, string file_ext]]])
- * Convert a phar.tar or phar.zip archive to the phar file format. The
+/* Convert a phar.tar or phar.zip archive to the phar file format. The
  * optional parameter allows the user to determine the new
  * filename extension (default is phar).
  */
@@ -2480,8 +2457,7 @@ PHP_METHOD(Phar, convertToExecutable)
 }
 /* }}} */
 
-/* {{{ proto object Phar::convertToData([int format[, int compression [, string file_ext]]])
- * Convert an archive to a non-executable .tar or .zip.
+/* Convert an archive to a non-executable .tar or .zip.
  * The optional parameter allows the user to determine the new
  * filename extension (default is .zip or .tar).
  */
@@ -2583,8 +2559,7 @@ PHP_METHOD(Phar, convertToData)
 }
 /* }}} */
 
-/* {{{ proto int|false Phar::isCompressed()
- * Returns Phar::GZ or PHAR::BZ2 if the entire archive is compressed
+/* Returns Phar::GZ or PHAR::BZ2 if the entire archive is compressed
  * (.tar.gz/tar.bz2 and so on), or FALSE otherwise.
  */
 PHP_METHOD(Phar, isCompressed)
@@ -2607,8 +2582,7 @@ PHP_METHOD(Phar, isCompressed)
 }
 /* }}} */
 
-/* {{{ proto bool Phar::isWritable()
- * Returns true if phar.readonly=0 or phar is a PharData AND the actual file is writable.
+/* Returns true if phar.readonly=0 or phar is a PharData AND the actual file is writable.
  */
 PHP_METHOD(Phar, isWritable)
 {
@@ -2635,8 +2609,7 @@ PHP_METHOD(Phar, isWritable)
 }
 /* }}} */
 
-/* {{{ proto bool Phar::delete(string entry)
- * Deletes a named file within the archive.
+/* Deletes a named file within the archive.
  */
 PHP_METHOD(Phar, delete)
 {
@@ -2687,8 +2660,7 @@ PHP_METHOD(Phar, delete)
 }
 /* }}} */
 
-/* {{{ proto int Phar::getAlias()
- * Returns the alias for the Phar or NULL.
+/* Returns the alias for the Phar or NULL.
  */
 PHP_METHOD(Phar, getAlias)
 {
@@ -2704,8 +2676,7 @@ PHP_METHOD(Phar, getAlias)
 }
 /* }}} */
 
-/* {{{ proto int Phar::getPath()
- * Returns the real path to the phar archive on disk
+/* Returns the real path to the phar archive on disk
  */
 PHP_METHOD(Phar, getPath)
 {
@@ -2719,8 +2690,7 @@ PHP_METHOD(Phar, getPath)
 }
 /* }}} */
 
-/* {{{ proto bool Phar::setAlias(string alias)
- * Sets the alias for a Phar archive. The default value is the full path
+/* Sets the alias for a Phar archive. The default value is the full path
  * to the archive.
  */
 PHP_METHOD(Phar, setAlias)
@@ -2821,8 +2791,7 @@ valid_alias:
 }
 /* }}} */
 
-/* {{{ proto string Phar::getVersion()
- * Return version info of Phar archive
+/* Return version info of Phar archive
  */
 PHP_METHOD(Phar, getVersion)
 {
@@ -2836,8 +2805,7 @@ PHP_METHOD(Phar, getVersion)
 }
 /* }}} */
 
-/* {{{ proto void Phar::startBuffering()
- * Do not flush a writeable phar (save its contents) until explicitly requested
+/* Do not flush a writeable phar (save its contents) until explicitly requested
  */
 PHP_METHOD(Phar, startBuffering)
 {
@@ -2851,8 +2819,7 @@ PHP_METHOD(Phar, startBuffering)
 }
 /* }}} */
 
-/* {{{ proto bool Phar::isBuffering()
- * Returns whether write operations are flushing to disk immediately.
+/* Returns whether write operations are flushing to disk immediately.
  */
 PHP_METHOD(Phar, isBuffering)
 {
@@ -2866,8 +2833,7 @@ PHP_METHOD(Phar, isBuffering)
 }
 /* }}} */
 
-/* {{{ proto bool Phar::stopBuffering()
- * Saves the contents of a modified archive to disk.
+/* Saves the contents of a modified archive to disk.
  */
 PHP_METHOD(Phar, stopBuffering)
 {
@@ -2895,8 +2861,7 @@ PHP_METHOD(Phar, stopBuffering)
 }
 /* }}} */
 
-/* {{{ proto bool Phar::setStub(string|stream stub [, int len])
- * Change the stub in a phar, phar.tar or phar.zip archive to something other
+/* Change the stub in a phar, phar.tar or phar.zip archive to something other
  * than the default. The stub *must* end with a call to __HALT_COMPILER().
  */
 PHP_METHOD(Phar, setStub)
@@ -2966,8 +2931,7 @@ PHP_METHOD(Phar, setStub)
 }
 /* }}} */
 
-/* {{{ proto bool Phar::setDefaultStub([string index[, string webindex]])
- * In a pure phar archive, sets a stub that can be used to run the archive
+/* In a pure phar archive, sets a stub that can be used to run the archive
  * regardless of whether the phar extension is available. The first parameter
  * is the CLI startup filename, which defaults to "index.php". The second
  * parameter is the web startup filename and also defaults to "index.php"
@@ -3048,8 +3012,7 @@ PHP_METHOD(Phar, setDefaultStub)
 }
 /* }}} */
 
-/* {{{ proto array Phar::setSignatureAlgorithm(int sigtype[, string privatekey])
- * Sets the signature algorithm for a phar and applies it. The signature
+/* Sets the signature algorithm for a phar and applies it. The signature
  * algorithm must be one of Phar::MD5, Phar::SHA1, Phar::SHA256,
  * Phar::SHA512, or Phar::OPENSSL. Note that zip- based phar archives
  * cannot support signatures.
@@ -3100,8 +3063,7 @@ PHP_METHOD(Phar, setSignatureAlgorithm)
 }
 /* }}} */
 
-/* {{{ proto array|false Phar::getSignature()
- * Returns a hash signature, or FALSE if the archive is unsigned.
+/* Returns a hash signature, or FALSE if the archive is unsigned.
  */
 PHP_METHOD(Phar, getSignature)
 {
@@ -3143,8 +3105,7 @@ PHP_METHOD(Phar, getSignature)
 }
 /* }}} */
 
-/* {{{ proto bool Phar::getModified()
- * Return whether phar was modified
+/* Return whether phar was modified
  */
 PHP_METHOD(Phar, getModified)
 {
@@ -3215,8 +3176,7 @@ static int pharobj_cancompress(HashTable *manifest) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto object Phar::compress(int method[, string extension])
- * Compress a .tar, or .phar.tar with whole-file compression
+/* Compress a .tar, or .phar.tar with whole-file compression
  * The parameter can be one of Phar::GZ or Phar::BZ2 to specify
  * the kind of compression desired
  */
@@ -3286,8 +3246,7 @@ PHP_METHOD(Phar, compress)
 }
 /* }}} */
 
-/* {{{ proto object Phar::decompress([string extension])
- * Decompress a .tar, or .phar.tar with whole-file compression
+/* Decompress a .tar, or .phar.tar with whole-file compression
  */
 PHP_METHOD(Phar, decompress)
 {
@@ -3326,8 +3285,7 @@ PHP_METHOD(Phar, decompress)
 }
 /* }}} */
 
-/* {{{ proto object Phar::compressFiles(int method)
- * Compress all files within a phar or zip archive using the specified compression
+/* Compress all files within a phar or zip archive using the specified compression
  * The parameter can be one of Phar::GZ or Phar::BZ2 to specify
  * the kind of compression desired
  */
@@ -3404,8 +3362,7 @@ PHP_METHOD(Phar, compressFiles)
 }
 /* }}} */
 
-/* {{{ proto bool Phar::decompressFiles()
- * decompress every file
+/* decompress every file
  */
 PHP_METHOD(Phar, decompressFiles)
 {
@@ -3450,8 +3407,7 @@ PHP_METHOD(Phar, decompressFiles)
 }
 /* }}} */
 
-/* {{{ proto bool Phar::copy(string oldfile, string newfile)
- * copy a file internal to the phar archive to another new file within the phar
+/* copy a file internal to the phar archive to another new file within the phar
  */
 PHP_METHOD(Phar, copy)
 {
@@ -3551,8 +3507,7 @@ PHP_METHOD(Phar, copy)
 }
 /* }}} */
 
-/* {{{ proto bool Phar::offsetExists(string entry)
- * determines whether a file exists in the phar
+/* determines whether a file exists in the phar
  */
 PHP_METHOD(Phar, offsetExists)
 {
@@ -3588,8 +3543,7 @@ PHP_METHOD(Phar, offsetExists)
 }
 /* }}} */
 
-/* {{{ proto PharFileInfo Phar::offsetGet(string entry)
- * get a PharFileInfo object for a specific file
+/* get a PharFileInfo object for a specific file
  */
 PHP_METHOD(Phar, offsetGet)
 {
@@ -3768,8 +3722,7 @@ static void phar_mkdir(phar_archive_data **pphar, char *dirname, size_t dirname_
 }
 /* }}} */
 
-/* {{{ proto void Phar::offsetSet(string entry, string value)
- * set the contents of an internal file to those of an external file
+/* set the contents of an internal file to those of an external file
  */
 PHP_METHOD(Phar, offsetSet)
 {
@@ -3806,8 +3759,7 @@ PHP_METHOD(Phar, offsetSet)
 }
 /* }}} */
 
-/* {{{ proto bool Phar::offsetUnset(string entry)
- * remove a file from a phar
+/* remove a file from a phar
  */
 PHP_METHOD(Phar, offsetUnset)
 {
@@ -3858,8 +3810,7 @@ PHP_METHOD(Phar, offsetUnset)
 }
 /* }}} */
 
-/* {{{ proto string Phar::addEmptyDir(string dirname)
- * Adds an empty directory to the phar archive
+/* Adds an empty directory to the phar archive
  */
 PHP_METHOD(Phar, addEmptyDir)
 {
@@ -3881,8 +3832,7 @@ PHP_METHOD(Phar, addEmptyDir)
 }
 /* }}} */
 
-/* {{{ proto string Phar::addFile(string filename[, string localname])
- * Adds a file to the archive using the filename, or the second parameter as the name within the archive
+/* Adds a file to the archive using the filename, or the second parameter as the name within the archive
  */
 PHP_METHOD(Phar, addFile)
 {
@@ -3918,8 +3868,7 @@ PHP_METHOD(Phar, addFile)
 }
 /* }}} */
 
-/* {{{ proto string Phar::addFromString(string localname, string contents)
- * Adds a file to the archive using its contents as a string
+/* Adds a file to the archive using its contents as a string
  */
 PHP_METHOD(Phar, addFromString)
 {
@@ -3936,8 +3885,7 @@ PHP_METHOD(Phar, addFromString)
 }
 /* }}} */
 
-/* {{{ proto string Phar::getStub()
- * Returns the stub at the head of a phar archive as a string.
+/* Returns the stub at the head of a phar archive as a string.
  */
 PHP_METHOD(Phar, getStub)
 {
@@ -4035,8 +3983,7 @@ carry_on:
 }
 /* }}}*/
 
-/* {{{ proto int Phar::hasMetaData()
- * Returns TRUE if the phar has global metadata, FALSE otherwise.
+/* Returns TRUE if the phar has global metadata, FALSE otherwise.
  */
 PHP_METHOD(Phar, hasMetadata)
 {
@@ -4050,8 +3997,7 @@ PHP_METHOD(Phar, hasMetadata)
 }
 /* }}} */
 
-/* {{{ proto int Phar::getMetaData()
- * Returns the global metadata of the phar
+/* Returns the global metadata of the phar
  */
 PHP_METHOD(Phar, getMetadata)
 {
@@ -4074,8 +4020,7 @@ PHP_METHOD(Phar, getMetadata)
 }
 /* }}} */
 
-/* {{{ proto int Phar::setMetaData(mixed $metadata)
- * Sets the global metadata of the phar
+/* Sets the global metadata of the phar
  */
 PHP_METHOD(Phar, setMetadata)
 {
@@ -4113,8 +4058,7 @@ PHP_METHOD(Phar, setMetadata)
 }
 /* }}} */
 
-/* {{{ proto int Phar::delMetadata()
- * Deletes the global metadata of the phar
+/* Deletes the global metadata of the phar
  */
 PHP_METHOD(Phar, delMetadata)
 {
@@ -4362,8 +4306,7 @@ static int extract_helper(phar_archive_data *archive, zend_string *search, char 
 }
 /* }}} */
 
-/* {{{ proto bool Phar::extractTo(string pathto[[, mixed files], bool overwrite])
- * Extract one or more file from a phar archive, optionally overwriting existing files
+/* Extract one or more file from a phar archive, optionally overwriting existing files
  */
 PHP_METHOD(Phar, extractTo)
 {
@@ -4480,8 +4423,7 @@ PHP_METHOD(Phar, extractTo)
 /* }}} */
 
 
-/* {{{ proto PharFileInfo::__construct(string entry)
- * Construct a Phar entry object
+/* Construct a Phar entry object
  */
 PHP_METHOD(PharFileInfo, __construct)
 {
@@ -4555,8 +4497,7 @@ PHP_METHOD(PharFileInfo, __construct)
 		RETURN_THROWS(); \
 	}
 
-/* {{{ proto PharFileInfo::__destruct()
- * clean up directory-based entry objects
+/* clean up directory-based entry objects
  */
 PHP_METHOD(PharFileInfo, __destruct)
 {
@@ -4575,8 +4516,7 @@ PHP_METHOD(PharFileInfo, __destruct)
 }
 /* }}} */
 
-/* {{{ proto int PharFileInfo::getCompressedSize()
- * Returns the compressed size
+/* Returns the compressed size
  */
 PHP_METHOD(PharFileInfo, getCompressedSize)
 {
@@ -4590,8 +4530,7 @@ PHP_METHOD(PharFileInfo, getCompressedSize)
 }
 /* }}} */
 
-/* {{{ proto bool PharFileInfo::isCompressed([int compression_type])
- * Returns whether the entry is compressed, and whether it is compressed with Phar::GZ or Phar::BZ2 if specified
+/* Returns whether the entry is compressed, and whether it is compressed with Phar::GZ or Phar::BZ2 if specified
  */
 PHP_METHOD(PharFileInfo, isCompressed)
 {
@@ -4617,8 +4556,7 @@ PHP_METHOD(PharFileInfo, isCompressed)
 }
 /* }}} */
 
-/* {{{ proto int PharFileInfo::getCRC32()
- * Returns CRC32 code or throws an exception if not CRC checked
+/* Returns CRC32 code or throws an exception if not CRC checked
  */
 PHP_METHOD(PharFileInfo, getCRC32)
 {
@@ -4643,8 +4581,7 @@ PHP_METHOD(PharFileInfo, getCRC32)
 }
 /* }}} */
 
-/* {{{ proto int PharFileInfo::isCRCChecked()
- * Returns whether file entry is CRC checked
+/* Returns whether file entry is CRC checked
  */
 PHP_METHOD(PharFileInfo, isCRCChecked)
 {
@@ -4658,8 +4595,7 @@ PHP_METHOD(PharFileInfo, isCRCChecked)
 }
 /* }}} */
 
-/* {{{ proto int PharFileInfo::getPharFlags()
- * Returns the Phar file entry flags
+/* Returns the Phar file entry flags
  */
 PHP_METHOD(PharFileInfo, getPharFlags)
 {
@@ -4673,8 +4609,7 @@ PHP_METHOD(PharFileInfo, getPharFlags)
 }
 /* }}} */
 
-/* {{{ proto int PharFileInfo::chmod()
- * set the file permissions for the Phar.  This only allows setting execution bit, read/write
+/* set the file permissions for the Phar.  This only allows setting execution bit, read/write
  */
 PHP_METHOD(PharFileInfo, chmod)
 {
@@ -4736,8 +4671,7 @@ PHP_METHOD(PharFileInfo, chmod)
 }
 /* }}} */
 
-/* {{{ proto int PharFileInfo::hasMetaData()
- * Returns the metadata of the entry
+/* Returns the metadata of the entry
  */
 PHP_METHOD(PharFileInfo, hasMetadata)
 {
@@ -4751,8 +4685,7 @@ PHP_METHOD(PharFileInfo, hasMetadata)
 }
 /* }}} */
 
-/* {{{ proto int PharFileInfo::getMetaData()
- * Returns the metadata of the entry
+/* Returns the metadata of the entry
  */
 PHP_METHOD(PharFileInfo, getMetadata)
 {
@@ -4775,8 +4708,7 @@ PHP_METHOD(PharFileInfo, getMetadata)
 }
 /* }}} */
 
-/* {{{ proto int PharFileInfo::setMetaData(mixed $metadata)
- * Sets the metadata of the entry
+/* Sets the metadata of the entry
  */
 PHP_METHOD(PharFileInfo, setMetadata)
 {
@@ -4828,8 +4760,7 @@ PHP_METHOD(PharFileInfo, setMetadata)
 }
 /* }}} */
 
-/* {{{ proto bool PharFileInfo::delMetaData()
- * Deletes the metadata of the entry
+/* Deletes the metadata of the entry
  */
 PHP_METHOD(PharFileInfo, delMetadata)
 {
@@ -4884,8 +4815,7 @@ PHP_METHOD(PharFileInfo, delMetadata)
 }
 /* }}} */
 
-/* {{{ proto string PharFileInfo::getContent()
- * return the complete file contents of the entry (like file_get_contents)
+/* return the complete file contents of the entry (like file_get_contents)
  */
 PHP_METHOD(PharFileInfo, getContent)
 {
@@ -4935,8 +4865,7 @@ PHP_METHOD(PharFileInfo, getContent)
 }
 /* }}} */
 
-/* {{{ proto int PharFileInfo::compress(int compression_type)
- * Instructs the Phar class to compress the current file using zlib or bzip2 compression
+/* Instructs the Phar class to compress the current file using zlib or bzip2 compression
  */
 PHP_METHOD(PharFileInfo, compress)
 {
@@ -5063,8 +4992,7 @@ PHP_METHOD(PharFileInfo, compress)
 }
 /* }}} */
 
-/* {{{ proto int PharFileInfo::decompress()
- * Instructs the Phar class to decompress the current file
+/* Instructs the Phar class to decompress the current file
  */
 PHP_METHOD(PharFileInfo, decompress)
 {

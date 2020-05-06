@@ -846,8 +846,7 @@ static inline void mb_regex_substitute(
  * php functions
  */
 
-/* {{{ proto string mb_regex_encoding([string encoding])
-   Returns the current encoding for regex as a string. */
+/* Returns the current encoding for regex as a string. */
 PHP_FUNCTION(mb_regex_encoding)
 {
 	char *encoding = NULL;
@@ -982,16 +981,14 @@ out:
 }
 /* }}} */
 
-/* {{{ proto int mb_ereg(string pattern, string string [, array registers])
-   Regular expression match for multibyte string */
+/* Regular expression match for multibyte string */
 PHP_FUNCTION(mb_ereg)
 {
 	_php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
-/* {{{ proto int mb_eregi(string pattern, string string [, array registers])
-   Case-insensitive regular expression match for multibyte string */
+/* Case-insensitive regular expression match for multibyte string */
 PHP_FUNCTION(mb_eregi)
 {
 	_php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
@@ -1178,32 +1175,28 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 }
 /* }}} */
 
-/* {{{ proto string mb_ereg_replace(string pattern, string replacement, string string [, string option])
-   Replace regular expression for multibyte string */
+/* Replace regular expression for multibyte string */
 PHP_FUNCTION(mb_ereg_replace)
 {
 	_php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0, 0);
 }
 /* }}} */
 
-/* {{{ proto string mb_eregi_replace(string pattern, string replacement, string string)
-   Case insensitive replace regular expression for multibyte string */
+/* Case insensitive replace regular expression for multibyte string */
 PHP_FUNCTION(mb_eregi_replace)
 {
 	_php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, ONIG_OPTION_IGNORECASE, 0);
 }
 /* }}} */
 
-/* {{{ proto string mb_ereg_replace_callback(string pattern, string callback, string string [, string option])
-    regular expression for multibyte string using replacement callback */
+/* regular expression for multibyte string using replacement callback */
 PHP_FUNCTION(mb_ereg_replace_callback)
 {
 	_php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0, 1);
 }
 /* }}} */
 
-/* {{{ proto array mb_split(string pattern, string string [, int limit])
-   split multibyte string into array by regular expression */
+/* split multibyte string into array by regular expression */
 PHP_FUNCTION(mb_split)
 {
 	char *arg_pattern;
@@ -1285,8 +1278,7 @@ PHP_FUNCTION(mb_split)
 }
 /* }}} */
 
-/* {{{ proto bool mb_ereg_match(string pattern, string string [,string option])
-   Regular expression match for multibyte string */
+/* Regular expression match for multibyte string */
 PHP_FUNCTION(mb_ereg_match)
 {
 	char *arg_pattern;
@@ -1463,32 +1455,28 @@ _php_mb_regex_ereg_search_exec(INTERNAL_FUNCTION_PARAMETERS, int mode)
 }
 /* }}} */
 
-/* {{{ proto bool mb_ereg_search([string pattern[, string option]])
-   Regular expression search for multibyte string */
+/* Regular expression search for multibyte string */
 PHP_FUNCTION(mb_ereg_search)
 {
 	_php_mb_regex_ereg_search_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
-/* {{{ proto array mb_ereg_search_pos([string pattern[, string option]])
-   Regular expression search for multibyte string */
+/* Regular expression search for multibyte string */
 PHP_FUNCTION(mb_ereg_search_pos)
 {
 	_php_mb_regex_ereg_search_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
-/* {{{ proto array mb_ereg_search_regs([string pattern[, string option]])
-   Regular expression search for multibyte string */
+/* Regular expression search for multibyte string */
 PHP_FUNCTION(mb_ereg_search_regs)
 {
 	_php_mb_regex_ereg_search_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, 2);
 }
 /* }}} */
 
-/* {{{ proto bool mb_ereg_search_init(string string [, string pattern[, string option]])
-   Initialize string and regular expression for search. */
+/* Initialize string and regular expression for search. */
 PHP_FUNCTION(mb_ereg_search_init)
 {
 	zend_string *arg_str;
@@ -1546,8 +1534,7 @@ PHP_FUNCTION(mb_ereg_search_init)
 }
 /* }}} */
 
-/* {{{ proto array mb_ereg_search_getregs(void)
-   Get matched substring of the last time */
+/* Get matched substring of the last time */
 PHP_FUNCTION(mb_ereg_search_getregs)
 {
 	size_t n, i, len;
@@ -1589,8 +1576,7 @@ PHP_FUNCTION(mb_ereg_search_getregs)
 }
 /* }}} */
 
-/* {{{ proto int mb_ereg_search_getpos(void)
-   Get search start position */
+/* Get search start position */
 PHP_FUNCTION(mb_ereg_search_getpos)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1601,8 +1587,7 @@ PHP_FUNCTION(mb_ereg_search_getpos)
 }
 /* }}} */
 
-/* {{{ proto bool mb_ereg_search_setpos(int position)
-   Set search start position */
+/* Set search start position */
 PHP_FUNCTION(mb_ereg_search_setpos)
 {
 	zend_long position;
@@ -1641,8 +1626,7 @@ static void _php_mb_regex_set_options(OnigOptionType options, OnigSyntaxType *sy
 }
 /* }}} */
 
-/* {{{ proto string mb_regex_set_options([string options])
-   Set or get the default options for mbregex functions */
+/* Set or get the default options for mbregex functions */
 PHP_FUNCTION(mb_regex_set_options)
 {
 	OnigOptionType opt, prev_opt;

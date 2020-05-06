@@ -1430,16 +1430,14 @@ void register_html_constants(INIT_FUNC_ARGS)
 }
 /* }}} */
 
-/* {{{ proto string htmlspecialchars(string string [, int quote_style[, string encoding[, bool double_encode]]])
-   Convert special characters to HTML entities */
+/* Convert special characters to HTML entities */
 PHP_FUNCTION(htmlspecialchars)
 {
 	php_html_entities(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
-/* {{{ proto string htmlspecialchars_decode(string string [, int quote_style])
-   Convert special HTML entities back to characters */
+/* Convert special HTML entities back to characters */
 PHP_FUNCTION(htmlspecialchars_decode)
 {
 	zend_string *str;
@@ -1460,8 +1458,7 @@ PHP_FUNCTION(htmlspecialchars_decode)
 }
 /* }}} */
 
-/* {{{ proto string html_entity_decode(string string [, int quote_style][, string encoding])
-   Convert all HTML entities to their applicable characters */
+/* Convert all HTML entities to their applicable characters */
 PHP_FUNCTION(html_entity_decode)
 {
 	zend_string *str, *hint_charset = NULL;
@@ -1489,8 +1486,7 @@ PHP_FUNCTION(html_entity_decode)
 /* }}} */
 
 
-/* {{{ proto string htmlentities(string string [, int quote_style[, string encoding[, bool double_encode]]])
-   Convert all applicable characters to HTML entities */
+/* Convert all applicable characters to HTML entities */
 PHP_FUNCTION(htmlentities)
 {
 	php_html_entities(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
@@ -1552,8 +1548,7 @@ static inline void write_s3row_data(
 }
 /* }}} */
 
-/* {{{ proto array get_html_translation_table([int table [, int flags [, string encoding]]])
-   Returns the internal translation table used by htmlspecialchars and htmlentities */
+/* Returns the internal translation table used by htmlspecialchars and htmlentities */
 PHP_FUNCTION(get_html_translation_table)
 {
 	zend_long all = HTML_SPECIALCHARS,

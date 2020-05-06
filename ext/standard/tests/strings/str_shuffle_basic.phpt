@@ -2,8 +2,7 @@
 Test str_shuffle() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : string str_shuffle  ( string $str  )
- * Description: Randomly shuffles a string
+/* Description: Randomly shuffles a string
  * Source code: ext/standard/string.c
 */
 

@@ -20,8 +20,7 @@
 #include "spoofchecker_class.h"
 #include "intl_data.h"
 
-/* {{{ proto Spoofchecker::__construct()
- * Spoofchecker object constructor.
+/* Spoofchecker object constructor.
  */
 PHP_METHOD(Spoofchecker, __construct)
 {

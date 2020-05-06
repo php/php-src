@@ -3,8 +3,7 @@ Test unpack() function : error conditions
 --FILE--
 <?php
 
-/* Prototype  : array unpack  ( string $format  , string $data  )
- * Description: Unpack data from binary string
+/* Description: Unpack data from binary string
  * Source code: ext/standard/pack.c
 */
 

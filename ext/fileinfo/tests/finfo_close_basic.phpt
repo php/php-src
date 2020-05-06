@@ -4,8 +4,7 @@ Test finfo_close() function : basic functionality
 <?php require_once(__DIR__ . '/skipif.inc'); ?>
 --FILE--
 <?php
-/* Prototype  : resource finfo_close(resource finfo)
- * Description: Close fileinfo resource.
+/* Description: Close fileinfo resource.
  * Source code: ext/fileinfo/fileinfo.c
  * Alias to functions:
  */

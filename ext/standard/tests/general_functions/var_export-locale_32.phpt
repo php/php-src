@@ -14,8 +14,7 @@ if (PHP_INT_SIZE > 4) {
 --FILE--
 <?php
 setlocale(LC_ALL, "german", "de","de_DE","de_DE.ISO8859-1","de_DE.ISO_8859-1","de_DE.UTF-8");
-/* Prototype: mixed var_export( mixed expression [, bool return]);
- * Description: Returns the variable representation when the return parameter is used and evaluates to TRUE. Otherwise, this function will return NULL.
+/* Description: Returns the variable representation when the return parameter is used and evaluates to TRUE. Otherwise, this function will return NULL.
 
 */
 

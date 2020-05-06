@@ -8,8 +8,7 @@ if (!extension_loaded("xml")) {
 ?>
 --FILE--
 <?php
-/* Prototype  : proto bool xml_set_notation_decl_handler  ( resource $parser  , callback $handler  )
- * Description: Sets the notation declaration handler function for the XML parser.
+/* Description: Sets the notation declaration handler function for the XML parser.
  * Source code: ext/xml/xml.c
  * Alias to functions:
  */

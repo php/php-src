@@ -2,8 +2,7 @@
 Test htmlentities() function
 --FILE--
 <?php
-/* Prototype: string htmlentities ( string $string [, int $quote_style [, string $charset]] );
-   Description: Convert all applicable characters to HTML entities
+/* Description: Convert all applicable characters to HTML entities
 */
 
 /* retrieving htmlentities from the ANSI character table */

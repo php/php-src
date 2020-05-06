@@ -4,8 +4,7 @@ Test finfo_open() function : variations in opening
 <?php require_once(__DIR__ . '/skipif.inc'); ?>
 --FILE--
 <?php
-/* Prototype  : resource finfo_open([int options [, string arg]])
- * Description: Create a new fileinfo resource.
+/* Description: Create a new fileinfo resource.
  * Source code: ext/fileinfo/fileinfo.c
  * Alias to functions:
  */

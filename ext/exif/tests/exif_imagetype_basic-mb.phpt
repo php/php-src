@@ -8,8 +8,7 @@ zlib.output_compression=0
 --FILE--
 <?php
 
-/* Prototype  : int exif_imagetype  ( string $filename  )
- * Description: Determine the type of an image
+/* Description: Determine the type of an image
  * Source code: ext/exif/exif.c
 */
 echo "*** Testing exif_imagetype() : basic functionality ***\n";

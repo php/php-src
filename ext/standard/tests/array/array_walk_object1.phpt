@@ -2,8 +2,7 @@
 Test array_walk() function : object functionality
 --FILE--
 <?php
-/* Prototype  : bool array_walk(array $input, string $funcname [, mixed $userdata])
- * Description: Apply a user function to every member of an array
+/* Description: Apply a user function to every member of an array
  * Source code: ext/standard/array.c
 */
 

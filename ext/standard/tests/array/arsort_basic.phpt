@@ -2,8 +2,7 @@
 Test arsort() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : bool arsort ( array &$array [, int $sort_flags] )
- * Description: Sort an array and maintain index association
+/* Description: Sort an array and maintain index association
                 Elements will be arranged from highest to lowest when this function has completed.
  * Source code: ext/standard/array.c
 */

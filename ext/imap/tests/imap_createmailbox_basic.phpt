@@ -6,8 +6,7 @@ require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
-/* Prototype  : bool imap_createmailbox  ( resource $imap_stream  , string $mailbox  )
- * Description: Creates a new mailbox specified by mailbox .
+/* Description: Creates a new mailbox specified by mailbox .
  * Source code: ext/imap/php_imap.c
  */
 

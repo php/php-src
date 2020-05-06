@@ -7,8 +7,7 @@ if( substr(PHP_OS, 0, 3) != "WIN" )
 ?>
 --FILE--
 <?php
-/* Prototype  : string escapeshellarg  ( string $arg  )
- * Description: Escape a string to be used as a shell argument.
+/* Description: Escape a string to be used as a shell argument.
  * Source code: ext/standard/exec.c
  * Alias to functions:
  */

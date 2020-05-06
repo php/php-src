@@ -103,8 +103,7 @@ PHP_MINFO_FUNCTION(sysvmsg)
 }
 /* }}} */
 
-/* {{{ proto bool msg_set_queue(resource queue, array data)
-   Set information for a message queue */
+/* Set information for a message queue */
 PHP_FUNCTION(msg_set_queue)
 {
 	zval *queue, *data;
@@ -144,8 +143,7 @@ PHP_FUNCTION(msg_set_queue)
 }
 /* }}} */
 
-/* {{{ proto array msg_stat_queue(resource queue)
-   Returns information about a message queue */
+/* Returns information about a message queue */
 PHP_FUNCTION(msg_stat_queue)
 {
 	zval *queue;
@@ -179,8 +177,7 @@ PHP_FUNCTION(msg_stat_queue)
 }
 /* }}} */
 
-/* {{{ proto bool msg_queue_exists(int key)
-   Check whether a message queue exists */
+/* Check whether a message queue exists */
 PHP_FUNCTION(msg_queue_exists)
 {
 	zend_long key;
@@ -197,8 +194,7 @@ PHP_FUNCTION(msg_queue_exists)
 }
 /* }}} */
 
-/* {{{ proto resource msg_get_queue(int key [, int perms])
-   Attach to a message queue */
+/* Attach to a message queue */
 PHP_FUNCTION(msg_get_queue)
 {
 	zend_long key;
@@ -226,8 +222,7 @@ PHP_FUNCTION(msg_get_queue)
 }
 /* }}} */
 
-/* {{{ proto bool msg_remove_queue(resource queue)
-   Destroy the queue */
+/* Destroy the queue */
 PHP_FUNCTION(msg_remove_queue)
 {
 	zval *queue;
@@ -249,8 +244,7 @@ PHP_FUNCTION(msg_remove_queue)
 }
 /* }}} */
 
-/* {{{ proto mixed msg_receive(resource queue, int desiredmsgtype, int &msgtype, int maxsize, mixed &message [, bool unserialize=true [, int flags=0 [, int &errorcode]]])
-   Send a message of type msgtype (must be > 0) to a message queue */
+/* Send a message of type msgtype (must be > 0) to a message queue */
 PHP_FUNCTION(msg_receive)
 {
 	zval *out_message, *queue, *out_msgtype, *zerrcode = NULL;
@@ -335,8 +329,7 @@ PHP_FUNCTION(msg_receive)
 }
 /* }}} */
 
-/* {{{ proto bool msg_send(resource queue, int msgtype, mixed message [, bool serialize=true [, bool blocking=true [, int errorcode]]])
-   Send a message of type msgtype (must be > 0) to a message queue */
+/* Send a message of type msgtype (must be > 0) to a message queue */
 PHP_FUNCTION(msg_send)
 {
 	zval *message, *queue, *zerror=NULL;

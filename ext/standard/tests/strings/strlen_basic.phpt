@@ -3,8 +3,7 @@ Test strlen() function : basic functionality
 --FILE--
 <?php
 
-/* Prototype  : int strlen  ( string $string  )
- * Description: Get string length
+/* Description: Get string length
  * Source code: ext/standard/string.c
 */
 

@@ -42,8 +42,7 @@ PHPAPI zend_long php_rand(void)
 }
 /* }}} */
 
-/* {{{ proto int mt_rand([int min, int max])
-   Returns a random number from Mersenne Twister */
+/* Returns a random number from Mersenne Twister */
 PHP_FUNCTION(rand)
 {
 	zend_long min;

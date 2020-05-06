@@ -2,8 +2,7 @@
 Test getdate() function : usage variation - Verifyig by supplying year-wise sample time stamps since Unix epoch time
 --FILE--
 <?php
-/* Prototype  : array getdate([int timestamp])
- * Description: Get date/time information
+/* Description: Get date/time information
  * Source code: ext/date/php_date.c
  * Alias to functions:
  */

@@ -2,8 +2,7 @@
 Test parse_str() function : test with badly formed strings
 --FILE--
 <?php
-/* Prototype  : void parse_str  ( string $str  [, array &$arr  ] )
- * Description: Parses the string into variables
+/* Description: Parses the string into variables
  * Source code: ext/standard/string.c
 */
 

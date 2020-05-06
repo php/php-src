@@ -10,8 +10,7 @@ if(substr(PHP_OS, 0, 3) == "AIX")
 ?>
 --FILE--
 <?php
-/* Prototype: bool copy ( string $source, string $dest );
-   Description: Makes a copy of the file source to dest.
+/* Description: Makes a copy of the file source to dest.
      Returns TRUE on success or FALSE on failure.
 */
 

@@ -2,8 +2,7 @@
 Test soundex() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : string soundex  ( string $str  )
- * Description: Calculate the soundex key of a string
+/* Description: Calculate the soundex key of a string
  * Source code: ext/standard/string.c
 */
 echo "*** Testing soundex() : basic functionality ***\n";

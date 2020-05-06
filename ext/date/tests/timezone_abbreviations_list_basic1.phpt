@@ -2,8 +2,7 @@
 Test timezone_abbreviations_list() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : array timezone_abbreviations_list  ( void  )
- * Description: Returns associative array containing dst, offset and the timezone name
+/* Description: Returns associative array containing dst, offset and the timezone name
  * Source code: ext/date/php_date.c
  * Alias to functions: DateTimeZone::listAbbreviations
  */

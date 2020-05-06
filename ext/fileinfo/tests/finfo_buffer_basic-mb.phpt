@@ -4,8 +4,7 @@ Test finfo_buffer() function : basic functionality
 <?php require_once(__DIR__ . '/skipif.inc'); ?>
 --FILE--
 <?php
-/* Prototype  : string finfo_buffer(resource finfo, char *string [, int options [, resource context]])
- * Description: Return information about a string buffer.
+/* Description: Return information about a string buffer.
  * Source code: ext/fileinfo/fileinfo.c
  * Alias to functions:
  */

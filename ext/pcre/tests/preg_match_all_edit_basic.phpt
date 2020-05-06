@@ -2,8 +2,7 @@
 Test preg_match_all() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : proto int preg_match_all(string pattern, string subject, array subpatterns [, int flags [, int offset]])
- * Description: Perform a Perl-style global regular expression match
+/* Description: Perform a Perl-style global regular expression match
  * Source code: ext/pcre/php_pcre.c
  * Alias to functions:
 */

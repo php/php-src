@@ -2,8 +2,7 @@
 Test array_push() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : int array_push(array $stack, mixed $var [, mixed $...])
- * Description: Pushes elements onto the end of the array
+/* Description: Pushes elements onto the end of the array
  * Source code: ext/standard/array.c
  */
 

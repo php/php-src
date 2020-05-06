@@ -312,8 +312,7 @@ PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
 }
 /* }}} */
 
-/* {{{ proto mixed parse_url(string url, [int url_component])
-   Parse a URL and return its components */
+/* Parse a URL and return its components */
 PHP_FUNCTION(parse_url)
 {
 	char *str;
@@ -483,8 +482,7 @@ PHPAPI zend_string *php_url_encode(char const *s, size_t len)
 }
 /* }}} */
 
-/* {{{ proto string urlencode(string str)
-   URL-encodes string */
+/* URL-encodes string */
 PHP_FUNCTION(urlencode)
 {
 	zend_string *in_str;
@@ -497,8 +495,7 @@ PHP_FUNCTION(urlencode)
 }
 /* }}} */
 
-/* {{{ proto string urldecode(string str)
-   Decodes URL-encoded string */
+/* Decodes URL-encoded string */
 PHP_FUNCTION(urldecode)
 {
 	zend_string *in_str, *out_str;
@@ -571,8 +568,7 @@ PHPAPI zend_string *php_raw_url_encode(char const *s, size_t len)
 }
 /* }}} */
 
-/* {{{ proto string rawurlencode(string str)
-   URL-encodes string */
+/* URL-encodes string */
 PHP_FUNCTION(rawurlencode)
 {
 	zend_string *in_str;
@@ -585,8 +581,7 @@ PHP_FUNCTION(rawurlencode)
 }
 /* }}} */
 
-/* {{{ proto string rawurldecode(string str)
-   Decodes URL-encodes string */
+/* Decodes URL-encodes string */
 PHP_FUNCTION(rawurldecode)
 {
 	zend_string *in_str, *out_str;
@@ -626,8 +621,7 @@ PHPAPI size_t php_raw_url_decode(char *str, size_t len)
 }
 /* }}} */
 
-/* {{{ proto array|false get_headers(string url[, int format[, resource context]])
-   fetches all the headers sent by the server in response to a HTTP request */
+/* fetches all the headers sent by the server in response to a HTTP request */
 PHP_FUNCTION(get_headers)
 {
 	char *url;

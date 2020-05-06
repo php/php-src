@@ -2,8 +2,7 @@
 Test is_scalar() function
 --FILE--
 <?php
-/* Prototype: bool is_scalar ( mixed $var );
- * Description: Finds whether a variable is a scalar (i.e integer, float, string or boolean)
+/* Description: Finds whether a variable is a scalar (i.e integer, float, string or boolean)
  */
 
 echo "*** Testing basic operations ***\n";

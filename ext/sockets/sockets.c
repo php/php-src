@@ -651,8 +651,7 @@ static int php_sock_array_from_fd_set(zval *sock_array, fd_set *fds) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto int socket_select(array &read_fds, array &write_fds, array &except_fds, int tv_sec[, int tv_usec])
-   Runs the select() system call on the sets mentioned with a timeout specified by tv_sec and tv_usec */
+/* Runs the select() system call on the sets mentioned with a timeout specified by tv_sec and tv_usec */
 PHP_FUNCTION(socket_select)
 {
 	zval			*r_array, *w_array, *e_array;
@@ -729,8 +728,7 @@ PHP_FUNCTION(socket_select)
 }
 /* }}} */
 
-/* {{{ proto resource socket_create_listen(int port[, int backlog])
-   Opens a socket on port to accept connections */
+/* Opens a socket on port to accept connections */
 PHP_FUNCTION(socket_create_listen)
 {
 	php_socket	*php_sock;
@@ -751,8 +749,7 @@ PHP_FUNCTION(socket_create_listen)
 }
 /* }}} */
 
-/* {{{ proto resource socket_accept(resource socket)
-   Accepts a connection on the listening socket fd */
+/* Accepts a connection on the listening socket fd */
 PHP_FUNCTION(socket_accept)
 {
 	zval				 *arg1;
@@ -776,8 +773,7 @@ PHP_FUNCTION(socket_accept)
 }
 /* }}} */
 
-/* {{{ proto bool socket_set_nonblock(resource socket)
-   Sets nonblocking mode on a socket resource */
+/* Sets nonblocking mode on a socket resource */
 PHP_FUNCTION(socket_set_nonblock)
 {
 	zval		*arg1;
@@ -814,8 +810,7 @@ PHP_FUNCTION(socket_set_nonblock)
 }
 /* }}} */
 
-/* {{{ proto bool socket_set_block(resource socket)
-   Sets blocking mode on a socket resource */
+/* Sets blocking mode on a socket resource */
 PHP_FUNCTION(socket_set_block)
 {
 	zval		*arg1;
@@ -854,8 +849,7 @@ PHP_FUNCTION(socket_set_block)
 }
 /* }}} */
 
-/* {{{ proto bool socket_listen(resource socket[, int backlog])
-   Sets the maximum number of connections allowed to be waited for on the socket specified by fd */
+/* Sets the maximum number of connections allowed to be waited for on the socket specified by fd */
 PHP_FUNCTION(socket_listen)
 {
 	zval		*arg1;
@@ -878,8 +872,7 @@ PHP_FUNCTION(socket_listen)
 }
 /* }}} */
 
-/* {{{ proto void socket_close(resource socket)
-   Closes a file descriptor */
+/* Closes a file descriptor */
 PHP_FUNCTION(socket_close)
 {
 	zval		*arg1;
@@ -908,8 +901,7 @@ PHP_FUNCTION(socket_close)
 }
 /* }}} */
 
-/* {{{ proto int socket_write(resource socket, string buf[, int length])
-   Writes the buffer to the socket resource, length is optional */
+/* Writes the buffer to the socket resource, length is optional */
 PHP_FUNCTION(socket_write)
 {
 	zval		*arg1;
@@ -951,8 +943,7 @@ PHP_FUNCTION(socket_write)
 }
 /* }}} */
 
-/* {{{ proto string socket_read(resource socket, int length [, int type])
-   Reads a maximum of length bytes from socket */
+/* Reads a maximum of length bytes from socket */
 PHP_FUNCTION(socket_read)
 {
 	zval		*arg1;
@@ -1011,8 +1002,7 @@ PHP_FUNCTION(socket_read)
 }
 /* }}} */
 
-/* {{{ proto bool socket_getsockname(resource socket, string &addr[, int &port])
-   Queries the remote side of the given socket which may either result in host/port or in a UNIX filesystem path, dependent on its type. */
+/* Queries the remote side of the given socket which may either result in host/port or in a UNIX filesystem path, dependent on its type. */
 PHP_FUNCTION(socket_getsockname)
 {
 	zval					*arg1, *addr, *port = NULL;
@@ -1085,8 +1075,7 @@ PHP_FUNCTION(socket_getsockname)
 }
 /* }}} */
 
-/* {{{ proto bool socket_getpeername(resource socket, string &addr[, int &port])
-   Queries the remote side of the given socket which may either result in host/port or in a UNIX filesystem path, dependent on its type. */
+/* Queries the remote side of the given socket which may either result in host/port or in a UNIX filesystem path, dependent on its type. */
 PHP_FUNCTION(socket_getpeername)
 {
 	zval					*arg1, *arg2, *arg3 = NULL;
@@ -1162,8 +1151,7 @@ PHP_FUNCTION(socket_getpeername)
 }
 /* }}} */
 
-/* {{{ proto resource socket_create(int domain, int type, int protocol)
-   Creates an endpoint for communication in the domain specified by domain, of type specified by type */
+/* Creates an endpoint for communication in the domain specified by domain, of type specified by type */
 PHP_FUNCTION(socket_create)
 {
 	zend_long	domain, type, protocol;
@@ -1208,8 +1196,7 @@ PHP_FUNCTION(socket_create)
 }
 /* }}} */
 
-/* {{{ proto bool socket_connect(resource socket, string addr [, int port])
-   Opens a connection to addr:port on the socket specified by socket */
+/* Opens a connection to addr:port on the socket specified by socket */
 PHP_FUNCTION(socket_connect)
 {
 	zval				*resource_socket;
@@ -1298,8 +1285,7 @@ PHP_FUNCTION(socket_connect)
 }
 /* }}} */
 
-/* {{{ proto string socket_strerror(int errno)
-   Returns a string describing an error */
+/* Returns a string describing an error */
 PHP_FUNCTION(socket_strerror)
 {
 	zend_long	arg1;
@@ -1312,8 +1298,7 @@ PHP_FUNCTION(socket_strerror)
 }
 /* }}} */
 
-/* {{{ proto bool socket_bind(resource socket, string addr [, int port])
-   Binds an open socket to a listening port, port is only specified in AF_INET family. */
+/* Binds an open socket to a listening port, port is only specified in AF_INET family. */
 PHP_FUNCTION(socket_bind)
 {
 	zval					*arg1;
@@ -1395,8 +1380,7 @@ PHP_FUNCTION(socket_bind)
 }
 /* }}} */
 
-/* {{{ proto int socket_recv(resource socket, string &buf, int len, int flags)
-   Receives data from a connected socket */
+/* Receives data from a connected socket */
 PHP_FUNCTION(socket_recv)
 {
 	zval		*php_sock_res, *buf;
@@ -1438,8 +1422,7 @@ PHP_FUNCTION(socket_recv)
 }
 /* }}} */
 
-/* {{{ proto int socket_send(resource socket, string buf, int len, int flags)
-   Sends data to a connected socket */
+/* Sends data to a connected socket */
 PHP_FUNCTION(socket_send)
 {
 	zval		*arg1;
@@ -1472,8 +1455,7 @@ PHP_FUNCTION(socket_send)
 }
 /* }}} */
 
-/* {{{ proto int socket_recvfrom(resource socket, string &buf, int len, int flags, string &name [, int &port])
-   Receives data from a socket, connected or not */
+/* Receives data from a socket, connected or not */
 PHP_FUNCTION(socket_recvfrom)
 {
 	zval				*arg1, *arg2, *arg5, *arg6 = NULL;
@@ -1590,8 +1572,7 @@ PHP_FUNCTION(socket_recvfrom)
 }
 /* }}} */
 
-/* {{{ proto int socket_sendto(resource socket, string buf, int len, int flags, string addr [, int port])
-   Sends a message to a socket, whether it is connected or not */
+/* Sends a message to a socket, whether it is connected or not */
 PHP_FUNCTION(socket_sendto)
 {
 	zval				*arg1;
@@ -1675,8 +1656,7 @@ PHP_FUNCTION(socket_sendto)
 }
 /* }}} */
 
-/* {{{ proto mixed socket_get_option(resource socket, int level, int optname)
-   Gets socket options for the socket */
+/* Gets socket options for the socket */
 PHP_FUNCTION(socket_get_option)
 {
 	zval			*arg1;
@@ -1785,8 +1765,7 @@ PHP_FUNCTION(socket_get_option)
 }
 /* }}} */
 
-/* {{{ proto bool socket_set_option(resource socket, int level, int optname, int|array optval)
-   Sets socket options for the socket */
+/* Sets socket options for the socket */
 PHP_FUNCTION(socket_set_option)
 {
 	zval					*arg1, *arg4;
@@ -1931,8 +1910,7 @@ default_case:
 /* }}} */
 
 #ifdef HAVE_SOCKETPAIR
-/* {{{ proto bool socket_create_pair(int domain, int type, int protocol, array &fd)
-   Creates a pair of indistinguishable sockets and stores them in fds. */
+/* Creates a pair of indistinguishable sockets and stores them in fds. */
 PHP_FUNCTION(socket_create_pair)
 {
 	zval		retval[2], *fds_array_zval;
@@ -1998,8 +1976,7 @@ PHP_FUNCTION(socket_create_pair)
 #endif
 
 #ifdef HAVE_SHUTDOWN
-/* {{{ proto bool socket_shutdown(resource socket[, int how])
-   Shuts down a socket for receiving, sending, or both. */
+/* Shuts down a socket for receiving, sending, or both. */
 PHP_FUNCTION(socket_shutdown)
 {
 	zval		*arg1;
@@ -2024,8 +2001,7 @@ PHP_FUNCTION(socket_shutdown)
 /* }}} */
 #endif
 
-/* {{{ proto int socket_last_error([resource socket])
-   Returns the last socket error (either the last used or the provided socket resource) */
+/* Returns the last socket error (either the last used or the provided socket resource) */
 PHP_FUNCTION(socket_last_error)
 {
 	zval		*arg1 = NULL;
@@ -2046,8 +2022,7 @@ PHP_FUNCTION(socket_last_error)
 }
 /* }}} */
 
-/* {{{ proto void socket_clear_error([resource socket])
-   Clears the error on the socket or the last error code. */
+/* Clears the error on the socket or the last error code. */
 PHP_FUNCTION(socket_clear_error)
 {
 	zval		*arg1 = NULL;
@@ -2117,8 +2092,7 @@ error:
 	return NULL;
 }
 
-/* {{{ proto resource socket_import_stream(resource stream)
-   Imports a stream that encapsulates a socket into a socket extension resource. */
+/* Imports a stream that encapsulates a socket into a socket extension resource. */
 PHP_FUNCTION(socket_import_stream)
 {
 	zval				 *zstream;
@@ -2163,8 +2137,7 @@ PHP_FUNCTION(socket_import_stream)
 }
 /* }}} */
 
-/* {{{ proto resource socket_export_stream(resource socket)
-   Exports a socket extension resource into a stream that encapsulates a socket. */
+/* Exports a socket extension resource into a stream that encapsulates a socket. */
 PHP_FUNCTION(socket_export_stream)
 {
 	zval *zsocket;
@@ -2260,8 +2233,7 @@ PHP_FUNCTION(socket_export_stream)
 }
 /* }}} */
 
-/* {{{ proto resource addrinfo socket_addrinfo_lookup(string hostname[, mixed service, array hints])
-   Gets array with contents of getaddrinfo about the given hostname. */
+/* Gets array with contents of getaddrinfo about the given hostname. */
 PHP_FUNCTION(socket_addrinfo_lookup)
 {
 	char *service = NULL;
@@ -2322,8 +2294,7 @@ PHP_FUNCTION(socket_addrinfo_lookup)
 }
 /* }}} */
 
-/* {{{ proto resource socket_addrinfo_bind(resource addrinfo)
-   Creates and binds to a socket from a given addrinfo resource */
+/* Creates and binds to a socket from a given addrinfo resource */
 PHP_FUNCTION(socket_addrinfo_bind)
 {
 	zval			*arg1;
@@ -2388,8 +2359,7 @@ PHP_FUNCTION(socket_addrinfo_bind)
 }
 /* }}} */
 
-/* {{{ proto resource socket_addrinfo_connect(resource addrinfo)
-   Creates and connects to a socket from a given addrinfo resource */
+/* Creates and connects to a socket from a given addrinfo resource */
 PHP_FUNCTION(socket_addrinfo_connect)
 {
 	zval			*arg1;
@@ -2454,8 +2424,7 @@ PHP_FUNCTION(socket_addrinfo_connect)
 }
 /* }}} */
 
-/* {{{ proto resource socket_addrinfo_explain(resource addrinfo)
-   Creates and connects to a socket from a given addrinfo resource */
+/* Creates and connects to a socket from a given addrinfo resource */
 PHP_FUNCTION(socket_addrinfo_explain)
 {
 	zval			*arg1, sockaddr;
@@ -2511,8 +2480,7 @@ PHP_FUNCTION(socket_addrinfo_explain)
 
 #ifdef PHP_WIN32
 
- /* {{{ proto string socket_wsaprotocol_info_export(resource stream, int target_pid)
-   Exports the network socket information suitable to be used in another process and returns the info id. */
+ /* Exports the network socket information suitable to be used in another process and returns the info id. */
 PHP_FUNCTION(socket_wsaprotocol_info_export)
 {
 	WSAPROTOCOL_INFO wi;
@@ -2567,8 +2535,7 @@ PHP_FUNCTION(socket_wsaprotocol_info_export)
 }
 /* }}} */
 
-/* {{{ proto resource socket_wsaprotocol_info_import(string id)
-   Imports the network socket information using the supplied id and creates a new socket on its base. */
+/* Imports the network socket information using the supplied id and creates a new socket on its base. */
 PHP_FUNCTION(socket_wsaprotocol_info_import)
 {
 	char *id;
@@ -2626,8 +2593,7 @@ PHP_FUNCTION(socket_wsaprotocol_info_import)
 }
 /* }}} */
 
-/* {{{ proto bool socket_wsaprotocol_info_release(string id)
-   Frees the exported info and corresponding resources using the supplied id. */
+/* Frees the exported info and corresponding resources using the supplied id. */
 PHP_FUNCTION(socket_wsaprotocol_info_release)
 {
 	char *id;

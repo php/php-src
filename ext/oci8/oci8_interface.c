@@ -40,8 +40,7 @@
 #define OCI_STMT_CALL 10
 #endif
 
-/* {{{ proto bool oci_register_taf_callback( resource connection [, mixed callback] )
-   Register a callback function for Oracle Transparent Application Failover (TAF) */
+/* Register a callback function for Oracle Transparent Application Failover (TAF) */
 PHP_FUNCTION(oci_register_taf_callback)
 {
 	zval *z_connection;
@@ -93,8 +92,7 @@ PHP_FUNCTION(oci_register_taf_callback)
 }
 /* }}} */
 
-/* {{{ proto bool oci_unregister_taf_callback( resource connection )
- *    Unregister a callback function for Oracle Transparent Application Failover (TAF) */
+/* *    Unregister a callback function for Oracle Transparent Application Failover (TAF) */
 PHP_FUNCTION(oci_unregister_taf_callback)
 {
 	zval *z_connection;
@@ -114,8 +112,7 @@ PHP_FUNCTION(oci_unregister_taf_callback)
 }
 /* }}} */
 
-/* {{{ proto bool oci_define_by_name(resource stmt, string name, mixed &var [, int type])
-   Define a PHP variable to an Oracle column by name */
+/* Define a PHP variable to an Oracle column by name */
 /* if you want to define a LOB/CLOB etc make sure you allocate it via OCINewDescriptor BEFORE defining!!! */
 PHP_FUNCTION(oci_define_by_name)
 {
@@ -182,8 +179,7 @@ PHP_FUNCTION(oci_define_by_name)
 }
 /* }}} */
 
-/* {{{ proto bool oci_bind_by_name(resource stmt, string name, mixed &var [, int maxlength [, int type]])
-   Bind a PHP variable to an Oracle placeholder by name */
+/* Bind a PHP variable to an Oracle placeholder by name */
 /* if you want to bind a LOB/CLOB etc make sure you allocate it via OCINewDescriptor BEFORE binding!!! */
 PHP_FUNCTION(oci_bind_by_name)
 {
@@ -217,8 +213,7 @@ PHP_FUNCTION(oci_bind_by_name)
 }
 /* }}} */
 
-/* {{{ proto bool oci_bind_array_by_name(resource stmt, string name, array &var, int max_table_length [, int max_item_length [, int type ]])
-   Bind a PHP array to an Oracle PL/SQL type by name */
+/* Bind a PHP array to an Oracle PL/SQL type by name */
 PHP_FUNCTION(oci_bind_array_by_name)
 {
 	size_t name_len;
@@ -258,8 +253,7 @@ PHP_FUNCTION(oci_bind_array_by_name)
 }
 /* }}} */
 
-/* {{{ proto bool oci_free_descriptor()
-   Deletes large object description */
+/* Deletes large object description */
 PHP_FUNCTION(oci_free_descriptor)
 {
 	zval *tmp, *z_descriptor = getThis();
@@ -283,8 +277,7 @@ PHP_FUNCTION(oci_free_descriptor)
 }
 /* }}} */
 
-/* {{{ proto bool oci_lob_save( string data [, int offset ])
-   Saves a large object */
+/* Saves a large object */
 PHP_FUNCTION(oci_lob_save)
 {
 	zval *tmp, *z_descriptor = getThis();
@@ -324,8 +317,7 @@ PHP_FUNCTION(oci_lob_save)
 }
 /* }}} */
 
-/* {{{ proto bool oci_lob_import( string filename )
-   Loads file into a LOB */
+/* Loads file into a LOB */
 PHP_FUNCTION(oci_lob_import)
 {
 	zval *tmp, *z_descriptor = getThis();
@@ -358,8 +350,7 @@ PHP_FUNCTION(oci_lob_import)
 }
 /* }}} */
 
-/* {{{ proto string oci_lob_load()
-   Loads a large object */
+/* Loads a large object */
 PHP_FUNCTION(oci_lob_load)
 {
 	zval *tmp, *z_descriptor = getThis();
@@ -395,8 +386,7 @@ PHP_FUNCTION(oci_lob_load)
 }
 /* }}} */
 
-/* {{{ proto string oci_lob_read( int length )
-   Reads particular part of a large object */
+/* Reads particular part of a large object */
 PHP_FUNCTION(oci_lob_read)
 {
 	zval *tmp, *z_descriptor = getThis();
@@ -442,8 +432,7 @@ PHP_FUNCTION(oci_lob_read)
 }
 /* }}} */
 
-/* {{{ proto bool oci_lob_eof()
-   Checks if EOF is reached */
+/* Checks if EOF is reached */
 PHP_FUNCTION(oci_lob_eof)
 {
 	zval *tmp, *z_descriptor = getThis();
@@ -472,8 +461,7 @@ PHP_FUNCTION(oci_lob_eof)
 }
 /* }}} */
 
-/* {{{ proto int oci_lob_tell()
-   Tells LOB pointer position */
+/* Tells LOB pointer position */
 PHP_FUNCTION(oci_lob_tell)
 {
 	zval *tmp, *z_descriptor = getThis();
@@ -496,8 +484,7 @@ PHP_FUNCTION(oci_lob_tell)
 }
 /* }}} */
 
-/* {{{ proto bool oci_lob_rewind()
-   Rewind pointer of a LOB */
+/* Rewind pointer of a LOB */
 PHP_FUNCTION(oci_lob_rewind)
 {
 	zval *tmp, *z_descriptor = getThis();
@@ -522,8 +509,7 @@ PHP_FUNCTION(oci_lob_rewind)
 }
 /* }}} */
 
-/* {{{ proto bool oci_lob_seek( int offset [, int whence ])
-   Moves the pointer of a LOB */
+/* Moves the pointer of a LOB */
 PHP_FUNCTION(oci_lob_seek)
 {
 	zval *tmp, *z_descriptor = getThis();
@@ -578,8 +564,7 @@ PHP_FUNCTION(oci_lob_seek)
 }
 /* }}} */
 
-/* {{{ proto int oci_lob_size()
-   Returns size of a large object */
+/* Returns size of a large object */
 PHP_FUNCTION(oci_lob_size)
 {
 	zval *tmp, *z_descriptor = getThis();
@@ -606,8 +591,7 @@ PHP_FUNCTION(oci_lob_size)
 }
 /* }}} */
 
-/* {{{ proto int oci_lob_write( string string [, int length ])
-   Writes data to current position of a LOB */
+/* Writes data to current position of a LOB */
 PHP_FUNCTION(oci_lob_write)
 {
 	zval *tmp, *z_descriptor = getThis();
@@ -654,8 +638,7 @@ PHP_FUNCTION(oci_lob_write)
 }
 /* }}} */
 
-/* {{{ proto bool oci_lob_append( object lob )
-   Appends data from a LOB to another LOB */
+/* Appends data from a LOB to another LOB */
 PHP_FUNCTION(oci_lob_append)
 {
 	zval *tmp_dest, *tmp_from, *z_descriptor_dest = getThis(), *z_descriptor_from;
@@ -693,8 +676,7 @@ PHP_FUNCTION(oci_lob_append)
 }
 /* }}} */
 
-/* {{{ proto bool oci_lob_truncate( [ int length ])
-   Truncates a LOB */
+/* Truncates a LOB */
 PHP_FUNCTION(oci_lob_truncate)
 {
 	zval *tmp, *z_descriptor = getThis();
@@ -733,8 +715,7 @@ PHP_FUNCTION(oci_lob_truncate)
 }
 /* }}} */
 
-/* {{{ proto int oci_lob_erase( [ int offset [, int length ] ] )
-   Erases a specified portion of the internal LOB, starting at a specified offset */
+/* Erases a specified portion of the internal LOB, starting at a specified offset */
 PHP_FUNCTION(oci_lob_erase)
 {
 	zval *tmp, *z_descriptor = getThis();
@@ -787,8 +768,7 @@ PHP_FUNCTION(oci_lob_erase)
 }
 /* }}} */
 
-/* {{{ proto bool oci_lob_flush( [ int flag ] )
-   Flushes the LOB buffer */
+/* Flushes the LOB buffer */
 PHP_FUNCTION(oci_lob_flush)
 {
 	zval *tmp, *z_descriptor = getThis();
@@ -825,8 +805,7 @@ PHP_FUNCTION(oci_lob_flush)
 }
 /* }}} */
 
-/* {{{ proto bool ocisetbufferinglob( boolean flag )
-   Enables/disables buffering for a LOB */
+/* Enables/disables buffering for a LOB */
 PHP_FUNCTION(ocisetbufferinglob)
 {
 	zval *tmp, *z_descriptor = getThis();
@@ -858,8 +837,7 @@ PHP_FUNCTION(ocisetbufferinglob)
 }
 /* }}} */
 
-/* {{{ proto bool ocigetbufferinglob()
-   Returns current state of buffering for a LOB */
+/* Returns current state of buffering for a LOB */
 PHP_FUNCTION(ocigetbufferinglob)
 {
 	zval *tmp, *z_descriptor = getThis();
@@ -885,8 +863,7 @@ PHP_FUNCTION(ocigetbufferinglob)
 }
 /* }}} */
 
-/* {{{ proto bool oci_lob_copy( object lob_to, object lob_from [, int length ] )
-   Copies data from a LOB to another LOB */
+/* Copies data from a LOB to another LOB */
 PHP_FUNCTION(oci_lob_copy)
 {
 	zval *tmp_dest, *tmp_from, *z_descriptor_dest, *z_descriptor_from;
@@ -927,8 +904,7 @@ PHP_FUNCTION(oci_lob_copy)
 }
 /* }}} */
 
-/* {{{ proto bool oci_lob_is_equal( object lob1, object lob2 )
-   Tests to see if two LOB/FILE locators are equal */
+/* Tests to see if two LOB/FILE locators are equal */
 PHP_FUNCTION(oci_lob_is_equal)
 {
 	zval *tmp_first, *tmp_second, *z_descriptor_first, *z_descriptor_second;
@@ -963,8 +939,7 @@ PHP_FUNCTION(oci_lob_is_equal)
 }
 /* }}} */
 
-/* {{{ proto bool oci_lob_export([string filename [, int start [, int length]]])
-   Writes a large object into a file */
+/* Writes a large object into a file */
 PHP_FUNCTION(oci_lob_export)
 {
 	zval *tmp, *z_descriptor = getThis();
@@ -1074,8 +1049,7 @@ PHP_FUNCTION(oci_lob_export)
 }
 /* }}} */
 
-/* {{{ proto bool oci_lob_write_temporary(string var [, int lob_type])
-   Writes temporary blob */
+/* Writes temporary blob */
 PHP_FUNCTION(oci_lob_write_temporary)
 {
 	zval *tmp, *z_descriptor = getThis();
@@ -1109,8 +1083,7 @@ PHP_FUNCTION(oci_lob_write_temporary)
 }
 /* }}} */
 
-/* {{{ proto bool oci_lob_close()
-   Closes lob descriptor */
+/* Closes lob descriptor */
 PHP_FUNCTION(oci_lob_close)
 {
 	zval *tmp, *z_descriptor = getThis();
@@ -1136,8 +1109,7 @@ PHP_FUNCTION(oci_lob_close)
 }
 /* }}} */
 
-/* {{{ proto object oci_new_descriptor(resource connection [, int type])
-   Initialize a new empty descriptor LOB/FILE (LOB is default) */
+/* Initialize a new empty descriptor LOB/FILE (LOB is default) */
 PHP_FUNCTION(oci_new_descriptor)
 {
 	zval *z_connection;
@@ -1163,8 +1135,7 @@ PHP_FUNCTION(oci_new_descriptor)
 }
 /* }}} */
 
-/* {{{ proto bool oci_rollback(resource connection)
-   Rollback the current context */
+/* Rollback the current context */
 PHP_FUNCTION(oci_rollback)
 {
 	zval *z_connection;
@@ -1187,8 +1158,7 @@ PHP_FUNCTION(oci_rollback)
 }
 /* }}} */
 
-/* {{{ proto bool oci_commit(resource connection)
-   Commit the current context */
+/* Commit the current context */
 PHP_FUNCTION(oci_commit)
 {
 	zval *z_connection;
@@ -1211,8 +1181,7 @@ PHP_FUNCTION(oci_commit)
 }
 /* }}} */
 
-/* {{{ proto string oci_field_name(resource stmt, mixed col)
-   Tell the name of a column */
+/* Tell the name of a column */
 PHP_FUNCTION(oci_field_name)
 {
 	php_oci_out_column *column;
@@ -1224,8 +1193,7 @@ PHP_FUNCTION(oci_field_name)
 }
 /* }}} */
 
-/* {{{ proto int oci_field_size(resource stmt, mixed col)
-   Tell the maximum data size of a column */
+/* Tell the maximum data size of a column */
 PHP_FUNCTION(oci_field_size)
 {
 	php_oci_out_column *column;
@@ -1241,8 +1209,7 @@ PHP_FUNCTION(oci_field_size)
 }
 /* }}} */
 
-/* {{{ proto int oci_field_scale(resource stmt, mixed col)
-   Tell the scale of a column */
+/* Tell the scale of a column */
 PHP_FUNCTION(oci_field_scale)
 {
 	php_oci_out_column *column;
@@ -1254,8 +1221,7 @@ PHP_FUNCTION(oci_field_scale)
 }
 /* }}} */
 
-/* {{{ proto int oci_field_precision(resource stmt, mixed col)
-   Tell the precision of a column */
+/* Tell the precision of a column */
 PHP_FUNCTION(oci_field_precision)
 {
 	php_oci_out_column *column;
@@ -1267,8 +1233,7 @@ PHP_FUNCTION(oci_field_precision)
 }
 /* }}} */
 
-/* {{{ proto mixed oci_field_type(resource stmt, mixed col)
-   Tell the data type of a column */
+/* Tell the data type of a column */
 PHP_FUNCTION(oci_field_type)
 {
 	php_oci_out_column *column;
@@ -1347,8 +1312,7 @@ PHP_FUNCTION(oci_field_type)
 }
 /* }}} */
 
-/* {{{ proto int oci_field_type_raw(resource stmt, mixed col)
-   Tell the raw oracle data type of a column */
+/* Tell the raw oracle data type of a column */
 PHP_FUNCTION(oci_field_type_raw)
 {
 	php_oci_out_column *column;
@@ -1361,8 +1325,7 @@ PHP_FUNCTION(oci_field_type_raw)
 }
 /* }}} */
 
-/* {{{ proto bool oci_field_is_null(resource stmt, mixed col)
-   Tell whether a field in the current row is NULL */
+/* Tell whether a field in the current row is NULL */
 PHP_FUNCTION(oci_field_is_null)
 {
 	php_oci_out_column *column;
@@ -1376,16 +1339,14 @@ PHP_FUNCTION(oci_field_is_null)
 }
 /* }}} */
 
-/* {{{ proto void oci_internal_debug(int onoff)
-   Toggle internal debugging output for the OCI extension */
+/* Toggle internal debugging output for the OCI extension */
 PHP_FUNCTION(oci_internal_debug)
 {
 	/* NOP in OCI8 2.0. Obsoleted by DTrace probes */
 }
 /* }}} */
 
-/* {{{ proto bool oci_execute(resource stmt [, int mode])
-   Execute a parsed statement */
+/* Execute a parsed statement */
 PHP_FUNCTION(oci_execute)
 {
 	zval *z_statement;
@@ -1407,8 +1368,7 @@ PHP_FUNCTION(oci_execute)
 }
 /* }}} */
 
-/* {{{ proto bool oci_cancel(resource stmt)
-   Cancel reading from a cursor */
+/* Cancel reading from a cursor */
 PHP_FUNCTION(oci_cancel)
 {
 	zval *z_statement;
@@ -1427,8 +1387,7 @@ PHP_FUNCTION(oci_cancel)
 }
 /* }}} */
 
-/* {{{ proto bool oci_fetch(resource stmt)
-   Prepare a new row of data for reading */
+/* Prepare a new row of data for reading */
 PHP_FUNCTION(oci_fetch)
 {
 	zval *z_statement;
@@ -1448,16 +1407,14 @@ PHP_FUNCTION(oci_fetch)
 }
 /* }}} */
 
-/* {{{ proto int ocifetchinto(resource stmt, array &output [, int mode])
-   Fetch a row of result data into an array */
+/* Fetch a row of result data into an array */
 PHP_FUNCTION(ocifetchinto)
 {
 	php_oci_fetch_row(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_OCI_NUM, 3);
 }
 /* }}} */
 
-/* {{{ proto int oci_fetch_all(resource stmt, array &output[, int skip[, int maxrows[, int flags]]])
-   Fetch all rows of result data into an array */
+/* Fetch all rows of result data into an array */
 PHP_FUNCTION(oci_fetch_all)
 {
 	zval *z_statement, *array;
@@ -1586,8 +1543,7 @@ PHP_FUNCTION(oci_fetch_all)
 }
 /* }}} */
 
-/* {{{ proto object oci_fetch_object( resource stmt )
-   Fetch a result row as an object */
+/* Fetch a result row as an object */
 PHP_FUNCTION(oci_fetch_object)
 {
 	php_oci_fetch_row(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_OCI_ASSOC | PHP_OCI_RETURN_NULLS, 2);
@@ -1598,32 +1554,28 @@ PHP_FUNCTION(oci_fetch_object)
 }
 /* }}} */
 
-/* {{{ proto array oci_fetch_row( resource stmt )
-   Fetch a result row as an enumerated array */
+/* Fetch a result row as an enumerated array */
 PHP_FUNCTION(oci_fetch_row)
 {
 	php_oci_fetch_row(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_OCI_NUM | PHP_OCI_RETURN_NULLS, 1);
 }
 /* }}} */
 
-/* {{{ proto array oci_fetch_assoc( resource stmt )
-   Fetch a result row as an associative array */
+/* Fetch a result row as an associative array */
 PHP_FUNCTION(oci_fetch_assoc)
 {
 	php_oci_fetch_row(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_OCI_ASSOC | PHP_OCI_RETURN_NULLS, 1);
 }
 /* }}} */
 
-/* {{{ proto array oci_fetch_array( resource stmt [, int mode ])
-   Fetch a result row as an array */
+/* Fetch a result row as an array */
 PHP_FUNCTION(oci_fetch_array)
 {
 	php_oci_fetch_row(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_OCI_BOTH | PHP_OCI_RETURN_NULLS, 2);
 }
 /* }}} */
 
-/* {{{ proto bool oci_free_statement(resource stmt)
-   Free all resources associated with a statement */
+/* Free all resources associated with a statement */
 PHP_FUNCTION(oci_free_statement)
 {
 	zval *z_statement;
@@ -1640,8 +1592,7 @@ PHP_FUNCTION(oci_free_statement)
 }
 /* }}} */
 
-/* {{{ proto bool oci_close(resource connection)
-   Disconnect from database */
+/* Disconnect from database */
 PHP_FUNCTION(oci_close)
 {
 	/* oci_close for pconnect (if old_oci_close_semantics not set) would
@@ -1680,32 +1631,28 @@ PHP_FUNCTION(oci_close)
 }
 /* }}} */
 
-/* {{{ proto resource oci_new_connect(string user, string pass [, string db, string charset [, int session_mode ]])
-   Connect to an Oracle database and log on. Returns a new session. */
+/* Connect to an Oracle database and log on. Returns a new session. */
 PHP_FUNCTION(oci_new_connect)
 {
 	php_oci_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0, 1);
 }
 /* }}} */
 
-/* {{{ proto resource oci_connect(string user, string pass [, string db [, string charset [, int session_mode ]])
-   Connect to an Oracle database and log on. Returns a new session. */
+/* Connect to an Oracle database and log on. Returns a new session. */
 PHP_FUNCTION(oci_connect)
 {
 	php_oci_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0, 0);
 }
 /* }}} */
 
-/* {{{ proto resource oci_pconnect(string user, string pass [, string db [, string charset [, int session_mode ]])
-   Connect to an Oracle database using a persistent connection and log on. Returns a new session. */
+/* Connect to an Oracle database using a persistent connection and log on. Returns a new session. */
 PHP_FUNCTION(oci_pconnect)
 {
 	php_oci_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1, 0);
 }
 /* }}} */
 
-/* {{{ proto array oci_error([resource stmt|connection|global])
-   Return the last error of stmt|connection|global. If no error happened returns false. */
+/* Return the last error of stmt|connection|global. If no error happened returns false. */
 PHP_FUNCTION(oci_error)
 {
 	zval *arg = NULL;
@@ -1777,8 +1724,7 @@ go_out:
 }
 /* }}} */
 
-/* {{{ proto int oci_num_fields(resource stmt)
-   Return the number of result columns in a statement */
+/* Return the number of result columns in a statement */
 PHP_FUNCTION(oci_num_fields)
 {
 	zval *z_statement;
@@ -1794,8 +1740,7 @@ PHP_FUNCTION(oci_num_fields)
 }
 /* }}} */
 
-/* {{{ proto resource oci_parse(resource connection, string statement)
-   Parse a SQL or PL/SQL statement and return a statement resource */
+/* Parse a SQL or PL/SQL statement and return a statement resource */
 PHP_FUNCTION(oci_parse)
 {
 	zval *z_connection;
@@ -1820,8 +1765,7 @@ PHP_FUNCTION(oci_parse)
 }
 /* }}} */
 
-/* {{{ proto bool oci_set_prefetch(resource stmt, int prefetch_rows)
-  Sets the number of rows to be prefetched on execute to prefetch_rows for stmt */
+/* Sets the number of rows to be prefetched on execute to prefetch_rows for stmt */
 PHP_FUNCTION(oci_set_prefetch)
 {
 	zval *z_statement;
@@ -1847,8 +1791,7 @@ PHP_FUNCTION(oci_set_prefetch)
 }
 /* }}} */
 
-/* {{{ proto bool oci_set_client_identifier(resource connection, string value)
-  Sets the client identifier attribute on the connection */
+/* Sets the client identifier attribute on the connection */
 PHP_FUNCTION(oci_set_client_identifier)
 {
 	zval *z_connection;
@@ -1899,8 +1842,7 @@ PHP_FUNCTION(oci_set_client_identifier)
 }
 /* }}} */
 
-/* {{{ proto bool oci_set_edition(string value)
-  Sets the edition attribute for all subsequent connections created */
+/* Sets the edition attribute for all subsequent connections created */
 PHP_FUNCTION(oci_set_edition)
 {
 #if ((OCI_MAJOR_VERSION > 11) || ((OCI_MAJOR_VERSION == 11) && (OCI_MINOR_VERSION >= 2)))
@@ -1931,8 +1873,7 @@ PHP_FUNCTION(oci_set_edition)
 }
 /* }}} */
 
-/* {{{ proto bool oci_set_module_name(resource connection, string value)
-  Sets the module attribute on the connection for end-to-end tracing */
+/* Sets the module attribute on the connection for end-to-end tracing */
 PHP_FUNCTION(oci_set_module_name)
 {
 #if (OCI_MAJOR_VERSION >= 10)
@@ -1964,8 +1905,7 @@ PHP_FUNCTION(oci_set_module_name)
 }
 /* }}} */
 
-/* {{{ proto bool oci_set_action(resource connection, string value)
-  Sets the action attribute on the connection for end-to-end tracing */
+/* Sets the action attribute on the connection for end-to-end tracing */
 PHP_FUNCTION(oci_set_action)
 {
 #if (OCI_MAJOR_VERSION >= 10)
@@ -1997,8 +1937,7 @@ PHP_FUNCTION(oci_set_action)
 }
 /* }}} */
 
-/* {{{ proto bool oci_set_client_info(resource connection, string value)
-  Sets the client info attribute on the connection  for end-to-end tracing */
+/* Sets the client info attribute on the connection  for end-to-end tracing */
 PHP_FUNCTION(oci_set_client_info)
 {
 #if (OCI_MAJOR_VERSION >= 10)
@@ -2030,8 +1969,7 @@ PHP_FUNCTION(oci_set_client_info)
 }
 /* }}} */
 
-/* {{{ proto bool oci_set_db_operation(resource connection, string value)
-   Sets the "DB operation" on the connection for Oracle end-to-end tracing.
+/* Sets the "DB operation" on the connection for Oracle end-to-end tracing.
    For history, see Oracle bug 16695981 */
 PHP_FUNCTION(oci_set_db_operation)
 {
@@ -2062,8 +2000,6 @@ PHP_FUNCTION(oci_set_db_operation)
 }
 /* }}} */
 
-/* {{{ proto bool oci_set_call_timeout(resource connection, int call_timeout)
- */
 PHP_FUNCTION(oci_set_call_timeout)
 {
 #if (OCI_MAJOR_VERSION >= 18)
@@ -2092,8 +2028,7 @@ PHP_FUNCTION(oci_set_call_timeout)
 }
 /* }}} */
 
-/* {{{ proto bool oci_password_change(resource connection, string username, string old_password, string new_password)
-  Changes the password of an account */
+/* Changes the password of an account */
 PHP_FUNCTION(oci_password_change)
 {
 	zval *z_connection;
@@ -2146,8 +2081,7 @@ PHP_FUNCTION(oci_password_change)
 }
 /* }}} */
 
-/* {{{ proto resource oci_new_cursor(resource connection)
-   Return a new cursor (Statement-Handle) - use this to bind ref-cursors! */
+/* Return a new cursor (Statement-Handle) - use this to bind ref-cursors! */
 PHP_FUNCTION(oci_new_cursor)
 {
 	zval *z_connection;
@@ -2169,8 +2103,7 @@ PHP_FUNCTION(oci_new_cursor)
 }
 /* }}} */
 
-/* {{{ proto string oci_result(resource stmt, mixed column)
-   Return a single column of result data */
+/* Return a single column of result data */
 PHP_FUNCTION(oci_result)
 {
 	php_oci_out_column *column;
@@ -2185,8 +2118,7 @@ PHP_FUNCTION(oci_result)
 }
 /* }}} */
 
-/* {{{ proto string oci_client_version()
-   Return a string containing runtime client library version information */
+/* Return a string containing runtime client library version information */
 PHP_FUNCTION(oci_client_version)
 {
 	char version[256];
@@ -2196,8 +2128,7 @@ PHP_FUNCTION(oci_client_version)
 }
 /* }}} */
 
-/* {{{ proto string oci_server_version(resource connection)
-   Return a string containing server version information */
+/* Return a string containing server version information */
 PHP_FUNCTION(oci_server_version)
 {
 	zval *z_connection;
@@ -2220,8 +2151,7 @@ PHP_FUNCTION(oci_server_version)
 }
 /* }}} */
 
-/* {{{ proto string oci_statement_type(resource stmt)
-   Return the query type of an OCI statement */
+/* Return the query type of an OCI statement */
 PHP_FUNCTION(oci_statement_type)
 {
 	zval *z_statement;
@@ -2275,8 +2205,7 @@ PHP_FUNCTION(oci_statement_type)
 }
 /* }}} */
 
-/* {{{ proto int oci_num_rows(resource stmt)
-   Return the row count of an OCI statement */
+/* Return the row count of an OCI statement */
 PHP_FUNCTION(oci_num_rows)
 {
 	zval *z_statement;
@@ -2296,8 +2225,7 @@ PHP_FUNCTION(oci_num_rows)
 }
 /* }}} */
 
-/* {{{ proto bool oci_free_collection()
-   Deletes collection object*/
+/* Deletes collection object*/
 PHP_FUNCTION(oci_free_collection)
 {
 	zval *tmp, *z_collection = getThis();
@@ -2321,8 +2249,7 @@ PHP_FUNCTION(oci_free_collection)
 }
 /* }}} */
 
-/* {{{ proto bool oci_collection_append(string value)
-   Append an object to the collection */
+/* Append an object to the collection */
 PHP_FUNCTION(oci_collection_append)
 {
 	zval *tmp, *z_collection = getThis();
@@ -2355,8 +2282,7 @@ PHP_FUNCTION(oci_collection_append)
 }
 /* }}} */
 
-/* {{{ proto string oci_collection_element_get(int ndx)
-   Retrieve the value at collection index ndx */
+/* Retrieve the value at collection index ndx */
 PHP_FUNCTION(oci_collection_element_get)
 {
 	zval *tmp, *z_collection = getThis();
@@ -2388,8 +2314,7 @@ PHP_FUNCTION(oci_collection_element_get)
 }
 /* }}} */
 
-/* {{{ proto bool oci_collection_assign(object from)
-   Assign a collection from another existing collection */
+/* Assign a collection from another existing collection */
 PHP_FUNCTION(oci_collection_assign)
 {
 	zval *tmp_dest, *tmp_from, *z_collection_dest = getThis(), *z_collection_from;
@@ -2426,8 +2351,7 @@ PHP_FUNCTION(oci_collection_assign)
 }
 /* }}} */
 
-/* {{{ proto bool oci_collection_element_assign(int index, string val)
-   Assign element val to collection at index ndx */
+/* Assign element val to collection at index ndx */
 PHP_FUNCTION(oci_collection_element_assign)
 {
 	zval *tmp, *z_collection = getThis();
@@ -2461,8 +2385,7 @@ PHP_FUNCTION(oci_collection_element_assign)
 }
 /* }}} */
 
-/* {{{ proto int oci_collection_size()
-   Return the size of a collection */
+/* Return the size of a collection */
 PHP_FUNCTION(oci_collection_size)
 {
 	zval *tmp, *z_collection = getThis();
@@ -2489,8 +2412,7 @@ PHP_FUNCTION(oci_collection_size)
 }
 /* }}} */
 
-/* {{{ proto int oci_collection_max()
-   Return the max value of a collection. For a varray this is the maximum length of the array */
+/* Return the max value of a collection. For a varray this is the maximum length of the array */
 PHP_FUNCTION(oci_collection_max)
 {
 	zval *tmp, *z_collection = getThis();
@@ -2517,8 +2439,7 @@ PHP_FUNCTION(oci_collection_max)
 }
 /* }}} */
 
-/* {{{ proto bool oci_collection_trim(int num)
-   Trim num elements from the end of a collection */
+/* Trim num elements from the end of a collection */
 PHP_FUNCTION(oci_collection_trim)
 {
 	zval *tmp, *z_collection = getThis();
@@ -2550,8 +2471,7 @@ PHP_FUNCTION(oci_collection_trim)
 }
 /* }}} */
 
-/* {{{ proto object oci_new_collection(resource connection, string tdo [, string schema])
-   Initialize a new collection */
+/* Initialize a new collection */
 PHP_FUNCTION(oci_new_collection)
 {
 	zval *z_connection;
@@ -2576,8 +2496,7 @@ PHP_FUNCTION(oci_new_collection)
 }
 /* }}} */
 
-/* {{{ proto bool oci_get_implicit(resource stmt)
-   Get the next statement resource from an Oracle 12c PL/SQL Implicit Result Set */
+/* Get the next statement resource from an Oracle 12c PL/SQL Implicit Result Set */
 PHP_FUNCTION(oci_get_implicit_resultset)
 {
 	zval *z_statement;

@@ -2,8 +2,7 @@
 Test date_create() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : DateTime date_create  ([ string $time  [, DateTimeZone $timezone  ]] )
- * Description: Returns new DateTime object
+/* Description: Returns new DateTime object
  * Source code: ext/date/php_date.c
  * Alias to functions: DateTime::__construct
  */

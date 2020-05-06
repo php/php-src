@@ -30,7 +30,6 @@
 * Since:
 */
 
-/* {{{ proto DOMProcessingInstruction::__construct(string name, [string value]); */
 PHP_METHOD(DOMProcessingInstruction, __construct)
 {
 	xmlNodePtr nodep = NULL, oldnode = NULL;

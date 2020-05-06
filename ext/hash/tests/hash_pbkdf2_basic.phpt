@@ -3,8 +3,7 @@ Hash: hash_pbkdf2() function : basic functionality
 --FILE--
 <?php
 
-/* Prototype  : string hash_hmac(string $algo, string $data, string $key [, int $length = 0 [, bool $raw_output = false]])
- * Description: Generate a keyed hash value using the HMAC method
+/* Description: Generate a keyed hash value using the HMAC method
  * Source code: ext/hash/hash.c
  * Alias to functions:
 */

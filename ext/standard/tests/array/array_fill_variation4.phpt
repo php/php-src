@@ -2,8 +2,7 @@
 Test array_fill() function : usage variations - using return value of array_fill for 'val' argument
 --FILE--
 <?php
-/* Prototype  : proto array array_fill(int start_key, int num, mixed val)
- * Description: Create an array containing num elements starting with index start_key each initialized to val
+/* Description: Create an array containing num elements starting with index start_key each initialized to val
  * Source code: ext/standard/array.c
  */
 

@@ -98,8 +98,7 @@ PHP_MINFO_FUNCTION(sysvshm)
 }
 /* }}} */
 
-/* {{{ proto int shm_attach(int key [, int memsize [, int perm]])
-   Creates or open a shared memory segment */
+/* Creates or open a shared memory segment */
 PHP_FUNCTION(shm_attach)
 {
 	sysvshm_shm *shm_list_ptr;
@@ -156,8 +155,7 @@ PHP_FUNCTION(shm_attach)
 }
 /* }}} */
 
-/* {{{ proto bool shm_detach(resource shm_identifier)
-   Disconnects from shared memory segment */
+/* Disconnects from shared memory segment */
 PHP_FUNCTION(shm_detach)
 {
 	zval *shm_id;
@@ -171,8 +169,7 @@ PHP_FUNCTION(shm_detach)
 }
 /* }}} */
 
-/* {{{ proto bool shm_remove(resource shm_identifier)
-   Removes shared memory from Unix systems */
+/* Removes shared memory from Unix systems */
 PHP_FUNCTION(shm_remove)
 {
 	zval *shm_id;
@@ -192,8 +189,7 @@ PHP_FUNCTION(shm_remove)
 }
 /* }}} */
 
-/* {{{ proto bool shm_put_var(resource shm_identifier, int variable_key, mixed variable)
-   Inserts or updates a variable in shared memory */
+/* Inserts or updates a variable in shared memory */
 PHP_FUNCTION(shm_put_var)
 {
 	zval *shm_id, *arg_var;
@@ -232,8 +228,7 @@ PHP_FUNCTION(shm_put_var)
 }
 /* }}} */
 
-/* {{{ proto mixed shm_get_var(resource id, int variable_key)
-   Returns a variable from shared memory */
+/* Returns a variable from shared memory */
 PHP_FUNCTION(shm_get_var)
 {
 	zval *shm_id;
@@ -269,8 +264,7 @@ PHP_FUNCTION(shm_get_var)
 }
 /* }}} */
 
-/* {{{ proto bool shm_has_var(resource id, int variable_key)
-	Checks whether a specific entry exists */
+/* Checks whether a specific entry exists */
 PHP_FUNCTION(shm_has_var)
 {
 	zval *shm_id;
@@ -285,8 +279,7 @@ PHP_FUNCTION(shm_has_var)
 }
 /* }}} */
 
-/* {{{ proto bool shm_remove_var(resource id, int variable_key)
-   Removes variable from shared memory */
+/* Removes variable from shared memory */
 PHP_FUNCTION(shm_remove_var)
 {
 	zval *shm_id;

@@ -9,8 +9,7 @@ gd_info()
 --FILE--
 <?php
 
-/* Prototype  : array gd_info  ( void  )
- * Description: Retrieve information about the currently installed GD library
+/* Description: Retrieve information about the currently installed GD library
  * Source code: ext/standard/image.c
  * Alias to functions:
  */

@@ -4,8 +4,7 @@ Test file_get_contents() function : variation - various absolute and relative pa
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
-/* Prototype  : string file_get_contents(string filename [, bool use_include_path [, resource context [, long offset [, long maxlen]]]])
- * Description: Read the entire file into a string
+/* Description: Read the entire file into a string
  * Source code: ext/standard/file.c
  * Alias to functions:
  */

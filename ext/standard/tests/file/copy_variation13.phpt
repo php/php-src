@@ -2,8 +2,7 @@
 Test copy() function: usage variations - src as dir and dest as an existing file(Bug #42243)
 --FILE--
 <?php
-/* Prototype: bool copy ( string $source, string $dest );
-   Description: Makes a copy of the file source to dest.
+/* Description: Makes a copy of the file source to dest.
      Returns TRUE on success or FALSE on failure.
 */
 

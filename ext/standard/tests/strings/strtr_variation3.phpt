@@ -2,9 +2,7 @@
 Test strtr() function : usage variations - string containing escape sequences for 'str' argument
 --FILE--
 <?php
-/* Prototype  : string strtr(string $str, string $from[, string $to]);
-                string strtr(string $str, array $replace_pairs);
- * Description: Translates characters in str using given translation tables
+/* Description: Translates characters in str using given translation tables
  * Source code: ext/standard/string.c
 */
 

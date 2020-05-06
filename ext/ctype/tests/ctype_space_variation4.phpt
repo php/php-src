@@ -4,8 +4,7 @@ Test ctype_space() function : usage variations - octal and hexadecimal values
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-/* Prototype  : bool ctype_space(mixed $c)
- * Description: Checks for whitespace character(s)
+/* Description: Checks for whitespace character(s)
  * Source code: ext/ctype/ctype.c
  */
 

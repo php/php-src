@@ -109,8 +109,7 @@ static zend_bool zend_valid_closure_binding(
 }
 /* }}} */
 
-/* {{{ proto mixed Closure::call(object to [, mixed parameter] [, mixed ...] )
-   Call closure, binding to a given object with its class as the scope */
+/* Call closure, binding to a given object with its class as the scope */
 ZEND_METHOD(Closure, call)
 {
 	zval *newthis, closure_result;
@@ -187,8 +186,7 @@ ZEND_METHOD(Closure, call)
 }
 /* }}} */
 
-/* {{{ proto Closure Closure::bind(callable old, object to [, mixed scope])
-   Create a closure from another one and bind to another object and scope */
+/* Create a closure from another one and bind to another object and scope */
 ZEND_METHOD(Closure, bind)
 {
 	zval *newthis, *zclosure, *scope_arg = NULL;
@@ -324,8 +322,7 @@ static int zend_create_closure_from_callable(zval *return_value, zval *callable,
 }
 /* }}} */
 
-/* {{{ proto Closure Closure::fromCallable(callable callable)
-   Create a closure from a callable using the current scope. */
+/* Create a closure from a callable using the current scope. */
 ZEND_METHOD(Closure, fromCallable)
 {
 	zval *callable;
@@ -592,8 +589,7 @@ static HashTable *zend_closure_get_gc(zend_object *obj, zval **table, int *n) /*
 }
 /* }}} */
 
-/* {{{ proto Closure::__construct()
-   Private constructor preventing instantiation */
+/* Private constructor preventing instantiation */
 ZEND_COLD ZEND_METHOD(Closure, __construct)
 {
 	zend_throw_error(NULL, "Instantiation of 'Closure' is not allowed");

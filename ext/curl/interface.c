@@ -1577,8 +1577,7 @@ static void curl_free_slist(zval *el)
 }
 /* }}} */
 
-/* {{{ proto array curl_version([int version])
-   Return cURL version information. */
+/* Return cURL version information. */
 PHP_FUNCTION(curl_version)
 {
 	curl_version_info_data *d;
@@ -1742,8 +1741,7 @@ static void _php_curl_set_default_options(php_curl *ch)
 }
 /* }}} */
 
-/* {{{ proto resource curl_init([string url])
-   Initialize a cURL session */
+/* Initialize a cURL session */
 PHP_FUNCTION(curl_init)
 {
 	php_curl *ch;
@@ -2070,8 +2068,7 @@ static inline int build_mime_structure_from_hash(php_curl *ch, zval *zpostfields
 }
 /* }}} */
 
-/* {{{ proto resource curl_copy_handle(resource ch)
-   Copy a cURL handle along with all of it's preferences */
+/* Copy a cURL handle along with all of it's preferences */
 PHP_FUNCTION(curl_copy_handle)
 {
 	CURL		*cp;
@@ -2773,8 +2770,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 }
 /* }}} */
 
-/* {{{ proto bool curl_setopt(resource ch, int option, mixed value)
-   Set an option for a cURL transfer */
+/* Set an option for a cURL transfer */
 PHP_FUNCTION(curl_setopt)
 {
 	zval       *zid, *zvalue;
@@ -2804,8 +2800,7 @@ PHP_FUNCTION(curl_setopt)
 }
 /* }}} */
 
-/* {{{ proto bool curl_setopt_array(resource ch, array options)
-   Set an array of option for a cURL transfer */
+/* Set an array of option for a cURL transfer */
 PHP_FUNCTION(curl_setopt_array)
 {
 	zval		*zid, *arr, *entry;
@@ -2853,8 +2848,7 @@ void _php_curl_cleanup_handle(php_curl *ch)
 }
 /* }}} */
 
-/* {{{ proto bool curl_exec(resource ch)
-   Perform a cURL session */
+/* Perform a cURL session */
 PHP_FUNCTION(curl_exec)
 {
 	CURLcode	error;
@@ -2910,8 +2904,7 @@ PHP_FUNCTION(curl_exec)
 }
 /* }}} */
 
-/* {{{ proto mixed curl_getinfo(resource ch [, int option])
-   Get information regarding a specific transfer */
+/* Get information regarding a specific transfer */
 PHP_FUNCTION(curl_getinfo)
 {
 	zval		*zid;
@@ -3165,8 +3158,7 @@ PHP_FUNCTION(curl_getinfo)
 }
 /* }}} */
 
-/* {{{ proto string curl_error(resource ch)
-   Return a string contain the last error for the current session */
+/* Return a string contain the last error for the current session */
 PHP_FUNCTION(curl_error)
 {
 	zval		*zid;
@@ -3189,8 +3181,7 @@ PHP_FUNCTION(curl_error)
 }
 /* }}} */
 
-/* {{{ proto int curl_errno(resource ch)
-   Return an integer containing the last error number */
+/* Return an integer containing the last error number */
 PHP_FUNCTION(curl_errno)
 {
 	zval		*zid;
@@ -3208,8 +3199,7 @@ PHP_FUNCTION(curl_errno)
 }
 /* }}} */
 
-/* {{{ proto void curl_close(resource ch)
-   Close a cURL session */
+/* Close a cURL session */
 PHP_FUNCTION(curl_close)
 {
 	zval		*zid;
@@ -3315,8 +3305,7 @@ static void _php_curl_close(zend_resource *rsrc)
 }
 /* }}} */
 
-/* {{{ proto bool curl_strerror(int code)
-      return string describing error code */
+/* return string describing error code */
 PHP_FUNCTION(curl_strerror)
 {
 	zend_long code;
@@ -3381,8 +3370,7 @@ static void _php_curl_reset_handlers(php_curl *ch)
 }
 /* }}} */
 
-/* {{{ proto void curl_reset(resource ch)
-   Reset all options of a libcurl session handle */
+/* Reset all options of a libcurl session handle */
 PHP_FUNCTION(curl_reset)
 {
 	zval       *zid;
@@ -3407,8 +3395,7 @@ PHP_FUNCTION(curl_reset)
 }
 /* }}} */
 
-/* {{{ proto void curl_escape(resource ch, string str)
-   URL encodes the given string */
+/* URL encodes the given string */
 PHP_FUNCTION(curl_escape)
 {
 	zend_string *str;
@@ -3438,8 +3425,7 @@ PHP_FUNCTION(curl_escape)
 }
 /* }}} */
 
-/* {{{ proto void curl_unescape(resource ch, string str)
-   URL decodes the given string */
+/* URL decodes the given string */
 PHP_FUNCTION(curl_unescape)
 {
 	char        *out = NULL;
@@ -3470,8 +3456,7 @@ PHP_FUNCTION(curl_unescape)
 }
 /* }}} */
 
-/* {{{ proto void curl_pause(resource ch, int bitmask)
-       pause and unpause a connection */
+/* pause and unpause a connection */
 PHP_FUNCTION(curl_pause)
 {
 	zend_long       bitmask;

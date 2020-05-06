@@ -11,8 +11,7 @@ if(substr(PHP_OS, 0, 3) == "WIN")
 obscure_filename
 --FILE--
 <?php
-/* Prototype  : int file_put_contents(string file, mixed data [, int flags [, resource context]])
- * Description: Write/Create a file with contents data and return the number of bytes written
+/* Description: Write/Create a file with contents data and return the number of bytes written
  * Source code: ext/standard/file.c
  * Alias to functions:
  */

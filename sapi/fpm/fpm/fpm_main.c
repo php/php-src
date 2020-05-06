@@ -1496,8 +1496,7 @@ PHP_FUNCTION(apache_request_headers) /* {{{ */
 	}
 } /* }}} */
 
-/* {{{ proto array fpm_get_status
- * Returns the status of the fastcgi process manager */
+/* Returns the status of the fastcgi process manager */
 PHP_FUNCTION(fpm_get_status) /* {{{ */
 {
 	if (zend_parse_parameters_none() == FAILURE) {
