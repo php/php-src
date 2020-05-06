@@ -171,6 +171,7 @@ static void php_enchant_broker_free(zend_object *object) /* {{{ */
 			enchant_broker_free(broker->pbroker);
 		}
 	}
+	zend_object_std_dtor(object);
 }
 /* }}} */
 
@@ -190,6 +191,7 @@ static void php_enchant_dict_free(zend_object *object) /* {{{ */
 			}
 		}
 	}
+	zend_object_std_dtor(object);
 }
 /* }}} */
 
