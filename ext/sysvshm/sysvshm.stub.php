@@ -6,7 +6,7 @@ final class SysvSharedMemory
 {
 }
 
-function shm_attach(int $key, int $memsize = UNKNOWN, int $perm = 0666): SysvSharedMemory|false {}
+function shm_attach(int $key, ?int $memsize = null, int $perm = 0666): SysvSharedMemory|false {}
 
 function shm_detach(SysvSharedMemory $shm): bool {}
 

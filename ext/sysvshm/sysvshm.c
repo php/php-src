@@ -137,15 +137,20 @@ PHP_FUNCTION(shm_attach)
 	sysvshm_shm *shm_list_ptr;
 	char *shm_ptr;
 	sysvshm_chunk_head *chunk_ptr;
-	zend_long shm_key, shm_id, shm_size = php_sysvshm.init_mem, shm_flag = 0666;
+	zend_long shm_key, shm_id, shm_size, shm_flag = 0666;
+	zend_bool shm_size_is_null = 1;
 
-	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "l|ll", &shm_key, &shm_size, &shm_flag)) {
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "l|l!l", &shm_key, &shm_size, &shm_size_is_null, &shm_flag)) {
 		RETURN_THROWS();
 	}
 
+	if (shm_size_is_null) {
+		shm_size = php_sysvshm.init_mem;
+	}
+
 	if (shm_size < 1) {
-		php_error_docref(NULL, E_WARNING, "Segment size must be greater than zero");
-		RETURN_FALSE;
+		zend_argument_value_error(2, "must be greater than 0");
+		RETURN_THROWS();
   	}
 
 	/* get the id from a specified key or create new shared memory */
