@@ -4794,7 +4794,9 @@ PHP_FUNCTION(setlocale)
 				/* Remember if locale was changed */
 				size_t len = strlen(retval);
 
-				BG(locale_changed) = 1;
+				if (!zend_string_equals_literal(loc, "C")) {
+					BG(locale_changed) = 1;
+				}
 				if (cat == LC_CTYPE || cat == LC_ALL) {
 					if (BG(locale_string)) {
 						zend_string_release_ex(BG(locale_string), 0);
