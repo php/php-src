@@ -192,9 +192,9 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 	mbfl_encoding_detector *identd = NULL;
 	mbfl_buffer_converter *convd = NULL;
 
-	mbfl_string_init_set(&string, info->to_language, info->to_encoding);
-	mbfl_string_init_set(&resvar, info->to_language, info->to_encoding);
-	mbfl_string_init_set(&resval, info->to_language, info->to_encoding);
+	mbfl_string_init_set(&string, info->to_encoding);
+	mbfl_string_init_set(&resvar, info->to_encoding);
+	mbfl_string_init_set(&resval, info->to_encoding);
 
 	if (!res || *res == '\0') {
 		goto out;

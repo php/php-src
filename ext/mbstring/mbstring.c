@@ -469,7 +469,6 @@ static const zend_encoding *php_mb_zend_encoding_detector(const unsigned char *a
 	}
 
 	mbfl_string_init(&string);
-	string.no_language = MBSTRG(language);
 	string.val = (unsigned char *)arg_string;
 	string.len = arg_length;
 	return (const zend_encoding *) mbfl_identify_encoding(&string, (const mbfl_encoding **)list, list_size, 0);
@@ -485,7 +484,6 @@ static size_t php_mb_zend_encoding_converter(unsigned char **to, size_t *to_leng
 	/* new encoding */
 	/* initialize string */
 	string.encoding = (const mbfl_encoding*)encoding_from;
-	string.no_language = MBSTRG(language);
 	string.val = (unsigned char*)from;
 	string.len = from_length;
 
@@ -1753,7 +1751,6 @@ PHP_FUNCTION(mb_output_handler)
  	/* feed the string */
  	mbfl_string_init(&string);
 	/* these are not needed. convd has encoding info.
-	string.no_language = MBSTRG(language);
 	string.encoding = MBSTRG(current_internal_encoding);
 	*/
  	string.val = (unsigned char *)arg_string;
@@ -1834,7 +1831,6 @@ PHP_FUNCTION(mb_str_split)
 	/* fill mbfl_string structure */
 	string.val = (unsigned char *) ZSTR_VAL(str);
 	string.len = ZSTR_LEN(str);
-	string.no_language = MBSTRG(language);
 	string.encoding = php_mb_get_encoding(encoding, 3);
 	if (!string.encoding) {
 		RETURN_THROWS();
@@ -1959,7 +1955,6 @@ PHP_FUNCTION(mb_strlen)
 
 	string.val = (unsigned char *) str;
 	string.len = str_len;
-	string.no_language = MBSTRG(language);
 	string.encoding = php_mb_get_encoding(enc_name, 2);
 	if (!string.encoding) {
 		RETURN_THROWS();
@@ -2003,7 +1998,6 @@ PHP_FUNCTION(mb_strpos)
 		RETURN_THROWS();
 	}
 
-	haystack.no_language = needle.no_language = MBSTRG(language);
 	haystack.encoding = needle.encoding = php_mb_get_encoding(enc_name, 4);
 	if (!haystack.encoding) {
 		RETURN_THROWS();
@@ -2031,7 +2025,6 @@ PHP_FUNCTION(mb_strrpos)
 		RETURN_THROWS();
 	}
 
-	haystack.no_language = needle.no_language = MBSTRG(language);
 	haystack.encoding = needle.encoding = php_mb_get_encoding(enc_name, 4);
 	if (!haystack.encoding) {
 		RETURN_THROWS();
@@ -2127,7 +2120,6 @@ static void php_mb_strstr_variants(INTERNAL_FUNCTION_PARAMETERS, unsigned int va
 		RETURN_THROWS();
 	}
 
-	haystack.no_language = needle.no_language = MBSTRG(language);
 	haystack.encoding = needle.encoding = php_mb_get_encoding(encoding_name, 4);
 	if (!haystack.encoding) {
 		RETURN_THROWS();
@@ -2216,7 +2208,6 @@ PHP_FUNCTION(mb_substr_count)
 		RETURN_THROWS();
 	}
 
-	haystack.no_language = needle.no_language = MBSTRG(language);
 	haystack.encoding = needle.encoding = php_mb_get_encoding(enc_name, 3);
 	if (!haystack.encoding) {
 		RETURN_THROWS();
@@ -2248,7 +2239,6 @@ PHP_FUNCTION(mb_substr)
 		RETURN_THROWS();
 	}
 
-	string.no_language = MBSTRG(language);
 	string.encoding = php_mb_get_encoding(encoding, 4);
 	if (!string.encoding) {
 		RETURN_THROWS();
@@ -2309,7 +2299,6 @@ PHP_FUNCTION(mb_strcut)
 		RETURN_THROWS();
 	}
 
-	string.no_language = MBSTRG(language);
 	string.encoding = php_mb_get_encoding(encoding, 4);
 	if (!string.encoding) {
 		RETURN_THROWS();
@@ -2365,7 +2354,6 @@ PHP_FUNCTION(mb_strwidth)
 		RETURN_THROWS();
 	}
 
-	string.no_language = MBSTRG(language);
 	string.encoding = php_mb_get_encoding(enc_name, 2);
 	if (!string.encoding) {
 		RETURN_THROWS();
@@ -2391,7 +2379,6 @@ PHP_FUNCTION(mb_strimwidth)
 		RETURN_THROWS();
 	}
 
-	string.no_language = marker.no_language = MBSTRG(language);
 	string.encoding = marker.encoding = php_mb_get_encoding(encoding, 5);
 	if (!string.encoding) {
 		RETURN_THROWS();
@@ -2466,7 +2453,6 @@ MBSTRING_API char *php_mb_convert_encoding_ex(const char *input, size_t length, 
 
 	/* initialize string */
 	string.encoding = from_encoding;
-	string.no_language = MBSTRG(language);
 	string.val = (unsigned char *)input;
 	string.len = length;
 
@@ -2834,7 +2820,6 @@ PHP_FUNCTION(mb_detect_encoding)
 	}
 
 	mbfl_string_init(&string);
-	string.no_language = MBSTRG(language);
 	string.val = (unsigned char *)str;
 	string.len = str_len;
 	ret = mbfl_identify_encoding(&string, elist, size, strict);
@@ -2911,7 +2896,6 @@ PHP_FUNCTION(mb_encode_mimeheader)
 	size_t linefeed_len;
 	zend_long indent = 0;
 
-	string.no_language = MBSTRG(language);
 	string.encoding = MBSTRG(current_internal_encoding);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|Sssl", (char **)&string.val, &string.len, &charset_name, &trans_enc_name, &trans_enc_name_len, &linefeed, &linefeed_len, &indent) == FAILURE) {
@@ -2957,7 +2941,6 @@ PHP_FUNCTION(mb_decode_mimeheader)
 {
 	mbfl_string string, result, *ret;
 
-	string.no_language = MBSTRG(language);
 	string.encoding = MBSTRG(current_internal_encoding);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", (char **)&string.val, &string.len) == FAILURE) {
@@ -3053,7 +3036,6 @@ PHP_FUNCTION(mb_convert_kana)
 	}
 
 	/* encoding */
-	string.no_language = MBSTRG(language);
 	string.encoding = php_mb_get_encoding(encname, 3);
 	if (!string.encoding) {
 		RETURN_THROWS();
@@ -3195,7 +3177,6 @@ PHP_FUNCTION(mb_convert_variables)
 	mbfl_string_init(&result);
 	from_encoding = MBSTRG(current_internal_encoding);
 	string.encoding = from_encoding;
-	string.no_language = MBSTRG(language);
 
 	/* pre-conversion encoding */
 	if (from_enc_ht) {
@@ -3302,7 +3283,6 @@ php_mb_numericentity_exec(INTERNAL_FUNCTION_PARAMETERS, int type)
 		}
 	}
 
-	string.no_language = MBSTRG(language);
 	string.val = (unsigned char *)str;
 	string.len = str_len;
 	string.encoding = php_mb_get_encoding(encoding, 3);
@@ -3706,7 +3686,6 @@ PHP_FUNCTION(mb_send_mail)
 	}
 
 	/* Subject: */
-	orig_str.no_language = MBSTRG(language);
 	orig_str.val = (unsigned char *)subject;
 	orig_str.len = subject_len;
 	orig_str.encoding = MBSTRG(current_internal_encoding);
@@ -3720,7 +3699,6 @@ PHP_FUNCTION(mb_send_mail)
 	}
 
 	/* message body */
-	orig_str.no_language = MBSTRG(language);
 	orig_str.val = (unsigned char *)message;
 	orig_str.len = message_len;
 	orig_str.encoding = MBSTRG(current_internal_encoding);
@@ -3997,7 +3975,7 @@ static inline int php_mb_check_encoding_impl(mbfl_buffer_converter *convd, const
 	size_t illegalchars = 0;
 
 	/* initialize string */
-	mbfl_string_init_set(&string, mbfl_no_language_neutral, encoding);
+	mbfl_string_init_set(&string, encoding);
 	mbfl_string_init(&result);
 
 	string.val = (unsigned char *) input;
@@ -4463,9 +4441,7 @@ MBSTRING_API size_t php_mb_stripos(int mode, const char *old_haystack, size_t ol
 
 	mbfl_string_init(&haystack);
 	mbfl_string_init(&needle);
-	haystack.no_language = MBSTRG(language);
 	haystack.encoding = enc;
-	needle.no_language = MBSTRG(language);
 	needle.encoding = enc;
 
 	do {

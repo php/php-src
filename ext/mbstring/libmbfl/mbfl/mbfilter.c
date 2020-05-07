@@ -1038,7 +1038,6 @@ mbfl_substr(
 	unsigned char *p, *w;
 
 	mbfl_string_init(result);
-	result->no_language = string->no_language;
 	result->encoding = string->encoding;
 
 	if ((encoding->flag & (MBFL_ENCTYPE_SBCS | MBFL_ENCTYPE_WCS2BE | MBFL_ENCTYPE_WCS2LE | MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_WCS4LE)) ||
@@ -1125,7 +1124,6 @@ mbfl_substr(
 
 		mbfl_memory_device_init(&device, length + 1, 0);
 		mbfl_string_init(result);
-		result->no_language = string->no_language;
 		result->encoding = string->encoding;
 		/* output code filter */
 		decoder = mbfl_convert_filter_new(
@@ -1187,7 +1185,6 @@ mbfl_strcut(
 	}
 
 	mbfl_string_init(result);
-	result->no_language = string->no_language;
 	result->encoding = string->encoding;
 
 	if ((encoding->flag & (MBFL_ENCTYPE_SBCS
@@ -1573,7 +1570,6 @@ mbfl_strimwidth(
 		return NULL;
 	}
 	mbfl_string_init(result);
-	result->no_language = string->no_language;
 	result->encoding = string->encoding;
 	mbfl_memory_device_init(&pc.device, MIN(string->len, width), 0);
 
@@ -1675,7 +1671,6 @@ mbfl_ja_jp_hantozen(
 	mbfl_memory_device_init(&device, string->len, 0);
 	mbfl_string_init(result);
 
-	result->no_language = string->no_language;
 	result->encoding = string->encoding;
 
 	decoder = mbfl_convert_filter_new(
@@ -2028,7 +2023,6 @@ mbfl_mime_header_encode(
 	struct mime_header_encoder_data *pe;
 
 	mbfl_string_init(result);
-	result->no_language = string->no_language;
 	result->encoding = &mbfl_encoding_ascii;
 
 	pe = mime_header_encoder_new(string->encoding, outcode, encoding);
@@ -2320,7 +2314,6 @@ mbfl_mime_header_decode(
 	struct mime_header_decoder_data *pd;
 
 	mbfl_string_init(result);
-	result->no_language = string->no_language;
 	result->encoding = outcode;
 
 	pd = mime_header_decoder_new(outcode);
@@ -2715,7 +2708,6 @@ mbfl_html_numeric_entity(
 		return NULL;
 	}
 	mbfl_string_init(result);
-	result->no_language = string->no_language;
 	result->encoding = string->encoding;
 	mbfl_memory_device_init(&device, string->len, 0);
 
