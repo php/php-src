@@ -251,7 +251,9 @@ void php_filter_full_special_chars(PHP_INPUT_FILTER_PARAM_DECL)
 	} else {
 		quotes = ENT_NOQUOTES;
 	}
-	buf = php_escape_html_entities_ex((unsigned char *) Z_STRVAL_P(value), Z_STRLEN_P(value), 1, quotes, SG(default_charset), 0);
+	buf = php_escape_html_entities_ex(
+		(unsigned char *) Z_STRVAL_P(value), Z_STRLEN_P(value), /* all */ 1, quotes,
+		/* charset_hint */ NULL, /* double_encode */ 0, /* quiet */ 0);
 	zval_ptr_dtor(value);
 	ZVAL_STR(value, buf);
 }

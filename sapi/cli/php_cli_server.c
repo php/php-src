@@ -1978,7 +1978,7 @@ static int php_cli_server_send_error_page(php_cli_server *server, php_cli_server
 	php_cli_server_content_sender_ctor(&client->content_sender);
 	client->content_sender_initialized = 1;
 
-	escaped_request_uri = php_escape_html_entities_ex((unsigned char *)client->request.request_uri, client->request.request_uri_len, 0, ENT_QUOTES, NULL, 0);
+	escaped_request_uri = php_escape_html_entities_ex((unsigned char *)client->request.request_uri, client->request.request_uri_len, 0, ENT_QUOTES, NULL, /* double_encode */ 0, /* quiet */ 0);
 
 	{
 		static const char prologue_template[] = "<!doctype html><html><head><title>%d %s</title>";

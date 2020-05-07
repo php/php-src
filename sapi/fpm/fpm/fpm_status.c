@@ -517,7 +517,7 @@ int fpm_status_handle_request(void) /* {{{ */
 					if (!encode) {
 						query_string = proc.query_string;
 					} else {
-						tmp_query_string = php_escape_html_entities_ex((unsigned char *)proc.query_string, strlen(proc.query_string), 1, ENT_HTML_IGNORE_ERRORS & ENT_COMPAT, NULL, 1);
+						tmp_query_string = php_escape_html_entities_ex((unsigned char *)proc.query_string, strlen(proc.query_string), 1, ENT_HTML_IGNORE_ERRORS & ENT_COMPAT, NULL, /* double_encode */ 1, /* quiet */ 0);
 						query_string = ZSTR_VAL(tmp_query_string);
 					}
 				}

@@ -95,31 +95,6 @@ PHPAPI size_t core_globals_offset;
 
 #define SAFE_FILENAME(f) ((f)?(f):"-")
 
-static char *get_safe_charset_hint(void) {
-	ZEND_TLS char *lastHint = NULL;
-	ZEND_TLS char *lastCodeset = NULL;
-	char *hint = SG(default_charset);
-	size_t len = strlen(hint);
-	size_t i = 0;
-
-	if (lastHint == SG(default_charset)) {
-		return lastCodeset;
-	}
-
-	lastHint = hint;
-	lastCodeset = NULL;
-
-	for (i = 0; i < sizeof(charset_map)/sizeof(charset_map[0]); i++) {
-		if (len == charset_map[i].codeset_len
-			&& zend_binary_strcasecmp(hint, len, charset_map[i].codeset, len) == 0) {
-			lastCodeset = (char*)charset_map[i].codeset;
-			break;
-		}
-	}
-
-	return lastCodeset;
-}
-
 /* {{{ PHP_INI_MH
  */
 static PHP_INI_MH(OnSetFacility)
@@ -937,6 +912,19 @@ PHPAPI size_t php_printf(const char *format, ...)
 }
 /* }}} */
 
+static zend_string *escape_html(const char *buffer, size_t buffer_len) {
+	zend_string *result = php_escape_html_entities_ex(
+		(const unsigned char *) buffer, buffer_len, 0, ENT_COMPAT,
+		/* charset_hint */ NULL, /* double_encode */ 1, /* quiet */ 1);
+	if (!result || ZSTR_LEN(result) == 0) {
+		/* Retry with substituting invalid chars on fail. */
+		result = php_escape_html_entities_ex(
+			(const unsigned char *) buffer, buffer_len, 0, ENT_COMPAT | ENT_HTML_SUBSTITUTE_ERRORS,
+			/* charset_hint */ NULL, /* double_encode */ 1, /* quiet */ 1);
+	}
+	return result;
+}
+
 /* {{{ php_verror */
 /* php_verror is called from php_error_docref<n> functions.
  * Its purpose is to unify error messages and automatically generate clickable
@@ -962,12 +950,7 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 	buffer_len = (int)vspprintf(&buffer, 0, format, args);
 
 	if (PG(html_errors)) {
-		replace_buffer = php_escape_html_entities((unsigned char*)buffer, buffer_len, 0, ENT_COMPAT, get_safe_charset_hint());
-		/* Retry with substituting invalid chars on fail. */
-		if (!replace_buffer || ZSTR_LEN(replace_buffer) < 1) {
-			replace_buffer = php_escape_html_entities((unsigned char*)buffer, buffer_len, 0, ENT_COMPAT | ENT_HTML_SUBSTITUTE_ERRORS, get_safe_charset_hint());
-		}
-
+		replace_buffer = escape_html(buffer, buffer_len);
 		efree(buffer);
 
 		if (replace_buffer) {
@@ -1032,7 +1015,7 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 	}
 
 	if (PG(html_errors)) {
-		replace_origin = php_escape_html_entities((unsigned char*)origin, origin_len, 0, ENT_COMPAT, get_safe_charset_hint());
+		replace_origin = escape_html(origin, origin_len);
 		efree(origin);
 		origin = ZSTR_VAL(replace_origin);
 	}
@@ -1335,7 +1318,7 @@ static ZEND_COLD void php_error_cb(int orig_type, const char *error_filename, co
 
 				if (PG(html_errors)) {
 					if (type == E_ERROR || type == E_PARSE) {
-						zend_string *buf = php_escape_html_entities((unsigned char*)buffer, buffer_len, 0, ENT_COMPAT, get_safe_charset_hint());
+						zend_string *buf = escape_html(buffer, buffer_len);
 						php_printf("%s<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%" PRIu32 "</b><br />\n%s", STR_PRINT(prepend_string), error_type_str, ZSTR_VAL(buf), error_filename, error_lineno, STR_PRINT(append_string));
 						zend_string_free(buf);
 					} else {
