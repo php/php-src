@@ -1881,6 +1881,7 @@ PHP_FUNCTION(str_starts_with)
 
 	RETURN_BOOL(memcmp(ZSTR_VAL(haystack), ZSTR_VAL(needle), ZSTR_LEN(needle)) == 0);
 }
+/* }}} */
 
 /* {{{ proto bool str_ends_with(string haystack, string needle)
    Checks if haystack ends with needle */
@@ -1901,6 +1902,7 @@ PHP_FUNCTION(str_ends_with)
 		ZSTR_VAL(haystack) + ZSTR_LEN(haystack) - ZSTR_LEN(needle),
 		ZSTR_VAL(needle), ZSTR_LEN(needle)) == 0);
 }
+/* }}} */
 
 /* {{{ proto string strchr(string haystack, string needle)
    An alias for strstr */
@@ -5857,7 +5859,6 @@ PHP_FUNCTION(str_shuffle)
 }
 /* }}} */
 
-
 /* {{{ proto array|int str_word_count(string str, [int format [, string charlist]])
    	Counts the number of words inside a string. If format of 1 is specified,
    	then the function will return an array containing all the words
@@ -6126,7 +6127,6 @@ static zend_string *php_utf8_decode(const char *s, size_t len)
 	return str;
 }
 /* }}} */
-
 
 /* {{{ proto string utf8_encode(string data)
    Encodes an ISO-8859-1 string to UTF-8 */
