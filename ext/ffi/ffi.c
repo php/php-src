@@ -1987,18 +1987,20 @@ static HashTable *zend_ffi_cdata_get_debug_info(zval *object, int *is_temp) /* {
 			break;
 		case ZEND_FFI_TYPE_STRUCT:
 			ht = zend_new_array(zend_hash_num_elements(&type->record.fields));
-			ZEND_HASH_FOREACH_STR_KEY_PTR(&type->record.fields, key, f) {
-				if (key) {
-					if (!f->bits) {
-						void *f_ptr = (void*)(((char*)ptr) + f->offset);
-						zend_ffi_cdata_to_zval(NULL, f_ptr, ZEND_FFI_TYPE(f->type), BP_VAR_R, &tmp, ZEND_FFI_FLAG_CONST, 0);
-						zend_hash_add(ht, key, &tmp);
-					} else {
-						zend_ffi_bit_field_to_zval(ptr, f, &tmp);
-						zend_hash_add(ht, key, &tmp);
+			if (!(type->attr & ZEND_FFI_ATTR_UNION)) {
+				ZEND_HASH_FOREACH_STR_KEY_PTR(&type->record.fields, key, f) {
+					if (key) {
+						if (!f->bits) {
+							void *f_ptr = (void*)(((char*)ptr) + f->offset);
+							zend_ffi_cdata_to_zval(NULL, f_ptr, ZEND_FFI_TYPE(f->type), BP_VAR_R, &tmp, ZEND_FFI_FLAG_CONST, 0);
+							zend_hash_add(ht, key, &tmp);
+						} else {
+							zend_ffi_bit_field_to_zval(ptr, f, &tmp);
+							zend_hash_add(ht, key, &tmp);
+						}
 					}
-				}
-			} ZEND_HASH_FOREACH_END();
+				} ZEND_HASH_FOREACH_END();
+			}
 			*is_temp = 1;
 			return ht;
 		case ZEND_FFI_TYPE_ARRAY:
