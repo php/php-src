@@ -1,6 +1,6 @@
 /* This is a generated file, edit the .stub.php file instead. */
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_sem_get, 0, 1, Sysvsem, MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_sem_get, 0, 1, SysvSemaphore, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, key, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, max_acquire, IS_LONG, 0, "1")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, perm, IS_LONG, 0, "0666")
@@ -8,12 +8,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_sem_get, 0, 1, Sysvsem, MAY_
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sem_acquire, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, sem_identifier, Sysvsem, 0)
+	ZEND_ARG_OBJ_INFO(0, semaphore, SysvSemaphore, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, nowait, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sem_release, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, sem_identifier, Sysvsem, 0)
+	ZEND_ARG_OBJ_INFO(0, semaphore, SysvSemaphore, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_sem_remove arginfo_sem_release
@@ -34,6 +34,6 @@ static const zend_function_entry ext_functions[] = {
 };
 
 
-static const zend_function_entry class_Sysvsem_methods[] = {
+static const zend_function_entry class_SysvSemaphore_methods[] = {
 	ZEND_FE_END
 };

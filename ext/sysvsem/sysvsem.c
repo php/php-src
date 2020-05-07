@@ -86,7 +86,7 @@ ZEND_GET_MODULE(sysvsem)
 #define SYSVSEM_USAGE	1
 #define SYSVSEM_SETVAL	2
 
-/* Sysvsem class */
+/* SysvSemaphore class */
 
 zend_class_entry *sysvsem_ce;
 static zend_object_handlers sysvsem_object_handlers;
@@ -108,7 +108,7 @@ static zend_object *sysvsem_create_object(zend_class_entry *class_type) {
 }
 
 static zend_function *sysvsem_get_constructor(zend_object *object) {
-	zend_throw_error(NULL, "Cannot directly construct Sysvsem, use sem_get() instead");
+	zend_throw_error(NULL, "Cannot directly construct SysvSemaphore, use sem_get() instead");
 	return NULL;
 }
 
@@ -154,7 +154,7 @@ static void sysvsem_free_obj(zend_object *object)
 PHP_MINIT_FUNCTION(sysvsem)
 {
 	zend_class_entry ce;
-	INIT_CLASS_ENTRY(ce, "Sysvsem", class_Sysvsem_methods);
+	INIT_CLASS_ENTRY(ce, "SysvSemaphore", class_SysvSemaphore_methods);
 	sysvsem_ce = zend_register_internal_class(&ce);
 	sysvsem_ce->ce_flags |= ZEND_ACC_FINAL;
 	sysvsem_ce->create_object = sysvsem_create_object;
@@ -187,7 +187,7 @@ PHP_MINFO_FUNCTION(sysvsem)
 #undef SETVAL_WANTS_PTR
 #endif
 
-/* {{{ proto Sysvsem sem_get(int key [, int max_acquire [, int perm [, int auto_release]])
+/* {{{ proto SysvSemaphore sem_get(int key [, int max_acquire [, int perm [, int auto_release]])
    Return an id for the semaphore with the given key, and allow max_acquire (default 1) processes to acquire it simultaneously */
 PHP_FUNCTION(sem_get)
 {
@@ -341,7 +341,7 @@ static void php_sysvsem_semop(INTERNAL_FUNCTION_PARAMETERS, int acquire)
 }
 /* }}} */
 
-/* {{{ proto bool sem_acquire(Sysvsem id)
+/* {{{ proto bool sem_acquire(SysvSemaphore id)
    Acquires the semaphore with the given id, blocking if necessary */
 PHP_FUNCTION(sem_acquire)
 {
@@ -349,7 +349,7 @@ PHP_FUNCTION(sem_acquire)
 }
 /* }}} */
 
-/* {{{ proto bool sem_release(Sysvsem id)
+/* {{{ proto bool sem_release(SysvSemaphore id)
    Releases the semaphore with the given id */
 PHP_FUNCTION(sem_release)
 {
@@ -357,7 +357,7 @@ PHP_FUNCTION(sem_release)
 }
 /* }}} */
 
-/* {{{ proto bool sem_remove(Sysvsem id)
+/* {{{ proto bool sem_remove(SysvSemaphore id)
    Removes semaphore from Unix systems */
 
 /*

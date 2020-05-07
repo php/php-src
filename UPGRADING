@@ -417,7 +417,7 @@ PHP 8.0 UPGRADE NOTES
     locale component from the default.
 
 - Sysvsem:
-  . sem_get() will now return an Sysvsem object rather than a resource.
+  . sem_get() will now return an SysvSemaphore object rather than a resource.
     Return value checks using is_resource() should be replaced with checks
     for `false`.
 
