@@ -595,8 +595,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, in
 	zend_string 		*key;
 	pcre_cache_entry *ret;
 
-	if (locale_aware && BG(ctype_string) &&
-		(ZSTR_LEN(BG(ctype_string)) != 1 && ZSTR_VAL(BG(ctype_string))[0] != 'C')) {
+	if (locale_aware && BG(ctype_string)) {
 		key = zend_string_concat2(
 			ZSTR_VAL(BG(ctype_string)), ZSTR_LEN(BG(ctype_string)),
 			ZSTR_VAL(regex), ZSTR_LEN(regex));
