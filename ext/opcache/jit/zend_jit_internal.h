@@ -272,7 +272,7 @@ typedef struct _zend_jit_trace_rec {
 			union {
 				uint8_t   recursive; /* part of recursive return sequence for ZEND_JIT_TRACE_BACK */
 				int8_t    return_value_used; /* for ZEND_JIT_TRACE_ENTER */
-				uint8_t   fake; /* for ZEND_JIT_TRACE_INIT_FCALL */
+				uint8_t   fake; /* for ZEND_JIT_TRACE_INIT_CALL */
 			};
 			uint8_t first_ssa_var; /* may be used for ZEND_JIT_TRACE_ENTER and ZEND_JIT_TRACE_BACK */
 		};
