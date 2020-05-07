@@ -4014,7 +4014,7 @@ done:
 		goto jit_failure;
 	}
 
-	handler = dasm_link_and_encode(&dasm_state, NULL, NULL, NULL, NULL, ZSTR_VAL(name), 1);
+	handler = dasm_link_and_encode(&dasm_state, NULL, NULL, NULL, NULL, ZSTR_VAL(name), ZEND_JIT_TRACE_NUM);
 
 jit_failure:
 	dasm_free(&dasm_state);
@@ -4106,7 +4106,7 @@ static const void *zend_jit_trace_exit_to_vm(uint32_t trace_num, uint32_t exit_n
 
 	zend_jit_trace_return(&dasm_state, original_handler);
 
-	handler = dasm_link_and_encode(&dasm_state, NULL, NULL, NULL, NULL, name, 1);
+	handler = dasm_link_and_encode(&dasm_state, NULL, NULL, NULL, NULL, name, ZEND_JIT_TRACE_NUM);
 
 jit_failure:
 	dasm_free(&dasm_state);

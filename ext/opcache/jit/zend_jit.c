@@ -245,7 +245,7 @@ static void *dasm_link_and_encode(dasm_State             **dasm_state,
                                   const zend_op           *rt_opline,
                                   zend_lifetime_interval **ra,
                                   const char              *name,
-                                  zend_bool                is_trace)
+                                  uint32_t                 trace_num)
 {
 	size_t size;
 	int ret;
@@ -314,7 +314,7 @@ static void *dasm_link_and_encode(dasm_State             **dasm_state,
 	entry = *dasm_ptr;
 	*dasm_ptr = (void*)((char*)*dasm_ptr + ZEND_MM_ALIGNED_SIZE_EX(size, DASM_ALIGNMENT));
 
-	if (is_trace) {
+	if (trace_num) {
 		zend_jit_trace_add_code(entry, size);
 	}
 
@@ -368,7 +368,7 @@ static void *dasm_link_and_encode(dasm_State             **dasm_state,
 	} else {
 	    if (ZCG(accel_directives).jit_debug & (ZEND_JIT_DEBUG_ASM_STUBS|ZEND_JIT_DEBUG_ASM)) {
 			zend_jit_disasm_add_symbol(name, (uintptr_t)entry, size);
-		    if (is_trace || (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_ASM_STUBS) != 0) {
+			if (trace_num || (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_ASM_STUBS) != 0) {
 				zend_jit_disasm(
 					name,
 					(op_array && op_array->filename) ? ZSTR_VAL(op_array->filename) : NULL,
