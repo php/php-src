@@ -4895,6 +4895,7 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 {
 	uint32_t trace_num = (uint32_t)(uintptr_t)EG(reserved)[zend_func_info_rid];
 	zend_execute_data *execute_data = EG(current_execute_data);
+	const zend_op *orig_opline = EX(opline);
 	const zend_op *opline;
 	zend_jit_trace_info *t = &zend_jit_traces[trace_num];
 
@@ -4922,7 +4923,7 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 	}
 
 	if (EG(vm_interrupt)) {
-		return 0;
+		return 1;
 	/* Lock-free check if the side trace was already JIT-ed or blacklist-ed in another process */
 	} else if (t->exit_info[exit_num].flags & (ZEND_JIT_EXIT_JITED|ZEND_JIT_EXIT_BLACKLISTED)) {
 		return 0;
@@ -4949,12 +4950,14 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 				fprintf(stderr, "---- EXIT %d/%d blacklisted\n",
 					trace_num, exit_num);
 			}
+			return 0;
 		}
 	} else if (zend_jit_trace_exit_is_hot(trace_num, exit_num)) {
 		return zend_jit_trace_hot_side(execute_data, trace_num, exit_num);
 	}
 
-	return 0;
+	/* Return 1 to call original handler instead of the same JIT-ed trace */
+	return (orig_opline == t->opline && EX(opline) == orig_opline);
 }
 
 static zend_always_inline uint8_t zend_jit_trace_supported(const zend_op *opline)
