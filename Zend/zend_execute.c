@@ -2828,7 +2828,7 @@ static zend_never_inline void zend_assign_to_property_reference_var_var(zval *co
 }
 
 static zend_never_inline int zend_fetch_static_property_address_ex(zval **retval, zend_property_info **prop_info, uint32_t cache_slot, int fetch_type OPLINE_DC EXECUTE_DATA_DC) {
-	zend_string *name, *tmp_name;
+	zend_string *name;
 	zend_class_entry *ce;
 	zend_property_info *property_info;
 
@@ -2868,7 +2868,9 @@ static zend_never_inline int zend_fetch_static_property_address_ex(zval **retval
 
 	if (EXPECTED(op1_type == IS_CONST)) {
 		name = Z_STR_P(RT_CONSTANT(opline, opline->op1));
+		*retval = zend_std_get_static_property_with_info(ce, name, fetch_type, &property_info);
 	} else {
+		zend_string *tmp_name;
 		zval *varname = get_zval_ptr_undef(opline->op1_type, opline->op1, BP_VAR_R);
 		if (EXPECTED(Z_TYPE_P(varname) == IS_STRING)) {
 			name = Z_STR_P(varname);
@@ -2879,14 +2881,13 @@ static zend_never_inline int zend_fetch_static_property_address_ex(zval **retval
 			}
 			name = zval_get_tmp_string(varname, &tmp_name);
 		}
-	}
+		*retval = zend_std_get_static_property_with_info(ce, name, fetch_type, &property_info);
 
-	*retval = zend_std_get_static_property_with_info(ce, name, fetch_type, &property_info);
+		if (UNEXPECTED(op1_type != IS_CONST)) {
+			zend_tmp_string_release(tmp_name);
 
-	if (UNEXPECTED(op1_type != IS_CONST)) {
-		zend_tmp_string_release(tmp_name);
-
-		FREE_OP(op1_type, opline->op1.var);
+			FREE_OP(op1_type, opline->op1.var);
+		}
 	}
 
 	if (UNEXPECTED(*retval == NULL)) {
