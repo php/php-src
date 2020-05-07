@@ -18,11 +18,12 @@ echo $_POST['a']."\n";
 echo $_GET['b']."\n";
 
 // Get encoding
-$enc = mb_http_input('P');
-var_dump($enc);
+var_dump(mb_http_input('P'));
+var_dump(mb_http_input('G'));
 
 ?>
 --EXPECT--
 ÆüËÜ¸ì0123456789ÆüËÜ¸ì¥«¥¿¥«¥Ê¤Ò¤é¤¬¤Ê
 ÆüËÜ¸ì0123456789ÆüËÜ¸ì¥«¥¿¥«¥Ê¤Ò¤é¤¬¤Ê
+string(10) "ISO-8859-1"
 string(10) "ISO-8859-1"

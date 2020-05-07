@@ -5,9 +5,9 @@ mb_http_input() with pass encoding
 extension_loaded('mbstring') or die('skip mbstring not available');
 ?>
 --POST--
-a=ÆüËÜ¸ì0123456789ÆüËÜ¸ì¥«¥¿¥«¥Ê¤Ò¤é¤¬¤Ê
+a=���ܸ�0123456789���ܸ쥫�����ʤҤ餬��
 --GET--
-b=ÆüËÜ¸ì0123456789ÆüËÜ¸ì¥«¥¿¥«¥Ê¤Ò¤é¤¬¤Ê
+b=���ܸ�0123456789���ܸ쥫�����ʤҤ餬��
 --INI--
 mbstring.encoding_translation=1
 input_encoding=pass
@@ -18,11 +18,12 @@ echo $_POST['a']."\n";
 echo $_GET['b']."\n";
 
 // Get encoding
-$enc = mb_http_input('P');
-var_dump($enc);
+var_dump(mb_http_input('P'));
+var_dump(mb_http_input('G'));
 
 ?>
 --EXPECT--
-ÆüËÜ¸ì0123456789ÆüËÜ¸ì¥«¥¿¥«¥Ê¤Ò¤é¤¬¤Ê
-ÆüËÜ¸ì0123456789ÆüËÜ¸ì¥«¥¿¥«¥Ê¤Ò¤é¤¬¤Ê
+���ܸ�0123456789���ܸ쥫�����ʤҤ餬��
+���ܸ�0123456789���ܸ쥫�����ʤҤ餬��
+string(4) "pass"
 string(4) "pass"
