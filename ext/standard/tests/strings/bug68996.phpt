@@ -6,6 +6,6 @@ html_errors=1
 <?php
 fopen("\xfc\x63", "r");
 ?>
---EXPECT--
+--EXPECTF--
 <br />
 <b>Warning</b>:  fopen(�c): Failed to open stream: No such file or directory in <b>%sbug68996.php</b> on line <b>2</b><br />
