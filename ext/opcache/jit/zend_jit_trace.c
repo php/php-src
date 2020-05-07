@@ -127,7 +127,7 @@ static const void *zend_jit_trace_get_exit_addr(uint32_t n)
 		((n % ZEND_JIT_EXIT_POINTS_PER_GROUP) * ZEND_JIT_EXIT_POINTS_SPACING));
 }
 
-static uint32_t zend_jit_trace_get_exit_point(const zend_op *from_opline, const zend_op *to_opline, zend_jit_trace_rec *trace)
+static uint32_t zend_jit_trace_get_exit_point(const zend_op *from_opline, const zend_op *to_opline, zend_jit_trace_rec *trace, uint32_t flags)
 {
 	zend_jit_trace_info *t = &zend_jit_traces[ZEND_JIT_TRACE_NUM];
 	uint32_t exit_point;
@@ -163,7 +163,8 @@ static uint32_t zend_jit_trace_get_exit_point(const zend_op *from_opline, const 
 			 || (t->exit_info[i].stack_size >= stack_size
 			  && memcmp(t->stack_map + t->exit_info[i].stack_offset, stack, stack_size * sizeof(zend_jit_trace_stack)) == 0)) {
 				stack_offset = t->exit_info[i].stack_offset;
-				if (t->exit_info[i].opline == to_opline) {
+				if (t->exit_info[i].opline == to_opline
+				 && t->exit_info[i].flags == flags) {
 					return i;
 				}
 			}
@@ -182,6 +183,7 @@ static uint32_t zend_jit_trace_get_exit_point(const zend_op *from_opline, const 
 		t->exit_count++;
 		t->exit_info[exit_point].opline = to_opline;
 		t->exit_info[exit_point].op_array = op_array;
+		t->exit_info[exit_point].flags = flags;
 		t->exit_info[exit_point].stack_size = stack_size;
 		t->exit_info[exit_point].stack_offset = stack_offset;
 	}
@@ -2507,7 +2509,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 	if (!parent_trace) {
 		zend_jit_set_opline(&dasm_state, opline);
 	} else {
-		if (!((uintptr_t)zend_jit_traces[parent_trace].exit_info[exit_num].opline & ~(ZEND_JIT_EXIT_JITED|ZEND_JIT_EXIT_BLACKLISTED))) {
+		if (zend_jit_traces[parent_trace].exit_info[exit_num].opline == NULL) {
 			zend_jit_trace_opline_guard(&dasm_state, opline);
 			zend_jit_set_opline(&dasm_state, opline);
 		} else {
@@ -2631,7 +2633,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 			const void *exit_addr = NULL;
 
 			if (ra && zend_jit_trace_stack_needs_deoptimization(stack, op_array->last_var + op_array->T)) {
-				uint32_t exit_point = zend_jit_trace_get_exit_point(NULL, NULL, NULL);
+				uint32_t exit_point = zend_jit_trace_get_exit_point(NULL, NULL, NULL, 0);
 
 				exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 				if (!exit_addr) {
@@ -3161,7 +3163,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							if (ra) {
 								zend_jit_trace_clenup_stack(stack, opline, ssa_op, ssa, ra);
 							}
-							exit_point = zend_jit_trace_get_exit_point(opline, exit_opline, p + 1);
+							exit_point = zend_jit_trace_get_exit_point(opline, exit_opline, p + 1, 0);
 							exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 							if (!exit_addr) {
 								goto jit_failure;
@@ -3194,7 +3196,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							if (ra) {
 								zend_jit_trace_clenup_stack(stack, opline, ssa_op, ssa, ra);
 							}
-							exit_point = zend_jit_trace_get_exit_point(opline, exit_opline, p + 1);
+							exit_point = zend_jit_trace_get_exit_point(opline, exit_opline, p + 1, 0);
 							exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 							if (!exit_addr) {
 								goto jit_failure;
@@ -3220,7 +3222,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						if ((opline->result_type & (IS_SMART_BRANCH_JMPZ|IS_SMART_BRANCH_JMPNZ)) != 0) {
 							zend_bool exit_if_true = 0;
 							const zend_op *exit_opline = zend_jit_trace_get_exit_opline(p + 1, opline + 1, &exit_if_true);
-							uint32_t exit_point = zend_jit_trace_get_exit_point(opline, exit_opline, p + 1);
+							uint32_t exit_point = zend_jit_trace_get_exit_point(opline, exit_opline, p + 1, 0);
 
 							exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 							if (!exit_addr) {
@@ -3250,7 +3252,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							if (ra) {
 								zend_jit_trace_clenup_stack(stack, opline, ssa_op, ssa, ra);
 							}
-							exit_point = zend_jit_trace_get_exit_point(opline, exit_opline, p + 1);
+							exit_point = zend_jit_trace_get_exit_point(opline, exit_opline, p + 1, 0);
 							exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 							if (!exit_addr) {
 								goto jit_failure;
@@ -3370,7 +3372,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							if (ra) {
 								zend_jit_trace_clenup_stack(stack, opline, ssa_op, ssa, ra);
 							}
-							exit_point = zend_jit_trace_get_exit_point(opline, exit_opline, p+1);
+							exit_point = zend_jit_trace_get_exit_point(opline, exit_opline, p+1, 0);
 							exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 							if (!exit_addr) {
 								goto jit_failure;
@@ -3426,7 +3428,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							if (ra) {
 								zend_jit_trace_clenup_stack(stack, opline, ssa_op, ssa, ra);
 							}
-							exit_point = zend_jit_trace_get_exit_point(opline, exit_opline, p + 1);
+							exit_point = zend_jit_trace_get_exit_point(opline, exit_opline, p + 1, 0);
 							exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 							if (!exit_addr) {
 								goto jit_failure;
@@ -4047,7 +4049,6 @@ static int zend_jit_trace_exit_needs_deoptimization(uint32_t trace_num, uint32_t
 	uint32_t stack_size;
 	zend_jit_trace_stack *stack;
 
-	opline = (const zend_op*)((uintptr_t)opline & ~(ZEND_JIT_EXIT_JITED|ZEND_JIT_EXIT_BLACKLISTED));
 	if (opline) {
 		return 1;
 	}
@@ -4095,7 +4096,6 @@ static const void *zend_jit_trace_exit_to_vm(uint32_t trace_num, uint32_t exit_n
 	}
 
 	opline = zend_jit_traces[trace_num].exit_info[exit_num].opline;
-	opline = (const zend_op*)((uintptr_t)opline & ~(ZEND_JIT_EXIT_JITED|ZEND_JIT_EXIT_BLACKLISTED));
 	if (opline) {
 		zend_jit_set_ip(&dasm_state, opline);
 		if (opline == zend_jit_traces[zend_jit_traces[trace_num].root].opline) {
@@ -4483,6 +4483,9 @@ static void zend_jit_dump_exit_info(zend_jit_trace_info *t)
 		} else {
 			fprintf(stderr, "----/0");
 		}
+		if (t->exit_info[i].flags & ZEND_JIT_EXIT_TO_VM) {
+			fprintf(stderr, "/VM");
+		}
 		for (j = 0; j < stack_size; j++) {
 			zend_uchar type = STACK_TYPE(stack, j);
 			if (type != IS_UNKNOWN) {
@@ -4622,7 +4625,7 @@ static void zend_jit_blacklist_trace_exit(uint32_t trace_num, uint32_t exit_num)
 
 	zend_shared_alloc_lock();
 
-	if (!((uintptr_t)zend_jit_traces[trace_num].exit_info[exit_num].opline & ZEND_JIT_EXIT_BLACKLISTED)) {
+	if (!(zend_jit_traces[trace_num].exit_info[exit_num].flags & (ZEND_JIT_EXIT_JITED|ZEND_JIT_EXIT_BLACKLISTED))) {
 		SHM_UNPROTECT();
 		zend_jit_unprotect();
 
@@ -4636,8 +4639,7 @@ static void zend_jit_blacklist_trace_exit(uint32_t trace_num, uint32_t exit_num)
 				handler);
 		}
 
-		zend_jit_traces[trace_num].exit_info[exit_num].opline = (const zend_op*)
-		    ((uintptr_t)zend_jit_traces[trace_num].exit_info[exit_num].opline | ZEND_JIT_EXIT_BLACKLISTED);
+		zend_jit_traces[trace_num].exit_info[exit_num].flags |= ZEND_JIT_EXIT_BLACKLISTED;
 
 		zend_jit_protect();
 		SHM_PROTECT();
@@ -4680,7 +4682,7 @@ static zend_jit_trace_stop zend_jit_compile_side_trace(zend_jit_trace_rec *trace
 	zend_shared_alloc_lock();
 
 	/* Checks under lock */
-	if (((uintptr_t)zend_jit_traces[parent_num].exit_info[exit_num].opline & ZEND_JIT_EXIT_JITED)) {
+	if (zend_jit_traces[parent_num].exit_info[exit_num].flags & (ZEND_JIT_EXIT_JITED|ZEND_JIT_EXIT_BLACKLISTED)) {
 		ret = ZEND_JIT_TRACE_STOP_ALREADY_DONE;
 	} else if (ZEND_JIT_TRACE_NUM >= ZEND_JIT_TRACE_MAX_TRACES) {
 		ret = ZEND_JIT_TRACE_STOP_TOO_MANY_TRACES;
@@ -4750,8 +4752,7 @@ static zend_jit_trace_stop zend_jit_compile_side_trace(zend_jit_trace_rec *trace
 
 			zend_jit_traces[zend_jit_traces[parent_num].root].child_count++;
 			ZEND_JIT_TRACE_NUM++;
-			zend_jit_traces[parent_num].exit_info[exit_num].opline = (const zend_op*)
-			    ((uintptr_t)zend_jit_traces[parent_num].exit_info[exit_num].opline | ZEND_JIT_EXIT_JITED);
+			zend_jit_traces[parent_num].exit_info[exit_num].flags |= ZEND_JIT_EXIT_JITED;
 
 			ret = ZEND_JIT_TRACE_STOP_COMPILED;
 		} else if (t->exit_count >= ZEND_JIT_TRACE_MAX_EXITS ||
@@ -4794,7 +4795,7 @@ int ZEND_FASTCALL zend_jit_trace_hot_side(zend_execute_data *execute_data, uint3
 	trace_num = ZEND_JIT_TRACE_NUM;
 
 	/* Lock-free check if the side trace was already JIT-ed or blacklist-ed in another process */
-	if ((uintptr_t)zend_jit_traces[parent_num].exit_info[exit_num].opline & (ZEND_JIT_EXIT_JITED|ZEND_JIT_EXIT_BLACKLISTED)) {
+	if (zend_jit_traces[parent_num].exit_info[exit_num].flags & (ZEND_JIT_EXIT_JITED|ZEND_JIT_EXIT_BLACKLISTED)) {
 		return 0;
 	}
 
@@ -4914,21 +4915,17 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 		}
 	}
 
-	/* Lock-free check if the side trace was already JIT-ed or blacklist-ed in another process */
-	// TODO: We may remove this, because of the same check in zend_jit_trace_hot_side() ???
 	opline = t->exit_info[exit_num].opline;
-	if (EG(vm_interrupt) || ((uintptr_t)opline & (ZEND_JIT_EXIT_JITED|ZEND_JIT_EXIT_BLACKLISTED))) {
-		opline = (const zend_op*)((uintptr_t)opline & ~(ZEND_JIT_EXIT_JITED|ZEND_JIT_EXIT_BLACKLISTED));
-		if (opline) {
-			/* Set VM opline to continue interpretation */
-			EX(opline) = opline;
-		}
-		return 0;
-	}
-
 	if (opline) {
 		/* Set VM opline to continue interpretation */
 		EX(opline) = opline;
+	}
+
+	if (EG(vm_interrupt)) {
+		return 0;
+	/* Lock-free check if the side trace was already JIT-ed or blacklist-ed in another process */
+	} else if (t->exit_info[exit_num].flags & (ZEND_JIT_EXIT_JITED|ZEND_JIT_EXIT_BLACKLISTED)) {
+		return 0;
 	}
 
 	ZEND_ASSERT(EX(func)->type == ZEND_USER_FUNCTION);
@@ -4945,7 +4942,15 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 			EX(opline)->lineno);
 	}
 
-	if (zend_jit_trace_exit_is_hot(trace_num, exit_num)) {
+	if (t->exit_info[exit_num].flags & ZEND_JIT_EXIT_TO_VM) {
+		if (zend_jit_trace_exit_is_bad(trace_num, exit_num)) {
+			zend_jit_blacklist_trace_exit(trace_num, exit_num);
+			if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_TRACE_BLACKLIST) {
+				fprintf(stderr, "---- EXIT %d/%d blacklisted\n",
+					trace_num, exit_num);
+			}
+		}
+	} else if (zend_jit_trace_exit_is_hot(trace_num, exit_num)) {
 		return zend_jit_trace_hot_side(execute_data, trace_num, exit_num);
 	}
 

@@ -223,6 +223,7 @@ typedef enum _zend_jit_trace_stop {
 
 #define ZEND_JIT_EXIT_JITED         (1<<0)
 #define ZEND_JIT_EXIT_BLACKLISTED   (1<<1)
+#define ZEND_JIT_EXIT_TO_VM         (1<<2) /* exit to VM without attempt to create a side trace */
 
 typedef union _zend_op_trace_info {
 	zend_op dummy; /* the size of this structure must be the same as zend_op */
@@ -305,6 +306,7 @@ typedef struct _zend_jit_trace_start_rec {
 typedef struct _zend_jit_trace_exit_info {
 	const zend_op       *opline;     /* opline where VM should continue execution */
 	const zend_op_array *op_array;
+	uint32_t             flags;      /* set of ZEND_JIT_EXIT_... */
 	uint32_t             stack_size;
 	uint32_t             stack_offset;
 } zend_jit_trace_exit_info;
