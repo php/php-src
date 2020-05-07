@@ -23,6 +23,7 @@
 
 #include "php.h"
 #include "php_ini.h"
+#include "Zend/zend_interfaces.h"
 #include "php_shmop.h"
 #include "shmop_arginfo.h"
 
@@ -37,14 +38,6 @@
 #ifdef HAVE_SHMOP
 
 #include "ext/standard/info.h"
-
-#ifdef ZTS
-int shmop_globals_id;
-#else
-php_shmop_globals shmop_globals;
-#endif
-
-int shm_type;
 
 /* {{{ shmop_module_entry
  */
@@ -66,22 +59,59 @@ zend_module_entry shmop_module_entry = {
 ZEND_GET_MODULE(shmop)
 #endif
 
-/* {{{ rsclean
- */
-static void rsclean(zend_resource *rsrc)
+zend_class_entry *shmop_ce;
+static zend_object_handlers shmop_object_handlers;
+
+static inline php_shmop *shmop_from_obj(zend_object *obj)
 {
-	struct php_shmop *shmop = (struct php_shmop *)rsrc->ptr;
+	return (php_shmop *)((char *)(obj) - XtOffsetOf(php_shmop, std));
+}
+
+#define Z_SHMOP_P(zv) shmop_from_obj(Z_OBJ_P(zv))
+
+static zend_object *shmop_create_object(zend_class_entry *class_type)
+{
+	php_shmop *intern = zend_object_alloc(sizeof(php_shmop), class_type);
+
+	zend_object_std_init(&intern->std, class_type);
+	object_properties_init(&intern->std, class_type);
+	intern->std.handlers = &shmop_object_handlers;
+
+	return &intern->std;
+}
+
+static zend_function *shmop_get_constructor(zend_object *object)
+{
+	zend_throw_error(NULL, "Cannot directly construct Shmop, use shmop_open() instead");
+	return NULL;
+}
+
+static void shmop_free_obj(zend_object *object)
+{
+	php_shmop *shmop = shmop_from_obj(object);
 
 	shmdt(shmop->addr);
-	efree(shmop);
+
+	zend_object_std_dtor(&shmop->std);
 }
-/* }}} */
 
 /* {{{ PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(shmop)
 {
-	shm_type = zend_register_list_destructors_ex(rsclean, NULL, "shmop", module_number);
+	zend_class_entry ce;
+	INIT_CLASS_ENTRY(ce, "Shmop", class_Shmop_methods);
+	shmop_ce = zend_register_internal_class(&ce);
+	shmop_ce->ce_flags |= ZEND_ACC_FINAL;
+	shmop_ce->create_object = shmop_create_object;
+	shmop_ce->serialize = zend_class_serialize_deny;
+	shmop_ce->unserialize = zend_class_unserialize_deny;
+
+	memcpy(&shmop_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	shmop_object_handlers.offset = XtOffsetOf(php_shmop, std);
+	shmop_object_handlers.free_obj = shmop_free_obj;
+	shmop_object_handlers.get_constructor = shmop_get_constructor;
+	shmop_object_handlers.clone_obj = NULL;
 
 	return SUCCESS;
 }
@@ -97,12 +127,12 @@ PHP_MINFO_FUNCTION(shmop)
 }
 /* }}} */
 
-/* {{{ proto resource shmop_open(int key, string flags, int mode, int size)
+/* {{{ proto Shmop shmop_open(int key, string flags, int mode, int size)
    gets and attaches a shared memory segment */
 PHP_FUNCTION(shmop_open)
 {
 	zend_long key, mode, size;
-	struct php_shmop *shmop;
+	php_shmop *shmop;
 	struct shmid_ds shm;
 	char *flags;
 	size_t flags_len;
@@ -116,9 +146,8 @@ PHP_FUNCTION(shmop_open)
 		RETURN_FALSE;
 	}
 
-	shmop = emalloc(sizeof(struct php_shmop));
-	memset(shmop, 0, sizeof(struct php_shmop));
-
+	object_init_ex(return_value, shmop_ce);
+	shmop = Z_SHMOP_P(return_value);
 	shmop->key = key;
 	shmop->shmflg |= mode;
 
@@ -175,32 +204,30 @@ PHP_FUNCTION(shmop_open)
 	}
 
 	shmop->size = shm.shm_segsz;
+	return;
 
-	RETURN_RES(zend_register_resource(shmop, shm_type));
 err:
-	efree(shmop);
+	zend_object_release(Z_OBJ_P(return_value));
 	RETURN_FALSE;
 }
 /* }}} */
 
-/* {{{ proto string shmop_read(resource shmid, int start, int count)
+/* {{{ proto string shmop_read(Shmop shmid, int start, int count)
    reads from a shm segment */
 PHP_FUNCTION(shmop_read)
 {
 	zval *shmid;
 	zend_long start, count;
-	struct php_shmop *shmop;
+	php_shmop *shmop;
 	char *startaddr;
 	int bytes;
 	zend_string *return_string;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rll", &shmid, &start, &count) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oll", &shmid, shmop_ce, &start, &count) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	if ((shmop = (struct php_shmop *)zend_fetch_resource(Z_RES_P(shmid), "shmop", shm_type)) == NULL) {
-		RETURN_THROWS();
-	}
+	shmop = Z_SHMOP_P(shmid);
 
 	if (start < 0 || start > shmop->size) {
 		php_error_docref(NULL, E_WARNING, "Start is out of range");
@@ -221,62 +248,50 @@ PHP_FUNCTION(shmop_read)
 }
 /* }}} */
 
-/* {{{ proto void shmop_close(resource shmid)
-   closes a shared memory segment */
+/* {{{ proto void shmop_close(Shmop shmid)
+   used to close a shared memory segment; now a NOP */
 PHP_FUNCTION(shmop_close)
 {
 	zval *shmid;
-	struct php_shmop *shmop;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &shmid) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &shmid, shmop_ce) == FAILURE) {
 		RETURN_THROWS();
 	}
-
-
-	if ((shmop = (struct php_shmop *)zend_fetch_resource(Z_RES_P(shmid), "shmop", shm_type)) == NULL) {
-		RETURN_THROWS();
-	}
-
-	zend_list_close(Z_RES_P(shmid));
 }
 /* }}} */
 
-/* {{{ proto int shmop_size(resource shmid)
+/* {{{ proto int shmop_size(Shmop shmid)
    returns the shm size */
 PHP_FUNCTION(shmop_size)
 {
 	zval *shmid;
-	struct php_shmop *shmop;
+	php_shmop *shmop;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &shmid) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &shmid, shmop_ce) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	if ((shmop = (struct php_shmop *)zend_fetch_resource(Z_RES_P(shmid), "shmop", shm_type)) == NULL) {
-		RETURN_THROWS();
-	}
+	shmop = Z_SHMOP_P(shmid);
 
 	RETURN_LONG(shmop->size);
 }
 /* }}} */
 
-/* {{{ proto int shmop_write(resource shmid, string data, int offset)
+/* {{{ proto int shmop_write(Shmop shmid, string data, int offset)
    writes to a shared memory segment */
 PHP_FUNCTION(shmop_write)
 {
-	struct php_shmop *shmop;
+	php_shmop *shmop;
 	zend_long writesize;
 	zend_long offset;
 	zend_string *data;
 	zval *shmid;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rSl", &shmid, &data, &offset) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OSl", &shmid, shmop_ce, &data, &offset) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	if ((shmop = (struct php_shmop *)zend_fetch_resource(Z_RES_P(shmid), "shmop", shm_type)) == NULL) {
-		RETURN_THROWS();
-	}
+	shmop = Z_SHMOP_P(shmid);
 
 	if ((shmop->shmatflg & SHM_RDONLY) == SHM_RDONLY) {
 		php_error_docref(NULL, E_WARNING, "Trying to write to a read only segment");
@@ -295,20 +310,18 @@ PHP_FUNCTION(shmop_write)
 }
 /* }}} */
 
-/* {{{ proto bool shmop_delete(resource shmid)
+/* {{{ proto bool shmop_delete(Shmop shmid)
    mark segment for deletion */
 PHP_FUNCTION(shmop_delete)
 {
 	zval *shmid;
-	struct php_shmop *shmop;
+	php_shmop *shmop;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &shmid) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &shmid, shmop_ce) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	if ((shmop = (struct php_shmop *)zend_fetch_resource(Z_RES_P(shmid), "shmop", shm_type)) == NULL) {
-		RETURN_THROWS();
-	}
+	shmop = Z_SHMOP_P(shmid);
 
 	if (shmctl(shmop->shmid, IPC_RMID, NULL)) {
 		php_error_docref(NULL, E_WARNING, "Can't mark segment for deletion (are you the owner?)");

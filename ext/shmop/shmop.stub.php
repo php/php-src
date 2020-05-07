@@ -2,20 +2,17 @@
 
 /** @generate-function-entries */
 
-/** @return resource|false */
-function shmop_open(int $key, string $flags, int $mode, int $size) {}
+final class Shmop {}
 
-/** @param resource $shmid */
-function shmop_read($shmid, int $start, int $count): string|false {}
+function shmop_open(int $key, string $flags, int $mode, int $size): Shmop|false {}
 
-/** @param resource $shmid */
-function shmop_close($shmid): void {}
+function shmop_read(Shmop $shmid, int $start, int $count): string|false {}
 
-/** @param resource $shmid */
-function shmop_size($shmid): int {}
+/** @deprecated */
+function shmop_close(Shmop $shmid): void {}
 
-/** @param resource $shmid */
-function shmop_write($shmid, string $data, int $offset): int|false {}
+function shmop_size(Shmop $shmid): int {}
 
-/** @param resource $shmid */
-function shmop_delete($shmid): bool {}
+function shmop_write(Shmop $shmid, string $data, int $offset): int|false {}
+
+function shmop_delete(Shmop $shmid): bool {}

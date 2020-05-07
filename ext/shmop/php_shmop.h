@@ -32,7 +32,7 @@ PHP_MINFO_FUNCTION(shmop);
 # include "win32/ipc.h"
 #endif
 
-struct php_shmop
+typedef struct php_shmop
 {
 	int shmid;
 	key_t key;
@@ -40,17 +40,8 @@ struct php_shmop
 	int shmatflg;
 	char *addr;
 	zend_long size;
-};
-
-typedef struct {
-	int le_shmop;
-} php_shmop_globals;
-
-#ifdef ZTS
-#define SHMOPG(v) TSRMG(shmop_globals_id, php_shmop_globals *, v)
-#else
-#define SHMOPG(v) (shmop_globals.v)
-#endif
+  zend_object std;
+} php_shmop;
 
 #else
 
