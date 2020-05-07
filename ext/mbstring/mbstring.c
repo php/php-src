@@ -3217,9 +3217,7 @@ PHP_FUNCTION(mb_convert_variables)
 			from_encoding = mbfl_encoding_detector_judge(identd);
 			mbfl_encoding_detector_delete(identd);
 			if (recursion_error) {
-				if (elist != NULL) {
-					efree((void *)elist);
-				}
+				efree(elist);
 				php_error_docref(NULL, E_WARNING, "Cannot handle recursive references");
 				RETURN_FALSE;
 			}
@@ -3227,49 +3225,42 @@ PHP_FUNCTION(mb_convert_variables)
 
 		if (!from_encoding) {
 			php_error_docref(NULL, E_WARNING, "Unable to detect encoding");
-			from_encoding = &mbfl_encoding_pass;
-		}
-	}
-	efree((void *)elist);
-	/* create converter */
-	convd = NULL;
-	if (from_encoding != &mbfl_encoding_pass) {
-		convd = mbfl_buffer_converter_new(from_encoding, to_encoding, 0);
-		/* If this assertion fails this means some memory allocation failure which is a bug */
-		ZEND_ASSERT(convd != NULL);
-
-		mbfl_buffer_converter_illegal_mode(convd, MBSTRG(current_filter_illegal_mode));
-		mbfl_buffer_converter_illegal_substchar(convd, MBSTRG(current_filter_illegal_substchar));
-	}
-
-	/* convert */
-	if (convd != NULL) {
-		n = 0;
-		while (n < argc) {
-			zval *zv = &args[n];
-
-			ZVAL_DEREF(zv);
-			recursion_error = mb_recursive_convert_variable(convd, zv);
-			if (recursion_error) {
-				break;
-			}
-			n++;
-		}
-
-		MBSTRG(illegalchars) += mbfl_buffer_illegalchars(convd);
-		mbfl_buffer_converter_delete(convd);
-
-		if (recursion_error) {
-			php_error_docref(NULL, E_WARNING, "Cannot handle recursive references");
+			efree(elist);
 			RETURN_FALSE;
 		}
 	}
 
-	if (from_encoding) {
-		RETURN_STRING(from_encoding->name);
-	} else {
+	efree(elist);
+
+	convd = mbfl_buffer_converter_new(from_encoding, to_encoding, 0);
+	/* If this assertion fails this means some memory allocation failure which is a bug */
+	ZEND_ASSERT(convd != NULL);
+
+	mbfl_buffer_converter_illegal_mode(convd, MBSTRG(current_filter_illegal_mode));
+	mbfl_buffer_converter_illegal_substchar(convd, MBSTRG(current_filter_illegal_substchar));
+
+	/* convert */
+	n = 0;
+	while (n < argc) {
+		zval *zv = &args[n];
+
+		ZVAL_DEREF(zv);
+		recursion_error = mb_recursive_convert_variable(convd, zv);
+		if (recursion_error) {
+			break;
+		}
+		n++;
+	}
+
+	MBSTRG(illegalchars) += mbfl_buffer_illegalchars(convd);
+	mbfl_buffer_converter_delete(convd);
+
+	if (recursion_error) {
+		php_error_docref(NULL, E_WARNING, "Cannot handle recursive references");
 		RETURN_FALSE;
 	}
+
+	RETURN_STRING(from_encoding->name);
 }
 /* }}} */
 
