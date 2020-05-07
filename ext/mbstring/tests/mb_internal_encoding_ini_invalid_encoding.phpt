@@ -21,8 +21,11 @@ echo ini_get('mbstring.internal_encoding')."\n";
 ?>
 --EXPECT--
 PHP Deprecated:  PHP Startup: Use of mbstring.internal_encoding is deprecated in Unknown on line 0
+PHP Warning:  PHP Startup: Unknown encoding "BAD" in ini setting in Unknown on line 0
 
 Deprecated: PHP Startup: Use of mbstring.internal_encoding is deprecated in Unknown on line 0
+
+Warning: PHP Startup: Unknown encoding "BAD" in ini setting in Unknown on line 0
 *** Testing INI mbstring.internal_encoding: invalid encoding specified in INI ***
 UTF-8
 BAD

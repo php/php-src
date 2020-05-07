@@ -898,6 +898,10 @@ static int _php_mb_ini_mbstring_internal_encoding_set(const char *new_value, siz
 
 	if (!new_value || !new_value_length || !(encoding = mbfl_name2encoding(new_value))) {
 		/* falls back to UTF-8 if an unknown encoding name is given */
+		if (new_value) {
+			php_error_docref("ref.mbstring", E_WARNING,
+				"Unknown encoding \"%s\" in ini setting", new_value);
+		}
 		encoding = mbfl_no2encoding(mbfl_no_encoding_utf8);
 	}
 	MBSTRG(internal_encoding) = encoding;

@@ -23,6 +23,7 @@ PHP Deprecated:  PHP Startup: Use of mbstring.http_input is deprecated in Unknow
 PHP Warning:  PHP Startup: INI setting contains invalid encoding "HTTP_INPUT" in Unknown on line 0
 PHP Deprecated:  PHP Startup: Use of mbstring.http_output is deprecated in Unknown on line 0
 PHP Deprecated:  PHP Startup: Use of mbstring.internal_encoding is deprecated in Unknown on line 0
+PHP Warning:  PHP Startup: Unknown encoding "UNKNOWN_ENCODING" in ini setting in Unknown on line 0
 
 Warning: PHP Startup: INI setting contains invalid encoding "DETECT_ORDER" in Unknown on line 0
 
@@ -33,3 +34,5 @@ Warning: PHP Startup: INI setting contains invalid encoding "HTTP_INPUT" in Unkn
 Deprecated: PHP Startup: Use of mbstring.http_output is deprecated in Unknown on line 0
 
 Deprecated: PHP Startup: Use of mbstring.internal_encoding is deprecated in Unknown on line 0
+
+Warning: PHP Startup: Unknown encoding "UNKNOWN_ENCODING" in ini setting in Unknown on line 0
