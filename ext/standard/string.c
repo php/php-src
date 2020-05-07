@@ -1462,7 +1462,7 @@ PHPAPI zend_string *php_string_tolower(zend_string *s)
 	unsigned char *c;
 	const unsigned char *e;
 
-	if (EXPECTED(!BG(locale_changed))) {
+	if (EXPECTED(!BG(ctype_string))) {
 		return zend_string_tolower(s);
 	} else {
 		c = (unsigned char *)ZSTR_VAL(s);
@@ -4801,7 +4801,12 @@ PHP_FUNCTION(setlocale)
 					if (BG(ctype_string)) {
 						zend_string_release_ex(BG(ctype_string), 0);
 					}
-					if (len == ZSTR_LEN(loc) && !memcmp(ZSTR_VAL(loc), retval, len)) {
+					if (len == 1 && *retval == 'C') {
+						/* C locale is represented as NULL. */
+						BG(ctype_string) = NULL;
+						zend_string_release_ex(loc, 0);
+						RETURN_INTERNED_STR(ZSTR_CHAR('C'));
+					} else if (len == ZSTR_LEN(loc) && !memcmp(ZSTR_VAL(loc), retval, len)) {
 						BG(ctype_string) = zend_string_copy(loc);
 						RETURN_STR(BG(ctype_string));
 					} else {
