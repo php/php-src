@@ -271,7 +271,6 @@ typedef struct _zend_jit_trace_rec {
 		};
 		struct {
 			union {
-				uint8_t   recursive; /* part of recursive return sequence for ZEND_JIT_TRACE_BACK */
 				int8_t    return_value_used; /* for ZEND_JIT_TRACE_ENTER */
 				uint8_t   fake; /* for ZEND_JIT_TRACE_INIT_CALL */
 			};
@@ -382,18 +381,17 @@ struct _zend_jit_trace_stack_frame {
 #define TRACE_FRAME_MASK_RETURN_VALUE_USED   0x00000008
 #define TRACE_FRAME_MASK_RETURN_VALUE_UNUSED 0x00000010
 #define TRACE_FRAME_MASK_THIS_CHECKED        0x00000020
+#define TRACE_FRAME_MASK_UNKNOWN_RETURN      0x00000040
 
 
-#define TRACE_FRAME_INIT(frame, _func, nested, num_args) do { \
+#define TRACE_FRAME_INIT(frame, _func, _flags, num_args) do { \
 		zend_jit_trace_stack_frame *_frame = (frame); \
 		_frame->call = NULL; \
 		_frame->prev = NULL; \
 		_frame->func = (const zend_function*)_func; \
 		_frame->call_level = 0; \
 		_frame->_info = (((uint32_t)(num_args)) << TRACE_FRAME_SHIFT_NUM_ARGS) & TRACE_FRAME_MASK_NUM_ARGS; \
-		if (nested) { \
-			_frame->_info |= TRACE_FRAME_MASK_NESTED; \
-		}; \
+		_frame->_info |= _flags; \
 	} while (0)
 
 #define TRACE_FRAME_RETURN_SSA_VAR(frame) \
@@ -412,6 +410,8 @@ struct _zend_jit_trace_stack_frame {
 	((frame)->_info & TRACE_FRAME_MASK_RETURN_VALUE_UNUSED)
 #define TRACE_FRAME_IS_THIS_CHECKED(frame) \
 	((frame)->_info & TRACE_FRAME_MASK_THIS_CHECKED)
+#define TRACE_FRAME_IS_UNKNOWN_RETURN(frame) \
+	((frame)->_info & TRACE_FRAME_MASK_UNKNOWN_RETURN)
 
 #define TRACE_FRAME_SET_RETURN_SSA_VAR(frame, var) do { \
 		(frame)->_info = var; \

@@ -367,9 +367,8 @@ ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_loop_trace_helper(ZEND_OPCODE_HAN
 		break; \
 	}
 
-#define TRACE_RECORD_BACK(_op, _recursive, _ptr) \
+#define TRACE_RECORD_BACK(_op, _ptr) \
 	trace_buffer[idx].op = _op; \
-	trace_buffer[idx].recursive = _recursive; \
 	trace_buffer[idx].ptr = _ptr; \
 	idx++; \
 	if (idx >= ZEND_JIT_TRACE_MAX_LENGTH - 1) { \
@@ -545,7 +544,7 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 	zend_execute_data *save_execute_data = execute_data;
 	const zend_op *save_opline = opline;
 #endif
-	const zend_op *orig_opline;
+	const zend_op *orig_opline, *end_opline;
 	zend_jit_trace_stop stop = ZEND_JIT_TRACE_STOP_ERROR;
 	int level = 0;
 	int ret_level = 0;
@@ -757,7 +756,7 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 							stop = ZEND_JIT_TRACE_STOP_TOO_DEEP_RET;
 							break;
 						}
-						TRACE_RECORD_BACK(ZEND_JIT_TRACE_BACK, 1, &EX(func)->op_array);
+						TRACE_RECORD_BACK(ZEND_JIT_TRACE_BACK, &EX(func)->op_array);
 						count = zend_jit_trace_recursive_ret_count(&EX(func)->op_array, unrolled_calls, ret_level);
 						if (opline == orig_opline) {
 							if (count + 1 >= ZEND_JIT_TRACE_MAX_RECURSION) {
@@ -791,7 +790,7 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 					}
 				} else {
 					level--;
-					TRACE_RECORD_BACK(ZEND_JIT_TRACE_BACK, 0, &EX(func)->op_array);
+					TRACE_RECORD_BACK(ZEND_JIT_TRACE_BACK, &EX(func)->op_array);
 				}
 			}
 #ifdef HAVE_GCC_GLOBAL_REGS
@@ -877,14 +876,17 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 		}
 	}
 
+	end_opline = opline;
 	if (!ZEND_JIT_TRACE_STOP_OK(stop)) {
 		if (backtrack_recursion > 0) {
 			idx = backtrack_recursion;
 			stop = ZEND_JIT_TRACE_STOP_RECURSIVE_CALL;
+			end_opline = orig_opline;
 		} else if (backtrack_ret_recursion > 0) {
 			idx = backtrack_ret_recursion;
 			ret_level = backtrack_ret_recursion_level;
 			stop = ZEND_JIT_TRACE_STOP_RECURSIVE_RET;
+			end_opline = orig_opline;
 		}
 	}
 
@@ -895,7 +897,7 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 		}
 	}
 
-	TRACE_END(ZEND_JIT_TRACE_END, stop, opline);
+	TRACE_END(ZEND_JIT_TRACE_END, stop, end_opline);
 
 #ifdef HAVE_GCC_GLOBAL_REGS
 	if (stop != ZEND_JIT_TRACE_STOP_HALT) {

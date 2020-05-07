@@ -9477,7 +9477,7 @@ static int zend_jit_leave_func(dasm_State **Dst, const zend_op *opline, const ze
 	|9:
 	if (trace) {
 		if (trace->op != ZEND_JIT_TRACE_END
-		 && (trace->op != ZEND_JIT_TRACE_BACK || !trace->recursive)) {
+		 && (JIT_G(current_frame) && !TRACE_FRAME_IS_UNKNOWN_RETURN(JIT_G(current_frame)))) {
 			zend_jit_reset_opline(Dst, NULL);
 		} else {
 			// TODO: exception handling for tracing JIT ???
@@ -9487,9 +9487,8 @@ static int zend_jit_leave_func(dasm_State **Dst, const zend_op *opline, const ze
 
 		|8:
 
-		if (opline->opcode == ZEND_RETURN
-		 && trace->op == ZEND_JIT_TRACE_BACK
-		 && trace->recursive) {
+		if (trace->op == ZEND_JIT_TRACE_BACK
+		 && (!JIT_G(current_frame) || TRACE_FRAME_IS_UNKNOWN_RETURN(JIT_G(current_frame)))) {
 			const zend_op *next_opline = trace->opline;
 			uint32_t exit_point;
 			const void *exit_addr;

@@ -307,7 +307,7 @@ static int zend_jit_trace_may_exit(const zend_op_array *op_array, const zend_op 
 		case ZEND_RETURN_BY_REF:
 		case ZEND_RETURN:
 			/* return */
-			return trace->op == ZEND_JIT_TRACE_BACK && trace->recursive;
+			return !JIT_G(current_frame) || TRACE_FRAME_IS_UNKNOWN_RETURN(JIT_G(current_frame));
 		default:
 			break;
 	}
@@ -2479,7 +2479,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 	op_array = p->op_array;
 	frame = JIT_G(current_frame);
 	top = zend_jit_trace_call_frame(frame, op_array);
-	TRACE_FRAME_INIT(frame, op_array, 0, -1);
+	TRACE_FRAME_INIT(frame, op_array, TRACE_FRAME_MASK_UNKNOWN_RETURN, -1);
 	stack = frame->stack;
 
 	opline = ((zend_jit_trace_start_rec*)p)->opline;
@@ -3872,7 +3872,7 @@ done:
 				ZEND_ASSERT(&frame->func->op_array == op_array);
 			} else {
 				frame = zend_jit_trace_ret_frame(frame, op_array);
-				TRACE_FRAME_INIT(frame, op_array, 0, -1);
+				TRACE_FRAME_INIT(frame, op_array, TRACE_FRAME_MASK_UNKNOWN_RETURN, -1);
 				stack = frame->stack;
 				for (i = 0; i < op_array->last_var + op_array->T; i++) {
 					/* Initialize abstract stack using SSA */
@@ -3917,7 +3917,7 @@ done:
 			}
 
 			call = top;
-			TRACE_FRAME_INIT(call, p->func, 1, num_args);
+			TRACE_FRAME_INIT(call, p->func, TRACE_FRAME_MASK_NESTED, num_args);
 			call->prev = frame->call;
 			if (!p->fake) {
 				TRACE_FRAME_SET_LAST_SEND_BY_VAL(call);
