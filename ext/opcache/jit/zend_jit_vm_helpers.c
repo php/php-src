@@ -289,7 +289,7 @@ static zend_always_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_trace_c
 	const zend_op *opline = EX(opline);
 #endif
 
-	*(ZEND_OP_TRACE_INFO(opline, offset)->counter) -= ZEND_JIT_TRACE_FUNC_COST;
+	*(ZEND_OP_TRACE_INFO(opline, offset)->counter) -= cost;
 
 	if (UNEXPECTED(*(ZEND_OP_TRACE_INFO(opline, offset)->counter) <= 0)) {
 		*(ZEND_OP_TRACE_INFO(opline, offset)->counter) = ZEND_JIT_TRACE_COUNTER_INIT;
