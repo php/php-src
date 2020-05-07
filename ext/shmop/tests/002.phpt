@@ -4,9 +4,6 @@ shmop extension error messages
 edgarsandi - <edgar.r.sandi@gmail.com>
 --SKIPIF--
 <?php
-	if( substr(PHP_OS, 0, 3) == "WIN") {
-		die('skip not for Windows');
-	}
 	if (!extension_loaded("shmop")) {
 		die("skip shmop() extension not available");
 	}
@@ -55,7 +52,7 @@ bool(false)
 Warning: shmop_open(): Invalid access mode in %s on line %d
 bool(false)
 
-Warning: shmop_open(): Unable to attach or create shared memory segment 'Invalid argument' in %s on line %d
+Warning: shmop_open(): Unable to attach or create shared memory segment '%s' in %s on line %d
 bool(false)
 
 Warning: shmop_open(): Shared memory segment size must be greater than zero in %s on line %d
