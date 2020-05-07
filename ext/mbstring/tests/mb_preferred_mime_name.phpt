@@ -41,10 +41,8 @@ try {
     echo $e->getMessage() . \PHP_EOL;
 }
 
-// No preferred name
-var_dump(mb_preferred_mime_name('pass'));
 ?>
---EXPECTF--
+--EXPECT--
 Shift_JIS
 Shift_JIS
 EUC-JP
@@ -56,6 +54,3 @@ UCS-2
 UCS-4
 == INVALID PARAMETER ==
 mb_preferred_mime_name(): Argument #1 ($encoding) must be a valid encoding, "BAD_NAME" given
-
-Warning: mb_preferred_mime_name(): No MIME preferred name corresponding to "pass" in %s on line %d
-bool(false)

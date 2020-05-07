@@ -52,7 +52,7 @@ bool(true)
 bool(true)
 bool(true)
 mb_chr(): Argument #2 ($encoding) must be a valid encoding, "typo" given
-mb_chr() does not support the "pass" encoding
+mb_chr(): Argument #2 ($encoding) must be a valid encoding, "pass" given
 mb_chr() does not support the "JIS" encoding
 mb_chr() does not support the "CP50222" encoding
 mb_chr() does not support the "UTF-7" encoding
