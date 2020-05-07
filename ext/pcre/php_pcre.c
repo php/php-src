@@ -595,10 +595,10 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, in
 	zend_string 		*key;
 	pcre_cache_entry *ret;
 
-	if (locale_aware && BG(locale_string) &&
-		(ZSTR_LEN(BG(locale_string)) != 1 && ZSTR_VAL(BG(locale_string))[0] != 'C')) {
+	if (locale_aware && BG(ctype_string) &&
+		(ZSTR_LEN(BG(ctype_string)) != 1 && ZSTR_VAL(BG(ctype_string))[0] != 'C')) {
 		key = zend_string_concat2(
-			ZSTR_VAL(BG(locale_string)), ZSTR_LEN(BG(locale_string)),
+			ZSTR_VAL(BG(ctype_string)), ZSTR_LEN(BG(ctype_string)),
 			ZSTR_VAL(regex), ZSTR_LEN(regex));
 	} else {
 		key = regex;
@@ -757,7 +757,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, in
 	}
 
 	if (key != regex) {
-		tables = (uint8_t *)zend_hash_find_ptr(&char_tables, BG(locale_string));
+		tables = (uint8_t *)zend_hash_find_ptr(&char_tables, BG(ctype_string));
 		if (!tables) {
 			zend_string *_k;
 			tables = pcre2_maketables(gctx);
@@ -768,7 +768,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, in
 				efree(pattern);
 				return NULL;
 			}
-			_k = zend_string_init(ZSTR_VAL(BG(locale_string)), ZSTR_LEN(BG(locale_string)), 1);
+			_k = zend_string_init(ZSTR_VAL(BG(ctype_string)), ZSTR_LEN(BG(ctype_string)), 1);
 			GC_MAKE_PERSISTENT_LOCAL(_k);
 			zend_hash_add_ptr(&char_tables, _k, (void *)tables);
 			zend_string_release(_k);

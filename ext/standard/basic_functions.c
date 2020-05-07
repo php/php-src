@@ -460,7 +460,7 @@ PHP_RINIT_FUNCTION(basic) /* {{{ */
 	BG(strtok_string) = NULL;
 	ZVAL_UNDEF(&BG(strtok_zval));
 	BG(strtok_last) = NULL;
-	BG(locale_string) = NULL;
+	BG(ctype_string) = NULL;
 	BG(locale_changed) = 0;
 	BG(array_walk_fci) = empty_fcall_info;
 	BG(array_walk_fci_cache) = empty_fcall_info_cache;
@@ -517,9 +517,9 @@ PHP_RSHUTDOWN_FUNCTION(basic) /* {{{ */
 	if (BG(locale_changed)) {
 		setlocale(LC_ALL, "C");
 		zend_update_current_locale();
-		if (BG(locale_string)) {
-			zend_string_release_ex(BG(locale_string), 0);
-			BG(locale_string) = NULL;
+		if (BG(ctype_string)) {
+			zend_string_release_ex(BG(ctype_string), 0);
+			BG(ctype_string) = NULL;
 		}
 	}
 

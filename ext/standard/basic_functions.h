@@ -62,7 +62,7 @@ typedef struct _php_basic_globals {
 	HashTable putenv_ht;
 	zval  strtok_zval;
 	char *strtok_string;
-	zend_string *locale_string; /* current LC_CTYPE locale (or NULL for 'C') */
+	zend_string *ctype_string; /* current LC_CTYPE locale (or NULL for 'C') */
 	zend_bool locale_changed;   /* locale was changed and has to be restored */
 	char *strtok_last;
 	char strtok_table[256];

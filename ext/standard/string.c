@@ -4798,16 +4798,16 @@ PHP_FUNCTION(setlocale)
 
 				BG(locale_changed) = 1;
 				if (cat == LC_CTYPE || cat == LC_ALL) {
-					if (BG(locale_string)) {
-						zend_string_release_ex(BG(locale_string), 0);
+					if (BG(ctype_string)) {
+						zend_string_release_ex(BG(ctype_string), 0);
 					}
 					if (len == ZSTR_LEN(loc) && !memcmp(ZSTR_VAL(loc), retval, len)) {
-						BG(locale_string) = zend_string_copy(loc);
-						RETURN_STR(BG(locale_string));
+						BG(ctype_string) = zend_string_copy(loc);
+						RETURN_STR(BG(ctype_string));
 					} else {
-						BG(locale_string) = zend_string_init(retval, len, 0);
+						BG(ctype_string) = zend_string_init(retval, len, 0);
 						zend_string_release_ex(loc, 0);
-						RETURN_STR_COPY(BG(locale_string));
+						RETURN_STR_COPY(BG(ctype_string));
 					}
 				} else if (len == ZSTR_LEN(loc) && !memcmp(ZSTR_VAL(loc), retval, len)) {
 					RETURN_STR(loc);
