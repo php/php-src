@@ -18,6 +18,8 @@ function iconv_mime_decode_headers(string $headers, int $mode = 0, ?string $char
 
 function iconv(string $in_charset, string $out_charset, string $str): string|false {}
 
+/** @deprecated */
 function iconv_set_encoding(string $type, string $charset): bool {}
 
-function iconv_get_encoding(string $type = "all"): array|string|false {}
+/** @deprecated */
+function iconv_get_encoding(string $type = 'all'): array|string|false {}

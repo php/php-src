@@ -25,7 +25,6 @@
 #include "ext/standard/info.h"
 #include "main/php_output.h"
 #include "SAPI.h"
-#include "php_ini.h"
 
 #include <stdlib.h>
 #include <errno.h>
@@ -56,9 +55,6 @@
 #define _php_iconv_memequal(a, b, c) \
 	(memcmp(a, b, c) == 0)
 
-ZEND_DECLARE_MODULE_GLOBALS(iconv)
-static PHP_GINIT_FUNCTION(iconv);
-
 /* {{{ iconv_module_entry */
 zend_module_entry iconv_module_entry = {
 	STANDARD_MODULE_HEADER,
@@ -70,11 +66,7 @@ zend_module_entry iconv_module_entry = {
 	NULL,
 	PHP_MINFO(miconv),
 	PHP_ICONV_VERSION,
-	PHP_MODULE_GLOBALS(iconv),
-	PHP_GINIT(iconv),
-	NULL,
-	NULL,
-	STANDARD_MODULE_PROPERTIES_EX
+	STANDARD_MODULE_PROPERTIES,
 };
 /* }}} */
 
@@ -84,18 +76,6 @@ ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 ZEND_GET_MODULE(iconv)
 #endif
-
-/* {{{ PHP_GINIT_FUNCTION */
-static PHP_GINIT_FUNCTION(iconv)
-{
-#if defined(COMPILE_DL_ICONV) && defined(ZTS)
-	ZEND_TSRMLS_CACHE_UPDATE();
-#endif
-	iconv_globals->input_encoding = NULL;
-	iconv_globals->output_encoding = NULL;
-	iconv_globals->internal_encoding = NULL;
-}
-/* }}} */
 
 #if defined(HAVE_LIBICONV) && defined(ICONV_ALIASED_LIBICONV)
 #define iconv libiconv
@@ -141,60 +121,10 @@ static const char _generic_superset_name[] = ICONV_UCS4_ENCODING;
 #define GENERIC_SUPERSET_NBYTES 4
 /* }}} */
 
-
-static PHP_INI_MH(OnUpdateInputEncoding)
-{
-	if (ZSTR_LEN(new_value) >= ICONV_CSNMAXLEN) {
-		return FAILURE;
-	}
-	if (stage & (PHP_INI_STAGE_ACTIVATE | PHP_INI_STAGE_RUNTIME)) {
-		php_error_docref("ref.iconv", E_DEPRECATED, "Use of iconv.input_encoding is deprecated");
-	}
-	OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
-	return SUCCESS;
-}
-
-
-static PHP_INI_MH(OnUpdateOutputEncoding)
-{
-	if (ZSTR_LEN(new_value) >= ICONV_CSNMAXLEN) {
-		return FAILURE;
-	}
-	if (stage & (PHP_INI_STAGE_ACTIVATE | PHP_INI_STAGE_RUNTIME)) {
-		php_error_docref("ref.iconv", E_DEPRECATED, "Use of iconv.output_encoding is deprecated");
-	}
-	OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
-	return SUCCESS;
-}
-
-
-static PHP_INI_MH(OnUpdateInternalEncoding)
-{
-	if (ZSTR_LEN(new_value) >= ICONV_CSNMAXLEN) {
-		return FAILURE;
-	}
-	if (stage & (PHP_INI_STAGE_ACTIVATE | PHP_INI_STAGE_RUNTIME)) {
-		php_error_docref("ref.iconv", E_DEPRECATED, "Use of iconv.internal_encoding is deprecated");
-	}
-	OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
-	return SUCCESS;
-}
-
-
-/* {{{ PHP_INI */
-PHP_INI_BEGIN()
-	STD_PHP_INI_ENTRY("iconv.input_encoding",    "", PHP_INI_ALL, OnUpdateInputEncoding,    input_encoding,    zend_iconv_globals, iconv_globals)
-	STD_PHP_INI_ENTRY("iconv.output_encoding",   "", PHP_INI_ALL, OnUpdateOutputEncoding,   output_encoding,   zend_iconv_globals, iconv_globals)
-	STD_PHP_INI_ENTRY("iconv.internal_encoding", "", PHP_INI_ALL, OnUpdateInternalEncoding, internal_encoding, zend_iconv_globals, iconv_globals)
-PHP_INI_END()
-/* }}} */
-
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(miconv)
 {
 	char *version = "unknown";
-
-	REGISTER_INI_ENTRIES();
 
 #ifdef HAVE_LIBICONV
 	{
@@ -234,7 +164,6 @@ PHP_MINIT_FUNCTION(miconv)
 PHP_MSHUTDOWN_FUNCTION(miconv)
 {
 	php_iconv_stream_filter_unregister_factory();
-	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
 /* }}} */
@@ -252,32 +181,8 @@ PHP_MINFO_FUNCTION(miconv)
 	php_info_print_table_row(2, "iconv implementation", Z_STRVAL_P(iconv_impl));
 	php_info_print_table_row(2, "iconv library version", Z_STRVAL_P(iconv_ver));
 	php_info_print_table_end();
-
-	DISPLAY_INI_ENTRIES();
 }
 /* }}} */
-
-static const char *get_internal_encoding(void) {
-	if (ICONVG(internal_encoding) && ICONVG(internal_encoding)[0]) {
-		return ICONVG(internal_encoding);
-	}
-	return php_get_internal_encoding();
-}
-
-static const char *get_input_encoding(void) {
-	if (ICONVG(input_encoding) && ICONVG(input_encoding)[0]) {
-		return ICONVG(input_encoding);
-	}
-	return php_get_input_encoding();
-}
-
-static const char *get_output_encoding(void) {
-	if (ICONVG(output_encoding) && ICONVG(output_encoding)[0]) {
-		return ICONVG(output_encoding);
-	}
-	return php_get_output_encoding();
-}
-
 
 static int php_iconv_output_conflict(const char *handler_name, size_t handler_name_len)
 {
@@ -319,12 +224,16 @@ static int php_iconv_output_handler(void **nothing, php_output_context *output_c
 
 		if (mimetype != NULL && !(output_context->op & PHP_OUTPUT_HANDLER_CLEAN)) {
 			size_t len;
-			char *p = strstr(get_output_encoding(), "//");
+			char *p = strstr(php_get_output_encoding(), "//");
 
 			if (p) {
-				len = spprintf(&content_type, 0, "Content-Type:%.*s; charset=%.*s", mimetype_len ? mimetype_len : (int) strlen(mimetype), mimetype, (int) (p - get_output_encoding()), get_output_encoding());
+				len = spprintf(&content_type, 0, "Content-Type:%.*s; charset=%.*s",
+					mimetype_len ? mimetype_len : (int) strlen(mimetype), mimetype,
+					(int) (p - php_get_output_encoding()), php_get_output_encoding());
 			} else {
-				len = spprintf(&content_type, 0, "Content-Type:%.*s; charset=%s", mimetype_len ? mimetype_len : (int) strlen(mimetype), mimetype, get_output_encoding());
+				len = spprintf(&content_type, 0, "Content-Type:%.*s; charset=%s",
+					mimetype_len ? mimetype_len : (int) strlen(mimetype),
+					mimetype, php_get_output_encoding());
 			}
 			if (content_type && SUCCESS == sapi_add_header(content_type, len, 0)) {
 				SG(sapi_headers).send_default_content_type = 0;
@@ -336,7 +245,9 @@ static int php_iconv_output_handler(void **nothing, php_output_context *output_c
 	if (output_context->in.used) {
 		zend_string *out;
 		output_context->out.free = 1;
-		_php_iconv_show_error(php_iconv_string(output_context->in.data, output_context->in.used, &out, get_output_encoding(), get_internal_encoding()), get_output_encoding(), get_internal_encoding());
+		_php_iconv_show_error(php_iconv_string(output_context->in.data, output_context->in.used, &out,
+			php_get_output_encoding(), php_get_internal_encoding()), php_get_output_encoding(),
+			php_get_internal_encoding());
 		if (out) {
 			output_context->out.data = estrndup(ZSTR_VAL(out), ZSTR_LEN(out));
 			output_context->out.used = ZSTR_LEN(out);
@@ -1836,7 +1747,7 @@ PHP_FUNCTION(iconv_strlen)
 	}
 
 	if (charset == NULL) {
-	 	charset = get_internal_encoding();
+	 	charset = php_get_internal_encoding();
 	} else if (charset_len >= ICONV_CSNMAXLEN) {
 		php_error_docref(NULL, E_WARNING, "Charset parameter exceeds the maximum allowed length of %d characters", ICONV_CSNMAXLEN);
 		RETURN_FALSE;
@@ -1872,7 +1783,7 @@ PHP_FUNCTION(iconv_substr)
 	}
 
 	if (charset == NULL) {
-	 	charset = get_internal_encoding();
+	 	charset = php_get_internal_encoding();
 	} else if (charset_len >= ICONV_CSNMAXLEN) {
 		php_error_docref(NULL, E_WARNING, "Charset parameter exceeds the maximum allowed length of %d characters", ICONV_CSNMAXLEN);
 		RETURN_FALSE;
@@ -1913,7 +1824,7 @@ PHP_FUNCTION(iconv_strpos)
 	}
 
 	if (charset == NULL) {
-	 	charset = get_internal_encoding();
+	 	charset = php_get_internal_encoding();
 	} else if (charset_len >= ICONV_CSNMAXLEN) {
 		php_error_docref(NULL, E_WARNING, "Charset parameter exceeds the maximum allowed length of %d characters", ICONV_CSNMAXLEN);
 		RETURN_FALSE;
@@ -1972,7 +1883,7 @@ PHP_FUNCTION(iconv_strrpos)
 	}
 
 	if (charset == NULL) {
-	 	charset = get_internal_encoding();
+	 	charset = php_get_internal_encoding();
 	} else if (charset_len >= ICONV_CSNMAXLEN) {
 		php_error_docref(NULL, E_WARNING, "Charset parameter exceeds the maximum allowed length of %d characters", ICONV_CSNMAXLEN);
 		RETURN_FALSE;
@@ -2000,7 +1911,7 @@ PHP_FUNCTION(iconv_mime_encode)
 	smart_str retval = {0};
 	php_iconv_err_t err;
 
-	const char *in_charset = get_internal_encoding();
+	const char *in_charset = php_get_internal_encoding();
 	const char *out_charset = in_charset;
 	zend_long line_len = 76;
 	const char *lfchars = "\r\n";
@@ -2111,7 +2022,7 @@ PHP_FUNCTION(iconv_mime_decode)
 	}
 
 	if (charset == NULL) {
-	 	charset = get_internal_encoding();
+	 	charset = php_get_internal_encoding();
 	} else if (charset_len >= ICONV_CSNMAXLEN) {
 		php_error_docref(NULL, E_WARNING, "Charset parameter exceeds the maximum allowed length of %d characters", ICONV_CSNMAXLEN);
 		RETURN_FALSE;
@@ -2152,7 +2063,7 @@ PHP_FUNCTION(iconv_mime_decode_headers)
 	}
 
 	if (charset == NULL) {
-	 	charset = get_internal_encoding();
+	 	charset = php_get_internal_encoding();
 	} else if (charset_len >= ICONV_CSNMAXLEN) {
 		php_error_docref(NULL, E_WARNING, "Charset parameter exceeds the maximum allowed length of %d characters", ICONV_CSNMAXLEN);
 		RETURN_FALSE;
@@ -2269,8 +2180,7 @@ PHP_FUNCTION(iconv_set_encoding)
 {
 	char *type;
 	zend_string *charset;
-	size_t type_len, retval;
-	zend_string *name;
+	size_t type_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sS", &type, &type_len, &charset) == FAILURE) {
 		RETURN_THROWS();
@@ -2281,24 +2191,7 @@ PHP_FUNCTION(iconv_set_encoding)
 		RETURN_FALSE;
 	}
 
-	if(!strcasecmp("input_encoding", type)) {
-		name = zend_string_init("iconv.input_encoding", sizeof("iconv.input_encoding") - 1, 0);
-	} else if(!strcasecmp("output_encoding", type)) {
-		name = zend_string_init("iconv.output_encoding", sizeof("iconv.output_encoding") - 1, 0);
-	} else if(!strcasecmp("internal_encoding", type)) {
-		name = zend_string_init("iconv.internal_encoding", sizeof("iconv.internal_encoding") - 1, 0);
-	} else {
-		RETURN_FALSE;
-	}
-
-	retval = zend_alter_ini_entry(name, charset, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
-	zend_string_release_ex(name, 0);
-
-	if (retval == SUCCESS) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
+	RETURN_FALSE;
 }
 /* }}} */
 
@@ -2314,15 +2207,15 @@ PHP_FUNCTION(iconv_get_encoding)
 
 	if (!strcasecmp("all", type)) {
 		array_init(return_value);
-		add_assoc_string(return_value, "input_encoding",    get_input_encoding());
-		add_assoc_string(return_value, "output_encoding",   get_output_encoding());
-		add_assoc_string(return_value, "internal_encoding", get_internal_encoding());
+		add_assoc_string(return_value, "input_encoding",    php_get_input_encoding());
+		add_assoc_string(return_value, "output_encoding",   php_get_output_encoding());
+		add_assoc_string(return_value, "internal_encoding", php_get_internal_encoding());
 	} else if (!strcasecmp("input_encoding", type)) {
-		RETVAL_STRING(get_input_encoding());
+		RETVAL_STRING(php_get_input_encoding());
 	} else if (!strcasecmp("output_encoding", type)) {
-		RETVAL_STRING(get_output_encoding());
+		RETVAL_STRING(php_get_output_encoding());
 	} else if (!strcasecmp("internal_encoding", type)) {
-		RETVAL_STRING(get_internal_encoding());
+		RETVAL_STRING(php_get_internal_encoding());
 	} else {
 		RETURN_FALSE;
 	}

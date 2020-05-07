@@ -65,18 +65,6 @@ PHP_FUNCTION(iconv_mime_encode);
 PHP_FUNCTION(iconv_mime_decode);
 PHP_FUNCTION(iconv_mime_decode_headers);
 
-ZEND_BEGIN_MODULE_GLOBALS(iconv)
-	char *input_encoding;
-	char *internal_encoding;
-	char *output_encoding;
-ZEND_END_MODULE_GLOBALS(iconv)
-
-#define ICONVG(v) ZEND_MODULE_GLOBALS_ACCESSOR(iconv, v)
-
-#if defined(ZTS) && defined(COMPILE_DL_ICONV)
-ZEND_TSRMLS_CACHE_EXTERN()
-#endif
-
 #ifdef HAVE_IBM_ICONV
 # define ICONV_ASCII_ENCODING "IBM-850"
 # define ICONV_UCS4_ENCODING "UCS-4"
