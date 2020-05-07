@@ -365,36 +365,18 @@ static inline unsigned int get_next_char(
 /* }}} */
 
 /* {{{ entity_charset determine_charset
- * returns the charset identifier based on current locale or a hint.
- * defaults to UTF-8 */
+ * Returns the charset identifier based on an explicitly provided charset,
+ * the internal_encoding and default_charset ini settings, or UTF-8 by default. */
 static enum entity_charset determine_charset(char *charset_hint, zend_bool quiet)
 {
-	size_t i;
-	const zend_encoding *zenc;
+	if (!charset_hint || !*charset_hint) {
+		charset_hint = get_default_charset();
+	}
 
 	if (charset_hint && *charset_hint) {
-		/* Explicitly passed charset */
-		goto det_charset;
-	}
-
-	charset_hint = get_default_charset();
-	if (charset_hint && *charset_hint) {
-		/* default_charset or internal_encoding */
-		goto det_charset;
-	}
-
-	zenc = zend_multibyte_get_internal_encoding();
-	if (zenc != NULL) {
-		/* mbstring.internal_encoding or mb_internal_encoding() */
-		// TODO: We *shouldn't* be taking this into account anymore.
-		charset_hint = (char *)zend_multibyte_get_encoding_name(zenc);
-	}
-
-det_charset:
-	if (charset_hint) {
 		size_t len = strlen(charset_hint);
 		/* now walk the charset map and look for the codeset */
-		for (i = 0; i < sizeof(charset_map)/sizeof(charset_map[0]); i++) {
+		for (size_t i = 0; i < sizeof(charset_map)/sizeof(charset_map[0]); i++) {
 			if (len == charset_map[i].codeset_len &&
 			    zend_binary_strcasecmp(charset_hint, len, charset_map[i].codeset, len) == 0) {
 				return charset_map[i].charset;
@@ -406,6 +388,7 @@ det_charset:
 					charset_hint);
 		}
 	}
+
 	return cs_utf_8;
 }
 /* }}} */
