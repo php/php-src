@@ -1257,10 +1257,8 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 		if (p->op == ZEND_JIT_TRACE_VM) {
 			uint8_t op1_type, op2_type, op3_type;
 
-			// TODO: use types recorded in trace (add guards) ???
 			// TODO: range inference ???
 			opline = p->opline;
-
 
 			op1_type = p->op1_type;
 			op2_type = p->op2_type;
@@ -3119,7 +3117,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							if ((opline->opcode == ZEND_SEND_VAR_EX
 							  || opline->opcode == ZEND_SEND_FUNC_ARG)
 							 && ARG_SHOULD_BE_SENT_BY_REF(frame->call->func, opline->op2.num)) {
-								// TODO: this may require invalidation, if caller is changed ???
 								goto done;
 							}
 							if (op1_type != IS_UNKNOWN) {
@@ -3812,6 +3809,7 @@ done:
 			op_array_ssa = &jit_extension->func_info.ssa;
 			call = frame->call;
 			if (!call) {
+				assert(0); // This should be handled by "fake" ZEND_JIT_TRACE_INIT_CALL
 				/* Trace missed INIT_FCALL opcode */
 				call = top;
 				TRACE_FRAME_INIT(call, op_array, 0, -1); // TODO: should be possible to get the real number af arguments ???
