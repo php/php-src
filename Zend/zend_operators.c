@@ -605,12 +605,6 @@ try_again:
 }
 /* }}} */
 
-ZEND_API void ZEND_FASTCALL _convert_to_cstring(zval *op) /* {{{ */
-{
-	_convert_to_string(op);
-}
-/* }}} */
-
 ZEND_API void ZEND_FASTCALL _convert_to_string(zval *op) /* {{{ */
 {
 try_again:
@@ -945,9 +939,7 @@ try_again:
 			return zend_long_to_str(Z_LVAL_P(op));
 		}
 		case IS_DOUBLE: {
-			zend_string *str = zend_strpprintf_unchecked(0, "%.*H", (int) EG(precision), Z_DVAL_P(op));
-
-			return str;
+			return zend_strpprintf_unchecked(0, "%.*H", (int) EG(precision), Z_DVAL_P(op));
 		}
 		case IS_ARRAY:
 			zend_error(E_WARNING, "Array to string conversion");
