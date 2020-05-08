@@ -18,7 +18,8 @@ echo "Done\n";
 ?>
 --EXPECTF--
 bool(false)
-resource(%d) of type (sysvmsg queue)
+object(SysvMessageQueue)#1 (0) {
+}
 bool(true)
 bool(true)
 bool(false)
