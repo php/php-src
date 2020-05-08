@@ -2723,6 +2723,19 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						}
 						goto done;
 					case ZEND_INIT_FCALL:
+						if (!(PROFITABILITY_CHECKS && (!ssa->ops || !ssa->var_info))) {
+							// Attempt to replace ZEND_INIT_FCALL, ZEND_SEND_VAR..., ZEND_DO_ICALL with faster assembly where possible to do so.
+							//
+							// TODO: Maybe limit this based on config settings,
+							// depending on how expensive this check is for startup when multiple functions have specialized assembly?
+							int opcodes_skipped = zend_jit_emit_optimized_icall(&dasm_state, op_array, ssa, i, end);
+							if (opcodes_skipped) {
+								// Skip generating assembly for ZEND_SEND_VAR and ZEND_DO_ICALL
+								i += opcodes_skipped;
+								goto done;
+							}
+						}
+						/* fall through */
 					case ZEND_INIT_FCALL_BY_NAME:
 					case ZEND_INIT_NS_FCALL_BY_NAME:
 						if (!zend_jit_init_fcall(&dasm_state, opline, b, op_array, ssa, ssa_op, call_level, NULL, 1)) {

@@ -6142,6 +6142,70 @@ static int zend_jit_assign_to_variable(dasm_State    **Dst,
 	return 1;
 }
 
+static zend_bool validate_single_arg(dasm_State **Dst, const zend_op_array *op_array, const zend_op *opcodes, zend_ssa *ssa, int i, int end, uint32_t expected_type_mask)
+{
+	if (i + 2 > end) {
+		return 0;
+	}
+	const zend_op *arg1_opline = &opcodes[i + 1];
+	if (arg1_opline->opcode != ZEND_SEND_VAR && arg1_opline->op1_type != IS_CV) {
+		return 0;
+	}
+	const zend_op *result_opline = &opcodes[i + 2];
+	if (result_opline->opcode != ZEND_DO_ICALL) {
+		return 0;
+	}
+	uint32_t arg_op1_info = _ssa_op1_info(op_array, ssa, arg1_opline+1, &ssa->ops[i + 1]);
+	if ((arg_op1_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) != expected_type_mask) {
+		return 0;
+	}
+	return 1;
+}
+
+/* On success, returns the number of opcodes the caller should skip over */
+static int zend_jit_emit_optimized_icall(dasm_State **Dst, const zend_op_array *op_array, zend_ssa *ssa, int i, int end)
+{
+	const zend_op *opcodes = op_array->opcodes;
+	const zend_op *first_opline = &opcodes[i];
+	zval *fname_zval = (zval*)RT_CONSTANT(first_opline, first_opline->op2);
+	zend_string *fname = Z_STR_P(fname_zval);
+	// TODO: Add additional specializations for commonly used functions such as fdiv, intdiv (when divisor is non-zero), cos, sin, etc when types exactly match
+	// TODO: Add specializations for in_array($needle, array $haystack, true) by directly calling a method that calls php_search_array.
+	if (zend_string_equals_literal(fname, "ord")) {
+		if (!validate_single_arg(Dst, op_array, opcodes, ssa, i, end, MAY_BE_STRING)) {
+			return 0;
+		}
+
+		zend_jit_addr op1_addr = OP_ADDR(first_opline+1, op1_type, op1);
+		zend_jit_addr res_addr = OP_ADDR(first_opline+2, result_type, result);
+
+		// Move the first byte of the string's data into the result zval, zero-extending (movzx).
+		// See ext/standard/string.c - this even works for the empty string.
+		|	GET_ZVAL_PTR r0, op1_addr
+		|	movzx r0, byte [r0 + offsetof(zend_string, val)]
+		|	SET_ZVAL_LVAL res_addr, r0
+		|	SET_ZVAL_TYPE_INFO res_addr, IS_LONG
+
+		return 2;
+	}
+	if (zend_string_equals_literal(fname, "spl_object_id")) {
+		if (!validate_single_arg(Dst, op_array, opcodes, ssa, i, end, MAY_BE_OBJECT)) {
+			return 0;
+		}
+		zend_jit_addr op1_addr = OP_ADDR(first_opline+1, op1_type, op1);
+		zend_jit_addr res_addr = OP_ADDR(first_opline+2, result_type, result);
+
+		// Move the uint32_t with the object handle into the result zval.
+		|	GET_ZVAL_PTR r0, op1_addr
+		|	mov eax, dword [r0 + offsetof(zend_object, handle)]
+		|	SET_ZVAL_LVAL res_addr, r0
+		|	SET_ZVAL_TYPE_INFO res_addr, IS_LONG
+
+		return 2;
+	}
+	return 0;
+}
+
 static int zend_jit_assign_dim(dasm_State **Dst, const zend_op *opline, uint32_t op1_info, zend_jit_addr op1_addr, uint32_t op2_info, uint32_t val_info, int may_throw)
 {
 	zend_jit_addr op2_addr, op3_addr, res_addr;
