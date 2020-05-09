@@ -697,10 +697,8 @@ PHP_INI_MH(OnChangeBrowscap);
  /* Windows use the internal mail */
 #if defined(PHP_WIN32)
 # define DEFAULT_SENDMAIL_PATH NULL
-#elif defined(PHP_PROG_SENDMAIL)
-# define DEFAULT_SENDMAIL_PATH PHP_PROG_SENDMAIL " -t -i "
 #else
-# define DEFAULT_SENDMAIL_PATH "/usr/sbin/sendmail -t -i"
+# define DEFAULT_SENDMAIL_PATH PHP_PROG_SENDMAIL " -t -i"
 #endif
 
 /* {{{ PHP_INI
