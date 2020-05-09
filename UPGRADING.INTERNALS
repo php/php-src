@@ -16,6 +16,7 @@ PHP 8.0 INTERNALS UPGRADE NOTES
   m. All internal functions must have arginfo
   n. zend_hash_sort compare function signature change
   o. cast_object() object handler is now required
+  p. ARG_COUNT() macro removed
 
 2. Build system changes
   a. Abstract
@@ -113,6 +114,8 @@ PHP 8.0 INTERNALS UPGRADE NOTES
 
   o. The cast_object() handler is now required, i.e. must be non-null. You can
      indicate that casting is not supported by always returning FAILURE.
+
+  p. The ARG_COUNT() macro has been removed use ZEND_NUM_ARGS() instead.
 
 ========================
 2. Build system changes
