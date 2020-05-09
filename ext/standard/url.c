@@ -448,33 +448,6 @@ static int php_htoi(char *s)
 
 static unsigned char hexchars[] = "0123456789ABCDEF";
 
-#ifdef __SSE2__
-#ifdef WORDS_BIGENDIAN
-#define URL_ENCODE_EXTRACT_BYTE(val, lo, hi) hi = val & 0xff; lo = (val >> 8) & 0xff;
-#else
-#define URL_ENCODE_EXTRACT_BYTE(val, lo, hi) lo = val & 0xff; hi = (val >> 8) & 0xff;
-#endif
-#define URL_ENCODE_PHASE(count, bits, to, in) do { \
-	unsigned char hi, lo; \
-	uint32_t pair = _mm_extract_epi16(in, count); \
-	URL_ENCODE_EXTRACT_BYTE(pair, lo, hi); \
-	if (bits & (0x1 << (count * 2))) { \
-		*to++ = lo; \
-	} else { \
-		*to++ = '%'; \
-		*to++ = hexchars[lo >> 4]; \
-		*to++ = hexchars[lo & 0xf]; \
-	} \
-	if (bits & (0x1 << (count * 2 + 1))) { \
-		*to++ = hi; \
-	} else { \
-		*to++ = '%'; \
-		*to++ = hexchars[hi >> 4]; \
-		*to++ = hexchars[hi & 0xf]; \
-	} \
-} while (0)
-#endif
-
 static zend_always_inline zend_string *php_url_encode_impl(const char *s, size_t len, zend_bool raw) /* {{{ */ {
 	register unsigned char c;
 	unsigned char *to;
@@ -531,14 +504,18 @@ static zend_always_inline zend_string *php_url_encode_impl(const char *s, size_t
 			_mm_storeu_si128((__m128i*)to, in);
 			to += 16;
 		} else {
-			URL_ENCODE_PHASE(0, bits, to, in);
-			URL_ENCODE_PHASE(1, bits, to, in);
-			URL_ENCODE_PHASE(2, bits, to, in);
-			URL_ENCODE_PHASE(3, bits, to, in);
-			URL_ENCODE_PHASE(4, bits, to, in);
-			URL_ENCODE_PHASE(5, bits, to, in);
-			URL_ENCODE_PHASE(6, bits, to, in);
-			URL_ENCODE_PHASE(7, bits, to, in);
+			int i;
+			unsigned char xmm[16];
+			_mm_storeu_si128((__m128i*)xmm, in);
+			for (i = 0; i < sizeof(xmm); i++) {
+				if ((bits & (0x1 << i))) {
+					*to++ = xmm[i];
+				} else {
+					*to++ = '%';
+					*to++ = hexchars[xmm[i] >> 4];
+					*to++ = hexchars[xmm[i] & 0xf];
+				}
+			}
 		}
 		from += 16;
 	}
