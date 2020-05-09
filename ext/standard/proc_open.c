@@ -933,11 +933,13 @@ PHP_FUNCTION(proc_open)
 
 		if (Z_TYPE_P(descitem) == IS_RESOURCE) {
 			/* should be a stream - try and dup the descriptor */
-			php_stream *stream;
+			php_stream *stream = (php_stream*)zend_fetch_resource(Z_RES_P(descitem), "stream", php_file_le_stream());
+			if (stream == NULL) {
+				goto exit_fail;
+			}
+
 			php_socket_t fd;
 			php_file_descriptor_t desc;
-
-			php_stream_from_zval(stream, descitem);
 
 			if (FAILURE == php_stream_cast(stream, PHP_STREAM_AS_FD, (void **)&fd, REPORT_ERRORS)) {
 				goto exit_fail;
