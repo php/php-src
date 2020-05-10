@@ -38,8 +38,14 @@ $new_stat = stat($dirname);
 // compare self stats
 var_dump( compare_self_stat($old_stat) );
 var_dump( compare_self_stat($new_stat) );
+// activity from background processes may unexpectedly update the atime
+// so don't include "atime" (or 8, which also means atime)
+$compare_keys = array(0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12,
+                      "dev", "ino", "mode", "nlink", "uid", "gid",
+                      "rdev", "size", "mtime", "ctime",
+                      "blksize", "blocks");
 // compare the stat
-var_dump( compare_stats($old_stat, $new_stat, $all_stat_keys) );
+var_dump( compare_stats($old_stat, $new_stat, $compare_keys) );
 
 echo "\n--- Done ---";
 ?>
