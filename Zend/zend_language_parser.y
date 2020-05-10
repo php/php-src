@@ -175,7 +175,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_FINALLY    "finally (T_FINALLY)"
 %token T_THROW      "throw (T_THROW)"
 %token T_USE        "use (T_USE)"
-%token T_EXTENSION  "extension (T_EXTENSION)"
+%token T_USE_EXTENSION "use extension (T_USE_EXTENSION)"
 %token T_INSTEADOF  "insteadof (T_INSTEADOF)"
 %token T_GLOBAL     "global (T_GLOBAL)"
 %token T_STATIC     "static (T_STATIC)"
@@ -280,7 +280,7 @@ reserved_non_modifiers:
 	| T_THROW | T_USE | T_INSTEADOF | T_GLOBAL | T_VAR | T_UNSET | T_ISSET | T_EMPTY | T_CONTINUE | T_GOTO
 	| T_FUNCTION | T_CONST | T_RETURN | T_PRINT | T_YIELD | T_LIST | T_SWITCH | T_ENDSWITCH | T_CASE | T_DEFAULT | T_BREAK
 	| T_ARRAY | T_CALLABLE | T_EXTENDS | T_IMPLEMENTS | T_NAMESPACE | T_TRAIT | T_INTERFACE | T_CLASS
-	| T_CLASS_C | T_TRAIT_C | T_FUNC_C | T_METHOD_C | T_LINE | T_FILE | T_DIR | T_NS_C | T_FN | T_EXTENSION
+	| T_CLASS_C | T_TRAIT_C | T_FUNC_C | T_METHOD_C | T_LINE | T_FILE | T_DIR | T_NS_C | T_FN
 ;
 
 semi_reserved:
@@ -336,8 +336,8 @@ top_statement:
 	|	T_USE use_type group_use_declaration ';'	{ $$ = $3; $$->attr = $2; }
 	|	T_USE use_declarations ';'					{ $$ = $2; $$->attr = ZEND_SYMBOL_CLASS; }
 	|	T_USE use_type use_declarations ';'			{ $$ = $3; $$->attr = $2; }
-	|	T_USE T_EXTENSION identifier class_name ';'
-			{ $$ = zend_ast_create(ZEND_AST_USE_EXTENSION, $3, $4); }
+	|	T_USE_EXTENSION identifier class_name ';'
+			{ $$ = zend_ast_create(ZEND_AST_USE_EXTENSION, $2, $3); }
 	|	T_CONST const_list ';'						{ $$ = $2; }
 ;
 
