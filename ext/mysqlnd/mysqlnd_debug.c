@@ -53,7 +53,7 @@ MYSQLND_METHOD(mysqlnd_debug, log)(MYSQLND_DEBUG * self,
 	unsigned int message_line_len;
 	unsigned int flags = self->flags;
 	char pid_buffer[10], time_buffer[30], file_buffer[200],
-		 line_buffer[6], level_buffer[7];
+		 line_buffer[13], level_buffer[13];
 
 	if (!self->stream && FAIL == self->m->open(self, FALSE)) {
 		return FAIL;
@@ -150,7 +150,7 @@ MYSQLND_METHOD(mysqlnd_debug, log_va)(MYSQLND_DEBUG *self,
 	va_list args;
 	unsigned int flags = self->flags;
 	char pid_buffer[10], time_buffer[30], file_buffer[200],
-		 line_buffer[6], level_buffer[7];
+		 line_buffer[13], level_buffer[13];
 
 	if (!self->stream && FAIL == self->m->open(self, FALSE)) {
 		return FAIL;

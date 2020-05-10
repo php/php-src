@@ -224,7 +224,7 @@ xml_element* XMLRPC_to_xml_element_worker(XMLRPC_VALUE current_vector, XMLRPC_VA
          case xmlrpc_double:
             {
                                 elem_val->name = estrdup(ELEM_DOUBLE);
-                ap_php_snprintf(buf, BUF_SIZE, "%.*G", (int) EG(precision), XMLRPC_GetValueDouble(node));
+                snprintf(buf, BUF_SIZE, "%.*G", (int) EG(precision), XMLRPC_GetValueDouble(node));
                 simplestring_add(&elem_val->text, buf);
             }
             break;

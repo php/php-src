@@ -640,7 +640,7 @@ void php_get_windows_cpu(char *buf, int bufsize)
 PHPAPI zend_string *php_get_uname(char mode)
 {
 	char *php_uname;
-	char tmp_uname[256];
+	char tmp_uname[325];
 #ifdef PHP_WIN32
 	DWORD dwBuild=0;
 	DWORD dwVersion = GetVersion();
