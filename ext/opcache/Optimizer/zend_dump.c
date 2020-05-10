@@ -997,6 +997,15 @@ void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_flags, cons
 		}
 	}
 
+	if (op_array->scalar_extensions != NULL) {
+		for (uint32_t i = 0; i < ZEND_SCALAR_EXTENSIONS_MAX_HANDLER; i++) {
+			zend_string *extension = op_array->scalar_extensions[i];
+			if (extension != NULL) {
+				fprintf(stderr, "     ; (use extension %s %s)\n", zend_get_type_by_const(i), extension->val);
+			}
+		}
+	}
+
 	if (cfg) {
 		int n;
 		zend_basic_block *b;
