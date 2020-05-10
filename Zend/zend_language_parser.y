@@ -249,7 +249,8 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> top_statement_list use_declarations const_list inner_statement_list if_stmt
 %type <ast> alt_if_stmt for_exprs switch_case_list global_var_list static_var_list
 %type <ast> echo_expr_list unset_variables catch_name_list catch_list parameter_list class_statement_list
-%type <ast> implements_list case_list return_if_stmt return_if_optional_return if_stmt_without_else
+%type <ast> implements_list case_list
+%type <ast> break_if_stmt continue_if_stmt return_if_stmt guard_if_optional_return if_stmt_without_else
 %type <ast> non_empty_parameter_list argument_list non_empty_argument_list property_list
 %type <ast> class_const_list class_const_decl class_name_list trait_adaptations method_body non_empty_for_exprs
 %type <ast> ctor_arguments alt_if_stmt_without_else trait_adaptation_list lexical_vars
@@ -427,8 +428,10 @@ inner_statement:
 
 statement:
 		'{' inner_statement_list '}' { $$ = $2; }
-	|	return_if_stmt { $$ = $1; }
 	|	if_stmt { $$ = $1; }
+	|	continue_if_stmt { $$ = $1; }
+	|	break_if_stmt { $$ = $1; }
+	|	return_if_stmt { $$ = $1; }
 	|	alt_if_stmt { $$ = $1; }
 	|	T_WHILE '(' expr ')' while_statement
 			{ $$ = zend_ast_create(ZEND_AST_WHILE, $3, $5); }
@@ -601,14 +604,28 @@ while_statement:
 	|	':' inner_statement_list T_ENDWHILE ';' { $$ = $2; }
 ;
 
+break_if_stmt:
+		T_BREAK T_IF '(' expr ')' guard_if_optional_return
+			{ $$ = zend_ast_create_list(2, ZEND_AST_IF,
+				zend_ast_create(ZEND_AST_IF_ELEM, $4,
+				zend_ast_create(ZEND_AST_BREAK, $6))); }
+;
+
+continue_if_stmt:
+		T_CONTINUE T_IF '(' expr ')' guard_if_optional_return
+			{ $$ = zend_ast_create_list(2, ZEND_AST_IF,
+				zend_ast_create(ZEND_AST_IF_ELEM, $4,
+				zend_ast_create(ZEND_AST_CONTINUE, $6))); }
+;
+
 return_if_stmt:
-		T_RETURN T_IF '(' expr ')' return_if_optional_return
+		T_RETURN T_IF '(' expr ')' guard_if_optional_return
 			{ $$ = zend_ast_create_list(2, ZEND_AST_IF,
 				zend_ast_create(ZEND_AST_IF_ELEM, $4,
 				zend_ast_create(ZEND_AST_RETURN, $6))); }
 ;
 
-return_if_optional_return:
+guard_if_optional_return:
 		':' optional_expr ';' { $$ = $2; }
 	|	';' { $$ = NULL; }
 ;
