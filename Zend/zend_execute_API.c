@@ -1675,6 +1675,11 @@ ZEND_API zend_function *zend_scalar_extensions_get_indirection_func(zend_class_e
 
 	ind->fn.function_name = zend_string_copy(Z_STR_P(method));
 	zend_set_function_arg_flags(fn);
+
+	if (fbc->common.num_args >= 1 && ZEND_ARG_SEND_MODE(&fbc->common.arg_info[0])) {
+		ZVAL_MAKE_REF(obj);
+	}
+
 	ZVAL_COPY_VALUE(&ind->obj, obj);
 
 	return fn;
