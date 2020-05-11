@@ -23,6 +23,6 @@ object(FFI\CData:union <anonymous>)#%d (2) {
   ["num"]=>
   int(42)
   ["str"]=>
-  int(42)
+  string(4) "0x2a"
 }
 int(42)
