@@ -1072,7 +1072,7 @@ PHP_FUNCTION(libxml_set_external_entity_loader)
 
 	_php_libxml_destroy_fci(&LIBXML(entity_loader).fci, &LIBXML(entity_loader).object);
 
-	if (fci.size > 0) { /* argument not null */
+	if (ZEND_FCI_INITIALIZED(fci)) { /* argument not null */
 		LIBXML(entity_loader).fci = fci;
 		Z_ADDREF(fci.function_name);
 		if (fci.object != NULL) {
