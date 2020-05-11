@@ -58,6 +58,9 @@ static inline long long php_date_llabs( long long i ) { return i >= 0 ? i : -i; 
 #endif
 #endif
 
+#define DATE_USECS_TO_FRACTION(u) (((double)(u)) / 1000000.0)
+#define DATE_FRACTION_TO_USECS(f) ((timelib_sll)((f) * 1000000))
+
 PHPAPI time_t php_time()
 {
 #ifdef HAVE_GETTIMEOFDAY
@@ -174,6 +177,7 @@ static HashTable *date_object_get_gc(zend_object *object, zval **table, int *n);
 static HashTable *date_object_get_properties_for(zend_object *object, zend_prop_purpose purpose);
 static HashTable *date_object_get_gc_interval(zend_object *object, zval **table, int *n);
 static HashTable *date_object_get_properties_interval(zend_object *object);
+static HashTable *date_object_get_debug_info_interval(zend_object *object, int *is_temp);
 static HashTable *date_object_get_gc_period(zend_object *object, zval **table, int *n);
 static HashTable *date_object_get_properties_period(zend_object *object);
 static HashTable *date_object_get_properties_for_timezone(zend_object *object, zend_prop_purpose purpose);
@@ -1684,6 +1688,7 @@ static void date_register_classes(void) /* {{{ */
 	date_object_handlers_interval.read_property = date_interval_read_property;
 	date_object_handlers_interval.write_property = date_interval_write_property;
 	date_object_handlers_interval.get_properties = date_object_get_properties_interval;
+	date_object_handlers_interval.get_debug_info = date_object_get_debug_info_interval;
 	date_object_handlers_interval.get_property_ptr_ptr = date_interval_get_property_ptr_ptr;
 	date_object_handlers_interval.get_gc = date_object_get_gc_interval;
 	date_object_handlers_interval.compare = date_interval_compare_objects;
@@ -2021,44 +2026,69 @@ static HashTable *date_object_get_gc_interval(zend_object *object, zval **table,
 	return zend_std_get_properties(object);
 } /* }}} */
 
-static HashTable *date_object_get_properties_interval(zend_object *object) /* {{{ */
-{
-	HashTable *props;
-	zval zv;
-	php_interval_obj *intervalobj;
+#define DATE_INTERVAL_EXPORT_PROPERTY_LONG(n, f)            \
+	do {                                                    \
+		ZVAL_LONG(&zv, (zend_long)intervalobj->diff->f);    \
+		zend_hash_str_update(props, n, sizeof(n) - 1, &zv); \
+	} while (0)
 
-	intervalobj = php_interval_obj_from_obj(object);
-	props = zend_std_get_properties(object);
+static HashTable *date_interval_export_properties(php_interval_obj *intervalobj, HashTable *props, zend_bool debug_info)
+{
+	zval zv;
+
 	if (!intervalobj->initialized) {
 		return props;
 	}
 
-#define PHP_DATE_INTERVAL_ADD_PROPERTY(n,f) \
-	ZVAL_LONG(&zv, (zend_long)intervalobj->diff->f); \
-	zend_hash_str_update(props, n, sizeof(n)-1, &zv);
+	DATE_INTERVAL_EXPORT_PROPERTY_LONG("y", y);
+	DATE_INTERVAL_EXPORT_PROPERTY_LONG("m", m);
+	DATE_INTERVAL_EXPORT_PROPERTY_LONG("d", d);
+	DATE_INTERVAL_EXPORT_PROPERTY_LONG("h", h);
+	DATE_INTERVAL_EXPORT_PROPERTY_LONG("i", i);
+	DATE_INTERVAL_EXPORT_PROPERTY_LONG("s", s);
 
-	PHP_DATE_INTERVAL_ADD_PROPERTY("y", y);
-	PHP_DATE_INTERVAL_ADD_PROPERTY("m", m);
-	PHP_DATE_INTERVAL_ADD_PROPERTY("d", d);
-	PHP_DATE_INTERVAL_ADD_PROPERTY("h", h);
-	PHP_DATE_INTERVAL_ADD_PROPERTY("i", i);
-	PHP_DATE_INTERVAL_ADD_PROPERTY("s", s);
-	ZVAL_DOUBLE(&zv, (double)intervalobj->diff->us / 1000000.0);
+	if (debug_info) {
+		DATE_INTERVAL_EXPORT_PROPERTY_LONG("u", us);
+	}
+
+	ZVAL_DOUBLE(&zv, DATE_USECS_TO_FRACTION(intervalobj->diff->us));
 	zend_hash_str_update(props, "f", sizeof("f") - 1, &zv);
-	PHP_DATE_INTERVAL_ADD_PROPERTY("weekday", weekday);
-	PHP_DATE_INTERVAL_ADD_PROPERTY("weekday_behavior", weekday_behavior);
-	PHP_DATE_INTERVAL_ADD_PROPERTY("first_last_day_of", first_last_day_of);
-	PHP_DATE_INTERVAL_ADD_PROPERTY("invert", invert);
+
+	DATE_INTERVAL_EXPORT_PROPERTY_LONG("weekday", weekday);
+	DATE_INTERVAL_EXPORT_PROPERTY_LONG("weekday_behavior", weekday_behavior);
+	DATE_INTERVAL_EXPORT_PROPERTY_LONG("first_last_day_of", first_last_day_of);
+	DATE_INTERVAL_EXPORT_PROPERTY_LONG("invert", invert);
+
 	if (intervalobj->diff->days != -99999) {
-		PHP_DATE_INTERVAL_ADD_PROPERTY("days", days);
+		DATE_INTERVAL_EXPORT_PROPERTY_LONG("days", days);
 	} else {
 		ZVAL_FALSE(&zv);
 		zend_hash_str_update(props, "days", sizeof("days")-1, &zv);
 	}
-	PHP_DATE_INTERVAL_ADD_PROPERTY("special_type", special.type);
-	PHP_DATE_INTERVAL_ADD_PROPERTY("special_amount", special.amount);
-	PHP_DATE_INTERVAL_ADD_PROPERTY("have_weekday_relative", have_weekday_relative);
-	PHP_DATE_INTERVAL_ADD_PROPERTY("have_special_relative", have_special_relative);
+
+	DATE_INTERVAL_EXPORT_PROPERTY_LONG("special_type", special.type);
+	DATE_INTERVAL_EXPORT_PROPERTY_LONG("special_amount", special.amount);
+
+	DATE_INTERVAL_EXPORT_PROPERTY_LONG("have_weekday_relative", have_weekday_relative);
+	DATE_INTERVAL_EXPORT_PROPERTY_LONG("have_special_relative", have_special_relative);
+
+	return props;
+}
+
+static HashTable *date_object_get_properties_interval(zend_object *object) /* {{{ */
+{
+	return date_interval_export_properties(php_interval_obj_from_obj(object), zend_std_get_properties(object), 0);
+} /* }}} */
+
+static HashTable *date_object_get_debug_info_interval(zend_object *object, int *is_temp) /* {{{ */
+{
+	HashTable *props = zend_std_get_properties(object);
+	php_interval_obj *intervalobj = php_interval_obj_from_obj(object);
+
+	if (intervalobj->initialized) {
+		*is_temp = 1;
+		props = date_interval_export_properties(intervalobj, zend_array_dup(props), 1);
+	}
 
 	return props;
 } /* }}} */
@@ -2688,7 +2718,7 @@ void php_date_do_return_parsed_time(INTERNAL_FUNCTION_PARAMETERS, timelib_time *
 	if (parsed_time->us == -99999) {
 		add_assoc_bool(return_value, "fraction", 0);
 	} else {
-		add_assoc_double(return_value, "fraction", (double)parsed_time->us / 1000000.0);
+		add_assoc_double(return_value, "fraction", DATE_USECS_TO_FRACTION(parsed_time->us));
 	}
 
 	zval_from_error_container(return_value, error);
@@ -3742,6 +3772,12 @@ static int date_interval_initialize(timelib_rel_time **rt, /*const*/ char *forma
 	int               retval = 0;
 	timelib_error_container *errors;
 
+	if (format_length == 0) {
+		#define DATE_INTERVAL_DEFAULT_FORMAT "PT0S"
+		format = DATE_INTERVAL_DEFAULT_FORMAT;
+		format_length = sizeof(DATE_INTERVAL_DEFAULT_FORMAT) - 1;
+	}
+
 	timelib_strtointerval(format, format_length, &b, &e, &p, &r, &errors);
 
 	if (errors->error_count > 0) {
@@ -3808,8 +3844,9 @@ static zval *date_interval_read_property(zend_object *object, zend_string *name,
 		GET_VALUE_FROM_STRUCT(h, "h");
 		GET_VALUE_FROM_STRUCT(i, "i");
 		GET_VALUE_FROM_STRUCT(s, "s");
+		GET_VALUE_FROM_STRUCT(us, "u");
 		if (strcmp(ZSTR_VAL(name), "f") == 0) {
-			fvalue = obj->diff->us / 1000000.0;
+			fvalue = DATE_USECS_TO_FRACTION(obj->diff->us);
 			break;
 		}
 		GET_VALUE_FROM_STRUCT(invert, "invert");
@@ -3858,8 +3895,9 @@ static zval *date_interval_write_property(zend_object *object, zend_string *name
 		SET_VALUE_FROM_STRUCT(h, "h");
 		SET_VALUE_FROM_STRUCT(i, "i");
 		SET_VALUE_FROM_STRUCT(s, "s");
+		SET_VALUE_FROM_STRUCT(us, "u");
 		if (strcmp(ZSTR_VAL(name), "f") == 0) {
-			obj->diff->us = zval_get_double(value) * 1000000;
+			obj->diff->us = DATE_FRACTION_TO_USECS(zval_get_double(value));
 			break;
 		}
 		SET_VALUE_FROM_STRUCT(invert, "invert");
@@ -3876,15 +3914,16 @@ static zval *date_interval_get_property_ptr_ptr(zend_object *object, zend_string
 {
 	zval *ret;
 
-	if(zend_binary_strcmp("y", sizeof("y") - 1, ZSTR_VAL(name), ZSTR_LEN(name)) == 0 ||
-		zend_binary_strcmp("m", sizeof("m") - 1, ZSTR_VAL(name), ZSTR_LEN(name)) == 0 ||
-		zend_binary_strcmp("d", sizeof("d") - 1, ZSTR_VAL(name), ZSTR_LEN(name)) == 0 ||
-		zend_binary_strcmp("h", sizeof("h") - 1, ZSTR_VAL(name), ZSTR_LEN(name)) == 0 ||
-		zend_binary_strcmp("i", sizeof("i") - 1, ZSTR_VAL(name), ZSTR_LEN(name)) == 0 ||
-		zend_binary_strcmp("s", sizeof("s") - 1, ZSTR_VAL(name), ZSTR_LEN(name)) == 0 ||
-		zend_binary_strcmp("f", sizeof("f") - 1, ZSTR_VAL(name), ZSTR_LEN(name)) == 0 ||
-		zend_binary_strcmp("days", sizeof("days") - 1, ZSTR_VAL(name), ZSTR_LEN(name)) == 0 ||
-		zend_binary_strcmp("invert", sizeof("invert") - 1, ZSTR_VAL(name), ZSTR_LEN(name)) == 0) {
+	if (zend_string_equals_literal(name, "y") ||
+		zend_string_equals_literal(name, "m") ||
+		zend_string_equals_literal(name, "d") ||
+		zend_string_equals_literal(name, "h") ||
+		zend_string_equals_literal(name, "i") ||
+		zend_string_equals_literal(name, "s") ||
+		zend_string_equals_literal(name, "u") ||
+		zend_string_equals_literal(name, "f") ||
+		zend_string_equals_literal(name, "days") ||
+		zend_string_equals_literal(name, "invert")) {
 		/* Fallback to read_property. */
 		ret = NULL;
 	} else {
@@ -3900,16 +3939,18 @@ static zval *date_interval_get_property_ptr_ptr(zend_object *object, zend_string
 */
 PHP_METHOD(DateInterval, __construct)
 {
-	zend_string *interval_string = NULL;
+	char *interval_str = NULL;
+	size_t interval_str_len = 0;
 	timelib_rel_time *reltime;
 	zend_error_handling error_handling;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STR(interval_string)
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STRING_OR_NULL(interval_str, interval_str_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	zend_replace_error_handling(EH_THROW, NULL, &error_handling);
-	if (date_interval_initialize(&reltime, ZSTR_VAL(interval_string), ZSTR_LEN(interval_string)) == SUCCESS) {
+	if (date_interval_initialize(&reltime, interval_str, interval_str_len) == SUCCESS) {
 		php_interval_obj *diobj = Z_PHPINTERVAL_P(ZEND_THIS);
 		diobj->diff = reltime;
 		diobj->initialized = 1;
@@ -3960,16 +4001,6 @@ static int php_date_interval_initialize_from_hash(zval **return_value, php_inter
 		} \
 	} while (0);
 
-#define PHP_DATE_INTERVAL_READ_PROPERTY_DOUBLE(element, member, def) \
-	do { \
-		zval *z_arg = zend_hash_str_find(myht, element, sizeof(element) - 1); \
-		if (z_arg) { \
-			(*intobj)->diff->member = (double)zval_get_double(z_arg); \
-		} else { \
-			(*intobj)->diff->member = (double)def; \
-		} \
-	} while (0);
-
 	PHP_DATE_INTERVAL_READ_PROPERTY("y", y, timelib_sll, -1)
 	PHP_DATE_INTERVAL_READ_PROPERTY("m", m, timelib_sll, -1)
 	PHP_DATE_INTERVAL_READ_PROPERTY("d", d, timelib_sll, -1)
@@ -3980,7 +4011,7 @@ static int php_date_interval_initialize_from_hash(zval **return_value, php_inter
 		zval *z_arg = zend_hash_str_find(myht, "f", sizeof("f") - 1);
 		(*intobj)->diff->us = -1000000;
 		if (z_arg) {
-			double val = zval_get_double(z_arg) * 1000000;
+			timelib_sll val = DATE_FRACTION_TO_USECS(zval_get_double(z_arg));
 			if (val >= 0 && val < 1000000) {
 				(*intobj)->diff->us = val;
 			}
