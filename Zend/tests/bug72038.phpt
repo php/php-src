@@ -4,22 +4,22 @@ Bug #72038 (Function calls with values to a by-ref parameter don't always throw 
 <?php
 
 try {
-	test($foo = new stdClass);
-	var_dump($foo);
+    test($foo = new stdClass);
+    var_dump($foo);
 } catch (Throwable $e) {
-	echo "Exception: " . $e->getMessage() . "\n";
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 try {
-	test($bar = 2);
-	var_dump($bar);
+    test($bar = 2);
+    var_dump($bar);
 } catch (Throwable $e) {
-	echo "Exception: " . $e->getMessage() . "\n";
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 try {
-	test($baz = &$bar);
-	var_dump($baz);
+    test($baz = &$bar);
+    var_dump($baz);
 } catch (Throwable $e) {
-	echo "Exception: " . $e->getMessage() . "\n";
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 
 function test(&$param) {

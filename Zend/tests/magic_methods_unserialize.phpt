@@ -3,7 +3,7 @@ __unserialize declaration
 --FILE--
 <?php
 class Foo {
-	static function __unserialize($data, $value) {}
+    static function __unserialize($data, $value) {}
 }
 ?>
 --EXPECTF--

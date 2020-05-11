@@ -4,9 +4,9 @@ Bug #79526 (`__sleep` error message doesn't include the name of the class)
 <?php
 class A
 {
-	public function __sleep() {
-		return 1;
-	}
+    public function __sleep() {
+        return 1;
+    }
 }
 
 
@@ -14,9 +14,9 @@ serialize(new A());
 
 class B
 {
-	public function __sleep() {
-		return [1];
-	}
+    public function __sleep() {
+        return [1];
+    }
 }
 
 

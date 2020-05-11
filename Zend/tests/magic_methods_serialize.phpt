@@ -3,7 +3,7 @@ __serialize declaration
 --FILE--
 <?php
 class Foo {
-	static function __serialize($arguments) {}
+    static function __serialize($arguments) {}
 }
 ?>
 --EXPECTF--

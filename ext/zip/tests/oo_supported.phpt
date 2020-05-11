@@ -9,28 +9,28 @@ if (!method_exists('ZipArchive', 'isCompressionMethodSupported')) die('skip need
 --FILE--
 <?php
 $methods = [
-	ZipArchive::CM_STORE      => "STORE",
-	ZipArchive::CM_DEFLATE    => "DEFLATE",
-	ZipArchive::CM_BZIP2      => "BZIP2",
-	ZipArchive::CM_XZ         => "XZ",
+    ZipArchive::CM_STORE      => "STORE",
+    ZipArchive::CM_DEFLATE    => "DEFLATE",
+    ZipArchive::CM_BZIP2      => "BZIP2",
+    ZipArchive::CM_XZ         => "XZ",
 ];
 foreach($methods as $method => $name) {
-	echo "Compression $name\n";
-	var_dump(ZipArchive::isCompressionMethodSupported($method));
-	var_dump(ZipArchive::isCompressionMethodSupported($method, false));
+    echo "Compression $name\n";
+    var_dump(ZipArchive::isCompressionMethodSupported($method));
+    var_dump(ZipArchive::isCompressionMethodSupported($method, false));
 }
 
 $methods = [
-	ZipArchive::EM_NONE        => "NONE",
-	ZipArchive::EM_TRAD_PKWARE => "TRAD_PKWARE",
-	ZipArchive::EM_AES_128     => "AES-128",
-	ZipArchive::EM_AES_192     => "AES-192",
-	ZipArchive::EM_AES_256     => "AES-256",
+    ZipArchive::EM_NONE        => "NONE",
+    ZipArchive::EM_TRAD_PKWARE => "TRAD_PKWARE",
+    ZipArchive::EM_AES_128     => "AES-128",
+    ZipArchive::EM_AES_192     => "AES-192",
+    ZipArchive::EM_AES_256     => "AES-256",
 ];
 foreach($methods as $method => $name) {
-	echo "Encryption $name\n";
-	var_dump(ZipArchive::isEncryptionMethodSupported($method));
-	var_dump(ZipArchive::isEncryptionMethodSupported($method, false));
+    echo "Encryption $name\n";
+    var_dump(ZipArchive::isEncryptionMethodSupported($method));
+    var_dump(ZipArchive::isEncryptionMethodSupported($method, false));
 }
 ?>
 Done
