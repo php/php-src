@@ -502,6 +502,12 @@ PHP 8.0 UPGRADE NOTES
   . spl_autoload_register() will now always throw a TypeError on invalid
     arguments, therefore the second argument $do_throw is ignored and a
     notice will be emitted if it is set to false.
+  . SplFixedArray is now an IteratorAggregate and not an Iterator.
+    SplFixedArray::rewind(), ::current(), ::key(), ::next(), and ::valid()
+    have been removed. In their place, SplFixedArray::getIterator() has been
+    added. Any code which uses explicit iteration over SplFixedArray must now
+    obtain an Iterator through SplFixedArray::getIterator(). This means that
+    SplFixedArray is now safe to use in nested loops.
 
 - Standard:
   . assert() will no longer evaluate string arguments, instead they will be

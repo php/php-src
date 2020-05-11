@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 4b6c37c54416ee46f610baba2a8b2be45d1db96f */
+ * Stub hash: 2075619a330ed636ce7f7c85aeb208a8f9f55ca7 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFixedArray___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, size, IS_LONG, 0, "0")
@@ -36,15 +36,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_SplFixedArray_offsetUnset arginfo_class_SplFixedArray_offsetExists
 
-#define arginfo_class_SplFixedArray_rewind arginfo_class_SplFixedArray___wakeup
-
-#define arginfo_class_SplFixedArray_current arginfo_class_SplFixedArray___wakeup
-
-#define arginfo_class_SplFixedArray_key arginfo_class_SplFixedArray___wakeup
-
-#define arginfo_class_SplFixedArray_next arginfo_class_SplFixedArray___wakeup
-
-#define arginfo_class_SplFixedArray_valid arginfo_class_SplFixedArray___wakeup
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_SplFixedArray_getIterator, 0, 0, Iterator, 0)
+ZEND_END_ARG_INFO()
 
 
 ZEND_METHOD(SplFixedArray, __construct);
@@ -58,11 +51,7 @@ ZEND_METHOD(SplFixedArray, offsetExists);
 ZEND_METHOD(SplFixedArray, offsetGet);
 ZEND_METHOD(SplFixedArray, offsetSet);
 ZEND_METHOD(SplFixedArray, offsetUnset);
-ZEND_METHOD(SplFixedArray, rewind);
-ZEND_METHOD(SplFixedArray, current);
-ZEND_METHOD(SplFixedArray, key);
-ZEND_METHOD(SplFixedArray, next);
-ZEND_METHOD(SplFixedArray, valid);
+ZEND_METHOD(SplFixedArray, getIterator);
 
 
 static const zend_function_entry class_SplFixedArray_methods[] = {
@@ -77,10 +66,6 @@ static const zend_function_entry class_SplFixedArray_methods[] = {
 	ZEND_ME(SplFixedArray, offsetGet, arginfo_class_SplFixedArray_offsetGet, ZEND_ACC_PUBLIC)
 	ZEND_ME(SplFixedArray, offsetSet, arginfo_class_SplFixedArray_offsetSet, ZEND_ACC_PUBLIC)
 	ZEND_ME(SplFixedArray, offsetUnset, arginfo_class_SplFixedArray_offsetUnset, ZEND_ACC_PUBLIC)
-	ZEND_ME(SplFixedArray, rewind, arginfo_class_SplFixedArray_rewind, ZEND_ACC_PUBLIC)
-	ZEND_ME(SplFixedArray, current, arginfo_class_SplFixedArray_current, ZEND_ACC_PUBLIC)
-	ZEND_ME(SplFixedArray, key, arginfo_class_SplFixedArray_key, ZEND_ACC_PUBLIC)
-	ZEND_ME(SplFixedArray, next, arginfo_class_SplFixedArray_next, ZEND_ACC_PUBLIC)
-	ZEND_ME(SplFixedArray, valid, arginfo_class_SplFixedArray_valid, ZEND_ACC_PUBLIC)
+	ZEND_ME(SplFixedArray, getIterator, arginfo_class_SplFixedArray_getIterator, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
