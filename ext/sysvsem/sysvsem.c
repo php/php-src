@@ -117,13 +117,13 @@ static void sysvsem_free_obj(zend_object *object)
 	sysvsem_sem *sem_ptr = sysvsem_from_obj(object);
 	struct sembuf sop[2];
 	int opcount = 1;
-/*
- * if count == -1, semaphore has been removed
- * Need better way to handle this
- */
 
+	/*
+	 * if count == -1, semaphore has been removed
+	 * Need better way to handle this
+	 */
 	if (sem_ptr->count == -1 || !sem_ptr->auto_release) {
-		efree(sem_ptr);
+		zend_object_std_dtor(&sem_ptr->std);
 		return;
 	}
 	/* Decrement the usage count. */
