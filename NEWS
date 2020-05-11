@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #79566 (Private SHM is not private on Windows). (cmb)
 
+- FFI:
+  . Fixed bug #79571 (FFI: var_dumping unions may segfault). (cmb)
+
 - SimpleXML:
   . Fixed bug #79528 (Different object of the same xml between 7.4.5 and
     7.4.4). (cmb)

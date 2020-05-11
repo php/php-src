@@ -459,7 +459,7 @@ static zend_never_inline zend_ffi_cdata *zend_ffi_cdata_to_zval_slow_ret(void *p
 }
 /* }}} */
 
-static zend_always_inline void zend_ffi_cdata_to_zval(zend_ffi_cdata *cdata, void *ptr, zend_ffi_type *type, int read_type, zval *rv, zend_ffi_flags flags, zend_bool is_ret) /* {{{ */
+static zend_always_inline void zend_ffi_cdata_to_zval(zend_ffi_cdata *cdata, void *ptr, zend_ffi_type *type, int read_type, zval *rv, zend_ffi_flags flags, zend_bool is_ret, zend_bool debug_union) /* {{{ */
 {
 	if (read_type == BP_VAR_R) {
 		zend_ffi_type_kind kind = type->kind;
@@ -513,6 +513,9 @@ again:
 			case ZEND_FFI_TYPE_POINTER:
 				if (*(void**)ptr == NULL) {
 					ZVAL_NULL(rv);
+					return;
+				} else if (debug_union) {
+					ZVAL_STR(rv, zend_strpprintf(0, "%p", *(void**)ptr));
 					return;
 				} else if ((type->attr & ZEND_FFI_ATTR_CONST) && ZEND_FFI_TYPE(type->pointer.type)->kind == ZEND_FFI_TYPE_CHAR) {
 					ZVAL_STRING(rv, *(char**)ptr);
@@ -864,7 +867,7 @@ static void zend_ffi_callback_trampoline(ffi_cif* cif, void* ret, void** args, v
 
 		ZEND_HASH_FOREACH_PTR(callback_data->type->func.args, arg_type) {
 			arg_type = ZEND_FFI_TYPE(arg_type);
-			zend_ffi_cdata_to_zval(NULL, args[n], arg_type, BP_VAR_R, &fci.params[n], (zend_ffi_flags)(arg_type->attr & ZEND_FFI_ATTR_CONST), 0);
+			zend_ffi_cdata_to_zval(NULL, args[n], arg_type, BP_VAR_R, &fci.params[n], (zend_ffi_flags)(arg_type->attr & ZEND_FFI_ATTR_CONST), 0, 0);
 			n++;
 		} ZEND_HASH_FOREACH_END();
 	}
@@ -999,7 +1002,7 @@ static zval *zend_ffi_cdata_get(zval *object, zval *member, int read_type, void 
 		return &EG(uninitialized_zval);;
 	}
 
-	zend_ffi_cdata_to_zval(cdata, cdata->ptr, type, BP_VAR_R, rv, 0, 0);
+	zend_ffi_cdata_to_zval(cdata, cdata->ptr, type, BP_VAR_R, rv, 0, 0, 0);
 	return rv;
 }
 /* }}} */
@@ -1171,7 +1174,7 @@ static zval *zend_ffi_cdata_read_field(zval *object, zval *member, int read_type
 			}
 		}
 		ptr = (void*)(((char*)ptr) + field->offset);
-		zend_ffi_cdata_to_zval(NULL, ptr, field_type, read_type, rv, (cdata->flags & ZEND_FFI_FLAG_CONST) | (zend_ffi_flags)field->is_const, 0);
+		zend_ffi_cdata_to_zval(NULL, ptr, field_type, read_type, rv, (cdata->flags & ZEND_FFI_FLAG_CONST) | (zend_ffi_flags)field->is_const, 0, 0);
 	} else {
 		zend_ffi_bit_field_to_zval(ptr, field, rv);
 	}
@@ -1312,7 +1315,7 @@ static zval *zend_ffi_cdata_read_dim(zval *object, zval *offset, int read_type, 
 		return &EG(uninitialized_zval);
 	}
 
-	zend_ffi_cdata_to_zval(NULL, ptr, dim_type, read_type, rv, is_const, 0);
+	zend_ffi_cdata_to_zval(NULL, ptr, dim_type, read_type, rv, is_const, 0, 0);
 	return rv;
 }
 /* }}} */
@@ -1863,7 +1866,7 @@ static zval *zend_ffi_cdata_it_get_current_data(zend_object_iterator *it) /* {{{
 	ptr = (void*)((char*)cdata->ptr + dim_type->size * iter->it.index);
 
 	zval_ptr_dtor(&iter->value);
-	zend_ffi_cdata_to_zval(NULL, ptr, dim_type, iter->by_ref ? BP_VAR_RW : BP_VAR_R, &iter->value, (cdata->flags & ZEND_FFI_FLAG_CONST) | (zend_ffi_flags)(type->attr & ZEND_FFI_ATTR_CONST), 0);
+	zend_ffi_cdata_to_zval(NULL, ptr, dim_type, iter->by_ref ? BP_VAR_RW : BP_VAR_R, &iter->value, (cdata->flags & ZEND_FFI_FLAG_CONST) | (zend_ffi_flags)(type->attr & ZEND_FFI_ATTR_CONST), 0, 0);
 	return &iter->value;
 }
 /* }}} */
@@ -1958,7 +1961,7 @@ static HashTable *zend_ffi_cdata_get_debug_info(zval *object, int *is_temp) /* {
 		case ZEND_FFI_TYPE_SINT32:
 		case ZEND_FFI_TYPE_UINT64:
 		case ZEND_FFI_TYPE_SINT64:
-			zend_ffi_cdata_to_zval(cdata, ptr, type, BP_VAR_R, &tmp, ZEND_FFI_FLAG_CONST, 0);
+			zend_ffi_cdata_to_zval(cdata, ptr, type, BP_VAR_R, &tmp, ZEND_FFI_FLAG_CONST, 0, 0);
 			ht = zend_new_array(1);
 			zend_hash_str_add(ht, "cdata", sizeof("cdata")-1, &tmp);
 			*is_temp = 1;
@@ -1978,7 +1981,7 @@ static HashTable *zend_ffi_cdata_get_debug_info(zval *object, int *is_temp) /* {
 				*is_temp = 1;
 				return ht;
 			} else {
-				zend_ffi_cdata_to_zval(NULL, *(void**)ptr, ZEND_FFI_TYPE(type->pointer.type), BP_VAR_R, &tmp, ZEND_FFI_FLAG_CONST, 0);
+				zend_ffi_cdata_to_zval(NULL, *(void**)ptr, ZEND_FFI_TYPE(type->pointer.type), BP_VAR_R, &tmp, ZEND_FFI_FLAG_CONST, 0, 0);
 				ht = zend_new_array(1);
 				zend_hash_index_add_new(ht, 0, &tmp);
 				*is_temp = 1;
@@ -1991,7 +1994,7 @@ static HashTable *zend_ffi_cdata_get_debug_info(zval *object, int *is_temp) /* {
 				if (key) {
 					if (!f->bits) {
 						void *f_ptr = (void*)(((char*)ptr) + f->offset);
-						zend_ffi_cdata_to_zval(NULL, f_ptr, ZEND_FFI_TYPE(f->type), BP_VAR_R, &tmp, ZEND_FFI_FLAG_CONST, 0);
+						zend_ffi_cdata_to_zval(NULL, f_ptr, ZEND_FFI_TYPE(f->type), BP_VAR_R, &tmp, ZEND_FFI_FLAG_CONST, 0, type->attr & ZEND_FFI_ATTR_UNION);
 						zend_hash_add(ht, key, &tmp);
 					} else {
 						zend_ffi_bit_field_to_zval(ptr, f, &tmp);
@@ -2004,7 +2007,7 @@ static HashTable *zend_ffi_cdata_get_debug_info(zval *object, int *is_temp) /* {
 		case ZEND_FFI_TYPE_ARRAY:
 			ht = zend_new_array(type->array.length);
 			for (n = 0; n < type->array.length; n++) {
-				zend_ffi_cdata_to_zval(NULL, ptr, ZEND_FFI_TYPE(type->array.type), BP_VAR_R, &tmp, ZEND_FFI_FLAG_CONST, 0);
+				zend_ffi_cdata_to_zval(NULL, ptr, ZEND_FFI_TYPE(type->array.type), BP_VAR_R, &tmp, ZEND_FFI_FLAG_CONST, 0, 0);
 				zend_hash_index_add(ht, n, &tmp);
 				ptr = (void*)(((char*)ptr) + ZEND_FFI_TYPE(type->array.type)->size);
 			}
@@ -2373,7 +2376,7 @@ static zval *zend_ffi_read_var(zval *object, zval *member, int read_type, void *
 	zend_tmp_string_release(tmp_var_name);
 
 	if (sym->kind == ZEND_FFI_SYM_VAR) {
-		zend_ffi_cdata_to_zval(NULL, sym->addr, ZEND_FFI_TYPE(sym->type), read_type, rv, (zend_ffi_flags)sym->is_const, 0);
+		zend_ffi_cdata_to_zval(NULL, sym->addr, ZEND_FFI_TYPE(sym->type), read_type, rv, (zend_ffi_flags)sym->is_const, 0, 0);
 	} else if (sym->kind == ZEND_FFI_SYM_FUNC) {
 		zend_ffi_cdata *cdata;
 		zend_ffi_type *new_type = emalloc(sizeof(zend_ffi_type));
@@ -2746,7 +2749,7 @@ static ZEND_FUNCTION(ffi_trampoline) /* {{{ */
 		free_alloca(arg_values, arg_values_use_heap);
 	}
 
-	zend_ffi_cdata_to_zval(NULL, ret, ZEND_FFI_TYPE(type->func.ret_type), BP_VAR_R, return_value, 0, 1);
+	zend_ffi_cdata_to_zval(NULL, ret, ZEND_FFI_TYPE(type->func.ret_type), BP_VAR_R, return_value, 0, 1, 0);
 	free_alloca(ret, ret_use_heap);
 
 exit:
