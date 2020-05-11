@@ -489,7 +489,10 @@ extern "C++" {
 # undef HAVE_FUNC_ATTRIBUTE_IFUNC
 #endif
 
-#if defined(HAVE_FUNC_ATTRIBUTE_IFUNC) && defined(HAVE_FUNC_ATTRIBUTE_TARGET)
+/* Only use ifunc resolvers if we have __builtin_cpu_supports() and __builtin_cpu_init(),
+ * otherwise the use of zend_cpu_supports() may not be safe inside ifunc resolvers. */
+#if defined(HAVE_FUNC_ATTRIBUTE_IFUNC) && defined(HAVE_FUNC_ATTRIBUTE_TARGET) && \
+	defined(PHP_HAVE_BUILTIN_CPU_SUPPORTS) && defined(PHP_HAVE_BUILTIN_CPU_INIT)
 # define ZEND_INTRIN_HAVE_IFUNC_TARGET 1
 #endif
 
