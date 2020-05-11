@@ -1164,15 +1164,6 @@ static void zend_timeout_handler(int dummy) /* {{{ */
 #endif
 
 	if (zend_on_timeout) {
-#ifdef ZEND_SIGNALS
-		/*
-		   We got here because we got a timeout signal, so we are in a signal handler
-		   at this point. However, we want to be able to timeout any user-supplied
-		   shutdown functions, so pretend we are not in a signal handler while we are
-		   calling these
-		*/
-		SIGG(running) = 0;
-#endif
 		zend_on_timeout(EG(timeout_seconds));
 	}
 
@@ -1216,13 +1207,13 @@ static void zend_set_timeout_ex(zend_long seconds, int reset_signals) /* {{{ */
 #ifdef ZEND_WIN32
 	zend_executor_globals *eg;
 
-	if(!seconds) {
+	if (!seconds) {
 		return;
 	}
 
-        /* Don't use ChangeTimerQueueTimer() as it will not restart an expired
-		timer, so we could end up with just an ignored timeout. Instead
-		delete and recreate. */
+	/* Don't use ChangeTimerQueueTimer() as it will not restart an expired
+	 * timer, so we could end up with just an ignored timeout. Instead
+	 * delete and recreate. */
 	if (NULL != tq_timer) {
 		if (!DeleteTimerQueueTimer(NULL, tq_timer, INVALID_HANDLE_VALUE)) {
 			tq_timer = NULL;

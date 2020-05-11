@@ -83,6 +83,7 @@ ZEND_API int (*zend_post_startup_cb)(void) = NULL;
 ZEND_API void (*zend_post_shutdown_cb)(void) = NULL;
 ZEND_API int (*zend_preload_autoload)(zend_string *filename) = NULL;
 
+/* This callback must be signal handler safe! */
 void (*zend_on_timeout)(int seconds);
 
 static void (*zend_message_dispatcher_p)(zend_long message, const void *data);
