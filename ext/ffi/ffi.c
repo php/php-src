@@ -511,12 +511,11 @@ again:
 				kind = type->enumeration.kind;
 				goto again;
 			case ZEND_FFI_TYPE_POINTER:
-				if (debug_union) {
-					ZVAL_LONG(rv, (uintptr_t)*(void**)ptr);
-					return;
-				}
 				if (*(void**)ptr == NULL) {
 					ZVAL_NULL(rv);
+					return;
+				} else if (debug_union) {
+					ZVAL_LONG(rv, (uintptr_t)*(void**)ptr);
 					return;
 				} else if ((type->attr & ZEND_FFI_ATTR_CONST) && ZEND_FFI_TYPE(type->pointer.type)->kind == ZEND_FFI_TYPE_CHAR) {
 					ZVAL_STRING(rv, *(char**)ptr);
