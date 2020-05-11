@@ -23,18 +23,18 @@ if (!$zip->open($file, ZipArchive::CREATE | ZipArchive::OVERWRITE)) {
         exit('failed');
 }
 $options = [
-	'remove_all_path' => true,
+    'remove_all_path' => true,
 ];
 if (!$zip->addGlob($dirname . 'foo.*', GLOB_BRACE, $options)) {
         echo "failed 1\n";
 }
 
 $options = [
-	'remove_all_path' => true,
-	'comp_method' => ZipArchive::CM_STORE,
-	'comp_flags' => 5,
-	'enc_method' => ZipArchive::EM_AES_256,
-	'enc_password' => 'secret',
+    'remove_all_path' => true,
+    'comp_method' => ZipArchive::CM_STORE,
+    'comp_flags' => 5,
+    'enc_method' => ZipArchive::EM_AES_256,
+    'enc_password' => 'secret',
 ];
 if (!$zip->addGlob($dirname . 'bar.*', GLOB_BRACE, $options)) {
         echo "failed 2\n";
@@ -42,14 +42,14 @@ if (!$zip->addGlob($dirname . 'bar.*', GLOB_BRACE, $options)) {
 if ($zip->status == ZIPARCHIVE::ER_OK) {
         $zip->close();
 
-		$zip = new ZipArchive();
-		$zip->open($file);
-		for($i=0; $i<$zip->numFiles; $i++) {
-			$sb = $zip->statIndex($i);
-			echo "$i: " . $sb['name'] . 
-				", comp=" . $sb['comp_method'] .
-				", enc="  . $sb['encryption_method'] . "\n";
-		}
+        $zip = new ZipArchive();
+        $zip->open($file);
+        for($i=0; $i<$zip->numFiles; $i++) {
+            $sb = $zip->statIndex($i);
+            echo "$i: " . $sb['name'] .
+                ", comp=" . $sb['comp_method'] .
+                ", enc="  . $sb['encryption_method'] . "\n";
+        }
 } else {
         echo "failed 3\n";
 }

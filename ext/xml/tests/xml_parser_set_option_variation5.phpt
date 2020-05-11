@@ -11,7 +11,7 @@ if (!extension_loaded('xml')) {
 
 $xmlParser = xml_parser_create();
 
-var_dump(xml_parser_set_option($xmlParser, 42, 1)); 
+var_dump(xml_parser_set_option($xmlParser, 42, 1));
 
 ?>
 --EXPECTF--

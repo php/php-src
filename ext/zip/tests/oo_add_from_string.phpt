@@ -31,10 +31,10 @@ var_dump($zip->addFromString('entry1.txt', __FILE__, ZipArchive::FL_OVERWRITE));
 var_dump($zip->status == ZipArchive::ER_OK);
 
 if ($zip->status == ZipArchive::ER_OK) {
-	dump_entries_name($zip);
-	$zip->close();
+    dump_entries_name($zip);
+    $zip->close();
 } else {
-	echo "failed\n";
+    echo "failed\n";
 }
 ?>
 Done
