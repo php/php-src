@@ -1011,6 +1011,21 @@ static void pdo_firebird_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval
 }
 /* }}} */
 
+/* Check if connection is liveness */
+static int pdo_firebird_check_liveness(pdo_dbh_t *dbh){
+	ISC_STATUS status[20];
+	static char info[] = { isc_info_base_level, isc_info_end };
+	char result[8];
+
+	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
+
+	if(!isc_database_info(status, &H->db, sizeof(info), info, sizeof(result), result)){
+		return SUCCESS;
+	}
+	return FAILURE;
+}
+/* }}} */
+
 static const struct pdo_dbh_methods firebird_methods = { /* {{{ */
 	firebird_handle_closer,
 	firebird_handle_preparer,
@@ -1023,7 +1038,7 @@ static const struct pdo_dbh_methods firebird_methods = { /* {{{ */
 	NULL, /* last_id not supported */
 	pdo_firebird_fetch_error_func,
 	firebird_handle_get_attribute,
-	NULL, /* check_liveness */
+	pdo_firebird_check_liveness, /* check_liveness */
 	NULL, /* get driver methods */
 	NULL, /* request shutdown */
 	NULL, /* in transaction, use PDO's internal tracking mechanism */
