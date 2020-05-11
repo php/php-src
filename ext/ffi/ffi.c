@@ -515,7 +515,7 @@ again:
 					ZVAL_NULL(rv);
 					return;
 				} else if (debug_union) {
-					ZVAL_STR(rv, zend_strpprintf(2 * SIZEOF_SIZE_T + sizeof("0x"), "%p", *(void**)ptr));
+					ZVAL_STR(rv, zend_strpprintf(0, "%p", *(void**)ptr));
 					return;
 				} else if ((type->attr & ZEND_FFI_ATTR_CONST) && ZEND_FFI_TYPE(type->pointer.type)->kind == ZEND_FFI_TYPE_CHAR) {
 					ZVAL_STRING(rv, *(char**)ptr);
