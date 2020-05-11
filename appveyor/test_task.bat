@@ -66,11 +66,9 @@ rem prepare for Opcache
 if "%OPCACHE%" equ "1" set OPCACHE_OPTS=-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.protect_memory=1 -d opcache.jit_buffer_size=16M
 
 rem prepare for enchant
-mkdir c:\enchant_plugins
+mkdir C:\usr\local\lib\enchant-2
 if %errorlevel% neq 0 exit /b 3
-copy %DEPS_DIR%\bin\libenchant_ispell.dll c:\enchant_plugins
-if %errorlevel% neq 0 exit /b 3
-copy %DEPS_DIR%\bin\libenchant_myspell.dll c:\enchant_plugins
+copy %DEPS_DIR%\bin\libenchant2_hunspell.dll C:\usr\local\lib\enchant-2
 if %errorlevel% neq 0 exit /b 3
 reg add HKEY_CURRENT_USER\SOFTWARE\Enchant\Config /v Module_Dir /t REG_SZ /d c:\enchant_plugins
 if %errorlevel% neq 0 exit /b 3
@@ -88,8 +86,8 @@ if not exist "%PHP_BUILD_CACHE_ENCHANT_DICT_DIR%\en_US.aff" (
 	del /q dict.zip
 	popd
 )
-mkdir %USERPROFILE%\enchant\myspell
-copy %PHP_BUILD_CACHE_ENCHANT_DICT_DIR%\* %USERPROFILE%\enchant\myspell
+mkdir %LOCALAPPDATA%\enchant\hunspell
+copy %PHP_BUILD_CACHE_ENCHANT_DICT_DIR%\* %LOCALAPPDATA%\enchant\hunspell
 
 mkdir c:\tests_tmp
 
