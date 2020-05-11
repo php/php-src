@@ -2,6 +2,11 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.2.31
 
+- Core:
+  . Fixed bug #78875 (Long filenames cause OOM and temp files are not cleaned). 
+    (CVE-2019-11048) (cmb)
+  . Fixed bug #78876 (Long variables in multipart/form-data cause OOM and temp 
+    files are not cleaned). (CVE-2019-11048) (cmb)
 
 16 Apr 2020, PHP 7.2.30
 
