@@ -1,12 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.3.18
-
-- SimpleXML:
-  . Fixed bug #79528 (Different object of the same xml between 7.4.5 and
-    7.4.4). (cmb)
-
-30 Apr 2020, PHP 7.3.18RC1
+14 May 2020, PHP 7.3.18
 
 - Core:
   . Fixed bug #79434 (PHP 7.3 and PHP-7.4 crash with NULL-pointer dereference
@@ -34,6 +28,10 @@ PHP                                                                        NEWS
 
 - Phar:
   . Fix bug #79503 (Memory leak on duplicate metadata). (cmb)
+
+- SimpleXML:
+  . Fixed bug #79528 (Different object of the same xml between 7.4.5 and
+    7.4.4). (cmb)
 
 - Standard:
   . Fixed bug #79468 (SIGSEGV when closing stream handle with a stream filter
