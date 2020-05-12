@@ -367,8 +367,6 @@ static int spl_ptr_heap_count(spl_ptr_heap *heap) { /* {{{ */
 }
 /* }}} */
 
-zend_object_iterator *spl_heap_get_iterator(zend_class_entry *ce, zval *object, int by_ref);
-
 static void spl_heap_object_free_storage(zend_object *object) /* {{{ */
 {
 	spl_heap_object *intern = spl_heap_from_obj(object);
