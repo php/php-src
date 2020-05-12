@@ -343,6 +343,9 @@ typedef union _zend_jit_trace_stack {
 		(_stack)[_slot].reg = _reg; \
 	} while (0)
 
+/* trace info flags */
+#define ZEND_JIT_TRACE_CHECK_INTERRUPT (1<<0)
+
 typedef struct _zend_jit_trace_info {
 	uint32_t                  id;            /* trace id */
 	uint32_t                  root;          /* root trace id or self id for root traces */
@@ -353,7 +356,7 @@ typedef struct _zend_jit_trace_info {
 	uint32_t                  code_size;     /* size of native code */
 	uint32_t                  exit_counters; /* offset in exit counters array */
 	uint32_t                  stack_map_size;
-	uint32_t                  loop_kind;     /* LOOP, RECURSIVE_CALL or RECURSIVE_RET */
+	uint32_t                  flags;         /* See ZEND_JIT_TRACE_... defines above */
 	const zend_op            *opline;        /* first opline */
 	const void               *code_start;    /* address of native code */
 	zend_jit_trace_exit_info *exit_info;     /* info about side exits */

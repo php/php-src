@@ -3029,7 +3029,7 @@ static int zend_jit_trace_link_to_root(dasm_State **Dst, zend_jit_trace_info *t)
 	}
 	link_addr = (const void*)((const char*)t->code_start + prologue_size);
 
-	if (t->link == t->id && t->loop_kind != ZEND_JIT_TRACE_STOP_RECURSIVE_RET) {
+	if (t->flags & ZEND_JIT_TRACE_CHECK_INTERRUPT) {
 		/* Check timeout for links to LOOP */
 		|	MEM_OP2_1_ZTS cmp, byte, executor_globals, vm_interrupt, 0, r0
 		|	je &link_addr

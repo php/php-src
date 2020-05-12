@@ -3981,7 +3981,9 @@ done:
 			}
 		}
 		t->link = ZEND_JIT_TRACE_NUM;
-		t->loop_kind = p->stop;
+		if (p->stop != ZEND_JIT_TRACE_STOP_RECURSIVE_RET) {
+			t->flags |= ZEND_JIT_TRACE_CHECK_INTERRUPT;
+		}
 		zend_jit_trace_end_loop(&dasm_state, 0, timeout_exit_addr); /* jump back to start of the trace loop */
 	} else if (p->stop == ZEND_JIT_TRACE_STOP_LINK) {
 		if (ra) {
@@ -4140,7 +4142,7 @@ static zend_jit_trace_stop zend_jit_compile_root_trace(zend_jit_trace_rec *trace
 		t->exit_count = 0;
 		t->child_count = 0;
 		t->stack_map_size = 0;
-		t->loop_kind = 0;
+		t->flags = 0;
 		t->opline = ((zend_jit_trace_start_rec*)trace_buffer)->opline;
 		t->exit_info = exit_info;
 		t->stack_map = NULL;
@@ -4701,7 +4703,7 @@ static zend_jit_trace_stop zend_jit_compile_side_trace(zend_jit_trace_rec *trace
 		t->exit_count = 0;
 		t->child_count = 0;
 		t->stack_map_size = 0;
-		t->loop_kind = 0;
+		t->flags = 0;
 		t->opline = NULL;
 		t->exit_info = exit_info;
 		t->stack_map = NULL;
