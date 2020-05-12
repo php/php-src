@@ -489,7 +489,7 @@ static void php_cli_usage(char *argv0)
 				"   %s [options] -- [args...]\n"
 				"   %s [options] -a\n"
 				"\n"
-#if (HAVE_LIBREADLINE || HAVE_LIBEDIT) && !defined(COMPILE_DL_READLINE)
+#if (defined(HAVE_LIBREADLINE) || defined(HAVE_LIBEDIT)) && !defined(COMPILE_DL_READLINE)
 				"  -a               Run as interactive shell\n"
 #else
 				"  -a               Run interactively\n"
@@ -641,7 +641,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 			case 'v': /* show php version & quit */
 				php_printf("PHP %s (%s) (built: %s %s) ( %s)\nCopyright (c) The PHP Group\n%s",
 					PHP_VERSION, cli_sapi_module.name, __DATE__, __TIME__,
-#if ZTS
+#ifdef ZTS
 					"ZTS "
 #else
 					"NTS "
@@ -871,7 +871,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 #endif
 
 		if (interactive) {
-#if (HAVE_LIBREADLINE || HAVE_LIBEDIT) && !defined(COMPILE_DL_READLINE)
+#if (defined(HAVE_LIBREADLINE) || defined(HAVE_LIBEDIT)) && !defined(COMPILE_DL_READLINE)
 			printf("Interactive shell\n\n");
 #else
 			printf("Interactive mode enabled\n\n");
