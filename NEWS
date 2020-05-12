@@ -9,6 +9,7 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug #79535 (PHP crashes with specific opcache.optimization_level).
     (Nikita)
+  . Fixed bug #79588 (Boolean opcache settings ignore on/off values). (cmb)
 
 - Standard:
   . Fixed bug #79561 (dns_get_record() fails with DNS_ALL). (cmb)
