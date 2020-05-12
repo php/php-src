@@ -2,13 +2,6 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.4.6
 
-- SimpleXML:
-  . Fixed bug #79528 (Different object of the same xml between 7.4.5 and
-    7.4.4). (cmb)
-
-
-30 Apr 2020, PHP 7.4.6RC1
-
 - Core:
   . Fixed bug #78434 (Generator yields no items after valid() call). (Nikita)
   . Fixed bug #79477 (casting object into array creates references). (Nikita)
@@ -18,6 +11,10 @@ PHP                                                                        NEWS
     (cmb)
   . Fixed bug #78784 (Unable to interact with files inside a VFS for Git
     repository). (cmb)
+  . Fixed bug #78875 (Long variables cause OOM and temp files are not cleaned).
+    (cmb) (CVE-2019-11048)
+  . Fixed bug #78876 (Long variables cause OOM and temp files are not cleaned).
+    (cmb) (CVE-2019-11048)
 
 - DOM:
   . Fixed bug #78221 (DOMNode::normalize() doesn't remove empty text nodes).
@@ -43,6 +40,10 @@ PHP                                                                        NEWS
 
 - Phar:
   . Fixed bug #79503 (Memory leak on duplicate metadata). (cmb)
+
+- SimpleXML:
+  . Fixed bug #79528 (Different object of the same xml between 7.4.5 and
+    7.4.4). (cmb)
 
 - SPL:
   . Fixed bug #69264 (__debugInfo() ignored while extending SPL classes). (cmb)
