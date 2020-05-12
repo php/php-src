@@ -353,6 +353,7 @@ typedef struct _zend_jit_trace_info {
 	uint32_t                  code_size;     /* size of native code */
 	uint32_t                  exit_counters; /* offset in exit counters array */
 	uint32_t                  stack_map_size;
+	uint32_t                  loop_kind;     /* LOOP, RECURSIVE_CALL or RECURSIVE_RET */
 	const zend_op            *opline;        /* first opline */
 	const void               *code_start;    /* address of native code */
 	zend_jit_trace_exit_info *exit_info;     /* info about side exits */

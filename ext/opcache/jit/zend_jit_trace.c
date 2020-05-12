@@ -2456,6 +2456,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 	zend_uchar res_type = IS_UNKNOWN;
 	const zend_op *opline, *orig_opline;
 	const zend_ssa_op *ssa_op, *orig_ssa_op;
+	const void *timeout_exit_addr = NULL;
 
 	JIT_G(current_trace) = trace_buffer;
 
@@ -2628,17 +2629,16 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 		}
 
 		if (trace_buffer->stop != ZEND_JIT_TRACE_STOP_RECURSIVE_RET) {
-			const void *exit_addr = NULL;
-
 			if (ra && zend_jit_trace_stack_needs_deoptimization(stack, op_array->last_var + op_array->T)) {
-				uint32_t exit_point = zend_jit_trace_get_exit_point(NULL, NULL, NULL, 0);
+				uint32_t exit_point = zend_jit_trace_get_exit_point(NULL, NULL, NULL, ZEND_JIT_EXIT_TO_VM);
 
-				exit_addr = zend_jit_trace_get_exit_addr(exit_point);
-				if (!exit_addr) {
+				timeout_exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+				if (!timeout_exit_addr) {
 					goto jit_failure;
 				}
+			} else {
+				timeout_exit_addr = dasm_labels[zend_lbinterrupt_handler];
 			}
-			zend_jit_check_timeout(&dasm_state, opline, exit_addr);
 		}
 
 		if (ra && trace_buffer->stop != ZEND_JIT_TRACE_STOP_LOOP) {
@@ -3981,7 +3981,8 @@ done:
 			}
 		}
 		t->link = ZEND_JIT_TRACE_NUM;
-		zend_jit_jmp(&dasm_state, 0); /* jump back to start of the trace loop */
+		t->loop_kind = p->stop;
+		zend_jit_trace_end_loop(&dasm_state, 0, timeout_exit_addr); /* jump back to start of the trace loop */
 	} else if (p->stop == ZEND_JIT_TRACE_STOP_LINK) {
 		if (ra) {
 			/* Generate code for trace deoptimization */
@@ -4000,7 +4001,7 @@ done:
 			goto jit_failure;
 		}
 		t->link = zend_jit_find_trace(p->opline->handler);
-		zend_jit_trace_link_to_root(&dasm_state, p->opline->handler);
+		zend_jit_trace_link_to_root(&dasm_state, &zend_jit_traces[t->link]);
 	} else if (p->stop == ZEND_JIT_TRACE_STOP_RETURN) {
 		zend_jit_trace_return(&dasm_state, 0);
 	} else {
@@ -4139,6 +4140,7 @@ static zend_jit_trace_stop zend_jit_compile_root_trace(zend_jit_trace_rec *trace
 		t->exit_count = 0;
 		t->child_count = 0;
 		t->stack_map_size = 0;
+		t->loop_kind = 0;
 		t->opline = ((zend_jit_trace_start_rec*)trace_buffer)->opline;
 		t->exit_info = exit_info;
 		t->stack_map = NULL;
@@ -4699,6 +4701,7 @@ static zend_jit_trace_stop zend_jit_compile_side_trace(zend_jit_trace_rec *trace
 		t->exit_count = 0;
 		t->child_count = 0;
 		t->stack_map_size = 0;
+		t->loop_kind = 0;
 		t->opline = NULL;
 		t->exit_info = exit_info;
 		t->stack_map = NULL;

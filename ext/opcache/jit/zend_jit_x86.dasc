@@ -2784,6 +2784,18 @@ static int zend_jit_check_timeout(dasm_State **Dst, const zend_op *opline, const
 	return 1;
 }
 
+static int zend_jit_trace_end_loop(dasm_State **Dst, int loop_label, const void *timeout_exit_addr)
+{
+	if (timeout_exit_addr) {
+		|	MEM_OP2_1_ZTS cmp, byte, executor_globals, vm_interrupt, 0, r0
+		|	je =>loop_label
+		|	jmp &timeout_exit_addr
+	} else {
+		|	jmp =>loop_label
+	}
+	return 1;
+}
+
 static int zend_jit_check_exception(dasm_State **Dst)
 {
 	|	MEM_OP2_1_ZTS cmp, aword, executor_globals, exception, 0, r0
@@ -2984,9 +2996,9 @@ static int zend_jit_link_side_trace(const void *code, size_t size, uint32_t exit
 	return zend_jit_patch(code, size, zend_jit_trace_get_exit_addr(exit_num), addr);
 }
 
-static int zend_jit_trace_link_to_root(dasm_State **Dst, const void *code)
+static int zend_jit_trace_link_to_root(dasm_State **Dst, zend_jit_trace_info *t)
 {
-	const void *exit_addr;
+	const void *link_addr;
 	size_t prologue_size;
 
 	/* Skip prologue. */
@@ -3016,9 +3028,16 @@ static int zend_jit_trace_link_to_root(dasm_State **Dst, const void *code)
 		prologue_size = 12;
 #endif
 	}
-	exit_addr = (const void*)((const char*)code + prologue_size);
+	link_addr = (const void*)((const char*)t->code_start + prologue_size);
 
-	|	jmp &exit_addr
+	if (t->link == t->id && t->loop_kind != ZEND_JIT_TRACE_STOP_RECURSIVE_RET) {
+		/* Check timeout for links to LOOP */
+		|	MEM_OP2_1_ZTS cmp, byte, executor_globals, vm_interrupt, 0, r0
+		|	je &link_addr
+		|	jmp ->interrupt_handler
+	} else {
+		|	jmp &link_addr
+	}
 	return 1;
 }
 
