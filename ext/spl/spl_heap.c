@@ -62,22 +62,18 @@ typedef struct _spl_ptr_heap {
 	size_t                  elem_size;
 } spl_ptr_heap;
 
-typedef struct _spl_heap_object spl_heap_object;
-typedef struct _spl_heap_it spl_heap_it;
-
-struct _spl_heap_object {
+typedef struct _spl_heap_object {
 	spl_ptr_heap       *heap;
 	int                 flags;
 	zend_function      *fptr_cmp;
 	zend_function      *fptr_count;
 	zend_object         std;
-};
+} spl_heap_object;
 
-/* define an overloaded iterator structure */
-struct _spl_heap_it {
+typedef struct _spl_heap_it {
 	zend_user_iterator  intern;
 	int                 flags;
-};
+} spl_heap_it;
 
 typedef struct _spl_pqueue_elem {
 	zval data;
@@ -905,7 +901,7 @@ static zval *spl_heap_it_get_current_data(zend_object_iterator *iter) /* {{{ */
 
 static zval *spl_pqueue_it_get_current_data(zend_object_iterator *iter) /* {{{ */
 {
-	zend_user_iterator *user_it = (zend_user_iterator *) iter;
+	spl_heap_it *it = (spl_heap_it*)iter;
 	spl_heap_object *object = Z_SPLHEAP_P(&iter->data);
 
 	if (object->heap->flags & SPL_HEAP_CORRUPTED) {
@@ -917,11 +913,11 @@ static zval *spl_pqueue_it_get_current_data(zend_object_iterator *iter) /* {{{ *
 		return NULL;
 	}
 
-	if (Z_ISUNDEF(user_it->value)) {
+	if (Z_ISUNDEF(it->intern.value)) {
 		spl_pqueue_elem *elem = spl_heap_elem(object->heap, 0);
-		spl_pqueue_extract_helper(&user_it->value, elem, object->flags);
+		spl_pqueue_extract_helper(&it->intern.value, elem, it->flags);
 	}
-	return &user_it->value;
+	return &it->intern.value;
 }
 /* }}} */
 
