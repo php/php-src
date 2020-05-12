@@ -22,7 +22,7 @@
 #include "php_bz2.h"
 #include "bz2_arginfo.h"
 
-#if HAVE_BZ2
+#ifdef HAVE_BZ2
 
 /* PHP Includes */
 #include "ext/standard/info.h"
@@ -504,7 +504,7 @@ PHP_FUNCTION(bzdecompress)
 	size_t source_len;
 	int error;
 	zend_long small = 0;
-#if defined(PHP_WIN32)
+#ifdef PHP_WIN32
 	unsigned __int64 size = 0;
 #else
 	unsigned long long size = 0;
@@ -534,7 +534,7 @@ PHP_FUNCTION(bzdecompress)
 		/* compression is better then 2:1, need to allocate more memory */
 		bzs.avail_out = source_len;
 		size = (bzs.total_out_hi32 * (unsigned int) -1) + bzs.total_out_lo32;
-#if !ZEND_ENABLE_ZVAL_LONG64
+#ifndef ZEND_ENABLE_ZVAL_LONG64
 		if (size > SIZE_MAX) {
 			/* no reason to continue if we're going to drop it anyway */
 			break;
@@ -546,7 +546,7 @@ PHP_FUNCTION(bzdecompress)
 
 	if (error == BZ_STREAM_END || error == BZ_OK) {
 		size = (bzs.total_out_hi32 * (unsigned int) -1) + bzs.total_out_lo32;
-#if !ZEND_ENABLE_ZVAL_LONG64
+#ifndef ZEND_ENABLE_ZVAL_LONG64
 		if (UNEXPECTED(size > SIZE_MAX)) {
 			php_error_docref(NULL, E_WARNING, "Decompressed size too big, max is %zd", SIZE_MAX);
 			zend_string_efree(dest);
