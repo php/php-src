@@ -767,7 +767,7 @@ static int sp_adj[SP_ADJ_LAST];
 # pragma clang diagnostic pop
 #endif
 
-#if _WIN32
+#ifdef _WIN32
 # include <Windows.h>
 #else
 # include <sys/mman.h>
@@ -4616,7 +4616,7 @@ ZEND_EXT_API void zend_jit_unprotect(void)
 			fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));
 		}
 	}
-#elif _WIN32
+#elif defined(_WIN32)
 	if (!(JIT_G(debug) & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP))) {
 		DWORD old, new;
 #ifdef ZTS
@@ -4642,7 +4642,7 @@ ZEND_EXT_API void zend_jit_protect(void)
 			fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));
 		}
 	}
-#elif _WIN32
+#elif defined(_WIN32)
 	if (!(JIT_G(debug) & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP))) {
 		DWORD old;
 
@@ -4907,7 +4907,7 @@ ZEND_EXT_API int zend_jit_startup(void *buf, size_t size, bool reattached)
 			fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));
 		}
 	}
-#elif _WIN32
+#elif defined(_WIN32)
 	if (JIT_G(debug) & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP)) {
 		DWORD old;
 
@@ -4933,7 +4933,7 @@ ZEND_EXT_API int zend_jit_startup(void *buf, size_t size, bool reattached)
 	if (!reattached) {
 		zend_jit_unprotect();
 		*dasm_ptr = dasm_buf;
-#if _WIN32
+#ifdef _WIN32
 		/* reserve space for global labels */
 		*dasm_ptr = (void**)*dasm_ptr + zend_lb_MAX;
 #endif
@@ -4958,7 +4958,7 @@ ZEND_EXT_API int zend_jit_startup(void *buf, size_t size, bool reattached)
 	if (!reattached) {
 		zend_jit_unprotect();
 		ret = zend_jit_make_stubs();
-#if _WIN32
+#ifdef _WIN32
 		/* save global labels */
 		memcpy(dasm_buf, dasm_labels, sizeof(void*) * zend_lb_MAX);
 #endif
@@ -4968,7 +4968,7 @@ ZEND_EXT_API int zend_jit_startup(void *buf, size_t size, bool reattached)
 			return FAILURE;
 		}
 	} else {
-#if _WIN32
+#ifdef _WIN32
 		/* restore global labels */
 		memcpy(dasm_labels, dasm_buf, sizeof(void*) * zend_lb_MAX);
 		zend_jit_init_handlers();

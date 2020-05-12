@@ -142,7 +142,7 @@ const char* zend_reg_name[] = {
 
 static void* dasm_labels[zend_lb_MAX];
 
-#if ZTS
+#ifdef ZTS
 static size_t tsrm_ls_cache_tcb_offset = 0;
 static size_t tsrm_tls_index;
 static size_t tsrm_tls_offset;
@@ -2831,7 +2831,7 @@ static const zend_jit_stub zend_jit_stubs[] = {
 #endif
 };
 
-#if ZTS && defined(ZEND_WIN32)
+#if defined(ZTS) && defined(ZEND_WIN32)
 extern uint32_t _tls_index;
 extern char *_tls_start;
 extern char *_tls_end;
@@ -2894,7 +2894,7 @@ static int zend_jit_setup(void)
 		allowed_opt_flags |= ZEND_JIT_CPU_AVX;
 	}
 
-#if ZTS
+#ifdef ZTS
 # ifdef _WIN64
 	tsrm_tls_index  = _tls_index * sizeof(void*);
 
@@ -2919,7 +2919,7 @@ static int zend_jit_setup(void)
 			return FAILURE;
 		}
 	} while(0);
-# elif ZEND_WIN32
+# elif defined(ZEND_WIN32)
 	tsrm_tls_index  = _tls_index * sizeof(void*);
 
 	/* To find offset of "_tsrm_ls_cache" in TLS segment we perform a linear scan of local TLS memory */
@@ -3192,7 +3192,7 @@ static int zend_jit_trace_begin(dasm_State **Dst, uint32_t trace_num, zend_jit_t
 {
 	zend_regset regset = ZEND_REGSET_SCRATCH;
 
-#if ZTS
+#ifdef ZTS
 	if (1) {
 #else
 	if ((sizeof(void*) == 8 && !IS_SIGNED_32BIT(&EG(jit_trace_num)))) {
@@ -7997,7 +7997,7 @@ static int zend_jit_cmp(dasm_State    **Dst,
 			}
 			|	mov eax, dword T1 // restore
 		} else if (may_throw) {
-#if ZTS
+#ifdef ZTS
 			|	mov dword T1, eax // save
 #else
 			if ((sizeof(void*) == 8 && !IS_SIGNED_32BIT(&EG(exception)))) {
@@ -8005,7 +8005,7 @@ static int zend_jit_cmp(dasm_State    **Dst,
 			}
 #endif
 			zend_jit_check_exception_undef_result(Dst, opline);
-#if ZTS
+#ifdef ZTS
 			|	mov eax, dword T1 // restore
 #else
 			if ((sizeof(void*) == 8 && !IS_SIGNED_32BIT(&EG(exception)))) {
@@ -16233,7 +16233,7 @@ bw_op:
 		if (ssa_op == ssa->ops
 		 && (JIT_G(current_trace)->stop == ZEND_JIT_TRACE_STOP_LOOP ||
 			 JIT_G(current_trace)->stop == ZEND_JIT_TRACE_STOP_RECURSIVE_CALL)) {
-#if ZTS
+#ifdef ZTS
 			ZEND_REGSET_INCL(regset, ZREG_R0);
 #else
 			if ((sizeof(void*) == 8 && !IS_SIGNED_32BIT(&EG(vm_interrupt)))) {
@@ -16246,7 +16246,7 @@ bw_op:
 
 		if ((ssa->cfg.blocks[b].flags & ZEND_BB_LOOP_HEADER) != 0
 		 && ssa->cfg.blocks[b].start == ssa_op - ssa->ops) {
-#if ZTS
+#ifdef ZTS
 			ZEND_REGSET_INCL(regset, ZREG_R0);
 #else
 			if ((sizeof(void*) == 8 && !IS_SIGNED_32BIT(&EG(vm_interrupt)))) {
