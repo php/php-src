@@ -109,17 +109,17 @@ static void init_ancillary_registry(void)
 	key.cmsg_type		= type; \
 	zend_hash_str_update_mem(&ancillary_registry.ht, (char*)&key, sizeof(key), (void*)&entry, sizeof(entry))
 
-#if defined(IPV6_PKTINFO) && HAVE_IPV6
+#if defined(IPV6_PKTINFO) && defined(HAVE_IPV6)
 	PUT_ENTRY(sizeof(struct in6_pktinfo), 0, 0, from_zval_write_in6_pktinfo,
 			to_zval_read_in6_pktinfo, IPPROTO_IPV6, IPV6_PKTINFO);
 #endif
 
-#if defined(IPV6_HOPLIMIT) && HAVE_IPV6
+#if defined(IPV6_HOPLIMIT) && defined(HAVE_IPV6)
 	PUT_ENTRY(sizeof(int), 0, 0, from_zval_write_int,
 			to_zval_read_int, IPPROTO_IPV6, IPV6_HOPLIMIT);
 #endif
 
-#if defined(IPV6_TCLASS) && HAVE_IPV6
+#if defined(IPV6_TCLASS) && defined(HAVE_IPV6)
 	PUT_ENTRY(sizeof(int), 0, 0, from_zval_write_int,
 			to_zval_read_int, IPPROTO_IPV6, IPV6_TCLASS);
 #endif
@@ -320,7 +320,7 @@ PHP_FUNCTION(socket_cmsg_space)
 	RETURN_LONG((zend_long)CMSG_SPACE(entry->size + n * entry->var_el_size));
 }
 
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 int php_do_setsockopt_ipv6_rfc3542(php_socket *php_sock, int level, int optname, zval *arg4)
 {
 	struct err_s	err = {0};
@@ -417,11 +417,11 @@ int php_do_getsockopt_ipv6_rfc3542(php_socket *php_sock, int level, int optname,
 void php_socket_sendrecvmsg_init(INIT_FUNC_ARGS)
 {
 	/* IPv6 ancillary data */
-#if defined(IPV6_RECVPKTINFO) && HAVE_IPV6
+#if defined(IPV6_RECVPKTINFO) && defined(HAVE_IPV6)
 	REGISTER_LONG_CONSTANT("IPV6_RECVPKTINFO",		IPV6_RECVPKTINFO,	CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IPV6_PKTINFO",          IPV6_PKTINFO,       CONST_CS | CONST_PERSISTENT);
 #endif
-#if defined(IPV6_RECVHOPLIMIT) && HAVE_IPV6
+#if defined(IPV6_RECVHOPLIMIT) && defined(HAVE_IPV6)
 	REGISTER_LONG_CONSTANT("IPV6_RECVHOPLIMIT",		IPV6_RECVHOPLIMIT,	CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IPV6_HOPLIMIT",         IPV6_HOPLIMIT,      CONST_CS | CONST_PERSISTENT);
 #endif
@@ -430,7 +430,7 @@ void php_socket_sendrecvmsg_init(INIT_FUNC_ARGS)
 	REGISTER_LONG_CONSTANT("IPV6_RECVHOPOPTS",		IPV6_RECVHOPOPTS,	CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IPV6_RECVDSTOPTS",		IPV6_RECVDSTOPTS,	CONST_CS | CONST_PERSISTENT);
 	*/
-#if defined(IPV6_RECVTCLASS) && HAVE_IPV6
+#if defined(IPV6_RECVTCLASS) && defined(HAVE_IPV6)
 	REGISTER_LONG_CONSTANT("IPV6_RECVTCLASS",		IPV6_RECVTCLASS,	CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IPV6_TCLASS",			IPV6_TCLASS,		CONST_CS | CONST_PERSISTENT);
 #endif
