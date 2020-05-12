@@ -24,7 +24,7 @@ function tidy_diagnose(tidy $object): bool {}
 
 function tidy_get_release(): string {}
 
-#if HAVE_TIDYOPTGETDOC
+#ifdef HAVE_TIDYOPTGETDOC
 function tidy_get_opt_doc(tidy $object, string $optname): string|false {}
 #endif
 
@@ -129,7 +129,7 @@ class tidy
      */
     public function getHtmlVer() {}
 
-#if HAVE_TIDYOPTGETDOC
+#ifdef HAVE_TIDYOPTGETDOC
     /**
      * @return string|false
      * @alias tidy_get_opt_doc

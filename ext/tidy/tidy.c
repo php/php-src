@@ -21,18 +21,18 @@
 #include "php.h"
 #include "php_tidy.h"
 
-#if HAVE_TIDY
+#ifdef HAVE_TIDY
 
 #include "php_ini.h"
 #include "ext/standard/info.h"
 
-#if HAVE_TIDY_H
+#ifdef HAVE_TIDY_H
 #include "tidy.h"
-#elif HAVE_TIDYP_H
+#elif defined(HAVE_TIDYP_H)
 #include "tidyp.h"
 #endif
 
-#if HAVE_TIDYBUFFIO_H
+#ifdef HAVE_TIDYBUFFIO_H
 #include "tidybuffio.h"
 #else
 #include "buffio.h"
@@ -865,12 +865,12 @@ static PHP_MINFO_FUNCTION(tidy)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "Tidy support", "enabled");
-#if HAVE_TIDYBUFFIO_H
+#ifdef HAVE_TIDYBUFFIO_H
 	php_info_print_table_row(2, "libTidy Version", (char *)tidyLibraryVersion());
-#elif HAVE_TIDYP_H
+#elif defined(HAVE_TIDYP_H)
 	php_info_print_table_row(2, "libtidyp Version", (char *)tidyVersion());
 #endif
-#if HAVE_TIDYRELEASEDATE
+#ifdef HAVE_TIDYRELEASEDATE
 	php_info_print_table_row(2, "libTidy Release", (char *)tidyReleaseDate());
 #endif
 	php_info_print_table_end();
@@ -1139,7 +1139,7 @@ PHP_FUNCTION(tidy_get_release)
 		RETURN_THROWS();
 	}
 
-#if HAVE_TIDYRELEASEDATE
+#ifdef HAVE_TIDYRELEASEDATE
 	RETURN_STRING((char *)tidyReleaseDate());
 #else
 	RETURN_STRING((char *)"unknown");
@@ -1148,7 +1148,7 @@ PHP_FUNCTION(tidy_get_release)
 /* }}} */
 
 
-#if HAVE_TIDYOPTGETDOC
+#ifdef HAVE_TIDYOPTGETDOC
 /* {{{ proto string tidy_get_opt_doc(tidy resource, string optname)
    Returns the documentation for the given option name */
 PHP_FUNCTION(tidy_get_opt_doc)
@@ -1775,7 +1775,7 @@ static void _php_tidy_register_tags(INIT_FUNC_ARGS)
 	TIDY_TAG_CONST(VAR);
 	TIDY_TAG_CONST(WBR);
 	TIDY_TAG_CONST(XMP);
-# if HAVE_TIDYBUFFIO_H
+# ifdef HAVE_TIDYBUFFIO_H
 	TIDY_TAG_CONST(ARTICLE);
 	TIDY_TAG_CONST(ASIDE);
 	TIDY_TAG_CONST(AUDIO);
