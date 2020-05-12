@@ -126,7 +126,7 @@ typedef int pid_t;
 #endif
 #include <assert.h>
 
-#if HAVE_UNIX_H
+#ifdef HAVE_UNIX_H
 #include <unix.h>
 #endif
 
@@ -293,10 +293,10 @@ END_EXTERN_C()
 #define php_ignore_value(x) ZEND_IGNORE_VALUE(x)
 
 /* global variables */
-#if !defined(PHP_WIN32)
+#ifndef PHP_WIN32
 #define php_sleep sleep
 extern char **environ;
-#endif	/* !defined(PHP_WIN32) */
+#endif	/* ifndef PHP_WIN32 */
 
 #ifdef PHP_PWRITE_64
 ssize_t pwrite(int, void *, size_t, off64_t);

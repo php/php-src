@@ -2498,7 +2498,7 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file)
 {
 	zend_file_handle *prepend_file_p, *append_file_p;
 	zend_file_handle prepend_file, append_file;
-#if HAVE_BROKEN_GETCWD
+#ifdef HAVE_BROKEN_GETCWD
 	volatile int old_cwd_fd = -1;
 #else
 	char *old_cwd;
@@ -2525,7 +2525,7 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file)
 		PG(during_request_startup) = 0;
 
 		if (primary_file->filename && !(SG(options) & SAPI_OPTION_NO_CHDIR)) {
-#if HAVE_BROKEN_GETCWD
+#ifdef HAVE_BROKEN_GETCWD
 			/* this looks nasty to me */
 			old_cwd_fd = open(".", 0);
 #else
@@ -2590,7 +2590,7 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file)
 		} zend_end_try();
 	}
 
-#if HAVE_BROKEN_GETCWD
+#ifdef HAVE_BROKEN_GETCWD
 	if (old_cwd_fd != -1) {
 		fchdir(old_cwd_fd);
 		close(old_cwd_fd);
