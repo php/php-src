@@ -15,7 +15,7 @@
    +----------------------------------------------------------------------+
  */
 
-#if HAVE_EXIF
+#ifdef HAVE_EXIF
 
 #include "php_version.h"
 #define PHP_EXIF_VERSION PHP_VERSION
