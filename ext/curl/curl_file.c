@@ -23,7 +23,7 @@
 #include "Zend/zend_interfaces.h"
 #include "php_curl.h"
 #include "curl_file_arginfo.h"
-#if HAVE_CURL
+#ifdef HAVE_CURL
 
 PHP_CURL_API zend_class_entry *curl_CURLFile_class;
 

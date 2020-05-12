@@ -22,7 +22,7 @@
 
 #include "php.h"
 
-#if HAVE_CURL
+#ifdef HAVE_CURL
 
 #include "php_curl.h"
 

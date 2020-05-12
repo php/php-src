@@ -22,7 +22,7 @@
 
 #include "php.h"
 
-#if HAVE_CURL
+#ifdef HAVE_CURL
 
 #include <stdio.h>
 #include <string.h>
@@ -1722,7 +1722,7 @@ static void _php_curl_set_default_options(php_curl *ch)
 	curl_easy_setopt(ch->cp, CURLOPT_INFILE,            (void *) ch);
 	curl_easy_setopt(ch->cp, CURLOPT_HEADERFUNCTION,    curl_write_header);
 	curl_easy_setopt(ch->cp, CURLOPT_WRITEHEADER,       (void *) ch);
-#if !defined(ZTS)
+#ifndef ZTS
 	curl_easy_setopt(ch->cp, CURLOPT_DNS_USE_GLOBAL_CACHE, 1);
 #endif
 	curl_easy_setopt(ch->cp, CURLOPT_DNS_CACHE_TIMEOUT, 120);
@@ -1736,7 +1736,7 @@ static void _php_curl_set_default_options(php_curl *ch)
 		curl_easy_setopt(ch->cp, CURLOPT_CAINFO, cainfo);
 	}
 
-#if defined(ZTS)
+#ifdef ZTS
 	curl_easy_setopt(ch->cp, CURLOPT_NOSIGNAL, 1);
 #endif
 }

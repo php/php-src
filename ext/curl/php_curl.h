@@ -26,7 +26,7 @@
 #define HAVE_CURL 1
 #endif
 
-#if HAVE_CURL
+#ifdef HAVE_CURL
 
 #define PHP_CURL_DEBUG 0
 
