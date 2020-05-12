@@ -1382,11 +1382,11 @@ PHPDBG_WATCH(array) /* {{{ */
 
 
 void phpdbg_setup_watchpoints(void) {
-#if _SC_PAGE_SIZE
+#if defined(_SC_PAGE_SIZE)
 	phpdbg_pagesize = sysconf(_SC_PAGE_SIZE);
-#elif _SC_PAGESIZE
+#elif defined(_SC_PAGESIZE)
 	phpdbg_pagesize = sysconf(_SC_PAGESIZE);
-#elif _SC_NUTC_OS_PAGESIZE
+#elif defined(_SC_NUTC_OS_PAGESIZE)
 	phpdbg_pagesize = sysconf(_SC_NUTC_OS_PAGESIZE);
 #else
 	phpdbg_pagesize = 4096; /* common pagesize */
