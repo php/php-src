@@ -18,7 +18,7 @@
 #ifndef	_INCLUDED_FTP_H
 #define	_INCLUDED_FTP_H
 
-#if HAVE_FTP
+#ifdef HAVE_FTP
 
 extern zend_module_entry php_ftp_module_entry;
 #define php_ftp_module_ptr &php_ftp_module_entry

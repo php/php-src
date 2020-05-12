@@ -25,7 +25,7 @@
 # include <openssl/ssl.h>
 #endif
 
-#if HAVE_FTP
+#ifdef HAVE_FTP
 
 #include "ext/standard/info.h"
 #include "ext/standard/file.h"
@@ -52,7 +52,7 @@ zend_module_entry php_ftp_module_entry = {
 	STANDARD_MODULE_PROPERTIES
 };
 
-#if COMPILE_DL_FTP
+#ifdef COMPILE_DL_FTP
 ZEND_GET_MODULE(php_ftp)
 #endif
 
