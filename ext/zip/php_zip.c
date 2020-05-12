@@ -3323,7 +3323,7 @@ static PHP_MINIT_FUNCTION(zip)
 #endif
 	REGISTER_ZIP_CLASS_CONST_LONG("EM_UNKNOWN",				ZIP_EM_UNKNOWN);
 
-#if HAVE_LIBZIP_VERSION
+#ifdef HAVE_LIBZIP_VERSION
 	zend_declare_class_constant_string(zip_class_entry, "LIBZIP_VERSION", sizeof("LIBZIP_VERSION")-1, zip_libzip_version());
 #else
 	zend_declare_class_constant_string(zip_class_entry, "LIBZIP_VERSION", sizeof("LIBZIP_VERSION")-1, LIBZIP_VERSION);
@@ -3356,7 +3356,7 @@ static PHP_MINFO_FUNCTION(zip)
 
 	php_info_print_table_row(2, "Zip", "enabled");
 	php_info_print_table_row(2, "Zip version", PHP_ZIP_VERSION);
-#if HAVE_LIBZIP_VERSION
+#ifdef HAVE_LIBZIP_VERSION
 	php_info_print_table_row(2, "Libzip headers version", LIBZIP_VERSION);
 	php_info_print_table_row(2, "Libzip library version", zip_libzip_version());
 #else
