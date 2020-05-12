@@ -5570,7 +5570,7 @@ PHPAPI int php_multisort_compare(const void *a, const void *b) /* {{{ */
 		r++;
 	} while (Z_TYPE(ab[r].val) != IS_UNDEF);
 
-	return 0;
+	return stable_sort_fallback(&ab[r], &bb[r]);
 }
 /* }}} */
 
@@ -5707,8 +5707,8 @@ PHP_FUNCTION(array_multisort)
 
 	/* Create the indirection array. This array is of size MxN, where
 	 * M is the number of entries in each input array and N is the number
-	 * of the input arrays + 1. The last column is NULL to indicate the end
-	 * of the row. */
+	 * of the input arrays + 1. The last column is UNDEF to indicate the end
+	 * of the row. It also stores the original position for stable sorting. */
 	indirect = (Bucket **)safe_emalloc(array_size, sizeof(Bucket *), 0);
 	for (i = 0; i < array_size; i++) {
 		indirect[i] = (Bucket *)safe_emalloc((num_arrays + 1), sizeof(Bucket), 0);
@@ -5724,6 +5724,7 @@ PHP_FUNCTION(array_multisort)
 	}
 	for (k = 0; k < array_size; k++) {
 		ZVAL_UNDEF(&indirect[k][num_arrays].val);
+		Z_EXTRA_P(&indirect[k][num_arrays].val) = k;
 	}
 
 	/* Do the actual sort magic - bada-bim, bada-boom. */
