@@ -409,7 +409,7 @@ PHP_MINIT_FUNCTION(imap)
 #ifndef PHP_WIN32
 	auth_link(&auth_log);		/* link in the log authenticator */
 	auth_link(&auth_md5);		/* link in the cram-md5 authenticator */
-#if HAVE_IMAP_KRB && defined(HAVE_IMAP_AUTH_GSS)
+#if defined(HAVE_IMAP_KRB) && defined(HAVE_IMAP_AUTH_GSS)
 	auth_link(&auth_gss);		/* link in the gss authenticator */
 #endif
 	auth_link(&auth_pla);		/* link in the plain authenticator */
@@ -665,26 +665,26 @@ PHP_RSHUTDOWN_FUNCTION(imap)
 }
 /* }}} */
 
-#if !defined(CCLIENTVERSION)
-#if HAVE_IMAP2007e
-#define CCLIENTVERSION "2007e"
-#elif HAVE_IMAP2007d
-#define CCLIENTVERSION "2007d"
-#elif HAVE_IMAP2007b
-#define CCLIENTVERSION "2007b"
-#elif HAVE_IMAP2007a
-#define CCLIENTVERSION "2007a"
-#elif HAVE_IMAP2004
-#define CCLIENTVERSION "2004"
-#elif HAVE_IMAP2001
-#define CCLIENTVERSION "2001"
-#elif HAVE_IMAP2000
-#define CCLIENTVERSION "2000"
-#elif defined(IMAP41)
-#define CCLIENTVERSION "4.1"
-#else
-#define CCLIENTVERSION "4.0"
-#endif
+#ifndef CCLIENTVERSION
+# if defined(HAVE_IMAP2007e)
+#  define CCLIENTVERSION "2007e"
+# elif defined(HAVE_IMAP2007d)
+#  define CCLIENTVERSION "2007d"
+# elif defined(HAVE_IMAP2007b)
+#  define CCLIENTVERSION "2007b"
+# elif defined(HAVE_IMAP2007a)
+#  define CCLIENTVERSION "2007a"
+# elif defined(HAVE_IMAP2004)
+#  define CCLIENTVERSION "2004"
+# elif defined(HAVE_IMAP2001)
+#  define CCLIENTVERSION "2001"
+# elif defined(HAVE_IMAP2000)
+#  define CCLIENTVERSION "2000"
+# elif defined(IMAP41)
+#  define CCLIENTVERSION "4.1"
+# else
+#  define CCLIENTVERSION "4.0"
+# endif
 #endif
 
 /* {{{ PHP_MINFO_FUNCTION
@@ -693,10 +693,10 @@ PHP_MINFO_FUNCTION(imap)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "IMAP c-Client Version", CCLIENTVERSION);
-#if HAVE_IMAP_SSL
+#ifdef HAVE_IMAP_SSL
 	php_info_print_table_row(2, "SSL Support", "enabled");
 #endif
-#if HAVE_IMAP_KRB && HAVE_IMAP_AUTH_GSS
+#if defined(HAVE_IMAP_KRB) && defined(HAVE_IMAP_AUTH_GSS)
 	php_info_print_table_row(2, "Kerberos Support", "enabled");
 #endif
 	php_info_print_table_end();

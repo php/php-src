@@ -28,7 +28,7 @@
 #ifndef PHP_IMAP_H
 #define PHP_IMAP_H
 
-#if HAVE_IMAP
+#ifdef HAVE_IMAP
 
 #if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
 
