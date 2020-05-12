@@ -27,7 +27,7 @@
 
 #include <ctype.h>
 
-#if HAVE_CTYPE
+#ifdef HAVE_CTYPE
 
 static PHP_MINFO_FUNCTION(ctype);
 
