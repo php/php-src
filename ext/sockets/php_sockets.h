@@ -20,11 +20,11 @@
 #ifndef PHP_SOCKETS_H
 #define PHP_SOCKETS_H
 
-#if HAVE_CONFIG_H
+#ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
 
-#if HAVE_SOCKETS
+#ifdef HAVE_SOCKETS
 
 #include <php.h>
 #ifdef PHP_WIN32
@@ -41,7 +41,7 @@ extern zend_module_entry sockets_module_entry;
 #ifdef PHP_WIN32
 #include <Winsock2.h>
 #else
-#if HAVE_SYS_SOCKET_H
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
 #endif
