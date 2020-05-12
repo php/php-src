@@ -337,7 +337,7 @@ ITT_INLINE long __itt_interlocked_increment(volatile long* ptr)
 #define __itt_fstrdup(s)          strdup(s)
 #define __itt_thread_id()         pthread_self()
 #define __itt_thread_yield()      sched_yield()
-#if ITT_ARCH==ITT_ARCH_IA64
+#if defined(ITT_ARCH_IA64) && ITT_ARCH==ITT_ARCH_IA64
 #ifdef __INTEL_COMPILER
 #define __TBB_machine_fetchadd4(addr, val) __fetchadd4_acq((void *)addr, val)
 #else  /* __INTEL_COMPILER */

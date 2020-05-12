@@ -137,7 +137,7 @@ const char* zend_reg_name[] = {
 # define GCC_GLOBAL_REGS 0
 #endif
 
-#if ZTS
+#ifdef ZTS
 static size_t tsrm_ls_cache_tcb_offset = 0;
 static size_t tsrm_tls_index;
 static size_t tsrm_tls_offset;
@@ -2859,7 +2859,7 @@ static const zend_jit_stub zend_jit_stubs[] = {
 #endif
 };
 
-#if ZTS && defined(ZEND_WIN32)
+#if defined(ZTS) && defined(ZEND_WIN32)
 extern uint32_t _tls_index;
 extern char *_tls_start;
 extern char *_tls_end;
@@ -2876,7 +2876,7 @@ static int zend_jit_setup(void)
 		allowed_opt_flags |= ZEND_JIT_CPU_AVX;
 	}
 
-#if ZTS
+#ifdef ZTS
 # ifdef _WIN64
 	tsrm_tls_index  = _tls_index * sizeof(void*);
 
@@ -2901,7 +2901,7 @@ static int zend_jit_setup(void)
 			return FAILURE;
 		}
 	} while(0);
-# elif ZEND_WIN32
+# elif defined(ZEND_WIN32)
 	tsrm_tls_index  = _tls_index * sizeof(void*);
 
 	/* To find offset of "_tsrm_ls_cache" in TLS segment we perform a linear scan of local TLS memory */
@@ -3132,7 +3132,7 @@ static int zend_jit_trace_begin(dasm_State **Dst, uint32_t trace_num, zend_jit_t
 {
 	zend_regset regset = ZEND_REGSET_SCRATCH;
 
-#if ZTS
+#ifdef ZTS
 	if (1) {
 #else
 	if ((sizeof(void*) == 8 && !IS_32BIT(&EG(jit_trace_num)))) {
@@ -9614,9 +9614,9 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 					|	mov r0, EX:RX->func
 				}
 				|	mov r2, aword [r0 + offsetof(zend_op_array, run_time_cache__ptr)]
-#if ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR
+#if defined(ZEND_MAP_PTR_KIND) && defined(ZEND_MAP_PTR_KIND_PTR) && ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR
 				|	mov r2, aword [r2]
-#elif ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR_OR_OFFSET
+#elif defined(ZEND_MAP_PTR_KIND) && defined(ZEND_MAP_PTR_KIND_PTR_OR_OFFSET) && ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR_OR_OFFSET
 				if (func && !(func->op_array.fn_flags & ZEND_ACC_CLOSURE)) {
 					if (ZEND_MAP_PTR_IS_OFFSET(func->op_array.run_time_cache)) {
 						|	MEM_OP2_2_ZTS add, r2, aword, compiler_globals, map_ptr_base, r1
@@ -15296,7 +15296,7 @@ static zend_regset zend_jit_get_scratch_regset(const zend_op *opline, const zend
 		if (ssa_op == ssa->ops
 		 && (JIT_G(current_trace)->stop == ZEND_JIT_TRACE_STOP_LOOP ||
 			 JIT_G(current_trace)->stop == ZEND_JIT_TRACE_STOP_RECURSIVE_CALL)) {
-#if ZTS
+#ifdef ZTS
 			ZEND_REGSET_INCL(regset, ZREG_R0);
 #else
 			if ((sizeof(void*) == 8 && !IS_32BIT(&EG(vm_interrupt)))) {
@@ -15309,7 +15309,7 @@ static zend_regset zend_jit_get_scratch_regset(const zend_op *opline, const zend
 
 		if ((ssa->cfg.blocks[b].flags & ZEND_BB_LOOP_HEADER) != 0
 		 && ssa->cfg.blocks[b].start == ssa_op - ssa->ops) {
-#if ZTS
+#ifdef ZTS
 			ZEND_REGSET_INCL(regset, ZREG_R0);
 #else
 			if ((sizeof(void*) == 8 && !IS_32BIT(&EG(vm_interrupt)))) {
