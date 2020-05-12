@@ -1493,7 +1493,7 @@ function run_all_tests_parallel($test_files, $env, $redir_tested)
     // Tests waiting due to conflicts. Map from conflict key to array.
     $waitingTests = [];
 
-    escape:
+escape:
     while ($test_files || $sequentialTests || $testsInProgress > 0) {
         $toRead = array_values($workerSocks);
         $toWrite = null;
