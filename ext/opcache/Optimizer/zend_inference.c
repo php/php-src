@@ -2180,12 +2180,13 @@ static uint32_t zend_convert_type_declaration_mask(uint32_t type_mask) {
 uint32_t zend_fetch_arg_info_type(const zend_script *script, zend_arg_info *arg_info, zend_class_entry **pce)
 {
 	uint32_t tmp;
+
+	*pce = NULL;
 	if (!ZEND_TYPE_IS_SET(arg_info->type)) {
 		return MAY_BE_ANY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF|MAY_BE_RC1|MAY_BE_RCN;
 	}
 
 	tmp = zend_convert_type_declaration_mask(ZEND_TYPE_PURE_MASK(arg_info->type));
-	*pce = NULL;
 	if (ZEND_TYPE_HAS_CLASS(arg_info->type)) {
 		tmp |= MAY_BE_OBJECT;
 		/* As we only have space to store one CE, we use a plain object type for class unions. */
