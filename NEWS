@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.2.31
+?? ??? ????, PHP 7.2.32
+
+
+14 May 2020, PHP 7.2.31
 
 - Core:
   . Fixed bug #78875 (Long filenames cause OOM and temp files are not cleaned). 
