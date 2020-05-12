@@ -22,7 +22,7 @@
 #include "php.h"
 #include "ext/standard/file.h"
 
-#if HAVE_EXIF
+#ifdef HAVE_EXIF
 
 /* When EXIF_DEBUG is defined the module generates a lot of debug messages
  * that help understanding what is going on. This can and should be used
