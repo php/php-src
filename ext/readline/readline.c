@@ -25,7 +25,7 @@
 #include "readline_cli.h"
 #include "readline_arginfo.h"
 
-#if HAVE_LIBREADLINE || HAVE_LIBEDIT
+#if defined(HAVE_LIBREADLINE) || defined(HAVE_LIBEDIT)
 
 #ifndef HAVE_RL_COMPLETION_MATCHES
 #define rl_completion_matches completion_matches
@@ -38,7 +38,7 @@
 #include <readline/history.h>
 #endif
 
-#if HAVE_RL_CALLBACK_READ_CHAR
+#ifdef HAVE_RL_CALLBACK_READ_CHAR
 
 static zval _prepped_callback;
 
@@ -74,12 +74,12 @@ ZEND_GET_MODULE(readline)
 
 PHP_MINIT_FUNCTION(readline)
 {
-#if HAVE_LIBREADLINE
+#ifdef HAVE_LIBREADLINE
 		/* libedit don't need this call which set the tty in cooked mode */
 	using_history();
 #endif
 	ZVAL_UNDEF(&_readline_completion);
-#if HAVE_RL_CALLBACK_READ_CHAR
+#ifdef HAVE_RL_CALLBACK_READ_CHAR
 	ZVAL_UNDEF(&_prepped_callback);
 #endif
 	return PHP_MINIT(cli_readline)(INIT_FUNC_ARGS_PASSTHRU);
@@ -94,7 +94,7 @@ PHP_RSHUTDOWN_FUNCTION(readline)
 {
 	zval_ptr_dtor(&_readline_completion);
 	ZVAL_UNDEF(&_readline_completion);
-#if HAVE_RL_CALLBACK_READ_CHAR
+#ifdef HAVE_RL_CALLBACK_READ_CHAR
 	if (Z_TYPE(_prepped_callback) != IS_UNDEF) {
 		rl_callback_handler_remove();
 		zval_ptr_dtor(&_prepped_callback);
@@ -168,7 +168,7 @@ PHP_FUNCTION(readline_info)
 				: ZSTR_CHAR(rl_completion_append_character));
 		add_assoc_bool(return_value,"completion_suppress_append",rl_completion_suppress_append);
 #endif
-#if HAVE_ERASE_EMPTY_LINE
+#ifdef HAVE_ERASE_EMPTY_LINE
 		add_assoc_long(return_value,"erase_empty_line",rl_erase_empty_line);
 #endif
 #ifndef PHP_WIN32
@@ -232,7 +232,7 @@ PHP_FUNCTION(readline_info)
 			RETVAL_INTERNED_STR(
 				oldval == 0 ? ZSTR_EMPTY_ALLOC() : ZSTR_CHAR(oldval));
 #endif
-#if HAVE_ERASE_EMPTY_LINE
+#ifdef HAVE_ERASE_EMPTY_LINE
 		} else if (zend_string_equals_literal_ci(what, "erase_empty_line")) {
 			oldval = rl_erase_empty_line;
 			if (value) {
@@ -288,7 +288,7 @@ PHP_FUNCTION(readline_clear_history)
 		RETURN_THROWS();
 	}
 
-#if HAVE_LIBEDIT
+#ifdef HAVE_LIBEDIT
 	/* clear_history is the only function where rl_initialize
 	   is not call to ensure correct allocation */
 	using_history();
@@ -490,7 +490,7 @@ PHP_FUNCTION(readline_completion_function)
 
 /* }}} */
 
-#if HAVE_RL_CALLBACK_READ_CHAR
+#ifdef HAVE_RL_CALLBACK_READ_CHAR
 
 static void php_rl_callback_handler(char *the_line)
 {
@@ -569,7 +569,7 @@ PHP_FUNCTION(readline_redisplay)
 		RETURN_THROWS();
 	}
 
-#if HAVE_LIBEDIT
+#ifdef HAVE_LIBEDIT
 	/* seems libedit doesn't take care of rl_initialize in rl_redisplay
 	 * see bug #72538 */
 	using_history();
@@ -580,7 +580,7 @@ PHP_FUNCTION(readline_redisplay)
 
 #endif
 
-#if HAVE_RL_ON_NEW_LINE
+#ifdef HAVE_RL_ON_NEW_LINE
 /* {{{ Inform readline that the cursor has moved to a new line */
 PHP_FUNCTION(readline_on_new_line)
 {
