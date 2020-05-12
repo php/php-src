@@ -9,6 +9,9 @@ PHP                                                                        NEWS
 - FFI:
   . Fixed bug #79571 (FFI: var_dumping unions may segfault). (cmb)
 
+- Opcache:
+  . Fixed bug #79588 (Boolean opcache settings ignore on/off values). (cmb)
+
 - SimpleXML:
   . Fixed bug #79528 (Different object of the same xml between 7.4.5 and
     7.4.4). (cmb)
