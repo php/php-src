@@ -17,7 +17,7 @@
 #ifndef PHP_GETTEXT_H
 #define PHP_GETTEXT_H
 
-#if HAVE_LIBINTL
+#ifdef HAVE_LIBINTL
 
 extern zend_module_entry php_gettext_module_entry;
 #define gettext_module_ptr &php_gettext_module_entry

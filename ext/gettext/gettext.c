@@ -20,7 +20,7 @@
 
 #include "php.h"
 
-#if HAVE_LIBINTL
+#ifdef HAVE_LIBINTL
 
 #include <stdio.h>
 #include "ext/standard/info.h"
@@ -197,7 +197,7 @@ PHP_FUNCTION(bindtextdomain)
 }
 /* }}} */
 
-#if HAVE_NGETTEXT
+#ifdef HAVE_NGETTEXT
 /* {{{ proto string ngettext(string MSGID1, string MSGID2, int N)
    Plural version of gettext() */
 PHP_FUNCTION(ngettext)
@@ -221,7 +221,7 @@ PHP_FUNCTION(ngettext)
 /* }}} */
 #endif
 
-#if HAVE_DNGETTEXT
+#ifdef HAVE_DNGETTEXT
 /* {{{ proto string dngettext(string domain, string msgid1, string msgid2, int count)
    Plural version of dgettext() */
 PHP_FUNCTION(dngettext)
@@ -247,7 +247,7 @@ PHP_FUNCTION(dngettext)
 /* }}} */
 #endif
 
-#if HAVE_DCNGETTEXT
+#ifdef HAVE_DCNGETTEXT
 /* {{{ proto string dcngettext(string domain, string msgid1, string msgid2, int n, int category)
    Plural version of dcgettext() */
 PHP_FUNCTION(dcngettext)
@@ -275,7 +275,7 @@ PHP_FUNCTION(dcngettext)
 /* }}} */
 #endif
 
-#if HAVE_BIND_TEXTDOMAIN_CODESET
+#ifdef HAVE_BIND_TEXTDOMAIN_CODESET
 
 /* {{{ proto string bind_textdomain_codeset(string domain, string codeset)
    Specify the character encoding in which the messages from the DOMAIN message catalog will be returned. */
