@@ -20,7 +20,7 @@
 
 #include "php.h"
 
-#if HAVE_BCMATH
+#ifdef HAVE_BCMATH
 
 #include "php_ini.h"
 #include "zend_exceptions.h"
