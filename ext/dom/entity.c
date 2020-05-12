@@ -20,7 +20,7 @@
 #endif
 
 #include "php.h"
-#if HAVE_LIBXML && HAVE_DOM
+#if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
 
 

@@ -21,7 +21,7 @@
 #endif
 
 #include "php.h"
-#if HAVE_LIBXML && HAVE_DOM
+#if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "ext/standard/php_rand.h"
 #include "php_dom.h"
 #include "php_dom_arginfo.h"
@@ -53,7 +53,7 @@ PHP_DOM_EXPORT zend_class_entry *dom_notation_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_entity_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_entityreference_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_processinginstruction_class_entry;
-#if defined(LIBXML_XPATH_ENABLED)
+#ifdef LIBXML_XPATH_ENABLED
 PHP_DOM_EXPORT zend_class_entry *dom_xpath_class_entry;
 #endif
 PHP_DOM_EXPORT zend_class_entry *dom_namespace_node_class_entry;
@@ -61,7 +61,7 @@ PHP_DOM_EXPORT zend_class_entry *dom_namespace_node_class_entry;
 
 zend_object_handlers dom_object_handlers;
 zend_object_handlers dom_nnodemap_object_handlers;
-#if defined(LIBXML_XPATH_ENABLED)
+#ifdef LIBXML_XPATH_ENABLED
 zend_object_handlers dom_xpath_object_handlers;
 #endif
 
@@ -81,7 +81,7 @@ static HashTable dom_notation_prop_handlers;
 static HashTable dom_entity_prop_handlers;
 static HashTable dom_processinginstruction_prop_handlers;
 static HashTable dom_namespace_node_prop_handlers;
-#if defined(LIBXML_XPATH_ENABLED)
+#ifdef LIBXML_XPATH_ENABLED
 static HashTable dom_xpath_prop_handlers;
 #endif
 /* }}} */
@@ -551,7 +551,7 @@ static zval *dom_nodelist_read_dimension(zend_object *object, zval *offset, int 
 static int dom_nodelist_has_dimension(zend_object *object, zval *member, int check_empty);
 static zend_object *dom_objects_store_clone_obj(zend_object *zobject);
 static void dom_nnodemap_object_dtor(zend_object *object);
-#if defined(LIBXML_XPATH_ENABLED)
+#ifdef LIBXML_XPATH_ENABLED
 void dom_xpath_objects_free_storage(zend_object *object);
 #endif
 
@@ -780,7 +780,7 @@ PHP_MINIT_FUNCTION(dom)
 	zend_hash_merge(&dom_processinginstruction_prop_handlers, &dom_node_prop_handlers, dom_copy_prop_handler, 0);
 	zend_hash_add_ptr(&classes, ce.name, &dom_processinginstruction_prop_handlers);
 
-#if defined(LIBXML_XPATH_ENABLED)
+#ifdef LIBXML_XPATH_ENABLED
 	memcpy(&dom_xpath_object_handlers, &dom_object_handlers, sizeof(zend_object_handlers));
 	dom_xpath_object_handlers.offset = XtOffsetOf(dom_xpath_object, dom) + XtOffsetOf(dom_object, std);
 	dom_xpath_object_handlers.free_obj = dom_xpath_objects_free_storage;
@@ -859,13 +859,13 @@ PHP_MINFO_FUNCTION(dom)
 	php_info_print_table_row(2, "DOM/XML", "enabled");
 	php_info_print_table_row(2, "DOM/XML API Version", DOM_API_VERSION);
 	php_info_print_table_row(2, "libxml Version", LIBXML_DOTTED_VERSION);
-#if defined(LIBXML_HTML_ENABLED)
+#ifdef LIBXML_HTML_ENABLED
 	php_info_print_table_row(2, "HTML Support", "enabled");
 #endif
-#if defined(LIBXML_XPATH_ENABLED)
+#ifdef LIBXML_XPATH_ENABLED
 	php_info_print_table_row(2, "XPath Support", "enabled");
 #endif
-#if defined(LIBXML_XPTR_ENABLED)
+#ifdef LIBXML_XPTR_ENABLED
 	php_info_print_table_row(2, "XPointer Support", "enabled");
 #endif
 #ifdef LIBXML_SCHEMAS_ENABLED
@@ -892,7 +892,7 @@ PHP_MSHUTDOWN_FUNCTION(dom) /* {{{ */
 	zend_hash_destroy(&dom_notation_prop_handlers);
 	zend_hash_destroy(&dom_entity_prop_handlers);
 	zend_hash_destroy(&dom_processinginstruction_prop_handlers);
-#if defined(LIBXML_XPATH_ENABLED)
+#ifdef LIBXML_XPATH_ENABLED
 	zend_hash_destroy(&dom_xpath_prop_handlers);
 #endif
 	zend_hash_destroy(&classes);
@@ -941,7 +941,7 @@ void node_list_unlink(xmlNodePtr node)
 }
 /* }}} end node_list_unlink */
 
-#if defined(LIBXML_XPATH_ENABLED)
+#ifdef LIBXML_XPATH_ENABLED
 /* {{{ dom_xpath_objects_free_storage */
 void dom_xpath_objects_free_storage(zend_object *object)
 {
@@ -1035,7 +1035,7 @@ zend_object *dom_objects_new(zend_class_entry *class_type)
 }
 /* }}} */
 
-#if defined(LIBXML_XPATH_ENABLED)
+#ifdef LIBXML_XPATH_ENABLED
 /* {{{ zend_object dom_xpath_objects_new(zend_class_entry *class_type) */
 zend_object *dom_xpath_objects_new(zend_class_entry *class_type)
 {

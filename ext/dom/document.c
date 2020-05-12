@@ -20,7 +20,7 @@
 #endif
 
 #include "php.h"
-#if HAVE_LIBXML && HAVE_DOM
+#if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
 #include <libxml/SAX.h>
 #ifdef LIBXML_SCHEMAS_ENABLED
@@ -1225,9 +1225,9 @@ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source, size_t so
 
 	/* If loading from memory, we need to set the base directory for the document */
 	if (mode != DOM_LOAD_FILE) {
-#if HAVE_GETCWD
+#ifdef HAVE_GETCWD
 		directory = VCWD_GETCWD(resolved_path, MAXPATHLEN);
-#elif HAVE_GETWD
+#elif defined(HAVE_GETWD)
 		directory = VCWD_GETWD(resolved_path);
 #endif
 		if (directory) {
@@ -1621,7 +1621,7 @@ PHP_METHOD(DOMDocument, validate)
 }
 /* }}} */
 
-#if defined(LIBXML_SCHEMAS_ENABLED)
+#ifdef LIBXML_SCHEMAS_ENABLED
 static void _dom_document_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 {
 	zval *id;
@@ -1819,7 +1819,7 @@ PHP_METHOD(DOMDocument, relaxNGValidateSource)
 
 #endif
 
-#if defined(LIBXML_HTML_ENABLED)
+#ifdef LIBXML_HTML_ENABLED
 
 static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 {

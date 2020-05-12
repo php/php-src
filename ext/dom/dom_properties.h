@@ -132,7 +132,7 @@ int dom_processinginstruction_data_write(dom_object *obj, zval *newval);
 /* text properties */
 int dom_text_whole_text_read(dom_object *obj, zval *retval);
 
-#if defined(LIBXML_XPATH_ENABLED)
+#ifdef LIBXML_XPATH_ENABLED
 /* xpath properties */
 int dom_xpath_document_read(dom_object *obj, zval *retval);
 int dom_xpath_register_node_ns_read(dom_object *obj, zval *retval);

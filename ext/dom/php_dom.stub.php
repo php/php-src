@@ -306,7 +306,7 @@ class DOMDocument implements DOMParentNode
     /** @return int|false */
     public function save(string $filename, int $options = 0) {}
 
-#if defined(LIBXML_HTML_ENABLED)
+#ifdef LIBXML_HTML_ENABLED
     /** @return DOMDocument|bool */
     public function loadHTML(string $source, int $options = 0) {}
 
@@ -323,7 +323,7 @@ class DOMDocument implements DOMParentNode
     /** @return string|false */
     public function saveXML(?DOMNode $node = null, int $options = 0) {}
 
-#if defined(LIBXML_SCHEMAS_ENABLED)
+#ifdef LIBXML_SCHEMAS_ENABLED
     /** @return bool */
     public function schemaValidate(string $filename, int $flags = 0) {}
 
@@ -407,7 +407,7 @@ class DOMProcessingInstruction
     public function __construct(string $name, string $value = "") {}
 }
 
-#if defined(LIBXML_XPATH_ENABLED)
+#ifdef LIBXML_XPATH_ENABLED
 class DOMXPath
 {
     public function __construct(DOMDocument $doc, bool $registerNodeNS = true) {}

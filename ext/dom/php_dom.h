@@ -34,15 +34,15 @@ extern zend_module_entry dom_module_entry;
 #include <libxml/xinclude.h>
 #include <libxml/hash.h>
 #include <libxml/c14n.h>
-#if defined(LIBXML_HTML_ENABLED)
+#ifdef LIBXML_HTML_ENABLED
 #include <libxml/HTMLparser.h>
 #include <libxml/HTMLtree.h>
 #endif
-#if defined(LIBXML_XPATH_ENABLED)
+#ifdef LIBXML_XPATH_ENABLED
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
 #endif
-#if defined(LIBXML_XPTR_ENABLED)
+#ifdef LIBXML_XPTR_ENABLED
 #include <libxml/xpointer.h>
 #endif
 #ifdef PHP_WIN32
@@ -99,7 +99,7 @@ dom_object *dom_object_get_data(xmlNodePtr obj);
 dom_doc_propsptr dom_get_doc_props(php_libxml_ref_obj *document);
 zend_object *dom_objects_new(zend_class_entry *class_type);
 zend_object *dom_nnodemap_objects_new(zend_class_entry *class_type);
-#if defined(LIBXML_XPATH_ENABLED)
+#ifdef LIBXML_XPATH_ENABLED
 zend_object *dom_xpath_objects_new(zend_class_entry *class_type);
 #endif
 int dom_get_strict_error(php_libxml_ref_obj *document);

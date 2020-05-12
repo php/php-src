@@ -20,7 +20,7 @@
 #endif
 
 #include "php.h"
-#if HAVE_LIBXML && HAVE_DOM
+#if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
 
 #define PHP_DOM_XPATH_QUERY 0
@@ -30,7 +30,7 @@
 * class DOMXPath
 */
 
-#if defined(LIBXML_XPATH_ENABLED)
+#ifdef LIBXML_XPATH_ENABLED
 
 static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int type) /* {{{ */
 {
