@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.4.6
+14 May 2020, PHP 7.4.6
 
 - Core:
   . Fixed bug #78434 (Generator yields no items after valid() call). (Nikita)
