@@ -386,15 +386,15 @@ static void *ensureCapacity(struct timsort *ts, size_t minCapacity,
 	return ts->tmp;
 }
 
-#define WIDTH 4
+/*#define WIDTH 4
 #include "zend_timsort_impl.h"
 #undef WIDTH
 
 #define WIDTH 8
 #include "zend_timsort_impl.h"
-#undef WIDTH
+#undef WIDTH*/
 
-#define WIDTH 16
+#define WIDTH 32 /* sizeof(Bucket) */
 #include "zend_timsort_impl.h"
 #undef WIDTH
 
@@ -406,12 +406,12 @@ static void *ensureCapacity(struct timsort *ts, size_t minCapacity,
 int TIMSORT(void *a, size_t nel, size_t width, CMPPARAMS(c, carg))
 {
 	switch (width) {
-	case 4:
+	/*case 4:
 		return timsort_4(a, nel, width, CMPARGS(c, carg));
 	case 8:
-		return timsort_8(a, nel, width, CMPARGS(c, carg));
-	case 16:
-		return timsort_16(a, nel, width, CMPARGS(c, carg));
+		return timsort_8(a, nel, width, CMPARGS(c, carg));*/
+	case 32:
+		return timsort_32(a, nel, width, CMPARGS(c, carg));
 	default:
 		return timsort_width(a, nel, width, CMPARGS(c, carg));
 	}
