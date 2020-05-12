@@ -57,10 +57,10 @@
 static int le_proc_open;
 
 /* {{{ _php_array_to_envp */
-static php_process_env_t _php_array_to_envp(zval *environment)
+static php_process_env _php_array_to_envp(zval *environment)
 {
 	zval *element;
-	php_process_env_t env;
+	php_process_env env;
 	zend_string *key, *str;
 #ifndef PHP_WIN32
 	char **ep;
@@ -140,7 +140,7 @@ static php_process_env_t _php_array_to_envp(zval *environment)
 /* }}} */
 
 /* {{{ _php_free_envp */
-static void _php_free_envp(php_process_env_t env)
+static void _php_free_envp(php_process_env env)
 {
 #ifndef PHP_WIN32
 	if (env.envarray) {
@@ -156,7 +156,7 @@ static void _php_free_envp(php_process_env_t env)
 /* {{{ proc_open_rsrc_dtor */
 static void proc_open_rsrc_dtor(zend_resource *rsrc)
 {
-	struct php_process_handle *proc = (struct php_process_handle*)rsrc->ptr;
+	php_process_handle *proc = (php_process_handle*)rsrc->ptr;
 #ifdef PHP_WIN32
 	DWORD wstatus;
 #elif HAVE_SYS_WAIT_H
@@ -227,7 +227,7 @@ PHP_MINIT_FUNCTION(proc_open)
 PHP_FUNCTION(proc_terminate)
 {
 	zval *zproc;
-	struct php_process_handle *proc;
+	php_process_handle *proc;
 	zend_long sig_no = SIGTERM;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
@@ -236,7 +236,7 @@ PHP_FUNCTION(proc_terminate)
 		Z_PARAM_LONG(sig_no)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if ((proc = (struct php_process_handle *)zend_fetch_resource(Z_RES_P(zproc), "process", le_proc_open)) == NULL) {
+	if ((proc = (php_process_handle*)zend_fetch_resource(Z_RES_P(zproc), "process", le_proc_open)) == NULL) {
 		RETURN_THROWS();
 	}
 
@@ -261,13 +261,13 @@ PHP_FUNCTION(proc_terminate)
 PHP_FUNCTION(proc_close)
 {
 	zval *zproc;
-	struct php_process_handle *proc;
+	php_process_handle *proc;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_RESOURCE(zproc)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if ((proc = (struct php_process_handle *)zend_fetch_resource(Z_RES_P(zproc), "process", le_proc_open)) == NULL) {
+	if ((proc = (php_process_handle*)zend_fetch_resource(Z_RES_P(zproc), "process", le_proc_open)) == NULL) {
 		RETURN_THROWS();
 	}
 
@@ -283,7 +283,7 @@ PHP_FUNCTION(proc_close)
 PHP_FUNCTION(proc_get_status)
 {
 	zval *zproc;
-	struct php_process_handle *proc;
+	php_process_handle *proc;
 #ifdef PHP_WIN32
 	DWORD wstatus;
 #elif HAVE_SYS_WAIT_H
@@ -297,7 +297,7 @@ PHP_FUNCTION(proc_get_status)
 		Z_PARAM_RESOURCE(zproc)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if ((proc = (struct php_process_handle *)zend_fetch_resource(Z_RES_P(zproc), "process", le_proc_open)) == NULL) {
+	if ((proc = (php_process_handle*)zend_fetch_resource(Z_RES_P(zproc), "process", le_proc_open)) == NULL) {
 		RETURN_THROWS();
 	}
 
@@ -841,7 +841,7 @@ PHP_FUNCTION(proc_open)
 	zval *pipes;
 	zval *environment = NULL;
 	zval *other_options = NULL;
-	php_process_env_t env;
+	php_process_env env;
 	int ndesc = 0;
 	int i;
 	zval *descitem = NULL;
@@ -868,7 +868,7 @@ PHP_FUNCTION(proc_open)
 #endif
 	int pty_master_fd = -1, pty_slave_fd = -1;
 	php_process_id_t child;
-	struct php_process_handle *proc;
+	php_process_handle *proc;
 
 	ZEND_PARSE_PARAMETERS_START(3, 6)
 		Z_PARAM_ZVAL(command_zv)
@@ -1088,7 +1088,7 @@ PHP_FUNCTION(proc_open)
 		goto exit_fail;
 	}
 
-	proc = (struct php_process_handle*) emalloc(sizeof(struct php_process_handle));
+	proc = (php_process_handle*) emalloc(sizeof(php_process_handle));
 	proc->command = command;
 	proc->pipes = emalloc(sizeof(zend_resource *) * ndesc);
 	proc->npipes = ndesc;
