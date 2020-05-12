@@ -2481,7 +2481,7 @@ static int zend_jit_trace_exit_group_stub(dasm_State **Dst, uint32_t n)
 	}
 	|	push byte i
 	|// 1:
-	|	.byte 0x81, 0x04, 0x24; .dword n // add aword [r4], n
+	|	add aword [r4], n
 	|	jmp ->trace_exit
 
 	return 1;
