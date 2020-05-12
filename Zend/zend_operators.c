@@ -34,7 +34,7 @@
 #include <emmintrin.h>
 #endif
 
-#if ZEND_USE_TOLOWER_L
+#ifdef ZEND_USE_TOLOWER_L
 #include <locale.h>
 static _locale_t current_locale = NULL;
 /* this is true global! may lead to strange effects on ZTS, but so may setlocale() */
@@ -3125,7 +3125,7 @@ ZEND_API const char* ZEND_FASTCALL zend_memnrstr_ex(const char *haystack, const 
 }
 /* }}} */
 
-#if !ZEND_DVAL_TO_LVAL_CAST_OK
+#ifndef ZEND_DVAL_TO_LVAL_CAST_OK
 # if SIZEOF_ZEND_LONG == 4
 ZEND_API zend_long ZEND_FASTCALL zend_dval_to_lval_slow(double d) /* {{{ */
 {

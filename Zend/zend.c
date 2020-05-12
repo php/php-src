@@ -829,7 +829,7 @@ int zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 
 	zend_interrupt_function = NULL;
 
-#if HAVE_DTRACE
+#ifdef HAVE_DTRACE
 /* build with dtrace support */
 	{
 		char *tmp = getenv("USE_ZEND_DTRACE");

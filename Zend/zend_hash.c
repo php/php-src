@@ -110,7 +110,7 @@ static void ZEND_FASTCALL zend_hash_do_resize(HashTable *ht);
 
 static zend_always_inline uint32_t zend_hash_check_size(uint32_t nSize)
 {
-#if defined(ZEND_WIN32)
+#ifdef ZEND_WIN32
 	unsigned long index;
 #endif
 
@@ -122,7 +122,7 @@ static zend_always_inline uint32_t zend_hash_check_size(uint32_t nSize)
 		zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%u * %zu + %zu)", nSize, sizeof(Bucket), sizeof(Bucket));
 	}
 
-#if defined(ZEND_WIN32)
+#ifdef ZEND_WIN32
 	if (BitScanReverse(&index, nSize - 1)) {
 		return 0x2u << ((31 - index) ^ 0x1f);
 	} else {

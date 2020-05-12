@@ -318,7 +318,7 @@ char *alloca();
 # endif
 #endif /* ZEND_DEBUG */
 
-#if PHP_HAVE_BUILTIN_EXPECT
+#ifdef PHP_HAVE_BUILTIN_EXPECT
 # define EXPECTED(condition)   __builtin_expect(!!(condition), 1)
 # define UNEXPECTED(condition) __builtin_expect(!!(condition), 0)
 #else
@@ -351,7 +351,7 @@ char *alloca();
 
 #endif
 
-#if (HAVE_ALLOCA || (defined (__GNUC__) && __GNUC__ >= 2)) && !(defined(ZTS) && defined(HPUX)) && !defined(DARWIN)
+#if (defined(HAVE_ALLOCA) || (defined (__GNUC__) && __GNUC__ >= 2)) && !(defined(ZTS) && defined(HPUX)) && !defined(DARWIN)
 # define ZEND_ALLOCA_MAX_SIZE (32 * 1024)
 # define ALLOCA_FLAG(name) \
 	zend_bool name;
@@ -524,14 +524,14 @@ extern "C++" {
 #endif
 
 /* Do not use for conditional declaration of API functions! */
-#if ZEND_INTRIN_SSSE3_RESOLVER && ZEND_INTRIN_HAVE_IFUNC_TARGET
+#if defined(ZEND_INTRIN_SSSE3_RESOLVER) && defined(ZEND_INTRIN_HAVE_IFUNC_TARGET)
 # define ZEND_INTRIN_SSSE3_FUNC_PROTO 1
-#elif ZEND_INTRIN_SSSE3_RESOLVER
+#elif defined(ZEND_INTRIN_SSSE3_RESOLVER)
 # define ZEND_INTRIN_SSSE3_FUNC_PTR 1
 #endif
 
-#if ZEND_INTRIN_SSSE3_RESOLVER
-# if defined(HAVE_FUNC_ATTRIBUTE_TARGET)
+#ifdef ZEND_INTRIN_SSSE3_RESOLVER
+# ifdef HAVE_FUNC_ATTRIBUTE_TARGET
 #  define ZEND_INTRIN_SSSE3_FUNC_DECL(func) ZEND_API func __attribute__((target("ssse3")))
 # else
 #  define ZEND_INTRIN_SSSE3_FUNC_DECL(func) func
@@ -549,14 +549,14 @@ extern "C++" {
 #endif
 
 /* Do not use for conditional declaration of API functions! */
-#if ZEND_INTRIN_SSE4_2_RESOLVER && ZEND_INTRIN_HAVE_IFUNC_TARGET
+#if defined(ZEND_INTRIN_SSE4_2_RESOLVER) && defined(ZEND_INTRIN_HAVE_IFUNC_TARGET)
 # define ZEND_INTRIN_SSE4_2_FUNC_PROTO 1
-#elif ZEND_INTRIN_SSE4_2_RESOLVER
+#elif defined(ZEND_INTRIN_SSE4_2_RESOLVER)
 # define ZEND_INTRIN_SSE4_2_FUNC_PTR 1
 #endif
 
-#if ZEND_INTRIN_SSE4_2_RESOLVER
-# if defined(HAVE_FUNC_ATTRIBUTE_TARGET)
+#ifdef ZEND_INTRIN_SSE4_2_RESOLVER
+# ifdef HAVE_FUNC_ATTRIBUTE_TARGET
 #  define ZEND_INTRIN_SSE4_2_FUNC_DECL(func) ZEND_API func __attribute__((target("sse4.2")))
 # else
 #  define ZEND_INTRIN_SSE4_2_FUNC_DECL(func) func
@@ -572,14 +572,14 @@ extern "C++" {
 #endif
 
 /* Do not use for conditional declaration of API functions! */
-#if ZEND_INTRIN_AVX2_RESOLVER && ZEND_INTRIN_HAVE_IFUNC_TARGET
+#if defined(ZEND_INTRIN_AVX2_RESOLVER) && defined(ZEND_INTRIN_HAVE_IFUNC_TARGET)
 # define ZEND_INTRIN_AVX2_FUNC_PROTO 1
-#elif ZEND_INTRIN_AVX2_RESOLVER
+#elif defined(ZEND_INTRIN_AVX2_RESOLVER)
 # define ZEND_INTRIN_AVX2_FUNC_PTR 1
 #endif
 
-#if ZEND_INTRIN_AVX2_RESOLVER
-# if defined(HAVE_FUNC_ATTRIBUTE_TARGET)
+#ifdef ZEND_INTRIN_AVX2_RESOLVER
+# ifdef HAVE_FUNC_ATTRIBUTE_TARGET
 #  define ZEND_INTRIN_AVX2_FUNC_DECL(func) ZEND_API func __attribute__((target("avx2")))
 # else
 #  define ZEND_INTRIN_AVX2_FUNC_DECL(func) func
@@ -592,7 +592,7 @@ extern "C++" {
 
 #ifdef ZEND_WIN32
 # define ZEND_SET_ALIGNED(alignment, decl) __declspec(align(alignment)) decl
-#elif HAVE_ATTRIBUTE_ALIGNED
+#elif defined(HAVE_ATTRIBUTE_ALIGNED)
 # define ZEND_SET_ALIGNED(alignment, decl) decl __attribute__ ((__aligned__ (alignment)))
 #else
 # define ZEND_SET_ALIGNED(alignment, decl) decl
