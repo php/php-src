@@ -1106,27 +1106,11 @@ zend_object_iterator *spl_heap_get_iterator(zend_class_entry *ce, zval *object, 
 
 zend_object_iterator *spl_pqueue_get_iterator(zend_class_entry *ce, zval *object, int by_ref) /* {{{ */
 {
-	spl_heap_it     *iterator;
-	spl_heap_object *heap_object = Z_SPLHEAP_P(object);
-
-	if (by_ref) {
-		zend_throw_exception(spl_ce_RuntimeException, "An iterator cannot be used with foreach by reference", 0);
-		return NULL;
+	zend_object_iterator *iterator = spl_heap_get_iterator(ce, object, by_ref);
+	if (iterator != NULL) {
+		iterator->funcs = &spl_pqueue_it_funcs;
 	}
-
-	iterator = emalloc(sizeof(spl_heap_it));
-
-	zend_iterator_init((zend_object_iterator*)iterator);
-
-	Z_ADDREF_P(object);
-	ZVAL_OBJ(&iterator->intern.it.data, Z_OBJ_P(object));
-	iterator->intern.it.funcs = &spl_pqueue_it_funcs;
-	iterator->intern.ce       = ce;
-	iterator->flags           = heap_object->flags;
-
-	ZVAL_UNDEF(&iterator->intern.value);
-
-	return &iterator->intern.it;
+	return iterator;
 }
 /* }}} */
 
