@@ -19,7 +19,7 @@
 #include "../fpm.h"
 #include "../zlog.h"
 
-#if HAVE_DEVPOLL
+#ifdef HAVE_DEVPOLL
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -53,7 +53,7 @@ static int npollfds = 0;
 
 struct fpm_event_module_s *fpm_event_devpoll_module() /* {{{ */
 {
-#if HAVE_DEVPOLL
+#ifdef HAVE_DEVPOLL
 	return &devpoll_module;
 #else
 	return NULL;
@@ -61,7 +61,7 @@ struct fpm_event_module_s *fpm_event_devpoll_module() /* {{{ */
 }
 /* }}} */
 
-#if HAVE_DEVPOLL
+#ifdef HAVE_DEVPOLL
 
 /*
  * Init module

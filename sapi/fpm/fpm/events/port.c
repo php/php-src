@@ -19,7 +19,7 @@
 #include "../fpm.h"
 #include "../zlog.h"
 
-#if HAVE_PORT
+#ifdef HAVE_PORT
 
 #include <port.h>
 #include <poll.h>
@@ -49,7 +49,7 @@ static int pfd = -1;
 
 struct fpm_event_module_s *fpm_event_port_module() /* {{{ */
 {
-#if HAVE_PORT
+#ifdef HAVE_PORT
 	return &port_module;
 #else
 	return NULL;
@@ -57,7 +57,7 @@ struct fpm_event_module_s *fpm_event_port_module() /* {{{ */
 }
 /* }}} */
 
-#if HAVE_PORT
+#ifdef HAVE_PORT
 
 /*
  * Init the module

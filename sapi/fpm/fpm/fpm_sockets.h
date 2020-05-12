@@ -14,7 +14,7 @@
 /*
   On FreeBSD and OpenBSD, backlog negative values are truncated to SOMAXCONN
 */
-#if (__FreeBSD__) || (__OpenBSD__)
+#if defined(__FreeBSD__) || defined(__OpenBSD__)
 #define FPM_BACKLOG_DEFAULT -1
 #else
 #define FPM_BACKLOG_DEFAULT 511

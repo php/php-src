@@ -19,7 +19,7 @@
 #include "../fpm.h"
 #include "../zlog.h"
 
-#if HAVE_KQUEUE
+#ifdef HAVE_KQUEUE
 
 #include <sys/types.h>
 #include <sys/event.h>
@@ -54,7 +54,7 @@ static int kfd = 0;
  */
 struct fpm_event_module_s *fpm_event_kqueue_module() /* {{{ */
 {
-#if HAVE_KQUEUE
+#ifdef HAVE_KQUEUE
 	return &kqueue_module;
 #else
 	return NULL;
@@ -62,7 +62,7 @@ struct fpm_event_module_s *fpm_event_kqueue_module() /* {{{ */
 }
 /* }}} */
 
-#if HAVE_KQUEUE
+#ifdef HAVE_KQUEUE
 
 /*
  * init kqueue and stuff

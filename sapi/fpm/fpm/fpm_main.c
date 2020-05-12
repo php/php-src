@@ -33,11 +33,11 @@
 #include <stdio.h>
 #include "php.h"
 
-#if HAVE_SYS_TIME_H
+#ifdef HAVE_SYS_TIME_H
 # include <sys/time.h>
 #endif
 
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
 
@@ -45,15 +45,15 @@
 
 #include <locale.h>
 
-#if HAVE_SYS_TYPES_H
+#ifdef HAVE_SYS_TYPES_H
 # include <sys/types.h>
 #endif
 
-#if HAVE_SYS_WAIT_H
+#ifdef HAVE_SYS_WAIT_H
 # include <sys/wait.h>
 #endif
 
-#if HAVE_FCNTL_H
+#ifdef HAVE_FCNTL_H
 # include <fcntl.h>
 #endif
 
@@ -1807,7 +1807,7 @@ consult the installation file that came with this distribution, or visit \n\
 <a href=\"http://php.net/install.windows\">the manual page</a>.</p>\n");
 			} zend_catch {
 			} zend_end_try();
-#if defined(ZTS) && !defined(PHP_DEBUG)
+#if defined(ZTS) && !PHP_DEBUG
 			/* XXX we're crashing here in msvc6 debug builds at
 			 * php_message_handler_for_zend:839 because
 			 * SG(request_info).path_translated is an invalid pointer.
