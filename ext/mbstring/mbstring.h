@@ -45,7 +45,7 @@
 #endif
 
 
-#if HAVE_MBSTRING
+#ifdef HAVE_MBSTRING
 
 #include "libmbfl/mbfl/mbfilter.h"
 #include "SAPI.h"
@@ -108,7 +108,7 @@ ZEND_BEGIN_MODULE_GLOBALS(mbstring)
 	size_t illegalchars;
 	mbfl_buffer_converter *outconv;
     void *http_output_conv_mimetypes;
-#if HAVE_MBREGEX
+#ifdef HAVE_MBREGEX
     struct _zend_mb_regex_globals *mb_regex_globals;
     zend_long regex_stack_limit;
 #endif
@@ -118,7 +118,7 @@ ZEND_BEGIN_MODULE_GLOBALS(mbstring)
 	zend_bool internal_encoding_set;
 	zend_bool http_output_set;
 	zend_bool http_input_set;
-#if HAVE_MBREGEX
+#ifdef HAVE_MBREGEX
     zend_long regex_retry_limit;
 #endif
 ZEND_END_MODULE_GLOBALS(mbstring)

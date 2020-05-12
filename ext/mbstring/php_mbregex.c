@@ -21,7 +21,7 @@
 #include "php.h"
 #include "php_ini.h"
 
-#if HAVE_MBREGEX
+#ifdef HAVE_MBREGEX
 
 #include "zend_smart_str.h"
 #include "ext/standard/info.h"
@@ -33,7 +33,7 @@
 #include <oniguruma.h>
 #undef UChar
 
-#if ONIGURUMA_VERSION_INT < 60800
+#if !defined(ONIGURUMA_VERSION_INT) || ONIGURUMA_VERSION_INT < 60800
 typedef void OnigMatchParam;
 #define onig_new_match_param() (NULL)
 #define onig_initialize_match_param(x) (void)(x)

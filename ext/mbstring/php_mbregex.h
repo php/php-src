@@ -17,7 +17,7 @@
 #ifndef _PHP_MBREGEX_H
 #define _PHP_MBREGEX_H
 
-#if HAVE_MBREGEX
+#ifdef HAVE_MBREGEX
 
 #include "php.h"
 #include "zend.h"

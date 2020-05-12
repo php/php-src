@@ -88,7 +88,7 @@ function mb_ord(string $str, string $encoding = UNKNOWN): int|false {}
 
 function mb_chr(int $cp, string $encoding = UNKNOWN): string|false {}
 
-#if HAVE_MBREGEX
+#ifdef HAVE_MBREGEX
 function mb_regex_encoding(string $encoding = UNKNOWN): string|bool {}
 
 function mb_ereg(string $pattern, string $string, &$registers = UNKNOWN): int|false {}

@@ -35,7 +35,7 @@
 #include "php.h"
 #include "php_ini.h"
 
-#if HAVE_MBSTRING
+#ifdef HAVE_MBSTRING
 
 /* include case folding data generated from the official UnicodeData.txt file */
 #include "mbstring.h"

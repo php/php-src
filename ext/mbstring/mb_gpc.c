@@ -41,7 +41,7 @@
 #include "mb_gpc.h"
 /* }}} */
 
-#if HAVE_MBSTRING
+#ifdef HAVE_MBSTRING
 
 ZEND_EXTERN_MODULE_GLOBALS(mbstring)
 

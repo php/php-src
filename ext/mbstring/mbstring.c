@@ -53,12 +53,12 @@
 
 #include "mb_gpc.h"
 
-#if HAVE_MBREGEX
+#ifdef HAVE_MBREGEX
 # include "php_mbregex.h"
 # include "php_onig_compat.h"
 # include <oniguruma.h>
 # undef UChar
-#if ONIGURUMA_VERSION_INT < 60800
+# if !defined(ONIGURUMA_VERSION_INT) || ONIGURUMA_VERSION_INT < 60800
 typedef void OnigMatchParam;
 #define onig_new_match_param() (NULL)
 #define onig_initialize_match_param(x) (void)(x)
@@ -69,7 +69,7 @@ typedef void OnigMatchParam;
 onig_search(reg, str, end, start, range, region, option)
 #define onig_match_with_param(re, str, end, at, region, option, mp) \
 onig_match(re, str, end, at, region, option)
-#endif
+# endif
 #else
 # include "ext/pcre/php_pcre.h"
 #endif
@@ -78,7 +78,7 @@ onig_match(re, str, end, at, region, option)
 #include "mbstring_arginfo.h"
 /* }}} */
 
-#if HAVE_MBSTRING
+#ifdef HAVE_MBSTRING
 
 /* {{{ prototypes */
 ZEND_DECLARE_MODULE_GLOBALS(mbstring)
@@ -554,7 +554,7 @@ static void *_php_mb_compile_regex(const char *pattern);
 static int _php_mb_match_regex(void *opaque, const char *str, size_t str_len);
 static void _php_mb_free_regex(void *opaque);
 
-#if HAVE_MBREGEX
+#ifdef HAVE_MBREGEX
 /* {{{ _php_mb_compile_regex */
 static void *_php_mb_compile_regex(const char *pattern)
 {
@@ -906,7 +906,7 @@ static int _php_mb_ini_mbstring_internal_encoding_set(const char *new_value, siz
 	}
 	MBSTRG(internal_encoding) = encoding;
 	MBSTRG(current_internal_encoding) = encoding;
-#if HAVE_MBREGEX
+#ifdef HAVE_MBREGEX
 	{
 		const char *enc_name = new_value;
 		if (FAILURE == php_mb_regex_set_default_mbctype(enc_name)) {
@@ -1054,7 +1054,7 @@ PHP_INI_BEGIN()
 		PHP_INI_ALL,
 		OnUpdateBool,
 		strict_detection, zend_mbstring_globals, mbstring_globals)
-#if HAVE_MBREGEX
+#ifdef HAVE_MBREGEX
 	STD_PHP_INI_ENTRY("mbstring.regex_stack_limit", "100000",PHP_INI_ALL, OnUpdateLong, regex_stack_limit, zend_mbstring_globals, mbstring_globals)
 	STD_PHP_INI_ENTRY("mbstring.regex_retry_limit", "1000000",PHP_INI_ALL, OnUpdateLong, regex_retry_limit, zend_mbstring_globals, mbstring_globals)
 #endif
@@ -1113,7 +1113,7 @@ ZEND_TSRMLS_CACHE_UPDATE();
 	mbstring_globals->strict_detection = 0;
 	mbstring_globals->outconv = NULL;
 	mbstring_globals->http_output_conv_mimetypes = NULL;
-#if HAVE_MBREGEX
+#ifdef HAVE_MBREGEX
 	mbstring_globals->mb_regex_globals = php_mb_regex_globals_alloc();
 #endif
 	mbstring_globals->last_used_encoding_name = NULL;
@@ -1136,7 +1136,7 @@ static PHP_GSHUTDOWN_FUNCTION(mbstring)
 	if (mbstring_globals->http_output_conv_mimetypes) {
 		_php_mb_free_regex(mbstring_globals->http_output_conv_mimetypes);
 	}
-#if HAVE_MBREGEX
+#ifdef HAVE_MBREGEX
 	php_mb_regex_globals_free(mbstring_globals->mb_regex_globals);
 #endif
 }
@@ -1174,7 +1174,7 @@ ZEND_TSRMLS_CACHE_UPDATE();
 	REGISTER_LONG_CONSTANT("MB_CASE_TITLE_SIMPLE", PHP_UNICODE_CASE_TITLE_SIMPLE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MB_CASE_FOLD_SIMPLE", PHP_UNICODE_CASE_FOLD_SIMPLE, CONST_CS | CONST_PERSISTENT);
 
-#if HAVE_MBREGEX
+#ifdef HAVE_MBREGEX
 	PHP_MINIT(mb_regex) (INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
@@ -1201,7 +1201,7 @@ PHP_MSHUTDOWN_FUNCTION(mbstring)
 
 	zend_multibyte_restore_functions();
 
-#if HAVE_MBREGEX
+#ifdef HAVE_MBREGEX
 	PHP_MSHUTDOWN(mb_regex) (INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
@@ -1223,7 +1223,7 @@ PHP_RINIT_FUNCTION(mbstring)
 
 	php_mb_populate_current_detect_order_list();
 
-#if HAVE_MBREGEX
+#ifdef HAVE_MBREGEX
 	PHP_RINIT(mb_regex) (INIT_FUNC_ARGS_PASSTHRU);
 #endif
 	zend_multibyte_set_internal_encoding((const zend_encoding *)MBSTRG(internal_encoding));
@@ -1262,7 +1262,7 @@ PHP_RSHUTDOWN_FUNCTION(mbstring)
 	MBSTRG(http_output_set) = 0;
 	MBSTRG(http_input_set) = 0;
 
-#if HAVE_MBREGEX
+#ifdef HAVE_MBREGEX
 	PHP_RSHUTDOWN(mb_regex) (INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
@@ -1288,7 +1288,7 @@ PHP_MINFO_FUNCTION(mbstring)
 	php_info_print_table_header(1, "mbstring extension makes use of \"streamable kanji code filter and converter\", which is distributed under the GNU Lesser General Public License version 2.1.");
 	php_info_print_table_end();
 
-#if HAVE_MBREGEX
+#ifdef HAVE_MBREGEX
 	PHP_MINFO(mb_regex)(ZEND_MODULE_INFO_FUNC_ARGS_PASSTHRU);
 #endif
 

@@ -205,13 +205,13 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mb_chr, 0, 1, MAY_BE_STRING|MAY_
 	ZEND_ARG_TYPE_INFO(0, encoding, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#if HAVE_MBREGEX
+#if defined(HAVE_MBREGEX)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mb_regex_encoding, 0, 0, MAY_BE_STRING|MAY_BE_BOOL)
 	ZEND_ARG_TYPE_INFO(0, encoding, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#if HAVE_MBREGEX
+#if defined(HAVE_MBREGEX)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mb_ereg, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, pattern, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
@@ -219,11 +219,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mb_ereg, 0, 2, MAY_BE_LONG|MAY_B
 ZEND_END_ARG_INFO()
 #endif
 
-#if HAVE_MBREGEX
+#if defined(HAVE_MBREGEX)
 #define arginfo_mb_eregi arginfo_mb_ereg
 #endif
 
-#if HAVE_MBREGEX
+#if defined(HAVE_MBREGEX)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mb_ereg_replace, 0, 3, MAY_BE_STRING|MAY_BE_FALSE|MAY_BE_NULL)
 	ZEND_ARG_TYPE_INFO(0, pattern, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, replacement, IS_STRING, 0)
@@ -232,11 +232,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mb_ereg_replace, 0, 3, MAY_BE_ST
 ZEND_END_ARG_INFO()
 #endif
 
-#if HAVE_MBREGEX
+#if defined(HAVE_MBREGEX)
 #define arginfo_mb_eregi_replace arginfo_mb_ereg_replace
 #endif
 
-#if HAVE_MBREGEX
+#if defined(HAVE_MBREGEX)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mb_ereg_replace_callback, 0, 3, MAY_BE_STRING|MAY_BE_FALSE|MAY_BE_NULL)
 	ZEND_ARG_TYPE_INFO(0, pattern, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
@@ -245,7 +245,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mb_ereg_replace_callback, 0, 3, 
 ZEND_END_ARG_INFO()
 #endif
 
-#if HAVE_MBREGEX
+#if defined(HAVE_MBREGEX)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mb_split, 0, 2, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, pattern, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
@@ -253,7 +253,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mb_split, 0, 2, MAY_BE_ARRAY|MAY
 ZEND_END_ARG_INFO()
 #endif
 
-#if HAVE_MBREGEX
+#if defined(HAVE_MBREGEX)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mb_ereg_match, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, pattern, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
@@ -261,22 +261,22 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mb_ereg_match, 0, 2, _IS_BOOL, 0
 ZEND_END_ARG_INFO()
 #endif
 
-#if HAVE_MBREGEX
+#if defined(HAVE_MBREGEX)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mb_ereg_search, 0, 0, MAY_BE_ARRAY|MAY_BE_BOOL)
 	ZEND_ARG_TYPE_INFO(0, pattern, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, option, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#if HAVE_MBREGEX
+#if defined(HAVE_MBREGEX)
 #define arginfo_mb_ereg_search_pos arginfo_mb_ereg_search
 #endif
 
-#if HAVE_MBREGEX
+#if defined(HAVE_MBREGEX)
 #define arginfo_mb_ereg_search_regs arginfo_mb_ereg_search
 #endif
 
-#if HAVE_MBREGEX
+#if defined(HAVE_MBREGEX)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mb_ereg_search_init, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, pattern, IS_STRING, 0)
@@ -284,23 +284,23 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mb_ereg_search_init, 0, 1, _IS_B
 ZEND_END_ARG_INFO()
 #endif
 
-#if HAVE_MBREGEX
+#if defined(HAVE_MBREGEX)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mb_ereg_search_getregs, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 #endif
 
-#if HAVE_MBREGEX
+#if defined(HAVE_MBREGEX)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mb_ereg_search_getpos, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#if HAVE_MBREGEX
+#if defined(HAVE_MBREGEX)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mb_ereg_search_setpos, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, position, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#if HAVE_MBREGEX
+#if defined(HAVE_MBREGEX)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mb_regex_set_options, 0, 0, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, options, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -350,52 +350,52 @@ ZEND_FUNCTION(mb_check_encoding);
 ZEND_FUNCTION(mb_scrub);
 ZEND_FUNCTION(mb_ord);
 ZEND_FUNCTION(mb_chr);
-#if HAVE_MBREGEX
+#if defined(HAVE_MBREGEX)
 ZEND_FUNCTION(mb_regex_encoding);
 #endif
-#if HAVE_MBREGEX
+#if defined(HAVE_MBREGEX)
 ZEND_FUNCTION(mb_ereg);
 #endif
-#if HAVE_MBREGEX
+#if defined(HAVE_MBREGEX)
 ZEND_FUNCTION(mb_eregi);
 #endif
-#if HAVE_MBREGEX
+#if defined(HAVE_MBREGEX)
 ZEND_FUNCTION(mb_ereg_replace);
 #endif
-#if HAVE_MBREGEX
+#if defined(HAVE_MBREGEX)
 ZEND_FUNCTION(mb_eregi_replace);
 #endif
-#if HAVE_MBREGEX
+#if defined(HAVE_MBREGEX)
 ZEND_FUNCTION(mb_ereg_replace_callback);
 #endif
-#if HAVE_MBREGEX
+#if defined(HAVE_MBREGEX)
 ZEND_FUNCTION(mb_split);
 #endif
-#if HAVE_MBREGEX
+#if defined(HAVE_MBREGEX)
 ZEND_FUNCTION(mb_ereg_match);
 #endif
-#if HAVE_MBREGEX
+#if defined(HAVE_MBREGEX)
 ZEND_FUNCTION(mb_ereg_search);
 #endif
-#if HAVE_MBREGEX
+#if defined(HAVE_MBREGEX)
 ZEND_FUNCTION(mb_ereg_search_pos);
 #endif
-#if HAVE_MBREGEX
+#if defined(HAVE_MBREGEX)
 ZEND_FUNCTION(mb_ereg_search_regs);
 #endif
-#if HAVE_MBREGEX
+#if defined(HAVE_MBREGEX)
 ZEND_FUNCTION(mb_ereg_search_init);
 #endif
-#if HAVE_MBREGEX
+#if defined(HAVE_MBREGEX)
 ZEND_FUNCTION(mb_ereg_search_getregs);
 #endif
-#if HAVE_MBREGEX
+#if defined(HAVE_MBREGEX)
 ZEND_FUNCTION(mb_ereg_search_getpos);
 #endif
-#if HAVE_MBREGEX
+#if defined(HAVE_MBREGEX)
 ZEND_FUNCTION(mb_ereg_search_setpos);
 #endif
-#if HAVE_MBREGEX
+#if defined(HAVE_MBREGEX)
 ZEND_FUNCTION(mb_regex_set_options);
 #endif
 
@@ -444,52 +444,52 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(mb_scrub, arginfo_mb_scrub)
 	ZEND_FE(mb_ord, arginfo_mb_ord)
 	ZEND_FE(mb_chr, arginfo_mb_chr)
-#if HAVE_MBREGEX
+#if defined(HAVE_MBREGEX)
 	ZEND_FE(mb_regex_encoding, arginfo_mb_regex_encoding)
 #endif
-#if HAVE_MBREGEX
+#if defined(HAVE_MBREGEX)
 	ZEND_FE(mb_ereg, arginfo_mb_ereg)
 #endif
-#if HAVE_MBREGEX
+#if defined(HAVE_MBREGEX)
 	ZEND_FE(mb_eregi, arginfo_mb_eregi)
 #endif
-#if HAVE_MBREGEX
+#if defined(HAVE_MBREGEX)
 	ZEND_FE(mb_ereg_replace, arginfo_mb_ereg_replace)
 #endif
-#if HAVE_MBREGEX
+#if defined(HAVE_MBREGEX)
 	ZEND_FE(mb_eregi_replace, arginfo_mb_eregi_replace)
 #endif
-#if HAVE_MBREGEX
+#if defined(HAVE_MBREGEX)
 	ZEND_FE(mb_ereg_replace_callback, arginfo_mb_ereg_replace_callback)
 #endif
-#if HAVE_MBREGEX
+#if defined(HAVE_MBREGEX)
 	ZEND_FE(mb_split, arginfo_mb_split)
 #endif
-#if HAVE_MBREGEX
+#if defined(HAVE_MBREGEX)
 	ZEND_FE(mb_ereg_match, arginfo_mb_ereg_match)
 #endif
-#if HAVE_MBREGEX
+#if defined(HAVE_MBREGEX)
 	ZEND_FE(mb_ereg_search, arginfo_mb_ereg_search)
 #endif
-#if HAVE_MBREGEX
+#if defined(HAVE_MBREGEX)
 	ZEND_FE(mb_ereg_search_pos, arginfo_mb_ereg_search_pos)
 #endif
-#if HAVE_MBREGEX
+#if defined(HAVE_MBREGEX)
 	ZEND_FE(mb_ereg_search_regs, arginfo_mb_ereg_search_regs)
 #endif
-#if HAVE_MBREGEX
+#if defined(HAVE_MBREGEX)
 	ZEND_FE(mb_ereg_search_init, arginfo_mb_ereg_search_init)
 #endif
-#if HAVE_MBREGEX
+#if defined(HAVE_MBREGEX)
 	ZEND_FE(mb_ereg_search_getregs, arginfo_mb_ereg_search_getregs)
 #endif
-#if HAVE_MBREGEX
+#if defined(HAVE_MBREGEX)
 	ZEND_FE(mb_ereg_search_getpos, arginfo_mb_ereg_search_getpos)
 #endif
-#if HAVE_MBREGEX
+#if defined(HAVE_MBREGEX)
 	ZEND_FE(mb_ereg_search_setpos, arginfo_mb_ereg_search_setpos)
 #endif
-#if HAVE_MBREGEX
+#if defined(HAVE_MBREGEX)
 	ZEND_FE(mb_regex_set_options, arginfo_mb_regex_set_options)
 #endif
 	ZEND_FE_END
