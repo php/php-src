@@ -18,6 +18,7 @@
 #include "fpm_status.h"
 #include "fpm_request.h"
 #include "fpm_log.h"
+#include "fpm_env.h"
 
 #include "zlog.h"
 
@@ -53,6 +54,11 @@ void fpm_request_accepting() /* {{{ */
 
 	/* idle++, active-- */
 	fpm_scoreboard_update(1, -1, 0, 0, 0, 0, 0, FPM_SCOREBOARD_ACTION_INC, NULL);
+
+	char *title;
+	spprintf(&title, 0, "pool %s: idle", fpm_scoreboard_get()->pool);
+	fpm_env_setproctitle(title);
+	efree(title);
 }
 /* }}} */
 
@@ -96,6 +102,11 @@ void fpm_request_reading_headers() /* {{{ */
 
 	/* idle--, active++, request++ */
 	fpm_scoreboard_update(-1, 1, 0, 0, 1, 0, 0, FPM_SCOREBOARD_ACTION_INC, NULL);
+
+	char *title;
+	spprintf(&title, 0, "pool %s: busy", fpm_scoreboard_get()->pool);
+	fpm_env_setproctitle(title);
+	efree(title);
 }
 /* }}} */
 
