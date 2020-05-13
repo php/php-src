@@ -1129,7 +1129,6 @@ ZEND_API ZEND_NORETURN void ZEND_FASTCALL zend_timeout(void) /* {{{ */
 # endif
 #else
 	EG(timed_out) = 0;
-	zend_set_timeout_ex(0);
 #endif
 
 	zend_error_noreturn(E_ERROR, "Maximum execution time of " ZEND_LONG_FMT " second%s exceeded", EG(timeout_seconds), EG(timeout_seconds) == 1 ? "" : "s");
