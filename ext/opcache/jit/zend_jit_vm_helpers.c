@@ -326,8 +326,8 @@ ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_loop_trace_helper(ZEND_OPCODE_HAN
 	ZEND_OPCODE_TAIL_CALL_EX(zend_jit_trace_counter_helper, ZEND_JIT_TRACE_LOOP_COST);
 }
 
-#define TRACE_RECORD(_op, _ptr) \
-	trace_buffer[idx].op = _op; \
+#define TRACE_RECORD(_op, _info, _ptr) \
+	trace_buffer[idx].info = _op | (_info); \
 	trace_buffer[idx].ptr = _ptr; \
 	idx++; \
 	if (idx >= ZEND_JIT_TRACE_MAX_LENGTH - 1) { \
@@ -347,52 +347,17 @@ ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_loop_trace_helper(ZEND_OPCODE_HAN
 		break; \
 	}
 
-#define TRACE_RECORD_ENTER(_op, _return_value_used, _ptr) \
-	trace_buffer[idx].op = _op; \
-	trace_buffer[idx].return_value_used = _return_value_used; \
-	trace_buffer[idx].ptr = _ptr; \
-	idx++; \
-	if (idx >= ZEND_JIT_TRACE_MAX_LENGTH - 1) { \
-		stop = ZEND_JIT_TRACE_STOP_TOO_LONG; \
-		break; \
-	}
-
-#define TRACE_RECORD_INIT(_op, _fake, _ptr) \
-	trace_buffer[idx].op = _op; \
-	trace_buffer[idx].fake = _fake; \
-	trace_buffer[idx].ptr = _ptr; \
-	idx++; \
-	if (idx >= ZEND_JIT_TRACE_MAX_LENGTH - 1) { \
-		stop = ZEND_JIT_TRACE_STOP_TOO_LONG; \
-		break; \
-	}
-
-#define TRACE_RECORD_BACK(_op, _ptr) \
-	trace_buffer[idx].op = _op; \
-	trace_buffer[idx].ptr = _ptr; \
-	idx++; \
-	if (idx >= ZEND_JIT_TRACE_MAX_LENGTH - 1) { \
-		stop = ZEND_JIT_TRACE_STOP_TOO_LONG; \
-		break; \
-	}
-
-#define TRACE_RECORD_TYPE(_op, _ptr) \
-	trace_buffer[idx].op = _op; \
-	trace_buffer[idx].ptr = _ptr; \
-	idx++; \
-	if (idx >= ZEND_JIT_TRACE_MAX_LENGTH - 1) { \
-		stop = ZEND_JIT_TRACE_STOP_TOO_LONG; \
-		break; \
-	}
-
-#define TRACE_START(_op, _start, _ptr) \
+#define TRACE_START(_op, _start, _ptr1, _ptr2) \
 	trace_buffer[0].op = _op; \
 	trace_buffer[0].start = _start; \
 	trace_buffer[0].level = 0; \
-	trace_buffer[0].ptr = _ptr; \
+	trace_buffer[0].ptr = _ptr1; \
+	trace_buffer[1].last = 0; \
+	trace_buffer[1].ptr = _ptr2; \
 	idx = ZEND_JIT_TRACE_START_REC_SIZE;
 
 #define TRACE_END(_op, _stop, _ptr) \
+	trace_buffer[1].last = idx; \
 	trace_buffer[idx].op   = _op; \
 	trace_buffer[idx].start = trace_buffer[idx].start; \
 	trace_buffer[idx].stop = trace_buffer[0].stop = _stop; \
@@ -503,7 +468,7 @@ static int zend_jit_trace_record_fake_init_call(zend_execute_data *call, zend_ji
 		if (call->prev_execute_data) {
 			idx = zend_jit_trace_record_fake_init_call(call->prev_execute_data, trace_buffer, idx);
 		}
-		TRACE_RECORD_INIT(ZEND_JIT_TRACE_INIT_CALL, 1, call->func);
+		TRACE_RECORD(ZEND_JIT_TRACE_INIT_CALL, ZEND_JIT_TRACE_FAKE_INIT_CALL, call->func);
 	} while (0);
 	return idx;
 }
@@ -581,8 +546,7 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 		(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(&EX(func)->op_array);
 	offset = jit_extension->offset;
 
-	TRACE_START(ZEND_JIT_TRACE_START, start, &EX(func)->op_array);
-	((zend_jit_trace_start_rec*)trace_buffer)->opline = opline;
+	TRACE_START(ZEND_JIT_TRACE_START, start, &EX(func)->op_array, opline);
 	is_toplevel = EX(func)->op_array.function_name == NULL;
 
 	if (prev_call) {
@@ -669,11 +633,11 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 		TRACE_RECORD_VM(ZEND_JIT_TRACE_VM, opline, op1_type, op2_type, op3_type);
 
 		if (ce1) {
-			TRACE_RECORD_TYPE(ZEND_JIT_TRACE_OP1_TYPE, ce1);
+			TRACE_RECORD(ZEND_JIT_TRACE_OP1_TYPE, 0, ce1);
 		}
 
 		if (ce2) {
-			TRACE_RECORD_TYPE(ZEND_JIT_TRACE_OP2_TYPE, ce2);
+			TRACE_RECORD(ZEND_JIT_TRACE_OP2_TYPE, 0, ce2);
 		}
 
 		switch (opline->opcode) {
@@ -682,7 +646,7 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 			case ZEND_DO_UCALL:
 			case ZEND_DO_FCALL_BY_NAME:
 				if (EX(call)->func->type == ZEND_INTERNAL_FUNCTION) {
-					TRACE_RECORD(ZEND_JIT_TRACE_DO_ICALL, EX(call)->func);
+					TRACE_RECORD(ZEND_JIT_TRACE_DO_ICALL, 0, EX(call)->func);
 				}
 				break;
 			default:
@@ -722,7 +686,9 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 					break;
 				}
 
-				TRACE_RECORD_ENTER(ZEND_JIT_TRACE_ENTER, EX(return_value) != NULL, &EX(func)->op_array);
+				TRACE_RECORD(ZEND_JIT_TRACE_ENTER,
+					EX(return_value) != NULL ? ZEND_JIT_TRACE_RETRUN_VALUE_USED : 0,
+					&EX(func)->op_array);
 
 				count = zend_jit_trace_recursive_call_count(&EX(func)->op_array, unrolled_calls, ret_level, level);
 
@@ -756,7 +722,7 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 							stop = ZEND_JIT_TRACE_STOP_TOO_DEEP_RET;
 							break;
 						}
-						TRACE_RECORD_BACK(ZEND_JIT_TRACE_BACK, &EX(func)->op_array);
+						TRACE_RECORD(ZEND_JIT_TRACE_BACK, 0, &EX(func)->op_array);
 						count = zend_jit_trace_recursive_ret_count(&EX(func)->op_array, unrolled_calls, ret_level);
 						if (opline == orig_opline) {
 							if (count + 1 >= ZEND_JIT_TRACE_MAX_RECURSION) {
@@ -790,7 +756,7 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 					}
 				} else {
 					level--;
-					TRACE_RECORD_BACK(ZEND_JIT_TRACE_BACK, &EX(func)->op_array);
+					TRACE_RECORD(ZEND_JIT_TRACE_BACK, 0, &EX(func)->op_array);
 				}
 			}
 #ifdef HAVE_GCC_GLOBAL_REGS
@@ -812,7 +778,7 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 					stop = ZEND_JIT_TRACE_STOP_TRAMPOLINE;
 					break;
 				}
-				TRACE_RECORD_INIT(ZEND_JIT_TRACE_INIT_CALL, 0, EX(call)->func);
+				TRACE_RECORD(ZEND_JIT_TRACE_INIT_CALL, 0, EX(call)->func);
 			}
 			prev_call = EX(call);
 		}
@@ -869,7 +835,7 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 					break;
 				}
 			} else if (trace_flags & ZEND_JIT_TRACE_UNSUPPORTED) {
-				TRACE_RECORD(ZEND_JIT_TRACE_VM, opline);
+				TRACE_RECORD(ZEND_JIT_TRACE_VM, 0, opline);
 				stop = ZEND_JIT_TRACE_STOP_NOT_SUPPORTED;
 				break;
 			}
@@ -892,7 +858,8 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 
 	if (stop == ZEND_JIT_TRACE_STOP_LINK) {
 		/* Shrink fake INIT_CALLs */
-		while (trace_buffer[idx-1].op == ZEND_JIT_TRACE_INIT_CALL && trace_buffer[idx-1].fake) {
+		while (trace_buffer[idx-1].op == ZEND_JIT_TRACE_INIT_CALL
+				&& (trace_buffer[idx-1].info & ZEND_JIT_TRACE_FAKE_INIT_CALL)) {
 			idx--;
 		}
 	}

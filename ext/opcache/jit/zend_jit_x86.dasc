@@ -11479,7 +11479,7 @@ static zend_regset zend_jit_get_scratch_regset(const zend_op *opline, const zend
 	if (zend_jit_trigger == ZEND_JIT_ON_HOT_TRACE) {
 		if (ssa_op == ssa->ops
 		 && JIT_G(current_trace)[ZEND_JIT_TRACE_START_REC_SIZE].op == ZEND_JIT_TRACE_INIT_CALL
-		 && JIT_G(current_trace)[ZEND_JIT_TRACE_START_REC_SIZE].fake) {
+		 && (JIT_G(current_trace)[ZEND_JIT_TRACE_START_REC_SIZE].info & ZEND_JIT_TRACE_FAKE_INIT_CALL)) {
 			ZEND_REGSET_INCL(regset, ZREG_R0);
 			ZEND_REGSET_INCL(regset, ZREG_R1);
 		}

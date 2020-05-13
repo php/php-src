@@ -254,34 +254,47 @@ typedef enum _zend_jit_trace_op {
 	ZEND_JIT_TRACE_DO_ICALL,
 	ZEND_JIT_TRACE_ENTER,
 	ZEND_JIT_TRACE_BACK,
-	ZEND_JIT_TRACE_START,
 	ZEND_JIT_TRACE_END,
+	ZEND_JIT_TRACE_START,
 } zend_jit_trace_op;
 
 #define IS_UNKNOWN 255 /* may be used for zend_jit_trace_rec.op?_type */
 #define IS_TRACE_REFERENCE (1<<5)
 #define IS_TRACE_INDIRECT  (1<<6)
 
+#define ZEND_JIT_TRACE_FAKE_INIT_CALL    0x00000100
+#define ZEND_JIT_TRACE_RETRUN_VALUE_USED 0x00000100
+
+#define ZEND_JIT_TRACE_MAX_SSA_VAR       0x7ffffe
+#define ZEND_JIT_TRACE_SSA_VAR_SHIFT     9
+
+#define ZEND_JIT_TRACE_SET_FIRST_SSA_VAR(_info, var) do { \
+		_info |= (var << ZEND_JIT_TRACE_SSA_VAR_SHIFT); \
+	} while (0)
+#define ZEND_JIT_TRACE_GET_FIRST_SSA_VAR(_info) \
+	(_info >> ZEND_JIT_TRACE_SSA_VAR_SHIFT)
+
 typedef struct _zend_jit_trace_rec {
-	uint8_t   op;    /* zend_jit_trace_op */
 	union {
-		struct {
-			uint8_t op1_type;/* recorded zval op1_type for ZEND_JIT_TRACE_VM */
-			uint8_t op2_type;/* recorded zval op2_type for ZEND_JIT_TRACE_VM */
-			uint8_t op3_type;/* recorded zval for op_data.op1_type for ZEND_JIT_TRACE_VM */
-		};
-		struct {
+		struct { ZEND_ENDIAN_LOHI(
+			uint8_t   op,    /* zend_jit_trace_op */
 			union {
-				int8_t    return_value_used; /* for ZEND_JIT_TRACE_ENTER */
-				uint8_t   fake; /* for ZEND_JIT_TRACE_INIT_CALL */
-			};
-			uint8_t first_ssa_var; /* may be used for ZEND_JIT_TRACE_ENTER and ZEND_JIT_TRACE_BACK */
+				struct {
+					uint8_t op1_type;/* recorded zval op1_type for ZEND_JIT_TRACE_VM */
+					uint8_t op2_type;/* recorded zval op2_type for ZEND_JIT_TRACE_VM */
+					uint8_t op3_type;/* recorded zval for op_data.op1_type for ZEND_JIT_TRACE_VM */
+				};
+				struct {
+					uint8_t  start;  /* ZEND_JIT_TRACE_START_MASK for ZEND_JIT_TRACE_START/END */
+					uint8_t  stop;   /* zend_jit_trace_stop for ZEND_JIT_TRACE_START/END */
+					uint8_t  level;  /* recursive return level for ZEND_JIT_TRACE_START */
+				};
+			})
 		};
-		struct {
-			uint8_t  start;  /* ZEND_JIT_TRACE_START_MASK for ZEND_JIT_TRACE_START/END */
-			uint8_t  stop;   /* zend_jit_trace_stop for ZEND_JIT_TRACE_START/END */
-			uint8_t  level;  /* recursive return level for ZEND_JIT_TRACE_START */
-		};
+		uint32_t last;
+		uint32_t info; /* "first_ssa_var" for ZEND_JIT_TRACE_ENTER and ZEND_JIT_TRACE_BACK,
+		                * "return_value_used" for ZEND_JIT_TRACE_ENTER,
+		                * "fake" for ZEND_JIT_TRACE_INIT_CALL */
 	};
 	union {
 		const void             *ptr;
@@ -291,15 +304,6 @@ typedef struct _zend_jit_trace_rec {
 		const zend_class_entry *ce;
 	};
 } zend_jit_trace_rec;
-
-typedef struct _zend_jit_trace_start_rec {
-	uint8_t  op;     /* zend_jit_trace_op */
-	uint8_t  start;  /* ZEND_JIT_TRACE_START_MASK for ZEND_JIT_TRACE_START/END */
-	uint8_t  stop;   /* zend_jit_trace_stop for ZEND_JIT_TRACE_START/END */
-	uint8_t  level;  /* recursive return level for ZEND_JIT_TRACE_START */
-	const zend_op_array *op_array;
-	const zend_op *opline;
-} zend_jit_trace_start_rec;
 
 #define ZEND_JIT_TRACE_START_REC_SIZE 2
 
