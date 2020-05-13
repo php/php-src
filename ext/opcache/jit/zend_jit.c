@@ -3206,6 +3206,7 @@ void ZEND_FASTCALL zend_jit_hot_func(zend_execute_data *execute_data, const zend
 static int zend_jit_setup_hot_counters(zend_op_array *op_array)
 {
 	zend_op *opline = op_array->opcodes;
+	zend_func_info *func_info;
 	zend_jit_op_array_hot_extension *jit_extension;
 	zend_cfg cfg;
 	uint32_t i;
@@ -3218,6 +3219,14 @@ static int zend_jit_setup_hot_counters(zend_op_array *op_array)
 	}
 
 	jit_extension = (zend_jit_op_array_hot_extension*)zend_shared_alloc(sizeof(zend_jit_op_array_hot_extension) + (op_array->last - 1) * sizeof(void*));
+	func_info = (zend_func_info*)ZEND_FUNC_INFO(op_array);
+	if (func_info) {
+		memcpy(&jit_extension->func_info, func_info, sizeof(zend_func_info));
+	} else {
+		memset(&jit_extension->func_info, 0, sizeof(zend_func_info));
+		jit_extension->func_info.num_args = -1;
+		jit_extension->func_info.return_value_used = -1;
+	}
 	jit_extension->counter = &zend_jit_hot_counters[zend_jit_op_array_hash(op_array) & (ZEND_HOT_COUNTERS_COUNT - 1)];
 	for (i = 0; i < op_array->last; i++) {
 		jit_extension->orig_handlers[i] = op_array->opcodes[i].handler;
