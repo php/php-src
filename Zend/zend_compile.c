@@ -6417,7 +6417,7 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t flags) /
 				} else {
 					zend_error_noreturn(E_COMPILE_ERROR,
 						"Cannot use %s as default value for property %s::$%s of type %s",
-						zend_get_type_by_const(Z_TYPE(value_zv)),
+						zend_zval_type_name(&value_zv),
 						ZSTR_VAL(ce->name), ZSTR_VAL(name), ZSTR_VAL(str));
 				}
 			}
@@ -8320,7 +8320,7 @@ void zend_compile_class_name(znode *result, zend_ast *ast) /* {{{ */
 			/* Unlikely case that happen if class_ast is constant folded.
 			 * Handle it here, to avoid needing a CONST specialization in the VM. */
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use ::class on value of type %s",
-				zend_get_type_by_const(Z_TYPE(expr_node.u.constant)));
+				zend_zval_type_name(&expr_node.u.constant));
 		}
 
 		zend_emit_op_tmp(result, ZEND_FETCH_CLASS_NAME, &expr_node, NULL);

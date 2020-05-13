@@ -740,7 +740,7 @@ int set_proc_descriptor_from_array(
 			goto finish;
 		}
 		if (Z_TYPE_P(ztarget) != IS_LONG) {
-			zend_value_error("Redirection target must be of type int, %s given", zend_get_type_by_const(Z_TYPE_P(ztarget)));
+			zend_value_error("Redirection target must be of type int, %s given", zend_zval_type_name(ztarget));
 			goto finish;
 		}
 
