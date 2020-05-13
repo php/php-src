@@ -1113,6 +1113,11 @@ ZEND_API int zend_eval_string_ex(const char *str, zval *retval_ptr, const char *
 ZEND_API ZEND_NORETURN void ZEND_FASTCALL zend_timeout(void) /* {{{ */
 {
 	EG(timed_out) = 0;
+
+	if (zend_on_timeout) { /* Hook which can be defined by extensions */
+		zend_on_timeout(EG(timeout_seconds));
+	}
+
 	zend_error_noreturn(E_ERROR, "Maximum execution time of " ZEND_LONG_FMT " second%s exceeded", EG(timeout_seconds), EG(timeout_seconds) == 1 ? "" : "s");
 }
 /* }}} */
@@ -1265,10 +1270,6 @@ static VOID CALLBACK zend_timeout_handler(PVOID arg, BOOLEAN timed_out)
 
 static void zend_timeout_handler(int dummy) /* {{{ */
 {
-	if (zend_on_timeout) { /* Hook which can be defined by extensions */
-		zend_on_timeout(EG(timeout_seconds));
-	}
-
 # ifndef ZTS
 	/* No-op if `hard_timeout` is set to zero */
 	zend_set_timeout_ex(EG(hard_timeout), zend_hard_timeout_handler);
