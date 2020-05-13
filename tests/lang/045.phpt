@@ -21,4 +21,4 @@ plop();
 --EXPECTF--
 Fatal error: Maximum execution time of 1 second exceeded in %s on line %d
 
-Fatal error: Maximum execution time of 1 second exceeded in %s on line %d
+Fatal error: Maximum execution time of 1+1 seconds exceeded (terminated) in %s on line %d
