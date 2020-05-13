@@ -1215,12 +1215,12 @@ VOID CALLBACK tq_timer_cb(PVOID arg, BOOLEAN timed_out)
 
 static void zend_set_timeout_ex(zend_long seconds) /* {{{ */
 {
-#ifdef ZEND_WIN32
-	zend_executor_globals *eg;
-
 	if (!seconds) {
 		return;
 	}
+
+#ifdef ZEND_WIN32
+	zend_executor_globals *eg;
 
 	/* Don't use ChangeTimerQueueTimer() as it will not restart an expired
 	 * timer, so we could end up with just an ignored timeout. Instead
@@ -1246,17 +1246,14 @@ static void zend_set_timeout_ex(zend_long seconds) /* {{{ */
 		struct itimerval t_r;		/* timeout requested */
 		int signo;
 
-		if(seconds) {
-			t_r.it_value.tv_sec = seconds;
-			t_r.it_value.tv_usec = t_r.it_interval.tv_sec = t_r.it_interval.tv_usec = 0;
+		t_r.it_value.tv_sec = seconds;
+		t_r.it_value.tv_usec = t_r.it_interval.tv_sec = t_r.it_interval.tv_usec = 0;
 
 # ifdef __CYGWIN__
-			setitimer(ITIMER_REAL, &t_r, NULL);
-		}
+		setitimer(ITIMER_REAL, &t_r, NULL);
 		signo = SIGALRM;
 # else
-			setitimer(ITIMER_PROF, &t_r, NULL);
-		}
+		setitimer(ITIMER_PROF, &t_r, NULL);
 		signo = SIGPROF;
 # endif
 
