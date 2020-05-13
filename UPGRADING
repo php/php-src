@@ -221,6 +221,10 @@ PHP 8.0 UPGRADE NOTES
      * DOMUserDataHandler
      * DOMTypeInfo
 
+- Enchant:
+  . enchant_broker_list_dicts(), enchant_broker_describe() and
+    enchant_dict_suggest() will now return an empty array instead of null.
+
 - Exif:
   . Removed read_exif_data(). exif_read_data() should be used instead.
 

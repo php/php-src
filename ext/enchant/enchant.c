@@ -92,11 +92,6 @@ enumerate_providers_fn (const char * const name,
 	add_assoc_string(&tmp_array, "name", (char *)name);
 	add_assoc_string(&tmp_array, "desc", (char *)desc);
 	add_assoc_string(&tmp_array, "file", (char *)file);
-
-	if (Z_TYPE_P(zdesc)!=IS_ARRAY) {
-		array_init(zdesc);
-	}
-
 	add_next_index_zval(zdesc, &tmp_array);
 }
 /* }}} */
@@ -129,10 +124,6 @@ static void php_enchant_list_dicts_fn( const char * const lang_tag,
 	add_assoc_string(&tmp_array, "provider_name", (char *)provider_name);
 	add_assoc_string(&tmp_array, "provider_desc", (char *)provider_desc);
 	add_assoc_string(&tmp_array, "provider_file", (char *)provider_file);
-
-	if (Z_TYPE_P(zdesc) != IS_ARRAY) {
-		array_init(zdesc);
-	}
 	add_next_index_zval(zdesc, &tmp_array);
 
 }
@@ -434,6 +425,7 @@ PHP_FUNCTION(enchant_broker_list_dicts)
 
 	PHP_ENCHANT_GET_BROKER;
 
+	array_init(return_value);
 	enchant_broker_list_dicts(pbroker->pbroker, php_enchant_list_dicts_fn, (void *)return_value);
 }
 /* }}} */
@@ -612,6 +604,7 @@ PHP_FUNCTION(enchant_broker_describe)
 
 	PHP_ENCHANT_GET_BROKER;
 
+	array_init(return_value);
 	enchant_broker_describe(pbroker->pbroker, describetozval, (void *)return_value);
 }
 /* }}} */
@@ -698,12 +691,12 @@ PHP_FUNCTION(enchant_dict_suggest)
 	}
 
 	PHP_ENCHANT_GET_DICT;
+	array_init(return_value);
 
 	suggs = enchant_dict_suggest(pdict->pdict, word, wordlen, &n_sugg);
 	if (suggs && n_sugg) {
 		size_t i;
 
-		array_init(return_value);
 		for (i = 0; i < n_sugg; i++) {
 			add_next_index_string(return_value, suggs[i]);
 		}
