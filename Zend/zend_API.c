@@ -138,7 +138,9 @@ ZEND_API const char *zend_zval_type_name(const zval *arg) /* {{{ */
 }
 /* }}} */
 
-ZEND_API zend_string *zend_zval_get_type(const zval *arg) /* {{{ */
+/* This API exists *only* for use in gettype().
+ * For anything else, you likely want zend_zval_type_name(). */
+ZEND_API zend_string *zend_zval_get_legacy_type(const zval *arg) /* {{{ */
 {
 	switch (Z_TYPE_P(arg)) {
 		case IS_NULL:

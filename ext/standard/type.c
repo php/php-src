@@ -28,7 +28,7 @@ PHP_FUNCTION(gettype)
 		Z_PARAM_ZVAL(arg)
 	ZEND_PARSE_PARAMETERS_END();
 
-	type = zend_zval_get_type(arg);
+	type = zend_zval_get_legacy_type(arg);
 	if (EXPECTED(type)) {
 		RETURN_INTERNED_STR(type);
 	} else {
