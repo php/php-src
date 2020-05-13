@@ -1144,9 +1144,7 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 
 #ifdef HAVE_JIT
 	if (ZCG(jit_enabled) && for_shm) {
-		if (ZEND_JIT_LEVEL(ZCG(accel_directives).jit) >= ZEND_JIT_LEVEL_OPT_SCRIPT &&
-				(ZEND_JIT_TRIGGER(ZCG(accel_directives).jit) == ZEND_JIT_ON_SCRIPT_LOAD ||
-				 ZEND_JIT_TRIGGER(ZCG(accel_directives).jit) == ZEND_JIT_ON_DOC_COMMENT)) {
+		if (ZEND_JIT_LEVEL(ZCG(accel_directives).jit) >= ZEND_JIT_LEVEL_OPT_SCRIPT) {
 			zend_jit_script(&script->script);
 		}
 		zend_jit_protect();
