@@ -769,7 +769,6 @@ TSRM_API int shmctl(int key, int cmd, struct shmid_ds *buf)
 	}
 }/*}}}*/
 
-#if HAVE_UTIME
 static zend_always_inline void UnixTimeToFileTime(time_t t, LPFILETIME pft) /* {{{ */
 {
 	// Note that LONGLONG is a 64-bit value
@@ -823,5 +822,4 @@ TSRM_API int win32_utime(const char *filename, struct utimbuf *buf) /* {{{ */
 	return 1;
 }
 /* }}} */
-#endif
 #endif
