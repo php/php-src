@@ -1136,38 +1136,42 @@ ZEND_API ZEND_NORETURN void ZEND_FASTCALL zend_timeout(void) /* {{{ */
 }
 /* }}} */
 
+static void die_on_hard_timeout()
+{
+	const char *error_filename = NULL;
+	uint32_t error_lineno = 0;
+	char log_buffer[2048];
+	int output_len = 0;
+
+	if (zend_is_compiling()) {
+		error_filename = ZSTR_VAL(zend_get_compiled_filename());
+		error_lineno = zend_get_compiled_lineno();
+	} else if (zend_is_executing()) {
+		error_filename = zend_get_executed_filename();
+		if (error_filename[0] == '[') { /* [no active file] */
+			error_filename = NULL;
+			error_lineno = 0;
+		} else {
+			error_lineno = zend_get_executed_lineno();
+		}
+	}
+	if (!error_filename) {
+		error_filename = "Unknown";
+	}
+
+	output_len = snprintf(log_buffer, sizeof(log_buffer), "\nFatal error: Maximum execution time of " ZEND_LONG_FMT "+" ZEND_LONG_FMT " seconds exceeded (terminated) in %s on line %d\n", EG(timeout_seconds), EG(hard_timeout), error_filename, error_lineno);
+	if (output_len > 0) {
+		zend_quiet_write(2, log_buffer, MIN(output_len, sizeof(log_buffer)));
+	}
+	_exit(124);
+}
+
 #ifndef ZEND_WIN32
 static void zend_timeout_handler(int dummy) /* {{{ */
 {
 #ifndef ZTS
     if (EG(timed_out)) {
-		/* Die on hard timeout */
-		const char *error_filename = NULL;
-		uint32_t error_lineno = 0;
-		char log_buffer[2048];
-		int output_len = 0;
-
-		if (zend_is_compiling()) {
-			error_filename = ZSTR_VAL(zend_get_compiled_filename());
-			error_lineno = zend_get_compiled_lineno();
-		} else if (zend_is_executing()) {
-			error_filename = zend_get_executed_filename();
-			if (error_filename[0] == '[') { /* [no active file] */
-				error_filename = NULL;
-				error_lineno = 0;
-			} else {
-				error_lineno = zend_get_executed_lineno();
-			}
-		}
-		if (!error_filename) {
-			error_filename = "Unknown";
-		}
-
-		output_len = snprintf(log_buffer, sizeof(log_buffer), "\nFatal error: Maximum execution time of " ZEND_LONG_FMT "+" ZEND_LONG_FMT " seconds exceeded (terminated) in %s on line %d\n", EG(timeout_seconds), EG(hard_timeout), error_filename, error_lineno);
-		if (output_len > 0) {
-			zend_quiet_write(2, log_buffer, MIN(output_len, sizeof(log_buffer)));
-		}
-		_exit(124);
+			die_on_hard_timeout();
     }
 #endif
 
