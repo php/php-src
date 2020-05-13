@@ -11,7 +11,7 @@ final class EnchantBroker
 	public function getError(): string|false {}
 
 	/** @alias enchant_broker_list_dicts */
-	public function listDicts(): ?array {}
+	public function listDicts(): array {}
 
 	/** @alias enchant_broker_request_dict */
 	public function requestDict(string $tag): EnchantDict|false {}
@@ -26,7 +26,7 @@ final class EnchantBroker
 	public function setOrdering(string $tag, string $ordering): bool {}
 
 	/** @alias enchant_broker_describe */
-	public function describe(): ?array {}
+	public function describe(): array {}
 }
 
 final class EnchantDict
@@ -40,7 +40,7 @@ final class EnchantDict
 	public function check(string $word): bool {}
 
 	/** @alias enchant_dict_suggest */
-	public function suggest(string $word): ?array {}
+	public function suggest(string $word): array {}
 
 	/** @alias enchant_dict_add */
 	public function add(string $word): void {}
@@ -80,7 +80,7 @@ function enchant_broker_set_dict_path(EnchantBroker $broker, int $name, string $
 */
 function enchant_broker_get_dict_path(EnchantBroker $broker, int $name): string|false {}
 
-function enchant_broker_list_dicts(EnchantBroker $broker): ?array {}
+function enchant_broker_list_dicts(EnchantBroker $broker): array {}
 
 function enchant_broker_request_dict(EnchantBroker $broker, string $tag): EnchantDict|false {}
 
@@ -95,13 +95,13 @@ function enchant_broker_dict_exists(EnchantBroker $broker, string $tag): bool {}
 
 function enchant_broker_set_ordering(EnchantBroker $broker, string $tag, string $ordering): bool {}
 
-function enchant_broker_describe(EnchantBroker $broker): ?array {}
+function enchant_broker_describe(EnchantBroker $broker): array {}
 
 function enchant_dict_quick_check(EnchantDict $dict, string $word, &$suggestions = null): bool {}
 
 function enchant_dict_check(EnchantDict $dict, string $word): bool {}
 
-function enchant_dict_suggest(EnchantDict $dict, string $word): ?array {}
+function enchant_dict_suggest(EnchantDict $dict, string $word): array {}
 
 function enchant_dict_add(EnchantDict $dict, string $word): void {}
 
