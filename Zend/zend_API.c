@@ -125,8 +125,7 @@ ZEND_API const char *zend_get_type_by_const(int type) /* {{{ */
 			return "void";
 		case _IS_NUMBER:
 			return "number";
-		default:
-			return "unknown";
+		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 }
 /* }}} */
