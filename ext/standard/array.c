@@ -5958,7 +5958,7 @@ PHP_FUNCTION(array_filter)
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_ARRAY(array)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_FUNC(fci, fci_cache)
+		Z_PARAM_FUNC_OR_NULL(fci, fci_cache)
 		Z_PARAM_LONG(use_type)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -5969,7 +5969,7 @@ PHP_FUNCTION(array_filter)
 	}
 	array_init(return_value);
 
-	if (ZEND_NUM_ARGS() > 1) {
+	if (ZEND_FCI_INITIALIZED(fci)) {
 		have_callback = 1;
 		fci.no_separation = 0;
 		fci.retval = &retval;
@@ -6045,7 +6045,7 @@ PHP_FUNCTION(array_map)
 	uint32_t k, maxlen = 0;
 
 	ZEND_PARSE_PARAMETERS_START(2, -1)
-		Z_PARAM_FUNC_EX(fci, fci_cache, 1, 0)
+		Z_PARAM_FUNC_OR_NULL(fci, fci_cache)
 		Z_PARAM_VARIADIC('+', arrays, n_arrays)
 	ZEND_PARSE_PARAMETERS_END();
 

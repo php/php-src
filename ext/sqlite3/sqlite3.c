@@ -1361,7 +1361,7 @@ PHP_METHOD(SQLite3, setAuthorizer)
 	zend_fcall_info_cache	fcc;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_FUNC_EX(fci, fcc, 1, 0)
+		Z_PARAM_FUNC_OR_NULL(fci, fcc)
 	ZEND_PARSE_PARAMETERS_END();
 
 	SQLITE3_CHECK_INITIALIZED(db_obj, db_obj->initialised, SQLite3)

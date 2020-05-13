@@ -1067,7 +1067,7 @@ PHP_FUNCTION(libxml_set_external_entity_loader)
 	zend_fcall_info_cache	fcc;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_FUNC_EX(fci, fcc, 1, 0)
+		Z_PARAM_FUNC_OR_NULL(fci, fcc)
 	ZEND_PARSE_PARAMETERS_END();
 
 	_php_libxml_destroy_fci(&LIBXML(entity_loader).fci, &LIBXML(entity_loader).object);
