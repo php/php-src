@@ -2428,6 +2428,21 @@ static void zend_jit_trace_clenup_stack(zend_jit_trace_stack *stack, const zend_
 	}
 }
 
+static void zend_jit_trace_setup_ret_counter(const zend_op *opline, size_t offset)
+{
+	zend_op *next_opline = (zend_op*)(opline + 1);
+
+	if (!ZEND_OP_TRACE_INFO(next_opline, offset)->trace_flags) {
+		if (!ZEND_OP_TRACE_INFO(next_opline, offset)->counter) {
+			ZEND_OP_TRACE_INFO(next_opline, offset)->counter =
+				&zend_jit_hot_counters[ZEND_JIT_COUNTER_NUM];
+			ZEND_JIT_COUNTER_NUM = (ZEND_JIT_COUNTER_NUM + 1) % ZEND_HOT_COUNTERS_COUNT;
+		}
+		ZEND_OP_TRACE_INFO(next_opline, offset)->trace_flags = ZEND_JIT_TRACE_START_RETURN;
+		next_opline->handler = (const void*)zend_jit_ret_counter_handler;
+	}
+}
+
 static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t parent_trace, uint32_t exit_num)
 {
 	const void *handler = NULL;
@@ -3802,6 +3817,11 @@ done:
 			}
 
 		} else if (p->op == ZEND_JIT_TRACE_ENTER) {
+			if ((p+1)->op == ZEND_JIT_TRACE_END) {
+				p++;
+				zend_jit_set_opline(&dasm_state, p->opline);
+				break;
+			}
 			op_array = (zend_op_array*)p->op_array;
 			jit_extension =
 				(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
@@ -4019,6 +4039,30 @@ done:
 	}
 
 	handler = dasm_link_and_encode(&dasm_state, NULL, NULL, NULL, NULL, ZSTR_VAL(name), ZEND_JIT_TRACE_NUM);
+
+	if (handler) {
+		if (p->stop == ZEND_JIT_TRACE_STOP_RECURSIVE_CALL) {
+			op_array = trace_buffer->op_array;
+			p = trace_buffer + ZEND_JIT_TRACE_START_REC_SIZE;
+			for (;;p++) {
+				if (p->op == ZEND_JIT_TRACE_VM) {
+					opline = p->opline;
+				} else if (p->op == ZEND_JIT_TRACE_ENTER) {
+					if (p->op_array == op_array) {
+						zend_jit_trace_setup_ret_counter(opline, jit_extension->offset);
+					}
+				} else if (p->op == ZEND_JIT_TRACE_END) {
+					break;
+				}
+			}
+		} else if (p->stop == ZEND_JIT_TRACE_STOP_LINK) {
+			if (opline->opcode == ZEND_DO_UCALL
+			 || opline->opcode == ZEND_DO_FCALL
+			 || opline->opcode == ZEND_DO_FCALL_BY_NAME) {
+				zend_jit_trace_setup_ret_counter(opline, jit_extension->offset);
+			}
+		}
+	}
 
 jit_failure:
 	dasm_free(&dasm_state);
@@ -5041,20 +5085,6 @@ static int zend_jit_setup_hot_trace_counters(zend_op_array *op_array)
 
 	for (i = 0; i < cfg.blocks_count; i++) {
 		if (cfg.blocks[i].flags & ZEND_BB_REACHABLE) {
-			if (cfg.blocks[i].flags & ZEND_BB_ENTRY) {
-				/* continuation after return from function call */
-				opline = op_array->opcodes + cfg.blocks[i].start;
-				if (!(ZEND_OP_TRACE_INFO(opline, jit_extension->offset)->trace_flags & ZEND_JIT_TRACE_UNSUPPORTED)) {
-					opline->handler = (const void*)zend_jit_ret_counter_handler;
-					if (!ZEND_OP_TRACE_INFO(opline, jit_extension->offset)->counter) {
-						ZEND_OP_TRACE_INFO(opline, jit_extension->offset)->counter =
-							&zend_jit_hot_counters[ZEND_JIT_COUNTER_NUM];
-						ZEND_JIT_COUNTER_NUM = (ZEND_JIT_COUNTER_NUM + 1) % ZEND_HOT_COUNTERS_COUNT;
-					}
-					ZEND_OP_TRACE_INFO(opline, jit_extension->offset)->trace_flags |=
-						ZEND_JIT_TRACE_START_RETURN;
-				}
-			}
 			if (cfg.blocks[i].flags & ZEND_BB_LOOP_HEADER) {
 				/* loop header */
 				opline = op_array->opcodes + cfg.blocks[i].start;

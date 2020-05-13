@@ -133,7 +133,7 @@ int  ZEND_FASTCALL zend_jit_check_constant(const zval *key);
 	zend_jit_hash(opline)
 
 #define ZEND_JIT_TRACE_FUNC_COST      (1*250)
-#define ZEND_JIT_TRACE_RET_COST     (1*250-1)
+#define ZEND_JIT_TRACE_RET_COST      (15*250)
 #define ZEND_JIT_TRACE_LOOP_COST      (2*250)
 #define ZEND_JIT_TRACE_COUNTER_INIT (127*250)
 
