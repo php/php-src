@@ -217,11 +217,6 @@ PHP 8.0 UPGRADE NOTES
      * DOMUserDataHandler
      * DOMTypeInfo
 
-- Enchant:
-  . enchant_broker_init will now return an EnchantBroker object,
-    enchant_broker_request_dict and enchant_broker_request_pwl_dict will
-    now return an EnchantDict object rather than a resource.
-
 - Exif:
   . Removed read_exif_data(). exif_read_data() should be used instead.
 
@@ -512,7 +507,6 @@ PHP 8.0 UPGRADE NOTES
   . enchant_dict_add()
   . enchant_dict_is_added()
   . LIBENCHANT_VERSION macro
-  . New object API using EnchantBroker and EnchantDict
 
 - dom:
   . Introduce DOMParentNode and DOMChildNode with new traversal and manipulation APIs
@@ -550,8 +544,6 @@ PHP 8.0 UPGRADE NOTES
     not available in libenchant < 1.5 nor in libenchant-2
   . enchant_dict_add_to_personal, use enchant_dict_add instead
   . enchant_dict_is_in_session, use enchant_dict_is_added instead
-  . enchant_broker_free and enchant_broker_free_dict, unset the object instead
-  . ENCHANT_MYSPELL and ENCHANT_ISPELL constants
 
 - Zip:
   . Using empty file as ZipArchive is deprecated. Libzip 1.6.0

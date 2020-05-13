@@ -44,12 +44,9 @@ PHP                                                                        NEWS
 - Enchant:
   . Add LIBENCHANT_VERSION macro
   . Deprecate enchant_broker_set_dict_path, enchant_broker_get_dict_path
-    enchant_dict_add_to_personal, enchant_dict_is_in_session,
-    enchant_broker_free and enchant_broker_free_dict functions
-  . Deprecate ENCHANT_MYSPELL and ENCHANT_ISPELL constants
+    enchant_dict_add_to_personal and enchant_dict_is_in_session
   . Add enchant_dict_add and enchant_dict_is_added functions
   . Use libenchant-2 when available
-  . Add object API
 
 - FPM:
   . Fixed bug #64865 (Search for .user.ini files from script dir up to
