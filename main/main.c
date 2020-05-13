@@ -439,7 +439,7 @@ static PHP_INI_MH(OnUpdateTimeout)
 	}
 	zend_unset_timeout();
 	ZEND_ATOL(EG(timeout_seconds), ZSTR_VAL(new_value));
-	zend_set_timeout(EG(timeout_seconds), 0);
+	zend_set_timeout(EG(timeout_seconds));
 	return SUCCESS;
 }
 /* }}} */
@@ -1763,9 +1763,9 @@ int php_request_startup(void)
 		sapi_activate();
 
 		if (PG(max_input_time) == -1) {
-			zend_set_timeout(EG(timeout_seconds), 1);
+			zend_set_timeout(EG(timeout_seconds));
 		} else {
-			zend_set_timeout(PG(max_input_time), 1);
+			zend_set_timeout(PG(max_input_time));
 		}
 
 		/* Disable realpath cache if an open_basedir is set */
@@ -2561,7 +2561,7 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file)
 #ifdef PHP_WIN32
 			zend_unset_timeout();
 #endif
-			zend_set_timeout(INI_INT("max_execution_time"), 0);
+			zend_set_timeout(INI_INT("max_execution_time"));
 		}
 
 		/*
