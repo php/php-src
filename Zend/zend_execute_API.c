@@ -40,6 +40,9 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#ifdef ZEND_WIN32
+#include <winnt.h>
+#endif
 
 ZEND_API void (*zend_execute_ex)(zend_execute_data *execute_data);
 ZEND_API void (*zend_execute_internal)(zend_execute_data *execute_data, zval *return_value);
@@ -1263,6 +1266,7 @@ static VOID CALLBACK zend_timeout_handler(PVOID arg, BOOLEAN timed_out)
 # endif
 
 	eg->timed_out = 1;
+	MemoryBarrier();
 	eg->vm_interrupt = 1;
 }
 
