@@ -2196,7 +2196,7 @@ static int zend_jit_hybrid_func_counter_stub(dasm_State **Dst)
 	|->hybrid_func_counter:
 	|	mov r0, EX->func
 	|	mov r1, aword [r0 + offsetof(zend_op_array, reserved[zend_func_info_rid])]
-	|	mov r2, aword [r1]
+	|	mov r2, aword [r1 + offsetof(zend_jit_op_array_hot_extension, counter)]
 	|	sub word [r2], ZEND_JIT_HOT_FUNC_COST
 	|	jle >1
 	|	GET_IP r2
@@ -2211,9 +2211,9 @@ static int zend_jit_hybrid_func_counter_stub(dasm_State **Dst)
 	|		imul r2, 0xb6db6db7
 	|	.endif
 	|	.if X64
-	|		jmp aword [r1+r2*8+8]
+	|		jmp aword [r1+r2*8+offsetof(zend_jit_op_array_hot_extension, orig_handlers)]
 	|	.else
-	|		jmp aword [r1+r2*4+4]
+	|		jmp aword [r1+r2*4+offsetof(zend_jit_op_array_hot_extension, orig_handlers)]
 	|	.endif
 	|1:
 	|	mov word [r2], ZEND_JIT_HOT_COUNTER_INIT
@@ -2229,7 +2229,7 @@ static int zend_jit_hybrid_loop_counter_stub(dasm_State **Dst)
 	|->hybrid_loop_counter:
 	|	mov r0, EX->func
 	|	mov r1, aword [r0 + offsetof(zend_op_array, reserved[zend_func_info_rid])]
-	|	mov r2, aword [r1]
+	|	mov r2, aword [r1 + offsetof(zend_jit_op_array_hot_extension, counter)]
 	|	sub word [r2], ZEND_JIT_HOT_LOOP_COST
 	|	jle >1
 	|	GET_IP r2
@@ -2244,9 +2244,9 @@ static int zend_jit_hybrid_loop_counter_stub(dasm_State **Dst)
 	|		imul r2, 0xb6db6db7
 	|	.endif
 	|	.if X64
-	|		jmp aword [r1+r2*8+8]
+	|		jmp aword [r1+r2*8+offsetof(zend_jit_op_array_hot_extension, orig_handlers)]
 	|	.else
-	|		jmp aword [r1+r2*4+4]
+	|		jmp aword [r1+r2*4+offsetof(zend_jit_op_array_hot_extension, orig_handlers)]
 	|	.endif
 	|1:
 	|	mov word [r2], ZEND_JIT_HOT_COUNTER_INIT
