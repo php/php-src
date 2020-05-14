@@ -545,7 +545,7 @@ struct _zend_ast_ref {
 #define _IS_BOOL					16
 #define _IS_NUMBER					17
 
-static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
+ZEND_API zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 	return pz->u1.v.type;
 }
 
@@ -619,7 +619,8 @@ static zend_always_inline zend_uchar zval_gc_type(uint32_t gc_type_info) {
 	return (gc_type_info & GC_TYPE_MASK);
 }
 
-static zend_always_inline uint32_t zval_gc_flags(uint32_t gc_type_info) {
+ZEND_API zend_always_inline uint32_t zval_gc_flags(uint32_t gc_type_info)
+{
 	return (gc_type_info >> GC_FLAGS_SHIFT) & (GC_FLAGS_MASK >> GC_FLAGS_SHIFT);
 }
 
@@ -1129,21 +1130,21 @@ extern ZEND_API zend_bool zend_rc_debug;
 	do { } while (0)
 #endif
 
-static zend_always_inline uint32_t zend_gc_refcount(const zend_refcounted_h *p) {
+ZEND_API zend_always_inline uint32_t zend_gc_refcount(const zend_refcounted_h *p) {
 	return p->refcount;
 }
 
-static zend_always_inline uint32_t zend_gc_set_refcount(zend_refcounted_h *p, uint32_t rc) {
+ZEND_API zend_always_inline uint32_t zend_gc_set_refcount(zend_refcounted_h *p, uint32_t rc) {
 	p->refcount = rc;
 	return p->refcount;
 }
 
-static zend_always_inline uint32_t zend_gc_addref(zend_refcounted_h *p) {
+ZEND_API zend_always_inline uint32_t zend_gc_addref(zend_refcounted_h *p) {
 	ZEND_RC_MOD_CHECK(p);
 	return ++(p->refcount);
 }
 
-static zend_always_inline uint32_t zend_gc_delref(zend_refcounted_h *p) {
+ZEND_API zend_always_inline uint32_t zend_gc_delref(zend_refcounted_h *p) {
 	ZEND_ASSERT(p->refcount > 0);
 	ZEND_RC_MOD_CHECK(p);
 	return --(p->refcount);

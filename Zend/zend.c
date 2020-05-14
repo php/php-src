@@ -33,6 +33,13 @@
 #include "zend_smart_string.h"
 #include "zend_cpuinfo.h"
 
+ZEND_API extern inline uint32_t zend_gc_addref(zend_refcounted_h *p);
+ZEND_API extern inline uint32_t zend_gc_delref(zend_refcounted_h *p);
+ZEND_API extern inline uint32_t zval_gc_flags(uint32_t gc_type_info);
+ZEND_API extern inline uint32_t zend_gc_refcount(const zend_refcounted_h *p);
+ZEND_API extern inline uint32_t zend_gc_set_refcount(zend_refcounted_h *p, uint32_t rc);
+ZEND_API extern inline zend_uchar zval_get_type(const zval* pz);
+
 static size_t global_map_ptr_last = 0;
 
 #ifdef ZTS

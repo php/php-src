@@ -23,6 +23,25 @@
 # include "valgrind/callgrind.h"
 #endif
 
+ZEND_API extern inline uint32_t zend_string_addref(zend_string *s);
+ZEND_API extern inline zend_string *zend_string_alloc(size_t len, int persistent);
+ZEND_API extern inline zend_string *zend_string_copy(zend_string *s);
+ZEND_API extern inline uint32_t zend_string_delref(zend_string *s);
+ZEND_API extern inline zend_string *zend_string_dup(zend_string *s, int persistent);
+ZEND_API extern inline void zend_string_efree(zend_string *s);
+ZEND_API extern inline zend_bool zend_string_equal_content(zend_string *s1, zend_string *s2);
+ZEND_API extern inline zend_bool zend_string_equals(zend_string *s1, zend_string *s2);
+ZEND_API extern inline zend_string *zend_string_extend(zend_string *s, size_t len, int persistent);
+ZEND_API extern inline void zend_string_free(zend_string *s);
+ZEND_API extern inline void zend_string_forget_hash_val(zend_string *s);
+ZEND_API extern inline zend_ulong zend_string_hash_val(zend_string *s);
+ZEND_API extern inline zend_string *zend_string_init(const char *str, size_t len, int persistent);
+ZEND_API extern inline void zend_string_release(zend_string *s);
+ZEND_API extern inline zend_string *zend_string_realloc(zend_string *s, size_t len, int persistent);
+ZEND_API extern inline void zend_string_release_ex(zend_string *s, int persistent);
+ZEND_API extern inline zend_string *zend_string_safe_alloc(size_t n, size_t m, size_t l, int persistent);
+ZEND_API extern inline zend_string *zend_string_truncate(zend_string *s, size_t len, int persistent);
+
 ZEND_API zend_new_interned_string_func_t zend_new_interned_string;
 ZEND_API zend_string_init_interned_func_t zend_string_init_interned;
 
