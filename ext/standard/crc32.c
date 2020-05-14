@@ -18,7 +18,7 @@
 #include "basic_functions.h"
 #include "crc32.h"
 
-#if defined(__aarch64__) && defined(HAVE_SYS_AUXV_H)
+#if HAVE_AARCH64_CRC32
 # include <arm_acle.h>
 # if defined(__linux__)
 #  include <sys/auxv.h>
@@ -83,7 +83,7 @@ PHP_FUNCTION(crc32)
 
 	crc = crcinit^0xFFFFFFFF;
 
-#if defined(__aarch64__) && defined(HAVE_SYS_AUXV_H)
+#if HAVE_AARCH64_CRC32
 	if (has_crc32_insn()) {
 		crc = crc32_aarch64(crc, p, nr);
 		RETURN_LONG(crc^0xFFFFFFFF);
