@@ -292,6 +292,7 @@ static void zval_ini_dtor(zval *zv)
 %define api.value.type {zval}
 %define parse.error verbose
 
+%token END 0 "end of file"
 %token TC_SECTION
 %token TC_RAW
 %token TC_CONSTANT
