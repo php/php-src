@@ -1158,8 +1158,8 @@ static void zend_set_timeout_ex(zend_long seconds, TIMEOUT_HANDLER callback_func
 		tq_timer = NULL;
 	}
 
-	/* XXX passing NULL means the default timer queue provided by the system is used */
 	eg = ZEND_MODULE_GLOBALS_BULK(executor);
+	/* NULL means the default timer queue provided by the system is used */
 	if (!CreateTimerQueueTimer(&tq_timer, NULL, callback_func, (VOID*)eg, seconds*1000, 0, WT_EXECUTEONLYONCE)) {
 		tq_timer = NULL;
 		zend_error_noreturn(E_ERROR, "Could not set script execution timeout: Error %lu",
