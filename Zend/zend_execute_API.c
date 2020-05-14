@@ -1151,7 +1151,8 @@ static void zend_set_timeout_ex(zend_long seconds, TIMEOUT_HANDLER callback_func
 	if (tq_timer != NULL) {
 		if (!DeleteTimerQueueTimer(NULL, tq_timer, INVALID_HANDLE_VALUE)) {
 			tq_timer = NULL;
-			zend_error_noreturn(E_ERROR, "Could not delete queued timer");
+			zend_error_noreturn(E_ERROR, "Could not delete queued timer: Error %lu",
+				(unsigned long)GetLastError());
 			return;
 		}
 		tq_timer = NULL;
@@ -1161,7 +1162,8 @@ static void zend_set_timeout_ex(zend_long seconds, TIMEOUT_HANDLER callback_func
 	eg = ZEND_MODULE_GLOBALS_BULK(executor);
 	if (!CreateTimerQueueTimer(&tq_timer, NULL, callback_func, (VOID*)eg, seconds*1000, 0, WT_EXECUTEONLYONCE)) {
 		tq_timer = NULL;
-		zend_error_noreturn(E_ERROR, "Could not queue new timer");
+		zend_error_noreturn(E_ERROR, "Could not set script execution timeout: Error %lu",
+			(unsigned long)GetLastError());
 		return;
 	}
 #elif defined(HAVE_SETITIMER)
@@ -1294,10 +1296,11 @@ void zend_set_timeout(zend_long seconds) /* {{{ */
 void zend_unset_timeout(void) /* {{{ */
 {
 #ifdef ZEND_WIN32
-	if (NULL != tq_timer) {
+	if (tq_timer != NULL) {
 		if (!DeleteTimerQueueTimer(NULL, tq_timer, INVALID_HANDLE_VALUE)) {
 			tq_timer = NULL;
-			zend_error_noreturn(E_ERROR, "Could not delete queued timer");
+			zend_error_noreturn(E_ERROR, "Could not delete queued timer: Error %lu",
+				(unsigned long)GetLastError());
 			return;
 		}
 		tq_timer = NULL;
