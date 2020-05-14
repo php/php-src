@@ -238,7 +238,7 @@ typedef struct _zend_oparray_context {
 /* op_array or class is preloaded                         |     |     |     */
 #define ZEND_ACC_PRELOADED               (1 << 10) /*  X  |  X  |     |     */
 /*                                                        |     |     |     */
-/* Class Flags (unused: 13, 14, 15, 24...)                |     |     |     */
+/* Class Flags (unused: 14, 15, 24...)                    |     |     |     */
 /* ===========                                            |     |     |     */
 /*                                                        |     |     |     */
 /* Special class types                                    |     |     |     */
@@ -259,6 +259,9 @@ typedef struct _zend_oparray_context {
 /*                                                        |     |     |     */
 /* Class constants updated                                |     |     |     */
 #define ZEND_ACC_CONSTANTS_UPDATED       (1 << 12) /*  X  |     |     |     */
+/*                                                        |     |     |     */
+/* Objects of this class may not have dynamic properties  |     |     |     */
+#define ZEND_ACC_NO_DYNAMIC_PROPERTIES   (1 << 13) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* User class has methods with static variables           |     |     |     */
 #define ZEND_HAS_STATIC_IN_METHODS       (1 << 16) /*  X  |     |     |     */
