@@ -217,6 +217,10 @@ PHP_FUNCTION(shm_remove)
 
 	shm_list_ptr = Z_SYSVSHM_P(shm_id);
 
+	if (!shm_list_ptr->ptr) {
+		RETURN_TRUE;
+	}
+
 	if (shmctl(shm_list_ptr->id, IPC_RMID, NULL) < 0) {
 		php_error_docref(NULL, E_WARNING, "Failed for key 0x%x, id " ZEND_LONG_FMT ": %s", shm_list_ptr->key, Z_LVAL_P(shm_id), strerror(errno));
 		RETURN_FALSE;
@@ -244,12 +248,15 @@ PHP_FUNCTION(shm_put_var)
 		RETURN_THROWS();
 	}
 
+	shm_list_ptr = Z_SYSVSHM_P(shm_id);
+	if (!shm_list_ptr->ptr) {
+		RETURN_FALSE;
+	}
+
 	/* setup string-variable and serialize */
 	PHP_VAR_SERIALIZE_INIT(var_hash);
 	php_var_serialize(&shm_var, arg_var, &var_hash);
 	PHP_VAR_SERIALIZE_DESTROY(var_hash);
-
-	shm_list_ptr = Z_SYSVSHM_P(shm_id);
 
 	/* insert serialized variable into shared memory */
 	ret = php_put_shm_data(shm_list_ptr->ptr, shm_key, shm_var.s? ZSTR_VAL(shm_var.s) : NULL, shm_var.s? ZSTR_LEN(shm_var.s) : 0);
@@ -317,6 +324,10 @@ PHP_FUNCTION(shm_has_var)
 
 	shm_list_ptr = Z_SYSVSHM_P(shm_id);
 
+	if (!shm_list_ptr->ptr) {
+		RETURN_FALSE;
+	}
+
 	RETURN_BOOL(php_check_shm_data(shm_list_ptr->ptr, shm_key) >= 0);
 }
 /* }}} */
@@ -382,6 +393,10 @@ static zend_long php_check_shm_data(sysvshm_chunk_head *ptr, zend_long key)
 	zend_long pos;
 	sysvshm_chunk *shm_var;
 
+	if (!ptr) {
+		return -1;
+	}
+
 	pos = ptr->start;
 
 	for (;;) {
@@ -408,6 +423,10 @@ static int php_remove_shm_data(sysvshm_chunk_head *ptr, zend_long shm_varpos)
 {
 	sysvshm_chunk *chunk_ptr, *next_chunk_ptr;
 	zend_long memcpy_len;
+
+	if (!ptr) {
+		return -1;
+	}
 
 	chunk_ptr = (sysvshm_chunk *) ((char *) ptr + shm_varpos);
 	next_chunk_ptr = (sysvshm_chunk *) ((char *) ptr + shm_varpos + chunk_ptr->next);
