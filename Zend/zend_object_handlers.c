@@ -261,6 +261,12 @@ static ZEND_COLD zend_never_inline void zend_bad_property_name(void) /* {{{ */
 }
 /* }}} */
 
+static ZEND_COLD zend_never_inline void zend_forbidden_dynamic_property(
+		zend_class_entry *ce, zend_string *member) {
+	zend_throw_error(NULL, "Cannot create dynamic property %s::$%s",
+		ZSTR_VAL(ce->name), ZSTR_VAL(member));
+}
+
 static zend_always_inline uintptr_t zend_get_property_offset(zend_class_entry *ce, zend_string *member, int silent, void **cache_slot, zend_property_info **info_ptr) /* {{{ */
 {
 	zval *zv;
@@ -772,6 +778,11 @@ write_std_property:
 
 			ZVAL_COPY_VALUE(variable_ptr, value);
 		} else {
+			if (UNEXPECTED(zobj->ce->ce_flags & ZEND_ACC_NO_DYNAMIC_PROPERTIES)) {
+				zend_forbidden_dynamic_property(zobj->ce, name);
+				variable_ptr = &EG(error_zval);
+				goto exit;
+			}
 			if (!zobj->properties) {
 				rebuild_object_properties(zobj);
 			}
@@ -935,6 +946,10 @@ ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *zobj, zend_string *nam
 		}
 		if (EXPECTED(!zobj->ce->__get) ||
 		    UNEXPECTED((*zend_get_property_guard(zobj, name)) & IN_GET)) {
+			if (UNEXPECTED(zobj->ce->ce_flags & ZEND_ACC_NO_DYNAMIC_PROPERTIES)) {
+				zend_forbidden_dynamic_property(zobj->ce, name);
+				return NULL;
+			}
 			if (UNEXPECTED(!zobj->properties)) {
 				rebuild_object_properties(zobj);
 			}
