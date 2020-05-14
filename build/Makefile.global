@@ -125,6 +125,7 @@ distclean: clean
 	rm -f sapi/fpm/php-fpm.conf sapi/fpm/init.d.php-fpm sapi/fpm/php-fpm.service sapi/fpm/php-fpm.8 sapi/fpm/status.html
 	rm -f ext/iconv/php_have_bsd_iconv.h ext/iconv/php_have_glibc_iconv.h ext/iconv/php_have_ibm_iconv.h ext/iconv/php_have_iconv.h ext/iconv/php_have_libiconv.h ext/iconv/php_iconv_aliased_libiconv.h ext/iconv/php_iconv_supports_errno.h ext/iconv/php_php_iconv_h_path.h ext/iconv/php_php_iconv_impl.h
 	rm -f ext/phar/phar.phar ext/phar/phar.php
+	rm -f ext/opcache/jit/zend_jit_x86.c
 	if test "$(srcdir)" != "$(builddir)"; then \
 	  rm -f ext/phar/phar/phar.inc; \
 	fi
