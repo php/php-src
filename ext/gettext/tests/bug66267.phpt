@@ -27,6 +27,7 @@ $domain = 'domain';
 $loc = ["de_DE", "fr_FR", "en_US"];
 
 foreach ($loc as $l) {
+    putenv("LANGUAGE=");
     putenv("LC_ALL=$l");
     setlocale(LC_ALL, $l);
 
