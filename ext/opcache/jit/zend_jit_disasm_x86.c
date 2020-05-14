@@ -514,6 +514,8 @@ static int zend_jit_disasm_init(void)
 		opline.op1_type = IS_CV;
 		zend_vm_set_opcode_handler(&opline);
 		zend_jit_disasm_add_symbol("ZEND_RETURN_SPEC_CV_LABEL", (uint64_t)(uintptr_t)opline.handler, sizeof(void*));
+
+		zend_jit_disasm_add_symbol("ZEND_HYBRID_HALT_LABEL", (uint64_t)(uintptr_t)zend_jit_halt_op->handler, sizeof(void*));
 	}
 
 	return 1;
