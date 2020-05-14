@@ -478,7 +478,8 @@ ZEND_API zend_bool ZEND_FASTCALL I_WRAP_SONAME_FNNAME_ZU(NONE,zend_string_equal_
 	return ret;
 }
 #endif
-
+#else
+ZEND_API extern inline zend_bool zend_string_equal_val(zend_string *s1, zend_string *s2);
 #endif
 
 ZEND_API zend_string *zend_string_concat2(
