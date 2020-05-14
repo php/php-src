@@ -136,6 +136,10 @@ static uint32_t zend_jit_trace_get_exit_point(const zend_op *from_opline, const 
 	uint32_t stack_size;
 	zend_jit_trace_stack *stack = NULL;
 
+	if (delayed_call_chain) {
+		assert(to_opline != NULL); /* CALL and IP share the same register */
+		flags |= ZEND_JIT_EXIT_RESTORE_CALL;
+	}
 	if (JIT_G(current_frame)) {
 		op_array = &JIT_G(current_frame)->func->op_array;
 		stack_size = op_array->last_var + op_array->T;
@@ -2582,15 +2586,23 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 			}
 		}
 
-		// TODO: Merge two loops implementing parallel move ???
-		for (i = 0; i < parent_vars_count; i++) {
-			if (STACK_REG(parent_stack, i) != ZREG_NONE) {
-				if (ra && ra[i] && ra[i]->reg == STACK_REG(parent_stack, i)) {
-				    /* register already loaded by parent trace */
-					SET_STACK_REG(stack, i, ra[i]->reg);
-				} else if (!zend_jit_store_var(&dasm_state, ssa->var_info[i].type, i, STACK_REG(parent_stack, i))) {
-					goto jit_failure;
+		if (parent_trace) {
+			/* Deoptimization */
+
+			// TODO: Merge this loop with the following LOAD loop to implement parallel move ???
+			for (i = 0; i < parent_vars_count; i++) {
+				if (STACK_REG(parent_stack, i) != ZREG_NONE) {
+					if (ra && ra[i] && ra[i]->reg == STACK_REG(parent_stack, i)) {
+					    /* register already loaded by parent trace */
+						SET_STACK_REG(stack, i, ra[i]->reg);
+					} else if (!zend_jit_store_var(&dasm_state, ssa->var_info[i].type, i, STACK_REG(parent_stack, i))) {
+						goto jit_failure;
+					}
 				}
+			}
+
+			if (zend_jit_traces[parent_trace].exit_info[exit_num].flags & ZEND_JIT_EXIT_RESTORE_CALL) {
+				zend_jit_save_call_chain(&dasm_state, -1);
 			}
 		}
 
@@ -3069,7 +3081,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 					case ZEND_INIT_FCALL:
 					case ZEND_INIT_FCALL_BY_NAME:
 					case ZEND_INIT_NS_FCALL_BY_NAME:
-						if (!zend_jit_init_fcall(&dasm_state, opline, op_array_ssa->cfg.map ? op_array_ssa->cfg.map[opline - op_array->opcodes] : -1, op_array, op_array_ssa, frame->call_level, p + 1)) {
+						if (!zend_jit_init_fcall(&dasm_state, opline, op_array_ssa->cfg.map ? op_array_ssa->cfg.map[opline - op_array->opcodes] : -1, op_array, ssa, ssa_op, frame->call_level, p + 1)) {
 							goto jit_failure;
 						}
 						goto done;
@@ -4094,10 +4106,11 @@ jit_cleanup:
 static int zend_jit_trace_exit_needs_deoptimization(uint32_t trace_num, uint32_t exit_num)
 {
 	const zend_op *opline = zend_jit_traces[trace_num].exit_info[exit_num].opline;
+	uint32_t flags = zend_jit_traces[trace_num].exit_info[exit_num].flags;
 	uint32_t stack_size;
 	zend_jit_trace_stack *stack;
 
-	if (opline) {
+	if (opline || (flags & ZEND_JIT_EXIT_RESTORE_CALL)) {
 		return 1;
 	}
 
@@ -4133,6 +4146,9 @@ static const void *zend_jit_trace_exit_to_vm(uint32_t trace_num, uint32_t exit_n
 	zend_jit_align_func(&dasm_state);
 
 	/* Deoptimization */
+	if (zend_jit_traces[trace_num].exit_info[exit_num].flags & ZEND_JIT_EXIT_RESTORE_CALL) {
+		zend_jit_save_call_chain(&dasm_state, -1);
+	}
 	stack_size = zend_jit_traces[trace_num].exit_info[exit_num].stack_size;
 	stack = zend_jit_traces[trace_num].stack_map + zend_jit_traces[trace_num].exit_info[exit_num].stack_offset;
 	for (i = 0; i < stack_size; i++) {
@@ -4534,6 +4550,9 @@ static void zend_jit_dump_exit_info(zend_jit_trace_info *t)
 		}
 		if (t->exit_info[i].flags & ZEND_JIT_EXIT_TO_VM) {
 			fprintf(stderr, "/VM");
+		}
+		if (t->exit_info[i].flags & ZEND_JIT_EXIT_RESTORE_CALL) {
+			fprintf(stderr, "/CALL");
 		}
 		for (j = 0; j < stack_size; j++) {
 			zend_uchar type = STACK_TYPE(stack, j);
@@ -4955,6 +4974,12 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 	uint32_t i;
 	uint32_t stack_size = t->exit_info[exit_num].stack_size;
 	zend_jit_trace_stack *stack = t->stack_map + t->exit_info[exit_num].stack_offset;
+
+	if (t->exit_info[exit_num].flags & ZEND_JIT_EXIT_RESTORE_CALL) {
+		zend_execute_data *call = (zend_execute_data *)regs->r[ZREG_RX];
+		call->prev_execute_data = EX(call);
+		EX(call) = call;
+	}
 
 	for (i = 0; i < stack_size; i++) {
 		if (STACK_REG(stack, i) != ZREG_NONE) {

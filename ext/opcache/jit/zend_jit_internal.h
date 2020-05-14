@@ -225,6 +225,7 @@ typedef enum _zend_jit_trace_stop {
 #define ZEND_JIT_EXIT_JITED         (1<<0)
 #define ZEND_JIT_EXIT_BLACKLISTED   (1<<1)
 #define ZEND_JIT_EXIT_TO_VM         (1<<2) /* exit to VM without attempt to create a side trace */
+#define ZEND_JIT_EXIT_RESTORE_CALL  (1<<3) /* deoptimizer should restore EX(call) chain */
 
 typedef union _zend_op_trace_info {
 	zend_op dummy; /* the size of this structure must be the same as zend_op */

@@ -2328,6 +2328,7 @@ static int zend_jit_trace_exit_stub(dasm_State **Dst)
 	|	// Save CPU registers
 	|.if X64
 	|	sub r4, 16*8+16*8-8 /* CPU regs + SSE regs */
+	|	mov aword [r4+15*8], r15
 	|	mov aword [r4+11*8], r11
 	|	mov aword [r4+10*8], r10
 	|	mov aword [r4+9*8], r9
@@ -2357,6 +2358,7 @@ static int zend_jit_trace_exit_stub(dasm_State **Dst)
 	|	movsd qword [r4+16*8+0*8], xmm0
 	|.else
 	|	sub r4, 8*4+8*8-4 /* CPU regs + SSE regs */
+	|	mov aword [r4+7*4], edi
 	|	mov aword [r4+2*4], edx
 	|	mov aword [r4+1*4], ecx
 	|	mov aword [r4+0*4], eax
@@ -7673,18 +7675,83 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, con
 	return 1;
 }
 
-static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, const zend_op_array *op_array, zend_ssa *ssa, const zend_op *opline)
+static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, const zend_op_array *op_array, zend_ssa *ssa, const zend_ssa_op *ssa_op, const zend_op *opline, zend_jit_trace_rec *trace)
 {
 	int skip;
+
+	if (trace) {
+		zend_jit_trace_rec *p = trace;
+
+		ssa_op++;
+		while (1) {
+			if (p->op == ZEND_JIT_TRACE_VM) {
+				switch (p->opline->opcode) {
+					case ZEND_SEND_ARRAY:
+					case ZEND_SEND_USER:
+					case ZEND_SEND_UNPACK:
+					case ZEND_INIT_FCALL:
+					case ZEND_INIT_METHOD_CALL:
+					case ZEND_INIT_STATIC_METHOD_CALL:
+					case ZEND_INIT_FCALL_BY_NAME:
+					case ZEND_INIT_NS_FCALL_BY_NAME:
+					case ZEND_INIT_DYNAMIC_CALL:
+					case ZEND_NEW:
+					case ZEND_INIT_USER_CALL:
+					case ZEND_FAST_CALL:
+					case ZEND_JMP:
+					case ZEND_JMPZNZ:
+					case ZEND_JMPZ:
+					case ZEND_JMPNZ:
+					case ZEND_JMPZ_EX:
+					case ZEND_JMPNZ_EX:
+					case ZEND_FE_RESET_R:
+					case ZEND_FE_RESET_RW:
+					case ZEND_JMP_SET:
+					case ZEND_COALESCE:
+					case ZEND_ASSERT_CHECK:
+					case ZEND_CATCH:
+					case ZEND_DECLARE_ANON_CLASS:
+					case ZEND_FE_FETCH_R:
+					case ZEND_FE_FETCH_RW:
+						return 1;
+					case ZEND_DO_ICALL:
+					case ZEND_DO_UCALL:
+					case ZEND_DO_FCALL_BY_NAME:
+					case ZEND_DO_FCALL:
+						return 0;
+					case ZEND_SEND_VAL:
+					case ZEND_SEND_VAR:
+					case ZEND_SEND_VAL_EX:
+					case ZEND_SEND_VAR_EX:
+					case ZEND_SEND_FUNC_ARG:
+					case ZEND_SEND_REF:
+					case ZEND_SEND_VAR_NO_REF:
+					case ZEND_SEND_VAR_NO_REF_EX:
+						/* skip */
+						break;
+					default:
+						if (zend_may_throw(opline, ssa_op, op_array, ssa)) {
+							return 1;
+						}
+				}
+				ssa_op += zend_jit_trace_op_len(opline);
+			} else if (p->op == ZEND_JIT_TRACE_ENTER ||
+			           p->op == ZEND_JIT_TRACE_BACK ||
+			           p->op == ZEND_JIT_TRACE_END) {
+				return 1;
+			}
+			p++;
+		}
+	}
 
 	if (!call_info) {
 		const zend_op *end = op_array->opcodes + op_array->last;
 
 		opline++;
+		ssa_op++;
 		skip = 1;
 		while (opline != end) {
 			if (!skip) {
-				zend_ssa_op *ssa_op = &ssa->ops[opline - op_array->opcodes];
 				if (zend_may_throw(opline, ssa_op, op_array, ssa)) {
 					return 1;
 				}
@@ -7740,6 +7807,7 @@ static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, cons
 					return 0;
 			}
 			opline++;
+			ssa_op++;
 		}
 
 		return 1;
@@ -7752,6 +7820,7 @@ static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, cons
 		}
 
 		opline++;
+		ssa_op++;
 		skip = 1;
 		while (opline != end) {
 			if (skip) {
@@ -7772,12 +7841,12 @@ static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, cons
 						return 1;
 				}
 			} else {
-				zend_ssa_op *ssa_op = &ssa->ops[opline - op_array->opcodes];
 				if (zend_may_throw(opline, ssa_op, op_array, ssa)) {
 					return 1;
 				}
 			}
 			opline++;
+			ssa_op++;
 		}
 
 		return 0;
@@ -7847,7 +7916,7 @@ static int zend_jit_init_fcall_guard(dasm_State **Dst, const zend_op *opline, co
 	return 1;
 }
 
-static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t b, const zend_op_array *op_array, zend_ssa *ssa, int call_level, zend_jit_trace_rec *trace)
+static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t b, const zend_op_array *op_array, zend_ssa *ssa, const zend_ssa_op *ssa_op, int call_level, zend_jit_trace_rec *trace)
 {
 	zend_func_info *info = ZEND_FUNC_INFO(op_array);
 	zend_call_info *call_info = NULL;
@@ -7984,7 +8053,7 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t
 		return 0;
 	}
 
-	if (trace || zend_jit_needs_call_chain(call_info, b, op_array, ssa, opline)) {
+	if (zend_jit_needs_call_chain(call_info, b, op_array, ssa, ssa_op, opline, trace)) {
 		if (!zend_jit_save_call_chain(Dst, call_level)) {
 			return 0;
 		}
