@@ -42,7 +42,10 @@
 #endif
 #ifdef ZEND_WIN32
 #include <winnt.h>
+#elif _POSIX_TIMERS > 0
+#include <time.h>
 #endif
+
 
 ZEND_API void (*zend_execute_ex)(zend_execute_data *execute_data);
 ZEND_API void (*zend_execute_internal)(zend_execute_data *execute_data, zval *return_value);
@@ -53,6 +56,8 @@ ZEND_API const zend_fcall_info_cache empty_fcall_info_cache = { NULL, NULL, NULL
 
 #ifdef ZEND_WIN32
 ZEND_TLS HANDLE tq_timer = NULL;
+#elif _POSIX_TIMERS > 0
+ZEND_TLS timer_t timer_id = NULL;
 #endif
 
 #if 0&&ZEND_DEBUG
@@ -1127,7 +1132,9 @@ ZEND_API ZEND_NORETURN void ZEND_FASTCALL zend_timeout(void) /* {{{ */
 
 #ifdef ZEND_WIN32
 typedef VOID (*TIMEOUT_HANDLER)(PVOID, BOOLEAN);
-#else /* POSIX */
+#elif _POSIX_TIMERS > 0
+typedef void (*TIMEOUT_HANDLER)(int, siginfo_t*, void*);
+#else
 typedef void (*TIMEOUT_HANDLER)(int);
 #endif
 
@@ -1166,6 +1173,89 @@ static void zend_set_timeout_ex(zend_long seconds, TIMEOUT_HANDLER callback_func
 			(unsigned long)GetLastError());
 		return;
 	}
+
+#elif _POSIX_TIMERS > 0
+	/* If a timeout occurs, the OS will alert us via a signal, but this signal may be delivered
+	 * to any thread. If we have multiple threads, we need to make sure that the timeout
+	 * flag is set on _this_ one. So pass a reference to this thread's executor globals (including
+	 * the timeout flag) through to the signal handler. */
+	zend_executor_globals *eg = ZEND_MODULE_GLOBALS_BULK(executor);
+
+	/* If a timer is already running, cancel it */
+	if (timer_id != -1) {
+		ZEND_ASSERT(timer_delete(timer_id));
+		timer_id = -1;
+	}
+
+	struct sigevent se = {
+		.sigev_notify = SIGEV_SIGNAL,
+		.sigev_signo  = SIGALRM,
+		.sigev_value  = { .sival_ptr = eg }
+	};
+	/* The POSIX timers API has several different types of clock which can be selected when
+	 * creating a timer, but not all implementations support all of them.
+	 * There are compile-time macros which can tell us that "thread CPU time" or "process
+	 * CPU time" clocks are definitely available... but even if those macros are set to zero,
+	 * that does not mean that those clocks will _not_ be available. Rather, it means that
+	 * you need to check at runtime. We just do a runtime check and don't bother with those
+	 * troublesome macros. */
+	int clock_id = CLOCK_THREAD_CPUTIME_ID; /* our #1 preferred clock */
+	int status;
+
+	do {
+		status = timer_create(clock_id, &se, &timer_id);
+		if (status == 0) {
+			break; /* We win */
+		} else if (errno == EINVAL) {
+			/* Try a different clock */
+			if (clock_id == CLOCK_THREAD_CPUTIME_ID) {
+				clock_id = CLOCK_PROCESS_CPUTIME_ID;
+			} else if (clock_id == CLOCK_PROCESS_CPUTIME_ID) {
+				clock_id = CLOCK_REALTIME;
+			} else {
+				/* We lose */
+				zend_error_noreturn(E_ERROR, "Could not initialize script execution timer: %s",
+					strerror(errno));
+				return;
+			}
+		/* EAGAIN means there was a "temporary error during kernel allocation of timer structures";
+		 * if we get that, repeat the loop and try calling `timer_create` with the same clock ID */
+		} else if (errno != EAGAIN) {
+			zend_error_noreturn(E_ERROR, "Could not initialize script execution timer: %s",
+				strerror(errno));
+			return;
+		}
+	} while (1);
+
+	/* Ensure this process will be able to receive SIGALRM and invoke callback */
+# ifdef HAVE_SIGACTION
+	struct sigaction act;
+
+	act.sa_sigaction = callback_func;
+	/* Don't block any other signals while timeout signal handler is running */
+	sigemptyset(&act.sa_mask);
+	/* Restore signal action for timeout signal to default after it is received */
+	act.sa_flags = SA_RESETHAND;
+	act.sa_flags |= SA_SIGINFO; /* Signal handler has an additional argument to receive extra info */
+	sigaction(SIGALRM, &act, NULL);
+# else
+	signal(SIGALRM, callback_func);
+# endif /* HAVE_SIGACTION */
+
+	/* Make sure timeout signal is unblocked */
+	sigset_t sigset;
+	sigemptyset(&sigset);
+	sigaddset(&sigset, SIGALRM);
+	sigprocmask(SIG_UNBLOCK, &sigset, NULL);
+
+	struct itimerspec time_spec = {
+		.it_value = { .tv_sec = seconds }
+	};
+	if (timer_settime(timer_id, 0, &time_spec, NULL) == -1) {
+		zend_error_noreturn(E_ERROR, "Could not set script execution timer: %s", strerror(errno));
+		return;
+	}
+
 #elif defined(HAVE_SETITIMER)
 	struct itimerval t_r;		/* timeout requested */
 	int signo;
@@ -1203,7 +1293,9 @@ static void zend_set_timeout_ex(zend_long seconds, TIMEOUT_HANDLER callback_func
 #ifndef ZTS
 # ifdef ZEND_WIN32
 static VOID CALLBACK zend_hard_timeout_handler(PVOID arg, BOOLEAN timed_out)
-# else /* POSIX */
+# elif _POSIX_TIMERS > 0
+static void zend_hard_timeout_handler(int dummy, siginfo_t *siginfo, void *unused)
+# else
 static void zend_hard_timeout_handler(int dummy)
 # endif
 {
@@ -1215,6 +1307,9 @@ static void zend_hard_timeout_handler(int dummy)
 #ifdef ZEND_WIN32
 	zend_long timeout_seconds = ((zend_executor_globals*)arg)->timeout_seconds;
 	zend_long hard_timeout    = ((zend_executor_globals*)arg)->hard_timeout;
+#elif _POSIX_TIMERS > 0
+	zend_long timeout_seconds = ((zend_executor_globals*)(siginfo->si_value.sival_ptr))->timeout_seconds;
+	zend_long hard_timeout    = ((zend_executor_globals*)(siginfo->si_value.sival_ptr))->hard_timeout;
 #else
 	zend_long timeout_seconds = EG(timeout_seconds);
 	zend_long hard_timeout    = EG(hard_timeout);
@@ -1272,7 +1367,22 @@ static VOID CALLBACK zend_timeout_handler(PVOID arg, BOOLEAN timed_out)
 	eg->vm_interrupt = 1;
 }
 
-#else /* POSIX */
+#elif _POSIX_TIMERS > 0
+
+static void zend_timeout_handler(int dummy, siginfo_t *siginfo, void *unused)
+{
+	zend_executor_globals *eg = (zend_executor_globals*)(siginfo->si_value.sival_ptr);
+
+# ifndef ZTS
+	/* No-op if `hard_timeout` is set to zero */
+	zend_set_timeout_ex(eg->hard_timeout, zend_hard_timeout_handler);
+# endif
+
+	eg->timed_out = 1;
+	eg->vm_interrupt = 1;
+}
+
+#else /* POSIX, using setitimer */
 
 static void zend_timeout_handler(int dummy) /* {{{ */
 {
@@ -1305,6 +1415,15 @@ void zend_unset_timeout(void) /* {{{ */
 		}
 		tq_timer = NULL;
 	}
+
+#elif _POSIX_TIMERS > 0
+	if (timer_id != NULL) {
+		/* `timer_delete` only errors out if `timer_id` is invalid... but it
+		 * should never be invalid */
+		ZEND_ASSERT(!timer_delete(timer_id));
+		timer_id = NULL;
+	}
+
 #elif defined(HAVE_SETITIMER)
 	if (EG(timeout_seconds)) {
 		struct itimerval no_timeout;
