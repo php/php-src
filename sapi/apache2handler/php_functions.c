@@ -476,20 +476,6 @@ PHP_MINFO_FUNCTION(apache)
 	}
 }
 
-static const zend_function_entry apache_functions[] = {
-	PHP_FE(apache_lookup_uri, 		arginfo_apache_lookup_uri)
-	PHP_FE(virtual, 				arginfo_virtual)
-	PHP_FE(apache_request_headers, 	arginfo_apache_request_headers)
-	PHP_FE(apache_response_headers, arginfo_apache_response_headers)
-	PHP_FE(apache_setenv, 		arginfo_apache_setenv)
-	PHP_FE(apache_getenv, 		arginfo_apache_getenv)
-	PHP_FE(apache_note, 		arginfo_apache_note)
-	PHP_FE(apache_get_version, 	arginfo_apache_get_version)
-	PHP_FE(apache_get_modules, 	arginfo_apache_get_modules)
-	PHP_FALIAS(getallheaders, 	apache_request_headers, arginfo_getallheaders)
-	{NULL, NULL, NULL}
-};
-
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("xbithack",		"0",	PHP_INI_ALL,	OnUpdateBool,	xbithack,	php_apache2_info_struct, php_apache2_info)
 	STD_PHP_INI_ENTRY("engine",		"1",	PHP_INI_ALL,	OnUpdateBool,	engine, 	php_apache2_info_struct, php_apache2_info)
@@ -514,7 +500,7 @@ static PHP_MSHUTDOWN_FUNCTION(apache)
 zend_module_entry php_apache_module = {
 	STANDARD_MODULE_HEADER,
 	"apache2handler",
-	apache_functions,
+	ext_functions,
 	PHP_MINIT(apache),
 	PHP_MSHUTDOWN(apache),
 	NULL,

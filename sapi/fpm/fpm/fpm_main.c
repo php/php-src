@@ -82,6 +82,7 @@ int __riscosify_control = __RISCOSIFY_STRICT_UNIX_SPECS;
 
 #include <php_config.h>
 #include "fpm.h"
+#include "fpm_main_arginfo.h"
 #include "fpm_request.h"
 #include "fpm_status.h"
 #include "fpm_signals.h"
@@ -1457,9 +1458,6 @@ static PHP_MINFO_FUNCTION(cgi)
 }
 /* }}} */
 
-ZEND_BEGIN_ARG_INFO(cgi_fcgi_sapi_no_arginfo, 0)
-ZEND_END_ARG_INFO()
-
 PHP_FUNCTION(fastcgi_finish_request) /* {{{ */
 {
 	fcgi_request *request = (fcgi_request*) SG(server_context);
@@ -1510,18 +1508,10 @@ PHP_FUNCTION(fpm_get_status) /* {{{ */
 }
 /* }}} */
 
-static const zend_function_entry cgi_fcgi_sapi_functions[] = {
-	PHP_FE(fastcgi_finish_request,                    cgi_fcgi_sapi_no_arginfo)
-	PHP_FE(fpm_get_status,                            cgi_fcgi_sapi_no_arginfo)
-	PHP_FE(apache_request_headers,                    cgi_fcgi_sapi_no_arginfo)
-	PHP_FALIAS(getallheaders, apache_request_headers, cgi_fcgi_sapi_no_arginfo)
-	PHP_FE_END
-};
-
 static zend_module_entry cgi_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"cgi-fcgi",
-	cgi_fcgi_sapi_functions,
+	ext_functions,
 	PHP_MINIT(cgi),
 	PHP_MSHUTDOWN(cgi),
 	NULL,

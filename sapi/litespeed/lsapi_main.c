@@ -24,6 +24,7 @@
 #include "ext/standard/basic_functions.h"
 #include "ext/standard/info.h"
 #include "lsapilib.h"
+#include "lsapi_main_arginfo.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -1615,28 +1616,12 @@ int main( int argc, char * argv[] )
 
 /*   LiteSpeed PHP module starts here */
 
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO(arginfo_litespeed__void, 0)
-ZEND_END_ARG_INFO()
-/* }}} */
-
 PHP_FUNCTION(litespeed_request_headers);
 PHP_FUNCTION(litespeed_response_headers);
 PHP_FUNCTION(apache_get_modules);
 PHP_FUNCTION(litespeed_finish_request);
 
 PHP_MINFO_FUNCTION(litespeed);
-
-static const zend_function_entry litespeed_functions[] = {
-    PHP_FE(litespeed_request_headers,   arginfo_litespeed__void)
-    PHP_FE(litespeed_response_headers,  arginfo_litespeed__void)
-    PHP_FE(apache_get_modules,          arginfo_litespeed__void)
-    PHP_FE(litespeed_finish_request,    arginfo_litespeed__void)
-    PHP_FALIAS(getallheaders,           litespeed_request_headers,  arginfo_litespeed__void)
-    PHP_FALIAS(apache_request_headers,  litespeed_request_headers,  arginfo_litespeed__void)
-    PHP_FALIAS(apache_response_headers, litespeed_response_headers, arginfo_litespeed__void)
-    {NULL, NULL, NULL}
-};
 
 static PHP_MINIT_FUNCTION(litespeed)
 {
@@ -1675,7 +1660,7 @@ static PHP_MSHUTDOWN_FUNCTION(litespeed)
 zend_module_entry litespeed_module_entry = {
     STANDARD_MODULE_HEADER,
     "litespeed",
-    litespeed_functions,
+    ext_functions,
     PHP_MINIT(litespeed),
     PHP_MSHUTDOWN(litespeed),
     NULL,
@@ -1697,14 +1682,13 @@ static int add_associate_array( const char * pKey, int keyLen, const char * pVal
    Fetch all HTTP request headers */
 PHP_FUNCTION(litespeed_request_headers)
 {
-    /* TODO: */
-    if (ZEND_NUM_ARGS() > 0) {
-        WRONG_PARAM_COUNT;
+    if (zend_parse_parameters_none() == FAILURE) {
+        RETURN_THROWS();
     }
+
     array_init(return_value);
 
     LSAPI_ForeachOrgHeader( add_associate_array, return_value );
-
 }
 /* }}} */
 
@@ -1720,9 +1704,9 @@ PHP_FUNCTION(litespeed_response_headers)
     int          len;
     char         headerBuf[SAPI_LSAPI_MAX_HEADER_LENGTH];
 
-    if (ZEND_NUM_ARGS() > 0) {
-        WRONG_PARAM_COUNT;
-    }
+    if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
 
     if (!&SG(sapi_headers).headers) {
         RETURN_FALSE;
@@ -1762,10 +1746,11 @@ PHP_FUNCTION(apache_get_modules)
         "mod_rewrite", "mod_mime", "mod_headers", "mod_expires", "mod_auth_basic", NULL
     };
     const char **name = mod_names;
-    /* TODO: */
-    if (ZEND_NUM_ARGS() > 0) {
-        WRONG_PARAM_COUNT;
-    }
+
+    if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
     array_init(return_value);
     while( *name )
     {
@@ -1776,13 +1761,13 @@ PHP_FUNCTION(apache_get_modules)
 /* }}} */
 
 
-/* {{{ proto array litespeed_finish_request(void)
+/* {{{ proto bool litespeed_finish_request(void)
    Flushes all response data to the client */
 PHP_FUNCTION(litespeed_finish_request)
 {
-    if (ZEND_NUM_ARGS() > 0) {
-        WRONG_PARAM_COUNT;
-    }
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
 
     php_output_end_all();
     php_header();

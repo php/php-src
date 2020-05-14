@@ -291,7 +291,7 @@ static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
 	If the execution context was set previously it is returned
 	If the execution context was not set previously boolean true is returned
 	If the request to set the context fails, boolean false is returned, and an E_WARNING raised */
-static PHP_FUNCTION(phpdbg_exec)
+PHP_FUNCTION(phpdbg_exec)
 {
 	zend_string *exec;
 
@@ -331,7 +331,7 @@ static PHP_FUNCTION(phpdbg_exec)
 
 /* {{{ proto void phpdbg_break()
     instructs phpdbg to insert a breakpoint at the next opcode */
-static PHP_FUNCTION(phpdbg_break_next)
+PHP_FUNCTION(phpdbg_break_next)
 {
 	zend_execute_data *ex;
 
@@ -352,7 +352,7 @@ static PHP_FUNCTION(phpdbg_break_next)
 } /* }}} */
 
 /* {{{ proto void phpdbg_break_file(string file, int line) */
-static PHP_FUNCTION(phpdbg_break_file)
+PHP_FUNCTION(phpdbg_break_file)
 {
 	char *file;
 	size_t flen;
@@ -366,7 +366,7 @@ static PHP_FUNCTION(phpdbg_break_file)
 } /* }}} */
 
 /* {{{ proto void phpdbg_break_method(string class, string method) */
-static PHP_FUNCTION(phpdbg_break_method)
+PHP_FUNCTION(phpdbg_break_method)
 {
 	char *class, *method;
 	size_t clen, mlen;
@@ -379,7 +379,7 @@ static PHP_FUNCTION(phpdbg_break_method)
 } /* }}} */
 
 /* {{{ proto void phpdbg_break_function(string function) */
-static PHP_FUNCTION(phpdbg_break_function)
+PHP_FUNCTION(phpdbg_break_function)
 {
 	char    *function;
 	size_t   function_len;
@@ -393,7 +393,7 @@ static PHP_FUNCTION(phpdbg_break_function)
 
 /* {{{ proto void phpdbg_clear(void)
    instructs phpdbg to clear breakpoints */
-static PHP_FUNCTION(phpdbg_clear)
+PHP_FUNCTION(phpdbg_clear)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
@@ -411,7 +411,7 @@ static PHP_FUNCTION(phpdbg_clear)
 } /* }}} */
 
 /* {{{ proto void phpdbg_color(int element, string color) */
-static PHP_FUNCTION(phpdbg_color)
+PHP_FUNCTION(phpdbg_color)
 {
 	zend_long element;
 	char *color;
@@ -434,7 +434,7 @@ static PHP_FUNCTION(phpdbg_color)
 } /* }}} */
 
 /* {{{ proto void phpdbg_prompt(string prompt) */
-static PHP_FUNCTION(phpdbg_prompt)
+PHP_FUNCTION(phpdbg_prompt)
 {
 	char *prompt = NULL;
 	size_t prompt_len = 0;
@@ -447,7 +447,7 @@ static PHP_FUNCTION(phpdbg_prompt)
 } /* }}} */
 
 /* {{{ proto void phpdbg_start_oplog() */
-static PHP_FUNCTION(phpdbg_start_oplog)
+PHP_FUNCTION(phpdbg_start_oplog)
 {
 	phpdbg_oplog_list *prev;
 
@@ -524,7 +524,7 @@ static inline HashTable* phpdbg_add_empty_array(HashTable *ht, zend_string *name
 }
 
 /* {{{ proto void phpdbg_get_executable() */
-static PHP_FUNCTION(phpdbg_get_executable)
+PHP_FUNCTION(phpdbg_get_executable)
 {
 	HashTable *options = NULL;
 	zval *option_buffer;
@@ -622,7 +622,7 @@ static PHP_FUNCTION(phpdbg_get_executable)
 }
 
 /* {{{ proto void phpdbg_end_oplog() */
-static PHP_FUNCTION(phpdbg_end_oplog)
+PHP_FUNCTION(phpdbg_end_oplog)
 {
 	phpdbg_oplog_entry *cur;
 	phpdbg_oplog_list *prev;
@@ -724,29 +724,10 @@ static PHP_FUNCTION(phpdbg_end_oplog)
 	}
 }
 
-static const zend_function_entry phpdbg_user_functions[] = {
-	PHP_FE(phpdbg_clear, arginfo_phpdbg_clear)
-	PHP_FE(phpdbg_break_next, arginfo_phpdbg_break_next)
-	PHP_FE(phpdbg_break_file, arginfo_phpdbg_break_file)
-	PHP_FE(phpdbg_break_method, arginfo_phpdbg_break_method)
-	PHP_FE(phpdbg_break_function, arginfo_phpdbg_break_function)
-	PHP_FE(phpdbg_exec, arginfo_phpdbg_exec)
-	PHP_FE(phpdbg_color, arginfo_phpdbg_color)
-	PHP_FE(phpdbg_prompt, arginfo_phpdbg_prompt)
-	PHP_FE(phpdbg_start_oplog, arginfo_phpdbg_start_oplog)
-	PHP_FE(phpdbg_end_oplog, arginfo_phpdbg_end_oplog)
-	PHP_FE(phpdbg_get_executable, arginfo_phpdbg_get_executable)
-#ifdef  PHP_FE_END
-	PHP_FE_END
-#else
-	{NULL,NULL,NULL}
-#endif
-};
-
 static zend_module_entry sapi_phpdbg_module_entry = {
 	STANDARD_MODULE_HEADER,
 	PHPDBG_NAME,
-	phpdbg_user_functions,
+	ext_functions,
 	PHP_MINIT(phpdbg),
 	PHP_MSHUTDOWN(phpdbg),
 	PHP_RINIT(phpdbg),
