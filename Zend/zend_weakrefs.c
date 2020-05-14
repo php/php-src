@@ -234,9 +234,6 @@ static void zend_weakref_free(zend_object *zo) {
 	zend_object_std_dtor(&wr->std);
 }
 
-#define zend_weakref_unsupported(object, thing) \
-	zend_throw_error(NULL, "%s objects do not support " thing, ZSTR_VAL(object->ce->name));
-
 ZEND_COLD ZEND_METHOD(WeakReference, __construct)
 {
 	zend_throw_error(NULL,

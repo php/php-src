@@ -597,7 +597,7 @@ void curl_multi_register_class(const zend_function_entry *method_entries) {
 	zend_class_entry ce_multi;
 	INIT_CLASS_ENTRY(ce_multi, "CurlMultiHandle", method_entries);
 	curl_multi_ce = zend_register_internal_class(&ce_multi);
-	curl_multi_ce->ce_flags |= ZEND_ACC_FINAL;
+	curl_multi_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
 	curl_multi_ce->create_object = curl_multi_create_object;
 	curl_multi_ce->serialize = zend_class_serialize_deny;
 	curl_multi_ce->unserialize = zend_class_unserialize_deny;

@@ -257,7 +257,7 @@ PHP_MINIT_FUNCTION(xml)
 	INIT_CLASS_ENTRY(ce, "XmlParser", class_XMLParser_methods);
 	xml_parser_ce = zend_register_internal_class(&ce);
 	xml_parser_ce->create_object = xml_parser_create_object;
-	xml_parser_ce->ce_flags |= ZEND_ACC_FINAL;
+	xml_parser_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
 	xml_parser_ce->serialize = zend_class_serialize_deny;
 	xml_parser_ce->unserialize = zend_class_unserialize_deny;
 

@@ -1193,7 +1193,7 @@ PHP_MINIT_FUNCTION(curl)
 	zend_class_entry ce;
 	INIT_CLASS_ENTRY(ce, "CurlHandle", class_CurlHandle_methods);
 	curl_ce = zend_register_internal_class(&ce);
-	curl_ce->ce_flags |= ZEND_ACC_FINAL;
+	curl_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
 	curl_ce->create_object = curl_create_object;
 	curl_ce->serialize = zend_class_serialize_deny;
 	curl_ce->unserialize = zend_class_unserialize_deny;

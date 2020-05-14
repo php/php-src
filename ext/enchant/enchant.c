@@ -192,7 +192,7 @@ PHP_MINIT_FUNCTION(enchant)
 
 	INIT_CLASS_ENTRY(bce, "EnchantBroker", class_EnchantBroker_methods);
 	enchant_broker_ce = zend_register_internal_class(&bce);
-	enchant_broker_ce->ce_flags |= ZEND_ACC_FINAL;
+	enchant_broker_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
 	enchant_broker_ce->create_object = enchant_broker_create_object;
 	enchant_broker_ce->serialize = zend_class_serialize_deny;
 	enchant_broker_ce->unserialize = zend_class_unserialize_deny;
@@ -204,7 +204,7 @@ PHP_MINIT_FUNCTION(enchant)
 
 	INIT_CLASS_ENTRY(dce, "EnchantDictionary", class_EnchantDictionary_methods);
 	enchant_dict_ce = zend_register_internal_class(&dce);
-	enchant_dict_ce->ce_flags |= ZEND_ACC_FINAL;
+	enchant_dict_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
 	enchant_dict_ce->create_object = enchant_dict_create_object;
 	enchant_dict_ce->serialize = zend_class_serialize_deny;
 	enchant_dict_ce->unserialize = zend_class_unserialize_deny;

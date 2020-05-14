@@ -156,7 +156,7 @@ PHP_MINIT_FUNCTION(sysvsem)
 	zend_class_entry ce;
 	INIT_CLASS_ENTRY(ce, "SysvSemaphore", class_SysvSemaphore_methods);
 	sysvsem_ce = zend_register_internal_class(&ce);
-	sysvsem_ce->ce_flags |= ZEND_ACC_FINAL;
+	sysvsem_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
 	sysvsem_ce->create_object = sysvsem_create_object;
 	sysvsem_ce->serialize = zend_class_serialize_deny;
 	sysvsem_ce->unserialize = zend_class_unserialize_deny;
