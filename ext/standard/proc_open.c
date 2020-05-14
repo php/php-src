@@ -1187,6 +1187,17 @@ PHP_FUNCTION(proc_open)
 		}
 	}
 
+	if (1) {
+		RETVAL_RES(zend_register_resource(proc, le_proc_open));
+	} else {
+exit_fail:
+		_php_free_envp(env);
+		if (command) {
+			efree(command);
+		}
+		RETVAL_FALSE;
+	}
+
 #ifdef PHP_WIN32
 	free(cwdw);
 	free(cmdw);
@@ -1202,34 +1213,9 @@ PHP_FUNCTION(proc_open)
 		close(pty_slave_fd);
 	}
 #endif
-	efree(descriptors);
-	ZVAL_RES(return_value, zend_register_resource(proc, le_proc_open));
-	return;
-
-exit_fail:
 	if (descriptors) {
 		efree(descriptors);
 	}
-	_php_free_envp(env);
-	if (command) {
-		efree(command);
-	}
-#ifdef PHP_WIN32
-	free(cwdw);
-	free(cmdw);
-	free(envpw);
-#else
-	efree_argv(argv);
-#endif
-#if HAVE_OPENPTY
-	if (pty_master_fd != -1) {
-		close(pty_master_fd);
-	}
-	if (pty_slave_fd != -1) {
-		close(pty_slave_fd);
-	}
-#endif
-	RETURN_FALSE;
 }
 /* }}} */
 
