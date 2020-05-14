@@ -31,7 +31,7 @@
 
 /*
  * Convert from a 4-byte float to a 8-byte decimal by first converting
- * the float to a string (Iinoring localization), and then the string to a double.
+ * the float to a string (ignoring localization), and then the string to a double.
  * The decimals argument specifies the precision of the output. If decimals
  * is less than zero, then a gcvt(3) like logic is used with the significant
  * digits set to FLT_DIG i.e. 6.
