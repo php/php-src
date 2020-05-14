@@ -1166,43 +1166,41 @@ static void zend_set_timeout_ex(zend_long seconds, TIMEOUT_HANDLER callback_func
 		return;
 	}
 #elif defined(HAVE_SETITIMER)
-	{
-		struct itimerval t_r;		/* timeout requested */
-		int signo;
+	struct itimerval t_r;		/* timeout requested */
+	int signo;
 
-		t_r.it_value.tv_sec = seconds;
-		t_r.it_value.tv_usec = t_r.it_interval.tv_sec = t_r.it_interval.tv_usec = 0;
+	t_r.it_value.tv_sec = seconds;
+	t_r.it_value.tv_usec = t_r.it_interval.tv_sec = t_r.it_interval.tv_usec = 0;
 
 # ifdef __CYGWIN__
-		setitimer(ITIMER_REAL, &t_r, NULL);
-		signo = SIGALRM;
+	setitimer(ITIMER_REAL, &t_r, NULL);
+	signo = SIGALRM;
 # else
-		setitimer(ITIMER_PROF, &t_r, NULL);
-		signo = SIGPROF;
+	setitimer(ITIMER_PROF, &t_r, NULL);
+	signo = SIGPROF;
 # endif
 
 # ifdef ZEND_SIGNALS
-		zend_signal(signo, callback_func);
+	zend_signal(signo, callback_func);
 
 # else
-		sigset_t sigset;
+	sigset_t sigset;
 
 #  ifdef HAVE_SIGACTION
-		struct sigaction act;
+	struct sigaction act;
 
-		act.sa_handler = callback_func;
-		sigemptyset(&act.sa_mask);
-		act.sa_flags = SA_RESETHAND | SA_NODEFER;
-		sigaction(signo, &act, NULL);
+	act.sa_handler = callback_func;
+	sigemptyset(&act.sa_mask);
+	act.sa_flags = SA_RESETHAND | SA_NODEFER;
+	sigaction(signo, &act, NULL);
 #  else
-		signal(signo, callback_func);
+	signal(signo, callback_func);
 #  endif /* HAVE_SIGACTION */
 
-		sigemptyset(&sigset);
-		sigaddset(&sigset, signo);
-		sigprocmask(SIG_UNBLOCK, &sigset, NULL);
+	sigemptyset(&sigset);
+	sigaddset(&sigset, signo);
+	sigprocmask(SIG_UNBLOCK, &sigset, NULL);
 # endif /* ZEND_SIGNALS */
-	}
 #endif /* HAVE_SETITIMER */
 }
 /* }}} */
