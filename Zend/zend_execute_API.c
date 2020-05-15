@@ -1173,6 +1173,39 @@ typedef void (*TIMEOUT_HANDLER)(int);
 #define SIGPROF 27
 #endif
 
+#if _POSIX_TIMERS > 0 || defined(HAVE_SETITIMER)
+static void prepare_to_receive_timeout_signal(int signo, TIMEOUT_HANDLER callback_func)
+{
+# ifdef HAVE_SIGACTION
+	struct sigaction act;
+
+#  if _POSIX_TIMERS > 0
+	act.sa_sigaction = callback_func;
+#  else
+	act.sa_handler = callback_func;
+#  endif
+
+	/* Don't block any other signals while timeout signal handler is running */
+	sigemptyset(&act.sa_mask);
+	/* Restore signal action for timeout signal to default after it is received */
+	act.sa_flags = SA_RESETHAND;
+#  if _POSIX_TIMERS > 0
+	act.sa_flags |= SA_SIGINFO; /* Signal handler has additional argument to receive extra info */
+#  endif
+	sigaction(signo, &act, NULL);
+
+# else
+	signal(signo, callback_func);
+# endif /* HAVE_SIGACTION */
+
+	/* Make sure timeout signal is unblocked */
+	sigset_t sigset;
+	sigemptyset(&sigset);
+	sigaddset(&sigset, signo);
+	sigprocmask(SIG_UNBLOCK, &sigset, NULL);
+}
+#endif
+
 static void zend_set_timeout_ex(zend_long seconds, TIMEOUT_HANDLER callback_func) /* {{{ */
 {
 	if (!seconds) {
@@ -1237,26 +1270,7 @@ static void zend_set_timeout_ex(zend_long seconds, TIMEOUT_HANDLER callback_func
 		}
 	} while (1);
 
-	/* Ensure this process will be able to receive SIGALRM and invoke callback */
-# ifdef HAVE_SIGACTION
-	struct sigaction act;
-
-	act.sa_sigaction = callback_func;
-	/* Don't block any other signals while timeout signal handler is running */
-	sigemptyset(&act.sa_mask);
-	/* Restore signal action for timeout signal to default after it is received */
-	act.sa_flags = SA_RESETHAND;
-	act.sa_flags |= SA_SIGINFO; /* Signal handler has an additional argument to receive extra info */
-	sigaction(SIGALRM, &act, NULL);
-# else
-	signal(SIGALRM, callback_func);
-# endif /* HAVE_SIGACTION */
-
-	/* Make sure timeout signal is unblocked */
-	sigset_t sigset;
-	sigemptyset(&sigset);
-	sigaddset(&sigset, SIGALRM);
-	sigprocmask(SIG_UNBLOCK, &sigset, NULL);
+	prepare_to_receive_timeout_signal(SIGALRM, callback_func);
 
 	struct itimerspec time_spec = {
 		.it_value = { .tv_sec = seconds }
@@ -1267,35 +1281,17 @@ static void zend_set_timeout_ex(zend_long seconds, TIMEOUT_HANDLER callback_func
 	}
 
 #elif defined(HAVE_SETITIMER)
-	struct itimerval t_r;		/* timeout requested */
-	int signo;
-
+	struct itimerval t_r;	/* timeout requested */
 	t_r.it_value.tv_sec = seconds;
 	t_r.it_value.tv_usec = t_r.it_interval.tv_sec = t_r.it_interval.tv_usec = 0;
 
 # ifdef __CYGWIN__
 	setitimer(ITIMER_REAL, &t_r, NULL);
-	signo = SIGALRM;
+	prepare_to_receive_timeout_signal(SIGALRM, callback_func);
 # else
 	setitimer(ITIMER_PROF, &t_r, NULL);
-	signo = SIGPROF;
+	prepare_to_receive_timeout_signal(SIGPROF, callback_func);
 # endif
-
-	if (reset_signals) {
-		sigset_t sigset;
-#  ifdef HAVE_SIGACTION
-		struct sigaction act;
-		act.sa_handler = callback_func;
-		sigemptyset(&act.sa_mask);
-		act.sa_flags = SA_RESETHAND | SA_NODEFER;
-		sigaction(signo, &act, NULL);
-#  else
-		signal(signo, callback_func);
-#  endif /* HAVE_SIGACTION */
-		sigemptyset(&sigset);
-		sigaddset(&sigset, signo);
-		sigprocmask(SIG_UNBLOCK, &sigset, NULL);
-	}
 #endif /* HAVE_SETITIMER */
 }
 /* }}} */
