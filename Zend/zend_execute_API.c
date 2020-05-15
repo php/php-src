@@ -1138,7 +1138,7 @@ typedef void (*TIMEOUT_HANDLER)(int, siginfo_t*, void*);
 typedef void (*TIMEOUT_HANDLER)(int);
 #endif
 
-/* This one doesn't exists on QNX */
+/* This one doesn't exist on QNX */
 #ifndef SIGPROF
 #define SIGPROF 27
 #endif
