@@ -1118,8 +1118,38 @@ ZEND_API int zend_eval_string_ex(const char *str, zval *retval_ptr, const char *
 }
 /* }}} */
 
+/*** Handling script execution timeouts ***
+ *
+ * A time limit on script execution can be set either by calling `set_time_limit` in PHP code,
+ * or via various .INI directives.
+ *
+ * If the time limit is reached, `vm_interrupt` and `timed_out` flags are set which tell the
+ * thread to print an error and start shutting down (including running shutdown functions).
+ *
+ * However, some scripts might take a long time to stop after the flags are set. One reason is
+ * because the `vm_interrupt` flag is not generally checked when running built-in functions
+ * implemented in C. Another reason is because shutdown functions might run for a long time.
+ *
+ * Therefore, a `hard_timeout` .INI directive can be used to limit how long a script can take to
+ * shut down after timeout. If the hard timeout is reached, the process is killed. For obvious
+ * reasons, this feature is disabled on ZTS builds. Setting `hard_timeout` to zero also disables it.
+ *
+ * There are 3 timer implementations, selected via preprocessor directives:
+ *
+ * - Win32
+ *   - based on timer queues from Windows thread pool API
+ *   - uses real-time clock (actual, "wall clock" time and not CPU time used by script)
+ * - POSIX timers
+ *   - prefers to use thread CPU time, but falls back to process CPU time or real time
+ * - setitimer
+ *   - fallback for Unix-like systems which do not support POSIX timers
+ *   - uses process CPU time (except Cygwin, which uses real time)
+ */
+
 ZEND_API ZEND_NORETURN void ZEND_FASTCALL zend_timeout(void) /* {{{ */
 {
+  /* Clear `timed_out` flag, so that if `vm_interrupt` is set while shutdown functions are running,
+   * perhaps due to a signal, the VM interrupt check will not try to call this function again */
 	EG(timed_out) = 0;
 
 	if (zend_on_timeout) { /* Hook which can be defined by extensions */
