@@ -729,6 +729,7 @@ try_again:
 
 	if (UNEXPECTED(!Z_ISUNDEF(generator->values))) {
 		if (EXPECTED(zend_generator_get_next_delegated_value(generator) == SUCCESS)) {
+			orig_generator->flags &= ~ZEND_GENERATOR_DO_INIT;
 			return;
 		}
 		/* If there are no more deletegated values, resume the generator
