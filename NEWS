@@ -6,12 +6,16 @@ PHP                                                                        NEWS
   . Fixed bug #79599 (coredump in set_error_handler). (Laruence)
   . Fixed bug #79566 (Private SHM is not private on Windows). (cmb)
   . Fixed bug #79489 (.user.ini does not inherit). (cmb)
+  . Fixed bug #79600 (Regression in 7.4.6 when yielding an array based
+    generator). (Nikita)
 
 - FFI:
   . Fixed bug #79571 (FFI: var_dumping unions may segfault). (cmb)
 
 - Opcache:
   . Fixed bug #79588 (Boolean opcache settings ignore on/off values). (cmb)
+  . Fixed bug #79548 (Preloading segfault with inherited method using static
+    variable). (Nikita)
 
 - SimpleXML:
   . Fixed bug #79528 (Different object of the same xml between 7.4.5 and
