@@ -145,6 +145,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_CLONE     "clone (T_CLONE)"
 %token T_EXIT      "exit (T_EXIT)"
 %token T_IF        "if (T_IF)"
+%token T_GUARD 	   "guard (T_GUARD)"
 %token T_ELSEIF    "elseif (T_ELSEIF)"
 %token T_ELSE      "else (T_ELSE)"
 %token T_ENDIF     "endif (T_ENDIF)"
@@ -234,7 +235,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> group_use_declaration inline_use_declarations inline_use_declaration
 %type <ast> mixed_group_use_declaration use_declaration unprefixed_use_declaration
 %type <ast> unprefixed_use_declarations const_decl inner_statement
-%type <ast> expr optional_expr while_statement for_statement foreach_variable
+%type <ast> expr optional_expr guard_statement while_statement for_statement foreach_variable
 %type <ast> foreach_statement declare_statement finally_statement unset_variable variable
 %type <ast> extends_from parameter optional_type_without_static argument global_var
 %type <ast> static_var class_statement trait_adaptation trait_precedence trait_alias
@@ -429,6 +430,8 @@ statement:
 		'{' inner_statement_list '}' { $$ = $2; }
 	|	if_stmt { $$ = $1; }
 	|	alt_if_stmt { $$ = $1; }
+	|	T_GUARD '(' expr ')' T_ELSE guard_statement
+			{ $$ = zend_ast_create(ZEND_AST_GUARD, $3, $6); }
 	|	T_WHILE '(' expr ')' while_statement
 			{ $$ = zend_ast_create(ZEND_AST_WHILE, $3, $5); }
 	|	T_DO statement T_WHILE '(' expr ')' ';'
@@ -598,6 +601,10 @@ case_separator:
 while_statement:
 		statement { $$ = $1; }
 	|	':' inner_statement_list T_ENDWHILE ';' { $$ = $2; }
+;
+
+guard_statement:
+		statement { $$ = $1; }
 ;
 
 

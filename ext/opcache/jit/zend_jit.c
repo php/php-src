@@ -2689,6 +2689,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						}
 						goto done;
 					case ZEND_JMPZ:
+					case ZEND_JMPZ_FALSE:
 					case ZEND_JMPNZ:
 						if (opline > op_array->opcodes + ssa->cfg.blocks[b].start &&
 						    ((opline-1)->result_type & (IS_SMART_BRANCH_JMPZ|IS_SMART_BRANCH_JMPNZ)) != 0) {
@@ -2737,6 +2738,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						if ((opline->result_type & IS_TMP_VAR)
 						 && (i + 1) <= end
 						 && ((opline+1)->opcode == ZEND_JMPZ
+						  || (opline+1)->opcode == ZEND_JMPZ_FALSE
 						  || (opline+1)->opcode == ZEND_JMPNZ
 						  || (opline+1)->opcode == ZEND_JMPZNZ)
 						 && (opline+1)->op1_type == IS_TMP_VAR
@@ -2940,6 +2942,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 					is_terminated = 1;
 					break;
 				case ZEND_JMPZ:
+				case ZEND_JMPZ_FALSE:
 				case ZEND_JMPNZ:
 					if (opline > op_array->opcodes &&
 					    ((opline-1)->result_type & (IS_SMART_BRANCH_JMPZ|IS_SMART_BRANCH_JMPNZ)) != 0) {

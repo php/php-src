@@ -1182,6 +1182,7 @@ static ZEND_COLD void zend_ast_export_stmt(smart_str *str, zend_ast *ast, int in
 		switch (ast->kind) {
 			case ZEND_AST_LABEL:
 			case ZEND_AST_IF:
+			case ZEND_AST_GUARD:
 			case ZEND_AST_SWITCH:
 			case ZEND_AST_WHILE:
 			case ZEND_AST_TRY:
@@ -1824,6 +1825,14 @@ simple_list:
 			smart_str_appends(str, "while (");
 			zend_ast_export_ex(str, ast->child[0], 0, indent);
 			smart_str_appends(str, ") {\n");
+			zend_ast_export_stmt(str, ast->child[1], indent + 1);
+			zend_ast_export_indent(str, indent);
+			smart_str_appendc(str, '}');
+			break;
+		case ZEND_AST_GUARD:
+			smart_str_appends(str, "guard (");
+			zend_ast_export_ex(str, ast->child[0], 0, indent);
+			smart_str_appends(str, ") else {\n");
 			zend_ast_export_stmt(str, ast->child[1], indent + 1);
 			zend_ast_export_indent(str, indent);
 			smart_str_appendc(str, '}');

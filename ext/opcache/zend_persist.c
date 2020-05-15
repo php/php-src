@@ -477,6 +477,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 						/* relative extended_value don't have to be changed */
 						/* break omitted intentionally */
 					case ZEND_JMPZ:
+					case ZEND_JMPZ_FALSE:
 					case ZEND_JMPNZ:
 					case ZEND_JMPZ_EX:
 					case ZEND_JMPNZ_EX:

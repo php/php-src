@@ -483,7 +483,7 @@ static zend_always_inline const zend_op* zend_jit_trace_get_exit_opline(zend_jit
 			return OP_JMP_ADDR(opline, opline->op2);
 		} else if (trace->opline == OP_JMP_ADDR(opline, opline->op2)) {
 			/* taken branch */
-			*exit_if_true = opline->opcode == ZEND_JMPZ;
+			*exit_if_true = opline->opcode == ZEND_JMPZ || opline->opcode == ZEND_JMPZ_FALSE;
 			return opline + 1;
 		} else {
 			ZEND_ASSERT(0);

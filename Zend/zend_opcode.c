@@ -980,6 +980,7 @@ ZEND_API int pass_two(zend_op_array *op_array)
 				opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, opline->extended_value);
 				/* break omitted intentionally */
 			case ZEND_JMPZ:
+			case ZEND_JMPZ_FALSE:
 			case ZEND_JMPNZ:
 			case ZEND_JMPZ_EX:
 			case ZEND_JMPNZ_EX:

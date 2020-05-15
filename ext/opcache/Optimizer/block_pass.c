@@ -1293,6 +1293,7 @@ static void zend_jmp_optimization(zend_basic_block *block, zend_op_array *op_arr
 			break;
 
 		case ZEND_JMPZ:
+		case ZEND_JMPZ_FALSE:
 		case ZEND_JMPNZ:
 			jmp_hitlist_count = 0;
 

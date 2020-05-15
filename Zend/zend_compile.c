@@ -2130,7 +2130,7 @@ static inline uint32_t zend_emit_cond_jump(zend_uchar opcode, znode *cond, uint3
 		if (opline->result_type == IS_TMP_VAR
 		 && opline->result.var == cond->u.op.var
 		 && zend_is_smart_branch(opline)) {
-			if (opcode == ZEND_JMPZ) {
+			if (opcode == ZEND_JMPZ || opcode == ZEND_JMPZ_FALSE) {
 				opline->result_type = IS_TMP_VAR | IS_SMART_BRANCH_JMPZ;
 			} else {
 				ZEND_ASSERT(opcode == ZEND_JMPNZ);
@@ -2152,6 +2152,7 @@ static inline void zend_update_jump_target(uint32_t opnum_jump, uint32_t opnum_t
 			opline->op1.opline_num = opnum_target;
 			break;
 		case ZEND_JMPZ:
+		case ZEND_JMPZ_FALSE:
 		case ZEND_JMPNZ:
 		case ZEND_JMPZ_EX:
 		case ZEND_JMPNZ_EX:
@@ -4951,6 +4952,41 @@ void zend_compile_if(zend_ast *ast) /* {{{ */
 		}
 		efree(jmp_opnums);
 	}
+}
+/* }}} */
+
+void zend_compile_guard(zend_ast *ast) /* {{{ */
+{
+	int16_t i;
+	zend_ast *cond_ast = ast->child[0];
+	zend_ast *stmt_ast = ast->child[1];
+	znode cond_node;
+	uint32_t opnum_jmpz_false;
+	zend_compile_expr(&cond_node, cond_ast);
+
+	zend_ast_list *list = zend_ast_get_list(stmt_ast);
+	uint32_t invalid = 1;
+    for (i = list->children - 1; i >= 0; i--) {
+		if (list->child[i]->kind == ZEND_AST_THROW
+			|| list->child[i]->kind == ZEND_AST_RETURN
+			|| list->child[i]->kind == ZEND_AST_CONTINUE
+			|| list->child[i]->kind == ZEND_AST_BREAK
+		) {
+			invalid = 0;
+			break;
+		}
+    }
+    if (invalid) {
+    	CG(zend_lineno) = cond_ast->lineno;
+		zend_error_noreturn(
+			E_COMPILE_ERROR,
+			"Guard statement must contain"
+		);
+    }
+    opnum_jmpz_false = zend_emit_cond_jump(ZEND_JMPZ_FALSE, &cond_node, 0);
+	zend_compile_stmt(stmt_ast);
+
+	zend_update_jump_target_to_next(opnum_jmpz_false);
 }
 /* }}} */
 
@@ -8755,6 +8791,9 @@ void zend_compile_stmt(zend_ast *ast) /* {{{ */
 			break;
 		case ZEND_AST_IF:
 			zend_compile_if(ast);
+			break;
+		case ZEND_AST_GUARD:
+			zend_compile_guard(ast);
 			break;
 		case ZEND_AST_SWITCH:
 			zend_compile_switch(ast);

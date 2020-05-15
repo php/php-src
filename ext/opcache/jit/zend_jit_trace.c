@@ -267,6 +267,7 @@ static int zend_jit_trace_may_exit(const zend_op_array *op_array, const zend_op 
 			break;
 		case ZEND_JMPZNZ:
 		case ZEND_JMPZ:
+		case ZEND_JMPZ_FALSE:
 		case ZEND_JMPNZ:
 		case ZEND_JMPZ_EX:
 		case ZEND_JMPNZ_EX:
@@ -1332,6 +1333,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 				case ZEND_BOOL:
 				case ZEND_BOOL_NOT:
 				case ZEND_JMPZ:
+				case ZEND_JMPZ_FALSE:
 				case ZEND_JMPNZ:
 				case ZEND_JMPZNZ:
 				case ZEND_JMPZ_EX:

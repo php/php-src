@@ -1451,6 +1451,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	RETURN_TOKEN(T_ELSE);
 }
 
+<ST_IN_SCRIPTING>"guard" {
+	RETURN_TOKEN(T_GUARD);
+}
+
 <ST_IN_SCRIPTING>"while" {
 	RETURN_TOKEN(T_WHILE);
 }
