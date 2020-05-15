@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 7.4.7
 
 - Core:
+  . Fixed bug #79536 (zend_clear_exception prevent exception's destructor to be
+    called). (Laruence)
   . Fixed bug #79566 (Private SHM is not private on Windows). (cmb)
   . Fixed bug #79489 (.user.ini does not inherit). (cmb)
 
@@ -19,15 +21,17 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #79561 (dns_get_record() fails with DNS_ALL). (cmb)
 
-?? ??? ????, PHP 7.4.6
+14 May 2020, PHP 7.4.6
 
 - Core:
-  . Fixed bug #79536 (zend_clear_exception prevent exception's destructor to be
-    called). (Laruence)
   . Fixed bug #78434 (Generator yields no items after valid() call). (Nikita)
   . Fixed bug #79477 (casting object into array creates references). (Nikita)
   . Fixed bug #79514 (Memory leaks while including unexistent file). (cmb,
     Nikita)
+  . Fixed bug #78875 (Long filenames cause OOM and temp files are not cleaned). 
+    (CVE-2019-11048) (cmb)
+  . Fixed bug #78876 (Long variables in multipart/form-data cause OOM and temp 
+    files are not cleaned). (CVE-2019-11048) (cmb)
 
 - DOM:
   . Fixed bug #78221 (DOMNode::normalize() doesn't remove empty text nodes).
@@ -65,7 +69,7 @@ PHP                                                                        NEWS
   . Fixed bug #79447 (Serializing uninitialized typed properties with __sleep
     should not throw). (nicolas-grekas)
 
-?? ??? ????, PHP 7.4.5
+16 Apr 2020, PHP 7.4.5
 
 - Core:
   . Fixed bug #79364 (When copy empty array, next key is unspecified). (cmb)
