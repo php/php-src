@@ -224,6 +224,12 @@ PHP 8.0 UPGRADE NOTES
 - Enchant:
   . enchant_broker_list_dicts(), enchant_broker_describe() and
     enchant_dict_suggest() will now return an empty array instead of null.
+  . enchant_broker_init() will now return an EnchantBroker object rather than
+    a resource. Return value checks using is_resource() should be replaced with
+    checks for `false`.
+  . enchant_broker_request_dict() and enchant_broker_request_pwl_dict() will now
+    return an EnchantDictionary object rather than a resource. Return value checks
+    using is_resource() should be replaced with checks for `false`.
 
 - Exif:
   . Removed read_exif_data(). exif_read_data() should be used instead.
