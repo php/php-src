@@ -11,6 +11,9 @@ PHP                                                                        NEWS
 - FFI:
   . Fixed bug #79571 (FFI: var_dumping unions may segfault). (cmb)
 
+- MySQLnd:
+  . Fixed bug #79596 (MySQL FLOAT truncates to int some locales). (cmb)
+
 - Opcache:
   . Fixed bug #79588 (Boolean opcache settings ignore on/off values). (cmb)
 
