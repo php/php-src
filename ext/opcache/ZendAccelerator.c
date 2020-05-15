@@ -2854,6 +2854,10 @@ static int accel_startup(zend_extension *extension)
 	accel_globals_ctor(&accel_globals);
 #endif
 
+#ifdef HAVE_JIT
+	zend_jit_init();
+#endif
+
 #ifdef ZEND_WIN32
 # if !defined(__has_feature) || !__has_feature(address_sanitizer)
 	_setmaxstdio(2048); /* The default configuration is limited to 512 stdio files */
@@ -2937,8 +2941,7 @@ static int accel_post_startup(void)
 		size_t jit_size = 0;
 		zend_bool reattached = 0;
 
-		if (ZCG(accel_directives).jit &&
-		    ZCG(accel_directives).jit_buffer_size) {
+		if (JIT_G(enabled) && JIT_G(buffer_size)) {
 			size_t page_size;
 
 # ifdef _WIN32
@@ -2952,12 +2955,9 @@ static int accel_post_startup(void)
 				zend_accel_error(ACCEL_LOG_FATAL, "Failure to initialize shared memory structures - can't get page size.");
 				abort();
 			}
-			jit_size = ZCG(accel_directives).jit_buffer_size;
+			jit_size = JIT_G(buffer_size);
 			jit_size = ZEND_MM_ALIGNED_SIZE_EX(jit_size, page_size);
 			shm_size += jit_size;
-		} else {
-			ZCG(accel_directives).jit = 0;
-			ZCG(accel_directives).jit_buffer_size = 0;
 		}
 
 		switch (zend_shared_alloc_startup(shm_size, jit_size)) {
@@ -3010,13 +3010,13 @@ static int accel_post_startup(void)
 
 		zend_shared_alloc_lock();
 #ifdef HAVE_JIT
-		if (ZCG(accel_directives).jit &&
-		    ZCG(accel_directives).jit_buffer_size &&
-		    ZSMMG(reserved) &&
-			zend_jit_startup(ZCG(accel_directives).jit, ZSMMG(reserved), jit_size, reattached) == SUCCESS) {
-			ZCG(jit_enabled) = 1;
-		} else {
-			ZCG(jit_enabled) = 0;
+		if (JIT_G(enabled)) {
+			if (JIT_G(buffer_size) == 0
+		     || !ZSMMG(reserved)
+			 || zend_jit_startup(ZSMMG(reserved), jit_size, reattached) != SUCCESS) {
+				JIT_G(enabled) = 0;
+				JIT_G(on) = 0;
+			}
 		}
 #endif
 		zend_shared_alloc_save_state();

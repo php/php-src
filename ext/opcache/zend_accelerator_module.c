@@ -194,6 +194,28 @@ static ZEND_INI_MH(OnUpdateFileCache)
 	return SUCCESS;
 }
 
+#ifdef HAVE_JIT
+static ZEND_INI_MH(OnUpdateJit)
+{
+	if (zend_jit_config(new_value, stage) == SUCCESS) {
+		return OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
+	}
+	return FAILURE;
+}
+
+static ZEND_INI_MH(OnUpdateJitDebug)
+{
+	zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
+	zend_long val = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
+
+	if (zend_jit_debug_config(*p, val, stage) == SUCCESS) {
+		*p = val;
+		return SUCCESS;
+	}
+	return FAILURE;
+}
+#endif
+
 ZEND_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("opcache.enable"             , "1", PHP_INI_ALL,    OnEnable,     enabled                             , zend_accel_globals, accel_globals)
 	STD_PHP_INI_BOOLEAN("opcache.use_cwd"            , "1", PHP_INI_SYSTEM, OnUpdateBool, accel_directives.use_cwd            , zend_accel_globals, accel_globals)
@@ -251,10 +273,10 @@ ZEND_INI_BEGIN()
 	STD_PHP_INI_ENTRY("opcache.cache_id"                      , ""    , PHP_INI_SYSTEM, OnUpdateString,           accel_directives.cache_id,               zend_accel_globals, accel_globals)
 #endif
 #ifdef HAVE_JIT
-	STD_PHP_INI_ENTRY("opcache.jit"                           , ZEND_JIT_DEFAULT, PHP_INI_SYSTEM, OnUpdateLong, accel_directives.jit,                      zend_accel_globals, accel_globals)
-	STD_PHP_INI_ENTRY("opcache.jit_buffer_size"               , "0"   , PHP_INI_SYSTEM, OnUpdateLong,	   accel_directives.jit_buffer_size,               zend_accel_globals, accel_globals)
-	STD_PHP_INI_ENTRY("opcache.jit_debug"                     , "0"   , PHP_INI_SYSTEM, OnUpdateLong,	   accel_directives.jit_debug,                     zend_accel_globals, accel_globals)
-	STD_PHP_INI_ENTRY("opcache.jit_bisect_limit"              , "0"   , PHP_INI_SYSTEM, OnUpdateLong,      accel_directives.jit_bisect_limit,              zend_accel_globals, accel_globals)
+	STD_PHP_INI_ENTRY("opcache.jit"                           , ZEND_JIT_DEFAULT_OPTIONS,     PHP_INI_ALL,    OnUpdateJit,      options,      zend_jit_globals, jit_globals)
+	STD_PHP_INI_ENTRY("opcache.jit_buffer_size"               , ZEND_JIT_DEFAULT_BUFFER_SIZE, PHP_INI_SYSTEM, OnUpdateLong,     buffer_size,  zend_jit_globals, jit_globals)
+	STD_PHP_INI_ENTRY("opcache.jit_debug"                     , "0",                          PHP_INI_ALL,    OnUpdateJitDebug, debug,        zend_jit_globals, jit_globals)
+	STD_PHP_INI_ENTRY("opcache.jit_bisect_limit"              , "0",                          PHP_INI_ALL,    OnUpdateLong,     bisect_limit, zend_jit_globals, jit_globals)
 #endif
 ZEND_INI_END()
 
@@ -387,8 +409,12 @@ void zend_accel_info(ZEND_MODULE_INFO_FUNC_ARGS)
 		php_info_print_table_row(2, "File Cache", "Disabled");
 	}
 #if HAVE_JIT
-	if (ZCG(jit_enabled)) {
-		php_info_print_table_row(2, "JIT", "Enabled");
+	if (JIT_G(enabled)) {
+		if (JIT_G(on)) {
+			php_info_print_table_row(2, "JIT", "On");
+		} else {
+			php_info_print_table_row(2, "JIT", "Off");
+		}
 	} else {
 		php_info_print_table_row(2, "JIT", "Disabled");
 	}
@@ -722,10 +748,10 @@ ZEND_FUNCTION(opcache_get_configuration)
 	add_assoc_string(&directives, "opcache.cache_id", STRING_NOT_NULL(ZCG(accel_directives).cache_id));
 #endif
 #ifdef HAVE_JIT
-	add_assoc_long(&directives,   "opcache.jit", ZCG(accel_directives).jit);
-	add_assoc_long(&directives,   "opcache.jit_buffer_size", ZCG(accel_directives).jit_buffer_size);
-	add_assoc_long(&directives,   "opcache.jit_debug", ZCG(accel_directives).jit_debug);
-	add_assoc_long(&directives,   "opcache.jit_bisect_limit", ZCG(accel_directives).jit_bisect_limit);
+	add_assoc_string(&directives, "opcache.jit", JIT_G(options));
+	add_assoc_long(&directives,   "opcache.jit_buffer_size", JIT_G(buffer_size));
+	add_assoc_long(&directives,   "opcache.jit_debug", JIT_G(debug));
+	add_assoc_long(&directives,   "opcache.jit_bisect_limit", JIT_G(bisect_limit));
 #endif
 
 	add_assoc_zval(return_value, "directives", &directives);

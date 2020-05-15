@@ -191,12 +191,6 @@ typedef struct _zend_accel_directives {
 #ifdef ZEND_WIN32
 	char *cache_id;
 #endif
-#ifdef HAVE_JIT
-	zend_long      jit;
-	zend_long      jit_buffer_size;
-	zend_long      jit_debug;
-	zend_long      jit_bisect_limit;
-#endif
 } zend_accel_directives;
 
 typedef struct _zend_accel_globals {
@@ -227,9 +221,6 @@ typedef struct _zend_accel_globals {
 	void                   *arena_mem;
 	zend_persistent_script *current_persistent_script;
 	zend_bool               is_immutable_class;
-#ifdef HAVE_JIT
-	zend_bool               jit_enabled;
-#endif
 	/* cache to save hash lookup on the same INCLUDE opcode */
 	const zend_op          *cache_opline;
 	zend_persistent_script *cache_persistent_script;

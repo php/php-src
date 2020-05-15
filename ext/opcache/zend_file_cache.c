@@ -33,6 +33,10 @@
 #include "zend_accelerator_util_funcs.h"
 #include "zend_accelerator_hash.h"
 
+#if HAVE_JIT
+#include "jit/zend_jit.h"
+#endif
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -892,7 +896,7 @@ int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
 
 #ifdef HAVE_JIT
 	/* FIXME: dump jited codes out to file cache? */
-	if (ZCG(jit_enabled)) {
+	if (JIT_G(on)) {
 		return FAILURE;
 	}
 #endif
