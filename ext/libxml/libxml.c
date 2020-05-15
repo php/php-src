@@ -27,7 +27,7 @@
 #include "ext/standard/info.h"
 #include "ext/standard/file.h"
 
-#if HAVE_LIBXML
+#ifdef HAVE_LIBXML
 
 #include <libxml/parser.h>
 #include <libxml/parserInternals.h>
@@ -714,7 +714,7 @@ PHP_LIBXML_API void php_libxml_initialize(void)
 PHP_LIBXML_API void php_libxml_shutdown(void)
 {
 	if (_php_libxml_initialized) {
-#if defined(LIBXML_SCHEMAS_ENABLED)
+#ifdef LIBXML_SCHEMAS_ENABLED
 		xmlRelaxNGCleanupTypes();
 #endif
 		/* xmlCleanupParser(); */
@@ -767,7 +767,7 @@ static PHP_MINIT_FUNCTION(libxml)
 	REGISTER_LONG_CONSTANT("LIBXML_NOEMPTYTAG",	LIBXML_SAVE_NOEMPTYTAG,	CONST_CS | CONST_PERSISTENT);
 
 	/* Schema validation options */
-#if defined(LIBXML_SCHEMAS_ENABLED)
+#ifdef LIBXML_SCHEMAS_ENABLED
 	REGISTER_LONG_CONSTANT("LIBXML_SCHEMA_CREATE",	XML_SCHEMA_VAL_VC_I_CREATE,	CONST_CS | CONST_PERSISTENT);
 #endif
 
