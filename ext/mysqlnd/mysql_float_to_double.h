@@ -31,7 +31,7 @@
 
 /*
  * Convert from a 4-byte float to a 8-byte decimal by first converting
- * the float to a string, and then the string to a double.
+ * the float to a string (ignoring localization), and then the string to a double.
  * The decimals argument specifies the precision of the output. If decimals
  * is less than zero, then a gcvt(3) like logic is used with the significant
  * digits set to FLT_DIG i.e. 6.
@@ -42,7 +42,7 @@ static inline double mysql_float_to_double(float fp4, int decimals) {
 	if (decimals < 0) {
 		php_gcvt(fp4, FLT_DIG, '.', 'e', num_buf);
 	} else {
-		php_sprintf(num_buf, "%.*f", decimals, fp4);
+		snprintf(num_buf, MAX_CHAR_BUF_LEN, "%.*F", decimals, fp4);
 	}
 
 	return zend_strtod(num_buf, NULL);

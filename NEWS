@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #79566 (Private SHM is not private on Windows). (cmb)
   . Fixed bug #79489 (.user.ini does not inherit). (cmb)
 
+- MySQLnd:
+  . Fixed bug #79596 (MySQL FLOAT truncates to int some locales). (cmb)
+
 - Opcache:
   . Fixed bug #79535 (PHP crashes with specific opcache.optimization_level).
     (Nikita)
