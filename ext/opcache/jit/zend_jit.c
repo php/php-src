@@ -38,7 +38,7 @@
 #include "jit/zend_jit_internal.h"
 
 #ifdef ZTS
-int zend_jit_globals_id;
+int jit_globals_id;
 #else
 zend_jit_globals jit_globals;
 #endif
@@ -3637,7 +3637,7 @@ ZEND_EXT_API int zend_jit_debug_config(zend_long old_val, zend_long new_val, int
 ZEND_EXT_API void zend_jit_init(void)
 {
 #ifdef ZTS
-	zend_jit_globals_id = ts_allocate_id(&zend_jit_globals_id, sizeof(zend_jit_globals), (ts_allocate_ctor) zend_jit_globals_ctor, NULL);
+	jit_globals_id = ts_allocate_id(&jit_globals_id, sizeof(zend_jit_globals), (ts_allocate_ctor) zend_jit_globals_ctor, NULL);
 #else
 	zend_jit_globals_ctor(&jit_globals);
 #endif
