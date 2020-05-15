@@ -1434,10 +1434,7 @@ void zend_unset_timeout(void) /* {{{ */
 
 #elif defined(HAVE_SETITIMER) && !defined(ZTS)
 	if (EG(timeout_seconds)) {
-		struct itimerval no_timeout;
-
-		no_timeout.it_value.tv_sec = no_timeout.it_value.tv_usec = no_timeout.it_interval.tv_sec = no_timeout.it_interval.tv_usec = 0;
-
+		struct itimerval no_timeout = { .it_interval = {0}, .it_value = {0}};
 # ifdef __CYGWIN__
 		setitimer(ITIMER_REAL, &no_timeout, NULL);
 # else
