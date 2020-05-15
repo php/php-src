@@ -1282,15 +1282,13 @@ static void zend_set_timeout_ex(zend_long seconds, TIMEOUT_HANDLER callback_func
 	}
 
 #elif defined(HAVE_SETITIMER) && !defined(ZTS)
-	struct itimerval t_r;	/* timeout requested */
-	t_r.it_value.tv_sec = seconds;
-	t_r.it_value.tv_usec = t_r.it_interval.tv_sec = t_r.it_interval.tv_usec = 0;
+	struct itimerval timeout_requested = { .it_value = { .tv_sec = seconds }};
 
 # ifdef __CYGWIN__
-	setitimer(ITIMER_REAL, &t_r, NULL);
+	setitimer(ITIMER_REAL, &timeout_requested, NULL);
 	prepare_to_receive_timeout_signal(SIGALRM, callback_func);
 # else
-	setitimer(ITIMER_PROF, &t_r, NULL);
+	setitimer(ITIMER_PROF, &timeout_requested, NULL);
 	prepare_to_receive_timeout_signal(SIGPROF, callback_func);
 # endif
 #endif
