@@ -1150,22 +1150,8 @@ static void zend_set_timeout_ex(zend_long seconds, TIMEOUT_HANDLER callback_func
 	}
 
 #ifdef ZEND_WIN32
-	zend_executor_globals *eg;
+	zend_executor_globals *eg = ZEND_MODULE_GLOBALS_BULK(executor);
 
-	/* Don't use ChangeTimerQueueTimer() as it will not restart an expired
-	 * timer, so we could end up with just an ignored timeout. Instead
-	 * delete and recreate. */
-	if (tq_timer != NULL) {
-		if (!DeleteTimerQueueTimer(NULL, tq_timer, INVALID_HANDLE_VALUE)) {
-			tq_timer = NULL;
-			zend_error_noreturn(E_ERROR, "Could not delete queued timer: Error %lu",
-				(unsigned long)GetLastError());
-			return;
-		}
-		tq_timer = NULL;
-	}
-
-	eg = ZEND_MODULE_GLOBALS_BULK(executor);
 	/* NULL means the default timer queue provided by the system is used */
 	if (!CreateTimerQueueTimer(&tq_timer, NULL, callback_func, (VOID*)eg, seconds*1000, 0, WT_EXECUTEONLYONCE)) {
 		tq_timer = NULL;
@@ -1180,12 +1166,6 @@ static void zend_set_timeout_ex(zend_long seconds, TIMEOUT_HANDLER callback_func
 	 * flag is set on _this_ one. So pass a reference to this thread's executor globals (including
 	 * the timeout flag) through to the signal handler. */
 	zend_executor_globals *eg = ZEND_MODULE_GLOBALS_BULK(executor);
-
-	/* If a timer is already running, cancel it */
-	if (timer_id != -1) {
-		ZEND_ASSERT(timer_delete(timer_id));
-		timer_id = -1;
-	}
 
 	struct sigevent se = {
 		.sigev_notify = SIGEV_SIGNAL,
@@ -1354,10 +1334,6 @@ static VOID CALLBACK zend_timeout_handler(PVOID arg, BOOLEAN timed_out)
 	}
 
 # ifndef ZTS
-	/* Don't call DeleteTimerQueueTimer from inside the timer callback.
-	 * It blocks until the outstanding timer callback finishes... which means
-	 * if you call it inside the timer callback, it blocks forever. */
-	tq_timer = NULL;
 	/* No-op if `hard_timeout` is set to zero */
 	zend_set_timeout_ex(eg->hard_timeout, zend_hard_timeout_handler);
 # endif
@@ -1406,6 +1382,11 @@ void zend_set_timeout(zend_long seconds) /* {{{ */
 void zend_unset_timeout(void) /* {{{ */
 {
 #ifdef ZEND_WIN32
+	/* Don't use `ChangeTimerQueueTimer` as it will not restart an expired
+	 * timer, so we could end up with just an ignored timeout. Instead
+	 * delete and recreate.
+	 * Note that this must _not_ be called from inside the timer callback,
+	 * since it blocks until any outstanding timer callbacks have finished. */
 	if (tq_timer != NULL) {
 		if (!DeleteTimerQueueTimer(NULL, tq_timer, INVALID_HANDLE_VALUE)) {
 			tq_timer = NULL;
