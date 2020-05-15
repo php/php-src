@@ -1430,7 +1430,10 @@ static void zend_get_gc_buffer_release(void);
 ZEND_API int zend_gc_collect_cycles(void)
 {
 	int count = 0;
+	zend_bool should_rerun_gc = 0;
+	zend_bool did_rerun_gc = 0;
 
+rerun_gc:
 	if (GC_G(num_roots)) {
 		gc_root_buffer *current, *last;
 		zend_refcounted *p;
@@ -1475,8 +1478,8 @@ ZEND_API int zend_gc_collect_cycles(void)
 			 * be introduced. These references can be introduced in a way that does not
 			 * modify any refcounts, so we have no real way to detect this situation
 			 * short of rerunning full GC tracing. What we do instead is to only run
-			 * destructors at this point, and leave the actual freeing of the objects
-			 * until the next GC run. */
+			 * destructors at this point and automatically re-run GC afterwards. */
+			should_rerun_gc = 1;
 
 			/* Mark all roots for which a dtor will be invoked as DTOR_GARBAGE. Additionally
 			 * color them purple. This serves a double purpose: First, they should be
@@ -1609,6 +1612,15 @@ ZEND_API int zend_gc_collect_cycles(void)
 	}
 
 	gc_compact();
+
+	/* Objects with destructors were removed from this GC run. Rerun GC right away to clean them
+	 * up. We do this only once: If we encounter more destructors on the second run, we'll not
+	 * run GC another time. */
+	if (should_rerun_gc && !did_rerun_gc) {
+		did_rerun_gc = 1;
+		goto rerun_gc;
+	}
+
 	zend_get_gc_buffer_release();
 	return count;
 }
