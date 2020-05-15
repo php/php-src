@@ -1144,6 +1144,7 @@ ZEND_API int zend_eval_string_ex(const char *str, zval *retval_ptr, const char *
  *   - prefers to use thread CPU time, but falls back to process CPU time or real time
  * - setitimer
  *   - fallback for Unix-like systems which do not support POSIX timers
+ *   - disabled on ZTS builds, since on timeout, we would have no way to tell which thread timed out
  *   - uses process CPU time (except Cygwin, which uses real time)
  */
 
@@ -1174,7 +1175,7 @@ typedef void (*TIMEOUT_HANDLER)(int);
 #define SIGPROF 27
 #endif
 
-#if _POSIX_TIMERS > 0 || defined(HAVE_SETITIMER)
+#if _POSIX_TIMERS > 0 || (defined(HAVE_SETITIMER) && !defined(ZTS))
 static void prepare_to_receive_timeout_signal(int signo, TIMEOUT_HANDLER callback_func)
 {
 	/* We do not use Zend signal handling, since `zend_signal` expects a handler function which
@@ -1282,7 +1283,7 @@ static void zend_set_timeout_ex(zend_long seconds, TIMEOUT_HANDLER callback_func
 		return;
 	}
 
-#elif defined(HAVE_SETITIMER)
+#elif defined(HAVE_SETITIMER) && !defined(ZTS)
 	struct itimerval t_r;	/* timeout requested */
 	t_r.it_value.tv_sec = seconds;
 	t_r.it_value.tv_usec = t_r.it_interval.tv_sec = t_r.it_interval.tv_usec = 0;
@@ -1294,7 +1295,7 @@ static void zend_set_timeout_ex(zend_long seconds, TIMEOUT_HANDLER callback_func
 	setitimer(ITIMER_PROF, &t_r, NULL);
 	prepare_to_receive_timeout_signal(SIGPROF, callback_func);
 # endif
-#endif /* HAVE_SETITIMER */
+#endif
 }
 /* }}} */
 
@@ -1386,7 +1387,7 @@ static void zend_timeout_handler(int dummy, siginfo_t *siginfo, void *unused)
 	eg->vm_interrupt = 1;
 }
 
-#else /* POSIX, using setitimer */
+#else
 
 static void zend_timeout_handler(int dummy) /* {{{ */
 {
@@ -1433,7 +1434,7 @@ void zend_unset_timeout(void) /* {{{ */
 		timer_id = NULL;
 	}
 
-#elif defined(HAVE_SETITIMER)
+#elif defined(HAVE_SETITIMER) && !defined(ZTS)
 	if (EG(timeout_seconds)) {
 		struct itimerval no_timeout;
 
