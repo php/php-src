@@ -209,7 +209,7 @@ function ldap_control_paged_result($link, int $pagesize, bool $iscritical = fals
 function ldap_control_paged_result_response($link, $result, &$cookie = null, &$estimated = null): bool {}
 #endif
 
-#if (LDAP_API_VERSION > 2000) || HAVE_ORALDAP
+#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 /** @param resource $link_identifier */
 function ldap_rename($link_identifier, string $dn, string $newrdn, string $newparent, bool $deleteoldrdn, array $servercontrols = []): bool {}
 
