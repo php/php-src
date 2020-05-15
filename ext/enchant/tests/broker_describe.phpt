@@ -17,12 +17,12 @@ if (!$broker) {
 }
 
 if (!enchant_broker_describe($broker)) {
-	enchant_broker_free($broker);
+	@enchant_broker_free($broker);
 
 	echo "skip: No broker providers found\n";
 }
 
-enchant_broker_free($broker);
+@enchant_broker_free($broker);
 ?>
 --FILE--
 <?php
@@ -47,7 +47,7 @@ if($broker) {
         echo "failed, brocker describe array \n";
     }
 
-    enchant_broker_free($broker);
+    @enchant_broker_free($broker);
 
 } else {
     echo("failed, broker_init failure\n");
