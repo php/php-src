@@ -1754,7 +1754,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 
 	if (password_len) {
 		zend_ulong password_hash;
-		password_hash = zend_inline_hash_func(password, password_len);
+		password_hash = zend_hash_func(password, password_len);
 		smart_str_append_unsigned_ex(&hashed_details, password_hash, 0);
 	}
 	smart_str_appendl_ex(&hashed_details, "**", sizeof("**") - 1, 0);
@@ -2909,7 +2909,7 @@ static php_oci_spool *php_oci_get_spool(char *username, int username_len, char *
 	smart_str_appendl_ex(&spool_hashed_details, "**", sizeof("**") - 1, 0);
 	if (password_len) {
 		zend_ulong password_hash;
-		password_hash = zend_inline_hash_func(password, password_len);
+		password_hash = zend_hash_func(password, password_len);
 		smart_str_append_unsigned_ex(&spool_hashed_details, password_hash, 0);
 	}
 	smart_str_appendl_ex(&spool_hashed_details, "**", sizeof("**") - 1, 0);

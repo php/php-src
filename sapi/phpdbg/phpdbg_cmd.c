@@ -199,16 +199,16 @@ PHPDBG_API zend_ulong phpdbg_hash_param(const phpdbg_param_t *param) /* {{{ */
 		break;
 
 		case STR_PARAM:
-			hash += zend_inline_hash_func(param->str, param->len);
+			hash += zend_hash_func(param->str, param->len);
 		break;
 
 		case METHOD_PARAM:
-			hash += zend_inline_hash_func(param->method.class, strlen(param->method.class));
-			hash += zend_inline_hash_func(param->method.name, strlen(param->method.name));
+			hash += zend_hash_func(param->method.class, strlen(param->method.class));
+			hash += zend_hash_func(param->method.name, strlen(param->method.name));
 		break;
 
 		case FILE_PARAM:
-			hash += zend_inline_hash_func(param->file.name, strlen(param->file.name));
+			hash += zend_hash_func(param->file.name, strlen(param->file.name));
 			hash += param->file.line;
 			if (param->num)
 				hash += param->num;
@@ -223,13 +223,13 @@ PHPDBG_API zend_ulong phpdbg_hash_param(const phpdbg_param_t *param) /* {{{ */
 		break;
 
 		case NUMERIC_FUNCTION_PARAM:
-			hash += zend_inline_hash_func(param->str, param->len);
+			hash += zend_hash_func(param->str, param->len);
 			hash += param->num;
 		break;
 
 		case NUMERIC_METHOD_PARAM:
-			hash += zend_inline_hash_func(param->method.class, strlen(param->method.class));
-			hash += zend_inline_hash_func(param->method.name, strlen(param->method.name));
+			hash += zend_hash_func(param->method.class, strlen(param->method.class));
+			hash += zend_hash_func(param->method.name, strlen(param->method.name));
 			if (param->num)
 				hash+= param->num;
 		break;

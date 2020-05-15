@@ -906,7 +906,7 @@ static inline void phpdbg_create_conditional_break(phpdbg_breakcond_t *brake, co
 
 PHPDBG_API void phpdbg_set_breakpoint_expression(const char *expr, size_t expr_len) /* {{{ */
 {
-	zend_ulong expr_hash = zend_inline_hash_func(expr, expr_len);
+	zend_ulong expr_hash = zend_hash_func(expr, expr_len);
 	phpdbg_breakcond_t new_break;
 
 	if (!zend_hash_index_exists(&PHPDBG_G(bp)[PHPDBG_BREAK_COND], expr_hash)) {
@@ -925,7 +925,7 @@ PHPDBG_API void phpdbg_set_breakpoint_at(const phpdbg_param_t *param) /* {{{ */
 
 	if (param->next) {
 		condition = param->next;
-		hash = zend_inline_hash_func(condition->str, condition->len);
+		hash = zend_hash_func(condition->str, condition->len);
 
 		if (!zend_hash_index_exists(&PHPDBG_G(bp)[PHPDBG_BREAK_COND], hash)) {
 			phpdbg_create_conditional_break(&new_break, param, condition->str, condition->len, hash);
