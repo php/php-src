@@ -3,7 +3,7 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 7.4.7
 
 - Core:
-  . Fixed bug #97599 (coredump in set_error_handler). (Laruence)
+  . Fixed bug #79599 (coredump in set_error_handler). (Laruence)
   . Fixed bug #79566 (Private SHM is not private on Windows). (cmb)
   . Fixed bug #79489 (.user.ini does not inherit). (cmb)
 
