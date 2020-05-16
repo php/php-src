@@ -20,7 +20,7 @@
 
 #include "php.h"
 
-#if HAVE_SYSVSHM
+#ifdef HAVE_SYSVSHM
 
 #include <errno.h>
 

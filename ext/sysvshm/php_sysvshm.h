@@ -17,7 +17,7 @@
 #ifndef PHP_SYSVSHM_H
 #define PHP_SYSVSHM_H
 
-#if HAVE_SYSVSHM
+#ifdef HAVE_SYSVSHM
 
 extern zend_module_entry sysvshm_module_entry;
 #define sysvshm_module_ptr &sysvshm_module_entry
