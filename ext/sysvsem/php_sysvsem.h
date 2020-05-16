@@ -17,7 +17,7 @@
 #ifndef PHP_SYSVSEM_H
 #define PHP_SYSVSEM_H
 
-#if HAVE_SYSVSEM
+#ifdef HAVE_SYSVSEM
 
 extern zend_module_entry sysvsem_module_entry;
 #define sysvsem_module_ptr &sysvsem_module_entry

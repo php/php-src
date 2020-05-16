@@ -21,7 +21,7 @@
 
 #include "php.h"
 
-#if HAVE_SYSVSEM
+#ifdef HAVE_SYSVSEM
 
 #include <sys/types.h>
 #include <sys/ipc.h>
