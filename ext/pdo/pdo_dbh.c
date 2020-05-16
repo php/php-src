@@ -1238,6 +1238,10 @@ int pdo_hash_methods(pdo_dbh_object_t *dbh_obj, int kind)
 			func.num_args = 0;
 			func.required_num_args = 0;
 		}
+
+		ZEND_MAP_PTR_INIT(func.instrument_cache, zend_arena_alloc(&CG(arena), sizeof(void*)));
+		ZEND_MAP_PTR_SET(func.instrument_cache, NULL);
+
 		zend_set_function_arg_flags((zend_function*)&func);
 		namelen = strlen(funcs->fname);
 		lc_name = emalloc(namelen+1);

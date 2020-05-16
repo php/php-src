@@ -202,6 +202,9 @@ static void zend_hash_clone_methods(HashTable *ht)
 			if (IN_ARENA(ZEND_MAP_PTR(new_entry->run_time_cache))) {
 				ZEND_MAP_PTR_INIT(new_entry->run_time_cache, ARENA_REALLOC(ZEND_MAP_PTR(new_entry->run_time_cache)));
 			}
+			if (IN_ARENA(ZEND_MAP_PTR(new_entry->instrument_cache))) {
+				ZEND_MAP_PTR_INIT(new_entry->instrument_cache, ARENA_REALLOC(ZEND_MAP_PTR(new_entry->instrument_cache)));
+			}
 			ZEND_MAP_PTR_INIT(new_entry->static_variables_ptr, &new_entry->static_variables);
 		}
 	}

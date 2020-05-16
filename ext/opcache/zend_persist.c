@@ -584,6 +584,7 @@ static void zend_persist_op_array(zval *zv)
 	if (!ZCG(current_persistent_script)->corrupted) {
 		op_array->fn_flags |= ZEND_ACC_IMMUTABLE;
 		ZEND_MAP_PTR_NEW(op_array->run_time_cache);
+		ZEND_MAP_PTR_NEW(op_array->instrument_cache);
 		if (op_array->static_variables) {
 			ZEND_MAP_PTR_NEW(op_array->static_variables_ptr);
 		}
@@ -591,6 +592,8 @@ static void zend_persist_op_array(zval *zv)
 		ZEND_MAP_PTR_INIT(op_array->run_time_cache, ZCG(arena_mem));
 		ZCG(arena_mem) = (void*)(((char*)ZCG(arena_mem)) + ZEND_ALIGNED_SIZE(sizeof(void*)));
 		ZEND_MAP_PTR_SET(op_array->run_time_cache, NULL);
+		ZCG(arena_mem) = (void*)(((char*)ZCG(arena_mem)) + ZEND_ALIGNED_SIZE(sizeof(void*)));
+		ZEND_MAP_PTR_SET(op_array->instrument_cache, NULL);
 	}
 }
 

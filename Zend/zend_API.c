@@ -2061,6 +2061,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 	}
 	internal_function->type = ZEND_INTERNAL_FUNCTION;
 	internal_function->module = EG(current_module);
+	ZEND_MAP_PTR_NEW(internal_function->instrument_cache);
 	memset(internal_function->reserved, 0, ZEND_MAX_RESERVED_RESOURCES * sizeof(void*));
 
 	if (scope) {

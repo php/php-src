@@ -23,6 +23,7 @@
 
 #include "zend_compile.h"
 #include "zend_hash.h"
+#include "zend_instrument.h"
 #include "zend_operators.h"
 #include "zend_variables.h"
 
@@ -39,7 +40,20 @@ ZEND_API void zend_init_func_execute_data(zend_execute_data *execute_data, zend_
 ZEND_API void zend_init_code_execute_data(zend_execute_data *execute_data, zend_op_array *op_array, zval *return_value);
 ZEND_API void zend_execute(zend_op_array *op_array, zval *return_value);
 ZEND_API void execute_ex(zend_execute_data *execute_data);
-ZEND_API void execute_internal(zend_execute_data *execute_data, zval *return_value);
+
+ZEND_API inline void execute_internal(zend_execute_data *execute_data, zval *return_value)
+{
+	zend_instrument_cache *cache = (zend_instrument_cache *)
+		ZEND_MAP_PTR_GET(execute_data->func->common.instrument_cache);
+	if (UNEXPECTED(cache != ZEND_NOT_INSTRUMENTED)) {
+		zend_instrument_call_begin_handlers(execute_data, cache);
+		execute_data->func->internal_function.handler(execute_data, return_value);
+		zend_instrument_call_end_handlers(execute_data, cache);
+	} else {
+		execute_data->func->internal_function.handler(execute_data, return_value);
+	}
+}
+
 ZEND_API zend_class_entry *zend_lookup_class(zend_string *name);
 ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *lcname, uint32_t flags);
 ZEND_API zend_class_entry *zend_get_called_scope(zend_execute_data *ex);

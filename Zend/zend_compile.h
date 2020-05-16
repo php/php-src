@@ -403,6 +403,7 @@ struct _zend_op_array {
 	uint32_t num_args;
 	uint32_t required_num_args;
 	zend_arg_info *arg_info;
+	ZEND_MAP_PTR_DEF(struct zend_instrument_cache *, instrument_cache);
 	/* END of common elements */
 
 	int cache_size;     /* number of run_time_cache_slots * sizeof(void*) */
@@ -452,6 +453,7 @@ typedef struct _zend_internal_function {
 	uint32_t num_args;
 	uint32_t required_num_args;
 	zend_internal_arg_info *arg_info;
+	ZEND_MAP_PTR_DEF(struct zend_instrument_cache *, instrument_cache);
 	/* END of common elements */
 
 	zif_handler handler;
@@ -475,6 +477,7 @@ union _zend_function {
 		uint32_t num_args;
 		uint32_t required_num_args;
 		zend_arg_info *arg_info;  /* index -1 represents the return value info, if any */
+		ZEND_MAP_PTR_DEF(struct zend_instrument_cache *, instrument_cache);
 	} common;
 
 	zend_op_array op_array;

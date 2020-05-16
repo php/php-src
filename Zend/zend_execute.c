@@ -43,6 +43,7 @@
 
 /* Virtual current working directory support */
 #include "zend_virtual_cwd.h"
+#include "zend_instrument.h"
 
 #ifdef HAVE_GCC_GLOBAL_REGS
 # if defined(__GNUC__) && ZEND_GCC_VERSION >= 4008 && defined(i386)
@@ -137,6 +138,7 @@ ZEND_API const zend_internal_function zend_pass_function = {
 	0,                      /* num_args          */
 	0,                      /* required_num_args */
 	NULL,                   /* arg_info          */
+	NULL,
 	ZEND_FN(pass),          /* handler           */
 	NULL,                   /* module            */
 	{NULL,NULL,NULL,NULL}   /* reserved          */
@@ -3307,10 +3309,7 @@ static int zend_check_symbol(zval *pz)
 #define CHECK_SYMBOL_TABLES()
 #endif
 
-ZEND_API void execute_internal(zend_execute_data *execute_data, zval *return_value)
-{
-	execute_data->func->internal_function.handler(execute_data, return_value);
-}
+ZEND_API extern inline void execute_internal(zend_execute_data *execute_data, zval *return_value);
 
 ZEND_API void zend_clean_and_cache_symbol_table(zend_array *symbol_table) /* {{{ */
 {
@@ -3508,6 +3507,9 @@ ZEND_API zend_function * ZEND_FASTCALL zend_fetch_function(zend_string *name) /*
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache_i(&fbc->op_array);
 		}
+		if (UNEXPECTED(!ZEND_MAP_PTR_GET(fbc->common.instrument_cache))) {
+			zend_instrument_install_handlers(fbc);
+		}
 		return fbc;
 	}
 	return NULL;
@@ -3522,6 +3524,9 @@ ZEND_API zend_function * ZEND_FASTCALL zend_fetch_function_str(const char *name,
 
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache_i(&fbc->op_array);
+		}
+		if (UNEXPECTED(!ZEND_MAP_PTR_GET(fbc->common.instrument_cache))) {
+			zend_instrument_install_handlers(fbc);
 		}
 		return fbc;
 	}
@@ -3555,6 +3560,12 @@ static zend_always_inline void i_init_code_execute_data(zend_execute_data *execu
 		ZEND_MAP_PTR_SET(op_array->run_time_cache, ptr);
 		memset(ptr, 0, op_array->cache_size);
 	}
+	if (!ZEND_MAP_PTR(op_array->instrument_cache)) {
+		ZEND_MAP_PTR_INIT(op_array->instrument_cache,
+			zend_arena_alloc(&CG(arena), sizeof(void*)));
+		ZEND_MAP_PTR_SET(op_array->instrument_cache, NULL);
+		zend_instrument_install_handlers((zend_function *) op_array);
+	}
 	EX(run_time_cache) = RUN_TIME_CACHE(op_array);
 
 	EG(current_execute_data) = execute_data;
@@ -3578,6 +3589,9 @@ ZEND_API void zend_init_func_execute_data(zend_execute_data *ex, zend_op_array *
 	EX(prev_execute_data) = EG(current_execute_data);
 	if (!RUN_TIME_CACHE(op_array)) {
 		init_func_run_time_cache(op_array);
+	}
+	if (UNEXPECTED(!ZEND_MAP_PTR_GET(op_array->instrument_cache))) {
+		zend_instrument_install_handlers((zend_function *) op_array);
 	}
 	i_init_func_execute_data(op_array, return_value, 1 EXECUTE_DATA_CC);
 
@@ -3930,6 +3944,9 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_string(zend_s
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
 		}
+		if (UNEXPECTED(!ZEND_MAP_PTR_GET(fbc->common.instrument_cache))) {
+			zend_instrument_install_handlers(fbc);
+		}
 	} else {
 		if (ZSTR_VAL(function)[0] == '\\') {
 			lcname = zend_string_alloc(ZSTR_LEN(function) - 1, 0);
@@ -3947,6 +3964,9 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_string(zend_s
 		fbc = Z_FUNC_P(func);
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
+		}
+		if (UNEXPECTED(!ZEND_MAP_PTR_GET(fbc->common.instrument_cache))) {
+			zend_instrument_install_handlers(fbc);
 		}
 		called_scope = NULL;
 	}
@@ -3991,6 +4011,9 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_object(zend_o
 
 	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 		init_func_run_time_cache(&fbc->op_array);
+	}
+	if (UNEXPECTED(!ZEND_MAP_PTR_GET(fbc->common.instrument_cache))) {
+		zend_instrument_install_handlers(fbc);
 	}
 
 	return zend_vm_stack_push_call_frame(call_info,
@@ -4076,6 +4099,9 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_array(zend_ar
 
 	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 		init_func_run_time_cache(&fbc->op_array);
+	}
+	if (UNEXPECTED(!ZEND_MAP_PTR_GET(fbc->common.instrument_cache))) {
+		zend_instrument_install_handlers(fbc);
 	}
 
 	return zend_vm_stack_push_call_frame(call_info,

@@ -6258,9 +6258,14 @@ void zend_compile_func_decl(znode *result, zend_ast *ast, zend_bool toplevel) /*
 		op_array->fn_flags |= ZEND_ACC_PRELOADED;
 		ZEND_MAP_PTR_NEW(op_array->run_time_cache);
 		ZEND_MAP_PTR_NEW(op_array->static_variables_ptr);
+		ZEND_MAP_PTR_NEW(op_array->instrument_cache);
 	} else {
 		ZEND_MAP_PTR_INIT(op_array->run_time_cache, zend_arena_alloc(&CG(arena), sizeof(void*)));
 		ZEND_MAP_PTR_SET(op_array->run_time_cache, NULL);
+
+		ZEND_MAP_PTR_INIT(op_array->instrument_cache,
+			zend_arena_alloc(&CG(arena), sizeof(void*)));
+		ZEND_MAP_PTR_SET(op_array->instrument_cache, NULL);
 	}
 
 	op_array->fn_flags |= (orig_op_array->fn_flags & ZEND_ACC_STRICT_TYPES);
