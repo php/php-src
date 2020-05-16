@@ -1381,6 +1381,11 @@ static void zend_timeout_handler(int dummy, siginfo_t *siginfo, void *unused)
 # endif
 
 	eg->timed_out = 1;
+#if PHP_HAVE_ATOMIC_THREAD_FENCE
+	/* Guarantee that the assignment to `timed_out` will not become visible to other threads
+	 * after the assignment to `vm_interrupt` */
+	__atomic_thread_fence(__ATOMIC_SEQ_CST);
+#endif
 	eg->vm_interrupt = 1;
 }
 
