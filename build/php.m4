@@ -2670,6 +2670,26 @@ AC_DEFUN([PHP_CHECK_BUILTIN_CPU_SUPPORTS], [
 ])
 
 dnl
+dnl PHP_CHECK_ATOMIC_THREAD_FENCE
+dnl
+AC_DEFUN([PHP_CHECK_ATOMIC_THREAD_FENCE], [
+  AC_MSG_CHECKING([for __atomic_thread_fence])
+
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([], [[
+    __atomic_thread_fence(__ATOMIC_SEQ_CST); return 1;
+  ]])], [
+    have_atomic_thread_fence=1
+    AC_MSG_RESULT([yes])
+  ], [
+    have_atomic_thread_fence=0
+    AC_MSG_RESULT([no])
+  ])
+
+  AC_DEFINE_UNQUOTED([PHP_HAVE_ATOMIC_THREAD_FENCE],
+    [$have_atomic_thread_fence], [Whether the compiler supports __atomic_thread_fence])
+])
+
+dnl
 dnl PHP_PATCH_CONFIG_HEADERS([FILE])
 dnl
 dnl PACKAGE_* symbols are automatically defined by Autoconf. When including
