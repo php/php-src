@@ -116,5 +116,5 @@ Test 2
 Test 3
 123
 
-Notice: Undefined property: stdClass::$CASESENSITIVE in %sfetch_object_1.php on line %d
+Warning: Undefined property: stdClass::$CASESENSITIVE in %sfetch_object_1.php on line %d
 
