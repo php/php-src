@@ -23,23 +23,21 @@ static sigset_t block_sigset;
 static sigset_t child_block_sigset;
 
 const char *fpm_signal_names[NSIG + 1] = {
+	/* The C standard guarantees at least these 6 signal numbers will be defined in signal.c: */
+	[SIGABRT] = "SIGABRT",
+	[SIGFPE]  = "SIGFPE",
+	[SIGILL]  = "SIGILL",
+	[SIGINT]  = "SIGINT",
+	[SIGSEGV] = "SIGSEGV",
+	[SIGTERM] = "SIGTERM",
 #ifdef SIGHUP
 	[SIGHUP] 		= "SIGHUP",
-#endif
-#ifdef SIGINT
-	[SIGINT] 		= "SIGINT",
 #endif
 #ifdef SIGQUIT
 	[SIGQUIT] 		= "SIGQUIT",
 #endif
-#ifdef SIGILL
-	[SIGILL] 		= "SIGILL",
-#endif
 #ifdef SIGTRAP
 	[SIGTRAP] 		= "SIGTRAP",
-#endif
-#ifdef SIGABRT
-	[SIGABRT] 		= "SIGABRT",
 #endif
 #ifdef SIGEMT
 	[SIGEMT] 		= "SIGEMT",
@@ -47,17 +45,11 @@ const char *fpm_signal_names[NSIG + 1] = {
 #ifdef SIGBUS
 	[SIGBUS] 		= "SIGBUS",
 #endif
-#ifdef SIGFPE
-	[SIGFPE] 		= "SIGFPE",
-#endif
 #ifdef SIGKILL
 	[SIGKILL] 		= "SIGKILL",
 #endif
 #ifdef SIGUSR1
 	[SIGUSR1] 		= "SIGUSR1",
-#endif
-#ifdef SIGSEGV
-	[SIGSEGV] 		= "SIGSEGV",
 #endif
 #ifdef SIGUSR2
 	[SIGUSR2] 		= "SIGUSR2",
@@ -67,9 +59,6 @@ const char *fpm_signal_names[NSIG + 1] = {
 #endif
 #ifdef SIGALRM
 	[SIGALRM] 		= "SIGALRM",
-#endif
-#ifdef SIGTERM
-	[SIGTERM] 		= "SIGTERM",
 #endif
 #ifdef SIGCHLD
 	[SIGCHLD] 		= "SIGCHLD",
