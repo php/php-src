@@ -17,11 +17,11 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-#ifdef ZEND_DEBUG
+#if ZEND_DEBUG
 # include <assert.h>
-# define TSRM_ASSERT assert
+# define TSRM_ASSERT(c) assert(c)
 #else
-# define TSRM_ASSERT
+# define TSRM_ASSERT(c)
 #endif
 
 typedef struct _tsrm_tls_entry tsrm_tls_entry;
