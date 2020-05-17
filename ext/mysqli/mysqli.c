@@ -662,7 +662,7 @@ PHP_MINIT_FUNCTION(mysqli)
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_LOCAL_INFILE", MYSQL_OPT_LOCAL_INFILE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_INIT_COMMAND", MYSQL_INIT_COMMAND, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_READ_TIMEOUT", MYSQL_OPT_READ_TIMEOUT, CONST_CS | CONST_PERSISTENT);
-#if defined(MYSQLI_USE_MYSQLND)
+#ifdef MYSQLI_USE_MYSQLND
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_NET_CMD_BUFFER_SIZE", MYSQLND_OPT_NET_CMD_BUFFER_SIZE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_NET_READ_BUFFER_SIZE", MYSQLND_OPT_NET_READ_BUFFER_SIZE, CONST_CS | CONST_PERSISTENT);
 #endif
@@ -686,7 +686,7 @@ PHP_MINIT_FUNCTION(mysqli)
 	REGISTER_LONG_CONSTANT("MYSQLI_CLIENT_FOUND_ROWS", CLIENT_FOUND_ROWS, CONST_CS | CONST_PERSISTENT);
 #ifdef CLIENT_SSL_VERIFY_SERVER_CERT
 	REGISTER_LONG_CONSTANT("MYSQLI_CLIENT_SSL_VERIFY_SERVER_CERT", CLIENT_SSL_VERIFY_SERVER_CERT, CONST_CS | CONST_PERSISTENT);
-#if defined(MYSQLI_USE_MYSQLND)
+#ifdef MYSQLI_USE_MYSQLND
 	REGISTER_LONG_CONSTANT("MYSQLI_CLIENT_SSL_DONT_VERIFY_SERVER_CERT", CLIENT_SSL_DONT_VERIFY_SERVER_CERT, CONST_CS | CONST_PERSISTENT);
 #endif
 #endif
@@ -875,7 +875,7 @@ PHP_MSHUTDOWN_FUNCTION(mysqli)
  */
 PHP_RINIT_FUNCTION(mysqli)
 {
-#if !defined(MYSQLI_USE_MYSQLND) && defined(ZTS)
+#ifndef MYSQLI_USE_MYSQLND && defined(ZTS)
 	if (mysql_thread_init()) {
 		return FAILURE;
 	}
@@ -912,7 +912,7 @@ PHP_RSHUTDOWN_FUNCTION(mysqli)
 {
 	/* check persistent connections, move used to free */
 
-#if !defined(MYSQLI_USE_MYSQLND) && defined(ZTS)
+#ifndef MYSQLI_USE_MYSQLND && defined(ZTS)
 	mysql_thread_end();
 #endif
 	if (MyG(error_msg)) {
@@ -942,7 +942,7 @@ PHP_MINFO_FUNCTION(mysqli)
 	php_info_print_table_row(2, "Inactive Persistent Links", buf);
 	snprintf(buf, sizeof(buf), ZEND_LONG_FMT, MyG(num_links));
 	php_info_print_table_row(2, "Active Links", buf);
-#if !defined(MYSQLI_USE_MYSQLND)
+#ifndef MYSQLI_USE_MYSQLND
 	php_info_print_table_row(2, "Client API header version", MYSQL_SERVER_VERSION);
 	php_info_print_table_row(2, "MYSQLI_SOCKET", MYSQL_UNIX_ADDR);
 #endif
@@ -956,7 +956,7 @@ PHP_MINFO_FUNCTION(mysqli)
 /* Dependencies */
 static const  zend_module_dep mysqli_deps[] = {
 	ZEND_MOD_REQUIRED("spl")
-#if defined(MYSQLI_USE_MYSQLND)
+#ifdef MYSQLI_USE_MYSQLND
 	ZEND_MOD_REQUIRED("mysqlnd")
 #endif
 	ZEND_MOD_END
@@ -1091,7 +1091,7 @@ PHP_FUNCTION(mysqli_result_construct)
  */
 void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, zend_long fetchtype)
 {
-#if !defined(MYSQLI_USE_MYSQLND)
+#ifndef MYSQLI_USE_MYSQLND
 	MYSQL_ROW row;
 	unsigned int	i, num_fields;
 	MYSQL_FIELD		*fields;

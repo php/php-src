@@ -111,7 +111,7 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 		flags |= CLIENT_MULTI_RESULTS; /* needed for mysql_multi_query() */
 		/* remove some insecure options */
 		flags &= ~CLIENT_MULTI_STATEMENTS;   /* don't allow multi_queries via connect parameter */
-#if !defined(MYSQLI_USE_MYSQLND)
+#ifndef MYSQLI_USE_MYSQLND
 		if (PG(open_basedir) && PG(open_basedir)[0] != '\0') {
 			flags &= ~CLIENT_LOCAL_FILES;
 		}
@@ -242,7 +242,7 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 		goto err;
 	}
 	if (!mysql->mysql) {
-#if !defined(MYSQLI_USE_MYSQLND)
+#ifndef MYSQLI_USE_MYSQLND
 		if (!(mysql->mysql = mysql_init(NULL))) {
 #else
 		if (!(mysql->mysql = mysqlnd_init(MYSQLND_CLIENT_KNOWS_RSET_COPY_DATA, persistent))) {
@@ -252,7 +252,7 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 		new_connection = TRUE;
 	}
 
-#if !defined(MYSQLI_USE_MYSQLND)
+#ifndef MYSQLI_USE_MYSQLND
 	/* BC for prior to bug fix #53425 */
 	flags |= CLIENT_MULTI_RESULTS;
 
@@ -325,7 +325,7 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 	/* clear error */
 	php_mysqli_set_error(mysql_errno(mysql->mysql), (char *) mysql_error(mysql->mysql));
 
-#if !defined(MYSQLI_USE_MYSQLND)
+#ifndef MYSQLI_USE_MYSQLND
 	mysql->mysql->reconnect = MyG(reconnect);
 #endif
 	unsigned int allow_local_infile = MyG(allow_local_infile);
@@ -432,7 +432,7 @@ PHP_FUNCTION(mysqli_fetch_assoc)
 
 /* {{{ proto mixed mysqli_fetch_all(object result [,int resulttype])
    Fetches all result rows as an associative array, a numeric array, or both */
-#if defined(MYSQLI_USE_MYSQLND)
+#ifdef MYSQLI_USE_MYSQLND
 PHP_FUNCTION(mysqli_fetch_all)
 {
 	MYSQL_RES	*result;
@@ -494,7 +494,7 @@ PHP_FUNCTION(mysqli_error_list)
 		RETURN_THROWS();
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
-#if defined(MYSQLI_USE_MYSQLND)
+#ifdef MYSQLI_USE_MYSQLND
 	if (1) {
 		MYSQLND_ERROR_LIST_ELEMENT * message;
 		zend_llist_position pos;
@@ -540,7 +540,7 @@ PHP_FUNCTION(mysqli_stmt_error_list)
 		RETURN_THROWS();
 	}
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, mysql_stmt, MYSQLI_STATUS_INITIALIZED);
-#if defined(MYSQLI_USE_MYSQLND)
+#ifdef MYSQLI_USE_MYSQLND
 	if (stmt->stmt && stmt->stmt->data && stmt->stmt->data->error_info) {
 		MYSQLND_ERROR_LIST_ELEMENT * message;
 		zend_llist_position pos;
@@ -722,7 +722,7 @@ PHP_FUNCTION(mysqli_query)
 }
 /* }}} */
 
-#if defined(MYSQLI_USE_MYSQLND)
+#ifdef MYSQLI_USE_MYSQLND
 #include "php_network.h"
 /* {{{ mysqlnd_zval_array_to_mysqlnd_array functions */
 static int mysqlnd_zval_array_to_mysqlnd_array(zval *in_array, MYSQLND ***out_array)
@@ -1064,7 +1064,7 @@ PHP_FUNCTION(mysqli_get_charset)
 	zval					*mysql_link;
 	const char 				*name = NULL, *collation = NULL, *dir = NULL, *comment = NULL;
 	uint32_t				minlength, maxlength, number, state;
-#if !defined(MYSQLI_USE_MYSQLND)
+#ifndef MYSQLI_USE_MYSQLND
 	MY_CHARSET_INFO			cs;
 #else
 	const MYSQLND_CHARSET	*cs;
@@ -1076,7 +1076,7 @@ PHP_FUNCTION(mysqli_get_charset)
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 
 
-#if !defined(MYSQLI_USE_MYSQLND)
+#ifndef MYSQLI_USE_MYSQLND
 	mysql_get_character_set_info(mysql->mysql, &cs);
 	name = (char *)cs.csname;
 	collation = (char *)cs.name;
@@ -1113,7 +1113,7 @@ PHP_FUNCTION(mysqli_get_charset)
 }
 /* }}} */
 
-#if !defined(MYSQLI_USE_MYSQLND)
+#ifndef MYSQLI_USE_MYSQLND
 extern char * mysqli_escape_string_for_tx_name_in_comment(const char * const name);
 
 /* {{{ proto bool mysqli_begin_transaction_libmysql */
@@ -1192,7 +1192,7 @@ PHP_FUNCTION(mysqli_begin_transaction)
 		RETURN_FALSE;
 	}
 
-#if !defined(MYSQLI_USE_MYSQLND)
+#ifndef MYSQLI_USE_MYSQLND
 	if (mysqli_begin_transaction_libmysql(mysql->mysql, flags, name)) {
 		RETURN_FALSE;
 	}
@@ -1205,7 +1205,7 @@ PHP_FUNCTION(mysqli_begin_transaction)
 }
 /* }}} */
 
-#if !defined(MYSQLI_USE_MYSQLND)
+#ifndef MYSQLI_USE_MYSQLND
 /* {{{ proto bool mysqli_savepoint_libmysql */
 static int mysqli_savepoint_libmysql(MYSQL * conn, const char * const name, zend_bool release)
 {
@@ -1237,7 +1237,7 @@ PHP_FUNCTION(mysqli_savepoint)
 		RETURN_FALSE;
 	}
 
-#if !defined(MYSQLI_USE_MYSQLND)
+#ifndef MYSQLI_USE_MYSQLND
 	if (mysqli_savepoint_libmysql(mysql->mysql, name, FALSE)) {
 #else
 	if (FAIL == mysqlnd_savepoint(mysql->mysql, name)) {
@@ -1265,7 +1265,7 @@ PHP_FUNCTION(mysqli_release_savepoint)
 		php_error_docref(NULL, E_WARNING, "Savepoint name cannot be empty");
 		RETURN_FALSE;
 	}
-#if !defined(MYSQLI_USE_MYSQLND)
+#ifndef MYSQLI_USE_MYSQLND
 	if (mysqli_savepoint_libmysql(mysql->mysql, name, TRUE)) {
 #else
 	if (FAIL == mysqlnd_savepoint(mysql->mysql, name)) {

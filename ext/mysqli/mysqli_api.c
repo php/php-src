@@ -32,7 +32,7 @@
 #include "ext/mysqlnd/mysql_float_to_double.h"
 
 
-#if !defined(MYSQLI_USE_MYSQLND)
+#ifndef MYSQLI_USE_MYSQLND
 /* {{{ mysqli_tx_cor_options_to_string */
 static void mysqli_tx_cor_options_to_string(const MYSQL * const conn, smart_str * str, const uint32_t mode)
 {
@@ -609,7 +609,7 @@ PHP_FUNCTION(mysqli_change_user)
 	char		*user, *password, *dbname;
 	size_t			user_len, password_len, dbname_len;
 	zend_ulong		rc;
-#if !defined(MYSQLI_USE_MYSQLND)
+#ifndef MYSQLI_USE_MYSQLND
 	const		CHARSET_INFO * old_charset;
 #endif
 
@@ -618,11 +618,11 @@ PHP_FUNCTION(mysqli_change_user)
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 
-#if !defined(MYSQLI_USE_MYSQLND)
+#ifndef MYSQLI_USE_MYSQLND
 	old_charset = mysql->mysql->charset;
 #endif
 
-#if defined(MYSQLI_USE_MYSQLND)
+#ifdef MYSQLI_USE_MYSQLND
 	rc = mysqlnd_change_user_ex(mysql->mysql, user, password, dbname, FALSE, (size_t) password_len);
 #else
 	rc = mysql_change_user(mysql->mysql, user, password, dbname);
@@ -632,7 +632,7 @@ PHP_FUNCTION(mysqli_change_user)
 	if (rc) {
 		RETURN_FALSE;
 	}
-#if !defined(MYSQLI_USE_MYSQLND)
+#ifndef MYSQLI_USE_MYSQLND
 	if (mysql_get_server_version(mysql->mysql) < 50123L) {
 		/*
 		  Request the current charset, or it will be reset to the system one.
@@ -681,12 +681,12 @@ void php_mysqli_close(MY_MYSQL * mysql, int close_type, int resource_status)
 		if ((le = zend_hash_find_ptr(&EG(persistent_list), mysql->hash_key)) != NULL) {
 			if (le->type == php_le_pmysqli()) {
 				mysqli_plist_entry *plist = (mysqli_plist_entry *) le->ptr;
-#if defined(MYSQLI_USE_MYSQLND)
+#ifdef MYSQLI_USE_MYSQLND
 				mysqlnd_end_psession(mysql->mysql);
 #endif
 
 				if (MyG(rollback_on_cached_plink) &&
-#if !defined(MYSQLI_USE_MYSQLND)
+#ifndef MYSQLI_USE_MYSQLND
 					mysqli_commit_or_rollback_libmysql(mysql->mysql, FALSE, TRANS_COR_NO_OPT, NULL))
 #else
 					FAIL == mysqlnd_rollback(mysql->mysql, TRANS_COR_NO_OPT, NULL))
@@ -745,7 +745,7 @@ PHP_FUNCTION(mysqli_commit)
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 
-#if !defined(MYSQLI_USE_MYSQLND)
+#ifndef MYSQLI_USE_MYSQLND
 	if (mysqli_commit_or_rollback_libmysql(mysql->mysql, TRUE, flags, name)) {
 #else
 	if (FAIL == mysqlnd_commit(mysql->mysql, flags, name)) {
@@ -1125,7 +1125,7 @@ void mysqli_stmt_fetch_mysqlnd(INTERNAL_FUNCTION_PARAMETERS)
    Fetch results from a prepared statement into the bound variables */
 PHP_FUNCTION(mysqli_stmt_fetch)
 {
-#if !defined(MYSQLI_USE_MYSQLND)
+#ifndef MYSQLI_USE_MYSQLND
 	mysqli_stmt_fetch_libmysql(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 #else
 	mysqli_stmt_fetch_mysqlnd(INTERNAL_FUNCTION_PARAM_PASSTHRU);
@@ -1252,7 +1252,7 @@ PHP_FUNCTION(mysqli_fetch_lengths)
 	MYSQL_RES		*result;
 	zval			*mysql_result;
 	unsigned int	i, num_fields;
-#if defined(MYSQLI_USE_MYSQLND)
+#ifdef MYSQLI_USE_MYSQLND
 	const size_t	*ret;
 #else
 	const zend_ulong *ret;
@@ -1405,7 +1405,7 @@ PHP_FUNCTION(mysqli_get_host_info)
 		RETURN_THROWS();
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
-#if !defined(MYSQLI_USE_MYSQLND)
+#ifndef MYSQLI_USE_MYSQLND
 	RETURN_STRING((mysql->mysql->host_info) ? mysql->mysql->host_info : "");
 #else
 	RETURN_STRING((mysql->mysql->data->host_info) ? mysql->mysql->data->host_info : "");
@@ -1500,7 +1500,7 @@ void php_mysqli_init(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_method)
 
 	mysql = (MY_MYSQL *)ecalloc(1, sizeof(MY_MYSQL));
 
-#if !defined(MYSQLI_USE_MYSQLND)
+#ifndef MYSQLI_USE_MYSQLND
 	if (!(mysql->mysql = mysql_init(NULL)))
 #else
 	/*
@@ -1768,7 +1768,7 @@ PHP_FUNCTION(mysqli_options)
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_INITIALIZED);
 
-#if !defined(MYSQLI_USE_MYSQLND)
+#ifndef MYSQLI_USE_MYSQLND
 	if (PG(open_basedir) && PG(open_basedir)[0] != '\0') {
 		if(mysql_option == MYSQL_OPT_LOCAL_INFILE) {
 			RETURN_FALSE;
@@ -1842,7 +1842,7 @@ PHP_FUNCTION(mysqli_prepare)
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 
-#if !defined(MYSQLI_USE_MYSQLND)
+#ifndef MYSQLI_USE_MYSQLND
 	if (mysql->mysql->status == MYSQL_STATUS_GET_RESULT) {
 		php_error_docref(NULL, E_WARNING, "All data must be fetched before a new statement prepare takes place");
 		RETURN_FALSE;
@@ -1854,7 +1854,7 @@ PHP_FUNCTION(mysqli_prepare)
 	if ((stmt->stmt = mysql_stmt_init(mysql->mysql))) {
 		if (mysql_stmt_prepare(stmt->stmt, query, query_len)) {
 			/* mysql_stmt_close() clears errors, so we have to store them temporarily */
-#if !defined(MYSQLI_USE_MYSQLND)
+#ifndef MYSQLI_USE_MYSQLND
 			char  last_error[MYSQL_ERRMSG_SIZE];
 			char  sqlstate[SQLSTATE_LENGTH+1];
 			unsigned int last_errno;
@@ -1872,7 +1872,7 @@ PHP_FUNCTION(mysqli_prepare)
 			stmt->stmt = NULL;
 
 			/* restore error messages */
-#if !defined(MYSQLI_USE_MYSQLND)
+#ifndef MYSQLI_USE_MYSQLND
 			mysql->mysql->net.last_errno = last_errno;
 			memcpy(mysql->mysql->net.last_error, last_error, MYSQL_ERRMSG_SIZE);
 			memcpy(mysql->mysql->net.sqlstate, sqlstate, SQLSTATE_LENGTH+1);
@@ -1986,7 +1986,7 @@ PHP_FUNCTION(mysqli_rollback)
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 
-#if !defined(MYSQLI_USE_MYSQLND)
+#ifndef MYSQLI_USE_MYSQLND
 	if (mysqli_commit_or_rollback_libmysql(mysql->mysql, FALSE, flags, name)) {
 #else
 	if (FAIL == mysqlnd_rollback(mysql->mysql, flags, name)) {
@@ -2264,7 +2264,7 @@ PHP_FUNCTION(mysqli_stat)
 {
 	MY_MYSQL	*mysql;
 	zval		*mysql_link;
-#if defined(MYSQLI_USE_MYSQLND)
+#ifdef MYSQLI_USE_MYSQLND
 	zend_string *stat;
 #else
 	char		*stat;
@@ -2275,7 +2275,7 @@ PHP_FUNCTION(mysqli_stat)
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 
-#if !defined(MYSQLI_USE_MYSQLND)
+#ifndef MYSQLI_USE_MYSQLND
 	if ((stat = (char *)mysql_stat(mysql->mysql)))
 	{
 		RETURN_STRING(stat);
@@ -2347,7 +2347,7 @@ PHP_FUNCTION(mysqli_stmt_attr_set)
 		mode_p = &mode;
 		break;
 	}
-#if !defined(MYSQLI_USE_MYSQLND)
+#ifndef MYSQLI_USE_MYSQLND
 	if (mysql_stmt_attr_set(stmt->stmt, attr, mode_p)) {
 #else
 	if (FAIL == mysql_stmt_attr_set(stmt->stmt, attr, mode_p)) {
@@ -2516,7 +2516,7 @@ PHP_FUNCTION(mysqli_stmt_store_result)
 	}
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, mysql_stmt, MYSQLI_STATUS_VALID);
 
-#if !defined(MYSQLI_USE_MYSQLND)
+#ifndef MYSQLI_USE_MYSQLND
 	{
 		/*
 		  If the user wants to store the data and we have BLOBs/TEXTs we try to allocate
@@ -2588,7 +2588,7 @@ PHP_FUNCTION(mysqli_store_result)
 		RETURN_THROWS();
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
-#if MYSQLI_USE_MYSQLND
+#ifdef MYSQLI_USE_MYSQLND
 	result = flags & MYSQLI_STORE_RESULT_COPY_DATA? mysqlnd_store_result_ofs(mysql->mysql) : mysqlnd_store_result(mysql->mysql);
 #else
 	result = mysql_store_result(mysql->mysql);

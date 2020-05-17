@@ -120,7 +120,7 @@ MAP_PROPERTY_MYG_LONG_READ(driver_report_read, report_mode)
 
 ZEND_FUNCTION(mysqli_driver_construct)
 {
-#if G0
+#ifdef G0
 	MYSQLI_RESOURCE 	*mysqli_resource;
 
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));

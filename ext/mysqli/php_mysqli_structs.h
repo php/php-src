@@ -99,7 +99,7 @@ typedef struct {
 	php_stream		*li_stream;
 	unsigned int 	multi_query;
 	zend_bool		persistent;
-#if defined(MYSQLI_USE_MYSQLND)
+#ifdef MYSQLI_USE_MYSQLND
 	int				async_result_fetch_type;
 #endif
 } MY_MYSQL;

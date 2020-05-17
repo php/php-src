@@ -192,7 +192,7 @@ static int link_error_list_read(mysqli_object *obj, zval *retval, zend_bool quie
 
 	if (mysql) {
 		array_init(retval);
-#if defined(MYSQLI_USE_MYSQLND)
+#ifdef MYSQLI_USE_MYSQLND
 		if (1) {
 			MYSQLND_ERROR_LIST_ELEMENT * message;
 			zend_llist_position pos;
@@ -264,7 +264,7 @@ static int result_type_read(mysqli_object *obj, zval *retval, zend_bool quiet)
 static int result_lengths_read(mysqli_object *obj, zval *retval, zend_bool quiet)
 {
 	MYSQL_RES *p;
-#if defined(MYSQLI_USE_MYSQLND)
+#ifdef MYSQLI_USE_MYSQLND
 	const size_t *ret;
 #else
 	const zend_ulong *ret;
@@ -356,7 +356,7 @@ static int stmt_error_list_read(mysqli_object *obj, zval *retval, zend_bool quie
  	stmt = (MY_STMT *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
 	if (stmt && stmt->stmt) {
 		array_init(retval);
-#if defined(MYSQLI_USE_MYSQLND)
+#ifdef MYSQLI_USE_MYSQLND
 		if (stmt->stmt->data && stmt->stmt->data->error_info) {
 			MYSQLND_ERROR_LIST_ELEMENT * message;
 			zend_llist_position pos;
