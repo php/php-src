@@ -875,7 +875,7 @@ PHP_MSHUTDOWN_FUNCTION(mysqli)
  */
 PHP_RINIT_FUNCTION(mysqli)
 {
-#ifndef MYSQLI_USE_MYSQLND && defined(ZTS)
+#if !defined(MYSQLI_USE_MYSQLND) && defined(ZTS)
 	if (mysql_thread_init()) {
 		return FAILURE;
 	}
@@ -912,7 +912,7 @@ PHP_RSHUTDOWN_FUNCTION(mysqli)
 {
 	/* check persistent connections, move used to free */
 
-#ifndef MYSQLI_USE_MYSQLND && defined(ZTS)
+#if !defined(MYSQLI_USE_MYSQLND) && defined(ZTS)
 	mysql_thread_end();
 #endif
 	if (MyG(error_msg)) {
