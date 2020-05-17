@@ -22,7 +22,7 @@ else {
 }
 
 var_dump(oci_close($c1));
-var_dump(ocilogoff($c2));
+var_dump(oci_close($c2));
 
 echo "Done\n";
 

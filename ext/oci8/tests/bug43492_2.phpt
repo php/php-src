@@ -32,10 +32,10 @@ $stmtarray = array(
 oci8_test_sql_execute($c, $stmtarray);
 
 function fetch($c, $i) {
-    $s = ociparse($c, 'select cursor(select * from bug43492_tab) c from bug43492_tab');
-    ociexecute($s, OCI_DEFAULT);
-    ocifetchinto($s, $result, OCI_ASSOC);
-    ociexecute($result['C'], OCI_DEFAULT);
+    $s = oci_parse($c, 'select cursor(select * from bug43492_tab) c from bug43492_tab');
+    oci_execute($s, OCI_DEFAULT);
+    $result = oci_fetch_assoc($s);
+    oci_execute($result['C'], OCI_DEFAULT);
     return $result['C'];
 }
 
@@ -46,7 +46,7 @@ for($i = 0; $i < 300; $i++) {
         echo "$row[0] ";
     }
     echo "\n";
-    ocifreestatement($cur);
+    oci_free_statement($cur);
 }
 
 echo "Done\n";

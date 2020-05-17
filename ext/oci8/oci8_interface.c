@@ -1448,14 +1448,6 @@ PHP_FUNCTION(oci_fetch)
 }
 /* }}} */
 
-/* {{{ proto int ocifetchinto(resource stmt, array &output [, int mode])
-   Fetch a row of result data into an array */
-PHP_FUNCTION(ocifetchinto)
-{
-	php_oci_fetch_row(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_OCI_NUM, 3);
-}
-/* }}} */
-
 /* {{{ proto int oci_fetch_all(resource stmt, array &output[, int skip[, int maxrows[, int flags]]])
    Fetch all rows of result data into an array */
 PHP_FUNCTION(oci_fetch_all)

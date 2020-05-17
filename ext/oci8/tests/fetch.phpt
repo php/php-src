@@ -29,9 +29,9 @@ if (!oci_execute($s)) {
     die("oci_execute(select) failed!\n");
 }
 
-while(ocifetch($s)) {
-        $row = ociresult($s, 1);
-        $row1 = ociresult($s, 2);
+while(oci_fetch($s)) {
+        $row = oci_result($s, 1);
+        $row1 = oci_result($s, 2);
         var_dump($row);
         var_dump($row1);
 }
