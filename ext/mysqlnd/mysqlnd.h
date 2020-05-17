@@ -36,7 +36,7 @@
   on production systems, if of course measured performance degradation is not
   minimal.
 */
-#if A0 && PHP_DEBUG
+#if defined(A0) && PHP_DEBUG
 #define MYSQLND_DO_WIRE_CHECK_BEFORE_COMMAND 1
 #endif
 

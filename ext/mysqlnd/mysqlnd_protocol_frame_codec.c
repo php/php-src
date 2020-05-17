@@ -115,7 +115,7 @@ MYSQLND_METHOD(mysqlnd_pfc, send)(MYSQLND_PFC * const pfc, MYSQLND_VIO * const v
 			DBG_INF_FMT("writing "MYSQLND_SZ_T_SPEC" bytes to the network", payload_size + MYSQLND_HEADER_SIZE + COMPRESSED_HEADER_SIZE);
 			bytes_sent = vio->data->m.network_write(vio, compress_buf, payload_size + MYSQLND_HEADER_SIZE + COMPRESSED_HEADER_SIZE, conn_stats, error_info);
 			pfc->data->compressed_envelope_packet_no++;
-  #if WHEN_WE_NEED_TO_CHECK_WHETHER_COMPRESSION_WORKS_CORRECTLY
+  #ifdef WHEN_WE_NEED_TO_CHECK_WHETHER_COMPRESSION_WORKS_CORRECTLY
 			if (res == Z_OK) {
 				size_t decompressed_size = left + MYSQLND_HEADER_SIZE;
 				zend_uchar * decompressed_data = mnd_malloc(decompressed_size);

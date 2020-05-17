@@ -76,7 +76,7 @@ MYSQLND_METHOD(mysqlnd_debug, log)(MYSQLND_DEBUG * self,
 	}
 	if (flags & MYSQLND_DEBUG_DUMP_TIME) {
 		/* The following from FF's DBUG library, which is in the public domain */
-#if defined(PHP_WIN32)
+#ifdef PHP_WIN32
 		/* FIXME This doesn't give microseconds as in Unix case, and the resolution is
 		in system ticks, 10 ms intervals. See my_getsystime.c for high res */
 		SYSTEMTIME loc_t;
@@ -173,7 +173,7 @@ MYSQLND_METHOD(mysqlnd_debug, log_va)(MYSQLND_DEBUG *self,
 	}
 	if (flags & MYSQLND_DEBUG_DUMP_TIME) {
 		/* The following from FF's DBUG library, which is in the public domain */
-#if defined(PHP_WIN32)
+#ifdef PHP_WIN32
 		/* FIXME This doesn't give microseconds as in Unix case, and the resolution is
 		in system ticks, 10 ms intervals. See my_getsystime.c for high res */
 		SYSTEMTIME loc_t;

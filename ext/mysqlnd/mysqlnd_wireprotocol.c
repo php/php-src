@@ -1561,7 +1561,7 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_ROW_BUFFER * row_buffer, zval * 
 											  " bytes after end of packet", (p + len) - packet_end - 1);
 			DBG_RETURN(FAIL);
 		} else {
-#if defined(MYSQLND_STRING_TO_INT_CONVERSION)
+#ifdef MYSQLND_STRING_TO_INT_CONVERSION
 			struct st_mysqlnd_perm_bind perm_bind =
 					mysqlnd_ps_fetch_functions[fields_metadata[i].type];
 #endif
