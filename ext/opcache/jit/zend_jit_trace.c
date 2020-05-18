@@ -982,17 +982,14 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 	}
 	*num_op_arrays_ptr = num_op_arrays;
 
+	/* Allocate space for abstract stack */
+	JIT_G(current_frame) = frame = (zend_jit_trace_stack_frame*)((char*)zend_arena_alloc(&CG(arena), stack_bottom + stack_size) + stack_bottom);
+
 	/* 2. Construct TSSA */
 	tssa = zend_arena_calloc(&CG(arena), 1, sizeof(zend_tssa));
 	tssa->cfg.blocks = zend_arena_calloc(&CG(arena), 2, sizeof(zend_basic_block));
 	tssa->blocks = zend_arena_calloc(&CG(arena), 2, sizeof(zend_ssa_block));
 	tssa->cfg.predecessors = zend_arena_calloc(&CG(arena), 2, sizeof(int));
-	tssa->ops = ssa_ops = zend_arena_alloc(&CG(arena), ssa_ops_count * sizeof(zend_ssa_op));
-	memset(ssa_ops, -1, ssa_ops_count * sizeof(zend_ssa_op));
-	ssa_opcodes = zend_arena_calloc(&CG(arena), ssa_ops_count + 1, sizeof(zend_op*));
-	((zend_tssa*)tssa)->tssa_opcodes = ssa_opcodes;
-	ssa_opcodes[ssa_ops_count] = &_nop_opcode;
-	JIT_G(current_frame) = frame = (zend_jit_trace_stack_frame*)((char*)zend_arena_alloc(&CG(arena), stack_bottom + stack_size) + stack_bottom);
 
 	if (trace_buffer->stop == ZEND_JIT_TRACE_STOP_LOOP) {
 		tssa->cfg.blocks_count = 2;
@@ -1020,6 +1017,16 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 		tssa->cfg.blocks[0].successors_count = 0;
 		tssa->cfg.blocks[0].predecessors_count = 0;
 	}
+
+	if (JIT_G(opt_level) <= ZEND_JIT_LEVEL_INLINE) {
+		return tssa;
+	}
+
+	tssa->ops = ssa_ops = zend_arena_alloc(&CG(arena), ssa_ops_count * sizeof(zend_ssa_op));
+	memset(ssa_ops, -1, ssa_ops_count * sizeof(zend_ssa_op));
+	ssa_opcodes = zend_arena_calloc(&CG(arena), ssa_ops_count + 1, sizeof(zend_op*));
+	((zend_tssa*)tssa)->tssa_opcodes = ssa_opcodes;
+	ssa_opcodes[ssa_ops_count] = &_nop_opcode;
 
 	op_array = trace_buffer->op_array;
 	if (trace_buffer->start == ZEND_JIT_TRACE_START_ENTER) {
@@ -1215,7 +1222,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 				if (i < op_array->last_var) {
 					ssa_var_info[i].type = MAY_BE_UNDEF | MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_REF | MAY_BE_ANY  | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
 				} else {
-					ssa_var_info[i].type = MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_REF | MAY_BE_ANY  | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
+					ssa_var_info[i].type = MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_REF | MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
 				}
 			}
 			if (i < parent_vars_count) {
@@ -2499,6 +2506,9 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 	top = zend_jit_trace_call_frame(frame, op_array);
 	TRACE_FRAME_INIT(frame, op_array, TRACE_FRAME_MASK_UNKNOWN_RETURN, -1);
 	stack = frame->stack;
+	for (i = 0; i < op_array->last_var + op_array->T; i++) {
+		SET_STACK_TYPE(stack, i, IS_UNKNOWN);
+	}
 
 	opline = p[1].opline;
 	name = zend_jit_trace_name(op_array, opline->lineno);
@@ -2520,10 +2530,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 	}
 	zend_jit_trace_begin(&dasm_state, ZEND_JIT_TRACE_NUM);
 
-	for (i = 0; i < op_array->last_var + op_array->T; i++) {
-		SET_STACK_TYPE(stack, i, IS_UNKNOWN);
-	}
-
 	if (!parent_trace) {
 		zend_jit_set_opline(&dasm_state, opline);
 	} else {
@@ -2535,7 +2541,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 		}
 	}
 
-	if (1) {
+	if (JIT_G(opt_level) >= ZEND_JIT_LEVEL_INLINE) {
 		int last_var;
 		int parent_vars_count = 0;
 		zend_jit_trace_stack *parent_stack = NULL;
@@ -2685,7 +2691,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 		}
 	}
 
-	ssa_op = ssa->ops;
+	ssa_op = (JIT_G(opt_level) >= ZEND_JIT_LEVEL_INLINE) ? ssa->ops : NULL;
 	for (;;p++) {
 		if (p->op == ZEND_JIT_TRACE_VM) {
 			uint8_t op1_type = p->op1_type;
@@ -3658,177 +3664,178 @@ done:
 				zend_jit_trace_clenup_stack(stack, opline, ssa_op, ssa, ra);
 			}
 
-			/* Keep information about known types on abstract stack */
-			if (ssa_op->result_def >= 0) {
-				zend_uchar type = IS_UNKNOWN;
+			if (ssa_op) {
+				/* Keep information about known types on abstract stack */
+				if (ssa_op->result_def >= 0) {
+					zend_uchar type = IS_UNKNOWN;
 
-				if ((opline->result_type & (IS_SMART_BRANCH_JMPZ|IS_SMART_BRANCH_JMPNZ)) != 0
-				 || send_result) {
-					/* we didn't set result variable */
-					type = IS_UNKNOWN;
-				} else if (!(ssa->var_info[ssa_op->result_def].type & MAY_BE_GUARD)
-				 && has_concrete_type(ssa->var_info[ssa_op->result_def].type)) {
-					type = concrete_type(ssa->var_info[ssa_op->result_def].type);
-				} else if (opline->opcode == ZEND_QM_ASSIGN) {
-					if (opline->op1_type != IS_CONST) {
-						/* copy */
-						type = STACK_VAR_TYPE(opline->op1.var);
-					}
-				} else if (opline->opcode == ZEND_ASSIGN) {
-					if (opline->op2_type != IS_CONST
-					 && ssa_op->op1_use >= 0
-					 /* assignment to typed reference may cause conversion */
-					 && (ssa->var_info[ssa_op->op1_use].type & MAY_BE_REF) == 0) {
-						/* copy */
-						type = STACK_VAR_TYPE(opline->op2.var);
-					}
-				} else if (opline->opcode == ZEND_POST_INC
-		         || opline->opcode == ZEND_POST_DEC) {
-					/* copy */
-					type = STACK_VAR_TYPE(opline->op1.var);
-				}
-				SET_RES_STACK_VAR_TYPE(type);
-				if (type != IS_UNKNOWN) {
-					ssa->var_info[ssa_op->result_def].type &= ~MAY_BE_GUARD;
-					if (ra && ra[ssa_op->result_def]) {
-						SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->result.var), ra[ssa_op->result_def]->reg);
-					}
-				}
-			}
-			if (ssa_op->op1_def >= 0) {
-				zend_uchar type = IS_UNKNOWN;
-
-				if (!(ssa->var_info[ssa_op->op1_def].type & MAY_BE_GUARD)
-				 && has_concrete_type(ssa->var_info[ssa_op->op1_def].type)) {
-					type = concrete_type(ssa->var_info[ssa_op->op1_def].type);
-				} else if (opline->opcode == ZEND_ASSIGN) {
-					if (!(OP1_INFO() & MAY_BE_REF)
-					 || STACK_VAR_TYPE(opline->op1.var) != IS_UNKNOWN) {
-						if (opline->op2_type != IS_CONST) {
+					if ((opline->result_type & (IS_SMART_BRANCH_JMPZ|IS_SMART_BRANCH_JMPNZ)) != 0
+					 || send_result) {
+						/* we didn't set result variable */
+						type = IS_UNKNOWN;
+					} else if (!(ssa->var_info[ssa_op->result_def].type & MAY_BE_GUARD)
+					 && has_concrete_type(ssa->var_info[ssa_op->result_def].type)) {
+						type = concrete_type(ssa->var_info[ssa_op->result_def].type);
+					} else if (opline->opcode == ZEND_QM_ASSIGN) {
+						if (opline->op1_type != IS_CONST) {
+							/* copy */
+							type = STACK_VAR_TYPE(opline->op1.var);
+						}
+					} else if (opline->opcode == ZEND_ASSIGN) {
+						if (opline->op2_type != IS_CONST
+						 && ssa_op->op1_use >= 0
+						 /* assignment to typed reference may cause conversion */
+						 && (ssa->var_info[ssa_op->op1_use].type & MAY_BE_REF) == 0) {
 							/* copy */
 							type = STACK_VAR_TYPE(opline->op2.var);
 						}
+					} else if (opline->opcode == ZEND_POST_INC
+			         || opline->opcode == ZEND_POST_DEC) {
+						/* copy */
+						type = STACK_VAR_TYPE(opline->op1.var);
 					}
-				} else if (opline->opcode == ZEND_SEND_VAR
-				 || opline->opcode == ZEND_CAST
-				 || opline->opcode == ZEND_QM_ASSIGN
-				 || opline->opcode == ZEND_JMP_SET
-				 || opline->opcode == ZEND_COALESCE
-				 || opline->opcode == ZEND_FE_RESET_R) {
-					/* keep old value */
-					type = STACK_VAR_TYPE(opline->op1.var);
-				}
-				SET_OP1_STACK_VAR_TYPE(type);
-				if (type != IS_UNKNOWN) {
-					ssa->var_info[ssa_op->op1_def].type &= ~MAY_BE_GUARD;
-					if (ra && ra[ssa_op->op1_def]) {
-						SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->op1.var), ra[ssa_op->op1_def]->reg);
-					}
-				}
-			}
-			if (ssa_op->op2_def >= 0) {
-				zend_uchar type = IS_UNKNOWN;
-
-				if (!(ssa->var_info[ssa_op->op2_def].type & MAY_BE_GUARD)
-				 && has_concrete_type(ssa->var_info[ssa_op->op2_def].type)) {
-					type = concrete_type(ssa->var_info[ssa_op->op2_def].type);
-				} else if (opline->opcode == ZEND_ASSIGN) {
-					/* keep old value */
-					type = STACK_VAR_TYPE(opline->op2.var);
-				}
-				SET_OP2_STACK_VAR_TYPE(type);
-				if (type != IS_UNKNOWN) {
-					ssa->var_info[ssa_op->op2_def].type &= ~MAY_BE_GUARD;
-					if (ra && ra[ssa_op->op2_def]) {
-						SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->op2.var), ra[ssa_op->op2_def]->reg);
-					}
-				}
-			}
-
-			switch (opline->opcode) {
-				case ZEND_ASSIGN_DIM:
-				case ZEND_ASSIGN_OBJ:
-				case ZEND_ASSIGN_STATIC_PROP:
-				case ZEND_ASSIGN_DIM_OP:
-				case ZEND_ASSIGN_OBJ_OP:
-				case ZEND_ASSIGN_STATIC_PROP_OP:
-				case ZEND_ASSIGN_OBJ_REF:
-				case ZEND_ASSIGN_STATIC_PROP_REF:
-					/* OP_DATA */
-					ssa_op++;
-					opline++;
-					if (ssa_op->op1_def >= 0) {
-						zend_uchar type = IS_UNKNOWN;
-
-						if (!(ssa->var_info[ssa_op->op1_def].type & MAY_BE_GUARD)
-						 && has_concrete_type(ssa->var_info[ssa_op->op1_def].type)) {
-							type = concrete_type(ssa->var_info[ssa_op->op1_def].type);
-						} else if ((opline-1)->opcode == ZEND_ASSIGN_DIM
-						 || (opline-1)->opcode == ZEND_ASSIGN_OBJ
-						 || (opline-1)->opcode == ZEND_ASSIGN_STATIC_PROP) {
-							/* keep old value */
-							type = STACK_VAR_TYPE(opline->op1.var);
-						}
-						SET_OP1_STACK_VAR_TYPE(type);
-						if (type != IS_UNKNOWN) {
-							ssa->var_info[ssa_op->op1_def].type &= ~MAY_BE_GUARD;
-							if (ra && ra[ssa_op->op1_def]) {
-								SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->op1.var), ra[ssa_op->op1_def]->reg);
-							}
+					SET_RES_STACK_VAR_TYPE(type);
+					if (type != IS_UNKNOWN) {
+						ssa->var_info[ssa_op->result_def].type &= ~MAY_BE_GUARD;
+						if (ra && ra[ssa_op->result_def]) {
+							SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->result.var), ra[ssa_op->result_def]->reg);
 						}
 					}
-					ssa_op++;
-					break;
-				case ZEND_RECV_INIT:
-				    ssa_op++;
-					opline++;
-					while (opline->opcode == ZEND_RECV_INIT) {
-						if (ssa_op->result_def >= 0) {
-							zend_uchar type = IS_UNKNOWN;
+				}
+				if (ssa_op->op1_def >= 0) {
+					zend_uchar type = IS_UNKNOWN;
 
-							if (!(ssa->var_info[ssa_op->result_def].type & MAY_BE_GUARD)
-							 && has_concrete_type(ssa->var_info[ssa_op->result_def].type)) {
-								type = concrete_type(ssa->var_info[ssa_op->result_def].type);
-							}
-							SET_RES_STACK_VAR_TYPE(type);
-							if (ra && ra[ssa_op->result_def]) {
-								SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->result.var), ra[ssa_op->result_def]->reg);
+					if (!(ssa->var_info[ssa_op->op1_def].type & MAY_BE_GUARD)
+					 && has_concrete_type(ssa->var_info[ssa_op->op1_def].type)) {
+						type = concrete_type(ssa->var_info[ssa_op->op1_def].type);
+					} else if (opline->opcode == ZEND_ASSIGN) {
+						if (!(OP1_INFO() & MAY_BE_REF)
+						 || STACK_VAR_TYPE(opline->op1.var) != IS_UNKNOWN) {
+							if (opline->op2_type != IS_CONST) {
+								/* copy */
+								type = STACK_VAR_TYPE(opline->op2.var);
 							}
 						}
+					} else if (opline->opcode == ZEND_SEND_VAR
+					 || opline->opcode == ZEND_CAST
+					 || opline->opcode == ZEND_QM_ASSIGN
+					 || opline->opcode == ZEND_JMP_SET
+					 || opline->opcode == ZEND_COALESCE
+					 || opline->opcode == ZEND_FE_RESET_R) {
+						/* keep old value */
+						type = STACK_VAR_TYPE(opline->op1.var);
+					}
+					SET_OP1_STACK_VAR_TYPE(type);
+					if (type != IS_UNKNOWN) {
+						ssa->var_info[ssa_op->op1_def].type &= ~MAY_BE_GUARD;
+						if (ra && ra[ssa_op->op1_def]) {
+							SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->op1.var), ra[ssa_op->op1_def]->reg);
+						}
+					}
+				}
+				if (ssa_op->op2_def >= 0) {
+					zend_uchar type = IS_UNKNOWN;
+
+					if (!(ssa->var_info[ssa_op->op2_def].type & MAY_BE_GUARD)
+					 && has_concrete_type(ssa->var_info[ssa_op->op2_def].type)) {
+						type = concrete_type(ssa->var_info[ssa_op->op2_def].type);
+					} else if (opline->opcode == ZEND_ASSIGN) {
+						/* keep old value */
+						type = STACK_VAR_TYPE(opline->op2.var);
+					}
+					SET_OP2_STACK_VAR_TYPE(type);
+					if (type != IS_UNKNOWN) {
+						ssa->var_info[ssa_op->op2_def].type &= ~MAY_BE_GUARD;
+						if (ra && ra[ssa_op->op2_def]) {
+							SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->op2.var), ra[ssa_op->op2_def]->reg);
+						}
+					}
+				}
+
+				switch (opline->opcode) {
+					case ZEND_ASSIGN_DIM:
+					case ZEND_ASSIGN_OBJ:
+					case ZEND_ASSIGN_STATIC_PROP:
+					case ZEND_ASSIGN_DIM_OP:
+					case ZEND_ASSIGN_OBJ_OP:
+					case ZEND_ASSIGN_STATIC_PROP_OP:
+					case ZEND_ASSIGN_OBJ_REF:
+					case ZEND_ASSIGN_STATIC_PROP_REF:
+						/* OP_DATA */
 						ssa_op++;
 						opline++;
-					}
-					break;
-				case ZEND_BIND_GLOBAL:
-					ssa_op++;
-					opline++;
-					while (opline->opcode == ZEND_BIND_GLOBAL) {
 						if (ssa_op->op1_def >= 0) {
 							zend_uchar type = IS_UNKNOWN;
 
 							if (!(ssa->var_info[ssa_op->op1_def].type & MAY_BE_GUARD)
 							 && has_concrete_type(ssa->var_info[ssa_op->op1_def].type)) {
 								type = concrete_type(ssa->var_info[ssa_op->op1_def].type);
+							} else if ((opline-1)->opcode == ZEND_ASSIGN_DIM
+							 || (opline-1)->opcode == ZEND_ASSIGN_OBJ
+							 || (opline-1)->opcode == ZEND_ASSIGN_STATIC_PROP) {
+								/* keep old value */
+								type = STACK_VAR_TYPE(opline->op1.var);
 							}
 							SET_OP1_STACK_VAR_TYPE(type);
-							if (ra && ra[ssa_op->op1_def]) {
-								SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->op1.var), ra[ssa_op->op1_def]->reg);
+							if (type != IS_UNKNOWN) {
+								ssa->var_info[ssa_op->op1_def].type &= ~MAY_BE_GUARD;
+								if (ra && ra[ssa_op->op1_def]) {
+									SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->op1.var), ra[ssa_op->op1_def]->reg);
+								}
 							}
 						}
 						ssa_op++;
+						break;
+					case ZEND_RECV_INIT:
+					    ssa_op++;
 						opline++;
-					}
-					break;
-				default:
-					ssa_op += zend_jit_trace_op_len(opline);
-					break;
-			}
+						while (opline->opcode == ZEND_RECV_INIT) {
+							if (ssa_op->result_def >= 0) {
+								zend_uchar type = IS_UNKNOWN;
 
-			if (send_result) {
-				ssa_op++;
-				send_result = 0;
-			}
+								if (!(ssa->var_info[ssa_op->result_def].type & MAY_BE_GUARD)
+								 && has_concrete_type(ssa->var_info[ssa_op->result_def].type)) {
+									type = concrete_type(ssa->var_info[ssa_op->result_def].type);
+								}
+								SET_RES_STACK_VAR_TYPE(type);
+								if (ra && ra[ssa_op->result_def]) {
+									SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->result.var), ra[ssa_op->result_def]->reg);
+								}
+							}
+							ssa_op++;
+							opline++;
+						}
+						break;
+					case ZEND_BIND_GLOBAL:
+						ssa_op++;
+						opline++;
+						while (opline->opcode == ZEND_BIND_GLOBAL) {
+							if (ssa_op->op1_def >= 0) {
+								zend_uchar type = IS_UNKNOWN;
 
+								if (!(ssa->var_info[ssa_op->op1_def].type & MAY_BE_GUARD)
+								 && has_concrete_type(ssa->var_info[ssa_op->op1_def].type)) {
+									type = concrete_type(ssa->var_info[ssa_op->op1_def].type);
+								}
+								SET_OP1_STACK_VAR_TYPE(type);
+								if (ra && ra[ssa_op->op1_def]) {
+									SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->op1.var), ra[ssa_op->op1_def]->reg);
+								}
+							}
+							ssa_op++;
+							opline++;
+						}
+						break;
+					default:
+						ssa_op += zend_jit_trace_op_len(opline);
+						break;
+				}
+
+				if (send_result) {
+					ssa_op++;
+					send_result = 0;
+				}
+			}
 		} else if (p->op == ZEND_JIT_TRACE_ENTER) {
 			if ((p+1)->op == ZEND_JIT_TRACE_END) {
 				p++;
@@ -3841,32 +3848,39 @@ done:
 			op_array_ssa = &jit_extension->func_info.ssa;
 			call = frame->call;
 			if (!call) {
-				uint32_t v;
 
 				assert(0); // This should be handled by "fake" ZEND_JIT_TRACE_INIT_CALL
 				/* Trace missed INIT_FCALL opcode */
 				call = top;
 				TRACE_FRAME_INIT(call, op_array, 0, -1); // TODO: should be possible to get the real number af arguments ???
 				top = zend_jit_trace_call_frame(top, op_array);
-				i = 0;
-				v = ZEND_JIT_TRACE_GET_FIRST_SSA_VAR(p->info);
-				while (i < p->op_array->num_args) {
-					/* Initialize abstract stack using SSA */
-					if (!(ssa->var_info[v + i].type & MAY_BE_GUARD)
-					 && has_concrete_type(ssa->var_info[v + i].type)) {
-						SET_STACK_TYPE(call->stack, i, concrete_type(ssa->var_info[v + i].type));
-					} else {
+				if (JIT_G(opt_level) >= ZEND_JIT_LEVEL_INLINE) {
+					uint32_t v;
+
+					i = 0;
+					v = ZEND_JIT_TRACE_GET_FIRST_SSA_VAR(p->info);
+					while (i < p->op_array->num_args) {
+						/* Initialize abstract stack using SSA */
+						if (!(ssa->var_info[v + i].type & MAY_BE_GUARD)
+						 && has_concrete_type(ssa->var_info[v + i].type)) {
+							SET_STACK_TYPE(call->stack, i, concrete_type(ssa->var_info[v + i].type));
+						} else {
+							SET_STACK_TYPE(call->stack, i, IS_UNKNOWN);
+						}
+						i++;
+					}
+					while (i < p->op_array->last_var) {
+						SET_STACK_TYPE(call->stack, i, IS_UNDEF);
+						i++;
+					}
+					while (i < p->op_array->last_var + p->op_array->T) {
+						SET_STACK_TYPE(call->stack, i, IS_UNKNOWN);
+						i++;
+					}
+				} else {
+					for (i = 0; i < p->op_array->last_var + p->op_array->T; i++) {
 						SET_STACK_TYPE(call->stack, i, IS_UNKNOWN);
 					}
-					i++;
-				}
-				while (i < p->op_array->last_var) {
-					SET_STACK_TYPE(call->stack, i, IS_UNDEF);
-					i++;
-				}
-				while (i < p->op_array->last_var + p->op_array->T) {
-					SET_STACK_TYPE(call->stack, i, IS_UNKNOWN);
-					i++;
 				}
 			} else {
 				ZEND_ASSERT(&call->func->op_array == op_array);
@@ -3904,29 +3918,35 @@ done:
 				stack = frame->stack;
 				ZEND_ASSERT(&frame->func->op_array == op_array);
 			} else {
-				uint32_t j = ZEND_JIT_TRACE_GET_FIRST_SSA_VAR(p->info);
-
 				frame = zend_jit_trace_ret_frame(frame, op_array);
 				TRACE_FRAME_INIT(frame, op_array, TRACE_FRAME_MASK_UNKNOWN_RETURN, -1);
 				stack = frame->stack;
-				for (i = 0; i < op_array->last_var + op_array->T; i++, j++) {
-					/* Initialize abstract stack using SSA */
-					if (!(ssa->var_info[j].type & MAY_BE_GUARD)
-					 && has_concrete_type(ssa->var_info[j].type)) {
-						SET_STACK_TYPE(stack, i, concrete_type(ssa->var_info[j].type));
-					} else {
-						SET_STACK_TYPE(stack, i, IS_UNKNOWN);
-					}
-				}
-				if (ra) {
-					j = ZEND_JIT_TRACE_GET_FIRST_SSA_VAR(p->info);
+				if (JIT_G(opt_level) >= ZEND_JIT_LEVEL_INLINE) {
+					uint32_t j = ZEND_JIT_TRACE_GET_FIRST_SSA_VAR(p->info);
+
 					for (i = 0; i < op_array->last_var + op_array->T; i++, j++) {
-						if (ra[j] && (ra[j]->flags & ZREG_LOAD) != 0) {
-							//SET_STACK_REG(stack, i, ra[j]->reg);
-							if (!zend_jit_load_var(&dasm_state, ssa->var_info[j].type, i, ra[j]->reg)) {
-								goto jit_failure;
+						/* Initialize abstract stack using SSA */
+						if (!(ssa->var_info[j].type & MAY_BE_GUARD)
+						 && has_concrete_type(ssa->var_info[j].type)) {
+							SET_STACK_TYPE(stack, i, concrete_type(ssa->var_info[j].type));
+						} else {
+							SET_STACK_TYPE(stack, i, IS_UNKNOWN);
+						}
+					}
+					if (ra) {
+						j = ZEND_JIT_TRACE_GET_FIRST_SSA_VAR(p->info);
+						for (i = 0; i < op_array->last_var + op_array->T; i++, j++) {
+							if (ra[j] && (ra[j]->flags & ZREG_LOAD) != 0) {
+								//SET_STACK_REG(stack, i, ra[j]->reg);
+								if (!zend_jit_load_var(&dasm_state, ssa->var_info[j].type, i, ra[j]->reg)) {
+									goto jit_failure;
+								}
 							}
 						}
+					}
+				} else {
+					for (i = 0; i < op_array->last_var + op_array->T; i++) {
+						SET_STACK_TYPE(stack, i, IS_UNKNOWN);
 					}
 				}
 			}
@@ -3959,19 +3979,25 @@ done:
 			frame->call = call;
 			top = zend_jit_trace_call_frame(top, p->op_array);
 			if (p->func->type == ZEND_USER_FUNCTION) {
-				i = 0;
-				while (i < p->op_array->num_args) {
-					/* Types of arguments are going to be stored in abstract stack when proseccin SEV onstruction */
-					SET_STACK_TYPE(call->stack, i, IS_UNKNOWN);
-					i++;
-				}
-				while (i < p->op_array->last_var) {
-					SET_STACK_TYPE(call->stack, i, IS_UNDEF);
-					i++;
-				}
-				while (i < p->op_array->last_var + p->op_array->T) {
-					SET_STACK_TYPE(call->stack, i, IS_UNKNOWN);
-					i++;
+				if (JIT_G(opt_level) >= ZEND_JIT_LEVEL_INLINE) {
+					i = 0;
+					while (i < p->op_array->num_args) {
+						/* Types of arguments are going to be stored in abstract stack when proseccin SEV onstruction */
+						SET_STACK_TYPE(call->stack, i, IS_UNKNOWN);
+						i++;
+					}
+					while (i < p->op_array->last_var) {
+						SET_STACK_TYPE(call->stack, i, IS_UNDEF);
+						i++;
+					}
+					while (i < p->op_array->last_var + p->op_array->T) {
+						SET_STACK_TYPE(call->stack, i, IS_UNKNOWN);
+						i++;
+					}
+				} else {
+					for (i = 0; i < p->op_array->last_var + p->op_array->T; i++) {
+						SET_STACK_TYPE(call->stack, i, IS_UNKNOWN);
+					}
 				}
 			}
 			if (p->info & ZEND_JIT_TRACE_FAKE_INIT_CALL) {
