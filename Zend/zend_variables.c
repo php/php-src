@@ -33,6 +33,7 @@ static void ZEND_FASTCALL zend_string_destroy(zend_string *str);
 #endif
 static void ZEND_FASTCALL zend_reference_destroy(zend_reference *ref);
 static void ZEND_FASTCALL zend_empty_destroy(zend_reference *ref);
+static void ZEND_FASTCALL zend_func_ref_destroy(zend_func_ref *ref);
 
 typedef void (ZEND_FASTCALL *zend_rc_dtor_func_t)(zend_refcounted *p);
 
@@ -48,12 +49,13 @@ static const zend_rc_dtor_func_t zend_rc_dtor_func[] = {
 	/* IS_OBJECT       */ (zend_rc_dtor_func_t)zend_objects_store_del,
 	/* IS_RESOURCE     */ (zend_rc_dtor_func_t)zend_list_free,
 	/* IS_REFERENCE    */ (zend_rc_dtor_func_t)zend_reference_destroy,
-	/* IS_CONSTANT_AST */ (zend_rc_dtor_func_t)zend_ast_ref_destroy
+	/* IS_CONSTANT_AST */ (zend_rc_dtor_func_t)zend_ast_ref_destroy,
+	/* IS_FUNC_REF     */ (zend_rc_dtor_func_t)zend_func_ref_destroy,
 };
 
 ZEND_API void ZEND_FASTCALL rc_dtor_func(zend_refcounted *p)
 {
-	ZEND_ASSERT(GC_TYPE(p) <= IS_CONSTANT_AST);
+	ZEND_ASSERT(GC_TYPE(p) <= IS_FUNC_REF);
 	zend_rc_dtor_func[GC_TYPE(p)](p);
 }
 
@@ -77,6 +79,12 @@ static void ZEND_FASTCALL zend_reference_destroy(zend_reference *ref)
 
 static void ZEND_FASTCALL zend_empty_destroy(zend_reference *ref)
 {
+}
+
+static void ZEND_FASTCALL zend_func_ref_destroy(zend_func_ref *ref)
+{
+	destroy_zend_function(ref->func);
+	efree_size(ref, sizeof(zend_func_ref));
 }
 
 ZEND_API void zval_ptr_dtor(zval *zval_ptr) /* {{{ */

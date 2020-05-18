@@ -1071,21 +1071,11 @@ static zend_never_inline ZEND_COLD ZEND_NORETURN void do_bind_function_error(zen
 	}
 }
 
-ZEND_API int do_bind_function(zval *lcname) /* {{{ */
+ZEND_API int do_bind_function(zend_function *func, zval *lcname) /* {{{ */
 {
-	zend_function *function;
-	zval *rtd_key, *zv;
-
-	rtd_key = lcname + 1;
-	zv = zend_hash_find_ex(EG(function_table), Z_STR_P(rtd_key), 1);
-	if (UNEXPECTED(!zv)) {
-		do_bind_function_error(Z_STR_P(lcname), NULL, 0);
-		return FAILURE;
-	}
-	function = (zend_function*)Z_PTR_P(zv);
-	zv = zend_hash_set_bucket_key(EG(function_table), (Bucket*)zv, Z_STR_P(lcname));
-	if (UNEXPECTED(!zv)) {
-		do_bind_function_error(Z_STR_P(lcname), &function->op_array, 0);
+	zend_function *added_func = zend_hash_add_ptr(EG(function_table), Z_STR_P(lcname), func);
+	if (UNEXPECTED(!added_func)) {
+		do_bind_function_error(Z_STR_P(lcname), &func->op_array, 0);
 		return FAILURE;
 	}
 	return SUCCESS;
@@ -6176,7 +6166,7 @@ zend_string *zend_begin_method_decl(zend_op_array *op_array, zend_string *name, 
 
 static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_ast_decl *decl, zend_bool toplevel) /* {{{ */
 {
-	zend_string *unqualified_name, *name, *lcname, *key;
+	zend_string *unqualified_name, *name, *lcname;
 	zend_op *opline;
 
 	unqualified_name = decl->name;
@@ -6212,24 +6202,16 @@ static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_as
 		return;
 	}
 
-	key = zend_build_runtime_definition_key(lcname, decl->start_lineno);
-	if (!zend_hash_add_ptr(CG(function_table), key, op_array)) {
-		zend_error_noreturn(E_ERROR,
-			"Runtime definition key collision for function %s. This is a bug", ZSTR_VAL(name));
-	}
+	znode func_node;
+	func_node.op_type = IS_CONST;
+	ZVAL_NEW_FUNC_REF(&func_node.u.constant, (zend_function *) op_array);
 
 	if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
-		opline = zend_emit_op_tmp(result, ZEND_DECLARE_LAMBDA_FUNCTION, NULL, NULL);
-		opline->extended_value = zend_alloc_cache_slot();
-		opline->op1_type = IS_CONST;
-		LITERAL_STR(opline->op1, key);
+		zend_emit_op_tmp(result, ZEND_DECLARE_LAMBDA_FUNCTION, &func_node, NULL);
 	} else {
-		opline = get_next_op();
-		opline->opcode = ZEND_DECLARE_FUNCTION;
-		opline->op1_type = IS_CONST;
-		LITERAL_STR(opline->op1, zend_string_copy(lcname));
-		/* RTD key is placed after lcname literal in op1 */
-		zend_add_literal_string(&key);
+		opline = zend_emit_op(NULL, ZEND_DECLARE_FUNCTION, &func_node, NULL);
+		opline->op2_type = IS_CONST;
+		LITERAL_STR(opline->op2, zend_string_copy(lcname));
 	}
 	zend_string_release_ex(lcname, 0);
 }

@@ -93,6 +93,7 @@ typedef struct _zend_object     zend_object;
 typedef struct _zend_resource   zend_resource;
 typedef struct _zend_reference  zend_reference;
 typedef struct _zend_ast_ref    zend_ast_ref;
+typedef struct _zend_func_ref   zend_func_ref;
 typedef struct _zend_ast        zend_ast;
 
 typedef int  (*compare_func_t)(const void *, const void *);
@@ -293,6 +294,7 @@ typedef union _zend_value {
 	void             *ptr;
 	zend_class_entry *ce;
 	zend_function    *func;
+	zend_func_ref    *func_ref;
 	struct {
 		uint32_t w1;
 		uint32_t w2;
@@ -514,6 +516,11 @@ struct _zend_ast_ref {
 	/*zend_ast        ast; zend_ast follows the zend_ast_ref structure */
 };
 
+struct _zend_func_ref {
+	zend_refcounted_h gc;
+	zend_function *func;
+};
+
 /* Regular data types: Must be in sync with zend_variables.c. */
 #define IS_UNDEF					0
 #define IS_NULL						1
@@ -527,6 +534,7 @@ struct _zend_ast_ref {
 #define IS_RESOURCE					9
 #define IS_REFERENCE				10
 #define IS_CONSTANT_AST				11 /* Constant expressions */
+#define IS_FUNC_REF					12
 
 /* Fake types used only for type hinting.
  * These are allowed to overlap with the types below. */
@@ -682,6 +690,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define IS_REFERENCE_EX				(IS_REFERENCE      | (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT))
 
 #define IS_CONSTANT_AST_EX			(IS_CONSTANT_AST   | (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT))
+#define IS_FUNC_REF_EX				(IS_FUNC_REF       | (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT))
 
 /* string flags (zval.value->gc.u.flags) */
 #define IS_STR_INTERNED				GC_IMMUTABLE  /* interned string */
@@ -858,6 +867,9 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 
 #define Z_FUNC(zval)				(zval).value.func
 #define Z_FUNC_P(zval_p)			Z_FUNC(*(zval_p))
+
+#define Z_FUNC_REF(zval)			(zval).value.func_ref
+#define Z_FUNC_REF_P(zval_p)		Z_FUNC_REF(*(zval_p))
 
 #define Z_PTR(zval)					(zval).value.ptr
 #define Z_PTR_P(zval_p)				Z_PTR(*(zval_p))
@@ -1080,6 +1092,15 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 
 #define ZVAL_ERROR(z) do {				\
 		Z_TYPE_INFO_P(z) = _IS_ERROR;	\
+	} while (0)
+
+#define ZVAL_NEW_FUNC_REF(z, _func) do { \
+		zend_func_ref *_ref = emalloc(sizeof(zend_func_ref)); \
+		GC_SET_REFCOUNT(_ref, 1); \
+		GC_TYPE_INFO(_ref) = IS_FUNC_REF; \
+		_ref->func = (_func); \
+		Z_FUNC_REF_P(z) = _ref; \
+		Z_TYPE_INFO_P(z) = IS_FUNC_REF_EX; \
 	} while (0)
 
 #define Z_REFCOUNT_P(pz)			zval_refcount_p(pz)
