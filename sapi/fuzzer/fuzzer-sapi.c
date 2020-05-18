@@ -147,12 +147,6 @@ int fuzzer_request_startup()
 		return FAILURE;
 	}
 
-#ifdef ZEND_SIGNALS
-	/* Some signal handlers will be overridden,
-	 * don't complain about them during shutdown. */
-	SIGG(check) = 0;
-#endif
-
 	return SUCCESS;
 }
 
