@@ -789,7 +789,6 @@ static const zend_function_entry php_oci_functions[] = {
 	PHP_FE(oci_unregister_taf_callback, arginfo_oci_unregister_taf_callback)
 
 	PHP_FALIAS(oci_free_cursor,		oci_free_statement,		arginfo_oci_free_statement)
-	PHP_FALIAS(ocipasswordchange,	oci_password_change,	arginfo_oci_password_change)
 	PHP_FE_END
 };
 

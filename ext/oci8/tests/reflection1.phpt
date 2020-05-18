@@ -74,7 +74,6 @@ reflection::export(new reflectionfunction('oci_collection_max'));
 reflection::export(new reflectionfunction('oci_collection_trim'));
 reflection::export(new reflectionfunction('oci_new_collection'));
 reflection::export(new reflectionfunction('oci_free_cursor'));
-reflection::export(new reflectionfunction('ocipasswordchange'));
 reflection::export(new reflectionfunction('oci_set_edition'));
 reflection::export(new reflectionfunction('oci_set_module_name'));
 reflection::export(new reflectionfunction('oci_set_action'));
@@ -622,16 +621,6 @@ Function [ <internal%s> function oci_free_cursor ] {
 
   - Parameters [1] {
     Parameter #0 [ <required> $statement_resource ]
-  }
-}
-
-Function [ <internal%s> function ocipasswordchange ] {
-
-  - Parameters [4] {
-    Parameter #0 [ <required> $connection_resource_or_connection_string ]
-    Parameter #1 [ <required> $username ]
-    Parameter #2 [ <required> $old_password ]
-    Parameter #3 [ <required> $new_password ]
   }
 }
 
