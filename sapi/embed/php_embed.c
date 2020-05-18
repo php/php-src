@@ -173,8 +173,6 @@ EMBED_SAPI_API int php_embed_init(int argc, char **argv)
 # endif
 #endif
 
-	zend_signal_startup();
-
   sapi_startup(&php_embed_module);
 
 #ifdef PHP_WIN32

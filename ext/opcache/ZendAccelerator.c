@@ -4789,9 +4789,6 @@ static int accel_finish_startup(void)
 		size_t (*orig_ub_write)(const char *str, size_t str_length) = sapi_module.ub_write;
 		void (*orig_flush)(void *server_context) = sapi_module.flush;
 		uint32_t orig_compiler_options = CG(compiler_options);
-#ifdef ZEND_SIGNALS
-		zend_bool old_reset_signals = SIGG(reset);
-#endif
 
 		if (UNEXPECTED(file_cache_only)) {
 			zend_accel_error(ACCEL_LOG_WARNING, "Preloading doesn't work in \"file_cache_only\" mode");
@@ -4894,10 +4891,6 @@ static int accel_finish_startup(void)
 
 		zend_interned_strings_switch_storage(1);
 
-#ifdef ZEND_SIGNALS
-		SIGG(reset) = 0;
-#endif
-
 		orig_error_reporting = EG(error_reporting);
 		EG(error_reporting) = 0;
 
@@ -4930,20 +4923,12 @@ static int accel_finish_startup(void)
 
 			orig_report_memleaks = PG(report_memleaks);
 			PG(report_memleaks) = 0;
-#ifdef ZEND_SIGNALS
-			/* We may not have registered signal handlers due to SIGG(reset)=0, so
-			 * also disable the check that they are registered. */
-			SIGG(check) = 0;
-#endif
 			php_request_shutdown(NULL); /* calls zend_shared_alloc_unlock(); */
 			PG(report_memleaks) = orig_report_memleaks;
 		} else {
 			zend_shared_alloc_unlock();
 			ret = FAILURE;
 		}
-#ifdef ZEND_SIGNALS
-		SIGG(reset) = old_reset_signals;
-#endif
 
 		CG(compiler_options) = orig_compiler_options;
 

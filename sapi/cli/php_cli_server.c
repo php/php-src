@@ -2725,8 +2725,6 @@ int do_cli_server(int argc, char **argv) /* {{{ */
 	signal(SIGPIPE, SIG_IGN);
 #endif
 
-	zend_signal_init();
-
 	php_cli_server_do_event_loop(&server);
 	php_cli_server_dtor(&server);
 	return 0;

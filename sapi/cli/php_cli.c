@@ -1213,8 +1213,6 @@ int main(int argc, char *argv[])
 # endif
 #endif
 
-	zend_signal_startup();
-
 #ifdef PHP_WIN32
 	_fmode = _O_BINARY;			/*sets default for file streams to binary */
 	setmode(_fileno(stdin), O_BINARY);		/* make the stdio mode be binary */

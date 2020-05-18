@@ -303,22 +303,7 @@ AC_MSG_RESULT(done)
 
 AC_CHECK_FUNCS(mremap)
 
-AC_ARG_ENABLE([zend-signals],
-  [AS_HELP_STRING([--disable-zend-signals],
-    [whether to enable zend signal handling])],
-  [ZEND_SIGNALS=$enableval],
-  [ZEND_SIGNALS=yes])
-
-AC_CHECK_FUNCS([sigaction], [], [
-  ZEND_SIGNALS=no
-])
-if test "$ZEND_SIGNALS" = "yes"; then
-	AC_DEFINE(ZEND_SIGNALS, 1, [Use zend signal handling])
-	CFLAGS="$CFLAGS -DZEND_SIGNALS"
-fi
-
-AC_MSG_CHECKING(whether to enable zend signal handling)
-AC_MSG_RESULT($ZEND_SIGNALS)
+AC_CHECK_FUNCS(sigaction)
 
 ])
 

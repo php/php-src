@@ -1483,12 +1483,6 @@ int main( int argc, char * argv[] )
     php_tsrm_startup();
 #endif
 
-#if PHP_MAJOR_VERSION >= 7
-#if defined(ZEND_SIGNALS) || PHP_MINOR_VERSION > 0
-    zend_signal_startup();
-#endif
-#endif
-
     if (argc > 1 ) {
         if ( parse_opt( argc, argv, &climode,
                 &php_ini_path, &php_bind ) == -1 ) {
