@@ -17,13 +17,19 @@
 #include "TSRM.h"
 #include "php_signal.h"
 #include "Zend/zend.h"
-#include "Zend/zend_signal.h"
+
+#ifdef ZTS
+# define php_sigprocmask(how, set, oldset) tsrm_sigmask((how), (set), (oldset))
+#else
+# define php_sigprocmask(how, set, oldset) sigprocmask((how), (set), (oldset))
+#endif
 
 /* php_signal using sigaction is derived from Advanced Programming
  * in the Unix Environment by W. Richard Stevens p 298. */
-Sigfunc *php_signal4(int signo, Sigfunc *func, int restart, int mask_all)
+int php_signal4(int signo, Sigfunc *func, int restart, int mask_all)
 {
-	struct sigaction act,oact;
+	struct sigaction act;
+	sigset_t sigset;
 
 #ifdef HAVE_STRUCT_SIGINFO_T
 	act.sa_sigaction = func;
@@ -48,18 +54,19 @@ Sigfunc *php_signal4(int signo, Sigfunc *func, int restart, int mask_all)
 		act.sa_flags |= SA_RESTART; /* SVR4, 4.3+BSD */
 #endif
 	}
-	if (zend_sigaction(signo, &act, &oact) < 0) {
-		return (void*)SIG_ERR;
+	if (sigaction(signo, &act, NULL) < 0) {
+		return FAILURE;
 	}
 
-#ifdef HAVE_STRUCT_SIGINFO_T
-	return oact.sa_sigaction;
-#else
-	return oact.sa_handler;
-#endif
+	/* Ensure this signal is not blocked */
+	sigemptyset(&sigset);
+	sigaddset(&sigset, signo);
+	php_sigprocmask(SIG_UNBLOCK, &sigset, NULL);
+
+	return SUCCESS;
 }
 
-Sigfunc *php_signal(int signo, Sigfunc *func, int restart)
+int php_signal(int signo, Sigfunc *func, int restart)
 {
 	return php_signal4(signo, func, restart, 0);
 }
