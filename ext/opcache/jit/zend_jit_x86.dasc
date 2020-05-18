@@ -2297,6 +2297,10 @@ static int zend_jit_hybrid_trace_counter_stub(dasm_State **Dst, uint32_t cost)
 
 static int zend_jit_hybrid_func_trace_counter_stub(dasm_State **Dst)
 {
+	if (zend_jit_vm_kind != ZEND_VM_KIND_HYBRID) {
+		return 1;
+	}
+
 	|->hybrid_func_trace_counter:
 
 	return zend_jit_hybrid_trace_counter_stub(Dst, ZEND_JIT_COUNTER_FUNC_COST);
