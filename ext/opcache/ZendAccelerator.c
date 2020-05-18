@@ -118,6 +118,49 @@ zend_bool file_cache_only = 0;  /* process uses file cache only */
 zend_bool fallback_process = 0; /* process uses file cache fallback */
 #endif
 
+#ifdef HAVE_SIGPROCMASK
+static sigset_t mask_all_signals;
+
+# if ZEND_DEBUG
+#  ifdef ZTS
+	ZEND_TLS int _signals_masked = 0;
+#  else
+	static   int _signals_masked = 0;
+#  endif
+#  define DEBUG_BLOCK_ALL_SIGNALS() _signals_masked += 1
+#  define DEBUG_UNBLOCK_ALL_SIGNALS() \
+	if (--_signals_masked) \
+		zend_error_noreturn(E_ERROR, "Cannot nest BLOCK_ALL_SIGNALS; it is not re-entrant")
+# else
+#  define DEBUG_BLOCK_ALL_SIGNALS()   do {} while (0)
+#  define DEBUG_UNBLOCK_ALL_SIGNALS() do {} while (0)
+# endif
+
+# define BLOCK_ALL_SIGNALS() \
+	sigset_t _oldmask; \
+	DEBUG_BLOCK_ALL_SIGNALS(); \
+	MASK_ALL_SIGNALS()
+# define UNBLOCK_ALL_SIGNALS() \
+	DEBUG_UNBLOCK_ALL_SIGNALS(); \
+	UNMASK_ALL_SIGNALS()
+
+# ifdef ZTS
+#  define MASK_ALL_SIGNALS() \
+	tsrm_sigmask(SIG_BLOCK, &mask_all_signals, &_oldmask)
+#  define UNMASK_ALL_SIGNALS() \
+	tsrm_sigmask(SIG_SETMASK, &_oldmask, NULL)
+# else
+#  define MASK_ALL_SIGNALS() \
+	sigprocmask(SIG_BLOCK, &mask_all_signals, &_oldmask)
+#  define UNMASK_ALL_SIGNALS() \
+	sigprocmask(SIG_SETMASK, &_oldmask, NULL)
+# endif
+
+#else
+# define BLOCK_ALL_SIGNALS()   do {} while(0)
+# define UNBLOCK_ALL_SIGNALS() do {} while(0)
+#endif
+
 static zend_op_array *(*accelerator_orig_compile_file)(zend_file_handle *file_handle, int type);
 static int (*accelerator_orig_zend_stream_open_function)(const char *filename, zend_file_handle *handle );
 static zend_string *(*accelerator_orig_zend_resolve_path)(const char *filename, size_t filename_len);
@@ -744,7 +787,7 @@ static zend_string* ZEND_FASTCALL accel_replace_string_by_shm_permanent(zend_str
 
 static void accel_use_shm_interned_strings(void)
 {
-	HANDLE_BLOCK_INTERRUPTIONS();
+	BLOCK_ALL_SIGNALS();
 	SHM_UNPROTECT();
 	zend_shared_alloc_lock();
 
@@ -759,7 +802,7 @@ static void accel_use_shm_interned_strings(void)
 
 	zend_shared_alloc_unlock();
 	SHM_PROTECT();
-	HANDLE_UNBLOCK_INTERRUPTIONS();
+	UNBLOCK_ALL_SIGNALS();
 }
 
 #ifndef ZEND_WIN32
@@ -1158,7 +1201,7 @@ char *accel_make_persistent_key(const char *path, size_t path_length, int *key_l
 
 					zend_string *str = accel_find_interned_string(cwd_str);
 					if (!str) {
-						HANDLE_BLOCK_INTERRUPTIONS();
+						BLOCK_ALL_SIGNALS();
 						SHM_UNPROTECT();
 						zend_shared_alloc_lock();
 						str = accel_new_interned_string(zend_string_copy(cwd_str));
@@ -1168,7 +1211,7 @@ char *accel_make_persistent_key(const char *path, size_t path_length, int *key_l
 						}
 						zend_shared_alloc_unlock();
 						SHM_PROTECT();
-						HANDLE_UNBLOCK_INTERRUPTIONS();
+						UNBLOCK_ALL_SIGNALS();
 					}
 					if (str) {
 						char buf[32];
@@ -1202,7 +1245,7 @@ char *accel_make_persistent_key(const char *path, size_t path_length, int *key_l
 
 					zend_string *str = accel_find_interned_string(ZCG(include_path));
 					if (!str) {
-						HANDLE_BLOCK_INTERRUPTIONS();
+						BLOCK_ALL_SIGNALS();
 						SHM_UNPROTECT();
 						zend_shared_alloc_lock();
 						str = accel_new_interned_string(zend_string_copy(ZCG(include_path)));
@@ -1211,7 +1254,7 @@ char *accel_make_persistent_key(const char *path, size_t path_length, int *key_l
 						}
 						zend_shared_alloc_unlock();
 						SHM_PROTECT();
-						HANDLE_UNBLOCK_INTERRUPTIONS();
+						UNBLOCK_ALL_SIGNALS();
 					}
 					if (str) {
 						char buf[32];
@@ -1308,7 +1351,7 @@ int zend_accel_invalidate(const char *filename, size_t filename_len, zend_bool f
 		if (force ||
 			!ZCG(accel_directives).validate_timestamps ||
 			do_validate_timestamps(persistent_script, &file_handle) == FAILURE) {
-			HANDLE_BLOCK_INTERRUPTIONS();
+			BLOCK_ALL_SIGNALS();
 			SHM_UNPROTECT();
 			zend_shared_alloc_lock();
 			if (!persistent_script->corrupted) {
@@ -1323,7 +1366,7 @@ int zend_accel_invalidate(const char *filename, size_t filename_len, zend_bool f
 			}
 			zend_shared_alloc_unlock();
 			SHM_PROTECT();
-			HANDLE_UNBLOCK_INTERRUPTIONS();
+			UNBLOCK_ALL_SIGNALS();
 		}
 	}
 
@@ -1838,11 +1881,11 @@ zend_op_array *file_cache_compile_file(zend_file_handle *file_handle, int type)
 	    }
 	}
 
-	HANDLE_BLOCK_INTERRUPTIONS();
+	BLOCK_ALL_SIGNALS();
 	SHM_UNPROTECT();
 	persistent_script = zend_file_cache_script_load(file_handle);
 	SHM_PROTECT();
-	HANDLE_UNBLOCK_INTERRUPTIONS();
+	UNBLOCK_ALL_SIGNALS();
 	if (persistent_script) {
 		/* see bug #15471 (old BTS) */
 		if (persistent_script->script.filename) {
@@ -2000,13 +2043,13 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 					persistent_script = (zend_persistent_script *)bucket->data;
 
 					if (key && !persistent_script->corrupted) {
-						HANDLE_BLOCK_INTERRUPTIONS();
+						BLOCK_ALL_SIGNALS();
 						SHM_UNPROTECT();
 						zend_shared_alloc_lock();
 						zend_accel_add_key(key, key_length, bucket);
 						zend_shared_alloc_unlock();
 						SHM_PROTECT();
-						HANDLE_UNBLOCK_INTERRUPTIONS();
+						UNBLOCK_ALL_SIGNALS();
 					}
 				}
 			}
@@ -2051,7 +2094,7 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		return NULL;
 	}
 
-	HANDLE_BLOCK_INTERRUPTIONS();
+	BLOCK_ALL_SIGNALS();
 	SHM_UNPROTECT();
 
 	/* If script is found then validate_timestamps if option is enabled */
@@ -2114,7 +2157,7 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		/* No memory left. Behave like without the Accelerator */
 		if (ZSMMG(memory_exhausted) || ZCSG(restart_pending)) {
 			SHM_PROTECT();
-			HANDLE_UNBLOCK_INTERRUPTIONS();
+			UNBLOCK_ALL_SIGNALS();
 			if (ZCG(accel_directives).file_cache) {
 				return file_cache_compile_file(file_handle, type);
 			}
@@ -2122,9 +2165,9 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		}
 
 		SHM_PROTECT();
-		HANDLE_UNBLOCK_INTERRUPTIONS();
+		UNBLOCK_ALL_SIGNALS();
 		persistent_script = opcache_compile_file(file_handle, type, key, &op_array);
-		HANDLE_BLOCK_INTERRUPTIONS();
+		BLOCK_ALL_SIGNALS();
 		SHM_UNPROTECT();
 
 		/* Try and cache the script and assume that it is returned from_shared_memory.
@@ -2140,7 +2183,7 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		 */
 		if (!persistent_script) {
 			SHM_PROTECT();
-			HANDLE_UNBLOCK_INTERRUPTIONS();
+			UNBLOCK_ALL_SIGNALS();
 			return op_array;
 		}
 		if (from_shared_memory) {
@@ -2194,7 +2237,7 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 	persistent_script->dynamic_members.last_used = ZCG(request_time);
 
 	SHM_PROTECT();
-	HANDLE_UNBLOCK_INTERRUPTIONS();
+	UNBLOCK_ALL_SIGNALS();
 
     /* Fetch jit auto globals used in the script before execution */
     if (persistent_script->ping_auto_globals_mask) {
@@ -2300,13 +2343,13 @@ static zend_string* persistent_zend_resolve_path(const char *filename, size_t fi
 					if (!persistent_script->corrupted) {
 						if (key) {
 							/* add another "key" for the same bucket */
-							HANDLE_BLOCK_INTERRUPTIONS();
+							BLOCK_ALL_SIGNALS();
 							SHM_UNPROTECT();
 							zend_shared_alloc_lock();
 							zend_accel_add_key(key, key_length, bucket);
 							zend_shared_alloc_unlock();
 							SHM_PROTECT();
-							HANDLE_UNBLOCK_INTERRUPTIONS();
+							UNBLOCK_ALL_SIGNALS();
 						} else {
 							ZCG(key_len) = 0;
 						}
@@ -2403,7 +2446,7 @@ int accel_activate(INIT_FUNC_ARGS)
 	}
 #endif
 
-	HANDLE_BLOCK_INTERRUPTIONS();
+	BLOCK_ALL_SIGNALS();
 	SHM_UNPROTECT();
 
 	if (ZCG(counted)) {
@@ -2462,7 +2505,7 @@ int accel_activate(INIT_FUNC_ARGS)
 	ZCG(accelerator_enabled) = ZCSG(accelerator_enabled);
 
 	SHM_PROTECT();
-	HANDLE_UNBLOCK_INTERRUPTIONS();
+	UNBLOCK_ALL_SIGNALS();
 
 	if (ZCG(accelerator_enabled) && ZCSG(last_restart_time) != ZCG(last_restart_time)) {
 		/* SHM was reinitialized. */
@@ -2889,6 +2932,10 @@ static int accel_startup(zend_extension *extension)
 	}
 #endif
 
+#ifdef HAVE_SIGPROCMASK
+	sigfillset(&mask_all_signals);
+#endif
+
 	/* no supported SAPI found - disable acceleration and stop initialization */
 	if (accel_find_sapi() == FAILURE) {
 		accel_startup_ok = 0;
@@ -3157,7 +3204,7 @@ void zend_accel_schedule_restart(zend_accel_restart_reason reason)
 	zend_accel_error(ACCEL_LOG_DEBUG, "Restart Scheduled! Reason: %s",
 			zend_accel_restart_reason_text[reason]);
 
-	HANDLE_BLOCK_INTERRUPTIONS();
+	BLOCK_ALL_SIGNALS();
 	SHM_UNPROTECT();
 	ZCSG(restart_pending) = 1;
 	ZCSG(restart_reason) = reason;
@@ -3170,7 +3217,7 @@ void zend_accel_schedule_restart(zend_accel_restart_reason reason)
 		ZCSG(force_restart_time) = 0;
 	}
 	SHM_PROTECT();
-	HANDLE_UNBLOCK_INTERRUPTIONS();
+	UNBLOCK_ALL_SIGNALS();
 }
 
 /* this is needed because on WIN32 lock is not decreased unless ZCG(counted) is set */
@@ -4388,6 +4435,9 @@ static int accel_preload(const char *config)
 	char *orig_open_basedir;
 	size_t orig_map_ptr_last;
 	zval *zv;
+#ifdef HAVE_SIGPROCMASK
+	sigset_t _oldmask;
+#endif
 
 	ZCG(enabled) = 0;
 	ZCG(accelerator_enabled) = 0;
@@ -4627,7 +4677,7 @@ static int accel_preload(const char *config)
 
 		zend_shared_alloc_init_xlat_table();
 
-		HANDLE_BLOCK_INTERRUPTIONS();
+		MASK_ALL_SIGNALS();
 		SHM_UNPROTECT();
 
 		/* Store method names first, because they may be shared between preloaded and non-preloaded classes */
@@ -4646,7 +4696,7 @@ static int accel_preload(const char *config)
 		ZCSG(preload_script) = preload_script_in_shared_memory(script);
 
 		SHM_PROTECT();
-		HANDLE_UNBLOCK_INTERRUPTIONS();
+		UNMASK_ALL_SIGNALS();
 
 		zend_string_release(filename);
 
@@ -4655,7 +4705,7 @@ static int accel_preload(const char *config)
 		preload_load();
 
 		/* Store individual scripts with unlinked classes */
-		HANDLE_BLOCK_INTERRUPTIONS();
+		MASK_ALL_SIGNALS();
 		SHM_UNPROTECT();
 
 		i = 0;
@@ -4672,7 +4722,7 @@ static int accel_preload(const char *config)
 		accel_interned_strings_save_state();
 
 		SHM_PROTECT();
-		HANDLE_UNBLOCK_INTERRUPTIONS();
+		UNMASK_ALL_SIGNALS();
 
 		zend_shared_alloc_destroy_xlat_table();
 
