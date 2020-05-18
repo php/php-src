@@ -1367,16 +1367,24 @@ static bool needs_live_range(zend_op_array *op_array, zend_op *def_opline) {
 	return (type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) != 0;
 }
 
+static void zend_foreach_op_array_helper(
+		zend_op_array *op_array, zend_op_array_func_t func, void *context) {
+	func(op_array, context);
+	for (uint32_t i = 0; i < op_array->num_dynamic_func_defs; i++) {
+		func(op_array->dynamic_func_defs[i], context);
+	}
+}
+
 void zend_foreach_op_array(zend_script *script, zend_op_array_func_t func, void *context)
 {
 	zend_class_entry *ce;
 	zend_string *key;
 	zend_op_array *op_array;
 
-	func(&script->main_op_array, context);
+	zend_foreach_op_array_helper(&script->main_op_array, func, context);
 
 	ZEND_HASH_FOREACH_PTR(&script->function_table, op_array) {
-		func(op_array, context);
+		zend_foreach_op_array_helper(op_array, func, context);
 	} ZEND_HASH_FOREACH_END();
 
 	ZEND_HASH_FOREACH_STR_KEY_PTR(&script->class_table, key, ce) {
@@ -1387,7 +1395,7 @@ void zend_foreach_op_array(zend_script *script, zend_op_array_func_t func, void 
 			if (op_array->scope == ce
 					&& op_array->type == ZEND_USER_FUNCTION
 					&& !(op_array->fn_flags & ZEND_ACC_TRAIT_CLONE)) {
-				func(op_array, context);
+				zend_foreach_op_array_helper(op_array, func, context);
 			}
 		} ZEND_HASH_FOREACH_END();
 	} ZEND_HASH_FOREACH_END();

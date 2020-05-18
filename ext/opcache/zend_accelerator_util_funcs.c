@@ -138,23 +138,9 @@ static void zend_accel_function_hash_copy(HashTable *target, HashTable *source)
 		ZEND_ASSERT(p->key);
 		t = zend_hash_find_ex(target, p->key, 1);
 		if (UNEXPECTED(t != NULL)) {
-			if (EXPECTED(ZSTR_LEN(p->key) > 0) && EXPECTED(ZSTR_VAL(p->key)[0] == 0)) {
-				/* Runtime definition key. There are two circumstances under which the key can
-				 * already be defined:
-				 *  1. The file has been re-included without being changed in the meantime. In
-				 *     this case we can keep the old value, because we know that the definition
-				 *     hasn't changed.
-				 *  2. The file has been changed in the meantime, but the RTD key ends up colliding.
-				 *     This would be a bug.
-				 * As we can't distinguish these cases, we assume that it is 1. and keep the old
-				 * value. */
-				continue;
-			} else {
-				goto failure;
-			}
-		} else {
-			_zend_hash_append_ptr_ex(target, p->key, Z_PTR(p->val), 1);
+			goto failure;
 		}
+		_zend_hash_append_ptr_ex(target, p->key, Z_PTR(p->val), 1);
 	}
 	target->nInternalPointer = 0;
 	return;
@@ -190,7 +176,15 @@ static void zend_accel_class_hash_copy(HashTable *target, HashTable *source)
 		t = zend_hash_find_ex(target, p->key, 1);
 		if (UNEXPECTED(t != NULL)) {
 			if (EXPECTED(ZSTR_LEN(p->key) > 0) && EXPECTED(ZSTR_VAL(p->key)[0] == 0)) {
-				/* See comment in zend_accel_function_hash_copy(). */
+				/* Runtime definition key. There are two circumstances under which the key can
+				 * already be defined:
+				 *  1. The file has been re-included without being changed in the meantime. In
+				 *     this case we can keep the old value, because we know that the definition
+				 *     hasn't changed.
+				 *  2. The file has been changed in the meantime, but the RTD key ends up colliding.
+				 *     This would be a bug.
+				 * As we can't distinguish these cases, we assume that it is 1. and keep the old
+				 * value. */
 				continue;
 			} else if (UNEXPECTED(!ZCG(accel_directives).ignore_dups)) {
 				zend_class_entry *ce1 = Z_PTR(p->val);

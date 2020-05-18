@@ -1146,6 +1146,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_leave_helper
 		ZEND_VM_LEAVE();
 	} else if (EXPECTED((call_info & ZEND_CALL_TOP) == 0)) {
 		zend_detach_symbol_table(execute_data);
+		zend_destroy_static_vars(&EX(func)->op_array);
 		destroy_op_array(&EX(func)->op_array);
 		efree_size(EX(func), sizeof(zend_op_array));
 #ifdef ZEND_PREFER_RELOAD
@@ -2828,10 +2829,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DECLARE_ANON_CLASS_SPEC_HANDLE
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DECLARE_FUNCTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
+	zend_function *func;
 	USE_OPLINE
 
 	SAVE_OPLINE();
-	do_bind_function(RT_CONSTANT(opline, opline->op1));
+	func = (zend_function *) EX(func)->op_array.dynamic_func_defs[opline->op2.num];
+	do_bind_function(func, RT_CONSTANT(opline, opline->op1));
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -4732,6 +4735,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_CONST_HAN
 			zend_vm_stack_free_call_frame(call);
 		}
 
+		zend_destroy_static_vars(new_op_array);
 		destroy_op_array(new_op_array);
 		efree_size(new_op_array, sizeof(zend_op_array));
 		if (UNEXPECTED(EG(exception) != NULL)) {
@@ -4801,6 +4805,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_OBSERVER_
 			zend_vm_stack_free_call_frame(call);
 		}
 
+		zend_destroy_static_vars(new_op_array);
 		destroy_op_array(new_op_array);
 		efree_size(new_op_array, sizeof(zend_op_array));
 		if (UNEXPECTED(EG(exception) != NULL)) {
@@ -5150,6 +5155,32 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DECLARE_CLASS_SPEC_CONST_HANDL
 	SAVE_OPLINE();
 	do_bind_class(RT_CONSTANT(opline, opline->op1), (opline->op2_type == IS_CONST) ? Z_STR_P(RT_CONSTANT(opline, opline->op2)) : NULL);
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DECLARE_LAMBDA_FUNCTION_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_function *func;
+	zval *object;
+	zend_class_entry *called_scope;
+
+	func = (zend_function *) EX(func)->op_array.dynamic_func_defs[opline->op2.num];
+	if (Z_TYPE(EX(This)) == IS_OBJECT) {
+		called_scope = Z_OBJCE(EX(This));
+		if (UNEXPECTED((func->common.fn_flags & ZEND_ACC_STATIC) ||
+				(EX(func)->common.fn_flags & ZEND_ACC_STATIC))) {
+			object = NULL;
+		} else {
+			object = &EX(This);
+		}
+	} else {
+		called_scope = Z_CE(EX(This));
+		object = NULL;
+	}
+	zend_create_closure(EX_VAR(opline->result.var), func,
+		EX(func)->op_array.scope, called_scope, object);
+
+	ZEND_VM_NEXT_OPCODE();
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_FROM_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -10207,41 +10238,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_U
 }
 
 /* No specialization for op_types (CONST|TMPVAR|CV, UNUSED|CLASS_FETCH|CONST|VAR) */
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DECLARE_LAMBDA_FUNCTION_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zend_function *func;
-	zval *zfunc;
-	zval *object;
-	zend_class_entry *called_scope;
-
-	func = CACHED_PTR(opline->extended_value);
-	if (UNEXPECTED(func == NULL)) {
-		zfunc = zend_hash_find_ex(EG(function_table), Z_STR_P(RT_CONSTANT(opline, opline->op1)), 1);
-		ZEND_ASSERT(zfunc != NULL);
-		func = Z_FUNC_P(zfunc);
-		ZEND_ASSERT(func->type == ZEND_USER_FUNCTION);
-		CACHE_PTR(opline->extended_value, func);
-	}
-
-	if (Z_TYPE(EX(This)) == IS_OBJECT) {
-		called_scope = Z_OBJCE(EX(This));
-		if (UNEXPECTED((func->common.fn_flags & ZEND_ACC_STATIC) ||
-				(EX(func)->common.fn_flags & ZEND_ACC_STATIC))) {
-			object = NULL;
-		} else {
-			object = &EX(This);
-		}
-	} else {
-		called_scope = Z_CE(EX(This));
-		object = NULL;
-	}
-	zend_create_closure(EX_VAR(opline->result.var), func,
-		EX(func)->op_array.scope, called_scope, object);
-
-	ZEND_VM_NEXT_OPCODE();
-}
-
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -14356,6 +14352,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_TMPVAR_HA
 			zend_vm_stack_free_call_frame(call);
 		}
 
+		zend_destroy_static_vars(new_op_array);
 		destroy_op_array(new_op_array);
 		efree_size(new_op_array, sizeof(zend_op_array));
 		if (UNEXPECTED(EG(exception) != NULL)) {
@@ -38239,6 +38236,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_CV_HANDLE
 			zend_vm_stack_free_call_frame(call);
 		}
 
+		zend_destroy_static_vars(new_op_array);
 		destroy_op_array(new_op_array);
 		efree_size(new_op_array, sizeof(zend_op_array));
 		if (UNEXPECTED(EG(exception) != NULL)) {
@@ -53314,7 +53312,7 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_MAKE_REF_SPEC_CV_UNUSED_LABEL,
 			(void*)&&ZEND_DECLARE_FUNCTION_SPEC_LABEL,
-			(void*)&&ZEND_DECLARE_LAMBDA_FUNCTION_SPEC_CONST_UNUSED_LABEL,
+			(void*)&&ZEND_DECLARE_LAMBDA_FUNCTION_SPEC_CONST_LABEL,
 			(void*)&&ZEND_DECLARE_CONST_SPEC_CONST_CONST_LABEL,
 			(void*)&&ZEND_DECLARE_CLASS_SPEC_CONST_LABEL,
 			(void*)&&ZEND_DECLARE_CLASS_DELAYED_SPEC_CONST_CONST_LABEL,
@@ -54625,6 +54623,7 @@ zend_leave_helper_SPEC_LABEL:
 		ZEND_VM_LEAVE();
 	} else if (EXPECTED((call_info & ZEND_CALL_TOP) == 0)) {
 		zend_detach_symbol_table(execute_data);
+		zend_destroy_static_vars(&EX(func)->op_array);
 		destroy_op_array(&EX(func)->op_array);
 		efree_size(EX(func), sizeof(zend_op_array));
 #ifdef ZEND_PREFER_RELOAD
@@ -55133,6 +55132,10 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_DECLARE_CLASS_SPEC_CONST)
 				ZEND_DECLARE_CLASS_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_DECLARE_LAMBDA_FUNCTION_SPEC_CONST):
+				VM_TRACE(ZEND_DECLARE_LAMBDA_FUNCTION_SPEC_CONST)
+				ZEND_DECLARE_LAMBDA_FUNCTION_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_YIELD_FROM_SPEC_CONST):
 				VM_TRACE(ZEND_YIELD_FROM_SPEC_CONST)
 				ZEND_YIELD_FROM_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -55608,10 +55611,6 @@ zend_leave_helper_SPEC_LABEL:
 			HYBRID_CASE(ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_UNUSED):
 				VM_TRACE(ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_UNUSED)
 				ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_DECLARE_LAMBDA_FUNCTION_SPEC_CONST_UNUSED):
-				VM_TRACE(ZEND_DECLARE_LAMBDA_FUNCTION_SPEC_CONST_UNUSED)
-				ZEND_DECLARE_LAMBDA_FUNCTION_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_YIELD_SPEC_CONST_UNUSED):
 				VM_TRACE(ZEND_YIELD_SPEC_CONST_UNUSED)
@@ -61342,7 +61341,7 @@ void zend_vm_init(void)
 		ZEND_NULL_HANDLER,
 		ZEND_MAKE_REF_SPEC_CV_UNUSED_HANDLER,
 		ZEND_DECLARE_FUNCTION_SPEC_HANDLER,
-		ZEND_DECLARE_LAMBDA_FUNCTION_SPEC_CONST_UNUSED_HANDLER,
+		ZEND_DECLARE_LAMBDA_FUNCTION_SPEC_CONST_HANDLER,
 		ZEND_DECLARE_CONST_SPEC_CONST_CONST_HANDLER,
 		ZEND_DECLARE_CLASS_SPEC_CONST_HANDLER,
 		ZEND_DECLARE_CLASS_DELAYED_SPEC_CONST_CONST_HANDLER,
