@@ -1259,9 +1259,6 @@ static void zend_set_timeout_ex(zend_long seconds, int reset_signals) /* {{{ */
 # endif
 
 		if (reset_signals) {
-# ifdef ZEND_SIGNALS
-			zend_signal(signo, zend_timeout_handler);
-# else
 			sigset_t sigset;
 #  ifdef HAVE_SIGACTION
 			struct sigaction act;
@@ -1276,7 +1273,6 @@ static void zend_set_timeout_ex(zend_long seconds, int reset_signals) /* {{{ */
 			sigemptyset(&sigset);
 			sigaddset(&sigset, signo);
 			sigprocmask(SIG_UNBLOCK, &sigset, NULL);
-# endif /* ZEND_SIGNALS */
 		}
 	}
 #endif /* HAVE_SETITIMER */
