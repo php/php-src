@@ -1242,7 +1242,7 @@ void phpdbg_signal_handler(int sig, siginfo_t *info, void *context) /* {{{ */
 				if (PHPDBG_G(sigsegv_bailout)) {
 					LONGJMP(*PHPDBG_G(sigsegv_bailout), FAILURE);
 				}
-				zend_sigaction(sig, &PHPDBG_G(old_sigsegv_signal), NULL);
+				sigaction(sig, &PHPDBG_G(old_sigsegv_signal), NULL);
 			}
 			break;
 	}
@@ -1370,8 +1370,6 @@ phpdbg_main:
 	ZEND_TSRMLS_CACHE_UPDATE();
 # endif
 #endif
-
-	zend_signal_startup();
 
 	ini_entries = NULL;
 	ini_entries_len = 0;
@@ -1669,10 +1667,6 @@ phpdbg_main:
 			goto free_and_return;
 		}
 
-		zend_try {
-			zend_signal_activate();
-		} zend_end_try();
-
 		/* setup remote server if necessary */
 		if (cleaning <= 0 && listen > 0) {
 			server = phpdbg_open_socket(address, listen);
@@ -1681,7 +1675,7 @@ phpdbg_main:
 			}
 
 #ifndef _WIN32
-			zend_sigaction(SIGIO, &sigio_struct, NULL);
+			sigaction(SIGIO, &sigio_struct, NULL);
 #endif
 
 			/* set remote flag to stop service shutting down upon quit */
@@ -1689,7 +1683,7 @@ phpdbg_main:
 #ifndef _WIN32
 		} else {
 
-			zend_signal(SIGHUP, phpdbg_sighup_handler);
+			signal(SIGHUP, phpdbg_sighup_handler);
 #endif
 		}
 
@@ -1758,8 +1752,8 @@ phpdbg_main:
 		}
 
 #ifndef _WIN32
-		zend_try { zend_sigaction(SIGSEGV, &signal_struct, &PHPDBG_G(old_sigsegv_signal)); } zend_end_try();
-		zend_try { zend_sigaction(SIGBUS, &signal_struct, &PHPDBG_G(old_sigsegv_signal)); } zend_end_try();
+		sigaction(SIGSEGV, &signal_struct, &PHPDBG_G(old_sigsegv_signal));
+		sigaction(SIGBUS, &signal_struct, &PHPDBG_G(old_sigsegv_signal));
 #endif
 
 		/* do not install sigint handlers for remote consoles */
@@ -1767,14 +1761,14 @@ phpdbg_main:
 #ifndef _WIN32
 		if (listen < 0) {
 #endif
-			zend_try { zend_signal(SIGINT, phpdbg_sigint_handler); } zend_end_try();
+			signal(SIGINT, phpdbg_sigint_handler);
 #ifndef _WIN32
 		}
 
 		/* setup io here */
 		if (remote) {
 			PHPDBG_G(flags) |= PHPDBG_IS_REMOTE;
-			zend_signal(SIGPIPE, SIG_IGN);
+			signal(SIGPIPE, SIG_IGN);
 		}
 		PHPDBG_G(io)[PHPDBG_STDIN].ptr = stdin;
 		PHPDBG_G(io)[PHPDBG_STDIN].fd = fileno(stdin);
@@ -2107,7 +2101,7 @@ phpdbg_out:
 		}
 
 #ifndef _WIN32
-		/* force override (no zend_signals) to prevent crashes due to signal recursion in SIGSEGV/SIGBUS handlers */
+		/* restore default SIGSEGV/SIGBUS handlers */
 		signal(SIGSEGV, SIG_DFL);
 		signal(SIGBUS, SIG_DFL);
 

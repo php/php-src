@@ -43,7 +43,6 @@
 #include "zend_globals.h"
 #include "zend_ini_scanner.h"
 #include "zend_stream.h"
-#include "zend_signal.h"
 #if !defined(_WIN32) && !defined(ZEND_SIGNALS)
 #	include <signal.h>
 #elif defined(PHP_WIN32)
