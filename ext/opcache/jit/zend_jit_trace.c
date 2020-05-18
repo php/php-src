@@ -5059,7 +5059,6 @@ static zend_always_inline uint8_t zend_jit_trace_supported(const zend_op *opline
 static int zend_jit_setup_hot_trace_counters(zend_op_array *op_array)
 {
 	zend_op *opline;
-	zend_func_info *func_info;
 	zend_jit_op_array_trace_extension *jit_extension;
 	zend_cfg cfg;
 	uint32_t i;
@@ -5074,14 +5073,9 @@ static int zend_jit_setup_hot_trace_counters(zend_op_array *op_array)
 	}
 
 	jit_extension = (zend_jit_op_array_trace_extension*)zend_shared_alloc(sizeof(zend_jit_op_array_trace_extension) + (op_array->last - 1) * sizeof(zend_op_trace_info));
-	func_info = (zend_func_info*)ZEND_FUNC_INFO(op_array);
-	if (func_info) {
-		memcpy(&jit_extension->func_info, func_info, sizeof(zend_func_info));
-	} else {
-		memset(&jit_extension->func_info, 0, sizeof(zend_func_info));
-		jit_extension->func_info.num_args = -1;
-		jit_extension->func_info.return_value_used = -1;
-	}
+	memset(&jit_extension->func_info, 0, sizeof(zend_func_info));
+	jit_extension->func_info.num_args = -1;
+	jit_extension->func_info.return_value_used = -1;
 	jit_extension->offset = (char*)jit_extension->trace_info - (char*)op_array->opcodes;
 	for (i = 0; i < op_array->last; i++) {
 		jit_extension->trace_info[i].orig_handler = op_array->opcodes[i].handler;
