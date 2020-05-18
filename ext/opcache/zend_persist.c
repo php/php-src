@@ -79,6 +79,7 @@
 typedef void (*zend_persist_func_t)(zval*);
 
 static void zend_persist_zval(zval *z);
+static void zend_persist_op_array(zval *zv);
 
 static const uint32_t uninitialized_bucket[-HT_MIN_MASK] =
 	{HT_INVALID_IDX, HT_INVALID_IDX};
@@ -250,6 +251,23 @@ static void zend_persist_zval(zval *z)
 				GC_SET_REFCOUNT(Z_COUNTED_P(z), 1);
 				efree(old_ref);
 			}
+			break;
+		case IS_FUNC_REF:
+			new_ptr = zend_shared_alloc_get_xlat_entry(Z_FUNC_REF_P(z));
+			if (new_ptr) {
+				Z_FUNC_REF_P(z) = new_ptr;
+			} else {
+				zend_func_ref *old_ref = Z_FUNC_REF_P(z);
+				Z_FUNC_REF_P(z) = zend_shared_memdup_put(Z_FUNC_REF_P(z), sizeof(zend_func_ref));
+				GC_SET_REFCOUNT(Z_COUNTED_P(z), 1);
+				efree(old_ref);
+
+				zval tmp;
+				ZVAL_PTR(&tmp, Z_FUNC_REF_P(z)->func);
+				zend_persist_op_array(&tmp);
+				Z_FUNC_REF_P(z)->func = Z_PTR(tmp);
+			}
+			Z_TYPE_FLAGS_P(z) = 0;
 			break;
 		default:
 			ZEND_ASSERT(Z_TYPE_P(z) != IS_OBJECT);

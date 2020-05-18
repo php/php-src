@@ -211,6 +211,14 @@ static void zend_file_cache_unserialize_zval(zval                    *zv,
                                              zend_persistent_script  *script,
                                              void                    *buf);
 
+static void zend_file_cache_serialize_op_array(zend_op_array            *op_array,
+                                               zend_persistent_script   *script,
+                                               zend_file_cache_metainfo *info,
+                                               void                     *buf);
+static void zend_file_cache_unserialize_op_array(zend_op_array           *op_array,
+                                                 zend_persistent_script  *script,
+                                                 void                    *buf);
+
 static void *zend_file_cache_serialize_interned(zend_string              *str,
                                                 zend_file_cache_metainfo *info)
 {
@@ -366,6 +374,23 @@ static void zend_file_cache_serialize_zval(zval                     *zv,
 				ast = Z_AST_P(zv);
 				UNSERIALIZE_PTR(ast);
 				zend_file_cache_serialize_ast(GC_AST(ast), script, info, buf);
+			}
+			break;
+		case IS_FUNC_REF:
+			if (!IS_SERIALIZED(Z_FUNC_REF_P(zv))) {
+				zend_func_ref *ref;
+				zend_function *func;
+
+				SERIALIZE_PTR(Z_FUNC_REF_P(zv));
+				ref = Z_FUNC_REF_P(zv);
+				UNSERIALIZE_PTR(ref);
+
+				SERIALIZE_PTR(ref->func);
+				func = ref->func;
+				UNSERIALIZE_PTR(func);
+
+				ZEND_ASSERT(func->type == ZEND_USER_FUNCTION);
+				zend_file_cache_serialize_op_array((zend_op_array *) func, script, info, buf);
 			}
 			break;
 	}
@@ -1087,6 +1112,15 @@ static void zend_file_cache_unserialize_zval(zval                    *zv,
 			if (!IS_UNSERIALIZED(Z_AST_P(zv))) {
 				UNSERIALIZE_PTR(Z_AST_P(zv));
 				zend_file_cache_unserialize_ast(Z_ASTVAL_P(zv), script, buf);
+			}
+			break;
+		case IS_FUNC_REF:
+			if (!IS_UNSERIALIZED(Z_FUNC_REF_P(zv))) {
+				UNSERIALIZE_PTR(Z_FUNC_REF_P(zv));
+				UNSERIALIZE_PTR(Z_FUNC_REF_P(zv)->func);
+				ZEND_ASSERT(Z_FUNC_REF_P(zv)->func->type == ZEND_USER_FUNCTION);
+				zend_file_cache_unserialize_op_array(
+					(zend_op_array *) Z_FUNC_REF_P(zv)->func, script, buf);
 			}
 			break;
 	}

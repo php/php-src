@@ -72,6 +72,9 @@ void zend_dump_const(const zval *zv)
 		case IS_ARRAY:
 			fprintf(stderr, " array(...)");
 			break;
+		case IS_FUNC_REF:
+			fprintf(stderr, " func(%p)", Z_FUNC_REF_P(zv)->func);
+			break;
 		default:
 			fprintf(stderr, " zval(type=%d)", Z_TYPE_P(zv));
 			break;

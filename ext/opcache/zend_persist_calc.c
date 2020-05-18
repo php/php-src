@@ -54,6 +54,7 @@
 	} while (0)
 
 static void zend_persist_zval_calc(zval *z);
+static void zend_persist_op_array_calc(zval *zv);
 
 static void zend_hash_persist_calc(HashTable *ht)
 {
@@ -141,6 +142,14 @@ static void zend_persist_zval_calc(zval *z)
 				zend_persist_ast_calc(Z_ASTVAL_P(z));
 			}
 			break;
+		case IS_FUNC_REF:
+			size = zend_shared_memdup_size(Z_FUNC_REF_P(z), sizeof(zend_func_ref));
+			if (size) {
+				zval tmp;
+				ZVAL_PTR(&tmp, Z_FUNC_REF_P(z)->func);
+				zend_persist_op_array_calc(&tmp);
+				ADD_SIZE(size);
+			}
 		default:
 			ZEND_ASSERT(Z_TYPE_P(z) != IS_OBJECT);
 			ZEND_ASSERT(Z_TYPE_P(z) != IS_RESOURCE);
