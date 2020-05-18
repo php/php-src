@@ -198,10 +198,10 @@ ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_func_counter_helper(ZEND_OPCODE_H
 	const zend_op *opline = EX(opline);
 #endif
 
-	*(jit_extension->counter) -= ZEND_JIT_HOT_FUNC_COST;
+	*(jit_extension->counter) -= ZEND_JIT_COUNTER_FUNC_COST;
 
 	if (UNEXPECTED(*(jit_extension->counter) <= 0)) {
-		*(jit_extension->counter) = ZEND_JIT_HOT_COUNTER_INIT;
+		*(jit_extension->counter) = ZEND_JIT_COUNTER_INIT;
 		zend_jit_hot_func(execute_data, opline);
 		ZEND_OPCODE_RETURN();
 	} else {
@@ -218,10 +218,10 @@ ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_loop_counter_helper(ZEND_OPCODE_H
 	const zend_op *opline = EX(opline);
 #endif
 
-	*(jit_extension->counter) -= ZEND_JIT_HOT_LOOP_COST;
+	*(jit_extension->counter) -= ZEND_JIT_COUNTER_LOOP_COST;
 
 	if (UNEXPECTED(*(jit_extension->counter) <= 0)) {
-		*(jit_extension->counter) = ZEND_JIT_HOT_COUNTER_INIT;
+		*(jit_extension->counter) = ZEND_JIT_COUNTER_INIT;
 		zend_jit_hot_func(execute_data, opline);
 		ZEND_OPCODE_RETURN();
 	} else {
@@ -291,7 +291,7 @@ static zend_always_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_trace_c
 	*(ZEND_OP_TRACE_INFO(opline, offset)->counter) -= cost;
 
 	if (UNEXPECTED(*(ZEND_OP_TRACE_INFO(opline, offset)->counter) <= 0)) {
-		*(ZEND_OP_TRACE_INFO(opline, offset)->counter) = ZEND_JIT_TRACE_COUNTER_INIT;
+		*(ZEND_OP_TRACE_INFO(opline, offset)->counter) = ZEND_JIT_COUNTER_INIT;
 		if (UNEXPECTED(zend_jit_trace_hot_root(execute_data, opline) < 0)) {
 #ifndef HAVE_GCC_GLOBAL_REGS
 			return -1;
@@ -312,17 +312,17 @@ static zend_always_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_trace_c
 
 ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_func_trace_helper(ZEND_OPCODE_HANDLER_ARGS)
 {
-	ZEND_OPCODE_TAIL_CALL_EX(zend_jit_trace_counter_helper, ZEND_JIT_TRACE_FUNC_COST);
+	ZEND_OPCODE_TAIL_CALL_EX(zend_jit_trace_counter_helper, ZEND_JIT_COUNTER_FUNC_COST);
 }
 
 ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_ret_trace_helper(ZEND_OPCODE_HANDLER_ARGS)
 {
-	ZEND_OPCODE_TAIL_CALL_EX(zend_jit_trace_counter_helper, ZEND_JIT_TRACE_RET_COST);
+	ZEND_OPCODE_TAIL_CALL_EX(zend_jit_trace_counter_helper, ZEND_JIT_COUNTER_RET_COST);
 }
 
 ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_loop_trace_helper(ZEND_OPCODE_HANDLER_ARGS)
 {
-	ZEND_OPCODE_TAIL_CALL_EX(zend_jit_trace_counter_helper, ZEND_JIT_TRACE_LOOP_COST);
+	ZEND_OPCODE_TAIL_CALL_EX(zend_jit_trace_counter_helper, ZEND_JIT_COUNTER_LOOP_COST);
 }
 
 #define TRACE_RECORD(_op, _info, _ptr) \

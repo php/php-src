@@ -50,16 +50,14 @@ static void zend_jit_disasm_add_symbol(const char *name,
 
 static struct ud ud;
 
-typedef struct _sym_node {
+struct _sym_node {
 	uint64_t          addr;
 	uint64_t          end;
 	struct _sym_node *parent;
 	struct _sym_node *child[2];
 	unsigned char     info;
 	char              name[1];
-} zend_sym_node;
-
-static zend_sym_node *symbols = NULL;
+};
 
 static void zend_syms_rotateleft(zend_sym_node *p) {
 	zend_sym_node *r = p->child[1];
@@ -69,7 +67,7 @@ static void zend_syms_rotateleft(zend_sym_node *p) {
 	}
 	r->parent = p->parent;
 	if (p->parent == NULL) {
-		symbols = r;
+		JIT_G(symbols) = r;
 	} else if (p->parent->child[0] == p) {
 		p->parent->child[0] = r;
 	} else {
@@ -87,7 +85,7 @@ static void zend_syms_rotateright(zend_sym_node *p) {
 	}
 	l->parent = p->parent;
 	if (p->parent == NULL) {
-		symbols = l;
+		JIT_G(symbols) = l;
 	} else if (p->parent->child[1] == p) {
 		p->parent->child[1] = l;
 	} else {
@@ -113,8 +111,8 @@ static void zend_jit_disasm_add_symbol(const char *name,
 	memcpy((char*)&sym->name, name, len + 1);
 	sym->parent = sym->child[0] = sym->child[1] = NULL;
 	sym->info = 1;
-	if (symbols) {
-		zend_sym_node *node = symbols;
+	if (JIT_G(symbols)) {
+		zend_sym_node *node = JIT_G(symbols);
 
 		/* insert it into rbtree */
 		do {
@@ -147,7 +145,7 @@ static void zend_jit_disasm_add_symbol(const char *name,
 		} while (1);
 
 		/* fix rbtree after instering */
-		while (sym && sym != symbols && sym->parent->info == 1) {
+		while (sym && sym != JIT_G(symbols) && sym->parent->info == 1) {
 			if (sym->parent == sym->parent->parent->child[0]) {
 				node = sym->parent->parent->child[1];
 				if (node && node->info == 1) {
@@ -183,9 +181,9 @@ static void zend_jit_disasm_add_symbol(const char *name,
 			}
 		}
 	} else {
-		symbols = sym;
+		JIT_G(symbols) = sym;
 	}
-	symbols->info = 0;
+	JIT_G(symbols)->info = 0;
 }
 
 static void zend_jit_disasm_destroy_symbols(zend_sym_node *n) {
@@ -201,7 +199,7 @@ static void zend_jit_disasm_destroy_symbols(zend_sym_node *n) {
 
 static const char* zend_jit_disasm_find_symbol(uint64_t  addr,
                                                int64_t  *offset) {
-	zend_sym_node *node = symbols;
+	zend_sym_node *node = JIT_G(symbols);
 	while (node) {
 		if (addr < node->addr) {
 			node = node->child[0];
@@ -524,5 +522,8 @@ static int zend_jit_disasm_init(void)
 
 static void zend_jit_disasm_shutdown(void)
 {
-	zend_jit_disasm_destroy_symbols(symbols);
+	if (JIT_G(symbols)) {
+		zend_jit_disasm_destroy_symbols(JIT_G(symbols));
+		JIT_G(symbols) = NULL;
+	}
 }
