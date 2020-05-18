@@ -18,8 +18,8 @@ for($i=0;$i<7;$i++) {
 --EXPECT--
 !! [TypeError] imageaffinematrixget(): Argument #1 ($type) must be of type array when using translate or scale
 !! [TypeError] imageaffinematrixget(): Argument #1 ($type) must be of type array when using translate or scale
-!! [TypeError] imageaffinematrixget(): Argument #2 ($options) must be of type int|double when using rotate or shear
-!! [TypeError] imageaffinematrixget(): Argument #2 ($options) must be of type int|double when using rotate or shear
-!! [TypeError] imageaffinematrixget(): Argument #2 ($options) must be of type int|double when using rotate or shear
+!! [TypeError] imageaffinematrixget(): Argument #2 ($options) must be of type int|float when using rotate or shear
+!! [TypeError] imageaffinematrixget(): Argument #2 ($options) must be of type int|float when using rotate or shear
+!! [TypeError] imageaffinematrixget(): Argument #2 ($options) must be of type int|float when using rotate or shear
 !! [ValueError] imageaffinematrixget(): Argument #1 ($type) must be a valid element type
 !! [ValueError] imageaffinematrixget(): Argument #1 ($type) must be a valid element type

@@ -1869,20 +1869,21 @@ PHP_FUNCTION(imagexbm)
 	zval *imgind;
 	char *file = NULL;
 	size_t file_len = 0;
-	zend_long foreground_color = -1;
+	zend_long foreground_color;
+	zend_bool foreground_color_is_null = 1;
 	gdImagePtr im;
 	int argc = ZEND_NUM_ARGS();
 	int i;
 	gdIOCtx *ctx = NULL;
 	php_stream *stream;
 
-	if (zend_parse_parameters(argc, "Op!|l", &imgind, gd_image_ce, &file, &file_len, &foreground_color) == FAILURE) {
+	if (zend_parse_parameters(argc, "Op!|l!", &imgind, gd_image_ce, &file, &file_len, &foreground_color, &foreground_color_is_null) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	im = php_gd_libgdimageptr_from_zval_p(imgind);
 
-	if (argc > 1 && file != NULL) {
+	if (file != NULL) {
 		stream = php_stream_open_wrapper(file, "wb", REPORT_ERRORS|IGNORE_PATH|IGNORE_URL_WIN, NULL);
 		if (stream == NULL) {
 			RETURN_FALSE;
@@ -1893,10 +1894,13 @@ PHP_FUNCTION(imagexbm)
 		ctx = create_output_context();
 	}
 
-	if (argc < 3) {
+	if (foreground_color_is_null) {
 		for (i=0; i < gdImageColorsTotal(im); i++) {
-			if (!gdImageRed(im, i) && !gdImageGreen(im, i) && !gdImageBlue(im, i)) break;
+			if (!gdImageRed(im, i) && !gdImageGreen(im, i) && !gdImageBlue(im, i)) {
+				break;
+			}
 		}
+
 		foreground_color = i;
 	}
 
@@ -1946,20 +1950,20 @@ PHP_FUNCTION(imagejpeg)
 PHP_FUNCTION(imagewbmp)
 {
 	zval *imgind;
-	zend_long foreground_color = -1;
+	zend_long foreground_color;
+	zend_long foreground_color_is_null = 1;
 	gdImagePtr im;
-	int argc = ZEND_NUM_ARGS();
 	int i;
 	gdIOCtx *ctx = NULL;
 	zval *to_zval = NULL;
 
-	if (zend_parse_parameters(argc, "O|z!l", &imgind, gd_image_ce, &to_zval, &foreground_color) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|z!l!", &imgind, gd_image_ce, &to_zval, &foreground_color) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	im = php_gd_libgdimageptr_from_zval_p(imgind);
 
-	if (argc > 1 && to_zval != NULL) {
+	if (to_zval != NULL) {
 		ctx = create_stream_context_from_zval(to_zval);
 		if (!ctx) {
 			RETURN_FALSE;
@@ -1968,10 +1972,11 @@ PHP_FUNCTION(imagewbmp)
 		ctx = create_output_context();
 	}
 
-	if (argc < 3) {
+	if (foreground_color_is_null) {
 		for (i=0; i < gdImageColorsTotal(im); i++) {
-			if (!gdImageRed(im, i) && !gdImageGreen(im, i) && !gdImageBlue(im, i))
+			if (!gdImageRed(im, i) && !gdImageGreen(im, i) && !gdImageBlue(im, i)) {
 				break;
+			}
 		}
 
 		foreground_color = i;
@@ -2006,17 +2011,16 @@ PHP_FUNCTION(imagebmp)
 	zval *imgind;
 	zend_bool compressed = 1;
 	gdImagePtr im;
-	int argc = ZEND_NUM_ARGS();
 	gdIOCtx *ctx = NULL;
 	zval *to_zval = NULL;
 
-	if (zend_parse_parameters(argc, "O|z!b", &imgind, gd_image_ce, &to_zval, &compressed) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|z!b", &imgind, gd_image_ce, &to_zval, &compressed) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	im = php_gd_libgdimageptr_from_zval_p(imgind);
 
-	if (argc > 1 && to_zval != NULL) {
+	if (to_zval != NULL) {
 		ctx = create_stream_context_from_zval(to_zval);
 		if (!ctx) {
 			RETURN_FALSE;
@@ -2555,16 +2559,16 @@ PHP_FUNCTION(imagecolortransparent)
 {
 	zval *IM;
 	zend_long COL = 0;
+	zend_bool COL_IS_NULL = 1;
 	gdImagePtr im;
-	int argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc, "O|l", &IM, gd_image_ce, &COL) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|l!", &IM, gd_image_ce, &COL, &COL_IS_NULL) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 
-	if (argc > 1) {
+	if (!COL_IS_NULL) {
 		gdImageColorTransparent(im, COL);
 	}
 
@@ -2576,17 +2580,17 @@ PHP_FUNCTION(imagecolortransparent)
 PHP_FUNCTION(imageinterlace)
 {
 	zval *IM;
-	int argc = ZEND_NUM_ARGS();
 	zend_long INT = 0;
+	zend_bool INT_IS_NULL = 1;
 	gdImagePtr im;
 
-	if (zend_parse_parameters(argc, "O|l", &IM, gd_image_ce, &INT) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|l!", &IM, gd_image_ce, &INT, &INT_IS_NULL) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 
-	if (argc > 1) {
+	if (!INT_IS_NULL) {
 		gdImageInterlace(im, INT);
 	}
 
@@ -2603,15 +2607,16 @@ static void php_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled)
 {
 	zval *IM, *POINTS;
 	zend_long NPOINTS, COL;
+	zend_bool COL_IS_NULL = 1;
 	zval *var = NULL;
 	gdImagePtr im;
 	gdPointPtr points;
 	int npoints, col, nelem, i;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oal|l", &IM, gd_image_ce, &POINTS, &NPOINTS, &COL) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oal|l!", &IM, gd_image_ce, &POINTS, &NPOINTS, &COL, &COL_IS_NULL) == FAILURE) {
 		RETURN_THROWS();
 	}
-	if (ZEND_NUM_ARGS() == 3) {
+	if (COL_IS_NULL) {
 		COL = NPOINTS;
 		NPOINTS = zend_hash_num_elements(Z_ARRVAL_P(POINTS));
 		if (NPOINTS % 2 != 0) {
@@ -3733,7 +3738,7 @@ PHP_FUNCTION(imageaffine)
 	int i, nelems;
 	zval *zval_affine_elem = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oa|a", &IM, gd_image_ce, &z_affine, &z_rect) == FAILURE)  {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oa|a!", &IM, gd_image_ce, &z_affine, &z_rect) == FAILURE)  {
 		RETURN_THROWS();
 	}
 
@@ -3856,7 +3861,7 @@ PHP_FUNCTION(imageaffinematrixget)
 			double angle;
 
 			if (!options) {
-				zend_argument_type_error(2, "must be of type int|double when using rotate or shear");
+				zend_argument_type_error(2, "must be of type int|float when using rotate or shear");
 				RETURN_THROWS();
 			}
 
@@ -4003,26 +4008,29 @@ PHP_FUNCTION(imageresolution)
 {
 	zval *IM;
 	gdImagePtr im;
-	zend_long res_x = GD_RESOLUTION, res_y = GD_RESOLUTION;
+	zend_long res_x, res_y;
+	zend_bool res_x_is_null = 1, res_y_is_null = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|ll", &IM, gd_image_ce, &res_x, &res_y) == FAILURE)  {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|l!l!", &IM, gd_image_ce, &res_x, &res_x_is_null, &res_y, &res_y_is_null) == FAILURE)  {
 		RETURN_THROWS();
 	}
 
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 
-	switch (ZEND_NUM_ARGS()) {
-		case 3:
-			gdImageSetResolution(im, res_x, res_y);
-			RETURN_TRUE;
-		case 2:
-			gdImageSetResolution(im, res_x, res_x);
-			RETURN_TRUE;
-		default:
-			array_init(return_value);
-			add_next_index_long(return_value, gdImageResolutionX(im));
-			add_next_index_long(return_value, gdImageResolutionY(im));
+	if (!res_x_is_null && !res_y_is_null) {
+		gdImageSetResolution(im, res_x, res_y);
+		RETURN_TRUE;
+	} else if (!res_x_is_null && res_y_is_null) {
+		gdImageSetResolution(im, res_x, res_x);
+		RETURN_TRUE;
+	} else if (res_x_is_null && !res_y_is_null) {
+		gdImageSetResolution(im, res_y, res_y);
+		RETURN_TRUE;
 	}
+
+	array_init(return_value);
+	add_next_index_long(return_value, gdImageResolutionX(im));
+	add_next_index_long(return_value, gdImageResolutionY(im));
 }
 /* }}} */
 
@@ -4151,24 +4159,26 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 	zval *imgind;
 	zend_long quality = -1, basefilter = -1;
 	gdImagePtr im;
-	int argc = ZEND_NUM_ARGS();
-	int i;
 	gdIOCtx *ctx = NULL;
 	zval *to_zval = NULL;
 
-	if (image_type == PHP_GDIMG_TYPE_PNG) {
-		if (zend_parse_parameters(argc, "O|z!ll", &imgind, gd_image_ce, &to_zval, &quality, &basefilter) == FAILURE) {
+	if (image_type == PHP_GDIMG_TYPE_GIF) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|z", &imgind, gd_image_ce, &to_zval) == FAILURE) {
+			RETURN_THROWS();
+		}
+	} else if (image_type == PHP_GDIMG_TYPE_PNG) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|z!ll", &imgind, gd_image_ce, &to_zval, &quality, &basefilter) == FAILURE) {
 			RETURN_THROWS();
 		}
 	} else {
-		if (zend_parse_parameters(argc, "O|z!l", &imgind, gd_image_ce, &to_zval, &quality) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|z!l", &imgind, gd_image_ce, &to_zval, &quality) == FAILURE) {
 			RETURN_THROWS();
 		}
 	}
 
 	im = php_gd_libgdimageptr_from_zval_p(imgind);
 
-	if (argc > 1 && to_zval != NULL) {
+	if (to_zval != NULL) {
 		ctx = create_stream_context_from_zval(to_zval);
 		if (!ctx) {
 			RETURN_FALSE;
@@ -4189,16 +4199,6 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 			break;
 		case PHP_GDIMG_TYPE_PNG:
 			(*func_p)(im, ctx, (int) quality, (int) basefilter);
-			break;
-		case PHP_GDIMG_TYPE_WBM:
-			if (argc < 3) {
-				for (i=0; i < gdImageColorsTotal(im); i++) {
-					if (!gdImageRed(im, i) && !gdImageGreen(im, i) && !gdImageBlue(im, i)) break;
-				}
-				quality = (int) i;
-			}
-
-			(*func_p)(im, (int) quality, ctx);
 			break;
 		case PHP_GDIMG_TYPE_GIF:
 			(*func_p)(im, ctx);
