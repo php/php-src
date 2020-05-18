@@ -312,6 +312,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_fetch, 0, 0, 1)
 	ZEND_ARG_INFO(0, statement_resource)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ocifetchinto, 0, 0, 2)
+	ZEND_ARG_INFO(0, statement_resource)
+	ZEND_ARG_INFO(1, result)
+	ZEND_ARG_INFO(0, mode)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_fetch_all, 0, 0, 2)
 	ZEND_ARG_INFO(0, statement_resource)
 	ZEND_ARG_INFO(1, output)
@@ -638,6 +644,7 @@ PHP_FUNCTION(oci_field_type_raw);
 PHP_FUNCTION(oci_execute);
 PHP_FUNCTION(oci_fetch);
 PHP_FUNCTION(oci_cancel);
+PHP_FUNCTION(ocifetchinto);
 PHP_FUNCTION(oci_fetch_object);
 PHP_FUNCTION(oci_fetch_row);
 PHP_FUNCTION(oci_fetch_assoc);
@@ -727,6 +734,7 @@ static const zend_function_entry php_oci_functions[] = {
 	PHP_FE(oci_fetch_row,				arginfo_oci_fetch_row)
 	PHP_FE(oci_fetch_assoc,				arginfo_oci_fetch_assoc)
 	PHP_FE(oci_fetch_array,				arginfo_oci_fetch_array)
+	PHP_FE(ocifetchinto,				arginfo_ocifetchinto)
 	PHP_FE(oci_fetch_all,				arginfo_oci_fetch_all)
 	PHP_FE(oci_free_statement,			arginfo_oci_free_statement)
 	PHP_FE(oci_internal_debug,			arginfo_oci_internal_debug)
@@ -789,6 +797,52 @@ static const zend_function_entry php_oci_functions[] = {
 	PHP_FE(oci_unregister_taf_callback, arginfo_oci_unregister_taf_callback)
 
 	PHP_FALIAS(oci_free_cursor,		oci_free_statement,		arginfo_oci_free_statement)
+	PHP_FALIAS(ocifreecursor,		oci_free_statement,		arginfo_oci_free_statement)
+	PHP_FALIAS(ocibindbyname,		oci_bind_by_name,		arginfo_oci_bind_by_name)
+	PHP_FALIAS(ocidefinebyname,		oci_define_by_name,		arginfo_oci_define_by_name)
+	PHP_FALIAS(ocicolumnisnull,		oci_field_is_null,		arginfo_oci_field_is_null)
+	PHP_FALIAS(ocicolumnname,		oci_field_name,			arginfo_oci_field_name)
+	PHP_FALIAS(ocicolumnsize,		oci_field_size,			arginfo_oci_field_size)
+	PHP_FALIAS(ocicolumnscale,		oci_field_scale,		arginfo_oci_field_scale)
+	PHP_FALIAS(ocicolumnprecision,	oci_field_precision,	arginfo_oci_field_precision)
+	PHP_FALIAS(ocicolumntype,		oci_field_type,			arginfo_oci_field_type)
+	PHP_FALIAS(ocicolumntyperaw,	oci_field_type_raw,		arginfo_oci_field_type_raw)
+	PHP_FALIAS(ociexecute,			oci_execute,			arginfo_oci_execute)
+	PHP_FALIAS(ocicancel,			oci_cancel,				arginfo_oci_cancel)
+	PHP_FALIAS(ocifetch,			oci_fetch,				arginfo_oci_fetch)
+	PHP_FALIAS(ocifetchstatement,	oci_fetch_all,			arginfo_oci_fetch_all)
+	PHP_FALIAS(ocifreestatement,	oci_free_statement,		arginfo_oci_free_statement)
+	PHP_FALIAS(ociinternaldebug,	oci_internal_debug,		arginfo_oci_internal_debug)
+	PHP_FALIAS(ocinumcols,			oci_num_fields,			arginfo_oci_num_fields)
+	PHP_FALIAS(ociparse,			oci_parse,				arginfo_oci_parse)
+	PHP_FALIAS(ocinewcursor,		oci_new_cursor,			arginfo_oci_new_cursor)
+	PHP_FALIAS(ociresult,			oci_result,				arginfo_oci_result)
+	PHP_FALIAS(ociserverversion,	oci_server_version,		arginfo_oci_server_version)
+	PHP_FALIAS(ocistatementtype,	oci_statement_type,		arginfo_oci_statement_type)
+	PHP_FALIAS(ocirowcount,			oci_num_rows,			arginfo_oci_num_rows)
+	PHP_FALIAS(ocilogoff,			oci_close,				arginfo_oci_close)
+	PHP_FALIAS(ocilogon,			oci_connect,			arginfo_oci_connect)
+	PHP_FALIAS(ocinlogon,			oci_new_connect,		arginfo_oci_new_connect)
+	PHP_FALIAS(ociplogon,			oci_pconnect,			arginfo_oci_pconnect)
+	PHP_FALIAS(ocierror,			oci_error,				arginfo_oci_error)
+	PHP_FALIAS(ocifreedesc,			oci_free_descriptor,	arginfo_oci_free_descriptor)
+	PHP_FALIAS(ocisavelob,			oci_lob_save,			arginfo_oci_lob_save)
+	PHP_FALIAS(ocisavelobfile,		oci_lob_import,			arginfo_oci_lob_import)
+	PHP_FALIAS(ociwritelobtofile,	oci_lob_export,			arginfo_oci_lob_export)
+	PHP_FALIAS(ociloadlob,			oci_lob_load,			arginfo_oci_lob_load)
+	PHP_FALIAS(ocicommit,			oci_commit,				arginfo_oci_commit)
+	PHP_FALIAS(ocirollback,			oci_rollback,			arginfo_oci_rollback)
+	PHP_FALIAS(ocinewdescriptor,	oci_new_descriptor,		arginfo_oci_new_descriptor)
+	PHP_FALIAS(ocisetprefetch,		oci_set_prefetch,		arginfo_oci_set_prefetch)
+	PHP_FALIAS(ocipasswordchange,	oci_password_change,	arginfo_oci_password_change)
+	PHP_FALIAS(ocifreecollection,	oci_free_collection,	arginfo_oci_free_collection)
+	PHP_FALIAS(ocinewcollection,	oci_new_collection,		arginfo_oci_new_collection)
+	PHP_FALIAS(ocicollappend,		oci_collection_append,	arginfo_oci_collection_append)
+	PHP_FALIAS(ocicollgetelem,		oci_collection_element_get,		arginfo_oci_collection_element_get)
+	PHP_FALIAS(ocicollassignelem,	oci_collection_element_assign,	arginfo_oci_collection_element_assign)
+	PHP_FALIAS(ocicollsize,			oci_collection_size,	arginfo_oci_collection_size)
+	PHP_FALIAS(ocicollmax,			oci_collection_max,		arginfo_oci_collection_max)
+	PHP_FALIAS(ocicolltrim,			oci_collection_trim,	arginfo_oci_collection_trim)
 	PHP_FE_END
 };
 
