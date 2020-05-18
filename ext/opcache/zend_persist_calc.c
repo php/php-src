@@ -46,6 +46,7 @@
 	} while (0)
 
 static void zend_persist_zval_calc(zval *z);
+static void zend_persist_op_array_calc(zval *zv);
 
 static void zend_hash_persist_calc(HashTable *ht)
 {
@@ -287,16 +288,29 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 		}
 	}
 
+	if (op_array->num_dynamic_func_defs) {
+		ADD_SIZE(sizeof(void *) * op_array->num_dynamic_func_defs);
+		for (uint32_t i = 0; i < op_array->num_dynamic_func_defs; i++) {
+			zval tmp;
+			ZVAL_PTR(&tmp, op_array->dynamic_func_defs[i]);
+			zend_persist_op_array_calc(&tmp);
+		}
+	}
+
 	ADD_SIZE(ZEND_ALIGNED_SIZE(zend_extensions_op_array_persist_calc(op_array)));
 }
 
 static void zend_persist_op_array_calc(zval *zv)
 {
 	zend_op_array *op_array = Z_PTR_P(zv);
-
 	ZEND_ASSERT(op_array->type == ZEND_USER_FUNCTION);
-	ADD_SIZE(sizeof(zend_op_array));
-	zend_persist_op_array_calc_ex(Z_PTR_P(zv));
+	if (!zend_shared_alloc_get_xlat_entry(op_array)) {
+		zend_shared_alloc_register_xlat_entry(op_array, op_array);
+		ADD_SIZE(sizeof(zend_op_array));
+		zend_persist_op_array_calc_ex(op_array);
+	} else {
+		/* This can happen during preloading, if a dynamic function definition is declared. */
+	}
 }
 
 static void zend_persist_class_method_calc(zval *zv)

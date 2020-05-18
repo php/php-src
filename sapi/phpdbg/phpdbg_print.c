@@ -87,6 +87,13 @@ static inline void phpdbg_print_function_helper(zend_function *method) /* {{{ */
 					efree(decode);
 					opline++;
 				} while (opcode++ < end);
+
+				for (uint32_t i = 0; i < op_array->num_dynamic_func_defs; i++) {
+					zend_op_array *def = op_array->dynamic_func_defs[i];
+					phpdbg_out("\ndynamic def: %i, function name: %.*s\n",
+						i, (int) ZSTR_LEN(def->function_name), ZSTR_VAL(def->function_name));
+					phpdbg_print_function_helper((zend_function *) def);
+				}
 			}
 		} break;
 

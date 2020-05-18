@@ -241,9 +241,6 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 				case ZEND_RECV_INIT:
 					LITERAL_INFO(opline->op2.constant, LITERAL_VALUE, 1);
 					break;
-				case ZEND_DECLARE_FUNCTION:
-					LITERAL_INFO(opline->op1.constant, LITERAL_VALUE, 2);
-					break;
 				case ZEND_DECLARE_CLASS:
 				case ZEND_DECLARE_CLASS_DELAYED:
 					LITERAL_INFO(opline->op1.constant, LITERAL_VALUE, 2);
@@ -776,7 +773,6 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 						bind_var_slot[opline->op2.constant] = opline->extended_value;
 					}
 					break;
-				case ZEND_DECLARE_LAMBDA_FUNCTION:
 				case ZEND_DECLARE_ANON_CLASS:
 				case ZEND_DECLARE_CLASS_DELAYED:
 					opline->extended_value = cache_size;

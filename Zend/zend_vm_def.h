@@ -7583,12 +7583,14 @@ ZEND_VM_HANDLER(146, ZEND_DECLARE_ANON_CLASS, ANY, ANY, CACHE_SLOT)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(141, ZEND_DECLARE_FUNCTION, ANY, ANY)
+ZEND_VM_HANDLER(141, ZEND_DECLARE_FUNCTION, ANY, NUM)
 {
+	zend_function *func;
 	USE_OPLINE
 
 	SAVE_OPLINE();
-	do_bind_function(RT_CONSTANT(opline, opline->op1));
+	func = (zend_function *) EX(func)->op_array.dynamic_func_defs[opline->op2.num];
+	do_bind_function(func, RT_CONSTANT(opline, opline->op1));
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -7853,23 +7855,14 @@ ZEND_VM_HANDLER(143, ZEND_DECLARE_CONST, CONST, CONST)
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-ZEND_VM_HANDLER(142, ZEND_DECLARE_LAMBDA_FUNCTION, CONST, UNUSED, CACHE_SLOT)
+ZEND_VM_HANDLER(142, ZEND_DECLARE_LAMBDA_FUNCTION, CONST, NUM)
 {
 	USE_OPLINE
 	zend_function *func;
-	zval *zfunc;
 	zval *object;
 	zend_class_entry *called_scope;
 
-	func = CACHED_PTR(opline->extended_value);
-	if (UNEXPECTED(func == NULL)) {
-		zfunc = zend_hash_find_ex(EG(function_table), Z_STR_P(RT_CONSTANT(opline, opline->op1)), 1);
-		ZEND_ASSERT(zfunc != NULL);
-		func = Z_FUNC_P(zfunc);
-		ZEND_ASSERT(func->type == ZEND_USER_FUNCTION);
-		CACHE_PTR(opline->extended_value, func);
-	}
-
+	func = (zend_function *) EX(func)->op_array.dynamic_func_defs[opline->op2.num];
 	if (Z_TYPE(EX(This)) == IS_OBJECT) {
 		called_scope = Z_OBJCE(EX(This));
 		if (UNEXPECTED((func->common.fn_flags & ZEND_ACC_STATIC) ||

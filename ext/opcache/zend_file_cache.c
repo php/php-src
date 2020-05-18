@@ -606,6 +606,20 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 			}
 		}
 
+		if (op_array->num_dynamic_func_defs) {
+			zend_op_array **defs;
+			SERIALIZE_PTR(op_array->dynamic_func_defs);
+			defs = op_array->dynamic_func_defs;
+			UNSERIALIZE_PTR(defs);
+			for (uint32_t i = 0; i < op_array->num_dynamic_func_defs; i++) {
+				zend_op_array *def;
+				SERIALIZE_PTR(defs[i]);
+				def = defs[i];
+				UNSERIALIZE_PTR(def);
+				zend_file_cache_serialize_op_array(def, script, info, buf);
+			}
+		}
+
 		SERIALIZE_STR(op_array->function_name);
 		SERIALIZE_STR(op_array->filename);
 		SERIALIZE_PTR(op_array->live_range);
@@ -1391,6 +1405,14 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 					UNSERIALIZE_STR(*p);
 				}
 				p++;
+			}
+		}
+
+		if (op_array->num_dynamic_func_defs) {
+			UNSERIALIZE_PTR(op_array->dynamic_func_defs);
+			for (uint32_t i = 0; i < op_array->num_dynamic_func_defs; i++) {
+				UNSERIALIZE_PTR(op_array->dynamic_func_defs[i]);
+				zend_file_cache_unserialize_op_array(op_array->dynamic_func_defs[i], script, buf);
 			}
 		}
 

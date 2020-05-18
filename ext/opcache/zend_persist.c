@@ -82,6 +82,7 @@
 typedef void (*zend_persist_func_t)(zval*);
 
 static void zend_persist_zval(zval *z);
+static void zend_persist_op_array(zval *zv);
 
 static const uint32_t uninitialized_bucket[-HT_MIN_MASK] =
 	{HT_INVALID_IDX, HT_INVALID_IDX};
@@ -663,6 +664,17 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 		}
 	}
 
+	if (op_array->num_dynamic_func_defs) {
+		op_array->dynamic_func_defs = zend_shared_memdup_put_free(
+			op_array->dynamic_func_defs, sizeof(zend_function *) * op_array->num_dynamic_func_defs);
+		for (uint32_t i = 0; i < op_array->num_dynamic_func_defs; i++) {
+			zval tmp;
+			ZVAL_PTR(&tmp, op_array->dynamic_func_defs[i]);
+			zend_persist_op_array(&tmp);
+			op_array->dynamic_func_defs[i] = Z_PTR(tmp);
+		}
+	}
+
 	ZCG(mem) = (void*)((char*)ZCG(mem) + ZEND_ALIGNED_SIZE(zend_extensions_op_array_persist(op_array, ZCG(mem))));
 
 #ifdef HAVE_JIT
@@ -676,16 +688,22 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 static void zend_persist_op_array(zval *zv)
 {
 	zend_op_array *op_array = Z_PTR_P(zv);
-
+	zend_op_array *old_op_array;
 	ZEND_ASSERT(op_array->type == ZEND_USER_FUNCTION);
-	op_array = Z_PTR_P(zv) = zend_shared_memdup(Z_PTR_P(zv), sizeof(zend_op_array));
-	zend_persist_op_array_ex(op_array, NULL);
-	if (!ZCG(current_persistent_script)->corrupted) {
-		op_array->fn_flags |= ZEND_ACC_IMMUTABLE;
-		ZEND_MAP_PTR_NEW(op_array->run_time_cache);
-		if (op_array->static_variables) {
-			ZEND_MAP_PTR_NEW(op_array->static_variables_ptr);
+
+	old_op_array = zend_shared_alloc_get_xlat_entry(op_array);
+	if (!old_op_array) {
+		op_array = Z_PTR_P(zv) = zend_shared_memdup_put(Z_PTR_P(zv), sizeof(zend_op_array));
+		zend_persist_op_array_ex(op_array, NULL);
+		if (!ZCG(current_persistent_script)->corrupted) {
+			op_array->fn_flags |= ZEND_ACC_IMMUTABLE;
+			ZEND_MAP_PTR_NEW(op_array->run_time_cache);
+			if (op_array->static_variables) {
+				ZEND_MAP_PTR_NEW(op_array->static_variables_ptr);
+			}
 		}
+	} else {
+		/* This can happen during preloading, if a dynamic function definition is declared. */
 	}
 }
 
