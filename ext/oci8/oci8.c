@@ -312,12 +312,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_fetch, 0, 0, 1)
 	ZEND_ARG_INFO(0, statement_resource)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ocifetchinto, 0, 0, 2)
-	ZEND_ARG_INFO(0, statement_resource)
-	ZEND_ARG_INFO(1, result)
-	ZEND_ARG_INFO(0, mode)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_fetch_all, 0, 0, 2)
 	ZEND_ARG_INFO(0, statement_resource)
 	ZEND_ARG_INFO(1, output)
@@ -644,7 +638,6 @@ PHP_FUNCTION(oci_field_type_raw);
 PHP_FUNCTION(oci_execute);
 PHP_FUNCTION(oci_fetch);
 PHP_FUNCTION(oci_cancel);
-PHP_FUNCTION(ocifetchinto);
 PHP_FUNCTION(oci_fetch_object);
 PHP_FUNCTION(oci_fetch_row);
 PHP_FUNCTION(oci_fetch_assoc);
@@ -734,7 +727,6 @@ static const zend_function_entry php_oci_functions[] = {
 	PHP_FE(oci_fetch_row,				arginfo_oci_fetch_row)
 	PHP_FE(oci_fetch_assoc,				arginfo_oci_fetch_assoc)
 	PHP_FE(oci_fetch_array,				arginfo_oci_fetch_array)
-	PHP_FE(ocifetchinto,				arginfo_ocifetchinto)
 	PHP_FE(oci_fetch_all,				arginfo_oci_fetch_all)
 	PHP_FE(oci_free_statement,			arginfo_oci_free_statement)
 	PHP_FE(oci_internal_debug,			arginfo_oci_internal_debug)

@@ -42,7 +42,7 @@ function fetch($c, $i) {
 for($i = 0; $i < 300; $i++) {
     $cur = fetch($c, $i);
     for($j = 0; $j < 10; $j++) {
-        ocifetchinto($cur, $row, OCI_NUM);
+        $row = oci_fetch_row($cur);
         echo "$row[0] ";
     }
     echo "\n";
