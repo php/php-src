@@ -1018,7 +1018,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 		tssa->cfg.blocks[0].predecessors_count = 0;
 	}
 
-	if (JIT_G(opt_level) <= ZEND_JIT_LEVEL_INLINE) {
+	if (JIT_G(opt_level) < ZEND_JIT_LEVEL_INLINE) {
 		return tssa;
 	}
 
