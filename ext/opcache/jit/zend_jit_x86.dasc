@@ -2166,8 +2166,10 @@ static int zend_jit_hybrid_profile_jit_stub(dasm_State **Dst)
 # error "Unknown ZEND_MAP_PTR_KIND"
 #endif
 	|	inc aword [r2 + zend_jit_profile_counter_rid * sizeof(void*)]
-	|	// handler = (const void*)ZEND_FUNC_INFO(op_array);
+	|	// jit_extension = (const void*)ZEND_FUNC_INFO(op_array);
 	|	mov r0, aword [r0 + offsetof(zend_op_array, reserved[zend_func_info_rid])]
+	|	// handler = jit_extension->orig_handler
+	|	mov r0, aword [r0 + offsetof(zend_jit_op_array_extension, orig_handler)]
 	|	// return ((zend_vm_opcode_handler_t)handler)();
 	|	jmp r0
 	return 1;

@@ -20,6 +20,11 @@
 #ifndef ZEND_JIT_INTERNAL_H
 #define ZEND_JIT_INTERNAL_H
 
+typedef struct _zend_jit_op_array_extension {
+	zend_func_info func_info;
+	const void *orig_handler;
+} zend_jit_op_array_extension;
+
 /* Profiler */
 extern zend_ulong zend_jit_profile_counter;
 extern int zend_jit_profile_counter_rid;

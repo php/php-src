@@ -182,7 +182,8 @@ void ZEND_FASTCALL zend_jit_deprecated_helper(OPLINE_D)
 ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_profile_helper(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op_array *op_array = (zend_op_array*)EX(func);
-	zend_vm_opcode_handler_t handler = (zend_vm_opcode_handler_t)ZEND_FUNC_INFO(op_array);
+	zend_jit_op_array_extension *jit_extension = (zend_jit_op_array_extension*)ZEND_FUNC_INFO(op_array);
+	zend_vm_opcode_handler_t handler = jit_extension->orig_handler;
 	uintptr_t counter = (uintptr_t)ZEND_COUNTER_INFO(op_array);
 
 	ZEND_COUNTER_INFO(op_array) = (void*)(counter + 1);

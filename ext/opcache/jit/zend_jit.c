@@ -3044,13 +3044,53 @@ jit_failure:
 
 static int zend_jit_collect_calls(zend_op_array *op_array, zend_script *script)
 {
-	zend_func_info *func_info =
-		zend_arena_calloc(&CG(arena), 1, sizeof(zend_func_info));
+	zend_func_info *func_info;
 
-	ZEND_SET_FUNC_INFO(op_array, func_info);
+	if (JIT_G(trigger) == ZEND_JIT_ON_FIRST_EXEC ||
+	    JIT_G(trigger) == ZEND_JIT_ON_PROF_REQUEST ||
+	    JIT_G(trigger) == ZEND_JIT_ON_HOT_COUNTERS) {
+	    func_info = ZEND_FUNC_INFO(op_array);
+	} else {
+		func_info = zend_arena_calloc(&CG(arena), 1, sizeof(zend_func_info));
+		ZEND_SET_FUNC_INFO(op_array, func_info);
+	}
 	func_info->num_args = -1;
 	func_info->return_value_used = -1;
 	return zend_analyze_calls(&CG(arena), script, ZEND_CALL_TREE, op_array, func_info);
+}
+
+static void zend_jit_cleanup_func_info(zend_op_array *op_array)
+{
+	zend_func_info *func_info = ZEND_FUNC_INFO(op_array);
+	zend_call_info *caller_info, *callee_info;
+
+	if (func_info) {
+		caller_info = func_info->caller_info;
+		callee_info = func_info->callee_info;
+
+		if (JIT_G(trigger) == ZEND_JIT_ON_FIRST_EXEC ||
+		    JIT_G(trigger) == ZEND_JIT_ON_PROF_REQUEST ||
+		    JIT_G(trigger) == ZEND_JIT_ON_HOT_COUNTERS) {
+			memset(func_info, 0, sizeof(zend_func_info));
+			func_info->num_args = -1;
+			func_info->return_value_used = -1;
+		} else {
+			ZEND_SET_FUNC_INFO(op_array, NULL);
+		}
+
+		while (caller_info) {
+			if (caller_info->caller_op_array) {
+				zend_jit_cleanup_func_info(caller_info->caller_op_array);
+			}
+			caller_info = caller_info->next_caller;
+		}
+		while (callee_info) {
+			if (callee_info->callee_func && callee_info->callee_func->type == ZEND_USER_FUNCTION) {
+				zend_jit_cleanup_func_info(&callee_info->callee_func->op_array);
+			}
+			callee_info = callee_info->next_callee;
+		}
+	}
 }
 
 static int zend_real_jit_func(zend_op_array *op_array, zend_script *script, const zend_op *rt_opline)
@@ -3074,7 +3114,6 @@ static int zend_real_jit_func(zend_op_array *op_array, zend_script *script, cons
 
 	if (JIT_G(opt_level) >= ZEND_JIT_LEVEL_OPT_FUNCS) {
 		if (zend_jit_collect_calls(op_array, script) != SUCCESS) {
-			ZEND_SET_FUNC_INFO(op_array, NULL);
 			goto jit_failure;
 		}
 		func_info = ZEND_FUNC_INFO(op_array);
@@ -3096,14 +3135,12 @@ static int zend_real_jit_func(zend_op_array *op_array, zend_script *script, cons
 		goto jit_failure;
 	}
 
-	if (JIT_G(opt_level) >= ZEND_JIT_LEVEL_OPT_FUNCS) {
-		ZEND_SET_FUNC_INFO(op_array, NULL);
-	}
-
+	zend_jit_cleanup_func_info(op_array);
 	zend_arena_release(&CG(arena), checkpoint);
 	return SUCCESS;
 
 jit_failure:
+	zend_jit_cleanup_func_info(op_array);
 	zend_arena_release(&CG(arena), checkpoint);
 	return FAILURE;
 }
@@ -3114,6 +3151,7 @@ static void ZEND_FASTCALL zend_runtime_jit(void)
 	zend_execute_data *execute_data = EG(current_execute_data);
 	zend_op_array *op_array = &EX(func)->op_array;
 	zend_op *opline = op_array->opcodes;
+	zend_jit_op_array_extension *jit_extension;
 
 	zend_shared_alloc_lock();
 
@@ -3127,8 +3165,8 @@ static void ZEND_FASTCALL zend_runtime_jit(void)
 				opline++;
 			}
 		}
-		opline->handler = ZEND_FUNC_INFO(op_array);
-		ZEND_SET_FUNC_INFO(op_array, NULL);
+		jit_extension = (zend_jit_op_array_extension*)ZEND_FUNC_INFO(op_array);
+		opline->handler = jit_extension->orig_handler;
 
 		/* perform real JIT for this function */
 		zend_real_jit_func(op_array, NULL, NULL);
@@ -3147,6 +3185,7 @@ void zend_jit_check_funcs(HashTable *function_table, zend_bool is_method) {
 	zend_function *func;
 	zend_op_array *op_array;
 	uintptr_t counter;
+	zend_jit_op_array_extension *jit_extension;
 
 	ZEND_HASH_REVERSE_FOREACH_PTR(function_table, func) {
 		if (func->type == ZEND_INTERNAL_FUNCTION) {
@@ -3165,8 +3204,8 @@ void zend_jit_check_funcs(HashTable *function_table, zend_bool is_method) {
 			}
 			counter = (uintptr_t)ZEND_COUNTER_INFO(op_array);
 			ZEND_COUNTER_INFO(op_array) = 0;
-			opline->handler = ZEND_FUNC_INFO(op_array);
-			ZEND_SET_FUNC_INFO(op_array, NULL);
+			jit_extension = (zend_jit_op_array_extension*)ZEND_FUNC_INFO(op_array);
+			opline->handler = jit_extension->orig_handler;
 			if (((double)counter / (double)zend_jit_profile_counter) > ZEND_JIT_PROF_THRESHOLD) {
 				zend_real_jit_func(op_array, NULL, NULL);
 			}
@@ -3190,7 +3229,6 @@ void ZEND_FASTCALL zend_jit_hot_func(zend_execute_data *execute_data, const zend
 		for (i = 0; i < op_array->last; i++) {
 			op_array->opcodes[i].handler = jit_extension->orig_handlers[i];
 		}
-		ZEND_SET_FUNC_INFO(op_array, NULL);
 
 		/* perform real JIT for this function */
 		zend_real_jit_func(op_array, NULL, opline);
@@ -3274,6 +3312,7 @@ ZEND_EXT_API int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 	}
 
 	if (JIT_G(trigger) == ZEND_JIT_ON_FIRST_EXEC) {
+		zend_jit_op_array_extension *jit_extension;
 		zend_op *opline = op_array->opcodes;
 
 		/* Set run-time JIT handler */
@@ -3283,11 +3322,17 @@ ZEND_EXT_API int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 				opline++;
 			}
 		}
-		ZEND_SET_FUNC_INFO(op_array, (void*)opline->handler);
+		jit_extension = (zend_jit_op_array_extension*)zend_shared_alloc(sizeof(zend_jit_op_array_extension));
+		memset(&jit_extension->func_info, 0, sizeof(zend_func_info));
+		jit_extension->func_info.num_args = -1;
+		jit_extension->func_info.return_value_used = -1;
+		jit_extension->orig_handler = (void*)opline->handler;
+		ZEND_SET_FUNC_INFO(op_array, (void*)jit_extension);
 		opline->handler = (const void*)zend_jit_runtime_jit_handler;
 
 		return SUCCESS;
 	} else if (JIT_G(trigger) == ZEND_JIT_ON_PROF_REQUEST) {
+		zend_jit_op_array_extension *jit_extension;
 		zend_op *opline = op_array->opcodes;
 
 		ZEND_ASSERT(zend_jit_profile_jit_handler != NULL);
@@ -3297,7 +3342,12 @@ ZEND_EXT_API int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 					opline++;
 				}
 			}
-			ZEND_SET_FUNC_INFO(op_array, (void*)opline->handler);
+			jit_extension = (zend_jit_op_array_extension*)zend_shared_alloc(sizeof(zend_jit_op_array_extension));
+			memset(&jit_extension->func_info, 0, sizeof(zend_func_info));
+			jit_extension->func_info.num_args = -1;
+			jit_extension->func_info.return_value_used = -1;
+			jit_extension->orig_handler = (void*)opline->handler;
+			ZEND_SET_FUNC_INFO(op_array, (void*)jit_extension);
 			opline->handler = (const void*)zend_jit_profile_jit_handler;
 		}
 
@@ -3344,7 +3394,6 @@ ZEND_EXT_API int zend_jit_script(zend_script *script)
 	    JIT_G(trigger) == ZEND_JIT_ON_HOT_COUNTERS ||
 	    JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
 		for (i = 0; i < call_graph.op_arrays_count; i++) {
-			ZEND_SET_FUNC_INFO(call_graph.op_arrays[i], NULL);
 			if (zend_jit_op_array(call_graph.op_arrays[i], script) != SUCCESS) {
 				goto jit_failure;
 			}
@@ -3435,8 +3484,11 @@ ZEND_EXT_API int zend_jit_script(zend_script *script)
 	return SUCCESS;
 
 jit_failure:
-	for (i = 0; i < call_graph.op_arrays_count; i++) {
-		ZEND_SET_FUNC_INFO(call_graph.op_arrays[i], NULL);
+	if (JIT_G(trigger) == ZEND_JIT_ON_SCRIPT_LOAD ||
+	    JIT_G(trigger) == ZEND_JIT_ON_DOC_COMMENT) {
+		for (i = 0; i < call_graph.op_arrays_count; i++) {
+			ZEND_SET_FUNC_INFO(call_graph.op_arrays[i], NULL);
+		}
 	}
 	zend_arena_release(&CG(arena), checkpoint);
 	return FAILURE;
