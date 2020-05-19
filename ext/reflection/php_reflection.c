@@ -3781,21 +3781,24 @@ ZEND_METHOD(reflection_class, getStaticProperties)
 	array_init(return_value);
 
 	ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->properties_info, key, prop_info) {
+		zval *members;
+
 		if (((prop_info->flags & ZEND_ACC_PRIVATE) &&
 		     prop_info->ce != ce)) {
 			continue;
 		}
-		prop = NULL;
-		if ((prop_info->flags & ZEND_ACC_STATIC) != 0) {
-			zval *members;
-			if ((members = CE_STATIC_MEMBERS(ce))) {
-				prop = &members[prop_info->offset];
-			} else {
-				prop = &ce->default_static_members_table[prop_info->offset];
-			}
-			ZVAL_DEINDIRECT(prop);
+		if ((prop_info->flags & ZEND_ACC_STATIC) == 0) {
+			continue;
 		}
-		if (!prop || (prop_info->type && Z_ISUNDEF_P(prop))) {
+
+		if ((members = CE_STATIC_MEMBERS(ce))) {
+			prop = &members[prop_info->offset];
+		} else {
+			prop = &ce->default_static_members_table[prop_info->offset];
+		}
+		ZVAL_DEINDIRECT(prop);
+
+		if (prop_info->type && Z_ISUNDEF_P(prop)) {
 			continue;
 		}
 
