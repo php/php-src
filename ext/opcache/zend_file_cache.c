@@ -802,6 +802,26 @@ static void zend_file_cache_serialize_class(zval                     *zv,
 	ZEND_MAP_PTR_INIT(ce->static_members_table, &ce->default_static_members_table);
 }
 
+static void zend_file_cache_serialize_warnings(
+		zend_persistent_script *script, zend_file_cache_metainfo *info, void *buf)
+{
+	if (script->warnings) {
+		zend_recorded_warning **warnings;
+		SERIALIZE_PTR(script->warnings);
+		warnings = script->warnings;
+		UNSERIALIZE_PTR(warnings);
+
+		for (uint32_t i = 0; i < script->num_warnings; i++) {
+			zend_recorded_warning *warning;
+			SERIALIZE_PTR(warnings[i]);
+			warning = warnings[i];
+			UNSERIALIZE_PTR(warning);
+			SERIALIZE_STR(warning->error_filename);
+			SERIALIZE_STR(warning->error_message);
+		}
+	}
+}
+
 static void zend_file_cache_serialize(zend_persistent_script   *script,
                                       zend_file_cache_metainfo *info,
                                       void                     *buf)
@@ -823,6 +843,7 @@ static void zend_file_cache_serialize(zend_persistent_script   *script,
 	zend_file_cache_serialize_hash(&new_script->script.class_table, script, info, buf, zend_file_cache_serialize_class);
 	zend_file_cache_serialize_hash(&new_script->script.function_table, script, info, buf, zend_file_cache_serialize_func);
 	zend_file_cache_serialize_op_array(&new_script->script.main_op_array, script, info, buf);
+	zend_file_cache_serialize_warnings(new_script, info, buf);
 
 	SERIALIZE_PTR(new_script->arena_mem);
 	new_script->mem = NULL;
@@ -1506,6 +1527,18 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 	}
 }
 
+static void zend_file_cache_unserialize_warnings(zend_persistent_script *script, void *buf)
+{
+	if (script->warnings) {
+		UNSERIALIZE_PTR(script->warnings);
+		for (uint32_t i = 0; i < script->num_warnings; i++) {
+			UNSERIALIZE_PTR(script->warnings[i]);
+			UNSERIALIZE_STR(script->warnings[i]->error_filename);
+			UNSERIALIZE_STR(script->warnings[i]->error_message);
+		}
+	}
+}
+
 static void zend_file_cache_unserialize(zend_persistent_script  *script,
                                         void                    *buf)
 {
@@ -1518,6 +1551,7 @@ static void zend_file_cache_unserialize(zend_persistent_script  *script,
 	zend_file_cache_unserialize_hash(&script->script.function_table,
 			script, buf, zend_file_cache_unserialize_func, ZEND_FUNCTION_DTOR);
 	zend_file_cache_unserialize_op_array(&script->script.main_op_array, script, buf);
+	zend_file_cache_unserialize_warnings(script, buf);
 
 	UNSERIALIZE_PTR(script->arena_mem);
 }

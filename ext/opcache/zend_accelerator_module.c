@@ -280,6 +280,7 @@ ZEND_INI_BEGIN()
 
 	STD_PHP_INI_BOOLEAN("opcache.protect_memory"        , "0"  , PHP_INI_SYSTEM, OnUpdateBool,                  accel_directives.protect_memory,            zend_accel_globals, accel_globals)
 	STD_PHP_INI_BOOLEAN("opcache.save_comments"         , "1"  , PHP_INI_SYSTEM, OnUpdateBool,                  accel_directives.save_comments,             zend_accel_globals, accel_globals)
+	STD_PHP_INI_BOOLEAN("opcache.record_warnings"       , "0"  , PHP_INI_SYSTEM, OnUpdateBool,                  accel_directives.record_warnings,           zend_accel_globals, accel_globals)
 
 	STD_PHP_INI_ENTRY("opcache.optimization_level"    , DEFAULT_OPTIMIZATION_LEVEL , PHP_INI_SYSTEM, OnUpdateLong, accel_directives.optimization_level,   zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.opt_debug_level"       , "0"      , PHP_INI_SYSTEM, OnUpdateLong,             accel_directives.opt_debug_level,            zend_accel_globals, accel_globals)
@@ -767,6 +768,7 @@ ZEND_FUNCTION(opcache_get_configuration)
 
 	add_assoc_bool(&directives,   "opcache.protect_memory",         ZCG(accel_directives).protect_memory);
 	add_assoc_bool(&directives,   "opcache.save_comments",          ZCG(accel_directives).save_comments);
+	add_assoc_bool(&directives,   "opcache.record_warnings",        ZCG(accel_directives).record_warnings);
 	add_assoc_bool(&directives,   "opcache.enable_file_override",   ZCG(accel_directives).file_override_enabled);
 	add_assoc_long(&directives, 	 "opcache.optimization_level",     ZCG(accel_directives).optimization_level);
 

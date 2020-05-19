@@ -1087,6 +1087,19 @@ static void zend_accel_persist_class_table(HashTable *class_table)
 	} ZEND_HASH_FOREACH_END();
 }
 
+static void zend_persist_warnings(zend_persistent_script *script) {
+	if (script->warnings) {
+		script->warnings = zend_shared_memdup_free(
+			script->warnings, script->num_warnings * sizeof(zend_recorded_warning *));
+		for (uint32_t i = 0; i < script->num_warnings; i++) {
+			script->warnings[i] = zend_shared_memdup_free(
+				script->warnings[i], sizeof(zend_recorded_warning));
+			zend_accel_store_string(script->warnings[i]->error_filename);
+			zend_accel_store_string(script->warnings[i]->error_message);
+		}
+	}
+}
+
 zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script, const char **key, unsigned int key_length, int for_shm)
 {
 	Bucket *p;
@@ -1136,6 +1149,7 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 		zend_persist_op_array(&p->val);
 	} ZEND_HASH_FOREACH_END();
 	zend_persist_op_array_ex(&script->script.main_op_array, script);
+	zend_persist_warnings(script);
 
 	if (for_shm) {
 		ZCSG(map_ptr_last) = CG(map_ptr_last);

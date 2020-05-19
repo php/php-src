@@ -1776,6 +1776,11 @@ ldap.max_links = -1
 ; size of the optimized code.
 ;opcache.save_comments=1
 
+; If enabled, compilation warnings (including notices and deprecations) will
+; be recorded and replayed each time a file is included. Otherwise, compilation
+; warnings will only be emitted when the file is first cached.
+;opcache.record_warnings=0
+
 ; Allow file existence override (file_exists, etc.) performance feature.
 ;opcache.enable_file_override=0
 

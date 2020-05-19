@@ -90,6 +90,7 @@ PHP                                                                        NEWS
 - OpCache:
   . Fixed bug #78654 (Incorrectly computed opcache checksum on files with
     non-ascii characters). (mhagstrand)
+  . Fixed bug #76535 (Opcache does not replay compile-time warnings). (Nikita)
 
 - PCRE:
   . Don't ignore invalid escape sequences. (sjon)
