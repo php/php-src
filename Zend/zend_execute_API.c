@@ -1175,13 +1175,14 @@ typedef void (*TIMEOUT_HANDLER)(int, siginfo_t*, void*);
 #if _POSIX_TIMERS > 0 || (defined(HAVE_SETITIMER) && !defined(ZTS))
 static void prepare_to_receive_timeout_signal(int signo, TIMEOUT_HANDLER callback_func)
 {
-	struct sigaction act;
-	act.sa_sigaction = callback_func;
-
+	struct sigaction act = {
+		.sa_sigaction = callback_func,
+		/* Restore signal action for timeout signal to default after it is received
+		 * Also, use signal handler with 3 arguments (including siginfo struct) */
+		.sa_flags = SA_RESETHAND | SA_SIGINFO
+	};
 	/* Don't block any other signals while timeout signal handler is running */
 	sigemptyset(&act.sa_mask);
-	/* Restore signal action for timeout signal to default after it is received */
-	act.sa_flags = SA_RESETHAND | SA_SIGINFO;
 	sigaction(signo, &act, NULL);
 
 	/* Make sure timeout signal is unblocked */
