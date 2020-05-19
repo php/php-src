@@ -600,20 +600,11 @@ ZEND_COLD ZEND_METHOD(Closure, __construct)
 }
 /* }}} */
 
-static const zend_function_entry closure_functions[] = {
-	ZEND_ME(Closure, __construct, arginfo_class_Closure___construct, ZEND_ACC_PRIVATE)
-	ZEND_ME(Closure, bind, arginfo_class_Closure_bind, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_MALIAS(Closure, bindTo, bind, arginfo_class_Closure_bindTo, ZEND_ACC_PUBLIC)
-	ZEND_ME(Closure, call, arginfo_class_Closure_call, ZEND_ACC_PUBLIC)
-	ZEND_ME(Closure, fromCallable, arginfo_class_Closure_fromCallable, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_FE_END
-};
-
 void zend_register_closure_ce(void) /* {{{ */
 {
 	zend_class_entry ce;
 
-	INIT_CLASS_ENTRY(ce, "Closure", closure_functions);
+	INIT_CLASS_ENTRY(ce, "Closure", class_Closure_methods);
 	zend_ce_closure = zend_register_internal_class(&ce);
 	zend_ce_closure->ce_flags |= ZEND_ACC_FINAL;
 	zend_ce_closure->create_object = zend_closure_new;
