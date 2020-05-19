@@ -21,7 +21,6 @@
 #define ZEND_INTENSIVE_DEBUGGING 0
 
 #include <stdio.h>
-#include <signal.h>
 
 #include "zend.h"
 #include "zend_compile.h"

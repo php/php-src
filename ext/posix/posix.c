@@ -35,7 +35,6 @@
 #include <sys/utsname.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <signal.h>
 #include <sys/times.h>
 #include <errno.h>
 #include <grp.h>

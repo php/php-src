@@ -14,9 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include <signal.h>
 #ifndef PHP_SIGNAL_H
 #define PHP_SIGNAL_H
+
+#include <signal.h>
 
 #ifdef HAVE_STRUCT_SIGINFO_T
 typedef void Sigfunc(int, siginfo_t*, void*);

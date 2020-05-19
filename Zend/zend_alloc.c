@@ -57,7 +57,6 @@
 #include "zend_operators.h"
 #include "zend_multiply.h"
 #include "zend_bitset.h"
-#include <signal.h>
 
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>

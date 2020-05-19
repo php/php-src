@@ -80,7 +80,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string.h>
 #include <stdarg.h>
 
-#include <signal.h>
 #include <time.h>
 #include <sys/timeb.h>
 #include <unistd.h>

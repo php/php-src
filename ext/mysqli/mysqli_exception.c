@@ -18,8 +18,6 @@
 #include "config.h"
 #endif
 
-#include <signal.h>
-
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"

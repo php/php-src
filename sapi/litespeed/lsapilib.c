@@ -54,7 +54,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <limits.h>
 #include <sys/stat.h>
 #include <sched.h>
-#include <signal.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>

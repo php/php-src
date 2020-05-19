@@ -73,7 +73,6 @@ typedef int gid_t;
 # include <unistd.h>
 #endif
 #include <fcntl.h>
-#include <signal.h>
 #include <time.h>
 
 #ifndef ZEND_WIN32

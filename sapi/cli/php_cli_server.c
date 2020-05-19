@@ -42,7 +42,6 @@
 #include <unistd.h>
 #endif
 
-#include <signal.h>
 #include <locale.h>
 
 #if HAVE_DLFCN_H
