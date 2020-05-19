@@ -823,7 +823,7 @@ PHPDBG_API int phpdbg_ask_user_permission(const char *question) {
 
 		while (1) {
 			phpdbg_consume_stdin_line(buf);
-			if (buf[1] == '\n' && (buf[0] == 'y' || buf[0] == 'n')) {
+			if ((buf[1] == '\n' || (buf[1] == '\r' && buf[2] == '\n')) && (buf[0] == 'y' || buf[0] == 'n')) {
 				if (buf[0] == 'y') {
 					return SUCCESS;
 				}
