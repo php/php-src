@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #79595 (zend_init_fpu() alters FPU precision). (cmb, Nikita)
 
+- phpdbg:
+  . Fixed bug #73926 (phpdbg will not accept input on restart execution). (cmb)
+
 11 Jun 2020, PHP 7.4.7
 
 - Core:
