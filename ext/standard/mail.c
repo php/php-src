@@ -32,10 +32,6 @@
 #include <sys/sysexits.h>
 #endif
 
-#if PHP_SIGCHILD
-#include <signal.h>
-#endif
-
 #include "php_syslog.h"
 #include "php_mail.h"
 #include "php_ini.h"

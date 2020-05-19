@@ -17,7 +17,6 @@
 #include "php.h"
 #include <stdio.h>
 #include <ctype.h>
-#include <signal.h>
 #include "php_string.h"
 #include "ext/standard/head.h"
 #include "ext/standard/basic_functions.h"

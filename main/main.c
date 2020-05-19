@@ -38,7 +38,6 @@
 #include <unistd.h>
 #endif
 
-#include <signal.h>
 #include <locale.h>
 #include "zend.h"
 #include "zend_types.h"

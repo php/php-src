@@ -41,8 +41,6 @@
 # include <unistd.h>
 #endif
 
-#include <signal.h>
-
 #include <locale.h>
 
 #ifdef HAVE_SYS_TYPES_H

@@ -20,8 +20,6 @@
 #include "config.h"
 #endif
 
-#include <signal.h>
-
 #include "php.h"
 #include "php_ini.h"
 #include "php_mysqli_structs.h"

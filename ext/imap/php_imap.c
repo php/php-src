@@ -49,7 +49,6 @@
 #include <time.h>
 #include <stdio.h>
 #include <ctype.h>
-#include <signal.h>
 
 #ifdef PHP_WIN32
 #include <winsock2.h>
