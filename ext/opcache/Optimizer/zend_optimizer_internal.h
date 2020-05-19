@@ -117,4 +117,7 @@ int sccp_optimize_op_array(zend_optimizer_ctx *ctx, zend_op_array *op_arrya, zen
 int dce_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, zend_bool reorder_dtor_effects);
 int zend_ssa_escape_analysis(const zend_script *script, zend_op_array *op_array, zend_ssa *ssa);
 
+typedef void (*zend_op_array_func_t)(zend_op_array *, void *context);
+void zend_foreach_op_array(zend_script *script, zend_op_array_func_t func, void *context);
+
 #endif
