@@ -303,8 +303,6 @@ AC_MSG_RESULT(done)
 
 AC_CHECK_FUNCS(mremap)
 
-AC_CHECK_FUNCS(sigaction)
-
 ])
 
 AC_MSG_CHECKING(whether /dev/urandom exists)

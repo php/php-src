@@ -1163,10 +1163,8 @@ ZEND_API ZEND_NORETURN void ZEND_FASTCALL zend_timeout(void) /* {{{ */
 
 #ifdef ZEND_WIN32
 typedef VOID (*TIMEOUT_HANDLER)(PVOID, BOOLEAN);
-#elif _POSIX_TIMERS > 0
-typedef void (*TIMEOUT_HANDLER)(int, siginfo_t*, void*);
 #else
-typedef void (*TIMEOUT_HANDLER)(int);
+typedef void (*TIMEOUT_HANDLER)(int, siginfo_t*, void*);
 #endif
 
 /* This one doesn't exist on QNX */
@@ -1177,27 +1175,14 @@ typedef void (*TIMEOUT_HANDLER)(int);
 #if _POSIX_TIMERS > 0 || (defined(HAVE_SETITIMER) && !defined(ZTS))
 static void prepare_to_receive_timeout_signal(int signo, TIMEOUT_HANDLER callback_func)
 {
-# ifdef HAVE_SIGACTION
 	struct sigaction act;
-
-#  if _POSIX_TIMERS > 0
 	act.sa_sigaction = callback_func;
-#  else
-	act.sa_handler = callback_func;
-#  endif
 
 	/* Don't block any other signals while timeout signal handler is running */
 	sigemptyset(&act.sa_mask);
 	/* Restore signal action for timeout signal to default after it is received */
-	act.sa_flags = SA_RESETHAND;
-#  if _POSIX_TIMERS > 0
-	act.sa_flags |= SA_SIGINFO; /* Signal handler has additional argument to receive extra info */
-#  endif
+	act.sa_flags = SA_RESETHAND | SA_SIGINFO;
 	sigaction(signo, &act, NULL);
-
-# else
-	signal(signo, callback_func);
-# endif /* HAVE_SIGACTION */
 
 	/* Make sure timeout signal is unblocked */
 	sigset_t sigset;
@@ -1299,10 +1284,8 @@ static void zend_set_timeout_ex(zend_long seconds, TIMEOUT_HANDLER callback_func
 #ifndef ZTS
 # ifdef ZEND_WIN32
 static VOID CALLBACK zend_hard_timeout_handler(PVOID arg, BOOLEAN timed_out)
-# elif _POSIX_TIMERS > 0
+# else /* POSIX */
 static void zend_hard_timeout_handler(int dummy, siginfo_t *siginfo, void *unused)
-# else
-static void zend_hard_timeout_handler(int dummy)
 # endif
 {
 	const char *error_filename = NULL;
@@ -1391,7 +1374,7 @@ static void zend_timeout_handler(int dummy, siginfo_t *siginfo, void *unused)
 
 #else
 
-static void zend_timeout_handler(int dummy) /* {{{ */
+static void zend_timeout_handler(int dummy, siginfo_t *siginfo, void *unused) /* {{{ */
 {
 # ifndef ZTS
 	/* No-op if `hard_timeout` is set to zero */
