@@ -71,7 +71,7 @@ static PHP_INI_MH(OnUpdateEol)
 
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("phpdbg.path", "", PHP_INI_SYSTEM | PHP_INI_PERDIR, OnUpdateString, socket_path, zend_phpdbg_globals, phpdbg_globals)
-	STD_PHP_INI_ENTRY("phpdbg.eol", "2", PHP_INI_ALL, OnUpdateEol, socket_path, zend_phpdbg_globals, phpdbg_globals)
+	STD_PHP_INI_ENTRY("phpdbg.eol", "2", PHP_INI_ALL, OnUpdateEol, eol, zend_phpdbg_globals, phpdbg_globals)
 PHP_INI_END()
 
 static zend_bool phpdbg_booted = 0;
