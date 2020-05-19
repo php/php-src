@@ -16,6 +16,7 @@ PHP                                                                        NEWS
   . Fixed bug #79588 (Boolean opcache settings ignore on/off values). (cmb)
   . Fixed bug #79548 (Preloading segfault with inherited method using static
     variable). (Nikita)
+  . Fixed bug #79603 (RTD collision with opcache). (Nikita)
 
 - SimpleXML:
   . Fixed bug #79528 (Different object of the same xml between 7.4.5 and

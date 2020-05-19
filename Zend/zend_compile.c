@@ -5934,11 +5934,12 @@ static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_as
 		return;
 	}
 
-	key = zend_build_runtime_definition_key(lcname, decl->start_lineno);
-	if (!zend_hash_add_ptr(CG(function_table), key, op_array)) {
-		zend_error_noreturn(E_ERROR,
-			"Runtime definition key collision for function %s. This is a bug", ZSTR_VAL(name));
-	}
+	/* Generate RTD keys until we find one that isn't in use yet. */
+	key = NULL;
+	do {
+		zend_tmp_string_release(key);
+		key = zend_build_runtime_definition_key(lcname, decl->start_lineno);
+	} while (!zend_hash_add_ptr(CG(function_table), key, op_array));
 
 	if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
 		opline = zend_emit_op_tmp(result, ZEND_DECLARE_LAMBDA_FUNCTION, NULL, NULL);
@@ -6404,8 +6405,15 @@ zend_op *zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 
 		zend_register_seen_symbol(lcname, ZEND_SYMBOL_CLASS);
 	} else {
-		name = zend_generate_anon_class_name(decl->start_lineno);
-		lcname = zend_string_tolower(name);
+		/* Find an anon class name that is not in use yet. */
+		name = NULL;
+		lcname = NULL;
+		do {
+			zend_tmp_string_release(name);
+			zend_tmp_string_release(lcname);
+			name = zend_generate_anon_class_name(decl->start_lineno);
+			lcname = zend_string_tolower(name);
+		} while (zend_hash_exists(CG(class_table), lcname));
 	}
 	lcname = zend_new_interned_string(lcname);
 
@@ -6562,18 +6570,20 @@ zend_op *zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 		opline->result_type = IS_VAR;
 		opline->result.var = get_temporary_variable();
 		if (!zend_hash_add_ptr(CG(class_table), lcname, ce)) {
+			/* We checked above that the class name is not used. This really shouldn't happen. */
 			zend_error_noreturn(E_ERROR,
 				"Runtime definition key collision for %s. This is a bug", ZSTR_VAL(name));
 		}
 	} else {
-		zend_string *key = zend_build_runtime_definition_key(lcname, decl->start_lineno);
+		/* Generate RTD keys until we find one that isn't in use yet. */
+		zend_string *key = NULL;
+		do {
+			zend_tmp_string_release(key);
+			key = zend_build_runtime_definition_key(lcname, decl->start_lineno);
+		} while (!zend_hash_add_ptr(CG(class_table), key, ce));
 
 		/* RTD key is placed after lcname literal in op1 */
 		zend_add_literal_string(&key);
-		if (!zend_hash_add_ptr(CG(class_table), key, ce)) {
-			zend_error_noreturn(E_ERROR,
-				"Runtime definition key collision for class %s. This is a bug", ZSTR_VAL(name));
-		}
 
 		opline->opcode = ZEND_DECLARE_CLASS;
 		if (extends_ast && toplevel
