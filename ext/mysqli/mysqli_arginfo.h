@@ -683,7 +683,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_warning___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, mysqli_link, IS_OBJECT, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_mysqli_warning_next arginfo_class_mysqli_character_set_name
+#define arginfo_class_mysqli_warning_next arginfo_mysqli_thread_safe
 
 
 ZEND_FUNCTION(mysqli_affected_rows);

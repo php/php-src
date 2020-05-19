@@ -2,7 +2,7 @@
 
 /** @generate-function-entries */
 
-class mysqli_driver
+final class mysqli_driver
 {
 }
 
@@ -510,15 +510,14 @@ class mysqli_stmt
 #endif
 }
 
-class mysqli_warning
+final class mysqli_warning
 {
     protected function __construct(object $mysqli_link) {}
 
-    /** @return bool */
-    public function next() {}
+    public function next(): bool {}
 }
 
-class mysqli_sql_exception extends RuntimeException
+final class mysqli_sql_exception extends RuntimeException
 {
 }
 

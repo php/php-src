@@ -50,6 +50,7 @@ function mhash_count(): int {}
 function mhash(int $hash, string $data, string $key = UNKNOWN): string|false {}
 #endif
 
-class HashContext {
+final class HashContext
+{
     private function __construct() {}
 }
