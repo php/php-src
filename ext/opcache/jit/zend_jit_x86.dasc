@@ -1322,7 +1322,7 @@ static void* dasm_labels[zend_lb_MAX];
 ||					}
 |					EXT_CALL zend_array_destroy, r0
 ||				} else {
-|					EXT_CALL zend_jit_array_free, r0|
+|					EXT_CALL zend_jit_array_free, r0
 ||				}
 ||				break;
 ||			} else if (type == IS_OBJECT) {
