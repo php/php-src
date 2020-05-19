@@ -66,6 +66,15 @@ static uint32_t zend_version_info_length;
 #define ZEND_CORE_VERSION_INFO	"Zend Engine v" ZEND_VERSION ", Copyright (c) Zend Technologies\n"
 #define PRINT_ZVAL_INDENT 4
 
+#ifdef HAVE_SIGPROCMASK
+/* for blocking/unblocking signals */
+ZEND_API sigset_t mask_all_signals;
+
+# if ZEND_DEBUG
+ZEND_API TSRM_TLS int _signals_masked = 0;
+# endif
+#endif
+
 /* true multithread-shared globals */
 ZEND_API zend_class_entry *zend_standard_class_def = NULL;
 ZEND_API size_t (*zend_printf)(const char *format, ...);
@@ -801,6 +810,10 @@ int zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 #if defined(__FreeBSD__) || defined(__DragonFly__)
 	/* FreeBSD and DragonFly floating point precision fix */
 	fpsetmask(0);
+#endif
+
+#ifdef HAVE_SIGPROCMASK
+	sigfillset(&mask_all_signals);
 #endif
 
 	zend_startup_strtod();
