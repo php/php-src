@@ -1537,3 +1537,30 @@ static void ZEND_FASTCALL zend_jit_pre_dec(zval *var_ptr, zval *ret)
 	decrement_function(var_ptr);
 	ZVAL_COPY(ret, var_ptr);
 }
+
+#define HT_POISONED_PTR ((HashTable *) (intptr_t) -1)
+
+static zend_never_inline void ZEND_FASTCALL _zend_hash_iterators_remove(HashTable *ht)
+{
+	HashTableIterator *iter = EG(ht_iterators);
+	HashTableIterator *end  = iter + EG(ht_iterators_used);
+
+	while (iter != end) {
+		if (iter->ht == ht) {
+			iter->ht = HT_POISONED_PTR;
+		}
+		iter++;
+	}
+}
+
+static void ZEND_FASTCALL zend_jit_array_free(HashTable *ht)
+{
+	GC_REMOVE_FROM_BUFFER(ht);
+	if (UNEXPECTED(HT_HAS_ITERATORS(ht))) {
+		_zend_hash_iterators_remove(ht);
+	}
+	if (!(EXPECTED(HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED))) {
+		efree(HT_GET_DATA_ADDR(ht));
+	}
+	FREE_HASHTABLE(ht);
+}
