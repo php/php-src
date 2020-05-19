@@ -799,6 +799,15 @@ ZEND_FUNCTION(opcache_get_configuration)
 	add_assoc_long(&directives,   "opcache.jit_buffer_size", JIT_G(buffer_size));
 	add_assoc_long(&directives,   "opcache.jit_debug", JIT_G(debug));
 	add_assoc_long(&directives,   "opcache.jit_bisect_limit", JIT_G(bisect_limit));
+	add_assoc_long(&directives,   "opcache.jit_blacklist_root_trace", JIT_G(blacklist_root_trace));
+	add_assoc_long(&directives,   "opcache.jit_blacklist_side_trace", JIT_G(blacklist_side_trace));
+	add_assoc_long(&directives,   "opcache.jit_hot_func", JIT_G(hot_func));
+	add_assoc_long(&directives,   "opcache.jit_hot_loop", JIT_G(hot_loop));
+	add_assoc_long(&directives,   "opcache.jit_hot_return", JIT_G(hot_return));
+	add_assoc_long(&directives,   "opcache.jit_hot_side_exit", JIT_G(hot_side_exit));
+	add_assoc_long(&directives,   "opcache.jit_max_loops_unroll", JIT_G(max_loops_unroll));
+	add_assoc_long(&directives,   "opcache.jit_max_recursion_unroll", JIT_G(max_recursion_unroll));
+	add_assoc_long(&directives,   "opcache.jit_prof_threshold", JIT_G(prof_threshold));
 #endif
 
 	add_assoc_zval(return_value, "directives", &directives);
