@@ -4342,7 +4342,7 @@ static zend_bool zend_jit_trace_is_bad_root(const zend_op *opline, zend_jit_trac
 
 	for (i = 0; i < ZEND_JIT_TRACE_BAD_ROOT_SLOTS; i++) {
 		if (cache_opline[i] == opline) {
-			if (cache_count[i] >= ZEND_JIT_TRACE_MAX_ROOT_FAILURES - 1) {
+			if (cache_count[i] >= JIT_G(blacklist_root_trace) - 1) {
 				cache_opline[i] = NULL;
 				return 1;
 			} else {
@@ -4749,7 +4749,7 @@ static zend_bool zend_jit_trace_exit_is_bad(uint32_t trace_num, uint32_t exit_nu
 	uint8_t *counter = JIT_G(exit_counters) +
 		zend_jit_traces[trace_num].exit_counters + exit_num;
 
-	if (*counter + 1 >= ZEND_JIT_TRACE_HOT_SIDE_COUNT + ZEND_JIT_TRACE_MAX_SIDE_FAILURES) {
+	if (*counter + 1 >= JIT_G(hot_side_exit) + JIT_G(blacklist_side_trace)) {
 		return 1;
 	}
 	(*counter)++;
@@ -4761,7 +4761,7 @@ static zend_bool zend_jit_trace_exit_is_hot(uint32_t trace_num, uint32_t exit_nu
 	uint8_t *counter = JIT_G(exit_counters) +
 		zend_jit_traces[trace_num].exit_counters + exit_num;
 
-	if (*counter + 1 >= ZEND_JIT_TRACE_HOT_SIDE_COUNT) {
+	if (*counter + 1 >= JIT_G(hot_side_exit)) {
 		return 1;
 	}
 	(*counter)++;

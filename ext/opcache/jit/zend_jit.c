@@ -369,7 +369,7 @@ static void *dasm_link_and_encode(dasm_State             **dasm_state,
 	} else {
 	    if (JIT_G(debug) & (ZEND_JIT_DEBUG_ASM_STUBS|ZEND_JIT_DEBUG_ASM)) {
 			zend_jit_disasm_add_symbol(name, (uintptr_t)entry, size);
-			if (trace_num || (JIT_G(debug) & ZEND_JIT_DEBUG_ASM_STUBS) != 0) {
+			if ((JIT_G(debug) & (trace_num ? ZEND_JIT_DEBUG_ASM : ZEND_JIT_DEBUG_ASM_STUBS)) != 0) {
 				zend_jit_disasm(
 					name,
 					(op_array && op_array->filename) ? ZSTR_VAL(op_array->filename) : NULL,
@@ -3206,7 +3206,7 @@ void zend_jit_check_funcs(HashTable *function_table, zend_bool is_method) {
 			ZEND_COUNTER_INFO(op_array) = 0;
 			jit_extension = (zend_jit_op_array_extension*)ZEND_FUNC_INFO(op_array);
 			opline->handler = jit_extension->orig_handler;
-			if (((double)counter / (double)zend_jit_profile_counter) > ZEND_JIT_PROF_THRESHOLD) {
+			if (((double)counter / (double)zend_jit_profile_counter) > JIT_G(prof_threshold)) {
 				zend_real_jit_func(op_array, NULL, NULL);
 			}
 		}
@@ -3651,7 +3651,7 @@ ZEND_EXT_API int zend_jit_config(zend_string *jit, int stage)
 	}
 
 failure:
-	zend_error(E_WARNING, "Invalid opcache.jit setting. Should be \"disable\", \"on\", \"off\" or 4-digit number");
+	zend_error(E_WARNING, "Invalid \"opcache.jit\" setting. Should be \"disable\", \"on\", \"off\" or 4-digit number");
 	JIT_G(enabled) = 0;
 	JIT_G(on) = 0;
 	return FAILURE;

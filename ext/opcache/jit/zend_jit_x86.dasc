@@ -2209,7 +2209,7 @@ static int zend_jit_hybrid_func_hot_counter_stub(dasm_State **Dst)
 	|	mov r0, EX->func
 	|	mov r1, aword [r0 + offsetof(zend_op_array, reserved[zend_func_info_rid])]
 	|	mov r2, aword [r1 + offsetof(zend_jit_op_array_hot_extension, counter)]
-	|	sub word [r2], ZEND_JIT_COUNTER_FUNC_COST
+	|	sub word [r2], ((ZEND_JIT_COUNTER_INIT + JIT_G(hot_func) - 1) / JIT_G(hot_func))
 	|	jle >1
 	|	GET_IP r2
 	|	sub r2, aword [r0 + offsetof(zend_op_array, opcodes)]
@@ -2246,7 +2246,7 @@ static int zend_jit_hybrid_loop_hot_counter_stub(dasm_State **Dst)
 	|	mov r0, EX->func
 	|	mov r1, aword [r0 + offsetof(zend_op_array, reserved[zend_func_info_rid])]
 	|	mov r2, aword [r1 + offsetof(zend_jit_op_array_hot_extension, counter)]
-	|	sub word [r2], ZEND_JIT_COUNTER_LOOP_COST
+	|	sub word [r2], ((ZEND_JIT_COUNTER_INIT + JIT_G(hot_loop) - 1) / JIT_G(hot_loop))
 	|	jle >1
 	|	GET_IP r2
 	|	sub r2, aword [r0 + offsetof(zend_op_array, opcodes)]
@@ -2305,7 +2305,8 @@ static int zend_jit_hybrid_func_trace_counter_stub(dasm_State **Dst)
 
 	|->hybrid_func_trace_counter:
 
-	return zend_jit_hybrid_trace_counter_stub(Dst, ZEND_JIT_COUNTER_FUNC_COST);
+	return zend_jit_hybrid_trace_counter_stub(Dst,
+		((ZEND_JIT_COUNTER_INIT + JIT_G(hot_func) - 1)  / JIT_G(hot_func)));
 }
 
 static int zend_jit_hybrid_ret_trace_counter_stub(dasm_State **Dst)
@@ -2316,7 +2317,8 @@ static int zend_jit_hybrid_ret_trace_counter_stub(dasm_State **Dst)
 
 	|->hybrid_ret_trace_counter:
 
-	return zend_jit_hybrid_trace_counter_stub(Dst, ZEND_JIT_COUNTER_RET_COST);
+	return zend_jit_hybrid_trace_counter_stub(Dst,
+		((ZEND_JIT_COUNTER_INIT + JIT_G(hot_return) - 1) / JIT_G(hot_return)));
 }
 
 static int zend_jit_hybrid_loop_trace_counter_stub(dasm_State **Dst)
@@ -2327,7 +2329,8 @@ static int zend_jit_hybrid_loop_trace_counter_stub(dasm_State **Dst)
 
 	|->hybrid_loop_trace_counter:
 
-	return zend_jit_hybrid_trace_counter_stub(Dst, ZEND_JIT_COUNTER_LOOP_COST);
+	return zend_jit_hybrid_trace_counter_stub(Dst,
+		((ZEND_JIT_COUNTER_INIT + JIT_G(hot_loop) - 1) / JIT_G(hot_loop)));
 }
 
 static int zend_jit_trace_halt_stub(dasm_State **Dst)

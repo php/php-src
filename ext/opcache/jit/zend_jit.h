@@ -37,28 +37,10 @@
 #define ZEND_JIT_REG_ALLOC_GLOBAL (1<<1) /* global linear scan register allocation */
 #define ZEND_JIT_CPU_AVX          (1<<2) /* use AVX instructions, if available */
 
-//#define ZEND_JIT_LEVEL(n)          ((n) % 10)
-//#define ZEND_JIT_TRIGGER(n)        (((n) / 10) % 10)
-//#define ZEND_JIT_REG_ALLOC(n)      (((n) / 100) % 10)
-//#define ZEND_JIT_CPU_FLAGS(n)      (((n) / 1000) % 10)
-
 #define ZEND_JIT_DEFAULT_OPTIONS      "1205"
 #define ZEND_JIT_DEFAULT_BUFFER_SIZE  "0"
 
-
-/* Makes profile based JIT (opcache.jit=2*) to generate code only for most
- * often called functions (above the threshold).
- * TODO: this setting should be configurable
- */
-#define ZEND_JIT_PROF_THRESHOLD    0.005
-
-/* Hot/Trace Counters based JIT parameters.
- * TODO: this setting should be configurable
- */
-#define ZEND_JIT_COUNTER_FUNC_COST    1
-#define ZEND_JIT_COUNTER_RET_COST    15
-#define ZEND_JIT_COUNTER_LOOP_COST    2
-#define ZEND_JIT_COUNTER_INIT       127
+#define ZEND_JIT_COUNTER_INIT         32531
 
 #define ZEND_JIT_DEBUG_ASM       (1<<0)
 #define ZEND_JIT_DEBUG_SSA       (1<<1)
@@ -93,14 +75,7 @@
 #define ZEND_JIT_TRACE_MAX_FUNCS           30 /* max number of different functions in a single trace */
 #define ZEND_JIT_TRACE_MAX_CALL_DEPTH      10 /* max depth of inlined calls */
 #define ZEND_JIT_TRACE_MAX_RET_DEPTH        4 /* max depth of inlined returns */
-#define ZEND_JIT_TRACE_MAX_RECURSION        2 /* max number of recursive inlined calls */
-#define ZEND_JIT_TRACE_MAX_UNROLL_LOOPS     8 /* max number of unrolled loops */
-
-#define ZEND_JIT_TRACE_HOT_SIDE_COUNT       8 /* number of exits before taking side trace */
-#define ZEND_JIT_TRACE_HOT_RETURN_COUNT     8 /* number of returns before taking continuation trace */
-
-#define ZEND_JIT_TRACE_MAX_ROOT_FAILURES   16 /* number of attempts to record/compile a root trace */
-#define ZEND_JIT_TRACE_MAX_SIDE_FAILURES    4 /* number of attempts to record/compile a side trace */
+#define ZEND_JIT_TRACE_MAX_LOOPS_UNROLL    10 /* max number of unrolled loops */
 
 #define ZEND_JIT_TRACE_BAD_ROOT_SLOTS      64 /* number of slots in bad root trace cache */
 
@@ -119,6 +94,15 @@ typedef struct _zend_jit_globals {
 	zend_long   buffer_size;
 	zend_long   debug;
 	zend_long   bisect_limit;
+	double      prof_threshold;
+	zend_long   hot_loop;
+	zend_long   hot_func;
+	zend_long   hot_return;
+	zend_long   hot_side_exit;        /* number of exits before taking side trace */
+	zend_long   blacklist_root_trace; /* number of attempts to JIT a root trace before blacklist it */
+	zend_long   blacklist_side_trace; /* number of attempts to JIT a side trace before blacklist it */
+	zend_long   max_recursion_unroll; /* max number of recursive inlined calls/returns unrolls */
+	zend_long   max_loops_unroll;     /* max number of unrolled loops */
 
 	zend_sym_node *symbols; /* symbols for disassembler */
 
