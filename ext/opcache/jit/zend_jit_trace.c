@@ -5089,10 +5089,6 @@ static int zend_jit_setup_hot_trace_counters(zend_op_array *op_array)
 	zend_cfg cfg;
 	uint32_t i;
 
-	if (!zend_jit_traces && zend_jit_trace_startup() != SUCCESS) {
-		return FAILURE;
-	}
-
 	ZEND_ASSERT(zend_jit_func_trace_counter_handler != NULL);
 	ZEND_ASSERT(zend_jit_ret_trace_counter_handler != NULL);
 	ZEND_ASSERT(zend_jit_loop_trace_counter_handler != NULL);
