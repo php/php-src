@@ -48,7 +48,7 @@ static zend_always_inline const char *zend_jit_trace_star_desc(uint8_t trace_fla
 
 static int zend_jit_trace_startup(void)
 {
-	zend_jit_traces = (zend_jit_trace_info*)zend_shared_alloc(sizeof(zend_jit_trace_info) * ZEND_JIT_TRACE_MAX_TRACES);
+	zend_jit_traces = (zend_jit_trace_info*)zend_shared_alloc(sizeof(zend_jit_trace_info) * JIT_G(max_root_traces));
 	if (!zend_jit_traces) {
 		return FAILURE;
 	}
@@ -4217,7 +4217,7 @@ static zend_jit_trace_stop zend_jit_compile_root_trace(zend_jit_trace_rec *trace
 	/* Checks under lock */
 	if ((ZEND_OP_TRACE_INFO(opline, offset)->trace_flags & ZEND_JIT_TRACE_JITED)) {
 		ret = ZEND_JIT_TRACE_STOP_ALREADY_DONE;
-	} else if (ZEND_JIT_TRACE_NUM >= ZEND_JIT_TRACE_MAX_TRACES) {
+	} else if (ZEND_JIT_TRACE_NUM >= JIT_G(max_root_traces)) {
 		ret = ZEND_JIT_TRACE_STOP_TOO_MANY_TRACES;
 	} else {
 		SHM_UNPROTECT();
@@ -4639,7 +4639,7 @@ repeat:
 			opline->lineno);
 	}
 
-	if (ZEND_JIT_TRACE_NUM >= ZEND_JIT_TRACE_MAX_TRACES) {
+	if (ZEND_JIT_TRACE_NUM >= JIT_G(max_root_traces)) {
 		stop = ZEND_JIT_TRACE_STOP_TOO_MANY_TRACES;
 		goto abort;
 	}
@@ -4780,9 +4780,9 @@ static zend_jit_trace_stop zend_jit_compile_side_trace(zend_jit_trace_rec *trace
 	/* Checks under lock */
 	if (zend_jit_traces[parent_num].exit_info[exit_num].flags & (ZEND_JIT_EXIT_JITED|ZEND_JIT_EXIT_BLACKLISTED)) {
 		ret = ZEND_JIT_TRACE_STOP_ALREADY_DONE;
-	} else if (ZEND_JIT_TRACE_NUM >= ZEND_JIT_TRACE_MAX_TRACES) {
+	} else if (ZEND_JIT_TRACE_NUM >= JIT_G(max_root_traces)) {
 		ret = ZEND_JIT_TRACE_STOP_TOO_MANY_TRACES;
-	} else if (zend_jit_traces[zend_jit_traces[parent_num].root].child_count >= ZEND_JIT_TRACE_MAX_SIDE_TRACES) {
+	} else if (zend_jit_traces[zend_jit_traces[parent_num].root].child_count >= JIT_G(max_side_traces)) {
 		ret = ZEND_JIT_TRACE_STOP_TOO_MANY_CHILDREN;
 	} else {
 		SHM_UNPROTECT();
@@ -4905,12 +4905,12 @@ int ZEND_FASTCALL zend_jit_trace_hot_side(zend_execute_data *execute_data, uint3
 			EX(opline)->lineno);
 	}
 
-	if (ZEND_JIT_TRACE_NUM >= ZEND_JIT_TRACE_MAX_TRACES) {
+	if (ZEND_JIT_TRACE_NUM >= JIT_G(max_root_traces)) {
 		stop = ZEND_JIT_TRACE_STOP_TOO_MANY_TRACES;
 		goto abort;
 	}
 
-	if (zend_jit_traces[zend_jit_traces[parent_num].root].child_count >= ZEND_JIT_TRACE_MAX_SIDE_TRACES) {
+	if (zend_jit_traces[zend_jit_traces[parent_num].root].child_count >= JIT_G(max_side_traces)) {
 		stop = ZEND_JIT_TRACE_STOP_TOO_MANY_CHILDREN;
 		goto abort;
 	}
@@ -5088,6 +5088,10 @@ static int zend_jit_setup_hot_trace_counters(zend_op_array *op_array)
 	zend_jit_op_array_trace_extension *jit_extension;
 	zend_cfg cfg;
 	uint32_t i;
+
+	if (!zend_jit_traces && zend_jit_trace_startup() != SUCCESS) {
+		return FAILURE;
+	}
 
 	ZEND_ASSERT(zend_jit_func_trace_counter_handler != NULL);
 	ZEND_ASSERT(zend_jit_ret_trace_counter_handler != NULL);

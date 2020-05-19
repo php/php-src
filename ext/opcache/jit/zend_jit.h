@@ -66,10 +66,8 @@
 
 #define ZEND_JIT_DEBUG_PERSISTENT      0x1f0 /* profile and debbuger flags can't be changed at run-time */
 
-#define ZEND_JIT_TRACE_MAX_TRACES        1024 /* max number of traces */
 #define ZEND_JIT_TRACE_MAX_LENGTH        1024 /* max length of single trace */
 #define ZEND_JIT_TRACE_MAX_EXITS          512 /* max number of side exits per trace */
-#define ZEND_JIT_TRACE_MAX_SIDE_TRACES    128 /* max number of side traces of a root trace */
 #define ZEND_JIT_TRACE_MAX_EXIT_COUNTERS 8192 /* max number of side exits for all trace */
 
 #define ZEND_JIT_TRACE_MAX_FUNCS           30 /* max number of different functions in a single trace */
@@ -95,6 +93,8 @@ typedef struct _zend_jit_globals {
 	zend_long   debug;
 	zend_long   bisect_limit;
 	double      prof_threshold;
+	zend_long   max_root_traces;      /* max number of root traces */
+	zend_long   max_side_traces;      /* max number of side traces (per root trace) */
 	zend_long   hot_loop;
 	zend_long   hot_func;
 	zend_long   hot_return;
