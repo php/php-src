@@ -2175,6 +2175,21 @@ static int zend_jit_hybrid_profile_jit_stub(dasm_State **Dst)
 	return 1;
 }
 
+static int zend_jit_hybrid_hot_code_stub(dasm_State **Dst)
+{
+	if (zend_jit_vm_kind != ZEND_VM_KIND_HYBRID) {
+		return 1;
+	}
+
+	|->hybrid_hot_code:
+	|	mov word [r2], ZEND_JIT_COUNTER_INIT
+	|	mov FCARG1a, FP
+	|	GET_IP FCARG2a
+	|	EXT_CALL zend_jit_hot_func, r0
+	|	JMP_IP
+	return 1;
+}
+
 /*
  * This code is based Mike Pall's "Hashed profile counters" idea, implemented
  * in LuaJIT. The full description may be found in "LuaJIT 2.0 intellectual
@@ -2199,18 +2214,13 @@ static int zend_jit_hybrid_profile_jit_stub(dasm_State **Dst)
  * }
  *
  */
-static int zend_jit_hybrid_func_hot_counter_stub(dasm_State **Dst)
+static int zend_jit_hybrid_hot_counter_stub(dasm_State **Dst, uint32_t cost)
 {
-	if (zend_jit_vm_kind != ZEND_VM_KIND_HYBRID) {
-		return 1;
-	}
-
-	|->hybrid_func_hot_counter:
 	|	mov r0, EX->func
 	|	mov r1, aword [r0 + offsetof(zend_op_array, reserved[zend_func_info_rid])]
 	|	mov r2, aword [r1 + offsetof(zend_jit_op_array_hot_extension, counter)]
-	|	sub word [r2], ((ZEND_JIT_COUNTER_INIT + JIT_G(hot_func) - 1) / JIT_G(hot_func))
-	|	jle >1
+	|	sub word [r2], cost
+	|	jle ->hybrid_hot_code
 	|	GET_IP r2
 	|	sub r2, aword [r0 + offsetof(zend_op_array, opcodes)]
 	|	// divide by sizeof(zend_op)
@@ -2227,13 +2237,19 @@ static int zend_jit_hybrid_func_hot_counter_stub(dasm_State **Dst)
 	|	.else
 	|		jmp aword [r1+r2*4+offsetof(zend_jit_op_array_hot_extension, orig_handlers)]
 	|	.endif
-	|1:
-	|	mov word [r2], ZEND_JIT_COUNTER_INIT
-	|	mov FCARG1a, FP
-	|	GET_IP FCARG2a
-	|	EXT_CALL zend_jit_hot_func, r0
-	|	JMP_IP
 	return 1;
+}
+
+static int zend_jit_hybrid_func_hot_counter_stub(dasm_State **Dst)
+{
+	if (zend_jit_vm_kind != ZEND_VM_KIND_HYBRID) {
+		return 1;
+	}
+
+	|->hybrid_func_hot_counter:
+
+	return zend_jit_hybrid_hot_counter_stub(Dst,
+		((ZEND_JIT_COUNTER_INIT + JIT_G(hot_func) - 1) / JIT_G(hot_func)));
 }
 
 static int zend_jit_hybrid_loop_hot_counter_stub(dasm_State **Dst)
@@ -2243,46 +2259,18 @@ static int zend_jit_hybrid_loop_hot_counter_stub(dasm_State **Dst)
 	}
 
 	|->hybrid_loop_hot_counter:
-	|	mov r0, EX->func
-	|	mov r1, aword [r0 + offsetof(zend_op_array, reserved[zend_func_info_rid])]
-	|	mov r2, aword [r1 + offsetof(zend_jit_op_array_hot_extension, counter)]
-	|	sub word [r2], ((ZEND_JIT_COUNTER_INIT + JIT_G(hot_loop) - 1) / JIT_G(hot_loop))
-	|	jle >1
-	|	GET_IP r2
-	|	sub r2, aword [r0 + offsetof(zend_op_array, opcodes)]
-	|	// divide by sizeof(zend_op)
-	|	.if X64
-	||		ZEND_ASSERT(sizeof(zend_op) == 32);
-	|		sar r2, 5
-	|	.else
-	||		ZEND_ASSERT(sizeof(zend_op) == 28);
-	|		sar r2, 2
-	|		imul r2, 0xb6db6db7
-	|	.endif
-	|	.if X64
-	|		jmp aword [r1+r2*8+offsetof(zend_jit_op_array_hot_extension, orig_handlers)]
-	|	.else
-	|		jmp aword [r1+r2*4+offsetof(zend_jit_op_array_hot_extension, orig_handlers)]
-	|	.endif
-	|1:
-	|	mov word [r2], ZEND_JIT_COUNTER_INIT
-	|	mov FCARG1a, FP
-	|	GET_IP FCARG2a
-	|	EXT_CALL zend_jit_hot_func, r0
-	|	JMP_IP
-	return 1;
+
+	return zend_jit_hybrid_hot_counter_stub(Dst,
+		((ZEND_JIT_COUNTER_INIT + JIT_G(hot_loop) - 1) / JIT_G(hot_loop)));
 }
 
-static int zend_jit_hybrid_trace_counter_stub(dasm_State **Dst, uint32_t cost)
+static int zend_jit_hybrid_hot_trace_stub(dasm_State **Dst)
 {
-	|	mov r0, EX->func
-	|	mov r1, aword [r0 + offsetof(zend_op_array, reserved[zend_func_info_rid])]
-	|	mov r1, aword [r1 + offsetof(zend_jit_op_array_trace_extension, offset)]
-	|	mov r2, aword [IP + r1 + offsetof(zend_op_trace_info, counter)]
-	|	sub word [r2], cost
-	|	jle >1
-	|	jmp aword [IP + r1]
-	|1:
+	if (zend_jit_vm_kind != ZEND_VM_KIND_HYBRID) {
+		return 1;
+	}
+
+	|->hybrid_hot_trace:
 	|	mov word [r2], ZEND_JIT_COUNTER_INIT
 	|	mov FCARG1a, FP
 	|	GET_IP FCARG2a
@@ -2294,6 +2282,18 @@ static int zend_jit_hybrid_trace_counter_stub(dasm_State **Dst, uint32_t cost)
 	|	JMP_IP
 	|1:
 	|	EXT_JMP zend_jit_halt_op->handler, r0
+	return 1;
+}
+
+static int zend_jit_hybrid_trace_counter_stub(dasm_State **Dst, uint32_t cost)
+{
+	|	mov r0, EX->func
+	|	mov r1, aword [r0 + offsetof(zend_op_array, reserved[zend_func_info_rid])]
+	|	mov r1, aword [r1 + offsetof(zend_jit_op_array_trace_extension, offset)]
+	|	mov r2, aword [IP + r1 + offsetof(zend_op_trace_info, counter)]
+	|	sub word [r2], cost
+	|	jle ->hybrid_hot_trace
+	|	jmp aword [IP + r1]
 	return 1;
 }
 
@@ -2572,8 +2572,10 @@ static const zend_jit_stub zend_jit_stubs[] = {
 	JIT_STUB(trace_escape),
 	JIT_STUB(hybrid_runtime_jit),
 	JIT_STUB(hybrid_profile_jit),
+	JIT_STUB(hybrid_hot_code),
 	JIT_STUB(hybrid_func_hot_counter),
 	JIT_STUB(hybrid_loop_hot_counter),
+	JIT_STUB(hybrid_hot_trace),
 	JIT_STUB(hybrid_func_trace_counter),
 	JIT_STUB(hybrid_ret_trace_counter),
 	JIT_STUB(hybrid_loop_trace_counter),
