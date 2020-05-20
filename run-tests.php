@@ -667,8 +667,8 @@ NO_PROC_OPEN_ERROR;
     }
 
     if ($selected_tests && count($test_files) === 0) {
-        echo 'No tests found.' . PHP_EOL;
-        exit;
+        echo "No tests found.\n";
+        return;
     }
 
     // Default to PHP_BINARY as executable
