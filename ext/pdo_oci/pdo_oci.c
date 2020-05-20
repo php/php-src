@@ -116,7 +116,7 @@ PHP_RINIT_FUNCTION(pdo_oci)
 		tsrm_mutex_lock(pdo_oci_env_mutex);
 		if (!pdo_oci_Env) { // double-checked locking idiom
 #endif
-#if HAVE_OCIENVCREATE
+#ifdef HAVE_OCIENVCREATE
 		OCIEnvCreate(&pdo_oci_Env, PDO_OCI_INIT_MODE, NULL, NULL, NULL, NULL, 0, NULL);
 #else
 		OCIInitialize(PDO_OCI_INIT_MODE, NULL, NULL, NULL, NULL);
