@@ -218,12 +218,12 @@ static ZEND_INI_MH(OnUpdateJitDebug)
 static ZEND_INI_MH(OnUpdateCounter)
 {
 	zend_long val = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
-	if (val > 0 && val < 256) {
+	if (val >= 0 && val < 256) {
 		zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
 		*p = val;
 		return SUCCESS;
 	}
-	zend_error(E_WARNING, "Invalid \"%s\" setting. Should be between 1 and 256", ZSTR_VAL(entry->name));
+	zend_error(E_WARNING, "Invalid \"%s\" setting. Should be between 0 and 256", ZSTR_VAL(entry->name));
 	return FAILURE;
 }
 

@@ -3266,19 +3266,23 @@ static int zend_jit_setup_hot_counters(zend_op_array *op_array)
 	}
 	ZEND_SET_FUNC_INFO(op_array, (void*)jit_extension);
 
-	if (!(op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
-			opline++;
+	if (JIT_G(hot_func)) {
+		if (!(op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+			while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
+				opline++;
+			}
 		}
+
+		opline->handler = (const void*)zend_jit_func_hot_counter_handler;
 	}
 
-	opline->handler = (const void*)zend_jit_func_hot_counter_handler;
-
-	for (i = 0; i < cfg.blocks_count; i++) {
-		if ((cfg.blocks[i].flags & ZEND_BB_REACHABLE) &&
-		    (cfg.blocks[i].flags & ZEND_BB_LOOP_HEADER)) {
-		    op_array->opcodes[cfg.blocks[i].start].handler =
-				(const void*)zend_jit_loop_hot_counter_handler;
+	if (JIT_G(hot_loop)) {
+		for (i = 0; i < cfg.blocks_count; i++) {
+			if ((cfg.blocks[i].flags & ZEND_BB_REACHABLE) &&
+			    (cfg.blocks[i].flags & ZEND_BB_LOOP_HEADER)) {
+			    op_array->opcodes[cfg.blocks[i].start].handler =
+					(const void*)zend_jit_loop_hot_counter_handler;
+			}
 		}
 	}
 

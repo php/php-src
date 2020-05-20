@@ -2246,7 +2246,7 @@ static int zend_jit_hybrid_hot_counter_stub(dasm_State **Dst, uint32_t cost)
 
 static int zend_jit_hybrid_func_hot_counter_stub(dasm_State **Dst)
 {
-	if (zend_jit_vm_kind != ZEND_VM_KIND_HYBRID) {
+	if (zend_jit_vm_kind != ZEND_VM_KIND_HYBRID || !JIT_G(hot_func)) {
 		return 1;
 	}
 
@@ -2258,7 +2258,7 @@ static int zend_jit_hybrid_func_hot_counter_stub(dasm_State **Dst)
 
 static int zend_jit_hybrid_loop_hot_counter_stub(dasm_State **Dst)
 {
-	if (zend_jit_vm_kind != ZEND_VM_KIND_HYBRID) {
+	if (zend_jit_vm_kind != ZEND_VM_KIND_HYBRID || !JIT_G(hot_loop)) {
 		return 1;
 	}
 
@@ -2303,7 +2303,7 @@ static int zend_jit_hybrid_trace_counter_stub(dasm_State **Dst, uint32_t cost)
 
 static int zend_jit_hybrid_func_trace_counter_stub(dasm_State **Dst)
 {
-	if (zend_jit_vm_kind != ZEND_VM_KIND_HYBRID) {
+	if (zend_jit_vm_kind != ZEND_VM_KIND_HYBRID || !JIT_G(hot_func)) {
 		return 1;
 	}
 
@@ -2315,7 +2315,7 @@ static int zend_jit_hybrid_func_trace_counter_stub(dasm_State **Dst)
 
 static int zend_jit_hybrid_ret_trace_counter_stub(dasm_State **Dst)
 {
-	if (zend_jit_vm_kind != ZEND_VM_KIND_HYBRID) {
+	if (zend_jit_vm_kind != ZEND_VM_KIND_HYBRID || !JIT_G(hot_return)) {
 		return 1;
 	}
 
@@ -2327,7 +2327,7 @@ static int zend_jit_hybrid_ret_trace_counter_stub(dasm_State **Dst)
 
 static int zend_jit_hybrid_loop_trace_counter_stub(dasm_State **Dst)
 {
-	if (zend_jit_vm_kind != ZEND_VM_KIND_HYBRID) {
+	if (zend_jit_vm_kind != ZEND_VM_KIND_HYBRID || !JIT_G(hot_loop)) {
 		return 1;
 	}
 
