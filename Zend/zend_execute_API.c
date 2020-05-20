@@ -1390,6 +1390,8 @@ static void zend_timeout_handler(int dummy, siginfo_t *siginfo, void *unused)
 static void zend_timeout_handler(zend_executor_globals *eg)
 # endif
 
+	zend_unset_timeout(); /* Don't leak resources */
+
 # ifndef ZTS
 	/* No-op if `hard_timeout` is set to zero */
 	zend_set_timeout_ex(eg->hard_timeout, zend_hard_timeout_handler);
