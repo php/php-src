@@ -25,7 +25,7 @@
 #include "php_posix.h"
 #include "posix_arginfo.h"
 
-#if HAVE_POSIX
+#ifdef HAVE_POSIX
 
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>

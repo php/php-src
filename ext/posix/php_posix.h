@@ -21,7 +21,7 @@
 #include "config.h"
 #endif
 
-#if HAVE_POSIX
+#ifdef HAVE_POSIX
 #ifndef DLEXPORT
 #define DLEXPORT
 #endif
