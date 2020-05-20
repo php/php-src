@@ -6,7 +6,7 @@ This converts the PHP Virtual Machine's opcodes into x64/x86 assembly,
 on POSIX platforms and Windows.
 
 It generates native code directly from PHP byte-code and information collected
-by SSA static analysis framework (a part of the opcache optimizer).
+by the SSA static analysis framework (a part of the opcache optimizer).
 Code is usually generated separately for each PHP byte-code instruction. Only
 a few combinations are considered together (e.g. compare + conditional jump).
 
