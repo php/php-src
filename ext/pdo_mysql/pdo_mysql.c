@@ -48,7 +48,7 @@ ZEND_DECLARE_MODULE_GLOBALS(pdo_mysql)
 # ifdef PHP_MYSQL_UNIX_SOCK_ADDR
 #  define PDO_MYSQL_UNIX_ADDR PHP_MYSQL_UNIX_SOCK_ADDR
 # else
-#  if !PHP_WIN32
+#  ifndef PHP_WIN32
 #   define PDO_MYSQL_UNIX_ADDR "/tmp/mysql.sock"
 #  else
 #   define PDO_MYSQL_UNIX_ADDR NULL
@@ -143,7 +143,7 @@ static PHP_MINIT_FUNCTION(pdo_mysql)
 static PHP_MSHUTDOWN_FUNCTION(pdo_mysql)
 {
 	php_pdo_unregister_driver(&pdo_mysql_driver);
-#if PDO_USE_MYSQLND
+#ifdef PDO_USE_MYSQLND
 	UNREGISTER_INI_ENTRIES();
 #endif
 
@@ -169,7 +169,7 @@ static PHP_MINFO_FUNCTION(pdo_mysql)
 /* }}} */
 
 
-#if PDO_USE_MYSQLND && PDO_DBG_ENABLED
+#if defined(PDO_USE_MYSQLND) && PDO_DBG_ENABLED
 /* {{{ PHP_RINIT_FUNCTION
  */
 static PHP_RINIT_FUNCTION(pdo_mysql)
@@ -245,7 +245,7 @@ zend_module_entry pdo_mysql_module_entry = {
 	pdo_mysql_functions,
 	PHP_MINIT(pdo_mysql),
 	PHP_MSHUTDOWN(pdo_mysql),
-#if PDO_USE_MYSQLND && PDO_DBG_ENABLED
+#if defined(PDO_USE_MYSQLND) && PDO_DBG_ENABLED
 	PHP_RINIT(pdo_mysql),
 	PHP_RSHUTDOWN(pdo_mysql),
 #else

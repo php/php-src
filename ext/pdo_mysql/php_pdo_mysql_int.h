@@ -19,7 +19,7 @@
 #ifndef PHP_PDO_MYSQL_INT_H
 #define PHP_PDO_MYSQL_INT_H
 
-#if defined(PDO_USE_MYSQLND)
+#ifdef PDO_USE_MYSQLND
 #	include "ext/mysqlnd/mysqlnd.h"
 #	include "ext/mysqlnd/mysqlnd_libmysql_compat.h"
 #	define PDO_MYSQL_PARAM_BIND MYSQLND_PARAM_BIND
@@ -57,7 +57,7 @@ static inline void PDO_DBG_ENTER(char *func_name) {}
 
 #endif
 
-#if defined(PDO_USE_MYSQLND)
+#ifdef PDO_USE_MYSQLND
 #include "ext/mysqlnd/mysqlnd_debug.h"
 #endif
 
@@ -101,7 +101,7 @@ typedef struct {
 	unsigned buffered:1;
 	unsigned emulate_prepare:1;
 	unsigned fetch_table_names:1;
-#if !PDO_USE_MYSQLND
+#ifndef PDO_USE_MYSQLND
 	zend_ulong max_buffer_size;
 #endif
 
@@ -117,13 +117,13 @@ typedef struct {
 	MYSQL_RES				*result;
 	const MYSQL_FIELD		*fields;
 	MYSQL_ROW				current_data;
-#if PDO_USE_MYSQLND
+#ifdef PDO_USE_MYSQLND
 	const size_t			*current_lengths;
 #else
 	zend_long				*current_lengths;
 #endif
 	pdo_mysql_error_info 	einfo;
-#if PDO_USE_MYSQLND
+#ifdef PDO_USE_MYSQLND
 	MYSQLND_STMT 			*stmt;
 #else
 	MYSQL_STMT				*stmt;
