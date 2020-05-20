@@ -280,3 +280,177 @@ ZEND_END_ARG_INFO()
 #if defined(HAVE_METHOD_SUPPORTED)
 #define arginfo_class_ZipArchive_isEncryptionMethodSupported arginfo_class_ZipArchive_isCompressionMethodSupported
 #endif
+
+
+ZEND_FUNCTION(zip_open);
+ZEND_FUNCTION(zip_close);
+ZEND_FUNCTION(zip_read);
+ZEND_FUNCTION(zip_entry_open);
+ZEND_FUNCTION(zip_entry_close);
+ZEND_FUNCTION(zip_entry_read);
+ZEND_FUNCTION(zip_entry_name);
+ZEND_FUNCTION(zip_entry_compressedsize);
+ZEND_FUNCTION(zip_entry_filesize);
+ZEND_FUNCTION(zip_entry_compressionmethod);
+ZEND_METHOD(ZipArchive, open);
+ZEND_METHOD(ZipArchive, setPassword);
+ZEND_METHOD(ZipArchive, close);
+ZEND_METHOD(ZipArchive, count);
+ZEND_METHOD(ZipArchive, getStatusString);
+ZEND_METHOD(ZipArchive, addEmptyDir);
+ZEND_METHOD(ZipArchive, addFromString);
+ZEND_METHOD(ZipArchive, addFile);
+ZEND_METHOD(ZipArchive, replaceFile);
+ZEND_METHOD(ZipArchive, addGlob);
+ZEND_METHOD(ZipArchive, addPattern);
+ZEND_METHOD(ZipArchive, renameIndex);
+ZEND_METHOD(ZipArchive, renameName);
+ZEND_METHOD(ZipArchive, setArchiveComment);
+ZEND_METHOD(ZipArchive, getArchiveComment);
+ZEND_METHOD(ZipArchive, setCommentIndex);
+ZEND_METHOD(ZipArchive, setCommentName);
+#if defined(HAVE_SET_MTIME)
+ZEND_METHOD(ZipArchive, setMtimeIndex);
+#endif
+#if defined(HAVE_SET_MTIME)
+ZEND_METHOD(ZipArchive, setMtimeName);
+#endif
+ZEND_METHOD(ZipArchive, getCommentIndex);
+ZEND_METHOD(ZipArchive, getCommentName);
+ZEND_METHOD(ZipArchive, deleteIndex);
+ZEND_METHOD(ZipArchive, deleteName);
+ZEND_METHOD(ZipArchive, statName);
+ZEND_METHOD(ZipArchive, statIndex);
+ZEND_METHOD(ZipArchive, locateName);
+ZEND_METHOD(ZipArchive, getNameIndex);
+ZEND_METHOD(ZipArchive, unchangeArchive);
+ZEND_METHOD(ZipArchive, unchangeAll);
+ZEND_METHOD(ZipArchive, unchangeIndex);
+ZEND_METHOD(ZipArchive, unchangeName);
+ZEND_METHOD(ZipArchive, extractTo);
+ZEND_METHOD(ZipArchive, getFromName);
+ZEND_METHOD(ZipArchive, getFromIndex);
+ZEND_METHOD(ZipArchive, getStream);
+#if defined(ZIP_OPSYS_DEFAULT)
+ZEND_METHOD(ZipArchive, setExternalAttributesName);
+#endif
+#if defined(ZIP_OPSYS_DEFAULT)
+ZEND_METHOD(ZipArchive, setExternalAttributesIndex);
+#endif
+#if defined(ZIP_OPSYS_DEFAULT)
+ZEND_METHOD(ZipArchive, getExternalAttributesName);
+#endif
+#if defined(ZIP_OPSYS_DEFAULT)
+ZEND_METHOD(ZipArchive, getExternalAttributesIndex);
+#endif
+ZEND_METHOD(ZipArchive, setCompressionName);
+ZEND_METHOD(ZipArchive, setCompressionIndex);
+#if defined(HAVE_ENCRYPTION)
+ZEND_METHOD(ZipArchive, setEncryptionName);
+#endif
+#if defined(HAVE_ENCRYPTION)
+ZEND_METHOD(ZipArchive, setEncryptionIndex);
+#endif
+#if defined(HAVE_PROGRESS_CALLBACK)
+ZEND_METHOD(ZipArchive, registerProgressCallback);
+#endif
+#if defined(HAVE_CANCEL_CALLBACK)
+ZEND_METHOD(ZipArchive, registerCancelCallback);
+#endif
+#if defined(HAVE_METHOD_SUPPORTED)
+ZEND_METHOD(ZipArchive, isCompressionMethodSupported);
+#endif
+#if defined(HAVE_METHOD_SUPPORTED)
+ZEND_METHOD(ZipArchive, isEncryptionMethodSupported);
+#endif
+
+
+static const zend_function_entry ext_functions[] = {
+	ZEND_FE(zip_open, arginfo_zip_open)
+	ZEND_FE(zip_close, arginfo_zip_close)
+	ZEND_FE(zip_read, arginfo_zip_read)
+	ZEND_FE(zip_entry_open, arginfo_zip_entry_open)
+	ZEND_FE(zip_entry_close, arginfo_zip_entry_close)
+	ZEND_FE(zip_entry_read, arginfo_zip_entry_read)
+	ZEND_FE(zip_entry_name, arginfo_zip_entry_name)
+	ZEND_FE(zip_entry_compressedsize, arginfo_zip_entry_compressedsize)
+	ZEND_FE(zip_entry_filesize, arginfo_zip_entry_filesize)
+	ZEND_FE(zip_entry_compressionmethod, arginfo_zip_entry_compressionmethod)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_ZipArchive_methods[] = {
+	ZEND_ME(ZipArchive, open, arginfo_class_ZipArchive_open, ZEND_ACC_PUBLIC)
+	ZEND_ME(ZipArchive, setPassword, arginfo_class_ZipArchive_setPassword, ZEND_ACC_PUBLIC)
+	ZEND_ME(ZipArchive, close, arginfo_class_ZipArchive_close, ZEND_ACC_PUBLIC)
+	ZEND_ME(ZipArchive, count, arginfo_class_ZipArchive_count, ZEND_ACC_PUBLIC)
+	ZEND_ME(ZipArchive, getStatusString, arginfo_class_ZipArchive_getStatusString, ZEND_ACC_PUBLIC)
+	ZEND_ME(ZipArchive, addEmptyDir, arginfo_class_ZipArchive_addEmptyDir, ZEND_ACC_PUBLIC)
+	ZEND_ME(ZipArchive, addFromString, arginfo_class_ZipArchive_addFromString, ZEND_ACC_PUBLIC)
+	ZEND_ME(ZipArchive, addFile, arginfo_class_ZipArchive_addFile, ZEND_ACC_PUBLIC)
+	ZEND_ME(ZipArchive, replaceFile, arginfo_class_ZipArchive_replaceFile, ZEND_ACC_PUBLIC)
+	ZEND_ME(ZipArchive, addGlob, arginfo_class_ZipArchive_addGlob, ZEND_ACC_PUBLIC)
+	ZEND_ME(ZipArchive, addPattern, arginfo_class_ZipArchive_addPattern, ZEND_ACC_PUBLIC)
+	ZEND_ME(ZipArchive, renameIndex, arginfo_class_ZipArchive_renameIndex, ZEND_ACC_PUBLIC)
+	ZEND_ME(ZipArchive, renameName, arginfo_class_ZipArchive_renameName, ZEND_ACC_PUBLIC)
+	ZEND_ME(ZipArchive, setArchiveComment, arginfo_class_ZipArchive_setArchiveComment, ZEND_ACC_PUBLIC)
+	ZEND_ME(ZipArchive, getArchiveComment, arginfo_class_ZipArchive_getArchiveComment, ZEND_ACC_PUBLIC)
+	ZEND_ME(ZipArchive, setCommentIndex, arginfo_class_ZipArchive_setCommentIndex, ZEND_ACC_PUBLIC)
+	ZEND_ME(ZipArchive, setCommentName, arginfo_class_ZipArchive_setCommentName, ZEND_ACC_PUBLIC)
+#if defined(HAVE_SET_MTIME)
+	ZEND_ME(ZipArchive, setMtimeIndex, arginfo_class_ZipArchive_setMtimeIndex, ZEND_ACC_PUBLIC)
+#endif
+#if defined(HAVE_SET_MTIME)
+	ZEND_ME(ZipArchive, setMtimeName, arginfo_class_ZipArchive_setMtimeName, ZEND_ACC_PUBLIC)
+#endif
+	ZEND_ME(ZipArchive, getCommentIndex, arginfo_class_ZipArchive_getCommentIndex, ZEND_ACC_PUBLIC)
+	ZEND_ME(ZipArchive, getCommentName, arginfo_class_ZipArchive_getCommentName, ZEND_ACC_PUBLIC)
+	ZEND_ME(ZipArchive, deleteIndex, arginfo_class_ZipArchive_deleteIndex, ZEND_ACC_PUBLIC)
+	ZEND_ME(ZipArchive, deleteName, arginfo_class_ZipArchive_deleteName, ZEND_ACC_PUBLIC)
+	ZEND_ME(ZipArchive, statName, arginfo_class_ZipArchive_statName, ZEND_ACC_PUBLIC)
+	ZEND_ME(ZipArchive, statIndex, arginfo_class_ZipArchive_statIndex, ZEND_ACC_PUBLIC)
+	ZEND_ME(ZipArchive, locateName, arginfo_class_ZipArchive_locateName, ZEND_ACC_PUBLIC)
+	ZEND_ME(ZipArchive, getNameIndex, arginfo_class_ZipArchive_getNameIndex, ZEND_ACC_PUBLIC)
+	ZEND_ME(ZipArchive, unchangeArchive, arginfo_class_ZipArchive_unchangeArchive, ZEND_ACC_PUBLIC)
+	ZEND_ME(ZipArchive, unchangeAll, arginfo_class_ZipArchive_unchangeAll, ZEND_ACC_PUBLIC)
+	ZEND_ME(ZipArchive, unchangeIndex, arginfo_class_ZipArchive_unchangeIndex, ZEND_ACC_PUBLIC)
+	ZEND_ME(ZipArchive, unchangeName, arginfo_class_ZipArchive_unchangeName, ZEND_ACC_PUBLIC)
+	ZEND_ME(ZipArchive, extractTo, arginfo_class_ZipArchive_extractTo, ZEND_ACC_PUBLIC)
+	ZEND_ME(ZipArchive, getFromName, arginfo_class_ZipArchive_getFromName, ZEND_ACC_PUBLIC)
+	ZEND_ME(ZipArchive, getFromIndex, arginfo_class_ZipArchive_getFromIndex, ZEND_ACC_PUBLIC)
+	ZEND_ME(ZipArchive, getStream, arginfo_class_ZipArchive_getStream, ZEND_ACC_PUBLIC)
+#if defined(ZIP_OPSYS_DEFAULT)
+	ZEND_ME(ZipArchive, setExternalAttributesName, arginfo_class_ZipArchive_setExternalAttributesName, ZEND_ACC_PUBLIC)
+#endif
+#if defined(ZIP_OPSYS_DEFAULT)
+	ZEND_ME(ZipArchive, setExternalAttributesIndex, arginfo_class_ZipArchive_setExternalAttributesIndex, ZEND_ACC_PUBLIC)
+#endif
+#if defined(ZIP_OPSYS_DEFAULT)
+	ZEND_ME(ZipArchive, getExternalAttributesName, arginfo_class_ZipArchive_getExternalAttributesName, ZEND_ACC_PUBLIC)
+#endif
+#if defined(ZIP_OPSYS_DEFAULT)
+	ZEND_ME(ZipArchive, getExternalAttributesIndex, arginfo_class_ZipArchive_getExternalAttributesIndex, ZEND_ACC_PUBLIC)
+#endif
+	ZEND_ME(ZipArchive, setCompressionName, arginfo_class_ZipArchive_setCompressionName, ZEND_ACC_PUBLIC)
+	ZEND_ME(ZipArchive, setCompressionIndex, arginfo_class_ZipArchive_setCompressionIndex, ZEND_ACC_PUBLIC)
+#if defined(HAVE_ENCRYPTION)
+	ZEND_ME(ZipArchive, setEncryptionName, arginfo_class_ZipArchive_setEncryptionName, ZEND_ACC_PUBLIC)
+#endif
+#if defined(HAVE_ENCRYPTION)
+	ZEND_ME(ZipArchive, setEncryptionIndex, arginfo_class_ZipArchive_setEncryptionIndex, ZEND_ACC_PUBLIC)
+#endif
+#if defined(HAVE_PROGRESS_CALLBACK)
+	ZEND_ME(ZipArchive, registerProgressCallback, arginfo_class_ZipArchive_registerProgressCallback, ZEND_ACC_PUBLIC)
+#endif
+#if defined(HAVE_CANCEL_CALLBACK)
+	ZEND_ME(ZipArchive, registerCancelCallback, arginfo_class_ZipArchive_registerCancelCallback, ZEND_ACC_PUBLIC)
+#endif
+#if defined(HAVE_METHOD_SUPPORTED)
+	ZEND_ME(ZipArchive, isCompressionMethodSupported, arginfo_class_ZipArchive_isCompressionMethodSupported, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+#endif
+#if defined(HAVE_METHOD_SUPPORTED)
+	ZEND_ME(ZipArchive, isEncryptionMethodSupported, arginfo_class_ZipArchive_isEncryptionMethodSupported, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+#endif
+	ZEND_FE_END
+};

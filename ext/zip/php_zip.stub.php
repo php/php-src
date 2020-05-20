@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 /** @return resource|int|false */
 function zip_open(string $filename) {}
 
