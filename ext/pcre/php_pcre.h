@@ -17,7 +17,7 @@
 #ifndef PHP_PCRE_H
 #define PHP_PCRE_H
 
-#if HAVE_BUNDLED_PCRE
+#ifdef HAVE_BUNDLED_PCRE
 #include "pcre2lib/pcre2.h"
 #else
 #include "pcre2.h"
