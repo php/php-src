@@ -893,13 +893,13 @@ PHPAPI ZEND_COLD void php_print_info(int flag)
 			efree(descr);
 		}
 
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 		php_info_print_table_row(2, "IPv6 Support", "enabled" );
 #else
 		php_info_print_table_row(2, "IPv6 Support", "disabled" );
 #endif
 
-#if HAVE_DTRACE
+#ifdef HAVE_DTRACE
 		php_info_print_table_row(2, "DTrace Support", (zend_dtrace_enabled ? "enabled" : "available, disabled"));
 #else
 		php_info_print_table_row(2, "DTrace Support", "disabled" );

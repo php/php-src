@@ -25,15 +25,15 @@
 #include "ext/date/php_date.h"
 #include "zend_smart_str.h"
 
-#if HAVE_SYSEXITS_H
-#include <sysexits.h>
+#ifdef HAVE_SYSEXITS_H
+# include <sysexits.h>
 #endif
-#if HAVE_SYS_SYSEXITS_H
-#include <sys/sysexits.h>
+#ifdef HAVE_SYS_SYSEXITS_H
+# include <sys/sysexits.h>
 #endif
 
 #if PHP_SIGCHILD
-#include <signal.h>
+# include <signal.h>
 #endif
 
 #include "php_syslog.h"
@@ -43,7 +43,7 @@
 #include "exec.h"
 
 #ifdef PHP_WIN32
-#include "win32/sendmail.h"
+# include "win32/sendmail.h"
 #endif
 
 #define SKIP_LONG_HEADER_SEP(str, pos)																	\

@@ -320,7 +320,7 @@ PHP_FUNCTION(strcspn)
 /* }}} */
 
 /* {{{ PHP_MINIT_FUNCTION(nl_langinfo) */
-#if HAVE_NL_LANGINFO
+#ifdef HAVE_NL_LANGINFO
 PHP_MINIT_FUNCTION(nl_langinfo)
 {
 #define REGISTER_NL_LANGINFO_CONSTANT(x)	REGISTER_LONG_CONSTANT(#x, x, CONST_CS | CONST_PERSISTENT)
@@ -1429,7 +1429,7 @@ PHPAPI zend_string *php_basename(const char *s, size_t len, const char *suffix, 
 
 		/* Strip trailing slashes */
 		while (basename_end >= s
-#if defined(PHP_WIN32)
+#ifdef PHP_WIN32
 			&& (*basename_end == '/'
 				|| *basename_end == '\\'
 				|| (*basename_end == ':'
@@ -1447,7 +1447,7 @@ PHPAPI zend_string *php_basename(const char *s, size_t len, const char *suffix, 
 		basename_start = basename_end;
 		basename_end++;
 		while (basename_start > s
-#if defined(PHP_WIN32)
+#ifdef PHP_WIN32
 			&& *(basename_start-1) != '/'
 			&& *(basename_start-1) != '\\') {
 
@@ -1474,7 +1474,7 @@ PHPAPI zend_string *php_basename(const char *s, size_t len, const char *suffix, 
 				case 0:
 					goto quit_loop;
 				case 1:
-#if defined(PHP_WIN32)
+#ifdef PHP_WIN32
 					if (*s == '/' || *s == '\\') {
 #else
 					if (*s == '/') {
@@ -1483,7 +1483,7 @@ PHPAPI zend_string *php_basename(const char *s, size_t len, const char *suffix, 
 							state = 0;
 							basename_end = s;
 						}
-#if defined(PHP_WIN32)
+#ifdef PHP_WIN32
 					/* Catch relative paths in c:file.txt style. They're not to confuse
 					   with the NTFS streams. This part ensures also, that no drive
 					   letter traversing happens. */
@@ -3344,7 +3344,7 @@ PHP_FUNCTION(strtr)
 /* }}} */
 
 /* {{{ Reverse a string */
-#if ZEND_INTRIN_SSSE3_NATIVE
+#ifdef ZEND_INTRIN_SSSE3_NATIVE
 #include <tmmintrin.h>
 #elif defined(__aarch64__)
 #include <arm_neon.h>
@@ -3366,7 +3366,7 @@ PHP_FUNCTION(strrev)
 	s = ZSTR_VAL(str);
 	e = s + ZSTR_LEN(str);
 	--e;
-#if ZEND_INTRIN_SSSE3_NATIVE
+#ifdef ZEND_INTRIN_SSSE3_NATIVE
 	if (e - s > 15) {
 		const __m128i map = _mm_set_epi8(
 				0, 1, 2, 3,
@@ -3664,10 +3664,10 @@ PHPAPI zend_string *php_addcslashes(zend_string *str, const char *what, size_t w
 
 /* {{{ php_addslashes */
 
-#if ZEND_INTRIN_SSE4_2_NATIVE
+#ifdef ZEND_INTRIN_SSE4_2_NATIVE
 # include <nmmintrin.h>
 # include "Zend/zend_bitset.h"
-#elif ZEND_INTRIN_SSE4_2_RESOLVER
+#elif defined(ZEND_INTRIN_SSE4_2_RESOLVER)
 # include <nmmintrin.h>
 # include "Zend/zend_bitset.h"
 # include "Zend/zend_cpuinfo.h"
@@ -3678,7 +3678,7 @@ zend_string *php_addslashes_default(zend_string *str);
 ZEND_INTRIN_SSE4_2_FUNC_DECL(void php_stripslashes_sse42(zend_string *str));
 void php_stripslashes_default(zend_string *str);
 
-# if ZEND_INTRIN_SSE4_2_FUNC_PROTO
+# ifdef ZEND_INTRIN_SSE4_2_FUNC_PROTO
 PHPAPI zend_string *php_addslashes(zend_string *str) __attribute__((ifunc("resolve_addslashes")));
 PHPAPI void php_stripslashes(zend_string *str) __attribute__((ifunc("resolve_stripslashes")));
 
@@ -3730,10 +3730,10 @@ PHP_MINIT_FUNCTION(string_intrin)
 # endif
 #endif
 
-#if ZEND_INTRIN_SSE4_2_NATIVE || ZEND_INTRIN_SSE4_2_RESOLVER
-# if ZEND_INTRIN_SSE4_2_NATIVE
+#if defined(ZEND_INTRIN_SSE4_2_NATIVE) || defined(ZEND_INTRIN_SSE4_2_RESOLVER)
+# ifdef ZEND_INTRIN_SSE4_2_NATIVE
 PHPAPI zend_string *php_addslashes(zend_string *str) /* {{{ */
-# elif ZEND_INTRIN_SSE4_2_RESOLVER
+# elif defined(ZEND_INTRIN_SSE4_2_RESOLVER)
 zend_string *php_addslashes_sse42(zend_string *str)
 # endif
 {
@@ -3910,8 +3910,8 @@ static zend_always_inline char *aarch64_add_slashes(quad_word res, const char *s
 }
 #endif /* __aarch64__ */
 
-#if !ZEND_INTRIN_SSE4_2_NATIVE
-# if ZEND_INTRIN_SSE4_2_RESOLVER
+#ifndef ZEND_INTRIN_SSE4_2_NATIVE
+# ifdef ZEND_INTRIN_SSE4_2_RESOLVER
 zend_string *php_addslashes_default(zend_string *str) /* {{{ */
 # else
 PHPAPI zend_string *php_addslashes(zend_string *str)
@@ -4072,10 +4072,10 @@ static zend_always_inline char *php_stripslashes_impl(const char *str, char *out
 	return out;
 }
 
-#if ZEND_INTRIN_SSE4_2_NATIVE || ZEND_INTRIN_SSE4_2_RESOLVER
-# if ZEND_INTRIN_SSE4_2_NATIVE
+#if defined(ZEND_INTRIN_SSE4_2_NATIVE) || defined(ZEND_INTRIN_SSE4_2_RESOLVER)
+# ifdef ZEND_INTRIN_SSE4_2_NATIVE
 PHPAPI void php_stripslashes(zend_string *str)
-# elif ZEND_INTRIN_SSE4_2_RESOLVER
+# elif defined(ZEND_INTRIN_SSE4_2_RESOLVER)
 void php_stripslashes_sse42(zend_string *str)
 # endif
 {
@@ -4130,8 +4130,8 @@ void php_stripslashes_sse42(zend_string *str)
 }
 #endif
 
-#if !ZEND_INTRIN_SSE4_2_NATIVE
-# if ZEND_INTRIN_SSE4_2_RESOLVER
+#ifndef ZEND_INTRIN_SSE4_2_NATIVE
+# ifdef ZEND_INTRIN_SSE4_2_RESOLVER
 void php_stripslashes_default(zend_string *str) /* {{{ */
 # else
 PHPAPI void php_stripslashes(zend_string *str)

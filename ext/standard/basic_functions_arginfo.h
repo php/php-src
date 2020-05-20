@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: ed5328c35c17c591847feba6cb00f5badb2b446c */
+ * Stub hash: f9668ae68c1f7d0336b974f83c2552fbf9bf898a */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -413,14 +413,14 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_usleep, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, microseconds, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#if HAVE_NANOSLEEP
+#if defined(HAVE_NANOSLEEP)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_time_nanosleep, 0, 2, MAY_BE_ARRAY|MAY_BE_BOOL)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, nanoseconds, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#if HAVE_NANOSLEEP
+#if defined(HAVE_NANOSLEEP)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_time_sleep_until, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, timestamp, IS_DOUBLE, 0)
 ZEND_END_ARG_INFO()
@@ -519,27 +519,27 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ignore_user_abort, 0, 0, IS_LONG
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, enable, _IS_BOOL, 1, "null")
 ZEND_END_ARG_INFO()
 
-#if HAVE_GETSERVBYNAME
+#if defined(HAVE_GETSERVBYNAME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_getservbyname, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, service, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, protocol, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#if HAVE_GETSERVBYPORT
+#if defined(HAVE_GETSERVBYPORT)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_getservbyport, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, port, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, protocol, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#if HAVE_GETPROTOBYNAME
+#if defined(HAVE_GETPROTOBYNAME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_getprotobyname, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, protocol, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#if HAVE_GETPROTOBYNUMBER
+#if defined(HAVE_GETPROTOBYNUMBER)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_getprotobynumber, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, protocol, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -599,7 +599,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_crypt, 0, 2, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, salt, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#if HAVE_STRPTIME
+#if defined(HAVE_STRPTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_strptime, 0, 2, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, timestamp, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, format, IS_STRING, 0)
@@ -623,18 +623,18 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_gethostbynamel, 0, 1, MAY_BE_ARR
 	ZEND_ARG_TYPE_INFO(0, hostname, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
+#if defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_dns_check_record, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, hostname, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, type, IS_STRING, 0, "\"MX\"")
 ZEND_END_ARG_INFO()
 #endif
 
-#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
+#if defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC)
 #define arginfo_checkdnsrr arginfo_dns_check_record
 #endif
 
-#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
+#if defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_dns_get_record, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, hostname, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, type, IS_LONG, 0, "DNS_ANY")
@@ -644,7 +644,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_dns_get_record, 0, 1, MAY_BE_ARR
 ZEND_END_ARG_INFO()
 #endif
 
-#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
+#if defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_dns_get_mx, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, hostname, IS_STRING, 0)
 	ZEND_ARG_INFO(1, hosts)
@@ -652,7 +652,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_dns_get_mx, 0, 2, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
+#if defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC)
 #define arginfo_getmxrr arginfo_dns_get_mx
 #endif
 
@@ -661,7 +661,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_net_get_interfaces, 0, 0, MAY_BE
 ZEND_END_ARG_INFO()
 #endif
 
-#if HAVE_FTOK
+#if defined(HAVE_FTOK)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ftok, 0, 2, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, project_id, IS_STRING, 0)
@@ -820,7 +820,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_strcspn arginfo_strspn
 
-#if HAVE_NL_LANGINFO
+#if defined(HAVE_NL_LANGINFO)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_nl_langinfo, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, item, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -1113,7 +1113,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_chdir, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, directory, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#if defined(HAVE_CHROOT) && !defined(ZTS) && ENABLE_CHROOT_FUNC
+#if defined(HAVE_CHROOT) && !defined(ZTS) && defined(ENABLE_CHROOT_FUNC)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_chroot, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, directory, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -1415,14 +1415,14 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_chgrp, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_MASK(0, group, MAY_BE_STRING|MAY_BE_LONG, NULL)
 ZEND_END_ARG_INFO()
 
-#if HAVE_LCHOWN
+#if defined(HAVE_LCHOWN)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_lchown, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_MASK(0, user, MAY_BE_STRING|MAY_BE_LONG, NULL)
 ZEND_END_ARG_INFO()
 #endif
 
-#if HAVE_LCHOWN
+#if defined(HAVE_LCHOWN)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_lchgrp, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_MASK(0, group, MAY_BE_STRING|MAY_BE_LONG, NULL)
@@ -1434,7 +1434,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_chmod, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, permissions, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#if HAVE_UTIME
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_touch, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mtime, IS_LONG, 1, "null")
@@ -1442,55 +1442,82 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_touch, 0, 1, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 #endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_clearstatcache, 0, 0, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, clear_realpath_cache, _IS_BOOL, 0, "false")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, filename, IS_STRING, 0, "\"\"")
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_disk_total_space, 0, 1, MAY_BE_DOUBLE|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, directory, IS_STRING, 0)
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_disk_free_space arginfo_disk_total_space
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_diskfreespace arginfo_disk_total_space
+#endif
 
-#define arginfo_realpath_cache_get arginfo_ob_list_handlers
+#if defined(HAVE_UTIME)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_realpath_cache_get, 0, 0, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+#endif
 
-#define arginfo_realpath_cache_size arginfo_ob_get_level
+#if defined(HAVE_UTIME)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_realpath_cache_size, 0, 0, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sprintf, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, format, IS_STRING, 0)
 	ZEND_ARG_VARIADIC_TYPE_INFO(0, values, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_printf, 0, 1, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, format, IS_STRING, 0)
 	ZEND_ARG_VARIADIC_TYPE_INFO(0, values, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_vprintf, 0, 2, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, format, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, values, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_vsprintf, 0, 2, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, format, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, values, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_fprintf, 0, 2, IS_LONG, 0)
 	ZEND_ARG_INFO(0, stream)
 	ZEND_ARG_TYPE_INFO(0, format, IS_STRING, 0)
 	ZEND_ARG_VARIADIC_TYPE_INFO(0, values, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_vfprintf, 0, 3, IS_LONG, 0)
 	ZEND_ARG_INFO(0, stream)
 	ZEND_ARG_TYPE_INFO(0, format, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, values, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fsockopen, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, hostname, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, port, IS_LONG, 0, "-1")
@@ -1498,67 +1525,100 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_fsockopen, 0, 0, 1)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, error_message, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, timeout, IS_DOUBLE, 1, "null")
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_pfsockopen arginfo_fsockopen
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_http_build_query, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_MASK(0, data, MAY_BE_ARRAY|MAY_BE_OBJECT, NULL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, numeric_prefix, IS_STRING, 0, "\"\"")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, arg_separator, IS_STRING, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encoding_type, IS_LONG, 0, "PHP_QUERY_RFC1738")
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_image_type_to_mime_type, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, image_type, IS_LONG, 0)
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_image_type_to_extension, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, image_type, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, include_dot, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_getimagesize, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, image_info, "null")
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_getimagesizefromstring, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, image_info, "null")
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_phpinfo, 0, 0, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "INFO_ALL")
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_phpversion, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, extension, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_phpcredits, 0, 0, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "CREDITS_ALL")
 ZEND_END_ARG_INFO()
+#endif
 
-#define arginfo_php_sapi_name arginfo_ob_get_flush
+#if defined(HAVE_UTIME)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_php_sapi_name, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
+ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_php_uname, 0, 0, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_STRING, 0, "\"a\"")
 ZEND_END_ARG_INFO()
+#endif
 
-#define arginfo_php_ini_scanned_files arginfo_ob_get_flush
+#if defined(HAVE_UTIME)
+#define arginfo_php_ini_scanned_files arginfo_php_sapi_name
+#endif
 
-#define arginfo_php_ini_loaded_file arginfo_ob_get_flush
+#if defined(HAVE_UTIME)
+#define arginfo_php_ini_loaded_file arginfo_php_sapi_name
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_iptcembed, 0, 2, MAY_BE_STRING|MAY_BE_BOOL)
 	ZEND_ARG_TYPE_INFO(0, iptc_data, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, spool, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_iptcparse, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, iptc_block, IS_STRING, 0)
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_levenshtein, 0, 2, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, string1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, string2, IS_STRING, 0)
@@ -1566,30 +1626,32 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_levenshtein, 0, 2, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, replacement_cost, IS_LONG, 0, "1")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, deletion_cost, IS_LONG, 0, "1")
 ZEND_END_ARG_INFO()
+#endif
 
-#if defined(HAVE_SYMLINK) || defined(PHP_WIN32)
+#if defined(HAVE_UTIME) && defined(HAVE_SYMLINK) || defined(PHP_WIN32)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_readlink, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, path, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#if defined(HAVE_SYMLINK) || defined(PHP_WIN32)
+#if defined(HAVE_UTIME) && defined(HAVE_SYMLINK) || defined(PHP_WIN32)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_linkinfo, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, path, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#if defined(HAVE_SYMLINK) || defined(PHP_WIN32)
+#if defined(HAVE_UTIME) && defined(HAVE_SYMLINK) || defined(PHP_WIN32)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_symlink, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, target, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, link, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#if defined(HAVE_SYMLINK) || defined(PHP_WIN32)
+#if defined(HAVE_UTIME) && defined(HAVE_SYMLINK) || defined(PHP_WIN32)
 #define arginfo_link arginfo_symlink
 #endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mail, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, to, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, subject, IS_STRING, 0)
@@ -1597,188 +1659,288 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mail, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_MASK(0, additional_headers, MAY_BE_ARRAY|MAY_BE_STRING, "[]")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, additional_params, IS_STRING, 0, "\"\"")
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_abs, 0, 1, MAY_BE_LONG|MAY_BE_DOUBLE)
 	ZEND_ARG_TYPE_MASK(0, num, MAY_BE_LONG|MAY_BE_DOUBLE, NULL)
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ceil, 0, 1, IS_DOUBLE, 0)
 	ZEND_ARG_TYPE_MASK(0, num, MAY_BE_LONG|MAY_BE_DOUBLE, NULL)
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_floor arginfo_ceil
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_round, 0, 1, IS_DOUBLE, 0)
 	ZEND_ARG_TYPE_MASK(0, num, MAY_BE_LONG|MAY_BE_DOUBLE, NULL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, precision, IS_LONG, 0, "0")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "PHP_ROUND_HALF_UP")
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sin, 0, 1, IS_DOUBLE, 0)
 	ZEND_ARG_TYPE_INFO(0, num, IS_DOUBLE, 0)
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_cos arginfo_sin
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_tan arginfo_sin
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_asin arginfo_sin
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_acos arginfo_sin
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_atan arginfo_sin
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_atanh arginfo_sin
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_atan2, 0, 2, IS_DOUBLE, 0)
 	ZEND_ARG_TYPE_INFO(0, y, IS_DOUBLE, 0)
 	ZEND_ARG_TYPE_INFO(0, x, IS_DOUBLE, 0)
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_sinh arginfo_sin
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_cosh arginfo_sin
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_tanh arginfo_sin
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_asinh arginfo_sin
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_acosh arginfo_sin
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_expm1 arginfo_sin
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_log1p arginfo_sin
+#endif
 
-#define arginfo_pi arginfo_lcg_value
+#if defined(HAVE_UTIME)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pi, 0, 0, IS_DOUBLE, 0)
+ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_is_finite, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, num, IS_DOUBLE, 0)
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_is_nan arginfo_is_finite
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_intdiv, 0, 2, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, num1, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, num2, IS_LONG, 0)
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_is_infinite arginfo_is_finite
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pow, 0, 2, MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_OBJECT)
 	ZEND_ARG_TYPE_INFO(0, num, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, exponent, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_exp arginfo_sin
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_log, 0, 1, IS_DOUBLE, 0)
 	ZEND_ARG_TYPE_INFO(0, num, IS_DOUBLE, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, base, IS_DOUBLE, 0, "M_E")
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_log10 arginfo_sin
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_sqrt arginfo_sin
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_hypot, 0, 2, IS_DOUBLE, 0)
 	ZEND_ARG_TYPE_INFO(0, x, IS_DOUBLE, 0)
 	ZEND_ARG_TYPE_INFO(0, y, IS_DOUBLE, 0)
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_deg2rad arginfo_sin
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_rad2deg arginfo_sin
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_bindec, 0, 1, MAY_BE_LONG|MAY_BE_DOUBLE)
 	ZEND_ARG_TYPE_INFO(0, binary_string, IS_STRING, 0)
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_hexdec, 0, 1, MAY_BE_LONG|MAY_BE_DOUBLE)
 	ZEND_ARG_TYPE_INFO(0, hex_string, IS_STRING, 0)
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_octdec, 0, 1, MAY_BE_LONG|MAY_BE_DOUBLE)
 	ZEND_ARG_TYPE_INFO(0, octal_string, IS_STRING, 0)
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_decbin, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, num, IS_LONG, 0)
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_decoct arginfo_decbin
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_dechex arginfo_decbin
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_base_convert, 0, 3, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, num, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, from_base, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, to_base, IS_LONG, 0)
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_number_format, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, num, IS_DOUBLE, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, decimals, IS_LONG, 0, "0")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, decimal_separator, IS_STRING, 1, "\".\"")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, thousands_separator, IS_STRING, 1, "\",\"")
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_fmod, 0, 2, IS_DOUBLE, 0)
 	ZEND_ARG_TYPE_INFO(0, num1, IS_DOUBLE, 0)
 	ZEND_ARG_TYPE_INFO(0, num2, IS_DOUBLE, 0)
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_fdiv arginfo_fmod
+#endif
 
-#if defined(HAVE_GETTIMEOFDAY)
+#if defined(HAVE_UTIME) && defined(HAVE_GETTIMEOFDAY)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_microtime, 0, 0, MAY_BE_STRING|MAY_BE_DOUBLE)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, as_float, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 #endif
 
-#if defined(HAVE_GETTIMEOFDAY)
+#if defined(HAVE_UTIME) && defined(HAVE_GETTIMEOFDAY)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_gettimeofday, 0, 0, MAY_BE_ARRAY|MAY_BE_DOUBLE)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, as_float, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 #endif
 
-#if defined(HAVE_GETRUSAGE)
+#if defined(HAVE_UTIME) && defined(HAVE_GETRUSAGE)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_getrusage, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 #endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_pack arginfo_sprintf
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_unpack, 0, 2, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, format, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, offset, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_password_get_info, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, hash, IS_STRING, 0)
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_password_hash, 0, 2, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, password, IS_STRING, 0)
 	ZEND_ARG_TYPE_MASK(0, algo, MAY_BE_STRING|MAY_BE_LONG|MAY_BE_NULL, NULL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 0, "[]")
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_password_needs_rehash, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, hash, IS_STRING, 0)
 	ZEND_ARG_TYPE_MASK(0, algo, MAY_BE_STRING|MAY_BE_LONG|MAY_BE_NULL, NULL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 0, "[]")
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_password_verify, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, password, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, hash, IS_STRING, 0)
 ZEND_END_ARG_INFO()
+#endif
 
-#define arginfo_password_algos arginfo_ob_list_handlers
+#if defined(HAVE_UTIME)
+#define arginfo_password_algos arginfo_realpath_cache_get
+#endif
 
-#if defined(PHP_CAN_SUPPORT_PROC_OPEN)
+#if defined(HAVE_UTIME) && defined(PHP_CAN_SUPPORT_PROC_OPEN)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_proc_open, 0, 0, 3)
 	ZEND_ARG_TYPE_MASK(0, command, MAY_BE_ARRAY|MAY_BE_STRING, NULL)
 	ZEND_ARG_TYPE_INFO(0, descriptor_spec, IS_ARRAY, 0)
@@ -1789,58 +1951,83 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_proc_open, 0, 0, 3)
 ZEND_END_ARG_INFO()
 #endif
 
-#if defined(PHP_CAN_SUPPORT_PROC_OPEN)
+#if defined(HAVE_UTIME) && defined(PHP_CAN_SUPPORT_PROC_OPEN)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_proc_close, 0, 1, IS_LONG, 0)
 	ZEND_ARG_INFO(0, process)
 ZEND_END_ARG_INFO()
 #endif
 
-#if defined(PHP_CAN_SUPPORT_PROC_OPEN)
+#if defined(HAVE_UTIME) && defined(PHP_CAN_SUPPORT_PROC_OPEN)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_proc_terminate, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, process)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, signal, IS_LONG, 0, "15")
 ZEND_END_ARG_INFO()
 #endif
 
-#if defined(PHP_CAN_SUPPORT_PROC_OPEN)
+#if defined(HAVE_UTIME) && defined(PHP_CAN_SUPPORT_PROC_OPEN)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_proc_get_status, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_INFO(0, process)
 ZEND_END_ARG_INFO()
 #endif
 
-#define arginfo_quoted_printable_decode arginfo_base64_encode
+#if defined(HAVE_UTIME)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_quoted_printable_decode, 0, 1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+#endif
 
-#define arginfo_quoted_printable_encode arginfo_base64_encode
+#if defined(HAVE_UTIME)
+#define arginfo_quoted_printable_encode arginfo_quoted_printable_decode
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mt_srand, 0, 0, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, seed, IS_LONG, 0, "0")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "MT_RAND_MT19937")
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_srand arginfo_mt_srand
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_rand, 0, 0, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, min, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, max, IS_LONG, 0)
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_mt_rand arginfo_rand
+#endif
 
-#define arginfo_mt_getrandmax arginfo_ob_get_level
+#if defined(HAVE_UTIME)
+#define arginfo_mt_getrandmax arginfo_realpath_cache_size
+#endif
 
-#define arginfo_getrandmax arginfo_ob_get_level
+#if defined(HAVE_UTIME)
+#define arginfo_getrandmax arginfo_realpath_cache_size
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_random_bytes, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, length, IS_LONG, 0)
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_random_int, 0, 2, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, min, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, max, IS_LONG, 0)
 ZEND_END_ARG_INFO()
+#endif
 
-#define arginfo_soundex arginfo_base64_encode
+#if defined(HAVE_UTIME)
+#define arginfo_soundex arginfo_quoted_printable_decode
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_stream_select, 0, 4, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(1, read, IS_ARRAY, 1)
 	ZEND_ARG_TYPE_INFO(1, write, IS_ARRAY, 1)
@@ -1848,53 +2035,75 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_stream_select, 0, 4, MAY_BE_LONG
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 1)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, microseconds, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_stream_context_create, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, params, IS_ARRAY, 1, "null")
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_context_set_params, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, context)
 	ZEND_ARG_TYPE_INFO(0, params, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_context_get_params, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_INFO(0, context)
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_context_set_option, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, context)
 	ZEND_ARG_TYPE_MASK(0, wrapper_or_options, MAY_BE_ARRAY|MAY_BE_STRING, NULL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, option_name, IS_STRING, 1, "null")
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_context_get_options, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_INFO(0, stream_or_context)
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_stream_context_get_default, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 1, "null")
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_stream_context_set_default, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, options, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_stream_filter_prepend, 0, 0, 2)
 	ZEND_ARG_INFO(0, stream)
 	ZEND_ARG_TYPE_INFO(0, filter_name, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "0")
 	ZEND_ARG_TYPE_INFO(0, params, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_stream_filter_append arginfo_stream_filter_prepend
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_filter_remove, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, stream_filter)
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_stream_socket_client, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, address, IS_STRING, 0)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, error_code, "null")
@@ -1903,7 +2112,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_stream_socket_client, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "STREAM_CLIENT_CONNECT")
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, context, "null")
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_stream_socket_server, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, address, IS_STRING, 0)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, error_code, "null")
@@ -1911,47 +2122,58 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_stream_socket_server, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "STREAM_SERVER_BIND | STREAM_SERVER_LISTEN")
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, context, "null")
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_stream_socket_accept, 0, 0, 1)
 	ZEND_ARG_INFO(0, socket)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, timeout, IS_DOUBLE, 1, "null")
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, peer_name, "null")
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_stream_socket_get_name, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, socket)
 	ZEND_ARG_TYPE_INFO(0, remote, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_stream_socket_recvfrom, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, socket)
 	ZEND_ARG_TYPE_INFO(0, length, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, address, "null")
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_stream_socket_sendto, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, socket)
 	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, address, IS_STRING, 0, "\"\"")
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_stream_socket_enable_crypto, 0, 2, MAY_BE_LONG|MAY_BE_BOOL)
 	ZEND_ARG_INFO(0, stream)
 	ZEND_ARG_TYPE_INFO(0, enable, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, crypto_method, IS_LONG, 1, "null")
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, session_stream, "null")
 ZEND_END_ARG_INFO()
+#endif
 
-#if defined(HAVE_SHUTDOWN)
+#if defined(HAVE_UTIME) && defined(HAVE_SHUTDOWN)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_socket_shutdown, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, stream)
 	ZEND_ARG_TYPE_INFO(0, mode, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#if HAVE_SOCKETPAIR
+#if defined(HAVE_UTIME) && defined(HAVE_SOCKETPAIR)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_stream_socket_pair, 0, 3, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, domain, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, type, IS_LONG, 0)
@@ -1959,69 +2181,107 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_stream_socket_pair, 0, 3, MAY_BE
 ZEND_END_ARG_INFO()
 #endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_stream_copy_to_stream, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, from)
 	ZEND_ARG_INFO(0, to)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, length, IS_LONG, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, offset, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_stream_get_contents, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, stream)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, length, IS_LONG, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, offset, IS_LONG, 0, "-1")
 ZEND_END_ARG_INFO()
+#endif
 
-#define arginfo_stream_supports_lock arginfo_rewind
+#if defined(HAVE_UTIME)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_supports_lock, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_INFO(0, stream)
+ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_set_write_buffer, 0, 2, IS_LONG, 0)
 	ZEND_ARG_INFO(0, stream)
 	ZEND_ARG_TYPE_INFO(0, size, IS_LONG, 0)
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_set_file_buffer arginfo_stream_set_write_buffer
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_stream_set_read_buffer arginfo_stream_set_write_buffer
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_set_blocking, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, stream)
 	ZEND_ARG_TYPE_INFO(0, enable, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_socket_set_blocking arginfo_stream_set_blocking
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_get_meta_data, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_INFO(0, stream)
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_socket_get_status arginfo_stream_get_meta_data
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_stream_get_line, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, stream)
 	ZEND_ARG_TYPE_INFO(0, length, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, ending, IS_STRING, 0, "\"\"")
 ZEND_END_ARG_INFO()
+#endif
 
-#define arginfo_stream_resolve_include_path arginfo_filetype
+#if defined(HAVE_UTIME)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_stream_resolve_include_path, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+#endif
 
-#define arginfo_stream_get_wrappers arginfo_ob_list_handlers
+#if defined(HAVE_UTIME)
+#define arginfo_stream_get_wrappers arginfo_realpath_cache_get
+#endif
 
-#define arginfo_stream_get_transports arginfo_ob_list_handlers
+#if defined(HAVE_UTIME)
+#define arginfo_stream_get_transports arginfo_realpath_cache_get
+#endif
 
-#define arginfo_stream_is_local arginfo_rewind
+#if defined(HAVE_UTIME)
+#define arginfo_stream_is_local arginfo_stream_supports_lock
+#endif
 
-#define arginfo_stream_isatty arginfo_rewind
+#if defined(HAVE_UTIME)
+#define arginfo_stream_isatty arginfo_stream_supports_lock
+#endif
 
-#if defined(PHP_WIN32)
+#if defined(HAVE_UTIME) && defined(PHP_WIN32)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sapi_windows_vt100_support, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, stream)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, enable, _IS_BOOL, 1, "null")
 ZEND_END_ARG_INFO()
 #endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_stream_set_chunk_size arginfo_stream_set_write_buffer
+#endif
 
-#if HAVE_SYS_TIME_H || defined(PHP_WIN32)
+#if defined(HAVE_UTIME) && defined(HAVE_SYS_TIME_H) || defined(PHP_WIN32)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_set_timeout, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, stream)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -2029,174 +2289,265 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_set_timeout, 0, 2, _IS_BO
 ZEND_END_ARG_INFO()
 #endif
 
-#if HAVE_SYS_TIME_H || defined(PHP_WIN32)
+#if defined(HAVE_UTIME) && defined(HAVE_SYS_TIME_H) || defined(PHP_WIN32)
 #define arginfo_socket_set_timeout arginfo_stream_set_timeout
 #endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gettype, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_get_debug_type arginfo_gettype
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_settype, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(1, var, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, type, IS_STRING, 0)
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_intval, 0, 1, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, base, IS_LONG, 0, "10")
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_floatval, 0, 1, IS_DOUBLE, 0)
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_doubleval arginfo_floatval
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_boolval, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_strval arginfo_gettype
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_is_null arginfo_boolval
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_is_resource arginfo_boolval
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_is_bool arginfo_boolval
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_is_int arginfo_boolval
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_is_integer arginfo_boolval
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_is_long arginfo_boolval
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_is_float arginfo_boolval
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_is_double arginfo_boolval
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_is_numeric arginfo_boolval
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_is_string arginfo_boolval
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_is_array arginfo_boolval
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_is_object arginfo_boolval
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_is_scalar arginfo_boolval
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_is_callable, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, syntax_only, _IS_BOOL, 0, "false")
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, callable_name, "null")
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_is_iterable arginfo_boolval
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_is_countable arginfo_boolval
+#endif
 
-#if defined(HAVE_GETTIMEOFDAY)
+#if defined(HAVE_UTIME) && defined(HAVE_GETTIMEOFDAY)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_uniqid, 0, 0, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, prefix, IS_STRING, 0, "\"\"")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, more_entropy, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 #endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_parse_url, 0, 1, MAY_BE_LONG|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_NULL|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, url, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, component, IS_LONG, 0, "-1")
 ZEND_END_ARG_INFO()
+#endif
 
-#define arginfo_urlencode arginfo_base64_encode
+#if defined(HAVE_UTIME)
+#define arginfo_urlencode arginfo_quoted_printable_decode
+#endif
 
-#define arginfo_urldecode arginfo_base64_encode
+#if defined(HAVE_UTIME)
+#define arginfo_urldecode arginfo_quoted_printable_decode
+#endif
 
-#define arginfo_rawurlencode arginfo_base64_encode
+#if defined(HAVE_UTIME)
+#define arginfo_rawurlencode arginfo_quoted_printable_decode
+#endif
 
-#define arginfo_rawurldecode arginfo_base64_encode
+#if defined(HAVE_UTIME)
+#define arginfo_rawurldecode arginfo_quoted_printable_decode
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_get_headers, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, url, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, associative, _IS_BOOL, 0, "false")
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, context, "null")
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_bucket_make_writeable, 0, 1, IS_OBJECT, 1)
 	ZEND_ARG_INFO(0, brigade)
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_bucket_prepend, 0, 2, IS_VOID, 0)
 	ZEND_ARG_INFO(0, brigade)
 	ZEND_ARG_TYPE_INFO(0, bucket, IS_OBJECT, 0)
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_stream_bucket_append arginfo_stream_bucket_prepend
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_bucket_new, 0, 2, IS_OBJECT, 0)
 	ZEND_ARG_INFO(0, stream)
 	ZEND_ARG_TYPE_INFO(0, buffer, IS_STRING, 0)
 ZEND_END_ARG_INFO()
+#endif
 
-#define arginfo_stream_get_filters arginfo_ob_list_handlers
+#if defined(HAVE_UTIME)
+#define arginfo_stream_get_filters arginfo_realpath_cache_get
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_filter_register, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, filter_name, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, class, IS_STRING, 0)
 ZEND_END_ARG_INFO()
+#endif
 
-#define arginfo_convert_uuencode arginfo_base64_encode
+#if defined(HAVE_UTIME)
+#define arginfo_convert_uuencode arginfo_quoted_printable_decode
+#endif
 
-#define arginfo_convert_uudecode arginfo_hex2bin
+#if defined(HAVE_UTIME)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_convert_uudecode, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_var_dump, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 	ZEND_ARG_VARIADIC_TYPE_INFO(0, values, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_var_export, 0, 1, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, return, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_debug_zval_dump arginfo_var_dump
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_serialize arginfo_gettype
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_unserialize, 0, 1, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 0, "[]")
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_memory_get_usage, 0, 0, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, real_usage, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_UTIME)
 #define arginfo_memory_get_peak_usage arginfo_memory_get_usage
+#endif
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_memory_reset_peak_usage, 0, 0, IS_VOID, 0)
-ZEND_END_ARG_INFO()
-
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_version_compare, 0, 2, MAY_BE_LONG|MAY_BE_BOOL)
 	ZEND_ARG_TYPE_INFO(0, version1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, version2, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, operator, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
+#endif
 
-#if defined(PHP_WIN32)
+#if defined(HAVE_UTIME) && defined(PHP_WIN32)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sapi_windows_cp_set, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, codepage, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#if defined(PHP_WIN32)
+#if defined(HAVE_UTIME) && defined(PHP_WIN32)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sapi_windows_cp_get, 0, 0, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, kind, IS_STRING, 0, "\"\"")
 ZEND_END_ARG_INFO()
 #endif
 
-#if defined(PHP_WIN32)
+#if defined(HAVE_UTIME) && defined(PHP_WIN32)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sapi_windows_cp_conv, 0, 3, IS_STRING, 1)
 	ZEND_ARG_TYPE_MASK(0, in_codepage, MAY_BE_LONG|MAY_BE_STRING, NULL)
 	ZEND_ARG_TYPE_MASK(0, out_codepage, MAY_BE_LONG|MAY_BE_STRING, NULL)
@@ -2204,19 +2555,19 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sapi_windows_cp_conv, 0, 3, IS_S
 ZEND_END_ARG_INFO()
 #endif
 
-#if defined(PHP_WIN32)
+#if defined(HAVE_UTIME) && defined(PHP_WIN32)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sapi_windows_cp_is_utf8, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#if defined(PHP_WIN32)
+#if defined(HAVE_UTIME) && defined(PHP_WIN32)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sapi_windows_set_ctrl_handler, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, handler, IS_CALLABLE, 1)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, add, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
 #endif
 
-#if defined(PHP_WIN32)
+#if defined(HAVE_UTIME) && defined(PHP_WIN32)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sapi_windows_generate_ctrl_event, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, event, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, pid, IS_LONG, 0, "0")
@@ -2335,10 +2686,10 @@ ZEND_FUNCTION(getopt);
 ZEND_FUNCTION(flush);
 ZEND_FUNCTION(sleep);
 ZEND_FUNCTION(usleep);
-#if HAVE_NANOSLEEP
+#if defined(HAVE_NANOSLEEP)
 ZEND_FUNCTION(time_nanosleep);
 #endif
-#if HAVE_NANOSLEEP
+#if defined(HAVE_NANOSLEEP)
 ZEND_FUNCTION(time_sleep_until);
 #endif
 ZEND_FUNCTION(get_current_user);
@@ -2364,16 +2715,16 @@ ZEND_FUNCTION(print_r);
 ZEND_FUNCTION(connection_aborted);
 ZEND_FUNCTION(connection_status);
 ZEND_FUNCTION(ignore_user_abort);
-#if HAVE_GETSERVBYNAME
+#if defined(HAVE_GETSERVBYNAME)
 ZEND_FUNCTION(getservbyname);
 #endif
-#if HAVE_GETSERVBYPORT
+#if defined(HAVE_GETSERVBYPORT)
 ZEND_FUNCTION(getservbyport);
 #endif
-#if HAVE_GETPROTOBYNAME
+#if defined(HAVE_GETPROTOBYNAME)
 ZEND_FUNCTION(getprotobyname);
 #endif
-#if HAVE_GETPROTOBYNUMBER
+#if defined(HAVE_GETPROTOBYNUMBER)
 ZEND_FUNCTION(getprotobynumber);
 #endif
 ZEND_FUNCTION(register_tick_function);
@@ -2391,7 +2742,7 @@ ZEND_FUNCTION(sys_getloadavg);
 ZEND_FUNCTION(get_browser);
 ZEND_FUNCTION(crc32);
 ZEND_FUNCTION(crypt);
-#if HAVE_STRPTIME
+#if defined(HAVE_STRPTIME)
 ZEND_FUNCTION(strptime);
 #endif
 #if defined(HAVE_GETHOSTNAME)
@@ -2400,19 +2751,19 @@ ZEND_FUNCTION(gethostname);
 ZEND_FUNCTION(gethostbyaddr);
 ZEND_FUNCTION(gethostbyname);
 ZEND_FUNCTION(gethostbynamel);
-#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
+#if defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC)
 ZEND_FUNCTION(dns_check_record);
 #endif
-#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
+#if defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC)
 ZEND_FUNCTION(dns_get_record);
 #endif
-#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
+#if defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC)
 ZEND_FUNCTION(dns_get_mx);
 #endif
 #if defined(PHP_WIN32) || HAVE_GETIFADDRS || defined(__PASE__)
 ZEND_FUNCTION(net_get_interfaces);
 #endif
-#if HAVE_FTOK
+#if defined(HAVE_FTOK)
 ZEND_FUNCTION(ftok);
 #endif
 ZEND_FUNCTION(hrtime);
@@ -2460,7 +2811,7 @@ ZEND_FUNCTION(bin2hex);
 ZEND_FUNCTION(hex2bin);
 ZEND_FUNCTION(strspn);
 ZEND_FUNCTION(strcspn);
-#if HAVE_NL_LANGINFO
+#if defined(HAVE_NL_LANGINFO)
 ZEND_FUNCTION(nl_langinfo);
 #endif
 ZEND_FUNCTION(strcoll);
@@ -2530,7 +2881,7 @@ ZEND_FUNCTION(opendir);
 ZEND_FUNCTION(dir);
 ZEND_FUNCTION(closedir);
 ZEND_FUNCTION(chdir);
-#if defined(HAVE_CHROOT) && !defined(ZTS) && ENABLE_CHROOT_FUNC
+#if defined(HAVE_CHROOT) && !defined(ZTS) && defined(ENABLE_CHROOT_FUNC)
 ZEND_FUNCTION(chroot);
 #endif
 ZEND_FUNCTION(getcwd);
@@ -2609,242 +2960,563 @@ ZEND_FUNCTION(stat);
 ZEND_FUNCTION(lstat);
 ZEND_FUNCTION(chown);
 ZEND_FUNCTION(chgrp);
-#if HAVE_LCHOWN
+#if defined(HAVE_LCHOWN)
 ZEND_FUNCTION(lchown);
 #endif
-#if HAVE_LCHOWN
+#if defined(HAVE_LCHOWN)
 ZEND_FUNCTION(lchgrp);
 #endif
 ZEND_FUNCTION(chmod);
-#if HAVE_UTIME
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(touch);
 #endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(clearstatcache);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(disk_total_space);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(disk_free_space);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(realpath_cache_get);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(realpath_cache_size);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(sprintf);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(printf);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(vprintf);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(vsprintf);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(fprintf);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(vfprintf);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(fsockopen);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(pfsockopen);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(http_build_query);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(image_type_to_mime_type);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(image_type_to_extension);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(getimagesize);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(getimagesizefromstring);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(phpinfo);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(phpversion);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(phpcredits);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(php_sapi_name);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(php_uname);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(php_ini_scanned_files);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(php_ini_loaded_file);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(iptcembed);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(iptcparse);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(levenshtein);
-#if defined(HAVE_SYMLINK) || defined(PHP_WIN32)
+#endif
+#if defined(HAVE_UTIME) && defined(HAVE_SYMLINK) || defined(PHP_WIN32)
 ZEND_FUNCTION(readlink);
 #endif
-#if defined(HAVE_SYMLINK) || defined(PHP_WIN32)
+#if defined(HAVE_UTIME) && defined(HAVE_SYMLINK) || defined(PHP_WIN32)
 ZEND_FUNCTION(linkinfo);
 #endif
-#if defined(HAVE_SYMLINK) || defined(PHP_WIN32)
+#if defined(HAVE_UTIME) && defined(HAVE_SYMLINK) || defined(PHP_WIN32)
 ZEND_FUNCTION(symlink);
 #endif
-#if defined(HAVE_SYMLINK) || defined(PHP_WIN32)
+#if defined(HAVE_UTIME) && defined(HAVE_SYMLINK) || defined(PHP_WIN32)
 ZEND_FUNCTION(link);
 #endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(mail);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(abs);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(ceil);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(floor);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(round);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(sin);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(cos);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(tan);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(asin);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(acos);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(atan);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(atanh);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(atan2);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(sinh);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(cosh);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(tanh);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(asinh);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(acosh);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(expm1);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(log1p);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(pi);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(is_finite);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(is_nan);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(intdiv);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(is_infinite);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(pow);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(exp);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(log);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(log10);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(sqrt);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(hypot);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(deg2rad);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(rad2deg);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(bindec);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(hexdec);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(octdec);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(decbin);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(decoct);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(dechex);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(base_convert);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(number_format);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(fmod);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(fdiv);
-#if defined(HAVE_GETTIMEOFDAY)
+#endif
+#if defined(HAVE_UTIME) && defined(HAVE_GETTIMEOFDAY)
 ZEND_FUNCTION(microtime);
 #endif
-#if defined(HAVE_GETTIMEOFDAY)
+#if defined(HAVE_UTIME) && defined(HAVE_GETTIMEOFDAY)
 ZEND_FUNCTION(gettimeofday);
 #endif
-#if defined(HAVE_GETRUSAGE)
+#if defined(HAVE_UTIME) && defined(HAVE_GETRUSAGE)
 ZEND_FUNCTION(getrusage);
 #endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(pack);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(unpack);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(password_get_info);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(password_hash);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(password_needs_rehash);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(password_verify);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(password_algos);
-#if defined(PHP_CAN_SUPPORT_PROC_OPEN)
+#endif
+#if defined(HAVE_UTIME) && defined(PHP_CAN_SUPPORT_PROC_OPEN)
 ZEND_FUNCTION(proc_open);
 #endif
-#if defined(PHP_CAN_SUPPORT_PROC_OPEN)
+#if defined(HAVE_UTIME) && defined(PHP_CAN_SUPPORT_PROC_OPEN)
 ZEND_FUNCTION(proc_close);
 #endif
-#if defined(PHP_CAN_SUPPORT_PROC_OPEN)
+#if defined(HAVE_UTIME) && defined(PHP_CAN_SUPPORT_PROC_OPEN)
 ZEND_FUNCTION(proc_terminate);
 #endif
-#if defined(PHP_CAN_SUPPORT_PROC_OPEN)
+#if defined(HAVE_UTIME) && defined(PHP_CAN_SUPPORT_PROC_OPEN)
 ZEND_FUNCTION(proc_get_status);
 #endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(quoted_printable_decode);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(quoted_printable_encode);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(mt_srand);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(rand);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(mt_rand);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(mt_getrandmax);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(random_bytes);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(random_int);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(soundex);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(stream_select);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(stream_context_create);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(stream_context_set_params);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(stream_context_get_params);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(stream_context_set_option);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(stream_context_get_options);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(stream_context_get_default);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(stream_context_set_default);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(stream_filter_prepend);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(stream_filter_append);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(stream_filter_remove);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(stream_socket_client);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(stream_socket_server);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(stream_socket_accept);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(stream_socket_get_name);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(stream_socket_recvfrom);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(stream_socket_sendto);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(stream_socket_enable_crypto);
-#if defined(HAVE_SHUTDOWN)
+#endif
+#if defined(HAVE_UTIME) && defined(HAVE_SHUTDOWN)
 ZEND_FUNCTION(stream_socket_shutdown);
 #endif
-#if HAVE_SOCKETPAIR
+#if defined(HAVE_UTIME) && defined(HAVE_SOCKETPAIR)
 ZEND_FUNCTION(stream_socket_pair);
 #endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(stream_copy_to_stream);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(stream_get_contents);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(stream_supports_lock);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(stream_set_write_buffer);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(stream_set_read_buffer);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(stream_set_blocking);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(stream_get_meta_data);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(stream_get_line);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(stream_resolve_include_path);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(stream_get_wrappers);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(stream_get_transports);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(stream_is_local);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(stream_isatty);
-#if defined(PHP_WIN32)
+#endif
+#if defined(HAVE_UTIME) && defined(PHP_WIN32)
 ZEND_FUNCTION(sapi_windows_vt100_support);
 #endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(stream_set_chunk_size);
-#if HAVE_SYS_TIME_H || defined(PHP_WIN32)
+#endif
+#if defined(HAVE_UTIME) && defined(HAVE_SYS_TIME_H) || defined(PHP_WIN32)
 ZEND_FUNCTION(stream_set_timeout);
 #endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(gettype);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(get_debug_type);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(settype);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(intval);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(floatval);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(boolval);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(strval);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(is_null);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(is_resource);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(is_bool);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(is_int);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(is_float);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(is_numeric);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(is_string);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(is_array);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(is_object);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(is_scalar);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(is_callable);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(is_iterable);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(is_countable);
-#if defined(HAVE_GETTIMEOFDAY)
+#endif
+#if defined(HAVE_UTIME) && defined(HAVE_GETTIMEOFDAY)
 ZEND_FUNCTION(uniqid);
 #endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(parse_url);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(urlencode);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(urldecode);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(rawurlencode);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(rawurldecode);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(get_headers);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(stream_bucket_make_writeable);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(stream_bucket_prepend);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(stream_bucket_append);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(stream_bucket_new);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(stream_get_filters);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(stream_filter_register);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(convert_uuencode);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(convert_uudecode);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(var_dump);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(var_export);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(debug_zval_dump);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(serialize);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(unserialize);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(memory_get_usage);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(memory_get_peak_usage);
-ZEND_FUNCTION(memory_reset_peak_usage);
+#endif
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(version_compare);
-#if defined(PHP_WIN32)
+#endif
+#if defined(HAVE_UTIME) && defined(PHP_WIN32)
 ZEND_FUNCTION(sapi_windows_cp_set);
 #endif
-#if defined(PHP_WIN32)
+#if defined(HAVE_UTIME) && defined(PHP_WIN32)
 ZEND_FUNCTION(sapi_windows_cp_get);
 #endif
-#if defined(PHP_WIN32)
+#if defined(HAVE_UTIME) && defined(PHP_WIN32)
 ZEND_FUNCTION(sapi_windows_cp_conv);
 #endif
-#if defined(PHP_WIN32)
+#if defined(HAVE_UTIME) && defined(PHP_WIN32)
 ZEND_FUNCTION(sapi_windows_cp_is_utf8);
 #endif
-#if defined(PHP_WIN32)
+#if defined(HAVE_UTIME) && defined(PHP_WIN32)
 ZEND_FUNCTION(sapi_windows_set_ctrl_handler);
 #endif
-#if defined(PHP_WIN32)
+#if defined(HAVE_UTIME) && defined(PHP_WIN32)
 ZEND_FUNCTION(sapi_windows_generate_ctrl_event);
 #endif
 
@@ -2965,10 +3637,10 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(flush, arginfo_flush)
 	ZEND_FE(sleep, arginfo_sleep)
 	ZEND_FE(usleep, arginfo_usleep)
-#if HAVE_NANOSLEEP
+#if defined(HAVE_NANOSLEEP)
 	ZEND_FE(time_nanosleep, arginfo_time_nanosleep)
 #endif
-#if HAVE_NANOSLEEP
+#if defined(HAVE_NANOSLEEP)
 	ZEND_FE(time_sleep_until, arginfo_time_sleep_until)
 #endif
 	ZEND_FE(get_current_user, arginfo_get_current_user)
@@ -2996,16 +3668,16 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(connection_aborted, arginfo_connection_aborted)
 	ZEND_FE(connection_status, arginfo_connection_status)
 	ZEND_FE(ignore_user_abort, arginfo_ignore_user_abort)
-#if HAVE_GETSERVBYNAME
+#if defined(HAVE_GETSERVBYNAME)
 	ZEND_FE(getservbyname, arginfo_getservbyname)
 #endif
-#if HAVE_GETSERVBYPORT
+#if defined(HAVE_GETSERVBYPORT)
 	ZEND_FE(getservbyport, arginfo_getservbyport)
 #endif
-#if HAVE_GETPROTOBYNAME
+#if defined(HAVE_GETPROTOBYNAME)
 	ZEND_FE(getprotobyname, arginfo_getprotobyname)
 #endif
-#if HAVE_GETPROTOBYNUMBER
+#if defined(HAVE_GETPROTOBYNUMBER)
 	ZEND_FE(getprotobynumber, arginfo_getprotobynumber)
 #endif
 	ZEND_FE(register_tick_function, arginfo_register_tick_function)
@@ -3023,7 +3695,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(get_browser, arginfo_get_browser)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(crc32, arginfo_crc32)
 	ZEND_FE(crypt, arginfo_crypt)
-#if HAVE_STRPTIME
+#if defined(HAVE_STRPTIME)
 	ZEND_DEP_FE(strptime, arginfo_strptime)
 #endif
 #if defined(HAVE_GETHOSTNAME)
@@ -3032,25 +3704,25 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(gethostbyaddr, arginfo_gethostbyaddr)
 	ZEND_FE(gethostbyname, arginfo_gethostbyname)
 	ZEND_FE(gethostbynamel, arginfo_gethostbynamel)
-#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
+#if defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC)
 	ZEND_FE(dns_check_record, arginfo_dns_check_record)
 #endif
-#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
+#if defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC)
 	ZEND_FALIAS(checkdnsrr, dns_check_record, arginfo_checkdnsrr)
 #endif
-#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
+#if defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC)
 	ZEND_FE(dns_get_record, arginfo_dns_get_record)
 #endif
-#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
+#if defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC)
 	ZEND_FE(dns_get_mx, arginfo_dns_get_mx)
 #endif
-#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
+#if defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC)
 	ZEND_FALIAS(getmxrr, dns_get_mx, arginfo_getmxrr)
 #endif
 #if defined(PHP_WIN32) || HAVE_GETIFADDRS || defined(__PASE__)
 	ZEND_FE(net_get_interfaces, arginfo_net_get_interfaces)
 #endif
-#if HAVE_FTOK
+#if defined(HAVE_FTOK)
 	ZEND_FE(ftok, arginfo_ftok)
 #endif
 	ZEND_FE(hrtime, arginfo_hrtime)
@@ -3098,7 +3770,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(hex2bin, arginfo_hex2bin)
 	ZEND_FE(strspn, arginfo_strspn)
 	ZEND_FE(strcspn, arginfo_strcspn)
-#if HAVE_NL_LANGINFO
+#if defined(HAVE_NL_LANGINFO)
 	ZEND_FE(nl_langinfo, arginfo_nl_langinfo)
 #endif
 	ZEND_FE(strcoll, arginfo_strcoll)
@@ -3171,7 +3843,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(dir, arginfo_dir)
 	ZEND_FE(closedir, arginfo_closedir)
 	ZEND_FE(chdir, arginfo_chdir)
-#if defined(HAVE_CHROOT) && !defined(ZTS) && ENABLE_CHROOT_FUNC
+#if defined(HAVE_CHROOT) && !defined(ZTS) && defined(ENABLE_CHROOT_FUNC)
 	ZEND_FE(chroot, arginfo_chroot)
 #endif
 	ZEND_FE(getcwd, arginfo_getcwd)
@@ -3252,255 +3924,596 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(lstat, arginfo_lstat)
 	ZEND_FE(chown, arginfo_chown)
 	ZEND_FE(chgrp, arginfo_chgrp)
-#if HAVE_LCHOWN
+#if defined(HAVE_LCHOWN)
 	ZEND_FE(lchown, arginfo_lchown)
 #endif
-#if HAVE_LCHOWN
+#if defined(HAVE_LCHOWN)
 	ZEND_FE(lchgrp, arginfo_lchgrp)
 #endif
 	ZEND_FE(chmod, arginfo_chmod)
-#if HAVE_UTIME
+#if defined(HAVE_UTIME)
 	ZEND_FE(touch, arginfo_touch)
 #endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(clearstatcache, arginfo_clearstatcache)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(disk_total_space, arginfo_disk_total_space)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(disk_free_space, arginfo_disk_free_space)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FALIAS(diskfreespace, disk_free_space, arginfo_diskfreespace)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(realpath_cache_get, arginfo_realpath_cache_get)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(realpath_cache_size, arginfo_realpath_cache_size)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(sprintf, arginfo_sprintf)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(printf, arginfo_printf)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(vprintf, arginfo_vprintf)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(vsprintf, arginfo_vsprintf)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(fprintf, arginfo_fprintf)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(vfprintf, arginfo_vfprintf)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(fsockopen, arginfo_fsockopen)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(pfsockopen, arginfo_pfsockopen)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(http_build_query, arginfo_http_build_query)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(image_type_to_mime_type, arginfo_image_type_to_mime_type)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(image_type_to_extension, arginfo_image_type_to_extension)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(getimagesize, arginfo_getimagesize)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(getimagesizefromstring, arginfo_getimagesizefromstring)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(phpinfo, arginfo_phpinfo)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(phpversion, arginfo_phpversion)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(phpcredits, arginfo_phpcredits)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(php_sapi_name, arginfo_php_sapi_name)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(php_uname, arginfo_php_uname)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(php_ini_scanned_files, arginfo_php_ini_scanned_files)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(php_ini_loaded_file, arginfo_php_ini_loaded_file)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(iptcembed, arginfo_iptcembed)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(iptcparse, arginfo_iptcparse)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(levenshtein, arginfo_levenshtein)
-#if defined(HAVE_SYMLINK) || defined(PHP_WIN32)
+#endif
+#if defined(HAVE_UTIME) && defined(HAVE_SYMLINK) || defined(PHP_WIN32)
 	ZEND_FE(readlink, arginfo_readlink)
 #endif
-#if defined(HAVE_SYMLINK) || defined(PHP_WIN32)
+#if defined(HAVE_UTIME) && defined(HAVE_SYMLINK) || defined(PHP_WIN32)
 	ZEND_FE(linkinfo, arginfo_linkinfo)
 #endif
-#if defined(HAVE_SYMLINK) || defined(PHP_WIN32)
+#if defined(HAVE_UTIME) && defined(HAVE_SYMLINK) || defined(PHP_WIN32)
 	ZEND_FE(symlink, arginfo_symlink)
 #endif
-#if defined(HAVE_SYMLINK) || defined(PHP_WIN32)
+#if defined(HAVE_UTIME) && defined(HAVE_SYMLINK) || defined(PHP_WIN32)
 	ZEND_FE(link, arginfo_link)
 #endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(mail, arginfo_mail)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(abs, arginfo_abs)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(ceil, arginfo_ceil)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(floor, arginfo_floor)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(round, arginfo_round)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(sin, arginfo_sin)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(cos, arginfo_cos)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(tan, arginfo_tan)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(asin, arginfo_asin)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(acos, arginfo_acos)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(atan, arginfo_atan)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(atanh, arginfo_atanh)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(atan2, arginfo_atan2)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(sinh, arginfo_sinh)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(cosh, arginfo_cosh)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(tanh, arginfo_tanh)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(asinh, arginfo_asinh)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(acosh, arginfo_acosh)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(expm1, arginfo_expm1)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(log1p, arginfo_log1p)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(pi, arginfo_pi)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(is_finite, arginfo_is_finite)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(is_nan, arginfo_is_nan)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(intdiv, arginfo_intdiv)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(is_infinite, arginfo_is_infinite)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(pow, arginfo_pow)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(exp, arginfo_exp)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(log, arginfo_log)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(log10, arginfo_log10)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(sqrt, arginfo_sqrt)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(hypot, arginfo_hypot)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(deg2rad, arginfo_deg2rad)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(rad2deg, arginfo_rad2deg)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(bindec, arginfo_bindec)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(hexdec, arginfo_hexdec)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(octdec, arginfo_octdec)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(decbin, arginfo_decbin)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(decoct, arginfo_decoct)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(dechex, arginfo_dechex)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(base_convert, arginfo_base_convert)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(number_format, arginfo_number_format)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(fmod, arginfo_fmod)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(fdiv, arginfo_fdiv)
-#if defined(HAVE_GETTIMEOFDAY)
+#endif
+#if defined(HAVE_UTIME) && defined(HAVE_GETTIMEOFDAY)
 	ZEND_FE(microtime, arginfo_microtime)
 #endif
-#if defined(HAVE_GETTIMEOFDAY)
+#if defined(HAVE_UTIME) && defined(HAVE_GETTIMEOFDAY)
 	ZEND_FE(gettimeofday, arginfo_gettimeofday)
 #endif
-#if defined(HAVE_GETRUSAGE)
+#if defined(HAVE_UTIME) && defined(HAVE_GETRUSAGE)
 	ZEND_FE(getrusage, arginfo_getrusage)
 #endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(pack, arginfo_pack)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(unpack, arginfo_unpack)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(password_get_info, arginfo_password_get_info)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(password_hash, arginfo_password_hash)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(password_needs_rehash, arginfo_password_needs_rehash)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(password_verify, arginfo_password_verify)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(password_algos, arginfo_password_algos)
-#if defined(PHP_CAN_SUPPORT_PROC_OPEN)
+#endif
+#if defined(HAVE_UTIME) && defined(PHP_CAN_SUPPORT_PROC_OPEN)
 	ZEND_FE(proc_open, arginfo_proc_open)
 #endif
-#if defined(PHP_CAN_SUPPORT_PROC_OPEN)
+#if defined(HAVE_UTIME) && defined(PHP_CAN_SUPPORT_PROC_OPEN)
 	ZEND_FE(proc_close, arginfo_proc_close)
 #endif
-#if defined(PHP_CAN_SUPPORT_PROC_OPEN)
+#if defined(HAVE_UTIME) && defined(PHP_CAN_SUPPORT_PROC_OPEN)
 	ZEND_FE(proc_terminate, arginfo_proc_terminate)
 #endif
-#if defined(PHP_CAN_SUPPORT_PROC_OPEN)
+#if defined(HAVE_UTIME) && defined(PHP_CAN_SUPPORT_PROC_OPEN)
 	ZEND_FE(proc_get_status, arginfo_proc_get_status)
 #endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(quoted_printable_decode, arginfo_quoted_printable_decode)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(quoted_printable_encode, arginfo_quoted_printable_encode)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(mt_srand, arginfo_mt_srand)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FALIAS(srand, mt_srand, arginfo_srand)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(rand, arginfo_rand)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(mt_rand, arginfo_mt_rand)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(mt_getrandmax, arginfo_mt_getrandmax)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FALIAS(getrandmax, mt_getrandmax, arginfo_getrandmax)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(random_bytes, arginfo_random_bytes)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(random_int, arginfo_random_int)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(soundex, arginfo_soundex)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(stream_select, arginfo_stream_select)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(stream_context_create, arginfo_stream_context_create)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(stream_context_set_params, arginfo_stream_context_set_params)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(stream_context_get_params, arginfo_stream_context_get_params)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(stream_context_set_option, arginfo_stream_context_set_option)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(stream_context_get_options, arginfo_stream_context_get_options)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(stream_context_get_default, arginfo_stream_context_get_default)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(stream_context_set_default, arginfo_stream_context_set_default)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(stream_filter_prepend, arginfo_stream_filter_prepend)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(stream_filter_append, arginfo_stream_filter_append)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(stream_filter_remove, arginfo_stream_filter_remove)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(stream_socket_client, arginfo_stream_socket_client)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(stream_socket_server, arginfo_stream_socket_server)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(stream_socket_accept, arginfo_stream_socket_accept)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(stream_socket_get_name, arginfo_stream_socket_get_name)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(stream_socket_recvfrom, arginfo_stream_socket_recvfrom)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(stream_socket_sendto, arginfo_stream_socket_sendto)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(stream_socket_enable_crypto, arginfo_stream_socket_enable_crypto)
-#if defined(HAVE_SHUTDOWN)
+#endif
+#if defined(HAVE_UTIME) && defined(HAVE_SHUTDOWN)
 	ZEND_FE(stream_socket_shutdown, arginfo_stream_socket_shutdown)
 #endif
-#if HAVE_SOCKETPAIR
+#if defined(HAVE_UTIME) && defined(HAVE_SOCKETPAIR)
 	ZEND_FE(stream_socket_pair, arginfo_stream_socket_pair)
 #endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(stream_copy_to_stream, arginfo_stream_copy_to_stream)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(stream_get_contents, arginfo_stream_get_contents)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(stream_supports_lock, arginfo_stream_supports_lock)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(stream_set_write_buffer, arginfo_stream_set_write_buffer)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FALIAS(set_file_buffer, stream_set_write_buffer, arginfo_set_file_buffer)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(stream_set_read_buffer, arginfo_stream_set_read_buffer)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(stream_set_blocking, arginfo_stream_set_blocking)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FALIAS(socket_set_blocking, stream_set_blocking, arginfo_socket_set_blocking)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(stream_get_meta_data, arginfo_stream_get_meta_data)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FALIAS(socket_get_status, stream_get_meta_data, arginfo_socket_get_status)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(stream_get_line, arginfo_stream_get_line)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(stream_resolve_include_path, arginfo_stream_resolve_include_path)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(stream_get_wrappers, arginfo_stream_get_wrappers)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(stream_get_transports, arginfo_stream_get_transports)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(stream_is_local, arginfo_stream_is_local)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(stream_isatty, arginfo_stream_isatty)
-#if defined(PHP_WIN32)
+#endif
+#if defined(HAVE_UTIME) && defined(PHP_WIN32)
 	ZEND_FE(sapi_windows_vt100_support, arginfo_sapi_windows_vt100_support)
 #endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(stream_set_chunk_size, arginfo_stream_set_chunk_size)
-#if HAVE_SYS_TIME_H || defined(PHP_WIN32)
+#endif
+#if defined(HAVE_UTIME) && defined(HAVE_SYS_TIME_H) || defined(PHP_WIN32)
 	ZEND_FE(stream_set_timeout, arginfo_stream_set_timeout)
 #endif
-#if HAVE_SYS_TIME_H || defined(PHP_WIN32)
+#if defined(HAVE_UTIME) && defined(HAVE_SYS_TIME_H) || defined(PHP_WIN32)
 	ZEND_FALIAS(socket_set_timeout, stream_set_timeout, arginfo_socket_set_timeout)
 #endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(gettype, arginfo_gettype)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(get_debug_type, arginfo_get_debug_type)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(settype, arginfo_settype)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(intval, arginfo_intval)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(floatval, arginfo_floatval)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FALIAS(doubleval, floatval, arginfo_doubleval)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(boolval, arginfo_boolval)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(strval, arginfo_strval)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(is_null, arginfo_is_null)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(is_resource, arginfo_is_resource)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(is_bool, arginfo_is_bool)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(is_int, arginfo_is_int)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FALIAS(is_integer, is_int, arginfo_is_integer)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FALIAS(is_long, is_int, arginfo_is_long)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(is_float, arginfo_is_float)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FALIAS(is_double, is_float, arginfo_is_double)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(is_numeric, arginfo_is_numeric)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(is_string, arginfo_is_string)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(is_array, arginfo_is_array)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(is_object, arginfo_is_object)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(is_scalar, arginfo_is_scalar)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(is_callable, arginfo_is_callable)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(is_iterable, arginfo_is_iterable)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(is_countable, arginfo_is_countable)
-#if defined(HAVE_GETTIMEOFDAY)
+#endif
+#if defined(HAVE_UTIME) && defined(HAVE_GETTIMEOFDAY)
 	ZEND_FE(uniqid, arginfo_uniqid)
 #endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(parse_url, arginfo_parse_url)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(urlencode, arginfo_urlencode)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(urldecode, arginfo_urldecode)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(rawurlencode, arginfo_rawurlencode)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(rawurldecode, arginfo_rawurldecode)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(get_headers, arginfo_get_headers)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(stream_bucket_make_writeable, arginfo_stream_bucket_make_writeable)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(stream_bucket_prepend, arginfo_stream_bucket_prepend)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(stream_bucket_append, arginfo_stream_bucket_append)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(stream_bucket_new, arginfo_stream_bucket_new)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(stream_get_filters, arginfo_stream_get_filters)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(stream_filter_register, arginfo_stream_filter_register)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(convert_uuencode, arginfo_convert_uuencode)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(convert_uudecode, arginfo_convert_uudecode)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(var_dump, arginfo_var_dump)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(var_export, arginfo_var_export)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(debug_zval_dump, arginfo_debug_zval_dump)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(serialize, arginfo_serialize)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(unserialize, arginfo_unserialize)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(memory_get_usage, arginfo_memory_get_usage)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_FE(memory_get_peak_usage, arginfo_memory_get_peak_usage)
-	ZEND_FE(memory_reset_peak_usage, arginfo_memory_reset_peak_usage)
+#endif
+#if defined(HAVE_UTIME)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(version_compare, arginfo_version_compare)
-#if defined(PHP_WIN32)
+#endif
+#if defined(HAVE_UTIME) && defined(PHP_WIN32)
 	ZEND_FE(sapi_windows_cp_set, arginfo_sapi_windows_cp_set)
 #endif
-#if defined(PHP_WIN32)
+#if defined(HAVE_UTIME) && defined(PHP_WIN32)
 	ZEND_FE(sapi_windows_cp_get, arginfo_sapi_windows_cp_get)
 #endif
-#if defined(PHP_WIN32)
+#if defined(HAVE_UTIME) && defined(PHP_WIN32)
 	ZEND_FE(sapi_windows_cp_conv, arginfo_sapi_windows_cp_conv)
 #endif
-#if defined(PHP_WIN32)
+#if defined(HAVE_UTIME) && defined(PHP_WIN32)
 	ZEND_FE(sapi_windows_cp_is_utf8, arginfo_sapi_windows_cp_is_utf8)
 #endif
-#if defined(PHP_WIN32)
+#if defined(HAVE_UTIME) && defined(PHP_WIN32)
 	ZEND_FE(sapi_windows_set_ctrl_handler, arginfo_sapi_windows_set_ctrl_handler)
 #endif
-#if defined(PHP_WIN32)
+#if defined(HAVE_UTIME) && defined(PHP_WIN32)
 	ZEND_FE(sapi_windows_generate_ctrl_event, arginfo_sapi_windows_generate_ctrl_event)
 #endif
 	ZEND_FE_END
