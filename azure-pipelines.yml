@@ -75,6 +75,7 @@ jobs:
         configurationName: DEBUG_ZTS_MSAN
         configurationParameters: '--enable-debug --enable-zts'
         runTestsParameters: --asan
+        timeoutInMinutes: 90
     - template: azure/community_job.yml
       parameters:
         configurationName: COMMUNITY

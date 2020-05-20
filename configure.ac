@@ -974,6 +974,11 @@ PHP_ARG_ENABLE([werror],,
     [Enable -Werror])],
   [no],
   [no])
+PHP_ARG_ENABLE([memory-sanitizer],,
+  [AS_HELP_STRING([--enable-memory-sanitizer],
+    [Enable memory sanitizer (clang only)])],
+  [no],
+  [no])
 
 dnl Extension configuration.
 dnl ----------------------------------------------------------------------------
@@ -1369,9 +1374,16 @@ if test "$PHP_THREAD_SAFETY" = "yes" && test -n "$ac_cv_pthreads_cflags"; then
   CPPFLAGS="$CPPFLAGS $ac_cv_pthreads_cflags"
 fi
 
+dnl Enable -Werror late, because it may break configure checks throwing warnings.
 if test "$PHP_WERROR" = "yes"; then
   CFLAGS="$CFLAGS -Werror"
-  CPPFLAGS="$CPPFLAGS -Werror"
+  CXXFLAGS="$CXXFLAGS -Werror"
+fi
+
+dnl Enable -fsanitize=memory late, because interceptors may break linking detection.
+if test "$PHP_MEMORY_SANITIZER" = "yes"; then
+  CFLAGS="$CFLAGS -fsanitize=memory -fsanitize-memory-track-origins"
+  CXXFLAGS="$CXXFLAGS -fsanitize=memory -fsanitize-memory-track-origins"
 fi
 
 dnl
