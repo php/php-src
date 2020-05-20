@@ -28,7 +28,7 @@
 #include "ext/standard/html.h"
 #include "zend_interfaces.h"
 
-#if HAVE_XML
+#ifdef HAVE_XML
 
 #include "php_xml.h"
 # include "ext/standard/head.h"
