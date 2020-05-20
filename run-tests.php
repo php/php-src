@@ -678,10 +678,11 @@ NO_PROC_OPEN_ERROR;
     // Run selected tests.
     $test_cnt = count($test_files);
 
+    verify_config();
+    write_information();
+
     if ($test_cnt) {
         putenv('NO_INTERACTION=1');
-        verify_config();
-        write_information();
         usort($test_files, "test_sort");
         $start_time = time();
 
@@ -721,91 +722,78 @@ NO_PROC_OPEN_ERROR;
         if ($output_file != '' && $just_save_results) {
             save_or_mail_results();
         }
+    } else {
+        // Compile a list of all test files (*.phpt).
+        $test_files = array();
+        $exts_tested = count($exts_to_test);
+        $exts_skipped = 0;
+        $ignored_by_ext = 0;
+        sort($exts_to_test);
+        $test_dirs = array();
+        $optionals = array('Zend', 'tests', 'ext', 'sapi');
 
-        junit_save_xml();
-
-        if (getenv('REPORT_EXIT_STATUS') !== '0' &&
-            getenv('REPORT_EXIT_STATUS') !== 'no' && ($sum_results['FAILED'] || $sum_results['BORKED'] || $sum_results['LEAKED'])) {
-            exit(1);
+        foreach ($optionals as $dir) {
+            if (is_dir($dir)) {
+                $test_dirs[] = $dir;
+            }
         }
 
-        return;
-    }
-
-    verify_config();
-    write_information();
-
-    // Compile a list of all test files (*.phpt).
-    $test_files = array();
-    $exts_tested = count($exts_to_test);
-    $exts_skipped = 0;
-    $ignored_by_ext = 0;
-    sort($exts_to_test);
-    $test_dirs = array();
-    $optionals = array('Zend', 'tests', 'ext', 'sapi');
-
-    foreach ($optionals as $dir) {
-        if (is_dir($dir)) {
-            $test_dirs[] = $dir;
+        // Convert extension names to lowercase
+        foreach ($exts_to_test as $key => $val) {
+            $exts_to_test[$key] = strtolower($val);
         }
+
+        foreach ($test_dirs as $dir) {
+            find_files(TEST_PHP_SRCDIR . "/{$dir}", $dir == 'ext');
+        }
+
+        foreach ($user_tests as $dir) {
+            find_files($dir, $dir == 'ext');
+        }
+
+        $test_files = array_unique($test_files);
+        usort($test_files, "test_sort");
+
+        $start_time = time();
+        show_start($start_time);
+
+        $test_cnt = count($test_files);
+        $test_idx = 0;
+        run_all_tests($test_files, $environment);
+        $end_time = time();
+
+        if ($failed_tests_file) {
+            fclose($failed_tests_file);
+        }
+
+        if ($result_tests_file) {
+            fclose($result_tests_file);
+        }
+
+        // Summarize results
+
+        if (0 == count($test_results)) {
+            echo "No tests were run.\n";
+            return;
+        }
+
+        compute_summary();
+
+        show_end($end_time);
+        show_summary();
+
+        if ($html_output) {
+            fclose($html_file);
+        }
+
+        save_or_mail_results();
     }
-
-    // Convert extension names to lowercase
-    foreach ($exts_to_test as $key => $val) {
-        $exts_to_test[$key] = strtolower($val);
-    }
-
-    foreach ($test_dirs as $dir) {
-        find_files(TEST_PHP_SRCDIR . "/{$dir}", $dir == 'ext');
-    }
-
-    foreach ($user_tests as $dir) {
-        find_files($dir, $dir == 'ext');
-    }
-
-    $test_files = array_unique($test_files);
-    usort($test_files, "test_sort");
-
-    $start_time = time();
-    show_start($start_time);
-
-    $test_cnt = count($test_files);
-    $test_idx = 0;
-    run_all_tests($test_files, $environment);
-    $end_time = time();
-
-    if ($failed_tests_file) {
-        fclose($failed_tests_file);
-    }
-
-    if ($result_tests_file) {
-        fclose($result_tests_file);
-    }
-
-    // Summarize results
-
-    if (0 == count($test_results)) {
-        echo "No tests were run.\n";
-        return;
-    }
-
-    compute_summary();
-
-    show_end($end_time);
-    show_summary();
-
-    if ($html_output) {
-        fclose($html_file);
-    }
-
-    save_or_mail_results();
 
     junit_save_xml();
-    if (getenv('REPORT_EXIT_STATUS') !== '0' &&
-        getenv('REPORT_EXIT_STATUS') !== 'no' && ($sum_results['FAILED'] || $sum_results['LEAKED'])) {
+    if (getenv('REPORT_EXIT_STATUS') !== '0' && getenv('REPORT_EXIT_STATUS') !== 'no' &&
+            ($sum_results['FAILED'] || $sum_results['LEAKED'])) {
         exit(1);
     }
-    exit(0);
 }
 
 if (!function_exists("hrtime")) {
