@@ -295,18 +295,18 @@ ZEND_API int zend_copy_parameters_array(int param_count, zval *argument_array);
 
 #define ZEND_PARSE_PARAMS_THROW 0 /* No longer used, zpp always uses exceptions */
 #define ZEND_PARSE_PARAMS_QUIET (1<<1)
-ZEND_API int zend_parse_parameters(int num_args, const char *type_spec, ...);
-ZEND_API int zend_parse_parameters_ex(int flags, int num_args, const char *type_spec, ...);
+ZEND_API int zend_parse_parameters(uint32_t num_args, const char *type_spec, ...);
+ZEND_API int zend_parse_parameters_ex(int flags, uint32_t num_args, const char *type_spec, ...);
 /* NOTE: This must have at least one value in __VA_ARGS__ for the expression to be valid */
 #define zend_parse_parameters_throw(num_args, ...) \
 	zend_parse_parameters(num_args, __VA_ARGS__)
 ZEND_API const char *zend_zval_type_name(const zval *arg);
 ZEND_API zend_string *zend_zval_get_legacy_type(const zval *arg);
 
-ZEND_API int zend_parse_method_parameters(int num_args, zval *this_ptr, const char *type_spec, ...);
-ZEND_API int zend_parse_method_parameters_ex(int flags, int num_args, zval *this_ptr, const char *type_spec, ...);
+ZEND_API int zend_parse_method_parameters(uint32_t num_args, zval *this_ptr, const char *type_spec, ...);
+ZEND_API int zend_parse_method_parameters_ex(int flags, uint32_t num_args, zval *this_ptr, const char *type_spec, ...);
 
-ZEND_API int zend_parse_parameter(int flags, int arg_num, zval *arg, const char *spec, ...);
+ZEND_API int zend_parse_parameter(int flags, uint32_t arg_num, zval *arg, const char *spec, ...);
 
 /* End of parameter parsing API -- andrei */
 
