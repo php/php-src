@@ -15,8 +15,10 @@ var_dump($config["directives"]["opcache.enable"]);
 var_dump($config["directives"]["opcache.enable_cli"]);
 var_dump($status["opcache_enabled"]);
 var_dump($status["optimizations_enabled"]);
+var_dump($status["allow_cache"]);
 ?>
 --EXPECT--
+bool(true)
 bool(true)
 bool(true)
 bool(true)

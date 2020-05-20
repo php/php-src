@@ -1,9 +1,9 @@
 --TEST--
-no_cache_1: Opcache indicates if optimizations and caching are enabled
+allow_cache_1: Opcache indicates if optimizations and caching are enabled
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
-opcache.no_cache=1
+opcache.allow_cache=0
 opcache.preload=
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
@@ -18,6 +18,6 @@ array(3) {
   bool(true)
   ["opcache_enabled"]=>
   bool(false)
-  ["no_cache"]=>
-  bool(true)
+  ["allow_cache"]=>
+  bool(false)
 }

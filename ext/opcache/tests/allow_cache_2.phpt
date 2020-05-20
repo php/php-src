@@ -1,11 +1,11 @@
 --TEST--
-no_cache_2: no_cache takes precedence over file_cache
+allow_cache_2: allow_cache=0 takes precedence over file_cache
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
 opcache.file_cache_only=1
 opcache.file_cache="{TMP}"
-opcache.no_cache=1
+opcache.allow_cache=0
 opcache.opt_debug_level=0x20000
 opcache.optimization_level=-1
 opcache.preload=
@@ -15,7 +15,7 @@ opcache.preload=
 --FILE--
 <?php
 // Opcache should actually run.
-// Because no_cache is used, this will consistently emit debug output as a side effect.
+// Because allow_cache is used, this will consistently emit debug output as a side effect.
 // It should also indicate that file_cache is not used.
 $status = opcache_get_status();
 var_dump($status);
@@ -24,7 +24,7 @@ var_dump($status);
 $_main:
      ; (lines=7, args=0, vars=1, tmps=1)
      ; (after optimizer)
-     ; %sno_cache_2.php:1-8
+     ; %sallow_cache_2.php:1-8
 0000 INIT_FCALL 0 %d string("opcache_get_status")
 0001 V1 = DO_ICALL
 0002 ASSIGN CV0($status) V1
@@ -37,6 +37,6 @@ array(3) {
   bool(true)
   ["opcache_enabled"]=>
   bool(false)
-  ["no_cache"]=>
-  bool(true)
+  ["allow_cache"]=>
+  bool(false)
 }

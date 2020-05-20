@@ -187,7 +187,7 @@ typedef struct _zend_accel_directives {
 #endif
 	char          *file_cache;
 	zend_bool      file_cache_only;
-	zend_bool      no_cache;
+	zend_bool      allow_cache;
 	zend_bool      file_cache_consistency_checks;
 #if ENABLE_FILE_CACHE_FALLBACK
 	zend_bool      file_cache_fallback;
@@ -296,7 +296,7 @@ extern char accel_uname_id[32];
 #endif
 extern zend_bool accel_startup_ok;
 extern zend_bool file_cache_only;
-extern zend_bool no_cache;
+extern zend_bool allow_cache;
 #if ENABLE_FILE_CACHE_FALLBACK
 extern zend_bool fallback_process;
 #endif
