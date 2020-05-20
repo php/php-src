@@ -24,7 +24,7 @@
 
 #define PHP_SNMP_VERSION PHP_VERSION
 
-#if HAVE_SNMP
+#ifdef HAVE_SNMP
 
 #ifndef DLEXPORT
 #define DLEXPORT
