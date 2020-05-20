@@ -700,7 +700,9 @@ PHP_LIBXML_API void php_libxml_initialize(void)
 {
 	if (!_php_libxml_initialized) {
 		/* we should be the only one's to ever init!! */
+		ZEND_IGNORE_LEAKS_BEGIN();
 		xmlInitParser();
+		ZEND_IGNORE_LEAKS_END();
 
 		_php_libxml_default_entity_loader = xmlGetExternalEntityLoader();
 		xmlSetExternalEntityLoader(_php_libxml_pre_ext_ent_loader);
