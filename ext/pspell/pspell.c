@@ -24,7 +24,7 @@
 #include <ctype.h>
 #include <stdio.h>
 
-#if HAVE_PSPELL
+#ifdef HAVE_PSPELL
 
 /* this will enforce compatibility in .12 version (broken after .11.2) */
 #define USE_ORIGINAL_MANAGER_FUNCS

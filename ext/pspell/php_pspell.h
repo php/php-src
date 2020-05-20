@@ -16,7 +16,7 @@
 
 #ifndef _PSPELL_H
 #define _PSPELL_H
-#if HAVE_PSPELL
+#ifdef HAVE_PSPELL
 extern zend_module_entry pspell_module_entry;
 #define pspell_module_ptr &pspell_module_entry
 
