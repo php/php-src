@@ -5,6 +5,7 @@ Phar: delete a file within a .phar
 --INI--
 phar.readonly=0
 phar.require_hash=0
+opcache.validate_timestamps=1
 --FILE--
 <?php
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';

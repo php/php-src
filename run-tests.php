@@ -144,7 +144,7 @@ function main()
            $repeat, $result_tests_file, $slow_min_ms, $start_time, $switch,
            $temp_source, $temp_target, $temp_urlbase, $test_cnt, $test_dirs,
            $test_files, $test_idx, $test_list, $test_results, $testfile,
-           $user_tests, $valgrind, $sum_results, $shuffle;
+           $user_tests, $valgrind, $sum_results, $shuffle, $file_cache;
     // Parallel testing
     global $workers, $workerID;
 
@@ -396,6 +396,7 @@ NO_PROC_OPEN_ERROR;
     $no_clean = false;
     $slow_min_ms = INF;
     $preload = false;
+    $file_cache = null;
     $shuffle = false;
     $workers = null;
 
@@ -528,6 +529,12 @@ NO_PROC_OPEN_ERROR;
                     break;
                 case '--preload':
                     $preload = true;
+                    break;
+                case '--file-cache-prime':
+                    $file_cache = 'prime';
+                    break;
+                case '--file-cache-use':
+                    $file_cache = 'use';
                     break;
                 case '--no-clean':
                     $no_clean = true;
@@ -706,6 +713,11 @@ NO_PROC_OPEN_ERROR;
 
         if ($result_tests_file) {
             fclose($result_tests_file);
+        }
+
+        if (0 == count($test_results)) {
+            echo "No tests were run.\n";
+            return;
         }
 
         compute_summary();
@@ -1272,9 +1284,17 @@ function system_with_timeout($commandline, $env = null, $stdin = null, $captureS
 
 function run_all_tests($test_files, $env, $redir_tested = null)
 {
-    global $test_results, $failed_tests_file, $result_tests_file, $php, $test_idx;
+    global $test_results, $failed_tests_file, $result_tests_file, $php, $test_idx, $file_cache;
     // Parallel testing
     global $PHP_FAILED_TESTS, $workers, $workerID, $workerSock;
+
+    if ($file_cache !== null) {
+        /* Automatically skip opcache tests in --file-cache mode,
+         * because opcache generally doesn't expect those to run under file cache */
+        $test_files = array_filter($test_files, function($test) {
+            return !is_string($test) || false === strpos($test, 'ext/opcache');
+        });
+    }
 
     /* Ignore -jN if there is only one file to analyze. */
     if ($workers !== null && count($test_files) > 1 && !$workerID) {
@@ -1763,7 +1783,7 @@ function run_test($php, $file, $env)
     global $SHOW_ONLY_GROUPS;
     global $no_file_cache;
     global $slow_min_ms;
-    global $preload;
+    global $preload, $file_cache;
     // Parallel testing
     global $workerID;
     $temp_filenames = null;
@@ -2087,9 +2107,9 @@ TEST $file
         $ext_params = array();
         settings2array($ini_overwrites, $ext_params);
         $ext_params = settings2params($ext_params);
-        $ext_dir = `$php $pass_options $extra_options $ext_params -d display_errors=0 -r "echo ini_get('extension_dir');"`;
+        $ext_dir = `$php $pass_options $extra_options $ext_params $no_file_cache -d display_errors=0 -r "echo ini_get('extension_dir');"`;
         $extensions = preg_split("/[\n\r]+/", trim($section_text['EXTENSIONS']));
-        $loaded = explode(",", `$php $pass_options $extra_options $ext_params -d display_errors=0 -r "echo implode(',', get_loaded_extensions());"`);
+        $loaded = explode(",", `$php $pass_options $extra_options $ext_params $no_file_cache -d display_errors=0 -r "echo implode(',', get_loaded_extensions());"`);
         $ext_prefix = IS_WINDOWS ? "php_" : "";
         foreach ($extensions as $req_ext) {
             if (!in_array($req_ext, $loaded)) {
@@ -2107,6 +2127,19 @@ TEST $file
     settings2array($ini_overwrites, $ini_settings);
 
     $orig_ini_settings = settings2params($ini_settings);
+
+    if ($file_cache !== null) {
+        $ini_settings['opcache.file_cache'] = '/tmp';
+        // Make sure warnings still show up on the second run.
+        $ini_settings['opcache.record_warnings'] = '1';
+        // File cache is currently incompatible with JIT.
+        $ini_settings['opcache.jit'] = '0';
+        if ($file_cache === 'use') {
+            // Disable timestamp validation in order to fetch from file cache,
+            // even though all the files are re-created.
+            $ini_settings['opcache.validate_timestamps'] = '0';
+        }
+    }
 
     // Any special ini settings
     // these may overwrite the test defaults...
