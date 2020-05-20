@@ -17,7 +17,7 @@
 #ifndef FLOCK_COMPAT_H
 #define FLOCK_COMPAT_H
 
-#if HAVE_STRUCT_FLOCK
+#ifdef HAVE_STRUCT_FLOCK
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/file.h>
@@ -57,17 +57,16 @@ PHPAPI int flock(int fd, int operation);
 # define ftruncate(a, b) chsize(a, b)
 #endif /* defined(PHP_WIN32) */
 
-#if !HAVE_INET_ATON
-#if HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#if HAVE_ARPA_INET_H
-#include <arpa/inet.h>
-#endif
-
-#ifndef PHP_WIN32
+#ifndef HAVE_INET_ATON
+# ifdef HAVE_NETINET_IN_H
+#  include <netinet/in.h>
+# endif
+# ifdef HAVE_ARPA_INET_H
+#  include <arpa/inet.h>
+# endif
+# ifndef PHP_WIN32
 extern int inet_aton(const char *, struct in_addr *);
-#endif
+# endif
 #endif
 
 #endif	/* FLOCK_COMPAT_H */

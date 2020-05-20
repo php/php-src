@@ -134,7 +134,7 @@ static zend_always_inline php_hrtime_t _timer_current(void)
 #endif
 }/*}}}*/
 
-#if ZEND_ENABLE_ZVAL_LONG64
+#ifdef ZEND_ENABLE_ZVAL_LONG64
 #define PHP_RETURN_HRTIME(t) RETURN_LONG((zend_long)t)
 #else
 #ifdef _WIN32
