@@ -148,7 +148,7 @@ PHP_METHOD(SQLite3, open)
 		return;
 	}
 
-#if SQLITE_HAS_CODEC
+#ifdef SQLITE_HAS_CODEC
 	if (encryption_key_len > 0) {
 		if (sqlite3_key(db_obj->db, encryption_key, encryption_key_len) != SQLITE_OK) {
 			sqlite3_close(db_obj->db);
@@ -2423,7 +2423,7 @@ PHP_MINIT_FUNCTION(sqlite3)
 {
 	zend_class_entry ce;
 
-#if defined(ZTS)
+#ifdef ZTS
 	/* Refuse to load if this wasn't a threasafe library loaded */
 	if (!sqlite3_threadsafe()) {
 		php_error_docref(NULL, E_WARNING, "A thread safe version of SQLite is required when using a thread safe version of PHP.");
