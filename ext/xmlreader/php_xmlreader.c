@@ -1055,9 +1055,9 @@ PHP_METHOD(XMLReader, XML)
 
     if (inputbfr != NULL) {
 /* Get the URI of the current script so that we can set the base directory in libxml */
-#if HAVE_GETCWD
+#ifdef HAVE_GETCWD
 		directory = VCWD_GETCWD(resolved_path, MAXPATHLEN);
-#elif HAVE_GETWD
+#elif defined(HAVE_GETWD)
 		directory = VCWD_GETWD(resolved_path);
 #endif
 		if (directory) {
