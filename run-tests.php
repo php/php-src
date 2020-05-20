@@ -394,6 +394,7 @@ NO_PROC_OPEN_ERROR;
     $temp_urlbase = null;
     $conf_passed = null;
     $no_clean = false;
+    $selected_tests = false;
     $slow_min_ms = INF;
     $preload = false;
     $file_cache = null;
@@ -634,6 +635,7 @@ NO_PROC_OPEN_ERROR;
         }
 
         if (!$is_switch) {
+            $selected_tests = true;
             $testfile = realpath($argv[$i]);
 
             if (!$testfile && strpos($argv[$i], '*') !== false && function_exists('glob')) {
@@ -662,6 +664,11 @@ NO_PROC_OPEN_ERROR;
                 }
             }
         }
+    }
+
+    if ($selected_tests && count($test_files) === 0) {
+        echo "No tests found.\n";
+        return;
     }
 
     // Default to PHP_BINARY as executable
