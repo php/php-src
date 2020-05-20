@@ -287,8 +287,7 @@ void shutdown_executor(void) /* {{{ */
 			if (op_array->static_variables) {
 				HashTable *ht = ZEND_MAP_PTR_GET(op_array->static_variables_ptr);
 				if (ht) {
-					ZEND_ASSERT(GC_REFCOUNT(ht) == 1);
-					zend_array_destroy(ht);
+					zend_array_release(ht);
 					ZEND_MAP_PTR_SET(op_array->static_variables_ptr, NULL);
 				}
 			}
