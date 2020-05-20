@@ -9824,6 +9824,7 @@ static int zend_jit_return(dasm_State **Dst, const zend_op *opline, const zend_o
 	}
 
 	if (return_value_used == 0) {
+		|9:
 		return 1;
 	}
 
