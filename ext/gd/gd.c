@@ -390,7 +390,7 @@ PHP_MINIT_FUNCTION(gd)
 	REGISTER_LONG_CONSTANT("IMG_AFFINE_SHEAR_HORIZONTAL", GD_AFFINE_SHEAR_HORIZONTAL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_AFFINE_SHEAR_VERTICAL", GD_AFFINE_SHEAR_VERTICAL, CONST_CS | CONST_PERSISTENT);
 
-#if defined(HAVE_GD_BUNDLED)
+#ifdef HAVE_GD_BUNDLED
 	REGISTER_LONG_CONSTANT("GD_BUNDLED", 1, CONST_CS | CONST_PERSISTENT);
 #else
 	REGISTER_LONG_CONSTANT("GD_BUNDLED", 0, CONST_CS | CONST_PERSISTENT);
@@ -467,7 +467,7 @@ PHP_RSHUTDOWN_FUNCTION(gd)
 }
 /* }}} */
 
-#if defined(HAVE_GD_BUNDLED)
+#ifdef HAVE_GD_BUNDLED
 #define PHP_GD_VERSION_STRING "bundled (2.1.0 compatible)"
 #else
 # define PHP_GD_VERSION_STRING GD_VERSION_STRING
@@ -482,11 +482,11 @@ PHP_MINFO_FUNCTION(gd)
 
 	/* need to use a PHPAPI function here because it is external module in windows */
 
-#if defined(HAVE_GD_BUNDLED)
+#ifdef HAVE_GD_BUNDLED
 	php_info_print_table_row(2, "GD Version", PHP_GD_VERSION_STRING);
 #else
 	php_info_print_table_row(2, "GD headers Version", PHP_GD_VERSION_STRING);
-#if defined(HAVE_GD_LIBVERSION)
+#ifdef HAVE_GD_LIBVERSION
 	php_info_print_table_row(2, "GD library Version", gdVersionString());
 #endif
 #endif
@@ -516,7 +516,7 @@ PHP_MINFO_FUNCTION(gd)
 #ifdef HAVE_GD_JPG
 	{
 		php_info_print_table_row(2, "JPEG Support", "enabled");
-#if defined(HAVE_GD_BUNDLED)
+#ifdef HAVE_GD_BUNDLED
 		php_info_print_table_row(2, "libJPEG Version", gdJpegGetVersionString());
 #endif
 	}
@@ -524,14 +524,14 @@ PHP_MINFO_FUNCTION(gd)
 
 #ifdef HAVE_GD_PNG
 	php_info_print_table_row(2, "PNG Support", "enabled");
-#if defined(HAVE_GD_BUNDLED)
+#ifdef HAVE_GD_BUNDLED
 	php_info_print_table_row(2, "libPNG Version", gdPngGetVersionString());
 #endif
 #endif
 	php_info_print_table_row(2, "WBMP Support", "enabled");
-#if defined(HAVE_GD_XPM)
+#ifdef HAVE_GD_XPM
 	php_info_print_table_row(2, "XPM Support", "enabled");
-#if defined(HAVE_GD_BUNDLED)
+#ifdef HAVE_GD_BUNDLED
 	{
 		char tmp[12];
 		snprintf(tmp, sizeof(tmp), "%d", XpmLibraryVersion());
@@ -540,7 +540,7 @@ PHP_MINFO_FUNCTION(gd)
 #endif
 #endif
 	php_info_print_table_row(2, "XBM Support", "enabled");
-#if defined(USE_GD_JISX0208)
+#ifdef USE_GD_JISX0208
 	php_info_print_table_row(2, "JIS-mapped Japanese Font Support", "enabled");
 #endif
 #ifdef HAVE_GD_WEBP
@@ -588,7 +588,7 @@ PHP_FUNCTION(gd_info)
 	add_assoc_bool(return_value, "PNG Support", 0);
 #endif
 	add_assoc_bool(return_value, "WBMP Support", 1);
-#if defined(HAVE_GD_XPM)
+#ifdef HAVE_GD_XPM
 	add_assoc_bool(return_value, "XPM Support", 1);
 #else
 	add_assoc_bool(return_value, "XPM Support", 0);
@@ -609,7 +609,7 @@ PHP_FUNCTION(gd_info)
 #else
 	add_assoc_bool(return_value, "TGA Read Support", 0);
 #endif
-#if defined(USE_GD_JISX0208)
+#ifdef USE_GD_JISX0208
 	add_assoc_bool(return_value, "JIS-mapped Japanese Font Support", 1);
 #else
 	add_assoc_bool(return_value, "JIS-mapped Japanese Font Support", 0);
@@ -1399,7 +1399,7 @@ PHP_FUNCTION(imagetypes)
 	ret |= PHP_IMG_PNG;
 #endif
 	ret |= PHP_IMG_WBMP;
-#if defined(HAVE_GD_XPM)
+#ifdef HAVE_GD_XPM
 	ret |= PHP_IMG_XPM;
 #endif
 #ifdef HAVE_GD_WEBP
@@ -1676,7 +1676,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 			case PHP_GDIMG_TYPE_GD2PART:
 				im = (*func_p)(fp, srcx, srcy, width, height);
 				break;
-#if defined(HAVE_GD_XPM)
+#ifdef HAVE_GD_XPM
 			case PHP_GDIMG_TYPE_XPM:
 				im = gdImageCreateFromXpm(file);
 				break;
@@ -1758,7 +1758,7 @@ PHP_FUNCTION(imagecreatefromxbm)
 }
 /* }}} */
 
-#if defined(HAVE_GD_XPM)
+#ifdef HAVE_GD_XPM
 /* {{{ proto resource imagecreatefromxpm(string filename)
    Create a new image from XPM file or URL */
 PHP_FUNCTION(imagecreatefromxpm)
@@ -1800,7 +1800,7 @@ PHP_FUNCTION(imagecreatefromgd2part)
 }
 /* }}} */
 
-#if defined(HAVE_GD_BMP)
+#ifdef HAVE_GD_BMP
 /* {{{ proto resource imagecreatefrombmp(string filename)
    Create a new image from BMP file or URL */
 PHP_FUNCTION(imagecreatefrombmp)
@@ -1810,7 +1810,7 @@ PHP_FUNCTION(imagecreatefrombmp)
 /* }}} */
 #endif
 
-#if defined(HAVE_GD_TGA)
+#ifdef HAVE_GD_TGA
 /* {{{ proto resource imagecreatefromtga(string filename)
    Create a new image from TGA file or URL */
 PHP_FUNCTION(imagecreatefromtga)

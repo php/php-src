@@ -168,7 +168,7 @@ int read_header_tga(gdIOCtx *ctx, oTga *tga)
 	tga->fliph = (header[17] & 0x10) ? 1 : 0;
 	tga->flipv = (header[17] & 0x20) ? 0 : 1;
 
-#if DEBUG
+#ifdef DEBUG
 	printf("format bps: %i\n", tga->bits);
 	printf("flip h/v: %i / %i\n", tga->fliph, tga->flipv);
 	printf("alpha: %i\n", tga->alphabits);
