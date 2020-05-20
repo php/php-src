@@ -1,6 +1,8 @@
-#!/bin/bash
-echo '
-<?php $conn_str .= " user=postgres"; ?>' >> "./ext/pgsql/tests/config.inc"
-if [ -z "$ARM64" -o -z "$S390X"]; then
-  psql -c 'create database test;' -U postgres
+#!/bin/sh
+set -ev
+
+# PostgreSQL tests currently don't work on some architectures.
+if test -z "${ARM64}${S390X}"; then
+    psql -c "ALTER USER postgres PASSWORD 'postgres';" -U postgres
+    psql -c "CREATE DATABASE test;" -U postgres
 fi
