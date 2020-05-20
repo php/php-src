@@ -31,7 +31,7 @@
 #include "ext/standard/info.h"
 #include "php_ini.h"
 
-#if HAVE_OCI8
+#ifdef HAVE_OCI8
 
 #include "php_oci8.h"
 #include "php_oci8_int.h"
@@ -995,12 +995,7 @@ int php_oci_bind_post_exec(zval *data)
 		 * binds, php_oci_bind_out_callback() should have allocated a
 		 * new string that we can modify here.
 		 */
-#if PHP_VERSION_ID < 70300
-		SEPARATE_STRING(zv);
-		Z_STR_P(zv) = zend_string_extend(Z_STR_P(zv), Z_STRLEN_P(zv)+1, 0);
-#else
 		ZVAL_NEW_STR(zv, zend_string_extend(Z_STR_P(zv), Z_STRLEN_P(zv)+1, 0));
-#endif
 		Z_STRVAL_P(zv)[ Z_STRLEN_P(zv) ] = '\0';
 	} else if (Z_TYPE_P(zv) == IS_ARRAY) {
 		int i;
@@ -1265,11 +1260,7 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, size_t name_l
 		zvtmp = zend_string_init(name, name_len, 0);
 		bindp = (php_oci_bind *) ecalloc(1, sizeof(php_oci_bind));
 		bindp = zend_hash_update_ptr(statement->binds, zvtmp, bindp);
-#if PHP_VERSION_ID < 70300
-		zend_string_release(zvtmp);
-#else
 		zend_string_release_ex(zvtmp, 0);
-#endif
 	}
 
 	/* Make sure the minimum of value_sz is 1 to avoid ORA-3149
@@ -1717,11 +1708,7 @@ int php_oci_bind_array_by_name(php_oci_statement *statement, char *name, size_t 
 
 	zvtmp = zend_string_init(name, name_len, 0);
 	zend_hash_update_ptr(statement->binds, zvtmp, bind);
-#if PHP_VERSION_ID < 70300
-	zend_string_release(zvtmp);
-#else
 	zend_string_release_ex(zvtmp, 0);
-#endif
 
 	statement->errcode = 0; /* retain backwards compat with OCI8 1.4 */
 	return 0;
