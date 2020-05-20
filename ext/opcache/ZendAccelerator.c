@@ -1471,7 +1471,14 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 				zend_accel_add_key(key, key_length, bucket);
 			}
 			zend_shared_alloc_unlock();
+#if 1
+			/* prefer the script already stored in SHM */
+			free_persistent_script(new_persistent_script, 1);
+			*from_shared_memory = 1;
+			return existing_persistent_script;
+#else
 			return new_persistent_script;
+#endif
 		}
 	}
 

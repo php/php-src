@@ -64,6 +64,8 @@ void free_persistent_script(zend_persistent_script *persistent_script, int destr
 	if (!destroy_elements) {
 		persistent_script->script.function_table.pDestructor = NULL;
 		persistent_script->script.class_table.pDestructor = NULL;
+	} else {
+		destroy_op_array(&persistent_script->script.main_op_array);
 	}
 
 	zend_hash_destroy(&persistent_script->script.function_table);
