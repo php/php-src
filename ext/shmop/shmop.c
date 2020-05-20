@@ -34,7 +34,7 @@
 #endif
 
 
-#if HAVE_SHMOP
+#ifdef HAVE_SHMOP
 
 #include "ext/standard/info.h"
 

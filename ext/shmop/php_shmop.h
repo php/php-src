@@ -17,7 +17,7 @@
 #ifndef PHP_SHMOP_H
 #define PHP_SHMOP_H
 
-#if HAVE_SHMOP
+#ifdef HAVE_SHMOP
 
 extern zend_module_entry shmop_module_entry;
 #define phpext_shmop_ptr &shmop_module_entry
