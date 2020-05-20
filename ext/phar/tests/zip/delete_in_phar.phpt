@@ -5,6 +5,7 @@ Phar: delete a file within a zip-based .phar
 --INI--
 phar.readonly=0
 phar.require_hash=0
+opcache.validate_timestamps=1
 --FILE--
 <?php
 
