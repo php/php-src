@@ -131,7 +131,7 @@ PHP_MINIT_FUNCTION(xsl)
 	xsl_object_handlers.free_obj = xsl_objects_free_storage;
 
 	REGISTER_XSL_CLASS(ce, "XSLTProcessor", NULL, class_XSLTProcessor_methods, xsl_xsltprocessor_class_entry);
-#if HAVE_XSL_EXSLT
+#ifdef HAVE_XSL_EXSLT
 	exsltRegisterAll();
 #endif
 
@@ -158,7 +158,7 @@ PHP_MINIT_FUNCTION(xsl)
 	REGISTER_LONG_CONSTANT("LIBXSLT_VERSION",           LIBXSLT_VERSION,            CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("LIBXSLT_DOTTED_VERSION",  LIBXSLT_DOTTED_VERSION,     CONST_CS | CONST_PERSISTENT);
 
-#if HAVE_XSL_EXSLT
+#ifdef HAVE_XSL_EXSLT
 	REGISTER_LONG_CONSTANT("LIBEXSLT_VERSION",           LIBEXSLT_VERSION,            CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("LIBEXSLT_DOTTED_VERSION",  LIBEXSLT_DOTTED_VERSION,     CONST_CS | CONST_PERSISTENT);
 #endif
@@ -265,7 +265,7 @@ PHP_MINFO_FUNCTION(xsl)
 		snprintf(buffer, 128, "%d.%d.%d", major, minor, subminor);
 		php_info_print_table_row(2, "libxslt compiled against libxml Version", buffer);
 	}
-#if HAVE_XSL_EXSLT
+#ifdef HAVE_XSL_EXSLT
 	php_info_print_table_row(2, "EXSLT", "enabled");
 	php_info_print_table_row(2, "libexslt Version", LIBEXSLT_DOTTED_VERSION);
 #endif

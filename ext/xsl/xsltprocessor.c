@@ -862,7 +862,7 @@ PHP_METHOD(XSLTProcessor, hasExsltSupport)
 		RETURN_THROWS();
 	}
 
-#if HAVE_XSL_EXSLT
+#ifdef HAVE_XSL_EXSLT
 	RETURN_TRUE;
 #else
 	RETURN_FALSE;
