@@ -289,10 +289,10 @@ if (PHP_IPV6 == "yes") {
 }
 if (main_network_has_ipv6) {
 	STDOUT.WriteLine("Enabling IPv6 support");
+	AC_DEFINE('HAVE_GAI_STRERROR', 1);
+	AC_DEFINE('HAVE_IPV6', 1);
 }
 AC_DEFINE('HAVE_GETADDRINFO', main_network_has_ipv6);
-AC_DEFINE('HAVE_GAI_STRERROR', main_network_has_ipv6);
-AC_DEFINE('HAVE_IPV6', main_network_has_ipv6);
 
 /* this allows up to 256 sockets to be select()ed in a single
  * call to select(), instead of the usual 64 */
