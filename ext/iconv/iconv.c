@@ -198,7 +198,7 @@ PHP_MINIT_FUNCTION(miconv)
 
 	REGISTER_INI_ENTRIES();
 
-#if HAVE_LIBICONV
+#ifdef HAVE_LIBICONV
 	{
 		static char buf[16];
 		snprintf(buf, sizeof(buf), "%d.%d",
@@ -417,7 +417,7 @@ static php_iconv_err_t _php_iconv_appendc(smart_str *d, const char c, iconv_t cd
 /* }}} */
 
 /* {{{ */
-#if ICONV_BROKEN_IGNORE
+#ifdef ICONV_BROKEN_IGNORE
 static int _php_check_ignore(const char *charset)
 {
   size_t clen = strlen(charset);
