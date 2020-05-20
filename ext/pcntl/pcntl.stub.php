@@ -23,7 +23,7 @@ function pcntl_sigprocmask(int $how, array $set, &$oldset = null): bool {}
 #endif
 
 #ifdef HAVE_STRUCT_SIGINFO_T
-#if HAVE_SIGWAITINFO && HAVE_SIGTIMEDWAIT
+#if defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT)
 function pcntl_sigwaitinfo(array $set, &$info = []): int|false {}
 
 function pcntl_sigtimedwait(array $set, &$info = [], int $seconds = 0, int $nanoseconds = 0): int|false {}

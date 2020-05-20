@@ -35,7 +35,7 @@
 #include "php_signal.h"
 #include "php_ticks.h"
 
-#if HAVE_GETPRIORITY || HAVE_SETPRIORITY || HAVE_WAIT3
+#if defined(HAVE_GETPRIORITY) || defined(HAVE_SETPRIORITY) || defined(HAVE_WAIT3)
 #include <sys/wait.h>
 #include <sys/time.h>
 #include <sys/resource.h>
@@ -166,7 +166,7 @@ void php_register_signal_constants(INIT_FUNC_ARGS)
 	REGISTER_LONG_CONSTANT("SIGRTMAX", (zend_long) SIGRTMAX, CONST_CS | CONST_PERSISTENT);
 #endif
 
-#if HAVE_GETPRIORITY || HAVE_SETPRIORITY
+#if defined(HAVE_GETPRIORITY) || defined(HAVE_SETPRIORITY)
 	REGISTER_LONG_CONSTANT("PRIO_PGRP", PRIO_PGRP, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PRIO_USER", PRIO_USER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PRIO_PROCESS", PRIO_PROCESS, CONST_CS | CONST_PERSISTENT);
@@ -181,7 +181,7 @@ void php_register_signal_constants(INIT_FUNC_ARGS)
 	/* }}} */
 
 	/* {{{ si_code */
-#if HAVE_SIGWAITINFO && HAVE_SIGTIMEDWAIT
+#if defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT)
 	REGISTER_LONG_CONSTANT("SI_USER",    SI_USER,    CONST_CS | CONST_PERSISTENT);
 #ifdef SI_NOINFO
 	REGISTER_LONG_CONSTANT("SI_NOINFO",  SI_NOINFO,  CONST_CS | CONST_PERSISTENT);
@@ -314,7 +314,7 @@ void php_register_signal_constants(INIT_FUNC_ARGS)
 #ifdef BUS_OBJERR
 	REGISTER_LONG_CONSTANT("BUS_OBJERR", BUS_OBJERR, CONST_CS | CONST_PERSISTENT);
 #endif
-#endif /* HAVE_SIGWAITINFO && HAVE_SIGTIMEDWAIT */
+#endif /* defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT) */
 	/* }}} */
 
 	/* unshare(/clone) constants */
@@ -1058,7 +1058,7 @@ PHP_FUNCTION(pcntl_sigprocmask)
 #endif
 
 #ifdef HAVE_STRUCT_SIGINFO_T
-# if HAVE_SIGWAITINFO && HAVE_SIGTIMEDWAIT
+# if defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT)
 static void pcntl_sigwaitinfo(INTERNAL_FUNCTION_PARAMETERS, int timedwait) /* {{{ */
 {
 	zval            *user_set, *user_signo, *user_siginfo = NULL;

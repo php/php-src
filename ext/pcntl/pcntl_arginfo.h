@@ -37,14 +37,14 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_sigprocmask, 0, 2, _IS_BOO
 ZEND_END_ARG_INFO()
 #endif
 
-#if defined(HAVE_STRUCT_SIGINFO_T) && HAVE_SIGWAITINFO && HAVE_SIGTIMEDWAIT
+#if defined(HAVE_STRUCT_SIGINFO_T) && defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pcntl_sigwaitinfo, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, set, IS_ARRAY, 0)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, info, "[]")
 ZEND_END_ARG_INFO()
 #endif
 
-#if defined(HAVE_STRUCT_SIGINFO_T) && HAVE_SIGWAITINFO && HAVE_SIGTIMEDWAIT
+#if defined(HAVE_STRUCT_SIGINFO_T) && defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pcntl_sigtimedwait, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, set, IS_ARRAY, 0)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, info, "[]")
@@ -128,10 +128,10 @@ ZEND_FUNCTION(pcntl_signal_dispatch);
 #if defined(HAVE_SIGPROCMASK)
 ZEND_FUNCTION(pcntl_sigprocmask);
 #endif
-#if defined(HAVE_STRUCT_SIGINFO_T) && HAVE_SIGWAITINFO && HAVE_SIGTIMEDWAIT
+#if defined(HAVE_STRUCT_SIGINFO_T) && defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT)
 ZEND_FUNCTION(pcntl_sigwaitinfo);
 #endif
-#if defined(HAVE_STRUCT_SIGINFO_T) && HAVE_SIGWAITINFO && HAVE_SIGTIMEDWAIT
+#if defined(HAVE_STRUCT_SIGINFO_T) && defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT)
 ZEND_FUNCTION(pcntl_sigtimedwait);
 #endif
 ZEND_FUNCTION(pcntl_wifexited);
@@ -169,10 +169,10 @@ static const zend_function_entry ext_functions[] = {
 #if defined(HAVE_SIGPROCMASK)
 	ZEND_FE(pcntl_sigprocmask, arginfo_pcntl_sigprocmask)
 #endif
-#if defined(HAVE_STRUCT_SIGINFO_T) && HAVE_SIGWAITINFO && HAVE_SIGTIMEDWAIT
+#if defined(HAVE_STRUCT_SIGINFO_T) && defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT)
 	ZEND_FE(pcntl_sigwaitinfo, arginfo_pcntl_sigwaitinfo)
 #endif
-#if defined(HAVE_STRUCT_SIGINFO_T) && HAVE_SIGWAITINFO && HAVE_SIGTIMEDWAIT
+#if defined(HAVE_STRUCT_SIGINFO_T) && defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT)
 	ZEND_FE(pcntl_sigtimedwait, arginfo_pcntl_sigtimedwait)
 #endif
 	ZEND_FE(pcntl_wifexited, arginfo_pcntl_wifexited)
