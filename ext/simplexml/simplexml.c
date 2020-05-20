@@ -21,7 +21,7 @@
 #endif
 
 #include "php.h"
-#if HAVE_LIBXML && HAVE_SIMPLEXML
+#if defined(HAVE_LIBXML) && defined(HAVE_SIMPLEXML)
 
 #include "php_ini.h"
 #include "ext/standard/info.h"
