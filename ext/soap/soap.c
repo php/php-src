@@ -20,7 +20,7 @@
 #include "config.h"
 #endif
 #include "php_soap.h"
-#if HAVE_PHP_SESSION && !defined(COMPILE_DL_SESSION)
+#if defined(HAVE_PHP_SESSION) && !defined(COMPILE_DL_SESSION)
 #include "ext/session/php_session.h"
 #endif
 #include "soap_arginfo.h"
@@ -1403,7 +1403,7 @@ PHP_METHOD(SoapServer, handle)
 		soap_obj = &service->soap_object;
 		function_table = &((Z_OBJCE_P(soap_obj))->function_table);
 	} else if (service->type == SOAP_CLASS) {
-#if HAVE_PHP_SESSION && !defined(COMPILE_DL_SESSION)
+#if defined(HAVE_PHP_SESSION) && !defined(COMPILE_DL_SESSION)
 		/* If persistent then set soap_obj from from the previous created session (if available) */
 		if (service->soap_class.persistence == SOAP_PERSISTENCE_SESSION) {
 			zval *session_vars, *tmp_soap_p;
@@ -1475,7 +1475,7 @@ PHP_METHOD(SoapServer, handle)
 				}
 				efree(class_name);
 			}
-#if HAVE_PHP_SESSION && !defined(COMPILE_DL_SESSION)
+#if defined(HAVE_PHP_SESSION) && !defined(COMPILE_DL_SESSION)
 			/* If session then update session hash with new object */
 			if (service->soap_class.persistence == SOAP_PERSISTENCE_SESSION) {
 				zval *session_vars = &PS(http_session_vars), *tmp_soap_p;
@@ -1566,7 +1566,7 @@ PHP_METHOD(SoapServer, handle)
 		if (service->type == SOAP_CLASS || service->type == SOAP_OBJECT) {
 			call_status = call_user_function(NULL, soap_obj, &function_name, &retval, num_params, params);
 			if (service->type == SOAP_CLASS) {
-#if HAVE_PHP_SESSION && !defined(COMPILE_DL_SESSION)
+#if defined(HAVE_PHP_SESSION) && !defined(COMPILE_DL_SESSION)
 				if (service->soap_class.persistence != SOAP_PERSISTENCE_SESSION) {
 					zval_ptr_dtor(soap_obj);
 					soap_obj = NULL;
@@ -1588,7 +1588,7 @@ PHP_METHOD(SoapServer, handle)
 		php_output_discard();
 		_soap_server_exception(service, function, ZEND_THIS);
 		if (service->type == SOAP_CLASS) {
-#if HAVE_PHP_SESSION && !defined(COMPILE_DL_SESSION)
+#if defined(HAVE_PHP_SESSION) && !defined(COMPILE_DL_SESSION)
 			if (soap_obj && service->soap_class.persistence != SOAP_PERSISTENCE_SESSION) {
 #else
 			if (soap_obj) {
@@ -1627,7 +1627,7 @@ PHP_METHOD(SoapServer, handle)
 		php_output_discard();
 		_soap_server_exception(service, function, ZEND_THIS);
 		if (service->type == SOAP_CLASS) {
-#if HAVE_PHP_SESSION && !defined(COMPILE_DL_SESSION)
+#if defined(HAVE_PHP_SESSION) && !defined(COMPILE_DL_SESSION)
 			if (soap_obj && service->soap_class.persistence != SOAP_PERSISTENCE_SESSION) {
 #else
 			if (soap_obj) {
