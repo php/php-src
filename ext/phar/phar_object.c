@@ -1274,7 +1274,7 @@ PHP_METHOD(Phar, getSupportedSignatures)
 	add_next_index_stringl(return_value, "SHA-1", 5);
 	add_next_index_stringl(return_value, "SHA-256", 7);
 	add_next_index_stringl(return_value, "SHA-512", 7);
-#if PHAR_HAVE_OPENSSL
+#ifdef PHAR_HAVE_OPENSSL
 	add_next_index_stringl(return_value, "OpenSSL", 7);
 #else
 	if (zend_hash_str_exists(&module_registry, "openssl", sizeof("openssl")-1)) {
