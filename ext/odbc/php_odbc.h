@@ -19,7 +19,7 @@
 #ifndef PHP_ODBC_H
 #define PHP_ODBC_H
 
-#if HAVE_UODBC
+#ifdef HAVE_UODBC
 
 #ifdef ZTS
 #include "TSRM.h"

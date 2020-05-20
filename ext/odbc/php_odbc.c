@@ -34,7 +34,7 @@
 #include "php_globals.h"
 #include "odbc_arginfo.h"
 
-#if HAVE_UODBC
+#ifdef HAVE_UODBC
 
 #include <fcntl.h>
 #include "ext/standard/head.h"
