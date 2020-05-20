@@ -18,7 +18,7 @@
 #ifndef PHP_PGSQL_H
 #define PHP_PGSQL_H
 
-#if HAVE_PGSQL
+#ifdef HAVE_PGSQL
 
 #define PHP_PGSQL_API_VERSION 20140217
 
@@ -77,31 +77,31 @@ PHP_FUNCTION(pg_tty);
 PHP_FUNCTION(pg_options);
 PHP_FUNCTION(pg_version);
 PHP_FUNCTION(pg_ping);
-#if HAVE_PQPARAMETERSTATUS
+#ifdef HAVE_PQPARAMETERSTATUS
 PHP_FUNCTION(pg_parameter_status);
 #endif
-#if HAVE_PGTRANSACTIONSTATUS
+#ifdef HAVE_PGTRANSACTIONSTATUS
 PHP_FUNCTION(pg_transaction_status);
 #endif
 /* query functions */
 PHP_FUNCTION(pg_query);
-#if HAVE_PQEXECPARAMS
+#ifdef HAVE_PQEXECPARAMS
 PHP_FUNCTION(pg_query_params);
 #endif
-#if HAVE_PQPREPARE
+#ifdef HAVE_PQPREPARE
 PHP_FUNCTION(pg_prepare);
 #endif
-#if HAVE_PQEXECPREPARED
+#ifdef HAVE_PQEXECPREPARED
 PHP_FUNCTION(pg_execute);
 #endif
 PHP_FUNCTION(pg_send_query);
-#if HAVE_PQSENDQUERYPARAMS
+#ifdef HAVE_PQSENDQUERYPARAMS
 PHP_FUNCTION(pg_send_query_params);
 #endif
-#if HAVE_PQSENDPREPARE
+#ifdef HAVE_PQSENDPREPARE
 PHP_FUNCTION(pg_send_prepare);
 #endif
-#if HAVE_PQSENDQUERYPREPARED
+#ifdef HAVE_PQSENDQUERYPREPARED
 PHP_FUNCTION(pg_send_execute);
 #endif
 PHP_FUNCTION(pg_cancel_query);
@@ -113,7 +113,7 @@ PHP_FUNCTION(pg_fetch_result);
 PHP_FUNCTION(pg_fetch_row);
 PHP_FUNCTION(pg_fetch_all);
 PHP_FUNCTION(pg_fetch_all_columns);
-#if HAVE_PQCMDTUPLES
+#ifdef HAVE_PQCMDTUPLES
 PHP_FUNCTION(pg_affected_rows);
 #endif
 PHP_FUNCTION(pg_get_result);
@@ -139,7 +139,7 @@ PHP_FUNCTION(pg_flush);
 PHP_FUNCTION(pg_get_pid);
 /* error message functions */
 PHP_FUNCTION(pg_result_error);
-#if HAVE_PQRESULTERRORFIELD
+#ifdef HAVE_PQRESULTERRORFIELD
 PHP_FUNCTION(pg_result_error_field);
 #endif
 PHP_FUNCTION(pg_last_error);
@@ -161,7 +161,7 @@ PHP_FUNCTION(pg_lo_import);
 PHP_FUNCTION(pg_lo_export);
 PHP_FUNCTION(pg_lo_seek);
 PHP_FUNCTION(pg_lo_tell);
-#if HAVE_PG_LO_TRUNCATE
+#ifdef HAVE_PG_LO_TRUNCATE
 PHP_FUNCTION(pg_lo_truncate);
 #endif
 
@@ -172,10 +172,10 @@ PHP_FUNCTION(pg_untrace);
 /* utility functions */
 PHP_FUNCTION(pg_client_encoding);
 PHP_FUNCTION(pg_set_client_encoding);
-#if HAVE_PQSETERRORVERBOSITY
+#ifdef HAVE_PQSETERRORVERBOSITY
 PHP_FUNCTION(pg_set_error_verbosity);
 #endif
-#if HAVE_PQESCAPE
+#ifdef HAVE_PQESCAPE
 PHP_FUNCTION(pg_escape_string);
 PHP_FUNCTION(pg_escape_bytea);
 PHP_FUNCTION(pg_unescape_bytea);

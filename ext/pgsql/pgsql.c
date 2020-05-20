@@ -40,7 +40,7 @@
 #include "php_globals.h"
 #include "zend_exceptions.h"
 
-#if HAVE_PGSQL
+#ifdef HAVE_PGSQL
 
 #ifndef InvalidOid
 #define InvalidOid ((Oid) 0)
@@ -74,7 +74,7 @@
 #define PGSQL_RETURN_OID(oid) RETURN_LONG((zend_long)oid)
 #endif
 
-#if HAVE_PQSETNONBLOCKING
+#ifdef HAVE_PQSETNONBLOCKING
 #define PQ_SETNONBLOCKING(pg_link, flag) PQsetnonblocking(pg_link, flag)
 #else
 #define PQ_SETNONBLOCKING(pg_link, flag) 0
@@ -114,7 +114,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_connect_poll, 0, 0, 0)
 	ZEND_ARG_INFO(0, connection)
 ZEND_END_ARG_INFO()
 
-#if HAVE_PQPARAMETERSTATUS
+#ifdef HAVE_PQPARAMETERSTATUS
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_parameter_status, 0, 0, 1)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_INFO(0, param_name)
@@ -162,7 +162,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_query, 0, 0, 0)
 	ZEND_ARG_INFO(0, query)
 ZEND_END_ARG_INFO()
 
-#if HAVE_PQEXECPARAMS
+#ifdef HAVE_PQEXECPARAMS
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_query_params, 0, 0, 0)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_INFO(0, query)
@@ -170,7 +170,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_query_params, 0, 0, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#if HAVE_PQPREPARE
+#ifdef HAVE_PQPREPARE
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_prepare, 0, 0, 0)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_INFO(0, stmtname)
@@ -178,7 +178,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_prepare, 0, 0, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#if HAVE_PQEXECPREPARED
+#ifdef HAVE_PQEXECPREPARED
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_execute, 0, 0, 0)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_INFO(0, stmtname)
@@ -194,7 +194,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_num_fields, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
 ZEND_END_ARG_INFO()
 
-#if HAVE_PQCMDTUPLES
+#ifdef HAVE_PQCMDTUPLES
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_affected_rows, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
 ZEND_END_ARG_INFO()
@@ -371,21 +371,21 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_lo_tell, 0, 0, 1)
 	ZEND_ARG_INFO(0, large_object)
 ZEND_END_ARG_INFO()
 
-#if HAVE_PG_LO_TRUNCATE
+#ifdef HAVE_PG_LO_TRUNCATE
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_lo_truncate, 0, 0, 1)
 	ZEND_ARG_INFO(0, large_object)
 	ZEND_ARG_INFO(0, size)
 ZEND_END_ARG_INFO()
 #endif
 
-#if HAVE_PQSETERRORVERBOSITY
+#ifdef HAVE_PQSETERRORVERBOSITY
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_set_error_verbosity, 0, 0, 0)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_INFO(0, verbosity)
 ZEND_END_ARG_INFO()
 #endif
 
-#if HAVE_PQCLIENTENCODING
+#ifdef HAVE_PQCLIENTENCODING
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_set_client_encoding, 0, 0, 0)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_INFO(0, encoding)
@@ -420,7 +420,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_copy_from, 0, 0, 3)
 	ZEND_ARG_INFO(0, null_as)
 ZEND_END_ARG_INFO()
 
-#if HAVE_PQESCAPE
+#ifdef HAVE_PQESCAPE
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_escape_string, 0, 0, 0)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_INFO(0, data)
@@ -436,7 +436,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_unescape_bytea, 0, 0, 1)
 ZEND_END_ARG_INFO()
 #endif
 
-#if HAVE_PQESCAPE
+#ifdef HAVE_PQESCAPE
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_escape_literal, 0, 0, 0)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_INFO(0, data)
@@ -451,7 +451,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_result_error, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
 ZEND_END_ARG_INFO()
 
-#if HAVE_PQRESULTERRORFIELD
+#ifdef HAVE_PQRESULTERRORFIELD
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_result_error_field, 0, 0, 2)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(0, fieldcode)
@@ -462,7 +462,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_connection_status, 0, 0, 1)
 	ZEND_ARG_INFO(0, connection)
 ZEND_END_ARG_INFO()
 
-#if HAVE_PGTRANSACTIONSTATUS
+#ifdef HAVE_PGTRANSACTIONSTATUS
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_transaction_status, 0, 0, 1)
 	ZEND_ARG_INFO(0, connection)
 ZEND_END_ARG_INFO()
@@ -485,7 +485,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_send_query, 0, 0, 2)
 	ZEND_ARG_INFO(0, query)
 ZEND_END_ARG_INFO()
 
-#if HAVE_PQSENDQUERYPARAMS
+#ifdef HAVE_PQSENDQUERYPARAMS
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_send_query_params, 0, 0, 3)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_INFO(0, query)
@@ -493,7 +493,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_send_query_params, 0, 0, 3)
 ZEND_END_ARG_INFO()
 #endif
 
-#if HAVE_PQSENDPREPARE
+#ifdef HAVE_PQSENDPREPARE
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_send_prepare, 0, 0, 3)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_INFO(0, stmtname)
@@ -501,7 +501,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_send_prepare, 0, 0, 3)
 ZEND_END_ARG_INFO()
 #endif
 
-#if HAVE_PQSENDQUERYPREPARED
+#ifdef HAVE_PQSENDQUERYPREPARED
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_send_execute, 0, 0, 3)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_INFO(0, stmtname)
@@ -600,31 +600,31 @@ static const zend_function_entry pgsql_functions[] = {
 	PHP_FE(pg_options,		arginfo_pg_options)
 	PHP_FE(pg_version,		arginfo_pg_version)
 	PHP_FE(pg_ping,			arginfo_pg_ping)
-#if HAVE_PQPARAMETERSTATUS
+#ifdef HAVE_PQPARAMETERSTATUS
 	PHP_FE(pg_parameter_status, arginfo_pg_parameter_status)
 #endif
-#if HAVE_PGTRANSACTIONSTATUS
+#ifdef HAVE_PGTRANSACTIONSTATUS
 	PHP_FE(pg_transaction_status, arginfo_pg_transaction_status)
 #endif
 	/* query functions */
 	PHP_FE(pg_query,		arginfo_pg_query)
-#if HAVE_PQEXECPARAMS
+#ifdef HAVE_PQEXECPARAMS
 	PHP_FE(pg_query_params,		arginfo_pg_query_params)
 #endif
-#if HAVE_PQPREPARE
+#ifdef HAVE_PQPREPARE
 	PHP_FE(pg_prepare,		arginfo_pg_prepare)
 #endif
-#if HAVE_PQEXECPREPARED
+#ifdef HAVE_PQEXECPREPARED
 	PHP_FE(pg_execute,		arginfo_pg_execute)
 #endif
 	PHP_FE(pg_send_query,	arginfo_pg_send_query)
-#if HAVE_PQSENDQUERYPARAMS
+#ifdef HAVE_PQSENDQUERYPARAMS
 	PHP_FE(pg_send_query_params,	arginfo_pg_send_query_params)
 #endif
-#if HAVE_PQSENDPREPARE
+#ifdef HAVE_PQSENDPREPARE
 	PHP_FE(pg_send_prepare,	arginfo_pg_send_prepare)
 #endif
-#if HAVE_PQSENDQUERYPREPARED
+#ifdef HAVE_PQSENDQUERYPREPARED
 	PHP_FE(pg_send_execute,	arginfo_pg_send_execute)
 #endif
 	PHP_FE(pg_cancel_query, arginfo_pg_cancel_query)
@@ -636,7 +636,7 @@ static const zend_function_entry pgsql_functions[] = {
 	PHP_FE(pg_fetch_object,	arginfo_pg_fetch_object)
 	PHP_FE(pg_fetch_all,	arginfo_pg_fetch_all)
 	PHP_FE(pg_fetch_all_columns,	arginfo_pg_fetch_all_columns)
-#if HAVE_PQCMDTUPLES
+#ifdef HAVE_PQCMDTUPLES
 	PHP_FE(pg_affected_rows,arginfo_pg_affected_rows)
 #endif
 	PHP_FE(pg_get_result,	arginfo_pg_get_result)
@@ -664,7 +664,7 @@ static const zend_function_entry pgsql_functions[] = {
 	PHP_FE(pg_get_pid,      arginfo_pg_get_pid)
 	/* error message functions */
 	PHP_FE(pg_result_error, arginfo_pg_result_error)
-#if HAVE_PQRESULTERRORFIELD
+#ifdef HAVE_PQRESULTERRORFIELD
 	PHP_FE(pg_result_error_field, arginfo_pg_result_error_field)
 #endif
 	PHP_FE(pg_last_error,   arginfo_pg_last_error)
@@ -689,21 +689,21 @@ static const zend_function_entry pgsql_functions[] = {
 	PHP_FE(pg_lo_export,	arginfo_pg_lo_export)
 	PHP_FE(pg_lo_seek,		arginfo_pg_lo_seek)
 	PHP_FE(pg_lo_tell,		arginfo_pg_lo_tell)
-#if HAVE_PG_LO_TRUNCATE
+#ifdef HAVE_PG_LO_TRUNCATE
 	PHP_FE(pg_lo_truncate,	arginfo_pg_lo_truncate)
 #endif
 	/* utility functions */
-#if HAVE_PQESCAPE
+#ifdef HAVE_PQESCAPE
 	PHP_FE(pg_escape_string,	arginfo_pg_escape_string)
 	PHP_FE(pg_escape_bytea, 	arginfo_pg_escape_bytea)
 	PHP_FE(pg_unescape_bytea, 	arginfo_pg_unescape_bytea)
 	PHP_FE(pg_escape_literal,	arginfo_pg_escape_literal)
 	PHP_FE(pg_escape_identifier,	arginfo_pg_escape_identifier)
 #endif
-#if HAVE_PQSETERRORVERBOSITY
+#ifdef HAVE_PQSETERRORVERBOSITY
 	PHP_FE(pg_set_error_verbosity,	arginfo_pg_set_error_verbosity)
 #endif
-#if HAVE_PQCLIENTENCODING
+#ifdef HAVE_PQCLIENTENCODING
 	PHP_FE(pg_client_encoding,		arginfo_pg_client_encoding)
 	PHP_FE(pg_set_client_encoding,	arginfo_pg_set_client_encoding)
 #endif
@@ -717,7 +717,7 @@ static const zend_function_entry pgsql_functions[] = {
 	/* aliases for downwards compatibility */
 	PHP_FALIAS(pg_exec,          pg_query,          arginfo_pg_query)
 	PHP_FALIAS(pg_getlastoid,    pg_last_oid,       arginfo_pg_last_oid)
-#if HAVE_PQCMDTUPLES
+#ifdef HAVE_PQCMDTUPLES
 	PHP_FALIAS(pg_cmdtuples,	 pg_affected_rows,  arginfo_pg_affected_rows)
 #endif
 	PHP_FALIAS(pg_errormessage,	 pg_last_error,     arginfo_pg_last_error)
@@ -740,7 +740,7 @@ static const zend_function_entry pgsql_functions[] = {
 	PHP_FALIAS(pg_lowrite,	     pg_lo_write,       arginfo_pg_lo_write)
 	PHP_FALIAS(pg_loimport,	     pg_lo_import,      arginfo_pg_lo_import)
 	PHP_FALIAS(pg_loexport,	     pg_lo_export,      arginfo_pg_lo_export)
-#if HAVE_PQCLIENTENCODING
+#ifdef HAVE_PQCLIENTENCODING
 	PHP_FALIAS(pg_clientencoding,		pg_client_encoding,		arginfo_pg_client_encoding)
 	PHP_FALIAS(pg_setclientencoding,	pg_set_client_encoding,	arginfo_pg_set_client_encoding)
 #endif
@@ -783,11 +783,11 @@ static int le_link, le_plink, le_result, le_lofp, le_string;
 #define pg_encoding_to_char(x) "SQL_ASCII"
 #endif
 
-#if !HAVE_PQESCAPE_CONN
+#ifndef HAVE_PQESCAPE_CONN
 #define PQescapeStringConn(conn, to, from, len, error) PQescapeString(to, from, len)
 #endif
 
-#if HAVE_PQESCAPELITERAL
+#ifdef HAVE_PQESCAPELITERAL
 #define PGSQLescapeLiteral(conn, str, len) PQescapeLiteral(conn, str, len)
 #define PGSQLescapeIdentifier(conn, str, len) PQescapeIdentifier(conn, str, len)
 #define PGSQLfree(a) PQfreemem(a)
@@ -1008,13 +1008,13 @@ static int _rollback_transactions(zval *el)
 	while ((res = PQgetResult(link))) {
 		PQclear(res);
 	}
-#if HAVE_PGTRANSACTIONSTATUS && HAVE_PQPROTOCOLVERSION
+#if defined(HAVE_PGTRANSACTIONSTATUS) && defined(HAVE_PQPROTOCOLVERSION)
 	if ((PQprotocolVersion(link) >= 3 && PQtransactionStatus(link) != PQTRANS_IDLE) || PQprotocolVersion(link) < 3)
 #endif
 	{
 		int orig = PGG(ignore_notices);
 		PGG(ignore_notices) = 1;
-#if HAVE_PGTRANSACTIONSTATUS && HAVE_PQPROTOCOLVERSION
+#if defined(HAVE_PGTRANSACTIONSTATUS) && defined(HAVE_PQPROTOCOLVERSION)
 		res = PQexec(link,"ROLLBACK;");
 #else
 		res = PQexec(link,"BEGIN;");
@@ -1110,7 +1110,7 @@ PHP_MINIT_FUNCTION(pgsql)
 	le_result = zend_register_list_destructors_ex(_free_result, NULL, "pgsql result", module_number);
 	le_lofp = zend_register_list_destructors_ex(_free_ptr, NULL, "pgsql large object", module_number);
 	le_string = zend_register_list_destructors_ex(_free_ptr, NULL, "pgsql string", module_number);
-#if HAVE_PG_CONFIG_H
+#ifdef HAVE_PG_CONFIG_H
 	/* PG_VERSION - libpq version */
 	REGISTER_STRING_CONSTANT("PGSQL_LIBPQ_VERSION", PG_VERSION, CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("PGSQL_LIBPQ_VERSION_STR", PG_VERSION_STR, CONST_CS | CONST_PERSISTENT);
@@ -1143,7 +1143,7 @@ PHP_MINIT_FUNCTION(pgsql)
 	REGISTER_LONG_CONSTANT("PGSQL_POLLING_WRITING", PGRES_POLLING_WRITING, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_POLLING_OK", PGRES_POLLING_OK, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_POLLING_ACTIVE", PGRES_POLLING_ACTIVE, CONST_CS | CONST_PERSISTENT);
-#if HAVE_PGTRANSACTIONSTATUS
+#ifdef HAVE_PGTRANSACTIONSTATUS
 	/* For pg_transaction_status() */
 	REGISTER_LONG_CONSTANT("PGSQL_TRANSACTION_IDLE", PQTRANS_IDLE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_TRANSACTION_ACTIVE", PQTRANS_ACTIVE, CONST_CS | CONST_PERSISTENT);
@@ -1151,7 +1151,7 @@ PHP_MINIT_FUNCTION(pgsql)
 	REGISTER_LONG_CONSTANT("PGSQL_TRANSACTION_INERROR", PQTRANS_INERROR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_TRANSACTION_UNKNOWN", PQTRANS_UNKNOWN, CONST_CS | CONST_PERSISTENT);
 #endif
-#if HAVE_PQSETERRORVERBOSITY
+#ifdef HAVE_PQSETERRORVERBOSITY
 	/* For pg_set_error_verbosity() */
 	REGISTER_LONG_CONSTANT("PGSQL_ERRORS_TERSE", PQERRORS_TERSE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_ERRORS_DEFAULT", PQERRORS_DEFAULT, CONST_CS | CONST_PERSISTENT);
@@ -1173,7 +1173,7 @@ PHP_MINIT_FUNCTION(pgsql)
 	REGISTER_LONG_CONSTANT("PGSQL_BAD_RESPONSE", PGRES_BAD_RESPONSE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_NONFATAL_ERROR", PGRES_NONFATAL_ERROR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_FATAL_ERROR", PGRES_FATAL_ERROR, CONST_CS | CONST_PERSISTENT);
-#if HAVE_PQRESULTERRORFIELD
+#ifdef HAVE_PQRESULTERRORFIELD
 	/* For pg_result_error_field() field codes */
 	REGISTER_LONG_CONSTANT("PGSQL_DIAG_SEVERITY", PG_DIAG_SEVERITY, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_DIAG_SQLSTATE", PG_DIAG_SQLSTATE, CONST_CS | CONST_PERSISTENT);
@@ -1267,7 +1267,7 @@ PHP_MINFO_FUNCTION(pgsql)
 
 	php_info_print_table_start();
 	php_info_print_table_header(2, "PostgreSQL Support", "enabled");
-#if HAVE_PG_CONFIG_H
+#ifdef HAVE_PG_CONFIG_H
 	php_info_print_table_row(2, "PostgreSQL(libpq) Version", PG_VERSION);
 	php_info_print_table_row(2, "PostgreSQL(libpq) ", PG_VERSION_STR);
 #ifdef HAVE_PGSQL_WITH_MULTIBYTE_SUPPORT
@@ -1421,7 +1421,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				}
 			}
 			pgsql = (PGconn *) le->ptr;
-#if HAVE_PQPROTOCOLVERSION && HAVE_PQPARAMETERSTATUS
+#if defined(HAVE_PQPROTOCOLVERSION) && defined(HAVE_PQPARAMETERSTATUS)
 			if (PQprotocolVersion(pgsql) >= 3 && atof(PQparameterStatus(pgsql, "server_version")) >= 7.2) {
 #else
 			if (atof(PG_VERSION) >= 7.2) {
@@ -1662,9 +1662,9 @@ static void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type
 		case PHP_PG_VERSION:
 			array_init(return_value);
 			add_assoc_string(return_value, "client", PG_VERSION);
-#if HAVE_PQPROTOCOLVERSION
+#ifdef HAVE_PQPROTOCOLVERSION
 			add_assoc_long(return_value, "protocol", PQprotocolVersion(pgsql));
-#if HAVE_PQPARAMETERSTATUS
+#ifdef HAVE_PQPARAMETERSTATUS
 			if (PQprotocolVersion(pgsql) >= 3) {
 				/* 8.0 or grater supports protorol version 3 */
 				char *tmp;
@@ -1755,7 +1755,7 @@ PHP_FUNCTION(pg_version)
 }
 /* }}} */
 
-#if HAVE_PQPARAMETERSTATUS
+#ifdef HAVE_PQPARAMETERSTATUS
 /* {{{ proto string|false pg_parameter_status([resource connection,] string param_name)
    Returns the value of a server parameter */
 PHP_FUNCTION(pg_parameter_status)
@@ -1909,7 +1909,7 @@ PHP_FUNCTION(pg_query)
 }
 /* }}} */
 
-#if HAVE_PQEXECPARAMS || HAVE_PQEXECPREPARED || HAVE_PQSENDQUERYPARAMS || HAVE_PQSENDQUERYPREPARED
+#if defined(HAVE_PQEXECPARAMS) || defined(HAVE_PQEXECPREPARED) || defined(HAVE_PQSENDQUERYPARAMS) || defined(HAVE_PQSENDQUERYPREPARED)
 /* {{{ _php_pgsql_free_params */
 static void _php_pgsql_free_params(char **params, int num_params)
 {
@@ -1926,7 +1926,7 @@ static void _php_pgsql_free_params(char **params, int num_params)
 /* }}} */
 #endif
 
-#if HAVE_PQEXECPARAMS
+#ifdef HAVE_PQEXECPARAMS
 /* {{{ proto resource pg_query_params([resource connection,] string query, array params)
    Execute a query */
 PHP_FUNCTION(pg_query_params)
@@ -2045,7 +2045,7 @@ PHP_FUNCTION(pg_query_params)
 /* }}} */
 #endif
 
-#if HAVE_PQPREPARE
+#ifdef HAVE_PQPREPARE
 /* {{{ proto resource pg_prepare([resource connection,] string stmtname, string query)
    Prepare a query for future execution */
 PHP_FUNCTION(pg_prepare)
@@ -2129,7 +2129,7 @@ PHP_FUNCTION(pg_prepare)
 /* }}} */
 #endif
 
-#if HAVE_PQEXECPREPARED
+#ifdef HAVE_PQEXECPREPARED
 /* {{{ proto resource pg_execute([resource connection,] string stmtname, array params)
    Execute a prepared query  */
 PHP_FUNCTION(pg_execute)
@@ -2272,7 +2272,7 @@ static void php_pgsql_get_result_info(INTERNAL_FUNCTION_PARAMETERS, int entry_ty
 			RETVAL_LONG(PQnfields(pgsql_result));
 			break;
 		case PHP_PG_CMD_TUPLES:
-#if HAVE_PQCMDTUPLES
+#ifdef HAVE_PQCMDTUPLES
 			RETVAL_LONG(atoi(PQcmdTuples(pgsql_result)));
 #else
 			php_error_docref(NULL, E_WARNING, "Not supported under this build");
@@ -2301,7 +2301,7 @@ PHP_FUNCTION(pg_num_fields)
 }
 /* }}} */
 
-#if HAVE_PQCMDTUPLES
+#ifdef HAVE_PQCMDTUPLES
 /* {{{ proto int pg_affected_rows(resource result)
    Returns the number of affected tuples */
 PHP_FUNCTION(pg_affected_rows)
@@ -3827,7 +3827,7 @@ PHP_FUNCTION(pg_lo_seek)
 		RETURN_THROWS();
 	}
 
-#if HAVE_PG_LO64
+#ifdef HAVE_PG_LO64
 	if (PQserverVersion((PGconn *)pgsql->conn) >= 90300) {
 		result = lo_lseek64((PGconn *)pgsql->conn, pgsql->lofd, offset, (int)whence);
 	} else {
@@ -3861,7 +3861,7 @@ PHP_FUNCTION(pg_lo_tell)
 		RETURN_THROWS();
 	}
 
-#if HAVE_PG_LO64
+#ifdef VE_PG_LO64
 	if (PQserverVersion((PGconn *)pgsql->conn) >= 90300) {
 		offset = lo_tell64((PGconn *)pgsql->conn, pgsql->lofd);
 	} else {
@@ -3874,7 +3874,7 @@ PHP_FUNCTION(pg_lo_tell)
 }
 /* }}} */
 
-#if HAVE_PG_LO_TRUNCATE
+#ifdef HAVE_PG_LO_TRUNCATE
 /* {{{ proto bool pg_lo_truncate(resource large_object, int size)
    Truncate large object to size */
 PHP_FUNCTION(pg_lo_truncate)
@@ -3893,7 +3893,7 @@ PHP_FUNCTION(pg_lo_truncate)
 		RETURN_THROWS();
 	}
 
-#if HAVE_PG_LO64
+#ifdef VE_PG_LO64
 	if (PQserverVersion((PGconn *)pgsql->conn) >= 90300) {
 		result = lo_truncate64((PGconn *)pgsql->conn, pgsql->lofd, size);
 	} else {
@@ -3911,7 +3911,7 @@ PHP_FUNCTION(pg_lo_truncate)
 /* }}} */
 #endif
 
-#if HAVE_PQSETERRORVERBOSITY
+#ifdef HAVE_PQSETERRORVERBOSITY
 /* {{{ proto int pg_set_error_verbosity([resource connection,] int verbosity)
    Set error verbosity */
 PHP_FUNCTION(pg_set_error_verbosity)
@@ -4012,7 +4012,7 @@ PHP_FUNCTION(pg_client_encoding)
 /* }}} */
 #endif
 
-#if !HAVE_PQGETCOPYDATA
+#ifndef HAVE_PQGETCOPYDATA
 #define	COPYBUFSIZ	8192
 #endif
 
@@ -4141,13 +4141,13 @@ PHP_FUNCTION(pg_copy_to)
 		case PGRES_COPY_OUT:
 			if (pgsql_result) {
 				int copydone = 0;
-#if !HAVE_PQGETCOPYDATA
+#ifndef HAVE_PQGETCOPYDATA
 				char copybuf[COPYBUFSIZ];
 #endif
 
 				PQclear(pgsql_result);
 				array_init(return_value);
-#if HAVE_PQGETCOPYDATA
+#ifdef HAVE_PQGETCOPYDATA
 				while (!copydone)
 				{
 					int ret = PQgetCopyData(pgsql, &csv, 0);
@@ -4280,7 +4280,7 @@ PHP_FUNCTION(pg_copy_from)
 			if (pgsql_result) {
 				int command_failed = 0;
 				PQclear(pgsql_result);
-#if HAVE_PQPUTCOPYDATA
+#ifdef HAVE_PQPUTCOPYDATA
 				ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(pg_rows), value) {
 					zend_string *tmp = zval_try_get_string(value);
 					if (UNEXPECTED(!tmp)) {
@@ -4448,7 +4448,7 @@ PHP_FUNCTION(pg_escape_bytea)
 }
 /* }}} */
 
-#if !HAVE_PQUNESCAPEBYTEA
+#ifndef HAVE_PQUNESCAPEBYTEA
 /* PQunescapeBytea() from PostgreSQL 7.3 to provide bytea unescape feature to 7.2 users.
    Renamed to php_pgsql_unescape_bytea() */
 /*
@@ -4567,7 +4567,7 @@ PHP_FUNCTION(pg_unescape_bytea)
 		RETURN_THROWS();
 	}
 
-#if HAVE_PQUNESCAPEBYTEA
+#ifdef HAVE_PQUNESCAPEBYTEA
 	tmp = (char *)PQunescapeBytea((unsigned char*)from, &to_len);
 	to = estrndup(tmp, to_len);
 	PQfreemem(tmp);
@@ -4678,7 +4678,7 @@ PHP_FUNCTION(pg_result_error)
 }
 /* }}} */
 
-#if HAVE_PQRESULTERRORFIELD
+#ifdef HAVE_PQRESULTERRORFIELD
 /* {{{ proto string pg_result_error_field(resource result, int fieldcode)
    Get error message field associated with result */
 PHP_FUNCTION(pg_result_error_field)
@@ -4704,10 +4704,10 @@ PHP_FUNCTION(pg_result_error_field)
 	}
 	if (fieldcode & (PG_DIAG_SEVERITY|PG_DIAG_SQLSTATE|PG_DIAG_MESSAGE_PRIMARY|PG_DIAG_MESSAGE_DETAIL
 				|PG_DIAG_MESSAGE_HINT|PG_DIAG_STATEMENT_POSITION
-#if PG_DIAG_INTERNAL_POSITION
+#ifdef PG_DIAG_INTERNAL_POSITION
 				|PG_DIAG_INTERNAL_POSITION
 #endif
-#if PG_DIAG_INTERNAL_QUERY
+#ifdef PG_DIAG_INTERNAL_QUERY
 				|PG_DIAG_INTERNAL_QUERY
 #endif
 				|PG_DIAG_CONTEXT|PG_DIAG_SOURCE_FILE|PG_DIAG_SOURCE_LINE
@@ -4746,7 +4746,7 @@ PHP_FUNCTION(pg_connection_status)
 
 /* }}} */
 
-#if HAVE_PGTRANSACTIONSTATUS
+#ifdef HAVE_PGTRANSACTIONSTATUS
 /* {{{ proto int pg_transaction_status(resource connection)
    Get transaction status */
 PHP_FUNCTION(pg_transaction_status)
@@ -4956,7 +4956,7 @@ PHP_FUNCTION(pg_send_query)
 }
 /* }}} */
 
-#if HAVE_PQSENDQUERYPARAMS
+#ifdef HAVE_PQSENDQUERYPARAMS
 /* {{{ proto bool pg_send_query_params(resource connection, string query, array params)
    Send asynchronous parameterized query */
 PHP_FUNCTION(pg_send_query_params)
@@ -5054,7 +5054,7 @@ PHP_FUNCTION(pg_send_query_params)
 /* }}} */
 #endif
 
-#if HAVE_PQSENDPREPARE
+#ifdef HAVE_PQSENDPREPARE
 /* {{{ proto bool pg_send_prepare(resource connection, string stmtname, string query)
    Asynchronously prepare a query for future execution */
 PHP_FUNCTION(pg_send_prepare)
@@ -5126,7 +5126,7 @@ PHP_FUNCTION(pg_send_prepare)
 /* }}} */
 #endif
 
-#if HAVE_PQSENDQUERYPREPARED
+#ifdef HAVE_PQSENDQUERYPREPARED
 /* {{{ proto bool pg_send_execute(resource connection, string stmtname, array params)
    Executes prevriously prepared stmtname asynchronously */
 PHP_FUNCTION(pg_send_execute)
@@ -5323,12 +5323,12 @@ PHP_FUNCTION(pg_get_notify)
 	if (result_type & PGSQL_NUM) {
 		add_index_string(return_value, 0, pgsql_notify->relname);
 		add_index_long(return_value, 1, pgsql_notify->be_pid);
-#if HAVE_PQPROTOCOLVERSION && HAVE_PQPARAMETERSTATUS
+#if defined(HAVE_PQPROTOCOLVERSION) && defined(HAVE_PQPARAMETERSTATUS)
 		if (PQprotocolVersion(pgsql) >= 3 && atof(PQparameterStatus(pgsql, "server_version")) >= 9.0) {
 #else
 		if (atof(PG_VERSION) >= 9.0) {
 #endif
-#if HAVE_PQPARAMETERSTATUS
+#ifdef HAVE_PQPARAMETERSTATUS
 			add_index_string(return_value, 2, pgsql_notify->extra);
 #endif
 		}
@@ -5336,12 +5336,12 @@ PHP_FUNCTION(pg_get_notify)
 	if (result_type & PGSQL_ASSOC) {
 		add_assoc_string(return_value, "message", pgsql_notify->relname);
 		add_assoc_long(return_value, "pid", pgsql_notify->be_pid);
-#if HAVE_PQPROTOCOLVERSION && HAVE_PQPARAMETERSTATUS
+#if defined(HAVE_PQPROTOCOLVERSION) && defined(HAVE_PQPARAMETERSTATUS)
 		if (PQprotocolVersion(pgsql) >= 3 && atof(PQparameterStatus(pgsql, "server_version")) >= 9.0) {
 #else
 		if (atof(PG_VERSION) >= 9.0) {
 #endif
-#if HAVE_PQPARAMETERSTATUS
+#ifdef HAVE_PQPARAMETERSTATUS
 			add_assoc_string(return_value, "payload", pgsql_notify->extra);
 #endif
 		}
