@@ -383,6 +383,7 @@ alloca.h \
 arpa/inet.h \
 arpa/nameser.h \
 crypt.h \
+dispatch/dispatch.h \
 dns.h \
 fcntl.h \
 grp.h \

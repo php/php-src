@@ -40,12 +40,16 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+
 #ifdef ZEND_WIN32
 #include <winnt.h>
 #elif _POSIX_TIMERS > 0
+/* POSIX timers API */
 #include <time.h>
+#elif defined(HAVE_DISPATCH_DISPATCH_H)
+/* Async timer API on Mac OS */
+#include <dispatch/dispatch.h>
 #endif
-
 
 ZEND_API void (*zend_execute_ex)(zend_execute_data *execute_data);
 ZEND_API void (*zend_execute_internal)(zend_execute_data *execute_data, zval *return_value);
@@ -58,6 +62,9 @@ ZEND_API const zend_fcall_info_cache empty_fcall_info_cache = { NULL, NULL, NULL
 ZEND_TLS HANDLE tq_timer = NULL;
 #elif _POSIX_TIMERS > 0
 ZEND_TLS timer_t timer_id = NULL;
+#elif HAVE_DISPATCH_DISPATCH_H
+ZEND_TLS dispatch_queue_t  timer_queue = NULL;
+ZEND_TLS dispatch_source_t timer_src = NULL;
 #endif
 
 #if 0&&ZEND_DEBUG
@@ -1141,6 +1148,8 @@ ZEND_API int zend_eval_string_ex(const char *str, zval *retval_ptr, const char *
  *   - uses real-time clock (actual, "wall clock" time and not CPU time used by script)
  * - POSIX timers
  *   - prefers to use thread CPU time, but falls back to process CPU time or real time
+ * - libdispatch
+ *   - For Mac OS
  * - setitimer
  *   - fallback for Unix-like systems which do not support POSIX timers
  *   - disabled on ZTS builds, since on timeout, we would have no way to tell which thread timed out
@@ -1163,6 +1172,10 @@ ZEND_API ZEND_NORETURN void ZEND_FASTCALL zend_timeout(void) /* {{{ */
 
 #ifdef ZEND_WIN32
 typedef VOID (*TIMEOUT_HANDLER)(PVOID, BOOLEAN);
+#elif _POSIX_TIMERS > 0
+typedef void (*TIMEOUT_HANDLER)(int, siginfo_t*, void*);
+#elif defined(HAVE_DISPATCH_DISPATCH_H)
+typedef void (*TIMEOUT_HANDLER)(zend_executor_globals*);
 #else
 typedef void (*TIMEOUT_HANDLER)(int, siginfo_t*, void*);
 #endif
@@ -1268,6 +1281,16 @@ static void zend_set_timeout_ex(zend_long seconds, TIMEOUT_HANDLER callback_func
 		return;
 	}
 
+#elif defined(HAVE_DISPATCH_DISPATCH_H)
+	zend_executor_globals *eg = ZEND_MODULE_GLOBALS_BULK(executor);
+
+	timer_queue = dispatch_queue_create("PHP Script Execution Timeout", NULL);
+	timer_src = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, timer_queue);
+	dispatch_source_set_timer(timer_src, DISPATCH_TIME_NOW, seconds * 1000000000, 0);
+	/* FIXME: Need to emulate Objective-C blocks in plain C */
+	/* dispatch_source_set_event_handler(timer_src, ^{ callback_func(eg); }); */
+	dispatch_resume(timer_src);
+
 #elif defined(HAVE_SETITIMER) && !defined(ZTS)
 	struct itimerval timeout_requested = { .it_value = { .tv_sec = seconds }};
 
@@ -1285,7 +1308,11 @@ static void zend_set_timeout_ex(zend_long seconds, TIMEOUT_HANDLER callback_func
 #ifndef ZTS
 # ifdef ZEND_WIN32
 static VOID CALLBACK zend_hard_timeout_handler(PVOID arg, BOOLEAN timed_out)
-# else /* POSIX */
+# elif _POSIX_TIMERS > 0
+static void zend_hard_timeout_handler(int dummy, siginfo_t *siginfo, void *unused)
+# elif HAVE_DISPATCH_DISPATCH_H
+static void zend_hard_timeout_handler(zend_executor_globals *eg)
+# else
 static void zend_hard_timeout_handler(int dummy, siginfo_t *siginfo, void *unused)
 # endif
 {
@@ -1353,11 +1380,15 @@ static VOID CALLBACK zend_timeout_handler(PVOID arg, BOOLEAN timed_out)
 	eg->vm_interrupt = 1;
 }
 
-#elif _POSIX_TIMERS > 0
+#elif _POSIX_TIMERS > 0 || defined(HAVE_DISPATCH_DISPATCH_H)
 
+# if _POSIX_TIMERS > 0
 static void zend_timeout_handler(int dummy, siginfo_t *siginfo, void *unused)
 {
 	zend_executor_globals *eg = (zend_executor_globals*)(siginfo->si_value.sival_ptr);
+# else
+static void zend_timeout_handler(zend_executor_globals *eg)
+# endif
 
 # ifndef ZTS
 	/* No-op if `hard_timeout` is set to zero */
@@ -1418,6 +1449,16 @@ void zend_unset_timeout(void) /* {{{ */
 		 * should never be invalid */
 		ZEND_ASSERT(!timer_delete(timer_id));
 		timer_id = NULL;
+	}
+
+#elif defined(HAVE_DISPATCH_DISPATCH_H)
+	if (timer_src != NULL) {
+		dispatch_release(timer_src);
+		timer_src = NULL;
+	}
+	if (timer_queue != NULL) {
+		dispatch_release(timer_queue);
+		timer_queue = NULL;
 	}
 
 #elif defined(HAVE_SETITIMER) && !defined(ZTS)
