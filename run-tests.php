@@ -159,24 +159,14 @@ function main()
 
     define('INIT_DIR', getcwd());
 
-    // change into the PHP source directory.
+    // Change into the PHP source directory.
     if (getenv('TEST_PHP_SRCDIR')) {
         @chdir(getenv('TEST_PHP_SRCDIR'));
     }
+
     define('TEST_PHP_SRCDIR', getcwd());
 
-    if (!function_exists('proc_open')) {
-        echo <<<NO_PROC_OPEN_ERROR
-
-+-----------------------------------------------------------+
-|                       ! ERROR !                           |
-| The test-suite requires that proc_open() is available.    |
-| Please check if you disabled it in php.ini.               |
-+-----------------------------------------------------------+
-
-NO_PROC_OPEN_ERROR;
-        exit(1);
-    }
+    check_proc_open_function_exists();
 
     // If timezone is not set, use UTC.
     if (ini_get('date.timezone') == '') {
@@ -193,35 +183,36 @@ NO_PROC_OPEN_ERROR;
 
     ini_set('pcre.backtrack_limit', PHP_INT_MAX);
 
-    // delete as much output buffers as possible
-    while (@ob_end_clean()) {
-    }
-    if (ob_get_level()) {
-        echo "Not all buffers were deleted.\n";
-    }
+    init_output_buffers();
 
     error_reporting(E_ALL);
 
     $environment = $_ENV ?? array();
-    // Note: php.ini-development sets variables_order="GPCS" not "EGPCS", in which case $_ENV is NOT populated.
-    //	   detect and handle this case, or die or warn
+
+    // Some configurations like php.ini-development set variables_order="GPCS"
+    // not "EGPCS", in which case $_ENV is NOT populated. Detect if the $_ENV
+    // was empty and handle it by explicitly populating through getenv().
     if (empty($environment)) {
-        // not documented, but returns array of all environment variables
         $environment = getenv();
     }
+
     if (empty($environment['TEMP'])) {
         $environment['TEMP'] = sys_get_temp_dir();
 
         if (empty($environment['TEMP'])) {
-            // for example, OpCache on Windows will fail in this case because child processes (for tests) will not get
-            // a TEMP variable, so GetTempPath() will fallback to c:\windows, while GetTempPath() will return %TEMP% for parent
-            // (likely a different path). The parent will initialize the OpCache in that path, and child will fail to reattach to
-            // the OpCache because it will be using the wrong path.
+            // For example, OpCache on Windows will fail in this case because
+            // child processes (for tests) will not get a TEMP variable, so
+            // GetTempPath() will fallback to c:\windows, while GetTempPath()
+            // will return %TEMP% for parent (likely a different path). The
+            // parent will initialize the OpCache in that path, and child will
+            // fail to reattach to the OpCache because it will be using the
+            // wrong path.
             die("TEMP environment is NOT set");
         } else {
             if (count($environment) == 1) {
-                // not having other environment variables, only having TEMP, is probably ok, but strange and may make a
-                // difference in the test pass rate, so warn the user.
+                // Not having other environment variables, only having TEMP, is
+                // probably ok, but strange and may make a difference in the
+                // test pass rate, so warn the user.
                 echo "WARNING: Only 1 environment variable will be available to tests(TEMP environment variable)" . PHP_EOL;
             }
         }
@@ -1410,7 +1401,8 @@ function run_all_tests_parallel($test_files, $env, $redir_tested)
     if ($shuffle) {
         shuffle($test_files);
     }
-    /* Don't start more workers than test files */
+
+    // Don't start more workers than test files.
     $workers = max(1, min($workers, count($test_files)));
 
     echo "Spawning workers… ";
@@ -3690,6 +3682,33 @@ class RuntestsValgrind
         } else {
             return "$vcmd --vex-iropt-precise-memory-exns=yes --log-file-exactly=$memcheck_filename $cmd";
         }
+    }
+}
+
+function init_output_buffers()
+{
+    // Delete as much output buffers as possible.
+    while (@ob_end_clean()) {
+    }
+
+    if (ob_get_level()) {
+        echo "Not all buffers were deleted.\n";
+    }
+}
+
+function check_proc_open_function_exists()
+{
+    if (!function_exists('proc_open')) {
+        echo <<<NO_PROC_OPEN_ERROR
+
++-----------------------------------------------------------+
+|                       ! ERROR !                           |
+| The test-suite requires that proc_open() is available.    |
+| Please check if you disabled it in php.ini.               |
++-----------------------------------------------------------+
+
+NO_PROC_OPEN_ERROR;
+        exit(1);
     }
 }
 
