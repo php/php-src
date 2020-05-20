@@ -135,6 +135,11 @@ PHP 8.0 INTERNALS UPGRADE NOTES
 
   c. Windows build system changes
 
+    - The configuration option --enable-crt-debug has been removed. The VC
+      debug heap can now be enabled for debug builds by setting the environment
+      variable PHP_WIN32_DEBUG_HEAP to a non-negative number before PHP process
+      startup.
+
 ========================
 3. Module changes
 ========================
