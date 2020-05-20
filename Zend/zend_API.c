@@ -527,7 +527,7 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_str_or_long_slow(zval *arg, zend_strin
 }
 /* }}} */
 
-static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, const char **spec, char **error) /* {{{ */
+static const char *zend_parse_arg_impl(zval *arg, va_list *va, const char **spec, char **error) /* {{{ */
 {
 	const char *spec_walk = *spec;
 	char c = *spec_walk++;
@@ -796,12 +796,12 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 }
 /* }}} */
 
-static int zend_parse_arg(int arg_num, zval *arg, va_list *va, const char **spec, int flags) /* {{{ */
+static int zend_parse_arg(uint32_t arg_num, zval *arg, va_list *va, const char **spec, int flags) /* {{{ */
 {
 	const char *expected_type = NULL;
 	char *error = NULL;
 
-	expected_type = zend_parse_arg_impl(arg_num, arg, va, spec, &error);
+	expected_type = zend_parse_arg_impl(arg, va, spec, &error);
 	if (expected_type) {
 		if (EG(exception)) {
 			return FAILURE;
@@ -824,7 +824,7 @@ static int zend_parse_arg(int arg_num, zval *arg, va_list *va, const char **spec
 }
 /* }}} */
 
-ZEND_API int zend_parse_parameter(int flags, int arg_num, zval *arg, const char *spec, ...)
+ZEND_API int zend_parse_parameter(int flags, uint32_t arg_num, zval *arg, const char *spec, ...)
 {
 	va_list va;
 	int ret;
@@ -845,16 +845,17 @@ static ZEND_COLD void zend_parse_parameters_debug_error(const char *msg) {
 		ZSTR_VAL(active_function->common.function_name), msg);
 }
 
-static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, int flags) /* {{{ */
+static int zend_parse_va_args(uint32_t num_args, const char *type_spec, va_list *va, int flags) /* {{{ */
 {
 	const  char *spec_walk;
-	int c, i;
-	int min_num_args = -1;
-	int max_num_args = 0;
-	int post_varargs = 0;
+	char c;
+	uint32_t i;
+	uint32_t min_num_args = 0;
+	uint32_t max_num_args = 0;
+	uint32_t post_varargs = 0;
 	zval *arg;
-	int arg_count;
 	zend_bool have_varargs = 0;
+	zend_bool have_optional_args = 0;
 	zval **varargs = NULL;
 	int *n_varargs = NULL;
 
@@ -876,6 +877,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 
 			case '|':
 				min_num_args = max_num_args;
+				have_optional_args = 1;
 				break;
 
 			case '/':
@@ -905,17 +907,18 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 		}
 	}
 
-	if (min_num_args < 0) {
+	/* with no optional arguments the minimum number of arguments must be the same as the maximum */
+	if (!have_optional_args) {
 		min_num_args = max_num_args;
 	}
 
 	if (have_varargs) {
 		/* calculate how many required args are at the end of the specifier list */
 		post_varargs = max_num_args - post_varargs;
-		max_num_args = -1;
+		max_num_args = UINT32_MAX;
 	}
 
-	if (num_args < min_num_args || (num_args > max_num_args && max_num_args >= 0)) {
+	if (num_args < min_num_args || num_args > max_num_args) {
 		if (!(flags & ZEND_PARSE_PARAMS_QUIET)) {
 			zend_function *active_function = EG(current_execute_data)->func;
 			const char *class_name = active_function->common.scope ? ZSTR_VAL(active_function->common.scope->name) : "";
@@ -931,9 +934,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 		return FAILURE;
 	}
 
-	arg_count = ZEND_CALL_NUM_ARGS(EG(current_execute_data));
-
-	if (num_args > arg_count) {
+	if (num_args > ZEND_CALL_NUM_ARGS(EG(current_execute_data))) {
 		zend_parse_parameters_debug_error("could not obtain parameters for parsing");
 		return FAILURE;
 	}
@@ -981,7 +982,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 }
 /* }}} */
 
-ZEND_API int zend_parse_parameters_ex(int flags, int num_args, const char *type_spec, ...) /* {{{ */
+ZEND_API int zend_parse_parameters_ex(int flags, uint32_t num_args, const char *type_spec, ...) /* {{{ */
 {
 	va_list va;
 	int retval;
@@ -994,7 +995,7 @@ ZEND_API int zend_parse_parameters_ex(int flags, int num_args, const char *type_
 }
 /* }}} */
 
-ZEND_API int zend_parse_parameters(int num_args, const char *type_spec, ...) /* {{{ */
+ZEND_API int zend_parse_parameters(uint32_t num_args, const char *type_spec, ...) /* {{{ */
 {
 	va_list va;
 	int retval;
@@ -1008,7 +1009,7 @@ ZEND_API int zend_parse_parameters(int num_args, const char *type_spec, ...) /* 
 }
 /* }}} */
 
-ZEND_API int zend_parse_method_parameters(int num_args, zval *this_ptr, const char *type_spec, ...) /* {{{ */
+ZEND_API int zend_parse_method_parameters(uint32_t num_args, zval *this_ptr, const char *type_spec, ...) /* {{{ */
 {
 	va_list va;
 	int retval;
@@ -1048,7 +1049,7 @@ ZEND_API int zend_parse_method_parameters(int num_args, zval *this_ptr, const ch
 }
 /* }}} */
 
-ZEND_API int zend_parse_method_parameters_ex(int flags, int num_args, zval *this_ptr, const char *type_spec, ...) /* {{{ */
+ZEND_API int zend_parse_method_parameters_ex(int flags, uint32_t num_args, zval *this_ptr, const char *type_spec, ...) /* {{{ */
 {
 	va_list va;
 	int retval;
