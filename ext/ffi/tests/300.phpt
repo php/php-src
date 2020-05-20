@@ -10,6 +10,7 @@ opcache.enable=1
 opcache.enable_cli=1
 opcache.optimization_level=-1
 opcache.preload={PWD}/preload.inc
+opcache.file_cache_only=0
 --FILE--
 <?php
 $ffi = FFI::scope("TEST_300");
