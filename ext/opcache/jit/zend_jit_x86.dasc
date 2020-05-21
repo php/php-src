@@ -2156,26 +2156,14 @@ static int zend_jit_hybrid_profile_jit_stub(dasm_State **Dst)
 	|	.endif
 	|	// op_array = (zend_op_array*)EX(func);
 	|	mov r0, EX->func
-	|	// ++ZEND_COUNTER_INFO(op_array)
-	|	mov r2, aword [r0 + offsetof(zend_op_array, run_time_cache__ptr)]
-#if ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR
-	|	mov r2, aword [r2]
-#elif ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR_OR_OFFSET
-	|	test r2, 1
-	|	jz >1
-	|	MEM_OP2_2_ZTS add, r2, aword, compiler_globals, map_ptr_base, r1
-	|1:
-	|	mov r2, aword [r2]
-#else
-# error "Unknown ZEND_MAP_PTR_KIND"
-#endif
-	|	inc aword [r2 + zend_jit_profile_counter_rid * sizeof(void*)]
+	|	// run_time_cache = EX(run_time_cache);
+	|	mov r2, EX->run_time_cache
 	|	// jit_extension = (const void*)ZEND_FUNC_INFO(op_array);
 	|	mov r0, aword [r0 + offsetof(zend_op_array, reserved[zend_func_info_rid])]
-	|	// handler = jit_extension->orig_handler
-	|	mov r0, aword [r0 + offsetof(zend_jit_op_array_extension, orig_handler)]
-	|	// return ((zend_vm_opcode_handler_t)handler)();
-	|	jmp r0
+	|	// ++ZEND_COUNTER_INFO(op_array)
+	|	inc aword [r2 + zend_jit_profile_counter_rid * sizeof(void*)]
+	|	// return ((zend_vm_opcode_handler_t)jit_extension->orig_handler)()
+	|	jmp aword [r0 + offsetof(zend_jit_op_array_extension, orig_handler)]
 	return 1;
 }
 
