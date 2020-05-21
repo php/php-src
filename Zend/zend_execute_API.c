@@ -1122,16 +1122,18 @@ ZEND_API int zend_eval_string_ex(const char *str, zval *retval_ptr, const char *
  * There are 3 timer implementations, selected via preprocessor directives:
  *
  * - Win32
- *   - based on timer queues from Windows thread pool API
- *   - uses real-time clock (actual, "wall clock" time and not CPU time used by script)
+ *   - Based on timer queues from Windows thread pool API
+ *   - Uses real-time clock (actual, "wall clock" time and not CPU time used by script)
  * - POSIX timers
- *   - prefers to use thread CPU time, but falls back to process CPU time or real time
- * - libdispatch
+ *   - Prefers to use thread CPU time, but falls back to process CPU time or real time
+ * - libdispatch (AKA Grand Central Dispatch)
  *   - For Mac OS
+ *   - Uses "default clock" "based on Mach absolute time unit"... whatever that means
+ *   - Callback done via Objective-C block
  * - setitimer
- *   - fallback for Unix-like systems which do not support POSIX timers
- *   - disabled on ZTS builds, since on timeout, we would have no way to tell which thread timed out
- *   - uses process CPU time (except Cygwin, which uses real time)
+ *   - Fallback for Unix-like systems which do not support POSIX timers
+ *   - Disabled on ZTS builds, since on timeout, we would have no way to tell which thread timed out
+ *   - Uses process CPU time (except Cygwin, which uses real time)
  */
 
 #define TIMEOUT_WINDOWS_THREAD_POOL 0
@@ -1163,10 +1165,49 @@ ZEND_TLS timer_t timer_id = NULL;
 #define TIMEOUT_LIBDISPATCH 1
 #include <dispatch/dispatch.h>
 typedef void (*TIMEOUT_HANDLER)(zend_executor_globals*);
-#define TIMEOUT_HANDLER_ARGS zend_executor_globals* eg
-#define TIMEOUT_HANDLER_GET_EG (eg)
+#define TIMEOUT_HANDLER_ARGS zend_executor_globals* _eg
+#define TIMEOUT_HANDLER_GET_EG (_eg)
 ZEND_TLS dispatch_queue_t  timer_queue = NULL;
 ZEND_TLS dispatch_source_t timer_src = NULL;
+
+/* libdispatch takes Objective-C "blocks" as callbacks
+ * So imitate the ABI for Objective-C blocks in plain C
+ * We want a block like this, where "callback_func" is a TIMEOUT_HANDLER and "eg" is a pointer to
+ * zend_executor_globals:
+ *
+ * ^{ callback_func(eg); }
+ *
+ * Ref: http://clang.llvm.org/docs/Block-ABI-Apple.html */
+struct _Block {
+	void  *isa; /* _NSConcreteGlobalBlock or _NSConcreteStackBlock */
+	int    flags;
+	int    reserved;
+	void (*invoke)(struct _Block*);
+	struct _Block_descriptor {
+		unsigned long int reserved;
+		unsigned long int size;
+		const char *signature;
+	} *descriptor;
+	TIMEOUT_HANDLER callback_func;
+	zend_executor_globals* eg;
+};
+static struct _Block_descriptor _InvokeCallbackFunc_descriptor = {
+	.reserved = 0,
+	.size = sizeof(struct _Block),
+	.signature = "v8@?0" /* this encodes the type of the block... 'v' means 'void', etc */
+};
+static void _InvokeCallbackFunc_invoke(struct _Block *block)
+{
+	block->callback_func(block->eg);
+}
+extern void *_NSConcreteGlobalBlock;
+ZEND_TLS struct _Block _InvokeCallbackFunc = {
+	.isa        = &_NSConcreteGlobalBlock,
+	.flags      = (1 << 28) | (1 << 30), /* global block, has 'signature' string */
+	.reserved   = 0,
+	.invoke     = _InvokeCallbackFunc_invoke,
+	.descriptor = &_InvokeCallbackFunc_descriptor
+};
 
 #elif HAVE_SETITIMER && !defined(ZTS)
 #undef  TIMEOUT_SETITIMER
@@ -1185,6 +1226,7 @@ typedef void (*TIMEOUT_HANDLER)(int, siginfo_t*, void*);
 #undef  TIMEOUT_NONE
 #define TIMEOUT_NONE 1
 #define TIMEOUT_HANDLER_ARGS
+/* Just to make the code compile */
 #define TIMEOUT_HANDLER_GET_EG (ZEND_MODULE_GLOBALS_BULK(executor))
 #endif
 
@@ -1299,13 +1341,23 @@ static void zend_set_timeout_ex(zend_long seconds, TIMEOUT_HANDLER callback_func
 	}
 
 #elif TIMEOUT_LIBDISPATCH
-	zend_executor_globals *eg = ZEND_MODULE_GLOBALS_BULK(executor);
+	_InvokeCallbackFunc.callback_func = callback_func;
+	_InvokeCallbackFunc.eg = ZEND_MODULE_GLOBALS_BULK(executor);;
 
 	timer_queue = dispatch_queue_create("PHP Script Execution Timeout", NULL);
+	if (timer_queue == NULL) {
+		zend_error_noreturn(E_ERROR, "Could not set script execution timeout: dispatch_queue_create failed");
+		return;
+	}
 	timer_src = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, timer_queue);
-	dispatch_source_set_timer(timer_src, DISPATCH_TIME_NOW, seconds * 1000000000, 0);
-	/* FIXME: Need to emulate Objective-C blocks in plain C */
-	/* dispatch_source_set_event_handler(timer_src, ^{ callback_func(eg); }); */
+	if (timer_src == NULL) {
+		zend_error_noreturn(E_ERROR, "Could not set script execution timeout: dispatch_source_create failed");
+		return;
+	}
+	/* DISPATCH_TIME_FOREVER for interval means this is a "one-shot" timer */
+	dispatch_source_set_timer(timer_src, dispatch_time(DISPATCH_TIME_NOW, seconds * 1000000000),
+		DISPATCH_TIME_FOREVER, 0);
+	dispatch_source_set_event_handler(timer_src, (dispatch_block_t)&_InvokeCallbackFunc);
 	dispatch_resume(timer_src);
 
 #elif TIMEOUT_SETITIMER
