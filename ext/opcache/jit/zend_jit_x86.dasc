@@ -2230,16 +2230,15 @@ static int zend_jit_hybrid_hot_counter_stub(dasm_State **Dst, uint32_t cost)
 	|	// divide by sizeof(zend_op)
 	|	.if X64
 	||		ZEND_ASSERT(sizeof(zend_op) == 32);
-	|		sar r2, 5
+	|		sar r2, 2
 	|	.else
 	||		ZEND_ASSERT(sizeof(zend_op) == 28);
-	|		sar r2, 2
 	|		imul r2, 0xb6db6db7
 	|	.endif
 	|	.if X64
-	|		jmp aword [r1+r2*8+offsetof(zend_jit_op_array_hot_extension, orig_handlers)]
+	|		jmp aword [r1+r2+offsetof(zend_jit_op_array_hot_extension, orig_handlers)]
 	|	.else
-	|		jmp aword [r1+r2*4+offsetof(zend_jit_op_array_hot_extension, orig_handlers)]
+	|		jmp aword [r1+r2+offsetof(zend_jit_op_array_hot_extension, orig_handlers)]
 	|	.endif
 	return 1;
 }
