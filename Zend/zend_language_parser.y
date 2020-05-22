@@ -716,6 +716,7 @@ non_empty_argument_list:
 argument:
 		expr			{ $$ = $1; }
 	|	T_ELLIPSIS expr	{ $$ = zend_ast_create(ZEND_AST_UNPACK, $2); }
+	|   '?'				{ $$ = zend_ast_create(ZEND_AST_PARTIAL_PLACEHOLDER); }
 ;
 
 global_var_list:
