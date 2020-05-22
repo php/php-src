@@ -2626,9 +2626,8 @@ static inline void zend_emit_assign_znode(zend_ast *var_ast, znode *value_node) 
 static zend_op *zend_delayed_compile_dim(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
 {
 	if (ast->attr == ZEND_DIM_ALTERNATIVE_SYNTAX) {
-		zend_error(E_DEPRECATED, "Array and string offset access syntax with curly braces is deprecated");
+		zend_error(E_COMPILE_ERROR, "Array and string offset access syntax with curly braces is no longer supported");
 	}
-
 	zend_ast *var_ast = ast->child[0];
 	zend_ast *dim_ast = ast->child[1];
 	zend_op *opline;
@@ -9183,7 +9182,7 @@ void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 
 			if (ast->attr & ZEND_DIM_ALTERNATIVE_SYNTAX) {
 				ast->attr &= ~ZEND_DIM_ALTERNATIVE_SYNTAX; /* remove flag to avoid duplicate warning */
-				zend_error(E_DEPRECATED, "Array and string offset access syntax with curly braces is deprecated");
+				zend_error(E_COMPILE_ERROR, "Array and string offset access syntax with curly braces is no longer supported");
 			}
 
 			/* Set isset fetch indicator here, opcache disallows runtime altering of the AST */
