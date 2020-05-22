@@ -8,7 +8,6 @@ PHP                                                                        NEWS
   . Fixed bug #79489 (.user.ini does not inherit). (cmb)
   . Fixed bug #79600 (Regression in 7.4.6 when yielding an array based
     generator). (Nikita)
-  . Fixed bug #79595 (zend_init_fpu() alters FPU precision). (cmb, Nikita)
 
 - FFI:
   . Fixed bug #79571 (FFI: var_dumping unions may segfault). (cmb)
