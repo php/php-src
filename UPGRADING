@@ -191,6 +191,10 @@ PHP 8.0 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/arithmetic_operator_type_checks
   . Float to string casting will now always behave locale-independently.
     RFC: https://wiki.php.net/rfc/locale_independent_float_to_string
+  . Added support for mixed type
+    RFC: https://wiki.php.net/rfc/mixed_type_v2
+  . Removed support for deprecated curly braces for offset access
+    RFC: https://wiki.php.net/rfc/deprecate_curly_braces_array_access
 
 - COM:
   . Removed the ability to import case-insensitive constants from type
