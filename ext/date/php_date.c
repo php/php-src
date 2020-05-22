@@ -550,7 +550,7 @@ PHPAPI timelib_tzinfo *get_timezone_info(void)
 	tz = guess_timezone(DATE_TIMEZONEDB);
 	tzi = php_date_parse_tzfile(tz, DATE_TIMEZONEDB);
 	if (! tzi) {
-		php_error_docref(NULL, E_ERROR, "Timezone database is corrupt - this should *never* happen!");
+		zend_throw_error(NULL, "Timezone database is corrupt. Please file a bug report as this should never happen");
 	}
 	return tzi;
 }
@@ -961,7 +961,7 @@ PHP_FUNCTION(idate)
 
 	ret = php_idate(ZSTR_VAL(format)[0], ts, 0);
 	if (ret == -1) {
-		php_error_docref(NULL, E_WARNING, "Unrecognized date format token.");
+		php_error_docref(NULL, E_WARNING, "Unrecognized date format token");
 		RETURN_FALSE;
 	}
 	RETURN_LONG(ret);
@@ -1009,7 +1009,7 @@ PHPAPI zend_long php_parse_date(const char *string, zend_long *now)
 PHP_FUNCTION(strtotime)
 {
 	zend_string *times;
-	int error1, error2;
+	int parse_error, epoch_does_not_fit_in_zend_long;
 	timelib_error_container *error;
 	zend_long preset_ts, ts;
 	zend_bool preset_ts_is_null = 1;
@@ -1022,6 +1022,11 @@ PHP_FUNCTION(strtotime)
 		Z_PARAM_LONG_OR_NULL(preset_ts, preset_ts_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
+	/* timelib_strtotime() expects the string to not be empty */
+	if (ZSTR_LEN(times) == 0) {
+		RETURN_FALSE;
+	}
+
 	tzi = get_timezone_info();
 
 	now = timelib_time_ctor();
@@ -1032,20 +1037,27 @@ PHP_FUNCTION(strtotime)
 
 	t = timelib_strtotime(ZSTR_VAL(times), ZSTR_LEN(times), &error,
 		DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper);
-	error1 = error->error_count;
+	parse_error = error->error_count;
 	timelib_error_container_dtor(error);
+	if (parse_error) {
+		timelib_time_dtor(now);
+		timelib_time_dtor(t);
+		RETURN_FALSE;
+	}
+
 	timelib_fill_holes(t, now, TIMELIB_NO_CLONE);
 	timelib_update_ts(t, tzi);
-	ts = timelib_date_to_int(t, &error2);
+	ts = timelib_date_to_int(t, &epoch_does_not_fit_in_zend_long);
 
 	timelib_time_dtor(now);
 	timelib_time_dtor(t);
 
-	if (error1 || error2) {
+	if (epoch_does_not_fit_in_zend_long) {
+		php_error_docref(NULL, E_WARNING, "Epoch doesn't fit in a PHP integer");
 		RETURN_FALSE;
-	} else {
-		RETURN_LONG(ts);
 	}
+
+	RETURN_LONG(ts);
 }
 /* }}} */
 
@@ -1057,7 +1069,7 @@ PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 	timelib_time *now;
 	timelib_tzinfo *tzi = NULL;
 	zend_long ts, adjust_seconds = 0;
-	int error;
+	int epoch_does_not_fit_in_zend_long;
 
 	ZEND_PARSE_PARAMETERS_START(1, 6)
 		Z_PARAM_LONG(hou)
@@ -1115,15 +1127,18 @@ PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 	}
 
 	/* Clean up and return */
-	ts = timelib_date_to_int(now, &error);
+	ts = timelib_date_to_int(now, &epoch_does_not_fit_in_zend_long);
+
+	if (epoch_does_not_fit_in_zend_long) {
+		timelib_time_dtor(now);
+		php_error_docref(NULL, E_WARNING, "Epoch doesn't fit in a PHP integer");
+		RETURN_FALSE;
+	}
+
 	ts += adjust_seconds;
 	timelib_time_dtor(now);
 
-	if (error) {
-		RETURN_FALSE;
-	} else {
-		RETURN_LONG(ts);
-	}
+	RETURN_LONG(ts);
 }
 /* }}} */
 
@@ -2781,7 +2796,7 @@ static int php_date_modify(zval *object, char *modify, size_t modify_len) /* {{{
 	dateobj = Z_PHPDATE_P(object);
 
 	if (!(dateobj->time)) {
-		php_error_docref(NULL, E_WARNING, "The DateTime object has not been correctly initialized by its constructor");
+		zend_throw_error(NULL, "The DateTime object has not been correctly initialized by its constructor");
 		return 0;
 	}
 
@@ -3309,7 +3324,7 @@ PHP_FUNCTION(date_timestamp_get)
 	zval         *object;
 	php_date_obj *dateobj;
 	zend_long          timestamp;
-	int           error;
+	int           epoch_does_not_fit_in_zend_long;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &object, date_ce_interface) == FAILURE) {
 		RETURN_THROWS();
@@ -3318,12 +3333,14 @@ PHP_FUNCTION(date_timestamp_get)
 	DATE_CHECK_INITIALIZED(dateobj->time, DateTime);
 	timelib_update_ts(dateobj->time, NULL);
 
-	timestamp = timelib_date_to_int(dateobj->time, &error);
-	if (error) {
-		RETURN_FALSE;
-	} else {
-		RETVAL_LONG(timestamp);
+	timestamp = timelib_date_to_int(dateobj->time, &epoch_does_not_fit_in_zend_long);
+
+	if (epoch_does_not_fit_in_zend_long) {
+		zend_value_error("Epoch doesn't fit in a PHP integer");
+		RETURN_THROWS();
 	}
+
+	RETURN_LONG(timestamp);
 }
 /* }}} */
 
@@ -3387,7 +3404,7 @@ PHP_FUNCTION(timezone_open)
 	php_timezone_obj *tzobj;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STR(tz)
+		Z_PARAM_PATH_STR(tz) /* To prevent null bytes */
 	ZEND_PARSE_PARAMETERS_END();
 
 	tzobj = Z_PHPTIMEZONE_P(php_date_instantiate(date_ce_timezone, return_value));
@@ -3406,7 +3423,7 @@ PHP_METHOD(DateTimeZone, __construct)
 	zend_error_handling error_handling;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STR(tz)
+		Z_PARAM_PATH_STR(tz) /* To prevent null bytes */
 	ZEND_PARSE_PARAMETERS_END();
 
 	zend_replace_error_handling(EH_THROW, NULL, &error_handling);
@@ -4336,8 +4353,9 @@ PHP_FUNCTION(timezone_identifiers_list)
 
 	/* Extra validation */
 	if (what == PHP_DATE_TIMEZONE_PER_COUNTRY && option_len != 2) {
-		php_error_docref(NULL, E_NOTICE, "A two-letter ISO 3166-1 compatible country code is expected");
-		RETURN_FALSE;
+		zend_argument_value_error(2, "must be a two-letter ISO 3166-1 compatible country code "
+			"when argument #1 ($timezoneGroup) is DateTimeZone::PER_COUNTRY");
+		RETURN_THROWS();
 	}
 
 	tzdb = DATE_TIMEZONEDB;

@@ -1,8 +1,8 @@
 --TEST--
-Test gmmktime() function : usage variation - Passing positive and negative float values to arguments 32 bits.
+Test gmmktime() function : usage variation - Passing positive and negative float values to arguments 64 bits.
 --SKIPIF--
 <?php
-if (PHP_INT_SIZE != 4) die('skip 32 bit only');
+if (PHP_INT_SIZE == 4) die('skip 64 bit only');
 ?>
 --FILE--
 <?php
@@ -33,36 +33,26 @@ foreach($inputs as $key =>$value) {
       var_dump( gmmktime($hour, $min, $sec, $mon, $value, $value) );
 }
 ?>
---EXPECTF--
-*** Testing gmmktime() : usage variation ***
+--EXPECT--
+ *** Testing gmmktime() : usage variation ***
 
 --float 123456--
 int(1662595688)
 int(1225589768)
 int(1218306336)
-
-Warning: gmmktime(): Epoch doesn't fit in a PHP integer in %s on line %d
-bool(false)
-
-Warning: gmmktime(): Epoch doesn't fit in a PHP integer in %s on line %d
-bool(false)
+int(325855037288)
+int(3844412784488)
 
 --float -123456--
 int(773712488)
 int(1210775048)
 int(1218059424)
-
-Warning: gmmktime(): Epoch doesn't fit in a PHP integer in %s on line %d
-bool(false)
-
-Warning: gmmktime(): Epoch doesn't fit in a PHP integer in %s on line %d
-bool(false)
+int(-323460834712)
+int(-3968710530712)
 
 --float -10.5--
 int(1218118088)
 int(1218181808)
 int(1218182870)
 int(1170922088)
-
-Warning: gmmktime(): Epoch doesn't fit in a PHP integer in %s on line %d
-bool(false)
+int(-62465356312)
