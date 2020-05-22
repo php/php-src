@@ -68,7 +68,7 @@ if test "$PHP_PGSQL" != "no"; then
   old_LIBS=$LIBS
   old_LDFLAGS=$LDFLAGS
   LDFLAGS="-L$PGSQL_LIBDIR $LDFLAGS"
-  AC_CHECK_LIB(pq, PQprepare,, AC_MSG_ERROR([Unable to build the PDO PostgreSQL driver: at least libpq 7.4 is required]))
+  AC_CHECK_LIB(pq, PQprepare,, AC_MSG_ERROR([Unable to build the PostgreSQL extension: at least libpq 7.4 is required]))
   AC_CHECK_LIB(pq, PQescapeStringConn, AC_DEFINE(HAVE_PQESCAPE_CONN,1,[PostgreSQL 8.1.4 or later]))
   AC_CHECK_LIB(pq, PQescapeByteaConn, AC_DEFINE(HAVE_PQESCAPE_BYTEA_CONN,1,[PostgreSQL 8.1.4 or later]))
   AC_CHECK_LIB(pq, pg_encoding_to_char,AC_DEFINE(HAVE_PGSQL_WITH_MULTIBYTE_SUPPORT,1,[Whether libpq is compiled with --enable-multibyte]))
