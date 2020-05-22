@@ -1856,6 +1856,10 @@ ldap.max_links = -1
 ; cache is required.
 ;opcache.file_cache_fallback=1
 
+; If set to 0, it disables both the shared memory cache and the file cache,
+; while opcache continues to optimize code.
+;opcache.allow_cache=1
+
 ; Enables or disables copying of PHP code (text segment) into HUGE PAGES.
 ; This should improve performance, but requires appropriate OS configuration.
 ;opcache.huge_code_pages=0
