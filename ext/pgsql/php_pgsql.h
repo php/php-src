@@ -48,11 +48,6 @@ extern zend_module_entry pgsql_module_entry;
 # endif
 #endif
 
-#ifdef HAVE_PG_CONFIG_H
-#undef SIZEOF_OFF_T
-#include <pg_config.h>
-#endif
-
 #ifdef HAVE_PGSQL_WITH_MULTIBYTE_SUPPORT
 const char * pg_encoding_to_char(int encoding);
 #endif
@@ -141,9 +136,7 @@ PHP_FUNCTION(pg_lo_import);
 PHP_FUNCTION(pg_lo_export);
 PHP_FUNCTION(pg_lo_seek);
 PHP_FUNCTION(pg_lo_tell);
-#ifdef HAVE_PG_LO_TRUNCATE
 PHP_FUNCTION(pg_lo_truncate);
-#endif
 
 /* debugging functions */
 PHP_FUNCTION(pg_trace);

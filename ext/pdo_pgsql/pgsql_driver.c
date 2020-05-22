@@ -30,7 +30,6 @@
 #include "pdo/php_pdo_error.h"
 #include "ext/standard/file.h"
 #undef SIZEOF_OFF_T
-#include "pg_config.h" /* needed for PG_VERSION */
 #include "php_pdo_pgsql.h"
 #include "php_pdo_pgsql_int.h"
 #include "zend_exceptions.h"
@@ -377,6 +376,20 @@ static char *pdo_pgsql_last_insert_id(pdo_dbh_t *dbh, const char *name, size_t *
 	return id;
 }
 
+void pdo_libpq_version(char *buf, size_t len)
+{
+	int version = PQlibVersion();
+	int major = version / 10000;
+	if (major >= 10) {
+		int minor = version % 10000;
+		snprintf(buf, len, "%d.%d", major, minor);
+	} else {
+		int minor = version / 100 % 100;
+		int revision = version % 100;
+		snprintf(buf, len, "%d.%d.%d", major, minor, revision);
+	}
+}
+
 static int pdo_pgsql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_value)
 {
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
@@ -391,7 +404,9 @@ static int pdo_pgsql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_
 			break;
 
 		case PDO_ATTR_CLIENT_VERSION:
-			ZVAL_STRING(return_value, PG_VERSION);
+			char buf[16];
+			pdo_libpq_version(buf, sizeof(buf));
+			ZVAL_STRING(return_value, buf);
 			break;
 
 		case PDO_ATTR_SERVER_VERSION:

@@ -353,12 +353,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_lo_tell, 0, 0, 1)
 	ZEND_ARG_INFO(0, large_object)
 ZEND_END_ARG_INFO()
 
-#ifdef HAVE_PG_LO_TRUNCATE
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_lo_truncate, 0, 0, 1)
 	ZEND_ARG_INFO(0, large_object)
 	ZEND_ARG_INFO(0, size)
 ZEND_END_ARG_INFO()
-#endif
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_set_error_verbosity, 0, 0, 0)
 	ZEND_ARG_INFO(0, connection)
@@ -631,9 +629,7 @@ static const zend_function_entry pgsql_functions[] = {
 	PHP_FE(pg_lo_export,	arginfo_pg_lo_export)
 	PHP_FE(pg_lo_seek,		arginfo_pg_lo_seek)
 	PHP_FE(pg_lo_tell,		arginfo_pg_lo_tell)
-#ifdef HAVE_PG_LO_TRUNCATE
 	PHP_FE(pg_lo_truncate,	arginfo_pg_lo_truncate)
-#endif
 	/* utility functions */
 	PHP_FE(pg_escape_string,	arginfo_pg_escape_string)
 	PHP_FE(pg_escape_bytea, 	arginfo_pg_escape_bytea)
@@ -713,98 +709,6 @@ static int le_link, le_plink, le_result, le_lofp, le_string;
 
 #ifndef HAVE_PGSQL_WITH_MULTIBYTE_SUPPORT
 #define pg_encoding_to_char(x) "SQL_ASCII"
-#endif
-
-#ifndef HAVE_PQESCAPE_CONN
-#define PQescapeStringConn(conn, to, from, len, error) PQescapeString(to, from, len)
-#endif
-
-#ifdef HAVE_PQESCAPELITERAL
-#define PGSQLescapeLiteral(conn, str, len) PQescapeLiteral(conn, str, len)
-#define PGSQLescapeIdentifier(conn, str, len) PQescapeIdentifier(conn, str, len)
-#define PGSQLfree(a) PQfreemem(a)
-#else
-#define PGSQLescapeLiteral(conn, str, len) php_pgsql_PQescapeInternal(conn, str, len, 1, 0)
-#define PGSQLescapeLiteral2(conn, str, len) php_pgsql_PQescapeInternal(conn, str, len, 1, 1)
-#define PGSQLescapeIdentifier(conn, str, len) php_pgsql_PQescapeInternal(conn, str, len, 0, 0)
-#define PGSQLfree(a) efree(a)
-
-/* emulate libpq's PQescapeInternal() 9.0 or later */
-static char *php_pgsql_PQescapeInternal(PGconn *conn, const char *str, size_t len, int escape_literal, int safe) /* {{{ */
-{
-	char *result, *rp, *s;
-
-	if (!conn) {
-		return NULL;
-	}
-
-	/* allocate enough memory */
-	rp = result = (char *)safe_emalloc(len, 2, 5); /* leading " E" needs extra 2 bytes + quote_chars on both end for 2 bytes + NULL */
-
-	if (escape_literal) {
-		if (safe) {
-			size_t new_len;
-			char *tmp = (char *)safe_emalloc(len, 2, 1);
-			*rp++ = '\'';
-			/* PQescapeString does not escape \, but it handles multibyte chars safely.
-			   This escape is incompatible with PQescapeLiteral. */
-			new_len = PQescapeStringConn(conn, tmp, str, len, NULL);
-			strncpy(rp, tmp, new_len);
-			efree(tmp);
-			rp += new_len;
-		} else {
-			char *encoding;
-			size_t tmp_len;
-			/* This is compatible with PQescapeLiteral, but it cannot handle multbyte chars
-			   such as SJIS, BIG5. Raise warning and return NULL by checking
-			   client_encoding. */
-			encoding = (char *) pg_encoding_to_char(PQclientEncoding(conn));
-			if (!strncmp(encoding, "SJIS", sizeof("SJIS")-1) ||
-				!strncmp(encoding, "SHIFT_JIS_2004", sizeof("SHIFT_JIS_2004")-1) ||
-				!strncmp(encoding, "BIG5", sizeof("BIG5")-1) ||
-				!strncmp(encoding, "GB18030", sizeof("GB18030")-1) ||
-				!strncmp(encoding, "GBK", sizeof("GBK")-1) ||
-				!strncmp(encoding, "JOHAB", sizeof("JOHAB")-1) ||
-				!strncmp(encoding, "UHC", sizeof("UHC")-1) ) {
-
-				php_error_docref(NULL, E_WARNING, "Unsafe encoding is used. Do not use '%s' encoding or use PostgreSQL 9.0 or later libpq.", encoding);
-			}
-			/* check backslashes */
-			tmp_len = strspn(str, "\\");
-			if (tmp_len != len) {
-				/* add " E" for escaping slashes */
-				*rp++ = ' ';
-				*rp++ = 'E';
-			}
-			*rp++ = '\'';
-			for (s = (char *)str; s - str < len; ++s) {
-				if (*s == '\'' || *s == '\\') {
-					*rp++ = *s;
-					*rp++ = *s;
-				} else {
-					*rp++ = *s;
-				}
-			}
-		}
-		*rp++ = '\'';
-	} else {
-		/* Identifier escape. */
-		*rp++ = '"';
-		for (s = (char *)str; s - str < len; ++s) {
-			if (*s == '"') {
-				*rp++ = '"';
-				*rp++ = '"';
-			} else {
-				*rp++ = *s;
-			}
-		}
-		*rp++ = '"';
-	}
-	*rp = '\0';
-
-	return result;
-}
-/* }}} */
 #endif
 
 /* {{{ _php_pgsql_trim_message */
@@ -1022,10 +926,26 @@ static PHP_GINIT_FUNCTION(pgsql)
 }
 /* }}} */
 
+static void php_libpq_version(char *buf, size_t len)
+{
+	int version = PQlibVersion();
+	int major = version / 10000;
+	if (major >= 10) {
+		int minor = version % 10000;
+		snprintf(buf, len, "%d.%d", major, minor);
+	} else {
+		int minor = version / 100 % 100;
+		int revision = version % 100;
+		snprintf(buf, len, "%d.%d.%d", major, minor, revision);
+	}
+}
+
 /* {{{ PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(pgsql)
 {
+	char buf[16];
+
 	REGISTER_INI_ENTRIES();
 
 	le_link = zend_register_list_destructors_ex(_close_pgsql_link, NULL, "pgsql link", module_number);
@@ -1033,11 +953,10 @@ PHP_MINIT_FUNCTION(pgsql)
 	le_result = zend_register_list_destructors_ex(_free_result, NULL, "pgsql result", module_number);
 	le_lofp = zend_register_list_destructors_ex(_free_ptr, NULL, "pgsql large object", module_number);
 	le_string = zend_register_list_destructors_ex(_free_ptr, NULL, "pgsql string", module_number);
-#ifdef HAVE_PG_CONFIG_H
-	/* PG_VERSION - libpq version */
-	REGISTER_STRING_CONSTANT("PGSQL_LIBPQ_VERSION", PG_VERSION, CONST_CS | CONST_PERSISTENT);
-	REGISTER_STRING_CONSTANT("PGSQL_LIBPQ_VERSION_STR", PG_VERSION_STR, CONST_CS | CONST_PERSISTENT);
-#endif
+	/* libpq version */
+	php_libpq_version(buf, sizeof(buf));
+	REGISTER_STRING_CONSTANT("PGSQL_LIBPQ_VERSION", buf, CONST_CS | CONST_PERSISTENT);
+	REGISTER_STRING_CONSTANT("PGSQL_LIBPQ_VERSION_STR", buf, CONST_CS | CONST_PERSISTENT | CONST_DEPRECATED);
 	/* For connection option */
 	REGISTER_LONG_CONSTANT("PGSQL_CONNECT_FORCE_NEW", PGSQL_CONNECT_FORCE_NEW, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_CONNECT_ASYNC", PGSQL_CONNECT_ASYNC, CONST_CS | CONST_PERSISTENT);
@@ -1184,20 +1103,13 @@ PHP_MINFO_FUNCTION(pgsql)
 
 	php_info_print_table_start();
 	php_info_print_table_header(2, "PostgreSQL Support", "enabled");
-#ifdef HAVE_PG_CONFIG_H
-	php_info_print_table_row(2, "PostgreSQL(libpq) Version", PG_VERSION);
-	php_info_print_table_row(2, "PostgreSQL(libpq) ", PG_VERSION_STR);
+	php_libpq_version(buf, sizeof(buf));
+	php_info_print_table_row(2, "PostgreSQL(libpq) Version", buf);
 #ifdef HAVE_PGSQL_WITH_MULTIBYTE_SUPPORT
 	php_info_print_table_row(2, "Multibyte character support", "enabled");
 #else
 	php_info_print_table_row(2, "Multibyte character support", "disabled");
 #endif
-#if defined(USE_SSL) || defined(USE_OPENSSL)
-	php_info_print_table_row(2, "SSL support", "enabled");
-#else
-	php_info_print_table_row(2, "SSL support", "disabled");
-#endif
-#endif /* HAVE_PG_CONFIG_H */
 	snprintf(buf, sizeof(buf), ZEND_LONG_FMT, PGG(num_persistent));
 	php_info_print_table_row(2, "Active Persistent Links", buf);
 	snprintf(buf, sizeof(buf), ZEND_LONG_FMT, PGG(num_links));
@@ -1574,7 +1486,9 @@ static void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type
 			break;
 		case PHP_PG_VERSION:
 			array_init(return_value);
-			add_assoc_string(return_value, "client", PG_VERSION);
+			char buf[16];
+			php_libpq_version(buf, sizeof(buf));
+			add_assoc_string(return_value, "client", buf);
 			add_assoc_long(return_value, "protocol", PQprotocolVersion(pgsql));
 			if (PQprotocolVersion(pgsql) >= 3) {
 				/* 8.0 or grater supports protorol version 3 */
@@ -3133,9 +3047,6 @@ PHP_FUNCTION(pg_lo_create)
 	}
 
 	if (oid) {
-#ifndef HAVE_PG_LO_CREATE
-		php_error_docref(NULL, E_NOTICE, "Passing OID value is not supported. Upgrade your PostgreSQL");
-#else
 		switch (Z_TYPE_P(oid)) {
 		case IS_STRING:
 			{
@@ -3165,7 +3076,6 @@ PHP_FUNCTION(pg_lo_create)
 		}
 
 		PGSQL_RETURN_OID(pgsql_oid);
-#endif
 	}
 
 	if ((pgsql_oid = lo_creat(pgsql, INV_READ|INV_WRITE)) == InvalidOid) {
@@ -3544,9 +3454,6 @@ PHP_FUNCTION(pg_lo_import)
 	}
 
 	if (oid) {
-#ifndef HAVE_PG_LO_IMPORT_WITH_OID
-		php_error_docref(NULL, E_NOTICE, "OID value passing not supported");
-#else
 		Oid wanted_oid;
 		switch (Z_TYPE_P(oid)) {
 		case IS_STRING:
@@ -3579,7 +3486,6 @@ PHP_FUNCTION(pg_lo_import)
 	   }
 
 	   PGSQL_RETURN_OID(returned_oid);
-#endif
 	}
 
 	returned_oid = lo_import(pgsql, file_in);
@@ -3754,7 +3660,6 @@ PHP_FUNCTION(pg_lo_tell)
 }
 /* }}} */
 
-#ifdef HAVE_PG_LO_TRUNCATE
 /* {{{ proto bool pg_lo_truncate(resource large_object, int size)
    Truncate large object to size */
 PHP_FUNCTION(pg_lo_truncate)
@@ -3789,7 +3694,6 @@ PHP_FUNCTION(pg_lo_truncate)
 	}
 }
 /* }}} */
-#endif
 
 /* {{{ proto int pg_set_error_verbosity([resource connection,] int verbosity)
    Set error verbosity */
@@ -4162,9 +4066,7 @@ PHP_FUNCTION(pg_escape_string)
 	zend_string *from = NULL, *to = NULL;
 	zval *pgsql_link;
 	zend_resource *link;
-#ifdef HAVE_PQESCAPE_CONN
 	PGconn *pgsql;
-#endif
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
@@ -4182,14 +4084,12 @@ PHP_FUNCTION(pg_escape_string)
 	}
 
 	to = zend_string_safe_alloc(ZSTR_LEN(from), 2, 0, 0);
-#ifdef HAVE_PQESCAPE_CONN
 	if (link) {
 		if ((pgsql = (PGconn *)zend_fetch_resource2(link, "PostgreSQL link", le_link, le_plink)) == NULL) {
 			RETURN_THROWS();
 		}
 		ZSTR_LEN(to) = PQescapeStringConn(pgsql, ZSTR_VAL(to), ZSTR_VAL(from), ZSTR_LEN(from), NULL);
 	} else
-#endif
 	{
 		ZSTR_LEN(to) = PQescapeString(ZSTR_VAL(to), ZSTR_VAL(from), ZSTR_LEN(from));
 	}
@@ -4206,9 +4106,7 @@ PHP_FUNCTION(pg_escape_bytea)
 	char *from = NULL, *to = NULL;
 	size_t to_len;
 	size_t from_len;
-#ifdef HAVE_PQESCAPE_BYTEA_CONN
 	PGconn *pgsql;
-#endif
 	zval *pgsql_link;
 	zend_resource *link;
 
@@ -4227,14 +4125,12 @@ PHP_FUNCTION(pg_escape_bytea)
 			break;
 	}
 
-#ifdef HAVE_PQESCAPE_BYTEA_CONN
 	if (link) {
 		if ((pgsql = (PGconn *)zend_fetch_resource2(link, "PostgreSQL link", le_link, le_plink)) == NULL) {
 			RETURN_THROWS();
 		}
 		to = (char *)PQescapeByteaConn(pgsql, (unsigned char *)from, (size_t)from_len, &to_len);
 	} else
-#endif
 		to = (char *)PQescapeBytea((unsigned char*)from, from_len, &to_len);
 
 	RETVAL_STRINGL(to, to_len-1); /* to_len includes additional '\0' */
@@ -4301,9 +4197,9 @@ static void php_pgsql_escape_internal(INTERNAL_FUNCTION_PARAMETERS, int escape_l
 	}
 
 	if (escape_literal) {
-		tmp = PGSQLescapeLiteral(pgsql, from, (size_t)from_len);
+		tmp = PQescapeLiteral(pgsql, from, (size_t)from_len);
 	} else {
-		tmp = PGSQLescapeIdentifier(pgsql, from, (size_t)from_len);
+		tmp = PQescapeIdentifier(pgsql, from, (size_t)from_len);
 	}
 	if (!tmp) {
 		php_error_docref(NULL, E_WARNING,"Failed to escape");
@@ -4311,7 +4207,7 @@ static void php_pgsql_escape_internal(INTERNAL_FUNCTION_PARAMETERS, int escape_l
 	}
 
 	RETVAL_STRING(tmp);
-	PGSQLfree(tmp);
+	PQfreemem(tmp);
 }
 /* }}} */
 
@@ -6052,11 +5948,7 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 							unsigned char *tmp;
 							size_t to_len;
 							smart_str s = {0};
-#ifdef HAVE_PQESCAPE_BYTEA_CONN
 							tmp = PQescapeByteaConn(pg_link, (unsigned char *)Z_STRVAL_P(val), Z_STRLEN_P(val), &to_len);
-#else
-							tmp = PQescapeBytea(Z_STRVAL_P(val), (unsigned char *)Z_STRLEN_P(val), &to_len);
-#endif
 							ZVAL_STRINGL(&new_val, (char *)tmp, to_len - 1); /* PQescapeBytea's to_len includes additional '\0' */
 							PQfreemem(tmp);
 							php_pgsql_add_quotes(&new_val, 1);
@@ -6137,9 +6029,9 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 			if (_php_pgsql_detect_identifier_escape(ZSTR_VAL(field), ZSTR_LEN(field)) == SUCCESS) {
 				zend_hash_update(Z_ARRVAL_P(result), field, &new_val);
 			} else {
-				char *escaped = PGSQLescapeIdentifier(pg_link, ZSTR_VAL(field), ZSTR_LEN(field));
+				char *escaped = PQescapeIdentifier(pg_link, ZSTR_VAL(field), ZSTR_LEN(field));
 				add_assoc_zval(result, escaped, &new_val);
-				PGSQLfree(escaped);
+				PQfreemem(escaped);
 			}
 		}
 	} ZEND_HASH_FOREACH_END(); /* for */
@@ -6226,9 +6118,9 @@ static inline void build_tablename(smart_str *querystr, PGconn *pg_link, const c
 	if (_php_pgsql_detect_identifier_escape(table, len) == SUCCESS) {
 		smart_str_appendl(querystr, table, len);
 	} else {
-		char *escaped = PGSQLescapeIdentifier(pg_link, table, len);
+		char *escaped = PQescapeIdentifier(pg_link, table, len);
 		smart_str_appends(querystr, escaped);
-		PGSQLfree(escaped);
+		PQfreemem(escaped);
 	}
 	if (dot) {
 		const char *after_dot = dot + 1;
@@ -6238,10 +6130,10 @@ static inline void build_tablename(smart_str *querystr, PGconn *pg_link, const c
 			smart_str_appendc(querystr, '.');
 			smart_str_appendl(querystr, after_dot, len);
 		} else {
-			char *escaped = PGSQLescapeIdentifier(pg_link, after_dot, len);
+			char *escaped = PQescapeIdentifier(pg_link, after_dot, len);
 			smart_str_appendc(querystr, '.');
 			smart_str_appends(querystr, escaped);
-			PGSQLfree(escaped);
+			PQfreemem(escaped);
 		}
 	}
 }
@@ -6290,9 +6182,9 @@ PHP_PGSQL_API int php_pgsql_insert(PGconn *pg_link, const char *table, zval *var
 			goto cleanup;
 		}
 		if (opt & PGSQL_DML_ESCAPE) {
-			tmp = PGSQLescapeIdentifier(pg_link, ZSTR_VAL(fld), ZSTR_LEN(fld) + 1);
+			tmp = PQescapeIdentifier(pg_link, ZSTR_VAL(fld), ZSTR_LEN(fld) + 1);
 			smart_str_appends(&querystr, tmp);
-			PGSQLfree(tmp);
+			PQfreemem(tmp);
 		} else {
 			smart_str_appendl(&querystr, ZSTR_VAL(fld), ZSTR_LEN(fld));
 		}
@@ -6459,9 +6351,9 @@ static inline int build_assignment_string(PGconn *pg_link, smart_str *querystr, 
 			return -1;
 		}
 		if (opt & PGSQL_DML_ESCAPE) {
-			char *tmp = PGSQLescapeIdentifier(pg_link, ZSTR_VAL(fld), ZSTR_LEN(fld) + 1);
+			char *tmp = PQescapeIdentifier(pg_link, ZSTR_VAL(fld), ZSTR_LEN(fld) + 1);
 			smart_str_appends(querystr, tmp);
-			PGSQLfree(tmp);
+			PQfreemem(tmp);
 		} else {
 			smart_str_appendl(querystr, ZSTR_VAL(fld), ZSTR_LEN(fld));
 		}
