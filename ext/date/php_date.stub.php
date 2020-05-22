@@ -6,7 +6,7 @@ function strtotime(string $datetime, ?int $baseTimestamp = null): int|false {}
 
 function date(string $format, ?int $timestamp = null): string {}
 
-function idate(string $format, ?int $timestamp = null): int|false {}
+function idate(string $format, ?int $timestamp = null): int {}
 
 function gmdate(string $format, ?int $timestamp = null): string {}
 
@@ -73,7 +73,7 @@ function date_isodate_set(DateTime $object, int $year, int $week, int $day = 1):
 
 function date_timestamp_set(DateTime $object, int $timestamp): DateTime {}
 
-function date_timestamp_get(DateTimeInterface $object): int|false {}
+function date_timestamp_get(DateTimeInterface $object): int {}
 
 function timezone_open(string $timezone): DateTimeZone|false {}
 

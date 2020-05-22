@@ -550,7 +550,7 @@ PHPAPI timelib_tzinfo *get_timezone_info(void)
 	tz = guess_timezone(DATE_TIMEZONEDB);
 	tzi = php_date_parse_tzfile(tz, DATE_TIMEZONEDB);
 	if (! tzi) {
-		php_error_docref(NULL, E_ERROR, "Timezone database is corrupt - this should *never* happen!");
+		zend_throw_error(NULL, "Timezone database is corrupt. Please file a bug report as this should never happen");
 	}
 	return tzi;
 }
@@ -951,8 +951,8 @@ PHP_FUNCTION(idate)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZSTR_LEN(format) != 1) {
-		php_error_docref(NULL, E_WARNING, "idate format is one char");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "must be one character");
+		RETURN_THROWS();
 	}
 
 	if (ts_is_null) {
@@ -961,8 +961,8 @@ PHP_FUNCTION(idate)
 
 	ret = php_idate(ZSTR_VAL(format)[0], ts, 0);
 	if (ret == -1) {
-		php_error_docref(NULL, E_WARNING, "Unrecognized date format token.");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "must be a valid date format token");
+		RETURN_THROWS();
 	}
 	RETURN_LONG(ret);
 }
@@ -1022,6 +1022,12 @@ PHP_FUNCTION(strtotime)
 		Z_PARAM_LONG_OR_NULL(preset_ts, preset_ts_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
+	/* timelib_strtotime() expects the string to not be empty */
+	if (ZSTR_LEN(times) == 0) {
+		/* TODO Add a Warning? */
+		RETURN_FALSE;
+	}
+
 	tzi = get_timezone_info();
 
 	now = timelib_time_ctor();
@@ -1034,6 +1040,12 @@ PHP_FUNCTION(strtotime)
 		DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper);
 	error1 = error->error_count;
 	timelib_error_container_dtor(error);
+	if (error1) {
+		timelib_time_dtor(now);
+		timelib_time_dtor(t);
+		RETURN_FALSE;
+	}
+
 	timelib_fill_holes(t, now, TIMELIB_NO_CLONE);
 	timelib_update_ts(t, tzi);
 	ts = timelib_date_to_int(t, &error2);
@@ -1041,11 +1053,13 @@ PHP_FUNCTION(strtotime)
 	timelib_time_dtor(now);
 	timelib_time_dtor(t);
 
-	if (error1 || error2) {
+	/* Seconds since epoch must fit in a zend_long */
+	if (error2) {
+		/* TODO Add warning? */
 		RETURN_FALSE;
-	} else {
-		RETURN_LONG(ts);
 	}
+
+	RETURN_LONG(ts);
 }
 /* }}} */
 
@@ -1116,14 +1130,18 @@ PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 
 	/* Clean up and return */
 	ts = timelib_date_to_int(now, &error);
+
+	/* Seconds since epoch must fit in a zend_long */
+	if (error) {
+		timelib_time_dtor(now);
+		/* TODO Add warning? */
+		RETURN_FALSE;
+	}
+
 	ts += adjust_seconds;
 	timelib_time_dtor(now);
 
-	if (error) {
-		RETURN_FALSE;
-	} else {
-		RETURN_LONG(ts);
-	}
+	RETURN_LONG(ts);
 }
 /* }}} */
 
@@ -1180,6 +1198,7 @@ PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZSTR_LEN(format) == 0) {
+		/* TODO Add a warning? */
 		RETURN_FALSE;
 	}
 
@@ -1224,7 +1243,7 @@ PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 		ta.tm_zone = offset->abbr;
 #endif
 	}
-
+	// TODO Cleanup as bug is not present anymore? (Need to update link as MS retired connect.microsoft.com)
 	/* VS2012 crt has a bug where strftime crash with %z and %Z format when the
 	   initial buffer is too small. See
 	   http://connect.microsoft.com/VisualStudio/feedback/details/759720/vs2012-strftime-crash-with-z-formatting-code */
@@ -2781,7 +2800,7 @@ static int php_date_modify(zval *object, char *modify, size_t modify_len) /* {{{
 	dateobj = Z_PHPDATE_P(object);
 
 	if (!(dateobj->time)) {
-		php_error_docref(NULL, E_WARNING, "The DateTime object has not been correctly initialized by its constructor");
+		zend_throw_error(NULL, "The DateTime object has not been correctly initialized by its constructor");
 		return 0;
 	}
 
@@ -3319,11 +3338,14 @@ PHP_FUNCTION(date_timestamp_get)
 	timelib_update_ts(dateobj->time, NULL);
 
 	timestamp = timelib_date_to_int(dateobj->time, &error);
+
+	/* Seconds since epoch must fit in a zend_long */
 	if (error) {
+		/* TODO Add warning? */
 		RETURN_FALSE;
-	} else {
-		RETVAL_LONG(timestamp);
 	}
+
+	RETURN_LONG(timestamp);
 }
 /* }}} */
 
@@ -3387,7 +3409,7 @@ PHP_FUNCTION(timezone_open)
 	php_timezone_obj *tzobj;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STR(tz)
+		Z_PARAM_PATH_STR(tz) /* To prevent nul bytes */
 	ZEND_PARSE_PARAMETERS_END();
 
 	tzobj = Z_PHPTIMEZONE_P(php_date_instantiate(date_ce_timezone, return_value));
@@ -3406,7 +3428,7 @@ PHP_METHOD(DateTimeZone, __construct)
 	zend_error_handling error_handling;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STR(tz)
+		Z_PARAM_PATH_STR(tz) /* To prevent nul bytes */
 	ZEND_PARSE_PARAMETERS_END();
 
 	zend_replace_error_handling(EH_THROW, NULL, &error_handling);
@@ -4336,6 +4358,7 @@ PHP_FUNCTION(timezone_identifiers_list)
 
 	/* Extra validation */
 	if (what == PHP_DATE_TIMEZONE_PER_COUNTRY && option_len != 2) {
+		// Promoto to ValueError?
 		php_error_docref(NULL, E_NOTICE, "A two-letter ISO 3166-1 compatible country code is expected");
 		RETURN_FALSE;
 	}
