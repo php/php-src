@@ -273,7 +273,7 @@ static void zend_generator_free_storage(zend_object *object) /* {{{ */
 }
 /* }}} */
 
-static HashTable *zend_generator_get_gc(zend_object *object, zval **table, int *n) /* {{{ */
+static HashTable *zend_generator_get_gc(zend_object *object, zval **table, ptrdiff_t *n) /* {{{ */
 {
 	zend_generator *generator = (zend_generator*)object;
 	zend_execute_data *execute_data = generator->execute_data;

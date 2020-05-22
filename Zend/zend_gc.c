@@ -700,7 +700,7 @@ tail_call:
 		zend_object *obj = (zend_object*)ref;
 
 		if (EXPECTED(!(OBJ_FLAGS(ref) & IS_OBJ_FREE_CALLED))) {
-			int n;
+			ptrdiff_t n;
 			zval *zv, *end;
 
 			ht = obj->handlers->get_gc(obj, &zv, &n);
@@ -818,7 +818,7 @@ static void gc_mark_grey(zend_refcounted *ref, gc_stack *stack)
 			zend_object *obj = (zend_object*)ref;
 
 			if (EXPECTED(!(OBJ_FLAGS(ref) & IS_OBJ_FREE_CALLED))) {
-				int n;
+				ptrdiff_t n;
 				zval *zv, *end;
 
 				ht = obj->handlers->get_gc(obj, &zv, &n);
@@ -1002,7 +1002,7 @@ tail_call:
 				zend_object *obj = (zend_object*)ref;
 
 				if (EXPECTED(!(OBJ_FLAGS(ref) & IS_OBJ_FREE_CALLED))) {
-					int n;
+					ptrdiff_t n;
 					zval *zv, *end;
 
 					ht = obj->handlers->get_gc(obj, &zv, &n);
@@ -1163,7 +1163,7 @@ static int gc_collect_white(zend_refcounted *ref, uint32_t *flags, gc_stack *sta
 			zend_object *obj = (zend_object*)ref;
 
 			if (EXPECTED(!(OBJ_FLAGS(ref) & IS_OBJ_FREE_CALLED))) {
-				int n;
+				ptrdiff_t n;
 				zval *zv, *end;
 
 				/* optimization: color is GC_BLACK (0) */
@@ -1347,7 +1347,7 @@ tail_call:
 			zend_object *obj = (zend_object*)ref;
 
 			if (EXPECTED(!(OBJ_FLAGS(ref) & IS_OBJ_FREE_CALLED))) {
-				int n;
+				ptrdiff_t n;
 				zval *zv, *end;
 
 				ht = obj->handlers->get_gc(obj, &zv, &n);

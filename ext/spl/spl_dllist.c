@@ -523,7 +523,7 @@ static inline HashTable* spl_dllist_object_get_debug_info(zend_object *obj) /* {
 }
 /* }}}} */
 
-static HashTable *spl_dllist_object_get_gc(zend_object *obj, zval **gc_data, int *gc_data_count) /* {{{ */
+static HashTable *spl_dllist_object_get_gc(zend_object *obj, zval **gc_data, ptrdiff_t *gc_data_count) /* {{{ */
 {
 	spl_dllist_object *intern = spl_dllist_from_obj(obj);
 	zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();

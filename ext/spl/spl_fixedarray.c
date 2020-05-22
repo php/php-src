@@ -146,7 +146,7 @@ static void spl_fixedarray_copy(spl_fixedarray *to, spl_fixedarray *from) /* {{{
 }
 /* }}} */
 
-static HashTable* spl_fixedarray_object_get_gc(zend_object *obj, zval **table, int *n) /* {{{{ */
+static HashTable* spl_fixedarray_object_get_gc(zend_object *obj, zval **table, ptrdiff_t *n) /* {{{{ */
 {
 	spl_fixedarray_object *intern = spl_fixed_array_from_obj(obj);
 	HashTable *ht = zend_std_get_properties(obj);

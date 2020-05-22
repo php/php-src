@@ -276,7 +276,7 @@ static inline HashTable* spl_object_storage_debug_info(zend_object *obj) /* {{{ 
 /* }}} */
 
 /* overridden for garbage collection */
-static HashTable *spl_object_storage_get_gc(zend_object *obj, zval **table, int *n) /* {{{ */
+static HashTable *spl_object_storage_get_gc(zend_object *obj, zval **table, ptrdiff_t *n) /* {{{ */
 {
 	spl_SplObjectStorage *intern = spl_object_storage_from_obj(obj);
 	spl_SplObjectStorageElement *element;

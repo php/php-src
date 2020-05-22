@@ -855,7 +855,7 @@ static inline HashTable* spl_array_get_debug_info(zend_object *obj) /* {{{ */
 }
 /* }}} */
 
-static HashTable *spl_array_get_gc(zend_object *obj, zval **gc_data, int *gc_data_count) /* {{{ */
+static HashTable *spl_array_get_gc(zend_object *obj, zval **gc_data, ptrdiff_t *gc_data_count) /* {{{ */
 {
 	spl_array_object *intern = spl_array_from_obj(obj);
 	*gc_data = &intern->array;

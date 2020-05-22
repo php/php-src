@@ -170,14 +170,14 @@ static zend_object *date_object_clone_interval(zend_object *this_ptr);
 static zend_object *date_object_clone_period(zend_object *this_ptr);
 
 static int date_object_compare_date(zval *d1, zval *d2);
-static HashTable *date_object_get_gc(zend_object *object, zval **table, int *n);
+static HashTable *date_object_get_gc(zend_object *object, zval **table, ptrdiff_t *n);
 static HashTable *date_object_get_properties_for(zend_object *object, zend_prop_purpose purpose);
-static HashTable *date_object_get_gc_interval(zend_object *object, zval **table, int *n);
+static HashTable *date_object_get_gc_interval(zend_object *object, zval **table, ptrdiff_t *n);
 static HashTable *date_object_get_properties_interval(zend_object *object);
-static HashTable *date_object_get_gc_period(zend_object *object, zval **table, int *n);
+static HashTable *date_object_get_gc_period(zend_object *object, zval **table, ptrdiff_t *n);
 static HashTable *date_object_get_properties_period(zend_object *object);
 static HashTable *date_object_get_properties_for_timezone(zend_object *object, zend_prop_purpose purpose);
-static HashTable *date_object_get_gc_timezone(zend_object *object, zval **table, int *n);
+static HashTable *date_object_get_gc_timezone(zend_object *object, zval **table, ptrdiff_t *n);
 static HashTable *date_object_get_debug_info_timezone(zend_object *object, int *is_temp);
 static void php_timezone_to_string(php_timezone_obj *tzobj, zval *zv);
 
@@ -1772,14 +1772,14 @@ static int date_object_compare_date(zval *d1, zval *d2) /* {{{ */
 	return timelib_time_compare(o1->time, o2->time);
 } /* }}} */
 
-static HashTable *date_object_get_gc(zend_object *object, zval **table, int *n) /* {{{ */
+static HashTable *date_object_get_gc(zend_object *object, zval **table, ptrdiff_t *n) /* {{{ */
 {
 	*table = NULL;
 	*n = 0;
 	return zend_std_get_properties(object);
 } /* }}} */
 
-static HashTable *date_object_get_gc_timezone(zend_object *object, zval **table, int *n) /* {{{ */
+static HashTable *date_object_get_gc_timezone(zend_object *object, zval **table, ptrdiff_t *n) /* {{{ */
 {
        *table = NULL;
        *n = 0;
@@ -2013,7 +2013,7 @@ static zend_object *date_object_clone_interval(zend_object *this_ptr) /* {{{ */
 	return &new_obj->std;
 } /* }}} */
 
-static HashTable *date_object_get_gc_interval(zend_object *object, zval **table, int *n) /* {{{ */
+static HashTable *date_object_get_gc_interval(zend_object *object, zval **table, ptrdiff_t *n) /* {{{ */
 {
 
 	*table = NULL;
@@ -4729,7 +4729,7 @@ PHP_FUNCTION(date_sun_info)
 }
 /* }}} */
 
-static HashTable *date_object_get_gc_period(zend_object *object, zval **table, int *n) /* {{{ */
+static HashTable *date_object_get_gc_period(zend_object *object, zval **table, ptrdiff_t *n) /* {{{ */
 {
 	*table = NULL;
 	*n = 0;

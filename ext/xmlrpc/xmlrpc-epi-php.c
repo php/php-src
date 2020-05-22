@@ -211,7 +211,7 @@ static void xmlrpc_server_free_obj(zend_object *object)
 	zend_object_std_dtor(&server->std);
 }
 
-static HashTable *xmlrpc_server_get_gc(zend_object *object, zval **table, int *n)
+static HashTable *xmlrpc_server_get_gc(zend_object *object, zval **table, ptrdiff_t *n)
 {
 	xmlrpc_server_data *xmlrpc_server = xmlrpc_server_from_obj(object);
 

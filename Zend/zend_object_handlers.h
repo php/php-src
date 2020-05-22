@@ -134,7 +134,7 @@ typedef int (*zend_object_count_elements_t)(zend_object *object, zend_long *coun
 
 typedef int (*zend_object_get_closure_t)(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr, zend_bool check_only);
 
-typedef HashTable *(*zend_object_get_gc_t)(zend_object *object, zval **table, int *n);
+typedef HashTable *(*zend_object_get_gc_t)(zend_object *object, zval **table, ptrdiff_t *n);
 
 typedef int (*zend_object_do_operation_t)(zend_uchar opcode, zval *result, zval *op1, zval *op2);
 
@@ -189,7 +189,7 @@ ZEND_API ZEND_COLD zend_bool zend_std_unset_static_property(zend_class_entry *ce
 ZEND_API zend_function *zend_std_get_constructor(zend_object *object);
 ZEND_API struct _zend_property_info *zend_get_property_info(zend_class_entry *ce, zend_string *member, int silent);
 ZEND_API HashTable *zend_std_get_properties(zend_object *object);
-ZEND_API HashTable *zend_std_get_gc(zend_object *object, zval **table, int *n);
+ZEND_API HashTable *zend_std_get_gc(zend_object *object, zval **table, ptrdiff_t *n);
 ZEND_API HashTable *zend_std_get_debug_info(zend_object *object, int *is_temp);
 ZEND_API int zend_std_cast_object_tostring(zend_object *object, zval *writeobj, int type);
 ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *object, zend_string *member, int type, void **cache_slot);

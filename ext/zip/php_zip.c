@@ -938,7 +938,7 @@ static int php_zip_has_property(zend_object *object, zend_string *name, int type
 }
 /* }}} */
 
-static HashTable *php_zip_get_gc(zend_object *object, zval **gc_data, int *gc_data_count) /* {{{ */
+static HashTable *php_zip_get_gc(zend_object *object, zval **gc_data, ptrdiff_t *gc_data_count) /* {{{ */
 {
 	*gc_data = NULL;
 	*gc_data_count = 0;

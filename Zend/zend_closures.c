@@ -581,7 +581,7 @@ static HashTable *zend_closure_get_debug_info(zend_object *object, int *is_temp)
 }
 /* }}} */
 
-static HashTable *zend_closure_get_gc(zend_object *obj, zval **table, int *n) /* {{{ */
+static HashTable *zend_closure_get_gc(zend_object *obj, zval **table, ptrdiff_t *n) /* {{{ */
 {
 	zend_closure *closure = (zend_closure *)obj;
 

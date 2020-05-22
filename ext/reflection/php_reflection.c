@@ -250,7 +250,7 @@ static void reflection_free_objects_storage(zend_object *object) /* {{{ */
 }
 /* }}} */
 
-static HashTable *reflection_get_gc(zend_object *obj, zval **gc_data, int *gc_data_count) /* {{{ */
+static HashTable *reflection_get_gc(zend_object *obj, zval **gc_data, ptrdiff_t *gc_data_count) /* {{{ */
 {
 	reflection_object *intern = reflection_object_from_obj(obj);
 	*gc_data = &intern->obj;

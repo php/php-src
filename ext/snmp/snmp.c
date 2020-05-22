@@ -1746,7 +1746,7 @@ static int php_snmp_has_property(zend_object *object, zend_string *name, int has
 }
 /* }}} */
 
-static HashTable *php_snmp_get_gc(zend_object *object, zval **gc_data, int *gc_data_count) /* {{{ */
+static HashTable *php_snmp_get_gc(zend_object *object, zval **gc_data, ptrdiff_t *gc_data_count) /* {{{ */
 {
 	*gc_data = NULL;
 	*gc_data_count = 0;

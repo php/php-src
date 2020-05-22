@@ -1281,7 +1281,7 @@ static int dbh_compare(zval *object1, zval *object2)
 	return ZEND_UNCOMPARABLE;
 }
 
-static HashTable *dbh_get_gc(zend_object *object, zval **gc_data, int *gc_count)
+static HashTable *dbh_get_gc(zend_object *object, zval **gc_data, ptrdiff_t *gc_count)
 {
 	pdo_dbh_t *dbh = php_pdo_dbh_fetch_inner(object);
 	*gc_data = &dbh->def_stmt_ctor_args;

@@ -227,7 +227,7 @@ static HashTable *com_properties_get(zend_object *object)
 	return &zend_empty_array;
 }
 
-static HashTable *com_get_gc(zval *object, zval **table, int *n)
+static HashTable *com_get_gc(zval *object, zval **table, ptrdiff_t *n)
 {
 	*table = NULL;
 	*n = 0;

@@ -118,9 +118,9 @@ static zend_always_inline void zend_get_gc_buffer_add_obj(
 }
 
 static zend_always_inline void zend_get_gc_buffer_use(
-		zend_get_gc_buffer *gc_buffer, zval **table, int *n) {
+		zend_get_gc_buffer *gc_buffer, zval **table, ptrdiff_t *gc_data_count) {
 	*table = gc_buffer->start;
-	*n = gc_buffer->cur - gc_buffer->start;
+	*gc_data_count = gc_buffer->cur - gc_buffer->start;
 }
 
 #endif /* ZEND_GC_H */

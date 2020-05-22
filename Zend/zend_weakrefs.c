@@ -445,7 +445,7 @@ static HashTable *zend_weakmap_get_properties_for(zend_object *object, zend_prop
 	return ht;
 }
 
-static HashTable *zend_weakmap_get_gc(zend_object *object, zval **table, int *n)
+static HashTable *zend_weakmap_get_gc(zend_object *object, zval **table, ptrdiff_t *n)
 {
 	zend_weakmap *wm = zend_weakmap_from(object);
 	*table = NULL;

@@ -113,7 +113,7 @@ ZEND_API HashTable *zend_std_get_properties(zend_object *zobj) /* {{{ */
 }
 /* }}} */
 
-ZEND_API HashTable *zend_std_get_gc(zend_object *zobj, zval **table, int *n) /* {{{ */
+ZEND_API HashTable *zend_std_get_gc(zend_object *zobj, zval **table, ptrdiff_t *n) /* {{{ */
 {
 	if (zobj->handlers->get_properties != zend_std_get_properties) {
 		*table = NULL;

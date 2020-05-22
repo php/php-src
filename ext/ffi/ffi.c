@@ -4631,7 +4631,7 @@ static HashTable *zend_fake_get_properties(zend_object *obj) /* {{{ */
 }
 /* }}} */
 
-static HashTable *zend_fake_get_gc(zend_object *ob, zval **table, int *n) /* {{{ */
+static HashTable *zend_fake_get_gc(zend_object *ob, zval **table, ptrdiff_t *n) /* {{{ */
 {
 	*table = NULL;
 	*n = 0;

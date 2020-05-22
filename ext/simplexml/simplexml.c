@@ -1258,7 +1258,7 @@ next_iter:
 }
 /* }}} */
 
-static HashTable *sxe_get_gc(zend_object *object, zval **table, int *n) /* {{{ */ {
+static HashTable *sxe_get_gc(zend_object *object, zval **table, ptrdiff_t *n) /* {{{ */ {
 	php_sxe_object *sxe;
 	sxe = php_sxe_fetch_object(object);
 
