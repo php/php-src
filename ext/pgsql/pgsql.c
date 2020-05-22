@@ -74,8 +74,6 @@
 #define PGSQL_RETURN_OID(oid) RETURN_LONG((zend_long)oid)
 #endif
 
-#define PQ_SETNONBLOCKING(pg_link, flag) PQsetnonblocking(pg_link, flag)
-
 #define CHECK_DEFAULT_LINK(x) if ((x) == NULL) { php_error_docref(NULL, E_WARNING, "No PostgreSQL link opened yet"); RETURN_FALSE; }
 #define FETCH_DEFAULT_LINK()  PGG(default_link)
 
@@ -934,7 +932,7 @@ static int _rollback_transactions(zval *el)
 
 	link = (PGconn *) rsrc->ptr;
 
-	if (PQ_SETNONBLOCKING(link, 0)) {
+	if (PQsetnonblocking(link, 0)) {
 		php_error_docref("ref.pgsql", E_NOTICE, "Cannot set connection to blocking mode");
 		return -1;
 	}
@@ -1769,7 +1767,7 @@ PHP_FUNCTION(pg_query)
 		RETURN_THROWS();
 	}
 
-	if (PQ_SETNONBLOCKING(pgsql, 0)) {
+	if (PQsetnonblocking(pgsql, 0)) {
 		php_error_docref(NULL, E_NOTICE,"Cannot set connection to blocking mode");
 		RETURN_FALSE;
 	}
@@ -1869,7 +1867,7 @@ PHP_FUNCTION(pg_query_params)
 		RETURN_THROWS();
 	}
 
-	if (PQ_SETNONBLOCKING(pgsql, 0)) {
+	if (PQsetnonblocking(pgsql, 0)) {
 		php_error_docref(NULL, E_NOTICE,"Cannot set connection to blocking mode");
 		RETURN_FALSE;
 	}
@@ -1983,7 +1981,7 @@ PHP_FUNCTION(pg_prepare)
 		RETURN_THROWS();
 	}
 
-	if (PQ_SETNONBLOCKING(pgsql, 0)) {
+	if (PQsetnonblocking(pgsql, 0)) {
 		php_error_docref(NULL, E_NOTICE,"Cannot set connection to blocking mode");
 		RETURN_FALSE;
 	}
@@ -2068,7 +2066,7 @@ PHP_FUNCTION(pg_execute)
 		RETURN_THROWS();
 	}
 
-	if (PQ_SETNONBLOCKING(pgsql, 0)) {
+	if (PQsetnonblocking(pgsql, 0)) {
 		php_error_docref(NULL, E_NOTICE,"Cannot set connection to blocking mode");
 		RETURN_FALSE;
 	}
@@ -4482,7 +4480,7 @@ static int php_pgsql_flush_query(PGconn *pgsql)
 	PGresult *res;
 	int leftover = 0;
 
-	if (PQ_SETNONBLOCKING(pgsql, 1)) {
+	if (PQsetnonblocking(pgsql, 1)) {
 		php_error_docref(NULL, E_NOTICE,"Cannot set connection to nonblocking mode");
 		return -1;
 	}
@@ -4490,7 +4488,7 @@ static int php_pgsql_flush_query(PGconn *pgsql)
 		PQclear(res);
 		leftover++;
 	}
-	PQ_SETNONBLOCKING(pgsql, 0);
+	PQsetnonblocking(pgsql, 0);
 	return leftover;
 }
 /* }}} */
@@ -4512,7 +4510,7 @@ static void php_pgsql_do_async(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 		RETURN_THROWS();
 	}
 
-	if (PQ_SETNONBLOCKING(pgsql, 1)) {
+	if (PQsetnonblocking(pgsql, 1)) {
 		php_error_docref(NULL, E_NOTICE, "Cannot set connection to nonblocking mode");
 		RETURN_FALSE;
 	}
@@ -4531,7 +4529,7 @@ static void php_pgsql_do_async(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 			php_error_docref(NULL, E_ERROR, "PostgreSQL module error, please report this error");
 			break;
 	}
-	if (PQ_SETNONBLOCKING(pgsql, 0)) {
+	if (PQsetnonblocking(pgsql, 0)) {
 		php_error_docref(NULL, E_NOTICE, "Cannot set connection to blocking mode");
 	}
 	convert_to_boolean_ex(return_value);
@@ -4586,7 +4584,7 @@ PHP_FUNCTION(pg_send_query)
 
 	is_non_blocking = PQisnonblocking(pgsql);
 
-	if (is_non_blocking == 0 && PQ_SETNONBLOCKING(pgsql, 1) == -1) {
+	if (is_non_blocking == 0 && PQsetnonblocking(pgsql, 1) == -1) {
 		php_error_docref(NULL, E_NOTICE, "Cannot set connection to nonblocking mode");
 		RETURN_FALSE;
 	}
@@ -4620,7 +4618,7 @@ PHP_FUNCTION(pg_send_query)
 			usleep(10000);
 		}
 
-		if (PQ_SETNONBLOCKING(pgsql, 0)) {
+		if (PQsetnonblocking(pgsql, 0)) {
 			php_error_docref(NULL, E_NOTICE, "Cannot set connection to blocking mode");
 		}
 	}
@@ -4658,7 +4656,7 @@ PHP_FUNCTION(pg_send_query_params)
 
 	is_non_blocking = PQisnonblocking(pgsql);
 
-	if (is_non_blocking == 0 && PQ_SETNONBLOCKING(pgsql, 1) == -1) {
+	if (is_non_blocking == 0 && PQsetnonblocking(pgsql, 1) == -1) {
 		php_error_docref(NULL, E_NOTICE, "Cannot set connection to nonblocking mode");
 		RETURN_FALSE;
 	}
@@ -4716,7 +4714,7 @@ PHP_FUNCTION(pg_send_query_params)
 			usleep(10000);
 		}
 
-		if (PQ_SETNONBLOCKING(pgsql, 0) != 0) {
+		if (PQsetnonblocking(pgsql, 0) != 0) {
 			php_error_docref(NULL, E_NOTICE, "Cannot set connection to blocking mode");
 		}
 	}
@@ -4752,7 +4750,7 @@ PHP_FUNCTION(pg_send_prepare)
 
 	is_non_blocking = PQisnonblocking(pgsql);
 
-	if (is_non_blocking == 0 && PQ_SETNONBLOCKING(pgsql, 1) == -1) {
+	if (is_non_blocking == 0 && PQsetnonblocking(pgsql, 1) == -1) {
 		php_error_docref(NULL, E_NOTICE, "Cannot set connection to nonblocking mode");
 		RETURN_FALSE;
 	}
@@ -4786,7 +4784,7 @@ PHP_FUNCTION(pg_send_prepare)
 			}
 			usleep(10000);
 		}
-		if (PQ_SETNONBLOCKING(pgsql, 0) != 0) {
+		if (PQsetnonblocking(pgsql, 0) != 0) {
 			php_error_docref(NULL, E_NOTICE, "Cannot set connection to blocking mode");
 		}
 	}
@@ -4825,7 +4823,7 @@ PHP_FUNCTION(pg_send_execute)
 
 	is_non_blocking = PQisnonblocking(pgsql);
 
-	if (is_non_blocking == 0 && PQ_SETNONBLOCKING(pgsql, 1) == -1) {
+	if (is_non_blocking == 0 && PQsetnonblocking(pgsql, 1) == -1) {
 		php_error_docref(NULL, E_NOTICE, "Cannot set connection to nonblocking mode");
 		RETURN_FALSE;
 	}
@@ -4884,7 +4882,7 @@ PHP_FUNCTION(pg_send_execute)
 			}
 			usleep(10000);
 		}
-		if (PQ_SETNONBLOCKING(pgsql, 0) != 0) {
+		if (PQsetnonblocking(pgsql, 0) != 0) {
 			php_error_docref(NULL, E_NOTICE, "Cannot set connection to blocking mode");
 		}
 	}
@@ -5060,7 +5058,7 @@ static int php_pgsql_fd_set_option(php_stream *stream, int option, int value, vo
 	PGconn *pgsql = (PGconn *) stream->abstract;
 	switch (option) {
 		case PHP_STREAM_OPTION_BLOCKING:
-			return PQ_SETNONBLOCKING(pgsql, value);
+			return PQsetnonblocking(pgsql, value);
 		default:
 			return FAILURE;
 	}
@@ -5155,14 +5153,14 @@ PHP_FUNCTION(pg_flush)
 
 	is_non_blocking = PQisnonblocking(pgsql);
 
-	if (is_non_blocking == 0 && PQ_SETNONBLOCKING(pgsql, 1) == -1) {
+	if (is_non_blocking == 0 && PQsetnonblocking(pgsql, 1) == -1) {
 		php_error_docref(NULL, E_NOTICE, "Cannot set connection to nonblocking mode");
 		RETURN_FALSE;
 	}
 
 	ret = PQflush(pgsql);
 
-	if (is_non_blocking == 0 && PQ_SETNONBLOCKING(pgsql, 0) == -1) {
+	if (is_non_blocking == 0 && PQsetnonblocking(pgsql, 0) == -1) {
 		php_error_docref(NULL, E_NOTICE, "Failed resetting connection to blocking mode");
 	}
 
