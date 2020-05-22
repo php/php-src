@@ -1652,12 +1652,6 @@ function read_order_file($fn) {
 function gen_executor_code($f, $spec, $kind, $prolog, &$switch_labels = array()) {
     global $list, $opcodes, $helpers, $op_types_ex, $gen_order;
 
-    if ($kind == ZEND_VM_KIND_HYBRID && file_exists(__DIR__ . "/zend_vm_order.txt")) {
-        $gen_order = read_order_file(__DIR__ . "/zend_vm_order.txt");
-    } else {
-        $gen_order = null;
-    }
-
     if ($spec) {
         // Produce specialized executor
         $op1t = $op_types_ex;
@@ -1770,7 +1764,13 @@ function skip_blanks($f, $prolog, $epilog) {
 
 // Generates executor from skeleton file and definition (specialized or unspecialized)
 function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name) {
-    global $params, $skeleton_file, $line_no;
+    global $params, $skeleton_file, $line_no, $gen_order;
+
+    if ($kind == ZEND_VM_KIND_HYBRID && file_exists(__DIR__ . "/zend_vm_order.txt")) {
+        $gen_order = read_order_file(__DIR__ . "/zend_vm_order.txt");
+    } else {
+        $gen_order = null;
+    }
 
     $switch_labels = array();
     $lineno = 0;
@@ -1811,7 +1811,11 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                         out($f,"#endif\n\n");
                     }
                     out($f,"#ifndef VM_TRACE\n");
-                    out($f,"# define VM_TRACE(op)\n");
+                    if (is_array($gen_order)) {
+                        out($f,"# define VM_TRACE(op) ZEND_VM_GUARD(op);\n");
+                    } else {
+                        out($f,"# define VM_TRACE(op)\n");
+                    }
                     out($f,"#endif\n");
                     out($f,"#ifndef VM_TRACE_START\n");
                     out($f,"# define VM_TRACE_START()\n");
