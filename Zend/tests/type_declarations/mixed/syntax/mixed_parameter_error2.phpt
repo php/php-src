@@ -1,9 +1,9 @@
 --TEST--
-Test that the nullable mixed return type is not valid
+Test that the nullable mixed parameter type is not valid even though a null default value
 --FILE--
 <?php
 
-function foo(): ?mixed
+function foo(?mixed $a = null)
 {
 }
 

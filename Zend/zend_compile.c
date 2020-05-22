@@ -5671,8 +5671,8 @@ static zend_type zend_compile_typename(
 			ZSTR_VAL(type_str));
 	}
 
-	if ((type_mask == MAY_BE_ANY) && allow_null) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Type mixed cannot be nullable");
+	if (type_mask == MAY_BE_ANY && orig_ast_attr & ZEND_TYPE_NULLABLE) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Type mixed cannot be marked as nullable since mixed already includes null");
 	}
 
 	if ((type_mask & MAY_BE_OBJECT) && (ZEND_TYPE_HAS_CLASS(type) || (type_mask & MAY_BE_STATIC))) {

@@ -10,4 +10,4 @@ class Foo
 
 ?>
 --EXPECTF--
-Fatal error: Type mixed cannot be nullable in %s on line %d
+Fatal error: Type mixed cannot be marked as nullable since mixed already includes null in %s on line %d
