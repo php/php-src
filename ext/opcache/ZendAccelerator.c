@@ -2131,7 +2131,9 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 				if (ZSMMG(memory_exhausted)) {
 					zend_accel_restart_reason reason =
 						zend_accel_hash_is_full(&ZCSG(hash)) ? ACCEL_RESTART_HASH : ACCEL_RESTART_OOM;
+					HANDLE_BLOCK_INTERRUPTIONS();
 					zend_accel_schedule_restart_if_necessary(reason);
+					HANDLE_UNBLOCK_INTERRUPTIONS();
 				}
 			}
 			zend_shared_alloc_unlock();
@@ -2156,7 +2158,9 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 				if (ZSMMG(memory_exhausted)) {
 					zend_accel_restart_reason reason =
 						zend_accel_hash_is_full(&ZCSG(hash)) ? ACCEL_RESTART_HASH : ACCEL_RESTART_OOM;
+					HANDLE_BLOCK_INTERRUPTIONS();
 					zend_accel_schedule_restart_if_necessary(reason);
+					HANDLE_UNBLOCK_INTERRUPTIONS();
 				}
 			}
 			zend_shared_alloc_unlock();
@@ -3227,7 +3231,9 @@ void zend_accel_schedule_restart(zend_accel_restart_reason reason)
 	zend_accel_error(ACCEL_LOG_DEBUG, "Restart Scheduled! Reason: %s",
 			zend_accel_restart_reason_text[reason]);
 
-	HANDLE_BLOCK_INTERRUPTIONS();
+	/* This function must be called with signals blocked */
+	zend_debug_ensure_signals_masked();
+
 	SHM_UNPROTECT();
 	ZCSG(restart_pending) = 1;
 	ZCSG(restart_reason) = reason;
@@ -3240,7 +3246,6 @@ void zend_accel_schedule_restart(zend_accel_restart_reason reason)
 		ZCSG(force_restart_time) = 0;
 	}
 	SHM_PROTECT();
-	HANDLE_UNBLOCK_INTERRUPTIONS();
 }
 
 /* this is needed because on WIN32 lock is not decreased unless ZCG(counted) is set */

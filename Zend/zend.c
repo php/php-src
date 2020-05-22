@@ -78,8 +78,15 @@ ZEND_API void zend_debug_mask_signals()
 }
 ZEND_API void zend_debug_unmask_signals()
 {
-	if (--_signals_masked)
-	  zend_error_noreturn(E_ERROR, "Cannot nest ZEND_SIGNAL_BLOCK_INTERRUPTIONS; it is not re-entrant");
+	if (--_signals_masked) {
+	  zend_error_noreturn(E_ERROR, "Cannot nest HANDLE_BLOCK_INTERRUPTIONS; it is not re-entrant");
+	}
+}
+ZEND_API void zend_debug_ensure_signals_masked()
+{
+	if (!_signals_masked) {
+		zend_error_noreturn(E_ERROR, "Must block signals using HANDLE_BLOCK_INTERRUPTIONS");
+	}
 }
 # endif
 #endif

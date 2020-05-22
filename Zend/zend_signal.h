@@ -26,9 +26,11 @@ extern sigset_t mask_all_signals;
 # if ZEND_DEBUG
 ZEND_API void zend_debug_mask_signals();
 ZEND_API void zend_debug_unmask_signals();
+ZEND_API void zend_debug_ensure_signals_masked();
 # else
 #  define zend_debug_mask_signals()   do {} while (0)
 #  define zend_debug_unmask_signals() do {} while (0)
+#  define zend_debug_ensure_signals_masked() do {} while (0)
 # endif
 
 # define ZEND_SIGNAL_BLOCK_INTERRUPTIONS() \
@@ -55,6 +57,7 @@ ZEND_API void zend_debug_unmask_signals();
 
 # define ZEND_SIGNAL_BLOCK_INTERRUPTIONS()   do {} while(0)
 # define ZEND_SIGNAL_UNBLOCK_INTERRUPTIONS() do {} while(0)
+# define zend_debug_ensure_signals_masked()  do {} while(0)
 
 #endif /* HAVE_SIGPROCMASK */
 #endif /* ZEND_SIGNAL_H */

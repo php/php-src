@@ -851,9 +851,11 @@ ZEND_FUNCTION(opcache_reset)
 	}
 
 	/* exclusive lock */
+	HANDLE_BLOCK_INTERRUPTIONS();
 	zend_shared_alloc_lock();
 	zend_accel_schedule_restart(ACCEL_RESTART_USER);
 	zend_shared_alloc_unlock();
+	HANDLE_UNBLOCK_INTERRUPTIONS();
 	RETURN_TRUE;
 }
 
