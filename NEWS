@@ -95,6 +95,9 @@ PHP                                                                        NEWS
 - PCRE:
   . Don't ignore invalid escape sequences. (sjon)
 
+- PGSQL:
+  . Bumped required libpq version to 7.4.
+
 - PDO:
   . Changed default PDO error mode to exceptions. (AllenJB)
   . Fixed bug #77849 (Disable cloning of PDO handle/connection objects).
