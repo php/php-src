@@ -2118,7 +2118,6 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		return NULL;
 	}
 
-	HANDLE_BLOCK_INTERRUPTIONS();
 	SHM_UNPROTECT();
 
 	/* If script is found then validate_timestamps if option is enabled */
@@ -2167,7 +2166,9 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 
 	/* Check the second level cache */
 	if (!persistent_script && ZCG(accel_directives).file_cache) {
+		HANDLE_BLOCK_INTERRUPTIONS();
 		persistent_script = zend_file_cache_script_load(file_handle);
+		HANDLE_UNBLOCK_INTERRUPTIONS();
 	}
 
 	/* If script was not found or invalidated by validate_timestamps */
@@ -2181,7 +2182,6 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		/* No memory left. Behave like without the Accelerator */
 		if (ZSMMG(memory_exhausted) || ZCSG(restart_pending)) {
 			SHM_PROTECT();
-			HANDLE_UNBLOCK_INTERRUPTIONS();
 			if (ZCG(accel_directives).file_cache) {
 				return file_cache_compile_file(file_handle, type);
 			}
@@ -2189,9 +2189,7 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		}
 
 		SHM_PROTECT();
-		HANDLE_UNBLOCK_INTERRUPTIONS();
 		persistent_script = opcache_compile_file(file_handle, type, key, &op_array);
-		HANDLE_BLOCK_INTERRUPTIONS();
 		SHM_UNPROTECT();
 
 		/* Try and cache the script and assume that it is returned from_shared_memory.
@@ -2199,7 +2197,9 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
          */
        	from_shared_memory = 0;
 		if (persistent_script) {
+			HANDLE_BLOCK_INTERRUPTIONS();
 			persistent_script = cache_script_in_shared_memory(persistent_script, key, key ? key_length : 0, &from_shared_memory);
+			HANDLE_UNBLOCK_INTERRUPTIONS();
 		}
 
 		/* Caching is disabled, returning op_array;
@@ -2207,7 +2207,6 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		 */
 		if (!persistent_script) {
 			SHM_PROTECT();
-			HANDLE_UNBLOCK_INTERRUPTIONS();
 			return op_array;
 		}
 		if (from_shared_memory) {
@@ -2262,10 +2261,9 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 	persistent_script->dynamic_members.last_used = ZCG(request_time);
 
 	SHM_PROTECT();
-	HANDLE_UNBLOCK_INTERRUPTIONS();
 
-    /* Fetch jit auto globals used in the script before execution */
-    if (persistent_script->ping_auto_globals_mask) {
+	/* Fetch jit auto globals used in the script before execution */
+	if (persistent_script->ping_auto_globals_mask) {
 		zend_accel_set_auto_globals(persistent_script->ping_auto_globals_mask);
 	}
 
