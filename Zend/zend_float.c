@@ -22,6 +22,7 @@
 
 ZEND_API void zend_init_fpu(void) /* {{{ */
 {
+/* under __SSE__ the FPCW is irrelevant; no need to change it */
 #if XPFPA_HAVE_CW && !defined(__SSE__)
 	XPFPA_DECLARE
 
