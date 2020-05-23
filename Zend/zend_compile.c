@@ -4019,6 +4019,15 @@ void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
 
 	znode name_node;
 
+	// If this is a partial function call, convert it to a special partial opcode.
+	zend_ast_list *arglist = zend_ast_get_list(args_ast);
+	for (int i; i < arglist->children; ++i) {
+		if (arglist->child[i]->kind == ZEND_AST_PARTIAL_PLACEHOLDER) {
+			zend_emit_op(NULL, ZEND_DO_PARTIAL_FCALL, NULL, NULL);
+			return;
+		}
+	}
+
 	if (name_ast->kind != ZEND_AST_ZVAL || Z_TYPE_P(zend_ast_get_zval(name_ast)) != IS_STRING) {
 		zend_compile_expr(&name_node, name_ast);
 		zend_compile_dynamic_call(result, &name_node, args_ast);
