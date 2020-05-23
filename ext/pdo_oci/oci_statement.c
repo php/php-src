@@ -329,6 +329,7 @@ static int oci_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *pa
 
 					case PDO_PARAM_NULL:
 						P->oci_type = SQLT_CHR;
+						P->indicator = -1;
 						value_sz = 0;
 						break;
 
