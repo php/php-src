@@ -465,7 +465,7 @@ ZEND_METHOD(ErrorException, getSeverity)
 		tmp = zend_hash_find(ht, key);                                      \
 		if (tmp) {                                                          \
 			if (Z_TYPE_P(tmp) != IS_STRING) {                               \
-				zend_error(E_WARNING, "Value for %s is no string",          \
+				zend_error(E_WARNING, "Value for %s is not a string",       \
 					ZSTR_VAL(key));                                         \
 				smart_str_appends(str, "[unknown]");                        \
 			} else {                                                        \
@@ -542,7 +542,7 @@ static void _build_trace_string(smart_str *str, HashTable *ht, uint32_t num) /* 
 	file = zend_hash_find_ex(ht, ZSTR_KNOWN(ZEND_STR_FILE), 1);
 	if (file) {
 		if (Z_TYPE_P(file) != IS_STRING) {
-			zend_error(E_WARNING, "Function name is no string");
+			zend_error(E_WARNING, "Function name is not a string");
 			smart_str_appends(str, "[unknown function]");
 		} else{
 			zend_long line;
@@ -551,7 +551,7 @@ static void _build_trace_string(smart_str *str, HashTable *ht, uint32_t num) /* 
 				if (Z_TYPE_P(tmp) == IS_LONG) {
 					line = Z_LVAL_P(tmp);
 				} else {
-					zend_error(E_WARNING, "Line is no long");
+					zend_error(E_WARNING, "Line is not an int");
 					line = 0;
 				}
 			} else {
@@ -583,7 +583,7 @@ static void _build_trace_string(smart_str *str, HashTable *ht, uint32_t num) /* 
 				ZSTR_LEN(str->s) -= 2; /* remove last ', ' */
 			}
 		} else {
-			zend_error(E_WARNING, "args element is no array");
+			zend_error(E_WARNING, "args element is not an array");
 		}
 	}
 	smart_str_appends(str, ")\n");
