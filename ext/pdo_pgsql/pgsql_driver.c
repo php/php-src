@@ -403,10 +403,11 @@ static int pdo_pgsql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_
 			ZVAL_BOOL(return_value, H->disable_prepares);
 			break;
 
-		case PDO_ATTR_CLIENT_VERSION:
+		case PDO_ATTR_CLIENT_VERSION: {
 			char buf[16];
 			pdo_libpq_version(buf, sizeof(buf));
 			ZVAL_STRING(return_value, buf);
+		}
 			break;
 
 		case PDO_ATTR_SERVER_VERSION:
