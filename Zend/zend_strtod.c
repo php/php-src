@@ -93,9 +93,6 @@
  *	something other than "long long", #define Llong to be the name,
  *	and if "unsigned Llong" does not work as an unsigned version of
  *	Llong, #define #ULLong to be the corresponding unsigned type.
- * #define Bad_float_h if your system lacks a float.h or if it does not
- *	define some or all of DBL_DIG, DBL_MAX_10_EXP, DBL_MAX_EXP,
- *	FLT_RADIX, FLT_ROUNDS, and DBL_MAX.
  * #define Omit_Private_Memory to omit logic (added Jan. 1998) for making
  *	memory allocations from a private pool of memory when possible.
  *	When used, the private pool is PRIVATE_MEM bytes long:  2304 bytes,
@@ -215,39 +212,7 @@ static double private_mem[PRIVATE_mem], *pmem_next = private_mem;
 #endif
 
 #include "errno.h"
-
-#ifdef Bad_float_h
-
-#ifdef IEEE_Arith
-#define DBL_DIG 15
-#define DBL_MAX_10_EXP 308
-#define DBL_MAX_EXP 1024
-#define FLT_RADIX 2
-#endif /*IEEE_Arith*/
-
-#ifdef IBM
-#define DBL_DIG 16
-#define DBL_MAX_10_EXP 75
-#define DBL_MAX_EXP 63
-#define FLT_RADIX 16
-#define DBL_MAX 7.2370055773322621e+75
-#endif
-
-#ifdef VAX
-#define DBL_DIG 16
-#define DBL_MAX_10_EXP 38
-#define DBL_MAX_EXP 127
-#define FLT_RADIX 2
-#define DBL_MAX 1.7014118346046923e+38
-#endif
-
-#ifndef LONG_MAX
-#define LONG_MAX 2147483647
-#endif
-
-#else /* ifndef Bad_float_h */
 #include "float.h"
-#endif /* Bad_float_h */
 
 #ifndef __MATH_H__
 #include "math.h"
