@@ -73,16 +73,6 @@
  * #define No_leftright to omit left-right logic in fast floating-point
  *	computation of dtoa.  This will cause dtoa modes 4 and 5 to be
  *	treated the same as modes 2 and 3 for some inputs.
- * #define Honor_FLT_ROUNDS if FLT_ROUNDS can assume the values 2 or 3
- *	and strtod and dtoa should round accordingly.  Unless Trust_FLT_ROUNDS
- *	is also #defined, fegetround() will be queried for the rounding mode.
- *	Note that both FLT_ROUNDS and fegetround() are specified by the C99
- *	standard (and are specified to be consistent, with fesetround()
- *	affecting the value of FLT_ROUNDS), but that some (Linux) systems
- *	do not work correctly in this regard, so using fegetround() is more
- *	portable than using FLT_ROUNDS directly.
- * #define Check_FLT_ROUNDS if FLT_ROUNDS can assume the values 2 or 3
- *	and Honor_FLT_ROUNDS is not #defined.
  * #define RND_PRODQUOT to use rnd_prod and rnd_quot (assembly routines
  *	that use extended-precision instructions to compute rounded
  *	products and quotients) with IBM.
@@ -195,11 +185,7 @@ static void Bug(const char *message) {
 #include "stdlib.h"
 #include "string.h"
 
-#ifdef Honor_FLT_ROUNDS
-#ifndef Trust_FLT_ROUNDS
 #include <fenv.h>
-#endif
-#endif
 
 #ifndef Omit_Private_Memory
 #ifndef PRIVATE_MEM
@@ -356,16 +342,11 @@ extern int strtod_diglim;
 #endif
 #endif /*Flt_Rounds*/
 
-#ifdef Honor_FLT_ROUNDS
 #undef Check_FLT_ROUNDS
 #define Check_FLT_ROUNDS
-#else
-#define Rounding Flt_Rounds
-#endif
 
 #else /* ifndef IEEE_Arith */
 #undef Check_FLT_ROUNDS
-#undef Honor_FLT_ROUNDS
 #undef SET_INEXACT
 #undef  Sudden_Underflow
 #define Sudden_Underflow
@@ -1541,7 +1522,6 @@ static void hexnan(U *rvp, const char **sp)
 #define kmask 15
 #endif
 
-#if !defined(NO_HEX_FP) || defined(Honor_FLT_ROUNDS) /*{*/
 static Bigint *increment(Bigint *b)
 {
 	ULong *x, *xe;
@@ -1566,9 +1546,7 @@ static Bigint *increment(Bigint *b)
 		b->x[b->wds++] = 1;
 		}
 	return b;
-	}
-
-#endif /*}*/
+}
 
 #ifndef NO_HEX_FP /*{*/
 
@@ -2107,9 +2085,7 @@ static void bigcomp(U *rv, const char *s0, BCinfo *bc)
 		word1(rv) = 1;
 #endif
 		i = 0;
-#ifdef Honor_FLT_ROUNDS
 		if (bc->rounding == 1)
-#endif
 			{
 			speccase = 1;
 			--p2;
@@ -2142,19 +2118,15 @@ static void bigcomp(U *rv, const char *s0, BCinfo *bc)
 		i = j;
 #endif
 		}
-#ifdef Honor_FLT_ROUNDS
 	if (bc->rounding != 1) {
 		if (i > 0)
 			b = lshift(b, i);
 		if (dsign)
 			b = increment(b);
-		}
-	else
-#endif
-		{
+	} else {
 		b = lshift(b, ++i);
 		b->x[0] |= 1;
-		}
+	}
 #ifndef Sudden_Underflow
  have_i:
 #endif
@@ -2218,7 +2190,6 @@ static void bigcomp(U *rv, const char *s0, BCinfo *bc)
  ret:
 	Bfree(b);
 	Bfree(d);
-#ifdef Honor_FLT_ROUNDS
 	if (bc->rounding != 1) {
 		if (dd < 0) {
 			if (bc->rounding == 0) {
@@ -2244,9 +2215,7 @@ static void bigcomp(U *rv, const char *s0, BCinfo *bc)
 				goto rethi1;
 			}
 		}
-	else
-#endif
-	if (speccase) {
+	else if (speccase) {
 		if (dd <= 0)
 			rv->d = 0.;
 		}
@@ -2280,11 +2249,9 @@ retlow1:
 			}
 		}
 
-#ifdef Honor_FLT_ROUNDS
  ret1:
-#endif
 	return;
-	}
+}
 #endif /* NO_STRTOD_BIGCOMP */
 
 ZEND_API double zend_strtod(const char *s00, const char **se)
@@ -2307,18 +2274,7 @@ ZEND_API double zend_strtod(const char *s00, const char **se)
 #ifndef NO_STRTOD_BIGCOMP
 	int req_bigcomp = 0;
 #endif
-#ifdef Honor_FLT_ROUNDS /*{*/
-#ifdef Trust_FLT_ROUNDS /*{{ only define this if FLT_ROUNDS really works! */
 	bc.rounding = Flt_Rounds;
-#else /*}{*/
-	bc.rounding = 1;
-	switch(fegetround()) {
-	  case FE_TOWARDZERO:	bc.rounding = 0; break;
-	  case FE_UPWARD:	bc.rounding = 2; break;
-	  case FE_DOWNWARD:	bc.rounding = 3;
-	  }
-#endif /*}}*/
-#endif /*}*/
 
 	sign = nz0 = nz1 = nz = bc.dplen = bc.uflchk = 0;
 	dval(&rv) = 0.;
@@ -2348,11 +2304,7 @@ ZEND_API double zend_strtod(const char *s00, const char **se)
 		switch(s[1]) {
 		  case 'x':
 		  case 'X':
-#ifdef Honor_FLT_ROUNDS
 			gethex(&s, &rv, bc.rounding, sign);
-#else
-			gethex(&s, &rv, 1, sign);
-#endif
 			goto ret;
 		  }
 #endif /*}*/
@@ -2508,13 +2460,7 @@ ZEND_API double zend_strtod(const char *s00, const char **se)
 		dval(&rv) = tens[k - 9] * dval(&rv) + z;
 		}
 	bd0 = 0;
-	if (nd <= DBL_DIG
-#ifndef RND_PRODQUOT
-#ifndef Honor_FLT_ROUNDS
-		&& Flt_Rounds == 1
-#endif
-#endif
-			) {
+	if (nd <= DBL_DIG) {
 		if (!e)
 			goto ret;
 #ifndef ROUND_BIASED_without_Round_Up
@@ -2523,29 +2469,25 @@ ZEND_API double zend_strtod(const char *s00, const char **se)
 #ifdef VAX
 				goto vax_ovfl_check;
 #else
-#ifdef Honor_FLT_ROUNDS
 				/* round correctly FLT_ROUNDS = 2 or 3 */
 				if (sign) {
 					rv.d = -rv.d;
 					sign = 0;
-					}
-#endif
-				/* rv = */ rounded_product(dval(&rv), tens[e]);
-				goto ret;
-#endif
 				}
+				/* rv = */ rounded_product(dval(&rv), tens[e]);
+                goto ret;
+#endif
+			}
 			i = DBL_DIG - nd;
 			if (e <= Ten_pmax + i) {
 				/* A fancier test would sometimes let us do
 				 * this for larger i values.
 				 */
-#ifdef Honor_FLT_ROUNDS
 				/* round correctly FLT_ROUNDS = 2 or 3 */
 				if (sign) {
 					rv.d = -rv.d;
 					sign = 0;
-					}
-#endif
+				}
 				e -= i;
 				dval(&rv) *= tens[i];
 #ifdef VAX
@@ -2567,16 +2509,14 @@ ZEND_API double zend_strtod(const char *s00, const char **se)
 			}
 #ifndef Inaccurate_Divide
 		else if (e >= -Ten_pmax) {
-#ifdef Honor_FLT_ROUNDS
 			/* round correctly FLT_ROUNDS = 2 or 3 */
 			if (sign) {
 				rv.d = -rv.d;
 				sign = 0;
-				}
-#endif
+			}
 			/* rv = */ rounded_quotient(dval(&rv), tens[-e]);
 			goto ret;
-			}
+		}
 #endif
 #endif /* ROUND_BIASED_without_Round_Up */
 		}
@@ -2591,7 +2531,6 @@ ZEND_API double zend_strtod(const char *s00, const char **se)
 #ifdef Avoid_Underflow
 	bc.scale = 0;
 #endif
-#ifdef Honor_FLT_ROUNDS
 	if (bc.rounding >= 2) {
 		if (sign)
 			bc.rounding = bc.rounding == 2 ? 0 : 2;
@@ -2599,7 +2538,6 @@ ZEND_API double zend_strtod(const char *s00, const char **se)
 			if (bc.rounding != 2)
 				bc.rounding = 0;
 		}
-#endif
 #endif /*IEEE_Arith*/
 
 	/* Get starting approximation = rv * 10**e1 */
@@ -2612,7 +2550,6 @@ ZEND_API double zend_strtod(const char *s00, const char **se)
  ovfl:
 				/* Can't trust HUGE_VAL */
 #ifdef IEEE_Arith
-#ifdef Honor_FLT_ROUNDS
 				switch(bc.rounding) {
 				  case 0: /* toward 0 */
 				  case 3: /* toward -infinity */
@@ -2623,10 +2560,6 @@ ZEND_API double zend_strtod(const char *s00, const char **se)
 					word0(&rv) = Exp_mask;
 					word1(&rv) = 0;
 				  }
-#else /*Honor_FLT_ROUNDS*/
-				word0(&rv) = Exp_mask;
-				word1(&rv) = 0;
-#endif /*Honor_FLT_ROUNDS*/
 #ifdef SET_INEXACT
 				/* set overflow bit */
 				dval(&rv0) = 1e300;
@@ -2781,10 +2714,8 @@ ZEND_API double zend_strtod(const char *s00, const char **se)
 		else
 			bd2 -= bbe;
 		bs2 = bb2;
-#ifdef Honor_FLT_ROUNDS
 		if (bc.rounding != 1)
 			bs2++;
-#endif
 #ifdef Avoid_Underflow
 		Lsb = LSB;
 		Lsb1 = 0;
@@ -2855,7 +2786,6 @@ ZEND_API double zend_strtod(const char *s00, const char **se)
 				req_bigcomp = 1;
 				break;
 				}
-#ifdef Honor_FLT_ROUNDS
 			if (bc.rounding != 1) {
 				if (i < 0) {
 					req_bigcomp = 1;
@@ -2863,11 +2793,9 @@ ZEND_API double zend_strtod(const char *s00, const char **se)
 					}
 				}
 			else
-#endif
 				i = -1;	/* Discarded digits make delta smaller. */
 			}
 #endif /*}*/
-#ifdef Honor_FLT_ROUNDS /*{*/
 		if (bc.rounding != 1) {
 			if (i < 0) {
 				/* Error is less than an ulp */
@@ -2959,7 +2887,6 @@ ZEND_API double zend_strtod(const char *s00, const char **se)
 				dval(&rv) -= adj.d;
 			goto cont;
 			}
-#endif /*}Honor_FLT_ROUNDS*/
 
 		if (i < 0) {
 			/* Error is less than half an ulp -- check for
@@ -3479,19 +3406,8 @@ ZEND_API char *zend_dtoa(double dd, int mode, int ndigits, int *decpt, int *sign
 #ifdef SET_INEXACT
 	int inexact, oldinexact;
 #endif
-#ifdef Honor_FLT_ROUNDS /*{*/
 	int Rounding;
-#ifdef Trust_FLT_ROUNDS /*{{ only define this if FLT_ROUNDS really works! */
 	Rounding = Flt_Rounds;
-#else /*}{*/
-	Rounding = 1;
-	switch(fegetround()) {
-	  case FE_TOWARDZERO:	Rounding = 0; break;
-	  case FE_UPWARD:	Rounding = 2; break;
-	  case FE_DOWNWARD:	Rounding = 3;
-	  }
-#endif /*}}*/
-#endif /*}*/
 
 #ifndef MULTIPLE_THREADS
 	if (dtoa_result) {
@@ -3537,15 +3453,13 @@ ZEND_API char *zend_dtoa(double dd, int mode, int ndigits, int *decpt, int *sign
 	try_quick = oldinexact = get_inexact();
 	inexact = 1;
 #endif
-#ifdef Honor_FLT_ROUNDS
 	if (Rounding >= 2) {
 		if (*sign)
 			Rounding = Rounding == 2 ? 0 : 2;
 		else
 			if (Rounding != 2)
 				Rounding = 0;
-		}
-#endif
+	}
 
 	b = d2b(&u, &be, &bbits);
 #ifdef Sudden_Underflow
@@ -3676,10 +3590,8 @@ ZEND_API char *zend_dtoa(double dd, int mode, int ndigits, int *decpt, int *sign
 		}
 	s = s0 = rv_alloc(i);
 
-#ifdef Honor_FLT_ROUNDS
 	if (mode > 1 && Rounding != 1)
 		leftright = 0;
-#endif
 
 	if (ilim >= 0 && ilim <= Quick_max && try_quick) {
 
@@ -3824,13 +3736,11 @@ ZEND_API char *zend_dtoa(double dd, int mode, int ndigits, int *decpt, int *sign
 				break;
 				}
 			if (i == ilim) {
-#ifdef Honor_FLT_ROUNDS
 				if (mode > 1)
 				switch(Rounding) {
 				  case 0: goto ret1;
 				  case 2: goto bump_up;
-				  }
-#endif
+				}
 				dval(&u) += dval(&u);
 #ifdef ROUND_BIASED
 				if (dval(&u) >= ds)
@@ -3897,11 +3807,7 @@ ZEND_API char *zend_dtoa(double dd, int mode, int ndigits, int *decpt, int *sign
 	/* Check for special case that d is a normalized power of 2. */
 
 	spec_case = 0;
-	if ((mode < 2 || leftright)
-#ifdef Honor_FLT_ROUNDS
-			&& Rounding == 1
-#endif
-				) {
+	if ((mode < 2 || leftright) && Rounding == 1) {
 		if (!word1(&u) && !(word0(&u) & Bndry_mask)
 #ifndef Sudden_Underflow
 		 && word0(&u) & (Exp_mask & ~Exp_msk1)
@@ -3975,11 +3881,7 @@ ZEND_API char *zend_dtoa(double dd, int mode, int ndigits, int *decpt, int *sign
 			j1 = delta->sign ? 1 : cmp(b, delta);
 			Bfree(delta);
 #ifndef ROUND_BIASED
-			if (j1 == 0 && mode != 1 && !(word1(&u) & 1)
-#ifdef Honor_FLT_ROUNDS
-				&& Rounding >= 1
-#endif
-								   ) {
+			if (j1 == 0 && mode != 1 && !(word1(&u) & 1) && Rounding >= 1) {
 				if (dig == '9')
 					goto round_9_up;
 				if (j > 0)
@@ -4003,13 +3905,11 @@ ZEND_API char *zend_dtoa(double dd, int mode, int ndigits, int *decpt, int *sign
 #endif
 					goto accept_dig;
 					}
-#ifdef Honor_FLT_ROUNDS
 				if (mode > 1)
 				 switch(Rounding) {
 				  case 0: goto accept_dig;
 				  case 2: goto keep_dig;
 				  }
-#endif /*Honor_FLT_ROUNDS*/
 				if (j1 > 0) {
 					b = lshift(b, 1);
 					j1 = cmp(b, S);
@@ -4026,10 +3926,8 @@ ZEND_API char *zend_dtoa(double dd, int mode, int ndigits, int *decpt, int *sign
 				goto ret;
 				}
 			if (j1 > 0) {
-#ifdef Honor_FLT_ROUNDS
 				if (!Rounding)
 					goto accept_dig;
-#endif
 				if (dig == '9') { /* possible if i == 1 */
  round_9_up:
 					*s++ = '9';
@@ -4038,9 +3936,7 @@ ZEND_API char *zend_dtoa(double dd, int mode, int ndigits, int *decpt, int *sign
 				*s++ = dig + 1;
 				goto ret;
 				}
-#ifdef Honor_FLT_ROUNDS
  keep_dig:
-#endif
 			*s++ = dig;
 			if (i == ilim)
 				break;
@@ -4069,12 +3965,10 @@ ZEND_API char *zend_dtoa(double dd, int mode, int ndigits, int *decpt, int *sign
 
 	/* Round off last digit */
 
-#ifdef Honor_FLT_ROUNDS
 	switch(Rounding) {
 	  case 0: goto trimzeros;
 	  case 2: goto roundoff;
 	  }
-#endif
 	b = lshift(b, 1);
 	j = cmp(b, S);
 #ifdef ROUND_BIASED
@@ -4093,9 +3987,7 @@ ZEND_API char *zend_dtoa(double dd, int mode, int ndigits, int *decpt, int *sign
 		++*s++;
 		}
 	else {
-#ifdef Honor_FLT_ROUNDS
  trimzeros:
-#endif
 		while(*--s == '0');
 		s++;
 		}
