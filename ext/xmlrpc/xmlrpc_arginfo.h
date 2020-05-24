@@ -4,12 +4,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xmlrpc_encode, 0, 1, IS_STRING, 
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlrpc_decode, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xmlrpc_decode, 0, 1, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, xml, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encoding, IS_STRING, 0, "\"iso-8859-1\"")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlrpc_decode_request, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xmlrpc_decode_request, 0, 2, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, xml, IS_STRING, 0)
 	ZEND_ARG_INFO(1, method)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encoding, IS_STRING, 0, "\"iso-8859-1\"")
@@ -22,7 +22,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xmlrpc_encode_request, 0, 2, IS_
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xmlrpc_get_type, 0, 1, IS_STRING, 0)
-	ZEND_ARG_INFO(0, value)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xmlrpc_set_type, 0, 2, _IS_BOOL, 0)
@@ -47,14 +47,14 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xmlrpc_server_register_method, 0
 	ZEND_ARG_INFO(0, function)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlrpc_server_call_method, 0, 0, 3)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xmlrpc_server_call_method, 0, 3, IS_MIXED, 0)
 	ZEND_ARG_OBJ_INFO(0, server, XmlRpcServer, 0)
 	ZEND_ARG_TYPE_INFO(0, xml, IS_STRING, 0)
 	ZEND_ARG_INFO(0, user_data)
 	ZEND_ARG_TYPE_INFO(0, output_options, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlrpc_parse_method_descriptions, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xmlrpc_parse_method_descriptions, 0, 1, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, xml, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 

@@ -11,8 +11,7 @@ final class Closure
     /** @alias Closure::bind */
     public function bindTo(?object $newthis, $newscope = UNKNOWN): ?Closure {}
 
-    /** @return mixed */
-    public function call(object $newthis, ...$parameters) {}
+    public function call(object $newthis, mixed ...$parameters): mixed {}
 
     /** @param callable $callable Not a proper type annotation due to bug #78770 */
     public static function fromCallable($callable): Closure {}

@@ -64,11 +64,11 @@ function krsort(array &$arg, int $sort_flags = SORT_REGULAR): bool {}
 
 function ksort(array &$arg, int $sort_flags = SORT_REGULAR): bool {}
 
-/** @param mixed $var */
+/** @param array|object|null $var */
 function count($var, int $mode = COUNT_NORMAL): int {}
 
 /**
- * @param mixed $var
+ * @param array|object|null $var
  * @alias count
  */
 function sizeof($var, int $mode = COUNT_NORMAL): int {}
@@ -91,34 +91,24 @@ function uasort(array &$arg, callable $cmp_function): bool {}
 
 function uksort(array &$arg, callable $cmp_function): bool {}
 
-/** @return mixed */
-function end(array|object &$arg) {}
+function end(array|object &$arg): mixed {}
 
-/** @return mixed */
-function prev(array|object &$arg) {}
+function prev(array|object &$arg): mixed {}
 
-/** @return mixed */
-function next(array|object &$arg) {}
+function next(array|object &$arg): mixed {}
 
-/** @return mixed */
-function reset(array|object &$arg) {}
+function reset(array|object &$arg): mixed {}
 
-/** @return mixed */
-function current(array|object $arg) {}
+function current(array|object $arg): mixed {}
 
-/**
- * @return mixed
- * @alias current
- */
-function pos(array|object $arg) {}
+/** @alias current */
+function pos(array|object $arg): mixed {}
 
 function key(array|object $arg): int|string|null {}
 
-/** @return mixed */
-function min($arg, ...$args) {}
+function min($arg, mixed ...$args): mixed {}
 
-/** @return mixed */
-function max($arg, ...$args) {}
+function max($arg, mixed ...$args): mixed {}
 
 function array_walk(array|object &$input, callable $funcname, $userdata = UNKNOWN): bool {}
 
@@ -133,9 +123,9 @@ function extract(array &$arg, int $extract_type = EXTR_OVERWRITE, string $prefix
 
 function compact($var_name, ...$var_names): array {}
 
-function array_fill(int $start_key, int $num, $val): array {}
+function array_fill(int $start_key, int $num, mixed $val): array {}
 
-function array_fill_keys(array $keys, $val): array {}
+function array_fill_keys(array $keys, mixed $val): array {}
 
 /**
  * @param int|float|string $low
@@ -146,13 +136,11 @@ function range($low, $high, $step = 1): array {}
 
 function shuffle(array &$arg): bool {}
 
-/** @return mixed */
-function array_pop(array &$stack) {}
+function array_pop(array &$stack): mixed {}
 
-/** @return mixed */
-function array_shift(array &$stack) {}
+function array_shift(array &$stack): mixed {}
 
-function array_unshift(array &$stack, ...$vars): int {}
+function array_unshift(array &$stack, mixed ...$vars): int {}
 
 function array_splice(array &$arg, int $offset, ?int $length = null, $replacement = []): array {}
 
@@ -180,7 +168,7 @@ function array_column(array $arg, int|string|null $column_key, int|string|null $
 
 function array_reverse(array $input, bool $preserve_keys = false): array {}
 
-function array_pad(array $arg, int $pad_size, $pad_value): array {}
+function array_pad(array $arg, int $pad_size, mixed $pad_value): array {}
 
 function array_flip(array $arg): array {}
 
@@ -234,21 +222,16 @@ function array_sum(array $arg): int|float {}
 
 function array_product(array $arg): int|float {}
 
-/** @return mixed */
-function array_reduce(array $arg, callable $callback, $initial = null) {}
+function array_reduce(array $arg, callable $callback, $initial = null): mixed {}
 
 function array_filter(array $arg, ?callable $callback = null, int $use_keys = 0): array {}
 
 function array_map(?callable $callback, array $arr1, array ...$arrays): array {}
 
-/** @param mixed $key */
-function array_key_exists($key, array $search): bool {}
+function array_key_exists(mixed $key, array $search): bool {}
 
-/**
- * @param mixed $key
- * @alias array_key_exists
- */
-function key_exists($key, array $search): bool {}
+/** @alias array_key_exists */
+function key_exists(mixed $key, array $search): bool {}
 
 function array_chunk(array $arg, int $size, bool $preserve_keys = false): array {}
 
@@ -262,8 +245,7 @@ function base64_decode(string $str, bool $strict = false): string|false {}
 
 /* basic_functions.c */
 
-/** @return mixed */
-function constant(string $name) {}
+function constant(string $name): mixed {}
 
 function ip2long(string $ip_address): int|false {}
 
@@ -299,29 +281,16 @@ function error_get_last(): ?array {}
 
 function error_clear_last(): void {}
 
-/**
- * @param mixed ...$args
- * @return mixed
- */
-function call_user_func(callable $function, ...$args) {}
+function call_user_func(callable $function, mixed ...$args): mixed {}
 
-/** @return mixed */
-function call_user_func_array(callable $function, array $args) {}
+function call_user_func_array(callable $function, array $args): mixed {}
 
-/**
- * @param mixed ...$args
- * @return mixed
- */
-function forward_static_call(callable $function, ...$args) {}
+function forward_static_call(callable $function, mixed ...$args): mixed {}
 
-/** @return mixed */
-function forward_static_call_array(callable $function, array $args) {}
+function forward_static_call_array(callable $function, array $args): mixed {}
 
-/**
- * @param callable $function
- * @param mixed ...$args
- */
-function register_shutdown_function($function, ...$args): ?bool {}
+/** @param callable $function */
+function register_shutdown_function($function, mixed ...$args): ?bool {}
 
 function highlight_file(string $filename, bool $return = false): string|bool|null {}
 
@@ -347,8 +316,7 @@ function set_include_path(string $include_path): string|false {}
 
 function get_include_path(): string|false {}
 
-/** @param mixed $var */
-function print_r($var, bool $return = false): string|bool {}
+function print_r(mixed $var, bool $return = false): string|bool {}
 
 function connection_aborted(): int {}
 
@@ -372,8 +340,7 @@ function getprotobyname(string $name): int|false {}
 function getprotobynumber(int $protocol): string|false {}
 #endif
 
-/** @param mixed $args */
-function register_tick_function(callable $function, ...$args): bool {}
+function register_tick_function(callable $function, mixed ...$args): bool {}
 
 function unregister_tick_function($function): void {}
 
@@ -666,7 +633,7 @@ function hebrev(string $str, int $max_chars_per_line = 0): string {}
 
 function nl2br(string $str, bool $is_xhtml = true): string {}
 
-/** @param mixed $allowable_tags */
+/** @param array|string|null $allowable_tags */
 function strip_tags(string $str, $allowable_tags = UNKNOWN): string {}
 
 /**
@@ -812,11 +779,8 @@ function fread($handle, int $length): string|false {}
  */
 function fopen(string $filename, string $mode, bool $use_include_path = false, $context = null) {}
 
-/**
- * @param resource $stream
- * @param mixed ...$args
- */
-function fscanf($stream, string $format, &...$args): array|int|false|null {}
+/** @param resource $stream */
+function fscanf($stream, string $format, mixed &...$args): array|int|false|null {}
 
 /** @param resource $handle */
 function fpassthru($handle): int {}
@@ -868,11 +832,8 @@ function file_get_contents(string $filename, bool $use_include_path = false, $co
 /** @param resource|null $context */
 function unlink(string $filename, $context = null): bool {}
 
-/**
- * @param mixed $content
- * @param resource|null $context
- */
-function file_put_contents(string $filename, $content, int $flags = 0, $context = null): int|false {}
+/** @param resource|null $context */
+function file_put_contents(string $filename, mixed $content, int $flags = 0, $context = null): int|false {}
 
 /** @param resource $handle */
 function fputcsv($handle, array $fields, string $delimiter = ",", string $enclosure = "\"", string $escape = "\\"): int|false {}
@@ -960,27 +921,22 @@ function realpath_cache_size(): int {}
 
 /* formatted_print.c */
 
-/** @param mixed ...$args */
-function sprintf(string $format, ...$args): string {}
+function sprintf(string $format, mixed ...$args): string {}
 
-/** @param mixed ...$args */
-function printf(string $format, ...$args): int {}
+function printf(string $format, mixed ...$args): int {}
 
-/** @param mixed $args */
+/** @param array $args */
 function vprintf(string $format, $args): int {}
 
-/** @param mixed $args */
+/** @param array $args */
 function vsprintf(string $format, $args): string {}
 
-/**
- * @param resource $handle
- * @param mixed ...$args
- */
-function fprintf($handle, string $format, ...$args): int {}
+/** @param resource $handle */
+function fprintf($handle, string $format, mixed ...$args): int {}
 
 /**
  * @param resource $handle
- * @param mixed $args
+ * @param array $args
  */
 function vfprintf($handle, string $format, $args): int {}
 
@@ -1098,8 +1054,7 @@ function intdiv(int $dividend, int $divisor): int {}
 
 function is_infinite(float $number): bool {}
 
-/** @return mixed */
-function pow($base, $exp) {}
+function pow($base, $exp): int|float {}
 
 function exp(float $number): float {}
 
@@ -1231,7 +1186,7 @@ function stream_context_get_params($context): array {}
  * @param array|string $param2
  * @param mixed $value
  */
-function stream_context_set_option($context, $param2, string $option_name = UNKNOWN, $value = UNKNOWN): bool {}
+function stream_context_set_option($context, $param2, string $option_name = UNKNOWN, mixed $value = UNKNOWN): bool {}
 
 /** @param resource $stream_or_context */
 function stream_context_get_options($stream_or_context): array {}
@@ -1379,88 +1334,57 @@ function socket_set_timeout($socket, int $seconds, int $microseconds = 0): bool 
 
 /* type.c */
 
-/** @param mixed $var */
-function gettype($var): string {}
+function gettype(mixed $var): string {}
 
-/** @param mixed $var */
-function get_debug_type($var): string {}
+function get_debug_type(mixed $var): string {}
 
 function settype(&$var, string $type): bool {}
 
-/** @param mixed $value */
-function intval($value, int $base = 10): int {}
+function intval(mixed $value, int $base = 10): int {}
 
-/** @param mixed $value */
-function floatval($value): float {}
+function floatval(mixed $value): float {}
 
-/**
- * @param mixed $value
- * @alias floatval
- */
-function doubleval($value): float {}
+/** @alias floatval */
+function doubleval(mixed $value): float {}
 
-/** @param mixed $value */
-function boolval($value): bool {}
+function boolval(mixed $value): bool {}
 
-/** @param mixed $value */
-function strval($value): string {}
+function strval(mixed $value): string {}
 
-/** @param mixed $value */
-function is_null($value): bool {}
+function is_null(mixed $value): bool {}
 
-/** @param mixed $value */
-function is_resource($value): bool {}
+function is_resource(mixed $value): bool {}
 
-/** @param mixed $value */
-function is_bool($value): bool {}
+function is_bool(mixed $value): bool {}
 
-/** @param mixed $value */
-function is_int($value): bool {}
+function is_int(mixed $value): bool {}
 
-/**
- * @param mixed $value
- * @alias is_int
- */
-function is_integer($value): bool {}
+/** @alias is_int */
+function is_integer(mixed $value): bool {}
 
-/**
- * @param mixed $value
- * @alias is_int
- */
-function is_long($value): bool {}
+/** @alias is_int */
+function is_long(mixed $value): bool {}
 
-/** @param mixed $value */
-function is_float($value): bool {}
+function is_float(mixed $value): bool {}
 
-/**
- * @param mixed $value
- * @alias is_float
- */
-function is_double($value): bool {}
+/** @alias is_float */
+function is_double(mixed $value): bool {}
 
-/** @param mixed $value */
-function is_numeric($value): bool {}
+function is_numeric(mixed $value): bool {}
 
-/** @param mixed $value */
-function is_string($value): bool {}
+function is_string(mixed $value): bool {}
 
-/** @param mixed $value */
-function is_array($value): bool {}
+function is_array(mixed $value): bool {}
 
-/** @param mixed $value */
-function is_object($value): bool {}
+function is_object(mixed $value): bool {}
 
-/** @param mixed $value */
-function is_scalar($value): bool {}
+function is_scalar(mixed $value): bool {}
 
-/** @param mixed $value */
-function is_callable($value, bool $syntax_only = false, &$callable_name = null): bool {}
+function is_callable(mixed $value, bool $syntax_only = false, &$callable_name = null): bool {}
 
-/** @param mixed $value */
-function is_iterable($value): bool {}
+function is_iterable(mixed $value): bool {}
 
-/** @param mixed $value */
-function is_countable($value): bool {}
+function is_countable(mixed $value): bool {}
 
 /* uniqid.c */
 
@@ -1508,20 +1432,15 @@ function convert_uudecode(string $data): string|false {}
 
 /* var.c */
 
-/** @param mixed $value */
-function var_dump($value, ...$value): void {}
+function var_dump(mixed $value, mixed ...$value): void {}
 
-/** @param mixed $value */
-function var_export($value, bool $return = false): ?string {}
+function var_export(mixed $value, bool $return = false): ?string {}
 
-/** @param mixed $value */
-function debug_zval_dump($value, ...$value): void {}
+function debug_zval_dump(mixed $value, ...$value): void {}
 
-/** @param mixed $value */
-function serialize($value): string {}
+function serialize(mixed $value): string {}
 
-/** @return mixed */
-function unserialize(string $value, array $options = []) {}
+function unserialize(string $value, array $options = []): mixed {}
 
 function memory_get_usage(bool $real_usage = false): int {}
 

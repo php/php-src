@@ -26,7 +26,6 @@ function zend_create_unterminated_string(string $str): string {}
 
 function zend_terminate_string(string &$str): void {}
 
-/** @param mixed $variable */
-function zend_leak_variable($variable): void {}
+function zend_leak_variable(mixed $variable): void {}
 
 function zend_leak_bytes(int $bytes = 3): void {}
