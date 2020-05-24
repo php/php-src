@@ -106,20 +106,11 @@
  * #define Bad_float_h if your system lacks a float.h or if it does not
  *	define some or all of DBL_DIG, DBL_MAX_10_EXP, DBL_MAX_EXP,
  *	FLT_RADIX, FLT_ROUNDS, and DBL_MAX.
- * #define MALLOC your_malloc, where your_malloc(n) acts like malloc(n)
- *	if memory is available and otherwise does something you deem
- *	appropriate.  If MALLOC is undefined, malloc will be invoked
- *	directly -- and assumed always to succeed.  Similarly, if you
- *	want something other than the system's free() to be called to
- *	recycle memory acquired from MALLOC, #define FREE to be the
- *	name of the alternate routine.  (FREE or free is only called in
- *	pathological cases, e.g., in a dtoa call after a dtoa return in
- *	mode 3 with thousands of digits requested.)
  * #define Omit_Private_Memory to omit logic (added Jan. 1998) for making
  *	memory allocations from a private pool of memory when possible.
  *	When used, the private pool is PRIVATE_MEM bytes long:  2304 bytes,
  *	unless #defined to be a different length.  This default length
- *	suffices to get rid of MALLOC calls except for unusual cases,
+ *	suffices to get rid of malloc calls except for unusual cases,
  *	such as decimal-to-binary conversion of a very long string of
  *	digits.  The longest string dtoa can return is about 751 bytes
  *	long.  For conversions by strtod of strings of 800 digits and
@@ -208,12 +199,6 @@ static void Bug(const char *message) {
 #ifndef Trust_FLT_ROUNDS
 #include <fenv.h>
 #endif
-#endif
-
-#ifdef MALLOC
-extern void *MALLOC(size_t);
-#else
-#define MALLOC malloc
 #endif
 
 #ifndef Omit_Private_Memory
@@ -568,7 +553,7 @@ static Bigint *Balloc(int k)
 	else {
 		x = 1 << k;
 #ifdef Omit_Private_Memory
-		rv = (Bigint *)MALLOC(sizeof(Bigint) + (x-1)*sizeof(ULong));
+		rv = (Bigint *)malloc(sizeof(Bigint) + (x-1)*sizeof(ULong));
 		if (!rv) {
 			FREE_DTOA_LOCK(0);
 			zend_error_noreturn(E_ERROR, "Balloc() failed to allocate memory");
@@ -581,7 +566,7 @@ static Bigint *Balloc(int k)
 			pmem_next += len;
 			}
 		else
-			rv = (Bigint*)MALLOC(len*sizeof(double));
+			rv = (Bigint*)malloc(len*sizeof(double));
 			if (!rv) {
 				FREE_DTOA_LOCK(0);
 				zend_error_noreturn(E_ERROR, "Balloc() failed to allocate memory");
@@ -599,11 +584,7 @@ static void Bfree(Bigint *v)
 {
 	if (v) {
 		if (v->k > Kmax)
-#ifdef FREE
-			FREE((void*)v);
-#else
 			free((void*)v);
-#endif
 		else {
 			ACQUIRE_DTOA_LOCK(0);
 			v->next = freelist[v->k];
