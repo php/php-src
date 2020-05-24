@@ -27,7 +27,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector, String
     Property [ public $name = '' ]
   }
 
-  - Methods [53] {
+  - Methods [54] {
     Method [ <internal:Reflection> final private method __clone ] {
 
       - Parameters [0] {
@@ -363,6 +363,14 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector, String
     Method [ <internal:Reflection> public method getShortName ] {
 
       - Parameters [0] {
+      }
+    }
+
+    Method [ <internal:Reflection> public method getAttributes ] {
+
+      - Parameters [2] {
+        Parameter #0 [ <optional> ?string $name = null ]
+        Parameter #1 [ <optional> int $flags = 0 ]
       }
     }
   }

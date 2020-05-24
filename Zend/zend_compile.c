@@ -20,6 +20,7 @@
 
 #include <zend_language_parser.h>
 #include "zend.h"
+#include "zend_attributes.h"
 #include "zend_compile.h"
 #include "zend_constants.h"
 #include "zend_llist.h"
@@ -1045,6 +1046,10 @@ ZEND_API void function_add_ref(zend_function *function) /* {{{ */
 			ZEND_MAP_PTR_INIT(op_array->run_time_cache, zend_arena_alloc(&CG(arena), sizeof(void*)));
 			ZEND_MAP_PTR_SET(op_array->run_time_cache, NULL);
 		}
+
+		if (op_array->attributes) {
+			GC_ADDREF(op_array->attributes);
+		}
 	}
 
 	if (function->common.function_name) {
@@ -1816,6 +1821,7 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 	} else {
 		ZEND_MAP_PTR_INIT(ce->static_members_table, &ce->default_static_members_table);
 		ce->info.user.doc_comment = NULL;
+		ce->attributes = NULL;
 	}
 
 	ce->default_properties_count = 0;
@@ -2372,7 +2378,7 @@ static inline zend_bool zend_is_variable_or_call(zend_ast *ast) /* {{{ */
 static inline zend_bool zend_is_unticked_stmt(zend_ast *ast) /* {{{ */
 {
 	return ast->kind == ZEND_AST_STMT_LIST || ast->kind == ZEND_AST_LABEL
-		|| ast->kind == ZEND_AST_PROP_DECL || ast->kind == ZEND_AST_CLASS_CONST_DECL
+		|| ast->kind == ZEND_AST_PROP_DECL || ast->kind == ZEND_AST_CLASS_CONST_GROUP
 		|| ast->kind == ZEND_AST_USE_TRAIT || ast->kind == ZEND_AST_METHOD;
 }
 /* }}} */
@@ -5716,6 +5722,74 @@ static zend_bool zend_is_valid_default_value(zend_type type, zval *value)
 	return 0;
 }
 
+static zend_attribute *zend_compile_attribute(zend_ast *ast, uint32_t offset) /* {{{ */
+{
+	ZEND_ASSERT(ast->kind == ZEND_AST_ATTRIBUTE);
+
+	zend_ast_list *list = ast->child[1] ? zend_ast_get_list(ast->child[1]) : NULL;
+	zend_attribute *attr = emalloc(ZEND_ATTRIBUTE_SIZE(list ? list->children : 0));
+
+	attr->name = zend_resolve_class_name_ast(ast->child[0]);
+	attr->lcname = zend_string_tolower(attr->name);
+	attr->offset = offset;
+	attr->argc = list ? list->children : 0;
+
+	if (list) {
+		ZEND_ASSERT(ast->child[1]->kind == ZEND_AST_ARG_LIST);
+
+		uint32_t i;
+
+		for (i = 0; i < list->children; i++) {
+			zend_const_expr_to_zval(&attr->argv[i], list->child[i]);
+		}
+	}
+
+	return attr;
+}
+/* }}} */
+
+static void attribute_ptr_dtor(zval *v) /* {{{ */
+{
+	zend_attribute_free((zend_attribute *) Z_PTR_P(v));
+}
+/* }}} */
+
+static zend_always_inline HashTable *create_attribute_array() /* {{{ */
+{
+	HashTable *attributes;
+
+	ALLOC_HASHTABLE(attributes);
+	zend_hash_init(attributes, 8, NULL, attribute_ptr_dtor, 0);
+
+	return attributes;
+}
+/* }}} */
+
+static void zend_compile_attributes(HashTable *attributes, zend_ast *ast, uint32_t offset, int target) /* {{{ */
+{
+	zend_ast_list *list = zend_ast_get_list(ast);
+	uint32_t i;
+
+	zval tmp;
+
+	ZEND_ASSERT(ast->kind == ZEND_AST_ATTRIBUTE_LIST);
+
+	for (i = 0; i < list->children; i++) {
+		zend_attribute *attr = zend_compile_attribute(list->child[i], offset);
+
+		// Validate internal attribute
+		zend_attributes_internal_validator validator = zend_attribute_get_validator(attr->lcname);
+
+		if (validator != NULL) {
+			validator(attr, target);
+		}
+
+		ZVAL_PTR(&tmp, attr);
+		zend_hash_next_index_insert(attributes, &tmp);
+	}
+}
+/* }}} */
+
 void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fallback_return_type) /* {{{ */
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
@@ -5750,6 +5824,7 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fall
 		zend_ast *type_ast = param_ast->child[0];
 		zend_ast *var_ast = param_ast->child[1];
 		zend_ast *default_ast = param_ast->child[2];
+		zend_ast *attributes_ast = param_ast->child[3];
 		zend_string *name = zval_make_interned_string(zend_ast_get_zval(var_ast));
 		zend_bool is_ref = (param_ast->attr & ZEND_PARAM_REF) != 0;
 		zend_bool is_variadic = (param_ast->attr & ZEND_PARAM_VARIADIC) != 0;
@@ -5818,6 +5893,14 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fall
 		arg_info = &arg_infos[i];
 		arg_info->name = zend_string_copy(name);
 		arg_info->type = (zend_type) ZEND_TYPE_INIT_NONE(0);
+
+		if (attributes_ast) {
+			if (!op_array->attributes) {
+				op_array->attributes = create_attribute_array();
+			}
+
+			zend_compile_attributes(op_array->attributes, attributes_ast, i + 1, ZEND_ATTRIBUTE_TARGET_PARAMETER);
+		}
 
 		if (type_ast) {
 			uint32_t default_type = default_ast ? Z_TYPE(default_node.u.constant) : IS_UNDEF;
@@ -6290,6 +6373,15 @@ void zend_compile_func_decl(znode *result, zend_ast *ast, zend_bool toplevel) /*
 	if (decl->doc_comment) {
 		op_array->doc_comment = zend_string_copy(decl->doc_comment);
 	}
+	if (decl->attributes) {
+		int target = ZEND_ATTRIBUTE_TARGET_FUNCTION;
+
+		if (is_method) {
+			target = ZEND_ATTRIBUTE_TARGET_METHOD;
+		}
+		op_array->attributes = create_attribute_array();
+		zend_compile_attributes(op_array->attributes, decl->attributes, 0, target);
+	}
 	if (decl->kind == ZEND_AST_CLOSURE || decl->kind == ZEND_AST_ARROW_FUNC) {
 		op_array->fn_flags |= ZEND_ACC_CLOSURE;
 	}
@@ -6372,7 +6464,7 @@ void zend_compile_func_decl(znode *result, zend_ast *ast, zend_bool toplevel) /*
 }
 /* }}} */
 
-void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t flags) /* {{{ */
+void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t flags, HashTable *attributes) /* {{{ */
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
 	zend_class_entry *ce = CG(active_class_entry);
@@ -6447,17 +6539,29 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t flags) /
 			ZVAL_UNDEF(&value_zv);
 		}
 
-		zend_declare_typed_property(ce, name, &value_zv, flags, doc_comment, type);
+		zend_declare_typed_property(ce, name, &value_zv, flags, doc_comment, attributes, type);
 	}
 }
 /* }}} */
 
 void zend_compile_prop_group(zend_ast *list) /* {{{ */
 {
+	HashTable *attributes = NULL;
+
 	zend_ast *type_ast = list->child[0];
 	zend_ast *prop_ast = list->child[1];
 
-	zend_compile_prop_decl(prop_ast, type_ast, list->attr);
+	if (list->child[2]) {
+		if (zend_ast_get_list(prop_ast)->children > 1) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot apply attributes to a group of properties");
+			return;
+		}
+
+		attributes = create_attribute_array();
+		zend_compile_attributes(attributes, list->child[2], 0, ZEND_ATTRIBUTE_TARGET_PROPERTY);
+	}
+
+	zend_compile_prop_decl(prop_ast, type_ast, list->attr, attributes);
 }
 /* }}} */
 
@@ -6473,15 +6577,26 @@ static void zend_check_const_and_trait_alias_attr(uint32_t attr, const char* ent
 }
 /* }}} */
 
-void zend_compile_class_const_decl(zend_ast *ast) /* {{{ */
+void zend_compile_class_const_decl(zend_ast *ast, zend_ast *attr_ast) /* {{{ */
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
 	zend_class_entry *ce = CG(active_class_entry);
+	HashTable *attributes = NULL;
 	uint32_t i;
 
 	if ((ce->ce_flags & ZEND_ACC_TRAIT) != 0) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Traits cannot have constants");
 		return;
+	}
+
+	if (attr_ast) {
+		if (list->children > 1) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot apply attributes to a group of constants");
+			return;
+		}
+
+		attributes = create_attribute_array();
+		zend_compile_attributes(attributes, attr_ast, 0, ZEND_ATTRIBUTE_TARGET_CLASS_CONST);
 	}
 
 	for (i = 0; i < list->children; ++i) {
@@ -6498,7 +6613,7 @@ void zend_compile_class_const_decl(zend_ast *ast) /* {{{ */
 		}
 
 		zend_const_expr_to_zval(&value_zv, value_ast);
-		zend_declare_class_constant_ex(ce, name, &value_zv, ast->attr, doc_comment);
+		zend_declare_class_constant_ex(ce, name, &value_zv, ast->attr, doc_comment, attributes);
 	}
 }
 /* }}} */
@@ -6710,6 +6825,10 @@ void zend_compile_class_decl(znode *result, zend_ast *ast, zend_bool toplevel) /
 
 	if (decl->doc_comment) {
 		ce->info.user.doc_comment = zend_string_copy(decl->doc_comment);
+	}
+	if (decl->attributes) {
+		ce->attributes = create_attribute_array();
+		zend_compile_attributes(ce->attributes, decl->attributes, 0, ZEND_ATTRIBUTE_TARGET_CLASS);
 	}
 
 	if (UNEXPECTED((decl->flags & ZEND_ACC_ANON_CLASS))) {
@@ -8801,8 +8920,8 @@ void zend_compile_stmt(zend_ast *ast) /* {{{ */
 		case ZEND_AST_PROP_GROUP:
 			zend_compile_prop_group(ast);
 			break;
-		case ZEND_AST_CLASS_CONST_DECL:
-			zend_compile_class_const_decl(ast);
+		case ZEND_AST_CLASS_CONST_GROUP:
+			zend_compile_class_const_decl(ast->child[0], ast->child[1]);
 			break;
 		case ZEND_AST_USE_TRAIT:
 			zend_compile_use_trait(ast);

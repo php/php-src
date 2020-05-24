@@ -28,6 +28,7 @@
 #include "zend_constants.h"
 #include "zend_operators.h"
 #include "zend_interfaces.h"
+#include "zend_attributes.h"
 
 #ifdef HAVE_JIT
 # include "Optimizer/zend_func_info.h"
@@ -259,6 +260,39 @@ static void zend_persist_zval(zval *z)
 	}
 }
 
+static HashTable *zend_persist_attributes(HashTable *attributes)
+{
+	HashTable *ptr = zend_shared_alloc_get_xlat_entry(attributes);
+
+	if (!ptr) {
+		uint32_t i;
+		zval *v;
+
+		zend_hash_persist(attributes);
+
+		ZEND_HASH_FOREACH_VAL(attributes, v) {
+			zend_attribute *attr = Z_PTR_P(v);
+			zend_attribute *copy = zend_shared_memdup(attr, ZEND_ATTRIBUTE_SIZE(attr->argc));
+
+			zend_accel_store_interned_string(copy->name);
+			zend_accel_store_interned_string(copy->lcname);
+
+			for (i = 0; i < copy->argc; i++) {
+				zend_persist_zval(&copy->argv[i]);
+			}
+
+			ZVAL_PTR(v, copy);
+			efree(attr);
+		} ZEND_HASH_FOREACH_END();
+
+		ptr = zend_shared_memdup_put_free(attributes, sizeof(HashTable));
+		GC_SET_REFCOUNT(ptr, 2);
+		GC_TYPE_INFO(ptr) = IS_ARRAY | (IS_ARRAY_IMMUTABLE << GC_FLAGS_SHIFT);
+	}
+
+	return ptr;
+}
+
 static void zend_persist_type(zend_type *type) {
 	if (ZEND_TYPE_HAS_LIST(*type)) {
 		zend_type *list_type;
@@ -376,6 +410,10 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 					op_array->doc_comment = NULL;
 				}
 			}
+			if (op_array->attributes) {
+				op_array->attributes = zend_persist_attributes(op_array->attributes);
+			}
+
 			if (op_array->try_catch_array) {
 				op_array->try_catch_array = zend_shared_alloc_get_xlat_entry(op_array->try_catch_array);
 				ZEND_ASSERT(op_array->try_catch_array != NULL);
@@ -567,6 +605,10 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 		}
 	}
 
+	if (op_array->attributes) {
+		op_array->attributes = zend_persist_attributes(op_array->attributes);
+	}
+
 	if (op_array->try_catch_array) {
 		op_array->try_catch_array = zend_shared_memdup_put_free(op_array->try_catch_array, sizeof(zend_try_catch_element) * op_array->last_try_catch);
 	}
@@ -708,6 +750,9 @@ static void zend_persist_property_info(zval *zv)
 			prop->doc_comment = NULL;
 		}
 	}
+	if (prop->attributes) {
+		prop->attributes = zend_persist_attributes(prop->attributes);
+	}
 	zend_persist_type(&prop->type);
 }
 
@@ -746,6 +791,9 @@ static void zend_persist_class_constant(zval *zv)
 			}
 			c->doc_comment = NULL;
 		}
+	}
+	if (c->attributes) {
+		c->attributes = zend_persist_attributes(c->attributes);
 	}
 }
 
@@ -832,6 +880,9 @@ static void zend_persist_class_entry(zval *zv)
 				}
 				ce->info.user.doc_comment = NULL;
 			}
+		}
+		if (ce->attributes) {
+			ce->attributes = zend_persist_attributes(ce->attributes);
 		}
 		zend_hash_persist(&ce->properties_info);
 		ZEND_HASH_FOREACH_BUCKET(&ce->properties_info, p) {

@@ -23,11 +23,13 @@
 #include "ext/standard/info.h"
 #include "php_test.h"
 #include "test_arginfo.h"
+#include "zend_attributes.h"
 
 static zend_class_entry *zend_test_interface;
 static zend_class_entry *zend_test_class;
 static zend_class_entry *zend_test_child_class;
 static zend_class_entry *zend_test_trait;
+static zend_class_entry *zend_test_attribute;
 static zend_object_handlers zend_test_class_handlers;
 
 ZEND_FUNCTION(zend_test_func)
@@ -181,6 +183,13 @@ static zend_function *zend_test_class_static_method_get(zend_class_entry *ce, ze
 }
 /* }}} */
 
+void zend_attribute_validate_zendtestattribute(zend_attribute *attr, int target)
+{
+	if (target != ZEND_ATTRIBUTE_TARGET_CLASS) {
+		zend_error(E_COMPILE_ERROR, "Only classes can be marked with <<ZendTestAttribute>>");
+	}
+}
+
 ZEND_METHOD(_ZendTestClass, __toString) /* {{{ */ {
 	RETURN_EMPTY_STRING();
 }
@@ -217,7 +226,7 @@ PHP_MINIT_FUNCTION(zend_test)
 		zval val;
 		ZVAL_LONG(&val, 123);
 		zend_declare_typed_property(
-			zend_test_class, name, &val, ZEND_ACC_PUBLIC, NULL,
+			zend_test_class, name, &val, ZEND_ACC_PUBLIC, NULL, NULL,
 			(zend_type) ZEND_TYPE_INIT_CODE(IS_LONG, 0, 0));
 		zend_string_release(name);
 	}
@@ -228,7 +237,7 @@ PHP_MINIT_FUNCTION(zend_test)
 		zval val;
 		ZVAL_NULL(&val);
 		zend_declare_typed_property(
-			zend_test_class, name, &val, ZEND_ACC_PUBLIC, NULL,
+			zend_test_class, name, &val, ZEND_ACC_PUBLIC, NULL, NULL,
 			(zend_type) ZEND_TYPE_INIT_CLASS(class_name, 1, 0));
 		zend_string_release(name);
 	}
@@ -244,7 +253,7 @@ PHP_MINIT_FUNCTION(zend_test)
 		zend_type type = ZEND_TYPE_INIT_PTR(type_list, _ZEND_TYPE_LIST_BIT, 1, 0);
 		zval val;
 		ZVAL_NULL(&val);
-		zend_declare_typed_property(zend_test_class, name, &val, ZEND_ACC_PUBLIC, NULL, type);
+		zend_declare_typed_property(zend_test_class, name, &val, ZEND_ACC_PUBLIC, NULL, NULL, type);
 		zend_string_release(name);
 	}
 
@@ -253,7 +262,7 @@ PHP_MINIT_FUNCTION(zend_test)
 		zval val;
 		ZVAL_LONG(&val, 123);
 		zend_declare_typed_property(
-			zend_test_class, name, &val, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC, NULL,
+			zend_test_class, name, &val, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC, NULL, NULL,
 			(zend_type) ZEND_TYPE_INIT_CODE(IS_LONG, 0, 0));
 		zend_string_release(name);
 	}
@@ -272,6 +281,12 @@ PHP_MINIT_FUNCTION(zend_test)
 	zend_register_class_alias("_ZendTestClassAlias", zend_test_class);
 
 	REGISTER_LONG_CONSTANT("ZEND_TEST_DEPRECATED", 42, CONST_PERSISTENT | CONST_DEPRECATED);
+
+	INIT_CLASS_ENTRY(class_entry, "ZendTestAttribute", NULL);
+	zend_test_attribute = zend_register_internal_class(&class_entry);
+	zend_test_attribute->ce_flags |= ZEND_ACC_FINAL;
+
+	zend_compiler_attribute_register(zend_test_attribute, zend_attribute_validate_zendtestattribute);
 	return SUCCESS;
 }
 

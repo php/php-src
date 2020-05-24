@@ -266,22 +266,22 @@ PHP_MINIT_FUNCTION(tokenizer)
 	zend_class_implements(php_token_ce, 1, zend_ce_stringable);
 
 	name = zend_string_init("id", sizeof("id") - 1, 1);
-	zend_declare_typed_property(php_token_ce, name, &default_val, ZEND_ACC_PUBLIC, NULL,
+	zend_declare_typed_property(php_token_ce, name, &default_val, ZEND_ACC_PUBLIC, NULL, NULL,
 		(zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(name);
 
 	name = zend_string_init("text", sizeof("text") - 1, 1);
-	zend_declare_typed_property(php_token_ce, name, &default_val, ZEND_ACC_PUBLIC, NULL,
+	zend_declare_typed_property(php_token_ce, name, &default_val, ZEND_ACC_PUBLIC, NULL, NULL,
 		(zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 	zend_string_release(name);
 
 	name = zend_string_init("line", sizeof("line") - 1, 1);
-	zend_declare_typed_property(php_token_ce, name, &default_val, ZEND_ACC_PUBLIC, NULL,
+	zend_declare_typed_property(php_token_ce, name, &default_val, ZEND_ACC_PUBLIC, NULL, NULL,
 		(zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(name);
 
 	name = zend_string_init("pos", sizeof("pos") - 1, 1);
-	zend_declare_typed_property(php_token_ce, name, &default_val, ZEND_ACC_PUBLIC, NULL,
+	zend_declare_typed_property(php_token_ce, name, &default_val, ZEND_ACC_PUBLIC, NULL, NULL,
 		(zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(name);
 

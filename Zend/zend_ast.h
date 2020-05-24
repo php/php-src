@@ -62,6 +62,7 @@ enum _zend_ast_kind {
 	ZEND_AST_TRAIT_ADAPTATIONS,
 	ZEND_AST_USE,
 	ZEND_AST_TYPE_UNION,
+	ZEND_AST_ATTRIBUTE_LIST,
 
 	/* 0 child nodes */
 	ZEND_AST_MAGIC_CONST = 0 << ZEND_AST_NUM_CHILDREN_SHIFT,
@@ -138,7 +139,8 @@ enum _zend_ast_kind {
 	ZEND_AST_USE_ELEM,
 	ZEND_AST_TRAIT_ALIAS,
 	ZEND_AST_GROUP_USE,
-	ZEND_AST_PROP_GROUP,
+	ZEND_AST_CLASS_CONST_GROUP,
+	ZEND_AST_ATTRIBUTE,
 
 	/* 3 child nodes */
 	ZEND_AST_METHOD_CALL = 3 << ZEND_AST_NUM_CHILDREN_SHIFT,
@@ -147,13 +149,14 @@ enum _zend_ast_kind {
 
 	ZEND_AST_TRY,
 	ZEND_AST_CATCH,
-	ZEND_AST_PARAM,
+	ZEND_AST_PROP_GROUP,
 	ZEND_AST_PROP_ELEM,
 	ZEND_AST_CONST_ELEM,
 
 	/* 4 child nodes */
 	ZEND_AST_FOR = 4 << ZEND_AST_NUM_CHILDREN_SHIFT,
 	ZEND_AST_FOREACH,
+	ZEND_AST_PARAM,
 };
 
 typedef uint16_t zend_ast_kind;
@@ -191,6 +194,7 @@ typedef struct _zend_ast_decl {
 	uint32_t flags;
 	unsigned char *lex_pos;
 	zend_string *doc_comment;
+	zend_ast *attributes;
 	zend_string *name;
 	zend_ast *child[4];
 } zend_ast_decl;
@@ -311,6 +315,12 @@ static zend_always_inline zend_string *zend_ast_get_constant_name(zend_ast *ast)
 	return Z_STR(((zend_ast_zval *) ast)->val);
 }
 
+static zend_always_inline HashTable *zend_ast_get_hash(zend_ast *ast) {
+	zval *zv = zend_ast_get_zval(ast);
+	ZEND_ASSERT(Z_TYPE_P(zv) == IS_ARRAY);
+	return Z_ARR_P(zv);
+}
+
 static zend_always_inline uint32_t zend_ast_get_num_children(zend_ast *ast) {
 	ZEND_ASSERT(!zend_ast_is_list(ast));
 	return ast->kind >> ZEND_AST_NUM_CHILDREN_SHIFT;
@@ -322,6 +332,12 @@ static zend_always_inline uint32_t zend_ast_get_lineno(zend_ast *ast) {
 	} else {
 		return ast->lineno;
 	}
+}
+
+static zend_always_inline zend_ast *zend_ast_create_zval_from_hash(HashTable *hash) {
+	zval zv;
+	ZVAL_ARR(&zv, hash);
+	return zend_ast_create_zval(&zv);
 }
 
 static zend_always_inline zend_ast *zend_ast_create_binary_op(uint32_t opcode, zend_ast *op0, zend_ast *op1) {
@@ -340,4 +356,7 @@ static zend_always_inline zend_ast *zend_ast_list_rtrim(zend_ast *ast) {
 	}
 	return ast;
 }
+
+zend_ast * ZEND_FASTCALL zend_ast_with_attributes(zend_ast *ast, zend_ast *attr);
+
 #endif

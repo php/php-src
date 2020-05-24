@@ -2596,6 +2596,7 @@ static zend_class_entry *do_register_internal_class(zend_class_entry *orig_class
 	zend_initialize_class_data(class_entry, 0);
 	class_entry->ce_flags = ce_flags | ZEND_ACC_CONSTANTS_UPDATED | ZEND_ACC_LINKED | ZEND_ACC_RESOLVED_PARENT | ZEND_ACC_RESOLVED_INTERFACES;
 	class_entry->info.internal.module = EG(current_module);
+	class_entry->attributes = NULL;
 
 	if (class_entry->info.internal.builtin_functions) {
 		zend_register_functions(class_entry, class_entry->info.internal.builtin_functions, &class_entry->function_table, EG(current_module)->type);
@@ -3515,7 +3516,7 @@ static zend_always_inline zend_bool is_persistent_class(zend_class_entry *ce) {
 		&& ce->info.internal.module->type == MODULE_PERSISTENT;
 }
 
-ZEND_API int zend_declare_typed_property(zend_class_entry *ce, zend_string *name, zval *property, int access_type, zend_string *doc_comment, zend_type type) /* {{{ */
+ZEND_API int zend_declare_typed_property(zend_class_entry *ce, zend_string *name, zval *property, int access_type, zend_string *doc_comment, HashTable *attributes, zend_type type) /* {{{ */
 {
 	zend_property_info *property_info, *property_info_ptr;
 
@@ -3608,6 +3609,7 @@ ZEND_API int zend_declare_typed_property(zend_class_entry *ce, zend_string *name
 	property_info->name = zend_new_interned_string(property_info->name);
 	property_info->flags = access_type;
 	property_info->doc_comment = doc_comment;
+	property_info->attributes = attributes;
 	property_info->ce = ce;
 	property_info->type = type;
 
@@ -3744,16 +3746,16 @@ ZEND_API int zend_try_assign_typed_ref_zval_ex(zend_reference *ref, zval *zv, ze
 }
 /* }}} */
 
-ZEND_API int zend_declare_property_ex(zend_class_entry *ce, zend_string *name, zval *property, int access_type, zend_string *doc_comment) /* {{{ */
+ZEND_API int zend_declare_property_ex(zend_class_entry *ce, zend_string *name, zval *property, int access_type, zend_string *doc_comment, HashTable *attributes) /* {{{ */
 {
-	return zend_declare_typed_property(ce, name, property, access_type, doc_comment, (zend_type) ZEND_TYPE_INIT_NONE(0));
+	return zend_declare_typed_property(ce, name, property, access_type, doc_comment, attributes, (zend_type) ZEND_TYPE_INIT_NONE(0));
 }
 /* }}} */
 
 ZEND_API int zend_declare_property(zend_class_entry *ce, const char *name, size_t name_length, zval *property, int access_type) /* {{{ */
 {
 	zend_string *key = zend_string_init(name, name_length, is_persistent_class(ce));
-	int ret = zend_declare_property_ex(ce, key, property, access_type, NULL);
+	int ret = zend_declare_property_ex(ce, key, property, access_type, NULL, NULL);
 	zend_string_release(key);
 	return ret;
 }
@@ -3813,7 +3815,7 @@ ZEND_API int zend_declare_property_stringl(zend_class_entry *ce, const char *nam
 }
 /* }}} */
 
-ZEND_API int zend_declare_class_constant_ex(zend_class_entry *ce, zend_string *name, zval *value, int access_type, zend_string *doc_comment) /* {{{ */
+ZEND_API int zend_declare_class_constant_ex(zend_class_entry *ce, zend_string *name, zval *value, int access_type, zend_string *doc_comment, HashTable *attributes) /* {{{ */
 {
 	zend_class_constant *c;
 
@@ -3840,6 +3842,7 @@ ZEND_API int zend_declare_class_constant_ex(zend_class_entry *ce, zend_string *n
 	ZVAL_COPY_VALUE(&c->value, value);
 	Z_ACCESS_FLAGS(c->value) = access_type;
 	c->doc_comment = doc_comment;
+	c->attributes = attributes;
 	c->ce = ce;
 	if (Z_TYPE_P(value) == IS_CONSTANT_AST) {
 		ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
@@ -3865,7 +3868,7 @@ ZEND_API int zend_declare_class_constant(zend_class_entry *ce, const char *name,
 	} else {
 		key = zend_string_init(name, name_length, 0);
 	}
-	ret = zend_declare_class_constant_ex(ce, key, value, ZEND_ACC_PUBLIC, NULL);
+	ret = zend_declare_class_constant_ex(ce, key, value, ZEND_ACC_PUBLIC, NULL, NULL);
 	zend_string_release(key);
 	return ret;
 }
