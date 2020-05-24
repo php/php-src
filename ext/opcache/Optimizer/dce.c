@@ -140,6 +140,7 @@ static inline zend_bool may_have_side_effects(
 		case ZEND_JMP_SET:
 		case ZEND_COALESCE:
 		case ZEND_ASSERT_CHECK:
+		case ZEND_JMP_NULL:
 			/* For our purposes a jumps and branches are side effects. */
 			return 1;
 		case ZEND_BEGIN_SILENCE:

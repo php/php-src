@@ -352,6 +352,10 @@ typedef struct _zend_oparray_context {
 /* call through internal function handler. e.g. Closure::invoke() */
 #define ZEND_ACC_CALL_VIA_HANDLER     ZEND_ACC_CALL_VIA_TRAMPOLINE
 
+#define ZEND_SHORT_CIRCUITING_CHAIN_EXPR 0
+#define ZEND_SHORT_CIRCUITING_CHAIN_ISSET 1
+#define ZEND_SHORT_CIRCUITING_CHAIN_EMPTY 2
+
 char *zend_visibility_string(uint32_t fn_flags);
 
 typedef struct _zend_property_info {

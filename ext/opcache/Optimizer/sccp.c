@@ -1779,6 +1779,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 		case ZEND_JMP_SET:
 		case ZEND_COALESCE:
 		case ZEND_COPY_TMP:
+		case ZEND_JMP_NULL:
 			SET_RESULT(result, op1);
 			break;
 #if 0
@@ -1978,6 +1979,9 @@ static void sccp_mark_feasible_successors(
 		}
 		case ZEND_COALESCE:
 			s = (Z_TYPE_P(op1) == IS_NULL);
+			break;
+		case ZEND_JMP_NULL:
+			s = (Z_TYPE_P(op1) != IS_NULL);
 			break;
 		case ZEND_FE_RESET_R:
 		case ZEND_FE_RESET_RW:
@@ -2265,6 +2269,7 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 					|| opline->opcode == ZEND_JMPNZ_EX
 					|| opline->opcode == ZEND_JMP_SET
 					|| opline->opcode == ZEND_COALESCE
+					|| opline->opcode == ZEND_JMP_NULL
 					|| opline->opcode == ZEND_FE_RESET_R
 					|| opline->opcode == ZEND_FE_RESET_RW
 					|| opline->opcode == ZEND_FE_FETCH_R

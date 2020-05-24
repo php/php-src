@@ -130,6 +130,9 @@ struct _zend_compiler_globals {
 	HashTable *delayed_autoloads;
 
 	uint32_t rtd_key_counter;
+
+	zend_bool in_short_circuiting_chain;
+	zend_stack short_circuiting_chains;
 };
 
 
