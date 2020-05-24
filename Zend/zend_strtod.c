@@ -84,15 +84,6 @@
  *	arithmetic when the result could be computed with one rounding error.
  * #define Inaccurate_Divide for IEEE-format with correctly rounded
  *	products but inaccurate quotients, e.g., for Intel i860.
- * #define NO_LONG_LONG on machines that do not have a "long long"
- *	integer type (of >= 64 bits).  On such machines, you can
- *	#define Just_16 to store 16 bits per 32-bit Long when doing
- *	high-precision integer arithmetic.  Whether this speeds things
- *	up or slows things down depends on the machine and the number
- *	being converted.  If long long is available and the name is
- *	something other than "long long", #define Llong to be the name,
- *	and if "unsigned Llong" does not work as an unsigned version of
- *	Llong, #define #ULLong to be the corresponding unsigned type.
  * #define Omit_Private_Memory to omit logic (added Jan. 1998) for making
  *	memory allocations from a private pool of memory when possible.
  *	When used, the private pool is PRIVATE_MEM bytes long:  2304 bytes,
@@ -407,24 +398,12 @@ BCinfo { int dp0, dp1, dplen, dsign, e0, inexact, nd, nd0, rounding, scale, uflc
 
 #define FFFFFFFF 0xffffffffUL
 
-#ifdef NO_LONG_LONG
-#undef ULLong
-#ifdef Just_16
-#undef Pack_32
-/* When Pack_32 is not defined, we store 16 bits per 32-bit Long.
- * This makes some inner loops simpler and sometimes saves work
- * during multiplications, but it often seems to make things slightly
- * slower.  Hence the default is now to store 32 bits per Long.
- */
-#endif
-#else	/* long long available */
 #ifndef Llong
 #define Llong long long
 #endif
 #ifndef ULLong
 #define ULLong unsigned Llong
 #endif
-#endif /* NO_LONG_LONG */
 
 #ifndef MULTIPLE_THREADS
 #define ACQUIRE_DTOA_LOCK(n)	/*nothing*/
