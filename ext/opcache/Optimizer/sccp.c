@@ -1781,6 +1781,21 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 		case ZEND_COPY_TMP:
 			SET_RESULT(result, op1);
 			break;
+		case ZEND_JMP_NULL:
+			switch (opline->extended_value) {
+				case ZEND_SHORT_CIRCUITING_CHAIN_EXPR:
+					ZVAL_NULL(&zv);
+					break;
+				case ZEND_SHORT_CIRCUITING_CHAIN_ISSET:
+					ZVAL_FALSE(&zv);
+					break;
+				case ZEND_SHORT_CIRCUITING_CHAIN_EMPTY:
+					ZVAL_TRUE(&zv);
+					break;
+				EMPTY_SWITCH_DEFAULT_CASE()
+			}
+			SET_RESULT(result, &zv);
+			break;
 #if 0
 		case ZEND_FETCH_CLASS:
 			if (!op1) {
@@ -1978,6 +1993,9 @@ static void sccp_mark_feasible_successors(
 		}
 		case ZEND_COALESCE:
 			s = (Z_TYPE_P(op1) == IS_NULL);
+			break;
+		case ZEND_JMP_NULL:
+			s = (Z_TYPE_P(op1) != IS_NULL);
 			break;
 		case ZEND_FE_RESET_R:
 		case ZEND_FE_RESET_RW:
@@ -2265,6 +2283,7 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 					|| opline->opcode == ZEND_JMPNZ_EX
 					|| opline->opcode == ZEND_JMP_SET
 					|| opline->opcode == ZEND_COALESCE
+					|| opline->opcode == ZEND_JMP_NULL
 					|| opline->opcode == ZEND_FE_RESET_R
 					|| opline->opcode == ZEND_FE_RESET_RW
 					|| opline->opcode == ZEND_FE_FETCH_R

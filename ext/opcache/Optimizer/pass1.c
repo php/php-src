@@ -676,6 +676,7 @@ constant_binary_op:
 		case ZEND_JMP_SET:
 		case ZEND_COALESCE:
 		case ZEND_ASSERT_CHECK:
+		case ZEND_JMP_NULL:
 			collect_constants = 0;
 			break;
 		}

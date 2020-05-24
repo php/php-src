@@ -607,6 +607,8 @@ PHP 8.0 UPGRADE NOTES
     inheritance rules on the methods of a child class. (with the exception of
     final private constructors)
     RFC: https://wiki.php.net/rfc/inheritance_private_methods
+  . Added support for nullsafe operator (`?->`).
+    RFC: https://wiki.php.net/rfc/nullsafe_operator
 
 - Date:
   . Added DateTime::createFromInterface() and

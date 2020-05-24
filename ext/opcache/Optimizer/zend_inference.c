@@ -2499,6 +2499,17 @@ static zend_always_inline int _zend_update_type_info(
 			UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
 			COPY_SSA_OBJ_TYPE(ssa_op->op1_use, ssa_op->result_def);
 			break;
+		case ZEND_JMP_NULL:
+			if (opline->extended_value == ZEND_SHORT_CIRCUITING_CHAIN_EXPR) {
+				tmp = MAY_BE_NULL;
+			} else if (opline->extended_value == ZEND_SHORT_CIRCUITING_CHAIN_ISSET) {
+				tmp = MAY_BE_FALSE;
+			} else {
+				ZEND_ASSERT(opline->extended_value == ZEND_SHORT_CIRCUITING_CHAIN_EMPTY);
+				tmp = MAY_BE_TRUE;
+			}
+			UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
+			break;
 		case ZEND_ASSIGN_OP:
 		case ZEND_ASSIGN_DIM_OP:
 		case ZEND_ASSIGN_OBJ_OP:
@@ -4394,6 +4405,7 @@ int zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op, const ze
 		case ZEND_COPY_TMP:
 		case ZEND_CHECK_FUNC_ARG:
 		case ZEND_CASE_STRICT:
+		case ZEND_JMP_NULL:
 			return 0;
 		case ZEND_INIT_FCALL:
 			/* can't throw, because call is resolved at compile time */
