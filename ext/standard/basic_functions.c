@@ -1536,6 +1536,9 @@ PHP_FUNCTION(error_get_last)
 		add_assoc_string_ex(return_value, "message", sizeof("message")-1, PG(last_error_message));
 		add_assoc_string_ex(return_value, "file", sizeof("file")-1, PG(last_error_file)?PG(last_error_file):"-");
 		add_assoc_long_ex(return_value, "line", sizeof("line")-1, PG(last_error_lineno));
+		if (PG(last_error_backtrace)) {
+			add_assoc_string_ex(return_value, "backtrace", sizeof("backtrace")-1, PG(last_error_backtrace));
+		}
 	}
 }
 /* }}} */
@@ -1556,6 +1559,11 @@ PHP_FUNCTION(error_clear_last)
 		if (PG(last_error_file)) {
 			free(PG(last_error_file));
 			PG(last_error_file) = NULL;
+		}
+
+		if (PG(last_error_backtrace)) {
+			free(PG(last_error_backtrace));
+			PG(last_error_backtrace) = NULL;
 		}
 	}
 }

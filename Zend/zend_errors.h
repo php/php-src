@@ -39,6 +39,9 @@
 /* Indicates that this usually fatal error should not result in a bailout */
 #define E_DONT_BAIL			(1<<15L)
 
+/* Indicates that this error was caused by an uncaught exception */
+#define E_UNCAUGHT_EXCEPTION        (1<<16L)
+
 #define E_ALL (E_ERROR | E_WARNING | E_PARSE | E_NOTICE | E_CORE_ERROR | E_CORE_WARNING | E_COMPILE_ERROR | E_COMPILE_WARNING | E_USER_ERROR | E_USER_WARNING | E_USER_NOTICE | E_RECOVERABLE_ERROR | E_DEPRECATED | E_USER_DEPRECATED | E_STRICT)
 #define E_CORE (E_CORE_ERROR | E_CORE_WARNING)
 

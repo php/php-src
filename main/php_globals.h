@@ -67,6 +67,7 @@ struct _php_core_globals {
 
 	zend_bool display_errors;
 	zend_bool display_startup_errors;
+	zend_long error_backtraces;
 	zend_bool log_errors;
 	zend_long      log_errors_max_len;
 	zend_bool ignore_repeated_errors;
@@ -136,6 +137,7 @@ struct _php_core_globals {
 	char *last_error_message;
 	char *last_error_file;
 	int  last_error_lineno;
+	char *last_error_backtrace;
 
 	char *php_sys_temp_dir;
 

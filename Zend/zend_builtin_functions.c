@@ -27,6 +27,7 @@
 #include "zend_extensions.h"
 #include "zend_closures.h"
 #include "zend_generators.h"
+#include "zend_smart_str.h"
 #include "zend_builtin_functions_arginfo.h"
 
 /* }}} */
@@ -2149,6 +2150,164 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 	}
 }
 /* }}} */
+
+/* {{{ */
+#define TRACE_APPEND_KEY(key) do {                                          \
+		tmp = zend_hash_find(ht, key);                                      \
+		if (tmp) {                                                          \
+			if (Z_TYPE_P(tmp) != IS_STRING) {                               \
+				zend_error(E_WARNING, "Value for %s is not a string",       \
+					ZSTR_VAL(key));                                         \
+				smart_str_appends(str, "[unknown]");                        \
+			} else {                                                        \
+				smart_str_appends(str, Z_STRVAL_P(tmp));                    \
+			}                                                               \
+		} \
+	} while (0)
+
+static void _build_trace_args(zval *arg, smart_str *str) /* {{{ */
+{
+	/* the trivial way would be to do
+	 * convert_to_string_ex(arg);
+	 * append it and kill the now tmp arg.
+	 * but that could cause some E_NOTICE and also damn long lines.
+	 */
+
+	ZVAL_DEREF(arg);
+	switch (Z_TYPE_P(arg)) {
+		case IS_NULL:
+			smart_str_appends(str, "NULL, ");
+			break;
+		case IS_STRING:
+			smart_str_appendc(str, '\'');
+			smart_str_append_escaped(str, Z_STRVAL_P(arg), MIN(Z_STRLEN_P(arg), 15));
+			if (Z_STRLEN_P(arg) > 15) {
+				smart_str_appends(str, "...', ");
+			} else {
+				smart_str_appends(str, "', ");
+			}
+			break;
+		case IS_FALSE:
+			smart_str_appends(str, "false, ");
+			break;
+		case IS_TRUE:
+			smart_str_appends(str, "true, ");
+			break;
+		case IS_RESOURCE:
+			smart_str_appends(str, "Resource id #");
+			smart_str_append_long(str, Z_RES_HANDLE_P(arg));
+			smart_str_appends(str, ", ");
+			break;
+		case IS_LONG:
+			smart_str_append_long(str, Z_LVAL_P(arg));
+			smart_str_appends(str, ", ");
+			break;
+		case IS_DOUBLE: {
+			smart_str_append_printf(str, "%.*G", (int) EG(precision), Z_DVAL_P(arg));
+			smart_str_appends(str, ", ");
+			break;
+		}
+		case IS_ARRAY:
+			smart_str_appends(str, "Array, ");
+			break;
+		case IS_OBJECT: {
+			zend_string *class_name = Z_OBJ_HANDLER_P(arg, get_class_name)(Z_OBJ_P(arg));
+			smart_str_appends(str, "Object(");
+			smart_str_appends(str, ZSTR_VAL(class_name));
+			smart_str_appends(str, "), ");
+			zend_string_release_ex(class_name, 0);
+			break;
+		}
+	}
+}
+
+static void _build_trace_string(smart_str *str, HashTable *ht, uint32_t num)
+{
+	zval *file, *tmp;
+
+	smart_str_appendc(str, '#');
+	smart_str_append_long(str, num);
+	smart_str_appendc(str, ' ');
+
+	file = zend_hash_find_ex(ht, ZSTR_KNOWN(ZEND_STR_FILE), 1);
+	if (file) {
+		if (Z_TYPE_P(file) != IS_STRING) {
+			zend_error(E_WARNING, "Function name is not a string");
+			smart_str_appends(str, "[unknown function]");
+		} else{
+			zend_long line;
+			tmp = zend_hash_find_ex(ht, ZSTR_KNOWN(ZEND_STR_LINE), 1);
+			if (tmp) {
+				if (Z_TYPE_P(tmp) == IS_LONG) {
+					line = Z_LVAL_P(tmp);
+				} else {
+					zend_error(E_WARNING, "Line is not an int");
+					line = 0;
+				}
+			} else {
+				line = 0;
+			}
+			smart_str_append(str, Z_STR_P(file));
+			smart_str_appendc(str, '(');
+			smart_str_append_long(str, line);
+			smart_str_appends(str, "): ");
+		}
+	} else {
+		smart_str_appends(str, "[internal function]: ");
+	}
+	TRACE_APPEND_KEY(ZSTR_KNOWN(ZEND_STR_CLASS));
+	TRACE_APPEND_KEY(ZSTR_KNOWN(ZEND_STR_TYPE));
+	TRACE_APPEND_KEY(ZSTR_KNOWN(ZEND_STR_FUNCTION));
+	smart_str_appendc(str, '(');
+	tmp = zend_hash_find_ex(ht, ZSTR_KNOWN(ZEND_STR_ARGS), 1);
+	if (tmp) {
+		if (Z_TYPE_P(tmp) == IS_ARRAY) {
+			size_t last_len = ZSTR_LEN(str->s);
+			zval *arg;
+
+			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(tmp), arg) {
+				_build_trace_args(arg, str);
+			} ZEND_HASH_FOREACH_END();
+
+			if (last_len != ZSTR_LEN(str->s)) {
+				ZSTR_LEN(str->s) -= 2; /* remove last ', ' */
+			}
+		} else {
+			zend_error(E_WARNING, "args element is not an array");
+		}
+	}
+	smart_str_appends(str, ")\n");
+}
+/* }}} */
+
+/* {{{ */
+ZEND_API zend_string *zend_build_backtrace_string(zval *trace)
+{
+	zval *frame;
+	zend_ulong index;
+	smart_str str = {0};
+	uint32_t num = 0;
+
+	if (Z_TYPE_P(trace) != IS_ARRAY) {
+		zend_type_error("Trace is not an array");
+		return NULL;
+	}
+	ZEND_HASH_FOREACH_NUM_KEY_VAL(Z_ARRVAL_P(trace), index, frame) {
+		if (Z_TYPE_P(frame) != IS_ARRAY) {
+			zend_error(E_WARNING, "Expected array for frame " ZEND_ULONG_FMT, index);
+			continue;
+		}
+
+		_build_trace_string(&str, Z_ARRVAL_P(frame), num++);
+	} ZEND_HASH_FOREACH_END();
+
+	smart_str_appendc(&str, '#');
+	smart_str_append_long(&str, num);
+	smart_str_appends(&str, " {main}");
+	smart_str_0(&str);
+
+	return str.s;
+}
 
 /* {{{ proto array debug_backtrace([int options[, int limit]])
    Return backtrace as array */

@@ -70,6 +70,7 @@
 #include "zend_execute.h"
 #include "zend_highlight.h"
 #include "zend_extensions.h"
+#include "zend_builtin_functions.h"
 #include "zend_ini.h"
 #include "zend_dtrace.h"
 
@@ -486,6 +487,16 @@ static PHP_INI_MH(OnUpdateDisplayErrors)
 }
 /* }}} */
 
+/* {{{ PHP_INI_MH
+ */
+static PHP_INI_MH(OnUpdateErrorBacktraces)
+{
+	PG(error_backtraces) = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
+
+	return SUCCESS;
+}
+/* }}} */
+
 /* {{{ PHP_INI_DISP
  */
 static PHP_INI_DISP(display_errors_mode)
@@ -703,6 +714,7 @@ PHP_INI_BEGIN()
 
 	STD_PHP_INI_ENTRY_EX("display_errors",		"1",		PHP_INI_ALL,		OnUpdateDisplayErrors,	display_errors,			php_core_globals,	core_globals, display_errors_mode)
 	STD_PHP_INI_BOOLEAN("display_startup_errors",	"1",	PHP_INI_ALL,		OnUpdateBool,			display_startup_errors,	php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("error_backtraces",		"0",		PHP_INI_ALL,		OnUpdateErrorBacktraces,	error_backtraces,	php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("enable_dl",			"1",		PHP_INI_SYSTEM,		OnUpdateBool,			enable_dl,				php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("expose_php",			"1",		PHP_INI_SYSTEM,		OnUpdateBool,			expose_php,				php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("docref_root", 			"", 		PHP_INI_ALL,		OnUpdateString,			docref_root,			php_core_globals,	core_globals)
@@ -1188,6 +1200,30 @@ PHPAPI void php_html_puts(const char *str, size_t size)
 }
 /* }}} */
 
+/* {{{ */
+static ZEND_COLD char *php_backtrace_string()
+{
+	zval trace;
+	char *result = NULL;
+	/* In config, no limit is -1 while for zend_fetch_debug_backtrace(),
+	 * no limit is 0. */
+	int limit = PG(error_backtraces) > 0 ? PG(error_backtraces) : 0;
+
+	zend_fetch_debug_backtrace(&trace, 0, 0, limit);
+
+	if (Z_TYPE(trace) == IS_ARRAY) {
+		zend_string *str = zend_build_backtrace_string(&trace);
+		if (str) {
+			result = strdup(ZSTR_VAL(str));
+			zend_string_efree(str);
+		}
+	}
+	zval_ptr_dtor(&trace);
+
+	return result;
+}
+/* }}} */
+
 /* {{{ php_error_cb
  extended error handling function */
 static ZEND_COLD void php_error_cb(int orig_type, const char *error_filename, const uint32_t error_lineno, const char *format, va_list args)
@@ -1195,6 +1231,7 @@ static ZEND_COLD void php_error_cb(int orig_type, const char *error_filename, co
 	char *buffer;
 	int buffer_len, display;
 	int type = orig_type & E_ALL;
+	char *backtrace = NULL;
 
 	buffer_len = (int)vspprintf(&buffer, PG(log_errors_max_len), format, args);
 
@@ -1260,10 +1297,29 @@ static ZEND_COLD void php_error_cb(int orig_type, const char *error_filename, co
 		if (!error_filename) {
 			error_filename = "Unknown";
 		}
+		if (PG(last_error_backtrace)) {
+			char *s = PG(last_error_backtrace);
+			PG(last_error_backtrace) = NULL;
+			free(s);
+		}
 		PG(last_error_type) = type;
 		PG(last_error_message) = strdup(buffer);
 		PG(last_error_file) = strdup(error_filename);
 		PG(last_error_lineno) = error_lineno;
+
+		/* Don't report backtraces for uncaught exceptions. They already have this information, and here we only have information from
+		 * the outermost scope. */
+		if (PG(error_backtraces) && !(orig_type & E_UNCAUGHT_EXCEPTION)) {
+			char *bt = php_backtrace_string();
+			if (bt) {
+				if (bt[0]) {
+					PG(last_error_backtrace) = bt;
+					spprintf(&backtrace, 0, "\n%s", bt);
+				} else {
+					free(bt);
+				}
+			}
+		}
 	}
 
 	/* display/log the error if necessary */
@@ -1321,7 +1377,7 @@ static ZEND_COLD void php_error_cb(int orig_type, const char *error_filename, co
 				syslog(LOG_ALERT, "PHP %s: %s (%s)", error_type_str, buffer, GetCommandLine());
 			}
 #endif
-			spprintf(&log_buffer, 0, "PHP %s:  %s in %s on line %" PRIu32, error_type_str, buffer, error_filename, error_lineno);
+			spprintf(&log_buffer, 0, "PHP %s:  %s in %s on line %" PRIu32 "%s", error_type_str, buffer, error_filename, error_lineno, STR_PRINT(backtrace));
 			php_log_err_with_severity(log_buffer, syslog_type_int);
 			efree(log_buffer);
 		}
@@ -1346,12 +1402,12 @@ static ZEND_COLD void php_error_cb(int orig_type, const char *error_filename, co
 					if ((!strcmp(sapi_module.name, "cli") || !strcmp(sapi_module.name, "cgi") || !strcmp(sapi_module.name, "phpdbg")) &&
 						PG(display_errors) == PHP_DISPLAY_ERRORS_STDERR
 					) {
-						fprintf(stderr, "%s: %s in %s on line %" PRIu32 "\n", error_type_str, buffer, error_filename, error_lineno);
+						fprintf(stderr, "%s: %s in %s on line %" PRIu32 "%s\n", error_type_str, buffer, error_filename, error_lineno, STR_PRINT(backtrace));
 #ifdef PHP_WIN32
 						fflush(stderr);
 #endif
 					} else {
-						php_printf("%s\n%s: %s in %s on line %" PRIu32 "\n%s", STR_PRINT(prepend_string), error_type_str, buffer, error_filename, error_lineno, STR_PRINT(append_string));
+						php_printf("%s\n%s: %s in %s on line %" PRIu32 "%s\n%s", STR_PRINT(prepend_string), error_type_str, buffer, error_filename, error_lineno, STR_PRINT(backtrace), STR_PRINT(append_string));
 					}
 				}
 			}
@@ -1371,7 +1427,7 @@ static ZEND_COLD void php_error_cb(int orig_type, const char *error_filename, co
 					trigger_break=0;
 					break;
 			}
-			zend_output_debug_string(trigger_break, "%s(%" PRIu32 ") : %s - %s", error_filename, error_lineno, error_type_str, buffer);
+			zend_output_debug_string(trigger_break, "%s(%" PRIu32 ") : %s - %s%s", error_filename, error_lineno, error_type_str, buffer, backtrace);
 		}
 #endif
 	}
@@ -1406,6 +1462,9 @@ static ZEND_COLD void php_error_cb(int orig_type, const char *error_filename, co
 					/* restore memory limit */
 					zend_set_memory_limit(PG(memory_limit));
 					efree(buffer);
+					if (backtrace) {
+						efree(backtrace);
+					}
 					zend_objects_store_mark_destructed(&EG(objects_store));
 					zend_bailout();
 					return;
@@ -1415,6 +1474,9 @@ static ZEND_COLD void php_error_cb(int orig_type, const char *error_filename, co
 	}
 
 	efree(buffer);
+	if (backtrace) {
+		efree(backtrace);
+	}
 }
 /* }}} */
 
@@ -1724,6 +1786,7 @@ static void sigchld_handler(int apar)
 }
 /* }}} */
 #endif
+
 
 /* {{{ php_request_startup
  */
