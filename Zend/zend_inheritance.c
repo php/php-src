@@ -1967,6 +1967,7 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 	size_t i;
 	zend_property_info *property_info;
 	zend_property_info *coliding_prop;
+	zend_property_info *new_prop;
 	zend_string* prop_name;
 	const char* class_name_unused;
 	zend_bool not_compatible;
@@ -2072,8 +2073,18 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 
 			Z_TRY_ADDREF_P(prop_value);
 			doc_comment = property_info->doc_comment ? zend_string_copy(property_info->doc_comment) : NULL;
+
 			zend_type_copy_ctor(&property_info->type, /* persistent */ 0);
-			zend_declare_typed_property(ce, prop_name, prop_value, flags, doc_comment, property_info->type);
+			new_prop = zend_declare_typed_property(ce, prop_name, prop_value, flags, doc_comment, property_info->type);
+
+			if (property_info->attributes) {
+				new_prop->attributes = property_info->attributes;
+
+				if (!(GC_FLAGS(new_prop->attributes) & IS_ARRAY_IMMUTABLE)) {
+					GC_ADDREF(new_prop->attributes);
+				}
+			}
+
 			zend_string_release_ex(prop_name, 0);
 		} ZEND_HASH_FOREACH_END();
 	}

@@ -170,6 +170,7 @@ struct _zend_class_entry {
 	zend_class_name *trait_names;
 	zend_trait_alias **trait_aliases;
 	zend_trait_precedence **trait_precedences;
+	HashTable *attributes;
 
 	union {
 		struct {

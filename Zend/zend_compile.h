@@ -348,6 +348,7 @@ typedef struct _zend_property_info {
 	uint32_t flags;
 	zend_string *name;
 	zend_string *doc_comment;
+	HashTable *attributes;
 	zend_class_entry *ce;
 	zend_type type;
 } zend_property_info;
@@ -364,6 +365,7 @@ typedef struct _zend_property_info {
 typedef struct _zend_class_constant {
 	zval value; /* access flags are stored in reserved: zval.u2.access_flags */
 	zend_string *doc_comment;
+	HashTable *attributes;
 	zend_class_entry *ce;
 } zend_class_constant;
 
@@ -403,6 +405,7 @@ struct _zend_op_array {
 	uint32_t num_args;
 	uint32_t required_num_args;
 	zend_arg_info *arg_info;
+	HashTable *attributes;
 	/* END of common elements */
 
 	int cache_size;     /* number of run_time_cache_slots * sizeof(void*) */
@@ -452,6 +455,7 @@ typedef struct _zend_internal_function {
 	uint32_t num_args;
 	uint32_t required_num_args;
 	zend_internal_arg_info *arg_info;
+	HashTable *attributes;
 	/* END of common elements */
 
 	zif_handler handler;
@@ -475,6 +479,7 @@ union _zend_function {
 		uint32_t num_args;
 		uint32_t required_num_args;
 		zend_arg_info *arg_info;  /* index -1 represents the return value info, if any */
+		HashTable   *attributes;
 	} common;
 
 	zend_op_array op_array;

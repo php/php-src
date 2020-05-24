@@ -95,6 +95,9 @@ abstract class ReflectionFunctionAbstract implements Reflector
 
     /** @return ReflectionType|null */
     public function getReturnType() {}
+
+    /** @return ReflectionAttribute[] */
+    public function getAttributes(?string $name = null, int $flags = 0): array {}
 }
 
 class ReflectionFunction extends ReflectionFunctionAbstract
@@ -363,6 +366,9 @@ class ReflectionClass implements Reflector
 
     /** @return string */
     public function getShortName() {}
+
+    /** @return ReflectionAttribute[] */
+    public function getAttributes(?string $name = null, int $flags = 0): array {}
 }
 
 class ReflectionObject extends ReflectionClass
@@ -429,6 +435,9 @@ class ReflectionProperty implements Reflector
 
     /** @return mixed */
     public function getDefaultValue() {}
+
+    /** @return ReflectionAttribute[] */
+    public function getAttributes(?string $name = null, int $flags = 0): array {}
 }
 
 class ReflectionClassConstant implements Reflector
@@ -464,6 +473,9 @@ class ReflectionClassConstant implements Reflector
 
     /** @return string|false */
     public function getDocComment() {}
+
+    /** @return ReflectionAttribute[] */
+    public function getAttributes(?string $name = null, int $flags = 0): array {}
 }
 
 class ReflectionParameter implements Reflector
@@ -540,6 +552,9 @@ class ReflectionParameter implements Reflector
 
     /** @return bool */
     public function isVariadic() {}
+
+    /** @return ReflectionAttribute[] */
+    public function getAttributes(?string $name = null, int $flags = 0): array {}
 }
 
 abstract class ReflectionType implements Stringable
@@ -643,6 +658,17 @@ final class ReflectionReference
     public function getId(): string {}
 
     /** @alias ReflectionClass::__clone */
+    private function __clone() {}
+
+    private function __construct() {}
+}
+
+final class ReflectionAttribute
+{
+    public function getName(): string {}
+    public function getArguments(): array {}
+    public function newInstance(): object {}
+
     private function __clone() {}
 
     private function __construct() {}

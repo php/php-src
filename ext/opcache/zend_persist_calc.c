@@ -25,6 +25,7 @@
 #include "zend_extensions.h"
 #include "zend_shared_alloc.h"
 #include "zend_operators.h"
+#include "zend_attributes.h"
 
 #define ADD_DUP_SIZE(m,s)  ZCG(current_persistent_script)->size += zend_shared_memdup_size((void*)m, s)
 #define ADD_SIZE(m)        ZCG(current_persistent_script)->size += ZEND_ALIGNED_SIZE(m)
@@ -148,6 +149,28 @@ static void zend_persist_zval_calc(zval *z)
 	}
 }
 
+static void zend_persist_attributes_calc(HashTable *attributes)
+{
+	if (!zend_shared_alloc_get_xlat_entry(attributes)) {
+		zend_attribute *attr;
+		uint32_t i;
+
+		zend_shared_alloc_register_xlat_entry(attributes, attributes);
+		ADD_SIZE(sizeof(HashTable));
+		zend_hash_persist_calc(attributes);
+
+		ZEND_HASH_FOREACH_PTR(attributes, attr) {
+			ADD_SIZE(ZEND_ATTRIBUTE_SIZE(attr->argc));
+			ADD_INTERNED_STRING(attr->name);
+			ADD_INTERNED_STRING(attr->lcname);
+
+			for (i = 0; i < attr->argc; i++) {
+				zend_persist_zval_calc(&attr->argv[i]);
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
+}
+
 static void zend_persist_type_calc(zend_type *type)
 {
 	if (ZEND_TYPE_HAS_LIST(*type)) {
@@ -249,6 +272,10 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 		ADD_STRING(op_array->doc_comment);
 	}
 
+	if (op_array->attributes) {
+		zend_persist_attributes_calc(op_array->attributes);
+	}
+
 	if (op_array->try_catch_array) {
 		ADD_SIZE(sizeof(zend_try_catch_element) * op_array->last_try_catch);
 	}
@@ -325,6 +352,9 @@ static void zend_persist_property_info_calc(zval *zv)
 		if (ZCG(accel_directives).save_comments && prop->doc_comment) {
 			ADD_STRING(prop->doc_comment);
 		}
+		if (prop->attributes) {
+			zend_persist_attributes_calc(prop->attributes);
+		}
 	}
 }
 
@@ -338,6 +368,9 @@ static void zend_persist_class_constant_calc(zval *zv)
 		zend_persist_zval_calc(&c->value);
 		if (ZCG(accel_directives).save_comments && c->doc_comment) {
 			ADD_STRING(c->doc_comment);
+		}
+		if (c->attributes) {
+			zend_persist_attributes_calc(c->attributes);
 		}
 	}
 }
@@ -423,6 +456,9 @@ static void zend_persist_class_entry_calc(zval *zv)
 		}
 		if (ZCG(accel_directives).save_comments && ce->info.user.doc_comment) {
 			ADD_STRING(ce->info.user.doc_comment);
+		}
+		if (ce->attributes) {
+			zend_persist_attributes_calc(ce->attributes);
 		}
 
 		zend_hash_persist_calc(&ce->properties_info);
