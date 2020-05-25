@@ -88,6 +88,8 @@ foreach($values as $value) {
     $result = vprintf($format,$value);
     echo "\n";
     var_dump($result);
+  } catch (\TypeError $e) {
+    echo $e->getMessage(), "\n";
   } catch (\ValueError $e) {
     echo $e->getMessage(), "\n";
   }
@@ -98,92 +100,74 @@ foreach($values as $value) {
 fclose($file_handle);
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing vprintf() : with unexpected values for args argument ***
 
 -- Iteration 1 --
-0
-int(1)
+vprintf(): Argument #2 ($args) must be of type array, int given
 
 -- Iteration 2 --
-1
-int(1)
+vprintf(): Argument #2 ($args) must be of type array, int given
 
 -- Iteration 3 --
-12345
-int(5)
+vprintf(): Argument #2 ($args) must be of type array, int given
 
 -- Iteration 4 --
--2345
-int(5)
+vprintf(): Argument #2 ($args) must be of type array, int given
 
 -- Iteration 5 --
-10.5
-int(4)
+vprintf(): Argument #2 ($args) must be of type array, float given
 
 -- Iteration 6 --
--10.5
-int(5)
+vprintf(): Argument #2 ($args) must be of type array, float given
 
 -- Iteration 7 --
-101234567000
-int(12)
+vprintf(): Argument #2 ($args) must be of type array, float given
 
 -- Iteration 8 --
-1.07654321E-9
-int(13)
+vprintf(): Argument #2 ($args) must be of type array, float given
 
 -- Iteration 9 --
-0.5
-int(3)
+vprintf(): Argument #2 ($args) must be of type array, float given
 
 -- Iteration 10 --
-The arguments array must contain 1 items, 0 given
+vprintf(): Argument #2 ($args) must be of type array, null given
 
 -- Iteration 11 --
-The arguments array must contain 1 items, 0 given
+vprintf(): Argument #2 ($args) must be of type array, null given
 
 -- Iteration 12 --
-1
-int(1)
+vprintf(): Argument #2 ($args) must be of type array, bool given
 
 -- Iteration 13 --
-
-int(0)
+vprintf(): Argument #2 ($args) must be of type array, bool given
 
 -- Iteration 14 --
-1
-int(1)
+vprintf(): Argument #2 ($args) must be of type array, bool given
 
 -- Iteration 15 --
-
-int(0)
+vprintf(): Argument #2 ($args) must be of type array, bool given
 
 -- Iteration 16 --
-
-int(0)
+vprintf(): Argument #2 ($args) must be of type array, string given
 
 -- Iteration 17 --
-
-int(0)
+vprintf(): Argument #2 ($args) must be of type array, string given
 
 -- Iteration 18 --
-string
-int(6)
+vprintf(): Argument #2 ($args) must be of type array, string given
 
 -- Iteration 19 --
-string
-int(6)
+vprintf(): Argument #2 ($args) must be of type array, string given
 
 -- Iteration 20 --
-The arguments array must contain 1 items, 0 given
+vprintf(): Argument #2 ($args) must be of type array, object given
 
 -- Iteration 21 --
-The arguments array must contain 1 items, 0 given
+vprintf(): Argument #2 ($args) must be of type array, null given
 
 -- Iteration 22 --
-The arguments array must contain 1 items, 0 given
+vprintf(): Argument #2 ($args) must be of type array, null given
 
 -- Iteration 23 --
-Resource id #%d
-int(%d)
+vprintf(): Argument #2 ($args) must be of type array, resource given

@@ -651,20 +651,15 @@ fail:
 /* }}} */
 
 /* php_formatted_print_get_array() {{{ */
-static zval*
-php_formatted_print_get_array(zval *array, int *argc)
+static zval *php_formatted_print_get_array(zend_array *array, int *argc)
 {
 	zval *args, *zv;
 	int n;
 
-	if (Z_TYPE_P(array) != IS_ARRAY) {
-		convert_to_array(array);
-	}
-
-	n = zend_hash_num_elements(Z_ARRVAL_P(array));
+	n = zend_hash_num_elements(array);
 	args = (zval *)safe_emalloc(n, sizeof(zval), 0);
 	n = 0;
-	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(array), zv) {
+	ZEND_HASH_FOREACH_VAL(array, zv) {
 		ZVAL_COPY_VALUE(&args[n], zv);
 		n++;
 	} ZEND_HASH_FOREACH_END();
@@ -704,12 +699,13 @@ PHP_FUNCTION(vsprintf)
 	zend_string *result;
 	char *format;
 	size_t format_len;
-	zval *array, *args;
+	zval *args;
+	zend_array *array;
 	int argc;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_STRING(format, format_len)
-		Z_PARAM_ZVAL(array)
+		Z_PARAM_ARRAY_HT(array)
 	ZEND_PARSE_PARAMETERS_END();
 
 	args = php_formatted_print_get_array(array, &argc);
@@ -757,12 +753,13 @@ PHP_FUNCTION(vprintf)
 	size_t rlen;
 	char *format;
 	size_t format_len;
-	zval *array, *args;
+	zval *args;
+	zend_array *array;
 	int argc;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_STRING(format, format_len)
-		Z_PARAM_ZVAL(array)
+		Z_PARAM_ARRAY_HT(array)
 	ZEND_PARSE_PARAMETERS_END();
 
 	args = php_formatted_print_get_array(array, &argc);
@@ -820,7 +817,8 @@ PHP_FUNCTION(vfprintf)
 	php_stream *stream;
 	char *format;
 	size_t format_len;
-	zval *arg1, *array, *args;
+	zval *arg1, *args;
+	zend_array *array;
 	int argc;
 	zend_string *result;
 
@@ -831,7 +829,7 @@ PHP_FUNCTION(vfprintf)
 	ZEND_PARSE_PARAMETERS_START(3, 3)
 		Z_PARAM_RESOURCE(arg1)
 		Z_PARAM_STRING(format, format_len)
-		Z_PARAM_ZVAL(array)
+		Z_PARAM_ARRAY_HT(array)
 	ZEND_PARSE_PARAMETERS_END();
 
 	php_stream_from_zval(stream, arg1);

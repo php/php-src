@@ -966,11 +966,9 @@ function sprintf(string $format, ...$args): string {}
 /** @param mixed ...$args */
 function printf(string $format, ...$args): int {}
 
-/** @param mixed $args */
-function vprintf(string $format, $args): int {}
+function vprintf(string $format, array $args): int {}
 
-/** @param mixed $args */
-function vsprintf(string $format, $args): string {}
+function vsprintf(string $format, array $args): string {}
 
 /**
  * @param resource $handle
@@ -978,11 +976,8 @@ function vsprintf(string $format, $args): string {}
  */
 function fprintf($handle, string $format, ...$args): int {}
 
-/**
- * @param resource $handle
- * @param mixed $args
- */
-function vfprintf($handle, string $format, $args): int {}
+/** @param resource $handle */
+function vfprintf($handle, string $format, array $args): int {}
 
 /* fsock.c */
 

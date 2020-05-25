@@ -32,12 +32,16 @@ class FooClass
 // Output facilitating function
 function writeAndDump($fp, $format, $args)
 {
-    ftruncate( $fp, 0 );
-    $length = vfprintf( $fp, $format, $args );
-    rewind( $fp );
-    $content = stream_get_contents( $fp );
-    var_dump( $content );
-    var_dump( $length );
+    try {
+        ftruncate( $fp, 0 );
+        $length = vfprintf( $fp, $format, $args );
+        rewind( $fp );
+        $content = stream_get_contents( $fp );
+        var_dump( $content );
+        var_dump( $length );
+    } catch (TypeError $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 }
 
 // Test vfprintf()
@@ -62,8 +66,7 @@ unlink( $file );
 ?>
 --EXPECT--
 *** Testing vfprintf() : variation functionality ***
-string(6) "format"
-int(6)
+vfprintf(): Argument #3 ($args) must be of type array, null given
 string(17) "Foo is 30 and bar"
 int(17)
 string(14) "Foobar testing"
