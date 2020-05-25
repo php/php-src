@@ -61,22 +61,22 @@ jobs:
         sed -i 's/function query()/function query($statement = null)/' vendor/doctrine/dbal/lib/Doctrine/DBAL/Driver/PDOConnection.php
         php vendor/bin/phpunit
       displayName: 'Test Laravel'
-#    - script: |
-#        git clone https://github.com/symfony/symfony.git --branch=master --depth=1
-#        cd symfony
-#        php7.3 /usr/bin/composer install --no-progress
-#        php7.3 ./phpunit install
-#        # Work around PHP 8 incompatibility in Doctrine
-#        sed -i 's/function query()/function query($statement = null)/' vendor/doctrine/dbal/lib/Doctrine/DBAL/Driver/PDOConnection.php
-#        export USE_ZEND_ALLOC=0
-#        export USE_TRACKED_ALLOC=1
-#        export ASAN_OPTIONS=exitcode=139
-#        php ./phpunit --exclude-group tty,benchmark,intl-data,transient
-#        if [ $? -gt 128 ]; then
-#          exit 1
-#        fi
-#      displayName: 'Test Symfony'
-#      condition: or(succeeded(), failed())
+    - script: |
+        git clone https://github.com/symfony/symfony.git --branch=master --depth=1
+        cd symfony
+        php7.3 /usr/bin/composer install --no-progress
+        php7.3 ./phpunit install
+        # Work around PHP 8 incompatibility in Doctrine
+        sed -i 's/function query()/function query($statement = null)/' vendor/doctrine/dbal/lib/Doctrine/DBAL/Driver/PDOConnection.php
+        export USE_ZEND_ALLOC=0
+        export USE_TRACKED_ALLOC=1
+        export ASAN_OPTIONS=exitcode=139
+        php ./phpunit --exclude-group tty,benchmark,intl-data,transient
+        if [ $? -gt 128 ]; then
+          exit 1
+        fi
+      displayName: 'Test Symfony'
+      condition: or(succeeded(), failed())
     - script: |
         git clone https://github.com/amphp/amp.git --branch=master --depth=1
         cd amp
