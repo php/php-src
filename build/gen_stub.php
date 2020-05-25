@@ -169,7 +169,7 @@ class Type {
 
     public function isNullable(): bool {
         foreach ($this->types as $type) {
-            if ($type->isNull() || $type->name === "mixed") {
+            if ($type->isNull()) {
                 return true;
             }
         }
@@ -645,8 +645,11 @@ function parseFunctionLike(
             $param->default->name->toLowerString() === "null" &&
             $type && !$type->isNullable()
         ) {
-            throw new Exception(
-                "Parameter $varName of function $name has null default, but is not nullable");
+            $simpleType = $type->tryToSimpleType();
+            if ($simpleType === null || $simpleType->name !== "mixed") {
+                throw new Exception(
+                    "Parameter $varName of function $name has null default, but is not nullable");
+            }
         }
 
         $foundVariadic = $param->variadic;

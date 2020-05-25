@@ -298,7 +298,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_stmt_bind_param, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, mysql_stmt, mysqli_stmt, 0)
 	ZEND_ARG_TYPE_INFO(0, types, IS_STRING, 0)
-	ZEND_ARG_VARIADIC_TYPE_INFO(1, vars, IS_MIXED, 1)
+	ZEND_ARG_VARIADIC_TYPE_INFO(1, vars, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_stmt_bind_result, 0, 1, _IS_BOOL, 0)
@@ -633,7 +633,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_stmt_bind_param, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, types, IS_STRING, 0)
-	ZEND_ARG_VARIADIC_TYPE_INFO(1, vars, IS_MIXED, 1)
+	ZEND_ARG_VARIADIC_TYPE_INFO(1, vars, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_stmt_bind_result, 0, 0, 0)

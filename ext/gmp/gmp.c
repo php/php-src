@@ -336,13 +336,10 @@ static void shift_operator_helper(gmp_binary_ui_op_t op, zval *return_value, zva
 	zend_long shift = zval_get_long(op2);
 
 	if (shift < 0) {
-		if (strcmp(get_active_function_name(), "main")) {
-			zend_argument_value_error(2, "must be greater than or equal to 0");
-		} else {
-			zend_throw_error(zend_ce_value_error, "%s must be greater than or equal to 0",
-				opcode == ZEND_POW ? "Exponent" : "Shift"
-			);
-		}
+		zend_throw_error(
+			zend_ce_value_error, "%s must be greater than or equal to 0",
+			opcode == ZEND_POW ? "Exponent" : "Shift"
+		);
 		return;
 	} else {
 		mpz_ptr gmpnum_op, gmpnum_result;

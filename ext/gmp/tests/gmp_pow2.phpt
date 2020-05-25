@@ -31,5 +31,5 @@ object(GMP)#%d (1) {
   ["num"]=>
   string(4) "1024"
 }
-pow(): Argument #2 ($exp) must be greater than or equal to 0
+Exponent must be greater than or equal to 0
 Exponent must be greater than or equal to 0
