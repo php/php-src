@@ -169,7 +169,7 @@ class Type {
 
     public function isNullable(): bool {
         foreach ($this->types as $type) {
-            if ($type->isNull()) {
+            if ($type->isNull() || $type->name === "mixed") {
                 return true;
             }
         }

@@ -289,3 +289,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(gmp_binomial, arginfo_gmp_binomial)
 	ZEND_FE_END
 };
+
+
+static const zend_function_entry class_GMP_methods[] = {
+	ZEND_FE_END
+};

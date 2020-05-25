@@ -14,9 +14,9 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Closure_bindTo, 0, 1, Closu
 	ZEND_ARG_INFO(0, newscope)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Closure_call, 0, 1, IS_MIXED, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Closure_call, 0, 1, IS_MIXED, 1)
 	ZEND_ARG_TYPE_INFO(0, newthis, IS_OBJECT, 0)
-	ZEND_ARG_VARIADIC_TYPE_INFO(0, parameters, IS_MIXED, 0)
+	ZEND_ARG_VARIADIC_TYPE_INFO(0, parameters, IS_MIXED, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Closure_fromCallable, 0, 1, Closure, 0)

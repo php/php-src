@@ -222,16 +222,20 @@ function array_sum(array $arg): int|float {}
 
 function array_product(array $arg): int|float {}
 
-function array_reduce(array $arg, callable $callback, $initial = null): mixed {}
+function array_reduce(array $arg, callable $callback, mixed $initial = null): mixed {}
 
 function array_filter(array $arg, ?callable $callback = null, int $use_keys = 0): array {}
 
 function array_map(?callable $callback, array $arr1, array ...$arrays): array {}
 
-function array_key_exists(mixed $key, array $search): bool {}
+/** @param int|string $key */
+function array_key_exists($key, array $search): bool {}
 
-/** @alias array_key_exists */
-function key_exists(mixed $key, array $search): bool {}
+/**
+ * @param int|string $key
+ * @alias array_key_exists
+ */
+function key_exists($key, array $search): bool {}
 
 function array_chunk(array $arg, int $size, bool $preserve_keys = false): array {}
 
@@ -925,20 +929,15 @@ function sprintf(string $format, mixed ...$args): string {}
 
 function printf(string $format, mixed ...$args): int {}
 
-/** @param array $args */
-function vprintf(string $format, $args): int {}
+function vprintf(string $format, array $args): int {}
 
-/** @param array $args */
-function vsprintf(string $format, $args): string {}
+function vsprintf(string $format, array $args): string {}
 
 /** @param resource $handle */
 function fprintf($handle, string $format, mixed ...$args): int {}
 
-/**
- * @param resource $handle
- * @param array $args
- */
-function vfprintf($handle, string $format, $args): int {}
+/** @param resource $handle */
+function vfprintf($handle, string $format, array $args): int {}
 
 /* fsock.c */
 
@@ -1054,7 +1053,7 @@ function intdiv(int $dividend, int $divisor): int {}
 
 function is_infinite(float $number): bool {}
 
-function pow($base, $exp): int|float {}
+function pow($base, $exp): int|float|object {}
 
 function exp(float $number): float {}
 

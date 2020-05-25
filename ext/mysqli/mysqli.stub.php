@@ -407,7 +407,7 @@ class mysqli_stmt
      * @return bool
      * @alias mysqli_stmt_bind_param
      */
-    public function bind_param(string $types, &...$vars) {}
+    public function bind_param(string $types, mixed &...$vars) {}
 
     /**
      * @return bool
