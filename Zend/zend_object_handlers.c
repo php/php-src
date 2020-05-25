@@ -1800,7 +1800,9 @@ ZEND_API int zend_std_cast_object_tostring(zend_object *readobj, zval *writeobj,
 			zend_class_entry *ce = readobj->ce;
 			if (ce->__tostring) {
 				zval retval;
+				GC_ADDREF(readobj);
 				zend_call_method_with_0_params(readobj, ce, &ce->__tostring, "__tostring", &retval);
+				zend_object_release(readobj);
 				if (EXPECTED(Z_TYPE(retval) == IS_STRING)) {
 					ZVAL_COPY_VALUE(writeobj, &retval);
 					return SUCCESS;

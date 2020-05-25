@@ -414,8 +414,7 @@ ZEND_METHOD(Exception, getMessage)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	prop = GET_PROPERTY(ZEND_THIS, ZEND_STR_MESSAGE);
-	ZVAL_DEREF(prop);
-	ZVAL_COPY(return_value, prop);
+	RETURN_STR(zval_get_string(prop));
 }
 /* }}} */
 
