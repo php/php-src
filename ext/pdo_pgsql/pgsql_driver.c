@@ -407,8 +407,8 @@ static int pdo_pgsql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_
 			char buf[16];
 			pdo_libpq_version(buf, sizeof(buf));
 			ZVAL_STRING(return_value, buf);
-		}
 			break;
+		}
 
 		case PDO_ATTR_SERVER_VERSION:
 			if (PQprotocolVersion(H->server) >= 3) { /* PostgreSQL 7.4 or later */
@@ -474,8 +474,8 @@ static int pdo_pgsql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_
 					(char*)PQparameterStatus(H->server, "DateStyle"));
 
 			ZVAL_STR(return_value, str_info);
-		}
 			break;
+		}
 
 		default:
 			return 0;
