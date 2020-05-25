@@ -680,7 +680,7 @@ static const func_info_t func_infos[] = {
 	F1("sodium_crypto_aead_chacha20poly1305_ietf_encrypt",			MAY_BE_STRING),
 	F1("sodium_crypto_aead_chacha20poly1305_ietf_decrypt",			MAY_BE_FALSE | MAY_BE_STRING),
 	F1("sodium_crypto_aead_xchacha20poly1305_ietf_encrypt",			MAY_BE_STRING),
-	F1("sodium_crypto_aead_xchacha20poly1305_ietf_decrypt",			MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
+	F1("sodium_crypto_aead_xchacha20poly1305_ietf_decrypt",			MAY_BE_FALSE | MAY_BE_STRING),
 	F1("sodium_crypto_aead_chacha20poly1305_keygen",				MAY_BE_STRING),
 	F1("sodium_crypto_aead_chacha20poly1305_ietf_keygen",			MAY_BE_STRING),
 	F1("sodium_crypto_aead_xchacha20poly1305_ietf_keygen",			MAY_BE_STRING),
