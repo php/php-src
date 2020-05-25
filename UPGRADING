@@ -559,6 +559,10 @@ PHP 8.0 UPGRADE NOTES
   . enchant_dict_add_to_personal, use enchant_dict_add instead
   . enchant_dict_is_in_session, use enchant_dict_is_added instead
 
+- PGSQL / PDO PGSQL:
+  . The constant PG_VERSION_STR has now the same value as PG_VERSION, and thus
+    is deprecated.
+
 - Zip:
   . Using empty file as ZipArchive is deprecated. Libzip 1.6.0
     do not accept empty files as valid zip archives any longer.
@@ -680,8 +684,8 @@ PHP 8.0 UPGRADE NOTES
   . When mysqlnd is not used (which is the default and recommended option),
     the minimum supported libmysqlclient version is now 5.1.
 
-- PGSQL:
-  . The PGSQL extension now required at least libpq 7.4.
+- PGSQL / PDO PGSQL:
+  . The PGSQL and PDO PGSQL extensions now require at least libpq 9.1.
 
 ========================================
 10. New Global Constants

@@ -96,7 +96,7 @@ PHP                                                                        NEWS
   . Don't ignore invalid escape sequences. (sjon)
 
 - PGSQL:
-  . Bumped required libpq version to 7.4.
+  . Bumped required libpq version to 9.1. (cmb)
 
 - PDO:
   . Changed default PDO error mode to exceptions. (AllenJB)
@@ -106,6 +106,9 @@ PHP                                                                        NEWS
 - PDO_OCI:
   . Added support for setting and getting the oracle OCI 18c call timeout.
     (camporter)
+
+- PDO_PGSQL:
+  . Bumped required libpq version to 9.1. (cmb)
 
 - phpdbg:
   . Fixed bug #76596 (phpdbg support for display_errors=stderr). (kabel)
