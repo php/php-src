@@ -332,12 +332,16 @@ static zend_object *gmp_clone_obj(zend_object *obj) /* {{{ */
 }
 /* }}} */
 
-static void shift_operator_helper(gmp_binary_ui_op_t op, zval *return_value, zval *op1, zval *op2) {
+static void shift_operator_helper(gmp_binary_ui_op_t op, zval *return_value, zval *op1, zval *op2, zend_uchar opcode) {
 	zend_long shift = zval_get_long(op2);
 
 	if (shift < 0) {
-		php_error_docref(NULL, E_WARNING, "Shift cannot be negative");
-		RETVAL_FALSE;
+		zend_throw_error(
+			zend_ce_value_error, "%s must be greater than or equal to 0",
+			opcode == ZEND_POW ? "Exponent" : "Shift"
+		);
+		ZVAL_UNDEF(return_value);
+		return;
 	} else {
 		mpz_ptr gmpnum_op, gmpnum_result;
 		gmp_temp_t temp;
@@ -372,17 +376,17 @@ static int gmp_do_operation_ex(zend_uchar opcode, zval *result, zval *op1, zval 
 	case ZEND_MUL:
 		DO_BINARY_UI_OP(mpz_mul);
 	case ZEND_POW:
-		shift_operator_helper(mpz_pow_ui, result, op1, op2);
+		shift_operator_helper(mpz_pow_ui, result, op1, op2, opcode);
 		return SUCCESS;
 	case ZEND_DIV:
 		DO_BINARY_UI_OP_EX(mpz_tdiv_q, gmp_mpz_tdiv_q_ui, 1);
 	case ZEND_MOD:
 		DO_BINARY_UI_OP_EX(mpz_mod, gmp_mpz_mod_ui, 1);
 	case ZEND_SL:
-		shift_operator_helper(mpz_mul_2exp, result, op1, op2);
+		shift_operator_helper(mpz_mul_2exp, result, op1, op2, opcode);
 		return SUCCESS;
 	case ZEND_SR:
-		shift_operator_helper(mpz_fdiv_q_2exp, result, op1, op2);
+		shift_operator_helper(mpz_fdiv_q_2exp, result, op1, op2, opcode);
 		return SUCCESS;
 	case ZEND_BW_OR:
 		DO_BINARY_OP(mpz_ior);
@@ -520,7 +524,7 @@ static ZEND_GINIT_FUNCTION(gmp)
 ZEND_MINIT_FUNCTION(gmp)
 {
 	zend_class_entry tmp_ce;
-	INIT_CLASS_ENTRY(tmp_ce, "GMP", NULL);
+	INIT_CLASS_ENTRY(tmp_ce, "GMP", class_GMP_methods);
 	gmp_ce = zend_register_internal_class(&tmp_ce);
 	gmp_ce->create_object = gmp_create_object;
 	gmp_ce->serialize = gmp_serialize;
@@ -1261,8 +1265,8 @@ ZEND_FUNCTION(gmp_pow)
 	}
 
 	if (exp < 0) {
-		php_error_docref(NULL, E_WARNING, "Negative exponent not supported");
-		RETURN_FALSE;
+		zend_argument_value_error(2, "must be greater than or equal to 0");
+		RETURN_THROWS();
 	}
 
 	if (Z_TYPE_P(base_arg) == IS_LONG && Z_LVAL_P(base_arg) >= 0) {

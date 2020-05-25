@@ -2,6 +2,10 @@
 
 /** @generate-function-entries */
 
+class GMP
+{
+}
+
 /** @param int|bool|string $number */
 function gmp_init($number, int $base = 0): GMP|false {}
 

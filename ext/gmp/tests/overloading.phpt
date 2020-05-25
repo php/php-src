@@ -53,8 +53,17 @@ var_dump(42 << $b);
 var_dump($a >> 2);
 var_dump(-$a >> 2);
 
-var_dump($a << -1);
-var_dump($a >> -1);
+try {
+    $a << -1;
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    $a >> -1;
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 var_dump(~$a);
 var_dump(-$a);
@@ -237,12 +246,8 @@ object(GMP)#%d (1) {
   ["num"]=>
   string(3) "-11"
 }
-
-Warning: main(): Shift cannot be negative in %s on line %d
-bool(false)
-
-Warning: main(): Shift cannot be negative in %s on line %d
-bool(false)
+Shift must be greater than or equal to 0
+Shift must be greater than or equal to 0
 object(GMP)#%d (1) {
   ["num"]=>
   string(3) "-43"
