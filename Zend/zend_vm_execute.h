@@ -61348,6 +61348,7 @@ void zend_vm_dtor(void)
 	if (zend_handlers_table) {
 		zend_hash_destroy(zend_handlers_table);
 		free(zend_handlers_table);
+		zend_handlers_table = NULL;
 	}
 }
 

@@ -1406,6 +1406,8 @@ void phpdbg_setup_watchpoints(void) {
 	zend_hash_init(PHPDBG_G(watchlist_mem), phpdbg_pagesize / (sizeof(Bucket) + sizeof(uint32_t)), NULL, NULL, 1);
 	PHPDBG_G(watchlist_mem_backup) = malloc(phpdbg_pagesize > sizeof(HashTable) ? phpdbg_pagesize : sizeof(HashTable));
 	zend_hash_init(PHPDBG_G(watchlist_mem_backup), phpdbg_pagesize / (sizeof(Bucket) + sizeof(uint32_t)), NULL, NULL, 1);
+
+	PHPDBG_G(watch_tmp) = NULL;
 }
 
 void phpdbg_destroy_watchpoints(void) {
@@ -1432,4 +1434,14 @@ void phpdbg_destroy_watchpoints(void) {
 	free(PHPDBG_G(watchlist_mem));
 	zend_hash_destroy(PHPDBG_G(watchlist_mem_backup));
 	free(PHPDBG_G(watchlist_mem_backup));
+}
+
+void phpdbg_purge_watchpoint_tree(void) {
+	phpdbg_btree_position pos;
+	phpdbg_btree_result *res;
+
+	pos = phpdbg_btree_find_between(&PHPDBG_G(watchpoint_tree), 0, -1);
+	while ((res = phpdbg_btree_next(&pos))) {
+		phpdbg_deactivate_watchpoint(res->ptr);
+	}
 }
