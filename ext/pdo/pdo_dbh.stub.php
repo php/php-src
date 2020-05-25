@@ -21,7 +21,7 @@ class PDO
     /** @return int|false */
     public function exec(string $statement) {}
 
-    /** @return mixed */
+    /** @return bool|int|string|array|null */
     public function getAttribute(int $attribute) {}
 
     /** @return array */

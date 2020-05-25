@@ -8,20 +8,15 @@ final class Generator implements Iterator
 
     public function valid(): bool {}
 
-    /** @return mixed */
-    public function current() {}
+    public function current(): mixed {}
 
-    /** @return mixed */
-    public function key() {}
+    public function key(): mixed {}
 
     public function next(): void {}
 
-    /** @return mixed */
-    public function send($value) {}
+    public function send(mixed $value): mixed {}
 
-    /** @return mixed */
-    public function throw(Throwable $exception) {}
+    public function throw(Throwable $exception): mixed {}
 
-    /** @return mixed */
-    public function getReturn() {}
+    public function getReturn(): mixed {}
 }

@@ -6,8 +6,7 @@ function zend_version(): string {}
 
 function func_num_args(): int {}
 
-/** @return mixed */
-function func_get_arg(int $arg_num) {}
+function func_get_arg(int $arg_num): mixed {}
 
 function func_get_args(): array {}
 
@@ -69,12 +68,12 @@ function trigger_error(string $message, int $error_type = E_USER_NOTICE): bool {
 /** @alias trigger_error */
 function user_error(string $message, int $error_type = E_USER_NOTICE): bool {}
 
-/** @return mixed */
+/** @return string|array|object|null */
 function set_error_handler($error_handler, int $error_types = E_ALL) {}
 
 function restore_error_handler(): bool {}
 
-/** @return mixed */
+/** @return string|array|object|null */
 function set_exception_handler($exception_handler) {}
 
 function restore_exception_handler(): bool {}

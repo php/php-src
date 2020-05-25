@@ -407,7 +407,7 @@ class mysqli_stmt
      * @return bool
      * @alias mysqli_stmt_bind_param
      */
-    public function bind_param(string $types, &...$vars) {}
+    public function bind_param(string $types, mixed &...$vars) {}
 
     /**
      * @return bool
@@ -681,8 +681,7 @@ function mysqli_stmt_attr_get(mysqli_stmt $mysql_stmt, int $attr): int|false {}
 
 function mysqli_stmt_attr_set(mysqli_stmt $mysql_stmt, int $attr, int $mode_in): bool {}
 
-/** @param mixed &...$vars */
-function mysqli_stmt_bind_param(mysqli_stmt $mysql_stmt, string $types, &...$vars): bool {}
+function mysqli_stmt_bind_param(mysqli_stmt $mysql_stmt, string $types, mixed &...$vars): bool {}
 
 /** @param mixed &...$vars */
 function mysqli_stmt_bind_result(mysqli_stmt $mysql_stmt, &...$vars): bool {}

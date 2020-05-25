@@ -65,6 +65,10 @@ class SimpleType {
 
     public static function fromNode(Node $node) {
         if ($node instanceof Node\Name) {
+            if ($node->toString() === "mixed") {
+                return new SimpleType($node->toString(), true);
+            }
+
             assert($node->isFullyQualified());
             return new SimpleType($node->toString(), false);
         }
@@ -97,6 +101,8 @@ class SimpleType {
             return "IS_VOID";
         case "callable":
             return "IS_CALLABLE";
+        case "mixed":
+            return "IS_MIXED";
         default:
             throw new Exception("Not implemented: $this->name");
         }
@@ -123,6 +129,8 @@ class SimpleType {
             return "MAY_BE_OBJECT";
         case "callable":
             return "MAY_BE_CALLABLE";
+        case "mixed":
+            return "MAY_BE_ANY";
         default:
             throw new Exception("Not implemented: $this->name");
         }
@@ -637,8 +645,11 @@ function parseFunctionLike(
             $param->default->name->toLowerString() === "null" &&
             $type && !$type->isNullable()
         ) {
-            throw new Exception(
-                "Parameter $varName of function $name has null default, but is not nullable");
+            $simpleType = $type->tryToSimpleType();
+            if ($simpleType === null || $simpleType->name !== "mixed") {
+                throw new Exception(
+                    "Parameter $varName of function $name has null default, but is not nullable");
+            }
         }
 
         $foundVariadic = $param->variadic;

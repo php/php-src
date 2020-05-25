@@ -111,7 +111,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract
     public function isDisabled() {}
 
     /** @return mixed */
-    public function invoke(...$args) {}
+    public function invoke(mixed ...$args) {}
 
     /** @return mixed */
     public function invokeArgs(array $args) {}
@@ -181,7 +181,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract
     public function getModifiers() {}
 
     /** @return mixed */
-    public function invoke(?object $object = null, ...$args) {}
+    public function invoke(?object $object = null, mixed ...$args) {}
 
     /** @return mixed */
     public function invokeArgs(?object $object, array $args) {}
