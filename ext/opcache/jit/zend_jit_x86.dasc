@@ -2853,8 +2853,8 @@ static int zend_jit_trace_begin(dasm_State **Dst, uint32_t trace_num)
 {
 	current_trace_num = trace_num;
 
-	|	//EG(reserved)[zend_func_info_rid] = trace_num;
-	|	MEM_OP2_1_ZTS mov, aword, executor_globals, reserved[zend_func_info_rid], trace_num, r0
+	|	// EG(jit_trace_num) = trace_num;
+	|	MEM_OP2_1_ZTS mov, dword, executor_globals, jit_trace_num, trace_num, r0
 
 	return 1;
 }
@@ -8586,17 +8586,6 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 			|	EXT_CALL func->internal_function.handler, r0
 		} else {
 			|	call aword [r0 + offsetof(zend_internal_function, handler)]
-		}
-
-		if (trace) {
-			// TODO: This is a quick dirty fix ??????
-			//
-			// Internal function may call another trace that,
-			// replaces EG(trace_id) and the following side exit
-			// from this trace is going to be mad !!!!!!
-			//
-			// Lets set EG(trace_id) once again...
-			zend_jit_trace_begin(Dst, current_trace_num);
 		}
 
 		|	// EG(current_execute_data) = execute_data;

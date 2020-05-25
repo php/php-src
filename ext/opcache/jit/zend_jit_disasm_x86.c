@@ -385,6 +385,7 @@ static int zend_jit_disasm_init(void)
 	REGISTER_EG(vm_stack_top);
 	REGISTER_EG(vm_stack_end);
 	REGISTER_EG(symbol_table);
+	REGISTER_EG(jit_trace_num);
 #undef  REGISTER_EG
 #endif
 

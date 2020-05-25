@@ -164,6 +164,8 @@ struct _zend_executor_globals {
 	struct _zend_execute_data *current_execute_data;
 	zend_class_entry *fake_scope; /* used to avoid checks accessing properties */
 
+	uint32_t jit_trace_num; /* Used by tracing JIT to reference the currently running trace */
+
 	zend_long precision;
 
 	int ticks_count;

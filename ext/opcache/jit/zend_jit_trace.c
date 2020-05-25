@@ -4994,7 +4994,7 @@ blacklist:
 
 int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf *regs)
 {
-	uint32_t trace_num = (uint32_t)(uintptr_t)EG(reserved)[zend_func_info_rid];
+	uint32_t trace_num = EG(jit_trace_num);
 	zend_execute_data *execute_data = EG(current_execute_data);
 	const zend_op *orig_opline = EX(opline);
 	const zend_op *opline;
