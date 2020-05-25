@@ -75,7 +75,7 @@ int(1)
 *** Caught {closure}(): Argument #1 ($i) must be of type int, array given, called in %s on line %d
 
 *** Trying object value
-*** Caught {closure}(): Argument #1 ($i) must be of type int, object given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($i) must be of type int, stdClass given, called in %s on line %d
 
 *** Trying resource value
 *** Caught {closure}(): Argument #1 ($i) must be of type int, resource given, called in %s on line %d
@@ -104,7 +104,7 @@ float(1)
 *** Caught {closure}(): Argument #1 ($f) must be of type float, array given, called in %s on line %d
 
 *** Trying object value
-*** Caught {closure}(): Argument #1 ($f) must be of type float, object given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($f) must be of type float, stdClass given, called in %s on line %d
 
 *** Trying resource value
 *** Caught {closure}(): Argument #1 ($f) must be of type float, resource given, called in %s on line %d
@@ -133,7 +133,7 @@ string(1) "1"
 *** Caught {closure}(): Argument #1 ($s) must be of type string, array given, called in %s on line %d
 
 *** Trying object value
-*** Caught {closure}(): Argument #1 ($s) must be of type string, object given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($s) must be of type string, stdClass given, called in %s on line %d
 
 *** Trying resource value
 *** Caught {closure}(): Argument #1 ($s) must be of type string, resource given, called in %s on line %d
@@ -162,7 +162,7 @@ bool(false)
 *** Caught {closure}(): Argument #1 ($b) must be of type bool, array given, called in %s on line %d
 
 *** Trying object value
-*** Caught {closure}(): Argument #1 ($b) must be of type bool, object given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($b) must be of type bool, stdClass given, called in %s on line %d
 
 *** Trying resource value
 *** Caught {closure}(): Argument #1 ($b) must be of type bool, resource given, called in %s on line %d

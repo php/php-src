@@ -15,4 +15,4 @@ try {
 
 ?>
 --EXPECT--
-Return value of foo() must be of type mixed, none returned
+foo(): Return value must be of type mixed, none returned

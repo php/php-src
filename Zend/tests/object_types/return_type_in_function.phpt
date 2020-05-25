@@ -8,7 +8,7 @@ function a() : object {
 }
 a();
 --EXPECTF--
-Fatal error: Uncaught TypeError: Return value of a() must be of type object, int returned in %s:4
+Fatal error: Uncaught TypeError: a(): Return value must be of type object, int returned in %s:%d
 Stack trace:
 #0 %s(6): a()
 #1 {main}

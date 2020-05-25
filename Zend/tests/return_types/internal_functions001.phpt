@@ -10,5 +10,5 @@ if (!PHP_DEBUG) die('skip requires debug build');
 <?php
 zend_test_array_return();
 ?>
---EXPECTF--
-Fatal error: Return value of zend_test_array_return() must be of type array, null returned in %s on line %d
+--EXPECT--
+Fatal error: zend_test_array_return(): Return value must be of type array, null returned in Unknown on line 0

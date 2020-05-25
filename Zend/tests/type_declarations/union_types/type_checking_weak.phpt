@@ -77,8 +77,8 @@ true             => 1
 false            => 0
 null             => Argument ... must be of type int|float, null given
 []               => Argument ... must be of type int|float, array given
-new stdClass     => Argument ... must be of type int|float, object given
-new WithToString => Argument ... must be of type int|float, object given
+new stdClass     => Argument ... must be of type int|float, stdClass given
+new WithToString => Argument ... must be of type int|float, WithToString given
 
 Type int|float|false:
 42               => 42
@@ -93,8 +93,8 @@ true             => 1
 false            => false
 null             => Argument ... must be of type int|float|false, null given
 []               => Argument ... must be of type int|float|false, array given
-new stdClass     => Argument ... must be of type int|float|false, object given
-new WithToString => Argument ... must be of type int|float|false, object given
+new stdClass     => Argument ... must be of type int|float|false, stdClass given
+new WithToString => Argument ... must be of type int|float|false, WithToString given
 
 Type int|float|bool:
 42               => 42
@@ -109,8 +109,8 @@ true             => true
 false            => false
 null             => Argument ... must be of type int|float|bool, null given
 []               => Argument ... must be of type int|float|bool, array given
-new stdClass     => Argument ... must be of type int|float|bool, object given
-new WithToString => Argument ... must be of type int|float|bool, object given
+new stdClass     => Argument ... must be of type int|float|bool, stdClass given
+new WithToString => Argument ... must be of type int|float|bool, WithToString given
 
 Type int|bool:
 42               => 42
@@ -125,8 +125,8 @@ true             => true
 false            => false
 null             => Argument ... must be of type int|bool, null given
 []               => Argument ... must be of type int|bool, array given
-new stdClass     => Argument ... must be of type int|bool, object given
-new WithToString => Argument ... must be of type int|bool, object given
+new stdClass     => Argument ... must be of type int|bool, stdClass given
+new WithToString => Argument ... must be of type int|bool, WithToString given
 
 Type int|string|null:
 42               => 42
@@ -141,7 +141,7 @@ true             => 1
 false            => 0
 null             => null
 []               => Argument ... must be of type string|int|null, array given
-new stdClass     => Argument ... must be of type string|int|null, object given
+new stdClass     => Argument ... must be of type string|int|null, stdClass given
 new WithToString => "__toString()"
 
 Type string|bool:
@@ -157,7 +157,7 @@ true             => true
 false            => false
 null             => Argument ... must be of type string|bool, null given
 []               => Argument ... must be of type string|bool, array given
-new stdClass     => Argument ... must be of type string|bool, object given
+new stdClass     => Argument ... must be of type string|bool, stdClass given
 new WithToString => "__toString()"
 
 Type float|array:
@@ -173,8 +173,8 @@ true             => 1.0
 false            => 0.0
 null             => Argument ... must be of type array|float, null given
 []               => []
-new stdClass     => Argument ... must be of type array|float, object given
-new WithToString => Argument ... must be of type array|float, object given
+new stdClass     => Argument ... must be of type array|float, stdClass given
+new WithToString => Argument ... must be of type array|float, WithToString given
 
 Type string|array:
 42               => "42"
@@ -189,7 +189,7 @@ true             => "1"
 false            => ""
 null             => Argument ... must be of type array|string, null given
 []               => []
-new stdClass     => Argument ... must be of type array|string, object given
+new stdClass     => Argument ... must be of type array|string, stdClass given
 new WithToString => "__toString()"
 
 Type bool|array:
@@ -205,5 +205,5 @@ true             => true
 false            => false
 null             => Argument ... must be of type array|bool, null given
 []               => []
-new stdClass     => Argument ... must be of type array|bool, object given
-new WithToString => Argument ... must be of type array|bool, object given
+new stdClass     => Argument ... must be of type array|bool, stdClass given
+new WithToString => Argument ... must be of type array|bool, WithToString given

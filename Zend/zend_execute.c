@@ -663,9 +663,7 @@ static ZEND_COLD void zend_verify_type_error_common(
 	*need_msg = zend_type_to_string_resolved(arg_info->type, zf->common.scope);
 
 	if (value) {
-		zend_bool has_class = ZEND_TYPE_HAS_CLASS(arg_info->type)
-			|| (ZEND_TYPE_FULL_MASK(arg_info->type) & MAY_BE_STATIC);
-		if (has_class && Z_TYPE_P(value) == IS_OBJECT) {
+		if (Z_TYPE_P(value) == IS_OBJECT) {
 			*given_kind = ZSTR_VAL(Z_OBJCE_P(value)->name);
 		} else {
 			*given_kind = zend_zval_type_name(value);
@@ -1187,7 +1185,7 @@ ZEND_API ZEND_COLD void zend_verify_return_error(
 		zf, arg_info, cache_slot, value,
 		&fname, &fsep, &fclass, &need_msg, &given_msg);
 
-	zend_type_error("Return value of %s%s%s() must be of type %s, %s returned",
+	zend_type_error("%s%s%s(): Return value must be of type %s, %s returned",
 		fclass, fsep, fname, ZSTR_VAL(need_msg), given_msg);
 
 	zend_string_release(need_msg);
@@ -1206,7 +1204,7 @@ static ZEND_COLD void zend_verify_internal_return_error(
 		zf, arg_info, cache_slot, value,
 		&fname, &fsep, &fclass, &need_msg, &given_msg);
 
-	zend_error_noreturn(E_CORE_ERROR, "Return value of %s%s%s() must be of type %s, %s returned",
+	zend_error_noreturn(E_CORE_ERROR, "%s%s%s(): Return value must be of type %s, %s returned",
 		fclass, fsep, fname, ZSTR_VAL(need_msg), given_msg);
 }
 

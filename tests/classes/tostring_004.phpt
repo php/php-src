@@ -62,8 +62,8 @@ Object of class stdClass could not be converted to string
 
 Object with bad __toString():
 Try 1:
-Return value of badToString::__toString() must be of type string, array returned
+badToString::__toString(): Return value must be of type string, array returned
 
 
 Try 2:
-Return value of badToString::__toString() must be of type string, array returned
+badToString::__toString(): Return value must be of type string, array returned
