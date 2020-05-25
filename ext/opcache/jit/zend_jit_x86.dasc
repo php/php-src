@@ -8323,7 +8323,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 				|	mov r2, aword [r2]
 #elif ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR_OR_OFFSET
 				if (func) {
-					if (func->op_array.fn_flags & ZEND_ACC_IMMUTABLE) {
+					if (ZEND_MAP_PTR_IS_OFFSET(func->op_array.run_time_cache)) {
 						|	MEM_OP2_2_ZTS add, r2, aword, compiler_globals, map_ptr_base, r1
 					} else if (!zend_accel_in_shm(func->op_array.opcodes)) {
 						/* the called op_array may be not persisted yet */
