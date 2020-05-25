@@ -8983,6 +8983,8 @@ static int zend_jit_send_var(dasm_State **Dst, const zend_op *opline, const zend
 		if (op1_info & (MAY_BE_ANY|MAY_BE_REF)) {
 			|	jmp >7
 			|.code
+		} else {
+			return 1;
 		}
 	}
 
