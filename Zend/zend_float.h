@@ -74,7 +74,7 @@ END_EXTERN_C()
 #  define HAVE__CONTROLFP_S
 #endif /* _MSC_VER */
 
-#ifdef HAVE__CONTROLFP_S && !defined(__x86_64__)
+#if defined(HAVE__CONTROLFP_S) && !defined(__x86_64__)
 
 /* float.h defines _controlfp_s */
 # include <float.h>
