@@ -116,7 +116,7 @@ ceil(): Argument #1 ($number) must be of type int|float, string given
 ceil(): Argument #1 ($number) must be of type int|float, string given
 
 -- Iteration 13 --
-ceil(): Argument #1 ($number) must be of type int|float, object given
+ceil(): Argument #1 ($number) must be of type int|float, classA given
 
 -- Iteration 14 --
 float(0)

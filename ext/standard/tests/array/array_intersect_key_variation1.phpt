@@ -196,12 +196,12 @@ array_intersect_key(): Argument #1 ($arr1) must be of type array, string given
 array_intersect_key(): Argument #1 ($arr1) must be of type array, string given
 
 --instance of classWithToString--
-array_intersect_key(): Argument #1 ($arr1) must be of type array, object given
-array_intersect_key(): Argument #1 ($arr1) must be of type array, object given
+array_intersect_key(): Argument #1 ($arr1) must be of type array, classWithToString given
+array_intersect_key(): Argument #1 ($arr1) must be of type array, classWithToString given
 
 --instance of classWithoutToString--
-array_intersect_key(): Argument #1 ($arr1) must be of type array, object given
-array_intersect_key(): Argument #1 ($arr1) must be of type array, object given
+array_intersect_key(): Argument #1 ($arr1) must be of type array, classWithoutToString given
+array_intersect_key(): Argument #1 ($arr1) must be of type array, classWithoutToString given
 
 --undefined var--
 array_intersect_key(): Argument #1 ($arr1) must be of type array, null given

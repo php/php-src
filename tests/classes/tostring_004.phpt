@@ -53,7 +53,7 @@ try {
 --EXPECT--
 Object with no __toString():
 Try 1:
-printf(): Argument #1 ($format) must be of type string, object given
+printf(): Argument #1 ($format) must be of type string, stdClass given
 
 
 Try 2:

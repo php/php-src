@@ -66,5 +66,5 @@ array(2) {
   [2]=>
   string(4) "test"
 }
-preg_grep(): Argument #1 ($regex) must be of type string, object given
+preg_grep(): Argument #1 ($regex) must be of type string, stdClass given
 Done

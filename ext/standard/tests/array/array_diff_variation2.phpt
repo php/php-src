@@ -149,7 +149,7 @@ echo "Done";
 
 -- Iteration 22 --array_diff(): Argument #2 ($arr2) must be of type array, string given
 
--- Iteration 23 --array_diff(): Argument #2 ($arr2) must be of type array, object given
+-- Iteration 23 --array_diff(): Argument #2 ($arr2) must be of type array, classA given
 
 -- Iteration 24 --array_diff(): Argument #2 ($arr2) must be of type array, null given
 

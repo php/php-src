@@ -93,10 +93,10 @@ int(0)
 *** Caught {closure}(): Return value must be of type int, array returned in %s on line %d
 *** Trying object(stdClass)#6 (0) {
 }
-*** Caught {closure}(): Return value must be of type int, object returned in %s on line %d
+*** Caught {closure}(): Return value must be of type int, stdClass returned in %s on line %d
 *** Trying object(StringCapable)#7 (0) {
 }
-*** Caught {closure}(): Return value must be of type int, object returned in %s on line %d
+*** Caught {closure}(): Return value must be of type int, StringCapable returned in %s on line %d
 *** Trying resource(5) of type (stream)
 *** Caught {closure}(): Return value must be of type int, resource returned in %s on line %d
 
@@ -131,10 +131,10 @@ float(0)
 *** Caught {closure}(): Return value must be of type float, array returned in %s on line %d
 *** Trying object(stdClass)#6 (0) {
 }
-*** Caught {closure}(): Return value must be of type float, object returned in %s on line %d
+*** Caught {closure}(): Return value must be of type float, stdClass returned in %s on line %d
 *** Trying object(StringCapable)#7 (0) {
 }
-*** Caught {closure}(): Return value must be of type float, object returned in %s on line %d
+*** Caught {closure}(): Return value must be of type float, StringCapable returned in %s on line %d
 *** Trying resource(5) of type (stream)
 *** Caught {closure}(): Return value must be of type float, resource returned in %s on line %d
 
@@ -168,7 +168,7 @@ string(0) ""
 *** Caught {closure}(): Return value must be of type string, array returned in %s on line %d
 *** Trying object(stdClass)#6 (0) {
 }
-*** Caught {closure}(): Return value must be of type string, object returned in %s on line %d
+*** Caught {closure}(): Return value must be of type string, stdClass returned in %s on line %d
 *** Trying object(StringCapable)#7 (0) {
 }
 string(6) "foobar"
@@ -205,10 +205,10 @@ bool(false)
 *** Caught {closure}(): Return value must be of type bool, array returned in %s on line %d
 *** Trying object(stdClass)#6 (0) {
 }
-*** Caught {closure}(): Return value must be of type bool, object returned in %s on line %d
+*** Caught {closure}(): Return value must be of type bool, stdClass returned in %s on line %d
 *** Trying object(StringCapable)#7 (0) {
 }
-*** Caught {closure}(): Return value must be of type bool, object returned in %s on line %d
+*** Caught {closure}(): Return value must be of type bool, StringCapable returned in %s on line %d
 *** Trying resource(5) of type (stream)
 *** Caught {closure}(): Return value must be of type bool, resource returned in %s on line %d
 

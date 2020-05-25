@@ -130,7 +130,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --EXPECTF--
 mysqli object is not fully initialized
-[0] mysqli_result::fetch_object(): Argument #1 ($class_name) must be of type string, object given in %s on line %d
+[0] mysqli_result::fetch_object(): Argument #1 ($class_name) must be of type string, mysqli given in %s on line %d
 [0] mysqli_result::fetch_object() expects at most 2 parameters, 3 given in %s on line %d
 [0] mysqli_result::fetch_object(): Argument #2 ($params) must be of type array, null given in %s on line %d
 Exception: Too few arguments to function mysqli_fetch_object_construct::__construct(), 1 passed and exactly 2 expected

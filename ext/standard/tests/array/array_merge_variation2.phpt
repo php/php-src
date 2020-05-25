@@ -173,7 +173,7 @@ array_merge(): Argument #2 must be of type array, string given
 array_merge(): Argument #2 must be of type array, string given
 
 -- Iteration 22 --
-array_merge(): Argument #2 must be of type array, object given
+array_merge(): Argument #2 must be of type array, classA given
 
 -- Iteration 23 --
 array_merge(): Argument #2 must be of type array, null given

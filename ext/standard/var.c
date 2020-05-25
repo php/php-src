@@ -1241,7 +1241,7 @@ PHP_FUNCTION(unserialize)
 		max_depth = zend_hash_str_find_deref(Z_ARRVAL_P(options), "max_depth", sizeof("max_depth") - 1);
 		if (max_depth) {
 			if (Z_TYPE_P(max_depth) != IS_LONG) {
-				zend_type_error("unserialize(): 'max_depth' option must be of type int, %s given", zend_zval_type_name(max_depth));
+				zend_type_error("unserialize(): 'max_depth' option must be of type int, %s given", zend_zval_type_error_name(max_depth));
 				goto cleanup;
 			}
 			if (Z_LVAL_P(max_depth) < 0) {

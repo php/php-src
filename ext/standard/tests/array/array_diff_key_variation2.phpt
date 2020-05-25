@@ -193,12 +193,12 @@ array_diff_key(): Argument #2 ($arr2) must be of type array, string given
 array_diff_key(): Argument #2 ($arr2) must be of type array, string given
 
 --instance of classWithToString--
-array_diff_key(): Argument #2 ($arr2) must be of type array, object given
-array_diff_key(): Argument #2 ($arr2) must be of type array, object given
+array_diff_key(): Argument #2 ($arr2) must be of type array, classWithToString given
+array_diff_key(): Argument #2 ($arr2) must be of type array, classWithToString given
 
 --instance of classWithoutToString--
-array_diff_key(): Argument #2 ($arr2) must be of type array, object given
-array_diff_key(): Argument #2 ($arr2) must be of type array, object given
+array_diff_key(): Argument #2 ($arr2) must be of type array, classWithoutToString given
+array_diff_key(): Argument #2 ($arr2) must be of type array, classWithoutToString given
 
 --undefined var--
 array_diff_key(): Argument #2 ($arr2) must be of type array, null given

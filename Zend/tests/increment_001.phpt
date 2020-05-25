@@ -56,7 +56,7 @@ float(3.5)
 int(1)
 bool(true)
 bool(false)
-Cannot increment object
+Cannot increment stdClass
 object(stdClass)#%d (0) {
 }
 Cannot increment array

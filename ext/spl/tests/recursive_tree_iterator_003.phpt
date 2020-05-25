@@ -9,4 +9,4 @@ try {
 }
 ?>
 --EXPECT--
-RecursiveCachingIterator::__construct(): Argument #1 ($iterator) must be of type RecursiveIterator, object given
+RecursiveCachingIterator::__construct(): Argument #1 ($iterator) must be of type RecursiveIterator, ArrayIterator given

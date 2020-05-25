@@ -36,5 +36,5 @@ int(1)
 
 Arg value is: Array
 preg_match(): Argument #2 ($subject) must be of type string, array given
-preg_match(): Argument #2 ($subject) must be of type string, object given
+preg_match(): Argument #2 ($subject) must be of type string, stdClass given
 Done

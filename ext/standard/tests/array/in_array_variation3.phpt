@@ -59,7 +59,7 @@ bool(true)
 bool(true)
 
 *** Testing objects with in_array() ***
-in_array(): Argument #2 ($haystack) must be of type array, object given
-in_array(): Argument #2 ($haystack) must be of type array, object given
+in_array(): Argument #2 ($haystack) must be of type array, in_array_check given
+in_array(): Argument #2 ($haystack) must be of type array, in_array_check given
 bool(true)
 Done

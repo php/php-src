@@ -170,7 +170,7 @@ Warning: A non-numeric value encountered in %s on line %d
 float(1)
 
 -- Iteration 23 --
-Unsupported operand types: float ** object
+Unsupported operand types: float ** classA
 
 -- Iteration 24 --
 float(1)

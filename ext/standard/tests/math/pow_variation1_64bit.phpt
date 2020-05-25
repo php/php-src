@@ -174,7 +174,7 @@ Warning: A non-numeric value encountered in %s on line %d
 int(0)
 
 -- Iteration 23 --
-Unsupported operand types: object ** int
+Unsupported operand types: classA ** int
 
 -- Iteration 24 --
 int(0)

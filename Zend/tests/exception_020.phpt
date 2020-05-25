@@ -8,7 +8,7 @@ throw new MyErrorException(new stdClass);
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: ErrorException::__construct(): Argument #1 ($message) must be of type string, object given in %s:%d
+Fatal error: Uncaught TypeError: ErrorException::__construct(): Argument #1 ($message) must be of type string, stdClass given in %s:%d
 Stack trace:
 #0 %sexception_020.php(%d): ErrorException->__construct(Object(stdClass))
 #1 {main}

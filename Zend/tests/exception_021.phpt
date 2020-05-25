@@ -8,7 +8,7 @@ throw new Hello(new stdClass);
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: Error::__construct(): Argument #1 ($message) must be of type string, object given in %s:%d
+Fatal error: Uncaught TypeError: Error::__construct(): Argument #1 ($message) must be of type string, stdClass given in %s:%d
 Stack trace:
 #0 %sexception_021.php(%d): Error->__construct(Object(stdClass))
 #1 {main}

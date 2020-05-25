@@ -140,6 +140,22 @@ ZEND_API const char *zend_zval_type_name(const zval *arg) /* {{{ */
 }
 /* }}} */
 
+ZEND_API const char *zend_zval_type_error_name(const zval *arg) /* {{{ */
+{
+	ZVAL_DEREF(arg);
+
+	if (Z_ISUNDEF_P(arg)) {
+		return "null";
+	}
+
+	if (Z_TYPE_P(arg) == IS_OBJECT) {
+		return ZSTR_VAL(Z_OBJCE_P(arg)->name);
+	}
+
+	return zend_get_type_by_const(Z_TYPE_P(arg));
+}
+/* }}} */
+
 /* This API exists *only* for use in gettype().
  * For anything else, you likely want zend_zval_type_name(). */
 ZEND_API zend_string *zend_zval_get_legacy_type(const zval *arg) /* {{{ */
@@ -220,7 +236,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_type_error(int num, z
 		return;
 	}
 
-	zend_argument_type_error(num, "must be %s, %s given", expected_error[expected_type], zend_zval_type_name(arg));
+	zend_argument_type_error(num, "must be %s, %s given", expected_error[expected_type], zend_zval_type_error_name(arg));
 }
 /* }}} */
 
@@ -230,7 +246,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_error(int num, 
 		return;
 	}
 
-	zend_argument_type_error(num, "must be of type %s, %s given", name, zend_zval_type_name(arg));
+	zend_argument_type_error(num, "must be of type %s, %s given", name, zend_zval_type_error_name(arg));
 }
 /* }}} */
 
@@ -240,7 +256,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_or_null_error(i
 		return;
 	}
 
-	zend_argument_type_error(num, "must be of type ?%s, %s given", name, zend_zval_type_name(arg));
+	zend_argument_type_error(num, "must be of type ?%s, %s given", name, zend_zval_type_error_name(arg));
 }
 /* }}} */
 
@@ -607,7 +623,7 @@ static const char *zend_parse_arg_impl(zval *arg, va_list *va, const char **spec
 				size_t *pl = va_arg(*va, size_t *);
 				if (!zend_parse_arg_path(arg, p, pl, check_null)) {
 					zend_spprintf(error, 0, "a valid path%s, %s given",
-						check_null ? " or null" : "", zend_zval_type_name(arg)
+						check_null ? " or null" : "", zend_zval_type_error_name(arg)
 					);
 					return "";
 				}
@@ -619,7 +635,7 @@ static const char *zend_parse_arg_impl(zval *arg, va_list *va, const char **spec
 				zend_string **str = va_arg(*va, zend_string **);
 				if (!zend_parse_arg_path_str(arg, str, check_null)) {
 					zend_spprintf(error, 0, "a valid path%s, %s given",
-						check_null ? " or null" : "", zend_zval_type_name(arg)
+						check_null ? " or null" : "", zend_zval_type_error_name(arg)
 					);
 					return "";
 				}
@@ -700,7 +716,7 @@ static const char *zend_parse_arg_impl(zval *arg, va_list *va, const char **spec
 				if (!zend_parse_arg_object(arg, p, ce, check_null)) {
 					if (ce) {
 						if (check_null) {
-							zend_spprintf(error, 0, "of type ?%s, %s given", ZSTR_VAL(ce->name), zend_zval_type_name(arg));
+							zend_spprintf(error, 0, "of type ?%s, %s given", ZSTR_VAL(ce->name), zend_zval_type_error_name(arg));
 							return "";
 						} else {
 							return ZSTR_VAL(ce->name);
@@ -811,7 +827,7 @@ static int zend_parse_arg(uint32_t arg_num, zval *arg, va_list *va, const char *
 				zend_argument_type_error(arg_num, "must be %s", error);
 				efree(error);
 			} else {
-				zend_argument_type_error(arg_num, "must be of type %s, %s given", expected_type, zend_zval_type_name(arg));
+				zend_argument_type_error(arg_num, "must be of type %s, %s given", expected_type, zend_zval_type_error_name(arg));
 			}
 		} else if (error) {
 			efree(error);
