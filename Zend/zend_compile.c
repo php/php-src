@@ -1263,7 +1263,7 @@ static void zend_mark_function_as_generator() /* {{{ */
 
 	if (CG(active_op_array)->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
 		zend_type return_type = CG(active_op_array)->arg_info[-1].type;
-		zend_bool valid_type = (ZEND_TYPE_FULL_MASK(return_type) & MAY_BE_ITERABLE) != 0;
+		zend_bool valid_type = (ZEND_TYPE_FULL_MASK(return_type) & (MAY_BE_ITERABLE | MAY_BE_OBJECT)) != 0;
 		if (!valid_type) {
 			zend_type *single_type;
 			ZEND_TYPE_FOREACH(return_type, single_type) {
@@ -1278,8 +1278,7 @@ static void zend_mark_function_as_generator() /* {{{ */
 		if (!valid_type) {
 			zend_string *str = zend_type_to_string(return_type);
 			zend_error_noreturn(E_COMPILE_ERROR,
-				"Generators may only declare a return type containing " \
-				"Generator, Iterator, Traversable, or iterable, %s is not permitted",
+				"Generator return type must be a supertype of Generator, %s given",
 				ZSTR_VAL(str));
 		}
 	}
