@@ -64,7 +64,7 @@ function krsort(array &$arg, int $sort_flags = SORT_REGULAR): bool {}
 
 function ksort(array &$arg, int $sort_flags = SORT_REGULAR): bool {}
 
-/** @param array|object|null $var */
+/** @param array|Countable|null $var */
 function count($var, int $mode = COUNT_NORMAL): int {}
 
 /**
@@ -1435,7 +1435,7 @@ function var_dump(mixed $value, mixed ...$value): void {}
 
 function var_export(mixed $value, bool $return = false): ?string {}
 
-function debug_zval_dump(mixed $value, ...$value): void {}
+function debug_zval_dump(mixed $value, mixed ...$value): void {}
 
 function serialize(mixed $value): string {}
 

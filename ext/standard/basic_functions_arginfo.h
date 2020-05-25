@@ -2182,10 +2182,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_var_export, 0, 1, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, return, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_debug_zval_dump, 0, 1, IS_VOID, 0)
-	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
-	ZEND_ARG_VARIADIC_INFO(0, value)
-ZEND_END_ARG_INFO()
+#define arginfo_debug_zval_dump arginfo_var_dump
 
 #define arginfo_serialize arginfo_strval
 

@@ -340,6 +340,7 @@ static void shift_operator_helper(gmp_binary_ui_op_t op, zval *return_value, zva
 			zend_ce_value_error, "%s must be greater than or equal to 0",
 			opcode == ZEND_POW ? "Exponent" : "Shift"
 		);
+		ZVAL_UNDEF(return_value);
 		return;
 	} else {
 		mpz_ptr gmpnum_op, gmpnum_result;
