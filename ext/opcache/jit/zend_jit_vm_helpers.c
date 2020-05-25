@@ -538,6 +538,11 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 #endif
 	zend_execute_data *prev_call = EX(call);
 
+	if (UNEXPECTED(opline->opcode == ZEND_HANDLE_EXCEPTION)) {
+		/* Abort trace because of exception */
+		return ZEND_JIT_TRACE_STOP_EXCEPTION;
+	}
+
 	orig_opline = opline;
 
 	jit_extension =
@@ -552,12 +557,6 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 	}
 
 	while (1) {
-		if (UNEXPECTED(opline->opcode == ZEND_HANDLE_EXCEPTION)) {
-			/* Abort trace because of exception */
-			stop = ZEND_JIT_TRACE_STOP_EXCEPTION;
-			break;
-		}
-
 		ce1 = ce2 = NULL;
 		op1_type = op2_type = op3_type = IS_UNKNOWN;
 		if ((opline->op1_type & (IS_TMP_VAR|IS_VAR|IS_CV))
@@ -784,6 +783,12 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 #ifndef HAVE_GCC_GLOBAL_REGS
 		opline = EX(opline);
 #endif
+
+		if (UNEXPECTED(opline->opcode == ZEND_HANDLE_EXCEPTION)) {
+			/* Abort trace because of exception */
+			stop = ZEND_JIT_TRACE_STOP_EXCEPTION;
+			break;
+		}
 
 		trace_flags = ZEND_OP_TRACE_INFO(opline, offset)->trace_flags;
 		if (trace_flags) {
