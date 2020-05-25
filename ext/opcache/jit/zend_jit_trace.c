@@ -3334,7 +3334,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 									}
 								}
 							}
-							if (!zend_jit_leave_func(&dasm_state, opline, op_array, p + 1)) {
+							if (!zend_jit_leave_func(&dasm_state, opline, op_array, p + 1, &zend_jit_traces[ZEND_JIT_TRACE_NUM])) {
 								goto jit_failure;
 							}
 						}
@@ -4046,7 +4046,10 @@ done:
 		if (p->stop != ZEND_JIT_TRACE_STOP_RECURSIVE_RET) {
 			t->flags |= ZEND_JIT_TRACE_CHECK_INTERRUPT;
 		}
-		zend_jit_trace_end_loop(&dasm_state, 0, timeout_exit_addr); /* jump back to start of the trace loop */
+		if (!(t->flags & ZEND_JIT_TRACE_LOOP)) {
+			t->flags |= ZEND_JIT_TRACE_LOOP;
+			zend_jit_trace_end_loop(&dasm_state, 0, timeout_exit_addr); /* jump back to start of the trace loop */
+		}
 	} else if (p->stop == ZEND_JIT_TRACE_STOP_LINK) {
 		if (ra) {
 			/* Generate code for trace deoptimization */

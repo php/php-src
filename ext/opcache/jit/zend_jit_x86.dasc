@@ -9572,7 +9572,7 @@ static int zend_jit_free_cv(dasm_State **Dst, const zend_op *opline, const zend_
 	return 1;
 }
 
-static int zend_jit_leave_func(dasm_State **Dst, const zend_op *opline, const zend_op_array *op_array, zend_jit_trace_rec *trace)
+static int zend_jit_leave_func(dasm_State **Dst, const zend_op *opline, const zend_op_array *op_array, zend_jit_trace_rec *trace, zend_jit_trace_info *trace_info)
 {
 	/* ZEND_CALL_FAKE_CLOSURE handled on slow path to eliminate check for ZEND_CALL_CLOSURE on fast path */
 	|	mov FCARG1d, dword [FP + offsetof(zend_execute_data, This.u1.type_info)]
@@ -9669,8 +9669,16 @@ static int zend_jit_leave_func(dasm_State **Dst, const zend_op *opline, const ze
 				return 0;
 			}
 			|	// TODO: exception handling ???
-			|	CMP_IP next_opline
-			|	jne &exit_addr
+			if (trace->op == ZEND_JIT_TRACE_END
+			 && trace->stop == ZEND_JIT_TRACE_STOP_RECURSIVE_RET) {
+				trace_info->flags |= ZEND_JIT_TRACE_LOOP;
+				|	CMP_IP next_opline
+				|	je =>0 // LOOP
+				|	jmp &exit_addr
+			} else {
+				|	CMP_IP next_opline
+				|	jne &exit_addr
+			}
 
 			last_valid_opline = trace->opline;
 
