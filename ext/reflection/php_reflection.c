@@ -1146,8 +1146,6 @@ static int read_attributes(zval *ret, HashTable *attributes, zend_class_entry *s
 static void reflect_attributes(INTERNAL_FUNCTION_PARAMETERS, HashTable *attributes,
 		uint32_t offset, zend_class_entry *scope) /* {{{ */
 {
-	zval ret;
-
 	zend_string *name = NULL;
 	zend_long flags = 0;
 	zend_class_entry *base = NULL;
@@ -1157,7 +1155,7 @@ static void reflect_attributes(INTERNAL_FUNCTION_PARAMETERS, HashTable *attribut
 	}
 
 	if (flags & ~REFLECTION_ATTRIBUTE_IS_INSTANCEOF) {
-		zend_throw_error(NULL, "Invalid attribute filter flag specified");
+		zend_argument_value_error(2, "must be a valid attribute filter flag");
 		RETURN_THROWS();
 	}
 
@@ -1177,14 +1175,11 @@ static void reflect_attributes(INTERNAL_FUNCTION_PARAMETERS, HashTable *attribut
 		RETURN_EMPTY_ARRAY();
 	}
 
-	array_init(&ret);
+	array_init(return_value);
 
-	if (FAILURE == read_attributes(&ret, attributes, scope, offset, name, base)) {
-		zval_ptr_dtor(&ret);
+	if (FAILURE == read_attributes(return_value, attributes, scope, offset, name, base)) {
 		RETURN_THROWS();
 	}
-
-	RETURN_ZVAL(&ret, 1, 1);
 }
 /* }}} */
 
@@ -6393,6 +6388,8 @@ ZEND_METHOD(ReflectionAttribute, __construct)
 
 ZEND_METHOD(ReflectionAttribute, __clone)
 {
+	/* Should never be executable */
+	_DO_THROW("Cannot clone object using __clone()");
 }
 
 /* {{{ proto public string ReflectionAttribute::getName()
@@ -6415,6 +6412,7 @@ static zend_always_inline int import_attribute_value(zval *ret, zval *val, zend_
 {
 	if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
 		*ret = *val;
+		//ZVAL_COPY(ret, val);
 
 		if (FAILURE == zval_update_constant_ex(ret, scope)) {
 			return FAILURE;
@@ -6434,7 +6432,6 @@ ZEND_METHOD(ReflectionAttribute, getArguments)
 	reflection_object *intern;
 	attribute_reference *attr;
 
-	zval ret;
 	zval tmp;
 	uint32_t i;
 
@@ -6443,18 +6440,15 @@ ZEND_METHOD(ReflectionAttribute, getArguments)
 	}
 	GET_REFLECTION_OBJECT_PTR(attr);
 
-	array_init(&ret);
+	array_init(return_value);
 
 	for (i = 0; i < attr->data->argc; i++) {
 		if (FAILURE == import_attribute_value(&tmp, &attr->data->argv[i], attr->scope)) {
-			zval_ptr_dtor(&ret);
 			RETURN_THROWS();
 		}
 
-		add_next_index_zval(&ret, &tmp);
+		add_next_index_zval(return_value, &tmp);
 	}
-
-	RETURN_ZVAL(&ret, 1, 1);
 }
 /* }}} */
 
@@ -6582,7 +6576,7 @@ ZEND_METHOD(ReflectionAttribute, newInstance)
 
 	attribute_ctor_cleanup(NULL, args, argc);
 
-	RETURN_ZVAL(&obj, 1, 1);
+	RETURN_COPY_VALUE(&obj);
 }
 /* }}} */
 static const zend_function_entry reflection_ext_functions[] = { /* {{{ */

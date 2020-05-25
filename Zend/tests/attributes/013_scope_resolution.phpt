@@ -8,10 +8,10 @@ class C1
 {
 	<<A1(self::class, self::FOO)>>
 	private const FOO = 'foo';
-	
+
 	<<A1(self::class, self::FOO)>>
 	public $a;
-	
+
 	<<A1(self::class, self::FOO)>>
 	public function bar(<<A1(self::class, self::FOO)>> $p) { }
 }
@@ -28,7 +28,7 @@ echo "\n";
 class C2
 {
 	private const FOO = 'foo';
-	
+
 	public static function foo()
 	{
 		return <<A1(self::class, self::FOO)>> function (<<A1(self::class, self::FOO)>> $p) { };
@@ -44,12 +44,12 @@ echo "\n";
 class C3
 {
 	private const FOO = 'foo';
-	
+
 	public static function foo()
 	{
 		return new <<A1(self::class, self::FOO)>> class() {
 			private const FOO = 'bar';
-			
+
 			<<A1(self::class, self::FOO)>>
 			public function bar() { }
 		};

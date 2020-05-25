@@ -57,7 +57,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionFunctionAbstract_getReturnType arginfo_class_ReflectionFunctionAbstract___clone
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionFunctionAbstract_getAttributes, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionFunctionAbstract_getAttributes, 0, 0, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, name, IS_STRING, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()

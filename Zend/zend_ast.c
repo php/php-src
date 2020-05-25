@@ -1325,7 +1325,7 @@ static ZEND_COLD void zend_ast_export_attributes(smart_str *str, zend_ast *ast, 
 		zend_ast *attr = list->child[i];
 
 		smart_str_appends(str, "<<");
-		smart_str_append(str, zend_ast_get_str(attr->child[0]));
+		zend_ast_export_ns_name(str, attr->child[0], 0, indent);
 
 		if (attr->child[1]) {
 			zend_ast_list *args = zend_ast_get_list(attr->child[1]);
@@ -1446,7 +1446,7 @@ tail_call:
 		case ZEND_AST_METHOD:
 			decl = (zend_ast_decl *) ast;
 			if (decl->attributes) {
-				zend_bool newlines = (ast->kind == ZEND_AST_CLOSURE || ast->kind == ZEND_AST_ARROW_FUNC) ? 0 : 1;
+				zend_bool newlines = (ast->kind == ZEND_AST_CLOSURE || ast->kind == ZEND_AST_ARROW_FUNC);
 				zend_ast_export_attributes(str, decl->attributes, indent, newlines);
 			}
 			if (decl->flags & ZEND_ACC_PUBLIC) {

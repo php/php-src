@@ -107,6 +107,6 @@ Array
 )
 
 string(7) "ERROR 1"
-string(39) "Invalid attribute filter flag specified"
+string(103) "ReflectionFunctionAbstract::getAttributes(): Argument #2 ($flags) must be a valid attribute filter flag"
 string(7) "ERROR 2"
 string(34) "Class 'SomeMissingClass' not found"

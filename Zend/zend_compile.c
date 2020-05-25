@@ -1821,12 +1821,12 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 	} else {
 		ZEND_MAP_PTR_INIT(ce->static_members_table, &ce->default_static_members_table);
 		ce->info.user.doc_comment = NULL;
-		ce->attributes = NULL;
 	}
 
 	ce->default_properties_count = 0;
 	ce->default_static_members_count = 0;
 	ce->properties_info_table = NULL;
+	ce->attributes = NULL;
 
 	if (nullify_handlers) {
 		ce->constructor = NULL;
@@ -5750,7 +5750,7 @@ static zend_attribute *zend_compile_attribute(zend_ast *ast, uint32_t offset) /*
 
 static void attribute_ptr_dtor(zval *v) /* {{{ */
 {
-	zend_attribute_free((zend_attribute *) Z_PTR_P(v));
+	zend_attribute_free((zend_attribute *) Z_PTR_P(v), 0);
 }
 /* }}} */
 
@@ -5770,8 +5770,6 @@ static void zend_compile_attributes(HashTable *attributes, zend_ast *ast, uint32
 	zend_ast_list *list = zend_ast_get_list(ast);
 	uint32_t i;
 
-	zval tmp;
-
 	ZEND_ASSERT(ast->kind == ZEND_AST_ATTRIBUTE_LIST);
 
 	for (i = 0; i < list->children; i++) {
@@ -5784,8 +5782,7 @@ static void zend_compile_attributes(HashTable *attributes, zend_ast *ast, uint32
 			validator(attr, target);
 		}
 
-		ZVAL_PTR(&tmp, attr);
-		zend_hash_next_index_insert(attributes, &tmp);
+		zend_hash_next_index_insert_ptr(attributes, attr);
 	}
 }
 /* }}} */

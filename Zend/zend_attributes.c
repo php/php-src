@@ -18,7 +18,7 @@ ZEND_API zend_attributes_internal_validator zend_attribute_get_validator(zend_st
 	return zend_hash_find_ptr(&internal_validators, lcname);
 }
 
-ZEND_API void zend_attribute_free(zend_attribute *attr)
+ZEND_API void zend_attribute_free(zend_attribute *attr, int persistent)
 {
 	uint32_t i;
 
@@ -29,7 +29,7 @@ ZEND_API void zend_attribute_free(zend_attribute *attr)
 		zval_ptr_dtor(&attr->argv[i]);
 	}
 
-	efree(attr);
+	pefree(attr, persistent);
 }
 
 static zend_attribute *get_attribute(HashTable *attributes, zend_string *lcname, uint32_t offset)
@@ -86,7 +86,7 @@ ZEND_API zend_attribute *zend_get_parameter_attribute_str(HashTable *attributes,
 
 static void attribute_ptr_dtor(zval *v)
 {
-	zend_attribute_free((zend_attribute *) Z_PTR_P(v));
+	zend_attribute_free((zend_attribute *) Z_PTR_P(v), 1);
 }
 
 ZEND_API void zend_compiler_attribute_register(zend_class_entry *ce, zend_attributes_internal_validator validator)
@@ -96,7 +96,6 @@ ZEND_API void zend_compiler_attribute_register(zend_class_entry *ce, zend_attrib
 	}
 
 	zend_string *lcname = zend_string_tolower_ex(ce->name, 1);
-	zval tmp;
 
 	zend_hash_update_ptr(&internal_validators, lcname, validator);
 	zend_string_release(lcname);
@@ -113,8 +112,7 @@ ZEND_API void zend_compiler_attribute_register(zend_class_entry *ce, zend_attrib
 	attr->offset = 0;
 	attr->argc = 0;
 
-	ZVAL_PTR(&tmp, attr);
-	zend_hash_next_index_insert(ce->attributes, &tmp);
+	zend_hash_next_index_insert_ptr(ce->attributes, attr);
 }
 
 void zend_register_attribute_ce(void)

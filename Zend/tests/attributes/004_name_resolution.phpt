@@ -15,14 +15,21 @@ namespace Doctrine\ORM\Mapping {
     }
 }
 
+namespace Doctrine\ORM\Attributes {
+    class Table {
+    }
+}
+
 namespace Foo {
     use Doctrine\ORM\Mapping\Entity;
     use Doctrine\ORM\Mapping as ORM;
+    use Doctrine\ORM\Attributes;
 
     <<Entity("imported class")>>
     <<ORM\Entity("imported namespace")>>
     <<\Doctrine\ORM\Mapping\Entity("absolute from namespace")>>
     <<\Entity("import absolute from global")>>
+    <<Attributes\Table()>>
     function foo() {
     }
 }
@@ -34,7 +41,7 @@ namespace {
 }
 ?>
 --EXPECTF--
-array(4) {
+array(5) {
   [0]=>
   array(2) {
     ["name"]=>
@@ -73,6 +80,14 @@ array(4) {
     array(1) {
       [0]=>
       string(27) "import absolute from global"
+    }
+  }
+  [4]=>
+  array(2) {
+    ["name"]=>
+    string(29) "Doctrine\ORM\Attributes\Table"
+    ["args"]=>
+    array(0) {
     }
   }
 }

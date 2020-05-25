@@ -120,7 +120,6 @@ typedef struct _zend_file_context {
 typedef union _zend_parser_stack_elem {
 	zend_ast *ast;
 	zend_string *str;
-	HashTable *hash;
 	zend_ulong num;
 	unsigned char *ptr;
 } zend_parser_stack_elem;
@@ -406,7 +405,7 @@ struct _zend_op_array {
 	uint32_t num_args;
 	uint32_t required_num_args;
 	zend_arg_info *arg_info;
-	HashTable   *attributes;
+	HashTable *attributes;
 	/* END of common elements */
 
 	int cache_size;     /* number of run_time_cache_slots * sizeof(void*) */
@@ -456,7 +455,7 @@ typedef struct _zend_internal_function {
 	uint32_t num_args;
 	uint32_t required_num_args;
 	zend_internal_arg_info *arg_info;
-	HashTable   *attributes;
+	HashTable *attributes;
 	/* END of common elements */
 
 	zif_handler handler;

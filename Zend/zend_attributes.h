@@ -1,13 +1,13 @@
 #ifndef ZEND_ATTRIBUTES_H
 #define ZEND_ATTRIBUTES_H
 
-#define ZEND_ATTRIBUTE_TARGET_CLASS			1
-#define ZEND_ATTRIBUTE_TARGET_FUNCTION		2
-#define ZEND_ATTRIBUTE_TARGET_METHOD		4
-#define ZEND_ATTRIBUTE_TARGET_PROPERTY		8
-#define ZEND_ATTRIBUTE_TARGET_CLASS_CONST	16
-#define ZEND_ATTRIBUTE_TARGET_PARAMETER		32
-#define ZEND_ATTRIBUTE_TARGET_ALL			63
+#define ZEND_ATTRIBUTE_TARGET_CLASS			(1<<0)
+#define ZEND_ATTRIBUTE_TARGET_FUNCTION		(1<<1)
+#define ZEND_ATTRIBUTE_TARGET_METHOD		(1<<2)
+#define ZEND_ATTRIBUTE_TARGET_PROPERTY		(1<<3)
+#define ZEND_ATTRIBUTE_TARGET_CLASS_CONST	(1<<4)
+#define ZEND_ATTRIBUTE_TARGET_PARAMETER		(1<<5)
+#define ZEND_ATTRIBUTE_TARGET_ALL			(1<<6)
 
 #define ZEND_ATTRIBUTE_SIZE(argc) (sizeof(zend_attribute) + sizeof(zval) * (argc) - sizeof(zval))
 
@@ -26,7 +26,7 @@ typedef struct _zend_attribute {
 
 typedef void (*zend_attributes_internal_validator)(zend_attribute *attr, int target);
 
-ZEND_API void zend_attribute_free(zend_attribute *attr);
+ZEND_API void zend_attribute_free(zend_attribute *attr, int persistent);
 
 ZEND_API zend_attribute *zend_get_attribute(HashTable *attributes, zend_string *lcname);
 ZEND_API zend_attribute *zend_get_attribute_str(HashTable *attributes, const char *str, size_t len);
