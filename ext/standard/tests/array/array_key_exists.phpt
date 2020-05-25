@@ -224,5 +224,5 @@ bool(true)
 Illegal offset type
 
 *** Testing operation on objects ***
-array_key_exists(): Argument #2 ($array) must be of type array, object given
+array_key_exists(): Argument #2 ($array) must be of type array, key_check given
 Done

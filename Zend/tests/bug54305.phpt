@@ -16,4 +16,4 @@ try {
 }
 ?>
 --EXPECT--
-Cannot increment object
+Cannot increment ReflectionMethod

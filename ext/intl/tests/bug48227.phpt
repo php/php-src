@@ -19,4 +19,4 @@ foreach (['', 1, NULL, $x] as $value) {
 NumberFormatter::format(): Argument #1 ($value) must be of type int|float, string given
 string(1) "1"
 string(1) "0"
-NumberFormatter::format(): Argument #1 ($value) must be of type int|float, object given
+NumberFormatter::format(): Argument #1 ($value) must be of type int|float, NumberFormatter given

@@ -251,67 +251,67 @@ TypeError: iterableF(): Argument #1 ($param) must be of type ?iterable, int give
 Stack trace:
 #0 %s(60): iterableF(1)
 #1 {main}
-TypeError: intF(): Argument #1 ($param) must be of type ?int, object given, called in %s:%d
+TypeError: intF(): Argument #1 ($param) must be of type ?int, stdClass given, called in %s:%d
 Stack trace:
 #0 %s(68): intF(Object(stdClass))
 #1 {main}
-TypeError: Return value of returnUnloadedClass() must be of type ?I\Dont\Exist, stdClass returned in %s:74
+TypeError: returnUnloadedClass(): Return value must be of type ?I\Dont\Exist, stdClass returned in %s:%d
 Stack trace:
 #0 %s(78): returnUnloadedClass()
 #1 {main}
-TypeError: Return value of returnLoadedClass() must be of type ?RealClass, stdClass returned in %s:84
+TypeError: returnLoadedClass(): Return value must be of type ?RealClass, stdClass returned in %s:%d
 Stack trace:
 #0 %s(88): returnLoadedClass()
 #1 {main}
-TypeError: Return value of returnLoadedInterface() must be of type ?RealInterface, stdClass returned in %s:94
+TypeError: returnLoadedInterface(): Return value must be of type ?RealInterface, stdClass returned in %s:%d
 Stack trace:
 #0 %s(98): returnLoadedInterface()
 #1 {main}
-TypeError: Return value of returnUnloadedClassScalar() must be of type ?I\Dont\Exist, int returned in %s:104
+TypeError: returnUnloadedClassScalar(): Return value must be of type ?I\Dont\Exist, int returned in %s:%d
 Stack trace:
 #0 %s(108): returnUnloadedClassScalar()
 #1 {main}
-TypeError: Return value of returnLoadedClassScalar() must be of type ?RealClass, int returned in %s:114
+TypeError: returnLoadedClassScalar(): Return value must be of type ?RealClass, int returned in %s:%d
 Stack trace:
 #0 %s(118): returnLoadedClassScalar()
 #1 {main}
-TypeError: Return value of returnLoadedInterfaceScalar() must be of type ?RealInterface, int returned in %s:124
+TypeError: returnLoadedInterfaceScalar(): Return value must be of type ?RealInterface, int returned in %s:%d
 Stack trace:
 #0 %s(128): returnLoadedInterfaceScalar()
 #1 {main}
-TypeError: Return value of returnCallable() must be of type ?callable, int returned in %s:134
+TypeError: returnCallable(): Return value must be of type ?callable, int returned in %s:%d
 Stack trace:
 #0 %s(138): returnCallable()
 #1 {main}
-TypeError: Return value of returnIterable() must be of type ?iterable, int returned in %s:144
+TypeError: returnIterable(): Return value must be of type ?iterable, int returned in %s:%d
 Stack trace:
 #0 %s(148): returnIterable()
 #1 {main}
-TypeError: Return value of returnInt() must be of type ?int, object returned in %s:154
+TypeError: returnInt(): Return value must be of type ?int, stdClass returned in %s:%d
 Stack trace:
 #0 %s(158): returnInt()
 #1 {main}
-TypeError: Return value of returnMissingUnloadedClass() must be of type ?I\Dont\Exist, none returned in %s:164
+TypeError: returnMissingUnloadedClass(): Return value must be of type ?I\Dont\Exist, none returned in %s:%d
 Stack trace:
 #0 %s(167): returnMissingUnloadedClass()
 #1 {main}
-TypeError: Return value of returnMissingLoadedClass() must be of type ?RealClass, none returned in %s:173
+TypeError: returnMissingLoadedClass(): Return value must be of type ?RealClass, none returned in %s:%d
 Stack trace:
 #0 %s(176): returnMissingLoadedClass()
 #1 {main}
-TypeError: Return value of returnMissingLoadedInterface() must be of type ?RealInterface, none returned in %s:182
+TypeError: returnMissingLoadedInterface(): Return value must be of type ?RealInterface, none returned in %s:%d
 Stack trace:
 #0 %s(185): returnMissingLoadedInterface()
 #1 {main}
-TypeError: Return value of returnMissingCallable() must be of type ?callable, none returned in %s:191
+TypeError: returnMissingCallable(): Return value must be of type ?callable, none returned in %s:%d
 Stack trace:
 #0 %s(194): returnMissingCallable()
 #1 {main}
-TypeError: Return value of returnMissingIterable() must be of type ?iterable, none returned in %s:200
+TypeError: returnMissingIterable(): Return value must be of type ?iterable, none returned in %s:%d
 Stack trace:
 #0 %s(203): returnMissingIterable()
 #1 {main}
-TypeError: Return value of returnMissingInt() must be of type ?int, none returned in %s:209
+TypeError: returnMissingInt(): Return value must be of type ?int, none returned in %s:%d
 Stack trace:
 #0 %s(212): returnMissingInt()
 #1 {main}

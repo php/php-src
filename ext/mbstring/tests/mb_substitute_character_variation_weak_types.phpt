@@ -167,7 +167,7 @@ ValueError: mb_substitute_character(): Argument #1 ($substitute_character) must 
 --instance of classWithToString--
 ValueError: mb_substitute_character(): Argument #1 ($substitute_character) must be 'none', 'long', 'entity' or a valid codepoint
 --instance of classWithoutToString--
-TypeError: mb_substitute_character(): Argument #1 ($substitute_character) must be of type string|int|null, object given
+TypeError: mb_substitute_character(): Argument #1 ($substitute_character) must be of type string|int|null, classWithoutToString given
 --undefined var--
 int(0)
 --unset var--

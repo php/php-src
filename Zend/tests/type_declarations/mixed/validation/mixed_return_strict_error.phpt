@@ -15,6 +15,5 @@ try {
 }
 
 ?>
---EXPECTF--
-Return value of foo() must be of type mixed, none returned
-
+--EXPECT--
+foo(): Return value must be of type mixed, none returned

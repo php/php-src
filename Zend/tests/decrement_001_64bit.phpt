@@ -56,7 +56,7 @@ float(1.5)
 NULL
 bool(true)
 bool(false)
-Cannot decrement object
+Cannot decrement stdClass
 object(stdClass)#1 (0) {
 }
 Cannot decrement array

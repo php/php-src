@@ -51,7 +51,7 @@ microtime(): Argument #1 ($get_as_float) must be of type bool, array given
 
 --> bad arg: object(stdClass)#%d (0) {
 }
-microtime(): Argument #1 ($get_as_float) must be of type bool, object given
+microtime(): Argument #1 ($get_as_float) must be of type bool, stdClass given
 
 --> bad arg: int(1)
 float(%s)

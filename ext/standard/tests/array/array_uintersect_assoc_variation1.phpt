@@ -167,10 +167,10 @@ array_uintersect_assoc(): Argument #1 ($arr1) must be of type array, string give
 array_uintersect_assoc(): Argument #1 ($arr1) must be of type array, string given
 
 --instance of classWithToString--
-array_uintersect_assoc(): Argument #1 ($arr1) must be of type array, object given
+array_uintersect_assoc(): Argument #1 ($arr1) must be of type array, classWithToString given
 
 --instance of classWithoutToString--
-array_uintersect_assoc(): Argument #1 ($arr1) must be of type array, object given
+array_uintersect_assoc(): Argument #1 ($arr1) must be of type array, classWithoutToString given
 
 --undefined var--
 array_uintersect_assoc(): Argument #1 ($arr1) must be of type array, null given

@@ -161,7 +161,7 @@ vprintf(): Argument #2 ($args) must be of type array, string given
 vprintf(): Argument #2 ($args) must be of type array, string given
 
 -- Iteration 20 --
-vprintf(): Argument #2 ($args) must be of type array, object given
+vprintf(): Argument #2 ($args) must be of type array, sample given
 
 -- Iteration 21 --
 vprintf(): Argument #2 ($args) must be of type array, null given

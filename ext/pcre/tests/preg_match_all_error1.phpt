@@ -80,5 +80,5 @@ array(1) {
     string(1) "t"
   }
 }
-preg_match_all(): Argument #1 ($pattern) must be of type string, object given
+preg_match_all(): Argument #1 ($pattern) must be of type string, stdClass given
 NULL

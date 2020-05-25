@@ -67,4 +67,4 @@ array(3) {
   [2]=>
   string(4) " 5 6"
 }
-preg_split(): Argument #1 ($pattern) must be of type string, object given
+preg_split(): Argument #1 ($pattern) must be of type string, stdClass given

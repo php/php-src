@@ -180,8 +180,8 @@ array_intersect_assoc(): Argument #2 ($arr2) must be of type array, string given
 -- Iteration 20 --array_intersect_assoc(): Argument #2 ($arr2) must be of type array, string given
 array_intersect_assoc(): Argument #2 ($arr2) must be of type array, string given
 
--- Iteration 21 --array_intersect_assoc(): Argument #2 ($arr2) must be of type array, object given
-array_intersect_assoc(): Argument #2 ($arr2) must be of type array, object given
+-- Iteration 21 --array_intersect_assoc(): Argument #2 ($arr2) must be of type array, classA given
+array_intersect_assoc(): Argument #2 ($arr2) must be of type array, classA given
 
 -- Iteration 22 --array_intersect_assoc(): Argument #2 ($arr2) must be of type array, null given
 array_intersect_assoc(): Argument #2 ($arr2) must be of type array, null given

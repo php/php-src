@@ -34,7 +34,7 @@ libxml_set_streams_context(): Argument #1 ($context) must be of type resource, s
 bool(true)
 libxml_set_streams_context(): Argument #1 ($context) must be of type resource, int given
 bool(true)
-libxml_set_streams_context(): Argument #1 ($context) must be of type resource, object given
+libxml_set_streams_context(): Argument #1 ($context) must be of type resource, stdClass given
 bool(true)
 libxml_set_streams_context(): Argument #1 ($context) must be of type resource, array given
 bool(true)

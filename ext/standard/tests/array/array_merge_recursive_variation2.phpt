@@ -151,5 +151,5 @@ echo "Done";
 
 -- Iteration 23 --array_merge_recursive(): Argument #2 must be of type array, resource given
 
--- Iteration 24 --array_merge_recursive(): Argument #2 must be of type array, object given
+-- Iteration 24 --array_merge_recursive(): Argument #2 must be of type array, A given
 Done

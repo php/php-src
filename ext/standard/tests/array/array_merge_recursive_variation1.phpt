@@ -210,6 +210,6 @@ echo "Done";
 -- With more arguments --array_merge_recursive(): Argument #1 must be of type array, resource given
 
 -- Iteration 24 --
--- With default argument --array_merge_recursive(): Argument #1 must be of type array, object given
--- With more arguments --array_merge_recursive(): Argument #1 must be of type array, object given
+-- With default argument --array_merge_recursive(): Argument #1 must be of type array, A given
+-- With more arguments --array_merge_recursive(): Argument #1 must be of type array, A given
 Done

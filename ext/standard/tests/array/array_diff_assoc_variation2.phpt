@@ -172,7 +172,7 @@ array_diff_assoc(): Argument #2 ($arr2) must be of type array, string given
 array_diff_assoc(): Argument #2 ($arr2) must be of type array, string given
 
 -- Iteration 23 --
-array_diff_assoc(): Argument #2 ($arr2) must be of type array, object given
+array_diff_assoc(): Argument #2 ($arr2) must be of type array, classA given
 
 -- Iteration 24 --
 array_diff_assoc(): Argument #2 ($arr2) must be of type array, null given

@@ -138,7 +138,7 @@ join(): Argument #2 ($pieces) must be of type array, string given
 -- Iteration 15 --
 join(): Argument #2 ($pieces) must be of type array, string given
 -- Iteration 16 --
-join(): Argument #2 ($pieces) must be of type array, object given
+join(): Argument #2 ($pieces) must be of type array, test given
 -- Iteration 17 --
 join(): Argument #2 ($pieces) must be of type array, string given
 -- Iteration 18 --

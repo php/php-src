@@ -20,9 +20,9 @@ var_dump($c);
 echo "Done\n";
 ?>
 --EXPECTF--
-Exception: Unsupported operand types: array + object
+Exception: Unsupported operand types: array + stdClass
 
-Fatal error: Uncaught TypeError: Unsupported operand types: array + object in %s:%d
+Fatal error: Uncaught TypeError: Unsupported operand types: array + stdClass in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

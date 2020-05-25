@@ -663,13 +663,7 @@ static ZEND_COLD void zend_verify_type_error_common(
 	*need_msg = zend_type_to_string_resolved(arg_info->type, zf->common.scope);
 
 	if (value) {
-		zend_bool has_class = ZEND_TYPE_HAS_CLASS(arg_info->type)
-			|| (ZEND_TYPE_FULL_MASK(arg_info->type) & MAY_BE_STATIC);
-		if (has_class && Z_TYPE_P(value) == IS_OBJECT) {
-			*given_kind = ZSTR_VAL(Z_OBJCE_P(value)->name);
-		} else {
-			*given_kind = zend_zval_type_name(value);
-		}
+		*given_kind = zend_zval_type_name(value);
 	} else {
 		*given_kind = "none";
 	}
@@ -849,7 +843,7 @@ ZEND_COLD zend_never_inline void zend_verify_property_type_error(zend_property_i
 
 	type_str = zend_type_to_string(info->type);
 	zend_type_error("Cannot assign %s to property %s::$%s of type %s",
-		Z_TYPE_P(property) == IS_OBJECT ? ZSTR_VAL(Z_OBJCE_P(property)->name) : zend_zval_type_name(property),
+		zend_zval_type_name(property),
 		ZSTR_VAL(info->ce->name),
 		zend_get_unmangled_property_name(info->name),
 		ZSTR_VAL(type_str));
@@ -1187,7 +1181,7 @@ ZEND_API ZEND_COLD void zend_verify_return_error(
 		zf, arg_info, cache_slot, value,
 		&fname, &fsep, &fclass, &need_msg, &given_msg);
 
-	zend_type_error("Return value of %s%s%s() must be of type %s, %s returned",
+	zend_type_error("%s%s%s(): Return value must be of type %s, %s returned",
 		fclass, fsep, fname, ZSTR_VAL(need_msg), given_msg);
 
 	zend_string_release(need_msg);
@@ -1206,7 +1200,7 @@ static ZEND_COLD void zend_verify_internal_return_error(
 		zf, arg_info, cache_slot, value,
 		&fname, &fsep, &fclass, &need_msg, &given_msg);
 
-	zend_error_noreturn(E_CORE_ERROR, "Return value of %s%s%s() must be of type %s, %s returned",
+	zend_error_noreturn(E_CORE_ERROR, "%s%s%s(): Return value must be of type %s, %s returned",
 		fclass, fsep, fname, ZSTR_VAL(need_msg), given_msg);
 }
 
@@ -2952,7 +2946,7 @@ ZEND_API ZEND_COLD void zend_throw_ref_type_error_type(zend_property_info *prop1
 	zend_string *type1_str = zend_type_to_string(prop1->type);
 	zend_string *type2_str = zend_type_to_string(prop2->type);
 	zend_type_error("Reference with value of type %s held by property %s::$%s of type %s is not compatible with property %s::$%s of type %s",
-		Z_TYPE_P(zv) == IS_OBJECT ? ZSTR_VAL(Z_OBJCE_P(zv)->name) : zend_zval_type_name(zv),
+		zend_zval_type_name(zv),
 		ZSTR_VAL(prop1->ce->name),
 		zend_get_unmangled_property_name(prop1->name),
 		ZSTR_VAL(type1_str),
@@ -2967,7 +2961,7 @@ ZEND_API ZEND_COLD void zend_throw_ref_type_error_type(zend_property_info *prop1
 ZEND_API ZEND_COLD void zend_throw_ref_type_error_zval(zend_property_info *prop, zval *zv) {
 	zend_string *type_str = zend_type_to_string(prop->type);
 	zend_type_error("Cannot assign %s to reference held by property %s::$%s of type %s",
-		Z_TYPE_P(zv) == IS_OBJECT ? ZSTR_VAL(Z_OBJCE_P(zv)->name) : zend_zval_type_name(zv),
+		zend_zval_type_name(zv),
 		ZSTR_VAL(prop->ce->name),
 		zend_get_unmangled_property_name(prop->name),
 		ZSTR_VAL(type_str)
@@ -2979,7 +2973,7 @@ ZEND_API ZEND_COLD void zend_throw_conflicting_coercion_error(zend_property_info
 	zend_string *type1_str = zend_type_to_string(prop1->type);
 	zend_string *type2_str = zend_type_to_string(prop2->type);
 	zend_type_error("Cannot assign %s to reference held by property %s::$%s of type %s and property %s::$%s of type %s, as this would result in an inconsistent type conversion",
-		Z_TYPE_P(zv) == IS_OBJECT ? ZSTR_VAL(Z_OBJCE_P(zv)->name) : zend_zval_type_name(zv),
+		zend_zval_type_name(zv),
 		ZSTR_VAL(prop1->ce->name),
 		zend_get_unmangled_property_name(prop1->name),
 		ZSTR_VAL(type1_str),

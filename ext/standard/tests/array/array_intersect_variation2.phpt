@@ -179,8 +179,8 @@ array_intersect(): Argument #2 ($arr2) must be of type array, string given
 -- Iterator 20 --array_intersect(): Argument #2 ($arr2) must be of type array, string given
 array_intersect(): Argument #2 ($arr2) must be of type array, string given
 
--- Iterator 21 --array_intersect(): Argument #2 ($arr2) must be of type array, object given
-array_intersect(): Argument #2 ($arr2) must be of type array, object given
+-- Iterator 21 --array_intersect(): Argument #2 ($arr2) must be of type array, classA given
+array_intersect(): Argument #2 ($arr2) must be of type array, classA given
 
 -- Iterator 22 --array_intersect(): Argument #2 ($arr2) must be of type array, null given
 array_intersect(): Argument #2 ($arr2) must be of type array, null given
