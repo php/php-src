@@ -3309,7 +3309,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						 || !op_array->function_name
 						 // TODO: support for IS_UNDEF ???
 						 || (op1_info & MAY_BE_UNDEF)) {
-							if (!zend_jit_tail_handler(&dasm_state, opline)) {
+							if (!zend_jit_trace_handler(&dasm_state, op_array, opline, zend_may_throw(opline, ssa_op, op_array, ssa), p + 1)) {
 								goto jit_failure;
 							}
 						} else {
