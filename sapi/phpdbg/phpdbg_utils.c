@@ -357,8 +357,11 @@ PHPDBG_API int phpdbg_get_terminal_height(void) /* {{{ */
 #ifdef _WIN32
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 
-	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-	lines = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+	if (GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi)) {
+		lines = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+	} else {
+		lines = 40;
+	}
 #elif defined(HAVE_SYS_IOCTL_H) && defined(TIOCGWINSZ)
 	struct winsize w;
 
