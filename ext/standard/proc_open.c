@@ -47,8 +47,13 @@
 # if HAVE_PTY_H
 #  include <pty.h>
 # else
-/* Mac OS X defines `openpty` in <util.h> */
-#  include <util.h>
+#  if defined(__FreeBSD__)
+/* FreeBSD defines `openpty` in <libutil.h> */
+#    include <libutil.h>
+#  else
+/* Mac OS X and some BSD defines `openpty` in <util.h> */
+#    include <util.h>
+#  endif
 # endif
 #endif
 
