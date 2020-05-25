@@ -38,10 +38,6 @@
 	should be adapted then. */
 #define Omit_Private_Memory 1
 
-/* HEX strings aren't supported as per
-	https://wiki.php.net/rfc/remove_hex_support_in_numeric_strings */
-#define NO_HEX_FP 1
-
 #include <inttypes.h>
 
 #ifndef HAVE_INT32_T
