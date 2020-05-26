@@ -312,7 +312,7 @@ END_EXTERN_C()
                 return _xpfpa_result; \
             } while (0)
 
-#elif defined(HAVE_FPU_INLINE_ASM_X86)
+#elif defined(HAVE_FPU_INLINE_ASM_X86) && !defined(__x86_64__)
 
 /*
   Custom x86 inline assembler implementation.
