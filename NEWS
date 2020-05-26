@@ -2,7 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2020, PHP 7.4.8
 
-
+- Core:
+  . Fixed bug #79595 (zend_init_fpu() alters FPU precision). (cmb, Nikita)
 
 11 Jun 2020, PHP 7.4.7
 
