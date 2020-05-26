@@ -365,7 +365,7 @@ static int php_mb_parse_encoding_list(const char *value, size_t value_length,
 						zend_argument_value_error(arg_num, "contains invalid encoding \"%s\"", p1);
 					}
 					efree(tmpstr);
-					pefree(list, persistent);
+					pefree((void *) list, persistent);
 					return FAILURE;
 				}
 
@@ -400,7 +400,7 @@ static int php_mb_parse_encoding_array(HashTable *target_hash, const mbfl_encodi
 	ZEND_HASH_FOREACH_VAL(target_hash, hash_entry) {
 		zend_string *encoding_str = zval_try_get_string(hash_entry);
 		if (UNEXPECTED(!encoding_str)) {
-			efree(list);
+			efree((void *) list);
 			return FAILURE;
 		}
 
@@ -424,7 +424,7 @@ static int php_mb_parse_encoding_array(HashTable *target_hash, const mbfl_encodi
 			} else {
 				zend_argument_value_error(arg_num, "contains invalid encoding \"%s\"", ZSTR_VAL(encoding_str));
 				zend_string_release(encoding_str);
-				efree(list);
+				efree((void *) list);
 				return FAILURE;
 			}
 		}
@@ -809,7 +809,7 @@ static PHP_INI_MH(OnUpdate_mbstring_detect_order)
 
 	if (!new_value) {
 		if (MBSTRG(detect_order_list)) {
-			pefree(MBSTRG(detect_order_list), 1);
+			pefree((void *) MBSTRG(detect_order_list), 1);
 		}
 		MBSTRG(detect_order_list) = NULL;
 		MBSTRG(detect_order_list_size) = 0;
@@ -821,7 +821,7 @@ static PHP_INI_MH(OnUpdate_mbstring_detect_order)
 	}
 
 	if (MBSTRG(detect_order_list)) {
-		pefree(MBSTRG(detect_order_list), 1);
+		pefree((void *) MBSTRG(detect_order_list), 1);
 	}
 	MBSTRG(detect_order_list) = list;
 	MBSTRG(detect_order_list_size) = size;
@@ -836,7 +836,7 @@ static int _php_mb_ini_mbstring_http_input_set(const char *new_value, size_t new
 		return FAILURE;
 	}
 	if (MBSTRG(http_input_list)) {
-		pefree(MBSTRG(http_input_list), 1);
+		pefree((void *) MBSTRG(http_input_list), 1);
 	}
 	MBSTRG(http_input_list) = list;
 	MBSTRG(http_input_list_size) = size;
@@ -1128,10 +1128,10 @@ ZEND_TSRMLS_CACHE_UPDATE();
 static PHP_GSHUTDOWN_FUNCTION(mbstring)
 {
 	if (mbstring_globals->http_input_list) {
-		free(mbstring_globals->http_input_list);
+		free((void *) mbstring_globals->http_input_list);
 	}
 	if (mbstring_globals->detect_order_list) {
-		free(mbstring_globals->detect_order_list);
+		free((void *) mbstring_globals->detect_order_list);
 	}
 	if (mbstring_globals->http_output_conv_mimetypes) {
 		_php_mb_free_regex(mbstring_globals->http_output_conv_mimetypes);
@@ -1236,7 +1236,7 @@ PHP_RINIT_FUNCTION(mbstring)
 PHP_RSHUTDOWN_FUNCTION(mbstring)
 {
 	if (MBSTRG(current_detect_order_list) != NULL) {
-		efree(MBSTRG(current_detect_order_list));
+		efree((void *) MBSTRG(current_detect_order_list));
 		MBSTRG(current_detect_order_list) = NULL;
 		MBSTRG(current_detect_order_list_size) = 0;
 	}
@@ -1510,13 +1510,13 @@ PHP_FUNCTION(mb_detect_order)
 		}
 
 		if (size == 0) {
-			efree(list);
+			efree((void *) list);
 			zend_argument_value_error(1, "must specify at least one encoding");
 			RETURN_THROWS();
 		}
 
 		if (MBSTRG(current_detect_order_list)) {
-			efree(MBSTRG(current_detect_order_list));
+			efree((void *) MBSTRG(current_detect_order_list));
 		}
 		MBSTRG(current_detect_order_list) = list;
 		MBSTRG(current_detect_order_list_size) = size;
@@ -2632,7 +2632,7 @@ PHP_FUNCTION(mb_convert_encoding)
 	}
 
 	if (!num_from_encodings) {
-		efree(from_encodings);
+		efree((void *) from_encodings);
 		zend_argument_value_error(3, "must specify at least one encoding");
 		RETURN_THROWS();
 	}
@@ -2658,7 +2658,7 @@ PHP_FUNCTION(mb_convert_encoding)
 	}
 
 	if (free_from_encodings) {
-		efree(from_encodings);
+		efree((void *) from_encodings);
 	}
 }
 /* }}} */
@@ -2811,7 +2811,7 @@ PHP_FUNCTION(mb_detect_encoding)
 	}
 
 	if (size == 0) {
-		efree(elist);
+		efree((void *) elist);
 		zend_argument_value_error(2, "must specify at least one encoding");
 		RETURN_THROWS();
 	}
@@ -2826,7 +2826,7 @@ PHP_FUNCTION(mb_detect_encoding)
 	ret = mbfl_identify_encoding(&string, elist, size, strict);
 
 	if (free_elist) {
-		efree(elist);
+		efree((void *) elist);
 	}
 
 	if (ret == NULL) {
@@ -3191,7 +3191,7 @@ PHP_FUNCTION(mb_convert_variables)
 	}
 
 	if (elistsz == 0) {
-		efree(elist);
+		efree((void *) elist);
 		zend_argument_value_error(2, "must specify at least one encoding");
 		RETURN_THROWS();
 	}
@@ -3213,7 +3213,7 @@ PHP_FUNCTION(mb_convert_variables)
 			from_encoding = mbfl_encoding_detector_judge(identd);
 			mbfl_encoding_detector_delete(identd);
 			if (recursion_error) {
-				efree(elist);
+				efree((void *) elist);
 				php_error_docref(NULL, E_WARNING, "Cannot handle recursive references");
 				RETURN_FALSE;
 			}
@@ -3221,12 +3221,12 @@ PHP_FUNCTION(mb_convert_variables)
 
 		if (!from_encoding) {
 			php_error_docref(NULL, E_WARNING, "Unable to detect encoding");
-			efree(elist);
+			efree((void *) elist);
 			RETURN_FALSE;
 		}
 	}
 
-	efree(elist);
+	efree((void *) elist);
 
 	convd = mbfl_buffer_converter_new(from_encoding, to_encoding, 0);
 	/* If this assertion fails this means some memory allocation failure which is a bug */
@@ -4338,7 +4338,7 @@ static void php_mb_populate_current_detect_order_list(void)
 	if (MBSTRG(detect_order_list) && MBSTRG(detect_order_list_size)) {
 		nentries = MBSTRG(detect_order_list_size);
 		entry = (const mbfl_encoding **)safe_emalloc(nentries, sizeof(mbfl_encoding*), 0);
-		memcpy(entry, MBSTRG(detect_order_list), sizeof(mbfl_encoding*) * nentries);
+		memcpy((void *) entry, MBSTRG(detect_order_list), sizeof(mbfl_encoding*) * nentries);
 	} else {
 		const enum mbfl_no_encoding *src = MBSTRG(default_detect_order_list);
 		size_t i;

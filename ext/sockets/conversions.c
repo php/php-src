@@ -711,7 +711,7 @@ static void from_zval_write_sockaddr_aux(const zval *container,
 	if ((elem = zend_hash_str_find(Z_ARRVAL_P(container), "family", sizeof("family") - 1)) != NULL
 			&& Z_TYPE_P(elem) != IS_NULL) {
 		const char *node = "family";
-		zend_llist_add_element(&ctx->keys, &node);
+		zend_llist_add_element(&ctx->keys, (void *) &node);
 		from_zval_write_int(elem, (char*)&family, ctx);
 		zend_llist_remove_tail(&ctx->keys);
 	} else {
@@ -1454,7 +1454,7 @@ void *from_zval_run_conversions(const zval			*container,
 
 	structure = ecalloc(1, struct_size);
 
-	zend_llist_add_element(&ctx.keys, &top_name);
+	zend_llist_add_element(&ctx.keys, (void *) &top_name);
 	zend_llist_add_element(&ctx.allocations, &structure);
 
 	/* main call */
@@ -1489,7 +1489,7 @@ zval *to_zval_run_conversions(const char *structure,
 
 	memset(&ctx, 0, sizeof(ctx));
 	zend_llist_init(&ctx.keys, sizeof(const char *), NULL, 0);
-	zend_llist_add_element(&ctx.keys, &top_name);
+	zend_llist_add_element(&ctx.keys, (void *) &top_name);
 
 	zend_hash_init(&ctx.params, 8, NULL, NULL, 0);
 	for (kv = key_value_pairs; kv->key != NULL; kv++) {

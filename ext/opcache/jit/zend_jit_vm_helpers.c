@@ -183,7 +183,7 @@ ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_profile_helper(ZEND_OPCODE_HANDLE
 {
 	zend_op_array *op_array = (zend_op_array*)EX(func);
 	zend_jit_op_array_extension *jit_extension = (zend_jit_op_array_extension*)ZEND_FUNC_INFO(op_array);
-	zend_vm_opcode_handler_t handler = jit_extension->orig_handler;
+	zend_vm_opcode_handler_t handler = (zend_vm_opcode_handler_t) jit_extension->orig_handler;
 	++*(uintptr_t*)(EX(run_time_cache) + zend_jit_profile_counter_rid);
 	++zend_jit_profile_counter;
 	ZEND_OPCODE_TAIL_CALL(handler);

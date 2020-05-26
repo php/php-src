@@ -320,7 +320,7 @@ ZEND_TSRMLS_CACHE_DEFINE()
 ZEND_GET_MODULE(zend_test)
 #endif
 
-struct bug79096 bug79096(void)
+PHP_ZEND_TEST_API struct bug79096 bug79096(void)
 {
   struct bug79096 b;
 
@@ -329,7 +329,7 @@ struct bug79096 bug79096(void)
   return b;
 }
 
-void bug79532(off_t *array, size_t elems)
+PHP_ZEND_TEST_API void bug79532(off_t *array, size_t elems)
 {
 	int i;
 	for (i = 0; i < elems; i++) {

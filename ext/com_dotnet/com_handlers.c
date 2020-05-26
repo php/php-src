@@ -177,7 +177,7 @@ static void com_write_dimension(zend_object *object, zval *offset, zval *value)
 	}
 }
 
-static zval *com_get_property_ptr_ptr(zval *object, zval *member, int type, void **cache_slot)
+static zval *com_get_property_ptr_ptr(zend_object *object, zend_string *member, int type, void **cache_slot)
 {
 	return NULL;
 }
@@ -224,10 +224,10 @@ static HashTable *com_properties_get(zend_object *object)
 	 * infinite recursion when the hash is displayed via var_dump().
 	 * Perhaps it is best to leave it un-implemented.
 	 */
-	return &zend_empty_array;
+	return (HashTable *) &zend_empty_array;
 }
 
-static HashTable *com_get_gc(zval *object, zval **table, int *n)
+static HashTable *com_get_gc(zend_object *object, zval **table, int *n)
 {
 	*table = NULL;
 	*n = 0;

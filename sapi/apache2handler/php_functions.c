@@ -17,6 +17,12 @@
 #define ZEND_INCLUDE_FULL_WINDOWS_HEADERS
 
 #include "php.h"
+#ifdef strcasecmp
+# undef strcasecmp
+#endif
+#ifdef strncasecmp
+# undef strncasecmp
+#endif
 #include "zend_smart_str.h"
 #include "ext/standard/info.h"
 #include "ext/standard/head.h"

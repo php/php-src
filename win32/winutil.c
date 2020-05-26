@@ -439,7 +439,7 @@ PHP_WINUTIL_API char *php_win32_get_username(void)
 static zend_always_inline BOOL is_compatible(const char *name, BOOL is_smaller, char *format, char **err)
 {/*{{{*/
 	/* work around ImageLoad() issue */
-	char *name_stripped = name;
+	const char *name_stripped = name;
 	if (name[0] == '.' && IS_SLASH(name[1])) {
 		name_stripped += 2;
 	}

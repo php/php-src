@@ -36,6 +36,10 @@
 #include <fcntl.h>
 #endif
 
+#ifdef PHP_WIN32
+# pragma warning(disable: 4024 4047)
+#endif
+
 /* This symbol is defined in ext/standard/config.m4.
  * Essentially, it is set if you HAVE_FORK || PHP_WIN32
  * Other platforms may modify that configure check and add suitable #ifdefs
