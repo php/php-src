@@ -89,6 +89,10 @@ if not exist "%PHP_BUILD_CACHE_ENCHANT_DICT_DIR%\en_US.aff" (
 mkdir %LOCALAPPDATA%\enchant\hunspell
 copy %PHP_BUILD_CACHE_ENCHANT_DICT_DIR%\* %LOCALAPPDATA%\enchant\hunspell
 
+set TEST_PHPDBG_EXECUTABLE=%PHP_BUILD_OBJ_DIR%\Release
+if "%THREAD_SAFE%" equ "1" set TEST_PHPDBG_EXECUTABLE=%TEST_PHPDBG_EXECUTABLE%_TS
+set TEST_PHPDBG_EXECUTABLE=%TEST_PHPDBG_EXECUTABLE%\phpdbg.exe
+
 mkdir c:\tests_tmp
 
 set TEST_PHP_JUNIT=c:\junit.out.xml
