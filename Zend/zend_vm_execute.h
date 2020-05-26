@@ -3669,7 +3669,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CATCH_SPEC_CONST_HANDLER(ZEND_
 	USE_OPLINE
 	zend_class_entry *ce, *catch_ce;
 	zend_object *exception;
-	zval *ex;
 
 	SAVE_OPLINE();
 	/* Check whether an exception has been thrown, if not, jump over code */
@@ -3703,21 +3702,23 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CATCH_SPEC_CONST_HANDLER(ZEND_
 
 	exception = EG(exception);
 	if (RETURN_VALUE_USED(opline)) {
-		ex = EX_VAR(opline->result.var);
+		zval *ex = EX_VAR(opline->result.var);
 		if (UNEXPECTED(Z_ISREF_P(ex))) {
 			ex = Z_REFVAL_P(ex);
 		}
 		zval_ptr_dtor(ex);
 		ZVAL_OBJ(ex, EG(exception));
-	} else {
-		OBJ_RELEASE(EG(exception));
-	}
-	if (UNEXPECTED(EG(exception) != exception)) {
-		ZVAL_UNDEF(ex);
-		HANDLE_EXCEPTION();
+		if (UNEXPECTED(EG(exception) != exception)) {
+			ZVAL_UNDEF(ex);
+			HANDLE_EXCEPTION();
+		} else {
+			EG(exception) = NULL;
+			ZEND_VM_NEXT_OPCODE();
+		}
 	} else {
 		EG(exception) = NULL;
-		ZEND_VM_NEXT_OPCODE();
+		OBJ_RELEASE(exception);
+		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	}
 }
 

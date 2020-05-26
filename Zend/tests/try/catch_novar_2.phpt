@@ -15,5 +15,12 @@ try {
 }
 echo "Unreachable fallthrough\n";
 
---EXPECT--
+?>
+--EXPECTF--
 Throwing
+
+Fatal error: Uncaught RuntimeException: ThrowsOnDestruct::__destruct in %s:%d
+Stack trace:
+#0 %s(%d): ThrowsOnDestruct->__destruct()
+#1 {main}
+  thrown in %s on line %d
