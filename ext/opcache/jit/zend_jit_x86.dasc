@@ -3578,7 +3578,7 @@ static int zend_jit_inc_dec(dasm_State **Dst, const zend_op *opline, const zend_
 		int32_t exit_point;
 		const void *exit_addr;
 		zend_jit_trace_stack *stack;
-		uint32_t old_op1_info, old_res_info;
+		uint32_t old_op1_info, old_res_info = 0;
 
 		stack = JIT_G(current_frame)->stack;
 		old_op1_info = STACK_INFO(stack, EX_VAR_TO_NUM(opline->op1.var));
