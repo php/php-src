@@ -870,7 +870,7 @@ AC_DEFUN([PHP_SELECT_SAPI],[
 +--------------------------------------------------------------------+
 |                        *** ATTENTION ***                           |
 |                                                                    |
-| You've configured multiple SAPIs to be build. You can build only   |
+| You've configured multiple SAPIs to be built. You can build only   |
 | one SAPI module plus CGI, CLI and FPM binaries at the same time.   |
 +--------------------------------------------------------------------+
 ])
