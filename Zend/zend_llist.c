@@ -49,7 +49,7 @@ ZEND_API void zend_llist_add_element(zend_llist *l, const void *element)
 }
 
 
-ZEND_API void zend_llist_prepend_element(zend_llist *l, void *element)
+ZEND_API void zend_llist_prepend_element(zend_llist *l, const void *element)
 {
 	zend_llist_element *tmp = pemalloc(sizeof(zend_llist_element)+l->size-1, l->persistent);
 
