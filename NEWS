@@ -21,10 +21,6 @@ PHP                                                                        NEWS
     variable). (Nikita)
   . Fixed bug #79603 (RTD collision with opcache). (Nikita)
 
-- SimpleXML:
-  . Fixed bug #79528 (Different object of the same xml between 7.4.5 and
-    7.4.4). (cmb)
-
 - Standard:
   . Fixed bug #79561 (dns_get_record() fails with DNS_ALL). (cmb)
 
@@ -62,6 +58,10 @@ PHP                                                                        NEWS
 
 - Phar:
   . Fixed bug #79503 (Memory leak on duplicate metadata). (cmb)
+
+- SimpleXML:
+  . Fixed bug #79528 (Different object of the same xml between 7.4.5 and
+    7.4.4). (cmb)
 
 - SPL:
   . Fixed bug #69264 (__debugInfo() ignored while extending SPL classes). (cmb)
