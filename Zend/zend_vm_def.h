@@ -4632,17 +4632,15 @@ ZEND_VM_HANDLER(107, ZEND_CATCH, CONST, JMP_ADDR, LAST_CATCH|CACHE_SLOT)
 
 	exception = EG(exception);
 	ex = EX_VAR(opline->result.var);
-	if (UNEXPECTED(Z_ISREF_P(ex))) {
-		ex = Z_REFVAL_P(ex);
-	}
-	zval_ptr_dtor(ex);
-	ZVAL_OBJ(ex, EG(exception));
-	if (UNEXPECTED(EG(exception) != exception)) {
-		GC_ADDREF(EG(exception));
-		HANDLE_EXCEPTION();
-	} else {
+	{
+		/* Always perform a strict assignment. There is a reasonable expectation that if you
+		 * write "catch (Exception $e)" then $e will actually be instanceof Exception. As such,
+		 * we should not permit coercion to string here. */
+		zval tmp;
+		ZVAL_OBJ(&tmp, exception);
 		EG(exception) = NULL;
-		ZEND_VM_NEXT_OPCODE();
+		zend_assign_to_variable(ex, &tmp, IS_TMP_VAR, /* strict */ 1);
+		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	}
 }
 
