@@ -43,8 +43,6 @@ AH_TOP([
 #define ZEND_DLIMPORT
 ])
 AH_BOTTOM([
-#ifndef ZEND_ACCONFIG_H_NO_C_PROTOS
-
 #include <stdlib.h>
 
 #ifdef HAVE_SYS_TYPES_H
@@ -60,8 +58,6 @@ AH_BOTTOM([
 #endif
 
 #include <string.h>
-
-#endif /* ifndef ZEND_ACCONFIG_H_NO_C_PROTOS */
 
 #endif /* PHP_CONFIG_H */
 ])
@@ -372,7 +368,6 @@ dnl ----------------------------------------------------------------------------
 
 dnl QNX requires unix.h to allow functions in libunix to work properly.
 AC_CHECK_HEADERS([ \
-inttypes.h \
 stdint.h \
 dirent.h \
 sys/param.h \
@@ -389,8 +384,6 @@ grp.h \
 ieeefp.h \
 langinfo.h \
 malloc.h \
-monetary.h \
-netdb.h \
 poll.h \
 pty.h \
 pwd.h \
@@ -398,7 +391,6 @@ resolv.h \
 strings.h \
 syslog.h \
 sysexits.h \
-sys/auxv.h \
 sys/ioctl.h \
 sys/file.h \
 sys/mman.h \
@@ -415,7 +407,6 @@ sys/sysexits.h \
 sys/uio.h \
 sys/wait.h \
 sys/loadavg.h \
-termios.h \
 unistd.h \
 unix.h \
 utime.h \
@@ -1272,27 +1263,13 @@ AC_SUBST(EXPANDED_LOCALSTATEDIR)
 AC_SUBST(EXPANDED_PHP_CONFIG_FILE_PATH)
 AC_SUBST(EXPANDED_PHP_CONFIG_FILE_SCAN_DIR)
 
-if test -n "$php_ldflags_add_usr_lib"; then
-  PHP_RPATHS="$PHP_RPATHS /usr/lib"
-fi
-
 PHP_UTILIZE_RPATHS
 
-if test -z "$php_ldflags_add_usr_lib"; then
-  PHP_REMOVE_USR_LIB(PHP_LDFLAGS)
-  PHP_REMOVE_USR_LIB(LDFLAGS)
-fi
+PHP_REMOVE_USR_LIB(PHP_LDFLAGS)
+PHP_REMOVE_USR_LIB(LDFLAGS)
 
 EXTRA_LDFLAGS="$EXTRA_LDFLAGS $PHP_LDFLAGS"
 EXTRA_LDFLAGS_PROGRAM="$EXTRA_LDFLAGS_PROGRAM $PHP_LDFLAGS"
-
-dnl SOURCE_DATE_EPOCH for reproducible builds
-dnl https://reproducible-builds.org/specs/source-date-epoch/
-PHP_BUILD_DATE=`date --utc --date="@${SOURCE_DATE_EPOCH:-$(date +%s)}" +%Y-%m-%d 2>/dev/null`
-if test $? -ne 0 ; then
-PHP_BUILD_DATE=`date -u +%Y-%m-%d`
-fi
-AC_DEFINE_UNQUOTED(PHP_BUILD_DATE,"$PHP_BUILD_DATE",[PHP build date])
 
 UNAME=`uname -a | xargs`
 PHP_UNAME=${PHP_UNAME:-$UNAME}
@@ -1356,7 +1333,6 @@ PHP_SUBST(LIBTOOL)
 PHP_SUBST(LN_S)
 PHP_SUBST_OLD(NATIVE_RPATHS)
 PHP_SUBST_OLD(PEAR_INSTALLDIR)
-PHP_SUBST(PHP_BUILD_DATE)
 PHP_SUBST_OLD(PHP_LDFLAGS)
 PHP_SUBST_OLD(PHP_LIBS)
 PHP_SUBST(OVERALL_TARGET)

@@ -25,9 +25,6 @@
 #ifdef HAVE_LANGINFO_H
 # include <langinfo.h>
 #endif
-#ifdef HAVE_MONETARY_H
-# include <monetary.h>
-#endif
 
 /*
  * This define is here because some versions of libintl redefine setlocale

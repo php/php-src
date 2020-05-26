@@ -870,7 +870,7 @@ AC_DEFUN([PHP_SELECT_SAPI],[
 +--------------------------------------------------------------------+
 |                        *** ATTENTION ***                           |
 |                                                                    |
-| You've configured multiple SAPIs to be build. You can build only   |
+| You've configured multiple SAPIs to be built. You can build only   |
 | one SAPI module plus CGI, CLI and FPM binaries at the same time.   |
 +--------------------------------------------------------------------+
 ])
@@ -2218,8 +2218,8 @@ AC_DEFUN([PHP_DETECT_SUNCC],[
 dnl
 dnl PHP_CRYPT_R_STYLE
 dnl
-dnl Detect the style of crypt_r() is any is available see
-dnl APR_CHECK_CRYPT_R_STYLE() for original version.
+dnl Detect the style of crypt_r() if any is available.
+dnl See APR_CHECK_CRYPT_R_STYLE() for original version.
 dnl
 AC_DEFUN([PHP_CRYPT_R_STYLE],
 [

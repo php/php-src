@@ -146,7 +146,7 @@ _LT_AC_TRY_DLOPEN_SELF([
 ])
 
 dnl Checks for library functions.
-AC_CHECK_FUNCS(getpid kill finite sigsetjmp)
+AC_CHECK_FUNCS(getpid kill sigsetjmp)
 
 ZEND_CHECK_FLOAT_PRECISION
 
