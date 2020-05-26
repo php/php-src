@@ -3511,6 +3511,50 @@ static int zend_jit_update_regs(dasm_State **Dst, zend_jit_addr src, zend_jit_ad
 	return 1;
 }
 
+static int zend_jit_store_const(dasm_State **Dst, int var, zend_reg reg)
+{
+	zend_jit_addr dst = ZEND_ADDR_MEM_ZVAL(ZREG_FP, EX_NUM_TO_VAR(var));
+
+	if (reg == ZREG_LONG_MIN_MINUS_1) {
+		|.if X64
+			|	SET_ZVAL_LVAL dst, 0x00000000
+			|	SET_ZVAL_W2 dst, 0xc3e00000
+		|.else
+			|	SET_ZVAL_LVAL dst, 0x00200000
+			|	SET_ZVAL_W2 dst, 0xc1e00000
+		|.endif
+		|	SET_ZVAL_TYPE_INFO dst, IS_DOUBLE
+	} else if (reg == ZREG_LONG_MIN) {
+		|.if X64
+			|	SET_ZVAL_LVAL dst, 0x00000000
+			|	SET_ZVAL_W2 dst, 0x80000000
+		|.else
+			|	SET_ZVAL_LVAL dst, ZEND_LONG_MIN
+		|.endif
+		|	SET_ZVAL_TYPE_INFO dst, IS_LONG
+	} else if (reg == ZREG_LONG_MAX) {
+		|.if X64
+			|	SET_ZVAL_LVAL dst, 0xffffffff
+			|	SET_ZVAL_W2 dst, 0x7fffffff
+		|.else
+			|	SET_ZVAL_LVAL dst, ZEND_LONG_MAX
+		|.endif
+		|	SET_ZVAL_TYPE_INFO dst, IS_LONG
+	} else if (reg == ZREG_LONG_MAX_PLUS_1) {
+		|.if X64
+			|	SET_ZVAL_LVAL dst, 0
+			|	SET_ZVAL_W2 dst, 0x43e00000
+		|.else
+			|	SET_ZVAL_LVAL dst, 0
+			|	SET_ZVAL_W2 dst, 0x41e00000
+		|.endif
+		|	SET_ZVAL_TYPE_INFO dst, IS_DOUBLE
+	} else {
+		ZEND_ASSERT(0);
+	}
+	return 1;
+}
+
 static int zend_jit_inc_dec(dasm_State **Dst, const zend_op *opline, const zend_op_array *op_array, uint32_t op1_info, zend_jit_addr op1_addr, uint32_t op1_def_info, zend_jit_addr op1_def_addr, uint32_t res_use_info, uint32_t res_info, zend_jit_addr res_addr, int may_overflow, int may_throw)
 {
 	if (op1_info & ((MAY_BE_UNDEF|MAY_BE_ANY)-MAY_BE_LONG)) {
@@ -3528,13 +3572,51 @@ static int zend_jit_inc_dec(dasm_State **Dst, const zend_op *opline, const zend_
 		|	LONG_OP_WITH_CONST sub, op1_def_addr, Z_L(1)
 	}
 
-	if (may_overflow && ((op1_def_info & MAY_BE_GUARD) || (opline->result_type != IS_UNUSED && (res_info & MAY_BE_GUARD)))) {
-		int32_t exit_point = zend_jit_trace_get_exit_point(opline, opline, NULL, 0);
-		const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+	if (may_overflow &&
+	    (((op1_def_info & MAY_BE_GUARD) && (op1_def_info & MAY_BE_LONG)) ||
+	     ((opline->result_type != IS_UNUSED && (res_info & MAY_BE_GUARD) && (res_info & MAY_BE_LONG))))) {
+		int32_t exit_point;
+		const void *exit_addr;
+		zend_jit_trace_stack *stack;
+		uint32_t old_op1_info, old_res_info;
+
+		stack = JIT_G(current_frame)->stack;
+		old_op1_info = STACK_INFO(stack, EX_VAR_TO_NUM(opline->op1.var));
+		SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->op1.var), IS_DOUBLE);
+		if (opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_POST_INC) {
+			SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->op1.var), ZREG_LONG_MAX_PLUS_1);
+		} else {
+			SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->op1.var), ZREG_LONG_MIN_MINUS_1);
+		}
+		if (opline->result_type != IS_UNUSED) {
+			old_res_info = STACK_INFO(stack, EX_VAR_TO_NUM(opline->result.var));
+			if (opline->opcode == ZEND_PRE_INC) {
+				SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_DOUBLE);
+				SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->result.var), ZREG_LONG_MAX_PLUS_1);
+			} else if (opline->opcode == ZEND_PRE_DEC) {
+				SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_DOUBLE);
+				SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->result.var), ZREG_LONG_MIN_MINUS_1);
+			} else if (opline->opcode == ZEND_POST_INC) {
+				SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_LONG);
+				SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->result.var), ZREG_LONG_MAX);
+			} else if (opline->opcode == ZEND_POST_DEC) {
+				SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_LONG);
+				SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->result.var), ZREG_LONG_MIN);
+			}
+		}
+
+		exit_point = zend_jit_trace_get_exit_point(opline, opline + 1, NULL, 0);
+		exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 		|	jo &exit_addr
+
 		if ((opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_PRE_DEC) &&
 		    opline->result_type != IS_UNUSED) {
 			|	ZVAL_COPY_VALUE res_addr, res_use_info, op1_def_addr, MAY_BE_LONG, ZREG_R0, ZREG_R1
+		}
+
+		SET_STACK_INFO(stack, EX_VAR_TO_NUM(opline->op1.var), old_op1_info);
+		if (opline->result_type != IS_UNUSED) {
+			SET_STACK_INFO(stack, EX_VAR_TO_NUM(opline->result.var), old_res_info);
 		}
 	} else if (may_overflow) {
 		|	jo >1
@@ -3561,7 +3643,9 @@ static int zend_jit_inc_dec(dasm_State **Dst, const zend_op *opline, const zend_
 				|	SET_ZVAL_W2 op1_def_addr, 0xc1e00000
 			|.endif
 		}
-		|	SET_ZVAL_TYPE_INFO op1_def_addr, IS_DOUBLE
+		if (Z_MODE(op1_def_addr) == IS_MEM_ZVAL) {
+			|	SET_ZVAL_TYPE_INFO op1_def_addr, IS_DOUBLE
+		}
 		if ((opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_PRE_DEC) &&
 		    opline->result_type != IS_UNUSED) {
 			|	ZVAL_COPY_VALUE res_addr, res_use_info, op1_def_addr, MAY_BE_DOUBLE, ZREG_R0, ZREG_R1

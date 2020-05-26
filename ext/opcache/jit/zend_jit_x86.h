@@ -62,7 +62,13 @@ typedef enum _zend_reg {
 	ZREG_XMM15,
 #endif
 
-	ZREG_NUM
+	ZREG_NUM,
+
+	/* pseudo constants used by deoptimizer */
+	ZREG_LONG_MIN_MINUS_1,
+	ZREG_LONG_MIN,
+	ZREG_LONG_MAX,
+	ZREG_LONG_MAX_PLUS_1,
 } zend_reg;
 
 typedef struct _zend_jit_registers_buf {

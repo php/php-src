@@ -1866,7 +1866,9 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 		if ((ssa->vars[i].use_chain >= 0 /*|| ssa->vars[i].phi_use_chain*/)
 		 && zend_jit_var_supports_reg(ssa, i)) {
 			start[i] = 0;
-			if (i < parent_vars_count && STACK_REG(parent_stack, i) != ZREG_NONE) {
+			if (i < parent_vars_count
+			 && STACK_REG(parent_stack, i) != ZREG_NONE
+			 && STACK_REG(parent_stack, i) < ZREG_NUM) {
 				/* We will try to reuse register from parent trace */
 				count += 2;
 			} else {
@@ -2197,7 +2199,9 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 		}
 		while (i > 0) {
 			i--;
-			if (intervals[i] && STACK_REG(parent_stack, i) != ZREG_NONE) {
+			if (intervals[i]
+			 && STACK_REG(parent_stack, i) != ZREG_NONE
+			 && STACK_REG(parent_stack, i) < ZREG_NUM) {
 				list[j].ssa_var = - 1;
 				list[j].reg = STACK_REG(parent_stack, i);
 				list[j].flags = 0;
@@ -2602,8 +2606,15 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 					if (ra && ra[i] && ra[i]->reg == STACK_REG(parent_stack, i)) {
 					    /* register already loaded by parent trace */
 						SET_STACK_REG(stack, i, ra[i]->reg);
-					} else if (!zend_jit_store_var(&dasm_state, ssa->var_info[i].type, i, STACK_REG(parent_stack, i))) {
-						goto jit_failure;
+					} else if (STACK_REG(parent_stack, i) < ZREG_NUM) {
+						if (!zend_jit_store_var(&dasm_state, ssa->var_info[i].type, i, STACK_REG(parent_stack, i))) {
+							goto jit_failure;
+						}
+					} else {
+						SET_STACK_REG(stack, i, ZREG_NONE);
+						if (!zend_jit_store_const(&dasm_state, i, STACK_REG(parent_stack, i))) {
+							goto jit_failure;
+						}
 					}
 				}
 			}
@@ -2760,7 +2771,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								op1_def_info, OP1_DEF_REG_ADDR(),
 								res_use_info, res_info,
 								res_addr,
-								(op1_def_info & MAY_BE_LONG) && (op1_def_info & (MAY_BE_DOUBLE|MAY_BE_GUARD)) && zend_may_overflow_ex(opline, ssa_op, op_array, ssa),
+								(op1_def_info & (MAY_BE_DOUBLE|MAY_BE_GUARD)) && zend_may_overflow_ex(opline, ssa_op, op_array, ssa),
 								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
 						}
@@ -2882,7 +2893,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								op2_info, OP2_REG_ADDR(),
 								res_use_info, res_info, res_addr,
 								send_result,
-								(res_info & MAY_BE_LONG) && (res_info & (MAY_BE_DOUBLE|MAY_BE_GUARD)) && zend_may_overflow_ex(opline, ssa_op, op_array, ssa),
+								(op1_info & MAY_BE_LONG) && (op2_info & MAY_BE_LONG) && (res_info & (MAY_BE_DOUBLE|MAY_BE_GUARD)) && zend_may_overflow_ex(opline, ssa_op, op_array, ssa),
 								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
 						}
@@ -2979,7 +2990,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						if (!zend_jit_assign_op(&dasm_state, opline, op_array,
 								op1_info, op1_def_info, OP1_RANGE(),
 								op2_info, OP2_RANGE(),
-								(op1_def_info & MAY_BE_LONG) && (op1_def_info & (MAY_BE_DOUBLE|MAY_BE_GUARD)) && zend_may_overflow_ex(opline, ssa_op, op_array, ssa),
+								(op1_info & MAY_BE_LONG) && (op2_info & MAY_BE_LONG) && (op1_def_info & (MAY_BE_DOUBLE|MAY_BE_GUARD)) && zend_may_overflow_ex(opline, ssa_op, op_array, ssa),
 								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
 						}
@@ -4058,8 +4069,14 @@ done:
 			for (i = 0; i < op_array->last_var + op_array->T; i++) {
 				if (STACK_REG(stack, i) != ZREG_NONE) {
 					// TODO: optimize out useless stores ????
-					if (!zend_jit_store_var(&dasm_state, 1 << STACK_TYPE(stack, i), i, STACK_REG(stack, i))) {
-						goto jit_failure;
+					if (STACK_REG(stack, i) < ZREG_NUM) {
+						if (!zend_jit_store_var(&dasm_state, 1 << STACK_TYPE(stack, i), i, STACK_REG(stack, i))) {
+							goto jit_failure;
+						}
+					} else {
+						if (!zend_jit_store_const(&dasm_state, i, STACK_REG(stack, i))) {
+							goto jit_failure;
+						}
 					}
 				}
 			}
@@ -4183,8 +4200,14 @@ static const void *zend_jit_trace_exit_to_vm(uint32_t trace_num, uint32_t exit_n
 	stack = zend_jit_traces[trace_num].stack_map + zend_jit_traces[trace_num].exit_info[exit_num].stack_offset;
 	for (i = 0; i < stack_size; i++) {
 		if (STACK_REG(stack, i) != ZREG_NONE) {
-			if (!zend_jit_store_var(&dasm_state, 1 << STACK_TYPE(stack, i), i, STACK_REG(stack, i))) {
-				goto jit_failure;
+			if (STACK_REG(stack, i) < ZREG_NUM) {
+				if (!zend_jit_store_var(&dasm_state, 1 << STACK_TYPE(stack, i), i, STACK_REG(stack, i))) {
+					goto jit_failure;
+				}
+			} else {
+				if (!zend_jit_store_const(&dasm_state, i, STACK_REG(stack, i))) {
+					goto jit_failure;
+				}
 			}
 		}
 	}
@@ -4595,7 +4618,11 @@ static void zend_jit_dump_exit_info(zend_jit_trace_info *t)
 				} else {
 					fprintf(stderr, "%s", zend_get_type_by_const(type));
 					if (STACK_REG(stack, j) != ZREG_NONE) {
-						fprintf(stderr, "(%s)", zend_reg_name[STACK_REG(stack, j)]);
+						if (STACK_REG(stack, j) < ZREG_NUM) {
+							fprintf(stderr, "(%s)", zend_reg_name[STACK_REG(stack, j)]);
+						} else {
+							fprintf(stderr, "(const_%d)", STACK_REG(stack, j) - ZREG_NUM);
+						}
 					}
 				}
 			}
@@ -5014,9 +5041,31 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 	for (i = 0; i < stack_size; i++) {
 		if (STACK_REG(stack, i) != ZREG_NONE) {
 			if (STACK_TYPE(stack, i) == IS_LONG) {
-				ZVAL_LONG(EX_VAR_NUM(i), regs->r[STACK_REG(stack, i)]);
+				zend_long val;
+
+				if (STACK_REG(stack, i) < ZREG_NUM) {
+					val = regs->r[STACK_REG(stack, i)];
+				} else if (STACK_REG(stack, i) == ZREG_LONG_MIN) {
+					val = ZEND_LONG_MIN;
+				} else if (STACK_REG(stack, i) == ZREG_LONG_MAX) {
+					val = ZEND_LONG_MAX;
+				} else {
+					ZEND_ASSERT(0);
+				}
+				ZVAL_LONG(EX_VAR_NUM(i), val);
 			} else if (STACK_TYPE(stack, i) == IS_DOUBLE) {
-				ZVAL_DOUBLE(EX_VAR_NUM(i), regs->xmm[STACK_REG(stack, i) - ZREG_XMM0]);
+				double val;
+
+				if (STACK_REG(stack, i) < ZREG_NUM) {
+					val = regs->xmm[STACK_REG(stack, i) - ZREG_XMM0];
+				} else if (STACK_REG(stack, i) == ZREG_LONG_MIN_MINUS_1) {
+					val = (double)ZEND_LONG_MIN - 1.0;
+				} else if (STACK_REG(stack, i) == ZREG_LONG_MAX_PLUS_1) {
+					val = (double)ZEND_LONG_MAX + 1.0;
+				} else {
+					ZEND_ASSERT(0);
+				}
+				ZVAL_DOUBLE(EX_VAR_NUM(i), val);
 			} else {
 				ZEND_ASSERT(0);
 			}
