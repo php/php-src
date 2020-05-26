@@ -384,7 +384,6 @@ grp.h \
 ieeefp.h \
 langinfo.h \
 malloc.h \
-netdb.h \
 poll.h \
 pty.h \
 pwd.h \
