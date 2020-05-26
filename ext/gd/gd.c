@@ -3488,28 +3488,28 @@ PHP_FUNCTION(imagecrop)
 	if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "x", sizeof("x") -1)) != NULL) {
 		rect.x = zval_get_long(tmp);
 	} else {
-		zend_argument_value_error(2, "must have an 'x' key");
+		zend_argument_value_error(2, "must have an \"x\" key");
 		RETURN_THROWS();
 	}
 
 	if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "y", sizeof("y") - 1)) != NULL) {
 		rect.y = zval_get_long(tmp);
 	} else {
-		zend_argument_value_error(2, "must have a 'y' key");
+		zend_argument_value_error(2, "must have a \"y\" key");
 		RETURN_THROWS();
 	}
 
 	if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "width", sizeof("width") - 1)) != NULL) {
 		rect.width = zval_get_long(tmp);
 	} else {
-		zend_argument_value_error(2, "must have a 'width' key");
+		zend_argument_value_error(2, "must have a \"width\" key");
 		RETURN_THROWS();
 	}
 
 	if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "height", sizeof("height") - 1)) != NULL) {
 		rect.height = zval_get_long(tmp);
 	} else {
-		zend_argument_value_error(2, "must have a 'height' key");
+		zend_argument_value_error(2, "must have a \"height\" key");
 		RETURN_THROWS();
 	}
 
@@ -3672,28 +3672,28 @@ PHP_FUNCTION(imageaffine)
 		if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "x", sizeof("x") - 1)) != NULL) {
 			rect.x = zval_get_long(tmp);
 		} else {
-			zend_argument_value_error(3, "must have an 'x' key");
+			zend_argument_value_error(3, "must have an \"x\" key");
 			RETURN_THROWS();
 		}
 
 		if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "y", sizeof("y") - 1)) != NULL) {
 			rect.y = zval_get_long(tmp);
 		} else {
-			zend_argument_value_error(3, "must have a 'y' key");
+			zend_argument_value_error(3, "must have a \"y\" key");
 			RETURN_THROWS();
 		}
 
 		if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "width", sizeof("width") - 1)) != NULL) {
 			rect.width = zval_get_long(tmp);
 		} else {
-			zend_argument_value_error(3, "must have a 'width' key");
+			zend_argument_value_error(3, "must have a \"width\" key");
 			RETURN_THROWS();
 		}
 
 		if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "height", sizeof("height") - 1)) != NULL) {
 			rect.height = zval_get_long(tmp);
 		} else {
-			zend_argument_value_error(3, "must have a 'height' key");
+			zend_argument_value_error(3, "must have a \"height\" key");
 			RETURN_THROWS();
 		}
 		pRect = &rect;
@@ -3736,14 +3736,14 @@ PHP_FUNCTION(imageaffinematrixget)
 			if ((tmp = zend_hash_str_find(Z_ARRVAL_P(options), "x", sizeof("x") - 1)) != NULL) {
 				x = zval_get_double(tmp);
 			} else {
-				zend_argument_value_error(2, "must have an 'x' key");
+				zend_argument_value_error(2, "must have an \"x\" key");
 				RETURN_THROWS();
 			}
 
 			if ((tmp = zend_hash_str_find(Z_ARRVAL_P(options), "y", sizeof("y") - 1)) != NULL) {
 				y = zval_get_double(tmp);
 			} else {
-				zend_argument_value_error(2, "must have a 'y' key");
+				zend_argument_value_error(2, "must have a \"y\" key");
 				RETURN_THROWS();
 			}
 

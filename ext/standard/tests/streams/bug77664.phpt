@@ -10,7 +10,7 @@ stream_wrapper_register('error',ErrorWrapper::class);
 file_get_contents('error://test');
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: Undefined class constant 'self::INVALID' in %sbug77664.php:%d
+Fatal error: Uncaught Error: Undefined constant self::INVALID in %s:%d
 Stack trace:
 #0 %sbug77664.php(%d): file_get_contents('error://test')
 #1 {main}

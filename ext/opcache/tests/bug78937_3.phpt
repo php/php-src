@@ -20,7 +20,7 @@ Warning: Can't preload unlinked class Foo: Unknown parent Bar in %spreload_bug78
 
 Warning: Can't preload unlinked class Bar@anonymous: Unknown parent Bar in %spreload_bug78937.inc on line 3
 
-Fatal error: Uncaught Error: Class 'Bar' not found in %spreload_bug78937.inc:3
+Fatal error: Uncaught Error: Class "Bar" not found in %spreload_bug78937.inc:3
 Stack trace:
 #0 %sbug78937_3.php(3): foo()
 #1 {main}

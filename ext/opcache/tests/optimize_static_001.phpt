@@ -19,5 +19,5 @@ try {
 ?>
 OK
 --EXPECT--
-Exception: Undefined constant 'UNDEFINED_CONST'
+Exception: Undefined constant "UNDEFINED_CONST"
 OK

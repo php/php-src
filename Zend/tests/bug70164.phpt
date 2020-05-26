@@ -24,7 +24,7 @@ __halt_compiler();
 %d
 %d
 
-Fatal error: Uncaught Error: Undefined constant 'Foo\__COMPILER_HALT_OFFSET__' in %s:%d
+Fatal error: Uncaught Error: Undefined constant "Foo\__COMPILER_HALT_OFFSET__" in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

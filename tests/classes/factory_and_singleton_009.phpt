@@ -16,4 +16,4 @@ $obj = new test;
 --EXPECT--
 ===DONE===
 
-Warning: Call to protected test::__destruct() from context '' during shutdown ignored in Unknown on line 0
+Warning: Call to protected test::__destruct() from global scope during shutdown ignored in Unknown on line 0

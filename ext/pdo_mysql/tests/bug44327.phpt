@@ -60,5 +60,5 @@ object(PDORow)#%d (2) {
 string(19) "SELECT id FROM test"
 ----------------------------------
 
-Warning: Attempt to read property 'queryString' on bool in %s on line %d
+Warning: Attempt to read property "queryString" on bool in %s on line %d
 NULL

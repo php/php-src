@@ -43,4 +43,4 @@ array(3) {
   [2]=>
   int(3)
 }
-Exception: Cannot declare self-referencing constant 'self::B'
+Exception: Cannot declare self-referencing constant self::B

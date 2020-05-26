@@ -946,7 +946,7 @@ ZEND_API ZEND_COLD int zend_exception_error(zend_object *ex, int severity) /* {{
 			}
 
 			zend_error_va(E_WARNING, (file && ZSTR_LEN(file) > 0) ? ZSTR_VAL(file) : NULL, line,
-				"Uncaught %s in exception handling during call to %s::__tostring()",
+				"Uncaught %s in exception handling during call to %s::__toString()",
 				ZSTR_VAL(Z_OBJCE(zv)->name), ZSTR_VAL(ce_exception->name));
 
 			if (file) {
@@ -968,7 +968,7 @@ ZEND_API ZEND_COLD int zend_exception_error(zend_object *ex, int severity) /* {{
 		/* We successfully unwound, nothing more to do */
 		result = SUCCESS;
 	} else {
-		zend_error(severity, "Uncaught exception '%s'", ZSTR_VAL(ce_exception->name));
+		zend_error(severity, "Uncaught exception %s", ZSTR_VAL(ce_exception->name));
 	}
 
 	OBJ_RELEASE(ex);

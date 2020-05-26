@@ -47,11 +47,11 @@ try {
 ?>
 --EXPECTF--
 ReflectionClass::__construct() expects exactly 1 parameter, 0 given
-Class  does not exist
-Class 1 does not exist
-Class 1 does not exist
+Class "" does not exist
+Class "1" does not exist
+Class "1" does not exist
 
 Warning: Array to string conversion in %s on line %d
-Class Array does not exist
+Class "Array" does not exist
 ReflectionClass::__construct() expects exactly 1 parameter, 2 given
-Class X does not exist
+Class "X" does not exist

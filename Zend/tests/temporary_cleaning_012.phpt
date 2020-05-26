@@ -17,4 +17,4 @@ try {
 
 ?>
 --EXPECT--
-Access to undeclared static property: Foo::$property
+Access to undeclared static property Foo::$property

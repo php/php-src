@@ -108,13 +108,13 @@ string(7) "ERROR 2"
 string(74) "A1::__construct(): Argument #1 ($name) must be of type string, array given"
 
 string(7) "ERROR 3"
-string(30) "Attribute class 'A2' not found"
+string(30) "Attribute class "A2" not found"
 
 string(7) "ERROR 4"
-string(50) "Attribute constructor of class 'A3' must be public"
+string(48) "Attribute constructor of class A3 must be public"
 
 string(7) "ERROR 5"
-string(71) "Attribute class 'A4' does not have a constructor, cannot pass arguments"
+string(69) "Attribute class A4 does not have a constructor, cannot pass arguments"
 
 string(7) "ERROR 6"
-string(55) "Attempting to use non-attribute class 'A5' as attribute"
+string(55) "Attempting to use non-attribute class "A5" as attribute"

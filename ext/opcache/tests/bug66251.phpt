@@ -13,7 +13,7 @@ const A="hello";
 function getA() {return A;}
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: Undefined constant 'A' in %s:%d
+Fatal error: Uncaught Error: Undefined constant "A" in %s:%d
 Stack trace:
 #0 %s(%d): getA()
 #1 {main}

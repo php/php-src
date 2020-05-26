@@ -30,7 +30,7 @@ echo "Done\n"; // shouldn't be displayed
 --EXPECTF--
 Call show()
 
-Fatal error: Uncaught Error: Call to private method pass::show() from context 'fail' in %s:%d
+Fatal error: Uncaught Error: Call to private method pass::show() from scope fail in %s:%d
 Stack trace:
 #0 %s(%d): fail->do_show()
 #1 {main}

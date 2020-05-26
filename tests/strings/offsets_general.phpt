@@ -20,6 +20,6 @@ string(1) "o"
 bool(true)
 bool(true)
 
-Warning: Illegal string offset 'foo' in %s line %d
+Warning: Illegal string offset "foo" in %s on line %d
 string(1) "f"
 bool(false)

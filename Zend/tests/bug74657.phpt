@@ -19,7 +19,7 @@ try {
 var_dump((new C)->options);
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: Undefined class constant 'I::FOO' in %sbug74657.php:%d
+Fatal error: Uncaught Error: Undefined constant I::FOO in %s:%d
 Stack trace:
 #0 {main}
   thrown in %sbug74657.php on line %d

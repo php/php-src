@@ -11,4 +11,4 @@ $c->bindTo(new stdClass, $scope);
 
 ?>
 --EXPECTF--
-Warning: Class 'AAAABBBB' not found in %s on line %d
+Warning: Class "AAAABBBB" not found in %s on line %d

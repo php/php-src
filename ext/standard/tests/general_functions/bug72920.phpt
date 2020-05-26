@@ -13,4 +13,4 @@ try {
 }
 ?>
 --EXPECT--
-Cannot access private const Foo::C1
+Cannot access private constant Foo::C1

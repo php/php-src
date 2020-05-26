@@ -24,7 +24,7 @@ require(__DIR__ .'/clean.inc');
 --EXPECTF--
 database handler: %s
 
-Fatal error: Uncaught Error: dba_insert(): Argument #1 ($key) must have exactly two elements: 'key' and 'name' in %s.php:%d
+Fatal error: Uncaught Error: dba_insert(): Argument #1 ($key) must have exactly two elements: "key" and "name" in %s.php:%d
 Stack trace:
 #0 %sdba014.php(6): dba_insert(Array, '%s', Resource id #%d)
 #1 {main}

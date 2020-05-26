@@ -109,7 +109,7 @@ Dynamic properties:
 bool(true)
 bool(false)
 Visibility handling:
-Cannot access non-public member A::$p
+Cannot access non-public property A::$p
 bool(false)
 Object type:
 bool(false)

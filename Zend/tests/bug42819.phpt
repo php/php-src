@@ -297,7 +297,7 @@ Array
     [1] => 1
 )
 
-Fatal error: Uncaught Error: Undefined constant 'foo\foo\unknown' in %sbug42819.php:%d
+Fatal error: Uncaught Error: Undefined constant "foo\foo\unknown" in %s:%d
 Stack trace:
 #0 %s(%d): foo\oops()
 #1 {main}

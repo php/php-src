@@ -12,5 +12,5 @@ try {
 var_dump($var);
 ?>
 --EXPECT--
-Attempt to modify property 'prop' on null
+Attempt to modify property "prop" on null
 NULL

@@ -9,4 +9,4 @@ try {
   echo "Exception: {$e->getMessage()}\n";
 }
 --EXPECT--
-Exception: Call to private HashContext::__construct() from invalid context
+Exception: Call to private HashContext::__construct() from global scope

@@ -1167,7 +1167,7 @@ static void reflect_attributes(INTERNAL_FUNCTION_PARAMETERS, HashTable *attribut
 	if (name && (flags & REFLECTION_ATTRIBUTE_IS_INSTANCEOF)) {
 		if (NULL == (base = zend_lookup_class(name))) {
 			if (!EG(exception)) {
-				zend_throw_error(NULL, "Class '%s' not found", ZSTR_VAL(name));
+				zend_throw_error(NULL, "Class \"%s\" not found", ZSTR_VAL(name));
 			}
 
 			RETURN_THROWS();
@@ -2281,7 +2281,7 @@ ZEND_METHOD(ReflectionParameter, __construct)
 					}
 					if ((ce = zend_lookup_class(name)) == NULL) {
 						zend_throw_exception_ex(reflection_exception_ptr, 0,
-								"Class %s does not exist", ZSTR_VAL(name));
+								"Class \"%s\" does not exist", ZSTR_VAL(name));
 						zend_string_release(name);
 						RETURN_THROWS();
 					}
@@ -2513,19 +2513,19 @@ ZEND_METHOD(ReflectionParameter, getClass)
 			ce = param->fptr->common.scope;
 			if (!ce) {
 				zend_throw_exception_ex(reflection_exception_ptr, 0,
-					"Parameter uses 'self' as type hint but function is not a class member!");
+					"Parameter uses \"self\" as type but function is not a class member");
 				RETURN_THROWS();
 			}
 		} else if (0 == zend_binary_strcasecmp(ZSTR_VAL(class_name), ZSTR_LEN(class_name), "parent", sizeof("parent")- 1)) {
 			ce = param->fptr->common.scope;
 			if (!ce) {
 				zend_throw_exception_ex(reflection_exception_ptr, 0,
-					"Parameter uses 'parent' as type hint but function is not a class member!");
+					"Parameter uses \"parent\" as type but function is not a class member");
 				RETURN_THROWS();
 			}
 			if (!ce->parent) {
 				zend_throw_exception_ex(reflection_exception_ptr, 0,
-					"Parameter uses 'parent' as type hint although class does not have a parent!");
+					"Parameter uses \"parent\" as type although class does not have a parent");
 				RETURN_THROWS();
 			}
 			ce = ce->parent;
@@ -2533,7 +2533,7 @@ ZEND_METHOD(ReflectionParameter, getClass)
 			ce = zend_lookup_class(class_name);
 			if (!ce) {
 				zend_throw_exception_ex(reflection_exception_ptr, 0,
-					"Class %s does not exist", ZSTR_VAL(class_name));
+					"Class \"%s\" does not exist", ZSTR_VAL(class_name));
 				RETURN_THROWS();
 			}
 		}
@@ -3023,7 +3023,7 @@ ZEND_METHOD(ReflectionMethod, __construct)
 			if ((ce = zend_lookup_class(Z_STR_P(classname))) == NULL) {
 				if (!EG(exception)) {
 					zend_throw_exception_ex(reflection_exception_ptr, 0,
-							"Class %s does not exist", Z_STRVAL_P(classname));
+							"Class \"%s\" does not exist", Z_STRVAL_P(classname));
 				}
 				if (classname == &ztmp) {
 					zval_ptr_dtor_str(&ztmp);
@@ -3537,7 +3537,7 @@ ZEND_METHOD(ReflectionClassConstant, __construct)
 		case IS_STRING:
 			if ((ce = zend_lookup_class(Z_STR_P(classname))) == NULL) {
 				zend_throw_exception_ex(reflection_exception_ptr, 0,
-						"Class %s does not exist", Z_STRVAL_P(classname));
+						"Class \"%s\" does not exist", Z_STRVAL_P(classname));
 				RETURN_THROWS();
 			}
 			break;
@@ -3552,7 +3552,7 @@ ZEND_METHOD(ReflectionClassConstant, __construct)
 	}
 
 	if ((constant = zend_hash_find_ptr(&ce->constants_table, constname)) == NULL) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0, "Class Constant %s::%s does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(constname));
+		zend_throw_exception_ex(reflection_exception_ptr, 0, "Constant %s::%s does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(constname));
 		RETURN_THROWS();
 	}
 
@@ -3739,7 +3739,7 @@ static void reflection_class_object_ctor(INTERNAL_FUNCTION_PARAMETERS, int is_ob
 
 		if ((ce = zend_lookup_class(Z_STR_P(argument))) == NULL) {
 			if (!EG(exception)) {
-				zend_throw_exception_ex(reflection_exception_ptr, -1, "Class %s does not exist", Z_STRVAL_P(argument));
+				zend_throw_exception_ex(reflection_exception_ptr, -1, "Class \"%s\" does not exist", Z_STRVAL_P(argument));
 			}
 			RETURN_THROWS();
 		}
@@ -3876,7 +3876,7 @@ ZEND_METHOD(ReflectionClass, getStaticPropertyValue)
 			ZVAL_COPY(return_value, def_value);
 		} else {
 			zend_throw_exception_ex(reflection_exception_ptr, 0,
-				"Class %s does not have a property named %s", ZSTR_VAL(ce->name), ZSTR_VAL(name));
+				"Property %s::$%s does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(name));
 		}
 		return;
 	} else {
@@ -4173,7 +4173,7 @@ ZEND_METHOD(ReflectionClass, getMethod)
 		reflection_method_factory(ce, mptr, NULL, return_value);
 	} else {
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
-				"Method %s does not exist", ZSTR_VAL(name));
+				"Method %s::%s() does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(name));
 	}
 	zend_string_release(lc_name);
 }
@@ -4307,7 +4307,7 @@ ZEND_METHOD(ReflectionClass, getProperty)
 		ce2 = zend_lookup_class(classname);
 		if (!ce2) {
 			if (!EG(exception)) {
-				zend_throw_exception_ex(reflection_exception_ptr, -1, "Class %s does not exist", ZSTR_VAL(classname));
+				zend_throw_exception_ex(reflection_exception_ptr, -1, "Class \"%s\" does not exist", ZSTR_VAL(classname));
 			}
 			zend_string_release_ex(classname, 0);
 			RETURN_THROWS();
@@ -4315,7 +4315,7 @@ ZEND_METHOD(ReflectionClass, getProperty)
 		zend_string_release_ex(classname, 0);
 
 		if (!instanceof_function(ce, ce2)) {
-			zend_throw_exception_ex(reflection_exception_ptr, -1, "Fully qualified property name %s::%s does not specify a base class of %s", ZSTR_VAL(ce2->name), str_name, ZSTR_VAL(ce->name));
+			zend_throw_exception_ex(reflection_exception_ptr, -1, "Fully qualified property name %s::$%s does not specify a base class of %s", ZSTR_VAL(ce2->name), str_name, ZSTR_VAL(ce->name));
 			RETURN_THROWS();
 		}
 		ce = ce2;
@@ -4328,8 +4328,7 @@ ZEND_METHOD(ReflectionClass, getProperty)
 			return;
 		}
 	}
-	zend_throw_exception_ex(reflection_exception_ptr, 0,
-			"Property %s does not exist", str_name);
+	zend_throw_exception_ex(reflection_exception_ptr, 0, "Property %s::$%s does not exist", ZSTR_VAL(ce->name), str_name);
 }
 /* }}} */
 
@@ -4980,7 +4979,7 @@ ZEND_METHOD(ReflectionClass, isSubclassOf)
 		case IS_STRING:
 			if ((class_ce = zend_lookup_class(Z_STR_P(class_name))) == NULL) {
 				zend_throw_exception_ex(reflection_exception_ptr, 0,
-						"Class %s does not exist", Z_STRVAL_P(class_name));
+						"Class \"%s\" does not exist", Z_STRVAL_P(class_name));
 				RETURN_THROWS();
 			}
 			break;
@@ -5021,7 +5020,7 @@ ZEND_METHOD(ReflectionClass, implementsInterface)
 		case IS_STRING:
 			if ((interface_ce = zend_lookup_class(Z_STR_P(interface))) == NULL) {
 				zend_throw_exception_ex(reflection_exception_ptr, 0,
-						"Interface %s does not exist", Z_STRVAL_P(interface));
+						"Interface \"%s\" does not exist", Z_STRVAL_P(interface));
 				RETURN_THROWS();
 			}
 			break;
@@ -5200,7 +5199,7 @@ ZEND_METHOD(ReflectionProperty, __construct)
 		case IS_STRING:
 			if ((ce = zend_lookup_class(Z_STR_P(classname))) == NULL) {
 				zend_throw_exception_ex(reflection_exception_ptr, 0,
-						"Class %s does not exist", Z_STRVAL_P(classname));
+						"Class \"%s\" does not exist", Z_STRVAL_P(classname));
 				RETURN_THROWS();
 			}
 			break;
@@ -5372,7 +5371,7 @@ ZEND_METHOD(ReflectionProperty, getValue)
 
 	if (!(prop_get_flags(ref) & ZEND_ACC_PUBLIC) && intern->ignore_visibility == 0) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
-			"Cannot access non-public member %s::$%s",
+			"Cannot access non-public property %s::$%s",
 			ZSTR_VAL(intern->ce->name), ZSTR_VAL(ref->unmangled_name));
 		RETURN_THROWS();
 	}
@@ -5422,7 +5421,7 @@ ZEND_METHOD(ReflectionProperty, setValue)
 
 	if (!(prop_get_flags(ref) & ZEND_ACC_PUBLIC) && intern->ignore_visibility == 0) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
-			"Cannot access non-public member %s::$%s",
+			"Cannot access non-public property %s::$%s",
 			ZSTR_VAL(intern->ce->name), ZSTR_VAL(ref->unmangled_name));
 		RETURN_THROWS();
 	}
@@ -5461,7 +5460,7 @@ ZEND_METHOD(ReflectionProperty, isInitialized)
 
 	if (!(prop_get_flags(ref) & ZEND_ACC_PUBLIC) && intern->ignore_visibility == 0) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
-			"Cannot access non-public member %s::$%s",
+			"Cannot access non-public property %s::$%s",
 			ZSTR_VAL(intern->ce->name), ZSTR_VAL(ref->unmangled_name));
 		RETURN_THROWS();
 	}
@@ -5681,7 +5680,7 @@ ZEND_METHOD(ReflectionExtension, __construct)
 	if ((module = zend_hash_str_find_ptr(&module_registry, lcname, name_len)) == NULL) {
 		free_alloca(lcname, use_heap);
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
-			"Extension %s does not exist", name_str);
+			"Extension \"%s\" does not exist", name_str);
 		RETURN_THROWS();
 	}
 	free_alloca(lcname, use_heap);
@@ -6017,7 +6016,7 @@ ZEND_METHOD(ReflectionZendExtension, __construct)
 	extension = zend_get_extension(name_str);
 	if (!extension) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
-				"Zend Extension %s does not exist", name_str);
+				"Zend Extension \"%s\" does not exist", name_str);
 		RETURN_THROWS();
 	}
 	ZVAL_STRING(reflection_prop_name(object), extension->name);
@@ -6313,7 +6312,7 @@ static int call_attribute_constructor(zend_class_entry *ce, zend_object *obj, zv
 	ZEND_ASSERT(ctor != NULL);
 
 	if (!(ctor->common.fn_flags & ZEND_ACC_PUBLIC)) {
-		zend_throw_error(NULL, "Attribute constructor of class '%s' must be public", ZSTR_VAL(ce->name));
+		zend_throw_error(NULL, "Attribute constructor of class %s must be public", ZSTR_VAL(ce->name));
 		return FAILURE;
 	}
 
@@ -6366,12 +6365,12 @@ ZEND_METHOD(ReflectionAttribute, newInstance)
 	GET_REFLECTION_OBJECT_PTR(attr);
 
 	if (NULL == (ce = zend_lookup_class(attr->data->name))) {
-		zend_throw_error(NULL, "Attribute class '%s' not found", ZSTR_VAL(attr->data->name));
+		zend_throw_error(NULL, "Attribute class \"%s\" not found", ZSTR_VAL(attr->data->name));
 		RETURN_THROWS();
 	}
 
 	if (NULL == (marker = zend_get_attribute_str(ce->attributes, ZEND_STRL("attribute")))) {
-		zend_throw_error(NULL, "Attempting to use non-attribute class '%s' as attribute", ZSTR_VAL(attr->data->name));
+		zend_throw_error(NULL, "Attempting to use non-attribute class \"%s\" as attribute", ZSTR_VAL(attr->data->name));
 		RETURN_THROWS();
 	}
 
@@ -6434,7 +6433,7 @@ ZEND_METHOD(ReflectionAttribute, newInstance)
 		}
 	} else if (argc) {
 		attribute_ctor_cleanup(&obj, args, argc);
-		zend_throw_error(NULL, "Attribute class '%s' does not have a constructor, cannot pass arguments", ZSTR_VAL(ce->name));
+		zend_throw_error(NULL, "Attribute class %s does not have a constructor, cannot pass arguments", ZSTR_VAL(ce->name));
 		RETURN_THROWS();
 	}
 

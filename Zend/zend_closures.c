@@ -209,7 +209,7 @@ ZEND_METHOD(Closure, bind)
 			if (zend_string_equals_literal(class_name, "static")) {
 				ce = closure->func.common.scope;
 			} else if ((ce = zend_lookup_class(class_name)) == NULL) {
-				zend_error(E_WARNING, "Class '%s' not found", ZSTR_VAL(class_name));
+				zend_error(E_WARNING, "Class \"%s\" not found", ZSTR_VAL(class_name));
 				zend_tmp_string_release(tmp_class_name);
 				RETURN_NULL();
 			}
@@ -354,7 +354,7 @@ ZEND_METHOD(Closure, fromCallable)
 
 static ZEND_COLD zend_function *zend_closure_get_constructor(zend_object *object) /* {{{ */
 {
-	zend_throw_error(NULL, "Instantiation of 'Closure' is not allowed");
+	zend_throw_error(NULL, "Instantiation of class Closure is not allowed");
 	return NULL;
 }
 /* }}} */
@@ -597,7 +597,7 @@ static HashTable *zend_closure_get_gc(zend_object *obj, zval **table, int *n) /*
 /* {{{ Private constructor preventing instantiation */
 ZEND_COLD ZEND_METHOD(Closure, __construct)
 {
-	zend_throw_error(NULL, "Instantiation of 'Closure' is not allowed");
+	zend_throw_error(NULL, "Instantiation of class Closure is not allowed");
 }
 /* }}} */
 

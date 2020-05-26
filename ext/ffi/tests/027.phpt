@@ -77,13 +77,13 @@ try {
 }
 ?>
 --EXPECT--
-FFI\ParserException: '[*]' not allowed in other than function prototype scope at line 1
-FFI\ParserException: '[*]' not allowed in other than function prototype scope at line 1
-FFI\ParserException: '[*]' not allowed in other than function prototype scope at line 1
+FFI\ParserException: "[*]" is not allowed in other than function prototype scope at line 1
+FFI\ParserException: "[*]" is not allowed in other than function prototype scope at line 1
+FFI\ParserException: "[*]" is not allowed in other than function prototype scope at line 1
 ok
 FFI\Exception: Cannot instantiate FFI\CData of zero size
-FFI\ParserException: '[]' not allowed at line 1
-FFI\ParserException: '[]' not allowed at line 1
+FFI\ParserException: "[]" is not allowed at line 1
+FFI\ParserException: "[]" is not allowed at line 1
 ok
 ok
 ok

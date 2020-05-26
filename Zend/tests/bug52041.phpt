@@ -48,46 +48,46 @@ var_dump(foo());
 ?>
 --EXPECTF--
 Warning: Undefined variable $x in %s on line %d
-Attempt to assign property 'a' on null
+Attempt to assign property "a" on null
 
 Warning: Undefined variable $x in %s on line %d
-Attempt to modify property 'a' on null
+Attempt to modify property "a" on null
 
 Warning: Undefined variable $x in %s on line %d
-Attempt to increment/decrement property 'a' on null
+Attempt to increment/decrement property "a" on null
 
 Warning: Undefined variable $x in %s on line %d
-Attempt to modify property 'a' on null
+Attempt to modify property "a" on null
 
 Warning: Undefined variable $x in %s on line %d
-Attempt to assign property 'a' on null
+Attempt to assign property "a" on null
 
 Warning: Undefined variable $x in %s on line %d
-Attempt to modify property 'a' on null
-
-Warning: Undefined variable $x in %s on line %d
+Attempt to modify property "a" on null
 
 Warning: Undefined variable $x in %s on line %d
 
 Warning: Undefined variable $x in %s on line %d
 
-Notice: Undefined offset: 0 in %s on line %d
+Warning: Undefined variable $x in %s on line %d
+
+Notice: Undefined array key 0 in %s on line %d
 
 Warning: Undefined variable $x in %s on line %d
 
-Notice: Undefined offset: 0 in %s on line %d
+Notice: Undefined array key 0 in %s on line %d
 
-Notice: Undefined offset: 0 in %s on line %d
-
-Warning: Undefined variable $x in %s on line %d
-
-Notice: Undefined offset: 0 in %s on line %d
+Notice: Undefined array key 0 in %s on line %d
 
 Warning: Undefined variable $x in %s on line %d
 
-Notice: Undefined offset: 0 in %s on line %d
+Notice: Undefined array key 0 in %s on line %d
 
-Notice: Undefined offset: 0 in %s on line %d
+Warning: Undefined variable $x in %s on line %d
+
+Notice: Undefined array key 0 in %s on line %d
+
+Notice: Undefined array key 0 in %s on line %d
 
 Warning: Undefined variable $x in %s on line %d
 NULL

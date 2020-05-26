@@ -21,7 +21,7 @@ B::checkConstants();
 int(1)
 int(2)
 
-Fatal error: Uncaught Error: Undefined class constant 'B::Z' in %s:11
+Fatal error: Uncaught Error: Undefined constant B::Z in %s:%d
 Stack trace:
 #0 %s(15): B::checkConstants()
 #1 {main}

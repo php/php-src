@@ -35,7 +35,7 @@ Warning: Undefined variable $d in %s on line %d
 
 Warning: Trying to access array offset on value of type null in %s on line %d
 
-Warning: Attempt to read property '' on string in %s on line %d
+Warning: Attempt to read property "" on string in %s on line %d
 bool(false)
 bool(true)
 bool(false)

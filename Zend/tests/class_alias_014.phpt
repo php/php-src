@@ -12,4 +12,4 @@ class_alias('bar', 'baz');
 
 ?>
 --EXPECTF--
-Warning: Class 'bar' not found in %s on line %d
+Warning: Class "bar" not found in %s on line %d

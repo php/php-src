@@ -21,6 +21,6 @@ try {
 ?>
 ok
 --EXPECT--
-FFI\ParserException: Incomplete 'struct X' at line 1
+FFI\ParserException: Incomplete struct "X" at line 1
 ok
 ok

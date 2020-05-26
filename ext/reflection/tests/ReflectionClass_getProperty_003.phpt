@@ -110,9 +110,9 @@ object(ReflectionProperty)#%d (2) {
   ["class"]=>
   string(1) "A"
 }
-Cannot access non-public member C::$protA
+Cannot access non-public property C::$protA
 --- (Reflecting on privA) ---
-Property privA does not exist
+Property C::$privA does not exist
 --- (Reflecting on pubB) ---
 object(ReflectionProperty)#%d (2) {
   ["name"]=>
@@ -128,9 +128,9 @@ object(ReflectionProperty)#%d (2) {
   ["class"]=>
   string(1) "B"
 }
-Cannot access non-public member C::$protB
+Cannot access non-public property C::$protB
 --- (Reflecting on privB) ---
-Property privB does not exist
+Property C::$privB does not exist
 --- (Reflecting on pubC) ---
 object(ReflectionProperty)#%d (2) {
   ["name"]=>
@@ -146,7 +146,7 @@ object(ReflectionProperty)#%d (2) {
   ["class"]=>
   string(1) "C"
 }
-Cannot access non-public member C::$protC
+Cannot access non-public property C::$protC
 --- (Reflecting on privC) ---
 object(ReflectionProperty)#%d (2) {
   ["name"]=>
@@ -154,9 +154,9 @@ object(ReflectionProperty)#%d (2) {
   ["class"]=>
   string(1) "C"
 }
-Cannot access non-public member C::$privC
+Cannot access non-public property C::$privC
 --- (Reflecting on doesNotExist) ---
-Property doesNotExist does not exist
+Property C::$doesNotExist does not exist
 --- (Reflecting on A::pubC) ---
 object(ReflectionProperty)#%d (2) {
   ["name"]=>
@@ -172,7 +172,7 @@ object(ReflectionProperty)#%d (2) {
   ["class"]=>
   string(1) "A"
 }
-Cannot access non-public member A::$protC
+Cannot access non-public property A::$protC
 --- (Reflecting on A::privC) ---
 object(ReflectionProperty)#%d (2) {
   ["name"]=>
@@ -180,7 +180,7 @@ object(ReflectionProperty)#%d (2) {
   ["class"]=>
   string(1) "A"
 }
-Cannot access non-public member A::$privC
+Cannot access non-public property A::$privC
 --- (Reflecting on B::pubC) ---
 object(ReflectionProperty)#%d (2) {
   ["name"]=>
@@ -196,7 +196,7 @@ object(ReflectionProperty)#%d (2) {
   ["class"]=>
   string(1) "B"
 }
-Cannot access non-public member B::$protC
+Cannot access non-public property B::$protC
 --- (Reflecting on B::privC) ---
 object(ReflectionProperty)#%d (2) {
   ["name"]=>
@@ -204,7 +204,7 @@ object(ReflectionProperty)#%d (2) {
   ["class"]=>
   string(1) "B"
 }
-Cannot access non-public member B::$privC
+Cannot access non-public property B::$privC
 --- (Reflecting on c::pubC) ---
 object(ReflectionProperty)#%d (2) {
   ["name"]=>
@@ -214,7 +214,7 @@ object(ReflectionProperty)#%d (2) {
 }
 string(9) "pubC in C"
 --- (Reflecting on c::PUBC) ---
-Property PUBC does not exist
+Property C::$PUBC does not exist
 --- (Reflecting on C::pubC) ---
 object(ReflectionProperty)#%d (2) {
   ["name"]=>
@@ -230,7 +230,7 @@ object(ReflectionProperty)#%d (2) {
   ["class"]=>
   string(1) "C"
 }
-Cannot access non-public member C::$protC
+Cannot access non-public property C::$protC
 --- (Reflecting on C::privC) ---
 object(ReflectionProperty)#%d (2) {
   ["name"]=>
@@ -238,14 +238,14 @@ object(ReflectionProperty)#%d (2) {
   ["class"]=>
   string(1) "C"
 }
-Cannot access non-public member C::$privC
+Cannot access non-public property C::$privC
 --- (Reflecting on X::pubC) ---
-Fully qualified property name X::pubC does not specify a base class of C
+Fully qualified property name X::$pubC does not specify a base class of C
 --- (Reflecting on X::protC) ---
-Fully qualified property name X::protC does not specify a base class of C
+Fully qualified property name X::$protC does not specify a base class of C
 --- (Reflecting on X::privC) ---
-Fully qualified property name X::privC does not specify a base class of C
+Fully qualified property name X::$privC does not specify a base class of C
 --- (Reflecting on X::doesNotExist) ---
-Fully qualified property name X::doesNotExist does not specify a base class of C
+Fully qualified property name X::$doesNotExist does not specify a base class of C
 --- (Reflecting on doesNotexist::doesNotExist) ---
-Class doesnotexist does not exist
+Class "doesnotexist" does not exist

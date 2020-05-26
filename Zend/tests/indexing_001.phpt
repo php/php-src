@@ -75,14 +75,14 @@ array(1) {
   }
 }
 
-Warning: Illegal string offset 'foo' in %s on line %d
+Warning: Illegal string offset "foo" in %s on line %d
 
 Warning: Array to string conversion in %s on line %d
 
 Warning: Only the first byte will be assigned to the string offset in %s on line %d
 string(1) "A"
 
-Warning: Illegal string offset 'foo' in %s on line %d
+Warning: Illegal string offset "foo" in %s on line %d
 
 Warning: Array to string conversion in %s on line %d
 

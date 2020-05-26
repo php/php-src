@@ -8774,7 +8774,7 @@ void zend_compile_class_name(znode *result, zend_ast *ast) /* {{{ */
 		if (expr_node.op_type == IS_CONST) {
 			/* Unlikely case that happen if class_ast is constant folded.
 			 * Handle it here, to avoid needing a CONST specialization in the VM. */
-			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use ::class on value of type %s",
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use \"::class\" on value of type %s",
 				zend_zval_type_name(&expr_node.u.constant));
 		}
 

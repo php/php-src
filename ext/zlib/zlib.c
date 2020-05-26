@@ -716,7 +716,7 @@ PHP_FUNCTION(name) \
 		} \
 	} \
 	if (level < -1 || level > 9) { \
-		zend_value_error("Compression level (" ZEND_LONG_FMT ") must be within -1..9", level); \
+		zend_argument_value_error(default_encoding ? 2 : 3, "must be between -1 and 9"); \
 		RETURN_THROWS(); \
 	} \
 	switch (encoding) { \
@@ -725,7 +725,7 @@ PHP_FUNCTION(name) \
 		case PHP_ZLIB_ENCODING_DEFLATE: \
 			break; \
 		default: \
-			zend_value_error("Encoding mode must be either ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP or ZLIB_ENCODING_DEFLATE"); \
+			zend_argument_value_error(default_encoding ? 3 : 2, "must be either ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP, or ZLIB_ENCODING_DEFLATE"); \
 			RETURN_THROWS(); \
 	} \
 	if ((out = php_zlib_encode(ZSTR_VAL(in), ZSTR_LEN(in), encoding, level)) == NULL) { \
@@ -745,7 +745,7 @@ PHP_FUNCTION(name) \
 		RETURN_THROWS(); \
 	} \
 	if (max_len < 0) { \
-		zend_value_error("Length (" ZEND_LONG_FMT ") must be greater or equal zero", max_len); \
+		zend_argument_value_error(2, "must be greater than or equal to 0"); \
 		RETURN_THROWS(); \
 	} \
 	if (SUCCESS != php_zlib_decode(in_buf, in_len, &out_buf, &out_len, encoding, max_len)) { \

@@ -9,4 +9,4 @@ class A {
 
 ?>
 --EXPECTF--
-Fatal error: Trait 'abc' not found in %s on line %d
+Fatal error: Trait "abc" not found in %s on line %d

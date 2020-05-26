@@ -52,7 +52,7 @@ foreach($funcs as $idx => $func)
 ?>
 --EXPECTF--
 string(22) "MyAutoLoader::notExist"
-spl_autoload_register(): Argument #1 ($autoload_function) must be a valid callback, class 'MyAutoLoader' does not have a method 'notExist'
+spl_autoload_register(): Argument #1 ($autoload_function) must be a valid callback, class MyAutoLoader does not have a method "notExist"
 
 string(22) "MyAutoLoader::noAccess"
 spl_autoload_register(): Argument #1 ($autoload_function) must be a valid callback, cannot access protected method MyAutoLoader::noAccess()
@@ -69,7 +69,7 @@ array(2) {
   [1]=>
   string(8) "notExist"
 }
-spl_autoload_register(): Argument #1 ($autoload_function) must be a valid callback, class 'MyAutoLoader' does not have a method 'notExist'
+spl_autoload_register(): Argument #1 ($autoload_function) must be a valid callback, class MyAutoLoader does not have a method "notExist"
 
 array(2) {
   [0]=>
@@ -102,7 +102,7 @@ array(2) {
   [1]=>
   string(8) "notExist"
 }
-spl_autoload_register(): Argument #1 ($autoload_function) must be a valid callback, class 'MyAutoLoader' does not have a method 'notExist'
+spl_autoload_register(): Argument #1 ($autoload_function) must be a valid callback, class MyAutoLoader does not have a method "notExist"
 
 array(2) {
   [0]=>

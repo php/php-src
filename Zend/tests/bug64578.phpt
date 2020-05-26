@@ -10,5 +10,5 @@ $y = '1';
 x($y);
 print_r($y);
 --EXPECT--
-string(25) "Illegal string offset 'a'"
+string(25) "Illegal string offset "a""
 1

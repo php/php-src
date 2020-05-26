@@ -313,13 +313,13 @@ fetch_dim_string:
 				if (Z_TYPE_P(retval) == IS_UNDEF) {
 					switch (type) {
 						case BP_VAR_R:
-							zend_error(E_NOTICE, "Undefined index: %s", ZSTR_VAL(offset_key));
+							zend_error(E_NOTICE, "Undefined array key \"%s\"", ZSTR_VAL(offset_key));
 						case BP_VAR_UNSET:
 						case BP_VAR_IS:
 							retval = &EG(uninitialized_zval);
 							break;
 						case BP_VAR_RW:
-							zend_error(E_NOTICE,"Undefined index: %s", ZSTR_VAL(offset_key));
+							zend_error(E_NOTICE,"Undefined array key \"%s\"", ZSTR_VAL(offset_key));
 						case BP_VAR_W: {
 							ZVAL_NULL(retval);
 						}
@@ -329,13 +329,13 @@ fetch_dim_string:
 		} else {
 			switch (type) {
 				case BP_VAR_R:
-					zend_error(E_NOTICE, "Undefined index: %s", ZSTR_VAL(offset_key));
+					zend_error(E_NOTICE, "Undefined array key \"%s\"", ZSTR_VAL(offset_key));
 				case BP_VAR_UNSET:
 				case BP_VAR_IS:
 					retval = &EG(uninitialized_zval);
 					break;
 				case BP_VAR_RW:
-					zend_error(E_NOTICE,"Undefined index: %s", ZSTR_VAL(offset_key));
+					zend_error(E_NOTICE,"Undefined array key \"%s\"", ZSTR_VAL(offset_key));
 				case BP_VAR_W: {
 				    zval value;
 					ZVAL_NULL(&value);
@@ -363,13 +363,13 @@ num_index:
 		if ((retval = zend_hash_index_find(ht, index)) == NULL) {
 			switch (type) {
 				case BP_VAR_R:
-					zend_error(E_NOTICE, "Undefined offset: " ZEND_LONG_FMT, index);
+					zend_error(E_NOTICE, "Undefined array key " ZEND_LONG_FMT, index);
 				case BP_VAR_UNSET:
 				case BP_VAR_IS:
 					retval = &EG(uninitialized_zval);
 					break;
 				case BP_VAR_RW:
-					zend_error(E_NOTICE, "Undefined offset: " ZEND_LONG_FMT, index);
+					zend_error(E_NOTICE, "Undefined array key " ZEND_LONG_FMT, index);
 				case BP_VAR_W: {
 				    zval value;
 					ZVAL_UNDEF(&value);
@@ -541,7 +541,7 @@ try_again:
 		ht = spl_array_get_hash_table(intern);
 		if (ht == &EG(symbol_table)) {
 			if (zend_delete_global_variable(Z_STR_P(offset))) {
-				zend_error(E_NOTICE,"Undefined index: %s", Z_STRVAL_P(offset));
+				zend_error(E_NOTICE,"Undefined array key \"%s\"", Z_STRVAL_P(offset));
 			}
 		} else {
 			zval *data = zend_symtable_find(ht, Z_STR_P(offset));
@@ -550,7 +550,7 @@ try_again:
 				if (Z_TYPE_P(data) == IS_INDIRECT) {
 					data = Z_INDIRECT_P(data);
 					if (Z_TYPE_P(data) == IS_UNDEF) {
-						zend_error(E_NOTICE,"Undefined index: %s", Z_STRVAL_P(offset));
+						zend_error(E_NOTICE,"Undefined array key \"%s\"", Z_STRVAL_P(offset));
 					} else {
 						zval_ptr_dtor(data);
 						ZVAL_UNDEF(data);
@@ -561,10 +561,10 @@ try_again:
 						}
 					}
 				} else if (zend_symtable_del(ht, Z_STR_P(offset)) == FAILURE) {
-					zend_error(E_NOTICE,"Undefined index: %s", Z_STRVAL_P(offset));
+					zend_error(E_NOTICE,"Undefined array key \"%s\"", Z_STRVAL_P(offset));
 				}
 			} else {
-				zend_error(E_NOTICE,"Undefined index: %s", Z_STRVAL_P(offset));
+				zend_error(E_NOTICE,"Undefined array key \"%s\"", Z_STRVAL_P(offset));
 			}
 		}
 		break;
@@ -585,7 +585,7 @@ try_again:
 num_index:
 		ht = spl_array_get_hash_table(intern);
 		if (zend_hash_index_del(ht, index) == FAILURE) {
-			zend_error(E_NOTICE,"Undefined offset: " ZEND_LONG_FMT, index);
+			zend_error(E_NOTICE,"Undefined array key " ZEND_LONG_FMT, index);
 		}
 		break;
 	case IS_REFERENCE:

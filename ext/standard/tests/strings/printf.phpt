@@ -683,7 +683,7 @@ Notice: printf(): Requested precision of 988 digits was truncated to PHP maximum
 12345678900.00000000000000000000000000000000000000000000000000000
 
 *** Output for invalid width(-15) specifier ***
-Unknown format specifier '-'
+Unknown format specifier "-"
 
 *** Output for '%F' as the format parameter ***
 12345678900.000000

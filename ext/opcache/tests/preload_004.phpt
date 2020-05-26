@@ -15,6 +15,6 @@ if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows
 var_dump(class_exists('Foo'));
 ?>
 --EXPECT--
-Fatal error: Undefined class constant 'self::DOES_NOT_EXIST' in Unknown on line 0
+Fatal error: Undefined constant self::DOES_NOT_EXIST in Unknown on line 0
 
 Fatal error: Failed to resolve initializers of class Foo during preloading in Unknown on line 0

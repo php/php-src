@@ -54,4 +54,4 @@ Static method called!
 Static method called with args: arg1, arg2, arg3
 Static method called with args: arg1, arg2, arg3
 Call to undefined method TestClass::undefinedMethod()
-Class 'UndefinedClass' not found
+Class "UndefinedClass" not found

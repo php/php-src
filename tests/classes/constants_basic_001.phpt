@@ -79,7 +79,7 @@ string(6) "hello2"
 
 Expecting fatal error:
 
-Fatal error: Uncaught Error: Undefined class constant 'C::c19' in %s:%d
+Fatal error: Uncaught Error: Undefined constant C::c19 in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

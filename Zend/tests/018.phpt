@@ -18,7 +18,7 @@ var_dump(constant("TEST_CONST2"));
 echo "Done\n";
 ?>
 --EXPECT--
-Undefined constant ''
+Undefined constant ""
 int(1)
 string(4) "test"
 Done

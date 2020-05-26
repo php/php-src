@@ -32,7 +32,7 @@ value3
 value3
 value3
 
-Fatal error: Uncaught Error: Undefined constant 'NS1\ns2\coNSt1' in %sbug46304.php:%d
+Fatal error: Uncaught Error: Undefined constant "NS1\ns2\coNSt1" in %s:%d
 Stack trace:
 #0 {main}
   thrown in %sbug46304.php on line %d

@@ -81,7 +81,7 @@ Array
 (
 )
 
-Warning: ob_start(): class 'f' not found in %s on line %d
+Warning: ob_start(): class "f" not found in %s on line %d
 
 Notice: ob_start(): Failed to create buffer in %s on line %d
 bool(false)

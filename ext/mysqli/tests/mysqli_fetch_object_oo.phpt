@@ -138,4 +138,4 @@ NULL
 NULL
 mysqli_result object is already closed
 
-Fatal error: Class 'this_class_does_not_exist' not found in %s on line %d
+Fatal error: Class "this_class_does_not_exist" not found in %s on line %d

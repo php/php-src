@@ -13,4 +13,4 @@ try {
 }
 ?>
 --EXPECT--
-Class 'BAR' not found
+Class "BAR" not found

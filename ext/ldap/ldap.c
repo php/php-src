@@ -284,7 +284,7 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 	size_t num_tmpstrings1 = 0, num_tmpstrings2 = 0;
 
 	if ((val = zend_hash_str_find(Z_ARRVAL_P(array), "oid", sizeof("oid") - 1)) == NULL) {
-		php_error_docref(NULL, E_WARNING, "Control must have an oid key");
+		php_error_docref(NULL, E_WARNING, "Control must have an \"oid\" key");
 		return -1;
 	}
 

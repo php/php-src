@@ -25,6 +25,6 @@ try {
 
 ?>
 --EXPECT--
-Undefined constant 'foo\unknown'
-Undefined constant 'foo\unknown'
-Undefined constant 'unknown'
+Undefined constant "foo\unknown"
+Undefined constant "foo\unknown"
+Undefined constant "unknown"

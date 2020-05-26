@@ -14,4 +14,4 @@ try {
 
 ?>
 --EXPECT--
-Undefined class constant 'A::B1'
+Undefined constant A::B1

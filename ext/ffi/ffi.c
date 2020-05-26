@@ -3448,7 +3448,7 @@ static void zend_ffi_throw_parser_error(const char *format, ...) /* {{{ */
 static int zend_ffi_validate_vla(zend_ffi_type *type) /* {{{ */
 {
 	if (!FFI_G(allow_vla) && (type->attr & ZEND_FFI_ATTR_VLA)) {
-		zend_ffi_throw_parser_error("'[*]' not allowed in other than function prototype scope at line %d", FFI_G(line));
+		zend_ffi_throw_parser_error("\"[*]\" is not allowed in other than function prototype scope at line %d", FFI_G(line));
 		return FAILURE;
 	}
 	return SUCCESS;
@@ -3465,11 +3465,11 @@ static int zend_ffi_validate_incomplete_type(zend_ffi_type *type, zend_bool allo
 			ZEND_HASH_FOREACH_STR_KEY_PTR(FFI_G(tags), key, tag) {
 				if (ZEND_FFI_TYPE(tag->type) == type) {
 					if (type->kind == ZEND_FFI_TYPE_ENUM) {
-						zend_ffi_throw_parser_error("Incomplete 'enum %s' at line %d", ZSTR_VAL(key), FFI_G(line));
+						zend_ffi_throw_parser_error("Incomplete enum \"%s\" at line %d", ZSTR_VAL(key), FFI_G(line));
 					} else if (type->attr & ZEND_FFI_ATTR_UNION) {
-						zend_ffi_throw_parser_error("Incomplete 'union %s' at line %d", ZSTR_VAL(key), FFI_G(line));
+						zend_ffi_throw_parser_error("Incomplete union \"%s\" at line %d", ZSTR_VAL(key), FFI_G(line));
 					} else {
-						zend_ffi_throw_parser_error("Incomplete 'struct %s' at line %d", ZSTR_VAL(key), FFI_G(line));
+						zend_ffi_throw_parser_error("Incomplete struct \"%s\" at line %d", ZSTR_VAL(key), FFI_G(line));
 					}
 					return FAILURE;
 				}
@@ -3481,7 +3481,7 @@ static int zend_ffi_validate_incomplete_type(zend_ffi_type *type, zend_bool allo
 
 			ZEND_HASH_FOREACH_STR_KEY_PTR(FFI_G(symbols), key, sym) {
 				if (type == ZEND_FFI_TYPE(sym->type)) {
-					zend_ffi_throw_parser_error("Incomplete C type '%s' at line %d", ZSTR_VAL(key), FFI_G(line));
+					zend_ffi_throw_parser_error("Incomplete C type %s at line %d", ZSTR_VAL(key), FFI_G(line));
 					return FAILURE;
 				}
 			} ZEND_HASH_FOREACH_END();
@@ -3489,10 +3489,10 @@ static int zend_ffi_validate_incomplete_type(zend_ffi_type *type, zend_bool allo
 		zend_ffi_throw_parser_error("Incomplete type at line %d", FFI_G(line));
 		return FAILURE;
 	} else if (!allow_incomplete_array && (type->attr & ZEND_FFI_ATTR_INCOMPLETE_ARRAY)) {
-		zend_ffi_throw_parser_error("'[]' not allowed at line %d", FFI_G(line));
+		zend_ffi_throw_parser_error("\"[]\" is not allowed at line %d", FFI_G(line));
 		return FAILURE;
 	} else if (!FFI_G(allow_vla) && (type->attr & ZEND_FFI_ATTR_VLA)) {
-		zend_ffi_throw_parser_error("'[*]' not allowed in other than function prototype scope at line %d", FFI_G(line));
+		zend_ffi_throw_parser_error("\"[*]\" is not allowed in other than function prototype scope at line %d", FFI_G(line));
 		return FAILURE;
 	}
 	return SUCCESS;
@@ -3502,7 +3502,7 @@ static int zend_ffi_validate_incomplete_type(zend_ffi_type *type, zend_bool allo
 static int zend_ffi_validate_type(zend_ffi_type *type, zend_bool allow_incomplete_tag, zend_bool allow_incomplete_array) /* {{{ */
 {
 	if (type->kind == ZEND_FFI_TYPE_VOID) {
-		zend_ffi_throw_parser_error("'void' type is not allowed at line %d", FFI_G(line));
+		zend_ffi_throw_parser_error("void type is not allowed at line %d", FFI_G(line));
 		return FAILURE;
 	}
 	return zend_ffi_validate_incomplete_type(type, allow_incomplete_tag, allow_incomplete_array);
@@ -3512,7 +3512,7 @@ static int zend_ffi_validate_type(zend_ffi_type *type, zend_bool allow_incomplet
 static int zend_ffi_validate_var_type(zend_ffi_type *type, zend_bool allow_incomplete_array) /* {{{ */
 {
 	if (type->kind == ZEND_FFI_TYPE_FUNC) {
-		zend_ffi_throw_parser_error("'function' type is not allowed at line %d", FFI_G(line));
+		zend_ffi_throw_parser_error("function type is not allowed at line %d", FFI_G(line));
 		return FAILURE;
 	}
 	return zend_ffi_validate_type(type, 0, allow_incomplete_array);
@@ -4043,7 +4043,7 @@ ZEND_METHOD(FFI, arrayType) /* {{{ */
 		zend_throw_error(zend_ffi_exception_ce, "Only the leftmost array can be undimensioned");
 		RETURN_THROWS();
 	} else if (type->kind == ZEND_FFI_TYPE_VOID) {
-		zend_throw_error(zend_ffi_exception_ce, "Array of 'void' is not allowed");
+		zend_throw_error(zend_ffi_exception_ce, "Array of void type is not allowed");
 		RETURN_THROWS();
 	} else if (type->attr & ZEND_FFI_ATTR_INCOMPLETE_TAG) {
 		zend_throw_error(zend_ffi_exception_ce, "Array of incomplete type is not allowed");
@@ -4545,7 +4545,7 @@ static char *zend_ffi_parse_directives(const char *filename, char *code_pos, cha
 
 static ZEND_COLD zend_function *zend_fake_get_constructor(zend_object *object) /* {{{ */
 {
-	zend_throw_error(NULL, "Instantiation of '%s' is not allowed", ZSTR_VAL(object->ce->name));
+	zend_throw_error(NULL, "Instantiation of %s is not allowed", ZSTR_VAL(object->ce->name));
 	return NULL;
 }
 /* }}} */
@@ -5281,10 +5281,10 @@ static void zend_ffi_finalize_type(zend_ffi_dcl *dcl) /* {{{ */
 			case ZEND_FFI_DCL_FLOAT|ZEND_FFI_DCL_COMPLEX:
 			case ZEND_FFI_DCL_DOUBLE|ZEND_FFI_DCL_COMPLEX:
 			case ZEND_FFI_DCL_DOUBLE|ZEND_FFI_DCL_LONG|ZEND_FFI_DCL_COMPLEX:
-				zend_ffi_parser_error("unsupported type '_Complex' at line %d", FFI_G(line));
+				zend_ffi_parser_error("Unsupported type _Complex at line %d", FFI_G(line));
 				break;
 			default:
-				zend_ffi_parser_error("unsupported type specifier combination at line %d", FFI_G(line));
+				zend_ffi_parser_error("Unsupported type specifier combination at line %d", FFI_G(line));
 				break;
 		}
 		dcl->flags &= ~ZEND_FFI_DCL_TYPE_SPECIFIERS;
@@ -5332,7 +5332,7 @@ void zend_ffi_resolve_typedef(const char *name, size_t name_len, zend_ffi_dcl *d
 		dcl->type = type;
 		return;
 	}
-	zend_ffi_parser_error("undefined C type '%.*s' at line %d", name_len, name, FFI_G(line));
+	zend_ffi_parser_error("Undefined C type \"%.*s\" at line %d", name_len, name, FFI_G(line));
 }
 /* }}} */
 
@@ -5446,12 +5446,12 @@ void zend_ffi_add_enum_val(zend_ffi_dcl *enum_dcl, const char *name, size_t name
 		}
 		value = val->u64;
 	} else {
-		zend_ffi_parser_error("enumerator value '%.*s' must be an integer at line %d", name_len, name, FFI_G(line));
+		zend_ffi_parser_error("Enumerator value \"%.*s\" must be an integer at line %d", name_len, name, FFI_G(line));
 		return;
 	}
 
 	if (overflow) {
-		zend_ffi_parser_error("overflow in enumeration values '%.*s' at line %d", name_len, name, FFI_G(line));
+		zend_ffi_parser_error("Overflow in enumeration values \"%.*s\" at line %d", name_len, name, FFI_G(line));
 		return;
 	}
 
@@ -5495,7 +5495,7 @@ void zend_ffi_add_enum_val(zend_ffi_dcl *enum_dcl, const char *name, size_t name
 	}
 	sym = zend_hash_str_find_ptr(FFI_G(symbols), name, name_len);
 	if (sym) {
-		zend_ffi_parser_error("redeclaration of '%.*s' at line %d", name_len, name, FFI_G(line));
+		zend_ffi_parser_error("Redeclaration of \"%.*s\" at line %d", name_len, name, FFI_G(line));
 	} else {
 		sym = pemalloc(sizeof(zend_ffi_symbol), FFI_G(persistent));
 		sym->kind  = ZEND_FFI_SYM_CONST;
@@ -5597,7 +5597,7 @@ void zend_ffi_add_field(zend_ffi_dcl *struct_dcl, const char *name, size_t name_
 	if (!zend_hash_str_add_ptr(&struct_type->record.fields, name, name_len, field)) {
 		zend_ffi_type_dtor(field->type);
 		pefree(field, FFI_G(persistent));
-		zend_ffi_parser_error("duplicate field name '%.*s' at line %d", name_len, name, FFI_G(line));
+		zend_ffi_parser_error("Duplicate field name \"%.*s\" at line %d", name_len, name, FFI_G(line));
 	}
 }
 /* }}} */
@@ -5614,7 +5614,7 @@ void zend_ffi_add_anonymous_field(zend_ffi_dcl *struct_dcl, zend_ffi_dcl *field_
 	field_type = ZEND_FFI_TYPE(field_dcl->type);
 	if (field_type->kind != ZEND_FFI_TYPE_STRUCT) {
 		zend_ffi_cleanup_dcl(field_dcl);
-		zend_ffi_parser_error("declaration does not declare anything at line %d", FFI_G(line));
+		zend_ffi_parser_error("Declaration does not declare anything at line %d", FFI_G(line));
 		return;
 	}
 
@@ -5651,7 +5651,7 @@ void zend_ffi_add_anonymous_field(zend_ffi_dcl *struct_dcl, zend_ffi_dcl *field_
 			if (!zend_hash_add_ptr(&struct_type->record.fields, key, new_field)) {
 				zend_ffi_type_dtor(new_field->type);
 				pefree(new_field, FFI_G(persistent));
-				zend_ffi_parser_error("duplicate field name '%s' at line %d", ZSTR_VAL(key), FFI_G(line));
+				zend_ffi_parser_error("Duplicate field name \"%s\" at line %d", ZSTR_VAL(key), FFI_G(line));
 				return;
 			}
 		} else {
@@ -5686,37 +5686,37 @@ void zend_ffi_add_bit_field(zend_ffi_dcl *struct_dcl, const char *name, size_t n
 
 	if (field_type->kind < ZEND_FFI_TYPE_UINT8 || field_type->kind > ZEND_FFI_TYPE_BOOL) {
 		zend_ffi_cleanup_dcl(field_dcl);
-		zend_ffi_parser_error("wrong type of bit field '%.*s' at line %d", name ? name_len : sizeof("<anonymous>")-1, name ? name : "<anonymous>", FFI_G(line));
+		zend_ffi_parser_error("Wrong type of bit field \"%.*s\" at line %d", name ? name_len : sizeof("<anonymous>")-1, name ? name : "<anonymous>", FFI_G(line));
 	}
 
 	if (bits->kind == ZEND_FFI_VAL_INT32 || bits->kind == ZEND_FFI_VAL_INT64) {
 		if (bits->i64 < 0) {
 			zend_ffi_cleanup_dcl(field_dcl);
-			zend_ffi_parser_error("negative width in bit-field '%.*s' at line %d", name ? name_len : sizeof("<anonymous>")-1, name ? name : "<anonymous>", FFI_G(line));
+			zend_ffi_parser_error("Negative width in bit-field \"%.*s\" at line %d", name ? name_len : sizeof("<anonymous>")-1, name ? name : "<anonymous>", FFI_G(line));
 		} else if (bits->i64 == 0) {
 			zend_ffi_cleanup_dcl(field_dcl);
 			if (name) {
-				zend_ffi_parser_error("zero width in bit-field '%.*s' at line %d", name ? name_len : sizeof("<anonymous>")-1, name ? name : "<anonymous>", FFI_G(line));
+				zend_ffi_parser_error("Zero width in bit-field \"%.*s\" at line %d", name ? name_len : sizeof("<anonymous>")-1, name ? name : "<anonymous>", FFI_G(line));
 			}
 			return;
 		} else if (bits->i64 > field_type->size * 8) {
 			zend_ffi_cleanup_dcl(field_dcl);
-			zend_ffi_parser_error("width of '%.*s' exceeds its type at line %d", name ? name_len : sizeof("<anonymous>")-1, name ? name : "<anonymous>", FFI_G(line));
+			zend_ffi_parser_error("Width of \"%.*s\" exceeds its type at line %d", name ? name_len : sizeof("<anonymous>")-1, name ? name : "<anonymous>", FFI_G(line));
 		}
 	} else if (bits->kind == ZEND_FFI_VAL_UINT32 || bits->kind == ZEND_FFI_VAL_UINT64) {
 		if (bits->u64 == 0) {
 			zend_ffi_cleanup_dcl(field_dcl);
 			if (name) {
-				zend_ffi_parser_error("zero width in bit-field '%.*s' at line %d", name ? name_len : sizeof("<anonymous>")-1, name ? name : "<anonymous>", FFI_G(line));
+				zend_ffi_parser_error("Zero width in bit-field \"%.*s\" at line %d", name ? name_len : sizeof("<anonymous>")-1, name ? name : "<anonymous>", FFI_G(line));
 			}
 			return;
 		} else if (bits->u64 > field_type->size * 8) {
 			zend_ffi_cleanup_dcl(field_dcl);
-			zend_ffi_parser_error("width of '%.*s' exceeds its type at line %d", name ? name_len : sizeof("<anonymous>")-1, name ? name : "<anonymous>", FFI_G(line));
+			zend_ffi_parser_error("Width of \"%.*s\" exceeds its type at line %d", name ? name_len : sizeof("<anonymous>")-1, name ? name : "<anonymous>", FFI_G(line));
 		}
 	} else {
 		zend_ffi_cleanup_dcl(field_dcl);
-		zend_ffi_parser_error("bit field '%.*s' width not an integer constant at line %d", name ? name_len : sizeof("<anonymous>")-1, name ? name : "<anonymous>", FFI_G(line));
+		zend_ffi_parser_error("Bit field \"%.*s\" width not an integer constant at line %d", name ? name_len : sizeof("<anonymous>")-1, name ? name : "<anonymous>", FFI_G(line));
 	}
 
 	field = pemalloc(sizeof(zend_ffi_field), FFI_G(persistent));
@@ -5764,7 +5764,7 @@ void zend_ffi_add_bit_field(zend_ffi_dcl *struct_dcl, const char *name, size_t n
 		if (!zend_hash_str_add_ptr(&struct_type->record.fields, name, name_len, field)) {
 			zend_ffi_type_dtor(field->type);
 			pefree(field, FFI_G(persistent));
-			zend_ffi_parser_error("duplicate field name '%.*s' at line %d", name_len, name, FFI_G(line));
+			zend_ffi_parser_error("Duplicate field name \"%.*s\" at line %d", name_len, name, FFI_G(line));
 		}
 	} else {
 		zend_hash_next_index_insert_ptr(&struct_type->record.fields, field);
@@ -5839,12 +5839,12 @@ void zend_ffi_make_array_type(zend_ffi_dcl *dcl, zend_ffi_val *len) /* {{{ */
 		length = len->ch;
 	} else {
 		zend_ffi_cleanup_dcl(dcl);
-		zend_ffi_parser_error("unsupported array index type at line %d", FFI_G(line));
+		zend_ffi_parser_error("Unsupported array index type at line %d", FFI_G(line));
 		return;
 	}
 	if (length < 0) {
 		zend_ffi_cleanup_dcl(dcl);
-		zend_ffi_parser_error("negative array index at line %d", FFI_G(line));
+		zend_ffi_parser_error("Negative array index at line %d", FFI_G(line));
 		return;
 	}
 
@@ -5900,7 +5900,7 @@ void zend_ffi_make_func_type(zend_ffi_dcl *dcl, HashTable *args, zend_ffi_dcl *n
 					zend_ffi_cleanup_dcl(dcl);
 					zend_hash_destroy(args);
 					pefree(args, FFI_G(persistent));
-					zend_ffi_parser_error("'void' type is not allowed at line %d", FFI_G(line));
+					zend_ffi_parser_error("void type is not allowed at line %d", FFI_G(line));
 					return;
 				} else {
 					no_args = 1;
@@ -5930,7 +5930,7 @@ void zend_ffi_make_func_type(zend_ffi_dcl *dcl, HashTable *args, zend_ffi_dcl *n
 				zend_ffi_cleanup_dcl(dcl);
 				zend_hash_destroy(args);
 				pefree(args, FFI_G(persistent));
-				zend_ffi_parser_error("'float'/'double' type not allowed at position " ZEND_ULONG_FMT " with __vectorcall at line %d", i+1, FFI_G(line));
+				zend_ffi_parser_error("Type float/double is not allowed at position " ZEND_ULONG_FMT " with __vectorcall at line %d", i+1, FFI_G(line));
 				return;
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -6100,7 +6100,7 @@ void zend_ffi_declare(const char *name, size_t name_len, zend_ffi_dcl *dcl) /* {
 				}
 			}
 		}
-		zend_ffi_parser_error("redeclaration of '%.*s' at line %d", name_len, name, FFI_G(line));
+		zend_ffi_parser_error("Redeclaration of \"%.*s\" at line %d", name_len, name, FFI_G(line));
 	} else {
 		if ((dcl->flags & ZEND_FFI_DCL_STORAGE_CLASS) == ZEND_FFI_DCL_TYPEDEF) {
 			if (zend_ffi_validate_vla(ZEND_FFI_TYPE(dcl->type)) != SUCCESS) {
@@ -6165,26 +6165,26 @@ void zend_ffi_declare_tag(const char *name, size_t name_len, zend_ffi_dcl *dcl, 
 
 		if (dcl->flags & ZEND_FFI_DCL_STRUCT) {
 			if (tag->kind != ZEND_FFI_TAG_STRUCT) {
-				zend_ffi_parser_error("'%.*s' defined as wrong kind of tag at line %d", name_len, name, FFI_G(line));
+				zend_ffi_parser_error("\"%.*s\" defined as wrong kind of tag at line %d", name_len, name, FFI_G(line));
 				return;
 			} else if (!incomplete && !(type->attr & ZEND_FFI_ATTR_INCOMPLETE_TAG)) {
-				zend_ffi_parser_error("redefinition of 'struct %.*s' at line %d", name_len, name, FFI_G(line));
+				zend_ffi_parser_error("Redefinition of \"struct %.*s\" at line %d", name_len, name, FFI_G(line));
 				return;
 			}
 		} else if (dcl->flags & ZEND_FFI_DCL_UNION) {
 			if (tag->kind != ZEND_FFI_TAG_UNION) {
-				zend_ffi_parser_error("'%.*s' defined as wrong kind of tag at line %d", name_len, name, FFI_G(line));
+				zend_ffi_parser_error("\"%.*s\" defined as wrong kind of tag at line %d", name_len, name, FFI_G(line));
 				return;
 			} else if (!incomplete && !(type->attr & ZEND_FFI_ATTR_INCOMPLETE_TAG)) {
-				zend_ffi_parser_error("redefinition of 'union %.*s' at line %d", name_len, name, FFI_G(line));
+				zend_ffi_parser_error("Redefinition of \"union %.*s\" at line %d", name_len, name, FFI_G(line));
 				return;
 			}
 		} else if (dcl->flags & ZEND_FFI_DCL_ENUM) {
 			if (tag->kind != ZEND_FFI_TAG_ENUM) {
-				zend_ffi_parser_error("'%.*s' defined as wrong kind of tag at line %d", name_len, name, FFI_G(line));
+				zend_ffi_parser_error("\"%.*s\" defined as wrong kind of tag at line %d", name_len, name, FFI_G(line));
 				return;
 			} else if (!incomplete && !(type->attr & ZEND_FFI_ATTR_INCOMPLETE_TAG)) {
-				zend_ffi_parser_error("redefinition of 'enum %.*s' at line %d", name_len, name, FFI_G(line));
+				zend_ffi_parser_error("Redefinition of \"enum %.*s\" at line %d", name_len, name, FFI_G(line));
 				return;
 			}
 		} else {
@@ -6231,7 +6231,7 @@ void zend_ffi_declare_tag(const char *name, size_t name_len, zend_ffi_dcl *dcl, 
 void zend_ffi_set_abi(zend_ffi_dcl *dcl, uint16_t abi) /* {{{ */
 {
 	if (dcl->abi != ZEND_FFI_ABI_DEFAULT) {
-		zend_ffi_parser_error("multiple calling convention specifiers at line %d", FFI_G(line));
+		zend_ffi_parser_error("Multiple calling convention specifiers at line %d", FFI_G(line));
 	} else {
 		dcl->abi = abi;
 	}
@@ -6327,7 +6327,7 @@ void zend_ffi_add_attribute(zend_ffi_dcl *dcl, const char *name, size_t name_len
 			dcl->attr |= ZEND_FFI_ATTR_GCC_STRUCT;
 			break;
 		case attr_unsupported:
-			zend_ffi_parser_error("unsupported attribute '%.*s' at line %d", name_len, name, FFI_G(line));
+			zend_ffi_parser_error("Unsupported attribute \"%.*s\" at line %d", name_len, name, FFI_G(line));
 			break;
 		default:
 			/* ignore */
@@ -6382,7 +6382,7 @@ void zend_ffi_add_attribute_value(zend_ffi_dcl *dcl, const char *name, size_t na
 			 && val->i64 == 3) {
 				zend_ffi_set_abi(dcl, ZEND_FFI_ABI_REGISTER);
 			} else {
-				zend_ffi_parser_error("incorrect 'regparam' value at line %d", FFI_G(line));
+				zend_ffi_parser_error("Incorrect \"regparam\" value at line %d", FFI_G(line));
 			}
 			break;
 		case attr_aligned:
@@ -6391,7 +6391,7 @@ void zend_ffi_add_attribute_value(zend_ffi_dcl *dcl, const char *name, size_t na
 			 && val->i64 > 0 && val->i64 <= 0x80000000 && (val->i64 & (val->i64 - 1)) == 0) {
 				dcl->align = val->i64;
 			} else {
-				zend_ffi_parser_error("incorrect 'alignment' value at line %d", FFI_G(line));
+				zend_ffi_parser_error("Incorrect \"alignment\" value at line %d", FFI_G(line));
 			}
 			break;
 		case attr_mode:
@@ -6448,10 +6448,10 @@ void zend_ffi_add_attribute_value(zend_ffi_dcl *dcl, const char *name, size_t na
 					}
 				}
 			}
-			zend_ffi_parser_error("unsupported 'mode' value at line %d", FFI_G(line));
+			zend_ffi_parser_error("Unsupported \"mode\" value at line %d", FFI_G(line));
 			// TODO: ???
 		case attr_unsupported:
-			zend_ffi_parser_error("unsupported attribute '%.*s' at line %d", name_len, name, FFI_G(line));
+			zend_ffi_parser_error("Unsupported attribute \"%.*s\" at line %d", name_len, name, FFI_G(line));
 			break;
 		default:
 			/* ignore */
@@ -6467,7 +6467,7 @@ void zend_ffi_add_msvc_attribute_value(zend_ffi_dcl *dcl, const char *name, size
 		 && val->i64 > 0 && val->i64 <= 0x80000000 && (val->i64 & (val->i64 - 1)) == 0) {
 			dcl->align = val->i64;
 		} else {
-			zend_ffi_parser_error("incorrect 'alignment' value at line %d", FFI_G(line));
+			zend_ffi_parser_error("Incorrect \"alignment\" value at line %d", FFI_G(line));
 		}
 	} else {
 		/* ignore */

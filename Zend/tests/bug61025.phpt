@@ -24,7 +24,7 @@ Warning: The magic method InvokeAble::__invoke() cannot be static in %sbug61025.
 
 Warning: The magic method Bar::__invoke() must have public visibility in %sbug61025.php on line %d
 Bar
-Fatal error: Uncaught Error: Call to private method Bar::__invoke() from context '' in %sbug61025.php:%d
+Fatal error: Uncaught Error: Call to private method Bar::__invoke() from global scope in %s:%d
 Stack trace:
 #0 {main}
   thrown in %sbug61025.php on line %d

@@ -128,10 +128,10 @@ object(stdClass)#%d (2) {
   array(0) {
   }
 }
-Attempt to modify property 'abc' on array
+Attempt to modify property "abc" on array
 array(0) {
 }
-Attempt to modify property 'abc' on null
+Attempt to modify property "abc" on null
 NULL
-Attempt to modify property 'abc' on string
+Attempt to modify property "abc" on string
 string(0) ""

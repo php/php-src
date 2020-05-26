@@ -44,7 +44,7 @@ var_dump(gzuncompress($data2));
 
 ?>
 --EXPECTF--
-Compression level (1000) must be within -1..9
+gzcompress(): Argument #2 ($level) must be between -1 and 9
 string(%d) "%a"
 string(%d) "%a"
 string(%d) "%a"
@@ -53,7 +53,7 @@ string(%d) "%a"
 
 Warning: gzuncompress(): %s error in %s on line %d
 bool(false)
-Length (-1) must be greater or equal zero
+gzuncompress(): Argument #2 ($max_decoded_len) must be greater than or equal to 0
 
 Warning: gzuncompress(): %s error in %s on line %d
 bool(false)

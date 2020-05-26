@@ -34,7 +34,7 @@ trait T1
 class C2
 {
 	use T1;
-	
+
 	private const FOO = 'bar';
 }
 
@@ -109,7 +109,7 @@ Array
     [1] => bar
 )
 string(7) "ERROR 1"
-string(36) "Undefined class constant 'self::FOO'"
+string(28) "Undefined constant self::FOO"
 
 bool(true)
 string(3) "bar"

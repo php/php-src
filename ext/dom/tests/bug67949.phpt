@@ -62,7 +62,7 @@ bool(false)
 testing property access
 string(4) "data"
 
-Warning: Attempt to read property 'textContent' on null in %s on line %d
+Warning: Attempt to read property "textContent" on null in %s on line %d
 NULL
 testing offset not a long
 array(1) {
@@ -70,7 +70,7 @@ array(1) {
   string(4) "test"
 }
 
-Warning: Attempt to read property 'textContent' on null in %s on line %d
+Warning: Attempt to read property "textContent" on null in %s on line %d
 bool(false)
 NULL
 array(1) {

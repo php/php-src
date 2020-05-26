@@ -27,7 +27,7 @@ try {
 ?>
 ok
 --EXPECT--
-FFI\ParserException: 'function' type is not allowed at line 1
+FFI\ParserException: function type is not allowed at line 1
 FFI\ParserException: Struct/union can't contain an instance of itself at line 1
 ok
 ok

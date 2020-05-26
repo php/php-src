@@ -132,7 +132,7 @@ B2::doTest
 C2::test
 B4::doTest
 
-Fatal error: Uncaught Error: Call to protected C4::__construct() from context 'B4' in %sbug37632.php:%d
+Fatal error: Uncaught Error: Call to protected C4::__construct() from scope B4 in %s:%d
 Stack trace:
 #0 %s(%d): B4::doTest()
 #1 {main}

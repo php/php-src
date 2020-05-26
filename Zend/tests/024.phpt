@@ -41,17 +41,17 @@ NULL
 Warning: Undefined variable $b in %s on line %d
 int(1)
 
-Warning: Attempt to read property '1' on int in %s on line %d
+Warning: Attempt to read property "1" on int in %s on line %d
 NULL
 
-Warning: Attempt to read property '1' on int in %s on line %d
+Warning: Attempt to read property "1" on int in %s on line %d
 NULL
 
 Warning: Undefined variable $c in %s on line %d
 
 Warning: Trying to access array offset on value of type null in %s on line %d
 
-Warning: Attempt to read property '1' on int in %s on line %d
+Warning: Attempt to read property "1" on int in %s on line %d
 
-Warning: Attempt to read property '' on null in %s on line %d
+Warning: Attempt to read property "" on null in %s on line %d
 NULL

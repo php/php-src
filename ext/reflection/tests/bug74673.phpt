@@ -15,7 +15,7 @@ $class = new ReflectionClass('A');
 echo $class;
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: Undefined constant 'PHP_SELF' in %s:%d
+Fatal error: Uncaught Error: Undefined constant "PHP_SELF" in %s:%d
 Stack trace:
 #0 %s(%d): ReflectionClass->__toString()
 #1 {main}

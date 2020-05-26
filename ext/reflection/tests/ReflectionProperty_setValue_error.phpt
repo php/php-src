@@ -34,7 +34,7 @@ var_dump($instanceWithNoProperties->pub2);
 ?>
 --EXPECT--
 Protected property:
-Cannot access non-public member TestClass::$prot
+Cannot access non-public property TestClass::$prot
 
 Instance without property:
 NULL
