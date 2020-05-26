@@ -39,21 +39,18 @@
 /* This symbol is defined in ext/standard/config.m4.
  * Essentially, it is set if you HAVE_FORK || PHP_WIN32
  * Other platforms may modify that configure check and add suitable #ifdefs
- * around the alternate code.
- * */
+ * around the alternate code. */
 #ifdef PHP_CAN_SUPPORT_PROC_OPEN
 
 #if HAVE_OPENPTY
 # if HAVE_PTY_H
 #  include <pty.h>
-# else
-#  if defined(__FreeBSD__)
+# elif defined(__FreeBSD__)
 /* FreeBSD defines `openpty` in <libutil.h> */
-#    include <libutil.h>
-#  else
-/* Mac OS X and some BSD defines `openpty` in <util.h> */
-#    include <util.h>
-#  endif
+#  include <libutil.h>
+# else
+/* Mac OS X (and some BSDs) define `openpty` in <util.h> */
+#  include <util.h>
 # endif
 #endif
 
