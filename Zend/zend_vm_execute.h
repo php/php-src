@@ -3709,7 +3709,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CATCH_SPEC_CONST_HANDLER(ZEND_
 	zval_ptr_dtor(ex);
 	ZVAL_OBJ(ex, EG(exception));
 	if (UNEXPECTED(EG(exception) != exception)) {
-		GC_ADDREF(EG(exception));
+		ZVAL_UNDEF(ex);
 		HANDLE_EXCEPTION();
 	} else {
 		EG(exception) = NULL;

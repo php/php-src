@@ -4493,7 +4493,7 @@ ZEND_VM_HANDLER(107, ZEND_CATCH, CONST, JMP_ADDR, LAST_CATCH|CACHE_SLOT)
 	zval_ptr_dtor(ex);
 	ZVAL_OBJ(ex, EG(exception));
 	if (UNEXPECTED(EG(exception) != exception)) {
-		GC_ADDREF(EG(exception));
+		ZVAL_UNDEF(ex);
 		HANDLE_EXCEPTION();
 	} else {
 		EG(exception) = NULL;
