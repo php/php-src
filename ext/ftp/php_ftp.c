@@ -1292,7 +1292,7 @@ PHP_FUNCTION(ftp_set_option)
 		case PHP_FTP_OPT_TIMEOUT_SEC:
 			if (Z_TYPE_P(z_value) != IS_LONG) {
 				php_error_docref(NULL, E_WARNING, "Option TIMEOUT_SEC expects value of type int, %s given",
-					zend_zval_type_error_name(z_value));
+					zend_zval_type_name(z_value));
 				RETURN_FALSE;
 			}
 			if (Z_LVAL_P(z_value) <= 0) {
@@ -1305,7 +1305,7 @@ PHP_FUNCTION(ftp_set_option)
 		case PHP_FTP_OPT_AUTOSEEK:
 			if (Z_TYPE_P(z_value) != IS_TRUE && Z_TYPE_P(z_value) != IS_FALSE) {
 				php_error_docref(NULL, E_WARNING, "Option AUTOSEEK expects value of type bool, %s given",
-					zend_zval_type_error_name(z_value));
+					zend_zval_type_name(z_value));
 				RETURN_FALSE;
 			}
 			ftp->autoseek = Z_TYPE_P(z_value) == IS_TRUE ? 1 : 0;
@@ -1314,7 +1314,7 @@ PHP_FUNCTION(ftp_set_option)
 		case PHP_FTP_OPT_USEPASVADDRESS:
 			if (Z_TYPE_P(z_value) != IS_TRUE && Z_TYPE_P(z_value) != IS_FALSE) {
 				php_error_docref(NULL, E_WARNING, "Option USEPASVADDRESS expects value of type bool, %s given",
-					zend_zval_type_error_name(z_value));
+					zend_zval_type_name(z_value));
 				RETURN_FALSE;
 			}
 			ftp->usepasvaddress = Z_TYPE_P(z_value) == IS_TRUE ? 1 : 0;

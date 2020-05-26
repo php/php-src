@@ -2779,7 +2779,7 @@ PHP_METHOD(ZipArchive, extractTo)
 				}
 				break;
 			default:
-				zend_argument_type_error(2, "must be of type array|string|null, %s given", zend_zval_type_error_name(zval_files));
+				zend_argument_type_error(2, "must be of type array|string|null, %s given", zend_zval_type_name(zval_files));
 				RETURN_THROWS();
 		}
 	} else {

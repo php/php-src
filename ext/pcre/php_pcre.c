@@ -2302,7 +2302,7 @@ static void preg_replace_common(INTERNAL_FUNCTION_PARAMETERS, int is_filter)
 		}
 	} else {
 		if (Z_TYPE_P(regex) != IS_ARRAY) {
-			zend_argument_type_error(1, "must be of type array when argument #2 ($replace) is an array, %s given", zend_zval_type_error_name(regex));
+			zend_argument_type_error(1, "must be of type array when argument #2 ($replace) is an array, %s given", zend_zval_type_name(regex));
 			RETURN_THROWS();
 		}
 	}

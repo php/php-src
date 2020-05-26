@@ -663,7 +663,7 @@ static ZEND_COLD void zend_verify_type_error_common(
 	*need_msg = zend_type_to_string_resolved(arg_info->type, zf->common.scope);
 
 	if (value) {
-		*given_kind = zend_zval_type_error_name(value);
+		*given_kind = zend_zval_type_name(value);
 	} else {
 		*given_kind = "none";
 	}
@@ -843,7 +843,7 @@ ZEND_COLD zend_never_inline void zend_verify_property_type_error(zend_property_i
 
 	type_str = zend_type_to_string(info->type);
 	zend_type_error("Cannot assign %s to property %s::$%s of type %s",
-		zend_zval_type_error_name(property),
+		zend_zval_type_name(property),
 		ZSTR_VAL(info->ce->name),
 		zend_get_unmangled_property_name(info->name),
 		ZSTR_VAL(type_str));
@@ -1229,7 +1229,7 @@ static int zend_verify_internal_return_type(zend_function *zf, zval *ret)
 
 	if (ZEND_TYPE_FULL_MASK(ret_info->type) & MAY_BE_VOID) {
 		if (UNEXPECTED(Z_TYPE_P(ret) != IS_NULL)) {
-			zend_verify_void_return_error(zf, zend_zval_type_error_name(ret), "");
+			zend_verify_void_return_error(zf, zend_zval_type_name(ret), "");
 			return 0;
 		}
 		return 1;
@@ -2361,7 +2361,7 @@ try_string_offset:
 		}
 		if (!is_list && type != BP_VAR_IS) {
 			zend_error(E_WARNING, "Trying to access array offset on value of type %s",
-				zend_zval_type_error_name(container));
+				zend_zval_type_name(container));
 		}
 		ZVAL_NULL(result);
 	}
@@ -2560,7 +2560,7 @@ static ZEND_COLD void ZEND_FASTCALL zend_array_key_exists_error(
 	}
 	if (!EG(exception)) {
 		zend_type_error("array_key_exists(): Argument #2 ($array) must be of type array, %s given",
-			zend_zval_type_error_name(subject));
+			zend_zval_type_name(subject));
 	}
 }
 
@@ -2946,7 +2946,7 @@ ZEND_API ZEND_COLD void zend_throw_ref_type_error_type(zend_property_info *prop1
 	zend_string *type1_str = zend_type_to_string(prop1->type);
 	zend_string *type2_str = zend_type_to_string(prop2->type);
 	zend_type_error("Reference with value of type %s held by property %s::$%s of type %s is not compatible with property %s::$%s of type %s",
-		zend_zval_type_error_name(zv),
+		zend_zval_type_name(zv),
 		ZSTR_VAL(prop1->ce->name),
 		zend_get_unmangled_property_name(prop1->name),
 		ZSTR_VAL(type1_str),
@@ -2961,7 +2961,7 @@ ZEND_API ZEND_COLD void zend_throw_ref_type_error_type(zend_property_info *prop1
 ZEND_API ZEND_COLD void zend_throw_ref_type_error_zval(zend_property_info *prop, zval *zv) {
 	zend_string *type_str = zend_type_to_string(prop->type);
 	zend_type_error("Cannot assign %s to reference held by property %s::$%s of type %s",
-		zend_zval_type_error_name(zv),
+		zend_zval_type_name(zv),
 		ZSTR_VAL(prop->ce->name),
 		zend_get_unmangled_property_name(prop->name),
 		ZSTR_VAL(type_str)
@@ -2973,7 +2973,7 @@ ZEND_API ZEND_COLD void zend_throw_conflicting_coercion_error(zend_property_info
 	zend_string *type1_str = zend_type_to_string(prop1->type);
 	zend_string *type2_str = zend_type_to_string(prop2->type);
 	zend_type_error("Cannot assign %s to reference held by property %s::$%s of type %s and property %s::$%s of type %s, as this would result in an inconsistent type conversion",
-		zend_zval_type_error_name(zv),
+		zend_zval_type_name(zv),
 		ZSTR_VAL(prop1->ce->name),
 		zend_get_unmangled_property_name(prop1->name),
 		ZSTR_VAL(type1_str),

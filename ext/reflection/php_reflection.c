@@ -2215,7 +2215,7 @@ ZEND_METHOD(ReflectionParameter, __construct)
 			break;
 
 		default:
-			zend_argument_error(reflection_exception_ptr, 1, "must be either a string, an array(class, method) or a callable object, %s given", zend_zval_type_error_name(reference));
+			zend_argument_error(reflection_exception_ptr, 1, "must be either a string, an array(class, method) or a callable object, %s given", zend_zval_type_name(reference));
 			RETURN_THROWS();
 	}
 
@@ -2923,7 +2923,7 @@ ZEND_METHOD(ReflectionMethod, __construct)
 			if (classname == &ztmp) {
 				zval_ptr_dtor_str(&ztmp);
 			}
-			zend_argument_error(reflection_exception_ptr, 1, "must be of type object|string, %s given", zend_zval_type_error_name(classname));
+			zend_argument_error(reflection_exception_ptr, 1, "must be of type object|string, %s given", zend_zval_type_name(classname));
 			RETURN_THROWS();
 	}
 
@@ -3457,7 +3457,7 @@ ZEND_METHOD(ReflectionClassConstant, __construct)
 			break;
 
 		default:
-			zend_argument_error(reflection_exception_ptr, 1, "must be of type object|string, %s given", zend_zval_type_error_name(classname));
+			zend_argument_error(reflection_exception_ptr, 1, "must be of type object|string, %s given", zend_zval_type_name(classname));
 			RETURN_THROWS();
 	}
 
@@ -4929,7 +4929,7 @@ ZEND_METHOD(ReflectionClass, isSubclassOf)
 			}
 			/* no break */
 		default:
-			zend_argument_error(reflection_exception_ptr, 1, "must be of type ReflectionClass|string, %s given", zend_zval_type_error_name(class_name));
+			zend_argument_error(reflection_exception_ptr, 1, "must be of type ReflectionClass|string, %s given", zend_zval_type_name(class_name));
 			RETURN_THROWS();
 	}
 
@@ -4971,7 +4971,7 @@ ZEND_METHOD(ReflectionClass, implementsInterface)
 			}
 			/* no break */
 		default:
-			zend_argument_error(reflection_exception_ptr, 1, "must be of type ReflectionClass|string, %s given", zend_zval_type_error_name(interface));
+			zend_argument_error(reflection_exception_ptr, 1, "must be of type ReflectionClass|string, %s given", zend_zval_type_name(interface));
 			RETURN_THROWS();
 	}
 
@@ -5152,7 +5152,7 @@ ZEND_METHOD(ReflectionProperty, __construct)
 			break;
 
 		default:
-			zend_argument_error(reflection_exception_ptr, 1, "must be of type object|string, %s given", zend_zval_type_error_name(classname));
+			zend_argument_error(reflection_exception_ptr, 1, "must be of type object|string, %s given", zend_zval_type_name(classname));
 			RETURN_THROWS();
 	}
 
@@ -6133,7 +6133,7 @@ ZEND_METHOD(ReflectionReference, fromArrayElement)
 	} else if (Z_TYPE_P(key) == IS_STRING) {
 		item = zend_symtable_find(ht, Z_STR_P(key));
 	} else {
-		zend_argument_type_error(2, "must be of type string|int, %s given", zend_zval_type_error_name(key));
+		zend_argument_type_error(2, "must be of type string|int, %s given", zend_zval_type_name(key));
 		RETURN_THROWS();
 	}
 

@@ -6437,7 +6437,7 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t flags) /
 				} else {
 					zend_error_noreturn(E_COMPILE_ERROR,
 						"Cannot use %s as default value for property %s::$%s of type %s",
-						zend_zval_type_error_name(&value_zv),
+						zend_zval_type_name(&value_zv),
 						ZSTR_VAL(ce->name), ZSTR_VAL(name), ZSTR_VAL(str));
 				}
 			}

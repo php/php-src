@@ -3695,7 +3695,7 @@ ZEND_VM_C_LABEL(try_function_name):
 			}
 		}
 		zend_throw_error(NULL, "Value of type %s is not callable",
-			zend_zval_type_error_name(function_name));
+			zend_zval_type_name(function_name));
 		call = NULL;
 	}
 
@@ -4932,7 +4932,7 @@ ZEND_VM_HANDLER(119, ZEND_SEND_ARRAY, ANY, ANY, NUM)
 				ZEND_VM_C_GOTO(send_array);
 			}
 		}
-		zend_type_error("call_user_func_array(): Argument #2 ($args) must be of type array, %s given", zend_zval_type_error_name(args));
+		zend_type_error("call_user_func_array(): Argument #2 ($args) must be of type array, %s given", zend_zval_type_name(args));
 		FREE_UNFETCHED_OP2();
 		FREE_OP1();
 		HANDLE_EXCEPTION();
@@ -6186,7 +6186,7 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET_R, CONST|TMP|VAR|CV, JMP_ADDR)
 			}
 		}
 	} else {
-		zend_error(E_WARNING, "foreach() argument must be of type array|object, %s given", zend_zval_type_error_name(array_ptr));
+		zend_error(E_WARNING, "foreach() argument must be of type array|object, %s given", zend_zval_type_name(array_ptr));
 		ZVAL_UNDEF(EX_VAR(opline->result.var));
 		Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t)-1;
 		FREE_OP1();
@@ -6275,7 +6275,7 @@ ZEND_VM_COLD_CONST_HANDLER(125, ZEND_FE_RESET_RW, CONST|TMP|VAR|CV, JMP_ADDR)
 			}
 		}
 	} else {
-		zend_error(E_WARNING, "foreach() argument must be of type array|object, %s given", zend_zval_type_error_name(array_ptr));
+		zend_error(E_WARNING, "foreach() argument must be of type array|object, %s given", zend_zval_type_name(array_ptr));
 		ZVAL_UNDEF(EX_VAR(opline->result.var));
 		Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t)-1;
 		if (OP1_TYPE == IS_VAR) {
@@ -6585,7 +6585,7 @@ ZEND_VM_HANDLER(126, ZEND_FE_FETCH_RW, VAR, ANY, JMP_ADDR)
 			value_type = Z_TYPE_INFO_P(value);
 		}
 	} else {
-		zend_error(E_WARNING, "foreach() argument must be of type array|object, %s given", zend_zval_type_error_name(array));
+		zend_error(E_WARNING, "foreach() argument must be of type array|object, %s given", zend_zval_type_name(array));
 		if (UNEXPECTED(EG(exception))) {
 			UNDEF_RESULT();
 			HANDLE_EXCEPTION();
@@ -7915,7 +7915,7 @@ ZEND_VM_COLD_CONST_HANDLER(121, ZEND_STRLEN, CONST|TMPVAR|CV, ANY)
 				zval_ptr_dtor(&tmp);
 			}
 			if (!EG(exception)) {
-				zend_type_error("strlen(): Argument #1 ($str) must be of type string, %s given", zend_zval_type_error_name(value));
+				zend_type_error("strlen(): Argument #1 ($str) must be of type string, %s given", zend_zval_type_name(value));
 			}
 			ZVAL_UNDEF(EX_VAR(opline->result.var));
 		} while (0);
@@ -8010,7 +8010,7 @@ ZEND_VM_HANDLER(157, ZEND_FETCH_CLASS_NAME, CV|TMPVAR|UNUSED|CLASS_FETCH, ANY)
 		if (UNEXPECTED(Z_TYPE_P(op) != IS_OBJECT)) {
 			ZVAL_DEREF(op);
 			if (Z_TYPE_P(op) != IS_OBJECT) {
-				zend_type_error("Cannot use ::class on value of type %s", zend_zval_type_error_name(op));
+				zend_type_error("Cannot use ::class on value of type %s", zend_zval_type_name(op));
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				FREE_OP1();
 				HANDLE_EXCEPTION();
@@ -8522,7 +8522,7 @@ ZEND_VM_COLD_CONST_HANDLER(191, ZEND_GET_CLASS, UNUSED|CONST|TMPVAR|CV, UNUSED)
 				if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
 					ZVAL_UNDEFINED_OP1();
 				}
-				zend_type_error("get_class(): Argument #1 ($object) must be of type object, %s given", zend_zval_type_error_name(op1));
+				zend_type_error("get_class(): Argument #1 ($object) must be of type object, %s given", zend_zval_type_name(op1));
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 			}
 			break;
