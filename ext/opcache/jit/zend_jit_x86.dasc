@@ -4395,7 +4395,27 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 				|.code
 			}
 
-			//TODO: add check for -1 ???
+			/* Prevent overflow error/crash if op1 == LONG_MIN and op2 == -1 */
+			if (!op2_range || (op2_range->min <= -1 && op2_range->max >= -1)) {
+				if (Z_MODE(op2_addr) == IS_MEM_ZVAL) {
+					|	cmp aword [Ra(Z_REG(op2_addr))+Z_OFFSET(op2_addr)], -1
+				} else if (Z_MODE(op2_addr) == IS_REG) {
+					|	cmp Ra(Z_REG(op2_addr)), -1
+				}
+				|	jz >1
+				|.cold_code
+				|1:
+				|	SET_ZVAL_LVAL res_addr, 0
+				if (Z_MODE(res_addr) == IS_MEM_ZVAL) {
+					if (Z_MODE(op1_addr) != IS_MEM_ZVAL || Z_REG(op1_addr) != Z_REG(res_addr) || Z_OFFSET(op1_addr) != Z_OFFSET(res_addr)) {
+						if ((res_use_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF|MAY_BE_GUARD)) != MAY_BE_LONG) {
+							|	SET_ZVAL_TYPE_INFO res_addr, IS_LONG
+						}
+					}
+				}
+				|	jmp >5
+				|.code
+			}
 
 			result_reg = ZREG_RDX;
 			|	GET_ZVAL_LVAL ZREG_RAX, op1_addr
@@ -4431,7 +4451,6 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 		(op2_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_LONG))) {
 		if ((op1_info & MAY_BE_LONG) &&
 		    (op2_info & MAY_BE_LONG)) {
-			|5:
 			|.cold_code
 		}
 		|6:
@@ -4494,10 +4513,11 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 		}
 		if ((op1_info & MAY_BE_LONG) &&
 		    (op2_info & MAY_BE_LONG)) {
-			|	jmp <5
+			|	jmp >5
 			|.code
 		}
 	}
+	|5:
 
 	return 1;
 }
