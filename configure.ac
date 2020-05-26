@@ -43,8 +43,6 @@ AH_TOP([
 #define ZEND_DLIMPORT
 ])
 AH_BOTTOM([
-#ifndef ZEND_ACCONFIG_H_NO_C_PROTOS
-
 #include <stdlib.h>
 
 #ifdef HAVE_SYS_TYPES_H
@@ -60,8 +58,6 @@ AH_BOTTOM([
 #endif
 
 #include <string.h>
-
-#endif /* ifndef ZEND_ACCONFIG_H_NO_C_PROTOS */
 
 #endif /* PHP_CONFIG_H */
 ])
