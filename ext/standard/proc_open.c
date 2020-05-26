@@ -36,10 +36,6 @@
 #include <fcntl.h>
 #endif
 
-#ifdef PHP_WIN32
-# pragma warning(disable: 4024 4047)
-#endif
-
 /* This symbol is defined in ext/standard/config.m4.
  * Essentially, it is set if you HAVE_FORK || PHP_WIN32
  * Other platforms may modify that configure check and add suitable #ifdefs
@@ -844,6 +840,7 @@ static int set_proc_descriptor_from_resource(zval *resource, descriptorspec_item
 	return SUCCESS;
 }
 
+#ifndef PHP_WIN32
 static int close_parentends_of_pipes(descriptorspec_item *descriptors, int ndesc)
 {
 	/* We are running in child process
@@ -866,6 +863,7 @@ static int close_parentends_of_pipes(descriptorspec_item *descriptors, int ndesc
 
 	return SUCCESS;
 }
+#endif
 
 static void close_all_descriptors(descriptorspec_item *descriptors, int ndesc)
 {
