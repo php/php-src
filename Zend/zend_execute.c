@@ -3102,45 +3102,41 @@ conflicting_coercion_error:
 	return 1;
 }
 
-ZEND_API zval* zend_assign_to_typed_ref(zval *variable_ptr, zval *value, zend_uchar value_type, zend_bool strict, zend_refcounted *ref)
+static zend_always_inline void i_zval_ptr_dtor_noref(zval *zval_ptr) {
+	if (Z_REFCOUNTED_P(zval_ptr)) {
+		zend_refcounted *ref = Z_COUNTED_P(zval_ptr);
+		ZEND_ASSERT(Z_TYPE_P(zval_ptr) != IS_REFERENCE);
+		if (!GC_DELREF(ref)) {
+			rc_dtor_func(ref);
+		} else if (UNEXPECTED(GC_MAY_LEAK(ref))) {
+			gc_possible_root(ref);
+		}
+	}
+}
+
+ZEND_API zval* zend_assign_to_typed_ref(zval *variable_ptr, zval *orig_value, zend_uchar value_type, zend_bool strict, zend_refcounted *ref)
 {
-	zend_bool need_copy = ZEND_CONST_COND(value_type & (IS_CONST|IS_CV), 1) ||
-			((value_type & IS_VAR) && UNEXPECTED(ref) && GC_REFCOUNT(ref) > 1);
 	zend_bool ret;
-	zval tmp;
-
-	if (need_copy) {
-		ZVAL_COPY(&tmp, value);
-		value = &tmp;
-	}
-	ret = zend_verify_ref_assignable_zval(Z_REF_P(variable_ptr), value, strict);
-	if (need_copy) {
-		Z_TRY_DELREF_P(value);
-	}
-	if (!ret) {
-		if (value_type & (IS_VAR|IS_TMP_VAR)) {
-			zval_ptr_dtor(value);
-		}
-		return Z_REFVAL_P(variable_ptr);
-	}
-
+	zval value;
+	ZVAL_COPY(&value, orig_value);
+	ret = zend_verify_ref_assignable_zval(Z_REF_P(variable_ptr), &value, strict);
 	variable_ptr = Z_REFVAL_P(variable_ptr);
-	if (EXPECTED(Z_REFCOUNTED_P(variable_ptr))) {
-		zend_refcounted *garbage = Z_COUNTED_P(variable_ptr);
-
-		zend_copy_to_variable(variable_ptr, value, value_type, ref);
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else { /* we need to split */
-			/* optimized version of GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr) */
-			if (UNEXPECTED(GC_MAY_LEAK(garbage))) {
-				gc_possible_root(garbage);
-			}
-		}
-		return variable_ptr;
+	if (EXPECTED(ret)) {
+		i_zval_ptr_dtor_noref(variable_ptr);
+		ZVAL_COPY_VALUE(variable_ptr, &value);
+	} else {
+		zval_ptr_dtor_nogc(&value);
 	}
-
-	zend_copy_to_variable(variable_ptr, value, value_type, ref);
+	if (value_type & (IS_VAR|IS_TMP_VAR)) {
+		if (UNEXPECTED(ref)) {
+			if (UNEXPECTED(GC_DELREF(ref) == 0)) {
+				zval_ptr_dtor(orig_value);
+				efree_size(ref, sizeof(zend_reference));
+			}
+		} else {
+			i_zval_ptr_dtor_noref(orig_value);
+		}
+	}
 	return variable_ptr;
 }
 
