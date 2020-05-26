@@ -473,7 +473,7 @@ PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable
 		if (new_index && index_len == 0) {
 			zend_ulong numkey;
 			zend_string *strkey;
-			ZEND_HASH_FOREACH_KEY_PTR(parent, numkey, strkey, zv) {
+			ZEND_HASH_FOREACH_KEY_VAL(parent, numkey, strkey, zv) {
 				while (Z_TYPE_P(zv) == IS_INDIRECT) {
 					zv = Z_INDIRECT_P(zv);
 				}
