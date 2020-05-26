@@ -74,7 +74,7 @@ static php_process_env _php_array_to_envp(zval *environment)
 	char **ep;
 #endif
 	char *p;
-	size_t cnt, sizeenv = 0;
+	size_t sizeenv = 0;
 	HashTable *env_hash; /* temporary PHP array used as helper */
 
 	memset(&env, 0, sizeof(env));
@@ -83,7 +83,7 @@ static php_process_env _php_array_to_envp(zval *environment)
 		return env;
 	}
 
-	cnt = zend_hash_num_elements(Z_ARRVAL_P(environment));
+	uint32_t cnt = zend_hash_num_elements(Z_ARRVAL_P(environment));
 
 	if (cnt < 1) {
 #ifndef PHP_WIN32
@@ -794,7 +794,7 @@ static int set_proc_descriptor_from_array(zval *descitem, descriptorspec_item *d
 		}
 
 		retval = redirect_proc_descriptor(
-			&descriptors[ndesc], Z_LVAL_P(ztarget), descriptors, ndesc, nindex);
+			&descriptors[ndesc], (int)Z_LVAL_P(ztarget), descriptors, ndesc, nindex);
 	} else if (zend_string_equals_literal(ztype, "null")) {
 		/* Set descriptor to blackhole (discard all data written) */
 		retval = set_proc_descriptor_to_blackhole(&descriptors[ndesc]);
@@ -829,7 +829,7 @@ static int set_proc_descriptor_from_resource(zval *resource, descriptorspec_item
 	}
 
 #ifdef PHP_WIN32
-	php_file_descriptor_t fd_t = (HANDLE)_get_osfhandle(fd);
+	php_file_descriptor_t fd_t = (php_file_descriptor_t)_get_osfhandle(fd);
 #else
 	php_file_descriptor_t fd_t = fd;
 #endif
@@ -991,8 +991,8 @@ PHP_FUNCTION(proc_open)
 				goto exit_fail;
 			}
 		} else if (Z_TYPE_P(descitem) == IS_ARRAY) {
-			if (set_proc_descriptor_from_array(descitem, descriptors, ndesc, nindex, &pty_master_fd,
-				&pty_slave_fd) == FAILURE) {
+			if (set_proc_descriptor_from_array(descitem, descriptors, ndesc, (int)nindex,
+				&pty_master_fd, &pty_slave_fd) == FAILURE) {
 				goto exit_fail;
 			}
 		} else {
