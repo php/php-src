@@ -619,7 +619,7 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_throw_non_object_erro
 	 || opline->opcode == ZEND_POST_INC_OBJ
 	 || opline->opcode == ZEND_POST_DEC_OBJ) {
 		zend_throw_error(NULL,
-			"Attempt to increment/decrement property '%s' on %s",
+			"Attempt to increment/decrement property \"%s\" on %s",
 			ZSTR_VAL(property_name), zend_zval_type_name(object)
 		);
 	} else if (opline->opcode == ZEND_FETCH_OBJ_W
@@ -627,12 +627,12 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_throw_non_object_erro
 			|| opline->opcode == ZEND_FETCH_OBJ_FUNC_ARG
 			|| opline->opcode == ZEND_ASSIGN_OBJ_REF) {
 		zend_throw_error(NULL,
-			"Attempt to modify property '%s' on %s",
+			"Attempt to modify property \"%s\" on %s",
 			ZSTR_VAL(property_name), zend_zval_type_name(object)
 		);
 	} else {
 		zend_throw_error(NULL,
-			"Attempt to assign property '%s' on %s",
+			"Attempt to assign property \"%s\" on %s",
 			ZSTR_VAL(property_name), zend_zval_type_name(object)
 		);
 	}
@@ -1492,7 +1492,7 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_wrong_property_read(z
 {
 	zend_string *tmp_property_name;
 	zend_string *property_name = zval_get_tmp_string(property, &tmp_property_name);
-	zend_error(E_WARNING, "Attempt to read property '%s' on %s", ZSTR_VAL(property_name), zend_zval_type_name(object));
+	zend_error(E_WARNING, "Attempt to read property \"%s\" on %s", ZSTR_VAL(property_name), zend_zval_type_name(object));
 	zend_tmp_string_release(tmp_property_name);
 }
 
@@ -3327,7 +3327,7 @@ static zend_never_inline void zend_fetch_this_var(int type OPLINE_DC EXECUTE_DAT
 
 static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_wrong_clone_call(zend_function *clone, zend_class_entry *scope)
 {
-	zend_throw_error(NULL, "Call to %s %s::__clone() from context '%s'", zend_visibility_string(clone->common.fn_flags), ZSTR_VAL(clone->common.scope->name), scope ? ZSTR_VAL(scope->name) : "");
+	zend_throw_error(NULL, "Call to %s %s::__clone() from context \"%s\"", zend_visibility_string(clone->common.fn_flags), ZSTR_VAL(clone->common.scope->name), scope ? ZSTR_VAL(scope->name) : "");
 }
 
 #if ZEND_INTENSIVE_DEBUGGING
@@ -4299,7 +4299,7 @@ static zend_always_inline int _zend_quick_get_constant(
 
 	if (!c) {
 		if (!check_defined_only) {
-			zend_throw_error(NULL, "Undefined constant '%s'", Z_STRVAL_P(RT_CONSTANT(opline, opline->op2)));
+			zend_throw_error(NULL, "Undefined constant %s", Z_STRVAL_P(RT_CONSTANT(opline, opline->op2)));
 			ZVAL_UNDEF(EX_VAR(opline->result.var));
 		}
 		return FAILURE;

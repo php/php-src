@@ -2054,7 +2054,7 @@ PHP_METHOD(DOMDocument, registerNodeClass)
 		RETURN_TRUE;
 	}
 
-	zend_argument_error(NULL, 2, "must be a class name derived from %s or null, '%s' given", ZSTR_VAL(basece->name), ZSTR_VAL(ce->name));
+	zend_argument_error(NULL, 2, "must be a class name derived from %s or null, \"%s\" given", ZSTR_VAL(basece->name), ZSTR_VAL(ce->name));
 }
 /* }}} */
 

@@ -374,13 +374,13 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_class(zval *arg, zend_class_entry **pc
 	*pce = zend_lookup_class(Z_STR_P(arg));
 	if (ce_base) {
 		if ((!*pce || !instanceof_function(*pce, ce_base))) {
-			zend_argument_type_error(num, "must be a class name derived from %s, '%s' given", ZSTR_VAL(ce_base->name), Z_STRVAL_P(arg));
+			zend_argument_type_error(num, "must be a class name derived from %s, \"%s\" given", ZSTR_VAL(ce_base->name), Z_STRVAL_P(arg));
 			*pce = NULL;
 			return 0;
 		}
 	}
 	if (!*pce) {
-		zend_argument_type_error(num, "must be a valid class name, '%s' given", Z_STRVAL_P(arg));
+		zend_argument_type_error(num, "must be a valid class name, \"%s\" given", Z_STRVAL_P(arg));
 		return 0;
 	}
 	return 1;
@@ -784,14 +784,14 @@ static const char *zend_parse_arg_impl(zval *arg, va_list *va, const char **spec
 				}
 				if (ce_base) {
 					if ((!*pce || !instanceof_function(*pce, ce_base))) {
-						zend_spprintf(error, 0, "a class name derived from %s%s, '%s' given",
+						zend_spprintf(error, 0, "a class name derived from %s%s, \"%s\" given",
 							ZSTR_VAL(ce_base->name), check_null ? " or null" : "", Z_STRVAL_P(arg));
 						*pce = NULL;
 						return "";
 					}
 				}
 				if (!*pce) {
-					zend_spprintf(error, 0, "a valid class name%s, '%s' given",
+					zend_spprintf(error, 0, "a valid class name%s, \"%s\" given",
 						check_null ? " or null" : "", Z_STRVAL_P(arg));
 					return "";
 				}
@@ -2814,7 +2814,7 @@ static int zend_is_callable_check_class(zend_string *name, zend_class_entry *sco
 	*strict_class = 0;
 	if (zend_string_equals_literal(lcname, "self")) {
 		if (!scope) {
-			if (error) *error = estrdup("cannot access self:: when no class scope is active");
+			if (error) *error = estrdup("cannot access self when no class scope is active");
 		} else {
 			fcc->called_scope = zend_get_called_scope(EG(current_execute_data));
 			fcc->calling_scope = scope;
@@ -2825,9 +2825,9 @@ static int zend_is_callable_check_class(zend_string *name, zend_class_entry *sco
 		}
 	} else if (zend_string_equals_literal(lcname, "parent")) {
 		if (!scope) {
-			if (error) *error = estrdup("cannot access parent:: when no class scope is active");
+			if (error) *error = estrdup("cannot access parent when no class scope is active");
 		} else if (!scope->parent) {
-			if (error) *error = estrdup("cannot access parent:: when current class scope has no parent");
+			if (error) *error = estrdup("cannot access parent when current class scope has no parent");
 		} else {
 			fcc->called_scope = zend_get_called_scope(EG(current_execute_data));
 			fcc->calling_scope = scope->parent;
@@ -2841,7 +2841,7 @@ static int zend_is_callable_check_class(zend_string *name, zend_class_entry *sco
 		zend_class_entry *called_scope = zend_get_called_scope(EG(current_execute_data));
 
 		if (!called_scope) {
-			if (error) *error = estrdup("cannot access static:: when no class scope is active");
+			if (error) *error = estrdup("cannot access static when no class scope is active");
 		} else {
 			fcc->called_scope = called_scope;
 			fcc->calling_scope = called_scope;

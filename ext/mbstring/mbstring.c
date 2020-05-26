@@ -1581,7 +1581,7 @@ PHP_FUNCTION(mb_substitute_character)
 			RETURN_TRUE;
 		}
 		/* Invalid string value */
-		zend_argument_value_error(1, "must be 'none', 'long', 'entity' or a valid codepoint");
+		zend_argument_value_error(1, "must be \"none\", \"long\", \"entity\" or a valid codepoint");
 		RETURN_THROWS();
 	}
 	/* Integer codepoint passed */

@@ -354,7 +354,7 @@ ZEND_METHOD(Closure, fromCallable)
 
 static ZEND_COLD zend_function *zend_closure_get_constructor(zend_object *object) /* {{{ */
 {
-	zend_throw_error(NULL, "Instantiation of 'Closure' is not allowed");
+	zend_throw_error(NULL, "Instantiation of Closure is not allowed");
 	return NULL;
 }
 /* }}} */
@@ -597,7 +597,7 @@ static HashTable *zend_closure_get_gc(zend_object *obj, zval **table, int *n) /*
 /* {{{ Private constructor preventing instantiation */
 ZEND_COLD ZEND_METHOD(Closure, __construct)
 {
-	zend_throw_error(NULL, "Instantiation of 'Closure' is not allowed");
+	zend_throw_error(NULL, "Instantiation of Closure is not allowed");
 }
 /* }}} */
 

@@ -236,9 +236,7 @@ static void zend_weakref_free(zend_object *zo) {
 
 ZEND_COLD ZEND_METHOD(WeakReference, __construct)
 {
-	zend_throw_error(NULL,
-	    "Direct instantiation of 'WeakReference' is not allowed, "
-	    "use WeakReference::create instead");
+	zend_throw_error(NULL, "Direct instantiation of WeakReference is not allowed, use WeakReference::create instead");
 }
 
 ZEND_METHOD(WeakReference, create)

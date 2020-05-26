@@ -1030,7 +1030,7 @@ PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, zen
 
 	if (FAILURE == php_stream_parse_fopen_modes(mode, &open_flags)) {
 		if (options & REPORT_ERRORS) {
-			zend_value_error("`%s' is not a valid mode for fopen", mode);
+			zend_value_error("\"%s\" is not a valid mode for fopen", mode);
 		}
 		return NULL;
 	}
