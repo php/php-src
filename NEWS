@@ -28,7 +28,7 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #79561 (dns_get_record() fails with DNS_ALL). (cmb)
 
-?? ??? ????, PHP 7.4.6
+14 May 2020, PHP 7.4.6
 
 - Core:
   . Fixed bug #79536 (zend_clear_exception prevent exception's destructor to be
@@ -74,7 +74,7 @@ PHP                                                                        NEWS
   . Fixed bug #79447 (Serializing uninitialized typed properties with __sleep
     should not throw). (nicolas-grekas)
 
-?? ??? ????, PHP 7.4.5
+16 Apr 2020, PHP 7.4.5
 
 - Core:
   . Fixed bug #79364 (When copy empty array, next key is unspecified). (cmb)
