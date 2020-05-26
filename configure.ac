@@ -408,7 +408,6 @@ sys/sysexits.h \
 sys/uio.h \
 sys/wait.h \
 sys/loadavg.h \
-termios.h \
 unistd.h \
 unix.h \
 utime.h \
