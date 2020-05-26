@@ -48,22 +48,22 @@ var_dump($a);
 ?>
 --EXPECTF--
 --> read access:
-Warning: Attempt to read property 'p' on bool in %s on line %d
+Warning: Attempt to read property "p" on bool in %s on line %d
 
 --> direct assignment:
-Attempt to assign property 'p' on bool
+Attempt to assign property "p" on bool
 
 --> increment:
-Attempt to increment/decrement property 'p' on bool
+Attempt to increment/decrement property "p" on bool
 
 --> reference assignment:
-Attempt to modify property 'p' on bool
+Attempt to modify property "p" on bool
 
 --> reference assignment:
-Attempt to modify property 'p' on bool
+Attempt to modify property "p" on bool
 
 --> indexed assignment:
-Attempt to modify property 'p' on bool
+Attempt to modify property "p" on bool
 
 --> Confirm assignments have had no impact:
 bool(true)

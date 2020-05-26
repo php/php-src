@@ -45,23 +45,23 @@ unset($null);
 
 ?>
 --EXPECTF--
-Attempt to assign property 'a' on null
+Attempt to assign property "a" on null
 
 Warning: Undefined variable $null in %s on line %d
 NULL
-Attempt to modify property 'a' on null
+Attempt to modify property "a" on null
 
 Warning: Undefined variable $null in %s on line %d
 NULL
-Attempt to modify property 'a' on null
+Attempt to modify property "a" on null
 
 Warning: Undefined variable $null in %s on line %d
 NULL
-Attempt to modify property 'a' on null
+Attempt to modify property "a" on null
 
 Warning: Undefined variable $null in %s on line %d
 NULL
-Attempt to modify property 'a' on null
+Attempt to modify property "a" on null
 
 Warning: Undefined variable $null in %s on line %d
 NULL

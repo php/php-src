@@ -19,4 +19,4 @@ $obj = new Derived;
 --EXPECTF--
 ===DONE===
 
-Warning: Call to private Derived::__destruct() from context '' during shutdown ignored in Unknown on line %d
+Warning: Call to private Derived::__destruct() from context "" during shutdown ignored in Unknown on line %d

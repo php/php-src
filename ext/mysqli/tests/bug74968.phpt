@@ -17,7 +17,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 ==DONE==
 --EXPECTF--
-Fatal error: Uncaught Error: Class 'test' cannot be instantiated in %sbug74968.php:%d
+Fatal error: Uncaught Error: Class test cannot be instantiated in %sbug74968.php:%d
 Stack trace:
 #0 %sbug74968.php(%d): mysqli_result->fetch_object('test')
 #1 {main}

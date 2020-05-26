@@ -24,4 +24,4 @@ try {
 --EXPECT--
 string(12) "privateConst"
 string(12) "privateConst"
-Cannot access private const A::privateConst
+Cannot access private constant A::privateConst

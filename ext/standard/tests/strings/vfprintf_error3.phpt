@@ -49,5 +49,5 @@ unlink( $file );
 -- Testing vfprintf() function with wrong variable types as argument --
 vfprintf(): Argument #2 ($format) must be of type string, array given
 vfprintf(): Argument #3 ($args) must be of type array, string given
-Unknown format specifier 'y'
+Unknown format specifier "y"
 string(0) ""

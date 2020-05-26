@@ -38,7 +38,7 @@ try {
 *** Testing gzdeflate() : error conditions ***
 
 -- Testing with incorrect compression level --
-Compression level (99) must be within -1..9
+gzdeflate(): Argument #2 ($level) must be between -1 and 9
 
 -- Testing with incorrect encoding --
-Encoding mode must be either ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP or ZLIB_ENCODING_DEFLATE
+gzdeflate(): Argument #3 ($encoding) must be either ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP, or ZLIB_ENCODING_DEFLATE

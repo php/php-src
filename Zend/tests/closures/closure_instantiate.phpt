@@ -18,4 +18,4 @@ try {
 
 ?>
 --EXPECT--
-ERROR: Instantiation of 'Closure' is not allowed
+ERROR: Instantiation of Closure is not allowed

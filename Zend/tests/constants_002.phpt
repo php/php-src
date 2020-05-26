@@ -16,5 +16,5 @@ var_dump(foo);
 ?>
 --EXPECTF--
 Warning: Constants may only evaluate to scalar values, arrays or resources in %s on line %d
-Undefined constant 'foo'
+Undefined constant foo
 resource(5) of type (stream)

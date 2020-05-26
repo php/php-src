@@ -38,4 +38,4 @@ bool(true)
 string(4) "none"
 bool(true)
 string(4) "long"
-mb_substitute_character(): Argument #1 ($substitute_character) must be 'none', 'long', 'entity' or a valid codepoint
+mb_substitute_character(): Argument #1 ($substitute_character) must be "none", "long", "entity" or a valid codepoint

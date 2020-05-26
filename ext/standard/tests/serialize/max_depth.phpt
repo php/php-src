@@ -104,8 +104,8 @@ var_dump(is_array(unserialize(
 ?>
 --EXPECTF--
 Invalid max_depth:
-unserialize(): 'max_depth' option must be of type int, string given
-unserialize(): 'max_depth' option must be greater than or equal to 0
+unserialize(): "max_depth" option must be of type int, string given
+unserialize(): "max_depth" option must be greater than or equal to 0
 Array:
 bool(true)
 

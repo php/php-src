@@ -22,7 +22,7 @@ print "ok\n";
 
 ?>
 --EXPECTF--
-Warning: Attempt to read property 'a' on null in %s on line %d
+Warning: Attempt to read property "a" on null in %s on line %d
 ok
-Attempt to assign property 'a' on null
+Attempt to assign property "a" on null
 ok
