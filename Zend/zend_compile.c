@@ -2754,12 +2754,12 @@ zend_op *zend_compile_static_prop(znode *result, zend_ast *ast, uint32_t type, i
 }
 /* }}} */
 
-static void zend_verify_list_assign_target(zend_ast *var_ast, zend_bool old_style) /* {{{ */ {
+static void zend_verify_list_assign_target(zend_ast *var_ast, zend_ast_attr array_style) /* {{{ */ {
 	if (var_ast->kind == ZEND_AST_ARRAY) {
 		if (var_ast->attr == ZEND_ARRAY_SYNTAX_LONG) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot assign to array(), use [] instead");
 		}
-		if (old_style != var_ast->attr) {
+		if (array_style != var_ast->attr) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot mix [] and list()");
 		}
 	} else if (!zend_can_write_to_variable(var_ast)) {
@@ -2793,7 +2793,7 @@ static zend_bool zend_propagate_list_refs(zend_ast *ast) { /* {{{ */
 /* }}} */
 
 static void zend_compile_list_assign(
-		znode *result, zend_ast *ast, znode *expr_node, zend_bool old_style) /* {{{ */
+		znode *result, zend_ast *ast, znode *expr_node, zend_ast_attr array_style) /* {{{ */
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
 	uint32_t i;
@@ -2850,7 +2850,7 @@ static void zend_compile_list_assign(
 			Z_TRY_ADDREF(expr_node->u.constant);
 		}
 
-		zend_verify_list_assign_target(var_ast, old_style);
+		zend_verify_list_assign_target(var_ast, array_style);
 
 		opline = zend_emit_op(&fetch_result,
 			elem_ast->attr ? (expr_node->op_type == IS_CV ? ZEND_FETCH_DIM_W : ZEND_FETCH_LIST_W) : ZEND_FETCH_LIST_R, expr_node, &dim_node);
