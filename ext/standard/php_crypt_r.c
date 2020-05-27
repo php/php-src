@@ -39,11 +39,6 @@
 # include <Wincrypt.h>
 #endif
 
-#ifdef HAVE_ATOMIC_H /* Solaris 10 defines atomic API within */
-# include <atomic.h>
-#else
-# include <signal.h>
-#endif
 #include "php_crypt_r.h"
 #include "crypt_freesec.h"
 
@@ -76,29 +71,17 @@ void php_shutdown_crypt_r()
 
 void _crypt_extended_init_r(void)
 {
-#ifdef PHP_WIN32
-	LONG volatile initialized = 0;
-#elif defined(HAVE_ATOMIC_H) /* Solaris 10 defines atomic API within */
-	volatile unsigned int initialized = 0;
-#else
-	static volatile sig_atomic_t initialized = 0;
-#endif
+	static int initialized = 0;
 
 #ifdef ZTS
 	tsrm_mutex_lock(php_crypt_extended_init_lock);
 #endif
 
 	if (!initialized) {
-#ifdef PHP_WIN32
-		InterlockedIncrement(&initialized);
-#elif defined(HAVE_SYNC_FETCH_AND_ADD)
-		__sync_fetch_and_add(&initialized, 1);
-#elif defined(HAVE_ATOMIC_H) /* Solaris 10 defines atomic API within */
-		membar_producer();
-		atomic_add_int(&initialized, 1);
-#endif
+		initialized = 1;
 		_crypt_extended_init();
 	}
+
 #ifdef ZTS
 	tsrm_mutex_unlock(php_crypt_extended_init_lock);
 #endif
