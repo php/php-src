@@ -2326,10 +2326,6 @@ static int zend_jit_hybrid_loop_trace_counter_stub(dasm_State **Dst)
 
 static int zend_jit_trace_halt_stub(dasm_State **Dst)
 {
-	if (zend_jit_vm_kind != ZEND_VM_KIND_HYBRID) {
-		return 1;
-	}
-
 	|->trace_halt:
 	if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
 		|	add r4, HYBRID_SPAD
