@@ -111,7 +111,7 @@ static int zend_may_overflow(const zend_op *opline, const zend_op_array *op_arra
 static void ZEND_FASTCALL zend_runtime_jit(void);
 
 static int zend_jit_trace_op_len(const zend_op *opline);
-static int zend_jit_trace_may_exit(const zend_op_array *op_array, const zend_op *opline, zend_jit_trace_rec *trace);
+static int zend_jit_trace_may_exit(const zend_op_array *op_array, const zend_op *opline);
 static uint32_t zend_jit_trace_get_exit_point(const zend_op *from_opline, const zend_op *to_opline, zend_jit_trace_rec *trace, uint32_t flags);
 static const void *zend_jit_trace_get_exit_addr(uint32_t n);
 static void zend_jit_trace_add_code(const void *start, uint32_t size);

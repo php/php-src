@@ -240,7 +240,7 @@ static zend_string *zend_jit_trace_name(const zend_op_array *op_array, uint32_t 
 	return buf.s;
 }
 
-static int zend_jit_trace_may_exit(const zend_op_array *op_array, const zend_op *opline, zend_jit_trace_rec *trace)
+static int zend_jit_trace_may_exit(const zend_op_array *op_array, const zend_op *opline)
 {
 	switch (opline->opcode) {
 		case ZEND_IS_IDENTICAL:

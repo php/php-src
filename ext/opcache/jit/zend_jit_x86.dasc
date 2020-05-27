@@ -3148,8 +3148,14 @@ static int zend_jit_trace_handler(dasm_State **Dst, const zend_op_array *op_arra
 		zend_jit_check_exception(Dst);
 	}
 
-	if (!GCC_GLOBAL_REGS) {
+	while (trace->op != ZEND_JIT_TRACE_VM && trace->op != ZEND_JIT_TRACE_END) {
+		trace++;
+	}
+
+	if (!GCC_GLOBAL_REGS
+	 && (trace->op != ZEND_JIT_TRACE_END || trace->stop != ZEND_JIT_TRACE_STOP_RETURN)) {
 		if (opline->opcode == ZEND_RETURN ||
+		    opline->opcode == ZEND_RETURN_BY_REF ||
 		    opline->opcode == ZEND_DO_UCALL ||
 		    opline->opcode == ZEND_DO_FCALL_BY_NAME ||
 		    opline->opcode == ZEND_DO_FCALL) {
@@ -3157,9 +3163,9 @@ static int zend_jit_trace_handler(dasm_State **Dst, const zend_op_array *op_arra
 		}
 	}
 
-	if (zend_jit_trace_may_exit(op_array, opline, trace)) {
+	if (zend_jit_trace_may_exit(op_array, opline)) {
 		// TODO: try to avoid this check ???
-		if (opline->opcode == ZEND_RETURN) {
+		if (opline->opcode == ZEND_RETURN || opline->opcode == ZEND_RETURN_BY_REF) {
 			if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
 				|	cmp IP, zend_jit_halt_op
 				|	je ->trace_halt
@@ -3170,9 +3176,6 @@ static int zend_jit_trace_handler(dasm_State **Dst, const zend_op_array *op_arra
 				|	test eax, eax
 				|	jl ->trace_halt
 			}
-		}
-		while (trace->op != ZEND_JIT_TRACE_VM && trace->op != ZEND_JIT_TRACE_END) {
-			trace++;
 		}
 		if (trace->op != ZEND_JIT_TRACE_END || trace->stop != ZEND_JIT_TRACE_STOP_RETURN) {
 			const zend_op *next_opline = trace->opline;
@@ -3220,25 +3223,6 @@ static int zend_jit_trace_handler(dasm_State **Dst, const zend_op_array *op_arra
 			}
 			|	CMP_IP next_opline
 			|	jne &exit_addr
-		}
-	} else {
-		while (trace->op != ZEND_JIT_TRACE_VM && trace->op != ZEND_JIT_TRACE_END) {
-			trace++;
-		}
-		// TODO: remove this ???
-		if (opline->opcode == ZEND_RETURN
-		 && trace->op == ZEND_JIT_TRACE_END
-		 && trace->stop == ZEND_JIT_TRACE_STOP_RETURN) {
-			if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
-				|	cmp IP, zend_jit_halt_op
-				|	je ->trace_halt
-			} else if (GCC_GLOBAL_REGS) {
-				|	test IP, IP
-				|	je ->trace_halt
-			} else {
-				|	test eax, eax
-				|	jl ->trace_halt
-			}
 		}
 	}
 
