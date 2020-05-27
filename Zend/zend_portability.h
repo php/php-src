@@ -621,4 +621,11 @@ extern "C++" {
 # define ZEND_IGNORE_LEAKS_END()
 #endif
 
+/* MSVC yields C4090 when a (const T **) is passed to a (void *); ZEND_VOIDP works around that */
+#ifdef _MSC_VER
+# define ZEND_VOIDP(ptr) ((void *) ptr)
+#else
+# define ZEND_VOIDP(ptr) (ptr)
+#endif
+
 #endif /* ZEND_PORTABILITY_H */
