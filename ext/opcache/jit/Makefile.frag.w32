@@ -6,7 +6,7 @@ ext\opcache\jit\zend_jit_x86.c: ext\opcache\jit\zend_jit_x86.dasc $(BUILD_DIR)\\
 	@if exist ext\opcache\jit\zend_jit_x86.c del ext\opcache\jit\zend_jit_x86.c
 	$(BUILD_DIR)\\minilua.exe ext/opcache/jit/dynasm/dynasm.lua $(DASM_FLAGS) -o $@ ext/opcache/jit/zend_jit_x86.dasc
 
-$(BUILD_DIR)\opcache_jit\zend_jit.obj: \
+$(BUILD_DIR)\ext\opcache\jit\zend_jit.obj: \
 	ext/opcache/jit/zend_jit_x86.c \
 	ext/opcache/jit/zend_jit_helpers.c \
 	ext/opcache/jit/zend_jit_disasm_x86.c \
