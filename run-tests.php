@@ -137,23 +137,25 @@ function main()
     global $DETAILED, $PHP_FAILED_TESTS, $SHOW_ONLY_GROUPS, $argc, $argv, $cfg,
            $cfgfiles, $cfgtypes, $conf_passed, $end_time, $environment,
            $exts_skipped, $exts_tested, $exts_to_test, $failed_tests_file,
-           $html_file, $html_output, $ignored_by_ext, $ini_overwrites, $is_switch,
+           $ignored_by_ext, $ini_overwrites, $is_switch,
            $just_save_results, $log_format, $matches, $no_clean, $no_file_cache,
            $optionals, $output_file, $pass_option_n, $pass_options,
            $pattern_match, $php, $php_cgi, $phpdbg, $preload, $redir_tests,
            $repeat, $result_tests_file, $slow_min_ms, $start_time, $switch,
            $temp_source, $temp_target, $temp_urlbase, $test_cnt, $test_dirs,
            $test_files, $test_idx, $test_list, $test_results, $testfile,
-           $user_tests, $valgrind, $sum_results, $shuffle, $file_cache;
+           $user_tests, $valgrind, $sum_results, $shuffle, $file_cache, $outputHandler;
     // Parallel testing
     global $workers, $workerID;
 
     define('IS_WINDOWS', substr(PHP_OS, 0, 3) == "WIN");
 
+    $outputHandler = new OutputHandler();
+
     $workerID = 0;
-    if (getenv("TEST_PHP_WORKER")) {
+    if (is_worker_mode()) {
         $workerID = intval(getenv("TEST_PHP_WORKER"));
-        run_worker();
+        run_worker($workerID);
         return;
     }
 
@@ -378,8 +380,6 @@ function main()
 
     $just_save_results = false;
     $valgrind = null;
-    $html_output = false;
-    $html_file = null;
     $temp_source = null;
     $temp_target = null;
     $temp_urlbase = null;
@@ -607,8 +607,9 @@ function main()
                     }
                     break;
                 case '--html':
-                    $html_file = fopen($argv[++$i], 'wt');
-                    $html_output = is_resource($html_file);
+                    $html_output_filename = $argv[++$i];
+                    $outputHandler->setHtmlOutputFilename($html_output_filename);
+                    $outputHandler->clearHtmlFile();
                     break;
                 case '--version':
                     echo '$Id$' . "\n";
@@ -691,7 +692,7 @@ function main()
         usort($test_files, "test_sort");
         $start_time = time();
 
-        if (!$html_output) {
+        if (!$outputHandler->isHtmlEnabled()) {
             echo "Running selected tests.\n";
         } else {
             show_start($start_time);
@@ -701,7 +702,7 @@ function main()
         run_all_tests($test_files, $environment);
         $end_time = time();
 
-        if ($html_output) {
+        if ($outputHandler->isHtmlEnabled()) {
             show_end($end_time);
         }
 
@@ -719,14 +720,14 @@ function main()
         }
 
         compute_summary();
-        if ($html_output) {
-            fwrite($html_file, "<hr/>\n" . get_summary(false, true));
+        if ($outputHandler->isHtmlEnabled()) {
+            $outputHandler->writeHtml("<hr/>\n" . get_summary(false, true));
         }
         echo "=====================================================================";
         echo get_summary(false, false);
 
-        if ($html_output) {
-            fclose($html_file);
+        if ($outputHandler->isHtmlEnabled()) {
+            $outputHandler->closeHtmlHandle();;
         }
 
         if ($output_file != '' && $just_save_results) {
@@ -792,8 +793,8 @@ function main()
         show_end($end_time);
         show_summary();
 
-        if ($html_output) {
-            fclose($html_file);
+        if ($outputHandler->isHtmlEnabled()) {
+            $outputHandler->closeHtmlHandle();
         }
 
         save_or_mail_results();
@@ -1282,7 +1283,7 @@ function system_with_timeout($commandline, $env = null, $stdin = null, $captureS
 
 function run_all_tests($test_files, $env, $redir_tested = null)
 {
-    global $test_results, $failed_tests_file, $result_tests_file, $php, $test_idx, $file_cache;
+    global $test_results, $failed_tests_file, $result_tests_file, $php, $test_idx, $file_cache, $outputHandler;
     // Parallel testing
     global $PHP_FAILED_TESTS, $workers, $workerID, $workerSock;
 
@@ -1351,7 +1352,8 @@ function run_all_tests($test_files, $env, $redir_tested = null)
 /** The heart of parallel testing. */
 function run_all_tests_parallel($test_files, $env, $redir_tested)
 {
-    global $workers, $test_idx, $test_cnt, $test_results, $failed_tests_file, $result_tests_file, $PHP_FAILED_TESTS, $shuffle, $SHOW_ONLY_GROUPS, $valgrind;
+    global $workers, $test_idx, $test_cnt, $test_results, $failed_tests_file, $result_tests_file, $PHP_FAILED_TESTS,
+           $shuffle, $SHOW_ONLY_GROUPS, $valgrind, $outputHandler;
 
     // The PHP binary running run-tests.php, and run-tests.php itself
     // This PHP executable is *not* necessarily the same as the tested version
@@ -1412,7 +1414,7 @@ function run_all_tests_parallel($test_files, $env, $redir_tested)
     // Don't start more workers than test files.
     $workers = max(1, min($workers, count($test_files)));
 
-    echo "Spawning workers… ";
+    echo "Spawning workers ... ";
 
     // We use sockets rather than STDIN/STDOUT for comms because on Windows,
     // those can't be non-blocking for some reason.
@@ -1455,10 +1457,18 @@ function run_all_tests_parallel($test_files, $env, $redir_tested)
             error("Failed to accept connection from worker $i");
         }
 
+        $htmlOutputHandlerSettings = [];
+        if($outputHandler->isHtmlEnabled()) {
+            $htmlOutputHandlerSettings['filename'] = $outputHandler->getHtmlOutputFilename();
+        }
+
         $greeting = base64_encode(serialize([
             "type" => "hello",
             "workerID" => $i,
             "GLOBALS" => $GLOBALS,
+            'output_handler' => [
+                'html' => $htmlOutputHandlerSettings
+            ],
             "constants" => [
                 "INIT_DIR" => INIT_DIR,
                 "TEST_PHP_SRCDIR" => TEST_PHP_SRCDIR,
@@ -1688,9 +1698,9 @@ function kill_children(array $children)
     }
 }
 
-function run_worker()
+function run_worker($workerID)
 {
-    global $workerID, $workerSock;
+    global $workerSock, $outputHandler;
 
     $sockUri = getenv("TEST_PHP_URI");
 
@@ -1719,6 +1729,10 @@ function run_worker()
     }
     foreach ($greeting["constants"] as $const => $value) {
         define($const, $value);
+    }
+
+    if(isset($greeting["output_handler"]['html']['filename'])) {
+        $outputHandler->setHtmlOutputFilename($greeting["output_handler"]['html']['filename']);
     }
 
     send_message($workerSock, [
@@ -1775,7 +1789,7 @@ function show_file_block($file, $block, $section = null)
 //
 function run_test($php, $file, $env)
 {
-    global $log_format, $ini_overwrites, $PHP_FAILED_TESTS;
+    global $outputHandler, $log_format, $ini_overwrites, $PHP_FAILED_TESTS;
     global $pass_options, $DETAILED, $IN_REDIRECT, $test_cnt, $test_idx;
     global $valgrind, $temp_source, $temp_target, $cfg, $environment;
     global $no_clean;
@@ -1783,6 +1797,7 @@ function run_test($php, $file, $env)
     global $no_file_cache;
     global $slow_min_ms;
     global $preload, $file_cache;
+
     // Parallel testing
     global $workerID;
     $temp_filenames = null;
@@ -3187,11 +3202,10 @@ EXPECTED LEAK TEST SUMMARY
 
 function show_start($start_time)
 {
-    global $html_output, $html_file;
+    global $outputHandler;
 
-    if ($html_output) {
-        fwrite($html_file, "<h2>Time Start: " . date('Y-m-d H:i:s', $start_time) . "</h2>\n");
-        fwrite($html_file, "<table>\n");
+    if ($outputHandler->isHtmlEnabled()) {
+        $outputHandler->writeHtml("<h2>Time Start: " . date('Y-m-d H:i:s', $start_time) . "</h2>\n<table>\n");
     }
 
     echo "TIME START " . date('Y-m-d H:i:s', $start_time) . "\n=====================================================================\n";
@@ -3199,11 +3213,11 @@ function show_start($start_time)
 
 function show_end($end_time)
 {
-    global $html_output, $html_file;
+    global $outputHandler;
 
-    if ($html_output) {
-        fwrite($html_file, "</table>\n");
-        fwrite($html_file, "<h2>Time End: " . date('Y-m-d H:i:s', $end_time) . "</h2>\n");
+    if ($outputHandler->isHtmlEnabled()) {
+        $outputHandler->writeHtml("</table>\n");
+        $outputHandler->writeHtml("<h2>Time End: " . date('Y-m-d H:i:s', $end_time) . "</h2>\n");
     }
 
     echo "=====================================================================\nTIME END " . date('Y-m-d H:i:s', $end_time) . "\n";
@@ -3211,10 +3225,10 @@ function show_end($end_time)
 
 function show_summary()
 {
-    global $html_output, $html_file;
+    global $outputHandler;
 
-    if ($html_output) {
-        fwrite($html_file, "<hr/>\n" . get_summary(true, true));
+    if ($outputHandler->isHtmlEnabled()) {
+        $outputHandler->writeHtml("<hr/>\n" . get_summary(true, true));
     }
 
     echo get_summary(true, false);
@@ -3222,10 +3236,10 @@ function show_summary()
 
 function show_redirect_start($tests, $tested, $tested_file)
 {
-    global $html_output, $html_file, $line_length, $SHOW_ONLY_GROUPS;
+    global $outputHandler, $line_length, $SHOW_ONLY_GROUPS;
 
-    if ($html_output) {
-        fwrite($html_file, "<tr><td colspan='3'>---&gt; $tests ($tested [$tested_file]) begin</td></tr>\n");
+    if ($outputHandler->isHtmlEnabled()) {
+        $outputHandler->writeHtml("<tr><td colspan='3'>---&gt; $tests ($tested [$tested_file]) begin</td></tr>\n");
     }
 
     if (!$SHOW_ONLY_GROUPS || in_array('REDIRECT', $SHOW_ONLY_GROUPS)) {
@@ -3237,10 +3251,10 @@ function show_redirect_start($tests, $tested, $tested_file)
 
 function show_redirect_ends($tests, $tested, $tested_file)
 {
-    global $html_output, $html_file, $line_length, $SHOW_ONLY_GROUPS;
+    global $outputHandler, $line_length, $SHOW_ONLY_GROUPS;
 
-    if ($html_output) {
-        fwrite($html_file, "<tr><td colspan='3'>---&gt; $tests ($tested [$tested_file]) done</td></tr>\n");
+    if ($outputHandler->isHtmlEnabled()) {
+        $outputHandler->writeHtml("<tr><td colspan='3'>---&gt; $tests ($tested [$tested_file]) done</td></tr>\n");
     }
 
     if (!$SHOW_ONLY_GROUPS || in_array('REDIRECT', $SHOW_ONLY_GROUPS)) {
@@ -3282,15 +3296,14 @@ function parse_conflicts(string $text): array
 
 function show_result($result, $tested, $tested_file, $extra = '', $temp_filenames = null)
 {
-    global $html_output, $html_file, $temp_target, $temp_urlbase, $line_length, $SHOW_ONLY_GROUPS;
-
+    global $temp_target, $temp_urlbase, $line_length, $SHOW_ONLY_GROUPS, $outputHandler;
     if (!$SHOW_ONLY_GROUPS || in_array($result, $SHOW_ONLY_GROUPS)) {
         echo "$result $tested [$tested_file] $extra\n";
     } elseif (!$SHOW_ONLY_GROUPS) {
         clear_show_test();
     }
 
-    if ($html_output) {
+    if ($outputHandler->isHtmlEnabled()) {
         if (isset($temp_filenames['file']) && file_exists($temp_filenames['file'])) {
             $url = str_replace($temp_target, $temp_urlbase, $temp_filenames['file']);
             $tested = "<a href='$url'>$tested</a>";
@@ -3321,8 +3334,7 @@ function show_result($result, $tested, $tested_file, $extra = '', $temp_filename
             $mem = "&nbsp;";
         }
 
-        fwrite(
-            $html_file,
+        $outputHandler->writeHtml(
             "<tr>" .
                 "<td>$result</td>" .
                 "<td>$tested</td>" .
@@ -3692,6 +3704,7 @@ class RuntestsValgrind
     }
 }
 
+
 function init_output_buffers()
 {
     // Delete as much output buffers as possible.
@@ -3701,6 +3714,11 @@ function init_output_buffers()
     if (ob_get_level()) {
         echo "Not all buffers were deleted.\n";
     }
+}
+
+function is_worker_mode()
+{
+    return getenv("TEST_PHP_WORKER");
 }
 
 function check_proc_open_function_exists()
@@ -3717,6 +3735,81 @@ function check_proc_open_function_exists()
 NO_PROC_OPEN_ERROR;
         exit(1);
     }
+}
+
+class OutputHandler
+{
+
+    /**
+     * @var null|string
+     */
+    private $htmlOutputFilename = null;
+
+    /**
+     * @var null|resource
+     */
+    private $htmlHandle = null;
+
+    /**
+     * @param string $outputFilename
+     */
+    public function setHtmlOutputFilename($outputFilename)
+    {
+        $this->htmlOutputFilename = $outputFilename;
+    }
+
+    public function clearHtmlFile()
+    {
+        ftruncate($this->getHtmlFileHandle(), 0);
+    }
+
+    /**
+     * @return string
+     */
+    public function getHtmlOutputFilename()
+    {
+        if($this->htmlOutputFilename === null) {
+            throw new \Exception('No output filename has been set.');
+        }
+
+        return $this->htmlOutputFilename;
+    }
+
+    /**
+     * @return false|resource
+     */
+    public function getHtmlFileHandle()
+    {
+        if($this->htmlHandle !== null) {
+            return $this->htmlHandle;
+        }
+
+        $this->fileHandle = fopen($this->getHtmlOutputFilename(), 'at+');
+
+        return $this->fileHandle;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isHtmlEnabled()
+    {
+        return !empty($this->htmlOutputFilename) && is_resource($this->getHtmlFileHandle());
+    }
+
+    public function closeHtmlHandle()
+    {
+        fclose($this->getHtmlFileHandle());
+    }
+
+    /**
+     * @param $content
+     */
+    public function writeHtml($content)
+    {
+        fwrite($this->getHtmlFileHandle(), $content);
+    }
+
 }
 
 main();
