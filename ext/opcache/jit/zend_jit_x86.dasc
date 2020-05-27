@@ -7224,6 +7224,7 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, const z
 	uint32_t false_label = -1;
 	zend_bool set_bool = 0;
 	zend_bool set_bool_not = 0;
+	zend_bool set_delayed = 0;
 	zend_bool jmp_done = 0;
 
 	if (branch_opcode == ZEND_BOOL) {
@@ -7393,7 +7394,11 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, const z
 						} else {
 							|	add eax, 2
 						}
-						|	SET_ZVAL_TYPE_INFO res_addr, eax
+						if ((op1_info & MAY_BE_UNDEF) && (op1_info & MAY_BE_ANY)) {
+							set_delayed = 1;
+						} else {
+							|	SET_ZVAL_TYPE_INFO res_addr, eax
+						}
 					}
 				}
 			}
@@ -7401,7 +7406,13 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, const z
 			/* It's FALSE, but may be UNDEF */
 			if (op1_info & MAY_BE_UNDEF) {
 				if (op1_info & MAY_BE_ANY) {
-					|	IF_ZVAL_TYPE op1_addr, IS_UNDEF, >1
+					if (set_delayed) {
+						|	CMP_ZVAL_TYPE op1_addr, IS_UNDEF
+						|	SET_ZVAL_TYPE_INFO res_addr, eax
+						|	jz >1
+					} else {
+						|	IF_ZVAL_TYPE op1_addr, IS_UNDEF, >1
+					}
 					|.cold_code
 					|1:
 				}
