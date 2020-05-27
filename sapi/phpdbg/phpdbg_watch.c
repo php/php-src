@@ -713,9 +713,8 @@ void phpdbg_automatic_dequeue_free(phpdbg_watch_element *element) {
 		child = child->child;
 	}
 	PHPDBG_G(watchpoint_hit) = 1;
-	if (zend_hash_index_find(&PHPDBG_G(watch_elements), child->id)) {
+	if (zend_hash_index_del(&PHPDBG_G(watch_elements), child->id) == SUCCESS) {
 		phpdbg_notice("watchdelete", "variable=\"%.*s\" recursive=\"%s\"", "%.*s has been removed, removing watchpoint%s", (int) ZSTR_LEN(child->str), ZSTR_VAL(child->str), (child->flags & PHPDBG_WATCH_RECURSIVE_ROOT) ? " recursively" : "");
-		zend_hash_index_del(&PHPDBG_G(watch_elements), child->id);
 	}
 	phpdbg_free_watch_element_tree(element);
 }
