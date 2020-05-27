@@ -2433,7 +2433,11 @@ static int zend_jit_trace_exit_stub(dasm_State **Dst)
 	}
 
 	|1:
-	|	jl ->trace_halt
+	if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
+		|	jl ->trace_halt
+	} else {
+		|	jl >2
+	}
 
 	|	// execute_data = EG(current_execute_data)
 	|	MEM_OP2_2_ZTS mov, FP, aword, executor_globals, current_execute_data, r0
@@ -2456,6 +2460,9 @@ static int zend_jit_trace_exit_stub(dasm_State **Dst)
 		|	mov r0, aword [r0 + offsetof(zend_op_array, reserved[zend_func_info_rid])]
 		|	mov r0, aword [r0 + offsetof(zend_jit_op_array_trace_extension, offset)]
 		|	jmp aword [IP + r0]
+		|2:
+		|	add r4, SPAD // stack alignment
+		|	ret
 	} else {
 		|	mov IP, aword EX->opline
 		|	mov FCARG1a, FP
@@ -2467,6 +2474,9 @@ static int zend_jit_trace_exit_stub(dasm_State **Dst)
 		|	mov RX, aword T3 // restore IP
 		|	add r4, NR_SPAD // stack alignment
 		|	mov r0, 1 // ZEND_VM_ENTER
+		|	ret
+		|2:
+		|	add r4, NR_SPAD // stack alignment
 		|	ret
 	}
 
