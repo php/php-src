@@ -2218,8 +2218,8 @@ AC_DEFUN([PHP_DETECT_SUNCC],[
 dnl
 dnl PHP_CRYPT_R_STYLE
 dnl
-dnl Detect the style of crypt_r() is any is available see
-dnl APR_CHECK_CRYPT_R_STYLE() for original version.
+dnl Detect the style of crypt_r() if any is available.
+dnl See APR_CHECK_CRYPT_R_STYLE() for original version.
 dnl
 AC_DEFUN([PHP_CRYPT_R_STYLE],
 [
