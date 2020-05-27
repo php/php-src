@@ -12,6 +12,8 @@ PHP                                                                        NEWS
 
 - phpdbg:
   . Fixed bug #73926 (phpdbg will not accept input on restart execution). (cmb)
+  . Fixed bug #73927 (phpdbg fails with windows error prompt at "watch array").
+    (cmb)
   . Fixed several mostly Windows related phpdbg bugs. (cmb)
 
 11 Jun 2020, PHP 7.4.7
