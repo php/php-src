@@ -3848,6 +3848,25 @@ done:
 				}
 			}
 		} else if (p->op == ZEND_JIT_TRACE_ENTER) {
+			call = frame->call;
+			assert(call && &call->func->op_array == p->op_array);
+
+			/* Check if SEND_UNPACK/SEND_ARRAY may cause enter at diffrent opline */
+			if ((opline->opcode == ZEND_DO_UCALL
+			  || opline->opcode == ZEND_DO_FCALL_BY_NAME
+			  || opline->opcode == ZEND_DO_FCALL)
+			 && opline > op_array->opcodes
+			 && ((opline-1)->opcode == ZEND_SEND_ARRAY
+			  || (opline-1)->opcode == ZEND_SEND_UNPACK)
+			 && p->op_array->num_args
+			 && (p->op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) == 0
+			 && ((p+1)->op == ZEND_JIT_TRACE_VM
+			  || (p+1)->op == ZEND_JIT_TRACE_END)
+			 && TRACE_FRAME_NUM_ARGS(call) < p->op_array->num_args
+			 && !zend_jit_trace_opline_guard(&dasm_state, (p+1)->opline)) {
+				goto jit_failure;
+			}
+
 			if ((p+1)->op == ZEND_JIT_TRACE_END) {
 				p++;
 				zend_jit_set_opline(&dasm_state, p->opline);
@@ -3857,45 +3876,6 @@ done:
 			jit_extension =
 				(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
 			op_array_ssa = &jit_extension->func_info.ssa;
-			call = frame->call;
-			if (!call) {
-
-				assert(0); // This should be handled by "fake" ZEND_JIT_TRACE_INIT_CALL
-				/* Trace missed INIT_FCALL opcode */
-				call = top;
-				TRACE_FRAME_INIT(call, op_array, 0, -1); // TODO: should be possible to get the real number af arguments ???
-				top = zend_jit_trace_call_frame(top, op_array);
-				if (JIT_G(opt_level) >= ZEND_JIT_LEVEL_INLINE) {
-					uint32_t v;
-
-					i = 0;
-					v = ZEND_JIT_TRACE_GET_FIRST_SSA_VAR(p->info);
-					while (i < p->op_array->num_args) {
-						/* Initialize abstract stack using SSA */
-						if (!(ssa->var_info[v + i].type & MAY_BE_GUARD)
-						 && has_concrete_type(ssa->var_info[v + i].type)) {
-							SET_STACK_TYPE(call->stack, i, concrete_type(ssa->var_info[v + i].type));
-						} else {
-							SET_STACK_TYPE(call->stack, i, IS_UNKNOWN);
-						}
-						i++;
-					}
-					while (i < p->op_array->last_var) {
-						SET_STACK_TYPE(call->stack, i, IS_UNDEF);
-						i++;
-					}
-					while (i < p->op_array->last_var + p->op_array->T) {
-						SET_STACK_TYPE(call->stack, i, IS_UNKNOWN);
-						i++;
-					}
-				} else {
-					for (i = 0; i < p->op_array->last_var + p->op_array->T; i++) {
-						SET_STACK_TYPE(call->stack, i, IS_UNKNOWN);
-					}
-				}
-			} else {
-				ZEND_ASSERT(&call->func->op_array == op_array);
-			}
 			frame->call = call->prev;
 			call->prev = frame;
 			if (p->info & ZEND_JIT_TRACE_RETRUN_VALUE_USED) {
