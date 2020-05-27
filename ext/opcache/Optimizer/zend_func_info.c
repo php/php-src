@@ -54,7 +54,8 @@ typedef struct _func_info_t {
 
 static uint32_t zend_range_info(const zend_call_info *call_info, const zend_ssa *ssa)
 {
-	if (call_info->num_args == 2 || call_info->num_args == 3) {
+	if (!call_info->send_unpack
+	 && (call_info->num_args == 2 || call_info->num_args == 3)) {
 		zend_op_array *op_array = call_info->caller_op_array;
 		uint32_t t1 = _ssa_op1_info(op_array, ssa, call_info->arg_info[0].opline,
 			&ssa->ops[call_info->arg_info[0].opline - op_array->opcodes]);

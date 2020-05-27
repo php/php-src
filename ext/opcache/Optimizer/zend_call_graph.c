@@ -136,9 +136,8 @@ int zend_analyze_calls(zend_arena **arena, zend_script *script, uint32_t build_f
 				break;
 			case ZEND_SEND_ARRAY:
 			case ZEND_SEND_UNPACK:
-				/* TODO: set info about var_arg call ??? */
 				if (call_info) {
-					call_info->num_args = -1;
+					call_info->send_unpack = 1;
 				}
 				break;
 			case ZEND_EXIT:
