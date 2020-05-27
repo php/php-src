@@ -993,6 +993,9 @@ int odbc_bindcols(odbc_result *result)
 			default:
 				rc = PHP_ODBC_SQLCOLATTRIBUTE(result->stmt, (SQLUSMALLINT)(i+1), colfieldid,
 								NULL, 0, NULL, &displaysize);
+				if (rc != SQL_SUCCESS) {
+					displaysize = 0;
+				}
 #if defined(ODBCVER) && (ODBCVER >= 0x0300)
 				if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO && colfieldid == SQL_DESC_OCTET_LENGTH) {
 					SQLINTEGER err;
@@ -1012,6 +1015,9 @@ int odbc_bindcols(odbc_result *result)
 					charextraalloc = 1;
 					rc = SQLColAttributes(result->stmt, (SQLUSMALLINT)(i+1), SQL_COLUMN_DISPLAY_SIZE,
 								NULL, 0, NULL, &displaysize);
+					if (rc != SQL_SUCCESS) {
+						displaysize = 0;
+					}
 				}
 
 				/* Workaround for drivers that report NVARCHAR(MAX) columns as SQL_WVARCHAR with size 0 (bug #69975) */
