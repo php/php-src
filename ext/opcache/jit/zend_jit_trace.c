@@ -1961,7 +1961,7 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 
 	memset(start, -1, sizeof(int) * ssa->vars_count * 2);
 	memset(flags, 0, sizeof(uint8_t) * ssa->vars_count);
-	memset(vars_op_array, 0, sizeof(zend_op_array*) * ssa->vars_count);
+	memset(ZEND_VOIDP(vars_op_array), 0, sizeof(zend_op_array*) * ssa->vars_count);
 
 	op_array = trace_buffer->op_array;
 	jit_extension =
@@ -5353,7 +5353,7 @@ static int zend_jit_setup_hot_trace_counters(zend_op_array *op_array)
 
 static void zend_jit_trace_init_caches(void)
 {
-	memset(JIT_G(bad_root_cache_opline), 0, sizeof(JIT_G(bad_root_cache_opline)));
+	memset(ZEND_VOIDP(JIT_G(bad_root_cache_opline)), 0, sizeof(JIT_G(bad_root_cache_opline)));
 	memset(JIT_G(bad_root_cache_count), 0, sizeof(JIT_G(bad_root_cache_count)));
 	memset(JIT_G(bad_root_cache_stop), 0, sizeof(JIT_G(bad_root_cache_count)));
 	JIT_G(bad_root_slot) = 0;

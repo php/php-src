@@ -2071,7 +2071,7 @@ phpdbg_out:
 			settings->oplog = PHPDBG_G(oplog);
 			settings->prompt[0] = PHPDBG_G(prompt)[0];
 			settings->prompt[1] = PHPDBG_G(prompt)[1];
-			memcpy(settings->colors, PHPDBG_G(colors), sizeof(settings->colors));
+			memcpy(ZEND_VOIDP(settings->colors), PHPDBG_G(colors), sizeof(settings->colors));
 			settings->eol = PHPDBG_G(eol);
 			settings->input_buflen = PHPDBG_G(input_buflen);
 			memcpy(settings->input_buffer, PHPDBG_G(input_buffer), settings->input_buflen);

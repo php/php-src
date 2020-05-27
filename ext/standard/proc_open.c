@@ -841,6 +841,7 @@ static int set_proc_descriptor_from_resource(zval *resource, descriptorspec_item
 	return SUCCESS;
 }
 
+#ifndef PHP_WIN32
 static int close_parentends_of_pipes(descriptorspec_item *descriptors, int ndesc)
 {
 	/* We are running in child process
@@ -863,6 +864,7 @@ static int close_parentends_of_pipes(descriptorspec_item *descriptors, int ndesc
 
 	return SUCCESS;
 }
+#endif
 
 static void close_all_descriptors(descriptorspec_item *descriptors, int ndesc)
 {

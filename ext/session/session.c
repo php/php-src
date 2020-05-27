@@ -2821,7 +2821,7 @@ static PHP_MSHUTDOWN_FUNCTION(session) /* {{{ */
 	}
 
 	ps_serializers[PREDEFINED_SERIALIZERS].name = NULL;
-	memset(&ps_modules[PREDEFINED_MODULES], 0, (MAX_MODULES-PREDEFINED_MODULES)*sizeof(ps_module *));
+	memset(ZEND_VOIDP(&ps_modules[PREDEFINED_MODULES]), 0, (MAX_MODULES-PREDEFINED_MODULES)*sizeof(ps_module *));
 
 	return SUCCESS;
 }

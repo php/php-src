@@ -303,8 +303,8 @@ static inline zend_ulong realpath_cache_key(const char *path, size_t path_len) /
 {
 	register zend_ulong h;
 	size_t bucket_key_len;
-	char *bucket_key_start = tsrm_win32_get_path_sid_key(path, path_len, &bucket_key_len);
-	char *bucket_key = (char *)bucket_key_start;
+	const char *bucket_key_start = tsrm_win32_get_path_sid_key(path, path_len, &bucket_key_len);
+	const char *bucket_key = bucket_key_start;
 	const char *e;
 
 	if (!bucket_key) {

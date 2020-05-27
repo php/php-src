@@ -1109,7 +1109,7 @@ PHPAPI void php_explode_negative_limit(const zend_string *delim, zend_string *st
 		do {
 			if (found >= allocated) {
 				allocated = found + EXPLODE_ALLOC_STEP;/* make sure we have enough memory */
-				positions = erealloc(positions, allocated*sizeof(char *));
+				positions = erealloc(ZEND_VOIDP(positions), allocated*sizeof(char *));
 			}
 			positions[found++] = p1 = p2 + ZSTR_LEN(delim);
 			p2 = php_memnstr(p1, ZSTR_VAL(delim), ZSTR_LEN(delim), endp);
