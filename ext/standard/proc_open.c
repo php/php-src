@@ -48,6 +48,10 @@
 # elif defined(__FreeBSD__)
 /* FreeBSD defines `openpty` in <libutil.h> */
 #  include <libutil.h>
+# elif defined(__NetBSD__)
+/* On recent NetBSD releases the emalloc, estrdup ... calls had been introduced in libutil */
+#  include <sys/termios.h>
+extern int openpty(int *, int *, char *, struct termios *, struct winsize *);
 # else
 /* Mac OS X (and some BSDs) define `openpty` in <util.h> */
 #  include <util.h>
