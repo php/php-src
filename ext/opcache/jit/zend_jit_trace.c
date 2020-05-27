@@ -5205,6 +5205,8 @@ static int zend_jit_setup_hot_trace_counters(zend_op_array *op_array)
 		}
 	}
 
+	zend_shared_alloc_register_xlat_entry(op_array->opcodes, jit_extension);
+
 	return SUCCESS;
 }
 

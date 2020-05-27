@@ -3286,6 +3286,8 @@ static int zend_jit_setup_hot_counters(zend_op_array *op_array)
 		}
 	}
 
+	zend_shared_alloc_register_xlat_entry(op_array->opcodes, jit_extension);
+
 	return SUCCESS;
 }
 
@@ -3333,6 +3335,7 @@ ZEND_EXT_API int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 		jit_extension->orig_handler = (void*)opline->handler;
 		ZEND_SET_FUNC_INFO(op_array, (void*)jit_extension);
 		opline->handler = (const void*)zend_jit_runtime_jit_handler;
+		zend_shared_alloc_register_xlat_entry(op_array->opcodes, jit_extension);
 
 		return SUCCESS;
 	} else if (JIT_G(trigger) == ZEND_JIT_ON_PROF_REQUEST) {
@@ -3353,6 +3356,7 @@ ZEND_EXT_API int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 			jit_extension->orig_handler = (void*)opline->handler;
 			ZEND_SET_FUNC_INFO(op_array, (void*)jit_extension);
 			opline->handler = (const void*)zend_jit_profile_jit_handler;
+			zend_shared_alloc_register_xlat_entry(op_array->opcodes, jit_extension);
 		}
 
 		return SUCCESS;
@@ -3485,6 +3489,27 @@ ZEND_EXT_API int zend_jit_script(zend_script *script)
 	}
 
 	zend_arena_release(&CG(arena), checkpoint);
+
+	if (JIT_G(trigger) == ZEND_JIT_ON_FIRST_EXEC
+	 || JIT_G(trigger) == ZEND_JIT_ON_PROF_REQUEST
+	 || JIT_G(trigger) == ZEND_JIT_ON_HOT_COUNTERS
+	 || JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
+		zend_class_entry *ce;
+		zend_op_array *op_array;
+
+		ZEND_HASH_FOREACH_PTR(&script->class_table, ce) {
+			ZEND_HASH_FOREACH_PTR(&ce->function_table, op_array) {
+				if (!ZEND_FUNC_INFO(op_array)) {
+					void *jit_extension = zend_shared_alloc_get_xlat_entry(op_array->opcodes);
+
+					if (jit_extension) {
+						ZEND_SET_FUNC_INFO(op_array, jit_extension);
+					}
+				}
+			} ZEND_HASH_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
+	}
+
 	return SUCCESS;
 
 jit_failure:

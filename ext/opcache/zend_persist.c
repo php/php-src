@@ -30,6 +30,7 @@
 #include "zend_interfaces.h"
 
 #ifdef HAVE_JIT
+# include "Optimizer/zend_func_info.h"
 # include "jit/zend_jit.h"
 #endif
 
@@ -384,6 +385,21 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 				ZEND_ASSERT(op_array->vars != NULL);
 			}
 			ZCG(mem) = (void*)((char*)ZCG(mem) + ZEND_ALIGNED_SIZE(zend_extensions_op_array_persist(op_array, ZCG(mem))));
+#ifdef HAVE_JIT
+			if (JIT_G(on) && JIT_G(opt_level) <= ZEND_JIT_LEVEL_OPT_FUNCS &&
+			    !ZCG(current_persistent_script)->corrupted) {
+				if (JIT_G(trigger) == ZEND_JIT_ON_FIRST_EXEC
+				 || JIT_G(trigger) == ZEND_JIT_ON_PROF_REQUEST
+				 || JIT_G(trigger) == ZEND_JIT_ON_HOT_COUNTERS
+				 || JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
+					void *jit_extension = zend_shared_alloc_get_xlat_entry(op_array->opcodes);
+
+					if (jit_extension) {
+						ZEND_SET_FUNC_INFO(op_array, jit_extension);
+					}
+				}
+			}
+#endif
 			return;
 		}
 	} else {
