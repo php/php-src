@@ -389,11 +389,6 @@ if test "$ac_cv_strptime_decl_fails" = "yes"; then
 fi
 
 dnl
-dnl Check for atomic operation API availability in Solaris
-dnl
-AC_CHECK_HEADERS([atomic.h])
-
-dnl
 dnl Check for arc4random on BSD systems
 dnl
 AC_CHECK_DECLS([arc4random_buf])
