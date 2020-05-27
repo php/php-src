@@ -7,14 +7,14 @@ c
 w $value
 w $lower[]
 q
---EXPECT--
-[Successful compilation of C:\php-sdk\phpdev\vc15\x64\php-src-pr5599\sapi\phpdbg\tests\bug73927.php]
-prompt> [Breakpoint #0 added at C:\php-sdk\phpdev\vc15\x64\php-src-pr5599\sapi\phpdbg\tests\bug73927.php:19]
-prompt> [Breakpoint #0 at C:\php-sdk\phpdev\vc15\x64\php-src-pr5599\sapi\phpdbg\tests\bug73927.php:19, hits: 1]
+--EXPECTF--
+[Successful compilation of %s]
+prompt> [Breakpoint #0 added at %s:%d]
+prompt> [Breakpoint #0 at %s:%d, hits: 1]
 >00019:     if ($value < 100) {
  00020:         $lower[] = $value;
  00021:     } else {
-prompt> [Breakpoint #0 at C:\php-sdk\phpdev\vc15\x64\php-src-pr5599\sapi\phpdbg\tests\bug73927.php:19, hits: 2]
+prompt> [Breakpoint #0 at %s:%d, hits: 2]
 >00019:     if ($value < 100) {
  00020:         $lower[] = $value;
  00021:     } else {
