@@ -3207,7 +3207,7 @@ function toolset_setup_common_cflags()
 
 	// General CFLAGS for building objects
 	DEFINE("CFLAGS", "/nologo $(BASE_INCLUDES) /D _WINDOWS /D WINDOWS=1 \
-		/D ZEND_WIN32=1 /D PHP_WIN32=1 /D WIN32 /D _MBCS /W3 \
+		/D ZEND_WIN32=1 /D PHP_WIN32=1 /D WIN32 /D _MBCS \
 		/D _USE_MATH_DEFINES");
 
 	if (envCFLAGS) {
@@ -3399,7 +3399,7 @@ function toolset_setup_common_libs()
 function toolset_setup_build_mode()
 {
 	if (PHP_DEBUG == "yes") {
-		ADD_FLAG("CFLAGS", "/LDd /MDd /W3 /Od /D _DEBUG /D ZEND_DEBUG=1 " +
+		ADD_FLAG("CFLAGS", "/LDd /MDd /Od /D _DEBUG /D ZEND_DEBUG=1 " +
 			(X64?"/Zi":"/ZI"));
 		ADD_FLAG("LDFLAGS", "/debug");
 		// Avoid problems when linking to release libraries that use the release
@@ -3411,7 +3411,7 @@ function toolset_setup_build_mode()
 			ADD_FLAG("CFLAGS", "/Zi");
 			ADD_FLAG("LDFLAGS", "/incremental:no /debug /opt:ref,icf");
 		}
-		ADD_FLAG("CFLAGS", "/LD /MD /W3");
+		ADD_FLAG("CFLAGS", "/LD /MD");
 		if (PHP_SANITIZER == "yes" && CLANG_TOOLSET) {
 			ADD_FLAG("CFLAGS", "/Od /D NDebug /D NDEBUG /D ZEND_WIN32_NEVER_INLINE /D ZEND_DEBUG=0");
 		} else {
