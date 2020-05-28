@@ -159,7 +159,6 @@ int  ZEND_FASTCALL zend_jit_check_constant(const zval *key);
 	_(BLACK_LIST,        "trace blacklisted") \
 	_(INNER_LOOP,        "inner loop")                     /* trace it */ \
 	_(COMPILED_LOOP,     "compiled loop") \
-	_(TOPLEVEL,          "toplevel") \
 	_(TRAMPOLINE,        "trampoline call") \
 	_(BAD_FUNC,          "bad function call") \
 	_(HALT,              "exit from interpreter") \
@@ -219,6 +218,7 @@ typedef union _zend_op_trace_info {
 
 typedef struct _zend_jit_op_array_trace_extension {
 	zend_func_info func_info;
+	const zend_op_array *op_array;
 	size_t offset; /* offset from "zend_op" to corresponding "op_info" */
 	zend_op_trace_info trace_info[1];
 } zend_jit_op_array_trace_extension;

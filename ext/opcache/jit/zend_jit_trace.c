@@ -4668,16 +4668,6 @@ repeat:
 	stop = zend_jit_trace_execute(execute_data, opline, trace_buffer,
 		ZEND_OP_TRACE_INFO(opline, offset)->trace_flags & ZEND_JIT_TRACE_START_MASK);
 
-	if (stop == ZEND_JIT_TRACE_STOP_TOPLEVEL) {
-		/* op_array may be already deallocated */
-		if (JIT_G(debug) & ZEND_JIT_DEBUG_TRACE_ABORT) {
-			fprintf(stderr, "---- TRACE %d abort (%s)\n",
-				trace_num,
-				zend_jit_trace_stop_description[stop]);
-		}
-		goto blacklist;
-	}
-
 	if (UNEXPECTED(JIT_G(debug) & ZEND_JIT_DEBUG_TRACE_BYTECODE)) {
 		zend_jit_dump_trace(trace_buffer, NULL);
 	}
@@ -4713,7 +4703,6 @@ abort:
 				trace_num,
 				zend_jit_trace_stop_description[stop]);
 		}
-blacklist:
 		if (!ZEND_JIT_TRACE_STOP_MAY_RECOVER(stop)
 		 || zend_jit_trace_is_bad_root(orig_opline, stop, offset)) {
 			if (JIT_G(debug) & ZEND_JIT_DEBUG_TRACE_BLACKLIST) {
@@ -4938,16 +4927,6 @@ int ZEND_FASTCALL zend_jit_trace_hot_side(zend_execute_data *execute_data, uint3
 
 	stop = zend_jit_trace_execute(execute_data, EX(opline), trace_buffer, ZEND_JIT_TRACE_START_SIDE);
 
-	if (stop == ZEND_JIT_TRACE_STOP_TOPLEVEL) {
-		/* op_array may be already deallocated */
-		if (JIT_G(debug) & ZEND_JIT_DEBUG_TRACE_ABORT) {
-			fprintf(stderr, "---- TRACE %d abort (%s)\n",
-				trace_num,
-				zend_jit_trace_stop_description[stop]);
-		}
-		goto blacklist;
-	}
-
 	if (UNEXPECTED(JIT_G(debug) & ZEND_JIT_DEBUG_TRACE_BYTECODE)) {
 		zend_jit_dump_trace(trace_buffer, NULL);
 	}
@@ -4992,7 +4971,6 @@ abort:
 				trace_num,
 				zend_jit_trace_stop_description[stop]);
 		}
-blacklist:
 		if (!ZEND_JIT_TRACE_STOP_MAY_RECOVER(stop)
 		 || zend_jit_trace_exit_is_bad(parent_num, exit_num)) {
 			zend_jit_blacklist_trace_exit(parent_num, exit_num);
@@ -5140,6 +5118,7 @@ static int zend_jit_setup_hot_trace_counters(zend_op_array *op_array)
 	memset(&jit_extension->func_info, 0, sizeof(zend_func_info));
 	jit_extension->func_info.num_args = -1;
 	jit_extension->func_info.return_value_used = -1;
+	jit_extension->op_array = op_array;
 	jit_extension->offset = (char*)jit_extension->trace_info - (char*)op_array->opcodes;
 	for (i = 0; i < op_array->last; i++) {
 		jit_extension->trace_info[i].orig_handler = op_array->opcodes[i].handler;

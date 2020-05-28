@@ -8009,8 +8009,10 @@ static int zend_jit_init_fcall_guard(dasm_State **Dst, const zend_op *opline, co
 		return 0;
 	}
 
-	if (func->type == ZEND_USER_FUNCTION
-	 && !(func->common.fn_flags & ZEND_ACC_IMMUTABLE)) {
+	if (func->type == ZEND_USER_FUNCTION &&
+	    (!(func->common.fn_flags & ZEND_ACC_IMMUTABLE) ||
+	     (func->common.fn_flags & ZEND_ACC_CLOSURE) ||
+	     !func->common.function_name)) {
 		const zend_op *opcodes = func->op_array.opcodes;
 
 		|	// call = EX(call);
