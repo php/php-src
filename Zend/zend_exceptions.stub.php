@@ -4,26 +4,20 @@
 
 interface Throwable extends Stringable
 {
-    /** @return string */
-    public function getMessage();
+    public function getMessage(): string;
 
     /** @return int */
     public function getCode();
 
-    /** @return string */
-    public function getFile();
+    public function getFile(): string;
 
-    /** @return int */
-    public function getLine();
+    public function getLine(): int;
 
-    /** @return array */
-    public function getTrace();
+    public function getTrace(): array;
 
-    /** @return ?Throwable */
-    public function getPrevious();
+    public function getPrevious(): ?Throwable;
 
-    /** @return string */
-    public function getTraceAsString();
+    public function getTraceAsString(): string;
 }
 
 class Exception implements Throwable

@@ -1,21 +1,25 @@
 /* This is a generated file, edit the .stub.php file instead. */
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Throwable_getMessage, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Throwable_getMessage, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Throwable_getCode arginfo_class_Throwable_getMessage
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Throwable_getCode, 0, 0, 0)
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_Throwable_getFile arginfo_class_Throwable_getMessage
 
-#define arginfo_class_Throwable_getLine arginfo_class_Throwable_getMessage
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Throwable_getLine, 0, 0, IS_LONG, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_Throwable_getTrace arginfo_class_Throwable_getMessage
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Throwable_getTrace, 0, 0, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_Throwable_getPrevious arginfo_class_Throwable_getMessage
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Throwable_getPrevious, 0, 0, Throwable, 1)
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_Throwable_getTraceAsString arginfo_class_Throwable_getMessage
 
-#define arginfo_class_Exception___clone arginfo_class_Throwable_getMessage
+#define arginfo_class_Exception___clone arginfo_class_Throwable_getCode
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Exception___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
@@ -23,27 +27,23 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Exception___construct, 0, 0, 0)
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, previous, Throwable, 1, "null")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Exception___wakeup arginfo_class_Throwable_getMessage
+#define arginfo_class_Exception___wakeup arginfo_class_Throwable_getCode
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Exception_getMessage, 0, 0, IS_STRING, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_class_Exception_getMessage arginfo_class_Throwable_getMessage
 
-#define arginfo_class_Exception_getCode arginfo_class_Throwable_getMessage
+#define arginfo_class_Exception_getCode arginfo_class_Throwable_getCode
 
-#define arginfo_class_Exception_getFile arginfo_class_Exception_getMessage
+#define arginfo_class_Exception_getFile arginfo_class_Throwable_getMessage
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Exception_getLine, 0, 0, IS_LONG, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_class_Exception_getLine arginfo_class_Throwable_getLine
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Exception_getTrace, 0, 0, IS_ARRAY, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_class_Exception_getTrace arginfo_class_Throwable_getTrace
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Exception_getPrevious, 0, 0, Throwable, 1)
-ZEND_END_ARG_INFO()
+#define arginfo_class_Exception_getPrevious arginfo_class_Throwable_getPrevious
 
-#define arginfo_class_Exception_getTraceAsString arginfo_class_Exception_getMessage
+#define arginfo_class_Exception_getTraceAsString arginfo_class_Throwable_getMessage
 
-#define arginfo_class_Exception___toString arginfo_class_Exception_getMessage
+#define arginfo_class_Exception___toString arginfo_class_Throwable_getMessage
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ErrorException___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
@@ -54,29 +54,29 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ErrorException___construct, 0, 0, 0)
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, previous, Throwable, 1, "null")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_ErrorException_getSeverity arginfo_class_Exception_getLine
+#define arginfo_class_ErrorException_getSeverity arginfo_class_Throwable_getLine
 
-#define arginfo_class_Error___clone arginfo_class_Throwable_getMessage
+#define arginfo_class_Error___clone arginfo_class_Throwable_getCode
 
 #define arginfo_class_Error___construct arginfo_class_Exception___construct
 
-#define arginfo_class_Error___wakeup arginfo_class_Throwable_getMessage
+#define arginfo_class_Error___wakeup arginfo_class_Throwable_getCode
 
-#define arginfo_class_Error_getMessage arginfo_class_Exception_getMessage
+#define arginfo_class_Error_getMessage arginfo_class_Throwable_getMessage
 
-#define arginfo_class_Error_getCode arginfo_class_Throwable_getMessage
+#define arginfo_class_Error_getCode arginfo_class_Throwable_getCode
 
-#define arginfo_class_Error_getFile arginfo_class_Exception_getMessage
+#define arginfo_class_Error_getFile arginfo_class_Throwable_getMessage
 
-#define arginfo_class_Error_getLine arginfo_class_Exception_getLine
+#define arginfo_class_Error_getLine arginfo_class_Throwable_getLine
 
-#define arginfo_class_Error_getTrace arginfo_class_Exception_getTrace
+#define arginfo_class_Error_getTrace arginfo_class_Throwable_getTrace
 
-#define arginfo_class_Error_getPrevious arginfo_class_Exception_getPrevious
+#define arginfo_class_Error_getPrevious arginfo_class_Throwable_getPrevious
 
-#define arginfo_class_Error_getTraceAsString arginfo_class_Exception_getMessage
+#define arginfo_class_Error_getTraceAsString arginfo_class_Throwable_getMessage
 
-#define arginfo_class_Error___toString arginfo_class_Exception_getMessage
+#define arginfo_class_Error___toString arginfo_class_Throwable_getMessage
 
 
 ZEND_METHOD(Exception, __clone);

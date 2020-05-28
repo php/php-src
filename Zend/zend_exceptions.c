@@ -380,8 +380,7 @@ ZEND_METHOD(Exception, getFile)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	prop = GET_PROPERTY(ZEND_THIS, ZEND_STR_FILE);
-	ZVAL_DEREF(prop);
-	ZVAL_COPY(return_value, prop);
+	RETURN_STR(zval_get_string(prop));
 }
 /* }}} */
 
@@ -394,8 +393,7 @@ ZEND_METHOD(Exception, getLine)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	prop = GET_PROPERTY(ZEND_THIS, ZEND_STR_LINE);
-	ZVAL_DEREF(prop);
-	ZVAL_COPY(return_value, prop);
+	RETURN_LONG(zval_get_long(prop));
 }
 /* }}} */
 
