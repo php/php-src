@@ -556,7 +556,11 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 		ce1 = ce2 = NULL;
 		op1_type = op2_type = op3_type = IS_UNKNOWN;
 		if ((opline->op1_type & (IS_TMP_VAR|IS_VAR|IS_CV))
-		 && (opline->opcode != ZEND_ROPE_ADD && opline->opcode != ZEND_ROPE_END)) {
+		 && opline->opcode != ZEND_ROPE_ADD
+		 && opline->opcode != ZEND_ROPE_END
+		 && opline->opcode != ZEND_NEW
+		 && opline->opcode != ZEND_FETCH_CLASS_CONSTANT
+		 && opline->opcode != ZEND_INIT_STATIC_METHOD_CALL) {
 			zval *zv = EX_VAR(opline->op1.var);
 			op1_type = Z_TYPE_P(zv);
 			uint8_t flags = 0;
@@ -576,7 +580,9 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 				ce1 = Z_OBJCE_P(zv);
 			}
 		}
-		if (opline->op2_type & (IS_TMP_VAR|IS_VAR|IS_CV)) {
+		if (opline->op2_type & (IS_TMP_VAR|IS_VAR|IS_CV)
+		 && opline->opcode != ZEND_INSTANCEOF
+		 && opline->opcode != ZEND_UNSET_STATIC_PROP) {
 			zval *zv = EX_VAR(opline->op2.var);
 			uint8_t flags = 0;
 
