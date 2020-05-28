@@ -1,7 +1,5 @@
 --TEST--
 Bug #72069 (Behavior \JsonSerializable different from json_encode)
---SKIPIF--
-<?php if (!extension_loaded("json")) print "skip"; ?>
 --FILE--
 <?php
 

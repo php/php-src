@@ -1,7 +1,5 @@
 --TEST--
 Bug #68817 (Null pointer deference)
---SKIPIF--
-<?php if (!extension_loaded("json")) print "skip"; ?>
 --FILE--
 <?php
 

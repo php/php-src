@@ -1,7 +1,5 @@
 --TEST--
 Whitespace part of bug #64874 ("json_decode handles whitespace and case-sensitivity incorrectly")
---SKIPIF--
-<?php if (!extension_loaded("json")) print "skip"; ?>
 --FILE--
 <?php
 function decode($json) {
