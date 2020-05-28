@@ -404,25 +404,23 @@ static void zend_file_cache_serialize_attribute(zval                     *zv,
                                                 zend_file_cache_metainfo *info,
                                                 void                     *buf)
 {
-	if (!IS_SERIALIZED(Z_PTR_P(zv))) {
-		zend_attribute *attr = Z_PTR_P(zv);
-		uint32_t i;
+	zend_attribute *attr = Z_PTR_P(zv);
+	uint32_t i;
 
-		SERIALIZE_PTR(Z_PTR_P(zv));
-		attr = Z_PTR_P(zv);
-		UNSERIALIZE_PTR(attr);
+	SERIALIZE_PTR(Z_PTR_P(zv));
+	attr = Z_PTR_P(zv);
+	UNSERIALIZE_PTR(attr);
 
-		if (!IS_SERIALIZED(attr->name)) {
-			SERIALIZE_STR(attr->name);
-		}
+	if (!IS_SERIALIZED(attr->name)) {
+		SERIALIZE_STR(attr->name);
+	}
 
-		if (!IS_SERIALIZED(attr->lcname)) {
-			SERIALIZE_STR(attr->lcname);
-		}
+	if (!IS_SERIALIZED(attr->lcname)) {
+		SERIALIZE_STR(attr->lcname);
+	}
 
-		for (i = 0; i < attr->argc; i++) {
-			zend_file_cache_serialize_zval(&attr->argv[i], script, info, buf);
-		}
+	for (i = 0; i < attr->argc; i++) {
+		zend_file_cache_serialize_zval(&attr->argv[i], script, info, buf);
 	}
 }
 
@@ -1175,24 +1173,22 @@ static void zend_file_cache_unserialize_zval(zval                    *zv,
 
 static void zend_file_cache_unserialize_attribute(zval *zv, zend_persistent_script *script, void *buf)
 {
-	if (!IS_UNSERIALIZED(Z_PTR_P(zv))) {
-		zend_attribute *attr;
-		uint32_t i;
+	zend_attribute *attr;
+	uint32_t i;
 
-		UNSERIALIZE_PTR(Z_PTR_P(zv));
-		attr = Z_PTR_P(zv);
+	UNSERIALIZE_PTR(Z_PTR_P(zv));
+	attr = Z_PTR_P(zv);
 
-		if (!IS_UNSERIALIZED(attr->name)) {
-			UNSERIALIZE_STR(attr->name);
-		}
+	if (!IS_UNSERIALIZED(attr->name)) {
+		UNSERIALIZE_STR(attr->name);
+	}
 
-		if (!IS_UNSERIALIZED(attr->lcname)) {
-			UNSERIALIZE_STR(attr->lcname);
-		}
+	if (!IS_UNSERIALIZED(attr->lcname)) {
+		UNSERIALIZE_STR(attr->lcname);
+	}
 
-		for (i = 0; i < attr->argc; i++) {
-			zend_file_cache_unserialize_zval(&attr->argv[i], script, buf);
-		}
+	for (i = 0; i < attr->argc; i++) {
+		zend_file_cache_unserialize_zval(&attr->argv[i], script, buf);
 	}
 }
 

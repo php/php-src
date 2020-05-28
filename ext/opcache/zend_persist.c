@@ -272,7 +272,7 @@ static HashTable *zend_persist_attributes(HashTable *attributes)
 
 		ZEND_HASH_FOREACH_VAL(attributes, v) {
 			zend_attribute *attr = Z_PTR_P(v);
-			zend_attribute *copy = zend_shared_memdup(attr, ZEND_ATTRIBUTE_SIZE(attr->argc));
+			zend_attribute *copy = zend_shared_memdup_put_free(attr, ZEND_ATTRIBUTE_SIZE(attr->argc));
 
 			zend_accel_store_interned_string(copy->name);
 			zend_accel_store_interned_string(copy->lcname);
@@ -282,7 +282,6 @@ static HashTable *zend_persist_attributes(HashTable *attributes)
 			}
 
 			ZVAL_PTR(v, copy);
-			efree(attr);
 		} ZEND_HASH_FOREACH_END();
 
 		ptr = zend_shared_memdup_put_free(attributes, sizeof(HashTable));

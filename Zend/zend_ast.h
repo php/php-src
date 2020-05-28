@@ -315,12 +315,6 @@ static zend_always_inline zend_string *zend_ast_get_constant_name(zend_ast *ast)
 	return Z_STR(((zend_ast_zval *) ast)->val);
 }
 
-static zend_always_inline HashTable *zend_ast_get_hash(zend_ast *ast) {
-	zval *zv = zend_ast_get_zval(ast);
-	ZEND_ASSERT(Z_TYPE_P(zv) == IS_ARRAY);
-	return Z_ARR_P(zv);
-}
-
 static zend_always_inline uint32_t zend_ast_get_num_children(zend_ast *ast) {
 	ZEND_ASSERT(!zend_ast_is_list(ast));
 	return ast->kind >> ZEND_AST_NUM_CHILDREN_SHIFT;
@@ -332,12 +326,6 @@ static zend_always_inline uint32_t zend_ast_get_lineno(zend_ast *ast) {
 	} else {
 		return ast->lineno;
 	}
-}
-
-static zend_always_inline zend_ast *zend_ast_create_zval_from_hash(HashTable *hash) {
-	zval zv;
-	ZVAL_ARR(&zv, hash);
-	return zend_ast_create_zval(&zv);
 }
 
 static zend_always_inline zend_ast *zend_ast_create_binary_op(uint32_t opcode, zend_ast *op0, zend_ast *op1) {

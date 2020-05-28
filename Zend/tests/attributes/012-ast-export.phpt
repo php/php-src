@@ -21,13 +21,10 @@ assert(0 && ($a = function () {
 
 ?>
 --EXPECTF--
-Warning: assert(): assert(0 && ($a = <<A1>>
-<<A2>>
-function ($a, <<A3(1)>> $b) {
+Warning: assert(): assert(0 && ($a = <<A1>> <<A2>> function ($a, <<A3(1)>> $b) {
 })) failed in %s on line %d
 
-Warning: assert(): assert(0 && ($a = <<A1(1, 2, 1 + 2)>>
-fn() => 1)) failed in %s on line %d
+Warning: assert(): assert(0 && ($a = <<A1(1, 2, 1 + 2)>> fn() => 1)) failed in %s on line %d
 
 Warning: assert(): assert(0 && ($a = new <<A1>> class {
     <<A1>>
@@ -35,7 +32,8 @@ Warning: assert(): assert(0 && ($a = new <<A1>> class {
     const FOO = 'foo';
     <<A2>>
     public $x;
-    <<A3>> public function a() {
+    <<A3>>
+    public function a() {
     }
 
 })) failed in %s on line %d

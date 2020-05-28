@@ -1446,7 +1446,7 @@ tail_call:
 		case ZEND_AST_METHOD:
 			decl = (zend_ast_decl *) ast;
 			if (decl->attributes) {
-				zend_bool newlines = (ast->kind == ZEND_AST_CLOSURE || ast->kind == ZEND_AST_ARROW_FUNC);
+				zend_bool newlines = !(ast->kind == ZEND_AST_CLOSURE || ast->kind == ZEND_AST_ARROW_FUNC);
 				zend_ast_export_attributes(str, decl->attributes, indent, newlines);
 			}
 			if (decl->flags & ZEND_ACC_PUBLIC) {

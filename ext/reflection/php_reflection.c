@@ -1150,7 +1150,7 @@ static void reflect_attributes(INTERNAL_FUNCTION_PARAMETERS, HashTable *attribut
 	zend_long flags = 0;
 	zend_class_entry *base = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|Sl", &name, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S!l", &name, &flags) == FAILURE) {
 		RETURN_THROWS();
 	}
 
