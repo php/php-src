@@ -2427,13 +2427,11 @@ PHP_FUNCTION(preg_replace_callback_array)
 		}
 
 		if (!zend_is_callable_ex(replace, NULL, 0, NULL, &fcc, NULL)) {
-			zend_string *callback_name = zend_get_callable_name(replace);
-			php_error_docref(NULL, E_WARNING, "'%s' is not a valid callback", ZSTR_VAL(callback_name));
-			zend_string_release_ex(callback_name, 0);
 			zval_ptr_dtor(&regex);
 			zval_ptr_dtor(return_value);
 			ZVAL_COPY(return_value, subject);
-			return;
+			zend_argument_type_error(1, "must only contain callables, %s given", zend_zval_type_name(replace));
+			RETURN_THROWS();
 		}
 
 		ZVAL_COPY_VALUE(&fci.function_name, replace);

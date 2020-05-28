@@ -11,11 +11,13 @@ class test {
     }
 }
 
-var_dump(register_shutdown_function(array("test","__call")));
+register_shutdown_function(array("test","__call"));
 
 echo "Done\n";
 ?>
 --EXPECTF--
-Warning: register_shutdown_function(): Invalid shutdown callback 'test::__call' passed in %s on line %d
-bool(false)
-Done
+Fatal error: Uncaught TypeError: register_shutdown_function(): Argument #1 ($function) must be of type callable, array given in %s:%d
+Stack trace:
+#0 %s(%d): register_shutdown_function(Array)
+#1 {main}
+  thrown in %s on line %d

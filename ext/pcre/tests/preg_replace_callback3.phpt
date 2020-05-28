@@ -4,25 +4,13 @@ preg_replace_callback() 3
 <?php
 
 try {
-    var_dump(preg_replace_callback(1,2,3));
-} catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
-}
-try {
-    var_dump(preg_replace_callback(1,2,3,4));
-} catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    preg_replace_callback(1, 2, 3);
+} catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
 }
 
-$a = 5;
-try {
-    var_dump(preg_replace_callback(1,2,3,4,$a));
-} catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
-}
-
+echo "Done\n";
 ?>
 --EXPECT--
 preg_replace_callback(): Argument #2 ($callback) must be a valid callback, no array or string given
-preg_replace_callback(): Argument #2 ($callback) must be a valid callback, no array or string given
-preg_replace_callback(): Argument #2 ($callback) must be a valid callback, no array or string given
+Done

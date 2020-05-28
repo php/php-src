@@ -120,7 +120,8 @@ PHP_FUNCTION(header_register_callback)
 	}
 
 	if (!zend_is_callable(callback_func, 0, NULL)) {
-		RETURN_FALSE;
+		zend_argument_type_error(1, "must be of type callable, %s given", zend_zval_type_name(callback_func));
+		RETURN_THROWS();
 	}
 
 	if (Z_TYPE(SG(callback_func)) != IS_UNDEF) {

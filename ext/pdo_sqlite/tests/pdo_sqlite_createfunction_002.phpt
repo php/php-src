@@ -10,8 +10,12 @@ Chris MacPherson chris@kombine.co.uk
 
 $db = new PDO( 'sqlite::memory:');
 
-$db->sqliteCreateFunction('bar-alias', 'bar');
+try {
+    $db->sqliteCreateFunction('bar-alias', 'bar');
+} catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 ?>
---EXPECTF--
-Warning: PDO::sqliteCreateFunction(): Function 'bar' is not callable in %s on line %d
+--EXPECT--
+PDO::sqliteCreateFunction(): Argument #2 must be of type callable, string given

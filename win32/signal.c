@@ -118,7 +118,7 @@ PHP_FUNCTION(sapi_windows_set_ctrl_handler)
 	}
 
 	if (!zend_is_callable(handler, 0, NULL)) {
-		zend_argument_type_error(1, "must be a valid callable function name");
+		zend_argument_type_error(1, "must be of type callable, %s given", zend_zval_type_name(handler));
 		RETURN_THROWS();
 	}
 

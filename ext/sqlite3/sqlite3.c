@@ -987,10 +987,8 @@ PHP_METHOD(SQLite3, createFunction)
 	}
 
 	if (!zend_is_callable(callback_func, 0, NULL)) {
-		zend_string *callback_name = zend_get_callable_name(callback_func);
-		php_sqlite3_error(db_obj, "Not a valid callback function %s", ZSTR_VAL(callback_name));
-		zend_string_release_ex(callback_name, 0);
-		RETURN_FALSE;
+		zend_argument_type_error(1, "must be of type callable, %s given", zend_zval_type_name(callback_func));
+		RETURN_THROWS();
 	}
 
 	func = (php_sqlite3_func *)ecalloc(1, sizeof(*func));
@@ -1036,17 +1034,13 @@ PHP_METHOD(SQLite3, createAggregate)
 	}
 
 	if (!zend_is_callable(step_callback, 0, NULL)) {
-		zend_string *callback_name = zend_get_callable_name(step_callback);
-		php_sqlite3_error(db_obj, "Not a valid callback function %s", ZSTR_VAL(callback_name));
-		zend_string_release_ex(callback_name, 0);
-		RETURN_FALSE;
+		zend_argument_type_error(2, "must be of type callable, %s given", zend_zval_type_name(step_callback));
+		RETURN_THROWS();
 	}
 
 	if (!zend_is_callable(fini_callback, 0, NULL)) {
-		zend_string *callback_name = zend_get_callable_name(fini_callback);
-		php_sqlite3_error(db_obj, "Not a valid callback function %s", ZSTR_VAL(callback_name));
-		zend_string_release_ex(callback_name, 0);
-		RETURN_FALSE;
+		zend_argument_type_error(3, "must be of type callable, %s given", zend_zval_type_name(fini_callback));
+		RETURN_THROWS();
 	}
 
 	func = (php_sqlite3_func *)ecalloc(1, sizeof(*func));
@@ -1092,10 +1086,8 @@ PHP_METHOD(SQLite3, createCollation)
 	}
 
 	if (!zend_is_callable(callback_func, 0, NULL)) {
-		zend_string *callback_name = zend_get_callable_name(callback_func);
-		php_sqlite3_error(db_obj, "Not a valid callback function %s", ZSTR_VAL(callback_name));
-		zend_string_release_ex(callback_name, 0);
-		RETURN_FALSE;
+		zend_argument_type_error(1, "must be of type callable, %s given", zend_zval_type_name(callback_func));
+		RETURN_THROWS();
 	}
 
 	collation = (php_sqlite3_collation *)ecalloc(1, sizeof(*collation));

@@ -16,5 +16,5 @@ try {
 
 ?>
 --EXPECT--
-set_exception_handler(): Argument #1 ($exception_handler) must be a valid callback
-set_exception_handler(): Argument #1 ($exception_handler) must be a valid callback
+set_exception_handler(): Argument #1 ($exception_handler) must be a valid callback, string given
+set_exception_handler(): Argument #1 ($exception_handler) must be a valid callback, array given

@@ -540,10 +540,8 @@ static PHP_METHOD(SQLite, sqliteCreateFunction)
 	PDO_CONSTRUCT_CHECK;
 
 	if (!zend_is_callable(callback, 0, NULL)) {
-		zend_string *cbname = zend_get_callable_name(callback);
-		php_error_docref(NULL, E_WARNING, "Function '%s' is not callable", ZSTR_VAL(cbname));
-		zend_string_release_ex(cbname, 0);
-		RETURN_FALSE;
+		zend_argument_type_error(2, "must be of type callable, %s given", zend_zval_type_name(callback));
+		RETURN_THROWS();
 	}
 
 	H = (pdo_sqlite_db_handle *)dbh->driver_data;
@@ -612,17 +610,13 @@ static PHP_METHOD(SQLite, sqliteCreateAggregate)
 	PDO_CONSTRUCT_CHECK;
 
 	if (!zend_is_callable(step_callback, 0, NULL)) {
-		zend_string *cbname = zend_get_callable_name(step_callback);
-		php_error_docref(NULL, E_WARNING, "Function '%s' is not callable", ZSTR_VAL(cbname));
-		zend_string_release_ex(cbname, 0);
-		RETURN_FALSE;
+		zend_argument_type_error(2, "must be of type callable, %s given", zend_zval_type_name(step_callback));
+		RETURN_THROWS();
 	}
 
 	if (!zend_is_callable(fini_callback, 0, NULL)) {
-		zend_string *cbname = zend_get_callable_name(fini_callback);
-		php_error_docref(NULL, E_WARNING, "Function '%s' is not callable", ZSTR_VAL(cbname));
-		zend_string_release_ex(cbname, 0);
-		RETURN_FALSE;
+		zend_argument_type_error(3, "must be of type callable, %s given", zend_zval_type_name(fini_callback));
+		RETURN_THROWS();
 	}
 
 	H = (pdo_sqlite_db_handle *)dbh->driver_data;
@@ -672,10 +666,8 @@ static PHP_METHOD(SQLite, sqliteCreateCollation)
 	PDO_CONSTRUCT_CHECK;
 
 	if (!zend_is_callable(callback, 0, NULL)) {
-		zend_string *cbname = zend_get_callable_name(callback);
-		php_error_docref(NULL, E_WARNING, "Function '%s' is not callable", ZSTR_VAL(cbname));
-		zend_string_release_ex(cbname, 0);
-		RETURN_FALSE;
+		zend_argument_type_error(2, "must be of type callable, %s given", zend_zval_type_name(callback));
+		RETURN_THROWS();
 	}
 
 	H = (pdo_sqlite_db_handle *)dbh->driver_data;

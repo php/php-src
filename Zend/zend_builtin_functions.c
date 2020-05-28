@@ -1225,9 +1225,7 @@ ZEND_FUNCTION(set_error_handler)
 
 	if (Z_TYPE_P(error_handler) != IS_NULL) { /* NULL == unset */
 		if (!zend_is_callable(error_handler, 0, NULL)) {
-			zend_string *error_handler_name = zend_get_callable_name(error_handler);
-			zend_argument_type_error(1, "must be a valid callback");
-			zend_string_release_ex(error_handler_name, 0);
+			zend_argument_type_error(1, "must be a valid callback, %s given", zend_zval_type_name(error_handler));
 			RETURN_THROWS();
 		}
 	}
@@ -1291,9 +1289,7 @@ ZEND_FUNCTION(set_exception_handler)
 
 	if (Z_TYPE_P(exception_handler) != IS_NULL) { /* NULL == unset */
 		if (!zend_is_callable(exception_handler, 0, NULL)) {
-		zend_string *exception_handler_name = zend_get_callable_name(exception_handler);
-			zend_argument_type_error(1, "must be a valid callback");
-			zend_string_release_ex(exception_handler_name, 0);
+			zend_argument_type_error(1, "must be a valid callback, %s given", zend_zval_type_name(exception_handler));
 			RETURN_THROWS();
 		}
 	}

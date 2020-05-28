@@ -5,8 +5,15 @@ preg_replace_callback_array() errors
 
 $a = array();
 $b = "";
-var_dump(preg_replace_callback_array(array("xx" => "s"), $a, -1, $b));
+
+try {
+    preg_replace_callback_array(array("xx" => "s"), $a, -1, $b);
+} catch (TypeError $e) {
+    echo $e->getMessage() . "\n";
+}
+
 var_dump($b);
+
 function f() {
     static $count = 1;
     throw new Exception($count);
@@ -23,9 +30,7 @@ try {
 echo "Done\n";
 ?>
 --EXPECTF--
-Warning: preg_replace_callback_array(): 's' is not a valid callback in %spreg_replace_callback_array2.php on line %d
-array(0) {
-}
+preg_replace_callback_array(): Argument #1 ($pattern) must only contain callables, string given
 string(0) ""
 
 Warning: preg_replace_callback_array(): No ending delimiter '/' found in %spreg_replace_callback_array2.php on line %d

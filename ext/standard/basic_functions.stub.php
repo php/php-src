@@ -8,8 +8,7 @@ function set_time_limit(int $seconds): bool {}
 
 /* main/SAPI.c */
 
-// TODO: Make this a proper callable argument?
-function header_register_callback($callback): bool {}
+function header_register_callback(callable $callback): bool {}
 
 /* main/output.c */
 
@@ -293,8 +292,7 @@ function forward_static_call(callable $function, mixed ...$args): mixed {}
 
 function forward_static_call_array(callable $function, array $args): mixed {}
 
-/** @param callable $function */
-function register_shutdown_function($function, mixed ...$args): ?bool {}
+function register_shutdown_function(callable $function, mixed ...$args): ?bool {}
 
 function highlight_file(string $filename, bool $return = false): string|bool|null {}
 
@@ -1460,9 +1458,7 @@ function sapi_windows_cp_conv(int|string $in_codepage, int|string $out_codepage,
 
 function sapi_windows_cp_is_utf8(): bool {}
 
-/** @param callable|null $handler */
-function sapi_windows_set_ctrl_handler($handler, bool $add = true): bool {}
+function sapi_windows_set_ctrl_handler(?callable $handler, bool $add = true): bool {}
 
-/** @param callable|null $handler */
 function sapi_windows_generate_ctrl_event(int $event, int $pid = 0): bool {}
 #endif

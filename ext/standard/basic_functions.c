@@ -1847,12 +1847,9 @@ PHP_FUNCTION(register_shutdown_function)
 
 	/* Prevent entering of anything but valid callback (syntax check only!) */
 	if (!zend_is_callable(&shutdown_function_entry.arguments[0], 0, NULL)) {
-		zend_string *callback_name
-			= zend_get_callable_name(&shutdown_function_entry.arguments[0]);
-		php_error_docref(NULL, E_WARNING, "Invalid shutdown callback '%s' passed", ZSTR_VAL(callback_name));
 		efree(shutdown_function_entry.arguments);
-		zend_string_release_ex(callback_name, 0);
-		RETVAL_FALSE;
+		zend_argument_type_error(1, "must be of type callable, %s given", zend_zval_type_name(&shutdown_function_entry.arguments[0]));
+		RETURN_THROWS();
 	} else {
 		if (!BG(user_shutdown_function_names)) {
 			ALLOC_HASHTABLE(BG(user_shutdown_function_names));

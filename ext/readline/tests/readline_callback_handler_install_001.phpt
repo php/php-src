@@ -12,11 +12,14 @@ function foo() {
 }
 
 var_dump(readline_callback_handler_install('testing: ', 'foo'));
-var_dump(readline_callback_handler_install('testing: ', 'foobar!'));
+
+try {
+    readline_callback_handler_install('testing: ', 'foobar!');
+} catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 ?>
 --EXPECTF--
 %Atesting: bool(true)
-
-Warning: readline_callback_handler_install(): foobar! is not callable in %s on line %d
-bool(false)
+readline_callback_handler_install(): Argument #2 ($callback) must be of type callable, string given

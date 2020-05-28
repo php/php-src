@@ -261,13 +261,13 @@ ZEND_END_ARG_INFO()
 #if defined(HAVE_PROGRESS_CALLBACK)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ZipArchive_registerProgressCallback, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, rate, IS_DOUBLE, 0)
-	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
+	ZEND_ARG_INFO(0, callback)
 ZEND_END_ARG_INFO()
 #endif
 
 #if defined(HAVE_CANCEL_CALLBACK)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ZipArchive_registerCancelCallback, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
+	ZEND_ARG_INFO(0, callback)
 ZEND_END_ARG_INFO()
 #endif
 

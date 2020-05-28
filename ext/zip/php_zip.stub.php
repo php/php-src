@@ -205,13 +205,19 @@ class ZipArchive
 #endif
 
 #ifdef HAVE_PROGRESS_CALLBACK
-    /** @return bool */
-    public function registerProgressCallback(float $rate, callable $callback) {}
+    /**
+     * @param callable $callback
+     * @return bool
+     */
+    public function registerProgressCallback(float $rate, $callback) {}
 #endif
 
 #ifdef HAVE_CANCEL_CALLBACK
-    /** @return bool */
-    public function registerCancelCallback(callable $callback) {}
+    /**
+     * @param callable $callback
+     * @return bool
+     */
+    public function registerCancelCallback($callback) {}
 #endif
 
 #ifdef HAVE_METHOD_SUPPORTED

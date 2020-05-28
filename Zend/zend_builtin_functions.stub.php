@@ -69,12 +69,12 @@ function trigger_error(string $message, int $error_type = E_USER_NOTICE): bool {
 function user_error(string $message, int $error_type = E_USER_NOTICE): bool {}
 
 /** @return string|array|object|null */
-function set_error_handler($error_handler, int $error_types = E_ALL) {}
+function set_error_handler(?callable $error_handler, int $error_types = E_ALL) {}
 
 function restore_error_handler(): bool {}
 
 /** @return string|array|object|null */
-function set_exception_handler($exception_handler) {}
+function set_exception_handler(?callable $exception_handler) {}
 
 function restore_exception_handler(): bool {}
 

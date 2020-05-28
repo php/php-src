@@ -484,10 +484,8 @@ PHP_FUNCTION(readline_completion_function)
 	}
 
 	if (!zend_is_callable(arg, 0, NULL)) {
-		zend_string *name = zend_get_callable_name(arg);
-		php_error_docref(NULL, E_WARNING, "%s is not callable", ZSTR_VAL(name));
-		zend_string_release_ex(name, 0);
-		RETURN_FALSE;
+		zend_argument_type_error(1, "must be of type callable, %s given", zend_zval_type_name(arg));
+		RETURN_THROWS();
 	}
 
 	zval_ptr_dtor(&_readline_completion);
@@ -532,10 +530,8 @@ PHP_FUNCTION(readline_callback_handler_install)
 	}
 
 	if (!zend_is_callable(callback, 0, NULL)) {
-		zend_string *name = zend_get_callable_name(callback);
-		php_error_docref(NULL, E_WARNING, "%s is not callable", ZSTR_VAL(name));
-		zend_string_release_ex(name, 0);
-		RETURN_FALSE;
+		zend_argument_type_error(2, "must be of type callable, %s given", zend_zval_type_name(callback));
+		RETURN_THROWS();
 	}
 
 	if (Z_TYPE(_prepped_callback) != IS_UNDEF) {

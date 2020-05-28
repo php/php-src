@@ -2949,15 +2949,13 @@ PHP_METHOD(ZipArchive, registerProgressCallback)
 	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "dz", &rate, &callback) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	/* callable? */
 	if (!zend_is_callable(callback, 0, NULL)) {
-		zend_string *callback_name = zend_get_callable_name(callback);
-		php_error_docref(NULL, E_WARNING, "Invalid callback '%s'", ZSTR_VAL(callback_name));
-		zend_string_release_ex(callback_name, 0);
-		RETURN_FALSE;
+		zend_argument_type_error(2, "must be of type callable, %s given", zend_zval_type_name(callback));
+		RETURN_THROWS();
 	}
 
 	ZIP_FROM_OBJECT(intern, self);
@@ -3007,17 +3005,15 @@ PHP_METHOD(ZipArchive, registerCancelCallback)
 	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &callback) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	ZIP_FROM_OBJECT(intern, self);
 
 	/* callable? */
 	if (!zend_is_callable(callback, 0, NULL)) {
-		zend_string *callback_name = zend_get_callable_name(callback);
-		php_error_docref(NULL, E_WARNING, "Invalid callback '%s'", ZSTR_VAL(callback_name));
-		zend_string_release_ex(callback_name, 0);
-		RETURN_FALSE;
+		zend_argument_type_error(1, "must be of type callable, %s given", zend_zval_type_name(callback));
+		RETURN_THROWS();
 	}
 
 	obj = Z_ZIP_P(self);

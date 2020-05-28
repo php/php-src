@@ -59,13 +59,23 @@ class SQLite3
     /** @return mixed */
     public function querySingle(string $query, bool $entire_row = false) {}
 
-    /** @return bool */
+    /**
+     * @param callable $callback
+     * @return bool
+     */
     public function createFunction(string $name, $callback, int $argument_count = -1, int $flags = 0) {}
 
-    /** @return bool */
+    /**
+     * @param callable $step_callback
+     * @param callable $final_callback
+     * @return bool
+     */
     public function createAggregate(string $name, $step_callback, $final_callback, int $argument_count = -1) {}
 
-    /** @return bool */
+    /**
+     * @param callable $callback
+     * @return bool
+     */
     public function createCollation(string $name, $callback) {}
 
     /** @return resource|false */
@@ -77,8 +87,11 @@ class SQLite3
     /** @return bool */
     public function enableExtendedResultCodes(bool $enable = true) {}
 
-    /** @return bool */
-    public function setAuthorizer(?callable $callback) {}
+    /**
+     * @param callable|null $callback
+     * @return bool
+     */
+    public function setAuthorizer($callback) {}
 }
 
 class SQLite3Stmt

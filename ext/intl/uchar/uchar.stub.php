@@ -35,11 +35,17 @@ class IntlChar
     /** @return int|false|null */
     public static function digit(int|string $codepoint, int $radix = 10) {}
 
-    /** @return bool|null */
-    public static function enumCharNames(int|string $start, int|string $limit, callable $callback, int $nameChoice = IntlChar::UNICODE_CHAR_NAME) {}
+    /**
+     * @param callable $callback
+     * @return bool|null
+     */
+    public static function enumCharNames(int|string $start, int|string $limit, $callback, int $nameChoice = IntlChar::UNICODE_CHAR_NAME) {}
 
-    /** @return void */
-    public static function enumCharTypes(callable $callback) {}
+    /**
+     * @param callable $callback
+     * @return void
+     */
+    public static function enumCharTypes($callback) {}
 
     /**
      * @return int|string|null

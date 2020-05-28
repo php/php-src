@@ -14,7 +14,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_CallbackFilterIterator___construct, 0, 0, 2)
 	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
-	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
+	ZEND_ARG_INFO(0, callback)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_CallbackFilterIterator_accept arginfo_class_EmptyIterator_current

@@ -15,11 +15,14 @@ $data = array(
 );
 
 foreach ($data as $callback) {
-    readline_completion_function($callback);
+    try {
+        readline_completion_function($callback);
+    } catch (TypeError $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 }
 
 ?>
---EXPECTF--
-Warning: readline_completion_function(): 1 is not callable in %s on line %d
-
-Warning: readline_completion_function(): 1.1231 is not callable in %s on line %d
+--EXPECT--
+readline_completion_function(): Argument #1 ($funcname) must be of type callable, int given
+readline_completion_function(): Argument #1 ($funcname) must be of type callable, float given

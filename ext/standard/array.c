@@ -976,15 +976,6 @@ static int php_array_user_compare(Bucket *a, Bucket *b) /* {{{ */
 }
 /* }}} */
 
-/* check if comparison function is valid */
-#define PHP_ARRAY_CMP_FUNC_CHECK(func_name)	\
-	if (!zend_is_callable(*func_name, 0, NULL)) {	\
-		php_error_docref(NULL, E_WARNING, "Invalid comparison function");	\
-		BG(user_compare_fci) = old_user_compare_fci; \
-		BG(user_compare_fci_cache) = old_user_compare_fci_cache; \
-		RETURN_FALSE;	\
-	}	\
-
 	/* Clear FCI cache otherwise : for example the same or other array with
 	 * (partly) the same key values has been sorted with uasort() or
 	 * other sorting function the comparison is cached, however the name

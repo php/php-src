@@ -29,13 +29,13 @@ ZEND_END_ARG_INFO()
 #define arginfo_readline_write_history arginfo_readline_read_history
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_readline_completion_function, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, funcname)
+	ZEND_ARG_TYPE_INFO(0, funcname, IS_CALLABLE, 0)
 ZEND_END_ARG_INFO()
 
 #if HAVE_RL_CALLBACK_READ_CHAR
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_readline_callback_handler_install, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, prompt, IS_STRING, 0)
-	ZEND_ARG_INFO(0, callback)
+	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
 ZEND_END_ARG_INFO()
 #endif
 
