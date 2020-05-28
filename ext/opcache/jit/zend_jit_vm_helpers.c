@@ -365,10 +365,6 @@ ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_loop_trace_helper(ZEND_OPCODE_HAN
 	trace_buffer[idx].level = trace_buffer[0].level = ret_level ? ret_level + 1 : 0; \
 	trace_buffer[idx].ptr  = _ptr;
 
-#ifndef ZEND_JIT_RECORD_RECURSIVE_RETURN
-# define ZEND_JIT_RECORD_RECURSIVE_RETURN 1
-#endif
-
 static int zend_jit_trace_recursive_call_count(const zend_op_array *op_array, const zend_op_array **unrolled_calls, int ret_level, int level)
 {
 	int i;
@@ -690,12 +686,12 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 				count = zend_jit_trace_recursive_call_count(&EX(func)->op_array, unrolled_calls, ret_level, level);
 
 				if (opline == orig_opline) {
-					if (count + 1 >= JIT_G(max_recursion_unroll)) {
+					if (count + 1 >= JIT_G(max_recursive_calls)) {
 						stop = ZEND_JIT_TRACE_STOP_RECURSIVE_CALL;
 						break;
 					}
 					backtrack_recursion = idx;
-				} else if (count >= JIT_G(max_recursion_unroll)) {
+				} else if (count >= JIT_G(max_recursive_calls)) {
 					stop = ZEND_JIT_TRACE_STOP_DEEP_RECURSION;
 					break;
 				}
@@ -709,8 +705,8 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 					if (is_toplevel) {
 						stop = ZEND_JIT_TRACE_STOP_TOPLEVEL;
 						break;
-#if ZEND_JIT_RECORD_RECURSIVE_RETURN
 					} else if (start == ZEND_JIT_TRACE_START_RETURN
+					        && JIT_G(max_recursive_returns) > 0
 					        && execute_data->prev_execute_data
 					        && execute_data->prev_execute_data->func
 					        && execute_data->prev_execute_data->func->type == ZEND_USER_FUNCTION
@@ -722,13 +718,13 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 						TRACE_RECORD(ZEND_JIT_TRACE_BACK, 0, &EX(func)->op_array);
 						count = zend_jit_trace_recursive_ret_count(&EX(func)->op_array, unrolled_calls, ret_level);
 						if (opline == orig_opline) {
-							if (count + 1 >= JIT_G(max_recursion_unroll)) {
+							if (count + 1 >= JIT_G(max_recursive_returns)) {
 								stop = ZEND_JIT_TRACE_STOP_RECURSIVE_RET;
 								break;
 							}
 							backtrack_ret_recursion = idx;
 							backtrack_ret_recursion_level = ret_level;
-						} else if (count >= JIT_G(max_recursion_unroll)) {
+						} else if (count >= JIT_G(max_recursive_returns)) {
 							stop = ZEND_JIT_TRACE_STOP_DEEP_RECURSION;
 							break;
 						}
@@ -740,7 +736,6 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 						if (prev_call) {
 							idx = zend_jit_trace_record_fake_init_call(prev_call, trace_buffer, idx);
 						}
-#endif
 					} else if (start & ZEND_JIT_TRACE_START_LOOP
 					 && !zend_jit_trace_bad_loop_exit(orig_opline)) {
 						/* Fail to try close the loop.

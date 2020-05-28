@@ -227,16 +227,29 @@ static ZEND_INI_MH(OnUpdateCounter)
 	return FAILURE;
 }
 
-static ZEND_INI_MH(OnUpdateUnrollR)
+static ZEND_INI_MH(OnUpdateUnrollC)
 {
 	zend_long val = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
-	if (val > 0 && val < ZEND_JIT_TRACE_MAX_CALL_DEPTH && val < ZEND_JIT_TRACE_MAX_RET_DEPTH) {
+	if (val > 0 && val < ZEND_JIT_TRACE_MAX_CALL_DEPTH) {
 		zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
 		*p = val;
 		return SUCCESS;
 	}
 	zend_error(E_WARNING, "Invalid \"%s\" setting. Should be between 1 and %d", ZSTR_VAL(entry->name),
-		MIN(ZEND_JIT_TRACE_MAX_CALL_DEPTH, ZEND_JIT_TRACE_MAX_CALL_DEPTH));
+		ZEND_JIT_TRACE_MAX_CALL_DEPTH);
+	return FAILURE;
+}
+
+static ZEND_INI_MH(OnUpdateUnrollR)
+{
+	zend_long val = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
+	if (val >= 0 && val < ZEND_JIT_TRACE_MAX_RET_DEPTH) {
+		zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
+		*p = val;
+		return SUCCESS;
+	}
+	zend_error(E_WARNING, "Invalid \"%s\" setting. Should be between 0 and %d", ZSTR_VAL(entry->name),
+		ZEND_JIT_TRACE_MAX_RET_DEPTH);
 	return FAILURE;
 }
 
@@ -312,21 +325,22 @@ ZEND_INI_BEGIN()
 	STD_PHP_INI_ENTRY("opcache.cache_id"                      , ""    , PHP_INI_SYSTEM, OnUpdateString,           accel_directives.cache_id,               zend_accel_globals, accel_globals)
 #endif
 #ifdef HAVE_JIT
-	STD_PHP_INI_ENTRY("opcache.jit"                           , ZEND_JIT_DEFAULT_OPTIONS,     PHP_INI_ALL,    OnUpdateJit,      options,              zend_jit_globals, jit_globals)
-	STD_PHP_INI_ENTRY("opcache.jit_buffer_size"               , ZEND_JIT_DEFAULT_BUFFER_SIZE, PHP_INI_SYSTEM, OnUpdateLong,     buffer_size,          zend_jit_globals, jit_globals)
-	STD_PHP_INI_ENTRY("opcache.jit_debug"                     , "0",                          PHP_INI_ALL,    OnUpdateJitDebug, debug,                zend_jit_globals, jit_globals)
-	STD_PHP_INI_ENTRY("opcache.jit_bisect_limit"              , "0",                          PHP_INI_ALL,    OnUpdateLong,     bisect_limit,         zend_jit_globals, jit_globals)
-	STD_PHP_INI_ENTRY("opcache.jit_prof_threshold"            , "0.005",                      PHP_INI_ALL,    OnUpdateReal,     prof_threshold,       zend_jit_globals, jit_globals)
-	STD_PHP_INI_ENTRY("opcache.jit_max_root_traces"           , "1024",                       PHP_INI_SYSTEM, OnUpdateLong,     max_root_traces,      zend_jit_globals, jit_globals)
-	STD_PHP_INI_ENTRY("opcache.jit_max_side_traces"           , "128",                        PHP_INI_SYSTEM, OnUpdateLong,     max_side_traces,      zend_jit_globals, jit_globals)
-	STD_PHP_INI_ENTRY("opcache.jit_hot_loop"                  , "64",                         PHP_INI_SYSTEM, OnUpdateCounter,  hot_loop,             zend_jit_globals, jit_globals)
-	STD_PHP_INI_ENTRY("opcache.jit_hot_func"                  , "127",                        PHP_INI_SYSTEM, OnUpdateCounter,  hot_func,             zend_jit_globals, jit_globals)
-	STD_PHP_INI_ENTRY("opcache.jit_hot_return"                , "8",                          PHP_INI_SYSTEM, OnUpdateCounter,  hot_return,           zend_jit_globals, jit_globals)
-	STD_PHP_INI_ENTRY("opcache.jit_hot_side_exit"             , "8",                          PHP_INI_ALL,    OnUpdateCounter,  hot_side_exit,        zend_jit_globals, jit_globals)
-	STD_PHP_INI_ENTRY("opcache.jit_blacklist_root_trace"      , "16",                         PHP_INI_ALL,    OnUpdateCounter,  blacklist_root_trace, zend_jit_globals, jit_globals)
-	STD_PHP_INI_ENTRY("opcache.jit_blacklist_side_trace"      , "8",                          PHP_INI_ALL,    OnUpdateCounter,  blacklist_side_trace, zend_jit_globals, jit_globals)
-	STD_PHP_INI_ENTRY("opcache.jit_max_recursion_unroll"      , "2",                          PHP_INI_ALL,    OnUpdateUnrollR,  max_recursion_unroll, zend_jit_globals, jit_globals)
-	STD_PHP_INI_ENTRY("opcache.jit_max_loops_unroll"          , "8",                          PHP_INI_ALL,    OnUpdateUnrollL,  max_loops_unroll,     zend_jit_globals, jit_globals)
+	STD_PHP_INI_ENTRY("opcache.jit"                           , ZEND_JIT_DEFAULT_OPTIONS,     PHP_INI_ALL,    OnUpdateJit,      options,               zend_jit_globals, jit_globals)
+	STD_PHP_INI_ENTRY("opcache.jit_buffer_size"               , ZEND_JIT_DEFAULT_BUFFER_SIZE, PHP_INI_SYSTEM, OnUpdateLong,     buffer_size,           zend_jit_globals, jit_globals)
+	STD_PHP_INI_ENTRY("opcache.jit_debug"                     , "0",                          PHP_INI_ALL,    OnUpdateJitDebug, debug,                 zend_jit_globals, jit_globals)
+	STD_PHP_INI_ENTRY("opcache.jit_bisect_limit"              , "0",                          PHP_INI_ALL,    OnUpdateLong,     bisect_limit,          zend_jit_globals, jit_globals)
+	STD_PHP_INI_ENTRY("opcache.jit_prof_threshold"            , "0.005",                      PHP_INI_ALL,    OnUpdateReal,     prof_threshold,        zend_jit_globals, jit_globals)
+	STD_PHP_INI_ENTRY("opcache.jit_max_root_traces"           , "1024",                       PHP_INI_SYSTEM, OnUpdateLong,     max_root_traces,       zend_jit_globals, jit_globals)
+	STD_PHP_INI_ENTRY("opcache.jit_max_side_traces"           , "128",                        PHP_INI_SYSTEM, OnUpdateLong,     max_side_traces,       zend_jit_globals, jit_globals)
+	STD_PHP_INI_ENTRY("opcache.jit_hot_loop"                  , "64",                         PHP_INI_SYSTEM, OnUpdateCounter,  hot_loop,              zend_jit_globals, jit_globals)
+	STD_PHP_INI_ENTRY("opcache.jit_hot_func"                  , "127",                        PHP_INI_SYSTEM, OnUpdateCounter,  hot_func,              zend_jit_globals, jit_globals)
+	STD_PHP_INI_ENTRY("opcache.jit_hot_return"                , "8",                          PHP_INI_SYSTEM, OnUpdateCounter,  hot_return,            zend_jit_globals, jit_globals)
+	STD_PHP_INI_ENTRY("opcache.jit_hot_side_exit"             , "8",                          PHP_INI_ALL,    OnUpdateCounter,  hot_side_exit,         zend_jit_globals, jit_globals)
+	STD_PHP_INI_ENTRY("opcache.jit_blacklist_root_trace"      , "16",                         PHP_INI_ALL,    OnUpdateCounter,  blacklist_root_trace,  zend_jit_globals, jit_globals)
+	STD_PHP_INI_ENTRY("opcache.jit_blacklist_side_trace"      , "8",                          PHP_INI_ALL,    OnUpdateCounter,  blacklist_side_trace,  zend_jit_globals, jit_globals)
+	STD_PHP_INI_ENTRY("opcache.jit_max_loops_unroll"          , "8",                          PHP_INI_ALL,    OnUpdateUnrollL,  max_loops_unroll,      zend_jit_globals, jit_globals)
+	STD_PHP_INI_ENTRY("opcache.jit_max_recursive_calls"       , "2",                          PHP_INI_ALL,    OnUpdateUnrollC,  max_recursive_calls,   zend_jit_globals, jit_globals)
+	STD_PHP_INI_ENTRY("opcache.jit_max_recursive_returns"     , "2",                          PHP_INI_ALL,    OnUpdateUnrollR,  max_recursive_returns, zend_jit_globals, jit_globals)
 #endif
 ZEND_INI_END()
 
@@ -810,7 +824,8 @@ ZEND_FUNCTION(opcache_get_configuration)
 	add_assoc_long(&directives,   "opcache.jit_hot_return", JIT_G(hot_return));
 	add_assoc_long(&directives,   "opcache.jit_hot_side_exit", JIT_G(hot_side_exit));
 	add_assoc_long(&directives,   "opcache.jit_max_loops_unroll", JIT_G(max_loops_unroll));
-	add_assoc_long(&directives,   "opcache.jit_max_recursion_unroll", JIT_G(max_recursion_unroll));
+	add_assoc_long(&directives,   "opcache.jit_max_recursive_calls", JIT_G(max_recursive_calls));
+	add_assoc_long(&directives,   "opcache.jit_max_recursive_returns", JIT_G(max_recursive_returns));
 	add_assoc_long(&directives,   "opcache.jit_max_root_traces", JIT_G(max_root_traces));
 	add_assoc_long(&directives,   "opcache.jit_max_side_traces", JIT_G(max_side_traces));
 	add_assoc_long(&directives,   "opcache.jit_prof_threshold", JIT_G(prof_threshold));

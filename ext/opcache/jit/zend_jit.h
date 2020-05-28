@@ -93,18 +93,19 @@ typedef struct _zend_jit_globals {
 	zend_long   debug;
 	zend_long   bisect_limit;
 	double      prof_threshold;
-	zend_long   max_root_traces;      /* max number of root traces */
-	zend_long   max_side_traces;      /* max number of side traces (per root trace) */
+	zend_long   max_root_traces;       /* max number of root traces */
+	zend_long   max_side_traces;       /* max number of side traces (per root trace) */
 	zend_long   hot_loop;
 	zend_long   hot_func;
 	zend_long   hot_return;
-	zend_long   hot_side_exit;        /* number of exits before taking side trace */
-	zend_long   blacklist_root_trace; /* number of attempts to JIT a root trace before blacklist it */
-	zend_long   blacklist_side_trace; /* number of attempts to JIT a side trace before blacklist it */
-	zend_long   max_recursion_unroll; /* max number of recursive inlined calls/returns unrolls */
-	zend_long   max_loops_unroll;     /* max number of unrolled loops */
+	zend_long   hot_side_exit;         /* number of exits before taking side trace */
+	zend_long   blacklist_root_trace;  /* number of attempts to JIT a root trace before blacklist it */
+	zend_long   blacklist_side_trace;  /* number of attempts to JIT a side trace before blacklist it */
+	zend_long   max_loops_unroll;      /* max number of unrolled loops */
+	zend_long   max_recursive_calls;   /* max number of recursive inlined call unrolls */
+	zend_long   max_recursive_returns; /* max number of recursive inlined return unrolls */
 
-	zend_sym_node *symbols; /* symbols for disassembler */
+	zend_sym_node *symbols;            /* symbols for disassembler */
 
 	zend_jit_trace_rec *current_trace;
 	zend_jit_trace_stack_frame *current_frame;
