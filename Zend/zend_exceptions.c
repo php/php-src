@@ -316,13 +316,7 @@ ZEND_METHOD(Exception, __wakeup)
 	CHECK_EXC_TYPE(ZEND_STR_CODE,     IS_LONG);
 	CHECK_EXC_TYPE(ZEND_STR_FILE,     IS_STRING);
 	CHECK_EXC_TYPE(ZEND_STR_LINE,     IS_LONG);
-	CHECK_EXC_TYPE(ZEND_STR_TRACE,    IS_ARRAY);
-	pvalue = zend_read_property(i_get_exception_base(object), object, "previous", sizeof("previous")-1, 1, &value);
-	if (pvalue && Z_TYPE_P(pvalue) != IS_NULL && (Z_TYPE_P(pvalue) != IS_OBJECT ||
-			!instanceof_function(Z_OBJCE_P(pvalue), zend_ce_throwable) ||
-			pvalue == object)) {
-		zend_unset_property(i_get_exception_base(object), object, "previous", sizeof("previous")-1);
-	}
+	/* The type of $trace and $previous is enforced through typed properties. */
 }
 /* }}} */
 
@@ -751,7 +745,10 @@ static void declare_exception_properties(zend_class_entry *ce)
 		ce, ZSTR_KNOWN(ZEND_STR_TRACE), &val, ZEND_ACC_PRIVATE, NULL,
 		(zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY));
 
-	zend_declare_property_null(ce, "previous", sizeof("previous")-1, ZEND_ACC_PRIVATE);
+	ZVAL_NULL(&val);
+	zend_declare_typed_property(
+		ce, ZSTR_KNOWN(ZEND_STR_PREVIOUS), &val, ZEND_ACC_PRIVATE, NULL,
+		(zend_type) ZEND_TYPE_INIT_CE(zend_ce_throwable, /* allow_null */ 1, 0));
 }
 
 void zend_register_default_exception(void) /* {{{ */
