@@ -1,7 +1,5 @@
 --TEST--
 Bug #54484 (Empty string in json_decode doesn't reset json_last_error)
---SKIPIF--
-<?php if (!extension_loaded("json")) print "skip"; ?>
 --FILE--
 <?php
 json_decode('{"test":"test"}');

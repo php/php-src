@@ -11,10 +11,6 @@ if (!setlocale
     die("skip - locale needed for this test is not supported on this platform");
 }
 
-if (!extension_loaded("json")) {
-    print "skip - test requires the json extension";
-}
-
 ?>
 --FILE--
 <?php

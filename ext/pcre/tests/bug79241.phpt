@@ -1,7 +1,5 @@
 --TEST--
 Bug #79241: Segmentation fault on preg_match()
---SKIPIF--
-<?php if (!extension_loaded("json")) print "skip json extension missing"; ?>
 --FILE--
 <?php
 
