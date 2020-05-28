@@ -3125,6 +3125,9 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							if (opline->op1_type == IS_CONST) {
 								zend_jit_trace_send_type(opline, frame->call, Z_TYPE_P(RT_CONSTANT(opline, opline->op1)));
 							} else if (op1_type != IS_UNKNOWN) {
+								if (op1_type == IS_UNDEF) {
+									op1_type = IS_NULL;
+								}
 								zend_jit_trace_send_type(opline, frame->call, op1_type);
 							}
 						}
@@ -3169,6 +3172,9 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								goto done;
 							}
 							if (op1_type != IS_UNKNOWN) {
+								if (op1_type == IS_UNDEF) {
+									op1_type = IS_NULL;
+								}
 								zend_jit_trace_send_type(opline, frame->call, op1_type);
 							}
 						}
