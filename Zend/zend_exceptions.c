@@ -734,6 +734,17 @@ ZEND_METHOD(Exception, __toString)
 }
 /* }}} */
 
+static void declare_exception_properties(zend_class_entry *ce)
+{
+	zend_declare_property_string(ce, "message", sizeof("message")-1, "", ZEND_ACC_PROTECTED);
+	zend_declare_property_string(ce, "string", sizeof("string")-1, "", ZEND_ACC_PRIVATE);
+	zend_declare_property_long(ce, "code", sizeof("code")-1, 0, ZEND_ACC_PROTECTED);
+	zend_declare_property_null(ce, "file", sizeof("file")-1, ZEND_ACC_PROTECTED);
+	zend_declare_property_null(ce, "line", sizeof("line")-1, ZEND_ACC_PROTECTED);
+	zend_declare_property_null(ce, "trace", sizeof("trace")-1, ZEND_ACC_PRIVATE);
+	zend_declare_property_null(ce, "previous", sizeof("previous")-1, ZEND_ACC_PRIVATE);
+}
+
 void zend_register_default_exception(void) /* {{{ */
 {
 	zend_class_entry ce;
@@ -748,14 +759,7 @@ void zend_register_default_exception(void) /* {{{ */
 	zend_ce_exception = zend_register_internal_class_ex(&ce, NULL);
 	zend_ce_exception->create_object = zend_default_exception_new;
 	zend_class_implements(zend_ce_exception, 1, zend_ce_throwable);
-
-	zend_declare_property_string(zend_ce_exception, "message", sizeof("message")-1, "", ZEND_ACC_PROTECTED);
-	zend_declare_property_string(zend_ce_exception, "string", sizeof("string")-1, "", ZEND_ACC_PRIVATE);
-	zend_declare_property_long(zend_ce_exception, "code", sizeof("code")-1, 0, ZEND_ACC_PROTECTED);
-	zend_declare_property_null(zend_ce_exception, "file", sizeof("file")-1, ZEND_ACC_PROTECTED);
-	zend_declare_property_null(zend_ce_exception, "line", sizeof("line")-1, ZEND_ACC_PROTECTED);
-	zend_declare_property_null(zend_ce_exception, "trace", sizeof("trace")-1, ZEND_ACC_PRIVATE);
-	zend_declare_property_null(zend_ce_exception, "previous", sizeof("previous")-1, ZEND_ACC_PRIVATE);
+	declare_exception_properties(zend_ce_exception);
 
 	INIT_CLASS_ENTRY(ce, "ErrorException", class_ErrorException_methods);
 	zend_ce_error_exception = zend_register_internal_class_ex(&ce, zend_ce_exception);
@@ -766,14 +770,7 @@ void zend_register_default_exception(void) /* {{{ */
 	zend_ce_error = zend_register_internal_class_ex(&ce, NULL);
 	zend_ce_error->create_object = zend_default_exception_new;
 	zend_class_implements(zend_ce_error, 1, zend_ce_throwable);
-
-	zend_declare_property_string(zend_ce_error, "message", sizeof("message")-1, "", ZEND_ACC_PROTECTED);
-	zend_declare_property_string(zend_ce_error, "string", sizeof("string")-1, "", ZEND_ACC_PRIVATE);
-	zend_declare_property_long(zend_ce_error, "code", sizeof("code")-1, 0, ZEND_ACC_PROTECTED);
-	zend_declare_property_null(zend_ce_error, "file", sizeof("file")-1, ZEND_ACC_PROTECTED);
-	zend_declare_property_null(zend_ce_error, "line", sizeof("line")-1, ZEND_ACC_PROTECTED);
-	zend_declare_property_null(zend_ce_error, "trace", sizeof("trace")-1, ZEND_ACC_PRIVATE);
-	zend_declare_property_null(zend_ce_error, "previous", sizeof("previous")-1, ZEND_ACC_PRIVATE);
+	declare_exception_properties(zend_ce_error);
 
 	INIT_CLASS_ENTRY(ce, "CompileError", class_CompileError_methods);
 	zend_ce_compile_error = zend_register_internal_class_ex(&ce, zend_ce_error);
