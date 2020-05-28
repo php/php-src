@@ -9,6 +9,8 @@ $x->test();
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: Trace is not an array in %s:%d
-%a
+Fatal error: Uncaught TypeError: Cannot assign string to property Exception::$trace of type array in %s:%d
+Stack trace:
+#0 %s(%d): unserialize('O:9:"exception"...')
+#1 {main}
   thrown in %s on line %d
