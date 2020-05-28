@@ -6370,14 +6370,14 @@ void zend_compile_func_decl(znode *result, zend_ast *ast, zend_bool toplevel) /*
 	if (decl->doc_comment) {
 		op_array->doc_comment = zend_string_copy(decl->doc_comment);
 	}
-	if (decl->attributes) {
+	if (decl->child[4]) {
 		int target = ZEND_ATTRIBUTE_TARGET_FUNCTION;
 
 		if (is_method) {
 			target = ZEND_ATTRIBUTE_TARGET_METHOD;
 		}
 		op_array->attributes = create_attribute_array();
-		zend_compile_attributes(op_array->attributes, decl->attributes, 0, target);
+		zend_compile_attributes(op_array->attributes, decl->child[4], 0, target);
 	}
 	if (decl->kind == ZEND_AST_CLOSURE || decl->kind == ZEND_AST_ARROW_FUNC) {
 		op_array->fn_flags |= ZEND_ACC_CLOSURE;
@@ -6823,9 +6823,9 @@ void zend_compile_class_decl(znode *result, zend_ast *ast, zend_bool toplevel) /
 	if (decl->doc_comment) {
 		ce->info.user.doc_comment = zend_string_copy(decl->doc_comment);
 	}
-	if (decl->attributes) {
+	if (decl->child[4]) {
 		ce->attributes = create_attribute_array();
-		zend_compile_attributes(ce->attributes, decl->attributes, 0, ZEND_ATTRIBUTE_TARGET_CLASS);
+		zend_compile_attributes(ce->attributes, decl->child[4], 0, ZEND_ATTRIBUTE_TARGET_CLASS);
 	}
 
 	if (UNEXPECTED((decl->flags & ZEND_ACC_ANON_CLASS))) {

@@ -114,7 +114,7 @@ ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_class_const_or_name(zend_ast *
 
 ZEND_API zend_ast *zend_ast_create_decl(
 	zend_ast_kind kind, uint32_t flags, uint32_t start_lineno, zend_string *doc_comment,
-	zend_string *name, zend_ast *child0, zend_ast *child1, zend_ast *child2, zend_ast *child3
+	zend_string *name, zend_ast *child0, zend_ast *child1, zend_ast *child2, zend_ast *child3, zend_ast *child4
 ) {
 	zend_ast_decl *ast;
 
@@ -126,12 +126,12 @@ ZEND_API zend_ast *zend_ast_create_decl(
 	ast->flags = flags;
 	ast->lex_pos = LANG_SCNG(yy_text);
 	ast->doc_comment = doc_comment;
-	ast->attributes = NULL;
 	ast->name = name;
 	ast->child[0] = child0;
 	ast->child[1] = child1;
 	ast->child[2] = child2;
 	ast->child[3] = child3;
+	ast->child[4] = child4;
 
 	return (zend_ast *) ast;
 }
@@ -858,13 +858,11 @@ tail_call:
 		if (decl->doc_comment) {
 			zend_string_release_ex(decl->doc_comment, 0);
 		}
-		if (decl->attributes) {
-			zend_ast_destroy(decl->attributes);
-		}
 		zend_ast_destroy(decl->child[0]);
 		zend_ast_destroy(decl->child[1]);
 		zend_ast_destroy(decl->child[2]);
-		ast = decl->child[3];
+		zend_ast_destroy(decl->child[3]);
+		ast = decl->child[4];
 		goto tail_call;
 	}
 }
@@ -1445,9 +1443,9 @@ tail_call:
 		case ZEND_AST_ARROW_FUNC:
 		case ZEND_AST_METHOD:
 			decl = (zend_ast_decl *) ast;
-			if (decl->attributes) {
+			if (decl->child[4]) {
 				zend_bool newlines = !(ast->kind == ZEND_AST_CLOSURE || ast->kind == ZEND_AST_ARROW_FUNC);
-				zend_ast_export_attributes(str, decl->attributes, indent, newlines);
+				zend_ast_export_attributes(str, decl->child[4], indent, newlines);
 			}
 			if (decl->flags & ZEND_ACC_PUBLIC) {
 				smart_str_appends(str, "public ");
@@ -1505,8 +1503,8 @@ tail_call:
 			break;
 		case ZEND_AST_CLASS:
 			decl = (zend_ast_decl *) ast;
-			if (decl->attributes) {
-				zend_ast_export_attributes(str, decl->attributes, indent, 1);
+			if (decl->child[4]) {
+				zend_ast_export_attributes(str, decl->child[4], indent, 1);
 			}
 			if (decl->flags & ZEND_ACC_INTERFACE) {
 				smart_str_appends(str, "interface ");
@@ -1839,8 +1837,8 @@ simple_list:
 			smart_str_appends(str, "new ");
 			if (ast->child[0]->kind == ZEND_AST_CLASS) {
 				zend_ast_decl *decl = (zend_ast_decl *) ast->child[0];
-				if (decl->attributes) {
-					zend_ast_export_attributes(str, decl->attributes, indent, 0);
+				if (decl->child[4]) {
+					zend_ast_export_attributes(str, decl->child[4], indent, 0);
 				}
 				smart_str_appends(str, "class");
 				if (zend_ast_get_list(ast->child[1])->children) {
@@ -2187,7 +2185,7 @@ zend_ast * ZEND_FASTCALL zend_ast_with_attributes(zend_ast *ast, zend_ast *attr)
 	case ZEND_AST_METHOD:
 	case ZEND_AST_CLASS:
 	case ZEND_AST_ARROW_FUNC:
-		((zend_ast_decl *) ast)->attributes = attr;
+		((zend_ast_decl *) ast)->child[4] = attr;
 		break;
 	case ZEND_AST_PROP_GROUP:
 		ast->child[2] = attr;
