@@ -606,10 +606,12 @@ ZEND_METHOD(Exception, getTraceAsString)
 	base_ce = i_get_exception_base(object);
 
 	trace = zend_read_property_ex(base_ce, object, ZSTR_KNOWN(ZEND_STR_TRACE), 1, &rv);
-	if (Z_TYPE_P(trace) != IS_ARRAY) {
-		zend_type_error("Trace is not an array");
-		return;
+	if (EG(exception)) {
+		RETURN_THROWS();
 	}
+
+	/* Type should be guaranteed by property type. */
+	ZEND_ASSERT(Z_TYPE_P(trace) == IS_ARRAY);
 	ZEND_HASH_FOREACH_NUM_KEY_VAL(Z_ARRVAL_P(trace), index, frame) {
 		if (Z_TYPE_P(frame) != IS_ARRAY) {
 			zend_error(E_WARNING, "Expected array for frame " ZEND_ULONG_FMT, index);
@@ -736,12 +738,19 @@ ZEND_METHOD(Exception, __toString)
 
 static void declare_exception_properties(zend_class_entry *ce)
 {
+	zval val;
+
 	zend_declare_property_string(ce, "message", sizeof("message")-1, "", ZEND_ACC_PROTECTED);
 	zend_declare_property_string(ce, "string", sizeof("string")-1, "", ZEND_ACC_PRIVATE);
 	zend_declare_property_long(ce, "code", sizeof("code")-1, 0, ZEND_ACC_PROTECTED);
 	zend_declare_property_null(ce, "file", sizeof("file")-1, ZEND_ACC_PROTECTED);
 	zend_declare_property_null(ce, "line", sizeof("line")-1, ZEND_ACC_PROTECTED);
-	zend_declare_property_null(ce, "trace", sizeof("trace")-1, ZEND_ACC_PRIVATE);
+
+	ZVAL_EMPTY_ARRAY(&val);
+	zend_declare_typed_property(
+		ce, ZSTR_KNOWN(ZEND_STR_TRACE), &val, ZEND_ACC_PRIVATE, NULL,
+		(zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY));
+
 	zend_declare_property_null(ce, "previous", sizeof("previous")-1, ZEND_ACC_PRIVATE);
 }
 

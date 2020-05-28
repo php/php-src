@@ -3586,19 +3586,13 @@ ZEND_API int zend_declare_typed_property(zend_class_entry *ce, zend_string *name
 		Z_PROP_FLAG_P(property_default_ptr) = Z_ISUNDEF_P(property) ? IS_PROP_UNINIT : 0;
 	}
 	if (ce->type & ZEND_INTERNAL_CLASS) {
-		switch(Z_TYPE_P(property)) {
-			case IS_ARRAY:
-			case IS_OBJECT:
-			case IS_RESOURCE:
-				zend_error_noreturn(E_CORE_ERROR, "Internal zval's can't be arrays, objects or resources");
-				break;
-			default:
-				break;
-		}
-
 		/* Must be interned to avoid ZTS data races */
 		if (is_persistent_class(ce)) {
 			name = zend_new_interned_string(zend_string_copy(name));
+		}
+
+		if (Z_REFCOUNTED_P(property)) {
+			zend_error_noreturn(E_CORE_ERROR, "Internal zvals cannot be refcounted");
 		}
 	}
 
