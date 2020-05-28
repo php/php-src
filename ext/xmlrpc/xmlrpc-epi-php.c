@@ -966,12 +966,8 @@ PHP_FUNCTION(xmlrpc_server_call_method)
 	if (zend_parse_parameters(argc, "Osz|a", &handle, xmlrpc_server_ce, &rawxml, &rawxml_len, &caller_params, &output_opts) != SUCCESS) {
 		RETURN_THROWS();
 	}
-	/* user output options */
-	if (argc == 3) {
-		set_output_options(&out, NULL);
-	} else {
-		set_output_options(&out, output_opts);
-	}
+
+	set_output_options(&out, output_opts ? output_opts : NULL);
 
 	server = Z_XMLRPC_SERVER_P(handle);
 
