@@ -6411,8 +6411,9 @@ ZEND_METHOD(ReflectionAttribute, getName)
 static zend_always_inline int import_attribute_value(zval *ret, zval *val, zend_class_entry *scope) /* {{{ */
 {
 	ZVAL_COPY_OR_DUP(ret, val);
+
 	if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
-		if (FAILURE == zval_update_constant_ex(ret, scope)) {
+		if (SUCCESS != zval_update_constant_ex(ret, scope)) {
 			zval_ptr_dtor(ret);
 			return FAILURE;
 		}

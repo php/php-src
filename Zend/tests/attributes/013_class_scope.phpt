@@ -1,5 +1,5 @@
 --TEST--
-Attributes make use of correct scope.
+Attributes make use of class scope.
 --FILE--
 <?php
 
@@ -25,20 +25,21 @@ print_r($ref->getMethod('bar')->getParameters()[0]->getAttributes()[0]->getArgum
 
 echo "\n";
 
-class C2
+trait T1
 {
-	private const FOO = 'foo';
-
-	public static function foo()
-	{
-		return <<A1(self::class, self::FOO)>> function (<<A1(self::class, self::FOO)>> $p) { };
-	}
+	<<A1(self::class, self::FOO)>>
+	public function foo() { }
 }
 
-$ref = new \ReflectionFunction(C2::foo());
-print_r($ref->getAttributes()[0]->getArguments());
-print_r($ref->getParameters()[0]->getAttributes()[0]->getArguments());
+class C2
+{
+	use T1;
+	
+	private const FOO = 'bar';
+}
 
+$ref = new \ReflectionClass(C2::class);
+print_r($ref->getMethod('foo')->getAttributes()[0]->getArguments());
 echo "\n";
 
 class C3
@@ -56,13 +57,13 @@ class C3
 	}
 }
 
-$obj = C3::foo();
-$ref = new \ReflectionObject($obj);
-$name = $ref->getMethod('bar')->getAttributes()[0]->getArguments()[0];
+$ref = new \ReflectionObject(C3::foo());
 
-print_r($ref->getAttributes()[0]->getArguments());
-var_dump($name == get_class($obj));
-var_dump($ref->getMethod('bar')->getAttributes()[0]->getArguments()[1]);
+$args = $ref->getAttributes()[0]->getArguments();
+var_dump($args[0] == $ref->getName(), $args[1]);
+
+$args = $ref->getMethod('bar')->getAttributes()[0]->getArguments();
+var_dump($args[0] == $ref->getName(), $args[1]);
 
 ?>
 --EXPECT--
@@ -95,18 +96,10 @@ Array
 Array
 (
     [0] => C2
-    [1] => foo
-)
-Array
-(
-    [0] => C2
-    [1] => foo
+    [1] => bar
 )
 
-Array
-(
-    [0] => C3
-    [1] => foo
-)
+bool(true)
+string(3) "bar"
 bool(true)
 string(3) "bar"

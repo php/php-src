@@ -1046,10 +1046,6 @@ ZEND_API void function_add_ref(zend_function *function) /* {{{ */
 			ZEND_MAP_PTR_INIT(op_array->run_time_cache, zend_arena_alloc(&CG(arena), sizeof(void*)));
 			ZEND_MAP_PTR_SET(op_array->run_time_cache, NULL);
 		}
-
-		if (op_array->attributes) {
-			GC_ADDREF(op_array->attributes);
-		}
 	}
 
 	if (function->common.function_name) {
@@ -6370,15 +6366,7 @@ void zend_compile_func_decl(znode *result, zend_ast *ast, zend_bool toplevel) /*
 	if (decl->doc_comment) {
 		op_array->doc_comment = zend_string_copy(decl->doc_comment);
 	}
-	if (decl->child[4]) {
-		int target = ZEND_ATTRIBUTE_TARGET_FUNCTION;
 
-		if (is_method) {
-			target = ZEND_ATTRIBUTE_TARGET_METHOD;
-		}
-		op_array->attributes = create_attribute_array();
-		zend_compile_attributes(op_array->attributes, decl->child[4], 0, target);
-	}
 	if (decl->kind == ZEND_AST_CLOSURE || decl->kind == ZEND_AST_ARROW_FUNC) {
 		op_array->fn_flags |= ZEND_ACC_CLOSURE;
 	}
@@ -6397,6 +6385,17 @@ void zend_compile_func_decl(znode *result, zend_ast *ast, zend_bool toplevel) /*
 	}
 
 	CG(active_op_array) = op_array;
+
+	if (decl->child[4]) {
+		int target = ZEND_ATTRIBUTE_TARGET_FUNCTION;
+
+		if (is_method) {
+			target = ZEND_ATTRIBUTE_TARGET_METHOD;
+		}
+
+		op_array->attributes = create_attribute_array();
+		zend_compile_attributes(op_array->attributes, decl->child[4], 0, target);
+	}
 
 	/* Do not leak the class scope into free standing functions, even if they are dynamically
 	 * defined inside a class method. This is necessary for correct handling of magic constants.
@@ -6823,10 +6822,6 @@ void zend_compile_class_decl(znode *result, zend_ast *ast, zend_bool toplevel) /
 	if (decl->doc_comment) {
 		ce->info.user.doc_comment = zend_string_copy(decl->doc_comment);
 	}
-	if (decl->child[4]) {
-		ce->attributes = create_attribute_array();
-		zend_compile_attributes(ce->attributes, decl->child[4], 0, ZEND_ATTRIBUTE_TARGET_CLASS);
-	}
 
 	if (UNEXPECTED((decl->flags & ZEND_ACC_ANON_CLASS))) {
 		/* Serialization is not supported for anonymous classes */
@@ -6840,6 +6835,11 @@ void zend_compile_class_decl(znode *result, zend_ast *ast, zend_bool toplevel) /
 	}
 
 	CG(active_class_entry) = ce;
+
+	if (decl->child[4]) {
+		ce->attributes = create_attribute_array();
+		zend_compile_attributes(ce->attributes, decl->child[4], 0, ZEND_ATTRIBUTE_TARGET_CLASS);
+	}
 
 	if (implements_ast) {
 		zend_compile_implements(implements_ast);
