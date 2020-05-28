@@ -215,6 +215,7 @@ if (PHP_ANALYZER == "vs") {
 		pvscfg.WriteLine("platform = " + (X64 ? 'x64' : 'Win32'));
 		pvscfg.WriteLine("preprocessor = visualcpp");
 		pvscfg.WriteLine("language = C");
+		pvscfg.WriteLine("skip-cl-exe = no");
 	}
 } else {
 	PHP_ANALYZER = "no"
