@@ -74,7 +74,7 @@ ZEND_API FILE *(*zend_fopen)(const char *filename, zend_string **opened_path);
 ZEND_API int (*zend_stream_open_function)(const char *filename, zend_file_handle *handle);
 ZEND_API void (*zend_ticks_function)(int ticks);
 ZEND_API void (*zend_interrupt_function)(zend_execute_data *execute_data);
-ZEND_API void (*zend_error_cb)(int type, const char *error_filename, const uint32_t error_lineno, const char *format, va_list args);
+ZEND_API void (*zend_error_cb)(int type, const char *error_filename, const uint32_t error_lineno, zend_string *message);
 void (*zend_printf_to_smart_string)(smart_string *buf, const char *format, va_list ap);
 void (*zend_printf_to_smart_str)(smart_str *buf, const char *format, va_list ap);
 ZEND_API char *(*zend_getenv)(char *name, size_t name_len);
@@ -1263,7 +1263,6 @@ static ZEND_COLD void zend_error_va_list(
 		int orig_type, const char *error_filename, uint32_t error_lineno,
 		const char *format, va_list args)
 {
-	va_list usr_copy;
 	zval params[4];
 	zval retval;
 	zval orig_user_error_handler;
@@ -1273,6 +1272,7 @@ static ZEND_COLD void zend_error_va_list(
 	zend_stack delayed_oplines_stack;
 	zend_class_entry *orig_fake_scope;
 	int type = orig_type & E_ALL;
+	zend_string *message = zend_vstrpprintf(0, format, args);
 
 	/* Report about uncaught exception in case of fatal errors */
 	if (EG(exception)) {
@@ -1308,10 +1308,7 @@ static ZEND_COLD void zend_error_va_list(
 
 #ifdef HAVE_DTRACE
 	if (DTRACE_ERROR_ENABLED()) {
-		char *dtrace_error_buffer;
-		zend_vspprintf(&dtrace_error_buffer, 0, format, args);
-		DTRACE_ERROR(dtrace_error_buffer, (char *)error_filename, error_lineno);
-		efree(dtrace_error_buffer);
+		DTRACE_ERROR(ZSTR_VAL(message), (char *)error_filename, error_lineno);
 	}
 #endif /* HAVE_DTRACE */
 
@@ -1319,7 +1316,7 @@ static ZEND_COLD void zend_error_va_list(
 	if (Z_TYPE(EG(user_error_handler)) == IS_UNDEF
 		|| !(EG(user_error_handler_error_reporting) & type)
 		|| EG(error_handling) != EH_NORMAL) {
-		zend_error_cb(orig_type, error_filename, error_lineno, format, args);
+		zend_error_cb(orig_type, error_filename, error_lineno, message);
 	} else switch (type) {
 		case E_ERROR:
 		case E_PARSE:
@@ -1328,14 +1325,11 @@ static ZEND_COLD void zend_error_va_list(
 		case E_COMPILE_ERROR:
 		case E_COMPILE_WARNING:
 			/* The error may not be safe to handle in user-space */
-			zend_error_cb(orig_type, error_filename, error_lineno, format, args);
+			zend_error_cb(orig_type, error_filename, error_lineno, message);
 			break;
 		default:
 			/* Handle the error in user space */
-			va_copy(usr_copy, args);
-			ZVAL_STR(&params[1], zend_vstrpprintf(0, format, usr_copy));
-			va_end(usr_copy);
-
+			ZVAL_STR_COPY(&params[1], message);
 			ZVAL_LONG(&params[0], type);
 
 			if (error_filename) {
@@ -1369,13 +1363,13 @@ static ZEND_COLD void zend_error_va_list(
 			if (call_user_function(CG(function_table), NULL, &orig_user_error_handler, &retval, 4, params) == SUCCESS) {
 				if (Z_TYPE(retval) != IS_UNDEF) {
 					if (Z_TYPE(retval) == IS_FALSE) {
-						zend_error_cb(orig_type, error_filename, error_lineno, format, args);
+						zend_error_cb(orig_type, error_filename, error_lineno, message);
 					}
 					zval_ptr_dtor(&retval);
 				}
 			} else if (!EG(exception)) {
 				/* The user error handler failed, use built-in error handler */
-				zend_error_cb(orig_type, error_filename, error_lineno, format, args);
+				zend_error_cb(orig_type, error_filename, error_lineno, message);
 			}
 
 			EG(fake_scope) = orig_fake_scope;
@@ -1408,6 +1402,8 @@ static ZEND_COLD void zend_error_va_list(
 			EG(exit_status) = 255;
 		}
 	}
+
+	zend_string_release(message);
 }
 /* }}} */
 

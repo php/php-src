@@ -1190,19 +1190,16 @@ PHPAPI void php_html_puts(const char *str, size_t size)
 
 /* {{{ php_error_cb
  extended error handling function */
-static ZEND_COLD void php_error_cb(int orig_type, const char *error_filename, const uint32_t error_lineno, const char *format, va_list args)
+static ZEND_COLD void php_error_cb(int orig_type, const char *error_filename, const uint32_t error_lineno, zend_string *message)
 {
-	char *buffer;
-	int buffer_len, display;
+	zend_bool display;
 	int type = orig_type & E_ALL;
-
-	buffer_len = (int)vspprintf(&buffer, PG(log_errors_max_len), format, args);
 
 	/* check for repeated errors to be ignored */
 	if (PG(ignore_repeated_errors) && PG(last_error_message)) {
 		/* no check for PG(last_error_file) is needed since it cannot
 		 * be NULL if PG(last_error_message) is not NULL */
-		if (strcmp(PG(last_error_message), buffer)
+		if (zend_string_equals(PG(last_error_message), message)
 			|| (!PG(ignore_repeated_source)
 				&& ((PG(last_error_lineno) != (int)error_lineno)
 					|| strcmp(PG(last_error_file), error_filename)))) {
@@ -1238,9 +1235,8 @@ static ZEND_COLD void php_error_cb(int orig_type, const char *error_filename, co
 				 * but DO NOT overwrite a pending exception
 				 */
 				if (!EG(exception)) {
-					zend_throw_error_exception(EG(exception_class), buffer, 0, type);
+					zend_throw_error_exception(EG(exception_class), message, 0, type);
 				}
-				efree(buffer);
 				return;
 		}
 	}
@@ -1248,9 +1244,9 @@ static ZEND_COLD void php_error_cb(int orig_type, const char *error_filename, co
 	/* store the error if it has changed */
 	if (display) {
 		if (PG(last_error_message)) {
-			char *s = PG(last_error_message);
+			zend_string *s = PG(last_error_message);
 			PG(last_error_message) = NULL;
-			free(s);
+			zend_string_release(s);
 		}
 		if (PG(last_error_file)) {
 			char *s = PG(last_error_file);
@@ -1261,7 +1257,7 @@ static ZEND_COLD void php_error_cb(int orig_type, const char *error_filename, co
 			error_filename = "Unknown";
 		}
 		PG(last_error_type) = type;
-		PG(last_error_message) = strdup(buffer);
+		PG(last_error_message) = zend_string_copy(message);
 		PG(last_error_file) = strdup(error_filename);
 		PG(last_error_lineno) = error_lineno;
 	}
@@ -1318,40 +1314,40 @@ static ZEND_COLD void php_error_cb(int orig_type, const char *error_filename, co
 			char *log_buffer;
 #ifdef PHP_WIN32
 			if (type == E_CORE_ERROR || type == E_CORE_WARNING) {
-				syslog(LOG_ALERT, "PHP %s: %s (%s)", error_type_str, buffer, GetCommandLine());
+				syslog(LOG_ALERT, "PHP %s: %s (%s)", error_type_str, ZSTR_VAL(message), GetCommandLine());
 			}
 #endif
-			spprintf(&log_buffer, 0, "PHP %s:  %s in %s on line %" PRIu32, error_type_str, buffer, error_filename, error_lineno);
+			spprintf(&log_buffer, 0, "PHP %s:  %s in %s on line %" PRIu32, error_type_str, ZSTR_VAL(message), error_filename, error_lineno);
 			php_log_err_with_severity(log_buffer, syslog_type_int);
 			efree(log_buffer);
 		}
 
 		if (PG(display_errors) && ((module_initialized && !PG(during_request_startup)) || (PG(display_startup_errors)))) {
 			if (PG(xmlrpc_errors)) {
-				php_printf("<?xml version=\"1.0\"?><methodResponse><fault><value><struct><member><name>faultCode</name><value><int>" ZEND_LONG_FMT "</int></value></member><member><name>faultString</name><value><string>%s:%s in %s on line %" PRIu32 "</string></value></member></struct></value></fault></methodResponse>", PG(xmlrpc_error_number), error_type_str, buffer, error_filename, error_lineno);
+				php_printf("<?xml version=\"1.0\"?><methodResponse><fault><value><struct><member><name>faultCode</name><value><int>" ZEND_LONG_FMT "</int></value></member><member><name>faultString</name><value><string>%s:%s in %s on line %" PRIu32 "</string></value></member></struct></value></fault></methodResponse>", PG(xmlrpc_error_number), error_type_str, ZSTR_VAL(message), error_filename, error_lineno);
 			} else {
 				char *prepend_string = INI_STR("error_prepend_string");
 				char *append_string = INI_STR("error_append_string");
 
 				if (PG(html_errors)) {
 					if (type == E_ERROR || type == E_PARSE) {
-						zend_string *buf = escape_html(buffer, buffer_len);
+						zend_string *buf = escape_html(ZSTR_VAL(message), ZSTR_LEN(message));
 						php_printf("%s<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%" PRIu32 "</b><br />\n%s", STR_PRINT(prepend_string), error_type_str, ZSTR_VAL(buf), error_filename, error_lineno, STR_PRINT(append_string));
 						zend_string_free(buf);
 					} else {
-						php_printf("%s<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%" PRIu32 "</b><br />\n%s", STR_PRINT(prepend_string), error_type_str, buffer, error_filename, error_lineno, STR_PRINT(append_string));
+						php_printf("%s<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%" PRIu32 "</b><br />\n%s", STR_PRINT(prepend_string), error_type_str, ZSTR_VAL(message), error_filename, error_lineno, STR_PRINT(append_string));
 					}
 				} else {
 					/* Write CLI/CGI errors to stderr if display_errors = "stderr" */
 					if ((!strcmp(sapi_module.name, "cli") || !strcmp(sapi_module.name, "cgi") || !strcmp(sapi_module.name, "phpdbg")) &&
 						PG(display_errors) == PHP_DISPLAY_ERRORS_STDERR
 					) {
-						fprintf(stderr, "%s: %s in %s on line %" PRIu32 "\n", error_type_str, buffer, error_filename, error_lineno);
+						fprintf(stderr, "%s: %s in %s on line %" PRIu32 "\n", error_type_str, ZSTR_VAL(message), error_filename, error_lineno);
 #ifdef PHP_WIN32
 						fflush(stderr);
 #endif
 					} else {
-						php_printf("%s\n%s: %s in %s on line %" PRIu32 "\n%s", STR_PRINT(prepend_string), error_type_str, buffer, error_filename, error_lineno, STR_PRINT(append_string));
+						php_printf("%s\n%s: %s in %s on line %" PRIu32 "\n%s", STR_PRINT(prepend_string), error_type_str, ZSTR_VAL(message), error_filename, error_lineno, STR_PRINT(append_string));
 					}
 				}
 			}
@@ -1371,7 +1367,7 @@ static ZEND_COLD void php_error_cb(int orig_type, const char *error_filename, co
 					trigger_break=0;
 					break;
 			}
-			zend_output_debug_string(trigger_break, "%s(%" PRIu32 ") : %s - %s", error_filename, error_lineno, error_type_str, buffer);
+			zend_output_debug_string(trigger_break, "%s(%" PRIu32 ") : %s - %s", error_filename, error_lineno, error_type_str, ZSTR_VAL(message));
 		}
 #endif
 	}
@@ -1405,7 +1401,6 @@ static ZEND_COLD void php_error_cb(int orig_type, const char *error_filename, co
 				if (!(orig_type & E_DONT_BAIL)) {
 					/* restore memory limit */
 					zend_set_memory_limit(PG(memory_limit));
-					efree(buffer);
 					zend_objects_store_mark_destructed(&EG(objects_store));
 					zend_bailout();
 					return;
@@ -1413,8 +1408,6 @@ static ZEND_COLD void php_error_cb(int orig_type, const char *error_filename, co
 			}
 			break;
 	}
-
-	efree(buffer);
 }
 /* }}} */
 
@@ -1595,7 +1588,7 @@ static zval *php_get_configuration_directive_for_zend(zend_string *name)
 static void php_free_request_globals(void)
 {
 	if (PG(last_error_message)) {
-		free(PG(last_error_message));
+		zend_string_release(PG(last_error_message));
 		PG(last_error_message) = NULL;
 	}
 	if (PG(last_error_file)) {
@@ -1961,7 +1954,7 @@ static void core_globals_ctor(php_core_globals *core_globals)
 static void core_globals_dtor(php_core_globals *core_globals)
 {
 	if (core_globals->last_error_message) {
-		free(core_globals->last_error_message);
+		zend_string_release(core_globals->last_error_message);
 	}
 	if (core_globals->last_error_file) {
 		free(core_globals->last_error_file);

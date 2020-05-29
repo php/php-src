@@ -1214,7 +1214,8 @@ static void php_cli_server_log_response(php_cli_server_client *client, int statu
 
 	/* error */
 	if (append_error_message) {
-		spprintf(&error_buf, 0, " - %s in %s on line %d", PG(last_error_message), PG(last_error_file), PG(last_error_lineno));
+		spprintf(&error_buf, 0, " - %s in %s on line %d",
+			ZSTR_VAL(PG(last_error_message)), PG(last_error_file), PG(last_error_lineno));
 		if (!error_buf) {
 			efree(basic_buf);
 			if (message) {

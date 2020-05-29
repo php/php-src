@@ -1533,7 +1533,8 @@ PHP_FUNCTION(error_get_last)
 	if (PG(last_error_message)) {
 		array_init(return_value);
 		add_assoc_long_ex(return_value, "type", sizeof("type")-1, PG(last_error_type));
-		add_assoc_string_ex(return_value, "message", sizeof("message")-1, PG(last_error_message));
+		add_assoc_str_ex(return_value, "message", sizeof("message")-1,
+			zend_string_copy(PG(last_error_message)));
 		add_assoc_string_ex(return_value, "file", sizeof("file")-1, PG(last_error_file)?PG(last_error_file):"-");
 		add_assoc_long_ex(return_value, "line", sizeof("line")-1, PG(last_error_lineno));
 	}
@@ -1550,7 +1551,7 @@ PHP_FUNCTION(error_clear_last)
 		PG(last_error_type) = 0;
 		PG(last_error_lineno) = 0;
 
-		free(PG(last_error_message));
+		zend_string_release(PG(last_error_message));
 		PG(last_error_message) = NULL;
 
 		if (PG(last_error_file)) {

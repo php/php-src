@@ -121,7 +121,7 @@ zend_bool fallback_process = 0; /* process uses file cache fallback */
 static zend_op_array *(*accelerator_orig_compile_file)(zend_file_handle *file_handle, int type);
 static int (*accelerator_orig_zend_stream_open_function)(const char *filename, zend_file_handle *handle );
 static zend_string *(*accelerator_orig_zend_resolve_path)(const char *filename, size_t filename_len);
-static void (*accelerator_orig_zend_error_cb)(int type, const char *error_filename, const uint32_t error_lineno, const char *format, va_list args);
+static void (*accelerator_orig_zend_error_cb)(int type, const char *error_filename, const uint32_t error_lineno, zend_string *message);
 static zif_handler orig_chdir = NULL;
 static ZEND_INI_MH((*orig_include_path_on_modify)) = NULL;
 static int (*orig_post_startup_cb)(void);
@@ -1669,37 +1669,27 @@ static void zend_accel_init_auto_globals(void)
 	}
 }
 
-static void persistent_error_cb(int type, const char *error_filename, const uint32_t error_lineno, const char *format, va_list args) {
+static void persistent_error_cb(int type, const char *error_filename, const uint32_t error_lineno, zend_string *message) {
 	if (ZCG(record_warnings)) {
 		zend_recorded_warning *warning = emalloc(sizeof(zend_recorded_warning));
-		va_list args_copy;
 		warning->type = type;
 		warning->error_lineno = error_lineno;
 		warning->error_filename = zend_string_init(error_filename, strlen(error_filename), 0);
-		va_copy(args_copy, args);
-		warning->error_message = zend_vstrpprintf(0, format, args_copy);
-		va_end(args_copy);
+		warning->error_message = zend_string_copy(message);
 
 		ZCG(num_warnings)++;
 		ZCG(warnings) = erealloc(ZCG(warnings), sizeof(zend_recorded_warning) * ZCG(num_warnings));
 		ZCG(warnings)[ZCG(num_warnings)-1] = warning;
 	}
-	accelerator_orig_zend_error_cb(type, error_filename, error_lineno, format, args);
-}
-
-/* Hack to get us a va_list to pass to zend_error_cb. */
-static void replay_warning_helper(const zend_recorded_warning *warning, ...) {
-	va_list va;
-	va_start(va, warning);
-	accelerator_orig_zend_error_cb(
-		warning->type, ZSTR_VAL(warning->error_filename), warning->error_lineno, "%s", va);
-	va_end(va);
+	accelerator_orig_zend_error_cb(type, error_filename, error_lineno, message);
 }
 
 static void replay_warnings(zend_persistent_script *script) {
 	for (uint32_t i = 0; i < script->num_warnings; i++) {
 		zend_recorded_warning *warning = script->warnings[i];
-		replay_warning_helper(warning, ZSTR_VAL(warning->error_message));
+		accelerator_orig_zend_error_cb(
+			warning->type, ZSTR_VAL(warning->error_filename), warning->error_lineno,
+			warning->error_message);
 	}
 }
 
