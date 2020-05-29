@@ -214,11 +214,6 @@ PRIMARY MAINTAINER:  Rob Richards <rrichards@php.net> (2004 - 2010)
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
-EXTENSION:           xmlrpc
-PRIMARY MAINTAINER:  Unknown
-MAINTENANCE:         Orphaned
-STATUS:              Experimental
--------------------------------------------------------------------------------
 EXTENSION:           xmlwriter
 PRIMARY MAINTAINER:  Rob Richards <rrichards@php.net> (2004 - 2010)
                      Pierre-Alain Joye <pajoye@php.net> (2005-2009)

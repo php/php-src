@@ -45,7 +45,6 @@ $S390X_CONFIG \
 --enable-xmlreader \
 --with-xsl \
 --with-tidy \
---with-xmlrpc \
 --enable-sysvsem \
 --enable-sysvshm \
 --enable-shmop \

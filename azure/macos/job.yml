@@ -40,7 +40,6 @@ jobs:
             --enable-xmlreader \
             --with-xsl \
             --with-tidy=/usr/local/opt/tidyp \
-            --with-xmlrpc \
             --with-libxml \
             --enable-sysvsem \
             --enable-sysvshm \
