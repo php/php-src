@@ -1188,6 +1188,17 @@ PHPAPI void php_html_puts(const char *str, size_t size)
 }
 /* }}} */
 
+static void clear_last_error() {
+	if (PG(last_error_message)) {
+		zend_string_release(PG(last_error_message));
+		PG(last_error_message) = NULL;
+	}
+	if (PG(last_error_file)) {
+		free(PG(last_error_file));
+		PG(last_error_file) = NULL;
+	}
+}
+
 /* {{{ php_error_cb
  extended error handling function */
 static ZEND_COLD void php_error_cb(int orig_type, const char *error_filename, const uint32_t error_lineno, zend_string *message)
@@ -1243,16 +1254,7 @@ static ZEND_COLD void php_error_cb(int orig_type, const char *error_filename, co
 
 	/* store the error if it has changed */
 	if (display) {
-		if (PG(last_error_message)) {
-			zend_string *s = PG(last_error_message);
-			PG(last_error_message) = NULL;
-			zend_string_release(s);
-		}
-		if (PG(last_error_file)) {
-			char *s = PG(last_error_file);
-			PG(last_error_file) = NULL;
-			free(s);
-		}
+		clear_last_error();
 		if (!error_filename) {
 			error_filename = "Unknown";
 		}
@@ -1587,14 +1589,7 @@ static zval *php_get_configuration_directive_for_zend(zend_string *name)
  */
 static void php_free_request_globals(void)
 {
-	if (PG(last_error_message)) {
-		zend_string_release(PG(last_error_message));
-		PG(last_error_message) = NULL;
-	}
-	if (PG(last_error_file)) {
-		free(PG(last_error_file));
-		PG(last_error_file) = NULL;
-	}
+	clear_last_error();
 	if (PG(php_sys_temp_dir)) {
 		efree(PG(php_sys_temp_dir));
 		PG(php_sys_temp_dir) = NULL;
@@ -1876,11 +1871,11 @@ void php_request_shutdown(void *dummy)
 		}
 	} zend_end_try();
 
-	/* 9. free request-bound globals */
-	php_free_request_globals();
-
-	/* 10. Shutdown scanner/executor/compiler and restore ini entries */
+	/* 9. Shutdown scanner/executor/compiler and restore ini entries */
 	zend_deactivate();
+
+	/* 10. free request-bound globals */
+	php_free_request_globals();
 
 	/* 11. Call all extensions post-RSHUTDOWN functions */
 	zend_try {
@@ -1953,12 +1948,10 @@ static void core_globals_ctor(php_core_globals *core_globals)
  */
 static void core_globals_dtor(php_core_globals *core_globals)
 {
-	if (core_globals->last_error_message) {
-		zend_string_release(core_globals->last_error_message);
-	}
-	if (core_globals->last_error_file) {
-		free(core_globals->last_error_file);
-	}
+	/* These should have been freed earlier. */
+	ZEND_ASSERT(!core_globals->last_error_message);
+	ZEND_ASSERT(!core_globals->last_error_file);
+
 	if (core_globals->disable_functions) {
 		free(core_globals->disable_functions);
 	}
@@ -2391,6 +2384,8 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	sapi_deactivate();
 	module_startup = 0;
 
+	/* Don't leak errors from startup into the per-request phase. */
+	clear_last_error();
 	shutdown_memory_manager(1, 0);
  	virtual_cwd_activate();
 
