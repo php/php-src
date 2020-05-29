@@ -74,7 +74,6 @@ CREDIT_LINE("tidy", "John Coggeshall, Ilia Alshanetsky");
 CREDIT_LINE("tokenizer", "Andrei Zmievski, Johannes Schlueter");
 CREDIT_LINE("XML", "Stig Bakken, Thies C. Arntzen, Sterling Hughes");
 CREDIT_LINE("XMLReader", "Rob Richards");
-CREDIT_LINE("xmlrpc", "Dan Libby");
 CREDIT_LINE("XMLWriter", "Rob Richards, Pierre-Alain Joye");
 CREDIT_LINE("XSL", "Christian Stocker, Rob Richards");
 CREDIT_LINE("Zip", "Pierre-Alain Joye, Remi Collet");

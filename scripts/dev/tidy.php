@@ -27,7 +27,6 @@ $excludes = [
     'ext/opcache/jit/vtune',
     'ext/pcre/pcre2lib/',
     'ext/standard/html_tables/html_table_gen.php',
-    'ext/xmlrpc/libxmlrpc/',
     'sapi/cli/php_http_parser.c',
     'sapi/cli/php_http_parser.h',
     'sapi/litespeed/',
