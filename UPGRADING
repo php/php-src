@@ -585,6 +585,8 @@ PHP 8.0 UPGRADE NOTES
     not available in libenchant < 1.5 nor in libenchant-2
   . enchant_dict_add_to_personal, use enchant_dict_add instead
   . enchant_dict_is_in_session, use enchant_dict_is_added instead
+  . enchant_broker_free and enchant_broker_free_dict, unset the object instead
+  . ENCHANT_MYSPELL and ENCHANT_ISPELL constants
 
 - PGSQL / PDO PGSQL:
   . The constant PG_VERSION_STR has now the same value as PG_VERSION, and thus
