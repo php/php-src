@@ -960,7 +960,7 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 	const char *function;
 	int origin_len;
 	char *origin;
-	char *message;
+	zend_string *message;
 	int is_function = 0;
 
 	/* get error text into buffer and escape for html if necessary */
@@ -1095,15 +1095,15 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 		}
 		/* display html formatted or only show the additional links */
 		if (PG(html_errors)) {
-			spprintf(&message, 0, "%s [<a href='%s%s%s'>%s</a>]: %s", origin, docref_root, docref, docref_target, docref, buffer);
+			message = zend_strpprintf(0, "%s [<a href='%s%s%s'>%s</a>]: %s", origin, docref_root, docref, docref_target, docref, buffer);
 		} else {
-			spprintf(&message, 0, "%s [%s%s%s]: %s", origin, docref_root, docref, docref_target, buffer);
+			message = zend_strpprintf(0, "%s [%s%s%s]: %s", origin, docref_root, docref, docref_target, buffer);
 		}
 		if (target) {
 			efree(target);
 		}
 	} else {
-		spprintf(&message, 0, "%s: %s", origin, buffer);
+		message = zend_strpprintf(0, "%s: %s", origin, buffer);
 	}
 	if (replace_origin) {
 		zend_string_free(replace_origin);
@@ -1120,8 +1120,8 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 		efree(buffer);
 	}
 
-	php_error(type, "%s", message);
-	efree(message);
+	zend_error_zstr(type, message);
+	zend_string_release(message);
 }
 /* }}} */
 

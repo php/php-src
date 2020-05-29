@@ -1259,9 +1259,8 @@ ZEND_API zval *zend_get_configuration_directive(zend_string *name) /* {{{ */
 		} \
 	} while (0)
 
-static ZEND_COLD void zend_error_va_list(
-		int orig_type, const char *error_filename, uint32_t error_lineno,
-		const char *format, va_list args)
+static ZEND_COLD void zend_error_impl(
+		int orig_type, const char *error_filename, uint32_t error_lineno, zend_string *message)
 {
 	zval params[4];
 	zval retval;
@@ -1272,7 +1271,6 @@ static ZEND_COLD void zend_error_va_list(
 	zend_stack delayed_oplines_stack;
 	zend_class_entry *orig_fake_scope;
 	int type = orig_type & E_ALL;
-	zend_string *message = zend_vstrpprintf(0, format, args);
 
 	/* Report about uncaught exception in case of fatal errors */
 	if (EG(exception)) {
@@ -1402,10 +1400,17 @@ static ZEND_COLD void zend_error_va_list(
 			EG(exit_status) = 255;
 		}
 	}
-
-	zend_string_release(message);
 }
 /* }}} */
+
+static ZEND_COLD void zend_error_va_list(
+		int orig_type, const char *error_filename, uint32_t error_lineno,
+		const char *format, va_list args)
+{
+	zend_string *message = zend_vstrpprintf(0, format, args);
+	zend_error_impl(orig_type, error_filename, error_lineno, message);
+	zend_string_release(message);
+}
 
 static ZEND_COLD void get_filename_lineno(int type, const char **filename, uint32_t *lineno) {
 	/* Obtain relevant filename and lineno */
@@ -1495,7 +1500,6 @@ ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_at_noreturn(
 	/* Should never reach this. */
 	abort();
 }
-/* }}} */
 
 ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn(int type, const char *format, ...)
 {
@@ -1510,7 +1514,13 @@ ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn(int type, const char *
 	/* Should never reach this. */
 	abort();
 }
-/* }}} */
+
+ZEND_API ZEND_COLD void zend_error_zstr(int type, zend_string *message) {
+	const char *filename;
+	uint32_t lineno;
+	get_filename_lineno(type, &filename, &lineno);
+	zend_error_impl(type, filename, lineno, message);
+}
 
 ZEND_API ZEND_COLD void zend_throw_error(zend_class_entry *exception_ce, const char *format, ...) /* {{{ */
 {
