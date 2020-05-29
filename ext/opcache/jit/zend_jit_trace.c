@@ -2006,9 +2006,18 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 				 && (ssa->vars[ssa_op->result_def].use_chain >= 0
 			      || ssa->vars[ssa_op->result_def].phi_use_chain)
 				 && zend_jit_var_supports_reg(ssa, ssa_op->result_def)) {
-					start[ssa_op->result_def] = idx;
-					vars_op_array[ssa_op->result_def] = op_array;
-					count++;
+					if (!(ssa->var_info[ssa_op->result_def].type & MAY_BE_GUARD)
+					 || opline->opcode == ZEND_PRE_INC
+					 || opline->opcode == ZEND_PRE_DEC
+					 || opline->opcode == ZEND_POST_INC
+					 || opline->opcode == ZEND_POST_DEC
+					 || opline->opcode == ZEND_ADD
+					 || opline->opcode == ZEND_SUB
+					 || opline->opcode == ZEND_MUL) {
+						start[ssa_op->result_def] = idx;
+						vars_op_array[ssa_op->result_def] = op_array;
+						count++;
+					}
 				}
 				if (ssa_op->op1_def >= 0
 				 && (ssa->vars[ssa_op->op1_def].use_chain >= 0
