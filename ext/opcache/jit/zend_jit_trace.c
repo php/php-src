@@ -345,6 +345,15 @@ static zend_always_inline uint32_t zend_jit_trace_type_to_info(zend_uchar type)
 		SET_STACK_TYPE(stack, EX_VAR_TO_NUM(_var), _type); \
 	} while (0)
 
+#define ADD_OP_GUARD(_var, _op_type) do { \
+		if (_var >= 0 && _op_type != IS_UNKNOWN) { \
+			zend_ssa_var_info *info = &ssa_var_info[_var]; \
+			if ((info->type & (MAY_BE_ANY|MAY_BE_UNDEF)) != (1 << _op_type)) { \
+				info->type = MAY_BE_GUARD | zend_jit_trace_type_to_info_ex(_op_type, info->type); \
+			} \
+		} \
+	} while (0)
+
 #define CHECK_OP_TRACE_TYPE(_var, _ssa_var, op_info, op_type) do { \
 		if (op_type != IS_UNKNOWN) { \
 			if ((op_info & MAY_BE_GUARD) != 0 \
@@ -365,6 +374,12 @@ static zend_always_inline uint32_t zend_jit_trace_type_to_info(zend_uchar type)
 		} \
 	} while (0)
 
+#define ADD_OP1_TRACE_GUARD() \
+	ADD_OP_GUARD(tssa->ops[idx].op1_use, op1_type)
+#define ADD_OP2_TRACE_GUARD() \
+	ADD_OP_GUARD(tssa->ops[idx].op2_use, op2_type)
+#define ADD_OP1_DATA_TRACE_GUARD() \
+	ADD_OP_GUARD(tssa->ops[idx+1].op1_use, op3_type)
 #define CHECK_OP1_TRACE_TYPE() \
 	CHECK_OP_TRACE_TYPE(opline->op1.var, ssa_op->op1_use, op1_info, op1_type)
 #define CHECK_OP2_TRACE_TYPE() \
@@ -1294,15 +1309,43 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 			}
 
 			switch (opline->opcode) {
+				case ZEND_ASSIGN_OP:
+					if (opline->extended_value == ZEND_POW
+					 || opline->extended_value == ZEND_DIV) {
+						// TODO: check for division by zero ???
+						break;
+					}
+					if (opline->op1_type != IS_CV || opline->result_type != IS_UNUSED) {
+						break;
+					}
+					ADD_OP1_TRACE_GUARD();
+					ADD_OP2_TRACE_GUARD();
+					break;
 				case ZEND_ASSIGN_DIM_OP:
-				case ZEND_ASSIGN_DIM:
-					if (tssa->ops[idx+1].op1_use >= 0 && op3_type != IS_UNKNOWN) {
-						zend_ssa_var_info *info = &ssa_var_info[ssa_ops[idx+1].op1_use];
-						if ((info->type & (MAY_BE_ANY|MAY_BE_UNDEF)) != (1 << op3_type)) {
-							info->type = MAY_BE_GUARD | zend_jit_trace_type_to_info_ex(op3_type, info->type);
-						}
+					if (opline->extended_value == ZEND_POW
+					 || opline->extended_value == ZEND_DIV) {
+						// TODO: check for division by zero ???
+						break;
+					}
+					if (opline->result_type != IS_UNUSED) {
+						break;
 					}
 					/* break missing intentionally */
+				case ZEND_ASSIGN_DIM:
+					if (opline->op1_type != IS_CV) {
+						break;
+					}
+					ADD_OP1_DATA_TRACE_GUARD();
+					/* break missing intentionally */
+				case ZEND_IS_EQUAL:
+				case ZEND_IS_NOT_EQUAL:
+				case ZEND_IS_SMALLER:
+				case ZEND_IS_SMALLER_OR_EQUAL:
+				case ZEND_CASE:
+				case ZEND_IS_IDENTICAL:
+				case ZEND_IS_NOT_IDENTICAL:
+				case ZEND_FETCH_DIM_R:
+				case ZEND_FETCH_DIM_IS:
 				case ZEND_BW_OR:
 				case ZEND_BW_AND:
 				case ZEND_BW_XOR:
@@ -1315,76 +1358,71 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 //				case ZEND_DIV: // TODO: check for division by zero ???
 				case ZEND_CONCAT:
 				case ZEND_FAST_CONCAT:
-				case ZEND_ASSIGN_OP:
-				case ZEND_IS_EQUAL:
-				case ZEND_IS_NOT_EQUAL:
-				case ZEND_IS_SMALLER:
-				case ZEND_IS_SMALLER_OR_EQUAL:
-				case ZEND_CASE:
-				case ZEND_IS_IDENTICAL:
-				case ZEND_IS_NOT_IDENTICAL:
-				case ZEND_FETCH_DIM_R:
-				case ZEND_FETCH_DIM_IS:
-				case ZEND_ISSET_ISEMPTY_DIM_OBJ:
-					if (tssa->ops[idx].op2_use >= 0 && op2_type != IS_UNKNOWN) {
-						zend_ssa_var_info *info = &ssa_var_info[ssa_ops[idx].op2_use];
-						if ((info->type & (MAY_BE_ANY|MAY_BE_UNDEF)) != (1 << op2_type)) {
-							info->type = MAY_BE_GUARD | zend_jit_trace_type_to_info_ex(op2_type, info->type);
-						}
-					}
+					ADD_OP2_TRACE_GUARD();
 					/* break missing intentionally */
+				case ZEND_ECHO:
+				case ZEND_STRLEN:
+				case ZEND_QM_ASSIGN:
+					ADD_OP1_TRACE_GUARD();
+					break;
 				case ZEND_PRE_INC:
 				case ZEND_PRE_DEC:
 				case ZEND_POST_INC:
 				case ZEND_POST_DEC:
-				case ZEND_QM_ASSIGN:
-				case ZEND_BOOL:
-				case ZEND_BOOL_NOT:
+					if (opline->op1_type != IS_CV) {
+						break;
+					}
+					ADD_OP1_TRACE_GUARD();
+					break;
+				case ZEND_ASSIGN:
+					if (opline->op1_type != IS_CV) {
+						break;
+					}
+					ADD_OP2_TRACE_GUARD();
+					break;
+				case ZEND_CAST:
+					if (opline->extended_value != op1_type) {
+						break;
+					}
+					ADD_OP1_TRACE_GUARD();
+					break;
 				case ZEND_JMPZ:
 				case ZEND_JMPNZ:
+					if (/*opline > op_array->opcodes + ssa->cfg.blocks[b].start && ??? */
+					    opline->op1_type == IS_TMP_VAR &&
+					    ((opline-1)->result_type & (IS_SMART_BRANCH_JMPZ|IS_SMART_BRANCH_JMPNZ)) != 0) {
+						/* smart branch */
+						break;
+					}
+					/* break missing intentionally */
 				case ZEND_JMPZNZ:
 				case ZEND_JMPZ_EX:
 				case ZEND_JMPNZ_EX:
-				case ZEND_ECHO:
-				case ZEND_STRLEN:
-					if (tssa->ops[idx].op1_use >= 0 && op1_type != IS_UNKNOWN) {
-						zend_ssa_var_info *info = &ssa_var_info[ssa_ops[idx].op1_use];
-						if ((info->type & (MAY_BE_ANY|MAY_BE_UNDEF)) != (1 << op1_type)) {
-							info->type = MAY_BE_GUARD | zend_jit_trace_type_to_info_ex(op1_type, info->type);
-						}
-					}
+				case ZEND_BOOL:
+				case ZEND_BOOL_NOT:
+					ADD_OP1_TRACE_GUARD();
 					break;
-				case ZEND_CAST:
-					if (tssa->ops[idx].op1_use >= 0 && op1_type != IS_UNKNOWN) {
-						if (opline->extended_value == op1_type) {
-							zend_ssa_var_info *info = &ssa_var_info[ssa_ops[idx].op1_use];
-							if ((info->type & (MAY_BE_ANY|MAY_BE_UNDEF)) != (1 << op1_type)) {
-								info->type = MAY_BE_GUARD | zend_jit_trace_type_to_info_ex(op1_type, info->type);
-							}
-						}
+				case ZEND_ISSET_ISEMPTY_DIM_OBJ:
+					if ((opline->extended_value & ZEND_ISEMPTY)) {
+						// TODO: support for empty() ???
+						break;
 					}
+					ADD_OP1_TRACE_GUARD();
+					ADD_OP2_TRACE_GUARD();
 					break;
-				case ZEND_ASSIGN:
-					if (tssa->ops[idx].op2_use >= 0 && op2_type != IS_UNKNOWN) {
-						zend_ssa_var_info *info = &ssa_var_info[ssa_ops[idx].op2_use];
-						if ((info->type & (MAY_BE_ANY|MAY_BE_UNDEF)) != (1 << op2_type)) {
-							info->type = MAY_BE_GUARD | zend_jit_trace_type_to_info_ex(op2_type, info->type);
-						}
-					}
-					break;
-				case ZEND_SEND_VAL:
 				case ZEND_SEND_VAL_EX:
-				case ZEND_SEND_VAR:
 				case ZEND_SEND_VAR_EX:
-				case ZEND_SEND_VAR_NO_REF:
 				case ZEND_SEND_VAR_NO_REF_EX:
-				case ZEND_SEND_FUNC_ARG:
-					if (tssa->ops[idx].op1_use >= 0 && op1_type != IS_UNKNOWN) {
-						zend_ssa_var_info *info = &ssa_var_info[ssa_ops[idx].op1_use];
-						if ((info->type & (MAY_BE_ANY|MAY_BE_UNDEF)) != (1 << op1_type)) {
-							info->type = MAY_BE_GUARD | zend_jit_trace_type_to_info_ex(op1_type, info->type);
-						}
+					if (opline->op2.num > MAX_ARG_FLAG_NUM) {
+						goto propagate_arg;
 					}
+					/* break missing intentionally */
+				case ZEND_SEND_VAL:
+				case ZEND_SEND_VAR:
+				case ZEND_SEND_VAR_NO_REF:
+				case ZEND_SEND_FUNC_ARG:
+					ADD_OP1_TRACE_GUARD();
+propagate_arg:
 					/* Propagate argument type */
 					if (frame->call
 					 && frame->call->func->type == ZEND_USER_FUNCTION
@@ -1422,12 +1460,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 					}
 					break;
 				case ZEND_RETURN:
-					if (tssa->ops[idx].op1_use >= 0 && op1_type != IS_UNKNOWN) {
-						zend_ssa_var_info *info = &ssa_var_info[ssa_ops[idx].op1_use];
-						if ((info->type & (MAY_BE_ANY|MAY_BE_UNDEF)) != (1 << op1_type)) {
-							info->type = MAY_BE_GUARD | zend_jit_trace_type_to_info_ex(op1_type, info->type);
-						}
-					}
+					ADD_OP1_TRACE_GUARD();
 					/* Propagate return value types */
 					if (opline->op1_type == IS_UNUSED) {
 						return_value_info.type = MAY_BE_NULL;
