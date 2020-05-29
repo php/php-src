@@ -4110,7 +4110,8 @@ done:
 		}
 		t->link = zend_jit_find_trace(p->opline->handler);
 		zend_jit_trace_link_to_root(&dasm_state, &zend_jit_traces[t->link]);
-	} else if (p->stop == ZEND_JIT_TRACE_STOP_RETURN) {
+	} else if (p->stop == ZEND_JIT_TRACE_STOP_RETURN
+	        || p->stop == ZEND_JIT_TRACE_STOP_RETURN_HALT) {
 		zend_jit_trace_return(&dasm_state, 0);
 	} else {
 		// TODO: not implemented ???
@@ -4659,6 +4660,7 @@ int ZEND_FASTCALL zend_jit_trace_hot_root(zend_execute_data *execute_data, const
 {
 	const zend_op *orig_opline;
 	zend_jit_trace_stop stop;
+	int ret = 0;
 	zend_op_array *op_array;
 	zend_jit_op_array_trace_extension *jit_extension;
 	size_t offset;
@@ -4706,6 +4708,9 @@ repeat:
 	}
 
 	if (ZEND_JIT_TRACE_STOP_OK(stop)) {
+		if (stop == ZEND_JIT_TRACE_STOP_RETURN_HALT) {
+			ret = -1;
+		}
 		if (JIT_G(debug) & ZEND_JIT_DEBUG_TRACE_STOP) {
 			if (stop == ZEND_JIT_TRACE_STOP_LINK) {
 				uint32_t idx = trace_buffer[1].last;
@@ -4730,6 +4735,9 @@ repeat:
 			goto abort;
 		}
 	} else {
+		if (stop == ZEND_JIT_TRACE_STOP_HALT) {
+			ret = -1;
+		}
 abort:
 		if (JIT_G(debug) & ZEND_JIT_DEBUG_TRACE_ABORT) {
 			fprintf(stderr, "---- TRACE %d abort (%s)\n",
@@ -4755,7 +4763,7 @@ abort:
 		fprintf(stderr, "\n");
 	}
 
-	return (stop == ZEND_JIT_TRACE_STOP_HALT) ? -1 : 0;
+	return ret;
 }
 
 static void zend_jit_blacklist_trace_exit(uint32_t trace_num, uint32_t exit_num)
@@ -4929,6 +4937,7 @@ exit:
 int ZEND_FASTCALL zend_jit_trace_hot_side(zend_execute_data *execute_data, uint32_t parent_num, uint32_t exit_num)
 {
 	zend_jit_trace_stop stop;
+	int ret = 0;
 	uint32_t trace_num;
 	zend_jit_trace_rec trace_buffer[ZEND_JIT_TRACE_MAX_LENGTH];
 
@@ -4965,6 +4974,9 @@ int ZEND_FASTCALL zend_jit_trace_hot_side(zend_execute_data *execute_data, uint3
 	}
 
 	if (ZEND_JIT_TRACE_STOP_OK(stop)) {
+		if (stop == ZEND_JIT_TRACE_STOP_RETURN_HALT) {
+			ret = -1;
+		}
 		if (JIT_G(debug) & ZEND_JIT_DEBUG_TRACE_STOP) {
 			if (stop == ZEND_JIT_TRACE_STOP_LINK) {
 				uint32_t idx = trace_buffer[1].last;
@@ -4998,6 +5010,9 @@ int ZEND_FASTCALL zend_jit_trace_hot_side(zend_execute_data *execute_data, uint3
 			goto abort;
 		}
 	} else {
+		if (stop == ZEND_JIT_TRACE_STOP_HALT) {
+			ret = -1;
+		}
 abort:
 		if (JIT_G(debug) & ZEND_JIT_DEBUG_TRACE_ABORT) {
 			fprintf(stderr, "---- TRACE %d abort (%s)\n",
@@ -5018,7 +5033,7 @@ abort:
 		fprintf(stderr, "\n");
 	}
 
-	return (stop == ZEND_JIT_TRACE_STOP_HALT) ? -1 : 0;
+	return ret;
 }
 
 int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf *regs)
