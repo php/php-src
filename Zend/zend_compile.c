@@ -1184,7 +1184,7 @@ zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scop
 		str = zend_string_copy(ZEND_TYPE_CE(type)->name);
 	}
 
-	uint32_t type_mask = ZEND_TYPE_FULL_MASK(type);
+	uint32_t type_mask = ZEND_TYPE_PURE_MASK(type);
 
 	if (type_mask == MAY_BE_ANY) {
 		str = add_type_string(str, ZSTR_KNOWN(ZEND_STR_MIXED));

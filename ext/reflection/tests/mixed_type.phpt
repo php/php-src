@@ -6,7 +6,7 @@ class A
 {
     public mixed $a;
 
-    public function test(mixed $a): mixed {}
+    public function test(mixed ...$a): mixed {}
 }
 
 $a = new A();
