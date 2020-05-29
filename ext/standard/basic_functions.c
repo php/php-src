@@ -202,7 +202,6 @@ static void basic_globals_ctor(php_basic_globals *basic_globals_p) /* {{{ */
 	BG(left) = -1;
 	BG(user_tick_functions) = NULL;
 	BG(user_filter_map) = NULL;
-	BG(serialize_lock) = 0;
 
 	memset(&BG(serialize), 0, sizeof(BG(serialize)));
 	memset(&BG(unserialize), 0, sizeof(BG(unserialize)));
@@ -453,7 +452,6 @@ PHP_RINIT_FUNCTION(basic) /* {{{ */
 {
 	memset(BG(strtok_table), 0, 256);
 
-	BG(serialize_lock) = 0;
 	memset(&BG(serialize), 0, sizeof(BG(serialize)));
 	memset(&BG(unserialize), 0, sizeof(BG(unserialize)));
 
