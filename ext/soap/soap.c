@@ -67,7 +67,7 @@ static void delete_service(void *service);
 static void delete_url(void *handle);
 static void delete_hashtable(void *hashtable);
 
-static void soap_error_handler(int error_num, const char *error_filename, const uint32_t error_lineno, const char *format, va_list args);
+static void soap_error_handler(int error_num, const char *error_filename, const uint32_t error_lineno, zend_string *message);
 
 #define SOAP_SERVER_BEGIN_CODE() \
 	zend_bool _old_handler = SOAP_GLOBAL(use_soap_error_handler);\
@@ -163,15 +163,7 @@ zend_class_entry* soap_var_class_entry;
 
 ZEND_DECLARE_MODULE_GLOBALS(soap)
 
-static void (*old_error_handler)(int, const char *, const uint32_t, const char*, va_list);
-
-#define call_old_error_handler(error_num, error_filename, error_lineno, format, args) \
-{ \
-	va_list copy; \
-	va_copy(copy, args); \
-	old_error_handler(error_num, error_filename, error_lineno, format, copy); \
-	va_end(copy); \
-}
+static void (*old_error_handler)(int, const char *, const uint32_t, zend_string *);
 
 #define PHP_SOAP_SERVER_CLASSNAME "SoapServer"
 #define PHP_SOAP_CLIENT_CLASSNAME "SoapClient"
@@ -1837,7 +1829,7 @@ static ZEND_NORETURN void soap_server_fault(char* code, char* string, char *acto
 }
 /* }}} */
 
-static zend_never_inline ZEND_COLD void soap_real_error_handler(int error_num, const char *error_filename, const uint32_t error_lineno, const char *format, va_list args) /* {{{ */
+static zend_never_inline ZEND_COLD void soap_real_error_handler(int error_num, const char *error_filename, const uint32_t error_lineno, zend_string *message) /* {{{ */
 {
 	zend_bool _old_in_compilation;
 	zend_execute_data *_old_current_execute_data;
@@ -1866,24 +1858,12 @@ static zend_never_inline ZEND_COLD void soap_real_error_handler(int error_num, c
 		     error_num == E_PARSE) &&
 		    use_exceptions) {
 			zval fault;
-			char* code = SOAP_GLOBAL(error_code);
-			char buffer[1024];
-			size_t buffer_len;
-			va_list argcopy;
-
-			va_copy(argcopy, args);
-			buffer_len = vslprintf(buffer, sizeof(buffer)-1, format, argcopy);
-			va_end(argcopy);
-
-			buffer[sizeof(buffer)-1]=0;
-			if (buffer_len > sizeof(buffer) - 1 || buffer_len == (size_t)-1) {
-				buffer_len = sizeof(buffer) - 1;
-			}
-
+			char *code = SOAP_GLOBAL(error_code);
 			if (code == NULL) {
 				code = "Client";
 			}
-			add_soap_fault_ex(&fault, &SOAP_GLOBAL(error_object), code, buffer, NULL, NULL);
+
+			add_soap_fault_ex(&fault, &SOAP_GLOBAL(error_object), code, ZSTR_VAL(message), NULL, NULL);
 			Z_ADDREF(fault);
 			zend_throw_exception_object(&fault);
 			zend_bailout();
@@ -1891,13 +1871,12 @@ static zend_never_inline ZEND_COLD void soap_real_error_handler(int error_num, c
 		           !SOAP_GLOBAL(error_code) ||
 		           strcmp(SOAP_GLOBAL(error_code),"WSDL") != 0) {
 			/* Ignore libxml warnings during WSDL parsing */
-			call_old_error_handler(error_num, error_filename, error_lineno, format, args);
+			old_error_handler(error_num, error_filename, error_lineno, message);
 		}
 	} else {
 		int old = PG(display_errors);
 		int fault = 0;
 		zval fault_obj;
-		va_list argcopy;
 
 		if (error_num == E_USER_ERROR ||
 		    error_num == E_COMPILE_ERROR ||
@@ -1906,7 +1885,7 @@ static zend_never_inline ZEND_COLD void soap_real_error_handler(int error_num, c
 		    error_num == E_PARSE) {
 
 			char* code = SOAP_GLOBAL(error_code);
-			char buffer[1024];
+			zend_string *buffer;
 			zval outbuf;
 			zval *tmp;
 			soapServicePtr service;
@@ -1920,21 +1899,12 @@ static zend_never_inline ZEND_COLD void soap_real_error_handler(int error_num, c
 		        (tmp = zend_hash_str_find(Z_OBJPROP(SOAP_GLOBAL(error_object)), "service", sizeof("service")-1)) != NULL &&
 				(service = (soapServicePtr)zend_fetch_resource_ex(tmp, "service", le_service)) &&
 				!service->send_errors) {
-				strcpy(buffer, "Internal Error");
+				buffer = zend_string_init("Internal Error", sizeof("Internal Error")-1, 0);
 			} else {
-				size_t buffer_len;
-				zval outbuflen;
-
-				va_copy(argcopy, args);
-				buffer_len = vslprintf(buffer, sizeof(buffer)-1, format, argcopy);
-				va_end(argcopy);
-
-				buffer[sizeof(buffer)-1]=0;
-				if (buffer_len > sizeof(buffer) - 1 || buffer_len == (size_t)-1) {
-					buffer_len = sizeof(buffer) - 1;
-				}
+				buffer = zend_string_copy(message);
 
 				/* Get output buffer and send as fault detials */
+				zval outbuflen;
 				if (php_output_get_length(&outbuflen) != FAILURE && Z_LVAL(outbuflen) != 0) {
 					php_output_get_contents(&outbuf);
 				}
@@ -1942,14 +1912,15 @@ static zend_never_inline ZEND_COLD void soap_real_error_handler(int error_num, c
 
 			}
 			ZVAL_NULL(&fault_obj);
-			set_soap_fault(&fault_obj, NULL, code, buffer, NULL, &outbuf, NULL);
+			set_soap_fault(&fault_obj, NULL, code, ZSTR_VAL(buffer), NULL, &outbuf, NULL);
+			zend_string_release(buffer);
 			fault = 1;
 		}
 
 		PG(display_errors) = 0;
 		SG(sapi_headers).http_status_line = NULL;
 		zend_try {
-			call_old_error_handler(error_num, error_filename, error_lineno, format, args);
+			old_error_handler(error_num, error_filename, error_lineno, message);
 		} zend_catch {
 			CG(in_compilation) = _old_in_compilation;
 			EG(current_execute_data) = _old_current_execute_data;
@@ -1969,12 +1940,12 @@ static zend_never_inline ZEND_COLD void soap_real_error_handler(int error_num, c
 }
 /* }}} */
 
-static void soap_error_handler(int error_num, const char *error_filename, const uint32_t error_lineno, const char *format, va_list args) /* {{{ */
+static void soap_error_handler(int error_num, const char *error_filename, const uint32_t error_lineno, zend_string *message) /* {{{ */
 {
 	if (EXPECTED(!SOAP_GLOBAL(use_soap_error_handler))) {
-		call_old_error_handler(error_num, error_filename, error_lineno, format, args);
+		old_error_handler(error_num, error_filename, error_lineno, message);
 	} else {
-		soap_real_error_handler(error_num, error_filename, error_lineno, format, args);
+		soap_real_error_handler(error_num, error_filename, error_lineno, message);
 	}
 }
 /* }}} */

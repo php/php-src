@@ -820,7 +820,7 @@ ZEND_API zend_class_entry *zend_get_error_exception(void)
 }
 /* }}} */
 
-ZEND_API ZEND_COLD zend_object *zend_throw_exception(zend_class_entry *exception_ce, const char *message, zend_long code) /* {{{ */
+static zend_object *zend_throw_exception_zstr(zend_class_entry *exception_ce, zend_string *message, zend_long code) /* {{{ */
 {
 	zval ex, tmp;
 
@@ -836,9 +836,8 @@ ZEND_API ZEND_COLD zend_object *zend_throw_exception(zend_class_entry *exception
 
 
 	if (message) {
-		ZVAL_STRING(&tmp, message);
+		ZVAL_STR(&tmp, message);
 		zend_update_property_ex(exception_ce, &ex, ZSTR_KNOWN(ZEND_STR_MESSAGE), &tmp);
-		zval_ptr_dtor(&tmp);
 	}
 	if (code) {
 		ZVAL_LONG(&tmp, code);
@@ -847,6 +846,15 @@ ZEND_API ZEND_COLD zend_object *zend_throw_exception(zend_class_entry *exception
 
 	zend_throw_exception_internal(&ex);
 	return Z_OBJ(ex);
+}
+/* }}} */
+
+ZEND_API ZEND_COLD zend_object *zend_throw_exception(zend_class_entry *exception_ce, const char *message, zend_long code) /* {{{ */
+{
+	zend_string *msg_str = zend_string_init(message, strlen(message), 0);
+	zend_object *ex = zend_throw_exception_zstr(exception_ce, msg_str, code);
+	zend_string_release(msg_str);
+	return ex;
 }
 /* }}} */
 
@@ -865,10 +873,10 @@ ZEND_API ZEND_COLD zend_object *zend_throw_exception_ex(zend_class_entry *except
 }
 /* }}} */
 
-ZEND_API ZEND_COLD zend_object *zend_throw_error_exception(zend_class_entry *exception_ce, const char *message, zend_long code, int severity) /* {{{ */
+ZEND_API ZEND_COLD zend_object *zend_throw_error_exception(zend_class_entry *exception_ce, zend_string *message, zend_long code, int severity) /* {{{ */
 {
 	zval ex, tmp;
-	zend_object *obj = zend_throw_exception(exception_ce, message, code);
+	zend_object *obj = zend_throw_exception_zstr(exception_ce, message, code);
 	ZVAL_OBJ(&ex, obj);
 	ZVAL_LONG(&tmp, severity);
 	zend_update_property_ex(zend_ce_error_exception, &ex, ZSTR_KNOWN(ZEND_STR_SEVERITY), &tmp);
@@ -879,20 +887,11 @@ ZEND_API ZEND_COLD zend_object *zend_throw_error_exception(zend_class_entry *exc
 static void zend_error_va(int type, const char *file, uint32_t lineno, const char *format, ...) /* {{{ */
 {
 	va_list args;
-
 	va_start(args, format);
-	zend_error_cb(type, file, lineno, format, args);
+	zend_string *message = zend_vstrpprintf(0, format, args);
+	zend_error_cb(type, file, lineno, message);
+	zend_string_release(message);
 	va_end(args);
-}
-/* }}} */
-
-static void zend_error_helper(int type, const char *filename, const uint32_t lineno, const char *format, ...) /* {{{ */
-{
-	va_list va;
-
-	va_start(va, format);
-	zend_error_cb(type, filename, lineno, format, va);
-	va_end(va);
 }
 /* }}} */
 
@@ -910,9 +909,9 @@ ZEND_API ZEND_COLD void zend_exception_error(zend_object *ex, int severity) /* {
 		zend_string *file = zval_get_string(GET_PROPERTY_SILENT(&exception, ZEND_STR_FILE));
 		zend_long line = zval_get_long(GET_PROPERTY_SILENT(&exception, ZEND_STR_LINE));
 
-		zend_error_helper(
+		zend_error_cb(
 			(ce_exception == zend_ce_parse_error ? E_PARSE : E_COMPILE_ERROR) | E_DONT_BAIL,
-			ZSTR_VAL(file), line, "%s", ZSTR_VAL(message));
+			ZSTR_VAL(file), line, message);
 
 		zend_string_release_ex(file, 0);
 		zend_string_release_ex(message, 0);
