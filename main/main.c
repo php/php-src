@@ -1618,7 +1618,7 @@ static ZEND_COLD void php_message_handler_for_zend(zend_long message, const void
 			php_error_docref("function.include", E_WARNING, "Failed opening '%s' for inclusion (include_path='%s')", php_strip_url_passwd((char *) data), STR_PRINT(PG(include_path)));
 			break;
 		case ZMSG_FAILED_REQUIRE_FOPEN:
-			php_error_docref("function.require", E_COMPILE_ERROR, "Failed opening required '%s' (include_path='%s')", php_strip_url_passwd((char *) data), STR_PRINT(PG(include_path)));
+			zend_throw_error(NULL, "Failed opening required '%s' (include_path='%s')", php_strip_url_passwd((char *) data), STR_PRINT(PG(include_path)));
 			break;
 		case ZMSG_FAILED_HIGHLIGHT_FOPEN:
 			php_error_docref(NULL, E_WARNING, "Failed opening '%s' for highlighting", php_strip_url_passwd((char *) data));

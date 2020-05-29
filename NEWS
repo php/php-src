@@ -27,6 +27,8 @@ PHP                                                                        NEWS
   . Fixed bug #79467 (data:// wrappers are writable). (cmb)
   . Implemented FR #47074 (phpinfo() reports "On" as 1 for the some
     extensions). (cmb)
+  . Implemented FR #72089 (require() throws fatal error instead of exception).
+    (Nikita)
 
 - BZ2:
   . Fixed bug #71263 (fread() does not report bzip2.decompress errors). (cmb)
