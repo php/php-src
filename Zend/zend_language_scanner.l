@@ -188,7 +188,6 @@ static void yy_scan_buffer(char *str, unsigned int len)
 
 void startup_scanner(void)
 {
-	CG(parse_error) = 0;
 	CG(doc_comment) = NULL;
 	CG(extra_fn_flags) = 0;
 	zend_stack_init(&SCNG(state_stack), sizeof(int));
@@ -203,7 +202,6 @@ static void heredoc_label_dtor(zend_heredoc_label *heredoc_label) {
 
 void shutdown_scanner(void)
 {
-	CG(parse_error) = 0;
 	RESET_DOC_COMMENT();
 	zend_stack_destroy(&SCNG(state_stack));
 	zend_stack_destroy(&SCNG(nest_location_stack));
