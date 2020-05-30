@@ -1,5 +1,5 @@
 --TEST--
-ReflectionClass::getConstants()
+ReflectionClass::getConstant()
 --FILE--
 <?php
 class C {
@@ -17,25 +17,25 @@ class X {
 
 $classes = array("C", "D", "E", "F", "X");
 foreach($classes as $class) {
-    echo "Reflecting on class $class: \n";
+    echo "Reflecting on class $class:\n";
     $rc = new ReflectionClass($class);
     var_dump($rc->getConstant('a'));
     var_dump($rc->getConstant('doesnotexist'));
 }
 ?>
 --EXPECT--
-Reflecting on class C: 
+Reflecting on class C:
 string(12) "hello from C"
 bool(false)
-Reflecting on class D: 
+Reflecting on class D:
 string(12) "hello from C"
 bool(false)
-Reflecting on class E: 
+Reflecting on class E:
 string(12) "hello from C"
 bool(false)
-Reflecting on class F: 
+Reflecting on class F:
 string(12) "hello from F"
 bool(false)
-Reflecting on class X: 
+Reflecting on class X:
 bool(false)
 bool(false)
