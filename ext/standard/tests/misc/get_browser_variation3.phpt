@@ -2,6 +2,7 @@
 Test get_browser() against a larger corpus
 --INI--
 browscap={PWD}/browscap_lite_2016_12_06.ini
+--FILE--
 <?php
 
 $lst = file(__DIR__ . "/user_agents.txt", FILE_IGNORE_NEW_LINES);
