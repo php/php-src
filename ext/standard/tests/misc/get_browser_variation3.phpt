@@ -2,7 +2,6 @@
 Test get_browser() against a larger corpus
 --INI--
 browscap={PWD}/browscap_lite_2016_12_06.ini
---FILE--
 <?php
 
 $lst = file(__DIR__ . "/user_agents.txt", FILE_IGNORE_NEW_LINES);
@@ -1912,7 +1911,7 @@ Agent Mozilla/6.0 (compatible)
     Matched by: *
 Agent Mozilla/6.0 (compatible; MSIE 7.0a1; Windows NT 5.2; SV1)
     Matched by: *
-Agent node-fetch/1.0 (+https://github.com/bitinn/node-fetch)
+Agent node-fetch/1.0 (+https://github.com/node-fetch/node-fetch)
     Matched by: *
 Agent nutch-1.4/Nutch-1.4
     Matched by: *
