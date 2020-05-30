@@ -186,7 +186,7 @@ class ArrayIterator implements SeekableIterator, ArrayAccess, Serializable, Coun
     /**
      * @param int $sort_flags
      * @return bool
-     * @alias ArrayObject::offsetExists
+     * @alias ArrayObject::ksort
      */
     public function ksort($sort_flags = SORT_REGULAR) {}
 
