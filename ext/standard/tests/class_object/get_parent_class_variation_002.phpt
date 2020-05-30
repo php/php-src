@@ -70,10 +70,14 @@ $values = array(
 
 // loop through each element of the array for object
 
-foreach($values as $value) {
-      echo "\nArg value " . (is_object($value) ? get_class($value) : $value) . " \n";
-      var_dump( get_parent_class($value) );
-};
+foreach ($values as $value) {
+    echo "\nArg value " . (is_object($value) ? get_class($value) : $value) . " \n";
+    try {
+        var_dump(get_parent_class($value));
+    } catch (TypeError $exception) {
+        echo $exception->getMessage() . "\n";
+    }
+}
 
 echo "Done";
 ?>
@@ -83,12 +87,15 @@ Error: 2 - Undefined variable $undefined_var
 Error: 2 - Undefined variable $unset_var
 
 Arg value 0 
+In autoload(0)
 bool(false)
 
 Arg value 1 
+In autoload(1)
 bool(false)
 
 Arg value 12345 
+In autoload(12345)
 bool(false)
 
 Arg value -2345 
@@ -101,6 +108,7 @@ Arg value -10.5
 bool(false)
 
 Arg value 101234567000 
+In autoload(101234567000)
 bool(false)
 
 Arg value 1.07654321E-9 
@@ -111,23 +119,23 @@ bool(false)
 Error: 2 - Array to string conversion
 
 Arg value Array 
-bool(false)
+get_parent_class(): Argument #1 ($object) must be of type string|object|null, array given
 Error: 2 - Array to string conversion
 
 Arg value Array 
-bool(false)
+get_parent_class(): Argument #1 ($object) must be of type string|object|null, array given
 Error: 2 - Array to string conversion
 
 Arg value Array 
-bool(false)
+get_parent_class(): Argument #1 ($object) must be of type string|object|null, array given
 Error: 2 - Array to string conversion
 
 Arg value Array 
-bool(false)
+get_parent_class(): Argument #1 ($object) must be of type string|object|null, array given
 Error: 2 - Array to string conversion
 
 Arg value Array 
-bool(false)
+get_parent_class(): Argument #1 ($object) must be of type string|object|null, array given
 
 Arg value  
 bool(false)
@@ -136,12 +144,14 @@ Arg value
 bool(false)
 
 Arg value 1 
+In autoload(1)
 bool(false)
 
 Arg value  
 bool(false)
 
 Arg value 1 
+In autoload(1)
 bool(false)
 
 Arg value  

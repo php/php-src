@@ -36,7 +36,11 @@ var_dump(get_parent_class(""));
 var_dump(get_parent_class("[[[["));
 var_dump(get_parent_class(" "));
 var_dump(get_parent_class(new stdclass));
-var_dump(get_parent_class(array()));
+try {
+    get_parent_class(array());
+} catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 var_dump(get_parent_class(1));
 
 echo "Done\n";
@@ -54,6 +58,6 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
-bool(false)
+get_parent_class(): Argument #1 ($object) must be of type string|object|null, array given
 bool(false)
 Done

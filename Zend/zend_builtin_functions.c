@@ -637,26 +637,26 @@ ZEND_FUNCTION(get_called_class)
    Retrieves the parent class name for object or class or current scope or false if not in a scope. */
 ZEND_FUNCTION(get_parent_class)
 {
-	zval *arg;
+	zend_string *str = NULL;
+	zend_object *object = NULL;
 	zend_class_entry *ce = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|z", &arg) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_OBJECT_OR_NULL(str, object)
+	ZEND_PARSE_PARAMETERS_END();
 
-	if (!ZEND_NUM_ARGS()) {
+	if (object) {
+		ce = object->ce;
+	} else if (str) {
+		ce = zend_lookup_class(str);
+	} else {
 		ce = zend_get_executed_scope();
 		if (ce && ce->parent) {
 			RETURN_STR_COPY(ce->parent->name);
 		} else {
 			RETURN_FALSE;
 		}
-	}
-
-	if (Z_TYPE_P(arg) == IS_OBJECT) {
-		ce = Z_OBJ_P(arg)->ce;
-	} else if (Z_TYPE_P(arg) == IS_STRING) {
-		ce = zend_lookup_class(Z_STR_P(arg));
 	}
 
 	if (ce && ce->parent) {
