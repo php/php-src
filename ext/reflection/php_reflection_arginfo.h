@@ -189,9 +189,11 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionClass_hasConstant arginfo_class_ReflectionClass_hasMethod
 
-#define arginfo_class_ReflectionClass_getConstants arginfo_class_ReflectionFunctionAbstract___clone
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionClass_getConstants, 0, 0, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, filter, IS_LONG, 0, "ReflectionClassConstant::IS_PUBLIC | ReflectionClassConstant::IS_PROTECTED | ReflectionClassConstant::IS_PRIVATE")
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_ReflectionClass_getReflectionConstants arginfo_class_ReflectionFunctionAbstract___clone
+#define arginfo_class_ReflectionClass_getReflectionConstants arginfo_class_ReflectionClass_getConstants
 
 #define arginfo_class_ReflectionClass_getConstant arginfo_class_ReflectionClass_hasMethod
 
