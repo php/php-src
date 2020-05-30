@@ -620,6 +620,15 @@ PHP 8.0 UPGRADE NOTES
 5. Changed Functions
 ========================================
 
+- Reflection:
+  . ReflectionClass::getConstants and ReflectionClass::getReflectionConstants results
+    can be now filtered via a new parameter `$filter`. 3 new constants were added to
+    be used with it:
+
+      ReflectionClassConstant::IS_PUBLIC
+      ReflectionClassConstant::IS_PROTECTED
+      ReflectionClassConstant::IS_PRIVATE
+
 - Zip
  . ZipArchive::addGlob and ZipArchive::addPattern methods accept more
    values in the "options" array argument:

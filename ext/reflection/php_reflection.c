@@ -4502,33 +4502,39 @@ ZEND_METHOD(ReflectionClass, hasConstant)
 }
 /* }}} */
 
-/* {{{ proto public array ReflectionClass::getConstants()
+/* {{{ proto public array ReflectionClass::getConstants([int $filter = ReflectionClassConstant::IS_PUBLIC | ReflectionClassConstant::IS_PROTECTED | ReflectionClassConstant::IS_PRIVATE])
    Returns an associative array containing this class' constants and their values */
 ZEND_METHOD(ReflectionClass, getConstants)
 {
 	reflection_object *intern;
 	zend_class_entry *ce;
 	zend_string *key;
-	zend_class_constant *c;
+	zend_class_constant *constant;
 	zval val;
+	zend_long filter = ZEND_ACC_PPP_MASK;
 
-	if (zend_parse_parameters_none() == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &filter) == FAILURE) {
 		RETURN_THROWS();
 	}
+
 	GET_REFLECTION_OBJECT_PTR(ce);
+
 	array_init(return_value);
-	ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->constants_table, key, c) {
-		if (UNEXPECTED(zval_update_constant_ex(&c->value, ce) != SUCCESS)) {
+	ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->constants_table, key, constant) {
+		if (UNEXPECTED(zval_update_constant_ex(&constant->value, ce) != SUCCESS)) {
 			zend_array_destroy(Z_ARRVAL_P(return_value));
 			RETURN_NULL();
 		}
-		ZVAL_COPY_OR_DUP(&val, &c->value);
-		zend_hash_add_new(Z_ARRVAL_P(return_value), key, &val);
+
+		if (Z_ACCESS_FLAGS(constant->value) & filter) {
+			ZVAL_COPY_OR_DUP(&val, &constant->value);
+			zend_hash_add_new(Z_ARRVAL_P(return_value), key, &val);
+		}
 	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
 
-/* {{{ proto public array ReflectionClass::getReflectionConstants()
+/* {{{ proto public ReflectionClassConstant[] ReflectionClass::getReflectionConstants([int $filter = ReflectionClassConstant::IS_PUBLIC | ReflectionClassConstant::IS_PROTECTED | ReflectionClassConstant::IS_PRIVATE])
    Returns an associative array containing this class' constants as ReflectionClassConstant objects */
 ZEND_METHOD(ReflectionClass, getReflectionConstants)
 {
@@ -4536,16 +4542,21 @@ ZEND_METHOD(ReflectionClass, getReflectionConstants)
 	zend_class_entry *ce;
 	zend_string *name;
 	zend_class_constant *constant;
+	zend_long filter = ZEND_ACC_PPP_MASK;
 
-	if (zend_parse_parameters_none() == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &filter) == FAILURE) {
 		RETURN_THROWS();
 	}
+
 	GET_REFLECTION_OBJECT_PTR(ce);
+
 	array_init(return_value);
 	ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->constants_table, name, constant) {
-		zval class_const;
-		reflection_class_constant_factory(name, constant, &class_const);
-		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &class_const);
+		if (Z_ACCESS_FLAGS(constant->value) & filter) {
+			zval class_const;
+			reflection_class_constant_factory(name, constant, &class_const);
+			zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &class_const);
+		}
 	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
@@ -6722,6 +6733,11 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	zend_declare_property_string(reflection_property_ptr, "name", sizeof("name")-1, "", ZEND_ACC_PUBLIC);
 	zend_declare_property_string(reflection_property_ptr, "class", sizeof("class")-1, "", ZEND_ACC_PUBLIC);
 
+	REGISTER_REFLECTION_CLASS_CONST_LONG(property, "IS_STATIC", ZEND_ACC_STATIC);
+	REGISTER_REFLECTION_CLASS_CONST_LONG(property, "IS_PUBLIC", ZEND_ACC_PUBLIC);
+	REGISTER_REFLECTION_CLASS_CONST_LONG(property, "IS_PROTECTED", ZEND_ACC_PROTECTED);
+	REGISTER_REFLECTION_CLASS_CONST_LONG(property, "IS_PRIVATE", ZEND_ACC_PRIVATE);
+
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionClassConstant", class_ReflectionClassConstant_methods);
 	reflection_init_class_handlers(&_reflection_entry);
 	reflection_class_constant_ptr = zend_register_internal_class(&_reflection_entry);
@@ -6729,10 +6745,9 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	zend_declare_property_string(reflection_class_constant_ptr, "name", sizeof("name")-1, "", ZEND_ACC_PUBLIC);
 	zend_declare_property_string(reflection_class_constant_ptr, "class", sizeof("class")-1, "", ZEND_ACC_PUBLIC);
 
-	REGISTER_REFLECTION_CLASS_CONST_LONG(property, "IS_STATIC", ZEND_ACC_STATIC);
-	REGISTER_REFLECTION_CLASS_CONST_LONG(property, "IS_PUBLIC", ZEND_ACC_PUBLIC);
-	REGISTER_REFLECTION_CLASS_CONST_LONG(property, "IS_PROTECTED", ZEND_ACC_PROTECTED);
-	REGISTER_REFLECTION_CLASS_CONST_LONG(property, "IS_PRIVATE", ZEND_ACC_PRIVATE);
+	REGISTER_REFLECTION_CLASS_CONST_LONG(class_constant, "IS_PUBLIC", ZEND_ACC_PUBLIC);
+	REGISTER_REFLECTION_CLASS_CONST_LONG(class_constant, "IS_PROTECTED", ZEND_ACC_PROTECTED);
+	REGISTER_REFLECTION_CLASS_CONST_LONG(class_constant, "IS_PRIVATE", ZEND_ACC_PRIVATE);
 
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionExtension", class_ReflectionExtension_methods);
 	reflection_init_class_handlers(&_reflection_entry);

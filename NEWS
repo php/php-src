@@ -139,6 +139,8 @@ PHP                                                                        NEWS
   . Fixed bug #69180 (Reflection does not honor trait conflict resolution /
     method aliasing). (Nikita)
   . Fixed bug #74939 (Nested traits' aliased methods are lowercased). (Nikita)
+  . Implement #79628 (Add $filter parameter for ReflectionClass::getConstants
+    and ReflectionClass::getReflectionConstants) (carusogabriel)
 
 - Session:
   . Fixed bug #78624 (session_gc return value for user defined session
