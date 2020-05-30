@@ -1515,6 +1515,9 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_value_error(uint32_t arg_num
 #define Z_PARAM_OBJECT(dest) \
 	Z_PARAM_OBJECT_EX(dest, 0, 0)
 
+#define Z_PARAM_OBJECT_OR_NULL(dest) \
+	Z_PARAM_OBJECT_EX(dest, 1, 0)
+
 /* old "O" */
 #define Z_PARAM_OBJECT_OF_CLASS_EX2(dest, _ce, check_null, deref, separate) \
 		Z_PARAM_PROLOGUE(deref, separate); \
@@ -1535,6 +1538,9 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_value_error(uint32_t arg_num
 
 #define Z_PARAM_OBJECT_OF_CLASS(dest, _ce) \
 	Z_PARAM_OBJECT_OF_CLASS_EX(dest, _ce, 0, 0)
+
+#define Z_PARAM_OBJECT_OF_CLASS_OR_NULL(dest, _ce) \
+	Z_PARAM_OBJECT_OF_CLASS_EX(dest, _ce, 1, 0)
 
 /* old "p" */
 #define Z_PARAM_PATH_EX2(dest, dest_len, check_null, deref, separate) \
