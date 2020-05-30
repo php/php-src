@@ -218,7 +218,7 @@ static const zend_function_entry class_ArrayIterator_methods[] = {
 	ZEND_MALIAS(ArrayObject, getFlags, getFlags, arginfo_class_ArrayIterator_getFlags, ZEND_ACC_PUBLIC)
 	ZEND_MALIAS(ArrayObject, setFlags, setFlags, arginfo_class_ArrayIterator_setFlags, ZEND_ACC_PUBLIC)
 	ZEND_MALIAS(ArrayObject, asort, asort, arginfo_class_ArrayIterator_asort, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(ArrayObject, ksort, offsetExists, arginfo_class_ArrayIterator_ksort, ZEND_ACC_PUBLIC)
+	ZEND_MALIAS(ArrayObject, ksort, ksort, arginfo_class_ArrayIterator_ksort, ZEND_ACC_PUBLIC)
 	ZEND_MALIAS(ArrayObject, uasort, uasort, arginfo_class_ArrayIterator_uasort, ZEND_ACC_PUBLIC)
 	ZEND_MALIAS(ArrayObject, uksort, uksort, arginfo_class_ArrayIterator_uksort, ZEND_ACC_PUBLIC)
 	ZEND_MALIAS(ArrayObject, natsort, natsort, arginfo_class_ArrayIterator_natsort, ZEND_ACC_PUBLIC)
