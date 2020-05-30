@@ -231,6 +231,8 @@ ZEND_FUNCTION(func_get_args)
 	uint32_t i;
 	zend_execute_data *ex = EX(prev_execute_data);
 
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	if (ZEND_CALL_INFO(ex) & ZEND_CALL_CODE) {
 		zend_throw_error(NULL, "func_get_args() cannot be called from the global scope");
 		RETURN_THROWS();
