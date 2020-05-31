@@ -2575,7 +2575,7 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file)
 		}
 
 		/*
-		   If cli primary file has shabang line and there is a prepend file,
+		   If cli primary file has shebang line and there is a prepend file,
 		   the `skip_shebang` will be used by prepend file but not primary file,
 		   save it and restore after prepend file been executed.
 		 */
