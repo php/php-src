@@ -553,6 +553,11 @@ PHP 8.0 UPGRADE NOTES
         printf("%.*H", (int) ini_get("precision"), $float);
         printf("%.*H", (int) ini_get("serialize_precision"), $float);
 
+  . proc_open() now supports pseudo-terminal (PTY) descriptors. The following
+    attaches stdin, stdout and stderr to the same PTY:
+
+        $proc = proc_open($command, [['pty'], ['pty'], ['pty']], $pipes);
+
 - Zip:
   . Extension updated to version 1.19.0
   . New ZipArchive::lastId property to get index value of last added entry.
@@ -760,6 +765,9 @@ PHP 8.0 UPGRADE NOTES
 14. Performance Improvements
 ========================================
 
+- A Just-In-Time (JIT) compiler has been added to the opcache extension.
 - array_slice() on an array without gaps will no longer scan the whole array to
   find the start offset. This may significantly reduce the runtime of the
   function with large offsets and small lengths.
+- strtolower() now uses a SIMD implementation when using the "C" LC_CTYPE
+  locale (which is the default).
