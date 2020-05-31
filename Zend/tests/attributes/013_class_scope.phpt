@@ -40,6 +40,16 @@ class C2
 
 $ref = new \ReflectionClass(C2::class);
 print_r($ref->getMethod('foo')->getAttributes()[0]->getArguments());
+
+$ref = new \ReflectionClass(T1::class);
+$attr = $ref->getMethod('foo')->getAttributes()[0];
+
+try {
+	$attr->getArguments();
+} catch (\Error $e) {
+    var_dump('ERROR 1', $e->getMessage());
+}
+
 echo "\n";
 
 class C3
@@ -98,6 +108,8 @@ Array
     [0] => C2
     [1] => bar
 )
+string(7) "ERROR 1"
+string(36) "Undefined class constant 'self::FOO'"
 
 bool(true)
 string(3) "bar"

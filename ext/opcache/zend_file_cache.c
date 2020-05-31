@@ -411,13 +411,8 @@ static void zend_file_cache_serialize_attribute(zval                     *zv,
 	attr = Z_PTR_P(zv);
 	UNSERIALIZE_PTR(attr);
 
-	if (!IS_SERIALIZED(attr->name)) {
-		SERIALIZE_STR(attr->name);
-	}
-
-	if (!IS_SERIALIZED(attr->lcname)) {
-		SERIALIZE_STR(attr->lcname);
-	}
+	SERIALIZE_STR(attr->name);
+	SERIALIZE_STR(attr->lcname);
 
 	for (i = 0; i < attr->argc; i++) {
 		zend_file_cache_serialize_zval(&attr->argv[i], script, info, buf);
@@ -1179,13 +1174,8 @@ static void zend_file_cache_unserialize_attribute(zval *zv, zend_persistent_scri
 	UNSERIALIZE_PTR(Z_PTR_P(zv));
 	attr = Z_PTR_P(zv);
 
-	if (!IS_UNSERIALIZED(attr->name)) {
-		UNSERIALIZE_STR(attr->name);
-	}
-
-	if (!IS_UNSERIALIZED(attr->lcname)) {
-		UNSERIALIZE_STR(attr->lcname);
-	}
+	UNSERIALIZE_STR(attr->name);
+	UNSERIALIZE_STR(attr->lcname);
 
 	for (i = 0; i < attr->argc; i++) {
 		zend_file_cache_unserialize_zval(&attr->argv[i], script, buf);
