@@ -46,5 +46,5 @@ install-pharcmd: pharcmd
 	-@rm -f $(INSTALL_ROOT)$(bindir)/phar
 	$(LN_S) -f phar$(program_suffix).phar $(INSTALL_ROOT)$(bindir)/phar$(program_suffix)
 	@$(mkinstalldirs) $(INSTALL_ROOT)$(mandir)/man1
-	@$(INSTALL_DATA) $(builddir)/phar.1 $(INSTALL_ROOT)$(mandir)/man1/phar.1
-	@$(INSTALL_DATA) $(builddir)/phar.phar.1 $(INSTALL_ROOT)$(mandir)/man1/phar.phar.1
+	@$(INSTALL_DATA) $(builddir)/phar.1 $(INSTALL_ROOT)$(mandir)/man1/phar$(program_suffix).1
+	@$(INSTALL_DATA) $(builddir)/phar.phar.1 $(INSTALL_ROOT)$(mandir)/man1/phar$(program_suffix).phar.1
