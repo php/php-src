@@ -459,12 +459,6 @@ PHP 8.0 UPGRADE NOTES
     instead the XmlParser instance is automatically destroyed if it is no longer
     referenced.
 
-- XML-RPC:
-  . xmlrpc_server_create() will now return an XmlRpcServer object rather than a
-    resource. The xmlrpc_server_destroy() function no longer has an effect,
-    instead the XmlRpcServer instance is automatically destroyed if it is no
-    longer referenced.
-
 - XMLWriter:
   . The XMLWriter functions now accept and return, respectively, XMLWriter
     objects instead of resources.
@@ -691,6 +685,10 @@ PHP 8.0 UPGRADE NOTES
 ========================================
 8. Removed Extensions and SAPIs
 ========================================
+
+- XML-RPC:
+  . The xmlrpc extension has been unbundled and moved to PECL.
+    RFC: https://wiki.php.net/rfc/unbundle_xmlprc
 
 ========================================
 9. Other Changes to Extensions
