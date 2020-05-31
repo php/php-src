@@ -13,12 +13,14 @@ $x[0]->startComment();
 
 $y = new XMLWriter();
 $y->openUri("bug79029_2.txt");
-fclose(@end(get_resources()));
+$r = get_resources();
+fclose(end($r));
 
 file_put_contents("bug79029_3.txt", "a");
 $z = new XMLReader();
 $z->open("bug79029_3.txt");
-fclose(@end(get_resources()));
+$r = get_resources();
+fclose(end($r));
 ?>
 okey
 --CLEAN--

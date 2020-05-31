@@ -17,11 +17,15 @@ $test->_columns['name'] = new stdClass;
 
 function test ($value, $column, &$columns) {}
 
-array_walk (
-    get_object_vars ($test),
-    'test',
-    $test->_columns
-);
+try {
+	array_walk (
+		get_object_vars ($test),
+		'test',
+		$test->_columns
+	);
+} catch (Throwable $e) {
+	echo "Exception: " . $e->getMessage() . "\n";
+}
 
 var_dump($test);
 
@@ -33,7 +37,7 @@ array_intersect_key (
 echo "Done\n";
 ?>
 --EXPECTF--
-Notice: Only variables should be passed by reference in %s on line %d
+Exception: Cannot pass parameter 1 by reference
 object(Test)#%d (4) {
   ["_table"]=>
   string(0) ""

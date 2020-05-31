@@ -18,11 +18,12 @@ function f() {
 }
 
 echo "\n-- Passing an indirect temporary variable --\n";
-var_dump(prev(f()));
-
+try {
+	var_dump(prev(f()));
+} catch (Throwable $e) {
+	echo "Exception: " . $e->getMessage() . "\n";
+}
 ?>
 --EXPECTF--
 -- Passing an indirect temporary variable --
-
-Notice: Only variables should be passed by reference in %s on line %d
-int(1)
+Exception: Cannot pass parameter 1 by reference

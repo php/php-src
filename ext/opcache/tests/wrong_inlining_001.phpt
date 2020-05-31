@@ -13,7 +13,11 @@ function get_const() {
 }
 
 function test() {
-    foo(get_const());
+	try {
+	    foo(get_const());
+	} catch (Throwable $e) {
+		echo "Exception: " . $e->getMessage() . "\n";
+	}
 }
 
 if (true) {
@@ -23,6 +27,6 @@ if (true) {
 test();
 ?>
 OK
---EXPECTF--
-Notice: Only variables should be passed by reference in %swrong_inlining_001.php on line 7
+--EXPECT--
+Exception: Cannot pass parameter 1 by reference
 OK

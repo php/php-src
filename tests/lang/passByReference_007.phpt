@@ -44,61 +44,79 @@ function foo(&$ref) {
 
 echo "Pass a function call that returns a value:\n";
 $a = "original";
-foo(returnVal());
+try {
+	foo(returnVal());
+} catch (Throwable $e) {
+	echo "Exception: " . $e->getMessage() . "\n";
+}
 var_dump($a);
 
 echo "Pass a function call that returns a reference:\n";
 $a = "original";
-foo(returnReference());
+try {
+	foo(returnReference());
+} catch (Throwable $e) {
+	echo "Exception: " . $e->getMessage() . "\n";
+}
 var_dump($a);
 
 
 echo "\nPass a static method call that returns a value:\n";
 $a = "original";
-foo(C::sreturnVal());
+try {
+	foo(C::sreturnVal());
+} catch (Throwable $e) {
+	echo "Exception: " . $e->getMessage() . "\n";
+}
 var_dump($a);
 
 echo "Pass a static method call that returns a reference:\n";
 $a = "original";
-foo(C::sreturnReference());
+try{
+	foo(C::sreturnReference());
+} catch (Throwable $e) {
+	echo "Exception: " . $e->getMessage() . "\n";
+}
 var_dump($a);
 
 
 $myC = new C;
 echo "\nPass a method call that returns a value:\n";
 $a = "original";
-foo($myC->returnVal());
+try {
+	foo($myC->returnVal());
+} catch (Throwable $e) {
+	echo "Exception: " . $e->getMessage() . "\n";
+}
 var_dump($a);
 
 echo "Pass a method call that returns a reference:\n";
 $a = "original";
-foo($myC->returnReference());
+try {
+	foo($myC->returnReference());
+} catch (Throwable $e) {
+	echo "Exception: " . $e->getMessage() . "\n";
+}
 var_dump($a);
 
 ?>
---EXPECTF--
+--EXPECT--
 Pass a function call that returns a value:
-
-Notice: Only variables should be passed by reference in %s on line 44
-string(8) "original"
+Exception: Cannot pass parameter 1 by reference
 string(8) "original"
 Pass a function call that returns a reference:
 string(8) "original"
 string(7) "changed"
 
 Pass a static method call that returns a value:
-
-Notice: Only variables should be passed by reference in %s on line 55
-string(8) "original"
+Exception: Cannot pass parameter 1 by reference
 string(8) "original"
 Pass a static method call that returns a reference:
 string(8) "original"
 string(7) "changed"
 
 Pass a method call that returns a value:
-
-Notice: Only variables should be passed by reference in %s on line 67
-string(8) "original"
+Exception: Cannot pass parameter 1 by reference
 string(8) "original"
 Pass a method call that returns a reference:
 string(8) "original"
