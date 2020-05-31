@@ -44,8 +44,8 @@ PHP 8.0 UPGRADE NOTES
   . Removed ability to use array_key_exists() with objects. Use one of isset()
     or property_exists() instead.
   . Made the behavior of array_key_exists() regarding the type of the key
-    parameter consistent with isset() and normal array access. All key types now use
-    the usual coercions and array/object keys throw a TypeError.
+    parameter consistent with isset() and normal array access. All key types now
+    use the usual coercions and array/object keys throw a TypeError.
   . Any array that has a number n as its first numeric key will use n+1 for
     its next implicit key. Even if n is negative.
     RFC: https://wiki.php.net/rfc/negative_array_index
@@ -119,17 +119,18 @@ PHP 8.0 UPGRADE NOTES
     * Attempting to assign an empty string to a string offset.
 
     RFC: https://wiki.php.net/rfc/engine_warnings
-  . Attempting to assign multiple bytes to a string offset will now emit a warning.
+  . Attempting to assign multiple bytes to a string offset will now emit a
+    warning.
   . Unexpected characters in source files (such as null bytes outside of
     strings) will now result in a ParseError exception instead of a compile
     warning.
   . Uncaught exceptions now go through "clean shutdown", which means that
     destructors will be called after an uncaught exception.
-  . Compile time fatal error "Only variables can be passed by reference" has been
-    delayed until run-time and converted to "Cannot pass parameter by reference"
-    exception.
-  . Some "Only variables should be passed by reference" notices have been converted
-    to "Cannot pass parameter by reference" exception.
+  . Compile time fatal error "Only variables can be passed by reference" has
+    been delayed until run-time and converted to "Cannot pass parameter by
+    reference" exception.
+  . Some "Only variables should be passed by reference" notices have been
+    converted to "Cannot pass parameter by reference" exception.
   . The generated name for anonymous classes has changed. It will now include
     the name of the first parent or interface:
 
@@ -226,8 +227,8 @@ PHP 8.0 UPGRADE NOTES
     a resource. Return value checks using is_resource() should be replaced with
     checks for `false`.
   . enchant_broker_request_dict() and enchant_broker_request_pwl_dict() will now
-    return an EnchantDictionary object rather than a resource. Return value checks
-    using is_resource() should be replaced with checks for `false`.
+    return an EnchantDictionary object rather than a resource. Return value
+    checks using is_resource() should be replaced with checks for `false`.
 
 - Exif:
   . Removed read_exif_data(). exif_read_data() should be used instead.
@@ -264,8 +265,8 @@ PHP 8.0 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/deprecate-and-remove-intl_idna_variant_2003
   . The deprecated Normalizer::NONE constant has been removed.
   . The IntlDateFormatter::RELATIVE_FULL, IntlDateFormatter::RELATIVE_LONG,
-    IntlDateFormatter::RELATIVE_MEDIUM, and IntlDateFormatter::RELATIVE_SHORT constants
-    have been added.
+    IntlDateFormatter::RELATIVE_MEDIUM, and IntlDateFormatter::RELATIVE_SHORT
+    constants have been added.
 
 - LDAP:
   . The deprecated function ldap_sort has been removed.
@@ -299,12 +300,14 @@ PHP 8.0 UPGRADE NOTES
   . A non-string pattern argument to mb_ereg_replace() will now be interpreted
     as a string instead of an ASCII codepoint. The previous behavior may be
     restored with an explicit call to chr().
-  . The needle argument for mb_strpos(), mb_strrpos(), mb_stripos(), mb_strripos(),
-    mb_strstr(), mb_stristr(), mb_strrchr() and mb_strrichr() can now be empty.
+  . The needle argument for mb_strpos(), mb_strrpos(), mb_stripos(),
+    mb_strripos(), mb_strstr(), mb_stristr(), mb_strrchr() and mb_strrichr() can
+    now be empty.
   . The $is_hex parameter, which was not used internally, has been removed from
     mb_decode_numericentity().
-  . The legacy behaviour of passing the encoding as the third argument instead of an offset for the mb_strrpos
-    function has been removed, provide an explicit 0 offset with the encoding as the fourth argument.
+  . The legacy behaviour of passing the encoding as the third argument instead
+    of an offset for the mb_strrpos() function has been removed, provide an
+    explicit 0 offset with the encoding as the fourth argument instead.
 
 - PCRE:
   . When passing invalid escape sequences they are no longer interpreted as
@@ -313,7 +316,7 @@ PHP 8.0 UPGRADE NOTES
 
 - PDO:
   . The default error handling mode has been changed from "silent" to
-   "exceptions". See https://www.php.net/manual/en/pdo.error-handling.php
+    "exceptions". See https://www.php.net/manual/en/pdo.error-handling.php
     for details of behavior changes and how to explicitly set this attribute.
     RFC: https://wiki.php.net/rfc/pdo_default_errmode
   . The method PDOStatement::setFetchMode() now accepts the following signature:
@@ -355,8 +358,8 @@ PHP 8.0 UPGRADE NOTES
         ReflectionParameter::isDefaultValueConstant()
         ReflectionParameter::getDefaultValueConstantName()
   . ReflectionMethod::isConstructor() and ReflectionMethod::isDestructor() now
-    also return true for `__construct` and `__destruct` in methods of interfaces.
-    Previously, this would only be true in methods of classes and traits.
+    also return true for `__construct` and `__destruct` methods of interfaces.
+    Previously, this would only be true for methods of classes and traits.
 
 - Socket:
   . The deprecated AI_IDN_ALLOW_UNASSIGNED and AI_IDN_USE_STD3_ASCII_RULES
@@ -388,8 +391,8 @@ PHP 8.0 UPGRADE NOTES
     string. Previously non-string needles were interpreted as an ASCII code
     point. An explicit call to chr() can be used to restore the previous
     behavior.
-  . The needle argument for strpos(), strrpos(), stripos(), strripos(), strstr(),
-    stristr() and strrchr() can now be empty.
+  . The needle argument for strpos(), strrpos(), stripos(), strripos(),
+    strstr(), stristr() and strrchr() can now be empty.
   . The length argument for substr(), substr_count(), substr_compare(), and
     iconv_substr() can now be null. Null values will behave as if no length
     argument was provided and will therefore return the remainder of the string
@@ -436,9 +439,9 @@ PHP 8.0 UPGRADE NOTES
     locale component from the default.
 
 - Sysvmsg:
-  . msg_get_queue() will now return an SysvMessageQueue object rather than a resource.
-    Return value checks using is_resource() should be replaced with checks
-    for `false`.
+  . msg_get_queue() will now return an SysvMessageQueue object rather than a
+    resource.  Return value checks using is_resource() should be replaced with
+    checks for `false`.
 
 - Sysvsem:
   . sem_get() will now return an SysvSemaphore object rather than a resource.
@@ -457,10 +460,10 @@ PHP 8.0 UPGRADE NOTES
     referenced.
 
 - XML-RPC:
-  . xmlrpc_server_create() will now return an XmlRpcServer object rather than a resource.
-    The xmlrpc_server_destroy() function no longer has an effect,
-    instead the XmlRpcServer instance is automatically destroyed if it is no longer
-    referenced.
+  . xmlrpc_server_create() will now return an XmlRpcServer object rather than a
+    resource. The xmlrpc_server_destroy() function no longer has an effect,
+    instead the XmlRpcServer instance is automatically destroyed if it is no
+    longer referenced.
 
 - XMLWriter:
   . The XMLWriter functions now accept and return, respectively, XMLWriter
@@ -759,6 +762,6 @@ PHP 8.0 UPGRADE NOTES
 14. Performance Improvements
 ========================================
 
-- array_slice() on an array without gaps will no longer scan the whole array to find
-  the start offset. This may significantly reduce the runtime of the function
-  with large offsets and small lengths.
+- array_slice() on an array without gaps will no longer scan the whole array to
+  find the start offset. This may significantly reduce the runtime of the
+  function with large offsets and small lengths.
