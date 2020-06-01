@@ -1469,6 +1469,10 @@ propagate_arg:
 					} else {
 						ZEND_ASSERT(ssa_ops[idx].op1_use >= 0);
 						return_value_info = ssa_var_info[ssa_ops[idx].op1_use];
+						if (return_value_info.type & MAY_BE_UNDEF) {
+							return_value_info.type &= ~MAY_BE_UNDEF;
+							return_value_info.type |= MAY_BE_NULL;
+						}
 						return_value_info.type &= ~MAY_BE_GUARD;
 					}
 					break;
