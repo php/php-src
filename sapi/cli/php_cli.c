@@ -260,6 +260,9 @@ PHP_CLI_API ssize_t sapi_cli_single_write(const char *str, size_t str_length) /*
 	} while (ret <= 0 && errno == EAGAIN && sapi_cli_select(STDOUT_FILENO));
 #else
 	ret = fwrite(str, 1, MIN(str_length, 16384), stdout);
+	if (ret == 0 && ferror(stdout)) {
+		return -1;
+	}
 #endif
 	return ret;
 }
