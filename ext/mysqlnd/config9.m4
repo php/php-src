@@ -24,7 +24,9 @@ if test "$PHP_MYSQLND" != "no" || test "$PHP_MYSQLND_ENABLED" = "yes"; then
 
 
   if test "$PHP_MYSQLND_COMPRESSION_SUPPORT" != "no"; then
-    PKG_CHECK_MODULES([ZLIB], [zlib])
+    PKG_CHECK_MODULES([ZLIB], [zlib], [
+      AC_DEFINE(HAVE_ZLIB, 1, "ZLIB support")
+    ])
     PHP_EVAL_LIBLINE($ZLIB_LIBS, MYSQLND_SHARED_LIBADD)
     PHP_EVAL_INCLINE($ZLIB_CFLAGS)
     AC_DEFINE([MYSQLND_COMPRESSION_WANTED], 1, [Enable compressed protocol support])
