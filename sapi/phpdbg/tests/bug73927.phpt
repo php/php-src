@@ -1,5 +1,11 @@
 --TEST--
 Bug #73927 (phpdbg fails with windows error prompt at "watch array")
+--SKIPIF--
+<?php
+if (PHP_OS_FAMILY === 'Windows' && ini_get('opcache.jit') && ini_get('opcache.jit_buffer_size')) {
+    die('xfail breakpoint/watchpoint issues with JIT on Windows');
+}
+?>
 --PHPDBG--
 b 19
 r
