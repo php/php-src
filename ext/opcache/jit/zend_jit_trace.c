@@ -338,6 +338,15 @@ static zend_always_inline uint32_t zend_jit_trace_type_to_info(zend_uchar type)
 	return zend_jit_trace_type_to_info_ex(type, -1);
 }
 
+static zend_always_inline int zend_jit_var_may_be_modified_indirectly(const zend_op_array *op_array, const zend_ssa *ssa, uint32_t var)
+{
+	if ((!op_array->function_name || (ssa->cfg.flags & ZEND_FUNC_INDIRECT_VAR_ACCESS))
+	 && var < op_array->last_var) {
+		return 1;
+	}
+	return 0;
+}
+
 #define STACK_VAR_TYPE(_var) \
 	STACK_TYPE(stack, EX_VAR_TO_NUM(_var))
 
@@ -348,7 +357,9 @@ static zend_always_inline uint32_t zend_jit_trace_type_to_info(zend_uchar type)
 #define ADD_OP_GUARD(_var, _op_type) do { \
 		if (_var >= 0 && _op_type != IS_UNKNOWN) { \
 			zend_ssa_var_info *info = &ssa_var_info[_var]; \
-			if ((info->type & (MAY_BE_ANY|MAY_BE_UNDEF)) != (1 << _op_type)) { \
+			if (zend_jit_var_may_be_modified_indirectly(op_array, ssa, ssa_vars[_var].var)) { \
+				info->type = MAY_BE_GUARD | zend_jit_trace_type_to_info(_op_type); \
+			} else if ((info->type & (MAY_BE_ANY|MAY_BE_UNDEF)) != (1 << _op_type)) { \
 				info->type = MAY_BE_GUARD | zend_jit_trace_type_to_info_ex(_op_type, info->type); \
 			} \
 		} \
@@ -361,9 +372,13 @@ static zend_always_inline uint32_t zend_jit_trace_type_to_info(zend_uchar type)
 				if (!zend_jit_type_guard(&dasm_state, opline, _var, op_type)) { \
 					goto jit_failure; \
 				} \
-				op_info &= ~MAY_BE_GUARD; \
+				if (zend_jit_var_may_be_modified_indirectly(op_array, op_array_ssa, _var)) { \
+					SET_STACK_VAR_TYPE(_var, IS_UNKNOWN); \
+				} else { \
+					SET_STACK_VAR_TYPE(_var, op_type); \
+					op_info &= ~MAY_BE_GUARD; \
+				} \
 				ssa->var_info[_ssa_var].type &= op_info; \
-				SET_STACK_VAR_TYPE(_var, op_type); \
 			} \
 		} \
 	} while (0)
@@ -927,6 +942,30 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 	ssa = zend_jit_trace_build_ssa(op_array, script);
 	for (;;p++) {
 		if (p->op == ZEND_JIT_TRACE_VM) {
+			if (JIT_G(opt_level) < ZEND_JIT_LEVEL_OPT_FUNC) {
+				const zend_op *opline = p->opline;
+
+				switch (opline->opcode) {
+					case ZEND_INCLUDE_OR_EVAL:
+						ssa->cfg.flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
+						break;
+					case ZEND_FETCH_R:
+					case ZEND_FETCH_W:
+					case ZEND_FETCH_RW:
+					case ZEND_FETCH_FUNC_ARG:
+					case ZEND_FETCH_IS:
+					case ZEND_FETCH_UNSET:
+					case ZEND_UNSET_VAR:
+					case ZEND_ISSET_ISEMPTY_VAR:
+						if (opline->extended_value & ZEND_FETCH_LOCAL) {
+							ssa->cfg.flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
+						} else if ((opline->extended_value & (ZEND_FETCH_GLOBAL | ZEND_FETCH_GLOBAL_LOCK)) &&
+						           !op_array->function_name) {
+							ssa->cfg.flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
+						}
+						break;
+				}
+			}
 			ssa_ops_count += zend_jit_trace_op_len(p->opline);
 		} else if (p->op == ZEND_JIT_TRACE_INIT_CALL) {
 			call_level++;
@@ -935,6 +974,14 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 				stack_size = stack_top;
 			}
 		} else if (p->op == ZEND_JIT_TRACE_DO_ICALL) {
+			if (JIT_G(opt_level) < ZEND_JIT_LEVEL_OPT_FUNC) {
+				if (p->func != (zend_function*)&zend_pass_function
+				 && (zend_string_equals_literal(p->func->common.function_name, "extract")
+				  || zend_string_equals_literal(p->func->common.function_name, "compact")
+				  || zend_string_equals_literal(p->func->common.function_name, "get_defined_vars"))) {
+					ssa->cfg.flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
+				}
+			}
 			frame_size = zend_jit_trace_frame_size(p->op_array);
 			if (call_level == 0) {
 				if (stack_top + frame_size > stack_size) {
@@ -1739,13 +1786,20 @@ propagate_arg:
 		/* Propagate guards through Phi sources */
 		zend_ssa_phi *phi = tssa->blocks[1].phis;
 
+		op_array = trace_buffer->op_array;
+		jit_extension =
+			(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
+		ssa = &jit_extension->func_info.ssa;
+
 		while (phi) {
 			uint32_t t  = ssa_var_info[phi->ssa_var].type;
 			uint32_t t0 = ssa_var_info[phi->sources[0]].type;
 			uint32_t t1 = ssa_var_info[phi->sources[1]].type;
 
 			if (t & MAY_BE_GUARD) {
-				if (((t0 | t1) & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF)) == (t & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF))) {
+				if (zend_jit_var_may_be_modified_indirectly(op_array, ssa, phi->sources[0])) {
+					/* pass */
+				} else if (((t0 | t1) & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF)) == (t & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF))) {
 					if (!((t0 | t1) & MAY_BE_GUARD)) {
 						ssa_var_info[phi->ssa_var].type = t & ~MAY_BE_GUARD;
 					}
@@ -1905,7 +1959,8 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 		vars_op_array[i] = op_array;
 		/* We don't start intervals for variables used in Phi */
 		if ((ssa->vars[i].use_chain >= 0 /*|| ssa->vars[i].phi_use_chain*/)
-		 && zend_jit_var_supports_reg(ssa, i)) {
+		 && zend_jit_var_supports_reg(ssa, i)
+		 && !zend_jit_var_may_be_modified_indirectly(op_array, op_array_ssa, i)) {
 			start[i] = 0;
 			if (i < parent_vars_count
 			 && STACK_REG(parent_stack, i) != ZREG_NONE
@@ -1935,7 +1990,8 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 			SET_STACK_VAR(stack, phi->var, phi->ssa_var);
 			vars_op_array[phi->ssa_var] = op_array;
 			if (ssa->vars[phi->ssa_var].use_chain >= 0
-			 && zend_jit_var_supports_reg(ssa, phi->ssa_var)) {
+			 && zend_jit_var_supports_reg(ssa, phi->ssa_var)
+			 && !zend_jit_var_may_be_modified_indirectly(op_array, op_array_ssa, phi->sources[0])) {
 				start[phi->ssa_var] = 0;
 				count++;
 			}
@@ -2009,7 +2065,8 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 				if (ssa_op->result_def >= 0
 				 && (ssa->vars[ssa_op->result_def].use_chain >= 0
 			      || ssa->vars[ssa_op->result_def].phi_use_chain)
-				 && zend_jit_var_supports_reg(ssa, ssa_op->result_def)) {
+				 && zend_jit_var_supports_reg(ssa, ssa_op->result_def)
+				 && !zend_jit_var_may_be_modified_indirectly(op_array, op_array_ssa, EX_VAR_TO_NUM(opline->result.var))) {
 					if (!(ssa->var_info[ssa_op->result_def].type & MAY_BE_GUARD)
 					 || opline->opcode == ZEND_PRE_INC
 					 || opline->opcode == ZEND_PRE_DEC
@@ -2026,7 +2083,8 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 				if (ssa_op->op1_def >= 0
 				 && (ssa->vars[ssa_op->op1_def].use_chain >= 0
 			      || ssa->vars[ssa_op->op1_def].phi_use_chain)
-				 && zend_jit_var_supports_reg(ssa, ssa_op->op1_def)) {
+				 && zend_jit_var_supports_reg(ssa, ssa_op->op1_def)
+				 && !zend_jit_var_may_be_modified_indirectly(op_array, op_array_ssa, EX_VAR_TO_NUM(opline->op1.var))) {
 					start[ssa_op->op1_def] = idx;
 					vars_op_array[ssa_op->op1_def] = op_array;
 					count++;
@@ -2034,7 +2092,8 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 				if (ssa_op->op2_def >= 0
 				 && (ssa->vars[ssa_op->op2_def].use_chain >= 0
 			      || ssa->vars[ssa_op->op2_def].phi_use_chain)
-				 && zend_jit_var_supports_reg(ssa, ssa_op->op2_def)) {
+				 && zend_jit_var_supports_reg(ssa, ssa_op->op2_def)
+				 && !zend_jit_var_may_be_modified_indirectly(op_array, op_array_ssa, EX_VAR_TO_NUM(opline->op2.var))) {
 					start[ssa_op->op2_def] = idx;
 					vars_op_array[ssa_op->op2_def] = op_array;
 					count++;
@@ -2071,7 +2130,8 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 						if (support_opline
 						 && (ssa->vars[ssa_op->op1_def].use_chain >= 0
 					      || ssa->vars[ssa_op->op1_def].phi_use_chain)
-						 && zend_jit_var_supports_reg(ssa, ssa_op->op1_def)) {
+						 && zend_jit_var_supports_reg(ssa, ssa_op->op1_def)
+						 && !zend_jit_var_may_be_modified_indirectly(op_array, op_array_ssa, EX_VAR_TO_NUM(opline->op1.var))) {
 							start[ssa_op->op1_def] = idx;
 							vars_op_array[ssa_op->op1_def] = op_array;
 							count++;
@@ -2129,7 +2189,8 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 				SET_STACK_VAR(stack, i, j);
 				vars_op_array[j] = op_array;
 				if (ssa->vars[j].use_chain >= 0
-				 && zend_jit_var_supports_reg(ssa, j)) {
+				 && zend_jit_var_supports_reg(ssa, j)
+				 && !zend_jit_var_may_be_modified_indirectly(op_array, op_array_ssa, i)) {
 					start[j] = idx;
 					flags[j] = ZREG_LOAD;
 					count++;
@@ -2158,7 +2219,8 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 					SET_STACK_VAR(stack, i, j);
 					vars_op_array[j] = op_array;
 					if (ssa->vars[j].use_chain >= 0
-					 && zend_jit_var_supports_reg(ssa, j)) {
+					 && zend_jit_var_supports_reg(ssa, j)
+					 && !zend_jit_var_may_be_modified_indirectly(op_array, op_array_ssa, i)) {
 						start[j] = idx;
 						flags[j] = ZREG_LOAD;
 						count++;
@@ -2620,6 +2682,8 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 
 			if (!(info & MAY_BE_GUARD) && has_concrete_type(info)) {
 				SET_STACK_TYPE(stack, i, concrete_type(info));
+			} else if (zend_jit_var_may_be_modified_indirectly(op_array, op_array_ssa, i)) {
+				SET_STACK_TYPE(stack, i, IS_UNKNOWN);
 			} else if (i < parent_vars_count
 			 && STACK_TYPE(parent_stack, i) != IS_UNKNOWN) {
 				/* This must be already handled by trace type inference */
