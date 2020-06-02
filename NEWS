@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #79650 (php-win.exe 100% cpu lockup). (cmb)
 
+- PDO SQLite:
+  . Fixed bug #79664 (PDOStatement::getColumnMeta fails on empty result set).
+    (cmb)
+
 ?? ??? ????, PHP 7.3.19
 
 - Core:
