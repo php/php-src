@@ -106,17 +106,17 @@ function pos(array|object $arg): mixed {}
 
 function key(array|object $arg): int|string|null {}
 
-function min($arg, mixed ...$args): mixed {}
+function min(mixed $arg, mixed ...$args): mixed {}
 
-function max($arg, mixed ...$args): mixed {}
+function max(mixed $arg, mixed ...$args): mixed {}
 
 function array_walk(array|object &$input, callable $funcname, $userdata = UNKNOWN): bool {}
 
 function array_walk_recursive(array|object &$input, callable $funcname, $userdata = UNKNOWN): bool {}
 
-function in_array($needle, array $haystack, bool $strict = false): bool {}
+function in_array(mixed $needle, array $haystack, bool $strict = false): bool {}
 
-function array_search($needle, array $haystack, bool $strict = false): int|string|false {}
+function array_search(mixed $needle, array $haystack, bool $strict = false): int|string|false {}
 
 /** @prefer-ref $arg */
 function extract(array &$arg, int $extract_type = EXTR_OVERWRITE, string $prefix = ""): int {}
