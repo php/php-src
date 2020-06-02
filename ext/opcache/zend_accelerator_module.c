@@ -67,20 +67,8 @@ static ZEND_INI_MH(OnUpdateMemoryConsumption)
 	zend_long memsize = atoi(ZSTR_VAL(new_value));
 	/* sanity check we must use at least 8 MB */
 	if (memsize < 8) {
-		const char *new_new_value = "8";
-		zend_ini_entry *ini_entry;
-
-		memsize = 8;
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache.memory_consumption is set below the required 8MB.\n");
-		zend_accel_error(ACCEL_LOG_WARNING, ACCELERATOR_PRODUCT_NAME " will use the minimal 8MB configuration.\n");
-
-		if ((ini_entry = zend_hash_str_find_ptr(EG(ini_directives),
-					"opcache.memory_consumption",
-					sizeof("opcache.memory_consumption")-1)) == NULL) {
-			return FAILURE;
-		}
-
-		ini_entry->value = zend_string_init_interned(new_new_value, 1, 1);
+		return FAILURE;
 	}
 	if (UNEXPECTED(memsize > ZEND_ULONG_MAX / (1024 * 1024))) {
 		*p = ZEND_ULONG_MAX;
@@ -95,29 +83,13 @@ static ZEND_INI_MH(OnUpdateMaxAcceleratedFiles)
 	zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
 	zend_long size = atoi(ZSTR_VAL(new_value));
 	/* sanity check we must use a value between MIN_ACCEL_FILES and MAX_ACCEL_FILES */
-
-	if (size < MIN_ACCEL_FILES || size > MAX_ACCEL_FILES) {
-		const char *new_new_value;
-		zend_ini_entry *ini_entry;
-
-		if (size < MIN_ACCEL_FILES) {
-			size = MIN_ACCEL_FILES;
-			new_new_value = TOKENTOSTR(MIN_ACCEL_FILES);
-			zend_accel_error(ACCEL_LOG_WARNING, "opcache.max_accelerated_files is set below the required minimum (%d).\n", MIN_ACCEL_FILES);
-			zend_accel_error(ACCEL_LOG_WARNING, ACCELERATOR_PRODUCT_NAME " will use the minimal configuration.\n");
-		}
-		if (size > MAX_ACCEL_FILES) {
-			size = MAX_ACCEL_FILES;
-			new_new_value = TOKENTOSTR(MAX_ACCEL_FILES);
-			zend_accel_error(ACCEL_LOG_WARNING, "opcache.max_accelerated_files is set above the limit (%d).\n", MAX_ACCEL_FILES);
-			zend_accel_error(ACCEL_LOG_WARNING, ACCELERATOR_PRODUCT_NAME " will use the maximal configuration.\n");
-		}
-		if ((ini_entry = zend_hash_str_find_ptr(EG(ini_directives),
-					"opcache.max_accelerated_files",
-					sizeof("opcache.max_accelerated_files")-1)) == NULL) {
-			return FAILURE;
-		}
-		ini_entry->value = zend_string_init_interned(new_new_value, strlen(new_new_value), 1);
+	if (size < MIN_ACCEL_FILES) {
+		zend_accel_error(ACCEL_LOG_WARNING, "opcache.max_accelerated_files is set below the required minimum (%d).\n", MIN_ACCEL_FILES);
+		return FAILURE;
+	}
+	if (size > MAX_ACCEL_FILES) {
+		zend_accel_error(ACCEL_LOG_WARNING, "opcache.max_accelerated_files is set above the limit (%d).\n", MAX_ACCEL_FILES);
+		return FAILURE;
 	}
 	*p = size;
 	return SUCCESS;
@@ -129,18 +101,8 @@ static ZEND_INI_MH(OnUpdateMaxWastedPercentage)
 	zend_long percentage = atoi(ZSTR_VAL(new_value));
 
 	if (percentage <= 0 || percentage > 50) {
-		const char *new_new_value = "5";
-		zend_ini_entry *ini_entry;
-
-		percentage = 5;
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache.max_wasted_percentage must be set between 1 and 50.\n");
-		zend_accel_error(ACCEL_LOG_WARNING, ACCELERATOR_PRODUCT_NAME " will use 5%%.\n");
-		if ((ini_entry = zend_hash_str_find_ptr(EG(ini_directives),
-					"opcache.max_wasted_percentage",
-					sizeof("opcache.max_wasted_percentage")-1)) == NULL) {
-			return FAILURE;
-		}
-		ini_entry->value = zend_string_init_interned(new_new_value, strlen(new_new_value), 1);
+		return FAILURE;
 	}
 	*p = (double)percentage / 100.0;
 	return SUCCESS;
