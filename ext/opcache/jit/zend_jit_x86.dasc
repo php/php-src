@@ -9619,7 +9619,8 @@ static uint32_t zend_ssa_cv_info(const zend_op *opline, const zend_op_array *op_
 			}
 		}
 	} else {
-		info = MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_REF | MAY_BE_ANY | MAY_BE_UNDEF;
+		info = MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_REF | MAY_BE_ANY | MAY_BE_UNDEF |
+			MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
 	}
 
 #ifdef ZEND_JIT_USE_RC_INFERENCE
