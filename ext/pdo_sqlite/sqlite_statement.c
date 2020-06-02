@@ -339,7 +339,7 @@ static int pdo_sqlite_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *ret
 	if (!S->stmt) {
 		return FAILURE;
 	}
-	if(colno >= sqlite3_data_count(S->stmt)) {
+	if(colno >= sqlite3_column_count(S->stmt)) {
 		/* error invalid column */
 		pdo_sqlite_error_stmt(stmt);
 		return FAILURE;
