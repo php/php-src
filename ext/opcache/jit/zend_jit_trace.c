@@ -3455,6 +3455,13 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								goto jit_failure;
 						    }
 							for (j = 0 ; j < op_array->last_var; j++) {
+								if (opline->op1_type == IS_CV
+								 && EX_VAR_TO_NUM(opline->op1.var) == j
+								 && !(op1_info & MAY_BE_REF)
+								 && JIT_G(current_frame)
+								 && TRACE_FRAME_IS_RETURN_VALUE_USED(JIT_G(current_frame))) {
+									continue;
+								}
 								// TODO: get info from trace ???
 								uint32_t info = zend_ssa_cv_info(opline, op_array, op_array_ssa, j);
 								zend_uchar type = STACK_TYPE(stack, j);
