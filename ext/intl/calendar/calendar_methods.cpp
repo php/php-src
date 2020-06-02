@@ -431,7 +431,7 @@ U_CFUNC PHP_FUNCTION(intlcal_roll)
 				value;
 	zval		args_a[3]		 = {0},
 				*args			 = args_a;
-	zend_bool	bool_variant_val = (zend_bool)-1;
+	zend_bool	bool_variant_val;
 	CALENDAR_METHOD_INIT_VARS;
 
 	object = getThis();
@@ -451,7 +451,8 @@ U_CFUNC PHP_FUNCTION(intlcal_roll)
 				== FAILURE) {
 			RETURN_THROWS();
 		}
-		bool_variant_val = Z_TYPE(args[1]) == IS_TRUE? 1 : 0;
+		/* false corresponds to rolling down, i.e. -1 */
+		value = Z_TYPE(args[1]) == IS_TRUE? 1 : -1;
 	} else if (zend_parse_method_parameters(ZEND_NUM_ARGS(), object,
 			"Oll", &object, Calendar_ce_ptr, &field, &value) == FAILURE) {
 		RETURN_THROWS();
@@ -462,8 +463,7 @@ U_CFUNC PHP_FUNCTION(intlcal_roll)
 			"intlcal_roll: invalid field", 0);
 		RETURN_FALSE;
 	}
-	if (bool_variant_val == (zend_bool)-1 &&
-			(value < INT32_MIN || value > INT32_MAX)) {
+	if (value < INT32_MIN || value > INT32_MAX) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"intlcal_roll: value out of bounds", 0);
 		RETURN_FALSE;
@@ -471,13 +471,7 @@ U_CFUNC PHP_FUNCTION(intlcal_roll)
 
 	CALENDAR_METHOD_FETCH_OBJECT;
 
-	if (bool_variant_val != (zend_bool)-1) {
-		co->ucal->roll((UCalendarDateFields)field, (UBool)bool_variant_val,
-			CALENDAR_ERROR_CODE(co));
-	} else {
-		co->ucal->roll((UCalendarDateFields)field, (int32_t)value,
-			CALENDAR_ERROR_CODE(co));
-	}
+	co->ucal->roll((UCalendarDateFields)field, (int32_t)value, CALENDAR_ERROR_CODE(co));
 	INTL_METHOD_CHECK_STATUS(co, "intlcal_roll: Error calling ICU Calendar::roll");
 
 	RETURN_TRUE;
