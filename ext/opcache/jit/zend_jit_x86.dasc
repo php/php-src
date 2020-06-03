@@ -8776,7 +8776,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 			return 0;
 		}
 
-		if (opline->opcode != ZEND_DO_ICALL) {
+		if (!trace && opline->opcode != ZEND_DO_ICALL) {
 			|	LOAD_IP_ADDR (opline + 1)
 		}
 	}
