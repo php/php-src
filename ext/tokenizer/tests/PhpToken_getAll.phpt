@@ -15,12 +15,12 @@ var_dump(PhpToken::getAll($code));
 var_dump(PhpToken::getAll($code, TOKEN_PARSE));
 
 ?>
---EXPECT--
+--EXPECTF--
 array(15) {
   [0]=>
   object(PhpToken)#1 (4) {
     ["id"]=>
-    int(382)
+    int(%d)
     ["text"]=>
     string(6) "<?php
 "
@@ -32,7 +32,7 @@ array(15) {
   [1]=>
   object(PhpToken)#2 (4) {
     ["id"]=>
-    int(343)
+    int(%d)
     ["text"]=>
     string(8) "function"
     ["line"]=>
@@ -43,7 +43,7 @@ array(15) {
   [2]=>
   object(PhpToken)#3 (4) {
     ["id"]=>
-    int(385)
+    int(%d)
     ["text"]=>
     string(1) " "
     ["line"]=>
@@ -54,7 +54,7 @@ array(15) {
   [3]=>
   object(PhpToken)#4 (4) {
     ["id"]=>
-    int(311)
+    int(%d)
     ["text"]=>
     string(3) "foo"
     ["line"]=>
@@ -65,7 +65,7 @@ array(15) {
   [4]=>
   object(PhpToken)#5 (4) {
     ["id"]=>
-    int(40)
+    int(%d)
     ["text"]=>
     string(1) "("
     ["line"]=>
@@ -76,7 +76,7 @@ array(15) {
   [5]=>
   object(PhpToken)#6 (4) {
     ["id"]=>
-    int(41)
+    int(%d)
     ["text"]=>
     string(1) ")"
     ["line"]=>
@@ -87,7 +87,7 @@ array(15) {
   [6]=>
   object(PhpToken)#7 (4) {
     ["id"]=>
-    int(385)
+    int(%d)
     ["text"]=>
     string(1) " "
     ["line"]=>
@@ -98,7 +98,7 @@ array(15) {
   [7]=>
   object(PhpToken)#8 (4) {
     ["id"]=>
-    int(123)
+    int(%d)
     ["text"]=>
     string(1) "{"
     ["line"]=>
@@ -109,7 +109,7 @@ array(15) {
   [8]=>
   object(PhpToken)#9 (4) {
     ["id"]=>
-    int(385)
+    int(%d)
     ["text"]=>
     string(5) "
     "
@@ -121,7 +121,7 @@ array(15) {
   [9]=>
   object(PhpToken)#10 (4) {
     ["id"]=>
-    int(325)
+    int(%d)
     ["text"]=>
     string(4) "echo"
     ["line"]=>
@@ -132,7 +132,7 @@ array(15) {
   [10]=>
   object(PhpToken)#11 (4) {
     ["id"]=>
-    int(385)
+    int(%d)
     ["text"]=>
     string(1) " "
     ["line"]=>
@@ -143,7 +143,7 @@ array(15) {
   [11]=>
   object(PhpToken)#12 (4) {
     ["id"]=>
-    int(315)
+    int(%d)
     ["text"]=>
     string(5) ""bar""
     ["line"]=>
@@ -154,7 +154,7 @@ array(15) {
   [12]=>
   object(PhpToken)#13 (4) {
     ["id"]=>
-    int(59)
+    int(%d)
     ["text"]=>
     string(1) ";"
     ["line"]=>
@@ -165,7 +165,7 @@ array(15) {
   [13]=>
   object(PhpToken)#14 (4) {
     ["id"]=>
-    int(385)
+    int(%d)
     ["text"]=>
     string(1) "
 "
@@ -177,7 +177,7 @@ array(15) {
   [14]=>
   object(PhpToken)#15 (4) {
     ["id"]=>
-    int(125)
+    int(%d)
     ["text"]=>
     string(1) "}"
     ["line"]=>
@@ -190,7 +190,7 @@ array(15) {
   [0]=>
   object(PhpToken)#15 (4) {
     ["id"]=>
-    int(382)
+    int(%d)
     ["text"]=>
     string(6) "<?php
 "
@@ -202,7 +202,7 @@ array(15) {
   [1]=>
   object(PhpToken)#14 (4) {
     ["id"]=>
-    int(343)
+    int(%d)
     ["text"]=>
     string(8) "function"
     ["line"]=>
@@ -213,7 +213,7 @@ array(15) {
   [2]=>
   object(PhpToken)#13 (4) {
     ["id"]=>
-    int(385)
+    int(%d)
     ["text"]=>
     string(1) " "
     ["line"]=>
@@ -224,7 +224,7 @@ array(15) {
   [3]=>
   object(PhpToken)#12 (4) {
     ["id"]=>
-    int(311)
+    int(%d)
     ["text"]=>
     string(3) "foo"
     ["line"]=>
@@ -235,7 +235,7 @@ array(15) {
   [4]=>
   object(PhpToken)#11 (4) {
     ["id"]=>
-    int(40)
+    int(%d)
     ["text"]=>
     string(1) "("
     ["line"]=>
@@ -246,7 +246,7 @@ array(15) {
   [5]=>
   object(PhpToken)#10 (4) {
     ["id"]=>
-    int(41)
+    int(%d)
     ["text"]=>
     string(1) ")"
     ["line"]=>
@@ -257,7 +257,7 @@ array(15) {
   [6]=>
   object(PhpToken)#9 (4) {
     ["id"]=>
-    int(385)
+    int(%d)
     ["text"]=>
     string(1) " "
     ["line"]=>
@@ -268,7 +268,7 @@ array(15) {
   [7]=>
   object(PhpToken)#8 (4) {
     ["id"]=>
-    int(123)
+    int(%d)
     ["text"]=>
     string(1) "{"
     ["line"]=>
@@ -279,7 +279,7 @@ array(15) {
   [8]=>
   object(PhpToken)#7 (4) {
     ["id"]=>
-    int(385)
+    int(%d)
     ["text"]=>
     string(5) "
     "
@@ -291,7 +291,7 @@ array(15) {
   [9]=>
   object(PhpToken)#6 (4) {
     ["id"]=>
-    int(325)
+    int(%d)
     ["text"]=>
     string(4) "echo"
     ["line"]=>
@@ -302,7 +302,7 @@ array(15) {
   [10]=>
   object(PhpToken)#5 (4) {
     ["id"]=>
-    int(385)
+    int(%d)
     ["text"]=>
     string(1) " "
     ["line"]=>
@@ -313,7 +313,7 @@ array(15) {
   [11]=>
   object(PhpToken)#4 (4) {
     ["id"]=>
-    int(315)
+    int(%d)
     ["text"]=>
     string(5) ""bar""
     ["line"]=>
@@ -324,7 +324,7 @@ array(15) {
   [12]=>
   object(PhpToken)#3 (4) {
     ["id"]=>
-    int(59)
+    int(%d)
     ["text"]=>
     string(1) ";"
     ["line"]=>
@@ -335,7 +335,7 @@ array(15) {
   [13]=>
   object(PhpToken)#2 (4) {
     ["id"]=>
-    int(385)
+    int(%d)
     ["text"]=>
     string(1) "
 "
@@ -347,7 +347,7 @@ array(15) {
   [14]=>
   object(PhpToken)#1 (4) {
     ["id"]=>
-    int(125)
+    int(%d)
     ["text"]=>
     string(1) "}"
     ["line"]=>
