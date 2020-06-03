@@ -1,5 +1,11 @@
 --TEST--
 Bug #73927 (phpdbg fails with windows error prompt at "watch array")
+--SKIPIF--
+<?php
+if (getenv('SKIP_ASAN')) {
+    die("skip intentionally causes segfaults");
+}
+?>
 --PHPDBG--
 b 19
 r
