@@ -284,7 +284,7 @@ static int pdo_sqlite_stmt_describe(pdo_stmt_t *stmt, int colno)
 
 	str = sqlite3_column_name(S->stmt, colno);
 	stmt->columns[colno].name = zend_string_init(str, strlen(str), 0);
-	stmt->columns[colno].maxlen = 0xffffffff;
+	stmt->columns[colno].maxlen = SIZE_MAX;
 	stmt->columns[colno].precision = 0;
 
 	switch (sqlite3_column_type(S->stmt, colno)) {

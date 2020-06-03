@@ -24,7 +24,7 @@ array(6) {
   ["name"]=>
   string(1) "1"
   ["len"]=>
-  int(4294967295)
+  int(-1)
   ["precision"]=>
   int(0)
   ["pdo_type"]=>
