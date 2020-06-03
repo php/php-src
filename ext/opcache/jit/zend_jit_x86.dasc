@@ -2794,22 +2794,16 @@ static int zend_jit_check_timeout(dasm_State **Dst, const zend_op *opline, const
 	|	jne ->interrupt_handler
 #else
 	|	MEM_OP2_1_ZTS cmp, byte, executor_globals, vm_interrupt, 0, r0
-	if (last_valid_opline == opline) {
-		if (exit_addr) {
-			|	jne &exit_addr
-		} else {
-			|	jne ->interrupt_handler
-		}
+	if (exit_addr) {
+		|	jne &exit_addr
+	} else if (last_valid_opline == opline) {
+		|	jne ->interrupt_handler
 	} else {
 		|	jne >1
 		|.cold_code
 		|1:
 		|	LOAD_IP_ADDR opline
-		if (exit_addr) {
-			|	jmp &exit_addr
-		} else {
-			|	jmp ->interrupt_handler
-		}
+		|	jmp ->interrupt_handler
 		|.code
 	}
 #endif
@@ -8231,6 +8225,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 	zend_jit_addr res_addr;
 	uint32_t call_num_args = 0;
 	zend_bool unknown_num_args = 0;
+	const void *exit_addr = NULL;
 
 	if (RETURN_VALUE_USED(opline)) {
 		res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
@@ -8340,8 +8335,8 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 		if (!func) {
 			if (trace) {
 				uint32_t exit_point = zend_jit_trace_get_exit_point(opline, opline, NULL, ZEND_JIT_EXIT_TO_VM);
-				const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 
+				exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 				if (!exit_addr) {
 					return 0;
 				}
@@ -8628,8 +8623,8 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 			if (!func) {
 				if (trace) {
 					uint32_t exit_point = zend_jit_trace_get_exit_point(opline, opline, NULL, ZEND_JIT_EXIT_TO_VM);
-					const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 
+					exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 					if (!exit_addr) {
 						return 0;
 					}
@@ -8762,9 +8757,20 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 		|.code
 
 		// TODO: Can we avoid checking for interrupts after each call ???
-		if (!zend_jit_check_timeout(Dst, opline + 1, NULL)) {
+		if (trace && last_valid_opline != opline) {
+			int32_t exit_point = zend_jit_trace_get_exit_point(opline, opline + 1, NULL, ZEND_JIT_EXIT_TO_VM);
+
+			exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+			if (!exit_addr) {
+				return 0;
+			}
+		} else {
+			exit_addr = NULL;
+		}
+		if (!zend_jit_check_timeout(Dst, opline + 1, exit_addr)) {
 			return 0;
 		}
+
 		if (opline->opcode != ZEND_DO_ICALL) {
 			|	LOAD_IP_ADDR (opline + 1)
 		}
