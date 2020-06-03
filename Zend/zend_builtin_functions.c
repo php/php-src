@@ -1847,16 +1847,9 @@ static int copy_function_name(zval *zv, int num_args, va_list args, zend_hash_ke
 		return 0;
 	}
 
-	if (func->type == ZEND_INTERNAL_FUNCTION) {
-		char *disable_functions = INI_STR("disable_functions");
-
-		if ((*exclude_disabled == 1) && (disable_functions != NULL)) {
-			if (func->internal_function.handler != ZEND_FN(display_disabled_function)) {
-				add_next_index_str(internal_ar, zend_string_copy(hash_key->key));
-			}
-		} else {
-			add_next_index_str(internal_ar, zend_string_copy(hash_key->key));
-		}
+	if (func->type == ZEND_INTERNAL_FUNCTION
+		&& (!*exclude_disabled || func->internal_function.handler != ZEND_FN(display_disabled_function))) {
+		add_next_index_str(internal_ar, zend_string_copy(hash_key->key));
 	} else if (func->type == ZEND_USER_FUNCTION) {
 		add_next_index_str(user_ar, zend_string_copy(hash_key->key));
 	}
