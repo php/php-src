@@ -1836,20 +1836,6 @@ ZEND_FUNCTION(get_declared_interfaces)
 }
 /* }}} */
 
-static inline zend_bool is_name_in_list(zend_string *name, const char *list)
-{
-	char *p = list;
-	size_t len = ZSTR_LEN(name);
-
-	while ((p = strstr(p, ZSTR_VAL(name))) != NULL
-		&& ((p != list && *(p-1) != ' ' && *(p-1) != ',')
-		|| (*(p+len) != '\0' && *(p+len) != ' ' && *(p+len) != ','))
-	) {
-		p++;
-	}
-	return p != NULL;
-}
-
 static int copy_function_name(zval *zv, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	zend_function *func = Z_PTR_P(zv);
@@ -1865,7 +1851,7 @@ static int copy_function_name(zval *zv, int num_args, va_list args, zend_hash_ke
 		char *disable_functions = INI_STR("disable_functions");
 
 		if ((*exclude_disabled == 1) && (disable_functions != NULL)) {
-			if (!is_name_in_list(func->common.function_name, disable_functions)) {
+			if (func->internal_function.handler != ZEND_FN(display_disabled_function)) {
 				add_next_index_str(internal_ar, zend_string_copy(hash_key->key));
 			}
 		} else {
