@@ -54,7 +54,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_get_called_class arginfo_zend_version
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_get_parent_class, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_TYPE_MASK(0, object, MAY_BE_STRING|MAY_BE_OBJECT|MAY_BE_NULL, "null")
+	ZEND_ARG_TYPE_MASK(0, object, MAY_BE_STRING|MAY_BE_OBJECT, NULL)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_is_subclass_of, 0, 2, _IS_BOOL, 0)

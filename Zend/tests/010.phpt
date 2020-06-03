@@ -58,6 +58,6 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
-get_parent_class(): Argument #1 ($object) must be of type string|object|null, array given
+get_parent_class(): Argument #1 ($object) must be of type string|object, array given
 bool(false)
 Done

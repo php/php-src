@@ -71,7 +71,7 @@ $values = array(
 // loop through each element of the array for object
 
 foreach ($values as $value) {
-    echo "\nArg value " . (is_object($value) ? get_class($value) : $value) . " \n";
+    echo "\nArg value " . (is_object($value) ? get_class($value) : $value) . "\n";
     try {
         var_dump(get_parent_class($value));
     } catch (TypeError $exception) {
@@ -86,97 +86,97 @@ echo "Done";
 Error: 2 - Undefined variable $undefined_var
 Error: 2 - Undefined variable $unset_var
 
-Arg value 0 
+Arg value 0
 In autoload(0)
 bool(false)
 
-Arg value 1 
+Arg value 1
 In autoload(1)
 bool(false)
 
-Arg value 12345 
+Arg value 12345
 In autoload(12345)
 bool(false)
 
-Arg value -2345 
+Arg value -2345
 bool(false)
 
-Arg value 10.5 
+Arg value 10.5
 bool(false)
 
-Arg value -10.5 
+Arg value -10.5
 bool(false)
 
-Arg value 101234567000 
+Arg value 101234567000
 In autoload(101234567000)
 bool(false)
 
-Arg value 1.07654321E-9 
+Arg value 1.07654321E-9
 bool(false)
 
-Arg value 0.5 
+Arg value 0.5
 bool(false)
 Error: 2 - Array to string conversion
 
-Arg value Array 
-get_parent_class(): Argument #1 ($object) must be of type string|object|null, array given
+Arg value Array
+get_parent_class(): Argument #1 ($object) must be of type string|object, array given
 Error: 2 - Array to string conversion
 
-Arg value Array 
-get_parent_class(): Argument #1 ($object) must be of type string|object|null, array given
+Arg value Array
+get_parent_class(): Argument #1 ($object) must be of type string|object, array given
 Error: 2 - Array to string conversion
 
-Arg value Array 
-get_parent_class(): Argument #1 ($object) must be of type string|object|null, array given
+Arg value Array
+get_parent_class(): Argument #1 ($object) must be of type string|object, array given
 Error: 2 - Array to string conversion
 
-Arg value Array 
-get_parent_class(): Argument #1 ($object) must be of type string|object|null, array given
+Arg value Array
+get_parent_class(): Argument #1 ($object) must be of type string|object, array given
 Error: 2 - Array to string conversion
 
-Arg value Array 
-get_parent_class(): Argument #1 ($object) must be of type string|object|null, array given
+Arg value Array
+get_parent_class(): Argument #1 ($object) must be of type string|object, array given
 
-Arg value  
+Arg value 
 bool(false)
 
-Arg value  
+Arg value 
 bool(false)
 
-Arg value 1 
+Arg value 1
 In autoload(1)
 bool(false)
 
-Arg value  
+Arg value 
 bool(false)
 
-Arg value 1 
+Arg value 1
 In autoload(1)
 bool(false)
 
-Arg value  
+Arg value 
 bool(false)
 
-Arg value  
+Arg value 
 bool(false)
 
-Arg value  
+Arg value 
 bool(false)
 
-Arg value string 
+Arg value string
 In autoload(string)
 bool(false)
 
-Arg value String 
+Arg value String
 In autoload(String)
 bool(false)
 
-Arg value stdClass 
+Arg value stdClass
 bool(false)
 
-Arg value  
+Arg value 
 bool(false)
 
-Arg value  
+Arg value 
 bool(false)
 Done
