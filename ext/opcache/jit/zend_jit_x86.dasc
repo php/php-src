@@ -8689,7 +8689,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 		|	MEM_OP2_1_ZTS mov, aword, executor_globals, current_execute_data, FP, r0
 
 		|	// zend_vm_stack_free_args(call);
-		if (func && call_info && !unknown_num_args) {
+		if (func && !unknown_num_args) {
 			for (i = 0; i < call_num_args; i++ ) {
 				uint32_t offset = EX_NUM_TO_VAR(i);
 				|	ZVAL_PTR_DTOR ZEND_ADDR_MEM_ZVAL(ZREG_RX, offset), MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN, 0, 1, opline
