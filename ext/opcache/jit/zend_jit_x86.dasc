@@ -1732,7 +1732,7 @@ static int zend_jit_leave_throw_stub(dasm_State **Dst)
 {
 	|->leave_throw_handler:
 	|	// if (opline->opcode != ZEND_HANDLE_EXCEPTION) {
-		if (GCC_GLOBAL_REGS) {
+	if (GCC_GLOBAL_REGS) {
 		|	cmp byte OP:IP->opcode, ZEND_HANDLE_EXCEPTION
 		|	je >5
 		|	// EG(opline_before_exception) = opline;
@@ -1764,16 +1764,19 @@ static int zend_jit_leave_throw_stub(dasm_State **Dst)
 static int zend_jit_icall_throw_stub(dasm_State **Dst)
 {
 	|->icall_throw_handler:
-	|	// zend_throw_exception_internal(NULL);
-	|.if X64
-		|	xor CARG1, CARG1
-		|	EXT_CALL zend_throw_exception_internal, r0
-	|.else
-		|	sub r4, 12
-		|	push 0
-		|	EXT_CALL zend_throw_exception_internal, r0
-		|	add r4, 16
-	|.endif
+	|	// zend_rethrow_exception(zend_execute_data *execute_data)
+	|	mov IP, aword EX->opline
+	|	// if (EX(opline)->opcode != ZEND_HANDLE_EXCEPTION) {
+	|	cmp byte OP:IP->opcode, ZEND_HANDLE_EXCEPTION
+	|	je >1
+	|	// EG(opline_before_exception) = opline;
+	|	MEM_OP2_1_ZTS mov, aword, executor_globals, opline_before_exception, IP, r0
+	|1:
+	|	// opline = EG(exception_op);
+	|	LOAD_IP_ADDR_ZTS executor_globals, exception_op
+	||	if (GCC_GLOBAL_REGS) {
+	|		mov aword EX->opline, IP
+	||	}
 	|	// HANDLE_EXCEPTION()
 	|	jmp ->exception_handler
 
