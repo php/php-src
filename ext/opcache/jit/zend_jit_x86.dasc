@@ -7571,7 +7571,9 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, const z
 			(op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
 			op1_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->op1.var);
 
-			|	IF_NOT_ZVAL_REFCOUNTED op1_addr, >3
+			if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+				|	IF_NOT_ZVAL_REFCOUNTED op1_addr, >3
+			}
 			|	GET_ZVAL_PTR FCARG1a, op1_addr
 			|	GC_DELREF FCARG1a
 			|	jnz >3
