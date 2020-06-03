@@ -3502,13 +3502,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 					case ZEND_JMPZNZ:
 					case ZEND_JMPZ_EX:
 					case ZEND_JMPNZ_EX:
-						if (opline->result_type == IS_UNDEF) {
-							res_addr = 0;
-						} else {
-							res_addr = RES_REG_ADDR();
-						}
-						op1_info = OP1_INFO();
-						CHECK_OP1_TRACE_TYPE();
 						if ((p+1)->op == ZEND_JIT_TRACE_VM || (p+1)->op == ZEND_JIT_TRACE_END) {
 							const zend_op *exit_opline = NULL;
 							uint32_t exit_point;
@@ -3549,6 +3542,13 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						} else  {
 							ZEND_ASSERT(0);
 						}
+						if (opline->result_type == IS_UNDEF) {
+							res_addr = 0;
+						} else {
+							res_addr = RES_REG_ADDR();
+						}
+						op1_info = OP1_INFO();
+						CHECK_OP1_TRACE_TYPE();
 						if (!zend_jit_bool_jmpznz(&dasm_state, opline, op_array,
 								op1_info, OP1_REG_ADDR(), res_addr,
 								-1, -1,
