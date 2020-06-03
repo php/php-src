@@ -652,11 +652,6 @@ ZEND_FUNCTION(get_parent_class)
 		ce = zend_lookup_class(str);
 	} else {
 		ce = zend_get_executed_scope();
-		if (ce && ce->parent) {
-			RETURN_STR_COPY(ce->parent->name);
-		} else {
-			RETURN_FALSE;
-		}
 	}
 
 	if (ce && ce->parent) {
