@@ -247,7 +247,7 @@ static PHP_INI_MH(OnUpdateCacheDir)
 }
 
 PHP_INI_BEGIN()
-STD_PHP_INI_ENTRY("soap.wsdl_cache_enabled",     "1", PHP_INI_ALL, OnUpdateBool,
+STD_PHP_INI_BOOLEAN("soap.wsdl_cache_enabled",     "1", PHP_INI_ALL, OnUpdateBool,
                   cache_enabled, zend_soap_globals, soap_globals)
 STD_PHP_INI_ENTRY("soap.wsdl_cache_dir",         "/tmp", PHP_INI_ALL, OnUpdateCacheDir,
                   cache_dir, zend_soap_globals, soap_globals)

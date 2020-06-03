@@ -25,6 +25,8 @@ PHP                                                                        NEWS
   . Use SSE2 instructions do locale independent strtolower. (Laruence)
   . Fixed bug #79521 (Check __set_state structure). (carusogabriel)
   . Fixed bug #79467 (data:// wrappers are writable). (cmb)
+  . Implemented FR #47074 (phpinfo() reports "On" as 1 for the some
+    extensions). (cmb)
 
 - BZ2:
   . Fixed bug #71263 (fread() does not report bzip2.decompress errors). (cmb)
