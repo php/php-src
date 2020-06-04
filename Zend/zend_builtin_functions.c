@@ -1810,7 +1810,6 @@ ZEND_FUNCTION(get_defined_functions)
 	zend_string *key;
 	zend_function *func;
 	zend_bool exclude_disabled = 0;
-	char *disable_functions = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &exclude_disabled) == FAILURE) {
 		return;
@@ -1820,19 +1819,11 @@ ZEND_FUNCTION(get_defined_functions)
 	array_init(&user);
 	array_init(return_value);
 
-	if (exclude_disabled) {
-		disable_functions = INI_STR("disable_functions");
-	}
 	ZEND_HASH_FOREACH_STR_KEY_PTR(EG(function_table), key, func) {
 		if (key && ZSTR_VAL(key)[0] != 0) {
-			if (func->type == ZEND_INTERNAL_FUNCTION) {
-				if (disable_functions != NULL) {
-					if (strstr(disable_functions, func->common.function_name->val) == NULL) {
-						add_next_index_str(&internal, zend_string_copy(key));
-					}
-				} else {
-					add_next_index_str(&internal, zend_string_copy(key));
-				}
+			if (func->type == ZEND_INTERNAL_FUNCTION
+				&& (!exclude_disabled || func->internal_function.handler != ZEND_FN(display_disabled_function))) {
+				add_next_index_str(&internal, zend_string_copy(key));
 			} else if (func->type == ZEND_USER_FUNCTION) {
 				add_next_index_str(&user, zend_string_copy(key));
 			}
