@@ -10773,7 +10773,17 @@ static int zend_jit_fetch_obj_read(dasm_State **Dst, const zend_op *opline, cons
 	} else {
 		prop_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, offset);
 		|	mov edx, dword [FCARG1a + offset + 8]
-		|	IF_TYPE dl, IS_UNDEF, >5
+		if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
+			int32_t exit_point = zend_jit_trace_get_exit_point(opline, opline, NULL, ZEND_JIT_EXIT_TO_VM);
+			const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+
+			if (!exit_addr) {
+				return 0;
+			}
+			|	IF_TYPE dl, IS_UNDEF, &exit_addr
+		} else {
+			|	IF_TYPE dl, IS_UNDEF, >5
+		}
 	}
 	|	GET_ZVAL_PTR r0, prop_addr
 	|	IF_NOT_REFCOUNTED dh, >2
@@ -10791,26 +10801,29 @@ static int zend_jit_fetch_obj_read(dasm_State **Dst, const zend_op *opline, cons
 	|	SET_ZVAL_TYPE_INFO res_addr, edx
 
 	|.cold_code
-	|5:
-	|	LOAD_ADDR FCARG2a, member
-	|.if X64
-		|	LOAD_ZVAL_ADDR CARG3, res_addr
-		|	mov CARG4, (opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS)
-	|.else
-		|	sub r4, 8
-		|	push (opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS)
-		|	PUSH_ZVAL_ADDR res_addr, r0
-	|.endif
-	|	SAVE_VALID_OPLINE opline, r0
-	if (opline->opcode != ZEND_FETCH_OBJ_IS) {
-		|	EXT_CALL zend_jit_fetch_obj_r_slow, r0
-	} else {
-		|	EXT_CALL zend_jit_fetch_obj_is_slow, r0
+
+	if (JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE || offset == ZEND_WRONG_PROPERTY_OFFSET) {
+		|5:
+		|	LOAD_ADDR FCARG2a, member
+		|.if X64
+			|	LOAD_ZVAL_ADDR CARG3, res_addr
+			|	mov CARG4, (opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS)
+		|.else
+			|	sub r4, 8
+			|	push (opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS)
+			|	PUSH_ZVAL_ADDR res_addr, r0
+		|.endif
+		|	SAVE_VALID_OPLINE opline, r0
+		if (opline->opcode != ZEND_FETCH_OBJ_IS) {
+			|	EXT_CALL zend_jit_fetch_obj_r_slow, r0
+		} else {
+			|	EXT_CALL zend_jit_fetch_obj_is_slow, r0
+		}
+		|.if not(X64)
+		|	add r4, 8
+		|.endif
+		|	jmp >9
 	}
-	|.if not(X64)
-	|	add r4, 8
-	|.endif
-	|	jmp >9
 
 	|6:
 	if (offset == ZEND_WRONG_PROPERTY_OFFSET) {
@@ -10822,7 +10835,7 @@ static int zend_jit_fetch_obj_read(dasm_State **Dst, const zend_op *opline, cons
 	|	EXT_CALL zend_jit_zval_copy_deref_helper, r0
 	|	jmp >9
 
-	if ((op1_info & ((MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)- MAY_BE_OBJECT))  && JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE) {
+	if ((op1_info & ((MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)- MAY_BE_OBJECT)) && JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE) {
 		|7:
 		if (opline->opcode != ZEND_FETCH_OBJ_IS) {
 			|	SAVE_VALID_OPLINE opline, r1
@@ -10874,6 +10887,13 @@ static int zend_jit_fetch_obj_read(dasm_State **Dst, const zend_op *opline, cons
 	|.code;
 	|9: // END
 	|	FREE_OP opline->op1_type, opline->op1, op1_info, 1, op_array, opline
+
+	if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE
+	 && offset != ZEND_WRONG_PROPERTY_OFFSET
+	 && opline->op1_type != IS_VAR
+	 && opline->op1_type != IS_TMP_VAR) {
+		may_throw = 0;
+	}
 
 	if (may_throw) {
 		if (!zend_jit_check_exception(Dst)) {
