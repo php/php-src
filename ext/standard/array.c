@@ -4024,7 +4024,7 @@ PHP_FUNCTION(array_values)
 	}
 
 	/* Initialize return array */
-	array_init_size(return_value, zend_hash_num_elements(arrval));
+	array_init_size(return_value, arrlen);
 	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 
 	/* Go through input array and add values to the return array */
