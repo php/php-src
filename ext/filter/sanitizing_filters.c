@@ -110,7 +110,7 @@ static void php_filter_strip(zval *value, zend_long flags)
 {
 	unsigned char *str;
 	size_t i;
-	int c;
+	size_t c;
 	zend_string *buf;
 
 	/* Optimization for if no strip flags are set */
