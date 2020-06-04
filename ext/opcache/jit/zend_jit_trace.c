@@ -1412,6 +1412,16 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 				case ZEND_QM_ASSIGN:
 					ADD_OP1_TRACE_GUARD();
 					break;
+				case ZEND_FETCH_DIM_FUNC_ARG:
+					if (!frame
+					 || !frame->call
+					 || !frame->call->func
+					 || !TRACE_FRAME_IS_LAST_SEND_BY_VAL(frame->call)) {
+						break;
+					}
+					ADD_OP2_TRACE_GUARD();
+					ADD_OP1_TRACE_GUARD();
+					break;
 				case ZEND_PRE_INC:
 				case ZEND_PRE_DEC:
 				case ZEND_POST_INC:
@@ -1521,6 +1531,19 @@ propagate_arg:
 							return_value_info.type |= MAY_BE_NULL;
 						}
 						return_value_info.type &= ~MAY_BE_GUARD;
+					}
+					break;
+				case ZEND_CHECK_FUNC_ARG:
+					if (frame
+					 && frame->call
+					 && frame->call->func) {
+						uint32_t arg_num = opline->op2.num;
+
+						if (ARG_SHOULD_BE_SENT_BY_REF(frame->call->func, arg_num)) {
+							TRACE_FRAME_SET_LAST_SEND_BY_REF(frame->call);
+						} else {
+							TRACE_FRAME_SET_LAST_SEND_BY_VAL(frame->call);
+						}
 					}
 					break;
 				default:
