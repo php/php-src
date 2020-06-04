@@ -18,20 +18,6 @@ ZEND_API zend_attributes_internal_validator zend_attribute_get_validator(zend_st
 	return zend_hash_find_ptr(&internal_validators, lcname);
 }
 
-ZEND_API void zend_attribute_free(zend_attribute *attr, int persistent)
-{
-	uint32_t i;
-
-	zend_string_release(attr->name);
-	zend_string_release(attr->lcname);
-
-	for (i = 0; i < attr->argc; i++) {
-		zval_ptr_dtor(&attr->argv[i]);
-	}
-
-	pefree(attr, persistent);
-}
-
 static zend_attribute *get_attribute(HashTable *attributes, zend_string *lcname, uint32_t offset)
 {
 	if (attributes) {
@@ -84,9 +70,52 @@ ZEND_API zend_attribute *zend_get_parameter_attribute_str(HashTable *attributes,
 	return get_attribute_str(attributes, str, len, offset + 1);
 }
 
-static void attribute_ptr_dtor(zval *v)
+static zend_always_inline void free_attribute(zend_attribute *attr, int persistent)
 {
-	zend_attribute_free((zend_attribute *) Z_PTR_P(v), 1);
+	uint32_t i;
+
+	zend_string_release(attr->name);
+	zend_string_release(attr->lcname);
+
+	for (i = 0; i < attr->argc; i++) {
+		zval_ptr_dtor(&attr->argv[i]);
+	}
+
+	pefree(attr, persistent);
+}
+
+static void attr_free(zval *v)
+{
+	free_attribute((zend_attribute *) Z_PTR_P(v), 0);
+}
+
+static void attr_pfree(zval *v)
+{
+	free_attribute((zend_attribute *) Z_PTR_P(v), 1);
+}
+
+ZEND_API zend_attribute *zend_add_attribute(HashTable **attributes, zend_bool persistent, uint32_t offset, zend_string *name, uint32_t argc)
+{
+	if (*attributes == NULL) {
+		*attributes = pemalloc(sizeof(HashTable), persistent);
+		zend_hash_init(*attributes, 8, NULL, persistent ? attr_pfree : attr_free, persistent);
+	}
+
+	zend_attribute *attr = pemalloc(ZEND_ATTRIBUTE_SIZE(argc), persistent);
+
+	if (persistent == ((GC_FLAGS(name) & IS_STR_PERSISTENT) != 0)) {
+		attr->name = zend_string_copy(name);
+	} else {
+		attr->name = zend_string_dup(name, persistent);
+	}
+
+	attr->lcname = zend_string_tolower_ex(attr->name, persistent);
+	attr->offset = offset;
+	attr->argc = argc;
+
+	zend_hash_next_index_insert_ptr(*attributes, attr);
+
+	return attr;
 }
 
 ZEND_API void zend_compiler_attribute_register(zend_class_entry *ce, zend_attributes_internal_validator validator)
@@ -100,19 +129,7 @@ ZEND_API void zend_compiler_attribute_register(zend_class_entry *ce, zend_attrib
 	zend_hash_update_ptr(&internal_validators, lcname, validator);
 	zend_string_release(lcname);
 
-	if (ce->attributes == NULL) {
-		ce->attributes = pemalloc(sizeof(HashTable), 1);
-		zend_hash_init(ce->attributes, 8, NULL, attribute_ptr_dtor, 1);
-	}
-
-	zend_attribute *attr = pemalloc(ZEND_ATTRIBUTE_SIZE(0), 1);
-
-	attr->name = zend_string_copy(zend_ce_php_attribute->name);
-	attr->lcname = zend_string_tolower_ex(attr->name, 1);
-	attr->offset = 0;
-	attr->argc = 0;
-
-	zend_hash_next_index_insert_ptr(ce->attributes, attr);
+	zend_add_class_attribute(ce, zend_ce_php_attribute->name, 0);
 }
 
 void zend_register_attribute_ce(void)
