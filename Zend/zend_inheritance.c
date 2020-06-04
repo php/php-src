@@ -1973,7 +1973,6 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 	zval* prop_value;
 	uint32_t flags;
 	zend_string *doc_comment;
-	HashTable *attributes = NULL;
 
 	/* In the following steps the properties are inserted into the property table
 	 * for that, a very strict approach is applied:
@@ -2073,15 +2072,19 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 
 			Z_TRY_ADDREF_P(prop_value);
 			doc_comment = property_info->doc_comment ? zend_string_copy(property_info->doc_comment) : NULL;
-			if (property_info->attributes) {
-				attributes = property_info->attributes;
 
-				if (!(GC_FLAGS(attributes) & IS_ARRAY_IMMUTABLE)) {
-					GC_ADDREF(attributes);
+			zend_type_copy_ctor(&property_info->type, /* persistent */ 0);
+			zend_declare_typed_property(ce, prop_name, prop_value, flags, doc_comment, property_info->type);
+
+			if (property_info->attributes) {
+				zend_property_info *info = (zend_property_info *) zend_hash_find_ptr(&ce->properties_info, prop_name);
+				info->attributes = property_info->attributes;
+
+				if (!(GC_FLAGS(info->attributes) & IS_ARRAY_IMMUTABLE)) {
+					GC_ADDREF(info->attributes);
 				}
 			}
-			zend_type_copy_ctor(&property_info->type, /* persistent */ 0);
-			zend_declare_typed_property(ce, prop_name, prop_value, flags, doc_comment, attributes, property_info->type);
+
 			zend_string_release_ex(prop_name, 0);
 		} ZEND_HASH_FOREACH_END();
 	}

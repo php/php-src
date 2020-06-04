@@ -26,8 +26,6 @@ typedef struct _zend_attribute {
 
 typedef void (*zend_attributes_internal_validator)(zend_attribute *attr, int target);
 
-ZEND_API void zend_attribute_free(zend_attribute *attr, int persistent);
-
 ZEND_API zend_attribute *zend_get_attribute(HashTable *attributes, zend_string *lcname);
 ZEND_API zend_attribute *zend_get_attribute_str(HashTable *attributes, const char *str, size_t len);
 
@@ -37,8 +35,59 @@ ZEND_API zend_attribute *zend_get_parameter_attribute_str(HashTable *attributes,
 ZEND_API void zend_compiler_attribute_register(zend_class_entry *ce, zend_attributes_internal_validator validator);
 ZEND_API zend_attributes_internal_validator zend_attribute_get_validator(zend_string *lcname);
 
-void zend_register_attribute_ce(void);
+ZEND_API zend_attribute *zend_add_attribute(HashTable **attributes, zend_bool persistent, uint32_t offset, zend_string *name, uint32_t argc);
 
 END_EXTERN_C()
+
+static zend_always_inline zend_attribute *zend_add_class_attribute(zend_class_entry *ce, zend_string *name, uint32_t argc)
+{
+	return zend_add_attribute(&ce->attributes, ce->type != ZEND_USER_CLASS, 0, name, argc);
+}
+
+static zend_always_inline zend_attribute *zend_add_function_attribute(zend_function *func, zend_string *name, uint32_t argc)
+{
+	return zend_add_attribute(&func->common.attributes, func->common.type != ZEND_USER_FUNCTION, 0, name, argc);
+}
+
+static zend_always_inline zend_attribute *zend_add_parameter_attribute(zend_function *func, uint32_t offset, zend_string *name, uint32_t argc)
+{
+	return zend_add_attribute(&func->common.attributes, func->common.type != ZEND_USER_FUNCTION, offset + 1, name, argc);
+}
+
+static zend_always_inline zend_attribute *zend_add_property_attribute(zend_class_entry *ce, zend_property_info *info, zend_string *name, uint32_t argc)
+{
+	return zend_add_attribute(&info->attributes, ce->type != ZEND_USER_CLASS, 0, name, argc);
+}
+
+static zend_always_inline zend_attribute *zend_add_property_attribute_str(zend_class_entry *ce, const char *key, size_t len, zend_string *name, uint32_t argc)
+{
+	zend_property_info *info = (zend_property_info *) zend_hash_str_find_ptr(&ce->properties_info, key, len);
+
+	if (info == NULL) {
+		zend_error_noreturn(E_ERROR, "Property '%.*s' not found in class '%s'", (int) len, key, ZSTR_VAL(ce->name));
+		return NULL;
+	}
+
+	return zend_add_attribute(&info->attributes, ce->type != ZEND_USER_CLASS, 0, name, argc);
+}
+
+static zend_always_inline zend_attribute *zend_add_class_constant_attribute(zend_class_entry *ce, zend_class_constant *c, zend_string *name, uint32_t argc)
+{
+	return zend_add_attribute(&c->attributes, ce->type != ZEND_USER_CLASS, 0, name, argc);
+}
+
+static zend_always_inline zend_attribute *zend_add_class_constant_attribute_str(zend_class_entry *ce, const char *key, size_t len, zend_string *name, uint32_t argc)
+{
+	zend_class_constant *c = (zend_class_constant *) zend_hash_str_find_ptr(&ce->constants_table, key, len);
+
+	if (c == NULL) {
+		zend_error_noreturn(E_ERROR, "Class constant '%.*s' not found in class '%s'", (int) len, key, ZSTR_VAL(ce->name));
+		return NULL;
+	}
+
+	return zend_add_attribute(&c->attributes, ce->type != ZEND_USER_CLASS, 0, name, argc);
+}
+
+void zend_register_attribute_ce(void);
 
 #endif

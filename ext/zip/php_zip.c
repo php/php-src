@@ -819,7 +819,7 @@ static void php_zip_register_prop_handler(HashTable *prop_handler, char *name, z
 
 	/* Register for reflection */
 	ZVAL_NULL(&tmp);
-	zend_declare_property_ex(zip_class_entry, str, &tmp, ZEND_ACC_PUBLIC, NULL, NULL);
+	zend_declare_property_ex(zip_class_entry, str, &tmp, ZEND_ACC_PUBLIC, NULL);
 	zend_string_release_ex(str, 1);
 }
 /* }}} */
