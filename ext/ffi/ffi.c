@@ -3448,7 +3448,7 @@ static void zend_ffi_throw_parser_error(const char *format, ...) /* {{{ */
 static int zend_ffi_validate_vla(zend_ffi_type *type) /* {{{ */
 {
 	if (!FFI_G(allow_vla) && (type->attr & ZEND_FFI_ATTR_VLA)) {
-		zend_ffi_throw_parser_error("'[*]' not allowed in other than function prototype scope at line %d", FFI_G(line));
+		zend_ffi_throw_parser_error("\"[*]\" is not allowed in other than function prototype scope at line %d", FFI_G(line));
 		return FAILURE;
 	}
 	return SUCCESS;
@@ -3465,11 +3465,11 @@ static int zend_ffi_validate_incomplete_type(zend_ffi_type *type, zend_bool allo
 			ZEND_HASH_FOREACH_STR_KEY_PTR(FFI_G(tags), key, tag) {
 				if (ZEND_FFI_TYPE(tag->type) == type) {
 					if (type->kind == ZEND_FFI_TYPE_ENUM) {
-						zend_ffi_throw_parser_error("Incomplete \"enum %s\" at line %d", ZSTR_VAL(key), FFI_G(line));
+						zend_ffi_throw_parser_error("Incomplete enum %s at line %d", ZSTR_VAL(key), FFI_G(line));
 					} else if (type->attr & ZEND_FFI_ATTR_UNION) {
-						zend_ffi_throw_parser_error("Incomplete \"union %s\" at line %d", ZSTR_VAL(key), FFI_G(line));
+						zend_ffi_throw_parser_error("Incomplete union %s at line %d", ZSTR_VAL(key), FFI_G(line));
 					} else {
-						zend_ffi_throw_parser_error("Incomplete \"struct %s\" at line %d", ZSTR_VAL(key), FFI_G(line));
+						zend_ffi_throw_parser_error("Incomplete struct %s at line %d", ZSTR_VAL(key), FFI_G(line));
 					}
 					return FAILURE;
 				}
@@ -3489,10 +3489,10 @@ static int zend_ffi_validate_incomplete_type(zend_ffi_type *type, zend_bool allo
 		zend_ffi_throw_parser_error("Incomplete type at line %d", FFI_G(line));
 		return FAILURE;
 	} else if (!allow_incomplete_array && (type->attr & ZEND_FFI_ATTR_INCOMPLETE_ARRAY)) {
-		zend_ffi_throw_parser_error("\"[]\" not allowed at line %d", FFI_G(line));
+		zend_ffi_throw_parser_error("\"[]\" is not allowed at line %d", FFI_G(line));
 		return FAILURE;
 	} else if (!FFI_G(allow_vla) && (type->attr & ZEND_FFI_ATTR_VLA)) {
-		zend_ffi_throw_parser_error("\"[*]\" not allowed in other than function prototype scope at line %d", FFI_G(line));
+		zend_ffi_throw_parser_error("\"[*]\" is not allowed in other than function prototype scope at line %d", FFI_G(line));
 		return FAILURE;
 	}
 	return SUCCESS;
@@ -3502,7 +3502,7 @@ static int zend_ffi_validate_incomplete_type(zend_ffi_type *type, zend_bool allo
 static int zend_ffi_validate_type(zend_ffi_type *type, zend_bool allow_incomplete_tag, zend_bool allow_incomplete_array) /* {{{ */
 {
 	if (type->kind == ZEND_FFI_TYPE_VOID) {
-		zend_ffi_throw_parser_error("void type is not allowed at line %d", FFI_G(line));
+		zend_ffi_throw_parser_error("Type void is not allowed at line %d", FFI_G(line));
 		return FAILURE;
 	}
 	return zend_ffi_validate_incomplete_type(type, allow_incomplete_tag, allow_incomplete_array);
@@ -3512,7 +3512,7 @@ static int zend_ffi_validate_type(zend_ffi_type *type, zend_bool allow_incomplet
 static int zend_ffi_validate_var_type(zend_ffi_type *type, zend_bool allow_incomplete_array) /* {{{ */
 {
 	if (type->kind == ZEND_FFI_TYPE_FUNC) {
-		zend_ffi_throw_parser_error("function type is not allowed at line %d", FFI_G(line));
+		zend_ffi_throw_parser_error("Type function is not allowed at line %d", FFI_G(line));
 		return FAILURE;
 	}
 	return zend_ffi_validate_type(type, 0, allow_incomplete_array);
@@ -4043,7 +4043,7 @@ ZEND_METHOD(FFI, arrayType) /* {{{ */
 		zend_throw_error(zend_ffi_exception_ce, "Only the leftmost array can be undimensioned");
 		RETURN_THROWS();
 	} else if (type->kind == ZEND_FFI_TYPE_VOID) {
-		zend_throw_error(zend_ffi_exception_ce, "Array of 'void' is not allowed");
+		zend_throw_error(zend_ffi_exception_ce, "Array of void type is not allowed");
 		RETURN_THROWS();
 	} else if (type->attr & ZEND_FFI_ATTR_INCOMPLETE_TAG) {
 		zend_throw_error(zend_ffi_exception_ce, "Array of incomplete type is not allowed");
@@ -5900,7 +5900,7 @@ void zend_ffi_make_func_type(zend_ffi_dcl *dcl, HashTable *args, zend_ffi_dcl *n
 					zend_ffi_cleanup_dcl(dcl);
 					zend_hash_destroy(args);
 					pefree(args, FFI_G(persistent));
-					zend_ffi_parser_error("void type is not allowed at line %d", FFI_G(line));
+					zend_ffi_parser_error("Type void is not allowed at line %d", FFI_G(line));
 					return;
 				} else {
 					no_args = 1;
@@ -5930,7 +5930,7 @@ void zend_ffi_make_func_type(zend_ffi_dcl *dcl, HashTable *args, zend_ffi_dcl *n
 				zend_ffi_cleanup_dcl(dcl);
 				zend_hash_destroy(args);
 				pefree(args, FFI_G(persistent));
-				zend_ffi_parser_error("float/double type is not allowed at position " ZEND_ULONG_FMT " with __vectorcall at line %d", i+1, FFI_G(line));
+				zend_ffi_parser_error("Type float/double is not allowed at position " ZEND_ULONG_FMT " with __vectorcall at line %d", i+1, FFI_G(line));
 				return;
 			}
 		} ZEND_HASH_FOREACH_END();
