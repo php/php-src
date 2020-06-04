@@ -5245,7 +5245,7 @@ static int zend_jit_assign_to_variable(dasm_State    **Dst,
 
 	//ZEND_ASSERT(Z_MODE(var_addr) == IS_MEM_ZVAL);
 	if (var_info & MAY_BE_REF) {
-		if (Z_MODE(var_addr) != IS_REG || Z_REG(var_addr) != ZREG_FCARG1a) {
+		if (Z_MODE(var_addr) != IS_MEM_ZVAL || Z_REG(var_addr) != ZREG_FCARG1a || Z_OFFSET(var_addr) != 0) {
 			|	LOAD_ZVAL_ADDR FCARG1a, var_addr
 			var_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, 0);
 		}
