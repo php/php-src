@@ -1156,6 +1156,11 @@ static void* dasm_labels[zend_lb_MAX];
 ||	}
 |.endmacro
 
+|.macro IF_UNDEF, type_reg, label
+|	test type_reg, type_reg
+|	je label
+|.endmacro
+
 |.macro IF_TYPE, type, val, label
 |	cmp type, val
 |	je label
@@ -1204,7 +1209,9 @@ static void* dasm_labels[zend_lb_MAX];
 |.endmacro
 
 |.macro IF_NOT_REFCOUNTED, type_flags, label
-|	IF_NOT_FLAGS type_flags, IS_TYPE_REFCOUNTED, label
+|	//IF_NOT_FLAGS type_flags, IS_TYPE_REFCOUNTED, label
+|	test type_flags, type_flags
+|	jz label
 |.endmacro
 
 |.macro IF_ZVAL_FLAGS, addr, mask, label
@@ -10767,7 +10774,7 @@ static int zend_jit_fetch_obj_read(dasm_State **Dst, const zend_op *opline, cons
 			|	jl >8 // dynamic property
 		}
 		|	mov edx, dword [FCARG1a + r0 + 8]
-		|	IF_TYPE dl, IS_UNDEF, >5
+		|	IF_UNDEF dl, >5
 		|	add FCARG1a, r0
 		prop_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, 0);
 	} else {
@@ -10780,9 +10787,9 @@ static int zend_jit_fetch_obj_read(dasm_State **Dst, const zend_op *opline, cons
 			if (!exit_addr) {
 				return 0;
 			}
-			|	IF_TYPE dl, IS_UNDEF, &exit_addr
+			|	IF_UNDEF dl, &exit_addr
 		} else {
-			|	IF_TYPE dl, IS_UNDEF, >5
+			|	IF_UNDEF dl, >5
 		}
 	}
 	|	GET_ZVAL_PTR r0, prop_addr
