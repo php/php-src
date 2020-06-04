@@ -110,7 +110,7 @@ static void php_filter_strip(zval *value, zend_long flags)
 {
 	unsigned char *str;
 	size_t i;
-	int c;
+	size_t c;
 	zend_string *buf;
 
 	/* Optimization for if no strip flags are set */
@@ -119,7 +119,7 @@ static void php_filter_strip(zval *value, zend_long flags)
 	}
 
 	str = (unsigned char *)Z_STRVAL_P(value);
-	buf = zend_string_alloc(Z_STRLEN_P(value) + 1, 0);
+	buf = zend_string_alloc(Z_STRLEN_P(value), 0);
 	c = 0;
 	for (i = 0; i < Z_STRLEN_P(value); i++) {
 		if ((str[i] >= 127) && (flags & FILTER_FLAG_STRIP_HIGH)) {
@@ -161,7 +161,7 @@ static void filter_map_apply(zval *value, filter_map *map)
 	zend_string *buf;
 
 	str = (unsigned char *)Z_STRVAL_P(value);
-	buf = zend_string_alloc(Z_STRLEN_P(value) + 1, 0);
+	buf = zend_string_alloc(Z_STRLEN_P(value), 0);
 	c = 0;
 	for (i = 0; i < Z_STRLEN_P(value); i++) {
 		if ((*map)[str[i]]) {
