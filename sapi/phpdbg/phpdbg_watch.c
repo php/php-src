@@ -1249,10 +1249,12 @@ static int phpdbg_watchpoint_parse_wrapper(char *name, size_t namelen, char *key
 		if (element->child) {
 			element = element->child;
 		}
-		element->id = PHPDBG_G(watch_elements).nNextFreeElement;
-		zend_hash_index_add_ptr(&PHPDBG_G(watch_elements), element->id, element);
 
-		phpdbg_notice("watchadd", "index=\"%d\" variable=\"%.*s\"", "Added%s watchpoint #%d for %.*s", (element->flags & PHPDBG_WATCH_RECURSIVE_ROOT) ? " recursive" : "", element->id, (int) ZSTR_LEN(element->str), ZSTR_VAL(element->str));
+		/* work around missing API for extending an array with a new element, and getting its index */
+		zend_hash_next_index_insert_ptr(&PHPDBG_G(watch_elements), element);
+		element->id = PHPDBG_G(watch_elements).nNextFreeElement - 1;
+
+		phpdbg_notice("watchadd", "index=\"%d\" variable=\"%.*s\"", "Added%s watchpoint #%u for %.*s", (element->flags & PHPDBG_WATCH_RECURSIVE_ROOT) ? " recursive" : "", element->id, (int) ZSTR_LEN(element->str), ZSTR_VAL(element->str));
 	}
 
 	PHPDBG_G(watch_tmp) = NULL;
