@@ -522,6 +522,8 @@ PHP 8.0 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/non-capturing_catches
   . Added support for mixed type
     RFC: https://wiki.php.net/rfc/mixed_type_v2
+  . Added support for Attributes
+    RFC: https://wiki.php.net/rfc/attributes_v2
 
 - Date:
   . Added DateTime::createFromInterface() and
