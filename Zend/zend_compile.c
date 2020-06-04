@@ -6439,6 +6439,7 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t flags, z
 	}
 
 	for (i = 0; i < children; ++i) {
+		zend_property_info *info;
 		zend_ast *prop_ast = list->child[i];
 		zend_ast *name_ast = prop_ast->child[0];
 		zend_ast *value_ast = prop_ast->child[1];
@@ -6499,10 +6500,9 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t flags, z
 			ZVAL_UNDEF(&value_zv);
 		}
 
-		zend_declare_typed_property(ce, name, &value_zv, flags, doc_comment, type);
+		info = zend_declare_typed_property(ce, name, &value_zv, flags, doc_comment, type);
 
 		if (attr_ast) {
-			zend_property_info *info = (zend_property_info *) zend_hash_find_ptr(&ce->properties_info, name);
 			zend_compile_attributes(&info->attributes, attr_ast, 0, ZEND_ATTRIBUTE_TARGET_PROPERTY);
 		}
 	}
@@ -6553,6 +6553,7 @@ void zend_compile_class_const_decl(zend_ast *ast, zend_ast *attr_ast) /* {{{ */
 	}
 
 	for (i = 0; i < list->children; ++i) {
+		zend_class_constant *c;
 		zend_ast *const_ast = list->child[i];
 		zend_ast *name_ast = const_ast->child[0];
 		zend_ast *value_ast = const_ast->child[1];
@@ -6566,10 +6567,9 @@ void zend_compile_class_const_decl(zend_ast *ast, zend_ast *attr_ast) /* {{{ */
 		}
 
 		zend_const_expr_to_zval(&value_zv, value_ast);
-		zend_declare_class_constant_ex(ce, name, &value_zv, ast->attr, doc_comment);
+		c = zend_declare_class_constant_ex(ce, name, &value_zv, ast->attr, doc_comment);
 
 		if (attr_ast) {
-			zend_class_constant *c = (zend_class_constant *) zend_hash_find_ptr(&ce->constants_table, name);
 			zend_compile_attributes(&c->attributes, attr_ast, 0, ZEND_ATTRIBUTE_TARGET_CLASS_CONST);
 		}
 	}

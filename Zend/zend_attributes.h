@@ -59,32 +59,8 @@ static zend_always_inline zend_attribute *zend_add_property_attribute(zend_class
 	return zend_add_attribute(&info->attributes, ce->type != ZEND_USER_CLASS, 0, name, argc);
 }
 
-static zend_always_inline zend_attribute *zend_add_property_attribute_str(zend_class_entry *ce, const char *key, size_t len, zend_string *name, uint32_t argc)
-{
-	zend_property_info *info = (zend_property_info *) zend_hash_str_find_ptr(&ce->properties_info, key, len);
-
-	if (info == NULL) {
-		zend_error_noreturn(E_ERROR, "Property '%.*s' not found in class '%s'", (int) len, key, ZSTR_VAL(ce->name));
-		return NULL;
-	}
-
-	return zend_add_attribute(&info->attributes, ce->type != ZEND_USER_CLASS, 0, name, argc);
-}
-
 static zend_always_inline zend_attribute *zend_add_class_constant_attribute(zend_class_entry *ce, zend_class_constant *c, zend_string *name, uint32_t argc)
 {
-	return zend_add_attribute(&c->attributes, ce->type != ZEND_USER_CLASS, 0, name, argc);
-}
-
-static zend_always_inline zend_attribute *zend_add_class_constant_attribute_str(zend_class_entry *ce, const char *key, size_t len, zend_string *name, uint32_t argc)
-{
-	zend_class_constant *c = (zend_class_constant *) zend_hash_str_find_ptr(&ce->constants_table, key, len);
-
-	if (c == NULL) {
-		zend_error_noreturn(E_ERROR, "Class constant '%.*s' not found in class '%s'", (int) len, key, ZSTR_VAL(ce->name));
-		return NULL;
-	}
-
 	return zend_add_attribute(&c->attributes, ce->type != ZEND_USER_CLASS, 0, name, argc);
 }
 

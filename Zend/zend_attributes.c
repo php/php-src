@@ -103,7 +103,7 @@ ZEND_API zend_attribute *zend_add_attribute(HashTable **attributes, zend_bool pe
 
 	zend_attribute *attr = pemalloc(ZEND_ATTRIBUTE_SIZE(argc), persistent);
 
-	if (persistent == (zend_bool) (GC_FLAGS(name) & IS_STR_PERSISTENT)) {
+	if (persistent == ((GC_FLAGS(name) & IS_STR_PERSISTENT) != 0)) {
 		attr->name = zend_string_copy(name);
 	} else {
 		attr->name = zend_string_dup(name, persistent);
