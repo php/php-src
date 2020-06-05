@@ -30,7 +30,6 @@ include $pname . '/foo/hi';
 ?>
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
-<?php rmdir(__DIR__ . '/poo'); ?>
 <?php unlink(__DIR__ . '/readfile_edgecases.txt'); ?>
 --EXPECTF--
 blah
