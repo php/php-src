@@ -147,13 +147,10 @@ U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, getRuleStatusVec)
 
 	int32_t num_rules = fetch_rbbi(bio)->getRuleStatusVec(NULL, 0,
 			BREAKITER_ERROR_CODE(bio));
-	if (BREAKITER_ERROR_CODE(bio) == U_BUFFER_OVERFLOW_ERROR) {
-		BREAKITER_ERROR_CODE(bio) = U_ZERO_ERROR;
-	} else {
-		// should not happen
-		INTL_METHOD_CHECK_STATUS(bio, "rbbi_get_rule_status_vec: failed "
-				" determining the number of status values");
-	}
+
+	ZEND_ASSERT(BREAKITER_ERROR_CODE(bio) == U_BUFFER_OVERFLOW_ERROR);
+	BREAKITER_ERROR_CODE(bio) = U_ZERO_ERROR;
+
 	int32_t *rules = new int32_t[num_rules];
 	num_rules = fetch_rbbi(bio)->getRuleStatusVec(rules, num_rules,
 			BREAKITER_ERROR_CODE(bio));
