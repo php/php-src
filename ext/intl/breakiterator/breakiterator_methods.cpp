@@ -240,23 +240,18 @@ U_CFUNC PHP_METHOD(IntlBreakIterator, previous)
 
 U_CFUNC PHP_METHOD(IntlBreakIterator, next)
 {
-	bool no_arg_version = false;
+	zval *arg = NULL;
 
 	if (ZEND_NUM_ARGS() == 0) {
-		no_arg_version = true;
-	} else if (ZEND_NUM_ARGS() == 1) {
-		zval *arg;
-		int res = zend_parse_parameters(ZEND_NUM_ARGS(), "z", &arg);
-		assert(res == SUCCESS);
-		if (Z_TYPE_P(arg) == IS_NULL) {
-			no_arg_version = true;
-			ZEND_NUM_ARGS() = 0; /* pretend we don't have any argument */
-		} else {
-			no_arg_version = false;
-		}
+		goto no_arg_version;
+	}
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z!", &arg) == FAILURE) {
+		RETURN_THROWS();
 	}
 
-	if (no_arg_version) {
+	if (arg == NULL) {
+		ZEND_NUM_ARGS() = 0; /* pretend we don't have any argument */
+		no_arg_version:
 		_breakiter_no_args_ret_int32("breakiter_next",
 				&BreakIterator::next,
 				INTERNAL_FUNCTION_PARAM_PASSTHRU);
