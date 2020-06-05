@@ -122,6 +122,7 @@ typedef union _zend_parser_stack_elem {
 	zend_string *str;
 	zend_ulong num;
 	unsigned char *ptr;
+	char *ident;
 } zend_parser_stack_elem;
 
 void zend_compile_top_stmt(zend_ast *ast);
