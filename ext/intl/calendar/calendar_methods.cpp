@@ -175,6 +175,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_keyword_values_for_locale)
 	}
 
 	//does not work; see ICU bug 9194
+	// TODO This was fixed in ICU 50.1 see: https://unicode-org.atlassian.net/browse/ICU-9194
 #if 0
 	StringEnumeration *se = Calendar::getKeywordValuesForLocale(key,
 		Locale::createFromName(locale), (UBool)commonly_used,
