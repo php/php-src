@@ -29,6 +29,7 @@ PHP                                                                        NEWS
     extensions). (cmb)
   . Implemented FR #72089 (require() throws fatal error instead of exception).
     (Nikita)
+  . Fixed bug #77966 (Cannot alias a method named "namespace"). (Nikita)
 
 - BZ2:
   . Fixed bug #71263 (fread() does not report bzip2.decompress errors). (cmb)
