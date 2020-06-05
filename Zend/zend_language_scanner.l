@@ -306,13 +306,14 @@ ZEND_API void zend_destroy_file_handle(zend_file_handle *file_handle)
 	}
 }
 
-ZEND_API void zend_lex_tstring(zval *zv)
+ZEND_API void zend_lex_tstring(zval *zv, zend_lexer_ident_ref ident_ref)
 {
+	char *ident = (char *) SCNG(yy_start) + ident_ref.offset;
 	if (SCNG(on_event)) {
 		SCNG(on_event)(ON_FEEDBACK, T_STRING, 0, SCNG(on_event_context));
 	}
 
-	ZVAL_STRINGL(zv, (char*)SCNG(yy_text), SCNG(yy_leng));
+	ZVAL_STRINGL(zv, ident, ident_ref.len);
 }
 
 #define BOM_UTF32_BE	"\x00\x00\xfe\xff"
@@ -3024,7 +3025,8 @@ emit_token:
 
 emit_token_with_ident:
 	if (PARSER_MODE()) {
-		elem->ident = yytext;
+		elem->ident.offset = SCNG(yy_text) - SCNG(yy_start);
+		elem->ident.len = SCNG(yy_leng);
 	}
 	if (SCNG(on_event)) {
 		SCNG(on_event)(ON_TOKEN, token, start_line, SCNG(on_event_context));

@@ -117,12 +117,17 @@ typedef struct _zend_file_context {
 	HashTable seen_symbols;
 } zend_file_context;
 
+typedef struct {
+	uint32_t offset;
+	uint32_t len;
+} zend_lexer_ident_ref;
+
 typedef union _zend_parser_stack_elem {
 	zend_ast *ast;
 	zend_string *str;
 	zend_ulong num;
 	unsigned char *ptr;
-	char *ident;
+	zend_lexer_ident_ref ident;
 } zend_parser_stack_elem;
 
 void zend_compile_top_stmt(zend_ast *ast);
