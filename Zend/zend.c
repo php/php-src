@@ -32,6 +32,7 @@
 #include "zend_smart_str.h"
 #include "zend_smart_string.h"
 #include "zend_cpuinfo.h"
+#include "zend_attributes.h"
 
 static size_t global_map_ptr_last = 0;
 
@@ -1077,6 +1078,7 @@ void zend_shutdown(void) /* {{{ */
 	zend_hash_destroy(GLOBAL_CONSTANTS_TABLE);
 	free(GLOBAL_CONSTANTS_TABLE);
 	zend_shutdown_strtod();
+	zend_attributes_shutdown();
 
 #ifdef ZTS
 	GLOBAL_FUNCTION_TABLE = NULL;

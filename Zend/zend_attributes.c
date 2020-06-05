@@ -144,3 +144,8 @@ void zend_register_attribute_ce(void)
 
 	zend_compiler_attribute_register(zend_ce_php_attribute, zend_attribute_validate_phpattribute);
 }
+
+void zend_attributes_shutdown(void)
+{
+	zend_hash_destroy(&internal_validators);
+}

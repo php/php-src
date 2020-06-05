@@ -65,5 +65,6 @@ static zend_always_inline zend_attribute *zend_add_class_constant_attribute(zend
 }
 
 void zend_register_attribute_ce(void);
+void zend_attributes_shutdown(void);
 
 #endif
