@@ -15,6 +15,7 @@ $rc = new ReflectionClass(Test::class);
 echo $rc, "\n";
 
 $y = $rc->getProperty('y');
+var_dump($y->isPromoted());
 var_dump($y->getDocComment());
 
 ?>
@@ -48,4 +49,5 @@ Class [ <user> class Test ] {
   }
 }
 
+bool(true)
 string(24) "/** @SomeAnnotation() */"

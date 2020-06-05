@@ -413,6 +413,8 @@ class ReflectionProperty implements Reflector
     /** @return bool */
     public function isDefault() {}
 
+    public function isPromoted(): bool {}
+
     /** @return int */
     public function getModifiers() {}
 

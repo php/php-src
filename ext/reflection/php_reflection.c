@@ -5461,6 +5461,14 @@ ZEND_METHOD(ReflectionProperty, isDefault)
 }
 /* }}} */
 
+/* {{{ proto public bool ReflectionProperty::isPromoted()
+   Returns whether this property has been promoted from a constructor */
+ZEND_METHOD(ReflectionProperty, isPromoted)
+{
+	_property_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_PROMOTED);
+}
+/* }}} */
+
 /* {{{ proto public int ReflectionProperty::getModifiers()
    Returns a bitfield of the access modifiers for this property */
 ZEND_METHOD(ReflectionProperty, getModifiers)
