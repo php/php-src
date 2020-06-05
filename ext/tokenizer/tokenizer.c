@@ -423,8 +423,6 @@ struct event_context {
 void on_event(zend_php_scanner_event event, int token, int line, void *context)
 {
 	struct event_context *ctx = context;
-	HashTable *tokens_ht;
-	zval *token_zv;
 
 	switch (event) {
 		case ON_TOKEN:
@@ -438,16 +436,20 @@ void on_event(zend_php_scanner_event event, int token, int line, void *context)
 			add_token(ctx->tokens, token,
 				LANG_SCNG(yy_text), LANG_SCNG(yy_leng), line, ctx->token_class, NULL);
 			break;
-		case ON_FEEDBACK:
-			tokens_ht = Z_ARRVAL_P(ctx->tokens);
-			token_zv = zend_hash_index_find(tokens_ht, zend_hash_num_elements(tokens_ht) - 1);
+		case ON_FEEDBACK: {
+			HashTable *tokens_ht = Z_ARRVAL_P(ctx->tokens);
+			zval *token_zv = zend_hash_index_find(tokens_ht, zend_hash_num_elements(tokens_ht) - 1);
+			zval *id_zv;
 			ZEND_ASSERT(token_zv);
 			if (Z_TYPE_P(token_zv) == IS_ARRAY) {
-				ZVAL_LONG(zend_hash_index_find(Z_ARRVAL_P(token_zv), 0), token);
+				id_zv = zend_hash_index_find(Z_ARRVAL_P(token_zv), 0);
 			} else {
-				zend_update_property_long(php_token_ce, token_zv, "type", sizeof("type")-1, token);
+				ZEND_ASSERT(Z_TYPE_P(token_zv) == IS_OBJECT);
+				id_zv = OBJ_PROP_NUM(Z_OBJ_P(token_zv), 0);
 			}
+			ZVAL_LONG(id_zv, token);
 			break;
+		}
 		case ON_STOP:
 			if (LANG_SCNG(yy_cursor) != LANG_SCNG(yy_limit)) {
 				add_token(ctx->tokens, T_INLINE_HTML, LANG_SCNG(yy_cursor),
