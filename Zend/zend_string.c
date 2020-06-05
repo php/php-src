@@ -115,7 +115,7 @@ ZEND_API void zend_interned_strings_dtor(void)
 {
 	zend_hash_destroy(&interned_strings_permanent);
 
-	free(zend_known_strings);
+	pefree(zend_known_strings, 1);
 	zend_known_strings = NULL;
 }
 
