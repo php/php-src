@@ -194,9 +194,9 @@ class ZipArchive
 
 #ifdef HAVE_METHOD_SUPPORTED
     /** @return bool */
-    public static function isCompressionMethodSupported(int $method, bool $enc): bool {}
+    public static function isCompressionMethodSupported(int $method, bool $enc = true): bool {}
 
     /** @return bool */
-    public static function isEncryptionMethodSupported(int $method, bool $enc): bool {}
+    public static function isEncryptionMethodSupported(int $method, bool $enc = true): bool {}
 #endif
 }
