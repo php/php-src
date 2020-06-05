@@ -319,7 +319,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 						zend_string_release_ex(prop_info->doc_comment, 0);
 					}
 					if (prop_info->attributes) {
-						zend_array_release(prop_info->attributes);
+						zend_hash_release(prop_info->attributes);
 					}
 					zend_type_release(prop_info->type, /* persistent */ 0);
 				}
@@ -337,7 +337,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 							zend_string_release_ex(c->doc_comment, 0);
 						}
 						if (c->attributes) {
-							zend_array_release(c->attributes);
+							zend_hash_release(c->attributes);
 						}
 					}
 				} ZEND_HASH_FOREACH_END();
@@ -358,7 +358,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 				zend_string_release_ex(ce->info.user.doc_comment, 0);
 			}
 			if (ce->attributes) {
-				zend_array_release(ce->attributes);
+				zend_hash_release(ce->attributes);
 			}
 
 			if (ce->num_traits > 0) {
@@ -412,7 +412,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 							zend_string_release_ex(c->doc_comment, 1);
 						}
 						if (c->attributes) {
-							zend_array_release(c->attributes);
+							zend_hash_release(c->attributes);
 						}
 					}
 					free(c);
@@ -427,6 +427,9 @@ ZEND_API void destroy_zend_class(zval *zv)
 			}
 			if (ce->properties_info_table) {
 				free(ce->properties_info_table);
+			}
+			if (ce->attributes) {
+				zend_hash_release(ce->attributes);
 			}
 			free(ce);
 			break;
@@ -497,7 +500,7 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 		zend_string_release_ex(op_array->doc_comment, 0);
 	}
 	if (op_array->attributes) {
-		zend_array_release(op_array->attributes);
+		zend_hash_release(op_array->attributes);
 	}
 	if (op_array->live_range) {
 		efree(op_array->live_range);

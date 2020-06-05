@@ -324,11 +324,23 @@ static zend_always_inline void zend_hash_iterators_update(HashTable *ht, HashPos
 	}
 }
 
+/* For regular arrays (non-persistent, storing zvals). */
 static zend_always_inline void zend_array_release(zend_array *array)
 {
 	if (!(GC_FLAGS(array) & IS_ARRAY_IMMUTABLE)) {
 		if (GC_DELREF(array) == 0) {
 			zend_array_destroy(array);
+		}
+	}
+}
+
+/* For general hashes (possibly persistent, storing any kind of value). */
+static zend_always_inline void zend_hash_release(zend_array *array)
+{
+	if (!(GC_FLAGS(array) & IS_ARRAY_IMMUTABLE)) {
+		if (GC_DELREF(array) == 0) {
+			zend_hash_destroy(array);
+			pefree(array, GC_FLAGS(array) & IS_ARRAY_PERSISTENT);
 		}
 	}
 }
