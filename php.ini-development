@@ -113,6 +113,11 @@
 ;   Development Value: On
 ;   Production Value: On
 
+; error_backtraces
+;   Default Value: 0
+;   Development Value: 100
+;   Production Value: 0
+
 ; max_input_time
 ;   Default Value: -1 (Unlimited)
 ;   Development Value: 60 (60 seconds)
@@ -502,6 +507,11 @@ log_errors = On
 ; added. The default is 1024 and 0 allows to not apply any maximum length at all.
 ; http://php.net/log-errors-max-len
 log_errors_max_len = 1024
+
+; Maximum number of stack frames to report for PHP errors.
+; 0 for no backtraces, -1 for no limit.
+; http://php.net/debug-backtraces
+debug_backtraces = 100
 
 ; Do not log repeated messages. Repeated errors must occur in same file on same
 ; line unless ignore_repeated_source is set true.
