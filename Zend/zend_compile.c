@@ -653,7 +653,7 @@ static int zend_add_const_name_literal(zend_string *name, zend_bool unqualified)
 void zend_stop_lexing(void)
 {
 	if (LANG_SCNG(on_event)) {
-		LANG_SCNG(on_event)(ON_STOP, END, 0, LANG_SCNG(on_event_context));
+		LANG_SCNG(on_event)(ON_STOP, END, 0, NULL, 0, LANG_SCNG(on_event_context));
 	}
 
 	LANG_SCNG(yy_cursor) = LANG_SCNG(yy_limit);

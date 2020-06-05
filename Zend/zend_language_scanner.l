@@ -309,11 +309,12 @@ ZEND_API void zend_destroy_file_handle(zend_file_handle *file_handle)
 ZEND_API void zend_lex_tstring(zval *zv, zend_lexer_ident_ref ident_ref)
 {
 	char *ident = (char *) SCNG(yy_start) + ident_ref.offset;
+	size_t length = ident_ref.len;
 	if (SCNG(on_event)) {
-		SCNG(on_event)(ON_FEEDBACK, T_STRING, 0, SCNG(on_event_context));
+		SCNG(on_event)(ON_FEEDBACK, T_STRING, 0, ident, length, SCNG(on_event_context));
 	}
 
-	ZVAL_STRINGL(zv, ident, ident_ref.len);
+	ZVAL_STRINGL(zv, ident, length);
 }
 
 #define BOM_UTF32_BE	"\x00\x00\xfe\xff"
@@ -3019,7 +3020,7 @@ emit_token_with_val:
 
 emit_token:
 	if (SCNG(on_event)) {
-		SCNG(on_event)(ON_TOKEN, token, start_line, SCNG(on_event_context));
+		SCNG(on_event)(ON_TOKEN, token, start_line, yytext, yyleng, SCNG(on_event_context));
 	}
 	return token;
 
@@ -3029,14 +3030,14 @@ emit_token_with_ident:
 		elem->ident.len = SCNG(yy_leng);
 	}
 	if (SCNG(on_event)) {
-		SCNG(on_event)(ON_TOKEN, token, start_line, SCNG(on_event_context));
+		SCNG(on_event)(ON_TOKEN, token, start_line, yytext, yyleng, SCNG(on_event_context));
 	}
 	return token;
 
 return_whitespace:
 	HANDLE_NEWLINES(yytext, yyleng);
 	if (SCNG(on_event)) {
-		SCNG(on_event)(ON_TOKEN, T_WHITESPACE, start_line, SCNG(on_event_context));
+		SCNG(on_event)(ON_TOKEN, T_WHITESPACE, start_line, yytext, yyleng, SCNG(on_event_context));
 	}
 	if (PARSER_MODE()) {
 		start_line = CG(zend_lineno);
@@ -3047,7 +3048,7 @@ return_whitespace:
 
 skip_token:
 	if (SCNG(on_event)) {
-		SCNG(on_event)(ON_TOKEN, token, start_line, SCNG(on_event_context));
+		SCNG(on_event)(ON_TOKEN, token, start_line, yytext, yyleng, SCNG(on_event_context));
 	}
 	start_line = CG(zend_lineno);
 	goto restart;

@@ -50,7 +50,9 @@ typedef struct _zend_lex_state {
 	const zend_encoding *script_encoding;
 
 	/* hooks */
-	void (*on_event)(zend_php_scanner_event event, int token, int line, void *context);
+	void (*on_event)(
+		zend_php_scanner_event event, int token, int line,
+		const char *text, size_t length, void *context);
 	void *on_event_context;
 
 	zend_ast *ast;
