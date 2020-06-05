@@ -3,20 +3,14 @@ Test that there is no arginfo/zpp mismatch
 --FILE--
 <?php
 
-set_error_handler(
-    function (string $code, string $message) {
-        return true;
-    },
-    E_NOTICE | E_WARNING
-);
-
 foreach (get_defined_functions()["internal"] as $function) {
     try {
-        $function(null, null, null, null, null, null, null, null);
+        @$function(null, null, null, null, null, null, null, null);
     } catch (ArgumentCountError|Error) {
     }
 }
 
+// var_dump() and debug_zval_dump() print all arguments
 ?>
 --EXPECT--
 NULL

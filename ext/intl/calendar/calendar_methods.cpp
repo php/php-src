@@ -427,51 +427,34 @@ U_CFUNC PHP_FUNCTION(intlcal_set)
 
 U_CFUNC PHP_FUNCTION(intlcal_roll)
 {
-	zend_long		field,
-				value;
-	zval		args_a[3]		 = {0},
-				*args			 = args_a;
-	zend_bool	bool_variant_val;
+	zval *zvalue;
+	zend_long field, value;
 	CALENDAR_METHOD_INIT_VARS;
 
-	object = getThis();
-
-	if (ZEND_NUM_ARGS() > (object ? 2 :3) ||
-			zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_set: too many arguments", 0);
-		RETURN_FALSE;
-	}
-	if (!object) {
-		args++;
-	}
-	if (!Z_ISUNDEF(args[1]) && (Z_TYPE(args[1]) == IS_TRUE || Z_TYPE(args[1]) == IS_FALSE)) {
-		if (zend_parse_method_parameters(ZEND_NUM_ARGS(), object,
-				"Olb", &object, Calendar_ce_ptr, &field, &bool_variant_val)
-				== FAILURE) {
-			RETURN_THROWS();
-		}
-		/* false corresponds to rolling down, i.e. -1 */
-		value = Z_TYPE(args[1]) == IS_TRUE? 1 : -1;
-	} else if (zend_parse_method_parameters(ZEND_NUM_ARGS(), object,
-			"Oll", &object, Calendar_ce_ptr, &field, &value) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Olz", &object, Calendar_ce_ptr, &field, &zvalue) == FAILURE) {
 		RETURN_THROWS();
-	}
-
-	if (field < 0 || field >= UCAL_FIELD_COUNT) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_roll: invalid field", 0);
-		RETURN_FALSE;
-	}
-	if (value < INT32_MIN || value > INT32_MAX) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_roll: value out of bounds", 0);
-		RETURN_FALSE;
 	}
 
 	CALENDAR_METHOD_FETCH_OBJECT;
 
+	if (field < 0 || field >= UCAL_FIELD_COUNT) {
+		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "intlcal_roll: invalid field", 0);
+		RETURN_FALSE;
+	}
+
+	if (Z_TYPE_P(zvalue) == IS_FALSE || Z_TYPE_P(zvalue) == IS_TRUE) {
+		value = Z_TYPE_P(zvalue) == IS_TRUE ? 1 : -1;
+	} else {
+		value = zval_get_long(zvalue);
+
+		if (value < INT32_MIN || value > INT32_MAX) {
+			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "intlcal_roll: value out of bounds", 0);
+			RETURN_FALSE;
+		}
+	}
+
 	co->ucal->roll((UCalendarDateFields)field, (int32_t)value, CALENDAR_ERROR_CODE(co));
+
 	INTL_METHOD_CHECK_STATUS(co, "intlcal_roll: Error calling ICU Calendar::roll");
 
 	RETURN_TRUE;
