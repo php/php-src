@@ -1917,6 +1917,20 @@ PHP_FUNCTION(session_module_name)
 }
 /* }}} */
 
+static int save_handler_check_session() {
+	if (PS(session_status) == php_session_active) {
+		php_error_docref(NULL, E_WARNING, "Cannot change save handler when session is active");
+		return FAILURE;
+	}
+
+	if (SG(headers_sent)) {
+		php_error_docref(NULL, E_WARNING, "Cannot change save handler when headers already sent");
+		return FAILURE;
+	}
+
+	return SUCCESS;
+}
+
 /* {{{ proto bool session_set_save_handler(string open, string close, string read, string write, string destroy, string gc, string create_sid)
    Sets user-level functions */
 PHP_FUNCTION(session_set_save_handler)
@@ -1924,16 +1938,6 @@ PHP_FUNCTION(session_set_save_handler)
 	zval *args = NULL;
 	int i, num_args, argc = ZEND_NUM_ARGS();
 	zend_string *ini_name, *ini_val;
-
-	if (PS(session_status) == php_session_active) {
-		php_error_docref(NULL, E_WARNING, "Cannot change save handler when session is active");
-		RETURN_FALSE;
-	}
-
-	if (SG(headers_sent)) {
-		php_error_docref(NULL, E_WARNING, "Cannot change save handler when headers already sent");
-		RETURN_FALSE;
-	}
 
 	if (argc > 0 && argc <= 2) {
 		zval *obj = NULL;
@@ -1943,6 +1947,10 @@ PHP_FUNCTION(session_set_save_handler)
 
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|b", &obj, php_session_iface_entry, &register_shutdown) == FAILURE) {
 			RETURN_THROWS();
+		}
+
+		if (save_handler_check_session() == FAILURE) {
+			RETURN_FALSE;
 		}
 
 		/* For compatibility reason, implemented interface is not checked */
@@ -2045,6 +2053,10 @@ PHP_FUNCTION(session_set_save_handler)
 
 	if (zend_parse_parameters(argc, "+", &args, &num_args) == FAILURE) {
 		RETURN_THROWS();
+	}
+
+	if (save_handler_check_session() == FAILURE) {
+		RETURN_FALSE;
 	}
 
 	/* remove shutdown function */

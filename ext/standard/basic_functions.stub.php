@@ -357,7 +357,7 @@ function parse_ini_file(string $filename, bool $process_sections = false, int $s
 function parse_ini_string(string $ini_string, bool $process_sections = false, int $scanner_mode = INI_SCANNER_NORMAL): array|false {}
 
 #if ZEND_DEBUG
-function config_get_hash(string $ini_string, bool $process_sections = false, int $scanner_mode = INI_SCANNER_NORMAL): array {}
+function config_get_hash(): array {}
 #endif
 
 #ifdef HAVE_GETLOADAVG

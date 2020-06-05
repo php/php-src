@@ -2540,13 +2540,13 @@ PHP_FUNCTION(is_uploaded_file)
 	char *path;
 	size_t path_len;
 
-	if (!SG(rfc1867_uploaded_files)) {
-		RETURN_FALSE;
-	}
-
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_PATH(path, path_len)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (!SG(rfc1867_uploaded_files)) {
+		RETURN_FALSE;
+	}
 
 	if (zend_hash_str_exists(SG(rfc1867_uploaded_files), path, path_len)) {
 		RETURN_TRUE;
@@ -2568,14 +2568,14 @@ PHP_FUNCTION(move_uploaded_file)
 	int oldmask; int ret;
 #endif
 
-	if (!SG(rfc1867_uploaded_files)) {
-		RETURN_FALSE;
-	}
-
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_STRING(path, path_len)
 		Z_PARAM_PATH(new_path, new_path_len)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (!SG(rfc1867_uploaded_files)) {
+		RETURN_FALSE;
+	}
 
 	if (!zend_hash_str_exists(SG(rfc1867_uploaded_files), path, path_len)) {
 		RETURN_FALSE;
