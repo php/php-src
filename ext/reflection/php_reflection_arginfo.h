@@ -402,6 +402,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionParameter_isVariadic arginfo_class_ReflectionFunctionAbstract___clone
 
+#define arginfo_class_ReflectionParameter_isPromoted arginfo_class_ReflectionProperty_isPromoted
+
 #define arginfo_class_ReflectionParameter_getAttributes arginfo_class_ReflectionFunctionAbstract_getAttributes
 
 #define arginfo_class_ReflectionType___clone arginfo_class_ReflectionFunctionAbstract___clone
@@ -647,6 +649,7 @@ ZEND_METHOD(ReflectionParameter, getDefaultValue);
 ZEND_METHOD(ReflectionParameter, isDefaultValueConstant);
 ZEND_METHOD(ReflectionParameter, getDefaultValueConstantName);
 ZEND_METHOD(ReflectionParameter, isVariadic);
+ZEND_METHOD(ReflectionParameter, isPromoted);
 ZEND_METHOD(ReflectionParameter, getAttributes);
 ZEND_METHOD(ReflectionType, allowsNull);
 ZEND_METHOD(ReflectionType, __toString);
@@ -907,6 +910,7 @@ static const zend_function_entry class_ReflectionParameter_methods[] = {
 	ZEND_ME(ReflectionParameter, isDefaultValueConstant, arginfo_class_ReflectionParameter_isDefaultValueConstant, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionParameter, getDefaultValueConstantName, arginfo_class_ReflectionParameter_getDefaultValueConstantName, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionParameter, isVariadic, arginfo_class_ReflectionParameter_isVariadic, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionParameter, isPromoted, arginfo_class_ReflectionParameter_isPromoted, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionParameter, getAttributes, arginfo_class_ReflectionParameter_getAttributes, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };

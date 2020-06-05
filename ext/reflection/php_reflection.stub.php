@@ -555,6 +555,8 @@ class ReflectionParameter implements Reflector
     /** @return bool */
     public function isVariadic() {}
 
+    public function isPromoted(): bool {}
+
     /** @return ReflectionAttribute[] */
     public function getAttributes(?string $name = null, int $flags = 0): array {}
 }
