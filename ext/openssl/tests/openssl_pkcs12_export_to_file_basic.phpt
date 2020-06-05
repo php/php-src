@@ -25,7 +25,7 @@ var_dump(openssl_pkcs12_export_to_file($cert_path, $pkcsfile, $priv_path, $pass)
 var_dump(openssl_pkcs12_read(file_get_contents($pkcsfile), $opts, $pass));
 var_dump(openssl_pkcs12_export_to_file($cert_res, $pkcsfile, $priv_res, $pass));
 var_dump(openssl_pkcs12_read(file_get_contents($pkcsfile), $opts, $pass));
-var_dump(openssl_pkcs12_export_to_file($cert_res, $pkcsfile, $priv_res, $pass, array($cert)));
+var_dump(openssl_pkcs12_export_to_file($cert_res, $pkcsfile, $priv_res, $pass, array('extracerts' => $cert)));
 var_dump(openssl_pkcs12_read(file_get_contents($pkcsfile), $opts, $pass));
 
 var_dump(openssl_pkcs12_export_to_file($invalid, $pkcsfile, $invalid, $pass));
