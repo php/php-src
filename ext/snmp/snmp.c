@@ -26,6 +26,9 @@
 #include "php.h"
 #include "main/php_network.h"
 #include "ext/standard/info.h"
+#ifdef ssize_t
+# undef ssize_t
+#endif
 #include "php_snmp.h"
 
 #include "zend_exceptions.h"

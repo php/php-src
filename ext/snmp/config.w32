@@ -8,6 +8,7 @@ if (PHP_SNMP != "no") {
 		if (CHECK_LIB("netsnmp.lib", "snmp", PHP_SNMP)) {
 			EXTENSION('snmp', 'snmp.c');
 			AC_DEFINE('HAVE_SNMP', 1);
+			ADD_FLAG("CFLAGS_SNMP", "/D HAVE_SSIZE_T");
 		} else {
 			WARNING("snmp not enabled; libraries and headers not found");
 		}
