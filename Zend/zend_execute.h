@@ -86,10 +86,17 @@ ZEND_API zend_bool zend_value_instanceof_static(zval *zv);
 ZEND_API void ZEND_FASTCALL zend_ref_add_type_source(zend_property_info_source_list *source_list, zend_property_info *prop);
 ZEND_API void ZEND_FASTCALL zend_ref_del_type_source(zend_property_info_source_list *source_list, zend_property_info *prop);
 
-ZEND_API zval* zend_assign_to_typed_ref(zval *variable_ptr, zval *value, zend_uchar value_type, zend_bool strict, zend_refcounted *ref);
+ZEND_API zval* zend_assign_to_typed_ref(zval *variable_ptr, zval *value, zend_uchar value_type, zend_bool strict);
 
-static zend_always_inline void zend_copy_to_variable(zval *variable_ptr, zval *value, zend_uchar value_type, zend_refcounted *ref)
+static zend_always_inline void zend_copy_to_variable(zval *variable_ptr, zval *value, zend_uchar value_type)
 {
+	zend_refcounted *ref = NULL;
+
+	if (ZEND_CONST_COND(value_type & (IS_VAR|IS_CV), 1) && Z_ISREF_P(value)) {
+		ref = Z_COUNTED_P(value);
+		value = Z_REFVAL_P(value);
+	}
+
 	ZVAL_COPY_VALUE(variable_ptr, value);
 	if (ZEND_CONST_COND(value_type  == IS_CONST, 0)) {
 		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(variable_ptr))) {
@@ -110,20 +117,13 @@ static zend_always_inline void zend_copy_to_variable(zval *variable_ptr, zval *v
 
 static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval *value, zend_uchar value_type, zend_bool strict)
 {
-	zend_refcounted *ref = NULL;
-
-	if (ZEND_CONST_COND(value_type & (IS_VAR|IS_CV), 1) && Z_ISREF_P(value)) {
-		ref = Z_COUNTED_P(value);
-		value = Z_REFVAL_P(value);
-	}
-
 	do {
 		if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr))) {
 			zend_refcounted *garbage;
 
 			if (Z_ISREF_P(variable_ptr)) {
 				if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(variable_ptr)))) {
-					return zend_assign_to_typed_ref(variable_ptr, value, value_type, strict, ref);
+					return zend_assign_to_typed_ref(variable_ptr, value, value_type, strict);
 				}
 
 				variable_ptr = Z_REFVAL_P(variable_ptr);
@@ -132,7 +132,7 @@ static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval
 				}
 			}
 			garbage = Z_COUNTED_P(variable_ptr);
-			zend_copy_to_variable(variable_ptr, value, value_type, ref);
+			zend_copy_to_variable(variable_ptr, value, value_type);
 			if (GC_DELREF(garbage) == 0) {
 				rc_dtor_func(garbage);
 			} else { /* we need to split */
@@ -145,7 +145,7 @@ static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval
 		}
 	} while (0);
 
-	zend_copy_to_variable(variable_ptr, value, value_type, ref);
+	zend_copy_to_variable(variable_ptr, value, value_type);
 	return variable_ptr;
 }
 

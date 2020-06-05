@@ -3109,10 +3109,17 @@ static zend_always_inline void i_zval_ptr_dtor_noref(zval *zval_ptr) {
 	}
 }
 
-ZEND_API zval* zend_assign_to_typed_ref(zval *variable_ptr, zval *orig_value, zend_uchar value_type, zend_bool strict, zend_refcounted *ref)
+ZEND_API zval* zend_assign_to_typed_ref(zval *variable_ptr, zval *orig_value, zend_uchar value_type, zend_bool strict)
 {
 	zend_bool ret;
 	zval value;
+	zend_refcounted *ref = NULL;
+
+	if (Z_ISREF_P(orig_value)) {
+		ref = Z_COUNTED_P(orig_value);
+		orig_value = Z_REFVAL_P(orig_value);
+	}
+
 	ZVAL_COPY(&value, orig_value);
 	ret = zend_verify_ref_assignable_zval(Z_REF_P(variable_ptr), &value, strict);
 	variable_ptr = Z_REFVAL_P(variable_ptr);
