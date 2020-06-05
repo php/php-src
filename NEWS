@@ -11,6 +11,9 @@ PHP                                                                        NEWS
 - Filter:
   . Fixed bug #73527 (Invalid memory access in php_filter_strip). (cmb)
 
+- GD:
+  . Fixed bug #79676 (imagescale adds black border with IMG_BICUBIC). (cmb)
+
 - OpenSSL:
   . Fixed bug #62890 (default_socket_timeout=-1 causes connection to timeout).
     (cmb)
