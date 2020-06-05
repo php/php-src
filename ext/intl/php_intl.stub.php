@@ -13,9 +13,9 @@ function intlcal_get_now(): float {}
 
 function intlcal_get_available_locales(): array {}
 
-function intlcal_get(IntlCalendar $calendar, int $field): int|false {}
+function intlcal_get(IntlCalendar $calendar, int $field): int {}
 
-function intlcal_get_time(IntlCalendar $calendar): float|false {}
+function intlcal_get_time(IntlCalendar $calendar): float {}
 
 function intlcal_set_time(IntlCalendar $calendar, float $date): bool {}
 
@@ -35,35 +35,35 @@ function intlcal_roll(IntlCalendar $calendar, int $field, $amountOrUpOrDown): bo
 
 function intlcal_clear(IntlCalendar $calendar, ?int $field = null): bool {}
 
-function intlcal_field_difference(IntlCalendar $calendar, float $when, int $field): int|false {}
+function intlcal_field_difference(IntlCalendar $calendar, float $when, int $field): int {}
 
-function intlcal_get_actual_maximum(IntlCalendar $calendar, int $field): int|false {}
+function intlcal_get_actual_maximum(IntlCalendar $calendar, int $field): int {}
 
-function intlcal_get_actual_minimum(IntlCalendar $calendar, int $field): int|false {}
+function intlcal_get_actual_minimum(IntlCalendar $calendar, int $field): int {}
 
-function intlcal_get_day_of_week_type(IntlCalendar $calendar, int $dayOfWeek): int|false {}
+function intlcal_get_day_of_week_type(IntlCalendar $calendar, int $dayOfWeek): int {}
 
-function intlcal_get_first_day_of_week(IntlCalendar $calendar): int|false {}
+function intlcal_get_first_day_of_week(IntlCalendar $calendar): int {}
 
-function intlcal_get_least_maximum(IntlCalendar $calendar, int $field): int|false {}
+function intlcal_get_least_maximum(IntlCalendar $calendar, int $field): int {}
 
-function intlcal_get_greatest_minimum(IntlCalendar $calendar, int $field): int|false {}
+function intlcal_get_greatest_minimum(IntlCalendar $calendar, int $field): int {}
 
-function intlcal_get_locale(IntlCalendar $calendar, int $localeType): string|false {}
+function intlcal_get_locale(IntlCalendar $calendar, int $localeType): string {}
 
-function intlcal_get_maximum(IntlCalendar $calendar, int $field): int|false {}
+function intlcal_get_maximum(IntlCalendar $calendar, int $field): int {}
 
-function intlcal_get_minimal_days_in_first_week(IntlCalendar $calendar): int|false {}
+function intlcal_get_minimal_days_in_first_week(IntlCalendar $calendar): int {}
 
 function intlcal_set_minimal_days_in_first_week(IntlCalendar $calendar, int $numberOfDays): bool {}
 
-function intlcal_get_minimum(IntlCalendar $calendar, int $field): int|false {}
+function intlcal_get_minimum(IntlCalendar $calendar, int $field): int {}
 
 function intlcal_get_time_zone(IntlCalendar $calendar): IntlTimeZone|false {}
 
 function intlcal_get_type(IntlCalendar $calendar): string {}
 
-function intlcal_get_weekend_transition(IntlCalendar $calendar, int $dayOfWeek): int|false {}
+function intlcal_get_weekend_transition(IntlCalendar $calendar, int $dayOfWeek): int {}
 
 function intlcal_in_daylight_time(IntlCalendar $calendar): bool {}
 
@@ -103,7 +103,7 @@ function intlgregcal_create_instance($timeZoneOrYear = UNKNOWN, $localeOrMonth =
 
 function intlgregcal_set_gregorian_change(IntlGregorianCalendar $calendar, float $change): bool {}
 
-function intlgregcal_get_gregorian_change(IntlGregorianCalendar $calendar): float|false {}
+function intlgregcal_get_gregorian_change(IntlGregorianCalendar $calendar): float {}
 
 function intlgregcal_is_leap_year(IntlGregorianCalendar $calendar, int $year): bool {}
 

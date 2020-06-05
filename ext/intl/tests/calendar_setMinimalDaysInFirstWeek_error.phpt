@@ -8,23 +8,27 @@ if (!extension_loaded('intl'))
 	die('skip intl extension not enabled');
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
 
 $c = new IntlGregorianCalendar(NULL, 'pt_PT');
 
-var_dump($c->setMinimalDaysInFirstWeek(0));
+try {
+    var_dump($c->setMinimalDaysInFirstWeek(0));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
-var_dump(intlcal_set_minimal_days_in_first_week($c, 0));
-var_dump(intlcal_set_minimal_days_in_first_week(1, 2));
---EXPECTF--
-Warning: IntlCalendar::setMinimalDaysInFirstWeek(): intlcal_set_minimal_days_in_first_week: invalid number of days; must be between 1 and 7 in %s on line %d
-bool(false)
+try {
+    var_dump(intlcal_set_minimal_days_in_first_week($c, 0));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    var_dump(intlcal_set_minimal_days_in_first_week(1, 2));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
-Warning: intlcal_set_minimal_days_in_first_week(): intlcal_set_minimal_days_in_first_week: invalid number of days; must be between 1 and 7 in %s on line %d
-bool(false)
-
-Fatal error: Uncaught TypeError: intlcal_set_minimal_days_in_first_week(): Argument #1 ($calendar) must be of type IntlCalendar, int given in %s:%d
-Stack trace:
-#0 %s(%d): intlcal_set_minimal_days_in_first_week(1, 2)
-#1 {main}
-  thrown in %s on line %d
+--EXPECT--
+IntlCalendar::setMinimalDaysInFirstWeek(): Argument #1 ($numberOfDays) must be between 1 and 7
+intlcal_set_minimal_days_in_first_week(): Argument #2 ($numberOfDays) must be between 1 and 7
+intlcal_set_minimal_days_in_first_week(): Argument #1 ($calendar) must be of type IntlCalendar, int given

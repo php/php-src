@@ -8,19 +8,20 @@ if (!extension_loaded('intl'))
 	die('skip intl extension not enabled');
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
-
 $c = new IntlGregorianCalendar(NULL, 'pt_PT');
 
-var_dump($c->getDayOfWeekType(0));
+try {
+    var_dump($c->getDayOfWeekType(0));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
-var_dump(intlcal_get_day_of_week_type(1, 1));
---EXPECTF--
-Warning: IntlCalendar::getDayOfWeekType(): intlcal_get_day_of_week_type: invalid day of week in %s on line %d
-bool(false)
+try {
+    var_dump(intlcal_get_day_of_week_type(1, 1));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
-Fatal error: Uncaught TypeError: intlcal_get_day_of_week_type(): Argument #1 ($calendar) must be of type IntlCalendar, int given in %s:%d
-Stack trace:
-#0 %s(%d): intlcal_get_day_of_week_type(1, 1)
-#1 {main}
-  thrown in %s on line %d
+--EXPECT--
+IntlCalendar::getDayOfWeekType(): Argument #1 ($dayOfWeek) must be a valid day of the week
+intlcal_get_day_of_week_type(): Argument #1 ($calendar) must be of type IntlCalendar, int given
