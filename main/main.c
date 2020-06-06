@@ -1816,9 +1816,9 @@ void php_request_shutdown(void *dummy)
 	php_deactivate_ticks();
 
 	/* 1. Call all possible shutdown functions registered with register_shutdown_function() */
-	if (PG(modules_activated)) zend_try {
+	if (PG(modules_activated)) {
 		php_call_shutdown_functions();
-	} zend_end_try();
+	}
 
 	/* 2. Call all possible __destruct() functions */
 	zend_try {
