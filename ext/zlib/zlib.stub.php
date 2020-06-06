@@ -2,6 +2,14 @@
 
 /** @generate-function-entries */
 
+final class InflateContext
+{
+}
+
+final class DeflateContext
+{
+}
+
 function ob_gzhandler(string $data, int $flags): string|false {}
 
 function zlib_get_coding_type(): string|false {}
@@ -95,20 +103,14 @@ function gzread($fp, int $length): string|false {}
  */
 function gzgets($fp, int $length = 1024): string|false {}
 
-/** @return resource|false */
-function deflate_init(int $encoding, array $options = []) {}
+function deflate_init(int $encoding, array $options = []): DeflateContext|false {}
 
-/** @param resource $resource */
-function deflate_add($resource, string $add, int $flush_behavior = ZLIB_SYNC_FLUSH): string|false {}
+function deflate_add(DeflateContext $context, string $add, int $flush_behavior = ZLIB_SYNC_FLUSH): string|false {}
 
-/** @return resource|false */
-function inflate_init(int $encoding, array $options = []) {}
+function inflate_init(int $encoding, array $options = []): InflateContext|false {}
 
-/** @param resource $context */
-function inflate_add($context, string $encoded_data, int $flush_mode = ZLIB_SYNC_FLUSH): string|false {}
+function inflate_add(InflateContext $context, string $encoded_data, int $flush_mode = ZLIB_SYNC_FLUSH): string|false {}
 
-/** @param resource $resource */
-function inflate_get_status($resource): int {}
+function inflate_get_status(InflateContext $context): int {}
 
-/** @param resource $resource */
-function inflate_get_read_len($resource): int {}
+function inflate_get_read_len(InflateContext $context): int {}

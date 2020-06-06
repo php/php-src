@@ -103,27 +103,30 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_gzgets, 0, 1, MAY_BE_STRING|MAY_
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, length, IS_LONG, 0, "1024")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_deflate_init, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_deflate_init, 0, 1, DeflateContext, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, encoding, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 0, "[]")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_deflate_add, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_INFO(0, resource)
+	ZEND_ARG_OBJ_INFO(0, context, DeflateContext, 0)
 	ZEND_ARG_TYPE_INFO(0, add, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flush_behavior, IS_LONG, 0, "ZLIB_SYNC_FLUSH")
 ZEND_END_ARG_INFO()
 
-#define arginfo_inflate_init arginfo_deflate_init
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_inflate_init, 0, 1, InflateContext, MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, encoding, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 0, "[]")
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_inflate_add, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_INFO(0, context)
+	ZEND_ARG_OBJ_INFO(0, context, InflateContext, 0)
 	ZEND_ARG_TYPE_INFO(0, encoded_data, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flush_mode, IS_LONG, 0, "ZLIB_SYNC_FLUSH")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_inflate_get_status, 0, 1, IS_LONG, 0)
-	ZEND_ARG_INFO(0, resource)
+	ZEND_ARG_OBJ_INFO(0, context, InflateContext, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_inflate_get_read_len arginfo_inflate_get_status
@@ -191,5 +194,15 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(inflate_add, arginfo_inflate_add)
 	ZEND_FE(inflate_get_status, arginfo_inflate_get_status)
 	ZEND_FE(inflate_get_read_len, arginfo_inflate_get_read_len)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_InflateContext_methods[] = {
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_DeflateContext_methods[] = {
 	ZEND_FE_END
 };
