@@ -468,7 +468,7 @@ PHP_MSHUTDOWN_FUNCTION(password) /* {{{ */
 }
 /* }}} */
 
-const php_password_algo* php_password_algo_default() {
+const php_password_algo* php_password_algo_default(void) {
 	return &php_password_algo_bcrypt;
 }
 

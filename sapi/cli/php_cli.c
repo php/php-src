@@ -118,7 +118,7 @@ static DWORD orig_cp = 0;
 #define PHP_MODE_SHOW_INI_CONFIG        13
 
 cli_shell_callbacks_t cli_shell_callbacks = { NULL, NULL, NULL };
-PHP_CLI_API cli_shell_callbacks_t *php_cli_get_shell_callbacks()
+PHP_CLI_API cli_shell_callbacks_t *php_cli_get_shell_callbacks(void)
 {
 	return &cli_shell_callbacks;
 }

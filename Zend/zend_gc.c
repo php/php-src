@@ -1611,7 +1611,7 @@ ZEND_API void zend_gc_get_status(zend_gc_status *status)
 	status->num_roots = GC_G(num_roots);
 }
 
-ZEND_API zend_get_gc_buffer *zend_get_gc_buffer_create() {
+ZEND_API zend_get_gc_buffer *zend_get_gc_buffer_create(void) {
 	/* There can only be one get_gc() call active at a time,
 	 * so there only needs to be one buffer. */
 	zend_get_gc_buffer *gc_buffer = &EG(get_gc_buffer);
