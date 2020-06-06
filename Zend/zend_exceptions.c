@@ -851,9 +851,11 @@ static zend_object *zend_throw_exception_zstr(zend_class_entry *exception_ce, ze
 
 ZEND_API ZEND_COLD zend_object *zend_throw_exception(zend_class_entry *exception_ce, const char *message, zend_long code) /* {{{ */
 {
-	zend_string *msg_str = zend_string_init(message, strlen(message), 0);
+	zend_string *msg_str = message ? zend_string_init(message, strlen(message), 0) : NULL;
 	zend_object *ex = zend_throw_exception_zstr(exception_ce, msg_str, code);
-	zend_string_release(msg_str);
+	if (msg_str) {
+		zend_string_release(msg_str);
+	}
 	return ex;
 }
 /* }}} */
