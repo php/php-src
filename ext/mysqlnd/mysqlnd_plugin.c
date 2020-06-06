@@ -125,7 +125,7 @@ mysqlnd_plugin_subsystem_end(void)
 
 
 /* {{{ mysqlnd_plugin_register */
-PHPAPI unsigned int mysqlnd_plugin_register()
+PHPAPI unsigned int mysqlnd_plugin_register(void)
 {
 	return mysqlnd_plugin_register_ex(NULL);
 }
@@ -181,7 +181,7 @@ PHPAPI void mysqlnd_plugin_apply_with_argument(apply_func_arg_t apply_func, void
 
 
 /* {{{ mysqlnd_plugin_count */
-PHPAPI unsigned int mysqlnd_plugin_count()
+PHPAPI unsigned int mysqlnd_plugin_count(void)
 {
 	return mysqlnd_plugins_counter;
 }

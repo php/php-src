@@ -94,7 +94,7 @@ typedef struct {
 	zval *start;
 } zend_get_gc_buffer;
 
-ZEND_API zend_get_gc_buffer *zend_get_gc_buffer_create();
+ZEND_API zend_get_gc_buffer *zend_get_gc_buffer_create(void);
 ZEND_API void zend_get_gc_buffer_grow(zend_get_gc_buffer *gc_buffer);
 
 static zend_always_inline void zend_get_gc_buffer_add_zval(

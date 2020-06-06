@@ -51,7 +51,7 @@ extern const php_password_algo php_password_algo_argon2id;
 
 PHPAPI int php_password_algo_register(const char*, const php_password_algo*);
 PHPAPI void php_password_algo_unregister(const char*);
-PHPAPI const php_password_algo* php_password_algo_default();
+PHPAPI const php_password_algo* php_password_algo_default(void);
 PHPAPI zend_string *php_password_algo_extract_ident(const zend_string*);
 PHPAPI const php_password_algo* php_password_algo_find(const zend_string*);
 

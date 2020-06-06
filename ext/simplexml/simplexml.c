@@ -35,7 +35,7 @@
 
 zend_class_entry *sxe_class_entry = NULL;
 
-PHP_SXE_API zend_class_entry *sxe_get_element_class_entry() /* {{{ */
+PHP_SXE_API zend_class_entry *sxe_get_element_class_entry(void) /* {{{ */
 {
 	return sxe_class_entry;
 }

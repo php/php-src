@@ -68,7 +68,7 @@ ZEND_GET_MODULE(gmp)
 static zend_class_entry *gmp_ce;
 static zend_object_handlers gmp_object_handlers;
 
-PHP_GMP_API zend_class_entry *php_gmp_class_entry() {
+PHP_GMP_API zend_class_entry *php_gmp_class_entry(void) {
 	return gmp_ce;
 }
 

@@ -1366,7 +1366,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, info)(const MYSQLND_CONN_DATA * const conn)
 
 
 /* {{{ mysqlnd_get_client_info */
-PHPAPI const char * mysqlnd_get_client_info()
+PHPAPI const char * mysqlnd_get_client_info(void)
 {
 	return PHP_MYSQLND_VERSION;
 }
@@ -1374,7 +1374,7 @@ PHPAPI const char * mysqlnd_get_client_info()
 
 
 /* {{{ mysqlnd_get_client_version */
-PHPAPI unsigned long mysqlnd_get_client_version()
+PHPAPI unsigned long mysqlnd_get_client_version(void)
 {
 	return MYSQLND_VERSION_ID;
 }
