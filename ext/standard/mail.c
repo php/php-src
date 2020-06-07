@@ -501,7 +501,7 @@ PHPAPI int php_mail(const char *to, const char *subject, const char *message, co
 	if (!sendmail_path) {
 #ifdef PHP_WIN32
 		/* handle old style win smtp sending */
-		if (TSendMail(INI_STR("SMTP"), &tsm_err, &tsm_errmsg, hdr, (char *) subject, (char *) to, (char *) message, NULL, NULL, NULL) == FAILURE) {
+		if (TSendMail(INI_STR("SMTP"), &tsm_err, &tsm_errmsg, hdr, subject, to, message, NULL, NULL, NULL) == FAILURE) {
 			if (tsm_errmsg) {
 				php_error_docref(NULL, E_WARNING, "%s", tsm_errmsg);
 				efree(tsm_errmsg);

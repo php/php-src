@@ -177,7 +177,7 @@ static zend_string *php_win32_mail_trim_header(char *header)
 //  See SendText() for additional args!
 //********************************************************************/
 PHPAPI int TSendMail(char *host, int *error, char **error_message,
-			  char *headers, char *Subject, char *mailTo, char *data,
+			  char *headers, const char *Subject, const char *mailTo, const char *data,
 			  char *mailCc, char *mailBcc, char *mailRPath)
 {
 	int ret;
@@ -352,7 +352,7 @@ PHPAPI char *GetSMErrorText(int index)
 // Author/Date:  jcar 20/9/96
 // History:
 //*******************************************************************/
-static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char *mailBcc, char *data,
+static int SendText(char *RPath, const char *Subject, const char *mailTo, char *mailCc, char *mailBcc, const char *data,
 			 char *headers, char *headers_lc, char **error_message)
 {
 	int res;
@@ -633,7 +633,7 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 	return (SUCCESS);
 }
 
-static int addToHeader(char **header_buffer, const char *specifier, char *string)
+static int addToHeader(char **header_buffer, const char *specifier, const char *string)
 {
 	*header_buffer = erealloc(*header_buffer, strlen(*header_buffer) + strlen(specifier) + strlen(string) + 1);
 	sprintf(*header_buffer + strlen(*header_buffer), specifier, string);
@@ -651,7 +651,7 @@ static int addToHeader(char **header_buffer, const char *specifier, char *string
 // Author/Date:  jcar 20/9/96
 // History:
 //********************************************************************/
-static int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders)
+static int PostHeader(char *RPath, const char *Subject, const char *mailTo, char *xheaders)
 {
 	/* Print message header according to RFC 822 */
 	/* Return-path, Received, Date, From, Subject, Sender, To, cc */
