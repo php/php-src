@@ -903,6 +903,7 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 #endif
 				}
 			}
+            return PHP_STREAM_OPTION_RETURN_NOTIMPL;
 
 #ifdef PHP_WIN32
 		case PHP_STREAM_OPTION_PIPE_BLOCKING:

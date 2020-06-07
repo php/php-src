@@ -761,7 +761,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value, enum pdo_
 		return 1;
 	}
 
-	if (flags & PDO_FETCH_GROUP && stmt->fetch.column == -1) {
+	if ((flags & PDO_FETCH_GROUP) && stmt->fetch.column == -1) {
 		colno = 1;
 	} else {
 		colno = stmt->fetch.column;

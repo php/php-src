@@ -621,7 +621,7 @@ PHP_FUNCTION(file_put_contents)
 		RETURN_FALSE;
 	}
 
-	if (flags & LOCK_EX && (!php_stream_supports_lock(stream) || php_stream_lock(stream, LOCK_EX))) {
+	if ((flags & LOCK_EX) && (!php_stream_supports_lock(stream) || php_stream_lock(stream, LOCK_EX))) {
 		php_stream_close(stream);
 		php_error_docref(NULL, E_WARNING, "Exclusive locks are not supported for this stream");
 		RETURN_FALSE;

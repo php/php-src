@@ -58,7 +58,7 @@ PHPAPI int php_flock(int fd, int operation)
 
 	ret = fcntl(fd, operation & LOCK_NB ? F_SETLK : F_SETLKW, &flck);
 
-	if (operation & LOCK_NB && ret == -1 &&
+	if ((operation & LOCK_NB) && ret == -1 &&
 			(errno == EACCES || errno == EAGAIN))
 		errno = EWOULDBLOCK;
 

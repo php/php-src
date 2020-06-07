@@ -245,7 +245,7 @@ PHPAPI void php_stream_wrapper_log_error(const php_stream_wrapper *wrapper, int 
 	vspprintf(&buffer, 0, fmt, args);
 	va_end(args);
 
-	if (options & REPORT_ERRORS || wrapper == NULL) {
+	if ((options & REPORT_ERRORS) || wrapper == NULL) {
 		php_error_docref(NULL, E_WARNING, "%s", buffer);
 		efree(buffer);
 	} else {
@@ -703,7 +703,7 @@ PHPAPI ssize_t _php_stream_read(php_stream *stream, char *buf, size_t size)
 			break;
 		}
 
-		if (!stream->readfilters.head && (stream->flags & PHP_STREAM_FLAG_NO_BUFFER || stream->chunk_size == 1)) {
+		if (!stream->readfilters.head && ((stream->flags & PHP_STREAM_FLAG_NO_BUFFER) || stream->chunk_size == 1)) {
 			toread = stream->ops->read(stream, buf, size);
 			if (toread < 0) {
 				/* Report an error if the read failed and we did not read any data
@@ -2088,7 +2088,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 	path_to_open = path;
 
 	wrapper = php_stream_locate_url_wrapper(path, &path_to_open, options);
-	if (options & STREAM_USE_URL && (!wrapper || !wrapper->is_url)) {
+	if ((options & STREAM_USE_URL) && (!wrapper || !wrapper->is_url)) {
 		php_error_docref(NULL, E_WARNING, "This function may only be used against URLs");
 		if (resolved_path) {
 			zend_string_release_ex(resolved_path, 0);

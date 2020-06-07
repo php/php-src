@@ -2333,7 +2333,7 @@ void zend_emit_final_return(int return_one) /* {{{ */
 	zend_op *ret;
 	zend_bool returns_reference = (CG(active_op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0;
 
-	if (CG(active_op_array)->fn_flags & ZEND_ACC_HAS_RETURN_TYPE
+	if ((CG(active_op_array)->fn_flags & ZEND_ACC_HAS_RETURN_TYPE)
 			&& !(CG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR)) {
 		zend_emit_return_type_check(NULL, CG(active_op_array)->arg_info - 1, 1);
 	}
@@ -4516,7 +4516,7 @@ void zend_compile_return(zend_ast *ast) /* {{{ */
 	}
 
 	/* Generator return types are handled separately */
-	if (!is_generator && CG(active_op_array)->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+	if (!is_generator && (CG(active_op_array)->fn_flags & ZEND_ACC_HAS_RETURN_TYPE)) {
 		zend_emit_return_type_check(
 			expr_ast ? &expr_node : NULL, CG(active_op_array)->arg_info - 1, 0);
 	}
@@ -5492,7 +5492,7 @@ ZEND_API void zend_set_function_arg_flags(zend_function *func) /* {{{ */
 			ZEND_SET_ARG_FLAG(func, i + 1, ZEND_ARG_SEND_MODE(&func->common.arg_info[i]));
 			i++;
 		}
-		if (UNEXPECTED(func->common.fn_flags & ZEND_ACC_VARIADIC && ZEND_ARG_SEND_MODE(&func->common.arg_info[i]))) {
+		if (UNEXPECTED((func->common.fn_flags & ZEND_ACC_VARIADIC) && ZEND_ARG_SEND_MODE(&func->common.arg_info[i]))) {
 			uint32_t pass_by_reference = ZEND_ARG_SEND_MODE(&func->common.arg_info[i]);
 			while (i < MAX_ARG_FLAG_NUM) {
 				ZEND_SET_ARG_FLAG(func, i + 1, pass_by_reference);
@@ -9339,7 +9339,7 @@ void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 			}
 
 			/* Set isset fetch indicator here, opcache disallows runtime altering of the AST */
-			if (ast->attr & ZEND_DIM_IS && ast->child[0]->kind == ZEND_AST_DIM) {
+			if ((ast->attr & ZEND_DIM_IS) && ast->child[0]->kind == ZEND_AST_DIM) {
 				ast->child[0]->attr |= ZEND_DIM_IS;
 			}
 

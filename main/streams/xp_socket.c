@@ -449,12 +449,11 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 #endif
 
 				default:
-					return PHP_STREAM_OPTION_RETURN_NOTIMPL;
+				    break;
 			}
-
-		default:
-			return PHP_STREAM_OPTION_RETURN_NOTIMPL;
 	}
+
+	return PHP_STREAM_OPTION_RETURN_NOTIMPL;
 }
 
 static int php_sockop_cast(php_stream *stream, int castas, void **ret)

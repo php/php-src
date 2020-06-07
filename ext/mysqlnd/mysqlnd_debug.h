@@ -129,18 +129,18 @@ PHPAPI MYSQLND_DEBUG * mysqlnd_debug_init(const char * skip_functions[]);
 						/* EMPTY */ ; /* shut compiler's mouth */	\
 					} \
 					do { \
-						if (((dbg_obj1) && (dbg_obj1)->flags & MYSQLND_DEBUG_PROFILE_CALLS) || \
-							((dbg_obj2) && (dbg_obj2)->flags & MYSQLND_DEBUG_PROFILE_CALLS)) \
+						if (((dbg_obj1) && ((dbg_obj1)->flags & MYSQLND_DEBUG_PROFILE_CALLS)) || \
+							((dbg_obj2) && ((dbg_obj2)->flags & MYSQLND_DEBUG_PROFILE_CALLS))) \
 						{ \
 							DBG_PROFILE_START_TIME(); \
 						} \
 					} while (0);
 
-#define DBG_LEAVE_EX2(dbg_obj1, dbg_obj2, leave)	\
-			do {\
+#define DBG_LEAVE_EX2(dbg_obj1, dbg_obj2, leave) \
+			do { \
 				uint64_t this_call_duration = 0; \
-				if (((dbg_obj1) && (dbg_obj1)->flags & MYSQLND_DEBUG_PROFILE_CALLS) || \
-					((dbg_obj2) && (dbg_obj2)->flags & MYSQLND_DEBUG_PROFILE_CALLS)) \
+				if (((dbg_obj1) && ((dbg_obj1)->flags & MYSQLND_DEBUG_PROFILE_CALLS)) || \
+					((dbg_obj2) && ((dbg_obj2)->flags & MYSQLND_DEBUG_PROFILE_CALLS))) \
 				{ \
 					DBG_PROFILE_END_TIME(this_call_duration); \
 				} \

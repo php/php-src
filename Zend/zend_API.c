@@ -2154,7 +2154,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 					scope->ce_flags |= ZEND_ACC_EXPLICIT_ABSTRACT_CLASS;
 				}
 			}
-			if (ptr->flags & ZEND_ACC_STATIC && (!scope || !(scope->ce_flags & ZEND_ACC_INTERFACE))) {
+			if ((ptr->flags & ZEND_ACC_STATIC) && (!scope || !(scope->ce_flags & ZEND_ACC_INTERFACE))) {
 				zend_error(error_type, "Static function %s%s%s() cannot be abstract", scope ? ZSTR_VAL(scope->name) : "", scope ? "::" : "", ptr->fname);
 			}
 		} else {
@@ -2992,7 +2992,7 @@ static zend_always_inline int zend_is_callable_check_func(int check_flags, zval 
 				if (zv != NULL) {
 					zend_function *priv_fbc = Z_PTR_P(zv);
 
-					if (priv_fbc->common.fn_flags & ZEND_ACC_PRIVATE
+					if ((priv_fbc->common.fn_flags & ZEND_ACC_PRIVATE)
 					 && priv_fbc->common.scope == scope) {
 						fcc->function_handler = priv_fbc;
 					}
@@ -3096,7 +3096,7 @@ get_function_via_handler:
 	if (fcc->object) {
 		fcc->called_scope = fcc->object->ce;
 		if (fcc->function_handler
-		 && fcc->function_handler->common.fn_flags & ZEND_ACC_STATIC) {
+		 && (fcc->function_handler->common.fn_flags & ZEND_ACC_STATIC)) {
 			fcc->object = NULL;
 		}
 	}

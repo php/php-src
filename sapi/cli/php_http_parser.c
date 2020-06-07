@@ -1315,7 +1315,7 @@ size_t php_http_parser_execute (php_http_parser *parser,
 
         nread = 0;
 
-        if (parser->flags & F_UPGRADE || parser->method == PHP_HTTP_CONNECT) {
+        if ((parser->flags & F_UPGRADE) || parser->method == PHP_HTTP_CONNECT) {
           parser->upgrade = 1;
         }
 

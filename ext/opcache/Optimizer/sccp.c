@@ -2258,7 +2258,7 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 			} else if (var->use_chain >= 0
 					|| var->phi_use_chain != NULL) {
 				if (value
-						&& opline->result_type & (IS_VAR|IS_TMP_VAR)
+						&& (opline->result_type & (IS_VAR|IS_TMP_VAR))
 						&& opline->opcode != ZEND_QM_ASSIGN
 						&& opline->opcode != ZEND_ROPE_INIT
 						&& opline->opcode != ZEND_ROPE_ADD
@@ -2288,7 +2288,7 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 				if (opline->opcode == ZEND_DO_ICALL) {
 					removed_ops = remove_call(ctx, opline, ssa_op);
 				} else if (opline->opcode == ZEND_TYPE_CHECK
-						&& opline->op1_type & (IS_VAR|IS_TMP_VAR)
+						&& (opline->op1_type & (IS_VAR|IS_TMP_VAR))
 						&& !value_known(&ctx->values[ssa_op->op1_use])) {
 					/* For TYPE_CHECK we may compute the result value without knowing the
 					 * operand, based on type inference information. Make sure the operand is

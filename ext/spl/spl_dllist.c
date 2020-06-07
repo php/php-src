@@ -701,7 +701,7 @@ PHP_METHOD(SplDoublyLinkedList, setIteratorMode)
 
 	intern = Z_SPLDLLIST_P(ZEND_THIS);
 
-	if (intern->flags & SPL_DLLIST_IT_FIX
+	if ((intern->flags & SPL_DLLIST_IT_FIX)
 		&& (intern->flags & SPL_DLLIST_IT_LIFO) != (value & SPL_DLLIST_IT_LIFO)) {
 		zend_throw_exception(spl_ce_RuntimeException, "Iterators' LIFO/FIFO modes for SplStack/SplQueue objects are frozen", 0);
 		RETURN_THROWS();
