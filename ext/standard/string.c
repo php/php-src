@@ -793,7 +793,7 @@ static zend_always_inline zend_string *php_trim_int(zend_string *str, const char
 				}
 			}
 		} else {
-			php_charmask((unsigned char*)what, what_len, mask);
+			php_charmask((const unsigned char *) what, what_len, mask);
 
 			if (mode & 1) {
 				while (start != end) {
@@ -2720,7 +2720,7 @@ PHP_FUNCTION(ucwords)
 		RETURN_EMPTY_STRING();
 	}
 
-	php_charmask((unsigned char *)delims, delims_len, mask);
+	php_charmask((const unsigned char *) delims, delims_len, mask);
 
 	ZVAL_STRINGL(return_value, ZSTR_VAL(str), ZSTR_LEN(str));
 	r = Z_STRVAL_P(return_value);
@@ -3651,7 +3651,7 @@ PHPAPI zend_string *php_addcslashes_str(const char *str, size_t len, const char 
 	size_t  newlen;
 	zend_string *new_str = zend_string_safe_alloc(4, len, 0, 0);
 
-	php_charmask((unsigned char *)what, wlength, flags);
+	php_charmask((const unsigned char *) what, wlength, flags);
 
 	for (source = str, end = source + len, target = ZSTR_VAL(new_str); source < end; source++) {
 		c = *source;
@@ -5909,7 +5909,7 @@ PHP_FUNCTION(str_word_count)
 	}
 
 	if (char_list) {
-		php_charmask((unsigned char *)char_list, char_list_len, ch);
+		php_charmask((const unsigned char *) char_list, char_list_len, ch);
 	}
 
 	p = ZSTR_VAL(str);
