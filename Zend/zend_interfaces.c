@@ -34,12 +34,16 @@ ZEND_API zend_class_entry *zend_ce_stringable;
  Only returns the returned zval if retval_ptr != NULL */
 ZEND_API zval* zend_call_method(zend_object *object, zend_class_entry *obj_ce, zend_function **fn_proxy, const char *function_name, size_t function_name_len, zval *retval_ptr, int param_count, zval* arg1, zval* arg2)
 {
-	zend_string *function_name_str;
+	zend_string *function_name_str = NULL;
 	zval *retval;
 
-	function_name_str = zend_string_init(function_name, function_name_len, 0);
+	if (!fn_proxy || !*fn_proxy) {
+		function_name_str = zend_string_init(function_name, function_name_len, 0);
+	}
 	retval = zend_call_method_ex(object, obj_ce, fn_proxy, function_name_str, retval_ptr, param_count, arg1, arg2);
-	zend_string_free(function_name_str);
+	if (function_name_str) {
+		zend_string_efree(function_name_str);
+	}
 
 	return retval;
 }
@@ -66,6 +70,8 @@ ZEND_API zval* zend_call_method_ex(zend_object *object, zend_class_entry *obj_ce
 	fci.param_count = param_count;
 	fci.params = params;
 	fci.no_separation = 1;
+
+	ZEND_ASSERT(function_name || (fn_proxy && *fn_proxy));
 
 	if (!fn_proxy && !obj_ce) {
 		/* no interest in caching and no information already present that is
@@ -106,8 +112,8 @@ ZEND_API zval* zend_call_method_ex(zend_object *object, zend_class_entry *obj_ce
 			zend_class_entry *called_scope = zend_get_called_scope(EG(current_execute_data));
 
 			if (obj_ce &&
-			    (!called_scope ||
-			     !instanceof_function(called_scope, obj_ce))) {
+				(!called_scope ||
+				!instanceof_function(called_scope, obj_ce))) {
 				fcic.called_scope = obj_ce;
 			} else {
 				fcic.called_scope = called_scope;
@@ -116,12 +122,15 @@ ZEND_API zval* zend_call_method_ex(zend_object *object, zend_class_entry *obj_ce
 		fcic.object = object;
 		result = zend_call_function(&fci, &fcic);
 	}
-	if (result == FAILURE) {
+	if (UNEXPECTED(result == FAILURE)) {
 		/* error at c-level */
-		if (!obj_ce) {
-			obj_ce = object ? object->ce : NULL;
-		}
-		if (!EG(exception)) {
+		if (UNEXPECTED(!EG(exception))) {
+			if (!obj_ce) {
+				obj_ce = object ? object->ce : NULL;
+			}
+			if (!function_name) {
+				function_name = (*fn_proxy)->common.function_name;
+			}
 			zend_error_noreturn(E_CORE_ERROR, "Couldn't execute method %s%s%s", obj_ce ? ZSTR_VAL(obj_ce->name) : "", obj_ce ? "::" : "", ZSTR_VAL(function_name));
 		}
 	}
