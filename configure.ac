@@ -1291,7 +1291,8 @@ PHP_BUILD_DATE=`date -u +%Y-%m-%d`
 fi
 AC_DEFINE_UNQUOTED(PHP_BUILD_DATE,"$PHP_BUILD_DATE",[PHP build date])
 
-PHP_UNAME=`uname -a | xargs`
+UNAME=`uname -a | xargs`
+PHP_UNAME=${PHP_UNAME:-$UNAME}
 AC_DEFINE_UNQUOTED(PHP_UNAME,"$PHP_UNAME",[uname -a output])
 PHP_OS=`uname | xargs`
 AC_DEFINE_UNQUOTED(PHP_OS,"$PHP_OS",[uname output])
