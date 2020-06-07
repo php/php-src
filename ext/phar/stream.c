@@ -318,7 +318,7 @@ idata_error:
 		return NULL;
 	}
 
-	if (!PHAR_G(cwd_init) && options & STREAM_OPEN_FOR_INCLUDE) {
+	if (!PHAR_G(cwd_init) && (options & STREAM_OPEN_FOR_INCLUDE)) {
 		char *entry = idata->internal_file->filename, *cwd;
 
 		PHAR_G(cwd_init) = 1;

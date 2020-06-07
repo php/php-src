@@ -3485,7 +3485,7 @@ static int zend_ffi_validate_incomplete_type(zend_ffi_type *type, zend_bool allo
 		}
 		zend_ffi_throw_parser_error("Incomplete type at line %d", FFI_G(line));
 		return FAILURE;
-	} else if (!allow_incomplete_array && type->attr & ZEND_FFI_ATTR_INCOMPLETE_ARRAY) {
+	} else if (!allow_incomplete_array && (type->attr & ZEND_FFI_ATTR_INCOMPLETE_ARRAY)) {
 		zend_ffi_throw_parser_error("'[]' not allowed at line %d", FFI_G(line));
 		return FAILURE;
 	} else if (!FFI_G(allow_vla) && (type->attr & ZEND_FFI_ATTR_VLA)) {

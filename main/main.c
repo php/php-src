@@ -1265,7 +1265,7 @@ static ZEND_COLD void php_error_cb(int orig_type, const char *error_filename, co
 	}
 
 	/* display/log the error if necessary */
-	if (display && (EG(error_reporting) & type || (type & E_CORE))
+	if (display && ((EG(error_reporting) & type) || (type & E_CORE))
 		&& (PG(log_errors) || PG(display_errors) || (!module_initialized))) {
 		char *error_type_str;
 		int syslog_type_int = LOG_NOTICE;

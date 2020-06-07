@@ -75,7 +75,7 @@ void spl_register_property( zend_class_entry * class_entry, char *prop_name, int
 /* {{{ spl_add_class_name */
 void spl_add_class_name(zval *list, zend_class_entry *pce, int allow, int ce_flags)
 {
-	if (!allow || (allow > 0 && pce->ce_flags & ce_flags) || (allow < 0 && !(pce->ce_flags & ce_flags))) {
+	if (!allow || (allow > 0 && (pce->ce_flags & ce_flags)) || (allow < 0 && !(pce->ce_flags & ce_flags))) {
 		zval *tmp;
 
 		if ((tmp = zend_hash_find(Z_ARRVAL_P(list), pce->name)) == NULL) {

@@ -1319,7 +1319,7 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, si
 					return NULL;
 				}
 
-				if (ssb.sb.st_mode & S_IFDIR && !dir) {
+				if ((ssb.sb.st_mode & S_IFDIR) && !dir) {
 					efree(test);
 					if (error) {
 						spprintf(error, 4096, "phar error: path \"%s\" is a directory", path);

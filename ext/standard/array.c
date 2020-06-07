@@ -4748,7 +4748,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 	if (behavior == INTERSECT_NORMAL && data_compare_type == INTERSECT_COMP_DATA_USER) {
 		BG(user_compare_fci) = *fci_data;
 		BG(user_compare_fci_cache) = *fci_data_cache;
-	} else if (behavior & INTERSECT_ASSOC && key_compare_type == INTERSECT_COMP_KEY_USER) {
+	} else if ((behavior & INTERSECT_ASSOC) && key_compare_type == INTERSECT_COMP_KEY_USER) {
 		BG(user_compare_fci) = *fci_key;
 		BG(user_compare_fci_cache) = *fci_key_cache;
 	}
@@ -5155,7 +5155,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 	if (behavior == DIFF_NORMAL && data_compare_type == DIFF_COMP_DATA_USER) {
 		BG(user_compare_fci) = *fci_data;
 		BG(user_compare_fci_cache) = *fci_data_cache;
-	} else if (behavior & DIFF_ASSOC && key_compare_type == DIFF_COMP_KEY_USER) {
+	} else if ((behavior & DIFF_ASSOC) && key_compare_type == DIFF_COMP_KEY_USER) {
 		BG(user_compare_fci) = *fci_key;
 		BG(user_compare_fci_cache) = *fci_key_cache;
 	}

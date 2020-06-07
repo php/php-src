@@ -422,7 +422,7 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, char 
 		zend_function *mptr;
 
 		ZEND_HASH_FOREACH_PTR(&ce->function_table, mptr) {
-			if (mptr->common.fn_flags & ZEND_ACC_STATIC
+			if ((mptr->common.fn_flags & ZEND_ACC_STATIC)
 				&& ((mptr->common.fn_flags & ZEND_ACC_PRIVATE) == 0 || mptr->common.scope == ce))
 			{
 				count_static_funcs++;
@@ -436,7 +436,7 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, char 
 		zend_function *mptr;
 
 		ZEND_HASH_FOREACH_PTR(&ce->function_table, mptr) {
-			if (mptr->common.fn_flags & ZEND_ACC_STATIC
+			if ((mptr->common.fn_flags & ZEND_ACC_STATIC)
 				&& ((mptr->common.fn_flags & ZEND_ACC_PRIVATE) == 0 || mptr->common.scope == ce))
 			{
 				smart_str_append_printf(str, "\n");
@@ -3499,7 +3499,7 @@ ZEND_METHOD(ReflectionMethod, isConstructor)
 	/* we need to check if the ctor is the ctor of the class level we we
 	 * looking at since we might be looking at an inherited old style ctor
 	 * defined in base class. */
-	RETURN_BOOL(mptr->common.fn_flags & ZEND_ACC_CTOR && intern->ce->constructor && intern->ce->constructor->common.scope == mptr->common.scope);
+	RETURN_BOOL((mptr->common.fn_flags & ZEND_ACC_CTOR) && intern->ce->constructor && intern->ce->constructor->common.scope == mptr->common.scope);
 }
 /* }}} */
 

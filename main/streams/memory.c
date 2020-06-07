@@ -254,9 +254,9 @@ static int php_stream_memory_set_option(php_stream *stream, int option, int valu
 					ms->fsize = newsize;
 					return PHP_STREAM_OPTION_RETURN_OK;
 			}
-		default:
-			return PHP_STREAM_OPTION_RETURN_NOTIMPL;
 	}
+
+	return PHP_STREAM_OPTION_RETURN_NOTIMPL;
 }
 /* }}} */
 

@@ -1995,7 +1995,7 @@ php_mysqlnd_chg_user_read(MYSQLND_CONN_DATA * conn, void * _packet)
 	packet->response_code = uint1korr(p);
 	p++;
 
-	if (packet->header.size == 1 && buf[0] == EODATA_MARKER && packet->server_capabilities & CLIENT_SECURE_CONNECTION) {
+	if (packet->header.size == 1 && buf[0] == EODATA_MARKER && (packet->server_capabilities & CLIENT_SECURE_CONNECTION)) {
 		/* We don't handle 3.23 authentication */
 		packet->server_asked_323_auth = TRUE;
 		DBG_RETURN(FAIL);

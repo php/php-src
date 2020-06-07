@@ -1156,7 +1156,7 @@ static zend_never_inline zend_function *zend_get_parent_private_method(zend_clas
 		func = zend_hash_find(&scope->function_table, function_name);
 		if (func != NULL) {
 			fbc = Z_FUNC_P(func);
-			if (fbc->common.fn_flags & ZEND_ACC_PRIVATE
+			if ((fbc->common.fn_flags & ZEND_ACC_PRIVATE)
 			 && fbc->common.scope == scope) {
 				return fbc;
 			}
