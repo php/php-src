@@ -7932,16 +7932,9 @@ ZEND_VM_HOT_NOCONST_HANDLER(123, ZEND_TYPE_CHECK, CONST|TMPVAR|CV, ANY, TYPE_MAS
 
 	value = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
 	if ((opline->extended_value >> (uint32_t)Z_TYPE_P(value)) & 1) {
-ZEND_VM_C_LABEL(type_check_resource):
-		if (opline->extended_value != MAY_BE_RESOURCE
-		 || EXPECTED(NULL != zend_rsrc_list_get_rsrc_type(Z_RES_P(value)))) {
-			result = 1;
-		}
+		result = 1;
 	} else if ((OP1_TYPE & (IS_CV|IS_VAR)) && Z_ISREF_P(value)) {
-		value = Z_REFVAL_P(value);
-		if ((opline->extended_value >> (uint32_t)Z_TYPE_P(value)) & 1) {
-			ZEND_VM_C_GOTO(type_check_resource);
-		}
+		result = (opline->extended_value >> (uint32_t)Z_TYPE_P(Z_REFVAL_P(value))) & 1;
 	} else if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
 		result = ((1 << IS_NULL) & opline->extended_value) != 0;
 		SAVE_OPLINE();
@@ -7958,6 +7951,36 @@ ZEND_VM_C_LABEL(type_check_resource):
 	} else {
 		ZEND_VM_SMART_BRANCH(result, 0);
 	}
+}
+
+ZEND_VM_HOT_NOCONST_HANDLER(195, ZEND_IS_RESOURCE, CONST|TMPVAR|CV, ANY, TYPE_MASK)
+{
+	USE_OPLINE
+	zval *value;
+
+	value = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
+ZEND_VM_C_LABEL(type_check_resource):
+	if (EXPECTED(Z_TYPE_P(value) == IS_RESOURCE)) {
+		int result = EXPECTED(NULL != zend_rsrc_list_get_rsrc_type(Z_RES_P(value)));
+		SAVE_OPLINE();
+		FREE_OP1();
+		ZEND_VM_SMART_BRANCH(result, 1);
+	} else if ((OP1_TYPE & (IS_CV|IS_VAR)) && Z_ISREF_P(value)) {
+		value = Z_REFVAL_P(value);
+		ZEND_VM_C_GOTO(type_check_resource);
+	} else if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+		SAVE_OPLINE();
+		ZVAL_UNDEFINED_OP1();
+		if (UNEXPECTED(EG(exception))) {
+            /* I'm not sure why ZEND_TYPE_CHECK did this. */
+			ZVAL_UNDEF(EX_VAR(opline->result.var));
+			HANDLE_EXCEPTION();
+		}
+		ZEND_VM_SMART_BRANCH(0, 0);
+	}
+	SAVE_OPLINE();
+	FREE_OP1();
+	ZEND_VM_SMART_BRANCH(0, 1);
 }
 
 ZEND_VM_HOT_HANDLER(122, ZEND_DEFINED, CONST, ANY, CACHE_SLOT)

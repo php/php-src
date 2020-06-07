@@ -83,6 +83,7 @@ static inline zend_bool may_have_side_effects(
 		case ZEND_QM_ASSIGN:
 		case ZEND_FREE:
 		case ZEND_TYPE_CHECK:
+		case ZEND_IS_RESOURCE:
 		case ZEND_DEFINED:
 		case ZEND_ADD:
 		case ZEND_SUB:

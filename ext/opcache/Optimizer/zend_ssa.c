@@ -467,15 +467,22 @@ static void place_essa_pis(
 				   opline->op1.var == (opline-1)->result.var && (opline-1)->op1_type == IS_CV) {
 			int var = EX_VAR_TO_NUM((opline-1)->op1.var);
 			uint32_t type = (opline-1)->extended_value;
+			/* Add the implication if this type check is true */
 			if ((pi = add_pi(arena, op_array, dfg, ssa, j, bt, var))) {
 				pi_type_mask(pi, mask_for_type_check(type));
 			}
-			if (type != MAY_BE_RESOURCE) {
-				/* is_resource() may return false for closed resources */
-				if ((pi = add_pi(arena, op_array, dfg, ssa, j, bf, var))) {
-					pi_not_type_mask(pi, mask_for_type_check(type));
-				}
+			/* Add the implication if this type check is false */
+			if ((pi = add_pi(arena, op_array, dfg, ssa, j, bf, var))) {
+				pi_not_type_mask(pi, mask_for_type_check(type));
 			}
+		} else if (opline->op1_type == IS_TMP_VAR && (opline-1)->opcode == ZEND_IS_RESOURCE &&
+				   opline->op1.var == (opline-1)->result.var && (opline-1)->op1_type == IS_CV) {
+			int var = EX_VAR_TO_NUM((opline-1)->op1.var);
+			/* Add the implication if this type check is true */
+			if ((pi = add_pi(arena, op_array, dfg, ssa, j, bt, var))) {
+				pi_type_mask(pi, mask_for_type_check(MAY_BE_RESOURCE));
+			}
+			/* is_resource() will also return false for resources that are closed, so the negation doesn't imply anything. */
 		} else if (opline->op1_type == IS_TMP_VAR &&
 				   ((opline-1)->opcode == ZEND_IS_IDENTICAL
 					|| (opline-1)->opcode == ZEND_IS_NOT_IDENTICAL) &&

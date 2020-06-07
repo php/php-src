@@ -3473,6 +3473,7 @@ static zend_always_inline int _zend_update_type_info(
 			UPDATE_SSA_TYPE(MAY_BE_STRING|MAY_BE_RC1|MAY_BE_RCN, ssa_op->result_def);
 			break;
 		case ZEND_TYPE_CHECK:
+		case ZEND_IS_RESOURCE:
 		case ZEND_DEFINED:
 			UPDATE_SSA_TYPE(MAY_BE_FALSE|MAY_BE_TRUE, ssa_op->result_def);
 			break;
@@ -4330,6 +4331,7 @@ int zend_may_throw(const zend_op *opline, const zend_ssa_op *ssa_op, const zend_
 		case ZEND_FREE:
 		case ZEND_SEPARATE:
 		case ZEND_TYPE_CHECK:
+		case ZEND_IS_RESOURCE:
 		case ZEND_DEFINED:
 		case ZEND_ISSET_ISEMPTY_THIS:
 		case ZEND_COALESCE:

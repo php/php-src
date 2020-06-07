@@ -2633,6 +2633,13 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							goto jit_failure;
 						}
 						goto done;
+					case ZEND_IS_RESOURCE:
+						/* fallback to subroutine threading */
+						/* TODO: support for is_resource() ??? */
+						if (!zend_jit_handler(&dasm_state, opline, zend_may_throw(opline, op_array, ssa))) {
+							goto jit_failure;
+						}
+						goto done;
 					case ZEND_RETURN:
 						op1_info = OP1_INFO();
 						if ((PROFITABILITY_CHECKS && (!ssa->ops || !ssa->var_info))
