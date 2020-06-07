@@ -525,23 +525,23 @@ EMPTY_SWITCH_DEFAULT_CASE()
 	_(MAGIC_CONSTRUCT,        "__construct") \
 	_(MAGIC_INVOKE,           "__invoke") \
 	_(MAGIC_TO_STRING,        "__tostring") \
-    _(MAGIC_DEBUG_INFO,       "__debuginfo") \
-    _(SERIALIZE,              "serialize") \
-    _(UNSERIALIZE,            "unserialize") \
+	_(MAGIC_DEBUG_INFO,       "__debuginfo") \
+	_(SERIALIZE,              "serialize") \
+	_(UNSERIALIZE,            "unserialize") \
 	_(ACCEPT,                 "accept") \
 	_(COMPARE,                "compare") \
 	_(COUNT,                  "count") \
 	_(CURRENT,                "current") \
-    _(REWIND,                 "rewind") \
-    _(NEXT,                   "next") \
-    _(HASNEXT,                "hasnext") \
-    _(VALID,                  "valid") \
-    _(SEEK,                   "seek") \
-    _(ITEM,                   "item") \
-    _(BEGIN_ITERATION,        "beginiteration") \
-    _(BEGIN_CHILDREN,         "beginchildren") \
-    _(CALL_HAS_CHILDREN,      "callhaschildren") \
-    _(CALL_GET_CHILDREN,      "callgetchildren") \
+	_(REWIND,                 "rewind") \
+	_(NEXT,                   "next") \
+	_(HASNEXT,                "hasnext") \
+	_(VALID,                  "valid") \
+	_(SEEK,                   "seek") \
+	_(ITEM,                   "item") \
+	_(BEGIN_ITERATION,        "beginiteration") \
+	_(BEGIN_CHILDREN,         "beginchildren") \
+	_(CALL_HAS_CHILDREN,      "callhaschildren") \
+	_(CALL_GET_CHILDREN,      "callgetchildren") \
 	_(END_ITERATION,          "enditeration") \
 	_(END_CHILDREN,           "endchildren") \
 	_(GET_CURRENT_LINE,       "getcurrentline") \

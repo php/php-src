@@ -34,14 +34,14 @@ ZEND_API zend_class_entry *zend_ce_stringable;
  Only returns the returned zval if retval_ptr != NULL */
 ZEND_API zval* zend_call_method(zend_object *object, zend_class_entry *obj_ce, zend_function **fn_proxy, const char *function_name, size_t function_name_len, zval *retval_ptr, int param_count, zval* arg1, zval* arg2)
 {
-    zend_string *function_name_str;
-    zval *retval;
+	zend_string *function_name_str;
+	zval *retval;
 
-    function_name_str = zend_string_init(function_name, function_name_len, 0);
-    retval = zend_call_method_ex(object, obj_ce, fn_proxy, function_name_str, retval_ptr, param_count, arg1, arg2);
-    zend_string_free(function_name_str);
+	function_name_str = zend_string_init(function_name, function_name_len, 0);
+	retval = zend_call_method_ex(object, obj_ce, fn_proxy, function_name_str, retval_ptr, param_count, arg1, arg2);
+	zend_string_free(function_name_str);
 
-    return retval;
+	return retval;
 }
 /* }}} */
 
