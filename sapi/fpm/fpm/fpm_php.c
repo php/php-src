@@ -48,7 +48,7 @@ static int fpm_php_zend_ini_alter_master(char *name, int name_length, char *new_
 }
 /* }}} */
 
-static void fpm_php_disable(char *value, int (*zend_disable)(char *, size_t)) /* {{{ */
+static void fpm_php_disable(char *value, int (*zend_disable)(const char *, size_t)) /* {{{ */
 {
 	char *s = 0, *e = value;
 

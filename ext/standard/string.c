@@ -765,7 +765,7 @@ static inline int php_charmask(const unsigned char *input, size_t len, char *mas
  * mode 3 : trim left and right
  * what indicates which chars are to be trimmed. NULL->default (' \t\n\r\v\0')
  */
-static zend_always_inline zend_string *php_trim_int(zend_string *str, char *what, size_t what_len, int mode)
+static zend_always_inline zend_string *php_trim_int(zend_string *str, const char *what, size_t what_len, int mode)
 {
 	const char *start = ZSTR_VAL(str);
 	const char *end = start + ZSTR_LEN(str);
@@ -857,7 +857,7 @@ static zend_always_inline zend_string *php_trim_int(zend_string *str, char *what
  * mode 3 : trim left and right
  * what indicates which chars are to be trimmed. NULL->default (' \t\n\r\v\0')
  */
-PHPAPI zend_string *php_trim(zend_string *str, char *what, size_t what_len, int mode)
+PHPAPI zend_string *php_trim(zend_string *str, const char *what, size_t what_len, int mode)
 {
 	return php_trim_int(str, what, what_len, mode);
 }
@@ -1508,7 +1508,7 @@ PHP_FUNCTION(strtolower)
 
 /* {{{ php_basename
  */
-PHPAPI zend_string *php_basename(const char *s, size_t len, char *suffix, size_t suffix_len)
+PHPAPI zend_string *php_basename(const char *s, size_t len, const char *suffix, size_t suffix_len)
 {
 	/* State 0 is directly after a directory separator (or at the start of the string).
 	 * State 1 is everything else. */
@@ -1745,7 +1745,7 @@ PHPAPI char *php_stristr(char *s, char *t, size_t s_len, size_t t_len)
 
 /* {{{ php_strspn
  */
-PHPAPI size_t php_strspn(char *s1, char *s2, char *s1_end, char *s2_end)
+PHPAPI size_t php_strspn(const char *s1, const char *s2, const char *s1_end, const char *s2_end)
 {
 	register const char *p = s1, *spanp;
 	register char c = *p;
@@ -1763,7 +1763,7 @@ cont:
 
 /* {{{ php_strcspn
  */
-PHPAPI size_t php_strcspn(char *s1, char *s2, char *s1_end, char *s2_end)
+PHPAPI size_t php_strcspn(const char *s1, const char *s2, const char *s1_end, const char *s2_end)
 {
 	register const char *p, *spanp;
 	register char c = *s1;
@@ -3642,7 +3642,7 @@ PHPAPI void php_stripcslashes(zend_string *str)
 
 /* {{{ php_addcslashes_str
  */
-PHPAPI zend_string *php_addcslashes_str(const char *str, size_t len, char *what, size_t wlength)
+PHPAPI zend_string *php_addcslashes_str(const char *str, size_t len, const char *what, size_t wlength)
 {
 	char flags[256];
 	char *target;
@@ -3685,7 +3685,7 @@ PHPAPI zend_string *php_addcslashes_str(const char *str, size_t len, char *what,
 
 /* {{{ php_addcslashes
  */
-PHPAPI zend_string *php_addcslashes(zend_string *str, char *what, size_t wlength)
+PHPAPI zend_string *php_addcslashes(zend_string *str, const char *what, size_t wlength)
 {
 	return php_addcslashes_str(ZSTR_VAL(str), ZSTR_LEN(str), what, wlength);
 }

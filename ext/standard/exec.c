@@ -111,7 +111,7 @@ static size_t handle_line(int type, zval *array, char *buf, size_t bufl) {
  * If type==3, output will be printed binary, no lines will be saved or returned (passthru)
  *
  */
-PHPAPI int php_exec(int type, char *cmd, zval *array, zval *return_value)
+PHPAPI int php_exec(int type, const char *cmd, zval *array, zval *return_value)
 {
 	FILE *fp;
 	char *buf;
@@ -282,7 +282,7 @@ PHP_FUNCTION(passthru)
 
    *NOT* safe for binary strings
 */
-PHPAPI zend_string *php_escape_shell_cmd(char *str)
+PHPAPI zend_string *php_escape_shell_cmd(const char *str)
 {
 	register size_t x, y;
 	size_t l = strlen(str);
@@ -389,7 +389,7 @@ PHPAPI zend_string *php_escape_shell_cmd(char *str)
 
 /* {{{ php_escape_shell_arg
  */
-PHPAPI zend_string *php_escape_shell_arg(char *str)
+PHPAPI zend_string *php_escape_shell_arg(const char *str)
 {
 	size_t x, y = 0;
 	size_t l = strlen(str);

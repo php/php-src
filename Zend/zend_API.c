@@ -2716,7 +2716,7 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, const char *name, int name_lengt
 
 /* Disabled functions support */
 
-ZEND_API int zend_disable_function(char *function_name, size_t function_name_length) /* {{{ */
+ZEND_API int zend_disable_function(const char *function_name, size_t function_name_length) /* {{{ */
 {
 	return zend_hash_str_del(CG(function_table), function_name, function_name_length);
 }
@@ -2753,7 +2753,7 @@ static const zend_function_entry disabled_class_new[] = {
 	ZEND_FE_END
 };
 
-ZEND_API int zend_disable_class(char *class_name, size_t class_name_length) /* {{{ */
+ZEND_API int zend_disable_class(const char *class_name, size_t class_name_length) /* {{{ */
 {
 	zend_class_entry *disabled_class;
 	zend_string *key;

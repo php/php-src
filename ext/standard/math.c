@@ -1026,8 +1026,8 @@ PHPAPI zend_string *_php_math_number_format(double d, int dec, char dec_point, c
 	return _php_math_number_format_ex(d, dec, &dec_point, 1, &thousand_sep, 1);
 }
 
-PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, char *dec_point,
-		size_t dec_point_len, char *thousand_sep, size_t thousand_sep_len)
+PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, const char *dec_point,
+		size_t dec_point_len, const char *thousand_sep, size_t thousand_sep_len)
 {
 	zend_string *res;
 	zend_string *tmpbuf;

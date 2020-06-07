@@ -725,7 +725,7 @@ static void php_url_scanner_output_handler(char *output, size_t output_len, char
 	php_url_scanner_session_handler_impl(output, output_len, handled_output, handled_output_len, mode, 0);
 }
 
-static inline int php_url_scanner_add_var_impl(char *name, size_t name_len, char *value, size_t value_len, int encode, int type)
+static inline int php_url_scanner_add_var_impl(const char *name, size_t name_len, const char *value, size_t value_len, int encode, int type)
 {
 	smart_str sname = {0};
 	smart_str svalue = {0};
@@ -788,13 +788,13 @@ static inline int php_url_scanner_add_var_impl(char *name, size_t name_len, char
 }
 
 
-PHPAPI int php_url_scanner_add_session_var(char *name, size_t name_len, char *value, size_t value_len, int encode)
+PHPAPI int php_url_scanner_add_session_var(const char *name, size_t name_len, const char *value, size_t value_len, int encode)
 {
 	return php_url_scanner_add_var_impl(name, name_len, value, value_len, encode, 1);
 }
 
 
-PHPAPI int php_url_scanner_add_var(char *name, size_t name_len, char *value, size_t value_len, int encode)
+PHPAPI int php_url_scanner_add_var(const char *name, size_t name_len, const char *value, size_t value_len, int encode)
 {
 	return php_url_scanner_add_var_impl(name, name_len, value, value_len, encode, 0);
 }

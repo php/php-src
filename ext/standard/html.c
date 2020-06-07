@@ -367,7 +367,7 @@ static inline unsigned int get_next_char(
 /* {{{ entity_charset determine_charset
  * Returns the charset identifier based on an explicitly provided charset,
  * the internal_encoding and default_charset ini settings, or UTF-8 by default. */
-static enum entity_charset determine_charset(char *charset_hint, zend_bool quiet)
+static enum entity_charset determine_charset(const char *charset_hint, zend_bool quiet)
 {
 	if (!charset_hint || !*charset_hint) {
 		charset_hint = get_default_charset();
@@ -979,7 +979,7 @@ static entity_table_opt determine_entity_table(int all, int doctype)
  * only the basic ones, i.e., those in basic_entities_ex + the numeric entities
  * that correspond to quotes.
  */
-PHPAPI zend_string *php_unescape_html_entities(zend_string *str, int all, int flags, char *hint_charset)
+PHPAPI zend_string *php_unescape_html_entities(zend_string *str, int all, int flags, const char *hint_charset)
 {
 	zend_string *ret;
 	enum entity_charset charset;
@@ -1015,7 +1015,7 @@ PHPAPI zend_string *php_unescape_html_entities(zend_string *str, int all, int fl
 }
 /* }}} */
 
-PHPAPI zend_string *php_escape_html_entities(const unsigned char *old, size_t oldlen, int all, int flags, char *hint_charset)
+PHPAPI zend_string *php_escape_html_entities(const unsigned char *old, size_t oldlen, int all, int flags, const char *hint_charset)
 {
 	return php_escape_html_entities_ex(old, oldlen, all, flags, hint_charset, 1, /* quiet */ 0);
 }
@@ -1103,7 +1103,7 @@ static inline void find_entity_for_char_basic(
 
 /* {{{ php_escape_html_entities
  */
-PHPAPI zend_string *php_escape_html_entities_ex(const unsigned char *old, size_t oldlen, int all, int flags, char *hint_charset, zend_bool double_encode, zend_bool quiet)
+PHPAPI zend_string *php_escape_html_entities_ex(const unsigned char *old, size_t oldlen, int all, int flags, const char *hint_charset, zend_bool double_encode, zend_bool quiet)
 {
 	size_t cursor, maxlen, len;
 	zend_string *replaced;

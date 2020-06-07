@@ -1374,7 +1374,7 @@ static int php_session_send_cookie(void) /* {{{ */
 }
 /* }}} */
 
-PHPAPI const ps_module *_php_find_ps_module(char *name) /* {{{ */
+PHPAPI const ps_module *_php_find_ps_module(const char *name) /* {{{ */
 {
 	const ps_module *ret = NULL;
 	const ps_module **mod;
@@ -1390,7 +1390,7 @@ PHPAPI const ps_module *_php_find_ps_module(char *name) /* {{{ */
 }
 /* }}} */
 
-PHPAPI const ps_serializer *_php_find_ps_serializer(char *name) /* {{{ */
+PHPAPI const ps_serializer *_php_find_ps_serializer(const char *name) /* {{{ */
 {
 	const ps_serializer *ret = NULL;
 	const ps_serializer *mod;
