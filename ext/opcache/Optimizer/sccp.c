@@ -1678,6 +1678,16 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			}
 			SET_RESULT_BOT(result);
 			break;
+		case ZEND_YIELD_FROM:
+			// tmp = yield from [] -> tmp = null
+			SKIP_IF_TOP(op1);
+			if (Z_TYPE_P(op1) == IS_ARRAY && zend_hash_num_elements(Z_ARR_P(op1)) == 0) {
+				ZVAL_NULL(&zv);
+				SET_RESULT(result, &zv);
+				break;
+			}
+			SET_RESULT_BOT(result);
+			break;
 		case ZEND_COUNT:
 			SKIP_IF_TOP(op1);
 			if (Z_TYPE_P(op1) == IS_ARRAY) {
