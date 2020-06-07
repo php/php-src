@@ -546,6 +546,13 @@ PHP 8.0 UPGRADE NOTES
     compile-time warnings and replay them on the next include, even if it is
     served from cache.
 
+- OpenSSL:
+  . Added Cryptographic Message Syntax (CMS) (RFC 5652) support composed of
+    functions for encryption, decryption, signing, verifying and reading. The
+    API is similar to the API for PKCS #7 functions with an addition of new
+    encoding constants: OPENSSL_ENCODING_DER, OPENSSL_ENCODING_SMIME and
+    OPENSSL_ENCODING_PEM.
+
 - Standard:
   . printf() and friends how support the %h and %H format specifiers. These
     are the same as %g and %G, but always use "." as the decimal separator,
@@ -649,6 +656,18 @@ PHP 8.0 UPGRADE NOTES
 - Core:
   . Added get_resource_id($resource) function, which returns the same value as
     (int) $resource. It provides the same functionality under a clearer API.
+
+- OpenSSL:
+  . Added openssl_cms_encrypt() encrypts the message in the file with the
+    certificates and outputs the result to the supplied file.
+  . Added openssl_cms_decrypt() that decrypts the S/MIME message in the file
+    and outputs the results to the supplied file.
+  . Added openssl_cms_read() that exports the CMS file to an array of PEM
+    certificates.
+  . Added openssl_cms_sign() that signs the MIME message in the file with
+    a cert and key and output the result to the supplied file.
+  . Added openssl_cms_verify() that verifies that the data block is intact,
+    the signer is who they say they are, and returns the certs of the signers.
 
 - PCRE:
   . Added preg_last_error_msg(), which returns a human-readable message for

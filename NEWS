@@ -102,6 +102,9 @@ PHP                                                                        NEWS
   . Fixed bug #79665 (ini_get() and opcache_get_configuration() inconsistency).
     (cmb)
 
+- OpenSSL:
+  . Added Cryptographic Message Syntax (CMS) support. (Eliot Lear)
+
 - PCRE:
   . Don't ignore invalid escape sequences. (sjon)
 
