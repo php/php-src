@@ -777,7 +777,7 @@ static void sapi_cli_server_log_write(int type, char *msg) /* {{{ */
 #endif
 } /* }}} */
 
-static void sapi_cli_server_log_message(char *msg, int syslog_type_int) /* {{{ */
+static void sapi_cli_server_log_message(const char *msg, int syslog_type_int) /* {{{ */
 {
 	sapi_cli_server_log_write(PHP_CLI_SERVER_LOG_MESSAGE, msg);
 } /* }}} */

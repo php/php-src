@@ -877,7 +877,7 @@ PHPAPI ZEND_COLD void php_log_err_with_severity(const char *log_message, int sys
 	/* Otherwise fall back to the default logging location, if we have one */
 
 	if (sapi_module.log_message) {
-		sapi_module.log_message((char *) log_message, syslog_type_int);
+		sapi_module.log_message(log_message, syslog_type_int);
 	}
 	PG(in_error_log) = 0;
 }

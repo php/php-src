@@ -1510,7 +1510,7 @@ PHPAPI int _php_error_log_ex(int opt_err, const char *message, size_t message_le
 
 		case 4: /* send to SAPI */
 			if (sapi_module.log_message) {
-				sapi_module.log_message((char *) message, -1);
+				sapi_module.log_message(message, -1);
 			} else {
 				return FAILURE;
 			}
