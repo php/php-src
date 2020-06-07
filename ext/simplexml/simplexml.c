@@ -1995,7 +1995,7 @@ static int sxe_count_elements(zend_object *object, zend_long *count) /* {{{ */
 	intern = php_sxe_fetch_object(object);
 	if (intern->fptr_count) {
 		zval rv;
-		zend_call_method_with_0_params(object, intern->zo.ce, &intern->fptr_count, "count", &rv);
+		zend_call_method_with_0_params_ex(object, intern->zo.ce, &intern->fptr_count, ZSTR_KNOWN(ZEND_STR_COUNT), &rv);
 		if (!Z_ISUNDEF(rv)) {
 			*count = zval_get_long(&rv);
 			zval_ptr_dtor(&rv);

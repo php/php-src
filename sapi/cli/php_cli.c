@@ -1070,7 +1070,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 
 					memset(&execute_data, 0, sizeof(zend_execute_data));
 					EG(current_execute_data) = &execute_data;
-					zend_call_method_with_1_params(Z_OBJ(ref), pce, &pce->constructor, "__construct", NULL, &arg);
+					zend_call_method_with_1_params_ex(Z_OBJ(ref), pce, &pce->constructor, ZSTR_KNOWN(ZEND_STR_MAGIC_CONSTRUCT), NULL, &arg);
 
 					if (EG(exception)) {
 						zval tmp, *msg, rv;

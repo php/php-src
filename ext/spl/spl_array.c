@@ -413,7 +413,7 @@ static zval *spl_array_read_dimension_ex(int check_inherited, zend_object *objec
 			} else {
 				SEPARATE_ARG_IF_REF(offset);
 			}
-			zend_call_method_with_1_params(object, object->ce, &intern->fptr_offset_get, "offsetGet", rv, offset);
+			zend_call_method_with_1_params_ex(object, object->ce, &intern->fptr_offset_get, ZSTR_KNOWN(ZEND_STR_OFFSET_GET), rv, offset);
 			zval_ptr_dtor(offset);
 
 			if (!Z_ISUNDEF_P(rv)) {
@@ -459,7 +459,7 @@ static void spl_array_write_dimension_ex(int check_inherited, zend_object *objec
 		} else {
 			SEPARATE_ARG_IF_REF(offset);
 		}
-		zend_call_method_with_2_params(object, object->ce, &intern->fptr_offset_set, "offsetSet", NULL, offset, value);
+		zend_call_method_with_2_params_ex(object, object->ce, &intern->fptr_offset_set, ZSTR_KNOWN(ZEND_STR_OFFSET_SET), NULL, offset, value);
 		zval_ptr_dtor(offset);
 		return;
 	}
@@ -527,7 +527,7 @@ static void spl_array_unset_dimension_ex(int check_inherited, zend_object *objec
 
 	if (check_inherited && intern->fptr_offset_del) {
 		SEPARATE_ARG_IF_REF(offset);
-		zend_call_method_with_1_params(object, object->ce, &intern->fptr_offset_del, "offsetUnset", NULL, offset);
+		zend_call_method_with_1_params_ex(object, object->ce, &intern->fptr_offset_del, ZSTR_KNOWN(ZEND_STR_OFFSET_UNSET), NULL, offset);
 		zval_ptr_dtor(offset);
 		return;
 	}
@@ -612,7 +612,7 @@ static int spl_array_has_dimension_ex(int check_inherited, zend_object *object, 
 
 	if (check_inherited && intern->fptr_offset_has) {
 		SEPARATE_ARG_IF_REF(offset);
-		zend_call_method_with_1_params(object, object->ce, &intern->fptr_offset_has, "offsetExists", &rv, offset);
+		zend_call_method_with_1_params_ex(object, object->ce, &intern->fptr_offset_has, ZSTR_KNOWN(ZEND_STR_OFFSET_EXISTS), &rv, offset);
 		zval_ptr_dtor(offset);
 
 		if (zend_is_true(&rv)) {
@@ -1408,7 +1408,7 @@ int spl_array_object_count_elements(zend_object *object, zend_long *count) /* {{
 
 	if (intern->fptr_count) {
 		zval rv;
-		zend_call_method_with_0_params(object, intern->std.ce, &intern->fptr_count, "count", &rv);
+		zend_call_method_with_0_params_ex(object, intern->std.ce, &intern->fptr_count, ZSTR_KNOWN(ZEND_STR_COUNT), &rv);
 		if (Z_TYPE(rv) != IS_UNDEF) {
 			*count = zval_get_long(&rv);
 			zval_ptr_dtor(&rv);

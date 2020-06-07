@@ -104,7 +104,7 @@ ZEND_API void zend_interned_strings_init(void)
 	}
 
 	/* known strings */
-	zend_known_strings = pemalloc(sizeof(zend_string*) * ((sizeof(known_strings) / sizeof(known_strings[0]) - 1)), 1);
+	zend_known_strings = pemalloc(sizeof(zend_string *) * ((sizeof(known_strings) / sizeof(known_strings[0])) - 1), 1);
 	for (i = 0; i < (sizeof(known_strings) / sizeof(known_strings[0])) - 1; i++) {
 		str = zend_string_init(known_strings[i], strlen(known_strings[i]), 1);
 		zend_known_strings[i] = zend_new_interned_string_permanent(str);

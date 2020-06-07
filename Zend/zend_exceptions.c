@@ -920,7 +920,7 @@ ZEND_API ZEND_COLD void zend_exception_error(zend_object *ex, int severity) /* {
 		zend_string *str, *file = NULL;
 		zend_long line = 0;
 
-		zend_call_method_with_0_params(Z_OBJ(exception), ce_exception, &ex->ce->__tostring, "__tostring", &tmp);
+		zend_call_method_with_0_params_ex(Z_OBJ(exception), ce_exception, &ex->ce->__tostring, ZSTR_KNOWN(ZEND_STR_MAGIC_TO_STRING), &tmp);
 		if (!EG(exception)) {
 			if (Z_TYPE(tmp) != IS_STRING) {
 				zend_error(E_WARNING, "%s::__toString() must return a string", ZSTR_VAL(ce_exception->name));
@@ -941,7 +941,7 @@ ZEND_API ZEND_COLD void zend_exception_error(zend_object *ex, int severity) /* {
 			}
 
 			zend_error_va(E_WARNING, (file && ZSTR_LEN(file) > 0) ? ZSTR_VAL(file) : NULL, line,
-				"Uncaught %s in exception handling during call to %s::__tostring()",
+				"Uncaught %s in exception handling during call to %s::__toString()",
 				ZSTR_VAL(Z_OBJCE(zv)->name), ZSTR_VAL(ce_exception->name));
 
 			if (file) {

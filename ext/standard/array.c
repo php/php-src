@@ -736,7 +736,7 @@ PHP_FUNCTION(count)
 			}
 			/* if not and the object implements Countable we call its count() method */
 			if (instanceof_function(Z_OBJCE_P(array), zend_ce_countable)) {
-				zend_call_method_with_0_params(Z_OBJ_P(array), NULL, NULL, "count", &retval);
+				zend_call_method_with_0_params_ex(Z_OBJ_P(array), NULL, NULL, ZSTR_KNOWN(ZEND_STR_COUNT), &retval);
 				if (Z_TYPE(retval) != IS_UNDEF) {
 					RETVAL_LONG(zval_get_long(&retval));
 					zval_ptr_dtor(&retval);

@@ -39,6 +39,7 @@ typedef struct _zend_user_iterator {
 } zend_user_iterator;
 
 ZEND_API zval* zend_call_method(zend_object *object, zend_class_entry *obj_ce, zend_function **fn_proxy, const char *function_name, size_t function_name_len, zval *retval, int param_count, zval* arg1, zval* arg2);
+ZEND_API zval* zend_call_method_ex(zend_object *object, zend_class_entry *obj_ce, zend_function **fn_proxy, zend_string *function_name, zval *retval_ptr, int param_count, zval* arg1, zval* arg2);
 
 #define zend_call_method_with_0_params(obj, obj_ce, fn_proxy, function_name, retval) \
 	zend_call_method(obj, obj_ce, fn_proxy, function_name, sizeof(function_name)-1, retval, 0, NULL, NULL)
@@ -48,6 +49,15 @@ ZEND_API zval* zend_call_method(zend_object *object, zend_class_entry *obj_ce, z
 
 #define zend_call_method_with_2_params(obj, obj_ce, fn_proxy, function_name, retval, arg1, arg2) \
 	zend_call_method(obj, obj_ce, fn_proxy, function_name, sizeof(function_name)-1, retval, 2, arg1, arg2)
+
+#define zend_call_method_with_0_params_ex(obj, obj_ce, fn_proxy, function_name, retval) \
+    zend_call_method_ex(obj, obj_ce, fn_proxy, function_name, retval, 0, NULL, NULL)
+
+#define zend_call_method_with_1_params_ex(obj, obj_ce, fn_proxy, function_name, retval, arg1) \
+    zend_call_method_ex(obj, obj_ce, fn_proxy, function_name, retval, 1, arg1, NULL)
+
+#define zend_call_method_with_2_params_ex(obj, obj_ce, fn_proxy, function_name, retval, arg1, arg2) \
+    zend_call_method_ex(obj, obj_ce, fn_proxy, function_name, retval, 2, arg1, arg2)
 
 #define REGISTER_MAGIC_INTERFACE(class_name, class_name_str) \
 	{\

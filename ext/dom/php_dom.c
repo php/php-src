@@ -1529,7 +1529,7 @@ static zval *dom_nodelist_read_dimension(zend_object *object, zval *offset, int 
 
 	ZVAL_LONG(&offset_copy, zval_get_long(offset));
 
-	zend_call_method_with_1_params(object, object->ce, NULL, "item", rv, &offset_copy);
+	zend_call_method_with_1_params_ex(object, object->ce, NULL, ZSTR_KNOWN(ZEND_STR_ITEM), rv, &offset_copy);
 
 	return rv;
 } /* }}} end dom_nodelist_read_dimension */
