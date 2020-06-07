@@ -1783,6 +1783,9 @@ AC_DEFUN([PHP_PROG_BISON], [
     AC_MSG_CHECKING([for bison version])
 
     php_bison_version=$($YACC --version 2> /dev/null | grep 'GNU Bison' | cut -d ' ' -f 4 | tr -d a-z)
+    if test -z "$php_bison_version"; then
+      php_bison_version=0.0.0
+    fi
     ac_IFS=$IFS; IFS="."
     set $php_bison_version
     IFS=$ac_IFS
@@ -1846,6 +1849,9 @@ AC_DEFUN([PHP_PROG_RE2C],[
     AC_MSG_CHECKING([for re2c version])
 
     php_re2c_version=$($RE2C --version | cut -d ' ' -f 2 2>/dev/null)
+    if test -z "$php_re2c_version"; then
+      php_re2c_version=0.0.0
+    fi
     ac_IFS=$IFS; IFS="."
     set $php_re2c_version
     IFS=$ac_IFS
