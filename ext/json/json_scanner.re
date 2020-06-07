@@ -91,7 +91,7 @@ static int php_json_ucs2_to_int(php_json_scanner *s, int size)
 	return php_json_ucs2_to_int_ex(s, size, 1);
 }
 
-void php_json_scanner_init(php_json_scanner *s, char *str, size_t str_len, int options)
+void php_json_scanner_init(php_json_scanner *s, const char *str, size_t str_len, int options)
 {
 	s->cursor = (php_json_ctype *) str;
 	s->limit = (php_json_ctype *) str + str_len;

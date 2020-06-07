@@ -32,7 +32,7 @@
 #define MAX_ERROR_INDEX					22 /* Always last error message + 1 */
 
 
-PHPAPI int TSendMail(char *smtpaddr, int *returnerror, char **error_message,
+PHPAPI int TSendMail(const char *smtpaddr, int *returnerror, char **error_message,
 			  char *RPath, const char *Subject, const char *mailTo, const char *data,
 			  char *mailCc, char *mailBcc, char *mailRPath);
 PHPAPI void TSMClose(void);

@@ -195,7 +195,7 @@ static const char *php_json_get_error_msg(php_json_error_code error_code) /* {{{
 }
 /* }}} */
 
-PHP_JSON_API int php_json_decode_ex(zval *return_value, char *str, size_t str_len, zend_long options, zend_long depth) /* {{{ */
+PHP_JSON_API int php_json_decode_ex(zval *return_value, const char *str, size_t str_len, zend_long options, zend_long depth) /* {{{ */
 {
 	php_json_parser parser;
 

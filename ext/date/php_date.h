@@ -131,7 +131,7 @@ PHPAPI zend_class_entry *php_date_get_period_ce(void);
 
 /* Functions for creating DateTime objects, and initializing them from a string */
 PHPAPI zval *php_date_instantiate(zend_class_entry *pce, zval *object);
-PHPAPI int php_date_initialize(php_date_obj *dateobj, const char *time_str, size_t time_str_len, char *format, zval *timezone_object, int ctor);
+PHPAPI int php_date_initialize(php_date_obj *dateobj, const char *time_str, size_t time_str_len, const char *format, zval *timezone_object, int ctor);
 
 
 #endif /* PHP_DATE_H */

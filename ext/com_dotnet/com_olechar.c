@@ -26,7 +26,7 @@
 #include "php_com_dotnet_internal.h"
 
 
-PHP_COM_DOTNET_API OLECHAR *php_com_string_to_olestring(char *string, size_t string_len, int codepage)
+PHP_COM_DOTNET_API OLECHAR *php_com_string_to_olestring(const char *string, size_t string_len, int codepage)
 {
 	OLECHAR *olestring = NULL;
 	DWORD flags = codepage == CP_UTF8 ? 0 : MB_PRECOMPOSED | MB_ERR_INVALID_CHARS;

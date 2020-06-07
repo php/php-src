@@ -2187,7 +2187,7 @@ static void php_date_get_current_time_with_fraction(time_t *sec, suseconds_t *us
 #endif
 }
 
-PHPAPI int php_date_initialize(php_date_obj *dateobj, const char *time_str, size_t time_str_len, char *format, zval *timezone_object, int ctor) /* {{{ */
+PHPAPI int php_date_initialize(php_date_obj *dateobj, const char *time_str, size_t time_str_len, const char *format, zval *timezone_object, int ctor) /* {{{ */
 {
 	timelib_time   *now;
 	timelib_tzinfo *tzi = NULL;
@@ -2205,7 +2205,8 @@ PHPAPI int php_date_initialize(php_date_obj *dateobj, const char *time_str, size
 		if (time_str_len == 0) {
 			time_str = "";
 		}
-		dateobj->time = timelib_parse_from_format(format, (char *) time_str, time_str_len, &err, DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper);
+		// TODO: drop this const casts
+		dateobj->time = timelib_parse_from_format((char *) format, (char *) time_str, time_str_len, &err, DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper);
 	} else {
 		if (time_str_len == 0) {
 			time_str = "now";

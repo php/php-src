@@ -36,12 +36,12 @@
 #define YYFILL(n)		{ RET(PDO_PARSER_EOI); }
 
 typedef struct Scanner {
-	char 	*ptr, *cur, *tok, *end;
+	const char *ptr, *cur, *tok, *end;
 } Scanner;
 
 static int scan(Scanner *s)
 {
-	char *cursor = s->cur;
+	const char *cursor = s->cur;
 
 	s->tok = cursor;
 	/*!re2c
@@ -81,7 +81,7 @@ static void free_param_name(zval *el) {
 	efree(Z_PTR_P(el));
 }
 
-PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, size_t inquery_len,
+PDO_API int pdo_parse_params(pdo_stmt_t *stmt, const char *inquery, size_t inquery_len,
 	char **outquery, size_t *outquery_len)
 {
 	Scanner s;

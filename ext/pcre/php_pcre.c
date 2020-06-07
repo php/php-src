@@ -1038,7 +1038,7 @@ static inline void add_offset_pair(
 /* }}} */
 
 static void populate_subpat_array(
-		zval *subpats, char *subject, PCRE2_SIZE *offsets, zend_string **subpat_names,
+		zval *subpats, const char *subject, PCRE2_SIZE *offsets, zend_string **subpat_names,
 		uint32_t num_subpats, int count, const PCRE2_SPTR mark, zend_long flags) {
 	zend_bool offset_capture = (flags & PREG_OFFSET_CAPTURE) != 0;
 	zend_bool unmatched_as_null = (flags & PREG_UNMATCHED_AS_NULL) != 0;
@@ -1531,7 +1531,7 @@ static int preg_get_backref(char **str, int *backref)
 
 /* {{{ preg_do_repl_func
  */
-static zend_string *preg_do_repl_func(zend_fcall_info *fci, zend_fcall_info_cache *fcc, char *subject, PCRE2_SIZE *offsets, zend_string **subpat_names, uint32_t num_subpats, int count, const PCRE2_SPTR mark, zend_long flags)
+static zend_string *preg_do_repl_func(zend_fcall_info *fci, zend_fcall_info_cache *fcc, const char *subject, PCRE2_SIZE *offsets, zend_string **subpat_names, uint32_t num_subpats, int count, const PCRE2_SPTR mark, zend_long flags)
 {
 	zend_string *result_str;
 	zval		 retval;			/* Function return value */
@@ -1596,7 +1596,7 @@ PHPAPI zend_string *php_pcre_replace(zend_string *regex,
 /* }}} */
 
 /* {{{ php_pcre_replace_impl() */
-PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *subject_str, char *subject, size_t subject_len, zend_string *replace_str, size_t limit, size_t *replace_count)
+PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *subject_str, const char *subject, size_t subject_len, zend_string *replace_str, size_t limit, size_t *replace_count)
 {
 	uint32_t		 options;			/* Execution options */
 	int				 count;				/* Count of matched subpatterns */
@@ -1838,7 +1838,7 @@ error:
 /* }}} */
 
 /* {{{ php_pcre_replace_func_impl() */
-static zend_string *php_pcre_replace_func_impl(pcre_cache_entry *pce, zend_string *subject_str, char *subject, size_t subject_len, zend_fcall_info *fci, zend_fcall_info_cache *fcc, size_t limit, size_t *replace_count, zend_long flags)
+static zend_string *php_pcre_replace_func_impl(pcre_cache_entry *pce, zend_string *subject_str, const char *subject, size_t subject_len, zend_fcall_info *fci, zend_fcall_info_cache *fcc, size_t limit, size_t *replace_count, zend_long flags)
 {
 	uint32_t		 options;			/* Execution options */
 	int				 count;				/* Count of matched subpatterns */

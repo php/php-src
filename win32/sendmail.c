@@ -176,7 +176,7 @@ static zend_string *php_win32_mail_trim_header(char *header)
 //
 //  See SendText() for additional args!
 //********************************************************************/
-PHPAPI int TSendMail(char *host, int *error, char **error_message,
+PHPAPI int TSendMail(const char *host, int *error, char **error_message,
 			  char *headers, const char *Subject, const char *mailTo, const char *data,
 			  char *mailCc, char *mailBcc, char *mailRPath)
 {

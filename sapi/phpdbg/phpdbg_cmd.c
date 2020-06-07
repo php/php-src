@@ -737,7 +737,7 @@ PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, zend_bool allow_async
 	return SUCCESS;
 } /* }}} */
 
-PHPDBG_API char *phpdbg_read_input(char *buffered) /* {{{ */
+PHPDBG_API char *phpdbg_read_input(const char *buffered) /* {{{ */
 {
 	char buf[PHPDBG_MAX_CMD];
 	char *cmd = NULL;

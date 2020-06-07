@@ -33,7 +33,7 @@ PHPDBG_PRINT(method);
 PHPDBG_PRINT(func);
 PHPDBG_PRINT(stack);
 
-PHPDBG_API void phpdbg_print_opcodes(char *function);
+PHPDBG_API void phpdbg_print_opcodes(const char *function);
 
 extern const phpdbg_command_t phpdbg_print_commands[];
 
