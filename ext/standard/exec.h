@@ -20,8 +20,8 @@
 PHP_MINIT_FUNCTION(proc_open);
 PHP_MINIT_FUNCTION(exec);
 
-PHPAPI zend_string *php_escape_shell_cmd(char *);
-PHPAPI zend_string *php_escape_shell_arg(char *);
-PHPAPI int php_exec(int type, char *cmd, zval *array, zval *return_value);
+PHPAPI zend_string *php_escape_shell_cmd(const char *str);
+PHPAPI zend_string *php_escape_shell_arg(const char *str);
+PHPAPI int php_exec(int type, const char *cmd, zval *array, zval *return_value);
 
 #endif /* EXEC_H */

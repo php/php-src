@@ -57,7 +57,7 @@ static ZEND_COLD int php_info_print_html_esc(const char *str, size_t len) /* {{{
 	size_t written;
 	zend_string *new_str;
 
-	new_str = php_escape_html_entities((unsigned char *) str, len, 0, ENT_QUOTES, "utf-8");
+	new_str = php_escape_html_entities((const unsigned char *) str, len, 0, ENT_QUOTES, "utf-8");
 	written = php_output_write(ZSTR_VAL(new_str), ZSTR_LEN(new_str));
 	zend_string_free(new_str);
 	return written;
@@ -249,9 +249,9 @@ PHPAPI ZEND_COLD void ZEND_COLD php_info_print_style(void)
 
 /* {{{ php_info_html_esc
  */
-PHPAPI ZEND_COLD zend_string *php_info_html_esc(char *string)
+PHPAPI ZEND_COLD zend_string *php_info_html_esc(const char *string)
 {
-	return php_escape_html_entities((unsigned char *) string, strlen(string), 0, ENT_QUOTES, NULL);
+	return php_escape_html_entities((const unsigned char *) string, strlen(string), 0, ENT_QUOTES, NULL);
 }
 /* }}} */
 
@@ -1095,7 +1095,7 @@ PHPAPI ZEND_COLD void php_info_print_hr(void) /* {{{ */
 }
 /* }}} */
 
-PHPAPI ZEND_COLD void php_info_print_table_colspan_header(int num_cols, char *header) /* {{{ */
+PHPAPI ZEND_COLD void php_info_print_table_colspan_header(int num_cols, const char *header) /* {{{ */
 {
 	int spaces;
 

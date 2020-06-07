@@ -553,7 +553,7 @@ static char *cgi_getenv_win32(const char *name, size_t name_len)
 }
 #endif
 
-static char *sapi_cgi_getenv(char *name, size_t name_len)
+static char *sapi_cgi_getenv(const char *name, size_t name_len)
 {
 #ifndef PHP_WIN32
 	return getenv(name);
@@ -562,7 +562,7 @@ static char *sapi_cgi_getenv(char *name, size_t name_len)
 #endif
 }
 
-static char *sapi_fcgi_getenv(char *name, size_t name_len)
+static char *sapi_fcgi_getenv(const char *name, size_t name_len)
 {
 	/* when php is started by mod_fastcgi, no regular environment
 	 * is provided to PHP.  It is always sent to PHP at the start
@@ -646,10 +646,10 @@ static char *sapi_fcgi_read_cookies(void)
 	return FCGI_GETENV(request, "HTTP_COOKIE");
 }
 
-static void cgi_php_load_env_var(char *var, unsigned int var_len, char *val, unsigned int val_len, void *arg)
+static void cgi_php_load_env_var(const char *var, unsigned int var_len, char *val, unsigned int val_len, void *arg)
 {
-	zval *array_ptr = (zval*)arg;
-	int filter_arg = (Z_ARR_P(array_ptr) == Z_ARR(PG(http_globals)[TRACK_VARS_ENV]))?PARSE_ENV:PARSE_SERVER;
+	zval *array_ptr = (zval *) arg;
+	int filter_arg = (Z_ARR_P(array_ptr) == Z_ARR(PG(http_globals)[TRACK_VARS_ENV])) ? PARSE_ENV : PARSE_SERVER;
 	size_t new_val_len;
 
 	if (sapi_module.input_filter(filter_arg, var, &val, strlen(val), &new_val_len)) {
@@ -747,7 +747,7 @@ static void sapi_cgi_register_variables(zval *track_vars_array)
 	}
 }
 
-static void sapi_cgi_log_message(char *message, int syslog_type_int)
+static void sapi_cgi_log_message(const char *message, int syslog_type_int)
 {
 	if (fcgi_is_fastcgi() && CGIG(fcgi_logging)) {
 		fcgi_request *request;

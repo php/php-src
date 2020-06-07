@@ -50,7 +50,7 @@ typedef enum
 
 PHP_MINIT_FUNCTION(imagetypes);
 
-PHPAPI int php_getimagetype(php_stream *stream, char *input, char *filetype);
+PHPAPI int php_getimagetype(php_stream *stream, const char *input, char *filetype);
 
 PHPAPI char * php_image_type_to_mime_type(int image_type);
 

@@ -191,7 +191,7 @@ static int sapi_lsapi_deactivate(void)
 
 /* {{{ sapi_lsapi_getenv
  */
-static char *sapi_lsapi_getenv( char * name, size_t name_len )
+static char *sapi_lsapi_getenv(const char * name, size_t name_len )
 {
     if ( lsapi_mode ) {
         return LSAPI_GetEnv( name );
@@ -509,7 +509,7 @@ static int sapi_lsapi_send_headers(sapi_headers_struct *sapi_headers)
 
 /* {{{ sapi_lsapi_send_headers
  */
-static void sapi_lsapi_log_message(char *message, int syslog_type_int)
+static void sapi_lsapi_log_message(const char *message, int syslog_type_int)
 {
     char buf[8192];
     int len = strlen( message );
@@ -521,7 +521,7 @@ static void sapi_lsapi_log_message(char *message, int syslog_type_int)
             len = 8191;
         ++len;
     }
-    LSAPI_Write_Stderr( message, len);
+    LSAPI_Write_Stderr( message, len );
 }
 /* }}} */
 

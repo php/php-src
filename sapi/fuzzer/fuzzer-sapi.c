@@ -72,7 +72,7 @@ static void register_variables(zval *track_vars_array)
 	php_import_environment_variables(track_vars_array);
 }
 
-static void log_message(char *message, int level)
+static void log_message(const char *message, int level)
 {
 }
 

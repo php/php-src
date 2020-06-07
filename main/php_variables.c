@@ -30,13 +30,13 @@
 void _php_import_environment_variables(zval *array_ptr);
 PHPAPI void (*php_import_environment_variables)(zval *array_ptr) = _php_import_environment_variables;
 
-PHPAPI void php_register_variable(char *var, char *strval, zval *track_vars_array)
+PHPAPI void php_register_variable(const char *var, const char *strval, zval *track_vars_array)
 {
 	php_register_variable_safe(var, strval, strlen(strval), track_vars_array);
 }
 
 /* binary-safe version */
-PHPAPI void php_register_variable_safe(char *var, char *strval, size_t str_len, zval *track_vars_array)
+PHPAPI void php_register_variable_safe(const char *var, const char *strval, size_t str_len, zval *track_vars_array)
 {
 	zval new_entry;
 	assert(strval != NULL);
@@ -60,7 +60,7 @@ static zend_always_inline void php_register_variable_quick(const char *name, siz
 	zend_string_release_ex(key, 0);
 }
 
-PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars_array)
+PHPAPI void php_register_variable_ex(const char *var_name, zval *val, zval *track_vars_array)
 {
 	char *p = NULL;
 	char *ip = NULL;		/* index pointer */
@@ -593,11 +593,10 @@ zend_bool php_std_auto_global_callback(char *name, uint32_t name_len)
 
 /* {{{ php_build_argv
  */
-PHPAPI void php_build_argv(char *s, zval *track_vars_array)
+PHPAPI void php_build_argv(const char *s, zval *track_vars_array)
 {
 	zval arr, argc, tmp;
 	int count = 0;
-	char *ss, *space;
 
 	if (!(SG(request_info).argc || track_vars_array)) {
 		return;
@@ -615,24 +614,18 @@ PHPAPI void php_build_argv(char *s, zval *track_vars_array)
 			}
 		}
 	} else 	if (s && *s) {
-		ss = s;
-		while (ss) {
-			space = strchr(ss, '+');
-			if (space) {
-				*space = '\0';
-			}
+		while (1) {
+			const char *space = strchr(s, '+');
 			/* auto-type */
-			ZVAL_STRING(&tmp, ss);
+			ZVAL_STRINGL(&tmp, s, space ? space - s : strlen(s));
 			count++;
 			if (zend_hash_next_index_insert(Z_ARRVAL(arr), &tmp) == NULL) {
 				zend_string_efree(Z_STR(tmp));
 			}
-			if (space) {
-				*space = '+';
-				ss = space + 1;
-			} else {
-				ss = space;
+			if (!space) {
+				break;
 			}
+			s = space + 1;
 		}
 	}
 

@@ -145,7 +145,7 @@ SAPI_API void sapi_shutdown(void);
 SAPI_API void sapi_activate(void);
 SAPI_API void sapi_deactivate(void);
 SAPI_API void sapi_initialize_empty_request(void);
-SAPI_API void sapi_add_request_header(char *var, unsigned int var_len, char *val, unsigned int val_len, void *arg);
+SAPI_API void sapi_add_request_header(const char *var, unsigned int var_len, char *val, unsigned int val_len, void *arg);
 END_EXTERN_C()
 
 /*
@@ -160,7 +160,7 @@ END_EXTERN_C()
  */
 
 typedef struct {
-	char *line; /* If you allocated this, you need to free it yourself */
+	const char *line; /* If you allocated this, you need to free it yourself */
 	size_t line_len;
 	zend_long response_code; /* long due to zend_parse_parameters compatibility */
 } sapi_header_line;
@@ -177,7 +177,7 @@ BEGIN_EXTERN_C()
 SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg);
 
 /* Deprecated functions. Use sapi_header_op instead. */
-SAPI_API int sapi_add_header_ex(char *header_line, size_t header_line_len, zend_bool duplicate, zend_bool replace);
+SAPI_API int sapi_add_header_ex(const char *header_line, size_t header_line_len, zend_bool duplicate, zend_bool replace);
 #define sapi_add_header(a, b, c) sapi_add_header_ex((a),(b),(c),1)
 
 
@@ -190,11 +190,11 @@ SAPI_API int sapi_register_post_entry(const sapi_post_entry *post_entry);
 SAPI_API void sapi_unregister_post_entry(const sapi_post_entry *post_entry);
 SAPI_API int sapi_register_default_post_reader(void (*default_post_reader)(void));
 SAPI_API int sapi_register_treat_data(void (*treat_data)(int arg, char *str, zval *destArray));
-SAPI_API int sapi_register_input_filter(unsigned int (*input_filter)(int arg, char *var, char **val, size_t val_len, size_t *new_val_len), unsigned int (*input_filter_init)(void));
+SAPI_API int sapi_register_input_filter(unsigned int (*input_filter)(int arg, const char *var, char **val, size_t val_len, size_t *new_val_len), unsigned int (*input_filter_init)(void));
 
 SAPI_API int sapi_flush(void);
 SAPI_API zend_stat_t *sapi_get_stat(void);
-SAPI_API char *sapi_getenv(char *name, size_t name_len);
+SAPI_API char *sapi_getenv(const char *name, size_t name_len);
 
 SAPI_API char *sapi_get_default_content_type(void);
 SAPI_API void sapi_get_default_content_type_header(sapi_header_struct *default_header);
@@ -223,7 +223,7 @@ struct _sapi_module_struct {
 	size_t (*ub_write)(const char *str, size_t str_length);
 	void (*flush)(void *server_context);
 	zend_stat_t *(*get_stat)(void);
-	char *(*getenv)(char *name, size_t name_len);
+	char *(*getenv)(const char *name, size_t name_len);
 
 	void (*sapi_error)(int type, const char *error_msg, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 
@@ -235,7 +235,7 @@ struct _sapi_module_struct {
 	char *(*read_cookies)(void);
 
 	void (*register_server_variables)(zval *track_vars_array);
-	void (*log_message)(char *message, int syslog_type_int);
+	void (*log_message)(const char *message, int syslog_type_int);
 	double (*get_request_time)(void);
 	void (*terminate_process)(void);
 
@@ -255,7 +255,7 @@ struct _sapi_module_struct {
 	int (*get_target_uid)(uid_t *);
 	int (*get_target_gid)(gid_t *);
 
-	unsigned int (*input_filter)(int arg, char *var, char **val, size_t val_len, size_t *new_val_len);
+	unsigned int (*input_filter)(int arg, const char *var, char **val, size_t val_len, size_t *new_val_len);
 
 	void (*ini_defaults)(HashTable *configuration_hash);
 	int phpinfo_as_text;
@@ -288,7 +288,7 @@ struct _sapi_post_entry {
 #define SAPI_POST_HANDLER_FUNC(post_handler) void post_handler(char *content_type_dup, void *arg)
 
 #define SAPI_TREAT_DATA_FUNC(treat_data) void treat_data(int arg, char *str, zval* destArray)
-#define SAPI_INPUT_FILTER_FUNC(input_filter) unsigned int input_filter(int arg, char *var, char **val, size_t val_len, size_t *new_val_len)
+#define SAPI_INPUT_FILTER_FUNC(input_filter) unsigned int input_filter(int arg, const char *var, char **val, size_t val_len, size_t *new_val_len)
 
 BEGIN_EXTERN_C()
 SAPI_API SAPI_POST_READER_FUNC(sapi_read_standard_form_data);

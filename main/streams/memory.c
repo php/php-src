@@ -315,7 +315,7 @@ PHPAPI php_stream *_php_stream_memory_create(int mode STREAMS_DC)
 
 
 /* {{{ */
-PHPAPI php_stream *_php_stream_memory_open(int mode, char *buf, size_t length STREAMS_DC)
+PHPAPI php_stream *_php_stream_memory_open(int mode, const char *buf, size_t length STREAMS_DC)
 {
 	php_stream *stream;
 	php_stream_memory_data *ms;
@@ -325,7 +325,7 @@ PHPAPI php_stream *_php_stream_memory_open(int mode, char *buf, size_t length ST
 
 		if (mode == TEMP_STREAM_READONLY || mode == TEMP_STREAM_TAKE_BUFFER) {
 			/* use the buffer directly */
-			ms->data = buf;
+			ms->data = (char *) buf;
 			ms->fsize = length;
 		} else {
 			if (length) {
@@ -598,7 +598,7 @@ PHPAPI php_stream *_php_stream_temp_create(int mode, size_t max_memory_usage STR
 /* }}} */
 
 /* {{{ _php_stream_temp_open */
-PHPAPI php_stream *_php_stream_temp_open(int mode, size_t max_memory_usage, char *buf, size_t length STREAMS_DC)
+PHPAPI php_stream *_php_stream_temp_open(int mode, size_t max_memory_usage, const char *buf, size_t length STREAMS_DC)
 {
 	php_stream *stream;
 	php_stream_temp_data *ts;

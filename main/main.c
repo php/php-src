@@ -822,7 +822,7 @@ PHPAPI int php_get_module_initialized(void)
 
 /* {{{ php_log_err_with_severity
  */
-PHPAPI ZEND_COLD void php_log_err_with_severity(char *log_message, int syslog_type_int)
+PHPAPI ZEND_COLD void php_log_err_with_severity(const char *log_message, int syslog_type_int)
 {
 	int fd = -1;
 	time_t error_time;

@@ -737,10 +737,9 @@ PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, zend_bool allow_async
 	return SUCCESS;
 } /* }}} */
 
-PHPDBG_API char *phpdbg_read_input(char *buffered) /* {{{ */
+PHPDBG_API char *phpdbg_read_input(const char *buffered) /* {{{ */
 {
 	char buf[PHPDBG_MAX_CMD];
-	char *cmd = NULL;
 	char *buffer = NULL;
 
 	if ((PHPDBG_G(flags) & (PHPDBG_IS_STOPPING | PHPDBG_IS_RUNNING)) != PHPDBG_IS_STOPPING) {
@@ -755,11 +754,12 @@ PHPDBG_API char *phpdbg_read_input(char *buffered) /* {{{ */
 #endif
 			{
 				phpdbg_write("prompt", "", "%s", phpdbg_get_prompt());
-				phpdbg_consume_stdin_line(cmd = buf);
+				phpdbg_consume_stdin_line(buf);
+				buffer = estrdup(buf);
 			}
 #ifdef HAVE_PHPDBG_READLINE
 			else {
-				cmd = readline(phpdbg_get_prompt());
+				char *cmd = readline(phpdbg_get_prompt());
 				PHPDBG_G(last_was_newline) = 1;
 
 				if (!cmd) {
@@ -768,19 +768,13 @@ PHPDBG_API char *phpdbg_read_input(char *buffered) /* {{{ */
 				}
 
 				add_history(cmd);
+				buffer = estrdup(cmd);
+				free(cmd);
 			}
 #endif
 		} else {
-			cmd = buffered;
+			buffer = estrdup(buffered);
 		}
-
-		buffer = estrdup(cmd);
-
-#ifdef HAVE_PHPDBG_READLINE
-		if (!buffered && cmd &&	!(PHPDBG_G(flags) & PHPDBG_IS_REMOTE) && isatty(PHPDBG_G(io)[PHPDBG_STDIN].fd)) {
-			free(cmd);
-		}
-#endif
 	}
 
 	if (buffer && isspace(*buffer)) {

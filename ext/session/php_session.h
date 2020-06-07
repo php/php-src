@@ -247,7 +247,7 @@ PHPAPI zend_string *php_session_create_id(PS_CREATE_SID_ARGS);
 PHPAPI int php_session_validate_sid(PS_VALIDATE_SID_ARGS);
 PHPAPI int php_session_update_timestamp(PS_UPDATE_TIMESTAMP_ARGS);
 
-PHPAPI void session_adapt_url(const char *, size_t, char **, size_t *);
+PHPAPI void session_adapt_url(const char *url, size_t url_len, char **new_url, size_t *new_len);
 
 PHPAPI int php_session_destroy(void);
 PHPAPI void php_add_session_var(zend_string *name);
@@ -260,12 +260,11 @@ PHPAPI int php_session_register_serializer(const char *name,
 	        zend_string *(*encode)(PS_SERIALIZER_ENCODE_ARGS),
 	        int (*decode)(PS_SERIALIZER_DECODE_ARGS));
 
-PHPAPI void php_session_set_id(char *id);
 PHPAPI int php_session_start(void);
 PHPAPI int php_session_flush(int write);
 
-PHPAPI const ps_module *_php_find_ps_module(char *name);
-PHPAPI const ps_serializer *_php_find_ps_serializer(char *name);
+PHPAPI const ps_module *_php_find_ps_module(const char *name);
+PHPAPI const ps_serializer *_php_find_ps_serializer(const char *name);
 
 PHPAPI int php_session_valid_key(const char *key);
 PHPAPI int php_session_reset_id(void);

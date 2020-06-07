@@ -1472,13 +1472,13 @@ PHP_FUNCTION(error_log)
 /* }}} */
 
 /* For BC (not binary-safe!) */
-PHPAPI int _php_error_log(int opt_err, char *message, char *opt, char *headers) /* {{{ */
+PHPAPI int _php_error_log(int opt_err, const char *message, const char *opt, const char *headers) /* {{{ */
 {
 	return _php_error_log_ex(opt_err, message, (opt_err == 3) ? strlen(message) : 0, opt, headers);
 }
 /* }}} */
 
-PHPAPI int _php_error_log_ex(int opt_err, char *message, size_t message_len, char *opt, char *headers) /* {{{ */
+PHPAPI int _php_error_log_ex(int opt_err, const char *message, size_t message_len, const char *opt, const char *headers) /* {{{ */
 {
 	php_stream *stream = NULL;
 	size_t nbytes;
@@ -1870,7 +1870,7 @@ PHP_FUNCTION(register_shutdown_function)
 }
 /* }}} */
 
-PHPAPI zend_bool register_user_shutdown_function(char *function_name, size_t function_len, php_shutdown_function_entry *shutdown_function_entry) /* {{{ */
+PHPAPI zend_bool register_user_shutdown_function(const char *function_name, size_t function_len, php_shutdown_function_entry *shutdown_function_entry) /* {{{ */
 {
 	if (!BG(user_shutdown_function_names)) {
 		ALLOC_HASHTABLE(BG(user_shutdown_function_names));
@@ -1882,7 +1882,7 @@ PHPAPI zend_bool register_user_shutdown_function(char *function_name, size_t fun
 }
 /* }}} */
 
-PHPAPI zend_bool remove_user_shutdown_function(char *function_name, size_t function_len) /* {{{ */
+PHPAPI zend_bool remove_user_shutdown_function(const char *function_name, size_t function_len) /* {{{ */
 {
 	if (BG(user_shutdown_function_names)) {
 		return zend_hash_str_del(BG(user_shutdown_function_names), function_name, function_len) != FAILURE;

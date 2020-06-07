@@ -6888,7 +6888,7 @@ static void php_openssl_load_cipher_mode(struct php_openssl_cipher_mode *mode, c
 }
 /* }}} */
 
-static int php_openssl_validate_iv(char **piv, size_t *piv_len, size_t iv_required_len,
+static int php_openssl_validate_iv(const char **piv, size_t *piv_len, size_t iv_required_len,
 		zend_bool *free_iv, EVP_CIPHER_CTX *cipher_ctx, struct php_openssl_cipher_mode *mode) /* {{{ */
 {
 	char *iv_new;
@@ -6942,9 +6942,9 @@ static int php_openssl_validate_iv(char **piv, size_t *piv_len, size_t iv_requir
 
 static int php_openssl_cipher_init(const EVP_CIPHER *cipher_type,
 		EVP_CIPHER_CTX *cipher_ctx, struct php_openssl_cipher_mode *mode,
-		char **ppassword, size_t *ppassword_len, zend_bool *free_password,
-		char **piv, size_t *piv_len, zend_bool *free_iv,
-		char *tag, int tag_len, zend_long options, int enc)  /* {{{ */
+		const char **ppassword, size_t *ppassword_len, zend_bool *free_password,
+		const char **piv, size_t *piv_len, zend_bool *free_iv,
+		const char *tag, int tag_len, zend_long options, int enc)  /* {{{ */
 {
 	unsigned char *key;
 	int key_len, password_len;
@@ -7014,8 +7014,8 @@ static int php_openssl_cipher_init(const EVP_CIPHER *cipher_type,
 
 static int php_openssl_cipher_update(const EVP_CIPHER *cipher_type,
 		EVP_CIPHER_CTX *cipher_ctx, struct php_openssl_cipher_mode *mode,
-		zend_string **poutbuf, int *poutlen, char *data, size_t data_len,
-		char *aad, size_t aad_len, int enc)  /* {{{ */
+		zend_string **poutbuf, int *poutlen, const char *data, size_t data_len,
+		const char *aad, size_t aad_len, int enc)  /* {{{ */
 {
 	int i = 0;
 
@@ -7025,7 +7025,7 @@ static int php_openssl_cipher_update(const EVP_CIPHER *cipher_type,
 		return FAILURE;
 	}
 
-	if (mode->is_aead && !EVP_CipherUpdate(cipher_ctx, NULL, &i, (unsigned char *)aad, (int)aad_len)) {
+	if (mode->is_aead && !EVP_CipherUpdate(cipher_ctx, NULL, &i, (const unsigned char *) aad, (int) aad_len)) {
 		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "Setting of additional application data failed");
 		return FAILURE;
@@ -7034,7 +7034,7 @@ static int php_openssl_cipher_update(const EVP_CIPHER *cipher_type,
 	*poutbuf = zend_string_alloc((int)data_len + EVP_CIPHER_block_size(cipher_type), 0);
 
 	if (!EVP_CipherUpdate(cipher_ctx, (unsigned char*)ZSTR_VAL(*poutbuf),
-					&i, (unsigned char *)data, (int)data_len)) {
+					&i, (const unsigned char *)data, (int)data_len)) {
 		/* we don't show warning when we fail but if we ever do, then it should look like this:
 		if (mode->is_single_run_aead && !enc) {
 			php_error_docref(NULL, E_WARNING, "Tag verifycation failed");
@@ -7054,7 +7054,14 @@ static int php_openssl_cipher_update(const EVP_CIPHER *cipher_type,
 /* }}} */
 
 
-PHP_OPENSSL_API zend_string* php_openssl_encrypt(char *data, size_t data_len, char *method, size_t method_len, char *password, size_t password_len, zend_long options, char *iv, size_t iv_len, zval *tag, zend_long tag_len, char *aad, size_t aad_len)
+PHP_OPENSSL_API zend_string* php_openssl_encrypt(
+	const char *data, size_t data_len,
+	const char *method, size_t method_len,
+	const char *password, size_t password_len,
+	zend_long options,
+	const char *iv, size_t iv_len,
+	zval *tag, zend_long tag_len,
+	const char *aad, size_t aad_len)
 {
 	const EVP_CIPHER *cipher_type;
 	EVP_CIPHER_CTX *cipher_ctx;
@@ -7130,10 +7137,10 @@ PHP_OPENSSL_API zend_string* php_openssl_encrypt(char *data, size_t data_len, ch
 	}
 
 	if (free_password) {
-		efree(password);
+		efree((void *) password);
 	}
 	if (free_iv) {
-		efree(iv);
+		efree((void *) iv);
 	}
 	EVP_CIPHER_CTX_reset(cipher_ctx);
 	EVP_CIPHER_CTX_free(cipher_ctx);
@@ -7163,7 +7170,14 @@ PHP_FUNCTION(openssl_encrypt)
 }
 /* }}} */
 
-PHP_OPENSSL_API zend_string* php_openssl_decrypt(char *data, size_t data_len, char *method, size_t method_len, char *password, size_t password_len, zend_long options, char *iv, size_t iv_len, char *tag, zend_long tag_len, char *aad, size_t aad_len)
+PHP_OPENSSL_API zend_string* php_openssl_decrypt(
+	const char *data, size_t data_len,
+	const char *method, size_t method_len,
+	const char *password, size_t password_len,
+	zend_long options,
+	const char *iv, size_t iv_len,
+	const char *tag, zend_long tag_len,
+	const char *aad, size_t aad_len)
 {
 	const EVP_CIPHER *cipher_type;
 	EVP_CIPHER_CTX *cipher_ctx;
@@ -7222,10 +7236,10 @@ PHP_OPENSSL_API zend_string* php_openssl_decrypt(char *data, size_t data_len, ch
 	}
 
 	if (free_password) {
-		efree(password);
+		efree((void *) password);
 	}
 	if (free_iv) {
-		efree(iv);
+		efree((void *) iv);
 	}
 	if (base64_str) {
 		zend_string_release_ex(base64_str, 0);
@@ -7262,7 +7276,7 @@ PHP_FUNCTION(openssl_decrypt)
 }
 /* }}} */
 
-PHP_OPENSSL_API zend_long php_openssl_cipher_iv_length(char *method)
+PHP_OPENSSL_API zend_long php_openssl_cipher_iv_length(const char *method)
 {
 	const EVP_CIPHER *cipher_type;
 

@@ -29,7 +29,7 @@ PHPAPI zval *cfg_get_entry(const char *name, size_t name_length);
 PHPAPI int cfg_get_long(const char *varname, zend_long *result);
 PHPAPI int cfg_get_double(const char *varname, double *result);
 PHPAPI int cfg_get_string(const char *varname, char **result);
-PHPAPI int php_parse_user_ini_file(const char *dirname, char *ini_filename, HashTable *target_hash);
+PHPAPI int php_parse_user_ini_file(const char *dirname, const char *ini_filename, HashTable *target_hash);
 PHPAPI void php_ini_activate_config(HashTable *source_hash, int modify_type, int stage);
 PHPAPI int php_ini_has_per_dir_config(void);
 PHPAPI int php_ini_has_per_host_config(void);

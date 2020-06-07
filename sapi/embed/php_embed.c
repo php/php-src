@@ -91,9 +91,9 @@ static void php_embed_send_header(sapi_header_struct *sapi_header, void *server_
 {
 }
 
-static void php_embed_log_message(char *message, int syslog_type_int)
+static void php_embed_log_message(const char *message, int syslog_type_int)
 {
-	fprintf (stderr, "%s\n", message);
+	fprintf(stderr, "%s\n", message);
 }
 
 static void php_embed_register_variables(zval *track_vars_array)

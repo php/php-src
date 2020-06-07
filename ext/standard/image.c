@@ -1293,7 +1293,7 @@ PHP_FUNCTION(image_type_to_extension)
 
 /* {{{ php_imagetype
    detect filetype from first bytes */
-PHPAPI int php_getimagetype(php_stream * stream, char *input, char *filetype)
+PHPAPI int php_getimagetype(php_stream * stream, const char *input, char *filetype)
 {
 	char tmp[12];
     int twelve_bytes_read;

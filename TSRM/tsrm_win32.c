@@ -443,7 +443,7 @@ TSRM_API FILE *popen(const char *command, const char *type)
 	return popen_ex(command, type, NULL, NULL);
 }/*}}}*/
 
-TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, char *env)
+TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, const char *env)
 {/*{{{*/
 	FILE *stream = NULL;
 	int fno, type_len, read, mode;

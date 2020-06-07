@@ -198,7 +198,7 @@ typedef struct _zend_utility_functions {
 	int (*stream_open_function)(const char *filename, zend_file_handle *handle);
 	void (*printf_to_smart_string_function)(smart_string *buf, const char *format, va_list ap);
 	void (*printf_to_smart_str_function)(smart_str *buf, const char *format, va_list ap);
-	char *(*getenv_function)(char *name, size_t name_len);
+	char *(*getenv_function)(const char *name, size_t name_len);
 	zend_string *(*resolve_path_function)(const char *filename, size_t filename_len);
 } zend_utility_functions;
 
@@ -286,7 +286,7 @@ extern ZEND_API void (*zend_on_timeout)(int seconds);
 extern ZEND_API int (*zend_stream_open_function)(const char *filename, zend_file_handle *handle);
 extern void (*zend_printf_to_smart_string)(smart_string *buf, const char *format, va_list ap);
 extern void (*zend_printf_to_smart_str)(smart_str *buf, const char *format, va_list ap);
-extern ZEND_API char *(*zend_getenv)(char *name, size_t name_len);
+extern ZEND_API char *(*zend_getenv)(const char *name, size_t name_len);
 extern ZEND_API zend_string *(*zend_resolve_path)(const char *filename, size_t filename_len);
 
 /* These two callbacks are especially for opcache */

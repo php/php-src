@@ -260,7 +260,7 @@ ITypeLib *php_com_cache_typelib(ITypeLib* TL, char *cache_key, zend_long cache_k
 	return result;
 }
 
-PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib_via_cache(char *search_string,
+PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib_via_cache(const char *search_string,
 	int codepage, int *cached)
 {
 	ITypeLib *TL;
