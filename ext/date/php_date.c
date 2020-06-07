@@ -2211,6 +2211,7 @@ PHPAPI int php_date_initialize(php_date_obj *dateobj, const char *time_str, size
 			time_str = "now";
 			time_str_len = sizeof("now") - 1;
 		}
+		// TODO: drop this const casts
 		dateobj->time = timelib_strtotime((char *) time_str, time_str_len, &err, DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper);
 	}
 
@@ -2220,7 +2221,7 @@ PHPAPI int php_date_initialize(php_date_obj *dateobj, const char *time_str, size
 
 	if (ctor && err && err->error_count) {
 		/* spit out the first library error message, at least */
-		php_error_docref(NULL, E_WARNING, "Failed to parse time string (%.*s) at position %d (%c): %s", (int) time_str_len, time_str,
+		php_error_docref(NULL, E_WARNING, "Failed to parse time string (%s) at position %d (%c): %s", time_str,
 			err->error_messages[0].position, err->error_messages[0].character, err->error_messages[0].message);
 	}
 	if (err && err->error_count) {

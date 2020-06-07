@@ -614,9 +614,8 @@ PHPAPI void php_build_argv(const char *s, zval *track_vars_array)
 			}
 		}
 	} else 	if (s && *s) {
-		const char* space;
 		while (1) {
-			space = strchr(s, '+');
+			const char *space = strchr(s, '+');
 			/* auto-type */
 			ZVAL_STRINGL(&tmp, s, space ? space - s : strlen(s));
 			count++;

@@ -247,7 +247,7 @@ PHPAPI zend_string *php_session_create_id(PS_CREATE_SID_ARGS);
 PHPAPI int php_session_validate_sid(PS_VALIDATE_SID_ARGS);
 PHPAPI int php_session_update_timestamp(PS_UPDATE_TIMESTAMP_ARGS);
 
-PHPAPI void session_adapt_url(const char *url, size_t urllen, char **new, size_t *newlen);
+PHPAPI void session_adapt_url(const char *url, size_t url_len, char **new_url, size_t *new_len);
 
 PHPAPI int php_session_destroy(void);
 PHPAPI void php_add_session_var(zend_string *name);
