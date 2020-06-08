@@ -2048,7 +2048,7 @@ PHP_FUNCTION(highlight_string)
 	} else if (ZSTR_LEN(val) == 0) { \
 		RETVAL_EMPTY_STRING(); \
 	} else if (ZSTR_LEN(val) == 1) { \
-		RETVAL_INTERNED_STR(ZSTR_CHAR((zend_uchar)ZSTR_VAL(val)[0])); \
+		RETVAL_CHAR(ZSTR_VAL(val)[0]); \
 	} else if (!(GC_FLAGS(val) & GC_PERSISTENT)) { \
 		ZVAL_NEW_STR(return_value, zend_string_copy(val)); \
 	} else { \
