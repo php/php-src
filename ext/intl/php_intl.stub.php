@@ -28,7 +28,7 @@ function intlcal_after(IntlCalendar $calendarObject, IntlCalendar $calendar): bo
 
 function intlcal_before(IntlCalendar $calendarObject, IntlCalendar $calendar): bool {}
 
-function intlcal_set(IntlCalendar $calendar, int $year, int $month, ?int $dayOfMonth = null, ?int $hour = null, ?int $minute = null, ?int $second = null): bool {}
+function intlcal_set(IntlCalendar $calendar, int $year, int $month, int $dayOfMonth = UNKNOWN, $hour = UNKNOWN, int $minute = UNKNOWN, int $second = UNKNOWN): bool {}
 
 /** @param int|bool $amountOrUpOrDown */
 function intlcal_roll(IntlCalendar $calendar, int $field, $amountOrUpOrDown): bool {}

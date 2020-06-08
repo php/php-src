@@ -380,7 +380,6 @@ U_CFUNC PHP_FUNCTION(intlcal_before)
 U_CFUNC PHP_FUNCTION(intlcal_set)
 {
 	zend_long args[6];
-	zend_bool args_is_null[6] = {0, 0, 1, 1, 1, 1};
 
 	CALENDAR_METHOD_INIT_VARS;
 
@@ -389,15 +388,14 @@ U_CFUNC PHP_FUNCTION(intlcal_set)
 	int arg_num = ZEND_NUM_ARGS() - (object ? 0 : 1);
 
 	if (zend_parse_method_parameters(
-		ZEND_NUM_ARGS(), object, "Oll|l!l!l!l!",
-		&object, Calendar_ce_ptr, &args[0], &args[1], &args[2], &args_is_null[2],
-		&args[3], &args_is_null[3], &args[4], &args_is_null[4], &args[5], &args_is_null[5]
+		ZEND_NUM_ARGS(), object, "Oll|llll",
+		&object, Calendar_ce_ptr, &args[0], &args[1], &args[2], &args[3], &args[4], &args[5]
 	) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	for (int i = 0; i < arg_num; i++) {
-		if ((i < 2 || !args_is_null[i]) && (args[i] < INT32_MIN || args[i] > INT32_MAX)) {
+		if (args[i] < INT32_MIN || args[i] > INT32_MAX) {
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 				"intlcal_set: at least one of the arguments has an absolute value that is too large", 0);
 			RETURN_FALSE;
@@ -406,21 +404,21 @@ U_CFUNC PHP_FUNCTION(intlcal_set)
 
 	CALENDAR_METHOD_FETCH_OBJECT;
 
-	if (!args_is_null[5]) {
-		co->ucal->set((int32_t)args[0], (int32_t)args[1], (int32_t)args[2], (int32_t)args[3], (int32_t)args[4], (int32_t)args[5]);
-	} else if (!args_is_null[4]) {
-		co->ucal->set((int32_t)args[0], (int32_t)args[1], (int32_t)args[2], (int32_t)args[3], (int32_t)args[4]);
-	} else if (!args_is_null[3]) {
-		zend_argument_count_error("No variant with 4 arguments");
-		RETURN_THROWS();
-	} else if (!args_is_null[2]) {
-		co->ucal->set((int32_t)args[0], (int32_t)args[1], (int32_t)args[2]);
-	} else {
+	if (arg_num == 2) {
 		if (args[0] < 0 || args[0] >= UCAL_FIELD_COUNT) {
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "intlcal_set: invalid field", 0);
 			RETURN_FALSE;
 		}
 		co->ucal->set((UCalendarDateFields)args[0], (int32_t)args[1]);
+	} else if (arg_num == 3) {
+		co->ucal->set((int32_t)args[0], (int32_t)args[1], (int32_t)args[2]);
+	} else if (arg_num == 4) {
+		zend_argument_count_error("No variant with 4 arguments");
+		RETURN_THROWS();
+	} else if (arg_num == 5) {
+		co->ucal->set((int32_t)args[0], (int32_t)args[1], (int32_t)args[2], (int32_t)args[3], (int32_t)args[4]);
+	} else {
+		co->ucal->set((int32_t)args[0], (int32_t)args[1], (int32_t)args[2], (int32_t)args[3], (int32_t)args[4], (int32_t)args[5]);
 	}
 
 	RETURN_TRUE;
