@@ -68,9 +68,9 @@ static int scan(Scanner *s)
 }
 
 struct placeholder {
-	char *pos;
+	const char *pos;
 	size_t len;
-	size_t qlen;		/* quoted length of value */
+	size_t qlen;	/* quoted length of value */
 	char *quoted;	/* quoted value */
 	int freeq;
 	int bindno;
@@ -85,7 +85,8 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, const char *inquery, size_t inque
 	char **outquery, size_t *outquery_len)
 {
 	Scanner s;
-	char *ptr, *newbuffer;
+	const char *ptr;
+	char *newbuffer;
 	ptrdiff_t t;
 	uint32_t bindno = 0;
 	int ret = 0, escapes = 0;
