@@ -347,6 +347,7 @@ attributed_statement:
 	|	class_declaration_statement			{ $$ = $1; }
 	|	trait_declaration_statement			{ $$ = $1; }
 	|	interface_declaration_statement		{ $$ = $1; }
+;
 
 top_statement:
 		statement							{ $$ = $1; }
@@ -810,6 +811,7 @@ attributed_class_statement:
 		return_type backup_fn_flags method_body backup_fn_flags
 			{ $$ = zend_ast_create_decl(ZEND_AST_METHOD, $3 | $1 | $12, $2, $5,
 				  zend_ast_get_str($4), $7, NULL, $11, $9, NULL); CG(extra_fn_flags) = $10; }
+;
 
 class_statement:
 		attributed_class_statement { $$ = $1; }
