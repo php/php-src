@@ -1016,7 +1016,8 @@ U_CFUNC PHP_FUNCTION(intlcal_from_date_time)
 	if (!(Z_TYPE_P(zv_arg) == IS_OBJECT && instanceof_function(
 			Z_OBJCE_P(zv_arg), php_date_get_date_ce()))) {
 		object_init_ex(&zv_tmp, php_date_get_date_ce());
-		zend_call_method_with_1_params(Z_OBJ(zv_tmp), NULL, &Z_OBJCE(zv_tmp)->constructor, "__construct", NULL, zv_arg);
+		zend_call_known_instance_method_with_1_params(
+			Z_OBJCE(zv_tmp)->constructor, Z_OBJ(zv_tmp), NULL, zv_arg);
 		zv_datetime = &zv_tmp;
 		if (EG(exception)) {
 			zend_object_store_ctor_failed(Z_OBJ(zv_tmp));
@@ -1130,7 +1131,8 @@ U_CFUNC PHP_FUNCTION(intlcal_to_date_time)
 
 	/* Finally, instantiate object and call constructor */
 	object_init_ex(return_value, php_date_get_date_ce());
-	zend_call_method_with_2_params(Z_OBJ_P(return_value), NULL, &Z_OBJCE_P(return_value)->constructor, "__construct", NULL, &ts_zval, timezone_zval);
+	zend_call_known_instance_method_with_2_params(
+		Z_OBJCE_P(return_value)->constructor, Z_OBJ_P(return_value), NULL, &ts_zval, timezone_zval);
 	if (EG(exception)) {
 		intl_errors_set(CALENDAR_ERROR_P(co), U_ILLEGAL_ARGUMENT_ERROR,
 			"intlcal_to_date_time: DateTime constructor has thrown exception",

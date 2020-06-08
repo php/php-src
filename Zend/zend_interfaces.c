@@ -34,10 +34,8 @@ ZEND_API zend_class_entry *zend_ce_stringable;
  Only returns the returned zval if retval_ptr != NULL */
 ZEND_API zval* zend_call_method(zend_object *object, zend_class_entry *obj_ce, zend_function **fn_proxy, const char *function_name, size_t function_name_len, zval *retval_ptr, int param_count, zval* arg1, zval* arg2)
 {
-	int result;
-	zend_fcall_info fci;
-	zend_fcall_info_cache fcic;
-	zval retval;
+	zend_function *fn;
+	zend_class_entry *called_scope;
 	zval params[2];
 
 	if (param_count > 0) {
@@ -47,68 +45,43 @@ ZEND_API zval* zend_call_method(zend_object *object, zend_class_entry *obj_ce, z
 		ZVAL_COPY_VALUE(&params[1], arg2);
 	}
 
-	fci.size = sizeof(fci);
-	fci.object = object;
-	fci.retval = retval_ptr ? retval_ptr : &retval;
-	fci.param_count = param_count;
-	fci.params = params;
-	fci.no_separation = 1;
-	ZVAL_UNDEF(&fci.function_name); /* Unused */
-
 	if (!obj_ce) {
 		obj_ce = object ? object->ce : NULL;
 	}
 	if (!fn_proxy || !*fn_proxy) {
 		if (EXPECTED(obj_ce)) {
-			fcic.function_handler = zend_hash_str_find_ptr(
+			fn = zend_hash_str_find_ptr(
 				&obj_ce->function_table, function_name, function_name_len);
-			if (UNEXPECTED(fcic.function_handler == NULL)) {
+			if (UNEXPECTED(fn == NULL)) {
 				/* error at c-level */
 				zend_error_noreturn(E_CORE_ERROR, "Couldn't find implementation for method %s::%s", ZSTR_VAL(obj_ce->name), function_name);
 			}
 		} else {
-			fcic.function_handler = zend_fetch_function_str(function_name, function_name_len);
-			if (UNEXPECTED(fcic.function_handler == NULL)) {
+			fn = zend_fetch_function_str(function_name, function_name_len);
+			if (UNEXPECTED(fn == NULL)) {
 				/* error at c-level */
 				zend_error_noreturn(E_CORE_ERROR, "Couldn't find implementation for function %s", function_name);
 			}
 		}
 		if (fn_proxy) {
-			*fn_proxy = fcic.function_handler;
+			*fn_proxy = fn;
 		}
 	} else {
-		fcic.function_handler = *fn_proxy;
+		fn = *fn_proxy;
 	}
 
 	if (object) {
-		fcic.called_scope = object->ce;
+		called_scope = object->ce;
 	} else {
-		zend_class_entry *called_scope = zend_get_called_scope(EG(current_execute_data));
-
+		called_scope = zend_get_called_scope(EG(current_execute_data));
 		if (obj_ce &&
 			(!called_scope ||
 			 !instanceof_function(called_scope, obj_ce))) {
-			fcic.called_scope = obj_ce;
-		} else {
-			fcic.called_scope = called_scope;
+			called_scope = obj_ce;
 		}
 	}
-	fcic.object = object;
-	result = zend_call_function(&fci, &fcic);
 
-	if (result == FAILURE) {
-		/* error at c-level */
-		if (!obj_ce) {
-			obj_ce = object ? object->ce : NULL;
-		}
-		if (!EG(exception)) {
-			zend_error_noreturn(E_CORE_ERROR, "Couldn't execute method %s%s%s", obj_ce ? ZSTR_VAL(obj_ce->name) : "", obj_ce ? "::" : "", function_name);
-		}
-	}
-	if (!retval_ptr) {
-		zval_ptr_dtor(&retval);
-		return NULL;
-	}
+	zend_call_known_function(fn, object, called_scope, retval_ptr, param_count, params);
 	return retval_ptr;
 }
 /* }}} */
@@ -390,8 +363,7 @@ ZEND_API int zend_user_serialize(zval *object, unsigned char **buffer, size_t *b
 	zval retval;
 	int result;
 
-	zend_call_method_with_0_params(Z_OBJ_P(object), ce, &ce->serialize_func, "serialize", &retval);
-
+	zend_call_known_instance_method_with_0_params(ce->serialize_func, Z_OBJ_P(object), &retval);
 
 	if (Z_TYPE(retval) == IS_UNDEF || EG(exception)) {
 		result = FAILURE;
@@ -430,9 +402,8 @@ ZEND_API int zend_user_unserialize(zval *object, zend_class_entry *ce, const uns
 	}
 
 	ZVAL_STRINGL(&zdata, (char*)buf, buf_len);
-
-	zend_call_method_with_1_params(Z_OBJ_P(object), ce, &ce->unserialize_func, "unserialize", NULL, &zdata);
-
+	zend_call_known_instance_method_with_1_params(
+		ce->unserialize_func, Z_OBJ_P(object), NULL, &zdata);
 	zval_ptr_dtor(&zdata);
 
 	if (EG(exception)) {

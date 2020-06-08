@@ -149,7 +149,7 @@ ZEND_API HashTable *zend_std_get_debug_info(zend_object *object, int *is_temp) /
 		return object->handlers->get_properties(object);
 	}
 
-	zend_call_method_with_0_params(object, ce, &ce->__debugInfo, ZEND_DEBUGINFO_FUNC_NAME, &retval);
+	zend_call_known_instance_method_with_0_params(ce->__debugInfo, object, &retval);
 	if (Z_TYPE(retval) == IS_ARRAY) {
 		if (!Z_REFCOUNTED(retval)) {
 			*is_temp = 1;
@@ -1801,7 +1801,7 @@ ZEND_API int zend_std_cast_object_tostring(zend_object *readobj, zval *writeobj,
 			if (ce->__tostring) {
 				zval retval;
 				GC_ADDREF(readobj);
-				zend_call_method_with_0_params(readobj, ce, &ce->__tostring, "__tostring", &retval);
+				zend_call_known_instance_method_with_0_params(ce->__tostring, readobj, &retval);
 				zend_object_release(readobj);
 				if (EXPECTED(Z_TYPE(retval) == IS_STRING)) {
 					ZVAL_COPY_VALUE(writeobj, &retval);

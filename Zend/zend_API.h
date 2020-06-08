@@ -563,6 +563,36 @@ ZEND_API int zend_fcall_info_call(zend_fcall_info *fci, zend_fcall_info_cache *f
 
 ZEND_API int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache);
 
+/* Call the provided zend_function with the given params.
+ * If retval_ptr is NULL, the return value is discarded.
+ * If object is NULL, this must be a free function or static call.
+ * called_scope must be provided for instance and static method calls. */
+ZEND_API void zend_call_known_function(
+		zend_function *fn, zend_object *object, zend_class_entry *called_scope,
+		zval *retval_ptr, int param_count, zval *params);
+
+/* Call the provided zend_function instance method on an object. */
+static zend_always_inline void zend_call_known_instance_method(
+		zend_function *fn, zend_object *object, zval *retval_ptr, int param_count, zval *params)
+{
+	zend_call_known_function(fn, object, object->ce, retval_ptr, param_count, params);
+}
+
+static zend_always_inline void zend_call_known_instance_method_with_0_params(
+		zend_function *fn, zend_object *object, zval *retval_ptr)
+{
+	zend_call_known_instance_method(fn, object, retval_ptr, 0, NULL);
+}
+
+static zend_always_inline void zend_call_known_instance_method_with_1_params(
+		zend_function *fn, zend_object *object, zval *retval_ptr, zval *param)
+{
+	zend_call_known_instance_method(fn, object, retval_ptr, 1, param);
+}
+
+ZEND_API void zend_call_known_instance_method_with_2_params(
+		zend_function *fn, zend_object *object, zval *retval_ptr, zval *param1, zval *param2);
+
 ZEND_API int zend_set_hash_symbol(zval *symbol, const char *name, int name_length, zend_bool is_ref, int num_symbol_tables, ...);
 
 ZEND_API int zend_delete_global_variable(zend_string *name);
