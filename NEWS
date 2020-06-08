@@ -23,6 +23,9 @@ PHP                                                                        NEWS
     (cmb)
   . Fixed several mostly Windows related phpdbg bugs. (cmb)
 
+- Standard:
+  . Fixed bug #74267 (segfault with streams and invalid data). (cmb)
+
 11 Jun 2020, PHP 7.4.7
 
 - Core:
