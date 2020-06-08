@@ -81,7 +81,8 @@ struct _zend_compiler_globals {
 
 	HashTable *auto_globals;
 
-	zend_bool parse_error;
+	/* Refer to zend_yytnamerr() in zend_language_parser.y for meaning of values */
+	zend_uchar parse_error;
 	zend_bool in_compilation;
 	zend_bool short_tags;
 
