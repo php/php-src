@@ -239,12 +239,29 @@ PHP_HASH_API void PHP_TIGER192Final(unsigned char digest[24], PHP_TIGER_CTX *con
 	ZEND_SECURE_ZERO(context, sizeof(*context));
 }
 
+static int php_tiger_unserialize(php_hashcontext_object *hash, zend_long magic, const zval *zv)
+{
+	PHP_TIGER_CTX *ctx = (PHP_TIGER_CTX *) hash->context;
+	int r = FAILURE;
+	if (magic == PHP_HASH_SERIALIZE_MAGIC_SPEC
+		&& (r = php_hash_unserialize_spec(hash, zv, PHP_TIGER_SPEC)) == SUCCESS
+		&& ctx->length < sizeof(ctx->buffer)) {
+		return SUCCESS;
+	} else {
+		return r != SUCCESS ? r : -2000;
+	}
+}
+
 #define PHP_HASH_TIGER_OPS(p, b) \
 	const php_hash_ops php_hash_##p##tiger##b##_ops = { \
+		"tiger" #b "," #p, \
 		(php_hash_init_func_t) PHP_##p##TIGERInit, \
 		(php_hash_update_func_t) PHP_TIGERUpdate, \
 		(php_hash_final_func_t) PHP_TIGER##b##Final, \
-		(php_hash_copy_func_t) php_hash_copy, \
+		php_hash_copy, \
+		php_hash_serialize, \
+		php_tiger_unserialize, \
+		PHP_TIGER_SPEC, \
 		b/8, \
 		64, \
 		sizeof(PHP_TIGER_CTX), \

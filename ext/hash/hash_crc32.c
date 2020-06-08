@@ -78,10 +78,14 @@ PHP_HASH_API int PHP_CRC32Copy(const php_hash_ops *ops, PHP_CRC32_CTX *orig_cont
 }
 
 const php_hash_ops php_hash_crc32_ops = {
+	"crc32",
 	(php_hash_init_func_t) PHP_CRC32Init,
 	(php_hash_update_func_t) PHP_CRC32Update,
 	(php_hash_final_func_t) PHP_CRC32LEFinal,
 	(php_hash_copy_func_t) PHP_CRC32Copy,
+	php_hash_serialize,
+	php_hash_unserialize,
+	PHP_CRC32_SPEC,
 	4, /* what to say here? */
 	4,
 	sizeof(PHP_CRC32_CTX),
@@ -89,10 +93,14 @@ const php_hash_ops php_hash_crc32_ops = {
 };
 
 const php_hash_ops php_hash_crc32b_ops = {
+	"crc32b",
 	(php_hash_init_func_t) PHP_CRC32Init,
 	(php_hash_update_func_t) PHP_CRC32BUpdate,
 	(php_hash_final_func_t) PHP_CRC32BEFinal,
 	(php_hash_copy_func_t) PHP_CRC32Copy,
+	php_hash_serialize,
+	php_hash_unserialize,
+	PHP_CRC32_SPEC,
 	4, /* what to say here? */
 	4,
 	sizeof(PHP_CRC32_CTX),
@@ -100,10 +108,14 @@ const php_hash_ops php_hash_crc32b_ops = {
 };
 
 const php_hash_ops php_hash_crc32c_ops = {
+	"crc32c",
 	(php_hash_init_func_t) PHP_CRC32Init,
 	(php_hash_update_func_t) PHP_CRC32CUpdate,
 	(php_hash_final_func_t) PHP_CRC32BEFinal,
 	(php_hash_copy_func_t) PHP_CRC32Copy,
+	php_hash_serialize,
+	php_hash_unserialize,
+	PHP_CRC32_SPEC,
 	4, /* what to say here? */
 	4,
 	sizeof(PHP_CRC32_CTX),

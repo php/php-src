@@ -18,10 +18,14 @@
 #include "php_hash_md.h"
 
 const php_hash_ops php_hash_md5_ops = {
+	"md5",
 	(php_hash_init_func_t) PHP_MD5Init,
 	(php_hash_update_func_t) PHP_MD5Update,
 	(php_hash_final_func_t) PHP_MD5Final,
-	(php_hash_copy_func_t) php_hash_copy,
+	php_hash_copy,
+	php_hash_serialize,
+	php_hash_unserialize,
+	PHP_MD5_SPEC,
 	16,
 	64,
 	sizeof(PHP_MD5_CTX),
@@ -29,21 +33,31 @@ const php_hash_ops php_hash_md5_ops = {
 };
 
 const php_hash_ops php_hash_md4_ops = {
+	"md4",
 	(php_hash_init_func_t) PHP_MD4Init,
 	(php_hash_update_func_t) PHP_MD4Update,
 	(php_hash_final_func_t) PHP_MD4Final,
-	(php_hash_copy_func_t) php_hash_copy,
+	php_hash_copy,
+	php_hash_serialize,
+	php_hash_unserialize,
+	PHP_MD4_SPEC,
 	16,
 	64,
 	sizeof(PHP_MD4_CTX),
 	1
 };
 
+static int php_md2_unserialize(php_hashcontext_object *hash, zend_long magic, const zval *zv);
+
 const php_hash_ops php_hash_md2_ops = {
+	"md2",
 	(php_hash_init_func_t) PHP_MD2Init,
 	(php_hash_update_func_t) PHP_MD2Update,
 	(php_hash_final_func_t) PHP_MD2Final,
-	(php_hash_copy_func_t) php_hash_copy,
+	php_hash_copy,
+	php_hash_serialize,
+	php_md2_unserialize,
+	PHP_MD2_SPEC,
 	16,
 	16,
 	sizeof(PHP_MD2_CTX),
@@ -339,4 +353,17 @@ PHP_HASH_API void PHP_MD2Final(unsigned char output[16], PHP_MD2_CTX *context)
 	MD2_Transform(context, context->checksum);
 
 	memcpy(output, context->state, 16);
+}
+
+static int php_md2_unserialize(php_hashcontext_object *hash, zend_long magic, const zval *zv)
+{
+	PHP_MD2_CTX *ctx = (PHP_MD2_CTX *) hash->context;
+	int r = FAILURE;
+	if (magic == PHP_HASH_SERIALIZE_MAGIC_SPEC
+		&& (r = php_hash_unserialize_spec(hash, zv, PHP_MD2_SPEC)) == SUCCESS
+		&& (unsigned char) ctx->in_buffer < sizeof(ctx->buffer)) {
+		return SUCCESS;
+	} else {
+		return r != SUCCESS ? r : -2000;
+	}
 }

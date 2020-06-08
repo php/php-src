@@ -22,10 +22,14 @@
 #include "php_hash_joaat.h"
 
 const php_hash_ops php_hash_joaat_ops = {
+	"joaat",
 	(php_hash_init_func_t) PHP_JOAATInit,
 	(php_hash_update_func_t) PHP_JOAATUpdate,
 	(php_hash_final_func_t) PHP_JOAATFinal,
-	(php_hash_copy_func_t) php_hash_copy,
+	php_hash_copy,
+	php_hash_serialize,
+	php_hash_unserialize,
+	PHP_JOAAT_SPEC,
 	4,
 	4,
 	sizeof(PHP_JOAAT_CTX),

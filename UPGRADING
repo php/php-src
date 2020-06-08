@@ -568,14 +568,18 @@ PHP 8.0 UPGRADE NOTES
   . Added DateTime::createFromInterface() and
     DateTimeImmutable::createFromInterface().
 
+- Dom:
+  . Introduce DOMParentNode and DOMChildNode with new traversal and
+    manipulation APIs.
+    RFC: https://wiki.php.net/rfc/dom_living_standard_api
+
 - Enchant:
   . enchant_dict_add()
   . enchant_dict_is_added()
   . LIBENCHANT_VERSION macro
 
-- dom:
-  . Introduce DOMParentNode and DOMChildNode with new traversal and manipulation APIs
-    RFC: https://wiki.php.net/rfc/dom_living_standard_api
+- Hash:
+  . HashContext objects can now be serialized.
 
 - Opcache:
   . If the opcache.record_warnings ini setting is enabled, opcache will record

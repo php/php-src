@@ -63,10 +63,14 @@ static void SHADecode32(uint32_t *output, const unsigned char *input, unsigned i
 /* }}} */
 
 const php_hash_ops php_hash_sha1_ops = {
+	"sha1",
 	(php_hash_init_func_t) PHP_SHA1Init,
 	(php_hash_update_func_t) PHP_SHA1Update,
 	(php_hash_final_func_t) PHP_SHA1Final,
-	(php_hash_copy_func_t) php_hash_copy,
+	php_hash_copy,
+	php_hash_serialize,
+	php_hash_unserialize,
+	PHP_SHA1_SPEC,
 	20,
 	64,
 	sizeof(PHP_SHA1_CTX),
@@ -76,10 +80,14 @@ const php_hash_ops php_hash_sha1_ops = {
 /* sha224/sha256 */
 
 const php_hash_ops php_hash_sha256_ops = {
+	"sha256",
 	(php_hash_init_func_t) PHP_SHA256Init,
 	(php_hash_update_func_t) PHP_SHA256Update,
 	(php_hash_final_func_t) PHP_SHA256Final,
-	(php_hash_copy_func_t) php_hash_copy,
+	php_hash_copy,
+	php_hash_serialize,
+	php_hash_unserialize,
+	PHP_SHA256_SPEC,
 	32,
 	64,
 	sizeof(PHP_SHA256_CTX),
@@ -87,10 +95,14 @@ const php_hash_ops php_hash_sha256_ops = {
 };
 
 const php_hash_ops php_hash_sha224_ops = {
+	"sha224",
 	(php_hash_init_func_t) PHP_SHA224Init,
 	(php_hash_update_func_t) PHP_SHA224Update,
 	(php_hash_final_func_t) PHP_SHA224Final,
-	(php_hash_copy_func_t) php_hash_copy,
+	php_hash_copy,
+	php_hash_serialize,
+	php_hash_unserialize,
+	PHP_SHA224_SPEC,
 	28,
 	64,
 	sizeof(PHP_SHA224_CTX),
@@ -578,10 +590,14 @@ PHP_HASH_API void PHP_SHA384Final(unsigned char digest[48], PHP_SHA384_CTX * con
 /* }}} */
 
 const php_hash_ops php_hash_sha384_ops = {
+	"sha384",
 	(php_hash_init_func_t) PHP_SHA384Init,
 	(php_hash_update_func_t) PHP_SHA384Update,
 	(php_hash_final_func_t) PHP_SHA384Final,
-	(php_hash_copy_func_t) php_hash_copy,
+	php_hash_copy,
+	php_hash_serialize,
+	php_hash_unserialize,
+	PHP_SHA384_SPEC,
 	48,
 	128,
 	sizeof(PHP_SHA384_CTX),
@@ -751,10 +767,14 @@ PHP_HASH_API void PHP_SHA512_224Final(unsigned char digest[28], PHP_SHA512_CTX *
 /* }}} */
 
 const php_hash_ops php_hash_sha512_ops = {
+	"sha512",
 	(php_hash_init_func_t) PHP_SHA512Init,
 	(php_hash_update_func_t) PHP_SHA512Update,
 	(php_hash_final_func_t) PHP_SHA512Final,
-	(php_hash_copy_func_t) php_hash_copy,
+	php_hash_copy,
+	php_hash_serialize,
+	php_hash_unserialize,
+	PHP_SHA512_SPEC,
 	64,
 	128,
 	sizeof(PHP_SHA512_CTX),
@@ -762,10 +782,14 @@ const php_hash_ops php_hash_sha512_ops = {
 };
 
 const php_hash_ops php_hash_sha512_256_ops = {
+	"sha512/256",
 	(php_hash_init_func_t) PHP_SHA512_256Init,
 	(php_hash_update_func_t) PHP_SHA512_256Update,
 	(php_hash_final_func_t) PHP_SHA512_256Final,
-	(php_hash_copy_func_t) php_hash_copy,
+	php_hash_copy,
+	php_hash_serialize,
+	php_hash_unserialize,
+	PHP_SHA512_SPEC,
 	32,
 	128,
 	sizeof(PHP_SHA512_CTX),
@@ -773,10 +797,14 @@ const php_hash_ops php_hash_sha512_256_ops = {
 };
 
 const php_hash_ops php_hash_sha512_224_ops = {
+	"sha512/224",
 	(php_hash_init_func_t) PHP_SHA512_224Init,
 	(php_hash_update_func_t) PHP_SHA512_224Update,
 	(php_hash_final_func_t) PHP_SHA512_224Final,
-	(php_hash_copy_func_t) php_hash_copy,
+	php_hash_copy,
+	php_hash_serialize,
+	php_hash_unserialize,
+	PHP_SHA512_SPEC,
 	28,
 	128,
 	sizeof(PHP_SHA512_CTX),

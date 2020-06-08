@@ -53,4 +53,8 @@ function mhash(int $hash, string $data, string $key = UNKNOWN): string|false {}
 final class HashContext
 {
     private function __construct() {}
+
+    public function __serialize(): array {}
+
+    public function __unserialize(array $serialized): void {}
 }
