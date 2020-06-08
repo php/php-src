@@ -57,7 +57,7 @@ final class FFI
     public static function memset(FFI\CData $ptr, int $ch, int $size): void {}
 
     /** @prefer-ref $ptr */
-    public static function string(FFI\CData $ptr, int $size = UNKNOWN): ?string {}
+    public static function string(FFI\CData $ptr, ?int $size = null): ?string {}
 
     /** @prefer-ref $ptr */
     public static function isNull(FFI\CData $ptr): bool {}

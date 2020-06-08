@@ -365,7 +365,7 @@ class mysqli_result
      * @return object|null
      * @alias mysqli_fetch_object
      */
-    public function fetch_object(string $class_name = UNKNOWN, array $params = []) {}
+    public function fetch_object(string $class_name = "stdClass", array $params = []) {}
 
     /**
      * @return array|null
@@ -579,11 +579,7 @@ function mysqli_fetch_array(mysqli_result $mysql_result, int $fetchtype = MYSQLI
 
 function mysqli_fetch_assoc(mysqli_result $mysql_result): ?array {}
 
-function mysqli_fetch_object(
-    mysqli_result $mysqli_result,
-    string $class_name = UNKNOWN,
-    array $params = []
-): ?object {}
+function mysqli_fetch_object(mysqli_result $mysqli_result, string $class_name = "stdClass", array $params = []): ?object {}
 
 function mysqli_fetch_row(mysqli_result $mysqli_result): ?array {}
 
@@ -601,7 +597,7 @@ function mysqli_get_client_stats(): array {}
 
 function mysqli_get_charset(mysqli $mysqli_link): ?object {}
 
-function mysqli_get_client_info(mysqli $mysqli_link = UNKNOWN): ?string {}
+function mysqli_get_client_info(?mysqli $mysqli_link = null): ?string {}
 
 function mysqli_get_client_version(): int {}
 

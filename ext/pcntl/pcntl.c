@@ -1196,17 +1196,18 @@ static void pcntl_siginfo_to_zval(int signo, siginfo_t *siginfo, zval *user_sigi
 PHP_FUNCTION(pcntl_getpriority)
 {
 	zend_long who = PRIO_PROCESS;
-	zend_long pid = getpid();
+	zend_long pid;
+	zend_bool pid_is_null = 1;
 	int pri;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|ll", &pid, &who) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l!l", &pid, &who) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	/* needs to be cleared, since any returned value is valid */
 	errno = 0;
 
-	pri = getpriority(who, pid);
+	pri = getpriority(who, pid_is_null ? getpid() : pid);
 
 	if (errno) {
 		PCNTL_G(last_error) = errno;
@@ -1235,14 +1236,15 @@ PHP_FUNCTION(pcntl_getpriority)
 PHP_FUNCTION(pcntl_setpriority)
 {
 	zend_long who = PRIO_PROCESS;
-	zend_long pid = getpid();
+	zend_long pid;
+	zend_bool pid_is_null = 1;
 	zend_long pri;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|ll", &pri, &pid, &who) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|l!l", &pri, &pid, &who) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	if (setpriority(who, pid, pri)) {
+	if (setpriority(who, pid_is_null ? getpid() : pid, pri)) {
 		PCNTL_G(last_error) = errno;
 		switch (errno) {
 			case ESRCH:
@@ -1401,14 +1403,16 @@ void pcntl_signal_dispatch()
    Enable/disable asynchronous signal handling and return the old setting. */
 PHP_FUNCTION(pcntl_async_signals)
 {
-	zend_bool on;
+	zend_bool on, on_is_null = 1;
 
-	if (ZEND_NUM_ARGS() == 0) {
-		RETURN_BOOL(PCNTL_G(async_signals));
-	}
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &on) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b!", &on, &on_is_null) == FAILURE) {
 		RETURN_THROWS();
 	}
+
+	if (on_is_null) {
+		RETURN_BOOL(PCNTL_G(async_signals));
+	}
+
 	RETVAL_BOOL(PCNTL_G(async_signals));
 	PCNTL_G(async_signals) = on;
 }

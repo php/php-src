@@ -648,7 +648,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_id_for_windows_id)
 	UnicodeString uWinID, uID;
 	UErrorCode error;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|S", &winID, &region) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|S!", &winID, &region) == FAILURE) {
 		RETURN_THROWS();
 	}
 

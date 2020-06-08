@@ -389,16 +389,15 @@ U_CFUNC PHP_FUNCTION(intlcal_set)
 
 	if (zend_parse_method_parameters(
 		ZEND_NUM_ARGS(), object, "Oll|llll",
-		&object, Calendar_ce_ptr, &args[0], &args[1], &args[2], &args[3], &args[4], &args[5]) == FAILURE
-	) {
+		&object, Calendar_ce_ptr, &args[0], &args[1], &args[2], &args[3], &args[4], &args[5]
+	) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	for (int i = 0; i < arg_num; i++) {
 		if (args[i] < INT32_MIN || args[i] > INT32_MAX) {
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-				"intlcal_set: at least one of the arguments has an absolute "
-				"value that is too large", 0);
+				"intlcal_set: at least one of the arguments has an absolute value that is too large", 0);
 			RETURN_FALSE;
 		}
 	}

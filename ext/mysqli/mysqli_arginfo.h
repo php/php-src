@@ -111,7 +111,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_fetch_object, 0, 1, IS_OBJECT, 1)
 	ZEND_ARG_OBJ_INFO(0, mysqli_result, mysqli_result, 0)
-	ZEND_ARG_TYPE_INFO(0, class_name, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, class_name, IS_STRING, 0, "\"stdClass\"")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, params, IS_ARRAY, 0, "[]")
 ZEND_END_ARG_INFO()
 
@@ -148,7 +148,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_get_charset, 0, 1, IS_OBJ
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_get_client_info, 0, 0, IS_STRING, 1)
-	ZEND_ARG_OBJ_INFO(0, mysqli_link, mysqli, 0)
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, mysqli_link, mysqli, 1, "null")
 ZEND_END_ARG_INFO()
 
 #define arginfo_mysqli_get_client_version arginfo_mysqli_connect_errno
@@ -607,7 +607,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_mysqli_result_fetch_assoc arginfo_class_mysqli_character_set_name
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_result_fetch_object, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, class_name, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, class_name, IS_STRING, 0, "\"stdClass\"")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, params, IS_ARRAY, 0, "[]")
 ZEND_END_ARG_INFO()
 

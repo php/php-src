@@ -175,7 +175,7 @@ function datefmt_set_pattern(IntlDateFormatter $df, string $pattern): bool {}
 
 function datefmt_get_pattern(IntlDateFormatter $df): string|false {}
 
-function datefmt_get_locale(IntlDateFormatter $df, int $which = UNKNOWN): string|false {}
+function datefmt_get_locale(IntlDateFormatter $df, int $which = ULOC_ACTUAL_LOCALE): string|false {}
 
 function datefmt_set_lenient(IntlDateFormatter $df, bool $lenient): void {}
 
@@ -395,7 +395,7 @@ function intltz_get_unknown(): IntlTimeZone {}
 #if U_ICU_VERSION_MAJOR_NUM >= 52
 function intltz_get_windows_id(string $timezone): string|false {}
 
-function intltz_get_id_for_windows_id(string $timezone, string $region = UNKNOWN): string|false {}
+function intltz_get_id_for_windows_id(string $timezone, ?string $region = null): string|false {}
 #endif
 
 function intltz_has_same_rules(IntlTimeZone $tz, IntlTimeZone $otherTimeZone): bool {}
