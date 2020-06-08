@@ -622,7 +622,7 @@ SAPI_API int sapi_add_header_ex(const char *header_line, size_t header_line_len,
 			&ctr);
 
 	if (!duplicate)
-		efree(header_line);
+		efree((void *) header_line);
 
 	return r;
 }
@@ -682,7 +682,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 				if (!p->line || !p->line_len) {
 					return FAILURE;
 				}
-				header_line = p->line;
+				header_line = estrndup(p->line, p->line_len);
 				header_line_len = p->line_len;
 				http_response_code = p->response_code;
 				break;
@@ -698,8 +698,6 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 		default:
 			return FAILURE;
 	}
-
-	header_line = estrndup(header_line, header_line_len);
 
 	/* cut off trailing spaces, linefeeds and carriage-returns */
 	if (header_line_len && isspace(header_line[header_line_len-1])) {
@@ -1115,7 +1113,7 @@ SAPI_API void sapi_add_request_header(const char *var, unsigned int var_len, con
 	    var[3] == 'P' &&
 	    var[4] == '_') {
 
-		char *p;
+		const char *p;
 
 		var_len -= 5;
 		p = var + 5;
@@ -1146,7 +1144,7 @@ SAPI_API void sapi_add_request_header(const char *var, unsigned int var_len, con
 	}
 	add_assoc_stringl_ex(return_value, var, var_len, val, val_len);
 	if (str) {
-		free_alloca(var, use_heap);
+		free_alloca((void *) var, use_heap);
 	}
 }
 /* }}} */
