@@ -1464,7 +1464,7 @@ PHP_METHOD(ZipArchive, open)
 		if (VCWD_STAT(resolved_path, &st) == 0 && st.st_size == 0) {
 			php_error_docref(NULL, E_DEPRECATED, "Using empty file as ZipArchive is deprecated");
 
-			/* reduce BC break introduce in libzip 1.6.0
+			/* reduce BC break introduced in libzip 1.6.0
 			   "Do not accept empty files as valid zip archives any longer" */
 			flags |= ZIP_TRUNCATE;
 		}
