@@ -34,15 +34,17 @@ PHP_FUNCTION(header)
 {
 	zend_bool rep = 1;
 	sapi_header_line ctr = {0};
+	char *line;
 	size_t len;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
-		Z_PARAM_STRING(ctr.line, len)
+		Z_PARAM_STRING(line, len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(rep)
 		Z_PARAM_LONG(ctr.response_code)
 	ZEND_PARSE_PARAMETERS_END();
 
+	ctr.line = line;
 	ctr.line_len = (uint32_t)len;
 	sapi_header_op(rep ? SAPI_HEADER_REPLACE:SAPI_HEADER_ADD, &ctr);
 }
@@ -53,13 +55,15 @@ PHP_FUNCTION(header)
 PHP_FUNCTION(header_remove)
 {
 	sapi_header_line ctr = {0};
+	char *line = NULL;
 	size_t len = 0;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING(ctr.line, len)
+		Z_PARAM_STRING(line, len)
 	ZEND_PARSE_PARAMETERS_END();
 
+	ctr.line = line;
 	ctr.line_len = (uint32_t)len;
 	sapi_header_op(ZEND_NUM_ARGS() == 0 ? SAPI_HEADER_DELETE_ALL : SAPI_HEADER_DELETE, &ctr);
 }
