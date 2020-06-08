@@ -24,6 +24,7 @@
 
 #include "zend_portability.h"
 #include "zend_long.h"
+#include <stdbool.h>
 
 #ifdef __SSE2__
 # include <mmintrin.h>
@@ -46,7 +47,7 @@
 # define ZEND_ENDIAN_LOHI_C_4(a, b, c, d)  a, b, c, d
 #endif
 
-typedef unsigned char zend_bool;
+typedef bool zend_bool;
 typedef unsigned char zend_uchar;
 
 typedef enum {
