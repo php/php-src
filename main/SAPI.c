@@ -1102,7 +1102,7 @@ SAPI_API void sapi_terminate_process(void) {
 SAPI_API void sapi_add_request_header(const char *var, unsigned int var_len, char *val, unsigned int val_len, void *arg) /* {{{ */
 {
 	zval *return_value = (zval*)arg;
-	char *str = NULL;
+	char *buf = NULL;
 
 	ALLOCA_FLAG(use_heap)
 
@@ -1114,10 +1114,11 @@ SAPI_API void sapi_add_request_header(const char *var, unsigned int var_len, cha
 	    var[4] == '_') {
 
 		const char *p;
+		char *str;
 
 		var_len -= 5;
 		p = var + 5;
-		var = str = do_alloca(var_len + 1, use_heap);
+		var = str = buf = do_alloca(var_len + 1, use_heap);
 		*str++ = *p++;
 		while (*p) {
 			if (*p == '_') {
@@ -1143,8 +1144,8 @@ SAPI_API void sapi_add_request_header(const char *var, unsigned int var_len, cha
 		return;
 	}
 	add_assoc_stringl_ex(return_value, var, var_len, val, val_len);
-	if (str) {
-		free_alloca((void *) var, use_heap);
+	if (buf) {
+		free_alloca(buf, use_heap);
 	}
 }
 /* }}} */
