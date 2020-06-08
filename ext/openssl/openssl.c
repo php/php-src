@@ -5789,6 +5789,12 @@ clean_exit:
 	if (cms != NULL) {
 		CMS_ContentInfo_free(cms);
 	}
+	if (certs != NULL) {
+		sk_X509_pop_free(certs, X509_free);
+	}
+	if (crls != NULL) {
+		sk_X509_CRL_pop_free(crls, X509_CRL_free);
+	}
 }
 /* }}} */
 
