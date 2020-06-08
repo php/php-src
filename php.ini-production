@@ -1790,13 +1790,13 @@ ldap.max_links = -1
 
 ;opcache.dups_fix=0
 
-; The location of the OPcache blacklist file (wildcards allowed).
-; Each OPcache blacklist file is a text file that holds the names of files
+; The location of the OPcache blocklist file (wildcards allowed).
+; Each OPcache blocklist file is a text file that holds the names of files
 ; that should not be accelerated. The file format is to add each filename
 ; to a new line. The filename may be a full path or just a file prefix
-; (i.e., /var/www/x  blacklists all the files and directories in /var/www
+; (i.e., /var/www/x  blocklists all the files and directories in /var/www
 ; that start with 'x'). Line starting with a ; are ignored (comments).
-;opcache.blacklist_filename=
+;opcache.blocklist_filename=
 
 ; Allows exclusion of large files from being cached. By default all files
 ; are cached.

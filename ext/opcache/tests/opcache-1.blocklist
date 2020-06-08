@@ -1,4 +1,4 @@
-; comments are allowed in blacklist file
+; comments are allowed in blocklist file
 ; and empty line are ignored
 
 /path/to/foo

@@ -6,7 +6,7 @@ Incorrect type inference
 <?php
 class PHP_CodeCoverage
 {
-    private function addUncoveredFilesFromWhitelist()
+    private function addUncoveredFilesFromAllowlist()
     {
         foreach ($uncoveredFiles as $uncoveredFile) {
             for ($i = 1; $i <= $lines; $i++) {
