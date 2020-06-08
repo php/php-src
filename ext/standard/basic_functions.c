@@ -2041,6 +2041,21 @@ PHP_FUNCTION(highlight_string)
 }
 /* }}} */
 
+#define INI_RETVAL_STR(val) do { \
+	/* copy to return value here, because alter might free it! */ \
+	if (ZSTR_IS_INTERNED(val)) { \
+		RETVAL_INTERNED_STR(val); \
+	} else if (ZSTR_LEN(val) == 0) { \
+		RETVAL_EMPTY_STRING(); \
+	} else if (ZSTR_LEN(val) == 1) { \
+		RETVAL_INTERNED_STR(ZSTR_CHAR((zend_uchar)ZSTR_VAL(val)[0])); \
+	} else if (!(GC_FLAGS(val) & GC_PERSISTENT)) { \
+		ZVAL_NEW_STR(return_value, zend_string_copy(val)); \
+	} else { \
+		ZVAL_NEW_STR(return_value, zend_string_init(ZSTR_VAL(val), ZSTR_LEN(val), 0)); \
+	} \
+} while (0)
+
 /* {{{ proto string|false ini_get(string varname)
    Get a configuration option */
 PHP_FUNCTION(ini_get)
@@ -2057,17 +2072,7 @@ PHP_FUNCTION(ini_get)
 		RETURN_FALSE;
 	}
 
-	if (ZSTR_IS_INTERNED(val)) {
-		RETVAL_INTERNED_STR(val);
-	} else if (ZSTR_LEN(val) == 0) {
-		RETVAL_EMPTY_STRING();
-	} else if (ZSTR_LEN(val) == 1) {
-		RETVAL_INTERNED_STR(ZSTR_CHAR((zend_uchar)ZSTR_VAL(val)[0]));
-	} else if (!(GC_FLAGS(val) & GC_PERSISTENT)) {
-		ZVAL_NEW_STR(return_value, zend_string_copy(val));
-	} else {
-		ZVAL_NEW_STR(return_value, zend_string_init(ZSTR_VAL(val), ZSTR_LEN(val), 0));
-	}
+	INI_RETVAL_STR(val);
 }
 /* }}} */
 
@@ -2168,19 +2173,8 @@ PHP_FUNCTION(ini_set)
 
 	val = zend_ini_get_value(varname);
 
-	/* copy to return here, because alter might free it! */
 	if (val) {
-		if (ZSTR_IS_INTERNED(val)) {
-			RETVAL_INTERNED_STR(val);
-		} else if (ZSTR_LEN(val) == 0) {
-			RETVAL_EMPTY_STRING();
-		} else if (ZSTR_LEN(val) == 1) {
-			RETVAL_INTERNED_STR(ZSTR_CHAR((zend_uchar)ZSTR_VAL(val)[0]));
-		} else if (!(GC_FLAGS(val) & GC_PERSISTENT)) {
-			ZVAL_NEW_STR(return_value, zend_string_copy(val));
-		} else {
-			ZVAL_NEW_STR(return_value, zend_string_init(ZSTR_VAL(val), ZSTR_LEN(val), 0));
-		}
+		INI_RETVAL_STR(val);
 	} else {
 		RETVAL_FALSE;
 	}
@@ -2208,6 +2202,8 @@ PHP_FUNCTION(ini_set)
 	}
 }
 /* }}} */
+
+#undef INI_RETVAL_STR
 
 /* {{{ proto void ini_restore(string varname)
    Restore the value of a configuration option specified by varname */

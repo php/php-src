@@ -801,7 +801,7 @@ static inline int ct_eval_func_call(
 			}
 
 			c = Z_LVAL_P(args[0]) & 0xff;
-			ZVAL_INTERNED_STR(result, ZSTR_CHAR(c));
+			ZVAL_ONE_CHAR_STRING(result, c);
 			return SUCCESS;
 		} else if (zend_string_equals_literal(name, "count")) {
 			if (Z_TYPE_P(args[0]) != IS_ARRAY) {
