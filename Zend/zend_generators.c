@@ -794,6 +794,7 @@ try_again:
 			} else {
 				generator = zend_generator_get_current(orig_generator);
 				zend_generator_throw_exception(generator, NULL);
+				orig_generator->flags &= ~ZEND_GENERATOR_DO_INIT;
 				goto try_again;
 			}
 		}
