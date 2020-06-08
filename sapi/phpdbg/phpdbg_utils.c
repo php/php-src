@@ -424,11 +424,11 @@ static int phpdbg_parse_variable_arg_wrapper(char *name, size_t len, char *keyna
 	return callback(name, len, keyname, keylen, parent, zv);
 }
 
-PHPDBG_API int phpdbg_parse_variable(const char *input, size_t len, HashTable *parent, size_t i, phpdbg_parse_var_func callback, zend_bool silent) {
+PHPDBG_API int phpdbg_parse_variable(char *input, size_t len, HashTable *parent, size_t i, phpdbg_parse_var_func callback, zend_bool silent) {
 	return phpdbg_parse_variable_with_arg(input, len, parent, i, (phpdbg_parse_var_with_arg_func) phpdbg_parse_variable_arg_wrapper, NULL, silent, callback);
 }
 
-PHPDBG_API int phpdbg_parse_variable_with_arg(const char *input, size_t len, HashTable *parent, size_t i, phpdbg_parse_var_with_arg_func callback, phpdbg_parse_var_with_arg_func step_cb, zend_bool silent, void *arg) {
+PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable *parent, size_t i, phpdbg_parse_var_with_arg_func callback, phpdbg_parse_var_with_arg_func step_cb, zend_bool silent, void *arg) {
 	int ret = FAILURE;
 	zend_bool new_index = 1;
 	char *last_index = NULL;
