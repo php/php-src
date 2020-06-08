@@ -167,6 +167,17 @@ static zend_always_inline zend_string *zend_string_init(const char *str, size_t 
 	return ret;
 }
 
+static zend_always_inline zend_string *zend_string_init_fast(const char *str, size_t len)
+{
+	if (len > 1) {
+		return zend_string_init(str, len, 0);
+	} else if (len == 0) {
+		return zend_empty_string;
+	} else /* if (len == 1) */ {
+		return ZSTR_CHAR((zend_uchar) *str);
+	}
+}
+
 static zend_always_inline zend_string *zend_string_copy(zend_string *s)
 {
 	if (!ZSTR_IS_INTERNED(s)) {

@@ -504,7 +504,7 @@ again:
 				ZVAL_BOOL(rv, *(uint8_t*)ptr);
 				return;
 			case ZEND_FFI_TYPE_CHAR:
-				ZVAL_INTERNED_STR(rv, ZSTR_CHAR(*(unsigned char*)ptr));
+				ZVAL_CHAR(rv, *(char*)ptr);
 				return;
 			case ZEND_FFI_TYPE_ENUM:
 				kind = type->enumeration.kind;
@@ -1077,7 +1077,7 @@ again:
 				ZVAL_BOOL(writeobj, *(uint8_t*)ptr);
 				break;
 			case ZEND_FFI_TYPE_CHAR:
-				ZVAL_INTERNED_STR(writeobj, ZSTR_CHAR(*(unsigned char*)ptr));
+				ZVAL_CHAR(writeobj, *(char*)ptr);
 				return SUCCESS;
 			case ZEND_FFI_TYPE_ENUM:
 				kind = ctype->enumeration.kind;

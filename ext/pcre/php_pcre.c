@@ -966,13 +966,7 @@ static void init_unmatched_empty_pair() {
 
 static zend_always_inline void populate_match_value_str(
 		zval *val, const char *subject, PCRE2_SIZE start_offset, PCRE2_SIZE end_offset) {
-	if (start_offset == end_offset) {
-		ZVAL_EMPTY_STRING(val);
-	} else if (start_offset + 1 == end_offset) {
-		ZVAL_INTERNED_STR(val, ZSTR_CHAR((unsigned char) subject[start_offset]));
-	} else {
-		ZVAL_STRINGL(val, subject + start_offset, end_offset - start_offset);
-	}
+	ZVAL_STRINGL_FAST(val, subject + start_offset, end_offset - start_offset);
 }
 
 static inline void populate_match_value(

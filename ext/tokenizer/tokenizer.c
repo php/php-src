@@ -226,7 +226,7 @@ PHP_METHOD(PhpToken, getTokenName)
 	}
 
 	if (Z_LVAL_P(id_zval) < 256) {
-		RETURN_INTERNED_STR(ZSTR_CHAR(Z_LVAL_P(id_zval)));
+		RETURN_CHAR(Z_LVAL_P(id_zval));
 	} else {
 		const char *token_name = get_token_type_name(Z_LVAL_P(id_zval));
 		if (!token_name) {

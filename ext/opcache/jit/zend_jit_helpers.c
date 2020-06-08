@@ -638,7 +638,7 @@ try_string_offset:
 		real_offset = (UNEXPECTED(offset < 0)) /* Handle negative offset */
 			? (zend_long)Z_STRLEN_P(container) + offset : offset;
 		c = (zend_uchar)Z_STRVAL_P(container)[real_offset];
-		ZVAL_INTERNED_STR(result, ZSTR_CHAR(c));
+		ZVAL_CHAR(result, c);
 	}
 }
 
@@ -685,7 +685,7 @@ try_string_offset:
 		real_offset = (UNEXPECTED(offset < 0)) /* Handle negative offset */
 			? (zend_long)Z_STRLEN_P(container) + offset : offset;
 		c = (zend_uchar)Z_STRVAL_P(container)[real_offset];
-		ZVAL_INTERNED_STR(result, ZSTR_CHAR(c));
+		ZVAL_CHAR(result, c);
 	}
 }
 
@@ -952,7 +952,7 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 
 	if (result) {
 		/* Return the new character */
-		ZVAL_INTERNED_STR(result, ZSTR_CHAR(c));
+		ZVAL_CHAR(result, c);
 	}
 }
 
