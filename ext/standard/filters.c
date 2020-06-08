@@ -1113,8 +1113,7 @@ static php_conv_err_t php_conv_qprint_decode_convert(php_conv_qprint_decode *ins
 					*ps == (unsigned char)inst->lbchars[lb_cnt]) {
 					lb_cnt++;
 					scan_stat = 5;
-				}
-				if (*ps != '\t' && *ps != ' ') {
+				} else if (*ps != '\t' && *ps != ' ') {
 					err = PHP_CONV_ERR_INVALID_SEQ;
 					goto out;
 				}
