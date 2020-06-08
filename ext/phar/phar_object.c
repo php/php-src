@@ -168,12 +168,12 @@ static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char
 		case PHAR_MIME_OTHER:
 			/* send headers, output file contents */
 			efree(basename);
-			ctr.line_len = spprintf(&(ctr.line), 0, "Content-type: %s", mime_type);
+			ctr.line_len = spprintf((char **) &(ctr.line), 0, "Content-type: %s", mime_type);
 			sapi_header_op(SAPI_HEADER_REPLACE, &ctr);
-			efree(ctr.line);
-			ctr.line_len = spprintf(&(ctr.line), 0, "Content-length: %u", info->uncompressed_filesize);
+			efree((void *) ctr.line);
+			ctr.line_len = spprintf((char **) &(ctr.line), 0, "Content-length: %u", info->uncompressed_filesize);
 			sapi_header_op(SAPI_HEADER_REPLACE, &ctr);
-			efree(ctr.line);
+			efree((void *) ctr.line);
 
 			if (FAILURE == sapi_send_headers()) {
 				zend_bailout();
@@ -790,9 +790,9 @@ PHP_METHOD(Phar, webPhar)
 			ctr.response_code = 0;
 
 			if (path_info[strlen(path_info)-1] == '/') {
-				ctr.line_len = spprintf(&(ctr.line), 4096, "Location: %s%s", path_info, entry + 1);
+				ctr.line_len = spprintf((char **) &(ctr.line), 4096, "Location: %s%s", path_info, entry + 1);
 			} else {
-				ctr.line_len = spprintf(&(ctr.line), 4096, "Location: %s%s", path_info, entry);
+				ctr.line_len = spprintf((char **) &(ctr.line), 4096, "Location: %s%s", path_info, entry);
 			}
 
 			if (not_cgi) {
@@ -805,7 +805,7 @@ PHP_METHOD(Phar, webPhar)
 
 			sapi_header_op(SAPI_HEADER_REPLACE, &ctr);
 			sapi_send_headers();
-			efree(ctr.line);
+			efree((void *) ctr.line);
 			zend_bailout();
 		}
 	}
