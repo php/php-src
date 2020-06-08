@@ -2,15 +2,14 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.4.7
 
-
-28 May 2020, PHP 7.4.7RC1
-
 - Core:
   . Fixed bug #79599 (coredump in set_error_handler). (Laruence)
   . Fixed bug #79566 (Private SHM is not private on Windows). (cmb)
   . Fixed bug #79489 (.user.ini does not inherit). (cmb)
   . Fixed bug #79600 (Regression in 7.4.6 when yielding an array based
     generator). (Nikita)
+  . Fixed bug #79657 ("yield from" hangs when invalid value encountered).
+    (Nikita)
 
 - FFI:
   . Fixed bug #79571 (FFI: var_dumping unions may segfault). (cmb)
