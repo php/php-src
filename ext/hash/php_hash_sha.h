@@ -27,6 +27,7 @@ typedef struct {
 	uint32_t count[2];		/* number of bits, modulo 2^64 */
 	unsigned char buffer[64];	/* input buffer */
 } PHP_SHA224_CTX;
+#define PHP_SHA224_SPEC "l8l2b64."
 
 PHP_HASH_API void PHP_SHA224Init(PHP_SHA224_CTX *);
 PHP_HASH_API void PHP_SHA224Update(PHP_SHA224_CTX *, const unsigned char *, size_t);
@@ -38,6 +39,7 @@ typedef struct {
 	uint32_t count[2];		/* number of bits, modulo 2^64 */
 	unsigned char buffer[64];	/* input buffer */
 } PHP_SHA256_CTX;
+#define PHP_SHA256_SPEC "l8l2b64."
 
 PHP_HASH_API void PHP_SHA256Init(PHP_SHA256_CTX *);
 PHP_HASH_API void PHP_SHA256Update(PHP_SHA256_CTX *, const unsigned char *, size_t);
@@ -49,6 +51,7 @@ typedef struct {
 	uint64_t count[2];	/* number of bits, modulo 2^128 */
 	unsigned char buffer[128];	/* input buffer */
 } PHP_SHA384_CTX;
+#define PHP_SHA384_SPEC "q8q2b128."
 
 PHP_HASH_API void PHP_SHA384Init(PHP_SHA384_CTX *);
 PHP_HASH_API void PHP_SHA384Update(PHP_SHA384_CTX *, const unsigned char *, size_t);
@@ -60,6 +63,7 @@ typedef struct {
 	uint64_t count[2];	/* number of bits, modulo 2^128 */
 	unsigned char buffer[128];	/* input buffer */
 } PHP_SHA512_CTX;
+#define PHP_SHA512_SPEC "q8q2b128."
 
 PHP_HASH_API void PHP_SHA512Init(PHP_SHA512_CTX *);
 PHP_HASH_API void PHP_SHA512Update(PHP_SHA512_CTX *, const unsigned char *, size_t);

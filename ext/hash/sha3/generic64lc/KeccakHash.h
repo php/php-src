@@ -108,6 +108,8 @@ HashReturn Keccak_HashFinal(Keccak_HashInstance *hashInstance, BitSequence *hash
   */
 HashReturn Keccak_HashSqueeze(Keccak_HashInstance *hashInstance, BitSequence *data, DataLength databitlen);
 
+#define Keccak_HashInstance_ImplType 64
+
 #endif
 
 #endif

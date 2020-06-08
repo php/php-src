@@ -30,6 +30,7 @@ typedef struct {
 	unsigned char length;
 	unsigned char buffer[32];
 } PHP_SNEFRU_CTX;
+#define PHP_SNEFRU_SPEC "l16l2bb32"
 
 PHP_HASH_API void PHP_SNEFRUInit(PHP_SNEFRU_CTX *);
 PHP_HASH_API void PHP_SNEFRUUpdate(PHP_SNEFRU_CTX *, const unsigned char *, size_t);

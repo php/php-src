@@ -59,10 +59,14 @@ PHP_HASH_API int PHP_ADLER32Copy(const php_hash_ops *ops, PHP_ADLER32_CTX *orig_
 }
 
 const php_hash_ops php_hash_adler32_ops = {
+	"adler32",
 	(php_hash_init_func_t) PHP_ADLER32Init,
 	(php_hash_update_func_t) PHP_ADLER32Update,
 	(php_hash_final_func_t) PHP_ADLER32Final,
 	(php_hash_copy_func_t) PHP_ADLER32Copy,
+	php_hash_serialize,
+	php_hash_unserialize,
+	PHP_ADLER32_SPEC,
 	4, /* what to say here? */
 	4,
 	sizeof(PHP_ADLER32_CTX),
