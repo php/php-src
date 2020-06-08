@@ -2617,7 +2617,7 @@ PHP_FUNCTION(chr)
 	ZEND_PARSE_PARAMETERS_END();
 
 	c &= 0xff;
-	RETURN_ONE_CHAR_STRING(c);
+	RETURN_CHAR(c);
 }
 /* }}} */
 
@@ -4785,7 +4785,7 @@ PHP_FUNCTION(setlocale)
 						/* C locale is represented as NULL. */
 						BG(ctype_string) = NULL;
 						zend_string_release_ex(loc, 0);
-						RETURN_ONE_CHAR_STRING('C');
+						RETURN_CHAR('C');
 					} else if (len == ZSTR_LEN(loc) && !memcmp(ZSTR_VAL(loc), retval, len)) {
 						BG(ctype_string) = zend_string_copy(loc);
 						RETURN_STR(BG(ctype_string));

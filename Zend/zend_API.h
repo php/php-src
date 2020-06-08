@@ -636,7 +636,7 @@ END_EXTERN_C()
 		ZVAL_PSTRINGL(z, "", 0);				\
 	} while (0)
 
-#define ZVAL_ONE_CHAR_STRING(z, c)  do {		\
+#define ZVAL_CHAR(z, c)  do {		            \
 		char _c = (c);                          \
 		ZVAL_INTERNED_STR(z, ZSTR_CHAR((zend_uchar) _c));	\
 	} while (0)
@@ -680,7 +680,7 @@ END_EXTERN_C()
 #define RETVAL_STRING_FAST(s)			ZVAL_STRING_FAST(return_value, s)
 #define RETVAL_STRINGL_FAST(s, l)		ZVAL_STRINGL_FAST(return_value, s, l)
 #define RETVAL_EMPTY_STRING()			ZVAL_EMPTY_STRING(return_value)
-#define RETVAL_ONE_CHAR_STRING(c)		ZVAL_ONE_CHAR_STRING(return_value, c)
+#define RETVAL_CHAR(c)		            ZVAL_CHAR(return_value, c)
 #define RETVAL_RES(r)					ZVAL_RES(return_value, r)
 #define RETVAL_ARR(r)					ZVAL_ARR(return_value, r)
 #define RETVAL_EMPTY_ARRAY()			ZVAL_EMPTY_ARRAY(return_value)
@@ -704,7 +704,7 @@ END_EXTERN_C()
 #define RETURN_STRING_FAST(s) 			do { RETVAL_STRING_FAST(s); return; } while (0)
 #define RETURN_STRINGL_FAST(s, l)		do { RETVAL_STRINGL_FAST(s, l); return; } while (0)
 #define RETURN_EMPTY_STRING() 			do { RETVAL_EMPTY_STRING(); return; } while (0)
-#define RETURN_ONE_CHAR_STRING(c)		do { RETVAL_ONE_CHAR_STRING(c); return; } while (0)
+#define RETURN_CHAR(c)		            do { RETVAL_CHAR(c); return; } while (0)
 #define RETURN_RES(r)					do { RETVAL_RES(r); return; } while (0)
 #define RETURN_ARR(r)					do { RETVAL_ARR(r); return; } while (0)
 #define RETURN_EMPTY_ARRAY()			do { RETVAL_EMPTY_ARRAY(); return; } while (0)
