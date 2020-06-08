@@ -35,6 +35,7 @@ jobs:
             --enable-fpm \
             --with-pdo-mysql=mysqlnd \
             --with-mysqli=mysqlnd \
+            --disable-mysqlnd-compression-support \
             --without-pear \
             --enable-exif \
             --enable-sysvsem \
