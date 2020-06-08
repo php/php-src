@@ -10517,7 +10517,7 @@ static int zend_jit_recv(dasm_State **Dst, const zend_op *opline, const zend_op_
 static int zend_jit_recv_init(dasm_State **Dst, const zend_op *opline, const zend_op_array *op_array, zend_bool is_last, int may_throw)
 {
 	zend_arg_info *arg_info = NULL;
-	zend_bool has_slow = 0;
+	uint8_t has_slow = 0;
 	uint32_t arg_num = opline->op1.num;
 	zval *zv = RT_CONSTANT(opline, opline->op2);
 	zend_jit_addr res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
