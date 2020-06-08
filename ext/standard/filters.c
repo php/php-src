@@ -788,7 +788,7 @@ static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *ins
 	lb_ptr = inst->lb_ptr;
 	lb_cnt = inst->lb_cnt;
 
-	if ((in_pp == NULL || in_left_p == NULL) && (lb_ptr >=lb_cnt)) {
+	if (in_pp == NULL || in_left_p == NULL) {
 		return PHP_CONV_ERR_SUCCESS;
 	}
 
@@ -1016,7 +1016,7 @@ static php_conv_err_t php_conv_qprint_decode_convert(php_conv_qprint_decode *ins
 	lb_ptr = inst->lb_ptr;
 	lb_cnt = inst->lb_cnt;
 
-	if ((in_pp == NULL || in_left_p == NULL) && lb_cnt == lb_ptr) {
+	if (in_pp == NULL || in_left_p == NULL) {
 		if (inst->scan_stat != 0) {
 			return PHP_CONV_ERR_UNEXPECTED_EOS;
 		}
