@@ -151,6 +151,9 @@ PHP                                                                        NEWS
     handlers). (bshaffer)
   . Fixed bug #73529 (session_decode() silently fails on wrong input). (cmb)
 
+- Shmop:
+  . Converted shmop resources to objects. (cmb)
+
 - SimpleXML:
   . Fixed bug #75245 (Don't set content of elements with only whitespaces).
     (eriklundin)

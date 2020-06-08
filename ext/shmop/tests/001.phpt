@@ -32,8 +32,6 @@ shmop extension test
 
     echo "data in memory is: " . shmop_read($shm_id, 0, $written) . "\n";
 
-    shmop_close($shm_id);
-
     echo "shm open for read only: ";
     $shm_id = shmop_open($hex_shm_id, "a", 0644, 1024);
     if (!$shm_id) {
@@ -46,8 +44,6 @@ shmop extension test
 
     /* try to append data to the shared memory segment, this should fail */
     shmop_write($shm_id, $write_d1, $written);
-
-    shmop_close($shm_id);
 
     echo "shm open for read only: ";
     $shm_id = shmop_open($hex_shm_id, "w", 0644, 1024);
@@ -73,8 +69,6 @@ shmop extension test
     } else {
         echo "ok\n";
     }
-
-    shmop_close($shm_id);
 ?>
 --EXPECTF--
 shm open for create: ok

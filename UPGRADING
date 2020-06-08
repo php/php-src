@@ -793,6 +793,13 @@ PHP 8.0 UPGRADE NOTES
 - PGSQL / PDO PGSQL:
   . The PGSQL and PDO PGSQL extensions now require at least libpq 9.1.
 
+- Shmop:
+  . shmop_open() will now return a Shmop object rather than a resource. Return
+    value checks using is_resource() should be replaced with checks for `false`.
+    The shmop_close() function no longer has an effect, and is deprecated;
+    instead the Shmop instance is automatically destroyed if it is no longer
+    referenced.
+
 ========================================
 10. New Global Constants
 ========================================
