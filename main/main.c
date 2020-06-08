@@ -447,9 +447,9 @@ static PHP_INI_MH(OnUpdateTimeout)
 
 /* {{{ php_get_display_errors_mode() helper function
  */
-static int php_get_display_errors_mode(char *value, size_t value_length)
+static zend_uchar php_get_display_errors_mode(char *value, size_t value_length)
 {
-	int mode;
+	zend_uchar mode;
 
 	if (!value) {
 		return PHP_DISPLAY_ERRORS_STDOUT;
@@ -490,7 +490,8 @@ static PHP_INI_MH(OnUpdateDisplayErrors)
  */
 static PHP_INI_DISP(display_errors_mode)
 {
-	int mode, cgi_or_cli;
+	zend_uchar mode;
+	bool cgi_or_cli;
 	size_t tmp_value_length;
 	char *tmp_value;
 
