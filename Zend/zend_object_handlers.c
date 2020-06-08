@@ -149,7 +149,7 @@ ZEND_API HashTable *zend_std_get_debug_info(zend_object *object, int *is_temp) /
 		return object->handlers->get_properties(object);
 	}
 
-	zend_call_method_with_0_params(object, ce, &ce->__debugInfo, ZEND_DEBUGINFO_FUNC_NAME, &retval);
+	zend_call_known_instance_method_with_0_params(ce->__debugInfo, object, &retval);
 	if (Z_TYPE(retval) == IS_ARRAY) {
 		if (!Z_REFCOUNTED(retval)) {
 			*is_temp = 1;
@@ -177,35 +177,13 @@ ZEND_API HashTable *zend_std_get_debug_info(zend_object *object, int *is_temp) /
 
 static void zend_std_call_getter(zend_object *zobj, zend_string *prop_name, zval *retval) /* {{{ */
 {
-	zend_class_entry *ce = zobj->ce;
 	zend_class_entry *orig_fake_scope = EG(fake_scope);
-	zend_fcall_info fci;
-	zend_fcall_info_cache fcic;
 	zval member;
 
 	EG(fake_scope) = NULL;
 
-	/* __get handler is called with one argument:
-	      property name
-
-	   it should return whether the call was successful or not
-	*/
-
 	ZVAL_STR(&member, prop_name);
-
-	fci.size = sizeof(fci);
-	fci.object = zobj;
-	fci.retval = retval;
-	fci.param_count = 1;
-	fci.params = &member;
-	fci.no_separation = 1;
-	ZVAL_UNDEF(&fci.function_name); /* Unused */
-
-	fcic.function_handler = ce->__get;
-	fcic.called_scope = ce;
-	fcic.object = zobj;
-
-	zend_call_function(&fci, &fcic);
+	zend_call_known_instance_method_with_1_params(zobj->ce->__get, zobj, retval, &member);
 
 	EG(fake_scope) = orig_fake_scope;
 }
@@ -213,37 +191,14 @@ static void zend_std_call_getter(zend_object *zobj, zend_string *prop_name, zval
 
 static void zend_std_call_setter(zend_object *zobj, zend_string *prop_name, zval *value) /* {{{ */
 {
-	zend_class_entry *ce = zobj->ce;
 	zend_class_entry *orig_fake_scope = EG(fake_scope);
-	zend_fcall_info fci;
-	zend_fcall_info_cache fcic;
-	zval args[2], ret;
+	zval args[2];
 
 	EG(fake_scope) = NULL;
 
-	/* __set handler is called with two arguments:
-	     property name
-	     value to be set
-	*/
-
 	ZVAL_STR(&args[0], prop_name);
 	ZVAL_COPY_VALUE(&args[1], value);
-	ZVAL_UNDEF(&ret);
-
-	fci.size = sizeof(fci);
-	fci.object = zobj;
-	fci.retval = &ret;
-	fci.param_count = 2;
-	fci.params = args;
-	fci.no_separation = 1;
-	ZVAL_UNDEF(&fci.function_name); /* Unused */
-
-	fcic.function_handler = ce->__set;
-	fcic.called_scope = ce;
-	fcic.object = zobj;
-
-	zend_call_function(&fci, &fcic);
-	zval_ptr_dtor(&ret);
+	zend_call_known_instance_method(zobj->ce->__set, zobj, NULL, 2, args);
 
 	EG(fake_scope) = orig_fake_scope;
 }
@@ -251,35 +206,13 @@ static void zend_std_call_setter(zend_object *zobj, zend_string *prop_name, zval
 
 static void zend_std_call_unsetter(zend_object *zobj, zend_string *prop_name) /* {{{ */
 {
-	zend_class_entry *ce = zobj->ce;
 	zend_class_entry *orig_fake_scope = EG(fake_scope);
-	zend_fcall_info fci;
-	zend_fcall_info_cache fcic;
-	zval ret, member;
+	zval member;
 
 	EG(fake_scope) = NULL;
 
-	/* __unset handler is called with one argument:
-	      property name
-	*/
-
 	ZVAL_STR(&member, prop_name);
-	ZVAL_UNDEF(&ret);
-
-	fci.size = sizeof(fci);
-	fci.object = zobj;
-	fci.retval = &ret;
-	fci.param_count = 1;
-	fci.params = &member;
-	fci.no_separation = 1;
-	ZVAL_UNDEF(&fci.function_name); /* Unused */
-
-	fcic.function_handler = ce->__unset;
-	fcic.called_scope = ce;
-	fcic.object = zobj;
-
-	zend_call_function(&fci, &fcic);
-	zval_ptr_dtor(&ret);
+	zend_call_known_instance_method_with_1_params(zobj->ce->__unset, zobj, NULL, &member);
 
 	EG(fake_scope) = orig_fake_scope;
 }
@@ -287,35 +220,13 @@ static void zend_std_call_unsetter(zend_object *zobj, zend_string *prop_name) /*
 
 static void zend_std_call_issetter(zend_object *zobj, zend_string *prop_name, zval *retval) /* {{{ */
 {
-	zend_class_entry *ce = zobj->ce;
 	zend_class_entry *orig_fake_scope = EG(fake_scope);
-	zend_fcall_info fci;
-	zend_fcall_info_cache fcic;
 	zval member;
 
 	EG(fake_scope) = NULL;
 
-	/* __isset handler is called with one argument:
-	      property name
-
-	   it should return whether the property is set or not
-	*/
-
 	ZVAL_STR(&member, prop_name);
-
-	fci.size = sizeof(fci);
-	fci.object = zobj;
-	fci.retval = retval;
-	fci.param_count = 1;
-	fci.params = &member;
-	fci.no_separation = 1;
-	ZVAL_UNDEF(&fci.function_name); /* Unused */
-
-	fcic.function_handler = ce->__isset;
-	fcic.called_scope = ce;
-	fcic.object = zobj;
-
-	zend_call_function(&fci, &fcic);
+	zend_call_known_instance_method_with_1_params(zobj->ce->__isset, zobj, retval, &member);
 
 	EG(fake_scope) = orig_fake_scope;
 }
@@ -1803,7 +1714,7 @@ ZEND_API int zend_std_cast_object_tostring(zend_object *readobj, zval *writeobj,
 				zend_class_entry *fake_scope = EG(fake_scope);
 				EG(fake_scope) = NULL;
 				GC_ADDREF(readobj);
-				zend_call_method_with_0_params(readobj, ce, &ce->__tostring, "__tostring", &retval);
+				zend_call_known_instance_method_with_0_params(ce->__tostring, readobj, &retval);
 				zend_object_release(readobj);
 				EG(fake_scope) = fake_scope;
 				if (EXPECTED(Z_TYPE(retval) == IS_STRING)) {

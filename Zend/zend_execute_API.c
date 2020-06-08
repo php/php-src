@@ -861,6 +861,51 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 }
 /* }}} */
 
+ZEND_API void zend_call_known_function(
+		zend_function *fn, zend_object *object, zend_class_entry *called_scope, zval *retval_ptr,
+		uint32_t param_count, zval *params)
+{
+	zval retval;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcic;
+
+	ZEND_ASSERT(fn && "zend_function must be passed!");
+
+	fci.size = sizeof(fci);
+	fci.object = object;
+	fci.retval = retval_ptr ? retval_ptr : &retval;
+	fci.param_count = param_count;
+	fci.params = params;
+	fci.no_separation = 1;
+	ZVAL_UNDEF(&fci.function_name); /* Unused */
+
+	fcic.function_handler = fn;
+	fcic.object = object;
+	fcic.called_scope = called_scope;
+
+	int result = zend_call_function(&fci, &fcic);
+	if (UNEXPECTED(result == FAILURE)) {
+		if (!EG(exception)) {
+			zend_error_noreturn(E_CORE_ERROR, "Couldn't execute method %s%s%s",
+				fn->common.scope ? ZSTR_VAL(fn->common.scope->name) : "",
+				fn->common.scope ? "::" : "", ZSTR_VAL(fn->common.function_name));
+		}
+	}
+
+	if (!retval_ptr) {
+		zval_ptr_dtor(&retval);
+	}
+}
+
+ZEND_API void zend_call_known_instance_method_with_2_params(
+		zend_function *fn, zend_object *object, zval *retval_ptr, zval *param1, zval *param2)
+{
+	zval params[2];
+	ZVAL_COPY_VALUE(&params[0], param1);
+	ZVAL_COPY_VALUE(&params[1], param2);
+	zend_call_known_instance_method(fn, object, retval_ptr, 2, params);
+}
+
 ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *key, uint32_t flags) /* {{{ */
 {
 	zend_class_entry *ce = NULL;

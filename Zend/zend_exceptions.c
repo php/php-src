@@ -922,7 +922,7 @@ ZEND_API ZEND_COLD void zend_exception_error(zend_object *ex, int severity) /* {
 		zend_string *str, *file = NULL;
 		zend_long line = 0;
 
-		zend_call_method_with_0_params(Z_OBJ(exception), ce_exception, &ex->ce->__tostring, "__tostring", &tmp);
+		zend_call_known_instance_method_with_0_params(ex->ce->__tostring, Z_OBJ(exception), &tmp);
 		if (!EG(exception)) {
 			if (Z_TYPE(tmp) != IS_STRING) {
 				zend_error(E_WARNING, "%s::__toString() must return a string", ZSTR_VAL(ce_exception->name));
