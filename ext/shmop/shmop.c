@@ -59,6 +59,17 @@ zend_module_entry shmop_module_entry = {
 ZEND_GET_MODULE(shmop)
 #endif
 
+typedef struct php_shmop
+{
+	int shmid;
+	key_t key;
+	int shmflg;
+	int shmatflg;
+	char *addr;
+	zend_long size;
+  zend_object std;
+} php_shmop;
+
 zend_class_entry *shmop_ce;
 static zend_object_handlers shmop_object_handlers;
 

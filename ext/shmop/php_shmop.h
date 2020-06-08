@@ -32,17 +32,6 @@ PHP_MINFO_FUNCTION(shmop);
 # include "win32/ipc.h"
 #endif
 
-typedef struct php_shmop
-{
-	int shmid;
-	key_t key;
-	int shmflg;
-	int shmatflg;
-	char *addr;
-	zend_long size;
-  zend_object std;
-} php_shmop;
-
 #else
 
 #define phpext_shmop_ptr NULL
