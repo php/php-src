@@ -4365,18 +4365,19 @@ ZEND_METHOD(FFI, string) /* {{{ */
 	zend_ffi_cdata *cdata;
 	zend_ffi_type *type;
 	void *ptr;
-	zend_long size = 0;
+	zend_long size;
+	zend_bool size_is_null = 1;
 
 	ZEND_FFI_VALIDATE_API_RESTRICTION();
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_OBJECT_OF_CLASS_EX2(zv, zend_ffi_cdata_ce, 0, 1, 0);
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(size)
+		Z_PARAM_LONG_OR_NULL(size, size_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
 	cdata = (zend_ffi_cdata*)Z_OBJ_P(zv);
 	type = ZEND_FFI_TYPE(cdata->type);
-	if (EX_NUM_ARGS() == 2) {
+	if (!size_is_null) {
 		if (type->kind == ZEND_FFI_TYPE_POINTER) {
 			ptr = *(void**)cdata->ptr;
 		} else {

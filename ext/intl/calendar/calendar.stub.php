@@ -235,7 +235,7 @@ class IntlCalendar
      * @return bool
      * @alias intlcal_set
      */
-    public function set(int $year, int $month, int $dayOfMonth = UNKNOWN, $hour = UNKNOWN, int $minute = UNKNOWN, int $second = UNKNOWN) {}
+    public function set(int $year, int $month, ?int $dayOfMonth = null, ?int $hour = null, ?int $minute = null, ?int $second = null) {}
 
     /**
      * @return bool

@@ -56,16 +56,16 @@ function pcntl_get_last_error(): int {}
 function pcntl_errno(): int {}
 
 #ifdef HAVE_GETPRIORITY
-function pcntl_getpriority(int $pid = UNKNOWN, int $process_identifier = PRIO_PROCESS): int|false {}
+function pcntl_getpriority(?int $pid = null, int $process_identifier = PRIO_PROCESS): int|false {}
 #endif
 
 #ifdef HAVE_SETPRIORITY
-function pcntl_setpriority(int $priority, int $pid = UNKNOWN, int $process_identifier = PRIO_PROCESS): bool{}
+function pcntl_setpriority(int $priority, ?int $pid = null, int $process_identifier = PRIO_PROCESS): bool{}
 #endif
 
 function pcntl_strerror(int $errno): string {}
 
-function pcntl_async_signals(bool $on = UNKNOWN): bool {}
+function pcntl_async_signals(?bool $on = null): bool {}
 
 #ifdef HAVE_UNSHARE
 function pcntl_unshare(int $flags): bool {}

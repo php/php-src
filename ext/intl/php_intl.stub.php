@@ -28,7 +28,7 @@ function intlcal_after(IntlCalendar $calendarObject, IntlCalendar $calendar): bo
 
 function intlcal_before(IntlCalendar $calendarObject, IntlCalendar $calendar): bool {}
 
-function intlcal_set(IntlCalendar $calendar, int $year, int $month, int $dayOfMonth = UNKNOWN, $hour = UNKNOWN, int $minute = UNKNOWN, int $second = UNKNOWN): bool {}
+function intlcal_set(IntlCalendar $calendar, int $year, int $month, ?int $dayOfMonth = null, ?int $hour = null, ?int $minute = null, ?int $second = null): bool {}
 
 /** @param int|bool $amountOrUpOrDown */
 function intlcal_roll(IntlCalendar $calendar, int $field, $amountOrUpOrDown): bool {}
@@ -175,7 +175,7 @@ function datefmt_set_pattern(IntlDateFormatter $df, string $pattern): bool {}
 
 function datefmt_get_pattern(IntlDateFormatter $df): string|false {}
 
-function datefmt_get_locale(IntlDateFormatter $df, int $which = UNKNOWN): string|false {}
+function datefmt_get_locale(IntlDateFormatter $df, int $which = datefmt_get_locale): string|false {}
 
 function datefmt_set_lenient(IntlDateFormatter $df, bool $lenient): void {}
 
@@ -395,7 +395,7 @@ function intltz_get_unknown(): IntlTimeZone {}
 #if U_ICU_VERSION_MAJOR_NUM >= 52
 function intltz_get_windows_id(string $timezone): string|false {}
 
-function intltz_get_id_for_windows_id(string $timezone, string $region = UNKNOWN): string|false {}
+function intltz_get_id_for_windows_id(string $timezone, ?string $region = null): string|false {}
 #endif
 
 function intltz_has_same_rules(IntlTimeZone $tz, IntlTimeZone $otherTimeZone): bool {}

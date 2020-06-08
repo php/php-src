@@ -84,7 +84,7 @@ class IntlDateFormatter
      * @return string|false
      * @alias datefmt_get_locale
      */
-    public function getLocale(int $which = UNKNOWN) {}
+    public function getLocale(int $which = ULOC_ACTUAL_LOCALE) {}
 
     /**
      * @return void

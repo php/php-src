@@ -132,7 +132,7 @@ class IntlTimeZone
      * @return string|false
      * @alias intltz_get_id_for_windows_id
      */
-    public static function getIDForWindowsID(string $timezone, string $region = UNKNOWN) {}
+    public static function getIDForWindowsID(string $timezone, ?string $region = null) {}
 #endif
     /**
      * @return bool
