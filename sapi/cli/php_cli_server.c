@@ -748,7 +748,7 @@ static void sapi_cli_server_register_variables(zval *track_vars_array) /* {{{ */
 	zend_hash_apply_with_arguments(&client->request.headers, (apply_func_args_t)sapi_cli_server_register_entry_cb, 1, track_vars_array);
 } /* }}} */
 
-static void sapi_cli_server_log_write(int type, char *msg) /* {{{ */
+static void sapi_cli_server_log_write(int type, const char *msg) /* {{{ */
 {
 	char buf[52];
 
