@@ -7,6 +7,8 @@ PHP                                                                        NEWS
   . Fixed bug #79650 (php-win.exe 100% cpu lockup). (cmb)
   . Fixed bug #79668 (get_defined_functions(true) may miss functions). (cmb,
     Nikita)
+  . Fixed bug #79657 ("yield from" hangs when invalid value encountered).
+    (Nikita)
 
 - Filter:
   . Fixed bug #73527 (Invalid memory access in php_filter_strip). (cmb)
