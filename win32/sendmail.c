@@ -122,7 +122,7 @@ static char *ErrorMessages[] =
  * Returns NULL on error, or the new char* buffer on success.
  * You have to take care and efree() the buffer on your own.
  */
-static zend_string *php_win32_mail_trim_header(char *header)
+static zend_string *php_win32_mail_trim_header(const char *header)
 {
 	zend_string *result, *result2;
 	zend_string *replace;
@@ -177,13 +177,13 @@ static zend_string *php_win32_mail_trim_header(char *header)
 //  See SendText() for additional args!
 //********************************************************************/
 PHPAPI int TSendMail(const char *host, int *error, char **error_message,
-			  char *headers, const char *Subject, const char *mailTo, const char *data,
+			  const char *headers, const char *Subject, const char *mailTo, const char *data,
 			  char *mailCc, char *mailBcc, char *mailRPath)
 {
 	int ret;
 	char *RPath = NULL;
 	zend_string *headers_lc = NULL, *headers_trim = NULL; /* headers_lc is only created if we've a header at all */
-	char *pos1 = NULL, *pos2 = NULL;
+	const char *pos1 = NULL, *pos2 = NULL;
 
 	if (host == NULL) {
 		*error = BAD_MAIL_HOST;
@@ -216,7 +216,7 @@ PHPAPI int TSendMail(const char *host, int *error, char **error_message,
 		RPath = estrdup(INI_STR("sendmail_from"));
 	} else if (headers_lc) {
 		int found = 0;
-		char *lookup = ZSTR_VAL(headers_lc);
+		const char *lookup = ZSTR_VAL(headers_lc);
 
 		while (lookup) {
 			pos1 = strstr(lookup, "from:");
@@ -353,11 +353,12 @@ PHPAPI char *GetSMErrorText(int index)
 // History:
 //*******************************************************************/
 static int SendText(char *RPath, const char *Subject, const char *mailTo, char *mailCc, char *mailBcc, const char *data,
-			 char *headers, char *headers_lc, char **error_message)
+			 const char *headers, char *headers_lc, char **error_message)
 {
 	int res;
 	char *p;
-	char *tempMailTo, *token, *pos1, *pos2;
+	char *tempMailTo, *token;
+	const char *pos1, *pos2;
 	char *server_response = NULL;
 	char *stripped_header  = NULL;
 	zend_string *data_cln;
