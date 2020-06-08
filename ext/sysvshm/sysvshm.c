@@ -195,10 +195,19 @@ PHP_FUNCTION(shm_attach)
 PHP_FUNCTION(shm_detach)
 {
 	zval *shm_id;
+	sysvshm_shm *shm_list_ptr;
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "O", &shm_id, sysvshm_ce)) {
 		RETURN_THROWS();
 	}
+
+	shm_list_ptr = Z_SYSVSHM_P(shm_id);
+	if (!shm_list_ptr->ptr) {
+		RETURN_TRUE;
+	}
+
+	shmdt((void *) shm_list_ptr->ptr);
+	shm_list_ptr->ptr = NULL;
 
 	RETURN_TRUE;
 }
@@ -216,7 +225,6 @@ PHP_FUNCTION(shm_remove)
 	}
 
 	shm_list_ptr = Z_SYSVSHM_P(shm_id);
-
 	if (!shm_list_ptr->ptr) {
 		RETURN_TRUE;
 	}
@@ -225,9 +233,6 @@ PHP_FUNCTION(shm_remove)
 		php_error_docref(NULL, E_WARNING, "Failed for key 0x%x, id " ZEND_LONG_FMT ": %s", shm_list_ptr->key, Z_LVAL_P(shm_id), strerror(errno));
 		RETURN_FALSE;
 	}
-
-	shmdt((void *) shm_list_ptr->ptr);
-	shm_list_ptr->ptr = NULL;
 
 	RETURN_TRUE;
 }
