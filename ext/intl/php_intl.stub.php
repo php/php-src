@@ -175,7 +175,7 @@ function datefmt_set_pattern(IntlDateFormatter $df, string $pattern): bool {}
 
 function datefmt_get_pattern(IntlDateFormatter $df): string|false {}
 
-function datefmt_get_locale(IntlDateFormatter $df, int $which = datefmt_get_locale): string|false {}
+function datefmt_get_locale(IntlDateFormatter $df, int $which = ULOC_ACTUAL_LOCALE): string|false {}
 
 function datefmt_set_lenient(IntlDateFormatter $df, bool $lenient): void {}
 

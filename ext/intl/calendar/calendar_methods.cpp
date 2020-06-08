@@ -380,7 +380,7 @@ U_CFUNC PHP_FUNCTION(intlcal_before)
 U_CFUNC PHP_FUNCTION(intlcal_set)
 {
 	zend_long args[6];
-	zend_bool args_is_null[6];
+	zend_bool args_is_null[6] = {0, 0, 1, 1, 1, 1};
 
 	CALENDAR_METHOD_INIT_VARS;
 
