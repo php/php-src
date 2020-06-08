@@ -78,7 +78,7 @@ ZEND_API void (*zend_interrupt_function)(zend_execute_data *execute_data);
 ZEND_API void (*zend_error_cb)(int type, const char *error_filename, const uint32_t error_lineno, zend_string *message);
 void (*zend_printf_to_smart_string)(smart_string *buf, const char *format, va_list ap);
 void (*zend_printf_to_smart_str)(smart_str *buf, const char *format, va_list ap);
-ZEND_API char *(*zend_getenv)(char *name, size_t name_len);
+ZEND_API char *(*zend_getenv)(const char *name, size_t name_len);
 ZEND_API zend_string *(*zend_resolve_path)(const char *filename, size_t filename_len);
 ZEND_API int (*zend_post_startup_cb)(void) = NULL;
 ZEND_API void (*zend_post_shutdown_cb)(void) = NULL;
