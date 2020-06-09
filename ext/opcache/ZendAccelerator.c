@@ -2646,7 +2646,7 @@ static int zend_accel_init_shm(void)
 	if (ZCG(accel_directives).interned_strings_buffer) {
 		accel_shared_globals = zend_shared_alloc((ZCG(accel_directives).interned_strings_buffer * 1024 * 1024));
 	} else {
-		accel_shared_globals = zend_shared_alloc(sizeof(zend_accel_shared_globals));
+		accel_shared_globals = zend_shared_alloc(sizeof(zend_accel_shared_globals) + sizeof(uint32_t)); // alloc one more slot to prevent invalid read
 	}
 	if (!accel_shared_globals) {
 		zend_accel_error(ACCEL_LOG_FATAL, "Insufficient shared memory!");
@@ -2687,6 +2687,8 @@ static int zend_accel_init_shm(void)
 			STRTAB_INVALID_POS,
 			(char*)ZCSG(interned_strings).start -
 				((char*)&ZCSG(interned_strings) + sizeof(zend_string_table)));
+	} else {
+		*STRTAB_HASH_TO_SLOT(&ZCSG(interned_strings), 0) =  STRTAB_INVALID_POS;
 	}
 
 	zend_interned_strings_set_request_storage_handlers(accel_new_interned_string_for_php, accel_init_interned_string_for_php);
