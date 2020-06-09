@@ -862,8 +862,8 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 /* }}} */
 
 ZEND_API void zend_call_known_function(
-		zend_function *fn, zend_object *object, zend_class_entry *called_scope,
-		zval *retval_ptr, int param_count, zval *params)
+		zend_function *fn, zend_object *object, zend_class_entry *called_scope, zval *retval_ptr,
+		uint32_t param_count, zval *params)
 {
 	zval retval;
 	zend_fcall_info fci;

@@ -568,12 +568,13 @@ ZEND_API int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci
  * If object is NULL, this must be a free function or static call.
  * called_scope must be provided for instance and static method calls. */
 ZEND_API void zend_call_known_function(
-		zend_function *fn, zend_object *object, zend_class_entry *called_scope,
-		zval *retval_ptr, int param_count, zval *params);
+		zend_function *fn, zend_object *object, zend_class_entry *called_scope, zval *retval_ptr,
+		uint32_t param_count, zval *params);
 
 /* Call the provided zend_function instance method on an object. */
 static zend_always_inline void zend_call_known_instance_method(
-		zend_function *fn, zend_object *object, zval *retval_ptr, int param_count, zval *params)
+		zend_function *fn, zend_object *object, zval *retval_ptr,
+		uint32_t param_count, zval *params)
 {
 	zend_call_known_function(fn, object, object->ce, retval_ptr, param_count, params);
 }
