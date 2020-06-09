@@ -139,8 +139,10 @@ PHP_MINFO_FUNCTION(assert) /* {{{ */
    Checks if assertion is false */
 PHP_FUNCTION(assert)
 {
-	zval *assertion;
-	zval *description = NULL;
+	/* `desc_or_throwable` may either be a description string which will be used in
+	 * the message for a failed assertion, or a `Throwable` object which will be
+	 * thrown if the assertion fails */
+	zval *assertion, *desc_or_throwable = NULL;
 
 	if (! ASSERTG(active)) {
 		RETURN_TRUE;
@@ -149,7 +151,7 @@ PHP_FUNCTION(assert)
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_ZVAL(assertion)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL(description)
+		Z_PARAM_ZVAL(desc_or_throwable)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (zend_is_true(assertion)) {
@@ -173,12 +175,12 @@ PHP_FUNCTION(assert)
 		ZVAL_FALSE(&retval);
 
 		/* XXX do we want to check for error here? */
-		if (!description) {
+		if (!desc_or_throwable) {
 			call_user_function(NULL, NULL, &ASSERTG(callback), &retval, 3, args);
 			zval_ptr_dtor(&(args[2]));
 			zval_ptr_dtor(&(args[0]));
 		} else {
-			ZVAL_STR(&args[3], zval_get_string(description));
+			ZVAL_STR(&args[3], zval_get_string(desc_or_throwable));
 			call_user_function(NULL, NULL, &ASSERTG(callback), &retval, 4, args);
 			zval_ptr_dtor(&(args[3]));
 			zval_ptr_dtor(&(args[2]));
@@ -189,22 +191,22 @@ PHP_FUNCTION(assert)
 	}
 
 	if (ASSERTG(exception)) {
-		if (!description) {
+		if (!desc_or_throwable) {
 			zend_throw_exception(assertion_error_ce, NULL, E_ERROR);
-		} else if (Z_TYPE_P(description) == IS_OBJECT &&
-			instanceof_function(Z_OBJCE_P(description), zend_ce_throwable)) {
-			Z_ADDREF_P(description);
-			zend_throw_exception_object(description);
+		} else if (Z_TYPE_P(desc_or_throwable) == IS_OBJECT &&
+			instanceof_function(Z_OBJCE_P(desc_or_throwable), zend_ce_throwable)) {
+			Z_ADDREF_P(desc_or_throwable);
+			zend_throw_exception_object(desc_or_throwable);
 		} else {
-			zend_string *str = zval_get_string(description);
+			zend_string *str = zval_get_string(desc_or_throwable);
 			zend_throw_exception(assertion_error_ce, ZSTR_VAL(str), E_ERROR);
 			zend_string_release_ex(str, 0);
 		}
 	} else if (ASSERTG(warning)) {
-		if (!description) {
+		if (!desc_or_throwable) {
 			php_error_docref(NULL, E_WARNING, "Assertion failed");
 		} else {
-			zend_string *str = zval_get_string(description);
+			zend_string *str = zval_get_string(desc_or_throwable);
 			php_error_docref(NULL, E_WARNING, "%s failed", ZSTR_VAL(str));
 			zend_string_release_ex(str, 0);
 		}
