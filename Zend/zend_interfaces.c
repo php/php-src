@@ -36,6 +36,7 @@ ZEND_API zval* zend_call_method(zend_object *object, zend_class_entry *obj_ce, z
 {
 	int result;
 	zend_fcall_info fci;
+	zend_fcall_info_cache fcic;
 	zval retval;
 	zval params[2];
 
@@ -52,58 +53,49 @@ ZEND_API zval* zend_call_method(zend_object *object, zend_class_entry *obj_ce, z
 	fci.param_count = param_count;
 	fci.params = params;
 	fci.no_separation = 1;
+	ZVAL_UNDEF(&fci.function_name); /* Unused */
 
-	if (!fn_proxy && !obj_ce) {
-		/* no interest in caching and no information already present that is
-		 * needed later inside zend_call_function. */
-		ZVAL_STRINGL(&fci.function_name, function_name, function_name_len);
-		result = zend_call_function(&fci, NULL);
-		zval_ptr_dtor(&fci.function_name);
-	} else {
-		zend_fcall_info_cache fcic;
-		ZVAL_UNDEF(&fci.function_name); /* Unused */
-
-		if (!obj_ce) {
-			obj_ce = object ? object->ce : NULL;
-		}
-		if (!fn_proxy || !*fn_proxy) {
-			if (EXPECTED(obj_ce)) {
-				fcic.function_handler = zend_hash_str_find_ptr(
-					&obj_ce->function_table, function_name, function_name_len);
-				if (UNEXPECTED(fcic.function_handler == NULL)) {
-					/* error at c-level */
-					zend_error_noreturn(E_CORE_ERROR, "Couldn't find implementation for method %s::%s", ZSTR_VAL(obj_ce->name), function_name);
-				}
-			} else {
-				fcic.function_handler = zend_fetch_function_str(function_name, function_name_len);
-				if (UNEXPECTED(fcic.function_handler == NULL)) {
-					/* error at c-level */
-					zend_error_noreturn(E_CORE_ERROR, "Couldn't find implementation for function %s", function_name);
-				}
-			}
-			if (fn_proxy) {
-				*fn_proxy = fcic.function_handler;
-			}
-		} else {
-			fcic.function_handler = *fn_proxy;
-		}
-
-		if (object) {
-			fcic.called_scope = object->ce;
-		} else {
-			zend_class_entry *called_scope = zend_get_called_scope(EG(current_execute_data));
-
-			if (obj_ce &&
-			    (!called_scope ||
-			     !instanceof_function(called_scope, obj_ce))) {
-				fcic.called_scope = obj_ce;
-			} else {
-				fcic.called_scope = called_scope;
-			}
-		}
-		fcic.object = object;
-		result = zend_call_function(&fci, &fcic);
+	if (!obj_ce) {
+		obj_ce = object ? object->ce : NULL;
 	}
+	if (!fn_proxy || !*fn_proxy) {
+		if (EXPECTED(obj_ce)) {
+			fcic.function_handler = zend_hash_str_find_ptr(
+				&obj_ce->function_table, function_name, function_name_len);
+			if (UNEXPECTED(fcic.function_handler == NULL)) {
+				/* error at c-level */
+				zend_error_noreturn(E_CORE_ERROR, "Couldn't find implementation for method %s::%s", ZSTR_VAL(obj_ce->name), function_name);
+			}
+		} else {
+			fcic.function_handler = zend_fetch_function_str(function_name, function_name_len);
+			if (UNEXPECTED(fcic.function_handler == NULL)) {
+				/* error at c-level */
+				zend_error_noreturn(E_CORE_ERROR, "Couldn't find implementation for function %s", function_name);
+			}
+		}
+		if (fn_proxy) {
+			*fn_proxy = fcic.function_handler;
+		}
+	} else {
+		fcic.function_handler = *fn_proxy;
+	}
+
+	if (object) {
+		fcic.called_scope = object->ce;
+	} else {
+		zend_class_entry *called_scope = zend_get_called_scope(EG(current_execute_data));
+
+		if (obj_ce &&
+			(!called_scope ||
+			 !instanceof_function(called_scope, obj_ce))) {
+			fcic.called_scope = obj_ce;
+		} else {
+			fcic.called_scope = called_scope;
+		}
+	}
+	fcic.object = object;
+	result = zend_call_function(&fci, &fcic);
+
 	if (result == FAILURE) {
 		/* error at c-level */
 		if (!obj_ce) {
