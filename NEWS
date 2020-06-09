@@ -6,6 +6,7 @@ PHP                                                                        NEWS
   . Fixed bug #79650 (php-win.exe 100% cpu lockup). (cmb)
   . Fixed bug #79668 (get_defined_functions(true) may miss functions). (cmb,
     Nikita)
+  . Fixed possibly unsupported timercmp() usage. (cmb)
 
 - Filter:
   . Fixed bug #73527 (Invalid memory access in php_filter_strip). (cmb)
