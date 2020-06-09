@@ -17,7 +17,7 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #74267 (segfault with streams and invalid data). (cmb)
 
-?? ??? ????, PHP 7.3.19
+11 Jun 2020, PHP 7.3.19
 
 - Core:
   . Fixed bug #79566 (Private SHM is not private on Windows). (cmb)
