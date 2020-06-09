@@ -176,7 +176,6 @@ struct _zend_executor_globals {
 	uint32_t persistent_classes_count;
 
 	HashTable *in_autoload;
-	zend_function *autoload_func;
 	zend_bool full_tables_cleanup;
 
 	/* for extended information support */

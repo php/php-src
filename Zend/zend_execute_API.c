@@ -44,6 +44,7 @@
 
 ZEND_API void (*zend_execute_ex)(zend_execute_data *execute_data);
 ZEND_API void (*zend_execute_internal)(zend_execute_data *execute_data, zval *return_value);
+ZEND_API zend_class_entry *(*zend_autoload)(zend_string *name, zend_string *lc_name);
 
 /* true globals */
 ZEND_API const zend_fcall_info empty_fcall_info = {0};
@@ -140,7 +141,6 @@ void init_executor(void) /* {{{ */
 	EG(class_table) = CG(class_table);
 
 	EG(in_autoload) = NULL;
-	EG(autoload_func) = NULL;
 	EG(error_handling) = EH_NORMAL;
 	EG(flags) = EG_FLAGS_INITIAL;
 
@@ -913,11 +913,9 @@ ZEND_API void zend_call_known_instance_method_with_2_params(
 ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *key, uint32_t flags) /* {{{ */
 {
 	zend_class_entry *ce = NULL;
-	zval args[1], *zv;
-	zval local_retval;
+	zval *zv;
 	zend_string *lc_name;
-	zend_fcall_info fcall_info;
-	zend_fcall_info_cache fcall_cache;
+	zend_string *autoload_name;
 
 	if (key) {
 		lc_name = key;
@@ -952,9 +950,7 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 		return ce;
 	}
 
-	/* The compiler is not-reentrant. Make sure we __autoload() only during run-time
-	 * (doesn't impact functionality of __autoload()
-	*/
+	/* The compiler is not-reentrant. Make sure we autoload only during run-time. */
 	if ((flags & ZEND_FETCH_CLASS_NO_AUTOLOAD) || zend_is_compiling()) {
 		if (!key) {
 			zend_string_release_ex(lc_name, 0);
@@ -962,15 +958,14 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 		return NULL;
 	}
 
-	if (!EG(autoload_func)) {
+	if (!zend_autoload) {
 		if (!key) {
 			zend_string_release_ex(lc_name, 0);
 		}
 		return NULL;
-
 	}
 
-	/* Verify class name before passing it to __autoload() */
+	/* Verify class name before passing it to the autoloader. */
 	if (!key && strspn(ZSTR_VAL(name), "0123456789_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\200\201\202\203\204\205\206\207\210\211\212\213\214\215\216\217\220\221\222\223\224\225\226\227\230\231\232\233\234\235\236\237\240\241\242\243\244\245\246\247\250\251\252\253\254\255\256\257\260\261\262\263\264\265\266\267\270\271\272\273\274\275\276\277\300\301\302\303\304\305\306\307\310\311\312\313\314\315\316\317\320\321\322\323\324\325\326\327\330\331\332\333\334\335\336\337\340\341\342\343\344\345\346\347\350\351\352\353\354\355\356\357\360\361\362\363\364\365\366\367\370\371\372\373\374\375\376\377\\") != ZSTR_LEN(name)) {
 		zend_string_release_ex(lc_name, 0);
 		return NULL;
@@ -988,38 +983,18 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 		return NULL;
 	}
 
-	ZVAL_UNDEF(&local_retval);
-
 	if (ZSTR_VAL(name)[0] == '\\') {
-		ZVAL_STRINGL(&args[0], ZSTR_VAL(name) + 1, ZSTR_LEN(name) - 1);
+		autoload_name = zend_string_init(ZSTR_VAL(name) + 1, ZSTR_LEN(name) - 1, 0);
 	} else {
-		ZVAL_STR_COPY(&args[0], name);
+		autoload_name = zend_string_copy(name);
 	}
-
-	fcall_info.size = sizeof(fcall_info);
-	ZVAL_STR_COPY(&fcall_info.function_name, EG(autoload_func)->common.function_name);
-	fcall_info.retval = &local_retval;
-	fcall_info.param_count = 1;
-	fcall_info.params = args;
-	fcall_info.object = NULL;
-	fcall_info.no_separation = 1;
-
-	fcall_cache.function_handler = EG(autoload_func);
-	fcall_cache.called_scope = NULL;
-	fcall_cache.object = NULL;
 
 	zend_exception_save();
-	if ((zend_call_function(&fcall_info, &fcall_cache) == SUCCESS) && !EG(exception)) {
-		ce = zend_hash_find_ptr(EG(class_table), lc_name);
-	}
+	ce = zend_autoload(autoload_name, lc_name);
 	zend_exception_restore();
 
-	zval_ptr_dtor(&args[0]);
-	zval_ptr_dtor_str(&fcall_info.function_name);
-
+	zend_string_release_ex(autoload_name, 0);
 	zend_hash_del(EG(in_autoload), lc_name);
-
-	zval_ptr_dtor(&local_retval);
 
 	if (!key) {
 		zend_string_release_ex(lc_name, 0);
