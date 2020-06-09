@@ -279,7 +279,7 @@ static int zend_jit_trace_may_exit(const zend_op_array *op_array, const zend_op 
 		case ZEND_FE_FETCH_RW:
 		case ZEND_SWITCH_LONG:
 		case ZEND_SWITCH_STRING:
-			/* branch opcdoes */
+			/* branch opcodes */
 			return 1;
 		case ZEND_NEW:
 			if (opline->extended_value == 0 && (opline+1)->opcode == ZEND_DO_FCALL) {
@@ -305,7 +305,7 @@ static int zend_jit_trace_may_exit(const zend_op_array *op_array, const zend_op 
 		case ZEND_DO_UCALL:
 		case ZEND_DO_FCALL_BY_NAME:
 			/* monomorphic call */
-			// TODO: recompilation may change traget ???
+			// TODO: recompilation may change target ???
 			return 0;
 #endif
 		case ZEND_RETURN_BY_REF:
@@ -4023,7 +4023,7 @@ done:
 			call = frame->call;
 			assert(call && &call->func->op_array == p->op_array);
 
-			/* Check if SEND_UNPACK/SEND_ARRAY may cause enter at diffrent opline */
+			/* Check if SEND_UNPACK/SEND_ARRAY may cause enter at different opline */
 			if ((opline->opcode == ZEND_DO_UCALL
 			  || opline->opcode == ZEND_DO_FCALL_BY_NAME
 			  || opline->opcode == ZEND_DO_FCALL)
@@ -4146,7 +4146,7 @@ done:
 					if (JIT_G(opt_level) >= ZEND_JIT_LEVEL_INLINE) {
 						i = 0;
 						while (i < p->op_array->num_args) {
-							/* Types of arguments are going to be stored in abstract stack when proseccin SEV onstruction */
+							/* Types of arguments are going to be stored in abstract stack when processing SEV instruction */
 							SET_STACK_TYPE(call->stack, i, IS_UNKNOWN);
 							i++;
 						}
