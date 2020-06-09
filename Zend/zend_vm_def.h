@@ -4005,6 +4005,37 @@ ZEND_VM_C_LABEL(fcall_by_name_end):
 	ZEND_VM_CONTINUE();
 }
 
+ZEND_VM_HANDLER(195, ZEND_DO_PARTIAL_FCALL, ANY, ANY, SPEC(RETVAL))
+{
+	// Unclear if this is needed.
+	USE_OPLINE
+
+	// Extract type information from the function.
+	USE_OPLINE
+	zend_execute_data *call = EX(call);
+	zend_function *fbc = call->func;
+	zval *ret;
+
+	SAVE_OPLINE();
+	EX(call) = call->prev_execute_data;
+
+	// Build a list of opcodes for "call the function"
+	// with some literal values and some parameters.
+
+
+	// Create a closure out of the information gathered above.
+	zend_create_closure(EX_VAR(opline->result.var), func, EX(func)->op_array.scope, called_scope, object);
+
+	ZEND_VM_NEXT_OPCODE();
+
+/*
+	USE_OPLINE
+
+	ZEND_VM_SET_OPCODE(opline + 1);
+	ZEND_VM_CONTINUE();
+*/
+}
+
 ZEND_VM_HOT_HANDLER(60, ZEND_DO_FCALL, ANY, ANY, SPEC(RETVAL))
 {
 	USE_OPLINE
