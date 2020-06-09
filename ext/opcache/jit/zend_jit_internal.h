@@ -207,6 +207,7 @@ typedef enum _zend_jit_trace_stop {
 #define ZEND_JIT_EXIT_BLACKLISTED   (1<<1)
 #define ZEND_JIT_EXIT_TO_VM         (1<<2) /* exit to VM without attempt to create a side trace */
 #define ZEND_JIT_EXIT_RESTORE_CALL  (1<<3) /* deoptimizer should restore EX(call) chain */
+#define ZEND_JIT_EXIT_POLYMORPHISM  (1<<4) /* exit becaus of polymorphic call */
 
 typedef union _zend_op_trace_info {
 	zend_op dummy; /* the size of this structure must be the same as zend_op */
@@ -346,6 +347,7 @@ typedef struct _zend_jit_trace_info {
 	uint32_t                  exit_counters; /* offset in exit counters array */
 	uint32_t                  stack_map_size;
 	uint32_t                  flags;         /* See ZEND_JIT_TRACE_... defines above */
+	uint32_t                  polymorphism;  /* Counter of polymorphic calls */
 	const zend_op            *opline;        /* first opline */
 	const void               *code_start;    /* address of native code */
 	zend_jit_trace_exit_info *exit_info;     /* info about side exits */
@@ -433,7 +435,7 @@ ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_loop_trace_helper(ZEND_OPCODE_HAN
 
 int ZEND_FASTCALL zend_jit_trace_hot_root(zend_execute_data *execute_data, const zend_op *opline);
 int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf *regs);
-zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *execute_data, const zend_op *opline, zend_jit_trace_rec *trace_buffer, uint8_t start);
+zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *execute_data, const zend_op *opline, zend_jit_trace_rec *trace_buffer, uint8_t start, zend_bool is_megamorphc);
 
 static zend_always_inline const zend_op* zend_jit_trace_get_exit_opline(zend_jit_trace_rec *trace, const zend_op *opline, zend_bool *exit_if_true)
 {
@@ -454,6 +456,27 @@ static zend_always_inline const zend_op* zend_jit_trace_get_exit_opline(zend_jit
 	}
 	*exit_if_true = 0;
 	return NULL;
+}
+
+static zend_always_inline zend_bool zend_jit_may_be_polymorphic_call(const zend_op *opline)
+{
+	if (opline->opcode == ZEND_INIT_FCALL
+	 || opline->opcode == ZEND_INIT_FCALL_BY_NAME
+	 || opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME) {
+		return 0;
+	} else if (opline->opcode == ZEND_INIT_METHOD_CALL
+     || opline->opcode == ZEND_INIT_DYNAMIC_CALL) {
+		return 1;
+	} else if (opline->opcode == ZEND_INIT_STATIC_METHOD_CALL) {
+		return (opline->op1_type != IS_CONST || opline->op2_type != IS_CONST);
+	} else if (opline->opcode == ZEND_INIT_USER_CALL) {
+		return (opline->op2_type != IS_CONST);
+	} else if (opline->opcode == ZEND_NEW) {
+		return (opline->op1_type != IS_CONST);
+	} else {
+		ZEND_ASSERT(0);
+		return 0;
+	}
 }
 
 #endif /* ZEND_JIT_INTERNAL_H */

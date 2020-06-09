@@ -4177,6 +4177,11 @@ done:
 							}
 							call_info = call_info->next_callee;
 						}
+						if (!skip_guard
+						 && !zend_jit_may_be_polymorphic_call(init_opline)) {
+							// TODO: recompilation may change target ???
+							skip_guard = 1;
+						}
 					}
 					if (!skip_guard && !zend_jit_init_fcall_guard(&dasm_state, NULL, p->func, trace_buffer[1].opline)) {
 						goto jit_failure;
@@ -4422,6 +4427,7 @@ static zend_jit_trace_stop zend_jit_compile_root_trace(zend_jit_trace_rec *trace
 		t->child_count = 0;
 		t->stack_map_size = 0;
 		t->flags = 0;
+		t->polymorphism = 0;
 		t->opline = trace_buffer[1].opline;
 		t->exit_info = exit_info;
 		t->stack_map = NULL;
@@ -4770,6 +4776,9 @@ static void zend_jit_dump_exit_info(zend_jit_trace_info *t)
 		if (t->exit_info[i].flags & ZEND_JIT_EXIT_RESTORE_CALL) {
 			fprintf(stderr, "/CALL");
 		}
+		if (t->exit_info[i].flags & ZEND_JIT_EXIT_POLYMORPHISM) {
+			fprintf(stderr, "/POLY");
+		}
 		for (j = 0; j < stack_size; j++) {
 			zend_uchar type = STACK_TYPE(stack, j);
 			if (type != IS_UNKNOWN) {
@@ -4839,7 +4848,7 @@ repeat:
 	}
 
 	stop = zend_jit_trace_execute(execute_data, opline, trace_buffer,
-		ZEND_OP_TRACE_INFO(opline, offset)->trace_flags & ZEND_JIT_TRACE_START_MASK);
+		ZEND_OP_TRACE_INFO(opline, offset)->trace_flags & ZEND_JIT_TRACE_START_MASK, 0);
 
 	if (UNEXPECTED(JIT_G(debug) & ZEND_JIT_DEBUG_TRACE_BYTECODE)) {
 		zend_jit_dump_trace(trace_buffer, NULL);
@@ -4957,7 +4966,7 @@ static zend_bool zend_jit_trace_exit_is_hot(uint32_t trace_num, uint32_t exit_nu
 	return 0;
 }
 
-static zend_jit_trace_stop zend_jit_compile_side_trace(zend_jit_trace_rec *trace_buffer, uint32_t parent_num, uint32_t exit_num)
+static zend_jit_trace_stop zend_jit_compile_side_trace(zend_jit_trace_rec *trace_buffer, uint32_t parent_num, uint32_t exit_num, uint32_t polymorphism)
 {
 	zend_jit_trace_stop ret;
 	const void *handler;
@@ -4987,6 +4996,7 @@ static zend_jit_trace_stop zend_jit_compile_side_trace(zend_jit_trace_rec *trace
 		t->child_count = 0;
 		t->stack_map_size = 0;
 		t->flags = 0;
+		t->polymorphism = polymorphism;
 		t->opline = NULL;
 		t->exit_info = exit_info;
 		t->stack_map = NULL;
@@ -5078,6 +5088,8 @@ int ZEND_FASTCALL zend_jit_trace_hot_side(zend_execute_data *execute_data, uint3
 	int ret = 0;
 	uint32_t trace_num;
 	zend_jit_trace_rec trace_buffer[ZEND_JIT_TRACE_MAX_LENGTH];
+	zend_bool is_megamorphic = 0;
+	uint32_t polymorphism = 0;
 
 	trace_num = ZEND_JIT_TRACE_NUM;
 
@@ -5105,7 +5117,19 @@ int ZEND_FASTCALL zend_jit_trace_hot_side(zend_execute_data *execute_data, uint3
 		goto abort;
 	}
 
-	stop = zend_jit_trace_execute(execute_data, EX(opline), trace_buffer, ZEND_JIT_TRACE_START_SIDE);
+	if (EX(call)
+	 && JIT_G(max_polymorphic_calls) > 0
+	 && (zend_jit_traces[parent_num].exit_info[exit_num].flags & ZEND_JIT_EXIT_POLYMORPHISM)) {
+		if (zend_jit_traces[parent_num].polymorphism >= JIT_G(max_polymorphic_calls) - 1) {
+			is_megamorphic = 1;
+		} else if (!zend_jit_traces[parent_num].polymorphism) {
+			polymorphism = 1;
+		} else if (exit_num == 0) {
+			polymorphism = zend_jit_traces[parent_num].polymorphism + 1;
+		}
+	}
+
+	stop = zend_jit_trace_execute(execute_data, EX(opline), trace_buffer, ZEND_JIT_TRACE_START_SIDE, is_megamorphic);
 
 	if (UNEXPECTED(JIT_G(debug) & ZEND_JIT_DEBUG_TRACE_BYTECODE)) {
 		zend_jit_dump_trace(trace_buffer, NULL);
@@ -5129,7 +5153,7 @@ int ZEND_FASTCALL zend_jit_trace_hot_side(zend_execute_data *execute_data, uint3
 			}
 		}
 		if (EXPECTED(stop != ZEND_JIT_TRACE_STOP_LOOP)) {
-			stop = zend_jit_compile_side_trace(trace_buffer, parent_num, exit_num);
+			stop = zend_jit_compile_side_trace(trace_buffer, parent_num, exit_num, polymorphism);
 		} else {
 			const zend_op_array *op_array = trace_buffer[0].op_array;
 			zend_jit_op_array_trace_extension *jit_extension =

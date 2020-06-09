@@ -8009,7 +8009,7 @@ static int zend_jit_init_fcall_guard(dasm_State **Dst, const zend_op *opline, co
 		return 0;
 	}
 
-	exit_point = zend_jit_trace_get_exit_point(opline, to_opline, NULL, 0);
+	exit_point = zend_jit_trace_get_exit_point(opline, to_opline, NULL, ZEND_JIT_EXIT_POLYMORPHISM);
 	exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 	if (!exit_addr) {
 		return 0;
