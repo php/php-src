@@ -29,6 +29,11 @@ for (; $iter->valid(); $iter->next()) {
     echo "$i: ", $date->format('Y-m-d'), "\n";
 }
 
+echo "\n";
+foreach (new IteratorIterator($period) as $i => $date) {
+    echo "$i: ", $date->format('Y-m-d'), "\n";
+}
+
 // Extension that does not overwrite getIterator().
 class MyDatePeriod1 extends DatePeriod {
 }
@@ -54,6 +59,10 @@ foreach ($period as $i => $notDate) {
 
 ?>
 --EXPECT--
+0: 2012-07-01
+1: 2012-07-08
+2: 2012-07-15
+
 0: 2012-07-01
 1: 2012-07-08
 2: 2012-07-15
