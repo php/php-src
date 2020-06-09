@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.4.7
+11 Jun 2020, PHP 7.4.7
 
 - Core:
   . Fixed bug #79599 (coredump in set_error_handler). (Laruence)
