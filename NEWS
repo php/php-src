@@ -10,6 +10,10 @@ PHP                                                                        NEWS
 - Filter:
   . Fixed bug #73527 (Invalid memory access in php_filter_strip). (cmb)
 
+- OpenSSL:
+  . Fixed bug #62890 (default_socket_timeout=-1 causes connection to timeout).
+    (cmb)
+
 - PDO SQLite:
   . Fixed bug #79664 (PDOStatement::getColumnMeta fails on empty result set).
     (cmb)
