@@ -4311,6 +4311,8 @@ static zend_always_inline zend_execute_data *_zend_vm_stack_push_call_frame(uint
 
 #ifdef ZEND_VM_TRACE_HANDLERS
 # include "zend_vm_trace_handlers.h"
+#elif defined(ZEND_VM_TRACE_LINES)
+# include "zend_vm_trace_lines.h"
 #elif defined(ZEND_VM_TRACE_MAP)
 # include "zend_vm_trace_map.h"
 #endif
