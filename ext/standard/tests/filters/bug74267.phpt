@@ -20,7 +20,7 @@ fclose($stream);
 echo "done\n";
 ?>
 --EXPECTF--
-Warning: fwrite(): stream filter (convert.quoted-printable-decode): invalid byte sequence in %s on line %d
+Warning: fwrite(): Stream filter (convert.quoted-printable-decode): invalid byte sequence in %s on line %d
 
-Warning: fwrite(): stream filter (convert.quoted-printable-decode): invalid byte sequence in %s on line %d
+Warning: fwrite(): Stream filter (convert.quoted-printable-decode): invalid byte sequence in %s on line %d
 done
