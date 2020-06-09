@@ -739,9 +739,8 @@ PHP_FUNCTION(spl_autoload_functions)
 	fptr = spl_autoload_call_fn;
 
 	if (EG(autoload_func) == fptr) {
-		zend_string *key;
 		array_init(return_value);
-		ZEND_HASH_FOREACH_STR_KEY_PTR(SPL_G(autoload_functions), key, alfi) {
+		ZEND_HASH_FOREACH_PTR(SPL_G(autoload_functions), alfi) {
 			if (!Z_ISUNDEF(alfi->closure)) {
 				Z_ADDREF(alfi->closure);
 				add_next_index_zval(return_value, &alfi->closure);
@@ -758,11 +757,7 @@ PHP_FUNCTION(spl_autoload_functions)
 				add_next_index_str(&tmp, zend_string_copy(alfi->func_ptr->common.function_name));
 				add_next_index_zval(return_value, &tmp);
 			} else {
-				if (strncmp(ZSTR_VAL(alfi->func_ptr->common.function_name), "__lambda_func", sizeof("__lambda_func") - 1)) {
-					add_next_index_str(return_value, zend_string_copy(alfi->func_ptr->common.function_name));
-				} else {
-					add_next_index_str(return_value, zend_string_copy(key));
-				}
+				add_next_index_str(return_value, zend_string_copy(alfi->func_ptr->common.function_name));
 			}
 		} ZEND_HASH_FOREACH_END();
 		return;
