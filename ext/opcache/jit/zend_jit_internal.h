@@ -142,7 +142,8 @@ int  ZEND_FASTCALL zend_jit_check_constant(const zval *key);
 	_(RECURSIVE_CALL,    "recursive call") \
 	_(RECURSIVE_RET,     "recursive return") \
 	_(RETURN,            "return") \
-	_(RETURN_HALT,        "return from interpreter") \
+	_(RETURN_HALT,       "return from interpreter") \
+	_(INTERPRETER,       "exit to VM interpreter") \
 	_(LINK,              "link to another trace") \
 	/* compilation and linking successful */ \
 	_(COMPILED,          "compiled") \
