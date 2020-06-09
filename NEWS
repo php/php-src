@@ -160,6 +160,10 @@ PHP                                                                        NEWS
 - SQLite3:
   . Added SQLite3::setAuthorizer() and respective class constants. (bohwaz)
 
+- SPL:
+  . Fixed bug #71236 (Second call of spl_autoload_register() does nothing if it
+    has no arguments). (Nikita)
+
 - Standard:
   . Implemented FR #78638 (__PHP_Incomplete_Class should be final). (Laruence)
   . Fixed bug #77204 (getimagesize(): Read error! should mention file path).

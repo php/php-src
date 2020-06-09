@@ -29,9 +29,7 @@ string(3) "Bar"
 
 Fatal error: Uncaught Exception: Bar in %s:%d
 Stack trace:
-#0 [internal function]: {closure}('Bar')
-#1 %s(%d): spl_autoload_call('Bar')
-#2 [internal function]: {closure}('Foo')
-#3 %s(%d): spl_autoload_call('Foo')
-#4 {main}
+#0 %s(%d): {closure}('Bar')
+#1 %s(%d): {closure}('Foo')
+#2 {main}
   thrown in %s on line %d
