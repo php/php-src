@@ -1796,7 +1796,10 @@ ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int ty
 		case IS_STRING:
 			ce = Z_OBJCE_P(readobj);
 			if (ce->__tostring) {
+				zend_class_entry *fake_scope = EG(fake_scope);
+				EG(fake_scope) = NULL;
 				zend_call_method_with_0_params(readobj, ce, &ce->__tostring, "__tostring", &retval);
+				EG(fake_scope) = fake_scope;
 				if (EXPECTED(Z_TYPE(retval) == IS_STRING)) {
 					ZVAL_COPY_VALUE(writeobj, &retval);
 					return SUCCESS;
