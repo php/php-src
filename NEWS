@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #64076 (imap_sort() does not return FALSE on failure). (cmb)
   . Fixed bug #80239 (imap_rfc822_write_address() leaks memory). (cmb)
 
+- Opcache:
+  . Fixed bug #79643 (PHP with Opcache crashes when a file with specific name
+    is included). (twosee)
+
 - OpenSSL:
   . Fixed bug #79983 (openssl_encrypt / openssl_decrypt fail with OCB mode).
     (Nikita)
