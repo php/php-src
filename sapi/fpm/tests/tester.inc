@@ -499,7 +499,7 @@ class Tester
         array $expectedFields,
         string $address = null,
         string $statusPath = '/status',
-        $formats = ['plain', 'html', 'xml', 'json']
+        $formats = ['plain', 'html', 'xml', 'json', 'openmetrics']
     ) {
         if (!is_array($formats)) {
             $formats = [$formats];
