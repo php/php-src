@@ -10,6 +10,7 @@ PHP                                                                        NEWS
   . Fixed bug #79657 ("yield from" hangs when invalid value encountered).
     (Nikita)
   . Fixed bug #79683 (Fake reflection scope affects __toString()). (Nikita)
+  . Fixed possibly unsupported timercmp() usage. (cmb)
 
 - Filter:
   . Fixed bug #73527 (Invalid memory access in php_filter_strip). (cmb)
