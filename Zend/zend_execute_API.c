@@ -646,6 +646,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 	zend_function *func;
 	uint32_t call_info;
 	void *object_or_called_scope;
+	zend_class_entry *orig_fake_scope;
 
 	ZVAL_UNDEF(fci->retval);
 
@@ -791,6 +792,8 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 		ZEND_ADD_CALL_FLAG(call, call_info);
 	}
 
+	orig_fake_scope = EG(fake_scope);
+	EG(fake_scope) = NULL;
 	if (func->type == ZEND_USER_FUNCTION) {
 		int call_via_handler = (func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) != 0;
 		const zend_op *current_opline_before_exception = EG(opline_before_exception);
@@ -841,6 +844,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 			}
 		}
 	}
+	EG(fake_scope) = orig_fake_scope;
 
 	zend_vm_stack_free_call_frame(call);
 
@@ -914,7 +918,6 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 	zend_string *lc_name;
 	zend_fcall_info fcall_info;
 	zend_fcall_info_cache fcall_cache;
-	zend_class_entry *orig_fake_scope;
 
 	if (key) {
 		lc_name = key;
@@ -1005,14 +1008,11 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 	fcall_cache.called_scope = NULL;
 	fcall_cache.object = NULL;
 
-	orig_fake_scope = EG(fake_scope);
-	EG(fake_scope) = NULL;
 	zend_exception_save();
 	if ((zend_call_function(&fcall_info, &fcall_cache) == SUCCESS) && !EG(exception)) {
 		ce = zend_hash_find_ptr(EG(class_table), lc_name);
 	}
 	zend_exception_restore();
-	EG(fake_scope) = orig_fake_scope;
 
 	zval_ptr_dtor(&args[0]);
 	zval_ptr_dtor_str(&fcall_info.function_name);

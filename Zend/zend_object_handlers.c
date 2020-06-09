@@ -177,58 +177,34 @@ ZEND_API HashTable *zend_std_get_debug_info(zend_object *object, int *is_temp) /
 
 static void zend_std_call_getter(zend_object *zobj, zend_string *prop_name, zval *retval) /* {{{ */
 {
-	zend_class_entry *orig_fake_scope = EG(fake_scope);
 	zval member;
-
-	EG(fake_scope) = NULL;
-
 	ZVAL_STR(&member, prop_name);
 	zend_call_known_instance_method_with_1_params(zobj->ce->__get, zobj, retval, &member);
-
-	EG(fake_scope) = orig_fake_scope;
 }
 /* }}} */
 
 static void zend_std_call_setter(zend_object *zobj, zend_string *prop_name, zval *value) /* {{{ */
 {
-	zend_class_entry *orig_fake_scope = EG(fake_scope);
 	zval args[2];
-
-	EG(fake_scope) = NULL;
-
 	ZVAL_STR(&args[0], prop_name);
 	ZVAL_COPY_VALUE(&args[1], value);
 	zend_call_known_instance_method(zobj->ce->__set, zobj, NULL, 2, args);
-
-	EG(fake_scope) = orig_fake_scope;
 }
 /* }}} */
 
 static void zend_std_call_unsetter(zend_object *zobj, zend_string *prop_name) /* {{{ */
 {
-	zend_class_entry *orig_fake_scope = EG(fake_scope);
 	zval member;
-
-	EG(fake_scope) = NULL;
-
 	ZVAL_STR(&member, prop_name);
 	zend_call_known_instance_method_with_1_params(zobj->ce->__unset, zobj, NULL, &member);
-
-	EG(fake_scope) = orig_fake_scope;
 }
 /* }}} */
 
 static void zend_std_call_issetter(zend_object *zobj, zend_string *prop_name, zval *retval) /* {{{ */
 {
-	zend_class_entry *orig_fake_scope = EG(fake_scope);
 	zval member;
-
-	EG(fake_scope) = NULL;
-
 	ZVAL_STR(&member, prop_name);
 	zend_call_known_instance_method_with_1_params(zobj->ce->__isset, zobj, retval, &member);
-
-	EG(fake_scope) = orig_fake_scope;
 }
 /* }}} */
 
@@ -1711,12 +1687,9 @@ ZEND_API int zend_std_cast_object_tostring(zend_object *readobj, zval *writeobj,
 			zend_class_entry *ce = readobj->ce;
 			if (ce->__tostring) {
 				zval retval;
-				zend_class_entry *fake_scope = EG(fake_scope);
-				EG(fake_scope) = NULL;
 				GC_ADDREF(readobj);
 				zend_call_known_instance_method_with_0_params(ce->__tostring, readobj, &retval);
 				zend_object_release(readobj);
-				EG(fake_scope) = fake_scope;
 				if (EXPECTED(Z_TYPE(retval) == IS_STRING)) {
 					ZVAL_COPY_VALUE(writeobj, &retval);
 					return SUCCESS;

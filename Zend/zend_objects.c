@@ -97,7 +97,6 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 
 	if (destructor) {
 		zend_object *old_exception;
-		zend_class_entry *orig_fake_scope;
 
 		if (destructor->op_array.fn_flags & (ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED)) {
 			if (destructor->op_array.fn_flags & ZEND_ACC_PRIVATE) {
@@ -156,8 +155,6 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 				EG(exception) = NULL;
 			}
 		}
-		orig_fake_scope = EG(fake_scope);
-		EG(fake_scope) = NULL;
 
 		zend_call_known_instance_method_with_0_params(destructor, object, NULL);
 
@@ -169,7 +166,6 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 			}
 		}
 		OBJ_RELEASE(object);
-		EG(fake_scope) = orig_fake_scope;
 	}
 }
 
