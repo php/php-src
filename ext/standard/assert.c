@@ -142,16 +142,17 @@ PHP_FUNCTION(assert)
 	/* `desc_or_throwable` may either be a description string which will be used in
 	 * the message for a failed assertion, or a `Throwable` object which will be
 	 * thrown if the assertion fails */
-	zval *assertion, *desc_or_throwable = NULL;
+	zval *assertion, *desc_or_throwable = NULL, *assertion_str = NULL;
 
 	if (! ASSERTG(active)) {
 		RETURN_TRUE;
 	}
 
-	ZEND_PARSE_PARAMETERS_START(1, 2)
+	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_ZVAL(assertion)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ZVAL(desc_or_throwable)
+		Z_PARAM_ZVAL(assertion_str) /* inserted into call by `zend_compile_assert` */
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (zend_is_true(assertion)) {
@@ -170,7 +171,11 @@ PHP_FUNCTION(assert)
 
 		ZVAL_STRING(&args[0], SAFE_STRING(filename));
 		ZVAL_LONG(&args[1], lineno);
-		ZVAL_NULL(&args[2]);
+		if (assertion_str) {
+			ZVAL_STR(&args[2], zval_get_string(assertion_str));
+		} else {
+			ZVAL_NULL(&args[2]);
+		}
 
 		ZVAL_FALSE(&retval);
 
@@ -182,7 +187,8 @@ PHP_FUNCTION(assert)
 			call_user_function(NULL, NULL, &ASSERTG(callback), &retval, 4, args);
 			zval_ptr_dtor(&(args[3]));
 		}
-		zval_ptr_dtor(&(args[0]));
+		zval_ptr_dtor(&args[0]);
+		zval_ptr_dtor(&args[2]);
 		zval_ptr_dtor(&retval);
 	}
 

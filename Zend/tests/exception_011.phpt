@@ -15,6 +15,6 @@ Content-type: text/html; charset=UTF-8
 --EXPECTF--
 Fatal error: Uncaught AssertionError: assert(false) in %sexception_011.php:%d
 Stack trace:
-#0 %sexception_011.php(%d): assert(false, 'assert(false)')
+#0 %sexception_011.php(%d): assert(false, 'assert(false)', 'false')
 #1 {main}
   thrown in %sexception_011.php on line %d

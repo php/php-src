@@ -24,7 +24,7 @@ new Two();
 --EXPECTF--
 Fatal error: Uncaught AssertionError: [Message]: MyExpectations in %sexpect_011.php:%d
 Stack trace:
-#0 %sexpect_011.php(%d): assert(false, '[Message]: MyEx...')
+#0 %sexpect_011.php(%d): assert(false, '[Message]: MyEx...', 'false')
 #1 %sexpect_011.php(%d): One->__construct()
 #2 {main}
   thrown in %sexpect_011.php on line %d

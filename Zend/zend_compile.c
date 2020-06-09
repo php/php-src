@@ -3710,6 +3710,12 @@ static void zend_compile_assert(znode *result, zend_ast_list *args, zend_string 
 				zend_ast_create_zval_from_str(
 					zend_ast_export("assert(", args->child[0], ")")));
 		}
+		if (args->children == 2) {
+			/* may be used as the 3rd argument to an assert callback if one is set */
+			zend_ast_list_add((zend_ast*)args,
+				zend_ast_create_zval_from_str(
+					zend_ast_export("", args->child[0], "")));
+		}
 
 		zend_compile_call_common(result, (zend_ast*)args, fbc);
 

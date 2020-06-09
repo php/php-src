@@ -19,7 +19,7 @@ new Two();
 --EXPECTF--
 Fatal error: Uncaught AssertionError: assert(false) in %sexpect_009.php:%d
 Stack trace:
-#0 %sexpect_009.php(%d): assert(false, 'assert(false)')
+#0 %sexpect_009.php(%d): assert(false, 'assert(false)', 'false')
 #1 %sexpect_009.php(%d): Two->__construct()
 #2 {main}
   thrown in %sexpect_009.php on line %d
