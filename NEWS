@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-28 May 2020, PHP 7.3.19RC1
+11 Jun 2020, PHP 7.3.19
 
 - Core:
   . Fixed bug #79566 (Private SHM is not private on Windows). (cmb)
