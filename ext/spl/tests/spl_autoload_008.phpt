@@ -42,18 +42,23 @@ foreach($funcs as $idx => $func)
 {
     echo "====$idx====\n";
 
-    try
-    {
-        var_dump($func);
+    var_dump($func);
+    try {
         spl_autoload_register($func);
-        if (count(spl_autoload_functions()))
-        {
-            echo "registered\n";
-
-            var_dump(class_exists("NoExistingTestClass", true));
-        }
-    } catch(\TypeError|\Exception $e) {
+    } catch (TypeError $e) {
         echo get_class($e) . ': ' . $e->getMessage() . \PHP_EOL;
+        var_dump(count(spl_autoload_functions()));
+        continue;
+    }
+
+    if (count(spl_autoload_functions())) {
+        echo "registered\n";
+
+        try {
+            var_dump(class_exists("NoExistingTestClass", true));
+        } catch (Exception $e) {
+            echo get_class($e) . ': ' . $e->getMessage() . \PHP_EOL;
+        }
     }
 
     spl_autoload_unregister($func);

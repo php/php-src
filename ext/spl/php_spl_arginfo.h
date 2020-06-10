@@ -35,7 +35,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_spl_autoload_register, 0, 0, _IS
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_spl_autoload_unregister, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, autoload_function)
+	ZEND_ARG_TYPE_INFO(0, autoload_function, IS_CALLABLE, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_spl_classes arginfo_spl_autoload_functions

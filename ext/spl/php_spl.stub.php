@@ -18,7 +18,7 @@ function spl_autoload_functions(): array {}
 
 function spl_autoload_register(?callable $autoload_function = null, bool $throw = true, bool $prepend = false): bool {}
 
-function spl_autoload_unregister($autoload_function): bool {}
+function spl_autoload_unregister(callable $autoload_function): bool {}
 
 function spl_classes(): array {}
 

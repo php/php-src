@@ -163,6 +163,8 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed bug #71236 (Second call of spl_autoload_register() does nothing if it
     has no arguments). (Nikita)
+  . Fixed bug #65006 (spl_autoload_register fails with multiple callables using
+    self, same method). (Nikita)
 
 - Standard:
   . Implemented FR #78638 (__PHP_Incomplete_Class should be final). (Laruence)
