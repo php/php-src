@@ -4023,20 +4023,24 @@ done:
 			call = frame->call;
 			assert(call && &call->func->op_array == p->op_array);
 
-			/* Check if SEND_UNPACK/SEND_ARRAY may cause enter at different opline */
-			if ((opline->opcode == ZEND_DO_UCALL
-			  || opline->opcode == ZEND_DO_FCALL_BY_NAME
-			  || opline->opcode == ZEND_DO_FCALL)
-			 && opline > op_array->opcodes
-			 && ((opline-1)->opcode == ZEND_SEND_ARRAY
-			  || (opline-1)->opcode == ZEND_SEND_UNPACK)
-			 && p->op_array->num_args
-			 && (p->op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) == 0
-			 && ((p+1)->op == ZEND_JIT_TRACE_VM
-			  || (p+1)->op == ZEND_JIT_TRACE_END)
-			 && TRACE_FRAME_NUM_ARGS(call) < p->op_array->num_args
-			 && !zend_jit_trace_opline_guard(&dasm_state, (p+1)->opline)) {
-				goto jit_failure;
+			if (opline->opcode == ZEND_DO_UCALL
+			 || opline->opcode == ZEND_DO_FCALL_BY_NAME
+			 || opline->opcode == ZEND_DO_FCALL) {
+
+				frame->call_opline = opline;
+
+				/* Check if SEND_UNPACK/SEND_ARRAY may cause enter at different opline */
+				if (opline > op_array->opcodes
+				 && ((opline-1)->opcode == ZEND_SEND_ARRAY
+				  || (opline-1)->opcode == ZEND_SEND_UNPACK)
+				 && p->op_array->num_args
+				 && (p->op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) == 0
+				 && ((p+1)->op == ZEND_JIT_TRACE_VM
+				  || (p+1)->op == ZEND_JIT_TRACE_END)
+				 && TRACE_FRAME_NUM_ARGS(call) < p->op_array->num_args
+				 && !zend_jit_trace_opline_guard(&dasm_state, (p+1)->opline)) {
+					goto jit_failure;
+				}
 			}
 
 			if ((p+1)->op == ZEND_JIT_TRACE_END) {
@@ -4287,6 +4291,19 @@ done:
 			 || opline->opcode == ZEND_DO_FCALL
 			 || opline->opcode == ZEND_DO_FCALL_BY_NAME) {
 				zend_jit_trace_setup_ret_counter(opline, jit_extension->offset);
+			}
+			if (JIT_G(current_frame)
+			 && JIT_G(current_frame)->prev) {
+				frame = JIT_G(current_frame)->prev;
+				do {
+					if (frame->call_opline) {
+						op_array = &frame->func->op_array;
+						jit_extension =
+							(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
+						zend_jit_trace_setup_ret_counter(frame->call_opline, jit_extension->offset);
+					}
+					frame = frame->prev;
+				} while (frame);
 			}
 		}
 	}
