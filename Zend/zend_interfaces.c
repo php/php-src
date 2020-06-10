@@ -73,12 +73,7 @@ ZEND_API zval* zend_call_method(zend_object *object, zend_class_entry *obj_ce, z
 	if (object) {
 		called_scope = object->ce;
 	} else {
-		called_scope = zend_get_called_scope(EG(current_execute_data));
-		if (obj_ce &&
-			(!called_scope ||
-			 !instanceof_function(called_scope, obj_ce))) {
-			called_scope = obj_ce;
-		}
+		called_scope = obj_ce;
 	}
 
 	zend_call_known_function(fn, object, called_scope, retval_ptr, param_count, params);
