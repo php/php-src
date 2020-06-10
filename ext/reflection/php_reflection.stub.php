@@ -298,6 +298,8 @@ class ReflectionClass implements Reflector
     /** @return bool */
     public function isTrait() {}
 
+    public function isEnum(): bool {}
+
     /** @return bool */
     public function isAbstract() {}
 
@@ -479,6 +481,8 @@ class ReflectionClassConstant implements Reflector
 
     /** @return ReflectionAttribute[] */
     public function getAttributes(?string $name = null, int $flags = 0): array {}
+
+    public function isEnumCase(): bool {}
 }
 
 class ReflectionParameter implements Reflector
@@ -682,4 +686,37 @@ final class ReflectionAttribute
     private function __clone(): void {}
 
     private function __construct() {}
+}
+
+final class ReflectionEnum extends ReflectionClass
+{
+    public function __construct(object|string $objectOrClass) {}
+
+    public function hasCase(string $name): bool {}
+
+    public function getCase(string $name): ReflectionEnumUnitCase {}
+
+    /** @return ReflectionEnumUnitCase[] */
+    public function getCases(): array {}
+
+    public function isBacked(): bool {}
+
+    public function getBackingType(): ReflectionType|null {}
+}
+
+class ReflectionEnumUnitCase extends ReflectionClassConstant
+{
+    public function __construct(object|string $class, string $constant) {}
+
+    public function getEnum(): ReflectionEnum {}
+
+    /** @implementation-alias ReflectionClassConstant::getValue */
+    public function getValue(): UnitEnum {}
+}
+
+final class ReflectionEnumBackedCase extends ReflectionEnumUnitCase
+{
+    public function __construct(object|string $class, string $constant) {}
+
+    public function getBackingValue(): int|string {}
 }

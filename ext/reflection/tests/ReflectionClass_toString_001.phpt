@@ -27,7 +27,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector, String
     Property [ public string $name ]
   }
 
-  - Methods [54] {
+  - Methods [55] {
     Method [ <internal:Reflection> final private method __clone ] {
 
       - Parameters [0] {
@@ -232,6 +232,13 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector, String
 
       - Parameters [0] {
       }
+    }
+
+    Method [ <internal:Reflection> public method isEnum ] {
+
+      - Parameters [0] {
+      }
+      - Return [ bool ]
     }
 
     Method [ <internal:Reflection> public method isAbstract ] {

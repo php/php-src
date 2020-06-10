@@ -1538,6 +1538,19 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	RETURN_TOKEN_WITH_IDENT(T_TRAIT);
 }
 
+/*
+ * The enum keyword must be followed by whitespace and another identifier.
+ * This avoids the BC break of using enum in classes, namespaces, functions and constants.
+ */
+<ST_IN_SCRIPTING>"enum"{WHITESPACE}("extends"|"implements") {
+	yyless(4);
+	RETURN_TOKEN_WITH_STR(T_STRING, 0);
+}
+<ST_IN_SCRIPTING>"enum"{WHITESPACE}[a-zA-Z_\x80-\xff] {
+	yyless(4);
+	RETURN_TOKEN_WITH_IDENT(T_ENUM);
+}
+
 <ST_IN_SCRIPTING>"extends" {
 	RETURN_TOKEN_WITH_IDENT(T_EXTENDS);
 }

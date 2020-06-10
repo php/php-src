@@ -26,6 +26,7 @@
 #include "zend_closures.h"
 #include "zend_generators.h"
 #include "zend_weakrefs.h"
+#include "zend_enum.h"
 
 ZEND_API void zend_register_default_classes(void)
 {
@@ -36,4 +37,5 @@ ZEND_API void zend_register_default_classes(void)
 	zend_register_generator_ce();
 	zend_register_weakref_ce();
 	zend_register_attribute_ce();
+	zend_register_enum_ce();
 }

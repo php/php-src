@@ -26,6 +26,7 @@
 #include "zend_smart_str.h"
 #include "zend_operators.h"
 #include "zend_exceptions.h"
+#include "zend_enum.h"
 
 ZEND_API zend_class_entry* (*zend_inheritance_cache_get)(zend_class_entry *ce, zend_class_entry *parent, zend_class_entry **traits_and_interfaces) = NULL;
 ZEND_API zend_class_entry* (*zend_inheritance_cache_add)(zend_class_entry *ce, zend_class_entry *proto, zend_class_entry *parent, zend_class_entry **traits_and_interfaces, HashTable *dependencies) = NULL;
@@ -2684,6 +2685,12 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 		}
 	}
 
+#ifndef ZEND_WIN32
+	if (ce->ce_flags & ZEND_ACC_ENUM) {
+		/* We will add internal methods. */
+		is_cacheable = false;
+	}
+#endif
 
 	if (ce->ce_flags & ZEND_ACC_IMMUTABLE) {
 		if (is_cacheable) {
@@ -2725,6 +2732,12 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 	orig_linking_class = CG(current_linking_class);
 	CG(current_linking_class) = is_cacheable ? ce : NULL;
 
+	if (ce->ce_flags & ZEND_ACC_ENUM) {
+		/* Only register builtin enum methods during inheritance to avoid persisting them in
+		 * opcache. */
+		zend_enum_register_funcs(ce);
+	}
+
 	if (parent) {
 		if (!(parent->ce_flags & ZEND_ACC_LINKED)) {
 			add_dependency_obligation(ce, parent);
@@ -2755,6 +2768,9 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 		&& (ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))
 	) {
 		zend_verify_abstract_class(ce);
+	}
+	if (ce->ce_flags & ZEND_ACC_ENUM) {
+		zend_verify_enum(ce);
 	}
 
 	zend_build_properties_info_table(ce);

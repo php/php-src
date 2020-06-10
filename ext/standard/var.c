@@ -26,6 +26,7 @@
 #include "zend_smart_str.h"
 #include "basic_functions.h"
 #include "php_incomplete_class.h"
+#include "zend_enum.h"
 /* }}} */
 
 struct php_serialize_data {
@@ -144,7 +145,14 @@ again:
 			}
 			PUTS("}\n");
 			break;
-		case IS_OBJECT:
+		case IS_OBJECT: {
+			zend_class_entry *ce = Z_OBJCE_P(struc);
+			if (ce->ce_flags & ZEND_ACC_ENUM) {
+				zval *case_name_zval = zend_enum_fetch_case_name(Z_OBJ_P(struc));
+				php_printf("%senum(%s::%s)\n", COMMON, ZSTR_VAL(ce->name), Z_STRVAL_P(case_name_zval));
+				return;
+			}
+
 			if (Z_IS_RECURSIVE_P(struc)) {
 				PUTS("*RECURSION*\n");
 				return;
@@ -183,6 +191,7 @@ again:
 			PUTS("}\n");
 			Z_UNPROTECT_RECURSION_P(struc);
 			break;
+		}
 		case IS_RESOURCE: {
 			const char *type_name = zend_rsrc_list_get_rsrc_type(Z_RES_P(struc));
 			php_printf("%sresource(%d) of type (%s)\n", COMMON, Z_RES_P(struc)->handle, type_name ? type_name : "Unknown");
@@ -568,27 +577,39 @@ again:
 				buffer_append_spaces(buf, level - 1);
 			}
 
+			zend_class_entry *ce = Z_OBJCE_P(struc);
+			bool is_enum = ce->ce_flags & ZEND_ACC_ENUM;
+
 			/* stdClass has no __set_state method, but can be casted to */
-			if (Z_OBJCE_P(struc) == zend_standard_class_def) {
+			if (ce == zend_standard_class_def) {
 				smart_str_appendl(buf, "(object) array(\n", 16);
 			} else {
-				smart_str_append(buf, Z_OBJCE_P(struc)->name);
-				smart_str_appendl(buf, "::__set_state(array(\n", 21);
+				smart_str_append(buf, ce->name);
+				if (is_enum) {
+					zend_object *zobj = Z_OBJ_P(struc);
+					zval *case_name_zval = zend_enum_fetch_case_name(zobj);
+					smart_str_appendl(buf, "::", 2);
+					smart_str_append(buf, Z_STR_P(case_name_zval));
+				} else {
+					smart_str_appendl(buf, "::__set_state(array(\n", 21);
+				}
 			}
 
-			if (myht) {
+			if (myht && !is_enum) {
 				ZEND_HASH_FOREACH_KEY_VAL_IND(myht, index, key, val) {
 					php_object_element_export(val, index, key, level, buf);
 				} ZEND_HASH_FOREACH_END();
 				GC_TRY_UNPROTECT_RECURSION(myht);
+			}
+			if (myht) {
 				zend_release_properties(myht);
 			}
-			if (level > 1) {
+			if (level > 1 && !is_enum) {
 				buffer_append_spaces(buf, level - 1);
 			}
-			if (Z_OBJCE_P(struc) == zend_standard_class_def) {
+			if (ce == zend_standard_class_def) {
 				smart_str_appendc(buf, ')');
-			} else {
+			} else if (!is_enum) {
 				smart_str_appendl(buf, "))", 2);
 			}
 
@@ -1047,6 +1068,23 @@ again:
 				zend_class_entry *ce = Z_OBJCE_P(struc);
 				bool incomplete_class;
 				uint32_t count;
+
+				if (ce->ce_flags & ZEND_ACC_ENUM) {
+					PHP_CLASS_ATTRIBUTES;
+
+					zval *case_name_zval = zend_enum_fetch_case_name(Z_OBJ_P(struc));
+
+					PHP_SET_CLASS_ATTRIBUTES(struc);
+					smart_str_appendl(buf, "E:", 2);
+					smart_str_append_unsigned(buf, ZSTR_LEN(class_name) + strlen(":") + Z_STRLEN_P(case_name_zval));
+					smart_str_appendl(buf, ":\"", 2);
+					smart_str_append(buf, class_name);
+					smart_str_appendc(buf, ':');
+					smart_str_append(buf, Z_STR_P(case_name_zval));
+					smart_str_appendl(buf, "\";", 2);
+					PHP_CLEANUP_CLASS_ATTRIBUTES();
+					return;
+				}
 
 				if (ce->__serialize) {
 					zval retval, obj;

@@ -1309,6 +1309,86 @@ object ":" uiv ":" ["]	{
 	return object_common(UNSERIALIZE_PASSTHRU, elements, has_unserialize);
 }
 
+"E:" uiv ":" ["] {
+	if (!var_hash) return 0;
+
+	size_t len = parse_uiv(start + 2);
+	size_t maxlen = max - YYCURSOR;
+	if (maxlen < len || len == 0) {
+		*p = start + 2;
+		return 0;
+	}
+
+	char *str = (char *) YYCURSOR;
+	YYCURSOR += len;
+
+	if (*(YYCURSOR) != '"') {
+		*p = YYCURSOR;
+		return 0;
+	}
+	if (*(YYCURSOR+1) != ';') {
+		*p = YYCURSOR+1;
+		return 0;
+	}
+
+	char *colon_ptr = memchr(str, ':', len);
+	if (colon_ptr == NULL) {
+		php_error_docref(NULL, E_WARNING, "Invalid enum name '%.*s' (missing colon)", (int) len, str);
+		return 0;
+	}
+	size_t colon_pos = colon_ptr - str;
+
+	zend_string *enum_name = zend_string_init(str, colon_pos, 0);
+	zend_string *case_name = zend_string_init(&str[colon_pos + 1], len - colon_pos - 1, 0);
+
+	if (!zend_is_valid_class_name(enum_name)) {
+		goto fail;
+	}
+
+	zend_class_entry *ce = zend_lookup_class(enum_name);
+	if (!ce) {
+		php_error_docref(NULL, E_WARNING, "Class '%s' not found", ZSTR_VAL(enum_name));
+		goto fail;
+	}
+	if (!(ce->ce_flags & ZEND_ACC_ENUM)) {
+		php_error_docref(NULL, E_WARNING, "Class '%s' is not an enum", ZSTR_VAL(enum_name));
+		goto fail;
+	}
+
+	YYCURSOR += 2;
+	*p = YYCURSOR;
+
+	zend_class_constant *c = zend_hash_find_ptr(CE_CONSTANTS_TABLE(ce), case_name);
+	if (!c) {
+		php_error_docref(NULL, E_WARNING, "Undefined constant %s::%s", ZSTR_VAL(enum_name), ZSTR_VAL(case_name));
+		goto fail;
+	}
+
+	if (!(Z_ACCESS_FLAGS(c->value) & ZEND_CLASS_CONST_IS_CASE)) {
+		php_error_docref(NULL, E_WARNING, "%s::%s is not an enum case", ZSTR_VAL(enum_name), ZSTR_VAL(case_name));
+		goto fail;
+	}
+
+	zend_string_release_ex(enum_name, 0);
+	zend_string_release_ex(case_name, 0);
+
+	zval *value = &c->value;
+	if (Z_TYPE_P(value) == IS_CONSTANT_AST) {
+		if (zval_update_constant_ex(value, c->ce) == FAILURE) {
+			return 0;
+		}
+	}
+	ZEND_ASSERT(Z_TYPE_P(value) == IS_OBJECT);
+	ZVAL_COPY(rval, value);
+
+	return 1;
+
+fail:
+	zend_string_release_ex(enum_name, 0);
+	zend_string_release_ex(case_name, 0);
+	return 0;
+}
+
 "}" {
 	/* this is the case where we have less data than planned */
 	php_error_docref(NULL, E_NOTICE, "Unexpected end of serialized data");

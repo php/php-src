@@ -326,6 +326,26 @@ uint32_t zend_accel_get_type_map_ptr(zend_string *type_name, zend_class_entry *s
 	return ret;
 }
 
+static HashTable *zend_persist_backed_enum_table(HashTable *backed_enum_table)
+{
+	HashTable *ptr;
+	Bucket *p;
+	zend_hash_persist(backed_enum_table);
+
+	ZEND_HASH_FOREACH_BUCKET(backed_enum_table, p) {
+		if (p->key != NULL) {
+			zend_accel_store_interned_string(p->key);
+		}
+		zend_persist_zval(&p->val);
+	} ZEND_HASH_FOREACH_END();
+
+	ptr = zend_shared_memdup_free(backed_enum_table, sizeof(HashTable));
+	GC_SET_REFCOUNT(ptr, 2);
+	GC_TYPE_INFO(ptr) = GC_ARRAY | ((IS_ARRAY_IMMUTABLE|GC_NOT_COLLECTABLE) << GC_FLAGS_SHIFT);
+
+	return ptr;
+}
+
 static void zend_persist_type(zend_type *type, zend_class_entry *scope) {
 	if (ZEND_TYPE_HAS_LIST(*type)) {
 		zend_type_list *list = ZEND_TYPE_LIST(*type);
@@ -1049,6 +1069,10 @@ zend_class_entry *zend_persist_class_entry(zend_class_entry *orig_ce)
 				ce->trait_precedences = zend_shared_memdup_free(
 					ce->trait_precedences, sizeof(zend_trait_precedence*) * (i + 1));
 			}
+		}
+
+		if (ce->backed_enum_table) {
+			ce->backed_enum_table = zend_persist_backed_enum_table(ce->backed_enum_table);
 		}
 	}
 

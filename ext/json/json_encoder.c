@@ -27,6 +27,7 @@
 #include "php_json.h"
 #include "php_json_encoder.h"
 #include <zend_exceptions.h>
+#include "zend_enum.h"
 
 static const char digits[] = "0123456789abcdef";
 
@@ -570,6 +571,19 @@ static int php_json_encode_serializable_object(smart_str *buf, zval *val, int op
 }
 /* }}} */
 
+static int php_json_encode_serializable_enum(smart_str *buf, zval *val, int options, php_json_encoder *encoder)
+{
+	zend_class_entry *ce = Z_OBJCE_P(val);
+	if (ce->enum_backing_type == IS_UNDEF) {
+		encoder->error_code = PHP_JSON_ERROR_NON_BACKED_ENUM;
+		smart_str_appendc(buf, '0');
+		return FAILURE;
+	}
+
+	zval *value_zv = zend_enum_fetch_case_value(Z_OBJ_P(val));
+	return php_json_encode_zval(buf, value_zv, options, encoder);
+}
+
 int php_json_encode_zval(smart_str *buf, zval *val, int options, php_json_encoder *encoder) /* {{{ */
 {
 again:
@@ -605,6 +619,9 @@ again:
 		case IS_OBJECT:
 			if (instanceof_function(Z_OBJCE_P(val), php_json_serializable_ce)) {
 				return php_json_encode_serializable_object(buf, val, options, encoder);
+			}
+			if (Z_OBJCE_P(val)->ce_flags & ZEND_ACC_ENUM) {
+				return php_json_encode_serializable_enum(buf, val, options, encoder);
 			}
 			/* fallthrough -- Non-serializable object */
 		case IS_ARRAY: {

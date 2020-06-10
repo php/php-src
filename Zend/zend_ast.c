@@ -24,6 +24,7 @@
 #include "zend_smart_str.h"
 #include "zend_exceptions.h"
 #include "zend_constants.h"
+#include "zend_enum.h"
 
 ZEND_API zend_ast_process_t zend_ast_process = NULL;
 
@@ -740,19 +741,49 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate(zval *result, zend_ast *ast
 
 			if (UNEXPECTED(zend_ast_evaluate(&op1, ast->child[0], scope) != SUCCESS)) {
 				ret = FAILURE;
-			} else if (UNEXPECTED(zend_ast_evaluate(&op2, ast->child[1], scope) != SUCCESS)) {
+				break;
+			}
+
+			// DIM on objects is disallowed because it allows executing arbitrary expressions
+			if (Z_TYPE(op1) == IS_OBJECT) {
+				zval_ptr_dtor_nogc(&op1);
+				zend_throw_error(NULL, "Cannot use [] on objects in constant expression");
+				ret = FAILURE;
+				break;
+			}
+
+			if (UNEXPECTED(zend_ast_evaluate(&op2, ast->child[1], scope) != SUCCESS)) {
 				zval_ptr_dtor_nogc(&op1);
 				ret = FAILURE;
-			} else {
-				zend_fetch_dimension_const(result, &op1, &op2, (ast->attr & ZEND_DIM_IS) ? BP_VAR_IS : BP_VAR_R);
-
-				zval_ptr_dtor_nogc(&op1);
-				zval_ptr_dtor_nogc(&op2);
-				if (UNEXPECTED(EG(exception))) {
-					return FAILURE;
-				}
+				break;
 			}
+
+			zend_fetch_dimension_const(result, &op1, &op2, (ast->attr & ZEND_DIM_IS) ? BP_VAR_IS : BP_VAR_R);
+
+			zval_ptr_dtor_nogc(&op1);
+			zval_ptr_dtor_nogc(&op2);
+			if (UNEXPECTED(EG(exception))) {
+				return FAILURE;
+			}
+
 			break;
+		case ZEND_AST_CONST_ENUM_INIT:
+		{
+			zend_ast *class_name_ast = ast->child[0];
+			zend_string *class_name = zend_ast_get_str(class_name_ast);
+
+			zend_ast *case_name_ast = ast->child[1];
+			zend_string *case_name = zend_ast_get_str(case_name_ast);
+
+			zend_ast *case_value_ast = ast->child[2];
+			zval *case_value_zv = case_value_ast != NULL
+				? zend_ast_get_zval(case_value_ast)
+				: NULL;
+
+			zend_class_entry *ce = zend_lookup_class(class_name);
+			zend_enum_new(result, ce, case_name, case_value_zv);
+			break;
+		}
 		default:
 			zend_throw_error(NULL, "Unsupported constant expression");
 			ret = FAILURE;
@@ -1558,6 +1589,8 @@ tail_call:
 				smart_str_appends(str, "interface ");
 			} else if (decl->flags & ZEND_ACC_TRAIT) {
 				smart_str_appends(str, "trait ");
+			} else if (decl->flags & ZEND_ACC_ENUM) {
+				smart_str_appends(str, "enum ");
 			} else {
 				if (decl->flags & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS) {
 					smart_str_appends(str, "abstract ");
@@ -1568,6 +1601,10 @@ tail_call:
 				smart_str_appends(str, "class ");
 			}
 			smart_str_appendl(str, ZSTR_VAL(decl->name), ZSTR_LEN(decl->name));
+			if (decl->flags & ZEND_ACC_ENUM && decl->child[4]) {
+				smart_str_appends(str, ": ");
+				zend_ast_export_type(str, decl->child[4], indent);
+			}
 			zend_ast_export_class_no_header(str, decl, indent);
 			smart_str_appendc(str, '\n');
 			break;
@@ -2150,6 +2187,17 @@ simple_list:
 			smart_str_appendc(str, '$');
 			zend_ast_export_name(str, ast->child[1], 0, indent);
 			APPEND_DEFAULT_VALUE(2);
+		case ZEND_AST_ENUM_CASE:
+			if (ast->child[2]) {
+				zend_ast_export_attributes(str, ast->child[2], indent, 1);
+			}
+			smart_str_appends(str, "case ");
+			zend_ast_export_name(str, ast->child[0], 0, indent);
+			if (ast->child[1]) {
+				smart_str_appends(str, " = ");
+				zend_ast_export_ex(str, ast->child[1], 0, indent);
+			}
+			break;
 
 		/* 4 child nodes */
 		case ZEND_AST_FOR:
@@ -2272,6 +2320,9 @@ zend_ast * ZEND_FASTCALL zend_ast_with_attributes(zend_ast *ast, zend_ast *attr)
 		break;
 	case ZEND_AST_CLASS_CONST_GROUP:
 		ast->child[1] = attr;
+		break;
+	case ZEND_AST_ENUM_CASE:
+		ast->child[2] = attr;
 		break;
 	EMPTY_SWITCH_DEFAULT_CASE()
 	}

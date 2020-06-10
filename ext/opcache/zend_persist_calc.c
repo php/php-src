@@ -534,6 +534,18 @@ void zend_persist_class_entry_calc(zend_class_entry *ce)
 				ADD_SIZE(sizeof(zend_trait_precedence*) * (i + 1));
 			}
 		}
+
+		if (ce->backed_enum_table) {
+			Bucket *p;
+			ADD_SIZE(sizeof(HashTable));
+			zend_hash_persist_calc(ce->backed_enum_table);
+			ZEND_HASH_FOREACH_BUCKET(ce->backed_enum_table, p) {
+				if (p->key != NULL) {
+					ADD_INTERNED_STRING(p->key);
+				}
+				zend_persist_zval_calc(&p->val);
+			} ZEND_HASH_FOREACH_END();
+		}
 	}
 }
 
