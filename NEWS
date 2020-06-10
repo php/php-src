@@ -149,6 +149,7 @@ PHP                                                                        NEWS
 - Session:
   . Fixed bug #78624 (session_gc return value for user defined session
     handlers). (bshaffer)
+  . Fixed bug #73529 (session_decode() silently fails on wrong input). (cmb)
 
 - SimpleXML:
   . Fixed bug #75245 (Don't set content of elements with only whitespaces).

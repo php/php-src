@@ -873,7 +873,7 @@ PS_SERIALIZER_DECODE_FUNC(php_serialize) /* {{{ */
 	Z_ADDREF_P(&PS(http_session_vars));
 	zend_hash_update_ind(&EG(symbol_table), var_name, &PS(http_session_vars));
 	zend_string_release_ex(var_name, 0);
-	return SUCCESS;
+	return result || !vallen ? SUCCESS : FAILURE;
 }
 /* }}} */
 
@@ -990,7 +990,10 @@ PS_SERIALIZER_DECODE_FUNC(php) /* {{{ */
 	while (p < endptr) {
 		q = p;
 		while (*q != PS_DELIMITER) {
-			if (++q >= endptr) goto break_outer_loop;
+			if (++q >= endptr) {
+				retval = FAILURE;
+				goto break_outer_loop;
+			}
 		}
 
 		namelen = q - p;

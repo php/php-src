@@ -29,7 +29,7 @@ var_dump(session_destroy());
 echo "Done";
 ob_end_flush();
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing session_decode() : variation ***
 bool(true)
 array(0) {
@@ -42,14 +42,12 @@ array(3) {
   ["guff"]=>
   float(123.456)
 }
-bool(true)
-array(3) {
-  ["foo"]=>
-  int(1234567890)
-  ["bar"]=>
-  string(5) "Blah!"
-  ["guff"]=>
-  float(123.456)
+
+Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s on line %d
+bool(false)
+array(0) {
 }
-bool(true)
+
+Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
+bool(false)
 Done
