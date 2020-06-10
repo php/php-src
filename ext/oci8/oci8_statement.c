@@ -1516,13 +1516,16 @@ sb4 php_oci_bind_out_callback(
  Helper function to get column by name and index */
 php_oci_out_column *php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAMETERS, int need_data)
 {
-	zval *z_statement, *column_index;
+	zval *z_statement;
+	zend_string *column_index_string;
+	zend_long column_index_int;
+
 	php_oci_statement *statement;
 	php_oci_out_column *column;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_RESOURCE(z_statement)
-		Z_PARAM_ZVAL(column_index)
+		Z_PARAM_STR_OR_LONG(column_index_string, column_index_int)
 	ZEND_PARSE_PARAMETERS_END_EX(return NULL);
 
 	statement = (php_oci_statement *) zend_fetch_resource_ex(z_statement, "oci8 statement", le_statement);
@@ -1535,19 +1538,17 @@ php_oci_out_column *php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAME
 		return NULL;
 	}
 
-	if (Z_TYPE_P(column_index) == IS_STRING) {
-		column = php_oci_statement_get_column(statement, -1, Z_STRVAL_P(column_index), (int) Z_STRLEN_P(column_index));
+	if (column_index_string != NULL) {
+		column = php_oci_statement_get_column(statement, -1, ZSTR_VAL(column_index_string), (int) ZSTR_LEN(column_index_string));
 		if (!column) {
-			php_error_docref(NULL, E_WARNING, "Invalid column name \"%s\"", Z_STRVAL_P(column_index));
+			php_error_docref(NULL, E_WARNING, "Invalid column name \"%s\"", ZSTR_VAL(column_index_string));
 			return NULL;
 		}
 	} else {
-		zend_long tmp;
+		column = php_oci_statement_get_column(statement, column_index_int, NULL, 0);
 
-		tmp = zval_get_long(column_index);
-		column = php_oci_statement_get_column(statement, tmp, NULL, 0);
 		if (!column) {
-			php_error_docref(NULL, E_WARNING, "Invalid column index \"" ZEND_LONG_FMT "\"", tmp);
+			php_error_docref(NULL, E_WARNING, "Invalid column index \"" ZEND_LONG_FMT "\"", column_index_int);
 			return NULL;
 		}
 	}
