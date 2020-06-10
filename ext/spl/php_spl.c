@@ -403,7 +403,6 @@ static zend_class_entry *spl_perform_autoload(zend_string *class_name, zend_stri
 	zval params[1];
 	zval retval;
 	zend_string *func_name;
-	zend_class_entry *called_scope = zend_get_called_scope(EG(current_execute_data));
 
 	fci.size = sizeof(fci);
 	fci.retval = &retval;
@@ -431,13 +430,7 @@ static zend_class_entry *spl_perform_autoload(zend_string *class_name, zend_stri
 		if (Z_ISUNDEF(alfi->obj)) {
 			fci.object = NULL;
 			fcic.object = NULL;
-			if (alfi->ce &&
-				(!called_scope ||
-				 !instanceof_function(called_scope, alfi->ce))) {
-				fcic.called_scope = alfi->ce;
-			} else {
-				fcic.called_scope = called_scope;
-			}
+			fcic.called_scope = alfi->ce;
 		} else {
 			fci.object = Z_OBJ(alfi->obj);
 			fcic.object = Z_OBJ(alfi->obj);
