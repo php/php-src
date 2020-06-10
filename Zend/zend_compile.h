@@ -233,13 +233,19 @@ typedef struct _zend_oparray_context {
 /* op_array or class is preloaded                         |     |     |     */
 #define ZEND_ACC_PRELOADED               (1 << 10) /*  X  |  X  |     |     */
 /*                                                        |     |     |     */
-/* Class Flags (unused: 28...)                            |     |     |     */
+/* Flag to differenciate cases from constants.            |     |     |     */
+/* Stored in Z_ACCESS_FLAGS, must not conflict with       |     |     |     */
+/* ZEND_ACC_ visibility flags or IS_CONSTANT_VISITED_MARK |     |     |     */
+#define ZEND_CLASS_CONST_IS_CASE         (1 << 6)  /*     |     |     |  X  */
+/*                                                        |     |     |     */
+/* Class Flags (unused: 29...)                            |     |     |     */
 /* ===========                                            |     |     |     */
 /*                                                        |     |     |     */
 /* Special class types                                    |     |     |     */
 #define ZEND_ACC_INTERFACE               (1 <<  0) /*  X  |     |     |     */
 #define ZEND_ACC_TRAIT                   (1 <<  1) /*  X  |     |     |     */
 #define ZEND_ACC_ANON_CLASS              (1 <<  2) /*  X  |     |     |     */
+#define ZEND_ACC_ENUM                    (1 << 28) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* Class linked with parent, interfaces and traits        |     |     |     */
 #define ZEND_ACC_LINKED                  (1 <<  3) /*  X  |     |     |     */
@@ -387,7 +393,7 @@ typedef struct _zend_property_info {
 	((offset - OBJ_PROP_TO_OFFSET(0)) / sizeof(zval))
 
 typedef struct _zend_class_constant {
-	zval value; /* access flags are stored in reserved: zval.u2.access_flags */
+	zval value; /* access flags and other constant flags are stored in reserved: zval.u2.access_flags */
 	zend_string *doc_comment;
 	HashTable *attributes;
 	zend_class_entry *ce;

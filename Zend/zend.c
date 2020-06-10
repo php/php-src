@@ -457,11 +457,22 @@ static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent) /* 
 			{
 				HashTable *properties;
 
-				zend_string *class_name = Z_OBJ_HANDLER_P(expr, get_class_name)(Z_OBJ_P(expr));
+				zend_object *zobj = Z_OBJ_P(expr);
+				zend_string *class_name = Z_OBJ_HANDLER_P(expr, get_class_name)(zobj);
 				smart_str_appends(buf, ZSTR_VAL(class_name));
 				zend_string_release_ex(class_name, 0);
 
-				smart_str_appends(buf, " Object\n");
+				if (!(zobj->ce->ce_flags & ZEND_ACC_ENUM)) {
+					smart_str_appends(buf, " Object\n");
+				} else {
+					smart_str_appends(buf, " Enum");
+					if (zobj->ce->enum_backing_type != IS_UNDEF) {
+						smart_str_appendc(buf, ':');
+						smart_str_appends(buf, zend_get_type_by_const(zobj->ce->enum_backing_type));
+					}
+					smart_str_appendc(buf, '\n');
+				}
+				
 				if (GC_IS_RECURSIVE(Z_OBJ_P(expr))) {
 					smart_str_appends(buf, " *RECURSION*");
 					return;

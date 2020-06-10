@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 429fc9b22054348101d0b9d6746494e52dc04edf */
+ * Stub hash: c333499e3ea100d976f0fa8bb8800ed21b04f1c6 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_version, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -105,6 +105,11 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_trait_exists, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, trait, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, autoload, _IS_BOOL, 0, "true")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_enum_exists, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, enum, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, autoload, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
 
@@ -238,6 +243,7 @@ ZEND_FUNCTION(property_exists);
 ZEND_FUNCTION(class_exists);
 ZEND_FUNCTION(interface_exists);
 ZEND_FUNCTION(trait_exists);
+ZEND_FUNCTION(enum_exists);
 ZEND_FUNCTION(function_exists);
 ZEND_FUNCTION(class_alias);
 ZEND_FUNCTION(get_included_files);
@@ -298,6 +304,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(class_exists, arginfo_class_exists)
 	ZEND_FE(interface_exists, arginfo_interface_exists)
 	ZEND_FE(trait_exists, arginfo_trait_exists)
+	ZEND_FE(enum_exists, arginfo_enum_exists)
 	ZEND_FE(function_exists, arginfo_function_exists)
 	ZEND_FE(class_alias, arginfo_class_alias)
 	ZEND_FE(get_included_files, arginfo_get_included_files)

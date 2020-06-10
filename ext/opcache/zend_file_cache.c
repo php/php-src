@@ -622,12 +622,12 @@ static void zend_file_cache_serialize_func(zval                     *zv,
                                            zend_file_cache_metainfo *info,
                                            void                     *buf)
 {
-	zend_op_array *op_array;
-
+	zend_function *func;
 	SERIALIZE_PTR(Z_PTR_P(zv));
-	op_array = Z_PTR_P(zv);
-	UNSERIALIZE_PTR(op_array);
-	zend_file_cache_serialize_op_array(op_array, script, info, buf);
+	func = Z_PTR_P(zv);
+	UNSERIALIZE_PTR(func);
+	ZEND_ASSERT(func->type == ZEND_USER_FUNCTION);
+	zend_file_cache_serialize_op_array(&func->op_array, script, info, buf);
 }
 
 static void zend_file_cache_serialize_prop_info(zval                     *zv,
@@ -827,6 +827,14 @@ static void zend_file_cache_serialize_class(zval                     *zv,
 				p++;
 			}
 		}
+	}
+
+	if (ce->backed_enum_table) {
+		HashTable *ht;
+		SERIALIZE_PTR(ce->backed_enum_table);
+		ht = ce->backed_enum_table;
+		UNSERIALIZE_PTR(ht);
+		zend_file_cache_serialize_hash(ht, script, info, buf, zend_file_cache_serialize_zval);
 	}
 
 	SERIALIZE_PTR(ce->constructor);
@@ -1408,11 +1416,11 @@ static void zend_file_cache_unserialize_func(zval                    *zv,
                                              zend_persistent_script  *script,
                                              void                    *buf)
 {
-	zend_op_array *op_array;
-
+	zend_function *func;
 	UNSERIALIZE_PTR(Z_PTR_P(zv));
-	op_array = Z_PTR_P(zv);
-	zend_file_cache_unserialize_op_array(op_array, script, buf);
+	func = Z_PTR_P(zv);
+	ZEND_ASSERT(func->type == ZEND_USER_FUNCTION);
+	zend_file_cache_unserialize_op_array(&func->op_array, script, buf);
 }
 
 static void zend_file_cache_unserialize_prop_info(zval                    *zv,
@@ -1589,6 +1597,12 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 				p++;
 			}
 		}
+	}
+
+	if (ce->backed_enum_table) {
+		UNSERIALIZE_PTR(ce->backed_enum_table);
+		zend_file_cache_unserialize_hash(
+			ce->backed_enum_table, script, buf, zend_file_cache_unserialize_zval, ZVAL_PTR_DTOR);
 	}
 
 	UNSERIALIZE_PTR(ce->constructor);

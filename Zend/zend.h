@@ -197,6 +197,9 @@ struct _zend_class_entry {
 	zend_trait_precedence **trait_precedences;
 	HashTable *attributes;
 
+	uint32_t enum_backing_type;
+	HashTable *backed_enum_table;
+
 	union {
 		struct {
 			zend_string *filename;
