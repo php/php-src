@@ -368,7 +368,7 @@ PHP_FUNCTION(spl_autoload_extensions)
 
 typedef struct {
 	zend_function *func_ptr;
-	zval obj;
+	zend_object *obj;
 	zval closure;
 	zend_class_entry *ce;
 } autoload_func_info;
@@ -376,8 +376,8 @@ typedef struct {
 static void autoload_func_info_dtor(zval *element)
 {
 	autoload_func_info *alfi = (autoload_func_info*)Z_PTR_P(element);
-	if (!Z_ISUNDEF(alfi->obj)) {
-		zval_ptr_dtor(&alfi->obj);
+	if (alfi->obj) {
+		zend_object_release(alfi->obj);
 	}
 	if (alfi->func_ptr &&
 		UNEXPECTED(alfi->func_ptr->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
@@ -395,51 +395,27 @@ static zend_class_entry *spl_perform_autoload(zend_string *class_name, zend_stri
 		return NULL;
 	}
 
-	HashPosition pos;
-	zend_ulong num_idx;
-	zend_function *func;
-	zend_fcall_info fci;
-	zend_fcall_info_cache fcic;
-	zval params[1];
-	zval retval;
-	zend_string *func_name;
-
-	fci.size = sizeof(fci);
-	fci.retval = &retval;
-	fci.param_count = 1;
-	fci.params = params;
-	fci.no_separation = 1;
-	ZVAL_STR(&params[0], class_name);
-
-	ZVAL_UNDEF(&fci.function_name); /* Unused */
-
 	/* We don't use ZEND_HASH_FOREACH here,
 	 * because autoloaders may be added/removed during autoloading. */
+	HashPosition pos;
 	zend_hash_internal_pointer_reset_ex(SPL_G(autoload_functions), &pos);
-	while (zend_hash_get_current_key_ex(SPL_G(autoload_functions), &func_name, &num_idx, &pos) == HASH_KEY_IS_STRING) {
+	while (1) {
 		autoload_func_info *alfi =
 			zend_hash_get_current_data_ptr_ex(SPL_G(autoload_functions), &pos);
-		func = alfi->func_ptr;
+		if (!alfi) {
+			break;
+		}
+
+		zend_function *func = alfi->func_ptr;
 		if (UNEXPECTED(func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
 			func = emalloc(sizeof(zend_op_array));
 			memcpy(func, alfi->func_ptr, sizeof(zend_op_array));
 			zend_string_addref(func->op_array.function_name);
 		}
-		ZVAL_UNDEF(&retval);
-		fcic.function_handler = func;
-		if (Z_ISUNDEF(alfi->obj)) {
-			fci.object = NULL;
-			fcic.object = NULL;
-			fcic.called_scope = alfi->ce;
-		} else {
-			fci.object = Z_OBJ(alfi->obj);
-			fcic.object = Z_OBJ(alfi->obj);
-			fcic.called_scope = Z_OBJCE(alfi->obj);
-		}
 
-		zend_call_function(&fci, &fcic);
-		zval_ptr_dtor(&retval);
-
+		zval param;
+		ZVAL_STR(&param, class_name);
+		zend_call_known_function(func, alfi->obj, alfi->ce, NULL, 1, &param);
 		if (EG(exception)) {
 			break;
 		}
@@ -487,7 +463,6 @@ PHP_FUNCTION(spl_autoload_register)
 	zend_bool do_throw = 1;
 	zend_bool prepend  = 0;
 	autoload_func_info alfi;
-	zend_object *obj_ptr;
 	zend_fcall_info fci = {0};
 	zend_fcall_info_cache fcc;
 
@@ -512,7 +487,7 @@ PHP_FUNCTION(spl_autoload_register)
 	if (ZEND_FCI_INITIALIZED(fci)) {
 		alfi.ce = fcc.calling_scope;
 		alfi.func_ptr = fcc.function_handler;
-		obj_ptr = fcc.object;
+		alfi.obj = !(alfi.func_ptr->common.fn_flags & ZEND_ACC_STATIC) ? fcc.object : NULL;
 
 		if (fcc.function_handler->type == ZEND_INTERNAL_FUNCTION &&
 			fcc.function_handler->internal_function.handler == zif_spl_autoload_call) {
@@ -547,15 +522,12 @@ PHP_FUNCTION(spl_autoload_register)
 			goto skip;
 		}
 
-		if (obj_ptr && !(alfi.func_ptr->common.fn_flags & ZEND_ACC_STATIC)) {
+		if (alfi.obj) {
 			/* add object id to the hash to ensure uniqueness, for more reference look at bug #40091 */
 			lc_name = zend_string_extend(lc_name, ZSTR_LEN(lc_name) + sizeof(uint32_t), 0);
-			memcpy(ZSTR_VAL(lc_name) + ZSTR_LEN(lc_name) - sizeof(uint32_t), &obj_ptr->handle, sizeof(uint32_t));
+			memcpy(ZSTR_VAL(lc_name) + ZSTR_LEN(lc_name) - sizeof(uint32_t), &alfi.obj->handle, sizeof(uint32_t));
 			ZSTR_VAL(lc_name)[ZSTR_LEN(lc_name)] = '\0';
-			ZVAL_OBJ(&alfi.obj, obj_ptr);
-			Z_ADDREF(alfi.obj);
-		} else {
-			ZVAL_UNDEF(&alfi.obj);
+			GC_ADDREF(alfi.obj);
 		}
 
 		if (UNEXPECTED(alfi.func_ptr == &EG(trampoline))) {
@@ -566,8 +538,8 @@ PHP_FUNCTION(spl_autoload_register)
 			alfi.func_ptr = copy;
 		}
 		if (zend_hash_add_mem(SPL_G(autoload_functions), lc_name, &alfi, sizeof(autoload_func_info)) == NULL) {
-			if (obj_ptr && !(alfi.func_ptr->common.fn_flags & ZEND_ACC_STATIC)) {
-				Z_DELREF(alfi.obj);
+			if (alfi.obj && !(alfi.func_ptr->common.fn_flags & ZEND_ACC_STATIC)) {
+				GC_DELREF(alfi.obj);
 			}
 			if (!Z_ISUNDEF(alfi.closure)) {
 				Z_DELREF(alfi.closure);
@@ -587,9 +559,9 @@ skip:
 		autoload_func_info spl_alfi;
 		spl_alfi.func_ptr = zend_hash_str_find_ptr(
 			CG(function_table), "spl_autoload", sizeof("spl_autoload") - 1);
-		ZVAL_UNDEF(&spl_alfi.obj);
-		ZVAL_UNDEF(&spl_alfi.closure);
+		spl_alfi.obj = NULL;
 		spl_alfi.ce = NULL;
+		ZVAL_UNDEF(&spl_alfi.closure);
 		zend_hash_add_mem(SPL_G(autoload_functions), spl_alfi.func_ptr->common.function_name,
 				&spl_alfi, sizeof(autoload_func_info));
 		if (prepend && SPL_G(autoload_functions)->nNumOfElements > 1) {
@@ -689,9 +661,11 @@ PHP_FUNCTION(spl_autoload_functions)
 				zval tmp;
 
 				array_init(&tmp);
-				if (!Z_ISUNDEF(alfi->obj)) {
-					Z_ADDREF(alfi->obj);
-					add_next_index_zval(&tmp, &alfi->obj);
+				if (alfi->obj) {
+					zval obj_zv;
+					ZVAL_OBJ(&obj_zv, alfi->obj);
+					Z_ADDREF(obj_zv);
+					add_next_index_zval(&tmp, &obj_zv);
 				} else {
 					add_next_index_str(&tmp, zend_string_copy(alfi->ce->name));
 				}
