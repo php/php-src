@@ -4822,7 +4822,7 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 				if (op1_info & MAY_BE_ARRAY_KEY_LONG) {
 					|4:
 				}
-				|	EXT_CALL zend_hash_index_find, r0
+				|	EXT_CALL _zend_hash_index_find, r0
 				|	test r0, r0
 				|	jz >9 // NOT_FOUND
 				if (op2_info & MAY_BE_STRING) {
@@ -4849,7 +4849,7 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 					}
 					|4:
 				}
-				|	EXT_CALL zend_hash_index_find, r0
+				|	EXT_CALL _zend_hash_index_find, r0
 				|	test r0, r0
 				if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE && type == BP_VAR_R) {
 					|	jz &exit_addr

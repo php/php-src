@@ -126,7 +126,7 @@ static zval* ZEND_FASTCALL zend_jit_symtable_find(HashTable *ht, zend_string *st
 
 static zval* ZEND_FASTCALL zend_jit_hash_index_lookup_rw(HashTable *ht, zend_long idx)
 {
-	zval *retval = zend_hash_index_find(ht, idx);
+	zval *retval = _zend_hash_index_find(ht, idx);
 
 	if (!retval) {
 		zend_error(E_NOTICE,"Undefined offset: " ZEND_LONG_FMT, idx);
@@ -137,7 +137,7 @@ static zval* ZEND_FASTCALL zend_jit_hash_index_lookup_rw(HashTable *ht, zend_lon
 
 static zval* ZEND_FASTCALL zend_jit_hash_index_lookup_w(HashTable *ht, zend_long idx)
 {
-	zval *retval = zend_hash_index_find(ht, idx);
+	zval *retval = _zend_hash_index_find(ht, idx);
 
 	if (!retval) {
 		retval = zend_hash_index_add_new(ht, idx, &EG(uninitialized_zval));
