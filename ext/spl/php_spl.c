@@ -53,7 +53,6 @@ static PHP_GINIT_FUNCTION(spl)
 {
 	spl_globals->autoload_extensions = NULL;
 	spl_globals->autoload_functions = NULL;
-	spl_globals->autoload_running = 0;
 }
 /* }}} */
 
@@ -405,9 +404,6 @@ static zend_class_entry *spl_perform_autoload(zend_string *class_name, zend_stri
 	zval retval;
 	zend_string *func_name;
 	zend_class_entry *called_scope = zend_get_called_scope(EG(current_execute_data));
-	int l_autoload_running = SPL_G(autoload_running);
-
-	SPL_G(autoload_running) = 1;
 
 	fci.size = sizeof(fci);
 	fci.retval = &retval;
@@ -418,6 +414,8 @@ static zend_class_entry *spl_perform_autoload(zend_string *class_name, zend_stri
 
 	ZVAL_UNDEF(&fci.function_name); /* Unused */
 
+	/* We don't use ZEND_HASH_FOREACH here,
+	 * because autoloaders may be added/removed during autoloading. */
 	zend_hash_internal_pointer_reset_ex(SPL_G(autoload_functions), &pos);
 	while (zend_hash_get_current_key_ex(SPL_G(autoload_functions), &func_name, &num_idx, &pos) == HASH_KEY_IS_STRING) {
 		autoload_func_info *alfi =
@@ -455,13 +453,11 @@ static zend_class_entry *spl_perform_autoload(zend_string *class_name, zend_stri
 
 		zend_class_entry *ce = zend_hash_find_ptr(EG(class_table), lc_name);
 		if (ce) {
-			SPL_G(autoload_running) = l_autoload_running;
 			return ce;
 		}
 
 		zend_hash_move_forward_ex(SPL_G(autoload_functions), &pos);
 	}
-	SPL_G(autoload_running) = l_autoload_running;
 	return NULL;
 }
 
@@ -661,14 +657,8 @@ PHP_FUNCTION(spl_autoload_unregister)
 
 	if (SPL_G(autoload_functions)) {
 		if (zend_string_equals_literal(lc_name, "spl_autoload_call")) {
-			/* remove all */
-			if (!SPL_G(autoload_running)) {
-				zend_hash_destroy(SPL_G(autoload_functions));
-				FREE_HASHTABLE(SPL_G(autoload_functions));
-				SPL_G(autoload_functions) = NULL;
-			} else {
-				zend_hash_clean(SPL_G(autoload_functions));
-			}
+			/* Don't destroy the hash table, as we might be iterating over it right now. */
+			zend_hash_clean(SPL_G(autoload_functions));
 			success = SUCCESS;
 		} else {
 			/* remove specific */
