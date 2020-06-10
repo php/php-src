@@ -14,6 +14,10 @@ PHP                                                                        NEWS
   . Fixed bug #79683 (Fake reflection scope affects __toString()). (Nikita)
   . Fixed possibly unsupported timercmp() usage. (cmb)
 
+- Fileinfo:
+  . Fixed bug #79681 (mime_content_type/finfo returning incorrect mimetype).
+    (cmb)
+
 - Filter:
   . Fixed bug #73527 (Invalid memory access in php_filter_strip). (cmb)
 
