@@ -558,6 +558,14 @@ PHP 8.0 UPGRADE NOTES
     accept parameters by reference will now warn if a callback with reference
     parameters is used. Examples include array_filter() and array_reduce().
     This was already the case for most, but not all, functions previously.
+  . The HTTP stream wrapper as used by functions like file_get_contents()
+    now advertises HTTP/1.1 rather than HTTP/1.0 by default. This does not
+    change the behaviour of the client, but may cause servers to respond
+    differently. To retain the old behaviour, set the 'protocol_version'
+    stream context option, e.g.
+
+        $ctx = stream_context_create(['http' => ['protocol_version' => '1.0']]);
+        echo file_get_contents('http://example.org', false, $ctx);
 
 - Sysvmsg:
   . msg_get_queue() will now return an SysvMessageQueue object rather than a

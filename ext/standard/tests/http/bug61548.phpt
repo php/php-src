@@ -42,35 +42,35 @@ do_test("First:1\nContent-type:text/plain\nSecond:2\nThird:");
 ?>
 Done
 --EXPECT--
-POST / HTTP/1.0
+POST / HTTP/1.1
 Host: 127.0.0.1:12342
 Connection: close
 First:1
 Second:2
 Content-type: text/plain
 
-GET /foo HTTP/1.0
+GET /foo HTTP/1.1
 Host: 127.0.0.1:12342
 Connection: close
 First:1
 Second:2
 
 
-POST / HTTP/1.0
+POST / HTTP/1.1
 Host: 127.0.0.1:12342
 Connection: close
 First:1
 Second:2
 Content-type: text/plain
 
-GET /foo HTTP/1.0
+GET /foo HTTP/1.1
 Host: 127.0.0.1:12342
 Connection: close
 First:1
 Second:2
 
 
-POST / HTTP/1.0
+POST / HTTP/1.1
 Host: 127.0.0.1:12342
 Connection: close
 First:1
@@ -78,40 +78,40 @@ Second:2
 Content-type: text/plain
 Third:
 
-GET /foo HTTP/1.0
+GET /foo HTTP/1.1
 Host: 127.0.0.1:12342
 Connection: close
 First:1
 Second:2
 Third:
 
-POST / HTTP/1.0
+POST / HTTP/1.1
 Host: 127.0.0.1:12342
 Connection: close
 First:1
 Content-type:text/plain
 Second:2
 
-GET /foo HTTP/1.0
+GET /foo HTTP/1.1
 Host: 127.0.0.1:12342
 Connection: close
 First:1
 Second:2
 
-POST / HTTP/1.0
+POST / HTTP/1.1
 Host: 127.0.0.1:12342
 Connection: close
 First:1
 Content-type:text/plain
 Second:2
 
-GET /foo HTTP/1.0
+GET /foo HTTP/1.1
 Host: 127.0.0.1:12342
 Connection: close
 First:1
 Second:2
 
-POST / HTTP/1.0
+POST / HTTP/1.1
 Host: 127.0.0.1:12342
 Connection: close
 First:1
@@ -119,7 +119,7 @@ Content-type:text/plain
 Second:2
 Third:
 
-GET /foo HTTP/1.0
+GET /foo HTTP/1.1
 Host: 127.0.0.1:12342
 Connection: close
 First:1

@@ -9,7 +9,7 @@ allow_url_fopen=1
 require 'server.inc';
 
 $responses = array(
-    "data://text/plain,HTTP/1.0 200 OK\r\n\r\n",
+    "data://text/plain,HTTP/1.1 200 OK\r\n\r\n",
 );
 
 $pid = http_server("tcp://127.0.0.1:12342", $responses, $output);
@@ -32,7 +32,7 @@ http_server_kill($pid);
 
 ?>
 --EXPECT--
-GET / HTTP/1.0
+GET / HTTP/1.1
 Connection: close
 RandomHeader: localhost:8080
 Cookie: foo=bar
