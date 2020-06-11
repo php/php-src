@@ -7,7 +7,7 @@
  * @param int $type
  * @return bool
  */
-function oci_define_by_name($statement_resource, string $column_name, $variable, int $type = 0): bool {}
+function oci_define_by_name($statement_resource, string $column_name, &$variable, int $type = 0): bool {}
 
 /**
  * @param resource $statement_resource
@@ -17,7 +17,7 @@ function oci_define_by_name($statement_resource, string $column_name, $variable,
  * @param int $type
  * @return bool
  */
-function oci_bind_by_name($statement_resource, string $column_name, $variable, int $maximum_length = -1, int $type = 0): bool {}
+function oci_bind_by_name($statement_resource, string $column_name, &$variable, int $maximum_length = -1, int $type = 0): bool {}
 
 /**
  * @param resource $statement_resource
@@ -28,7 +28,7 @@ function oci_bind_by_name($statement_resource, string $column_name, $variable, i
  * @param int $type
  * @return bool
  */
-function oci_bind_array_by_name($statement_resource, string $column_name, $variable, int $maximum_array_length, int $maximum_item_length = -1, int $type = SQLT_AFC): bool {}
+function oci_bind_array_by_name($statement_resource, string $column_name, &$variable, int $maximum_array_length, int $maximum_item_length = -1, int $type = SQLT_AFC): bool {}
 
 /**
  * @param OCI_Lob $lob_descriptor
@@ -270,7 +270,7 @@ function oci_fetch($statement_resource): bool {}
  * @param int $mode
  * @return int|false @todo return false, double check?
  */
-function ocifetchinto($statement_resource, $result, int $mode = 0) {}
+function ocifetchinto($statement_resource, &$result, int $mode = 0) {}
 
 /**
  * @param resource $statement_resource
@@ -280,7 +280,7 @@ function ocifetchinto($statement_resource, $result, int $mode = 0) {}
  * @param int $flags
  * @return int @todo double check.
  */
-function oci_fetch_all($statement_resource, $output, int $skip = 0, int $maximum_rows = -1, int $flags = 0): int {}
+function oci_fetch_all($statement_resource, &$output, int $skip = 0, int $maximum_rows = -1, int $flags = 0): int {}
 
 /**
  * @param resource $statement_resource
@@ -556,19 +556,19 @@ class OCI_Lob {
      * @param int $offset
      * @return bool
      */
-    public function save(string $data, int $offset = 0): bool {}
+    public function save(string $data, int $offset = 0) {}
 
     /**
      * @param $filename @todo path?
      * @return bool
      */
-    public function import($filename): bool {}
+    public function import($filename) {}
 
     /**
      * @param $filename @todo path?
      * @return bool
      */
-    public function savefile($filename): bool {}
+    public function savefile($filename) {}
 
     /**
      * @return string|false @todo return false
@@ -584,7 +584,7 @@ class OCI_Lob {
     /**
      * @return bool
      */
-    public function eof(): bool {}
+    public function eof() {}
 
     /**
      * @return int|false @todo return false
@@ -594,14 +594,14 @@ class OCI_Lob {
     /**
      * @return bool
      */
-    public function rewind(): bool {}
+    public function rewind() {}
 
     /**
      * @param int $offset
      * @param int $whence
      * @return bool
      */
-    public function seek(int $offset, int $whence = 0): bool {}
+    public function seek(int $offset, int $whence = 0) {}
 
     /**
      * @return int|false @todo return false
@@ -619,13 +619,13 @@ class OCI_Lob {
      * @param OCI_Lob $lob_descriptor_from
      * @return bool
      */
-    public function append(OCI_Lob $lob_descriptor_from): bool {}
+    public function append(OCI_Lob $lob_descriptor_from) {}
 
     /**
      * @param int $length
      * @return bool
      */
-    public function truncate(int $length = 0): bool {}
+    public function truncate(int $length = 0) {}
 
     /**
      * @param int $offset
@@ -644,20 +644,12 @@ class OCI_Lob {
      * @param bool $mode
      * @return bool
      */
-    public function setbuffering(bool $mode): bool {}
+    public function setbuffering(bool $mode) {}
 
     /**
      * @return bool
      */
-    public function getbuffering(): bool {}
-
-    /**
-     * @param $path @todo path?
-     * @param int $start
-     * @param int $length
-     * @return bool
-     */
-    public function writetofile($path, int $start = -1, int $length = -1): bool {}
+    public function getbuffering() {}
 
     /**
      * @param $path @todo path?
@@ -665,37 +657,45 @@ class OCI_Lob {
      * @param int $length
      * @return bool
      */
-    public function export($path, int $start = -1, int $length = -1): bool {}
+    public function writetofile($path, int $start = -1, int $length = -1) {}
+
+    /**
+     * @param $path @todo path?
+     * @param int $start
+     * @param int $length
+     * @return bool
+     */
+    public function export($path, int $start = -1, int $length = -1) {}
 
     /**
      * @param string $data
      * @param int $type
      * @return bool
      */
-    public function writetemporary(string $data, int $type = OCI_TEMP_CLOB): bool {}
+    public function writetemporary(string $data, int $type = OCI_TEMP_CLOB) {}
 
     /**
      * @return bool @todo double check.
      */
-    public function close(): bool {}
+    public function close() {}
 
     /**
      * @return bool
      */
-    public function free(): bool {}
+    public function free() {}
 }
 
 class OCI_Collection {
     /**
      * @return bool
      */
-    public function free(): bool {}
+    public function free() {}
 
     /**
      * @param string $value
      * @return bool
      */
-    public function append(string $value): bool {}
+    public function append(string $value) {}
 
     /**
      * @param int $index
@@ -707,14 +707,14 @@ class OCI_Collection {
      * @param OCI_Collection $collection_from
      * @return bool
      */
-    public function assign(OCI_Collection $collection_from): bool {}
+    public function assign(OCI_Collection $collection_from) {}
 
     /**
      * @param int $index
      * @param string $value
      * @return bool
      */
-    public function assignelem(int $index, string $value): bool {}
+    public function assignelem(int $index, string $value) {}
 
     /**
      * @return int|false @otodo check return false.
@@ -730,5 +730,5 @@ class OCI_Collection {
      * @param int $number
      * @return bool
      */
-    public function trim(int $number): bool {}
+    public function trim(int $number) {}
 }
