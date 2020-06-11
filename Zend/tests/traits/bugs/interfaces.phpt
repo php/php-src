@@ -16,4 +16,4 @@ trait THello implements MyInterface {
 
 ?>
 --EXPECTF--
-Parse error: syntax error, unexpected 'implements' (T_IMPLEMENTS), expecting '{' in %s on line %d
+Parse error: syntax error, unexpected token "implements", expecting "{" in %s on line %d

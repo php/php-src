@@ -4,4 +4,4 @@ Invalid consecutive numeric separators after binary literal
 <?php
 0b0__1
 --EXPECTF--
-Parse error: syntax error, unexpected '__1' (T_STRING) in %s on line %d
+Parse error: syntax error, unexpected identifier "__1" in %s on line %d

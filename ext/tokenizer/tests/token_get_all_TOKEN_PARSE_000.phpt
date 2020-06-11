@@ -15,5 +15,5 @@ echo "Done";
 
 ?>
 --EXPECT--
-syntax error, unexpected 'code' (T_STRING)
+syntax error, unexpected identifier "code"
 Done

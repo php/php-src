@@ -11,4 +11,4 @@ use const Foo\Bar\{
     function C
 };
 --EXPECTF--
-Parse error: syntax error, unexpected 'const' (T_CONST), expecting '}' in %s on line 7
+Parse error: syntax error, unexpected token "const", expecting "}" in %s on line %d

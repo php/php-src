@@ -5,4 +5,4 @@ Group use declarations mustn't contain two commas mid-list
 use Baz\{Foo,,Bar};
 ?>
 --EXPECTF--
-Parse error: syntax error, unexpected ',', expecting '}' in %s on line %d
+Parse error: syntax error, unexpected token ",", expecting "}" in %s on line %d
