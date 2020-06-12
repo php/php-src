@@ -287,6 +287,15 @@ static const mbfl_encoding *php_mb_get_encoding_or_pass(const char *encoding_nam
 	return mbfl_name2encoding(encoding_name);
 }
 
+static size_t count_commas(const char *p, size_t length) {
+	size_t count = 0;
+	while ((p = memchr(p, ',', length))) {
+		count++;
+		p++;
+	}
+	return count;
+}
+
 /* {{{ static int php_mb_parse_encoding_list()
  *  Return FAILURE if input contains any illegal encoding, otherwise SUCCESS.
  * 	Emits a ValueError in function context and a warning in INI context, in INI context arg_num must be 0.
@@ -302,7 +311,7 @@ static int php_mb_parse_encoding_list(const char *value, size_t value_length,
 	} else {
 		zend_bool included_auto;
 		size_t n, size;
-		char *p, *p1, *p2, *endp, *tmpstr;
+		char *p1, *endp, *tmpstr;
 		const mbfl_encoding **entry, **list;
 
 		/* copy the value string for work */
@@ -312,26 +321,17 @@ static int php_mb_parse_encoding_list(const char *value, size_t value_length,
 		} else {
 			tmpstr = (char *)estrndup(value, value_length);
 		}
-		/* count the number of listed encoding names */
-		endp = tmpstr + value_length;
-		n = 1;
-		p1 = tmpstr;
-		while ((p2 = (char*)php_memnstr(p1, ",", 1, endp)) != NULL) {
-			p1 = p2 + 1;
-			n++;
-		}
-		size = n + MBSTRG(default_detect_order_list_size);
-		/* make list */
+
+		size = 1 + count_commas(tmpstr, value_length) + MBSTRG(default_detect_order_list_size);
 		list = (const mbfl_encoding **)pecalloc(size, sizeof(mbfl_encoding*), persistent);
 		entry = list;
 		n = 0;
 		included_auto = 0;
 		p1 = tmpstr;
-		do {
-			p2 = p = (char*)php_memnstr(p1, ",", 1, endp);
-			if (p == NULL) {
-				p = endp;
-			}
+		endp = tmpstr + value_length;
+		while (1) {
+			char *comma = (char *) php_memnstr(p1, ",", 1, endp);
+			char *p = comma ? comma : endp;
 			*p = '\0';
 			/* trim spaces */
 			while (p1 < p && (*p1 == ' ' || *p1 == '\t')) {
@@ -372,8 +372,11 @@ static int php_mb_parse_encoding_list(const char *value, size_t value_length,
 				*entry++ = encoding;
 				n++;
 			}
-			p1 = p2 + 1;
-		} while (n < size && p2 != NULL);
+			if (n >= size || comma == NULL) {
+				break;
+			}
+			p1 = comma + 1;
+		}
 		*return_list = list;
 		*return_size = n;
 		efree(tmpstr);
