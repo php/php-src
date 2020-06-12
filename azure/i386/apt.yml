@@ -40,7 +40,6 @@ steps:
                               libpq-dev:i386 \
                               libreadline-dev:i386 \
                               libffi-dev:i386 \
-                              libfreetype6-dev:i386 \
                               libsodium-dev:i386 \
                               ${{ parameters.packages }}
     displayName: 'APT'
