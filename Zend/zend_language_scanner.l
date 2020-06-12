@@ -2531,6 +2531,7 @@ skip_escape_conversion:
 	}
 
 	heredoc_label->label = estrndup(s, heredoc_label->length);
+	heredoc_label->indentation_uses_spaces = 0;
 	heredoc_label->indentation = 0;
 	saved_cursor = YYCURSOR;
 
