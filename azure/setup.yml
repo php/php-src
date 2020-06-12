@@ -1,0 +1,9 @@
+steps:
+  - script: |
+      set -e
+      sudo service mysql start
+      sudo service postgresql start
+      mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS test"
+      sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'postgres';"
+      sudo -u postgres psql -c "CREATE DATABASE test;"
+    displayName: 'Setup'
