@@ -287,9 +287,9 @@ static const mbfl_encoding *php_mb_get_encoding_or_pass(const char *encoding_nam
 	return mbfl_name2encoding(encoding_name);
 }
 
-static size_t count_commas(const char *p, size_t length) {
+static size_t count_commas(const char *p, const char *end) {
 	size_t count = 0;
-	while ((p = memchr(p, ',', length))) {
+	while ((p = memchr(p, ',', end - p))) {
 		count++;
 		p++;
 	}
@@ -322,13 +322,13 @@ static int php_mb_parse_encoding_list(const char *value, size_t value_length,
 			tmpstr = (char *)estrndup(value, value_length);
 		}
 
-		size = 1 + count_commas(tmpstr, value_length) + MBSTRG(default_detect_order_list_size);
+		endp = tmpstr + value_length;
+		size = 1 + count_commas(tmpstr, endp) + MBSTRG(default_detect_order_list_size);
 		list = (const mbfl_encoding **)pecalloc(size, sizeof(mbfl_encoding*), persistent);
 		entry = list;
 		n = 0;
 		included_auto = 0;
 		p1 = tmpstr;
-		endp = tmpstr + value_length;
 		while (1) {
 			char *comma = (char *) php_memnstr(p1, ",", 1, endp);
 			char *p = comma ? comma : endp;
