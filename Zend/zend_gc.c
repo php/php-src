@@ -704,15 +704,17 @@ tail_call:
 			zval *zv, *end;
 
 			ht = obj->handlers->get_gc(obj, &zv, &n);
-			end = zv + n;
 			if (EXPECTED(!ht) || UNEXPECTED(GC_REF_CHECK_COLOR(ht, GC_BLACK))) {
 				ht = NULL;
 				if (!n) goto next;
+				end = zv + n;
 				while (!Z_REFCOUNTED_P(--end)) {
 					if (zv == end) goto next;
 				}
 			} else {
 				GC_REF_SET_BLACK(ht);
+				if (!n) goto handle_ht;
+				end = zv + n;
 			}
 			while (zv != end) {
 				if (Z_REFCOUNTED_P(zv)) {
@@ -757,6 +759,7 @@ tail_call:
 		goto next;
 	}
 
+handle_ht:
 	if (!ht->nNumUsed) goto next;
 	p = ht->arData;
 	end = p + ht->nNumUsed;
@@ -822,15 +825,17 @@ static void gc_mark_grey(zend_refcounted *ref, gc_stack *stack)
 				zval *zv, *end;
 
 				ht = obj->handlers->get_gc(obj, &zv, &n);
-				end = zv + n;
 				if (EXPECTED(!ht) || UNEXPECTED(GC_REF_CHECK_COLOR(ht, GC_GREY))) {
 					ht = NULL;
 					if (!n) goto next;
+					end = zv + n;
 					while (!Z_REFCOUNTED_P(--end)) {
 						if (zv == end) goto next;
 					}
 				} else {
 					GC_REF_SET_COLOR(ht, GC_GREY);
+					if (!n) goto handle_ht;
+					end = zv + n;
 				}
 				while (zv != end) {
 					if (Z_REFCOUNTED_P(zv)) {
@@ -876,6 +881,7 @@ static void gc_mark_grey(zend_refcounted *ref, gc_stack *stack)
 			goto next;
 		}
 
+handle_ht:
 		if (!ht->nNumUsed) goto next;
 		p = ht->arData;
 		end = p + ht->nNumUsed;
@@ -1006,15 +1012,17 @@ tail_call:
 					zval *zv, *end;
 
 					ht = obj->handlers->get_gc(obj, &zv, &n);
-					end = zv + n;
 					if (EXPECTED(!ht) || UNEXPECTED(!GC_REF_CHECK_COLOR(ht, GC_GREY))) {
 						ht = NULL;
 						if (!n) goto next;
+						end = zv + n;
 						while (!Z_REFCOUNTED_P(--end)) {
 							if (zv == end) goto next;
 						}
 					} else {
 						GC_REF_SET_COLOR(ht, GC_WHITE);
+						if (!n) goto handle_ht;
+						end = zv + n;
 					}
 					while (zv != end) {
 						if (Z_REFCOUNTED_P(zv)) {
@@ -1057,6 +1065,7 @@ tail_call:
 				goto next;
 			}
 
+handle_ht:
 			if (!ht->nNumUsed) goto next;
 			p = ht->arData;
 			end = p + ht->nNumUsed;
@@ -1176,15 +1185,17 @@ static int gc_collect_white(zend_refcounted *ref, uint32_t *flags, gc_stack *sta
 					*flags |= GC_HAS_DESTRUCTORS;
 				}
 				ht = obj->handlers->get_gc(obj, &zv, &n);
-				end = zv + n;
 				if (EXPECTED(!ht) || UNEXPECTED(GC_REF_CHECK_COLOR(ht, GC_BLACK))) {
 					ht = NULL;
 					if (!n) goto next;
+					end = zv + n;
 					while (!Z_REFCOUNTED_P(--end)) {
 						if (zv == end) goto next;
 					}
 				} else {
 					GC_REF_SET_BLACK(ht);
+					if (!n) goto handle_ht;
+					end = zv + n;
 				}
 				while (zv != end) {
 					if (Z_REFCOUNTED_P(zv)) {
@@ -1229,6 +1240,7 @@ static int gc_collect_white(zend_refcounted *ref, uint32_t *flags, gc_stack *sta
 			goto next;
 		}
 
+handle_ht:
 		if (!ht->nNumUsed) goto next;
 		p = ht->arData;
 		end = p + ht->nNumUsed;
@@ -1351,12 +1363,15 @@ tail_call:
 				zval *zv, *end;
 
 				ht = obj->handlers->get_gc(obj, &zv, &n);
-				end = zv + n;
 				if (EXPECTED(!ht)) {
 					if (!n) return count;
+					end = zv + n;
 					while (!Z_REFCOUNTED_P(--end)) {
 						if (zv == end) return count;
 					}
+				} else {
+					if (!n) goto handle_ht;
+					end = zv + n;
 				}
 				while (zv != end) {
 					if (Z_REFCOUNTED_P(zv)) {
@@ -1382,6 +1397,7 @@ tail_call:
 			return count;
 		}
 
+handle_ht:
 		if (!ht->nNumUsed) return count;
 		p = ht->arData;
 		end = p + ht->nNumUsed;
