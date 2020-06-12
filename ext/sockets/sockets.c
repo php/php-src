@@ -99,6 +99,14 @@ static int le_socket;
 static int le_addrinfo;
 #define le_addrinfo_name php_sockets_le_addrinfo_name
 
+/* The AI_IDN_ALLOW_UNASSIGNED deprecations are implemented as a pragma GCC warning,
+ * using _Pragma() for macro support. As this warning is thrown without a warning
+ * category, it's also not possible to suppress it, because it is not part of
+ * -Wdeprecated-declarations or similar. We work around this by defining
+ * __glibc_macro_warning() to be empty. */
+#undef __glibc_macro_warning
+#define __glibc_macro_warning(message)
+
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_select, 0, 0, 4)
 	ZEND_ARG_INFO(1, read_fds)
