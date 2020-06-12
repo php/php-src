@@ -1328,14 +1328,14 @@ static int gc_collect_roots(uint32_t *flags, gc_stack *stack)
 	return count;
 }
 
-static int gc_remove_nested_data_from_buffer(zend_refcounted *ref, gc_root_buffer *root)
+static int gc_remove_nested_data_from_buffer(zend_refcounted *ref, gc_root_buffer *root, gc_stack *stack)
 {
 	HashTable *ht = NULL;
 	Bucket *p, *end;
 	zval *zv;
 	int count = 0;
+	GC_STACK_DCL(stack);
 
-tail_call:
 	do {
 		if (root) {
 			root = NULL;
@@ -1348,11 +1348,11 @@ tail_call:
 		} else if (GC_TYPE(ref) == IS_REFERENCE) {
 			if (Z_REFCOUNTED(((zend_reference*)ref)->val)) {
 				ref = Z_COUNTED(((zend_reference*)ref)->val);
-				goto tail_call;
+				continue;
 			}
-			return count;
+			goto next;
 		} else {
-			return count;
+			goto next;
 		}
 
 		if (GC_TYPE(ref) == IS_OBJECT) {
@@ -1364,10 +1364,10 @@ tail_call:
 
 				ht = obj->handlers->get_gc(obj, &zv, &n);
 				if (EXPECTED(!ht)) {
-					if (!n) return count;
+					if (!n) goto next;
 					end = zv + n;
 					while (!Z_REFCOUNTED_P(--end)) {
-						if (zv == end) return count;
+						if (zv == end) goto next;
 					}
 				} else {
 					if (!n) goto handle_ht;
@@ -1376,13 +1376,13 @@ tail_call:
 				while (zv != end) {
 					if (Z_REFCOUNTED_P(zv)) {
 						ref = Z_COUNTED_P(zv);
-						count += gc_remove_nested_data_from_buffer(ref, NULL);
+						GC_STACK_PUSH(ref);
 					}
 					zv++;
 				}
 				if (EXPECTED(!ht)) {
 					ref = Z_COUNTED_P(zv);
-					goto tail_call;
+					continue;
 				}
 handle_ht:
 				if (GC_REF_ADDRESS(ht) != 0 && GC_REF_CHECK_COLOR(ht, GC_BLACK)) {
@@ -1390,15 +1390,15 @@ handle_ht:
 					GC_REMOVE_FROM_BUFFER(ht);
 				}
 			} else {
-				return count;
+				goto next;
 			}
 		} else if (GC_TYPE(ref) == IS_ARRAY) {
 			ht = (zend_array*)ref;
 		} else {
-			return count;
+			goto next;
 		}
 
-		if (!ht->nNumUsed) return count;
+		if (!ht->nNumUsed) goto next;
 		p = ht->arData;
 		end = p + ht->nNumUsed;
 		while (1) {
@@ -1410,7 +1410,7 @@ handle_ht:
 			if (Z_REFCOUNTED_P(zv)) {
 				break;
 			}
-			if (p == end) return count;
+			if (p == end) goto next;
 		}
 		while (p != end) {
 			zv = &p->val;
@@ -1419,7 +1419,7 @@ handle_ht:
 			}
 			if (Z_REFCOUNTED_P(zv)) {
 				ref = Z_COUNTED_P(zv);
-				count += gc_remove_nested_data_from_buffer(ref, NULL);
+				GC_STACK_PUSH(ref);
 			}
 			p++;
 		}
@@ -1428,8 +1428,12 @@ handle_ht:
 			zv = Z_INDIRECT_P(zv);
 		}
 		ref = Z_COUNTED_P(zv);
-		goto tail_call;
-	} while (0);
+		continue;
+
+next:
+		ref = GC_STACK_POP();
+	} while (ref);
+	return count;
 }
 
 static void zend_get_gc_buffer_release();
@@ -1464,11 +1468,10 @@ ZEND_API int zend_gc_collect_cycles(void)
 		GC_TRACE("Collecting roots");
 		count = gc_collect_roots(&gc_flags, &stack);
 
-		gc_stack_free(&stack);
-
 		if (!GC_G(num_roots)) {
 			/* nothing to free */
 			GC_TRACE("Nothing to free");
+			gc_stack_free(&stack);
 			zend_get_gc_buffer_release();
 			GC_G(gc_active) = 0;
 			return 0;
@@ -1518,7 +1521,7 @@ ZEND_API int zend_gc_collect_cycles(void)
 			while (idx != end) {
 				if (GC_IS_DTOR_GARBAGE(current->ref)) {
 					p = GC_GET_PTR(current->ref);
-					count -= gc_remove_nested_data_from_buffer(p, current);
+					count -= gc_remove_nested_data_from_buffer(p, current, &stack);
 				}
 				current++;
 				idx++;
@@ -1556,6 +1559,8 @@ ZEND_API int zend_gc_collect_cycles(void)
 				return 0;
 			}
 		}
+
+		gc_stack_free(&stack);
 
 		/* Destroy zvals. The root buffer may be reallocated. */
 		GC_TRACE("Destroying zvals");
