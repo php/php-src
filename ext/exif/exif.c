@@ -1710,31 +1710,33 @@ static size_t double_to_size_t(double x) {
  * Evaluate number, be it int, rational, or float from directory. */
 static size_t exif_convert_any_to_int(void *value, int format, int motorola_intel)
 {
-	int 		s_den;
-	unsigned 	u_den;
-
-	switch(format) {
+	switch (format) {
 		case TAG_FMT_SBYTE:     return *(signed char *)value;
 		case TAG_FMT_BYTE:      return *(uchar *)value;
 
 		case TAG_FMT_USHORT:    return php_ifd_get16u(value, motorola_intel);
 		case TAG_FMT_ULONG:     return php_ifd_get32u(value, motorola_intel);
 
-		case TAG_FMT_URATIONAL:
-			u_den = php_ifd_get32u(4+(char *)value, motorola_intel);
+		case TAG_FMT_URATIONAL: {
+			unsigned u_den = php_ifd_get32u(4+(char *)value, motorola_intel);
 			if (u_den == 0) {
 				return 0;
 			} else {
 				return php_ifd_get32u(value, motorola_intel) / u_den;
 			}
+		}
 
-		case TAG_FMT_SRATIONAL:
-			s_den = php_ifd_get32s(4+(char *)value, motorola_intel);
+		case TAG_FMT_SRATIONAL: {
+			int s_num = php_ifd_get32s(value, motorola_intel);
+			int s_den = php_ifd_get32s(4+(char *)value, motorola_intel);
 			if (s_den == 0) {
 				return 0;
+			} else if (s_num == INT_MIN && s_den == -1) {
+				return INT_MAX;
 			} else {
-				return (size_t)((double)php_ifd_get32s(value, motorola_intel) / s_den);
+				return s_num / s_den;
 			}
+		}
 
 		case TAG_FMT_SSHORT:    return php_ifd_get16u(value, motorola_intel);
 		case TAG_FMT_SLONG:     return php_ifd_get32s(value, motorola_intel);
@@ -3473,7 +3475,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, con
 
 			case TAG_FOCALPLANE_RESOLUTION_UNIT:
 				REQUIRE_NON_EMPTY();
-				switch((int)exif_convert_any_format(value_ptr, format, ImageInfo->motorola_intel)) {
+				switch (exif_convert_any_to_int(value_ptr, format, ImageInfo->motorola_intel)) {
 					case 1: ImageInfo->FocalplaneUnits = 25.4; break; /* inch */
 					case 2:
 						/* According to the information I was using, 2 measn meters.
