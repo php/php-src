@@ -4579,7 +4579,7 @@ PHP_FUNCTION(exif_read_data)
 	}
 	if(ImageInfo.ExposureTime>0) {
 		float recip_exposure_time = 0.5f + 1.0f/ImageInfo.ExposureTime;
-		if (ImageInfo.ExposureTime <= 0.5 && recip_exposure_time < INT_MAX) {
+		if (ImageInfo.ExposureTime <= 0.5 && recip_exposure_time < (float)INT_MAX) {
 			exif_iif_add_fmt(&ImageInfo, SECTION_COMPUTED, "ExposureTime", "%0.3F s (1/%d)", ImageInfo.ExposureTime, (int) recip_exposure_time);
 		} else {
 			exif_iif_add_fmt(&ImageInfo, SECTION_COMPUTED, "ExposureTime", "%0.3F s", ImageInfo.ExposureTime);
