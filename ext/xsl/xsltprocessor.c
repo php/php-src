@@ -576,6 +576,14 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 		php_error_docref(NULL, E_WARNING, "Can't set libxslt security properties, not doing transformation for security reasons");
 	} else {
 		newdocp = xsltApplyStylesheetUser(style, doc, (const char**) params,  NULL, f, ctxt);
+		/* work around libxslt dropping the DTD */
+		if (doc->intSubset) {
+			if (doc->children == NULL) {
+				xmlAddChild((xmlNodePtr) doc, (xmlNodePtr) doc->intSubset);
+			} else {
+				xmlAddPrevSibling(doc->children, (xmlNodePtr) doc->intSubset);
+			} 
+		}
 	}
 	if (f) {
 		fclose(f);
