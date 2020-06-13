@@ -14,6 +14,10 @@ PHP                                                                        NEWS
   . Fixed bug #79683 (Fake reflection scope affects __toString()). (Nikita)
   . Fixed possibly unsupported timercmp() usage. (cmb)
 
+- Exif:
+  . Fixed bug #79687 (Sony picture - PHP Warning - Make, Model, MakerNotes). 
+    (cmb)
+
 - Fileinfo:
   . Fixed bug #79681 (mime_content_type/finfo returning incorrect mimetype).
     (cmb)
