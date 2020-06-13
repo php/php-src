@@ -8,6 +8,10 @@ PHP                                                                        NEWS
     Nikita)
   . Fixed possibly unsupported timercmp() usage. (cmb)
 
+- Exif:
+  . Fixed bug #79687 (Sony picture - PHP Warning - Make, Model, MakerNotes). 
+    (cmb)
+
 - Filter:
   . Fixed bug #73527 (Invalid memory access in php_filter_strip). (cmb)
 
