@@ -87,13 +87,9 @@ Options:
     --help
     -h          This Help.
 
-    --html <file> Generate HTML output.
-
     --temp-source <sdir>  --temp-target <tdir> [--temp-urlbase <url>]
                 Write temporary files to <tdir> by replacing <sdir> from the
-                filenames to generate with <tdir>. If --html is being used and
-                <url> given then the generated links are relative and prefixed
-                with the given url. In general you want to make <sdir> the path
+                filenames to generate with <tdir>. In general you want to make <sdir> the path
                 to your source files and <tdir> some patch in your web page
                 hierarchy with <url> pointing to <tdir>.
 
@@ -137,7 +133,7 @@ function main()
     global $DETAILED, $PHP_FAILED_TESTS, $SHOW_ONLY_GROUPS, $argc, $argv, $cfg,
            $cfgfiles, $cfgtypes, $conf_passed, $end_time, $environment,
            $exts_skipped, $exts_tested, $exts_to_test, $failed_tests_file,
-           $html_file, $html_output, $ignored_by_ext, $ini_overwrites, $is_switch,
+           $ignored_by_ext, $ini_overwrites, $is_switch,
            $just_save_results, $log_format, $matches, $no_clean, $no_file_cache,
            $optionals, $output_file, $pass_option_n, $pass_options,
            $pattern_match, $php, $php_cgi, $phpdbg, $preload, $redir_tests,
@@ -378,8 +374,6 @@ function main()
 
     $just_save_results = false;
     $valgrind = null;
-    $html_output = false;
-    $html_file = null;
     $temp_source = null;
     $temp_target = null;
     $temp_urlbase = null;
@@ -606,10 +600,6 @@ function main()
                         $repeat = true;
                     }
                     break;
-                case '--html':
-                    $html_file = fopen($argv[++$i], 'wt');
-                    $html_output = is_resource($html_file);
-                    break;
                 case '--version':
                     echo '$Id$' . "\n";
                     exit(1);
@@ -691,19 +681,11 @@ function main()
         usort($test_files, "test_sort");
         $start_time = time();
 
-        if (!$html_output) {
-            echo "Running selected tests.\n";
-        } else {
-            show_start($start_time);
-        }
+        echo "Running selected tests.\n";
 
         $test_idx = 0;
         run_all_tests($test_files, $environment);
         $end_time = time();
-
-        if ($html_output) {
-            show_end($end_time);
-        }
 
         if ($failed_tests_file) {
             fclose($failed_tests_file);
@@ -719,15 +701,8 @@ function main()
         }
 
         compute_summary();
-        if ($html_output) {
-            fwrite($html_file, "<hr/>\n" . get_summary(false, true));
-        }
         echo "=====================================================================";
         echo get_summary(false, false);
-
-        if ($html_output) {
-            fclose($html_file);
-        }
 
         if ($output_file != '' && $just_save_results) {
             save_or_mail_results();
@@ -791,10 +766,6 @@ function main()
 
         show_end($end_time);
         show_summary();
-
-        if ($html_output) {
-            fclose($html_file);
-        }
 
         save_or_mail_results();
     }
@@ -3014,7 +2985,7 @@ function compute_summary()
     }
 }
 
-function get_summary($show_ext_summary, $show_html)
+function get_summary($show_ext_summary)
 {
     global $exts_skipped, $exts_tested, $n_total, $sum_results, $percent_results, $end_time, $start_time, $failed_test_summary, $PHP_FAILED_TESTS, $valgrind;
 
@@ -3032,10 +3003,6 @@ function get_summary($show_ext_summary, $show_html)
     }
 
     $summary = '';
-
-    if ($show_html) {
-        $summary .= "<pre>\n";
-    }
 
     if ($show_ext_summary) {
         $summary .= '
@@ -3178,55 +3145,27 @@ EXPECTED LEAK TEST SUMMARY
         $summary .= $failed_test_summary;
     }
 
-    if ($show_html) {
-        $summary .= "</pre>";
-    }
-
     return $summary;
 }
 
 function show_start($start_time)
 {
-    global $html_output, $html_file;
-
-    if ($html_output) {
-        fwrite($html_file, "<h2>Time Start: " . date('Y-m-d H:i:s', $start_time) . "</h2>\n");
-        fwrite($html_file, "<table>\n");
-    }
-
     echo "TIME START " . date('Y-m-d H:i:s', $start_time) . "\n=====================================================================\n";
 }
 
 function show_end($end_time)
 {
-    global $html_output, $html_file;
-
-    if ($html_output) {
-        fwrite($html_file, "</table>\n");
-        fwrite($html_file, "<h2>Time End: " . date('Y-m-d H:i:s', $end_time) . "</h2>\n");
-    }
-
     echo "=====================================================================\nTIME END " . date('Y-m-d H:i:s', $end_time) . "\n";
 }
 
 function show_summary()
 {
-    global $html_output, $html_file;
-
-    if ($html_output) {
-        fwrite($html_file, "<hr/>\n" . get_summary(true, true));
-    }
-
     echo get_summary(true, false);
 }
 
 function show_redirect_start($tests, $tested, $tested_file)
 {
-    global $html_output, $html_file, $line_length, $SHOW_ONLY_GROUPS;
-
-    if ($html_output) {
-        fwrite($html_file, "<tr><td colspan='3'>---&gt; $tests ($tested [$tested_file]) begin</td></tr>\n");
-    }
+    global $SHOW_ONLY_GROUPS;
 
     if (!$SHOW_ONLY_GROUPS || in_array('REDIRECT', $SHOW_ONLY_GROUPS)) {
         echo "REDIRECT $tests ($tested [$tested_file]) begin\n";
@@ -3237,11 +3176,7 @@ function show_redirect_start($tests, $tested, $tested_file)
 
 function show_redirect_ends($tests, $tested, $tested_file)
 {
-    global $html_output, $html_file, $line_length, $SHOW_ONLY_GROUPS;
-
-    if ($html_output) {
-        fwrite($html_file, "<tr><td colspan='3'>---&gt; $tests ($tested [$tested_file]) done</td></tr>\n");
-    }
+    global $SHOW_ONLY_GROUPS;
 
     if (!$SHOW_ONLY_GROUPS || in_array('REDIRECT', $SHOW_ONLY_GROUPS)) {
         echo "REDIRECT $tests ($tested [$tested_file]) done\n";
@@ -3282,7 +3217,7 @@ function parse_conflicts(string $text): array
 
 function show_result($result, $tested, $tested_file, $extra = '', $temp_filenames = null)
 {
-    global $html_output, $html_file, $temp_target, $temp_urlbase, $line_length, $SHOW_ONLY_GROUPS;
+    global $temp_target, $temp_urlbase, $line_length, $SHOW_ONLY_GROUPS;
 
     if (!$SHOW_ONLY_GROUPS || in_array($result, $SHOW_ONLY_GROUPS)) {
         echo "$result $tested [$tested_file] $extra\n";
@@ -3290,48 +3225,6 @@ function show_result($result, $tested, $tested_file, $extra = '', $temp_filename
         clear_show_test();
     }
 
-    if ($html_output) {
-        if (isset($temp_filenames['file']) && file_exists($temp_filenames['file'])) {
-            $url = str_replace($temp_target, $temp_urlbase, $temp_filenames['file']);
-            $tested = "<a href='$url'>$tested</a>";
-        }
-
-        if (isset($temp_filenames['skip']) && file_exists($temp_filenames['skip'])) {
-            if (empty($extra)) {
-                $extra = "skipif";
-            }
-
-            $url = str_replace($temp_target, $temp_urlbase, $temp_filenames['skip']);
-            $extra = "<a href='$url'>$extra</a>";
-        } elseif (empty($extra)) {
-            $extra = "&nbsp;";
-        }
-
-        if (isset($temp_filenames['diff']) && file_exists($temp_filenames['diff'])) {
-            $url = str_replace($temp_target, $temp_urlbase, $temp_filenames['diff']);
-            $diff = "<a href='$url'>diff</a>";
-        } else {
-            $diff = "&nbsp;";
-        }
-
-        if (isset($temp_filenames['mem']) && file_exists($temp_filenames['mem'])) {
-            $url = str_replace($temp_target, $temp_urlbase, $temp_filenames['mem']);
-            $mem = "<a href='$url'>leaks</a>";
-        } else {
-            $mem = "&nbsp;";
-        }
-
-        fwrite(
-            $html_file,
-            "<tr>" .
-                "<td>$result</td>" .
-                "<td>$tested</td>" .
-                "<td>$extra</td>" .
-                "<td>$diff</td>" .
-                "<td>$mem</td>" .
-                "</tr>\n"
-        );
-    }
 }
 
 function junit_init()
