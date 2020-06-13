@@ -31,6 +31,9 @@
 # include <sys/sysctl.h>
 #elif defined(__NetBSD__)
 # include <lwp.h>
+#elif defined(__sun)
+// avoiding thread.h inclusion as it conflicts with vtunes types.
+extern unsigned int thr_self(void);
 #endif
 
 #include "zend_elf.h"
@@ -126,6 +129,9 @@ static void zend_jit_perf_jitdump_open(void)
 		return;
 	}
 	fd = open(path, O_RDONLY);
+#elif defined(__sun)
+	const char *path = getexecname();
+	fd = open(path, O_RDONLY);
 #else
 	fd = -1;
 #endif
@@ -209,6 +215,8 @@ static void zend_jit_perf_jitdump_register(const char *name, void *start, size_t
 		thread_id = getthrid();
 #elif defined(__NetBSD__)
 		thread_id = _lwp_self();
+#elif defined(__sun)
+		thread_id = thr_self();
 #endif
 
 		memset(&rec, 0, sizeof(rec));
