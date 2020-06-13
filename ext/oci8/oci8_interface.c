@@ -1556,14 +1556,14 @@ PHP_FUNCTION(oci_close)
 	zval *z_connection;
 	php_oci_connection *connection;
 
-	if (OCI_G(old_oci_close_semantics)) {
-		/* do nothing to keep BC */
-		return;
-	}
-
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_RESOURCE(z_connection)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (OCI_G(old_oci_close_semantics)) {
+		/* do nothing to keep BC */
+		RETURN_NULL();
+	}
 
 	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
 	if (GC_REFCOUNT(connection->id) == 2) { /* CHANGED VERSION::PHP7
@@ -2255,7 +2255,6 @@ PHP_FUNCTION(oci_collection_element_get)
 	zval *tmp, *z_collection;
 	php_oci_collection *collection;
 	zend_long element_index;
-	zval value;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Ol", &z_collection, oci_coll_class_entry_ptr, &element_index) == FAILURE) {
 		RETURN_THROWS();
