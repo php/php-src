@@ -36,7 +36,7 @@
 #include <unistd.h>
 #endif
 
-#ifdef ZEND_SIGNALS
+#ifdef HAVE_SIGACTION
 
 #include "zend_signal.h"
 
@@ -441,5 +441,9 @@ ZEND_API void zend_signal_startup(void)
 }
 /* }}} */
 
+ZEND_API void zend_signal_disable_debug(void)
+{
+	SIGG(check) = 0;
+}
 
-#endif /* ZEND_SIGNALS */
+#endif /* HAVE_SIGACTION */

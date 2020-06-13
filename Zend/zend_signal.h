@@ -21,7 +21,7 @@
 #ifndef ZEND_SIGNAL_H
 #define ZEND_SIGNAL_H
 
-#ifdef ZEND_SIGNALS
+#ifdef HAVE_SIGACTION
 
 #include <signal.h>
 
@@ -61,6 +61,8 @@ typedef struct _zend_signal_globals_t {
 	zend_signal_queue_t pstorage[ZEND_SIGNAL_QUEUE_SIZE], *phead, *ptail, *pavail; /* pending queue */
 } zend_signal_globals_t;
 
+# define SIZEOF_ZEND_SIGNAL_GLOBALS sizeof(zend_signal_globals_t)
+
 # ifdef ZTS
 #  define SIGG(v) ZEND_TSRMG_FAST(zend_signal_globals_offset, zend_signal_globals_t *, v)
 BEGIN_EXTERN_C()
@@ -89,11 +91,14 @@ BEGIN_EXTERN_C()
 ZEND_API void zend_signal_startup(void);
 END_EXTERN_C()
 void zend_signal_init(void);
+ZEND_API void zend_signal_disable_debug(void);
 
 ZEND_API int zend_signal(int signo, void (*handler)(int));
 ZEND_API int zend_sigaction(int signo, const struct sigaction *act, struct sigaction *oldact);
 
-#else /* ZEND_SIGNALS */
+#else /* HAVE_SIGACTION */
+
+# define SIZEOF_ZEND_SIGNAL_GLOBALS 0
 
 # define ZEND_SIGNAL_BLOCK_INTERRUPTIONS()
 # define ZEND_SIGNAL_UNBLOCK_INTERRUPTIONS()
@@ -102,10 +107,11 @@ ZEND_API int zend_sigaction(int signo, const struct sigaction *act, struct sigac
 # define zend_signal_deactivate()
 # define zend_signal_startup()
 # define zend_signal_init()
+# define zend_signal_disable_debug()
 
 # define zend_signal(signo, handler)           signal(signo, handler)
 # define zend_sigaction(signo, act, oldact)    sigaction(signo, act, oldact)
 
-#endif /* ZEND_SIGNALS */
+#endif /* HAVE_SIGACTION */
 
 #endif /* ZEND_SIGNAL_H */
