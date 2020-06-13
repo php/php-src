@@ -262,13 +262,11 @@ PHP_FUNCTION(oci_bind_array_by_name)
    Deletes large object description */
 PHP_FUNCTION(oci_free_descriptor)
 {
-	zval *tmp, *z_descriptor = getThis();
+	zval *tmp, *z_descriptor;
 	php_oci_descriptor *descriptor;
 
-	if (!getThis()) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &z_descriptor, oci_lob_class_entry_ptr) == FAILURE) {
-			RETURN_THROWS();
-		}
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &z_descriptor, oci_lob_class_entry_ptr) == FAILURE) {
+		RETURN_THROWS();
 	}
 
 	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor")-1)) == NULL) {
