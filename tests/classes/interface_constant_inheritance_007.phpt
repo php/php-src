@@ -6,4 +6,4 @@ interface A {
     private const FOO = 10;
 }
 --EXPECTF--
-Fatal error: Access type for interface constant A::FOO must be public in %s on line 3
+Fatal error: Access type for interface constant A::FOO can not be private in %s on line 3
