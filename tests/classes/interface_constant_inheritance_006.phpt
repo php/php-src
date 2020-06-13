@@ -1,8 +1,8 @@
 --TEST--
-Ensure a interface can have protected constants
+Ensure an interface can have protected constants
 --FILE--
 <?php
-interface IA {
+interface I {
     protected const FOO = 10;
 }
 
