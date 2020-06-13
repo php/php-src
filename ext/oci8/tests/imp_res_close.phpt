@@ -41,12 +41,17 @@ oci8_test_sql_execute($c, $stmtarray);
 echo "Test 1\n";
 $s = oci_parse($c, "begin imp_res_close_proc(); end;");
 oci_execute($s);
-while (($row = oci_fetch_array($s, OCI_ASSOC+OCI_RETURN_NULLS)) != false) {
-    foreach ($row as $item) {
-        echo "  ".$item;
+
+try {
+    while (($row = oci_fetch_array($s, OCI_ASSOC+OCI_RETURN_NULLS)) != false) {
+        foreach ($row as $item) {
+            echo "  ".$item;
+        }
+        echo "\n";
+        oci_free_statement($s);  // Free the implicit result handle
     }
-    echo "\n";
-    oci_free_statement($s);  // Free the implicit result handle
+} catch(\TypeError $exception) {
+    var_dump($exception->getMessage());
 }
 
 // Clean up
@@ -61,5 +66,4 @@ oci8_test_sql_execute($c, $stmtarray);
 --EXPECTF--
 Test 1
   1
-
-Warning: oci_fetch_array(): supplied resource is not a valid oci8 statement resource in %simp_res_close.php on line %d
+string(%d) "oci_fetch_array(): supplied resource is not a valid oci8 statement resource"

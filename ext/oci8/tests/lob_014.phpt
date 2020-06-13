@@ -29,7 +29,6 @@ var_dump($blob->write("test"));
 var_dump($blob->close());
 var_dump($blob->write("test"));
 var_dump($blob->free());
-var_dump($blob->write("test"));
 
 oci_commit($c);
 
@@ -49,9 +48,6 @@ int(4)
 bool(true)
 int(4)
 bool(true)
-
-Warning: OCI-Lob::write(): %s is not a valid oci8 descriptor resource in %slob_014.php on line %d
-bool(false)
 array(1) {
   [0]=>
   string(8) "testtest"

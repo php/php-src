@@ -20,9 +20,9 @@ echo "\nTest 2 - Parse\n";
 
 $s = @oci_parse($c, "select ' from dual");
 if (!$s) {
-    var_dump(oci_error(), oci_error($c), oci_error($s));
+    var_dump(oci_error(), oci_error($c));
     echo "2nd call\n";
-    var_dump(oci_error(), oci_error($c), oci_error($s));
+    var_dump(oci_error(), oci_error($c));
 }
 
 echo "\nTest 3 - Execute\n";
@@ -164,8 +164,6 @@ array(4) {
 }
 
 Test 2 - Parse
-
-Warning: oci_error(): Argument #1 must be of type resource, bool%sgiven in %sbug51291_1.php on line %d
 bool(false)
 array(4) {
   ["code"]=>
@@ -177,10 +175,7 @@ array(4) {
   ["sqltext"]=>
   string(0) ""
 }
-NULL
 2nd call
-
-Warning: oci_error(): Argument #1 must be of type resource, bool%sgiven in %sbug51291_1.php on line %d
 bool(false)
 array(4) {
   ["code"]=>
@@ -192,7 +187,6 @@ array(4) {
   ["sqltext"]=>
   string(0) ""
 }
-NULL
 
 Test 3 - Execute
 array(4) {

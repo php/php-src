@@ -50,7 +50,7 @@ if (!oci_execute($s)) {
 
 while ($row = oci_fetch_object($s)) {
     echo $row->COL1 . "\n";
-    echo $row->COL2->load(100) . "\n";
+    echo $row->COL2->load() . "\n";
     echo $row->COL3 . "\n";
 }
 
