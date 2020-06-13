@@ -452,7 +452,7 @@ function main()
                         foreach ($test_list as $test) {
                             $matches =[];
                             if (preg_match('/^#.*\[(.*)\]\:\s+(.*)$/', $test, $matches)) {
-                                $redir_tests[] = [matches[1], $matches[2]];
+                                $redir_tests[] = [matches[1], $matches[2];
                             } else {
                                 if (strlen($test)) {
                                     $test_files[] = trim($test);
@@ -707,7 +707,7 @@ function main()
         $ignored_by_ext = 0;
         sort($exts_to_test);
         $test_dirs =[];
-        $optionals = ['Zend', 'tests', 'ext', 'sapi'];
+        $optionals = array('Zend', 'tests', 'ext', 'sapi');
 
         foreach ($optionals as $dir) {
             if (is_dir($dir)) {
@@ -1776,7 +1776,7 @@ TEST $file
     }
 
     // Load the sections of the test file.
-    $section_text = ['TEST' => ''];
+    $section_text = array('TEST' => '');
 
     $fp = fopen($file, "rb") or error("Cannot open test file: $file");
 
@@ -2969,7 +2969,7 @@ function compute_summary()
 
     $n_total = count($test_results);
     $n_total += $ignored_by_ext;
-    $sum_results = [
+    $sum_results = array(
         'PASSED' => 0,
         'WARNED' => 0,
         'SKIPPED' => 0,
@@ -2978,7 +2978,7 @@ function compute_summary()
         'LEAKED' => 0,
         'XFAILED' => 0,
         'XLEAKED' => 0
-    ];
+    );
 
     foreach ($test_results as $v) {
         $sum_results[$v]++;
