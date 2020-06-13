@@ -61,6 +61,9 @@ void zend_elf_load_symbols(void)
 		return;
 	}
 	int fd = open(path, O_RDONLY);
+#elif defined(__sun)
+	const char *path = getexecname();
+	int fd = open(path, O_RDONLY);
 #else
 	// To complete eventually for other ELF platforms.
 	// Otherwise APPLE is Mach-O
