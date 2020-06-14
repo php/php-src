@@ -61,9 +61,9 @@ static zend_class_entry *dir_class_entry_ptr;
 #define FETCH_DIRP() \
 	ZEND_PARSE_PARAMETERS_START(0, 1) \
 		Z_PARAM_OPTIONAL \
-		Z_PARAM_RESOURCE(id) \
+		Z_PARAM_RESOURCE_OR_NULL(id) \
 	ZEND_PARSE_PARAMETERS_END(); \
-	if (ZEND_NUM_ARGS() == 0) { \
+	if (id == NULL) { \
 		myself = getThis(); \
 		if (myself) { \
 			if ((tmp = zend_hash_str_find(Z_OBJPROP_P(myself), "handle", sizeof("handle")-1)) == NULL) { \

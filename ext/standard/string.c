@@ -268,16 +268,17 @@ static void php_spn_common_handler(INTERNAL_FUNCTION_PARAMETERS, int behavior) /
 {
 	zend_string *s11, *s22;
 	zend_long start = 0, len = 0;
+	zend_bool len_is_null = 1;
 
 	ZEND_PARSE_PARAMETERS_START(2, 4)
 		Z_PARAM_STR(s11)
 		Z_PARAM_STR(s22)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(start)
-		Z_PARAM_LONG(len)
+		Z_PARAM_LONG_OR_NULL(len, len_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (ZEND_NUM_ARGS() < 4) {
+	if (len_is_null) {
 		len = ZSTR_LEN(s11);
 	}
 
@@ -1301,10 +1302,10 @@ PHP_FUNCTION(strtok)
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR(tok)
+		Z_PARAM_STR_OR_NULL(tok)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (ZEND_NUM_ARGS() == 1) {
+	if (!tok) {
 		tok = str;
 	} else {
 		zval_ptr_dtor(&BG(strtok_zval));
@@ -1649,14 +1650,19 @@ PHP_FUNCTION(pathinfo)
 	char *path, *dirname;
 	size_t path_len;
 	int have_basename;
-	zend_long opt = PHP_PATHINFO_ALL;
+	zend_long opt;
 	zend_string *ret = NULL;
+	zend_bool opt_is_null = 1;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STRING(path, path_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(opt)
+		Z_PARAM_LONG_OR_NULL(opt, opt_is_null)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (opt_is_null) {
+		opt = PHP_PATHINFO_ALL;
+	}
 
 	have_basename = ((opt & PHP_PATHINFO_BASENAME) == PHP_PATHINFO_BASENAME);
 
@@ -2306,7 +2312,7 @@ PHP_FUNCTION(substr_replace)
 		Z_PARAM_STR_OR_ARRAY_HT(repl_str, repl_ht)
 		Z_PARAM_ZVAL(from)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL(len)
+		Z_PARAM_ZVAL_OR_NULL(len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (Z_TYPE_P(from) != IS_ARRAY) {
@@ -3273,19 +3279,18 @@ PHP_FUNCTION(strtr)
 	HashTable *from_ht = NULL;
 	char *to = NULL;
 	size_t to_len = 0;
-	int ac = ZEND_NUM_ARGS();
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STR(str)
 		Z_PARAM_STR_OR_ARRAY_HT(from_str, from_ht)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING(to, to_len)
+		Z_PARAM_STRING_OR_NULL(to, to_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (ac == 2 && from_ht == NULL) {
+	if (!to && from_ht == NULL) {
 		zend_argument_type_error(2, "must be of type array, string given");
 		RETURN_THROWS();
-	} else if (ac != 2 && from_str == NULL) {
+	} else if (to && from_str == NULL) {
 		zend_argument_type_error(2, "must be of type string, array given");
 		RETURN_THROWS();
 	}
@@ -3295,7 +3300,7 @@ PHP_FUNCTION(strtr)
 		RETURN_EMPTY_STRING();
 	}
 
-	if (ac == 2) {
+	if (!to) {
 		if (zend_hash_num_elements(from_ht) < 1) {
 			RETURN_STR_COPY(str);
 		} else if (zend_hash_num_elements(from_ht) == 1) {
@@ -4331,14 +4336,13 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensit
 	zend_string *string_key;
 	zend_ulong num_key;
 	zend_long count = 0;
-	int argc = ZEND_NUM_ARGS();
 
 	ZEND_PARSE_PARAMETERS_START(3, 4)
 		Z_PARAM_ZVAL(search)
 		Z_PARAM_ZVAL(replace)
 		Z_PARAM_STR_OR_ARRAY_HT(subject_str, subject_ht)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL(zcount)
+		Z_PARAM_ZVAL_OR_NULL(zcount)
 	ZEND_PARSE_PARAMETERS_END();
 
 	/* Make sure we're dealing with strings and do the replacement. */
@@ -4378,7 +4382,8 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensit
 	} else {	/* if subject is not an array */
 		count = php_str_replace_in_subject(search, replace, subject_str, return_value, case_sensitivity);
 	}
-	if (argc > 3) {
+
+	if (zcount) {
 		ZEND_TRY_ASSIGN_REF_LONG(zcount, count);
 	}
 }
@@ -4663,7 +4668,7 @@ PHP_FUNCTION(strip_tags)
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL(allow)
+		Z_PARAM_ZVAL_OR_NULL(allow)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (allow) {

@@ -110,9 +110,9 @@ function min(mixed $arg, mixed ...$args): mixed {}
 
 function max(mixed $arg, mixed ...$args): mixed {}
 
-function array_walk(array|object &$input, callable $funcname, $userdata = UNKNOWN): bool {}
+function array_walk(array|object &$input, callable $funcname, mixed $userdata = null): bool {}
 
-function array_walk_recursive(array|object &$input, callable $funcname, $userdata = UNKNOWN): bool {}
+function array_walk_recursive(array|object &$input, callable $funcname, mixed $userdata = null): bool {}
 
 function in_array(mixed $needle, array $haystack, bool $strict = false): bool {}
 
@@ -154,7 +154,7 @@ function array_replace(array $arr1, array ...$arrays): array {}
 
 function array_replace_recursive(array $arr1, array ...$arrays): array {}
 
-function array_keys(array $arg, $search_value = UNKNOWN, bool $strict = false): array {}
+function array_keys(array $arg, $search_value = null, bool $strict = false): array {}
 
 function array_key_first(array $arg): int|string|null {}
 
@@ -255,7 +255,7 @@ function ip2long(string $ip_address): int|false {}
 
 function long2ip(int $proper_address): string|false {}
 
-function getenv(string $variable = UNKNOWN, bool $local_only = false): string|array|false {}
+function getenv(?string $variable = null, bool $local_only = false): string|array|false {}
 
 #ifdef HAVE_PUTENV
 function putenv(string $setting): bool {}
@@ -279,7 +279,7 @@ function get_current_user(): string {}
 
 function get_cfg_var(string $option_name): string|array|false {}
 
-function error_log(string $message, int $message_type = 0, string $destination = UNKNOWN, string $extra_headers = UNKNOWN): bool {}
+function error_log(string $message, int $message_type = 0, ?string $destination = null, ?string $extra_headers = null): bool {}
 
 function error_get_last(): ?array {}
 
@@ -326,7 +326,7 @@ function connection_aborted(): int {}
 
 function connection_status(): int {}
 
-function ignore_user_abort(bool $value = UNKNOWN): int {}
+function ignore_user_abort(?bool $value = null): int {}
 
 #if HAVE_GETSERVBYNAME
 function getservbyname(string $service, string $protocol): int|false {}
@@ -495,7 +495,7 @@ function htmlspecialchars(string $string, int $quote_style = ENT_COMPAT, ?string
 
 function htmlspecialchars_decode(string $string, int $quote_style = ENT_COMPAT): string|false {}
 
-function html_entity_decode(string $string, int $quote_style = ENT_COMPAT, string $encoding = UNKNOWN): string|false {}
+function html_entity_decode(string $string, int $quote_style = ENT_COMPAT, ?string $encoding = null): string|false {}
 
 function htmlentities(string $string, int $quote_style = ENT_COMPAT, ?string $encoding = null, bool $double_encode = true): string {}
 
@@ -508,7 +508,7 @@ function get_html_translation_table(int $table = HTML_SPECIALCHARS, int $quote_s
 /** @param mixed $assertion */
 function assert($assertion, $description = null): bool {}
 
-function assert_options(int $what, $value = UNKNOWN): array|object|int|string|bool|null {}
+function assert_options(int $what, mixed $value = null): array|object|int|string|bool|null {}
 
 /* string.c */
 
@@ -516,9 +516,9 @@ function bin2hex(string $data): string {}
 
 function hex2bin(string $data): string|false {}
 
-function strspn(string $str, string $mask, int $start = 0, int $len = UNKNOWN): int|false {}
+function strspn(string $str, string $mask, int $start = 0, ?int $len = null): int|false {}
 
-function strcspn(string $str, string $mask, int $start = 0, int $len = UNKNOWN): int|false {}
+function strcspn(string $str, string $mask, int $start = 0, ?int $len = null): int|false {}
 
 #if HAVE_NL_LANGINFO
 function nl_langinfo(int $item): string|false {}
@@ -544,7 +544,7 @@ function implode(string|array $glue, array $pieces = UNKNOWN): string {}
 /** @alias implode */
 function join(string|array $glue, array $pieces = UNKNOWN): string {}
 
-function strtok(string $str, string $token = UNKNOWN): string|false {}
+function strtok(string $str, ?string $token = null): string|false {}
 
 function strtoupper(string $str): string {}
 
@@ -554,7 +554,7 @@ function basename(string $path, string $suffix = ""): string {}
 
 function dirname(string $path, int $levels = 1): string {}
 
-function pathinfo(string $path, int $options = UNKNOWN): array|string {}
+function pathinfo(string $path, ?int $options = null): array|string {}
 
 function stristr(string $haystack, string $needle, bool $before_needle = false): string|false {}
 
@@ -583,12 +583,8 @@ function chunk_split(string $str, int $chunklen = 76, string $ending = "\r\n"): 
 
 function substr(string $str, int $start, ?int $length = null): string|false {}
 
-/**
- * @param mixed $start
- * @param mixed $length
- */
 function substr_replace(
-    string|array $str, string|array $replace, $start, $length = UNKNOWN): string|array|false {}
+    string|array $str, string|array $replace, mixed $start, mixed $length = null): string|array|false {}
 
 function quotemeta(string $str): string {}
 
@@ -602,7 +598,7 @@ function lcfirst(string $str): string {}
 
 function ucwords(string $str, string $delimiters = " \t\r\n\f\v"): string {}
 
-function strtr(string $str, string|array $from, string $to = UNKNOWN): string {}
+function strtr(string $str, string|array $from, ?string $to = null): string {}
 
 function strrev(string $str): string {}
 
@@ -623,7 +619,7 @@ function stripslashes(string $str): string {}
  * @param int $replace_count
  */
 function str_replace(
-    $search, $replace, string|array $subject, &$replace_count = UNKNOWN): string|array {}
+    $search, $replace, string|array $subject, &$replace_count = null): string|array {}
 
 /**
  * @param string|array $search
@@ -631,14 +627,14 @@ function str_replace(
  * @param int $replace_count
  */
 function str_ireplace(
-    $search, $replace, string|array $subject, &$replace_count = UNKNOWN): string|array {}
+    $search, $replace, string|array $subject, &$replace_count = null): string|array {}
 
 function hebrev(string $str, int $max_chars_per_line = 0): string {}
 
 function nl2br(string $str, bool $is_xhtml = true): string {}
 
 /** @param array|string|null $allowable_tags */
-function strip_tags(string $str, $allowable_tags = UNKNOWN): string {}
+function strip_tags(string $str, $allowable_tags = null): string {}
 
 /**
  * @param string|array $locales

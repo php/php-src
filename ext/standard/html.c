@@ -1403,7 +1403,7 @@ PHP_FUNCTION(html_entity_decode)
 		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(quote_style)
-		Z_PARAM_STR(hint_charset)
+		Z_PARAM_STR_OR_NULL(hint_charset)
 	ZEND_PARSE_PARAMETERS_END();
 
 	replaced = php_unescape_html_entities(

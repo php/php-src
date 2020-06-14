@@ -1547,6 +1547,9 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_value_error(uint32_t arg_num
 #define Z_PARAM_PATH(dest, dest_len) \
 	Z_PARAM_PATH_EX(dest, dest_len, 0, 0)
 
+#define Z_PARAM_PATH_OR_NULL(dest, dest_len) \
+	Z_PARAM_PATH_EX(dest, dest_len, 1, 0)
+
 /* old "P" */
 #define Z_PARAM_PATH_STR_EX2(dest, check_null, deref, separate) \
 		Z_PARAM_PROLOGUE(deref, separate); \
@@ -1626,6 +1629,9 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_value_error(uint32_t arg_num
 
 #define Z_PARAM_ZVAL(dest) \
 	Z_PARAM_ZVAL_EX(dest, 0, 0)
+
+#define Z_PARAM_ZVAL_OR_NULL(dest) \
+	Z_PARAM_ZVAL_EX(dest, 1, 0)
 
 /* old "+" and "*" */
 #define Z_PARAM_VARIADIC_EX(spec, dest, dest_num, post_varargs) do { \

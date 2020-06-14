@@ -743,7 +743,7 @@ PHP_FUNCTION(getenv)
 
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_STRING_OR_NULL(str, str_len)
 		Z_PARAM_BOOL(local_only)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -1456,7 +1456,7 @@ PHP_FUNCTION(error_log)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(erropt)
 		Z_PARAM_PATH(opt, opt_len)
-		Z_PARAM_STRING(headers, headers_len)
+		Z_PARAM_STRING_OR_NULL(headers, headers_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (argc > 1) {
@@ -2313,17 +2313,17 @@ PHP_FUNCTION(connection_status)
    Set whether we want to ignore a user abort event or not */
 PHP_FUNCTION(ignore_user_abort)
 {
-	zend_bool arg = 0;
+	zend_bool arg = 0, arg_is_null = 1;
 	int old_setting;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_BOOL(arg)
+		Z_PARAM_BOOL_OR_NULL(arg, arg_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
 	old_setting = (unsigned short)PG(ignore_user_abort);
 
-	if (ZEND_NUM_ARGS()) {
+	if (!arg_is_null) {
 		zend_string *key = zend_string_init("ignore_user_abort", sizeof("ignore_user_abort") - 1, 0);
 		zend_alter_ini_entry_chars(key, arg ? "1" : "0", 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 		zend_string_release_ex(key, 0);

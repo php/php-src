@@ -1413,7 +1413,7 @@ PHP_FUNCTION(array_walk)
 		Z_PARAM_ARRAY_OR_OBJECT_EX(array, 0, 1)
 		Z_PARAM_FUNC(BG(array_walk_fci), BG(array_walk_fci_cache))
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL(userdata)
+		Z_PARAM_ZVAL_OR_NULL(userdata)
 	ZEND_PARSE_PARAMETERS_END_EX(
 		BG(array_walk_fci) = orig_array_walk_fci;
 		BG(array_walk_fci_cache) = orig_array_walk_fci_cache;
@@ -1444,7 +1444,7 @@ PHP_FUNCTION(array_walk_recursive)
 		Z_PARAM_ARRAY_OR_OBJECT_EX(array, 0, 1)
 		Z_PARAM_FUNC(BG(array_walk_fci), BG(array_walk_fci_cache))
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL(userdata)
+		Z_PARAM_ZVAL_OR_NULL(userdata)
 	ZEND_PARSE_PARAMETERS_END_EX(
 		BG(array_walk_fci) = orig_array_walk_fci;
 		BG(array_walk_fci_cache) = orig_array_walk_fci_cache;
@@ -3896,7 +3896,7 @@ PHP_FUNCTION(array_keys)
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_ARRAY(input)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL(search_value)
+		Z_PARAM_ZVAL_OR_NULL(search_value)
 		Z_PARAM_BOOL(strict)
 	ZEND_PARSE_PARAMETERS_END();
 	arrval = Z_ARRVAL_P(input);
