@@ -80,7 +80,7 @@ function oci_lob_seek(OCI_Lob $lob_descriptor, int $offset, int $whence = OCI_SE
 
 function oci_lob_size(OCI_Lob $lob_descriptor): int|false {}
 
-function oci_lob_write(OCI_Lob $lob_descriptor, string $string, ?int $length = null): int|false {}
+function oci_lob_write(OCI_Lob $lob_descriptor, string $string, int $length = UNKNOWN): int|false {}
 
 function oci_lob_append(OCI_Lob $lob_descriptor_to, OCI_Lob $lob_descriptor_from): bool {}
 
@@ -362,7 +362,7 @@ function ocilogoff($connection_resource): bool {}
 /**
  * @return resource|false
  */
-function oci_new_connect(string $username, string $password, ?string $connection_string = null, ?string $character_set = null, int $session_mode = OCI_DEFAULT) {}
+function oci_new_connect(string $username, string $password, string $connection_string = UNKNOWN, string $character_set = UNKNOWN, int $session_mode = OCI_DEFAULT) {}
 
 /**
  * @return resource|false

@@ -79,7 +79,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_oci_lob_write, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, lob_descriptor, OCI_Lob, 0)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, length, IS_LONG, 1, "null")
+	ZEND_ARG_TYPE_INFO(0, length, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_lob_append, 0, 2, _IS_BOOL, 0)
@@ -251,20 +251,26 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_new_connect, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, username, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, password, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, connection_string, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, character_set, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, session_mode, IS_LONG, 0, "OCI_DEFAULT")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ocinlogon, 0, 0, 2)
+	ZEND_ARG_TYPE_INFO(0, username, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, password, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, connection_string, IS_STRING, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, character_set, IS_STRING, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, session_mode, IS_LONG, 0, "OCI_DEFAULT")
 ZEND_END_ARG_INFO()
 
-#define arginfo_ocinlogon arginfo_oci_new_connect
+#define arginfo_oci_connect arginfo_ocinlogon
 
-#define arginfo_oci_connect arginfo_oci_new_connect
+#define arginfo_ocilogon arginfo_ocinlogon
 
-#define arginfo_ocilogon arginfo_oci_new_connect
+#define arginfo_oci_pconnect arginfo_ocinlogon
 
-#define arginfo_oci_pconnect arginfo_oci_new_connect
-
-#define arginfo_ociplogon arginfo_oci_new_connect
+#define arginfo_ociplogon arginfo_ocinlogon
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_oci_error, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, connection_or_statement_resource, "null")
