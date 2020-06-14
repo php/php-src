@@ -1,5 +1,5 @@
 --TEST--
-Destructors cannot declare a return type
+Destructors must return void
 --FILE--
 <?php
 
@@ -7,4 +7,4 @@ class Foo {
     function __destruct() : Foo {}
 }
 --EXPECTF--
-Fatal error: Destructor %s::%s() cannot declare a return type in %s on line %d
+Fatal error: Destructor %s::%s() must return void in %s on line %d
