@@ -585,7 +585,7 @@ PHP_FUNCTION(oci_lob_write)
 		data_len = MIN((zend_long) data_len, write_len);
 	}
 
-	if (! getThis() && ZEND_NUM_ARGS() == 3) {
+	if (!getThis() && ZEND_NUM_ARGS() == 3) {
 		data_len = MIN((zend_long) data_len, write_len);
 	}
 
@@ -695,12 +695,12 @@ PHP_FUNCTION(oci_lob_erase)
 		RETURN_FALSE;
 	}
 
-	if (! getThis() && ZEND_NUM_ARGS() > 1 && offset < 0) {
+	if (!getThis() && ZEND_NUM_ARGS() > 1 && offset < 0) {
 		php_error_docref(NULL, E_WARNING, "Offset must be greater than or equal to 0");
 		RETURN_FALSE;
 	}
 
-	if (! getThis() && ZEND_NUM_ARGS() > 2 && length < 0) {
+	if (!getThis() && ZEND_NUM_ARGS() > 2 && length < 0) {
 		php_error_docref(NULL, E_WARNING, "Length must be greater than or equal to 0");
 		RETURN_FALSE;
 	}
@@ -896,7 +896,7 @@ PHP_FUNCTION(oci_lob_export)
 		RETURN_THROWS();
 	}
 
-	if (getThis() &&ZEND_NUM_ARGS() > 1 && start < 0) {
+	if (getThis() && ZEND_NUM_ARGS() > 1 && start < 0) {
 		php_error_docref(NULL, E_WARNING, "Start parameter must be greater than or equal to 0");
 		RETURN_FALSE;
 	}
@@ -906,12 +906,12 @@ PHP_FUNCTION(oci_lob_export)
 		RETURN_FALSE;
 	}
 
-	if (! getThis() && ZEND_NUM_ARGS() > 2 && start < 0) {
+	if (!getThis() && ZEND_NUM_ARGS() > 2 && start < 0) {
 		php_error_docref(NULL, E_WARNING, "Start parameter must be greater than or equal to 0");
 		RETURN_FALSE;
 	}
 
-	if (! getThis() && ZEND_NUM_ARGS() > 3 && length < 0) {
+	if (!getThis() && ZEND_NUM_ARGS() > 3 && length < 0) {
 		php_error_docref(NULL, E_WARNING, "length parameter must be greater than or equal to 0");
 		RETURN_FALSE;
 	}
