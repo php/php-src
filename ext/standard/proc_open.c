@@ -56,6 +56,63 @@ extern int openpty(int *, int *, char *, struct termios *, struct winsize *);
 /* Mac OS X (and some BSDs) define `openpty` in <util.h> */
 #  include <util.h>
 # endif
+#elif defined(__sun)
+# include <fcntl.h>
+# include <stropts.h>
+# include <termios.h>
+# define HAVE_OPENPTY 1
+
+/* Solaris/Illumos does not have any openpty implementation */
+int openpty(int *master, int *slave, char *name, struct termios *termp, struct winsize *winp)
+{
+	int fd, sd;
+	const char *slaveid;
+
+	assert(master);
+	assert(slave);
+
+	sd = *master = *slave = -1;
+	fd = open("/dev/ptmx", O_NOCTTY|O_RDWR);
+	if (fd == -1) {
+		return -1;
+	}
+	/* Checking if we can have to the pseudo terminal */
+	if (grantpt(fd) != 0 || unlockpt(fd) != 0) {
+		goto fail;
+	}
+	slaveid = ptsname(fd);
+	if (!slaveid) {
+		goto fail;
+	}
+
+	/* Getting the slave path and pushing pseudo terminal */
+	sd = open(slaveid, O_NOCTTY|O_RDONLY);
+	if (sd == -1 || ioctl(sd, I_PUSH, "ptem") == -1) {
+		goto fail;
+	}
+	if (termp) {
+		if (tcgetattr(sd, termp) < 0) {
+			goto fail;
+		}
+	}
+	if (winp) {
+		if (ioctl(sd, TIOCSWINSZ, winp) == -1) {
+			goto fail;
+		}
+	}
+
+	*slave = sd;
+	*master = fd;
+	return 0;
+fail:
+	if (sd != -1) {
+		close(sd);
+	}
+	if (fd != -1) {
+		close(fd);
+	}
+	return -1;
+}
 #endif
 
 #include "proc_open.h"
