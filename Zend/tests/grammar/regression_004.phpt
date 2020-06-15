@@ -9,6 +9,6 @@ class Obj
     function return(){} // valid
 }
 
-function echo(){} // not valid
---EXPECTF--
-Parse error: syntax error, unexpected 'echo' (T_ECHO), expecting %s in %s on line 9
+function echo(){} // valid
+--EXPECT--
+

@@ -255,7 +255,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> echo_expr_list unset_variables catch_name_list catch_list optional_variable parameter_list class_statement_list
 %type <ast> implements_list case_list if_stmt_without_else
 %type <ast> non_empty_parameter_list argument_list non_empty_argument_list property_list
-%type <ast> class_const_list class_const_decl class_name_list trait_adaptations method_body non_empty_for_exprs
+%type <ast> class_const_list class_name_list trait_adaptations method_body non_empty_for_exprs
 %type <ast> ctor_arguments alt_if_stmt_without_else trait_adaptation_list lexical_vars
 %type <ast> lexical_var_list encaps_list
 %type <ast> array_pair non_empty_array_pair_list array_pair_list possible_array_pair
@@ -535,7 +535,7 @@ unset_variable:
 ;
 
 function_declaration_statement:
-	function returns_ref T_STRING backup_doc_comment '(' parameter_list ')' return_type
+	function returns_ref identifier backup_doc_comment '(' parameter_list ')' return_type
 	backup_fn_flags '{' inner_statement_list '}' backup_fn_flags
 		{ $$ = zend_ast_create_decl(ZEND_AST_FUNC_DECL, $2 | $13, $1, $4,
 		      zend_ast_get_str($3), $6, NULL, $11, $8, NULL); CG(extra_fn_flags) = $9; }
@@ -923,16 +923,12 @@ property:
 ;
 
 class_const_list:
-		class_const_list ',' class_const_decl { $$ = zend_ast_list_add($1, $3); }
-	|	class_const_decl { $$ = zend_ast_create_list(1, ZEND_AST_CLASS_CONST_DECL, $1); }
-;
-
-class_const_decl:
-	identifier '=' expr backup_doc_comment { $$ = zend_ast_create(ZEND_AST_CONST_ELEM, $1, $3, ($4 ? zend_ast_create_zval_from_str($4) : NULL)); }
+		class_const_list ',' const_decl { $$ = zend_ast_list_add($1, $3); }
+	|	const_decl { $$ = zend_ast_create_list(1, ZEND_AST_CLASS_CONST_DECL, $1); }
 ;
 
 const_decl:
-	T_STRING '=' expr backup_doc_comment { $$ = zend_ast_create(ZEND_AST_CONST_ELEM, $1, $3, ($4 ? zend_ast_create_zval_from_str($4) : NULL)); }
+	identifier '=' expr backup_doc_comment { $$ = zend_ast_create(ZEND_AST_CONST_ELEM, $1, $3, ($4 ? zend_ast_create_zval_from_str($4) : NULL)); }
 ;
 
 echo_expr_list:
