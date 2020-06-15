@@ -280,7 +280,7 @@ static void *zend_file_cache_unserialize_interned(zend_string *str, int in_shm)
 			memcpy(ret, str, size);
 			/* String wasn't interned but we will use it as interned anyway */
 			GC_SET_REFCOUNT(ret, 1);
-			GC_TYPE_INFO(ret) = IS_STRING | ((IS_STR_INTERNED | IS_STR_PERSISTENT | IS_STR_PERMANENT) << GC_FLAGS_SHIFT);
+			GC_TYPE_INFO(ret) = GC_STRING | ((IS_STR_INTERNED | IS_STR_PERSISTENT | IS_STR_PERMANENT) << GC_FLAGS_SHIFT);
 		}
 	} else {
 		ret = str;

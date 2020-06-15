@@ -231,7 +231,7 @@ static zend_always_inline void zend_ffi_type_dtor(zend_ffi_type *type) /* {{{ */
 static zend_always_inline void zend_ffi_object_init(zend_object *object, zend_class_entry *ce) /* {{{ */
 {
 	GC_SET_REFCOUNT(object, 1);
-	GC_TYPE_INFO(object) = IS_OBJECT | ((GC_COLLECTABLE | IS_OBJ_DESTRUCTOR_CALLED) << GC_FLAGS_SHIFT);
+	GC_TYPE_INFO(object) = GC_OBJECT | (IS_OBJ_DESTRUCTOR_CALLED << GC_FLAGS_SHIFT);
 	object->ce = ce;
 	object->properties = NULL;
 	zend_objects_store_put(object);

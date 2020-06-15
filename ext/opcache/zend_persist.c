@@ -37,9 +37,9 @@
 
 #define zend_set_str_gc_flags(str) do { \
 	if (file_cache_only) { \
-		GC_TYPE_INFO(str) = IS_STRING | (IS_STR_INTERNED << GC_FLAGS_SHIFT); \
+		GC_TYPE_INFO(str) = GC_STRING | (IS_STR_INTERNED << GC_FLAGS_SHIFT); \
 	} else { \
-		GC_TYPE_INFO(str) = IS_STRING | ((IS_STR_INTERNED | IS_STR_PERMANENT) << GC_FLAGS_SHIFT); \
+		GC_TYPE_INFO(str) = GC_STRING | ((IS_STR_INTERNED | IS_STR_PERMANENT) << GC_FLAGS_SHIFT); \
 	} \
 } while (0)
 
@@ -286,7 +286,7 @@ static HashTable *zend_persist_attributes(HashTable *attributes)
 
 		ptr = zend_shared_memdup_put_free(attributes, sizeof(HashTable));
 		GC_SET_REFCOUNT(ptr, 2);
-		GC_TYPE_INFO(ptr) = IS_ARRAY | (IS_ARRAY_IMMUTABLE << GC_FLAGS_SHIFT);
+		GC_TYPE_INFO(ptr) = GC_ARRAY | ((IS_ARRAY_IMMUTABLE|GC_NOT_COLLECTABLE) << GC_FLAGS_SHIFT);
 	}
 
 	return ptr;
@@ -456,7 +456,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 		op_array->static_variables = zend_shared_memdup_put_free(op_array->static_variables, sizeof(HashTable));
 		/* make immutable array */
 		GC_SET_REFCOUNT(op_array->static_variables, 2);
-		GC_TYPE_INFO(op_array->static_variables) = IS_ARRAY | (IS_ARRAY_IMMUTABLE << GC_FLAGS_SHIFT);
+		GC_TYPE_INFO(op_array->static_variables) = GC_ARRAY | ((IS_ARRAY_IMMUTABLE|GC_NOT_COLLECTABLE) << GC_FLAGS_SHIFT);
 	}
 	ZEND_MAP_PTR_INIT(op_array->static_variables_ptr, &op_array->static_variables);
 

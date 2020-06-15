@@ -45113,7 +45113,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_BIND_STATIC_SPEC_CV_UNUSED_HAN
 		if (UNEXPECTED(!Z_ISREF_P(value))) {
 			zend_reference *ref = (zend_reference*)emalloc(sizeof(zend_reference));
 			GC_SET_REFCOUNT(ref, 2);
-			GC_TYPE_INFO(ref) = IS_REFERENCE;
+			GC_TYPE_INFO(ref) = GC_REFERENCE;
 			ZVAL_COPY_VALUE(&ref->val, value);
 			ref->sources.ptr = NULL;
 			Z_REF_P(value) = ref;

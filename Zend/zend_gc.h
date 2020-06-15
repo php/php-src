@@ -66,12 +66,11 @@ END_EXTERN_C()
 
 #define GC_MAY_LEAK(ref) \
 	((GC_TYPE_INFO(ref) & \
-		(GC_INFO_MASK | (GC_COLLECTABLE << GC_FLAGS_SHIFT))) == \
-	(GC_COLLECTABLE << GC_FLAGS_SHIFT))
+		(GC_INFO_MASK | (GC_NOT_COLLECTABLE << GC_FLAGS_SHIFT))) == 0)
 
 static zend_always_inline void gc_check_possible_root(zend_refcounted *ref)
 {
-	if (EXPECTED(GC_TYPE_INFO(ref) == IS_REFERENCE)) {
+	if (EXPECTED(GC_TYPE_INFO(ref) == GC_REFERENCE)) {
 		zval *zv = &((zend_reference*)ref)->val;
 
 		if (!Z_COLLECTABLE_P(zv)) {

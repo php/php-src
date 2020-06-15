@@ -1574,7 +1574,7 @@ ZEND_API int zend_gc_collect_cycles(void)
 					zend_object *obj = (zend_object*)p;
 
 					EG(objects_store).object_buckets[obj->handle] = SET_OBJ_INVALID(obj);
-					GC_TYPE_INFO(obj) = IS_NULL |
+					GC_TYPE_INFO(obj) = GC_NULL |
 						(GC_TYPE_INFO(obj) & ~GC_TYPE_MASK);
 					/* Modify current before calling free_obj (bug #78811: free_obj() can cause the root buffer (with current) to be reallocated.) */
 					current->ref = GC_MAKE_GARBAGE(((char*)obj) - obj->handlers->offset);
@@ -1589,7 +1589,7 @@ ZEND_API int zend_gc_collect_cycles(void)
 				} else if (GC_TYPE(p) == IS_ARRAY) {
 					zend_array *arr = (zend_array*)p;
 
-					GC_TYPE_INFO(arr) = IS_NULL |
+					GC_TYPE_INFO(arr) = GC_NULL |
 						(GC_TYPE_INFO(arr) & ~GC_TYPE_MASK);
 
 					/* GC may destroy arrays with rc>1. This is valid and safe. */

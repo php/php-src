@@ -1253,9 +1253,7 @@ static void* dasm_labels[zend_lb_MAX];
 |.endmacro
 
 |.macro IF_GC_MAY_NOT_LEAK, ptr, tmp_reg, label
-|	mov tmp_reg, dword [ptr + 4]
-|	and tmp_reg, (GC_INFO_MASK | (GC_COLLECTABLE << GC_FLAGS_SHIFT))
-|	cmp tmp_reg, (GC_COLLECTABLE << GC_FLAGS_SHIFT)
+|	test dword [ptr + 4],(GC_INFO_MASK | (GC_NOT_COLLECTABLE << GC_FLAGS_SHIFT))
 |	jne label
 |.endmacro
 
