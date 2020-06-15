@@ -8942,7 +8942,7 @@ static int zend_jit_send_ref(dasm_State **Dst, const zend_op *opline, const zend
 		}
 		|	EMALLOC sizeof(zend_reference), op_array, opline
 		|	mov dword [r0], 2
-		|	mov dword [r0 + offsetof(zend_reference, gc.u.type_info)], IS_REFERENCE
+		|	mov dword [r0 + offsetof(zend_reference, gc.u.type_info)], GC_REFERENCE
 		|	mov aword [r0 + offsetof(zend_reference, sources.ptr)], 0
 		ref_addr = ZEND_ADDR_MEM_ZVAL(ZREG_R0, 8);
 		if (opline->op1_type == IS_VAR) {
