@@ -8,4 +8,4 @@ class A {}
 
 ?>
 --EXPECTF--
-Parse error: syntax error, unexpected variable "$x", expecting identifier or "static" or "namespace" or "\" in %s on line %d
+Parse error: syntax error, unexpected variable "$x" in %s on line %d

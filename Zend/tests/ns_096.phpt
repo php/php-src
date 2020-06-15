@@ -7,4 +7,4 @@ use Foo\Bar\{\Baz};
 
 ?>
 --EXPECTF--
-Parse error: syntax error, unexpected token "\", expecting identifier or "function" or "const" in %s on line %d
+Parse error: syntax error, unexpected fully qualified name "\Baz", expecting identifier or namespaced name or "function" or "const" in %s on line %d

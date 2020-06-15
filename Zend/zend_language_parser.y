@@ -89,6 +89,9 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token <ast> T_LNUMBER   "integer"
 %token <ast> T_DNUMBER   "floating-point number"
 %token <ast> T_STRING    "identifier"
+%token <ast> T_NAME_FULLY_QUALIFIED "fully qualified name"
+%token <ast> T_NAME_RELATIVE "namespace-relative name"
+%token <ast> T_NAME_QUALIFIED "namespaced name"
 %token <ast> T_VARIABLE  "variable"
 %token <ast> T_INLINE_HTML
 %token <ast> T_ENCAPSED_AND_WHITESPACE  "string content"
@@ -231,7 +234,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_ERROR
 
 %type <ast> top_statement namespace_name name statement function_declaration_statement
-%type <ast> class_declaration_statement trait_declaration_statement
+%type <ast> class_declaration_statement trait_declaration_statement legacy_namespace_name
 %type <ast> interface_declaration_statement interface_extends_list
 %type <ast> group_use_declaration inline_use_declarations inline_use_declaration
 %type <ast> mixed_group_use_declaration use_declaration unprefixed_use_declaration
@@ -261,7 +264,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> identifier type_expr_without_static union_type_without_static
 %type <ast> inline_function union_type
 %type <ast> attributed_statement attributed_class_statement attributed_parameter
-%type <ast> attribute_decl attribute attributes
+%type <ast> attribute_decl attribute attributes namespace_declaration_name
 %type <ast> match match_arm_list non_empty_match_arm_list match_arm match_arm_cond_list
 
 %type <num> returns_ref function fn is_reference is_variadic variable_modifiers
@@ -308,15 +311,29 @@ top_statement_list:
 	|	%empty { $$ = zend_ast_create_list(0, ZEND_AST_STMT_LIST); }
 ;
 
+/* Name usable in a namespace declaration. */
+namespace_declaration_name:
+		identifier								{ $$ = $1; }
+	|	T_NAME_QUALIFIED						{ $$ = $1; }
+;
+
+/* Name usable in "use" declarations (loading separator forbidden). */
 namespace_name:
 		T_STRING								{ $$ = $1; }
-	|	namespace_name T_NS_SEPARATOR T_STRING	{ $$ = zend_ast_append_str($1, $3); }
+	|	T_NAME_QUALIFIED						{ $$ = $1; }
+;
+
+/* Name usable in "use" declarations (leading separator allowed). */
+legacy_namespace_name:
+		namespace_name							{ $$ = $1; }
+	|	T_NAME_FULLY_QUALIFIED					{ $$ = $1; }
 ;
 
 name:
-		namespace_name								{ $$ = $1; $$->attr = ZEND_NAME_NOT_FQ; }
-	|	T_NAMESPACE T_NS_SEPARATOR namespace_name	{ $$ = $3; $$->attr = ZEND_NAME_RELATIVE; }
-	|	T_NS_SEPARATOR namespace_name				{ $$ = $2; $$->attr = ZEND_NAME_FQ; }
+		T_STRING									{ $$ = $1; $$->attr = ZEND_NAME_NOT_FQ; }
+	|	T_NAME_QUALIFIED							{ $$ = $1; $$->attr = ZEND_NAME_NOT_FQ; }
+	|	T_NAME_FULLY_QUALIFIED						{ $$ = $1; $$->attr = ZEND_NAME_FQ; }
+	|	T_NAME_RELATIVE								{ $$ = $1; $$->attr = ZEND_NAME_RELATIVE; }
 ;
 
 attribute_decl:
@@ -350,10 +367,10 @@ top_statement:
 			{ $$ = zend_ast_create(ZEND_AST_HALT_COMPILER,
 			      zend_ast_create_zval_from_long(zend_get_scanned_file_offset()));
 			  zend_stop_lexing(); }
-	|	T_NAMESPACE namespace_name ';'
+	|	T_NAMESPACE namespace_declaration_name ';'
 			{ $$ = zend_ast_create(ZEND_AST_NAMESPACE, $2, NULL);
 			  RESET_DOC_COMMENT(); }
-	|	T_NAMESPACE namespace_name { RESET_DOC_COMMENT(); }
+	|	T_NAMESPACE namespace_declaration_name { RESET_DOC_COMMENT(); }
 		'{' top_statement_list '}'
 			{ $$ = zend_ast_create(ZEND_AST_NAMESPACE, $2, $5); }
 	|	T_NAMESPACE { RESET_DOC_COMMENT(); }
@@ -372,17 +389,13 @@ use_type:
 ;
 
 group_use_declaration:
-		namespace_name T_NS_SEPARATOR '{' unprefixed_use_declarations possible_comma '}'
+		legacy_namespace_name T_NS_SEPARATOR '{' unprefixed_use_declarations possible_comma '}'
 			{ $$ = zend_ast_create(ZEND_AST_GROUP_USE, $1, $4); }
-	|	T_NS_SEPARATOR namespace_name T_NS_SEPARATOR '{' unprefixed_use_declarations possible_comma '}'
-			{ $$ = zend_ast_create(ZEND_AST_GROUP_USE, $2, $5); }
 ;
 
 mixed_group_use_declaration:
-		namespace_name T_NS_SEPARATOR '{' inline_use_declarations possible_comma '}'
+		legacy_namespace_name T_NS_SEPARATOR '{' inline_use_declarations possible_comma '}'
 			{ $$ = zend_ast_create(ZEND_AST_GROUP_USE, $1, $4);}
-	|	T_NS_SEPARATOR namespace_name T_NS_SEPARATOR '{' inline_use_declarations possible_comma '}'
-			{ $$ = zend_ast_create(ZEND_AST_GROUP_USE, $2, $5); }
 ;
 
 possible_comma:
@@ -424,8 +437,10 @@ unprefixed_use_declaration:
 ;
 
 use_declaration:
-		unprefixed_use_declaration                { $$ = $1; }
-	|	T_NS_SEPARATOR unprefixed_use_declaration { $$ = $2; }
+		legacy_namespace_name
+			{ $$ = zend_ast_create(ZEND_AST_USE_ELEM, $1, NULL); }
+	|	legacy_namespace_name T_AS T_STRING
+			{ $$ = zend_ast_create(ZEND_AST_USE_ELEM, $1, $3); }
 ;
 
 const_list:
