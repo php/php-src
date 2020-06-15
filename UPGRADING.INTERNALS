@@ -17,7 +17,7 @@ PHP 8.0 INTERNALS UPGRADE NOTES
   n. zend_hash_sort compare function signature change
   o. cast_object() object handler is now required
   p. ARG_COUNT() macro removed
-  r. GC_COLLECTABLE flag
+  q. GC_COLLECTABLE flag
 
 2. Build system changes
   a. Abstract
@@ -118,8 +118,8 @@ PHP 8.0 INTERNALS UPGRADE NOTES
 
   p. The ARG_COUNT() macro has been removed use ZEND_NUM_ARGS() instead.
 
-  r. GC_COLLECTABLE flag was inverted into GC_NOT_COLLECTABLE.
-     Assignments to GC_TYPE_INFO() maight need to be changed to properly
+  q. GC_COLLECTABLE flag was inverted into GC_NOT_COLLECTABLE.
+     Assignments to GC_TYPE_INFO() might need to be changed to properly
      set the value of the GC_NOT_COLLECTABLE flag.
 
 ========================
