@@ -6464,8 +6464,16 @@ void zend_compile_func_decl(znode *result, zend_ast *ast, zend_bool toplevel) /*
 		zend_stack_push(&CG(loop_var_stack), (void *) &dummy_var);
 	}
 
-	zend_compile_params(params_ast, return_type_ast,
-		is_method && zend_string_equals_literal_ci(decl->name, "__toString") ? IS_STRING : 0);
+	uint32_t fallback_return_type = 0;
+	if (is_method) {
+		if (zend_string_equals_literal_ci(decl->name, "__toString")) {
+			fallback_return_type = IS_STRING;
+		} else if (zend_string_equals_literal_ci(decl->name, "__construct")) {
+			fallback_return_type = IS_VOID;
+		}
+	}
+	zend_compile_params(params_ast, return_type_ast, fallback_return_type);
+
 	if (CG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR) {
 		zend_mark_function_as_generator();
 		zend_emit_op(NULL, ZEND_GENERATOR_CREATE, NULL, NULL);
