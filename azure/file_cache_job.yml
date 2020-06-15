@@ -17,7 +17,7 @@ jobs:
     - script: make -j$(/usr/bin/nproc) >/dev/null
       displayName: 'Make Build'
     - template: install.yml
-    - template: script.yml
+    - template: setup.yml
     - template: test.yml
       parameters:
         configurationName: ${{ parameters.configurationName }}
