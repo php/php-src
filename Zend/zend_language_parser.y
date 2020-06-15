@@ -432,14 +432,14 @@ inline_use_declaration:
 unprefixed_use_declaration:
 		namespace_name
 			{ $$ = zend_ast_create(ZEND_AST_USE_ELEM, $1, NULL); }
-	|	namespace_name T_AS T_STRING
+	|	namespace_name T_AS identifier
 			{ $$ = zend_ast_create(ZEND_AST_USE_ELEM, $1, $3); }
 ;
 
 use_declaration:
 		legacy_namespace_name
 			{ $$ = zend_ast_create(ZEND_AST_USE_ELEM, $1, NULL); }
-	|	legacy_namespace_name T_AS T_STRING
+	|	legacy_namespace_name T_AS identifier
 			{ $$ = zend_ast_create(ZEND_AST_USE_ELEM, $1, $3); }
 ;
 
