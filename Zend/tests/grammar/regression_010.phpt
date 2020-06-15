@@ -5,8 +5,11 @@ Test to check regressions on T_IMPLEMENTS followed by a T_NS_SEPARATOR
 
 interface A{}
 
+// No longer considered legal in PHP 8.
 class B implements\A {}
 
 echo "Done", PHP_EOL;
---EXPECT--
-Done
+
+?>
+--EXPECTF--
+Parse error: syntax error, unexpected 'implements\A' (T_NAME_QUALIFIED), expecting '{' in %s on line %d
