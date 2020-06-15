@@ -7432,7 +7432,7 @@ void zend_compile_namespace(zend_ast *ast) /* {{{ */
 	if (name_ast) {
 		name = zend_ast_get_str(name_ast);
 
-		if (ZEND_FETCH_CLASS_DEFAULT != zend_get_class_fetch_type(name)) {
+		if (zend_string_equals_literal_ci(name, "namespace")) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use '%s' as namespace name", ZSTR_VAL(name));
 		}
 
