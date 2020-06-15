@@ -1361,33 +1361,6 @@ void dom_normalize (xmlNodePtr nodep)
 }
 /* }}} end dom_normalize */
 
-
-/* {{{ void dom_set_old_ns(xmlDoc *doc, xmlNs *ns) */
-void dom_set_old_ns(xmlDoc *doc, xmlNs *ns) {
-	xmlNs *cur;
-
-	if (doc == NULL)
-		return;
-
-	if (doc->oldNs == NULL) {
-		doc->oldNs = (xmlNsPtr) xmlMalloc(sizeof(xmlNs));
-		if (doc->oldNs == NULL) {
-			return;
-		}
-		memset(doc->oldNs, 0, sizeof(xmlNs));
-		doc->oldNs->type = XML_LOCAL_NAMESPACE;
-		doc->oldNs->href = xmlStrdup(XML_XML_NAMESPACE);
-		doc->oldNs->prefix = xmlStrdup((const xmlChar *)"xml");
-	}
-
-	cur = doc->oldNs;
-	while (cur->next != NULL) {
-		cur = cur->next;
-	}
-	cur->next = ns;
-}
-/* }}} end dom_set_old_ns */
-
 void dom_reconcile_ns(xmlDocPtr doc, xmlNodePtr nodep) /* {{{ */
 {
 	xmlNsPtr nsptr, nsdftptr, curns, prevns = NULL;
@@ -1407,7 +1380,6 @@ void dom_reconcile_ns(xmlDocPtr doc, xmlNodePtr nodep) /* {{{ */
 						} else {
 							prevns->next = nsdftptr;
 						}
-						dom_set_old_ns(doc, curns);
 						curns = prevns;
 					}
 				}
