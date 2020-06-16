@@ -1412,7 +1412,7 @@ function run_all_tests_parallel($test_files, $env, $redir_tested)
     // Don't start more workers than test files.
     $workers = max(1, min($workers, count($test_files)));
 
-    echo "Spawning workers… ";
+    echo "Spawning $workers workers... ";
 
     // We use sockets rather than STDIN/STDOUT for comms because on Windows,
     // those can't be non-blocking for some reason.
@@ -1428,6 +1428,7 @@ function run_all_tests_parallel($test_files, $env, $redir_tested)
     $sockUri = "tcp://$sockHost:$sockPort";
     $totalFileCount = count($test_files);
 
+    $startTime = microtime(true);
     for ($i = 1; $i <= $workers; $i++) {
         $proc = proc_open(
             $thisPHP . ' ' . escapeshellarg($thisScript),
@@ -1448,16 +1449,17 @@ function run_all_tests_parallel($test_files, $env, $redir_tested)
             error("Failed to spawn worker $i");
         }
         $workerProcs[$i] = $proc;
+    }
 
+    for ($i = 1; $i <= $workers; $i++) {
         $workerSock = stream_socket_accept($listenSock, 5);
         if ($workerSock === false) {
             kill_children($workerProcs);
-            error("Failed to accept connection from worker $i");
+            error("Failed to accept connection from worker.");
         }
 
         $greeting = base64_encode(serialize([
             "type" => "hello",
-            "workerID" => $i,
             "GLOBALS" => $GLOBALS,
             "constants" => [
                 "INIT_DIR" => INIT_DIR,
@@ -1472,29 +1474,28 @@ function run_all_tests_parallel($test_files, $env, $redir_tested)
         stream_set_timeout($workerSock, 5);
         if (fwrite($workerSock, $greeting) === false) {
             kill_children($workerProcs);
-            error("Failed to send greeting to worker $i.");
+            error("Failed to send greeting to worker.");
         }
 
         $rawReply = fgets($workerSock);
         if ($rawReply === false) {
             kill_children($workerProcs);
-            error("Failed to read greeting reply from worker $i.");
+            error("Failed to read greeting reply from worker.");
         }
 
         $reply = unserialize(base64_decode($rawReply));
-        if (!$reply || $reply["type"] !== "hello_reply" || $reply["workerID"] !== $i) {
+        if (!$reply || $reply["type"] !== "hello_reply") {
             kill_children($workerProcs);
-            error("Greeting reply from worker $i unexpected or could not be decoded: '$rawReply'");
+            error("Greeting reply from worker unexpected or could not be decoded: '$rawReply'");
         }
 
         stream_set_timeout($workerSock, 0);
         stream_set_blocking($workerSock, false);
 
-        $workerSocks[$i] = $workerSock;
-
-        echo "$i ";
+        $workerID = $reply["workerID"];
+        $workerSocks[$workerID] = $workerSock;
     }
-    echo "… done!\n";
+    printf("Done in %.2fs\n", microtime(true) - $startTime);
     echo "=====================================================================\n";
     echo "\n";
 
@@ -1698,8 +1699,8 @@ function run_worker()
 
     $greeting = fgets($workerSock);
     $greeting = unserialize(base64_decode($greeting)) or die("Could not decode greeting\n");
-    if ($greeting["type"] !== "hello" || $greeting["workerID"] !== $workerID) {
-        error("Unexpected greeting of type $greeting[type] and for worker $greeting[workerID]");
+    if ($greeting["type"] !== "hello") {
+        error("Unexpected greeting of type $greeting[type]");
     }
 
     set_error_handler(function ($errno, $errstr, $errfile, $errline) use ($workerSock) {
