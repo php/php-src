@@ -1,3 +1,5 @@
+#define _CRTDBG_MAP_ALLOC
+
 #include <malloc.h>
 #include <string.h>
 #include <errno.h>
