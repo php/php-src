@@ -58,7 +58,7 @@ static inline php_curlm *curl_multi_from_obj(zend_object *obj) {
 
 #define Z_CURL_MULTI_P(zv) curl_multi_from_obj(Z_OBJ_P(zv))
 
-/* {{{ proto CurlMulti curl_multi_init(void)
+/* {{{ proto CurlMultiHandle curl_multi_init(void)
    Returns a new cURL multi handle */
 PHP_FUNCTION(curl_multi_init)
 {
@@ -75,7 +75,7 @@ PHP_FUNCTION(curl_multi_init)
 }
 /* }}} */
 
-/* {{{ proto int curl_multi_add_handle(CurlMulti mh, Curl ch)
+/* {{{ proto int curl_multi_add_handle(CurlMultiHandle mh, Curl ch)
    Add a normal cURL handle to a cURL multi handle */
 PHP_FUNCTION(curl_multi_add_handle)
 {
@@ -144,7 +144,7 @@ static zval *_php_curl_multi_find_easy_handle(php_curlm *mh, CURL *easy) /* {{{ 
 }
 /* }}} */
 
-/* {{{ proto int curl_multi_remove_handle(CurlMulti mh, Curl ch)
+/* {{{ proto int curl_multi_remove_handle(CurlMultiHandle mh, Curl ch)
    Remove a multi handle from a set of cURL handles */
 PHP_FUNCTION(curl_multi_remove_handle)
 {
@@ -171,7 +171,7 @@ PHP_FUNCTION(curl_multi_remove_handle)
 }
 /* }}} */
 
-/* {{{ proto int curl_multi_select(CurlMulti mh[, double timeout])
+/* {{{ proto int curl_multi_select(CurlMultiHandle mh[, double timeout])
    Get all the sockets associated with the cURL extension, which can then be "selected" */
 PHP_FUNCTION(curl_multi_select)
 {
@@ -199,7 +199,7 @@ PHP_FUNCTION(curl_multi_select)
 }
 /* }}} */
 
-/* {{{ proto int curl_multi_exec(CurlMulti mh, int &still_running)
+/* {{{ proto int curl_multi_exec(CurlMultiHandle mh, int &still_running)
    Run the sub-connections of the current cURL handle */
 PHP_FUNCTION(curl_multi_exec)
 {
@@ -238,7 +238,7 @@ PHP_FUNCTION(curl_multi_exec)
 }
 /* }}} */
 
-/* {{{ proto string curl_multi_getcontent(Curl ch)
+/* {{{ proto string curl_multi_getcontent(CurlHandle ch)
    Return the content of a cURL handle if CURLOPT_RETURNTRANSFER is set */
 PHP_FUNCTION(curl_multi_getcontent)
 {
@@ -263,7 +263,7 @@ PHP_FUNCTION(curl_multi_getcontent)
 }
 /* }}} */
 
-/* {{{ proto array curl_multi_info_read(CurlMulti mh [, int &msgs_in_queue])
+/* {{{ proto array curl_multi_info_read(CurlMultiHandle mh [, int &msgs_in_queue])
    Get information about the current transfers */
 PHP_FUNCTION(curl_multi_info_read)
 {
@@ -310,7 +310,7 @@ PHP_FUNCTION(curl_multi_info_read)
 }
 /* }}} */
 
-/* {{{ proto void curl_multi_close(CurlMulti mh)
+/* {{{ proto void curl_multi_close(CurlMultiHandle mh)
    Close a set of cURL handles */
 PHP_FUNCTION(curl_multi_close)
 {
@@ -336,7 +336,7 @@ PHP_FUNCTION(curl_multi_close)
 }
 /* }}} */
 
-/* {{{ proto int curl_multi_errno(CurlMulti mh)
+/* {{{ proto int curl_multi_errno(CurlMultiHandle mh)
          Return an integer containing the last multi curl error number */
 PHP_FUNCTION(curl_multi_errno)
 {
@@ -498,7 +498,7 @@ static int _php_curl_multi_setopt(php_curlm *mh, zend_long option, zval *zvalue,
 }
 /* }}} */
 
-/* {{{ proto int curl_multi_setopt(CurlMulti mh, int option, mixed value)
+/* {{{ proto int curl_multi_setopt(CurlMultiHandle mh, int option, mixed value)
        Set an option for the curl multi handle */
 PHP_FUNCTION(curl_multi_setopt)
 {
@@ -526,10 +526,6 @@ PHP_FUNCTION(curl_multi_setopt)
 
 static zend_object_handlers curl_multi_handlers;
 
-static const zend_function_entry curl_multi_methods[] = {
-	PHP_FE_END
-};
-
 static zend_object *curl_multi_create_object(zend_class_entry *class_type) {
 	php_curlm *intern = zend_object_alloc(sizeof(php_curlm), class_type);
 
@@ -541,7 +537,7 @@ static zend_object *curl_multi_create_object(zend_class_entry *class_type) {
 }
 
 static zend_function *curl_multi_get_constructor(zend_object *object) {
-	zend_throw_error(NULL, "Cannot directly construct CurlMulti, use curl_multi_init() instead");
+	zend_throw_error(NULL, "Cannot directly construct CurlMultiHandle, use curl_multi_init() instead");
 	return NULL;
 }
 
@@ -597,9 +593,9 @@ static HashTable *curl_multi_get_gc(zend_object *object, zval **table, int *n)
 	return zend_std_get_properties(object);
 }
 
-void curl_multi_register_class(void) {
+void curl_multi_register_class(const zend_function_entry *method_entries) {
 	zend_class_entry ce_multi;
-	INIT_CLASS_ENTRY(ce_multi, "CurlMulti", curl_multi_methods);
+	INIT_CLASS_ENTRY(ce_multi, "CurlMultiHandle", method_entries);
 	curl_multi_ce = zend_register_internal_class(&ce_multi);
 	curl_multi_ce->ce_flags |= ZEND_ACC_FINAL;
 	curl_multi_ce->create_object = curl_multi_create_object;

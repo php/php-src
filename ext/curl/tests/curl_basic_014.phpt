@@ -10,5 +10,5 @@ Jean-Marc Fontaine <jmf@durcommefaire.net>
   var_dump($ch);
 ?>
 --EXPECT--
-object(Curl)#1 (0) {
+object(CurlHandle)#1 (0) {
 }

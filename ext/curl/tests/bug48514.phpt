@@ -21,9 +21,9 @@ var_dump($ch2::class);
 
 ?>
 --EXPECT--
-object(Curl)#1 (0) {
+object(CurlHandle)#1 (0) {
 }
-string(4) "Curl"
-object(CurlMulti)#2 (0) {
+string(10) "CurlHandle"
+object(CurlMultiHandle)#2 (0) {
 }
-string(9) "CurlMulti"
+string(15) "CurlMultiHandle"

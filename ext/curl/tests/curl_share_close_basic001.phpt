@@ -14,7 +14,7 @@ var_dump($sh);
 
 ?>
 --EXPECT--
-object(CurlShare)#1 (0) {
+object(CurlShareHandle)#1 (0) {
 }
-object(CurlShare)#1 (0) {
+object(CurlShareHandle)#1 (0) {
 }

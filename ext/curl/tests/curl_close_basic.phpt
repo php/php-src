@@ -14,5 +14,5 @@ curl_close($ch);
 var_dump($ch);
 ?>
 --EXPECT--
-object(Curl)#1 (0) {
+object(CurlHandle)#1 (0) {
 }

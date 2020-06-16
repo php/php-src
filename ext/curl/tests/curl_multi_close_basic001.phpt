@@ -14,8 +14,8 @@ var_dump($cmh);
 curl_multi_close($cmh);
 ?>
 --EXPECTF--
-object(CurlMulti)#1 (0) {
+object(CurlMultiHandle)#1 (0) {
 }
 NULL
-object(CurlMulti)#1 (0) {
+object(CurlMultiHandle)#1 (0) {
 }

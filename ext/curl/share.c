@@ -33,7 +33,7 @@
 
 zend_class_entry *curl_share_ce;
 
-/* {{{ proto CurlShare curl_share_init()
+/* {{{ proto CurlShareHandle curl_share_init()
    Initialize a share curl handle */
 PHP_FUNCTION(curl_share_init)
 {
@@ -48,7 +48,7 @@ PHP_FUNCTION(curl_share_init)
 }
 /* }}} */
 
-/* {{{ proto void curl_share_close(CurlShare sh)
+/* {{{ proto void curl_share_close(CurlShareHandle sh)
    Close a set of cURL handles */
 PHP_FUNCTION(curl_share_close)
 {
@@ -82,7 +82,7 @@ static int _php_curl_share_setopt(php_curlsh *sh, zend_long option, zval *zvalue
 }
 /* }}} */
 
-/* {{{ proto bool curl_share_setopt(CurlShare sh, int option, mixed value)
+/* {{{ proto bool curl_share_setopt(CurlShareHandle sh, int option, mixed value)
       Set an option for a cURL transfer */
 PHP_FUNCTION(curl_share_setopt)
 {
@@ -106,7 +106,7 @@ PHP_FUNCTION(curl_share_setopt)
 }
 /* }}} */
 
-/* {{{ proto int curl_share_errno(CurlShare sh)
+/* {{{ proto int curl_share_errno(CurlShareHandle sh)
          Return an integer containing the last share curl error number */
 PHP_FUNCTION(curl_share_errno)
 {
@@ -148,10 +148,6 @@ PHP_FUNCTION(curl_share_strerror)
 
 static zend_object_handlers curl_share_handlers;
 
-static const zend_function_entry curl_share_methods[] = {
-	PHP_FE_END
-};
-
 static zend_object *curl_share_create_object(zend_class_entry *class_type) {
 	php_curlsh *intern = zend_object_alloc(sizeof(php_curlsh), class_type);
 
@@ -163,7 +159,7 @@ static zend_object *curl_share_create_object(zend_class_entry *class_type) {
 }
 
 static zend_function *curl_share_get_constructor(zend_object *object) {
-	zend_throw_error(NULL, "Cannot directly construct CurlShare, use curl_share_init() instead");
+	zend_throw_error(NULL, "Cannot directly construct CurlShareHandle, use curl_share_init() instead");
 	return NULL;
 }
 
@@ -175,9 +171,9 @@ void curl_share_free_obj(zend_object *object)
 	zend_object_std_dtor(&sh->std);
 }
 
-void curl_share_register_class(void) {
+void curl_share_register_class(const zend_function_entry *method_entries) {
 	zend_class_entry ce_share;
-	INIT_CLASS_ENTRY(ce_share, "CurlShare", curl_share_methods);
+	INIT_CLASS_ENTRY(ce_share, "CurlShareHandle", method_entries);
 	curl_share_ce = zend_register_internal_class(&ce_share);
 	curl_share_ce->ce_flags |= ZEND_ACC_FINAL;
 	curl_share_ce->create_object = curl_share_create_object;

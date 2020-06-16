@@ -39,7 +39,7 @@ array(3) {
   ["result"]=>
   int(%d)
   ["handle"]=>
-  object(Curl)#%d (0) {
+  object(CurlHandle)#%d (0) {
   }
 }
 array(3) {
@@ -48,6 +48,6 @@ array(3) {
   ["result"]=>
   int(%d)
   ["handle"]=>
-  object(Curl)#%d (0) {
+  object(CurlHandle)#%d (0) {
   }
 }

@@ -14,5 +14,5 @@ curl_multi_close($ch);
 var_dump($ch);
 ?>
 --EXPECT--
-object(CurlMulti)#1 (0) {
+object(CurlMultiHandle)#1 (0) {
 }

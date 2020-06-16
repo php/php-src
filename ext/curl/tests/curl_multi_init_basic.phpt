@@ -25,7 +25,7 @@ var_dump($mh);
 ?>
 --EXPECTF--
 *** Testing curl_multi_init(void); ***
-object(CurlMulti)#1 (0) {
+object(CurlMultiHandle)#1 (0) {
 }
-object(CurlMulti)#1 (0) {
+object(CurlMultiHandle)#1 (0) {
 }

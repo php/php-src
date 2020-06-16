@@ -244,10 +244,6 @@ static zend_object *curl_clone_obj(zend_object *object);
 php_curl *init_curl_handle_into_zval(zval *curl);
 static inline int build_mime_structure_from_hash(php_curl *ch, zval *zpostfields);
 
-static const zend_function_entry curl_object_methods[] = {
-	PHP_FE_END
-};
-
 /* {{{ PHP_INI_BEGIN */
 PHP_INI_BEGIN()
 	PHP_INI_ENTRY("curl.cainfo", "", PHP_INI_SYSTEM, NULL)
@@ -1195,7 +1191,7 @@ PHP_MINIT_FUNCTION(curl)
 	}
 
 	zend_class_entry ce;
-	INIT_CLASS_ENTRY(ce, "Curl", curl_object_methods);
+	INIT_CLASS_ENTRY(ce, "CurlHandle", class_CurlHandle_methods);
 	curl_ce = zend_register_internal_class(&ce);
 	curl_ce->ce_flags |= ZEND_ACC_FINAL;
 	curl_ce->create_object = curl_create_object;
@@ -1209,8 +1205,8 @@ PHP_MINIT_FUNCTION(curl)
 	curl_object_handlers.get_constructor = curl_get_constructor;
 	curl_object_handlers.clone_obj = curl_clone_obj;
 
-	curl_multi_register_class();
-	curl_share_register_class();
+	curl_multi_register_class(class_CurlMultiHandle_methods);
+	curl_share_register_class(class_CurlShareHandle_methods);
 	curlfile_register_class();
 
 	return SUCCESS;
@@ -1230,7 +1226,7 @@ static zend_object *curl_create_object(zend_class_entry *class_type) {
 }
 
 static zend_function *curl_get_constructor(zend_object *object) {
-	zend_throw_error(NULL, "Cannot directly construct Curl, use curl_init() instead");
+	zend_throw_error(NULL, "Cannot directly construct CurlHandle, use curl_init() instead");
 	return NULL;
 }
 
@@ -1865,7 +1861,7 @@ static void _php_curl_set_default_options(php_curl *ch)
 }
 /* }}} */
 
-/* {{{ proto Curl curl_init([string url])
+/* {{{ proto CurlHandle curl_init([string url])
    Initialize a cURL session */
 PHP_FUNCTION(curl_init)
 {
@@ -2190,7 +2186,7 @@ static inline int build_mime_structure_from_hash(php_curl *ch, zval *zpostfields
 }
 /* }}} */
 
-/* {{{ proto Curl curl_copy_handle(Curl ch)
+/* {{{ proto Curl curl_copy_handle(CurlHandle ch)
    Copy a cURL handle along with all of it's preferences */
 PHP_FUNCTION(curl_copy_handle)
 {
@@ -2885,7 +2881,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 }
 /* }}} */
 
-/* {{{ proto bool curl_setopt(Curl ch, int option, mixed value)
+/* {{{ proto bool curl_setopt(CurlHandle ch, int option, mixed value)
    Set an option for a cURL transfer */
 PHP_FUNCTION(curl_setopt)
 {
@@ -2914,7 +2910,7 @@ PHP_FUNCTION(curl_setopt)
 }
 /* }}} */
 
-/* {{{ proto bool curl_setopt_array(Curl ch, array options)
+/* {{{ proto bool curl_setopt_array(CurlHandle ch, array options)
    Set an array of option for a cURL transfer */
 PHP_FUNCTION(curl_setopt_array)
 {
@@ -2961,7 +2957,7 @@ void _php_curl_cleanup_handle(php_curl *ch)
 }
 /* }}} */
 
-/* {{{ proto bool curl_exec(Curl ch)
+/* {{{ proto bool curl_exec(CurlHandle ch)
    Perform a cURL session */
 PHP_FUNCTION(curl_exec)
 {
@@ -3016,7 +3012,7 @@ PHP_FUNCTION(curl_exec)
 }
 /* }}} */
 
-/* {{{ proto mixed curl_getinfo(Curl ch [, int option])
+/* {{{ proto mixed curl_getinfo(CurlHandle ch [, int option])
    Get information regarding a specific transfer */
 PHP_FUNCTION(curl_getinfo)
 {
@@ -3269,7 +3265,7 @@ PHP_FUNCTION(curl_getinfo)
 }
 /* }}} */
 
-/* {{{ proto string curl_error(Curl ch)
+/* {{{ proto string curl_error(CurlHandle ch)
    Return a string contain the last error for the current session */
 PHP_FUNCTION(curl_error)
 {
@@ -3291,7 +3287,7 @@ PHP_FUNCTION(curl_error)
 }
 /* }}} */
 
-/* {{{ proto int curl_errno(Curl ch)
+/* {{{ proto int curl_errno(CurlHandle ch)
    Return an integer containing the last error number */
 PHP_FUNCTION(curl_errno)
 {
@@ -3308,7 +3304,7 @@ PHP_FUNCTION(curl_errno)
 }
 /* }}} */
 
-/* {{{ proto void curl_close(Curl ch)
+/* {{{ proto void curl_close(CurlHandle ch)
    Close a cURL session */
 PHP_FUNCTION(curl_close)
 {
@@ -3467,7 +3463,7 @@ static void _php_curl_reset_handlers(php_curl *ch)
 }
 /* }}} */
 
-/* {{{ proto void curl_reset(Curl ch)
+/* {{{ proto void curl_reset(CurlHandle ch)
    Reset all options of a libcurl session handle */
 PHP_FUNCTION(curl_reset)
 {
@@ -3491,7 +3487,7 @@ PHP_FUNCTION(curl_reset)
 }
 /* }}} */
 
-/* {{{ proto void curl_escape(Curl ch, string str)
+/* {{{ proto void curl_escape(CurlHandle ch, string str)
    URL encodes the given string */
 PHP_FUNCTION(curl_escape)
 {
@@ -3520,7 +3516,7 @@ PHP_FUNCTION(curl_escape)
 }
 /* }}} */
 
-/* {{{ proto void curl_unescape(Curl ch, string str)
+/* {{{ proto void curl_unescape(CurlHandle ch, string str)
    URL decodes the given string */
 PHP_FUNCTION(curl_unescape)
 {
@@ -3550,7 +3546,7 @@ PHP_FUNCTION(curl_unescape)
 }
 /* }}} */
 
-/* {{{ proto void curl_pause(Curl ch, int bitmask)
+/* {{{ proto void curl_pause(CurlHandle ch, int bitmask)
        pause and unpause a connection */
 PHP_FUNCTION(curl_pause)
 {
