@@ -706,7 +706,7 @@ static int add_exclude_list_path(zend_exclude_list_entry *p, zval *return_value)
    Obtain configuration information */
 ZEND_FUNCTION(opcache_get_configuration)
 {
-	zval directives, version, exclude_list, exclude_list;
+	zval directives, version, exclude_list;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
