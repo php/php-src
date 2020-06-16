@@ -20,9 +20,9 @@ function xmlwriter_end_attribute(XMLWriter $xmlwriter): bool {}
 
 function xmlwriter_write_attribute(XMLWriter $xmlwriter, string $name, string $value): bool {}
 
-function xmlwriter_start_attribute_ns(XMLWriter $xmlwriter, string $prefix, string $name, ?string $uri): bool {}
+function xmlwriter_start_attribute_ns(XMLWriter $xmlwriter, ?string $prefix, string $name, ?string $uri): bool {}
 
-function xmlwriter_write_attribute_ns(XMLWriter $xmlwriter, string $prefix, string $name, ?string $uri, string $content): bool {}
+function xmlwriter_write_attribute_ns(XMLWriter $xmlwriter, ?string $prefix, string $name, ?string $uri, string $content): bool {}
 
 function xmlwriter_start_element(XMLWriter $xmlwriter, string $name): bool {}
 
@@ -116,10 +116,10 @@ class XMLWriter
     public function writeAttribute(string $name, string $value): bool {}
 
     /** @alias xmlwriter_start_attribute_ns */
-    public function startAttributeNs(string $prefix, string $name, ?string $uri): bool {}
+    public function startAttributeNs(?string $prefix, string $name, ?string $uri): bool {}
 
     /** @alias xmlwriter_write_attribute_ns */
-    public function writeAttributeNs(string $prefix, string $name, ?string $uri, string $content): bool {}
+    public function writeAttributeNs(?string $prefix, string $name, ?string $uri, string $content): bool {}
 
     /** @alias xmlwriter_start_element */
     public function startElement(string $name): bool {}
