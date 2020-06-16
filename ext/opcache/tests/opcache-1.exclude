@@ -1,4 +1,4 @@
-; comments are allowed in blocklist file
+; comments are allowed in exclude list file
 ; and empty line are ignored
 
 /path/to/foo

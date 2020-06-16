@@ -1,0 +1,9 @@
+{
+    "files.associations": {
+        "phar_internal.h": "c",
+        "spl_exceptions.h": "c",
+        "zend_object_handlers.h": "c",
+        "php.h": "c",
+        "php_pcre.h": "c"
+    }
+}

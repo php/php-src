@@ -1,6 +1,6 @@
 /path/to/bar
 ; wildcard and relative entries
-blocklist.inc
+exclude.inc
 ./current.php
 /tmp/path/?nocache.inc
 /tmp/path/*/somedir

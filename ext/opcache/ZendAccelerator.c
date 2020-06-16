@@ -28,7 +28,7 @@
 #include "zend_persist.h"
 #include "zend_shared_alloc.h"
 #include "zend_accelerator_module.h"
-#include "zend_accelerator_blocklist.h"
+#include "zend_accelerator_exclude_list.h"
 #include "zend_list.h"
 #include "zend_execute.h"
 #include "zend_inheritance.h"
@@ -1678,10 +1678,10 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
     	}
     }
 
-	/* check blocklist right after ensuring that file was opened */
-	if (file_handle->opened_path && zend_accel_blocklist_is_blocklisted(&accel_blocklist, ZSTR_VAL(file_handle->opened_path), ZSTR_LEN(file_handle->opened_path))) {
+	/* check exclude_list right after ensuring that file was opened */
+	if (file_handle->opened_path && zend_accel_exclude_list_is_excluded(&accel_exclude_list, ZSTR_VAL(file_handle->opened_path), ZSTR_LEN(file_handle->opened_path))) {
 		SHM_UNPROTECT();
-		ZCSG(blocklist_misses)++;
+		ZCSG(exclude_list_misses)++;
 		SHM_PROTECT();
 		*op_array_p = accelerator_orig_compile_file(file_handle, type);
 		return NULL;
@@ -1714,7 +1714,7 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
 
 		if (ZCG(accel_directives).max_file_size > 0 && size > (size_t)ZCG(accel_directives).max_file_size) {
 			SHM_UNPROTECT();
-			ZCSG(blocklist_misses)++;
+			ZCSG(exclude_list_misses)++;
 			SHM_PROTECT();
 			*op_array_p = accelerator_orig_compile_file(file_handle, type);
 			return NULL;
@@ -2316,7 +2316,7 @@ static void zend_reset_cache_vars(void)
 	ZSMMG(memory_exhausted) = 0;
 	ZCSG(hits) = 0;
 	ZCSG(misses) = 0;
-	ZCSG(blocklist_misses) = 0;
+	ZCSG(exclude_list_misses) = 0;
 	ZSMMG(wasted_shared_memory) = 0;
 	ZCSG(restart_pending) = 0;
 	ZCSG(force_restart_time) = 0;
@@ -3057,12 +3057,12 @@ file_cache_fallback:
 	zend_accel_override_file_functions();
 
 	/* Load block list */
-	accel_blocklist.entries = NULL;
+	accel_exclude_list.entries = NULL;
 	if (ZCG(enabled) && accel_startup_ok &&
-	    ZCG(accel_directives).user_blocklist_filename &&
-	    *ZCG(accel_directives.user_blocklist_filename)) {
-		zend_accel_blocklist_init(&accel_blocklist);
-		zend_accel_blocklist_load(&accel_blocklist, ZCG(accel_directives.user_blocklist_filename));
+	    ZCG(accel_directives).user_exclude_list_filename &&
+	    *ZCG(accel_directives.user_exclude_list_filename)) {
+		zend_accel_exclude_list_init(&accel_exclude_list);
+		zend_accel_exclude_list_load(&accel_exclude_list, ZCG(accel_directives.user_exclude_list_filename));
 	}
 
 	zend_optimizer_startup();
@@ -3092,7 +3092,7 @@ void accel_shutdown(void)
 
 	zend_optimizer_shutdown();
 
-	zend_accel_blocklist_shutdown(&accel_blocklist);
+	zend_accel_exclude_list_shutdown(&accel_exclude_list);
 
 	if (!ZCG(enabled) || !accel_startup_ok) {
 #ifdef ZTS

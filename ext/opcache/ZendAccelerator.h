@@ -143,7 +143,7 @@ typedef struct _zend_accel_directives {
 	zend_long           memory_consumption;
 	zend_long           max_accelerated_files;
 	double         max_wasted_percentage;
-	char          *user_blocklist_filename;
+	char          *user_exclude_list_filename;
 	zend_long           consistency_checks;
 	zend_long           force_restart_timeout;
 	zend_bool      use_cwd;
@@ -251,7 +251,7 @@ typedef struct _zend_accel_shared_globals {
 	/* Cache Data Structures */
 	zend_ulong   hits;
 	zend_ulong   misses;
-	zend_ulong   blocklist_misses;
+	zend_ulong   exclude_list_misses;
 	zend_ulong   oom_restarts;     /* number of restarts because of out of memory */
 	zend_ulong   hash_restarts;    /* number of restarts because of hash overflow */
 	zend_ulong   manual_restarts;  /* number of restarts scheduled by opcache_reset() */
