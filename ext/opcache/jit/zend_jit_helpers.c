@@ -1241,12 +1241,6 @@ static void ZEND_FASTCALL zend_jit_verify_return_slow(zval *arg, const zend_op_a
 	}
 }
 
-static void ZEND_FASTCALL zend_jit_zval_copy_deref_helper(zval *dst, zval *src)
-{
-	ZVAL_DEREF(src);
-	ZVAL_COPY(dst, src);
-}
-
 static void ZEND_FASTCALL zend_jit_fetch_obj_r_slow(zend_object *zobj, zval *offset, zval *result, uint32_t cache_slot)
 {
 	zval *retval;
