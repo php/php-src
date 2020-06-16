@@ -58,6 +58,7 @@ Class [ <user> class Test ] {
         Parameter #1 [ <optional> string $y = '123' ]
         Parameter #2 [ <optional> string $z = 'abc' ]
       }
+      - Return [ void ]
     }
   }
 }

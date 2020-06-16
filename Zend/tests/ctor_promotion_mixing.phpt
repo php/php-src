@@ -49,6 +49,7 @@ Class [ <user> class Test ] {
         Parameter #0 [ <optional> string $prop1 = '' ]
         Parameter #1 [ <optional> $param2 = '' ]
       }
+      - Return [ void ]
     }
   }
 }

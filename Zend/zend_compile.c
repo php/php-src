@@ -6464,8 +6464,19 @@ void zend_compile_func_decl(znode *result, zend_ast *ast, zend_bool toplevel) /*
 		zend_stack_push(&CG(loop_var_stack), (void *) &dummy_var);
 	}
 
-	zend_compile_params(params_ast, return_type_ast,
-		is_method && zend_string_equals_literal_ci(decl->name, "__toString") ? IS_STRING : 0);
+	uint32_t fallback_return_type = 0;
+
+	if (is_method) {
+		if (zend_string_equals_literal_ci(decl->name, "__construct")
+			|| zend_string_equals_literal_ci(decl->name, "__destruct")) {
+			fallback_return_type = IS_VOID;
+		} else if (zend_string_equals_literal_ci(decl->name, "__toString")) {
+			fallback_return_type = IS_STRING;
+		}
+	}
+
+	zend_compile_params(params_ast, return_type_ast, fallback_return_type);
+
 	if (CG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR) {
 		zend_mark_function_as_generator();
 		zend_emit_op(NULL, ZEND_GENERATOR_CREATE, NULL, NULL);
@@ -6894,9 +6905,10 @@ void zend_compile_class_decl(znode *result, zend_ast *ast, zend_bool toplevel) /
 			zend_error_noreturn(E_COMPILE_ERROR, "Constructor %s::%s() cannot be static",
 				ZSTR_VAL(ce->name), ZSTR_VAL(ce->constructor->common.function_name));
 		}
-		if (ce->constructor->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+		if (ce->constructor->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE
+			&& ZEND_TYPE_PURE_MASK(ce->constructor->common.arg_info[-1].type) != MAY_BE_VOID) {
 			zend_error_noreturn(E_COMPILE_ERROR,
-				"Constructor %s::%s() cannot declare a return type",
+				"Constructor %s::%s() must return void",
 				ZSTR_VAL(ce->name), ZSTR_VAL(ce->constructor->common.function_name));
 		}
 	}
@@ -6904,9 +6916,10 @@ void zend_compile_class_decl(znode *result, zend_ast *ast, zend_bool toplevel) /
 		if (ce->destructor->common.fn_flags & ZEND_ACC_STATIC) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Destructor %s::%s() cannot be static",
 				ZSTR_VAL(ce->name), ZSTR_VAL(ce->destructor->common.function_name));
-		} else if (ce->destructor->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+		} else if (ce->destructor->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE
+			&& ZEND_TYPE_PURE_MASK(ce->destructor->common.arg_info[-1].type) != MAY_BE_VOID) {
 			zend_error_noreturn(E_COMPILE_ERROR,
-				"Destructor %s::%s() cannot declare a return type",
+				"Destructor %s::%s() must return void",
 				ZSTR_VAL(ce->name), ZSTR_VAL(ce->destructor->common.function_name));
 		}
 	}

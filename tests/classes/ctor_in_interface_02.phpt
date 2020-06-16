@@ -31,4 +31,4 @@ class implem13 implements constr1, constr3
 }
 ?>
 --EXPECTF--
-Fatal error: Declaration of implem13::__construct() must be compatible with constr3::__construct($a) in %s on line %d
+Fatal error: Declaration of implem13::__construct(): void must be compatible with constr3::__construct($a): void in %s on line %d

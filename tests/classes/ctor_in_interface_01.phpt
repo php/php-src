@@ -16,4 +16,4 @@ class implem implements constr
 
 ?>
 --EXPECTF--
-Fatal error: Declaration of implem::__construct($a) must be compatible with constr::__construct() in %s on line %d
+Fatal error: Declaration of implem::__construct($a): void must be compatible with constr::__construct(): void in %s on line %d

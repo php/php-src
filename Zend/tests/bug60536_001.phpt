@@ -9,12 +9,12 @@ class X {
 class Y extends X {
       use T;
       function __construct() {
-          return ++$this->x;
+          ++$this->x;
       }
 }
 class Z extends Y {
       function __construct() {
-          return ++$this->x;
+          ++$this->x;
       }
 }
 $a = new Z();

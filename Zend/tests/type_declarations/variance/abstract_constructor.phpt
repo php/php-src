@@ -15,4 +15,4 @@ class C extends B {
 }
 ?>
 --EXPECTF--
-Fatal error: Could not check compatibility between C::__construct(Y $x) and A::__construct(X $x), because class Y is not available in %s on line %d
+Fatal error: Could not check compatibility between C::__construct(Y $x): void and A::__construct(X $x): void, because class Y is not available in %s on line %d
