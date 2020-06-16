@@ -1757,7 +1757,7 @@ ZEND_API HashTable *zend_std_get_properties_for(zend_object *obj, zend_prop_purp
 			}
 			return ht;
 		default:
-			ZEND_ASSERT(0);
+			ZEND_UNREACHABLE();
 			return NULL;
 	}
 }

@@ -160,7 +160,7 @@ static void spl_pqueue_extract_helper(zval *result, spl_pqueue_elem *elem, int f
 		return;
 	}
 
-	ZEND_ASSERT(0);
+	ZEND_UNREACHABLE();
 }
 /* }}} */
 

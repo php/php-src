@@ -631,7 +631,7 @@ static void emit_live_range(
 		case ZEND_ADD_ARRAY_ELEMENT:
 		case ZEND_ADD_ARRAY_UNPACK:
 		case ZEND_ROPE_ADD:
-			ZEND_ASSERT(0);
+			ZEND_UNREACHABLE();
 			return;
 		/* Result is boolean, it doesn't have to be destroyed. */
 		case ZEND_JMPZ_EX:
@@ -1131,7 +1131,7 @@ ZEND_API binary_op_type get_binary_op(int opcode)
 		case ZEND_BOOL_XOR:
 			return (binary_op_type) boolean_xor_function;
 		default:
-			ZEND_ASSERT(0);
+			ZEND_UNREACHABLE();
 			return (binary_op_type) NULL;
 	}
 }

@@ -41,7 +41,7 @@ static zend_always_inline const char *zend_jit_trace_star_desc(uint8_t trace_fla
 	} else if (trace_flags & ZEND_JIT_TRACE_START_RETURN) {
 		return "return";
 	} else {
-		ZEND_ASSERT(0);
+		ZEND_UNREACHABLE();
 		return "???";
 	}
 }
@@ -212,7 +212,7 @@ static uint32_t zend_jit_find_trace(const void *addr)
 			return i;
 		}
 	}
-	ZEND_ASSERT(0);
+	ZEND_UNREACHABLE();
 	return 0;
 }
 
@@ -2711,7 +2711,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 			} else if (i < parent_vars_count
 			 && STACK_TYPE(parent_stack, i) != IS_UNKNOWN) {
 				/* This must be already handled by trace type inference */
-				ZEND_ASSERT(0);
+				ZEND_UNREACHABLE();
 				SET_STACK_TYPE(stack, i, STACK_TYPE(parent_stack, i));
 			} else if ((info & MAY_BE_GUARD) != 0
 			 && trace_buffer->stop == ZEND_JIT_TRACE_STOP_LOOP
@@ -2729,7 +2729,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 			 && op_array->function_name
 			 && i >= op_array->num_args) {
 				/* This must be already handled by trace type inference */
-				ZEND_ASSERT(0);
+				ZEND_UNREACHABLE();
 				SET_STACK_TYPE(stack, i, IS_UNDEF);
 			} else {
 				SET_STACK_TYPE(stack, i, IS_UNKNOWN);
@@ -3574,7 +3574,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								smart_branch_opcode = opline->opcode;
 								exit_opline = OP_JMP_ADDR(opline, opline->op2);
 							} else {
-								ZEND_ASSERT(0);
+								ZEND_UNREACHABLE();
 							}
 							if (ra) {
 								zend_jit_trace_clenup_stack(stack, opline, ssa_op, ssa, ra);
@@ -3585,7 +3585,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								goto jit_failure;
 							}
 						} else  {
-							ZEND_ASSERT(0);
+							ZEND_UNREACHABLE();
 						}
 						if (opline->result_type == IS_UNDEF) {
 							res_addr = 0;
@@ -4234,7 +4234,7 @@ done:
 				frame->call = call->prev;
 			}
 		} else {
-			ZEND_ASSERT(0);
+			ZEND_UNREACHABLE();
 		}
 	}
 
@@ -5278,7 +5278,7 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 				} else if (STACK_REG(stack, i) == ZREG_LONG_MAX) {
 					val = ZEND_LONG_MAX;
 				} else {
-					ZEND_ASSERT(0);
+					ZEND_UNREACHABLE();
 				}
 				ZVAL_LONG(EX_VAR_NUM(i), val);
 			} else if (STACK_TYPE(stack, i) == IS_DOUBLE) {
@@ -5291,11 +5291,11 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 				} else if (STACK_REG(stack, i) == ZREG_LONG_MAX_PLUS_1) {
 					val = (double)ZEND_LONG_MAX + 1.0;
 				} else {
-					ZEND_ASSERT(0);
+					ZEND_UNREACHABLE();
 				}
 				ZVAL_DOUBLE(EX_VAR_NUM(i), val);
 			} else {
-				ZEND_ASSERT(0);
+				ZEND_UNREACHABLE();
 			}
 		}
 	}

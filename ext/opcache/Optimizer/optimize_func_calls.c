@@ -214,7 +214,7 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 							|| fcall->opcode == ZEND_NEW) {
 						/* We don't have specialized opcodes for this, do nothing */
 					} else {
-						ZEND_ASSERT(0);
+						ZEND_UNREACHABLE();
 					}
 
 					if ((ZEND_OPTIMIZER_PASS_16 & ctx->optimization_level)

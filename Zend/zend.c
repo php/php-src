@@ -529,7 +529,7 @@ static void zend_get_windows_version_info(OSVERSIONINFOEX *osvi) /* {{{ */
 	ZeroMemory(osvi, sizeof(OSVERSIONINFOEX));
 	osvi->dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
 	if(!GetVersionEx((OSVERSIONINFO *) osvi)) {
-		ZEND_ASSERT(0); /* Should not happen as sizeof is used. */
+		ZEND_UNREACHABLE(); /* Should not happen as sizeof is used. */
 	}
 }
 /* }}} */
@@ -1718,7 +1718,7 @@ ZEND_API void *zend_map_ptr_new(void)
 	if (CG(map_ptr_last) >= CG(map_ptr_size)) {
 #if ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR
 		// TODO: error ???
-		ZEND_ASSERT(0);
+		ZEND_UNREACHABLE();
 #elif ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR_OR_OFFSET
 		/* Grow map_ptr table */
 		CG(map_ptr_size) = ZEND_MM_ALIGNED_SIZE_EX(CG(map_ptr_last) + 1, 4096);
@@ -1747,7 +1747,7 @@ ZEND_API void zend_map_ptr_extend(size_t last)
 		if (last >= CG(map_ptr_size)) {
 #if ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR
 			/* This may never happen */
-			ZEND_ASSERT(0);
+			ZEND_UNREACHABLE();
 #elif ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR_OR_OFFSET
 			/* Grow map_ptr table */
 			CG(map_ptr_size) = ZEND_MM_ALIGNED_SIZE_EX(last, 4096);

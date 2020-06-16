@@ -283,7 +283,7 @@ static void bin_to_readable(unsigned char *in, size_t inlen, char *out, size_t o
 				have += 8;
 			} else {
 				/* Should never happen. Input must be large enough. */
-				ZEND_ASSERT(0);
+				ZEND_UNREACHABLE();
 				break;
 			}
 		}
