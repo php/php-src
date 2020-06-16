@@ -190,6 +190,8 @@ PHP                                                                        NEWS
 - XMLWriter:
   . Changed functions to accept/return XMLWriter objects instead of resources.
     (cmb)
+  . Implemented FR #79344 (xmlwriter_write_attribute_ns: $prefix should be
+    nullable). (cmb)
 
 - Zip:
   . Fixed bug #72374 (remove_path strips first char of filename). (tyage, Remi)

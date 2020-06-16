@@ -307,7 +307,7 @@ PHP_FUNCTION(xmlwriter_start_attribute_ns)
 	int retval;
 	zval *self;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osss!", &self, xmlwriter_class_entry_ce,
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os!ss!", &self, xmlwriter_class_entry_ce,
 		&prefix, &prefix_len, &name, &name_len, &uri, &uri_len) == FAILURE) {
 		RETURN_THROWS();
 	}
@@ -365,7 +365,7 @@ PHP_FUNCTION(xmlwriter_write_attribute_ns)
 	int retval;
 	zval *self;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osss!s", &self, xmlwriter_class_entry_ce,
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os!ss!s", &self, xmlwriter_class_entry_ce,
 		&prefix, &prefix_len, &name, &name_len, &uri, &uri_len, &content, &content_len) == FAILURE) {
 		RETURN_THROWS();
 	}
