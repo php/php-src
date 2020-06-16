@@ -1426,7 +1426,7 @@ _php_mb_regex_ereg_search_exec(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	size_t arg_pattern_len, arg_options_len;
 	int err;
 	size_t n, i, pos, len, beg, end;
-	OnigOptionType option;
+	OnigOptionType option = 0;
 	OnigUChar *str;
 	OnigSyntaxType *syntax;
 
@@ -1434,11 +1434,11 @@ _php_mb_regex_ereg_search_exec(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		return;
 	}
 
-	option = MBREX(regex_default_options);
-
 	if (arg_options) {
-		option = 0;
 		_php_mb_regex_init_options(arg_options, arg_options_len, &option, &syntax, NULL);
+	} else {
+		option |= MBREX(regex_default_options);
+		syntax = MBREX(regex_default_syntax);
 	}
 
 	if (MBREX(search_regs)) {
@@ -1448,7 +1448,7 @@ _php_mb_regex_ereg_search_exec(INTERNAL_FUNCTION_PARAMETERS, int mode)
 
 	if (arg_pattern) {
 		/* create regex pattern buffer */
-		if ((MBREX(search_re) = php_mbregex_compile_pattern(arg_pattern, arg_pattern_len, option, MBREX(current_mbctype), MBREX(regex_default_syntax))) == NULL) {
+		if ((MBREX(search_re) = php_mbregex_compile_pattern(arg_pattern, arg_pattern_len, option, MBREX(current_mbctype), syntax)) == NULL) {
 			RETURN_FALSE;
 		}
 	}
