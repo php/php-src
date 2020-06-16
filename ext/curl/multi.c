@@ -328,8 +328,11 @@ PHP_FUNCTION(curl_multi_close)
 
 	for (pz_ch = (zval *)zend_llist_get_first_ex(&mh->easyh, &pos); pz_ch;
 		pz_ch = (zval *)zend_llist_get_next_ex(&mh->easyh, &pos)) {
-		zend_llist_del_element(&mh->easyh, pz_ch, (int (*)(void *, void *))curl_compare_objects);
+		php_curl *ch = Z_CURL_P(pz_ch);
+		_php_curl_verify_handlers(ch, 1);
+		curl_multi_remove_handle(mh->multi, ch->cp);
 	}
+	zend_llist_clean(&mh->easyh);
 }
 /* }}} */
 
