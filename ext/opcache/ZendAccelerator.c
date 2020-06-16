@@ -1678,7 +1678,7 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
     	}
     }
 
-	/* check exclude_list right after ensuring that file was opened */
+	/* check exclude list right after ensuring that file was opened */
 	if (file_handle->opened_path && zend_accel_exclude_list_is_excluded(&accel_exclude_list, ZSTR_VAL(file_handle->opened_path), ZSTR_LEN(file_handle->opened_path))) {
 		SHM_UNPROTECT();
 		ZCSG(exclude_list_misses)++;
