@@ -17,13 +17,10 @@
 #ifndef PHP_MAIL_H
 #define PHP_MAIL_H
 
-PHP_FUNCTION(mail);
-PHP_FUNCTION(ezmlm_hash);
-
 PHP_MINFO_FUNCTION(mail);
 
-PHPAPI zend_string *php_mail_build_headers(zval *headers);
-PHPAPI extern int php_mail(char *to, char *subject, char *message, char *headers, char *extra_cmd);
+PHPAPI zend_string *php_mail_build_headers(HashTable *headers);
+PHPAPI extern int php_mail(const char *to, const char *subject, const char *message, const char *headers, const char *extra_cmd);
 
 #define PHP_MAIL_BUILD_HEADER_CHECK(target, s, key, val) \
 do { \

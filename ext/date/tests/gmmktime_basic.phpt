@@ -22,8 +22,6 @@ $year = 2008;
 var_dump( gmmktime($hour, $min, $sec, $mon, $day, $year) );
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing gmmktime() : basic functionality ***
 int(1218182888)
-===DONE===

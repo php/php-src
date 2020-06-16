@@ -10,6 +10,8 @@ skip_if_no_required_exts();
 skip_if_wrong_cp(874, "ansi");
 
 ?>
+--CONFLICTS--
+file_cp874
 --INI--
 internal_encoding=cp874
 --FILE--
@@ -34,10 +36,8 @@ system("dir /b " . $fn);
 remove_data("file_cp874");
 
 ?>
-===DONE===
 --EXPECTF--
 string(%d) "%s\เป็นแฟ้มที่ทดสอบ11"
 bool(true)
 bool(true)
 เป็นแฟ้มที่ทดสอบ11
-===DONE===

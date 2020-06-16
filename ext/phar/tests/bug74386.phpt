@@ -12,10 +12,8 @@ $r = new ReflectionMethod(PharData::class, '__construct');
 var_dump($r->getNumberOfRequiredParameters());
 var_dump($r->getNumberOfParameters());
 ?>
-===DONE===
 --EXPECT--
 int(1)
 int(3)
 int(1)
 int(4)
-===DONE===

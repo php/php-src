@@ -43,14 +43,12 @@ $reader = new XMLReader();
 $reader->XML($xmlstring);
 
 if ($reader->setRelaxNGSchema('')) {
-	echo 'failed';
+    echo 'failed';
 }
 $reader->close();
 ?>
-===DONE===
 --EXPECTF--
 file relaxNG: ok
 string relaxNG: ok
 
 Warning: XMLReader::setRelaxNGSchema(): Schema data source is required in %s on line %d
-===DONE===

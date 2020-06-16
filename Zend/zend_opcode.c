@@ -63,6 +63,7 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 	op_array->function_name = NULL;
 	op_array->filename = zend_get_compiled_filename();
 	op_array->doc_comment = NULL;
+	op_array->attributes = NULL;
 
 	op_array->arg_info = NULL;
 	op_array->num_args = 0;
@@ -102,6 +103,22 @@ ZEND_API void destroy_zend_function(zend_function *function)
 	zend_function_dtor(&tmp);
 }
 
+ZEND_API void zend_type_release(zend_type type, zend_bool persistent) {
+	if (ZEND_TYPE_HAS_LIST(type)) {
+		zend_type *list_type;
+		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(type), list_type) {
+			if (ZEND_TYPE_HAS_NAME(*list_type)) {
+				zend_string_release(ZEND_TYPE_NAME(*list_type));
+			}
+		} ZEND_TYPE_LIST_FOREACH_END();
+		if (!ZEND_TYPE_USES_ARENA(type)) {
+			pefree(ZEND_TYPE_LIST(type), persistent);
+		}
+	} else if (ZEND_TYPE_HAS_NAME(type)) {
+		zend_string_release(ZEND_TYPE_NAME(type));
+	}
+}
+
 void zend_free_internal_arg_info(zend_internal_function *function) {
 	if ((function->fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS)) &&
 		function->arg_info) {
@@ -114,9 +131,7 @@ void zend_free_internal_arg_info(zend_internal_function *function) {
 			num_args++;
 		}
 		for (i = 0 ; i < num_args; i++) {
-			if (ZEND_TYPE_IS_CLASS(arg_info[i].type)) {
-				zend_string_release_ex(ZEND_TYPE_NAME(arg_info[i].type), 1);
-			}
+			zend_type_release(arg_info[i].type, /* persistent */ 1);
 		}
 		free(arg_info);
 	}
@@ -152,22 +167,42 @@ ZEND_API void zend_cleanup_internal_class_data(zend_class_entry *ce)
 		zval *static_members = CE_STATIC_MEMBERS(ce);
 		zval *p = static_members;
 		zval *end = p + ce->default_static_members_count;
-
-		ZEND_MAP_PTR_SET(ce->static_members_table, NULL);
-		while (p != end) {
-			if (UNEXPECTED(Z_ISREF_P(p))) {
-				zend_property_info *prop_info;
-				ZEND_REF_FOREACH_TYPE_SOURCES(Z_REF_P(p), prop_info) {
-					if (prop_info->ce == ce && p - static_members == prop_info->offset) {
-						ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(p), prop_info);
-						break; /* stop iteration here, the array might be realloc()'ed */
-					}
-				} ZEND_REF_FOREACH_TYPE_SOURCES_END();
+		if (UNEXPECTED(ZEND_MAP_PTR(ce->static_members_table) == &ce->default_static_members_table)) {
+			/* Special case: If this is a static property on a dl'ed internal class, then the
+			 * static property table and the default property table are the same. In this case we
+			 * destroy the values here, but leave behind valid UNDEF zvals and don't free the
+			 * table itself. */
+			while (p != end) {
+				if (UNEXPECTED(Z_ISREF_P(p))) {
+					zend_property_info *prop_info;
+					ZEND_REF_FOREACH_TYPE_SOURCES(Z_REF_P(p), prop_info) {
+						if (prop_info->ce == ce && p - static_members == prop_info->offset) {
+							ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(p), prop_info);
+							break; /* stop iteration here, the array might be realloc()'ed */
+						}
+					} ZEND_REF_FOREACH_TYPE_SOURCES_END();
+				}
+				i_zval_ptr_dtor(p);
+				ZVAL_UNDEF(p);
+				p++;
 			}
-			i_zval_ptr_dtor(p);
-			p++;
+		} else {
+			ZEND_MAP_PTR_SET(ce->static_members_table, NULL);
+			while (p != end) {
+				if (UNEXPECTED(Z_ISREF_P(p))) {
+					zend_property_info *prop_info;
+					ZEND_REF_FOREACH_TYPE_SOURCES(Z_REF_P(p), prop_info) {
+						if (prop_info->ce == ce && p - static_members == prop_info->offset) {
+							ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(p), prop_info);
+							break; /* stop iteration here, the array might be realloc()'ed */
+						}
+					} ZEND_REF_FOREACH_TYPE_SOURCES_END();
+				}
+				i_zval_ptr_dtor(p);
+				p++;
+			}
+			efree(static_members);
 		}
-		efree(static_members);
 	}
 }
 
@@ -283,9 +318,10 @@ ZEND_API void destroy_zend_class(zval *zv)
 					if (prop_info->doc_comment) {
 						zend_string_release_ex(prop_info->doc_comment, 0);
 					}
-					if (ZEND_TYPE_IS_NAME(prop_info->type)) {
-						zend_string_release(ZEND_TYPE_NAME(prop_info->type));
+					if (prop_info->attributes) {
+						zend_hash_release(prop_info->attributes);
 					}
+					zend_type_release(prop_info->type, /* persistent */ 0);
 				}
 			} ZEND_HASH_FOREACH_END();
 			zend_hash_destroy(&ce->properties_info);
@@ -299,6 +335,9 @@ ZEND_API void destroy_zend_class(zval *zv)
 						zval_ptr_dtor_nogc(&c->value);
 						if (c->doc_comment) {
 							zend_string_release_ex(c->doc_comment, 0);
+						}
+						if (c->attributes) {
+							zend_hash_release(c->attributes);
 						}
 					}
 				} ZEND_HASH_FOREACH_END();
@@ -317,6 +356,9 @@ ZEND_API void destroy_zend_class(zval *zv)
 			}
 			if (ce->info.user.doc_comment) {
 				zend_string_release_ex(ce->info.user.doc_comment, 0);
+			}
+			if (ce->attributes) {
+				zend_hash_release(ce->attributes);
 			}
 
 			if (ce->num_traits > 0) {
@@ -369,6 +411,9 @@ ZEND_API void destroy_zend_class(zval *zv)
 						if (c->doc_comment) {
 							zend_string_release_ex(c->doc_comment, 1);
 						}
+						if (c->attributes) {
+							zend_hash_release(c->attributes);
+						}
 					}
 					free(c);
 				} ZEND_HASH_FOREACH_END();
@@ -382,6 +427,9 @@ ZEND_API void destroy_zend_class(zval *zv)
 			}
 			if (ce->properties_info_table) {
 				free(ce->properties_info_table);
+			}
+			if (ce->attributes) {
+				zend_hash_release(ce->attributes);
 			}
 			free(ce);
 			break;
@@ -415,6 +463,10 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 		efree(ZEND_MAP_PTR(op_array->run_time_cache));
 	}
 
+	if (op_array->function_name) {
+		zend_string_release_ex(op_array->function_name, 0);
+	}
+
 	if (!op_array->refcount || --(*op_array->refcount) > 0) {
 		return;
 	}
@@ -444,11 +496,11 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 	}
 	efree(op_array->opcodes);
 
-	if (op_array->function_name) {
-		zend_string_release_ex(op_array->function_name, 0);
-	}
 	if (op_array->doc_comment) {
 		zend_string_release_ex(op_array->doc_comment, 0);
+	}
+	if (op_array->attributes) {
+		zend_hash_release(op_array->attributes);
 	}
 	if (op_array->live_range) {
 		efree(op_array->live_range);
@@ -476,9 +528,7 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 			if (arg_info[i].name) {
 				zend_string_release_ex(arg_info[i].name, 0);
 			}
-			if (ZEND_TYPE_IS_CLASS(arg_info[i].type)) {
-				zend_string_release_ex(ZEND_TYPE_NAME(arg_info[i].type), 0);
-			}
+			zend_type_release(arg_info[i].type, /* persistent */ 0);
 		}
 		efree(arg_info);
 	}
@@ -563,7 +613,7 @@ static void emit_live_range_raw(
 
 	ZEND_ASSERT(start < end);
 	range = &op_array->live_range[op_array->last_live_range - 1];
-	range->var = (uint32_t) (intptr_t) ZEND_CALL_VAR_NUM(NULL, op_array->last_var + var_num);
+	range->var = EX_NUM_TO_VAR(op_array->last_var + var_num);
 	range->var |= kind;
 	range->start = start;
 	range->end = end;
@@ -651,7 +701,8 @@ static void emit_live_range(
 				/* Trivial live-range, no need to store it. */
 				return;
 			}
-			/* break missing intentionally */
+		}
+		/* explicit fallthrough */
 		default:
 			start++;
 			kind = ZEND_LIVE_TMPVAR;
@@ -662,14 +713,12 @@ static void emit_live_range(
 				return;
 			}
 			break;
-		}
 		case ZEND_COPY_TMP:
 		{
 			/* COPY_TMP has a split live-range: One from the definition until the use in
 			 * "null" branch, and another from the start of the "non-null" branch to the
 			 * FREE opcode. */
-			uint32_t rt_var_num =
-				(uint32_t) (intptr_t) ZEND_CALL_VAR_NUM(NULL, op_array->last_var + var_num);
+			uint32_t rt_var_num = EX_NUM_TO_VAR(op_array->last_var + var_num);
 			zend_op *block_start_op = use_opline;
 
 			if (needs_live_range && !needs_live_range(op_array, orig_def_opline)) {
@@ -797,7 +846,17 @@ static void zend_calc_live_ranges(
 		}
 		if (opline->op2_type & (IS_TMP_VAR|IS_VAR)) {
 			uint32_t var_num = EX_VAR_TO_NUM(opline->op2.var) - var_offset;
-			if (EXPECTED(last_use[var_num] == (uint32_t) -1)) {
+			if (UNEXPECTED(opline->opcode == ZEND_FE_FETCH_R
+					|| opline->opcode == ZEND_FE_FETCH_RW)) {
+				/* OP2 of FE_FETCH is actually a def, not a use. */
+				if (last_use[var_num] != (uint32_t) -1) {
+					if (opnum + 1 != last_use[var_num]) {
+						emit_live_range(
+							op_array, var_num, opnum, last_use[var_num], needs_live_range);
+					}
+					last_use[var_num] = (uint32_t) -1;
+				}
+			} else if (EXPECTED(last_use[var_num] == (uint32_t) -1)) {
 #if 1
 				/* OP_DATA uses only op1 operand */
 				ZEND_ASSERT(opline->opcode != ZEND_OP_DATA);
@@ -995,15 +1054,15 @@ ZEND_API int pass_two(zend_op_array *op_array)
 		if (opline->op1_type == IS_CONST) {
 			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline, opline->op1);
 		} else if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
-			opline->op1.var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + opline->op1.var);
+			opline->op1.var = EX_NUM_TO_VAR(op_array->last_var + opline->op1.var);
 		}
 		if (opline->op2_type == IS_CONST) {
 			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline, opline->op2);
 		} else if (opline->op2_type & (IS_VAR|IS_TMP_VAR)) {
-			opline->op2.var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + opline->op2.var);
+			opline->op2.var = EX_NUM_TO_VAR(op_array->last_var + opline->op2.var);
 		}
 		if (opline->result_type & (IS_VAR|IS_TMP_VAR)) {
-			opline->result.var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + opline->result.var);
+			opline->result.var = EX_NUM_TO_VAR(op_array->last_var + opline->result.var);
 		}
 		ZEND_VM_SET_OPCODE_HANDLER(opline);
 		opline++;

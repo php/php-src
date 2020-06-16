@@ -24,7 +24,6 @@ $res = sscanf($str, $format, $arg1, $arg2, $arg3, $arg4, $arg5, $arg6);
 var_dump($res, $arg1, $arg2, $arg3, $arg4, $arg5, $arg6);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing sscanf() : basic functionality - using octal format ***
 
@@ -44,4 +43,3 @@ int(83)
 int(10)
 NULL
 NULL
-===DONE===

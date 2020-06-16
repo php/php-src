@@ -40,7 +40,6 @@ echo "\n";
 var_dump($result);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing printf() : basic functionality - using integer format ***
 
@@ -59,4 +58,3 @@ int(7)
 -- Calling printf() with three arguments--
 111 222 333
 int(11)
-===DONE===

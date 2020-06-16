@@ -8,7 +8,7 @@ include('skipif.inc');
 <?php
 
 /* Create an XML document
- * with strcuture
+ * with structure
  * <book>
  *  <title>This is the title</title>
  * </book>

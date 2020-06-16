@@ -16,9 +16,9 @@ echo "\n-- Testing get_declared_interfaces() function with Zero arguments --\n";
 var_dump(get_declared_interfaces());
 
 foreach (get_declared_interfaces() as $interface) {
-	if (!interface_exists($interface)) {
-		echo "Error: $interface is not a valid interface.\n";
-	}
+    if (!interface_exists($interface)) {
+        echo "Error: $interface is not a valid interface.\n";
+    }
 }
 
 echo "\n-- Ensure userspace classes are not listed --\n";

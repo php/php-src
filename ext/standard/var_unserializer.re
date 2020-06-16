@@ -559,10 +559,13 @@ string_key:
 
 				if ((old_data = zend_hash_find(ht, Z_STR(key))) != NULL) {
 					if (Z_TYPE_P(old_data) == IS_INDIRECT) {
+						/* This is a property with a declaration */
 						old_data = Z_INDIRECT_P(old_data);
 						info = zend_get_typed_property_info_for_slot(obj, old_data);
 						var_push_dtor(var_hash, old_data);
-						data = zend_hash_update_ind(ht, Z_STR(key), &d);
+						Z_TRY_DELREF_P(old_data);
+						ZVAL_COPY_VALUE(old_data, &d);
+						data = old_data;
 
 						if (UNEXPECTED(info)) {
 							/* Remember to which property this slot belongs, so we can add a
@@ -940,14 +943,10 @@ use_double:
 	YYCURSOR += 2;
 	*p = YYCURSOR;
 
-	if (len == 0) {
-		ZVAL_EMPTY_STRING(rval);
-	} else if (len == 1) {
-		ZVAL_INTERNED_STR(rval, ZSTR_CHAR((zend_uchar)*str));
-	} else if (as_key) {
+	if (as_key) {
 		ZVAL_STR(rval, zend_string_init_interned(str, len, 0));
 	} else {
-		ZVAL_STRINGL(rval, str, len);
+		ZVAL_STRINGL_FAST(rval, str, len);
 	}
 	return 1;
 }
@@ -999,7 +998,7 @@ use_double:
 	if (elements) {
 		array_init_size(rval, elements);
 		/* we can't convert from packed to hash during unserialization, because
-		   reference to some zvals might be keept in var_hash (to support references) */
+		   reference to some zvals might be kept in var_hash (to support references) */
 		zend_hash_real_init_mixed(Z_ARRVAL_P(rval));
 	} else {
 		ZVAL_EMPTY_ARRAY(rval);

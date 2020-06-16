@@ -20,7 +20,7 @@ echo gettype( posix_strerror($errno) )."\n";
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing posix_strerror() : error conditions ***
 
 -- Testing posix_strerror() function with invalid error number --

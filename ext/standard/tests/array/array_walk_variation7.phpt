@@ -33,7 +33,7 @@ echo "-- Anonymous function with null argument --\n";
 var_dump( array_walk( $input, function() { echo "1\n"; }));
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_walk() : anonymous function as callback ***
 -- Anonymous function with one argument --
 int(2)

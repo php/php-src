@@ -4,6 +4,8 @@ Test asinh function : 64bit long tests
 <?php
 if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 ?>
+--INI--
+serialize_precision=14
 --FILE--
 <?php
 
@@ -25,7 +27,6 @@ foreach ($longVals as $longVal) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 --- testing: 9223372036854775807 ---
 float(44.361419555836)
@@ -57,4 +58,3 @@ float(44.361419555836)
 float(-44.361419555836)
 --- testing: -9.2233720368548E+18 ---
 float(-44.361419555836)
-===DONE===

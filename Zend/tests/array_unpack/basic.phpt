@@ -5,13 +5,13 @@ Basic array unpacking
 $array = [1, 2, 3];
 
 function getArr() {
-	return [4, 5];
+    return [4, 5];
 }
 
 function arrGen() {
-	for($i = 11; $i < 15; $i++) {
-		yield $i;
-	}
+    for($i = 11; $i < 15; $i++) {
+        yield $i;
+    }
 }
 
 var_dump([...[]]);

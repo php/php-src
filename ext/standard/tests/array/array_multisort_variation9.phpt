@@ -12,9 +12,9 @@ echo "*** Testing array_multisort() : usage variation  - test sort order of all 
 
 // define some classes
 class classWithToString {
-	public function __toString() {
-		return "Class A object";
-	}
+    public function __toString() {
+        return "Class A object";
+    }
 }
 
 class classWithoutToString { }
@@ -36,7 +36,6 @@ var_dump(array_multisort($inputs, SORT_NUMERIC));
 var_dump($inputs);
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing array_multisort() : usage variation  - test sort order of all types***
 
@@ -73,4 +72,3 @@ array(10) {
   object(classWithoutToString)#2 (0) {
   }
 }
-===DONE===

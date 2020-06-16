@@ -28,18 +28,18 @@ echo "\n-- Mixed string (mulitbyte and ASCII characters) --\n";
 $a = mb_strtoupper($string_mixed_lower, 'UTF-8');
 var_dump(base64_encode($a));
 if ($a == $string_mixed_upper) {
-	echo "Correctly Converted\n";
+    echo "Correctly Converted\n";
 } else {
-	echo "Incorrectly Converted\n";
+    echo "Incorrectly Converted\n";
 }
 
 echo "\n-- Multibyte Only String--\n";
 $b = mb_strtoupper($string_all_mb, 'UTF-8');
 var_dump(base64_encode($b));
 if ($b == $string_all_mb) { // Japanese characters only - should not be any conversion
-	echo "Correctly Converted\n";
+    echo "Correctly Converted\n";
 } else {
-	echo "Incorrectly Converted\n";
+    echo "Incorrectly Converted\n";
 }
 
 echo "Done";

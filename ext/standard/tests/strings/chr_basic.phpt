@@ -15,9 +15,7 @@ echo chr(10); // "\n"
 echo "World";
 echo "\n";
 ?>
-===DONE===
 --EXPECT--
 *** Testing chr() : basic functionality ***
 Hello
 World
-===DONE===

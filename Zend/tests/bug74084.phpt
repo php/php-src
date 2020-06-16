@@ -24,11 +24,14 @@ try {
     echo $e->getMessage(), "\n";
 }
 unset($$A);
-$$A **= $$B['a'] = &$$C;
-var_dump($$A);
+try {
+    $$A **= $$B['a'] = &$$C;
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
 --EXPECT--
-Unsupported operand types
-Unsupported operand types
-Unsupported operand types
-int(0)
+Unsupported operand types: array - array
+Unsupported operand types: array * array
+Unsupported operand types: array / array
+Unsupported operand types: array ** array

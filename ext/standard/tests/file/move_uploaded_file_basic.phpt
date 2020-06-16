@@ -50,7 +50,7 @@ var_dump(move_uploaded_file($_FILES['file2']['tmp_name'], $destination4));
 unlink($destination4);
 
 ?>
---EXPECTF--
+--EXPECT--
 Valid move
 bool(true)
 bool(true)

@@ -29,7 +29,6 @@ echo gzread($h, strlen($str2))."\n";
 gzclose($h);
 unlink($f);
 ?>
-===DONE===
 --EXPECT--
 tell=23
 tell=43
@@ -39,4 +38,3 @@ reading the output file
 This is the first line.
 string(40) "0000000000000000000000000000000000000000"
 This is the second line.
-===DONE===

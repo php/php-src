@@ -25,12 +25,12 @@ var_dump(openssl_x509_read($f)); // read an array with the filename
 resource(%d) of type (OpenSSL X.509)
 resource(%d) of type (OpenSSL X.509)
 
-Warning: openssl_x509_read(): supplied parameter cannot be coerced into an X509 certificate! in %s on line %d
+Warning: openssl_x509_read(): Supplied parameter cannot be coerced into an X509 certificate! in %s on line %d
 bool(false)
 resource(%d) of type (OpenSSL X.509)
 
-Warning: openssl_x509_read(): supplied parameter cannot be coerced into an X509 certificate! in %s on line %d
+Warning: openssl_x509_read(): Supplied parameter cannot be coerced into an X509 certificate! in %s on line %d
 bool(false)
 
-Warning: openssl_x509_read(): supplied parameter cannot be coerced into an X509 certificate! in %s on line %d
+Warning: openssl_x509_read(): Supplied parameter cannot be coerced into an X509 certificate! in %s on line %d
 bool(false)

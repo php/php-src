@@ -24,7 +24,6 @@ var_dump($phar->getModified());
 $phar->compressFiles(Phar::GZ);
 var_dump($phar->getModified());
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar');
@@ -33,4 +32,3 @@ unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
 --EXPECT--
 bool(false)
 bool(true)
-===DONE===

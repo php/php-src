@@ -27,7 +27,7 @@ ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
 /* {{{ Commands Table */
 #define PHPDBG_COMMAND_HELP_D(name, tip, alias, action) \
-	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, action, &phpdbg_prompt_commands[16], 0}
+	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, action, &phpdbg_prompt_commands[16], 0, NULL, (zend_bool) 0}
 
 const phpdbg_command_t phpdbg_help_commands[] = {
 	PHPDBG_COMMAND_HELP_D(aliases,    "show alias list", 'a', phpdbg_do_help_aliases),
@@ -428,7 +428,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 
 "This mode is enabled by specifying the **-a** option. Phpdbg will bind only to the loopback "
 "interface by default, and this can only be overridden by explicitly setting the remote console "
-"bind address using the **-a** option. If **-a** is specied without an argument, then phpdbg "
+"bind address using the **-a** option. If **-a** is specified without an argument, then phpdbg "
 "will bind to all available interfaces.  You should be aware of the security implications of "
 "doing this, so measures should be taken to secure this service if bound to a publicly accessible "
 "interface/port." CR CR

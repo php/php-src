@@ -8,7 +8,7 @@ Test array_map() function : usage variations - anonymous callback function
  */
 
 /*
- * Test array_map() by passing anoymous callback function with following variations
+ * Test array_map() by passing anonymous callback function with following variations
  */
 
 echo "*** Testing array_map() : anonymous callback function ***\n";
@@ -21,9 +21,9 @@ var_dump( array_map( function($a, $b) { return array($a, $b); }, $array1, $array
 
 echo "-- anonymous function with two parameters and passing one array --\n";
 try {
-	var_dump( array_map( function($a, $b) { return array($a, $b); }, $array1));
+    var_dump( array_map( function($a, $b) { return array($a, $b); }, $array1));
 } catch (Throwable $e) {
-	echo "Exception: " . $e->getMessage() . "\n";
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 
 echo "-- anonymous function with NULL parameter --\n";
@@ -88,5 +88,5 @@ array(3) {
   NULL
 }
 -- passing NULL as 'arr1' --
-Expected parameter 2 to be an array, null given
+array_map(): Argument #2 ($arr1) must be of type array, null given
 Done

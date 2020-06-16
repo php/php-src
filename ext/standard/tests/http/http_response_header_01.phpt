@@ -9,7 +9,7 @@ allow_url_fopen=1
 require 'server.inc';
 
 $responses = array(
-	"data://text/plain,HTTP/1.0 200 Ok\r\nSome: Header\r\nSome: Header\r\n\r\nBody",
+    "data://text/plain,HTTP/1.0 200 Ok\r\nSome: Header\r\nSome: Header\r\n\r\nBody",
 );
 
 $pid = http_server("tcp://127.0.0.1:22346", $responses, $output);
@@ -23,7 +23,6 @@ test();
 
 http_server_kill($pid);
 ?>
-==DONE==
 --EXPECT--
 string(4) "Body"
 array(3) {
@@ -34,4 +33,3 @@ array(3) {
   [2]=>
   string(12) "Some: Header"
 }
-==DONE==

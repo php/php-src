@@ -29,7 +29,7 @@ unlink($file_path."/file.tmp");
 array(0) {
 }
 
-Warning: file(temp.tmp): failed to open stream: No such file or directory in %s on line %d
+Warning: file(temp.tmp): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 --- Done ---

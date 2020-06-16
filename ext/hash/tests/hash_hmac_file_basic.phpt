@@ -15,7 +15,7 @@ echo "*** Testing hash_hmac_file() : basic functionality ***\n";
 $file = __DIR__ . "hash_hmac_file.txt";
 /* Creating a temporary file file */
 if (($fp = fopen( $file, "w+")) == FALSE) {
-	echo "Cannot create file ($file)";
+    echo "Cannot create file ($file)";
     exit;
 }
 
@@ -57,8 +57,7 @@ echo "sha256(raw): " . bin2hex(hash_hmac_file('sha256', $file, $key, TRUE)). "\n
 unlink($file);
 
 ?>
-===Done===
---EXPECTF--
+--EXPECT--
 *** Testing hash_hmac_file() : basic functionality ***
 gost: 94c39a40d5db852a8dc3d24e37eebf2d53e3d711457c59cd02b614f792a9d918
 haval128,3: f1cea637451097d790354a86de3f54a3
@@ -78,4 +77,3 @@ tiger192,3: ca89badf843ba68e3fae5832635aa848a72a4bc11676edd4
 whirlpool: 37a0fbb90547690d5e5e11c046f6654ffdb7bab15e16d9d79c7d85765cc4bdcbfd9df8db7a3ce9558f3f244fead00ca29cf05297f75596555195a0683f15d69f
 md5(raw): 8bddf39dd1c566c27acc7fa85ec36acf
 sha256(raw): 9135286ca4c84dec711e4b831f6cd39e672e5ff93d011321274eb76733cc1e40
-===Done===

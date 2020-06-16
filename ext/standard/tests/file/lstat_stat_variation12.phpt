@@ -36,7 +36,7 @@ $linkname = "$file_path/lstat_stat_variation12_link.tmp";
 $old_stat = lstat($linkname);
 // clear the stat
 clearstatcache();
-sleep(2);
+sleep(1);
 var_dump( is_link($linkname) );
 $new_stat = lstat($linkname);
 // compare self stats

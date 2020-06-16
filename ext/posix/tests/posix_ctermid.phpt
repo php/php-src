@@ -20,7 +20,5 @@ PHP Testfest Berlin 2009-05-10
 <?php
     var_dump(posix_ctermid());
 ?>
-===DONE===
 --EXPECTF--
 string(%d) "%s"
-===DONE===

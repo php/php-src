@@ -21,7 +21,7 @@
 #endif
 
 #include "php.h"
-#if HAVE_LIBXML && HAVE_SIMPLEXML
+#if defined(HAVE_LIBXML) && defined(HAVE_SIMPLEXML)
 
 #include "php_ini.h"
 #include "ext/standard/info.h"
@@ -35,7 +35,7 @@
 
 zend_class_entry *sxe_class_entry = NULL;
 
-PHP_SXE_API zend_class_entry *sxe_get_element_class_entry() /* {{{ */
+PHP_SXE_API zend_class_entry *sxe_get_element_class_entry(void) /* {{{ */
 {
 	return sxe_class_entry;
 }
@@ -44,7 +44,7 @@ PHP_SXE_API zend_class_entry *sxe_get_element_class_entry() /* {{{ */
 #define SXE_ME(func, arg_info, flags) PHP_ME(simplexml_element, func, arg_info, flags)
 #define SXE_MALIAS(func, alias, arg_info, flags) PHP_MALIAS(simplexml_element, func, alias, arg_info, flags)
 
-#define SXE_METHOD(func) PHP_METHOD(simplexml_element, func)
+#define SXE_METHOD(func) PHP_METHOD(SimpleXMLElement, func)
 
 static php_sxe_object* php_sxe_object_new(zend_class_entry *ce, zend_function *fptr_count);
 static xmlNodePtr php_sxe_reset_iterator(php_sxe_object *sxe, int use_data);
@@ -1291,16 +1291,24 @@ static int sxe_objects_compare(zval *object1, zval *object2) /* {{{ */
 	sxe1 = Z_SXEOBJ_P(object1);
 	sxe2 = Z_SXEOBJ_P(object2);
 
-	if (sxe1->node == NULL) {
-		if (sxe2->node) {
-			return 1;
-		} else if (sxe1->document->ptr == sxe2->document->ptr) {
+	if (sxe1->node != NULL && sxe2->node != NULL) {
+		/* Both nodes set: Only support equality comparison between nodes. */
+		if (sxe1->node == sxe2->node) {
 			return 0;
 		}
-	} else {
-		return !(sxe1->node == sxe2->node);
+		return ZEND_UNCOMPARABLE;
 	}
-	return 1;
+
+	if (sxe1->node == NULL && sxe2->node == NULL) {
+		/* Both nodes not set: Only support equality comparison between documents. */
+		if (sxe1->document->ptr == sxe2->document->ptr) {
+			return 0;
+		}
+		return ZEND_UNCOMPARABLE;
+	}
+
+	/* Only one of the nodes set: Cannot compare. */
+	return ZEND_UNCOMPARABLE;
 }
 /* }}} */
 
@@ -1320,7 +1328,7 @@ SXE_METHOD(xpath)
 	xmlNodePtr		   nodeptr;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &query, &query_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	sxe = Z_SXEOBJ_P(ZEND_THIS);
@@ -1405,7 +1413,7 @@ SXE_METHOD(registerXPathNamespace)
 	char *prefix, *ns_uri;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &prefix, &prefix_len, &ns_uri, &ns_uri_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	sxe = Z_SXEOBJ_P(ZEND_THIS);
@@ -1434,7 +1442,7 @@ SXE_METHOD(asXML)
 	size_t                 filename_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|p", &filename, &filename_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	sxe = Z_SXEOBJ_P(ZEND_THIS);
@@ -1556,7 +1564,7 @@ SXE_METHOD(getNamespaces)
 	xmlNodePtr          node;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &recursive) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	array_init(return_value);
@@ -1605,7 +1613,7 @@ SXE_METHOD(getDocNamespaces)
 	xmlNodePtr          node;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|bb", &recursive, &from_root) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	sxe = Z_SXEOBJ_P(ZEND_THIS);
@@ -1635,7 +1643,7 @@ SXE_METHOD(children)
 	zend_bool       isprefix = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s!b", &nsprefix, &nsprefix_len, &isprefix) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	sxe = Z_SXEOBJ_P(ZEND_THIS);
@@ -1661,7 +1669,7 @@ SXE_METHOD(getName)
 	int             namelen;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	sxe = Z_SXEOBJ_P(ZEND_THIS);
@@ -1688,7 +1696,7 @@ SXE_METHOD(attributes)
 	zend_bool       isprefix = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s!b", &nsprefix, &nsprefix_len, &isprefix) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	sxe = Z_SXEOBJ_P(ZEND_THIS);
@@ -1717,7 +1725,7 @@ SXE_METHOD(addChild)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s!s!",
 		&qname, &qname_len, &value, &value_len, &nsuri, &nsuri_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (qname_len == 0) {
@@ -1783,7 +1791,7 @@ SXE_METHOD(addAttribute)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|s!",
 		&qname, &qname_len, &value, &value_len, &nsuri, &nsuri_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (qname_len == 0) {
@@ -1944,7 +1952,7 @@ static int sxe_object_cast(zend_object *readobj, zval *writeobj, int type)
 SXE_METHOD(__toString)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (sxe_object_cast_ex(Z_OBJ_P(ZEND_THIS), return_value, IS_STRING) != SUCCESS) {
@@ -2007,7 +2015,7 @@ SXE_METHOD(count)
 	php_sxe_object *sxe = Z_SXEOBJ_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	php_sxe_count_elements_helper(sxe, &count);
@@ -2182,7 +2190,7 @@ PHP_FUNCTION(simplexml_load_file)
 	zend_bool       isprefix = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|C!lsb", &filename, &filename_len, &ce, &options, &ns, &ns_len, &isprefix) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (ZEND_LONG_EXCEEDS_INT(options)) {
@@ -2228,7 +2236,7 @@ PHP_FUNCTION(simplexml_load_string)
 	zend_bool       isprefix = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|C!lsb", &data, &data_len, &ce, &options, &ns, &ns_len, &isprefix) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (ZEND_SIZE_T_INT_OVFL(data_len)) {
@@ -2277,21 +2285,21 @@ SXE_METHOD(__construct)
 	zend_long            options = 0;
 	zend_bool       is_url = 0, isprefix = 0;
 
-	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s|lbsb", &data, &data_len, &options, &is_url, &ns, &ns_len, &isprefix) == FAILURE) {
-		return;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|lbsb", &data, &data_len, &options, &is_url, &ns, &ns_len, &isprefix) == FAILURE) {
+		RETURN_THROWS();
 	}
 
 	if (ZEND_SIZE_T_INT_OVFL(data_len)) {
-		zend_throw_exception(zend_ce_exception, "Data is too long", 0);
-		return;
+		zend_argument_error(zend_ce_exception, 1, "is too long");
+		RETURN_THROWS();
 	}
 	if (ZEND_SIZE_T_INT_OVFL(ns_len)) {
-		zend_throw_exception(zend_ce_exception, "Namespace is too long", 0);
-		return;
+		zend_argument_error(zend_ce_exception, 4, "is too long");
+		RETURN_THROWS();
 	}
 	if (ZEND_LONG_EXCEEDS_INT(options)) {
-		zend_throw_exception(zend_ce_exception, "Invalid options", 0);
-		return;
+		zend_argument_error(zend_ce_exception, 2, "is invalid");
+		RETURN_THROWS();
 	}
 
 	docp = is_url ? xmlReadFile(data, NULL, (int)options) : xmlReadMemory(data, (int)data_len, NULL, NULL, (int)options);
@@ -2299,7 +2307,7 @@ SXE_METHOD(__construct)
 	if (!docp) {
 		((php_libxml_node_object *)sxe)->document = NULL;
 		zend_throw_exception(zend_ce_exception, "String could not be parsed as XML", 0);
-		return;
+		RETURN_THROWS();
 	}
 
 	sxe->iter.nsprefix = ns_len ? (xmlChar*)estrdup(ns) : NULL;
@@ -2531,7 +2539,7 @@ PHP_FUNCTION(simplexml_import_dom)
 	zend_function    *fptr_count;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o|C!", &node, &ce) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	object = Z_LIBXML_NODE_P(node);
@@ -2568,14 +2576,6 @@ PHP_FUNCTION(simplexml_import_dom)
 }
 /* }}} */
 
-static const zend_function_entry simplexml_functions[] = { /* {{{ */
-	PHP_FE(simplexml_load_file, 	arginfo_simplexml_load_file)
-	PHP_FE(simplexml_load_string,	arginfo_simplexml_load_string)
-	PHP_FE(simplexml_import_dom,	arginfo_simplexml_import_dom)
-	PHP_FE_END
-};
-/* }}} */
-
 static const zend_module_dep simplexml_deps[] = { /* {{{ */
 	ZEND_MOD_REQUIRED("libxml")
 	ZEND_MOD_REQUIRED("spl")
@@ -2587,7 +2587,7 @@ zend_module_entry simplexml_module_entry = { /* {{{ */
 	STANDARD_MODULE_HEADER_EX, NULL,
 	simplexml_deps,
 	"SimpleXML",
-	simplexml_functions,
+	ext_functions,
 	PHP_MINIT(simplexml),
 	PHP_MSHUTDOWN(simplexml),
 	NULL,
@@ -2602,38 +2602,17 @@ zend_module_entry simplexml_module_entry = { /* {{{ */
 ZEND_GET_MODULE(simplexml)
 #endif
 
-/* the method table */
-/* each method can have its own parameters and visibility */
-static const zend_function_entry sxe_functions[] = { /* {{{ */
-	SXE_ME(__construct,            arginfo_class_SimpleXMLElement___construct, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL) /* must be called */
-	SXE_ME(asXML,                  arginfo_class_SimpleXMLElement_asXML, ZEND_ACC_PUBLIC)
-	SXE_MALIAS(saveXML, asXML,	   arginfo_class_SimpleXMLElement_saveXML, ZEND_ACC_PUBLIC)
-	SXE_ME(xpath,                  arginfo_class_SimpleXMLElement_xpath, ZEND_ACC_PUBLIC)
-	SXE_ME(registerXPathNamespace, arginfo_class_SimpleXMLElement_registerXPathNamespace, ZEND_ACC_PUBLIC)
-	SXE_ME(attributes,             arginfo_class_SimpleXMLElement_attributes, ZEND_ACC_PUBLIC)
-	SXE_ME(children,               arginfo_class_SimpleXMLElement_children, ZEND_ACC_PUBLIC)
-	SXE_ME(getNamespaces,          arginfo_class_SimpleXMLElement_getNamespaces, ZEND_ACC_PUBLIC)
-	SXE_ME(getDocNamespaces,       arginfo_class_SimpleXMLElement_getDocNamespaces, ZEND_ACC_PUBLIC)
-	SXE_ME(getName,                arginfo_class_SimpleXMLElement_getName, ZEND_ACC_PUBLIC)
-	SXE_ME(addChild,               arginfo_class_SimpleXMLElement_addChild, ZEND_ACC_PUBLIC)
-	SXE_ME(addAttribute,           arginfo_class_SimpleXMLElement_addAttribute, ZEND_ACC_PUBLIC)
-	SXE_ME(__toString,             arginfo_class_SimpleXMLElement___toString, ZEND_ACC_PUBLIC)
-	SXE_ME(count,                  arginfo_class_SimpleXMLElement_count, ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};
-/* }}} */
-
 /* {{{ PHP_MINIT_FUNCTION(simplexml)
  */
 PHP_MINIT_FUNCTION(simplexml)
 {
 	zend_class_entry sxe;
 
-	INIT_CLASS_ENTRY(sxe, "SimpleXMLElement", sxe_functions);
+	INIT_CLASS_ENTRY(sxe, "SimpleXMLElement", class_SimpleXMLElement_methods);
 	sxe.create_object = sxe_object_new;
 	sxe_class_entry = zend_register_internal_class(&sxe);
 	sxe_class_entry->get_iterator = php_sxe_get_iterator;
-	zend_class_implements(sxe_class_entry, 2, zend_ce_traversable, zend_ce_countable);
+	zend_class_implements(sxe_class_entry, 3, zend_ce_traversable, zend_ce_countable, zend_ce_stringable);
 
 	memcpy(&sxe_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	sxe_object_handlers.offset = XtOffsetOf(php_sxe_object, zo);

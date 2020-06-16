@@ -42,14 +42,6 @@ PHP_RINIT_FUNCTION(filter);
 PHP_RSHUTDOWN_FUNCTION(filter);
 PHP_MINFO_FUNCTION(filter);
 
-PHP_FUNCTION(filter_input);
-PHP_FUNCTION(filter_var);
-PHP_FUNCTION(filter_input_array);
-PHP_FUNCTION(filter_var_array);
-PHP_FUNCTION(filter_list);
-PHP_FUNCTION(filter_has_var);
-PHP_FUNCTION(filter_id);
-
 ZEND_BEGIN_MODULE_GLOBALS(filter)
 	zval post_array;
 	zval get_array;
@@ -90,7 +82,6 @@ void php_filter_url(PHP_INPUT_FILTER_PARAM_DECL);
 void php_filter_number_int(PHP_INPUT_FILTER_PARAM_DECL);
 void php_filter_number_float(PHP_INPUT_FILTER_PARAM_DECL);
 void php_filter_add_slashes(PHP_INPUT_FILTER_PARAM_DECL);
-void php_filter_magic_quotes(PHP_INPUT_FILTER_PARAM_DECL);
 
 void php_filter_callback(PHP_INPUT_FILTER_PARAM_DECL);
 

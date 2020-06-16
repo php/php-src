@@ -66,17 +66,16 @@ $inputs = array(
 // loop through each element of $inputs to check the behaviour of floor()
 $iterator = 1;
 foreach($inputs as $input) {
-	echo "\n-- Iteration $iterator --\n";
-	try {
-		var_dump(floor($input));
-	} catch (TypeError $e) {
-		echo $e->getMessage(), "\n";
-	}
-	$iterator++;
+    echo "\n-- Iteration $iterator --\n";
+    try {
+        var_dump(floor($input));
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
+    $iterator++;
 };
 fclose($fp);
 ?>
-===Done===
 --EXPECT--
 *** Testing floor() : usage variations ***
 
@@ -99,25 +98,25 @@ float(1)
 float(0)
 
 -- Iteration 7 --
-floor() expects parameter 1 to be int or float, string given
+floor(): Argument #1 ($number) must be of type int|float, string given
 
 -- Iteration 8 --
-floor() expects parameter 1 to be int or float, string given
+floor(): Argument #1 ($number) must be of type int|float, string given
 
 -- Iteration 9 --
-floor() expects parameter 1 to be int or float, array given
+floor(): Argument #1 ($number) must be of type int|float, array given
 
 -- Iteration 10 --
-floor() expects parameter 1 to be int or float, string given
+floor(): Argument #1 ($number) must be of type int|float, string given
 
 -- Iteration 11 --
-floor() expects parameter 1 to be int or float, string given
+floor(): Argument #1 ($number) must be of type int|float, string given
 
 -- Iteration 12 --
-floor() expects parameter 1 to be int or float, string given
+floor(): Argument #1 ($number) must be of type int|float, string given
 
 -- Iteration 13 --
-floor() expects parameter 1 to be int or float, object given
+floor(): Argument #1 ($number) must be of type int|float, classA given
 
 -- Iteration 14 --
 float(0)
@@ -126,5 +125,4 @@ float(0)
 float(0)
 
 -- Iteration 16 --
-floor() expects parameter 1 to be int or float, resource given
-===Done===
+floor(): Argument #1 ($number) must be of type int|float, resource given

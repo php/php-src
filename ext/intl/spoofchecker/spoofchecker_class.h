@@ -18,7 +18,6 @@
 #include <php.h>
 
 #include "intl_common.h"
-#include "spoofchecker_create.h"
 #include "intl_error.h"
 #include "intl_data.h"
 
@@ -63,9 +62,8 @@ extern zend_class_entry *Spoofchecker_ce_ptr;
 #define SPOOFCHECKER_METHOD_FETCH_OBJECT							\
 	SPOOFCHECKER_METHOD_FETCH_OBJECT_NO_CHECK;						\
 	if (co->uspoof == NULL)	{										\
-		intl_errors_set(&co->err, U_ILLEGAL_ARGUMENT_ERROR,			\
-				"Found unconstructed Spoofchecker", 0);	\
-		RETURN_FALSE;												\
+		zend_throw_error(NULL, "Found unconstructed Spoofchecker");	\
+		RETURN_THROWS();											\
 	}
 
 // Macro to check return value of a ucol_* function call.

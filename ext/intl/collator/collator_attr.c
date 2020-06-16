@@ -20,7 +20,6 @@
 #include "php_intl.h"
 #include "collator_class.h"
 #include "collator_convert.h"
-#include "collator_attr.h"
 
 #include <unicode/ustring.h>
 
@@ -39,7 +38,7 @@ PHP_FUNCTION( collator_get_attribute )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Ol",
 		&object, Collator_ce_ptr, &attribute ) == FAILURE )
 	{
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */
@@ -67,7 +66,7 @@ PHP_FUNCTION( collator_set_attribute )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Oll",
 		&object, Collator_ce_ptr, &attribute, &value ) == FAILURE)
 	{
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */
@@ -94,7 +93,7 @@ PHP_FUNCTION( collator_get_strength )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, Collator_ce_ptr ) == FAILURE )
 	{
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */
@@ -120,7 +119,7 @@ PHP_FUNCTION( collator_set_strength )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Ol",
 		&object, Collator_ce_ptr, &strength ) == FAILURE )
 	{
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */

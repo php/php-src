@@ -24,9 +24,9 @@ unset ($unset_var);
 // get a class
 class classA
 {
-	public function __toString() {
-		return "Class A object";
-	}
+    public function __toString() {
+        return "Class A object";
+    }
 }
 
 // heredoc string
@@ -98,7 +98,6 @@ fclose($fp);
 
 setlocale(LC_CTYPE, $orig);
 ?>
-===DONE===
 --EXPECT--
 *** Testing ctype_print() : usage variations ***
 
@@ -176,4 +175,3 @@ bool(false)
 
 -- Iteration 25 --
 bool(false)
-===DONE===

@@ -192,6 +192,7 @@ void startup_scanner(void)
 	CG(doc_comment) = NULL;
 	CG(extra_fn_flags) = 0;
 	zend_stack_init(&SCNG(state_stack), sizeof(int));
+	zend_stack_init(&SCNG(nest_location_stack), sizeof(zend_nest_location));
 	zend_ptr_stack_init(&SCNG(heredoc_label_stack));
 	SCNG(heredoc_scan_ahead) = 0;
 }
@@ -205,6 +206,7 @@ void shutdown_scanner(void)
 	CG(parse_error) = 0;
 	RESET_DOC_COMMENT();
 	zend_stack_destroy(&SCNG(state_stack));
+	zend_stack_destroy(&SCNG(nest_location_stack));
 	zend_ptr_stack_clean(&SCNG(heredoc_label_stack), (void (*)(void *)) &heredoc_label_dtor, 1);
 	zend_ptr_stack_destroy(&SCNG(heredoc_label_stack));
 	SCNG(heredoc_scan_ahead) = 0;
@@ -222,6 +224,9 @@ ZEND_API void zend_save_lexical_state(zend_lex_state *lex_state)
 
 	lex_state->state_stack = SCNG(state_stack);
 	zend_stack_init(&SCNG(state_stack), sizeof(int));
+
+	lex_state->nest_location_stack = SCNG(nest_location_stack);
+	zend_stack_init(&SCNG(nest_location_stack), sizeof(zend_nest_location));
 
 	lex_state->heredoc_label_stack = SCNG(heredoc_label_stack);
 	zend_ptr_stack_init(&SCNG(heredoc_label_stack));
@@ -257,6 +262,9 @@ ZEND_API void zend_restore_lexical_state(zend_lex_state *lex_state)
 
 	zend_stack_destroy(&SCNG(state_stack));
 	SCNG(state_stack) = lex_state->state_stack;
+
+	zend_stack_destroy(&SCNG(nest_location_stack));
+	SCNG(nest_location_stack) = lex_state->nest_location_stack;
 
 	zend_ptr_stack_clean(&SCNG(heredoc_label_stack), (void (*)(void *)) &heredoc_label_dtor, 1);
 	zend_ptr_stack_destroy(&SCNG(heredoc_label_stack));
@@ -298,13 +306,15 @@ ZEND_API void zend_destroy_file_handle(zend_file_handle *file_handle)
 	}
 }
 
-ZEND_API void zend_lex_tstring(zval *zv)
+ZEND_API void zend_lex_tstring(zval *zv, zend_lexer_ident_ref ident_ref)
 {
+	char *ident = (char *) SCNG(yy_start) + ident_ref.offset;
+	size_t length = ident_ref.len;
 	if (SCNG(on_event)) {
-		SCNG(on_event)(ON_FEEDBACK, T_STRING, 0, SCNG(on_event_context));
+		SCNG(on_event)(ON_FEEDBACK, T_STRING, 0, ident, length, SCNG(on_event_context));
 	}
 
-	ZVAL_STRINGL(zv, (char*)SCNG(yy_text), SCNG(yy_leng));
+	ZVAL_STRINGL(zv, ident, length);
 }
 
 #define BOM_UTF32_BE	"\x00\x00\xfe\xff"
@@ -637,11 +647,13 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type)
 	zend_save_lexical_state(&original_lex_state);
 
 	if (open_file_for_scanning(file_handle)==FAILURE) {
-		if (type==ZEND_REQUIRE) {
-			zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file_handle->filename);
-			zend_bailout();
-		} else {
-			zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle->filename);
+		if (!EG(exception)) {
+			if (type==ZEND_REQUIRE) {
+				zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file_handle->filename);
+				zend_bailout();
+			} else {
+				zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle->filename);
+			}
 		}
 	} else {
 		op_array = zend_compile(ZEND_USER_FUNCTION);
@@ -651,6 +663,42 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type)
 	return op_array;
 }
 
+ZEND_API zend_ast *zend_compile_string_to_ast(
+		zend_string *code, zend_arena **ast_arena, const char *filename) {
+	zval code_zv;
+	zend_bool original_in_compilation;
+	zend_lex_state original_lex_state;
+	zend_ast *ast;
+
+	ZVAL_STR_COPY(&code_zv, code);
+
+	original_in_compilation = CG(in_compilation);
+	CG(in_compilation) = 1;
+
+	zend_save_lexical_state(&original_lex_state);
+	if (zend_prepare_string_for_scanning(&code_zv, filename) == SUCCESS) {
+		CG(ast) = NULL;
+		CG(ast_arena) = zend_arena_create(1024 * 32);
+		LANG_SCNG(yy_state) = yycINITIAL;
+
+		if (zendparse() != 0) {
+			zend_ast_destroy(CG(ast));
+			zend_arena_destroy(CG(ast_arena));
+			CG(ast) = NULL;
+		}
+	}
+
+	/* restore_lexical_state changes CG(ast) and CG(ast_arena) */
+	ast = CG(ast);
+	*ast_arena = CG(ast_arena);
+
+	zend_restore_lexical_state(&original_lex_state);
+	CG(in_compilation) = original_in_compilation;
+
+	zval_dtor(&code_zv);
+
+	return ast;
+}
 
 zend_op_array *compile_filename(int type, zval *filename)
 {
@@ -1212,6 +1260,63 @@ static void copy_heredoc_label_stack(void *void_heredoc_label)
 	zend_ptr_stack_push(&SCNG(heredoc_label_stack), (void *) new_heredoc_label);
 }
 
+/* Check that { }, [ ], ( ) are nested correctly */
+static void report_bad_nesting(char opening, int opening_lineno, char closing)
+{
+	char   buf[256];
+	size_t used = 0;
+
+	used = snprintf(buf, sizeof(buf), "Unclosed '%c'", opening);
+
+	if (opening_lineno != CG(zend_lineno)) {
+		used += snprintf(buf + used, sizeof(buf) - used, " on line %d", opening_lineno);
+	}
+
+	if (closing) { 	/* 'closing' will be 0 if at end of file */
+		used += snprintf(buf + used, sizeof(buf) - used, " does not match '%c'", closing);
+	}
+
+	zend_throw_exception(zend_ce_parse_error, buf, 0);
+}
+
+static void enter_nesting(char opening)
+{
+	zend_nest_location nest_loc = {opening, CG(zend_lineno)};
+	zend_stack_push(&SCNG(nest_location_stack), &nest_loc);
+}
+
+static int exit_nesting(char closing)
+{
+	if (zend_stack_is_empty(&SCNG(nest_location_stack))) {
+		zend_throw_exception_ex(zend_ce_parse_error, 0, "Unmatched '%c'", closing);
+		return -1;
+	}
+
+	zend_nest_location *nest_loc = zend_stack_top(&SCNG(nest_location_stack));
+	char opening = nest_loc->text;
+
+	if ((opening == '{' && closing != '}') ||
+	    (opening == '[' && closing != ']') ||
+	    (opening == '(' && closing != ')')) {
+		report_bad_nesting(opening, nest_loc->lineno, closing);
+		return -1;
+	}
+
+	zend_stack_del_top(&SCNG(nest_location_stack));
+	return 0;
+}
+
+static int check_nesting_at_end()
+{
+	if (!zend_stack_is_empty(&SCNG(nest_location_stack))) {
+		zend_nest_location *nest_loc = zend_stack_top(&SCNG(nest_location_stack));
+		report_bad_nesting(nest_loc->text, nest_loc->lineno, 0);
+		return -1;
+	}
+
+	return 0;
+}
+
 #define PARSER_MODE() \
 	EXPECTED(elem != NULL)
 
@@ -1231,12 +1336,33 @@ static void copy_heredoc_label_stack(void *void_heredoc_label)
 		goto emit_token_with_str; \
 	} while (0)
 
+#define RETURN_TOKEN_WITH_IDENT(_token) do { \
+		token = _token; \
+		goto emit_token_with_ident; \
+	} while (0)
+
 #define RETURN_OR_SKIP_TOKEN(_token) do { \
 		token = _token; \
 		if (PARSER_MODE()) { \
 			goto skip_token; \
 		} \
 		goto emit_token; \
+	} while (0)
+
+#define RETURN_EXIT_NESTING_TOKEN(_token) do { \
+		if (exit_nesting(_token) && PARSER_MODE()) { \
+			RETURN_TOKEN(T_ERROR); \
+		} else { \
+			RETURN_TOKEN(_token); \
+		} \
+	} while(0)
+
+#define RETURN_END_TOKEN do { \
+		if (check_nesting_at_end() && PARSER_MODE()) { \
+			RETURN_TOKEN(T_ERROR); \
+		} else { \
+			RETURN_TOKEN(END); \
+		} \
 	} while (0)
 
 int ZEND_FASTCALL lex_scan(zval *zendlval, zend_parser_stack_elem *elem)
@@ -1259,7 +1385,7 @@ BNUM	"0b"[01]+(_[01]+)*
 LABEL	[a-zA-Z_\x80-\xff][a-zA-Z0-9_\x80-\xff]*
 WHITESPACE [ \n\r\t]+
 TABS_AND_SPACES [ \t]*
-TOKENS [;:,.\[\]()|^&+-/*=%!~$<>?@]
+TOKENS [;:,.|^&+-/*=%!~$<>?@]
 ANY_CHAR [^]
 NEWLINE ("\r"|"\n"|"\r\n")
 
@@ -1267,169 +1393,169 @@ NEWLINE ("\r"|"\n"|"\r\n")
 <!*> := yyleng = YYCURSOR - SCNG(yy_text);
 
 <ST_IN_SCRIPTING>"exit" {
-	RETURN_TOKEN(T_EXIT);
+	RETURN_TOKEN_WITH_IDENT(T_EXIT);
 }
 
 <ST_IN_SCRIPTING>"die" {
-	RETURN_TOKEN(T_EXIT);
+	RETURN_TOKEN_WITH_IDENT(T_EXIT);
 }
 
 <ST_IN_SCRIPTING>"fn" {
-	RETURN_TOKEN(T_FN);
+	RETURN_TOKEN_WITH_IDENT(T_FN);
 }
 
 <ST_IN_SCRIPTING>"function" {
-	RETURN_TOKEN(T_FUNCTION);
+	RETURN_TOKEN_WITH_IDENT(T_FUNCTION);
 }
 
 <ST_IN_SCRIPTING>"const" {
-	RETURN_TOKEN(T_CONST);
+	RETURN_TOKEN_WITH_IDENT(T_CONST);
 }
 
 <ST_IN_SCRIPTING>"return" {
-	RETURN_TOKEN(T_RETURN);
+	RETURN_TOKEN_WITH_IDENT(T_RETURN);
 }
 
 <ST_IN_SCRIPTING>"yield"{WHITESPACE}"from"[^a-zA-Z0-9_\x80-\xff] {
 	yyless(yyleng - 1);
 	HANDLE_NEWLINES(yytext, yyleng);
-	RETURN_TOKEN(T_YIELD_FROM);
+	RETURN_TOKEN_WITH_IDENT(T_YIELD_FROM);
 }
 
 <ST_IN_SCRIPTING>"yield" {
-	RETURN_TOKEN(T_YIELD);
+	RETURN_TOKEN_WITH_IDENT(T_YIELD);
 }
 
 <ST_IN_SCRIPTING>"try" {
-	RETURN_TOKEN(T_TRY);
+	RETURN_TOKEN_WITH_IDENT(T_TRY);
 }
 
 <ST_IN_SCRIPTING>"catch" {
-	RETURN_TOKEN(T_CATCH);
+	RETURN_TOKEN_WITH_IDENT(T_CATCH);
 }
 
 <ST_IN_SCRIPTING>"finally" {
-	RETURN_TOKEN(T_FINALLY);
+	RETURN_TOKEN_WITH_IDENT(T_FINALLY);
 }
 
 <ST_IN_SCRIPTING>"throw" {
-	RETURN_TOKEN(T_THROW);
+	RETURN_TOKEN_WITH_IDENT(T_THROW);
 }
 
 <ST_IN_SCRIPTING>"if" {
-	RETURN_TOKEN(T_IF);
+	RETURN_TOKEN_WITH_IDENT(T_IF);
 }
 
 <ST_IN_SCRIPTING>"elseif" {
-	RETURN_TOKEN(T_ELSEIF);
+	RETURN_TOKEN_WITH_IDENT(T_ELSEIF);
 }
 
 <ST_IN_SCRIPTING>"endif" {
-	RETURN_TOKEN(T_ENDIF);
+	RETURN_TOKEN_WITH_IDENT(T_ENDIF);
 }
 
 <ST_IN_SCRIPTING>"else" {
-	RETURN_TOKEN(T_ELSE);
+	RETURN_TOKEN_WITH_IDENT(T_ELSE);
 }
 
 <ST_IN_SCRIPTING>"while" {
-	RETURN_TOKEN(T_WHILE);
+	RETURN_TOKEN_WITH_IDENT(T_WHILE);
 }
 
 <ST_IN_SCRIPTING>"endwhile" {
-	RETURN_TOKEN(T_ENDWHILE);
+	RETURN_TOKEN_WITH_IDENT(T_ENDWHILE);
 }
 
 <ST_IN_SCRIPTING>"do" {
-	RETURN_TOKEN(T_DO);
+	RETURN_TOKEN_WITH_IDENT(T_DO);
 }
 
 <ST_IN_SCRIPTING>"for" {
-	RETURN_TOKEN(T_FOR);
+	RETURN_TOKEN_WITH_IDENT(T_FOR);
 }
 
 <ST_IN_SCRIPTING>"endfor" {
-	RETURN_TOKEN(T_ENDFOR);
+	RETURN_TOKEN_WITH_IDENT(T_ENDFOR);
 }
 
 <ST_IN_SCRIPTING>"foreach" {
-	RETURN_TOKEN(T_FOREACH);
+	RETURN_TOKEN_WITH_IDENT(T_FOREACH);
 }
 
 <ST_IN_SCRIPTING>"endforeach" {
-	RETURN_TOKEN(T_ENDFOREACH);
+	RETURN_TOKEN_WITH_IDENT(T_ENDFOREACH);
 }
 
 <ST_IN_SCRIPTING>"declare" {
-	RETURN_TOKEN(T_DECLARE);
+	RETURN_TOKEN_WITH_IDENT(T_DECLARE);
 }
 
 <ST_IN_SCRIPTING>"enddeclare" {
-	RETURN_TOKEN(T_ENDDECLARE);
+	RETURN_TOKEN_WITH_IDENT(T_ENDDECLARE);
 }
 
 <ST_IN_SCRIPTING>"instanceof" {
-	RETURN_TOKEN(T_INSTANCEOF);
+	RETURN_TOKEN_WITH_IDENT(T_INSTANCEOF);
 }
 
 <ST_IN_SCRIPTING>"as" {
-	RETURN_TOKEN(T_AS);
+	RETURN_TOKEN_WITH_IDENT(T_AS);
 }
 
 <ST_IN_SCRIPTING>"switch" {
-	RETURN_TOKEN(T_SWITCH);
+	RETURN_TOKEN_WITH_IDENT(T_SWITCH);
 }
 
 <ST_IN_SCRIPTING>"endswitch" {
-	RETURN_TOKEN(T_ENDSWITCH);
+	RETURN_TOKEN_WITH_IDENT(T_ENDSWITCH);
 }
 
 <ST_IN_SCRIPTING>"case" {
-	RETURN_TOKEN(T_CASE);
+	RETURN_TOKEN_WITH_IDENT(T_CASE);
 }
 
 <ST_IN_SCRIPTING>"default" {
-	RETURN_TOKEN(T_DEFAULT);
+	RETURN_TOKEN_WITH_IDENT(T_DEFAULT);
 }
 
 <ST_IN_SCRIPTING>"break" {
-	RETURN_TOKEN(T_BREAK);
+	RETURN_TOKEN_WITH_IDENT(T_BREAK);
 }
 
 <ST_IN_SCRIPTING>"continue" {
-	RETURN_TOKEN(T_CONTINUE);
+	RETURN_TOKEN_WITH_IDENT(T_CONTINUE);
 }
 
 <ST_IN_SCRIPTING>"goto" {
-	RETURN_TOKEN(T_GOTO);
+	RETURN_TOKEN_WITH_IDENT(T_GOTO);
 }
 
 <ST_IN_SCRIPTING>"echo" {
-	RETURN_TOKEN(T_ECHO);
+	RETURN_TOKEN_WITH_IDENT(T_ECHO);
 }
 
 <ST_IN_SCRIPTING>"print" {
-	RETURN_TOKEN(T_PRINT);
+	RETURN_TOKEN_WITH_IDENT(T_PRINT);
 }
 
 <ST_IN_SCRIPTING>"class" {
-	RETURN_TOKEN(T_CLASS);
+	RETURN_TOKEN_WITH_IDENT(T_CLASS);
 }
 
 <ST_IN_SCRIPTING>"interface" {
-	RETURN_TOKEN(T_INTERFACE);
+	RETURN_TOKEN_WITH_IDENT(T_INTERFACE);
 }
 
 <ST_IN_SCRIPTING>"trait" {
-	RETURN_TOKEN(T_TRAIT);
+	RETURN_TOKEN_WITH_IDENT(T_TRAIT);
 }
 
 <ST_IN_SCRIPTING>"extends" {
-	RETURN_TOKEN(T_EXTENDS);
+	RETURN_TOKEN_WITH_IDENT(T_EXTENDS);
 }
 
 <ST_IN_SCRIPTING>"implements" {
-	RETURN_TOKEN(T_IMPLEMENTS);
+	RETURN_TOKEN_WITH_IDENT(T_IMPLEMENTS);
 }
 
 <ST_IN_SCRIPTING>"->" {
@@ -1473,15 +1599,15 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>"new" {
-	RETURN_TOKEN(T_NEW);
+	RETURN_TOKEN_WITH_IDENT(T_NEW);
 }
 
 <ST_IN_SCRIPTING>"clone" {
-	RETURN_TOKEN(T_CLONE);
+	RETURN_TOKEN_WITH_IDENT(T_CLONE);
 }
 
 <ST_IN_SCRIPTING>"var" {
-	RETURN_TOKEN(T_VAR);
+	RETURN_TOKEN_WITH_IDENT(T_VAR);
 }
 
 <ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("int"|"integer"){TABS_AND_SPACES}")" {
@@ -1494,7 +1620,8 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <ST_IN_SCRIPTING>"("{TABS_AND_SPACES}"real"{TABS_AND_SPACES}")" {
 	if (PARSER_MODE()) {
-		zend_error(E_DEPRECATED, "The (real) cast is deprecated, use (float) instead");
+		zend_throw_exception(zend_ce_parse_error, "The (real) cast has been removed, use (float) instead", 0);
+		RETURN_TOKEN(T_ERROR);
 	}
 	RETURN_TOKEN(T_DOUBLE_CAST);
 }
@@ -1520,79 +1647,79 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>"eval" {
-	RETURN_TOKEN(T_EVAL);
+	RETURN_TOKEN_WITH_IDENT(T_EVAL);
 }
 
 <ST_IN_SCRIPTING>"include" {
-	RETURN_TOKEN(T_INCLUDE);
+	RETURN_TOKEN_WITH_IDENT(T_INCLUDE);
 }
 
 <ST_IN_SCRIPTING>"include_once" {
-	RETURN_TOKEN(T_INCLUDE_ONCE);
+	RETURN_TOKEN_WITH_IDENT(T_INCLUDE_ONCE);
 }
 
 <ST_IN_SCRIPTING>"require" {
-	RETURN_TOKEN(T_REQUIRE);
+	RETURN_TOKEN_WITH_IDENT(T_REQUIRE);
 }
 
 <ST_IN_SCRIPTING>"require_once" {
-	RETURN_TOKEN(T_REQUIRE_ONCE);
+	RETURN_TOKEN_WITH_IDENT(T_REQUIRE_ONCE);
 }
 
 <ST_IN_SCRIPTING>"namespace" {
-	RETURN_TOKEN(T_NAMESPACE);
+	RETURN_TOKEN_WITH_IDENT(T_NAMESPACE);
 }
 
 <ST_IN_SCRIPTING>"use" {
-	RETURN_TOKEN(T_USE);
+	RETURN_TOKEN_WITH_IDENT(T_USE);
 }
 
 <ST_IN_SCRIPTING>"insteadof" {
-    RETURN_TOKEN(T_INSTEADOF);
+    RETURN_TOKEN_WITH_IDENT(T_INSTEADOF);
 }
 
 <ST_IN_SCRIPTING>"global" {
-	RETURN_TOKEN(T_GLOBAL);
+	RETURN_TOKEN_WITH_IDENT(T_GLOBAL);
 }
 
 <ST_IN_SCRIPTING>"isset" {
-	RETURN_TOKEN(T_ISSET);
+	RETURN_TOKEN_WITH_IDENT(T_ISSET);
 }
 
 <ST_IN_SCRIPTING>"empty" {
-	RETURN_TOKEN(T_EMPTY);
+	RETURN_TOKEN_WITH_IDENT(T_EMPTY);
 }
 
 <ST_IN_SCRIPTING>"__halt_compiler" {
-	RETURN_TOKEN(T_HALT_COMPILER);
+	RETURN_TOKEN_WITH_IDENT(T_HALT_COMPILER);
 }
 
 <ST_IN_SCRIPTING>"static" {
-	RETURN_TOKEN(T_STATIC);
+	RETURN_TOKEN_WITH_IDENT(T_STATIC);
 }
 
 <ST_IN_SCRIPTING>"abstract" {
-	RETURN_TOKEN(T_ABSTRACT);
+	RETURN_TOKEN_WITH_IDENT(T_ABSTRACT);
 }
 
 <ST_IN_SCRIPTING>"final" {
-	RETURN_TOKEN(T_FINAL);
+	RETURN_TOKEN_WITH_IDENT(T_FINAL);
 }
 
 <ST_IN_SCRIPTING>"private" {
-	RETURN_TOKEN(T_PRIVATE);
+	RETURN_TOKEN_WITH_IDENT(T_PRIVATE);
 }
 
 <ST_IN_SCRIPTING>"protected" {
-	RETURN_TOKEN(T_PROTECTED);
+	RETURN_TOKEN_WITH_IDENT(T_PROTECTED);
 }
 
 <ST_IN_SCRIPTING>"public" {
-	RETURN_TOKEN(T_PUBLIC);
+	RETURN_TOKEN_WITH_IDENT(T_PUBLIC);
 }
 
 <ST_IN_SCRIPTING>"unset" {
-	RETURN_TOKEN(T_UNSET);
+	RETURN_TOKEN_WITH_IDENT(T_UNSET);
 }
 
 <ST_IN_SCRIPTING>"=>" {
@@ -1600,15 +1727,15 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>"list" {
-	RETURN_TOKEN(T_LIST);
+	RETURN_TOKEN_WITH_IDENT(T_LIST);
 }
 
 <ST_IN_SCRIPTING>"array" {
-	RETURN_TOKEN(T_ARRAY);
+	RETURN_TOKEN_WITH_IDENT(T_ARRAY);
 }
 
 <ST_IN_SCRIPTING>"callable" {
-	RETURN_TOKEN(T_CALLABLE);
+	RETURN_TOKEN_WITH_IDENT(T_CALLABLE);
 }
 
 <ST_IN_SCRIPTING>"++" {
@@ -1712,15 +1839,15 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>"OR" {
-	RETURN_TOKEN(T_LOGICAL_OR);
+	RETURN_TOKEN_WITH_IDENT(T_LOGICAL_OR);
 }
 
 <ST_IN_SCRIPTING>"AND" {
-	RETURN_TOKEN(T_LOGICAL_AND);
+	RETURN_TOKEN_WITH_IDENT(T_LOGICAL_AND);
 }
 
 <ST_IN_SCRIPTING>"XOR" {
-	RETURN_TOKEN(T_LOGICAL_XOR);
+	RETURN_TOKEN_WITH_IDENT(T_LOGICAL_XOR);
 }
 
 <ST_IN_SCRIPTING>"<<" {
@@ -1731,6 +1858,16 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	RETURN_TOKEN(T_SR);
 }
 
+<ST_IN_SCRIPTING>"]"|")" {
+	/* Check that ] and ) match up properly with a preceding [ or ( */
+	RETURN_EXIT_NESTING_TOKEN(yytext[0]);
+}
+
+<ST_IN_SCRIPTING>"["|"(" {
+	enter_nesting(yytext[0]);
+	RETURN_TOKEN(yytext[0]);
+}
+
 <ST_IN_SCRIPTING>{TOKENS} {
 	RETURN_TOKEN(yytext[0]);
 }
@@ -1738,22 +1875,23 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <ST_IN_SCRIPTING>"{" {
 	yy_push_state(ST_IN_SCRIPTING);
+	enter_nesting('{');
 	RETURN_TOKEN('{');
 }
 
 
 <ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"${" {
 	yy_push_state(ST_LOOKING_FOR_VARNAME);
+	enter_nesting('{');
 	RETURN_TOKEN(T_DOLLAR_OPEN_CURLY_BRACES);
 }
-
 
 <ST_IN_SCRIPTING>"}" {
 	RESET_DOC_COMMENT();
 	if (!zend_stack_is_empty(&SCNG(state_stack))) {
 		yy_pop_state();
 	}
-	RETURN_TOKEN('}');
+	RETURN_EXIT_NESTING_TOKEN('}');
 }
 
 
@@ -1820,25 +1958,32 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	zend_bool is_octal = lnum[0] == '0';
 	zend_bool contains_underscores = (memchr(lnum, '_', len) != NULL);
 
+	if (contains_underscores) {
+		lnum = estrndup(lnum, len);
+		strip_underscores(lnum, &len);
+	}
+
 	/* Digits 8 and 9 are illegal in octal literals. */
 	if (is_octal) {
 		size_t i;
 		for (i = 0; i < len; i++) {
 			if (lnum[i] == '8' || lnum[i] == '9') {
 				zend_throw_exception(zend_ce_parse_error, "Invalid numeric literal", 0);
-				ZVAL_UNDEF(zendlval);
 				if (PARSER_MODE()) {
+					if (contains_underscores) {
+						efree(lnum);
+					}
+					ZVAL_UNDEF(zendlval);
 					RETURN_TOKEN(T_ERROR);
 				}
-				RETURN_TOKEN_WITH_VAL(T_LNUMBER);
+
+				/* Continue in order to determine if this is T_LNUMBER or T_DNUMBER. */
+				len = i;
+				break;
 			}
 		}
 	}
 
-	if (contains_underscores) {
-		lnum = estrndup(lnum, len);
-		strip_underscores(lnum, &len);
-	}
 
 	if (len < MAX_LENGTH_OF_LONG - 1) { /* Won't overflow */
 		errno = 0;
@@ -1850,7 +1995,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		ZVAL_LONG(zendlval, ZEND_STRTOL(lnum, &end, 0));
 		if (errno == ERANGE) { /* Overflow */
 			errno = 0;
-			if (lnum[0] == '0') { /* octal overflow */
+			if (is_octal) { /* octal overflow */
 				ZVAL_DOUBLE(zendlval, zend_oct_strtod(lnum, (const char **)&end));
 			} else {
 				ZVAL_DOUBLE(zendlval, zend_strtod(lnum, (const char **)&end));
@@ -1958,35 +2103,35 @@ string:
 }
 
 <ST_IN_SCRIPTING>"__CLASS__" {
-	RETURN_TOKEN(T_CLASS_C);
+	RETURN_TOKEN_WITH_IDENT(T_CLASS_C);
 }
 
 <ST_IN_SCRIPTING>"__TRAIT__" {
-	RETURN_TOKEN(T_TRAIT_C);
+	RETURN_TOKEN_WITH_IDENT(T_TRAIT_C);
 }
 
 <ST_IN_SCRIPTING>"__FUNCTION__" {
-	RETURN_TOKEN(T_FUNC_C);
+	RETURN_TOKEN_WITH_IDENT(T_FUNC_C);
 }
 
 <ST_IN_SCRIPTING>"__METHOD__" {
-	RETURN_TOKEN(T_METHOD_C);
+	RETURN_TOKEN_WITH_IDENT(T_METHOD_C);
 }
 
 <ST_IN_SCRIPTING>"__LINE__" {
-	RETURN_TOKEN(T_LINE);
+	RETURN_TOKEN_WITH_IDENT(T_LINE);
 }
 
 <ST_IN_SCRIPTING>"__FILE__" {
-	RETURN_TOKEN(T_FILE);
+	RETURN_TOKEN_WITH_IDENT(T_FILE);
 }
 
 <ST_IN_SCRIPTING>"__DIR__" {
-	RETURN_TOKEN(T_DIR);
+	RETURN_TOKEN_WITH_IDENT(T_DIR);
 }
 
 <ST_IN_SCRIPTING>"__NAMESPACE__" {
-	RETURN_TOKEN(T_NS_C);
+	RETURN_TOKEN_WITH_IDENT(T_NS_C);
 }
 
 <SHEBANG>"#!" .* {NEWLINE} {
@@ -2042,7 +2187,7 @@ string:
 
 <INITIAL>{ANY_CHAR} {
 	if (YYCURSOR > YYLIMIT) {
-		RETURN_TOKEN(END);
+		RETURN_END_TOKEN;
 	}
 
 inline_char_handler:
@@ -2119,7 +2264,7 @@ inline_char_handler:
 	RETURN_TOKEN(']');
 }
 
-<ST_VAR_OFFSET>{TOKENS}|[{}"`] {
+<ST_VAR_OFFSET>{TOKENS}|[[(){}"`] {
 	/* Only '[' or '-' can be valid, but returning other tokens will allow a more explicit parse error */
 	RETURN_TOKEN(yytext[0]);
 }
@@ -2183,8 +2328,11 @@ inline_char_handler:
 
 	if (YYCURSOR < YYLIMIT) {
 		YYCURSOR++;
-	} else if (!SCNG(heredoc_scan_ahead)) {
-		zend_error(E_COMPILE_WARNING, "Unterminated comment starting line %d", CG(zend_lineno));
+	} else {
+		zend_throw_exception_ex(zend_ce_parse_error, 0, "Unterminated comment starting line %d", CG(zend_lineno));
+		if (PARSER_MODE()) {
+			RETURN_TOKEN(T_ERROR);
+		}
 	}
 
 	yyleng = YYCURSOR - SCNG(yy_text);
@@ -2383,6 +2531,7 @@ skip_escape_conversion:
 	}
 
 	heredoc_label->label = estrndup(s, heredoc_label->length);
+	heredoc_label->indentation_uses_spaces = 0;
 	heredoc_label->indentation = 0;
 	saved_cursor = YYCURSOR;
 
@@ -2425,6 +2574,7 @@ skip_escape_conversion:
 
 	if (is_heredoc && !SCNG(heredoc_scan_ahead)) {
 		zend_lex_state current_state;
+		zend_string *saved_doc_comment = CG(doc_comment);
 		int heredoc_nesting_level = 1;
 		int first_token = 0;
 		int error = 0;
@@ -2435,6 +2585,7 @@ skip_escape_conversion:
 		SCNG(heredoc_indentation) = 0;
 		SCNG(heredoc_indentation_uses_spaces) = 0;
 		LANG_SCNG(on_event) = NULL;
+		CG(doc_comment) = NULL;
 
 		zend_ptr_stack_reverse_apply(&current_state.heredoc_label_stack, copy_heredoc_label_stack);
 
@@ -2484,6 +2635,7 @@ skip_escape_conversion:
 		zend_restore_lexical_state(&current_state);
 		SCNG(heredoc_scan_ahead) = 0;
 		CG(increment_lineno) = 0;
+		CG(doc_comment) = saved_doc_comment;
 
 		if (PARSER_MODE() && error) {
 			RETURN_TOKEN(T_ERROR);
@@ -2517,6 +2669,7 @@ skip_escape_conversion:
 <ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"{$" {
 	yy_push_state(ST_IN_SCRIPTING);
 	yyless(1);
+	enter_nesting('{');
 	RETURN_TOKEN(T_CURLY_OPEN);
 }
 
@@ -2541,7 +2694,7 @@ skip_escape_conversion:
 	}
 
 	if (YYCURSOR > YYLIMIT) {
-		RETURN_TOKEN(END);
+		RETURN_END_TOKEN;
 	}
 	if (yytext[0] == '\\' && YYCURSOR < YYLIMIT) {
 		YYCURSOR++;
@@ -2588,7 +2741,7 @@ double_quotes_scan_done:
 
 <ST_BACKQUOTE>{ANY_CHAR} {
 	if (YYCURSOR > YYLIMIT) {
-		RETURN_TOKEN(END);
+		RETURN_END_TOKEN;
 	}
 	if (yytext[0] == '\\' && YYCURSOR < YYLIMIT) {
 		YYCURSOR++;
@@ -2637,7 +2790,7 @@ double_quotes_scan_done:
 	int newline = 0, indentation = 0, spacing = 0;
 
 	if (YYCURSOR > YYLIMIT) {
-		RETURN_TOKEN(END);
+		RETURN_END_TOKEN;
 	}
 
 	YYCURSOR--;
@@ -2761,7 +2914,7 @@ heredoc_scan_done:
 	int newline = 0, indentation = 0, spacing = -1;
 
 	if (YYCURSOR > YYLIMIT) {
-		RETURN_TOKEN(END);
+		RETURN_END_TOKEN;
 	}
 
 	YYCURSOR--;
@@ -2849,7 +3002,7 @@ nowdoc_scan_done:
 
 <ST_IN_SCRIPTING,ST_VAR_OFFSET>{ANY_CHAR} {
 	if (YYCURSOR > YYLIMIT) {
-		RETURN_TOKEN(END);
+		RETURN_END_TOKEN;
 	}
 
 	RETURN_TOKEN(T_BAD_CHARACTER);
@@ -2868,14 +3021,24 @@ emit_token_with_val:
 
 emit_token:
 	if (SCNG(on_event)) {
-		SCNG(on_event)(ON_TOKEN, token, start_line, SCNG(on_event_context));
+		SCNG(on_event)(ON_TOKEN, token, start_line, yytext, yyleng, SCNG(on_event_context));
+	}
+	return token;
+
+emit_token_with_ident:
+	if (PARSER_MODE()) {
+		elem->ident.offset = SCNG(yy_text) - SCNG(yy_start);
+		elem->ident.len = SCNG(yy_leng);
+	}
+	if (SCNG(on_event)) {
+		SCNG(on_event)(ON_TOKEN, token, start_line, yytext, yyleng, SCNG(on_event_context));
 	}
 	return token;
 
 return_whitespace:
 	HANDLE_NEWLINES(yytext, yyleng);
 	if (SCNG(on_event)) {
-		SCNG(on_event)(ON_TOKEN, T_WHITESPACE, start_line, SCNG(on_event_context));
+		SCNG(on_event)(ON_TOKEN, T_WHITESPACE, start_line, yytext, yyleng, SCNG(on_event_context));
 	}
 	if (PARSER_MODE()) {
 		start_line = CG(zend_lineno);
@@ -2886,7 +3049,7 @@ return_whitespace:
 
 skip_token:
 	if (SCNG(on_event)) {
-		SCNG(on_event)(ON_TOKEN, token, start_line, SCNG(on_event_context));
+		SCNG(on_event)(ON_TOKEN, token, start_line, yytext, yyleng, SCNG(on_event_context));
 	}
 	start_line = CG(zend_lineno);
 	goto restart;

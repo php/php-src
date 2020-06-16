@@ -23,8 +23,8 @@ date_default_timezone_set("Asia/Calcutta");
 
 //array of values to iterate over
 $inputs = array(
-	  'Newline character' => "%n",
-	  'Tab character' => "%t"
+      'Newline character' => "%n",
+      'Tab character' => "%t"
 );
 
 // loop through each element of the array for timestamp
@@ -36,7 +36,6 @@ foreach($inputs as $key =>$value) {
 };
 
 ?>
-===DONE===
 --EXPECTREGEX--
 \*\*\* Testing gmstrftime\(\) : usage variation \*\*\*
 
@@ -49,4 +48,3 @@ string\(1\) "
 --Tab character--
 string\(1\) "\s"
 string\(1\) "\s"
-===DONE===

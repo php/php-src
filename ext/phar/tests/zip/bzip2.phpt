@@ -6,17 +6,16 @@ Phar: process bzip2-compressed zip entry
 --FILE--
 <?php
 try {
-	$a = new PharData(dirname(__FILE__) . '/files/bzip2.zip');
-	foreach ($a as $entry => $file) {
-		echo $file->getContent();
-	}
-	$a = new Phar(dirname(__FILE__) . '/files/bz2_alias.phar.zip');
-	var_dump($a->getAlias());
+    $a = new PharData(dirname(__FILE__) . '/files/bzip2.zip');
+    foreach ($a as $entry => $file) {
+        echo $file->getContent();
+    }
+    $a = new Phar(dirname(__FILE__) . '/files/bz2_alias.phar.zip');
+    var_dump($a->getAlias());
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --EXPECT--
 <?php
 include dirname(__FILE__) . '/corrupt_zipmaker.php.inc';
@@ -79,4 +78,3 @@ $a->addFile('hi', null, 'hii', null, null, 'compress', 'compress', 11);
 $a->writeZip(dirname(__FILE__) . '/compress_unsupunknown.zip');
 ?>
 string(175) "hitheresuperlongzipistoostupidtodowhatIsaysoIhavetousethisridiculouslylongaliasbecauseitisstupiddidImentionthatalreadythemadnessdoesnotstopIhateinfozipIhateinfozipIhateinfozip"
-===DONE===

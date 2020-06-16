@@ -5,9 +5,9 @@ ZE2 cannot override final __construct
 
 class Base
 {
-	public final function __construct()
-	{
-	}
+    public final function __construct()
+    {
+    }
 }
 
 class Works extends Base
@@ -16,9 +16,9 @@ class Works extends Base
 
 class Extended extends Base
 {
-	public function __construct()
-	{
-	}
+    public function __construct()
+    {
+    }
 }
 
 ?>

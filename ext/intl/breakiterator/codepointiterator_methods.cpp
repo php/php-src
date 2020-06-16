@@ -25,13 +25,13 @@ static inline CodePointBreakIterator *fetch_cpbi(BreakIterator_object *bio) {
 	return (CodePointBreakIterator*)bio->biter;
 }
 
-U_CFUNC PHP_FUNCTION(cpbi_get_last_code_point)
+U_CFUNC PHP_METHOD(IntlCodePointBreakIterator, getLastCodePoint)
 {
 	BREAKITER_METHOD_INIT_VARS;
 	object = ZEND_THIS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	BREAKITER_METHOD_FETCH_OBJECT;

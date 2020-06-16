@@ -35,7 +35,6 @@ var_dump( gmdate('t') );
 var_dump( gmdate('t', $timestamp) );
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing gmdate() : usage variation ***
 
@@ -58,4 +57,3 @@ string(1) "8"
 -- Testing gmdate() function with number of days in a month format --
 string(%d) "%d"
 string(2) "31"
-===DONE===

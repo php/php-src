@@ -82,7 +82,7 @@ _bc_free_num_ex (num, persistent)
 }
 
 
-/* Intitialize the number package! */
+/* Initialize the number package! */
 
 void
 bc_init_numbers (void)

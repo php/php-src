@@ -136,6 +136,7 @@ mysqlnd_run_authentication(
 				ret = mysqlnd_auth_change_user(conn, user, strlen(user), passwd, passwd_len, db, db_len, silent,
 											   first_call,
 											   requested_protocol,
+											   auth_plugin, plugin_data, plugin_data_len,
 											   scrambled_data, scrambled_data_len,
 											   &switch_to_auth_protocol, &switch_to_auth_protocol_len,
 											   &switch_to_auth_protocol_data, &switch_to_auth_protocol_data_len
@@ -318,8 +319,12 @@ mysqlnd_auth_handshake(MYSQLND_CONN_DATA * conn,
 	}
 
 	if (auth_plugin && auth_plugin->methods.handle_server_response) {
-		auth_plugin->methods.handle_server_response(auth_plugin, conn,
-				orig_auth_plugin_data, orig_auth_plugin_data_len, passwd, passwd_len);
+		if (FAIL == auth_plugin->methods.handle_server_response(auth_plugin, conn,
+				orig_auth_plugin_data, orig_auth_plugin_data_len, passwd, passwd_len,
+				switch_to_auth_protocol, switch_to_auth_protocol_len,
+				switch_to_auth_protocol_data, switch_to_auth_protocol_data_len)) {
+			goto end;
+		}
 	}
 
 	if (FAIL == PACKET_READ(conn, &auth_resp_packet) || auth_resp_packet.response_code >= 0xFE) {
@@ -371,6 +376,9 @@ mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
 								const zend_bool silent,
 								const zend_bool use_full_blown_auth_packet,
 								const char * const auth_protocol,
+								struct st_mysqlnd_authentication_plugin * auth_plugin,
+								const zend_uchar * const orig_auth_plugin_data,
+								const size_t orig_auth_plugin_data_len,
 								const zend_uchar * const auth_plugin_data,
 								const size_t auth_plugin_data_len,
 								char ** switch_to_auth_protocol,
@@ -436,6 +444,15 @@ mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
 		PACKET_FREE(&auth_packet);
 	}
 
+	if (auth_plugin && auth_plugin->methods.handle_server_response) {
+		if (FAIL == auth_plugin->methods.handle_server_response(auth_plugin, conn,
+				orig_auth_plugin_data, orig_auth_plugin_data_len, passwd, passwd_len,
+				switch_to_auth_protocol, switch_to_auth_protocol_len,
+				switch_to_auth_protocol_data, switch_to_auth_protocol_data_len)) {
+			goto end;
+		}
+	}
+
 	ret = PACKET_READ(conn, &chg_user_resp);
 	COPY_CLIENT_ERROR(conn->error_info, chg_user_resp.error_info);
 
@@ -490,7 +507,7 @@ mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
 		conn->password.s = tmp;
 
 		if (conn->last_message.s) {
-			mnd_pefree(conn->last_message.s, conn->persistent);
+			mnd_efree(conn->last_message.s);
 			conn->last_message.s = NULL;
 		}
 		UPSERT_STATUS_RESET(conn->upsert_status);
@@ -675,20 +692,149 @@ mysqlnd_xor_string(char * dst, const size_t dst_len, const char * xor_str, const
 	}
 }
 
+#ifndef PHP_WIN32
 
 #include <openssl/rsa.h>
 #include <openssl/pem.h>
 #include <openssl/err.h>
 
+typedef RSA * mysqlnd_rsa_t;
+
+/* {{{ mysqlnd_sha256_get_rsa_from_pem */
+static mysqlnd_rsa_t
+mysqlnd_sha256_get_rsa_from_pem(const char *buf, size_t len)
+{
+	BIO * bio = BIO_new_mem_buf(buf, len);
+	RSA * ret = PEM_read_bio_RSA_PUBKEY(bio, NULL, NULL, NULL);
+	BIO_free(bio);
+	return ret;
+}
+/* }}} */
+
+/* {{{ mysqlnd_sha256_public_encrypt */
+static zend_uchar *
+mysqlnd_sha256_public_encrypt(MYSQLND_CONN_DATA * conn, mysqlnd_rsa_t server_public_key, size_t passwd_len, size_t * auth_data_len, char *xor_str)
+{
+	zend_uchar * ret = NULL;
+	size_t server_public_key_len = (size_t) RSA_size(server_public_key);
+
+	DBG_ENTER("mysqlnd_sha256_public_encrypt");
+	/*
+		Because RSA_PKCS1_OAEP_PADDING is used there is a restriction on the passwd_len.
+		RSA_PKCS1_OAEP_PADDING is recommended for new applications. See more here:
+		http://www.openssl.org/docs/crypto/RSA_public_encrypt.html
+	*/
+	if (server_public_key_len <= passwd_len + 41) {
+		/* password message is to long */
+		RSA_free(server_public_key);
+		SET_CLIENT_ERROR(conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, "password is too long");
+		DBG_ERR("password is too long");
+		DBG_RETURN(NULL);
+	}
+
+	*auth_data_len = server_public_key_len;
+	ret = malloc(*auth_data_len);
+	RSA_public_encrypt(passwd_len + 1, (zend_uchar *) xor_str, ret, server_public_key, RSA_PKCS1_OAEP_PADDING);
+	RSA_free(server_public_key);
+	DBG_RETURN(ret);
+}
+/* }}} */
+
+#else
+
+#include <wincrypt.h>
+#include <bcrypt.h>
+
+typedef HANDLE mysqlnd_rsa_t;
+
+/* {{{ mysqlnd_sha256_get_rsa_from_pem */
+static mysqlnd_rsa_t
+mysqlnd_sha256_get_rsa_from_pem(const char *buf, size_t len)
+{
+	BCRYPT_KEY_HANDLE ret = 0;
+	LPSTR der_buf = NULL;
+	DWORD der_len;
+	CERT_PUBLIC_KEY_INFO *key_info = NULL;
+	DWORD key_info_len;
+	ALLOCA_FLAG(use_heap);
+
+	if (!CryptStringToBinaryA(buf, len, CRYPT_STRING_BASE64HEADER, NULL, &der_len, NULL, NULL)) {
+		goto finish;
+	}
+	der_buf = do_alloca(der_len, use_heap);
+	if (!CryptStringToBinaryA(buf, len, CRYPT_STRING_BASE64HEADER, der_buf, &der_len, NULL, NULL)) {
+		goto finish;
+	}
+	if (!CryptDecodeObjectEx(X509_ASN_ENCODING, X509_PUBLIC_KEY_INFO, der_buf, der_len, CRYPT_ENCODE_ALLOC_FLAG, NULL, &key_info, &key_info_len)) {
+		goto finish;
+	}
+	if (!CryptImportPublicKeyInfoEx2(X509_ASN_ENCODING, key_info, CRYPT_OID_INFO_PUBKEY_ENCRYPT_KEY_FLAG, NULL, &ret)) {
+		goto finish;
+	}
+
+finish:
+	if (key_info) {
+		LocalFree(key_info);
+	}
+	if (der_buf) {
+		free_alloca(der_buf, use_heap);
+	}
+	return (mysqlnd_rsa_t) ret;
+}
+/* }}} */
+
+/* {{{ mysqlnd_sha256_public_encrypt */
+static zend_uchar *
+mysqlnd_sha256_public_encrypt(MYSQLND_CONN_DATA * conn, mysqlnd_rsa_t server_public_key, size_t passwd_len, size_t * auth_data_len, char *xor_str)
+{
+	zend_uchar * ret = NULL;
+	DWORD server_public_key_len = passwd_len;
+	BCRYPT_OAEP_PADDING_INFO padding_info;
+
+	DBG_ENTER("mysqlnd_sha256_public_encrypt");
+
+	ZeroMemory(&padding_info, sizeof padding_info);
+	padding_info.pszAlgId = BCRYPT_SHA1_ALGORITHM;
+	if (BCryptEncrypt((BCRYPT_KEY_HANDLE) server_public_key, xor_str, passwd_len + 1, &padding_info,
+			NULL, 0, NULL, 0, &server_public_key_len, BCRYPT_PAD_OAEP)) {
+		DBG_RETURN(0);
+	}
+
+	/*
+		Because RSA_PKCS1_OAEP_PADDING is used there is a restriction on the passwd_len.
+		RSA_PKCS1_OAEP_PADDING is recommended for new applications. See more here:
+		http://www.openssl.org/docs/crypto/RSA_public_encrypt.html
+	*/
+	if ((size_t) server_public_key_len <= passwd_len + 41) {
+		/* password message is to long */
+		BCryptDestroyKey((BCRYPT_KEY_HANDLE) server_public_key);
+		SET_CLIENT_ERROR(conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, "password is too long");
+		DBG_ERR("password is too long");
+		DBG_RETURN(0);
+	}
+
+	*auth_data_len = server_public_key_len;
+	ret = malloc(*auth_data_len);
+	if (BCryptEncrypt((BCRYPT_KEY_HANDLE) server_public_key, xor_str, passwd_len + 1, &padding_info,
+			NULL, 0, ret, server_public_key_len, &server_public_key_len, BCRYPT_PAD_OAEP)) {
+		BCryptDestroyKey((BCRYPT_KEY_HANDLE) server_public_key);
+		DBG_RETURN(0);
+	}
+	BCryptDestroyKey((BCRYPT_KEY_HANDLE) server_public_key);
+	DBG_RETURN(ret);
+}
+/* }}} */
+
+#endif
 
 /* {{{ mysqlnd_sha256_get_rsa_key */
-static RSA *
+static mysqlnd_rsa_t
 mysqlnd_sha256_get_rsa_key(MYSQLND_CONN_DATA * conn,
 						   const MYSQLND_SESSION_OPTIONS * const session_options,
 						   const MYSQLND_PFC_DATA * const pfc_data
 						  )
 {
-	RSA * ret = NULL;
+	mysqlnd_rsa_t ret = NULL;
 	const char * fname = (pfc_data->sha256_server_public_key && pfc_data->sha256_server_public_key[0] != '\0')?
 								pfc_data->sha256_server_public_key:
 								MYSQLND_G(sha256_server_public_key);
@@ -720,11 +866,7 @@ mysqlnd_sha256_get_rsa_key(MYSQLND_CONN_DATA * conn,
 			}
 			DBG_INF_FMT("Public key(%d):\n%s", pk_resp_packet.public_key_len, pk_resp_packet.public_key);
 			/* now extract the public key */
-			{
-				BIO * bio = BIO_new_mem_buf(pk_resp_packet.public_key, pk_resp_packet.public_key_len);
-				ret = PEM_read_bio_RSA_PUBKEY(bio, NULL, NULL, NULL);
-				BIO_free(bio);
-			}
+			ret = mysqlnd_sha256_get_rsa_from_pem((const char *) pk_resp_packet.public_key, pk_resp_packet.public_key_len);
 		} while (0);
 		PACKET_FREE(&pk_req_packet);
 		PACKET_FREE(&pk_resp_packet);
@@ -743,9 +885,7 @@ mysqlnd_sha256_get_rsa_key(MYSQLND_CONN_DATA * conn,
 
 		if (stream) {
 			if ((key_str = php_stream_copy_to_mem(stream, PHP_STREAM_COPY_ALL, 0)) != NULL) {
-				BIO * bio = BIO_new_mem_buf(ZSTR_VAL(key_str), ZSTR_LEN(key_str));
-				ret = PEM_read_bio_RSA_PUBKEY(bio, NULL, NULL, NULL);
-				BIO_free(bio);
+				ret = mysqlnd_sha256_get_rsa_from_pem(ZSTR_VAL(key_str), ZSTR_LEN(key_str));
 				DBG_INF("Successfully loaded");
 				DBG_INF_FMT("Public key:%*.s", ZSTR_LEN(key_str), ZSTR_VAL(key_str));
 				zend_string_release_ex(key_str, 0);
@@ -769,7 +909,7 @@ mysqlnd_sha256_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self
 								  const zend_ulong mysql_flags
 								 )
 {
-	RSA * server_public_key;
+	mysqlnd_rsa_t server_public_key;
 	zend_uchar * ret = NULL;
 	DBG_ENTER("mysqlnd_sha256_auth_get_auth_data");
 	DBG_INF_FMT("salt(%d)=[%.*s]", auth_plugin_data_len, auth_plugin_data_len, auth_plugin_data);
@@ -786,28 +926,13 @@ mysqlnd_sha256_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self
 		server_public_key = mysqlnd_sha256_get_rsa_key(conn, session_options, pfc_data);
 
 		if (server_public_key) {
-			int server_public_key_len;
-			char xor_str[passwd_len + 1];
+			ALLOCA_FLAG(use_heap);
+			char *xor_str = do_alloca(passwd_len + 1, use_heap);
 			memcpy(xor_str, passwd, passwd_len);
 			xor_str[passwd_len] = '\0';
 			mysqlnd_xor_string(xor_str, passwd_len, (char *) auth_plugin_data, auth_plugin_data_len);
-
-			server_public_key_len = RSA_size(server_public_key);
-			/*
-			  Because RSA_PKCS1_OAEP_PADDING is used there is a restriction on the passwd_len.
-			  RSA_PKCS1_OAEP_PADDING is recommended for new applications. See more here:
-			  http://www.openssl.org/docs/crypto/RSA_public_encrypt.html
-			*/
-			if ((size_t) server_public_key_len - 41 <= passwd_len) {
-				/* password message is to long */
-				SET_CLIENT_ERROR(conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, "password is too long");
-				DBG_ERR("password is too long");
-				DBG_RETURN(NULL);
-			}
-
-			*auth_data_len = server_public_key_len;
-			ret = malloc(*auth_data_len);
-			RSA_public_encrypt(passwd_len + 1, (zend_uchar *) xor_str, ret, server_public_key, RSA_PKCS1_OAEP_PADDING);
+			ret = mysqlnd_sha256_public_encrypt(conn, server_public_key, passwd_len, auth_data_len, xor_str);
+			free_alloca(xor_str, use_heap);
 		}
 	}
 
@@ -878,6 +1003,78 @@ void php_mysqlnd_scramble_sha2(zend_uchar * const buffer, const zend_uchar * con
 }
 /* }}} */
 
+#ifndef PHP_WIN32
+
+/* {{{ mysqlnd_caching_sha2_public_encrypt */
+static size_t
+mysqlnd_caching_sha2_public_encrypt(MYSQLND_CONN_DATA * conn, mysqlnd_rsa_t server_public_key, size_t passwd_len, unsigned char **crypted, char *xor_str)
+{
+	size_t server_public_key_len = (size_t) RSA_size(server_public_key);
+
+	DBG_ENTER("mysqlnd_caching_sha2_public_encrypt");
+	/*
+		Because RSA_PKCS1_OAEP_PADDING is used there is a restriction on the passwd_len.
+		RSA_PKCS1_OAEP_PADDING is recommended for new applications. See more here:
+		http://www.openssl.org/docs/crypto/RSA_public_encrypt.html
+	*/
+	if (server_public_key_len <= passwd_len + 41) {
+		/* password message is to long */
+		RSA_free(server_public_key);
+		SET_CLIENT_ERROR(conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, "password is too long");
+		DBG_ERR("password is too long");
+		DBG_RETURN(0);
+	}
+
+	*crypted = emalloc(server_public_key_len);
+	RSA_public_encrypt(passwd_len + 1, (zend_uchar *) xor_str, *crypted, server_public_key, RSA_PKCS1_OAEP_PADDING);
+	RSA_free(server_public_key);
+	DBG_RETURN(server_public_key_len);
+}
+/* }}} */
+
+#else
+
+/* {{{ mysqlnd_caching_sha2_public_encrypt */
+static size_t
+mysqlnd_caching_sha2_public_encrypt(MYSQLND_CONN_DATA * conn, mysqlnd_rsa_t server_public_key, size_t passwd_len, unsigned char **crypted, char *xor_str)
+{
+	DWORD server_public_key_len = passwd_len;
+	BCRYPT_OAEP_PADDING_INFO padding_info;
+
+	DBG_ENTER("mysqlnd_caching_sha2_public_encrypt");
+
+	ZeroMemory(&padding_info, sizeof padding_info);
+	padding_info.pszAlgId = BCRYPT_SHA1_ALGORITHM;
+	if (BCryptEncrypt((BCRYPT_KEY_HANDLE) server_public_key, xor_str, passwd_len + 1, &padding_info,
+			NULL, 0, NULL, 0, &server_public_key_len, BCRYPT_PAD_OAEP)) {
+		DBG_RETURN(0);
+	}
+
+	/*
+		Because RSA_PKCS1_OAEP_PADDING is used there is a restriction on the passwd_len.
+		RSA_PKCS1_OAEP_PADDING is recommended for new applications. See more here:
+		http://www.openssl.org/docs/crypto/RSA_public_encrypt.html
+	*/
+	if ((size_t) server_public_key_len <= passwd_len + 41) {
+		/* password message is to long */
+		BCryptDestroyKey((BCRYPT_KEY_HANDLE) server_public_key);
+		SET_CLIENT_ERROR(conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, "password is too long");
+		DBG_ERR("password is too long");
+		DBG_RETURN(0);
+	}
+
+	*crypted = emalloc(server_public_key_len);
+	if (BCryptEncrypt((BCRYPT_KEY_HANDLE) server_public_key, xor_str, passwd_len + 1, &padding_info,
+			NULL, 0, *crypted, server_public_key_len, &server_public_key_len, BCRYPT_PAD_OAEP)) {
+		BCryptDestroyKey((BCRYPT_KEY_HANDLE) server_public_key);
+		DBG_RETURN(0);
+	}
+	BCryptDestroyKey((BCRYPT_KEY_HANDLE) server_public_key);
+	DBG_RETURN(server_public_key_len);
+}
+/* }}} */
+
+#endif
 
 /* {{{ mysqlnd_native_auth_get_auth_data */
 static zend_uchar *
@@ -895,6 +1092,12 @@ mysqlnd_caching_sha2_get_auth_data(struct st_mysqlnd_authentication_plugin * sel
 	DBG_INF_FMT("salt(%d)=[%.*s]", auth_plugin_data_len, auth_plugin_data_len, auth_plugin_data);
 	*auth_data_len = 0;
 
+	if (auth_plugin_data_len < SCRAMBLE_LENGTH) {
+		SET_CLIENT_ERROR(conn->error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "The server sent wrong length for scramble");
+		DBG_ERR_FMT("The server sent wrong length for scramble %u. Expected %u", auth_plugin_data_len, SCRAMBLE_LENGTH);
+		DBG_RETURN(NULL);
+	}
+
 	DBG_INF("First auth step: send hashed password");
 	/* copy scrambled pass*/
 	if (passwd && passwd_len) {
@@ -909,10 +1112,10 @@ mysqlnd_caching_sha2_get_auth_data(struct st_mysqlnd_authentication_plugin * sel
 }
 /* }}} */
 
-static RSA *
+static mysqlnd_rsa_t
 mysqlnd_caching_sha2_get_key(MYSQLND_CONN_DATA *conn)
 {
-	RSA * ret = NULL;
+	mysqlnd_rsa_t ret = NULL;
 	const MYSQLND_PFC_DATA * const pfc_data = conn->protocol_frame_codec->data;
 	const char * fname = (pfc_data->sha256_server_public_key && pfc_data->sha256_server_public_key[0] != '\0')?
 								pfc_data->sha256_server_public_key:
@@ -946,11 +1149,7 @@ mysqlnd_caching_sha2_get_key(MYSQLND_CONN_DATA *conn)
 			}
 			DBG_INF_FMT("Public key(%d):\n%s", pk_resp_packet.public_key_len, pk_resp_packet.public_key);
 			/* now extract the public key */
-			{
-				BIO * bio = BIO_new_mem_buf(pk_resp_packet.public_key, pk_resp_packet.public_key_len);
-				ret = PEM_read_bio_RSA_PUBKEY(bio, NULL, NULL, NULL);
-				BIO_free(bio);
-			}
+			ret = mysqlnd_sha256_get_rsa_from_pem((const char *) pk_resp_packet.public_key, pk_resp_packet.public_key_len);
 		} while (0);
 		PACKET_FREE(&req_packet);
 		PACKET_FREE(&pk_resp_packet);
@@ -969,9 +1168,7 @@ mysqlnd_caching_sha2_get_key(MYSQLND_CONN_DATA *conn)
 
 		if (stream) {
 			if ((key_str = php_stream_copy_to_mem(stream, PHP_STREAM_COPY_ALL, 0)) != NULL) {
-				BIO * bio = BIO_new_mem_buf(ZSTR_VAL(key_str), ZSTR_LEN(key_str));
-				ret = PEM_read_bio_RSA_PUBKEY(bio, NULL, NULL, NULL);
-				BIO_free(bio);
+				ret = mysqlnd_sha256_get_rsa_from_pem(ZSTR_VAL(key_str), ZSTR_LEN(key_str));
 				DBG_INF("Successfully loaded");
 				DBG_INF_FMT("Public key:%*.s", ZSTR_LEN(key_str), ZSTR_VAL(key_str));
 				zend_string_release(key_str);
@@ -984,7 +1181,7 @@ mysqlnd_caching_sha2_get_key(MYSQLND_CONN_DATA *conn)
 }
 
 
-/* {{{ mysqlnd_caching_sha2_get_key */
+/* {{{ mysqlnd_caching_sha2_get_and_use_key */
 static size_t
 mysqlnd_caching_sha2_get_and_use_key(MYSQLND_CONN_DATA *conn,
 		const zend_uchar * auth_plugin_data, const size_t auth_plugin_data_len,
@@ -992,72 +1189,88 @@ mysqlnd_caching_sha2_get_and_use_key(MYSQLND_CONN_DATA *conn,
 		const char * const passwd,
 		const size_t passwd_len)
 {
-	static RSA *server_public_key;
-	server_public_key = mysqlnd_caching_sha2_get_key(conn);
+	mysqlnd_rsa_t server_public_key = mysqlnd_caching_sha2_get_key(conn);
 
 	DBG_ENTER("mysqlnd_caching_sha2_get_and_use_key(");
 
 	if (server_public_key) {
 		int server_public_key_len;
-		char xor_str[passwd_len + 1];
+		ALLOCA_FLAG(use_heap)
+		char *xor_str = do_alloca(passwd_len + 1, use_heap);
 		memcpy(xor_str, passwd, passwd_len);
 		xor_str[passwd_len] = '\0';
-		mysqlnd_xor_string(xor_str, passwd_len, (char *) auth_plugin_data, auth_plugin_data_len);
-
-		server_public_key_len = RSA_size(server_public_key);
-		/*
-		  Because RSA_PKCS1_OAEP_PADDING is used there is a restriction on the passwd_len.
-		  RSA_PKCS1_OAEP_PADDING is recommended for new applications. See more here:
-		  http://www.openssl.org/docs/crypto/RSA_public_encrypt.html
-		*/
-		if ((size_t) server_public_key_len - 41 <= passwd_len) {
-			/* password message is to long */
-			SET_CLIENT_ERROR(conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, "password is too long");
-			DBG_ERR("password is too long");
-			DBG_RETURN(0);
-		}
-
-		*crypted = emalloc(server_public_key_len);
-		RSA_public_encrypt(passwd_len + 1, (zend_uchar *) xor_str, *crypted, server_public_key, RSA_PKCS1_OAEP_PADDING);
+		mysqlnd_xor_string(xor_str, passwd_len, (char *) auth_plugin_data, SCRAMBLE_LENGTH);
+		server_public_key_len = mysqlnd_caching_sha2_public_encrypt(conn, server_public_key, passwd_len, crypted, xor_str);
+		free_alloca(xor_str, use_heap);
 		DBG_RETURN(server_public_key_len);
 	}
 	DBG_RETURN(0);
 }
 /* }}} */
 
-/* {{{ mysqlnd_native_auth_get_auth_data */
-static void
+static int is_secure_transport(MYSQLND_CONN_DATA *conn) {
+	if (conn->vio->data->ssl) {
+		return 1;
+	}
+
+	return strcmp(conn->vio->data->stream->ops->label, "unix_socket") == 0;
+}
+
+/* {{{ mysqlnd_caching_sha2_handle_server_response */
+static enum_func_status
 mysqlnd_caching_sha2_handle_server_response(struct st_mysqlnd_authentication_plugin *self,
 		MYSQLND_CONN_DATA * conn,
 		const zend_uchar * auth_plugin_data, const size_t auth_plugin_data_len,
 		const char * const passwd,
-		const size_t passwd_len)
+		const size_t passwd_len,
+		char **new_auth_protocol, size_t *new_auth_protocol_len,
+		zend_uchar **new_auth_protocol_data, size_t *new_auth_protocol_data_len
+		)
 {
 	DBG_ENTER("mysqlnd_caching_sha2_handle_server_response");
 	MYSQLND_PACKET_CACHED_SHA2_RESULT result_packet;
-	conn->payload_decoder_factory->m.init_cached_sha2_result_packet(&result_packet);
 
+	if (passwd_len == 0) {
+		DBG_INF("empty password fast path");
+		DBG_RETURN(PASS);
+	}
+
+	conn->payload_decoder_factory->m.init_cached_sha2_result_packet(&result_packet);
 	if (FAIL == PACKET_READ(conn, &result_packet)) {
-		DBG_VOID_RETURN;
+		DBG_RETURN(PASS);
 	}
 
 	switch (result_packet.response_code) {
+		case 0xFF:
+			if (result_packet.sqlstate[0]) {
+				strlcpy(conn->error_info->sqlstate, result_packet.sqlstate, sizeof(conn->error_info->sqlstate));
+				DBG_ERR_FMT("ERROR:%u [SQLSTATE:%s] %s", result_packet.error_no, result_packet.sqlstate, result_packet.error);
+			}
+			SET_CLIENT_ERROR(conn->error_info, result_packet.error_no, UNKNOWN_SQLSTATE, result_packet.error);
+			DBG_RETURN(FAIL);
+		case 0xFE:
+			DBG_INF("auth switch response");
+			*new_auth_protocol = result_packet.new_auth_protocol;
+			*new_auth_protocol_len = result_packet.new_auth_protocol_len;
+			*new_auth_protocol_data = result_packet.new_auth_protocol_data;
+			*new_auth_protocol_data_len = result_packet.new_auth_protocol_data_len;
+			DBG_RETURN(FAIL);
 		case 3:
 			DBG_INF("fast path succeeded");
-			DBG_VOID_RETURN;
+			DBG_RETURN(PASS);
 		case 4:
-			if (conn->vio->data->ssl || conn->unix_socket.s) {
-				DBG_INF("fast path failed, doing full auth via SSL");
+			if (is_secure_transport(conn)) {
+				DBG_INF("fast path failed, doing full auth via secure transport");
 				result_packet.password = (zend_uchar *)passwd;
 				result_packet.password_len = passwd_len + 1;
 				PACKET_WRITE(conn, &result_packet);
 			} else {
-				DBG_INF("fast path failed, doing full auth without SSL");
+				DBG_INF("fast path failed, doing full auth via insecure transport");
 				result_packet.password_len = mysqlnd_caching_sha2_get_and_use_key(conn, auth_plugin_data, auth_plugin_data_len, &result_packet.password, passwd, passwd_len);
 				PACKET_WRITE(conn, &result_packet);
 				efree(result_packet.password);
 			}
-			DBG_VOID_RETURN;
+			DBG_RETURN(PASS);
 		case 2:
 			// The server tried to send a key, which we didn't expect
 			// fall-through
@@ -1065,7 +1278,7 @@ mysqlnd_caching_sha2_handle_server_response(struct st_mysqlnd_authentication_plu
 			php_error_docref(NULL, E_WARNING, "Unexpected server response while doing caching_sha2 auth: %i", result_packet.response_code);
 	}
 
-	DBG_VOID_RETURN;
+	DBG_RETURN(PASS);
 }
 /* }}} */
 

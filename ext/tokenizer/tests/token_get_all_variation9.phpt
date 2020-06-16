@@ -5,7 +5,7 @@ Test token_get_all() function : usage variations - with different types of comme
 --FILE--
 <?php
 /* Prototype  : array token_get_all(string $source)
- * Description: splits the given source into an array of PHP languange tokens
+ * Description: splits the given source into an array of PHP language tokens
  * Source code: ext/tokenizer/tokenizer.c
 */
 
@@ -20,7 +20,7 @@ echo "*** Testing token_get_all() : 'source' string with different comments ***\
 
 // types of comments: '//', '/* */', '#' & /** */
 
-$source = '<?php 
+$source = '<?php
 /** Performing addition operation on given values :
   * a, b
   */
@@ -30,8 +30,8 @@ $a = 10;
 $b = 20;
 $c = true; // bool value
 
-/* 
- * Performing operation on $a,$b 
+/*
+ * Performing operation on $a,$b
  * display result
  */
 $c = $a + $b;
@@ -45,27 +45,18 @@ echo "Done"
 ?>
 --EXPECTF--
 *** Testing token_get_all() : 'source' string with different comments ***
-array(51) {
+array(50) {
   [0]=>
   array(3) {
     [0]=>
     int(%d)
     [1]=>
-    string(6) "<?php "
-    [2]=>
-    int(1)
-  }
-  [1]=>
-  array(3) {
-    [0]=>
-    int(%d)
-    [1]=>
-    string(1) "
+    string(6) "<?php
 "
     [2]=>
     int(1)
   }
-  [2]=>
+  [1]=>
   array(3) {
     [0]=>
     int(%d)
@@ -76,7 +67,7 @@ array(51) {
     [2]=>
     int(2)
   }
-  [3]=>
+  [2]=>
   array(3) {
     [0]=>
     int(%d)
@@ -87,7 +78,7 @@ array(51) {
     [2]=>
     int(4)
   }
-  [4]=>
+  [3]=>
   array(3) {
     [0]=>
     int(%d)
@@ -97,7 +88,7 @@ array(51) {
     [2]=>
     int(6)
   }
-  [5]=>
+  [4]=>
   array(3) {
     [0]=>
     int(%d)
@@ -106,18 +97,18 @@ array(51) {
     [2]=>
     int(7)
   }
+  [5]=>
+  array(3) {
+    [0]=>
+    int(%d)
+    [1]=>
+    string(1) " "
+    [2]=>
+    int(7)
+  }
   [6]=>
-  array(3) {
-    [0]=>
-    int(%d)
-    [1]=>
-    string(1) " "
-    [2]=>
-    int(7)
-  }
-  [7]=>
   string(1) "="
-  [8]=>
+  [7]=>
   array(3) {
     [0]=>
     int(%d)
@@ -126,7 +117,7 @@ array(51) {
     [2]=>
     int(7)
   }
-  [9]=>
+  [8]=>
   array(3) {
     [0]=>
     int(%d)
@@ -135,9 +126,9 @@ array(51) {
     [2]=>
     int(7)
   }
-  [10]=>
+  [9]=>
   string(1) ";"
-  [11]=>
+  [10]=>
   array(3) {
     [0]=>
     int(%d)
@@ -147,7 +138,7 @@ array(51) {
     [2]=>
     int(7)
   }
-  [12]=>
+  [11]=>
   array(3) {
     [0]=>
     int(%d)
@@ -156,18 +147,18 @@ array(51) {
     [2]=>
     int(8)
   }
+  [12]=>
+  array(3) {
+    [0]=>
+    int(%d)
+    [1]=>
+    string(1) " "
+    [2]=>
+    int(8)
+  }
   [13]=>
-  array(3) {
-    [0]=>
-    int(%d)
-    [1]=>
-    string(1) " "
-    [2]=>
-    int(8)
-  }
-  [14]=>
   string(1) "="
-  [15]=>
+  [14]=>
   array(3) {
     [0]=>
     int(%d)
@@ -176,7 +167,7 @@ array(51) {
     [2]=>
     int(8)
   }
-  [16]=>
+  [15]=>
   array(3) {
     [0]=>
     int(%d)
@@ -185,9 +176,9 @@ array(51) {
     [2]=>
     int(8)
   }
-  [17]=>
+  [16]=>
   string(1) ";"
-  [18]=>
+  [17]=>
   array(3) {
     [0]=>
     int(%d)
@@ -197,7 +188,7 @@ array(51) {
     [2]=>
     int(8)
   }
-  [19]=>
+  [18]=>
   array(3) {
     [0]=>
     int(%d)
@@ -206,18 +197,18 @@ array(51) {
     [2]=>
     int(9)
   }
+  [19]=>
+  array(3) {
+    [0]=>
+    int(%d)
+    [1]=>
+    string(1) " "
+    [2]=>
+    int(9)
+  }
   [20]=>
-  array(3) {
-    [0]=>
-    int(%d)
-    [1]=>
-    string(1) " "
-    [2]=>
-    int(9)
-  }
-  [21]=>
   string(1) "="
-  [22]=>
+  [21]=>
   array(3) {
     [0]=>
     int(%d)
@@ -226,7 +217,7 @@ array(51) {
     [2]=>
     int(9)
   }
-  [23]=>
+  [22]=>
   array(3) {
     [0]=>
     int(%d)
@@ -235,9 +226,9 @@ array(51) {
     [2]=>
     int(9)
   }
-  [24]=>
+  [23]=>
   string(1) ";"
-  [25]=>
+  [24]=>
   array(3) {
     [0]=>
     int(%d)
@@ -246,7 +237,7 @@ array(51) {
     [2]=>
     int(9)
   }
-  [26]=>
+  [25]=>
   array(3) {
     [0]=>
     int(%d)
@@ -256,7 +247,7 @@ array(51) {
     [2]=>
     int(9)
   }
-  [27]=>
+  [26]=>
   array(3) {
     [0]=>
     int(%d)
@@ -266,19 +257,19 @@ array(51) {
     [2]=>
     int(10)
   }
-  [28]=>
+  [27]=>
   array(3) {
     [0]=>
     int(%d)
     [1]=>
-    string(59) "/* 
- * Performing operation on $a,$b 
+    string(57) "/*
+ * Performing operation on $a,$b
  * display result
  */"
     [2]=>
     int(11)
   }
-  [29]=>
+  [28]=>
   array(3) {
     [0]=>
     int(%d)
@@ -288,7 +279,7 @@ array(51) {
     [2]=>
     int(14)
   }
-  [30]=>
+  [29]=>
   array(3) {
     [0]=>
     int(%d)
@@ -297,18 +288,18 @@ array(51) {
     [2]=>
     int(15)
   }
+  [30]=>
+  array(3) {
+    [0]=>
+    int(%d)
+    [1]=>
+    string(1) " "
+    [2]=>
+    int(15)
+  }
   [31]=>
-  array(3) {
-    [0]=>
-    int(%d)
-    [1]=>
-    string(1) " "
-    [2]=>
-    int(15)
-  }
-  [32]=>
   string(1) "="
-  [33]=>
+  [32]=>
   array(3) {
     [0]=>
     int(%d)
@@ -317,7 +308,7 @@ array(51) {
     [2]=>
     int(15)
   }
-  [34]=>
+  [33]=>
   array(3) {
     [0]=>
     int(%d)
@@ -326,18 +317,18 @@ array(51) {
     [2]=>
     int(15)
   }
+  [34]=>
+  array(3) {
+    [0]=>
+    int(%d)
+    [1]=>
+    string(1) " "
+    [2]=>
+    int(15)
+  }
   [35]=>
-  array(3) {
-    [0]=>
-    int(%d)
-    [1]=>
-    string(1) " "
-    [2]=>
-    int(15)
-  }
-  [36]=>
   string(1) "+"
-  [37]=>
+  [36]=>
   array(3) {
     [0]=>
     int(%d)
@@ -346,7 +337,7 @@ array(51) {
     [2]=>
     int(15)
   }
-  [38]=>
+  [37]=>
   array(3) {
     [0]=>
     int(%d)
@@ -355,9 +346,9 @@ array(51) {
     [2]=>
     int(15)
   }
-  [39]=>
+  [38]=>
   string(1) ";"
-  [40]=>
+  [39]=>
   array(3) {
     [0]=>
     int(%d)
@@ -367,7 +358,7 @@ array(51) {
     [2]=>
     int(15)
   }
-  [41]=>
+  [40]=>
   array(3) {
     [0]=>
     int(%d)
@@ -376,9 +367,9 @@ array(51) {
     [2]=>
     int(16)
   }
-  [42]=>
+  [41]=>
   string(1) "("
-  [43]=>
+  [42]=>
   array(3) {
     [0]=>
     int(%d)
@@ -387,11 +378,11 @@ array(51) {
     [2]=>
     int(16)
   }
-  [44]=>
+  [43]=>
   string(1) ")"
-  [45]=>
+  [44]=>
   string(1) ";"
-  [46]=>
+  [45]=>
   array(3) {
     [0]=>
     int(%d)
@@ -400,7 +391,7 @@ array(51) {
     [2]=>
     int(16)
   }
-  [47]=>
+  [46]=>
   array(3) {
     [0]=>
     int(%d)
@@ -410,7 +401,7 @@ array(51) {
     [2]=>
     int(16)
   }
-  [48]=>
+  [47]=>
   array(3) {
     [0]=>
     int(%d)
@@ -420,7 +411,7 @@ array(51) {
     [2]=>
     int(17)
   }
-  [49]=>
+  [48]=>
   array(3) {
     [0]=>
     int(%d)
@@ -430,7 +421,7 @@ array(51) {
     [2]=>
     int(18)
   }
-  [50]=>
+  [49]=>
   array(3) {
     [0]=>
     int(%d)

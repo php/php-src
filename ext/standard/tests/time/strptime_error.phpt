@@ -24,10 +24,8 @@ $format = '%b %d %Y %H:%M:%S';
 var_dump( strptime('foo', $format) );
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing strptime() : error conditions ***
 
 -- Testing strptime() function on failure --
 bool(false)
-===DONE===

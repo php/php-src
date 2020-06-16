@@ -18,11 +18,6 @@
 
 #include <php.h>
 
-PHP_FUNCTION( intl_get_error_code );
-PHP_FUNCTION( intl_get_error_message );
-PHP_FUNCTION( intl_is_failure );
-PHP_FUNCTION( intl_error_name );
-
 void intl_expose_icu_error_codes( INIT_FUNC_ARGS );
 
 #endif // INTL_COMMON_ERROR_H

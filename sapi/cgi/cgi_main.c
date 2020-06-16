@@ -238,11 +238,8 @@ static void fcgi_log(int type, const char *format, ...) {
 }
 #endif
 
-static int module_name_cmp(const void *a, const void *b)
+static int module_name_cmp(Bucket *f, Bucket *s)
 {
-	Bucket *f = (Bucket *) a;
-	Bucket *s = (Bucket *) b;
-
 	return strcasecmp(	((zend_module_entry *)Z_PTR(f->val))->name,
 						((zend_module_entry *)Z_PTR(s->val))->name);
 }
@@ -261,10 +258,9 @@ static void print_modules(void)
 	zend_hash_destroy(&sorted_registry);
 }
 
-static int print_extension_info(zend_extension *ext, void *arg)
+static void print_extension_info(zend_extension *ext)
 {
 	php_printf("%s\n", ext->name);
-	return 0;
 }
 
 static int extension_name_cmp(const zend_llist_element **f, const zend_llist_element **s)
@@ -281,7 +277,7 @@ static void print_extensions(void)
 	zend_llist_copy(&sorted_exts, &zend_extensions);
 	sorted_exts.dtor = NULL;
 	zend_llist_sort(&sorted_exts, extension_name_cmp);
-	zend_llist_apply_with_argument(&sorted_exts, (llist_apply_with_arg_func_t) print_extension_info, NULL);
+	zend_llist_apply(&sorted_exts, (llist_apply_func_t) print_extension_info);
 	zend_llist_destroy(&sorted_exts);
 }
 
@@ -557,7 +553,7 @@ static char *cgi_getenv_win32(const char *name, size_t name_len)
 }
 #endif
 
-static char *sapi_cgi_getenv(char *name, size_t name_len)
+static char *sapi_cgi_getenv(const char *name, size_t name_len)
 {
 #ifndef PHP_WIN32
 	return getenv(name);
@@ -566,7 +562,7 @@ static char *sapi_cgi_getenv(char *name, size_t name_len)
 #endif
 }
 
-static char *sapi_fcgi_getenv(char *name, size_t name_len)
+static char *sapi_fcgi_getenv(const char *name, size_t name_len)
 {
 	/* when php is started by mod_fastcgi, no regular environment
 	 * is provided to PHP.  It is always sent to PHP at the start
@@ -650,10 +646,10 @@ static char *sapi_fcgi_read_cookies(void)
 	return FCGI_GETENV(request, "HTTP_COOKIE");
 }
 
-static void cgi_php_load_env_var(char *var, unsigned int var_len, char *val, unsigned int val_len, void *arg)
+static void cgi_php_load_env_var(const char *var, unsigned int var_len, char *val, unsigned int val_len, void *arg)
 {
-	zval *array_ptr = (zval*)arg;
-	int filter_arg = (Z_ARR_P(array_ptr) == Z_ARR(PG(http_globals)[TRACK_VARS_ENV]))?PARSE_ENV:PARSE_SERVER;
+	zval *array_ptr = (zval *) arg;
+	int filter_arg = (Z_ARR_P(array_ptr) == Z_ARR(PG(http_globals)[TRACK_VARS_ENV])) ? PARSE_ENV : PARSE_SERVER;
 	size_t new_val_len;
 
 	if (sapi_module.input_filter(filter_arg, var, &val, strlen(val), &new_val_len)) {
@@ -751,7 +747,7 @@ static void sapi_cgi_register_variables(zval *track_vars_array)
 	}
 }
 
-static void sapi_cgi_log_message(char *message, int syslog_type_int)
+static void sapi_cgi_log_message(const char *message, int syslog_type_int)
 {
 	if (fcgi_is_fastcgi() && CGIG(fcgi_logging)) {
 		fcgi_request *request;
@@ -779,7 +775,7 @@ static void sapi_cgi_log_message(char *message, int syslog_type_int)
 
 /* {{{ php_cgi_ini_activate_user_config
  */
-static void php_cgi_ini_activate_user_config(char *path, size_t path_len, const char *doc_root, size_t doc_root_len, int start)
+static void php_cgi_ini_activate_user_config(char *path, size_t path_len, const char *doc_root, size_t doc_root_len)
 {
 	user_config_cache_entry *new_entry, *entry;
 	time_t request_time = (time_t)sapi_get_request_time();
@@ -832,8 +828,12 @@ static void php_cgi_ini_activate_user_config(char *path, size_t path_len, const 
 #else
 		if (strncmp(s1, s2, s_len) == 0) {
 #endif
-			char *ptr = s2 + start;  /* start is the point where doc_root ends! */
+			char *ptr = s2 + doc_root_len;
+#ifdef PHP_WIN32
+			while ((ptr = strpbrk(ptr, "\\/")) != NULL) {
+#else
 			while ((ptr = strchr(ptr, DEFAULT_SLASH)) != NULL) {
+#endif
 				*ptr = 0;
 				php_parse_user_ini_file(path, PG(user_ini_filename), entry->user_config);
 				*ptr = '/';
@@ -913,9 +913,12 @@ static int sapi_cgi_activate(void)
 			if (fcgi_is_fastcgi()) {
 				fcgi_request *request = (fcgi_request*) SG(server_context);
 
-				doc_root = FCGI_GETENV(request, "DOCUMENT_ROOT");
+				/* Prefer CONTEXT_DOCUMENT_ROOT if set */
+				doc_root = FCGI_GETENV(request, "CONTEXT_DOCUMENT_ROOT");
+				doc_root = doc_root ? doc_root : FCGI_GETENV(request, "DOCUMENT_ROOT");
 			} else {
-				doc_root = getenv("DOCUMENT_ROOT");
+				doc_root = getenv("CONTEXT_DOCUMENT_ROOT");
+				doc_root = doc_root ? doc_root : getenv("DOCUMENT_ROOT");
 			}
 			/* DOCUMENT_ROOT should also be defined at this stage..but better check it anyway */
 			if (doc_root) {
@@ -928,7 +931,7 @@ static int sapi_cgi_activate(void)
 				doc_root = estrndup(doc_root, doc_root_len);
 				zend_str_tolower(doc_root, doc_root_len);
 #endif
-				php_cgi_ini_activate_user_config(path, path_len, doc_root, doc_root_len, (doc_root_len > 0 && (doc_root_len - 1)));
+				php_cgi_ini_activate_user_config(path, path_len, doc_root, doc_root_len);
 
 #ifdef PHP_WIN32
 				efree(doc_root);
@@ -1101,7 +1104,7 @@ static int is_valid_path(const char *path)
 
   initializes request_info structure
 
-  specificly in this section we handle proper translations
+  specifically in this section we handle proper translations
   for:
 
   PATH_INFO
@@ -1509,16 +1512,16 @@ BOOL WINAPI fastcgi_cleanup(DWORD sig)
 #endif
 
 PHP_INI_BEGIN()
-	STD_PHP_INI_ENTRY("cgi.rfc2616_headers",     "0",  PHP_INI_ALL,    OnUpdateBool,   rfc2616_headers, php_cgi_globals_struct, php_cgi_globals)
-	STD_PHP_INI_ENTRY("cgi.nph",                 "0",  PHP_INI_ALL,    OnUpdateBool,   nph, php_cgi_globals_struct, php_cgi_globals)
-	STD_PHP_INI_ENTRY("cgi.check_shebang_line",  "1",  PHP_INI_SYSTEM, OnUpdateBool,   check_shebang_line, php_cgi_globals_struct, php_cgi_globals)
-	STD_PHP_INI_ENTRY("cgi.force_redirect",      "1",  PHP_INI_SYSTEM, OnUpdateBool,   force_redirect, php_cgi_globals_struct, php_cgi_globals)
+	STD_PHP_INI_BOOLEAN("cgi.rfc2616_headers",     "0",  PHP_INI_ALL,    OnUpdateBool,   rfc2616_headers, php_cgi_globals_struct, php_cgi_globals)
+	STD_PHP_INI_BOOLEAN("cgi.nph",                 "0",  PHP_INI_ALL,    OnUpdateBool,   nph, php_cgi_globals_struct, php_cgi_globals)
+	STD_PHP_INI_BOOLEAN("cgi.check_shebang_line",  "1",  PHP_INI_SYSTEM, OnUpdateBool,   check_shebang_line, php_cgi_globals_struct, php_cgi_globals)
+	STD_PHP_INI_BOOLEAN("cgi.force_redirect",      "1",  PHP_INI_SYSTEM, OnUpdateBool,   force_redirect, php_cgi_globals_struct, php_cgi_globals)
 	STD_PHP_INI_ENTRY("cgi.redirect_status_env", NULL, PHP_INI_SYSTEM, OnUpdateString, redirect_status_env, php_cgi_globals_struct, php_cgi_globals)
-	STD_PHP_INI_ENTRY("cgi.fix_pathinfo",        "1",  PHP_INI_SYSTEM, OnUpdateBool,   fix_pathinfo, php_cgi_globals_struct, php_cgi_globals)
-	STD_PHP_INI_ENTRY("cgi.discard_path",        "0",  PHP_INI_SYSTEM, OnUpdateBool,   discard_path, php_cgi_globals_struct, php_cgi_globals)
-	STD_PHP_INI_ENTRY("fastcgi.logging",         "1",  PHP_INI_SYSTEM, OnUpdateBool,   fcgi_logging, php_cgi_globals_struct, php_cgi_globals)
+	STD_PHP_INI_BOOLEAN("cgi.fix_pathinfo",        "1",  PHP_INI_SYSTEM, OnUpdateBool,   fix_pathinfo, php_cgi_globals_struct, php_cgi_globals)
+	STD_PHP_INI_BOOLEAN("cgi.discard_path",        "0",  PHP_INI_SYSTEM, OnUpdateBool,   discard_path, php_cgi_globals_struct, php_cgi_globals)
+	STD_PHP_INI_BOOLEAN("fastcgi.logging",         "1",  PHP_INI_SYSTEM, OnUpdateBool,   fcgi_logging, php_cgi_globals_struct, php_cgi_globals)
 #ifdef PHP_WIN32
-	STD_PHP_INI_ENTRY("fastcgi.impersonate",     "0",  PHP_INI_SYSTEM, OnUpdateBool,   impersonate, php_cgi_globals_struct, php_cgi_globals)
+	STD_PHP_INI_BOOLEAN("fastcgi.impersonate",     "0",  PHP_INI_SYSTEM, OnUpdateBool,   impersonate, php_cgi_globals_struct, php_cgi_globals)
 #endif
 PHP_INI_END()
 
@@ -1575,7 +1578,7 @@ static PHP_MINFO_FUNCTION(cgi)
 PHP_FUNCTION(apache_child_terminate) /* {{{ */
 {
 	if (zend_parse_parameters_none()) {
-		return;
+		RETURN_THROWS();
 	}
 	if (fcgi_is_fastcgi()) {
 		fcgi_terminate();
@@ -1587,7 +1590,7 @@ PHP_FUNCTION(apache_child_terminate) /* {{{ */
 PHP_FUNCTION(apache_request_headers) /* {{{ */
 {
 	if (zend_parse_parameters_none()) {
-		return;
+		RETURN_THROWS();
 	}
 	array_init(return_value);
 	if (fcgi_is_fastcgi()) {
@@ -1700,7 +1703,7 @@ static void add_response_header(sapi_header_struct *h, zval *return_value) /* {{
 PHP_FUNCTION(apache_response_headers) /* {{{ */
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	array_init(return_value);
@@ -2280,6 +2283,7 @@ parent_loop_end:
 					break;
 				case 'h':
 				case '?':
+				case PHP_GETOPT_INVALID_ARG:
 					if (request) {
 						fcgi_destroy_request(request);
 					}
@@ -2289,6 +2293,9 @@ parent_loop_end:
 					php_cgi_usage(argv[0]);
 					php_output_end_all();
 					exit_status = 0;
+					if (c == PHP_GETOPT_INVALID_ARG) {
+						exit_status = 1;
+					}
 					goto out;
 			}
 		}

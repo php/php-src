@@ -4,7 +4,7 @@ SplFileObject::fwrite function - writing with two parameters length < input stri
 <?php
 $file = __DIR__.'/SplFileObject_fwrite_variation_001.txt';
 if(file_exists($file)) {
-	unlink($file);
+    unlink($file);
 }
 $obj = New SplFileObject($file,'w');
 $obj->fwrite('test_write',4);

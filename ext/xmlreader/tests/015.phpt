@@ -52,7 +52,6 @@ while ($reader->read()) {
 // clean up
 $reader->close();
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__.'/015.xml');
@@ -63,4 +62,3 @@ ns2:idx: 2
 ns2:isbn: 4
 Attribute does not exist
 ns2:isbn: 4
-===DONE===

@@ -1,7 +1,5 @@
 --TEST--
 Bug #72069 (Behavior \JsonSerializable different from json_encode)
---SKIPIF--
-<?php if (!extension_loaded("json")) print "skip"; ?>
 --FILE--
 <?php
 
@@ -10,10 +8,10 @@ var_dump($result);
 
 class A implements \JsonSerializable
 {
-	function jsonSerialize()
-	{
-		return ['end' => json_decode(null, true)];
-	}
+    function jsonSerialize()
+    {
+        return ['end' => json_decode(null, true)];
+    }
 }
 $a = new A();
 $toJsonData = $a->jsonSerialize();

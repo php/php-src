@@ -47,7 +47,6 @@ var_dump(bin2hex(mb_strrichr($string_mb, $needle_mb_mixed, false)));
 var_dump(bin2hex(mb_strrichr($string_mb, $needle_mb_mixed, true)));
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing mb_strrichr() : basic functionality ***
 
@@ -66,4 +65,3 @@ string(20) "ce9cce9dcebecebfcea0"
 string(42) "cebacebbcebccebdcebece9fcea0cea120cebacebb"
 string(20) "ce9cce9dcebecebfcea0"
 string(42) "cebacebbcebccebdcebece9fcea0cea120cebacebb"
-===DONE===

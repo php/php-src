@@ -10,16 +10,16 @@ Bug #67248 (imageaffinematrixget missing check of parameters)
 require __DIR__ . '/func.inc';
 
 for($i=0;$i<7;$i++) {
-	trycatch_dump(
+    trycatch_dump(
         fn() => imageaffinematrixget($i)
     );
 }
 ?>
 --EXPECT--
-!! [TypeError] Array expected as options when using translate or scale
-!! [TypeError] Array expected as options when using translate or scale
-!! [TypeError] Number is expected as option when using rotate or shear
-!! [TypeError] Number is expected as option when using rotate or shear
-!! [TypeError] Number is expected as option when using rotate or shear
-!! [ValueError] Invalid type for element 5
-!! [ValueError] Invalid type for element 6
+!! [TypeError] imageaffinematrixget(): Argument #1 ($type) must be of type array when using translate or scale
+!! [TypeError] imageaffinematrixget(): Argument #1 ($type) must be of type array when using translate or scale
+!! [TypeError] imageaffinematrixget(): Argument #2 ($options) must be of type int|double when using rotate or shear
+!! [TypeError] imageaffinematrixget(): Argument #2 ($options) must be of type int|double when using rotate or shear
+!! [TypeError] imageaffinematrixget(): Argument #2 ($options) must be of type int|double when using rotate or shear
+!! [ValueError] imageaffinematrixget(): Argument #1 ($type) must be a valid element type
+!! [ValueError] imageaffinematrixget(): Argument #1 ($type) must be a valid element type

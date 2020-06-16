@@ -1,23 +1,31 @@
 <?php
 
+/** @generate-function-entries */
+
 class finfo
 {
-    function __construct(int $options = FILEINFO_NONE, string $arg = "") {}
+    /** @alias finfo_open */
+    public function __construct(int $options = FILEINFO_NONE, string $arg = "") {}
 
     /**
-     * @param ?resource $context
+     * @param resource|null $context
      * @return string|false
+     * @alias finfo_file
      */
-    function file(string $file_name, int $options = FILEINFO_NONE, $context = null) {}
+    public function file(string $file_name, int $options = FILEINFO_NONE, $context = null) {}
 
     /**
-     * @param ?resource $context
+     * @param resource|null $context
      * @return string|false
+     * @alias finfo_buffer
      */
-    function buffer(string $string, int $options = FILEINFO_NONE, $context = null) {}
+    public function buffer(string $string, int $options = FILEINFO_NONE, $context = null) {}
 
-    /** @return bool */
-    function set_flags(int $options) {}
+    /**
+     * @return bool
+     * @alias finfo_set_flags
+     */
+    public function set_flags(int $options) {}
 }
 
 /** @return resource|false */
@@ -35,20 +43,17 @@ function finfo_set_flags($finfo, int $options): bool {}
 
 /**
  * @param resource $finfo
- * @param ?resource $context
- * @return string|false
+ * @param resource|null $context
  */
-function finfo_file($finfo, string $file_name, int $options = FILEINFO_NONE, $context = null) {}
+function finfo_file($finfo, string $file_name, int $options = FILEINFO_NONE, $context = null): string|false {}
 
 /**
  * @param resource $finfo
- * @param ?resource $context
- * @return string|false
+ * @param resource|null $context
  */
-function finfo_buffer($finfo, string $string, int $options = FILEINFO_NONE, $context = null) {}
+function finfo_buffer($finfo, string $string, int $options = FILEINFO_NONE, $context = null): string|false {}
 
 /**
  * @param resource|string $filename
- * @return string|false
  */
-function mime_content_type($filename) {}
+function mime_content_type($filename): string|false {}

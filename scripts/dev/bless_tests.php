@@ -62,9 +62,9 @@ function getFiles(array $dirsOrFiles): \Iterator {
 }
 
 function normalizeOutput(string $out): string {
-    $out = preg_replace('/in \/.+ on line \d+$/m', 'in %s on line %d', $out);
-    $out = preg_replace('/in \/.+:\d+$/m', 'in %s:%d', $out);
-    $out = preg_replace('/^#(\d+) \/.+\(\d+\):/m', '#$1 %s(%d):', $out);
+    $out = preg_replace('/in (\/|[A-Z]:\\\\).+ on line \d+$/m', 'in %s on line %d', $out);
+    $out = preg_replace('/in (\/|[A-Z]:\\\\).+:\d+$/m', 'in %s:%d', $out);
+    $out = preg_replace('/^#(\d+) (\/|[A-Z]:\\\\).+\(\d+\):/m', '#$1 %s(%d):', $out);
     $out = preg_replace('/Resource id #\d+/', 'Resource id #%d', $out);
     $out = preg_replace('/resource\(\d+\) of type/', 'resource(%d) of type', $out);
     $out = preg_replace(
@@ -106,7 +106,8 @@ function generateMinimallyDifferingOutput(string $out, string $oldExpect) {
 
 function insertOutput(string $phpt, string $out): string {
     return preg_replace_callback('/--EXPECTF?--.*$/s', function($matches) use($out) {
-        $F = strpos($out, '%') !== false ? 'F' : '';
+        $hasWildcard = preg_match('/%[resSaAwidxfc]/', $out);
+        $F = $hasWildcard ? 'F' : '';
         return "--EXPECT$F--\n" . $out . "\n";
     }, $phpt);
 }

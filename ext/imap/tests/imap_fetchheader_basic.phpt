@@ -23,20 +23,19 @@ $options = array('FT_UID' => FT_UID, 'FT_INTERNAL' => FT_INTERNAL,
 // Calling imap_fetchheader() with all possible arguments
 echo "\n-- All possible arguments --\n";
 foreach ($options as $key => $option) {
-	echo "-- Option is $key --\n";
-	if ($key == 'FT_UID') {
-		$msg_uid = imap_uid($stream_id, $msg_no);
-		var_dump(imap_fetchheader($stream_id, $msg_uid, $option));
-	} else {
-		var_dump(imap_fetchheader($stream_id, $msg_no, $option));
-	}
+    echo "-- Option is $key --\n";
+    if ($key == 'FT_UID') {
+        $msg_uid = imap_uid($stream_id, $msg_no);
+        var_dump(imap_fetchheader($stream_id, $msg_uid, $option));
+    } else {
+        var_dump(imap_fetchheader($stream_id, $msg_no, $option));
+    }
 }
 
 // Calling imap_fetchheader() with mandatory arguments
 echo "\n-- Mandatory arguments --\n";
 var_dump( imap_fetchheader($stream_id, $msg_no) );
 ?>
-===DONE===
 --CLEAN--
 <?php
 require_once(__DIR__.'/clean.inc');
@@ -80,4 +79,3 @@ MIME-Version: 1.0
 Content-Type: %s; %s
 
 "
-===DONE===

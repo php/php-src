@@ -3,7 +3,7 @@ Test typed properties error condition (read uninitialized)
 --FILE--
 <?php
 $thing = new class() {
-	public int $int;
+    public int $int;
 };
 
 var_dump($thing->int);

@@ -27,7 +27,6 @@ var_dump( localtime($timestamp) );
 var_dump( localtime() );
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing localtime() : basic functionality ***
 array(9) {
@@ -90,4 +89,3 @@ array(9) {
   [8]=>
   int(%d)
 }
-===DONE===

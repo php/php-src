@@ -8,9 +8,13 @@ date.timezone=UTC
 <?php
   print_r(cal_info());
   print_r(cal_info(1));
-  print_r(cal_info(99999));
+  try {
+      cal_info(99999);
+  } catch (ValueError $ex) {
+      echo "{$ex->getMessage()}\n";
+  }
 ?>
---EXPECTF--
+--EXPECT--
 Array
 (
     [0] => Array
@@ -212,5 +216,4 @@ Array
     [calname] => Julian
     [calsymbol] => CAL_JULIAN
 )
-
-Warning: cal_info(): invalid calendar ID 99999 in %s on line %d
+cal_info(): Argument #1 ($calendar) must be a valid calendar ID

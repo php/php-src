@@ -13,7 +13,5 @@ $h = gzopen($f, "r");
 var_dump(fstat($h));
 fclose($h);
 ?>
-===DONE===
 --EXPECT--
 bool(false)
-===DONE===

@@ -30,13 +30,11 @@ $time = ($time_end - $time_start) * 1000 * 1000;
 $summary = "Thread slept for " . $time . " micro-seconds\n";
 
 if ($time >= $sleeplow) {
-	echo "TEST PASSED: $summary";
+    echo "TEST PASSED: $summary";
 } else {
-	echo "TEST FAILED: $summary";
+    echo "TEST FAILED: $summary";
 }
 ?>
-===DONE===
 --EXPECTF--
 *** Testing usleep() : basic functionality ***
 TEST PASSED: Thread slept for %f micro-seconds
-===DONE===

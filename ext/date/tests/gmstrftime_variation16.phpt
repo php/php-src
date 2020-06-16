@@ -23,9 +23,9 @@ date_default_timezone_set("Asia/Calcutta");
 
 //array of values to iterate over
 $inputs = array(
-	  'Time in a.m/p.m notation' => "%r",
-	  'Time in 24 hour notation' => "%R",
-	  'Current time %H:%M:%S format' => "%T",
+      'Time in a.m/p.m notation' => "%r",
+      'Time in 24 hour notation' => "%R",
+      'Current time %H:%M:%S format' => "%T",
 );
 
 // loop through each element of the array for timestamp
@@ -37,7 +37,6 @@ foreach($inputs as $key =>$value) {
 };
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing gmstrftime() : usage variation ***
 
@@ -52,4 +51,3 @@ string(5) "14:08"
 --Current time %H:%M:%S format--
 string(%d) "%d:%d:%d"
 string(8) "14:08:08"
-===DONE===

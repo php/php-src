@@ -23,7 +23,7 @@ $files['b.php'] = '<?php echo "This is b\n"; ?>';
 $files['b/c.php'] = '<?php echo "This is b/c\n"; ?>';
 
 foreach ($files as $n => $file) {
-	$phar[$n] = $file;
+    $phar[$n] = $file;
 }
 
 $phar->stopBuffering();
@@ -35,12 +35,10 @@ include $alias . '/b/c.php';
 
 ?>
 
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar'); ?>
 --EXPECTF--
-Warning: fopen(phar://%sopen_for_write_existing_b.phar.tar/b/c.php): failed to open stream: phar error: write operations disabled by the php.ini setting phar.readonly in %sopen_for_write_existing_b.php on line %d
+Warning: fopen(phar://%sopen_for_write_existing_b.phar.tar/b/c.php): Failed to open stream: phar error: write operations disabled by the php.ini setting phar.readonly in %sopen_for_write_existing_b.php on line %d
 bool(false)
 This is b/c
 
-===DONE===

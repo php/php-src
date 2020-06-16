@@ -10,7 +10,5 @@ Test return type and value for expected input time()
 var_dump(time());
 
 ?>
-===DONE===
 --EXPECTF--
 int(%d)
-===DONE===

@@ -34,7 +34,7 @@ $file_handle = fopen($filename, "w");
 fclose($file_handle);
 // stat of the file created
 $file_stat = stat($filename);
-sleep(2);
+sleep(1);
 
 // now new stat of the dir after file is created
 $new_dir_stat = stat($dirname);

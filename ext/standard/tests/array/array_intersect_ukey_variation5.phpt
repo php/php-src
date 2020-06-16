@@ -33,7 +33,6 @@ var_dump( array_intersect_ukey($arr_default_int, $arr_string, "key_compare_func"
 echo "\n-- Result of integers and strings containing floating points intersection --\n";
 var_dump( array_intersect_ukey($arr_default_int, $arr_string_float, "key_compare_func") );
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_intersect_ukey() : usage variation ***
 
@@ -60,4 +59,3 @@ array(2) {
   [1]=>
   int(2)
 }
-===DONE===

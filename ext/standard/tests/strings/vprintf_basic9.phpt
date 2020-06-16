@@ -44,7 +44,6 @@ echo "\n";
 var_dump($result);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing vprintf() : basic functionality - using hexadecimal format ***
 b
@@ -59,4 +58,3 @@ b 84 b1
 int(7)
 B 84 B1
 int(7)
-===DONE===

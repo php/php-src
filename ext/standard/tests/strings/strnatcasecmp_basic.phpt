@@ -11,7 +11,7 @@ Felix De Vliegher <felix.devliegher@gmail.com>
  */
 
 function str_dump($one, $two) {
-	var_dump(strnatcasecmp($one, $two));
+    var_dump(strnatcasecmp($one, $two));
 }
 
 echo "*** Testing strnatcasecmp() : basic functionality ***\n";
@@ -32,7 +32,6 @@ str_dump('pIc 6', 'pic   7');
 str_dump(0xFFF, 0Xfff);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing strnatcasecmp() : basic functionality ***
 int(0)
@@ -48,4 +47,3 @@ int(-1)
 int(0)
 int(-1)
 int(0)
-===DONE===

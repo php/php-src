@@ -39,21 +39,21 @@ opendir($dir_path);
 echo "\n-- Reading Directory Contents with Previous Handle --\n";
 $a = array();
 while (FALSE !== ($file = readdir($dir_handle1))) {
-	$a[] = $file;
+    $a[] = $file;
 }
 sort($a);
 foreach ($a as $file) {
-	var_dump($file);
+    var_dump($file);
 }
 
 echo "\n-- Reading Directory Contents with Current Handle (no arguments supplied) --\n";
 $a = array();
 while (FALSE !== ($file = readdir())) {
-	$a[] = $file;
+    $a[] = $file;
 }
 sort($a);
 foreach ($a as $file) {
-	var_dump($file);
+    var_dump($file);
 }
 
 // delete temporary files
@@ -61,7 +61,6 @@ delete_files($dir_path, 3, "私はガラスを食べられますreaddir_variatio
 closedir($dir_handle1);
 closedir();
 ?>
-===DONE===
 --CLEAN--
 <?php
 $dir_path = __DIR__ . "/私はガラスを食べられますreaddir_variation6";
@@ -83,4 +82,3 @@ string(2) ".."
 string(59) "私はガラスを食べられますreaddir_variation61.tmp"
 string(59) "私はガラスを食べられますreaddir_variation62.tmp"
 string(59) "私はガラスを食べられますreaddir_variation63.tmp"
-===DONE===

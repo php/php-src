@@ -15,13 +15,13 @@ $array2 = array('green' => 5, 'blue' => 6, 'yellow' => 7, 'cyan'   => 8);
 
 class MyClass
 {
-	static function static_compare_func($key1, $key2) {
-		return strcasecmp($key1, $key2);
-	}
+    static function static_compare_func($key1, $key2) {
+        return strcasecmp($key1, $key2);
+    }
 
-	public function class_compare_func($key1, $key2) {
-		return strcasecmp($key1, $key2);
-	}
+    public function class_compare_func($key1, $key2) {
+        return strcasecmp($key1, $key2);
+    }
 
 }
 
@@ -33,7 +33,6 @@ echo "\n-- Testing array_intersect_uassoc() function using class with regular me
 $obj = new MyClass();
 var_dump( array_intersect_ukey($array1, $array2, array($obj,'class_compare_func')) );
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_intersect_ukey() : usage variation ***
 
@@ -58,4 +57,3 @@ array(2) {
   ["green"]=>
   int(3)
 }
-===DONE===

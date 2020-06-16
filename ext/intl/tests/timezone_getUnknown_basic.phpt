@@ -14,7 +14,6 @@ print_r($tz);
 $tz = intltz_get_unknown();
 print_r($tz);
 ?>
-==DONE==
 --EXPECT--
 IntlTimeZone Object
 (
@@ -30,4 +29,3 @@ IntlTimeZone Object
     [rawOffset] => 0
     [currentOffset] => 0
 )
-==DONE==

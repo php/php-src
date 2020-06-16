@@ -32,10 +32,8 @@ function f_exists($file) {
    }
 }
 ?>
-===DONE===
 --EXPECT--
 *** Testing unlink() : variation: contexts and relative files ***
 subdir/testfile.txt exists
 bool(true)
 subdir/testfile.txt doesn't exist
-===DONE===

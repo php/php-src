@@ -23,7 +23,7 @@
 #include "php.h"
 /* }}} */
 
-#if HAVE_MBSTRING
+#ifdef HAVE_MBSTRING
 /* {{{ typedefs */
 typedef struct _php_mb_encoding_handler_info_t {
 	const char *separator;

@@ -19,18 +19,17 @@ $is_associative = true;
 $inputs = array(
 
       'Octal 0' => 00,
-	  'Octal 10' => 012,
-	  'Octal -10' => -012
+      'Octal 10' => 012,
+      'Octal -10' => -012
 );
 
 foreach($inputs as $key =>$value) {
       echo "\n--$key--\n";
-	  var_dump( localtime($value) );
-	  var_dump( localtime($value, $is_associative) );
+      var_dump( localtime($value) );
+      var_dump( localtime($value, $is_associative) );
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing localtime() : usage variation ***
 
@@ -159,4 +158,3 @@ array(9) {
   ["tm_isdst"]=>
   int(0)
 }
-===DONE===

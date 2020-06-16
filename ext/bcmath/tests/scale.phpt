@@ -15,7 +15,6 @@ echo
     'bcsqrt:   ', bcsqrt('4', 5), PHP_EOL,
     'bcsub:    ', bcsub('2', '1', 5), PHP_EOL;
 ?>
-===DONE===
 --EXPECT--
 bcadd:    3.00000
 bcdiv:    2.00000
@@ -24,4 +23,3 @@ bcpow:    2.00000
 bcpowmod: 2.00000
 bcsqrt:   2.00000
 bcsub:    1.00000
-===DONE===

@@ -45,12 +45,12 @@ for ($i = 0; $i < count($toCompare); $i +=3) {
    }
 
    if ($invalid_compares != NULL) {
-	   foreach($invalid_compares as $compareVal) {
-	      if ($typeToTest <= $compareVal) {
-	         echo "FAILED: '$typeToTest' <= '$compareVal'\n";
-	         $failed = true;
-	      }
-	   }
+       foreach($invalid_compares as $compareVal) {
+          if ($typeToTest <= $compareVal) {
+             echo "FAILED: '$typeToTest' <= '$compareVal'\n";
+             $failed = true;
+          }
+       }
    }
 
 }
@@ -58,7 +58,5 @@ if ($failed == false) {
    echo "Test Passed\n";
 }
 ?>
-===DONE===
 --EXPECT--
 Test Passed
-===DONE===

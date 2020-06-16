@@ -47,23 +47,23 @@ resource(%d) of type (OpenSSL X.509)
 resource(%d) of type (OpenSSL X.509)
 resource(%d) of type (OpenSSL X.509)
 
-Warning: openssl_csr_sign(): cannot get cert from parameter 2 in %s on line %d
+Warning: openssl_csr_sign(): Cannot get cert from parameter 2 in %s on line %d
 bool(false)
 
-Warning: openssl_csr_sign(): cannot get private key from parameter 3 in %s on line %d
+Warning: openssl_csr_sign(): Cannot get private key from parameter 3 in %s on line %d
 bool(false)
 
-Warning: openssl_csr_sign(): cannot get CSR from parameter 1 in %s on line %d
+Warning: openssl_csr_sign(): Cannot get CSR from parameter 1 in %s on line %d
 bool(false)
 
-Warning: openssl_csr_sign(): cannot get CSR from parameter 1 in %s on line %d
+Warning: openssl_csr_sign(): Cannot get CSR from parameter 1 in %s on line %d
 bool(false)
 
-Warning: openssl_csr_sign(): cannot get cert from parameter 2 in %s on line %d
+Warning: openssl_csr_sign(): Cannot get cert from parameter 2 in %s on line %d
 bool(false)
 
-Warning: openssl_csr_sign(): key array must be of the form array(0 => key, 1 => phrase) in %s on line %d
+Warning: openssl_csr_sign(): Key array must be of the form array(0 => key, 1 => phrase) in %s on line %d
 
-Warning: openssl_csr_sign(): cannot get private key from parameter 3 in %s on line %d
+Warning: openssl_csr_sign(): Cannot get private key from parameter 3 in %s on line %d
 bool(false)
 resource(%d) of type (OpenSSL X.509)

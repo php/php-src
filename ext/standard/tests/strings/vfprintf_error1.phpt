@@ -35,7 +35,6 @@ try {
 fclose($fp);
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 
@@ -43,8 +42,7 @@ $file = 'vfprintf_error1.txt';
 unlink( $file );
 
 ?>
---EXPECTF--
+--EXPECT--
 -- Testing vfprintf() function with more than expected no. of arguments --
 Wrong parameter count for vfprintf()
 Wrong parameter count for vfprintf()
-===DONE===

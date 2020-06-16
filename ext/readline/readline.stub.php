@@ -1,7 +1,8 @@
 <?php
 
-/** @return string|false */
-function readline(?string $prompt = null) {}
+/** @generate-function-entries */
+
+function readline(?string $prompt = null): string|false {}
 
 /** @return mixed */
 function readline_info(string $varname = UNKNOWN, string $newvalue = UNKNOWN) {}

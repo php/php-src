@@ -1,5 +1,5 @@
 --TEST--
-Test sort() function : usage variations - sort diff. associative arrays, 'sort_flags' as defualt/SORT_REGULAR
+Test sort() function : usage variations - sort diff. associative arrays, 'sort_flags' as default/SORT_REGULAR
 --FILE--
 <?php
 /* Prototype  : bool sort ( array &$array [, int $sort_flags] )
@@ -11,7 +11,7 @@ Test sort() function : usage variations - sort diff. associative arrays, 'sort_f
 /*
  * Testing sort() by providing arrays  with key values for $array argument
  * with following flag values.
- * 1.flag value as defualt
+ * 1.flag value as default
  * 2.SORT_REGULAR - compare items normally
  * To test the new keys for the elements in the sorted array.
  */
@@ -38,7 +38,7 @@ echo "\n-- Testing sort() by supplying various arrays with key values --\n";
 foreach ($various_arrays as $array) {
   echo "\n-- Iteration $count --\n";
 
-  echo "- With Defualt sort flag -\n";
+  echo "- With Default sort flag -\n";
   $temp_array = $array;
   var_dump(sort($temp_array) );
   var_dump($temp_array);
@@ -58,7 +58,7 @@ echo "Done\n";
 -- Testing sort() by supplying various arrays with key values --
 
 -- Iteration 1 --
-- With Defualt sort flag -
+- With Default sort flag -
 bool(true)
 array(5) {
   [0]=>
@@ -88,7 +88,7 @@ array(5) {
 }
 
 -- Iteration 2 --
-- With Defualt sort flag -
+- With Default sort flag -
 bool(true)
 array(3) {
   [0]=>
@@ -164,7 +164,7 @@ array(3) {
 }
 
 -- Iteration 3 --
-- With Defualt sort flag -
+- With Default sort flag -
 bool(true)
 array(6) {
   [0]=>
@@ -198,7 +198,7 @@ array(6) {
 }
 
 -- Iteration 4 --
-- With Defualt sort flag -
+- With Default sort flag -
 bool(true)
 array(2) {
   [0]=>
@@ -216,7 +216,7 @@ array(2) {
 }
 
 -- Iteration 5 --
-- With Defualt sort flag -
+- With Default sort flag -
 bool(true)
 array(4) {
   [0]=>

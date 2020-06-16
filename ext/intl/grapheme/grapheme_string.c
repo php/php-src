@@ -61,7 +61,7 @@ PHP_FUNCTION(grapheme_strlen)
 	UErrorCode status;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &string, &string_len) == FAILURE) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	ret_len = grapheme_ascii_check((unsigned char *)string, string_len);
@@ -112,7 +112,7 @@ PHP_FUNCTION(grapheme_strpos)
 	zend_long ret_pos;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|l", &haystack, &haystack_len, &needle, &needle_len, &loffset) == FAILURE) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if ( OUTSIDE_STRING(loffset, haystack_len) ) {
@@ -173,7 +173,7 @@ PHP_FUNCTION(grapheme_stripos)
 	int is_ascii;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|l", &haystack, &haystack_len, &needle, &needle_len, &loffset) == FAILURE) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if ( OUTSIDE_STRING(loffset, haystack_len) ) {
@@ -240,7 +240,7 @@ PHP_FUNCTION(grapheme_strrpos)
 	int is_ascii;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|l", &haystack, &haystack_len, &needle, &needle_len, &loffset) == FAILURE) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if ( OUTSIDE_STRING(loffset, haystack_len) ) {
@@ -301,7 +301,7 @@ PHP_FUNCTION(grapheme_strripos)
 	int is_ascii;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|l", &haystack, &haystack_len, &needle, &needle_len, &loffset) == FAILURE) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if ( OUTSIDE_STRING(loffset, haystack_len) ) {
@@ -379,7 +379,7 @@ PHP_FUNCTION(grapheme_substr)
 	zend_bool no_length = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl|l!", &str, &str_len, &lstart, &length, &no_length) == FAILURE) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if ( OUTSIDE_STRING(lstart, str_len)) {
@@ -584,7 +584,7 @@ static void strstr_common_handler(INTERNAL_FUNCTION_PARAMETERS, int f_ignore_cas
 	zend_bool part = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|b", &haystack, &haystack_len, &needle, &needle_len, &part) == FAILURE) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if (needle_len == 0) {
@@ -771,7 +771,7 @@ PHP_FUNCTION(grapheme_extract)
 	zval *next = NULL; /* return offset of next part of the string */
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl|llz", &str, &str_len, &size, &extract_type, &lstart, &next) == FAILURE) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if (lstart < 0) {

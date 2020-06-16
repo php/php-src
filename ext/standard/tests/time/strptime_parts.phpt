@@ -51,7 +51,6 @@ var_dump($res["tm_year"]);
 
 setlocale(LC_ALL, $orig);
 ?>
-===DONE===
 --EXPECT--
 *** Testing strptime() : basic functionality ***
 int(20)
@@ -72,4 +71,3 @@ int(10)
 int(2)
 int(6)
 int(0)
-===DONE===

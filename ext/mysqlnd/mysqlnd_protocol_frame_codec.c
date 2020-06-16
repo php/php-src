@@ -115,7 +115,7 @@ MYSQLND_METHOD(mysqlnd_pfc, send)(MYSQLND_PFC * const pfc, MYSQLND_VIO * const v
 			DBG_INF_FMT("writing "MYSQLND_SZ_T_SPEC" bytes to the network", payload_size + MYSQLND_HEADER_SIZE + COMPRESSED_HEADER_SIZE);
 			bytes_sent = vio->data->m.network_write(vio, compress_buf, payload_size + MYSQLND_HEADER_SIZE + COMPRESSED_HEADER_SIZE, conn_stats, error_info);
 			pfc->data->compressed_envelope_packet_no++;
-  #if WHEN_WE_NEED_TO_CHECK_WHETHER_COMPRESSION_WORKS_CORRECTLY
+  #ifdef WHEN_WE_NEED_TO_CHECK_WHETHER_COMPRESSION_WORKS_CORRECTLY
 			if (res == Z_OK) {
 				size_t decompressed_size = left + MYSQLND_HEADER_SIZE;
 				zend_uchar * decompressed_data = mnd_malloc(decompressed_size);
@@ -368,7 +368,8 @@ MYSQLND_METHOD(mysqlnd_pfc, set_client_option)(MYSQLND_PFC * const pfc, enum_mys
 			}
 			pfc->data->sha256_server_public_key = value? mnd_pestrdup(value, pers) : NULL;
 			break;
-		case MYSQLND_OPT_NET_CMD_BUFFER_SIZE:
+		}
+		case MYSQLND_OPT_NET_CMD_BUFFER_SIZE: {
 			DBG_INF("MYSQLND_OPT_NET_CMD_BUFFER_SIZE");
 			if (*(unsigned int*) value < MYSQLND_NET_CMD_BUFFER_MIN_SIZE) {
 				DBG_RETURN(FAIL);

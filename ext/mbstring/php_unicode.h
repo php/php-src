@@ -31,7 +31,7 @@
 #ifndef PHP_UNICODE_H
 #define PHP_UNICODE_H
 
-#if HAVE_MBSTRING
+#ifdef HAVE_MBSTRING
 
 #define UC_MN  0 /* Mark, Non-Spacing          */
 #define UC_MC  1 /* Mark, Spacing Combining    */

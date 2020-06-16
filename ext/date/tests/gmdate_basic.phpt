@@ -22,9 +22,7 @@ var_dump( gmdate($format, $timestamp) );
 var_dump( gmdate($format) );
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing gmdate() : basic functionality ***
 string(24) "2008-08-08T08:08:08+0000"
 string(%d) "%s"
-===DONE===

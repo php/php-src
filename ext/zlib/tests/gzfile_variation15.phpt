@@ -78,7 +78,6 @@ function test_gzfile() {
 }
 
 ?>
-===DONE===
 --EXPECT--
 array(1) {
   [0]=>
@@ -105,4 +104,3 @@ array(1) {
   string(28) "This is a file in script dir"
 }
 
-===DONE===

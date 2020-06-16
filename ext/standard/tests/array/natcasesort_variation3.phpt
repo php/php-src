@@ -34,9 +34,9 @@ $inputs = array (
 
 $iterator = 1;
 foreach ($inputs as $array_arg) {
-	echo "\n-- Iteration $iterator --\n";
-	var_dump(natcasesort($array_arg));
-	var_dump($array_arg);
+    echo "\n-- Iteration $iterator --\n";
+    var_dump(natcasesort($array_arg));
+    var_dump($array_arg);
 }
 
 echo "Done";

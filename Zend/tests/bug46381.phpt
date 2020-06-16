@@ -4,9 +4,9 @@ Bug #46381 (wrong $this passed to internal methods causes segfault)
 <?php
 
 class test {
-	public function method() {
-		return ArrayIterator::current();
-	}
+    public function method() {
+        return ArrayIterator::current();
+    }
 }
 $test = new test();
 $test->method();

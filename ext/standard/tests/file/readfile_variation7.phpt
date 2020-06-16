@@ -42,8 +42,6 @@ function runtest() {
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing readfile() : variation ***
 File in script location
-===DONE===

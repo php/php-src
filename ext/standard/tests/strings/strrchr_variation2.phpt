@@ -81,7 +81,7 @@ for($index=0; $index<count($needle); $index++) {
 }
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strrchr() function: with various single quoted strings ***
 -- Iteration 1 --
 string(22) "lo123456he \x234 \101 "

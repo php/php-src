@@ -37,7 +37,7 @@ $counter = 1;
 
 // writing to the file
 foreach($resource_types as $value) {
-  @fprintf($file_handle, $value);
+  @fprintf($file_handle, "%s", $value);
   @fprintf($file_handle, "\n");
 }
 // closing the file
@@ -56,7 +56,11 @@ foreach($unsigned_formats as $unsigned_format) {
   rewind($file_handle);
   echo "\n-- iteration $counter --\n";
   while( !feof($file_handle) ) {
-    var_dump( fscanf($file_handle,$unsigned_format) );
+    try {
+      var_dump(fscanf($file_handle,$unsigned_format));
+    } catch (ValueError $exception) {
+      echo $exception->getMessage() . "\n";
+    }
   }
   $counter++;
 }
@@ -73,7 +77,7 @@ $file_path = __DIR__;
 $filename = "$file_path/fscanf_variation41.tmp";
 unlink($filename);
 ?>
---EXPECTF--
+--EXPECT--
 *** Test fscanf(): different unsigned format types with resource ***
 
 -- iteration 1 --
@@ -143,12 +147,8 @@ array(1) {
 bool(false)
 
 -- iteration 7 --
-
-Warning: fscanf(): Bad scan conversion character " " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character " " in %s on line %d
-NULL
+Bad scan conversion character " "
+Bad scan conversion character " "
 bool(false)
 
 -- iteration 8 --

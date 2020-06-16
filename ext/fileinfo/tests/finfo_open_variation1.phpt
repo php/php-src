@@ -20,9 +20,7 @@ var_dump( finfo_open( FILEINFO_MIME | FILEINFO_SYMLINK, $magicFile ) );
 var_dump( finfo_open( FILEINFO_DEVICES | FILEINFO_RAW, $magicFile ) );
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing finfo_open() : variations in opening ***
 resource(%d) of type (file_info)
 resource(%d) of type (file_info)
-===DONE===

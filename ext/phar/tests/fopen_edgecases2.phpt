@@ -33,15 +33,12 @@ fopen("../oops", "r");
 ');
 include $pname . '/foo/hi';
 ?>
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
-<?php rmdir(__DIR__ . '/poo'); ?>
 <?php unlink(__DIR__ . '/fopen_edgecases2.txt'); ?>
 --EXPECTF--
-fopen() expects parameter 1 to be a valid path, array given
+fopen(): Argument #1 ($filename) must be a valid path, array given
 blah
 test
 
-Warning: fopen(phar://%sfopen_edgecases2.phar.php/oops): failed to open stream: phar error: path "oops" is a directory in phar://%sfopen_edgecases2.phar.php/foo/hi on line %d
-===DONE===
+Warning: fopen(phar://%sfopen_edgecases2.phar.php/oops): Failed to open stream: phar error: path "oops" is a directory in phar://%sfopen_edgecases2.phar.php/foo/hi on line %d

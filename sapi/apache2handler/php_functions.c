@@ -17,6 +17,12 @@
 #define ZEND_INCLUDE_FULL_WINDOWS_HEADERS
 
 #include "php.h"
+#ifdef strcasecmp
+# undef strcasecmp
+#endif
+#ifdef strncasecmp
+# undef strncasecmp
+#endif
 #include "zend_smart_str.h"
 #include "ext/standard/info.h"
 #include "ext/standard/head.h"
@@ -43,6 +49,7 @@
 #endif
 
 #include "php_apache.h"
+#include "php_functions_arginfo.h"
 
 #ifdef ZTS
 int php_apache2_info_id;
@@ -72,7 +79,7 @@ PHP_FUNCTION(virtual)
 	request_rec *rr;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &filename, &filename_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!(rr = php_apache_lookup_uri(filename))) {
@@ -118,7 +125,7 @@ PHP_FUNCTION(apache_lookup_uri)
 	size_t filename_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &filename, &filename_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!(rr = php_apache_lookup_uri(filename))) {
@@ -173,7 +180,7 @@ PHP_FUNCTION(apache_request_headers)
 	char *key, *val;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	array_init(return_value);
@@ -197,7 +204,7 @@ PHP_FUNCTION(apache_response_headers)
 	char *key, *val;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	array_init(return_value);
@@ -222,7 +229,7 @@ PHP_FUNCTION(apache_note)
 	char *old_note_val=NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s", &note_name, &note_name_len, &note_val, &note_val_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	ctx = SG(server_context);
@@ -256,7 +263,7 @@ PHP_FUNCTION(apache_setenv)
 	request_rec *r;
 
 	if (zend_parse_parameters(arg_count, "ss|b", &variable, &variable_len, &string_val, &string_val_len, &walk_to_top) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	ctx = SG(server_context);
@@ -292,7 +299,7 @@ PHP_FUNCTION(apache_getenv)
 	request_rec *r;
 
 	if (zend_parse_parameters(arg_count, "s|b", &variable, &variable_len, &walk_to_top) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	ctx = SG(server_context);
@@ -475,62 +482,10 @@ PHP_MINFO_FUNCTION(apache)
 	}
 }
 
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_apache2handler_lookup_uri, 0, 0, 1)
-	ZEND_ARG_INFO(0, filename)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_apache2handler_virtual, 0, 0, 1)
-	ZEND_ARG_INFO(0, uri)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_apache2handler_response_headers, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_apache2handler_getallheaders, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_apache2handler_note, 0, 0, 1)
-	ZEND_ARG_INFO(0, note_name)
-	ZEND_ARG_INFO(0, note_value)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_apache2handler_setenv, 0, 0, 2)
-	ZEND_ARG_INFO(0, variable)
-	ZEND_ARG_INFO(0, value)
-	ZEND_ARG_INFO(0, walk_to_top)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_apache2handler_getenv, 0, 0, 1)
-	ZEND_ARG_INFO(0, variable)
-	ZEND_ARG_INFO(0, walk_to_top)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_apache2handler_get_version, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_apache2handler_get_modules, 0)
-ZEND_END_ARG_INFO()
-/* }}} */
-
-static const zend_function_entry apache_functions[] = {
-	PHP_FE(apache_lookup_uri, 		arginfo_apache2handler_lookup_uri)
-	PHP_FE(virtual, 				arginfo_apache2handler_virtual)
-	PHP_FE(apache_request_headers, 	arginfo_apache2handler_getallheaders)
-	PHP_FE(apache_response_headers, arginfo_apache2handler_response_headers)
-	PHP_FE(apache_setenv, 		arginfo_apache2handler_setenv)
-	PHP_FE(apache_getenv, 		arginfo_apache2handler_getenv)
-	PHP_FE(apache_note, 		arginfo_apache2handler_note)
-	PHP_FE(apache_get_version, 	arginfo_apache2handler_get_version)
-	PHP_FE(apache_get_modules, 	arginfo_apache2handler_get_modules)
-	PHP_FALIAS(getallheaders, 	apache_request_headers, arginfo_apache2handler_getallheaders)
-	{NULL, NULL, NULL}
-};
-
 PHP_INI_BEGIN()
-	STD_PHP_INI_ENTRY("xbithack",		"0",	PHP_INI_ALL,	OnUpdateBool,	xbithack,	php_apache2_info_struct, php_apache2_info)
-	STD_PHP_INI_ENTRY("engine",		"1",	PHP_INI_ALL,	OnUpdateBool,	engine, 	php_apache2_info_struct, php_apache2_info)
-	STD_PHP_INI_ENTRY("last_modified",	"0",	PHP_INI_ALL,	OnUpdateBool,	last_modified,	php_apache2_info_struct, php_apache2_info)
+	STD_PHP_INI_BOOLEAN("xbithack",		"0",	PHP_INI_ALL,	OnUpdateBool,	xbithack,	php_apache2_info_struct, php_apache2_info)
+	STD_PHP_INI_BOOLEAN("engine",		"1",	PHP_INI_ALL,	OnUpdateBool,	engine, 	php_apache2_info_struct, php_apache2_info)
+	STD_PHP_INI_BOOLEAN("last_modified",	"0",	PHP_INI_ALL,	OnUpdateBool,	last_modified,	php_apache2_info_struct, php_apache2_info)
 PHP_INI_END()
 
 static PHP_MINIT_FUNCTION(apache)
@@ -551,7 +506,7 @@ static PHP_MSHUTDOWN_FUNCTION(apache)
 zend_module_entry php_apache_module = {
 	STANDARD_MODULE_HEADER,
 	"apache2handler",
-	apache_functions,
+	ext_functions,
 	PHP_MINIT(apache),
 	PHP_MSHUTDOWN(apache),
 	NULL,

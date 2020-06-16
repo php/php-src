@@ -9,11 +9,11 @@ class sw {
         return true;
     }
 
-	public function stream_stat() {
-		return array(
+    public function stream_stat() {
+        return array(
             'atime' => $this->undefined,
         );
-	}
+    }
 
 }
 stream_wrapper_register('sx', 'sw') or die('failed');

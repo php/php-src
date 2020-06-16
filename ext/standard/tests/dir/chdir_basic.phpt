@@ -33,7 +33,6 @@ echo "\n-- Testing chdir() with relative paths: --\n";
 var_dump(chdir($level1_two_dir_name));
 var_dump(getcwd());
 ?>
-===DONE===
 --CLEAN--
 <?php
 $file_path = __DIR__;
@@ -50,4 +49,3 @@ string(%d) "%slevel1_one"
 -- Testing chdir() with relative paths: --
 bool(true)
 string(%d) "%slevel1_one%elevel1_two"
-===DONE===

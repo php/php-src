@@ -16,10 +16,6 @@
 
 #include <php.h>
 
-PHP_FUNCTION( datefmt_create );
-PHP_FUNCTION( datefmt_get_error_code );
-PHP_FUNCTION( datefmt_get_error_message );
-PHP_METHOD( IntlDateFormatter, __construct );
 void dateformat_register_constants( INIT_FUNC_ARGS );
 
 /*

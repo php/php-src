@@ -39,7 +39,6 @@ foreach($strings as $string) {
 
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing convert_uuencode() : basic functionality ***
 -- Iteration 1 --
@@ -85,4 +84,3 @@ string(82) "M7'0@5&AI<R!3=')I;F<@8V]N=&%I;G,@7'1<="!S;VUE(&-O;G1R;VP@8VAA
 +<F%C=&5R<UQR7&X`
 `
 "
-===DONE===

@@ -14,8 +14,8 @@ Test parse_url() function: Parse a load of URLs without specifying the component
 include_once(__DIR__ . '/urls.inc');
 
 foreach ($urls as $url) {
-	echo "\n--> $url: ";
-	var_dump(parse_url($url));
+    echo "\n--> $url: ";
+    var_dump(parse_url($url));
 }
 
 echo "Done";
@@ -144,30 +144,36 @@ echo "Done";
   string(10) "/index.php"
 }
 
---> www.php.net/?: array(1) {
+--> www.php.net/?: array(2) {
   ["path"]=>
   string(12) "www.php.net/"
+  ["query"]=>
+  string(0) ""
 }
 
---> www.php.net:80/?: array(3) {
+--> www.php.net:80/?: array(4) {
   ["host"]=>
   string(11) "www.php.net"
   ["port"]=>
   int(80)
   ["path"]=>
   string(1) "/"
+  ["query"]=>
+  string(0) ""
 }
 
---> http://www.php.net/?: array(3) {
+--> http://www.php.net/?: array(4) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
   string(11) "www.php.net"
   ["path"]=>
   string(1) "/"
+  ["query"]=>
+  string(0) ""
 }
 
---> http://www.php.net:80/?: array(4) {
+--> http://www.php.net:80/?: array(5) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
@@ -176,6 +182,8 @@ echo "Done";
   int(80)
   ["path"]=>
   string(1) "/"
+  ["query"]=>
+  string(0) ""
 }
 
 --> http://www.php.net:80/index.php: array(4) {
@@ -290,7 +298,7 @@ echo "Done";
   string(10) "/index.php"
 }
 
---> http://www.php.net:80/index.php?: array(4) {
+--> http://www.php.net:80/index.php?: array(5) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
@@ -299,6 +307,8 @@ echo "Done";
   int(80)
   ["path"]=>
   string(10) "/index.php"
+  ["query"]=>
+  string(0) ""
 }
 
 --> http://www.php.net:80/#foo: array(5) {
@@ -314,7 +324,7 @@ echo "Done";
   string(3) "foo"
 }
 
---> http://www.php.net:80/?#: array(4) {
+--> http://www.php.net:80/?#: array(6) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
@@ -323,6 +333,10 @@ echo "Done";
   int(80)
   ["path"]=>
   string(1) "/"
+  ["query"]=>
+  string(0) ""
+  ["fragment"]=>
+  string(0) ""
 }
 
 --> http://www.php.net:80/?test=1: array(5) {
@@ -731,11 +745,13 @@ echo "Done";
   string(4) "/:80"
 }
 
---> http://x:?: array(2) {
+--> http://x:?: array(3) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
   string(1) "x"
+  ["query"]=>
+  string(0) ""
 }
 
 --> x:blah.com: array(2) {
@@ -754,18 +770,22 @@ echo "Done";
 
 --> x://::abc/?: bool(false)
 
---> http://::?: array(2) {
+--> http://::?: array(3) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
   string(1) ":"
+  ["query"]=>
+  string(0) ""
 }
 
---> http://::#: array(2) {
+--> http://::#: array(3) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
   string(1) ":"
+  ["fragment"]=>
+  string(0) ""
 }
 
 --> x://::6.5: array(3) {

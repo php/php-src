@@ -12,8 +12,6 @@ $rf = new ReflectionFunction('imagewebp');
 var_dump($rf->getNumberOfParameters());
 var_dump($rf->getNumberOfRequiredParameters());
 ?>
-===DONE===
 --EXPECT--
 int(3)
 int(1)
-===DONE===

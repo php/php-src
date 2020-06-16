@@ -21,7 +21,6 @@ echo "\ntesting __get magic method\n";
 var_dump(property_exists("AutoTest", "foo"));
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing property_exists() : class auto loading ***
 
@@ -30,4 +29,3 @@ bool(true)
 
 testing __get magic method
 bool(false)
-===DONE===

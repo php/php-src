@@ -37,7 +37,7 @@ typedef struct filter_list_entry {
 /* {{{ filter_list */
 static const filter_list_entry filter_list[] = {
 	{ "int",             FILTER_VALIDATE_INT,           php_filter_int             },
-	{ "boolean",         FILTER_VALIDATE_BOOLEAN,       php_filter_boolean         },
+	{ "boolean",         FILTER_VALIDATE_BOOL,          php_filter_boolean         },
 	{ "float",           FILTER_VALIDATE_FLOAT,         php_filter_float           },
 
 	{ "validate_regexp", FILTER_VALIDATE_REGEXP,        php_filter_validate_regexp },
@@ -57,7 +57,6 @@ static const filter_list_entry filter_list[] = {
 	{ "url",             FILTER_SANITIZE_URL,           php_filter_url             },
 	{ "number_int",      FILTER_SANITIZE_NUMBER_INT,    php_filter_number_int      },
 	{ "number_float",    FILTER_SANITIZE_NUMBER_FLOAT,  php_filter_number_float    },
-	{ "magic_quotes",    FILTER_SANITIZE_MAGIC_QUOTES,  php_filter_magic_quotes    },
 	{ "add_slashes",     FILTER_SANITIZE_ADD_SLASHES,   php_filter_add_slashes     },
 
 	{ "callback",        FILTER_CALLBACK,               php_filter_callback        },
@@ -76,29 +75,15 @@ static const filter_list_entry filter_list[] = {
 #define PARSE_SESSION 6
 #endif
 
-static unsigned int php_sapi_filter(int arg, char *var, char **val, size_t val_len, size_t *new_val_len);
+static unsigned int php_sapi_filter(int arg, const char *var, char **val, size_t val_len, size_t *new_val_len);
 static unsigned int php_sapi_filter_init(void);
-
-/* {{{ filter_functions[]
- */
-static const zend_function_entry filter_functions[] = {
-	PHP_FE(filter_input,		arginfo_filter_input)
-	PHP_FE(filter_var,		arginfo_filter_var)
-	PHP_FE(filter_input_array,	arginfo_filter_input_array)
-	PHP_FE(filter_var_array,	arginfo_filter_var_array)
-	PHP_FE(filter_list,		arginfo_filter_list)
-	PHP_FE(filter_has_var,		arginfo_filter_has_var)
-	PHP_FE(filter_id,		arginfo_filter_id)
-	PHP_FE_END
-};
-/* }}} */
 
 /* {{{ filter_module_entry
  */
 zend_module_entry filter_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"filter",
-	filter_functions,
+	ext_functions,
 	PHP_MINIT(filter),
 	PHP_MSHUTDOWN(filter),
 	NULL,
@@ -191,7 +176,8 @@ PHP_MINIT_FUNCTION(filter)
 	REGISTER_LONG_CONSTANT("FILTER_NULL_ON_FAILURE", FILTER_NULL_ON_FAILURE, CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("FILTER_VALIDATE_INT", FILTER_VALIDATE_INT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_VALIDATE_BOOLEAN", FILTER_VALIDATE_BOOLEAN, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_VALIDATE_BOOLEAN", FILTER_VALIDATE_BOOL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_VALIDATE_BOOL", FILTER_VALIDATE_BOOL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILTER_VALIDATE_FLOAT", FILTER_VALIDATE_FLOAT, CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("FILTER_VALIDATE_REGEXP", FILTER_VALIDATE_REGEXP, CONST_CS | CONST_PERSISTENT);
@@ -213,7 +199,6 @@ PHP_MINIT_FUNCTION(filter)
 	REGISTER_LONG_CONSTANT("FILTER_SANITIZE_URL", FILTER_SANITIZE_URL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILTER_SANITIZE_NUMBER_INT", FILTER_SANITIZE_NUMBER_INT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILTER_SANITIZE_NUMBER_FLOAT", FILTER_SANITIZE_NUMBER_FLOAT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_SANITIZE_MAGIC_QUOTES", FILTER_SANITIZE_MAGIC_QUOTES, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILTER_SANITIZE_ADD_SLASHES", FILTER_SANITIZE_ADD_SLASHES, CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("FILTER_CALLBACK", FILTER_CALLBACK, CONST_CS | CONST_PERSISTENT);
@@ -375,7 +360,7 @@ handle_default:
 }
 /* }}} */
 
-static unsigned int php_sapi_filter(int arg, char *var, char **val, size_t val_len, size_t *new_val_len) /* {{{ */
+static unsigned int php_sapi_filter(int arg, const char *var, char **val, size_t val_len, size_t *new_val_len) /* {{{ */
 {
 	zval  new_var, raw_var;
 	zval *array_ptr = NULL, *orig_array_ptr = NULL;
@@ -531,7 +516,7 @@ PHP_FUNCTION(filter_has_var)
 	zval        *array_ptr = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lS", &arg, &var) == FAILURE) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	array_ptr = php_filter_get_storage(arg);
@@ -675,7 +660,7 @@ PHP_FUNCTION(filter_input)
 	zend_string *var;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lS|lz", &fetch_from, &var, &filter, &filter_args) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!PHP_FILTER_ID_EXISTS(filter)) {
@@ -729,7 +714,7 @@ PHP_FUNCTION(filter_var)
 	zval *filter_args = NULL, *data;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|lz", &data, &filter, &filter_args) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!PHP_FILTER_ID_EXISTS(filter)) {
@@ -752,7 +737,7 @@ PHP_FUNCTION(filter_input_array)
 	zend_bool add_empty = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|zb",  &fetch_from, &op, &add_empty) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (op && (Z_TYPE_P(op) != IS_ARRAY) && !(Z_TYPE_P(op) == IS_LONG && PHP_FILTER_ID_EXISTS(Z_LVAL_P(op)))) {
@@ -797,7 +782,7 @@ PHP_FUNCTION(filter_var_array)
 	zend_bool add_empty = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a|zb",  &array_input, &op, &add_empty) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (op && (Z_TYPE_P(op) != IS_ARRAY) && !(Z_TYPE_P(op) == IS_LONG && PHP_FILTER_ID_EXISTS(Z_LVAL_P(op)))) {
@@ -815,7 +800,7 @@ PHP_FUNCTION(filter_list)
 	int i, size = sizeof(filter_list) / sizeof(filter_list_entry);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	array_init(return_value);
@@ -835,7 +820,7 @@ PHP_FUNCTION(filter_id)
 	char *filter;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &filter, &filter_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	for (i = 0; i < size; ++i) {

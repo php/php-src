@@ -23,7 +23,6 @@ echo $phar->getAlias() . "\n";
 $phar->setAlias('test');
 echo $phar->getAlias() . "\n";
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
@@ -33,4 +32,3 @@ __HALT_COMPILER();
 --EXPECT--
 hio
 test
-===DONE===

@@ -30,4 +30,22 @@ extern zend_module_entry zend_test_module_entry;
 ZEND_TSRMLS_CACHE_EXTERN()
 #endif
 
+struct bug79096 {
+	uint64_t a;
+	uint64_t b;
+};
+
+#ifdef PHP_WIN32
+#	ifdef PHP_ZEND_TEST_EXPORTS
+#		define PHP_ZEND_TEST_API __declspec(dllexport)
+#	else
+#		define PHP_ZEND_TEST_API __declspec(dllimport)
+#	endif
+#else
+#	define PHP_ZEND_TEST_API ZEND_API
+#endif
+
+PHP_ZEND_TEST_API struct bug79096 bug79096(void);
+PHP_ZEND_TEST_API void bug79532(off_t *array, size_t elems);
+
 #endif

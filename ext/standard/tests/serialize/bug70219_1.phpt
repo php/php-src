@@ -18,7 +18,6 @@ class obj implements Serializable {
     }
     function unserialize($data) {
         session_decode($data);
-        return null;
     }
 }
 
@@ -34,18 +33,20 @@ for ($i = 0; $i < 5; $i++) {
 var_dump($data);
 var_dump($_SESSION);
 ?>
---EXPECT--
+--EXPECTF--
 array(2) {
   [0]=>
-  object(obj)#1 (1) {
+  object(obj)#%d (1) {
     ["data"]=>
     NULL
   }
   [1]=>
-  object(obj)#2 (1) {
+  object(obj)#%d (1) {
     ["data"]=>
     NULL
   }
 }
-array(0) {
+object(obj)#1 (1) {
+  ["data"]=>
+  NULL
 }

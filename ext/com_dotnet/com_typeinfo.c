@@ -260,7 +260,7 @@ ITypeLib *php_com_cache_typelib(ITypeLib* TL, char *cache_key, zend_long cache_k
 	return result;
 }
 
-PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib_via_cache(char *search_string,
+PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib_via_cache(const char *search_string,
 	int codepage, int *cached)
 {
 	ITypeLib *TL;
@@ -478,6 +478,7 @@ int php_com_process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, int pri
 	char *ansiname = NULL;
 	size_t ansinamelen;
 	int ret = 0;
+	DISPID lastid = 0;	/* for props */
 
 	if (FAILED(ITypeInfo_GetTypeAttr(typeinfo, &attr))) {
 		return 0;
@@ -511,7 +512,6 @@ int php_com_process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, int pri
 		/* So we've got the dispatch interface; lets list the event methods */
 		for (i = 0; i < attr->cFuncs; i++) {
 			zval tmp;
-			DISPID lastid = 0;	/* for props */
 			int isprop;
 
 			if (FAILED(ITypeInfo_GetFuncDesc(typeinfo, i, &func)))
@@ -624,8 +624,8 @@ int php_com_process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, int pri
 					ZVAL_STRINGL(&tmp, ansiname, ansinamelen);
 					zend_hash_index_update(id_to_name, func->memid, &tmp);
 					// TODO: avoid reallocation???
-					efree(ansiname);
 				}
+				efree(ansiname);
 			}
 			ITypeInfo_ReleaseFuncDesc(typeinfo, func);
 		}

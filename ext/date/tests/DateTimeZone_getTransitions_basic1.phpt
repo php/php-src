@@ -19,7 +19,7 @@ $tz = new DateTimeZone("Europe/London");
 $tran = $tz->getTransitions(-306972000, -37241999);
 
 if (!is_array($tran)) {
-	echo "TEST FAILED: Expected an array\n";
+    echo "TEST FAILED: Expected an array\n";
 }
 
 echo "\n-- Total number of transitions: " . count($tran). " --\n";
@@ -28,7 +28,6 @@ echo "\n-- Format a sample entry for Spring 1963 --\n";
 var_dump( $tran[6] );
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing DateTimeZone::getTransitions() : basic functionality ***
 
@@ -47,4 +46,3 @@ array(5) {
   ["abbr"]=>
   string(3) "BST"
 }
-===DONE===

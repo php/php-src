@@ -8,7 +8,6 @@ $params = $method->getParameters();
 var_dump($params);
 
 ?>
-===DONE===
 --EXPECT--
 array(4) {
   [0]=>
@@ -32,4 +31,3 @@ array(4) {
     string(6) "escape"
   }
 }
-===DONE===

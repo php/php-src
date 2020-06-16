@@ -53,7 +53,7 @@ int zend_init_rsrc_list_dtors(void);
 void zend_destroy_rsrc_list_dtors(void);
 
 ZEND_API zval* ZEND_FASTCALL zend_list_insert(void *ptr, int type);
-ZEND_API int ZEND_FASTCALL zend_list_free(zend_resource *res);
+ZEND_API void ZEND_FASTCALL zend_list_free(zend_resource *res);
 ZEND_API int ZEND_FASTCALL zend_list_delete(zend_resource *res);
 ZEND_API int ZEND_FASTCALL zend_list_close(zend_resource *res);
 

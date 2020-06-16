@@ -3,11 +3,11 @@ Test typed properties inheritance (scalar)
 --FILE--
 <?php
 class Foo {
-	public int $qux;
+    public int $qux;
 }
 
 class Bar extends Foo {
-	public string $qux;
+    public string $qux;
 }
 ?>
 --EXPECTF--

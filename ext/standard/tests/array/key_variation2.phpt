@@ -97,13 +97,12 @@ $iterator = 1;
 foreach($inputs as $key => $input) {
   echo "\n-- Iteration $iterator : $key data --\n";
   while (key($input) !== NULL) {
-  	var_dump(key($input));
-  	next($input);
+    var_dump(key($input));
+    next($input);
   }
   $iterator++;
 };
 ?>
-===DONE===
 --EXPECT--
 *** Testing key() : usage variations ***
 
@@ -152,4 +151,3 @@ string(0) ""
 
 -- Iteration 12 : unset data --
 string(0) ""
-===DONE===

@@ -10,14 +10,14 @@ require(__DIR__.'/details.inc');
 // Initialization
 
 $stmtarray = array(
-	"drop table connect_scope2_tab",
-	"create table connect_scope2_tab (c1 number)",
+    "drop table connect_scope2_tab",
+    "create table connect_scope2_tab (c1 number)",
 );
 
 if (!empty($dbase))
-	$c1 = oci_new_connect($user,$password,$dbase);
+    $c1 = oci_new_connect($user,$password,$dbase);
 else
-	$c1 = oci_new_connect($user,$password);
+    $c1 = oci_new_connect($user,$password);
 
 oci8_test_sql_execute($c1, $stmtarray);
 
@@ -27,15 +27,15 @@ echo "Test 1 - oci_pconnect\n";
 
 function f()
 {
-	global $user, $password, $dbase;
+    global $user, $password, $dbase;
 
-	if (!empty($dbase))
-		$c = oci_pconnect($user,$password,$dbase);
-	else
-		$c = oci_pconnect($user,$password);
-	$s = oci_parse($c, "insert into connect_scope2_tab values (1)");
-	oci_execute($s, OCI_DEFAULT);  // no commit
-	return($s); // this keeps the connection refcount positive so the connection isn't closed
+    if (!empty($dbase))
+        $c = oci_pconnect($user,$password,$dbase);
+    else
+        $c = oci_pconnect($user,$password);
+    $s = oci_parse($c, "insert into connect_scope2_tab values (1)");
+    oci_execute($s, OCI_DEFAULT);  // no commit
+    return($s); // this keeps the connection refcount positive so the connection isn't closed
 }
 
 $s2 = f();
@@ -60,7 +60,7 @@ var_dump($r);
 // Cleanup
 
 $stmtarray = array(
-	"drop table connect_scope2_tab"
+    "drop table connect_scope2_tab"
 );
 
 oci8_test_sql_execute($c1, $stmtarray);

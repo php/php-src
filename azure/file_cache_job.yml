@@ -1,0 +1,54 @@
+parameters:
+  configurationName: ''
+  configurationParameters: ''
+  runTestsParameters: ''
+  timeoutInMinutes: 60
+
+jobs:
+  - job: ${{ parameters.configurationName }}
+    timeoutInMinutes: ${{ parameters.timeoutInMinutes }}
+    pool:
+      vmImage: 'ubuntu-18.04'
+    steps:
+    - template: apt.yml
+    - template: configure.yml
+      parameters:
+        configurationParameters: ${{ parameters.configurationParameters }}
+    - script: make -j$(/usr/bin/nproc) >/dev/null
+      displayName: 'Make Build'
+    - template: install.yml
+    - template: setup.yml
+    - template: test.yml
+      parameters:
+        configurationName: ${{ parameters.configurationName }}
+        runTestsName: 'File Cache (prime)'
+        runTestsParameters: >-
+          ${{ parameters.runTestsParameters }}
+          -d zend_extension=opcache.so
+          --file-cache-prime
+    - template: test.yml
+      parameters:
+        configurationName: ${{ parameters.configurationName }}
+        runTestsName: 'File Cache (use)'
+        runTestsParameters: >-
+          ${{ parameters.runTestsParameters }}
+          -d zend_extension=opcache.so
+          --file-cache-use
+    - template: test.yml
+      parameters:
+        configurationName: ${{ parameters.configurationName }}
+        runTestsName: 'File Cache Only (prime)'
+        runTestsParameters: >-
+          ${{ parameters.runTestsParameters }}
+          -d zend_extension=opcache.so
+          --file-cache-prime
+          -d opcache.file_cache_only=1
+    - template: test.yml
+      parameters:
+        configurationName: ${{ parameters.configurationName }}
+        runTestsName: 'File Cache Only (use)'
+        runTestsParameters: >-
+          ${{ parameters.runTestsParameters }}
+          -d zend_extension=opcache.so
+          --file-cache-use
+          -d opcache.file_cache_only=1

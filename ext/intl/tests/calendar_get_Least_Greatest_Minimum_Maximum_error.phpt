@@ -28,24 +28,24 @@ echo "error: $errno, $errstr\n";
 set_error_handler('eh');
 
 try {
-	var_dump(intlcal_get_least_maximum(1, 1));
+    var_dump(intlcal_get_least_maximum(1, 1));
 } catch (Error $ex) {
-	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
+    echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 try {
-	var_dump(intlcal_get_maximum(1, 1));
+    var_dump(intlcal_get_maximum(1, 1));
 } catch (Error $ex) {
-	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
+    echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 try {
-	var_dump(intlcal_get_greatest_minimum(1, -1));
+    var_dump(intlcal_get_greatest_minimum(1, -1));
 } catch (Error $ex) {
-	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
+    echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 try {
-	var_dump(intlcal_get_minimum(1, -1));
+    var_dump(intlcal_get_minimum(1, -1));
 } catch (Error $ex) {
-	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
+    echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 --EXPECTF--
 Warning: IntlCalendar::getLeastMaximum(): intlcal_get_least_maximum: invalid field in %s on line %d
@@ -71,10 +71,10 @@ bool(false)
 
 Warning: intlcal_get_minimum(): intlcal_get_minimum: invalid field in %s on line %d
 bool(false)
-error: 0, intlcal_get_least_maximum() expects parameter 1 to be IntlCalendar, int given
+error: 0, intlcal_get_least_maximum(): Argument #1 ($calendar) must be of type IntlCalendar, int given
 
-error: 0, intlcal_get_maximum() expects parameter 1 to be IntlCalendar, int given
+error: 0, intlcal_get_maximum(): Argument #1 ($calendar) must be of type IntlCalendar, int given
 
-error: 0, intlcal_get_greatest_minimum() expects parameter 1 to be IntlCalendar, int given
+error: 0, intlcal_get_greatest_minimum(): Argument #1 ($calendar) must be of type IntlCalendar, int given
 
-error: 0, intlcal_get_minimum() expects parameter 1 to be IntlCalendar, int given
+error: 0, intlcal_get_minimum(): Argument #1 ($calendar) must be of type IntlCalendar, int given

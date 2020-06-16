@@ -35,17 +35,16 @@ $options = array ('1', true,
 $iterator = 1;
 imap_check($stream_id);
 foreach($options as $option) {
-	echo "\n-- Iteration $iterator --\n";
-	if(is_string(imap_fetchbody($stream_id, $msg_uid, $section, $option))) {
-		echo "FT_UID valid\n";
-	} else {
+    echo "\n-- Iteration $iterator --\n";
+    if(is_string(imap_fetchbody($stream_id, $msg_uid, $section, $option))) {
+        echo "FT_UID valid\n";
+    } else {
                 echo "FT_UID not valid\n";
         }
-	$iterator++;
+    $iterator++;
 }
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 require_once(__DIR__.'/clean.inc');
@@ -69,11 +68,10 @@ FT_UID valid
 
 -- Iteration 5 --
 
-Warning: imap_fetchbody(): invalid value for the options parameter in %s on line %d
+Warning: imap_fetchbody(): Invalid value for the options parameter in %s on line %d
 FT_UID not valid
 
 -- Iteration 6 --
 
-Warning: imap_fetchbody(): invalid value for the options parameter in %s on line %d
+Warning: imap_fetchbody(): Invalid value for the options parameter in %s on line %d
 FT_UID not valid
-===DONE===

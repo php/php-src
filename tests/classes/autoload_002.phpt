@@ -8,18 +8,16 @@ ZE2 Autoload and get_class_methods
 <?php
 
 spl_autoload_register(function ($class_name) {
-	require_once(__DIR__ . '/' . $class_name . '.inc');
-	echo 'autoload(' . $class_name . ")\n";
+    require_once(__DIR__ . '/' . $class_name . '.inc');
+    echo 'autoload(' . $class_name . ")\n";
 });
 
 var_dump(get_class_methods('autoload_root'));
 
 ?>
-===DONE===
 --EXPECT--
 autoload(autoload_root)
 array(1) {
   [0]=>
   string(12) "testFunction"
 }
-===DONE===

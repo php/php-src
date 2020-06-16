@@ -401,7 +401,7 @@ PS_WRITE_FUNC(mm)
 
 			if (!sd->data) {
 				ps_sd_destroy(data, sd);
-				php_error_docref(NULL, E_WARNING, "cannot allocate new data segment");
+				php_error_docref(NULL, E_WARNING, "Cannot allocate new data segment");
 				sd = NULL;
 			}
 		}

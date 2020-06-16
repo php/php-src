@@ -1,20 +1,16 @@
 --TEST--
 json_decode() invalid UTF8
---SKIPIF--
-<?php
-if (!extension_loaded("json")) print "skip";
-?>
 --FILE--
 <?php
 function json_decode_invalid_utf8($str) {
-	var_dump(json_decode($str));
-	var_dump(json_decode($str, true, 512, JSON_INVALID_UTF8_IGNORE));
-	$json = json_decode($str, true, 512, JSON_INVALID_UTF8_SUBSTITUTE);
-	if (is_array($json)) {
-		var_dump(array_map(function($item) { return bin2hex($item); }, $json));
-	} else {
-		var_dump(bin2hex($json));
-	}
+    var_dump(json_decode($str));
+    var_dump(json_decode($str, true, 512, JSON_INVALID_UTF8_IGNORE));
+    $json = json_decode($str, true, 512, JSON_INVALID_UTF8_SUBSTITUTE);
+    if (is_array($json)) {
+        var_dump(array_map(function($item) { return bin2hex($item); }, $json));
+    } else {
+        var_dump(bin2hex($json));
+    }
 }
 json_decode_invalid_utf8("\"a\xb0b\"");
 json_decode_invalid_utf8("\"a\xd0\xf2b\"");

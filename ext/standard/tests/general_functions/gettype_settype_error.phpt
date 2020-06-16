@@ -16,15 +16,17 @@ echo "**** Testing gettype() and settype() functions ****\n";
 echo "\n*** Testing settype(): error conditions ***\n";
 
 // passing an invalid type to set
-var_dump( settype( $var, "unknown" ) );
+try {
+    settype( $var, "unknown" );
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 **** Testing gettype() and settype() functions ****
 
 *** Testing settype(): error conditions ***
-
-Warning: settype(): Invalid type in %s on line %d
-bool(false)
+settype(): Argument #2 ($type) must be a valid type
 Done

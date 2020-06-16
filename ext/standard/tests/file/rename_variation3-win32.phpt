@@ -25,7 +25,7 @@ mkdir($dirname);
 $filename = "$file_path/rename_variation3.tmp";
 $fp = fopen($filename, "w");
 if (!$fp) {
-	die("Cannot create $filename\n");
+    die("Cannot create $filename\n");
 }
 fclose($fp);
 

@@ -27,17 +27,16 @@ $sequences = array (0,     4, // out of range
                     );
 
 foreach($sequences as $msg_no) {
-	echo "\n-- \$msg_no is $msg_no --\n";
-	var_dump($overview = imap_fetchheader($stream_id, $msg_no));
-	if (!$overview) {
-		echo imap_last_error() . "\n";
-	}
+    echo "\n-- \$msg_no is $msg_no --\n";
+    var_dump($overview = imap_fetchheader($stream_id, $msg_no));
+    if (!$overview) {
+        echo imap_last_error() . "\n";
+    }
 }
 
 // clear error stack
 imap_errors();
 ?>
-===DONE===
 --CLEAN--
 <?php
 require_once(__DIR__.'/clean.inc');
@@ -80,4 +79,3 @@ MIME-Version: 1.0
 Content-Type: MULTIPART/mixed; BOUNDARY="%s"
 
 "
-===DONE===

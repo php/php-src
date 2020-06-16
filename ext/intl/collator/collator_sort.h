@@ -20,9 +20,4 @@
 
 typedef int (*collator_compare_func_t)( zval *result, zval *op1, zval *op2 );
 
-PHP_FUNCTION( collator_sort );
-PHP_FUNCTION( collator_sort_with_sort_keys );
-PHP_FUNCTION( collator_get_sort_key );
-PHP_FUNCTION( collator_asort );
-
 #endif // COLLATOR_SORT_H

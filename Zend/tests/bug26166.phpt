@@ -33,8 +33,8 @@ echo "===NONE===\n";
 
 class NoneTest
 {
-	function __toString() {
-	}
+    function __toString() {
+    }
 }
 
 $o = new NoneTest;
@@ -48,24 +48,22 @@ echo "===THROW===\n";
 
 class ErrorTest
 {
-	function __toString() {
-		throw new Exception("This is an error!");
-	}
+    function __toString() {
+        throw new Exception("This is an error!");
+    }
 }
 
 $o = new ErrorTest;
 try {
-	echo $o;
+    echo $o;
 } catch (Exception $e) {
-	echo $e->getMessage(), "\n";
+    echo $e->getMessage(), "\n";
 }
 
 ?>
-===DONE===
 --EXPECT--
 Hello World!
 ===NONE===
-Method NoneTest::__toString() must return a string value
+NoneTest::__toString(): Return value must be of type string, none returned
 ===THROW===
 This is an error!
-===DONE===

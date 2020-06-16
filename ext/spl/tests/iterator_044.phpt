@@ -5,57 +5,57 @@ SPL: CachingIterator and offsetGet/Exists using flag FULL_CACHE
 
 class MyFoo
 {
-	function __toString()
-	{
-		return 'foo';
-	}
+    function __toString()
+    {
+        return 'foo';
+    }
 }
 
 class MyCachingIterator extends CachingIterator
 {
-	function __construct(Iterator $it, $flags = 0)
-	{
-		parent::__construct($it, $flags);
-	}
+    function __construct(Iterator $it, $flags = 0)
+    {
+        parent::__construct($it, $flags);
+    }
 
-	function test($ar)
-	{
-		foreach($ar as $k => $v)
-		{
-			echo "===$k===\n";
-			var_dump($v);
-			try {
+    function test($ar)
+    {
+        foreach($ar as $k => $v)
+        {
+            echo "===$k===\n";
+            var_dump($v);
+            try {
                 var_dump($this->offsetExists($v));
             } catch (TypeError $e) {
                 echo $e->getMessage(), "\n";
             }
-			try {
+            try {
                 var_dump($this->offsetGet($v));
             } catch (TypeError $e) {
                 echo $e->getMessage(), "\n";
             }
-		}
-	}
+        }
+    }
 }
 
 $it = new MyCachingIterator(new ArrayIterator(array(0, 'foo'=>1, 2, 'bar'=>3, 4)));
 
 try
 {
-	var_dump($it->offsetExists(0));
+    var_dump($it->offsetExists(0));
 }
 catch(Exception $e)
 {
-	echo "Exception: " . $e->getMessage() . "\n";
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 
 try
 {
-	var_dump($it->offsetGet(0));
+    var_dump($it->offsetGet(0));
 }
 catch(Exception $e)
 {
-	echo "Exception: " . $e->getMessage() . "\n";
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 
 $it = new MyCachingIterator(new ArrayIterator(array(0, 'foo'=>1, 2, 'bar'=>3, 4)), CachingIterator::FULL_CACHE);
@@ -71,8 +71,6 @@ foreach($it as $v); // read all into cache
 $it->test($checks);
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 Exception: MyCachingIterator does not use a full cache (see CachingIterator::__construct)
 Exception: MyCachingIterator does not use a full cache (see CachingIterator::__construct)
@@ -85,8 +83,8 @@ NULL
 ===1===
 object(stdClass)#%d (0) {
 }
-CachingIterator::offsetExists() expects parameter 1 to be string, object given
-CachingIterator::offsetGet() expects parameter 1 to be string, object given
+CachingIterator::offsetExists(): Argument #1 ($index) must be of type string, stdClass given
+CachingIterator::offsetGet(): Argument #1 ($index) must be of type string, stdClass given
 ===2===
 object(MyFoo)#%d (0) {
 }
@@ -126,8 +124,8 @@ int(0)
 ===1===
 object(stdClass)#1 (0) {
 }
-CachingIterator::offsetExists() expects parameter 1 to be string, object given
-CachingIterator::offsetGet() expects parameter 1 to be string, object given
+CachingIterator::offsetExists(): Argument #1 ($index) must be of type string, stdClass given
+CachingIterator::offsetGet(): Argument #1 ($index) must be of type string, stdClass given
 ===2===
 object(MyFoo)#2 (0) {
 }
@@ -153,4 +151,3 @@ bool(false)
 
 Notice: Undefined index: 3 in %siterator_044.php on line %d
 NULL
-===DONE===

@@ -29,7 +29,7 @@ try {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing Error Conditions ***
 Wrong parameter count for fprintf()
 Wrong parameter count for fprintf()

@@ -98,8 +98,6 @@ typedef enum _zend_prop_purpose {
 	ZEND_PROP_PURPOSE_VAR_EXPORT,
 	/* Used for json_encode(). */
 	ZEND_PROP_PURPOSE_JSON,
-	/* array_key_exists(). Not intended for general use! */
-	_ZEND_PROP_PURPOSE_ARRAY_KEY_EXISTS,
 	/* Dummy member to ensure that "default" is specified. */
 	_ZEND_PROP_PURPOSE_NON_EXHAUSTIVE_ENUM
 } zend_prop_purpose;
@@ -160,7 +158,7 @@ struct _zend_object_handlers {
 	zend_object_get_method_t				get_method;           /* required */
 	zend_object_get_constructor_t			get_constructor;      /* required */
 	zend_object_get_class_name_t			get_class_name;       /* required */
-	zend_object_cast_t						cast_object;          /* optional */
+	zend_object_cast_t						cast_object;          /* required */
 	zend_object_count_elements_t			count_elements;       /* optional */
 	zend_object_get_debug_info_t			get_debug_info;       /* optional */
 	zend_object_get_closure_t				get_closure;          /* optional */

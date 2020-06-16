@@ -1,5 +1,7 @@
 --TEST--
 Test is_file() function: usage variations - invalid filenames
+--CONFLICTS--
+obscure_filename
 --FILE--
 <?php
 /* Prototype: bool is_file ( string $filename );
@@ -37,7 +39,7 @@ foreach([
   clearstatcache();
 }
 ?>
---EXPECTF--
+--EXPECT--
 float(-2.34555): 0
 string(1) " ": 0
 string(0) "": 0

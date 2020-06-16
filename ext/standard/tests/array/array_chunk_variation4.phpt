@@ -23,7 +23,7 @@ $input_array = array (
   "array3" =>  array(1)
 );
 
-echo "\n-- Testing array_chunk() by supplying an array containing different sub arrays & 'preserve_key' as defualt --\n";
+echo "\n-- Testing array_chunk() by supplying an array containing different sub arrays & 'preserve_key' as default --\n";
 var_dump( array_chunk($input_array, $size) );
 
 echo "\n-- Testing array_chunk() by supplying an array containing different sub arrays & 'preserve_key' = true --\n";
@@ -37,7 +37,7 @@ echo "Done";
 --EXPECT--
 *** Testing array_chunk() : usage variations ***
 
--- Testing array_chunk() by supplying an array containing different sub arrays & 'preserve_key' as defualt --
+-- Testing array_chunk() by supplying an array containing different sub arrays & 'preserve_key' as default --
 array(2) {
   [0]=>
   array(2) {

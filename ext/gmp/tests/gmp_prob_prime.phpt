@@ -18,9 +18,9 @@ var_dump(gmp_prob_prime(-31));
 var_dump(gmp_prob_prime("172368715471481723"));
 
 for ($i = -1; $i < 12; $i++) {
-	var_dump(gmp_prob_prime((773*$i)-($i*7)-1, $i));
-	$n = gmp_init("23476812735411");
-	var_dump(gmp_prob_prime(gmp_add($n, $i-1), $i));
+    var_dump(gmp_prob_prime((773*$i)-($i*7)-1, $i));
+    $n = gmp_init("23476812735411");
+    var_dump(gmp_prob_prime(gmp_add($n, $i-1), $i));
 }
 
 $n = gmp_init("19481923");

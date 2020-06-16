@@ -7,6 +7,8 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip ... not for Windows');
 }
+--CONFLICTS--
+obscure_filename
 --FILE--
 <?php
 /* Prototype: array lstat ( string $filename );
@@ -28,7 +30,6 @@ var_dump(lstat(false));
 var_dump(lstat(''));
 var_dump(lstat(' '));
 var_dump(lstat('|'));
-echo "Done";
 ?>
 --EXPECTF--
 *** testing stat ***
@@ -51,4 +52,3 @@ bool(false)
 
 Warning: lstat(): Lstat failed for | in %s on line %d
 bool(false)
-Done

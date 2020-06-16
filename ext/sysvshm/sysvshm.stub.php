@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 /** @return resource|false */
 function shm_attach(int $key, int $memsize = UNKNOWN, int $perm = 0666) {}
 

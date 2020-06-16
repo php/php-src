@@ -31,7 +31,7 @@ exit(0);
 ');
 
 if (!$r) {
-	die("couldn't create helper script '$callee'");
+    die("couldn't create helper script '$callee'");
 }
 
 $process = proc_open($cmd, $descriptors, $pipes);
@@ -57,7 +57,6 @@ var_dump(array(
 ), strlen($stdout), strlen($stderr));
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 $callee = __DIR__ . "/process_proc_open_bug51800_right.php";
@@ -74,4 +73,3 @@ array(3) {
 }
 int(10000)
 int(10000)
-===DONE===

@@ -19,14 +19,13 @@ echo "*** Testing ctype_digit() : usage variations ***\n";
 $orig = setlocale(LC_CTYPE, "C");
 
 for ($i = 0; $i < 256; $i++) {
-	if (ctype_digit($i)) {
-		echo "character code $i is a numeric digit\n";
-	}
+    if (ctype_digit($i)) {
+        echo "character code $i is a numeric digit\n";
+    }
 }
 
 setlocale(LC_CTYPE, $orig);
 ?>
-===DONE===
 --EXPECT--
 *** Testing ctype_digit() : usage variations ***
 character code 48 is a numeric digit
@@ -39,4 +38,3 @@ character code 54 is a numeric digit
 character code 55 is a numeric digit
 character code 56 is a numeric digit
 character code 57 is a numeric digit
-===DONE===

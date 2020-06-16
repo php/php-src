@@ -79,6 +79,9 @@ struct dasm_State {
 /* The size of the core structure depends on the max. number of sections. */
 #define DASM_PSZ(ms)	(sizeof(dasm_State)+(ms-1)*sizeof(dasm_Section))
 
+/* Perform potentially overflowing pointer operations in a way that avoids UB. */
+#define DASM_PTR_SUB(p1, off) ((void *) ((uintptr_t) (p1) - sizeof(*p1) * (uintptr_t) (off)))
+#define DASM_PTR_ADD(p1, off) ((void *) ((uintptr_t) (p1) + sizeof(*p1) * (uintptr_t) (off)))
 
 /* Initialize DynASM state. */
 void dasm_init(Dst_DECL, int maxsection)
@@ -98,7 +101,7 @@ void dasm_init(Dst_DECL, int maxsection)
   D->maxsection = maxsection;
   for (i = 0; i < maxsection; i++) {
     D->sections[i].buf = NULL;  /* Need this for pass3. */
-    D->sections[i].rbuf = D->sections[i].buf - DASM_SEC2POS(i);
+    D->sections[i].rbuf = DASM_PTR_SUB(D->sections[i].buf, DASM_SEC2POS(i));
     D->sections[i].bsize = 0;
     D->sections[i].epos = 0;  /* Wrong, but is recalculated after resize. */
   }
@@ -194,7 +197,7 @@ void dasm_put(Dst_DECL, int start, ...)
       switch (action) {
       case DASM_DISP:
 	if (n == 0) { if (mrm < 0) mrm = p[-2]; if ((mrm&7) != 5) break; }
-      case DASM_IMM_DB: if (((n+128)&-256) == 0) goto ob;
+      case DASM_IMM_DB: if ((((unsigned)n+128)&-256) == 0) goto ob;
       case DASM_REL_A: /* Assumes ptrdiff_t is int. !x64 */
       case DASM_IMM_D: ofs += 4; break;
       case DASM_IMM_S: CK(((n+128)&-256) == 0, RANGE_I); goto ob;
@@ -377,7 +380,7 @@ int dasm_encode(Dst_DECL, void *buffer)
   for (secnum = 0; secnum < D->maxsection; secnum++) {
     dasm_Section *sec = D->sections + secnum;
     int *b = sec->buf;
-    int *endb = sec->rbuf + sec->pos;
+    int *endb = DASM_PTR_ADD(sec->rbuf, sec->pos);
 
     while (b != endb) {
       dasm_ActList p = D->actionlist + *b++;
@@ -394,7 +397,7 @@ int dasm_encode(Dst_DECL, void *buffer)
 	  if (((n+128) & -256) != 0) goto wd; else mm[-1] -= 0x40;
 	}
 	case DASM_IMM_S: case DASM_IMM_B: wb: dasmb(n); break;
-	case DASM_IMM_DB: if (((n+128)&-256) == 0) {
+	case DASM_IMM_DB: if ((((unsigned)n+128)&-256) == 0) {
 	    db: if (!mark) mark = cp; mark[-2] += 2; mark = NULL; goto wb;
 	  } else mark = NULL;
 	case DASM_IMM_D: wd: dasmd(n); break;

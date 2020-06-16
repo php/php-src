@@ -65,7 +65,7 @@ function test_realfile($file, $tounlink) {
    $res = unlink($tounlink);
    if ($res === true) {
       if (file_exists($tounlink) === false) {
-      	echo "file removed\n";
+        echo "file removed\n";
       }
       else {
         echo "FAILED: file not removed\n";
@@ -76,7 +76,6 @@ function test_realfile($file, $tounlink) {
    }
 }
 ?>
-===DONE===
 --EXPECTF--
 *** Testing unlink() : variation ***
 -- removing unlinkVar8.tmp/file.tmp --
@@ -110,4 +109,3 @@ Warning: unlink(%s/unlinkVar8.tmp/file.tmp/): No such file or directory in %s on
 file removed
 -- removing %s//unlinkVar8.tmp//file.tmp --
 file removed
-===DONE===

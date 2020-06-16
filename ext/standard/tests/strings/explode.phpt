@@ -14,17 +14,17 @@ echo "\n";
 
 try {
     var_dump(explode("", ""));
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . "\n";
 }
 try {
     var_dump(explode("", NULL));
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . "\n";
 }
 try {
     var_dump(explode(NULL, ""));
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . "\n";
 }
 
@@ -33,7 +33,7 @@ var_dump(explode("a", "a"));
 var_dump(explode("a", NULL));
 try {
     var_dump(explode(NULL, "a"));
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . "\n";
 }
 var_dump(explode("abc", "acb"));
@@ -60,9 +60,9 @@ array (
   4 => 'd',
 )
 d6bee42a771449205344c0938ad4f035
-Empty delimiter
-Empty delimiter
-Empty delimiter
+explode(): Argument #1 ($separator) cannot be empty
+explode(): Argument #1 ($separator) cannot be empty
+explode(): Argument #1 ($separator) cannot be empty
 array(1) {
   [0]=>
   string(0) ""
@@ -77,7 +77,7 @@ array(1) {
   [0]=>
   string(0) ""
 }
-Empty delimiter
+explode(): Argument #1 ($separator) cannot be empty
 array(1) {
   [0]=>
   string(3) "acb"

@@ -27,21 +27,19 @@ var_dump(scandir($directory));
 echo "\n-- Pass scandir() a relative path that does not exist --\n";
 var_dump(scandir('/idonotexist'));
 ?>
-===DONE===
 --EXPECTF--
 *** Testing scandir() : error conditions ***
 
 -- Pass scandir() an absolute path that does not exist --
 
-Warning: scandir(%s/idonotexist): failed to open dir: %s in %s on line %d
+Warning: scandir(%s/idonotexist): Failed to open directory: %s in %s on line %d
 
 Warning: scandir(): (errno %d): %s in %s on line %d
 bool(false)
 
 -- Pass scandir() a relative path that does not exist --
 
-Warning: scandir(/idonotexist): failed to open dir: %s in %s on line %d
+Warning: scandir(/idonotexist): Failed to open directory: %s in %s on line %d
 
 Warning: scandir(): (errno %d): %s in %s on line %d
 bool(false)
-===DONE===

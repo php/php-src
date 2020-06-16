@@ -17,7 +17,5 @@ $sxe = simplexml_load_string($xml);
 var_dump((string)$sxe);
 
 ?>
-===DONE===
 --EXPECT--
 string(6) "barbar"
-===DONE===

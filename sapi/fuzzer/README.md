@@ -4,12 +4,13 @@ Fuzzing SAPI for PHP
 The following `./configure` options can be used to enable the fuzzing SAPI, as well as all availablefuzzers. If you don't build the exif/json/mbstring extensions, fuzzers for these extensions will not be built.
 
 ```sh
+CC=clang CXX=clang++ \
 ./configure \
+    --disable-all \
     --enable-fuzzer \
     --with-pic \
     --enable-debug-assertions \
     --enable-exif \
-    --enable-json \
     --enable-mbstring
 ```
 

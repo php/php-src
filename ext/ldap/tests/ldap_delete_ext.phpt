@@ -15,26 +15,25 @@ require "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
 ldap_add($link, "dc=my-domain,$base", array(
-	"objectClass"	=> array(
-		"top",
-		"dcObject",
-		"organization"),
-	"dc"			=> "my-domain",
-	"o"				=> "my-domain",
+    "objectClass"	=> array(
+        "top",
+        "dcObject",
+        "organization"),
+    "dc"			=> "my-domain",
+    "o"				=> "my-domain",
 ));
 
 var_dump(
-	$result = ldap_delete_ext($link, "dc=my-domain,$base",
-		[['oid' => LDAP_CONTROL_PRE_READ, 'iscritical' => TRUE, 'value' => ['attrs' => ['dc', 'o']]]]
-	),
-	ldap_parse_result($link, $result, $errcode, $matcheddn, $errmsg, $referrals, $ctrls),
-	$errcode,
-	$errmsg,
-	$ctrls[LDAP_CONTROL_PRE_READ],
-	@ldap_search($link, "dc=my-domain,$base", "(o=my-domain)")
+    $result = ldap_delete_ext($link, "dc=my-domain,$base",
+        [['oid' => LDAP_CONTROL_PRE_READ, 'iscritical' => TRUE, 'value' => ['attrs' => ['dc', 'o']]]]
+    ),
+    ldap_parse_result($link, $result, $errcode, $matcheddn, $errmsg, $referrals, $ctrls),
+    $errcode,
+    $errmsg,
+    $ctrls[LDAP_CONTROL_PRE_READ],
+    @ldap_search($link, "dc=my-domain,$base", "(o=my-domain)")
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 require "connect.inc";
@@ -68,4 +67,3 @@ array(2) {
   }
 }
 bool(false)
-===DONE===

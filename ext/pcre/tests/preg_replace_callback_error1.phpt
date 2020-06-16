@@ -26,7 +26,6 @@ foreach($regex_array as $regex_value) {
     var_dump(preg_replace_callback($regex_value, 'integer_word', $subject));
 }
 ?>
-===Done===
 --EXPECTF--
 *** Testing preg_replace_callback() : error conditions ***
 
@@ -55,4 +54,3 @@ string(9) "number 1."
 
 Arg value is /[0-9]/
 string(11) "number one."
-===Done===

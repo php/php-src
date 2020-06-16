@@ -25,11 +25,11 @@ var_dump($phar->getStub() == $stub);
 $newstub = '<?php echo "second stub\n"; _x_HALT_COMPILER(); ?>';
 try
 {
-	$phar->setStub($newstub);
+    $phar->setStub($newstub);
 }
 catch(exception $e)
 {
-	echo 'Exception: ' . $e->getMessage() . "\n";
+    echo 'Exception: ' . $e->getMessage() . "\n";
 }
 var_dump($phar->getStub());
 var_dump($phar->getStub() == $stub);
@@ -38,7 +38,6 @@ var_dump($phar->getStub());
 var_dump($phar->getStub() == $stub);
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
@@ -53,4 +52,3 @@ string(48) "<?php echo "first stub\n"; __HALT_COMPILER(); ?>"
 bool(true)
 string(48) "<?php echo "first stub\n"; __HALT_COMPILER(); ?>"
 bool(true)
-===DONE===

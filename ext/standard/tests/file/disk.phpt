@@ -8,6 +8,8 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip not for Windows');
 }
 ?>
+--CONFLICTS--
+disk_total_space
 --FILE--
 <?php
 

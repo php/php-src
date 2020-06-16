@@ -83,9 +83,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
-#ifdef HAVE_INTTYPES_H
 #include <inttypes.h>
-#endif
 
 #include <locale.h>
 #ifdef ZTS
@@ -311,25 +309,6 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
 				case 'L':
 					fmt++;
 					modifier = LM_LONG_DOUBLE;
-					break;
-				case 'I':
-					fmt++;
-#if SIZEOF_LONG_LONG
-					if (*fmt == '6' && *(fmt+1) == '4') {
-						fmt += 2;
-						modifier = LM_LONG_LONG;
-					} else
-#endif
-						if (*fmt == '3' && *(fmt+1) == '2') {
-							fmt += 2;
-							modifier = LM_LONG;
-						} else {
-#ifdef _WIN64
-							modifier = LM_LONG_LONG;
-#else
-							modifier = LM_LONG;
-#endif
-						}
 					break;
 				case 'l':
 					fmt++;
@@ -587,7 +566,6 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
 
 
 				case 's':
-				case 'v':
 					s = va_arg(ap, char *);
 					if (s != NULL) {
 						if (!adjust_precision) {

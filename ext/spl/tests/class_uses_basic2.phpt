@@ -20,7 +20,7 @@ class barUser { use bar; }
 class foobarUser { use foo, bar; }
 
 /** There is no semantics for traits in the inheritance chain.
-    Traits are flattend into a class, and that semantics is nothing
+    Traits are flattened into a class, and that semantics is nothing
     like a type, or interface, and thus, not propergated. */
 class fooViaBarUser extends barUser { use foo; }
 
@@ -39,7 +39,6 @@ function s_var_dump($arr) {
    var_dump($arr);
 }
 ?>
-===DONE===
 --EXPECT--
 *** Testing class_uses() : basic ***
 array(2) {
@@ -66,4 +65,3 @@ array(0) {
 }
 array(0) {
 }
-===DONE===

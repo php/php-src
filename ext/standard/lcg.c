@@ -114,9 +114,8 @@ PHP_MINIT_FUNCTION(lcg) /* {{{ */
    Returns a value from the combined linear congruential generator */
 PHP_FUNCTION(lcg_value)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	RETURN_DOUBLE(php_combined_lcg());
 }
 /* }}} */

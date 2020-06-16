@@ -1,5 +1,5 @@
 --TEST--
-ldap_option_reqcert_error() - A test to check if ldap cant connect to a LDAP server with a invalid certificate with certificate checking enabled
+ldap_option_reqcert_error() - A test to check if ldap can't connect to a LDAP server with a invalid certificate with certificate checking enabled
 --CREDITS--
 Edwin Hoksberg <edwin@edwinhoksberg.nl>
 --SKIPIF--
@@ -18,7 +18,5 @@ ldap_set_option($link, LDAP_OPT_PROTOCOL_VERSION, $protocol_version);
 
 var_dump(@ldap_bind($link, $user, $passwd));
 ?>
-===DONE===
 --EXPECT--
 bool(true)
-===DONE===

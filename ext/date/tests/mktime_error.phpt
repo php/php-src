@@ -35,8 +35,7 @@ try {
 }
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing mktime() : error conditions ***
 
 -- Testing mktime() function with Zero arguments --
@@ -44,4 +43,3 @@ mktime() expects at least 1 parameter, 0 given
 
 -- Testing mktime() function with more than expected no. of arguments --
 mktime() expects at most 6 parameters, 7 given
-===DONE===

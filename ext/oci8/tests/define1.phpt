@@ -27,12 +27,11 @@ $string = '';
 var_dump(oci_define_by_name($stmt, "STRING", $string, 20));
 var_dump(oci_define_by_name($stmt, "STRING", $string, 20));
 var_dump(oci_define_by_name($stmt, "", $string, 20));
-var_dump(oci_define_by_name($stmt, ""));
 
 oci_execute($stmt);
 
 while (oci_fetch($stmt)) {
-	var_dump($string);
+    var_dump($string);
 }
 
 // Cleanup
@@ -52,8 +51,5 @@ bool(false)
 
 Warning: oci_define_by_name(): Column name cannot be empty in %s on line %d
 bool(false)
-
-Warning: oci_define_by_name() expects at least 3 parameters, 2 given in %s on line %d
-NULL
 string(4) "some"
 Done

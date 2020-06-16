@@ -14,8 +14,8 @@ Test parse_url() function: Parse a load of URLs without specifying PHP_URL_PORT 
 include_once(__DIR__ . '/urls.inc');
 
 foreach ($urls as $url) {
-	echo "--> $url   : ";
-	var_dump(parse_url($url, PHP_URL_PORT));
+    echo "--> $url   : ";
+    var_dump(parse_url($url, PHP_URL_PORT));
 }
 
 echo "Done";

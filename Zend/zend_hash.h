@@ -264,9 +264,11 @@ ZEND_API void  ZEND_FASTCALL zend_hash_merge_ex(HashTable *target, HashTable *so
 ZEND_API void  zend_hash_bucket_swap(Bucket *p, Bucket *q);
 ZEND_API void  zend_hash_bucket_renum_swap(Bucket *p, Bucket *q);
 ZEND_API void  zend_hash_bucket_packed_swap(Bucket *p, Bucket *q);
+
+typedef int (*bucket_compare_func_t)(Bucket *a, Bucket *b);
 ZEND_API int   zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t compar, zend_bool ordered);
-ZEND_API void  ZEND_FASTCALL zend_hash_sort_ex(HashTable *ht, sort_func_t sort_func, compare_func_t compare_func, zend_bool renumber);
-ZEND_API zval* ZEND_FASTCALL zend_hash_minmax(const HashTable *ht, compare_func_t compar, uint32_t flag);
+ZEND_API void  ZEND_FASTCALL zend_hash_sort_ex(HashTable *ht, sort_func_t sort_func, bucket_compare_func_t compare_func, zend_bool renumber);
+ZEND_API zval* ZEND_FASTCALL zend_hash_minmax(const HashTable *ht, bucket_compare_func_t compar, uint32_t flag);
 
 #define zend_hash_sort(ht, compare_func, renumber) \
 	zend_hash_sort_ex(ht, zend_sort, compare_func, renumber)
@@ -322,6 +324,26 @@ static zend_always_inline void zend_hash_iterators_update(HashTable *ht, HashPos
 	}
 }
 
+/* For regular arrays (non-persistent, storing zvals). */
+static zend_always_inline void zend_array_release(zend_array *array)
+{
+	if (!(GC_FLAGS(array) & IS_ARRAY_IMMUTABLE)) {
+		if (GC_DELREF(array) == 0) {
+			zend_array_destroy(array);
+		}
+	}
+}
+
+/* For general hashes (possibly persistent, storing any kind of value). */
+static zend_always_inline void zend_hash_release(zend_array *array)
+{
+	if (!(GC_FLAGS(array) & IS_ARRAY_IMMUTABLE)) {
+		if (GC_DELREF(array) == 0) {
+			zend_hash_destroy(array);
+			pefree(array, GC_FLAGS(array) & IS_ARRAY_PERSISTENT);
+		}
+	}
+}
 
 END_EXTERN_C()
 
@@ -845,6 +867,14 @@ static zend_always_inline void *zend_hash_str_find_ptr(const HashTable *ht, cons
 	}
 }
 
+/* Will lowercase the str; use only if you don't need the lowercased string for
+ * anything else. If you have a lowered string, use zend_hash_str_find_ptr. */
+ZEND_API void *zend_hash_str_find_ptr_lc(const HashTable *ht, const char *str, size_t len);
+
+/* Will lowercase the str; use only if you don't need the lowercased string for
+ * anything else. If you have a lowered string, use zend_hash_find_ptr. */
+ZEND_API void *zend_hash_find_ptr_lc(const HashTable *ht, zend_string *key);
+
 static zend_always_inline void *zend_hash_index_find_ptr(const HashTable *ht, zend_ulong h)
 {
 	zval *zv;
@@ -1110,11 +1140,15 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 		ZEND_HASH_FILL_NEXT(); \
 	} while (0)
 
-#define ZEND_HASH_FILL_END() \
+#define ZEND_HASH_FILL_FINISH() do { \
 		__fill_ht->nNumUsed = __fill_idx; \
 		__fill_ht->nNumOfElements = __fill_idx; \
 		__fill_ht->nNextFreeElement = __fill_idx; \
 		__fill_ht->nInternalPointer = 0; \
+	} while (0)
+
+#define ZEND_HASH_FILL_END() \
+		ZEND_HASH_FILL_FINISH(); \
 	} while (0)
 
 static zend_always_inline zval *_zend_hash_append_ex(HashTable *ht, zend_string *key, zval *zv, int interned)

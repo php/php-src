@@ -35,7 +35,7 @@ for($i = -1; $i < 10; $i++) {
     $output = gzencode($data, $i);
 
     // Clear OS byte before encode
-	$output[9] = "\x00";
+    $output[9] = "\x00";
 
     var_dump(md5($output));
 }
@@ -46,7 +46,7 @@ for($i = -1; $i < 10; $i++) {
     $output = gzencode($smallstring, $i);
 
     // Clear OS byte before encode
-	$output[9] = "\x00";
+    $output[9] = "\x00";
 
     var_dump(md5($output));
 }
@@ -59,7 +59,6 @@ echo "\n-- Testing gzencode with mode specified --\n";
 var_dump(bin2hex(gzencode($smallstring, -1, FORCE_GZIP)));
 
 ?>
-===Done===
 --EXPECTF--
 *** Testing gzencode() : basic functionality ***
 -- Compression level -1 --
@@ -112,4 +111,3 @@ string(94) "1f8b08000000000000%c%c735428ce4dccc951282e29cacc4b5728c95748cecf2d28
 
 -- Testing gzencode with mode specified --
 string(94) "1f8b08000000000000%c%c735428ce4dccc951282e29cacc4b5728c95748cecf2d284a2d2ee60200edc4e40b1b000000"
-===Done===

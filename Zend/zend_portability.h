@@ -289,7 +289,7 @@ char *alloca();
 	(_default)
 #endif
 
-#if ZEND_DEBUG
+#if ZEND_DEBUG || defined(ZEND_WIN32_NEVER_INLINE)
 # define zend_always_inline inline
 # define zend_never_inline
 #else
@@ -318,7 +318,7 @@ char *alloca();
 # endif
 #endif /* ZEND_DEBUG */
 
-#if PHP_HAVE_BUILTIN_EXPECT
+#ifdef PHP_HAVE_BUILTIN_EXPECT
 # define EXPECTED(condition)   __builtin_expect(!!(condition), 1)
 # define UNEXPECTED(condition) __builtin_expect(!!(condition), 0)
 #else
@@ -351,7 +351,7 @@ char *alloca();
 
 #endif
 
-#if (HAVE_ALLOCA || (defined (__GNUC__) && __GNUC__ >= 2)) && !(defined(ZTS) && defined(HPUX)) && !defined(DARWIN)
+#if (defined(HAVE_ALLOCA) || (defined (__GNUC__) && __GNUC__ >= 2)) && !(defined(ZTS) && defined(HPUX)) && !defined(DARWIN)
 # define ZEND_ALLOCA_MAX_SIZE (32 * 1024)
 # define ALLOCA_FLAG(name) \
 	zend_bool name;
@@ -438,49 +438,23 @@ char *alloca();
 #define ZEND_BIT_TEST(bits, bit) \
 	(((bits)[(bit) / (sizeof((bits)[0])*8)] >> ((bit) & (sizeof((bits)[0])*8-1))) & 1)
 
-/* We always define a function, even if there's a macro or expression we could
- * alias, so that using it in contexts where we can't make function calls
- * won't fail to compile on some machines and not others.
- */
-static zend_always_inline double _zend_get_inf(void) /* {{{ */
-{
-#ifdef INFINITY
-	return INFINITY;
-#elif HAVE_HUGE_VAL_INF
-	return HUGE_VAL;
-#elif defined(__i386__) || defined(_X86_) || defined(ALPHA) || defined(_ALPHA) || defined(__alpha)
-# define _zend_DOUBLE_INFINITY_HIGH       0x7ff00000
-	double val = 0.0;
-	((uint32_t*)&val)[1] = _zend_DOUBLE_INFINITY_HIGH;
-	((uint32_t*)&val)[0] = 0;
-	return val;
-#elif HAVE_ATOF_ACCEPTS_INF
-	return atof("INF");
-#else
-	return 1.0/0.0;
-#endif
-} /* }}} */
-#define ZEND_INFINITY (_zend_get_inf())
+#define ZEND_INFINITY INFINITY
 
-static zend_always_inline double _zend_get_nan(void) /* {{{ */
-{
-#ifdef NAN
-	return NAN;
-#elif HAVE_HUGE_VAL_NAN
-	return HUGE_VAL + -HUGE_VAL;
-#elif defined(__i386__) || defined(_X86_) || defined(ALPHA) || defined(_ALPHA) || defined(__alpha)
-# define _zend_DOUBLE_QUIET_NAN_HIGH      0xfff80000
-	double val = 0.0;
-	((uint32_t*)&val)[1] = _zend_DOUBLE_QUIET_NAN_HIGH;
-	((uint32_t*)&val)[0] = 0;
-	return val;
-#elif HAVE_ATOF_ACCEPTS_NAN
-	return atof("NAN");
+#define ZEND_NAN NAN
+
+#if defined(__cplusplus) && __cplusplus >= 201103L
+extern "C++" {
+# include <cmath>
+}
+# define zend_isnan std::isnan
+# define zend_isinf std::isinf
+# define zend_finite std::isfinite
 #else
-	return 0.0/0.0;
+# include <math.h>
+# define zend_isnan(a) isnan(a)
+# define zend_isinf(a) isinf(a)
+# define zend_finite(a) isfinite(a)
 #endif
-} /* }}} */
-#define ZEND_NAN (_zend_get_nan())
 
 #define ZEND_STRL(str)		(str), (sizeof(str)-1)
 #define ZEND_STRS(str)		(str), (sizeof(str))
@@ -507,46 +481,37 @@ static zend_always_inline double _zend_get_nan(void) /* {{{ */
 #define ZEND_VALID_SOCKET(sock) ((sock) >= 0)
 #endif
 
-/* va_copy() is __va_copy() in old gcc versions.
- * According to the autoconf manual, using
- * memcpy(&dst, &src, sizeof(va_list))
- * gives maximum portability. */
-#ifndef va_copy
-# ifdef __va_copy
-#  define va_copy(dest, src) __va_copy((dest), (src))
-# else
-#  define va_copy(dest, src) memcpy(&(dest), &(src), sizeof(va_list))
-# endif
-#endif
-
 /* Intrinsics macros start. */
 
 /* Memory sanitizer is incompatible with ifunc resolvers. Even if the resolver
  * is marked as no_sanitize("memory") it will still be instrumented and crash. */
-#if __has_feature(memory_sanitizer)
+#if __has_feature(memory_sanitizer) || __has_feature(thread_sanitizer)
 # undef HAVE_FUNC_ATTRIBUTE_IFUNC
 #endif
 
-#if defined(HAVE_FUNC_ATTRIBUTE_IFUNC) && defined(HAVE_FUNC_ATTRIBUTE_TARGET)
+/* Only use ifunc resolvers if we have __builtin_cpu_supports() and __builtin_cpu_init(),
+ * otherwise the use of zend_cpu_supports() may not be safe inside ifunc resolvers. */
+#if defined(HAVE_FUNC_ATTRIBUTE_IFUNC) && defined(HAVE_FUNC_ATTRIBUTE_TARGET) && \
+	defined(PHP_HAVE_BUILTIN_CPU_SUPPORTS) && defined(PHP_HAVE_BUILTIN_CPU_INIT)
 # define ZEND_INTRIN_HAVE_IFUNC_TARGET 1
 #endif
 
 #if (defined(__i386__) || defined(__x86_64__))
-# if PHP_HAVE_SSSE3_INSTRUCTIONS && defined(HAVE_TMMINTRIN_H)
-# define PHP_HAVE_SSSE3
+# if defined(HAVE_TMMINTRIN_H)
+#  define PHP_HAVE_SSSE3
 # endif
 
-# if PHP_HAVE_SSE4_2_INSTRUCTIONS && defined(HAVE_NMMINTRIN_H)
-# define PHP_HAVE_SSE4_2
+# if defined(HAVE_NMMINTRIN_H)
+#  define PHP_HAVE_SSE4_2
 # endif
 
 /*
  * AVX2 support was added in gcc 4.7, but AVX2 intrinsics don't work in
  * __attribute__((target("avx2"))) functions until gcc 4.9.
  */
-# if PHP_HAVE_AVX2_INSTRUCTIONS && defined(HAVE_IMMINTRIN_H) && \
+# if defined(HAVE_IMMINTRIN_H) && \
   (defined(__llvm__) || defined(__clang__) || (defined(__GNUC__) && ZEND_GCC_VERSION >= 4009))
-# define PHP_HAVE_AVX2
+#  define PHP_HAVE_AVX2
 # endif
 #endif
 
@@ -559,14 +524,14 @@ static zend_always_inline double _zend_get_nan(void) /* {{{ */
 #endif
 
 /* Do not use for conditional declaration of API functions! */
-#if ZEND_INTRIN_SSSE3_RESOLVER && ZEND_INTRIN_HAVE_IFUNC_TARGET
+#if defined(ZEND_INTRIN_SSSE3_RESOLVER) && defined(ZEND_INTRIN_HAVE_IFUNC_TARGET)
 # define ZEND_INTRIN_SSSE3_FUNC_PROTO 1
-#elif ZEND_INTRIN_SSSE3_RESOLVER
+#elif defined(ZEND_INTRIN_SSSE3_RESOLVER)
 # define ZEND_INTRIN_SSSE3_FUNC_PTR 1
 #endif
 
-#if ZEND_INTRIN_SSSE3_RESOLVER
-# if defined(HAVE_FUNC_ATTRIBUTE_TARGET)
+#ifdef ZEND_INTRIN_SSSE3_RESOLVER
+# ifdef HAVE_FUNC_ATTRIBUTE_TARGET
 #  define ZEND_INTRIN_SSSE3_FUNC_DECL(func) ZEND_API func __attribute__((target("ssse3")))
 # else
 #  define ZEND_INTRIN_SSSE3_FUNC_DECL(func) func
@@ -584,14 +549,14 @@ static zend_always_inline double _zend_get_nan(void) /* {{{ */
 #endif
 
 /* Do not use for conditional declaration of API functions! */
-#if ZEND_INTRIN_SSE4_2_RESOLVER && ZEND_INTRIN_HAVE_IFUNC_TARGET
+#if defined(ZEND_INTRIN_SSE4_2_RESOLVER) && defined(ZEND_INTRIN_HAVE_IFUNC_TARGET)
 # define ZEND_INTRIN_SSE4_2_FUNC_PROTO 1
-#elif ZEND_INTRIN_SSE4_2_RESOLVER
+#elif defined(ZEND_INTRIN_SSE4_2_RESOLVER)
 # define ZEND_INTRIN_SSE4_2_FUNC_PTR 1
 #endif
 
-#if ZEND_INTRIN_SSE4_2_RESOLVER
-# if defined(HAVE_FUNC_ATTRIBUTE_TARGET)
+#ifdef ZEND_INTRIN_SSE4_2_RESOLVER
+# ifdef HAVE_FUNC_ATTRIBUTE_TARGET
 #  define ZEND_INTRIN_SSE4_2_FUNC_DECL(func) ZEND_API func __attribute__((target("sse4.2")))
 # else
 #  define ZEND_INTRIN_SSE4_2_FUNC_DECL(func) func
@@ -607,14 +572,14 @@ static zend_always_inline double _zend_get_nan(void) /* {{{ */
 #endif
 
 /* Do not use for conditional declaration of API functions! */
-#if ZEND_INTRIN_AVX2_RESOLVER && ZEND_INTRIN_HAVE_IFUNC_TARGET
+#if defined(ZEND_INTRIN_AVX2_RESOLVER) && defined(ZEND_INTRIN_HAVE_IFUNC_TARGET)
 # define ZEND_INTRIN_AVX2_FUNC_PROTO 1
-#elif ZEND_INTRIN_AVX2_RESOLVER
+#elif defined(ZEND_INTRIN_AVX2_RESOLVER)
 # define ZEND_INTRIN_AVX2_FUNC_PTR 1
 #endif
 
-#if ZEND_INTRIN_AVX2_RESOLVER
-# if defined(HAVE_FUNC_ATTRIBUTE_TARGET)
+#ifdef ZEND_INTRIN_AVX2_RESOLVER
+# ifdef HAVE_FUNC_ATTRIBUTE_TARGET
 #  define ZEND_INTRIN_AVX2_FUNC_DECL(func) ZEND_API func __attribute__((target("avx2")))
 # else
 #  define ZEND_INTRIN_AVX2_FUNC_DECL(func) func
@@ -627,7 +592,7 @@ static zend_always_inline double _zend_get_nan(void) /* {{{ */
 
 #ifdef ZEND_WIN32
 # define ZEND_SET_ALIGNED(alignment, decl) __declspec(align(alignment)) decl
-#elif HAVE_ATTRIBUTE_ALIGNED
+#elif defined(HAVE_ATTRIBUTE_ALIGNED)
 # define ZEND_SET_ALIGNED(alignment, decl) decl __attribute__ ((__aligned__ (alignment)))
 #else
 # define ZEND_SET_ALIGNED(alignment, decl) decl
@@ -646,6 +611,21 @@ static zend_always_inline double _zend_get_nan(void) /* {{{ */
 /* On CPU with few registers, it's cheaper to reload value then use spill slot */
 #if defined(__i386__) || (defined(_WIN32) && !defined(_WIN64))
 # define ZEND_PREFER_RELOAD
+#endif
+
+#if defined(ZEND_WIN32) && defined(_DEBUG)
+# define ZEND_IGNORE_LEAKS_BEGIN() _CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) & ~_CRTDBG_ALLOC_MEM_DF)
+# define ZEND_IGNORE_LEAKS_END() _CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_ALLOC_MEM_DF)
+#else
+# define ZEND_IGNORE_LEAKS_BEGIN()
+# define ZEND_IGNORE_LEAKS_END()
+#endif
+
+/* MSVC yields C4090 when a (const T **) is passed to a (void *); ZEND_VOIDP works around that */
+#ifdef _MSC_VER
+# define ZEND_VOIDP(ptr) ((void *) ptr)
+#else
+# define ZEND_VOIDP(ptr) (ptr)
 #endif
 
 #endif /* ZEND_PORTABILITY_H */

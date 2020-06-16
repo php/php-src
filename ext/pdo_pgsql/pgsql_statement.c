@@ -27,7 +27,7 @@
 #include "pdo/php_pdo_driver.h"
 #include "php_pdo_pgsql.h"
 #include "php_pdo_pgsql_int.h"
-#if HAVE_NETINET_IN_H
+#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 

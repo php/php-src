@@ -4,16 +4,16 @@ Using traits to implement interface
 <?php
 
 trait foo {
-	public function abc() {
-	}
+    public function abc() {
+    }
 }
 
 interface baz {
-	public function abc();
+    public function abc();
 }
 
 class bar implements baz {
-	use foo;
+    use foo;
 
 }
 

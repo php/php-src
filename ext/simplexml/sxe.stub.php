@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 class SimpleXMLIterator
 {
     /** @return void */
@@ -8,7 +10,7 @@ class SimpleXMLIterator
     /** @return bool */
     public function valid() {}
 
-    /** @return ?SimpleXMLElement */
+    /** @return SimpleXMLElement|null */
     public function current() {}
 
     /** @return string|false */
@@ -20,6 +22,6 @@ class SimpleXMLIterator
     /** @return bool */
     public function hasChildren() {}
 
-    /** @return ?SimpleXMLIterator */
+    /** @return SimpleXMLIterator|null */
     public function getChildren() {}
 }

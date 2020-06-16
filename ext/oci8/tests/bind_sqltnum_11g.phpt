@@ -16,7 +16,7 @@ require(__DIR__.'/connect.inc');
 // Initialization
 
 $stmtarray = array(
-	"drop table bind_sqltnum_tab",
+    "drop table bind_sqltnum_tab",
 
     "create table bind_sqltnum_tab (
         id                number,
@@ -165,14 +165,12 @@ check_col($c, 'number_t92', 50);
 // Clean up
 
 $stmtarray = array(
-	"drop table bind_sqltnum_tab"
+    "drop table bind_sqltnum_tab"
 );
 
 oci8_test_sql_execute($c, $stmtarray);
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 Test 1 - baseline test
 array(2) {
@@ -276,4 +274,3 @@ array(1) {
   array(0) {
   }
 }
-===DONE===

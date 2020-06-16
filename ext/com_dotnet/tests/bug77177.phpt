@@ -31,7 +31,6 @@ foreach ($strings as $string) {
     var_dump(unserialize($string));
 }
 ?>
-===DONE===
 --EXPECTF--
 Exception: Serialization of 'com' is not allowed
 Exception: Serialization of 'dotnet' is not allowed
@@ -54,4 +53,3 @@ Warning: Erroneous data format for unserializing 'variant' in %s on line %d
 
 Notice: unserialize(): Error at offset 17 of 18 bytes in %s on line %d
 bool(false)
-===DONE===

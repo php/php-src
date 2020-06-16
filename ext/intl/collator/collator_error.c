@@ -19,7 +19,6 @@
 
 #include "php_intl.h"
 #include "collator_class.h"
-#include "collator_error.h"
 
 /* {{{ proto int Collator::getErrorCode( Collator $coll )
  * Get collator's last error code. }}} */
@@ -34,7 +33,7 @@ PHP_FUNCTION( collator_get_error_code )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, Collator_ce_ptr ) == FAILURE )
 	{
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object (without resetting its last error code). */
@@ -62,7 +61,7 @@ PHP_FUNCTION( collator_get_error_message )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, Collator_ce_ptr ) == FAILURE )
 	{
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object (without resetting its last error code). */

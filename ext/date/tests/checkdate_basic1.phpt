@@ -32,7 +32,6 @@ var_dump( checkdate(7, 2, 32768) ); // >max year
 var_dump( checkdate(7, 2, 0) ); // <min year
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing checkdate() : basic functionality ***
 -- The following are all valid dates --
@@ -51,4 +50,3 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
-===DONE===

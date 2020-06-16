@@ -69,7 +69,8 @@ const struct mbfl_convert_vtbl vtbl_sjis2004_wchar = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_jis2004_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_sjis2004 = {
@@ -78,7 +79,8 @@ const struct mbfl_convert_vtbl vtbl_wchar_sjis2004 = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_wchar_jis2004,
-	mbfl_filt_conv_jis2004_flush
+	mbfl_filt_conv_jis2004_flush,
+	NULL,
 };
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
@@ -506,7 +508,7 @@ retry:
 
 	/* check for 2nd char of combining characters */
 	if ((filter->status & 0xf) == 1 &&
-		filter->cache >= 0 && filter->cache <= jisx0213_u2_tbl_len) {
+		filter->cache >= 0 && filter->cache < jisx0213_u2_tbl_len) {
 		k = filter->cache;
 		filter->status &= ~0xf;
 		filter->cache = 0;

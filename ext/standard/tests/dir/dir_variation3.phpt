@@ -58,7 +58,7 @@ for($count = 0; $count < count($permission_values); $count++) {
   // create the dir now
   @mkdir($dir_path);
 
-  // change the dir permisson to test dir on it
+  // change the dir permission to test dir on it
   var_dump( chmod($dir_path, $permission_values[$count]) );
 
   // try to get dir handle

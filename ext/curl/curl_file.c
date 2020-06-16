@@ -22,9 +22,8 @@
 #include "Zend/zend_exceptions.h"
 #include "Zend/zend_interfaces.h"
 #include "php_curl.h"
-#include "curl_arginfo.h"
 #include "curl_file_arginfo.h"
-#if HAVE_CURL
+#ifdef HAVE_CURL
 
 PHP_CURL_API zend_class_entry *curl_CURLFile_class;
 
@@ -73,9 +72,7 @@ static void curlfile_get_property(char *name, size_t name_len, INTERNAL_FUNCTION
 {
 	zval *res, rv;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 	res = zend_read_property(curl_CURLFile_class, ZEND_THIS, name, name_len, 1, &rv);
 	ZVAL_COPY_DEREF(return_value, res);
 }
@@ -131,20 +128,10 @@ ZEND_METHOD(CURLFile, setPostFilename)
 }
 /* }}} */
 
-static const zend_function_entry curlfile_funcs[] = {
-	PHP_ME(CURLFile,			__construct,        arginfo_class_CURLFile___construct, ZEND_ACC_PUBLIC)
-	PHP_ME(CURLFile,			getFilename,        arginfo_class_CURLFile_getFilename, ZEND_ACC_PUBLIC)
-	PHP_ME(CURLFile,			getMimeType,        arginfo_class_CURLFile_getMimeType, ZEND_ACC_PUBLIC)
-	PHP_ME(CURLFile,			setMimeType,        arginfo_class_CURLFile_setMimeType, ZEND_ACC_PUBLIC)
-	PHP_ME(CURLFile,			getPostFilename,    arginfo_class_CURLFile_getPostFilename, ZEND_ACC_PUBLIC)
-	PHP_ME(CURLFile,			setPostFilename,    arginfo_class_CURLFile_setPostFilename, ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};
-
 void curlfile_register_class(void)
 {
 	zend_class_entry ce;
-	INIT_CLASS_ENTRY( ce, "CURLFile", curlfile_funcs );
+	INIT_CLASS_ENTRY( ce, "CURLFile", class_CURLFile_methods );
 	curl_CURLFile_class = zend_register_internal_class(&ce);
 	curl_CURLFile_class->serialize = zend_class_serialize_deny;
 	curl_CURLFile_class->unserialize = zend_class_unserialize_deny;

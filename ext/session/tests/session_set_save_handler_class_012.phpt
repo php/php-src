@@ -20,19 +20,19 @@ ob_start();
 echo "*** Testing session_set_save_handler() : incorrect arguments for existing handler open ***\n";
 
 class MySession extends SessionHandler {
-	public $i = 0;
-	public function open($path, $name) {
-		++$this->i;
-		echo 'Open ', session_id(), "\n";
-		// This test was written for broken return value handling
-		// Mimmick what was actually being tested by returning true here
-		return (null === parent::open());
-	}
-	public function read($key) {
-		++$this->i;
-		echo 'Read ', session_id(), "\n";
-		return parent::read($key);
-	}
+    public $i = 0;
+    public function open($path, $name) {
+        ++$this->i;
+        echo 'Open ', session_id(), "\n";
+        // This test was written for broken return value handling
+        // Mimmick what was actually being tested by returning true here
+        return (null === parent::open());
+    }
+    public function read($key) {
+        ++$this->i;
+        echo 'Read ', session_id(), "\n";
+        return parent::read($key);
+    }
 }
 
 $oldHandler = ini_get('session.save_handler');
@@ -52,7 +52,7 @@ Open
 Warning: session_start(): Failed to initialize storage module: user (path: ) in %s on line %d
 SessionHandler::open() expects exactly 2 parameters, 0 given
 
-Warning: Undefined variable: _SESSION in %s on line %d
+Warning: Undefined variable $_SESSION in %s on line %d
 string(0) ""
 string(5) "files"
 string(4) "user"

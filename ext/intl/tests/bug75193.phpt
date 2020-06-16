@@ -8,7 +8,5 @@ $a = new \Collator('en_US');
 $b = [new stdclass, new stdclass];
 var_dump($a->sort($b));
 ?>
-===DONE===
 --EXPECT--
 bool(true)
-===DONE===

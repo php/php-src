@@ -9,7 +9,7 @@ Test in_array() function : usage variations - haystack as resource/multi dimensi
  * Source Code: ext/standard/array.c
 */
 
-/* Test in_array() with haystack as resouce and multidimensional arrays */
+/* Test in_array() with haystack as resource and multidimensional arrays */
 
 /* checking for Resources */
 echo "*** Testing resource type with in_array() ***\n";
@@ -22,7 +22,7 @@ $dir_handle = opendir( __DIR__ );
 //store resources in array for comparison.
 $resources = array($file_handle, $dir_handle);
 
-// search for resouce type in the resource array
+// search for resource type in the resource array
 var_dump( in_array($file_handle, $resources, true) );
 //checking for (int) type resource
 var_dump( in_array((int)$dir_handle, $resources, true) );

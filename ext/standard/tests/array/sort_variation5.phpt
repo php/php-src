@@ -10,7 +10,7 @@ Test sort() function : usage variations - sort strings
 
 /*
  * testing sort() by providing different string arrays for $array argument with following flag values
- *  flag  value as defualt
+ *  flag  value as default
  *  SORT_REGULAR - compare items normally
  *  SORT_STRING  - compare items as strings
 */

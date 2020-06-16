@@ -124,6 +124,7 @@ static inline zend_bool may_have_side_effects(
 		case ZEND_IN_ARRAY:
 		case ZEND_FUNC_NUM_ARGS:
 		case ZEND_FUNC_GET_ARGS:
+		case ZEND_ARRAY_KEY_EXISTS:
 			/* No side effects */
 			return 0;
 		case ZEND_ROPE_END:
@@ -415,7 +416,7 @@ static zend_bool dce_instr(context *ctx, zend_op *opline, zend_ssa_op *ssa_op) {
 
 	if (free_var >= 0) {
 		opline->opcode = ZEND_FREE;
-		opline->op1.var = (uintptr_t) ZEND_CALL_VAR_NUM(NULL, ssa->vars[free_var].var);
+		opline->op1.var = EX_NUM_TO_VAR(ssa->vars[free_var].var);
 		opline->op1_type = free_var_type;
 
 		ssa_op->op1_use = free_var;
@@ -531,7 +532,7 @@ int dce_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, zend_bool reor
 					add_operands_to_worklists(&ctx, &op_array->opcodes[op_data], &ssa->ops[op_data], ssa, 0);
 				}
 			} else if (may_have_side_effects(op_array, ssa, &op_array->opcodes[i], &ssa->ops[i], ctx.reorder_dtor_effects)
-					|| zend_may_throw(&op_array->opcodes[i], op_array, ssa)
+					|| zend_may_throw(&op_array->opcodes[i], &ssa->ops[i], op_array, ssa)
 					|| (has_varargs && may_break_varargs(op_array, ssa, &ssa->ops[i]))) {
 				if (op_array->opcodes[i].opcode == ZEND_NEW
 						&& op_array->opcodes[i+1].opcode == ZEND_DO_FCALL

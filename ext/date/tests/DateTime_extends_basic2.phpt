@@ -10,7 +10,7 @@ echo "*** Testing new DateTime() : with user space __construct magic method ***\
 
 class DateTimeExt extends DateTime
 {
-	public function __construct ($date = null, DateTimeZone  $dtz = null)
+    public function __construct ($date = null, DateTimeZone  $dtz = null)
     {
         if($dtz === null)
         {
@@ -24,8 +24,6 @@ $d = new DateTimeExt("1967-05-01 22:30:41");
 echo $d->format("F j, Y, g:i:s a") . "\n";
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing new DateTime() : with user space __construct magic method ***
 May 1, 1967, 10:30:41 pm
-===DONE===

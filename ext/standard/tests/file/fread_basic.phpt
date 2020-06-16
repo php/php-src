@@ -54,7 +54,7 @@ $file_content_types = array("numeric","text","text_with_new_line","alphanumeric"
        exit();
     }
 
-    /* read file by giving the acutal length, check the length and content by calculating the
+    /* read file by giving the actual length, check the length and content by calculating the
       hash using md5() function
     */
     /* Reading 1024 bytes from file, expecting 1024 bytes */ ;

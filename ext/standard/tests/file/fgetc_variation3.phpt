@@ -56,7 +56,7 @@ bool(true)
 int(0)
 bool(false)
 
-Notice: fgetc(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetc(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -65,7 +65,7 @@ bool(true)
 int(0)
 bool(false)
 
-Notice: fgetc(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetc(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -74,7 +74,7 @@ bool(true)
 int(0)
 bool(false)
 
-Notice: fgetc(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetc(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -83,7 +83,7 @@ bool(true)
 int(0)
 bool(false)
 
-Notice: fgetc(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetc(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -92,7 +92,7 @@ bool(true)
 int(0)
 bool(false)
 
-Notice: fgetc(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetc(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -101,7 +101,7 @@ bool(true)
 int(0)
 bool(false)
 
-Notice: fgetc(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetc(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -110,7 +110,7 @@ bool(true)
 int(0)
 bool(false)
 
-Notice: fgetc(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetc(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -119,7 +119,7 @@ bool(true)
 int(0)
 bool(false)
 
-Notice: fgetc(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetc(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -128,7 +128,7 @@ bool(true)
 int(0)
 bool(false)
 
-Notice: fgetc(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetc(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)

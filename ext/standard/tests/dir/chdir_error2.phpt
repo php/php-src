@@ -17,10 +17,8 @@ $directory = __FILE__ . '/idonotexist';
 
 var_dump(chdir($directory));
 ?>
-===DONE===
 --EXPECTF--
 *** Testing chdir() : error conditions ***
 
 Warning: chdir(): %s (errno %d) in %s on line %d
 bool(false)
-===DONE===

@@ -5,9 +5,9 @@ zend.enable_gc=1
 --FILE--
 <?php
 try {
-	throw new Exception();
+    throw new Exception();
 } catch (Exception $e) {
-	gc_collect_cycles();
+    gc_collect_cycles();
 }
 echo "ok\n";
 --EXPECT--

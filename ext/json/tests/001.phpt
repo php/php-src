@@ -1,7 +1,5 @@
 --TEST--
 json_decode() tests
---SKIPIF--
-<?php if (!extension_loaded("json")) print "skip"; ?>
 --FILE--
 <?php
 
@@ -23,7 +21,6 @@ var_dump(json_decode('{ "": { "": "" }'));
 var_dump(json_decode('{ "": "": "" } }'));
 
 ?>
-===DONE===
 --EXPECTF--
 NULL
 NULL
@@ -65,4 +62,3 @@ object(stdClass)#%d (1) {
 }
 NULL
 NULL
-===DONE===

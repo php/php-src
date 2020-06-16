@@ -36,50 +36,50 @@ $file_handle = fopen(__FILE__, 'r');
 //array of values to iterate over
 $values = array(
 
-		  // int data
+          // int data
 /*1*/	  0,
-		  1,
-		  12345,
-		  -2345,
+          1,
+          12345,
+          -2345,
 
-		  // float data
+          // float data
 /*5*/	  10.5,
-		  -10.5,
-		  10.1234567e10,
-		  10.7654321E-10,
-		  .5,
+          -10.5,
+          10.1234567e10,
+          10.7654321E-10,
+          .5,
 
-		  // array data
+          // array data
 /*10*/	  array(),
-		  array(0),
-		  array(1),
-		  array(1,2),
-		  array('color' => 'red', 'item' => 'pen'),
+          array(0),
+          array(1),
+          array(1,2),
+          array('color' => 'red', 'item' => 'pen'),
 
-		  // null data
+          // null data
 /*15*/	  NULL,
-		  null,
+          null,
 
-		  // boolean data
+          // boolean data
 /*17*/	  true,
-		  false,
-		  TRUE,
-		  FALSE,
+          false,
+          TRUE,
+          FALSE,
 
-		  // empty data
+          // empty data
 /*21*/	  "",
-		  '',
+          '',
 
-		  // object data
+          // object data
 /*23*/	  new sample(),
 
-		  // undefined data
+          // undefined data
 /*24*/	  @$undefined_var,
 
-		  // unset data
+          // unset data
 /*25*/	  @$unset_var,
 
-		  // resource data
+          // resource data
 /*26*/	  $file_handle
 );
 
@@ -88,19 +88,22 @@ $values = array(
 $counter = 1;
 foreach($values as $value) {
   echo "\n -- Iteration $counter --\n";
-  $result = vprintf($value,$args);
-  echo "\n";
-  var_dump($result);
-  $counter++;
+  try {
+    $result = vprintf($value, $args);
+    echo "\n";
+    var_dump($result);
+  } catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+  }
 
-};
+  $counter++;
+}
 
 // closing the resource
 fclose($file_handle);
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing vprintf() : with unexpected values for format argument ***
 
  -- Iteration 1 --
@@ -140,34 +143,19 @@ int(13)
 int(3)
 
  -- Iteration 10 --
-
-Warning: Array to string conversion in %s on line %d
-Array
-int(5)
+vprintf(): Argument #1 ($format) must be of type string, array given
 
  -- Iteration 11 --
-
-Warning: Array to string conversion in %s on line %d
-Array
-int(5)
+vprintf(): Argument #1 ($format) must be of type string, array given
 
  -- Iteration 12 --
-
-Warning: Array to string conversion in %s on line %d
-Array
-int(5)
+vprintf(): Argument #1 ($format) must be of type string, array given
 
  -- Iteration 13 --
-
-Warning: Array to string conversion in %s on line %d
-Array
-int(5)
+vprintf(): Argument #1 ($format) must be of type string, array given
 
  -- Iteration 14 --
-
-Warning: Array to string conversion in %s on line %d
-Array
-int(5)
+vprintf(): Argument #1 ($format) must be of type string, array given
 
  -- Iteration 15 --
 
@@ -214,6 +202,4 @@ int(0)
 int(0)
 
  -- Iteration 26 --
-Resource id #%d
-int(%d)
-===DONE===
+vprintf(): Argument #1 ($format) must be of type string, resource given

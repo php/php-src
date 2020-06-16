@@ -27,7 +27,7 @@ echo "Done\n";
 --EXPECTF--
 int(0)
 
-Notice: fwrite(): write of 4 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fwrite(): Write of 4 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 int(4)

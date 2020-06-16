@@ -7,6 +7,8 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 if(substr(PHP_OS, 0, 3) != "WIN")
   die("skip run only on Windows");
 ?>
+--CONFLICTS--
+obscure_filename
 --FILE--
 <?php
 /* Prototype  : bool rename(string old_name, string new_name[, resource context])
@@ -40,7 +42,7 @@ $file_path = __DIR__."/renameVar13";
 $aFile = $file_path.'/afile.tmp';
 
 if (!mkdir($file_path)) {
-	die("fail to create $file_path tmp dir");
+    die("fail to create $file_path tmp dir");
 }
 
 for( $i=0; $i < count($names_arr); $i++ ) {
@@ -63,7 +65,6 @@ for( $i=0; $i < count($names_arr); $i++ ) {
 }
 
 rmdir($file_path);
-echo "\n*** Done ***\n";
 ?>
 --EXPECTF--
 *** Testing rename() with obscure files ***
@@ -119,5 +120,3 @@ bool(false)
 
 Warning: rename(php/php,%safile.tmp): The system cannot find the path specified. (code: 3) in %srename_variation13-win32.php on line %d
 bool(false)
-
-*** Done ***

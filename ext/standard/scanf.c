@@ -387,7 +387,7 @@ notXpg:
 		gotSequential = 1;
 		if (gotXpg) {
 mixedXPG:
-			php_error_docref(NULL, E_WARNING, "%s", "cannot mix \"%\" and \"%n$\" conversion specifiers");
+			zend_value_error("%s", "cannot mix \"%\" and \"%n$\" conversion specifiers");
 			goto error;
 		}
 
@@ -469,11 +469,11 @@ xpgCheckDone:
 				}
 				break;
 badSet:
-				php_error_docref(NULL, E_WARNING, "Unmatched [ in format string");
+				zend_value_error("Unmatched [ in format string");
 				goto error;
 
 			default: {
-				php_error_docref(NULL, E_WARNING, "Bad scan conversion character \"%c\"", *ch);
+				zend_value_error("Bad scan conversion character \"%c\"", *ch);
 				goto error;
 			}
 		}
@@ -523,14 +523,14 @@ badSet:
 	}
 	for (i = 0; i < numVars; i++) {
 		if (nassign[i] > 1) {
-			php_error_docref(NULL, E_WARNING, "%s", "Variable is assigned by multiple \"%n$\" conversion specifiers");
+			zend_value_error("%s", "Variable is assigned by multiple \"%n$\" conversion specifiers");
 			goto error;
 		} else if (!xpgSize && (nassign[i] == 0)) {
 			/*
 			 * If the space is empty, and xpgSize is 0 (means XPG wasn't
 			 * used, and/or numVars != 0), then too many vars were given
 			 */
-			php_error_docref(NULL, E_WARNING, "Variable is not assigned by any conversion specifiers");
+			zend_value_error("Variable is not assigned by any conversion specifiers");
 			goto error;
 		}
 	}
@@ -542,9 +542,9 @@ badSet:
 
 badIndex:
 	if (gotXpg) {
-		php_error_docref(NULL, E_WARNING, "%s", "\"%n$\" argument index out of range");
+		zend_value_error("%s", "\"%n$\" argument index out of range");
 	} else {
-		php_error_docref(NULL, E_WARNING, "Different numbers of variable names and field specifiers");
+		zend_value_error("Different numbers of variable names and field specifiers");
 	}
 
 error:
@@ -598,10 +598,6 @@ PHPAPI int php_sscanf_internal( char *string, char *format,
 		numVars = 0;
 	}
 
-#if 0
-	zend_printf("<br>in sscanf_internal : <br> string is \"%s\", format = \"%s\"<br> NumVars = %d. VarStart = %d<br>-------------------------<br>",
-					string, format, numVars, varStart);
-#endif
 	/*
 	 * Check for errors in the format string.
 	 */
@@ -617,11 +613,7 @@ PHPAPI int php_sscanf_internal( char *string, char *format,
 	 */
 	if (numVars) {
 		for (i = varStart;i < argCount;i++){
-			if ( ! Z_ISREF(args[ i ] ) ) {
-				php_error_docref(NULL, E_WARNING, "Parameter %d must be passed by reference", i);
-				scan_set_error_return(numVars, return_value);
-				return SCAN_ERROR_VAR_PASSED_BYVAL;
-			}
+			ZEND_ASSERT(Z_ISREF(args[i]) && "Parameter must be passed by reference");
 		}
 	}
 

@@ -19,11 +19,9 @@ var_dump(ldap_bind($link, $user, "ThisIsNotCorrect$passwd"));
 // Invalid DN syntax
 var_dump(ldap_bind($link, "unexistingProperty=weirdValue,$user", $passwd));
 ?>
-===DONE===
 --EXPECTF--
 Warning: ldap_bind(): Unable to bind to server: Invalid credentials in %s on line %d
 bool(false)
 
 Warning: ldap_bind(): Unable to bind to server: Invalid DN syntax in %s on line %d
 bool(false)
-===DONE===

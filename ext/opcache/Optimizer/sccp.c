@@ -786,9 +786,7 @@ static inline int ct_eval_func_call(
 	int overflow;
 
 	if (num_args == 0) {
-		if (zend_string_equals_literal(name, "get_magic_quotes_gpc")
-				|| zend_string_equals_literal(name, "get_magic_quotes_gpc_runtime")
-				|| zend_string_equals_literal(name, "php_sapi_name")
+		if (zend_string_equals_literal(name, "php_sapi_name")
 				|| zend_string_equals_literal(name, "imagetypes")
 				|| zend_string_equals_literal(name, "phpversion")) {
 			/* pass */
@@ -803,7 +801,7 @@ static inline int ct_eval_func_call(
 			}
 
 			c = Z_LVAL_P(args[0]) & 0xff;
-			ZVAL_INTERNED_STR(result, ZSTR_CHAR(c));
+			ZVAL_CHAR(result, c);
 			return SUCCESS;
 		} else if (zend_string_equals_literal(name, "count")) {
 			if (Z_TYPE_P(args[0]) != IS_ARRAY) {
@@ -888,13 +886,6 @@ static inline int ct_eval_func_call(
 				return FAILURE;
 			}
 			/* pass */
-		} else if (zend_string_equals_literal(name, "strpos")) {
-			if (Z_TYPE_P(args[0]) != IS_STRING
-					|| Z_TYPE_P(args[1]) != IS_STRING
-					|| !Z_STRLEN_P(args[1])) {
-				return FAILURE;
-			}
-			/* pass */
 		} else if (zend_string_equals_literal(name, "str_split")) {
 			if (Z_TYPE_P(args[0]) != IS_STRING
 					|| Z_TYPE_P(args[1]) != IS_LONG
@@ -962,7 +953,11 @@ static inline int ct_eval_func_call(
 				} ZEND_HASH_FOREACH_END();
 			}
 			/* pass */
-		} else if (zend_string_equals_literal(name, "version_compare")) {
+		} else if (zend_string_equals_literal(name, "strpos")
+				|| zend_string_equals_literal(name, "str_contains")
+				|| zend_string_equals_literal(name, "str_starts_with")
+				|| zend_string_equals_literal(name, "str_ends_with")
+				|| zend_string_equals_literal(name, "version_compare")) {
 			if (Z_TYPE_P(args[0]) != IS_STRING
 					|| Z_TYPE_P(args[1]) != IS_STRING) {
 				return FAILURE;
@@ -1026,8 +1021,7 @@ static inline int ct_eval_func_call(
 	}
 
 	func = zend_hash_find_ptr(CG(function_table), name);
-	if (!func || func->type != ZEND_INTERNAL_FUNCTION
-			|| func->internal_function.handler == ZEND_FN(display_disabled_function)) {
+	if (!func || func->type != ZEND_INTERNAL_FUNCTION) {
 		return FAILURE;
 	}
 
@@ -1203,11 +1197,6 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 					return;
 				}
 
-				/* If $a in $a->foo=$c is UNDEF, treat it like NULL. There is no warning. */
-				if ((var_info->type & MAY_BE_ANY) == 0) {
-					op1 = &EG(uninitialized_zval);
-				}
-
 				if (IS_BOT(op1)) {
 					SET_RESULT_BOT(result);
 					SET_RESULT_BOT(op1);
@@ -1284,7 +1273,8 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			}
 
 			call = ctx->call_map[opline - ctx->scdf.op_array->opcodes];
-			if (IS_TOP(op1) || !call || call->caller_call_opline->opcode != ZEND_DO_ICALL) {
+			if (IS_TOP(op1) || !call || !call->caller_call_opline
+					|| call->caller_call_opline->opcode != ZEND_DO_ICALL) {
 				return;
 			}
 
@@ -1688,6 +1678,16 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			}
 			SET_RESULT_BOT(result);
 			break;
+		case ZEND_YIELD_FROM:
+			// tmp = yield from [] -> tmp = null
+			SKIP_IF_TOP(op1);
+			if (Z_TYPE_P(op1) == IS_ARRAY && zend_hash_num_elements(Z_ARR_P(op1)) == 0) {
+				ZVAL_NULL(&zv);
+				SET_RESULT(result, &zv);
+				break;
+			}
+			SET_RESULT_BOT(result);
+			break;
 		case ZEND_COUNT:
 			SKIP_IF_TOP(op1);
 			if (Z_TYPE_P(op1) == IS_ARRAY) {
@@ -1851,7 +1851,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			}
 
 			/* We're only interested in functions with up to three arguments right now */
-			if (call->num_args > 3) {
+			if (call->num_args > 3 || call->send_unpack) {
 				SET_RESULT_BOT(result);
 				break;
 			}
@@ -2166,11 +2166,6 @@ static zval *value_from_type_and_range(sccp_ctx *ctx, int var_num, zval *tmp) {
 	zend_ssa *ssa = ctx->scdf.ssa;
 	zend_ssa_var_info *info = &ssa->var_info[var_num];
 
-	if (ssa->vars[var_num].var >= ctx->scdf.op_array->last_var) {
-		// TODO Non-CVs may cause issues with FREEs
-		return NULL;
-	}
-
 	if (info->type & MAY_BE_UNDEF) {
 		return NULL;
 	}
@@ -2273,7 +2268,7 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 			} else if (var->use_chain >= 0
 					|| var->phi_use_chain != NULL) {
 				if (value
-						&& opline->result_type & (IS_VAR|IS_TMP_VAR)
+						&& (opline->result_type & (IS_VAR|IS_TMP_VAR))
 						&& opline->opcode != ZEND_QM_ASSIGN
 						&& opline->opcode != ZEND_ROPE_INIT
 						&& opline->opcode != ZEND_ROPE_ADD
@@ -2303,7 +2298,7 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 				if (opline->opcode == ZEND_DO_ICALL) {
 					removed_ops = remove_call(ctx, opline, ssa_op);
 				} else if (opline->opcode == ZEND_TYPE_CHECK
-						&& opline->op1_type & (IS_VAR|IS_TMP_VAR)
+						&& (opline->op1_type & (IS_VAR|IS_TMP_VAR))
 						&& !value_known(&ctx->values[ssa_op->op1_use])) {
 					/* For TYPE_CHECK we may compute the result value without knowing the
 					 * operand, based on type inference information. Make sure the operand is
@@ -2342,7 +2337,7 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 						}
 						break;
 					default:
-						if (zend_may_throw(opline, op_array, ssa)) {
+						if (zend_may_throw(opline, ssa_op, op_array, ssa)) {
 							return 0;
 						}
 						break;

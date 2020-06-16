@@ -10,6 +10,8 @@ skip_if_no_required_exts();
 skip_if_wrong_cp(1256, "ansi");
 
 ?>
+--CONFLICTS--
+dir_cp1256
 --INI--
 internal_encoding=cp1256
 --FILE--
@@ -39,7 +41,6 @@ var_dump(rmdir($subpath));
 remove_data("dir_cp1256");
 
 ?>
-===DONE===
 --EXPECTF--
 bool(true)
 bool(true)
@@ -51,4 +52,3 @@ bool(true)
 string(%d) "%s\ãÓÇÑ ãÊÚÏÏ ÇáÈÇíÊ ÇÎÊÈÇÑ42\ãÓÇÑ ãÊÚÏÏ ÇáÈÇíÊ ÇÎÊÈÇÑ4"
 Active code page: %d
 bool(true)
-===DONE===

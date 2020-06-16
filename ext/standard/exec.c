@@ -81,6 +81,29 @@ PHP_MINIT_FUNCTION(exec)
 }
 /* }}} */
 
+static size_t strip_trailing_whitespace(char *buf, size_t bufl) {
+	size_t l = bufl;
+	while (l-- > 0 && isspace(((unsigned char *)buf)[l]));
+	if (l != (bufl - 1)) {
+		bufl = l + 1;
+		buf[bufl] = '\0';
+	}
+	return bufl;
+}
+
+static size_t handle_line(int type, zval *array, char *buf, size_t bufl) {
+	if (type == 1) {
+		PHPWRITE(buf, bufl);
+		if (php_output_get_level() < 1) {
+			sapi_flush();
+		}
+	} else if (type == 2) {
+		bufl = strip_trailing_whitespace(buf, bufl);
+		add_next_index_stringl(array, buf, bufl);
+	}
+	return bufl;
+}
+
 /* {{{ php_exec
  * If type==0, only last line of output is returned (exec)
  * If type==1, all lines will be printed and last lined returned (system)
@@ -88,11 +111,10 @@ PHP_MINIT_FUNCTION(exec)
  * If type==3, output will be printed binary, no lines will be saved or returned (passthru)
  *
  */
-PHPAPI int php_exec(int type, char *cmd, zval *array, zval *return_value)
+PHPAPI int php_exec(int type, const char *cmd, zval *array, zval *return_value)
 {
 	FILE *fp;
 	char *buf;
-	size_t l = 0;
 	int pclose_return;
 	char *b, *d=NULL;
 	php_stream *stream;
@@ -139,38 +161,17 @@ PHPAPI int php_exec(int type, char *cmd, zval *array, zval *return_value)
 				bufl += b - buf;
 			}
 
-			if (type == 1) {
-				PHPWRITE(buf, bufl);
-				if (php_output_get_level() < 1) {
-					sapi_flush();
-				}
-			} else if (type == 2) {
-				/* strip trailing whitespaces */
-				l = bufl;
-				while (l-- > 0 && isspace(((unsigned char *)buf)[l]));
-				if (l != (bufl - 1)) {
-					bufl = l + 1;
-					buf[bufl] = '\0';
-				}
-				add_next_index_stringl(array, buf, bufl);
-			}
+			bufl = handle_line(type, array, buf, bufl);
 			b = buf;
 		}
 		if (bufl) {
-			/* strip trailing whitespaces if we have not done so already */
-			if ((type == 2 && buf != b) || type != 2) {
-				l = bufl;
-				while (l-- > 0 && isspace(((unsigned char *)buf)[l]));
-				if (l != (bufl - 1)) {
-					bufl = l + 1;
-					buf[bufl] = '\0';
-				}
-				if (type == 2) {
-					add_next_index_stringl(array, buf, bufl);
-				}
+			if (buf != b) {
+				/* Process remaining output */
+				bufl = handle_line(type, array, buf, bufl);
 			}
 
 			/* Return last line from the shell command */
+			bufl = strip_trailing_whitespace(buf, bufl);
 			RETVAL_STRINGL(buf, bufl);
 		} else { /* should return NULL, but for BC we return "" */
 			RETVAL_EMPTY_STRING();
@@ -197,6 +198,7 @@ done:
 	return pclose_return;
 err:
 	pclose_return = -1;
+	RETVAL_FALSE;
 	goto done;
 }
 /* }}} */
@@ -235,7 +237,7 @@ static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 		} else {
 			ret_array = zend_try_array_init(ret_array);
 			if (!ret_array) {
-				return;
+				RETURN_THROWS();
 			}
 		}
 
@@ -280,7 +282,7 @@ PHP_FUNCTION(passthru)
 
    *NOT* safe for binary strings
 */
-PHPAPI zend_string *php_escape_shell_cmd(char *str)
+PHPAPI zend_string *php_escape_shell_cmd(const char *str)
 {
 	register size_t x, y;
 	size_t l = strlen(str);
@@ -387,7 +389,7 @@ PHPAPI zend_string *php_escape_shell_cmd(char *str)
 
 /* {{{ php_escape_shell_arg
  */
-PHPAPI zend_string *php_escape_shell_arg(char *str)
+PHPAPI zend_string *php_escape_shell_arg(const char *str)
 {
 	size_t x, y = 0;
 	size_t l = strlen(str);
@@ -483,8 +485,8 @@ PHP_FUNCTION(escapeshellcmd)
 
 	if (command_len) {
 		if (command_len != strlen(command)) {
-			zend_type_error("Input string contains NULL bytes");
-			return;
+			zend_argument_type_error(1, "must not contain any null bytes");
+			RETURN_THROWS();
 		}
 		RETVAL_STR(php_escape_shell_cmd(command));
 	} else {
@@ -505,8 +507,8 @@ PHP_FUNCTION(escapeshellarg)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (argument_len != strlen(argument)) {
-		zend_type_error("Input string contains NULL bytes");
-		return;
+		zend_argument_type_error(1, "must not contain any null bytes");
+		RETURN_THROWS();
 	}
 
 	RETVAL_STR(php_escape_shell_arg(argument));
@@ -526,6 +528,15 @@ PHP_FUNCTION(shell_exec)
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STRING(command, command_len)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (!command_len) {
+		php_error_docref(NULL, E_WARNING, "Cannot execute a blank command");
+		RETURN_FALSE;
+	}
+	if (strlen(command) != command_len) {
+		php_error_docref(NULL, E_WARNING, "NULL byte detected. Possible attack");
+		RETURN_FALSE;
+	}
 
 #ifdef PHP_WIN32
 	if ((in=VCWD_POPEN(command, "rt"))==NULL) {

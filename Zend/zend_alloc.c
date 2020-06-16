@@ -260,7 +260,7 @@ struct _zend_mm_heap {
 	int                peak_chunks_count;		/* peak number of allocated chunks for current request */
 	int                cached_chunks_count;		/* number of cached chunks */
 	double             avg_chunks_count;		/* average number of chunks allocated per request */
-	int                last_chunks_delete_boundary; /* numer of chunks after last deletion */
+	int                last_chunks_delete_boundary; /* number of chunks after last deletion */
 	int                last_chunks_delete_count;    /* number of deletion over the last boundary */
 #if ZEND_MM_CUSTOM
 	union {
@@ -2065,6 +2065,7 @@ static zend_long zend_mm_find_leaks(zend_mm_heap *heap, zend_mm_chunk *p, uint32
 			}
 		}
 		p = p->next;
+		i = ZEND_MM_FIRST_PAGE;
 	} while (p != heap->main_chunk);
 	return count;
 }
@@ -2697,10 +2698,23 @@ ZEND_API void shutdown_memory_manager(int silent, int full_shutdown)
 #if ZEND_MM_CUSTOM
 static void *tracked_malloc(size_t size)
 {
+	zend_mm_heap *heap = AG(mm_heap);
+	if (size > heap->limit) {
+#if ZEND_DEBUG
+		zend_mm_safe_error(heap,
+			"Allowed memory size of %zu bytes exhausted at %s:%d (tried to allocate %zu bytes)",
+			heap->limit, "file", 0, size);
+#else
+		zend_mm_safe_error(heap,
+			"Allowed memory size of %zu bytes exhausted (tried to allocate %zu bytes)",
+			heap->limit, size);
+#endif
+	}
+
 	void *ptr = __zend_malloc(size);
 	zend_ulong h = ((uintptr_t) ptr) >> ZEND_MM_ALIGNMENT_LOG2;
 	ZEND_ASSERT((void *) (uintptr_t) (h << ZEND_MM_ALIGNMENT_LOG2) == ptr);
-	zend_hash_index_add_empty_element(AG(mm_heap)->tracked_allocs, h);
+	zend_hash_index_add_empty_element(heap->tracked_allocs, h);
 	return ptr;
 }
 
@@ -2741,6 +2755,9 @@ static void alloc_globals_ctor(zend_alloc_globals *alloc_globals)
 		zend_mm_heap *mm_heap = alloc_globals->mm_heap = malloc(sizeof(zend_mm_heap));
 		memset(mm_heap, 0, sizeof(zend_mm_heap));
 		mm_heap->use_custom_heap = ZEND_MM_CUSTOM_HEAP_STD;
+		mm_heap->limit = ((size_t)Z_L(-1) >> (size_t)Z_L(1));
+		mm_heap->overflow = 0;
+
 		if (!tracked) {
 			/* Use system allocator. */
 			mm_heap->custom_heap.std._malloc = __zend_malloc;

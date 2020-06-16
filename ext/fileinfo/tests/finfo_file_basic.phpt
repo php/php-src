@@ -22,7 +22,6 @@ var_dump( finfo_file( $finfo, $magicFile ) );
 var_dump( finfo_file( $finfo, $magicFile.chr(0).$magicFile) );
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing finfo_file() : basic functionality ***
 string(28) "text/x-php; charset=us-ascii"
@@ -31,4 +30,3 @@ string(32) "text/plain; charset=unknown-8bit"
 
 Warning: finfo_file(): Invalid path in %s%efinfo_file_basic.php on line %d
 bool(false)
-===DONE===

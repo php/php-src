@@ -39,7 +39,11 @@ echo "\n*** Output for insufficient number of arguments ***\n";
 $string = "dingy%sflem%dwombat";
 $nbr = 5;
 $name = "voudras";
-printf("%d $string %s", $nbr, $name);
+try {
+    printf("%d $string %s", $nbr, $name);
+} catch (\ArgumentCountError $e) {
+    print('Error found: '.$e->getMessage());
+}
 
 
 /* Scalar argument */
@@ -203,7 +207,11 @@ echo"\n\n*** Output for precision value more than maximum ***\n";
 printf("%.988f",1.23456789e10);
 
 echo"\n\n*** Output for invalid width(-15) specifier ***\n";
-printf("%030.-15s", $tempstring);
+try {
+    printf("%030.-15s", $tempstring);
+} catch (ValueError $e) {
+    echo $e->getMessage();
+}
 
 echo"\n\n*** Output for '%F' as the format parameter ***\n";
 printf("%F",1.23456789e10);
@@ -233,9 +241,7 @@ printf("%d", $tempstring);
 printf() expects at least 1 parameter, 0 given
 
 *** Output for insufficient number of arguments ***
-
-Warning: printf(): Too few arguments in %s on line %d
-
+Error found: 5 parameters are required, 3 given
 *** Output for scalar argument ***
 3
 *** Output for NULL as argument ***
@@ -677,7 +683,7 @@ Notice: printf(): Requested precision of 988 digits was truncated to PHP maximum
 12345678900.0000000000%d
 
 *** Output for invalid width(-15) specifier ***
-15s
+Unknown format specifier '-'
 
 *** Output for '%F' as the format parameter ***
 12345678900.000000

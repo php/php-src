@@ -48,26 +48,25 @@ $permission_values = array(
 $iterator = 1;
 foreach ($permission_values as $perm) {
 
-	echo "\n-- Iteration $iterator --\n";
-	// try to remove the dir if exists  & create
-	if (is_dir($dir_path)){
-		chmod ($dir_path, 0777); // change dir permission to allow all operation
-		rmdir ($dir_path);
-	}
-	mkdir($dir_path);
+    echo "\n-- Iteration $iterator --\n";
+    // try to remove the dir if exists  & create
+    if (is_dir($dir_path)){
+        chmod ($dir_path, 0777); // change dir permission to allow all operation
+        rmdir ($dir_path);
+    }
+    mkdir($dir_path);
 
-	// change the dir permisson to test dir on it
-	var_dump( chmod($dir_path, $perm) );
+    // change the dir permission to test dir on it
+    var_dump( chmod($dir_path, $perm) );
 
-	var_dump($dh = opendir($dir_path));
+    var_dump($dh = opendir($dir_path));
 
-	if (is_resource($dh)) {
-		closedir($dh);
-	}
-	$iterator++;
+    if (is_resource($dh)) {
+        closedir($dh);
+    }
+    $iterator++;
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
 // deleting temporary directory
@@ -116,4 +115,3 @@ resource(%d) of type (stream)
 -- Iteration 10 --
 bool(true)
 resource(%d) of type (stream)
-===DONE===

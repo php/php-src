@@ -372,7 +372,9 @@ static int firebird_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,  /* {{
 
 			*ptr = FETCH_BUF(S->fetch_buf[colno], char, CHAR_BUF_LEN, NULL);
 
-			if (n >= 0) {
+			if ((var->sqltype & ~1) == SQL_DOUBLE) {
+				*len = slprintf(*ptr, CHAR_BUF_LEN, "%.*F", -var->sqlscale, *(double*)var->sqldata);
+			} else if (n >= 0) {
 				*len = slprintf(*ptr, CHAR_BUF_LEN, "%" LL_MASK "d.%0*" LL_MASK "d",
 					n / f, -var->sqlscale, n % f);
 			} else if (n <= -f) {
@@ -623,7 +625,7 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 						{
 							zend_long lval;
 							double dval;
-						
+
 							if ((Z_STRLEN_P(parameter) == 0)) {
 								*(FB_BOOLEAN*)var->sqldata = FB_FALSE;
 								break;
@@ -661,7 +663,7 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 				break;
 			}
 #endif
-			
+
 
 			/* check if a NULL should be inserted */
 			switch (Z_TYPE_P(parameter)) {

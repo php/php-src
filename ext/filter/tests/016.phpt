@@ -22,7 +22,7 @@ $values = Array(
 'foo@bar.-'
 );
 foreach ($values as $value) {
-	var_dump(filter_var($value, FILTER_VALIDATE_EMAIL));
+    var_dump(filter_var($value, FILTER_VALIDATE_EMAIL));
 }
 
 echo "Done\n";

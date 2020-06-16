@@ -26,12 +26,11 @@ $rbbi = new IntlRuleBasedBreakIterator($rules);
 $rbbi->setText('sdfkjsdf88á.... ,;');
 
 do {
-	echo "pos        : {$rbbi->current()}\n",
-		 "rule status: {$rbbi->getRuleStatus()}\n";
+    echo "pos        : {$rbbi->current()}\n",
+         "rule status: {$rbbi->getRuleStatus()}\n";
 } while ($rbbi->next() != IntlBreakIterator::DONE);
 
 ?>
-==DONE==
 --EXPECT--
 pos        : 0
 rule status: 0
@@ -43,4 +42,3 @@ pos        : 17
 rule status: 0
 pos        : 19
 rule status: 42
-==DONE==

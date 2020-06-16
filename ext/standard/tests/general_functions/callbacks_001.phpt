@@ -83,8 +83,7 @@ $o = new P;
 $o->test();
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 parent|who
 B
 C|parent::who
@@ -107,5 +106,4 @@ O
 $this|O::who
 O
 $this|B::who
-call_user_func() expects parameter 1 to be a valid callback, class 'P' is not a subclass of 'B'
-===DONE===
+call_user_func(): Argument #1 ($function) must be a valid callback, class 'P' is not a subclass of 'B'

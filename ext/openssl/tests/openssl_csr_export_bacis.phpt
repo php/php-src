@@ -41,6 +41,6 @@ var_dump(openssl_csr_export($csr, $output, false));
 ?>
 --EXPECT--
 bool(true)
-openssl_csr_export() expects parameter 1 to be resource, string given
+openssl_csr_export(): Argument #1 ($csr) must be of type resource, string given
 openssl_csr_export(): supplied resource is not a valid OpenSSL X.509 CSR resource
 bool(true)

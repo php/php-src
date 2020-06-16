@@ -21,7 +21,6 @@ var_dump(getcwd());
 chdir($directory);
 var_dump(getcwd());
 ?>
-===DONE===
 --CLEAN--
 <?php
 $directory = __DIR__ . "/getcwd_basic";
@@ -31,4 +30,3 @@ rmdir($directory);
 *** Testing getcwd() : basic functionality ***
 string(%d) "%s"
 string(%d) "%s%egetcwd_basic"
-===DONE===

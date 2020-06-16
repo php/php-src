@@ -124,12 +124,10 @@ PHP_FUNCTION(gethostname)
 {
 	char buf[HOST_NAME_MAX + 1];
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (gethostname(buf, sizeof(buf))) {
-		php_error_docref(NULL, E_WARNING, "unable to fetch host [%d]: %s", errno, strerror(errno));
+		php_error_docref(NULL, E_WARNING, "Unable to fetch host [%d]: %s", errno, strerror(errno));
 		RETURN_FALSE;
 	}
 
@@ -383,8 +381,8 @@ PHP_FUNCTION(dns_check_record)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (hostname_len == 0) {
-		php_error_docref(NULL, E_WARNING, "Host cannot be empty");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
 	}
 
 	if (rectype) {
@@ -835,13 +833,13 @@ PHP_FUNCTION(dns_get_record)
 	if (authns) {
 		authns = zend_try_array_init(authns);
 		if (!authns) {
-			return;
+			RETURN_THROWS();
 		}
 	}
 	if (addtl) {
 		addtl = zend_try_array_init(addtl);
 		if (!addtl) {
-			return;
+			RETURN_THROWS();
 		}
 	}
 
@@ -866,7 +864,7 @@ PHP_FUNCTION(dns_get_record)
 	 *   store_results is used to skip storing the results retrieved in step
 	 *   NUMTYPES+1 when results were already fetched.
 	 * - In case of PHP_DNS_ANY we use the directly fetch DNS_T_ANY. (step NUMTYPES+1 )
-	 * - In case of raw mode, we query only the requestd type instead of looping type by type
+	 * - In case of raw mode, we query only the requested type instead of looping type by type
 	 *   before going with the additional info stuff.
 	 */
 
@@ -1071,13 +1069,13 @@ PHP_FUNCTION(dns_get_mx)
 
 	mx_list = zend_try_array_init(mx_list);
 	if (!mx_list) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (weight_list) {
 		weight_list = zend_try_array_init(weight_list);
 		if (!weight_list) {
-			return;
+			RETURN_THROWS();
 		}
 	}
 
@@ -1143,7 +1141,7 @@ PHP_FUNCTION(dns_get_mx)
 #endif /* HAVE_FULL_DNS_FUNCS */
 #endif /* !defined(PHP_WIN32) && HAVE_DNS_SEARCH_FUNC */
 
-#if HAVE_FULL_DNS_FUNCS || defined(PHP_WIN32)
+#if HAVE_FULL_DNS_FUNCS && !defined(PHP_WIN32)
 PHP_MINIT_FUNCTION(dns) {
 	REGISTER_LONG_CONSTANT("DNS_A",     PHP_DNS_A,     CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("DNS_NS",    PHP_DNS_NS,    CONST_CS | CONST_PERSISTENT);

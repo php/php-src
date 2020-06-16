@@ -220,7 +220,6 @@ echo @file_get_contents($outFile);
 @unlink($outFile);
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing mail() : basic functionality ***
 -- Valid Header --
@@ -326,4 +325,3 @@ HEAD1: a
 HEAD2: b
 
 A Message
-===DONE===

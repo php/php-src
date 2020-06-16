@@ -26,9 +26,6 @@
 #include <unistd.h>
 #endif
 #include "php_image.h"
-#ifdef PHP_WIN32
-#include "win32/php_stdint.h"
-#endif
 
 #if HAVE_ZLIB && !defined(COMPILE_DL_ZLIB)
 #include "zlib.h"
@@ -398,7 +395,7 @@ static unsigned int php_next_marker(php_stream * stream, int last_marker, int ff
 			extraneous++;
 	}
 		if (extraneous) {
-			php_error_docref(NULL, E_WARNING, "corrupt JPEG data: %zu extraneous bytes before marker", extraneous);
+			php_error_docref(NULL, E_WARNING, "Corrupt JPEG data: %zu extraneous bytes before marker", extraneous);
 		}
 	}
 	a = 1;
@@ -436,7 +433,7 @@ static int php_skip_variable(php_stream * stream)
  */
 static int php_read_APP(php_stream * stream, unsigned int marker, zval *info)
 {
-	unsigned short length;
+	size_t length;
 	char *buffer;
 	char markername[16];
 	zval *tmp;
@@ -447,7 +444,7 @@ static int php_read_APP(php_stream * stream, unsigned int marker, zval *info)
 	}
 	length -= 2;				/* length includes itself */
 
-	buffer = emalloc((size_t)length);
+	buffer = emalloc(length);
 
 	if (php_stream_read(stream, buffer, (size_t) length) != length) {
 		efree(buffer);
@@ -1296,7 +1293,7 @@ PHP_FUNCTION(image_type_to_extension)
 
 /* {{{ php_imagetype
    detect filetype from first bytes */
-PHPAPI int php_getimagetype(php_stream * stream, char *input, char *filetype)
+PHPAPI int php_getimagetype(php_stream * stream, const char *input, char *filetype)
 {
 	char tmp[12];
     int twelve_bytes_read;
@@ -1497,7 +1494,7 @@ static void php_getimagesize_from_any(INTERNAL_FUNCTION_PARAMETERS, int mode) { 
 	if (argc == 2) {
 		info = zend_try_array_init(info);
 		if (!info) {
-			return;
+			RETURN_THROWS();
 		}
 	}
 

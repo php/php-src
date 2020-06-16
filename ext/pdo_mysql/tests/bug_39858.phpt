@@ -28,29 +28,29 @@ $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
 
 function bug_39858($db) {
 
-	$db->exec("DROP PROCEDURE IF EXISTS p");
-	$db->exec("
-		CREATE PROCEDURE p()
-			NOT DETERMINISTIC
-			CONTAINS SQL
-			SQL SECURITY DEFINER
-			COMMENT ''
-		BEGIN
-			SELECT 2 * 2;
-		END;");
+    $db->exec("DROP PROCEDURE IF EXISTS p");
+    $db->exec("
+        CREATE PROCEDURE p()
+            NOT DETERMINISTIC
+            CONTAINS SQL
+            SQL SECURITY DEFINER
+            COMMENT ''
+        BEGIN
+            SELECT 2 * 2;
+        END;");
 
-	$stmt = $db->prepare("CALL p()");
-	$stmt->execute();
-	do {
-		var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
-	} while ($stmt->nextRowset());
+    $stmt = $db->prepare("CALL p()");
+    $stmt->execute();
+    do {
+        var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
+    } while ($stmt->nextRowset());
 
-	$stmt = $db->prepare("CALL p()");
-	$stmt->execute();
-	do {
-		var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
-	} while ($stmt->nextRowset());
-	$stmt->closeCursor();
+    $stmt = $db->prepare("CALL p()");
+    $stmt->execute();
+    do {
+        var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
+    } while ($stmt->nextRowset());
+    $stmt->closeCursor();
 
 }
 

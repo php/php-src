@@ -12,32 +12,32 @@ if(substr(PHP_OS, 0, 3) == 'WIN' ) {
 <?php
 
 function test($stream, $sock) {
-	if ($stream !== null) {
-		echo "stream_set_blocking ";
-		try {
-			print_r(stream_set_blocking($stream, 0));
-		} catch (TypeError $e) {
-			echo $e->getMessage(), "\n";
-		}
-		echo "\n";
-	}
-	if ($sock !== null) {
-		echo "socket_set_block ";
-		try {
-			print_r(socket_set_block($sock));
-		} catch (TypeError $e) {
-			echo $e->getMessage(), "\n";
-		}
-		echo "\n";
-		echo "socket_get_option ";
-		try {
-			print_r(socket_get_option($sock, SOL_SOCKET, SO_TYPE));
-		} catch (TypeError $e) {
-			echo $e->getMessage(), "\n";
-		}
-		echo "\n";
-	}
-	echo "\n";
+    if ($stream !== null) {
+        echo "stream_set_blocking ";
+        try {
+            print_r(stream_set_blocking($stream, 0));
+        } catch (TypeError $e) {
+            echo $e->getMessage(), "\n";
+        }
+        echo "\n";
+    }
+    if ($sock !== null) {
+        echo "socket_set_block ";
+        try {
+            print_r(socket_set_block($sock));
+        } catch (TypeError $e) {
+            echo $e->getMessage(), "\n";
+        }
+        echo "\n";
+        echo "socket_get_option ";
+        try {
+            print_r(socket_get_option($sock, SOL_SOCKET, SO_TYPE));
+        } catch (TypeError $e) {
+            echo $e->getMessage(), "\n";
+        }
+        echo "\n";
+    }
+    echo "\n";
 }
 
 echo "normal\n";
@@ -93,7 +93,7 @@ socket_set_block
 Warning: socket_set_block(): unable to set blocking mode [%d]: %s in %s on line %d
 
 socket_get_option 
-Warning: socket_get_option(): unable to retrieve socket option [%d]: %s in %s on line %d
+Warning: socket_get_option(): Unable to retrieve socket option [%d]: %s in %s on line %d
 
 
 

@@ -14,19 +14,13 @@
    +----------------------------------------------------------------------+
  */
 
-/* This has been built and tested on Linux 2.2.14
- *
- * This has been built and tested on Solaris 2.6.
- * It may not compile or execute correctly on other systems.
- */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #include "php.h"
 
-#if HAVE_SYSVSHM
+#ifdef HAVE_SYSVSHM
 
 #include <errno.h>
 
@@ -37,26 +31,12 @@
 #include "zend_smart_str.h"
 #include "php_ini.h"
 
-/* {{{ sysvshm_functions[]
- */
-static const zend_function_entry sysvshm_functions[] = {
-	PHP_FE(shm_attach,		arginfo_shm_attach)
-	PHP_FE(shm_remove,		arginfo_shm_detach)
-	PHP_FE(shm_detach, 		arginfo_shm_remove)
-	PHP_FE(shm_put_var,		arginfo_shm_put_var)
-	PHP_FE(shm_has_var,		arginfo_shm_has_var)
-	PHP_FE(shm_get_var,		arginfo_shm_get_var)
-	PHP_FE(shm_remove_var,	arginfo_shm_remove_var)
-	PHP_FE_END
-};
-/* }}} */
-
 /* {{{ sysvshm_module_entry
  */
 zend_module_entry sysvshm_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"sysvshm",
-	sysvshm_functions,
+	ext_functions,
 	PHP_MINIT(sysvshm),
 	NULL,
 	NULL,
@@ -75,7 +55,7 @@ ZEND_GET_MODULE(sysvshm)
 
 #define SHM_FETCH_RESOURCE(shm_ptr, z_ptr) do { \
 	if ((shm_ptr = (sysvshm_shm *)zend_fetch_resource(Z_RES_P(z_ptr), PHP_SHM_RSRC_NAME, php_sysvshm.le_shm)) == NULL) { \
-		RETURN_FALSE; \
+		RETURN_THROWS(); \
 	} \
 } while (0)
 
@@ -128,7 +108,7 @@ PHP_FUNCTION(shm_attach)
 	zend_long shm_key, shm_id, shm_size = php_sysvshm.init_mem, shm_flag = 0666;
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "l|ll", &shm_key, &shm_size, &shm_flag)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (shm_size < 1) {
@@ -141,19 +121,19 @@ PHP_FUNCTION(shm_attach)
 	/* get the id from a specified key or create new shared memory */
 	if ((shm_id = shmget(shm_key, 0, 0)) < 0) {
 		if (shm_size < (zend_long)sizeof(sysvshm_chunk_head)) {
-			php_error_docref(NULL, E_WARNING, "failed for key 0x" ZEND_XLONG_FMT ": memorysize too small", shm_key);
+			php_error_docref(NULL, E_WARNING, "Failed for key 0x" ZEND_XLONG_FMT ": memorysize too small", shm_key);
 			efree(shm_list_ptr);
 			RETURN_FALSE;
 		}
 		if ((shm_id = shmget(shm_key, shm_size, shm_flag | IPC_CREAT | IPC_EXCL)) < 0) {
-			php_error_docref(NULL, E_WARNING, "failed for key 0x" ZEND_XLONG_FMT ": %s", shm_key, strerror(errno));
+			php_error_docref(NULL, E_WARNING, "Failed for key 0x" ZEND_XLONG_FMT ": %s", shm_key, strerror(errno));
 			efree(shm_list_ptr);
 			RETURN_FALSE;
 		}
 	}
 
 	if ((shm_ptr = shmat(shm_id, NULL, 0)) == (void *) -1) {
-		php_error_docref(NULL, E_WARNING, "failed for key 0x" ZEND_XLONG_FMT ": %s", shm_key, strerror(errno));
+		php_error_docref(NULL, E_WARNING, "Failed for key 0x" ZEND_XLONG_FMT ": %s", shm_key, strerror(errno));
 		efree(shm_list_ptr);
 		RETURN_FALSE;
 	}
@@ -184,7 +164,7 @@ PHP_FUNCTION(shm_detach)
 	sysvshm_shm *shm_list_ptr;
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "r", &shm_id)) {
-		return;
+		RETURN_THROWS();
 	}
 	SHM_FETCH_RESOURCE(shm_list_ptr, shm_id);
 	RETURN_BOOL(SUCCESS == zend_list_close(Z_RES_P(shm_id)));
@@ -199,12 +179,12 @@ PHP_FUNCTION(shm_remove)
 	sysvshm_shm *shm_list_ptr;
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "r", &shm_id)) {
-		return;
+		RETURN_THROWS();
 	}
 	SHM_FETCH_RESOURCE(shm_list_ptr, shm_id);
 
 	if (shmctl(shm_list_ptr->id, IPC_RMID, NULL) < 0) {
-		php_error_docref(NULL, E_WARNING, "failed for key 0x%x, id " ZEND_LONG_FMT ": %s", shm_list_ptr->key, Z_LVAL_P(shm_id), strerror(errno));
+		php_error_docref(NULL, E_WARNING, "Failed for key 0x%x, id " ZEND_LONG_FMT ": %s", shm_list_ptr->key, Z_LVAL_P(shm_id), strerror(errno));
 		RETURN_FALSE;
 	}
 
@@ -224,7 +204,7 @@ PHP_FUNCTION(shm_put_var)
 	php_serialize_data_t var_hash;
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "rlz", &shm_id, &shm_key, &arg_var)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	/* setup string-variable and serialize */
@@ -235,7 +215,7 @@ PHP_FUNCTION(shm_put_var)
 	shm_list_ptr = zend_fetch_resource(Z_RES_P(shm_id), PHP_SHM_RSRC_NAME, php_sysvshm.le_shm);
 	if (!shm_list_ptr) {
 		smart_str_free(&shm_var);
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* insert serialized variable into shared memory */
@@ -245,7 +225,7 @@ PHP_FUNCTION(shm_put_var)
 	smart_str_free(&shm_var);
 
 	if (ret == -1) {
-		php_error_docref(NULL, E_WARNING, "not enough shared memory left");
+		php_error_docref(NULL, E_WARNING, "Not enough shared memory left");
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -265,7 +245,7 @@ PHP_FUNCTION(shm_get_var)
 	php_unserialize_data_t var_hash;
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "rl", &shm_id, &shm_key)) {
-		return;
+		RETURN_THROWS();
 	}
 	SHM_FETCH_RESOURCE(shm_list_ptr, shm_id);
 
@@ -274,7 +254,7 @@ PHP_FUNCTION(shm_get_var)
 	shm_varpos = php_check_shm_data((shm_list_ptr->ptr), shm_key);
 
 	if (shm_varpos < 0) {
-		php_error_docref(NULL, E_WARNING, "variable key " ZEND_LONG_FMT " doesn't exist", shm_key);
+		php_error_docref(NULL, E_WARNING, "Variable key " ZEND_LONG_FMT " doesn't exist", shm_key);
 		RETURN_FALSE;
 	}
 	shm_var = (sysvshm_chunk*) ((char *)shm_list_ptr->ptr + shm_varpos);
@@ -282,7 +262,7 @@ PHP_FUNCTION(shm_get_var)
 
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
 	if (php_var_unserialize(return_value, (const unsigned char **) &shm_data, (unsigned char *) shm_data + shm_var->length, &var_hash) != 1) {
-		php_error_docref(NULL, E_WARNING, "variable data in shared memory is corrupted");
+		php_error_docref(NULL, E_WARNING, "Variable data in shared memory is corrupted");
 		RETVAL_FALSE;
 	}
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
@@ -298,7 +278,7 @@ PHP_FUNCTION(shm_has_var)
 	sysvshm_shm *shm_list_ptr;
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "rl", &shm_id, &shm_key)) {
-		return;
+		RETURN_THROWS();
 	}
 	SHM_FETCH_RESOURCE(shm_list_ptr, shm_id);
 	RETURN_BOOL(php_check_shm_data(shm_list_ptr->ptr, shm_key) >= 0);
@@ -314,14 +294,14 @@ PHP_FUNCTION(shm_remove_var)
 	sysvshm_shm *shm_list_ptr;
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "rl", &shm_id, &shm_key)) {
-		return;
+		RETURN_THROWS();
 	}
 	SHM_FETCH_RESOURCE(shm_list_ptr, shm_id);
 
 	shm_varpos = php_check_shm_data((shm_list_ptr->ptr), shm_key);
 
 	if (shm_varpos < 0) {
-		php_error_docref(NULL, E_WARNING, "variable key " ZEND_LONG_FMT " doesn't exist", shm_key);
+		php_error_docref(NULL, E_WARNING, "Variable key " ZEND_LONG_FMT " doesn't exist", shm_key);
 		RETURN_FALSE;
 	}
 	php_remove_shm_data((shm_list_ptr->ptr), shm_varpos);

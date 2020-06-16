@@ -79,12 +79,12 @@ extern "C" {
 #endif
 
 /* startup/shutdown */
-TSRM_API int tsrm_startup(int expected_threads, int expected_resources, int debug_level, char *debug_filename);
+TSRM_API int tsrm_startup(int expected_threads, int expected_resources, int debug_level, const char *debug_filename);
 TSRM_API void tsrm_shutdown(void);
 
 /* environ lock API */
-TSRM_API void tsrm_env_lock();
-TSRM_API void tsrm_env_unlock();
+TSRM_API void tsrm_env_lock(void);
+TSRM_API void tsrm_env_unlock(void);
 
 /* allocates a new thread-safe-resource id */
 TSRM_API ts_rsrc_id ts_allocate_id(ts_rsrc_id *rsrc_id, size_t size, ts_allocate_ctor ctor, ts_allocate_dtor dtor);
@@ -115,7 +115,7 @@ typedef void (*tsrm_shutdown_func_t)(void);
 
 
 TSRM_API int tsrm_error(int level, const char *format, ...);
-TSRM_API void tsrm_error_set(int level, char *debug_filename);
+TSRM_API void tsrm_error_set(int level, const char *debug_filename);
 
 /* utility functions */
 TSRM_API THREAD_T tsrm_thread_id(void);

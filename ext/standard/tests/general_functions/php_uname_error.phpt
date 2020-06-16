@@ -13,10 +13,8 @@ echo "\n-- Testing php_uname() function with invalid mode --\n";
 var_dump( php_uname('z') == php_uname('z') );
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing php_uname() - error test
 
 -- Testing php_uname() function with invalid mode --
 bool(true)
-===DONE===

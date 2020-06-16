@@ -4,41 +4,41 @@ PDO_Firebird: prepare/execute/binding
 <?php require('skipif.inc'); ?>
 --FILE--
 <?php
-	require("testdb.inc");
+    require("testdb.inc");
 
-	var_dump($dbh->getAttribute(PDO::ATTR_CONNECTION_STATUS));
+    var_dump($dbh->getAttribute(PDO::ATTR_CONNECTION_STATUS));
 
-	$dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-	$dbh->setAttribute(PDO::FB_ATTR_TIMESTAMP_FORMAT, '%Y-%m-%d %H:%M:%S');
+    $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $dbh->setAttribute(PDO::FB_ATTR_TIMESTAMP_FORMAT, '%Y-%m-%d %H:%M:%S');
 
-	@$dbh->exec('DROP TABLE ddl');
-	$dbh->exec("CREATE TABLE ddl (id SMALLINT NOT NULL PRIMARY KEY, text VARCHAR(32),
-		datetime TIMESTAMP DEFAULT '2000-02-12' NOT NULL)");
-	$dbh->exec("INSERT INTO ddl (id,text) VALUES (1,'bla')");
+    @$dbh->exec('DROP TABLE ddl');
+    $dbh->exec("CREATE TABLE ddl (id SMALLINT NOT NULL PRIMARY KEY, text VARCHAR(32),
+        datetime TIMESTAMP DEFAULT '2000-02-12' NOT NULL)");
+    $dbh->exec("INSERT INTO ddl (id,text) VALUES (1,'bla')");
 
-	$s = $dbh->prepare("SELECT * FROM ddl WHERE id=? FOR UPDATE");
+    $s = $dbh->prepare("SELECT * FROM ddl WHERE id=? FOR UPDATE");
 
-	$id = 0;
-	$s->bindParam(1,$id);
-	$var = null;
-	$s->bindColumn("TEXT",$var);
-	$id = 1;
-	$s->execute();
-	$s->setAttribute(PDO::ATTR_CURSOR_NAME, "c");
+    $id = 0;
+    $s->bindParam(1,$id);
+    $var = null;
+    $s->bindColumn("TEXT",$var);
+    $id = 1;
+    $s->execute();
+    $s->setAttribute(PDO::ATTR_CURSOR_NAME, "c");
 
-	var_dump($id);
+    var_dump($id);
 
-	var_dump($s->fetch());
+    var_dump($s->fetch());
 
-	var_dump($var);
+    var_dump($var);
 
-	var_dump($dbh->exec("UPDATE ddl SET id=2 WHERE CURRENT OF c"));
+    var_dump($dbh->exec("UPDATE ddl SET id=2 WHERE CURRENT OF c"));
 
-	var_dump($s->fetch());
+    var_dump($s->fetch());
 
-	unset($s);
-	unset($dbh);
-	echo "done\n";
+    unset($s);
+    unset($dbh);
+    echo "done\n";
 
 ?>
 --EXPECT--

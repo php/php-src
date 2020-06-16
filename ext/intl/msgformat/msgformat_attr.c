@@ -18,7 +18,6 @@
 
 #include "php_intl.h"
 #include "msgformat_class.h"
-#include "msgformat_attr.h"
 #include "msgformat_data.h"
 #include "intl_convert.h"
 
@@ -36,7 +35,7 @@ PHP_FUNCTION( msgfmt_get_pattern )
 	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O", &object, MessageFormatter_ce_ptr ) == FAILURE )
 	{
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */
@@ -67,7 +66,7 @@ PHP_FUNCTION( msgfmt_set_pattern )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Os",
 		&object, MessageFormatter_ce_ptr, &value, &value_len ) == FAILURE )
 	{
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	MSG_FORMAT_METHOD_FETCH_OBJECT;
@@ -121,7 +120,7 @@ PHP_FUNCTION( msgfmt_get_locale )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, MessageFormatter_ce_ptr ) == FAILURE )
 	{
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */

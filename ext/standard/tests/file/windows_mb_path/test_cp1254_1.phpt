@@ -10,6 +10,8 @@ skip_if_no_required_exts();
 skip_if_wrong_cp(857, "oem");
 
 ?>
+--CONFLICTS--
+dir_cp1254
 --INI--
 internal_encoding=cp1254
 --FILE--
@@ -39,7 +41,6 @@ var_dump(rmdir($subpath));
 remove_data("dir_cp1254");
 
 ?>
-===DONE===
 --EXPECTF--
 bool(true)
 bool(true)
@@ -51,4 +52,3 @@ bool(true)
 string(%d) "%s\çokbaytlý iþleri42\çokbaytlý iþleri4"
 Active code page: %d
 bool(true)
-===DONE===

@@ -19,14 +19,13 @@ echo "*** Testing ctype_cntrl() : usage variations ***\n";
 $orig = setlocale(LC_CTYPE, "C");
 
 for ($i = 0; $i < 256; $i++) {
-	if (ctype_cntrl($i)) {
-		echo "character code $i is control character\n";
-	}
+    if (ctype_cntrl($i)) {
+        echo "character code $i is control character\n";
+    }
 }
 
 setlocale(LC_CTYPE, $orig);
 ?>
-===DONE===
 --EXPECT--
 *** Testing ctype_cntrl() : usage variations ***
 character code 0 is control character
@@ -62,4 +61,3 @@ character code 29 is control character
 character code 30 is control character
 character code 31 is control character
 character code 127 is control character
-===DONE===

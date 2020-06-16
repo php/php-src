@@ -5,17 +5,17 @@ Should warn about the conflict.
 <?php
 
 trait foo {
-	public function test() { return 3; }
+    public function test() { return 3; }
 }
 
 trait baz {
-	public function test() { return 4; }
+    public function test() { return 4; }
 }
 
 class bar {
-	use foo, baz {
-		baz::test as zzz;
-	}
+    use foo, baz {
+        baz::test as zzz;
+    }
 }
 
 $x = new bar;
@@ -23,4 +23,4 @@ var_dump($x->test());
 
 ?>
 --EXPECTF--
-Fatal error: Trait method test has not been applied, because there are collisions with other trait methods on bar in %s on line %d
+Fatal error: Trait method baz::test has not been applied as bar::test, because of collision with foo::test in %s on line %d

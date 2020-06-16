@@ -12,19 +12,19 @@ echo "*** Testing ReflectionMethod::getClosure() : basic functionality ***\n";
 
 class StaticExample
 {
-	static function foo()
-	{
-		var_dump( "Static Example class, Hello World!" );
-	}
+    static function foo()
+    {
+        var_dump( "Static Example class, Hello World!" );
+    }
 }
 
 class Example
 {
-	public $bar = 42;
-	public function foo()
-	{
-		var_dump( "Example class, bar: " . $this->bar );
-	}
+    public $bar = 42;
+    public function foo()
+    {
+        var_dump( "Example class, bar: " . $this->bar );
+    }
 }
 
 // Initialize classes
@@ -46,10 +46,8 @@ $object->bar = 34;
 $closure();
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing ReflectionMethod::getClosure() : basic functionality ***
 string(34) "Static Example class, Hello World!"
 string(22) "Example class, bar: 42"
 string(22) "Example class, bar: 34"
-===DONE===

@@ -11,7 +11,7 @@ class test2
 {
     function __toString()
     {
-    	echo __METHOD__ . "()\n";
+        echo __METHOD__ . "()\n";
         return "Converted\n";
     }
 }
@@ -20,8 +20,8 @@ class test3
 {
     function __toString()
     {
-    	echo __METHOD__ . "()\n";
-        return 42;
+        echo __METHOD__ . "()\n";
+        return [];
     }
 }
 echo "====test1====\n";
@@ -131,5 +131,5 @@ Converted
 object(test3)#2 (0) {
 }
 test3::__toString()
-Method test3::__toString() must return a string value
+test3::__toString(): Return value must be of type string, array returned
 ====DONE====

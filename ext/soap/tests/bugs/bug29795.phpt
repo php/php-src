@@ -14,9 +14,9 @@ class LocalSoapClient extends SoapClient {
 
   function __doRequest($request, $location, $action, $version, $one_way = 0) {
     return <<<EOF
-<?xml version="1.0" encoding="UTF-8"?><SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" 
-xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" 
-xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+<?xml version="1.0" encoding="UTF-8"?><SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xmlns:xsd="http://www.w3.org/2001/XMLSchema"><SOAP-ENV:Body><Price><Amount>3995</Amount><CurrencyCode>USD</CurrencyCode></Price></SOAP-ENV:Body></SOAP-ENV:Envelope>
 EOF;
   }

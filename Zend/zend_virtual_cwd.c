@@ -53,6 +53,14 @@
 #define IO_REPARSE_TAG_ONEDRIVE   (0x80000021L)
 #endif
 
+# ifndef IO_REPARSE_TAG_ACTIVISION_HSM
+#  define IO_REPARSE_TAG_ACTIVISION_HSM (0x00000047L)
+# endif
+
+# ifndef IO_REPARSE_TAG_PROJFS
+#  define IO_REPARSE_TAG_PROJFS (0x9000001CL)
+# endif
+
 # ifndef VOLUME_NAME_NT
 #  define VOLUME_NAME_NT 0x2
 # endif
@@ -63,10 +71,6 @@
 
 # include <winioctl.h>
 # include <winnt.h>
-#endif
-
-#ifndef HAVE_REALPATH
-#define realpath(x,y) strcpy(y,x)
 #endif
 
 #define VIRTUAL_CWD_DEBUG 0
@@ -299,8 +303,8 @@ static inline zend_ulong realpath_cache_key(const char *path, size_t path_len) /
 {
 	register zend_ulong h;
 	size_t bucket_key_len;
-	char *bucket_key_start = tsrm_win32_get_path_sid_key(path, path_len, &bucket_key_len);
-	char *bucket_key = (char *)bucket_key_start;
+	const char *bucket_key_start = tsrm_win32_get_path_sid_key(path, path_len, &bucket_key_len);
+	const char *bucket_key = bucket_key_start;
 	const char *e;
 
 	if (!bucket_key) {
@@ -751,7 +755,9 @@ retry:
 			else if (pbuffer->ReparseTag == IO_REPARSE_TAG_DEDUP ||
 					/* Starting with 1709. */
 					(pbuffer->ReparseTag & ~IO_REPARSE_TAG_CLOUD_MASK) == IO_REPARSE_TAG_CLOUD ||
-					IO_REPARSE_TAG_ONEDRIVE == pbuffer->ReparseTag) {
+					IO_REPARSE_TAG_ONEDRIVE == pbuffer->ReparseTag ||
+					IO_REPARSE_TAG_ACTIVISION_HSM == pbuffer->ReparseTag ||
+					IO_REPARSE_TAG_PROJFS == pbuffer->ReparseTag) {
 				isabsolute = 1;
 				substitutename = malloc((len + 1) * sizeof(char));
 				if (!substitutename) {

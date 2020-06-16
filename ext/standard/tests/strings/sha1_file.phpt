@@ -63,7 +63,6 @@ unlink("DataFileSHA1.txt");
 unlink("EmptyFileSHA1.txt");
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing sha1_file() : basic functionality ***
 
@@ -76,12 +75,12 @@ bool(false)
 
 -- invalid filename --
 
-Warning: sha1_file(rewncwYcn89q): failed to open stream: No such file or directory in %s on line %d
+Warning: sha1_file(rewncwYcn89q): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 -- Scalar value as filename --
 
-Warning: sha1_file(12): failed to open stream: No such file or directory in %s on line %d
+Warning: sha1_file(12): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 -- NULL as filename --
@@ -100,4 +99,3 @@ string(40) "d16a568ab98233deff7ec8b1668eb4b3d9e53fee"
 
 -- Raw Binary Output for a valid file with some contents --
 string(40) "d16a568ab98233deff7ec8b1668eb4b3d9e53fee"
-===DONE===

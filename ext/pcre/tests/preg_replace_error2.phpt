@@ -29,13 +29,13 @@ try {
 }
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing preg_replace() : error conditions ***
 
 Arg value is: this is a string
 string(64) "this is a stringthis is a stringthis is a stringthis is a string"
 
 Arg value is: Array
-Parameter mismatch, pattern is a string while replacement is an array
+preg_replace(): Argument #1 ($regex) must be of type array when argument #2 ($replace) is an array, string given
 Object of class stdClass could not be converted to string
 Done

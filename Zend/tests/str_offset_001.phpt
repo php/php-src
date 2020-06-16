@@ -5,7 +5,7 @@ string offset 001
 // Test positive or null string offsets
 
 function foo($x) {
-	var_dump($x);
+    var_dump($x);
 }
 
 $str = "abc";

@@ -19,16 +19,15 @@ insert_dummy_data($link, $base);
 $dn = "$base";
 $filter = "(cn=user*)";
 var_dump(
-	$result = ldap_search($link, $dn, $filter, array('cn'), 0, 0, 0, LDAP_DEREF_NEVER,
-		[['oid' => LDAP_CONTROL_PAGEDRESULTS, 'value' => ['size' => 2]]]),
-	ldap_get_entries($link, $result),
-	ldap_parse_result($link, $result, $errcode , $matcheddn , $errmsg , $referrals, $controls),
-	$result = ldap_search($link, $dn, $filter, array('cn'), 0, 0, 0, LDAP_DEREF_NEVER,
-		[['oid' => LDAP_CONTROL_PAGEDRESULTS, 'value' => ['size' => 20, 'cookie' => $controls[LDAP_CONTROL_PAGEDRESULTS]['value']['cookie']]]]),
-	ldap_get_entries($link, $result)
+    $result = ldap_search($link, $dn, $filter, array('cn'), 0, 0, 0, LDAP_DEREF_NEVER,
+        [['oid' => LDAP_CONTROL_PAGEDRESULTS, 'value' => ['size' => 2]]]),
+    ldap_get_entries($link, $result),
+    ldap_parse_result($link, $result, $errcode , $matcheddn , $errmsg , $referrals, $controls),
+    $result = ldap_search($link, $dn, $filter, array('cn'), 0, 0, 0, LDAP_DEREF_NEVER,
+        [['oid' => LDAP_CONTROL_PAGEDRESULTS, 'value' => ['size' => 20, 'cookie' => $controls[LDAP_CONTROL_PAGEDRESULTS]['value']['cookie']]]]),
+    ldap_get_entries($link, $result)
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 include "connect.inc";
@@ -96,4 +95,3 @@ array(2) {
     string(%d) "cn=userC,cn=userB,%s"
   }
 }
-===DONE===

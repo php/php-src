@@ -31,7 +31,7 @@
 #include "zend_stack.h"
 #include "php_output.h"
 
-PHPAPI ZEND_DECLARE_MODULE_GLOBALS(output);
+PHPAPI ZEND_DECLARE_MODULE_GLOBALS(output)
 
 const char php_output_default_handler_name[sizeof("default output handler")] = "default output handler";
 const char php_output_devnull_handler_name[sizeof("null output handler")] = "null output handler";
@@ -590,9 +590,9 @@ PHPAPI int php_output_handler_conflict(const char *handler_new, size_t handler_n
 {
 	if (php_output_handler_started(handler_set, handler_set_len)) {
 		if (handler_new_len != handler_set_len || memcmp(handler_new, handler_set, handler_set_len)) {
-			php_error_docref("ref.outcontrol", E_WARNING, "output handler '%s' conflicts with '%s'", handler_new, handler_set);
+			php_error_docref("ref.outcontrol", E_WARNING, "Output handler '%s' conflicts with '%s'", handler_new, handler_set);
 		} else {
-			php_error_docref("ref.outcontrol", E_WARNING, "output handler '%s' cannot be used twice", handler_new);
+			php_error_docref("ref.outcontrol", E_WARNING, "Output handler '%s' cannot be used twice", handler_new);
 		}
 		return 1;
 	}
@@ -1197,12 +1197,12 @@ static int php_output_stack_pop(int flags)
 
 	if (!orphan) {
 		if (!(flags & PHP_OUTPUT_POP_SILENT)) {
-			php_error_docref("ref.outcontrol", E_NOTICE, "failed to %s buffer. No buffer to %s", (flags&PHP_OUTPUT_POP_DISCARD)?"discard":"send", (flags&PHP_OUTPUT_POP_DISCARD)?"discard":"send");
+			php_error_docref("ref.outcontrol", E_NOTICE, "Failed to %s buffer. No buffer to %s", (flags&PHP_OUTPUT_POP_DISCARD)?"discard":"send", (flags&PHP_OUTPUT_POP_DISCARD)?"discard":"send");
 		}
 		return 0;
 	} else if (!(flags & PHP_OUTPUT_POP_FORCE) && !(orphan->flags & PHP_OUTPUT_HANDLER_REMOVABLE)) {
 		if (!(flags & PHP_OUTPUT_POP_SILENT)) {
-			php_error_docref("ref.outcontrol", E_NOTICE, "failed to %s buffer of %s (%d)", (flags&PHP_OUTPUT_POP_DISCARD)?"discard":"send", ZSTR_VAL(orphan->name), orphan->level);
+			php_error_docref("ref.outcontrol", E_NOTICE, "Failed to %s buffer of %s (%d)", (flags&PHP_OUTPUT_POP_DISCARD)?"discard":"send", ZSTR_VAL(orphan->name), orphan->level);
 		}
 		return 0;
 	} else {
@@ -1299,7 +1299,7 @@ PHP_FUNCTION(ob_start)
 	zend_long flags = PHP_OUTPUT_HANDLER_STDFLAGS;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|zll", &output_handler, &chunk_size, &flags) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (chunk_size < 0) {
@@ -1307,7 +1307,7 @@ PHP_FUNCTION(ob_start)
 	}
 
 	if (php_output_start_user(output_handler, chunk_size, flags) == FAILURE) {
-		php_error_docref("ref.outcontrol", E_NOTICE, "failed to create buffer");
+		php_error_docref("ref.outcontrol", E_NOTICE, "Failed to create buffer");
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -1319,16 +1319,16 @@ PHP_FUNCTION(ob_start)
 PHP_FUNCTION(ob_flush)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!OG(active)) {
-		php_error_docref("ref.outcontrol", E_NOTICE, "failed to flush buffer. No buffer to flush");
+		php_error_docref("ref.outcontrol", E_NOTICE, "Failed to flush buffer. No buffer to flush");
 		RETURN_FALSE;
 	}
 
 	if (SUCCESS != php_output_flush()) {
-		php_error_docref("ref.outcontrol", E_NOTICE, "failed to flush buffer of %s (%d)", ZSTR_VAL(OG(active)->name), OG(active)->level);
+		php_error_docref("ref.outcontrol", E_NOTICE, "Failed to flush buffer of %s (%d)", ZSTR_VAL(OG(active)->name), OG(active)->level);
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -1340,16 +1340,16 @@ PHP_FUNCTION(ob_flush)
 PHP_FUNCTION(ob_clean)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!OG(active)) {
-		php_error_docref("ref.outcontrol", E_NOTICE, "failed to delete buffer. No buffer to delete");
+		php_error_docref("ref.outcontrol", E_NOTICE, "Failed to delete buffer. No buffer to delete");
 		RETURN_FALSE;
 	}
 
 	if (SUCCESS != php_output_clean()) {
-		php_error_docref("ref.outcontrol", E_NOTICE, "failed to delete buffer of %s (%d)", ZSTR_VAL(OG(active)->name), OG(active)->level);
+		php_error_docref("ref.outcontrol", E_NOTICE, "Failed to delete buffer of %s (%d)", ZSTR_VAL(OG(active)->name), OG(active)->level);
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -1361,11 +1361,11 @@ PHP_FUNCTION(ob_clean)
 PHP_FUNCTION(ob_end_flush)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!OG(active)) {
-		php_error_docref("ref.outcontrol", E_NOTICE, "failed to delete and flush buffer. No buffer to delete or flush");
+		php_error_docref("ref.outcontrol", E_NOTICE, "Failed to delete and flush buffer. No buffer to delete or flush");
 		RETURN_FALSE;
 	}
 
@@ -1378,11 +1378,11 @@ PHP_FUNCTION(ob_end_flush)
 PHP_FUNCTION(ob_end_clean)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!OG(active)) {
-		php_error_docref("ref.outcontrol", E_NOTICE, "failed to delete buffer. No buffer to delete");
+		php_error_docref("ref.outcontrol", E_NOTICE, "Failed to delete buffer. No buffer to delete");
 		RETURN_FALSE;
 	}
 
@@ -1395,16 +1395,16 @@ PHP_FUNCTION(ob_end_clean)
 PHP_FUNCTION(ob_get_flush)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (php_output_get_contents(return_value) == FAILURE) {
-		php_error_docref("ref.outcontrol", E_NOTICE, "failed to delete and flush buffer. No buffer to delete or flush");
+		php_error_docref("ref.outcontrol", E_NOTICE, "Failed to delete and flush buffer. No buffer to delete or flush");
 		RETURN_FALSE;
 	}
 
 	if (SUCCESS != php_output_end()) {
-		php_error_docref("ref.outcontrol", E_NOTICE, "failed to delete buffer of %s (%d)", ZSTR_VAL(OG(active)->name), OG(active)->level);
+		php_error_docref("ref.outcontrol", E_NOTICE, "Failed to delete buffer of %s (%d)", ZSTR_VAL(OG(active)->name), OG(active)->level);
 	}
 }
 /* }}} */
@@ -1414,7 +1414,7 @@ PHP_FUNCTION(ob_get_flush)
 PHP_FUNCTION(ob_get_clean)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if(!OG(active)) {
@@ -1422,12 +1422,12 @@ PHP_FUNCTION(ob_get_clean)
 	}
 
 	if (php_output_get_contents(return_value) == FAILURE) {
-		php_error_docref("ref.outcontrol", E_NOTICE, "failed to delete buffer. No buffer to delete");
+		php_error_docref("ref.outcontrol", E_NOTICE, "Failed to delete buffer. No buffer to delete");
 		RETURN_FALSE;
 	}
 
 	if (SUCCESS != php_output_discard()) {
-		php_error_docref("ref.outcontrol", E_NOTICE, "failed to delete buffer of %s (%d)", ZSTR_VAL(OG(active)->name), OG(active)->level);
+		php_error_docref("ref.outcontrol", E_NOTICE, "Failed to delete buffer of %s (%d)", ZSTR_VAL(OG(active)->name), OG(active)->level);
 	}
 }
 /* }}} */
@@ -1437,7 +1437,7 @@ PHP_FUNCTION(ob_get_clean)
 PHP_FUNCTION(ob_get_contents)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (php_output_get_contents(return_value) == FAILURE) {
@@ -1451,7 +1451,7 @@ PHP_FUNCTION(ob_get_contents)
 PHP_FUNCTION(ob_get_level)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(php_output_get_level());
@@ -1463,7 +1463,7 @@ PHP_FUNCTION(ob_get_level)
 PHP_FUNCTION(ob_get_length)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (php_output_get_length(return_value) == FAILURE) {
@@ -1477,7 +1477,7 @@ PHP_FUNCTION(ob_get_length)
 PHP_FUNCTION(ob_list_handlers)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	array_init(return_value);
@@ -1497,7 +1497,7 @@ PHP_FUNCTION(ob_get_status)
 	zend_bool full_status = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &full_status) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!OG(active)) {
@@ -1521,7 +1521,7 @@ PHP_FUNCTION(ob_implicit_flush)
 	zend_long flag = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &flag) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	php_output_set_implicit_flush(flag);
@@ -1533,7 +1533,7 @@ PHP_FUNCTION(ob_implicit_flush)
 PHP_FUNCTION(output_reset_rewrite_vars)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (php_url_scanner_reset_vars() == SUCCESS) {
@@ -1552,7 +1552,7 @@ PHP_FUNCTION(output_add_rewrite_var)
 	size_t name_len, value_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &name, &name_len, &value, &value_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (php_url_scanner_add_var(name, name_len, value, value_len, 1) == SUCCESS) {

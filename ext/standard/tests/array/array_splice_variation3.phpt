@@ -12,14 +12,14 @@ echo "*** array_splice() function : usage variations - lengths and offsets\n";
 
 function test_splice ($offset, $length)
 {
-	echo "  - No replacement\n";
-	$input_array=array(0,1,2,3,4,5);
-	var_dump (array_splice ($input_array,$offset,$length));
-	var_dump ($input_array);
+    echo "  - No replacement\n";
+    $input_array=array(0,1,2,3,4,5);
+    var_dump (array_splice ($input_array,$offset,$length));
+    var_dump ($input_array);
     echo "  - With replacement\n";
     $input_array=array(0,1,2,3,4,5);
     var_dump (array_splice ($input_array,$offset,$length,array ("A","B","C")));
-	var_dump ($input_array);
+    var_dump ($input_array);
 }
 
 echo "absolute offset - absolute length - cut from beginning\n";

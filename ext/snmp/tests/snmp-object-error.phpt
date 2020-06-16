@@ -15,40 +15,40 @@ snmp_set_quick_print(false);
 snmp_set_valueretrieval(SNMP_VALUE_PLAIN);
 
 try {
-	var_dump(new SNMP(SNMP::VERSION_1, $hostname));
+    var_dump(new SNMP(SNMP::VERSION_1, $hostname));
 } catch (TypeError $e) {
-	print $e->getMessage() . "\n";
+    print $e->getMessage() . "\n";
 }
 try {
-	var_dump(new SNMP(SNMP::VERSION_1, $hostname, $community, ''));
+    var_dump(new SNMP(SNMP::VERSION_1, $hostname, $community, ''));
 } catch (TypeError $e) {
-	print $e->getMessage() . "\n";
+    print $e->getMessage() . "\n";
 }
 try {
-	var_dump(new SNMP(SNMP::VERSION_1, $hostname, $community, $timeout, ''));
+    var_dump(new SNMP(SNMP::VERSION_1, $hostname, $community, $timeout, ''));
 } catch (TypeError $e) {
-	print $e->getMessage() . "\n";
+    print $e->getMessage() . "\n";
 }
 try {
-	var_dump(new SNMP(7, $hostname, $community));
+    var_dump(new SNMP(7, $hostname, $community));
 } catch (Exception $e) {
-	print $e->getMessage() . "\n";
+    print $e->getMessage() . "\n";
 }
 
 echo "Exception handling\n";
 $session = new SNMP(SNMP::VERSION_3, $hostname, $user_noauth, $timeout, $retries);
 try {
-	var_dump($session->get('.1.3.6.1.2.1.1.1..0'));
+    var_dump($session->get('.1.3.6.1.2.1.1.1..0'));
 } catch (SNMPException $e) {
-	var_dump($e->getCode());
-	var_dump($e->getMessage());
+    var_dump($e->getCode());
+    var_dump($e->getMessage());
 }
 $session->exceptions_enabled = SNMP::ERRNO_ANY;
 try {
-	var_dump($session->get('.1.3.6.1.2.1.1.1..0'));
+    var_dump($session->get('.1.3.6.1.2.1.1.1..0'));
 } catch (SNMPException $e) {
-	var_dump($e->getCode());
-	var_dump($e->getMessage());
+    var_dump($e->getCode());
+    var_dump($e->getMessage());
 }
 var_dump($session->close());
 
@@ -70,9 +70,9 @@ var_dump($session->max_oids);
 ?>
 --EXPECTF--
 SNMP::__construct() expects at least 3 parameters, 2 given
-SNMP::__construct() expects parameter 4 to be int, string given
-SNMP::__construct() expects parameter 5 to be int, string given
-Unknown SNMP protocol version
+SNMP::__construct(): Argument #4 must be of type int, string given
+SNMP::__construct(): Argument #5 must be of type int, string given
+SNMP::__construct(): Argument #1 ($version) must be a valid SNMP protocol version
 Exception handling
 
 Warning: SNMP::get(): Invalid object identifier: .1.3.6.1.2.1.1.1..0 in %s on line %d

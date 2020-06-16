@@ -43,6 +43,6 @@ is_file($tempfile) and @unlink($tempfile);
 isset($tempname) and is_file($tempname) and @unlink($tempname);
 ?>
 --EXPECTF--
-Warning: curl_setopt(): the provided file handle is not writable in %s on line %d
+Warning: curl_setopt(): The provided file handle is not writable in %s on line %d
 Hello World!
 Hello World!

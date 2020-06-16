@@ -18,4 +18,4 @@ try {
 }
 ?>
 --EXPECT--
-Invalid 2nd parameter, filename must not contain null bytes
+imagewebp(): Argument #2 ($to) must not contain null bytes

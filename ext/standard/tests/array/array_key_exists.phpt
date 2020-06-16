@@ -70,39 +70,28 @@ foreach ($search_arrays_v as $search_array) {
 
 echo "\n*** Testing error conditions ***\n";
 // first args as array
-var_dump( array_key_exists(array(), array()) );
-// first argument as floating point value
-var_dump( array_key_exists(17.5, array(1,23) ) ) ;
+try {
+    array_key_exists(array(), array());
+} catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 echo "\n*** Testing operation on objects ***\n";
 class key_check
 {
-  private   $private_var = "Priviate var";
-  protected $protected_var = "Protected var";
-  public    $public_var = "Public var";
-  public    $arr = array("var" => "value", "1" => "one", ""=>"value");
-  public function print_member()
-  {
-    echo $this->$private_var."\n";
-    echo $this->$protected_var."\n";
-    echo $this->$public_var."\n";
-  }
+  public $public_var = "Public var";
 }
 
 $key_check_obj = new key_check; //new object
-/* array_key_exists() on an object, it should work on only public member variables */
-var_dump(array_key_exists("private_var", $key_check_obj)); // not found, private member
-var_dump(array_key_exists("protected_var", $key_check_obj)); // not found, private member
-var_dump(array_key_exists("public_var", $key_check_obj)); // found, public member
-var_dump(array_key_exists("print_member", $key_check_obj)); // not found, its a function
-var_dump(array_key_exists("arr", $key_check_obj)); //found, public member
-var_dump(array_key_exists("var", $key_check_obj->arr)); //found,  key is in member array
+try {
+    var_dump(array_key_exists("public_var", $key_check_obj));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
-/* error condition, first argument as object */
-var_dump( array_key_exists($key_check_obj, $key_check_obj) );
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing basic functionalities ***
 -- Iteration 1 --
 bool(true)
@@ -232,33 +221,8 @@ bool(false)
 bool(true)
 
 *** Testing error conditions ***
-
-Warning: array_key_exists(): The first argument should be either a string or an integer in %s on line %d
-bool(false)
-
-Warning: array_key_exists(): The first argument should be either a string or an integer in %s on line %d
-bool(false)
+Illegal offset type
 
 *** Testing operation on objects ***
-
-Deprecated: array_key_exists(): Using array_key_exists() on objects is deprecated. Use isset() or property_exists() instead in %s on line %d
-bool(false)
-
-Deprecated: array_key_exists(): Using array_key_exists() on objects is deprecated. Use isset() or property_exists() instead in %s on line %d
-bool(false)
-
-Deprecated: array_key_exists(): Using array_key_exists() on objects is deprecated. Use isset() or property_exists() instead in %s on line %d
-bool(true)
-
-Deprecated: array_key_exists(): Using array_key_exists() on objects is deprecated. Use isset() or property_exists() instead in %s on line %d
-bool(false)
-
-Deprecated: array_key_exists(): Using array_key_exists() on objects is deprecated. Use isset() or property_exists() instead in %s on line %d
-bool(true)
-bool(true)
-
-Deprecated: array_key_exists(): Using array_key_exists() on objects is deprecated. Use isset() or property_exists() instead in %s on line %d
-
-Warning: array_key_exists(): The first argument should be either a string or an integer in %s on line %d
-bool(false)
+array_key_exists(): Argument #2 ($array) must be of type array, key_check given
 Done

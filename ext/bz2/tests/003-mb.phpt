@@ -7,18 +7,21 @@ bzread() tests
 
 $fd = bzopen(__DIR__."/003私はガラスを食べられます.txt.bz2","r");
 var_dump(bzread($fd, 0));
-var_dump(bzread($fd, -10));
+
+try {
+    var_dump(bzread($fd, -10));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+
 var_dump(bzread($fd, 1));
 var_dump(bzread($fd, 2));
 var_dump(bzread($fd, 100000));
 
-echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 string(0) ""
-
-Warning: bzread(): length may not be negative in %s on line %d
-bool(false)
+bzread(): Argument #2 ($length) must be greater than or equal to 0
 string(1) "R"
 string(2) "is"
 string(251) "ing up from the heart of the desert
@@ -30,4 +33,3 @@ Rising up for Jerusalem
 Rising up from the heat of the desert
 Heading out for Jerusalem
 "
-Done

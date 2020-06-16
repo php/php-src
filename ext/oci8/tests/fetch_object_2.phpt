@@ -50,7 +50,7 @@ if (!oci_execute($s)) {
 
 while ($row = oci_fetch_object($s)) {
     echo $row->COL1 . "\n";
-    echo $row->COL2->load(100) . "\n";
+    echo $row->COL2->load() . "\n";
     echo $row->COL3 . "\n";
 }
 
@@ -63,8 +63,6 @@ $stmtarray = array(
 oci8_test_sql_execute($c, $stmtarray);
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 Test 1
 object(stdClass)#%d (3) {
@@ -110,4 +108,3 @@ Test 2
 789
 3rd row col2 string
 3 more text
-===DONE===

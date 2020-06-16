@@ -84,13 +84,12 @@ $inputs = array(
 // loop through each element of $inputs to check the behaviour of decbin()
 $iterator = 1;
 foreach($inputs as $input) {
-	echo "\n-- Iteration $iterator --\n";
-	var_dump(decbin($input));
-	$iterator++;
+    echo "\n-- Iteration $iterator --\n";
+    var_dump(decbin($input));
+    $iterator++;
 };
 fclose($fp);
 ?>
-===Done===
 --EXPECTF--
 *** Testing decbin() : usage variations ***
 
@@ -176,4 +175,3 @@ string(1) "0"
 
 -- Iteration 27 --
 string(%d) "%d"
-===Done===

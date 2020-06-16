@@ -21,7 +21,5 @@ foo();
 var_dump(preg_match('/./', "a"));
 
 ?>
-==DONE==
 --EXPECT--
 int(1)
-==DONE==

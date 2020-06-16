@@ -5,11 +5,11 @@ zend.enable_gc = 1
 --FILE--
 <?php
 class ryat {
-	    var $ryat;
+        var $ryat;
         var $chtg;
         var $nested;
-	    function __destruct() {
-	            $GLOBALS['x'] = $this;
+        function __destruct() {
+                $GLOBALS['x'] = $this;
         }
 }
 $o = new ryat;

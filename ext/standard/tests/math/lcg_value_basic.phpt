@@ -8,23 +8,23 @@ echo "MATHS test script started\n";
 
 echo "\n lcg_value tests...\n";
 for ($i = 0; $i < 100; $i++) {
-	$res = lcg_value();
+    $res = lcg_value();
 
-	if (!is_float($res) || $res < 0 || $res > 1) {
-		break;
-	}
+    if (!is_float($res) || $res < 0 || $res > 1) {
+        break;
+    }
 }
 
 if ($i != 100) {
-	echo "FAILED\n";
+    echo "FAILED\n";
 } else {
-	echo "PASSED\n";
+    echo "PASSED\n";
 }
 
 echo "MATHS test script completed\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 MATHS test script started
 
  lcg_value tests...

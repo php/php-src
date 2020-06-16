@@ -1,14 +1,14 @@
 <?php
 
-/** @return SimpleXMLElement|false */
-function simplexml_load_file(string $filename, ?string $class_name = SimpleXMLElement::class, int $options = 0, string $ns = '', bool $is_prefix = false) {}
+/** @generate-function-entries */
 
-/** @return SimpleXMLElement|false */
-function simplexml_load_string(string $data, ?string $class_name = SimpleXMLElement::class, int $options = 0, string $ns = '', bool $is_prefix = false) {}
+function simplexml_load_file(string $filename, ?string $class_name = SimpleXMLElement::class, int $options = 0, string $ns = '', bool $is_prefix = false): SimpleXMLElement|false {}
+
+function simplexml_load_string(string $data, ?string $class_name = SimpleXMLElement::class, int $options = 0, string $ns = '', bool $is_prefix = false): SimpleXMLElement|false {}
 
 function simplexml_import_dom(DOMNode $node, ?string $class_name = SimpleXMLElement::class): ?SimpleXMLElement {}
 
-class SimpleXMLElement
+class SimpleXMLElement implements Stringable
 {
     /** @return array|false */
     public function xpath(string $path) {}
@@ -19,7 +19,10 @@ class SimpleXMLElement
     /** @return string|bool */
     public function asXML(string $filename = UNKNOWN) {}
 
-    /** @return string|bool */
+    /**
+     * @return string|bool
+     * @alias SimpleXMLElement::asXML
+     */
     public function saveXML(string $filename = UNKNOWN) {}
 
     /** @return array */
@@ -45,8 +48,7 @@ class SimpleXMLElement
     /** @return string */
     public function getName() {}
 
-    /** @return string */
-    public function __toString() {}
+    public function __toString(): string {}
 
     /** @return int */
     public function count() {}

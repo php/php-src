@@ -3,8 +3,8 @@ SPL: FixedArray: Iterators
 --FILE--
 <?php
 class A extends SplFixedArray {
-	public $prop1 = "dummy";
-	public $prop2 = "dummy";
+    public $prop1 = "dummy";
+    public $prop2 = "dummy";
 
     public function current() {
         echo "A::current\n";
@@ -49,7 +49,6 @@ foreach ($a as $k => $v) {
     echo "$k => $v\n";
 }
 ?>
-===DONE===
 --EXPECT--
 ==Direct instance==
 0 => a
@@ -85,4 +84,3 @@ A::key
 4 => f
 A::next
 A::valid
-===DONE===

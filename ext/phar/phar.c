@@ -3428,6 +3428,7 @@ PHP_MSHUTDOWN_FUNCTION(phar) /* {{{ */
 		zend_hash_destroy(&(cached_alias));
 	}
 
+	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
 /* }}} */

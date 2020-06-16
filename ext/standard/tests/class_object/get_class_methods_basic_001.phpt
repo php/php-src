@@ -15,9 +15,9 @@ Test get_class_methods() function : basic functionality
 echo "*** Testing get_class_methods() : basic functionality ***\n";
 
 class C {
-	function f() {}
-	function g() {}
-	function h() {}
+    function f() {}
+    function g() {}
+    function h() {}
 }
 
 echo "Argument is class name:\n";

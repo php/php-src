@@ -7,13 +7,13 @@ interface I {
 }
 
 class C {
-	const FOO = I::FOO;
+    const FOO = I::FOO;
 
-	public $options = [self::FOO => "bar"];
+    public $options = [self::FOO => "bar"];
 }
 
 try {
-	var_dump((new C)->options);
+    var_dump((new C)->options);
 } catch (Throwable $e) {}
 
 var_dump((new C)->options);

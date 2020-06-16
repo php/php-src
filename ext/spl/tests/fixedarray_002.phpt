@@ -3,8 +3,8 @@ SPL: FixedArray: overloading
 --FILE--
 <?php
 class A extends SplFixedArray {
-	public $prop1 = NULL;
-	public $prop2 = NULL;
+    public $prop1 = NULL;
+    public $prop2 = NULL;
 
     public function count() {
         return 2;
@@ -67,7 +67,6 @@ var_dump($a[0], $a[2], $a[3], $a[4]);
 
 var_dump(count($a), $a->getSize(), count($a) == $a->getSize());
 ?>
-===DONE===
 --EXPECT--
 A::offsetSet
 Exception: Index invalid or out of range
@@ -100,4 +99,3 @@ string(6) "value4"
 int(2)
 int(10)
 bool(false)
-===DONE===

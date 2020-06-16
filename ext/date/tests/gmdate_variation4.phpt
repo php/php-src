@@ -27,7 +27,6 @@ var_dump( gmdate('S') );
 var_dump( gmdate('S', $timestamp) );
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing gmdate() : usage variation ***
 
@@ -42,4 +41,3 @@ string(6) "Friday"
 -- Testing gmdate() function with English ordinal suffix --
 string(%d) "%s"
 string(2) "th"
-===DONE===

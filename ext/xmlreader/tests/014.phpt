@@ -37,7 +37,6 @@ while ($reader->read()) {
 // clean up
 $reader->close();
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__.'/_014.xml');
@@ -48,4 +47,3 @@ Warning: main(): Cannot write to read-only property in %s on line %d
 Warning: main(): Cannot write to read-only property in %s on line %d
 
 Warning: main(): Cannot write to read-only property in %s on line %d
-===DONE===

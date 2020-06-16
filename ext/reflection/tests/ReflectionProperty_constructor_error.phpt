@@ -38,7 +38,7 @@ Non-existent class:
 Class NonExistentClass does not exist
 
 Wrong property parameter type:
-The parameter class is expected to be either a string or an object
+ReflectionProperty::__construct(): Argument #1 ($class) must be of type object|string, int given
 
 Non-existent property:
 Property TestClass::$nonExistentProperty does not exist

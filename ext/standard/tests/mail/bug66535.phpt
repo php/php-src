@@ -1,13 +1,8 @@
 --TEST--
 Bug #66535: Extra newline if add_x_header and no additional headers are used
 --INI--
-sendmail_path=tee mailBug66535.out >/dev/null
+sendmail_path={MAIL:mailBug66535.out}
 mail.add_x_header = On
---SKIPIF--
-<?php
-if(substr(PHP_OS, 0, 3) == "WIN")
-  die("skip Won't run on Windows");
-?>
 --FILE--
 <?php
 /* Prototype  : int mail(string to, string subject, string message [, string additional_headers [, string additional_parameters]])
@@ -31,7 +26,6 @@ echo file_get_contents($outFile);
 unlink($outFile);
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing mail() : send email without additional headers ***
 bool(true)
@@ -40,4 +34,3 @@ Subject: Test Subject
 X-PHP-Originating-Script: %d:bug66535.php
 
 A Message
-===DONE===

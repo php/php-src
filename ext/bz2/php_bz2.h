@@ -17,7 +17,7 @@
 #ifndef PHP_BZ2_H
 #define PHP_BZ2_H
 
-#if HAVE_BZ2
+#ifdef HAVE_BZ2
 
 extern zend_module_entry bz2_module_entry;
 #define phpext_bz2_ptr &bz2_module_entry

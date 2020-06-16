@@ -23,7 +23,7 @@ $stmt->execute();
 
 var_dump($db->query('SELECT * from test'));
 foreach ($db->query('SELECT * from test') as $row) {
-	print_r($row);
+    print_r($row);
 }
 
 ?>

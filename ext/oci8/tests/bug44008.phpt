@@ -13,9 +13,9 @@ require __DIR__.'/connect.inc';
 // Initialization
 
 $stmtarray = array(
-		"create or replace procedure bug44008_proc (p in out clob)
-		as begin p := 'A';
-		end;"
+        "create or replace procedure bug44008_proc (p in out clob)
+        as begin p := 'A';
+        end;"
 );
 
 oci8_test_sql_execute($c, $stmtarray);

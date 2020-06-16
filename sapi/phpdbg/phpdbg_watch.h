@@ -117,6 +117,7 @@ typedef struct {
 
 void phpdbg_setup_watchpoints(void);
 void phpdbg_destroy_watchpoints(void);
+void phpdbg_purge_watchpoint_tree(void);
 
 #ifndef _WIN32
 int phpdbg_watchpoint_segfault_handler(siginfo_t *info, void *context);

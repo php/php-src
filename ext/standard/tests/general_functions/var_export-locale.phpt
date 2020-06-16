@@ -58,12 +58,12 @@ $counter++;
 echo "*** Testing var_export() with valid boolean values ***\n";
 // different valid  boolean values
 $valid_bool = array(
-		    1,
-		    TRUE,
+            1,
+            TRUE,
                 true,
                 0,
-		    FALSE,
-		    false
+            FALSE,
+            false
                );
 $counter = 1;
 /* Loop to check for above boolean values with var_export() */
@@ -307,7 +307,7 @@ echo "\nDone";
 
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing var_export() with integer values ***
 
 *** Output for integer values ***

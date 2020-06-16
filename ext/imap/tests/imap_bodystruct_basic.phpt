@@ -17,7 +17,7 @@ require_once(__DIR__.'/imap_include.inc');
 echo "Create a new mailbox for test and add a multipart msgs\n";
 $imap_stream = setup_test_mailbox("", 1, $mailbox, "multipart");
 if (!is_resource($imap_stream)) {
-	exit("TEST FAILED: Unable to create test mailbox\n");
+    exit("TEST FAILED: Unable to create test mailbox\n");
 }
 
 echo "\nGet and validate structure of body part 1\n";
@@ -68,7 +68,6 @@ function isValid($param)
 return $result;
 }
 ?>
-===Done===
 --CLEAN--
 <?php
 require_once('clean.inc');
@@ -90,4 +89,3 @@ parameters is an array
 
 Try to get part 4!
 bool(false)
-===Done===

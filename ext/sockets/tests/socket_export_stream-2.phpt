@@ -14,7 +14,7 @@ try {
     echo $e->getMessage(), "\n";
 }
 try {
-    var_dump(socket_export_stream(stream_socket_server("udp://127.0.0.1:58392", $errno, $errstr, STREAM_SERVER_BIND)));
+    var_dump(socket_export_stream(stream_socket_server("udp://127.0.0.1:0", $errno, $errstr, STREAM_SERVER_BIND)));
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }

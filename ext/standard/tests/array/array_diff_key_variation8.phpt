@@ -12,7 +12,7 @@ echo "*** Testing array_diff_key() : usage variation ***\n";
 // Initialise function arguments not being substituted (if any)
 $array1 = array(
 
-	  'first' => array('blue' => 1, 'red' => 2),
+      'first' => array('blue' => 1, 'red' => 2),
 
       'second' => array('yellow' => 7),
 
@@ -21,7 +21,7 @@ $array1 = array(
 
 $array2 = array (
 
-	  'first' => array('blue' => 1, 'red' => 2,),
+      'first' => array('blue' => 1, 'red' => 2,),
 
       'second' => array('cyan' => 8),
 
@@ -32,7 +32,6 @@ echo "\n-- Testing array_diff_key() function with multi dimensional array --\n";
 var_dump( array_diff_key($array1, $array2) );
 var_dump( array_diff_key($array2, $array1) );
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_diff_key() : usage variation ***
 
@@ -51,4 +50,3 @@ array(1) {
     string(3) "two"
   }
 }
-===DONE===

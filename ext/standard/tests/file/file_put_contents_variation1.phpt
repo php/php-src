@@ -31,7 +31,6 @@ unlink($filename);
 
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing file_put_contents() : variation ***
 int(25)
@@ -40,4 +39,3 @@ int(18)
 The first string to write, followed by this
 25
 The first string to write
-===DONE===

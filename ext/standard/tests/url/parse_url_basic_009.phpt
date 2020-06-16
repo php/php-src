@@ -14,8 +14,8 @@ Test parse_url() function: Parse a load of URLs without specifying PHP_URL_FRAGM
 include_once(__DIR__ . '/urls.inc');
 
 foreach ($urls as $url) {
-	echo "--> $url   : ";
-	var_dump(parse_url($url, PHP_URL_FRAGMENT));
+    echo "--> $url   : ";
+    var_dump(parse_url($url, PHP_URL_FRAGMENT));
 }
 
 echo "Done";
@@ -54,7 +54,7 @@ echo "Done";
 --> http://www.php.net:80/index.php   : NULL
 --> http://www.php.net:80/index.php?   : NULL
 --> http://www.php.net:80/#foo   : string(3) "foo"
---> http://www.php.net:80/?#   : NULL
+--> http://www.php.net:80/?#   : string(0) ""
 --> http://www.php.net:80/?test=1   : NULL
 --> http://www.php.net/?test=1&   : NULL
 --> http://www.php.net:80/?&   : NULL
@@ -96,7 +96,7 @@ echo "Done";
 --> x:/blah.com   : NULL
 --> x://::abc/?   : bool(false)
 --> http://::?   : NULL
---> http://::#   : NULL
+--> http://::#   : string(0) ""
 --> x://::6.5   : NULL
 --> http://?:/   : bool(false)
 --> http://@?:/   : bool(false)

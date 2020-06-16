@@ -12,15 +12,13 @@ if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 <?php
 
 /* No way to affect timeout here. On different systems this might take some
-	dozens of seconds to complete. */
+    dozens of seconds to complete. */
 
 $s = '\\\\hello.com' . str_repeat('\\', 260);
 
 var_dump($s, @stat($s));
 
 ?>
-===DONE===
 --EXPECTF--
 string(271) "%s"
 bool(false)
-===DONE===

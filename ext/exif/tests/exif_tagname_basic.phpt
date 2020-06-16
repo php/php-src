@@ -20,10 +20,8 @@ var_dump(exif_tagname(0x10F));
 var_dump(exif_tagname(0x110));
 
 ?>
-===Done===
 --EXPECT--
 *** Testing exif_tagname() : basic functionality ***
 string(16) "ImageDescription"
 string(4) "Make"
 string(5) "Model"
-===Done===

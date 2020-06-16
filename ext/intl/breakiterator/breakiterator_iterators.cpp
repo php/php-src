@@ -24,6 +24,7 @@
 extern "C" {
 #define USE_BREAKITERATOR_POINTER
 #include "breakiterator_class.h"
+#include "breakiterator_arginfo.h"
 #include "../intl_convert.h"
 #include "../locale/locale.h"
 #include <zend_exceptions.h>
@@ -276,7 +277,7 @@ U_CFUNC PHP_METHOD(IntlPartsIterator, getBreakIterator)
 	INTLITERATOR_METHOD_INIT_VARS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	INTLITERATOR_METHOD_FETCH_OBJECT;
@@ -285,20 +286,12 @@ U_CFUNC PHP_METHOD(IntlPartsIterator, getBreakIterator)
 	ZVAL_COPY_DEREF(return_value, biter_zval);
 }
 
-ZEND_BEGIN_ARG_INFO_EX(ainfo_parts_it_void, 0, 0, 0)
-ZEND_END_ARG_INFO()
-
-static const zend_function_entry IntlPartsIterator_class_functions[] = {
-	PHP_ME(IntlPartsIterator,	getBreakIterator,	ainfo_parts_it_void,	ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};
-
 U_CFUNC void breakiterator_register_IntlPartsIterator_class(void)
 {
 	zend_class_entry ce;
 
 	/* Create and register 'BreakIterator' class. */
-	INIT_CLASS_ENTRY(ce, "IntlPartsIterator", IntlPartsIterator_class_functions);
+	INIT_CLASS_ENTRY(ce, "IntlPartsIterator", class_IntlPartsIterator_methods);
 	IntlPartsIterator_ce_ptr = zend_register_internal_class_ex(&ce,
 			IntlIterator_ce_ptr);
 	IntlPartsIterator_ce_ptr->create_object = IntlPartsIterator_object_create;

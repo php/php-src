@@ -17,7 +17,7 @@
 #ifndef PHP_SYSVSEM_H
 #define PHP_SYSVSEM_H
 
-#if HAVE_SYSVSEM
+#ifdef HAVE_SYSVSEM
 
 extern zend_module_entry sysvsem_module_entry;
 #define sysvsem_module_ptr &sysvsem_module_entry
@@ -27,24 +27,14 @@ extern zend_module_entry sysvsem_module_entry;
 
 PHP_MINIT_FUNCTION(sysvsem);
 PHP_MINFO_FUNCTION(sysvsem);
-PHP_FUNCTION(sem_get);
-PHP_FUNCTION(sem_acquire);
-PHP_FUNCTION(sem_release);
-PHP_FUNCTION(sem_remove);
 
 typedef struct {
-	int le_sem;
-} sysvsem_module;
-
-typedef struct {
-	int id;						/* For error reporting. */
 	int key;					/* For error reporting. */
 	int semid;					/* Returned by semget(). */
 	int count;					/* Acquire count for auto-release. */
 	int auto_release;			/* flag that says to auto-release. */
+	zend_object std;
 } sysvsem_sem;
-
-extern sysvsem_module php_sysvsem_module;
 
 #else
 

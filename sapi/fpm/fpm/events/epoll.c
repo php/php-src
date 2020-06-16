@@ -19,7 +19,7 @@
 #include "../fpm.h"
 #include "../zlog.h"
 
-#if HAVE_EPOLL
+#ifdef HAVE_EPOLL
 
 #include <sys/epoll.h>
 #include <errno.h>
@@ -48,7 +48,7 @@ static int epollfd = -1;
 
 struct fpm_event_module_s *fpm_event_epoll_module() /* {{{ */
 {
-#if HAVE_EPOLL
+#ifdef HAVE_EPOLL
 	return &epoll_module;
 #else
 	return NULL;
@@ -56,7 +56,7 @@ struct fpm_event_module_s *fpm_event_epoll_module() /* {{{ */
 }
 /* }}} */
 
-#if HAVE_EPOLL
+#ifdef HAVE_EPOLL
 
 /*
  * Init the module

@@ -21,11 +21,9 @@ var_dump( gmstrftime($format) );
 var_dump( gmstrftime($format, $timestamp) );
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing gmstrftime() : usage variation ***
 
 -- Testing gmstrftime() function with  Abbreviated month name format %h --
 string(%d) "%s"
 string(3) "Aug"
-===DONE===

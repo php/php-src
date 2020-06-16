@@ -23,5 +23,5 @@ try {
 }
 ?>
 --EXPECT--
-ReflectionMethod::invoke() expects parameter 1 to be object, string given
-ReflectionMethod::invokeArgs() expects parameter 1 to be object, string given
+ReflectionMethod::invoke(): Argument #1 ($object) must be of type ?object, string given
+ReflectionMethod::invokeArgs(): Argument #1 ($object) must be of type ?object, string given

@@ -20,15 +20,8 @@
 #endif
 
 #include "php.h"
-#if HAVE_LIBXML && HAVE_DOM
+#if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
-
-
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_cdatasection_construct, 0, 0, 1)
-	ZEND_ARG_INFO(0, value)
-ZEND_END_ARG_INFO();
-/* }}} */
 
 /*
 * class DOMCdataSection extends DOMText
@@ -37,28 +30,23 @@ ZEND_END_ARG_INFO();
 * Since:
 */
 
-const zend_function_entry php_dom_cdatasection_class_functions[] = {
-	PHP_ME(domcdatasection, __construct, arginfo_dom_cdatasection_construct, ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};
-
 /* {{{ proto DOMCdataSection::__construct(string value); */
-PHP_METHOD(domcdatasection, __construct)
+PHP_METHOD(DOMCdataSection, __construct)
 {
 	xmlNodePtr nodep = NULL, oldnode = NULL;
 	dom_object *intern;
 	char *value = NULL;
 	size_t value_len;
 
-	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s", &value, &value_len) == FAILURE) {
-		return;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &value, &value_len) == FAILURE) {
+		RETURN_THROWS();
 	}
 
 	nodep = xmlNewCDataBlock(NULL, (xmlChar *) value, value_len);
 
 	if (!nodep) {
 		php_dom_throw_error(INVALID_STATE_ERR, 1);
-		RETURN_FALSE;
+		return;
 	}
 
 	intern = Z_DOMOBJ_P(ZEND_THIS);

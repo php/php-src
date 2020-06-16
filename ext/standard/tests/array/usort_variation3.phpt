@@ -74,7 +74,6 @@ var_dump( usort($array_arg, 'cmp_function') );
 echo "\n-- Sorted array after usort() function call --\n";
 var_dump($array_arg);
 ?>
-===DONE===
 --EXPECT--
 *** Testing usort() : usage variation ***
 bool(true)
@@ -112,4 +111,3 @@ array(15) {
   [14]=>
   int(0)
 }
-===DONE===

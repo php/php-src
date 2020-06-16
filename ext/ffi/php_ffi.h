@@ -36,6 +36,7 @@ ZEND_BEGIN_MODULE_GLOBALS(ffi)
 	HashTable types;
 
 	/* preloading */
+	char *preload;
 	HashTable *scopes;           /* list of preloaded scopes */
 
 	/* callbacks */
@@ -129,6 +130,7 @@ ZEND_EXTERN_MODULE_GLOBALS(ffi)
 #define	ZEND_FFI_ABI_REGISTER       6  // FFI_REGISTER
 #define	ZEND_FFI_ABI_MS             7  // FFI_MS_CDECL
 #define	ZEND_FFI_ABI_SYSV           8  // FFI_SYSV
+#define ZEND_FFI_ABI_VECTORCALL     9  // FFI_VECTORCALL
 
 #define ZEND_FFI_ATTR_CONST             (1<<0)
 #define ZEND_FFI_ATTR_INCOMPLETE_TAG    (1<<1)
@@ -196,7 +198,7 @@ typedef struct _zend_ffi_val {
 		uint64_t        u64;
 		int64_t         i64;
 		zend_ffi_double d;
-		char            ch;
+		signed char     ch;
 		struct {
 			const char *str;
 			size_t      len;

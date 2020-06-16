@@ -14,15 +14,13 @@ echo "*** Testing get_include_path()\n";
 var_dump(get_include_path());
 
 if (ini_get("include_path") == get_include_path()) {
-	echo "PASSED\n";
+    echo "PASSED\n";
 } else {
-	echo "FAILED\n";
+    echo "FAILED\n";
 }
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing get_include_path()
 string(1) "."
 PASSED
-===DONE===

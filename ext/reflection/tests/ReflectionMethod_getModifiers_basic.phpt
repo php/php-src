@@ -52,7 +52,7 @@ class TestClass
 
     public function __wakeup() {}
 
-    public function __set_state() {}
+    public static function __set_state() {}
 
     public function __autoload() {}
 }
@@ -60,12 +60,12 @@ class TestClass
 class DerivedClass extends TestClass {}
 
 interface TestInterface {
-	public function int();
-	public function __clone();
+    public function int();
+    public function __clone();
 }
 
 abstract class AbstractClass {
-	public abstract function foo();
+    public abstract function foo();
 }
 
 
@@ -81,7 +81,7 @@ echo "ReflectionMethod::getModifiers() modifiers:\n";
 printf("0x%08x\n", $a->getModifiers());
 
 ?>
---EXPECTF--
+--EXPECT--
 Modifiers for method TestClass::foo():
 0x00000001
 
@@ -143,7 +143,7 @@ Modifiers for method TestClass::__wakeup():
 
 
 Modifiers for method TestClass::__set_state():
-0x00000001
+0x00000011
 
 
 Modifiers for method TestClass::__autoload():
@@ -158,10 +158,6 @@ Modifiers for method TestClass::stat():
 0x00000011
 
 
-Modifiers for method TestClass::priv():
-0x00000004
-
-
 Modifiers for method TestClass::prot():
 0x00000002
 
@@ -211,7 +207,7 @@ Modifiers for method TestClass::__wakeup():
 
 
 Modifiers for method TestClass::__set_state():
-0x00000001
+0x00000011
 
 
 Modifiers for method TestClass::__autoload():

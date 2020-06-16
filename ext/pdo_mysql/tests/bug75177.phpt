@@ -21,13 +21,11 @@ $pdo->query("INSERT INTO $tbl (`bit`) VALUES (0b01100)");
 $ret = $pdo->query("SELECT * FROM $tbl")->fetchAll();
 
 foreach ($ret as $i) {
-	var_dump($i["bit"]);
+    var_dump($i["bit"]);
 }
 
 ?>
-==DONE==
 --EXPECT--
 string(1) "1"
 string(1) "3"
 string(2) "12"
-==DONE==

@@ -134,7 +134,7 @@ fclose($fp);
 closedir($dfp);
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing is_bool() with valid boolean values ***
 -- Iteration 1 --
 bool(true)

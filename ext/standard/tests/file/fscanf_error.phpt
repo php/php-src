@@ -19,7 +19,7 @@ fclose($file_handle);
 
 // invalid file handle
 try {
-    var_dump( fscanf($file_handle, "%s") );
+    fscanf($file_handle, "%s");
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
@@ -28,7 +28,11 @@ try {
 $file_handle = fopen($filename, 'r');
 if ($file_handle == false)
   exit("Error:failed to open file $filename");
-var_dump( fscanf($file_handle, "%d%s%f", $int_var, $string_var) );
+try {
+    fscanf($file_handle, "%d%s%f", $int_var, $string_var);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 fclose($file_handle);
 
 // different invalid format strings
@@ -42,7 +46,11 @@ foreach($invalid_formats as $format)  {
   $file_handle = fopen($filename, 'r');
   if ($file_handle == false)
     exit("Error:failed to open file $filename");
-  var_dump( fscanf($file_handle, $format) );
+  try {
+    var_dump(fscanf($file_handle, $format));
+  } catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+  }
   fclose($file_handle);
 }
 
@@ -57,24 +65,14 @@ unlink($filename);
 --EXPECTF--
 *** Testing fscanf() for error conditions ***
 fscanf(): supplied resource is not a valid File-Handle resource
+Different numbers of variable names and field specifiers
 
-Warning: fscanf(): Different numbers of variable names and field specifiers in %s on line %d
-int(-1)
-
-Warning: Undefined variable: undefined_var in %s on line %d
+Warning: Undefined variable $undefined_var in %s on line %d
 array(0) {
 }
-
-Warning: fscanf(): Bad scan conversion character " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character "." in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character "m" in %s on line %d
-NULL
+Bad scan conversion character "
+Bad scan conversion character "
+Bad scan conversion character "."
+Bad scan conversion character "m"
 
 *** Done ***

@@ -24,7 +24,6 @@ var_dump($ar2);
 
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_multisort() : basic functionality ***
 
@@ -57,4 +56,3 @@ array(3) {
   ["row1"]=>
   int(2)
 }
-===DONE===

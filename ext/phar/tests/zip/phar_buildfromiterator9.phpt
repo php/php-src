@@ -36,16 +36,15 @@ class myIterator implements Iterator
     }
 }
 try {
-	chdir(__DIR__);
-	$phar = new Phar(__DIR__ . '/buildfromiterator.phar');
-	var_dump($phar->buildFromIterator(new myIterator(array('a' => $a = fopen(basename(__FILE__, 'php') . 'phpt', 'r')))));
-	fclose($a);
+    chdir(__DIR__);
+    $phar = new Phar(__DIR__ . '/buildfromiterator.phar');
+    var_dump($phar->buildFromIterator(new myIterator(array('a' => $a = fopen(basename(__FILE__, 'php') . 'phpt', 'r')))));
+    fclose($a);
 } catch (Exception $e) {
-	var_dump(get_class($e));
-	echo $e->getMessage() . "\n";
+    var_dump(get_class($e));
+    echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/buildfromiterator.phar');
@@ -62,4 +61,3 @@ array(1) {
   ["a"]=>
   string(%d) "[stream]"
 }
-===DONE===

@@ -14,7 +14,6 @@ $pizza  = "piece1 piece2 piece3 piece4 piece5 piece6 p";
 $pieces = explode(" p", $pizza);
 var_dump($pieces);
 ?>
-===DONE===
 --EXPECT--
 *** Testing explode() function: match longer string ***
 array(7) {
@@ -33,4 +32,3 @@ array(7) {
   [6]=>
   string(0) ""
 }
-===DONE===

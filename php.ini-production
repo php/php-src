@@ -306,12 +306,12 @@ serialize_precision = -1
 ; http://php.net/open-basedir
 ;open_basedir =
 
-; This directive allows you to disable certain functions for security reasons.
+; This directive allows you to disable certain functions.
 ; It receives a comma-delimited list of function names.
 ; http://php.net/disable-functions
 disable_functions =
 
-; This directive allows you to disable certain classes for security reasons.
+; This directive allows you to disable certain classes.
 ; It receives a comma-delimited list of class names.
 ; http://php.net/disable-classes
 disable_classes =
@@ -404,7 +404,7 @@ max_input_time = 60
 ; How many GET/POST/COOKIE input variables may be accepted
 ;max_input_vars = 1000
 
-; Maximum amount of memory a script may consume (128MB)
+; Maximum amount of memory a script may consume
 ; http://php.net/memory-limit
 memory_limit = 128M
 
@@ -901,6 +901,7 @@ default_socket_timeout = 60
 ;extension=bz2
 ;extension=curl
 ;extension=ffi
+;extension=ftp
 ;extension=fileinfo
 ;extension=gd2
 ;extension=gettext
@@ -932,8 +933,9 @@ default_socket_timeout = 60
 ;extension=sodium
 ;extension=sqlite3
 ;extension=tidy
-;extension=xmlrpc
 ;extension=xsl
+
+;zend_extension=opcache
 
 ;;;;;;;;;;;;;;;;;;;
 ; Module Settings ;
@@ -1375,7 +1377,8 @@ session.cookie_domain =
 session.cookie_httponly =
 
 ; Add SameSite attribute to cookie to help mitigate Cross-Site Request Forgery (CSRF/XSRF)
-; Current valid values are "Lax" or "Strict"
+; Current valid values are "Strict", "Lax" or "None". When using "None",
+; make sure to include the quotes, as `none` is interpreted like `false` in ini files.
 ; https://tools.ietf.org/html/draft-west-first-party-cookies-07
 session.cookie_samesite =
 
@@ -1383,12 +1386,9 @@ session.cookie_samesite =
 ; http://php.net/session.serialize-handler
 session.serialize_handler = php
 
-; Defines the probability that the 'garbage collection' process is started
-; on every session initialization. The probability is calculated by using
-; gc_probability/gc_divisor. Where session.gc_probability is the numerator
-; and gc_divisor is the denominator in the equation. Setting this value to 1
-; when the session.gc_divisor value is 100 will give you approximately a 1% chance
-; the gc will run on any given request.
+; Defines the probability that the 'garbage collection' process is started on every
+; session initialization. The probability is calculated by using gc_probability/gc_divisor,
+; e.g. 1/100 means there is a 1% chance that the GC process starts on each request.
 ; Default Value: 1
 ; Development Value: 1
 ; Production Value: 1
@@ -1396,13 +1396,9 @@ session.serialize_handler = php
 session.gc_probability = 1
 
 ; Defines the probability that the 'garbage collection' process is started on every
-; session initialization. The probability is calculated by using the following equation:
-; gc_probability/gc_divisor. Where session.gc_probability is the numerator and
-; session.gc_divisor is the denominator in the equation. Setting this value to 100
-; when the session.gc_probability value is 1 will give you approximately a 1% chance
-; the gc will run on any given request. Increasing this value to 1000 will give you
-; a 0.1% chance the gc will run on any given request. For high volume production servers,
-; this is a more efficient approach.
+; session initialization. The probability is calculated by using gc_probability/gc_divisor,
+; e.g. 1/100 means there is a 1% chance that the GC process starts on each request.
+; For high volume production servers, using a value of 1000 is a more efficient approach.
 ; Default Value: 100
 ; Development Value: 1000
 ; Production Value: 1000
@@ -1418,8 +1414,8 @@ session.gc_maxlifetime = 1440
 ;       (see session.save_path above), then garbage collection does *not*
 ;       happen automatically.  You will need to do your own garbage
 ;       collection through a shell script, cron entry, or some other method.
-;       For example, the following script would is the equivalent of
-;       setting session.gc_maxlifetime to 1440 (1440 seconds = 24 minutes):
+;       For example, the following script is the equivalent of setting
+;       session.gc_maxlifetime to 1440 (1440 seconds = 24 minutes):
 ;          find /path/to/sessions -cmin +24 -type f | xargs rm
 
 ; Check HTTP Referer to invalidate externally stored URLs containing ids.
@@ -1781,6 +1777,11 @@ ldap.max_links = -1
 ; size of the optimized code.
 ;opcache.save_comments=1
 
+; If enabled, compilation warnings (including notices and deprecations) will
+; be recorded and replayed each time a file is included. Otherwise, compilation
+; warnings will only be emitted when the file is first cached.
+;opcache.record_warnings=0
+
 ; Allow file existence override (file_exists, etc.) performance feature.
 ;opcache.enable_file_override=0
 
@@ -1915,8 +1916,11 @@ ldap.max_links = -1
 ;openssl.capath=
 
 [ffi]
-; FFI API restriction. Possibe values:
+; FFI API restriction. Possible values:
 ; "preload" - enabled in CLI scripts and preloaded files (default)
 ; "false"   - always disabled
 ; "true"    - always enabled
 ;ffi.enable=preload
+
+; List of headers files to preload, wildcard patterns allowed.
+;ffi.preload=

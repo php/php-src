@@ -6,26 +6,26 @@ FFI 024: anonymous struct/union
 ffi.enable=1
 --FILE--
 <?php
-	$p = FFI::new("
-	struct {
-		int a;
-		struct {
-			int b;
-			int c;
-		};
-		union {
-			int d;
-			uint32_t e;
-		};
-		int f;
-	}");
-	var_dump(FFI::sizeof($p));
-	$p->a = 1;
-	$p->b = 2;
-	$p->c = 3;
-	$p->d = 4;
-	$p->f = 5;
-	var_dump($p);
+    $p = FFI::new("
+    struct {
+        int a;
+        struct {
+            int b;
+            int c;
+        };
+        union {
+            int d;
+            uint32_t e;
+        };
+        int f;
+    }");
+    var_dump(FFI::sizeof($p));
+    $p->a = 1;
+    $p->b = 2;
+    $p->c = 3;
+    $p->d = 4;
+    $p->f = 5;
+    var_dump($p);
 ?>
 --EXPECTF--
 int(20)

@@ -32,7 +32,6 @@ echo "\n-- Trim the ASCII control characters at the beginning of a string --\n";
 var_dump(ltrim($binary, "\x00..\x1F"));
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing ltrim() : basic functionality ***
 
@@ -50,4 +49,3 @@ string(10) "0123456789"
 
 -- Trim the ASCII control characters at the beginning of a string --
 string(14) "Example string"
-===DONE===

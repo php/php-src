@@ -9,11 +9,11 @@ error_reporting=2039
 /* charset=EUC-JP */
 
 function hexdump($str) {
-	$len = strlen($str);
-	for ($i = 0; $i < $len; ++$i) {
-		printf("%02x", ord($str{$i}));
-	}
-	print "\n";
+    $len = strlen($str);
+    for ($i = 0; $i < $len; ++$i) {
+        printf("%02x", ord($str[$i]));
+    }
+    print "\n";
 }
 
 $str = str_repeat("日本語テキストと English text", 30);

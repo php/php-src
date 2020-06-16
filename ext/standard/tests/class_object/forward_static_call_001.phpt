@@ -5,41 +5,41 @@ forward_static_call() called from outside of a method.
 
 class A
 {
-	const NAME = 'A';
-	public static function test() {
-		echo static::NAME, "\n";
-	}
+    const NAME = 'A';
+    public static function test() {
+        echo static::NAME, "\n";
+    }
 }
 
 class B extends A
 {
-	const NAME = 'B';
+    const NAME = 'B';
 
-	public static function test() {
-		echo self::NAME, "\n";
-		forward_static_call(array('parent', 'test'));
-	}
+    public static function test() {
+        echo self::NAME, "\n";
+        forward_static_call(array('parent', 'test'));
+    }
 
-	public static function test2() {
-		echo self::NAME, "\n";
-		forward_static_call(array('self', 'test'));
-	}
+    public static function test2() {
+        echo self::NAME, "\n";
+        forward_static_call(array('self', 'test'));
+    }
 
-	public static function test3() {
-		echo self::NAME, "\n";
-		forward_static_call(array('A', 'test'));
-	}
+    public static function test3() {
+        echo self::NAME, "\n";
+        forward_static_call(array('A', 'test'));
+    }
 }
 
 class C extends B
 {
-	const NAME = 'C';
+    const NAME = 'C';
 
-	public static function test()
-	{
-		echo self::NAME, "\n";
-		forward_static_call(array('A', 'test'));
-	}
+    public static function test()
+    {
+        echo self::NAME, "\n";
+        forward_static_call(array('A', 'test'));
+    }
 }
 
 A::test();
@@ -57,7 +57,6 @@ echo "-\n";
 C::test3();
 
 ?>
-===DONE===
 --EXPECT--
 A
 -
@@ -80,4 +79,3 @@ C
 -
 B
 C
-===DONE===

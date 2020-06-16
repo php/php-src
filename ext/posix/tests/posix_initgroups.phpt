@@ -11,5 +11,5 @@ if (!function_exists('posix_initgroups')) die('skip posix_initgroups() not found
 var_dump(posix_initgroups(NULL, NULL));
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(false)

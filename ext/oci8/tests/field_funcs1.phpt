@@ -50,15 +50,6 @@ var_dump(oci_field_scale($s, "none"));
 var_dump(oci_field_precision($s, "none"));
 var_dump(oci_field_size($s, "none"));
 
-echo "Test 3\n";
-var_dump(oci_field_is_null($c, -1));
-var_dump(oci_field_name($c, -1));
-var_dump(oci_field_type($c, -1));
-var_dump(oci_field_type_raw($c, -1));
-var_dump(oci_field_scale($c, -1));
-var_dump(oci_field_precision($c, -1));
-var_dump(oci_field_size($c, -1));
-
 echo "Test 4\n";
 var_dump(oci_field_is_null($s, array()));
 var_dump(oci_field_name($s, array()));
@@ -67,9 +58,6 @@ var_dump(oci_field_type_raw($s, array()));
 var_dump(oci_field_scale($s, array()));
 var_dump(oci_field_precision($s, array()));
 var_dump(oci_field_size($s, array()));
-
-var_dump(oci_field_size($s));
-
 
 // Cleanup
 
@@ -133,28 +121,6 @@ bool(false)
 
 Warning: oci_field_size(): Invalid column name "none" in %s on line %d
 bool(false)
-Test 3
-
-Warning: oci_field_is_null(): supplied resource is not a valid oci8 statement resource in %s on line %d
-bool(false)
-
-Warning: oci_field_name(): supplied resource is not a valid oci8 statement resource in %s on line %d
-bool(false)
-
-Warning: oci_field_type(): supplied resource is not a valid oci8 statement resource in %s on line %d
-bool(false)
-
-Warning: oci_field_type_raw(): supplied resource is not a valid oci8 statement resource in %s on line %d
-bool(false)
-
-Warning: oci_field_scale(): supplied resource is not a valid oci8 statement resource in %s on line %d
-bool(false)
-
-Warning: oci_field_precision(): supplied resource is not a valid oci8 statement resource in %s on line %d
-bool(false)
-
-Warning: oci_field_size(): supplied resource is not a valid oci8 statement resource in %s on line %d
-bool(false)
 Test 4
 
 Warning: oci_field_is_null(): Invalid column index "0" in %s on line %d
@@ -176,8 +142,5 @@ Warning: oci_field_precision(): Invalid column index "0" in %s on line %d
 bool(false)
 
 Warning: oci_field_size(): Invalid column index "0" in %s on line %d
-bool(false)
-
-Warning: oci_field_size() expects exactly 2 parameters, 1 given in %s on line %d
 bool(false)
 Done

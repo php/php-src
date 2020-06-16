@@ -10,6 +10,8 @@ skip_if_no_required_exts();
 skip_if_wrong_cp(950, "ansi");
 
 ?>
+--CONFLICTS--
+dir_big5
 --INI--
 internal_encoding=big5
 --FILE--
@@ -39,7 +41,6 @@ var_dump(rmdir($subpath));
 remove_data("dir_big5");
 
 ?>
-===DONE===
 --EXPECTF--
 bool(true)
 bool(true)
@@ -51,4 +52,3 @@ bool(true)
 string(%d) "%s測試多字節路徑5\測試多字節路徑4"
 Active code page: %d
 bool(true)
-===DONE===

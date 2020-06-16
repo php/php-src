@@ -25,7 +25,6 @@
 #include "../common/common_date.h"
 #include "dateformat.h"
 #include "dateformat_class.h"
-#include "dateformat_format.h"
 #include "dateformat_data.h"
 
 /* {{{
@@ -161,7 +160,7 @@ PHP_FUNCTION(datefmt_format)
 			&object, IntlDateFormatter_ce_ptr, &zarg) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "datefmt_format: unable "
 				"to parse input params", 0 );
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	DATE_FORMAT_METHOD_FETCH_OBJECT;

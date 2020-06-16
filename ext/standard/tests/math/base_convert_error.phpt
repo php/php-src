@@ -14,9 +14,16 @@ class classA
 {
 }
 
-echo "Incorrect input\n";
-base_convert(1234, 1, 10);
-base_convert(1234, 10, 37);
+try {
+    base_convert(1234, 1, 10);
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    base_convert(1234, 10, 37);
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 try {
     base_convert(new classA(), 8, 10);
@@ -25,11 +32,8 @@ try {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing base_convert() : error conditions ***
-Incorrect input
-
-Warning: base_convert(): Invalid `from base' (1) in %s on line %d
-
-Warning: base_convert(): Invalid `to base' (37) in %s on line %d
+base_convert(): Argument #2 ($frombase) must be between 2 and 36 (inclusive)
+base_convert(): Argument #3 ($tobase) must be between 2 and 36 (inclusive)
 Object of class classA could not be converted to string

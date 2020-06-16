@@ -18,7 +18,7 @@
 #ifndef PHP_LIBXML_H
 #define PHP_LIBXML_H
 
-#if HAVE_LIBXML
+#ifdef HAVE_LIBXML
 extern zend_module_entry libxml_module_entry;
 #define libxml_module_ptr &libxml_module_entry
 

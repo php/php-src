@@ -31,7 +31,7 @@ ZEND_API void zend_llist_init(zend_llist *l, size_t size, llist_dtor_func_t dtor
 	l->persistent = persistent;
 }
 
-ZEND_API void zend_llist_add_element(zend_llist *l, void *element)
+ZEND_API void zend_llist_add_element(zend_llist *l, const void *element)
 {
 	zend_llist_element *tmp = pemalloc(sizeof(zend_llist_element)+l->size-1, l->persistent);
 
@@ -49,7 +49,7 @@ ZEND_API void zend_llist_add_element(zend_llist *l, void *element)
 }
 
 
-ZEND_API void zend_llist_prepend_element(zend_llist *l, void *element)
+ZEND_API void zend_llist_prepend_element(zend_llist *l, const void *element)
 {
 	zend_llist_element *tmp = pemalloc(sizeof(zend_llist_element)+l->size-1, l->persistent);
 

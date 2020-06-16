@@ -21,11 +21,9 @@ var_dump( strftime($format) );
 var_dump( strftime($format, $timestamp) );
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing strftime() : usage variation ***
 
 -- Testing strftime() function with  Abbreviated month name format %h --
 string(%d) "%s"
 string(3) "Aug"
-===DONE===

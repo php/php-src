@@ -32,7 +32,6 @@ var_dump( array_diff_uassoc($array1, $array2, "strcasecmp") );
 var_dump( array_diff_uassoc($array2, $array1, "strcasecmp") );
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_diff_uassoc() : usage variation ***
 
@@ -65,4 +64,3 @@ array(0) {
 }
 array(0) {
 }
-===DONE===

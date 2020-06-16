@@ -21,7 +21,7 @@
 #include "sha1.h"
 #include "md5.h"
 
-PHPAPI void make_sha1_digest(char *sha1str, unsigned char *digest)
+PHPAPI void make_sha1_digest(char *sha1str, const unsigned char *digest)
 {
 	make_digest_ex(sha1str, digest, 20);
 }

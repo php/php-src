@@ -35,9 +35,9 @@ var_dump( array_filter($input, 'dump2', true) );
 echo "*** Testing array_filter() : usage variations - 'callback' expecting second argument ***\n";
 
 try {
-	var_dump( array_filter($small, 'dump', false) );
+    var_dump( array_filter($small, 'dump', false) );
 } catch (Throwable $e) {
-	echo "Exception: " . $e->getMessage() . "\n";
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 
 echo "*** Testing array_filter() with various use types ***\n";
@@ -56,7 +56,7 @@ try {
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_filter() : usage variations - using array keys in 'callback' ***
 0 = 0
 1 = 1

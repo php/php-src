@@ -28,5 +28,5 @@ string(%d) "%s"
 bool(true)
 string(6) "abdcde"
 
-Warning: inflate_add(): dictionary does not match expected dictionary (incorrect adler32 hash) in %s on line %d
+Warning: inflate_add(): Dictionary does not match expected dictionary (incorrect adler32 hash) in %s on line %d
 bool(false)

@@ -485,7 +485,7 @@ class Client
     }
 
     /**
-     * Execute a request to the FastCGI application asyncronously
+     * Execute a request to the FastCGI application asynchronously
      *
      * This sends request to application and returns the assigned ID for that request.
      *
@@ -508,7 +508,7 @@ class Client
         // Pick random number between 1 and max 16 bit unsigned int 65535
         $id = mt_rand(1, (1 << 16) - 1);
 
-        // Using persistent sockets implies you want them keept alive by server!
+        // Using persistent sockets implies you want them kept alive by server!
         $keepAlive = intval($this->_keepAlive || $this->_persistentSocket);
 
         $request = $this->buildPacket(

@@ -22,7 +22,5 @@ PHP_MSHUTDOWN_FUNCTION(assert);
 PHP_RINIT_FUNCTION(assert);
 PHP_RSHUTDOWN_FUNCTION(assert);
 PHP_MINFO_FUNCTION(assert);
-PHP_FUNCTION(assert);
-PHP_FUNCTION(assert_options);
 
 #endif /* PHP_ASSERT_H */

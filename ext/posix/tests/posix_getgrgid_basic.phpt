@@ -6,7 +6,7 @@ Test posix_getgrgid() function : basic functionality
 ?>
 --FILE--
 <?php
-  echo "Basic test of POSIX getgid and getgrid fucntions\n";
+  echo "Basic test of POSIX getgid and getgrid functions\n";
 
   $gid = posix_getgid();
   $groupinfo = posix_getgrgid($gid);
@@ -14,9 +14,8 @@ Test posix_getgrgid() function : basic functionality
   print_r($groupinfo);
 
 ?>
-===DONE===
 --EXPECTF--
-Basic test of POSIX getgid and getgrid fucntions
+Basic test of POSIX getgid and getgrid functions
 Array
 (
     [name] => %s
@@ -26,4 +25,3 @@ Array
 
     [gid] => %d
 )
-===DONE===

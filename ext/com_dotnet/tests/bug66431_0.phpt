@@ -22,12 +22,11 @@ $result = ($check_text == $text);
 var_dump($result);
 
 if (!$result) {
-	echo "Expected: '$check_text'\n";
-	echo "Have: '$text'\n";
+    echo "Expected: '$check_text'\n";
+    echo "Have: '$text'\n";
 }
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 
@@ -39,4 +38,3 @@ if (file_exists($fpath)) {
 ?>
 --EXPECT--
 bool(true)
-===DONE===

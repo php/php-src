@@ -202,6 +202,8 @@
     ssh lists.php.net
     sudo -u ezmlm ezmlm-sub ~ezmlm/primary-qa-tester/mod moderator-email-address
     ```
+ 6. For RCs, post tweet with release announcement (and link to news article on
+    php.net) ([@official_php](https://twitter.com/official_php))  
 
 ## Rolling a stable release
 
@@ -291,11 +293,15 @@
     instead of the release xml.
 
  4. Update `php-qa/include/release-qa.php` and add the next version as an
-    QARELEASE (prepare for next RC).
+    QARELEASE (prepare for next RC). Keep `active => true` until there will be
+    no more QA releases. Setting the release number to 0 is sufficient to
+    remove the old QA release from the available QA releases list.
 
  5. Update the ChangeLog file for the given major version
 
     e.g. `ChangeLog-7.php` from the `NEWS` file
+
+    * You may want to try `php-web/bin/news2html` to automate this task.
 
     * Go over the list and put every element on one line.
     * Check for `&`, `<` and `>` and escape them if necessary.
@@ -312,13 +318,12 @@
 
         V. `s/FR #\([0-9]\+\)/FR <?php bugl(\1); ?>/`
 
-    * You may want to try `php-web/bin/news2html` to automate this task.
-
  6. Add a short notice to phpweb stating that there is a new release, and
     highlight the major important things (security fixes) and when it is
     important to upgrade.
 
     * Call `php bin/createNewsEntry` in your local phpweb checkout.
+    * Use the "frontpage" and "releases" category.
     * Add the content for the news entry.
 
  7. Commit and push all the changes to their respective git repos
@@ -338,6 +343,9 @@
     php-announce@ is its own completely separate email. This is to make sure
     that replies to the announcement on php-general@ or internals@ will not
     accidentally hit the php-announce@ mailinglist.
+    
+11. Post tweet with release announcement and link to news article on php.net 
+    ([@official_php](https://twitter.com/official_php))  
 
 ## Re-releasing the same version (or -pl)
 
@@ -417,7 +425,14 @@
  2. Timely get used to the differences in preparing and announcing a stable
     release.
 
+ 3. Before releasing X.Y.0, merge the NEWS entries of the pre-releases, so that
+    there is only a single section about PHP X.Y.0, instead of individual
+    sections for each pre-release.
+
 ## Prime the selection of the Release Managers of the next version
+
+This should be done by one of the release managers of the latest release
+branch:
 
  1. About three months before the scheduled release of the first alpha of the
     next minor or major release, issue a call for volunteers on

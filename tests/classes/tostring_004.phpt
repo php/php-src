@@ -28,9 +28,9 @@ try {
 
 echo "\n\nObject with bad __toString():\n";
 class badToString {
-	function __toString() {
-		return 0;
-	}
+    function __toString() {
+        return [];
+    }
 }
 
 $obj = new badToString;
@@ -53,7 +53,7 @@ try {
 --EXPECT--
 Object with no __toString():
 Try 1:
-Object of class stdClass could not be converted to string
+printf(): Argument #1 ($format) must be of type string, stdClass given
 
 
 Try 2:
@@ -62,8 +62,8 @@ Object of class stdClass could not be converted to string
 
 Object with bad __toString():
 Try 1:
-Method badToString::__toString() must return a string value
+badToString::__toString(): Return value must be of type string, array returned
 
 
 Try 2:
-Method badToString::__toString() must return a string value
+badToString::__toString(): Return value must be of type string, array returned

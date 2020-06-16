@@ -1,9 +1,5 @@
 --TEST--
 Test is_callable() function : usage variations - undefined functions
---SKIPIF--
-<?php
-if (!extension_loaded('json')) die("skip requires ext/json");
-?>
 --FILE--
 <?php
 /* Prototype: bool is_callable ( mixed $var [, bool $syntax_only [, string &$callable_name]] );
@@ -59,7 +55,6 @@ $undef_functions = array (
 check_iscallable($undef_functions);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing is_callable() on undefined functions ***
 -- Iteration  1 --
@@ -206,4 +201,3 @@ bool(true)
 bool(false)
 bool(false)
 "echo()"
-===DONE===

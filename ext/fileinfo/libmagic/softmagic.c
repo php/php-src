@@ -469,27 +469,25 @@ flush:
 private int
 check_fmt(struct magic_set *ms, const char *fmt)
 {
-	pcre2_code *pce;
-	uint32_t capture_count;
+	pcre_cache_entry *pce;
 	int rv = -1;
 	zend_string *pattern;
 
 	if (strchr(fmt, '%') == NULL)
 		return 0;
 
-	(void)setlocale(LC_CTYPE, "C");
 	pattern = zend_string_init("~%[-0-9\\.]*s~", sizeof("~%[-0-9\\.]*s~") - 1, 0);
-	if ((pce = pcre_get_compiled_regex(pattern, &capture_count)) == NULL) {
+	if ((pce = pcre_get_compiled_regex_cache_ex(pattern, 0)) == NULL) {
 		rv = -1;
 	} else {
-		pcre2_match_data *match_data = php_pcre_create_match_data(capture_count, pce);
+		pcre2_code *re = php_pcre_pce_re(pce);
+		pcre2_match_data *match_data = php_pcre_create_match_data(0, re);
 		if (match_data) {
-			rv = pcre2_match(pce, (PCRE2_SPTR)fmt, strlen(fmt), 0, 0, match_data, php_pcre_mctx()) > 0;
+			rv = pcre2_match(re, (PCRE2_SPTR)fmt, strlen(fmt), 0, 0, match_data, php_pcre_mctx()) > 0;
 			php_pcre_free_match_data(match_data);
 		}
 	}
-	zend_string_release_ex(pattern, 0);
-	(void)setlocale(LC_CTYPE, "");
+	zend_string_release(pattern);
 	return rv;
 }
 
@@ -1909,11 +1907,25 @@ file_strncmp16(const char *a, const char *b, size_t len, uint32_t flags)
 public void
 convert_libmagic_pattern(zval *pattern, char *val, size_t len, uint32_t options)
 {
-	int i, j=0;
+	int i, j;
 	zend_string *t;
 
-	t = zend_string_alloc(len * 2 + 4, 0);
+	for (i = j = 0; i < len; i++) {
+		switch (val[i]) {
+			case '~':
+				j += 2;
+				break;
+			case '\0':
+				j += 4;
+				break;
+			default:
+				j++;
+				break;
+		}
+	}
+	t = zend_string_alloc(j + 4, 0);
 
+	j = 0;
 	ZSTR_VAL(t)[j++] = '~';
 
 	for (i = 0; i < len; i++, j++) {

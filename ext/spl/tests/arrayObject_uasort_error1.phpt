@@ -12,19 +12,17 @@ Test ArrayObject::uasort() function : wrong arg count
 $ao = new ArrayObject();
 
 try {
-	$ao->uasort();
+    $ao->uasort();
 } catch (BadMethodCallException $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 
 try {
-	$ao->uasort(1,2);
+    $ao->uasort(1,2);
 } catch (BadMethodCallException $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --EXPECT--
 Function expects exactly one argument
 Function expects exactly one argument
-===DONE===

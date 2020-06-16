@@ -11,23 +11,23 @@ Test array_multisort() function : natural sorting case-insensitive
 echo "*** Testing array_multisort() : natural sorting case-insensitive\n";
 
 $a = array(
-	'Second',
-	'First.1',
-	'First.2',
-	'First.3',
-	'Twentieth',
-	'Tenth',
-	'Third',
+    'Second',
+    'First.1',
+    'First.2',
+    'First.3',
+    'Twentieth',
+    'Tenth',
+    'Third',
 );
 
 $b = array(
-	'2 a',
-	'1 bb 1',
-	'1 bB 2',
-	'1 BB 3',
-	'20 c',
-	'10 d',
-	'3 e',
+    '2 a',
+    '1 bb 1',
+    '1 bB 2',
+    '1 BB 3',
+    '20 c',
+    '10 d',
+    '3 e',
 );
 
 array_multisort($b, SORT_NATURAL | SORT_FLAG_CASE, $a);
@@ -35,7 +35,6 @@ array_multisort($b, SORT_NATURAL | SORT_FLAG_CASE, $a);
 var_dump($a, $b);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_multisort() : natural sorting case-insensitive
 array(7) {
@@ -70,4 +69,3 @@ array(7) {
   [6]=>
   string(4) "20 c"
 }
-===DONE===

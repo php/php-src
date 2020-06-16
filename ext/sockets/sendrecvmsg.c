@@ -66,12 +66,11 @@ inline ssize_t sendmsg(int sockfd, const struct msghdr *msg, int flags)
 }
 #endif
 
-#define LONG_CHECK_VALID_INT(l) \
+#define LONG_CHECK_VALID_INT(l, arg_pos) \
 	do { \
 		if ((l) < INT_MIN && (l) > INT_MAX) { \
-			php_error_docref(NULL, E_WARNING, "The value " ZEND_LONG_FMT " does not fit inside " \
-					"the boundaries of a native integer", (l)); \
-			return; \
+			zend_argument_value_error((arg_pos), "must be between %d and %d", INT_MIN, INT_MAX); \
+			RETURN_THROWS(); \
 		} \
 	} while (0)
 
@@ -174,14 +173,14 @@ PHP_FUNCTION(socket_sendmsg)
 
 	/* zmsg should be passed by ref */
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ra|l", &zsocket, &zmsg, &flags) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
-	LONG_CHECK_VALID_INT(flags);
+	LONG_CHECK_VALID_INT(flags, 3);
 
 	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(zsocket),
 					php_sockets_le_socket_name, php_sockets_le_socket())) == NULL) {
-		return;
+		RETURN_THROWS();
 	}
 
 	msghdr = from_zval_run_conversions(zmsg, php_sock, from_zval_write_msghdr_send,
@@ -219,14 +218,14 @@ PHP_FUNCTION(socket_recvmsg)
 	//ssize_t recvmsg(int sockfd, struct msghdr *msg, int flags);
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ra|l",
 			&zsocket, &zmsg, &flags) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
-	LONG_CHECK_VALID_INT(flags);
+	LONG_CHECK_VALID_INT(flags, 3);
 
 	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(zsocket),
 					php_sockets_le_socket_name, php_sockets_le_socket())) == NULL) {
-		return;
+		RETURN_THROWS();
 	}
 
 	msghdr = from_zval_run_conversions(zmsg, php_sock, from_zval_write_msghdr_recv,
@@ -265,7 +264,7 @@ PHP_FUNCTION(socket_recvmsg)
 		}
 	} else {
 		SOCKETS_G(last_error) = errno;
-		php_error_docref(NULL, E_WARNING, "error in recvmsg [%d]: %s",
+		php_error_docref(NULL, E_WARNING, "Error in recvmsg [%d]: %s",
 				errno, sockets_strerror(errno));
 		RETURN_FALSE;
 	}
@@ -282,32 +281,36 @@ PHP_FUNCTION(socket_cmsg_space)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll|l",
 			&level, &type, &n) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
-	LONG_CHECK_VALID_INT(level);
-	LONG_CHECK_VALID_INT(type);
-	LONG_CHECK_VALID_INT(n);
+	LONG_CHECK_VALID_INT(level, 1);
+	LONG_CHECK_VALID_INT(type, 2);
+	LONG_CHECK_VALID_INT(n, 3);
 
 	if (n < 0) {
-		php_error_docref(NULL, E_WARNING, "The third argument "
-				"cannot be negative");
-		return;
+		zend_argument_value_error(3, "must be greater than or equal to 0");
+		RETURN_THROWS();
 	}
 
 	entry = get_ancillary_reg_entry(level, type);
 	if (entry == NULL) {
-		php_error_docref(NULL, E_WARNING, "The pair level " ZEND_LONG_FMT "/type " ZEND_LONG_FMT " is "
-				"not supported by PHP", level, type);
-		return;
+		zend_value_error("Pair level " ZEND_LONG_FMT " and/or type " ZEND_LONG_FMT " is not supported",
+			level, type);
+		RETURN_THROWS();
 	}
 
-	if (entry->var_el_size > 0 && n > (zend_long)((ZEND_LONG_MAX - entry->size -
-			CMSG_SPACE(0) - 15L) / entry->var_el_size)) {
-		/* the -15 is to account for any padding CMSG_SPACE may add after the data */
-		php_error_docref(NULL, E_WARNING, "The value for the "
-				"third argument (" ZEND_LONG_FMT ") is too large", n);
-		return;
+	if (entry->var_el_size > 0) {
+		size_t rem_size = ZEND_LONG_MAX - entry->size;
+		size_t n_max = rem_size / entry->var_el_size;
+		size_t size = entry->size + n * entry->var_el_size;
+		size_t total_size = CMSG_SPACE(size);
+		if (n > n_max /* zend_long overflow */
+			|| total_size > ZEND_LONG_MAX
+			|| total_size < size /* align overflow */) {
+			zend_argument_value_error(3, "is too large");
+			RETURN_THROWS();
+		}
 	}
 
 	RETURN_LONG((zend_long)CMSG_SPACE(entry->size + n * entry->var_el_size));

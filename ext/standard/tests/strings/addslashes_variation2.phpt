@@ -8,7 +8,7 @@ Test addslashes() function : usage variations - strings with characters to be ba
 */
 
 /*
- * Test addslashes() with various strings containing characters thats can be backslashed
+ * Test addslashes() with various strings containing characters that can be backslashed
 */
 
 echo "*** Testing addslashes() : with various strings containing characters to be backslashed ***\n";
@@ -43,7 +43,7 @@ $str_array = array(
                     "",
                     "\"",
                     '"',
- 		    "hello\"",
+            "hello\"",
 
                     // string with backslash characters
                     'Is your name Ram\Krishna?',
@@ -65,7 +65,7 @@ $str_array = array(
                     '"c:\php\"'.chr(0)."'",
                     '"hello"'."'world'".chr(0).'//',
 
-		    // string with hexadecimal number
+            // string with hexadecimal number
                     "0xABCDEF0123456789",
                     "\x00",
                     '!@#$%&*@$%#&/;:,<>',

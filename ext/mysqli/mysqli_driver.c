@@ -25,13 +25,12 @@
 #include "ext/standard/info.h"
 #include "php_mysqli_structs.h"
 #include "zend_exceptions.h"
-#include "mysqli_fe.h"
 
 #define MAP_PROPERTY_MYG_BOOL_READ(name, value) \
-static zval *name(mysqli_object *obj, zval *retval) \
+static int name(mysqli_object *obj, zval *retval, zend_bool quiet) \
 { \
 	ZVAL_BOOL(retval, MyG(value)); \
-	return retval; \
+	return SUCCESS; \
 } \
 
 #define MAP_PROPERTY_MYG_BOOL_WRITE(name, value) \
@@ -42,10 +41,10 @@ static int name(mysqli_object *obj, zval *value) \
 } \
 
 #define MAP_PROPERTY_MYG_LONG_READ(name, value) \
-static zval *name(mysqli_object *obj, zval *retval) \
+static int name(mysqli_object *obj, zval *retval, zend_bool quiet) \
 { \
 	ZVAL_LONG(retval, MyG(value)); \
-	return retval; \
+	return SUCCESS; \
 } \
 
 #define MAP_PROPERTY_MYG_LONG_WRITE(name, value) \
@@ -56,10 +55,10 @@ static int name(mysqli_object *obj, zval *value) \
 } \
 
 #define MAP_PROPERTY_MYG_STRING_READ(name, value) \
-static zval *name(mysqli_object *obj, zval *retval) \
+static int name(mysqli_object *obj, zval *retval, zend_bool quiet) \
 { \
 	ZVAL_STRING(retval, MyG(value)); \
-	return retval; \
+	return SUCCESS; \
 } \
 
 #define MAP_PROPERTY_MYG_STRING_WRITE(name, value) \
@@ -80,34 +79,38 @@ static int driver_report_write(mysqli_object *obj, zval *value)
 /* }}} */
 
 /* {{{ property driver_embedded_read */
-static zval *driver_embedded_read(mysqli_object *obj, zval *retval)
+static int driver_embedded_read(mysqli_object *obj, zval *retval, zend_bool quiet)
 {
 	ZVAL_FALSE(retval);
-	return retval;
+
+	return SUCCESS;
 }
 /* }}} */
 
 /* {{{ property driver_client_version_read */
-static zval *driver_client_version_read(mysqli_object *obj, zval *retval)
+static int driver_client_version_read(mysqli_object *obj, zval *retval, zend_bool quiet)
 {
-	ZVAL_LONG(retval, MYSQL_VERSION_ID);
-	return retval;
+	ZVAL_LONG(retval, mysql_get_client_version());
+
+	return SUCCESS;
 }
 /* }}} */
 
 /* {{{ property driver_client_info_read */
-static zval *driver_client_info_read(mysqli_object *obj, zval *retval)
+static int driver_client_info_read(mysqli_object *obj, zval *retval, zend_bool quiet)
 {
 	ZVAL_STRING(retval, (char *)mysql_get_client_info());
-	return retval;
+
+	return SUCCESS;
 }
 /* }}} */
 
 /* {{{ property driver_driver_version_read */
-static zval *driver_driver_version_read(mysqli_object *obj, zval *retval)
+static int driver_driver_version_read(mysqli_object *obj, zval *retval, zend_bool quiet)
 {
 	ZVAL_LONG(retval, MYSQLI_VERSION_ID);
-	return retval;
+
+	return SUCCESS;
 }
 /* }}} */
 
@@ -117,7 +120,7 @@ MAP_PROPERTY_MYG_LONG_READ(driver_report_read, report_mode)
 
 ZEND_FUNCTION(mysqli_driver_construct)
 {
-#if G0
+#ifdef G0
 	MYSQLI_RESOURCE 	*mysqli_resource;
 
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
@@ -137,9 +140,3 @@ const mysqli_property_entry mysqli_driver_property_entries[] = {
 	{NULL, 0, NULL, NULL}
 };
 
-/* {{{ mysqli_driver_methods[]
- */
-const zend_function_entry mysqli_driver_methods[] = {
-	PHP_FE_END
-};
-/* }}} */

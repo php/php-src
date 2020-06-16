@@ -13,7 +13,7 @@ error_reporting(E_ALL ^ E_NOTICE);
 
 class MyClass
 {
-	// no toString() method defined
+    // no toString() method defined
 }
 
 // Testing strval with a object which has no toString() method
@@ -25,10 +25,8 @@ try {
 }
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing strval() : error conditions ***
 
 -- Testing strval() function with object which has not toString() method  --
 Object of class MyClass could not be converted to string
-===DONE===

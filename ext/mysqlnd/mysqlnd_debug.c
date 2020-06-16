@@ -76,7 +76,7 @@ MYSQLND_METHOD(mysqlnd_debug, log)(MYSQLND_DEBUG * self,
 	}
 	if (flags & MYSQLND_DEBUG_DUMP_TIME) {
 		/* The following from FF's DBUG library, which is in the public domain */
-#if defined(PHP_WIN32)
+#ifdef PHP_WIN32
 		/* FIXME This doesn't give microseconds as in Unix case, and the resolution is
 		in system ticks, 10 ms intervals. See my_getsystime.c for high res */
 		SYSTEMTIME loc_t;
@@ -173,7 +173,7 @@ MYSQLND_METHOD(mysqlnd_debug, log_va)(MYSQLND_DEBUG *self,
 	}
 	if (flags & MYSQLND_DEBUG_DUMP_TIME) {
 		/* The following from FF's DBUG library, which is in the public domain */
-#if defined(PHP_WIN32)
+#ifdef PHP_WIN32
 		/* FIXME This doesn't give microseconds as in Unix case, and the resolution is
 		in system ticks, 10 ms intervals. See my_getsystime.c for high res */
 		SYSTEMTIME loc_t;
@@ -697,6 +697,10 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_debug)
 MYSQLND_CLASS_METHODS_END;
 
 
+static void free_ptr(zval *zv) {
+	efree(Z_PTR_P(zv));
+}
+
 /* {{{ mysqlnd_debug_init */
 PHPAPI MYSQLND_DEBUG *
 mysqlnd_debug_init(const char * skip_functions[])
@@ -708,7 +712,7 @@ mysqlnd_debug_init(const char * skip_functions[])
 	zend_stack_init(&ret->call_stack, sizeof(char *));
 	zend_stack_init(&ret->call_time_stack, sizeof(uint64_t));
 	zend_hash_init(&ret->not_filtered_functions, 0, NULL, NULL, 0);
-	zend_hash_init(&ret->function_profiles, 0, NULL, NULL, 0);
+	zend_hash_init(&ret->function_profiles, 0, NULL, free_ptr, 0);
 
 	ret->m = & mysqlnd_mysqlnd_debug_methods;
 	ret->skip_functions = skip_functions;

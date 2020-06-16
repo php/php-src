@@ -28,7 +28,6 @@ foreach ($types as $desc => $type) {
 
 fclose($fp);
 ?>
-===DONE===
 --EXPECTF--
 *** Testing array_product() : variation - using non numeric values ***
 boolean (true)
@@ -55,4 +54,3 @@ int(0)
 array
 int(1)
 
-===DONE===

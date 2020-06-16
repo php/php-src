@@ -5,7 +5,7 @@ Test token_get_all() function : usage variations - with exception keywords
 --FILE--
 <?php
 /* Prototype  : array token_get_all(string $source)
- * Description: splits the given source into an array of PHP languange tokens
+ * Description: splits the given source into an array of PHP language tokens
  * Source code: ext/tokenizer/tokenizer.c
 */
 
@@ -32,6 +32,7 @@ try {
 } catch(Exception $e) {
     echo "caught exception:";
 }
+}
 ?>';
 $tokens =  token_get_all($source);
 var_dump($tokens);
@@ -40,7 +41,7 @@ echo "Done"
 ?>
 --EXPECTF--
 *** Testing token_get_all() : with exception keywords ***
-array(81) {
+array(83) {
   [0]=>
   array(3) {
     [0]=>
@@ -601,13 +602,25 @@ array(81) {
     int(14)
   }
   [80]=>
+  string(1) "}"
+  [81]=>
+  array(3) {
+    [0]=>
+    int(%d)
+    [1]=>
+    string(1) "
+"
+    [2]=>
+    int(15)
+  }
+  [82]=>
   array(3) {
     [0]=>
     int(%d)
     [1]=>
     string(2) "?>"
     [2]=>
-    int(15)
+    int(16)
   }
 }
 Done

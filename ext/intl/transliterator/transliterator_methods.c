@@ -19,7 +19,6 @@
 #include "php_intl.h"
 #include "transliterator.h"
 #include "transliterator_class.h"
-#include "transliterator_methods.h"
 #include "intl_data.h"
 #include "intl_convert.h"
 
@@ -31,7 +30,7 @@ static int create_transliterator( char *str_id, size_t str_id_len, zend_long dir
 	UChar	              *ustr_id    = NULL;
 	int32_t               ustr_id_len = 0;
 	UTransliterator       *utrans;
-	UParseError           parse_error   = {0, -1};
+	UParseError           parse_error;
 
 	intl_error_reset( NULL );
 
@@ -113,7 +112,7 @@ PHP_FUNCTION( transliterator_create )
 	if( zend_parse_parameters( ZEND_NUM_ARGS(), "s|l",
 		&str_id, &str_id_len, &direction ) == FAILURE )
 	{
-		RETURN_NULL();
+		RETURN_THROWS();
 	}
 
 	object = return_value;
@@ -136,7 +135,7 @@ PHP_FUNCTION( transliterator_create_from_rules )
 	UChar		    *ustr_rules    = NULL;
 	int32_t         ustr_rules_len = 0;
 	zend_long       direction      = TRANSLITERATOR_FORWARD;
-	UParseError     parse_error    = {0, -1};
+	UParseError     parse_error;
 	UTransliterator *utrans;
 	UChar           id[] = {0x52, 0x75, 0x6C, 0x65, 0x73, 0x54, 0x72,
 					       0x61, 0x6E, 0x73, 0x50, 0x48, 0x50, 0}; /* RulesTransPHP */
@@ -145,7 +144,7 @@ PHP_FUNCTION( transliterator_create_from_rules )
 	if( zend_parse_parameters( ZEND_NUM_ARGS(), "s|l",
 		&str_rules, &str_rules_len, &direction ) == FAILURE )
 	{
-		RETURN_NULL();
+		RETURN_THROWS();
 	}
 
 	if( ( direction != TRANSLITERATOR_FORWARD ) && (direction != TRANSLITERATOR_REVERSE ) )
@@ -208,7 +207,7 @@ PHP_FUNCTION( transliterator_create_inverse )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, Transliterator_ce_ptr ) == FAILURE )
 	{
-		RETURN_NULL();
+		RETURN_THROWS();
 	}
 
 	TRANSLITERATOR_METHOD_FETCH_OBJECT;
@@ -242,7 +241,7 @@ PHP_FUNCTION( transliterator_list_ids )
 
 	if( zend_parse_parameters_none() == FAILURE )
 	{
-		return;
+		RETURN_THROWS();
 	}
 
 	en = utrans_openIDs( &status );
@@ -304,7 +303,7 @@ PHP_FUNCTION( transliterator_transliterate )
 		if( zend_parse_parameters( ZEND_NUM_ARGS(), "zs|ll",
 			&arg1, &str, &str_len, &start, &limit ) == FAILURE )
 		{
-			RETURN_FALSE;
+			RETURN_THROWS();
 		}
 
 		if( Z_TYPE_P( arg1 ) == IS_OBJECT &&
@@ -316,7 +315,7 @@ PHP_FUNCTION( transliterator_transliterate )
 		{ /* not a transliterator object as first argument */
 			int res;
 			if( !try_convert_to_string( arg1 ) ) {
-				return;
+				RETURN_THROWS();
 			}
 			object = &tmp_object;
 			res = create_transliterator( Z_STRVAL_P( arg1 ), Z_STRLEN_P( arg1 ),
@@ -336,7 +335,7 @@ PHP_FUNCTION( transliterator_transliterate )
 	else if( zend_parse_parameters( ZEND_NUM_ARGS(), "s|ll",
 		&str, &str_len, &start, &limit ) == FAILURE )
 	{
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if( limit < -1 )
@@ -462,7 +461,7 @@ PHP_FUNCTION( transliterator_get_error_code )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, Transliterator_ce_ptr ) == FAILURE )
 	{
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object (without resetting its last error code ). */
@@ -487,7 +486,7 @@ PHP_FUNCTION( transliterator_get_error_message )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, Transliterator_ce_ptr ) == FAILURE )
 	{
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 

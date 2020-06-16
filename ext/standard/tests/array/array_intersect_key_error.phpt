@@ -28,7 +28,6 @@ try {
     echo $e->getMessage(), "\n";
 }
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_intersect_key() : error conditions ***
 
@@ -37,4 +36,3 @@ At least 2 parameters are required, 1 given
 
 -- Testing array_intersect_key() function with no arguments --
 At least 2 parameters are required, 0 given
-===DONE===

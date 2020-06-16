@@ -16,20 +16,20 @@ echo "acosh  1.1276259652064= ";
 var_dump(acosh(1.1276259652064));
 if (allowed_rounding_error(acosh(1.1276259652064), 0.5))
 {
-	echo "Pass\n";
+    echo "Pass\n";
 }
 else {
-	echo "Fail\n";
+    echo "Fail\n";
 }
 
 echo "acosh 10.067661995778= ";
 var_dump(acosh(10.067661995778));
 if (allowed_rounding_error(acosh(10.067661995778), 3.0))
 {
-	echo "Pass\n";
+    echo "Pass\n";
 }
 else {
-	echo "Fail\n";
+    echo "Fail\n";
 }
 
 

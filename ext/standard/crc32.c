@@ -18,7 +18,7 @@
 #include "basic_functions.h"
 #include "crc32.h"
 
-#if defined(__aarch64__)
+#if HAVE_AARCH64_CRC32
 # include <arm_acle.h>
 # if defined(__linux__)
 #  include <sys/auxv.h>
@@ -70,7 +70,7 @@ static uint32_t crc32_aarch64(uint32_t crc, char *p, size_t nr) {
 
 /* {{{ proto string crc32(string str)
    Calculate the crc32 polynomial of a string */
-PHP_NAMED_FUNCTION(php_if_crc32)
+PHP_FUNCTION(crc32)
 {
 	char *p;
 	size_t nr;
@@ -83,16 +83,16 @@ PHP_NAMED_FUNCTION(php_if_crc32)
 
 	crc = crcinit^0xFFFFFFFF;
 
-#if defined(__aarch64__)
+#if HAVE_AARCH64_CRC32
 	if (has_crc32_insn()) {
 		crc = crc32_aarch64(crc, p, nr);
-		RETVAL_LONG(crc^0xFFFFFFFF);
+		RETURN_LONG(crc^0xFFFFFFFF);
 	}
 #endif
 
 	for (; nr--; ++p) {
 		crc = ((crc >> 8) & 0x00FFFFFF) ^ crc32tab[(crc ^ (*p)) & 0xFF ];
 	}
-	RETVAL_LONG(crc^0xFFFFFFFF);
+	RETURN_LONG(crc^0xFFFFFFFF);
 }
 /* }}} */

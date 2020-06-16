@@ -10,63 +10,63 @@ opcache.jit_buffer_size=1M
 --FILE--
 <?php
 function foo() {
-	$var[] = 1;
-	var_dump($var);
+    $var[] = 1;
+    var_dump($var);
 }
 foo();
 
 function foo1() {
-	$var1[] = true;
-	var_dump($var1);
+    $var1[] = true;
+    var_dump($var1);
 }
 foo1();
 
 function foo2() {
-	$var2[] = array();
-	var_dump($var2);
+    $var2[] = array();
+    var_dump($var2);
 }
 foo2();
 
 function foo3() {
-	$array = array(PHP_INT_MAX => "dummy");
+    $array = array(PHP_INT_MAX => "dummy");
     try {
         $array[] = array();
     } catch (Error $e) {
         echo $e->getMessage(), "\n";
     }
 
-	$array = new ArrayObject();
-	$array[index()] = 1;
-	$array[offset()] = 2;
+    $array = new ArrayObject();
+    $array[index()] = 1;
+    $array[offset()] = 2;
 
-	var_dump($array);
+    var_dump($array);
 }
 foo3();
 
 function index() {
-	return 2;
+    return 2;
 }
 
 function offset() {
-	return "a";
+    return "a";
 }
 
 function foo4() {
-	$array = array();
-	$array[] = array();
-	$array[0][] = 1;
-	$array[0][1] = 1;
-	var_dump($array);
+    $array = array();
+    $array[] = array();
+    $array[0][] = 1;
+    $array[0][1] = 1;
+    var_dump($array);
 
     try {
         $array[function() {}] = 2;
     } catch (Error $e) {
         echo $e->getMessage(), "\n";
     }
-	var_dump($array);
+    var_dump($array);
 
-	$array2[][] = 3;
-	var_dump($array);
+    $array2[][] = 3;
+    var_dump($array);
 }
 foo4();
 

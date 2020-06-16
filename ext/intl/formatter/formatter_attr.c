@@ -18,7 +18,6 @@
 
 #include "php_intl.h"
 #include "formatter_class.h"
-#include "formatter_attr.h"
 #include "intl_convert.h"
 
 #include <unicode/ustring.h>
@@ -37,7 +36,7 @@ PHP_FUNCTION( numfmt_get_attribute )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Ol",
 		&object, NumberFormatter_ce_ptr, &attribute ) == FAILURE )
 	{
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */
@@ -107,7 +106,7 @@ PHP_FUNCTION( numfmt_get_text_attribute )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Ol",
 		&object, NumberFormatter_ce_ptr, &attribute ) == FAILURE )
 	{
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */
@@ -145,7 +144,7 @@ PHP_FUNCTION( numfmt_set_attribute )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Olz",
 		&object, NumberFormatter_ce_ptr, &attribute, &value ) == FAILURE)
 	{
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */
@@ -205,7 +204,7 @@ PHP_FUNCTION( numfmt_set_text_attribute )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Ols",
 		&object, NumberFormatter_ce_ptr, &attribute, &value, &len ) == FAILURE)
 	{
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */
@@ -243,7 +242,7 @@ PHP_FUNCTION( numfmt_get_symbol )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Ol",
 		&object, NumberFormatter_ce_ptr, &symbol ) == FAILURE )
 	{
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if(symbol >= UNUM_FORMAT_SYMBOL_COUNT || symbol < 0) {
@@ -289,7 +288,7 @@ PHP_FUNCTION( numfmt_set_symbol )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Ols",
 		&object, NumberFormatter_ce_ptr, &symbol, &value, &value_len ) == FAILURE )
 	{
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if (symbol >= UNUM_FORMAT_SYMBOL_COUNT || symbol < 0) {
@@ -331,7 +330,7 @@ PHP_FUNCTION( numfmt_get_pattern )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, NumberFormatter_ce_ptr ) == FAILURE )
 	{
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */
@@ -371,7 +370,7 @@ PHP_FUNCTION( numfmt_set_pattern )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Os",
 		&object, NumberFormatter_ce_ptr, &value, &value_len ) == FAILURE )
 	{
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	FORMATTER_METHOD_FETCH_OBJECT;
@@ -406,7 +405,7 @@ PHP_FUNCTION( numfmt_get_locale )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O|l",
 		&object, NumberFormatter_ce_ptr, &type ) == FAILURE )
 	{
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */

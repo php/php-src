@@ -18,7 +18,7 @@ class teLoader {
     }
 
     protected function autoload($class) {
-    	die("Protected autoload() called!\n");
+        die("Protected autoload() called!\n");
     }
 
     public function doSomething() {
@@ -29,9 +29,9 @@ class teLoader {
 $teLoader = new teLoader();
 
 try {
-	new teChild();
+    new teChild();
 } catch (Throwable $e) {
-	echo "Exception: ", $e->getMessage() , "\n";
+    echo "Exception: ", $e->getMessage() , "\n";
 }
 ?>
 --EXPECT--

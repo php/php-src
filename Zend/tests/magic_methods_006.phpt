@@ -4,9 +4,9 @@ Testing __callstatic declaration in interface with missing the 'static' modifier
 <?php
 
 interface a {
-	function __callstatic($a, $b);
+    function __callstatic($a, $b);
 }
 
 ?>
 --EXPECTF--
-Warning: The magic method __callStatic() must have public visibility and be static in %s on line %d
+Warning: The magic method a::__callStatic() must be static in %s on line %d

@@ -48,7 +48,6 @@ echo "\n";
 var_dump($result);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing vprintf() : basic functionality - using float format ***
 11.110000
@@ -63,4 +62,3 @@ int(19)
 int(29)
 11.110000 22.220000 33.330000
 int(29)
-===DONE===

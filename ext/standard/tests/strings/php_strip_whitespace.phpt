@@ -19,15 +19,15 @@ $data = '<?php
 /* test class */
 class test {
 
-	/* function foo () */
+    /* function foo () */
 
-	function foo () /* {{{ */
-	{
+    function foo () /* {{{ */
+    {
 
 
-		echo $var; //does not exist
-	}
-	/* }}} */
+        echo $var; //does not exist
+    }
+    /* }}} */
 
 }
 ?>';
@@ -39,7 +39,7 @@ var_dump(php_strip_whitespace($filename));
 echo "Done\n";
 ?>
 --EXPECTF--
-Warning: php_strip_whitespace(%sphp_strip_whitespace.dat): failed to open stream: No such file or directory in %s on line %d
+Warning: php_strip_whitespace(%sphp_strip_whitespace.dat): Failed to open stream: No such file or directory in %s on line %d
 string(0) ""
 string(18) "/* test comment */"
 string(9) "<?php  ?>"

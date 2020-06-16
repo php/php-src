@@ -31,7 +31,7 @@ assert(!is_null($ref_node));
 try {
     $parent_node->insertBefore($new_node, $ref_node);
 } catch(DOMException $e) {
-	echo $e->getMessage();
+    echo $e->getMessage();
 }
 
 ?>

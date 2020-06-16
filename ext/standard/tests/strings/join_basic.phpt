@@ -14,7 +14,7 @@ echo "*** Testing join() : basic functionality ***\n";
 $glue = ',';
 $pieces = array(1, 2, 3, 4);
 
-// pieces as arry with numeric values
+// pieces as array with numeric values
 var_dump( join($glue, $pieces) );
 
 // pieces as array with strings values

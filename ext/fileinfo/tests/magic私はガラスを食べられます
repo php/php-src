@@ -10475,7 +10475,7 @@
 # updated by Joerg Jenderek at Oct 2008
 # variables according to grub-0.97/stage1/stage1.S or
 # https://www.gnu.org/software/grub/manual/grub.html#Embedded-data
-# usual values are marked with comments to get only informations of strange GRUB loaders
+# usual values are marked with comments to get only information of strange GRUB loaders
 >342		search/60	\0Geom\0
 #>0		ulelong		x		%x=0x009048EB ,	0x2a9048EB  0
 >>0x41		ubyte		<2

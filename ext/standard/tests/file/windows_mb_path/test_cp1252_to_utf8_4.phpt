@@ -9,6 +9,8 @@ if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 skip_if_no_required_exts();
 
 ?>
+--CONFLICTS--
+dir2_cp1252
 --FILE--
 <?php
 /*
@@ -36,7 +38,6 @@ var_dump(rmdir($subpath));
 remove_data("dir2_cp1252");
 
 ?>
-===DONE===
 --EXPECTF--
 bool(true)
 bool(true)
@@ -48,4 +49,3 @@ bool(true)
 string(%d) "%s\Voláçao3\Voláçao4"
 Active code page: %d
 bool(true)
-===DONE===

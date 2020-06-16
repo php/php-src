@@ -48,7 +48,6 @@ var_dump(file_get_contents($pname . '/e'));
 var_dump($phar['e']->isCompressed());
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
@@ -70,4 +69,3 @@ string(5) "new d"
 bool(false)
 string(5) "new e"
 bool(true)
-===DONE===

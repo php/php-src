@@ -1,7 +1,7 @@
 --TEST--
 Test pow() function : usage variations - different data types as $base argument
 --INI--
-precision = 14
+serialize_precision = 14
 --SKIPIF--
 <?php
 if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
@@ -84,13 +84,16 @@ $inputs = array(
 // loop through each element of $inputs to check the behaviour of pow()
 $iterator = 1;
 foreach($inputs as $input) {
-	echo "\n-- Iteration $iterator --\n";
-	var_dump(pow($input, 3));
-	$iterator++;
+    echo "\n-- Iteration $iterator --\n";
+    try {
+        var_dump(pow($input, 3));
+    } catch (Error $e) {
+        echo $e->getMessage(), "\n";
+    }
+    $iterator++;
 };
 fclose($fp);
 ?>
-===Done===
 --EXPECTF--
 *** Testing pow() : usage variations ***
 
@@ -153,7 +156,7 @@ Warning: A non-numeric value encountered in %s on line %d
 int(0)
 
 -- Iteration 19 --
-int(0)
+Unsupported operand types: array ** int
 
 -- Iteration 20 --
 
@@ -171,9 +174,7 @@ Warning: A non-numeric value encountered in %s on line %d
 int(0)
 
 -- Iteration 23 --
-
-Notice: Object of class classA could not be converted to number in %s on line %d
-int(1)
+Unsupported operand types: classA ** int
 
 -- Iteration 24 --
 int(0)
@@ -183,4 +184,3 @@ int(0)
 
 -- Iteration 26 --
 %s
-===Done===

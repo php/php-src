@@ -89,7 +89,7 @@ $arrays = array(
 /*24*/ $fp
 );
 
-// loop through each sub-array within $arrrays to check the behavior of array_intersect()
+// loop through each sub-array within $arrays to check the behavior of array_intersect()
 $iterator = 1;
 foreach($arrays as $unexpected_value) {
     echo "\n-- Iterator $iterator --";
@@ -119,75 +119,75 @@ echo "Done";
 --EXPECT--
 *** Testing array_intersect() : Passing non-array values to $arr2 argument ***
 
--- Iterator 1 --Expected parameter 2 to be an array, int given
-Expected parameter 2 to be an array, int given
+-- Iterator 1 --array_intersect(): Argument #2 ($arr2) must be of type array, int given
+array_intersect(): Argument #2 ($arr2) must be of type array, int given
 
--- Iterator 2 --Expected parameter 2 to be an array, int given
-Expected parameter 2 to be an array, int given
+-- Iterator 2 --array_intersect(): Argument #2 ($arr2) must be of type array, int given
+array_intersect(): Argument #2 ($arr2) must be of type array, int given
 
--- Iterator 3 --Expected parameter 2 to be an array, int given
-Expected parameter 2 to be an array, int given
+-- Iterator 3 --array_intersect(): Argument #2 ($arr2) must be of type array, int given
+array_intersect(): Argument #2 ($arr2) must be of type array, int given
 
--- Iterator 4 --Expected parameter 2 to be an array, int given
-Expected parameter 2 to be an array, int given
+-- Iterator 4 --array_intersect(): Argument #2 ($arr2) must be of type array, int given
+array_intersect(): Argument #2 ($arr2) must be of type array, int given
 
--- Iterator 5 --Expected parameter 2 to be an array, float given
-Expected parameter 2 to be an array, float given
+-- Iterator 5 --array_intersect(): Argument #2 ($arr2) must be of type array, float given
+array_intersect(): Argument #2 ($arr2) must be of type array, float given
 
--- Iterator 6 --Expected parameter 2 to be an array, float given
-Expected parameter 2 to be an array, float given
+-- Iterator 6 --array_intersect(): Argument #2 ($arr2) must be of type array, float given
+array_intersect(): Argument #2 ($arr2) must be of type array, float given
 
--- Iterator 7 --Expected parameter 2 to be an array, float given
-Expected parameter 2 to be an array, float given
+-- Iterator 7 --array_intersect(): Argument #2 ($arr2) must be of type array, float given
+array_intersect(): Argument #2 ($arr2) must be of type array, float given
 
--- Iterator 8 --Expected parameter 2 to be an array, float given
-Expected parameter 2 to be an array, float given
+-- Iterator 8 --array_intersect(): Argument #2 ($arr2) must be of type array, float given
+array_intersect(): Argument #2 ($arr2) must be of type array, float given
 
--- Iterator 9 --Expected parameter 2 to be an array, float given
-Expected parameter 2 to be an array, float given
+-- Iterator 9 --array_intersect(): Argument #2 ($arr2) must be of type array, float given
+array_intersect(): Argument #2 ($arr2) must be of type array, float given
 
--- Iterator 10 --Expected parameter 2 to be an array, null given
-Expected parameter 2 to be an array, null given
+-- Iterator 10 --array_intersect(): Argument #2 ($arr2) must be of type array, null given
+array_intersect(): Argument #2 ($arr2) must be of type array, null given
 
--- Iterator 11 --Expected parameter 2 to be an array, null given
-Expected parameter 2 to be an array, null given
+-- Iterator 11 --array_intersect(): Argument #2 ($arr2) must be of type array, null given
+array_intersect(): Argument #2 ($arr2) must be of type array, null given
 
--- Iterator 12 --Expected parameter 2 to be an array, bool given
-Expected parameter 2 to be an array, bool given
+-- Iterator 12 --array_intersect(): Argument #2 ($arr2) must be of type array, bool given
+array_intersect(): Argument #2 ($arr2) must be of type array, bool given
 
--- Iterator 13 --Expected parameter 2 to be an array, bool given
-Expected parameter 2 to be an array, bool given
+-- Iterator 13 --array_intersect(): Argument #2 ($arr2) must be of type array, bool given
+array_intersect(): Argument #2 ($arr2) must be of type array, bool given
 
--- Iterator 14 --Expected parameter 2 to be an array, bool given
-Expected parameter 2 to be an array, bool given
+-- Iterator 14 --array_intersect(): Argument #2 ($arr2) must be of type array, bool given
+array_intersect(): Argument #2 ($arr2) must be of type array, bool given
 
--- Iterator 15 --Expected parameter 2 to be an array, bool given
-Expected parameter 2 to be an array, bool given
+-- Iterator 15 --array_intersect(): Argument #2 ($arr2) must be of type array, bool given
+array_intersect(): Argument #2 ($arr2) must be of type array, bool given
 
--- Iterator 16 --Expected parameter 2 to be an array, string given
-Expected parameter 2 to be an array, string given
+-- Iterator 16 --array_intersect(): Argument #2 ($arr2) must be of type array, string given
+array_intersect(): Argument #2 ($arr2) must be of type array, string given
 
--- Iterator 17 --Expected parameter 2 to be an array, string given
-Expected parameter 2 to be an array, string given
+-- Iterator 17 --array_intersect(): Argument #2 ($arr2) must be of type array, string given
+array_intersect(): Argument #2 ($arr2) must be of type array, string given
 
--- Iterator 18 --Expected parameter 2 to be an array, string given
-Expected parameter 2 to be an array, string given
+-- Iterator 18 --array_intersect(): Argument #2 ($arr2) must be of type array, string given
+array_intersect(): Argument #2 ($arr2) must be of type array, string given
 
--- Iterator 19 --Expected parameter 2 to be an array, string given
-Expected parameter 2 to be an array, string given
+-- Iterator 19 --array_intersect(): Argument #2 ($arr2) must be of type array, string given
+array_intersect(): Argument #2 ($arr2) must be of type array, string given
 
--- Iterator 20 --Expected parameter 2 to be an array, string given
-Expected parameter 2 to be an array, string given
+-- Iterator 20 --array_intersect(): Argument #2 ($arr2) must be of type array, string given
+array_intersect(): Argument #2 ($arr2) must be of type array, string given
 
--- Iterator 21 --Expected parameter 2 to be an array, object given
-Expected parameter 2 to be an array, object given
+-- Iterator 21 --array_intersect(): Argument #2 ($arr2) must be of type array, classA given
+array_intersect(): Argument #2 ($arr2) must be of type array, classA given
 
--- Iterator 22 --Expected parameter 2 to be an array, null given
-Expected parameter 2 to be an array, null given
+-- Iterator 22 --array_intersect(): Argument #2 ($arr2) must be of type array, null given
+array_intersect(): Argument #2 ($arr2) must be of type array, null given
 
--- Iterator 23 --Expected parameter 2 to be an array, null given
-Expected parameter 2 to be an array, null given
+-- Iterator 23 --array_intersect(): Argument #2 ($arr2) must be of type array, null given
+array_intersect(): Argument #2 ($arr2) must be of type array, null given
 
--- Iterator 24 --Expected parameter 2 to be an array, resource given
-Expected parameter 2 to be an array, resource given
+-- Iterator 24 --array_intersect(): Argument #2 ($arr2) must be of type array, resource given
+array_intersect(): Argument #2 ($arr2) must be of type array, resource given
 Done

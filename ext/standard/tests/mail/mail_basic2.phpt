@@ -35,7 +35,6 @@ var_dump( mail($to, $subject, $message, $additional_headers, $additional_paramet
 echo file_get_contents($outFile);
 unlink($outFile);
 ?>
-===DONE===
 --EXPECTF--
 *** Testing mail() : basic functionality ***
 -- extra parameters --
@@ -45,4 +44,3 @@ bool(true)
 %w3%wKHeaders
 %w4%w
 %w5%wA Message
-===DONE===

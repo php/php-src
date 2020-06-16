@@ -10475,7 +10475,7 @@
 # updated by Joerg Jenderek at Oct 2008
 # variables according to grub-0.97/stage1/stage1.S or
 # https://www.gnu.org/software/grub/manual/grub.html#Embedded-data
-# usual values are marked with comments to get only informations of strange GRUB loaders
+# usual values are marked with comments to get only information of strange GRUB loaders
 >342		search/60	\0Geom\0
 #>0		ulelong		x		%x=0x009048EB ,	0x2a9048EB  0
 >>0x41		ubyte		<2
@@ -11280,7 +11280,7 @@
 # In the second sector (+0x200) are variables according to grub-0.97/stage2/asm.S or
 # grub-1.94/kern/i386/pc/startup.S
 # https://www.gnu.org/software/grub/manual/grub.html#Embedded-data
-# usual values are marked with comments to get only informations of strange GRUB loaders
+# usual values are marked with comments to get only information of strange GRUB loaders
 0x200	uleshort		0x70EA
 # found only version 3.{1,2}
 >0x206		ubeshort	>0x0300
@@ -11342,7 +11342,7 @@
 0		ulelong&0x804000E9	0x000000E9
 !:strength	+60
 # mtools-3.9.8/msdos.h
-# usual values are marked with comments to get only informations of strange FAT systems
+# usual values are marked with comments to get only information of strange FAT systems
 # valid sectorsize must be a power of 2 from 32 to 32768
 >11		uleshort&0x001f	0
 >>11		uleshort	<32769

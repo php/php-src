@@ -24,7 +24,6 @@ var_dump(gzfile( $filename ) );
 unlink($filename);
 rmdir($dirname);
 ?>
-===DONE===
 --EXPECT--
 array(3) {
   [0]=>
@@ -36,4 +35,3 @@ array(3) {
   [2]=>
   string(17) "for all languages"
 }
-===DONE===

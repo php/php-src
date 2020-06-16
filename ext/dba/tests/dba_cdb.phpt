@@ -8,11 +8,10 @@ DBA CDB handler test
 ?>
 --FILE--
 <?php
-	$handler = 'cdb';
-	require_once(__DIR__ .'/test.inc');
-	require_once(__DIR__ .'/dba_handler.inc');
+    $handler = 'cdb';
+    require_once(__DIR__ .'/test.inc');
+    require_once(__DIR__ .'/dba_handler.inc');
 ?>
-===DONE===
 --CLEAN--
 <?php
 	require(__DIR__ .'/clean.inc');
@@ -48,4 +47,3 @@ array(5) {
   ["key5"]=>
   string(23) "The last content string"
 }
-===DONE===

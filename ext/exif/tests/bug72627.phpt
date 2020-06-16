@@ -4,8 +4,8 @@ Bug #72627 (Memory Leakage In exif_process_IFD_in_TIFF)
 <?php if (!extension_loaded('exif')) print 'skip exif extension not available';?>
 --FILE--
 <?php
-	$exif = exif_read_data(__DIR__ . '/bug72627.tiff',0,0,true);
-	var_dump($exif);
+    $exif = exif_read_data(__DIR__ . '/bug72627.tiff',0,0,true);
+    var_dump($exif);
 ?>
 --EXPECTF--
 Warning: exif_read_data(%s): Thumbnail goes IFD boundary or end of file reached in %sbug72627.php on line %d

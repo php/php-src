@@ -5,10 +5,6 @@ curl_multi_errno and curl_multi_strerror basic test
 if (!extension_loaded("curl")) {
 	    exit("skip curl extension not loaded");
 }
-$curl_version = curl_version();
-if ($curl_version['version_number'] < 0x070f04) {
-	exit("skip: test works only with curl >= 7.15.4");
-}
 ?>
 --FILE--
 <?php

@@ -29,19 +29,13 @@
  */
 
 #include "php.h"
-#include "php_iptc.h"
 #include "ext/standard/head.h"
 
 #include <sys/stat.h>
 
-#ifdef PHP_WIN32
-# include "win32/php_stdint.h"
-#else
-# if HAVE_INTTYPES_H
-#  include <inttypes.h>
-# elif HAVE_STDINT_H
-#  include <stdint.h>
-# endif
+#include <stdint.h>
+#ifndef PHP_WIN32
+# include <inttypes.h>
 #endif
 
 /* some defines for the different JPEG block types */

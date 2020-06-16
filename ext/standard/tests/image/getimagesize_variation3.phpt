@@ -10,10 +10,10 @@ Test getimagesize() function : variation - Passing non image files
 
 $file_types_array = array (
     //File containing text string
-	"File with text data" => "test.txt",
+    "File with text data" => "test.txt",
 
-	//File containing forcibly corrupted bmp image
-	"File with corrupted BMP data" => "200x100_unknown.unknown",
+    //File containing forcibly corrupted bmp image
+    "File with corrupted BMP data" => "200x100_unknown.unknown",
 
     //File which doesn't exist
      "Non-existent file" => "nofile.ext",
@@ -32,7 +32,6 @@ foreach($file_types_array as $key => $filename) {
       var_dump( $info );
 };
 ?>
-===DONE===
 --EXPECTF--
 *** Testing getimagesize() : variation ***
 
@@ -50,10 +49,10 @@ array(0) {
 
 -- Non-existent file (nofile.ext) --
 
-Warning: getimagesize(%snofile.ext): failed to open stream: No such file or directory in %s on line %d
+Warning: getimagesize(%snofile.ext): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
-Warning: getimagesize(%snofile.ext): failed to open stream: No such file or directory in %s on line %d
+Warning: getimagesize(%snofile.ext): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 array(0) {
 }
@@ -67,4 +66,3 @@ Notice: getimagesize(): Error reading from %s! in %s on line %d
 bool(false)
 array(0) {
 }
-===DONE===

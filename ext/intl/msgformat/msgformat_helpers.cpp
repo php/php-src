@@ -35,7 +35,6 @@
 extern "C" {
 #include "php_intl.h"
 #include "msgformat_class.h"
-#include "msgformat_format.h"
 #include "msgformat_helpers.h"
 #include "intl_convert.h"
 #define USE_TIMEZONE_POINTER

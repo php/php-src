@@ -37,7 +37,7 @@ var_dump($row = oci_fetch_array($s));
 
 $len = 0;
 while (!$row[0]->eof()) {
-	$len += strlen($row[0]->read(1024));
+    $len += strlen($row[0]->read(1024));
 }
 var_dump($len);
 

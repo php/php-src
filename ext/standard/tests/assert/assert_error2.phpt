@@ -11,7 +11,7 @@ display_errors = 1
 <?php
 function f1($script, $line, $message, $user_message)
 {
-	echo "f1 called\n";
+    echo "f1 called\n";
 }
 
 //bail out on error

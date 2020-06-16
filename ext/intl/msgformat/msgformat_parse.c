@@ -20,7 +20,6 @@
 
 #include "php_intl.h"
 #include "msgformat_class.h"
-#include "msgformat_parse.h"
 #include "msgformat_data.h"
 #include "msgformat_helpers.h"
 #include "intl_convert.h"
@@ -67,7 +66,7 @@ PHP_FUNCTION( msgfmt_parse )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Os",
 		&object, MessageFormatter_ce_ptr,  &source, &source_len ) == FAILURE )
 	{
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */
@@ -79,7 +78,7 @@ PHP_FUNCTION( msgfmt_parse )
 
 /* {{{ proto array MessageFormatter::formatMessage( string $locale, string $pattern, string $source )
  * Parse a message. }}} */
-/* {{{ proto array numfmt_parse_message( string $locale, string $pattern, string $source )
+/* {{{ proto array msgfmt_parse_message( string $locale, string $pattern, string $source )
  * Parse a message.
  */
 PHP_FUNCTION( msgfmt_parse_message )
@@ -99,7 +98,7 @@ PHP_FUNCTION( msgfmt_parse_message )
 	if( zend_parse_parameters( ZEND_NUM_ARGS(), "sss",
 		  &slocale, &slocale_len, &pattern, &pattern_len, &source, &src_len ) == FAILURE )
 	{
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	INTL_CHECK_LOCALE_LEN(slocale_len);

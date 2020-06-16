@@ -4,8 +4,8 @@ errmsg: __isset() must take exactly 1 argument
 <?php
 
 class test {
-	function __isset() {
-	}
+    function __isset() {
+    }
 }
 
 echo "Done\n";

@@ -28,9 +28,9 @@ $str = base64_decode('zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr8
 
 $iterator = 1;
 foreach ($linefeeds as $linefeed) {
-	echo "\n-- Iteration $iterator --\n";
-	var_dump(mb_encode_mimeheader($str, 'utf-8', 'B', $linefeed));
-	$iterator++;
+    echo "\n-- Iteration $iterator --\n";
+    var_dump(mb_encode_mimeheader($str, 'utf-8', 'B', $linefeed));
+    $iterator++;
 }
 
 

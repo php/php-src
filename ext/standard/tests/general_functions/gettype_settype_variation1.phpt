@@ -1,5 +1,5 @@
 --TEST--
-Test gettype() & settype() functions : usage variatoins
+Test gettype() & settype() functions : usage variations
 --SKIPIF--
 <?php
 if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");

@@ -5,7 +5,7 @@ openssl_pkey_new() basic usage tests
 --FILE--
 <?php
 function openssl_pkey_test_cmp($expected, $bin_key) {
-	var_dump(strcasecmp(ltrim($expected, '0'), bin2hex($bin_key)));
+    var_dump(strcasecmp(ltrim($expected, '0'), bin2hex($bin_key)));
 }
 
 // RSA

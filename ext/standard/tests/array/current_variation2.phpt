@@ -39,7 +39,7 @@ $inputs = array(
 
        // int data
 /*1*/  'int' => array(
-	   0,
+       0,
        1,
        12345,
        -2345,
@@ -115,7 +115,6 @@ foreach($inputs as $key => $input) {
 
 fclose($fp);
 ?>
-===DONE===
 --EXPECTF--
 *** Testing current() : usage variations ***
 
@@ -152,4 +151,3 @@ NULL
 
 -- Iteration 11 : resource data --
 resource(%d) of type (stream)
-===DONE===

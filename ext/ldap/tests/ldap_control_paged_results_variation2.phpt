@@ -17,12 +17,11 @@ insert_dummy_data($link, $base);
 $dn = "$base";
 $filter = "(cn=user*)";
 var_dump(
-	ldap_control_paged_result($link, 2),
-	$result = ldap_search($link, $dn, $filter, array('cn')),
-	ldap_get_entries($link, $result)
+    ldap_control_paged_result($link, 2),
+    $result = ldap_search($link, $dn, $filter, array('cn')),
+    ldap_get_entries($link, $result)
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 include "connect.inc";
@@ -70,4 +69,3 @@ array(3) {
     string(%d) "cn=userB,%s"
   }
 }
-===DONE===

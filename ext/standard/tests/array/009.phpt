@@ -71,7 +71,7 @@ foreach ($varient_arrays as $sub_array )  {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing basic operations ***
 -- Iteration 1 --
 int(0)

@@ -3,13 +3,13 @@ Bug #49074 (private class static fields can be modified by using reflection)
 --FILE--
 <?php
 class Test {
-	private static $data1 = 1;
-	private static $data4 = 4;
+    private static $data1 = 1;
+    private static $data4 = 4;
 }
 
 class Test2 extends Test {
-	private static $data2 = 2;
-	public static $data3 = 3;
+    private static $data2 = 2;
+    public static $data3 = 3;
 }
 
 $r = new ReflectionClass('Test2');

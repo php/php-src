@@ -23,17 +23,15 @@ foreach ( $variation as $var ) {
   var_dump(readgzfile( $var ,  $use_include_path ) );
 }
 ?>
-===DONE===
 --EXPECTF--
-Warning: readgzfile(0): failed to open stream: No such file or directory in %s on line %d
+Warning: readgzfile(0): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
-Warning: readgzfile(1): failed to open stream: No such file or directory in %s on line %d
+Warning: readgzfile(1): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
-Warning: readgzfile(12345): failed to open stream: No such file or directory in %s on line %d
+Warning: readgzfile(12345): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
-Warning: readgzfile(-2345): failed to open stream: No such file or directory in %s on line %d
+Warning: readgzfile(-2345): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
-===DONE===

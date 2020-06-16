@@ -37,7 +37,7 @@ PHAR_FUNC(phar_opendir) /* {{{ */
 	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|z", &filename, &filename_len, &zcontext) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!IS_ABSOLUTE_PATH(filename, filename_len) && !strstr(filename, "://")) {
@@ -137,7 +137,7 @@ PHAR_FUNC(phar_file_get_contents) /* {{{ */
 
 			if (ZEND_NUM_ARGS() == 5 && maxlen < 0) {
 				efree(arch);
-				php_error_docref(NULL, E_WARNING, "length must be greater than or equal to zero");
+				php_error_docref(NULL, E_WARNING, "Length must be greater than or equal to zero");
 				RETURN_FALSE;
 			}
 
@@ -765,7 +765,7 @@ ZEND_NAMED_FUNCTION(fname) { \
 		size_t filename_len; \
 		\
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &filename, &filename_len) == FAILURE) { \
-			return; \
+			RETURN_THROWS(); \
 		} \
 		\
 		phar_file_stat(filename, filename_len, funcnum, PHAR_G(orig), INTERNAL_FUNCTION_PARAM_PASSTHRU); \
@@ -1100,7 +1100,7 @@ static struct _phar_orig_functions {
 	zif_handler orig_lstat;
 	zif_handler orig_readfile;
 	zif_handler orig_stat;
-} phar_orig_functions = {NULL};
+} phar_orig_functions = {0};
 
 void phar_save_orig_functions(void) /* {{{ */
 {

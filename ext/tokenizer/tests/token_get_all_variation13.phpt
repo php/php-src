@@ -5,7 +5,7 @@ Test token_get_all() function : usage variations - with class/object constructs
 --FILE--
 <?php
 /* Prototype  : array token_get_all(string $source)
- * Description: splits the given source into an array of PHP languange tokens
+ * Description: splits the given source into an array of PHP language tokens
  * Source code: ext/tokenizer/tokenizer.c
 */
 
@@ -35,7 +35,7 @@ abstract class MyClass
   protected var $c;
   static $d;
   final $e = 10;
-  
+
   abstract public function myFunction($a);
 }
 class ChildClass extends MyClass implements MyInterface
@@ -573,8 +573,8 @@ array(145) {
     [0]=>
     int(%d)
     [1]=>
-    string(6) "
-  
+    string(4) "
+
   "
     [2]=>
     int(12)

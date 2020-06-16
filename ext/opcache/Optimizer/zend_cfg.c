@@ -93,7 +93,7 @@ static void zend_mark_reachable(zend_op *opcodes, zend_cfg *cfg, zend_basic_bloc
 				b = succ;
 				break;
 			} else {
-				/* Recusively check reachability */
+				/* Recursively check reachability */
 				if (!(succ->flags & ZEND_BB_REACHABLE)) {
 					zend_mark_reachable(opcodes, cfg, succ);
 				}
@@ -208,9 +208,7 @@ static void zend_mark_reachable_blocks(const zend_op_array *op_array, zend_cfg *
 
 			for (j = b->start; j < b->start + b->len; j++) {
 				zend_op *opline = &op_array->opcodes[j];
-				if (opline->opcode == ZEND_FE_FREE ||
-					(opline->opcode == ZEND_FREE && opline->extended_value == ZEND_FREE_SWITCH)
-				) {
+				if (zend_optimizer_is_loop_var_free(opline)) {
 					zend_op *def_opline = zend_optimizer_get_loop_var_def(op_array, opline);
 					if (def_opline) {
 						uint32_t def_block = block_map[def_opline - op_array->opcodes];
@@ -298,8 +296,14 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 			case ZEND_RETURN_BY_REF:
 			case ZEND_GENERATOR_RETURN:
 			case ZEND_EXIT:
-			case ZEND_THROW:
 				if (i + 1 < op_array->last) {
+					BB_START(i + 1);
+				}
+				break;
+			case ZEND_THROW:
+				/* Don't treat THROW as terminator if it's used in expression context,
+				 * as we may lose live ranges when eliminating unreachable code. */
+				if (opline->extended_value != ZEND_THROW_IS_EXPR && i + 1 < op_array->last) {
 					BB_START(i + 1);
 				}
 				break;

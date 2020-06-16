@@ -33,10 +33,10 @@
 /* Checks if a constant (like "true") may be replaced by its value */
 int zend_optimizer_get_persistent_constant(zend_string *name, zval *result, int copy)
 {
-	zval *zv;
 	zend_constant *c = zend_hash_find_ptr(EG(zend_constants), name);
 	if (c) {
 		if ((ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT)
+		 && !(ZEND_CONSTANT_FLAGS(c) & CONST_DEPRECATED)
 		 && (!(ZEND_CONSTANT_FLAGS(c) & CONST_NO_FILE_CACHE)
 		  || !(CG(compiler_options) & ZEND_COMPILE_WITH_FILE_CACHE))) {
 			ZVAL_COPY_VALUE(result, &c->value);
@@ -50,9 +50,9 @@ int zend_optimizer_get_persistent_constant(zend_string *name, zval *result, int 
 	}
 
 	/* Special constants null/true/false can always be substituted. */
-	zv = zend_get_special_const(ZSTR_VAL(name), ZSTR_LEN(name));
-	if (zv) {
-		ZVAL_COPY_VALUE(result, zv);
+	c = zend_get_special_const(ZSTR_VAL(name), ZSTR_LEN(name));
+	if (c) {
+		ZVAL_COPY_VALUE(result, &c->value);
 		return 1;
 	}
 	return 0;
@@ -250,13 +250,38 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 			case ZEND_FREE:
 				if (opline->op1_type == IS_TMP_VAR) {
 					src = VAR_SOURCE(opline->op1);
-					if (src &&
-					    (src->opcode == ZEND_BOOL || src->opcode == ZEND_BOOL_NOT)) {
-						/* T = BOOL(X), FREE(T) => T = BOOL(X) */
-						/* The remaining BOOL is removed by a separate optimization */
-						VAR_SOURCE(opline->op1) = NULL;
-						MAKE_NOP(opline);
-						++(*opt_count);
+					if (src) {
+						switch (src->opcode) {
+							case ZEND_BOOL:
+							case ZEND_BOOL_NOT:
+								/* T = BOOL(X), FREE(T) => T = BOOL(X) */
+								/* The remaining BOOL is removed by a separate optimization */
+								VAR_SOURCE(opline->op1) = NULL;
+								MAKE_NOP(opline);
+								++(*opt_count);
+								break;
+							case ZEND_ASSIGN:
+							case ZEND_ASSIGN_DIM:
+							case ZEND_ASSIGN_OBJ:
+							case ZEND_ASSIGN_STATIC_PROP:
+							case ZEND_ASSIGN_OP:
+							case ZEND_ASSIGN_DIM_OP:
+							case ZEND_ASSIGN_OBJ_OP:
+							case ZEND_ASSIGN_STATIC_PROP_OP:
+							case ZEND_PRE_INC:
+							case ZEND_PRE_DEC:
+							case ZEND_PRE_INC_OBJ:
+							case ZEND_PRE_DEC_OBJ:
+							case ZEND_PRE_INC_STATIC_PROP:
+							case ZEND_PRE_DEC_STATIC_PROP:
+								src->result_type = IS_UNUSED;
+								VAR_SOURCE(opline->op1) = NULL;
+								MAKE_NOP(opline);
+								++(*opt_count);
+								break;
+							default:
+								break;
+						}
 					}
 				} else if (opline->op1_type == IS_VAR) {
 					src = VAR_SOURCE(opline->op1);
@@ -270,6 +295,13 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 						src->result_type = IS_UNUSED;
 						MAKE_NOP(opline);
 						++(*opt_count);
+						if (src->opcode == ZEND_QM_ASSIGN) {
+							if (src->op1_type & (IS_VAR|IS_TMP_VAR)) {
+								src->opcode = ZEND_FREE;
+							} else {
+								MAKE_NOP(src);
+							}
+						}
 					}
 				}
 				break;
@@ -537,8 +569,15 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 							MAKE_NOP(opline);
 							block->successors[0] = block->successors[1];
 							block->len--;
+							cfg->blocks[block->successors[0]].flags |= ZEND_BB_FOLLOW;
 							break;
 						} else {
+							zend_basic_block *next = cfg->blocks + block->successors[1];
+
+							next->flags &= ~ZEND_BB_FOLLOW;
+							if (!(next->flags & (ZEND_BB_TARGET|ZEND_BB_PROTECTED))) {
+								next->flags &= ~ZEND_BB_REACHABLE;
+							}
 							opline->opcode = ZEND_JMP;
 							COPY_NODE(opline->op1, opline->op2);
 							break;
@@ -630,6 +669,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 							opline->op2.num = 0;
 							block->successors_count = 1;
 							block->successors[0] = block->successors[1];
+							cfg->blocks[block->successors[0]].flags |= ZEND_BB_FOLLOW;
 							break;
 						}
 					} else if (opline->op1_type == IS_TMP_VAR &&
@@ -1401,7 +1441,7 @@ static void zend_jmp_optimization(zend_basic_block *block, zend_op_array *op_arr
 					/*       should be used once on the branch path.           */
 					/*                                                         */
 					/*       The pattern works well only if jums processed in  */
-					/*       direct order, otherwise it breakes JMPZ_EX        */
+					/*       direct order, otherwise it breaks JMPZ_EX         */
 					/*       sequences too early.                              */
 					last_op->result.var = target->result.var;
 					next = target_block->successors[0];
@@ -1634,7 +1674,7 @@ static void zend_t_usage(zend_cfg *cfg, zend_op_array *op_array, zend_bitset use
 
 		while (opline >= end) {
 			/* usage checks */
-			if (opline->result_type == IS_VAR) {
+			if (opline->result_type & (IS_VAR|IS_TMP_VAR)) {
 				if (!zend_bitset_in(usage, VAR_NUM(opline->result.var))) {
 					switch (opline->opcode) {
 						case ZEND_ASSIGN_OP:
@@ -1651,13 +1691,6 @@ static void zend_t_usage(zend_cfg *cfg, zend_op_array *op_array, zend_bitset use
 						case ZEND_DO_FCALL_BY_NAME:
 							opline->result_type = IS_UNUSED;
 							break;
-					}
-				} else {
-					zend_bitset_excl(usage, VAR_NUM(opline->result.var));
-				}
-			} else if (opline->result_type == IS_TMP_VAR) {
-				if (!zend_bitset_in(usage, VAR_NUM(opline->result.var))) {
-					switch (opline->opcode) {
 						case ZEND_POST_INC:
 						case ZEND_POST_DEC:
 						case ZEND_POST_INC_OBJ:
@@ -1839,7 +1872,7 @@ void zend_optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			if (!(b->flags & ZEND_BB_REACHABLE)) {
 				continue;
 			}
-			/* we track data dependencies only insight a single basic block */
+			/* we track data dependencies only inside a single basic block */
 			if (!(b->flags & ZEND_BB_FOLLOW) ||
 			    (b->flags & ZEND_BB_TARGET)) {
 				/* Skip continuation of "extended" BB */
@@ -1854,6 +1887,8 @@ void zend_optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				strip_nops(op_array, b);
 			}
 		}
+
+		opt_count = 0;
 
 		/* Jump optimization for each block */
 		for (b = blocks; b < end; b++) {
@@ -1873,8 +1908,6 @@ void zend_optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 		}
 	}
 
-	zend_bitset_clear(usage, bitset_len);
-	zend_t_usage(&cfg, op_array, usage, ctx);
 	assemble_code_blocks(&cfg, op_array, ctx);
 
 	if (ctx->debug_level & ZEND_DUMP_AFTER_BLOCK_PASS) {

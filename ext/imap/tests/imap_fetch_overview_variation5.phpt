@@ -27,22 +27,21 @@ $sequences = array (0,     4,     '4', // out of range
                     '1:3'); // pass uid without setting FT_UID option
 
 foreach($sequences as $msg_no) {
-	echo "\n-- \$msg_no is $msg_no --\n";
+    echo "\n-- \$msg_no is $msg_no --\n";
         $overview = imap_fetch_overview($stream_id, $msg_no);
-	if (!$overview) {
-		echo imap_last_error() . "\n";
+    if (!$overview) {
+        echo imap_last_error() . "\n";
         } else {
-		foreach($overview as $ov) {
-			echo "\n";
-			displayOverviewFields($ov);
-       		 }
+        foreach($overview as $ov) {
+            echo "\n";
+            displayOverviewFields($ov);
+             }
         }
 }
 
 // clear error stack
 imap_errors();
 ?>
-===DONE===
 --CLEAN--
 <?php
 require_once(__DIR__.'/clean.inc');
@@ -135,4 +134,3 @@ deleted is 0
 seen is 0
 draft is 0
 udate is OK
-===DONE===

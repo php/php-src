@@ -7,6 +7,7 @@
 #include "php.h"
 #include "ext/standard/info.h"
 #include "php_%EXTNAME%.h"
+#include "%EXTNAME%_arginfo.h"
 
 /* For compatibility with older PHP versions */
 #ifndef ZEND_PARSE_PARAMETERS_NONE
@@ -15,9 +16,9 @@
 	ZEND_PARSE_PARAMETERS_END()
 #endif
 
-/* {{{ void %EXTNAME%_test1()
+/* {{{ void test1()
  */
-PHP_FUNCTION(%EXTNAME%_test1)
+PHP_FUNCTION(test1)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -25,9 +26,9 @@ PHP_FUNCTION(%EXTNAME%_test1)
 }
 /* }}} */
 
-/* {{{ string %EXTNAME%_test2( [ string $var ] )
+/* {{{ string test2( [ string $var ] )
  */
-PHP_FUNCTION(%EXTNAME%_test2)
+PHP_FUNCTION(test2)
 {
 	char *var = "World";
 	size_t var_len = sizeof("World") - 1;
@@ -66,31 +67,12 @@ PHP_MINFO_FUNCTION(%EXTNAME%)
 }
 /* }}} */
 
-/* {{{ arginfo
- */
-ZEND_BEGIN_ARG_INFO(arginfo_%EXTNAME%_test1, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_%EXTNAME%_test2, 0)
-	ZEND_ARG_INFO(0, str)
-ZEND_END_ARG_INFO()
-/* }}} */
-
-/* {{{ %EXTNAME%_functions[]
- */
-static const zend_function_entry %EXTNAME%_functions[] = {
-	PHP_FE(%EXTNAME%_test1,		arginfo_%EXTNAME%_test1)
-	PHP_FE(%EXTNAME%_test2,		arginfo_%EXTNAME%_test2)
-	PHP_FE_END
-};
-/* }}} */
-
 /* {{{ %EXTNAME%_module_entry
  */
 zend_module_entry %EXTNAME%_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"%EXTNAME%",					/* Extension name */
-	%EXTNAME%_functions,			/* zend_function_entry */
+	ext_functions,					/* zend_function_entry */
 	NULL,							/* PHP_MINIT - Module initialization */
 	NULL,							/* PHP_MSHUTDOWN - Module shutdown */
 	PHP_RINIT(%EXTNAME%),			/* PHP_RINIT - Request initialization */

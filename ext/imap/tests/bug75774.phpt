@@ -11,18 +11,16 @@ $fn = __DIR__ . DIRECTORY_SEPARATOR . "foo75774";
 $var1=fopen($fn, "w");
 
 try {
-	imap_append($var1, "", "", "", "");
+    imap_append($var1, "", "", "", "");
 } catch (Throwable $e) {
-	echo "\nException: " . $e->getMessage() . "\n";
+    echo "\nException: " . $e->getMessage() . "\n";
 }
 
 fclose($var1);
 unlink($fn);
 
 ?>
-==DONE==
 --EXPECTF--
-Warning: imap_append(): internal date not correctly formatted in %s on line %d
+Warning: imap_append(): Internal date not correctly formatted in %s on line %d
 
-Exception: imap_append(): supplied resource is not a valid imap resource
-==DONE==
+Exception: imap_append(): Supplied resource is not a valid imap resource

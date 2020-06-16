@@ -22,9 +22,7 @@ var_dump( strftime($format, $timestamp) );
 var_dump( strftime($format) );
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing strftime() : basic functionality ***
 string(20) "Aug 08 2008 08:08:08"
 string(%d) "%s %d %d %d:%d:%d"
-===DONE===

@@ -28,7 +28,7 @@ PHP_FUNCTION(gettype)
 		Z_PARAM_ZVAL(arg)
 	ZEND_PARSE_PARAMETERS_END();
 
-	type = zend_zval_get_type(arg);
+	type = zend_zval_get_legacy_type(arg);
 	if (EXPECTED(type)) {
 		RETURN_INTERNED_STR(type);
 	} else {
@@ -36,6 +36,52 @@ PHP_FUNCTION(gettype)
 	}
 }
 /* }}} */
+
+/* {{{ proto string get_debug_type(mixed var)
+   Returns the type of the variable resolving class names */
+PHP_FUNCTION(get_debug_type)
+{
+	zval *arg;
+	const char *name;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(arg)
+	ZEND_PARSE_PARAMETERS_END();
+
+	switch (Z_TYPE_P(arg)) {
+		case IS_NULL:
+			RETURN_INTERNED_STR(ZSTR_KNOWN(ZEND_STR_NULL_LOWERCASE));
+		case IS_FALSE:
+		case IS_TRUE:
+			RETURN_INTERNED_STR(ZSTR_KNOWN(ZEND_STR_BOOL));
+		case IS_LONG:
+			RETURN_INTERNED_STR(ZSTR_KNOWN(ZEND_STR_INT));
+		case IS_DOUBLE:
+			RETURN_INTERNED_STR(ZSTR_KNOWN(ZEND_STR_FLOAT));
+		case IS_STRING:
+			RETURN_INTERNED_STR(ZSTR_KNOWN(ZEND_STR_STRING));
+		case IS_ARRAY:
+			RETURN_INTERNED_STR(ZSTR_KNOWN(ZEND_STR_ARRAY));
+		case IS_OBJECT:
+			if (Z_OBJ_P(arg)->ce->ce_flags & ZEND_ACC_ANON_CLASS) {
+				name = ZSTR_VAL(Z_OBJ_P(arg)->ce->name);
+				RETURN_NEW_STR(zend_string_init(name, strlen(name), 0));
+			} else {
+				RETURN_STR_COPY(Z_OBJ_P(arg)->ce->name);
+			}
+		case IS_RESOURCE:
+			name = zend_rsrc_list_get_rsrc_type(Z_RES_P(arg));
+			if (name) {
+				RETURN_NEW_STR(zend_strpprintf(0, "resource (%s)", name));
+			} else {
+				RETURN_INTERNED_STR(ZSTR_KNOWN(ZEND_STR_CLOSED_RESOURCE));
+			}
+		default:
+			RETURN_INTERNED_STR(ZSTR_KNOWN(ZEND_STR_UNKNOWN));
+	}
+}
+/* }}} */
+
 
 /* {{{ proto bool settype(mixed &var, string type)
    Set the type of the variable */
@@ -82,11 +128,11 @@ PHP_FUNCTION(settype)
 			zval_ptr_dtor(&tmp);
 		}
 		if (zend_string_equals_literal_ci(type, "resource")) {
-			php_error_docref(NULL, E_WARNING, "Cannot convert to resource type");
+			zend_value_error("Cannot convert to resource type");
 		} else {
-			php_error_docref(NULL, E_WARNING, "Invalid type");
+			zend_argument_value_error(2, "must be a valid type");
 		}
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if (ptr == &tmp) {
@@ -170,31 +216,31 @@ PHP_FUNCTION(floatval)
 }
 /* }}} */
 
-/* {{{ proto bool boolval(mixed var)
+/* {{{ proto bool boolval(mixed value)
    Get the boolean value of a variable */
 PHP_FUNCTION(boolval)
 {
-	zval *val;
+	zval *value;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ZVAL(val)
+		Z_PARAM_ZVAL(value)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_BOOL(zend_is_true(val));
+	RETURN_BOOL(zend_is_true(value));
 }
 /* }}} */
 
-/* {{{ proto string strval(mixed var)
+/* {{{ proto string strval(mixed value)
    Get the string value of a variable */
 PHP_FUNCTION(strval)
 {
-	zval *num;
+	zval *value;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ZVAL(num)
+		Z_PARAM_ZVAL(value)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETVAL_STR(zval_get_string(num));
+	RETVAL_STR(zval_get_string(value));
 }
 /* }}} */
 

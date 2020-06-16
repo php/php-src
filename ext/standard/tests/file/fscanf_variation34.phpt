@@ -47,10 +47,10 @@ $float_values = array (
 );
 
 $hexa_formats = array( 	"%x",
-			"%hx", "%lx", "%Lx",
-		        " %x", "%x ", "% x",
-		        "\t%x", "\n%x", "%4x",
-	  	        "%30x", "%[0-9A-Za-z]", "%*x");
+            "%hx", "%lx", "%Lx",
+                " %x", "%x ", "% x",
+                "\t%x", "\n%x", "%4x",
+                "%30x", "%[0-9A-Za-z]", "%*x");
 
 $counter = 1;
 
@@ -75,7 +75,11 @@ foreach($hexa_formats as $hexa_format) {
   rewind($file_handle);
   echo "\n-- iteration $counter --\n";
   while( !feof($file_handle) ) {
-    var_dump( fscanf($file_handle,$hexa_format) );
+    try {
+      var_dump(fscanf($file_handle,$hexa_format));
+    } catch (ValueError $exception) {
+      echo $exception->getMessage() . "\n";
+    }
   }
   $counter++;
 }
@@ -88,7 +92,7 @@ $file_path = __DIR__;
 $filename = "$file_path/fscanf_variation34.tmp";
 unlink($filename);
 ?>
---EXPECTF--
+--EXPECT--
 *** Test fscanf(): different hexa format types with float values ***
 
 -- iteration 1 --
@@ -470,51 +474,21 @@ array(1) {
 bool(false)
 
 -- iteration 7 --
-
-Warning: fscanf(): Bad scan conversion character " " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character " " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character " " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character " " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character " " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character " " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character " " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character " " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character " " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character " " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character " " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character " " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character " " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character " " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character " " in %s on line %d
-NULL
+Bad scan conversion character " "
+Bad scan conversion character " "
+Bad scan conversion character " "
+Bad scan conversion character " "
+Bad scan conversion character " "
+Bad scan conversion character " "
+Bad scan conversion character " "
+Bad scan conversion character " "
+Bad scan conversion character " "
+Bad scan conversion character " "
+Bad scan conversion character " "
+Bad scan conversion character " "
+Bad scan conversion character " "
+Bad scan conversion character " "
+Bad scan conversion character " "
 bool(false)
 
 -- iteration 8 --

@@ -6,31 +6,87 @@ PHP                                                                        NEWS
   . Removed the pdo_odbc.db2_instance_name php.ini directive. (Kalle)
   . Fixed bug #77619 (Wrong reflection on MultipleIterator::__construct).
     (Fabien Villepinte)
+  . Fixed bug #65274 (Enhance undefined class constant error with class name).
+    (Nikita)
+  . Fixed bug #49555 (Fatal error "Function must be a string" message should be
+    renamed). (Nikita)
+  . Fixed bug #70839 (Converting optional argument to variadic forbidden by LSP
+    checks). (Nikita)
+  . Fixed bug #69084 (Unclear error message when not implementing a renamed
+    abstract trait function). (Nikita)
+  . Fixed bug #62609 (Allow implementing Traversable on abstract classes).
+    (Nikita)
+  . Fixed bug #79462 (method_exists and property_exists incoherent behavior).
+    (cmb)
+  . Fixed bug #79368 ("Unexpected end of file" is not an acceptable error
+    message). (Alex Dowad)
+  . Fixed bug #36365 (scandir duplicates file name at every 65535th file).
+    (cmb)
+  . Use SSE2 instructions do locale independent strtolower. (Laruence)
+  . Fixed bug #79521 (Check __set_state structure). (carusogabriel)
+  . Fixed bug #79467 (data:// wrappers are writable). (cmb)
+  . Implemented FR #47074 (phpinfo() reports "On" as 1 for the some
+    extensions). (cmb)
+  . Implemented FR #72089 (require() throws fatal error instead of exception).
+    (Nikita)
+  . Fixed bug #77966 (Cannot alias a method named "namespace"). (Nikita)
+
+- BZ2:
+  . Fixed bug #71263 (fread() does not report bzip2.decompress errors). (cmb)
+
+- CURL:
+  . Bumped required libcurl version to 7.29.0. (cmb)
 
 - Date:
   . Fixed bug #65547 (Default value for sunrise/sunset zenith still wrong).
     (cmb)
-  . Fixed bug #69044 (discrepency between time and microtime). (krakjoe)
+  . Fixed bug #69044 (discrepancy between time and microtime). (krakjoe)
 
 - DOM:
   . Add property DOMXPath::$registerNodeNamespaces and constructor argument
     that allow global flag to configure query() or evaluate() calls.
 
+- Enchant:
+  . Add LIBENCHANT_VERSION macro
+  . Deprecate enchant_broker_set_dict_path, enchant_broker_get_dict_path
+    enchant_dict_add_to_personal and enchant_dict_is_in_session
+  . Add enchant_dict_add and enchant_dict_is_added functions
+  . Use libenchant-2 when available
+
+- FPM:
+  . Fixed bug #64865 (Search for .user.ini files from script dir up to
+    CONTEXT_DOCUMENT_ROOT). (Will Bender)
+
 - GD:
+  . Fixed bug #55005 (imagepolygon num_points requirement). (cmb)
   . Replaced gd resources with objects. (Mark Randall)
+  . Made the $num_points parameter of php_imagepolygon optional. (cmb)
   . Removed deprecated image2wbmp(). (cmb)
   . Removed deprecated png2wbmp() and jpeg2wbmp(). (cmb)
+  . Added imagegetinterpolation(). (cmb)
+
+- Iconv:
+  . Dropped support for iconv without proper errno setting. (cmb)
 
 - Intl:
   . Removed deprecated INTL_IDNA_VARIANT_2003. (cmb)
 
 - JIT:
+  . Fixed bug #79582 (Crash seen when opcache.jit=1235 and
+    opcache.jit_debug=2). (Laruence)
   . Fixed bug #77857 (Wrong result if executed with JIT). (Laruence)
+  . Fixed bug #79255 (PHP cannot be compiled with enable JIT).
+    (Laruence, Dmitry)
+
+- JSON:
+  . The JSON extension is now an integral part of PHP and cannot be disabled
+    as per RFC: https://wiki.php.net/rfc/always_enable_json (tandre)
 
 - LDAP:
   . Removed deprecated ldap_sort. (mcmic)
 
 - MBString:
+  . Fixed bug #76999 (mb_regex_set_options() return current options). (cmb)
   . Removed the unused $is_hex parameter from mb_decode_numericentity(). (cmb)
 
 - MySQLi:
@@ -40,12 +96,33 @@ PHP                                                                        NEWS
 - mysqlnd:
   . Fixed #60594 (mysqlnd exposes 160 lines of stats in phpinfo). (PeeHaa)
 
+- OpCache:
+  . Fixed bug #78654 (Incorrectly computed opcache checksum on files with
+    non-ascii characters). (mhagstrand)
+  . Fixed bug #76535 (Opcache does not replay compile-time warnings). (Nikita)
+  . Fixed bug #79665 (ini_get() and opcache_get_configuration() inconsistency).
+    (cmb)
+
+- OpenSSL:
+  . Added Cryptographic Message Syntax (CMS) support. (Eliot Lear)
+
 - PCRE:
   . Don't ignore invalid escape sequences. (sjon)
 
+- PGSQL:
+  . Bumped required libpq version to 9.1. (cmb)
+
 - PDO:
+  . Changed default PDO error mode to exceptions. (AllenJB)
   . Fixed bug #77849 (Disable cloning of PDO handle/connection objects).
     (camporter)
+
+- PDO_OCI:
+  . Added support for setting and getting the oracle OCI 18c call timeout.
+    (camporter)
+
+- PDO_PGSQL:
+  . Bumped required libpq version to 9.1. (cmb)
 
 - phpdbg:
   . Fixed bug #76596 (phpdbg support for display_errors=stderr). (kabel)
@@ -54,9 +131,25 @@ PHP                                                                        NEWS
     (krakjoe)
   . Fixed bug #77805 (phpdbg build fails when readline is shared). (krakjoe)
 
+- Reflection:
+  . Fixed bug #78697 (ReflectionClass::implementsInterface - inaccurate error
+    message with traits). (villfa)
+  . Implement ReflectionProperty::hasDefaultValue and
+    Reflection::getDefaultValue (beberlei)
+  . Fixed bug #64592 (ReflectionClass::getMethods() returns methods out of
+    scope). (Nikita)
+  . Fixed bug #77325 (ReflectionClassConstant::$class returns wrong class when
+    extending). (Nikita)
+  . Fixed bug #69180 (Reflection does not honor trait conflict resolution /
+    method aliasing). (Nikita)
+  . Fixed bug #74939 (Nested traits' aliased methods are lowercased). (Nikita)
+  . Implement #79628 (Add $filter parameter for ReflectionClass::getConstants
+    and ReflectionClass::getReflectionConstants) (carusogabriel)
+
 - Session:
   . Fixed bug #78624 (session_gc return value for user defined session
     handlers). (bshaffer)
+  . Fixed bug #73529 (session_decode() silently fails on wrong input). (cmb)
 
 - SimpleXML:
   . Fixed bug #75245 (Don't set content of elements with only whitespaces).
@@ -65,11 +158,27 @@ PHP                                                                        NEWS
 - sodium:
   . Fixed bug #77646 (sign_detached() strings not terminated). (Frank)
 
+- SQLite3:
+  . Added SQLite3::setAuthorizer() and respective class constants. (bohwaz)
+
+- SPL:
+  . Fixed bug #71236 (Second call of spl_autoload_register() does nothing if it
+    has no arguments). (Nikita)
+  . Fixed bug #65006 (spl_autoload_register fails with multiple callables using
+    self, same method). (Nikita)
+
 - Standard:
+  . Implemented FR #78638 (__PHP_Incomplete_Class should be final). (Laruence)
   . Fixed bug #77204 (getimagesize(): Read error! should mention file path).
     (peter279k)
   . Fixed bug #76859 (stream_get_line skips data if used with data-generating
     filter). (kkopachev)
+  . Fixed bug #78385 (parse_url() does not include 'query' when question mark
+    is the last char). (Islam Israfilov)
+  . Fixed bug #75902 (str_replace should warn when misused with nested arrays).
+    (Nikita)
+  . Fixed bug #47983 (mixed LF and CRLF line endings in mail()). (cmb)
+  . Made quoting of cmd execution functions consistent. (cmb)
 
 - tidy:
   . Removed the unused $use_include_path parameter from tidy_repair_string().
@@ -79,10 +188,32 @@ PHP                                                                        NEWS
   . Fixed bug #76874 (xml_parser_free() should never leak memory). (Nikita)
 
 - XMLWriter:
-  . Changed functions to accept/return XMKWriter objects instead of resources.
+  . Changed functions to accept/return XMLWriter objects instead of resources.
     (cmb)
 
 - Zip:
-  . Fixed bug #72374 (remove_path strips first char of filename). (tyage)
+  . Fixed bug #72374 (remove_path strips first char of filename). (tyage, Remi)
+  . Add ZipArchive::setMtimeName and ZipArchive::setMtimeIndex methods. (Remi)
+  . Add ZipArchive::setProgressCallback method (since libzip 1.3.0). (Remi)
+  . Add ZipArchive::setCancelCallback method (since libzip 1.6.0). (Remi)
+  . Add optional "flags" parameter to ZipArchive::addEmptyDir, addFile and
+    addFromString methods. (Remi)
+  . Add "flags" options to ZipArchive::addGlob and addPattern methods
+    keeping previous behavior having FL_OVERWRITE by default. (Remi)
+  . Add ZipArchive::replaceFile() method. (Remi)
+  . Add lastId property to ZipArchive. (Remi)
+  . ZipArchive::status and ZipArchive::statusSys properties and
+    ZipArchive::getStatusString() method stay valid after the archive
+    is closed. (Remi)
+  . Fixed bug #50678 (files extracted by ZipArchive class lost their
+    original modified time). (Remi)
+  . Implemented FR #77960 (add compression / encryption options for
+    ZipArchive::addGlob and ZipArchive::addPattern). (Remi)
+  . Add ZipArchive::EM_UNKNOWN and ZipArchive::EM_TRAD_PKWARE constants. (Remi)
+  . Add ZipArchive::isCompressionMethodSupported() and
+    ZipArchive::isEncryptionMethodSupported() method (libzip 1.7.0). (Remi)
+
+- Zlib:
+  . Fixed bug #71417 (fread() does not report zlib.inflate errors). (cmb)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

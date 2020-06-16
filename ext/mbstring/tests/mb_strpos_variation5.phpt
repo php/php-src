@@ -30,31 +30,34 @@ $needle_mb = base64_decode('44CC');
 
 /*
  * Loop through integers as multiples of ten for $offset argument
- * mb_strpos should not be able to accept negative values as $offset.
  * 60 is larger than *BYTE* count for $string_mb
  */
 for ($i = -30; $i <= 60; $i += 10) {
-	echo "\n**-- Offset is: $i --**\n";
-	echo "-- ASCII String --\n";
-	var_dump(mb_strpos($string_ascii, $needle_ascii, $i));
-	echo "--Multibyte String --\n";
-	var_dump(mb_strpos($string_mb, $needle_mb, $i, 'UTF-8'));
+    echo "\n**-- Offset is: $i --**\n";
+    echo "-- ASCII String --\n";
+    try {
+        var_dump(mb_strpos($string_ascii, $needle_ascii, $i));
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
+
+    echo "--Multibyte String --\n";
+    try {
+        var_dump(mb_strpos($string_mb, $needle_mb, $i, 'UTF-8'));
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
 }
 
-echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing mb_strpos() : usage variations ***
 
 **-- Offset is: -30 --**
 -- ASCII String --
-
-Warning: mb_strpos(): Offset not contained in string in %s on line %d
-bool(false)
+mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 --Multibyte String --
-
-Warning: mb_strpos(): Offset not contained in string in %s on line %d
-bool(false)
+mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 **-- Offset is: -20 --**
 -- ASCII String --
@@ -88,41 +91,24 @@ int(20)
 
 **-- Offset is: 30 --**
 -- ASCII String --
-
-Warning: mb_strpos(): Offset not contained in string in %s on line %d
-bool(false)
+mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 --Multibyte String --
-
-Warning: mb_strpos(): Offset not contained in string in %s on line %d
-bool(false)
+mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 **-- Offset is: 40 --**
 -- ASCII String --
-
-Warning: mb_strpos(): Offset not contained in string in %s on line %d
-bool(false)
+mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 --Multibyte String --
-
-Warning: mb_strpos(): Offset not contained in string in %s on line %d
-bool(false)
+mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 **-- Offset is: 50 --**
 -- ASCII String --
-
-Warning: mb_strpos(): Offset not contained in string in %s on line %d
-bool(false)
+mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 --Multibyte String --
-
-Warning: mb_strpos(): Offset not contained in string in %s on line %d
-bool(false)
+mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 **-- Offset is: 60 --**
 -- ASCII String --
-
-Warning: mb_strpos(): Offset not contained in string in %s on line %d
-bool(false)
+mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 --Multibyte String --
-
-Warning: mb_strpos(): Offset not contained in string in %s on line %d
-bool(false)
-Done
+mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)

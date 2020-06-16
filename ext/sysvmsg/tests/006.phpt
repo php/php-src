@@ -1,7 +1,7 @@
 --TEST--
 msg_send() data types when not serializing
 --SKIPIF--
-<?php if (!extension_loaded("sysvmsg")) die("skip sysvmsg extenions is not available")?>
+<?php if (!extension_loaded("sysvmsg")) die("skip sysvmsg extensions is not available")?>
 --FILE--
 <?php
 
@@ -21,7 +21,7 @@ foreach ($tests as $elem) {
 }
 
 if (!msg_remove_queue($queue)) {
-	echo "BAD: queue removal failed\n";
+    echo "BAD: queue removal failed\n";
 }
 
 echo "Done\n";

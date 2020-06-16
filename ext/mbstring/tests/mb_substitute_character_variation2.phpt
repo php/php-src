@@ -3,7 +3,6 @@ Test mb_substitute_character() function : variation unmappable out char for conv
 --SKIPIF--
 <?php
 extension_loaded('mbstring') or die('skip');
-function_exists('mb_substitute_character') or die("skip mb_substitute_character() is not available in this build");
 ?>
 --FILE--
 <?php
@@ -29,11 +28,9 @@ var_dump(bin2hex(mb_convert_encoding($string_mb, "ISO-8859-1", "UTF-8")));
 
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing mb_substitute_character() : variation ***
 string(14) "3f3f3f3f3f3f3f"
 string(14) "42424242424242"
 string(0) ""
 string(14) "3f3f3f3f3f3f3f"
-===DONE===

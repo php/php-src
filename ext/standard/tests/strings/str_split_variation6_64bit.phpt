@@ -18,7 +18,7 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 * passing different integer values for 'split_length' argument to str_split()
 */
 
-echo "*** Testing str_split() : different intger values for 'split_length' ***\n";
+echo "*** Testing str_split() : different integer values for 'split_length' ***\n";
 //Initialise variables
 $str = 'This is a string with 123 & escape char \t';
 
@@ -39,16 +39,15 @@ for($count = 0; $count < count($values); $count++) {
     echo "-- Iteration ".($count + 1)." --\n";
     try {
         var_dump( str_split($str, $values[$count]) );
-    } catch (\Error $e) {
+    } catch (\ValueError $e) {
         echo $e->getMessage() . "\n";
     }
 }
-echo "Done"
 ?>
 --EXPECT--
-*** Testing str_split() : different intger values for 'split_length' ***
+*** Testing str_split() : different integer values for 'split_length' ***
 -- Iteration 1 --
-The length of each segment must be greater than zero
+str_split(): Argument #2 ($split_length) must be greater than 0
 -- Iteration 2 --
 array(42) {
   [0]=>
@@ -137,7 +136,7 @@ array(42) {
   string(1) "t"
 }
 -- Iteration 3 --
-The length of each segment must be greater than zero
+str_split(): Argument #2 ($split_length) must be greater than 0
 -- Iteration 4 --
 array(1) {
   [0]=>
@@ -161,5 +160,4 @@ array(1) {
   string(42) "This is a string with 123 & escape char \t"
 }
 -- Iteration 8 --
-The length of each segment must be greater than zero
-Done
+str_split(): Argument #2 ($split_length) must be greater than 0

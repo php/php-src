@@ -36,7 +36,6 @@
 #include <stdio.h>
 #include <errno.h>
 
-#include "microtime.h"
 #include "ext/date/php_date.h"
 
 #define NUL  '\0'

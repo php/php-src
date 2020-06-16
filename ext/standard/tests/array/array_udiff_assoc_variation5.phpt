@@ -25,9 +25,9 @@ function too_many_parameters ($val1, $val2, $val3) {
   return 1;
 }
 try {
-	var_dump(array_udiff_assoc($arr1, $arr2, 'too_many_parameters'));
+    var_dump(array_udiff_assoc($arr1, $arr2, 'too_many_parameters'));
 } catch (Throwable $e) {
-	echo "Exception: " . $e->getMessage() . "\n";
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 
 echo "\n-- comparison function taking too few parameters --\n";
@@ -37,7 +37,6 @@ function too_few_parameters ($val1) {
 var_dump(array_udiff_assoc($arr1, $arr2, 'too_few_parameters'));
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_udiff_assoc() : usage variation - differing comparison functions***
 
@@ -55,4 +54,3 @@ array(1) {
   [0]=>
   int(1)
 }
-===DONE===

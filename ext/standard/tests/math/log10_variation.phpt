@@ -13,36 +13,36 @@ precision = 10
 //Test log10 with a different input values
 
 $values = array(23,
-		-23,
-		2.345e1,
-		-2.345e1,
-		0x17,
-		027,
-		"23",
-		"23.45",
-		"2.345e1",
-		"1000",
-		"1000ABC",
-		null,
-		true,
-		false);
+        -23,
+        2.345e1,
+        -2.345e1,
+        0x17,
+        027,
+        "23",
+        "23.45",
+        "2.345e1",
+        "1000",
+        "1000ABC",
+        null,
+        true,
+        false);
 
 for ($i = 0; $i < count($values); $i++) {
-	$res = log10($values[$i]);
-	var_dump($res);
+    $res = log10($values[$i]);
+    var_dump($res);
 }
 
 ?>
 --EXPECTF--
-float(1.361727836)
+float(1.3617278360175928)
 float(NAN)
-float(1.370142847)
+float(1.3701428470511021)
 float(NAN)
-float(1.361727836)
-float(1.361727836)
-float(1.361727836)
-float(1.370142847)
-float(1.370142847)
+float(1.3617278360175928)
+float(1.3617278360175928)
+float(1.3617278360175928)
+float(1.3701428470511021)
+float(1.3701428470511021)
 float(3)
 
 Notice: A non well formed numeric value encountered in %s on line %d

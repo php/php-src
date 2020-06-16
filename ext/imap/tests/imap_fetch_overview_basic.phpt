@@ -44,7 +44,6 @@ displayOverviewFields($a[1]);
 imap_close($stream_id);
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 require_once(__DIR__.'/clean.inc');
@@ -93,4 +92,3 @@ deleted is 0
 seen is 0
 draft is 0
 udate is OK
-===DONE===

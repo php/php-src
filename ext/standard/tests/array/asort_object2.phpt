@@ -10,7 +10,7 @@ Test asort() function : object functionality - sorting objects with diff. access
 
 /*
  * testing asort() by providing integer/string object arrays with following flag values
- * 1. Defualt flag value
+ * 1. Default flag value
    2. SORT_REGULAR - compare items normally
 */
 

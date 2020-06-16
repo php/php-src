@@ -31,7 +31,6 @@ foreach ($methods as $method) {
     printf("%s: %d, %d\n", $method, $rm->getNumberOfParameters(), $rm->getNumberOfRequiredParameters());
 }
 ?>
-===DONE===
 --EXPECT--
 getDefault: 0, 0
 acceptFromHttp: 1, 1
@@ -51,4 +50,3 @@ getDisplayScript: 2, 1
 getDisplayVariant: 2, 1
 filterMatches: 3, 2
 lookup: 4, 2
-===DONE===

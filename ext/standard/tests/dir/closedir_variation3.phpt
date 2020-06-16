@@ -27,10 +27,9 @@ echo "\n-- Check file pointer: --\n";
 var_dump($fp);
 
 if(is_resource($fp)) {
-	fclose($fp);
+    fclose($fp);
 }
 ?>
-===DONE===
 --EXPECTF--
 *** Testing closedir() : usage variations ***
 
@@ -38,8 +37,7 @@ if(is_resource($fp)) {
 resource(%d) of type (stream)
 
 -- Try to close the file pointer using closedir() --
-%d is not a valid Directory resource
+closedir(): Argument #1 ($dir_handle) must be a valid Directory resource
 
 -- Check file pointer: --
 resource(%d) of type (stream)
-===DONE===

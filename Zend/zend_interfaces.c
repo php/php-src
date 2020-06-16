@@ -20,6 +20,7 @@
 #include "zend_API.h"
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
+#include "zend_interfaces_arginfo.h"
 
 ZEND_API zend_class_entry *zend_ce_traversable;
 ZEND_API zend_class_entry *zend_ce_aggregate;
@@ -27,14 +28,14 @@ ZEND_API zend_class_entry *zend_ce_iterator;
 ZEND_API zend_class_entry *zend_ce_arrayaccess;
 ZEND_API zend_class_entry *zend_ce_serializable;
 ZEND_API zend_class_entry *zend_ce_countable;
+ZEND_API zend_class_entry *zend_ce_stringable;
 
 /* {{{ zend_call_method
  Only returns the returned zval if retval_ptr != NULL */
-ZEND_API zval* zend_call_method(zend_object *object, zend_class_entry *obj_ce, zend_function **fn_proxy, const char *function_name, size_t function_name_len, zval *retval_ptr, int param_count, zval* arg1, zval* arg2)
+ZEND_API zval* zend_call_method(zend_object *object, zend_class_entry *obj_ce, zend_function **fn_proxy, const char *function_name, size_t function_name_len, zval *retval_ptr, uint32_t param_count, zval* arg1, zval* arg2)
 {
-	int result;
-	zend_fcall_info fci;
-	zval retval;
+	zend_function *fn;
+	zend_class_entry *called_scope;
 	zval params[2];
 
 	if (param_count > 0) {
@@ -44,77 +45,38 @@ ZEND_API zval* zend_call_method(zend_object *object, zend_class_entry *obj_ce, z
 		ZVAL_COPY_VALUE(&params[1], arg2);
 	}
 
-	fci.size = sizeof(fci);
-	fci.object = object;
-	fci.retval = retval_ptr ? retval_ptr : &retval;
-	fci.param_count = param_count;
-	fci.params = params;
-	fci.no_separation = 1;
-
-	if (!fn_proxy && !obj_ce) {
-		/* no interest in caching and no information already present that is
-		 * needed later inside zend_call_function. */
-		ZVAL_STRINGL(&fci.function_name, function_name, function_name_len);
-		result = zend_call_function(&fci, NULL);
-		zval_ptr_dtor(&fci.function_name);
+	if (!obj_ce) {
+		obj_ce = object ? object->ce : NULL;
+	}
+	if (!fn_proxy || !*fn_proxy) {
+		if (EXPECTED(obj_ce)) {
+			fn = zend_hash_str_find_ptr(
+				&obj_ce->function_table, function_name, function_name_len);
+			if (UNEXPECTED(fn == NULL)) {
+				/* error at c-level */
+				zend_error_noreturn(E_CORE_ERROR, "Couldn't find implementation for method %s::%s", ZSTR_VAL(obj_ce->name), function_name);
+			}
+		} else {
+			fn = zend_fetch_function_str(function_name, function_name_len);
+			if (UNEXPECTED(fn == NULL)) {
+				/* error at c-level */
+				zend_error_noreturn(E_CORE_ERROR, "Couldn't find implementation for function %s", function_name);
+			}
+		}
+		if (fn_proxy) {
+			*fn_proxy = fn;
+		}
 	} else {
-		zend_fcall_info_cache fcic;
-		ZVAL_UNDEF(&fci.function_name); /* Unused */
-
-		if (!obj_ce) {
-			obj_ce = object ? object->ce : NULL;
-		}
-		if (!fn_proxy || !*fn_proxy) {
-			if (EXPECTED(obj_ce)) {
-				fcic.function_handler = zend_hash_str_find_ptr(
-					&obj_ce->function_table, function_name, function_name_len);
-				if (UNEXPECTED(fcic.function_handler == NULL)) {
-					/* error at c-level */
-					zend_error_noreturn(E_CORE_ERROR, "Couldn't find implementation for method %s::%s", ZSTR_VAL(obj_ce->name), function_name);
-				}
-			} else {
-				fcic.function_handler = zend_fetch_function_str(function_name, function_name_len);
-				if (UNEXPECTED(fcic.function_handler == NULL)) {
-					/* error at c-level */
-					zend_error_noreturn(E_CORE_ERROR, "Couldn't find implementation for function %s", function_name);
-				}
-			}
-			if (fn_proxy) {
-				*fn_proxy = fcic.function_handler;
-			}
-		} else {
-			fcic.function_handler = *fn_proxy;
-		}
-
-		if (object) {
-			fcic.called_scope = object->ce;
-		} else {
-			zend_class_entry *called_scope = zend_get_called_scope(EG(current_execute_data));
-
-			if (obj_ce &&
-			    (!called_scope ||
-			     !instanceof_function(called_scope, obj_ce))) {
-				fcic.called_scope = obj_ce;
-			} else {
-				fcic.called_scope = called_scope;
-			}
-		}
-		fcic.object = object;
-		result = zend_call_function(&fci, &fcic);
+		fn = *fn_proxy;
 	}
-	if (result == FAILURE) {
-		/* error at c-level */
-		if (!obj_ce) {
-			obj_ce = object ? object->ce : NULL;
-		}
-		if (!EG(exception)) {
-			zend_error_noreturn(E_CORE_ERROR, "Couldn't execute method %s%s%s", obj_ce ? ZSTR_VAL(obj_ce->name) : "", obj_ce ? "::" : "", function_name);
-		}
+
+	if (object) {
+		called_scope = object->ce;
+	} else {
+		called_scope = obj_ce;
 	}
-	if (!retval_ptr) {
-		zval_ptr_dtor(&retval);
-		return NULL;
-	}
+
+	zend_call_known_function(fn, object, called_scope, retval_ptr, param_count, params);
 	return retval_ptr;
 }
 /* }}} */
@@ -192,7 +154,7 @@ ZEND_API void zend_user_it_get_current_key(zend_object_iterator *_iter, zval *ke
 	zend_call_method_with_0_params(Z_OBJ_P(object), iter->ce, &iter->ce->iterator_funcs_ptr->zf_key, "key", &retval);
 
 	if (Z_TYPE(retval) != IS_UNDEF) {
-		ZVAL_ZVAL(key, &retval, 1, 1);
+		ZVAL_COPY_VALUE(key, &retval);
 	} else {
 		if (!EG(exception)) {
 			zend_error(E_WARNING, "Nothing returned from %s::key()", ZSTR_VAL(iter->ce->name));
@@ -291,6 +253,11 @@ static int zend_implement_traversable(zend_class_entry *interface, zend_class_en
 	if (class_type->get_iterator || (class_type->parent && class_type->parent->get_iterator)) {
 		return SUCCESS;
 	}
+	/* Abstract class can implement Traversable only, in which case the extending class must
+	 * implement Iterator or IteratorAggregate. */
+	if (class_type->ce_flags & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS) {
+		return SUCCESS;
+	}
 	if (class_type->num_interfaces) {
 		ZEND_ASSERT(class_type->ce_flags & ZEND_ACC_RESOLVED_INTERFACES);
 		for (i = 0; i < class_type->num_interfaces; i++) {
@@ -311,59 +278,39 @@ static int zend_implement_traversable(zend_class_entry *interface, zend_class_en
 /* {{{ zend_implement_aggregate */
 static int zend_implement_aggregate(zend_class_entry *interface, zend_class_entry *class_type)
 {
-	uint32_t i;
-	int t = -1;
-	zend_class_iterator_funcs *funcs_ptr;
+	if (zend_class_implements_interface(class_type, zend_ce_iterator)) {
+		zend_error_noreturn(E_ERROR,
+			"Class %s cannot implement both Iterator and IteratorAggregate at the same time",
+			ZSTR_VAL(class_type->name));
+	}
 
-	if (class_type->get_iterator) {
-		if (class_type->type == ZEND_INTERNAL_CLASS) {
-			/* inheritance ensures the class has necessary userland methods */
+	zend_function *zf = zend_hash_str_find_ptr(
+		&class_type->function_table, "getiterator", sizeof("getiterator") - 1);
+	if (class_type->get_iterator && class_type->get_iterator != zend_user_it_get_new_iterator) {
+		/* get_iterator was explicitly assigned for an internal class. */
+		if (!class_type->parent || class_type->parent->get_iterator != class_type->get_iterator) {
+			ZEND_ASSERT(class_type->type == ZEND_INTERNAL_CLASS);
 			return SUCCESS;
-		} else if (class_type->get_iterator != zend_user_it_get_new_iterator) {
-			/* c-level get_iterator cannot be changed (exception being only Traversable is implemented) */
-			if (class_type->num_interfaces) {
-				ZEND_ASSERT(class_type->ce_flags & ZEND_ACC_RESOLVED_INTERFACES);
-				for (i = 0; i < class_type->num_interfaces; i++) {
-					if (class_type->interfaces[i] == zend_ce_iterator) {
-						zend_error_noreturn(E_ERROR, "Class %s cannot implement both %s and %s at the same time",
-									ZSTR_VAL(class_type->name),
-									ZSTR_VAL(interface->name),
-									ZSTR_VAL(zend_ce_iterator->name));
-						return FAILURE;
-					}
-					if (class_type->interfaces[i] == zend_ce_traversable) {
-						t = i;
-					}
-				}
-			}
-			if (t == -1) {
-				return FAILURE;
-			}
 		}
-	}
-	if (class_type->parent
-	 && (class_type->parent->ce_flags & ZEND_ACC_REUSE_GET_ITERATOR)) {
-		class_type->get_iterator = class_type->parent->get_iterator;
-		class_type->ce_flags |= ZEND_ACC_REUSE_GET_ITERATOR;
-	} else {
-		class_type->get_iterator = zend_user_it_get_new_iterator;
-	}
-	funcs_ptr = class_type->iterator_funcs_ptr;
-	if (class_type->type == ZEND_INTERNAL_CLASS) {
-		if (!funcs_ptr) {
-			funcs_ptr = calloc(1, sizeof(zend_class_iterator_funcs));
-			class_type->iterator_funcs_ptr = funcs_ptr;
+
+		/* The getIterator() method has not been overwritten, use inherited get_iterator(). */
+		if (zf->common.scope != class_type) {
+			return SUCCESS;
 		}
-		funcs_ptr->zf_new_iterator = zend_hash_str_find_ptr(&class_type->function_table, "getiterator", sizeof("getiterator") - 1);
-	} else {
-		if (!funcs_ptr) {
-			funcs_ptr = zend_arena_alloc(&CG(arena), sizeof(zend_class_iterator_funcs));
-			class_type->iterator_funcs_ptr = funcs_ptr;
-			memset(funcs_ptr, 0, sizeof(zend_class_iterator_funcs));
-		} else {
-			funcs_ptr->zf_new_iterator = NULL;
-		}
+
+		/* getIterator() has been overwritten, switch to zend_user_it_get_new_iterator. */
 	}
+
+	ZEND_ASSERT(!class_type->iterator_funcs_ptr && "Iterator funcs already set?");
+	zend_class_iterator_funcs *funcs_ptr = class_type->type == ZEND_INTERNAL_CLASS
+		? pemalloc(sizeof(zend_class_iterator_funcs), 1)
+		: zend_arena_alloc(&CG(arena), sizeof(zend_class_iterator_funcs));
+	class_type->get_iterator = zend_user_it_get_new_iterator;
+	class_type->iterator_funcs_ptr = funcs_ptr;
+
+	memset(funcs_ptr, 0, sizeof(zend_class_iterator_funcs));
+	funcs_ptr->zf_new_iterator = zf;
+
 	return SUCCESS;
 }
 /* }}} */
@@ -371,65 +318,38 @@ static int zend_implement_aggregate(zend_class_entry *interface, zend_class_entr
 /* {{{ zend_implement_iterator */
 static int zend_implement_iterator(zend_class_entry *interface, zend_class_entry *class_type)
 {
-	zend_class_iterator_funcs *funcs_ptr;
+	if (zend_class_implements_interface(class_type, zend_ce_aggregate)) {
+		zend_error_noreturn(E_ERROR,
+			"Class %s cannot implement both Iterator and IteratorAggregate at the same time",
+			ZSTR_VAL(class_type->name));
+	}
 
 	if (class_type->get_iterator && class_type->get_iterator != zend_user_it_get_iterator) {
-		if (class_type->type == ZEND_INTERNAL_CLASS) {
-			/* inheritance ensures the class has the necessary userland methods */
+		if (!class_type->parent || class_type->parent->get_iterator != class_type->get_iterator) {
+			/* get_iterator was explicitly assigned for an internal class. */
+			ZEND_ASSERT(class_type->type == ZEND_INTERNAL_CLASS);
 			return SUCCESS;
-		} else {
-			/* c-level get_iterator cannot be changed */
-			if (class_type->get_iterator == zend_user_it_get_new_iterator) {
-				zend_error_noreturn(E_ERROR, "Class %s cannot implement both %s and %s at the same time",
-							ZSTR_VAL(class_type->name),
-							ZSTR_VAL(interface->name),
-							ZSTR_VAL(zend_ce_aggregate->name));
-			}
-			return FAILURE;
 		}
+		/* Otherwise get_iterator was inherited from the parent by default. */
 	}
-	if (class_type->parent
-	 && (class_type->parent->ce_flags & ZEND_ACC_REUSE_GET_ITERATOR)) {
-		class_type->get_iterator = class_type->parent->get_iterator;
+
+	if (class_type->parent && (class_type->parent->ce_flags & ZEND_ACC_REUSE_GET_ITERATOR)) {
+		/* Keep the inherited get_iterator handler. */
 		class_type->ce_flags |= ZEND_ACC_REUSE_GET_ITERATOR;
 	} else {
 		class_type->get_iterator = zend_user_it_get_iterator;
 	}
-	funcs_ptr = class_type->iterator_funcs_ptr;
-	if (class_type->type == ZEND_INTERNAL_CLASS) {
-		if (!funcs_ptr) {
-			funcs_ptr = calloc(1, sizeof(zend_class_iterator_funcs));
-			class_type->iterator_funcs_ptr = funcs_ptr;
-		} else {
-			funcs_ptr->zf_rewind = zend_hash_str_find_ptr(&class_type->function_table, "rewind", sizeof("rewind") - 1);
-			funcs_ptr->zf_valid = zend_hash_str_find_ptr(&class_type->function_table, "valid", sizeof("valid") - 1);
-			funcs_ptr->zf_key = zend_hash_str_find_ptr(&class_type->function_table, "key", sizeof("key") - 1);
-			funcs_ptr->zf_current = zend_hash_str_find_ptr(&class_type->function_table, "current", sizeof("current") - 1);
-			funcs_ptr->zf_next = zend_hash_str_find_ptr(&class_type->function_table, "next", sizeof("next") - 1);
-		}
-	} else {
-		if (!funcs_ptr) {
-			funcs_ptr = zend_arena_alloc(&CG(arena), sizeof(zend_class_iterator_funcs));
-			class_type->iterator_funcs_ptr = funcs_ptr;
-			memset(funcs_ptr, 0, sizeof(zend_class_iterator_funcs));
-		} else {
-			funcs_ptr->zf_valid = NULL;
-			funcs_ptr->zf_current = NULL;
-			funcs_ptr->zf_key = NULL;
-			funcs_ptr->zf_next = NULL;
-			funcs_ptr->zf_rewind = NULL;
-		}
-	}
+
+	ZEND_ASSERT(!class_type->iterator_funcs_ptr && "Iterator funcs already set?");
+	zend_class_iterator_funcs *funcs_ptr = class_type->type == ZEND_INTERNAL_CLASS
+		? pemalloc(sizeof(zend_class_iterator_funcs), 1)
+		: zend_arena_alloc(&CG(arena), sizeof(zend_class_iterator_funcs));
+	memset(funcs_ptr, 0, sizeof(zend_class_iterator_funcs));
+	class_type->iterator_funcs_ptr = funcs_ptr;
+
 	return SUCCESS;
 }
 /* }}} */
-
-/* {{{ zend_implement_arrayaccess */
-static int zend_implement_arrayaccess(zend_class_entry *interface, zend_class_entry *class_type)
-{
-	return SUCCESS;
-}
-/* }}}*/
 
 /* {{{ zend_user_serialize */
 ZEND_API int zend_user_serialize(zval *object, unsigned char **buffer, size_t *buf_len, zend_serialize_data *data)
@@ -438,8 +358,7 @@ ZEND_API int zend_user_serialize(zval *object, unsigned char **buffer, size_t *b
 	zval retval;
 	int result;
 
-	zend_call_method_with_0_params(Z_OBJ_P(object), ce, &ce->serialize_func, "serialize", &retval);
-
+	zend_call_known_instance_method_with_0_params(ce->serialize_func, Z_OBJ_P(object), &retval);
 
 	if (Z_TYPE(retval) == IS_UNDEF || EG(exception)) {
 		result = FAILURE;
@@ -478,9 +397,8 @@ ZEND_API int zend_user_unserialize(zval *object, zend_class_entry *ce, const uns
 	}
 
 	ZVAL_STRINGL(&zdata, (char*)buf, buf_len);
-
-	zend_call_method_with_1_params(Z_OBJ_P(object), ce, &ce->unserialize_func, "unserialize", NULL, &zdata);
-
+	zend_call_known_instance_method_with_1_params(
+		ce->unserialize_func, Z_OBJ_P(object), NULL, &zdata);
 	zval_ptr_dtor(&zdata);
 
 	if (EG(exception)) {
@@ -511,7 +429,7 @@ static int zend_implement_serializable(zend_class_entry *interface, zend_class_e
 {
 	if (class_type->parent
 		&& (class_type->parent->serialize || class_type->parent->unserialize)
-		&& !instanceof_function_ex(class_type->parent, zend_ce_serializable, 1)) {
+		&& !zend_class_implements_interface(class_type->parent, zend_ce_serializable)) {
 		return FAILURE;
 	}
 	if (!class_type->serialize) {
@@ -524,70 +442,6 @@ static int zend_implement_serializable(zend_class_entry *interface, zend_class_e
 }
 /* }}}*/
 
-/* {{{ zend_implement_countable */
-static int zend_implement_countable(zend_class_entry *interface, zend_class_entry *class_type)
-{
-	return SUCCESS;
-}
-/* }}}*/
-
-/* {{{ function tables */
-static const zend_function_entry zend_funcs_aggregate[] = {
-	ZEND_ABSTRACT_ME(iterator, getIterator, NULL)
-	ZEND_FE_END
-};
-
-static const zend_function_entry zend_funcs_iterator[] = {
-	ZEND_ABSTRACT_ME(iterator, current,  NULL)
-	ZEND_ABSTRACT_ME(iterator, next,     NULL)
-	ZEND_ABSTRACT_ME(iterator, key,      NULL)
-	ZEND_ABSTRACT_ME(iterator, valid,    NULL)
-	ZEND_ABSTRACT_ME(iterator, rewind,   NULL)
-	ZEND_FE_END
-};
-
-static const zend_function_entry *zend_funcs_traversable = NULL;
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_arrayaccess_offset, 0, 0, 1)
-	ZEND_ARG_INFO(0, offset)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_arrayaccess_offset_get, 0, 0, 1) /* actually this should be return by ref but atm cannot be */
-	ZEND_ARG_INFO(0, offset)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_arrayaccess_offset_value, 0, 0, 2)
-	ZEND_ARG_INFO(0, offset)
-	ZEND_ARG_INFO(0, value)
-ZEND_END_ARG_INFO()
-
-static const zend_function_entry zend_funcs_arrayaccess[] = {
-	ZEND_ABSTRACT_ME(arrayaccess, offsetExists, arginfo_arrayaccess_offset)
-	ZEND_ABSTRACT_ME(arrayaccess, offsetGet,    arginfo_arrayaccess_offset_get)
-	ZEND_ABSTRACT_ME(arrayaccess, offsetSet,    arginfo_arrayaccess_offset_value)
-	ZEND_ABSTRACT_ME(arrayaccess, offsetUnset,  arginfo_arrayaccess_offset)
-	ZEND_FE_END
-};
-
-ZEND_BEGIN_ARG_INFO(arginfo_serializable_serialize, 0)
-	ZEND_ARG_INFO(0, serialized)
-ZEND_END_ARG_INFO()
-
-static const zend_function_entry zend_funcs_serializable[] = {
-	ZEND_ABSTRACT_ME(serializable, serialize,   NULL)
-	ZEND_FENTRY(unserialize, NULL, arginfo_serializable_serialize, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
-	ZEND_FE_END
-};
-
-ZEND_BEGIN_ARG_INFO(arginfo_countable_count, 0)
-ZEND_END_ARG_INFO()
-
-static const zend_function_entry zend_funcs_countable[] = {
-	ZEND_ABSTRACT_ME(Countable, count, arginfo_countable_count)
-	ZEND_FE_END
-};
-/* }}} */
-
 /* {{{ zend_register_interfaces */
 ZEND_API void zend_register_interfaces(void)
 {
@@ -599,10 +453,16 @@ ZEND_API void zend_register_interfaces(void)
 	REGISTER_MAGIC_INTERFACE(iterator, Iterator);
 	REGISTER_MAGIC_IMPLEMENT(iterator, traversable);
 
-	REGISTER_MAGIC_INTERFACE(arrayaccess, ArrayAccess);
-
 	REGISTER_MAGIC_INTERFACE(serializable, Serializable);
 
-	REGISTER_MAGIC_INTERFACE(countable, Countable);
+	zend_class_entry ce;
+	INIT_CLASS_ENTRY(ce, "ArrayAccess", class_ArrayAccess_methods);
+	zend_ce_arrayaccess = zend_register_internal_interface(&ce);
+
+	INIT_CLASS_ENTRY(ce, "Countable", class_Countable_methods);
+	zend_ce_countable = zend_register_internal_interface(&ce);
+
+	INIT_CLASS_ENTRY(ce, "Stringable", class_Stringable_methods);
+	zend_ce_stringable = zend_register_internal_interface(&ce);
 }
 /* }}} */

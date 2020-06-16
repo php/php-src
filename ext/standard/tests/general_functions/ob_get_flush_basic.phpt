@@ -27,7 +27,6 @@ $string = ob_get_flush();
 var_dump($string)
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing ob_get_flush() : basic functionality ***
 testing ob_get_flush() with some
@@ -39,4 +38,3 @@ Newlines too
 array(0) {
 }
 string(0) ""
-===DONE===

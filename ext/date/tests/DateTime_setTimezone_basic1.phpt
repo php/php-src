@@ -21,9 +21,7 @@ $datetime->setTimezone($la_time);
 echo "New timezone: " . date_timezone_get($datetime)->getName() . "\n";
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing DateTime::setTimezone() : basic functionality ***
 Default timezone: Europe/London
 New timezone: America/Los_Angeles
-===DONE===

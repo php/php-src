@@ -20,17 +20,8 @@
 #endif
 
 #include "php.h"
-#if HAVE_LIBXML && HAVE_DOM
+#if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
-
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_documentfragement_construct, 0, 0, 0)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_documentfragement_appendXML, 0, 0, 1)
-	ZEND_ARG_INFO(0, data)
-ZEND_END_ARG_INFO();
-/* }}} */
 
 /*
 * class DOMDocumentFragment extends DOMNode
@@ -39,27 +30,21 @@ ZEND_END_ARG_INFO();
 * Since:
 */
 
-const zend_function_entry php_dom_documentfragment_class_functions[] = {
-	PHP_ME(domdocumentfragment, __construct, arginfo_dom_documentfragement_construct, ZEND_ACC_PUBLIC)
-	PHP_ME(domdocumentfragment, appendXML, arginfo_dom_documentfragement_appendXML, ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};
-
 /* {{{ proto DOMDocumentFragment::__construct() */
-PHP_METHOD(domdocumentfragment, __construct)
+PHP_METHOD(DOMDocumentFragment, __construct)
 {
 	xmlNodePtr nodep = NULL, oldnode = NULL;
 	dom_object *intern;
 
-	if (zend_parse_parameters_none_throw() == FAILURE) {
-		return;
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
 	}
 
 	nodep = xmlNewDocFragment(NULL);
 
 	if (!nodep) {
 		php_dom_throw_error(INVALID_STATE_ERR, 1);
-		RETURN_FALSE;
+		return;
 	}
 
 	intern = Z_DOMOBJ_P(ZEND_THIS);
@@ -107,7 +92,7 @@ static void php_dom_xmlSetTreeDoc(xmlNodePtr tree, xmlDocPtr doc) /* {{{ */
 /* }}} */
 
 /* {{{ proto void DOMDocumentFragment::appendXML(string data) */
-PHP_METHOD(domdocumentfragment, appendXML) {
+PHP_METHOD(DOMDocumentFragment, appendXML) {
 	zval *id;
 	xmlNode *nodep;
 	dom_object *intern;
@@ -118,7 +103,7 @@ PHP_METHOD(domdocumentfragment, appendXML) {
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &data, &data_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
@@ -142,6 +127,50 @@ PHP_METHOD(domdocumentfragment, appendXML) {
 	}
 
 	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto void domdocumentfragment::append(string|DOMNode ...$nodes)
+URL: https://dom.spec.whatwg.org/#dom-parentnode-append
+Since: DOM Living Standard (DOM4)
+*/
+PHP_METHOD(DOMDocumentFragment, append)
+{
+	int argc;
+	zval *args, *id;
+	dom_object *intern;
+	xmlNode *context;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	id = ZEND_THIS;
+	DOM_GET_OBJ(context, id, xmlNodePtr, intern);
+
+	dom_parent_node_append(intern, args, argc);
+}
+/* }}} */
+
+/* {{{ proto void domdocumentfragment::prepend(string|DOMNode ...$nodes)
+URL: https://dom.spec.whatwg.org/#dom-parentnode-prepend
+Since: DOM Living Standard (DOM4)
+*/
+PHP_METHOD(DOMDocumentFragment, prepend)
+{
+	int argc;
+	zval *args, *id;
+	dom_object *intern;
+	xmlNode *context;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	id = ZEND_THIS;
+	DOM_GET_OBJ(context, id, xmlNodePtr, intern);
+
+	dom_parent_node_prepend(intern, args, argc);
 }
 /* }}} */
 

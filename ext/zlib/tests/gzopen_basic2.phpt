@@ -40,13 +40,11 @@ foreach($modes as $mode) {
 }
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing gzopen() : basic functionality ***
 testing mode -- w --
 This was the information that was written
 testing mode -- w+ --
 
-Warning: gzopen(): cannot open a zlib stream for reading and writing at the same time! in %s on line %d
+Warning: gzopen(): Cannot open a zlib stream for reading and writing at the same time! in %s on line %d
 bool(false)
-===DONE===

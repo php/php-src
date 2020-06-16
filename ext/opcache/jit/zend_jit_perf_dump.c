@@ -31,6 +31,9 @@
 # include <sys/sysctl.h>
 #elif defined(__NetBSD__)
 # include <lwp.h>
+#elif defined(__sun)
+// avoiding thread.h inclusion as it conflicts with vtunes types.
+extern unsigned int thr_self(void);
 #endif
 
 #include "zend_elf.h"
@@ -63,14 +66,14 @@
 #define PADDING8(size) (ALIGN8(size) - (size))
 
 typedef struct zend_perf_jitdump_header {
-  uint32_t magic;
-  uint32_t version;
-  uint32_t size;
-  uint32_t elf_mach_target;
-  uint32_t reserved;
-  uint32_t process_id;
-  uint64_t time_stamp;
-  uint64_t flags;
+	uint32_t magic;
+	uint32_t version;
+	uint32_t size;
+	uint32_t elf_mach_target;
+	uint32_t reserved;
+	uint32_t process_id;
+	uint64_t time_stamp;
+	uint64_t flags;
 } zend_perf_jitdump_header;
 
 typedef struct _zend_perf_jitdump_record {
@@ -123,8 +126,11 @@ static void zend_jit_perf_jitdump_open(void)
 	size_t pathlen = sizeof(path);
 	int mib[4] = {CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, -1};
 	if (sysctl(mib, 4, path, &pathlen, NULL, 0) == -1) {
-             return;
+		return;
 	}
+	fd = open(path, O_RDONLY);
+#elif defined(__sun)
+	const char *path = getexecname();
 	fd = open(path, O_RDONLY);
 #else
 	fd = -1;
@@ -209,6 +215,8 @@ static void zend_jit_perf_jitdump_register(const char *name, void *start, size_t
 		thread_id = getthrid();
 #elif defined(__NetBSD__)
 		thread_id = _lwp_self();
+#elif defined(__sun)
+		thread_id = thr_self();
 #endif
 
 		memset(&rec, 0, sizeof(rec));

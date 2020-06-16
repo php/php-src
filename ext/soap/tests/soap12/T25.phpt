@@ -7,7 +7,7 @@ SOAP 1.2: T25 echoOk
 $HTTP_RAW_POST_DATA = <<<EOF
 <?xml version='1.0' ?>
 <!DOCTYPE env:Envelope SYSTEM "env.dtd"[]>
-<env:Envelope xmlns:env="http://www.w3.org/2003/05/soap-envelope"> 
+<env:Envelope xmlns:env="http://www.w3.org/2003/05/soap-envelope">
   <env:Body>
     <test:echoOk xmlns:test="http://example.org/ts-tests">
       foo

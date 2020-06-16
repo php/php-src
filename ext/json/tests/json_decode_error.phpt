@@ -1,21 +1,20 @@
 --TEST--
 Test json_decode() function : error conditions
---SKIPIF--
-<?php if (!extension_loaded("json")) print "skip"; ?>
 --FILE--
 <?php
 echo "*** Testing json_decode() : error conditions ***\n";
 
 echo "\n-- Testing json_decode() function with depth below 0 --\n";
-var_dump(json_decode('"abc"', true, -1));
+
+try {
+    var_dump(json_decode('"abc"', true, -1));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 ?>
-===Done===
---EXPECTF--
+--EXPECT--
 *** Testing json_decode() : error conditions ***
 
 -- Testing json_decode() function with depth below 0 --
-
-Warning: json_decode(): Depth must be greater than zero in %s on line %d
-NULL
-===Done===
+json_decode(): Argument #3 ($depth) must be greater than 0

@@ -30,19 +30,17 @@ try {
 }
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing finfo_open() : error functionality ***
 
-Warning: finfo_open(%sfoobarfile): failed to open stream: No such file or directory in %sfinfo_open_error.php on line %d
+Warning: finfo_open(%sfoobarfile): Failed to open stream: No such file or directory in %sfinfo_open_error.php on line %d
 
-Warning: finfo_open(%sfoobarfile): failed to open stream: No such file or directory in %sfinfo_open_error.php on line %d
+Warning: finfo_open(%sfoobarfile): Failed to open stream: No such file or directory in %sfinfo_open_error.php on line %d
 
 Warning: finfo_open(): Failed to load magic database at '%sfoobarfile'. in %sfinfo_open_error.php on line %d
 bool(false)
 
 Notice: finfo_open(): Warning: using regular magic file `%smagic' in %sfinfo_open_error.php on line %d
 resource(6) of type (file_info)
-finfo_open() expects parameter 1 to be int, string given
-finfo::__construct() expects parameter 1 to be int, string given
-===DONE===
+finfo_open(): Argument #1 ($options) must be of type int, string given
+finfo::__construct(): Argument #1 ($options) must be of type int, string given

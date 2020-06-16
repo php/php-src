@@ -27,11 +27,9 @@ $a = new Phar(__DIR__ . '/files/openssl.phar');
 $r = $a->getSignature();
 var_dump($r['hash_type']);
 ?>
-===DONE===
 --EXPECT--
 string(5) "SHA-1"
 string(7) "SHA-512"
 string(7) "SHA-256"
 string(3) "MD5"
 string(7) "OpenSSL"
-===DONE===

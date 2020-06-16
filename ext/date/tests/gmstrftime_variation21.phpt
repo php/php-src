@@ -18,8 +18,8 @@ date_default_timezone_set("Asia/Calcutta");
 //array of values to iterate over
 $inputs = array(
       'Preferred date and time representation' => "%c",
-	  'Preferred date representation' => "%x",
-	  'Preferred time representation' => "%X",
+      'Preferred date representation' => "%x",
+      'Preferred time representation' => "%X",
 );
 
 // loop through each element of the array for timestamp
@@ -31,7 +31,6 @@ foreach($inputs as $key =>$value) {
 };
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing gmstrftime() : usage variation ***
 
@@ -46,4 +45,3 @@ string(8) "08/08/08"
 --Preferred time representation--
 string(%d) "%d:%d:%d"
 string(8) "08:08:08"
-===DONE===

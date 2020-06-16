@@ -4,16 +4,16 @@ Test typed references to static properties
 <?php
 
 class Test {
-	public static int $x = 0;
+    public static int $x = 0;
 }
 
 class Test2 extends Test {
-	public static $y = 1;
+    public static $y = 1;
 }
 
 $x =& Test::$x;
 try {
-	$x = "foo";
+    $x = "foo";
 } catch (TypeError $e) { echo $e->getMessage(), "\n"; }
 var_dump($x, Test::$x);
 

@@ -16,13 +16,11 @@ var_dump($df->setTimeZone(array()));
 var_dump($df->setTimeZone('non existing timezone'));
 
 ?>
-==DONE==
 --EXPECTF--
 Warning: Array to string conversion in %s on line %d
 
-Warning: IntlDateFormatter::setTimeZone(): datefmt_set_timezone: no such time zone: 'Array' in %s on line %d
+Warning: IntlDateFormatter::setTimeZone(): datefmt_set_timezone: No such time zone: 'Array' in %s on line %d
 bool(false)
 
-Warning: IntlDateFormatter::setTimeZone(): datefmt_set_timezone: no such time zone: 'non existing timezone' in %s on line %d
+Warning: IntlDateFormatter::setTimeZone(): datefmt_set_timezone: No such time zone: 'non existing timezone' in %s on line %d
 bool(false)
-==DONE==

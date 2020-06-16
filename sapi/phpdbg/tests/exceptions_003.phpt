@@ -1,5 +1,11 @@
 --TEST--
 Test breaks on HANDLE_EXCEPTION
+--SKIPIF--
+<?php
+if (PHP_OS_FAMILY === 'Windows' && ini_get('opcache.jit') && ini_get('opcache.jit_buffer_size')) {
+    die('xfail breakpoint/watchpoint issues with JIT on Windows');
+}
+?>
 --PHPDBG--
 b 5
 r
@@ -26,7 +32,7 @@ prompt> [L7 %s ECHO<1>                 "ok\n"                                   
  00009: } catch (Error $e) {
 prompt> ok
 [L7 %s FAST_RET                ~%d                   try-catch(0)                             %s]
-[L9 %s CATCH<%d>                "Error"                                   $e                   %s]
+[L9 %s CATCH<%d> %s "Error"                                   $e                   %s]
 >00005: 		x();
  00006: 	} finally {
  00007: 		print "ok\n";

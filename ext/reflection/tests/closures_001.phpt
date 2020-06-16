@@ -11,10 +11,10 @@ var_dump($rm->getNumberOfParameters());
 var_dump($rm->getNumberOfRequiredParameters());
 $rms = $ro->getMethods();
 foreach($rms as $rm) {
-	if ($rm->getName() == '__invoke') {
-		var_dump($rm->getNumberOfParameters());
-		var_dump($rm->getNumberOfRequiredParameters());
-	}
+    if ($rm->getName() == '__invoke') {
+        var_dump($rm->getNumberOfParameters());
+        var_dump($rm->getNumberOfRequiredParameters());
+    }
 }
 
 echo "---\n";
@@ -47,7 +47,6 @@ $rp = new ReflectionParameter($closure, 'b');
 var_dump($rp->isOptional());
 
 ?>
-===DONE===
 --EXPECT--
 int(2)
 int(1)
@@ -67,4 +66,3 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
-===DONE===

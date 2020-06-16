@@ -13,24 +13,24 @@ if (!extension_loaded('sockets')) {
 
 var_dump(socket_create_pair(AF_INET, null, null, $sockets));
 
-var_dump(socket_create_pair(31337, null, null, $sockets));
+try {
+    var_dump(socket_create_pair(31337, null, null, $sockets));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
-var_dump(socket_create_pair(AF_INET, 31337, 0, $sockets));
+try {
+    var_dump(socket_create_pair(AF_INET, 31337, 0, $sockets));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 ?>
 --EXPECTF--
-Warning: socket_create_pair(): unable to create socket pair [%d]: %s not supported in %s on line %d
+Warning: socket_create_pair(): Unable to create socket pair [%d]: %s not supported in %s on line %d
 bool(false)
-
-Warning: socket_create_pair(): invalid socket domain [31337] specified for argument 1, assuming AF_INET in %s on line %d
-
-Warning: socket_create_pair(): unable to create socket pair [%d]: %s not supported in %s on line %d
-bool(false)
-
-Warning: socket_create_pair(): invalid socket type [31337] specified for argument 2, assuming SOCK_STREAM in %s on line %d
-
-Warning: socket_create_pair(): unable to create socket pair [%d]: %s not supported %s on line %d
-bool(false)
+socket_create_pair(): Argument #1 ($domain) must be either AF_UNIX, AF_INET6 or AF_INET
+socket_create_pair(): Argument #2 ($type) must be either SOCK_STREAM, SOCK_DGRAM, SOCK_SEQPACKET, SOCK_RAW, or SOCK_RDM
 --CREDITS--
 Till Klampaeckel, till@php.net
 Berlin TestFest 2009

@@ -42,11 +42,7 @@
 	https://wiki.php.net/rfc/remove_hex_support_in_numeric_strings */
 #define NO_HEX_FP 1
 
-#if defined(HAVE_INTTYPES_H)
 #include <inttypes.h>
-#elif defined(HAVE_STDINT_H)
-#include <stdint.h>
-#endif
 
 #ifndef HAVE_INT32_T
 # if SIZEOF_INT == 4

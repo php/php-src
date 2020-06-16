@@ -78,7 +78,7 @@ foreach($file_content_types as $file_content_type) {
     }
 
     rewind($file_handle);
-    echo "-- Reading entire file content, expeceted : 0 bytes --\n";
+    echo "-- Reading entire file content, expected : 0 bytes --\n";
     // read from file, by giving the file actual size,
     $data_from_file = check_read($file_handle, 1024, (strstr($file_mode, "+") ? 1024 : 0 ) );
     // calculate the hash and dump it, if data read, expecting here no data was read
@@ -86,7 +86,7 @@ foreach($file_content_types as $file_content_type) {
       var_dump( md5($data_from_file) );
 
     // reading file by giving less than its size
-    echo "-- Reading file content less than max. file size, expeceted : 0 bytes --\n";
+    echo "-- Reading file content less than max. file size, expected : 0 bytes --\n";
     rewind($file_handle);
     $data_from_file = check_read($file_handle, 1000, (strstr($file_mode, "+") ? 1000 : 0 ) );
     // calculate the hash and dump it, if data read, expecting here no data was read
@@ -108,172 +108,172 @@ echo "Done\n";
 
 -- Testing fread() with file having content of type numeric --
 -- File opened in mode a --
--- Reading entire file content, expeceted : 0 bytes --
+-- Reading entire file content, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
--- Reading file content less than max. file size, expeceted : 0 bytes --
+-- Reading file content less than max. file size, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
 -- File opened in mode ab --
--- Reading entire file content, expeceted : 0 bytes --
+-- Reading entire file content, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
--- Reading file content less than max. file size, expeceted : 0 bytes --
+-- Reading file content less than max. file size, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
 -- File opened in mode at --
--- Reading entire file content, expeceted : 0 bytes --
+-- Reading entire file content, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
--- Reading file content less than max. file size, expeceted : 0 bytes --
+-- Reading file content less than max. file size, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
 -- File opened in mode w --
--- Reading entire file content, expeceted : 0 bytes --
+-- Reading entire file content, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
--- Reading file content less than max. file size, expeceted : 0 bytes --
+-- Reading file content less than max. file size, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
 -- File opened in mode wb --
--- Reading entire file content, expeceted : 0 bytes --
+-- Reading entire file content, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
--- Reading file content less than max. file size, expeceted : 0 bytes --
+-- Reading file content less than max. file size, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
 -- File opened in mode wt --
--- Reading entire file content, expeceted : 0 bytes --
+-- Reading entire file content, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
--- Reading file content less than max. file size, expeceted : 0 bytes --
+-- Reading file content less than max. file size, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
 -- File opened in mode x --
--- Reading entire file content, expeceted : 0 bytes --
+-- Reading entire file content, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
--- Reading file content less than max. file size, expeceted : 0 bytes --
+-- Reading file content less than max. file size, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
 -- File opened in mode xb --
--- Reading entire file content, expeceted : 0 bytes --
+-- Reading entire file content, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
--- Reading file content less than max. file size, expeceted : 0 bytes --
+-- Reading file content less than max. file size, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
 -- File opened in mode xt --
--- Reading entire file content, expeceted : 0 bytes --
+-- Reading entire file content, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
--- Reading file content less than max. file size, expeceted : 0 bytes --
+-- Reading file content less than max. file size, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
@@ -281,172 +281,172 @@ bool(false)
 
 -- Testing fread() with file having content of type text --
 -- File opened in mode a --
--- Reading entire file content, expeceted : 0 bytes --
+-- Reading entire file content, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
--- Reading file content less than max. file size, expeceted : 0 bytes --
+-- Reading file content less than max. file size, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
 -- File opened in mode ab --
--- Reading entire file content, expeceted : 0 bytes --
+-- Reading entire file content, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
--- Reading file content less than max. file size, expeceted : 0 bytes --
+-- Reading file content less than max. file size, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
 -- File opened in mode at --
--- Reading entire file content, expeceted : 0 bytes --
+-- Reading entire file content, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
--- Reading file content less than max. file size, expeceted : 0 bytes --
+-- Reading file content less than max. file size, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
 -- File opened in mode w --
--- Reading entire file content, expeceted : 0 bytes --
+-- Reading entire file content, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
--- Reading file content less than max. file size, expeceted : 0 bytes --
+-- Reading file content less than max. file size, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
 -- File opened in mode wb --
--- Reading entire file content, expeceted : 0 bytes --
+-- Reading entire file content, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
--- Reading file content less than max. file size, expeceted : 0 bytes --
+-- Reading file content less than max. file size, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
 -- File opened in mode wt --
--- Reading entire file content, expeceted : 0 bytes --
+-- Reading entire file content, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
--- Reading file content less than max. file size, expeceted : 0 bytes --
+-- Reading file content less than max. file size, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
 -- File opened in mode x --
--- Reading entire file content, expeceted : 0 bytes --
+-- Reading entire file content, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
--- Reading file content less than max. file size, expeceted : 0 bytes --
+-- Reading file content less than max. file size, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
 -- File opened in mode xb --
--- Reading entire file content, expeceted : 0 bytes --
+-- Reading entire file content, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
--- Reading file content less than max. file size, expeceted : 0 bytes --
+-- Reading file content less than max. file size, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
 -- File opened in mode xt --
--- Reading entire file content, expeceted : 0 bytes --
+-- Reading entire file content, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
--- Reading file content less than max. file size, expeceted : 0 bytes --
+-- Reading file content less than max. file size, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
@@ -454,172 +454,172 @@ bool(false)
 
 -- Testing fread() with file having content of type text_with_new_line --
 -- File opened in mode a --
--- Reading entire file content, expeceted : 0 bytes --
+-- Reading entire file content, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
--- Reading file content less than max. file size, expeceted : 0 bytes --
+-- Reading file content less than max. file size, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
 -- File opened in mode ab --
--- Reading entire file content, expeceted : 0 bytes --
+-- Reading entire file content, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
--- Reading file content less than max. file size, expeceted : 0 bytes --
+-- Reading file content less than max. file size, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
 -- File opened in mode at --
--- Reading entire file content, expeceted : 0 bytes --
+-- Reading entire file content, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
--- Reading file content less than max. file size, expeceted : 0 bytes --
+-- Reading file content less than max. file size, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
 -- File opened in mode w --
--- Reading entire file content, expeceted : 0 bytes --
+-- Reading entire file content, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
--- Reading file content less than max. file size, expeceted : 0 bytes --
+-- Reading file content less than max. file size, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
 -- File opened in mode wb --
--- Reading entire file content, expeceted : 0 bytes --
+-- Reading entire file content, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
--- Reading file content less than max. file size, expeceted : 0 bytes --
+-- Reading file content less than max. file size, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
 -- File opened in mode wt --
--- Reading entire file content, expeceted : 0 bytes --
+-- Reading entire file content, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
--- Reading file content less than max. file size, expeceted : 0 bytes --
+-- Reading file content less than max. file size, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
 -- File opened in mode x --
--- Reading entire file content, expeceted : 0 bytes --
+-- Reading entire file content, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
--- Reading file content less than max. file size, expeceted : 0 bytes --
+-- Reading file content less than max. file size, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
 -- File opened in mode xb --
--- Reading entire file content, expeceted : 0 bytes --
+-- Reading entire file content, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
--- Reading file content less than max. file size, expeceted : 0 bytes --
+-- Reading file content less than max. file size, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
 -- File opened in mode xt --
--- Reading entire file content, expeceted : 0 bytes --
+-- Reading entire file content, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
--- Reading file content less than max. file size, expeceted : 0 bytes --
+-- Reading file content less than max. file size, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
@@ -627,172 +627,172 @@ bool(false)
 
 -- Testing fread() with file having content of type alphanumeric --
 -- File opened in mode a --
--- Reading entire file content, expeceted : 0 bytes --
+-- Reading entire file content, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
--- Reading file content less than max. file size, expeceted : 0 bytes --
+-- Reading file content less than max. file size, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
 -- File opened in mode ab --
--- Reading entire file content, expeceted : 0 bytes --
+-- Reading entire file content, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
--- Reading file content less than max. file size, expeceted : 0 bytes --
+-- Reading file content less than max. file size, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
 -- File opened in mode at --
--- Reading entire file content, expeceted : 0 bytes --
+-- Reading entire file content, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
--- Reading file content less than max. file size, expeceted : 0 bytes --
+-- Reading file content less than max. file size, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
 -- File opened in mode w --
--- Reading entire file content, expeceted : 0 bytes --
+-- Reading entire file content, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
--- Reading file content less than max. file size, expeceted : 0 bytes --
+-- Reading file content less than max. file size, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
 -- File opened in mode wb --
--- Reading entire file content, expeceted : 0 bytes --
+-- Reading entire file content, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
--- Reading file content less than max. file size, expeceted : 0 bytes --
+-- Reading file content less than max. file size, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
 -- File opened in mode wt --
--- Reading entire file content, expeceted : 0 bytes --
+-- Reading entire file content, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
--- Reading file content less than max. file size, expeceted : 0 bytes --
+-- Reading file content less than max. file size, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
 -- File opened in mode x --
--- Reading entire file content, expeceted : 0 bytes --
+-- Reading entire file content, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
--- Reading file content less than max. file size, expeceted : 0 bytes --
+-- Reading file content less than max. file size, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
 -- File opened in mode xb --
--- Reading entire file content, expeceted : 0 bytes --
+-- Reading entire file content, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
--- Reading file content less than max. file size, expeceted : 0 bytes --
+-- Reading file content less than max. file size, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
 -- File opened in mode xt --
--- Reading entire file content, expeceted : 0 bytes --
+-- Reading entire file content, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)
 
--- Reading file content less than max. file size, expeceted : 0 bytes --
+-- Reading file content less than max. file size, expected : 0 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 0 bytes ... 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
 int(0)
 bool(false)

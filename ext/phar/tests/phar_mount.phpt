@@ -49,7 +49,6 @@ echo $e->getMessage(),"\n";
 Phar::mount($pname . '/testit2', $pname . '/testit1');
 echo substr($a['testit2']->getContent(),0, 50),"\n";
 ?>
-===DONE===
 --CLEAN--
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.tar'); ?>
@@ -60,4 +59,3 @@ Mounting of testit to %sphar_mount.php within phar %sphar_mount.phar.tar failed
 Mounting of /oops to /home/oops/../../etc/passwd: within phar %sphar_mount.phar.php failed
 <?php
 $fname = dirname(__FILE__) . '/' . basename(
-===DONE===

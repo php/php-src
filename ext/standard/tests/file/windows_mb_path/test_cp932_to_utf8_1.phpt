@@ -9,6 +9,8 @@ if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 skip_if_no_required_exts();
 
 ?>
+--CONFLICTS--
+dir_cp932
 --FILE--
 <?php
 /*
@@ -36,7 +38,6 @@ var_dump(rmdir($subpath));
 remove_data("dir_cp932");
 
 ?>
-===DONE===
 --EXPECTF--
 bool(true)
 bool(true)
@@ -48,4 +49,3 @@ bool(true)
 string(%d) "%s\テストマルチバイト・パス42\テストマルチバイト・パス4"
 Active code page: %d
 bool(true)
-===DONE===

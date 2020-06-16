@@ -6,12 +6,12 @@ Test substr_count() function (basic)
 echo "***Testing basic operations ***\n";
 try {
     substr_count("", "");
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . "\n";
 }
 try {
     substr_count("a", "");
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . "\n";
 }
 var_dump(substr_count("", "a"));
@@ -24,26 +24,27 @@ var_dump(substr_count($a, "bca"));
 $a = str_repeat("abcacbabca", 100);
 var_dump(substr_count($a, "bca"));
 var_dump(substr_count($a, "bca", 200));
+var_dump(substr_count($a, "bca", 200, null));
 var_dump(substr_count($a, "bca", 200, 50));
 var_dump(substr_count($a, "bca", -200));
+var_dump(substr_count($a, "bca", -200, null));
 var_dump(substr_count($a, "bca", -200, 50));
 var_dump(substr_count($a, "bca", -200, -50));
-
-echo "Done\n";
 
 ?>
 --EXPECT--
 ***Testing basic operations ***
-Empty substring
-Empty substring
+substr_count(): Argument #2 ($needle) must be a non-empty string
+substr_count(): Argument #2 ($needle) must be a non-empty string
 int(0)
 int(0)
 int(0)
 int(100)
 int(200)
 int(160)
+int(160)
 int(10)
+int(40)
 int(40)
 int(10)
 int(30)
-Done

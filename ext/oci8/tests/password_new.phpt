@@ -2,7 +2,7 @@
 oci_password_change()
 --SKIPIF--
 <?php
-$target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on thes
+$target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(__DIR__.'/skipif.inc');
 require(__DIR__.'/connect.inc');
 if (empty($dbase)) die ("skip requires database connection string be set");
@@ -37,7 +37,7 @@ require __DIR__."/connect.inc";
 
 $new_password = "test";
 var_dump(oci_password_change($dbase, $user, $password, $new_password));
-var_dump($new_c = ocilogon($user,$new_password,$dbase));
+var_dump($new_c = oci_connect($user,$new_password,$dbase));
 var_dump(oci_password_change($dbase, $user, $new_password, $password));
 
 

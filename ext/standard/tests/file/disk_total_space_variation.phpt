@@ -1,5 +1,7 @@
 --TEST--
 Testing disk_total_space() functions : Usage Variations.
+--CONFLICTS--
+disk_total_space
 --FILE--
 <?php
 /*
@@ -100,16 +102,16 @@ float(%d)
 float(%d)
 
 -- Iteration 9 --
-disk_total_space() expects parameter 1 to be a valid path, string given
+disk_total_space(): Argument #1 ($directory) must be a valid path, string given
 
 -- Iteration 10 --
-disk_total_space() expects parameter 1 to be a valid path, string given
+disk_total_space(): Argument #1 ($directory) must be a valid path, string given
 
 -- Iteration 11 --
-disk_total_space() expects parameter 1 to be a valid path, string given
+disk_total_space(): Argument #1 ($directory) must be a valid path, string given
 
 -- Iteration 12 --
-disk_total_space() expects parameter 1 to be a valid path, string given
+disk_total_space(): Argument #1 ($directory) must be a valid path, string given
 *** Testing with Binary Input ***
 float(%s)
 

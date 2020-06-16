@@ -17,7 +17,7 @@ $code ='
 <?php
 
 class test {
-	private $pri;
+    private $pri;
 }
 
 var_dump(test::$pri);

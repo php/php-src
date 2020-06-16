@@ -22,6 +22,7 @@
 #include <stdio.h>
 
 #include "common_enum.h"
+#include "common_arginfo.h"
 
 extern "C" {
 #include <zend_interfaces.h>
@@ -203,13 +204,13 @@ static zend_object *IntlIterator_object_create(zend_class_entry *ce)
 	return &intern->zo;
 }
 
-static PHP_METHOD(IntlIterator, current)
+PHP_METHOD(IntlIterator, current)
 {
 	zval *data;
 	INTLITERATOR_METHOD_INIT_VARS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	INTLITERATOR_METHOD_FETCH_OBJECT;
@@ -219,12 +220,12 @@ static PHP_METHOD(IntlIterator, current)
 	}
 }
 
-static PHP_METHOD(IntlIterator, key)
+PHP_METHOD(IntlIterator, key)
 {
 	INTLITERATOR_METHOD_INIT_VARS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	INTLITERATOR_METHOD_FETCH_OBJECT;
@@ -236,12 +237,12 @@ static PHP_METHOD(IntlIterator, key)
 	}
 }
 
-static PHP_METHOD(IntlIterator, next)
+PHP_METHOD(IntlIterator, next)
 {
 	INTLITERATOR_METHOD_INIT_VARS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	INTLITERATOR_METHOD_FETCH_OBJECT;
@@ -251,12 +252,12 @@ static PHP_METHOD(IntlIterator, next)
 	ii->iterator->index++;
 }
 
-static PHP_METHOD(IntlIterator, rewind)
+PHP_METHOD(IntlIterator, rewind)
 {
 	INTLITERATOR_METHOD_INIT_VARS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	INTLITERATOR_METHOD_FETCH_OBJECT;
@@ -268,30 +269,17 @@ static PHP_METHOD(IntlIterator, rewind)
 	}
 }
 
-static PHP_METHOD(IntlIterator, valid)
+PHP_METHOD(IntlIterator, valid)
 {
 	INTLITERATOR_METHOD_INIT_VARS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	INTLITERATOR_METHOD_FETCH_OBJECT;
 	RETURN_BOOL(ii->iterator->funcs->valid(ii->iterator) == SUCCESS);
 }
-
-ZEND_BEGIN_ARG_INFO_EX(ainfo_se_void, 0, 0, 0)
-ZEND_END_ARG_INFO()
-
-static const zend_function_entry IntlIterator_class_functions[] = {
-	PHP_ME(IntlIterator,	current,	ainfo_se_void,			ZEND_ACC_PUBLIC)
-	PHP_ME(IntlIterator,	key,		ainfo_se_void,			ZEND_ACC_PUBLIC)
-	PHP_ME(IntlIterator,	next,		ainfo_se_void,			ZEND_ACC_PUBLIC)
-	PHP_ME(IntlIterator,	rewind,		ainfo_se_void,			ZEND_ACC_PUBLIC)
-	PHP_ME(IntlIterator,	valid,		ainfo_se_void,			ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};
-
 
 /* {{{ intl_register_IntlIterator_class
  * Initialize 'IntlIterator' class
@@ -301,7 +289,7 @@ U_CFUNC void intl_register_IntlIterator_class(void)
 	zend_class_entry ce;
 
 	/* Create and register 'IntlIterator' class. */
-	INIT_CLASS_ENTRY(ce, "IntlIterator", IntlIterator_class_functions);
+	INIT_CLASS_ENTRY(ce, "IntlIterator", class_IntlIterator_methods);
 	ce.create_object = IntlIterator_object_create;
 	IntlIterator_ce_ptr = zend_register_internal_class(&ce);
 	IntlIterator_ce_ptr->get_iterator = IntlIterator_get_iterator;

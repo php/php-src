@@ -81,14 +81,14 @@ ZEND_API int zend_alter_ini_entry_chars_ex(zend_string *name, const char *value,
 ZEND_API int zend_restore_ini_entry(zend_string *name, int stage);
 ZEND_API void display_ini_entries(zend_module_entry *module);
 
-ZEND_API zend_long zend_ini_long(char *name, size_t name_length, int orig);
-ZEND_API double zend_ini_double(char *name, size_t name_length, int orig);
-ZEND_API char *zend_ini_string(char *name, size_t name_length, int orig);
-ZEND_API char *zend_ini_string_ex(char *name, size_t name_length, int orig, zend_bool *exists);
+ZEND_API zend_long zend_ini_long(const char *name, size_t name_length, int orig);
+ZEND_API double zend_ini_double(const char *name, size_t name_length, int orig);
+ZEND_API char *zend_ini_string(const char *name, size_t name_length, int orig);
+ZEND_API char *zend_ini_string_ex(const char *name, size_t name_length, int orig, zend_bool *exists);
 ZEND_API zend_string *zend_ini_get_value(zend_string *name);
 ZEND_API zend_bool zend_ini_parse_bool(zend_string *str);
 
-ZEND_API int zend_ini_register_displayer(char *name, uint32_t name_length, void (*displayer)(zend_ini_entry *ini_entry, int type));
+ZEND_API int zend_ini_register_displayer(const char *name, uint32_t name_length, void (*displayer)(zend_ini_entry *ini_entry, int type));
 
 ZEND_API ZEND_INI_DISP(zend_ini_boolean_displayer_cb);
 ZEND_API ZEND_INI_DISP(zend_ini_color_displayer_cb);
@@ -138,21 +138,21 @@ END_EXTERN_C()
 	ZEND_INI_ENTRY3_EX(name, default_value, modifiable, on_modify, (void *) XtOffsetOf(struct_type, property_name), (void *) &struct_ptr, NULL, zend_ini_boolean_displayer_cb)
 #endif
 
-#define INI_INT(name) zend_ini_long((name), sizeof(name)-1, 0)
-#define INI_FLT(name) zend_ini_double((name), sizeof(name)-1, 0)
-#define INI_STR(name) zend_ini_string_ex((name), sizeof(name)-1, 0, NULL)
+#define INI_INT(name) zend_ini_long((name), strlen(name), 0)
+#define INI_FLT(name) zend_ini_double((name), strlen(name), 0)
+#define INI_STR(name) zend_ini_string_ex((name), strlen(name), 0, NULL)
 #define INI_BOOL(name) ((zend_bool) INI_INT(name))
 
-#define INI_ORIG_INT(name)	zend_ini_long((name), sizeof(name)-1, 1)
-#define INI_ORIG_FLT(name)	zend_ini_double((name), sizeof(name)-1, 1)
-#define INI_ORIG_STR(name)	zend_ini_string((name), sizeof(name)-1, 1)
+#define INI_ORIG_INT(name)	zend_ini_long((name), strlen(name), 1)
+#define INI_ORIG_FLT(name)	zend_ini_double((name), strlen(name), 1)
+#define INI_ORIG_STR(name)	zend_ini_string((name), strlen(name), 1)
 #define INI_ORIG_BOOL(name) ((zend_bool) INI_ORIG_INT(name))
 
 #define REGISTER_INI_ENTRIES() zend_register_ini_entries(ini_entries, module_number)
 #define UNREGISTER_INI_ENTRIES() zend_unregister_ini_entries(module_number)
 #define DISPLAY_INI_ENTRIES() display_ini_entries(zend_module)
 
-#define REGISTER_INI_DISPLAYER(name, displayer) zend_ini_register_displayer((name), sizeof(name)-1, displayer)
+#define REGISTER_INI_DISPLAYER(name, displayer) zend_ini_register_displayer((name), strlen(name), displayer)
 #define REGISTER_INI_BOOLEAN(name) REGISTER_INI_DISPLAYER(name, zend_ini_boolean_displayer_cb)
 
 /* Standard message handlers */
@@ -193,5 +193,13 @@ typedef struct _zend_ini_parser_param {
 	zend_ini_parser_cb_t ini_parser_cb;
 	void *arg;
 } zend_ini_parser_param;
+
+#ifndef ZTS
+# define ZEND_INI_GET_BASE() ((char *) mh_arg2)
+#else
+# define ZEND_INI_GET_BASE() ((char *) ts_resource(*((int *) mh_arg2)))
+#endif
+
+#define ZEND_INI_GET_ADDR() (ZEND_INI_GET_BASE() + (size_t) mh_arg1)
 
 #endif /* ZEND_INI_H */

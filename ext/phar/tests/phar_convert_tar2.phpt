@@ -41,7 +41,6 @@ var_dump($phar->isCompressed() == Phar::GZ);
 var_dump($phar->getStub());
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar.gz');
@@ -61,4 +60,3 @@ bool(true)
 bool(true)
 string(60) "<?php // tar-based phar archive stub file
 __HALT_COMPILER();"
-===DONE===

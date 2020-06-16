@@ -42,12 +42,12 @@ $soap = new LocalSoapClient(NULL, array("uri"=>"http://test-uri", "location"=>"t
 function test($type, $num) {
   global $soap;
   try {
-	  printf("  %0.0f\n    ", $num);
-	  $ret = $soap->foo($type, new SoapVar($num, $type));
-	  printf("    %0.0f\n", $ret);
-	} catch (SoapFault $ex) {
-	  var_dump($ex);
-	}
+      printf("  %0.0f\n    ", $num);
+      $ret = $soap->foo($type, new SoapVar($num, $type));
+      printf("    %0.0f\n", $ret);
+    } catch (SoapFault $ex) {
+      var_dump($ex);
+    }
 }
 /*
 echo "byte\n";

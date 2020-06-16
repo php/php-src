@@ -8,7 +8,7 @@ jobs:
   - job: ${{ parameters.configurationName }}
     timeoutInMinutes: ${{ parameters.timeoutInMinutes }}
     pool:
-      vmImage: 'ubuntu-latest'
+      vmImage: 'ubuntu-18.04'
     steps:
     - template: apt.yml
     - script: |
@@ -20,15 +20,18 @@ jobs:
     - script: make -j$(/usr/bin/nproc) >/dev/null
       displayName: 'Make Build'
     - template: install.yml
-    - script: |
-        mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS test"
-        sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'postgres';"
-        sudo -u postgres psql -c "CREATE DATABASE test;"
-      displayName: 'Setup'
+    - template: setup.yml
     - template: test.yml
       parameters:
         configurationName: ${{ parameters.configurationName }}
         runTestsParameters: ${{ parameters.runTestsParameters }}
+    - template: test.yml
+      parameters:
+        configurationName: ${{ parameters.configurationName }}
+        runTestsName: 'OpCache'
+        runTestsParameters: >-
+          ${{ parameters.runTestsParameters }}
+          -d zend_extension=opcache.so
     - script: |
         make gcovr-xml
         mv gcovr.xml coverage.xml

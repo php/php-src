@@ -60,7 +60,7 @@ $arrays = array (
 // array to be passsed to $arr1 argument
 $arr1 = array(1, "float", "f4", "hello", 2.2, 'color', "string", "pen\n", 11);
 
-// loop through each sub-array within $arrrays to check the behavior of array_intersect()
+// loop through each sub-array within $arrays to check the behavior of array_intersect()
 $iterator = 1;
 foreach($arrays as $arr2) {
   echo "-- Iterator $iterator --\n";

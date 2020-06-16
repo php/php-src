@@ -15,7 +15,7 @@ function f1() {
   $vars = get_defined_vars();
 
   if (count($vars) != 0) {
-	 echo "TEST FAILED\n";
+     echo "TEST FAILED\n";
   }
 
   echo "\n-- ..define some local variables --\n";
@@ -33,7 +33,7 @@ function f2() {
   $vars= get_defined_vars();
 
   if (count($vars) != 0) {
-	 echo "TEST FAILED\n";
+     echo "TEST FAILED\n";
   }
 
   echo "\n-- ...define some variables --\n";
@@ -63,7 +63,6 @@ if (count($vars) == 0) {
 f1();
 
 ?>
-===DONE===
 --EXPECT--
 Simple testcase for get_defined_vars() function
 
@@ -149,4 +148,3 @@ array(9) {
   ["b1"]=>
   bool(true)
 }
-===DONE===

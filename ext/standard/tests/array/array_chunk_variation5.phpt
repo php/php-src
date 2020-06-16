@@ -29,30 +29,29 @@ foreach ($sizes as $size){
     echo "\n-- Testing array_chunk() when size = $size --\n";
     try {
         var_dump( array_chunk($input_array, $size) );
-    } catch (\Error $e) {
+    } catch (\ValueError $e) {
         echo $e->getMessage() . "\n";
     }
     try {
         var_dump( array_chunk($input_array, $size, true) );
-    } catch (\Error $e) {
+    } catch (\ValueError $e) {
         echo $e->getMessage() . "\n";
     }
     try {
         var_dump( array_chunk($input_array, $size, false) );
-    } catch (\Error $e) {
+    } catch (\ValueError $e) {
         echo $e->getMessage() . "\n";
     }
 }
 ?>
 
-DONE
 --EXPECT--
 *** Testing array_chunk() : usage variations ***
 
 -- Testing array_chunk() when size = -1 --
-Size parameter expected to be greater than 0
-Size parameter expected to be greater than 0
-Size parameter expected to be greater than 0
+array_chunk(): Argument #2 ($size) must be greater than 0
+array_chunk(): Argument #2 ($size) must be greater than 0
+array_chunk(): Argument #2 ($size) must be greater than 0
 
 -- Testing array_chunk() when size = 4 --
 array(1) {
@@ -90,9 +89,9 @@ array(1) {
 }
 
 -- Testing array_chunk() when size = 0 --
-Size parameter expected to be greater than 0
-Size parameter expected to be greater than 0
-Size parameter expected to be greater than 0
+array_chunk(): Argument #2 ($size) must be greater than 0
+array_chunk(): Argument #2 ($size) must be greater than 0
+array_chunk(): Argument #2 ($size) must be greater than 0
 
 -- Testing array_chunk() when size = 1.5 --
 array(3) {
@@ -146,5 +145,3 @@ array(3) {
     int(3)
   }
 }
-
-DONE

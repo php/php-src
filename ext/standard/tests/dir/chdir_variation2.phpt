@@ -59,7 +59,6 @@ var_dump(chdir("../../$level2_one_dir_name"));
 var_dump(getcwd());
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 $file_path = __DIR__;
@@ -101,4 +100,3 @@ string(%d) "%slevel2_one%elevel2_two"
 bool(true)
 bool(true)
 string(%d) "%slevel2_one"
-===DONE===

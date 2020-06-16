@@ -16,7 +16,6 @@ PHP Testfest Berlin 2009-05-10
 <?php
     var_dump(posix_times());
 ?>
-===DONE===
 --EXPECTF--
 array(5) {
   ["ticks"]=>
@@ -30,4 +29,3 @@ array(5) {
   ["cstime"]=>
   int(%d)
 }
-===DONE===

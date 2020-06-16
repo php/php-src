@@ -35,12 +35,8 @@ FILE_RCSID("@(#)$File: funcs.c,v 1.104 2019/05/07 02:27:11 christos Exp $")
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#if defined(HAVE_WCHAR_H)
 #include <wchar.h>
-#endif
-#if defined(HAVE_WCTYPE_H)
 #include <wctype.h>
-#endif
 #include <limits.h>
 
 #ifndef SIZE_MAX
@@ -438,7 +434,7 @@ file_getbuffer(struct magic_set *ms)
 	}
 	ms->o.pbuf = pbuf;
 
-#if defined(HAVE_WCHAR_H) && defined(HAVE_MBRTOWC) && defined(HAVE_WCWIDTH)
+#if defined(HAVE_WCWIDTH)
 	{
 		mbstate_t state;
 		wchar_t nextchar;
@@ -527,11 +523,9 @@ file_replace(struct magic_set *ms, const char *pat, const char *rep)
 	zend_string *repl;
 	size_t rep_cnt = 0;
 
-	(void)setlocale(LC_CTYPE, "C");
-
 	opts |= PCRE2_MULTILINE;
 	convert_libmagic_pattern(&patt, (char*)pat, strlen(pat), opts);
-	if ((pce = pcre_get_compiled_regex_cache(Z_STR(patt))) == NULL) {
+	if ((pce = pcre_get_compiled_regex_cache_ex(Z_STR(patt), 0)) == NULL) {
 		zval_ptr_dtor(&patt);
 		rep_cnt = -1;
 		goto out;
@@ -553,7 +547,6 @@ file_replace(struct magic_set *ms, const char *pat, const char *rep)
 	zend_string_release_ex(res, 0);
 
 out:
-	(void)setlocale(LC_CTYPE, "");
 	return rep_cnt;
 }
 

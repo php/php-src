@@ -7,6 +7,8 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 if(substr(PHP_OS, 0, 3) == "WIN")
   die("skip Not for Windows");
 ?>
+--CONFLICTS--
+obscure_filename
 --FILE--
 <?php
 /* Prototype  : int file_put_contents(string file, mixed data [, int flags [, resource context]])
@@ -79,16 +81,16 @@ Failed to write data to:
 -- Iteration 5 --
 9 bytes written to:  
 -- Iteration 6 --
-file_put_contents() expects parameter 1 to be a valid path, string given
+file_put_contents(): Argument #1 ($filename) must be a valid path, string given
 -- Iteration 7 --
-file_put_contents() expects parameter 1 to be a valid path, array given
+file_put_contents(): Argument #1 ($filename) must be a valid path, array given
 -- Iteration 8 --
 
-Warning: file_put_contents(%sdir): failed to open stream: %s in %s on line %d
-Failed to write data to: %sdir
+Warning: file_put_contents(%sdir): Failed to open stream: %s in %s on line %d
+Failed to write data to: %sir
 -- Iteration 9 --
 
-Warning: file_put_contents(%sphp): failed to open stream: %s in %s on line %d
+Warning: file_put_contents(%sphp): Failed to open stream: %s in %s on line %d
 Failed to write data to: %sphp
 
 *** Done ***

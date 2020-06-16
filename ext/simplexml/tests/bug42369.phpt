@@ -18,8 +18,6 @@ Bug #42369 (Implicit conversion to string leaks memory)
     }
 
 ?>
-===DONE===
 --EXPECT--
 explicit conversion
 no conversion
-===DONE===

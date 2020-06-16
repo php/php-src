@@ -1,5 +1,5 @@
 --TEST--
-SPL: RecursiveIteratorIterator - Ensure that non-overriden methods execute problem free.
+SPL: RecursiveIteratorIterator - Ensure that non-overridden methods execute problem free.
 --FILE--
 <?php
 

@@ -29,7 +29,6 @@ $res = sscanf($str, $format2, $arg1, $arg2, $arg3, $arg4, $arg5, $arg6);
 var_dump($res, $arg1, $arg2, $arg3, $arg4, $arg5, $arg6);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing sscanf() : basic functionality - - using hexadecimal format ***
 
@@ -62,4 +61,3 @@ int(4667)
 int(-4667)
 int(6844)
 int(1)
-===DONE===

@@ -52,21 +52,15 @@
 #include <stdio.h>	/* Include that here, to make sure __P gets defined */
 #include <errno.h>
 #include <fcntl.h>	/* For open and flags */
-#ifdef HAVE_STDINT_H
+
 #ifndef __STDC_LIMIT_MACROS
-#define __STDC_LIMIT_MACROS
+# define __STDC_LIMIT_MACROS
 #endif
 #ifndef __STDC_FORMAT_MACROS
-#define __STDC_FORMAT_MACROS
+# define __STDC_FORMAT_MACROS
 #endif
 #include <stdint.h>
-#endif
-#ifdef HAVE_INTTYPES_H
 #include <inttypes.h>
-#endif
-#ifdef PHP_WIN32
-#include "win32/php_stdint.h"
-#endif
 
 #include "php.h"
 #include "ext/standard/php_string.h"

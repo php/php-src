@@ -40,52 +40,51 @@ displayOverviewFields($a[0]);
  * @param string $mailbox
  */
 function create_multipart_message($imap_stream, $mailbox) {
-	global $users, $domain;
-	$envelope["from"]= "foo@anywhere.com";
-	$envelope["to"]  = "$users[0]@$domain";
-	$envelope["subject"] = "Test msg 1";
+    global $users, $domain;
+    $envelope["from"]= "foo@anywhere.com";
+    $envelope["to"]  = "$users[0]@$domain";
+    $envelope["subject"] = "Test msg 1";
 
-	$part1["type"] = TYPEMULTIPART;
-	$part1["subtype"] = "mixed";
+    $part1["type"] = TYPEMULTIPART;
+    $part1["subtype"] = "mixed";
 
-	$part2["type"] = TYPETEXT;
-	$part2["subtype"] = "plain";
-	$part2["description"] = "imap_mail_compose() function";
-	$part2["contents.data"] = "message 1:xxxxxxxxxxxxxxxxxxxxxxxxxx";
+    $part2["type"] = TYPETEXT;
+    $part2["subtype"] = "plain";
+    $part2["description"] = "imap_mail_compose() function";
+    $part2["contents.data"] = "message 1:xxxxxxxxxxxxxxxxxxxxxxxxxx";
 
-	$part3["type"] = TYPETEXT;
-	$part3["subtype"] = "plain";
-	$part3["description"] = "Example";
-	$part3["contents.data"] = "message 2:yyyyyyyyyyyyyyyyyyyyyyyyyy";
+    $part3["type"] = TYPETEXT;
+    $part3["subtype"] = "plain";
+    $part3["description"] = "Example";
+    $part3["contents.data"] = "message 2:yyyyyyyyyyyyyyyyyyyyyyyyyy";
 
-	$file_handle = fopen(__FILE__, 'r+');
-	$file_size = 1;
+    $file_handle = fopen(__FILE__, 'r+');
+    $file_size = 1;
 
-	$part4["type"] = TYPEAPPLICATION;
-	$part4["encoding"] = ENCBASE64;
-	$part4["subtype"] = "octet-stream";
-	$part4["description"] = 'Test';
-	$part4['disposition.type'] = 'attachment';
-	$part4['disposition'] = array ('filename' => 'Test');
-	$part4['type.parameters'] = array('name' => 'Test');
-	$part4["contents.data"] = base64_encode(fread($file_handle, 1));
+    $part4["type"] = TYPEAPPLICATION;
+    $part4["encoding"] = ENCBASE64;
+    $part4["subtype"] = "octet-stream";
+    $part4["description"] = 'Test';
+    $part4['disposition.type'] = 'attachment';
+    $part4['disposition'] = array ('filename' => 'Test');
+    $part4['type.parameters'] = array('name' => 'Test');
+    $part4["contents.data"] = base64_encode(fread($file_handle, 1));
 
-	$body[1] = $part1;
-	$body[2] = $part2;
-	$body[3] = $part3;
-	$body[4] = $part4;
+    $body[1] = $part1;
+    $body[2] = $part2;
+    $body[3] = $part3;
+    $body[4] = $part4;
 
-	$msg = imap_mail_compose($envelope, $body);
+    $msg = imap_mail_compose($envelope, $body);
 
-	if (imap_append($imap_stream, $mailbox, $msg) === false) {
-		echo imap_last_error() . "\n";
-		echo "TEST FAILED : could not append new message to mailbox '$mailbox'\n";
-		exit;
-	}
+    if (imap_append($imap_stream, $mailbox, $msg) === false) {
+        echo imap_last_error() . "\n";
+        echo "TEST FAILED : could not append new message to mailbox '$mailbox'\n";
+        exit;
+    }
 }
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 require_once(__DIR__.'/clean.inc');
@@ -106,4 +105,3 @@ deleted is 0
 seen is 0
 draft is 0
 udate is OK
-===DONE===

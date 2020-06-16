@@ -26,7 +26,6 @@ $ao = new ArrayObject(array(3=>0, 2=>1, 5=>2, 6=>3, 1=>4));
 $ao->uksort('cmp');
 var_dump($ao);
 ?>
-===DONE===
 --EXPECT--
 *** Testing ArrayObject::uksort() : basic functionality ***
 object(ArrayObject)#1 (1) {
@@ -44,4 +43,3 @@ object(ArrayObject)#1 (1) {
     int(4)
   }
 }
-===DONE===

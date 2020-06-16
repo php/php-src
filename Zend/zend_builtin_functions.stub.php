@@ -1,21 +1,24 @@
 <?php
 
+/** @generate-function-entries */
+
 function zend_version(): string {}
 
 function func_num_args(): int {}
 
-/** @return mixed */
-function func_get_arg(int $arg_num) {}
+function func_get_arg(int $arg_num): mixed {}
 
-/** @return array|false */
-function func_get_args() {}
+function func_get_args(): array {}
 
 function strlen(string $str): int {}
 
 function strcmp(string $str1, string $str2): int {}
 
-/** @return int|false */
-function strncmp(string $str1, string $str2, int $len) {}
+function strncmp(string $str1, string $str2, int $len): int {}
+
+function strcasecmp(string $str1, string $str2): int {}
+
+function strncasecmp(string $str1, string $str2, int $len): int {}
 
 function error_reporting($new_error_level = UNKNOWN): int {}
 
@@ -23,21 +26,17 @@ function define(string $constant_name, $value, bool $case_insensitive = false): 
 
 function defined(string $constant_name): bool {}
 
-/** @return string|false */
-function get_class(object $object = UNKNOWN) {}
+function get_class(object $object = UNKNOWN): string {}
 
-/** @return string|false */
-function get_called_class() {}
+function get_called_class(): string {}
 
-/** @return string|false */
-function get_parent_class($object = UNKNOWN) {}
+function get_parent_class($object = UNKNOWN): string|false {}
 
 function is_subclass_of($object, string $class_name, bool $allow_string = true): bool {}
 
 function is_a($object, string $class_name, bool $allow_string = false): bool {}
 
-/** @return array|false */
-function get_class_vars(string $class_name) {}
+function get_class_vars(string $class_name): array|false {}
 
 function get_object_vars(object $obj): array {}
 
@@ -47,7 +46,7 @@ function get_class_methods($class): ?array {}
 
 function method_exists($object_or_class, string $method): bool {}
 
-function property_exists($object_or_class, string $property_name): ?bool {}
+function property_exists($object_or_class, string $property_name): bool {}
 
 function class_exists(string $classname, bool $autoload = true): bool {}
 
@@ -69,12 +68,12 @@ function trigger_error(string $message, int $error_type = E_USER_NOTICE): bool {
 /** @alias trigger_error */
 function user_error(string $message, int $error_type = E_USER_NOTICE): bool {}
 
-/** @return mixed */
+/** @return string|array|object|null */
 function set_error_handler($error_handler, int $error_types = E_ALL) {}
 
 function restore_error_handler(): bool {}
 
-/** @return mixed */
+/** @return string|array|object|null */
 function set_exception_handler($exception_handler) {}
 
 function restore_exception_handler(): bool {}
@@ -85,11 +84,13 @@ function get_declared_traits(): array {}
 
 function get_declared_interfaces(): array {}
 
-function get_defined_functions(bool $exclude_disabled = false): array {}
+function get_defined_functions(bool $exclude_disabled = true): array {}
 
-function get_defined_vars(): ?array {}
+function get_defined_vars(): array {}
 
 function get_resource_type($res): string {}
+
+function get_resource_id($res): int {}
 
 function get_resources(string $type = UNKNOWN): array {}
 
@@ -103,8 +104,7 @@ function debug_print_backtrace(int $options = 0, int $limit = 0): void {}
 
 function extension_loaded(string $extension_name): bool {}
 
-/** @return array|false */
-function get_extension_funcs(string $extension_name) {}
+function get_extension_funcs(string $extension_name): array|false {}
 
 #if ZEND_DEBUG && defined(ZTS)
 function zend_thread_id(): int {}

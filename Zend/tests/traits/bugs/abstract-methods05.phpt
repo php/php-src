@@ -6,7 +6,7 @@ error_reporting(E_ALL);
 
 trait THelloB {
   public function hello() {
-	echo 'Hello';
+    echo 'Hello';
   }
 }
 
@@ -15,8 +15,8 @@ trait THelloA {
 }
 
 class TraitsTest1 {
-	use THelloB;
-	use THelloA;
+    use THelloB;
+    use THelloA;
 }
 
 

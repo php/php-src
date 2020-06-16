@@ -26,7 +26,6 @@ $compressed = gzcompress($data);
 var_dump(gzinflate($compressed, $short_len));
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing gzinflate() : error conditions ***
 
@@ -34,4 +33,3 @@ var_dump(gzinflate($compressed, $short_len));
 
 Warning: gzinflate(): data error in %s on line %d
 bool(false)
-===DONE===

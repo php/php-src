@@ -39,39 +39,18 @@
 # endif
 #endif
 
+#include <inttypes.h>
+#include <stdint.h>
 #if defined(_MSC_VER)
-/* Make sure the regular stdint.h wasn't included already and prevent it to be
-   included afterwards. Though if some other library needs some stuff from
-   stdint.h included afterwards and misses it, we'd have to extend ours. On
-   the other hand, if stdint.h was included before, some conflicts might
-   happen so we'd likewise have to fix ours. */
-# if !defined(_STDINT)
-#  define _STDINT
-#  include "win32/php_stdint.h"
-#  include "win32/php_inttypes.h"
+# ifndef u_char
+typedef unsigned __int8   u_char;
 # endif
-# define HAVE_INT8_T   1
-# define HAVE_UINT8_T  1
-# define HAVE_INT16_T  1
-# define HAVE_UINT16_T 1
-# define HAVE_INT32_T  1
-# define HAVE_UINT32_T 1
-# define HAVE_INT64_T  1
-# define HAVE_UINT64_T 1
 #else
 
 #include "php_config.h"
 
 #if HAVE_SYS_TYPES_H
 # include <sys/types.h>
-#endif
-
-#if HAVE_INTTYPES_H
-# include <inttypes.h>
-#endif
-
-#if HAVE_STDINT_H
-# include <stdint.h>
 #endif
 
 #ifndef HAVE_INT8_T

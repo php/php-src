@@ -6,13 +6,11 @@ Clint Priest @ PhpTek09
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-	$objDoc = new DomDocument();
+    $objDoc = new DomDocument();
 
-	$objRef = $objDoc->createEntityReference('Test');
-	echo $objRef->nodeName . "\n";
+    $objRef = $objDoc->createEntityReference('Test');
+    echo $objRef->nodeName . "\n";
 ?>
-===DONE===
 --EXPECT--
 Test
-===DONE===
 	

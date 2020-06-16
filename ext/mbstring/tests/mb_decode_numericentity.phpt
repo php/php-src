@@ -15,6 +15,12 @@ echo mb_decode_numericentity($str1, $convmap, "UTF-8")."\n";
 echo mb_decode_numericentity($str2, $convmap, "UTF-8")."\n";
 echo mb_decode_numericentity($str3, $convmap, "UTF-8")."\n";
 
+echo mb_decode_numericentity('&#1000000000', $convmap), "\n";
+echo mb_decode_numericentity('&#9000000000', $convmap), "\n";
+echo mb_decode_numericentity('&#10000000000', $convmap), "\n";
+echo mb_decode_numericentity('&#100000000000', $convmap), "\n";
+echo mb_decode_numericentity('&#000000000000', $convmap), "\n";
+
 $convmap = [];
 echo mb_decode_numericentity('f&ouml;o', $convmap, "UTF-8")."\n";
 
@@ -24,10 +30,16 @@ try {
 } catch (ValueError $ex) {
     echo $ex->getMessage()."\n";
 }
+
 ?>
 --EXPECT--
 ¡¢£¤¥¦§¨©ª«¬­®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ
 ƒΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩαβγδεζηθικλμνξοπρςστυφχψωϑϒϖ•…′″‾⁄℘ℑℜ™ℵ←↑→↓↔↵⇐⇑⇒⇓⇔∀∂∃∅∇∈∉∋∏∑−∗√∝∞∠∧∨∩∪∫∴∼≅≈≠≡≤≥⊂⊃⊄⊆⊇⊕⊗⊥⋅⌈⌉⌊⌋〈〉◊♠♣♥♦
 aŒbœcŠdše€fg
+&#1000000000
+&#9000000000
+&#10000000000
+&#100000000000
+&#000000000000
 f&ouml;o
-count($convmap) must be a multiple of 4
+mb_decode_numericentity(): Argument #2 ($convmap) must have a multiple of 4 elements

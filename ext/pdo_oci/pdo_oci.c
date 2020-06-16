@@ -92,6 +92,7 @@ PHP_MINIT_FUNCTION(pdo_oci)
 	REGISTER_PDO_CLASS_CONST_LONG("OCI_ATTR_CLIENT_INFO", (zend_long)PDO_OCI_ATTR_CLIENT_INFO);
 	REGISTER_PDO_CLASS_CONST_LONG("OCI_ATTR_CLIENT_IDENTIFIER", (zend_long)PDO_OCI_ATTR_CLIENT_IDENTIFIER);
 	REGISTER_PDO_CLASS_CONST_LONG("OCI_ATTR_MODULE", (zend_long)PDO_OCI_ATTR_MODULE);
+	REGISTER_PDO_CLASS_CONST_LONG("OCI_ATTR_CALL_TIMEOUT", (zend_long)PDO_OCI_ATTR_CALL_TIMEOUT);
 
 	php_pdo_register_driver(&pdo_oci_driver);
 
@@ -115,7 +116,7 @@ PHP_RINIT_FUNCTION(pdo_oci)
 		tsrm_mutex_lock(pdo_oci_env_mutex);
 		if (!pdo_oci_Env) { // double-checked locking idiom
 #endif
-#if HAVE_OCIENVCREATE
+#ifdef HAVE_OCIENVCREATE
 		OCIEnvCreate(&pdo_oci_Env, PDO_OCI_INIT_MODE, NULL, NULL, NULL, NULL, 0, NULL);
 #else
 		OCIInitialize(PDO_OCI_INIT_MODE, NULL, NULL, NULL, NULL);

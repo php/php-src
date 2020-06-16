@@ -9,14 +9,14 @@ SPL: ArrayObject from object
 
 class test
 {
-	public    $pub = "public";
-	protected $pro = "protected";
-	private   $pri = "private";
+    public    $pub = "public";
+    protected $pro = "protected";
+    private   $pri = "private";
 
-	function __construct()
-	{
-		$this->imp = "implicit";
-	}
+    function __construct()
+    {
+        $this->imp = "implicit";
+    }
 };
 
 $test = new test;
@@ -30,12 +30,10 @@ print_r($object);
 
 foreach($test as $key => $val)
 {
-	echo "$key => $val\n";
+    echo "$key => $val\n";
 }
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 test Object
 (
@@ -60,4 +58,3 @@ ArrayObject Object
 pub => public
 imp => implicit
 dyn => dynamic
-===DONE===

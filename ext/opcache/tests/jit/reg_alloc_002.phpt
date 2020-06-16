@@ -1,5 +1,5 @@
 --TEST--
-Register Alloction 002: SEND_VAL_EX uses %r0 as a temporay register
+Register Alloction 002: SEND_VAL_EX uses %r0 as a temporary register
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
@@ -12,10 +12,10 @@ opcache.protect_memory=1
 <?php
 class A {
     public function process($call) {
-		$i = 0;
-		foreach (array("a", "b", "c") as $attr) {
-			$call($i++, "xxx");
-		}
+        $i = 0;
+        foreach (array("a", "b", "c") as $attr) {
+            $call($i++, "xxx");
+        }
     }
 }
 

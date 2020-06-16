@@ -15,7 +15,5 @@ var_dump($xml->open($xmlfile, null, LIBXML_PARSEHUGE));
 $xml->setSchema($xsdfile);
 while($xml->read());
 ?>
-===DONE===
 --EXPECT--
 bool(true)
-===DONE===

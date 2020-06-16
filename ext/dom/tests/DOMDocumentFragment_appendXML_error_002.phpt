@@ -8,12 +8,11 @@ Eric Lee Stewart <ericleestewart@gmail.com>
 --FILE--
 <?php
 $fragment = new DOMDocumentFragment();
-$fragment->appendXML('<bait>crankbait</bait>');
-$document->appendChild($fragment);
+try {
+    $fragment->appendXML('<bait>crankbait</bait>');
+} catch (DOMException $e) {
+    echo $e->getMessage();
+}
 ?>
---EXPECTF--
-Fatal error: Uncaught DOMException: No Modification Allowed Error in %s:%d
-Stack trace:
-#0 %s(%d): DOMDocumentFragment->appendXML('<bait>crankbait...')
-#1 {main}
-  thrown in %s on line %d
+--EXPECT--
+No Modification Allowed Error

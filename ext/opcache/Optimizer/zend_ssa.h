@@ -113,7 +113,7 @@ typedef struct _zend_ssa_var {
 	int                    use_chain;      /* uses of this value, linked through opN_use_chain */
 	zend_ssa_phi          *phi_use_chain;  /* uses of this value in Phi, linked through use_chain */
 	zend_ssa_phi          *sym_use_chain;  /* uses of this value in Pi constraints */
-	unsigned int           no_val : 1;     /* value doesn't mater (used as op1 in ZEND_ASSIGN) */
+	unsigned int           no_val : 1;     /* value doesn't matter (used as op1 in ZEND_ASSIGN) */
 	unsigned int           scc_entry : 1;
 	unsigned int           alias : 2;  /* value may be changed indirectly */
 	unsigned int           escape_state : 2;
@@ -142,6 +142,7 @@ typedef struct _zend_ssa {
 BEGIN_EXTERN_C()
 
 int zend_build_ssa(zend_arena **arena, const zend_script *script, const zend_op_array *op_array, uint32_t build_flags, zend_ssa *ssa);
+int zend_ssa_rename_op(const zend_op_array *op_array, const zend_op *opline, uint32_t k, uint32_t build_flags, int ssa_vars_count, zend_ssa_op *ssa_ops, int *var);
 int zend_ssa_compute_use_def_chains(zend_arena **arena, const zend_op_array *op_array, zend_ssa *ssa);
 int zend_ssa_unlink_use_chain(zend_ssa *ssa, int op, int var);
 
@@ -212,10 +213,13 @@ static zend_always_inline zend_ssa_phi* zend_ssa_next_use_phi(const zend_ssa *ss
 
 static zend_always_inline zend_bool zend_ssa_is_no_val_use(const zend_op *opline, const zend_ssa_op *ssa_op, int var)
 {
-	if (opline->opcode == ZEND_ASSIGN || opline->opcode == ZEND_UNSET_CV) {
+	if (opline->opcode == ZEND_ASSIGN
+			 || opline->opcode == ZEND_UNSET_CV
+			 || opline->opcode == ZEND_BIND_GLOBAL
+			 || opline->opcode == ZEND_BIND_STATIC) {
 		return ssa_op->op1_use == var && ssa_op->op2_use != var;
 	}
-	if (opline->opcode == ZEND_FE_FETCH_R) {
+	if (opline->opcode == ZEND_FE_FETCH_R || opline->opcode == ZEND_FE_FETCH_RW) {
 		return ssa_op->op2_use == var && ssa_op->op1_use != var;
 	}
 	if (ssa_op->result_use == var

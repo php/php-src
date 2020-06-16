@@ -25,33 +25,24 @@
 #include "php_content_types.h"
 #include "SAPI.h"
 #include "zend_globals.h"
-#ifdef PHP_WIN32
-# include "win32/php_inttypes.h"
-#endif
 
 /* for systems that need to override reading of environment variables */
 void _php_import_environment_variables(zval *array_ptr);
 PHPAPI void (*php_import_environment_variables)(zval *array_ptr) = _php_import_environment_variables;
 
-PHPAPI void php_register_variable(char *var, char *strval, zval *track_vars_array)
+PHPAPI void php_register_variable(const char *var, const char *strval, zval *track_vars_array)
 {
 	php_register_variable_safe(var, strval, strlen(strval), track_vars_array);
 }
 
 /* binary-safe version */
-PHPAPI void php_register_variable_safe(char *var, char *strval, size_t str_len, zval *track_vars_array)
+PHPAPI void php_register_variable_safe(const char *var, const char *strval, size_t str_len, zval *track_vars_array)
 {
 	zval new_entry;
 	assert(strval != NULL);
 
-	/* Prepare value */
-	if (str_len == 0) {
-		ZVAL_EMPTY_STRING(&new_entry);
-	} else if (str_len == 1) {
-		ZVAL_INTERNED_STR(&new_entry, ZSTR_CHAR((zend_uchar)*strval));
-	} else {
-		ZVAL_NEW_STR(&new_entry, zend_string_init(strval, str_len, 0));
-	}
+	ZVAL_STRINGL_FAST(&new_entry, strval, str_len);
+
 	php_register_variable_ex(var, &new_entry, track_vars_array);
 }
 
@@ -63,7 +54,7 @@ static zend_always_inline void php_register_variable_quick(const char *name, siz
 	zend_string_release_ex(key, 0);
 }
 
-PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars_array)
+PHPAPI void php_register_variable_ex(const char *var_name, zval *val, zval *track_vars_array)
 {
 	char *p = NULL;
 	char *ip = NULL;		/* index pointer */
@@ -477,6 +468,9 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 	var = php_strtok_r(res, separator, &strtok_buf);
 
 	while (var) {
+		size_t val_len;
+		size_t new_val_len;
+
 		val = strchr(var, '=');
 
 		if (arg == PARSE_COOKIE) {
@@ -495,29 +489,25 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 		}
 
 		if (val) { /* have a value */
-			size_t val_len;
-			size_t new_val_len;
 
 			*val++ = '\0';
-			php_url_decode(var, strlen(var));
-			val_len = php_url_decode(val, strlen(val));
-			val = estrndup(val, val_len);
-			if (sapi_module.input_filter(arg, var, &val, val_len, &new_val_len)) {
-				php_register_variable_safe(var, val, new_val_len, &array);
-			}
-			efree(val);
-		} else {
-			size_t val_len;
-			size_t new_val_len;
 
-			php_url_decode(var, strlen(var));
-			val_len = 0;
-			val = estrndup("", val_len);
-			if (sapi_module.input_filter(arg, var, &val, val_len, &new_val_len)) {
-				php_register_variable_safe(var, val, new_val_len, &array);
+			if (arg == PARSE_COOKIE) {
+				val_len = php_raw_url_decode(val, strlen(val));
+			} else {
+				val_len = php_url_decode(val, strlen(val));
 			}
-			efree(val);
+		} else {
+			val     = "";
+			val_len =  0;
 		}
+
+		val = estrndup(val, val_len);
+		php_url_decode(var, strlen(var));
+		if (sapi_module.input_filter(arg, var, &val, val_len, &new_val_len)) {
+			php_register_variable_safe(var, val, new_val_len, &array);
+		}
+		efree(val);
 next_cookie:
 		var = php_strtok_r(NULL, separator, &strtok_buf);
 	}
@@ -539,40 +529,47 @@ static zend_always_inline int valid_environment_name(const char *name, const cha
 	return 1;
 }
 
-void _php_import_environment_variables(zval *array_ptr)
+static zend_always_inline void import_environment_variable(HashTable *ht, char *env)
 {
-	char **env, *p;
+	char *p;
 	size_t name_len, len;
 	zval val;
 	zend_ulong idx;
 
+	p = strchr(env, '=');
+	if (!p
+		|| p == env
+		|| !valid_environment_name(env, p)) {
+		/* malformed entry? */
+		return;
+	}
+	name_len = p - env;
+	p++;
+	len = strlen(p);
+	ZVAL_STRINGL_FAST(&val, p, len);
+	if (ZEND_HANDLE_NUMERIC_STR(env, name_len, idx)) {
+		zend_hash_index_update(ht, idx, &val);
+	} else {
+		php_register_variable_quick(env, name_len, &val, ht);
+	}
+}
+
+void _php_import_environment_variables(zval *array_ptr)
+{
 	tsrm_env_lock();
 
-	for (env = environ; env != NULL && *env != NULL; env++) {
-		p = strchr(*env, '=');
-		if (!p
-		 || p == *env
-		 || !valid_environment_name(*env, p)) {
-			/* malformed entry? */
-			continue;
-		}
-		name_len = p - *env;
-		p++;
-		len = strlen(p);
-		if (len == 0) {
-			ZVAL_EMPTY_STRING(&val);
-		} else if (len == 1) {
-			ZVAL_INTERNED_STR(&val, ZSTR_CHAR((zend_uchar)*p));
-		} else {
-			ZVAL_NEW_STR(&val, zend_string_init(p, len, 0));
-		}
-		if (ZEND_HANDLE_NUMERIC_STR(*env, name_len, idx)) {
-			zend_hash_index_update(Z_ARRVAL_P(array_ptr), idx, &val);
-		} else {
-			php_register_variable_quick(*env, name_len, &val, Z_ARRVAL_P(array_ptr));
-		}
+#ifndef PHP_WIN32
+	for (char **env = environ; env != NULL && *env != NULL; env++) {
+		import_environment_variable(Z_ARRVAL_P(array_ptr), *env);
 	}
-	
+#else
+	char *environment = GetEnvironmentStringsA();
+	for (char *env = environment; env != NULL && *env; env += strlen(env) + 1) {
+		import_environment_variable(Z_ARRVAL_P(array_ptr), env);
+	}
+	FreeEnvironmentStringsA(environment);
+#endif
+
 	tsrm_env_unlock();
 }
 
@@ -584,11 +581,10 @@ zend_bool php_std_auto_global_callback(char *name, uint32_t name_len)
 
 /* {{{ php_build_argv
  */
-PHPAPI void php_build_argv(char *s, zval *track_vars_array)
+PHPAPI void php_build_argv(const char *s, zval *track_vars_array)
 {
 	zval arr, argc, tmp;
 	int count = 0;
-	char *ss, *space;
 
 	if (!(SG(request_info).argc || track_vars_array)) {
 		return;
@@ -606,24 +602,18 @@ PHPAPI void php_build_argv(char *s, zval *track_vars_array)
 			}
 		}
 	} else 	if (s && *s) {
-		ss = s;
-		while (ss) {
-			space = strchr(ss, '+');
-			if (space) {
-				*space = '\0';
-			}
+		while (1) {
+			const char *space = strchr(s, '+');
 			/* auto-type */
-			ZVAL_STRING(&tmp, ss);
+			ZVAL_STRINGL(&tmp, s, space ? space - s : strlen(s));
 			count++;
 			if (zend_hash_next_index_insert(Z_ARRVAL(arr), &tmp) == NULL) {
 				zend_string_efree(Z_STR(tmp));
 			}
-			if (space) {
-				*space = '+';
-				ss = space + 1;
-			} else {
-				ss = space;
+			if (!space) {
+				break;
 			}
+			s = space + 1;
 		}
 	}
 

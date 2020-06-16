@@ -27,7 +27,6 @@ $array2 = &$array1;
 echo "\n-- Testing array_intersect_uassoc() function when \$array2 is referencd to \$array1 --\n";
 var_dump( array_intersect_uassoc($array1, $array2, "strcasecmp") );
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_intersect_uassoc() : usage variation ***
 
@@ -48,4 +47,3 @@ array(2) {
   [1]=>
   string(1) "a"
 }
-===DONE===

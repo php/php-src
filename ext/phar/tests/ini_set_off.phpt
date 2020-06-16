@@ -53,7 +53,6 @@ var_dump(Phar::canWrite());
 var_dump(ini_get('phar.require_hash'));
 var_dump(ini_get('phar.readonly'));
 ?>
-===DONE===
 --EXPECT--
 string(1) "0"
 string(1) "0"
@@ -84,4 +83,3 @@ string(4) "true"
 bool(true)
 string(1) "0"
 string(1) "0"
-===DONE===

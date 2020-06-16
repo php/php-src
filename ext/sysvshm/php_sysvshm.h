@@ -17,7 +17,7 @@
 #ifndef PHP_SYSVSHM_H
 #define PHP_SYSVSHM_H
 
-#if HAVE_SYSVSHM
+#ifdef HAVE_SYSVSHM
 
 extern zend_module_entry sysvshm_module_entry;
 #define sysvshm_module_ptr &sysvshm_module_entry
@@ -68,13 +68,6 @@ typedef struct {
 
 PHP_MINIT_FUNCTION(sysvshm);
 PHP_MINFO_FUNCTION(sysvshm);
-PHP_FUNCTION(shm_attach);
-PHP_FUNCTION(shm_detach);
-PHP_FUNCTION(shm_remove);
-PHP_FUNCTION(shm_put_var);
-PHP_FUNCTION(shm_get_var);
-PHP_FUNCTION(shm_has_var);
-PHP_FUNCTION(shm_remove_var);
 
 extern sysvshm_module php_sysvshm;
 

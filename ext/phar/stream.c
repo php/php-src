@@ -90,7 +90,7 @@ php_url* phar_parse_url(php_stream_wrapper *wrapper, const char *filename, const
 	resource->path = zend_string_init(entry, entry_len, 0);
 	efree(entry);
 
-#if MBO_0
+#ifdef MBO_0
 		if (resource) {
 			fprintf(stderr, "Alias:     %s\n", alias);
 			fprintf(stderr, "Scheme:    %s\n", ZSTR_VAL(resource->scheme));
@@ -299,7 +299,7 @@ idata_error:
 		}
 	}
 	php_url_free(resource);
-#if MBO_0
+#ifdef MBO_0
 		fprintf(stderr, "Pharname:   %s\n", idata->phar->filename);
 		fprintf(stderr, "Filename:   %s\n", internal_file);
 		fprintf(stderr, "Entry:      %s\n", idata->internal_file->filename);
@@ -318,7 +318,7 @@ idata_error:
 		return NULL;
 	}
 
-	if (!PHAR_G(cwd_init) && options & STREAM_OPEN_FOR_INCLUDE) {
+	if (!PHAR_G(cwd_init) && (options & STREAM_OPEN_FOR_INCLUDE)) {
 		char *entry = idata->internal_file->filename, *cwd;
 
 		PHAR_G(cwd_init) = 1;

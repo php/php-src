@@ -6,45 +6,37 @@ libxml_set_streams_context()
 <?php
 
 $ctxs = array(
-	NULL,
-	'bogus',
-	123,
-	new stdclass,
-	array('a'),
-	stream_context_create(),
-	stream_context_create(array('file')),
-	stream_context_create(array('file' => array('some_opt' => 'aaa')))
+    NULL,
+    'bogus',
+    123,
+    new stdclass,
+    array('a'),
+    stream_context_create(),
 );
 
-
 foreach ($ctxs as $ctx) {
-	try {
+    try {
         var_dump(libxml_set_streams_context($ctx));
     } catch (TypeError $e) {
         echo $e->getMessage(), "\n";
     }
-	$dom = new DOMDocument();
-	var_dump($dom->load(__DIR__.'/test.xml'));
+    $dom = new DOMDocument();
+    var_dump($dom->load(__DIR__.'/test.xml'));
 }
 
 echo "Done\n";
 
 ?>
---EXPECTF--
-Warning: stream_context_create(): options should have the form ["wrappername"]["optionname"] = $value in %s004.php on line %d
-libxml_set_streams_context() expects parameter 1 to be resource, null given
+--EXPECT--
+libxml_set_streams_context(): Argument #1 ($context) must be of type resource, null given
 bool(true)
-libxml_set_streams_context() expects parameter 1 to be resource, string given
+libxml_set_streams_context(): Argument #1 ($context) must be of type resource, string given
 bool(true)
-libxml_set_streams_context() expects parameter 1 to be resource, int given
+libxml_set_streams_context(): Argument #1 ($context) must be of type resource, int given
 bool(true)
-libxml_set_streams_context() expects parameter 1 to be resource, object given
+libxml_set_streams_context(): Argument #1 ($context) must be of type resource, stdClass given
 bool(true)
-libxml_set_streams_context() expects parameter 1 to be resource, array given
-bool(true)
-NULL
-bool(true)
-NULL
+libxml_set_streams_context(): Argument #1 ($context) must be of type resource, array given
 bool(true)
 NULL
 bool(true)

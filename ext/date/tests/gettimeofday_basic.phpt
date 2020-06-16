@@ -28,7 +28,6 @@ $get_as_float = false;
 var_dump( gettimeofday($get_as_float) );
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing gettimeofday() : basic functionality ***
 float(%f)
@@ -52,4 +51,3 @@ array(4) {
   ["dsttime"]=>
   int(0)
 }
-===DONE===

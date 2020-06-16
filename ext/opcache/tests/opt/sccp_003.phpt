@@ -11,26 +11,28 @@ opcache.preload=
 --FILE--
 <?php
 function foo() {
-	$a = [1,2,3];
-	$i = 1;
-	$c = $i < 2;
-	if ($c) {
-		$k = 2 * $i;
-		$a[$k] = $i;
-		echo $a[$k];
-	}
-	echo $a[2];
+    $a = [1,2,3];
+    $i = 1;
+    $c = $i < 2;
+    if ($c) {
+        $k = 2 * $i;
+        $a[$k] = $i;
+        echo $a[$k];
+    }
+    echo $a[2];
 }
 ?>
 --EXPECTF--
-$_main: ; (lines=1, args=0, vars=0, tmps=0)
-    ; (after optimizer)
-    ; %ssccp_003.php:1-14
-L0 (14):    RETURN int(1)
+$_main:
+     ; (lines=1, args=0, vars=0, tmps=0)
+     ; (after optimizer)
+     ; %ssccp_003.php:1-14
+0000 RETURN int(1)
 
-foo: ; (lines=3, args=0, vars=0, tmps=0)
-    ; (after optimizer)
-    ; %ssccp_003.php:2-12
-L0 (9):     ECHO int(1)
-L1 (11):    ECHO int(1)
-L2 (12):    RETURN null
+foo:
+     ; (lines=3, args=0, vars=0, tmps=0)
+     ; (after optimizer)
+     ; %ssccp_003.php:2-12
+0000 ECHO string("1")
+0001 ECHO string("1")
+0002 RETURN null

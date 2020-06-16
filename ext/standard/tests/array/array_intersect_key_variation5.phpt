@@ -17,7 +17,6 @@ echo "\n-- Testing array_intersect_key() function with float indexed array --\n"
 var_dump( array_intersect_key($input_array, $float_indx_array) );
 var_dump( array_intersect_key($float_indx_array,$input_array ) );
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_intersect_key() : usage variation ***
 
@@ -38,4 +37,3 @@ array(3) {
   [-10]=>
   string(5) "-10.5"
 }
-===DONE===

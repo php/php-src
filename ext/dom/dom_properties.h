@@ -87,6 +87,11 @@ int dom_entity_version_write(dom_object *obj, zval *newval);
 /* namednodemap properties */
 int dom_namednodemap_length_read(dom_object *obj, zval *retval);
 
+/* parent node properties */
+int dom_parent_node_first_element_child_read(dom_object *obj, zval *retval);
+int dom_parent_node_last_element_child_read(dom_object *obj, zval *retval);
+int dom_parent_node_child_element_count(dom_object *obj, zval *retval);
+
 /* node properties */
 int dom_node_node_name_read(dom_object *obj, zval *retval);
 int dom_node_node_value_read(dom_object *obj, zval *retval);
@@ -98,6 +103,8 @@ int dom_node_first_child_read(dom_object *obj, zval *retval);
 int dom_node_last_child_read(dom_object *obj, zval *retval);
 int dom_node_previous_sibling_read(dom_object *obj, zval *retval);
 int dom_node_next_sibling_read(dom_object *obj, zval *retval);
+int dom_node_previous_element_sibling_read(dom_object *obj, zval *retval);
+int dom_node_next_element_sibling_read(dom_object *obj, zval *retval);
 int dom_node_attributes_read(dom_object *obj, zval *retval);
 int dom_node_owner_document_read(dom_object *obj, zval *retval);
 int dom_node_namespace_uri_read(dom_object *obj, zval *retval);
@@ -125,7 +132,7 @@ int dom_processinginstruction_data_write(dom_object *obj, zval *newval);
 /* text properties */
 int dom_text_whole_text_read(dom_object *obj, zval *retval);
 
-#if defined(LIBXML_XPATH_ENABLED)
+#ifdef LIBXML_XPATH_ENABLED
 /* xpath properties */
 int dom_xpath_document_read(dom_object *obj, zval *retval);
 int dom_xpath_register_node_ns_read(dom_object *obj, zval *retval);

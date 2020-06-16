@@ -46,7 +46,6 @@ echo "\n";
 var_dump($result);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing printf() : basic functionality - using unsigned format ***
 
@@ -65,4 +64,3 @@ int(21)
 -- Calling printf() with three arguments --
 4294966185 4293732729 2345432
 int(29)
-===DONE===

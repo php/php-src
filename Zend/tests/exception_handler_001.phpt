@@ -6,7 +6,7 @@ exception handler tests - 1
 set_exception_handler("foo");
 
 function foo($e) {
-	var_dump(get_class($e)." thrown!");
+    var_dump(get_class($e)." thrown!");
 }
 
 class test extends Exception {

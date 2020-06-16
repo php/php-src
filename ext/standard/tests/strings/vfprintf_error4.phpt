@@ -22,13 +22,15 @@ try {
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
-var_dump( vfprintf( $fp, 'Foo %$c-0202Sd', array( 2 ) ) );
-
+try {
+    var_dump( vfprintf( $fp, 'Foo %$c-0202Sd', array( 2 ) ) );
+} catch(\ValueError $e) {
+    print('Error found: '.$e->getMessage().".\n");
+}
 // Close handle
 fclose( $fp );
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 
@@ -36,10 +38,7 @@ $file = 'vfprintf_error4.txt';
 unlink( $file );
 
 ?>
---EXPECTF--
+--EXPECT--
 -- Testing vfprintf() function with other strangeties  --
-vfprintf() expects parameter 1 to be resource, string given
-
-Warning: vfprintf(): Argument number must be greater than zero in %s on line %d
-bool(false)
-===DONE===
+vfprintf(): Argument #1 ($handle) must be of type resource, string given
+Error found: Argument number must be greater than zero.

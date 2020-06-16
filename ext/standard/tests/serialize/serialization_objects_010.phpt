@@ -14,18 +14,18 @@ Serialize() must return a string or NULL
  */
 
 Class C implements Serializable {
-	public function serialize() {
-		return $this;
-	}
+    public function serialize() {
+        return $this;
+    }
 
-	public function unserialize($blah) {
-	}
+    public function unserialize($blah) {
+    }
 }
 
 try {
-	var_dump(serialize(new C));
+    var_dump(serialize(new C));
 } catch (Exception $e) {
-	echo $e->getMessage(). "\n";
+    echo $e->getMessage(). "\n";
 }
 
 echo "Done";

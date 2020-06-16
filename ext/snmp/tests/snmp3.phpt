@@ -20,13 +20,13 @@ echo "GET single: noAuthNoPriv\n";
 var_dump(snmp3_get($hostname, $user_noauth, 'noAuthNoPriv', '', '', '', '', '.1.3.6.1.2.1.1.1.0', $timeout, $retries));
 
 foreach(array('MD5', 'SHA') as $signalg) {
-	echo "GET single: $signalg\n";
-	var_dump(snmp3_get($hostname, $user_auth_prefix . $signalg, 'authNoPriv', $signalg, $auth_pass, '', '', '.1.3.6.1.2.1.1.1.0', $timeout, $retries));
+    echo "GET single: $signalg\n";
+    var_dump(snmp3_get($hostname, $user_auth_prefix . $signalg, 'authNoPriv', $signalg, $auth_pass, '', '', '.1.3.6.1.2.1.1.1.0', $timeout, $retries));
 }
 
 foreach(array('AES', 'DES', 'AES128') as $chipher) {
-	echo "GET single: MD5/$chipher\n";
-	var_dump(snmp3_get($hostname, $user_auth_prefix . 'MD5' . $chipher, 'authPriv', 'MD5', $auth_pass, $chipher, $priv_pass, '.1.3.6.1.2.1.1.1.0', $timeout, $retries));
+    echo "GET single: MD5/$chipher\n";
+    var_dump(snmp3_get($hostname, $user_auth_prefix . 'MD5' . $chipher, 'authPriv', 'MD5', $auth_pass, $chipher, $priv_pass, '.1.3.6.1.2.1.1.1.0', $timeout, $retries));
 }
 $username = $user_auth_prefix . 'MD5';
 echo "GET multiple\n";

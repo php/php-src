@@ -1,79 +1,71 @@
 <?php
 
-/** @return resource|false */
-function enchant_broker_init() {}
+/** @generate-function-entries */
 
-/** @param resource $broker */
-function enchant_broker_free($broker): bool {}
+final class EnchantBroker
+{
+}
+
+final class EnchantDictionary
+{
+}
+
+function enchant_broker_init(): EnchantBroker|false {}
+
+/** @deprecated */
+function enchant_broker_free(EnchantBroker $broker): bool {}
+
+function enchant_broker_get_error(EnchantBroker $broker): string|false {}
+
+/** @deprecated */
+function enchant_broker_set_dict_path(EnchantBroker $broker, int $name, string $value): bool {}
+
+/** @deprecated */
+function enchant_broker_get_dict_path(EnchantBroker $broker, int $name): string|false {}
+
+function enchant_broker_list_dicts(EnchantBroker $broker): array {}
+
+function enchant_broker_request_dict(EnchantBroker $broker, string $tag): EnchantDictionary|false {}
+
+function enchant_broker_request_pwl_dict(EnchantBroker $broker, string $filename): EnchantDictionary|false {}
+
+/** @deprecated */
+function enchant_broker_free_dict(EnchantDictionary $dict): bool {}
+
+function enchant_broker_dict_exists(EnchantBroker $broker, string $tag): bool {}
+
+function enchant_broker_set_ordering(EnchantBroker $broker, string $tag, string $ordering): bool {}
+
+function enchant_broker_describe(EnchantBroker $broker): array {}
+
+function enchant_dict_quick_check(EnchantDictionary $dict, string $word, &$suggestions = null): bool {}
+
+function enchant_dict_check(EnchantDictionary $dict, string $word): bool {}
+
+function enchant_dict_suggest(EnchantDictionary $dict, string $word): array {}
+
+function enchant_dict_add(EnchantDictionary $dict, string $word): void {}
 
 /**
-* @param resource $broker
-* @return string|false
+* @alias enchant_dict_add
+* @deprecated
 */
-function enchant_broker_get_error($broker) {}
+function enchant_dict_add_to_personal(EnchantDictionary $dict, string $word): void {}
 
-/** @param resource $broker */
-function enchant_broker_set_dict_path($broker, int $name, string $value): bool {}
+function enchant_dict_add_to_session(EnchantDictionary $dict, string $word): void {}
 
-/**
- * @param resource $broker
- * @return string|false
- */
-function enchant_broker_get_dict_path($broker, int $name) {}
-
-/** @param resource $broker */
-function enchant_broker_list_dicts($broker): array {}
-
-/**
- * @param resource $broker
- * @return resource|false
- */
-function enchant_broker_request_dict($broker, string $tag) {}
-
-/**
- * @param resource $broker
- * @return resource|false
- */
-function enchant_broker_request_pwl_dict($broker, string $filename) {}
-
-/** @param resource $dict */
-function enchant_broker_free_dict($dict): bool {}
-
-/** @param resource $broker */
-function enchant_broker_dict_exists($broker, string $tag): bool {}
-
-/** @param resource $broker */
-function enchant_broker_set_ordering($broker, string $tag, string $ordering): bool {}
-
-/** @param resource $broker */
-function enchant_broker_describe($broker): array {}
-
-/** @param resource $dict */
-function enchant_dict_quick_check($dict, string $word, &$suggestions = UNKNOWN): bool {}
-
-/** @param resource $dict */
-function enchant_dict_check($dict, string $word): bool {}
-
-/** @param resource $dict */
-function enchant_dict_suggest($dict, string $word): ?array {}
-
-/** @param resource $dict */
-function enchant_dict_add_to_personal($dict, string $word): void {}
-
-/** @param resource $dict */
-function enchant_dict_add_to_session($dict, string $word): void {}
-
-/** @param resource $dict */
-function enchant_dict_is_in_session($dict, string $word): bool {}
-
-/** @param resource $dict */
-function enchant_dict_store_replacement($dict, string $mis, string $cor): void {}
+function enchant_dict_is_added(EnchantDictionary $dict, string $word): bool {}
 
 /**
 * @param resource $dict
-* @return string|false
+* @alias enchant_dict_is_added
+* @deprecated
 */
-function enchant_dict_get_error($dict) {}
+function enchant_dict_is_in_session(EnchantDictionary $dict, string $word): bool {}
 
-/** @param resource $dict */
-function enchant_dict_describe($dict): array {}
+function enchant_dict_store_replacement(EnchantDictionary $dict, string $mis, string $cor): void {}
+
+function enchant_dict_get_error(EnchantDictionary $dict): string|false {}
+
+function enchant_dict_describe(EnchantDictionary $dict): array {}
+

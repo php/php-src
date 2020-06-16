@@ -15,4 +15,4 @@ try {
 }
 ?>
 --EXPECT--
-call_user_func_array() expects parameter 2 to be array, null given
+call_user_func_array(): Argument #2 ($args) must be of type array, null given

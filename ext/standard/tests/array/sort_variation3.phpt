@@ -11,7 +11,7 @@ Test sort() function : usage variations - sort integer/float values
 /*
  * Testing sort() by providing different integer/float value arrays for $array argument
  * with following flag values
- * 1. flag  value as defualt
+ * 1. flag  value as default
  * 2. SORT_REGULAR - compare items normally
  * 3. SORT_NUMERIC - compare items numerically
  * 4. SORT_STRING - compare items as strings
@@ -44,7 +44,7 @@ echo "\n-- Testing sort() by supplying various integer/float arrays --\n";
 foreach ($various_arrays as $array) {
   echo "\n-- Iteration $count --\n";
 
-  echo "- With Defualt sort flag -\n";
+  echo "- With Default sort flag -\n";
   $temp_array = $array;
   var_dump(sort($temp_array) );
   var_dump($temp_array);
@@ -67,7 +67,7 @@ echo "Done\n";
 -- Testing sort() by supplying various integer/float arrays --
 
 -- Iteration 1 --
-- With Defualt sort flag -
+- With Default sort flag -
 bool(true)
 array(9) {
   [0]=>
@@ -135,7 +135,7 @@ array(9) {
 }
 
 -- Iteration 2 --
-- With Defualt sort flag -
+- With Default sort flag -
 bool(true)
 array(7) {
   [0]=>
@@ -191,7 +191,7 @@ array(7) {
 }
 
 -- Iteration 3 --
-- With Defualt sort flag -
+- With Default sort flag -
 bool(true)
 array(11) {
   [0]=>
@@ -271,7 +271,7 @@ array(11) {
 }
 
 -- Iteration 4 --
-- With Defualt sort flag -
+- With Default sort flag -
 bool(true)
 array(7) {
   [0]=>

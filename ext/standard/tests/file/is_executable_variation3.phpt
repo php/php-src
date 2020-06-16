@@ -40,7 +40,7 @@ foreach( $invalid_files as $invalid_file ) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing is_executable(): usage variations ***
 
 *** Testing is_executable() on invalid files ***

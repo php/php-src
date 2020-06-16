@@ -30,22 +30,20 @@ foreach ($hexLongStrs as $strVal) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 --- testing: 7fffffffffffffff ---
 int(9223372036854775807)
 --- testing: ffffffffffffffff ---
-float(1.844674407371E+19)
+float(1.8446744073709552E+19)
 --- testing: 7fffffff ---
 int(2147483647)
 --- testing: ffffffff ---
 int(4294967295)
 --- testing: 7ffffffffffffffff ---
-float(1.4757395258968E+20)
+float(1.4757395258967641E+20)
 --- testing: ffffffffffffffffff ---
-float(4.7223664828696E+21)
+float(4.722366482869645E+21)
 --- testing: 7ffffffff ---
 int(34359738367)
 --- testing: fffffffff ---
 int(68719476735)
-===DONE===

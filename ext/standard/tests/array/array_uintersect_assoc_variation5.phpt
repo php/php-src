@@ -24,9 +24,9 @@ function too_many_parameters ($val1, $val2, $val3) {
   return 1;
 }
 try {
-	var_dump(array_uintersect_assoc($arr1, $arr2, 'too_many_parameters'));
+    var_dump(array_uintersect_assoc($arr1, $arr2, 'too_many_parameters'));
 } catch (Throwable $e) {
-	echo "Exception: " . $e->getMessage() . "\n";
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 
 echo "\n-- comparison function taking too few parameters --\n";
@@ -37,7 +37,6 @@ var_dump(array_uintersect_assoc($arr1, $arr2, 'too_few_parameters'));
 
 ?>
 
-===DONE===
 --EXPECT--
 *** Testing array_uintersect_assoc() : usage variation - differing comparison functions***
 
@@ -52,4 +51,3 @@ Exception: Too few arguments to function too_many_parameters(), 2 passed and exa
 array(0) {
 }
 
-===DONE===

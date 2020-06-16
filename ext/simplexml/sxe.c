@@ -36,10 +36,10 @@ PHP_SXE_API zend_class_entry *ce_SimpleXMLElement;
 
 /* {{{ proto void SimpleXMLIterator::rewind()
  Rewind to first element */
-PHP_METHOD(ce_SimpleXMLIterator, rewind)
+PHP_METHOD(SimpleXMLIterator, rewind)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	php_sxe_rewind_iterator(Z_SXEOBJ_P(ZEND_THIS));
@@ -48,12 +48,12 @@ PHP_METHOD(ce_SimpleXMLIterator, rewind)
 
 /* {{{ proto bool SimpleXMLIterator::valid()
  Check whether iteration is valid */
-PHP_METHOD(ce_SimpleXMLIterator, valid)
+PHP_METHOD(SimpleXMLIterator, valid)
 {
 	php_sxe_object *sxe = Z_SXEOBJ_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_BOOL(!Z_ISUNDEF(sxe->iter.data));
@@ -62,13 +62,13 @@ PHP_METHOD(ce_SimpleXMLIterator, valid)
 
 /* {{{ proto SimpleXMLIterator SimpleXMLIterator::current()
  Get current element */
-PHP_METHOD(ce_SimpleXMLIterator, current)
+PHP_METHOD(SimpleXMLIterator, current)
 {
 	php_sxe_object *sxe = Z_SXEOBJ_P(ZEND_THIS);
 	zval *data;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (Z_ISUNDEF(sxe->iter.data)) {
@@ -82,14 +82,14 @@ PHP_METHOD(ce_SimpleXMLIterator, current)
 
 /* {{{ proto string SimpleXMLIterator::key()
  Get name of current child element */
-PHP_METHOD(ce_SimpleXMLIterator, key)
+PHP_METHOD(SimpleXMLIterator, key)
 {
 	xmlNodePtr curnode;
 	php_sxe_object *intern;
 	php_sxe_object *sxe = Z_SXEOBJ_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (Z_ISUNDEF(sxe->iter.data)) {
@@ -108,10 +108,10 @@ PHP_METHOD(ce_SimpleXMLIterator, key)
 
 /* {{{ proto void SimpleXMLIterator::next()
  Move to next element */
-PHP_METHOD(ce_SimpleXMLIterator, next)
+PHP_METHOD(SimpleXMLIterator, next)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	php_sxe_move_forward_iterator(Z_SXEOBJ_P(ZEND_THIS));
@@ -120,14 +120,14 @@ PHP_METHOD(ce_SimpleXMLIterator, next)
 
 /* {{{ proto bool SimpleXMLIterator::hasChildren()
  Check whether element has children (elements) */
-PHP_METHOD(ce_SimpleXMLIterator, hasChildren)
+PHP_METHOD(SimpleXMLIterator, hasChildren)
 {
 	php_sxe_object *sxe = Z_SXEOBJ_P(ZEND_THIS);
 	php_sxe_object *child;
 	xmlNodePtr      node;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (Z_ISUNDEF(sxe->iter.data) || sxe->iter.type == SXE_ITER_ATTRLIST) {
@@ -148,13 +148,13 @@ PHP_METHOD(ce_SimpleXMLIterator, hasChildren)
 
 /* {{{ proto SimpleXMLIterator SimpleXMLIterator::getChildren()
  Get child element iterator */
-PHP_METHOD(ce_SimpleXMLIterator, getChildren)
+PHP_METHOD(SimpleXMLIterator, getChildren)
 {
 	php_sxe_object *sxe = Z_SXEOBJ_P(ZEND_THIS);
 	zval *data;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (Z_ISUNDEF(sxe->iter.data) || sxe->iter.type == SXE_ITER_ATTRLIST) {
@@ -164,18 +164,6 @@ PHP_METHOD(ce_SimpleXMLIterator, getChildren)
 	data = &sxe->iter.data;
 	ZVAL_COPY_DEREF(return_value, data);
 }
-
-static const zend_function_entry funcs_SimpleXMLIterator[] = {
-	PHP_ME(ce_SimpleXMLIterator, rewind,                 arginfo_class_SimpleXMLIterator_rewind, ZEND_ACC_PUBLIC)
-	PHP_ME(ce_SimpleXMLIterator, valid,                  arginfo_class_SimpleXMLIterator_valid, ZEND_ACC_PUBLIC)
-	PHP_ME(ce_SimpleXMLIterator, current,                arginfo_class_SimpleXMLIterator_current, ZEND_ACC_PUBLIC)
-	PHP_ME(ce_SimpleXMLIterator, key,                    arginfo_class_SimpleXMLIterator_key, ZEND_ACC_PUBLIC)
-	PHP_ME(ce_SimpleXMLIterator, next,                   arginfo_class_SimpleXMLIterator_next, ZEND_ACC_PUBLIC)
-	PHP_ME(ce_SimpleXMLIterator, hasChildren,            arginfo_class_SimpleXMLIterator_hasChildren, ZEND_ACC_PUBLIC)
-	PHP_ME(ce_SimpleXMLIterator, getChildren,            arginfo_class_SimpleXMLIterator_getChildren, ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};
-/* }}} */
 
 PHP_MINIT_FUNCTION(sxe) /* {{{ */
 {
@@ -190,7 +178,7 @@ PHP_MINIT_FUNCTION(sxe) /* {{{ */
 
 	ce_SimpleXMLElement = pce;
 
-	INIT_CLASS_ENTRY_EX(sxi, "SimpleXMLIterator", sizeof("SimpleXMLIterator") - 1, funcs_SimpleXMLIterator);
+	INIT_CLASS_ENTRY_EX(sxi, "SimpleXMLIterator", sizeof("SimpleXMLIterator") - 1, class_SimpleXMLIterator_methods);
 	ce_SimpleXMLIterator = zend_register_internal_class_ex(&sxi, ce_SimpleXMLElement);
 	ce_SimpleXMLIterator->create_object = ce_SimpleXMLElement->create_object;
 

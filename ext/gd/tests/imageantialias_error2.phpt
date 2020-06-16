@@ -11,7 +11,7 @@ if (!extension_loaded("gd")) die("skip GD not present");
 <?php
 /*
 
-It seems the second argument passing is not being correclty checked.
+It seems the second argument passing is not being correctly checked.
 This test is failing due to this wrogn check
 
 */

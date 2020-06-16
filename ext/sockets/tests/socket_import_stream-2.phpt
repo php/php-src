@@ -14,7 +14,7 @@ try {
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
-$s = stream_socket_server("udp://127.0.0.1:58394", $errno, $errstr, STREAM_SERVER_BIND);
+$s = stream_socket_server("udp://127.0.0.1:0", $errno, $errstr, STREAM_SERVER_BIND);
 var_dump($s);
 var_dump(fclose($s));
 try {
@@ -26,7 +26,7 @@ try {
 echo "Done.";
 ?>
 --EXPECTF--
-Warning: socket_import_stream(): cannot represent a stream of type STDIO as a Socket Descriptor in %s on line %d
+Warning: socket_import_stream(): Cannot represent a stream of type STDIO as a Socket Descriptor in %s on line %d
 bool(false)
 socket_import_stream(): supplied resource is not a valid stream resource
 resource(%d) of type (stream)

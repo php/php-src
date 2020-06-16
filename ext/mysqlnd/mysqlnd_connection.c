@@ -669,13 +669,9 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 
 	{
 		const MYSQLND_CSTRING scheme = { transport.s, transport.l };
-		/* This will be overwritten below with a copy, but we can use it during authentication */
-		conn->unix_socket.s = (char *)socket_or_pipe.s;
 		if (FAIL == conn->m->connect_handshake(conn, &scheme, &username, &password, &database, mysql_flags)) {
-			conn->unix_socket.s = NULL;
 			goto err;
 		}
-		conn->unix_socket.s = NULL;
 	}
 
 	{
@@ -1370,7 +1366,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, info)(const MYSQLND_CONN_DATA * const conn)
 
 
 /* {{{ mysqlnd_get_client_info */
-PHPAPI const char * mysqlnd_get_client_info()
+PHPAPI const char * mysqlnd_get_client_info(void)
 {
 	return PHP_MYSQLND_VERSION;
 }
@@ -1378,7 +1374,7 @@ PHPAPI const char * mysqlnd_get_client_info()
 
 
 /* {{{ mysqlnd_get_client_version */
-PHPAPI unsigned long mysqlnd_get_client_version()
+PHPAPI unsigned long mysqlnd_get_client_version(void)
 {
 	return MYSQLND_VERSION_ID;
 }
@@ -1443,7 +1439,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, get_server_version)(const MYSQLND_CONN_DATA * 
 
 #define MARIA_DB_VERSION_HACK_PREFIX "5.5.5-"
 
-	if (conn->server_capabilities & CLIENT_PLUGIN_AUTH
+	if ((conn->server_capabilities & CLIENT_PLUGIN_AUTH)
 		&& !strncmp(p, MARIA_DB_VERSION_HACK_PREFIX, sizeof(MARIA_DB_VERSION_HACK_PREFIX)-1))
 	{
 		p += sizeof(MARIA_DB_VERSION_HACK_PREFIX)-1;
@@ -2004,24 +2000,24 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_rollback)(MYSQLND_CONN_DATA * conn)
 static void
 MYSQLND_METHOD(mysqlnd_conn_data, tx_cor_options_to_string)(const MYSQLND_CONN_DATA * const conn, smart_str * str, const unsigned int mode)
 {
-	if (mode & TRANS_COR_AND_CHAIN && !(mode & TRANS_COR_AND_NO_CHAIN)) {
+	if ((mode & TRANS_COR_AND_CHAIN) && !(mode & TRANS_COR_AND_NO_CHAIN)) {
 		if (str->s && ZSTR_LEN(str->s)) {
 			smart_str_appendl(str, " ", sizeof(" ") - 1);
 		}
 		smart_str_appendl(str, "AND CHAIN", sizeof("AND CHAIN") - 1);
-	} else if (mode & TRANS_COR_AND_NO_CHAIN && !(mode & TRANS_COR_AND_CHAIN)) {
+	} else if ((mode & TRANS_COR_AND_NO_CHAIN) && !(mode & TRANS_COR_AND_CHAIN)) {
 		if (str->s && ZSTR_LEN(str->s)) {
 			smart_str_appendl(str, " ", sizeof(" ") - 1);
 		}
 		smart_str_appendl(str, "AND NO CHAIN", sizeof("AND NO CHAIN") - 1);
 	}
 
-	if (mode & TRANS_COR_RELEASE && !(mode & TRANS_COR_NO_RELEASE)) {
+	if ((mode & TRANS_COR_RELEASE) && !(mode & TRANS_COR_NO_RELEASE)) {
 		if (str->s && ZSTR_LEN(str->s)) {
 			smart_str_appendl(str, " ", sizeof(" ") - 1);
 		}
 		smart_str_appendl(str, "RELEASE", sizeof("RELEASE") - 1);
-	} else if (mode & TRANS_COR_NO_RELEASE && !(mode & TRANS_COR_RELEASE)) {
+	} else if ((mode & TRANS_COR_NO_RELEASE) && !(mode & TRANS_COR_RELEASE)) {
 		if (str->s && ZSTR_LEN(str->s)) {
 			smart_str_appendl(str, " ", sizeof(" ") - 1);
 		}
@@ -2645,7 +2641,7 @@ mysqlnd_poll(MYSQLND **r_array, MYSQLND **e_array, MYSQLND ***dont_poll, long se
 	retval = php_select(max_fd + 1, &rfds, &wfds, &efds, tv_p);
 
 	if (retval == -1) {
-		php_error_docref(NULL, E_WARNING, "unable to select [%d]: %s (max_fd=%d)",
+		php_error_docref(NULL, E_WARNING, "Unable to select [%d]: %s (max_fd=%d)",
 						errno, strerror(errno), max_fd);
 		DBG_RETURN(FAIL);
 	}

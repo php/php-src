@@ -14,12 +14,16 @@ $url = 'http://secret:hideout@www.php.net:80/index.php?test=1&test2=char&test3=m
 echo "--> Below range:";
 var_dump(parse_url($url, -1));
 
-echo "\n\n--> Above range:";
-var_dump(parse_url($url, 99));
+echo "\n\n--> Above range:\n";
+try {
+    parse_url($url, 99);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing parse_url() : error conditions: url component specifier out of range ***
 --> Below range:array(8) {
   ["scheme"]=>
@@ -42,6 +46,5 @@ echo "Done"
 
 
 --> Above range:
-Warning: parse_url(): Invalid URL component identifier 99 in %s on line 15
-bool(false)
+parse_url(): Argument #2 ($component) must be a valid URL component identifier, 99 given
 Done

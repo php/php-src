@@ -118,7 +118,7 @@ static DWORD orig_cp = 0;
 #define PHP_MODE_SHOW_INI_CONFIG        13
 
 cli_shell_callbacks_t cli_shell_callbacks = { NULL, NULL, NULL };
-PHP_CLI_API cli_shell_callbacks_t *php_cli_get_shell_callbacks()
+PHP_CLI_API cli_shell_callbacks_t *php_cli_get_shell_callbacks(void)
 {
 	return &cli_shell_callbacks;
 }
@@ -173,11 +173,8 @@ const opt_struct OPTIONS[] = {
 	{'-', 0, NULL} /* end of args */
 };
 
-static int module_name_cmp(const void *a, const void *b) /* {{{ */
+static int module_name_cmp(Bucket *f, Bucket *s) /* {{{ */
 {
-	Bucket *f = (Bucket *) a;
-	Bucket *s = (Bucket *) b;
-
 	return strcasecmp(((zend_module_entry *)Z_PTR(f->val))->name,
 				  ((zend_module_entry *)Z_PTR(s->val))->name);
 }
@@ -198,10 +195,9 @@ static void print_modules(void) /* {{{ */
 }
 /* }}} */
 
-static int print_extension_info(zend_extension *ext, void *arg) /* {{{ */
+static void print_extension_info(zend_extension *ext) /* {{{ */
 {
 	php_printf("%s\n", ext->name);
-	return ZEND_HASH_APPLY_KEEP;
 }
 /* }}} */
 
@@ -264,6 +260,9 @@ PHP_CLI_API ssize_t sapi_cli_single_write(const char *str, size_t str_length) /*
 	} while (ret <= 0 && errno == EAGAIN && sapi_cli_select(STDOUT_FILENO));
 #else
 	ret = fwrite(str, 1, MIN(str_length, 16384), stdout);
+	if (ret == 0 && ferror(stdout)) {
+		return -1;
+	}
 #endif
 	return ret;
 }
@@ -355,7 +354,7 @@ static void sapi_cli_register_variables(zval *track_vars_array) /* {{{ */
 }
 /* }}} */
 
-static void sapi_cli_log_message(char *message, int syslog_type_int) /* {{{ */
+static void sapi_cli_log_message(const char *message, int syslog_type_int) /* {{{ */
 {
 	fprintf(stderr, "%s\n", message);
 #ifdef PHP_WIN32
@@ -411,7 +410,7 @@ static int php_cli_startup(sapi_module_struct *sapi_module) /* {{{ */
 
 /* {{{ sapi_cli_ini_defaults */
 
-/* overwriteable ini defaults must be set in sapi_cli_ini_defaults() */
+/* overwritable ini defaults must be set in sapi_cli_ini_defaults() */
 #define INI_DEFAULT(name,value)\
 	ZVAL_NEW_STR(&tmp, zend_string_init(value, sizeof(value)-1, 1));\
 	zend_hash_str_update(configuration_hash, name, sizeof(name)-1, &tmp);\
@@ -493,7 +492,7 @@ static void php_cli_usage(char *argv0)
 				"   %s [options] -- [args...]\n"
 				"   %s [options] -a\n"
 				"\n"
-#if (HAVE_LIBREADLINE || HAVE_LIBEDIT) && !defined(COMPILE_DL_READLINE)
+#if (defined(HAVE_LIBREADLINE) || defined(HAVE_LIBEDIT)) && !defined(COMPILE_DL_READLINE)
 				"  -a               Run as interactive shell\n"
 #else
 				"  -a               Run interactively\n"
@@ -645,7 +644,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 			case 'v': /* show php version & quit */
 				php_printf("PHP %s (%s) (built: %s %s) ( %s)\nCopyright (c) The PHP Group\n%s",
 					PHP_VERSION, cli_sapi_module.name, __DATE__, __TIME__,
-#if ZTS
+#ifdef ZTS
 					"ZTS "
 #else
 					"NTS "
@@ -875,7 +874,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 #endif
 
 		if (interactive) {
-#if (HAVE_LIBREADLINE || HAVE_LIBEDIT) && !defined(COMPILE_DL_READLINE)
+#if (defined(HAVE_LIBREADLINE) || defined(HAVE_LIBEDIT)) && !defined(COMPILE_DL_READLINE)
 			printf("Interactive shell\n\n");
 #else
 			printf("Interactive mode enabled\n\n");
@@ -906,7 +905,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 		} else {
 			/* We could handle PHP_MODE_PROCESS_STDIN in a different manner  */
 			/* here but this would make things only more complicated. And it */
-			/* is consitent with the way -R works where the stdin file handle*/
+			/* is consistent with the way -R works where the stdin file handle*/
 			/* is also accessible. */
 			zend_stream_init_fp(&file_handle, stdin, "Standard input code");
 		}
@@ -1071,7 +1070,8 @@ static int do_cli(int argc, char **argv) /* {{{ */
 
 					memset(&execute_data, 0, sizeof(zend_execute_data));
 					EG(current_execute_data) = &execute_data;
-					zend_call_method_with_1_params(Z_OBJ(ref), pce, &pce->constructor, "__construct", NULL, &arg);
+					zend_call_known_instance_method_with_1_params(
+						pce->constructor, Z_OBJ(ref), NULL, &arg);
 
 					if (EG(exception)) {
 						zval tmp, *msg, rv;
@@ -1184,20 +1184,23 @@ int main(int argc, char *argv[])
 
 	cli_sapi_module.additional_functions = additional_functions;
 
-#if defined(PHP_WIN32) && defined(_DEBUG) && defined(PHP_WIN32_DEBUG_HEAP)
+#if defined(PHP_WIN32) && defined(_DEBUG)
 	{
-		int tmp_flag;
-		_CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE);
-		_CrtSetReportFile(_CRT_WARN, _CRTDBG_FILE_STDERR);
-		_CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_FILE);
-		_CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDERR);
-		_CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE);
-		_CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
-		tmp_flag = _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG);
-		tmp_flag |= _CRTDBG_DELAY_FREE_MEM_DF;
-		tmp_flag |= _CRTDBG_LEAK_CHECK_DF;
+		char *tmp = getenv("PHP_WIN32_DEBUG_HEAP");
+		if (tmp && zend_atoi(tmp, 0)) {
+			int tmp_flag;
+			_CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE);
+			_CrtSetReportFile(_CRT_WARN, _CRTDBG_FILE_STDERR);
+			_CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_FILE);
+			_CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDERR);
+			_CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE);
+			_CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
+			tmp_flag = _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG);
+			tmp_flag |= _CRTDBG_DELAY_FREE_MEM_DF;
+			tmp_flag |= _CRTDBG_LEAK_CHECK_DF;
 
-		_CrtSetDbgFlag(tmp_flag);
+			_CrtSetDbgFlag(tmp_flag);
+		}
 	}
 #endif
 
@@ -1226,7 +1229,7 @@ int main(int argc, char *argv[])
 	setmode(_fileno(stderr), O_BINARY);		/* make the stdio mode be binary */
 #endif
 
-	while ((c = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0, 2))!=-1) {
+	while ((c = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 1, 2))!=-1) {
 		switch (c) {
 			case 'c':
 				if (ini_path_override) {
@@ -1277,6 +1280,10 @@ int main(int argc, char *argv[])
 			case 'h': /* help & quit */
 			case '?':
 				php_cli_usage(argv[0]);
+				goto out;
+			case PHP_GETOPT_INVALID_ARG: /* print usage on bad options, exit 1 */
+				php_cli_usage(argv[0]);
+				exit_status = 1;
 				goto out;
 			case 'i': case 'v': case 'm':
 				sapi_module = &cli_sapi_module;

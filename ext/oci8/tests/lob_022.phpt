@@ -23,11 +23,8 @@ $statement = oci_parse($c, $init);
 $clob = oci_new_descriptor($c, OCI_D_LOB);
 oci_bind_by_name($statement, ":mylob", $clob, -1, OCI_B_CLOB);
 oci_execute($statement, OCI_DEFAULT);
-$clob->save();
-oci_lob_save();
 oci_lob_save($clob, "data");
 unset($clob->descriptor);
-oci_lob_save($clob, "data");
 
 oci_commit($c);
 
@@ -48,8 +45,8 @@ $statement = oci_parse ($c, $query);
 oci_execute($statement, OCI_DEFAULT);
 
 while ($row = oci_fetch_array($statement, OCI_ASSOC)) {
-	$result = $row['LOB_1']->load();
-	var_dump($result);
+    $result = $row['LOB_1']->load();
+    var_dump($result);
 }
 
 $query = 'SELECT * FROM lob_test ORDER BY mykey DESC';
@@ -57,8 +54,8 @@ $statement = oci_parse ($c, $query);
 oci_execute($statement, OCI_DEFAULT);
 
 while ($row = oci_fetch_array($statement, OCI_ASSOC)) {
-	$result = $row['LOB_1']->load();
-	var_dump($result);
+    $result = $row['LOB_1']->load();
+    var_dump($result);
 }
 
 $drop = "DROP table lob_test";
@@ -69,11 +66,6 @@ echo "Done\n";
 
 ?>
 --EXPECTF--
-Warning: OCI-Lob::save() expects at least 1 parameter, 0 given in %s on line %d
-
-Warning: oci_lob_save() expects at least 2 parameters, 0 given in %s on line %d
-
-Warning: oci_lob_save(): Unable to find descriptor property in %s on line %d
 
 Warning: OCI-Lob::save(): Offset parameter must be greater than or equal to 0 in %s on line %d
 string(4) "data"

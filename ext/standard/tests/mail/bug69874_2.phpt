@@ -1,13 +1,8 @@
 --TEST--
 Bug #69874: Null addtional_headers does not send mail
 --INI--
-sendmail_path=tee mailBug69874_2.out >/dev/null
+sendmail_path={MAIL:mailBug69874_2.out}
 mail.add_x_header = On
---SKIPIF--
-<?php
-if(substr(PHP_OS, 0, 3) == "WIN")
-  die("skip Won't run on Windows");
-?>
 --FILE--
 <?php
 /* Prototype  : int mail(string to, string subject, string message [, string additional_headers [, string additional_parameters]])
@@ -31,7 +26,6 @@ echo file_get_contents($outFile);
 unlink($outFile);
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing mail() : send email without additional headers ***
 bool(true)
@@ -40,4 +34,3 @@ Subject: Test Subject
 X-PHP-Originating-Script: %d:bug69874_2.php
 
 A Message
-===DONE===

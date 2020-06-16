@@ -24,6 +24,7 @@
 #include "zend_shared_alloc.h"
 #include "zend_accelerator_util_funcs.h"
 #include "zend_execute.h"
+#include "SAPI.h"
 #include "tsrm_win32.h"
 #include "win32/winutil.h"
 #include <winbase.h>
@@ -68,15 +69,15 @@ static void zend_win_error_message(int type, char *msg, int err)
 
 static char *create_name_with_username(char *name)
 {
-	static char newname[MAXPATHLEN + 32 + 4 + 1 + 32];
-	snprintf(newname, sizeof(newname) - 1, "%s@%.32s@%.32s", name, accel_uname_id, accel_system_id);
+	static char newname[MAXPATHLEN + 32 + 4 + 1 + 32 + 21];
+	snprintf(newname, sizeof(newname) - 1, "%s@%.32s@%.20s@%.32s", name, accel_uname_id, sapi_module.name, accel_system_id);
 
 	return newname;
 }
 
 static char *get_mmap_base_file(void)
 {
-	static char windir[MAXPATHLEN+ 32 + 3 + sizeof("\\\\@") + 1 + 32];
+	static char windir[MAXPATHLEN+ 32 + 3 + sizeof("\\\\@") + 1 + 32 + 21];
 	int l;
 
 	GetTempPath(MAXPATHLEN, windir);
@@ -85,7 +86,7 @@ static char *get_mmap_base_file(void)
 		l--;
 	}
 
-	snprintf(windir + l, sizeof(windir) - l - 1, "\\%s@%.32s@%.32s", ACCEL_FILEMAP_BASE, accel_uname_id, accel_system_id);
+	snprintf(windir + l, sizeof(windir) - l - 1, "\\%s@%.32s@%.20s@%.32s", ACCEL_FILEMAP_BASE, accel_uname_id, sapi_module.name, accel_system_id);
 
 	return windir;
 }

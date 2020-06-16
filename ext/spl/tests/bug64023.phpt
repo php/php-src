@@ -4,7 +4,7 @@ Bug #64023: Overloading __toString() in SplFileInfo has no effect
 <?php
 class A extends \SplFileInfo
 {
-	    public function __toString() {return ' -expected- ';}
+        public function __toString() {return ' -expected- ';}
 }
 
 $a = new A('/');

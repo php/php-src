@@ -20,7 +20,7 @@ var_dump( posix_getgrgid($gid));
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing posix_getgrgid() : error conditions ***
 
 -- Testing posix_getgrgid() function with a negative group id --

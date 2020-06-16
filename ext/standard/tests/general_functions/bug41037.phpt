@@ -4,8 +4,8 @@ Bug #41037 (unregister_tick_function() inside the tick function crash PHP)
 <?php
 
 function a() {
-		echo "hello";
-			unregister_tick_function('a');
+        echo "hello";
+            unregister_tick_function('a');
 }
 
 declare (ticks=1) {

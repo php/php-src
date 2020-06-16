@@ -24,7 +24,6 @@
 #endif
 #include "normalizer.h"
 #include "normalizer_class.h"
-#include "normalizer_normalize.h"
 #include "intl_convert.h"
 #include <unicode/utf8.h>
 
@@ -107,7 +106,7 @@ PHP_FUNCTION( normalizer_normalize )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "s|l",
 				&input, &input_len, &form ) == FAILURE )
 	{
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	expansion_factor = 1;
@@ -244,7 +243,7 @@ PHP_FUNCTION( normalizer_is_normalized )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "s|l",
 				&input, &input_len, &form) == FAILURE )
 	{
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	switch(form) {
@@ -331,7 +330,7 @@ PHP_FUNCTION( normalizer_get_raw_decomposition )
 	intl_error_reset(NULL);
 
 	if ((zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &input, &input_length, &form) == FAILURE)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	norm = intl_get_normalizer(form, &status);

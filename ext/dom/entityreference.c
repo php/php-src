@@ -20,14 +20,8 @@
 #endif
 
 #include "php.h"
-#if HAVE_LIBXML && HAVE_DOM
+#if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
-
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_entityreference_construct, 0, 0, 1)
-	ZEND_ARG_INFO(0, name)
-ZEND_END_ARG_INFO();
-/* }}} */
 
 /*
 * class DOMEntityReference extends DOMNode
@@ -36,13 +30,8 @@ ZEND_END_ARG_INFO();
 * Since:
 */
 
-const zend_function_entry php_dom_entityreference_class_functions[] = {
-	PHP_ME(domentityreference, __construct, arginfo_dom_entityreference_construct, ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};
-
 /* {{{ proto DOMEntityReference::__construct(string name) */
-PHP_METHOD(domentityreference, __construct)
+PHP_METHOD(DOMEntityReference, __construct)
 {
 	xmlNode *node;
 	xmlNodePtr oldnode = NULL;
@@ -50,8 +39,8 @@ PHP_METHOD(domentityreference, __construct)
 	char *name;
 	size_t name_len, name_valid;
 
-	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
-		return;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
+		RETURN_THROWS();
 	}
 
 	name_valid = xmlValidateName((xmlChar *) name, 0);

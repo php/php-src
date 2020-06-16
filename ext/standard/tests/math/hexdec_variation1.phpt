@@ -76,17 +76,16 @@ $inputs = array(
 // loop through each element of $inputs to check the behaviour of hexdec()
 $iterator = 1;
 foreach($inputs as $input) {
-	echo "\n-- Iteration $iterator --\n";
-	try {
-		var_dump(hexdec($input));
-	} catch (TypeError $e) {
-		echo $e->getMessage(), "\n";
-	}
-	$iterator++;
+    echo "\n-- Iteration $iterator --\n";
+    try {
+        var_dump(hexdec($input));
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
+    $iterator++;
 };
 fclose($fp);
 ?>
-===Done===
 --EXPECTF--
 *** Testing hexdec() : usage variations ***
 
@@ -158,7 +157,7 @@ int(0)
 int(0)
 
 -- Iteration 20 --
-hexdec() expects parameter 1 to be string, array given
+hexdec(): Argument #1 ($hex_string) must be of type string, array given
 
 -- Iteration 21 --
 
@@ -182,5 +181,4 @@ int(0)
 int(0)
 
 -- Iteration 26 --
-hexdec() expects parameter 1 to be string, resource given
-===Done===
+hexdec(): Argument #1 ($hex_string) must be of type string, resource given

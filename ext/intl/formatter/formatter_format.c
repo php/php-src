@@ -39,32 +39,26 @@ PHP_FUNCTION( numfmt_format )
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Oz|l",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "On|l",
 		&object, NumberFormatter_ce_ptr,  &number, &type ) == FAILURE )
 	{
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */
 	FORMATTER_METHOD_FETCH_OBJECT;
 
 	if(type == FORMAT_TYPE_DEFAULT) {
-		if(Z_TYPE_P(number) == IS_STRING) {
-			convert_scalar_to_number_ex(number);
+		switch(Z_TYPE_P(number)) {
+			case IS_LONG:
+				/* take INT32 on 32-bit, int64 on 64-bit */
+				type = (sizeof(zend_long) == 8)?FORMAT_TYPE_INT64:FORMAT_TYPE_INT32;
+				break;
+			case IS_DOUBLE:
+				type = FORMAT_TYPE_DOUBLE;
+				break;
+			EMPTY_SWITCH_DEFAULT_CASE();
 		}
-
-		if(Z_TYPE_P(number) == IS_LONG) {
-			/* take INT32 on 32-bit, int64 on 64-bit */
-			type = (sizeof(zend_long) == 8)?FORMAT_TYPE_INT64:FORMAT_TYPE_INT32;
-		} else if(Z_TYPE_P(number) == IS_DOUBLE) {
-			type = FORMAT_TYPE_DOUBLE;
-		} else {
-			type = FORMAT_TYPE_INT32;
-		}
-	}
-
-	if(Z_TYPE_P(number) != IS_DOUBLE && Z_TYPE_P(number) != IS_LONG) {
-		convert_scalar_to_number(number );
 	}
 
 	switch(type) {
@@ -145,7 +139,7 @@ PHP_FUNCTION( numfmt_format_currency )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Ods",
 		&object, NumberFormatter_ce_ptr,  &number, &currency, &currency_len ) == FAILURE )
 	{
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */

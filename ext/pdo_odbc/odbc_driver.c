@@ -420,7 +420,7 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ 
 	}
 
 	rc = SQLSetConnectAttr(H->dbc, SQL_ATTR_AUTOCOMMIT,
-		(SQLPOINTER)(dbh->auto_commit ? SQL_AUTOCOMMIT_ON : SQL_AUTOCOMMIT_OFF), SQL_IS_INTEGER);
+		(SQLPOINTER)(intptr_t)(dbh->auto_commit ? SQL_AUTOCOMMIT_ON : SQL_AUTOCOMMIT_OFF), SQL_IS_INTEGER);
 	if (rc != SQL_SUCCESS) {
 		pdo_odbc_drv_error("SQLSetConnectAttr AUTOCOMMIT");
 		goto fail;

@@ -7,17 +7,17 @@ sysvmsg functions on non-existing queue
 
 $tests = array(null, 'foo');
 
-foreach ($tests as $q) {
+foreach ($tests as $i => $q) {
 
     if ($q === null) {
-		do {
-			$id = ftok(__FILE__, chr(mt_rand(0, 255))); } while (msg_queue_exists($id));
+        do {
+            $id = ftok(__FILE__, chr(mt_rand(0, 255))); } while (msg_queue_exists($id));
     }
 
-	$q = msg_get_queue($id) or die("Failed to create queue");
-	msg_remove_queue($q) or die("Failed to close queue");
+    $q = msg_get_queue($id) or die("Failed to create queue");
+    msg_remove_queue($q) or die("Failed to close queue");
 
-    echo "Using '$q' as queue resource:\n";
+    echo "Iteration " . ($i + 1) . ":\n";
 
     $errno = 0;
 
@@ -37,25 +37,25 @@ foreach ($tests as $q) {
 echo "Done\n";
 ?>
 --EXPECTF--
-Using 'Resource id #4' as queue resource:
+Iteration 1:
 bool(false)
 bool(false)
 bool(false)
 bool(true)
 
-Warning: msg_receive(): maximum size of the message has to be greater than zero in %s on line %d
+Warning: msg_receive(): Maximum size of the message has to be greater than zero in %s on line %d
 bool(false)
 
 Warning: msg_send(): msgsnd failed: Invalid argument in %s on line %d
 bool(false)
 bool(true)
-Using 'Resource id #5' as queue resource:
+Iteration 2:
 bool(false)
 bool(false)
 bool(false)
 bool(true)
 
-Warning: msg_receive(): maximum size of the message has to be greater than zero in %s on line %d
+Warning: msg_receive(): Maximum size of the message has to be greater than zero in %s on line %d
 bool(false)
 
 Warning: msg_send(): msgsnd failed: Invalid argument in %s on line %d

@@ -18,11 +18,9 @@ var_dump(dba_nextkey($db));
 dba_close($db);
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 	require(__DIR__ .'/clean.inc');
 ?>
 --EXPECT--
 bool(false)
-===DONE===

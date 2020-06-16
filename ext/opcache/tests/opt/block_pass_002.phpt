@@ -9,9 +9,9 @@ opcache.optimization_level=-1
 --FILE--
 <?php
 function foo($key, $value, array $attributes) {
-	return is_array($value)
-		? [$key, array_merge($value, $attributes)]
-		: [$value, $attributes];
+    return is_array($value)
+        ? [$key, array_merge($value, $attributes)]
+        : [$value, $attributes];
 }
 ?>
 OK

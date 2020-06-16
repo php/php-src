@@ -19,6 +19,12 @@
 #define ZEND_INCLUDE_FULL_WINDOWS_HEADERS
 
 #include "php.h"
+#ifdef strcasecmp
+# undef strcasecmp
+#endif
+#ifdef strncasecmp
+# undef strncasecmp
+#endif
 #include "php_apache.h"
 
 AP_MODULE_DECLARE_DATA module php_module = {

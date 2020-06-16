@@ -18,4 +18,4 @@ try {
 }
 ?>
 --EXPECTF--
-Invalid 2nd parameter, filename must not contain null bytes
+imagepng(): Argument #2 ($to) must not contain null bytes

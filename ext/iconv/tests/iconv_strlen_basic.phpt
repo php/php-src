@@ -28,7 +28,6 @@ var_dump(iconv_strlen($string_ascii));
 echo "\n-- Multibyte String --\n";
 var_dump(iconv_strlen($string_mb, 'UTF-8'));
 ?>
-===DONE===
 --EXPECT--
 *** Testing iconv_strlen() : basic functionality***
 
@@ -37,4 +36,3 @@ int(7)
 
 -- Multibyte String --
 int(21)
-===DONE===

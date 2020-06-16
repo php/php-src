@@ -17,6 +17,6 @@ echo "done"
 --EXPECTF--
 Warning: ob_start(): array must have exactly two members in %s on line %d
 
-Notice: ob_start(): failed to create buffer in %s on line 11
+Notice: ob_start(): Failed to create buffer in %s on line 11
 bool(false)
 done

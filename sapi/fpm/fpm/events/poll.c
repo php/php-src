@@ -19,7 +19,7 @@
 #include "../fpm.h"
 #include "../zlog.h"
 
-#if HAVE_POLL
+#ifdef HAVE_POLL
 
 #include <poll.h>
 #include <errno.h>
@@ -52,7 +52,7 @@ static int next_free_slot = 0;
  */
 struct fpm_event_module_s *fpm_event_poll_module() /* {{{ */
 {
-#if HAVE_POLL
+#ifdef HAVE_POLL
 	return &poll_module;
 #else
 	return NULL;
@@ -60,7 +60,7 @@ struct fpm_event_module_s *fpm_event_poll_module() /* {{{ */
 }
 /* }}} */
 
-#if HAVE_POLL
+#ifdef HAVE_POLL
 
 /*
  * Init the module
@@ -216,7 +216,7 @@ static int fpm_event_poll_add(struct fpm_event_s *ev) /* {{{ */
 		return 0;
 	}
 
-	zlog(ZLOG_ERROR, "poll: not enought space to add event (fd=%d)", ev->fd);
+	zlog(ZLOG_ERROR, "poll: not enough space to add event (fd=%d)", ev->fd);
 	return -1;
 }
 /* }}} */

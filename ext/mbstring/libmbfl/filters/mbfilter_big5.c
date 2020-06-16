@@ -101,7 +101,8 @@ const struct mbfl_convert_vtbl vtbl_big5_wchar = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_big5_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_big5 = {
@@ -110,7 +111,8 @@ const struct mbfl_convert_vtbl vtbl_wchar_big5 = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_wchar_big5,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL
 };
 
 const struct mbfl_convert_vtbl vtbl_cp950_wchar = {
@@ -119,7 +121,8 @@ const struct mbfl_convert_vtbl vtbl_cp950_wchar = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_big5_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_cp950 = {
@@ -128,7 +131,8 @@ const struct mbfl_convert_vtbl vtbl_wchar_cp950 = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_wchar_big5,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
@@ -145,10 +149,10 @@ static unsigned short cp950_pua_tbl[][4] = {
 static inline int is_in_cp950_pua(int c1, int c) {
 	if ((c1 >= 0xfa && c1 <= 0xfe) || (c1 >= 0x8e && c1 <= 0xa0) ||
 			(c1 >= 0x81 && c1 <= 0x8d) || (c1 >= 0xc7 && c1 <= 0xc8)) {
-		return (c > 0x39 && c < 0x7f) || (c > 0xa0 && c < 0xff);
+		return (c >=0x40 && c <= 0x7e) || (c >= 0xa1 && c <= 0xfe);
 	}
 	if (c1 == 0xc6) {
-		return c > 0xa0 && c < 0xff;
+		return c >= 0xa1 && c <= 0xfe;
 	}
 	return 0;
 }

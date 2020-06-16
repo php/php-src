@@ -34,9 +34,9 @@ const char HARDCODED_INI[] =
 	"implicit_flush=1\n"
 	"output_buffering=0\n"
 	"error_reporting=0\n"
-	/* Reduce oniguruma limits by a factor of 10 to speed up fuzzing */
+	/* Reduce oniguruma limits to speed up fuzzing */
 	"mbstring.regex_stack_limit=10000\n"
-	"mbstring.regex_retry_limit=100000";
+	"mbstring.regex_retry_limit=10000";
 
 static int startup(sapi_module_struct *sapi_module)
 {
@@ -72,7 +72,7 @@ static void register_variables(zval *track_vars_array)
 	php_import_environment_variables(track_vars_array);
 }
 
-static void log_message(char *message, int level)
+static void log_message(const char *message, int level)
 {
 }
 
@@ -148,7 +148,7 @@ int fuzzer_request_startup()
 	}
 
 #ifdef ZEND_SIGNALS
-	/* Some signal handlers will be overriden,
+	/* Some signal handlers will be overridden,
 	 * don't complain about them during shutdown. */
 	SIGG(check) = 0;
 #endif

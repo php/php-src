@@ -8,8 +8,6 @@ Phar::getSupportedCompression() (none)
 <?php
 var_dump(Phar::getSupportedCompression());
 ?>
-===DONE===
 --EXPECT--
 array(0) {
 }
-===DONE===

@@ -14,8 +14,8 @@ require(__DIR__.'/connect.inc');
 // Initialization
 
 $stmtarray = array(
-	"drop table xmltype_02_tab",
-	"create table xmltype_02_tab (warehouse_id number, warehouse_spec xmltype)",
+    "drop table xmltype_02_tab",
+    "create table xmltype_02_tab (warehouse_id number, warehouse_spec xmltype)",
 );
 
 oci8_test_sql_execute($c, $stmtarray);
@@ -101,14 +101,12 @@ $row[0]->free();
 // Clean up
 
 $stmtarray = array(
-	"drop table xmltype_02_tab"
+    "drop table xmltype_02_tab"
 );
 
 oci8_test_sql_execute($c, $stmtarray);
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 Test 1 Insert new XML data using a temporary CLOB
 array(1) {
@@ -178,4 +176,3 @@ string(%d) "<?xml version="1.0"?>
 %sVClearance>10</VClearance>
 </Warehouse>
 "
-===DONE===

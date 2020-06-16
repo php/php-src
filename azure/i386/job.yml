@@ -5,13 +5,13 @@ parameters:
 jobs:
   - job: ${{ parameters.configurationName }}
     pool:
-      vmImage: 'ubuntu-latest'
+      vmImage: 'ubuntu-18.04'
     steps:
     - template: apt.yml
     - script: |
         ./buildconf --force
-        export CFLAGS=-m32
-        export CXXFLAGS=-m32
+        export CFLAGS="-m32 -msse2"
+        export CXXFLAGS="-m32 -msse2"
         export LDFLAGS=-L/usr/lib/i386-linux-gnu
         export PKG_CONFIG=/usr/bin/i686-linux-gnu-pkg-config
         ./configure ${{ parameters.configurationParameters }} \
@@ -29,7 +29,6 @@ jobs:
             --enable-gd \
             --with-jpeg \
             --with-webp \
-            --with-freetype \
             --with-xpm \
             --enable-exif \
             --with-zip \
@@ -39,7 +38,6 @@ jobs:
             --enable-xmlreader \
             --with-xsl \
             --with-tidy \
-            --with-xmlrpc \
             --enable-sysvsem \
             --enable-sysvshm \
             --enable-shmop \
@@ -62,6 +60,7 @@ jobs:
             --with-ffi \
             --enable-zend-test \
             --with-mhash \
+            --with-sodium \
             --enable-werror \
             --with-config-file-path=/etc \
             --with-config-file-scan-dir=/etc/php.d
@@ -69,6 +68,7 @@ jobs:
     - script: make -j$(/usr/bin/nproc) >/dev/null
       displayName: 'Make Build'
     - script: |
+        set -e
         sudo make install
         sudo mkdir     /etc/php.d
         sudo chmod 777 /etc/php.d
@@ -78,9 +78,11 @@ jobs:
         echo opcache.protect_memory=1 >> /etc/php.d/opcache.ini
       displayName: 'Install Build'
     - script: |
+        set -e
+        sudo service mysql start
         mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS test"
-        sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'postgres';"
-        sudo -u postgres psql -c "CREATE DATABASE test;"
+        #sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'postgres';"
+        #sudo -u postgres psql -c "CREATE DATABASE test;"
       displayName: 'Setup'
     - template: test.yml
       parameters:

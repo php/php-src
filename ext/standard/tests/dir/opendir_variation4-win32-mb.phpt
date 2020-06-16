@@ -70,13 +70,12 @@ clean_dh($dh);
  * and to ensure directory is not in use at CLEAN section so can me removed
  */
 function clean_dh($dh){
-	if (is_resource($dh)) {
-		closedir($dh);
-	}
-	unset($dh);
+    if (is_resource($dh)) {
+        closedir($dh);
+    }
+    unset($dh);
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
 $base_dir_path = __DIR__ . '/opendir_variation4-win32-mb';
@@ -112,4 +111,3 @@ resource(%d) of type (stream)
 -- $path = '../../'私はガラスを食べられますlevel_one': --
 bool(true)
 resource(%d) of type (stream)
-===DONE===

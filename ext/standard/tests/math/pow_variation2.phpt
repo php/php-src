@@ -1,7 +1,7 @@
 --TEST--
 Test pow() function : usage variations - different data types as $exp argument
 --INI--
-precision = 14
+serialize_precision = 14
 --FILE--
 <?php
 /* Prototype  : number pow  ( number $base  , number $exp  )
@@ -80,13 +80,16 @@ $inputs = array(
 // loop through each element of $inputs to check the behaviour of pow()
 $iterator = 1;
 foreach($inputs as $input) {
-	echo "\n-- Iteration $iterator --\n";
-	var_dump(pow(20.3, $input));
-	$iterator++;
+    echo "\n-- Iteration $iterator --\n";
+    try {
+        var_dump(pow(20.3, $input));
+    } catch (Error $e) {
+        echo $e->getMessage(), "\n";
+    }
+    $iterator++;
 };
 fclose($fp);
 ?>
-===Done===
 --EXPECTF--
 *** Testing pow() : usage variations ***
 
@@ -149,7 +152,7 @@ Warning: A non-numeric value encountered in %s on line %d
 float(1)
 
 -- Iteration 19 --
-int(1)
+Unsupported operand types: float ** array
 
 -- Iteration 20 --
 
@@ -167,9 +170,7 @@ Warning: A non-numeric value encountered in %s on line %d
 float(1)
 
 -- Iteration 23 --
-
-Notice: Object of class classA could not be converted to number in %s on line %d
-float(20.3)
+Unsupported operand types: float ** classA
 
 -- Iteration 24 --
 float(1)
@@ -179,4 +180,3 @@ float(1)
 
 -- Iteration 26 --
 %s
-===Done===

@@ -17,8 +17,8 @@ $timestamp = gmmktime(8, 8, 8, 8, 8, 2008);
 $inputs = array(
       'Abbreviated weekday name' => "%a",
       'Full weekday name' => "%A",
-	  'Week number of the year' => "%U",
-	  'Week number of the year in decimal number' => "%W",
+      'Week number of the year' => "%U",
+      'Week number of the year in decimal number' => "%W",
 );
 
 // loop through each element of the array for timestamp
@@ -30,7 +30,6 @@ foreach($inputs as $key =>$value) {
 };
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing gmstrftime() : usage variation ***
 
@@ -49,4 +48,3 @@ string(2) "31"
 --Week number of the year in decimal number--
 string(%d) "%d"
 string(2) "31"
-===DONE===

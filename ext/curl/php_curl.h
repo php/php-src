@@ -26,7 +26,7 @@
 #define HAVE_CURL 1
 #endif
 
-#if HAVE_CURL
+#ifdef HAVE_CURL
 
 #define PHP_CURL_DEBUG 0
 
@@ -71,52 +71,6 @@ extern int  le_curl_share_handle;
 PHP_MINIT_FUNCTION(curl);
 PHP_MSHUTDOWN_FUNCTION(curl);
 PHP_MINFO_FUNCTION(curl);
-
-PHP_FUNCTION(curl_close);
-PHP_FUNCTION(curl_copy_handle);
-PHP_FUNCTION(curl_errno);
-PHP_FUNCTION(curl_error);
-PHP_FUNCTION(curl_exec);
-PHP_FUNCTION(curl_getinfo);
-PHP_FUNCTION(curl_init);
-PHP_FUNCTION(curl_setopt);
-PHP_FUNCTION(curl_setopt_array);
-PHP_FUNCTION(curl_version);
-
-PHP_FUNCTION(curl_multi_add_handle);
-PHP_FUNCTION(curl_multi_close);
-PHP_FUNCTION(curl_multi_exec);
-PHP_FUNCTION(curl_multi_getcontent);
-PHP_FUNCTION(curl_multi_info_read);
-PHP_FUNCTION(curl_multi_init);
-PHP_FUNCTION(curl_multi_remove_handle);
-PHP_FUNCTION(curl_multi_select);
-PHP_FUNCTION(curl_multi_errno);
-
-PHP_FUNCTION(curl_share_close);
-PHP_FUNCTION(curl_share_init);
-PHP_FUNCTION(curl_share_setopt);
-PHP_FUNCTION(curl_share_errno);
-
-PHP_FUNCTION(curl_strerror);
-PHP_FUNCTION(curl_multi_strerror);
-PHP_FUNCTION(curl_share_strerror);
-
-PHP_FUNCTION(curl_reset);
-
-#if LIBCURL_VERSION_NUM >= 0x070f04 /* 7.15.4 */
-PHP_FUNCTION(curl_escape);
-PHP_FUNCTION(curl_unescape);
-
-PHP_FUNCTION(curl_multi_setopt);
-#endif
-
-#if LIBCURL_VERSION_NUM >= 0x071200 /* 7.18.0 */
-PHP_FUNCTION(curl_pause);
-#endif
-
-PHP_FUNCTION(curl_file_create);
-
 
 void _php_curl_multi_close(zend_resource *);
 void _php_curl_share_close(zend_resource *);
@@ -181,6 +135,9 @@ typedef struct {
 	struct _php_curl_error        err;
 	zend_bool                     in_callback;
 	uint32_t*                     clone;
+#if LIBCURL_VERSION_NUM >= 0x073800 /* 7.56.0 */
+	zval                          postfields;
+#endif
 } php_curl;
 
 #define CURLOPT_SAFE_UPLOAD -1

@@ -22,7 +22,6 @@ var_dump(get_class($pi->getBreakIterator()));
 print_r(iterator_to_array($pi));
 var_dump($pi->getRuleStatus());
 ?>
-==DONE==
 --EXPECT--
 string(17) "IntlPartsIterator"
 Array
@@ -36,4 +35,3 @@ Array
     [2] => bar
 )
 int(0)
-==DONE==

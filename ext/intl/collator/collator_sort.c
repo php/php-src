@@ -208,19 +208,11 @@ static int collator_icu_compare_function(zval *result, zval *op1, zval *op2)
 /* {{{ collator_compare_func
  * Taken from PHP7 source (array_data_compare).
  */
-static int collator_compare_func( const void* a, const void* b )
+static int collator_compare_func(Bucket *f, Bucket *s)
 {
-	Bucket *f;
-	Bucket *s;
 	zval result;
-	zval *first;
-	zval *second;
-
-	f = (Bucket *) a;
-	s = (Bucket *) b;
-
-	first = &f->val;
-	second = &s->val;
+	zval *first = &f->val;
+	zval *second = &s->val;
 
 	if( INTL_G(compare_func)( &result, first, second) == FAILURE )
 		return 0;
@@ -301,7 +293,7 @@ static void collator_sort_internal( int renumber, INTERNAL_FUNCTION_PARAMETERS )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Oa/|l",
 		&object, Collator_ce_ptr, &array, &sort_flags ) == FAILURE )
 	{
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */
@@ -392,7 +384,7 @@ PHP_FUNCTION( collator_sort_with_sort_keys )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Oa",
 		&object, Collator_ce_ptr, &array ) == FAILURE )
 	{
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */
@@ -404,7 +396,7 @@ PHP_FUNCTION( collator_sort_with_sort_keys )
 			"Object not initialized", 0 );
 		zend_throw_error(NULL, "Object not initialized");
 
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/*
@@ -555,7 +547,7 @@ PHP_FUNCTION( collator_get_sort_key )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Os",
 		&object, Collator_ce_ptr, &str, &str_len ) == FAILURE )
 	{
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */
@@ -567,7 +559,7 @@ PHP_FUNCTION( collator_get_sort_key )
 			"Object not initialized", 0 );
 		zend_throw_error(NULL, "Object not initialized");
 
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/*

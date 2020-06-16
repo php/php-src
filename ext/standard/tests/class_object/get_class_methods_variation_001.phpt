@@ -10,7 +10,7 @@ Test get_class_methods() function : usage variations  - unexpected types
 
 
 function test_error_handler($err_no, $err_msg, $filename, $linenum) {
-	echo "Error: $err_no - $err_msg\n";
+    echo "Error: $err_no - $err_msg\n";
 }
 set_error_handler('test_error_handler');
 
@@ -83,8 +83,8 @@ echo "Done";
 ?>
 --EXPECT--
 *** Testing get_class_methods() : usage variations ***
-Error: 2 - Undefined variable: undefined_var
-Error: 2 - Undefined variable: unset_var
+Error: 2 - Undefined variable $undefined_var
+Error: 2 - Undefined variable $unset_var
 
 Arg value 0 
 NULL

@@ -27,7 +27,7 @@ chdir($directory);
 ini_set('open_basedir', '.');
 // Delete the existing directory
 if (file_exists($sessions) === TRUE) {
-	@rmdir($sessions);
+    @rmdir($sessions);
 }
 
 var_dump(mkdir($sessions));
@@ -40,9 +40,11 @@ echo "Done";
 ob_end_flush();
 ?>
 --CLEAN--
+<?php
 $directory = __DIR__;
 $sessions = ($directory."/sessions");
 var_dump(rmdir($sessions));
+?>
 --EXPECTF--
 *** Testing session_save_path() : variation ***
 bool(true)

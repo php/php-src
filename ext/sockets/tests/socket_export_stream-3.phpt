@@ -6,7 +6,7 @@ if (!extension_loaded('sockets')) {
 	die('SKIP sockets extension not available.');
 }
 $s = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
-$br = socket_bind($s, '0.0.0.0', 58393);
+$br = @socket_bind($s, '0.0.0.0', 58393);
 if ($br === false)
 	die("SKIP IPv4/port 58393 not available");
 $so = @socket_set_option($s, IPPROTO_IP, MCAST_JOIN_GROUP, array(
@@ -23,8 +23,8 @@ socket_bind($sock, '0.0.0.0', 58393);
 $stream = socket_export_stream($sock);
 var_dump($stream);
 $so = socket_set_option($sock, IPPROTO_IP, MCAST_JOIN_GROUP, array(
-	"group"	=> '224.0.0.23',
-	"interface" => "lo",
+    "group"	=> '224.0.0.23',
+    "interface" => "lo",
 ));
 var_dump($so);
 

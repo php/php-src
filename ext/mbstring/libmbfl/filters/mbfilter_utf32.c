@@ -75,7 +75,8 @@ const struct mbfl_convert_vtbl vtbl_utf32_wchar = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_utf32_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_utf32 = {
@@ -84,7 +85,8 @@ const struct mbfl_convert_vtbl vtbl_wchar_utf32 = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_wchar_utf32be,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_utf32be_wchar = {
@@ -93,7 +95,8 @@ const struct mbfl_convert_vtbl vtbl_utf32be_wchar = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_utf32be_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_utf32be = {
@@ -102,7 +105,8 @@ const struct mbfl_convert_vtbl vtbl_wchar_utf32be = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_wchar_utf32be,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_utf32le_wchar = {
@@ -111,7 +115,8 @@ const struct mbfl_convert_vtbl vtbl_utf32le_wchar = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_utf32le_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_utf32le = {
@@ -120,7 +125,8 @@ const struct mbfl_convert_vtbl vtbl_wchar_utf32le = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_wchar_utf32le,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
@@ -138,7 +144,7 @@ int mbfl_filt_conv_utf32_wchar(int c, mbfl_convert_filter *filter)
 		if (endian) {
 			n = c & 0xff;
 		} else {
-			n = (unsigned) (c & 0xff) << 24;
+			n = (c & 0xffu) << 24;
 		}
 		filter->cache = n;
 		filter->status++;
@@ -163,7 +169,7 @@ int mbfl_filt_conv_utf32_wchar(int c, mbfl_convert_filter *filter)
 		break;
 	default:
 		if (endian) {
-			n = (c & 0xff) << 24;
+			n = (c & 0xffu) << 24;
 		} else {
 			n = c & 0xff;
 		}
@@ -199,7 +205,7 @@ int mbfl_filt_conv_utf32be_wchar(int c, mbfl_convert_filter *filter)
 
 	if (filter->status == 0) {
 		filter->status = 1;
-		n = (c & 0xff) << 24;
+		n = (c & 0xffu) << 24;
 		filter->cache = n;
 	} else if (filter->status == 1) {
 		filter->status = 2;
@@ -260,7 +266,7 @@ int mbfl_filt_conv_utf32le_wchar(int c, mbfl_convert_filter *filter)
 		filter->cache |= n;
 	} else {
 		filter->status = 0;
-		n = ((c & 0xff) << 24) | filter->cache;
+		n = ((c & 0xffu) << 24) | filter->cache;
 		if (n < MBFL_WCSPLANE_UTF32MAX && (n < 0xd800 || n > 0xdfff)) {
 			CK((*filter->output_function)(n, filter->data));
 		} else {

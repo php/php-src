@@ -22,7 +22,7 @@ $files['b'] = 'b';
 $files['c'] = 'c';
 
 foreach ($files as $n => $file) {
-	$phar[$n] = $file;
+    $phar[$n] = $file;
 }
 
 $phar->stopBuffering();
@@ -37,7 +37,6 @@ $a = new Phar($fname2);
 echo $a->getAlias() . "\n";
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
@@ -48,4 +47,3 @@ __HALT_COMPILER();
 hio
 test
 test
-===DONE===

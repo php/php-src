@@ -19,7 +19,6 @@ var_dump( array_diff_uassoc($input_array, $float_indx_array, "strcasecmp") );
 var_dump( array_diff_uassoc($float_indx_array, $input_array, "strcasecmp") );
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_diff_uassoc() : usage variation ***
 
@@ -44,4 +43,3 @@ array(3) {
   [-10]=>
   string(5) "-10.5"
 }
-===DONE===

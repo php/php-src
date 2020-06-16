@@ -25,11 +25,9 @@ var_dump( $finfo );
 unset( $finfo );
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing finfo_close() : basic functionality ***
 resource(%d) of type (file_info)
 bool(true)
 object(finfo)#%d (%d) {
 }
-===DONE===

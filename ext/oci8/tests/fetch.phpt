@@ -22,18 +22,18 @@ oci8_test_sql_execute($c, $stmtarray);
 // Run Test
 
 if (!($s = oci_parse($c, "select * from fetch_tab"))) {
-	die("oci_parse(select) failed!\n");
+    die("oci_parse(select) failed!\n");
 }
 
 if (!oci_execute($s)) {
-	die("oci_execute(select) failed!\n");
+    die("oci_execute(select) failed!\n");
 }
 
-while(ocifetch($s)) {
-		$row = ociresult($s, 1);
-		$row1 = ociresult($s, 2);
-		var_dump($row);
-		var_dump($row1);
+while(oci_fetch($s)) {
+        $row = oci_result($s, 1);
+        $row1 = oci_result($s, 2);
+        var_dump($row);
+        var_dump($row1);
 }
 
 // Cleanup

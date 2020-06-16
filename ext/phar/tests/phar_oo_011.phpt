@@ -22,7 +22,6 @@ echo $phar['hi/f.php'];
 echo "\n";
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/files/phar_oo_011.phar.php');
@@ -32,4 +31,3 @@ __halt_compiler();
 bool(true)
 bool(true)
 hi
-===DONE===

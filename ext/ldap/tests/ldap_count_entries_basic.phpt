@@ -15,7 +15,6 @@ insert_dummy_data($link, $base);
 $result = ldap_search($link, "$base", "(objectclass=person)");
 var_dump(ldap_count_entries($link, $result));
 ?>
-===DONE===
 --CLEAN--
 <?php
 include "connect.inc";
@@ -25,4 +24,3 @@ remove_dummy_data($link, $base);
 ?>
 --EXPECT--
 int(3)
-===DONE===

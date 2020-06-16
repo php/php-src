@@ -28,19 +28,17 @@ $result2 = fread($fp, 5);
 
 echo "\n-- Check if rewinddir() has repositioned the file pointer --\n";
 if ($result1 === $result2) {
-	echo "rewinddir() works on file pointers\n";
+    echo "rewinddir() works on file pointers\n";
 } else {
-	echo "rewinddir() does not work on file pointers\n";
+    echo "rewinddir() does not work on file pointers\n";
 }
 ?>
-===DONE===
 --EXPECTF--
 *** Testing rewinddir() : usage variations ***
 
 -- Open a file using fopen --
 resource(%d) of type (stream)
-%d is not a valid Directory resource
+rewinddir(): Argument #1 ($dir_handle) must be a valid Directory resource
 
 -- Check if rewinddir() has repositioned the file pointer --
 rewinddir() does not work on file pointers
-===DONE===

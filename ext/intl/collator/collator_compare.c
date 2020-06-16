@@ -19,7 +19,6 @@
 
 #include "php_intl.h"
 #include "collator_class.h"
-#include "collator_compare.h"
 #include "intl_convert.h"
 
 /* {{{ proto int Collator::compare( string $str1, string $str2 )
@@ -47,7 +46,7 @@ PHP_FUNCTION( collator_compare )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Oss",
 		&object, Collator_ce_ptr, &str1, &str1_len, &str2, &str2_len ) == FAILURE )
 	{
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */
@@ -59,7 +58,7 @@ PHP_FUNCTION( collator_compare )
 			"Object not initialized", 0 );
 		zend_throw_error(NULL, "Object not initialized");
 
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/*

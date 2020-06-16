@@ -69,12 +69,11 @@ $inputs = array(
 // loop through each element of $inputs to check the behaviour of escapeshellarg()
 $iterator = 1;
 foreach($inputs as $input) {
-	echo "\n-- Iteration $iterator --\n";
-	var_dump(escapeshellarg($input));
-	$iterator++;
+    echo "\n-- Iteration $iterator --\n";
+    var_dump(escapeshellarg($input));
+    $iterator++;
 };
 ?>
-===Done===
 --EXPECT--
 *** Testing escapeshellarg() : usage variations ***
 
@@ -137,4 +136,3 @@ string(2) "''"
 
 -- Iteration 20 --
 string(2) "''"
-===Done===

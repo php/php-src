@@ -45,7 +45,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 		return 0;
 	}
 
-	stream = php_stream_fopen_tmpfile();
+	stream = php_stream_memory_create(TEMP_STREAM_DEFAULT);
 	php_stream_write(stream, (const char *) Data, Size);
 	php_stream_to_zval(stream, &stream_zv);
 

@@ -26,10 +26,6 @@
 #include "php_pdo_pgsql.h"
 #include "php_pdo_pgsql_int.h"
 
-#ifdef HAVE_PG_CONFIG_H
-#include <pg_config.h>
-#endif
-
 /* {{{ pdo_pgsql_functions[] */
 static const zend_function_entry pdo_pgsql_functions[] = {
 	PHP_FE_END
@@ -95,11 +91,12 @@ PHP_MSHUTDOWN_FUNCTION(pdo_pgsql)
  */
 PHP_MINFO_FUNCTION(pdo_pgsql)
 {
+	char buf[16];
+
 	php_info_print_table_start();
 	php_info_print_table_row(2, "PDO Driver for PostgreSQL", "enabled");
-#ifdef HAVE_PG_CONFIG_H
-	php_info_print_table_row(2, "PostgreSQL(libpq) Version", PG_VERSION);
-#endif
+	pdo_libpq_version(buf, sizeof(buf));
+	php_info_print_table_row(2, "PostgreSQL(libpq) Version", buf);
 	php_info_print_table_end();
 }
 /* }}} */

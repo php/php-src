@@ -81,7 +81,7 @@ AC_DEFUN([PHP_DEFINE],[
 dnl
 dnl PHP_SUBST(varname)
 dnl
-dnl Adds variable with it's value into Makefile, e.g.:
+dnl Adds variable with its value into Makefile, e.g.:
 dnl CC = gcc
 dnl
 AC_DEFUN([PHP_SUBST],[
@@ -89,14 +89,14 @@ AC_DEFUN([PHP_SUBST],[
 ])
 
 dnl
-dnl PHP_SUBST_OLD(varname)
+dnl PHP_SUBST_OLD(varname, [VALUE])
 dnl
 dnl Same as PHP_SUBST() but also substitutes all @VARNAME@ instances in every
 dnl file passed to AC_OUTPUT.
 dnl
 AC_DEFUN([PHP_SUBST_OLD],[
-  PHP_SUBST($1)
-  AC_SUBST($1)
+  AC_SUBST($@)
+  PHP_SUBST([$1])
 ])
 
 dnl
@@ -373,6 +373,8 @@ AC_DEFUN([PHP_EVAL_LIBLINE],[
         $2="[$]$2 -pthread"
       else
         PHP_RUN_ONCE(EXTRA_LDFLAGS, [$ac_i], [EXTRA_LDFLAGS="$EXTRA_LDFLAGS $ac_i"])
+        PHP_RUN_ONCE(EXTRA_LDFLAGS_PROGRAM, [$ac_i],
+            [EXTRA_LDFLAGS_PROGRAM="$EXTRA_LDFLAGS_PROGRAM $ac_i"])
       fi
     ;;
     -l*[)]
@@ -766,7 +768,7 @@ dnl PHP_BUILD_SHARED
 dnl
 AC_DEFUN([PHP_BUILD_SHARED],[
   PHP_BUILD_PROGRAM
-  OVERALL_TARGET=libphp[]$PHP_MAJOR_VERSION[.la]
+  OVERALL_TARGET=libphp.la
   php_sapi_module=shared
 
   php_c_pre=$shared_c_pre
@@ -783,7 +785,7 @@ dnl PHP_BUILD_STATIC
 dnl
 AC_DEFUN([PHP_BUILD_STATIC],[
   PHP_BUILD_PROGRAM
-  OVERALL_TARGET=libphp[]$PHP_MAJOR_VERSION[.la]
+  OVERALL_TARGET=libphp.la
   php_sapi_module=static
 ])
 
@@ -792,7 +794,7 @@ dnl PHP_BUILD_BUNDLE
 dnl
 AC_DEFUN([PHP_BUILD_BUNDLE],[
   PHP_BUILD_PROGRAM
-  OVERALL_TARGET=libs/libphp[]$PHP_MAJOR_VERSION[.bundle]
+  OVERALL_TARGET=libs/libphp.bundle
   php_sapi_module=static
 ])
 
@@ -849,7 +851,7 @@ AC_DEFUN([PHP_SHARED_MODULE],[
 	\$(LIBTOOL) --mode=install cp $3/$1.$suffix \$(phplibdir)
 
 $3/$1.$suffix: \$($2) \$(translit($1,a-z_-,A-Z__)_SHARED_DEPENDENCIES)
-	\$(LIBTOOL) --mode=link --tag=disable-static ifelse($4,,[\$(CC)],[\$(CXX)]) \$(COMMON_FLAGS) \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(LDFLAGS) $additional_flags -o [\$]@ -export-dynamic -avoid-version -prefer-pic -module -rpath \$(phplibdir) \$(EXTRA_LDFLAGS) \$($2) \$(translit($1,a-z_-,A-Z__)_SHARED_LIBADD)
+	\$(LIBTOOL) --mode=link ifelse($4,,[\$(CC)],[\$(CXX)]) -shared \$(COMMON_FLAGS) \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(LDFLAGS) $additional_flags -o [\$]@ -export-dynamic -avoid-version -prefer-pic -module -rpath \$(phplibdir) \$(EXTRA_LDFLAGS) \$($2) \$(translit($1,a-z_-,A-Z__)_SHARED_LIBADD)
 
 EOF
 ])
@@ -1042,9 +1044,7 @@ AC_DEFUN([_PHP_CHECK_SIZEOF], [
     AC_RUN_IFELSE([AC_LANG_SOURCE([[#include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
-#ifdef HAVE_INTTYPES_H
 #include <inttypes.h>
-#endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -1382,7 +1382,7 @@ int main(void) {
   ac_cv_ebcdic=no
 ])])
   if test "$ac_cv_ebcdic" = "yes"; then
-    AC_DEFINE(CHARSET_EBCDIC,1, [Define if system uses EBCDIC])
+    AC_MSG_ERROR([PHP does not support EBCDIC targets])
   fi
 ])
 
@@ -1734,7 +1734,7 @@ dnl Search for the sendmail binary.
 dnl
 AC_DEFUN([PHP_PROG_SENDMAIL], [
   PHP_ALT_PATH=/usr/bin:/usr/sbin:/usr/etc:/etc:/usr/ucblib:/usr/lib
-  AC_PATH_PROG(PROG_SENDMAIL, sendmail,[], $PATH:$PHP_ALT_PATH)
+  AC_PATH_PROG(PROG_SENDMAIL, sendmail, /usr/sbin/sendmail, $PATH:$PHP_ALT_PATH)
   PHP_SUBST(PROG_SENDMAIL)
 ])
 
@@ -1784,6 +1784,7 @@ AC_DEFUN([PHP_PROG_BISON], [
     AC_MSG_CHECKING([for bison version])
 
     php_bison_version=$($YACC --version 2> /dev/null | grep 'GNU Bison' | cut -d ' ' -f 4 | tr -d a-z)
+    [ -z "$php_bison_version" ] && php_bison_version=0.0.0
     ac_IFS=$IFS; IFS="."
     set $php_bison_version
     IFS=$ac_IFS
@@ -1813,6 +1814,7 @@ AC_DEFUN([PHP_PROG_BISON], [
     done
 
     if test "$php_bison_check" != "invalid"; then
+      PHP_SUBST_OLD([YFLAGS], [-Wall])
       AC_MSG_RESULT([$php_bison_version (ok)])
     else
       AC_MSG_RESULT([$php_bison_version])
@@ -1847,6 +1849,7 @@ AC_DEFUN([PHP_PROG_RE2C],[
     AC_MSG_CHECKING([for re2c version])
 
     php_re2c_version=$($RE2C --version | cut -d ' ' -f 2 2>/dev/null)
+    [ -z "$php_re2c_version" ] && php_re2c_version=0.0.0
     ac_IFS=$IFS; IFS="."
     set $php_re2c_version
     IFS=$ac_IFS
@@ -1918,13 +1921,7 @@ dnl
 AC_DEFUN([PHP_SETUP_OPENSSL],[
   found_openssl=no
 
-  dnl Empty variable means 'no'.
-  test -z "$PHP_OPENSSL" && PHP_OPENSSL=no
-  test -z "$PHP_IMAP_SSL" && PHP_IMAP_SSL=no
-
-  if test "$PHP_OPENSSL" != "no"; then
-    PKG_CHECK_MODULES([OPENSSL], [openssl >= 1.0.1], [found_openssl=yes])
-  fi
+  PKG_CHECK_MODULES([OPENSSL], [openssl >= 1.0.1], [found_openssl=yes])
 
   if test "$found_openssl" = "yes"; then
     PHP_EVAL_LIBLINE($OPENSSL_LIBS, $1)
@@ -2423,10 +2420,9 @@ AC_DEFUN([PHP_CHECK_STDINT_TYPES], [
   AC_CHECK_SIZEOF([long])
   AC_CHECK_SIZEOF([long long])
   AC_CHECK_SIZEOF([size_t])
+  AC_CHECK_SIZEOF([off_t])
   AC_CHECK_TYPES([int8, int16, int32, int64, int8_t, int16_t, int32_t, int64_t, uint8, uint16, uint32, uint64, uint8_t, uint16_t, uint32_t, uint64_t, u_int8_t, u_int16_t, u_int32_t, u_int64_t], [], [], [
-#if HAVE_STDINT_H
-# include <stdint.h>
-#endif
+#include <stdint.h>
 #if HAVE_SYS_TYPES_H
 # include <sys/types.h>
 #endif
@@ -2673,30 +2669,6 @@ AC_DEFUN([PHP_CHECK_BUILTIN_CPU_SUPPORTS], [
 
   AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_CPU_SUPPORTS],
    [$have_builtin_cpu_supports], [Whether the compiler supports __builtin_cpu_supports])
-])
-
-dnl
-dnl PHP_CHECK_CPU_SUPPORTS
-dnl
-AC_DEFUN([PHP_CHECK_CPU_SUPPORTS], [
-  AC_REQUIRE([PHP_CHECK_BUILTIN_CPU_INIT])
-  AC_REQUIRE([PHP_CHECK_BUILTIN_CPU_SUPPORTS])
-  have_ext_instructions=0
-  if test $have_builtin_cpu_supports = 1; then
-    AC_MSG_CHECKING([for $1 instructions supports])
-    AC_RUN_IFELSE([AC_LANG_SOURCE([[
-int main() {
-	return __builtin_cpu_supports("$1")? 0 : 1;
-}
-    ]])], [
-      have_ext_instructions=1
-      AC_MSG_RESULT([yes])
-    ], [
-      AC_MSG_RESULT([no])
-    ], [AC_MSG_RESULT([no])])
-  fi
-  AC_DEFINE_UNQUOTED(AS_TR_CPP([PHP_HAVE_$1_INSTRUCTIONS]),
-   [$have_ext_instructions], [Whether the compiler supports $1 instructions])
 ])
 
 dnl

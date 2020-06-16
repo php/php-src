@@ -36,15 +36,14 @@ class myIterator implements Iterator
     }
 }
 try {
-	chdir(__DIR__);
-	$phar = new Phar(__DIR__ . '/buildfromiterator.phar.zip');
-	var_dump($phar->buildFromIterator(new myIterator(array('a' => basename(__FILE__, 'php') . '/oopsie/there.phpt'))));
+    chdir(__DIR__);
+    $phar = new Phar(__DIR__ . '/buildfromiterator.phar.zip');
+    var_dump($phar->buildFromIterator(new myIterator(array('a' => basename(__FILE__, 'php') . '/oopsie/there.phpt'))));
 } catch (Exception $e) {
-	var_dump(get_class($e));
-	echo $e->getMessage() . "\n";
+    var_dump(get_class($e));
+    echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/buildfromiterator.phar.zip');
@@ -57,4 +56,3 @@ current
 key
 %s(24) "UnexpectedValueException"
 Iterator myIterator returned a file that could not be opened "phar_buildfromiterator7./oopsie/there.phpt"
-===DONE===

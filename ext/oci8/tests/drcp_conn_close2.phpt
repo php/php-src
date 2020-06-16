@@ -14,7 +14,7 @@ require __DIR__."/details.inc";
 // Close the connection
 // Open another connection
 // With oci_close() the connection is released to the pool and hence the
-// the second conneciton will be different
+// the second connection will be different
 
 
 // OCI_CONNECT
@@ -31,9 +31,9 @@ oci_close($conn2);
 // Compare the resource numbers
 
 if ($rn1 === $rn2)
-	echo "Both connections share a resource : NOT OK\n";
+    echo "Both connections share a resource : NOT OK\n";
 else
-	echo "Both connections are different : OK\n";
+    echo "Both connections are different : OK\n";
 
 echo "Done\n";
 

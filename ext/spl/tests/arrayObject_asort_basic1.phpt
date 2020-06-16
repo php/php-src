@@ -24,7 +24,6 @@ var_dump($ao2);
 var_dump($ao2->asort(SORT_NUMERIC));
 var_dump($ao2);
 ?>
-===DONE===
 --EXPECTF--
 *** Testing ArrayObject::asort() : basic functionality ***
 bool(true)
@@ -39,7 +38,7 @@ object(ArrayObject)#%d (1) {
     int(4)
   }
 }
-asort() expects parameter 2 to be int, string given
+asort(): Argument #2 ($sort_flags) must be of type int, string given
 object(ArrayObject)#%d (1) {
   ["storage":"ArrayObject":private]=>
   array(3) {
@@ -63,4 +62,3 @@ object(ArrayObject)#%d (1) {
     int(4)
   }
 }
-===DONE===

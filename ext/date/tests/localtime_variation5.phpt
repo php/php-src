@@ -19,18 +19,17 @@ $is_associative = true;
 $inputs = array(
 
       'Hexa-decimal 0' => 0x0,
-	  'Hexa-decimal 10' => 0xA,
-	  'Hexa-decimal -10' => -0XA
+      'Hexa-decimal 10' => 0xA,
+      'Hexa-decimal -10' => -0XA
 );
 
 foreach($inputs as $key =>$value) {
       echo "\n--$key--\n";
-	  var_dump( localtime($value) );
-	  var_dump( localtime($value, $is_associative) );
+      var_dump( localtime($value) );
+      var_dump( localtime($value, $is_associative) );
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing localtime() : usage variation ***
 
@@ -159,4 +158,3 @@ array(9) {
   ["tm_isdst"]=>
   int(0)
 }
-===DONE===

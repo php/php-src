@@ -115,7 +115,6 @@
 
 
 static const mbfl_encoding *mbfl_encoding_ptr_list[] = {
-	&mbfl_encoding_pass,
 	&mbfl_encoding_wchar,
 	&mbfl_encoding_byte2be,
 	&mbfl_encoding_byte2le,

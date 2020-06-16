@@ -171,14 +171,8 @@ ZEND_API int zend_copy_ini_directives(void) /* {{{ */
 /* }}} */
 #endif
 
-static int ini_key_compare(const void *a, const void *b) /* {{{ */
+static int ini_key_compare(Bucket *f, Bucket *s) /* {{{ */
 {
-	const Bucket *f;
-	const Bucket *s;
-
-	f = (const Bucket *) a;
-	s = (const Bucket *) b;
-
 	if (!f->key && !s->key) { /* both numeric */
 		if (f->h > s->h) {
 			return -1;
@@ -341,15 +335,17 @@ ZEND_API int zend_alter_ini_entry_ex(zend_string *name, zend_string *new_value, 
 		}
 	}
 
-	if (!EG(modified_ini_directives)) {
-		ALLOC_HASHTABLE(EG(modified_ini_directives));
-		zend_hash_init(EG(modified_ini_directives), 8, NULL, NULL, 0);
-	}
-	if (!modified) {
-		ini_entry->orig_value = ini_entry->value;
-		ini_entry->orig_modifiable = modifiable;
-		ini_entry->modified = 1;
-		zend_hash_add_ptr(EG(modified_ini_directives), ini_entry->name, ini_entry);
+	if (ini_entry->modifiable != ZEND_INI_SYSTEM) {
+		if (!EG(modified_ini_directives)) {
+			ALLOC_HASHTABLE(EG(modified_ini_directives));
+			zend_hash_init(EG(modified_ini_directives), 8, NULL, NULL, 0);
+		}
+		if (!modified) {
+			ini_entry->orig_value = ini_entry->value;
+			ini_entry->orig_modifiable = modifiable;
+			ini_entry->modified = 1;
+			zend_hash_add_ptr(EG(modified_ini_directives), ini_entry->name, ini_entry);
+		}
 	}
 
 	duplicate = zend_string_copy(new_value);
@@ -390,7 +386,7 @@ ZEND_API int zend_restore_ini_entry(zend_string *name, int stage) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int zend_ini_register_displayer(char *name, uint32_t name_length, void (*displayer)(zend_ini_entry *ini_entry, int type)) /* {{{ */
+ZEND_API int zend_ini_register_displayer(const char *name, uint32_t name_length, void (*displayer)(zend_ini_entry *ini_entry, int type)) /* {{{ */
 {
 	zend_ini_entry *ini_entry;
 
@@ -408,7 +404,7 @@ ZEND_API int zend_ini_register_displayer(char *name, uint32_t name_length, void 
  * Data retrieval
  */
 
-ZEND_API zend_long zend_ini_long(char *name, size_t name_length, int orig) /* {{{ */
+ZEND_API zend_long zend_ini_long(const char *name, size_t name_length, int orig) /* {{{ */
 {
 	zend_ini_entry *ini_entry;
 
@@ -425,7 +421,7 @@ ZEND_API zend_long zend_ini_long(char *name, size_t name_length, int orig) /* {{
 }
 /* }}} */
 
-ZEND_API double zend_ini_double(char *name, size_t name_length, int orig) /* {{{ */
+ZEND_API double zend_ini_double(const char *name, size_t name_length, int orig) /* {{{ */
 {
 	zend_ini_entry *ini_entry;
 
@@ -442,7 +438,7 @@ ZEND_API double zend_ini_double(char *name, size_t name_length, int orig) /* {{{
 }
 /* }}} */
 
-ZEND_API char *zend_ini_string_ex(char *name, size_t name_length, int orig, zend_bool *exists) /* {{{ */
+ZEND_API char *zend_ini_string_ex(const char *name, size_t name_length, int orig, zend_bool *exists) /* {{{ */
 {
 	zend_ini_entry *ini_entry;
 
@@ -466,7 +462,7 @@ ZEND_API char *zend_ini_string_ex(char *name, size_t name_length, int orig, zend
 }
 /* }}} */
 
-ZEND_API char *zend_ini_string(char *name, size_t name_length, int orig) /* {{{ */
+ZEND_API char *zend_ini_string(const char *name, size_t name_length, int orig) /* {{{ */
 {
 	zend_bool exists = 1;
 	char *return_value;
@@ -584,17 +580,7 @@ ZEND_INI_DISP(display_link_numbers) /* {{{ */
 /* Standard message handlers */
 ZEND_API ZEND_INI_MH(OnUpdateBool) /* {{{ */
 {
-	zend_bool *p;
-#ifndef ZTS
-	char *base = (char *) mh_arg2;
-#else
-	char *base;
-
-	base = (char *) ts_resource(*((int *) mh_arg2));
-#endif
-
-	p = (zend_bool *) (base+(size_t) mh_arg1);
-
+	zend_bool *p = (zend_bool *) ZEND_INI_GET_ADDR();
 	*p = zend_ini_parse_bool(new_value);
 	return SUCCESS;
 }
@@ -602,17 +588,7 @@ ZEND_API ZEND_INI_MH(OnUpdateBool) /* {{{ */
 
 ZEND_API ZEND_INI_MH(OnUpdateLong) /* {{{ */
 {
-	zend_long *p;
-#ifndef ZTS
-	char *base = (char *) mh_arg2;
-#else
-	char *base;
-
-	base = (char *) ts_resource(*((int *) mh_arg2));
-#endif
-
-	p = (zend_long *) (base+(size_t) mh_arg1);
-
+	zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
 	*p = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
 	return SUCCESS;
 }
@@ -620,21 +596,12 @@ ZEND_API ZEND_INI_MH(OnUpdateLong) /* {{{ */
 
 ZEND_API ZEND_INI_MH(OnUpdateLongGEZero) /* {{{ */
 {
-	zend_long *p, tmp;
-#ifndef ZTS
-	char *base = (char *) mh_arg2;
-#else
-	char *base;
-
-	base = (char *) ts_resource(*((int *) mh_arg2));
-#endif
-
-	tmp = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
+	zend_long tmp = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
 	if (tmp < 0) {
 		return FAILURE;
 	}
 
-	p = (zend_long *) (base+(size_t) mh_arg1);
+	zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
 	*p = tmp;
 
 	return SUCCESS;
@@ -643,17 +610,7 @@ ZEND_API ZEND_INI_MH(OnUpdateLongGEZero) /* {{{ */
 
 ZEND_API ZEND_INI_MH(OnUpdateReal) /* {{{ */
 {
-	double *p;
-#ifndef ZTS
-	char *base = (char *) mh_arg2;
-#else
-	char *base;
-
-	base = (char *) ts_resource(*((int *) mh_arg2));
-#endif
-
-	p = (double *) (base+(size_t) mh_arg1);
-
+	double *p = (double *) ZEND_INI_GET_ADDR();
 	*p = zend_strtod(ZSTR_VAL(new_value), NULL);
 	return SUCCESS;
 }
@@ -661,17 +618,7 @@ ZEND_API ZEND_INI_MH(OnUpdateReal) /* {{{ */
 
 ZEND_API ZEND_INI_MH(OnUpdateString) /* {{{ */
 {
-	char **p;
-#ifndef ZTS
-	char *base = (char *) mh_arg2;
-#else
-	char *base;
-
-	base = (char *) ts_resource(*((int *) mh_arg2));
-#endif
-
-	p = (char **) (base+(size_t) mh_arg1);
-
+	char **p = (char **) ZEND_INI_GET_ADDR();
 	*p = new_value ? ZSTR_VAL(new_value) : NULL;
 	return SUCCESS;
 }
@@ -679,21 +626,11 @@ ZEND_API ZEND_INI_MH(OnUpdateString) /* {{{ */
 
 ZEND_API ZEND_INI_MH(OnUpdateStringUnempty) /* {{{ */
 {
-	char **p;
-#ifndef ZTS
-	char *base = (char *) mh_arg2;
-#else
-	char *base;
-
-	base = (char *) ts_resource(*((int *) mh_arg2));
-#endif
-
 	if (new_value && !ZSTR_VAL(new_value)[0]) {
 		return FAILURE;
 	}
 
-	p = (char **) (base+(size_t) mh_arg1);
-
+	char **p = (char **) ZEND_INI_GET_ADDR();
 	*p = new_value ? ZSTR_VAL(new_value) : NULL;
 	return SUCCESS;
 }

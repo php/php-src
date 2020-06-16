@@ -75,16 +75,16 @@ $(BUILD_DIR)\$(PHPDLL).def: $(PHP_DLL_DEF_SOURCES)
 	type $(PHP_DLL_DEF_SOURCES) > $(BUILD_DIR)\$(PHPDLL).def
 
 Zend\zend_ini_parser.c Zend\zend_ini_parser.h: Zend\zend_ini_parser.y
-	$(BISON) --output=Zend/zend_ini_parser.c -v -d -p ini_ Zend/zend_ini_parser.y
+	$(BISON) --output=Zend/zend_ini_parser.c -v -d Zend/zend_ini_parser.y
 
 Zend\zend_language_parser.c Zend\zend_language_parser.h: Zend\zend_language_parser.y
-	$(BISON) --output=Zend/zend_language_parser.c -v -d -p zend Zend/zend_language_parser.y
+	$(BISON) --output=Zend/zend_language_parser.c -v -d Zend/zend_language_parser.y
 	@if "$(SED)" neq "" $(SED) -i "s,^int zendparse\(.*\),ZEND_API int zendparse\1,g" Zend/zend_language_parser.c
 	@if "$(SED)" neq "" $(SED) -i "s,^int zendparse\(.*\),ZEND_API int zendparse\1,g" Zend/zend_language_parser.h
 	@if "$(SED)" neq "" $(SED) -i "s,^#ifndef YYTOKENTYPE,#include \"zend.h\"\n#ifndef YYTOKENTYPE,g" Zend/zend_language_parser.h
 
 sapi\phpdbg\phpdbg_parser.c sapi\phpdbg\phpdbg_parser.h: sapi\phpdbg\phpdbg_parser.y
-	$(BISON) --output=sapi/phpdbg/phpdbg_parser.c -v -d -p phpdbg_ sapi/phpdbg/phpdbg_parser.y
+	$(BISON) --output=sapi/phpdbg/phpdbg_parser.c -v -d sapi/phpdbg/phpdbg_parser.y
 
 !if $(RE2C) != ""
 Zend\zend_ini_scanner.c: Zend\zend_ini_scanner.l
@@ -237,6 +237,7 @@ build-devel: build-headers build-lib
 	@if not exist $(BUILD_DIR_DEV)\script mkdir $(BUILD_DIR_DEV)\script >nul
 	@if not exist $(BUILD_DIR_DEV)\build mkdir $(BUILD_DIR_DEV)\build >nul
 	@copy run-tests.php $(BUILD_DIR_DEV)\script\ /y >nul
+	@copy build\gen_stub.php $(BUILD_DIR_DEV)\build\ /y >nul
 	@copy win32\build\confutils.js $(BUILD_DIR_DEV)\script\ /y >nul
 	@copy win32\build\configure.tail $(BUILD_DIR_DEV)\script\ /y >nul
 	@copy win32\build\config.w32.phpize.in $(BUILD_DIR_DEV)\script\ /y >nul

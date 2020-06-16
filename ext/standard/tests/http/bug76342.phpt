@@ -31,5 +31,5 @@ http_server_kill($pid);
 ?>
 DONE
 --EXPECTF--
-Warning: file_get_contents(http://127.0.0.1:12342/): failed to open stream: HTTP request failed! in %s on line %d
+Warning: file_get_contents(http://127.0.0.1:12342/): Failed to open stream: HTTP request failed! in %s on line %d
 DONE

@@ -32,12 +32,11 @@ mkdir($dir);
 $ints = array (PHP_INT_MAX, -PHP_INT_MAX, 0);
 
 foreach($ints as $sorting_order) {
-	var_dump( scandir($dir, $sorting_order) );
+    var_dump( scandir($dir, $sorting_order) );
 }
 
 delete_files($dir, 2, "私はガラスを食べられますfile");
 ?>
-===DONE===
 --CLEAN--
 <?php
 $dir = __DIR__ . '/私はガラスを食べられますscandir_variation9';
@@ -75,4 +74,3 @@ array(4) {
   [3]=>
   string(45) "私はガラスを食べられますfile2.tmp"
 }
-===DONE===

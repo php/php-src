@@ -20,20 +20,8 @@
 #endif
 
 #include "php.h"
-#if HAVE_LIBXML && HAVE_DOM
+#if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
-
-
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_nodelist_item, 0, 0, 1)
-	ZEND_ARG_INFO(0, index)
-ZEND_END_ARG_INFO();
-/* }}} */
-
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_nodelist_count, 0, 0, 0)
-ZEND_END_ARG_INFO();
-/* }}} */
 
 /*
 * class DOMNodeList
@@ -41,13 +29,6 @@ ZEND_END_ARG_INFO();
 * URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-536297177
 * Since:
 */
-
-const zend_function_entry php_dom_nodelist_class_functions[] = {
-	PHP_FALIAS(item, dom_nodelist_item, arginfo_dom_nodelist_item)
-	PHP_FALIAS(count, dom_nodelist_count, arginfo_dom_nodelist_count)
-	PHP_FE_END
-};
-
 
 /* {{{ length	int
 readonly=yes
@@ -102,14 +83,14 @@ int dom_nodelist_length_read(dom_object *obj, zval *retval)
 
 /* {{{ proto int|bool dom_nodelist_count();
 */
-PHP_FUNCTION(dom_nodelist_count)
+PHP_METHOD(DOMNodeList, count)
 {
 	zval *id;
 	dom_object *intern;
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_DOMOBJ_P(id);
@@ -125,7 +106,7 @@ PHP_FUNCTION(dom_nodelist_count)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-844377136
 Since:
 */
-PHP_FUNCTION(dom_nodelist_item)
+PHP_METHOD(DOMNodeList, item)
 {
 	zval *id;
 	zend_long index;
@@ -139,7 +120,7 @@ PHP_FUNCTION(dom_nodelist_item)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &index) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (index >= 0) {

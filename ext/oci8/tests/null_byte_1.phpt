@@ -32,15 +32,12 @@ $r = $lob->export("/tmp/abc\0def");
 var_dump($r);
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 Test 1: Import
 
-Warning: OCI-Lob::savefile() expects parameter 1 to be a valid path, string given in %snull_byte_1.php on line %d
+Warning: OCI-Lob::savefile(): Argument #1 ($function) must be a valid path, string given in %snull_byte_1.php on line %d
 NULL
 Test 2: Export
 
-Warning: OCI-Lob::export() expects parameter 1 to be a valid path, string given in %snull_byte_1.php on line %d
+Warning: OCI-Lob::export(): Argument #1 ($function) must be a valid path, string given in %snull_byte_1.php on line %d
 NULL
-===DONE===

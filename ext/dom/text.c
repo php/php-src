@@ -20,22 +20,9 @@
 #endif
 
 #include "php.h"
-#if HAVE_LIBXML && HAVE_DOM
+#if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
 #include "dom_ce.h"
-
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_text_split_text, 0, 0, 1)
-	ZEND_ARG_INFO(0, offset)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_text_is_whitespace_in_element_content, 0, 0, 0)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_text_construct, 0, 0, 0)
-	ZEND_ARG_INFO(0, value)
-ZEND_END_ARG_INFO();
-/* }}} */
 
 /*
 * class DOMText extends DOMCharacterData
@@ -44,24 +31,16 @@ ZEND_END_ARG_INFO();
 * Since:
 */
 
-const zend_function_entry php_dom_text_class_functions[] = {
-	PHP_FALIAS(splitText, dom_text_split_text, arginfo_dom_text_split_text)
-	PHP_FALIAS(isWhitespaceInElementContent, dom_text_is_whitespace_in_element_content, arginfo_dom_text_is_whitespace_in_element_content)
-	PHP_FALIAS(isElementContentWhitespace, dom_text_is_whitespace_in_element_content, arginfo_dom_text_is_whitespace_in_element_content)
-	PHP_ME(domtext, __construct, arginfo_dom_text_construct, ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};
-
 /* {{{ proto DOMText::__construct([string value]); */
-PHP_METHOD(domtext, __construct)
+PHP_METHOD(DOMText, __construct)
 {
 	xmlNodePtr nodep = NULL, oldnode = NULL;
 	dom_object *intern;
 	char *value = NULL;
 	size_t value_len;
 
-	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "|s", &value, &value_len) == FAILURE) {
-		return;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s", &value, &value_len) == FAILURE) {
+		RETURN_THROWS();
 	}
 
 	nodep = xmlNewText((xmlChar *) value);
@@ -126,7 +105,7 @@ int dom_text_whole_text_read(dom_object *obj, zval *retval)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-38853C1D
 Since:
 */
-PHP_FUNCTION(dom_text_split_text)
+PHP_METHOD(DOMText, splitText)
 {
 	zval       *id;
 	xmlChar    *cur;
@@ -140,7 +119,7 @@ PHP_FUNCTION(dom_text_split_text)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &offset) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	DOM_GET_OBJ(node, id, xmlNodePtr, intern);
 
@@ -188,7 +167,7 @@ PHP_FUNCTION(dom_text_split_text)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Text3-isWhitespaceInElementContent
 Since: DOM Level 3
 */
-PHP_FUNCTION(dom_text_is_whitespace_in_element_content)
+PHP_METHOD(DOMText, isWhitespaceInElementContent)
 {
 	zval       *id;
 	xmlNodePtr  node;
@@ -196,7 +175,7 @@ PHP_FUNCTION(dom_text_is_whitespace_in_element_content)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	DOM_GET_OBJ(node, id, xmlNodePtr, intern);
 

@@ -20,7 +20,7 @@ $input = array('English' => array('one' => 1, 'two' => 2, 'three' => 3),
 echo "\n-- Pass a two-dimensional array as \$input argument --\n";
 var_dump(array_change_key_case($input, CASE_UPPER));
 
-echo "\n-- Pass a sub-arry as \$input argument --\n";
+echo "\n-- Pass a sub-array as \$input argument --\n";
 var_dump(array_change_key_case($input['English'], CASE_UPPER));
 
 echo "Done";
@@ -59,7 +59,7 @@ array(3) {
   }
 }
 
--- Pass a sub-arry as $input argument --
+-- Pass a sub-array as $input argument --
 array(3) {
   ["ONE"]=>
   int(1)

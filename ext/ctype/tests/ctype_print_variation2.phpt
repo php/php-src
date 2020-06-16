@@ -19,14 +19,13 @@ echo "*** Testing ctype_print() : usage variations ***\n";
 $orig = setlocale(LC_CTYPE, "C");
 
 for ($i = 0; $i < 256; $i++) {
-	if (ctype_print($i)) {
-		echo "character code $i is a printable character\n";
-	}
+    if (ctype_print($i)) {
+        echo "character code $i is a printable character\n";
+    }
 }
 
 setlocale(LC_CTYPE, $orig);
 ?>
-===DONE===
 --EXPECT--
 *** Testing ctype_print() : usage variations ***
 character code 32 is a printable character
@@ -124,4 +123,3 @@ character code 123 is a printable character
 character code 124 is a printable character
 character code 125 is a printable character
 character code 126 is a printable character
-===DONE===

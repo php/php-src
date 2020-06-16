@@ -15,13 +15,13 @@ $array2 = array("a" => "green", "yellow", "red");
 // define some class with method
 class MyClass
 {
-	static function static_compare_func($a, $b) {
-		return strcasecmp($a, $b);
-	}
+    static function static_compare_func($a, $b) {
+        return strcasecmp($a, $b);
+    }
 
-	public function class_compare_func($a, $b) {
-		return strcasecmp($a, $b);
-	}
+    public function class_compare_func($a, $b) {
+        return strcasecmp($a, $b);
+    }
 
 }
 
@@ -33,7 +33,6 @@ echo "\n-- Testing array_intersect_uassoc() function using class with regular me
 $obj = new MyClass();
 var_dump( array_intersect_uassoc($array1, $array2, array($obj,'class_compare_func')) );
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_intersect_uassoc() : usage variation ***
 
@@ -52,4 +51,3 @@ array(1) {
   ["a"]=>
   string(5) "green"
 }
-===DONE===

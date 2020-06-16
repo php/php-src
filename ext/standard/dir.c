@@ -23,6 +23,7 @@
 #include "php_string.h"
 #include "php_scandir.h"
 #include "basic_functions.h"
+#include "dir_arginfo.h"
 
 #if HAVE_UNISTD_H
 #include <unistd.h>
@@ -67,35 +68,24 @@ static zend_class_entry *dir_class_entry_ptr;
 		if (myself) { \
 			if ((tmp = zend_hash_str_find(Z_OBJPROP_P(myself), "handle", sizeof("handle")-1)) == NULL) { \
 				zend_throw_error(NULL, "Unable to find my handle property"); \
-				return; \
+				RETURN_THROWS(); \
 			} \
 			if ((dirp = (php_stream *)zend_fetch_resource_ex(tmp, "Directory", php_file_le_stream())) == NULL) { \
-				return; \
+				RETURN_THROWS(); \
 			} \
 		} else { \
-			if (!DIRG(default_dir) || \
-				(dirp = (php_stream *)zend_fetch_resource(DIRG(default_dir), "Directory", php_file_le_stream())) == NULL) { \
-				return; \
+			if (!DIRG(default_dir)) { \
+				zend_type_error("No resource supplied"); \
+				RETURN_THROWS(); \
+			} else if ((dirp = (php_stream *)zend_fetch_resource(DIRG(default_dir), "Directory", php_file_le_stream())) == NULL) { \
+				RETURN_THROWS(); \
 			} \
 		} \
 	} else { \
 		if ((dirp = (php_stream *)zend_fetch_resource(Z_RES_P(id), "Directory", php_file_le_stream())) == NULL) { \
-			return; \
+			RETURN_THROWS(); \
 		} \
 	}
-
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dir, 0, 0, 0)
-	ZEND_ARG_INFO(0, dir_handle)
-ZEND_END_ARG_INFO()
-/* }}} */
-
-static const zend_function_entry php_dir_class_functions[] = {
-	PHP_FALIAS(close,	closedir,		arginfo_dir)
-	PHP_FALIAS(rewind,	rewinddir,		arginfo_dir)
-	PHP_NAMED_FE(read,  php_if_readdir, arginfo_dir)
-	PHP_FE_END
-};
 
 
 static void php_set_default_dir(zend_resource *res)
@@ -122,7 +112,7 @@ PHP_MINIT_FUNCTION(dir)
 	static char dirsep_str[2], pathsep_str[2];
 	zend_class_entry dir_class_entry;
 
-	INIT_CLASS_ENTRY(dir_class_entry, "Directory", php_dir_class_functions);
+	INIT_CLASS_ENTRY(dir_class_entry, "Directory", class_Directory_methods);
 	dir_class_entry_ptr = zend_register_internal_class(&dir_class_entry);
 
 #ifdef ZTS
@@ -264,8 +254,8 @@ PHP_FUNCTION(closedir)
 	FETCH_DIRP();
 
 	if (!(dirp->flags & PHP_STREAM_FLAG_IS_DIR)) {
-		zend_type_error("%d is not a valid Directory resource", dirp->res->handle);
-		return;
+		zend_argument_type_error(1, "must be a valid Directory resource");
+		RETURN_THROWS();
 	}
 
 	res = dirp->res;
@@ -352,9 +342,7 @@ PHP_FUNCTION(getcwd)
 	char path[MAXPATHLEN];
 	char *ret=NULL;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 #if HAVE_GETCWD
 	ret = VCWD_GETCWD(path, MAXPATHLEN);
@@ -380,8 +368,8 @@ PHP_FUNCTION(rewinddir)
 	FETCH_DIRP();
 
 	if (!(dirp->flags & PHP_STREAM_FLAG_IS_DIR)) {
-		zend_type_error("%d is not a valid Directory resource", dirp->res->handle);
-		return;
+		zend_argument_type_error(1, "must be a valid Directory resource");
+		RETURN_THROWS();
 	}
 
 	php_stream_rewinddir(dirp);
@@ -390,7 +378,7 @@ PHP_FUNCTION(rewinddir)
 
 /* {{{ proto string|false readdir([resource dir_handle])
    Read directory entry from dir_handle */
-PHP_NAMED_FUNCTION(php_if_readdir)
+PHP_FUNCTION(readdir)
 {
 	zval *id = NULL, *tmp, *myself;
 	php_stream *dirp;
@@ -399,8 +387,8 @@ PHP_NAMED_FUNCTION(php_if_readdir)
 	FETCH_DIRP();
 
 	if (!(dirp->flags & PHP_STREAM_FLAG_IS_DIR)) {
-		zend_type_error("%d is not a valid Directory resource", dirp->res->handle);
-		return;
+		zend_argument_type_error(1, "must be a valid Directory resource");
+		RETURN_THROWS();
 	}
 
 	if (php_stream_readdir(dirp, &entry)) {
@@ -564,8 +552,8 @@ PHP_FUNCTION(scandir)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (dirn_len < 1) {
-		zend_throw_error(NULL, "Directory name cannot be empty");
-		return;
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
 	}
 
 	if (zcontext) {

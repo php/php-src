@@ -32,7 +32,6 @@ include 'skipif.inc';
 
   var_dump( $curl_content );
 ?>
-===DONE===
 --EXPECT--
 *** Testing curl sending through GET an POST ***
 string(203) "array(2) {
@@ -50,4 +49,3 @@ array(3) {
   string(8) "John Doe"
 }
 "
-===DONE===

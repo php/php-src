@@ -12,11 +12,11 @@ require __DIR__.'/connect.inc';
 
 function f($conn)
 {
-	$sql =  "begin :p_clob := 'lob string'; end;";
-	$stid = oci_parse($conn, $sql);
-	$clob = oci_new_descriptor($conn, OCI_D_LOB);
-	oci_bind_by_name($stid, ":p_clob", $clob, -1, OCI_B_CLOB);
-	$r = oci_execute($stid, OCI_DEFAULT);
+    $sql =  "begin :p_clob := 'lob string'; end;";
+    $stid = oci_parse($conn, $sql);
+    $clob = oci_new_descriptor($conn, OCI_D_LOB);
+    oci_bind_by_name($stid, ":p_clob", $clob, -1, OCI_B_CLOB);
+    $r = oci_execute($stid, OCI_DEFAULT);
 }
 
 f($c);

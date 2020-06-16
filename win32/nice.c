@@ -54,7 +54,7 @@
  *   . PROCESS_MODE_BACKGROUND_BEGIN
  *   . PROCESS_MODE_BACKGROUND_END
  *     Process mode is not covered because it can easily forgotten to be changed
- *     back and can cause unforseen side effects that is hard to debug. Besides
+ *     back and can cause unforeseen side effects that is hard to debug. Besides
  *     that, these do generally not really fit into making a Windows somewhat
  *     compatible nice() function.
  */

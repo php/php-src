@@ -2,6 +2,8 @@
 Test fileinode() function: usage variations - invalid filenames
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
+--CONFLICTS--
+obscure_filename
 --FILE--
 <?php
 /*
@@ -33,8 +35,6 @@ foreach( $filenames as $filename ) {
   var_dump( fileinode($filename) );
   clearstatcache();
 }
-
-echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
@@ -61,5 +61,3 @@ bool(false)
 
 Warning: fileinode(): stat failed for 0 in %s on line %d
 bool(false)
-
-*** Done ***

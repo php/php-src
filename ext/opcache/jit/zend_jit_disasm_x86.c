@@ -50,16 +50,14 @@ static void zend_jit_disasm_add_symbol(const char *name,
 
 static struct ud ud;
 
-typedef struct _sym_node {
+struct _sym_node {
 	uint64_t          addr;
 	uint64_t          end;
 	struct _sym_node *parent;
 	struct _sym_node *child[2];
 	unsigned char     info;
 	char              name[1];
-} zend_sym_node;
-
-static zend_sym_node *symbols = NULL;
+};
 
 static void zend_syms_rotateleft(zend_sym_node *p) {
 	zend_sym_node *r = p->child[1];
@@ -69,7 +67,7 @@ static void zend_syms_rotateleft(zend_sym_node *p) {
 	}
 	r->parent = p->parent;
 	if (p->parent == NULL) {
-		symbols = r;
+		JIT_G(symbols) = r;
 	} else if (p->parent->child[0] == p) {
 		p->parent->child[0] = r;
 	} else {
@@ -87,7 +85,7 @@ static void zend_syms_rotateright(zend_sym_node *p) {
 	}
 	l->parent = p->parent;
 	if (p->parent == NULL) {
-		symbols = l;
+		JIT_G(symbols) = l;
 	} else if (p->parent->child[1] == p) {
 		p->parent->child[1] = l;
 	} else {
@@ -113,8 +111,8 @@ static void zend_jit_disasm_add_symbol(const char *name,
 	memcpy((char*)&sym->name, name, len + 1);
 	sym->parent = sym->child[0] = sym->child[1] = NULL;
 	sym->info = 1;
-	if (symbols) {
-		zend_sym_node *node = symbols;
+	if (JIT_G(symbols)) {
+		zend_sym_node *node = JIT_G(symbols);
 
 		/* insert it into rbtree */
 		do {
@@ -137,13 +135,17 @@ static void zend_jit_disasm_add_symbol(const char *name,
 				}
 			} else {
 				ZEND_ASSERT(sym->addr == node->addr);
+				if (strcmp(name, node->name) == 0 && sym->end < node->end) {
+					/* reduce size of the existing symbol */
+					node->end = sym->end;
+				}
 				free(sym);
 				return;
 			}
 		} while (1);
 
 		/* fix rbtree after instering */
-		while (sym && sym != symbols && sym->parent->info == 1) {
+		while (sym && sym != JIT_G(symbols) && sym->parent->info == 1) {
 			if (sym->parent == sym->parent->parent->child[0]) {
 				node = sym->parent->parent->child[1];
 				if (node && node->info == 1) {
@@ -179,9 +181,9 @@ static void zend_jit_disasm_add_symbol(const char *name,
 			}
 		}
 	} else {
-		symbols = sym;
+		JIT_G(symbols) = sym;
 	}
-	symbols->info = 0;
+	JIT_G(symbols)->info = 0;
 }
 
 static void zend_jit_disasm_destroy_symbols(zend_sym_node *n) {
@@ -197,7 +199,7 @@ static void zend_jit_disasm_destroy_symbols(zend_sym_node *n) {
 
 static const char* zend_jit_disasm_find_symbol(uint64_t  addr,
                                                int64_t  *offset) {
-	zend_sym_node *node = symbols;
+	zend_sym_node *node = JIT_G(symbols);
 	while (node) {
 		if (addr < node->addr) {
 			node = node->child[0];
@@ -249,7 +251,7 @@ static int zend_jit_cmp_labels(Bucket *b1, Bucket *b2)
 
 static int zend_jit_disasm(const char    *name,
                            const char    *filename,
-                           zend_op_array *op_array,
+                           const zend_op_array *op_array,
                            zend_cfg      *cfg,
                            const void    *start,
                            size_t         size)
@@ -292,7 +294,7 @@ static int zend_jit_disasm(const char    *name,
 		}
 	}
 
-	zend_hash_sort(&labels, (compare_func_t)zend_jit_cmp_labels, 0);
+	zend_hash_sort(&labels, zend_jit_cmp_labels, 0);
 
 	/* label numbering */
 	n = 0; m = 0;
@@ -383,20 +385,23 @@ static int zend_jit_disasm_init(void)
 	REGISTER_EG(vm_stack_top);
 	REGISTER_EG(vm_stack_end);
 	REGISTER_EG(symbol_table);
+	REGISTER_EG(jit_trace_num);
 #undef  REGISTER_EG
 #endif
 
-    /* Register JIT helper functions */
+	/* Register JIT helper functions */
 #define REGISTER_HELPER(n)  \
 	zend_jit_disasm_add_symbol(#n, \
 		(uint64_t)(uintptr_t)n, sizeof(void*));
 	REGISTER_HELPER(memcmp);
 	REGISTER_HELPER(zend_jit_init_func_run_time_cache_helper);
 	REGISTER_HELPER(zend_jit_find_func_helper);
+	REGISTER_HELPER(zend_jit_find_ns_func_helper);
 	REGISTER_HELPER(zend_jit_extend_stack_helper);
 	REGISTER_HELPER(zend_jit_int_extend_stack_helper);
 	REGISTER_HELPER(zend_jit_leave_nested_func_helper);
 	REGISTER_HELPER(zend_jit_leave_top_func_helper);
+	REGISTER_HELPER(zend_jit_leave_func_helper);
 	REGISTER_HELPER(zend_jit_symtable_find);
 	REGISTER_HELPER(zend_jit_hash_index_lookup_rw);
 	REGISTER_HELPER(zend_jit_hash_index_lookup_w);
@@ -421,10 +426,7 @@ static int zend_jit_disasm_init(void)
 	REGISTER_HELPER(zend_jit_fast_concat_helper);
 	REGISTER_HELPER(zend_jit_isset_dim_helper);
 	REGISTER_HELPER(zend_jit_free_call_frame);
-	REGISTER_HELPER(zend_jit_zval_copy_deref_helper)
-	REGISTER_HELPER(zend_jit_new_ref_helper);
 	REGISTER_HELPER(zend_jit_fetch_global_helper);
-	REGISTER_HELPER(zend_jit_verify_arg_object);
 	REGISTER_HELPER(zend_jit_verify_arg_slow);
 	REGISTER_HELPER(zend_jit_fetch_obj_r_slow);
 	REGISTER_HELPER(zend_jit_fetch_obj_r_dynamic);
@@ -441,10 +443,17 @@ static int zend_jit_disasm_init(void)
 	REGISTER_HELPER(zend_jit_pre_dec_typed_ref);
 	REGISTER_HELPER(zend_jit_post_inc_typed_ref);
 	REGISTER_HELPER(zend_jit_post_dec_typed_ref);
+	REGISTER_HELPER(zend_jit_assign_op_to_typed_ref);
 	REGISTER_HELPER(zend_jit_only_vars_by_reference);
 	REGISTER_HELPER(zend_jit_invalid_array_access);
+	REGISTER_HELPER(zend_jit_invalid_property_read);
+	REGISTER_HELPER(zend_jit_prepare_assign_dim_ref);
+	REGISTER_HELPER(zend_jit_pre_inc);
+	REGISTER_HELPER(zend_jit_pre_dec);
 	REGISTER_HELPER(zend_runtime_jit);
 	REGISTER_HELPER(zend_jit_hot_func);
+	REGISTER_HELPER(zend_jit_check_constant);
+	REGISTER_HELPER(zend_jit_array_free);
 #undef  REGISTER_HELPER
 
 #ifndef _WIN32
@@ -505,6 +514,8 @@ static int zend_jit_disasm_init(void)
 		opline.op1_type = IS_CV;
 		zend_vm_set_opcode_handler(&opline);
 		zend_jit_disasm_add_symbol("ZEND_RETURN_SPEC_CV_LABEL", (uint64_t)(uintptr_t)opline.handler, sizeof(void*));
+
+		zend_jit_disasm_add_symbol("ZEND_HYBRID_HALT_LABEL", (uint64_t)(uintptr_t)zend_jit_halt_op->handler, sizeof(void*));
 	}
 
 	return 1;
@@ -512,5 +523,8 @@ static int zend_jit_disasm_init(void)
 
 static void zend_jit_disasm_shutdown(void)
 {
-	zend_jit_disasm_destroy_symbols(symbols);
+	if (JIT_G(symbols)) {
+		zend_jit_disasm_destroy_symbols(JIT_G(symbols));
+		JIT_G(symbols) = NULL;
+	}
 }

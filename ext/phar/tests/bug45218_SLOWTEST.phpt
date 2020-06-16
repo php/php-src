@@ -39,19 +39,18 @@ class myIterator implements Iterator
     }
 }
 try {
-	chdir(__DIR__);
-	$phar = new Phar($fname);
-	$ret = $phar->buildFromIterator(new myIterator);
-	foreach ($ret as $a => $val) {
-		$ret[$a] = str_replace(dirname($fname2) . DIRECTORY_SEPARATOR, '*', $val);
-	}
-	var_dump($ret);
+    chdir(__DIR__);
+    $phar = new Phar($fname);
+    $ret = $phar->buildFromIterator(new myIterator);
+    foreach ($ret as $a => $val) {
+        $ret[$a] = str_replace(dirname($fname2) . DIRECTORY_SEPARATOR, '*', $val);
+    }
+    var_dump($ret);
 } catch (Exception $e) {
-	var_dump(get_class($e));
-	echo $e->getMessage() . "\n";
+    var_dump(get_class($e));
+    echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
@@ -6088,4 +6087,3 @@ array(2999) {
   ["f2999"]=>
   string(22) "*bug45218_SLOWTEST.txt"
 }
-===DONE===

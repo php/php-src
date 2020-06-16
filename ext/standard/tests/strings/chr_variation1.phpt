@@ -27,31 +27,31 @@ $file_handle = fopen(__FILE__, "r");
 // array with different values for $input
 $inputs =  array (
 
-		  // integer values
+          // integer values
 /*1*/	  0,
-		  1,
-		  255,
-		  256,
+          1,
+          255,
+          256,
 
-		  // float values
+          // float values
 /*5*/	  10.5,
-		  -20.5,
-		  1.1234e6,
+          -20.5,
+          1.1234e6,
 
-		  // boolean values
+          // boolean values
 /*11*/	  true,
-		  false,
-		  TRUE,
-		  FALSE,
+          false,
+          TRUE,
+          FALSE,
 
-		  // null values
+          // null values
 /*15*/	  NULL,
-		  null,
+          null,
 
-		  // undefined variable
+          // undefined variable
 /*19*/	  @$undefined_var,
 
-		  // unset variable
+          // unset variable
 /*20*/	  @$unset_var
 );
 
@@ -66,7 +66,6 @@ foreach($inputs as $input) {
 fclose($file_handle);  //closing the file handle
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing chr() function: with unexpected inputs for 'ascii' argument ***
 -- Iteration 1 --
@@ -99,4 +98,3 @@ string(2) "00"
 string(2) "00"
 -- Iteration 15 --
 string(2) "00"
-===DONE===

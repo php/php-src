@@ -5,10 +5,10 @@ Bug #37811 (define not using toString on objects)
 
 class TestClass
 {
-	function __toString()
-	{
-		return "Foo";
-	}
+    function __toString()
+    {
+        return "Foo";
+    }
 }
 
 define("Bar",new TestClass);

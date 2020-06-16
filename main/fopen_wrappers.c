@@ -73,14 +73,8 @@ Allows any change to open_basedir setting in during Startup and Shutdown events,
 or a tightening during activation/runtime/deactivation */
 PHPAPI ZEND_INI_MH(OnUpdateBaseDir)
 {
-	char **p, *pathbuf, *ptr, *end;
-#ifndef ZTS
-	char *base = (char *) mh_arg2;
-#else
-	char *base = (char *) ts_resource(*((int *) mh_arg2));
-#endif
-
-	p = (char **) (base + (size_t) mh_arg1);
+	char **p = (char **) ZEND_INI_GET_ADDR();
+	char *pathbuf, *ptr, *end;
 
 	if (stage == PHP_INI_STAGE_STARTUP || stage == PHP_INI_STAGE_SHUTDOWN || stage == PHP_INI_STAGE_ACTIVATE || stage == PHP_INI_STAGE_DEACTIVATE) {
 		/* We're in a PHP_INI_SYSTEM context, no restrictions */
@@ -556,8 +550,11 @@ PHPAPI zend_string *php_resolve_path(const char *filename, size_t filename_lengt
 				if (wrapper->wops->url_stat) {
 					php_stream_statbuf ssb;
 
-					if (SUCCESS == wrapper->wops->url_stat(wrapper, trypath, 0, &ssb, NULL)) {
+					if (SUCCESS == wrapper->wops->url_stat(wrapper, trypath, PHP_STREAM_URL_STAT_QUIET, &ssb, NULL)) {
 						return zend_string_init(trypath, strlen(trypath), 0);
+					}
+					if (EG(exception)) {
+						return NULL;
 					}
 				}
 				continue;
@@ -593,8 +590,11 @@ PHPAPI zend_string *php_resolve_path(const char *filename, size_t filename_lengt
 					if (wrapper->wops->url_stat) {
 						php_stream_statbuf ssb;
 
-						if (SUCCESS == wrapper->wops->url_stat(wrapper, trypath, 0, &ssb, NULL)) {
+						if (SUCCESS == wrapper->wops->url_stat(wrapper, trypath, PHP_STREAM_URL_STAT_QUIET, &ssb, NULL)) {
 							return zend_string_init(trypath, strlen(trypath), 0);
+						}
+						if (EG(exception)) {
+							return NULL;
 						}
 					}
 					return NULL;

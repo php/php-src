@@ -36,53 +36,53 @@ HERE;
 $res = mail($to, $subject, $message);
 
 if ($res !== true) {
-	exit("TEST COMPLETED : Unable to send test email\n");
+    exit("TEST COMPLETED : Unable to send test email\n");
 } else {
-	echo "Msg sent OK\n";
+    echo "Msg sent OK\n";
 }
 
 // Search for email message on the mail server using imap.
 $imap_stream = imap_open($default_mailbox, $username, $password);
 if ($imap_stream === false) {
-	echo "Cannot connect to IMAP server $server: " . imap_last_error() . "\n";
-	return false;
+    echo "Cannot connect to IMAP server $server: " . imap_last_error() . "\n";
+    return false;
 }
 
 $found = false;
 $repeat_count = 20; // we will repeat a max of 20 times
 while (!$found && $repeat_count > 0) {
 
-	// sleep for a while to allow msg to be delivered
-	sleep(1);
+    // sleep for a while to allow msg to be delivered
+    sleep(1);
 
-	$current_msg_count = imap_check($imap_stream)->Nmsgs;
+    $current_msg_count = imap_check($imap_stream)->Nmsgs;
 
-	// Iterate over recent msgs to find the one we sent above
-	for ($i = 1; $i <= $current_msg_count; $i++) {
-		// get hdr details
-		$hdr = imap_headerinfo($imap_stream, $i);
+    // Iterate over recent msgs to find the one we sent above
+    for ($i = 1; $i <= $current_msg_count; $i++) {
+        // get hdr details
+        $hdr = imap_headerinfo($imap_stream, $i);
 
-		if (substr($hdr->Subject, 0 , strlen($subject_prefix)) == $subject_prefix) {
-			echo "Id of msg just sent is $i\n";
-			echo ".. delete it\n";
-			imap_delete($imap_stream, $i);
-			$found = true;
-			break;
-		}
-	}
+        if (substr($hdr->Subject, 0 , strlen($subject_prefix)) == $subject_prefix) {
+            echo "Id of msg just sent is $i\n";
+            echo ".. delete it\n";
+            imap_delete($imap_stream, $i);
+            $found = true;
+            break;
+        }
+    }
 
-	$repeat_count -= 1;
+    $repeat_count -= 1;
 }
 
 if (!$found) {
-	echo "TEST FAILED: email not delivered\n";
+    echo "TEST FAILED: email not delivered\n";
 } else {
-	echo "TEST PASSED: Msgs sent and deleted OK\n";
+    echo "TEST PASSED: Msgs sent and deleted OK\n";
 }
 
 imap_close($imap_stream, CL_EXPUNGE);
 ?>
-===Done===
+===DONE===
 --EXPECTF--
 *** Testing mail() : basic functionality ***
 

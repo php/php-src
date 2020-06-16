@@ -24,12 +24,11 @@ var_dump( finfo_open( FILEINFO_CONTINUE, $magicFile ) );
 var_dump( finfo_open( FILEINFO_PRESERVE_ATIME, $magicFile ) );
 var_dump( finfo_open( FILEINFO_RAW, $magicFile ) );
 
-// OO inteface to finfo
+// OO interface to finfo
 var_dump( new finfo( FILEINFO_MIME, $magicFile ) );
 var_dump( new finfo() );
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing finfo_open() : basic functionality ***
 resource(%d) of type (file_info)
@@ -43,4 +42,3 @@ object(finfo)#%d (%d) {
 }
 object(finfo)#%d (%d) {
 }
-===DONE===

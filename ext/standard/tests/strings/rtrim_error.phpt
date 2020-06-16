@@ -19,7 +19,6 @@ var_dump(rtrim($hello, "z..a"));
 var_dump(rtrim($hello, "a..b..c"));
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing rtrim() : error conditions ***
 
@@ -40,4 +39,3 @@ string(14) "  Hello World
 Warning: rtrim(): Invalid '..'-range in %s on line %d
 string(14) "  Hello World
 "
-===DONE===

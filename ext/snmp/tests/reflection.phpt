@@ -19,8 +19,6 @@ echo new reflectionmethod('snmp', 'getError');
 
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 Method [ <internal:snmp, ctor> public method __construct ] {
 
@@ -89,4 +87,3 @@ Method [ <internal:snmp> public method getError ] {
   - Parameters [0] {
   }
 }
-===DONE===

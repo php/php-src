@@ -1,5 +1,5 @@
 --TEST--
-curl_multi_close return false when suplied resorce not valid cURL multi handle
+curl_multi_close return false when supplied resource not valid cURL multi handle
 --SKIPIF--
 <?php
 if (!extension_loaded('curl')) print 'skip';
@@ -18,10 +18,8 @@ try {
     echo $e->getMessage(), "\n";
 }
 ?>
-===DONE===
 --EXPECTF--
 resource(%d) of type (curl_multi)
 NULL
 resource(%d) of type (Unknown)
 curl_multi_close(): supplied resource is not a valid cURL Multi Handle resource
-===DONE===

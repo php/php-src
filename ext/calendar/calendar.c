@@ -35,33 +35,10 @@
 #undef CAL_GREGORIAN
 #endif
 
-static const zend_function_entry calendar_functions[] = {
-	PHP_FE(jdtogregorian, arginfo_jdtogregorian)
-	PHP_FE(gregoriantojd, arginfo_gregoriantojd)
-	PHP_FE(jdtojulian, arginfo_jdtojulian)
-	PHP_FE(juliantojd, arginfo_juliantojd)
-	PHP_FE(jdtojewish, arginfo_jdtojewish)
-	PHP_FE(jewishtojd, arginfo_jewishtojd)
-	PHP_FE(jdtofrench, arginfo_jdtofrench)
-	PHP_FE(frenchtojd, arginfo_frenchtojd)
-	PHP_FE(jddayofweek, arginfo_jddayofweek)
-	PHP_FE(jdmonthname, arginfo_jdmonthname)
-	PHP_FE(easter_date, arginfo_easter_date)
-	PHP_FE(easter_days, arginfo_easter_days)
-	PHP_FE(unixtojd, arginfo_unixtojd)
-	PHP_FE(jdtounix, arginfo_jdtounix)
-	PHP_FE(cal_to_jd, arginfo_cal_to_jd)
-	PHP_FE(cal_from_jd, arginfo_cal_from_jd)
-	PHP_FE(cal_days_in_month, arginfo_cal_days_in_month)
-	PHP_FE(cal_info, arginfo_cal_info)
-	PHP_FE_END
-};
-
-
 zend_module_entry calendar_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"calendar",
-	calendar_functions,
+	ext_functions,
 	PHP_MINIT(calendar),
 	NULL,
 	NULL,
@@ -198,9 +175,8 @@ PHP_FUNCTION(cal_info)
 {
 	zend_long cal = -1;
 
-
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &cal) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (cal == -1) {
@@ -216,14 +192,12 @@ PHP_FUNCTION(cal_info)
 		return;
 	}
 
-
-	if (cal != -1 && (cal < 0 || cal >= CAL_NUM_CALS)) {
-		php_error_docref(NULL, E_WARNING, "invalid calendar ID " ZEND_LONG_FMT, cal);
-		RETURN_FALSE;
+	if (cal < 0 || cal >= CAL_NUM_CALS) {
+		zend_argument_value_error(1, "must be a valid calendar ID");
+		RETURN_THROWS();
 	}
 
 	_php_cal_info(cal, return_value);
-
 }
 /* }}} */
 
@@ -236,12 +210,12 @@ PHP_FUNCTION(cal_days_in_month)
 	zend_long sdn_start, sdn_next;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lll", &cal, &month, &year) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (cal < 0 || cal >= CAL_NUM_CALS) {
-		php_error_docref(NULL, E_WARNING, "invalid calendar ID " ZEND_LONG_FMT, cal);
-		RETURN_FALSE;
+		zend_argument_value_error(1, "must be a valid calendar ID");
+		RETURN_THROWS();
 	}
 
 	calendar = &cal_conversion_table[cal];
@@ -249,8 +223,8 @@ PHP_FUNCTION(cal_days_in_month)
 	sdn_start = calendar->to_jd(year, month, 1);
 
 	if (sdn_start == 0) {
-		php_error_docref(NULL, E_WARNING, "invalid date");
-		RETURN_FALSE;
+		zend_value_error("Invalid date");
+		RETURN_THROWS();
 	}
 
 	sdn_next = calendar->to_jd(year, 1 + month, 1);
@@ -282,12 +256,12 @@ PHP_FUNCTION(cal_to_jd)
 	zend_long cal, month, day, year;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "llll", &cal, &month, &day, &year) != SUCCESS) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (cal < 0 || cal >= CAL_NUM_CALS) {
-		php_error_docref(NULL, E_WARNING, "invalid calendar ID " ZEND_LONG_FMT, cal);
-		RETURN_FALSE;
+		zend_argument_value_error(1, "must be a valid calendar ID");
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(cal_conversion_table[cal].to_jd(year, month, day));
@@ -303,12 +277,12 @@ PHP_FUNCTION(cal_from_jd)
 	const struct cal_entry_t *calendar;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &jd, &cal) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (cal < 0 || cal >= CAL_NUM_CALS) {
-		php_error_docref(NULL, E_WARNING, "invalid calendar ID " ZEND_LONG_FMT, cal);
-		RETURN_FALSE;
+		zend_argument_value_error(2, "must be a valid calendar ID");
+		RETURN_THROWS();
 	}
 	calendar = &cal_conversion_table[cal];
 
@@ -354,7 +328,7 @@ PHP_FUNCTION(jdtogregorian)
 	int year, month, day;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &julday) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	SdnToGregorian(julday, &year, &month, &day);
@@ -370,7 +344,7 @@ PHP_FUNCTION(gregoriantojd)
 	zend_long year, month, day;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lll", &month, &day, &year) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(GregorianToSdn(year, month, day));
@@ -385,7 +359,7 @@ PHP_FUNCTION(jdtojulian)
 	int year, month, day;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &julday) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	SdnToJulian(julday, &year, &month, &day);
@@ -401,7 +375,7 @@ PHP_FUNCTION(juliantojd)
 	zend_long year, month, day;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lll", &month, &day, &year) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(JulianToSdn(year, month, day));
@@ -514,7 +488,7 @@ PHP_FUNCTION(jdtojewish)
 	char *dayp, *yearp;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|bl", &julday, &heb, &fl) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	SdnToJewish(julday, &year, &month, &day);
@@ -522,8 +496,8 @@ PHP_FUNCTION(jdtojewish)
 		RETURN_NEW_STR(zend_strpprintf(0, "%i/%i/%i", month, day, year));
 	} else {
 		if (year <= 0 || year > 9999) {
-			php_error_docref(NULL, E_WARNING, "Year out of range (0-9999)");
-			RETURN_FALSE;
+			zend_value_error("Year out of range (0-9999)");
+			RETURN_THROWS();
 		}
 
 		RETVAL_NEW_STR(zend_strpprintf(0, "%s %s %s", heb_number_to_chars(day, fl, &dayp), JEWISH_HEB_MONTH_NAME(year)[month], heb_number_to_chars(year, fl, &yearp)));
@@ -545,7 +519,7 @@ PHP_FUNCTION(jewishtojd)
 	zend_long year, month, day;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lll", &month, &day, &year) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(JewishToSdn(year, month, day));
@@ -560,7 +534,7 @@ PHP_FUNCTION(jdtofrench)
 	int year, month, day;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &julday) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	SdnToFrench(julday, &year, &month, &day);
@@ -576,7 +550,7 @@ PHP_FUNCTION(frenchtojd)
 	zend_long year, month, day;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lll", &month, &day, &year) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(FrenchToSdn(year, month, day));
@@ -592,7 +566,7 @@ PHP_FUNCTION(jddayofweek)
 	const char *daynamel, *daynames;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|l", &julday, &mode) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	day = DayOfWeek(julday);
@@ -623,7 +597,7 @@ PHP_FUNCTION(jdmonthname)
 	int month, day, year;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &julday, &mode) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	switch (mode) {

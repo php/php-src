@@ -148,7 +148,7 @@ zend_object_iterator *php_com_iter_get(zend_class_entry *ce, zval *object, int b
 	obj = CDNO_FETCH(object);
 
 	if (V_VT(&obj->v) != VT_DISPATCH && !V_ISARRAY(&obj->v)) {
-		php_error_docref(NULL, E_WARNING, "variant is not an object or array VT=%d", V_VT(&obj->v));
+		php_error_docref(NULL, E_WARNING, "Variant is not an object or array VT=%d", V_VT(&obj->v));
 		return NULL;
 	}
 
@@ -185,7 +185,7 @@ zend_object_iterator *php_com_iter_get(zend_class_entry *ce, zval *object, int b
 		SafeArrayGetUBound(V_ARRAY(&I->safe_array), 1, &I->sa_max);
 
 		/* pre-fetch the element */
-		if (php_com_safearray_get_elem(&I->safe_array, &I->v, bound)) {
+		if (I->sa_max >= bound && php_com_safearray_get_elem(&I->safe_array, &I->v, bound)) {
 			I->key = bound;
 			ZVAL_NULL(&ptr);
 			php_com_zval_from_variant(&ptr, &I->v, I->code_page);

@@ -21,7 +21,7 @@ echo "*** Testing vprintf() : unsigned formats and unsigned values ***\n";
 // defining array of unsigned formats
 $formats = array(
   '%u %+u %-u',
-  '%lu %Lu %4u %-4u',
+  '%lu %4u %-4u',
   '%10.4u %-10.4u %.4u',
   '%\'#2u %\'2u %\'$2u %\'_2u',
   '%3$u %4$u %1$u %2$u'
@@ -31,7 +31,7 @@ $formats = array(
 // Each sub array contains unsigned values which correspond to each format string in $format
 $args_array = array(
   array(1234567, 01234567, 0 ),
-  array(12345678900, 12345678900, 1234, 12345),
+  array(12345678900, 1234, 12345),
   array("1234000", 10e20, 1.2e2),
   array(1, 0, 00, "10_"),
   array(3, 4, 1, 2)
@@ -49,7 +49,6 @@ foreach($formats as $format) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing vprintf() : unsigned formats and unsigned values ***
 
@@ -58,8 +57,8 @@ foreach($formats as $format) {
 int(16)
 
 -- Iteration 2 --
-12345678900 u 1234 12345
-int(24)
+12345678900 1234 12345
+int(22)
 
 -- Iteration 3 --
    1234000 3875820019684212736 120
@@ -72,4 +71,3 @@ int(10)
 -- Iteration 5 --
 1 2 3 4
 int(7)
-===DONE===

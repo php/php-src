@@ -19,38 +19,37 @@ insert_dummy_data($link, $base);
 
 /* Test assertion control */
 var_dump(
-	$result = ldap_search($link, "o=test,$base", "objectClass=*", array('o'), 0, 0, 0, LDAP_DEREF_NEVER,
-		[['oid' => LDAP_CONTROL_ASSERT, 'iscritical' => TRUE, 'value' => ['filter' => '(objectClass=organization)']]]),
-	ldap_get_entries($link, $result),
-	$result = ldap_search($link, "o=test,$base", "objectClass=*", array('o'), 0, 0, 0, LDAP_DEREF_NEVER,
-		[['oid' => LDAP_CONTROL_ASSERT, 'iscritical' => TRUE, 'value' => ['filter' => '(objectClass=organizationalUnit)']]]),
-	ldap_modify($link, "o=test,$base", ['description' => 'desc'],
-		[['oid' => LDAP_CONTROL_ASSERT, 'iscritical' => TRUE, 'value' => ['filter' => '(!(description=*))']]]),
-	$result = ldap_read($link, "o=test,$base", "objectClass=*", array('description')),
-	ldap_get_entries($link, $result),
-	ldap_modify($link, "o=test,$base", ['description' => 'desc2'],
-		[['oid' => LDAP_CONTROL_ASSERT, 'iscritical' => TRUE, 'value' => ['filter' => '(!(description=*))']]]),
-	$result = ldap_read($link, "o=test,$base", "objectClass=*", array('description')),
-	ldap_get_entries($link, $result),
-	ldap_delete($link, "o=test,$base", [['oid' => LDAP_CONTROL_ASSERT, 'iscritical' => TRUE, 'value' => ['filter' => '(description=desc2)']]]),
-	ldap_errno($link),
-	ldap_error($link),
-	ldap_rename($link, "o=test,$base", "o=test2", "", TRUE, [['oid' => LDAP_CONTROL_ASSERT, 'iscritical' => TRUE, 'value' => ['filter' => '(description=desc2)']]]),
-	ldap_compare($link, "o=test,$base", "o", "test"),
-	ldap_compare($link, "o=test,$base", "o", "test", [['oid' => LDAP_CONTROL_ASSERT, 'iscritical' => TRUE, 'value' => ['filter' => '(description=desc2)']]]),
-	ldap_compare($link, "o=test,$base", "o", "test", [['oid' => LDAP_CONTROL_ASSERT, 'iscritical' => TRUE, 'value' => ['filter' => '(description=desc)']]])
+    $result = ldap_search($link, "o=test,$base", "objectClass=*", array('o'), 0, 0, 0, LDAP_DEREF_NEVER,
+        [['oid' => LDAP_CONTROL_ASSERT, 'iscritical' => TRUE, 'value' => ['filter' => '(objectClass=organization)']]]),
+    ldap_get_entries($link, $result),
+    $result = ldap_search($link, "o=test,$base", "objectClass=*", array('o'), 0, 0, 0, LDAP_DEREF_NEVER,
+        [['oid' => LDAP_CONTROL_ASSERT, 'iscritical' => TRUE, 'value' => ['filter' => '(objectClass=organizationalUnit)']]]),
+    ldap_modify($link, "o=test,$base", ['description' => 'desc'],
+        [['oid' => LDAP_CONTROL_ASSERT, 'iscritical' => TRUE, 'value' => ['filter' => '(!(description=*))']]]),
+    $result = ldap_read($link, "o=test,$base", "objectClass=*", array('description')),
+    ldap_get_entries($link, $result),
+    ldap_modify($link, "o=test,$base", ['description' => 'desc2'],
+        [['oid' => LDAP_CONTROL_ASSERT, 'iscritical' => TRUE, 'value' => ['filter' => '(!(description=*))']]]),
+    $result = ldap_read($link, "o=test,$base", "objectClass=*", array('description')),
+    ldap_get_entries($link, $result),
+    ldap_delete($link, "o=test,$base", [['oid' => LDAP_CONTROL_ASSERT, 'iscritical' => TRUE, 'value' => ['filter' => '(description=desc2)']]]),
+    ldap_errno($link),
+    ldap_error($link),
+    ldap_rename($link, "o=test,$base", "o=test2", "", TRUE, [['oid' => LDAP_CONTROL_ASSERT, 'iscritical' => TRUE, 'value' => ['filter' => '(description=desc2)']]]),
+    ldap_compare($link, "o=test,$base", "o", "test"),
+    ldap_compare($link, "o=test,$base", "o", "test", [['oid' => LDAP_CONTROL_ASSERT, 'iscritical' => TRUE, 'value' => ['filter' => '(description=desc2)']]]),
+    ldap_compare($link, "o=test,$base", "o", "test", [['oid' => LDAP_CONTROL_ASSERT, 'iscritical' => TRUE, 'value' => ['filter' => '(description=desc)']]])
 );
 
 /* Test valuesreturnfilter control */
 var_dump(
-	$result = ldap_read($link, "o=test2,$base", "objectClass=*", ["l"]),
-	ldap_get_entries($link, $result)[0]['l'],
-	$result = ldap_read($link, "o=test2,$base", "objectClass=*", ["l"], 0, 0, 0, LDAP_DEREF_NEVER,
-		[['oid' => LDAP_CONTROL_VALUESRETURNFILTER, 'iscritical' => TRUE, 'value' => ['filter' => '(l=*here)']]]),
-	ldap_get_entries($link, $result)[0]['l']
+    $result = ldap_read($link, "o=test2,$base", "objectClass=*", ["l"]),
+    ldap_get_entries($link, $result)[0]['l'],
+    $result = ldap_read($link, "o=test2,$base", "objectClass=*", ["l"], 0, 0, 0, LDAP_DEREF_NEVER,
+        [['oid' => LDAP_CONTROL_VALUESRETURNFILTER, 'iscritical' => TRUE, 'value' => ['filter' => '(l=*here)']]]),
+    ldap_get_entries($link, $result)[0]['l']
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 include "connect.inc";
@@ -159,4 +158,3 @@ array(3) {
   [1]=>
   string(5) "there"
 }
-===DONE===

@@ -12,8 +12,8 @@ prev - ensure warning is received when passing an indirect temporary.
  */
 
 function f() {
-	$array  = array(1,2);
-	end($array);
+    $array  = array(1,2);
+    end($array);
     return $array;
 }
 

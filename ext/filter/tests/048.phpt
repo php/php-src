@@ -5,20 +5,20 @@ Hex integer overflow
 --FILE--
 <?php
 function hex_inc($s) {
-	$len = strlen($s);
-	while ($len > 0) {
-		$len--;
-		if ($s[$len] != 'f') {
-			if ($s[$len] == '9') {
-				$s[$len] = 'a';
-			} else {
-				$s[$len] = $s[$len] + 1;
-			}
-			return $s;
-		}
-		$s[$len] = '0';
-	}
-	return '1'.$s;
+    $len = strlen($s);
+    while ($len > 0) {
+        $len--;
+        if ($s[$len] != 'f') {
+            if ($s[$len] == '9') {
+                $s[$len] = 'a';
+            } else {
+                $s[$len] = $s[$len] + 1;
+            }
+            return $s;
+        }
+        $s[$len] = '0';
+    }
+    return '1'.$s;
 }
 
 

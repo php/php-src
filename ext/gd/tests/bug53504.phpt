@@ -51,16 +51,16 @@ $tests = [
 
 foreach ($tests as $testnum => $test) {
     $bbox = imageftbbox($test['fontSize'], $test['angle'], $font, $test['text']);
-	printf('%2d: ', $testnum);
-	for ($i = 0; $i < 8; $i++) {
-		$exp = $test['exp'][$i];
-		if ($bbox[$i] >= $exp - 2 && $bbox[$i] <= $exp + 2) {
-			echo '.';
-		} else {
-			echo "(expected $exp, got $bbox[$i])";
-		}
-	}
-	echo "\n";
+    printf('%2d: ', $testnum);
+    for ($i = 0; $i < 8; $i++) {
+        $exp = $test['exp'][$i];
+        if ($bbox[$i] >= $exp - 2 && $bbox[$i] <= $exp + 2) {
+            echo '.';
+        } else {
+            echo "(expected $exp, got $bbox[$i])";
+        }
+    }
+    echo "\n";
 
     $bboxDrawn = imagefttext($g, $test['fontSize'], $test['angle'],
         $test['x'], $test['y'], $black, $font, $test['text']);
@@ -72,7 +72,7 @@ foreach ($tests as $testnum => $test) {
     }
 
     // draw bounding box:
-    imagepolygon($g, $bboxDrawn, 4, $red);
+    imagepolygon($g, $bboxDrawn, $red);
 
     // draw baseline:
     $width = sqrt(pow($bboxDrawn[2] - $bboxDrawn[0], 2) + pow($bboxDrawn[3] - $bboxDrawn[1], 2));

@@ -16,9 +16,9 @@ echo "\n-- Testing get_declared_classes() function with Zero arguments --\n";
 var_dump(get_declared_classes());
 
 foreach (get_declared_classes() as $class) {
-	if (!class_exists($class)) {
-		echo "Error: $class is not a valid class.\n";
-	}
+    if (!class_exists($class)) {
+        echo "Error: $class is not a valid class.\n";
+    }
 }
 
 echo "\n-- Ensure userspace classes are listed --\n";

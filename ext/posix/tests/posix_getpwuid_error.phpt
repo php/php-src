@@ -20,7 +20,7 @@ var_dump( posix_getpwuid($uid) );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing posix_getpwuid() : error conditions ***
 
 -- Testing posix_getpwuid() function negative uid --

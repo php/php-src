@@ -20,13 +20,12 @@ echo "\n";
 var_dump($intlcal->get(IntlCalendar::FIELD_ZONE_OFFSET));
 
 intlcal_set_time_zone($intlcal,
-		IntlTimeZone::createTimeZone('GMT+05:30'));
+        IntlTimeZone::createTimeZone('GMT+05:30'));
 print_r($intlcal->getTimeZone()->getID());
 echo "\n";
 var_dump($intlcal->get(IntlCalendar::FIELD_ZONE_OFFSET));
 
 ?>
-==DONE==
 --EXPECT--
 Europe/Amsterdam
 int(3600000)
@@ -34,4 +33,3 @@ GMT
 int(0)
 GMT+05:30
 int(19800000)
-==DONE==

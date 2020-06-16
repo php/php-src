@@ -6,7 +6,7 @@ variables_order="egpcs"
 <?php
 
 function test() {
-	include __DIR__."/globals.inc";
+    include __DIR__."/globals.inc";
 }
 
 test();
@@ -23,6 +23,6 @@ string(%d) "%s"
 Notice: Undefined index: PHP_SELF in %s on line %d
 NULL
 
-Warning: Undefined variable: _SERVER in %s on line %d
+Warning: Undefined variable $_SERVER in %s on line %d
 NULL
 Done

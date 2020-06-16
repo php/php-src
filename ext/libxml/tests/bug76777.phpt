@@ -29,7 +29,7 @@ libxml_set_external_entity_loader(function($p,$s,$c) {
 $dom=new DOMDocument($xml);
 $dom->schemaValidateSource($xsd);
 ?>
---EXPECTF--
+--EXPECT--
 NULL
 string(15) "nonexistent.xsd"
 array(4) {

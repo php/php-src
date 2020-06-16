@@ -17,22 +17,21 @@ echo "*** Testing date_sub() : basic functionality ***\n";
 $startDate = '2008-01-01 12:25';
 $format = 'Y-m-d H:i:s';
 $intervals = array(
-	'P3Y6M4DT12H30M5S',
-	'P0D',
-	'P2DT1M',
-	'P1Y2MT23H43M150S'
+    'P3Y6M4DT12H30M5S',
+    'P0D',
+    'P2DT1M',
+    'P1Y2MT23H43M150S'
 );
 
 $d = new DateTime($startDate);
 var_dump( $d->format($format) );
 
 foreach($intervals as $interval) {
-	date_sub($d, new DateInterval($interval) );
-	var_dump( $d->format($format) );
+    date_sub($d, new DateInterval($interval) );
+    var_dump( $d->format($format) );
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing date_sub() : basic functionality ***
 string(19) "2008-01-01 12:25:00"
@@ -40,4 +39,3 @@ string(19) "2004-06-26 23:54:55"
 string(19) "2004-06-26 23:54:55"
 string(19) "2004-06-24 23:53:55"
 string(19) "2003-04-24 00:08:25"
-===DONE===

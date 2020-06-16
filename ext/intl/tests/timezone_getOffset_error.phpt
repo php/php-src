@@ -4,6 +4,12 @@ IntlTimeZone::getOffset(): errors
 <?php
 if (!extension_loaded('intl'))
 	die('skip intl extension not enabled');
+
+/* INF being an invalid offset depends on UB in float->int cast behavior. */
+$arch = php_uname('m');
+if ($arch != 'x86_64' && $arch != 'i386')
+    die('skip requires x86');
+?>
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -17,7 +23,7 @@ intltz_get_offset(null, time()*1000, false, $a, $a);
 Warning: IntlTimeZone::getOffset(): intltz_get_offset: error obtaining offset in %s on line %d
 bool(false)
 
-Fatal error: Uncaught TypeError: intltz_get_offset() expects parameter 1 to be IntlTimeZone, null given in %s:%d
+Fatal error: Uncaught TypeError: intltz_get_offset(): Argument #1 ($tz) must be of type IntlTimeZone, null given in %s:%d
 Stack trace:
 #0 %s(%d): intltz_get_offset(NULL, %d, false, NULL, NULL)
 #1 {main}

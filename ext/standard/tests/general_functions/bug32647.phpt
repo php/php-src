@@ -10,8 +10,8 @@ function foo()
 
 class bar
 {
-	function barfoo ()
-	{ echo "bar!\n"; }
+    function barfoo ()
+    { echo "bar!\n"; }
 }
 
 unset($obj);
@@ -30,11 +30,11 @@ register_shutdown_function(array($obj,'barfoo'));      // Valid
 
 ?>
 --EXPECTF--
-Warning: Undefined variable: obj in %s on line %d
+Warning: Undefined variable $obj in %s on line %d
 
 Warning: register_shutdown_function(): Invalid shutdown callback 'Array' passed in %s on line %d
 
-Warning: Undefined variable: obj in %s on line %d
+Warning: Undefined variable $obj in %s on line %d
 
 Warning: register_shutdown_function(): Invalid shutdown callback 'Array' passed in %s on line %d
 

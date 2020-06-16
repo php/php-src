@@ -23,7 +23,6 @@
 
 #include "formatter_class.h"
 #include "formatter_format.h"
-#include "formatter_parse.h"
 #include "intl_convert.h"
 
 #define ICU_LOCALE_BUG 1
@@ -52,7 +51,7 @@ PHP_FUNCTION( numfmt_parse )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Os|lz!",
 		&object, NumberFormatter_ce_ptr,  &str, &str_len, &type, &zposition ) == FAILURE )
 	{
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if(zposition) {
@@ -134,7 +133,7 @@ PHP_FUNCTION( numfmt_parse_currency )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Osz/|z!",
 		&object, NumberFormatter_ce_ptr,  &str, &str_len, &zcurrency, &zposition ) == FAILURE )
 	{
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */

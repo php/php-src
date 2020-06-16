@@ -26,7 +26,6 @@ foreach($input_arrays as $key =>$value) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_diff_uassoc() : usage variation ***
 
@@ -59,4 +58,3 @@ array(1) {
   [-7]=>
   int(-7)
 }
-===DONE===

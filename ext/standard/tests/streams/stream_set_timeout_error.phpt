@@ -41,7 +41,7 @@ fclose($server);
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing stream_set_timeout() : error conditions ***
 
 -- Testing stream_set_timeout() function with a closed socket --

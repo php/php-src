@@ -24,7 +24,7 @@ precision=14
    Set type of the data to "int"/"integer" and verify using gettype
    Following are performed in the listed sequence:
      get the current type of the variable
-     set the type of the variable to interger/int type
+     set the type of the variable to integer/int type
      dump the variable to see its new data
      get the new type of the variable
 */

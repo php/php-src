@@ -713,7 +713,7 @@ to conform with the license.
  </stability>
  <license uri="http://www.php.net/license">PHP</license>
  <notes>
-Bump PHP OCI8 2.0 mininum requirements to PHP 5.2 and Oracle client
+Bump PHP OCI8 2.0 minimum requirements to PHP 5.2 and Oracle client
 library 10.2.  (Use OCI8 1.4 for older PHP version support or if only
 Oracle 9.2 client libraries are available.)
 

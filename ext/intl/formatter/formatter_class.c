@@ -18,11 +18,10 @@
 #include "php_intl.h"
 #include "formatter_data.h"
 #include "formatter_format.h"
-#include "formatter_parse.h"
-#include "formatter_main.h"
-#include "formatter_attr.h"
+#include "formatter_arginfo.h"
 
 #include <zend_exceptions.h>
+#include "Zend/zend_interfaces.h"
 
 zend_class_entry *NumberFormatter_ce_ptr = NULL;
 static zend_object_handlers NumberFormatter_handlers;
@@ -90,86 +89,6 @@ zend_object *NumberFormatter_object_clone(zend_object *object)
  * 'NumberFormatter' class registration structures & functions
  */
 
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(number_parse_arginfo, 0, 0, 1)
-	ZEND_ARG_INFO(0, string)
-	ZEND_ARG_INFO(0, type)
-	ZEND_ARG_INFO(1, position)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(number_parse_currency_arginfo, 0, 0, 2)
-	ZEND_ARG_INFO(0, string)
-	ZEND_ARG_INFO(1, currency)
-	ZEND_ARG_INFO(1, position)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_numberformatter_getattribute, 0, 0, 1)
-	ZEND_ARG_INFO(0, attr)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_numberformatter_setattribute, 0, 0, 2)
-	ZEND_ARG_INFO(0, attr)
-	ZEND_ARG_INFO(0, value)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_numberformatter_setsymbol, 0, 0, 2)
-	ZEND_ARG_INFO(0, attr)
-	ZEND_ARG_INFO(0, symbol)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_numberformatter_getpattern, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_numberformatter_setpattern, 0, 0, 1)
-	ZEND_ARG_INFO(0, pattern)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_numberformatter_getlocale, 0, 0, 0)
-	ZEND_ARG_INFO(0, type)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_numberformatter___construct, 0, 0, 2)
-	ZEND_ARG_INFO(0, locale)
-	ZEND_ARG_INFO(0, style)
-	ZEND_ARG_INFO(0, pattern)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_numberformatter_formatcurrency, 0, 0, 2)
-	ZEND_ARG_INFO(0, num)
-	ZEND_ARG_INFO(0, currency)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_numberformatter_format, 0, 0, 1)
-	ZEND_ARG_INFO(0, num)
-	ZEND_ARG_INFO(0, type)
-ZEND_END_ARG_INFO()
-/* }}} */
-
-/* {{{ NumberFormatter_class_functions
- * Every 'NumberFormatter' class method has an entry in this table
- */
-static const zend_function_entry NumberFormatter_class_functions[] = {
-	PHP_ME( NumberFormatter, __construct, arginfo_numberformatter___construct, ZEND_ACC_PUBLIC )
-	ZEND_FENTRY( create, ZEND_FN( numfmt_create ), arginfo_numberformatter___construct, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC )
-	PHP_NAMED_FE( format, ZEND_FN( numfmt_format ), arginfo_numberformatter_format )
-	PHP_NAMED_FE( parse, ZEND_FN( numfmt_parse ), number_parse_arginfo )
-	PHP_NAMED_FE( formatCurrency, ZEND_FN( numfmt_format_currency ), arginfo_numberformatter_formatcurrency )
-	PHP_NAMED_FE( parseCurrency, ZEND_FN( numfmt_parse_currency ), number_parse_currency_arginfo )
-	PHP_NAMED_FE( setAttribute, ZEND_FN( numfmt_set_attribute ), arginfo_numberformatter_setattribute )
-	PHP_NAMED_FE( getAttribute, ZEND_FN( numfmt_get_attribute ), arginfo_numberformatter_getattribute )
-	PHP_NAMED_FE( setTextAttribute, ZEND_FN( numfmt_set_text_attribute ), arginfo_numberformatter_setattribute )
-	PHP_NAMED_FE( getTextAttribute, ZEND_FN( numfmt_get_text_attribute ), arginfo_numberformatter_getattribute )
-	PHP_NAMED_FE( setSymbol, ZEND_FN( numfmt_set_symbol ), arginfo_numberformatter_setsymbol )
-	PHP_NAMED_FE( getSymbol, ZEND_FN( numfmt_get_symbol ), arginfo_numberformatter_getattribute )
-	PHP_NAMED_FE( setPattern, ZEND_FN( numfmt_set_pattern ), arginfo_numberformatter_setpattern )
-	PHP_NAMED_FE( getPattern, ZEND_FN( numfmt_get_pattern ), arginfo_numberformatter_getpattern )
-	PHP_NAMED_FE( getLocale, ZEND_FN( numfmt_get_locale ), arginfo_numberformatter_getlocale )
-	PHP_NAMED_FE( getErrorCode, ZEND_FN( numfmt_get_error_code ), arginfo_numberformatter_getpattern )
-	PHP_NAMED_FE( getErrorMessage, ZEND_FN( numfmt_get_error_message ), arginfo_numberformatter_getpattern )
-	PHP_FE_END
-};
-/* }}} */
-
 /* {{{ formatter_register_class
  * Initialize 'NumberFormatter' class
  */
@@ -178,9 +97,11 @@ void formatter_register_class( void )
 	zend_class_entry ce;
 
 	/* Create and register 'NumberFormatter' class. */
-	INIT_CLASS_ENTRY( ce, "NumberFormatter", NumberFormatter_class_functions );
+	INIT_CLASS_ENTRY( ce, "NumberFormatter", class_NumberFormatter_methods );
 	ce.create_object = NumberFormatter_object_create;
 	NumberFormatter_ce_ptr = zend_register_internal_class( &ce );
+	NumberFormatter_ce_ptr->serialize = zend_class_serialize_deny;
+	NumberFormatter_ce_ptr->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&NumberFormatter_handlers, &std_object_handlers,
 		sizeof(NumberFormatter_handlers));

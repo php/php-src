@@ -4,7 +4,7 @@ errmsg: properties cannot be final
 <?php
 
 class test {
-	final $var = 1;
+    final $var = 1;
 }
 
 echo "Done\n";

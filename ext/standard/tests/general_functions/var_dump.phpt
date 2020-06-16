@@ -99,7 +99,7 @@ $strings = array (
   'PHP',
   "abcd\x0n1234\x0005678\x0000efgh\xijkl",  // strings with hexadecimal NULL
   "abcd\0efgh\0ijkl\x00mnop\x000qrst\00uvwx\0000yz",  // strings with octal NULL
-  "1234\t\n5678\n\t9100\rabcda"  // strings with escape characters
+  "1234\t\n5678\n\t9100\"abcda"  // strings with escape characters
 );
 /* calling check_vardump() to display contents of strings
    using var_dump() */
@@ -239,8 +239,8 @@ $resources = array (
    using var_dump() */
 check_vardump($resources);
 
-echo "\n*** Testing var_dump() on different combinations of scalar 
-            and non-scalar variables ***\n";
+echo "\n*** Testing var_dump() on different combinations of scalar
+    and non-scalar variables ***\n";
 /* a variable which is unset */
 $unset_var = 10.5;
 unset($unset_var);
@@ -260,14 +260,14 @@ $variations = array (
    non-scalar variables using var_dump() */
 check_vardump($variations);
 
-echo "\n*** Testing var_dump() on miscelleneous input arguments ***\n";
+echo "\n*** Testing var_dump() on miscellaneous input arguments ***\n";
 $misc_values = array (
   @$unset_var,
   NULL,  // NULL argument
   @$undef_variable,  //undefined variable
   null
 );
-/* calling check_vardump() to display miscelleneous data using var_dump() */
+/* calling check_vardump() to display miscellaneous data using var_dump() */
 check_vardump($misc_values);
 
 echo "\n*** Testing var_dump() on multiple arguments ***\n";
@@ -450,7 +450,7 @@ string(34) "abcd efgh ijkl mnop 0qrst uvwx 0yz"
 -- Iteration 14 --
 string(22) "1234	
 5678
-	9100abcda"
+	9100"abcda"
 
 *** Testing var_dump() on boolean variables ***
 -- Iteration 1 --
@@ -836,8 +836,8 @@ resource(%d) of type (stream)
 -- Iteration 2 --
 resource(%d) of type (stream)
 
-*** Testing var_dump() on different combinations of scalar 
-            and non-scalar variables ***
+*** Testing var_dump() on different combinations of scalar
+    and non-scalar variables ***
 -- Iteration 1 --
 array(3) {
   [0]=>
@@ -923,7 +923,7 @@ array(4) {
   string(5) "/00\7"
 }
 
-*** Testing var_dump() on miscelleneous input arguments ***
+*** Testing var_dump() on miscellaneous input arguments ***
 -- Iteration 1 --
 NULL
 -- Iteration 2 --
@@ -1104,7 +1104,7 @@ array(14) {
   [13]=>
   string(22) "1234	
 5678
-	9100abcda"
+	9100"abcda"
 }
 array(15) {
   [0]=>

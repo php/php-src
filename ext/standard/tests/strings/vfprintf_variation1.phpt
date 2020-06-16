@@ -23,21 +23,25 @@ unset( $funset );
 
 class FooClass
 {
-	public function __toString()
-	{
-		return "Object";
-	}
+    public function __toString()
+    {
+        return "Object";
+    }
 }
 
 // Output facilitating function
 function writeAndDump($fp, $format, $args)
 {
-	ftruncate( $fp, 0 );
-	$length = vfprintf( $fp, $format, $args );
-	rewind( $fp );
-	$content = stream_get_contents( $fp );
-	var_dump( $content );
-	var_dump( $length );
+    try {
+        ftruncate( $fp, 0 );
+        $length = vfprintf( $fp, $format, $args );
+        rewind( $fp );
+        $content = stream_get_contents( $fp );
+        var_dump( $content );
+        var_dump( $length );
+    } catch (TypeError $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 }
 
 // Test vfprintf()
@@ -53,7 +57,6 @@ writeAndDump( $fp, "Testing %b %d %f %o %s %x %X", array( 9, 6, 2.5502, 24, "foo
 fclose( $fp );
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 
@@ -63,8 +66,7 @@ unlink( $file );
 ?>
 --EXPECT--
 *** Testing vfprintf() : variation functionality ***
-string(6) "format"
-int(6)
+vfprintf(): Argument #3 ($args) must be of type array, null given
 string(17) "Foo is 30 and bar"
 int(17)
 string(14) "Foobar testing"
@@ -77,4 +79,3 @@ string(0) ""
 int(0)
 string(38) "Testing 1001 6 2.550200 30 foobar f 41"
 int(38)
-===DONE===

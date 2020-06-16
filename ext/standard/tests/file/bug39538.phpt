@@ -7,8 +7,8 @@ $content = array("\"\nthis is an test\", \"next data\", \"p\narsed\"","\"\r\nthi
 $file = __DIR__ . "/bug39538.csv";
 @unlink($file);
 foreach ($content as $v) {
-	file_put_contents($file, $v);
-	print_r (fgetcsv(fopen($file, "r"), filesize($file)));
+    file_put_contents($file, $v);
+    print_r (fgetcsv(fopen($file, "r"), filesize($file)));
 }
 @unlink($file);
 ?>

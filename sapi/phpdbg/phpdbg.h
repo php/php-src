@@ -109,7 +109,7 @@
 #define PHPDBG_DEFAULT_PROMPT "prompt>"
 /* }}} */
 
-/* Hey, apple. One shouldn't define *functions* from the standard C library as marcos. */
+/* Hey, apple. One shouldn't define *functions* from the standard C library as macros. */
 #ifdef memcpy
 #define memcpy_tmp(...) memcpy(__VA_ARGS__)
 #undef memcpy
@@ -314,7 +314,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	int input_buflen;                            /* length of stdin input buffer */
 	phpdbg_signal_safe_mem sigsafe_mem;          /* memory to use in async safe environment (only once!) */
 
-	JMP_BUF *sigsegv_bailout;                    /* bailout address for accesibility probing */
+	JMP_BUF *sigsegv_bailout;                    /* bailout address for accessibility probing */
 
 	uint64_t flags;                              /* phpdbg flags */
 

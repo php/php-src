@@ -44,7 +44,6 @@ var_dump(key($multi_array[3][3][3]));
 // see if internal pointer is in the same position from when accessing this inner array
 var_dump(key($multi_array[3][3][3][1]));
 ?>
-===DONE===
 --EXPECT--
 *** Testing key() : usage variations ***
 
@@ -60,4 +59,3 @@ Initial Position: int(0)
 Current Position: int(2)
 int(2)
 int(0)
-===DONE===

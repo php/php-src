@@ -45,7 +45,7 @@
 #endif
 
 
-#if HAVE_MBSTRING
+#ifdef HAVE_MBSTRING
 
 #include "libmbfl/mbfl/mbfilter.h"
 #include "SAPI.h"
@@ -61,54 +61,6 @@ PHP_RINIT_FUNCTION(mbstring);
 PHP_RSHUTDOWN_FUNCTION(mbstring);
 PHP_MINFO_FUNCTION(mbstring);
 
-/* functions in php_unicode.c */
-PHP_FUNCTION(mb_convert_case);
-PHP_FUNCTION(mb_strtoupper);
-PHP_FUNCTION(mb_strtolower);
-
-/* php function registration */
-PHP_FUNCTION(mb_language);
-PHP_FUNCTION(mb_internal_encoding);
-PHP_FUNCTION(mb_http_input);
-PHP_FUNCTION(mb_http_output);
-PHP_FUNCTION(mb_detect_order);
-PHP_FUNCTION(mb_substitute_character);
-PHP_FUNCTION(mb_preferred_mime_name);
-PHP_FUNCTION(mb_parse_str);
-PHP_FUNCTION(mb_output_handler);
-PHP_FUNCTION(mb_str_split);
-PHP_FUNCTION(mb_strlen);
-PHP_FUNCTION(mb_strpos);
-PHP_FUNCTION(mb_strrpos);
-PHP_FUNCTION(mb_stripos);
-PHP_FUNCTION(mb_strripos);
-PHP_FUNCTION(mb_strstr);
-PHP_FUNCTION(mb_strrchr);
-PHP_FUNCTION(mb_stristr);
-PHP_FUNCTION(mb_strrichr);
-PHP_FUNCTION(mb_substr_count);
-PHP_FUNCTION(mb_substr);
-PHP_FUNCTION(mb_strcut);
-PHP_FUNCTION(mb_strwidth);
-PHP_FUNCTION(mb_strimwidth);
-PHP_FUNCTION(mb_convert_encoding);
-PHP_FUNCTION(mb_detect_encoding);
-PHP_FUNCTION(mb_list_encodings);
-PHP_FUNCTION(mb_encoding_aliases);
-PHP_FUNCTION(mb_convert_kana);
-PHP_FUNCTION(mb_encode_mimeheader);
-PHP_FUNCTION(mb_decode_mimeheader);
-PHP_FUNCTION(mb_convert_variables);
-PHP_FUNCTION(mb_encode_numericentity);
-PHP_FUNCTION(mb_decode_numericentity);
-PHP_FUNCTION(mb_send_mail);
-PHP_FUNCTION(mb_get_info);
-PHP_FUNCTION(mb_check_encoding);
-PHP_FUNCTION(mb_ord);
-PHP_FUNCTION(mb_chr);
-PHP_FUNCTION(mb_scrub);
-
-
 MBSTRING_API char *php_mb_safe_strrchr_ex(const char *s, unsigned int c,
                                     size_t nbytes, const mbfl_encoding *enc);
 MBSTRING_API char *php_mb_safe_strrchr(const char *s, unsigned int c,
@@ -117,16 +69,15 @@ MBSTRING_API char *php_mb_safe_strrchr(const char *s, unsigned int c,
 MBSTRING_API char *php_mb_convert_encoding_ex(
 		const char *input, size_t length,
 		const mbfl_encoding *to_encoding, const mbfl_encoding *from_encoding, size_t *output_len);
-MBSTRING_API char * php_mb_convert_encoding(const char *input, size_t length,
-                                      const char *_to_encoding,
-                                      const char *_from_encodings,
-                                      size_t *output_len);
+MBSTRING_API char * php_mb_convert_encoding(
+		const char *input, size_t length, const mbfl_encoding *to_encoding,
+		const mbfl_encoding **from_encodings, size_t num_from_encodings, size_t *output_len);
 
 MBSTRING_API size_t php_mb_mbchar_bytes_ex(const char *s, const mbfl_encoding *enc);
 MBSTRING_API size_t php_mb_mbchar_bytes(const char *s);
 
-MBSTRING_API size_t php_mb_stripos(int mode, const char *old_haystack, size_t old_haystack_len, const char *old_needle, size_t old_needle_len, zend_long offset, zend_string *from_encoding);
-MBSTRING_API int php_mb_check_encoding(const char *input, size_t length, const char *enc);
+MBSTRING_API size_t php_mb_stripos(int mode, const char *old_haystack, size_t old_haystack_len, const char *old_needle, size_t old_needle_len, zend_long offset, const mbfl_encoding *encoding);
+MBSTRING_API int php_mb_check_encoding(const char *input, size_t length, const mbfl_encoding *encoding);
 
 ZEND_BEGIN_MODULE_GLOBALS(mbstring)
 	char *internal_encoding_name;
@@ -157,7 +108,7 @@ ZEND_BEGIN_MODULE_GLOBALS(mbstring)
 	size_t illegalchars;
 	mbfl_buffer_converter *outconv;
     void *http_output_conv_mimetypes;
-#if HAVE_MBREGEX
+#ifdef HAVE_MBREGEX
     struct _zend_mb_regex_globals *mb_regex_globals;
     zend_long regex_stack_limit;
 #endif
@@ -167,7 +118,7 @@ ZEND_BEGIN_MODULE_GLOBALS(mbstring)
 	zend_bool internal_encoding_set;
 	zend_bool http_output_set;
 	zend_bool http_input_set;
-#if HAVE_MBREGEX
+#ifdef HAVE_MBREGEX
     zend_long regex_retry_limit;
 #endif
 ZEND_END_MODULE_GLOBALS(mbstring)

@@ -511,9 +511,11 @@ PHPAPI int php_network_parse_network_address_with_port(const char *addr, zend_lo
 	zend_string *errstr = NULL;
 #if HAVE_IPV6
 	struct sockaddr_in6 *in6 = (struct sockaddr_in6*)sa;
-#endif
 
-	memset(sa, 0, sizeof(struct sockaddr));
+	memset(in6, 0, sizeof(struct sockaddr_in6));
+#else
+	memset(in4, 0, sizeof(struct sockaddr_in));
+#endif
 
 	if (*addr == '[') {
 		colon = memchr(addr + 1, ']', addrlen-1);
@@ -766,7 +768,7 @@ PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
 /* {{{ php_network_connect_socket_to_host */
 php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short port,
 		int socktype, int asynchronous, struct timeval *timeout, zend_string **error_string,
-		int *error_code, char *bindto, unsigned short bindport, long sockopts
+		int *error_code, const char *bindto, unsigned short bindport, long sockopts
 		)
 {
 	int num_addrs, n, fatal = 0;
@@ -873,7 +875,7 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
 #endif
 
 				if (!local_address || bind(sock, local_address, local_address_len)) {
-					php_error_docref(NULL, E_WARNING, "failed to bind to '%s:%d', system said: %s", bindto, bindport, strerror(errno));
+					php_error_docref(NULL, E_WARNING, "Failed to bind to '%s:%d', system said: %s", bindto, bindport, strerror(errno));
 				}
 skip_bind:
 				if (local_address) {
@@ -916,7 +918,7 @@ skip_bind:
 			if (timeout) {
 				gettimeofday(&time_now, NULL);
 
-				if (timercmp(&time_now, &limit_time, >=)) {
+				if (!timercmp(&time_now, &limit_time, <)) {
 					/* time limit expired; don't attempt any further connections */
 					fatal = 1;
 				} else {
@@ -1171,16 +1173,18 @@ PHPAPI void _php_emit_fd_setsize_warning(int max_fd)
 PHPAPI int php_poll2(php_pollfd *ufds, unsigned int nfds, int timeout)
 {
 	fd_set rset, wset, eset;
-	php_socket_t max_fd = SOCK_ERR;
+	php_socket_t max_fd = SOCK_ERR; /* effectively unused on Windows */
 	unsigned int i;
 	int n;
 	struct timeval tv;
 
+#ifndef PHP_WIN32
 	/* check the highest numbered descriptor */
 	for (i = 0; i < nfds; i++) {
 		if (ufds[i].fd > max_fd)
 			max_fd = ufds[i].fd;
 	}
+#endif
 
 	PHP_SAFE_MAX_FD(max_fd, nfds + 1);
 
@@ -1204,7 +1208,7 @@ PHPAPI int php_poll2(php_pollfd *ufds, unsigned int nfds, int timeout)
 		tv.tv_sec = timeout / 1000;
 		tv.tv_usec = (timeout - (tv.tv_sec * 1000)) * 1000;
 	}
-/* Reseting/initializing */
+/* Resetting/initializing */
 #ifdef PHP_WIN32
 	WSASetLastError(0);
 #else
@@ -1303,7 +1307,7 @@ struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char *
 #endif
 #endif
 
-PHPAPI struct hostent*	php_network_gethostbyname(char *name) {
+PHPAPI struct hostent*	php_network_gethostbyname(const char *name) {
 #if !defined(HAVE_GETHOSTBYNAME_R)
 	return gethostbyname(name);
 #else

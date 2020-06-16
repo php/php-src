@@ -34,16 +34,15 @@ $valid_arrays = array(
 /* Loop to check for above arrays with var_export() */
 echo "\n*** Output for arrays ***\n";
 foreach($valid_arrays as $key => $arr) {
-	echo "\n--Iteration: $key --\n";
-	var_export( $arr );
-	echo "\n";
-	var_export( $arr, FALSE);
-	echo "\n";
-	var_dump( var_export( $arr, TRUE) );
-	echo "\n";
+    echo "\n--Iteration: $key --\n";
+    var_export( $arr );
+    echo "\n";
+    var_export( $arr, FALSE);
+    echo "\n";
+    var_dump( var_export( $arr, TRUE) );
+    echo "\n";
 }
 ?>
-===DONE===
 --EXPECT--
 *** Testing var_export() with valid arrays ***
 
@@ -276,4 +275,3 @@ string(41) "array (
   1 => 'test',
 )"
 
-===DONE===

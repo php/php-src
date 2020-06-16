@@ -99,7 +99,6 @@ fclose($fp);
 
 setlocale(LC_CTYPE, $orig);
 ?>
-===DONE===
 --EXPECT--
 *** Testing ctype_punct() : usage variations ***
 
@@ -177,4 +176,3 @@ bool(false)
 
 -- Iteration 25 --
 bool(false)
-===DONE===

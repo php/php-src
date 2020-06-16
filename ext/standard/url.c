@@ -19,16 +19,14 @@
 #include <ctype.h>
 #include <sys/types.h>
 
+#ifdef __SSE2__
+#include <emmintrin.h>
+#endif
+
 #include "php.h"
 
 #include "url.h"
 #include "file.h"
-#ifdef _OSD_POSIX
-# ifndef CHARSET_EBCDIC
-#  define CHARSET_EBCDIC /* this machine uses EBCDIC, not ASCII! */
-# endif
-# include "ebcdic.h"
-#endif /*_OSD_POSIX*/
 
 /* {{{ free_url
  */
@@ -291,6 +289,8 @@ PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
 		if (p < e) {
 			ret->fragment = zend_string_init(p, (e - p), 0);
 			php_replace_controlchars_ex(ZSTR_VAL(ret->fragment), ZSTR_LEN(ret->fragment));
+		} else {
+			ret->fragment = ZSTR_EMPTY_ALLOC();
 		}
 		e = p-1;
 	}
@@ -301,6 +301,8 @@ PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
 		if (p < e) {
 			ret->query = zend_string_init(p, (e - p), 0);
 			php_replace_controlchars_ex(ZSTR_VAL(ret->query), ZSTR_LEN(ret->query));
+		} else {
+			ret->query = ZSTR_EMPTY_ALLOC();
 		}
 		e = p-1;
 	}
@@ -363,8 +365,8 @@ PHP_FUNCTION(parse_url)
 				if (resource->fragment != NULL) RETVAL_STR_COPY(resource->fragment);
 				break;
 			default:
-				php_error_docref(NULL, E_WARNING, "Invalid URL component identifier " ZEND_LONG_FMT, key);
-				RETVAL_FALSE;
+				zend_argument_value_error(2, "must be a valid URL component identifier, " ZEND_LONG_FMT " given", key);
+				break;
 		}
 		goto done;
 	}
@@ -446,10 +448,7 @@ static int php_htoi(char *s)
 
 static unsigned char hexchars[] = "0123456789ABCDEF";
 
-/* {{{ php_url_encode
- */
-PHPAPI zend_string *php_url_encode(char const *s, size_t len)
-{
+static zend_always_inline zend_string *php_url_encode_impl(const char *s, size_t len, zend_bool raw) /* {{{ */ {
 	register unsigned char c;
 	unsigned char *to;
 	unsigned char const *from, *end;
@@ -460,28 +459,80 @@ PHPAPI zend_string *php_url_encode(char const *s, size_t len)
 	start = zend_string_safe_alloc(3, len, 0, 0);
 	to = (unsigned char*)ZSTR_VAL(start);
 
+#ifdef __SSE2__
+	while (from + 16 < end) {
+		__m128i mask;
+		uint32_t bits;
+		const __m128i _A = _mm_set1_epi8('A' - 1);
+		const __m128i Z_ = _mm_set1_epi8('Z' + 1);
+		const __m128i _a = _mm_set1_epi8('a' - 1);
+		const __m128i z_ = _mm_set1_epi8('z' + 1);
+		const __m128i _zero = _mm_set1_epi8('0' - 1);
+		const __m128i nine_ = _mm_set1_epi8('9' + 1);
+		const __m128i dot = _mm_set1_epi8('.');
+		const __m128i minus = _mm_set1_epi8('-');
+		const __m128i under = _mm_set1_epi8('_');
+
+		__m128i in = _mm_loadu_si128((__m128i *)from);
+
+		__m128i gt = _mm_cmpgt_epi8(in, _A);
+		__m128i lt = _mm_cmplt_epi8(in, Z_);
+		mask = _mm_and_si128(lt, gt); /* upper */
+		gt = _mm_cmpgt_epi8(in, _a);
+		lt = _mm_cmplt_epi8(in, z_);
+		mask = _mm_or_si128(mask, _mm_and_si128(lt, gt)); /* lower */
+		gt = _mm_cmpgt_epi8(in, _zero);
+		lt = _mm_cmplt_epi8(in, nine_);
+		mask = _mm_or_si128(mask, _mm_and_si128(lt, gt)); /* number */
+		mask = _mm_or_si128(mask, _mm_cmpeq_epi8(in, dot));
+		mask = _mm_or_si128(mask, _mm_cmpeq_epi8(in, minus));
+		mask = _mm_or_si128(mask, _mm_cmpeq_epi8(in, under));
+
+		if (!raw) {
+			const __m128i blank = _mm_set1_epi8(' ');
+			__m128i eq = _mm_cmpeq_epi8(in, blank);
+			if (_mm_movemask_epi8(eq)) {
+				in = _mm_add_epi8(in, _mm_and_si128(eq, _mm_set1_epi8('+' - ' ')));
+				mask = _mm_or_si128(mask, eq);
+			}
+		}
+		if (raw) {
+			const __m128i wavy = _mm_set1_epi8('~');
+			mask = _mm_or_si128(mask, _mm_cmpeq_epi8(in, wavy));
+		}
+		if (((bits = _mm_movemask_epi8(mask)) & 0xffff) == 0xffff) {
+			_mm_storeu_si128((__m128i*)to, in);
+			to += 16;
+		} else {
+			int i;
+			unsigned char xmm[16];
+			_mm_storeu_si128((__m128i*)xmm, in);
+			for (i = 0; i < sizeof(xmm); i++) {
+				if ((bits & (0x1 << i))) {
+					*to++ = xmm[i];
+				} else {
+					*to++ = '%';
+					*to++ = hexchars[xmm[i] >> 4];
+					*to++ = hexchars[xmm[i] & 0xf];
+				}
+			}
+		}
+		from += 16;
+	}
+#endif
 	while (from < end) {
 		c = *from++;
 
-		if (c == ' ') {
+		if (!raw && c == ' ') {
 			*to++ = '+';
-#ifndef CHARSET_EBCDIC
 		} else if ((c < '0' && c != '-' && c != '.') ||
-				   (c < 'A' && c > '9') ||
-				   (c > 'Z' && c < 'a' && c != '_') ||
-				   (c > 'z')) {
+				(c < 'A' && c > '9') ||
+				(c > 'Z' && c < 'a' && c != '_') ||
+				(c > 'z' && (!raw || c != '~'))) {
 			to[0] = '%';
 			to[1] = hexchars[c >> 4];
 			to[2] = hexchars[c & 15];
 			to += 3;
-#else /*CHARSET_EBCDIC*/
-		} else if (!isalnum(c) && strchr("_-.", c) == NULL) {
-			/* Allow only alphanumeric chars and '_', '-', '.'; escape the rest */
-			to[0] = '%';
-			to[1] = hexchars[os_toascii[c] >> 4];
-			to[2] = hexchars[os_toascii[c] & 15];
-			to += 3;
-#endif /*CHARSET_EBCDIC*/
 		} else {
 			*to++ = c;
 		}
@@ -491,6 +542,14 @@ PHPAPI zend_string *php_url_encode(char const *s, size_t len)
 	start = zend_string_truncate(start, to - (unsigned char*)ZSTR_VAL(start), 0);
 
 	return start;
+}
+/* }}} */
+
+/* {{{ php_url_encode
+ */
+PHPAPI zend_string *php_url_encode(char const *s, size_t len)
+{
+	return php_url_encode_impl(s, len, 0);
 }
 /* }}} */
 
@@ -538,11 +597,7 @@ PHPAPI size_t php_url_decode(char *str, size_t len)
 		}
 		else if (*data == '%' && len >= 2 && isxdigit((int) *(data + 1))
 				 && isxdigit((int) *(data + 2))) {
-#ifndef CHARSET_EBCDIC
 			*dest = (char) php_htoi(data + 1);
-#else
-			*dest = os_toebcdic[(char) php_htoi(data + 1)];
-#endif
 			data += 2;
 			len -= 2;
 		} else {
@@ -560,36 +615,7 @@ PHPAPI size_t php_url_decode(char *str, size_t len)
  */
 PHPAPI zend_string *php_raw_url_encode(char const *s, size_t len)
 {
-	register size_t x, y;
-	zend_string *str;
-	char *ret;
-
-	str = zend_string_safe_alloc(3, len, 0, 0);
-	ret = ZSTR_VAL(str);
-	for (x = 0, y = 0; len--; x++, y++) {
-		char c = s[x];
-
-		ret[y] = c;
-#ifndef CHARSET_EBCDIC
-		if ((c < '0' && c != '-' &&  c != '.') ||
-			(c < 'A' && c > '9') ||
-			(c > 'Z' && c < 'a' && c != '_') ||
-			(c > 'z' && c != '~')) {
-			ret[y++] = '%';
-			ret[y++] = hexchars[(unsigned char) c >> 4];
-			ret[y] = hexchars[(unsigned char) c & 15];
-#else /*CHARSET_EBCDIC*/
-		if (!isalnum(c) && strchr("_-.~", c) != NULL) {
-			ret[y++] = '%';
-			ret[y++] = hexchars[os_toascii[(unsigned char) c] >> 4];
-			ret[y] = hexchars[os_toascii[(unsigned char) c] & 15];
-#endif /*CHARSET_EBCDIC*/
-		}
-	}
-	ret[y] = '\0';
-	str = zend_string_truncate(str, y, 0);
-
-	return str;
+	return php_url_encode_impl(s, len, 1);
 }
 /* }}} */
 
@@ -634,11 +660,7 @@ PHPAPI size_t php_raw_url_decode(char *str, size_t len)
 	while (len--) {
 		if (*data == '%' && len >= 2 && isxdigit((int) *(data + 1))
 			&& isxdigit((int) *(data + 2))) {
-#ifndef CHARSET_EBCDIC
 			*dest = (char) php_htoi(data + 1);
-#else
-			*dest = os_toebcdic[(char) php_htoi(data + 1)];
-#endif
 			data += 2;
 			len -= 2;
 		} else {
@@ -665,10 +687,10 @@ PHP_FUNCTION(get_headers)
 	php_stream_context *context;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
-		Z_PARAM_STRING(url, url_len)
+		Z_PARAM_PATH(url, url_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(format)
-		Z_PARAM_RESOURCE_EX(zcontext, 1, 0)
+		Z_PARAM_RESOURCE_OR_NULL(zcontext)
 	ZEND_PARSE_PARAMETERS_END();
 
 	context = php_stream_context_from_zval(zcontext, 0);

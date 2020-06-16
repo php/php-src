@@ -39,23 +39,21 @@ include $pname . '/b/c.php';
 
 $cache_dir = ini_get("opcache.file_cache");
 if (is_dir($cache_dir)) {
-	$it = new RecursiveIteratorIterator(
-		new RecursiveDirectoryIterator($cache_dir, RecursiveDirectoryIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST
-	);
-	foreach ($it as $fi) {
-		$fn = ($fi->isDir() ? 'rmdir' : 'unlink');
-		$fn($fi->getRealPath());
-	}
-	
-	rmdir($cache_dir);
+    $it = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($cache_dir, RecursiveDirectoryIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST
+    );
+    foreach ($it as $fi) {
+        $fn = ($fi->isDir() ? 'rmdir' : 'unlink');
+        $fn($fi->getRealPath());
+    }
+
+    rmdir($cache_dir);
 }
 
 ?>
-===DONE===
 --CLEAN--
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECT--
 This is a
 This is b
 This is b/c
-===DONE===

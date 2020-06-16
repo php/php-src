@@ -20,7 +20,6 @@ var_dump(srand(true));
 var_dump(srand(false));
 var_dump(srand(NULL));
 ?>
-===Done===
 --EXPECT--
 *** Testing srand() : basic functionality ***
 NULL
@@ -31,4 +30,3 @@ NULL
 NULL
 NULL
 NULL
-===Done===

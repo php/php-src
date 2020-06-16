@@ -30,8 +30,6 @@ $cropped = imagecropauto($orig, IMG_CROP_SIDES);
 var_dump(imagesx($cropped));
 
 ?>
-===DONE===
 --EXPECT--
 int(4)
 int(4)
-===DONE===

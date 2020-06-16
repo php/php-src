@@ -21,10 +21,8 @@ try {
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing finfo_close() : error conditions ***
 
 -- Testing finfo_close() function with wrong resource type --
 finfo_close(): supplied resource is not a valid file_info resource
-===DONE===

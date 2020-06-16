@@ -29,15 +29,14 @@ echo "\n-- Open directory second time: --\n";
 var_dump($dh2 = opendir($path));
 
 if ($dh1 !== $dh2) {
-	echo "\nNew resource created\n";
+    echo "\nNew resource created\n";
 } else {
-	echo "\nNo new resource created\n";
+    echo "\nNo new resource created\n";
 }
 
 closedir($dh1);
 closedir($dh2);
 ?>
-===DONE===
 --CLEAN--
 <?php
 $path = __DIR__ . "/私はガラスを食べられますopendir_variation3";
@@ -53,4 +52,3 @@ resource(%d) of type (stream)
 resource(%d) of type (stream)
 
 New resource created
-===DONE===

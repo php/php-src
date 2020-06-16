@@ -17,18 +17,21 @@ $file_handle = fopen($filename, "r");
 // invalid length argument
 echo "-- Testing fread() with invalid length arguments --\n";
 $len = 0;
-var_dump( fread($file_handle, $len) );
-$len = -10;
-var_dump( fread($file_handle, $len) );
+try {
+    var_dump( fread($file_handle, $len) );
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
-echo "Done\n";
---EXPECTF--
+$len = -10;
+try {
+    var_dump( fread($file_handle, $len) );
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+
+--EXPECT--
 *** Testing error conditions ***
 -- Testing fread() with invalid length arguments --
-
-Warning: fread(): Length parameter must be greater than 0 in %s on line %d
-bool(false)
-
-Warning: fread(): Length parameter must be greater than 0 in %s on line %d
-bool(false)
-Done
+fread(): Argument #2 ($length) must be greater than 0
+fread(): Argument #2 ($length) must be greater than 0

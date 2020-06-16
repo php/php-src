@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 function posix_kill(int $pid, int $sig): bool {}
 
 function posix_getpid(): int {}
@@ -27,13 +29,11 @@ function posix_setegid(int $gid): bool {}
 #endif
 
 #ifdef HAVE_GETGROUPS
-/** @return array|false */
-function posix_getgroups() {}
+function posix_getgroups(): array|false {}
 #endif
 
 #ifdef HAVE_GETLOGIN
-/** @return string|false */
-function posix_getlogin() {}
+function posix_getlogin(): string|false {}
 #endif
 
 function posix_getpgrp(): int {}
@@ -45,36 +45,27 @@ function posix_setsid(): int {}
 function posix_setpgid(int $pid, int $pgid): bool {}
 
 #ifdef HAVE_GETPGID
-/** @return int|false */
-function posix_getpgid(int $pid) {}
+function posix_getpgid(int $pid): int|false {}
 #endif
 
 #ifdef HAVE_GETSID
-/** @return int|false */
-function posix_getsid(int $pid) {}
+function posix_getsid(int $pid): int|false {}
 #endif
 
-/** @return array|false */
-function posix_uname() {}
+function posix_uname(): array|false {}
 
-/** @return array|false */
-function posix_times() {}
+function posix_times(): array|false {}
 
 
 #ifdef HAVE_CTERMID
-/** @return string|false */
-function posix_ctermid() {}
+function posix_ctermid(): string|false {}
 #endif
 
-/**
- * @return string|false
- */
-function posix_ttyname($fd) {}
+function posix_ttyname($fd): string|false {}
 
 function posix_isatty($fd): bool {}
 
-/** @return string|false */
-function posix_getcwd() {}
+function posix_getcwd(): string|false {}
 
 #ifdef HAVE_MKFIFO
 function posix_mkfifo(string $pathname, int $mode): bool {}
@@ -86,21 +77,16 @@ function posix_mknod(string $pathname, int $mode, int $major = 0, int $minor = 0
 
 function posix_access(string $file, int $mode = 0): bool {}
 
-/** @return array|false */
-function posix_getgrnam(string $name) {}
+function posix_getgrnam(string $name): array|false {}
 
-/** @return array|false */
-function posix_getgrgid(int $gid) {}
+function posix_getgrgid(int $gid): array|false {}
 
-/** @return array|false */
-function posix_getpwnam(string $username) {}
+function posix_getpwnam(string $username): array|false {}
 
-/** @return array|false */
-function posix_getpwuid(int $uid) {}
+function posix_getpwuid(int $uid): array|false {}
 
 #ifdef HAVE_GETRLIMIT
-/** @return array|false */
-function posix_getrlimit() {}
+function posix_getrlimit(): array|false {}
 #endif
 
 #ifdef HAVE_SETRLIMIT
@@ -109,6 +95,7 @@ function posix_setrlimit(int $resource, int $softlimit, int $hardlimit): bool {}
 
 function posix_get_last_error(): int {}
 
+/** @alias posix_get_last_error */
 function posix_errno(): int {}
 
 function posix_strerror(int $errno): string {}

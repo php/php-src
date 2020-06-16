@@ -10,10 +10,8 @@ phar.require_hash=0
 <?php
 var_dump(Phar::getSupportedCompression());
 ?>
-===DONE===
 --EXPECT--
 array(1) {
   [0]=>
   string(5) "BZIP2"
 }
-===DONE===

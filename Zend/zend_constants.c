@@ -34,7 +34,7 @@
 #define RESET_CONSTANT_VISITED(zv)  Z_ACCESS_FLAGS_P(zv) &= ~IS_CONSTANT_VISITED_MARK
 
 /* Use for special null/true/false constants. */
-static zval null_value, true_value, false_value;
+static zend_constant *null_const, *true_const, *false_const;
 
 void free_zend_constant(zval *zv)
 {
@@ -138,9 +138,9 @@ void zend_register_standard_constants(void)
 	REGISTER_MAIN_BOOL_CONSTANT("FALSE", 0, CONST_PERSISTENT);
 	REGISTER_MAIN_NULL_CONSTANT("NULL", CONST_PERSISTENT);
 
-	ZVAL_NULL(&null_value);
-	ZVAL_TRUE(&true_value);
-	ZVAL_FALSE(&false_value);
+	true_const = zend_hash_str_find_ptr(EG(zend_constants), "TRUE", sizeof("TRUE")-1);
+	false_const = zend_hash_str_find_ptr(EG(zend_constants), "FALSE", sizeof("FALSE")-1);
+	null_const = zend_hash_str_find_ptr(EG(zend_constants), "NULL", sizeof("NULL")-1);
 }
 
 
@@ -235,7 +235,7 @@ static zend_constant *zend_get_halt_offset_constant(const char *name, size_t nam
 	}
 }
 
-ZEND_API zval *_zend_get_special_const(const char *name, size_t len) /* {{{ */
+ZEND_API zend_constant *_zend_get_special_const(const char *name, size_t len) /* {{{ */
 {
 	if (len == 4) {
 		if ((name[0] == 'n' || name[0] == 'N') &&
@@ -243,14 +243,14 @@ ZEND_API zval *_zend_get_special_const(const char *name, size_t len) /* {{{ */
 			(name[2] == 'l' || name[2] == 'L') &&
 			(name[3] == 'l' || name[3] == 'L')
 		) {
-			return &null_value;
+			return null_const;
 		}
 		if ((name[0] == 't' || name[0] == 'T') &&
 			(name[1] == 'r' || name[1] == 'R') &&
 			(name[2] == 'u' || name[2] == 'U') &&
 			(name[3] == 'e' || name[3] == 'E')
 		) {
-			return &true_value;
+			return true_const;
 		}
 	} else {
 		if ((name[0] == 'f' || name[0] == 'F') &&
@@ -259,10 +259,10 @@ ZEND_API zval *_zend_get_special_const(const char *name, size_t len) /* {{{ */
 			(name[3] == 's' || name[3] == 'S') &&
 			(name[4] == 'e' || name[4] == 'E')
 		) {
-			return &false_value;
+			return false_const;
 		}
 	}
-	return 0;
+	return NULL;
 }
 /* }}} */
 
@@ -279,34 +279,52 @@ ZEND_API int zend_verify_const_access(zend_class_constant *c, zend_class_entry *
 }
 /* }}} */
 
-ZEND_API zval *zend_get_constant_str(const char *name, size_t name_len)
+static zend_constant *zend_get_constant_str_impl(const char *name, size_t name_len)
 {
 	zend_constant *c = zend_hash_str_find_ptr(EG(zend_constants), name, name_len);
 	if (c) {
-		return &c->value;
+		return c;
 	}
 
 	c = zend_get_halt_offset_constant(name, name_len);
 	if (c) {
-		return &c->value;
+		return c;
 	}
 
 	return zend_get_special_const(name, name_len);
 }
 
-ZEND_API zval *zend_get_constant(zend_string *name)
+ZEND_API zval *zend_get_constant_str(const char *name, size_t name_len)
+{
+	zend_constant *c = zend_get_constant_str_impl(name, name_len);
+	if (c) {
+		return &c->value;
+	}
+	return NULL;
+}
+
+static zend_constant *zend_get_constant_impl(zend_string *name)
 {
 	zend_constant *c = zend_hash_find_ptr(EG(zend_constants), name);
 	if (c) {
-		return &c->value;
+		return c;
 	}
 
 	c = zend_get_halt_offset_constant(ZSTR_VAL(name), ZSTR_LEN(name));
 	if (c) {
-		return &c->value;
+		return c;
 	}
 
 	return zend_get_special_const(ZSTR_VAL(name), ZSTR_LEN(name));
+}
+
+ZEND_API zval *zend_get_constant(zend_string *name)
+{
+	zend_constant *c = zend_get_constant_impl(name);
+	if (c) {
+		return &c->value;
+	}
+	return NULL;
 }
 
 ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope, uint32_t flags)
@@ -422,23 +440,31 @@ failure:
 		c = zend_hash_str_find_ptr(EG(zend_constants), lcname, lcname_len);
 		free_alloca(lcname, use_heap);
 
-		if (c) {
-			return &c->value;
+		if (!c) {
+			if (flags & IS_CONSTANT_UNQUALIFIED_IN_NAMESPACE) {
+				/* name requires runtime resolution, need to check non-namespaced name */
+				c = zend_get_constant_str_impl(constant_name, const_name_len);
+			}
 		}
-
-		if (!(flags & IS_CONSTANT_UNQUALIFIED_IN_NAMESPACE)) {
-			return NULL;
-		}
-
-		/* name requires runtime resolution, need to check non-namespaced name */
-		return zend_get_constant_str(constant_name, const_name_len);
 	} else {
 		if (cname) {
-			return zend_get_constant(cname);
+			c = zend_get_constant_impl(cname);
 		} else {
-			return zend_get_constant_str(name, name_len);
+			c = zend_get_constant_str_impl(name, name_len);
 		}
 	}
+
+	if (!c) {
+		if (!(flags & ZEND_FETCH_CLASS_SILENT)) {
+			zend_throw_error(NULL, "Undefined constant '%s'", name);
+		}
+		return NULL;
+	}
+
+	if (!(flags & ZEND_FETCH_CLASS_SILENT) && (ZEND_CONSTANT_FLAGS(c) & CONST_DEPRECATED)) {
+		zend_error(E_DEPRECATED, "Constant %s is deprecated", name);
+	}
+	return &c->value;
 }
 
 static void* zend_hash_add_constant(HashTable *ht, zend_string *key, zend_constant *c)

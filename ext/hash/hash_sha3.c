@@ -49,14 +49,14 @@ static inline uint64_t load64(const unsigned char* x) {
 	return ret;
 }
 static inline void store64(unsigned char* x, uint64_t val) {
-	char i;
+	size_t i;
 	for (i = 0; i < 8; ++i) {
 		x[i] = val & 0xFF;
 		val >>= 8;
 	}
 }
 static inline void xor64(unsigned char* x, uint64_t val) {
-	char i;
+	size_t i;
 	for (i = 0; i < 8; ++i) {
 		x[i] ^= val & 0xFF;
 		val >>= 8;

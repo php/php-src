@@ -18,7 +18,5 @@
 #define PACK_H
 
 PHP_MINIT_FUNCTION(pack);
-PHP_FUNCTION(pack);
-PHP_FUNCTION(unpack);
 
 #endif /* PACK_H */

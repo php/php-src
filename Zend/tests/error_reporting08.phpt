@@ -12,13 +12,13 @@ function foo2($arg) {
 }
 
 function foo3() {
-	error_reporting(E_ALL);
-	echo $undef3;
-	throw new Exception("test");
+    error_reporting(E_ALL);
+    echo $undef3;
+    throw new Exception("test");
 }
 
 try {
-	@foo1(@foo2(@foo3()));
+    @foo1(@foo2(@foo3()));
 } catch (Exception $e) {
 }
 
@@ -27,6 +27,6 @@ var_dump(error_reporting());
 echo "Done\n";
 ?>
 --EXPECTF--
-Warning: Undefined variable: undef3 in %s on line %d
+Warning: Undefined variable $undef3 in %s on line %d
 int(32767)
 Done

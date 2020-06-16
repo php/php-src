@@ -16,15 +16,15 @@ date_default_timezone_set("Asia/Calcutta");
 //array of values to iterate over
 $inputs = array(
 
-	  'Day of the month' => 'd',
-	  'Leap Year' =>'L',
-	  'Month number' => 'm',
-	  'Days in the month' => 't',
-	  'Day of the week' => 'w',
-	  'ISO-8601 week number' => 'W',
-	  'Year (1 or 2 digits)' => 'y',
-	  'Year 4 digits' => 'Y',
-	  'Day of the year' => 'z',
+      'Day of the month' => 'd',
+      'Leap Year' =>'L',
+      'Month number' => 'm',
+      'Days in the month' => 't',
+      'Day of the week' => 'w',
+      'ISO-8601 week number' => 'W',
+      'Year (1 or 2 digits)' => 'y',
+      'Year 4 digits' => 'Y',
+      'Day of the year' => 'z',
 );
 
 // loop through each element of the array for timestamp
@@ -33,7 +33,6 @@ foreach($inputs as $key =>$value) {
       var_dump( idate($value) );
 };
 ?>
-===DONE===
 --EXPECTF--
 *** Testing idate() : usage variation ***
 
@@ -63,4 +62,3 @@ int(%d)
 
 --Day of the year--
 int(%d)
-===DONE===

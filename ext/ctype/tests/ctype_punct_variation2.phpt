@@ -20,14 +20,13 @@ echo "*** Testing ctype_punct() : usage variations ***\n";
 $orig = setlocale(LC_CTYPE, "C");
 
 for ($c = 1; $c < 256; $c++) {
-	if (ctype_punct($c)) {
-		echo "character code $c is punctuation\n";
-	}
+    if (ctype_punct($c)) {
+        echo "character code $c is punctuation\n";
+    }
 }
 
 setlocale(LC_CTYPE, $orig);
 ?>
-===DONE===
 --EXPECT--
 *** Testing ctype_punct() : usage variations ***
 character code 33 is punctuation
@@ -62,4 +61,3 @@ character code 123 is punctuation
 character code 124 is punctuation
 character code 125 is punctuation
 character code 126 is punctuation
-===DONE===

@@ -28,32 +28,32 @@ $db = PDOTest::test_factory(__DIR__ . '/common.phpt');
 
 function bug_44707($db) {
 
-	$db->exec('DROP TABLE IF EXISTS test');
-	$db->exec('CREATE TABLE test(id INT, mybool TINYINT)');
+    $db->exec('DROP TABLE IF EXISTS test');
+    $db->exec('CREATE TABLE test(id INT, mybool TINYINT)');
 
-	$id = 1;
-	$mybool = false;
-	var_dump($mybool);
+    $id = 1;
+    $mybool = false;
+    var_dump($mybool);
 
-	$stmt = $db->prepare('INSERT INTO test(id, mybool) VALUES (?, ?)');
-	$stmt->bindParam(1, $id);
-	$stmt->bindParam(2, $mybool, PDO::PARAM_BOOL);
-	var_dump($mybool);
+    $stmt = $db->prepare('INSERT INTO test(id, mybool) VALUES (?, ?)');
+    $stmt->bindParam(1, $id);
+    $stmt->bindParam(2, $mybool, PDO::PARAM_BOOL);
+    var_dump($mybool);
 
-	$stmt->execute();
-	var_dump($mybool);
+    $stmt->execute();
+    var_dump($mybool);
 
-	$stmt = $db->query('SELECT * FROM test');
-	var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
+    $stmt = $db->query('SELECT * FROM test');
+    var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 
-	$stmt = $db->prepare('INSERT INTO test(id, mybool) VALUES (?, ?)');
-	$stmt->bindParam(1, $id);
-	// INT and integer work well together
-	$stmt->bindParam(2, $mybool, PDO::PARAM_INT);
-	$stmt->execute();
+    $stmt = $db->prepare('INSERT INTO test(id, mybool) VALUES (?, ?)');
+    $stmt->bindParam(1, $id);
+    // INT and integer work well together
+    $stmt->bindParam(2, $mybool, PDO::PARAM_INT);
+    $stmt->execute();
 
-	$stmt = $db->query('SELECT * FROM test');
-	var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
+    $stmt = $db->query('SELECT * FROM test');
+    var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 
 }
 

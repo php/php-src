@@ -31,6 +31,8 @@ var_dump( array_filter($input,"even") );
 
 // with default arguments
 var_dump( array_filter($input) );
+// same as with default arguments
+var_dump( array_filter($input, null) );
 
 echo "Done"
 ?>
@@ -41,6 +43,16 @@ array(2) {
   int(2)
   [3]=>
   int(0)
+}
+array(4) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [4]=>
+  int(-1)
 }
 array(4) {
   [0]=>

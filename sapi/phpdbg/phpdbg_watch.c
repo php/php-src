@@ -711,8 +711,9 @@ void phpdbg_automatic_dequeue_free(phpdbg_watch_element *element) {
 		child = child->child;
 	}
 	PHPDBG_G(watchpoint_hit) = 1;
-	phpdbg_notice("watchdelete", "variable=\"%.*s\" recursive=\"%s\"", "%.*s has been removed, removing watchpoint%s", (int) ZSTR_LEN(child->str), ZSTR_VAL(child->str), (child->flags & PHPDBG_WATCH_RECURSIVE_ROOT) ? " recursively" : "");
-	zend_hash_index_del(&PHPDBG_G(watch_elements), child->id);
+	if (zend_hash_index_del(&PHPDBG_G(watch_elements), child->id) == SUCCESS) {
+		phpdbg_notice("watchdelete", "variable=\"%.*s\" recursive=\"%s\"", "%.*s has been removed, removing watchpoint%s", (int) ZSTR_LEN(child->str), ZSTR_VAL(child->str), (child->flags & PHPDBG_WATCH_RECURSIVE_ROOT) ? " recursively" : "");
+	}
 	phpdbg_free_watch_element_tree(element);
 }
 
@@ -1071,7 +1072,7 @@ void phpdbg_reenable_memory_watches(void) {
 	phpdbg_watchpoint_t *watch;
 
 	ZEND_HASH_FOREACH_NUM_KEY(PHPDBG_G(watchlist_mem), page) {
-		/* Disble writing again if there are any watchers on that page */
+		/* Disable writing again if there are any watchers on that page */
 		res = phpdbg_btree_find_closest(&PHPDBG_G(watchpoint_tree), page + phpdbg_pagesize - 1);
 		if (res) {
 			watch = res->ptr;
@@ -1248,10 +1249,12 @@ static int phpdbg_watchpoint_parse_wrapper(char *name, size_t namelen, char *key
 		if (element->child) {
 			element = element->child;
 		}
-		element->id = PHPDBG_G(watch_elements).nNextFreeElement;
-		zend_hash_index_add_ptr(&PHPDBG_G(watch_elements), element->id, element);
 
-		phpdbg_notice("watchadd", "index=\"%d\" variable=\"%.*s\"", "Added%s watchpoint #%d for %.*s", (element->flags & PHPDBG_WATCH_RECURSIVE_ROOT) ? " recursive" : "", element->id, (int) ZSTR_LEN(element->str), ZSTR_VAL(element->str));
+		/* work around missing API for extending an array with a new element, and getting its index */
+		zend_hash_next_index_insert_ptr(&PHPDBG_G(watch_elements), element);
+		element->id = PHPDBG_G(watch_elements).nNextFreeElement - 1;
+
+		phpdbg_notice("watchadd", "index=\"%d\" variable=\"%.*s\"", "Added%s watchpoint #%u for %.*s", (element->flags & PHPDBG_WATCH_RECURSIVE_ROOT) ? " recursive" : "", element->id, (int) ZSTR_LEN(element->str), ZSTR_VAL(element->str));
 	}
 
 	PHPDBG_G(watch_tmp) = NULL;
@@ -1382,11 +1385,11 @@ PHPDBG_WATCH(array) /* {{{ */
 
 
 void phpdbg_setup_watchpoints(void) {
-#if _SC_PAGE_SIZE
+#if defined(_SC_PAGE_SIZE)
 	phpdbg_pagesize = sysconf(_SC_PAGE_SIZE);
-#elif _SC_PAGESIZE
+#elif defined(_SC_PAGESIZE)
 	phpdbg_pagesize = sysconf(_SC_PAGESIZE);
-#elif _SC_NUTC_OS_PAGESIZE
+#elif defined(_SC_NUTC_OS_PAGESIZE)
 	phpdbg_pagesize = sysconf(_SC_NUTC_OS_PAGESIZE);
 #else
 	phpdbg_pagesize = 4096; /* common pagesize */
@@ -1404,6 +1407,8 @@ void phpdbg_setup_watchpoints(void) {
 	zend_hash_init(PHPDBG_G(watchlist_mem), phpdbg_pagesize / (sizeof(Bucket) + sizeof(uint32_t)), NULL, NULL, 1);
 	PHPDBG_G(watchlist_mem_backup) = malloc(phpdbg_pagesize > sizeof(HashTable) ? phpdbg_pagesize : sizeof(HashTable));
 	zend_hash_init(PHPDBG_G(watchlist_mem_backup), phpdbg_pagesize / (sizeof(Bucket) + sizeof(uint32_t)), NULL, NULL, 1);
+
+	PHPDBG_G(watch_tmp) = NULL;
 }
 
 void phpdbg_destroy_watchpoints(void) {
@@ -1430,4 +1435,14 @@ void phpdbg_destroy_watchpoints(void) {
 	free(PHPDBG_G(watchlist_mem));
 	zend_hash_destroy(PHPDBG_G(watchlist_mem_backup));
 	free(PHPDBG_G(watchlist_mem_backup));
+}
+
+void phpdbg_purge_watchpoint_tree(void) {
+	phpdbg_btree_position pos;
+	phpdbg_btree_result *res;
+
+	pos = phpdbg_btree_find_between(&PHPDBG_G(watchpoint_tree), 0, -1);
+	while ((res = phpdbg_btree_next(&pos))) {
+		phpdbg_deactivate_watchpoint(res->ptr);
+	}
 }

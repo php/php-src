@@ -1,12 +1,13 @@
 <?php
 
+/** @generate-function-entries */
+
 /** @param resource $context */
 function libxml_set_streams_context($context): void {}
 
-function libxml_use_internal_errors(bool $use_errors = UNKNOWN): bool {}
+function libxml_use_internal_errors(?bool $use_errors = null): bool {}
 
-/** @return LibXMLError|false */
-function libxml_get_last_error() {}
+function libxml_get_last_error(): LibXMLError|false {}
 
 function libxml_get_errors(): array {}
 

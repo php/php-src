@@ -3,7 +3,7 @@ Test count() function
 --FILE--
 <?php
 /* Prototype: int count ( mixed $var [, int $mode] );
-   Discription: Count elements in an array, or properties in an object
+   Description: Count elements in an array, or properties in an object
 */
 
 echo "*** Testing basic functionality of count() function ***\n";
@@ -31,7 +31,7 @@ print "COUNT_NORMAL: should be 1, is ".count("string")."\n";
 print "COUNT_NORMAL: should be 2, is ".count(array("a", array("b")))."\n";
 
 $arr = array('a'=>array(NULL, NULL, NULL), 1=>array(NULL=>1, 1=>NULL),
-	array(array(array(array(array(NULL))))));
+    array(array(array(array(array(NULL))))));
 print "-- Testing really cool arrays --\n";
 print "COUNT_NORMAL: should be 3, is ".count($arr, COUNT_NORMAL)."\n";
 print "COUNT_RECURSIVE: should be 13, is ".count($arr, COUNT_RECURSIVE)."\n";
@@ -47,7 +47,7 @@ $count_array = array(
   array( 4 => 1, 3 => -2.344, "3" => "string", "2" => NULL,
          1 => -2.344, array()),
   array( TRUE => TRUE, FALSE => FALSE, "" => "", " " => " ",
-	 NULL => NULL, "\x000" => "\x000", "\000" => "\000"),
+     NULL => NULL, "\x000" => "\x000", "\000" => "\000"),
   array( NULL, 1.23 => "Hi", "string" => "hello",
          array("" => "World", "-2.34" => "a", "0" => "b"))
 );
@@ -104,14 +104,10 @@ echo "\n-- Testing count() on arrays containing references --\n";
 $arr = array(1, array("a", "b", "c"));
 $arr[2] = &$arr[1];
 
-$mode_arr = array( COUNT_NORMAL, COUNT_RECURSIVE, 0, 1, -1, -1.45, 2, TRUE,
-                   FALSE, NULL);
-for( $i =0; $i < count( $mode_arr ); $i++) {
-  echo "For mode '$mode_arr[$i]' count is => ";
-  var_dump(count($arr, $mode_arr[$i]));
-}
-
-echo "\nDone";
+echo "Count normal" . \PHP_EOL;
+var_dump(count($arr, COUNT_NORMAL));
+echo "Count recursive" . \PHP_EOL;
+var_dump(count($arr, COUNT_RECURSIVE));
 
 /* closing the resource handles */
 fclose( $resource1 );
@@ -209,15 +205,7 @@ COUNT_NORMAL: should be 3, is 3
 int(2)
 
 -- Testing count() on arrays containing references --
-For mode '0' count is => int(3)
-For mode '1' count is => int(9)
-For mode '0' count is => int(3)
-For mode '1' count is => int(9)
-For mode '-1' count is => int(3)
-For mode '-1.45' count is => int(3)
-For mode '2' count is => int(3)
-For mode '1' count is => int(9)
-For mode '' count is => int(3)
-For mode '' count is => int(3)
-
-Done
+Count normal
+int(3)
+Count recursive
+int(9)

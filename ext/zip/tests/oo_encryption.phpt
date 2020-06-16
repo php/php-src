@@ -3,7 +3,7 @@ ZipArchive::setEncryption*() functions
 --SKIPIF--
 <?php
 if (!extension_loaded('zip')) die('skip');
-if (!method_exists('ZipArchive', 'setEncryptionName')) die('skip encrytion not supported');
+if (!method_exists('ZipArchive', 'setEncryptionName')) die('skip encryption not supported');
 ?>
 --FILE--
 <?php
@@ -59,7 +59,7 @@ string(3) "bar"
 == Stream
 string(3) "foo"
 
-Warning: file_get_contents(%s): failed to open stream: operation failed in %s on line %d
+Warning: file_get_contents(%s): Failed to open stream: operation failed in %s on line %d
 bool(false)
 string(3) "bar"
 == Done

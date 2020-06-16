@@ -10,17 +10,17 @@ class class1{}
 class class2{}
 
 class class3{
-	public $aaa;
-	private $bbb;
-	protected $ccc;
+    public $aaa;
+    private $bbb;
+    protected $ccc;
 }
 
 class class4 extends class3{
 }
 
 class class5 extends class3{
-	public $ddd;
-	private $eee;
+    public $ddd;
+    private $eee;
 }
 
 // Define a bunch of objects all of which will use standard compare object handler
@@ -42,7 +42,6 @@ var_dump($obj4 == $obj3);
 var_dump($obj5 == $obj3);
 
 ?>
-===DONE===
 --EXPECT--
 Simple test for standard compare object handler
 
@@ -56,4 +55,3 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
-===DONE===

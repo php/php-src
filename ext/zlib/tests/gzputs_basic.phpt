@@ -23,9 +23,7 @@ gzclose($h);
 echo "\n";
 unlink($filename);
 ?>
-===DONE===
 --EXPECT--
 int(34)
 int(10)
 Here is the string to be written. Here is th
-===DONE===

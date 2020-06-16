@@ -19,9 +19,9 @@ unlink($directory . $file);
 
 echo "Above test directory\n";
 try {
-	$db = new SQLite3('../bad' . $file);
+    $db = new SQLite3('../bad' . $file);
 } catch (Exception $e) {
-	echo $e . "\n";
+    echo $e . "\n";
 }
 
 echo "Done\n";

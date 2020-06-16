@@ -27,7 +27,6 @@ $ao = new ArrayObject(array(2,3,1));
 $ao->uasort('cmp');
 var_dump($ao);
 ?>
-===DONE===
 --EXPECT--
 *** Testing ArrayObject::uasort() : basic functionality ***
 object(ArrayObject)#1 (1) {
@@ -41,4 +40,3 @@ object(ArrayObject)#1 (1) {
     int(1)
   }
 }
-===DONE===

@@ -15,7 +15,7 @@ $file = __DIR__ . "hash_file.txt";
 $key = 'secret';
 
 echo "\n-- Testing hash_hmac_file() function with invalid hash algorithm --\n";
-try { 
+try {
     var_dump(hash_hmac_file('foo', $file, $key, TRUE));
 }
 catch (\Error $e) {
@@ -34,21 +34,19 @@ echo "\n-- Testing hash_hmac_file() function with bad path --\n";
 try {
     var_dump(hash_hmac_file('md5', $file.chr(0).$file, $key, TRUE));
 }
-catch (\Error $e) {
+catch (TypeError $e) {
     echo $e->getMessage() . "\n";
 }
 
 ?>
-===Done===
 --EXPECT--
 *** Testing hash() : error conditions ***
 
 -- Testing hash_hmac_file() function with invalid hash algorithm --
-Unknown hashing algorithm: foo
+hash_hmac_file(): Argument #1 ($algo) must be a valid cryptographic hashing algorithm
 
 -- Testing hash_hmac_file() function with non-cryptographic hash algorithm --
-Non-cryptographic hashing algorithm: crc32
+hash_hmac_file(): Argument #1 ($algo) must be a valid cryptographic hashing algorithm
 
 -- Testing hash_hmac_file() function with bad path --
-Invalid path
-===Done===
+hash_hmac_file(): Argument #2 ($data) must be a valid path

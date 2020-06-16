@@ -32,7 +32,7 @@ typedef struct {
 #define PHP_HASH_HAVAL_INIT_DECL(p,b)	PHP_HASH_API void PHP_##p##HAVAL##b##Init(PHP_HAVAL_CTX *); \
 										PHP_HASH_API void PHP_HAVAL##b##Final(unsigned char*, PHP_HAVAL_CTX *);
 
-PHP_HASH_API void PHP_HAVALUpdate(PHP_HAVAL_CTX *, const unsigned char *, unsigned int);
+PHP_HASH_API void PHP_HAVALUpdate(PHP_HAVAL_CTX *, const unsigned char *, size_t);
 
 PHP_HASH_HAVAL_INIT_DECL(3,128)
 PHP_HASH_HAVAL_INIT_DECL(3,160)

@@ -6,56 +6,56 @@ Steve Seear <stevseea@php.net>
 --FILE--
 <?php
 class A {
-	static public $pubC = "pubC in A";
-	static protected $protC = "protC in A";
-	static private $privC = "privC in A";
+    static public $pubC = "pubC in A";
+    static protected $protC = "protC in A";
+    static private $privC = "privC in A";
 
-	static public $pubA = "pubA in A";
-	static protected $protA = "protA in A";
-	static private $privA = "privA in A";
+    static public $pubA = "pubA in A";
+    static protected $protA = "protA in A";
+    static private $privA = "privA in A";
 }
 
 class B extends A {
-	static public $pubC = "pubC in B";
-	static protected $protC = "protC in B";
-	static private $privC = "privC in B";
+    static public $pubC = "pubC in B";
+    static protected $protC = "protC in B";
+    static private $privC = "privC in B";
 
-	static public $pubB = "pubB in B";
-	static protected $protB = "protB in B";
-	static private $privB = "privB in B";
+    static public $pubB = "pubB in B";
+    static protected $protB = "protB in B";
+    static private $privB = "privB in B";
 }
 
 class C extends B {
-	static public $pubC = "pubC in C";
-	static protected $protC = "protC in C";
-	static private $privC = "privC in C";
+    static public $pubC = "pubC in C";
+    static protected $protC = "protC in C";
+    static private $privC = "privC in C";
 }
 
 class X {
-	static public $pubC = "pubC in X";
-	static protected $protC = "protC in X";
-	static private $privC = "privC in X";
+    static public $pubC = "pubC in X";
+    static protected $protC = "protC in X";
+    static private $privC = "privC in X";
 }
 
 $myC = new C;
 $rc = new ReflectionClass("C");
 
 function showInfo($name) {
-	global $rc, $myC;
-	echo "--- (Reflecting on $name) ---\n";
-	try {
-		$rp = $rc->getProperty($name);
-	} catch (Exception $e) {
-		echo $e->getMessage() . "\n";
-		return;
-	}
-	try {
-		var_dump($rp);
-		var_dump($rp->getValue($myC));
-	} catch (Exception $e) {
-		echo $e->getMessage() . "\n";
-		return;
-	}
+    global $rc, $myC;
+    echo "--- (Reflecting on $name) ---\n";
+    try {
+        $rp = $rc->getProperty($name);
+    } catch (Exception $e) {
+        echo $e->getMessage() . "\n";
+        return;
+    }
+    try {
+        var_dump($rp);
+        var_dump($rp->getValue($myC));
+    } catch (Exception $e) {
+        echo $e->getMessage() . "\n";
+        return;
+    }
 }
 
 
@@ -70,7 +70,7 @@ showInfo("privB");
 showInfo("pubC");
 showInfo("protC");
 showInfo("privC");
-showInfo("doesntExist");
+showInfo("doesNotExist");
 
 showInfo("A::pubC");
 showInfo("A::protC");
@@ -89,9 +89,9 @@ showInfo("C::privC");
 showInfo("X::pubC");
 showInfo("X::protC");
 showInfo("X::privC");
-showInfo("X::doesntExist");
+showInfo("X::doesNotExist");
 
-showInfo("doesntexist::doesntExist");
+showInfo("doesNotexist::doesNotExist");
 
 ?>
 --EXPECTF--
@@ -155,8 +155,8 @@ object(ReflectionProperty)#%d (2) {
   string(1) "C"
 }
 Cannot access non-public member C::$privC
---- (Reflecting on doesntExist) ---
-Property doesntExist does not exist
+--- (Reflecting on doesNotExist) ---
+Property doesNotExist does not exist
 --- (Reflecting on A::pubC) ---
 object(ReflectionProperty)#%d (2) {
   ["name"]=>
@@ -245,7 +245,7 @@ Fully qualified property name X::pubC does not specify a base class of C
 Fully qualified property name X::protC does not specify a base class of C
 --- (Reflecting on X::privC) ---
 Fully qualified property name X::privC does not specify a base class of C
---- (Reflecting on X::doesntExist) ---
-Fully qualified property name X::doesntExist does not specify a base class of C
---- (Reflecting on doesntexist::doesntExist) ---
-Class doesntexist does not exist
+--- (Reflecting on X::doesNotExist) ---
+Fully qualified property name X::doesNotExist does not specify a base class of C
+--- (Reflecting on doesNotexist::doesNotExist) ---
+Class doesnotexist does not exist

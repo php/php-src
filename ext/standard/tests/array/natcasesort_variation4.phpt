@@ -14,16 +14,16 @@ Test natcasesort() function : usage variations - different string types
 echo "*** Testing natcasesort() : usage variation ***\n";
 
 $inputs = array (
-	// group of escape sequences
-	array(null, NULL, "\a", "\cx", "\e", "\f", "\n", "\t", "\xhh", "\ddd", "\v"),
+    // group of escape sequences
+    array(null, NULL, "\a", "\cx", "\e", "\f", "\n", "\t", "\xhh", "\ddd", "\v"),
 
-	// array contains combination of capital/small letters
-	array("lemoN", "Orange", "banana", "apple", "Test", "TTTT", "ttt", "ww", "x", "X", "oraNGe", "BANANA")
+    // array contains combination of capital/small letters
+    array("lemoN", "Orange", "banana", "apple", "Test", "TTTT", "ttt", "ww", "x", "X", "oraNGe", "BANANA")
 );
 
 foreach ($inputs as $array_arg) {
-	var_dump( natcasesort($array_arg) );
-	var_dump($array_arg);
+    var_dump( natcasesort($array_arg) );
+    var_dump($array_arg);
 }
 
 echo "Done";

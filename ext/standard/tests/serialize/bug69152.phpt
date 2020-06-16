@@ -9,8 +9,8 @@ $x->test();
 
 ?>
 --EXPECTF--
-Exception in %s:%d
+Fatal error: Uncaught TypeError: Cannot assign string to property Exception::$trace of type array in %s:%d
 Stack trace:
-#0 {main}
-
-Fatal error: main(): The script tried to execute a method or access a property of an incomplete object. Please ensure that the class definition "unknown" of the object you are trying to operate on was loaded _before_ unserialize() gets called or provide an autoloader to load the class definition in %s on line %d
+#0 %s(%d): unserialize('O:9:"exception"...')
+#1 {main}
+  thrown in %s on line %d

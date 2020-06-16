@@ -71,7 +71,7 @@ $arr1 = array(0 => "0", 1, "two" => 2, "float" => 2.3333, "f1" => 1.2,
               "heredoc" => "Hello world", 11 => new classA(), "resource" => $fp,
               "int" => 133, 222 => "fruit");
 
-// loop through each sub-array within $arrrays to check the behavior of array_intersect_assoc()
+// loop through each sub-array within $arrays to check the behavior of array_intersect_assoc()
 $iterator = 1;
 foreach($arrays as $arr2) {
   echo "-- Iteration $iterator --\n";

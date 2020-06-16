@@ -22,10 +22,8 @@ function myErrorHandler($errno, $errstr, $errfile, $errline)
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing restore_error_handler() : error bug #46196 ***
 NULL
 bool(true)
 NULL
-===DONE===

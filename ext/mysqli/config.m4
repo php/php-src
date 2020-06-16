@@ -107,7 +107,7 @@ if test "$PHP_MYSQLI" != "no"; then
   fi
 
   mysqli_sources="mysqli.c mysqli_api.c mysqli_prop.c mysqli_nonapi.c \
-                  mysqli_fe.c mysqli_report.c mysqli_driver.c mysqli_warning.c \
+                  mysqli_report.c mysqli_driver.c mysqli_warning.c \
                   mysqli_exception.c mysqli_result_iterator.c"
   PHP_NEW_EXTENSION(mysqli, $mysqli_sources, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
   PHP_SUBST(MYSQLI_SHARED_LIBADD)

@@ -35,25 +35,24 @@ $hex_values2 = array(0x61, 0x62, 0x63, 0x64);
 echo "\n-- Octal values --\n";
 echo "'Incorrect' Integers: \n";
 foreach($octal_values1 as $c) {
-	var_dump(ctype_xdigit($c));
+    var_dump(ctype_xdigit($c));
 }
 echo "'Correct' Integers: \n";
 foreach($octal_values2 as $c) {
-	var_dump(ctype_xdigit($c));
+    var_dump(ctype_xdigit($c));
 }
 
 echo "\n-- Hexadecimal values --\n";
 echo "'Incorrect' Integers: \n";
 foreach($hex_values1 as $c) {
-	var_dump(ctype_xdigit($c));
+    var_dump(ctype_xdigit($c));
 }
 echo "'Correct' Integers: \n";
 foreach($hex_values2 as $c) {
-	var_dump(ctype_xdigit($c));
+    var_dump(ctype_xdigit($c));
 }
 setlocale(LC_CTYPE, $orig);
 ?>
-===DONE===
 --EXPECT--
 *** Testing ctype_xdigit() : usage variations ***
 
@@ -80,4 +79,3 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-===DONE===

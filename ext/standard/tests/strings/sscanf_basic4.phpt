@@ -24,7 +24,6 @@ $res = sscanf($str, $format, $arg1, $arg2, $arg3, $arg4);
 var_dump($res, $arg1, $arg2, $arg3, $arg4);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing sscanf() : basic functionality - using char format ***
 
@@ -40,4 +39,3 @@ string(1) "X"
 string(1) "A"
 string(1) "B"
 string(1) "C"
-===DONE===
