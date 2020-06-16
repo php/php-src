@@ -62,7 +62,9 @@ static void sysvshm_free_obj(zend_object *object)
 {
 	sysvshm_shm *sysvshm = sysvshm_from_obj(object);
 
-	shmdt((void *) sysvshm->ptr);
+	if (sysvshm->ptr) {
+		shmdt((void *) sysvshm->ptr);
+	}
 
 	zend_object_std_dtor(&sysvshm->std);
 }
@@ -438,9 +440,7 @@ static int php_remove_shm_data(sysvshm_chunk_head *ptr, zend_long shm_varpos)
 	sysvshm_chunk *chunk_ptr, *next_chunk_ptr;
 	zend_long memcpy_len;
 
-	if (!ptr) {
-		return -1;
-	}
+	ZEND_ASSERT(ptr);
 
 	chunk_ptr = (sysvshm_chunk *) ((char *) ptr + shm_varpos);
 	next_chunk_ptr = (sysvshm_chunk *) ((char *) ptr + shm_varpos + chunk_ptr->next);
