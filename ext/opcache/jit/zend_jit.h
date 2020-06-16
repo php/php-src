@@ -53,6 +53,7 @@
 #define ZEND_JIT_DEBUG_VTUNE     (1<<7)
 
 #define ZEND_JIT_DEBUG_GDB       (1<<8)
+#define ZEND_JIT_DEBUG_SIZE      (1<<9)
 
 #define ZEND_JIT_DEBUG_TRACE_START     (1<<12)
 #define ZEND_JIT_DEBUG_TRACE_STOP      (1<<13)
