@@ -86,7 +86,7 @@ function oci_lob_append(OCI_Lob $lob_descriptor_to, OCI_Lob $lob_descriptor_from
 
 function oci_lob_truncate(OCI_Lob $lob_descriptor, int $length = 0): bool {}
 
-function oci_lob_erase(OCI_Lob $lob_descriptor, int $offset = -1, int $length = -1): int|false {}
+function oci_lob_erase(OCI_Lob $lob_descriptor, int $offset = UNKNOWN, int $length = UNKNOWN): int|false {}
 
 function oci_lob_flush(OCI_Lob $lob_descriptor, int $flag = 0): bool {}
 
@@ -94,29 +94,29 @@ function ocisetbufferinglob(OCI_Lob $lob_descriptor, bool $mode): bool {}
 
 function ocigetbufferinglob(OCI_Lob $lob_descriptor): bool {}
 
-function oci_lob_copy(OCI_Lob $lob_descriptor_to, OCI_Lob $lob_descriptor_from, int $length = 0): bool {}
+function oci_lob_copy(OCI_Lob $lob_descriptor_to, OCI_Lob $lob_descriptor_from, int $length = UNKNOWN): bool {}
 
 function oci_lob_is_equal(OCI_Lob $lob_descriptor_first, OCI_Lob $lob_descriptor_second): bool {}
 
-function oci_lob_export(OCI_Lob $lob_descriptor, $path, int $start = -1, int $length = -1): bool {}
+function oci_lob_export(OCI_Lob $lob_descriptor, $path, int $start = UNKNOWN, int $length = UNKNOWN): bool {}
 
 /**
  * @alias oci_lob_export
  * @deprecated
  */
-function ociwritelobtofile(OCI_Lob $lob_descriptor, $path, int $start = -1, int $length = -1): bool {}
+function ociwritelobtofile(OCI_Lob $lob_descriptor, $path, int $start = UNKNOWN, int $length = UNKNOWN): bool {}
 
 /**
  * @param resource $connection_resource
  */
-function oci_new_descriptor($connection_resource, int $type = OCI_DTYPE_LOB): OCI_Lob {}
+function oci_new_descriptor($connection_resource, int $type = OCI_DTYPE_LOB): ?OCI_Lob {}
 
 /**
  * @param resource $connection_resource
  * @alias oci_new_descriptor
  * @deprecated
  */
-function ocinewdescriptor($connection_resource, int $type = OCI_DTYPE_LOB): OCI_Lob {}
+function ocinewdescriptor($connection_resource, int $type = OCI_DTYPE_LOB): ?OCI_Lob {}
 
 /**
  * @param resource $connection_resource
@@ -144,99 +144,87 @@ function ocicommit($connection_resource): bool {}
 
 /**
  * @param resource $statement_resource
- * @return string|false|null @todo return false, null?
  */
-function oci_field_name($statement_resource, mixed $column_number_or_name) {}
+function oci_field_name($statement_resource, string|int $column_number_or_name): string|false {}
 
 /**
  * @param resource $statement_resource
- * @return string|false|null @todo return false, null?
  * @alias oci_field_name
  * @deprecated
  */
-function ocicolumnname($statement_resource, mixed $column_number_or_name) {}
+function ocicolumnname($statement_resource, string|int $column_number_or_name): string|false {}
 
 /**
  * @param resource $statement_resource
- * @return int|false|null @todo return false, null?
  */
-function oci_field_size($statement_resource, mixed $column_number_or_name) {}
+function oci_field_size($statement_resource, string|int $column_number_or_name): int|false {}
 
 /**
  * @param resource $statement_resource
- * @return int|false|null @todo return false, null?
  * @alias oci_field_size
  * @deprecated
  */
-function ocicolumnsize($statement_resource, mixed $column_number_or_name) {}
+function ocicolumnsize($statement_resource, string|int $column_number_or_name): int|false {}
 
 /**
  * @param resource $statement_resource
- * @return int|false|null @todo return false, null?
  */
-function oci_field_scale($statement_resource, mixed $column_number_or_name) {}
+function oci_field_scale($statement_resource, string|int $column_number_or_name): int|false {}
 
 /**
  * @param resource $statement_resource
- * @return int|false|null @todo return false, null?
  * @alias oci_field_scale
  * @deprecated
  */
-function ocicolumnscale($statement_resource, mixed $column_number_or_name) {}
+function ocicolumnscale($statement_resource, string|int $column_number_or_name): int|false {}
 
 /**
  * @param resource $statement_resource
- * @return int|false|null @todo return false, null?
  */
-function oci_field_precision($statement_resource, mixed $column_number_or_name) {}
+function oci_field_precision($statement_resource, string|int $column_number_or_name): int|false {}
 
 /**
  * @param resource $statement_resource
- * @return int|false|null @todo return false, null?
  * @alias oci_field_precision
  * @deprecated
  */
-function ocicolumnprecision($statement_resource, mixed $column_number_or_name) {}
+function ocicolumnprecision($statement_resource, string|int $column_number_or_name): int|false {}
 
 /**
  * @param resource $statement_resource
- * @return string|int|false|null @todo return false, null?
  */
-function oci_field_type($statement_resource, mixed $column_number_or_name) {}
+function oci_field_type($statement_resource, string|int $column_number_or_name): string|int|false {}
 
 /**
  * @param resource $statement_resource
- * @return string|int|false|null @todo return false, null?
  * @alias oci_field_type
  * @deprecated
  */
-function ocicolumntype($statement_resource, mixed $column_number_or_name) {}
+function ocicolumntype($statement_resource, string|int $column_number_or_name): string|int|false {}
 
 /**
  * @param resource $statement_resource
- * @return int|false|null @todo return false, null?
  */
-function oci_field_type_raw($statement_resource, mixed $column_number_or_name) {}
+function oci_field_type_raw($statement_resource, string|int $column_number_or_name): int|false {}
 
 /**
  * @param resource $statement_resource
- * @return int|false|null @todo return false, null?
  * @alias oci_field_type_raw
  * @deprecated
  */
-function ocicolumntyperaw($statement_resource, mixed $column_number_or_name) {}
+function ocicolumntyperaw($statement_resource, string|int $column_number_or_name): int|false {}
 
 /**
  * @param resource $statement_resource
  */
-function oci_field_is_null($statement_resource, mixed $column_number_or_name): bool {}
+function oci_field_is_null($statement_resource, string|int $column_number_or_name): bool {}
 
 /**
  * @param resource $statement_resource
  * @alias oci_field_is_null
  * @deprecated
  */
-function ocicolumnisnull($statement_resource, mixed $column_number_or_name): bool {}
+function ocicolumnisnull($statement_resource, string|int $column_number_or_name): bool {}
 
 function oci_internal_debug(bool $mode): void {}
 
@@ -284,13 +272,13 @@ function ocifetch($statement_resource): bool {}
 
 /**
  * @param resource $statement_resource
- * @param mixed $result
+ * @param array $result
  */
-function ocifetchinto($statement_resource, &$result, int $mode = 0): int|false {}
+function ocifetchinto($statement_resource, &$result, int $mode = OCI_NUM): int|false {}
 
 /**
  * @param resource $statement_resource
- * @param mixed $output
+ * @param array $output
  */
 function oci_fetch_all($statement_resource, &$output, int $skip = 0, int $maximum_rows = -1, int $flags = 0): int {}
 
@@ -305,7 +293,7 @@ function ocifetchstatement($statement_resource, &$output, int $skip = 0, int $ma
 /**
  * @param resource $statement_resource
  */
-function oci_fetch_object($statement_resource, int $mode = 0): object {}
+function oci_fetch_object($statement_resource, int $mode = PHP_OCI_ASSOC | PHP_OCI_RETURN_NULLS): ?stdClass {}
 
 /**
  * @param resource $statement_resource
@@ -320,7 +308,7 @@ function oci_fetch_assoc($statement_resource): array|false {}
 /**
  * @param resource $statement_resource
  */
-function oci_fetch_array($statement_resource, int $mode = 0): array|false {}
+function oci_fetch_array($statement_resource, int $mode = PHP_OCI_BOTH | PHP_OCI_RETURN_NULLS): array|false {}
 
 /**
  * @param resource $statement_resource
