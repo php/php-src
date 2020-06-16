@@ -10293,20 +10293,32 @@ static int zend_jit_isset_isempty_dim(dasm_State **Dst, const zend_op *opline, c
 			|7:
 		}
 
-		|	SAVE_VALID_OPLINE opline, r0
-	    if (Z_REG(op1_addr) != ZREG_FCARG1a) {
-			|	LOAD_ZVAL_ADDR FCARG1a, op1_addr
-		}
-		if (opline->op2_type == IS_CONST && Z_EXTRA_P(RT_CONSTANT(opline, opline->op2)) == ZEND_EXTRA_VALUE) {
-			ZEND_ASSERT(Z_MODE(op2_addr) == IS_CONST_ZVAL);
-			|	LOAD_ADDR FCARG2a, (Z_ZV(op2_addr) + 1)
+		if (op1_info & (MAY_BE_STRING|MAY_BE_OBJECT)) {
+			|	SAVE_VALID_OPLINE opline, r0
+		    if (Z_REG(op1_addr) != ZREG_FCARG1a) {
+				|	LOAD_ZVAL_ADDR FCARG1a, op1_addr
+			}
+			if (opline->op2_type == IS_CONST && Z_EXTRA_P(RT_CONSTANT(opline, opline->op2)) == ZEND_EXTRA_VALUE) {
+				ZEND_ASSERT(Z_MODE(op2_addr) == IS_CONST_ZVAL);
+				|	LOAD_ADDR FCARG2a, (Z_ZV(op2_addr) + 1)
+			} else {
+				|	LOAD_ZVAL_ADDR FCARG2a, op2_addr
+			}
+			|	EXT_CALL zend_jit_isset_dim_helper, r0
+			|	test r0, r0
+			|	jz >9
+			|	jmp >8
 		} else {
-			|	LOAD_ZVAL_ADDR FCARG2a, op2_addr
+			if (op2_info & MAY_BE_UNDEF) {
+				if (op2_info & MAY_BE_ANY) {
+					|	IF_NOT_ZVAL_TYPE op2_addr, IS_UNDEF, >1
+				}
+				|	mov FCARG1d, opline->op2.var
+				|	EXT_CALL zend_jit_undefined_op_helper, r0
+				|1:
+			}
+			|	jmp >9
 		}
-		|	EXT_CALL zend_jit_isset_dim_helper, r0
-		|	test r0, r0
-		|	jz >9
-		|	jmp >8
 
 		if (op1_info & MAY_BE_ARRAY) {
 			|.code
