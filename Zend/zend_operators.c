@@ -2089,7 +2089,7 @@ ZEND_API int ZEND_FASTCALL zend_compare(zval *op1, zval *op2) /* {{{ */
 				} else if (Z_TYPE_P(op2)==IS_ARRAY) {
 					return -1;
 				} else {
-					ZEND_ASSERT(0);
+					ZEND_UNREACHABLE();
 					zend_throw_error(NULL, "Unsupported operand types");
 					return 1;
 				}

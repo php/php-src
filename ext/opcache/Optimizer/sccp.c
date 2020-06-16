@@ -267,7 +267,7 @@ static zend_bool can_replace_op1(
 				(opline - 1)->opcode != ZEND_ASSIGN_STATIC_PROP_REF;
 		default:
 			if (ssa_op->op1_def != -1) {
-				ZEND_ASSERT(0);
+				ZEND_UNREACHABLE();
 				return 0;
 			}
 	}

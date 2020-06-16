@@ -451,10 +451,10 @@ static zend_always_inline const zend_op* zend_jit_trace_get_exit_opline(zend_jit
 			*exit_if_true = opline->opcode == ZEND_JMPZ;
 			return opline + 1;
 		} else {
-			ZEND_ASSERT(0);
+			ZEND_UNREACHABLE();
 		}
 	} else  {
-		ZEND_ASSERT(0);
+		ZEND_UNREACHABLE();
 	}
 	*exit_if_true = 0;
 	return NULL;
@@ -476,7 +476,7 @@ static zend_always_inline zend_bool zend_jit_may_be_polymorphic_call(const zend_
 	} else if (opline->opcode == ZEND_NEW) {
 		return (opline->op1_type != IS_CONST);
 	} else {
-		ZEND_ASSERT(0);
+		ZEND_UNREACHABLE();
 		return 0;
 	}
 }

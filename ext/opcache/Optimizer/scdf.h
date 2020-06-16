@@ -86,7 +86,7 @@ static inline uint32_t scdf_edge(zend_cfg *cfg, int from, int to) {
 			return edge;
 		}
 	}
-	ZEND_ASSERT(0);
+	ZEND_UNREACHABLE();
 }
 
 static inline zend_bool scdf_is_edge_feasible(scdf_ctx *scdf, int from, int to) {

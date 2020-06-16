@@ -1504,7 +1504,7 @@ static int zend_ffi_ctype_name(zend_ffi_ctype_name_buf *buf, const zend_ffi_type
 				}
 				break;
 			default:
-				ZEND_ASSERT(0);
+				ZEND_UNREACHABLE();
 		}
 		if (name) {
 			break;
@@ -1992,7 +1992,7 @@ static HashTable *zend_ffi_cdata_get_debug_info(zend_object *obj, int *is_temp) 
 			return ht;
 			break;
 		default:
-			ZEND_ASSERT(0);
+			ZEND_UNREACHABLE();
 			break;
 	}
 	return NULL;
@@ -5364,7 +5364,7 @@ void zend_ffi_resolve_const(const char *name, size_t name_len, zend_ffi_val *val
 					val->kind = ZEND_FFI_VAL_UINT64;
 					break;
 				default:
-					ZEND_ASSERT(0);
+					ZEND_UNREACHABLE();
 			}
 			return;
 		}
@@ -6185,7 +6185,7 @@ void zend_ffi_declare_tag(const char *name, size_t name_len, zend_ffi_dcl *dcl, 
 				return;
 			}
 		} else {
-			ZEND_ASSERT(0);
+			ZEND_UNREACHABLE();
 			return;
 		}
 		dcl->type = type;
@@ -6212,7 +6212,7 @@ void zend_ffi_declare_tag(const char *name, size_t name_len, zend_ffi_dcl *dcl, 
 			type = ZEND_FFI_TYPE(dcl->type);
 			type->enumeration.tag_name = zend_string_copy(tag_name);
 		} else {
-			ZEND_ASSERT(0);
+			ZEND_UNREACHABLE();
 		}
 		tag->type = ZEND_FFI_TYPE_MAKE_OWNED(dcl->type);
 		dcl->type = ZEND_FFI_TYPE(dcl->type);
@@ -6511,7 +6511,7 @@ static int zend_ffi_nested_type(zend_ffi_type *type, zend_ffi_type *nested_type)
 			}
 			break;
 		default:
-			ZEND_ASSERT(0);
+			ZEND_UNREACHABLE();
 	}
 }
 /* }}} */

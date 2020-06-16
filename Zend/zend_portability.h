@@ -107,13 +107,15 @@
 # define ZEND_ASSERT(c) ZEND_ASSUME(c)
 #endif
 
+#if ZEND_DEBUG
+# define ZEND_UNREACHABLE() do {ZEND_ASSERT(0); ZEND_ASSUME(0);} while (0)
+#else
+# define ZEND_UNREACHABLE() ZEND_ASSUME(0)
+#endif
+
 /* Only use this macro if you know for sure that all of the switches values
    are covered by its case statements */
-#if ZEND_DEBUG
-# define EMPTY_SWITCH_DEFAULT_CASE() default: ZEND_ASSERT(0); break;
-#else
-# define EMPTY_SWITCH_DEFAULT_CASE() default: ZEND_ASSUME(0); break;
-#endif
+#define EMPTY_SWITCH_DEFAULT_CASE() default: ZEND_UNREACHABLE(); break;
 
 #if defined(__GNUC__) && __GNUC__ >= 4
 # define ZEND_IGNORE_VALUE(x) (({ __typeof__ (x) __x = (x); (void) __x; }))

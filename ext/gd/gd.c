@@ -1872,7 +1872,7 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 				(*func_p)(im, fp, q, t);
 				break;
 			default:
-				ZEND_ASSERT(0);
+				ZEND_UNREACHABLE();
 		}
 		fflush(fp);
 		fclose(fp);
@@ -1899,7 +1899,7 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 				(*func_p)(im, tmp, q, t);
 				break;
 			default:
-				ZEND_ASSERT(0);
+				ZEND_UNREACHABLE();
 		}
 
 		fseek(tmp, 0, SEEK_SET);

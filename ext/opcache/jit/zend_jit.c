@@ -3373,7 +3373,7 @@ ZEND_EXT_API int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 			return SUCCESS;
 		}
 	} else {
-		ZEND_ASSERT(0);
+		ZEND_UNREACHABLE();
 	}
 }
 
@@ -3485,7 +3485,7 @@ ZEND_EXT_API int zend_jit_script(zend_script *script)
 			ZEND_SET_FUNC_INFO(call_graph.op_arrays[i], NULL);
 		}
 	} else {
-		ZEND_ASSERT(0);
+		ZEND_UNREACHABLE();
 	}
 
 	zend_arena_release(&CG(arena), checkpoint);

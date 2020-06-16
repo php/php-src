@@ -1189,7 +1189,7 @@ int zend_ssa_unlink_use_chain(zend_ssa *ssa, int op, int var) /* {{{ */
 			}
 		}
 		/* something wrong */
-		ZEND_ASSERT(0);
+		ZEND_UNREACHABLE();
 		return 0;
 	}
 }
@@ -1238,7 +1238,7 @@ static inline zend_ssa_phi **zend_ssa_next_use_phi_ptr(zend_ssa *ssa, int var, z
 			}
 		}
 	}
-	ZEND_ASSERT(0);
+	ZEND_UNREACHABLE();
 	return NULL;
 }
 /* }}} */

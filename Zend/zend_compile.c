@@ -1903,7 +1903,7 @@ zend_ast *zend_negate_num_string(zend_ast *ast) /* {{{ */
 		memmove(Z_STRVAL_P(zv) + 1, Z_STRVAL_P(zv), orig_len + 1);
 		Z_STRVAL_P(zv)[0] = '-';
 	} else {
-		ZEND_ASSERT(0);
+		ZEND_UNREACHABLE();
 	}
 	return ast;
 }
@@ -2258,7 +2258,7 @@ static void zend_compile_memoized_expr(znode *result, zend_ast *expr) /* {{{ */
 			Z_TRY_ADDREF(result->u.constant);
 		}
 	} else {
-		ZEND_ASSERT(0);
+		ZEND_UNREACHABLE();
 	}
 }
 /* }}} */

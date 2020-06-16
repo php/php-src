@@ -376,7 +376,7 @@ static zend_object *spl_filesystem_object_clone(zend_object *old_object)
 			intern->u.dir.index = index;
 			break;
 		case SPL_FS_FILE:
-			ZEND_ASSERT(0);
+			ZEND_UNREACHABLE();
 	}
 
 	intern->file_class = source->file_class;

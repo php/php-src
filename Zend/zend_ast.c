@@ -1465,7 +1465,7 @@ tail_call:
 			break;
 		case ZEND_AST_ZNODE:
 			/* This AST kind is only used for temporary nodes during compilation */
-			ZEND_ASSERT(0);
+			ZEND_UNREACHABLE();
 			break;
 
 		/* declaration nodes */

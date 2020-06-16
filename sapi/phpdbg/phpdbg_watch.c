@@ -142,7 +142,7 @@ zend_bool phpdbg_check_watch_diff(phpdbg_watchtype type, void *oldPtr, void *new
 		case WATCH_ON_STR:
 			return memcmp(oldPtr, newPtr, *(size_t *) oldPtr + XtOffsetOf(zend_string, val) - XtOffsetOf(zend_string, len)) != 0;
 		case WATCH_ON_HASHDATA:
-			ZEND_ASSERT(0);
+			ZEND_UNREACHABLE();
 	}
 	return 0;
 }
@@ -210,7 +210,7 @@ void phpdbg_print_watch_diff(phpdbg_watchtype type, zend_string *name, void *old
 			break;
 
 		case WATCH_ON_HASHDATA:
-			ZEND_ASSERT(0);
+			ZEND_UNREACHABLE();
 	}
 
 	phpdbg_xml("</watchdata>");

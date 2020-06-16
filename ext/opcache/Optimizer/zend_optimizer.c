@@ -615,7 +615,7 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 								ZEND_ASSERT(opline->extended_value == ZEND_FREE_ON_RETURN);
 								MAKE_NOP(opline);
 							} else {
-								ZEND_ASSERT(0);
+								ZEND_UNREACHABLE();
 							}
 						}
 						opline++;
