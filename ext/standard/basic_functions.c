@@ -1242,7 +1242,6 @@ PHP_FUNCTION(sleep)
    Delay for a given number of micro seconds */
 PHP_FUNCTION(usleep)
 {
-#if HAVE_USLEEP
 	zend_long num;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -1253,12 +1252,9 @@ PHP_FUNCTION(usleep)
 		zend_argument_value_error(1, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
-	if (usleep((unsigned int)num) < 0) {
-#if ZEND_DEBUG
-		php_error_docref(NULL, E_NOTICE, "usleep() failed with errno %d: %s",
-			errno, strerror(errno));
-#endif
-	}
+
+#if HAVE_USLEEP
+	usleep((unsigned int)num);
 #endif
 }
 /* }}} */
