@@ -24,5 +24,5 @@ echo "Done\n";
 ?>
 --EXPECTF--
 bool(true)
-Shared memory block has already been destroyed.
+Shared memory block has already been destroyed
 Done

@@ -37,6 +37,6 @@ shm_remove($s);
 ?>
 --EXPECT--
 bool(true)
-Shared memory block has already been destroyed.
-Shared memory block has already been destroyed.
+Shared memory block has already been destroyed
+Shared memory block has already been destroyed
 Done

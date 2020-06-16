@@ -203,7 +203,7 @@ PHP_FUNCTION(shm_detach)
 
 	shm_list_ptr = Z_SYSVSHM_P(shm_id);
 	if (!shm_list_ptr->ptr) {
-		zend_throw_error(NULL, "Shared memory block has already been destroyed.");
+		zend_throw_error(NULL, "Shared memory block has already been destroyed");
 		RETURN_THROWS();
 	}
 
@@ -227,7 +227,7 @@ PHP_FUNCTION(shm_remove)
 
 	shm_list_ptr = Z_SYSVSHM_P(shm_id);
 	if (!shm_list_ptr->ptr) {
-		zend_throw_error(NULL, "Shared memory block has already been destroyed.");
+		zend_throw_error(NULL, "Shared memory block has already been destroyed");
 		RETURN_THROWS();
 	}
 
@@ -257,7 +257,7 @@ PHP_FUNCTION(shm_put_var)
 
 	shm_list_ptr = Z_SYSVSHM_P(shm_id);
 	if (!shm_list_ptr->ptr) {
-		zend_throw_error(NULL, "Shared memory block has already been destroyed.");
+		zend_throw_error(NULL, "Shared memory block has already been destroyed");
 		RETURN_THROWS();
 	}
 
@@ -298,7 +298,7 @@ PHP_FUNCTION(shm_get_var)
 
 	shm_list_ptr = Z_SYSVSHM_P(shm_id);
 	if (!shm_list_ptr->ptr) {
-		zend_throw_error(NULL, "Shared memory block has already been destroyed.");
+		zend_throw_error(NULL, "Shared memory block has already been destroyed");
 		RETURN_THROWS();
 	}
 
@@ -336,7 +336,7 @@ PHP_FUNCTION(shm_has_var)
 
 	shm_list_ptr = Z_SYSVSHM_P(shm_id);
 	if (!shm_list_ptr->ptr) {
-		zend_throw_error(NULL, "Shared memory block has already been destroyed.");
+		zend_throw_error(NULL, "Shared memory block has already been destroyed");
 		RETURN_THROWS();
 	}
 
@@ -358,7 +358,7 @@ PHP_FUNCTION(shm_remove_var)
 
 	shm_list_ptr = Z_SYSVSHM_P(shm_id);
 	if (!shm_list_ptr->ptr) {
-		zend_throw_error(NULL, "Shared memory block has already been destroyed.");
+		zend_throw_error(NULL, "Shared memory block has already been destroyed");
 		RETURN_THROWS();
 	}
 
@@ -408,10 +408,6 @@ static zend_long php_check_shm_data(sysvshm_chunk_head *ptr, zend_long key)
 {
 	zend_long pos;
 	sysvshm_chunk *shm_var;
-
-	if (!ptr) {
-		return -1;
-	}
 
 	pos = ptr->start;
 
