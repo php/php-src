@@ -13,8 +13,17 @@ $key = ftok(__DIR__."/003.phpt", 'q');
 $s = shm_attach($key);
 
 var_dump(shm_detach($s));
-var_dump(shm_detach($s));
-shm_remove($s);
+try {
+    shm_detach($s);
+} catch (Error $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    shm_remove($s);
+} catch (Error $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 echo "Done\n";
 ?>
@@ -28,5 +37,6 @@ shm_remove($s);
 ?>
 --EXPECT--
 bool(true)
-bool(true)
+Shared memory block has already been destroyed.
+Shared memory block has already been destroyed.
 Done

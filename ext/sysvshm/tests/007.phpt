@@ -14,11 +14,15 @@ $s = shm_attach($key, 1024);
 var_dump(shm_remove($s));
 
 shm_detach($s);
-var_dump(shm_remove($s));
+try {
+    shm_remove($s);
+} catch (Error $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 echo "Done\n";
 ?>
 --EXPECTF--
 bool(true)
-bool(true)
+Shared memory block has already been destroyed.
 Done

@@ -203,7 +203,8 @@ PHP_FUNCTION(shm_detach)
 
 	shm_list_ptr = Z_SYSVSHM_P(shm_id);
 	if (!shm_list_ptr->ptr) {
-		RETURN_TRUE;
+		zend_throw_error(NULL, "Shared memory block has already been destroyed.");
+		RETURN_THROWS();
 	}
 
 	shmdt((void *) shm_list_ptr->ptr);
@@ -226,7 +227,8 @@ PHP_FUNCTION(shm_remove)
 
 	shm_list_ptr = Z_SYSVSHM_P(shm_id);
 	if (!shm_list_ptr->ptr) {
-		RETURN_TRUE;
+		zend_throw_error(NULL, "Shared memory block has already been destroyed.");
+		RETURN_THROWS();
 	}
 
 	if (shmctl(shm_list_ptr->id, IPC_RMID, NULL) < 0) {
@@ -255,7 +257,8 @@ PHP_FUNCTION(shm_put_var)
 
 	shm_list_ptr = Z_SYSVSHM_P(shm_id);
 	if (!shm_list_ptr->ptr) {
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Shared memory block has already been destroyed.");
+		RETURN_THROWS();
 	}
 
 	/* setup string-variable and serialize */
@@ -294,10 +297,14 @@ PHP_FUNCTION(shm_get_var)
 	}
 
 	shm_list_ptr = Z_SYSVSHM_P(shm_id);
+	if (!shm_list_ptr->ptr) {
+		zend_throw_error(NULL, "Shared memory block has already been destroyed.");
+		RETURN_THROWS();
+	}
 
 	/* setup string-variable and serialize */
 	/* get serialized variable from shared memory */
-	shm_varpos = php_check_shm_data((shm_list_ptr->ptr), shm_key);
+	shm_varpos = php_check_shm_data(shm_list_ptr->ptr, shm_key);
 
 	if (shm_varpos < 0) {
 		php_error_docref(NULL, E_WARNING, "Variable key " ZEND_LONG_FMT " doesn't exist", shm_key);
@@ -328,9 +335,9 @@ PHP_FUNCTION(shm_has_var)
 	}
 
 	shm_list_ptr = Z_SYSVSHM_P(shm_id);
-
 	if (!shm_list_ptr->ptr) {
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Shared memory block has already been destroyed.");
+		RETURN_THROWS();
 	}
 
 	RETURN_BOOL(php_check_shm_data(shm_list_ptr->ptr, shm_key) >= 0);
@@ -350,8 +357,12 @@ PHP_FUNCTION(shm_remove_var)
 	}
 
 	shm_list_ptr = Z_SYSVSHM_P(shm_id);
+	if (!shm_list_ptr->ptr) {
+		zend_throw_error(NULL, "Shared memory block has already been destroyed.");
+		RETURN_THROWS();
+	}
 
-	shm_varpos = php_check_shm_data((shm_list_ptr->ptr), shm_key);
+	shm_varpos = php_check_shm_data(shm_list_ptr->ptr, shm_key);
 
 	if (shm_varpos < 0) {
 		php_error_docref(NULL, E_WARNING, "Variable key " ZEND_LONG_FMT " doesn't exist", shm_key);
