@@ -409,6 +409,8 @@ static zend_long php_check_shm_data(sysvshm_chunk_head *ptr, zend_long key)
 	zend_long pos;
 	sysvshm_chunk *shm_var;
 
+	ZEND_ASSERT(ptr);
+
 	pos = ptr->start;
 
 	for (;;) {
