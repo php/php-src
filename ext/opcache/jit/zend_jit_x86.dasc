@@ -11362,7 +11362,7 @@ static zend_bool zend_jit_fetch_reference(dasm_State **Dst, const zend_op *oplin
 {
 	zend_jit_addr var_addr = *var_addr_ptr;
 	uint32_t var_info = *var_info_ptr;
-	int32_t exit_point = zend_jit_trace_get_exit_point(opline, opline, NULL, ZEND_JIT_EXIT_TO_VM);
+	int32_t exit_point = zend_jit_trace_get_exit_point(opline, opline, NULL, 0);
 	const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 
 	if (!exit_addr) {
@@ -11379,16 +11379,8 @@ static zend_bool zend_jit_fetch_reference(dasm_State **Dst, const zend_op *oplin
 	var_type &= ~IS_TRACE_REFERENCE;
 	if (var_type != IS_UNKNOWN
 	 && (var_info & (MAY_BE_ANY|MAY_BE_UNDEF)) != (1 << var_type)) {
-		exit_point = zend_jit_trace_get_exit_point(opline, opline, NULL, 0);
-		exit_addr = zend_jit_trace_get_exit_addr(exit_point);
-
-		if (!exit_addr) {
-			return 0;
-		}
-
 		|	IF_NOT_Z_TYPE FCARG1a, var_type, &exit_addr
 
-		//var_info = zend_jit_trace_type_to_info_ex(var_type, var_info);
 		ZEND_ASSERT(var_info & (1 << var_type));
 		if (var_type < IS_STRING) {
 			var_info = (1 << var_type);
