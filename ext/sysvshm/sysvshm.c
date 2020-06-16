@@ -29,7 +29,45 @@
 #include "ext/standard/info.h"
 #include "ext/standard/php_var.h"
 #include "zend_smart_str.h"
+#include "Zend/zend_interfaces.h"
 #include "php_ini.h"
+
+/* SysvSharedMemory class */
+
+zend_class_entry *sysvshm_ce;
+static zend_object_handlers sysvshm_object_handlers;
+
+static inline sysvshm_shm *sysvshm_from_obj(zend_object *obj) {
+	return (sysvshm_shm *)((char *)(obj) - XtOffsetOf(sysvshm_shm, std));
+}
+
+#define Z_SYSVSHM_P(zv) sysvshm_from_obj(Z_OBJ_P(zv))
+
+static zend_object *sysvshm_create_object(zend_class_entry *class_type) {
+	sysvshm_shm *intern = zend_object_alloc(sizeof(sysvshm_shm), class_type);
+
+	zend_object_std_init(&intern->std, class_type);
+	object_properties_init(&intern->std, class_type);
+	intern->std.handlers = &sysvshm_object_handlers;
+
+	return &intern->std;
+}
+
+static zend_function *sysvshm_get_constructor(zend_object *object) {
+	zend_throw_error(NULL, "Cannot directly construct SysvSharedMemory, use shm_attach() instead");
+	return NULL;
+}
+
+static void sysvshm_free_obj(zend_object *object)
+{
+	sysvshm_shm *sysvshm = sysvshm_from_obj(object);
+
+	if (sysvshm->ptr) {
+		shmdt((void *) sysvshm->ptr);
+	}
+
+	zend_object_std_dtor(&sysvshm->std);
+}
 
 /* {{{ sysvshm_module_entry
  */
@@ -53,33 +91,29 @@ ZEND_GET_MODULE(sysvshm)
 
 #undef shm_ptr					/* undefine AIX-specific macro */
 
-#define SHM_FETCH_RESOURCE(shm_ptr, z_ptr) do { \
-	if ((shm_ptr = (sysvshm_shm *)zend_fetch_resource(Z_RES_P(z_ptr), PHP_SHM_RSRC_NAME, php_sysvshm.le_shm)) == NULL) { \
-		RETURN_THROWS(); \
-	} \
-} while (0)
-
 THREAD_LS sysvshm_module php_sysvshm;
 
 static int php_put_shm_data(sysvshm_chunk_head *ptr, zend_long key, const char *data, zend_long len);
 static zend_long php_check_shm_data(sysvshm_chunk_head *ptr, zend_long key);
 static int php_remove_shm_data(sysvshm_chunk_head *ptr, zend_long shm_varpos);
 
-/* {{{ php_release_sysvshm
- */
-static void php_release_sysvshm(zend_resource *rsrc)
-{
-	sysvshm_shm *shm_ptr = (sysvshm_shm *) rsrc->ptr;
-	shmdt((void *) shm_ptr->ptr);
-	efree(shm_ptr);
-}
-/* }}} */
-
 /* {{{ PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(sysvshm)
 {
-	php_sysvshm.le_shm = zend_register_list_destructors_ex(php_release_sysvshm, NULL, PHP_SHM_RSRC_NAME, module_number);
+	zend_class_entry ce;
+	INIT_CLASS_ENTRY(ce, "SysvSharedMemory", class_SysvSharedMemory_methods);
+	sysvshm_ce = zend_register_internal_class(&ce);
+	sysvshm_ce->ce_flags |= ZEND_ACC_FINAL;
+	sysvshm_ce->create_object = sysvshm_create_object;
+	sysvshm_ce->serialize = zend_class_serialize_deny;
+	sysvshm_ce->unserialize = zend_class_unserialize_deny;
+
+	memcpy(&sysvshm_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	sysvshm_object_handlers.offset = XtOffsetOf(sysvshm_shm, std);
+	sysvshm_object_handlers.free_obj = sysvshm_free_obj;
+	sysvshm_object_handlers.get_constructor = sysvshm_get_constructor;
+	sysvshm_object_handlers.clone_obj = NULL;
 
 	if (cfg_get_long("sysvshm.init_mem", &php_sysvshm.init_mem) == FAILURE) {
 		php_sysvshm.init_mem=10000;
@@ -105,36 +139,36 @@ PHP_FUNCTION(shm_attach)
 	sysvshm_shm *shm_list_ptr;
 	char *shm_ptr;
 	sysvshm_chunk_head *chunk_ptr;
-	zend_long shm_key, shm_id, shm_size = php_sysvshm.init_mem, shm_flag = 0666;
+	zend_long shm_key, shm_id, shm_size, shm_flag = 0666;
+	zend_bool shm_size_is_null = 1;
 
-	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "l|ll", &shm_key, &shm_size, &shm_flag)) {
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "l|l!l", &shm_key, &shm_size, &shm_size_is_null, &shm_flag)) {
 		RETURN_THROWS();
 	}
 
-	if (shm_size < 1) {
-		php_error_docref(NULL, E_WARNING, "Segment size must be greater than zero");
-		RETURN_FALSE;
-  	}
+	if (shm_size_is_null) {
+		shm_size = php_sysvshm.init_mem;
+	}
 
-	shm_list_ptr = (sysvshm_shm *) emalloc(sizeof(sysvshm_shm));
+	if (shm_size < 1) {
+		zend_argument_value_error(2, "must be greater than 0");
+		RETURN_THROWS();
+  	}
 
 	/* get the id from a specified key or create new shared memory */
 	if ((shm_id = shmget(shm_key, 0, 0)) < 0) {
 		if (shm_size < (zend_long)sizeof(sysvshm_chunk_head)) {
 			php_error_docref(NULL, E_WARNING, "Failed for key 0x" ZEND_XLONG_FMT ": memorysize too small", shm_key);
-			efree(shm_list_ptr);
 			RETURN_FALSE;
 		}
 		if ((shm_id = shmget(shm_key, shm_size, shm_flag | IPC_CREAT | IPC_EXCL)) < 0) {
 			php_error_docref(NULL, E_WARNING, "Failed for key 0x" ZEND_XLONG_FMT ": %s", shm_key, strerror(errno));
-			efree(shm_list_ptr);
 			RETURN_FALSE;
 		}
 	}
 
 	if ((shm_ptr = shmat(shm_id, NULL, 0)) == (void *) -1) {
 		php_error_docref(NULL, E_WARNING, "Failed for key 0x" ZEND_XLONG_FMT ": %s", shm_key, strerror(errno));
-		efree(shm_list_ptr);
 		RETURN_FALSE;
 	}
 
@@ -148,40 +182,56 @@ PHP_FUNCTION(shm_attach)
 		chunk_ptr->free = shm_size-chunk_ptr->end;
 	}
 
+	object_init_ex(return_value, sysvshm_ce);
+
+	shm_list_ptr = Z_SYSVSHM_P(return_value);
+
 	shm_list_ptr->key = shm_key;
 	shm_list_ptr->id = shm_id;
 	shm_list_ptr->ptr = chunk_ptr;
-
-	RETURN_RES(zend_register_resource(shm_list_ptr, php_sysvshm.le_shm));
 }
 /* }}} */
 
-/* {{{ proto bool shm_detach(resource shm_identifier)
+/* {{{ proto bool shm_detach(SysvSharedMemory shm_identifier)
    Disconnects from shared memory segment */
 PHP_FUNCTION(shm_detach)
 {
 	zval *shm_id;
 	sysvshm_shm *shm_list_ptr;
 
-	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "r", &shm_id)) {
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "O", &shm_id, sysvshm_ce)) {
 		RETURN_THROWS();
 	}
-	SHM_FETCH_RESOURCE(shm_list_ptr, shm_id);
-	RETURN_BOOL(SUCCESS == zend_list_close(Z_RES_P(shm_id)));
+
+	shm_list_ptr = Z_SYSVSHM_P(shm_id);
+	if (!shm_list_ptr->ptr) {
+		zend_throw_error(NULL, "Shared memory block has already been destroyed");
+		RETURN_THROWS();
+	}
+
+	shmdt((void *) shm_list_ptr->ptr);
+	shm_list_ptr->ptr = NULL;
+
+	RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ proto bool shm_remove(resource shm_identifier)
+/* {{{ proto bool shm_remove(SysvSharedMemory shm_identifier)
    Removes shared memory from Unix systems */
 PHP_FUNCTION(shm_remove)
 {
 	zval *shm_id;
 	sysvshm_shm *shm_list_ptr;
 
-	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "r", &shm_id)) {
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "O", &shm_id, sysvshm_ce)) {
 		RETURN_THROWS();
 	}
-	SHM_FETCH_RESOURCE(shm_list_ptr, shm_id);
+
+	shm_list_ptr = Z_SYSVSHM_P(shm_id);
+	if (!shm_list_ptr->ptr) {
+		zend_throw_error(NULL, "Shared memory block has already been destroyed");
+		RETURN_THROWS();
+	}
 
 	if (shmctl(shm_list_ptr->id, IPC_RMID, NULL) < 0) {
 		php_error_docref(NULL, E_WARNING, "Failed for key 0x%x, id " ZEND_LONG_FMT ": %s", shm_list_ptr->key, Z_LVAL_P(shm_id), strerror(errno));
@@ -192,7 +242,7 @@ PHP_FUNCTION(shm_remove)
 }
 /* }}} */
 
-/* {{{ proto bool shm_put_var(resource shm_identifier, int variable_key, mixed variable)
+/* {{{ proto bool shm_put_var(SysvSharedMemory shm_identifier, int variable_key, mixed variable)
    Inserts or updates a variable in shared memory */
 PHP_FUNCTION(shm_put_var)
 {
@@ -203,7 +253,13 @@ PHP_FUNCTION(shm_put_var)
 	smart_str shm_var = {0};
 	php_serialize_data_t var_hash;
 
-	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "rlz", &shm_id, &shm_key, &arg_var)) {
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "Olz", &shm_id, sysvshm_ce, &shm_key, &arg_var)) {
+		RETURN_THROWS();
+	}
+
+	shm_list_ptr = Z_SYSVSHM_P(shm_id);
+	if (!shm_list_ptr->ptr) {
+		zend_throw_error(NULL, "Shared memory block has already been destroyed");
 		RETURN_THROWS();
 	}
 
@@ -211,12 +267,6 @@ PHP_FUNCTION(shm_put_var)
 	PHP_VAR_SERIALIZE_INIT(var_hash);
 	php_var_serialize(&shm_var, arg_var, &var_hash);
 	PHP_VAR_SERIALIZE_DESTROY(var_hash);
-
-	shm_list_ptr = zend_fetch_resource(Z_RES_P(shm_id), PHP_SHM_RSRC_NAME, php_sysvshm.le_shm);
-	if (!shm_list_ptr) {
-		smart_str_free(&shm_var);
-		RETURN_THROWS();
-	}
 
 	/* insert serialized variable into shared memory */
 	ret = php_put_shm_data(shm_list_ptr->ptr, shm_key, shm_var.s? ZSTR_VAL(shm_var.s) : NULL, shm_var.s? ZSTR_LEN(shm_var.s) : 0);
@@ -232,7 +282,7 @@ PHP_FUNCTION(shm_put_var)
 }
 /* }}} */
 
-/* {{{ proto mixed shm_get_var(resource id, int variable_key)
+/* {{{ proto mixed shm_get_var(SysvSharedMemory id, int variable_key)
    Returns a variable from shared memory */
 PHP_FUNCTION(shm_get_var)
 {
@@ -244,14 +294,19 @@ PHP_FUNCTION(shm_get_var)
 	sysvshm_chunk *shm_var;
 	php_unserialize_data_t var_hash;
 
-	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "rl", &shm_id, &shm_key)) {
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "Ol", &shm_id, sysvshm_ce, &shm_key)) {
 		RETURN_THROWS();
 	}
-	SHM_FETCH_RESOURCE(shm_list_ptr, shm_id);
+
+	shm_list_ptr = Z_SYSVSHM_P(shm_id);
+	if (!shm_list_ptr->ptr) {
+		zend_throw_error(NULL, "Shared memory block has already been destroyed");
+		RETURN_THROWS();
+	}
 
 	/* setup string-variable and serialize */
 	/* get serialized variable from shared memory */
-	shm_varpos = php_check_shm_data((shm_list_ptr->ptr), shm_key);
+	shm_varpos = php_check_shm_data(shm_list_ptr->ptr, shm_key);
 
 	if (shm_varpos < 0) {
 		php_error_docref(NULL, E_WARNING, "Variable key " ZEND_LONG_FMT " doesn't exist", shm_key);
@@ -269,7 +324,7 @@ PHP_FUNCTION(shm_get_var)
 }
 /* }}} */
 
-/* {{{ proto bool shm_has_var(resource id, int variable_key)
+/* {{{ proto bool shm_has_var(SysvSharedMemory id, int variable_key)
 	Checks whether a specific entry exists */
 PHP_FUNCTION(shm_has_var)
 {
@@ -277,15 +332,21 @@ PHP_FUNCTION(shm_has_var)
 	zend_long shm_key;
 	sysvshm_shm *shm_list_ptr;
 
-	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "rl", &shm_id, &shm_key)) {
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "Ol", &shm_id, sysvshm_ce, &shm_key)) {
 		RETURN_THROWS();
 	}
-	SHM_FETCH_RESOURCE(shm_list_ptr, shm_id);
+
+	shm_list_ptr = Z_SYSVSHM_P(shm_id);
+	if (!shm_list_ptr->ptr) {
+		zend_throw_error(NULL, "Shared memory block has already been destroyed");
+		RETURN_THROWS();
+	}
+
 	RETURN_BOOL(php_check_shm_data(shm_list_ptr->ptr, shm_key) >= 0);
 }
 /* }}} */
 
-/* {{{ proto bool shm_remove_var(resource id, int variable_key)
+/* {{{ proto bool shm_remove_var(SysvSharedMemory id, int variable_key)
    Removes variable from shared memory */
 PHP_FUNCTION(shm_remove_var)
 {
@@ -293,12 +354,17 @@ PHP_FUNCTION(shm_remove_var)
 	zend_long shm_key, shm_varpos;
 	sysvshm_shm *shm_list_ptr;
 
-	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "rl", &shm_id, &shm_key)) {
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "Ol", &shm_id, sysvshm_ce, &shm_key)) {
 		RETURN_THROWS();
 	}
-	SHM_FETCH_RESOURCE(shm_list_ptr, shm_id);
 
-	shm_varpos = php_check_shm_data((shm_list_ptr->ptr), shm_key);
+	shm_list_ptr = Z_SYSVSHM_P(shm_id);
+	if (!shm_list_ptr->ptr) {
+		zend_throw_error(NULL, "Shared memory block has already been destroyed");
+		RETURN_THROWS();
+	}
+
+	shm_varpos = php_check_shm_data(shm_list_ptr->ptr, shm_key);
 
 	if (shm_varpos < 0) {
 		php_error_docref(NULL, E_WARNING, "Variable key " ZEND_LONG_FMT " doesn't exist", shm_key);
@@ -345,6 +411,8 @@ static zend_long php_check_shm_data(sysvshm_chunk_head *ptr, zend_long key)
 	zend_long pos;
 	sysvshm_chunk *shm_var;
 
+	ZEND_ASSERT(ptr);
+
 	pos = ptr->start;
 
 	for (;;) {
@@ -371,6 +439,8 @@ static int php_remove_shm_data(sysvshm_chunk_head *ptr, zend_long shm_varpos)
 {
 	sysvshm_chunk *chunk_ptr, *next_chunk_ptr;
 	zend_long memcpy_len;
+
+	ZEND_ASSERT(ptr);
 
 	chunk_ptr = (sysvshm_chunk *) ((char *) ptr + shm_varpos);
 	next_chunk_ptr = (sysvshm_chunk *) ((char *) ptr + shm_varpos + chunk_ptr->next);

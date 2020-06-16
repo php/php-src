@@ -448,6 +448,11 @@ PHP 8.0 UPGRADE NOTES
     Return value checks using is_resource() should be replaced with checks
     for `false`.
 
+- Sysvshm:
+  . shm_attach() will now return an SysvSharedMemory object rather than a resource.
+    Return value checks using is_resource() should be replaced with checks
+    for `false`.
+
 - tidy:
   . The $use_include_path parameter, which was not used internally, has been
     removed from tidy_repair_string().
