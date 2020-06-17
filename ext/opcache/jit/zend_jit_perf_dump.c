@@ -22,9 +22,10 @@
 #include <unistd.h>
 #include <time.h>
 #include <sys/mman.h>
-#include <sys/syscall.h>
 
-#if defined(__darwin__)
+#if defined(__linux__)
+#include <sys/syscall.h>
+#elif defined(__darwin__)
 # include <pthread.h>
 #elif defined(__FreeBSD__)
 # include <sys/thr.h>

@@ -601,6 +601,9 @@ AX_FUNC_WHICH_GETHOSTBYNAME_R
 dnl Some systems (like OpenSolaris) do not have nanosleep in libc.
 PHP_CHECK_FUNC_LIB(nanosleep, rt)
 
+dnl Haiku does not have network api in libc.
+PHP_CHECK_FUNC_LIB(setsockopt, network)
+
 dnl Check for getaddrinfo, should be a better way, but... Also check for working
 dnl getaddrinfo.
 AC_CACHE_CHECK([for getaddrinfo], ac_cv_func_getaddrinfo,
