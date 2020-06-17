@@ -97,7 +97,8 @@ class CertificateGenerator
             openssl_csr_new($dn, $this->lastKey, ['req_extensions' => 'v3_req']),
             $this->ca,
             $this->caKey,
-            2
+            /* days */ 2,
+            ['digest_alg' => 'sha256'],
         );
 
         $certText = '';
