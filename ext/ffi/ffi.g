@@ -65,6 +65,21 @@ php llk.php ffi.g
 static void yy_error(const char *msg);
 static void yy_error_sym(const char *msg, int sym);
 
+static int get_sym(void);
+static int peek_sym(void) {
+	unsigned const char *saved_text = yy_text;
+	unsigned const char *saved_pos = yy_pos;
+	int saved_line = yy_line;
+
+	int sym = get_sym();
+
+	yy_text = saved_text;
+	yy_pos  = saved_pos;
+	yy_line = saved_line;
+
+	return sym;
+}
+
 %}
 
 declarations:
@@ -143,7 +158,7 @@ declaration_specifiers(zend_ffi_dcl *dcl):
 
 specifier_qualifier_list(zend_ffi_dcl *dcl):
 	"__extension__"?
-	(	?{sym != YY_ID || zend_ffi_is_typedef_name((const char*)yy_text, yy_pos - yy_text)}
+	(	?{sym != YY_ID || zend_ffi_is_typedef_name((const char*)yy_text, yy_pos - yy_text) || peek_sym() == YY__STAR}
 		(	type_specifier(dcl)
 		|	type_qualifier(dcl)
 		|	attributes(dcl)
