@@ -757,7 +757,7 @@ PHP_FUNCTION(getenv)
 		/* SAPI method returns an emalloc()'d string */
 		ptr = sapi_getenv(str, str_len);
 		if (ptr) {
-			// TODO: avoid realocation ???
+			// TODO: avoid reallocation ???
 			RETVAL_STRING(ptr);
 			efree(ptr);
 			return;
@@ -775,7 +775,7 @@ PHP_FUNCTION(getenv)
 		}
 
 		SetLastError(0);
-		/*If the given bugger is not large enough to hold the data, the return value is
+		/*If the given buffer is not large enough to hold the data, the return value is
 		the buffer size,  in characters, required to hold the string and its terminating
 		null character. We use this return value to alloc the final buffer. */
 		size = GetEnvironmentVariableW(keyw, &dummybuf, 0);
