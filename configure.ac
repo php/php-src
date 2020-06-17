@@ -577,6 +577,7 @@ scandir \
 setitimer \
 setenv \
 shutdown \
+sigaction \
 sigprocmask \
 statfs \
 statvfs \

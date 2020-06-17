@@ -31,7 +31,6 @@ Zend Extension Build => API%s
 PHP Extension Build => API%s
 Debug Build => %s
 Thread Safety => %s%A
-Zend Signal Handling => %s
 Zend Memory Manager => %s
 Zend Multibyte Support => %s
 IPv6 Support => %s
