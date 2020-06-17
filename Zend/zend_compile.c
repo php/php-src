@@ -5906,7 +5906,7 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fall
 			zend_op_array *op_array = CG(active_op_array);
 			zend_class_entry *scope = op_array->scope;
 			zend_bool is_ctor =
-				scope && zend_string_equals_literal_ci(op_array->function_name, "__construct");
+				scope && zend_is_constructor(op_array->function_name);
 			if (!is_ctor) {
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"Cannot declare promoted property outside a constructor");
