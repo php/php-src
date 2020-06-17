@@ -124,7 +124,7 @@ static int php_ini_on_update_hosts(zend_ini_entry *entry, zend_string *new_value
 	}
 	zend_hash_clean(hosts);
 
-	/* Use user supplied host allowlist */
+	/* Use user supplied host whitelist */
 	tmp = estrndup(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
 	for (key = php_strtok_r(tmp, ",", &lasts);
 		 key;
@@ -209,7 +209,7 @@ static inline void append_modified_url(smart_str *url, smart_str *dest, smart_st
 		return;
 	}
 
-	/* Check host allowlist. If it's not listed, do nothing. */
+	/* Check host whitelist. If it's not listed, do nothing. */
 	if (url_parts->host) {
 		zend_string *tmp = zend_string_tolower(url_parts->host);
 		if (!zend_hash_exists(&BG(url_adapt_session_hosts_ht), tmp)) {
@@ -372,7 +372,7 @@ static int check_http_host(char *target)
 	return FAILURE;
 }
 
-static int check_host_allowlist(url_adapt_state_ex_t *ctx)
+static int check_host_whitelist(url_adapt_state_ex_t *ctx)
 {
 	php_url *url_parts = NULL;
 	HashTable *allowed_hosts = ctx->type ? &BG(url_adapt_session_hosts_ht) : &BG(url_adapt_output_hosts_ht);
@@ -425,7 +425,7 @@ static void handle_form(STD_PARA)
 		switch (ZSTR_LEN(ctx->tag.s)) {
 			case sizeof("form") - 1:
 				if (!strncasecmp(ZSTR_VAL(ctx->tag.s), "form", ZSTR_LEN(ctx->tag.s))
-					&& check_host_allowlist(ctx) == SUCCESS) {
+					&& check_host_whitelist(ctx) == SUCCESS) {
 					doit = 1;
 				}
 				break;
