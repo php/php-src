@@ -4507,7 +4507,7 @@ void zend_compile_return(zend_ast *ast) /* {{{ */
 			} else if (zend_string_equals_literal_ci(op_array->function_name,
 				ZEND_DESTRUCTOR_FUNC_NAME)) {
 				zend_error(E_DEPRECATED,
-					"Returning now-void value from a destructor is deprecated");
+					"Returning non-void value from a destructor is deprecated");
 			}
 		}
 
