@@ -15,4 +15,4 @@ class C extends B {
 
 ?>
 --EXPECTF--
-Fatal error: Declaration of C::__construct(): void must be compatible with A::__construct(X $x): void in %s on line 10
+Fatal error: Declaration of C::__construct() must be compatible with A::__construct(X $x) in %s on line 10

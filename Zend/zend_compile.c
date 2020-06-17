@@ -4484,8 +4484,9 @@ static int zend_has_finally(void) /* {{{ */
 void zend_compile_return(zend_ast *ast) /* {{{ */
 {
 	zend_ast *expr_ast = ast->child[0];
-	zend_bool is_generator = (CG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR) != 0;
-	zend_bool by_ref = (CG(active_op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0;
+	zend_op_array *op_array = CG(active_op_array);
+	zend_bool is_generator = (op_array->fn_flags & ZEND_ACC_GENERATOR) != 0;
+	zend_bool by_ref = (op_array->fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0;
 
 	znode expr_node;
 	zend_op *opline;
@@ -4498,13 +4499,26 @@ void zend_compile_return(zend_ast *ast) /* {{{ */
 	if (!expr_ast) {
 		expr_node.op_type = IS_CONST;
 		ZVAL_NULL(&expr_node.u.constant);
-	} else if (by_ref && zend_is_variable(expr_ast)) {
-		zend_compile_var(&expr_node, expr_ast, BP_VAR_W, 1);
 	} else {
-		zend_compile_expr(&expr_node, expr_ast);
+		if (op_array->scope && !(op_array->fn_flags & ZEND_ACC_HAS_RETURN_TYPE)) {
+			if (zend_is_constructor(op_array->function_name)) {
+				zend_error(E_DEPRECATED,
+					"Returning non-void value from a constructor is deprecated");
+			} else if (zend_string_equals_literal_ci(op_array->function_name,
+				ZEND_DESTRUCTOR_FUNC_NAME)) {
+				zend_error(E_DEPRECATED,
+					"Returning now-void value from a destructor is deprecated");
+			}
+		}
+
+		if (by_ref && zend_is_variable(expr_ast)) {
+			zend_compile_var(&expr_node, expr_ast, BP_VAR_W, 1);
+		} else {
+			zend_compile_expr(&expr_node, expr_ast);
+		}
 	}
 
-	if ((CG(active_op_array)->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK)
+	if ((op_array->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK)
 	 && (expr_node.op_type == IS_CV || (by_ref && expr_node.op_type == IS_VAR))
 	 && zend_has_finally()) {
 		/* Copy return value into temporary VAR to avoid modification in finally code */
@@ -4516,9 +4530,9 @@ void zend_compile_return(zend_ast *ast) /* {{{ */
 	}
 
 	/* Generator return types are handled separately */
-	if (!is_generator && (CG(active_op_array)->fn_flags & ZEND_ACC_HAS_RETURN_TYPE)) {
+	if (!is_generator && (op_array->fn_flags & ZEND_ACC_HAS_RETURN_TYPE)) {
 		zend_emit_return_type_check(
-			expr_ast ? &expr_node : NULL, CG(active_op_array)->arg_info - 1, 0);
+			expr_ast ? &expr_node : NULL, op_array->arg_info - 1, 0);
 	}
 
 	zend_handle_loops_and_finally((expr_node.op_type & (IS_TMP_VAR | IS_VAR)) ? &expr_node : NULL);
@@ -6467,10 +6481,7 @@ void zend_compile_func_decl(znode *result, zend_ast *ast, zend_bool toplevel) /*
 	uint32_t fallback_return_type = 0;
 
 	if (is_method) {
-		if (zend_string_equals_literal_ci(decl->name, "__construct")
-			|| zend_string_equals_literal_ci(decl->name, "__destruct")) {
-			fallback_return_type = IS_VOID;
-		} else if (zend_string_equals_literal_ci(decl->name, "__toString")) {
+		if (zend_string_equals_literal_ci(decl->name, ZEND_TOSTRING_FUNC_NAME)) {
 			fallback_return_type = IS_STRING;
 		}
 	}

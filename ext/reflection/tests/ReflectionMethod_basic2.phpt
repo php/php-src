@@ -128,10 +128,6 @@ Reflecting on method TestClass::__destruct()
 __toString():
 string(%d) "Method [ <user> public method __destruct ] {
   @@ %s 28 - 28
-
-  - Parameters [0] {
-  }
-  - Return [ void ]
 }
 "
 
