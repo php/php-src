@@ -13,5 +13,6 @@ $ch = curl_init();
 curl_close($ch);
 var_dump($ch);
 ?>
---EXPECTF--
-resource(%d) of type (Unknown)
+--EXPECT--
+object(CurlHandle)#1 (0) {
+}

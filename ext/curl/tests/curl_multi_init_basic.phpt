@@ -25,5 +25,7 @@ var_dump($mh);
 ?>
 --EXPECTF--
 *** Testing curl_multi_init(void); ***
-resource(%d) of type (curl_multi)
-resource(%d) of type (Unknown)
+object(CurlMultiHandle)#1 (0) {
+}
+object(CurlMultiHandle)#1 (0) {
+}

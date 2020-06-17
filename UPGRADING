@@ -739,6 +739,21 @@ PHP 8.0 UPGRADE NOTES
 
 - CURL:
   . The CURL extension now requires at least libcurl 7.29.0.
+  . curl_init() will now return a CurlHandle object rather than a resource.
+    Return value checks using is_resource() should be replaced with
+    checks for `false`. The curl_close() function no longer has an effect,
+    instead the CurlHandle instance is automatically destroyed if it is no
+    longer referenced.
+  . curl_multi_init() will now return a CurlMultiHandle object rather than a
+    resource. Return value checks using is_resource() should be replaced with
+    checks for `false`. The curl_multi_close() function no longer has an effect,
+    instead the CurlMultiHandle instance is automatically destroyed if it is no
+    longer referenced.
+  . curl_share_init() will now return a CurlShareHandle object rather than a
+    resource. Return value checks using is_resource() should be replaced with
+    checks for `false`. The curl_share_close() function no longer has an effect,
+    instead the CurlShareHandle instance is automatically destroyed if it is no
+    longer referenced.
 
 - Enchant:
   . The enchant extension now uses libenchant-2 by default when available.

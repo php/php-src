@@ -39,7 +39,8 @@ array(3) {
   ["result"]=>
   int(%d)
   ["handle"]=>
-  resource(%d) of type (curl)
+  object(CurlHandle)#%d (0) {
+  }
 }
 array(3) {
   ["msg"]=>
@@ -47,5 +48,6 @@ array(3) {
   ["result"]=>
   int(%d)
   ["handle"]=>
-  resource(%d) of type (curl)
+  object(CurlHandle)#%d (0) {
+  }
 }

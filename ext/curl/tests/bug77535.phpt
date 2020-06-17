@@ -53,7 +53,8 @@ class MyHttpClient
                 if (CURLMSG_DONE !== $info['msg']) {
                     continue;
                 }
-                die("Start handle request.");
+                echo "Start handle request.\n";
+                return;
             }
         }
     }
@@ -72,6 +73,7 @@ class MyHttpClient
 
 $buzz = new MyHttpClient();
 $buzz->sendRequest();
+?>
 --EXPECT--
 Start handle request.
 

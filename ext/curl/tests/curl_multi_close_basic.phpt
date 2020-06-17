@@ -13,5 +13,6 @@ $ch = curl_multi_init();
 curl_multi_close($ch);
 var_dump($ch);
 ?>
---EXPECTF--
-resource(%d) of type (Unknown)
+--EXPECT--
+object(CurlMultiHandle)#1 (0) {
+}

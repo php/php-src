@@ -12,16 +12,15 @@ PHP Testfest Berlin 2009-05-10
 	if (!extension_loaded('posix')) {
         die('SKIP - POSIX extension not available');
     }
-
-    if (!function_exists('curl_init')) {
-        die('SKIP - Function curl_init() not available');
+	if (!extension_loaded('sockets')) {
+        die('SKIP - Sockets extension not available');
     }
 ?>
 --FILE--
 <?php
 var_dump(posix_ttyname(0)); // param not a resource
 try {
-    var_dump(posix_ttyname(curl_init())); // wrong resource type
+    var_dump(posix_ttyname(socket_create(AF_INET, SOCK_DGRAM, SOL_UDP))); // wrong resource type
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }

@@ -27,7 +27,11 @@ resource(%d) of type (stream)
 resource(%d) of type (stream)
 resource(%d) of type (Unknown)
 resource(%d) of type (Unknown)
-resource(%d) of type (curl)
-resource(%d) of type (curl)
-resource(%d) of type (Unknown)
-resource(%d) of type (Unknown)
+object(CurlHandle)#1 (0) {
+}
+object(CurlHandle)#1 (0) {
+}
+object(CurlHandle)#1 (0) {
+}
+object(CurlHandle)#1 (0) {
+}

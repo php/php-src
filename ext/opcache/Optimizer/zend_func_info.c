@@ -510,8 +510,8 @@ static const func_info_t func_infos[] = {
 	F1("mysqli_use_result",						MAY_BE_FALSE | MAY_BE_OBJECT),
 
 	/* ext/curl */
-	F1("curl_init",                             MAY_BE_FALSE | MAY_BE_RESOURCE),
-	F1("curl_copy_handle",                      MAY_BE_FALSE | MAY_BE_RESOURCE),
+	F1("curl_init",                             MAY_BE_FALSE | MAY_BE_OBJECT),
+	F1("curl_copy_handle",                      MAY_BE_FALSE | MAY_BE_OBJECT),
 	F1("curl_version",                          MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_ARRAY),
 	F1("curl_getinfo",                          MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING | MAY_BE_LONG | MAY_BE_DOUBLE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY),
 	F1("curl_error",                            MAY_BE_STRING),
@@ -519,9 +519,9 @@ static const func_info_t func_infos[] = {
 	F1("curl_multi_strerror",                   MAY_BE_NULL | MAY_BE_STRING),
 	F1("curl_escape",                           MAY_BE_FALSE | MAY_BE_STRING),
 	F1("curl_unescape",                         MAY_BE_FALSE | MAY_BE_STRING),
-	F1("curl_multi_init",                       MAY_BE_RESOURCE),
-	F1("curl_multi_info_read",                  MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_RESOURCE),
-	F1("curl_share_init",                       MAY_BE_RESOURCE),
+	F1("curl_multi_init",                       MAY_BE_OBJECT),
+	F1("curl_multi_info_read",                  MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_OBJECT),
+	F1("curl_share_init",                       MAY_BE_OBJECT),
 	F1("curl_file_create",                      MAY_BE_OBJECT),
 
 	/* ext/mbstring */
