@@ -3156,7 +3156,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						op1_addr = OP1_REG_ADDR();
 						if (orig_op1_type != IS_UNKNOWN
 						 && (orig_op1_type & IS_TRACE_REFERENCE)) {
-							if (!zend_jit_fetch_reference(&dasm_state, opline, orig_op1_type, &op1_info, &op1_addr)) {
+							if (!zend_jit_fetch_reference(&dasm_state, opline, orig_op1_type, &op1_info, &op1_addr, 1)) {
 								goto jit_failure;
 							}
 						} else {
@@ -3182,7 +3182,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						op1_addr = OP1_REG_ADDR();
 						if (orig_op1_type != IS_UNKNOWN
 						 && (orig_op1_type & IS_TRACE_REFERENCE)) {
-							if (!zend_jit_fetch_reference(&dasm_state, opline, orig_op1_type, &op1_info, &op1_addr)) {
+							if (!zend_jit_fetch_reference(&dasm_state, opline, orig_op1_type, &op1_info, &op1_addr, 1)) {
 								goto jit_failure;
 							}
 						} else {
@@ -3221,10 +3221,28 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						CHECK_OP2_TRACE_TYPE();
 						op1_info = OP1_INFO();
 						op1_def_info = OP1_DEF_INFO();
-						USE_OP1_TRACE_TYPE();
+						op1_addr = OP1_REG_ADDR();
+						op1_def_addr = OP1_DEF_REG_ADDR();
+						if (orig_op1_type != IS_UNKNOWN
+						 && (orig_op1_type & IS_TRACE_REFERENCE)) {
+							if (!zend_jit_fetch_reference(&dasm_state, opline, orig_op1_type, &op1_info, &op1_addr, 0)) {
+								goto jit_failure;
+							}
+							op1_def_addr = op1_addr;
+						} else {
+							USE_OP1_TRACE_TYPE();
+							if (orig_op1_type != IS_UNKNOWN
+							 && (op1_info & MAY_BE_REF)) {
+								if (!zend_jit_noref_guard(&dasm_state, opline, op1_addr)) {
+									goto jit_failure;
+								}
+								op1_info &= ~MAY_BE_REF;
+								op1_def_info &= ~MAY_BE_REF;
+							}
+						}
 						if (!zend_jit_assign(&dasm_state, opline, op_array,
-								op1_info, OP1_REG_ADDR(),
-								op1_def_info, OP1_DEF_REG_ADDR(),
+								op1_info, op1_addr,
+								op1_def_info, op1_def_addr,
 								op2_info, op2_addr, op2_def_addr,
 								res_info, res_addr,
 								zend_may_throw(opline, ssa_op, op_array, ssa))) {
@@ -3616,7 +3634,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						op1_addr = OP1_REG_ADDR();
 						if (orig_op1_type != IS_UNKNOWN
 						 && (orig_op1_type & IS_TRACE_REFERENCE)) {
-							if (!zend_jit_fetch_reference(&dasm_state, opline, orig_op1_type, &op1_info, &op1_addr)) {
+							if (!zend_jit_fetch_reference(&dasm_state, opline, orig_op1_type, &op1_info, &op1_addr, 1)) {
 								goto jit_failure;
 							}
 						} else {
@@ -3649,7 +3667,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						op1_addr = OP1_REG_ADDR();
 						if (orig_op1_type != IS_UNKNOWN
 						 && (orig_op1_type & IS_TRACE_REFERENCE)) {
-							if (!zend_jit_fetch_reference(&dasm_state, opline, orig_op1_type, &op1_info, &op1_addr)) {
+							if (!zend_jit_fetch_reference(&dasm_state, opline, orig_op1_type, &op1_info, &op1_addr, 1)) {
 								goto jit_failure;
 							}
 						} else {
