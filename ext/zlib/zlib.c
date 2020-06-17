@@ -786,7 +786,7 @@ static zend_bool zlib_create_dictionary_string(HashTable *options, char **dict, 
 							}
 							efree(strings);
 							if (!EG(exception)) {
-								zend_value_error("Dictionary entries must be non-empty strings");
+								zend_argument_value_error(2, "must not contain empty strings");
 							}
 							return 0;
 						}
@@ -796,7 +796,7 @@ static zend_bool zlib_create_dictionary_string(HashTable *options, char **dict, 
 									efree(ptr);
 								} while (--ptr >= strings);
 								efree(strings);
-								zend_value_error("Dictionary entries must not contain a NULL-byte");
+								zend_argument_value_error(2, "must not contain strings with null bytes");
 								return 0;
 							}
 						}
@@ -1077,7 +1077,7 @@ PHP_FUNCTION(deflate_init)
 		level = zval_get_long(option_buffer);
 	}
 	if (level < -1 || level > 9) {
-		zend_value_error("Compression level (" ZEND_LONG_FMT ") must be within -1..9", level);
+		zend_value_error("deflate_init(): \"level\" option must be between -1 and 9");
 		RETURN_THROWS();
 	}
 
@@ -1085,7 +1085,7 @@ PHP_FUNCTION(deflate_init)
 		memory = zval_get_long(option_buffer);
 	}
 	if (memory < 1 || memory > 9) {
-		zend_value_error("Compression memory level (" ZEND_LONG_FMT ") must be within 1..9", memory);
+		zend_value_error("deflate_init(): \"memory\" option must be between 1 and 9");
 		RETURN_THROWS();
 	}
 
@@ -1093,7 +1093,7 @@ PHP_FUNCTION(deflate_init)
 		window = zval_get_long(option_buffer);
 	}
 	if (window < 8 || window > 15) {
-		zend_value_error("zlib window size (logarithm) (" ZEND_LONG_FMT ") must be within 8..15", window);
+		zend_value_error("deflate_init(): \"window\" option must be between 8 and 15");
 		RETURN_THROWS();
 	}
 
@@ -1108,7 +1108,7 @@ PHP_FUNCTION(deflate_init)
 		case Z_DEFAULT_STRATEGY:
 			break;
 		default:
-			zend_value_error("Strategy must be one of ZLIB_FILTERED, ZLIB_HUFFMAN_ONLY, ZLIB_RLE, ZLIB_FIXED or ZLIB_DEFAULT_STRATEGY");
+			zend_value_error("deflate_init(): \"strategy\" option must be one of ZLIB_FILTERED, ZLIB_HUFFMAN_ONLY, ZLIB_RLE, ZLIB_FIXED or ZLIB_DEFAULT_STRATEGY");
 			RETURN_THROWS();
 	}
 
@@ -1122,7 +1122,7 @@ PHP_FUNCTION(deflate_init)
 		case PHP_ZLIB_ENCODING_DEFLATE:
 			break;
 		default:
-			zend_value_error("Encoding mode must be ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP or ZLIB_ENCODING_DEFLATE");
+			zend_argument_value_error(1, "must be either ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP, or ZLIB_ENCODING_DEFLATE");
 			RETURN_THROWS();
 	}
 
@@ -1186,8 +1186,7 @@ PHP_FUNCTION(deflate_add)
 			break;
 
 		default:
-			zend_value_error(
-				"Flush mode must be ZLIB_NO_FLUSH, ZLIB_PARTIAL_FLUSH, ZLIB_SYNC_FLUSH, ZLIB_FULL_FLUSH, ZLIB_BLOCK or ZLIB_FINISH");
+			zend_argument_value_error(3, "must be one of ZLIB_NO_FLUSH, ZLIB_PARTIAL_FLUSH, ZLIB_SYNC_FLUSH, ZLIB_FULL_FLUSH, ZLIB_BLOCK, or ZLIB_FINISH");
 			RETURN_THROWS();
 	}
 

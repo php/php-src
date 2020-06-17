@@ -41,8 +41,8 @@ try {
 
 ?>
 --EXPECT--
-Encoding mode must be ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP or ZLIB_ENCODING_DEFLATE
-Compression level (42) must be within -1..9
-Compression level (-2) must be within -1..9
-Compression memory level (0) must be within 1..9
-Compression memory level (10) must be within 1..9
+deflate_init(): Argument #1 ($encoding) must be either ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP, or ZLIB_ENCODING_DEFLATE
+deflate_init(): "level" option must be between -1 and 9
+deflate_init(): "level" option must be between -1 and 9
+deflate_init(): "memory" option must be between 1 and 9
+deflate_init(): "memory" option must be between 1 and 9
