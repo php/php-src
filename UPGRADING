@@ -440,7 +440,7 @@ PHP 8.0 UPGRADE NOTES
 
 - Sysvmsg:
   . msg_get_queue() will now return an SysvMessageQueue object rather than a
-    resource.  Return value checks using is_resource() should be replaced with
+    resource. Return value checks using is_resource() should be replaced with
     checks for `false`.
 
 - Sysvsem:
@@ -474,6 +474,12 @@ PHP 8.0 UPGRADE NOTES
 
 - Zlib:
   . gzgetss() has been removed.
+  . inflate_init() will now return an InflateContext object rather than a
+    resource. Return value checks using is_resource() should be replaced with
+    checks for `false`.
+  . deflate_init() will now return a DeflateContext object rather than a
+    resource. Return value checks using is_resource() should be replaced with
+    checks for `false`.
 
 ========================================
 2. New Features
