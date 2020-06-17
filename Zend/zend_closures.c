@@ -283,8 +283,7 @@ static int zend_create_closure_from_callable(zval *return_value, zval *callable,
 		/* For Closure::fromCallable([$closure, "__invoke"]) return $closure. */
 		if (fcc.object && fcc.object->ce == zend_ce_closure
 				&& zend_string_equals_literal(mptr->common.function_name, "__invoke")) {
-			ZVAL_OBJ(return_value, fcc.object);
-			GC_ADDREF(fcc.object);
+			RETVAL_OBJ_COPY(fcc.object);
 			zend_free_trampoline(mptr);
 			return SUCCESS;
 		}
@@ -725,8 +724,7 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 	if (scope) {
 		closure->func.common.fn_flags |= ZEND_ACC_PUBLIC;
 		if (this_ptr && Z_TYPE_P(this_ptr) == IS_OBJECT && (closure->func.common.fn_flags & ZEND_ACC_STATIC) == 0) {
-			Z_ADDREF_P(this_ptr);
-			ZVAL_OBJ(&closure->this_ptr, Z_OBJ_P(this_ptr));
+			ZVAL_OBJ_COPY(&closure->this_ptr, Z_OBJ_P(this_ptr));
 		}
 	}
 }

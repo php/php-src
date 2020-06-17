@@ -189,8 +189,7 @@ static zend_always_inline zend_bool zend_weakref_find(zval *referent, zval *retu
 		zend_weakref *wr;
 found_weakref:
 		wr = ptr;
-		GC_ADDREF(&wr->std);
-		ZVAL_OBJ(return_value, &wr->std);
+		RETVAL_OBJ_COPY(&wr->std);
 		return 1;
 	}
 
@@ -221,8 +220,7 @@ static zend_always_inline void zend_weakref_get(zval *weakref, zval *return_valu
 	zend_weakref *wr = zend_weakref_fetch(weakref);
 
 	if (wr->referent) {
-		ZVAL_OBJ(return_value, wr->referent);
-		Z_ADDREF_P(return_value);
+		RETVAL_OBJ_COPY(wr->referent);
 	}
 }
 
@@ -433,8 +431,7 @@ static HashTable *zend_weakmap_get_properties_for(zend_object *object, zend_prop
 		zval obj_zv;
 		array_init(&pair);
 
-		ZVAL_OBJ(&obj_zv, (zend_object *) obj_addr);
-		Z_ADDREF(obj_zv);
+		ZVAL_OBJ_COPY(&obj_zv, (zend_object *) obj_addr);
 		add_assoc_zval(&pair, "key", &obj_zv);
 		Z_TRY_ADDREF_P(val);
 		add_assoc_zval(&pair, "value", val);
@@ -511,8 +508,7 @@ static void zend_weakmap_iterator_get_current_key(zend_object_iterator *obj_iter
 		ZEND_ASSERT(0 && "Must have integer key");
 	}
 
-	ZVAL_OBJ(key, (zend_object *) num_key);
-	Z_ADDREF_P(key);
+	ZVAL_OBJ_COPY(key, (zend_object *) num_key);
 }
 
 static void zend_weakmap_iterator_move_forward(zend_object_iterator *obj_iter)

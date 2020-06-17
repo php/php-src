@@ -997,8 +997,7 @@ void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xml
 
 	ZEND_ASSERT(basenode != NULL);
 
-	ZVAL_OBJ(&mapptr->baseobj_zv, &basenode->std);
-	Z_ADDREF(mapptr->baseobj_zv);
+	ZVAL_OBJ_COPY(&mapptr->baseobj_zv, &basenode->std);
 
 	mapptr->baseobj = basenode;
 	mapptr->nodetype = ntype;
@@ -1136,8 +1135,7 @@ PHP_DOM_EXPORT zend_bool php_dom_create_object(xmlNodePtr obj, zval *return_valu
 	}
 
 	if ((intern = (dom_object *) php_dom_object_get_data((void *) obj))) {
-		GC_ADDREF(&intern->std);
-		ZVAL_OBJ(return_value, &intern->std);
+		ZVAL_OBJ_COPY(return_value, &intern->std);
 		return 1;
 	}
 

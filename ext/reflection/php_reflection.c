@@ -1275,8 +1275,7 @@ static void reflection_parameter_factory(zend_function *fptr, zval *closure_obje
 	intern->ref_type = REF_TYPE_PARAMETER;
 	intern->ce = fptr->common.scope;
 	if (closure_object) {
-		Z_ADDREF_P(closure_object);
-		ZVAL_OBJ(&intern->obj, Z_OBJ_P(closure_object));
+		ZVAL_OBJ_COPY(&intern->obj, Z_OBJ_P(closure_object));
 	}
 
 	prop_name = reflection_prop_name(object);
@@ -1343,8 +1342,7 @@ static void reflection_function_factory(zend_function *function, zval *closure_o
 	intern->ref_type = REF_TYPE_FUNCTION;
 	intern->ce = NULL;
 	if (closure_object) {
-		Z_ADDREF_P(closure_object);
-		ZVAL_OBJ(&intern->obj, Z_OBJ_P(closure_object));
+		ZVAL_OBJ_COPY(&intern->obj, Z_OBJ_P(closure_object));
 	}
 	ZVAL_STR_COPY(reflection_prop_name(object), function->common.function_name);
 }
@@ -1361,8 +1359,7 @@ static void reflection_method_factory(zend_class_entry *ce, zend_function *metho
 	intern->ref_type = REF_TYPE_FUNCTION;
 	intern->ce = ce;
 	if (closure_object) {
-		Z_ADDREF_P(closure_object);
-		ZVAL_OBJ(&intern->obj, Z_OBJ_P(closure_object));
+		ZVAL_OBJ_COPY(&intern->obj, Z_OBJ_P(closure_object));
 	}
 
 	ZVAL_STR_COPY(reflection_prop_name(object), method->common.function_name);
@@ -1490,7 +1487,6 @@ ZEND_METHOD(ReflectionFunction, __construct)
 
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "O", &closure, zend_ce_closure) == SUCCESS) {
 		fptr = (zend_function*)zend_get_closure_method_def(closure);
-		Z_ADDREF_P(closure);
 	} else {
 		ALLOCA_FLAG(use_heap)
 
@@ -1521,7 +1517,7 @@ ZEND_METHOD(ReflectionFunction, __construct)
 	intern->ptr = fptr;
 	intern->ref_type = REF_TYPE_FUNCTION;
 	if (closure) {
-		ZVAL_OBJ(&intern->obj, Z_OBJ_P(closure));
+		ZVAL_OBJ_COPY(&intern->obj, Z_OBJ_P(closure));
 	} else {
 		ZVAL_UNDEF(&intern->obj);
 	}
@@ -1591,8 +1587,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, getClosureThis)
 	if (!Z_ISUNDEF(intern->obj)) {
 		closure_this = zend_get_closure_this_ptr(&intern->obj);
 		if (!Z_ISUNDEF_P(closure_this)) {
-			Z_ADDREF_P(closure_this);
-			ZVAL_OBJ(return_value, Z_OBJ_P(closure_this));
+			RETURN_OBJ_COPY(Z_OBJ_P(closure_this));
 		}
 	}
 }
@@ -1632,8 +1627,7 @@ ZEND_METHOD(ReflectionFunction, getClosure)
 
 	if (!Z_ISUNDEF(intern->obj)) {
 		/* Closures are immutable objects */
-		Z_ADDREF(intern->obj);
-		ZVAL_OBJ(return_value, Z_OBJ(intern->obj));
+		RETURN_OBJ_COPY(Z_OBJ(intern->obj));
 	} else {
 		zend_create_fake_closure(return_value, fptr, NULL, NULL, NULL);
 	}
@@ -2100,8 +2094,7 @@ ZEND_METHOD(ReflectionGenerator, __construct)
 	}
 
 	intern->ref_type = REF_TYPE_GENERATOR;
-	Z_ADDREF_P(generator);
-	ZVAL_OBJ(&intern->obj, Z_OBJ_P(generator));
+	ZVAL_OBJ_COPY(&intern->obj, Z_OBJ_P(generator));
 	intern->ce = zend_ce_generator;
 }
 /* }}} */
@@ -2217,10 +2210,9 @@ ZEND_METHOD(ReflectionGenerator, getThis)
 	REFLECTION_CHECK_VALID_GENERATOR(ex)
 
 	if (Z_TYPE(ex->This) == IS_OBJECT) {
-		Z_ADDREF(ex->This);
-		ZVAL_OBJ(return_value, Z_OBJ(ex->This));
+		RETURN_OBJ_COPY(Z_OBJ(ex->This));
 	} else {
-		ZVAL_NULL(return_value);
+		RETURN_NULL();
 	}
 }
 /* }}} */
@@ -2239,9 +2231,7 @@ ZEND_METHOD(ReflectionGenerator, getExecutingGenerator)
 	REFLECTION_CHECK_VALID_GENERATOR(ex)
 
 	current = zend_generator_get_current(generator);
-	GC_ADDREF(&current->std);
-
-	ZVAL_OBJ(return_value, (zend_object *) current);
+	RETURN_OBJ_COPY(&current->std);
 }
 /* }}} */
 
@@ -3166,8 +3156,7 @@ ZEND_METHOD(ReflectionMethod, getClosure)
 		if (Z_OBJCE_P(obj) == zend_ce_closure &&
 			(mptr->internal_function.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE))
 		{
-			Z_ADDREF_P(obj);
-			ZVAL_OBJ(return_value, Z_OBJ_P(obj));
+			RETURN_OBJ_COPY(Z_OBJ_P(obj));
 		} else {
 			zend_create_fake_closure(return_value, mptr, mptr->common.scope, Z_OBJCE_P(obj), obj);
 		}

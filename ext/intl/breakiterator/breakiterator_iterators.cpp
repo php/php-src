@@ -110,8 +110,7 @@ U_CFUNC zend_object_iterator *_breakiterator_get_iterator(
 
 	zoi_with_current *zoi_iter = static_cast<zoi_with_current*>(emalloc(sizeof *zoi_iter));
 	zend_iterator_init(&zoi_iter->zoi);
-	Z_ADDREF_P(object);
-	ZVAL_OBJ(&zoi_iter->zoi.data, Z_OBJ_P(object));
+	ZVAL_OBJ_COPY(&zoi_iter->zoi.data, Z_OBJ_P(object));
 	zoi_iter->zoi.funcs = &breakiterator_iterator_funcs;
 	zoi_iter->zoi.index = 0;
 	zoi_iter->destroy_it = _breakiterator_destroy_it;

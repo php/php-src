@@ -2216,7 +2216,7 @@ PHP_FUNCTION(simplexml_load_file)
 	php_libxml_increment_doc_ref((php_libxml_node_object *)sxe, docp);
 	php_libxml_increment_node_ptr((php_libxml_node_object *)sxe, xmlDocGetRootElement(docp), NULL);
 
-	ZVAL_OBJ(return_value, &sxe->zo);
+	RETURN_OBJ(&sxe->zo);
 }
 /* }}} */
 
@@ -2270,7 +2270,7 @@ PHP_FUNCTION(simplexml_load_string)
 	php_libxml_increment_doc_ref((php_libxml_node_object *)sxe, docp);
 	php_libxml_increment_node_ptr((php_libxml_node_object *)sxe, xmlDocGetRootElement(docp), NULL);
 
-	ZVAL_OBJ(return_value, &sxe->zo);
+	RETURN_OBJ(&sxe->zo);
 }
 /* }}} */
 
@@ -2419,8 +2419,7 @@ zend_object_iterator *php_sxe_get_iterator(zend_class_entry *ce, zval *object, i
 	iterator = emalloc(sizeof(php_sxe_iterator));
 	zend_iterator_init(&iterator->intern);
 
-	Z_ADDREF_P(object);
-	ZVAL_OBJ(&iterator->intern.data, Z_OBJ_P(object));
+	ZVAL_OBJ_COPY(&iterator->intern.data, Z_OBJ_P(object));
 	iterator->intern.funcs = &php_sxe_iterator_funcs;
 	iterator->sxe = Z_SXEOBJ_P(object);
 
@@ -2568,7 +2567,7 @@ PHP_FUNCTION(simplexml_import_dom)
 		php_libxml_increment_doc_ref((php_libxml_node_object *)sxe, nodep->doc);
 		php_libxml_increment_node_ptr((php_libxml_node_object *)sxe, nodep, NULL);
 
-		ZVAL_OBJ(return_value, &sxe->zo);
+		RETURN_OBJ(&sxe->zo);
 	} else {
 		php_error_docref(NULL, E_WARNING, "Invalid Nodetype to import");
 		RETVAL_NULL();

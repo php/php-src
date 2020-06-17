@@ -609,8 +609,7 @@ PHP_FUNCTION(spl_autoload_functions)
 		ZEND_HASH_FOREACH_PTR(SPL_G(autoload_functions), alfi) {
 			if (alfi->closure) {
 				zval obj_zv;
-				ZVAL_OBJ(&obj_zv, alfi->closure);
-				Z_ADDREF(obj_zv);
+				ZVAL_OBJ_COPY(&obj_zv, alfi->closure);
 				add_next_index_zval(return_value, &obj_zv);
 			} else if (alfi->func_ptr->common.scope) {
 				zval tmp;
@@ -618,8 +617,7 @@ PHP_FUNCTION(spl_autoload_functions)
 				array_init(&tmp);
 				if (alfi->obj) {
 					zval obj_zv;
-					ZVAL_OBJ(&obj_zv, alfi->obj);
-					Z_ADDREF(obj_zv);
+					ZVAL_OBJ_COPY(&obj_zv, alfi->obj);
 					add_next_index_zval(&tmp, &obj_zv);
 				} else {
 					add_next_index_str(&tmp, zend_string_copy(alfi->ce->name));

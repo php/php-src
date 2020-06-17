@@ -2416,8 +2416,7 @@ static void check_unrecoverable_load_failure(zend_class_entry *ce) {
 		zend_string *exception_str;
 		zval exception_zv;
 		ZEND_ASSERT(EG(exception) && "Exception must have been thrown");
-		ZVAL_OBJ(&exception_zv, EG(exception));
-		Z_ADDREF(exception_zv);
+		ZVAL_OBJ_COPY(&exception_zv, EG(exception));
 		zend_clear_exception();
 		exception_str = zval_get_string(&exception_zv);
 		zend_error_noreturn(E_ERROR,

@@ -457,7 +457,7 @@ static spl_filesystem_object *spl_filesystem_object_create_info(spl_filesystem_o
 	zend_update_class_constants(ce);
 
 	intern = spl_filesystem_from_obj(spl_filesystem_object_new_ex(ce));
-	ZVAL_OBJ(return_value, &intern->std);
+	RETVAL_OBJ(&intern->std);
 
 	if (ce->constructor->common.scope != spl_ce_SplFileInfo) {
 		ZVAL_STRINGL(&arg1, file_path, file_path_len);
@@ -501,7 +501,7 @@ static spl_filesystem_object *spl_filesystem_object_create_type(int num_args, sp
 			}
 
 			intern = spl_filesystem_from_obj(spl_filesystem_object_new_ex(ce));
-			ZVAL_OBJ(return_value, &intern->std);
+			RETVAL_OBJ(&intern->std);
 
 			spl_filesystem_object_get_file_name(source);
 			if (ce->constructor->common.scope != spl_ce_SplFileInfo) {
@@ -536,7 +536,7 @@ static spl_filesystem_object *spl_filesystem_object_create_type(int num_args, sp
 
 			intern = spl_filesystem_from_obj(spl_filesystem_object_new_ex(ce));
 
-			ZVAL_OBJ(return_value, &intern->std);
+			RETVAL_OBJ(&intern->std);
 
 			spl_filesystem_object_get_file_name(source);
 
@@ -802,8 +802,7 @@ PHP_METHOD(DirectoryIterator, current)
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
-	ZVAL_OBJ(return_value, Z_OBJ_P(ZEND_THIS));
-	Z_ADDREF_P(return_value);
+	RETURN_OBJ_COPY(Z_OBJ_P(ZEND_THIS));
 }
 /* }}} */
 
@@ -1099,8 +1098,7 @@ PHP_METHOD(FilesystemIterator, current)
 		spl_filesystem_object_get_file_name(intern);
 		spl_filesystem_object_create_type(0, intern, SPL_FS_INFO, NULL, return_value);
 	} else {
-		ZVAL_OBJ(return_value, Z_OBJ_P(ZEND_THIS));
-		Z_ADDREF_P(return_value);
+		RETURN_OBJ_COPY(Z_OBJ_P(ZEND_THIS));
 	}
 }
 /* }}} */
@@ -1645,8 +1643,7 @@ zend_object_iterator *spl_filesystem_dir_get_iterator(zend_class_entry *ce, zval
 	}
 	dir_object = Z_SPLFILESYSTEM_P(object);
 	iterator = spl_filesystem_object_to_iterator(dir_object);
-	Z_ADDREF_P(object);
-	ZVAL_OBJ(&iterator->intern.data, Z_OBJ_P(object));
+	ZVAL_OBJ_COPY(&iterator->intern.data, Z_OBJ_P(object));
 	iterator->intern.funcs = &spl_filesystem_dir_it_funcs;
 	/* ->current must be initialized; rewind doesn't set it and valid
 	 * doesn't check whether it's set */
@@ -1847,8 +1844,7 @@ zend_object_iterator *spl_filesystem_tree_get_iterator(zend_class_entry *ce, zva
 	dir_object = Z_SPLFILESYSTEM_P(object);
 	iterator = spl_filesystem_object_to_iterator(dir_object);
 
-	Z_ADDREF_P(object);
-	ZVAL_OBJ(&iterator->intern.data, Z_OBJ_P(object));
+	ZVAL_OBJ_COPY(&iterator->intern.data, Z_OBJ_P(object));
 	iterator->intern.funcs = &spl_filesystem_tree_it_funcs;
 
 	return &iterator->intern;

@@ -2473,7 +2473,7 @@ PHP_METHOD(Phar, convertToExecutable)
 	phar_obj->archive->is_data = is_data;
 
 	if (ret) {
-		ZVAL_OBJ(return_value, ret);
+		RETURN_OBJ(ret);
 	} else {
 		RETURN_NULL();
 	}
@@ -2576,7 +2576,7 @@ PHP_METHOD(Phar, convertToData)
 	phar_obj->archive->is_data = is_data;
 
 	if (ret) {
-		ZVAL_OBJ(return_value, ret);
+		RETURN_OBJ(ret);
 	} else {
 		RETURN_NULL();
 	}
@@ -3279,7 +3279,7 @@ PHP_METHOD(Phar, compress)
 	}
 
 	if (ret) {
-		ZVAL_OBJ(return_value, ret);
+		RETURN_OBJ(ret);
 	} else {
 		RETURN_NULL();
 	}
@@ -3319,7 +3319,7 @@ PHP_METHOD(Phar, decompress)
 	}
 
 	if (ret) {
-		ZVAL_OBJ(return_value, ret);
+		RETURN_OBJ(ret);
 	} else {
 		RETURN_NULL();
 	}

@@ -534,8 +534,7 @@ PHP_METHOD(SQLite3, prepare)
 	object_init_ex(return_value, php_sqlite3_stmt_entry);
 	stmt_obj = Z_SQLITE3_STMT_P(return_value);
 	stmt_obj->db_obj = db_obj;
-	Z_ADDREF_P(object);
-	ZVAL_OBJ(&stmt_obj->db_obj_zval, Z_OBJ_P(object));
+	ZVAL_OBJ_COPY(&stmt_obj->db_obj_zval, Z_OBJ_P(object));
 
 	errcode = sqlite3_prepare_v2(db_obj->db, ZSTR_VAL(sql), ZSTR_LEN(sql), &(stmt_obj->stmt), NULL);
 	if (errcode != SQLITE_OK) {
@@ -590,8 +589,7 @@ PHP_METHOD(SQLite3, query)
 	object_init_ex(&stmt, php_sqlite3_stmt_entry);
 	stmt_obj = Z_SQLITE3_STMT_P(&stmt);
 	stmt_obj->db_obj = db_obj;
-	Z_ADDREF_P(object);
-	ZVAL_OBJ(&stmt_obj->db_obj_zval, Z_OBJ_P(object));
+	ZVAL_OBJ_COPY(&stmt_obj->db_obj_zval, Z_OBJ_P(object));
 
 	return_code = sqlite3_prepare_v2(db_obj->db, ZSTR_VAL(sql), ZSTR_LEN(sql), &(stmt_obj->stmt), NULL);
 	if (return_code != SQLITE_OK) {
@@ -1879,8 +1877,7 @@ PHP_METHOD(SQLite3Stmt, execute)
 			result->is_prepared_statement = 1;
 			result->db_obj = stmt_obj->db_obj;
 			result->stmt_obj = stmt_obj;
-			Z_ADDREF_P(object);
-			ZVAL_OBJ(&result->stmt_obj_zval, Z_OBJ_P(object));
+			ZVAL_OBJ_COPY(&result->stmt_obj_zval, Z_OBJ_P(object));
 
 			break;
 		}
@@ -1929,8 +1926,7 @@ PHP_METHOD(SQLite3Stmt, __construct)
 	}
 
 	stmt_obj->db_obj = db_obj;
-	Z_ADDREF_P(db_zval);
-	ZVAL_OBJ(&stmt_obj->db_obj_zval, Z_OBJ_P(db_zval));
+	ZVAL_OBJ_COPY(&stmt_obj->db_obj_zval, Z_OBJ_P(db_zval));
 
 	errcode = sqlite3_prepare_v2(db_obj->db, ZSTR_VAL(sql), ZSTR_LEN(sql), &(stmt_obj->stmt), NULL);
 	if (errcode != SQLITE_OK) {

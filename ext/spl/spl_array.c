@@ -189,13 +189,11 @@ static zend_object *spl_array_object_new_ex(zend_class_entry *class_type, zend_o
 					zend_array_dup(spl_array_get_hash_table(other)));
 			} else {
 				ZEND_ASSERT(orig->handlers == &spl_handler_ArrayIterator);
-				GC_ADDREF(orig);
-				ZVAL_OBJ(&intern->array, orig);
+				ZVAL_OBJ_COPY(&intern->array, orig);
 				intern->ar_flags |= SPL_ARRAY_USE_OTHER;
 			}
 		} else {
-			GC_ADDREF(orig);
-			ZVAL_OBJ(&intern->array, orig);
+			ZVAL_OBJ_COPY(&intern->array, orig);
 			intern->ar_flags |= SPL_ARRAY_USE_OTHER;
 		}
 	} else {
@@ -1173,8 +1171,7 @@ zend_object_iterator *spl_array_get_iterator(zend_class_entry *ce, zval *object,
 
 	zend_iterator_init(&iterator->it);
 
-	Z_ADDREF_P(object);
-	ZVAL_OBJ(&iterator->it.data, Z_OBJ_P(object));
+	ZVAL_OBJ_COPY(&iterator->it.data, Z_OBJ_P(object));
 	iterator->it.funcs = &spl_array_it_funcs;
 	iterator->ce = ce;
 	ZVAL_UNDEF(&iterator->value);
@@ -1333,7 +1330,7 @@ PHP_METHOD(ArrayObject, getIterator)
 		RETURN_THROWS();
 	}
 
-	ZVAL_OBJ(return_value, spl_array_object_new_ex(intern->ce_get_iterator, Z_OBJ_P(object), 0));
+	RETURN_OBJ(spl_array_object_new_ex(intern->ce_get_iterator, Z_OBJ_P(object), 0));
 }
 /* }}} */
 
@@ -1652,9 +1649,7 @@ PHP_METHOD(RecursiveArrayIterator, getChildren)
 			return;
 		}
 		if (instanceof_function(Z_OBJCE_P(entry), Z_OBJCE_P(ZEND_THIS))) {
-			ZVAL_OBJ(return_value, Z_OBJ_P(entry));
-			Z_ADDREF_P(return_value);
-			return;
+			RETURN_OBJ_COPY(Z_OBJ_P(entry));
 		}
 	}
 

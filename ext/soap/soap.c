@@ -1049,8 +1049,7 @@ PHP_METHOD(SoapServer, setObject)
 
 	service->type = SOAP_OBJECT;
 
-	Z_ADDREF_P(obj);
-	ZVAL_OBJ(&service->soap_object, Z_OBJ_P(obj));
+	ZVAL_OBJ_COPY(&service->soap_object, Z_OBJ_P(obj));
 
 	SOAP_SERVER_END_CODE();
 }
@@ -1760,8 +1759,7 @@ PHP_METHOD(SoapServer, addSoapHeader)
 	*p = emalloc(sizeof(soapHeader));
 	memset(*p, 0, sizeof(soapHeader));
 	ZVAL_NULL(&(*p)->function_name);
-	Z_ADDREF_P(fault);
-	ZVAL_OBJ(&(*p)->retval, Z_OBJ_P(fault));
+	ZVAL_OBJ_COPY(&(*p)->retval, Z_OBJ_P(fault));
 
 	SOAP_SERVER_END_CODE();
 }

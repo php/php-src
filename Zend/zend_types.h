@@ -968,6 +968,14 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 		Z_TYPE_INFO_P(__z) = IS_OBJECT_EX;		\
 	} while (0)
 
+#define ZVAL_OBJ_COPY(z, o) do {				\
+		zval *__z = (z);						\
+		zend_object *__o = (o);					\
+		GC_ADDREF(__o);							\
+		Z_OBJ_P(__z) = __o;						\
+		Z_TYPE_INFO_P(__z) = IS_OBJECT_EX;		\
+	} while (0)
+
 #define ZVAL_RES(z, r) do {						\
 		zval *__z = (z);						\
 		Z_RES_P(__z) = (r);						\

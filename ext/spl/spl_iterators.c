@@ -459,8 +459,7 @@ static zend_object_iterator *spl_recursive_it_get_iterator(zend_class_entry *ce,
 
 	zend_iterator_init((zend_object_iterator*)iterator);
 
-	Z_ADDREF_P(zobject);
-	ZVAL_OBJ(&iterator->intern.data, Z_OBJ_P(zobject));
+	ZVAL_OBJ_COPY(&iterator->intern.data, Z_OBJ_P(zobject));
 	iterator->intern.funcs = &spl_recursive_it_iterator_funcs;
 	return (zend_object_iterator*)iterator;
 }

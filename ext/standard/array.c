@@ -2479,8 +2479,7 @@ static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_valu
 		} else if (zend_string_equals_literal(Z_STR_P(entry), "this")) {
 			zend_object *object = zend_get_this_object(EG(current_execute_data));
 			if (object) {
-				GC_ADDREF(object);
-				ZVAL_OBJ(&data, object);
+				ZVAL_OBJ_COPY(&data, object);
 				zend_hash_update(Z_ARRVAL_P(return_value), Z_STR_P(entry), &data);
 			}
 		} else {

@@ -535,8 +535,7 @@ PHP_METHOD(PDO, prepare)
 	stmt->default_fetch_type = dbh->default_fetch_type;
 	stmt->dbh = dbh;
 	/* give it a reference to me */
-	ZVAL_OBJ(&stmt->database_object_handle, &dbh_obj->std);
-	Z_ADDREF(stmt->database_object_handle);
+	ZVAL_OBJ_COPY(&stmt->database_object_handle, &dbh_obj->std);
 	/* we haven't created a lazy object yet */
 	ZVAL_UNDEF(&stmt->lazy_object_ref);
 
@@ -1073,8 +1072,7 @@ PHP_METHOD(PDO, query)
 	stmt->active_query_stringlen = statement_len;
 	stmt->dbh = dbh;
 	/* give it a reference to me */
-	ZVAL_OBJ(&stmt->database_object_handle, &dbh_obj->std);
-	Z_ADDREF(stmt->database_object_handle);
+	ZVAL_OBJ_COPY(&stmt->database_object_handle, &dbh_obj->std);
 	/* we haven't created a lazy object yet */
 	ZVAL_UNDEF(&stmt->lazy_object_ref);
 
