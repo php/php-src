@@ -1683,6 +1683,9 @@ phpdbg_main:
 			}
 
 #ifndef _WIN32
+# ifndef SIGIO
+#  define SIGIO SIGPOLL
+# endif
 			zend_sigaction(SIGIO, &sigio_struct, NULL);
 #endif
 
