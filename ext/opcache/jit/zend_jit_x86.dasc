@@ -1416,7 +1416,7 @@ static void* dasm_labels[zend_lb_MAX];
 ||		tmp_reg = (Z_REG(addr) == ZREG_FCARG1a) ? ZREG_R0 : ZREG_FCARG1a;
 |		GET_ZVAL_LVAL tmp_reg, addr
 ||		if (RC_MAY_BE_1(op_info)) {
-|			cmp dword [Ra(tmp_reg)], 1 // if (GC_REFCOUNTED() > 1)
+|			cmp dword [Ra(tmp_reg)], 1 // if (GC_REFCOUNT() > 1)
 ||			if (cold) {
 |				ja >1
 |.cold_code
@@ -1429,13 +1429,12 @@ static void* dasm_labels[zend_lb_MAX];
 |		GC_DELREF Ra(tmp_reg)
 |1:
 ||		if (Z_REG(addr) == ZREG_FCARG1a) {
-|			mov aword T1, FCARG1a // save
-||		} else {
-|			LOAD_ZVAL_ADDR FCARG1a, addr
-||		}
-|		EXT_CALL zval_copy_ctor_func, r0
-||		if (Z_REG(addr) == ZREG_FCARG1a) {
-|			mov FCARG1a, aword T1 // restore
+|			EXT_CALL zend_jit_zval_array_dup, r0
+||      } else {
+|			EXT_CALL zend_array_dup, r0
+|			SET_ZVAL_PTR addr, r0
+|			SET_ZVAL_TYPE_INFO addr, IS_ARRAY_EX
+|			mov FCARG1a, r0
 ||		}
 ||		if (RC_MAY_BE_1(op_info)) {
 ||			if (cold) {
@@ -1444,8 +1443,12 @@ static void* dasm_labels[zend_lb_MAX];
 ||			}
 ||		}
 |2:
-||	}
+||		if (Z_REG(addr) == ZREG_FCARG1a) {
+|			mov FCARG1a, r0
+||		}
+||	} else {
 |		GET_ZVAL_LVAL ZREG_FCARG1a, addr
+||	}
 |.endmacro
 
 |.macro EFREE_REG_24, op_array, opline

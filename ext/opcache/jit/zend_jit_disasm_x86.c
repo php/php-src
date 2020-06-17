@@ -454,6 +454,7 @@ static int zend_jit_disasm_init(void)
 	REGISTER_HELPER(zend_jit_hot_func);
 	REGISTER_HELPER(zend_jit_check_constant);
 	REGISTER_HELPER(zend_jit_array_free);
+	REGISTER_HELPER(zend_jit_zval_array_dup);
 #undef  REGISTER_HELPER
 
 #ifndef _WIN32

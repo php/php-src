@@ -1558,3 +1558,12 @@ static void ZEND_FASTCALL zend_jit_array_free(HashTable *ht)
 	}
 	FREE_HASHTABLE(ht);
 }
+
+static HashTable *ZEND_FASTCALL zend_jit_zval_array_dup(zval *arr)
+{
+	HashTable *ht = Z_ARRVAL_P(arr);
+
+	ht = zend_array_dup(ht);
+	ZVAL_ARR(arr, ht);
+	return ht;
+}
