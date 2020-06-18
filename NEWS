@@ -60,6 +60,9 @@ PHP                                                                        NEWS
 - GD:
   . Fixed bug #79615 (Wrong GIF header written in GD GIFEncode). (sageptr, cmb)
 
+- MySQLnd:
+  . Fixed bug #79596 (MySQL FLOAT truncates to int some locales). (cmb)
+
 - Opcache:
   . Fixed bug #79588 (Boolean opcache settings ignore on/off values). (cmb)
   . Fixed bug #79548 (Preloading segfault with inherited method using static
