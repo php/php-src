@@ -35,8 +35,8 @@ static void curlfile_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	ZEND_PARSE_PARAMETERS_START(1,3)
 		Z_PARAM_PATH_STR(fname)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR(mime)
-		Z_PARAM_STR(postname)
+		Z_PARAM_STR_OR_NULL(mime)
+		Z_PARAM_STR_OR_NULL(postname)
 	ZEND_PARSE_PARAMETERS_END();
 
 	zend_update_property_string(curl_CURLFile_class, cf, "name", sizeof("name")-1, ZSTR_VAL(fname));

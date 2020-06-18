@@ -4,11 +4,7 @@
 
 class CURLFile
 {
-    public function __construct(
-        string $filename,
-        string $mimetype = UNKNOWN,
-        string $postname = UNKNOWN
-    ) {}
+    public function __construct(string $filename, ?string $mimetype = null, ?string $postname = null) {}
 
     /** @return string */
     public function getFilename() {}

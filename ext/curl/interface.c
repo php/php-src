@@ -1871,7 +1871,7 @@ PHP_FUNCTION(curl_init)
 
 	ZEND_PARSE_PARAMETERS_START(0,1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR(url)
+		Z_PARAM_STR_OR_NULL(url)
 	ZEND_PARSE_PARAMETERS_END();
 
 	cp = curl_easy_init();
@@ -3018,17 +3018,18 @@ PHP_FUNCTION(curl_getinfo)
 {
 	zval		*zid;
 	php_curl	*ch;
-	zend_long	option = 0;
+	zend_long	option;
+	zend_bool option_is_null = 1;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_OBJECT_OF_CLASS(zid, curl_ce)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(option)
+		Z_PARAM_LONG_OR_NULL(option, option_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
 	ch = Z_CURL_P(zid);
 
-	if (ZEND_NUM_ARGS() < 2) {
+	if (option_is_null) {
 		char *s_code;
 		/* libcurl expects long datatype. So far no cases are known where
 		   it would be an issue. Using zend_long would truncate a 64-bit
