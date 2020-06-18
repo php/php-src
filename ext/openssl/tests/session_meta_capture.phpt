@@ -14,7 +14,8 @@ $serverCode = <<<'CODE'
     $serverUri = "ssl://127.0.0.1:64321";
     $serverFlags = STREAM_SERVER_BIND | STREAM_SERVER_LISTEN;
     $serverCtx = stream_context_create(['ssl' => [
-        'local_cert' => '%s'
+        'local_cert' => '%s',
+        'security_level' => 1,
     ]]);
 
     $server = stream_socket_server($serverUri, $errno, $errstr, $serverFlags, $serverCtx);
@@ -36,6 +37,7 @@ $clientCode = <<<'CODE'
         'cafile' => '%s',
         'peer_name' => '%s',
         'capture_session_meta' => true,
+        'security_level' => 1,
     ]]);
 
     phpt_wait();
