@@ -12,7 +12,7 @@ class foo extends ancester
 }
 
 $r = new ReflectionClass('foo');
-foreach ($r->getProperties() as $p)
+foreach ($r->GetProperties() as $p)
 {
     echo $p->getName(). " ". $p->getDeclaringClass()->getName()."\n";
 }
