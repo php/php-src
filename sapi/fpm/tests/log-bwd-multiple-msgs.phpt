@@ -47,5 +47,3 @@ Done
 require_once "tester.inc";
 FPM\Tester::clean();
 ?>
---XFAIL--
-There are bugs in FPM
