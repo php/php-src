@@ -3,6 +3,7 @@
 class CertificateGenerator
 {
     const CONFIG = __DIR__. DIRECTORY_SEPARATOR . 'openssl.cnf';
+    const SAN_CONFIG = __DIR__ . DIRECTORY_SEPARATOR . 'san.cnf';
 
     /** @var resource */
     private $ca;
@@ -82,23 +83,36 @@ class CertificateGenerator
         openssl_x509_export_to_file($this->ca, $file);
     }
 
-    public function saveNewCertAsFileWithKey($commonNameForCert, $file, $keyLength = null)
-    {
+    public function saveNewCertAsFileWithKey(
+        $commonNameForCert, $file, $keyLength = null, $subjectAltName = null
+    ) {
         $dn = [
             'countryName' => 'BY',
             'stateOrProvinceName' => 'Minsk',
             'localityName' => 'Minsk',
             'organizationName' => 'Example Org',
-            'commonName' => $commonNameForCert,
         ];
+        if ($commonNameForCert !== null) {
+            $dn['commonName'] = $commonNameForCert;
+        }
+
+        $config = [
+            'digest_alg' => 'sha256',
+            'req_extensions' => 'v3_req',
+            'x509_extensions' => 'usr_cert',
+        ];
+        if ($subjectAltName !== null) {
+            putenv("PHP_SUBJECTALTNAME=$subjectAltName");
+            $config['config'] = self::SAN_CONFIG;
+        }
 
         $this->lastKey = self::generateKey($keyLength);
         $this->lastCert = openssl_csr_sign(
-            openssl_csr_new($dn, $this->lastKey, ['req_extensions' => 'v3_req']),
+            openssl_csr_new($dn, $this->lastKey, $config),
             $this->ca,
             $this->caKey,
             /* days */ 2,
-            ['digest_alg' => 'sha256'],
+            $config,
         );
 
         $certText = '';
