@@ -7,12 +7,15 @@ if (!function_exists("proc_open")) die("skip no proc_open");
 ?>
 --FILE--
 <?php
+$certFile = __DIR__ . DIRECTORY_SEPARATOR . 'tls_min_v1.0_max_v1.1_wrapper.pem.tmp';
+
 $serverCode = <<<'CODE'
     $flags = STREAM_SERVER_BIND|STREAM_SERVER_LISTEN;
     $ctx = stream_context_create(['ssl' => [
-        'local_cert' => __DIR__ . '/streams_crypto_method.pem',
+        'local_cert' => '%s',
         'min_proto_version' => STREAM_CRYPTO_PROTO_TLSv1_0,
         'max_proto_version' => STREAM_CRYPTO_PROTO_TLSv1_1,
+        'security_level' => 1,
     ]]);
 
     $server = stream_socket_server('tls://127.0.0.1:64321', $errno, $errstr, $flags, $ctx);
@@ -22,12 +25,14 @@ $serverCode = <<<'CODE'
         @stream_socket_accept($server, 3);
     }
 CODE;
+$serverCode = sprintf($serverCode, $certFile);
 
 $clientCode = <<<'CODE'
     $flags = STREAM_CLIENT_CONNECT;
     $ctx = stream_context_create(['ssl' => [
         'verify_peer' => false,
         'verify_peer_name' => false,
+        'security_level' => 1,
     ]]);
 
     phpt_wait();
@@ -51,8 +56,16 @@ $clientCode = <<<'CODE'
     var_dump($client);
 CODE;
 
+include 'CertificateGenerator.inc';
+$certificateGenerator = new CertificateGenerator();
+$certificateGenerator->saveNewCertAsFileWithKey('tls_min_v1.0_max_v1.1_wrapper', $certFile);
+
 include 'ServerClientTestCase.inc';
 ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
+?>
+--CLEAN--
+<?php
+@unlink(__DIR__ . DIRECTORY_SEPARATOR . 'tls_min_v1.0_max_v1.1_wrapper.pem.tmp');
 ?>
 --EXPECTF--
 resource(%d) of type (stream)

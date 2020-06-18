@@ -8,10 +8,12 @@ if (OPENSSL_VERSION_NUMBER < 0x10101000) die("skip OpenSSL v1.1.1 required");
 ?>
 --FILE--
 <?php
+$certFile = __DIR__ . DIRECTORY_SEPARATOR . 'tlsv1.3_wrapper.pem.tmp';
+
 $serverCode = <<<'CODE'
     $flags = STREAM_SERVER_BIND|STREAM_SERVER_LISTEN;
     $ctx = stream_context_create(['ssl' => [
-        'local_cert' => __DIR__ . '/streams_crypto_method.pem',
+        'local_cert' => '%s',
     ]]);
 
     $server = stream_socket_server('tlsv1.3://127.0.0.1:64321', $errno, $errstr, $flags, $ctx);
@@ -21,6 +23,7 @@ $serverCode = <<<'CODE'
         @stream_socket_accept($server, 3);
     }
 CODE;
+$serverCode = sprintf($serverCode, $certFile);
 
 $clientCode = <<<'CODE'
     $flags = STREAM_CLIENT_CONNECT;
@@ -41,8 +44,16 @@ $clientCode = <<<'CODE'
     var_dump($client);
 CODE;
 
+include 'CertificateGenerator.inc';
+$certificateGenerator = new CertificateGenerator();
+$certificateGenerator->saveNewCertAsFileWithKey('tlsv1.3_wrapper', $certFile);
+
 include 'ServerClientTestCase.inc';
 ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
+?>
+--CLEAN--
+<?php
+@unlink(__DIR__ . DIRECTORY_SEPARATOR . 'tlsv1.3_wrapper.pem.tmp');
 ?>
 --EXPECTF--
 resource(%d) of type (stream)
