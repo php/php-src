@@ -2767,9 +2767,14 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						ce = NULL;
 						if (opline->op1_type == IS_UNUSED) {
 							op1_info = MAY_BE_OBJECT|MAY_BE_RC1|MAY_BE_RCN;
+							op1_addr = 0;
 							ce = op_array->scope;
 						} else {
 							op1_info = OP1_INFO();
+							if (!(op1_info & MAY_BE_OBJECT)) {
+								break;
+							}
+							op1_addr = OP1_REG_ADDR();
 							if (ssa->var_info && ssa->ops) {
 								zend_ssa_op *ssa_op = &ssa->ops[opline - op_array->opcodes];
 								if (ssa_op->op1_use >= 0) {
@@ -2780,11 +2785,8 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 								}
 							}
 						}
-						if (!(op1_info & MAY_BE_OBJECT)) {
-							break;
-						}
 						if (!zend_jit_fetch_obj_read(&dasm_state, opline, op_array,
-								op1_info, ce,
+								op1_info, op1_addr, ce,
 								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
 						}

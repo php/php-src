@@ -1547,6 +1547,23 @@ propagate_arg:
 						}
 					}
 					break;
+				case ZEND_FETCH_OBJ_FUNC_ARG:
+					if (!frame
+					 || !frame->call
+					 || !frame->call->func
+					 || !TRACE_FRAME_IS_LAST_SEND_BY_VAL(frame->call)) {
+						break;
+					}
+					/* break missing intentionally */
+				case ZEND_FETCH_OBJ_R:
+				case ZEND_FETCH_OBJ_IS:
+					if (opline->op2_type != IS_CONST
+					 || Z_TYPE_P(RT_CONSTANT(opline, opline->op2)) != IS_STRING
+					 || Z_STRVAL_P(RT_CONSTANT(opline, opline->op2))[0] == '\0') {
+						break;
+					}
+					ADD_OP1_TRACE_GUARD();
+					break;
 				default:
 					break;
 			}
@@ -3720,8 +3737,21 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						if (opline->op1_type == IS_UNUSED) {
 							op1_info = MAY_BE_OBJECT|MAY_BE_RC1|MAY_BE_RCN;
 							ce = op_array->scope;
+							op1_addr = 0;
 						} else {
 							op1_info = OP1_INFO();
+							if (!(op1_info & MAY_BE_OBJECT)) {
+								break;
+							}
+							op1_addr = OP1_REG_ADDR();
+							if (orig_op1_type != IS_UNKNOWN
+							 && (orig_op1_type & IS_TRACE_REFERENCE)) {
+								if (!zend_jit_fetch_reference(&dasm_state, opline, orig_op1_type, &op1_info, &op1_addr, 1)) {
+									goto jit_failure;
+								}
+							} else {
+								CHECK_OP1_TRACE_TYPE();
+							}
 							if (ssa->var_info && ssa->ops) {
 								if (ssa_op->op1_use >= 0) {
 									zend_ssa_var_info *op1_ssa = ssa->var_info + ssa_op->op1_use;
@@ -3731,11 +3761,8 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								}
 							}
 						}
-						if (!(op1_info & MAY_BE_OBJECT)) {
-							break;
-						}
 						if (!zend_jit_fetch_obj_read(&dasm_state, opline, op_array,
-								op1_info, ce,
+								op1_info, op1_addr, ce,
 								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
 						}
