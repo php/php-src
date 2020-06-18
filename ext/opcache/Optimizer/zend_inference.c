@@ -1983,6 +1983,9 @@ uint32_t zend_array_element_type(uint32_t t1, int write, int insert)
 				tmp |= MAY_BE_RC1 | MAY_BE_RCN;
 			}
 		}
+		if (write) {
+			tmp |= MAY_BE_INDIRECT;
+		}
 	}
 	if (t1 & MAY_BE_STRING) {
 		tmp |= MAY_BE_STRING | MAY_BE_RC1;
@@ -3398,7 +3401,7 @@ static zend_always_inline int _zend_update_type_info(
 				tmp = zend_fetch_prop_type(script,
 					zend_fetch_prop_info(op_array, ssa, opline, ssa_op), &ce);
 				if (opline->result_type != IS_TMP_VAR) {
-					tmp |= MAY_BE_REF;
+					tmp |= MAY_BE_REF | MAY_BE_INDIRECT;
 				}
 				UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
 				if (ce) {
@@ -3415,7 +3418,7 @@ static zend_always_inline int _zend_update_type_info(
 			tmp = zend_fetch_prop_type(script,
 				zend_fetch_static_prop_info(script, op_array, ssa, opline), &ce);
 			if (opline->result_type != IS_TMP_VAR) {
-				tmp |= MAY_BE_REF;
+				tmp |= MAY_BE_REF | MAY_BE_INDIRECT;
 			}
 			UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
 			if (ce) {
@@ -3524,6 +3527,26 @@ unknown_opcode:
 					tmp |= MAY_BE_RC1 | MAY_BE_RCN;
 				} else {
 					tmp |= MAY_BE_REF | MAY_BE_RC1 | MAY_BE_RCN;
+					switch (opline->opcode) {
+						case ZEND_FETCH_W:
+						case ZEND_FETCH_RW:
+						case ZEND_FETCH_FUNC_ARG:
+						case ZEND_FETCH_UNSET:
+						case ZEND_FETCH_DIM_W:
+						case ZEND_FETCH_DIM_RW:
+						case ZEND_FETCH_DIM_FUNC_ARG:
+						case ZEND_FETCH_DIM_UNSET:
+						case ZEND_FETCH_OBJ_W:
+						case ZEND_FETCH_OBJ_RW:
+						case ZEND_FETCH_OBJ_FUNC_ARG:
+						case ZEND_FETCH_OBJ_UNSET:
+						case ZEND_FETCH_STATIC_PROP_W:
+						case ZEND_FETCH_STATIC_PROP_RW:
+						case ZEND_FETCH_STATIC_PROP_FUNC_ARG:
+						case ZEND_FETCH_STATIC_PROP_UNSET:
+							tmp |= MAY_BE_INDIRECT;
+							break;
+					}
 				}
 				UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
 			}

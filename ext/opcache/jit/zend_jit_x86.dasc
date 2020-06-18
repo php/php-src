@@ -1323,7 +1323,7 @@ static void* dasm_labels[zend_lb_MAX];
 // zval should be in FCARG1a
 |.macro ZVAL_DTOR_FUNC, var_info, opline // arg1 must be in FCARG1a
 ||	do {
-||		if (has_concrete_type((var_info) & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+||		if (has_concrete_type((var_info) & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_INDIRECT))) {
 ||			zend_uchar type = concrete_type((var_info) & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE));
 ||			if (type == IS_STRING && !ZEND_DEBUG) {
 |				EXT_CALL _efree, r0
@@ -1355,7 +1355,7 @@ static void* dasm_labels[zend_lb_MAX];
 
 |.macro ZVAL_PTR_DTOR, addr, op_info, gc, cold, opline
 ||	if ((op_info) & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
-||		if ((op_info) & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+||		if ((op_info) & ((MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_INDIRECT)-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
 |			// if (Z_REFCOUNTED_P(cv)) {
 ||			if (cold) {
 |				IF_ZVAL_REFCOUNTED addr, >1
@@ -8916,12 +8916,15 @@ static int zend_jit_send_ref(dasm_State **Dst, const zend_op *opline, const zend
 	}
 
 	if (opline->op1_type == IS_VAR) {
-		|	LOAD_ZVAL_ADDR r0, op1_addr
-		|	// if (EXPECTED(Z_TYPE_P(ret) == IS_INDIRECT)) {
-		|	IF_NOT_Z_TYPE r0, IS_INDIRECT, >1
-		|	// ret = Z_INDIRECT_P(ret);
-		|	GET_Z_PTR r0, r0
-		|1:
+		if (op1_info & MAY_BE_INDIRECT) {
+			|	LOAD_ZVAL_ADDR r0, op1_addr
+			|	// if (EXPECTED(Z_TYPE_P(ret) == IS_INDIRECT)) {
+			|	IF_NOT_Z_TYPE r0, IS_INDIRECT, >1
+			|	// ret = Z_INDIRECT_P(ret);
+			|	GET_Z_PTR r0, r0
+			|1:
+			op1_addr = ZEND_ADDR_MEM_ZVAL(ZREG_R0, 0);
+		}
 	} else if (opline->op1_type == IS_CV) {
 		if (op1_info & MAY_BE_UNDEF) {
 			if (op1_info & (MAY_BE_ANY|MAY_BE_REF)) {
@@ -8939,13 +8942,8 @@ static int zend_jit_send_ref(dasm_State **Dst, const zend_op *opline, const zend
 
 	if (op1_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) {
 		if (op1_info & MAY_BE_REF) {
-			if (opline->op1_type == IS_VAR) {
-				|	IF_NOT_Z_TYPE r0, IS_REFERENCE, >2
-				|	GET_Z_PTR r1, r0
-			} else {
-				|	IF_NOT_ZVAL_TYPE op1_addr, IS_REFERENCE, >2
-				|	GET_ZVAL_PTR r1, op1_addr
-			}
+			|	IF_NOT_ZVAL_TYPE op1_addr, IS_REFERENCE, >2
+			|	GET_ZVAL_PTR r1, op1_addr
 			|	GC_ADDREF r1
 			|	SET_ZVAL_PTR arg_addr, r1
 			|	SET_ZVAL_TYPE_INFO arg_addr, IS_REFERENCE_EX

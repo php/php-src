@@ -61,5 +61,6 @@
 #define MAY_BE_ARRAY_KEY_ANY        (MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_KEY_STRING)
 
 #define MAY_BE_CLASS                (1<<23)
+#define MAY_BE_INDIRECT             (1<<24)
 
 #endif /* ZEND_TYPE_INFO_H */

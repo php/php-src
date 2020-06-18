@@ -195,7 +195,7 @@ static zend_always_inline uint32_t get_ssa_var_info(const zend_ssa *ssa, int ssa
 	if (ssa->var_info && ssa_var_num >= 0) {
 		return ssa->var_info[ssa_var_num].type;
 	} else {
-		return MAY_BE_UNDEF | MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_REF | MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
+		return MAY_BE_UNDEF | MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_REF | MAY_BE_INDIRECT | MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
 	}
 }
 
