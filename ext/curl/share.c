@@ -31,8 +31,6 @@
 
 #define SAVE_CURLSH_ERROR(__handle, __err) (__handle)->err.no = (int) __err;
 
-zend_class_entry *curl_share_ce;
-
 /* {{{ proto CurlShareHandle curl_share_init()
    Initialize a share curl handle */
 PHP_FUNCTION(curl_share_init)
