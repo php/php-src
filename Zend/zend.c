@@ -165,6 +165,12 @@ static ZEND_INI_MH(OnUpdateAssertions) /* {{{ */
 }
 /* }}} */
 
+#if ZEND_DEBUG
+# define SIGNAL_CHECK_DEFAULT "1"
+#else
+# define SIGNAL_CHECK_DEFAULT "0"
+#endif
+
 ZEND_INI_BEGIN()
 	ZEND_INI_ENTRY("error_reporting",				NULL,		ZEND_INI_ALL,		OnUpdateErrorReporting)
 	STD_ZEND_INI_ENTRY("zend.assertions",				"1",    ZEND_INI_ALL,       OnUpdateAssertions,           assertions,   zend_executor_globals,  executor_globals)
@@ -173,7 +179,7 @@ ZEND_INI_BEGIN()
  	ZEND_INI_ENTRY("zend.script_encoding",			NULL,		ZEND_INI_ALL,		OnUpdateScriptEncoding)
  	STD_ZEND_INI_BOOLEAN("zend.detect_unicode",			"1",	ZEND_INI_ALL,		OnUpdateBool, detect_unicode, zend_compiler_globals, compiler_globals)
 #ifdef ZEND_SIGNALS
-	STD_ZEND_INI_BOOLEAN("zend.signal_check", ZEND_DEBUG ? "1" : "0", ZEND_INI_SYSTEM, OnUpdateBool, check, zend_signal_globals_t, zend_signal_globals)
+	STD_ZEND_INI_BOOLEAN("zend.signal_check", SIGNAL_CHECK_DEFAULT, ZEND_INI_SYSTEM, OnUpdateBool, check, zend_signal_globals_t, zend_signal_globals)
 #endif
 	STD_ZEND_INI_BOOLEAN("zend.exception_ignore_args",	"0",	ZEND_INI_ALL,		OnUpdateBool, exception_ignore_args, zend_executor_globals, executor_globals)
 ZEND_INI_END()
