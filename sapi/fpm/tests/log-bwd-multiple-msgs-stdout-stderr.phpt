@@ -34,9 +34,9 @@ $tester->start();
 $tester->expectLogStartNotices();
 $tester->request()->expectEmptyBody();
 $tester->request()->expectEmptyBody();
-$tester->terminate();
 $tester->expectLogLine('msg 1 - ', false);
 $tester->expectLogLine('msg 2 - msg 3', true);
+$tester->terminate();
 $tester->close();
 
 ?>
