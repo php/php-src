@@ -21,7 +21,10 @@ $serverCode = <<<'CODE'
     $serverUri = "ssl://127.0.0.1:64322";
     $serverFlags = STREAM_SERVER_BIND | STREAM_SERVER_LISTEN;
     $serverCtx = stream_context_create(['ssl' => [
-        'local_cert' => '%s'
+        'local_cert' => '%s',
+        // Make sure the server side starts up successfully if the default security level is
+        // higher. We want to test the error at the client side.
+        'security_level' => 1,
     ]]);
 
     $server = stream_socket_server($serverUri, $errno, $errstr, $serverFlags, $serverCtx);
