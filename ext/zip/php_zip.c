@@ -31,6 +31,10 @@
 #include "zend_interfaces.h"
 #include "php_zip.h"
 
+#ifndef LIBZIP_VERSION_MAJOR
+# error You are likely using libzip 1.7.0, which is badly broken. Update to libzip 1.7.1
+#endif
+
 /* zip_open is a macro for renaming libzip zipopen, so we need to use PHP_NAMED_FUNCTION */
 static PHP_NAMED_FUNCTION(zif_zip_open);
 static PHP_NAMED_FUNCTION(zif_zip_read);
