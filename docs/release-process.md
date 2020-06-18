@@ -292,6 +292,11 @@
     Usually we use the same content as for point 6, but included in php template
     instead of the release xml.
 
+    Optionally use `phpweb/bin/createReleaseEntry -v x.y.z -r` to create
+    a standard announcement template for this and step 6.
+
+    Edit the generated files to expand on the base message if needed.
+
  4. Update `php-qa/include/release-qa.php` and add the next version as an
     QARELEASE (prepare for next RC). Keep `active => true` until there will be
     no more QA releases. Setting the release number to 0 is sufficient to
