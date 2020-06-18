@@ -19,22 +19,22 @@ var_dump(ob_start("no"));
 echo "done"
 ?>
 --EXPECTF--
-Warning: ob_start(): class 'nonExistent' not found in %s on line %d
+Warning: ob_start(): class "nonExistent" not found in %s on line %d
 
 Notice: ob_start(): Failed to create buffer in %s on line %d
 bool(false)
 
-Warning: ob_start(): class 'C' does not have a method 'nonExistent' in %s on line %d
+Warning: ob_start(): class "C" does not have a method "nonExistent" in %s on line %d
 
 Notice: ob_start(): Failed to create buffer in %s on line 13
 bool(false)
 
-Warning: ob_start(): class 'C' does not have a method 'no' in %s on line %d
+Warning: ob_start(): class "C" does not have a method "no" in %s on line %d
 
 Notice: ob_start(): Failed to create buffer in %s on line 14
 bool(false)
 
-Warning: ob_start(): function 'no' not found or invalid function name in %s on line %d
+Warning: ob_start(): function "no" not found or invalid function name in %s on line %d
 
 Notice: ob_start(): Failed to create buffer in %s on line 15
 bool(false)

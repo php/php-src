@@ -107,14 +107,16 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 
 					if (object->ce != scope) {
 						zend_throw_error(NULL,
-							"Call to private %s::__destruct() from context \"%s\"",
+							"Call to private %s::__destruct() from %s%s",
 							ZSTR_VAL(object->ce->name),
-							scope ? ZSTR_VAL(scope->name) : "");
+							scope ? "scope " : "global scope",
+							scope ? ZSTR_VAL(scope->name) : ""
+						);
 						return;
 					}
 				} else {
 					zend_error(E_WARNING,
-						"Call to private %s::__destruct() from context \"\" during shutdown ignored",
+						"Call to private %s::__destruct() from global scope during shutdown ignored",
 						ZSTR_VAL(object->ce->name));
 					return;
 				}
@@ -126,14 +128,16 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 
 					if (!zend_check_protected(zend_get_function_root_class(destructor), scope)) {
 						zend_throw_error(NULL,
-							"Call to protected %s::__destruct() from context \"%s\"",
+							"Call to protected %s::__destruct() from %s%s",
 							ZSTR_VAL(object->ce->name),
-							scope ? ZSTR_VAL(scope->name) : "");
+							scope ? "scope " : "global scope",
+							scope ? ZSTR_VAL(scope->name) : ""
+						);
 						return;
 					}
 				} else {
 					zend_error(E_WARNING,
-						"Call to protected %s::__destruct() from context \"\" during shutdown ignored",
+						"Call to protected %s::__destruct() from global scope during shutdown ignored",
 						ZSTR_VAL(object->ce->name));
 					return;
 				}

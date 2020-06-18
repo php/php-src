@@ -35,10 +35,10 @@ catch(Exception $e) {
 ?>
 --EXPECT--
 Non-existent class:
-Class NonExistentClass does not exist
+Class "NonExistentClass" does not exist
 
 Wrong property parameter type:
 ReflectionProperty::__construct(): Argument #1 ($class) must be of type object|string, int given
 
 Non-existent property:
-Property TestClass::$nonExistentProperty does not exist
+Property "TestClass::$nonExistentProperty" does not exist

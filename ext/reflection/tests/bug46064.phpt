@@ -62,7 +62,7 @@ array(1) {
 }
 int(1000)
 ---------------------------
-string(30) "Property x::$zz does not exist"
+string(32) "Property "x::$zz" does not exist"
 object(ReflectionProperty)#%d (2) {
   ["name"]=>
   string(3) "zzz"

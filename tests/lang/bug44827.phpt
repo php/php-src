@@ -16,4 +16,4 @@ try {
 --EXPECTF--
 Warning: Class constants cannot be defined or redefined in %s on line %d
 
-Fatal error: Class '' not found in %s on line %d
+Fatal error: Class "" not found in %s on line %d

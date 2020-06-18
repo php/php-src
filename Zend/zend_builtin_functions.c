@@ -1124,7 +1124,7 @@ ZEND_FUNCTION(class_alias)
 			RETURN_FALSE;
 		}
 	} else {
-		zend_error(E_WARNING, "Class '%s' not found", ZSTR_VAL(class_name));
+		zend_error(E_WARNING, "Class \"%s\" not found", ZSTR_VAL(class_name));
 		RETURN_FALSE;
 	}
 }

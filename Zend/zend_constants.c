@@ -353,16 +353,16 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 
 		if (zend_string_equals_literal_ci(class_name, "self")) {
 			if (UNEXPECTED(!scope)) {
-				zend_throw_error(NULL, "Cannot access self when no class scope is active");
+				zend_throw_error(NULL, "Cannot access \"self\" when no class scope is active");
 				goto failure;
 			}
 			ce = scope;
 		} else if (zend_string_equals_literal_ci(class_name, "parent")) {
 			if (UNEXPECTED(!scope)) {
-				zend_throw_error(NULL, "Cannot access parent when no class scope is active");
+				zend_throw_error(NULL, "Cannot access \"parent\" when no class scope is active");
 				goto failure;
 			} else if (UNEXPECTED(!scope->parent)) {
-				zend_throw_error(NULL, "Cannot access parent when current class scope has no parent");
+				zend_throw_error(NULL, "Cannot access \"parent\" when current class scope has no parent");
 				goto failure;
 			} else {
 				ce = scope->parent;
@@ -370,7 +370,7 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 		} else if (zend_string_equals_literal_ci(class_name, "static")) {
 			ce = zend_get_called_scope(EG(current_execute_data));
 			if (UNEXPECTED(!ce)) {
-				zend_throw_error(NULL, "Cannot access static:: when no class scope is active");
+				zend_throw_error(NULL, "Cannot access \"static\" when no class scope is active");
 				goto failure;
 			}
 		} else {
@@ -380,7 +380,7 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 			c = zend_hash_find_ptr(&ce->constants_table, constant_name);
 			if (c == NULL) {
 				if ((flags & ZEND_FETCH_CLASS_SILENT) == 0) {
-					zend_throw_error(NULL, "Undefined class constant %s::%s", ZSTR_VAL(class_name), ZSTR_VAL(constant_name));
+					zend_throw_error(NULL, "Undefined constant %s::%s", ZSTR_VAL(class_name), ZSTR_VAL(constant_name));
 					goto failure;
 				}
 				ret_constant = NULL;
@@ -456,13 +456,13 @@ failure:
 
 	if (!c) {
 		if (!(flags & ZEND_FETCH_CLASS_SILENT)) {
-			zend_throw_error(NULL, "Undefined constant %s", name);
+			zend_throw_error(NULL, "Undefined constant \"%s\"", name);
 		}
 		return NULL;
 	}
 
 	if (!(flags & ZEND_FETCH_CLASS_SILENT) && (ZEND_CONSTANT_FLAGS(c) & CONST_DEPRECATED)) {
-		zend_error(E_DEPRECATED, "Constant %s is deprecated", name);
+		zend_error(E_DEPRECATED, "Constant \"%s\" is deprecated", name);
 	}
 	return &c->value;
 }

@@ -374,13 +374,13 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_class(zval *arg, zend_class_entry **pc
 	*pce = zend_lookup_class(Z_STR_P(arg));
 	if (ce_base) {
 		if ((!*pce || !instanceof_function(*pce, ce_base))) {
-			zend_argument_type_error(num, "must be a class name derived from %s, \"%s\" given", ZSTR_VAL(ce_base->name), Z_STRVAL_P(arg));
+			zend_argument_type_error(num, "must be a class name derived from %s, %s given", ZSTR_VAL(ce_base->name), Z_STRVAL_P(arg));
 			*pce = NULL;
 			return 0;
 		}
 	}
 	if (!*pce) {
-		zend_argument_type_error(num, "must be a valid class name, \"%s\" given", Z_STRVAL_P(arg));
+		zend_argument_type_error(num, "must be a valid class name, %s given", Z_STRVAL_P(arg));
 		return 0;
 	}
 	return 1;
@@ -784,14 +784,14 @@ static const char *zend_parse_arg_impl(zval *arg, va_list *va, const char **spec
 				}
 				if (ce_base) {
 					if ((!*pce || !instanceof_function(*pce, ce_base))) {
-						zend_spprintf(error, 0, "a class name derived from %s%s, \"%s\" given",
+						zend_spprintf(error, 0, "a class name derived from %s%s, %s given",
 							ZSTR_VAL(ce_base->name), check_null ? " or null" : "", Z_STRVAL_P(arg));
 						*pce = NULL;
 						return "";
 					}
 				}
 				if (!*pce) {
-					zend_spprintf(error, 0, "a valid class name%s, \"%s\" given",
+					zend_spprintf(error, 0, "a valid class name%s, %s given",
 						check_null ? " or null" : "", Z_STRVAL_P(arg));
 					return "";
 				}
@@ -1089,7 +1089,7 @@ ZEND_API int zend_parse_method_parameters(uint32_t num_args, zval *this_ptr, con
 		*object = this_ptr;
 
 		if (ce && !instanceof_function(Z_OBJCE_P(this_ptr), ce)) {
-			zend_error_noreturn(E_CORE_ERROR, "%s::%s() must be derived from %s::%s",
+			zend_error_noreturn(E_CORE_ERROR, "%s::%s() must be derived from %s::%s()",
 				ZSTR_VAL(Z_OBJCE_P(this_ptr)->name), get_active_function_name(), ZSTR_VAL(ce->name), get_active_function_name());
 		}
 
@@ -1122,7 +1122,7 @@ ZEND_API int zend_parse_method_parameters_ex(int flags, uint32_t num_args, zval 
 
 		if (ce && !instanceof_function(Z_OBJCE_P(this_ptr), ce)) {
 			if (!(flags & ZEND_PARSE_PARAMS_QUIET)) {
-				zend_error_noreturn(E_CORE_ERROR, "%s::%s() must be derived from %s::%s",
+				zend_error_noreturn(E_CORE_ERROR, "%s::%s() must be derived from %s::%s()",
 					ZSTR_VAL(ce->name), get_active_function_name(), ZSTR_VAL(Z_OBJCE_P(this_ptr)->name), get_active_function_name());
 			}
 			va_end(va);
@@ -1776,7 +1776,7 @@ ZEND_API int zend_startup_module_ex(zend_module_entry *module) /* {{{ */
 				if ((req_mod = zend_hash_find_ptr(&module_registry, lcname)) == NULL || !req_mod->module_started) {
 					zend_string_efree(lcname);
 					/* TODO: Check version relationship */
-					zend_error(E_CORE_WARNING, "Cannot load module '%s' because required module '%s' is not loaded", module->name, dep->name);
+					zend_error(E_CORE_WARNING, "Cannot load module \"%s\" because required module \"%s\" is not loaded", module->name, dep->name);
 					module->module_started = 0;
 					return FAILURE;
 				}
@@ -1963,7 +1963,7 @@ ZEND_API zend_module_entry* zend_register_module_ex(zend_module_entry *module) /
 				if (zend_hash_exists(&module_registry, lcname) || zend_get_extension(dep->name)) {
 					zend_string_efree(lcname);
 					/* TODO: Check version relationship */
-					zend_error(E_CORE_WARNING, "Cannot load module '%s' because conflicting module '%s' is already loaded", module->name, dep->name);
+					zend_error(E_CORE_WARNING, "Cannot load module \"%s\" because conflicting module \"%s\" is already loaded", module->name, dep->name);
 					return NULL;
 				}
 				zend_string_efree(lcname);
@@ -1978,7 +1978,7 @@ ZEND_API zend_module_entry* zend_register_module_ex(zend_module_entry *module) /
 
 	lcname = zend_new_interned_string(lcname);
 	if ((module_ptr = zend_hash_add_mem(&module_registry, lcname, module, sizeof(zend_module_entry))) == NULL) {
-		zend_error(E_CORE_WARNING, "Module '%s' already loaded", module->name);
+		zend_error(E_CORE_WARNING, "Module \"%s\" is already loaded", module->name);
 		zend_string_release(lcname);
 		return NULL;
 	}
@@ -2814,7 +2814,7 @@ static int zend_is_callable_check_class(zend_string *name, zend_class_entry *sco
 	*strict_class = 0;
 	if (zend_string_equals_literal(lcname, "self")) {
 		if (!scope) {
-			if (error) *error = estrdup("cannot access self when no class scope is active");
+			if (error) *error = estrdup("cannot access \"self\" when no class scope is active");
 		} else {
 			fcc->called_scope = zend_get_called_scope(EG(current_execute_data));
 			fcc->calling_scope = scope;
@@ -2825,9 +2825,9 @@ static int zend_is_callable_check_class(zend_string *name, zend_class_entry *sco
 		}
 	} else if (zend_string_equals_literal(lcname, "parent")) {
 		if (!scope) {
-			if (error) *error = estrdup("cannot access parent when no class scope is active");
+			if (error) *error = estrdup("cannot access \"parent\" when no class scope is active");
 		} else if (!scope->parent) {
-			if (error) *error = estrdup("cannot access parent when current class scope has no parent");
+			if (error) *error = estrdup("cannot access \"parent\" when current class scope has no parent");
 		} else {
 			fcc->called_scope = zend_get_called_scope(EG(current_execute_data));
 			fcc->calling_scope = scope->parent;
@@ -2841,7 +2841,7 @@ static int zend_is_callable_check_class(zend_string *name, zend_class_entry *sco
 		zend_class_entry *called_scope = zend_get_called_scope(EG(current_execute_data));
 
 		if (!called_scope) {
-			if (error) *error = estrdup("cannot access static when no class scope is active");
+			if (error) *error = estrdup("cannot access \"static\" when no class scope is active");
 		} else {
 			fcc->called_scope = called_scope;
 			fcc->calling_scope = called_scope;
@@ -2877,7 +2877,7 @@ static int zend_is_callable_check_class(zend_string *name, zend_class_entry *sco
 		*strict_class = 1;
 		ret = 1;
 	} else {
-		if (error) zend_spprintf(error, 0, "class '%.*s' not found", (int)name_len, ZSTR_VAL(name));
+		if (error) zend_spprintf(error, 0, "class \"%.*s\" not found", (int)name_len, ZSTR_VAL(name));
 	}
 	ZSTR_ALLOCA_FREE(lcname, use_heap);
 	return ret;
@@ -2972,7 +2972,7 @@ static zend_always_inline int zend_is_callable_check_func(int check_flags, zval 
 
 		ftable = &fcc->calling_scope->function_table;
 		if (ce_org && !instanceof_function(ce_org, fcc->calling_scope)) {
-			if (error) zend_spprintf(error, 0, "class '%s' is not a subclass of '%s'", ZSTR_VAL(ce_org->name), ZSTR_VAL(fcc->calling_scope->name));
+			if (error) zend_spprintf(error, 0, "class %s is not a subclass of %s", ZSTR_VAL(ce_org->name), ZSTR_VAL(fcc->calling_scope->name));
 			return 0;
 		}
 		mname = zend_string_init(Z_STRVAL_P(callable) + clen + 2, mlen, 0);
@@ -2985,7 +2985,7 @@ static zend_always_inline int zend_is_callable_check_func(int check_flags, zval 
 	} else {
 		/* We already checked for plain function before. */
 		if (error && !(check_flags & IS_CALLABLE_CHECK_SILENT)) {
-			zend_spprintf(error, 0, "function '%s' not found or invalid function name", Z_STRVAL_P(callable));
+			zend_spprintf(error, 0, "function \"%s\" not found or invalid function name", Z_STRVAL_P(callable));
 		}
 		return 0;
 	}
@@ -3104,9 +3104,9 @@ get_function_via_handler:
 		}
 	} else if (error && !(check_flags & IS_CALLABLE_CHECK_SILENT)) {
 		if (fcc->calling_scope) {
-			if (error) zend_spprintf(error, 0, "class '%s' does not have a method '%s'", ZSTR_VAL(fcc->calling_scope->name), ZSTR_VAL(mname));
+			if (error) zend_spprintf(error, 0, "class %s does not have a method \"%s\"", ZSTR_VAL(fcc->calling_scope->name), ZSTR_VAL(mname));
 		} else {
-			if (error) zend_spprintf(error, 0, "function '%s' does not exist", ZSTR_VAL(mname));
+			if (error) zend_spprintf(error, 0, "function %s() does not exist", ZSTR_VAL(mname));
 		}
 	}
 	zend_string_release_ex(lmname, 0);

@@ -74,7 +74,7 @@ $OuterMatcher->stub = new PHPUnit_Framework_MockObject_Stub_ReturnCallback([$foo
 $a = $b = $c = 0;
 $foo->bar($a, $b, $c);
 --EXPECTF--
-Fatal error: Uncaught Error: Class 'DoesNotExists' not found in %sbug72101.php:61
+Fatal error: Uncaught Error: Class "DoesNotExists" not found in %s:%d
 Stack trace:
 #0 %sbug72101.php(8): {closure}(2, 'MethodCallbackB...', '%s', 8)
 #1 %sbug72101.php(27): PHPUnit_Framework_MockObject_Stub_ReturnCallback->invoke(Object(PHPUnit_Framework_MockObject_Invocation_Static))

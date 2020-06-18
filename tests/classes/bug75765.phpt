@@ -16,7 +16,7 @@ try {
 bool(false)
 bool(false)
 
-Fatal error: Uncaught Error: Class 'B' not found in %s:%d
+Fatal error: Uncaught Error: Class "B" not found in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

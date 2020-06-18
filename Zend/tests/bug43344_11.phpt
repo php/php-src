@@ -8,7 +8,7 @@ function f($a=namespace\bar) {
 echo f()."\n";
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: Undefined constant bar in %s:%d
+Fatal error: Uncaught Error: Undefined constant "bar" in %s:%d
 Stack trace:
 #0 %s(%d): f()
 #1 {main}

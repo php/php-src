@@ -115,10 +115,10 @@ array_map(): Argument #1 ($callback) must be a valid callback, no array or strin
 array_map(): Argument #1 ($callback) must be a valid callback, no array or string given
 
 -- Iteration 14 --
-array_map(): Argument #1 ($callback) must be a valid callback, function '' not found or invalid function name
+array_map(): Argument #1 ($callback) must be a valid callback, function "" not found or invalid function name
 
 -- Iteration 15 --
-array_map(): Argument #1 ($callback) must be a valid callback, function '' not found or invalid function name
+array_map(): Argument #1 ($callback) must be a valid callback, function "" not found or invalid function name
 
 -- Iteration 16 --
 array_map(): Argument #1 ($callback) must be a valid callback, array must have exactly two members

@@ -109,7 +109,7 @@ Array
     [1] => bar
 )
 string(7) "ERROR 1"
-string(34) "Undefined class constant self::FOO"
+string(28) "Undefined constant self::FOO"
 
 bool(true)
 string(3) "bar"

@@ -18,7 +18,7 @@ $rf = new ReflectionFunction('is_string');
 var_dump($rf->isDisabled());
 ?>
 --EXPECTF--
-Function is_file() does not exist
+Function "is_file" does not exist
 
 Deprecated: Method ReflectionFunction::isDisabled() is deprecated in %s on line %d
 bool(false)

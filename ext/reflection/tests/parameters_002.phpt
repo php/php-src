@@ -131,7 +131,7 @@ getName: string(2) "na"
 isPassedByReference: bool(false)
 
 Deprecated: Method ReflectionParameter::getClass() is deprecated in %s on line %d
-Class NonExistingClass does not exist
+Class "NonExistingClass" does not exist
 getDeclaringClass: NULL
 isArray: 
 Deprecated: Method ReflectionParameter::isArray() is deprecated in %s on line %d
@@ -225,7 +225,7 @@ getName: string(2) "na"
 isPassedByReference: bool(false)
 
 Deprecated: Method ReflectionParameter::getClass() is deprecated in %s on line %d
-Class NonExistingClass does not exist
+Class "NonExistingClass" does not exist
 getDeclaringClass: test
 isArray: 
 Deprecated: Method ReflectionParameter::isArray() is deprecated in %s on line %d

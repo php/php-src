@@ -12,7 +12,7 @@ class A implements I {
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught ReflectionException: Class A does not exist in %s:%d
+Fatal error: Uncaught ReflectionException: Class "A" does not exist in %s:%d
 Stack trace:
 #0 %s(%d): ReflectionClass->__construct('A')
 #1 %s(%d): {closure}('I')

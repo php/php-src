@@ -147,5 +147,5 @@ Test bad arguments:
 ReflectionClass::implementsInterface() expects exactly 1 parameter, 0 given
 ReflectionClass::implementsInterface() expects exactly 1 parameter, 2 given
 ReflectionClass::implementsInterface(): Argument #1 ($interface) must be of type ReflectionClass|string, null given
-Interface ThisClassDoesNotExist does not exist
+Interface "ThisClassDoesNotExist" does not exist
 ReflectionClass::implementsInterface(): Argument #1 ($interface) must be of type ReflectionClass|string, int given

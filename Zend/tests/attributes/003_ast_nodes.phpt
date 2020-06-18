@@ -104,6 +104,5 @@ array(1) {
 }
 
 int(1)
-string(30) "Class 'MissingClass' not found"
-string(30) "Class 'MissingClass' not found"
-
+string(30) "Class "MissingClass" not found"
+string(30) "Class "MissingClass" not found"
