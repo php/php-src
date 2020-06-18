@@ -1805,7 +1805,6 @@ PHP_FUNCTION(oci_set_client_identifier)
   Sets the edition attribute for all subsequent connections created */
 PHP_FUNCTION(oci_set_edition)
 {
-#if ((OCI_MAJOR_VERSION > 11) || ((OCI_MAJOR_VERSION == 11) && (OCI_MINOR_VERSION >= 2)))
 	char *edition;
 	size_t edition_len;
 
@@ -1813,6 +1812,7 @@ PHP_FUNCTION(oci_set_edition)
 		Z_PARAM_STRING(edition, edition_len)
 	ZEND_PARSE_PARAMETERS_END();
 
+#if ((OCI_MAJOR_VERSION > 11) || ((OCI_MAJOR_VERSION == 11) && (OCI_MINOR_VERSION >= 2)))
 	if (OCI_G(edition)) {
 		efree(OCI_G(edition));
 	}
@@ -1837,17 +1837,19 @@ PHP_FUNCTION(oci_set_edition)
   Sets the module attribute on the connection for end-to-end tracing */
 PHP_FUNCTION(oci_set_module_name)
 {
-#if (OCI_MAJOR_VERSION >= 10)
 	zval *z_connection;
-	php_oci_connection *connection;
 	char *module;
 	size_t module_len;
-	sword errstatus;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_RESOURCE(z_connection)
 		Z_PARAM_STRING(module, module_len)
 	ZEND_PARSE_PARAMETERS_END();
+
+#if (OCI_MAJOR_VERSION >= 10)
+
+	php_oci_connection *connection;
+	sword errstatus;
 
 	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
 
@@ -1870,17 +1872,19 @@ PHP_FUNCTION(oci_set_module_name)
   Sets the action attribute on the connection for end-to-end tracing */
 PHP_FUNCTION(oci_set_action)
 {
-#if (OCI_MAJOR_VERSION >= 10)
 	zval *z_connection;
-	php_oci_connection *connection;
 	char *action;
 	size_t action_len;
-	sword errstatus;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_RESOURCE(z_connection)
 		Z_PARAM_STRING(action, action_len)
 	ZEND_PARSE_PARAMETERS_END();
+
+#if (OCI_MAJOR_VERSION >= 10)
+
+	php_oci_connection *connection;
+	sword errstatus;
 
 	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
 
@@ -1903,17 +1907,19 @@ PHP_FUNCTION(oci_set_action)
   Sets the client info attribute on the connection  for end-to-end tracing */
 PHP_FUNCTION(oci_set_client_info)
 {
-#if (OCI_MAJOR_VERSION >= 10)
 	zval *z_connection;
-	php_oci_connection *connection;
 	char *client_info;
 	size_t client_info_len;
-	sword errstatus;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_RESOURCE(z_connection)
 		Z_PARAM_STRING(client_info, client_info_len)
 	ZEND_PARSE_PARAMETERS_END();
+
+#if (OCI_MAJOR_VERSION >= 10)
+
+	php_oci_connection *connection;
+	sword errstatus;
 
 	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
 
@@ -1937,9 +1943,7 @@ PHP_FUNCTION(oci_set_client_info)
    For history, see Oracle bug 16695981 */
 PHP_FUNCTION(oci_set_db_operation)
 {
-#if (OCI_MAJOR_VERSION > 11)
 	zval *z_connection;
-	php_oci_connection *connection;
 	char *dbop_name;
 	size_t dbop_name_len;
 
@@ -1947,6 +1951,9 @@ PHP_FUNCTION(oci_set_db_operation)
 		Z_PARAM_RESOURCE(z_connection)
 		Z_PARAM_STRING(dbop_name, dbop_name_len)
 	ZEND_PARSE_PARAMETERS_END();
+
+#if (OCI_MAJOR_VERSION > 11)
+	php_oci_connection *connection;
 
 	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
 
@@ -1968,15 +1975,16 @@ PHP_FUNCTION(oci_set_db_operation)
  */
 PHP_FUNCTION(oci_set_call_timeout)
 {
-#if (OCI_MAJOR_VERSION >= 18)
 	zval *z_connection;
-	php_oci_connection *connection;
 	zend_long call_timeout;  // milliseconds
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_RESOURCE(z_connection)
 		Z_PARAM_LONG(call_timeout)
 	ZEND_PARSE_PARAMETERS_END();
+
+#if (OCI_MAJOR_VERSION >= 18)
+	php_oci_connection *connection;
 
 	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
 
@@ -2091,6 +2099,7 @@ PHP_FUNCTION(oci_result)
    Return a string containing runtime client library version information */
 PHP_FUNCTION(oci_client_version)
 {
+	ZEND_PARSE_PARAMETERS_NONE();
 	char version[256];
 
 	php_oci_client_get_version(version, sizeof(version));

@@ -1517,8 +1517,8 @@ sb4 php_oci_bind_out_callback(
 php_oci_out_column *php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAMETERS, int need_data)
 {
 	zval *z_statement;
-	zend_string *column_index_string = NULL;
-	zend_long column_index_int = 0;
+	zend_string *column_index_string;
+	zend_long column_index_int;
 
 	php_oci_statement *statement;
 	php_oci_out_column *column;

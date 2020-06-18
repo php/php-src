@@ -293,7 +293,7 @@ function ocifetchstatement($statement_resource, &$output, int $skip = 0, int $ma
 /**
  * @param resource $statement_resource
  */
-function oci_fetch_object($statement_resource, int $mode = PHP_OCI_ASSOC | PHP_OCI_RETURN_NULLS): ?stdClass {}
+function oci_fetch_object($statement_resource, int $mode = PHP_OCI_ASSOC | PHP_OCI_RETURN_NULLS): stdClass|null|false {}
 
 /**
  * @param resource $statement_resource
@@ -338,55 +338,55 @@ function ocifreecursor($statement_resource): bool {}
 /**
  * @param resource $connection_resource
  */
-function oci_close($connection_resource): bool {}
+function oci_close($connection_resource): bool|null {}
 
 /**
  * @param resource $connection_resource
  * @alias oci_close
  * @deprecated
  */
-function ocilogoff($connection_resource): bool {}
+function ocilogoff($connection_resource): bool|null {}
 
 /**
  * @return resource|false
  */
-function oci_new_connect(string $username, string $password, string $connection_string = UNKNOWN, string $character_set = UNKNOWN, int $session_mode = OCI_DEFAULT) {}
+function oci_new_connect(string $username, string $password, string $connection_string = UNKNOWN, string $character_set = '', int $session_mode = OCI_DEFAULT) {}
 
 /**
  * @return resource|false
  * @alias oci_new_connect
  * @deprecated
  */
-function ocinlogon(string $username, string $password, ?string $connection_string = null, ?string $character_set = null, int $session_mode = OCI_DEFAULT) {}
+function ocinlogon(string $username, string $password, string $connection_string = UNKNOWN, string $character_set = '', int $session_mode = OCI_DEFAULT) {}
 
 /**
  * @return resource|false
  */
-function oci_connect(string $username, string $password, ?string $connection_string = null, ?string $character_set = null, int $session_mode = OCI_DEFAULT) {}
+function oci_connect(string $username, string $password, string $connection_string = UNKNOWN, string $character_set = '', int $session_mode = OCI_DEFAULT) {}
 
 /**
  * @return resource|false
  * @alias oci_connect
  * @deprecated
  */
-function ocilogon(string $username, string $password, ?string $connection_string = null, ?string $character_set = null, int $session_mode = OCI_DEFAULT) {}
+function ocilogon(string $username, string $password, string $connection_string = UNKNOWN, string $character_set = '', int $session_mode = OCI_DEFAULT) {}
 
 /**
  * @return resource|false
  */
-function oci_pconnect(string $username, string $password, ?string $connection_string = null, ?string $character_set = null, int $session_mode = OCI_DEFAULT) {}
+function oci_pconnect(string $username, string $password, string $connection_string = UNKNOWN, string $character_set = '', int $session_mode = OCI_DEFAULT) {}
 
 /**
  * @return resource|false
  * @alias oci_pconnect
  * @deprecated
  */
-function ociplogon(string $username, string $password, ?string $connection_string = null, ?string $character_set = null, int $session_mode = OCI_DEFAULT) {}
+function ociplogon(string $username, string $password, string $connection_string = UNKNOWN, string $character_set = '', int $session_mode = OCI_DEFAULT) {}
 
 /**
- * @param resource|null $connection_or_statement_resource
+ * @param resource $connection_or_statement_resource
  */
-function oci_error($connection_or_statement_resource = null): array|false {}
+function oci_error($connection_or_statement_resource = UNKNOWN): array|false {}
 
 /**
  * @param resource|null $connection_or_statement_resource
@@ -430,7 +430,7 @@ function oci_get_implicit_resultset($statement_resource) {}
 /**
  * @param resource $statement_resource
  */
-function oci_set_prefetch($statement_resource, int $number_of_rows): bool {}
+function oci_set_prefetch($statement_resource, int $number_of_rows): ?bool {}
 
 /**
  * @param resource $statement_resource
@@ -487,13 +487,13 @@ function ocipasswordchange($connection_resource_or_connection_string, string $us
 
 /**
  * @param resource $connection_resource
- * @return resource|false @todo check return false
+ * @return resource|false
  */
 function oci_new_cursor($connection_resource) {}
 
 /**
  * @param resource $connection_resource
- * @return resource|false @todo check return false
+ * @return resource|false
  * @alias oci_new_cursor
  * @deprecated
  */
@@ -502,14 +502,14 @@ function ocinewcursor($connection_resource) {}
 /**
  * @param resource $statement_resource
  */
-function oci_result($statement_resource, mixed $column_number_or_name): mixed {}
+function oci_result($statement_resource, string|int $column_number_or_name): mixed {}
 
 /**
  * @param resource $statement_resource
  * @alias oci_result
  * @deprecated
  */
-function ociresult($statement_resource, mixed $column_number_or_name): mixed {}
+function ociresult($statement_resource, string|int $column_number_or_name): mixed {}
 
 function oci_client_version(): string {}
 
@@ -565,13 +565,13 @@ function oci_collection_append(OCI_Collection $collection, string $value): bool 
  */
 function ocicollappend(OCI_Collection $collection, string $value): bool {}
 
-function oci_collection_element_get(OCI_Collection $collection, int $index): mixed {}
+function oci_collection_element_get(OCI_Collection $collection, int $index): string|double|null {}
 
 /**
  * @alias oci_collection_element_get
  * @deprecated
  */
-function ocicollgetelem(OCI_Collection $collection, int $index): mixed {}
+function ocicollgetelem(OCI_Collection $collection, int $index): string|double|null {}
 
 function oci_collection_assign(OCI_Collection $collection_to, OCI_Collection $collection_from): bool {}
 
@@ -610,14 +610,14 @@ function ocicolltrim(OCI_Collection $collection, int $number): bool {}
 /**
  * @param resource $connection_resource
  */
-function oci_new_collection($connection_resource, string $type_name, ?string $schema_name = null): OCI_Collection|false {}
+function oci_new_collection($connection_resource, string $type_name, string $schema_name = UNKNOWN): OCI_Collection|false {}
 
 /**
  * @param resource $connection_resource
  * @alias oci_new_collection
  * @deprecated
  */
-function ocinewcollection($connection_resource, string $type_name, ?string $schema_name = null): OCI_Collection|false {}
+function ocinewcollection($connection_resource, string $type_name, string $schema_name = UNKNOWN): OCI_Collection|false {}
 
 /**
  * @param resource $connection_resource
