@@ -137,7 +137,6 @@ ZEND_END_ARG_INFO()
 #define arginfo_curl_strerror arginfo_curl_multi_strerror
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_curl_version, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
-	ZEND_ARG_TYPE_INFO(0, age, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 

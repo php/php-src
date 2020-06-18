@@ -760,6 +760,7 @@ PHP 8.0 UPGRADE NOTES
     checks for `false`. The curl_share_close() function no longer has an effect,
     instead the CurlShareHandle instance is automatically destroyed if it is no
     longer referenced.
+  . The deprecated parameter `$version` of curl_version() has been removed.
 
 - Enchant:
   . The enchant extension now uses libenchant-2 by default when available.
