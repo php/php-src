@@ -322,9 +322,8 @@
     highlight the major important things (security fixes) and when it is
     important to upgrade.
 
-    * Call `php bin/createNewsEntry` in your local phpweb checkout.
-    * Use the "frontpage" and "releases" category.
-    * Add the content for the news entry.
+    * Call `php bin/createReleaseEntry -v <version> [ --security ]` in your
+      local phpweb checkout.
 
  7. Commit and push all the changes to their respective git repos
 
@@ -364,8 +363,8 @@
     highlight the major important things (security fixes) and when it is
     important to upgrade.
 
-    * Call `php bin/createNewsEntry` in your local phpweb checkout.
-    * Add the content for the news entry.
+    * Call `php bin/createReleaseEntry -v <version> [ --security ]` in your
+      local phpweb checkout.
 
  4. Commit all the changes (`include/version.inc`, `archive/archive.xml`,
     `archive/entries/YYYY-MM-DD-N.xml`).
