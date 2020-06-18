@@ -11,13 +11,10 @@ $certFile = __DIR__ . DIRECTORY_SEPARATOR . 'tlsv1.1_wrapper.pem.tmp';
 
 $serverCode = <<<'CODE'
     $flags = STREAM_SERVER_BIND|STREAM_SERVER_LISTEN;
-    $ssl_opts = [
+    $ctx = stream_context_create(['ssl' => [
         'local_cert' => '%s',
-    ];
-    if (OPENSSL_VERSION_NUMBER >= 0x10100000) {
-        $ssl_opts['security_level'] = 1;
-    }
-    $ctx = stream_context_create(['ssl' => $ssl_opts]);
+        'security_level' => 1,
+    ]]);
 
     $server = stream_socket_server('tlsv1.1://127.0.0.1:64321', $errno, $errstr, $flags, $ctx);
     phpt_notify();
@@ -30,14 +27,11 @@ $serverCode = sprintf($serverCode, $certFile);
 
 $clientCode = <<<'CODE'
     $flags = STREAM_CLIENT_CONNECT;
-    $ssl_opts = [
+    $ctx = stream_context_create(['ssl' => [
         'verify_peer' => false,
         'verify_peer_name' => false,
-    ];
-    if (OPENSSL_VERSION_NUMBER >= 0x10100000) {
-        $ssl_opts['security_level'] = 1;
-    }
-    $ctx = stream_context_create(['ssl' => $ssl_opts]);
+        'security_level' => 1,
+    ]]);
 
     phpt_wait();
 
