@@ -33,11 +33,11 @@ function curl_multi_setopt(CurlMultiHandle $multi_handle, int $option, mixed $va
 
 function curl_exec(CurlHandle $handle): string|bool {}
 
-function curl_file_create(string $filename, string $mimetype = UNKNOWN, string $postname = UNKNOWN): CURLFile {}
+function curl_file_create(string $filename, ?string $mimetype = null, ?string $postname = null): CURLFile {}
 
-function curl_getinfo(CurlHandle $handle, int $option = UNKNOWN): mixed {}
+function curl_getinfo(CurlHandle $handle, ?int $option = null): mixed {}
 
-function curl_init(string $url = UNKNOWN): CurlHandle|false {}
+function curl_init(?string $url = null): CurlHandle|false {}
 
 function curl_multi_add_handle(CurlMultiHandle $multi_handle, CurlHandle $handle): int {}
 
