@@ -346,13 +346,11 @@ PHP_FUNCTION(enchant_broker_get_error)
 }
 /* }}} */
 
-#if HAVE_ENCHANT_BROKER_SET_PARAM
 /* {{{ proto bool enchant_broker_set_dict_path(resource broker, int dict_type, string value)
 	Set the directory path for a given backend, works with ispell and myspell */
 PHP_FUNCTION(enchant_broker_set_dict_path)
 {
 	zval *broker;
-	enchant_broker *pbroker;
 	zend_long dict_type;
 	char *value;
 	size_t value_len;
@@ -361,6 +359,8 @@ PHP_FUNCTION(enchant_broker_set_dict_path)
 		RETURN_THROWS();
 	}
 
+#if HAVE_ENCHANT_BROKER_SET_PARAM
+	enchant_broker *pbroker;
 	if (!value_len) {
 		RETURN_FALSE;
 	}
@@ -383,6 +383,7 @@ PHP_FUNCTION(enchant_broker_set_dict_path)
 		default:
 			RETURN_FALSE;
 	}
+#endif
 }
 /* }}} */
 
@@ -392,14 +393,15 @@ PHP_FUNCTION(enchant_broker_set_dict_path)
 PHP_FUNCTION(enchant_broker_get_dict_path)
 {
 	zval *broker;
-	enchant_broker *pbroker;
 	zend_long dict_type;
-	char *value;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ol", &broker, enchant_broker_ce, &dict_type) == FAILURE) {
 		RETURN_THROWS();
 	}
 
+#if HAVE_ENCHANT_BROKER_SET_PARAM
+	enchant_broker *pbroker;
+	char *value;
 	PHP_ENCHANT_GET_BROKER;
 
 	switch (dict_type) {
@@ -423,26 +425,9 @@ PHP_FUNCTION(enchant_broker_get_dict_path)
 	}
 
 	RETURN_STRING(value);
-}
-/* }}} */
-#else
-/* {{{ proto bool enchant_broker_set_dict_path(resource broker, int dict_type, string value)
-	Set the directory path for a given backend, works with ispell and myspell */
-PHP_FUNCTION(enchant_broker_set_dict_path)
-{
-	RETURN_FALSE;
-}
-/* }}} */
-
-
-/* {{{ proto string enchant_broker_get_dict_path(resource broker, int dict_type)
-	Get the directory path for a given backend, works with ispell and myspell */
-PHP_FUNCTION(enchant_broker_get_dict_path)
-{
-	RETURN_FALSE;
-}
-/* }}} */
 #endif
+}
+/* }}} */
 
 /* {{{ proto array enchant_broker_list_dicts(resource broker)
    Lists the dictionaries available for the given broker */
