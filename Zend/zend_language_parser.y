@@ -296,7 +296,7 @@ identifier:
 		T_STRING { $$ = $1; }
 	| 	semi_reserved  {
 			zval zv;
-			zend_lex_tstring(&zv, $1);
+			if (zend_lex_tstring(&zv, $1) == FAILURE) { YYABORT; }
 			$$ = zend_ast_create_zval(&zv);
 		}
 ;
@@ -852,7 +852,8 @@ trait_alias:
 		trait_method_reference T_AS T_STRING
 			{ $$ = zend_ast_create(ZEND_AST_TRAIT_ALIAS, $1, $3); }
 	|	trait_method_reference T_AS reserved_non_modifiers
-			{ zval zv; zend_lex_tstring(&zv, $3);
+			{ zval zv;
+			  if (zend_lex_tstring(&zv, $3) == FAILURE) { YYABORT; }
 			  $$ = zend_ast_create(ZEND_AST_TRAIT_ALIAS, $1, zend_ast_create_zval(&zv)); }
 	|	trait_method_reference T_AS member_modifier identifier
 			{ $$ = zend_ast_create_ex(ZEND_AST_TRAIT_ALIAS, $3, $1, $4); }

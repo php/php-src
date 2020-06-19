@@ -306,15 +306,21 @@ ZEND_API void zend_destroy_file_handle(zend_file_handle *file_handle)
 	}
 }
 
-ZEND_API void zend_lex_tstring(zval *zv, zend_lexer_ident_ref ident_ref)
+ZEND_API int zend_lex_tstring(zval *zv, zend_lexer_ident_ref ident_ref)
 {
 	char *ident = (char *) SCNG(yy_start) + ident_ref.offset;
 	size_t length = ident_ref.len;
+	if (length == sizeof("<?=")-1 && memcmp(ident, "<?=", sizeof("<?=")-1) == 0) {
+		zend_throw_exception(zend_ce_parse_error, "Cannot use \"<?=\" as an identifier", 0);
+		return FAILURE;
+	}
+
 	if (SCNG(on_event)) {
 		SCNG(on_event)(ON_FEEDBACK, T_STRING, 0, ident, length, SCNG(on_event_context));
 	}
 
 	ZVAL_STRINGL(zv, ident, length);
+	return SUCCESS;
 }
 
 #define BOM_UTF32_BE	"\x00\x00\xfe\xff"
@@ -2149,7 +2155,8 @@ string:
 <INITIAL>"<?=" {
 	BEGIN(ST_IN_SCRIPTING);
 	if (PARSER_MODE()) {
-		RETURN_TOKEN(T_ECHO);
+		/* We'll reject this as an identifier in zend_lex_tstring. */
+		RETURN_TOKEN_WITH_IDENT(T_ECHO);
 	}
 	RETURN_TOKEN(T_OPEN_TAG_WITH_ECHO);
 }
