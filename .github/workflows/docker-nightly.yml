@@ -1,4 +1,4 @@
-name: Nightly Docker Image CI
+name: php-nightly
 
 on: [push]
 
@@ -8,8 +8,6 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - uses: docker/build-push-action@v1
-      env:
-        INPUT_REPOSITORY: ${GITHUB_REPOSITORY}/php-nightly
       with:
         username: ${GITHUB_ACTOR}
         password: ${{ secrets.GITHUB_TOKEN }}
@@ -17,3 +15,5 @@ jobs:
         dockerfile: .github/Dockerfile.debian
         tags: latest
         tag_with_sha: true
+      env:
+        INPUT_REPOSITORY: ${GITHUB_REPOSITORY}/php-nightly
