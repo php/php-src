@@ -7,6 +7,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
+    - name: Get current date
+      id: date
+      run: echo "::set-output name=date::$(date +'%Y%m%d')"
     - uses: docker/build-push-action@v1
       with:
         username: ${{ github.repository_owner }}
@@ -14,5 +17,5 @@ jobs:
         registry: docker.pkg.github.com
         repository: "${{ github.repository }}/php-nightly"
         dockerfile: .github/Dockerfile.debian
-        tags: latest
+        tags: "latest,${{ steps.date.outputs.date }}"
         tag_with_sha: true
