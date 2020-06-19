@@ -11,6 +11,7 @@ jobs:
       with:
         username: ${GITHUB_ACTOR}
         password: ${{ secrets.GITHUB_TOKEN }}
+        registry: docker.pkg.github.com
         repository: ${GITHUB_REPOSITORY}/php-nightly
         dockerfile: .github/Dockerfile.debian
         tags: latest
