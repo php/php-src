@@ -241,6 +241,7 @@ static void curl_free_obj(zend_object *object);
 static HashTable *curl_get_gc(zend_object *object, zval **table, int *n);
 static zend_function *curl_get_constructor(zend_object *object);
 static zend_object *curl_clone_obj(zend_object *object);
+static int curl_cast_object(zend_object *obj, zval *result, int type);
 php_curl *init_curl_handle_into_zval(zval *curl);
 static inline int build_mime_structure_from_hash(php_curl *ch, zval *zpostfields);
 
@@ -1204,6 +1205,7 @@ PHP_MINIT_FUNCTION(curl)
 	curl_object_handlers.get_gc = curl_get_gc;
 	curl_object_handlers.get_constructor = curl_get_constructor;
 	curl_object_handlers.clone_obj = curl_clone_obj;
+	curl_object_handlers.cast_object = curl_cast_object;
 
 	curl_multi_register_class(class_CurlMultiHandle_methods);
 	curl_share_register_class(class_CurlShareHandle_methods);
@@ -1301,6 +1303,18 @@ static HashTable *curl_get_gc(zend_object *object, zval **table, int *n)
 	zend_get_gc_buffer_use(gc_buffer, table, n);
 
 	return zend_std_get_properties(object);
+}
+
+static int curl_cast_object(zend_object *obj, zval *result, int type)
+{
+	if (type == IS_LONG) {
+		/* For better backward compatibility, make (int) $curl_handle return the object ID,
+		 * similar to how it previously returned the resource ID. */
+		ZVAL_LONG(result, obj->handle);
+		return SUCCESS;
+	}
+
+	return zend_std_cast_object_tostring(obj, result, type);
 }
 
 /* {{{ PHP_MSHUTDOWN_FUNCTION
