@@ -1140,8 +1140,14 @@ PHP_FUNCTION(posix_getgrgid)
 
 	grbuf = emalloc(grbuflen);
 
+try_again:
 	ret = getgrgid_r(gid, &_g, grbuf, grbuflen, &retgrptr);
 	if (ret || retgrptr == NULL) {
+		if (errno == ERANGE) {
+			grbuflen *= 2;
+			grbuf = erealloc(grbuf, grbuflen);
+			goto try_again;
+		}
 		POSIX_G(last_error) = ret;
 		efree(grbuf);
 		RETURN_FALSE;
@@ -1209,7 +1215,13 @@ PHP_FUNCTION(posix_getpwnam)
 	buf = emalloc(buflen);
 	pw = &pwbuf;
 
+try_again:
 	if (getpwnam_r(name, pw, buf, buflen, &pw) || pw == NULL) {
+		if (errno == ERANGE) {
+			buflen *= 2;
+			buf = erealloc(buf, buflen);
+			goto try_again;
+		}
 		efree(buf);
 		POSIX_G(last_error) = errno;
 		RETURN_FALSE;
@@ -1258,8 +1270,14 @@ PHP_FUNCTION(posix_getpwuid)
 	}
 	pwbuf = emalloc(pwbuflen);
 
+try_again:
 	ret = getpwuid_r(uid, &_pw, pwbuf, pwbuflen, &retpwptr);
 	if (ret || retpwptr == NULL) {
+		if (errno == ERANGE) {
+			pwbuflen *= 2;
+			pwbuf = erealloc(pwbuf, pwbuflen);
+			goto try_again;
+		}
 		POSIX_G(last_error) = ret;
 		efree(pwbuf);
 		RETURN_FALSE;
