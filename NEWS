@@ -48,6 +48,8 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fixed bug #74267 (segfault with streams and invalid data). (cmb)
+  . Fixed bug #79579 (ZTS build of PHP 7.3.17 doesn't handle ERANGE for
+    posix_getgrgid and others). (Böszörményi Zoltán)
 
 11 Jun 2020, PHP 7.4.7
 
