@@ -432,6 +432,10 @@ static int zend_jit_disasm_init(void)
 	REGISTER_HELPER(zend_jit_fetch_obj_r_dynamic);
 	REGISTER_HELPER(zend_jit_fetch_obj_is_slow);
 	REGISTER_HELPER(zend_jit_fetch_obj_is_dynamic);
+	REGISTER_HELPER(zend_jit_fetch_obj_w_slow);
+	REGISTER_HELPER(zend_jit_check_array_promotion);
+	REGISTER_HELPER(zend_jit_create_typed_ref);
+	REGISTER_HELPER(zend_jit_extract_helper);
 	REGISTER_HELPER(zend_jit_vm_stack_free_args_helper);
 	REGISTER_HELPER(zend_jit_copy_extra_args_helper);
 	REGISTER_HELPER(zend_jit_deprecated_helper);
@@ -447,6 +451,7 @@ static int zend_jit_disasm_init(void)
 	REGISTER_HELPER(zend_jit_only_vars_by_reference);
 	REGISTER_HELPER(zend_jit_invalid_array_access);
 	REGISTER_HELPER(zend_jit_invalid_property_read);
+	REGISTER_HELPER(zend_jit_invalid_property_write);
 	REGISTER_HELPER(zend_jit_prepare_assign_dim_ref);
 	REGISTER_HELPER(zend_jit_pre_inc);
 	REGISTER_HELPER(zend_jit_pre_dec);

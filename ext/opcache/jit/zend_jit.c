@@ -1969,6 +1969,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 	zend_bool send_result;
 	zend_jit_addr op1_addr, op1_def_addr, op2_addr, op2_def_addr, res_addr;
 	zend_class_entry *ce;
+	zend_bool ce_is_instanceof;
 
 	if (JIT_G(bisect_limit)) {
 		jit_bisect_pos++;
@@ -2759,16 +2760,19 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						goto done;
 					case ZEND_FETCH_OBJ_R:
 					case ZEND_FETCH_OBJ_IS:
+					case ZEND_FETCH_OBJ_W:
 						if (opline->op2_type != IS_CONST
 						 || Z_TYPE_P(RT_CONSTANT(opline, opline->op2)) != IS_STRING
 						 || Z_STRVAL_P(RT_CONSTANT(opline, opline->op2))[0] == '\0') {
 							break;
 						}
 						ce = NULL;
+						ce_is_instanceof = 0;
 						if (opline->op1_type == IS_UNUSED) {
 							op1_info = MAY_BE_OBJECT|MAY_BE_RC1|MAY_BE_RCN;
 							op1_addr = 0;
 							ce = op_array->scope;
+							ce_is_instanceof = (ce->ce_flags & ZEND_ACC_FINAL) != 0;
 						} else {
 							op1_info = OP1_INFO();
 							if (!(op1_info & MAY_BE_OBJECT)) {
@@ -2779,14 +2783,15 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 								zend_ssa_op *ssa_op = &ssa->ops[opline - op_array->opcodes];
 								if (ssa_op->op1_use >= 0) {
 									zend_ssa_var_info *op1_ssa = ssa->var_info + ssa_op->op1_use;
-									if (op1_ssa->ce && !op1_ssa->is_instanceof && !op1_ssa->ce->create_object) {
+									if (op1_ssa->ce && !op1_ssa->ce->create_object) {
 										ce = op1_ssa->ce;
+										ce_is_instanceof = op1_ssa->is_instanceof;
 									}
 								}
 							}
 						}
-						if (!zend_jit_fetch_obj_read(&dasm_state, opline, op_array,
-								op1_info, op1_addr, ce,
+						if (!zend_jit_fetch_obj(&dasm_state, opline, op_array,
+								op1_info, op1_addr, 0, ce, ce_is_instanceof,
 								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
 						}

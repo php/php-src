@@ -1345,6 +1345,193 @@ static void ZEND_FASTCALL zend_jit_fetch_obj_is_dynamic(zend_object *zobj, intpt
 	zend_jit_fetch_obj_is_slow(zobj, offset, result, cache_slot);
 }
 
+static zend_always_inline zend_bool promotes_to_array(zval *val) {
+	return Z_TYPE_P(val) <= IS_FALSE
+		|| (Z_ISREF_P(val) && Z_TYPE_P(Z_REFVAL_P(val)) <= IS_FALSE);
+}
+
+static zend_always_inline zend_bool check_type_array_assignable(zend_type type) {
+	if (!ZEND_TYPE_IS_SET(type)) {
+		return 1;
+	}
+	return (ZEND_TYPE_FULL_MASK(type) & (MAY_BE_ITERABLE|MAY_BE_ARRAY)) != 0;
+}
+
+static zend_property_info *zend_object_fetch_property_type_info(
+		zend_object *obj, zval *slot)
+{
+	if (EXPECTED(!ZEND_CLASS_HAS_TYPE_HINTS(obj->ce))) {
+		return NULL;
+	}
+
+	/* Not a declared property */
+	if (UNEXPECTED(slot < obj->properties_table ||
+			slot >= obj->properties_table + obj->ce->default_properties_count)) {
+		return NULL;
+	}
+
+	return zend_get_typed_property_info_for_slot(obj, slot);
+}
+
+static zend_never_inline ZEND_COLD void zend_throw_auto_init_in_prop_error(zend_property_info *prop, const char *type) {
+	zend_string *type_str = zend_type_to_string(prop->type);
+	zend_type_error(
+		"Cannot auto-initialize an %s inside property %s::$%s of type %s",
+		type,
+		ZSTR_VAL(prop->ce->name), zend_get_unmangled_property_name(prop->name),
+		ZSTR_VAL(type_str)
+	);
+	zend_string_release(type_str);
+}
+
+static zend_never_inline ZEND_COLD void zend_throw_access_uninit_prop_by_ref_error(
+		zend_property_info *prop) {
+	zend_throw_error(NULL,
+		"Cannot access uninitialized non-nullable property %s::$%s by reference",
+		ZSTR_VAL(prop->ce->name),
+		zend_get_unmangled_property_name(prop->name));
+}
+
+static zend_never_inline zend_bool zend_handle_fetch_obj_flags(
+		zval *result, zval *ptr, zend_object *obj, zend_property_info *prop_info, uint32_t flags)
+{
+	switch (flags) {
+		case ZEND_FETCH_DIM_WRITE:
+			if (promotes_to_array(ptr)) {
+				if (!prop_info) {
+					prop_info = zend_object_fetch_property_type_info(obj, ptr);
+					if (!prop_info) {
+						break;
+					}
+				}
+				if (!check_type_array_assignable(prop_info->type)) {
+					zend_throw_auto_init_in_prop_error(prop_info, "array");
+					if (result) ZVAL_ERROR(result);
+					return 0;
+				}
+			}
+			break;
+		case ZEND_FETCH_REF:
+			if (Z_TYPE_P(ptr) != IS_REFERENCE) {
+				if (!prop_info) {
+					prop_info = zend_object_fetch_property_type_info(obj, ptr);
+					if (!prop_info) {
+						break;
+					}
+				}
+				if (Z_TYPE_P(ptr) == IS_UNDEF) {
+					if (!ZEND_TYPE_ALLOW_NULL(prop_info->type)) {
+						zend_throw_access_uninit_prop_by_ref_error(prop_info);
+						if (result) ZVAL_ERROR(result);
+						return 0;
+					}
+					ZVAL_NULL(ptr);
+				}
+
+				ZVAL_NEW_REF(ptr, ptr);
+				ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(ptr), prop_info);
+			}
+			break;
+		EMPTY_SWITCH_DEFAULT_CASE()
+	}
+	return 1;
+}
+
+static void ZEND_FASTCALL zend_jit_fetch_obj_w_slow(zend_object *zobj, zval *offset, zval *result, uint32_t cache_slot)
+{
+	zval *retval;
+	zend_execute_data *execute_data = EG(current_execute_data);
+	const zend_op *opline = execute_data->opline;
+	zend_string *name, *tmp_name;
+
+	name = zval_get_tmp_string(offset, &tmp_name);
+	retval = zobj->handlers->get_property_ptr_ptr(zobj, name, BP_VAR_W, CACHE_ADDR(cache_slot));
+	if (NULL == retval) {
+		retval = zobj->handlers->read_property(zobj, name, BP_VAR_W, CACHE_ADDR(cache_slot), result);
+		if (retval == result) {
+			if (UNEXPECTED(Z_ISREF_P(retval) && Z_REFCOUNT_P(retval) == 1)) {
+				ZVAL_UNREF(retval);
+			}
+			goto end;
+		}
+	} else if (UNEXPECTED(Z_ISERROR_P(retval))) {
+		ZVAL_ERROR(result);
+		goto end;
+	}
+
+	ZVAL_INDIRECT(result, retval);
+
+	/* Support for typed properties */
+	do {
+		uint32_t flags = opline->extended_value & ZEND_FETCH_OBJ_FLAGS;
+
+		if (flags) {
+			zend_property_info *prop_info = NULL;
+
+			if (opline->op2_type == IS_CONST) {
+				prop_info = CACHED_PTR_EX(CACHE_ADDR(cache_slot) + 2);
+				if (!prop_info) {
+					break;
+				}
+			}
+			if (UNEXPECTED(!zend_handle_fetch_obj_flags(result, retval, zobj, prop_info, flags))) {
+				goto end;
+			}
+		}
+	} while (0);
+
+	if (UNEXPECTED(Z_TYPE_P(retval) == IS_UNDEF)) {
+		ZVAL_NULL(retval);
+	}
+
+end:
+	zend_tmp_string_release(tmp_name);
+}
+
+static void ZEND_FASTCALL zend_jit_check_array_promotion(zval *val, zend_property_info *prop)
+{
+	zend_execute_data *execute_data = EG(current_execute_data);
+	const zend_op *opline = execute_data->opline;
+	zval *result = EX_VAR(opline->result.var);
+
+	if (((Z_TYPE_P(val) <= IS_FALSE
+	  || (Z_ISREF_P(val) && Z_TYPE_P(Z_REFVAL_P(val)) <= IS_FALSE))
+	 &&	ZEND_TYPE_IS_SET(prop->type)
+	 && ZEND_TYPE_FULL_MASK(prop->type) & (MAY_BE_ITERABLE|MAY_BE_ARRAY)) == 0) {
+		zend_string *type_str = zend_type_to_string(prop->type);
+		zend_type_error(
+			"Cannot auto-initialize an array inside property %s::$%s of type %s",
+			ZSTR_VAL(prop->ce->name), zend_get_unmangled_property_name(prop->name),
+			ZSTR_VAL(type_str)
+		);
+		zend_string_release(type_str);
+		ZVAL_ERROR(result);
+	} else {
+		ZVAL_INDIRECT(result, val);
+	}
+}
+
+static void ZEND_FASTCALL zend_jit_create_typed_ref(zval *val, zend_property_info *prop, zval *result)
+{
+	if (!Z_ISREF_P(val)) {
+		ZVAL_NEW_REF(val, val);
+		ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(val), prop);
+	}
+	ZVAL_INDIRECT(result, val);
+}
+
+static void ZEND_FASTCALL zend_jit_extract_helper(zend_refcounted *garbage)
+{
+	zend_execute_data *execute_data = EG(current_execute_data);
+	const zend_op *opline = execute_data->opline;
+	zval *zv = EX_VAR(opline->result.var);
+
+	if (EXPECTED(Z_TYPE_P(zv) == IS_INDIRECT)) {
+		ZVAL_COPY(zv, Z_INDIRECT_P(zv));
+	}
+	rc_dtor_func(garbage);
+}
+
 static void ZEND_FASTCALL zend_jit_vm_stack_free_args_helper(zend_execute_data *call)
 {
 	zend_vm_stack_free_args(call);
@@ -1506,6 +1693,13 @@ static void ZEND_FASTCALL zend_jit_invalid_array_access(zval *container)
 static void ZEND_FASTCALL zend_jit_invalid_property_read(zval *container, const char *property_name)
 {
 	zend_error(E_WARNING, "Attempt to read property '%s' on %s", property_name, zend_zval_type_name(container));
+}
+
+static void ZEND_FASTCALL zend_jit_invalid_property_write(zval *container, const char *property_name)
+{
+	zend_throw_error(NULL,
+		"Attempt to modify property '%s' on %s",
+		property_name, zend_zval_type_name(container));
 }
 
 static zval * ZEND_FASTCALL zend_jit_prepare_assign_dim_ref(zval *ref) {
