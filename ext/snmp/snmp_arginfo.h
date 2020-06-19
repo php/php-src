@@ -1,4 +1,5 @@
-/* This is a generated file, edit the .stub.php file instead. */
+/* This is a generated file, edit the .stub.php file instead.
+ * Stub hash: 2b0a8233a01de36e93c025bc40c3a2f707825595 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_snmpget, 0, 3, MAY_BE_ARRAY|MAY_BE_BOOL)
 	ZEND_ARG_TYPE_INFO(0, host, IS_STRING, 0)

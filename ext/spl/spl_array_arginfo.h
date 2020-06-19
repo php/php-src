@@ -1,4 +1,5 @@
-/* This is a generated file, edit the .stub.php file instead. */
+/* This is a generated file, edit the .stub.php file instead.
+ * Stub hash: 1230e3161d7c7fb549c5ac2ec5cde2dec585d849 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ArrayObject___construct, 0, 0, 0)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, input, "[]")

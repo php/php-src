@@ -1,4 +1,5 @@
-/* This is a generated file, edit the .stub.php file instead. */
+/* This is a generated file, edit the .stub.php file instead.
+ * Stub hash: a1f54793e243d30e75cefd4f9aea17f1509a9c8d */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Normalizer_normalize, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, input, IS_STRING, 0)

@@ -1,4 +1,5 @@
-/* This is a generated file, edit the .stub.php file instead. */
+/* This is a generated file, edit the .stub.php file instead.
+ * Stub hash: ae14c81d7c4642412440f6236b34b7c7c0143911 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Directory_close, 0, 0, 0)
 	ZEND_ARG_INFO(0, dir_handle)

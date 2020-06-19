@@ -1,4 +1,5 @@
-/* This is a generated file, edit the .stub.php file instead. */
+/* This is a generated file, edit the .stub.php file instead.
+ * Stub hash: 0bbaf1b0aed026d0ed32274bc1084b363528bb61 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ftp_connect, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, host, IS_STRING, 0)
