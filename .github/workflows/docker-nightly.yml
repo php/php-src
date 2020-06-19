@@ -1,0 +1,17 @@
+name: Nightly Docker Image CI
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - uses: docker/build-push-action@v1
+      with:
+        username: ${GITHUB_ACTOR}
+        password: ${{ secrets.GITHUB_TOKEN }}
+        repository: ${GITHUB_REPOSITORY}/php-nightly
+        dockerfile: .github/Dockerfile.debian
+        tags: latest
+        tag_with_sha: true
