@@ -37,27 +37,27 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Stringable___toString, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_InternalIterator___construct arginfo_class_IteratorAggregate_getIterator
+#define arginfo_class_IteratorForExtensions___construct arginfo_class_IteratorAggregate_getIterator
 
-#define arginfo_class_InternalIterator_current arginfo_class_IteratorAggregate_getIterator
+#define arginfo_class_IteratorForExtensions_current arginfo_class_IteratorAggregate_getIterator
 
-#define arginfo_class_InternalIterator_key arginfo_class_IteratorAggregate_getIterator
+#define arginfo_class_IteratorForExtensions_key arginfo_class_IteratorAggregate_getIterator
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_InternalIterator_next, 0, 0, IS_VOID, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_IteratorForExtensions_next, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_InternalIterator_valid, 0, 0, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_IteratorForExtensions_valid, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_InternalIterator_rewind arginfo_class_InternalIterator_next
+#define arginfo_class_IteratorForExtensions_rewind arginfo_class_IteratorForExtensions_next
 
 
-ZEND_METHOD(InternalIterator, __construct);
-ZEND_METHOD(InternalIterator, current);
-ZEND_METHOD(InternalIterator, key);
-ZEND_METHOD(InternalIterator, next);
-ZEND_METHOD(InternalIterator, valid);
-ZEND_METHOD(InternalIterator, rewind);
+ZEND_METHOD(IteratorForExtensions, __construct);
+ZEND_METHOD(IteratorForExtensions, current);
+ZEND_METHOD(IteratorForExtensions, key);
+ZEND_METHOD(IteratorForExtensions, next);
+ZEND_METHOD(IteratorForExtensions, valid);
+ZEND_METHOD(IteratorForExtensions, rewind);
 
 
 static const zend_function_entry class_Traversable_methods[] = {
@@ -109,12 +109,12 @@ static const zend_function_entry class_Stringable_methods[] = {
 };
 
 
-static const zend_function_entry class_InternalIterator_methods[] = {
-	ZEND_ME(InternalIterator, __construct, arginfo_class_InternalIterator___construct, ZEND_ACC_PRIVATE)
-	ZEND_ME(InternalIterator, current, arginfo_class_InternalIterator_current, ZEND_ACC_PUBLIC)
-	ZEND_ME(InternalIterator, key, arginfo_class_InternalIterator_key, ZEND_ACC_PUBLIC)
-	ZEND_ME(InternalIterator, next, arginfo_class_InternalIterator_next, ZEND_ACC_PUBLIC)
-	ZEND_ME(InternalIterator, valid, arginfo_class_InternalIterator_valid, ZEND_ACC_PUBLIC)
-	ZEND_ME(InternalIterator, rewind, arginfo_class_InternalIterator_rewind, ZEND_ACC_PUBLIC)
+static const zend_function_entry class_IteratorForExtensions_methods[] = {
+	ZEND_ME(IteratorForExtensions, __construct, arginfo_class_IteratorForExtensions___construct, ZEND_ACC_PRIVATE)
+	ZEND_ME(IteratorForExtensions, current, arginfo_class_IteratorForExtensions_current, ZEND_ACC_PUBLIC)
+	ZEND_ME(IteratorForExtensions, key, arginfo_class_IteratorForExtensions_key, ZEND_ACC_PUBLIC)
+	ZEND_ME(IteratorForExtensions, next, arginfo_class_IteratorForExtensions_next, ZEND_ACC_PUBLIC)
+	ZEND_ME(IteratorForExtensions, valid, arginfo_class_IteratorForExtensions_valid, ZEND_ACC_PUBLIC)
+	ZEND_ME(IteratorForExtensions, rewind, arginfo_class_IteratorForExtensions_rewind, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };

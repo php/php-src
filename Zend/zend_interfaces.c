@@ -29,7 +29,7 @@ ZEND_API zend_class_entry *zend_ce_arrayaccess;
 ZEND_API zend_class_entry *zend_ce_serializable;
 ZEND_API zend_class_entry *zend_ce_countable;
 ZEND_API zend_class_entry *zend_ce_stringable;
-ZEND_API zend_class_entry *zend_ce_internal_iterator;
+ZEND_API zend_class_entry *zend_ce_iterator_for_extensions;
 
 static zend_object_handlers zend_internal_iterator_handlers;
 
@@ -464,7 +464,7 @@ ZEND_API int zend_create_internal_iterator_zval(zval *return_value, zval *obj) {
 	}
 
 	zend_internal_iterator *intern =
-		(zend_internal_iterator *) zend_internal_iterator_create(zend_ce_internal_iterator);
+		(zend_internal_iterator *) zend_internal_iterator_create(zend_ce_iterator_for_extensions);
 	intern->iter = iter;
 	ZVAL_OBJ(return_value, &intern->std);
 	return SUCCESS;
@@ -481,7 +481,8 @@ static void zend_internal_iterator_free(zend_object *obj) {
 static zend_internal_iterator *zend_internal_iterator_fetch(zval *This) {
 	zend_internal_iterator *intern = (zend_internal_iterator *) Z_OBJ_P(This);
 	if (!intern->iter) {
-		zend_throw_error(NULL, "The InternalIterator object has not been properly initialized");
+		zend_throw_error(NULL,
+			"The IteratorForExtensions object has not been properly initialized");
 		return NULL;
 	}
 	return intern;
@@ -503,11 +504,11 @@ static int zend_internal_iterator_ensure_rewound(zend_internal_iterator *intern)
 }
 
 
-ZEND_METHOD(InternalIterator, __construct) {
-	zend_throw_error(NULL, "Cannot manually construct InternalIterator");
+ZEND_METHOD(IteratorForExtensions, __construct) {
+	zend_throw_error(NULL, "Cannot manually construct IteratorForExtensions");
 }
 
-ZEND_METHOD(InternalIterator, current) {
+ZEND_METHOD(IteratorForExtensions, current) {
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	zend_internal_iterator *intern = zend_internal_iterator_fetch(ZEND_THIS);
@@ -525,7 +526,7 @@ ZEND_METHOD(InternalIterator, current) {
 	}
 }
 
-ZEND_METHOD(InternalIterator, key) {
+ZEND_METHOD(IteratorForExtensions, key) {
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	zend_internal_iterator *intern = zend_internal_iterator_fetch(ZEND_THIS);
@@ -544,7 +545,7 @@ ZEND_METHOD(InternalIterator, key) {
 	}
 }
 
-ZEND_METHOD(InternalIterator, next) {
+ZEND_METHOD(IteratorForExtensions, next) {
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	zend_internal_iterator *intern = zend_internal_iterator_fetch(ZEND_THIS);
@@ -560,7 +561,7 @@ ZEND_METHOD(InternalIterator, next) {
 	intern->iter->index++;
 }
 
-ZEND_METHOD(InternalIterator, valid) {
+ZEND_METHOD(IteratorForExtensions, valid) {
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	zend_internal_iterator *intern = zend_internal_iterator_fetch(ZEND_THIS);
@@ -575,7 +576,7 @@ ZEND_METHOD(InternalIterator, valid) {
 	RETURN_BOOL(intern->iter->funcs->valid(intern->iter) == SUCCESS);
 }
 
-ZEND_METHOD(InternalIterator, rewind) {
+ZEND_METHOD(IteratorForExtensions, rewind) {
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	zend_internal_iterator *intern = zend_internal_iterator_fetch(ZEND_THIS);
@@ -622,13 +623,13 @@ ZEND_API void zend_register_interfaces(void)
 	INIT_CLASS_ENTRY(ce, "Stringable", class_Stringable_methods);
 	zend_ce_stringable = zend_register_internal_interface(&ce);
 
-	INIT_CLASS_ENTRY(ce, "InternalIterator", class_InternalIterator_methods);
-	zend_ce_internal_iterator = zend_register_internal_class(&ce);
-	zend_class_implements(zend_ce_internal_iterator, 1, zend_ce_iterator);
-	zend_ce_internal_iterator->ce_flags |= ZEND_ACC_FINAL;
-	zend_ce_internal_iterator->create_object = zend_internal_iterator_create;
-	zend_ce_internal_iterator->serialize = zend_class_serialize_deny;
-	zend_ce_internal_iterator->unserialize = zend_class_unserialize_deny;
+	INIT_CLASS_ENTRY(ce, "IteratorForExtensions", class_IteratorForExtensions_methods);
+	zend_ce_iterator_for_extensions = zend_register_internal_class(&ce);
+	zend_class_implements(zend_ce_iterator_for_extensions, 1, zend_ce_iterator);
+	zend_ce_iterator_for_extensions->ce_flags |= ZEND_ACC_FINAL;
+	zend_ce_iterator_for_extensions->create_object = zend_internal_iterator_create;
+	zend_ce_iterator_for_extensions->serialize = zend_class_serialize_deny;
+	zend_ce_iterator_for_extensions->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&zend_internal_iterator_handlers, zend_get_std_object_handlers(),
 		sizeof(zend_object_handlers));
