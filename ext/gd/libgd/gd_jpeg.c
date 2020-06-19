@@ -47,7 +47,7 @@ typedef struct _jmpbuf_wrapper
 	int ignore_warning;
 } jmpbuf_wrapper;
 
-static long php_jpeg_emit_message(j_common_ptr jpeg_info, int level)
+static void php_jpeg_emit_message(j_common_ptr jpeg_info, int level)
 {
 	char message[JMSG_LENGTH_MAX];
 	jmpbuf_wrapper *jmpbufw;
@@ -81,9 +81,7 @@ static long php_jpeg_emit_message(j_common_ptr jpeg_info, int level)
 			}
 		}
 	}
-	return 1;
 }
-
 
 
 /* Called by the IJG JPEG library upon encountering a fatal error */
@@ -356,8 +354,7 @@ gdImagePtr gdImageCreateFromJpegCtxEx (gdIOCtx * infile, int ignore_warning)
 
 	cinfo.err = jpeg_std_error (&jerr);
 	cinfo.client_data = &jmpbufw;
-
-	cinfo.err->emit_message = (void (*)(j_common_ptr,int)) php_jpeg_emit_message;
+	cinfo.err->emit_message = php_jpeg_emit_message;
 
 	if (setjmp (jmpbufw.jmpbuf) != 0) {
 		/* we're here courtesy of longjmp */
