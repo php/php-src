@@ -7,8 +7,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
-    - name: GH_REPO test
-      run: echo docker.pkg.github.com/${GITHUB_REPOSITORY}/fcgi:latest
     - uses: docker/build-push-action@v1
       env:
         INPUT_REPOSITORY: ${GITHUB_REPOSITORY}/php-nightly
