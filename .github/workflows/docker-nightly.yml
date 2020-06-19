@@ -9,11 +9,6 @@ jobs:
     - uses: actions/checkout@v1
     - name: GH_REPO test
       run: echo docker.pkg.github.com/${GITHUB_REPOSITORY}/fcgi:latest
-    - name: GH_INPUT_REPO test
-      run: echo docker.pkg.github.com/${INPUT_REPOSITORY}::${INPUT_USERNAME}
-      with:
-        username: ${GITHUB_ACTOR}
-        repository: ${GITHUB_REPOSITORY}/php-nightly
     - uses: docker/build-push-action@v1
       env:
         INPUT_REPOSITORY: ${GITHUB_REPOSITORY}/php-nightly
