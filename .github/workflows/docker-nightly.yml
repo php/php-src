@@ -7,16 +7,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
-    - run: echo $INPUT_REPOSITORY
-      env:
-        INPUT_REPOSITORY: ${GITHUB_REPOSITORY}/php-nightly
     - uses: docker/build-push-action@v1
       with:
-        username: ${GITHUB_ACTOR}
+        username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
         registry: docker.pkg.github.com
+        repository: "${{ github.repository }}/php-nightly"
         dockerfile: .github/Dockerfile.debian
         tags: latest
         tag_with_sha: true
-      env:
-        INPUT_REPOSITORY: ${GITHUB_REPOSITORY}/php-nightly
