@@ -7,6 +7,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
+    - run: echo $INPUT_REPOSITORY
+      env:
+        INPUT_REPOSITORY: ${GITHUB_REPOSITORY}/php-nightly
     - uses: docker/build-push-action@v1
       with:
         username: ${GITHUB_ACTOR}
