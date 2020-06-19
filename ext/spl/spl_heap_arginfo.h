@@ -1,4 +1,5 @@
-/* This is a generated file, edit the .stub.php file instead. */
+/* This is a generated file, edit the .stub.php file instead.
+ * Stub hash: 7f0aaeba31232e23367618eae98398fa41ac6ef5 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplPriorityQueue_compare, 0, 0, 2)
 	ZEND_ARG_INFO(0, priority1)

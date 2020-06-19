@@ -1,4 +1,5 @@
-/* This is a generated file, edit the .stub.php file instead. */
+/* This is a generated file, edit the .stub.php file instead.
+ * Stub hash: 13fd80938fec3bea7ac4bbcfb6e0b69b230fba72 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_XSLTProcessor_importStylesheet, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, stylesheet, IS_OBJECT, 0)

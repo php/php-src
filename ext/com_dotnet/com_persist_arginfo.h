@@ -1,4 +1,5 @@
-/* This is a generated file, edit the .stub.php file instead. */
+/* This is a generated file, edit the .stub.php file instead.
+ * Stub hash: 69de4fb111796d28e92e16630221e2d02817e742 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_COMPersistHelper___construct, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, com_object, VARIANT, 1)

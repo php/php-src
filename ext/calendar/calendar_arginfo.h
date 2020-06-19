@@ -1,4 +1,5 @@
-/* This is a generated file, edit the .stub.php file instead. */
+/* This is a generated file, edit the .stub.php file instead.
+ * Stub hash: 1ace9d7ae3e505ae2e14323e21fa6ac0a490896d */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_cal_days_in_month, 0, 3, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, calendar, IS_LONG, 0)

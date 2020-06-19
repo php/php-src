@@ -12,20 +12,6 @@ use PhpParser\PrettyPrinterAbstract;
 
 error_reporting(E_ALL);
 
-try {
-    initPhpParser();
-} catch (Exception $e) {
-    echo "{$e->getMessage()}\n";
-    exit(1);
-}
-
-class CustomPrettyPrinter extends Standard
-{
-    protected function pName_FullyQualified(Name\FullyQualified $node) {
-        return implode('\\', $node->parts);
-    }
-}
-
 function processDirectory(string $dir) {
     $it = new RecursiveIteratorIterator(
         new RecursiveDirectoryIterator($dir),
@@ -40,16 +26,45 @@ function processDirectory(string $dir) {
 }
 
 function processStubFile(string $stubFile) {
-    $arginfoFile = str_replace('.stub.php', '', $stubFile) . '_arginfo.h';
-
     try {
-        $fileInfo = parseStubFile($stubFile);
-        $arginfoCode = generateArgInfoCode($fileInfo);
+        if (!file_exists($stubFile)) {
+            throw new Exception("File $stubFile does not exist");
+        }
+
+        $arginfoFile = str_replace('.stub.php', '', $stubFile) . '_arginfo.h';
+        $stubCode = file_get_contents($stubFile);
+        $stubHash = computeStubHash($stubCode);
+        $oldStubHash = extractStubHash($arginfoFile);
+        if ($stubHash === $oldStubHash) {
+            /* Stub file did not change, do not regenerate. */
+            return;
+        }
+
+        initPhpParser();
+        $fileInfo = parseStubFile($stubCode);
+        $arginfoCode = generateArgInfoCode($fileInfo, $stubHash);
         file_put_contents($arginfoFile, $arginfoCode);
     } catch (Exception $e) {
         echo "In $stubFile:\n{$e->getMessage()}\n";
         exit(1);
     }
+}
+
+function computeStubHash(string $stubCode): string {
+    return sha1(str_replace("\r\n", "\n", $stubCode));
+}
+
+function extractStubHash(string $arginfoFile): ?string {
+    if (!file_exists($arginfoFile)) {
+        return null;
+    }
+
+    $arginfoCode = file_get_contents($arginfoFile);
+    if (!preg_match('/\* Stub hash: ([0-9a-f]+) \*/', $arginfoCode, $matches)) {
+        return null;
+    }
+
+    return $matches[1];
 }
 
 class SimpleType {
@@ -737,18 +752,16 @@ function getFileDocComment(array $stmts): ?DocComment {
     return null;
 }
 
-function parseStubFile(string $fileName): FileInfo {
-    if (!file_exists($fileName)) {
-        throw new Exception("File $fileName does not exist");
-    }
-
-    $code = file_get_contents($fileName);
-
+function parseStubFile(string $code): FileInfo {
     $lexer = new PhpParser\Lexer();
     $parser = new PhpParser\Parser\Php7($lexer);
     $nodeTraverser = new PhpParser\NodeTraverser;
     $nodeTraverser->addVisitor(new PhpParser\NodeVisitor\NameResolver);
-    $prettyPrinter = new CustomPrettyPrinter();
+    $prettyPrinter = new class extends Standard {
+        protected function pName_FullyQualified(Name\FullyQualified $node) {
+            return implode('\\', $node->parts);
+        }
+    };
 
     $stmts = $parser->parse($code);
     $nodeTraverser->traverse($stmts);
@@ -948,8 +961,9 @@ function generateCodeWithConditions(
     return $code;
 }
 
-function generateArgInfoCode(FileInfo $fileInfo): string {
-    $code = "/* This is a generated file, edit the .stub.php file instead. */\n";
+function generateArgInfoCode(FileInfo $fileInfo, string $stubHash): string {
+    $code = "/* This is a generated file, edit the .stub.php file instead.\n"
+          . " * Stub hash: $stubHash */\n";
     $generatedFuncInfos = [];
     $code .= generateCodeWithConditions(
         $fileInfo->getAllFuncInfos(), "\n",
@@ -1055,6 +1069,12 @@ function installPhpParser(string $version, string $phpParserDir) {
 }
 
 function initPhpParser() {
+    static $isInitialized = false;
+    if ($isInitialized) {
+        return;
+    }
+
+    $isInitialized = true;
     $version = "4.3.0";
     $phpParserDir = __DIR__ . "/PHP-Parser-$version";
     if (!is_dir($phpParserDir)) {
