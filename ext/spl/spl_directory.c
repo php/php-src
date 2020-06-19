@@ -95,6 +95,7 @@ static void spl_filesystem_object_destroy_object(zend_object *object) /* {{{ */
 				php_stream_pclose(intern->u.file.stream);
 			}
 			intern->u.file.stream = NULL;
+			ZVAL_UNDEF(&intern->u.file.zresource);
 		}
 		break;
 	default:
@@ -1927,12 +1928,16 @@ static int spl_filesystem_file_call(spl_filesystem_object *intern, zend_function
 {
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcic;
-	zval *zresource_ptr = &intern->u.file.zresource;
+	zval *zresource_ptr = &intern->u.file.zresource, *params;
 	int result;
 	int num_args = pass_num_args + (arg2 ? 2 : 1);
 
-	zval *params = (zval*)safe_emalloc(num_args, sizeof(zval), 0);
+	if (Z_ISUNDEF_P(zresource_ptr)) {
+		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
+		return FAILURE;
+	}
 
+	params = (zval*)safe_emalloc(num_args, sizeof(zval), 0);
 	params[0] = *zresource_ptr;
 
 	if (arg2) {
