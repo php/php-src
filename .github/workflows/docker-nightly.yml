@@ -4,10 +4,28 @@ on:
   schedule:
     - cron:  '0 0 * * *'
 jobs:
-  build:
+  php-master-nightly:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
+    - name: Get current date
+      id: date
+      run: echo "::set-output name=date::$(date +'%Y%m%d')"
+    - uses: docker/build-push-action@v2
+      with:
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+        registry: docker.pkg.github.com
+        repository: "${{ github.repository }}/php-master-nightly"
+        dockerfile: .github/Dockerfile.debian
+        tags: "latest,${{ steps.date.outputs.date }}"
+        tag_with_sha: true
+
+  php-7.4-nightly:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      ref: PHP-7.4
     - name: Get current date
       id: date
       run: echo "::set-output name=date::$(date +'%Y%m%d')"
@@ -16,7 +34,7 @@ jobs:
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
         registry: docker.pkg.github.com
-        repository: "${{ github.repository }}/php-nightly"
+        repository: "${{ github.repository }}/php-7.4-nightly"
         dockerfile: .github/Dockerfile.debian
         tags: "latest,${{ steps.date.outputs.date }}"
         tag_with_sha: true
