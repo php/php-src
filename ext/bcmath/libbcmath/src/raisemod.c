@@ -67,7 +67,7 @@ bc_raisemod (bc_num base, bc_num expo, bc_num mod, bc_num *result, int scale)
 
   /* Check for correct numbers. */
   if (bc_is_zero(mod)) return -1;
-  if (bc_is_neg(expo)) return -1;
+  if (bc_is_neg(expo)) return -2;
 
   /* Set initial values.  */
   power = bc_copy_num (base);
