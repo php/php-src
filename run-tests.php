@@ -31,7 +31,7 @@
  * Minimum required PHP version: 7.0.0
  */
 
-function show_usage()
+function show_usage(): void
 {
     echo <<<HELP
 Synopsis:
@@ -146,10 +146,9 @@ function main()
 
     define('IS_WINDOWS', substr(PHP_OS, 0, 3) == "WIN");
 
-    $workerID = 0;
-    if (getenv("TEST_PHP_WORKER")) {
-        $workerID = intval(getenv("TEST_PHP_WORKER"));
-        run_worker();
+    $workerID = get_worker_id();
+    if($workerID) {
+        run_worker($workerID);
         return;
     }
 
@@ -443,18 +442,11 @@ function main()
 
             switch ($switch) {
                 case 'j':
-                    $workers = substr($argv[$i], 2);
-                    if (!preg_match('/^\d+$/', $workers) || $workers == 0) {
-                        error("'$workers' is not a valid number of workers, try e.g. -j16 for 16 workers");
-                    }
-                    $workers = intval($workers, 10);
-                    // Don't use parallel testing infrastructure if there is only one worker.
-                    if ($workers === 1) {
-                        $workers = null;
-                    }
+                    $workers = get_number_of_workers($argv[$i]);
                     break;
                 case 'r':
                 case 'l':
+                    // @Dragoonis
                     $test_list = file($argv[++$i]);
                     if ($test_list) {
                         foreach ($test_list as $test) {
@@ -1080,7 +1072,7 @@ function test_sort($a, $b)
 // Send Email to QA Team
 //
 
-function mail_qa_team($data, $status = false)
+function mail_qa_team($data, $status = false): bool
 {
     $url_bits = parse_url(QA_SUBMISSION_PAGE);
 
@@ -1119,7 +1111,7 @@ function mail_qa_team($data, $status = false)
     fwrite($fs, "\r\n\r\n");
     fclose($fs);
 
-    return 1;
+    return true;
 }
 
 //
@@ -1381,7 +1373,7 @@ function run_all_tests_parallel($test_files, $env, $redir_tested)
     }
 
     // Don't start more workers than test files.
-    $workers = max(1, min($workers, count($test_files)));
+    $workers = get_max_workers_from_test_files($workers, $test_files);
 
     echo "Spawning $workers workers... ";
 
@@ -1643,7 +1635,7 @@ escape:
     }
 }
 
-function send_message($stream, array $message)
+function send_message($stream, array $message): void
 {
     $blocking = stream_get_meta_data($stream)["blocked"];
     stream_set_blocking($stream, true);
@@ -1651,7 +1643,7 @@ function send_message($stream, array $message)
     stream_set_blocking($stream, $blocking);
 }
 
-function kill_children(array $children)
+function kill_children(array $children): void
 {
     foreach ($children as $child) {
         if ($child) {
@@ -1660,9 +1652,9 @@ function kill_children(array $children)
     }
 }
 
-function run_worker()
+function run_worker($workerID): void
 {
-    global $workerID, $workerSock;
+    global $workerSock;
 
     $sockUri = getenv("TEST_PHP_URI");
 
@@ -1819,15 +1811,7 @@ TEST $file
             }
 
             // check for unknown sections
-            if (!in_array($section, array(
-                'EXPECT', 'EXPECTF', 'EXPECTREGEX', 'EXPECTREGEX_EXTERNAL', 'EXPECT_EXTERNAL', 'EXPECTF_EXTERNAL', 'EXPECTHEADERS',
-                'POST', 'POST_RAW', 'GZIP_POST', 'DEFLATE_POST', 'PUT', 'GET', 'COOKIE', 'ARGS',
-                'FILE', 'FILEEOF', 'FILE_EXTERNAL', 'REDIRECTTEST',
-                'CAPTURE_STDIO', 'STDIN', 'CGI', 'PHPDBG',
-                'INI', 'ENV', 'EXTENSIONS',
-                'SKIPIF', 'XFAIL', 'XLEAK', 'CLEAN',
-                'CREDITS', 'DESCRIPTION', 'CONFLICTS', 'WHITESPACE_SENSITIVE',
-            ))) {
+            if (is_section_unknown($section)) {
                 $bork_info = 'Unknown section "' . $section . '"';
             }
 
@@ -3611,6 +3595,51 @@ function check_proc_open_function_exists()
 NO_PROC_OPEN_ERROR;
         exit(1);
     }
+}
+
+
+
+
+function get_number_of_workers($workers): int
+{
+    $cleanWorkers = substr($workers, 2);
+    if (!preg_match('/^\d+$/', $cleanWorkers) || $cleanWorkers == 0) {
+        error("'$workers' is not a valid number of workers, try e.g. -j16 for 16 workers");
+    }
+    $cleanWorkers = intval($cleanWorkers, 10);
+    // Don't use parallel testing infrastructure if there is only one worker.
+    if ($cleanWorkers === 1) {
+        $cleanWorkers = null;
+    }
+
+    return $cleanWorkers;
+}
+
+function get_max_workers_from_test_files($workers, $test_files): int
+{
+    return max(1, min($workers, count($test_files)));
+}
+
+function get_worker_id(): int
+{
+    if (!getenv("TEST_PHP_WORKER")) {
+        return 0;
+    }
+
+    return intval(getenv("TEST_PHP_WORKER"));
+}
+
+function is_section_unknown(string $section): bool
+{
+    return !in_array($section, array(
+        'EXPECT', 'EXPECTF', 'EXPECTREGEX', 'EXPECTREGEX_EXTERNAL', 'EXPECT_EXTERNAL', 'EXPECTF_EXTERNAL', 'EXPECTHEADERS',
+        'POST', 'POST_RAW', 'GZIP_POST', 'DEFLATE_POST', 'PUT', 'GET', 'COOKIE', 'ARGS',
+        'FILE', 'FILEEOF', 'FILE_EXTERNAL', 'REDIRECTTEST',
+        'CAPTURE_STDIO', 'STDIN', 'CGI', 'PHPDBG',
+        'INI', 'ENV', 'EXTENSIONS',
+        'SKIPIF', 'XFAIL', 'XLEAK', 'CLEAN',
+        'CREDITS', 'DESCRIPTION', 'CONFLICTS', 'WHITESPACE_SENSITIVE',
+    ));
 }
 
 main();
