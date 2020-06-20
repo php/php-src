@@ -27,6 +27,14 @@ extern zend_module_entry pdo_module_entry;
 #include "php_version.h"
 #define PHP_PDO_VERSION PHP_VERSION
 
+// Copied from php_reflection.h
+BEGIN_EXTERN_C()
+
+/* Class entry pointers */
+extern PHPAPI zend_class_entry *pdo_dbh_ce;
+
+END_EXTERN_C()
+
 #ifdef PHP_WIN32
 #	if defined(PDO_EXPORTS) || (!defined(COMPILE_DL_PDO))
 #		define PDO_API __declspec(dllexport)
