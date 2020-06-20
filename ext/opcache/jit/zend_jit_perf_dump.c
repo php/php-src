@@ -35,6 +35,8 @@
 #elif defined(__sun)
 // avoiding thread.h inclusion as it conflicts with vtunes types.
 extern unsigned int thr_self(void);
+#elif defined(__HAIKU__)
+#include <kernel/image.h>
 #endif
 
 #include "zend_elf.h"
@@ -133,6 +135,21 @@ static void zend_jit_perf_jitdump_open(void)
 #elif defined(__sun)
 	const char *path = getexecname();
 	fd = open(path, O_RDONLY);
+#elif defined(__HAIKU__)
+	image_info ii;
+	int32_t ic = 0;
+
+	while (get_next_image_info(0, &ic, &ii) == B_OK) {
+		if (ii.type == B_APP_IMAGE) {
+			break;
+		}
+	}
+
+	if (ii.type != B_APP_IMAGE) {
+		return;
+	}
+
+	fd = open(ii.name, O_RDONLY);
 #else
 	fd = -1;
 #endif
