@@ -985,6 +985,8 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 		function = "PHP Startup";
 	} else if (php_during_module_shutdown()) {
 		function = "PHP Shutdown";
+	} else if (PG(during_request_startup)) {
+		function = "PHP Request Startup";
 	} else if (EG(current_execute_data) &&
 				EG(current_execute_data)->func &&
 				ZEND_USER_CODE(EG(current_execute_data)->func->common.type) &&
@@ -1015,14 +1017,13 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 			default:
 				function = "Unknown";
 		}
+	} else if ((function = get_active_function_name()) && strlen(function)) {
+		is_function = 1;
+		class_name = get_active_class_name(&space);
+	} else if (EG(flags) & EG_FLAGS_IN_SHUTDOWN) {
+		function = "PHP Request Shutdown";
 	} else {
-		function = get_active_function_name();
-		if (!function || !strlen(function)) {
-			function = "Unknown";
-		} else {
-			is_function = 1;
-			class_name = get_active_class_name(&space);
-		}
+		function = "Unknown";
 	}
 
 	/* if we still have memory then format the origin */
@@ -1767,7 +1768,7 @@ int php_request_startup(void)
 			CWDG(realpath_cache_size_limit) = 0;
 		}
 
-		if (PG(expose_php)) {
+		if (PG(expose_php) && !SG(headers_sent)) {
 			sapi_add_header(SAPI_PHP_VERSION_HEADER, sizeof(SAPI_PHP_VERSION_HEADER)-1, 1);
 		}
 

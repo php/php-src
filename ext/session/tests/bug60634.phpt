@@ -53,7 +53,7 @@ echo "um, hi\n";
 --EXPECT--
 write: goodbye cruel world
 
-Warning: Unknown: Cannot call session save handler in a recursive manner in Unknown on line 0
+Warning: PHP Request Shutdown: Cannot call session save handler in a recursive manner in Unknown on line 0
 
-Warning: Unknown: Failed to write session data using user defined save handler. (session.save_path: ) in Unknown on line 0
+Warning: PHP Request Shutdown: Failed to write session data using user defined save handler. (session.save_path: ) in Unknown on line 0
 close: goodbye cruel world
