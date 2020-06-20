@@ -2,44 +2,66 @@
 
 /** @generate-function-entries */
 
-/** @return resource|int|false */
+/**
+ * @return resource|int|false
+ * @deprecated
+ */
 function zip_open(string $filename) {}
 
 /**
  * @param resource $zip
+ * @deprecated
  */
 function zip_close($zip): void {}
 
 /**
  * @param resource $zip
  * @return resource|false
+ * @deprecated
  */
 function zip_read($zip) {}
 
 /**
  * @param resource $zip_dp
  * @param resource $zip_entry
+ * @deprecated
  */
 function zip_entry_open($zip_dp, $zip_entry, string $mode = 'rb'): bool {}
 
 /**
  * @param resource $zip_ent
+ * @deprecated
  */
 function zip_entry_close($zip_ent): bool {}
 
-/** @param resource $zip_entry */
+/**
+ * @param resource $zip_entry
+ * @deprecated
+ */
 function zip_entry_read($zip_entry, int $len = 1024): string|false {}
 
-/** @param resource $zip_entry */
+/**
+ * @param resource $zip_entry
+ * @deprecated
+ */
 function zip_entry_name($zip_entry): string|false {}
 
-/** @param resource $zip_entry */
+/**
+ * @param resource $zip_entry
+ * @deprecated
+ */
 function zip_entry_compressedsize($zip_entry): int|false {}
 
-/** @param resource $zip_entry */
+/**
+ * @param resource $zip_entry
+ * @deprecated
+ */
 function zip_entry_filesize($zip_entry): int|false {}
 
-/** @param resource $zip_entry */
+/**
+ * @param resource $zip_entry
+ * @deprecated
+ */
 function zip_entry_compressionmethod($zip_entry): string|false {}
 
 class ZipArchive
