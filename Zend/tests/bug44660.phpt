@@ -1,5 +1,11 @@
 --TEST--
 Bug #44660 (Indexed and reference assignment to property of non-object don't trigger warning)
+--SKIPIF--
+<?php
+if (PHP_OS_FAMILY === 'Windows' && ini_get('opcache.jit') && ini_get('opcache.jit_buffer_size')) {
+    die('xfail unresolved issues with JIT on Windows');
+}
+?>
 --FILE--
 <?php
 $s = "hello";

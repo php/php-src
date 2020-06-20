@@ -1,5 +1,11 @@
 --TEST--
 Bug #31098 (isset() / empty() incorrectly returns true in dereference of a wrong type)
+--SKIPIF--
+<?php
+if (PHP_OS_FAMILY === 'Windows' && ini_get('opcache.jit') && ini_get('opcache.jit_buffer_size')) {
+    die('xfail unresolved issues with JIT on Windows');
+}
+?>
 --FILE--
 <?php
 $a = '';

@@ -7,6 +7,11 @@ opcache.file_update_protection=0
 opcache.jit_buffer_size=1M
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
+<?php
+if (PHP_OS_FAMILY === 'Windows' && ini_get('opcache.jit') && ini_get('opcache.jit_buffer_size')) {
+    die('xfail unresolved issues with JIT on Windows');
+}
+?>
 --FILE--
 <?php
 function foo(&$a) {
