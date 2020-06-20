@@ -396,6 +396,79 @@ options:
 }
 /* }}} */
 
+/* {{{ proto PDO::connect(string dsn[, string username[, string passwd [, array options]]])
+   */
+// Needs a jolly good refactor, as it starts as an almost exact copy of `static PHP_METHOD(PDO, dbh_constructor)`
+static PHP_METHOD(PDO, connect)
+{
+	char *data_source;
+	size_t data_source_len;
+	char *colon;
+	char *username=NULL, *password=NULL;
+	size_t usernamelen, passwordlen;
+	pdo_driver_t *driver = NULL;
+	zval *options = NULL;
+	char alt_dsn[512];
+
+	ZEND_PARSE_PARAMETERS_START_EX(ZEND_PARSE_PARAMS_THROW, 1, 4)
+		Z_PARAM_STRING(data_source, data_source_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STRING_EX(username, usernamelen, 1, 0)
+		Z_PARAM_STRING_EX(password, passwordlen, 1, 0)
+		Z_PARAM_ARRAY_EX(options, 1, 0)
+	ZEND_PARSE_PARAMETERS_END();
+
+	/* parse the data source name */
+	colon = strchr(data_source, ':');
+
+	if (!colon) {
+		/* let's see if this string has a matching dsn in the php.ini */
+		char *ini_dsn = NULL;
+
+		snprintf(alt_dsn, sizeof(alt_dsn), "pdo.dsn.%s", data_source);
+		if (FAILURE == cfg_get_string(alt_dsn, &ini_dsn)) {
+			zend_throw_exception_ex(php_pdo_get_exception(), 0, "invalid data source name");
+			return;
+		}
+
+		data_source = ini_dsn;
+		colon = strchr(data_source, ':');
+
+		if (!colon) {
+			zend_throw_exception_ex(php_pdo_get_exception(), 0, "invalid data source name (via INI: %s)", alt_dsn);
+			return;
+		}
+	}
+
+	if (!strncmp(data_source, "uri:", sizeof("uri:")-1)) {
+		/* the specified URI holds connection details */
+		data_source = dsn_from_uri(data_source + sizeof("uri:")-1, alt_dsn, sizeof(alt_dsn));
+		if (!data_source) {
+			zend_throw_exception_ex(php_pdo_get_exception(), 0, "invalid data source URI");
+			return;
+		}
+		colon = strchr(data_source, ':');
+		if (!colon) {
+			zend_throw_exception_ex(php_pdo_get_exception(), 0, "invalid data source name (via URI)");
+			return;
+		}
+	}
+
+	driver = pdo_find_driver(data_source, colon - data_source);
+
+	if (!driver) {
+		/* NB: don't want to include the data_source in the error message as
+		 * it might contain a password */
+		zend_throw_exception_ex(php_pdo_get_exception(), 0, "could not find driver");
+		return;
+	}
+
+	// Now the driver has been identified, this is where it should be doing `new PDOSQLite()`
+
+	// Somehow return the new object...
+}
+/* }}} */
+
 static zval *pdo_stmt_instantiate(pdo_dbh_t *dbh, zval *object, zend_class_entry *dbstmt_ce, zval *ctor_args) /* {{{ */
 {
 	if (!Z_ISUNDEF_P(ctor_args)) {
@@ -1214,6 +1287,7 @@ ZEND_END_ARG_INFO()
 
 const zend_function_entry pdo_dbh_functions[] = /* {{{ */ {
 	ZEND_MALIAS(PDO, __construct, dbh_constructor,	arginfo_pdo___construct,	ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, connect,            	arginfo_pdo___construct,	ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	PHP_ME(PDO, prepare, 				arginfo_pdo_prepare,		ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, beginTransaction,       arginfo_pdo__void,         ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, commit,                 arginfo_pdo__void,         ZEND_ACC_PUBLIC)
