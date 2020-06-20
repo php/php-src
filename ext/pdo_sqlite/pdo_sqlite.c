@@ -28,6 +28,10 @@
 #include "php_pdo_sqlite.h"
 #include "php_pdo_sqlite_int.h"
 #include "zend_exceptions.h"
+#include "zend_interfaces.h"
+
+/* Class entry pointers */
+PHPAPI zend_class_entry *pdo_dbh_sqlite_ptr;
 
 /* {{{ pdo_sqlite_functions[] */
 static const zend_function_entry pdo_sqlite_functions[] = {
@@ -77,6 +81,16 @@ PHP_MINIT_FUNCTION(pdo_sqlite)
 	REGISTER_PDO_CLASS_CONST_LONG("SQLITE_OPEN_CREATE", (zend_long)SQLITE_OPEN_CREATE);
 	REGISTER_PDO_CLASS_CONST_LONG("SQLITE_ATTR_READONLY_STATEMENT", (zend_long)PDO_SQLITE_ATTR_READONLY_STATEMENT);
 	REGISTER_PDO_CLASS_CONST_LONG("SQLITE_ATTR_EXTENDED_RESULT_CODES", (zend_long)PDO_SQLITE_ATTR_EXTENDED_RESULT_CODES);
+
+    zend_class_entry ce_sqlite;
+    INIT_CLASS_ENTRY(ce_sqlite, "PDOSQLite", pdo_sqlite_functions);
+    // The Reflection extension manges to set serialize and unserialize *before* calling
+    // zend_register_internal_class(). I couldn't make that work (something to do with
+    // pointers/references?) so have had to put them after.
+    pdo_dbh_sqlite_ptr = zend_register_internal_class(&ce_sqlite); // @TODO Add a second parameter with name of PDO ptr
+    pdo_dbh_sqlite_ptr->serialize = zend_class_serialize_deny;
+    pdo_dbh_sqlite_ptr->unserialize = zend_class_unserialize_deny;
+    zend_declare_property_string(pdo_dbh_sqlite_ptr, "name", sizeof("name")-1, "", ZEND_ACC_PUBLIC);
 
 	return php_pdo_register_driver(&pdo_sqlite_driver);
 }
