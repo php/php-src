@@ -366,16 +366,16 @@ ZEND_METHOD(ZipArchive, isEncryptionMethodSupported);
 
 
 static const zend_function_entry ext_functions[] = {
-	ZEND_FE(zip_open, arginfo_zip_open)
-	ZEND_FE(zip_close, arginfo_zip_close)
-	ZEND_FE(zip_read, arginfo_zip_read)
-	ZEND_FE(zip_entry_open, arginfo_zip_entry_open)
-	ZEND_FE(zip_entry_close, arginfo_zip_entry_close)
-	ZEND_FE(zip_entry_read, arginfo_zip_entry_read)
-	ZEND_FE(zip_entry_name, arginfo_zip_entry_name)
-	ZEND_FE(zip_entry_compressedsize, arginfo_zip_entry_compressedsize)
-	ZEND_FE(zip_entry_filesize, arginfo_zip_entry_filesize)
-	ZEND_FE(zip_entry_compressionmethod, arginfo_zip_entry_compressionmethod)
+	ZEND_DEP_FE(zip_open, arginfo_zip_open)
+	ZEND_DEP_FE(zip_close, arginfo_zip_close)
+	ZEND_DEP_FE(zip_read, arginfo_zip_read)
+	ZEND_DEP_FE(zip_entry_open, arginfo_zip_entry_open)
+	ZEND_DEP_FE(zip_entry_close, arginfo_zip_entry_close)
+	ZEND_DEP_FE(zip_entry_read, arginfo_zip_entry_read)
+	ZEND_DEP_FE(zip_entry_name, arginfo_zip_entry_name)
+	ZEND_DEP_FE(zip_entry_compressedsize, arginfo_zip_entry_compressedsize)
+	ZEND_DEP_FE(zip_entry_filesize, arginfo_zip_entry_filesize)
+	ZEND_DEP_FE(zip_entry_compressionmethod, arginfo_zip_entry_compressionmethod)
 	ZEND_FE_END
 };
 

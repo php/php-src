@@ -18,6 +18,10 @@ echo is_resource($zip) ? "OK" : "Failure";
 ?>
 --EXPECTF--
 Test case 1:
+Deprecated: Function zip_open() is deprecated in %s on line %d
+
 Warning: zip_open(): Empty string as source in %s on line %d
 Test case 2:
+
+Deprecated: Function zip_open() is deprecated in %s on line %d
 Failure

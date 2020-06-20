@@ -624,6 +624,7 @@ PHP 8.0 UPGRADE NOTES
   . Using empty file as ZipArchive is deprecated. Libzip 1.6.0
     do not accept empty files as valid zip archives any longer.
     Existing workaround will be removed in next version.
+  . The procedural API of Zip is deprecated. Use ZipArchive instead.
 
 - Reflection:
   . ReflectionFunction::isDisabled() is deprecated, as it is no longer possible
