@@ -32,6 +32,7 @@
 
 /* Class entry pointers */
 PHPAPI zend_class_entry *pdo_dbh_sqlite_ptr;
+PHPAPI zend_class_entry *ce_pdo;
 
 /* {{{ pdo_sqlite_functions[] */
 static const zend_function_entry pdo_sqlite_functions[] = {
@@ -82,12 +83,19 @@ PHP_MINIT_FUNCTION(pdo_sqlite)
 	REGISTER_PDO_CLASS_CONST_LONG("SQLITE_ATTR_READONLY_STATEMENT", (zend_long)PDO_SQLITE_ATTR_READONLY_STATEMENT);
 	REGISTER_PDO_CLASS_CONST_LONG("SQLITE_ATTR_EXTENDED_RESULT_CODES", (zend_long)PDO_SQLITE_ATTR_EXTENDED_RESULT_CODES);
 
+    zend_class_entry *pce;
     zend_class_entry ce_sqlite;
+
+    if ((pce = zend_hash_str_find_ptr(CG(class_table), "pdo", sizeof("PDO") - 1)) == NULL) {
+        return SUCCESS; /* SimpleXML must be initialized before */
+    }
+
+    ce_pdo = pce;
     INIT_CLASS_ENTRY(ce_sqlite, "PDOSQLite", pdo_sqlite_functions);
     // The Reflection extension manges to set serialize and unserialize *before* calling
     // zend_register_internal_class(). I couldn't make that work (something to do with
     // pointers/references?) so have had to put them after.
-    pdo_dbh_sqlite_ptr = zend_register_internal_class(&ce_sqlite, pdo_pdh_ce); // @TODO Second parameter doesn't resolve
+    pdo_dbh_sqlite_ptr = zend_register_internal_class_ex(&ce_sqlite, ce_pdo); // @TODO Second parameter doesn't resolve
     pdo_dbh_sqlite_ptr->serialize = zend_class_serialize_deny;
     pdo_dbh_sqlite_ptr->unserialize = zend_class_unserialize_deny;
     zend_declare_property_string(pdo_dbh_sqlite_ptr, "name", sizeof("name")-1, "", ZEND_ACC_PUBLIC);
@@ -114,20 +122,3 @@ PHP_MINFO_FUNCTION(pdo_sqlite)
 	php_info_print_table_end();
 }
 /* }}} */
-
-///* {{{ spl_register_sub_class */
-//PHPAPI void spl_register_sub_class(zend_class_entry ** ppce, zend_class_entry * parent_ce, char * class_name, void *obj_ctor, const zend_function_entry * function_list)
-//{
-//    zend_class_entry ce;
-//
-//    INIT_CLASS_ENTRY_EX(ce, class_name, strlen(class_name), function_list);
-//    *ppce = zend_register_internal_class_ex(&ce, parent_ce);
-//
-//    /* entries changed by initialize */
-//    if (obj_ctor) {
-//        (*ppce)->create_object = obj_ctor;
-//    } else {
-//        (*ppce)->create_object = parent_ce->create_object;
-//    }
-//}
-///* }}} */

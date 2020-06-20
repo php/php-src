@@ -36,5 +36,3 @@ PHP_RSHUTDOWN_FUNCTION(pdo_sqlite);
 PHP_MINFO_FUNCTION(pdo_sqlite);
 
 #endif	/* PHP_PDO_SQLITE_H */
-
-void spl_register_sub_class(zend_class_entry ** ppce, zend_class_entry * parent_ce, char * class_name, create_object_func_t ctor, const zend_function_entry * function_list);
