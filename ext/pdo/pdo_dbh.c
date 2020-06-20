@@ -463,7 +463,7 @@ static PHP_METHOD(PDO, connect)
 		return;
 	}
 
-	// Now the driver has been identified, this is where it should be doing `new PDOSQLite()`
+	// Now the driver has been identified, this is where we should be doing `new PDOSQLite()` for sqlite datasources
 
 	// Somehow return the new object...
 }
