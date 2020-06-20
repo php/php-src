@@ -404,10 +404,16 @@ PHP_FUNCTION(bcpowmod)
 	php_str2num(&second, ZSTR_VAL(right));
 	php_str2num(&mod, ZSTR_VAL(modulus));
 
-	if (bc_raisemod(first, second, mod, &result, scale) != -1) {
-		RETVAL_STR(bc_num2str_ex(result, scale));
-	} else {
-		RETVAL_FALSE;
+	switch (bc_raisemod(first, second, mod, &result, scale)) {
+		case 0:
+			RETVAL_STR(bc_num2str_ex(result, scale));
+			break;
+		case -1:
+			zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Modulo by zero");
+			break;
+		case -2:
+			zend_argument_value_error(2, "must be greater than 0");
+			break;
 	}
 
 	bc_free_num(&first);
