@@ -96,6 +96,7 @@ static zend_always_inline void *spl_heap_elem(spl_ptr_heap *heap, size_t i) {
 }
 
 static zend_always_inline void spl_heap_elem_copy(spl_ptr_heap *heap, void *to, void *from) {
+	assert(to != from);
 	memcpy(to, from, heap->elem_size);
 }
 
@@ -325,7 +326,10 @@ static int spl_ptr_heap_delete_top(spl_ptr_heap *heap, void *elem, void *cmp_use
 		heap->flags |= SPL_HEAP_CORRUPTED;
 	}
 
-	spl_heap_elem_copy(heap, spl_heap_elem(heap, i), bottom);
+	void *to = spl_heap_elem(heap, i);
+	if (to != bottom) {
+		spl_heap_elem_copy(heap, to, bottom);
+	}
 	return SUCCESS;
 }
 /* }}} */
