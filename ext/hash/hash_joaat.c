@@ -44,17 +44,22 @@ PHP_HASH_API void PHP_JOAATUpdate(PHP_JOAAT_CTX *context, const unsigned char *i
 
 PHP_HASH_API void PHP_JOAATFinal(unsigned char digest[4], PHP_JOAAT_CTX * context)
 {
+	uint32_t hval = context->state;
+	hval += (hval << 3);
+	hval ^= (hval >> 11);
+	hval += (hval << 15);
+
 #ifdef WORDS_BIGENDIAN
-	memcpy(digest, &context->state, 4);
+	memcpy(digest, &hval, 4);
 #else
 	int i = 0;
-	unsigned char *c = (unsigned char *) &context->state;
+	unsigned char *c = (unsigned char *) &hval;
 
 	for (i = 0; i < 4; i++) {
 		digest[i] = c[3 - i];
 	}
 #endif
-    context->state = 0;
+	context->state = 0;
 }
 
 /*
@@ -78,10 +83,6 @@ joaat_buf(void *buf, size_t len, uint32_t hval)
         hval += (hval << 10);
         hval ^= (hval >> 6);
     }
-
-    hval += (hval << 3);
-    hval ^= (hval >> 11);
-    hval += (hval << 15);
 
     return hval;
 }
