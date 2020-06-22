@@ -1125,11 +1125,7 @@ static zend_object* php_hashcontext_create(zend_class_entry *ce) {
 static void php_hashcontext_dtor(zend_object *obj) {
 	php_hashcontext_object *hash = php_hashcontext_from_object(obj);
 
-	/* Just in case the algo has internally allocated resources */
 	if (hash->context) {
-		unsigned char *dummy = emalloc(hash->ops->digest_size);
-		hash->ops->hash_final(dummy, hash->context);
-		efree(dummy);
 		efree(hash->context);
 		hash->context = NULL;
 	}
