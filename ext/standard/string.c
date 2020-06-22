@@ -57,6 +57,10 @@
 /* For php_next_utf8_char() */
 #include "ext/standard/html.h"
 
+#ifdef __SSE2__
+#include <emmintrin.h>
+#endif
+
 #define STR_PAD_LEFT			0
 #define STR_PAD_RIGHT			1
 #define STR_PAD_BOTH			2
@@ -1385,26 +1389,78 @@ PHPAPI zend_string *php_string_toupper(zend_string *s)
 {
 	unsigned char *c;
 	const unsigned char *e;
+	register unsigned char *r;
+	zend_string *result;
 
 	c = (unsigned char *)ZSTR_VAL(s);
 	e = c + ZSTR_LEN(s);
 
+/* If SSE2 instructions are available, process blocks of 16 bytes for speed
+ * But only do this in default "C" locale, since other locales may have other
+ * characters which need to be uppercased */
+#ifdef __SSE2__
+	if (BG(ctype_string) == NULL && (e - c >= 16)) {
+		__m128i lo = _mm_set1_epi8('a' - 1);
+		__m128i hi = _mm_set1_epi8('z' + 1);
+
+		do {
+			/* Load 16 bytes and check if any are between 97-122 (lowercase ASCII) */
+			__m128i bytes = _mm_loadu_si128((__m128i *)c);
+			__m128i mask1 = _mm_cmpgt_epi8(bytes, lo);
+			__m128i mask2 = _mm_cmplt_epi8(bytes, hi);
+			mask1 = _mm_and_si128(mask1, mask2);
+			if (_mm_movemask_epi8(mask1)) {
+				/* We found characters which need to be uppercased */
+
+				/* So allocate new string and copy over any bytes which were already processed */
+				result = zend_string_alloc(ZSTR_LEN(s), 0);
+				if (c != (unsigned char*)ZSTR_VAL(s)) {
+					memcpy(ZSTR_VAL(result), ZSTR_VAL(s), c - (unsigned char*)ZSTR_VAL(s));
+				}
+				r = c + (ZSTR_VAL(result) - ZSTR_VAL(s));
+				__m128i offset = _mm_set1_epi8('a' - 'A');
+				goto string_toupper_sse2_copy;
+
+				while (e - c >= 16) {
+					bytes = _mm_loadu_si128((__m128i *)c);
+					mask1 = _mm_cmpgt_epi8(bytes, lo);
+					mask2 = _mm_cmplt_epi8(bytes, hi);
+					mask1 = _mm_and_si128(mask1, mask2);
+string_toupper_sse2_copy:
+					/* Out of this block of 16 bytes, pick out those which are 97-122
+					 * and subtract 32 from them (leaving the others unmodified) */
+					mask1 = _mm_and_si128(mask1, offset);
+					bytes = _mm_sub_epi8(bytes, mask1);
+					_mm_storeu_si128((__m128i *)r, bytes);
+					c += 16;
+					r += 16;
+				}
+
+				/* Finish copying any bytes which don't make up a block of 16 */
+				goto string_toupper_finish_remaining_bytes;
+			}
+			c += 16;
+		} while (e - c >= 16);
+	}
+#endif
+
 	while (c < e) {
 		if (islower(*c)) {
-			register unsigned char *r;
-			zend_string *res = zend_string_alloc(ZSTR_LEN(s), 0);
-
+			result = zend_string_alloc(ZSTR_LEN(s), 0);
 			if (c != (unsigned char*)ZSTR_VAL(s)) {
-				memcpy(ZSTR_VAL(res), ZSTR_VAL(s), c - (unsigned char*)ZSTR_VAL(s));
+				memcpy(ZSTR_VAL(result), ZSTR_VAL(s), c - (unsigned char*)ZSTR_VAL(s));
 			}
-			r = c + (ZSTR_VAL(res) - ZSTR_VAL(s));
+			r = c + (ZSTR_VAL(result) - ZSTR_VAL(s));
+#ifdef __SSE2__
+string_toupper_finish_remaining_bytes:
+#endif
 			while (c < e) {
 				*r = toupper(*c);
 				r++;
 				c++;
 			}
 			*r = '\0';
-			return res;
+			return result;
 		}
 		c++;
 	}
@@ -5690,9 +5746,6 @@ PHP_FUNCTION(sscanf)
 /* }}} */
 
 /* static zend_string *php_str_rot13(zend_string *str) {{{ */
-#ifdef __SSE2__
-#include <emmintrin.h>
-#endif
 static zend_string *php_str_rot13(zend_string *str)
 {
 	zend_string *ret;
