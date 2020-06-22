@@ -1849,7 +1849,7 @@ PHP_FUNCTION(session_name)
 	zend_string *name = NULL;
 	zend_string *ini_name;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S", &name) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S!", &name) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1880,7 +1880,7 @@ PHP_FUNCTION(session_module_name)
 	zend_string *name = NULL;
 	zend_string *ini_name;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S", &name) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S!", &name) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -2103,7 +2103,7 @@ PHP_FUNCTION(session_save_path)
 	zend_string *name = NULL;
 	zend_string *ini_name;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S", &name) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|P!", &name) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -2120,11 +2120,6 @@ PHP_FUNCTION(session_save_path)
 	RETVAL_STRING(PS(save_path));
 
 	if (name) {
-		if (memchr(ZSTR_VAL(name), '\0', ZSTR_LEN(name)) != NULL) {
-			php_error_docref(NULL, E_WARNING, "The save_path cannot contain NULL characters");
-			zval_ptr_dtor_str(return_value);
-			RETURN_FALSE;
-		}
 		ini_name = zend_string_init("session.save_path", sizeof("session.save_path") - 1, 0);
 		zend_alter_ini_entry(ini_name, name, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 		zend_string_release_ex(ini_name, 0);
@@ -2139,7 +2134,7 @@ PHP_FUNCTION(session_id)
 	zend_string *name = NULL;
 	int argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc, "|S", &name) == FAILURE) {
+	if (zend_parse_parameters(argc, "|S!", &name) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -2337,7 +2332,7 @@ PHP_FUNCTION(session_cache_limiter)
 	zend_string *limiter = NULL;
 	zend_string *ini_name;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S", &limiter) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S!", &limiter) == FAILURE) {
 		RETURN_THROWS();
 	}
 
