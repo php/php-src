@@ -176,6 +176,7 @@ PHP_CURL_API extern zend_class_entry *curl_share_ce;
 void curl_multi_register_class(const zend_function_entry *method_entries);
 void curl_share_register_class(const zend_function_entry *method_entries);
 void curlfile_register_class(void);
+int curl_cast_object(zend_object *obj, zval *result, int type);
 
 PHP_CURL_API extern zend_class_entry *curl_CURLFile_class;
 

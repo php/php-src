@@ -608,6 +608,7 @@ void curl_multi_register_class(const zend_function_entry *method_entries) {
 	curl_multi_handlers.get_gc = curl_multi_get_gc;
 	curl_multi_handlers.get_constructor = curl_multi_get_constructor;
 	curl_multi_handlers.clone_obj = NULL;
+	curl_multi_handlers.cast_object = curl_cast_object;
 }
 
 #endif

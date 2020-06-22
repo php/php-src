@@ -13,8 +13,13 @@ unset($handle2);
 $handle3 = curl_init();
 var_dump((int) $handle3);
 
+// Also works for CurlMultiHandle.
+$handle4 = curl_multi_init();
+var_dump((int) $handle4);
+
 ?>
 --EXPECT--
 int(1)
 int(2)
 int(2)
+int(3)
