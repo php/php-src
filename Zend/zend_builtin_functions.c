@@ -643,7 +643,7 @@ ZEND_FUNCTION(get_parent_class)
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR_OR_OBJ(str, object)
+		Z_PARAM_CLASS_NAME_OR_OBJ(str, object)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (object) {
