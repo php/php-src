@@ -2369,7 +2369,7 @@ PHP_FUNCTION(preg_replace)
    Perform Perl-style regular expression replacement using replacement callback. */
 PHP_FUNCTION(preg_replace_callback)
 {
-	zval *regex, *replace, *subject, *zcount = NULL;
+	zval *regex, *subject, *zcount = NULL;
 	zend_long limit = -1, flags = 0;
 	size_t replace_count;
 	zend_fcall_info fci;
@@ -2378,25 +2378,13 @@ PHP_FUNCTION(preg_replace_callback)
 	/* Get function parameters and do error-checking. */
 	ZEND_PARSE_PARAMETERS_START(3, 6)
 		Z_PARAM_ZVAL(regex)
-		Z_PARAM_ZVAL(replace)
+		Z_PARAM_FUNC(fci, fcc)
 		Z_PARAM_ZVAL(subject)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(limit)
 		Z_PARAM_ZVAL(zcount)
 		Z_PARAM_LONG(flags)
 	ZEND_PARSE_PARAMETERS_END();
-
-	if (!zend_is_callable_ex(replace, NULL, 0, NULL, &fcc, NULL)) {
-		zend_string	*callback_name = zend_get_callable_name(replace);
-		php_error_docref(NULL, E_WARNING, "Requires argument 2, '%s', to be a valid callback", ZSTR_VAL(callback_name));
-		zend_string_release_ex(callback_name, 0);
-		ZVAL_STR(return_value, zval_get_string(subject));
-		return;
-	}
-
-	fci.size = sizeof(fci);
-	fci.object = NULL;
-	ZVAL_COPY_VALUE(&fci.function_name, replace);
 
 	replace_count = preg_replace_func_impl(return_value, regex, &fci, &fcc, subject, limit, flags);
 	if (zcount) {

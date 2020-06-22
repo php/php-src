@@ -23,10 +23,8 @@ function preg_filter($regex, $replace, $subject, int $limit = -1, &$count = null
 /**
  * @param string|array $regex
  * @param string|array $subject
- *
- * TODO: $callback should be `callable`
  */
-function preg_replace_callback($regex, $callback, $subject, int $limit = -1, &$count = null, int $flags = 0): string|array|null {}
+function preg_replace_callback($regex, callable $callback, $subject, int $limit = -1, &$count = null, int $flags = 0): string|array|null {}
 
 /** @param string|array $subject */
 function preg_replace_callback_array(array $pattern, $subject, int $limit = -1, &$count = null, int $flags = 0): string|array|null {}
