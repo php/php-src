@@ -443,7 +443,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_register_taf_callback, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, connection_resource)
-	ZEND_ARG_TYPE_INFO(0, function_name, IS_MIXED, 0)
+	ZEND_ARG_INFO(0, function_name)
 ZEND_END_ARG_INFO()
 
 #define arginfo_oci_unregister_taf_callback arginfo_oci_rollback
@@ -474,14 +474,14 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OCI_Lob_seek, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, offset, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, whence, IS_LONG, 0, "0")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, whence, IS_LONG, 0, "OCI_SEEK_SET")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_OCI_Lob_size arginfo_class_OCI_Lob_load
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OCI_Lob_write, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, length, IS_LONG, 0, "0")
+	ZEND_ARG_TYPE_INFO(0, length, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OCI_Lob_append, 0, 0, 1)
@@ -493,8 +493,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OCI_Lob_truncate, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OCI_Lob_erase, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, offset, IS_LONG, 0, "-1")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, length, IS_LONG, 0, "-1")
+	ZEND_ARG_TYPE_INFO(0, offset, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, length, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_OCI_Lob_flush, 0, 0, _IS_BOOL, 0)
@@ -509,8 +509,8 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OCI_Lob_writetofile, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, path, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, start, IS_LONG, 0, "-1")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, length, IS_LONG, 0, "-1")
+	ZEND_ARG_TYPE_INFO(0, start, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, length, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_OCI_Lob_export arginfo_class_OCI_Lob_writetofile

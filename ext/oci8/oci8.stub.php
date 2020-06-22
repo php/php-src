@@ -621,8 +621,9 @@ function ocinewcollection($connection_resource, string $type_name, string $schem
 
 /**
  * @param resource $connection_resource
+ * @param callable|null $function_name
  */
-function oci_register_taf_callback($connection_resource, mixed $function_name): bool {}
+function oci_register_taf_callback($connection_resource, $function_name): bool {}
 
 /**
  * @param resource $connection_resource
@@ -682,7 +683,7 @@ class OCI_Lob {
      * @alias oci_lob_seek
      * @return bool
      */
-    public function seek(int $offset, int $whence = 0) {}
+    public function seek(int $offset, int $whence = OCI_SEEK_SET) {}
 
     /**
      * @alias oci_lob_size
@@ -694,7 +695,7 @@ class OCI_Lob {
      * @alias oci_lob_write
      * @return int|false
      */
-    public function write(string $string, int $length = 0) {}
+    public function write(string $string, int $length = UNKNOWN) {}
 
     /**
      * @alias oci_lob_append
@@ -712,7 +713,7 @@ class OCI_Lob {
      * @alias oci_lob_erase
      * @return int|false
      */
-    public function erase(int $offset = -1, int $length = -1) {}
+    public function erase(int $offset = UNKNOWN, int $length = UNKNOWN) {}
 
     /**
      * @alias oci_lob_flush
@@ -736,13 +737,13 @@ class OCI_Lob {
      * @alias oci_lob_export
      * @return bool
      */
-    public function writetofile(string $path, int $start = -1, int $length = -1) {}
+    public function writetofile(string $path, int $start = UNKNOWN, int $length = UNKNOWN) {}
 
     /**
      * @alias oci_lob_export
      * @return bool
      */
-    public function export(string $path, int $start = -1, int $length = -1) {}
+    public function export(string $path, int $start = UNKNOWN, int $length = UNKNOWN) {}
 
     /**
      * @alias oci_lob_write_temporary
@@ -778,7 +779,7 @@ class OCI_Collection {
 
     /**
      * @alias oci_collection_element_get
-     * @return mixed
+     * @return string|double|null
      */
     public function getElem(int $index) {}
 

@@ -2099,8 +2099,8 @@ PHP_FUNCTION(oci_result)
    Return a string containing runtime client library version information */
 PHP_FUNCTION(oci_client_version)
 {
-	ZEND_PARSE_PARAMETERS_NONE();
 	char version[256];
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	php_oci_client_get_version(version, sizeof(version));
 	RETURN_STRING(version);
