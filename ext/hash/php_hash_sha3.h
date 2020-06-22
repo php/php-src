@@ -24,7 +24,7 @@ typedef struct {
 	unsigned char state[200]; // 5 * 5 * sizeof(uint64)
 	uint32_t pos;
 #else
-	void *hashinstance;
+	unsigned char state[224]; // this must fit a Keccak_HashInstance
 #endif
 } PHP_SHA3_CTX;
 
