@@ -10993,7 +10993,7 @@ static int zend_jit_fetch_obj(dasm_State **Dst, const zend_op *opline, const zen
 	if ((op1_info & ((MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)- MAY_BE_OBJECT)) && JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE) {
 		|7:
 		if (opline->opcode != ZEND_FETCH_OBJ_IS) {
-			|	SAVE_VALID_OPLINE opline, r1
+			|	SAVE_VALID_OPLINE opline, r0
 			if (opline->opcode != ZEND_FETCH_OBJ_W
 			 && (op1_info & MAY_BE_UNDEF)) {
 				zend_jit_addr orig_op1_addr = OP1_ADDR();
