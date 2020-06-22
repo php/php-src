@@ -36,5 +36,5 @@ string(64) "this is a stringthis is a stringthis is a stringthis is a string"
 
 Arg value is: Array
 preg_replace(): Argument #1 ($regex) must be of type array when argument #2 ($replace) is an array, string given
-Object of class stdClass could not be converted to string
+preg_replace(): Argument #2 ($replace) must be of type string|array, stdClass given
 Done

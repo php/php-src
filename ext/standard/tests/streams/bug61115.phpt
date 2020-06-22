@@ -9,9 +9,9 @@ $resourceFileTemp = fopen('php://temp', 'r+');
 stream_context_set_params($resourceFileTemp, array());
 try {
     preg_replace('', function() {}, $resourceFileTemp);
-} catch (Error $e) {
+} catch (\TypeError $e) {
     echo $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Object of class Closure could not be converted to string
+preg_replace(): Argument #2 ($replace) must be of type string|array, Closure given
