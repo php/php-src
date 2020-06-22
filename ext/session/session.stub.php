@@ -2,13 +2,13 @@
 
 /** @generate-function-entries */
 
-function session_name(string $name = UNKNOWN): string|false {}
+function session_name(?string $name = null): string|false {}
 
-function session_module_name(string $module = UNKNOWN): string|false {}
+function session_module_name(?string $module = null): string|false {}
 
-function session_save_path(string $path = UNKNOWN): string|false {}
+function session_save_path(?string $path = null): string|false {}
 
-function session_id(string $id = UNKNOWN): string|false {}
+function session_id(?string $id = null): string|false {}
 
 function session_create_id(string $prefix = ""): string|false {}
 
@@ -41,7 +41,7 @@ function session_commit(): bool {}
 
 function session_set_save_handler($open, $close = UNKNOWN, $read = UNKNOWN, $write = UNKNOWN, $destroy = UNKNOWN, $gc = UNKNOWN, $create_sid = UNKNOWN, $validate_sid = UNKNOWN, $update_timestamp = UNKNOWN): bool {}
 
-function session_cache_limiter(string $cache_limiter = UNKNOWN): string|false {}
+function session_cache_limiter(?string $cache_limiter = null): string|false {}
 
 function session_cache_expire(?int $new_cache_expire = null): int|false {}
 

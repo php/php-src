@@ -83,7 +83,7 @@ foreach($inputs as $input) {
     echo "\n-- Iteration $iterator --\n";
     var_dump(session_cache_limiter($input));
     $iterator++;
-};
+}
 
 fclose($fp);
 echo "Done";
@@ -123,10 +123,10 @@ string(13) "1.23456789E-9"
 string(3) "0.5"
 
 -- Iteration 11 --
-string(0) ""
+string(3) "0.5"
 
 -- Iteration 12 --
-string(0) ""
+string(3) "0.5"
 
 -- Iteration 13 --
 string(1) "1"
@@ -159,5 +159,5 @@ string(12) "Hello World!"
 string(12) "Hello World!"
 
 -- Iteration 23 --
-string(0) ""
+string(12) "Hello World!"
 Done
