@@ -113,7 +113,7 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
 
       - Parameters [6] {
         Parameter #0 [ <required> $regex ]
-        Parameter #1 [ <required> $callback ]
+        Parameter #1 [ <required> callable $callback ]
         Parameter #2 [ <required> $subject ]
         Parameter #3 [ <optional> int $limit = -1 ]
         Parameter #4 [ <optional> &$count = null ]
