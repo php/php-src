@@ -3778,6 +3778,10 @@ ZEND_METHOD(reflection_class, getStaticProperties)
 		return;
 	}
 
+	if (!CE_STATIC_MEMBERS(ce)) {
+		zend_class_init_statics(ce);
+	}
+
 	array_init(return_value);
 
 	ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->properties_info, key, prop_info) {
@@ -3791,11 +3795,7 @@ ZEND_METHOD(reflection_class, getStaticProperties)
 			continue;
 		}
 
-		if ((members = CE_STATIC_MEMBERS(ce))) {
-			prop = &members[prop_info->offset];
-		} else {
-			prop = &ce->default_static_members_table[prop_info->offset];
-		}
+		prop = &CE_STATIC_MEMBERS(ce)[prop_info->offset];
 		ZVAL_DEINDIRECT(prop);
 
 		if (prop_info->type && Z_ISUNDEF_P(prop)) {
@@ -3805,14 +3805,6 @@ ZEND_METHOD(reflection_class, getStaticProperties)
 		/* copy: enforce read only access */
 		ZVAL_DEREF(prop);
 		ZVAL_COPY_OR_DUP(&prop_copy, prop);
-
-		/* this is necessary to make it able to work with default array
-		* properties, returned to user */
-		if (Z_TYPE(prop_copy) == IS_CONSTANT_AST) {
-			if (UNEXPECTED(zval_update_constant_ex(&prop_copy, ce) != SUCCESS)) {
-				return;
-			}
-		}
 
 		zend_hash_update(Z_ARRVAL_P(return_value), key, &prop_copy);
 	} ZEND_HASH_FOREACH_END();
