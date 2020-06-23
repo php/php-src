@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.0.0alpha1
+25 Jun 2020, PHP 8.0.0alpha1
 
 - Core:
   . Removed the pdo_odbc.db2_instance_name php.ini directive. (Kalle)
