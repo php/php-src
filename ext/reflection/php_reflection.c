@@ -3845,7 +3845,9 @@ static void add_class_vars(zend_class_entry *ce, zend_bool statics, zval *return
 	zend_string *key;
 
 	ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->properties_info, key, prop_info) {
-		if (((prop_info->flags & ZEND_ACC_PRIVATE) &&
+		if (((prop_info->flags & ZEND_ACC_PROTECTED) &&
+		     !zend_check_protected(prop_info->ce, ce)) ||
+		    ((prop_info->flags & ZEND_ACC_PRIVATE) &&
 		     prop_info->ce != ce)) {
 			continue;
 		}
@@ -3883,9 +3885,6 @@ ZEND_METHOD(ReflectionClass, getStaticProperties)
 {
 	reflection_object *intern;
 	zend_class_entry *ce;
-	zend_property_info *prop_info;
-	zval *prop;
-	zend_string *key;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
@@ -3897,34 +3896,8 @@ ZEND_METHOD(ReflectionClass, getStaticProperties)
 		return;
 	}
 
-	if (!CE_STATIC_MEMBERS(ce)) {
-		zend_class_init_statics(ce);
-	}
-
 	array_init(return_value);
-
-	ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->properties_info, key, prop_info) {
-		if (((prop_info->flags & ZEND_ACC_PRIVATE) &&
-		     prop_info->ce != ce)) {
-			continue;
-		}
-		if ((prop_info->flags & ZEND_ACC_STATIC) == 0) {
-			continue;
-		}
-
-		prop = &CE_STATIC_MEMBERS(ce)[prop_info->offset];
-		ZVAL_DEINDIRECT(prop);
-
-		if (prop_info->type && Z_ISUNDEF_P(prop)) {
-			continue;
-		}
-
-		/* enforce read only access */
-		ZVAL_DEREF(prop);
-		Z_TRY_ADDREF_P(prop);
-
-		zend_hash_update(Z_ARRVAL_P(return_value), key, prop);
-	} ZEND_HASH_FOREACH_END();
+	add_class_vars(ce, 1, return_value);
 }
 /* }}} */
 
