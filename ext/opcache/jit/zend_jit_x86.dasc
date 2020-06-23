@@ -5131,7 +5131,8 @@ static int zend_jit_simple_assign(dasm_State    **Dst,
                                   zend_jit_addr   val_addr,
                                   uint32_t        val_info,
                                   zend_jit_addr   res_addr,
-                                  int             in_cold)
+                                  int             in_cold,
+                                  int             save_r1)
 /* Labels: 1,2,3 */
 {
 	ZEND_ASSERT(Z_MODE(var_addr) == IS_REG || Z_REG(var_addr) != ZREG_R0);
@@ -5160,13 +5161,17 @@ static int zend_jit_simple_assign(dasm_State    **Dst,
 				|1:
 			}
 			|	// zend_error(E_WARNING, "Undefined variable $%s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
-			if (Z_REG(var_addr) != ZREG_FP) {
+			if (save_r1) {
+				|	mov aword T1, FCARG1a // save
+			} else if (Z_REG(var_addr) != ZREG_FP) {
 				|	mov aword T1, Ra(Z_REG(var_addr)) // save
 			}
 			|	SAVE_VALID_OPLINE opline, r0
 			|	mov FCARG1d, val.var
 			|	EXT_CALL zend_jit_undefined_op_helper, r0
-			if (Z_REG(var_addr) != ZREG_FP) {
+			if (save_r1) {
+				|	mov FCARG1a, aword T1 // restore
+			} else if (Z_REG(var_addr) != ZREG_FP) {
 				|	mov Ra(Z_REG(var_addr)), aword T1 // restore
 			}
 			|	SET_ZVAL_TYPE_INFO var_addr, IS_NULL
@@ -5310,12 +5315,21 @@ static int zend_jit_assign_to_variable(dasm_State    **Dst,
 				|1:
 				in_cold = 1;
 			}
-			|	GET_ZVAL_PTR r0, var_addr
-			|	mov aword T1, r0 // save
-			if (!zend_jit_simple_assign(Dst, opline, op_array, var_addr, var_info, var_def_info, val_type, val, val_addr, val_info, res_addr, in_cold)) {
-				return 0;
+			if (Z_REG(var_addr) == ZREG_FCARG1a) {
+				|	GET_ZVAL_PTR r0, var_addr
+				|	mov aword T1, r0 // save
+				if (!zend_jit_simple_assign(Dst, opline, op_array, var_addr, var_info, var_def_info, val_type, val, val_addr, val_info, res_addr, in_cold, 0)) {
+					return 0;
+				}
+				if (Z_REG(var_addr) == ZREG_FCARG1a) {
+					|	mov FCARG1a, aword T1 // restore
+				}
+			} else {
+				|	GET_ZVAL_PTR FCARG1a, var_addr
+				if (!zend_jit_simple_assign(Dst, opline, op_array, var_addr, var_info, var_def_info, val_type, val, val_addr, val_info, res_addr, in_cold, 1)) {
+					return 0;
+				}
 			}
-			|	mov FCARG1a, aword T1 // restore
 			|	GC_DELREF FCARG1a
 			if (RC_MAY_BE_N(var_info) && (var_info & (MAY_BE_ARRAY|MAY_BE_OBJECT)) != 0) {
 				|	jnz >4
@@ -5364,7 +5378,7 @@ static int zend_jit_assign_to_variable(dasm_State    **Dst,
 	    }
 	}
 
-	if (!done && !zend_jit_simple_assign(Dst, opline, op_array, var_addr, var_info, var_def_info, val_type, val, val_addr, val_info, res_addr, 0)) {
+	if (!done && !zend_jit_simple_assign(Dst, opline, op_array, var_addr, var_info, var_def_info, val_type, val, val_addr, val_info, res_addr, 0, 0)) {
 		return 0;
 	}
 
@@ -5452,7 +5466,7 @@ static int zend_jit_assign_dim(dasm_State **Dst, const zend_op *opline, const ze
 			|.code
 			|	mov FCARG1a, r0
 
-			if (!zend_jit_simple_assign(Dst, opline, op_array, var_addr, var_info, -1, (opline+1)->op1_type, (opline+1)->op1, op3_addr, val_info, res_addr, 0)) {
+			if (!zend_jit_simple_assign(Dst, opline, op_array, var_addr, var_info, -1, (opline+1)->op1_type, (opline+1)->op1, op3_addr, val_info, res_addr, 0, 0)) {
 				return 0;
 			}
 		} else {
@@ -7695,7 +7709,7 @@ static int zend_jit_qm_assign(dasm_State **Dst, const zend_op *opline, const zen
 		}
 	}
 
-	if (!zend_jit_simple_assign(Dst, opline, op_array, res_addr, -1, -1, opline->op1_type, opline->op1, op1_addr, op1_info, 0, 0)) {
+	if (!zend_jit_simple_assign(Dst, opline, op_array, res_addr, -1, -1, opline->op1_type, opline->op1, op1_addr, op1_info, 0, 0, 0)) {
 		return 0;
 	}
 	if (!zend_jit_store_var_if_necessary(Dst, opline->result.var, res_addr, res_info)) {
