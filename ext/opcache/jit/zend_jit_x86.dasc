@@ -3660,8 +3660,8 @@ static int zend_jit_inc_dec(dasm_State **Dst, const zend_op *opline, const zend_
 				|	IF_NOT_ZVAL_TYPE op1_addr, IS_UNDEF, >2
 				|	// zend_error(E_WARNING, "Undefined variable $%s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
 				|	mov FCARG1d, opline->op1.var
-				|	EXT_CALL zend_jit_undefined_op_helper, r0
 				|	SET_ZVAL_TYPE_INFO op1_addr, IS_NULL
+				|	EXT_CALL zend_jit_undefined_op_helper, r0
 				op1_info |= MAY_BE_NULL;
 			}
 			|2:
@@ -5163,20 +5163,16 @@ static int zend_jit_simple_assign(dasm_State    **Dst,
 			|	// zend_error(E_WARNING, "Undefined variable $%s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
 			if (save_r1) {
 				|	mov aword T1, FCARG1a // save
-			} else if (Z_REG(var_addr) != ZREG_FP) {
-				|	mov aword T1, Ra(Z_REG(var_addr)) // save
+			}
+			|	SET_ZVAL_TYPE_INFO var_addr, IS_NULL
+			if (res_addr) {
+				|	SET_ZVAL_TYPE_INFO res_addr, IS_NULL
 			}
 			|	SAVE_VALID_OPLINE opline, r0
 			|	mov FCARG1d, val.var
 			|	EXT_CALL zend_jit_undefined_op_helper, r0
 			if (save_r1) {
 				|	mov FCARG1a, aword T1 // restore
-			} else if (Z_REG(var_addr) != ZREG_FP) {
-				|	mov Ra(Z_REG(var_addr)), aword T1 // restore
-			}
-			|	SET_ZVAL_TYPE_INFO var_addr, IS_NULL
-			if (res_addr) {
-				|	SET_ZVAL_TYPE_INFO res_addr, IS_NULL
 			}
 			|	jmp >3
 			if (in_cold) {
@@ -5225,7 +5221,13 @@ static int zend_jit_simple_assign(dasm_State    **Dst,
 					|	GC_ADDREF r0
 					|2:
 				}
+				if (save_r1) {
+					|	mov aword T1, FCARG1a // save
+				}
 				|	EFREE_24 aword [Ra(Z_REG(val_addr))+Z_OFFSET(val_addr)], op_array, opline
+				if (save_r1) {
+					|	mov FCARG1a, aword T1 // restore
+				}
 				|	jmp >3
 				if (in_cold) {
 					|1:
