@@ -1135,6 +1135,8 @@ function fmod(float $x, float $y): float {}
 
 function fdiv(float $dividend, float $divisor): float {}
 
+function gauss_sum(int|float $number): int|float {}
+
 /* microtime.c */
 
 #ifdef HAVE_GETTIMEOFDAY

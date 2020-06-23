@@ -1247,3 +1247,21 @@ PHP_FUNCTION(intdiv)
 	RETURN_LONG(dividend / divisor);
 }
 /* }}} */
+
+/* {{{ proto int|float gauss_sum(int|float number)
+   Return the the sequence of consecutive summations */
+PHP_FUNCTION(gauss_sum) {
+	long value = 1;
+
+	ZEND_PARSE_PARAMETERS_START(1,1)
+		Z_PARAM_LONG(value)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if(value < 1) {
+		zend_argument_value_error(1, "must be greater than 0");
+		RETURN_THROWS();
+	}
+
+	RETURN_DOUBLE((value * (value + 1)) / 2);
+}
+/* }}} */

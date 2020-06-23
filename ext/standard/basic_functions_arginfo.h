@@ -1733,6 +1733,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_fdiv, 0, 2, IS_DOUBLE, 0)
 	ZEND_ARG_TYPE_INFO(0, divisor, IS_DOUBLE, 0)
 ZEND_END_ARG_INFO()
 
+#define arginfo_gauss_sum arginfo_abs
+
 #if defined(HAVE_GETTIMEOFDAY)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_microtime, 0, 0, MAY_BE_STRING|MAY_BE_DOUBLE)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, get_as_float, _IS_BOOL, 0, "false")
@@ -2710,6 +2712,7 @@ ZEND_FUNCTION(base_convert);
 ZEND_FUNCTION(number_format);
 ZEND_FUNCTION(fmod);
 ZEND_FUNCTION(fdiv);
+ZEND_FUNCTION(gauss_sum);
 #if defined(HAVE_GETTIMEOFDAY)
 ZEND_FUNCTION(microtime);
 #endif
@@ -3346,6 +3349,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(number_format, arginfo_number_format)
 	ZEND_FE(fmod, arginfo_fmod)
 	ZEND_FE(fdiv, arginfo_fdiv)
+	ZEND_FE(gauss_sum, arginfo_gauss_sum)
 #if defined(HAVE_GETTIMEOFDAY)
 	ZEND_FE(microtime, arginfo_microtime)
 #endif
