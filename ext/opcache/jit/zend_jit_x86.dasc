@@ -10501,95 +10501,100 @@ static int zend_jit_bind_global(dasm_State **Dst, const zend_op *opline, const z
 static int zend_jit_recv(dasm_State **Dst, const zend_op *opline, const zend_op_array *op_array)
 {
 	uint32_t arg_num = opline->op1.num;
-
-	|	cmp dword EX->This.u2.num_args, arg_num
-	|	jb >1
-	|.cold_code
-	|1:
-	|	SAVE_VALID_OPLINE opline, r0
-	|	mov FCARG1a, FP
-	|	EXT_CALL zend_missing_arg_error, r0
-	|	jmp ->exception_handler
-	|.code
+	zend_arg_info *arg_info = NULL;
 
 	if (op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) {
-		zend_arg_info *arg_info = NULL;
-
 		if (EXPECTED(arg_num <= op_array->num_args)) {
 			arg_info = &op_array->arg_info[arg_num-1];
 		} else if (UNEXPECTED(op_array->fn_flags & ZEND_ACC_VARIADIC)) {
 			arg_info = &op_array->arg_info[op_array->num_args];
 		}
-		if (arg_info) {
-			zend_type type = arg_info->type;
-
-			if (ZEND_TYPE_IS_SET(type)) {
-				// Type check
-				zend_jit_addr res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
-
-				|	LOAD_ZVAL_ADDR r0, res_addr
-				if (ZEND_ARG_SEND_MODE(arg_info)) {
-					|	GET_Z_PTR r0, r0
-					|	add r0, offsetof(zend_reference, val)
-				}
-
-				uint32_t type_mask = ZEND_TYPE_PURE_MASK(type);
-				if (type_mask == 0) {
-					|	jmp >8
-				} else if (is_power_of_two(type_mask)) {
-					uint32_t type_code = concrete_type(type_mask);
-					|	cmp byte [r0 + 8], type_code
-					|	jne >8
-				} else {
-					|	mov edx, 1
-					|	mov cl, byte [r0 + 8]
-					|	shl edx, cl
-					|	test edx, type_mask
-					|	je >8
-				}
-
-				|.cold_code
-				|8:
-				|	SAVE_VALID_OPLINE opline, r0
-				|	mov FCARG1a, r0
-				|	mov r0, EX->run_time_cache
-				|	add r0, opline->extended_value
-				|	mov FCARG2a, EX->func
-				|.if X64WIN
-					|	mov CARG3, arg_num
-					|	LOAD_ADDR CARG4, (ptrdiff_t)arg_info
-					|	mov aword A5, r0
-					|	EXT_CALL zend_jit_verify_arg_slow, r0
-				|.elif X64
-					|	mov CARG3, arg_num
-					|	LOAD_ADDR CARG4, (ptrdiff_t)arg_info
-					|	mov CARG5, r0
-					|	EXT_CALL zend_jit_verify_arg_slow, r0
-				|.else
-					|	sub r4, 4
-					|	push r0
-					|	push (ptrdiff_t)arg_info
-					|	push arg_num
-					|	EXT_CALL zend_jit_verify_arg_slow, r0
-					|	add r4, 4
-				|.endif
-				if (!zend_jit_check_exception(Dst)) {
-					return 0;
-				}
-				|	jmp >1
-				|.code
-				|1:
-
-				if ((opline+1)->opcode != ZEND_RECV && (opline+1)->opcode != ZEND_RECV_INIT) {
-					last_valid_opline = NULL;
-					if (!zend_jit_set_valid_ip(Dst, opline + 1)) {
-						return 0;
-					}
-				}
-
-				return 1;
-			}
+		if (arg_info && !ZEND_TYPE_IS_SET(arg_info->type)) {
+			arg_info = NULL;
 		}
+	}
+
+	if (arg_info || (opline+1)->opcode != ZEND_RECV) {
+		|	cmp dword EX->This.u2.num_args, arg_num
+		if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
+			int32_t exit_point = zend_jit_trace_get_exit_point(opline, opline, NULL, ZEND_JIT_EXIT_TO_VM);
+			const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+
+			if (!exit_addr) {
+				return 0;
+			}
+			|	jb &exit_addr
+		} else {
+			|	jb >1
+			|.cold_code
+			|1:
+			|	SAVE_VALID_OPLINE opline, r0
+			|	mov FCARG1a, FP
+			|	EXT_CALL zend_missing_arg_error, r0
+			|	jmp ->exception_handler
+			|.code
+		}
+	}
+
+	if (arg_info) {
+		// Type check
+		zend_type type = arg_info->type;
+		zend_jit_addr res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
+		uint32_t type_mask;
+
+		|	LOAD_ZVAL_ADDR r0, res_addr
+		if (ZEND_ARG_SEND_MODE(arg_info)) {
+			|	GET_Z_PTR r0, r0
+			|	add r0, offsetof(zend_reference, val)
+		}
+
+		type_mask = ZEND_TYPE_PURE_MASK(type);
+		if (type_mask == 0) {
+			|	jmp >8
+		} else if (is_power_of_two(type_mask)) {
+			uint32_t type_code = concrete_type(type_mask);
+			|	cmp byte [r0 + 8], type_code
+			|	jne >8
+		} else {
+			|	mov edx, 1
+			|	mov cl, byte [r0 + 8]
+			|	shl edx, cl
+			|	test edx, type_mask
+			|	je >8
+		}
+
+		|.cold_code
+		|8:
+		|	SAVE_VALID_OPLINE opline, r0
+		|	mov FCARG1a, r0
+		|	mov r0, EX->run_time_cache
+		|	add r0, opline->extended_value
+		|	mov FCARG2a, EX->func
+		|.if X64WIN
+			|	mov CARG3, arg_num
+			|	LOAD_ADDR CARG4, (ptrdiff_t)arg_info
+			|	mov aword A5, r0
+			|	EXT_CALL zend_jit_verify_arg_slow, r0
+		|.elif X64
+			|	mov CARG3, arg_num
+			|	LOAD_ADDR CARG4, (ptrdiff_t)arg_info
+			|	mov CARG5, r0
+			|	EXT_CALL zend_jit_verify_arg_slow, r0
+		|.else
+			|	sub r4, 4
+			|	push r0
+			|	push (ptrdiff_t)arg_info
+			|	push arg_num
+			|	EXT_CALL zend_jit_verify_arg_slow, r0
+			|	add r4, 4
+		|.endif
+
+		if (!zend_jit_check_exception(Dst)) {
+			return 0;
+		}
+		|	jmp >1
+		|.code
+		|1:
 	}
 
 	if ((opline+1)->opcode != ZEND_RECV && (opline+1)->opcode != ZEND_RECV_INIT) {
