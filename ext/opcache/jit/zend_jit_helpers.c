@@ -1169,7 +1169,7 @@ check_indirect:
 	return ref;
 }
 
-static zend_always_inline zend_bool zend_jit_verify_type_common(zval *arg, const zend_op_array *op_array, zend_arg_info *arg_info, void **cache_slot)
+static zend_always_inline zend_bool zend_jit_verify_type_common(zval *arg, zend_arg_info *arg_info, void **cache_slot)
 {
 	uint32_t type_mask;
 
@@ -1227,16 +1227,23 @@ builtin_types:
 	return 0;
 }
 
-static void ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, const zend_op_array *op_array, uint32_t arg_num, zend_arg_info *arg_info, void **cache_slot)
+//static void ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, const zend_op_array *op_array, uint32_t arg_num, zend_arg_info *arg_info, void **cache_slot)
+static int ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, zend_arg_info *arg_info)
 {
-	if (UNEXPECTED(!zend_jit_verify_type_common(arg, op_array, arg_info, cache_slot))) {
-		zend_verify_arg_error((zend_function*)op_array, arg_info, arg_num, cache_slot, arg);
+	zend_execute_data *execute_data = EG(current_execute_data);
+	const zend_op *opline = EX(opline);
+	void **cache_slot = CACHE_ADDR(opline->extended_value);
+
+	if (UNEXPECTED(!zend_jit_verify_type_common(arg, arg_info, cache_slot))) {
+		zend_verify_arg_error(EX(func), arg_info, opline->op1.num, cache_slot, arg);
+		return 0;
 	}
+	return 1;
 }
 
 static void ZEND_FASTCALL zend_jit_verify_return_slow(zval *arg, const zend_op_array *op_array, zend_arg_info *arg_info, void **cache_slot)
 {
-	if (UNEXPECTED(!zend_jit_verify_type_common(arg, op_array, arg_info, cache_slot))) {
+	if (UNEXPECTED(!zend_jit_verify_type_common(arg, arg_info, cache_slot))) {
 		zend_verify_return_error((zend_function*)op_array, cache_slot, arg);
 	}
 }
