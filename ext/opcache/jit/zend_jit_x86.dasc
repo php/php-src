@@ -10984,15 +10984,6 @@ static int zend_jit_fetch_obj(dasm_State **Dst, const zend_op *opline, const zen
 
 	if (JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE || offset == ZEND_WRONG_PROPERTY_OFFSET) {
 		|5:
-		|	LOAD_ADDR FCARG2a, member
-		|.if X64
-			|	LOAD_ZVAL_ADDR CARG3, res_addr
-			|	mov CARG4, (opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS)
-		|.else
-			|	sub r4, 8
-			|	push (opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS)
-			|	PUSH_ZVAL_ADDR res_addr, r0
-		|.endif
 		|	SAVE_VALID_OPLINE opline, r0
 		if (opline->opcode == ZEND_FETCH_OBJ_W) {
 			|	EXT_CALL zend_jit_fetch_obj_w_slow, r0
@@ -11001,9 +10992,6 @@ static int zend_jit_fetch_obj(dasm_State **Dst, const zend_op *opline, const zen
 		} else {
 			|	EXT_CALL zend_jit_fetch_obj_is_slow, r0
 		}
-		|.if not(X64)
-		|	add r4, 8
-		|.endif
 		|	jmp >9
 	}
 
@@ -11045,29 +11033,12 @@ static int zend_jit_fetch_obj(dasm_State **Dst, const zend_op *opline, const zen
 	 && opline->opcode != ZEND_FETCH_OBJ_W) {
 		|8:
 		|	mov FCARG2a, r0
-		|.if X64WIN
-			|	LOAD_ADDR CARG3, member
-			|	LOAD_ZVAL_ADDR CARG4, res_addr
-			|	mov aword A5, (opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS)
-		|.elif X64
-			|	LOAD_ADDR CARG3, member
-			|	LOAD_ZVAL_ADDR CARG4, res_addr
-			|	mov CARG5, (opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS)
-		|.else
-			|	sub r4, 4
-			|	push (opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS)
-			|	PUSH_ZVAL_ADDR res_addr, r0
-			|	PUSH_ADDR member, r0
-		|.endif
 		|	SAVE_VALID_OPLINE opline, r0
 		if (opline->opcode != ZEND_FETCH_OBJ_IS) {
 			|	EXT_CALL zend_jit_fetch_obj_r_dynamic, r0
 		} else {
 			|	EXT_CALL zend_jit_fetch_obj_is_dynamic, r0
 		}
-		|.if not(X64)
-		|	add r4, 4
-		|.endif
 		|	jmp >9
 	}
 
