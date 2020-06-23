@@ -57,7 +57,6 @@ function enchant_dict_add_to_session(EnchantDictionary $dict, string $word): voi
 function enchant_dict_is_added(EnchantDictionary $dict, string $word): bool {}
 
 /**
-* @param resource $dict
 * @alias enchant_dict_is_added
 * @deprecated
 */
@@ -68,4 +67,3 @@ function enchant_dict_store_replacement(EnchantDictionary $dict, string $mis, st
 function enchant_dict_get_error(EnchantDictionary $dict): string|false {}
 
 function enchant_dict_describe(EnchantDictionary $dict): array {}
-
