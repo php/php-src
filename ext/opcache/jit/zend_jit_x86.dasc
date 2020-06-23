@@ -1411,40 +1411,41 @@ static void* dasm_labels[zend_lb_MAX];
 
 |.macro SEPARATE_ARRAY, addr, op_info, cold
 ||	if (RC_MAY_BE_N(op_info)) {
-||		zend_reg tmp_reg;
-||
-||		tmp_reg = (Z_REG(addr) == ZREG_FCARG1a) ? ZREG_R0 : ZREG_FCARG1a;
-|		GET_ZVAL_LVAL tmp_reg, addr
-||		if (RC_MAY_BE_1(op_info)) {
-|			cmp dword [Ra(tmp_reg)], 1 // if (GC_REFCOUNT() > 1)
-||			if (cold) {
-|				ja >1
-|.cold_code
-|1:
-||			} else {
+||		if (Z_REG(addr) == ZREG_FCARG1a) {
+|			GET_ZVAL_LVAL ZREG_R0, addr
+||			if (RC_MAY_BE_1(op_info)) {
+|				cmp dword [r0], 1 // if (GC_REFCOUNT() > 1)
 |				jbe >2
 ||			}
-||		}
-|		IF_NOT_ZVAL_REFCOUNTED addr, >1
-|		GC_DELREF Ra(tmp_reg)
-|1:
-||		if (Z_REG(addr) == ZREG_FCARG1a) {
 |			EXT_CALL zend_jit_zval_array_dup, r0
-||      } else {
+|2:
+|			mov FCARG1a, r0
+||		} else {
+|			GET_ZVAL_LVAL ZREG_FCARG1a, addr
+||			if (RC_MAY_BE_1(op_info)) {
+|				cmp dword [FCARG1a], 1 // if (GC_REFCOUNT() > 1)
+||				if (cold) {
+|					ja >1
+|.cold_code
+|1:
+||				} else {
+|					jbe >2
+||				}
+||			}
+|			IF_NOT_ZVAL_REFCOUNTED addr, >1
+|			GC_DELREF FCARG1a
+|1:
 |			EXT_CALL zend_array_dup, r0
 |			SET_ZVAL_PTR addr, r0
 |			SET_ZVAL_TYPE_INFO addr, IS_ARRAY_EX
 |			mov FCARG1a, r0
-||		}
-||		if (RC_MAY_BE_1(op_info)) {
-||			if (cold) {
-|				jmp >2
+||			if (RC_MAY_BE_1(op_info)) {
+||				if (cold) {
+|					jmp >2
 |.code
+||				}
 ||			}
-||		}
 |2:
-||		if (Z_REG(addr) == ZREG_FCARG1a) {
-|			mov FCARG1a, r0
 ||		}
 ||	} else {
 |		GET_ZVAL_LVAL ZREG_FCARG1a, addr

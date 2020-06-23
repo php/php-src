@@ -1755,8 +1755,10 @@ static void ZEND_FASTCALL zend_jit_array_free(HashTable *ht)
 
 static HashTable *ZEND_FASTCALL zend_jit_zval_array_dup(zval *arr)
 {
-	HashTable *ht = Z_ARRVAL_P(arr);
+	HashTable *ht;
 
+	Z_TRY_DELREF_P(arr);
+	ht = Z_ARRVAL_P(arr);
 	ht = zend_array_dup(ht);
 	ZVAL_ARR(arr, ht);
 	return ht;
