@@ -65,6 +65,7 @@ jobs:
             --enable-intl \
             --with-mhash \
             --with-sodium \
+            --enable-dba \
             --enable-werror \
             --with-config-file-path=/etc \
             --with-config-file-scan-dir=/etc/php.d
