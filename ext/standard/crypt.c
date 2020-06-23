@@ -81,6 +81,7 @@ PHP_MSHUTDOWN_FUNCTION(crypt) /* {{{ */
 
 static unsigned char itoa64[] = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
+/* Encode a string of bytes as Base64 */
 static void php_to64(char *s, int n) /* {{{ */
 {
 	while (--n >= 0) {
