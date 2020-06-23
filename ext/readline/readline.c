@@ -147,7 +147,7 @@ PHP_FUNCTION(readline_info)
 	size_t what_len, oldval;
 	char *oldstr;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|sz", &what, &what_len, &value) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s!z!", &what, &what_len, &value) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -369,7 +369,7 @@ PHP_FUNCTION(readline_read_history)
 	char *arg = NULL;
 	size_t arg_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|p", &arg, &arg_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|p!", &arg, &arg_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -394,7 +394,7 @@ PHP_FUNCTION(readline_write_history)
 	char *arg = NULL;
 	size_t arg_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|p", &arg, &arg_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|p!", &arg, &arg_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 

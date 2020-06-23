@@ -4,8 +4,11 @@
 
 function readline(?string $prompt = null): string|false {}
 
-/** @return mixed */
-function readline_info(string $varname = UNKNOWN, string $newvalue = UNKNOWN) {}
+/**
+ * @param int|string|bool|null $newvalue
+ * @return array|int|string|bool|null
+ */
+function readline_info(?string $varname = null, $newvalue = null): mixed {}
 
 function readline_add_history(string $prompt): bool {}
 
@@ -15,7 +18,7 @@ function readline_clear_history(): bool {}
 function readline_list_history(): array {}
 #endif
 
-function readline_read_history(string $filename = UNKNOWN): bool {}
+function readline_read_history(?string $filename = null): bool {}
 
 function readline_write_history(string $filename = UNKNOWN): bool {}
 
