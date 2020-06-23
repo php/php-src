@@ -64,7 +64,6 @@ cd "${0%/*}/../.."
   --with-xsl \
   --with-zip \
   --enable-mysqlnd \
-  --with-xmlrpc \
   --with-pear \
   --enable-werror \
   --enable-phar \
