@@ -1251,7 +1251,7 @@ PHP_FUNCTION(intdiv)
 /* {{{ proto int|float gauss_sum(int|float number)
    Return the the sequence of consecutive summations */
 PHP_FUNCTION(gauss_sum) {
-	long value = 1;
+	zend_long value = 1;
 
 	ZEND_PARSE_PARAMETERS_START(1,1)
 		Z_PARAM_LONG(value)
