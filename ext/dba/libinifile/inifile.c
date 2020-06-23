@@ -241,7 +241,7 @@ static int inifile_key_cmp(const key_type *k1, const key_type *k2)
 /* {{{ inifile_fetch
  */
 val_type inifile_fetch(inifile *dba, const key_type *key, int skip) {
-	line_type ln = {{NULL,NULL},{NULL}};
+	line_type ln = {{NULL,NULL},{NULL},0};
 	val_type val;
 	int res, grp_eq = 0;
 
@@ -294,7 +294,7 @@ int inifile_firstkey(inifile *dba) {
 /* {{{ inifile_nextkey
  */
 int inifile_nextkey(inifile *dba) {
-	line_type ln = {{NULL,NULL},{NULL}};
+	line_type ln = {{NULL,NULL},{NULL},0};
 
 	/*inifile_line_free(&dba->next); ??? */
 	php_stream_seek(dba->fp, dba->curr.pos, SEEK_SET);
@@ -335,7 +335,7 @@ static int inifile_find_group(inifile *dba, const key_type *key, size_t *pos_grp
 
 	if (key->group && strlen(key->group)) {
 		int res;
-		line_type ln = {{NULL,NULL},{NULL}};
+		line_type ln = {{NULL,NULL},{NULL},0};
 
 		res = 1;
 		while(inifile_read(dba, &ln)) {
@@ -364,7 +364,7 @@ static int inifile_find_group(inifile *dba, const key_type *key, size_t *pos_grp
 static int inifile_next_group(inifile *dba, const key_type *key, size_t *pos_grp_start)
 {
 	int ret = FAILURE;
-	line_type ln = {{NULL,NULL},{NULL}};
+	line_type ln = {{NULL,NULL},{NULL},0};
 
 	*pos_grp_start = php_stream_tell(dba->fp);
 	ln.key.group = estrdup(key->group);
@@ -416,7 +416,7 @@ static int inifile_filter(inifile *dba, inifile *from, const key_type *key, zend
 {
 	size_t pos_start = 0, pos_next = 0, pos_curr;
 	int ret = SUCCESS;
-	line_type ln = {{NULL,NULL},{NULL}};
+	line_type ln = {{NULL,NULL},{NULL},0};
 
 	php_stream_seek(from->fp, 0, SEEK_SET);
 	php_stream_seek(dba->fp, 0, SEEK_END);
