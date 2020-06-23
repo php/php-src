@@ -1252,8 +1252,8 @@ static void* dasm_labels[zend_lb_MAX];
 |	sub dword [zv], 1
 |.endmacro
 
-|.macro IF_GC_MAY_NOT_LEAK, ptr, tmp_reg, label
-|	test dword [ptr + 4],(GC_INFO_MASK | (GC_NOT_COLLECTABLE << GC_FLAGS_SHIFT))
+|.macro IF_GC_MAY_NOT_LEAK, ptr, label
+|	test dword [ptr+4],(GC_INFO_MASK | (GC_NOT_COLLECTABLE << GC_FLAGS_SHIFT))
 |	jne label
 |.endmacro
 
@@ -1391,7 +1391,7 @@ static void* dasm_labels[zend_lb_MAX];
 |				GET_ZVAL_PTR FCARG1a, ref_addr
 |1:
 ||			}
-|			IF_GC_MAY_NOT_LEAK FCARG1a, eax, >4
+|			IF_GC_MAY_NOT_LEAK FCARG1a, >4
 |			// gc_possible_root(Z_COUNTED_P(z))
 |			EXT_CALL gc_possible_root, r0
 ||		}
@@ -1526,17 +1526,21 @@ static void* dasm_labels[zend_lb_MAX];
 ||#endif
 |.endmacro
 
-|.macro OBJ_RELEASE, reg, tmp_reg, exit_label
-|	GC_DELREF reg
+|.macro OBJ_RELEASE, reg, exit_label
+|	GC_DELREF Ra(reg)
 |	jne >1
 |	// zend_objects_store_del(obj);
-|	mov FCARG1a, reg
+||	if (reg != ZREG_FCARG1a) {
+|		mov FCARG1a, Ra(reg)
+||	}
 |	EXT_CALL zend_objects_store_del, r0
 |	jmp exit_label
 |1:
-|	IF_GC_MAY_NOT_LEAK reg, tmp_reg, >1
+|	IF_GC_MAY_NOT_LEAK Ra(reg), >1
 |	// gc_possible_root(obj)
-|	mov FCARG1a, reg
+||	if (reg != ZREG_FCARG1a) {
+|		mov FCARG1a, Ra(reg)
+||	}
 |	EXT_CALL gc_possible_root, r0
 |1:
 |.endmacro
@@ -5343,7 +5347,7 @@ static int zend_jit_assign_to_variable(dasm_State    **Dst,
 			if (RC_MAY_BE_N(var_info) && (var_info & (MAY_BE_ARRAY|MAY_BE_OBJECT)) != 0) {
 				|	jmp >8
 				|4:
-				|	IF_GC_MAY_NOT_LEAK FCARG1a, eax, >8
+				|	IF_GC_MAY_NOT_LEAK FCARG1a, >8
 				|	EXT_CALL gc_possible_root, r0
 			}
 			if (in_cold) {
@@ -5361,14 +5365,14 @@ static int zend_jit_assign_to_variable(dasm_State    **Dst,
 			if (var_info & (MAY_BE_ARRAY|MAY_BE_OBJECT)) {
 				if (Z_REG(var_addr) == ZREG_FP) {
 					|	GET_ZVAL_PTR FCARG1a, var_addr
-					|	IF_GC_MAY_NOT_LEAK FCARG1a, eax, >5
+					|	IF_GC_MAY_NOT_LEAK FCARG1a, >5
 				} else if (Z_REG(var_addr) != ZREG_FCARG1a) {
 					|	GET_ZVAL_PTR FCARG1a, var_addr
-					|	IF_GC_MAY_NOT_LEAK FCARG1a, eax, >5
+					|	IF_GC_MAY_NOT_LEAK FCARG1a, >5
 					|	mov T1, Ra(Z_REG(var_addr)) // save
 				} else {
 					|	GET_ZVAL_PTR r0, var_addr
-					|	IF_GC_MAY_NOT_LEAK r0, eax, >5
+					|	IF_GC_MAY_NOT_LEAK r0, >5
 					|	mov T1, Ra(Z_REG(var_addr)) // save
 					|	GET_ZVAL_PTR FCARG1a, var_addr
 				}
@@ -8760,9 +8764,9 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 			|	jnz >1
 			|.cold_code
 			|1:
-			|	GET_Z_PTR r0, RX + offsetof(zend_execute_data, This)
+			|	GET_Z_PTR FCARG1a, RX + offsetof(zend_execute_data, This)
 			|	// OBJ_RELEASE(object);
-			|	OBJ_RELEASE r0, ecx, >2
+			|	OBJ_RELEASE ZREG_FCARG1a, >2
 			|	jmp >2
 			|.code
 			|2:
@@ -9768,17 +9772,17 @@ static int zend_jit_leave_func(dasm_State **Dst, const zend_op *opline, const ze
 	    (op_array->fn_flags & ZEND_ACC_CLOSURE)) {
 		if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
 			|	// OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
-			|	mov r0, EX->func
-			|	sub r0, sizeof(zend_object)
-			|	OBJ_RELEASE r0, ecx, >4
+			|	mov FCARG1a, EX->func
+			|	sub FCARG1a, sizeof(zend_object)
+			|	OBJ_RELEASE ZREG_FCARG1a, >4
 		} else if (op_array->scope && !(op_array->fn_flags & ZEND_ACC_STATIC)) {
 			|	// if (call_info & ZEND_CALL_RELEASE_THIS)
 			|	test FCARG1d, ZEND_CALL_RELEASE_THIS
 			|	je >4
 			|	// zend_object *object = Z_OBJ(execute_data->This);
-			|	mov r0, EX->This.value.obj
+			|	mov FCARG1a, EX->This.value.obj
 			|	// OBJ_RELEASE(object);
-			|	OBJ_RELEASE r0, ecx, >4
+			|	OBJ_RELEASE ZREG_FCARG1a, >4
 		}
 		|4:
 	}
@@ -10463,7 +10467,7 @@ static int zend_jit_bind_global(dasm_State **Dst, const zend_op *opline, const z
 		if (op1_info & (MAY_BE_REF|MAY_BE_ARRAY|MAY_BE_OBJECT)) {
 			|3:
 			|	// GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr)
-			|	IF_GC_MAY_NOT_LEAK FCARG1a, edx, >5
+			|	IF_GC_MAY_NOT_LEAK FCARG1a, >5
 			|	EXT_CALL gc_possible_root, r1
 			|	jmp >5
 		}
