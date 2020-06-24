@@ -51,9 +51,6 @@
 /* Used to check DES salts to ensure that they contain only valid characters */
 #define IS_VALID_SALT_CHARACTER(c) (((c) >= '.' && (c) <= '9') || ((c) >= 'A' && (c) <= 'Z') || ((c) >= 'a' && (c) <= 'z'))
 
-#define DES_INVALID_SALT_ERROR "Supplied salt is not valid for DES. Possible bug in provided salt format."
-
-
 PHP_MINIT_FUNCTION(crypt) /* {{{ */
 {
 	REGISTER_LONG_CONSTANT("CRYPT_SALT_LENGTH", PHP_MAX_SALT_LEN, CONST_CS | CONST_PERSISTENT);
@@ -163,20 +160,9 @@ PHPAPI zend_string *php_crypt(const char *password, const int pass_len, const ch
 				ZEND_SECURE_ZERO(output, PHP_MAX_SALT_LEN + 1);
 				return result;
 			}
-		} else {
+		} else if (salt[0] == '_'
+				|| (IS_VALID_SALT_CHARACTER(salt[0]) && IS_VALID_SALT_CHARACTER(salt[1]))) {
 			/* DES Fallback */
-
-			/* Only check the salt if it's not EXT_DES */
-			if (salt[0] != '_') {
-				/* DES style hashes */
-				if (!IS_VALID_SALT_CHARACTER(salt[0]) || !IS_VALID_SALT_CHARACTER(salt[1])) {
-					if (!quiet) {
-						/* error consistently about invalid DES fallbacks */
-						php_error_docref(NULL, E_DEPRECATED, DES_INVALID_SALT_ERROR);
-					}
-				}
-			}
-
 			memset(&buffer, 0, sizeof(buffer));
 			_crypt_extended_init_r();
 
@@ -187,16 +173,12 @@ PHPAPI zend_string *php_crypt(const char *password, const int pass_len, const ch
 				result = zend_string_init(crypt_res, strlen(crypt_res), 0);
 				return result;
 			}
+		} else {
+			/* Unknown hash type */
+			return NULL;
 		}
 	}
 #else
-
-	if (salt[0] != '$' && salt[0] != '_' && (!IS_VALID_SALT_CHARACTER(salt[0]) || !IS_VALID_SALT_CHARACTER(salt[1]))) {
-		if (!quiet) {
-			/* error consistently about invalid DES fallbacks */
-			php_error_docref(NULL, E_DEPRECATED, DES_INVALID_SALT_ERROR);
-		}
-	}
 
 # if defined(HAVE_CRYPT_R) && (defined(_REENTRANT) || defined(_THREAD_SAFE))
 	{

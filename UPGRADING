@@ -437,6 +437,9 @@ PHP 8.0 UPGRADE NOTES
     respect the inherited locale without an explicit setlocale() call. An
     explicit setlocale() call is now always required if you wish to change any
     locale component from the default.
+  . Remove deprecated DES fallback in crypt(). If an unknown salt format is
+    passed to crypt(), the function will fail with *0 instead of falling back
+    to a weak DES hash now.
 
 - Sysvmsg:
   . msg_get_queue() will now return an SysvMessageQueue object rather than a
