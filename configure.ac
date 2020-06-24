@@ -531,7 +531,6 @@ alphasort \
 asctime_r \
 chroot \
 ctime_r \
-crypt \
 explicit_memset \
 flock \
 ftok \
@@ -647,11 +646,6 @@ AC_REPLACE_FUNCS(strlcat strlcpy explicit_bzero getopt)
 AC_FUNC_ALLOCA
 PHP_TIME_R_TYPE
 PHP_CHECK_IN_ADDR_T
-
-AC_CHECK_FUNCS(crypt_r, [ php_crypt_r="1" ], [ php_crypt_r="0" ])
-if test "x$php_crypt_r" = "x1"; then
-  PHP_CRYPT_R_STYLE
-fi
 
 AC_CACHE_CHECK([for aarch64 CRC32 API], ac_cv_func___crc32d,
 [AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <arm_acle.h>]],[[__crc32d(0, 0);]])],[ac_cv_func___crc32d=yes],[ac_cv_func___crc32d="no"])])
