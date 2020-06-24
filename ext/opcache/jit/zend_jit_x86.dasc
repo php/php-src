@@ -10512,7 +10512,7 @@ static int zend_jit_verify_arg_type(dasm_State **Dst, const zend_op *opline, zen
 
 	if (ZEND_ARG_SEND_MODE(arg_info)) {
 		if (opline->opcode == ZEND_RECV_INIT) {
-			|	GET_ZVAL_PTR Ra(tmp_reg), res_addr
+			|	LOAD_ZVAL_ADDR Ra(tmp_reg), res_addr
 			|	ZVAL_DEREF Ra(tmp_reg), MAY_BE_REF
 			res_addr = ZEND_ADDR_MEM_ZVAL(tmp_reg, 0);
 		} else {
