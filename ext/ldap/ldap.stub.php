@@ -262,7 +262,7 @@ function ldap_parse_result($link, $result, &$errcode, &$matcheddn = null, &$errm
  * @param resource $link
  * @param callable $callback
  */
-function ldap_set_rebind_proc($link, $callback): bool {}
+function ldap_set_rebind_proc($link, callable $callback): bool {}
 #endif
 
 #ifdef HAVE_LDAP_START_TLS_S

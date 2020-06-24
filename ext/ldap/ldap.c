@@ -3763,8 +3763,8 @@ PHP_FUNCTION(ldap_set_rebind_proc)
 
 	/* callable? */
 	if (!zend_is_callable(callback, 0, NULL)) {
-		php_error_docref(NULL, E_WARNING, "Expected argument 2 to be a callable");
-		RETURN_FALSE;
+		zend_argument_type_error(2, "must be a valid callback, %s given", zend_zval_type_name(callback));
+		RETURN_THROWS();
 	}
 
 	/* register rebind procedure */
