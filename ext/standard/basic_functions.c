@@ -908,6 +908,7 @@ PHP_FUNCTION(putenv)
 		}
 		/* valw may be NULL, but the failed conversion still needs to be checked. */
 		if (!keyw || !valw && value) {
+			tsrm_env_unlock();
 			efree(pe.putenv_string);
 			efree(pe.key);
 			free(keyw);
