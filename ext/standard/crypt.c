@@ -99,6 +99,11 @@ PHPAPI zend_string *php_crypt(const char *password, const int pass_len, const ch
 {
 	char *crypt_res;
 	zend_string *result;
+
+	if (salt[0] == '*' && (salt[1] == '0' || salt[1] == '1')) {
+		return NULL;
+	}
+
 /* Windows (win32/crypt) has a stripped down version of libxcrypt and
 	a CryptoApi md5_crypt implementation */
 #if PHP_USE_PHP_CRYPT_R
@@ -160,8 +165,6 @@ PHPAPI zend_string *php_crypt(const char *password, const int pass_len, const ch
 				ZEND_SECURE_ZERO(output, PHP_MAX_SALT_LEN + 1);
 				return result;
 			}
-        } else if (salt[0] == '*' && (salt[1] == '0' || salt[1] == '1')) {
-            return NULL;
 		} else {
 			/* DES Fallback */
 
