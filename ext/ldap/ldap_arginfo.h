@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 53051e130a22dc519676c7a91529d2f9f7d1e6ad */
+ * Stub hash: c9ce0e98ab386130b6332ae017808bec67b1cd07 */
 
 #if defined(HAVE_ORALDAP)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_connect, 0, 0, 0)
@@ -280,7 +280,7 @@ ZEND_END_ARG_INFO()
 #if defined(LDAP_API_FEATURE_X_OPENLDAP) && defined(HAVE_3ARG_SETREBINDPROC)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ldap_set_rebind_proc, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, link)
-	ZEND_ARG_INFO(0, callback)
+	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 1)
 ZEND_END_ARG_INFO()
 #endif
 

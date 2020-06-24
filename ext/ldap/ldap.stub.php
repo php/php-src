@@ -260,9 +260,8 @@ function ldap_parse_result($link, $result, &$errcode, &$matcheddn = null, &$errm
 #if defined(LDAP_API_FEATURE_X_OPENLDAP) && defined(HAVE_3ARG_SETREBINDPROC)
 /**
  * @param resource $link
- * @param callable $callback
  */
-function ldap_set_rebind_proc($link, $callback): bool {}
+function ldap_set_rebind_proc($link, ?callable $callback): bool {}
 #endif
 
 #ifdef HAVE_LDAP_START_TLS_S
