@@ -36,5 +36,5 @@ $link = ldap_connect($host, $port);
 var_dump(ldap_set_rebind_proc($link, "rebind_proc_inexistent"));
 ?>
 --EXPECTF--
-Warning: ldap_set_rebind_proc(): Two arguments expected for 'rebind_proc_inexistent' to be a valid callback in %s on line %d
+Warning: ldap_set_rebind_proc(): Expected argument 2 to be a callable in %s on line %d
 bool(false)
