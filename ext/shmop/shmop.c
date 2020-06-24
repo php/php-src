@@ -113,7 +113,7 @@ PHP_MINIT_FUNCTION(shmop)
 	zend_class_entry ce;
 	INIT_CLASS_ENTRY(ce, "Shmop", class_Shmop_methods);
 	shmop_ce = zend_register_internal_class(&ce);
-	shmop_ce->ce_flags |= ZEND_ACC_FINAL;
+	shmop_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
 	shmop_ce->create_object = shmop_create_object;
 	shmop_ce->serialize = zend_class_serialize_deny;
 	shmop_ce->unserialize = zend_class_unserialize_deny;
