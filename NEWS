@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - FTP:
   . Fixed bug #55857 (ftp_size on large files). (cmb)
 
+- Reflection:
+  . Fixed bug #79487 (::getStaticProperties() ignores property modifications).
+    (cmb, Nikita)
+
 ?? ??? 2020, PHP 7.4.8
 
 - Core:
