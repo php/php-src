@@ -3,11 +3,6 @@ Test array_push() function
 --FILE--
 <?php
 
-/* Prototype: int array_push( array &array );
- * Description: Push one or more elements onto the end of array
- and returns the new number of elements in the array.
- */
-
 $empty_array = array();
 $number = 5;
 $str = "abc";

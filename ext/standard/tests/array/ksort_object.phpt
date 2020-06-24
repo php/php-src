@@ -2,10 +2,6 @@
 Test ksort() function : object functionality - sort objects
 --FILE--
 <?php
-/* Prototype  : bool ksort ( array &$array [, int $sort_flags] )
- * Description: Sort an array by key, maintaining key to data correlation.
- * Source code: ext/standard/array.c
-*/
 /*
  * testing ksort() by providing array ofinteger/string objects with following flag values:
  *  1.SORT_NUMERIC - compare items numerically

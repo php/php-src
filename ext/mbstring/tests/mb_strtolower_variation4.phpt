@@ -7,11 +7,6 @@ function_exists('mb_strtolower') or die("skip mb_strtolower() is not available i
 ?>
 --FILE--
 <?php
-/* Prototype  : string mb_strtolower(string $sourcestring [, string $encoding])
- * Description: Returns a lowercased version of $sourcestring
- * Source code: ext/mbstring/mbstring.c
- */
-
 /*
  * Pass accented characters and Russian characters to check case conversion is correct
  */

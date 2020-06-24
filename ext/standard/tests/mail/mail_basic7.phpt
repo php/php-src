@@ -5,12 +5,6 @@ sendmail_path={MAIL:mailBasic7.out}
 mail.add_x_header = Off
 --FILE--
 <?php
-/* Prototype  : int mail(string to, string subject, string message [, mixed additional_headers [, string additional_parameters]])
- * Description: Send an email message
- * Source code: ext/standard/mail.c
- * Alias to functions:
- */
-
 error_reporting(-1);
 
 echo "*** Testing mail() : basic functionality ***\n";
@@ -142,21 +136,21 @@ A Message
 ************* TEST ******************
 -- All Mail Content Parameters --
 
-Warning: mail(): 'orig-date' header must be at most one header. Array is passed for 'orig-date' in %s on line 59
+Warning: mail(): 'orig-date' header must be at most one header. Array is passed for 'orig-date' in %s on line %d
 
-Warning: mail(): 'from' header must be at most one header. Array is passed for 'from' in %s on line 59
+Warning: mail(): 'from' header must be at most one header. Array is passed for 'from' in %s on line %d
 
-Warning: mail(): 'sender' header must be at most one header. Array is passed for 'sender' in %s on line 59
+Warning: mail(): 'sender' header must be at most one header. Array is passed for 'sender' in %s on line %d
 
-Warning: mail(): 'reply-to' header must be at most one header. Array is passed for 'reply-to' in %s on line 59
+Warning: mail(): 'reply-to' header must be at most one header. Array is passed for 'reply-to' in %s on line %d
 
-Warning: mail(): Extra header cannot contain 'To' header in %s on line 59
+Warning: mail(): Extra header cannot contain 'To' header in %s on line %d
 
-Warning: mail(): 'bcc' header must be at most one header. Array is passed for 'bcc' in %s on line 59
+Warning: mail(): 'bcc' header must be at most one header. Array is passed for 'bcc' in %s on line %d
 
-Warning: mail(): 'message-id' header must be at most one header. Array is passed for 'message-id' in %s on line 59
+Warning: mail(): 'message-id' header must be at most one header. Array is passed for 'message-id' in %s on line %d
 
-Warning: mail(): 'in-reply-to' header must be at most one header. Array is passed for 'in-reply-to' in %s on line 59
+Warning: mail(): 'in-reply-to' header must be at most one header. Array is passed for 'in-reply-to' in %s on line %d
 bool(true)
 To: user@example.com
 Subject: Test Subject
@@ -167,19 +161,19 @@ A Message
 ************* TEST ******************
 -- All Mail Content Parameters --
 
-Warning: mail(): Multiple header key must be numeric index (foo1) in %s on line 84
+Warning: mail(): Multiple header key must be numeric index (foo1) in %s on line %d
 
-Warning: mail(): Multiple header values must be string (foo2) in %s on line 84
+Warning: mail(): Multiple header values must be string (foo2) in %s on line %d
 
-Warning: mail(): Multiple header values must be string (foo3) in %s on line 84
+Warning: mail(): Multiple header values must be string (foo3) in %s on line %d
 
-Warning: mail(): Multiple header values must be string (foo4) in %s on line 84
+Warning: mail(): Multiple header values must be string (foo4) in %s on line %d
 
-Warning: mail(): Multiple header values must be string (foo5) in %s on line 84
+Warning: mail(): Multiple header values must be string (foo5) in %s on line %d
 
-Warning: mail(): Multiple header values must be string (foo6) in %s on line 84
+Warning: mail(): Multiple header values must be string (foo6) in %s on line %d
 
-Warning: mail(): Multiple header values must be string (foo7) in %s on line 84
+Warning: mail(): Multiple header values must be string (foo7) in %s on line %d
 bool(true)
 To: user@example.com
 Subject: Test Subject
@@ -191,15 +185,15 @@ A Message
 ************* TEST ******************
 -- All Mail Content Parameters --
 
-Warning: mail(): Header field name (*:foo1) contains invalid chars in %s on line 112
+Warning: mail(): Header field name (*:foo1) contains invalid chars in %s on line %d
 
-Warning: mail(): Header field name (foo2:::) contains invalid chars in %s on line 112
+Warning: mail(): Header field name (foo2:::) contains invalid chars in %s on line %d
 
-Warning: mail(): Header field name () contains invalid chars in %s on line 112
+Warning: mail(): Header field name () contains invalid chars in %s on line %d
 
-Warning: mail(): Header field name (foo7) contains invalid chars in %s on line 112
+Warning: mail(): Header field name (foo7) contains invalid chars in %s on line %d
 
-Warning: mail(): Header field value (foo10 => abc) contains invalid chars or format in %s on line 112
+Warning: mail(): Header field value (foo10 => abc) contains invalid chars or format in %s on line %d
 bool(true)
 To: user@example.com
 Subject: Test Subject

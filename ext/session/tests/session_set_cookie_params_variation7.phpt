@@ -14,12 +14,6 @@ session.cookie_samesite=""
 
 ob_start();
 
-/*
- * Prototype : void session_set_cookie_params(array $options)
- * Description : Set the session cookie parameters
- * Source code : ext/session/session.c
- */
-
 echo "*** Testing session_set_cookie_params() : array parameter variation ***\n";
 
 // Invalid cases

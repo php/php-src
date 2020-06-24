@@ -4,11 +4,6 @@ Test token_get_all() function : usage variations - with increment/decrement oper
 <?php if (!extension_loaded("tokenizer")) print "skip"; ?>
 --FILE--
 <?php
-/* Prototype  : array token_get_all(string $source)
- * Description: splits the given source into an array of PHP language tokens
- * Source code: ext/tokenizer/tokenizer.c
-*/
-
 /*
  * Passing 'source' argument with different increment/decrement operators to test them for token
  *  ++ - T_INC(297)

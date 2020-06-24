@@ -2,11 +2,6 @@
 Test natcasesort() function : object functionality - array of objects
 --FILE--
 <?php
-/* Prototype  : bool natcasesort(array &$array_arg)
- * Description: Sort an array using case-insensitive natural sort
- * Source code: ext/standard/array.c
- */
-
 /*
  * Pass natcasesort() an array of objects to test how it re-orders them
  */

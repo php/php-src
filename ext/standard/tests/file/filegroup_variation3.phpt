@@ -4,9 +4,6 @@ Test filegroup() function: usage variations - diff. path notations
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
-/* Prototype: int filegroup ( string $filename )
- * Description: Returns the group ID of the file, or FALSE in case of an error.
- */
 
 /* Passing file names with different notations, using slashes, wild-card chars */
 

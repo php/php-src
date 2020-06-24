@@ -2,11 +2,6 @@
 Test copy() function: usage variations - stat after copy
 --FILE--
 <?php
-/* Prototype: bool copy ( string $source, string $dest );
-   Description: Makes a copy of the file source to dest.
-     Returns TRUE on success or FALSE on failure.
-*/
-
 /* Test copy(): checking stat of file before and after after copy operation */
 
 $file_path = __DIR__;

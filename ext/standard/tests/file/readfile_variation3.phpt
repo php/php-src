@@ -2,9 +2,6 @@
 Test readfile() function: usage variation - include path
 --FILE--
 <?php
-/* Prototype: int readfile ( string $filename [, bool $use_include_path [, resource $context]] );
-   Description: Outputs a file
-*/
 /* test readfile() by providing an include path, second argument */
 
 // include file.inc

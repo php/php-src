@@ -3,11 +3,6 @@ Test fscanf() function: usage variations - string formats with strings
 --FILE--
 <?php
 
-/*
-  Prototype: mixed fscanf ( resource $handle, string $format [, mixed &$...] );
-  Description: Parses input from a file according to a format
-*/
-
 /* Test fscanf() to scan different strings using different string format types */
 
 $file_path = __DIR__;

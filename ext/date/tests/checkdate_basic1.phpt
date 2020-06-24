@@ -2,12 +2,6 @@
 Test date_create() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : bool checkdate  ( int $month  , int $day  , int $year  )
- * Description: Checks the validity of the date formed by the arguments.
- *              A date is considered valid if each parameter is properly defined.
- * Source code: ext/date/php_date.c
- */
-
 //Set the default time zone
 date_default_timezone_set("Europe/London");
 

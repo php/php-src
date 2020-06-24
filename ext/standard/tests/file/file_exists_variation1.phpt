@@ -4,12 +4,6 @@ Test file_exists() function : usage variations
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
-/* Prototype  : proto bool file_exists(string filename)
- * Description: Returns true if filename exists
- * Source code: ext/standard/filestat.c
- * Alias to functions:
- */
-
 echo "*** Testing file_exists() : usage variations ***\n";
 
 var_dump(file_exists(NULL));

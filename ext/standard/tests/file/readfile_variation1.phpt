@@ -2,10 +2,6 @@
 Test readfile() function: usage variation - stream_context
 --FILE--
 <?php
-/* Prototype: int readfile ( string $filename [, bool $use_include_path [, resource $context]] );
-   Description: Outputs a file
-*/
-
 /* test readfile() with third argument : context */
 
 // include file.inc

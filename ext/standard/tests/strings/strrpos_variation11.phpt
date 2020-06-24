@@ -2,11 +2,6 @@
 Test strrpos() function : usage variations - unexpected inputs for 'haystack' and 'needle' arguments
 --FILE--
 <?php
-/* Prototype  : int strrpos ( string $haystack, string $needle [, int $offset] );
- * Description: Find position of last occurrence of 'needle' in 'haystack'.
- * Source code: ext/standard/string.c
-*/
-
 /* Test strrpos() function with unexpected inputs for 'haystack' and 'needle' arguments */
 
 echo "*** Testing strrpos() function with unexpected values for haystack and needle ***\n";

@@ -2,11 +2,6 @@
 Test array_flip() function : usage variations - 'input' argument with repeatitive keys and values
 --FILE--
 <?php
-/* Prototype  : array array_flip(array $input)
- * Description: Return array with key <-> value flipped
- * Source code: ext/standard/array.c
-*/
-
 /*
 * Using different types of repeatitive keys as well as values for 'input' array
 */

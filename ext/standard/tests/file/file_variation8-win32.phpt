@@ -9,12 +9,6 @@ if(substr(PHP_OS, 0, 3) != "WIN")
 ?>
 --FILE--
 <?php
-/* Prototype  : array file(string filename [, int flags[, resource context]])
- * Description: Read entire file into an array
- * Source code: ext/standard/file.c
- * Alias to functions:
- */
-
 echo "*** Testing file() : variation ***\n";
 $mainDir = "fileVar8.dir";
 $subDir = "fileVar8Sub";

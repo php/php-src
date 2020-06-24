@@ -2,12 +2,6 @@
 Test array_search() function : usage variations - haystack as resource/multi dimensional array
 --FILE--
 <?php
-/*
- * Prototype  : mixed array_search ( mixed $needle, array $haystack [, bool $strict] )
- * Description: Searches haystack for needle and returns the key if it is found in the array, FALSE otherwise
- * Source Code: ext/standard/array.c
-*/
-
 /* checking for Resources */
 echo "*** Testing resource type with array_search() ***\n";
 //file type resource

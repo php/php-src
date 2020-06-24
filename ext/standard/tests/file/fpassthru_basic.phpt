@@ -2,12 +2,6 @@
 Test fpassthru() function: Basic functionality
 --FILE--
 <?php
-/*
-Prototype: int fpassthru ( resource $handle );
-Description: Reads to EOF on the given file pointer from the current position
-  and writes the results to the output buffer.
-*/
-
 $file_name = __DIR__."/passthru.tmp";
 $write_handle = fopen($file_name, "w");
 

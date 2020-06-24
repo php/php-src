@@ -2,12 +2,6 @@
 Test array_chunk() function : usage variations - array with diff. sub arrays
 --FILE--
 <?php
-/* Prototype  : array array_chunk(array $array, int $size [, bool $preserve_keys])
- * Description: Split array into chunks
- *            : Chunks an array into size large chunks
- * Source code: ext/standard/array.c
-*/
-
 /*
 * Testing array_chunk() function - input array containing different sub arrays
 */

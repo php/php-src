@@ -2,10 +2,6 @@
 Test fgetc() function : basic functionality
 --FILE--
 <?php
-/*
- Prototype: string fgetc ( resource $handle );
- Description: Gets character from file pointer
-*/
 // include the header for common test function
 include ("file.inc");
 

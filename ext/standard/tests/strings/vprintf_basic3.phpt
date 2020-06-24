@@ -2,11 +2,6 @@
 Test vprintf() function : basic functionality - float format
 --FILE--
 <?php
-/* Prototype  : string vprintf(string $format , array $args)
- * Description: Output a formatted string
- * Source code: ext/standard/formatted_print.c
-*/
-
 echo "*** Testing vprintf() : basic functionality - using float format ***\n";
 
 // Initialise all required variables

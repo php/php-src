@@ -8,13 +8,6 @@ if (getenv("TRAVIS") === "true") die("skip inaccurate on TravisCI");
 memory_limit=32M
 --FILE--
 <?php
-/*
- *  Prototype: float disk_free_space( string directory )
- *  Description: Given a string containing a directory, this function
- *               will return the number of bytes available on the corresponding
- *               filesystem or disk partition
- */
-
 $file_path = __DIR__;
 
 echo "*** Testing with existing directory ***\n";

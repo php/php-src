@@ -2,11 +2,6 @@
 Test sprintf() function : usage variations - with all types of values for arg1 argument
 --FILE--
 <?php
-/* Prototype  : string sprintf(string $format [, mixed $arg1 [, mixed ...]])
- * Description: Return a formatted string
- * Source code: ext/standard/formatted_print.c
-*/
-
 echo "*** Testing sprintf() : with different types of values passed for arg1 argument ***\n";
 
 // initialing required variables

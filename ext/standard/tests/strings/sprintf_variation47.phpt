@@ -2,11 +2,6 @@
 Test sprintf() function : usage variations - scientific formats with float values
 --FILE--
 <?php
-/* Prototype  : string sprintf(string $format [, mixed $arg1 [, mixed ...]])
- * Description: Return a formatted string
- * Source code: ext/standard/formatted_print.c
-*/
-
 echo "*** Testing sprintf() : scientific formats with float values ***\n";
 
 // array of float values

@@ -2,12 +2,6 @@
 Test method_exists() function : usage variations  - unexpected type for arg 1
 --FILE--
 <?php
-/* Prototype  : proto bool method_exists(object object, string method)
- * Description: Checks if the class method exists
- * Source code: Zend/zend_builtin_functions.c
- * Alias to functions:
- */
-
 spl_autoload_register(function ($className) {
     echo "In autoload($className)\n";
 });

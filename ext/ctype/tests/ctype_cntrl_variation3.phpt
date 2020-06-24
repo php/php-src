@@ -4,11 +4,6 @@ Test ctype_cntrl() function : usage variations - Different strings
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-/* Prototype  : bool ctype_cntrl(mixed $c)
- * Description: Checks for control character(s)
- * Source code: ext/ctype/ctype.c
- */
-
 /*
  * Pass strings containing different character types to ctype_cntrl() to test
  * which are considered valid control character only strings

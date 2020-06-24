@@ -2,12 +2,6 @@
 Test array_search() function : usage variations - haystack as sub-array/object
 --FILE--
 <?php
-/*
- * Prototype  : mixed array_search ( mixed $needle, array $haystack [, bool $strict] )
- * Description: Searches haystack for needle and returns the key if it is found in the array, FALSE otherwise
- * Source Code: ext/standard/array.c
-*/
-
 /* checking for sub-arrays with array_search() */
 echo "*** Testing sub-arrays with array_search() ***\n";
 $sub_array = array (

@@ -6,11 +6,6 @@ require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
-/* Prototype  : object imap_bodystruct  ( resource $imap_stream  , int $msg_number  , string $section  )
- * Description: Read the structure of a specified body section of a specific message.
- * Source code: ext/imap/php_imap.c
- */
-
 echo "*** Testing string imap_bodystruct : basic functionality ***\n";
 require_once(__DIR__.'/imap_include.inc');
 

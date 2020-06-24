@@ -2,11 +2,6 @@
 Test array_walk_recursive() function : error conditions - callback parameters
 --FILE--
 <?php
-/* Prototype  : bool array_walk_recursive(array $input, string $funcname [, mixed $userdata])
- * Description: Apply a user function to every member of an array
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Testing array_walk_recursive() by passing more number of parameters to callback function
  */

@@ -6,11 +6,6 @@ require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
-/* Prototype  : string imap_fetchbody(resource $stream_id, int $msg_no, string $section [, int $options])
- * Description: Get a specific body section
- * Source code: ext/imap/php_imap.c
- */
-
 /*
  * Test if FT_UID is set by passing the following as $options argument to imap_fetchbody():
  * 1. values that equate to 1

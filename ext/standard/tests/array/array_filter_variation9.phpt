@@ -2,11 +2,6 @@
 Test array_filter() function : usage variations - built-in functions as 'callback' argument
 --FILE--
 <?php
-/* Prototype  : array array_filter(array $input [, callback $callback])
- * Description: Filters elements from the array via the callback.
- * Source code: ext/standard/array.c
-*/
-
 /*
 * Passing built-in functions and different language constructs as 'callback' argument
 */

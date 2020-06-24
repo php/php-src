@@ -2,12 +2,6 @@
 Test key(), current(), next() & reset() functions
 --FILE--
 <?php
-/* Prototype & Usage:
-   mixed key ( array &$array ) -> returns the index element of the current array position
-   mixed current ( array &$array ) -> returns the current element in the array
-   mixed next ( array &$array ) -> similar to current() but advances the internal pointer to next element
-   mixed reset ( array &$array ) -> Reset the internal pointer to first element
-*/
 
 $basic_arrays = array (
   array(0),  // array with element as 0

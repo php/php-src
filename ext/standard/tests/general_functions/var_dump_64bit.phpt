@@ -8,12 +8,7 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 precision=14
 --FILE--
 <?php
-/* Prototype: void var_dump ( mixed $expression [, mixed $expression [, $...]] );
-   Description: Displays structured information about one or more expressions that includes its type and value.
-*/
 
-/* Prototype: void check_vardump( $variables );
-   Description: use var_dump() to display the variables */
 function check_vardump( $variables ) {
   $counter = 1;
   foreach( $variables as $variable ) {

@@ -2,11 +2,6 @@
 Test shuffle() function : usage variation - with MultiDimensional array
 --FILE--
 <?php
-/* Prototype  : bool shuffle(array $array_arg)
- * Description: Randomly shuffle the contents of an array
- * Source code: ext/standard/array.c
-*/
-
 /*
 * Test behaviour of shuffle() function when multi-dimensional array is
 * passed to 'array_arg' argument

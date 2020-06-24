@@ -2,13 +2,6 @@
 Test sizeof() function : usage variations - all kinds of unset variables for 'var' argument
 --FILE--
 <?php
-/* Prototype  : int sizeof($mixed var[, int $mode])
- * Description: Counts an elements in an array. If Standard PHP library is installed,
- * it will return the properties of an object.
- * Source code: ext/standard/basic_functions.c
- * Alias to functions: count()
- */
-
 echo "*** Testing sizeof() : usage variations ***\n";
 
 echo "--- Testing sizeof() for all kinds of unset variables in default, Normal and Recursive Modes ---\n";

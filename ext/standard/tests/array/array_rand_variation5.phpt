@@ -2,11 +2,6 @@
 Test array_rand() function : usage variation - invalid values for 'req_num' parameter
 --FILE--
 <?php
-/* Prototype  : mixed array_rand(array $input [, int $num_req])
- * Description: Return key/keys for random entry/entries in the array
- * Source code: ext/standard/array.c
-*/
-
 /*
 * Test behaviour of array_rand() function when associative array and
 * various invalid values are passed to the 'input' and 'req_num'

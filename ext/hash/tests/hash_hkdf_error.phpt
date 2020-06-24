@@ -5,11 +5,6 @@ Hash: hash_hkdf() function: error conditions
 
 error_reporting(E_ALL);
 
-/* Prototype  : string hkdf  ( string $algo  , string $ikm  [, int $length  , string $info = '' , string $salt = ''  ] )
- * Description: HMAC-based Key Derivation Function
- * Source code: ext/hash/hash.c
-*/
-
 function trycatch_dump(...$tests) {
     foreach ($tests as $test) {
         try {

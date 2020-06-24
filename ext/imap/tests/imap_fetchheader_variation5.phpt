@@ -6,11 +6,6 @@ require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
-/* Prototype  : string imap_fetchheader(resource $stream_id, int $msg_no [, int $options])
- * Description: Get the full unfiltered header for a message
- * Source code: ext/imap/php_imap.c
- */
-
 /*
  * Pass different integers and strings as $msg_no argument
  * to test behaviour of imap_fetchheader()

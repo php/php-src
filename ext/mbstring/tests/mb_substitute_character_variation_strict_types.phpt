@@ -7,11 +7,6 @@ extension_loaded('mbstring') or die('skip');
 --FILE--
 <?php
 declare(strict_types=1);
-/* Prototype  : string|int|true mb_substitute_character([string|int|null substitute_character])
- * Description: Sets the current substitute_character or returns the current substitute_character
- * Source code: ext/mbstring/mbstring.c
- * Alias to functions:
- */
 
 echo "*** Testing mb_substitute_character(): various types in strict typing mode ***\n";
 

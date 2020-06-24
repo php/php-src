@@ -10,12 +10,6 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype  : bool unlink(string filename[, context context])
- * Description: Delete a file
- * Source code: ext/standard/file.c
- * Alias to functions:
- */
-
 echo "*** Testing unlink() : variation ***\n";
 
 $workDir = "unlinkVar8.tmp";

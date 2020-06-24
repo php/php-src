@@ -2,11 +2,6 @@
 Test opendir() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : mixed opendir(string $path[, resource $context])
- * Description: Open a directory and return a dir_handle
- * Source code: ext/standard/dir.c
- */
-
 /*
  * Test basic functionality of opendir() with absolute and relative paths as $path argument
  */

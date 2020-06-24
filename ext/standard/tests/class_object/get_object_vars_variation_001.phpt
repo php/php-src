@@ -2,12 +2,6 @@
 get_object_vars() - ensure statics are not shown
 --FILE--
 <?php
-/* Prototype  : proto array get_object_vars(object obj)
- * Description: Returns an array of object properties
- * Source code: Zend/zend_builtin_functions.c
- * Alias to functions:
- */
-
 Class A {
     public static $var = 'hello';
 }

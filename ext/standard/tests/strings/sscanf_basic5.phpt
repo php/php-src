@@ -3,11 +3,6 @@ Test sscanf() function : basic functionality - exponential format
 --FILE--
 <?php
 
-/* Prototype  : mixed sscanf  ( string $str  , string $format  [, mixed &$...  ] )
- * Description: Parses input from a string according to a format
- * Source code: ext/standard/string.c
-*/
-
 echo "*** Testing sscanf() : basic functionality -using exponential format ***\n";
 
 $str = "10.12345 10.12345E3 10.12345e3 -10.12345e4" ;

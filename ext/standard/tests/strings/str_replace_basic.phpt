@@ -4,13 +4,6 @@ Test str_replace() function basic function
 precision=14
 --FILE--
 <?php
-/*
-  Prototype: mixed str_replace(mixed $search, mixed $replace,
-                               mixed $subject [, int &$count]);
-  Description: Replace all occurrences of the search string with
-               the replacement string
-*/
-
 echo "\n*** Testing str_replace() on basic operations ***\n";
 
 var_dump( str_replace("", "", "") );

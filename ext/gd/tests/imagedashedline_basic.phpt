@@ -7,14 +7,6 @@ imagedashedline()
 --FILE--
 <?php
 
-/* Prototype  : bool imagedashedline  ( resource $image  , int $x1  , int $y1  , int $x2  , int $y2  , int $color  )
- * Description: Draws a dashed line.
- * This function is deprecated. Use combination of imagesetstyle() and imageline() instead.
- * Source code: ext/standard/image.c
- * Alias to functions:
- */
-
-
 echo "Simple test of imagedashedline() function\n";
 
 $dest = dirname(realpath(__FILE__)) . '/imagedashedline.png';

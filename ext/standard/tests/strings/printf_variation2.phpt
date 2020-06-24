@@ -2,11 +2,6 @@
 Test printf() function : usage variations - with all types of values for arg1 argument
 --FILE--
 <?php
-/* Prototype  : int printf  ( string $format  [, mixed $args  [, mixed $...  ]] )
- * Description: Produces output according to format .
- * Source code: ext/standard/formatted_print.c
- */
-
 echo "*** Testing printf() : with different types of values passed for arg1 argument ***\n";
 
 // initialing required variables

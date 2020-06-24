@@ -2,12 +2,6 @@
 Test gmdate() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : string gmdate(string format [, long timestamp])
- * Description: Format a GMT date/time
- * Source code: ext/date/php_date.c
- * Alias to functions:
- */
-
 echo "*** Testing gmdate() : basic functionality ***\n";
 
 // Initialise all required variables

@@ -12,12 +12,6 @@ session.name=PHPSESSID
 
 ob_start();
 
-/*
- * Prototype : string session_save_path([string $path])
- * Description : Get and/or set the current session save path
- * Source code : ext/session/session.c
- */
-
 echo "*** Testing session_save_path() : variation ***\n";
 $initdir = __DIR__;
 $sessions = ($initdir."/sessions");
@@ -52,16 +46,16 @@ var_dump(rmdir($sessions));
 bool(true)
 bool(true)
 
-Warning: ini_set(): open_basedir restriction in effect. File(%s) is not within the allowed path(s): (.) in %s on line 24
+Warning: ini_set(): open_basedir restriction in effect. File(%s) is not within the allowed path(s): (.) in %s on line %d
 string(0) ""
 
-Warning: session_start(): open_basedir restriction in effect. File(%s) is not within the allowed path(s): (.) in %s on line 26
+Warning: session_start(): open_basedir restriction in effect. File(%s) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: session_start(): Failed to initialize storage module: files (path: ) in %s on line 26
+Warning: session_start(): Failed to initialize storage module: files (path: ) in %s on line %d
 bool(false)
 string(0) ""
 
-Warning: session_destroy(): Trying to destroy uninitialized session in %s on line 28
+Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
 bool(false)
 string(0) ""
 Done

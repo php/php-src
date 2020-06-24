@@ -3,7 +3,6 @@ Test ob_start() with non existent callback method.
 --FILE--
 <?php
 /*
- * proto bool ob_start([ string|array user_function [, int chunk_size [, bool erase]]])
  * Function is implemented in main/output.c
 */
 
@@ -17,6 +16,6 @@ echo "done"
 --EXPECTF--
 Warning: ob_start(): class 'C' does not have a method 'f' in %s on line %d
 
-Notice: ob_start(): Failed to create buffer in %s on line 11
+Notice: ob_start(): Failed to create buffer in %s on line %d
 bool(false)
 done

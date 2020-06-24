@@ -2,11 +2,6 @@
 Test strval() function : usage variations  - Pass all valid char codes
 --FILE--
 <?php
-/* Prototype  : string strval  ( mixed $var  )
- * Description: Get the string value of a variable.
- * Source code: ext/standard/string.c
- */
-
 echo "*** Testing strval() : usage variations  - Pass all valid char codes ***\n";
 
 $s0 = "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f";

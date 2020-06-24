@@ -2,12 +2,6 @@
 Test date_sunrise() function : usage variation -  Checking with North and South poles when Sun is up and down all day
 --FILE--
 <?php
-/* Prototype  : mixed date_sunrise(mixed time [, int format [, float latitude [, float longitude [, float zenith [, float gmt_offset]]]]])
- * Description: Returns time of sunrise for a given day and location
- * Source code: ext/date/php_date.c
- * Alias to functions:
- */
-
 echo "*** Testing date_sunrise() : usage variation ***\n";
 
 // GMT is zero for the timezone

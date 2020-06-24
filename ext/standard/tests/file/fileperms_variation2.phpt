@@ -6,10 +6,6 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 obscure_filename
 --FILE--
 <?php
-/* Prototype: int fileperms ( string $filename )
- * Description: Returns the group ID of the file, or FALSE in case of an error.
- */
-
 /* Testing fileperms() with invalid arguments -int, float, bool, NULL, resource */
 
 $file_path = __DIR__;

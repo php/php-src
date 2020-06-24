@@ -3,11 +3,6 @@ Test ltrim() function : basic functionality
 --FILE--
 <?php
 
-/* Prototype  : string ltrim  ( string $str  [, string $charlist  ] )
- * Description: Strip whitespace (or other characters) from the beginning of a string.
- * Source code: ext/standard/string.c
-*/
-
 echo "*** Testing ltrim() : basic functionality ***\n";
 
 $text  = " \t\r\n\0\x0B ---These are a few words---  ";

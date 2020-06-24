@@ -3,7 +3,6 @@ Test preg_split() function : error conditions - bad regular expressions
 --FILE--
 <?php
 /*
-* proto array preg_split(string pattern, string subject [, int limit [, int flags]])
 * Function is implemented in ext/pcre/php_pcre.c
 */
 /*

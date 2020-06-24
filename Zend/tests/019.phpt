@@ -2,16 +2,6 @@
 Test unset(), empty() and isset() functions
 --FILE--
 <?php
-/* Prototype: void unset ( mixed $var [, mixed $var [, mixed $...]] );
-   Description: unset() destroys the specified variables
-
-   Prototype: bool empty( mixed $var );
-   Description: Determine whether a variable is considered to be empty
-
-   Prototype: bool isset ( mixed $var [, mixed $var [, $...]] );
-   Description: Returns TRUE if var exists; FALSE otherwise
-*/
-
 echo "*** Testing unset(), empty() & isset() with scalar variables ***\n";
 
 // testing scalar variables

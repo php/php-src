@@ -2,12 +2,6 @@
 Test array_chunk() function : usage variations - different 'size' values
 --FILE--
 <?php
-/* Prototype  : array array_chunk(array $array, int $size [, bool $preserve_keys])
- * Description: Split array into chunks
- *            : Chunks an array into size large chunks
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Testing array_chunk() function with following conditions
  *   1. -ve size value

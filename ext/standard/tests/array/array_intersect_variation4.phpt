@@ -2,11 +2,6 @@
 Test array_intersect() function : usage variations - different arrays for 'arr2' argument
 --FILE--
 <?php
-/* Prototype  : array array_intersect(array $arr1, array $arr2 [, array $...])
- * Description: Returns the entries of arr1 that have values which are present in all the other arguments
- * Source code: ext/standard/array.c
-*/
-
 /*
 * Passing different types of arrays to $arr2 argument and testing whether
 * array_intersect() behaves in expected way with the other arguments passed to the function.

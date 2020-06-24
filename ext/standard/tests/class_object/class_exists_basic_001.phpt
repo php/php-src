@@ -2,12 +2,6 @@
 Test class_exists() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : proto bool class_exists(string classname [, bool autoload])
- * Description: Checks if the class exists
- * Source code: Zend/zend_builtin_functions.c
- * Alias to functions:
- */
-
 echo "*** Testing class_exists() : basic functionality ***\n";
 
 spl_autoload_register(function ($className) {

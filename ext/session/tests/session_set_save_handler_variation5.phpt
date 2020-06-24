@@ -15,12 +15,6 @@ session.save_handler=files
 
 ob_start();
 
-/*
- * Prototype : bool session_set_save_handler(callback $open, callback $close, callback $read, callback $write, callback $destroy, callback $gc)
- * Description : Sets user-level session storage functions with validate_id() and update()
- * Source code : ext/session/session.c
- */
-
 function noisy_gc($maxlifetime) {
     echo("GC [".$maxlifetime."]\n");
     echo gc($maxlifetime)." deleted\n";

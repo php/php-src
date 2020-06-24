@@ -2,11 +2,6 @@
 Test vsprintf() function : usage variations - scientific formats with scientific values
 --FILE--
 <?php
-/* Prototype  : string vsprintf(string format, array args)
- * Description: Output a formatted string
- * Source code: ext/standard/formatted_print.c
-*/
-
 /*
  * Test vprintf() when different scientific formats and scientific values
  * are passed to the '$format' and '$args' arguments of the function

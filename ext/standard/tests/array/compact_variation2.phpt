@@ -2,11 +2,6 @@
 Test compact() function: ensure compact() doesn't pick up variables declared outside of current scope.
 --FILE--
 <?php
-/* Prototype  : proto array compact(mixed var_names [, mixed ...])
-* Description: Creates a hash containing variables and their values
-* Source code: ext/standard/array.c
-* Alias to functions:
-*/
 echo "*** Testing compact() : usage variations  - variables outside of current scope ***\n";
 
 $a = 'main.a';

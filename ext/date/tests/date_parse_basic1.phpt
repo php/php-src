@@ -2,11 +2,6 @@
 Test date_parse() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : array date_parse  ( string $date  )
- * Description: Returns associative array with detailed info about given date.
- * Source code: ext/date/php_date.c
- */
-
 //Set the default time zone
 date_default_timezone_set("Europe/London");
 

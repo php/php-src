@@ -2,13 +2,6 @@
 Test array_column(): Index argument with various types in weak type mode
 --FILE--
 <?php
-/* Prototype:
- *  array array_column(array $input, mixed $column_key[, mixed $index_key]);
- * Description:
- *  Returns an array containing all the values from
- *  the specified "column" in a two-dimensional array.
- */
-
 echo "\n-- Testing array_column() column key parameter should be a string or an integer (testing bool) --\n";
 try {
     var_dump(array_column([['php7', 'foo'], ['php8', 'bar']], false));

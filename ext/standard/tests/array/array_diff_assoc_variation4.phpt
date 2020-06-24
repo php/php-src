@@ -2,12 +2,6 @@
 Test array_diff_assoc() function : usage variations - arrays with different data types as keys
 --FILE--
 <?php
-/* Prototype  : array array_diff_assoc(array $arr1, array $arr2 [, array ...])
- * Description: Returns the entries of arr1 that have values which are not present
- * in any of the others arguments but do additional checks whether the keys are equal
- * Source code: ext/standard/array.c
- */
-
 /*
  * Test how array_diff_assoc() compares arrays containing different data types
  * as keys

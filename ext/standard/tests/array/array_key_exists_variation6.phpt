@@ -2,12 +2,6 @@
 Test array_key_exists() function : usage variations -  equality test for certain data types
 --FILE--
 <?php
-/* Prototype  : bool array_key_exists(mixed $key, array $search)
- * Description: Checks if the given key or index exists in the array
- * Source code: ext/standard/array.c
- * Alias to functions: key_exists
- */
-
 /*
  * Pass certain data types that can be taken as a key in an array
  * and test whether array_key_exists(() thinks they are equal and therefore

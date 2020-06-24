@@ -4,11 +4,6 @@ Test ctype_digit() function : usage variations - octal and hexadecimal values
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-/* Prototype  : bool ctype_digit(mixed $c)
- * Description: Checks for numeric character(s)
- * Source code: ext/ctype/ctype.c
- */
-
 /*
  * Pass octal and hexadecimal values as $c argument to ctype_digit() to test behaviour
  */

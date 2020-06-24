@@ -6,11 +6,6 @@ require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
-/* Prototype  : string imap_fetchbody(resource $stream_id, int $msg_no, string $section [, int $options])
- * Description: Get a specific body section
- * Source code: ext/imap/php_imap.c
- */
-
 /*
  * Pass different integers, strings, msg sequences and msg UIDs as $msg_no argument
  * to test behaviour of imap_fetchbody()

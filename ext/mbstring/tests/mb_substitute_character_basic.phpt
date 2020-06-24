@@ -6,12 +6,6 @@ extension_loaded('mbstring') or die('skip');
 ?>
 --FILE--
 <?php
-/* Prototype  : mixed mb_substitute_character([mixed substchar])
- * Description: Sets the current substitute_character or returns the current substitute_character
- * Source code: ext/mbstring/mbstring.c
- * Alias to functions:
- */
-
 echo "*** Testing mb_substitute_character() : basic functionality ***\n";
 
 

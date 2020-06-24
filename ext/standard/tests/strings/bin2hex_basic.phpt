@@ -3,11 +3,6 @@ Test bin2hex() function : basic functionality
 --FILE--
 <?php
 
-/* Prototype  : string bin2hex  ( string $str  )
- * Description: Convert binary data into hexadecimal representation
- * Source code: ext/standard/string.c
-*/
-
 echo "*** Testing bin2hex() : basic functionality ***\n";
 
 // array with different values for $string

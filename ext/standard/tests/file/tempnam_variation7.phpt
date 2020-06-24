@@ -9,10 +9,6 @@ if(substr(PHP_OS, 0, 3) == "WIN")
 obscure_filename
 --FILE--
 <?php
-/* Prototype:  string tempnam ( string $dir, string $prefix );
-   Description: Create file with unique file name.
-*/
-
 /* Passing invalid/non-existing args for $dir,
      hence the unique files will be created in temporary dir */
 

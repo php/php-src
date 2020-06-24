@@ -7,12 +7,6 @@ function_exists('mb_strripos') or die("skip mb_strripos() is not available in th
 ?>
 --FILE--
 <?php
-/* Prototype  : int mb_strripos(string haystack, string needle [, int offset [, string encoding]])
- * Description: Finds position of last occurrence of a string within another, case insensitive
- * Source code: ext/mbstring/mbstring.c
- * Alias to functions:
- */
-
 /*
  * Test how mb_strripos() behaves when passed different integers as $offset argument
  * The character length of $string_ascii and $string_mb is the same,

@@ -2,11 +2,6 @@
 Test array_shift() function : usage variations - call recursively
 --FILE--
 <?php
-/* Prototype  : mixed array_shift(array &$stack)
- * Description: Pops an element off the beginning of the array
- * Source code: ext/standard/array.c
- */
-
 /*
  * Use the result of one call to array_shift
  * as the $stack argument of another call to array_shift()

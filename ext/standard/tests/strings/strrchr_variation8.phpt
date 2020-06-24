@@ -2,11 +2,6 @@
 Test strrchr() function : usage variations - empty heredoc string for 'haystack'
 --FILE--
 <?php
-/* Prototype  : string strrchr(string $haystack, string $needle);
- * Description: Finds the last occurrence of a character in a string.
- * Source code: ext/standard/string.c
-*/
-
 /* Test strrchr() function by passing empty heredoc string for haystack
  *  and with various needles
 */

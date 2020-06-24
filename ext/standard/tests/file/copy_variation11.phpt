@@ -2,11 +2,6 @@
 Test copy() function: usage variations - existing dir as destination
 --FILE--
 <?php
-/* Prototype: bool copy ( string $source, string $dest );
-   Description: Makes a copy of the file source to dest.
-     Returns TRUE on success or FALSE on failure.
-*/
-
 /* Test copy(): Trying to copy the file to a destination, where destination is an existing dir */
 
 $file_path = __DIR__;

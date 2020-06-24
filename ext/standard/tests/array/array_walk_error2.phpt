@@ -2,11 +2,6 @@
 Test array_walk() function : error conditions - callback parameters
 --FILE--
 <?php
-/* Prototype  : bool array_walk(array $input, string $funcname [, mixed $userdata])
- * Description: Apply a user function to every member of an array
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Testing array_walk() by passing more number of parameters to callback function
  */

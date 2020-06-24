@@ -9,11 +9,6 @@ if (PHP_INT_SIZE != 4) {
 --FILE--
 <?php
 
-/* Prototype  : mixed sscanf  ( string $str  , string $format  [, mixed &$...  ] )
- * Description: Parses input from a string according to a format
- * Source code: ext/standard/string.c
-*/
-
 echo "*** Testing sscanf() : basic functionality - using unsigned format ***\n";
 
 $str = "-11 +11 11 -11.234 +11.234 11.234";

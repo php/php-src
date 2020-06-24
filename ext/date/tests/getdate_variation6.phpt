@@ -2,12 +2,6 @@
 Test getdate() function : usage variation - Passing strings containing numbers
 --FILE--
 <?php
-/* Prototype  : array getdate([int timestamp])
- * Description: Get date/time information
- * Source code: ext/date/php_date.c
- * Alias to functions:
- */
-
 echo "*** Testing getdate() : usage variation ***\n";
 
 date_default_timezone_set("Asia/Calcutta");

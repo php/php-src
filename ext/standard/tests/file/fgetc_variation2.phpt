@@ -2,11 +2,6 @@
 Test fgetc() function : usage variations - closed handle
 --FILE--
 <?php
-/*
- Prototype: string fgetc ( resource $handle );
- Description: Gets character from file pointer
-*/
-
 /* try reading a char using fgetc() using invalid handles
     - closed file handle
     - unset file handle

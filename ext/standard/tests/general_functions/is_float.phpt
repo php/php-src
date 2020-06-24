@@ -6,10 +6,6 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 ?>
 --FILE--
 <?php
-/* Prototype: bool is_float ( mixed $var );
- * Description: Finds whether the given variable is a float
- */
-
 echo "*** Testing is_float(), is_double() with float values***\n";
 // different valid  float values
 $floats = array(

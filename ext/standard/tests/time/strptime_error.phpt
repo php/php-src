@@ -8,12 +8,6 @@ if (!function_exists('strptime')) {
 ?>
 --FILE--
 <?php
-/* Prototype  : array strptime  ( string $date  , string $format  )
- * Description: Parse a time/date generated with strftime()
- * Source code: ext/standard/datetime.c
- * Alias to functions:
- */
-
 //Set the default time zone
 date_default_timezone_set("Europe/London");
 

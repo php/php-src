@@ -10,12 +10,6 @@ sendmail_path="cat > /tmp/php_test_mailBasic2.out"
 mail.add_x_header = Off
 --FILE--
 <?php
-/* Prototype  : int mail(string to, string subject, string message [, string additional_headers [, string additional_parameters]])
- * Description: Send an email message
- * Source code: ext/standard/mail.c
- * Alias to functions:
- */
-
 echo "*** Testing mail() : basic functionality ***\n";
 
 

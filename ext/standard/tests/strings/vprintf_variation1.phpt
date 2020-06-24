@@ -2,11 +2,6 @@
 Test vprintf() function : usage variations - unexpected values for the format argument
 --FILE--
 <?php
-/* Prototype  : string vprintf(string $format, array $args)
- * Description: Output a formatted string
- * Source code: ext/standard/formatted_print.c
-*/
-
 /*
  * Test vprintf() when different unexpected format strings are passed to
  * the '$format' argument of the function

@@ -2,11 +2,6 @@
 Test copy() function: usage variations - identical names
 --FILE--
 <?php
-/* Prototype: bool copy ( string $source, string $dest );
-   Description: Makes a copy of the file source to dest.
-     Returns TRUE on success or FALSE on failure.
-*/
-
 /* Test copy(): Try copying source file to desntination file, where destination file name is identical to source name */
 
 $file_path = __DIR__;

@@ -13,12 +13,6 @@ Felix De Vliegher <felix.devliegher@gmail.com>
 ?>
 --FILE--
 <?php
-/* Prototype  : int imagecolorstotal(resource im)
- * Description: Find out the number of colors in an image's palette
- * Source code: ext/gd/gd.c
- * Alias to functions:
- */
-
 echo "*** Testing imagecolorstotal() : basic functionality ***\n";
 
 // Palette image

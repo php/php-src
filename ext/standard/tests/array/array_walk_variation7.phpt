@@ -2,11 +2,6 @@
 Test array_walk() function : usage variations - anonymous callback function
 --FILE--
 <?php
-/* Prototype  : proto bool array_walk(array $input, string $funcname [, mixed $userdata])
- * Description: Apply a user function to every member of an array
- * Source code: ext/standard/array.c
-*/
-
 /*
 * Passing anonymous(run-time) callback function with following variations:
 *   with one parameter

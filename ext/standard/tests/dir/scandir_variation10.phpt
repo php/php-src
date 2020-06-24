@@ -2,11 +2,6 @@
 Test scandir() function : usage variations - different sorting constants
 --FILE--
 <?php
-/* Prototype  : array scandir(string $dir [, int $sorting_order [, resource $context]])
- * Description: List files & directories inside the specified path
- * Source code: ext/standard/dir.c
- */
-
 printf("SCANDIR_SORT_ASCENDING: %d\n", SCANDIR_SORT_ASCENDING);
 printf("SCANDIR_SORT_DESCENDING: %d\n", SCANDIR_SORT_DESCENDING);
 printf("SCANDIR_SORT_NONE: %d\n", SCANDIR_SORT_NONE);

@@ -2,11 +2,6 @@
 Test rsort() function : object functionality - different visibilities
 --FILE--
 <?php
-/* Prototype  : bool rsort(array &$array_arg [, int $sort_flags])
- * Description: Sort an array in reverse order
- * Source code: ext/standard/array.c
- */
-
 /*
  * Test functionality of rsort() with objects where properties have different visibilities
  */

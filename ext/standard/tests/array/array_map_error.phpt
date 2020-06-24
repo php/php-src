@@ -2,11 +2,6 @@
 Test array_map() function : error conditions
 --FILE--
 <?php
-/* Prototype  : array array_map  ( callback $callback  , array $arr1  [, array $...  ] )
- * Description: Applies the callback to the elements of the given arrays
- * Source code: ext/standard/array.c
- */
-
 echo "*** Testing array_map() : error conditions ***\n";
 
 // Testing array_map with one less than the expected number of arguments

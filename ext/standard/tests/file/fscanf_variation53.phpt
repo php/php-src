@@ -3,11 +3,6 @@ Test fscanf() function: usage variations - file pointer pointing to EOF
 --FILE--
 <?php
 
-/*
-  Prototype: mixed fscanf ( resource $handle, string $format [, mixed &$...] );
-  Description: Parses input from a file according to a format
-*/
-
 /* Test fscanf() to read a file when file pointer is pointing to EOF */
 
 $file_path = __DIR__;

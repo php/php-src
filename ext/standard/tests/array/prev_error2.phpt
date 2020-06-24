@@ -2,11 +2,6 @@
 prev - ensure warning is received when passing an indirect temporary.
 --FILE--
 <?php
-/* Prototype  : mixed prev(array $array_arg)
- * Description: Move array argument's internal pointer to the previous element and return it
- * Source code: ext/standard/array.c
- */
-
 /*
  * Pass temporary variables to prev() to test behaviour
  */

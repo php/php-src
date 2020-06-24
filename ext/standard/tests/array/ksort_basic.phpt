@@ -2,11 +2,6 @@
 Test ksort() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : bool ksort ( array &$array [, int $sort_flags] )
- * Description: Sort an array by key, maintaining key to data correlation
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Testing ksort() by providing  array of integer/string values to check the basic functionality with following flag values :
  *  1.flag value as default

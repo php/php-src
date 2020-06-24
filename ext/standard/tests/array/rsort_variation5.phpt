@@ -2,11 +2,6 @@
 Test rsort() function : usage variations - String values
 --FILE--
 <?php
-/* Prototype  : bool rsort(array &$array_arg [, int $sort_flags])
- * Description: Sort an array in reverse order
- * Source code: ext/standard/array.c
- */
-
 /*
  * Pass arrays containing different string data to rsort() to test behaviour
  */

@@ -7,11 +7,6 @@ function_exists('mb_strpos') or die("skip mb_strpos() is not available in this b
 ?>
 --FILE--
 <?php
-/* Prototype  : int mb_strpos(string $haystack, string $needle [, int $offset [, string $encoding]])
- * Description: Find position of first occurrence of a string within another
- * Source code: ext/mbstring/mbstring.c
- */
-
 /*
  * Test how mb_strpos() behaves when passed different integers as $offset argument
  * The character length of $string_ascii and $string_mb is the same,

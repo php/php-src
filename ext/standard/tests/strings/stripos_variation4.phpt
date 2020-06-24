@@ -2,11 +2,6 @@
 Test stripos() function : usage variations - heredoc string containing special chars for 'haystack' argument
 --FILE--
 <?php
-/* Prototype  : int stripos ( string $haystack, string $needle [, int $offset] );
- * Description: Find position of first occurrence of a case-insensitive string
- * Source code: ext/standard/string.c
-*/
-
 /* Test stripos() function by passing heredoc string containing special chars for haystack
  *  and with various needles & offsets
 */

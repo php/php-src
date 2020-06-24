@@ -3,11 +3,6 @@ Test quotemeta() function : basic functionality
 --FILE--
 <?php
 
-/* Prototype  : string quotemeta  ( string $str  )
- * Description: Quote meta characters
- * Source code: ext/standard/string.c
-*/
-
 echo "*** Testing quotemeta() : basic functionality ***\n";
 
 var_dump(quotemeta("Hello how are you ?"));

@@ -2,11 +2,6 @@
 Test vfprintf() function : basic functionality - char format
 --FILE--
 <?php
-/* Prototype  : int vfprintf  ( resource $handle  , string $format , array $args  )
- * Description: Write a formatted string to a stream
- * Source code: ext/standard/formatted_print.c
-*/
-
 echo "*** Testing vfprintf() : basic functionality - using char format ***\n";
 
 // Initialise all required variables

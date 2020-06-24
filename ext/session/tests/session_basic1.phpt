@@ -15,12 +15,6 @@ session.name=PHPSESSID
 
 ob_start();
 
-/*
- * Prototype : session.use_strict_mode=0
- * Description : Test basic functionality.
- * Source code : ext/session/session.c, ext/session/mod_files.c
- */
-
 echo "*** Testing basic session functionality : variation1 ***\n";
 
 $session_id = 'testid';

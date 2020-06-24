@@ -8,11 +8,6 @@ version_compare(MB_ONIGURUMA_VERSION, '6.1.0', '>=') or die("skip requires onigu
 ?>
 --FILE--
 <?php
-/* Prototype  : int mb_ereg(string $pattern, string $string [, array $registers])
- * Description: Regular expression match for multibyte string
- * Source code: ext/mbstring/php_mbregex.c
- */
-
 /*
  * test that mb_ereg can match correctly when passed different character classes.
  */

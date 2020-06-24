@@ -2,12 +2,6 @@
 Test gmdate() function : usage variation - Passing numeric representation of day formats.
 --FILE--
 <?php
-/* Prototype  : string gmdate(string format [, long timestamp])
- * Description: Format a GMT date/time
- * Source code: ext/date/php_date.c
- * Alias to functions:
- */
-
 echo "*** Testing gmdate() : usage variation ***\n";
 
 // Initialise all required variables

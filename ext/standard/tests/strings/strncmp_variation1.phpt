@@ -2,11 +2,6 @@
 Test strncmp() function: usage variations - case-sensitivity
 --FILE--
 <?php
-/* Prototype  : int strncmp ( string $str1, string $str2, int $len );
- * Description: Binary safe case-sensitive string comparison of the first n characters
- * Source code: Zend/zend_builtin_functions.c
-*/
-
 /* Test strncmp() function with upper-case and lower-case alphabets as inputs for 'str1' and 'str2' */
 
 echo "*** Test strncmp() function: with alphabets ***\n";

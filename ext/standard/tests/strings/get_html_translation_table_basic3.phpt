@@ -2,11 +2,6 @@
 Test get_html_translation_table() function : basic functionality - table as HTML_SPECIALCHARS
 --FILE--
 <?php
-/* Prototype  : array get_html_translation_table ( [int $table [, int $quote_style [, string charset_hint]]] )
- * Description: Returns the internal translation table used by htmlspecialchars and htmlentities
- * Source code: ext/standard/html.c
-*/
-
 /* test get_html_translation_table() when $table argument is specified as HTML_SPECIALCHARS */
 
 echo "*** Testing get_html_translation_table() : basic functionality ***\n";

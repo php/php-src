@@ -4,10 +4,7 @@ Test get_include_path() function
 include_path=.
 --FILE--
 <?php
-/* Prototype: string get_include_path  ( void  )
- * Description: Gets the current include_path configuration option
 
-*/
 
 echo "*** Testing get_include_path()\n";
 

@@ -3,11 +3,6 @@ Test chr() function : error conditions
 --FILE--
 <?php
 
-/* Prototype  : string chr  ( int $ascii  )
- * Description: Return a specific character
- * Source code: ext/standard/string.c
-*/
-
 echo "*** Testing chr() : error conditions ***\n";
 
 echo "\n-- Testing chr() function with no arguments --\n";

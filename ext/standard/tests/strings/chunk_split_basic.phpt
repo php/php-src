@@ -2,12 +2,6 @@
 Test chunk_split() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : string chunk_split(string $str [, int $chunklen [, string $ending]])
- * Description: Returns split line
- * Source code: ext/standard/string.c
- * Alias to functions:
-*/
-
 /*
 * Testing chunk_split() for basic functionality by passing all possible
 * arguments as well as with default arguments chunklen and ending

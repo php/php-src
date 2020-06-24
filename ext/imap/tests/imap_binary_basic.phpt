@@ -6,11 +6,6 @@ extension_loaded('imap') or die('skip imap extension not available in this build
 ?>
 --FILE--
 <?php
-/* Prototype  : string imap_binary  ( string $string  )
- * Description: Convert an 8bit string to a base64 string.
- * Source code: ext/imap/php_imap.c
- */
-
 echo "*** Testing imap_binary() : basic functionality ***\n";
 
 echo "Encode as short string\n";

@@ -21,12 +21,6 @@ ob_start();
 $_SERVER['HTTP_HOST'] = 'php.net';
 ini_set('session.trans_sid_hosts','php.net,example.com');
 
-/*
- * Prototype : session.use_trans_sid=1
- * Description : Test basic functionality.
- * Source code : ext/session/session.c
- */
-
 echo "*** Testing basic session functionality : variation5 use_trans_sid ***\n";
 echo "*** Test trans sid ***\n";
 

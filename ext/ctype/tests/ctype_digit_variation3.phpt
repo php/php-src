@@ -4,11 +4,6 @@ Test ctype_digit() function : usage variations - different strings
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-/* Prototype  : bool ctype_digit(mixed $c)
- * Description: Checks for numeric character(s)
- * Source code: ext/ctype/ctype.c
- */
-
 /*
  * Pass strings containing different character types to ctype_digit() to test
  * which are considered valid decimal digit only strings

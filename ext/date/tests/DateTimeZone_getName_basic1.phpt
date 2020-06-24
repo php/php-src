@@ -2,12 +2,6 @@
 Test DateTimeZone::getName() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : public string DateTimeZone::getName  ( void  )
- * Description: Returns the name of the timezone
- * Source code: ext/date/php_date.c
- * Alias to functions: timezone_name_get()
- */
-
 echo "*** Testing DateTimeZone::getName() : basic functionality ***\n";
 
 //Set the default time zone

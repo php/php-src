@@ -2,11 +2,6 @@
 Test fgetcsv() : usage variations - with default enclosure & length as 0
 --FILE--
 <?php
-/*
- Prototype: array fgetcsv ( resource $handle [, int $length [, string $delimiter [, string $enclosure]]] );
- Description: Gets line from file pointer and parse for CSV fields
-*/
-
 /* Testing fgetcsv() to read a file when provided with default enclosure character
    and length value equal to zero
 */

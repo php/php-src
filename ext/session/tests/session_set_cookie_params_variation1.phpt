@@ -9,12 +9,6 @@ session.cookie_lifetime=3600
 
 ob_start();
 
-/*
- * Prototype : void session_set_cookie_params(int $lifetime [, string $path [, string $domain [, bool $secure [, bool $httponly]]]])
- * Description : Set the session cookie parameters
- * Source code : ext/session/session.c
- */
-
 echo "*** Testing session_set_cookie_params() : variation ***\n";
 
 var_dump(ini_get("session.cookie_lifetime"));
@@ -42,7 +36,7 @@ string(4) "3600"
 bool(true)
 string(4) "3600"
 
-Warning: session_set_cookie_params(): Cannot change session cookie parameters when session is active in %s on line 19
+Warning: session_set_cookie_params(): Cannot change session cookie parameters when session is active in %s on line %d
 bool(false)
 string(4) "3600"
 bool(true)

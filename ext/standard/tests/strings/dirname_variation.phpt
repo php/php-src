@@ -2,9 +2,6 @@
 Test dirname() function : usage variations
 --FILE--
 <?php
-/* Prototype: string dirname ( string $path );
-   Description: Returns directory name component of path.
-*/
 class temp
 {
    function __toString() {

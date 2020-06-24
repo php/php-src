@@ -2,11 +2,6 @@
 Test array_unshift() function : usage variations - different array values for 'array' argument
 --FILE--
 <?php
-/* Prototype  : int array_unshift(array $array, mixed $var [, mixed ...])
- * Description: Pushes elements onto the beginning of the array
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Testing the behavior of array_unshift() by passing different types of arrays
  * to $array argument to which the $var arguments will be prepended

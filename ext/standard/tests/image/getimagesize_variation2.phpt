@@ -2,12 +2,6 @@
 Test getimagesize() function : usage variations  - unexpected type for arg 2
 --FILE--
 <?php
-/* Prototype  : proto array getimagesize(string imagefile [, array info])
- * Description: Get the size of an image as 4-element array
- * Source code: ext/standard/image.c
- * Alias to functions:
- */
-
 function test_error_handler($err_no, $err_msg, $filename, $linenum) {
     echo "Error: $err_no - $err_msg\n";
 }

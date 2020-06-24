@@ -2,11 +2,6 @@
 Test is_resource() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : bool is_resource  ( mixed $var  )
- * Description:  Finds whether a variable is a resource
- * Source code: ext/standard/type.c
- */
-
 echo "*** Testing is_resource() : basic functionality ***\n";
 
 class Hello {

@@ -2,13 +2,6 @@
 Test disk_free_space and its alias diskfreespace() functions : Usage Variations
 --FILE--
 <?php
-/*
- *  Prototype: float disk_free_space( string directory )
- *  Description: Given a string containing a directory, this function
- *               will return the number of bytes available on the corresponding
- *               filesystem or disk partition
- */
-
 $file_path = __DIR__;
 
 echo "*** Testing with a directory ***\n";

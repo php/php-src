@@ -4,11 +4,6 @@ Test ctype_cntrl() function : basic functionality
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-/* Prototype  : bool ctype_cntrl(mixed $c)
- * Description: Checks for control character(s)
- * Source code: ext/ctype/ctype.c
- */
-
 echo "*** Testing ctype_cntrl() : basic functionality ***\n";
 
 $orig = setlocale(LC_CTYPE, "C");

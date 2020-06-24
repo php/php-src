@@ -4,10 +4,6 @@ Test strval() function
 precision=14
 --FILE--
 <?php
-/* Prototype: string strval ( mixed $var );
- * Description: Returns the string value of var
- */
-
 echo "*** Testing str_val() with scalar values***\n";
 $heredoc_string = <<<EOD
 This is a multiline heredoc

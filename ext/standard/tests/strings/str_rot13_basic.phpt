@@ -2,10 +2,6 @@
 Test soundex() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : string str_rot13  ( string $str  )
- * Description: Perform the rot13 transform on a string
- * Source code: ext/standard/string.c
-*/
 echo "*** Testing str_rot13() : basic functionality ***\n";
 
 echo "\nBasic tests\n";

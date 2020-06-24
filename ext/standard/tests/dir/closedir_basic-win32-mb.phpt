@@ -8,12 +8,6 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype  : void closedir([resource $dir_handle])
- * Description: Close directory connection identified by the dir_handle
- * Source code: ext/standard/dir.c
- * Alias to functions: close
- */
-
 /*
  * Test basic functionality of closedir()
  */

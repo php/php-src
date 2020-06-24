@@ -4,11 +4,6 @@ Test sprintf() function : usage variations - hexa formats with integer values
 <?php if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only"); ?>
 --FILE--
 <?php
-/* Prototype  : string sprintf(string $format [, mixed $arg1 [, mixed ...]])
- * Description: Return a formatted string
- * Source code: ext/standard/formatted_print.c
-*/
-
 echo "*** Testing sprintf() : hexa formats with integer values ***\n";
 
 // array of integer values

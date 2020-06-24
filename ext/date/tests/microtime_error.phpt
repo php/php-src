@@ -3,7 +3,6 @@ Test wrong number of arguments for microtime()
 --FILE--
 <?php
 /*
- * proto mixed microtime([bool get_as_float])
  * Function is implemented in ext/standard/microtime.c
 */
 
