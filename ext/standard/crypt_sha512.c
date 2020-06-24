@@ -393,7 +393,11 @@ php_sha512_crypt_r(const char *key, const char *salt, char *buffer, int buflen) 
 
 		if (*endp == '$') {
 			salt = endp + 1;
-			rounds = MAX(ROUNDS_MIN, MIN(srounds, ROUNDS_MAX));
+			if (srounds < ROUNDS_MIN || srounds > ROUNDS_MAX) {
+				return NULL;
+			}
+
+			rounds = srounds;
 			rounds_custom = 1;
 		}
 	}
