@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.21
 
+- Apache:
+  . Fixed bug #79030 (Upgrade apache2handler's php_apache_sapi_get_request_time
+    to return usec). (Herbert256)
+
 - FTP:
   . Fixed bug #55857 (ftp_size on large files). (cmb)
 
