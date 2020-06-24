@@ -181,17 +181,15 @@ PHPAPI zend_string *php_crypt(const char *password, const int pass_len, const ch
 #else
 
 # if defined(HAVE_CRYPT_R) && (defined(_REENTRANT) || defined(_THREAD_SAFE))
-	{
 #  if defined(CRYPT_R_STRUCT_CRYPT_DATA)
-		struct crypt_data buffer;
-		memset(&buffer, 0, sizeof(buffer));
+	struct crypt_data buffer;
+	memset(&buffer, 0, sizeof(buffer));
 #  elif defined(CRYPT_R_CRYPTD)
-		CRYPTD buffer;
+	CRYPTD buffer;
 #  else
 #   error Data struct used by crypt_r() is unknown. Please report.
 #  endif
-		crypt_res = crypt_r(password, salt, &buffer);
-	}
+	crypt_res = crypt_r(password, salt, &buffer);
 # elif defined(HAVE_CRYPT)
 	crypt_res = crypt(password, salt);
 # else
