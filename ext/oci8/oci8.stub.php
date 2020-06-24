@@ -98,13 +98,13 @@ function oci_lob_copy(OCI_Lob $lob_descriptor_to, OCI_Lob $lob_descriptor_from, 
 
 function oci_lob_is_equal(OCI_Lob $lob_descriptor_first, OCI_Lob $lob_descriptor_second): bool {}
 
-function oci_lob_export(OCI_Lob $lob_descriptor, $path, int $start = UNKNOWN, int $length = UNKNOWN): bool {}
+function oci_lob_export(OCI_Lob $lob_descriptor, string $path, int $start = UNKNOWN, int $length = UNKNOWN): bool {}
 
 /**
  * @alias oci_lob_export
  * @deprecated
  */
-function ociwritelobtofile(OCI_Lob $lob_descriptor, $path, int $start = UNKNOWN, int $length = UNKNOWN): bool {}
+function ociwritelobtofile(OCI_Lob $lob_descriptor, string $path, int $start = UNKNOWN, int $length = UNKNOWN): bool {}
 
 /**
  * @param resource $connection_resource
