@@ -36,9 +36,13 @@ foreach($additional_mime_maps as $ext => $mime) {
     if (!isset($extensions[$ext])) {
         $extensions[$ext] = $mime;
     } else {
-        printf(STDERR, "Ignored exist mime type: $ext => $mime\n");
+        fprintf(STDERR, "Ignored exist mime type: $ext => $mime\n");
     }
 }
+
+uksort($extensions, function($ext1, $ext2) {
+    return strcmp($ext1, $ext2);
+});
 
 echo <<<HEADER
 /*
