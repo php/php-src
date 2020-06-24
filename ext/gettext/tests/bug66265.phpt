@@ -5,11 +5,6 @@
 if (!extension_loaded("gettext")) {
 	die("skip\n");
 }
-if (PHP_ZTS) {
-	/* this is supposed to fail on the TS build at least on Windows,
-	should be even XFAIL till it's fixed there */
-	die("skip NTS only");
-}
 if (substr(PHP_OS, 0, 3) != 'WIN') {
 	$loc = ["de_DE", "fr_FR", "en_US"];
 	foreach($loc as $l) {

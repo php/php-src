@@ -775,29 +775,30 @@ PHP_FUNCTION(getenv)
 		}
 
 		SetLastError(0);
-		/*If the given buffer is not large enough to hold the data, the return value is
+		/* If the given buffer is not large enough to hold the data, the return value is
 		the buffer size,  in characters, required to hold the string and its terminating
 		null character. We use this return value to alloc the final buffer. */
 		size = GetEnvironmentVariableW(keyw, &dummybuf, 0);
-		if (GetLastError() == ERROR_ENVVAR_NOT_FOUND) {
+		switch (size) {
+			case 0:
 				/* The environment variable doesn't exist. */
+				ZEND_ASSERT(GetLastError() == ERROR_ENVVAR_NOT_FOUND);
 				free(keyw);
 				RETURN_FALSE;
-		}
-
-		if (size == 0) {
+			case 1:
 				/* env exists, but it is empty */
 				free(keyw);
 				RETURN_EMPTY_STRING();
 		}
 
-		valw = emalloc((size + 1) * sizeof(wchar_t));
+		valw = emalloc(size * sizeof(wchar_t));
 		size = GetEnvironmentVariableW(keyw, valw, size);
 		if (size == 0) {
-				/* has been removed between the two calls */
-				free(keyw);
-				efree(valw);
-				RETURN_EMPTY_STRING();
+			/* has been removed between the two calls */
+			ZEND_ASSERT(GetLastError() == ERROR_ENVVAR_NOT_FOUND);
+			free(keyw);
+			efree(valw);
+			RETURN_FALSE;
 		} else {
 			ptr = php_win32_cp_w_to_any(valw);
 			RETVAL_STRING(ptr);
@@ -841,7 +842,6 @@ PHP_FUNCTION(putenv)
 #ifdef PHP_WIN32
 	char *value = NULL;
 	int equals = 0;
-	int error_code;
 #endif
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -896,38 +896,33 @@ PHP_FUNCTION(putenv)
 		unsetenv(pe.putenv_string);
 	}
 	if (!p || putenv(pe.putenv_string) == 0) { /* success */
-#else
-# ifndef PHP_WIN32
+#elif !defined(PHP_WIN32)
 	if (putenv(pe.putenv_string) == 0) { /* success */
-# else
-		wchar_t *keyw, *valw = NULL;
+#else
+	wchar_t *keyw, *valw = NULL;
 
-		keyw = php_win32_cp_any_to_w(pe.key);
-		if (value) {
-			valw = php_win32_cp_any_to_w(value);
-		}
-		/* valw may be NULL, but the failed conversion still needs to be checked. */
-		if (!keyw || !valw && value) {
-			efree(pe.putenv_string);
-			efree(pe.key);
-			free(keyw);
-			free(valw);
-			RETURN_FALSE;
-		}
+	keyw = php_win32_cp_any_to_w(pe.key);
+	if (value) {
+		valw = php_win32_cp_any_to_w(value);
+	}
+	/* valw may be NULL, but the failed conversion still needs to be checked. */
+	if (!keyw || !valw && value) {
+		efree(pe.putenv_string);
+		efree(pe.key);
+		free(keyw);
+		free(valw);
+		RETURN_FALSE;
+	}
 
-	error_code = SetEnvironmentVariableW(keyw, valw);
-
-	if (error_code != 0
-# ifndef ZTS
-	/* We need both SetEnvironmentVariable and _putenv here as some
-		dependency lib could use either way to read the environment.
-		Obviously the CRT version will be useful more often. But
-		generally, doing both brings us on the safe track at least
-		in NTS build. */
-	&& _wputenv_s(keyw, valw ? valw : L"") == 0
-# endif
+	/* While we prefer SetEnvironmentVariable, we also call putenv here as
+	some dependency lib could use getenv to read the environment, and there
+	is at least a chance that the lib sees the putenv changes.
+	For best compatibility with other systems, we have to call _putenv first,
+	because that cannot assign an empty string, while SetEnvironmentVariable
+	can, so at least GetEnvironmentVariable will return the proper result. */
+	if (_wputenv_s(keyw, valw ? valw : L"") == 0
+		&& SetEnvironmentVariableW(keyw, valw) != 0
 	) { /* success */
-# endif
 #endif
 		zend_hash_str_add_mem(&BG(putenv_ht), pe.key, pe.key_len, &pe, sizeof(putenv_entry));
 #ifdef HAVE_TZSET
