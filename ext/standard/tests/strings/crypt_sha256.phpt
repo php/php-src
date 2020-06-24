@@ -41,12 +41,12 @@ $tests = array(
     ),
     8 => array(
         '$5$rounds=10$roundstoolow',
-        'the number of rouns is too low',
+        'the number of rounds is too low',
         '*0'
     ),
     9 => array(
         '$5$rounds=1000000000$roundstoohigh',
-        'the number of rouns is too high',
+        'the number of rounds is too high',
         '*0'
     )
 );
