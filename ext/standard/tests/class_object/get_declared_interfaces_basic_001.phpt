@@ -2,13 +2,6 @@
 Test get_declared_interfaces() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : proto array get_declared_interfaces()
- * Description: Returns an array of all declared interfaces.
- * Source code: Zend/zend_builtin_functions.c
- * Alias to functions:
- */
-
-
 echo "*** Testing get_declared_interfaces() : basic functionality ***\n";
 
 // Zero arguments

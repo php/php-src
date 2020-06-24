@@ -10,12 +10,6 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype  : bool touch(string filename [, int time [, int atime]])
- * Description: Set modification time of file
- * Source code: ext/standard/filestat.c
- * Alias to functions:
- */
-
 $workDir = "touchVar5.tmp";
 $subDirOrFile = "aSubDirOrFile";
 chdir(__DIR__);

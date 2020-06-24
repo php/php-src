@@ -8,11 +8,6 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 ?>
 --FILE--
 <?php
-/*
-Prototype: int fileinode ( string $filename );
-Description: Returns the inode number of the file, or FALSE in case of an error.
-*/
-
 echo "*** Testing fileinode() with files, links and directories ***\n";
 $file_path = __DIR__;
 $file1 = $file_path."/fileinode1_variation.tmp";

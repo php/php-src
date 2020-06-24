@@ -7,11 +7,6 @@ function_exists('mb_ereg_match') or die("skip mb_ereg_match() is not available i
 ?>
 --FILE--
 <?php
-/* Prototype  : bool mb_ereg_match(string $pattern, string $string [,string $option])
- * Description: Regular expression match for multibyte string
- * Source code: ext/mbstring/php_mbregex.c
- */
-
 /*
  * Test basic functionality of mb_ereg_match
  */

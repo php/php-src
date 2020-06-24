@@ -4,11 +4,6 @@ Test ctype_upper() function : usage variations - different data types
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-/* Prototype  : bool ctype_upper(mixed $c)
- * Description: Checks for uppercase character(s)
- * Source code: ext/ctype/ctype.c
- */
-
 /*
  * Pass different data types as $c argument to ctype_upper() to test behaviour
  */

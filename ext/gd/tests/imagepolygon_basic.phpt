@@ -7,13 +7,6 @@ imagepolygon()
 --FILE--
 <?php
 
-/* Prototype  : bool imagepolygon  ( resource $image  , array $points  , int $num_points  , int $color  )
- * Description: Draws a polygon.
- * Source code: ext/gd/gd.c
- * Alias to functions:
- */
-
-
 echo "Simple test of imagepolygon() function\n";
 
 $dest = dirname(realpath(__FILE__)) . '/imagepolygon.png';

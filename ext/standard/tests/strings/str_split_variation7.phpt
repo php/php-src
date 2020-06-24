@@ -6,14 +6,6 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 ?>
 --FILE--
 <?php
-/* Prototype  : array str_split(string $str [, int $split_length])
- * Description: Convert a string to an array. If split_length is
-                specified, break the string down into chunks each
-                split_length characters long.
- * Source code: ext/standard/string.c
- * Alias to functions: none
-*/
-
 /*
 * passing different integer values for 'split_length' and heredoc string as 'str' argument to str_split()
 */

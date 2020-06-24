@@ -2,13 +2,6 @@
 Test in_array() function : usage variations - haystack as sub-array/object
 --FILE--
 <?php
-/*
- * Prototype  : bool in_array ( mixed $needle, array $haystack [, bool $strict] )
- * Description: Searches haystack for needle and returns TRUE
- *              if it is found in the array, FALSE otherwise.
- * Source Code: ext/standard/array.c
-*/
-
 /* Test in_array() with haystack as sub-array and object */
 
 /* checking for sub-arrays with in_array() */

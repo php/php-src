@@ -6,12 +6,6 @@ Test posix_strerror() function : error conditions
 ?>
 --FILE--
 <?php
-/* Prototype  : proto string posix_strerror(int errno)
- * Description: Retrieve the system error message associated with the given errno.
- * Source code: ext/posix/posix.c
- * Alias to functions:
- */
-
 echo "*** Testing posix_strerror() : error conditions ***\n";
 
 echo "\n-- Testing posix_strerror() function with invalid error number --\n";

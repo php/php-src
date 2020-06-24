@@ -7,12 +7,6 @@ Test session_cache_expire() function : variation
 
 ob_start();
 
-/*
- * Prototype : int session_cache_expire([int $new_cache_expire])
- * Description : Return current cache expire
- * Source code : ext/session/session.c
- */
-
 echo "*** Testing session_cache_expire() : variation ***\n";
 
 ini_set("session.cache_expire", 360);

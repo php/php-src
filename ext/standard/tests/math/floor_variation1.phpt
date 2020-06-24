@@ -4,11 +4,6 @@ Test floor() function : usage variations - different data types as $value arg
 precision=14
 --FILE--
 <?php
-/* Prototype  : float floor  ( float $value  )
- * Description: Round fractions down.
- * Source code: ext/standard/math.c
- */
-
 echo "*** Testing floor() : usage variations ***\n";
 //get an unset variable
 $unset_var = 10;

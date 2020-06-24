@@ -2,11 +2,6 @@
 Test vsprintf() function : basic functionality - hexadecimal format
 --FILE--
 <?php
-/* Prototype  : string vsprintf(string $format , array $args)
- * Description: Return a formatted string
- * Source code: ext/standard/formatted_print.c
-*/
-
 echo "*** Testing vsprintf() : basic functionality - using hexadecimal format ***\n";
 
 // Initialising different format strings

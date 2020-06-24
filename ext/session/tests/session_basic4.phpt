@@ -21,12 +21,6 @@ url_rewriter.tags="a=href,area=href,frame=src,form="
 
 ob_start();
 
-/*
- * Prototype : session.use_trans_sid=1
- * Description : Test basic functionality.
- * Source code : ext/session/session.c
- */
-
 echo "*** Testing basic session functionality : variation4 use_trans_sid ***\n";
 
 echo "*** Test trans sid ***\n";

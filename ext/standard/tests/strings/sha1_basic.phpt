@@ -3,9 +3,6 @@ sha1() with ASCII output.
 --FILE--
 <?php
 
-/* Prototype: string sha1  ( string $str  [, bool $raw_output  ] )
- * Description: Calculate the sha1 hash of a string
- */
 
 echo "*** Testing sha1() : basic functionality ***\n";
 

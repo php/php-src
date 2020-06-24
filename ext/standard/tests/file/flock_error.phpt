@@ -5,7 +5,6 @@ obscure_filename
 --FILE--
 <?php
 /*
-Prototype: bool flock(resource $handle, int $operation [, int &$wouldblock]);
 Description: PHP supports a portable way of locking complete files
   in an advisory way
 */

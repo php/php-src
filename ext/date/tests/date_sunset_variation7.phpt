@@ -2,12 +2,6 @@
 Test date_sunset() function : usage variation -  Checking sunrise for consecutive days in specific timezone
 --FILE--
 <?php
-/* Prototype  : mixed date_sunset(mixed time [, int format [, float latitude [, float longitude [, float zenith [, float gmt_offset]]]]])
- * Description: Returns time of sunrise for a given day and location
- * Source code: ext/date/php_date.c
- * Alias to functions:
- */
-
 echo "*** Testing date_sunset() : usage variation ***\n";
 
 //Timezones with required data for date_sunrise

@@ -10,12 +10,6 @@ require __DIR__ . '/../skipif_root.inc';
 --FILE--
 <?php
 /*
- * Prototype  : object dir(string $directory[, resource $context])
- * Description: Directory class with properties, handle and class and methods read, rewind and close
- * Source code: ext/standard/dir.c
- */
-
-/*
  * Providing various permissions to the directory to be opened and checking
  * to see if dir() function opens the directory successfully.
  */

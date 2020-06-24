@@ -9,11 +9,6 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 --FILE--
 <?php
 
-/*
- *  Prototype: array stat ( string $filename );
- *  Description: Gives information about a file
- */
-
 /* test the effects of truncate() on stats of file */
 
 

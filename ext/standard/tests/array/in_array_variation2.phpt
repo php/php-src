@@ -2,13 +2,6 @@
 Test in_array() function : usage variations - different haystack values
 --FILE--
 <?php
-/*
- * Prototype  : bool in_array ( mixed $needle, array $haystack [, bool $strict] )
- * Description: Searches haystack for needle and returns TRUE
- *              if it is found in the array, FALSE otherwise.
- * Source Code: ext/standard/array.c
-*/
-
 /* Test in_array() with different possible haystack values */
 
 echo "*** Testing in_array() with different haystack values ***\n";

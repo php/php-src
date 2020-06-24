@@ -2,11 +2,6 @@
 Test strrchr() function : usage variations - unexpected inputs for haystack and needle
 --FILE--
 <?php
-/* Prototype  : string strrchr(string $haystack, string $needle);
- * Description: Finds the last occurrence of a character in a string.
- * Source code: ext/standard/string.c
-*/
-
 /* Test strrchr() function with unexpected inputs for haystack and needle */
 
 echo "*** Testing strrchr() function: with unexpected inputs for haystack and needle ***\n";

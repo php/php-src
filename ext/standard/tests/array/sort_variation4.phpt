@@ -2,12 +2,6 @@
 Test sort() function : usage variations - sort reference values
 --FILE--
 <?php
-/* Prototype  : bool sort ( array &$array [, int $sort_flags] )
- * Description: This function sorts an array.
-                Elements will be arranged from lowest to highest when this function has completed.
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Testing sort() by providing reference variable array with following flag values
  *  flag value as default

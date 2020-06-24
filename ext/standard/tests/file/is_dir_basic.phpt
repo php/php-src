@@ -2,11 +2,6 @@
 Test is_dir() function: basic functionality
 --FILE--
 <?php
-/* Prototype: bool is_dir ( string $filename );
-   Description: Tells whether the filename is a regular file
-     Returns TRUE if the filename exists and is a regular file
-*/
-
 echo "*** Testing is_dir(): basic functionality ***\n";
 $file_path = __DIR__;
 var_dump( is_dir($file_path) );

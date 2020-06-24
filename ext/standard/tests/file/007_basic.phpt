@@ -2,18 +2,6 @@
 Test fopen(), fclose() & feof() functions: basic functionality
 --FILE--
 <?php
-/*
- Prototype: resource fopen(string $filename, string $mode
-                            [, bool $use_include_path [, resource $context]] );
- Description: Opens file or URL.
-
- Prototype: bool fclose ( resource $handle );
- Description: Closes an open file pointer
-
- Prototype: bool feof ( resource $handle );
- Description: Tests for end-of-file on a file pointer
-*/
-
 echo "*** Testing basic operations of fopen() and fclose() functions ***\n";
 $modes = array(
   "w",

@@ -4,10 +4,7 @@ Test get_include_files() function
 include_path=.
 --FILE--
 <?php
-/* Prototype: array get_included_files  ( void  )
- * Description: Returns an array with the names of included or required files
 
-*/
 
 echo "*** Testing get_included_files()\n";
 

@@ -2,11 +2,6 @@
 Test sprintf() function : usage variations - unexpected values for format argument
 --FILE--
 <?php
-/* Prototype  : string sprintf(string $format [, mixed $arg1 [, mixed ...]])
- * Description: Return a formatted string
- * Source code: ext/standard/formatted_print.c
-*/
-
 /*
 * Testing sprintf() : with different unexpected values for format argument other than the strings
 */

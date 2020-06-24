@@ -8,10 +8,6 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 precision=14
 --FILE--
 <?php
-/* Prototype: bool is_float ( mixed $var );
- * Description: Finds whether the given variable is a float
- */
-
 echo "*** Testing is_float(), is_double() with float values***\n";
 // different valid  float values
 $floats = array(

@@ -9,12 +9,6 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 --FILE--
 <?php
 /*
- * Prototype  : object dir(string $directory[, resource $context])
- * Description: Directory class with properties, handle and class and methods read, rewind and close
- * Source code: ext/standard/dir.c
- */
-
-/*
  * Testing the behavior of dir() function by trying to open a
  * directory which is already open.
  */

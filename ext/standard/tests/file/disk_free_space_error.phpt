@@ -7,13 +7,6 @@ if(substr(PHP_OS, 0, 3) == 'WIN')
 ?>
 --FILE--
 <?php
-/*
- *  Prototype: float disk_free_space( string directory )
- *  Description: Given a string containing a directory, this function will
- *               return the number of bytes available on the corresponding
- *               filesystem or disk partition
- */
-
 echo "*** Testing error conditions ***\n";
 $file_path = __DIR__;
 

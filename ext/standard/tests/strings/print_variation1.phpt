@@ -3,12 +3,6 @@ Test print() function : usage variations
 --FILE--
 <?php
 
-/* Prototype  : int print  ( string $arg  )
- * Description: Output a string
- * Source code: n/a, print is a language construct not an extension function
- * Test based on php.net manual example.
-*/
-
 echo "*** Testing print() function: with unexpected inputs for 'arg' argument ***\n";
 
 //get an unset variable

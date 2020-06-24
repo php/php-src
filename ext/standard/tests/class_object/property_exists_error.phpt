@@ -2,12 +2,6 @@
 Test property_exists() function : error conditions
 --FILE--
 <?php
-/* Prototype  : bool property_exists(mixed object_or_class, string property_name)
- * Description: Checks if the object or class has a property
- * Source code: Zend/zend_builtin_functions.c
- * Alias to functions:
- */
-
 echo "*** Testing property_exists() : error conditions ***\n";
 
 echo "\n-- Testing property_exists() function with incorrect arguments --\n";

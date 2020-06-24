@@ -4,11 +4,6 @@ Test ctype_space() function : usage variations - different data types as $c argu
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-/* Prototype  : bool ctype_space(mixed $c)
- * Description: Checks for whitespace character(s)
- * Source code: ext/ctype/ctype.c
- */
-
 /*
  * Pass different data types as $c argument to ctype_space() to test behaviour
  */

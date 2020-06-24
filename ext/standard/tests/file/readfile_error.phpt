@@ -2,10 +2,6 @@
 Test readfile() function: error conditions
 --FILE--
 <?php
-/* Prototype: int readfile ( string $filename [, bool $use_include_path [, resource $context]] );
-   Description: Outputs a file
-*/
-
 $context = stream_context_create();
 
 echo "*** Test readfile(): error conditions ***\n";

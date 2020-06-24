@@ -2,11 +2,6 @@
 Test opendir() function : usage variations - open a directory twice
 --FILE--
 <?php
-/* Prototype  : mixed opendir(string $path[, resource $context])
- * Description: Open a directory and return a dir_handle
- * Source code: ext/standard/dir.c
- */
-
 /*
  * Call opendir() twice with the same directory as $path argument
  */

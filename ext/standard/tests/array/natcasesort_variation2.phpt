@@ -3,11 +3,6 @@ Test natcasesort() function : usage variations - Pass arrays of different data t
 --FILE--
 <?php
 
-/* Prototype  : bool natcasesort(array &$array_arg)
- * Description: Sort an array using case-insensitive natural sort
- * Source code: ext/standard/array.c
- */
-
 /*
  * Pass arrays of different data types to natcasesort() to test how they are sorted
  */

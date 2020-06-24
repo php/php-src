@@ -2,12 +2,6 @@
 Test rewinddir() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : void rewinddir([resource $dir_handle])
- * Description: Rewind dir_handle back to the start
- * Source code: ext/standard/dir.c
- * Alias to functions: rewind
- */
-
 /*
  * Test basic functionality of rewinddir()
  */

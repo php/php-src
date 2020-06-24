@@ -2,13 +2,6 @@
 Test var_export() function with valid strings
 --FILE--
 <?php
-/* Prototype  : mixed var_export(mixed var [, bool return])
- * Description: Outputs or returns a string representation of a variable
- * Source code: ext/standard/var.c
- * Alias to functions:
- */
-
-
 echo "*** Testing var_export() with valid strings ***\n";
 // different valid  string
 $valid_strings = array(

@@ -3,11 +3,6 @@ Test fgetcsv() : usage variations - two chars as enclosure & delimiter (various 
 --FILE--
 <?php
 /*
- Prototype: array fgetcsv ( resource $handle [, int $length [, string $delimiter [, string $enclosure]]] );
- Description: Gets line from file pointer and parse for CSV fields
-*/
-
-/*
    Testing fgetcsv() to read from a file opened in various write modes and
    enclosure argument with two characters
 */

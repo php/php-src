@@ -2,11 +2,6 @@
 Test natcasesort() function : usage variations - recursive arrays
 --FILE--
 <?php
-/* Prototype  : bool natcasesort(array &$array_arg)
- * Description: Sort an array using case-insensitive natural sort
- * Source code: ext/standard/array.c
- */
-
 /*
  * Pass natcasesort() an infinitely recursive array to test how it is re-ordered
  */

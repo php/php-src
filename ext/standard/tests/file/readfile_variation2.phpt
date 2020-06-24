@@ -8,10 +8,6 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype: int readfile ( string $filename [, bool $use_include_path [, resource $context]] );
-   Description: Outputs a file
-*/
-
 /* Variation 2 : Create file
                  Create soft/hard link to it
                  Read link using readfile()

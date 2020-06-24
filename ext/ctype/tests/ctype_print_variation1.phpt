@@ -4,11 +4,6 @@ Test ctype_print() function : usage variations - different data types as $c arg
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-/* Prototype  : bool ctype_print(mixed $c)
- * Description: Checks for printable character(s)
- * Source code: ext/ctype/ctype.c
- */
-
 /*
  * Pass different data types as $c argument to ctype_print() to test behaviour
  */

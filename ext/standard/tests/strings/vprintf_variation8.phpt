@@ -2,11 +2,6 @@
 Test vprintf() function : usage variations - string formats with non-string values
 --FILE--
 <?php
-/* Prototype  : string vprintf(string format, array args)
- * Description: Return a formatted string
- * Source code: ext/standard/formatted_print.c
-*/
-
 /*
  * Test vprintf() when different string formats and non-string values are passed to
  * the '$format' and '$args' arguments of the function

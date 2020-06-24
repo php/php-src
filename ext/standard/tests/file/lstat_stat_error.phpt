@@ -8,13 +8,6 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype: array lstat ( string $filename );
-   Description: Gives information about a file or symbolic link
-
-   Prototype: array stat ( string $filename );
-   Description: Gives information about a file
-*/
-
 echo "*** Testing lstat() for error conditions ***\n";
 $file_path = __DIR__;
 var_dump( lstat("$file_path/temp.tmp") ); // non existing file

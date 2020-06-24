@@ -2,11 +2,6 @@
 Test chop() function : usage variations - miscellaneous arguments
 --FILE--
 <?php
-/* Prototype  : string chop ( string $str [, string $charlist] )
- * Description: Strip whitespace (or other characters) from the end of a string
- * Source code: ext/standard/string.c
-*/
-
 /*
  * Testing chop() : with miscellaneous arguments
 */

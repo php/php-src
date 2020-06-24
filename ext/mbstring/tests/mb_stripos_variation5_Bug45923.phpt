@@ -7,11 +7,6 @@ function_exists('mb_stripos') or die("skip mb_stripos() is not available in this
 ?>
 --FILE--
 <?php
-/* Prototype  : int mb_stripos(string $haystack, string $needle [, int $offset [, string $encoding]])
- * Description: Find position of first occurrence of a string within another, case insensitive
- * Source code: ext/mbstring/mbstring.c
- */
-
 /*
  * Test how mb_stripos() behaves when passed different integers as $offset argument
  * The character length of $string_ascii and $string_mb is the same,

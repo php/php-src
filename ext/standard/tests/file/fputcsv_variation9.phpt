@@ -2,12 +2,6 @@
 Test fputcsv() : usage variations - two chars as enclosure & delimiter
 --FILE--
 <?php
-/*
- Prototype: array fputcsv ( resource $handle , array $fields [, string $delimiter [, string $enclosure]]] );
- Description: Format line as CSV and write to the file pointer
-*/
-
-
 /* Testing fputcsv() to write to a file when delimiter and enclosure are of two chars each */
 
 echo "*** Testing fputcsv() : with two chars as enclosure & delimiter ***\n";

@@ -4,11 +4,6 @@ Test pow() function : usage variations - different data types as $exp argument
 serialize_precision = 14
 --FILE--
 <?php
-/* Prototype  : number pow  ( number $base  , number $exp  )
- * Description: Exponential expression.
- * Source code: ext/standard/math.c
- */
-
 echo "*** Testing pow() : usage variations ***\n";
 
 //get an unset variable

@@ -5,7 +5,6 @@ precision = 10
 --FILE--
 <?php
 /*
- * proto float rad2deg(float number)
  * Function is implemented in ext/standard/math.c
 */
 

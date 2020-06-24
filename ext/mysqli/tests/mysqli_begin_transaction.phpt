@@ -16,7 +16,6 @@ if (!have_innodb($link))
 --FILE--
 <?php
     require_once("connect.inc");
-    /* {{{ proto bool mysqli_begin_transaction(object link, [int flags [, string name]]) */
     if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
         printf("[004] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
             $host, $user, $db, $port, $socket);

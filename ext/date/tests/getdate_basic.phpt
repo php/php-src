@@ -2,11 +2,6 @@
 Test getdate() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : array getdate([int timestamp])
- * Description: Get date/time information
- * Source code: ext/date/php_date.c
- */
-
 echo "*** Testing getdate() : basic functionality ***\n";
 
 //Set the default time zone

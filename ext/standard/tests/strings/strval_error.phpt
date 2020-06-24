@@ -2,11 +2,6 @@
 Test strval() function : usage variations  - error conditions
 --FILE--
 <?php
-/* Prototype  : string strval  ( mixed $var  )
- * Description: Get the string value of a variable.
- * Source code: ext/standard/string.c
- */
-
 echo "*** Testing strval() : error conditions ***\n";
 
 error_reporting(E_ALL ^ E_NOTICE);

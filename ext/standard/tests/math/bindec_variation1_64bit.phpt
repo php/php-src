@@ -6,11 +6,6 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 ?>
 --FILE--
 <?php
-/* Prototype  : number bindec  ( string $binary_string  )
- * Description: Returns the decimal equivalent of the binary number represented by the binary_string  argument.
- * Source code: ext/standard/math.c
- */
-
 echo "*** Testing bindec() : usage variations ***\n";
 //get an unset variable
 $unset_var = 10;

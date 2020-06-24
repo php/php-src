@@ -4,12 +4,6 @@ Hash: hash_file() function : error conditions
 Felix De Vliegher <felix.devliegher@gmail.com>
 --FILE--
 <?php
-/* Prototype  : string hash_file(string algo, string filename[, bool raw_output = false])
- * Description: Generate a hash of a given file
- * Source code: ext/hash/hash.c
- * Alias to functions:
- */
-
 echo "*** Testing hash_file() : error conditions ***\n";
 
 // Set up file

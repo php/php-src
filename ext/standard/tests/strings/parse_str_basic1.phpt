@@ -3,11 +3,6 @@ Test parse_str() function : basic functionality
 --FILE--
 <?php
 
-/* Prototype  : void parse_str  ( string $str , array &$arr )
- * Description: Parses the string into variables
- * Source code: ext/standard/string.c
-*/
-
 echo "*** Testing parse_str() : basic functionality ***\n";
 
 echo "\nBasic test WITH undefined var for result arg\n";

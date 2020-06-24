@@ -2,11 +2,6 @@
 Test array_map() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : array array_map  ( callback $callback  , array $arr1  [, array $...  ] )
- * Description: Applies the callback to the elements of the given arrays
- * Source code: ext/standard/array.c
- */
-
 echo "*** Testing array_map() : basic functionality ***\n";
 
 function multiply($p, $q) {

@@ -8,11 +8,6 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 ?>
 --FILE--
 <?php
-/* Prototype  : string dechex  ( int $number  )
- * Description: Returns a string containing a hexadecimal representation of the given number  argument.
- * Source code: ext/standard/math.c
- */
-
 echo "*** Testing dechex() : usage variations ***\n";
 //get an unset variable
 $unset_var = 10;

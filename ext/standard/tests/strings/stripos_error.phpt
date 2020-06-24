@@ -2,11 +2,6 @@
 Test stripos() function : error conditions
 --FILE--
 <?php
-/* Prototype  : int stripos ( string $haystack, string $needle [, int $offset] );
- * Description: Find position of first occurrence of a case-insensitive string
- * Source code: ext/standard/string.c
-*/
-
 echo "*** Testing stripos() function: error conditions ***\n";
 
 echo "\n-- Offset beyond the end of the string --\n";

@@ -3,10 +3,6 @@ Test stristr() function : usage variations - test values for $needle argument
 --FILE--
 <?php
 
-/* Prototype: string stristr ( string $haystack, string $needle );
-   Description: Case-insensitive strstr().
-*/
-
 echo "*** Testing stristr() function: with unexpected inputs for 'needle' argument ***\n";
 
 //get an unset variable

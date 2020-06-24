@@ -2,12 +2,6 @@
 Test array_diff() function : usage variations  - array with different data types as values
 --FILE--
 <?php
-/* Prototype  : array array_diff(array $arr1, array $arr2 [, array ...])
- * Description: Returns the entries of $arr1 that have values which are not
- * present in any of the others arguments.
- * Source code: ext/standard/array.c
- */
-
 /*
  * Test how array_diff() compares indexed arrays containing different
  * data types as values in place of $arr2

@@ -2,12 +2,6 @@
 Test asort() function : usage variations - sort bool values
 --FILE--
 <?php
-/* Prototype  : bool asort ( array &$array [, int $sort_flags] )
- * Description: This function asorts an array.
-                Elements will be arranged from lowest to highest when this function has completed.
- * Source code: ext/standard/array.c
-*/
-
 /*
  * testing asort() by providing bool value array for $array argument with following flag values.
  * flag value as default

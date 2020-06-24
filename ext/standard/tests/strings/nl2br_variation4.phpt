@@ -2,11 +2,6 @@
 Test nl2br() function : usage variations - html values for 'str' argument
 --FILE--
 <?php
-/* Prototype  : string nl2br(string $str)
- * Description: Inserts HTML line breaks before all newlines in a string.
- * Source code: ext/standard/string.c
-*/
-
 /*
 * Test nl2br() function by passing html string inputs containing line breaks and
 *   new line chars for 'str'

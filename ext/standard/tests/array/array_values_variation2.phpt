@@ -2,11 +2,6 @@
 Test array_values() function : usage variations - arrays of different data types
 --FILE--
 <?php
-/* Prototype  : array array_values(array $input)
- * Description: Return just the values from the input array
- * Source code: ext/standard/array.c
- */
-
 /*
  * Pass arrays of different data types as $input argument to array_values() to test behaviour
  */

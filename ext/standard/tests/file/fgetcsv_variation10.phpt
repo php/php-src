@@ -2,11 +2,6 @@
 Test fgetcsv() : usage variations - file pointer pointing to EOF
 --FILE--
 <?php
-/*
- Prototype: array fgetcsv ( resource $handle [, int $length [, string $delimiter [, string $enclosure]]] );
- Description: Gets line from file pointer and parse for CSV fields
-*/
-
 /* Testing fgetcsv() by reading from a file when the file pointer is pointing to end of file */
 
 echo "*** Testing fgetcsv() : with file pointer pointing to EOF ***\n";

@@ -6,12 +6,6 @@ Test posix_getgrgid() function : error conditions
 ?>
 --FILE--
 <?php
-/* Prototype  : proto array posix_getgrgid(long gid)
- * Description: Group database access (POSIX.1, 9.2.1)
- * Source code: ext/posix/posix.c
- * Alias to functions:
- */
-
 echo "*** Testing posix_getgrgid() : error conditions ***\n";
 
 echo "\n-- Testing posix_getgrgid() function with a negative group id --\n";

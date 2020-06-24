@@ -8,11 +8,6 @@ require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
-/* Prototype  : bool imap_mail_copy  ( resource $imap_stream  , string $msglist  , string $mailbox  [, int $options = 0  ] )
- * Description: Copies mail messages specified by msglist  to specified mailbox.
- * Source code: ext/imap/php_imap.c
- */
-
 echo "*** Testing imap_mail_copy() : basic functionality ***\n";
 
 require_once(__DIR__.'/imap_include.inc');

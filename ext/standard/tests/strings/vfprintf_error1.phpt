@@ -6,12 +6,6 @@ Felix De Vliegher <felix.devliegher@gmail.com>
 precision=14
 --FILE--
 <?php
-/* Prototype  : int vfprintf(resource stream, string format, array args)
- * Description: Output a formatted string into a stream
- * Source code: ext/standard/formatted_print.c
- * Alias to functions:
- */
-
 // Open handle
 $file = 'vfprintf_error1.txt';
 $fp = fopen( $file, "a+" );

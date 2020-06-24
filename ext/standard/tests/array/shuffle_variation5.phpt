@@ -2,11 +2,6 @@
 Test shuffle() function : usage variation - arrays with diff heredoc strings
 --FILE--
 <?php
-/* Prototype  : bool shuffle(array $array_arg)
- * Description: Randomly shuffle the contents of an array
- * Source code: ext/standard/array.c
-*/
-
 /*
 * Test behaviour of shuffle() when an array of heredoc strings is passed to
 * 'array_arg' argument of the function

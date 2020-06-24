@@ -9,12 +9,6 @@ if(substr(PHP_OS, 0, 3) == "WIN")
 ?>
 --FILE--
 <?php
-/* Prototype  : resource fopen(string filename, string mode [, bool use_include_path [, resource context]])
- * Description: Open a file or a URL and return a file pointer
- * Source code: ext/standard/file.c
- * Alias to functions:
- */
-
 $tmpDir = 'fopenVar19.Dir';
 $realFilename = __FILE__.'.real';
 $sortFilename = __FILE__.'.soft';

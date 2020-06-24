@@ -2,12 +2,6 @@
 Test base64_decode() function : basic functionality - ensure all base64 alphabet is supported.
 --FILE--
 <?php
-/* Prototype  : proto string base64_decode(string str[, bool strict])
- * Description: Decodes string using MIME base64 algorithm
- * Source code: ext/standard/base64.c
- * Alias to functions:
- */
-
 echo "Decode an input string containing the whole base64 alphabet:\n";
 $allbase64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/VV==";
 var_dump(bin2hex(base64_decode($allbase64)));

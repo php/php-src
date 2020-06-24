@@ -4,12 +4,6 @@ Test file function : variation - various absolute and relative paths
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
-/* Prototype  : array file(string filename [, int flags[, resource context]])
- * Description: Read entire file into an array
- * Source code: ext/standard/file.c
- * Alias to functions:
- */
-
 echo "*** Testing file() : variation ***\n";
 $mainDir = "fileVar8.dir";
 $subDir = "fileVar8Sub";

@@ -10,11 +10,6 @@ if (PHP_INT_SIZE != 4) {
 <?php
 
 /*
-  Prototype: mixed fscanf ( resource $handle, string $format [, mixed &$...] );
-  Description: Parses input from a file according to a format
-*/
-
-/*
   Test fscanf() to scan data using different format types and also
   tracking the file pointer movement along with reading
  */

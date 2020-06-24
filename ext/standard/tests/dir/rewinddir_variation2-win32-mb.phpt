@@ -8,12 +8,6 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype  : void rewinddir([resource $dir_handle])
- * Description: Rewind dir_handle back to the start
- * Source code: ext/standard/dir.c
- * Alias to functions: rewind
- */
-
 /*
  * Open and close a directory handle then call rewinddir() to test behaviour
  */

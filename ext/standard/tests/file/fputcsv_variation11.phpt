@@ -2,11 +2,6 @@
 Test fputcsv() : usage variations - with default enclosure value
 --FILE--
 <?php
-/*
- Prototype: array fputcsv ( resource $handle , array $fields [, string $delimiter [, string $enclosure]]] );
- Description: Format line as CSV and write to the file pointer
-*/
-
 /* Testing fputcsv() to write to a file when default enclosure value is provided */
 
 echo "*** Testing fputcsv() : with default enclosure value ***\n";

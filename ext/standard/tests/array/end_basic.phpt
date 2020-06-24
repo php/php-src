@@ -2,11 +2,6 @@
 Test end() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : mixed end(array $array_arg)
- * Description: Advances array argument's internal pointer to the last element and return it
- * Source code: ext/standard/array.c
- */
-
 /*
  * Test basic functionality of end()
  */

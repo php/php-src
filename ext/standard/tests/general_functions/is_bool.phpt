@@ -2,10 +2,6 @@
 Test is_bool() function
 --FILE--
 <?php
-/* Prototype: bool is_bool ( mixed $var );
- * Description: Finds whether the given variable is a boolean
- */
-
 echo "*** Testing is_bool() with valid boolean values ***\n";
 // different valid  boolean values
 $valid_bools = array(

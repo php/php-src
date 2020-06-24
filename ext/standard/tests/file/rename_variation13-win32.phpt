@@ -11,11 +11,6 @@ if(substr(PHP_OS, 0, 3) != "WIN")
 obscure_filename
 --FILE--
 <?php
-/* Prototype  : bool rename(string old_name, string new_name[, resource context])
- * Description: Rename a file
- * Source code: ext/standard/file.c
- * Alias to functions:
- */
 /* An array of files */
 $names_arr = array(
   /* Invalid args */

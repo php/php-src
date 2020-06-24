@@ -8,10 +8,6 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype: string realpath ( string $path );
-   Description: Returns canonicalized absolute pathname
-*/
-
 require __DIR__.'/file.inc';
 
 echo "*** Testing realpath(): usage variations ***\n";

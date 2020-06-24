@@ -4,13 +4,6 @@ Testing disk_total_space() functions : Usage Variations.
 disk_total_space
 --FILE--
 <?php
-/*
- *  Prototype: float disk_total_space( string directory )
- *  Description: given a string containing a directory, this function
- *               will return the total number of bytes on the corresponding
- *               filesystem or disk partition.
- */
-
 $file_path = __DIR__;
 
 echo "*** Testing with a directory ***\n";

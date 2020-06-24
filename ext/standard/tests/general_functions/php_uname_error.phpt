@@ -2,9 +2,6 @@
 Test php_uname() function -  error conditions - pass function incorrect arguments
 --FILE--
 <?php
-/* Prototype: string php_uname  ([ string $mode  ] )
- * Description:  Returns information about the operating system PHP is running on
-*/
 
 echo "*** Testing php_uname() - error test\n";
 

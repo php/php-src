@@ -2,11 +2,6 @@
 Test usort() function : usage variations - use built in functions as $cmp_function arg
 --FILE--
 <?php
-/* Prototype  : bool usort(array $array_arg, string $cmp_function)
- * Description: Sort an array by values using a user-defined comparison function
- * Source code: ext/standard/array.c
- */
-
 /*
  * Test usort() when comparison function is:
  * 1. a built in comparison function

@@ -7,12 +7,6 @@ Test session_decode() function : basic functionality
 
 ob_start();
 
-/*
- * Prototype : string session_decode(void)
- * Description : Decodes session data from a string
- * Source code : ext/session/session.c
- */
-
 echo "*** Testing session_decode() : basic functionality ***\n";
 
 // Get an unset variable

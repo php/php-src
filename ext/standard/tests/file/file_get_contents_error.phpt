@@ -4,10 +4,6 @@ Test file_get_contents() function : error conditions
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
-/* Prototype: string file_get_contents( string $filename{, bool $use_include_path[,
- *                                      resource $context[, int $offset[, int $maxlen]]]] )
- * Description: Reads entire file into a string
- */
 
 echo "*** Testing error conditions ***\n";
 

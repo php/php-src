@@ -4,12 +4,6 @@ Test finfo_buffer() function : basic functionality
 <?php require_once(__DIR__ . '/skipif.inc'); ?>
 --FILE--
 <?php
-/* Prototype  : string finfo_buffer(resource finfo, char *string [, int options [, resource context]])
- * Description: Return information about a string buffer.
- * Source code: ext/fileinfo/fileinfo.c
- * Alias to functions:
- */
-
 $magicFile = __DIR__ . DIRECTORY_SEPARATOR . 'magic私はガラスを食べられます';
 
 $options = array(

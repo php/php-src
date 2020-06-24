@@ -9,11 +9,6 @@ function_exists('mb_substr') or die("skip mb_substr() is not available in this b
 internal_encoding=ISO-8859-1
 --FILE--
 <?php
-/* Prototype  : string mb_substr(string $str, int $start [, int $length [, string $encoding]])
- * Description: Returns part of a string
- * Source code: ext/mbstring/mbstring.c
- */
-
 /*
  * Test Basic Functionality of mb_substr with ASCII characters and multibyte strings.
  */

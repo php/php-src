@@ -9,12 +9,6 @@ require __DIR__ . '/../skipif_root.inc';
 ?>
 --FILE--
 <?php
-/* Prototype: bool is_writable ( string $filename );
-   Description: Tells whether the filename is writable.
-
-   is_writeable() is an alias of is_writable()
-*/
-
 /* test is_executable() with file/dir having different permissions */
 
 require __DIR__.'/file.inc';

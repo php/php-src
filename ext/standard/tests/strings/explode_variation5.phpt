@@ -3,11 +3,6 @@ Test explode() function : usage variations - positive and negative limits
 --FILE--
 <?php
 
-/* Prototype  : array explode  ( string $delimiter  , string $string  [, int $limit  ] )
- * Description: Split a string by string.
- * Source code: ext/standard/string.c
-*/
-
 echo "*** Testing explode() function: positive and negative limits ***\n";
 $str = 'one||two||three||four';
 

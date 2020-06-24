@@ -2,12 +2,6 @@
 Test join() function : usage variations - different values for 'pieces' argument
 --FILE--
 <?php
-/* Prototype  : string join( string $glue, array $pieces )
- * Description: Join array elements with a string
- * Source code: ext/standard/string.c
- * Alias of function: implode()
-*/
-
 /*
  * test join() by giving different pieces values
 */

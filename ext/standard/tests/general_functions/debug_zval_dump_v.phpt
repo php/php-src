@@ -2,11 +2,6 @@
 Test debug_zval_dump() function : usage variations
 --FILE--
 <?php
-/* Prototype: void debug_zval_dump ( mixed $variable );
-   Description: Dumps a string representation of an internal zend value
-                to output.
-*/
-
 echo "*** Testing debug_zval_dump() on functions ***\n";
 echo "--- Variation 1: global variable inside a function ---\n";
 $global_var = 10;  //declaring global variable

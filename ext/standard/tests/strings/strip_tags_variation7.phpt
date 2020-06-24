@@ -2,11 +2,6 @@
 Test strip_tags() function : usage variations - invalid values for 'str' and 'allowable_tags'
 --FILE--
 <?php
-/* Prototype  : string strip_tags(string $str [, string $allowable_tags])
- * Description: Strips HTML and PHP tags from a string
- * Source code: ext/standard/string.c
-*/
-
 /*
  * testing functionality of strip_tags() by giving invalid values for $str and $allowable_tags argument
 */

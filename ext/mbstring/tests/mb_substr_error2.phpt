@@ -7,11 +7,6 @@ function_exists('mb_substr') or die("skip mb_substr() is not available in this b
 ?>
 --FILE--
 <?php
-/* Prototype  : string mb_substr(string $str, int $start [, int $length [, string $encoding]])
- * Description: Returns part of a string
- * Source code: ext/mbstring/mbstring.c
- */
-
 /*
  * Pass an unknown encoding to mb_substr() to test behaviour
  */

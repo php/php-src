@@ -5,13 +5,6 @@ error_reporting=2047
 precision=14
 --FILE--
 <?php
-/* Prototype: array explode ( string $delimiter, string $string [, int $limit] );
-   Description: Returns an array of strings, each of which is a substring of string
-                formed by splitting it on boundaries formed by the string delimiter.
-                If limit is set, the returned array will contain a maximum of limit
-                elements with the last element containing the rest of string.
-*/
-
 echo "*** Testing explode() for basic operations ***\n";
 $delimiters = array (
   "",  // len=0

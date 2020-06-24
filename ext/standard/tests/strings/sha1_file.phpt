@@ -3,9 +3,6 @@ Test sha1_file() function with ASCII output and raw binary output. Based on ext/
 --FILE--
 <?php
 
-/* Prototype: string sha1_file( string filename[, bool raw_output] )
- * Description: Calculate the sha1 hash of a file
- */
 
 echo "*** Testing sha1_file() : basic functionality ***\n";
 

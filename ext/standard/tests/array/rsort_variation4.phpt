@@ -2,11 +2,6 @@
 Test rsort() function : usage variations - referenced variables
 --FILE--
 <?php
-/* Prototype  : bool rsort(array &$array_arg [, int $sort_flags])
- * Description: Sort an array in reverse order
- * Source code: ext/standard/array.c
- */
-
 /*
  * Test behaviour of rsort() when:
  * 1. passed an array of referenced variables

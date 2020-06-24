@@ -2,16 +2,10 @@
 Test array_filter() function : usage variations - Different types of array for 'input' argument
 --FILE--
 <?php
-/* Prototype  : array array_filter(array $input [, callback $callback])
- * Description: Filters elements from the array via the callback.
- * Source code: ext/standard/array.c
-*/
-
 /*
 * Passing different types of array as 'input' argument.
 */
 
-// callback function returning always false
 function always_false($input)
 {
   return false;

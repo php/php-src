@@ -2,11 +2,6 @@
 Test sprintf() function : usage variations - int formats with int values
 --FILE--
 <?php
-/* Prototype  : string sprintf(string $format [, mixed $arg1 [, mixed ...]])
- * Description: Return a formatted string
- * Source code: ext/standard/formatted_print.c
-*/
-
 echo "*** Testing sprintf() : integer formats with integer values ***\n";
 
 // different valid  integer values

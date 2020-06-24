@@ -4,11 +4,6 @@ Test ctype_alpha() function : usage variations - Octal and hexadecimal values
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-/* Prototype  : bool ctype_alpha(mixed $c)
- * Description: Checks for alphabetic character(s)
- * Source code: ext/ctype/ctype.c
- */
-
 /*
  * Pass octal and hexadecimal values to ctype_alpha() to test behaviour
  */

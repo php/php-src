@@ -2,10 +2,6 @@
 Test str_contains() function
 --FILE--
 <?php
-/* Prototype: str_contains ( string $haystack , string $needle ) : bool
-   Description: Check if a string contains another string
-   Source code: ext/standard/string.c
-*/
 var_dump(str_contains("test string", "test"));
 var_dump(str_contains("test string", "string"));
 var_dump(str_contains("test string", "strin"));

@@ -2,11 +2,6 @@
 Test abs() function : usage variations - different data types as $number arg
 --FILE--
 <?php
-/* Prototype  : number abs  ( mixed $number  )
- * Description: Returns the absolute value of number.
- * Source code: ext/standard/math.c
- */
-
 /*
  * Pass different data types as $number argument to abs() to test behaviour
  */

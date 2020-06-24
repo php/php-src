@@ -8,19 +8,6 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype: bool symlink ( string $target, string $link );
-   Description: creates a symbolic link to the existing target with the specified name link
-
-   Prototype: bool is_link ( string $filename );
-   Description: Tells whether the given file is a symbolic link.
-
-   Prototype: bool link ( string $target, string $link );
-   Description: Create a hard link
-
-   Prototype: int linkinfo ( string $path );
-   Description: Gets information about a link
-*/
-
 /* Variation 1 : Creating links across directories where linkname is stored as an object and array member */
 
 // creating temp directory which will contain temp file and links created

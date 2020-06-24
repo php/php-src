@@ -2,10 +2,6 @@
 Test htmlspecialchars() function
 --FILE--
 <?php
-/* Prototype: string htmlspecialchars ( string $string [, int $quote_style [, string $charset]] );
-   Description: Convert special characters to HTML entities
-*/
-
 /* retrieving htmlspecialchars from the ANSI character table */
 echo "*** Retrieving htmlspecialchars for 256 characters ***\n";
 for($i=0; $i<256; $i++)

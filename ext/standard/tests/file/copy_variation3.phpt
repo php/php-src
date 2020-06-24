@@ -9,11 +9,6 @@ if(substr(PHP_OS, 0, 3) == "WIN")
 obscure_filename
 --FILE--
 <?php
-/* Prototype: bool copy ( string $source, string $dest );
-   Description: Makes a copy of the file source to dest.
-     Returns TRUE on success or FALSE on failure.
-*/
-
 /* Test copy() function: In creation of destination file names containing white spaces
      and checking the existence and size of destination files
 */

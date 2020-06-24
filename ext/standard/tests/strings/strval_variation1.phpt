@@ -2,11 +2,6 @@
 Test strval() function : usage variations  - Pass different data types as strval
 --FILE--
 <?php
-/* Prototype  : string strval  ( mixed $var  )
- * Description: Get the string value of a variable.
- * Source code: ext/standard/string.c
- */
-
 echo "*** Testing strval() : usage variations ***\n";
 
 //get an unset variable

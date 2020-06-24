@@ -2,12 +2,6 @@
 Test asort() function : usage variations - sort array with diff. sub arrays, 'sort_flags' as default/SORT_REGULAR
 --FILE--
 <?php
-/* Prototype  : bool asort ( array &$array [, int $sort_flags] )
- * Description: Sort an array and maintain index association.
-                Elements will be arranged from lowest to highest when this function has completed.
- * Source code: ext/standard/array.c
-*/
-
 /*
  * testing asort() by providing arrays contains sub arrays for $array argument with flowing flag values
  * flag value as default

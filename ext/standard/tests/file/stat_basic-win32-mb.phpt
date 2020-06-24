@@ -8,11 +8,6 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-/*
-   Prototype: array stat ( string $filename );
-   Description: Gives information about a file
-*/
-
 $file_path = __DIR__;
 require("$file_path/file.inc");
 

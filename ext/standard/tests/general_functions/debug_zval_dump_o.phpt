@@ -4,13 +4,6 @@ Test debug_zval_dump() function : working on objects
 <?php if (PHP_ZTS) { print "skip only for no-zts build"; }
 --FILE--
 <?php
-/* Prototype: void debug_zval_dump ( mixed $variable );
-   Description: Dumps a string representation of an internal zend value to output.
-*/
-
-/* Prototype: void zval_dump( $value );
-   Description: use debug_zval_dump() to display the objects and its
-                reference count */
 function zval_dump( $values ) {
   $counter = 1;
   foreach( $values as $value ) {

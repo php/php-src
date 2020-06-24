@@ -11,12 +11,6 @@ session.save_handler=files
 
 ob_start();
 
-/*
- * Prototype : bool session_set_save_handler(callback $open, callback $close, callback $read, callback $write, callback $destroy, callback $gc)
- * Description : Sets user-level session storage functions
- * Source code : ext/session/session.c
- */
-
 echo "*** Testing session_set_save_handler() : error functionality ***\n";
 function open($save_path, $session_name) {
      throw new Exception("Do something bad..!");
@@ -35,11 +29,11 @@ ob_end_flush();
 --EXPECTF--
 *** Testing session_set_save_handler() : error functionality ***
 
-Warning: session_start(): Failed to initialize storage module: user (path: ) in %s on line 23
+Warning: session_start(): Failed to initialize storage module: user (path: ) in %s on line %d
 
-Fatal error: Uncaught Exception: Do something bad..! in %s:13
+Fatal error: Uncaught Exception: Do something bad..! in %s:%d
 Stack trace:
 #0 [internal function]: open('', 'PHPSESSID')
-#1 %s(23): session_start()
+#1 %s(%d): session_start()
 #2 {main}
-  thrown in %s on line 13
+  thrown in %s on line %d

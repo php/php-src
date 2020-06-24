@@ -2,11 +2,6 @@
 Test array_map() function : usage variations - failing built-in functions & language constructs
 --FILE--
 <?php
-/* Prototype  : array array_map  ( callback $callback  , array $arr1  [, array $...  ] )
- * Description: Applies the callback to the elements of the given arrays
- * Source code: ext/standard/array.c
- */
-
 /*
  * Test array_map() by passing non-permmited built-in functions and language constructs i.e.
  *   echo(), array(), empty(), eval(), exit(), isset(), list(), print()

@@ -2,11 +2,6 @@
 Test array_shift() function : usage variations - Pass array with different data types as keys
 --FILE--
 <?php
-/* Prototype  : mixed array_shift(array &$stack)
- * Description: Pops an element off the beginning of the array
- * Source code: ext/standard/array.c
- */
-
 /*
  * Pass arrays with different data types as keys to test how array_shift() re-assigns keys
  */

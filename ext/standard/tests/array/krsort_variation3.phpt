@@ -2,11 +2,6 @@
 Test krsort() function : usage variations - sort integer/float values
 --FILE--
 <?php
-/* Prototype  : bool krsort ( array &$array [, int $sort_flags] )
- * Description: Sort an array by key in reverse order, maintaining key to data correlation
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Testing krsort() by providing array of integer/float/mixed values for $array argument
  * with following flag values:

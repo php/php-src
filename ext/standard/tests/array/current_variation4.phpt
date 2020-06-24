@@ -2,12 +2,6 @@
 Test current() function : usage variations - multi-dimensional arrays
 --FILE--
 <?php
-/* Prototype  : mixed current(array $array_arg)
- * Description: Return the element currently pointed to by the internal array pointer
- * Source code: ext/standard/array.c
- * Alias to functions: pos
- */
-
 /*
  * Test how current() behaves with muti-dimensional and recursive arrays
  */

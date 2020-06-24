@@ -12,12 +12,6 @@ if(PHP_INT_SIZE != 8) {die('skip 64 bit only');}
 ?>
 --FILE--
 <?php
-/* Prototype  : int ip2long(string ip_address)
- * Description: Converts a string containing an (IPv4) Internet Protocol dotted address into a proper address
- * Source code: ext/standard/basic_functions.c
- * Alias to functions:
- */
-
 $ips = array(
     "1.1.011.011",
     "127.0.0.1",

@@ -2,11 +2,6 @@
 Test fscanf() function: error conditions
 --FILE--
 <?php
-/*
-  Prototype: mixed fscanf ( resource $handle, string $format [, mixed &$...] );
-  Description: Parses input from a file according to a format
-*/
-
 echo "*** Testing fscanf() for error conditions ***\n";
 $file_path = __DIR__;
 

@@ -2,17 +2,6 @@
 Test fopen and fclose() functions - usage variations - "wb" mode
 --FILE--
 <?php
-/*
- fopen() function:
- Prototype: resource fopen(string $filename, string $mode
-                            [, bool $use_include_path [, resource $context]] );
- Description: Opens file or URL.
-*/
-/*
- fclose() function:
- Prototype: bool fclose ( resource $handle );
- Description: Closes an open file pointer
-*/
 
 /* Test fopen() and fclose(): Opening the file in "wb" mode,
    checking for the file creation, write & read operations,

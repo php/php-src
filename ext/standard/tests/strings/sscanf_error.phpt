@@ -3,10 +3,6 @@ Test sscanf() function : error conditions
 --FILE--
 <?php
 
-/* Prototype  : mixed sscanf  ( string $str  , string $format  [, mixed &$...  ] )
- * Description: Parses input from a string according to a format
- * Source code: ext/standard/string.c
-*/
 echo "*** Testing sscanf() : error conditions ***\n";
 
 $str = "Hello World";

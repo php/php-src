@@ -3,11 +3,6 @@ Test fscanf() function: usage variations - file opened in write only mode
 --FILE--
 <?php
 
-/*
-  Prototype: mixed fscanf ( resource $handle, string $format [, mixed &$...] );
-  Description: Parses input from a file according to a format
-*/
-
 /* Test fscanf() to scan a file for read when file is opened inwrite only mode */
 
 $file_path = __DIR__;

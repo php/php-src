@@ -3,11 +3,6 @@ Test unpack() function : error conditions
 --FILE--
 <?php
 
-/* Prototype  : array unpack  ( string $format  , string $data  )
- * Description: Unpack data from binary string
- * Source code: ext/standard/pack.c
-*/
-
 echo "*** Testing unpack() : error conditions ***\n";
 
 echo "\n-- Testing unpack() function with invalid format character --\n";

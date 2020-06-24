@@ -4,11 +4,6 @@ Test ctype_xdigit() function : usage variations - different data typse as $c arg
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-/* Prototype  : bool ctype_xdigit(mixed $c)
- * Description: Checks for character(s) representing a hexadecimal digit
- * Source code: ext/ctype/ctype.c
- */
-
 /*
  * Pass different data types as $c argument to ctype_xdigit() to test behaviour
  */

@@ -6,11 +6,6 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 ?>
 --FILE--
 <?php
-/* Prototype  : string vprintf(string format, array args)
- * Description: Output a formatted string
- * Source code: ext/standard/formatted_print.c
-*/
-
 /*
  * Test vprintf() when different octal formats and octal values are passed to
  * the '$format' and '$args' arguments of the function

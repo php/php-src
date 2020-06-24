@@ -4,11 +4,6 @@ Test token_get_all() function : usage variations - with assignment operators
 <?php if (!extension_loaded("tokenizer")) print "skip"; ?>
 --FILE--
 <?php
-/* Prototype  : array token_get_all(string $source)
- * Description: splits the given source into an array of PHP language tokens
- * Source code: ext/tokenizer/tokenizer.c
-*/
-
 /*
  * Passing 'source' argument with different assignment operators to test them for tokens
  *  += - T_PLUS_EQUAL(277), -= - T_MINUS-EQUAL(276),

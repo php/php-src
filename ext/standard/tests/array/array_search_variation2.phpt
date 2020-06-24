@@ -2,12 +2,6 @@
 Test array_search() function : usage variations - different haystack values
 --FILE--
 <?php
-/*
- * Prototype  : mixed array_search ( mixed $needle, array $haystack [, bool $strict] )
- * Description: Searches haystack for needle and returns the key if it is found in the array, FALSE otherwise
- * Source Code: ext/standard/array.c
-*/
-
 /* Test array_search() with different possible haystack values */
 
 echo "*** Testing array_search() with different haystack values ***\n";

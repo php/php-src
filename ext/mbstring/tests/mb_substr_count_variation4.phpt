@@ -7,11 +7,6 @@ function_exists('mb_substr_count') or die("skip mb_substr_count() is not availab
 ?>
 --FILE--
 <?php
-/* Prototype  : int mb_substr_count(string $haystack, string $needle [, string $encoding])
- * Description: Count the number of substring occurrences
- * Source code: ext/mbstring/mbstring.c
- */
-
 /*
  * Pass mb_substr_count() a $needle that overlaps in $haystack and see whether
  * it counts only the first occurrence or all other occurrences regardless whether they

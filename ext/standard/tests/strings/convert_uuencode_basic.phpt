@@ -3,11 +3,6 @@ Test convert_uuencode() function : basic functionality
 --FILE--
 <?php
 
-/* Prototype  : string convert_uuencode  ( string $data  )
- * Description: Uuencode a string
- * Source code: ext/standard/uuencode.c
-*/
-
 echo "*** Testing convert_uuencode() : basic functionality ***\n";
 
 // array with different values for $string

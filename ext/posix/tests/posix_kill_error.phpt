@@ -6,13 +6,6 @@ Test posix_kill() function : error conditions
 ?>
 --FILE--
 <?php
-/* Prototype  : proto bool posix_kill(int pid, int sig)
- * Description: Send a signal to a process (POSIX.1, 3.3.2)
- * Source code: ext/posix/posix.c
- * Alias to functions:
- */
-
-
 echo "*** Testing posix_kill() : error conditions ***\n";
 
 

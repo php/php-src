@@ -7,11 +7,6 @@ function_exists('mb_ereg') or die("skip mb_ereg() is not available in this build
 ?>
 --FILE--
 <?php
-/* Prototype  : int mb_ereg(string $pattern, string $string [, array $registers])
- * Description: Regular expression match for multibyte string
- * Source code: ext/mbstring/php_mbregex.c
- */
-
 /*
  * Test mb_ereg with anchors (start and end of string) in $pattern
  */

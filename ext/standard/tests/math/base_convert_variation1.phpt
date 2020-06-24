@@ -2,11 +2,6 @@
 Test base_convert() function : usage variations - different data types as $number argument
 --FILE--
 <?php
-/* Prototype  : string base_convert  ( string $number  , int $frombase  , int $tobase  )
- * Description: Convert a number between arbitrary bases.
- * Source code: ext/standard/math.c
- */
-
 echo "*** Testing base_convert() : usage variations ***\n";
 
 //get an unset variable

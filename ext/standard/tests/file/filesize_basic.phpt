@@ -2,13 +2,6 @@
 Test filesize() function: basic functionaity
 --FILE--
 <?php
-/*
- * Prototype: int filesize ( string $filename );
- * Description: Returns the size of the file in bytes, or FALSE
- *              (and generates an error of level E_WARNING) in case of an error.
- */
-
-
 echo "*** Testing size of files and directories with filesize() ***\n";
 
 $file_path = __DIR__;

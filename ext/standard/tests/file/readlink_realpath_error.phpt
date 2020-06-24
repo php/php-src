@@ -8,13 +8,6 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype: string readlink ( string $path );
-   Description: Returns the target of a symbolic link
-
-   Prototype: string realpath ( string $path );
-   Description: Returns canonicalized absolute pathname
-*/
-
 echo "\n*** Testing readlink() on a non-existent link ***\n";
 var_dump( readlink(__DIR__."/readlink_error.tmp") );
 

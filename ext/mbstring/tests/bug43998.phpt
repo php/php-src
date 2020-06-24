@@ -7,11 +7,6 @@ function_exists('mb_strtolower') or die("skip mb_strtolower() is not available i
 ?>
 --FILE--
 <?php
-/* Prototype  : string mb_strto[lower|upper](string $sourcestring [, string $encoding])
- * Description: Returns a [lower|upper]cased version of $sourcestring
- * Source code: ext/mbstring/mbstring.c
- */
-
 /*
  * Two error messages returned for incorrect encoding for mb_strto[upper|lower]
  * Bug now appears to be fixed

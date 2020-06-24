@@ -9,13 +9,6 @@ if(substr(PHP_OS, 0, 3) == 'WIN')
 disk_total_space
 --FILE--
 <?php
-/*
- *  Prototype: float disk_total_space( string $directory );
- *  Description: given a string containing a directory, this function
- *               will return the total number of bytes on the corresponding
- *               filesystem or disk partition
- */
-
 echo "*** Testing error conditions ***\n";
 $file_path = __DIR__;
 

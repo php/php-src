@@ -2,11 +2,6 @@
 Test parse_ini_file() function
 --FILE--
 <?php
-/* Prototype: array parse_ini_file(string $filename [,bool $process_sections]);
-   Description: parse_ini_file() loads in the ini file specified in filename,
-     and returns the settings in it in an associative array.
-*/
-
 $file_path = __DIR__;
 
 $parse_string = <<<EOD

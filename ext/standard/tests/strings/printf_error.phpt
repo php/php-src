@@ -2,11 +2,6 @@
 Test printf() function : error conditions
 --FILE--
 <?php
-/* Prototype  : int printf  ( string $format  [, mixed $args  [, mixed $...  ]] )
- * Description: Produces output according to format .
- * Source code: ext/standard/formatted_print.c
- */
-
 echo "*** Testing printf() : error conditions ***\n";
 
 // Zero arguments

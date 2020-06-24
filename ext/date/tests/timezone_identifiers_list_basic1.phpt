@@ -2,12 +2,6 @@
 Test timezone_identifiers_list() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : array timezone_identifiers_list  ( void )
- * Description: Returns numerically index array with all timezone identifiers
- * Source code: ext/date/php_date.c
- * Alias to functions:
- */
-
 echo "*** Testing timezone_identifiers_list() : basic functionality ***\n";
 
 //Set the default time zone
