@@ -377,7 +377,6 @@ netinet/in.h \
 alloca.h \
 arpa/inet.h \
 arpa/nameser.h \
-crypt.h \
 dns.h \
 fcntl.h \
 grp.h \
