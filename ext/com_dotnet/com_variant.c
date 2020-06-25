@@ -236,12 +236,8 @@ PHP_COM_DOTNET_API int php_com_zval_from_variant(zval *z, VARIANT *v, int codepa
 		case VT_BSTR:
 			olestring = V_BSTR(v);
 			if (olestring) {
-				size_t len;
-				char *str = php_com_olestring_to_string(olestring,
-					&len, codepage);
-				ZVAL_STRINGL(z, str, len);
-				// TODO: avoid reallocation???
-				efree(str);
+				zend_string *str = php_com_bstr_to_string(olestring, codepage);
+				ZVAL_STR(z, str);
 				olestring = NULL;
 			}
 			break;

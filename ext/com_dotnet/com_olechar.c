@@ -103,3 +103,23 @@ PHP_COM_DOTNET_API char *php_com_olestring_to_string(OLECHAR *olestring, size_t 
 
 	return string;
 }
+
+zend_string *php_com_bstr_to_string(BSTR bstr, int codepage)
+{
+	zend_string *string;
+	uint32_t length = SysStringLen(bstr);
+
+	string = zend_string_alloc(length, 0);
+	length = WideCharToMultiByte(codepage, 0, bstr, length + 1, ZSTR_VAL(string), length + 1, NULL, NULL);
+
+	if (length <= 0) {
+		char *msg = php_win32_error_to_msg(GetLastError());
+
+		php_error_docref(NULL, E_WARNING,
+			"Could not convert string from unicode: `%s'", msg);
+
+		LocalFree(msg);
+	}
+
+	return string;
+}
