@@ -343,6 +343,7 @@ function main()
         'opcache.jit_hot_side_exit=1',
         'zend.assertions=1',
         'zend.exception_ignore_args=0',
+        'zend.exception_string_param_max_len=15',
         'short_open_tag=0',
     );
 

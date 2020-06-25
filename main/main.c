@@ -260,7 +260,6 @@ static PHP_INI_MH(OnSetSerializePrecision)
 }
 /* }}} */
 
-
 /* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnChangeMemoryLimit)
 {

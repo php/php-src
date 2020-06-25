@@ -241,6 +241,7 @@ struct _zend_executor_globals {
 	HashTable weakrefs;
 
 	zend_bool exception_ignore_args;
+	zend_long exception_string_param_max_len;
 
 	zend_get_gc_buffer get_gc_buffer;
 

@@ -482,8 +482,8 @@ static void _build_trace_args(zval *arg, smart_str *str) /* {{{ */
 			break;
 		case IS_STRING:
 			smart_str_appendc(str, '\'');
-			smart_str_append_escaped(str, Z_STRVAL_P(arg), MIN(Z_STRLEN_P(arg), 15));
-			if (Z_STRLEN_P(arg) > 15) {
+			smart_str_append_escaped(str, Z_STRVAL_P(arg), MIN(Z_STRLEN_P(arg), EG(exception_string_param_max_len)));
+			if (Z_STRLEN_P(arg) > EG(exception_string_param_max_len)) {
 				smart_str_appends(str, "...', ");
 			} else {
 				smart_str_appends(str, "', ");

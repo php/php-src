@@ -159,6 +159,11 @@
 ;   Development Value: Off
 ;   Production Value: On
 
+; zend.exception_string_param_max_len
+;   Default Value: 15
+;   Development Value: 15
+;   Production Value: 0
+
 ;;;;;;;;;;;;;;;;;;;;
 ; php.ini Options  ;
 ;;;;;;;;;;;;;;;;;;;;
@@ -366,12 +371,22 @@ zend.enable_gc = On
 ;zend.script_encoding =
 
 ; Allows to include or exclude arguments from stack traces generated for exceptions
-; In production, it is recommended to turn this setting on to prohibit the output 
+; In production, it is recommended to turn this setting on to prohibit the output
 ; of sensitive information in stack traces
 ; Default Value: Off
 ; Development Value: Off
 ; Production Value: On
 zend.exception_ignore_args = On
+
+; Allows setting the maximum string length in an argument of a stringified stack trace
+; to a value between 0 and 1000000.
+; This has no effect when zend.exception_ignore_args is enabled.
+; Default Value: 15
+; Development Value: 15
+; Production Value: 0
+; In production, it is recommended to set this to 0 to reduce the output
+; of sensitive information in stack traces.
+zend.exception_string_param_max_len = 0
 
 ;;;;;;;;;;;;;;;;;
 ; Miscellaneous ;
