@@ -5291,7 +5291,8 @@ static int zend_jit_assign_to_variable(dasm_State    **Dst,
                                        znode_op        val,
                                        zend_jit_addr   val_addr,
                                        uint32_t        val_info,
-                                       zend_jit_addr   res_addr)
+                                       zend_jit_addr   res_addr,
+                                       zend_bool       check_exception)
 /* Labels: 1,2,3,4,5,8 */
 {
 	int done = 0;
@@ -5361,14 +5362,24 @@ static int zend_jit_assign_to_variable(dasm_State    **Dst,
 				|	jnz >8
 			}
 			|	ZVAL_DTOR_FUNC var_info, opline
+			if (in_cold || (RC_MAY_BE_N(var_info) && (var_info & (MAY_BE_ARRAY|MAY_BE_OBJECT)) != 0)) {
+				if (check_exception) {
+					|	MEM_OP2_1_ZTS cmp, aword, executor_globals, exception, 0, r0
+					|	je >8
+					|	jmp ->exception_handler
+				} else {
+					|	jmp >8
+				}
+			}
 			if (RC_MAY_BE_N(var_info) && (var_info & (MAY_BE_ARRAY|MAY_BE_OBJECT)) != 0) {
-				|	jmp >8
 				|4:
 				|	IF_GC_MAY_NOT_LEAK FCARG1a, >8
 				|	EXT_CALL gc_possible_root, r0
+				if (in_cold) {
+					|	jmp >8
+				}
 			}
 			if (in_cold) {
-				|	jmp >8
 				|.code
 			} else {
 				done = 1;
@@ -5508,7 +5519,7 @@ static int zend_jit_assign_dim(dasm_State **Dst, const zend_op *opline, const ze
 				var_info |= MAY_BE_REF;
 			}
 			|	// value = zend_assign_to_variable(variable_ptr, value, OP_DATA_TYPE);
-			if (!zend_jit_assign_to_variable(Dst, opline, op_array, var_addr, var_info, -1, (opline+1)->op1_type, (opline+1)->op1, op3_addr, val_info, res_addr)) {
+			if (!zend_jit_assign_to_variable(Dst, opline, op_array, var_addr, var_info, -1, (opline+1)->op1_type, (opline+1)->op1, op3_addr, val_info, res_addr, 0)) {
 				return 0;
 			}
 		}
@@ -7752,7 +7763,8 @@ static int zend_jit_assign(dasm_State **Dst, const zend_op *opline, const zend_o
 		}
 	}
 
-	if (!zend_jit_assign_to_variable(Dst, opline, op_array, op1_addr, op1_info, op1_def_info, opline->op2_type, opline->op2, op2_addr, op2_info, res_addr)) {
+	if (!zend_jit_assign_to_variable(Dst, opline, op_array, op1_addr, op1_info, op1_def_info, opline->op2_type, opline->op2, op2_addr, op2_info, res_addr,
+			may_throw && !(op1_info & MAY_BE_REF) && (op1_info & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_ARRAY)))) {
 		return 0;
 	}
 	if (!zend_jit_store_var_if_necessary_ex(Dst, opline->op1.var, op1_addr, op1_def_info, op1_use_addr, op1_info)) {
@@ -7764,7 +7776,7 @@ static int zend_jit_assign(dasm_State **Dst, const zend_op *opline, const zend_o
 		}
 	}
 
-	if (may_throw) {
+	if (may_throw && (op1_info & MAY_BE_REF)) {
 		zend_jit_check_exception(Dst);
 	}
 
