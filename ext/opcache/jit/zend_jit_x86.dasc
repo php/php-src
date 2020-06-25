@@ -3843,7 +3843,12 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 		|	lea Ra(result_reg), [Ra(Z_REG(op1_addr))-Z_LVAL_P(Z_ZV(op2_addr))]
 	} else {
 		|	GET_ZVAL_LVAL result_reg, op1_addr
-		if (same_ops && opcode != ZEND_DIV) {
+		if ((opcode == ZEND_ADD || opcode == ZEND_SUB)
+		 && Z_MODE(op2_addr) == IS_CONST_ZVAL
+		 && Z_LVAL_P(Z_ZV(op2_addr)) == 0) {
+			/* +/- 0 */
+			may_overflow = 0;
+		} else if (same_ops && opcode != ZEND_DIV) {
 			|	LONG_MATH_REG opcode, Ra(result_reg), Ra(result_reg)
 		} else {
 			|	LONG_MATH opcode, result_reg, op2_addr
@@ -3990,12 +3995,24 @@ static int zend_jit_math_double_long(dasm_State    **Dst,
 				|	SSE_GET_ZVAL_DVAL result_reg, op1_addr
 				op1_reg = result_reg;
 			}
-			|	SSE_GET_ZVAL_LVAL tmp_reg, op2_addr
-			|	AVX_MATH_REG opcode, result_reg, op1_reg, tmp_reg
+			if ((opcode == ZEND_ADD || opcode == ZEND_SUB)
+			 && Z_MODE(op2_addr) == IS_CONST_ZVAL
+			 && Z_LVAL_P(Z_ZV(op2_addr)) == 0) {
+				/* +/- 0 */
+			} else {
+				|	SSE_GET_ZVAL_LVAL tmp_reg, op2_addr
+				|	AVX_MATH_REG opcode, result_reg, op1_reg, tmp_reg
+			}
 		} else {
 			|	SSE_GET_ZVAL_DVAL result_reg, op1_addr
-			|	SSE_GET_ZVAL_LVAL tmp_reg, op2_addr
-			|	SSE_MATH_REG opcode, result_reg, tmp_reg
+			if ((opcode == ZEND_ADD || opcode == ZEND_SUB)
+			 && Z_MODE(op2_addr) == IS_CONST_ZVAL
+			 && Z_LVAL_P(Z_ZV(op2_addr)) == 0) {
+				/* +/- 0 */
+			} else {
+				|	SSE_GET_ZVAL_LVAL tmp_reg, op2_addr
+				|	SSE_MATH_REG opcode, result_reg, tmp_reg
+			}
 		}
 	}
 	|	SSE_SET_ZVAL_DVAL res_addr, result_reg
