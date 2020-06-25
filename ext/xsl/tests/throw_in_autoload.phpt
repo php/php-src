@@ -1,16 +1,15 @@
 --TEST--
-Bug #33853 (php:function call __autoload with lowercase param)
+Fork of bug33853.phpt with exit replaced by throw
 --SKIPIF--
 <?php
 if (!extension_loaded('xsl')) die('skip xsl not loaded');
-if (getenv('SKIP_ASAN')) die('xfail bailing out across foreign C code');
 ?>
 --FILE--
 <?php
 
 spl_autoload_register(function ($className) {
     var_dump($className);
-    exit();
+    throw new Exception("Autoload exception");
 });
 
 $xsl = new DomDocument();
@@ -29,8 +28,14 @@ $inputdom->loadXML('<?xml version="1.0" encoding="iso-8859-1" ?>
 $proc = new XsltProcessor();
 $proc->registerPhpFunctions();
 $xsl = $proc->importStylesheet($xsl);
-$newdom = $proc->transformToDoc($inputdom);
+try {
+    $newdom = $proc->transformToDoc($inputdom);
+} catch (Exception $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
 ===DONE===
 --EXPECT--
 string(4) "TeSt"
+Autoload exception
+===DONE===

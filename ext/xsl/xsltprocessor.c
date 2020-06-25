@@ -248,7 +248,9 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 	fci.no_separation = 0;
 	/*fci.function_handler_cache = &function_ptr;*/
 	if (!zend_make_callable(&handler, &callable)) {
-		php_error_docref(NULL, E_WARNING, "Unable to call handler %s()", ZSTR_VAL(callable));
+		if (!EG(exception)) {
+			php_error_docref(NULL, E_WARNING, "Unable to call handler %s()", ZSTR_VAL(callable));
+		}
 		valuePush(ctxt, xmlXPathNewString((const xmlChar *) ""));
 	} else if ( intern->registerPhpFunctions == 2 && zend_hash_exists(intern->registered_phpfunctions, callable) == 0) {
 		php_error_docref(NULL, E_WARNING, "Not allowed to call handler '%s()'", ZSTR_VAL(callable));
