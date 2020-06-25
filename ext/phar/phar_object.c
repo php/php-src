@@ -681,39 +681,30 @@ PHP_METHOD(Phar, webPhar)
 		if (FAILURE == zend_fcall_info_init(rewrite, 0, &fci, &fcc, NULL, NULL)) {
 			zend_throw_exception_ex(phar_ce_PharException, 0, "phar error: invalid rewrite callback");
 
+cleanup_fail:
+			zval_ptr_dtor(&params);
 			if (free_pathinfo) {
 				efree(path_info);
 			}
+			efree(entry);
 			efree(pt);
-
 			RETURN_THROWS();
 		}
 
 		fci.param_count = 1;
 		fci.params = &params;
-		Z_ADDREF(params);
 		fci.retval = &retval;
 
 		if (FAILURE == zend_call_function(&fci, &fcc)) {
 			if (!EG(exception)) {
 				zend_throw_exception_ex(phar_ce_PharException, 0, "phar error: failed to call rewrite callback");
 			}
-
-			if (free_pathinfo) {
-				efree(path_info);
-			}
-			efree(pt);
-
-			RETURN_THROWS();
+			goto cleanup_fail;
 		}
 
 		if (Z_TYPE_P(fci.retval) == IS_UNDEF || Z_TYPE(retval) == IS_UNDEF) {
-			if (free_pathinfo) {
-				efree(path_info);
-			}
 			zend_throw_exception_ex(phar_ce_PharException, 0, "phar error: rewrite callback must return a string or false");
-			efree(pt);
-			RETURN_THROWS();
+			goto cleanup_fail;
 		}
 
 		switch (Z_TYPE(retval)) {
@@ -734,13 +725,8 @@ PHP_METHOD(Phar, webPhar)
 				zend_bailout();
 				return;
 			default:
-				if (free_pathinfo) {
-					efree(path_info);
-				}
-				efree(pt);
-
 				zend_throw_exception_ex(phar_ce_PharException, 0, "phar error: rewrite callback must return a string or false");
-				RETURN_THROWS();
+				goto cleanup_fail;
 		}
 	}
 
