@@ -2569,10 +2569,8 @@ parent_loop_end:
 					if (open_file_for_scanning(&file_handle) == SUCCESS) {
 						zend_strip();
 						zend_file_handle_dtor(&file_handle);
-						php_output_teardown();
 					}
-					return SUCCESS;
-					break;
+					goto parent_out;
 				case PHP_MODE_HIGHLIGHT:
 					{
 						zend_syntax_highlighter_ini syntax_highlighter_ini;
@@ -2584,9 +2582,8 @@ parent_loop_end:
 								goto fastcgi_request_done;
 							}
 							zend_file_handle_dtor(&file_handle);
-							php_output_teardown();
 						}
-						return SUCCESS;
+						goto parent_out;
 					}
 					break;
 			}
