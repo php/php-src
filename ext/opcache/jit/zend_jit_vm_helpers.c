@@ -153,7 +153,7 @@ void ZEND_FASTCALL zend_jit_copy_extra_args_helper(EXECUTE_DATA_D)
 	}
 }
 
-void ZEND_FASTCALL zend_jit_deprecated_helper(OPLINE_D)
+zend_bool ZEND_FASTCALL zend_jit_deprecated_helper(OPLINE_D)
 {
 	zend_execute_data *call = (zend_execute_data *) opline;
 	zend_function *fbc = call->func;
@@ -176,7 +176,9 @@ void ZEND_FASTCALL zend_jit_deprecated_helper(OPLINE_D)
 		}
 
 		zend_vm_stack_free_call_frame(call);
+		return 0;
 	}
+	return 1;
 }
 
 ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_profile_helper(ZEND_OPCODE_HANDLER_ARGS)

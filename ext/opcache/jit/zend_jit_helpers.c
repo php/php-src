@@ -1227,18 +1227,19 @@ builtin_types:
 	return 0;
 }
 
-//static void ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, const zend_op_array *op_array, uint32_t arg_num, zend_arg_info *arg_info, void **cache_slot)
-static int ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, zend_arg_info *arg_info)
+static zend_bool ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, zend_arg_info *arg_info)
 {
 	zend_execute_data *execute_data = EG(current_execute_data);
 	const zend_op *opline = EX(opline);
 	void **cache_slot = CACHE_ADDR(opline->extended_value);
+	zend_bool ret;
 
-	if (UNEXPECTED(!zend_jit_verify_type_common(arg, arg_info, cache_slot))) {
+	ret = zend_jit_verify_type_common(arg, arg_info, cache_slot);
+	if (UNEXPECTED(!ret)) {
 		zend_verify_arg_error(EX(func), arg_info, opline->op1.num, cache_slot, arg);
 		return 0;
 	}
-	return 1;
+	return ret;
 }
 
 static void ZEND_FASTCALL zend_jit_verify_return_slow(zval *arg, const zend_op_array *op_array, zend_arg_info *arg_info, void **cache_slot)

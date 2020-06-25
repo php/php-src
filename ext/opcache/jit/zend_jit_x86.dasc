@@ -5420,9 +5420,9 @@ static int zend_jit_assign_dim(dasm_State **Dst, const zend_op *opline, const ze
 		|	SAVE_VALID_OPLINE opline, r0
 		|	EXT_CALL zend_jit_prepare_assign_dim_ref, r0
 		|	test r0, r0
-		|	jz ->exception_handler_undef
 		|	mov FCARG1a, r0
-		|	jmp >1
+		|	jne >1
+		|	jmp ->exception_handler_undef
 		|.code
 		|1:
 		op1_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, 0);
@@ -5622,9 +5622,9 @@ static int zend_jit_assign_dim_op(dasm_State **Dst, const zend_op *opline, const
 		|	SAVE_VALID_OPLINE opline, r0
 		|	EXT_CALL zend_jit_prepare_assign_dim_ref, r0
 		|	test r0, r0
-		|	jz ->exception_handler_undef
 		|	mov FCARG1a, r0
-		|	jmp >1
+		|	jne >1
+		|	jmp ->exception_handler_undef
 		|.code
 		|1:
 		op1_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, 0);
@@ -8413,10 +8413,10 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 					|	mov FCARG1a, RX
 				}
 				|	EXT_CALL zend_jit_deprecated_helper, r0
-				|	MEM_OP2_1_ZTS cmp, aword, executor_globals, exception, 0, r0
-				|	jne ->exception_handler
+				|	test al, al
 				|	mov r0, EX:RX->func // reload
-				|	jmp >1
+				|	jne >1
+				|	jmp ->exception_handler
 				|.code
 				|1:
 			}
@@ -8425,8 +8425,8 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 				|	mov FCARG1a, RX
 			}
 			|	EXT_CALL zend_jit_deprecated_helper, r0
-			|	MEM_OP2_1_ZTS cmp, aword, executor_globals, exception, 0, r0
-			|	jne ->exception_handler
+			|	test al, al
+			|	je ->exception_handler
 		}
 	}
 
@@ -8706,10 +8706,10 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 						|	mov FCARG1a, RX
 					}
 					|	EXT_CALL zend_jit_deprecated_helper, r0
-					|	MEM_OP2_1_ZTS cmp, aword, executor_globals, exception, 0, r0
-					|	jne ->exception_handler
+					|	test al, al
 					|	mov r0, EX:RX->func // reload
-					|	jmp >1
+					|	jne >1
+					|	jmp ->exception_handler
 					|.code
 					|1:
 				}
@@ -8718,8 +8718,8 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 					|	mov FCARG1a, RX
 				}
 				|	EXT_CALL zend_jit_deprecated_helper, r0
-				|	MEM_OP2_1_ZTS cmp, aword, executor_globals, exception, 0, r0
-				|	jne ->exception_handler
+				|	test al, al
+				|	je ->exception_handler
 				|	mov r0, EX:RX->func // reload
 			}
 		}
@@ -10551,11 +10551,16 @@ static int zend_jit_verify_arg_type(dasm_State **Dst, const zend_op *opline, zen
 	|	EXT_CALL zend_jit_verify_arg_slow, r0
 
 	if (check_exception) {
-		|	test eax, eax
-		|	jz ->exception_handler
-	}
-
-	if (in_cold) {
+		|	test al, al
+		if (in_cold) {
+			|	jnz >1
+			|	jmp ->exception_handler
+			|.code
+			|1:
+		} else {
+			|	jz ->exception_handler
+		}
+	} else if (in_cold) {
 		|	jmp >1
 		|.code
 		|1:
@@ -10686,16 +10691,10 @@ static int zend_jit_recv_init(dasm_State **Dst, const zend_op *opline, const zen
 			if (!ZEND_TYPE_IS_SET(arg_info->type)) {
 				break;
 			}
-			if (!zend_jit_verify_arg_type(Dst, opline, arg_info, 0)) {
+			if (!zend_jit_verify_arg_type(Dst, opline, arg_info, may_throw)) {
 				return 0;
 			}
 		} while (0);
-	}
-
-	if (may_throw) {
-		if (!zend_jit_check_exception(Dst)) {
-			return 0;
-		}
 	}
 
 	if (JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE) {
