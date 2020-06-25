@@ -89,7 +89,8 @@ ZEND_API zval* zend_call_method(zend_object *object, zend_class_entry *obj_ce, z
 /* {{{ zend_user_it_new_iterator */
 ZEND_API void zend_user_it_new_iterator(zend_class_entry *ce, zval *object, zval *retval)
 {
-	zend_call_method_with_0_params(Z_OBJ_P(object), ce, &ce->iterator_funcs_ptr->zf_new_iterator, "getiterator", retval);
+	zend_call_known_instance_method_with_0_params(
+		ce->iterator_funcs_ptr->zf_new_iterator, Z_OBJ_P(object), retval);
 }
 /* }}} */
 
