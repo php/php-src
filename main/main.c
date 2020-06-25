@@ -2449,6 +2449,7 @@ void php_module_shutdown(void)
 
 	/* close down the ini config */
 	php_shutdown_config();
+	clear_last_error();
 
 #ifndef ZTS
 	zend_ini_shutdown();
