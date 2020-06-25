@@ -11178,29 +11178,31 @@ static int zend_jit_fetch_this(dasm_State **Dst, const zend_op *opline, const ze
 {
 	zend_jit_addr res_addr = RES_ADDR();
 
-	if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
-		if (!JIT_G(current_frame) ||
-		    !TRACE_FRAME_IS_THIS_CHECKED(JIT_G(current_frame))) {
+	if (!op_array->scope || (op_array->fn_flags & ZEND_ACC_STATIC)) {
+		if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
+			if (!JIT_G(current_frame) ||
+			    !TRACE_FRAME_IS_THIS_CHECKED(JIT_G(current_frame))) {
 
-			int32_t exit_point = zend_jit_trace_get_exit_point(opline, opline, NULL, ZEND_JIT_EXIT_TO_VM);
-			const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+				int32_t exit_point = zend_jit_trace_get_exit_point(opline, opline, NULL, ZEND_JIT_EXIT_TO_VM);
+				const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+
+				|	cmp byte EX->This.u1.v.type, IS_OBJECT
+				|	jne &exit_addr
+
+				if (JIT_G(current_frame)) {
+					TRACE_FRAME_SET_THIS_CHECKED(JIT_G(current_frame));
+				}
+			}
+		} else {
 
 			|	cmp byte EX->This.u1.v.type, IS_OBJECT
-			|	jne &exit_addr
-
-			if (JIT_G(current_frame)) {
-				TRACE_FRAME_SET_THIS_CHECKED(JIT_G(current_frame));
-			}
+			|	jne >1
+			|.cold_code
+			|1:
+			|	SAVE_VALID_OPLINE opline, r0
+			|	jmp ->invalid_this
+			|.code
 		}
-	} else {
-
-		|	cmp byte EX->This.u1.v.type, IS_OBJECT
-		|	jne >1
-		|.cold_code
-		|1:
-		|	SAVE_VALID_OPLINE opline, r0
-		|	jmp ->invalid_this
-		|.code
 	}
 
 	|	mov r0, aword EX->This.value.ptr
