@@ -69,7 +69,7 @@ jobs:
             CFLAGS='-fsanitize=undefined,address -DZEND_TRACK_ARENA_ALLOC'
             LDFLAGS='-fsanitize=undefined,address'
         runTestsParameters: --asan
-        timeoutInMinutes: 180
+        timeoutInMinutes: 210
     - template: azure/msan_job.yml
       parameters:
         configurationName: DEBUG_ZTS_MSAN
