@@ -635,7 +635,7 @@ function helper_name($name, $spec, $op1, $op2, $extra_spec) {
     $extra = "";
 
     if (isset($helpers[$name])) {
-        // If we haven't helper with specified spicialized operands then
+        // If we have no helper with specified specialized operands then
         // using unspecialized helper
         if (!isset($helpers[$name]["op1"][$op1])) {
             if (($op1 == 'TMP' || $op1 == 'VAR') &&
@@ -680,7 +680,7 @@ function opcode_name($name, $spec, $op1, $op2, $extra_spec) {
 
     if (isset($opnames[$name])) {
         $opcode = $opcodes[$opnames[$name]];
-        // If we haven't helper with specified spicialized operands then
+        // If we have no helper with specified specialized operands then
         // using unspecialized helper
         if (!isset($opcode["op1"][$op1])) {
             if (($op1 == 'TMP' || $op1 == 'VAR') &&
@@ -1648,7 +1648,7 @@ function read_order_file($fn) {
     return $order;
 }
 
-// Generates all opcode handlers and helpers (specialized or unspecilaized)
+// Generates all opcode handlers and helpers (specialized or unspecialized)
 function gen_executor_code($f, $spec, $kind, $prolog, &$switch_labels = array()) {
     global $list, $opcodes, $helpers, $op_types_ex, $gen_order;
 

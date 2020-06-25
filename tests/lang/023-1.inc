@@ -3,7 +3,7 @@
 <?php
 /* the point of this file is to intensively test various aspects of
  * the parser.  right now, each test focuses in one aspect only
- * (e.g. variable aliasing, arithemtic operator, various control
+ * (e.g. variable aliasing, arithmetic operator, various control
  * structures), while trying to combine code from other parts of the
  * parser as well.
  */

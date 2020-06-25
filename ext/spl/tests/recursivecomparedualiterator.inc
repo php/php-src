@@ -32,7 +32,7 @@ class RecursiveCompareDualIterator extends RecursiveIteratorIterator
         parent::__construct($it);
     }
 
-    /** Rewind iteration andcomparison process. Starting with $equal = true.
+    /** Rewind iteration and comparison process. Starting with $equal = true.
      */
     function rewind()
     {
