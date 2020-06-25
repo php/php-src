@@ -2791,7 +2791,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							}
 						}
 						if (!zend_jit_fetch_obj(&dasm_state, opline, op_array,
-								op1_info, op1_addr, 0, ce, ce_is_instanceof,
+								op1_info, op1_addr, 0, ce, ce_is_instanceof, 0,
 								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
 						}
@@ -2844,7 +2844,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						}
 						goto done;
 					case ZEND_FETCH_THIS:
-						if (!zend_jit_fetch_this(&dasm_state, opline, op_array)) {
+						if (!zend_jit_fetch_this(&dasm_state, opline, op_array, 0)) {
 							goto jit_failure;
 						}
 						goto done;

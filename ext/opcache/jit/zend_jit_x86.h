@@ -64,6 +64,8 @@ typedef enum _zend_reg {
 
 	ZREG_NUM,
 
+	ZREG_THIS, /* used for delayed FETCH_THIS deoptimization */
+
 	/* pseudo constants used by deoptimizer */
 	ZREG_LONG_MIN_MINUS_1,
 	ZREG_LONG_MIN,

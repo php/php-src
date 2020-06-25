@@ -10787,7 +10787,7 @@ static zend_bool zend_may_be_dynamic_property(zend_class_entry *ce, zend_string 
 	return 0;
 }
 
-static int zend_jit_fetch_obj(dasm_State **Dst, const zend_op *opline, const zend_op_array *op_array, uint32_t op1_info, zend_jit_addr op1_addr, zend_bool op1_indirect, zend_class_entry *ce, zend_bool ce_is_instanceof, int may_throw)
+static int zend_jit_fetch_obj(dasm_State **Dst, const zend_op *opline, const zend_op_array *op_array, uint32_t op1_info, zend_jit_addr op1_addr, zend_bool op1_indirect, zend_class_entry *ce, zend_bool ce_is_instanceof, zend_bool use_this, int may_throw)
 {
 	zval *member;
 	uint32_t offset;
@@ -10804,7 +10804,7 @@ static int zend_jit_fetch_obj(dasm_State **Dst, const zend_op *opline, const zen
 	ZEND_ASSERT(Z_TYPE_P(member) == IS_STRING && Z_STRVAL_P(member)[0] != '\0');
 	offset = zend_get_known_property_offset(ce, Z_STR_P(member), opline->op1_type == IS_UNUSED, op_array->filename, &prop_info);
 
-	if (opline->op1_type == IS_UNUSED) {
+	if (opline->op1_type == IS_UNUSED || use_this) {
 		|	GET_ZVAL_PTR FCARG1a, this_addr
 	} else {
 		if (opline->op1_type == IS_VAR
@@ -11024,7 +11024,7 @@ static int zend_jit_fetch_obj(dasm_State **Dst, const zend_op *opline, const zen
 
 	|.code;
 	|9: // END
-	if (!op1_indirect) {
+	if (opline->op1_type != IS_UNUSED && !use_this && !op1_indirect) {
 		if (opline->op1_type == IS_VAR
 		 && opline->opcode == ZEND_FETCH_OBJ_W) {
 			zend_jit_addr orig_op1_addr = OP1_ADDR();
@@ -11174,10 +11174,20 @@ static int zend_jit_strlen(dasm_State **Dst, const zend_op *opline, const zend_o
 	return 1;
 }
 
-static int zend_jit_fetch_this(dasm_State **Dst, const zend_op *opline, const zend_op_array *op_array)
+static int zend_jit_load_this(dasm_State **Dst, uint32_t var)
 {
-	zend_jit_addr res_addr = RES_ADDR();
+	zend_jit_addr var_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, var);
 
+	|	mov r0, aword EX->This.value.ptr
+	|	SET_ZVAL_PTR var_addr, r0
+	|	SET_ZVAL_TYPE_INFO var_addr, IS_OBJECT_EX
+	|	GC_ADDREF r0
+
+	return 1;
+}
+
+static int zend_jit_fetch_this(dasm_State **Dst, const zend_op *opline, const zend_op_array *op_array, zend_bool check_only)
+{
 	if (!op_array->scope || (op_array->fn_flags & ZEND_ACC_STATIC)) {
 		if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
 			if (!JIT_G(current_frame) ||
@@ -11205,10 +11215,11 @@ static int zend_jit_fetch_this(dasm_State **Dst, const zend_op *opline, const ze
 		}
 	}
 
-	|	mov r0, aword EX->This.value.ptr
-	|	SET_ZVAL_PTR res_addr, r0
-	|	SET_ZVAL_TYPE_INFO res_addr, IS_OBJECT_EX
-	|	GC_ADDREF r0
+	if (!check_only) {
+		if (!zend_jit_load_this(Dst, opline->result.var)) {
+			return 0;
+		}
+	}
 
 	return 1;
 }
