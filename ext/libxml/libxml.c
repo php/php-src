@@ -485,7 +485,6 @@ static void php_libxml_internal_error_handler(int error_type, void *ctx, const c
 	char *buf;
 	int len, len_iter, output = 0;
 
-
 	len = vspprintf(&buf, 0, *msg, ap);
 	len_iter = len;
 
@@ -502,7 +501,8 @@ static void php_libxml_internal_error_handler(int error_type, void *ctx, const c
 	if (output == 1) {
 		if (LIBXML(error_list)) {
 			_php_list_set_error_structure(NULL, ZSTR_VAL(LIBXML(error_buffer).s));
-		} else {
+		} else if (!EG(exception)) {
+			/* Don't throw additional notices/warnings if an exception has already been thrown. */
 			switch (error_type) {
 				case PHP_LIBXML_CTX_ERROR:
 					php_libxml_ctx_error_level(E_WARNING, ctx, ZSTR_VAL(LIBXML(error_buffer).s));

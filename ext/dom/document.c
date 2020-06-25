@@ -1681,7 +1681,9 @@ static void _dom_document_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type
 	sptr = xmlSchemaParse(parser);
 	xmlSchemaFreeParserCtxt(parser);
 	if (!sptr) {
-		php_error_docref(NULL, E_WARNING, "Invalid Schema");
+		if (!EG(exception)) {
+			php_error_docref(NULL, E_WARNING, "Invalid Schema");
+		}
 		RETURN_FALSE;
 	}
 

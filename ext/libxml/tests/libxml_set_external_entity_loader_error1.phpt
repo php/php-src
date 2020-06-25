@@ -20,9 +20,7 @@ try {
 }
 
 echo "Done.\n";
---EXPECTF--
+--EXPECT--
 bool(true)
-
-Warning: DOMDocument::validate(): Could not load the external subset "http://example.com/foobar" in %s on line %d
 Exception: Too few arguments to function {closure}(), 3 passed and exactly 4 expected
 Done.
