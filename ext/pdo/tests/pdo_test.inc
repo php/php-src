@@ -37,7 +37,7 @@ class PDOTest {
         if (!$db) {
             die("Could not create PDO object (DSN=$dsn, user=$user)\n");
         }
-        // Ignore errors about non-existant tables
+        // Ignore errors about non-existent tables
         $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 
         // clean up any crufty test tables we might have left behind

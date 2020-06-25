@@ -584,7 +584,7 @@ PHP 8.0 UPGRADE NOTES
     OPENSSL_ENCODING_PEM.
 
 - Standard:
-  . printf() and friends how support the %h and %H format specifiers. These
+  . printf() and friends now support the %h and %H format specifiers. These
     are the same as %g and %G, but always use "." as the decimal separator,
     rather than determining it through the LC_NUMERIC locale.
   . printf() and friends now support using "*" as width or precision, in which

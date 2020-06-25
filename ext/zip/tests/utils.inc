@@ -27,7 +27,7 @@ function verify_entries($zip, $entries = []) {
     return $verified;
 }
 
-/* recursively remove a directoryy */
+/* recursively remove a directory */
 function rmdir_rf($dir) {
     if ($handle = opendir($dir)) {
         while (false !== ($item = readdir($handle))) {
