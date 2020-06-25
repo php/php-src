@@ -4,4 +4,4 @@ Invalid use: underscore right of e
 <?php
 1e_2;
 --EXPECTF--
-Parse error: syntax error, unexpected 'e_2' (T_STRING) in %s on line %d
+Parse error: syntax error, unexpected identifier "e_2" in %s on line %d

@@ -10,4 +10,4 @@ class Test {
 
 ?>
 --EXPECTF--
-Parse error: syntax error, unexpected 'static' (T_STATIC) in %s on line %d
+Parse error: syntax error, unexpected token "static" in %s on line %d

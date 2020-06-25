@@ -7,4 +7,4 @@ $foo = (mixed) 12;
 
 ?>
 --EXPECTF--
-Parse error: syntax error, unexpected '12' (T_LNUMBER) in %s on line %d
+Parse error: syntax error, unexpected integer "12" in %s on line %d
