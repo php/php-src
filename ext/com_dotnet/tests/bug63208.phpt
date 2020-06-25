@@ -6,13 +6,12 @@ if (!extension_loaded('com_dotnet')) die('skip com_dotnet extension not availabl
 ?>
 --FILE--
 <?php
-$string = "ab\0cd";
-$variant = new VARIANT($string, VT_ARRAY | VT_UI1); // Array of bytes
+$string = "\u{0905}b\0cd";
+$variant = new VARIANT($string, VT_ARRAY | VT_UI1, CP_UTF8); // Array of bytes
 $converted = (string) $variant;
 var_dump(bin2hex($string));
 var_dump(bin2hex($converted));
 ?>
 --EXPECT--
-string(10) "6162006364"
-string(10) "6162006364"
-
+string(14) "e0a48562006364"
+string(14) "e0a48562006364"

@@ -104,21 +104,60 @@ PHP_COM_DOTNET_API char *php_com_olestring_to_string(OLECHAR *olestring, size_t 
 	return string;
 }
 
+BSTR php_com_string_to_bstr(zend_string *string, int codepage)
+{
+	BSTR bstr;
+	OLECHAR *olestring = NULL;
+	DWORD flags = codepage == CP_UTF8 ? 0 : MB_PRECOMPOSED | MB_ERR_INVALID_CHARS;
+	size_t mb_len = ZSTR_LEN(string);
+	int wc_len;
+
+	wc_len = MultiByteToWideChar(codepage, flags, ZSTR_VAL(string), (int)mb_len + 1, NULL, 0);
+	if (wc_len > 0) {
+		olestring = (OLECHAR*)safe_emalloc(wc_len, sizeof(OLECHAR), 0);
+		wc_len = MultiByteToWideChar(codepage, flags, ZSTR_VAL(string), (int)mb_len + 1, olestring, wc_len);
+	} else {
+		char *msg = php_win32_error_to_msg(GetLastError());
+
+		php_error_docref(NULL, E_WARNING,
+			"Could not convert string to unicode: `%s'", msg);
+		LocalFree(msg);
+
+		if (olestring == NULL) {
+			olestring = (OLECHAR*)emalloc(2 * sizeof(OLECHAR));
+		}
+		*olestring = *(olestring + 1) = '\0';
+	}
+
+	bstr = SysAllocStringLen(olestring, (UINT)(wc_len - 1));
+	efree(olestring);
+
+	return bstr;
+}
+
 zend_string *php_com_bstr_to_string(BSTR bstr, int codepage)
 {
-	zend_string *string;
-	uint32_t length = SysStringLen(bstr);
+	zend_string *string = NULL;
+	UINT wc_len = SysStringLen(bstr);
+	int mb_len;
 
-	string = zend_string_alloc(length, 0);
-	length = WideCharToMultiByte(codepage, 0, bstr, length + 1, ZSTR_VAL(string), length + 1, NULL, NULL);
+	mb_len = WideCharToMultiByte(codepage, 0, bstr, wc_len + 1, NULL, 0, NULL, NULL);
+	if (mb_len > 0) {
+		string = zend_string_alloc(mb_len - 1, 0);
+		mb_len = WideCharToMultiByte(codepage, 0, bstr, wc_len + 1, ZSTR_VAL(string), mb_len, NULL, NULL);
+	}
 
-	if (length <= 0) {
+	if (mb_len <= 0) {
 		char *msg = php_win32_error_to_msg(GetLastError());
 
 		php_error_docref(NULL, E_WARNING,
 			"Could not convert string from unicode: `%s'", msg);
-
 		LocalFree(msg);
+
+		if (string != NULL) {
+			zend_string_release(string);
+		}
+		string = ZSTR_EMPTY_ALLOC();
 	}
 
 	return string;

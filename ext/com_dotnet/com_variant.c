@@ -96,7 +96,6 @@ bogus:
 
 PHP_COM_DOTNET_API void php_com_variant_from_zval(VARIANT *v, zval *z, int codepage)
 {
-	OLECHAR *olestring;
 	php_com_dotnet_object *obj;
 	zend_uchar ztype = IS_NULL;
 
@@ -164,13 +163,7 @@ PHP_COM_DOTNET_API void php_com_variant_from_zval(VARIANT *v, zval *z, int codep
 
 		case IS_STRING:
 			V_VT(v) = VT_BSTR;
-			olestring = php_com_string_to_olestring(Z_STRVAL_P(z), Z_STRLEN_P(z), codepage);
-			if (CP_UTF8 == codepage) {
-				V_BSTR(v) = SysAllocStringByteLen((char*)olestring, (UINT)(wcslen(olestring) * sizeof(OLECHAR)));
-			} else {
-				V_BSTR(v) = SysAllocStringByteLen((char*)olestring, (UINT)(Z_STRLEN_P(z) * sizeof(OLECHAR)));
-			}
-			efree(olestring);
+			V_BSTR(v) = php_com_string_to_bstr(Z_STR_P(z), codepage);
 			break;
 
 		case IS_RESOURCE:
