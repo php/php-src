@@ -1297,13 +1297,12 @@ PHP_FUNCTION(min)
 
 	/* mixed min ( array $values ) */
 	if (argc == 1) {
-		zval *result;
-
 		if (Z_TYPE(args[0]) != IS_ARRAY) {
 			zend_argument_type_error(1, "must be of type array, %s given", zend_zval_type_name(&args[0]));
 			RETURN_THROWS();
 		} else {
-			if ((result = zend_hash_minmax(Z_ARRVAL(args[0]), php_array_data_compare, 0)) != NULL) {
+			zval *result = zend_hash_minmax(Z_ARRVAL(args[0]), php_array_data_compare_unstable, 0);
+			if (result) {
 				ZVAL_COPY_DEREF(return_value, result);
 			} else {
 				zend_argument_value_error(1, "must contain at least one element");
@@ -1344,13 +1343,12 @@ PHP_FUNCTION(max)
 
 	/* mixed max ( array $values ) */
 	if (argc == 1) {
-		zval *result;
-
 		if (Z_TYPE(args[0]) != IS_ARRAY) {
 			zend_argument_type_error(1, "must be of type array, %s given", zend_zval_type_name(&args[0]));
 			RETURN_THROWS();
 		} else {
-			if ((result = zend_hash_minmax(Z_ARRVAL(args[0]), php_array_data_compare, 1)) != NULL) {
+			zval *result = zend_hash_minmax(Z_ARRVAL(args[0]), php_array_data_compare_unstable, 1);
+			if (result) {
 				ZVAL_COPY_DEREF(return_value, result);
 			} else {
 				zend_argument_value_error(1, "must contain at least one element");
