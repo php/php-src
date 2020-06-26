@@ -21,7 +21,6 @@ $values = array(23,
         "23.45",
         "2.345e1",
         "1000",
-        "1000ABC",
         null,
         true,
         false);
@@ -32,7 +31,7 @@ for ($i = 0; $i < count($values); $i++) {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 float(3.8281684713331012)
 float(NAN)
 float(3.8475627390640357)
@@ -42,9 +41,6 @@ float(3.8281684713331012)
 float(3.8281684713331012)
 float(3.8475627390640357)
 float(3.8475627390640357)
-float(7.600902209541989)
-
-Notice: A non well formed numeric value encountered in %s on line %d
 float(7.600902209541989)
 float(NAN)
 float(0)

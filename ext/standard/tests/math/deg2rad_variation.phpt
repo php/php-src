@@ -21,7 +21,6 @@ $values = array(23,
         "23.45",
         "2.345e1",
         "1000",
-        "1000ABC",
         null,
         true,
         false);
@@ -42,9 +41,6 @@ float(0.40142572795869574)
 float(0.40142572795869574)
 float(0.40927970959267024)
 float(0.40927970959267024)
-float(17.453292519943293)
-
-Notice: A non well formed numeric value encountered in %s on line %d
 float(17.453292519943293)
 float(0)
 float(0.017453292519943295)
