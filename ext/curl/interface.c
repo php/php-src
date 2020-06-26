@@ -2719,7 +2719,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 				return FAILURE;
 			}
 
-			ZEND_HASH_FOREACH_VAL(ph, current) {
+			ZEND_HASH_FOREACH_VAL_IND(ph, current) {
 				ZVAL_DEREF(current);
 				val = zval_get_tmp_string(current, &tmp_val);
 				slist = curl_slist_append(slist, ZSTR_VAL(val));
@@ -2797,7 +2797,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 				}
 #endif
 
-				ZEND_HASH_FOREACH_KEY_VAL(postfields, num_key, string_key, current) {
+				ZEND_HASH_FOREACH_KEY_VAL_IND(postfields, num_key, string_key, current) {
 					zend_string *postval, *tmp_postval;
 					/* Pretend we have a string_key here */
 					if (!string_key) {
