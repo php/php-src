@@ -692,8 +692,8 @@ if test "$PHP_VALGRIND" != "no"; then
   fi
 fi
 
-dnl Check for openpty. It may require linking against libutil.
-PHP_CHECK_FUNC(openpty, util)
+dnl Check for openpty. It may require linking against libutil or libbsd.
+PHP_CHECK_FUNC(openpty, util, bsd)
 
 dnl General settings.
 dnl ----------------------------------------------------------------------------
