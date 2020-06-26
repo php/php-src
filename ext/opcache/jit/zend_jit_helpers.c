@@ -147,7 +147,7 @@ static zval* ZEND_FASTCALL zend_jit_hash_index_lookup_w(HashTable *ht, zend_long
 
 static zval* ZEND_FASTCALL zend_jit_hash_lookup_rw(HashTable *ht, zend_string *str)
 {
-	zval *retval = zend_hash_find(ht, str);
+	zval *retval = zend_hash_find_ex(ht, str, 1);
 
 	if (retval) {
 		if (UNEXPECTED(Z_TYPE_P(retval) == IS_INDIRECT)) {
@@ -166,7 +166,7 @@ static zval* ZEND_FASTCALL zend_jit_hash_lookup_rw(HashTable *ht, zend_string *s
 
 static zval* ZEND_FASTCALL zend_jit_hash_lookup_w(HashTable *ht, zend_string *str)
 {
-	zval *retval = zend_hash_find(ht, str);
+	zval *retval = zend_hash_find_ex(ht, str, 1);
 
 	if (retval) {
 		if (UNEXPECTED(Z_TYPE_P(retval) == IS_INDIRECT)) {
@@ -185,6 +185,7 @@ static zval* ZEND_FASTCALL zend_jit_symtable_lookup_rw(HashTable *ht, zend_strin
 {
 	zend_ulong idx;
 	register const char *tmp = str->val;
+	zval *retval;
 
 	do {
 		if (*tmp > '9') {
@@ -199,8 +200,7 @@ static zval* ZEND_FASTCALL zend_jit_symtable_lookup_rw(HashTable *ht, zend_strin
 			}
 		}
 		if (_zend_handle_numeric_str_ex(str->val, str->len, &idx)) {
-			zval *retval = zend_hash_index_find(ht, idx);
-
+			retval = zend_hash_index_find(ht, idx);
 			if (!retval) {
 				zend_error(E_NOTICE,"Undefined index: %s", ZSTR_VAL(str));
 				retval = zend_hash_index_update(ht, idx, &EG(uninitialized_zval));
@@ -209,13 +209,27 @@ static zval* ZEND_FASTCALL zend_jit_symtable_lookup_rw(HashTable *ht, zend_strin
 		}
 	} while (0);
 
-	return zend_jit_hash_lookup_rw(ht, str);
+	retval = zend_hash_find(ht, str);
+	if (retval) {
+		if (UNEXPECTED(Z_TYPE_P(retval) == IS_INDIRECT)) {
+			retval = Z_INDIRECT_P(retval);
+			if (UNEXPECTED(Z_TYPE_P(retval) == IS_UNDEF)) {
+				zend_error(E_NOTICE,"Undefined index: %s", ZSTR_VAL(str));
+				ZVAL_NULL(retval);
+			}
+		}
+	} else {
+		zend_error(E_NOTICE,"Undefined index: %s", ZSTR_VAL(str));
+		retval = zend_hash_update(ht, str, &EG(uninitialized_zval));
+	}
+	return retval;
 }
 
 static zval* ZEND_FASTCALL zend_jit_symtable_lookup_w(HashTable *ht, zend_string *str)
 {
 	zend_ulong idx;
 	register const char *tmp = str->val;
+	zval *retval;
 
 	do {
 		if (*tmp > '9') {
@@ -230,8 +244,7 @@ static zval* ZEND_FASTCALL zend_jit_symtable_lookup_w(HashTable *ht, zend_string
 			}
 		}
 		if (_zend_handle_numeric_str_ex(str->val, str->len, &idx)) {
-			zval *retval = zend_hash_index_find(ht, idx);
-
+			retval = zend_hash_index_find(ht, idx);
 			if (!retval) {
 				retval = zend_hash_index_add_new(ht, idx, &EG(uninitialized_zval));
 			}
@@ -239,7 +252,18 @@ static zval* ZEND_FASTCALL zend_jit_symtable_lookup_w(HashTable *ht, zend_string
 		}
 	} while (0);
 
-	return zend_jit_hash_lookup_w(ht, str);
+	retval = zend_hash_find(ht, str);
+	if (retval) {
+		if (UNEXPECTED(Z_TYPE_P(retval) == IS_INDIRECT)) {
+			retval = Z_INDIRECT_P(retval);
+			if (UNEXPECTED(Z_TYPE_P(retval) == IS_UNDEF)) {
+				ZVAL_NULL(retval);
+			}
+		}
+	} else {
+		retval = zend_hash_add_new(ht, str, &EG(uninitialized_zval));
+	}
+	return retval;
 }
 
 static void ZEND_FASTCALL zend_jit_undefined_op_helper(uint32_t var)
