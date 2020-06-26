@@ -2016,9 +2016,9 @@ static void free_cb(void *arg) /* {{{ */
 
 static inline int build_mime_structure_from_hash(php_curl *ch, zval *zpostfields) /* {{{ */
 {
+	HashTable *postfields = Z_ARRVAL_P(zpostfields);
 	CURLcode error = CURLE_OK;
 	zval *current;
-	HashTable *postfields;
 	zend_string *string_key;
 	zend_ulong num_key;
 #if LIBCURL_VERSION_NUM >= 0x073800 /* 7.56.0 */
@@ -2031,12 +2031,6 @@ static inline int build_mime_structure_from_hash(php_curl *ch, zval *zpostfields
 	CURLFORMcode form_error;
 #endif
 
-	postfields = HASH_OF(zpostfields);
-	if (!postfields) {
-		php_error_docref(NULL, E_WARNING, "Couldn't get HashTable in CURLOPT_POSTFIELDS");
-		return FAILURE;
-	}
-
 #if LIBCURL_VERSION_NUM >= 0x073800 /* 7.56.0 */
 	if (zend_hash_num_elements(postfields) > 0) {
 		mime = curl_mime_init(ch->cp);
@@ -2046,7 +2040,7 @@ static inline int build_mime_structure_from_hash(php_curl *ch, zval *zpostfields
 	}
 #endif
 
-	ZEND_HASH_FOREACH_KEY_VAL_IND(postfields, num_key, string_key, current) {
+	ZEND_HASH_FOREACH_KEY_VAL(postfields, num_key, string_key, current) {
 		zend_string *postval, *tmp_postval;
 		/* Pretend we have a string_key here */
 		if (!string_key) {
@@ -2659,8 +2653,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 			zend_string *val, *tmp_val;
 			struct curl_slist *slist = NULL;
 
-			ph = HASH_OF(zvalue);
-			if (!ph) {
+			if (Z_TYPE_P(zvalue) != IS_ARRAY) {
 				char *name = NULL;
 				switch (option) {
 					case CURLOPT_HTTPHEADER:
@@ -2698,11 +2691,12 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 						break;
 #endif
 				}
-				php_error_docref(NULL, E_WARNING, "You must pass either an object or an array with the %s argument", name);
+				php_error_docref(NULL, E_WARNING, "You must pass an array with the %s argument", name);
 				return FAILURE;
 			}
 
-			ZEND_HASH_FOREACH_VAL_IND(ph, current) {
+			ph = Z_ARRVAL_P(zvalue);
+			ZEND_HASH_FOREACH_VAL(ph, current) {
 				ZVAL_DEREF(current);
 				val = zval_get_tmp_string(current, &tmp_val);
 				slist = curl_slist_append(slist, ZSTR_VAL(val));
@@ -2745,7 +2739,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 			break;
 
 		case CURLOPT_POSTFIELDS:
-			if (Z_TYPE_P(zvalue) == IS_ARRAY || Z_TYPE_P(zvalue) == IS_OBJECT) {
+			if (Z_TYPE_P(zvalue) == IS_ARRAY) {
 				return build_mime_structure_from_hash(ch, zvalue);
 			} else {
 				zend_string *tmp_str;

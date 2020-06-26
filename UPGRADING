@@ -201,6 +201,11 @@ PHP 8.0 UPGRADE NOTES
     com.autoregister_casesensitive may no longer be disabled; case-insensitive
     markers in com.typelib_file are ignored.
 
+- Curl:
+  . CURLOPT_POSTFIELDS no longer accepts objects as arrays. To interpret an
+    object as an array, perform an explicit (array) cast. The same applies to
+    other options accepting arrays as well.
+
 - Date:
   . mktime() and gmmktime() now require at least one argument. time() can be
     used to get the current timestamp.
