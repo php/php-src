@@ -12,5 +12,9 @@ curl_setopt($ch, CURLOPT_POSTFIELDS, new Test);
 
 ?>
 ===DONE===
---EXPECT--
-===DONE===
+--EXPECTF--
+Fatal error: Uncaught Error: Object of class Test could not be converted to string in %s:%d
+Stack trace:
+#0 %s(%d): curl_setopt(Object(CurlHandle), %d, Object(Test))
+#1 {main}
+  thrown in %s on line %d
