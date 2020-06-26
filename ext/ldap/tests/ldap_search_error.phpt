@@ -10,7 +10,7 @@ Belgian PHP Testfest 2009
 <?php
 include "connect.inc";
 
-$link = ldap_connect($host, $port);
+$link = ldap_connect($uri);
 
 $dn = "dc=not-found,$base";
 $filter = "(dc=*)";

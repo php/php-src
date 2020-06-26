@@ -13,7 +13,7 @@ skipifunsupportedcontrol(LDAP_CONTROL_POST_READ);
 <?php
 require "connect.inc";
 
-$link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
+$link = ldap_connect_and_bind($uri, $user, $passwd, $protocol_version);
 
 var_dump(
     $result = ldap_add_ext($link, "o=test_ldap_add_ext,$base", array(
@@ -36,7 +36,7 @@ var_dump(
 <?php
 require "connect.inc";
 
-$link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
+$link = ldap_connect_and_bind($uri, $user, $passwd, $protocol_version);
 
 ldap_delete($link, "o=test_ldap_add_ext,$base");
 ?>

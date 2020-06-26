@@ -7,7 +7,7 @@ Chad Sikorra <Chad.Sikorra@gmail.com>
 --FILE--
 <?php
 require "connect.inc";
-$link = ldap_connect($host, $port);
+$link = ldap_connect($uri);
 
 $result = ldap_set_option($link, LDAP_OPT_X_TLS_CIPHER_SUITE, '3DES');
 var_dump($result);
@@ -15,6 +15,6 @@ var_dump($result);
 ldap_get_option($link, LDAP_OPT_X_TLS_CIPHER_SUITE, $optionval);
 var_dump($optionval);
 ?>
---EXPECT--
+--EXPECTF--
 bool(true)
 string(4) "3DES"

@@ -7,7 +7,7 @@ Chad Sikorra <Chad.Sikorra@gmail.com>
 --FILE--
 <?php
 require "connect.inc";
-$link = ldap_connect($host, $port);
+$link = ldap_connect($uri);
 
 foreach([
     LDAP_OPT_X_KEEPALIVE_IDLE,
@@ -21,7 +21,7 @@ foreach([
     var_dump($optionval);
 }
 ?>
---EXPECT--
+--EXPECTF--
 bool(true)
 int(5)
 bool(true)

@@ -9,7 +9,7 @@ Patrick Allaert <patrickallaert@php.net>
 <?php
 require "connect.inc";
 
-$link = ldap_connect($host, $port);
+$link = ldap_connect($uri);
 $option = null;
 
 $controls = array(
@@ -48,7 +48,7 @@ var_dump(
     $option
 );
 ?>
---EXPECT--
+--EXPECTF--
 bool(true)
 int(0)
 bool(true)

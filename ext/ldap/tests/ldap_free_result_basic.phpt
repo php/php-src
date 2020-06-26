@@ -10,7 +10,7 @@ Patrick Allaert <patrickallaert@php.net>
 <?php
 require "connect.inc";
 
-$link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
+$link = ldap_connect_and_bind($uri, $user, $passwd, $protocol_version);
 insert_dummy_data($link, $base);
 $result = ldap_search($link, "$base", "(objectclass=person)");
 var_dump(ldap_free_result($result));
@@ -19,7 +19,7 @@ var_dump(ldap_free_result($result));
 <?php
 include "connect.inc";
 
-$link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
+$link = ldap_connect_and_bind($uri, $user, $passwd, $protocol_version);
 remove_dummy_data($link, $base);
 ?>
 --EXPECT--

@@ -10,7 +10,7 @@ Patrick Allaert <patrickallaert@php.net>
 <?php
 require "connect.inc";
 
-$link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
+$link = ldap_connect_and_bind($uri, $user, $passwd, $protocol_version);
 
 // DN not found
 var_dump(ldap_mod_add($link, "dc=my-domain,$base", array()));
@@ -43,7 +43,7 @@ var_dump(ldap_mod_add($link, "dc=my-domain,$base", $entry2));
 <?php
 require "connect.inc";
 
-$link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
+$link = ldap_connect_and_bind($uri, $user, $passwd, $protocol_version);
 
 ldap_delete($link, "dc=my-domain,$base");
 ?>

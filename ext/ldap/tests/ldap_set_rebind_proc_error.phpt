@@ -10,7 +10,7 @@ Patrick Allaert <patrickallaert@php.net>
 		die("skip ldap_set_rebind_proc() does not exist");
 	}
 	require "connect.inc";
-	$link = @fsockopen($host, $port);
+	$link = @fsockopen($uri);
 	if (!$link) {
 		die("skip no server listening");
 	}
@@ -32,7 +32,7 @@ function rebind_proc ($ds, $ldap_url) {
   }
 }
 
-$link = ldap_connect($host, $port);
+$link = ldap_connect($uri);
 var_dump(ldap_set_rebind_proc($link, "rebind_proc_inexistent"));
 ?>
 --EXPECTF--

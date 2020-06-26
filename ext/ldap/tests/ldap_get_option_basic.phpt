@@ -9,7 +9,7 @@ Patrick Allaert <patrickallaert@php.net>
 <?php
 require "connect.inc";
 
-$link = ldap_connect($host, $port);
+$link = ldap_connect($uri);
 $option = null;
 ldap_set_option($link, LDAP_OPT_PROTOCOL_VERSION, $protocol_version);
 
@@ -18,6 +18,6 @@ var_dump(
     $option
 );
 ?>
---EXPECT--
+--EXPECTF--
 bool(true)
 int(3)
