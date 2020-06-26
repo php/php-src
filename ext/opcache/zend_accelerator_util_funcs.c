@@ -369,17 +369,13 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 	zend_update_inherited_handler(__get);
 	zend_update_inherited_handler(__set);
 	zend_update_inherited_handler(__call);
-/* 5.1 stuff */
-	zend_update_inherited_handler(serialize_func);
-	zend_update_inherited_handler(unserialize_func);
 	zend_update_inherited_handler(__isset);
 	zend_update_inherited_handler(__unset);
-/* 5.2 stuff */
 	zend_update_inherited_handler(__tostring);
-
-/* 5.3 stuff */
 	zend_update_inherited_handler(__callstatic);
 	zend_update_inherited_handler(__debugInfo);
+	zend_update_inherited_handler(__serialize);
+	zend_update_inherited_handler(__unserialize);
 
 /* 5.4 traits */
 	if (ce->num_traits) {

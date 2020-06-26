@@ -1835,6 +1835,9 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 		ce->__call = NULL;
 		ce->__callstatic = NULL;
 		ce->__tostring = NULL;
+		ce->__serialize = NULL;
+		ce->__unserialize = NULL;
+		ce->__debugInfo = NULL;
 		ce->create_object = NULL;
 		ce->get_iterator = NULL;
 		ce->iterator_funcs_ptr = NULL;
@@ -1849,9 +1852,6 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 		ce->trait_precedences = NULL;
 		ce->serialize = NULL;
 		ce->unserialize = NULL;
-		ce->serialize_func = NULL;
-		ce->unserialize_func = NULL;
-		ce->__debugInfo = NULL;
 		if (ce->type == ZEND_INTERNAL_CLASS) {
 			ce->info.internal.module = NULL;
 			ce->info.internal.builtin_functions = NULL;
@@ -6256,11 +6256,7 @@ zend_string *zend_begin_method_decl(zend_op_array *op_array, zend_string *name, 
 			ZSTR_VAL(ce->name), ZSTR_VAL(name));
 	}
 
-	if (zend_string_equals_literal(lcname, "serialize")) {
-		ce->serialize_func = (zend_function *) op_array;
-	} else if (zend_string_equals_literal(lcname, "unserialize")) {
-		ce->unserialize_func = (zend_function *) op_array;
-	} else if (ZSTR_VAL(lcname)[0] != '_' || ZSTR_VAL(lcname)[1] != '_') {
+	if (ZSTR_VAL(lcname)[0] != '_' || ZSTR_VAL(lcname)[1] != '_') {
 		/* pass */
 	} else if (zend_string_equals_literal(lcname, ZEND_CONSTRUCTOR_FUNC_NAME)) {
 		ce->constructor = (zend_function *) op_array;
@@ -6301,8 +6297,10 @@ zend_string *zend_begin_method_decl(zend_op_array *op_array, zend_string *name, 
 		ce->__debugInfo = (zend_function *) op_array;
 	} else if (zend_string_equals_literal(lcname, "__serialize")) {
 		zend_check_magic_method_attr(fn_flags, ce, "__serialize", 0);
+		ce->__serialize = (zend_function *) op_array;
 	} else if (zend_string_equals_literal(lcname, "__unserialize")) {
 		zend_check_magic_method_attr(fn_flags, ce, "__unserialize", 0);
+		ce->__unserialize = (zend_function *) op_array;
 	} else if (zend_string_equals_literal(lcname, "__set_state")) {
         zend_check_magic_method_attr(fn_flags, ce, "__set_state", 1);
 	}

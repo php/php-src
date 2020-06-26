@@ -827,8 +827,8 @@ static void zend_file_cache_serialize_class(zval                     *zv,
 	SERIALIZE_PTR(ce->__get);
 	SERIALIZE_PTR(ce->__set);
 	SERIALIZE_PTR(ce->__call);
-	SERIALIZE_PTR(ce->serialize_func);
-	SERIALIZE_PTR(ce->unserialize_func);
+	SERIALIZE_PTR(ce->__serialize);
+	SERIALIZE_PTR(ce->__unserialize);
 	SERIALIZE_PTR(ce->__isset);
 	SERIALIZE_PTR(ce->__unset);
 	SERIALIZE_PTR(ce->__tostring);
@@ -1564,8 +1564,8 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 	UNSERIALIZE_PTR(ce->__get);
 	UNSERIALIZE_PTR(ce->__set);
 	UNSERIALIZE_PTR(ce->__call);
-	UNSERIALIZE_PTR(ce->serialize_func);
-	UNSERIALIZE_PTR(ce->unserialize_func);
+	UNSERIALIZE_PTR(ce->__serialize);
+	UNSERIALIZE_PTR(ce->__unserialize);
 	UNSERIALIZE_PTR(ce->__isset);
 	UNSERIALIZE_PTR(ce->__unset);
 	UNSERIALIZE_PTR(ce->__tostring);

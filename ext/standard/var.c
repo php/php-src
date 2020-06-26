@@ -743,16 +743,12 @@ static int php_var_serialize_call_sleep(zval *retval, zval *struc) /* {{{ */
 
 static int php_var_serialize_call_magic_serialize(zval *retval, zval *obj) /* {{{ */
 {
-	zval fname;
-	int res;
-
-	ZVAL_STRINGL(&fname, "__serialize", sizeof("__serialize") - 1);
 	BG(serialize_lock)++;
-	res = call_user_function(CG(function_table), obj, &fname, retval, 0, 0);
+	zend_call_known_instance_method_with_0_params(
+		Z_OBJCE_P(obj)->__serialize, Z_OBJ_P(obj), retval);
 	BG(serialize_lock)--;
-	zval_ptr_dtor_str(&fname);
 
-	if (res == FAILURE || Z_ISUNDEF_P(retval)) {
+	if (EG(exception)) {
 		zval_ptr_dtor(retval);
 		return FAILURE;
 	}
@@ -995,7 +991,7 @@ again:
 				zend_bool incomplete_class;
 				uint32_t count;
 
-				if (zend_hash_str_exists(&ce->function_table, "__serialize", sizeof("__serialize")-1)) {
+				if (ce->__serialize) {
 					zval retval, obj;
 					zend_string *key;
 					zval *data;

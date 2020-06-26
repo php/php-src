@@ -357,7 +357,8 @@ ZEND_API int zend_user_serialize(zval *object, unsigned char **buffer, size_t *b
 	zval retval;
 	int result;
 
-	zend_call_known_instance_method_with_0_params(ce->serialize_func, Z_OBJ_P(object), &retval);
+	zend_call_method_with_0_params(
+		Z_OBJ_P(object), Z_OBJCE_P(object), NULL, "serialize", &retval);
 
 	if (Z_TYPE(retval) == IS_UNDEF || EG(exception)) {
 		result = FAILURE;
@@ -396,8 +397,8 @@ ZEND_API int zend_user_unserialize(zval *object, zend_class_entry *ce, const uns
 	}
 
 	ZVAL_STRINGL(&zdata, (char*)buf, buf_len);
-	zend_call_known_instance_method_with_1_params(
-		ce->unserialize_func, Z_OBJ_P(object), NULL, &zdata);
+	zend_call_method_with_1_params(
+		Z_OBJ_P(object), Z_OBJCE_P(object), NULL, "unserialize", NULL, &zdata);
 	zval_ptr_dtor(&zdata);
 
 	if (EG(exception)) {

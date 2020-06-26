@@ -1090,16 +1090,16 @@ static void zend_update_parent_ce(zend_class_entry *ce)
 			ce->__call = tmp;
 		}
 	}
-	if (ce->serialize_func) {
-		zend_function *tmp = zend_shared_alloc_get_xlat_entry(ce->serialize_func);
+	if (ce->__serialize) {
+		zend_function *tmp = zend_shared_alloc_get_xlat_entry(ce->__serialize);
 		if (tmp != NULL) {
-			ce->serialize_func = tmp;
+			ce->__serialize = tmp;
 		}
 	}
-	if (ce->unserialize_func) {
-		zend_function *tmp = zend_shared_alloc_get_xlat_entry(ce->unserialize_func);
+	if (ce->__unserialize) {
+		zend_function *tmp = zend_shared_alloc_get_xlat_entry(ce->__unserialize);
 		if (tmp != NULL) {
-			ce->unserialize_func = tmp;
+			ce->__unserialize = tmp;
 		}
 	}
 	if (ce->__isset) {

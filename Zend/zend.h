@@ -140,8 +140,8 @@ struct _zend_class_entry {
 	zend_function *__callstatic;
 	zend_function *__tostring;
 	zend_function *__debugInfo;
-	zend_function *serialize_func;
-	zend_function *unserialize_func;
+	zend_function *__serialize;
+	zend_function *__unserialize;
 
 	/* allocated only if class implements Iterator or IteratorAggregate interface */
 	zend_class_iterator_funcs *iterator_funcs_ptr;
