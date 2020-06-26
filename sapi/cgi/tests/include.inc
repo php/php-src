@@ -22,6 +22,7 @@ function get_cgi_path() /* {{{ */
         /* trying to guess ... */
         $php_path = $php;
         if (defined("PHP_WINDOWS_VERSION_MAJOR")) {
+            echo "Windows\n";
             /* On Windows it should be in the same dir as php.exe in most of the cases. */
             $php_path = dirname($php);
 
@@ -34,6 +35,7 @@ function get_cgi_path() /* {{{ */
                 if ($slash_pos) {
                     $php_path = substr($php_path, 0, $slash_pos);
                 } else {
+                    echo "Failed to remove directory\n";
                     return FALSE;
                 }
             }
@@ -42,10 +44,12 @@ function get_cgi_path() /* {{{ */
                 /* gotcha */
                 return $php_path."/cgi/php-cgi";
             }
+            echo "$php_path/cgi/php-cgi does not exist\n";
         }
         return false;
     }
     /* uhm? what's that then? */
+    echo "not cli\n";
     return false;
 }
 /* }}} */
