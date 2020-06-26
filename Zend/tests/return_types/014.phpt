@@ -7,4 +7,4 @@ class Foo {
     function __construct() : Foo {}
 }
 --EXPECTF--
-Fatal error: Constructor %s::%s() must return void in %s on line %d
+Fatal error: %s::%s(): Return type must be void when declared in %s on line %d

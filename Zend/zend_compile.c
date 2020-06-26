@@ -4503,11 +4503,12 @@ void zend_compile_return(zend_ast *ast) /* {{{ */
 		if (op_array->scope && !(op_array->fn_flags & ZEND_ACC_HAS_RETURN_TYPE)) {
 			if (zend_is_constructor(op_array->function_name)) {
 				zend_error(E_DEPRECATED,
-					"Returning non-void value from a constructor is deprecated");
-			} else if (zend_string_equals_literal_ci(op_array->function_name,
-				ZEND_DESTRUCTOR_FUNC_NAME)) {
+					"%s::%s(): Returning value from a constructor is deprecated",
+					ZSTR_VAL(op_array->scope->name), ZSTR_VAL(op_array->function_name));
+			} else if (zend_string_equals_literal_ci(op_array->function_name, ZEND_DESTRUCTOR_FUNC_NAME)) {
 				zend_error(E_DEPRECATED,
-					"Returning non-void value from a destructor is deprecated");
+					"%s::%s(): Returning value from a destructor is deprecated",
+					ZSTR_VAL(op_array->scope->name), ZSTR_VAL(op_array->function_name));
 			}
 		}
 
@@ -6911,7 +6912,7 @@ void zend_compile_class_decl(znode *result, zend_ast *ast, zend_bool toplevel) /
 		if (ce->constructor->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE
 			&& ZEND_TYPE_PURE_MASK(ce->constructor->common.arg_info[-1].type) != MAY_BE_VOID) {
 			zend_error_noreturn(E_COMPILE_ERROR,
-				"Constructor %s::%s() must return void",
+				"%s::%s(): Return type must be void when declared",
 				ZSTR_VAL(ce->name), ZSTR_VAL(ce->constructor->common.function_name));
 		}
 	}
@@ -6922,7 +6923,7 @@ void zend_compile_class_decl(znode *result, zend_ast *ast, zend_bool toplevel) /
 		} else if (ce->destructor->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE
 			&& ZEND_TYPE_PURE_MASK(ce->destructor->common.arg_info[-1].type) != MAY_BE_VOID) {
 			zend_error_noreturn(E_COMPILE_ERROR,
-				"Destructor %s::%s() must return void",
+				"%s::%s(): Return type must be void when declared",
 				ZSTR_VAL(ce->name), ZSTR_VAL(ce->destructor->common.function_name));
 		}
 	}

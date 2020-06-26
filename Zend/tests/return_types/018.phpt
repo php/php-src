@@ -7,4 +7,4 @@ class Foo {
     function __destruct() : Foo {}
 }
 --EXPECTF--
-Fatal error: Destructor %s::%s() must return void in %s on line %d
+Fatal error: %s::%s(): Return type must be void when declared in %s on line %d
