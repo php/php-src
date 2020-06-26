@@ -2568,9 +2568,8 @@ parent_loop_end:
 				case PHP_MODE_STRIP:
 					if (open_file_for_scanning(&file_handle) == SUCCESS) {
 						zend_strip();
-						zend_file_handle_dtor(&file_handle);
 					}
-					goto parent_out;
+					break;
 				case PHP_MODE_HIGHLIGHT:
 					{
 						zend_syntax_highlighter_ini syntax_highlighter_ini;
@@ -2578,12 +2577,7 @@ parent_loop_end:
 						if (open_file_for_scanning(&file_handle) == SUCCESS) {
 							php_get_highlight_struct(&syntax_highlighter_ini);
 							zend_highlight(&syntax_highlighter_ini);
-							if (fastcgi) {
-								goto fastcgi_request_done;
-							}
-							zend_file_handle_dtor(&file_handle);
 						}
-						goto parent_out;
 					}
 					break;
 			}
