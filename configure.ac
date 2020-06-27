@@ -491,6 +491,20 @@ PHP_CHECK_BUILTIN_CPU_INIT
 dnl Check __builtin_cpu_supports
 PHP_CHECK_BUILTIN_CPU_SUPPORTS
 
+dnl Check for __alignof__ support in the compiler
+AC_CACHE_CHECK(whether the compiler supports __alignof__, ac_cv_alignof_exists,[
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+]],[[
+  int align = __alignof__(int);
+]])],[
+  ac_cv_alignof_exists=yes
+],[
+  ac_cv_alignof_exists=no
+])])
+if test "$ac_cv_alignof_exists" = "yes"; then
+  AC_DEFINE([HAVE_ALIGNOF], 1, [whether the compiler supports __alignof__])
+fi
+
 dnl Check for structure members.
 AC_CHECK_MEMBERS([struct tm.tm_gmtoff],,,[#include <time.h>])
 AC_CHECK_MEMBERS([struct stat.st_blksize, struct stat.st_rdev])
