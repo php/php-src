@@ -17,6 +17,14 @@ http://creativecommons.org/publicdomain/zero/1.0/
 #include "brg_endian.h"
 #include "KeccakP-1600-SnP.h"
 #include "SnP-Relaned.h"
+#ifdef __has_feature
+# if __has_feature(undefined_behavior_sanitizer)
+#  define ALLOW_MISALIGNED_ACCESS __attribute__((no_sanitize("alignment")))
+# endif
+#endif
+#ifndef ALLOW_MISALIGNED_ACCESS
+# define ALLOW_MISALIGNED_ACCESS
+#endif
 
 typedef unsigned char UINT8;
 typedef unsigned int UINT32;
@@ -162,6 +170,7 @@ void KeccakP1600_AddBytesInLane(void *state, unsigned int lanePosition, const un
 
 /* ---------------------------------------------------------------- */
 
+ALLOW_MISALIGNED_ACCESS
 void KeccakP1600_AddLanes(void *state, const unsigned char *data, unsigned int laneCount)
 {
 #if (PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN)
@@ -217,6 +226,7 @@ void KeccakP1600_OverwriteBytesInLane(void *state, unsigned int lanePosition, co
 
 /* ---------------------------------------------------------------- */
 
+ALLOW_MISALIGNED_ACCESS
 void KeccakP1600_OverwriteLanes(void *state, const unsigned char *data, unsigned int laneCount)
 {
 #if (PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN)
@@ -304,6 +314,7 @@ void KeccakP1600_ExtractBytesInLane(const void *state, unsigned int lanePosition
 
 /* ---------------------------------------------------------------- */
 
+ALLOW_MISALIGNED_ACCESS
 void KeccakP1600_ExtractLanes(const void *state, unsigned char *data, unsigned int laneCount)
 {
 #if (PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN)
@@ -378,6 +389,7 @@ void KeccakP1600_ExtractAndAddBytesInLane(const void *state, unsigned int lanePo
 
 /* ---------------------------------------------------------------- */
 
+ALLOW_MISALIGNED_ACCESS
 void KeccakP1600_ExtractAndAddLanes(const void *state, const unsigned char *input, unsigned char *output, unsigned int laneCount)
 {
 #if (PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN)
