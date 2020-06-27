@@ -22,6 +22,7 @@ When running `make` it creates these binaries in `sapi/fuzzer/`:
 
 * `php-fuzz-parser`: Fuzzing language parser and compiler
 * `php-fuzz-unserialize`: Fuzzing unserialize() function
+* `php-fuzz-unserializehash`: Fuzzing unserialize() for HashContext objects
 * `php-fuzz-json`: Fuzzing JSON parser (requires --enable-json)
 * `php-fuzz-exif`: Fuzzing `exif_read_data()` function (requires --enable-exif)
 * `php-fuzz-mbstring`: fuzzing `mb_ereg[i]()` (requires --enable-mbstring)
@@ -39,6 +40,14 @@ For the unserialize fuzzer, a dictionary of internal classes should be generated
 sapi/cli/php sapi/fuzzer/generate_unserialize_dict.php
 cp -r sapi/fuzzer/corpus/unserialize ./my-unserialize-corpus
 sapi/fuzzer/php-fuzz-unserialize -dict=$PWD/sapi/fuzzer/dict/unserialize ./my-unserialize-corpus
+```
+
+For the unserializehash fuzzer, generate a corpus of initial hash serializations:
+
+```sh
+sapi/cli/php sapi/fuzzer/generate_unserializehash_corpus.php
+cp -r sapi/fuzzer/corpus/unserializehash ./my-unserialize-corpus
+sapi/fuzzer/php-fuzz-unserializehash ./my-unserialize-corpus
 ```
 
 For the parser fuzzer, a corpus may be generated from Zend test files:
