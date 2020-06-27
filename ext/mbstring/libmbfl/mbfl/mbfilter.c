@@ -172,12 +172,6 @@ mbfl_buffer_converter_delete(mbfl_buffer_converter *convd)
 	}
 }
 
-void
-mbfl_buffer_converter_reset(mbfl_buffer_converter *convd)
-{
-	mbfl_memory_device_reset(&convd->device);
-}
-
 int
 mbfl_buffer_converter_illegal_mode(mbfl_buffer_converter *convd, int mode)
 {
@@ -210,45 +204,16 @@ mbfl_buffer_converter_illegal_substchar(mbfl_buffer_converter *convd, int substc
 	return 1;
 }
 
-int
-mbfl_buffer_converter_strncat(mbfl_buffer_converter *convd, const unsigned char *p, size_t n)
-{
-	mbfl_convert_filter *filter;
-	int (*filter_function)(int c, mbfl_convert_filter *filter);
-
-	if (convd != NULL && p != NULL) {
-		filter = convd->filter1;
-		if (filter != NULL) {
-			filter_function = filter->filter_function;
-			while (n > 0) {
-				if ((*filter_function)(*p++, filter) < 0) {
-					break;
-				}
-				n--;
-			}
-		}
-	}
-
-	return n;
-}
-
-int
-mbfl_buffer_converter_feed(mbfl_buffer_converter *convd, mbfl_string *string)
-{
-	return mbfl_buffer_converter_feed2(convd, string, NULL);
-}
-
-int
-mbfl_buffer_converter_feed2(mbfl_buffer_converter *convd, mbfl_string *string, size_t *loc)
+size_t mbfl_buffer_converter_feed(mbfl_buffer_converter *convd, mbfl_string *string)
 {
 	size_t n;
 	unsigned char *p;
 	mbfl_convert_filter *filter;
 	int (*filter_function)(int c, mbfl_convert_filter *filter);
 
-	if (convd == NULL || string == NULL) {
-		return -1;
-	}
+	ZEND_ASSERT(convd);
+	ZEND_ASSERT(string);
+
 	mbfl_memory_device_realloc(&convd->device, convd->device.pos + string->len, string->len/4);
 	/* feed data */
 	n = string->len;
@@ -259,18 +224,12 @@ mbfl_buffer_converter_feed2(mbfl_buffer_converter *convd, mbfl_string *string, s
 		filter_function = filter->filter_function;
 		while (n > 0) {
 			if ((*filter_function)(*p++, filter) < 0) {
-				if (loc) {
-					*loc = p - string->val;
-				}
-				return -1;
+				return p - string->val;
 			}
 			n--;
 		}
 	}
-	if (loc) {
-		*loc = p - string->val;
-	}
-	return 0;
+	return p - string->val;
 }
 
 
@@ -289,20 +248,6 @@ mbfl_buffer_converter_flush(mbfl_buffer_converter *convd)
 	}
 
 	return 0;
-}
-
-mbfl_string *
-mbfl_buffer_converter_getbuffer(mbfl_buffer_converter *convd, mbfl_string *result)
-{
-	if (convd != NULL && result != NULL && convd->device.buffer != NULL) {
-		result->encoding = convd->to;
-		result->val = convd->device.buffer;
-		result->len = convd->device.pos;
-	} else {
-		result = NULL;
-	}
-
-	return result;
 }
 
 mbfl_string *
@@ -753,44 +698,6 @@ retry:
 
 	pc->output++;
 	return c;
-}
-
-/*
- *	oddlen
- */
-size_t
-mbfl_oddlen(mbfl_string *string)
-{
-	size_t len, n, k;
-	unsigned char *p;
-	const mbfl_encoding *encoding = string->encoding;
-
-	len = 0;
-	if (encoding->flag & MBFL_ENCTYPE_SBCS) {
-		return 0;
-	} else if (encoding->flag & (MBFL_ENCTYPE_WCS2BE | MBFL_ENCTYPE_WCS2LE)) {
-		return len % 2;
-	} else if (encoding->flag & (MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_WCS4LE)) {
-		return len % 4;
-	} else if (encoding->mblen_table != NULL) {
-		const unsigned char *mbtab = encoding->mblen_table;
- 		n = 0;
-		p = string->val;
-		k = string->len;
-		/* count */
-		if (p != NULL) {
-			while (n < k) {
-				unsigned m = mbtab[*p];
-				n += m;
-				p += m;
-			};
-		}
-		return n-k;
-	} else {
-		/* how can i do ? */
-		return 0;
-	}
-	/* NOT REACHED */
 }
 
 static const unsigned char *mbfl_find_offset_utf8(
@@ -2007,12 +1914,6 @@ mime_header_encoder_delete(struct mime_header_encoder_data *pe)
 	}
 }
 
-int
-mime_header_encoder_feed(int c, struct mime_header_encoder_data *pe)
-{
-	return (*pe->conv1_filter->filter_function)(c, pe->conv1_filter);
-}
-
 mbfl_string *
 mbfl_mime_header_encode(
     mbfl_string *string,
@@ -2299,12 +2200,6 @@ mime_header_decoder_delete(struct mime_header_decoder_data *pd)
 		mbfl_memory_device_clear(&pd->tmpdev);
 		efree((void*)pd);
 	}
-}
-
-int
-mime_header_decoder_feed(int c, struct mime_header_decoder_data *pd)
-{
-	return mime_header_decoder_collector(c, pd);
 }
 
 mbfl_string *

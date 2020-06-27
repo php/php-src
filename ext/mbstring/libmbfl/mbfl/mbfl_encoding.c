@@ -308,16 +308,3 @@ mbfl_no2preferred_mime_name(enum mbfl_no_encoding no_encoding)
 		return NULL;
 	}
 }
-
-int
-mbfl_is_support_encoding(const char *name)
-{
-	const mbfl_encoding *encoding;
-
-	encoding = mbfl_name2encoding(name);
-	if (encoding == NULL) {
-		return 0;
-	} else {
-		return 1;
-	}
-}

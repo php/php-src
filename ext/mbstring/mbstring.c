@@ -451,8 +451,6 @@ static size_t php_mb_zend_encoding_converter(unsigned char **to, size_t *to_leng
 {
 	mbfl_string string, result;
 	mbfl_buffer_converter *convd;
-	int status;
-	size_t loc;
 
 	/* new encoding */
 	/* initialize string */
@@ -470,11 +468,7 @@ static size_t php_mb_zend_encoding_converter(unsigned char **to, size_t *to_leng
 	mbfl_buffer_converter_illegal_substchar(convd, MBSTRG(current_filter_illegal_substchar));
 
 	/* do it */
-	status = mbfl_buffer_converter_feed2(convd, &string, &loc);
-	if (status) {
-		mbfl_buffer_converter_delete(convd);
-		return (size_t)-1;
-	}
+	size_t loc = mbfl_buffer_converter_feed(convd, &string);
 
 	mbfl_buffer_converter_flush(convd);
 	mbfl_string_init(&result);

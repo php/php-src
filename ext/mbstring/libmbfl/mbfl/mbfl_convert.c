@@ -221,12 +221,6 @@ mbfl_convert_filter_delete(mbfl_convert_filter *filter)
 }
 
 int
-mbfl_convert_filter_feed(int c, mbfl_convert_filter *filter)
-{
-	return (*filter->filter_function)(c, filter);
-}
-
-int
 mbfl_convert_filter_feed_string(mbfl_convert_filter *filter, const unsigned char *p, size_t len) {
 	while (len > 0) {
 		if ((*filter->filter_function)(*p++, filter) < 0) {

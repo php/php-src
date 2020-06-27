@@ -41,16 +41,6 @@ int mbfl_filter_output_pipe(int c, void* data)
 	return (*filter->filter_function)(c, filter);
 }
 
-int mbfl_filter_output_pipe_flush(void *data)
-{
-	mbfl_convert_filter *filter = (mbfl_convert_filter*)data;
-	if (filter->filter_flush != NULL) {
-		return (*filter->filter_flush)(filter);
-	}
-
-	return 0;
-}
-
 int mbfl_filter_output_null(int c, void* data)
 {
 	return c;

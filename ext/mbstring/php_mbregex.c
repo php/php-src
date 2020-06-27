@@ -86,12 +86,6 @@ static int _php_mb_regex_globals_ctor(zend_mb_regex_globals *pglobals)
 }
 /* }}} */
 
-/* {{{ _php_mb_regex_globals_dtor */
-static void _php_mb_regex_globals_dtor(zend_mb_regex_globals *pglobals)
-{
-}
-/* }}} */
-
 /* {{{ php_mb_regex_globals_alloc */
 zend_mb_regex_globals *php_mb_regex_globals_alloc(void)
 {
@@ -111,7 +105,6 @@ void php_mb_regex_globals_free(zend_mb_regex_globals *pglobals)
 	if (!pglobals) {
 		return;
 	}
-	_php_mb_regex_globals_dtor(pglobals);
 	pefree(pglobals, 1);
 }
 /* }}} */

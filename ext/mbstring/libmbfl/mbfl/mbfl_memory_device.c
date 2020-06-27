@@ -151,58 +151,6 @@ mbfl_memory_device_output(int c, void *data)
 }
 
 int
-mbfl_memory_device_output2(int c, void *data)
-{
-	mbfl_memory_device *device = (mbfl_memory_device *)data;
-
-	if (2 > device->length - device->pos) {
-		/* reallocate buffer */
-		size_t newlen;
-
-		if (device->length > SIZE_MAX - device->allocsz) {
-			/* overflow */
-			return -1;
-		}
-
-		newlen = device->length + device->allocsz;
-		device->buffer = erealloc(device->buffer, newlen);
-		device->length = newlen;
-	}
-
-	device->buffer[device->pos++] = (unsigned char)((c >> 8) & 0xff);
-	device->buffer[device->pos++] = (unsigned char)(c & 0xff);
-
-	return c;
-}
-
-int
-mbfl_memory_device_output4(int c, void* data)
-{
-	mbfl_memory_device *device = (mbfl_memory_device *)data;
-
-	if (4 > device->length - device->pos) {
-		/* reallocate buffer */
-		size_t newlen;
-
-		if (device->length > SIZE_MAX - device->allocsz) {
-			/* overflow */
-			return -1;
-		}
-
-		newlen = device->length + device->allocsz;
-		device->buffer = erealloc(device->buffer, newlen);
-		device->length = newlen;
-	}
-
-	device->buffer[device->pos++] = (unsigned char)((c >> 24) & 0xff);
-	device->buffer[device->pos++] = (unsigned char)((c >> 16) & 0xff);
-	device->buffer[device->pos++] = (unsigned char)((c >> 8) & 0xff);
-	device->buffer[device->pos++] = (unsigned char)(c & 0xff);
-
-	return c;
-}
-
-int
 mbfl_memory_device_strcat(mbfl_memory_device *device, const char *psrc)
 {
 	return mbfl_memory_device_strncat(device, psrc, strlen(psrc));
