@@ -249,53 +249,60 @@ static inline unsigned php_unicode_tofold_simple(unsigned code, enum mbfl_no_enc
 	return code;
 }
 
-static inline unsigned php_unicode_tolower_full(
-		unsigned code, enum mbfl_no_encoding enc, unsigned *out) {
+static inline void php_unicode_tolower_full(unsigned code, enum mbfl_no_encoding enc,
+	mbfl_convert_filter* next_filter) {
 	code = php_unicode_tolower_raw(code, enc);
 	if (UNEXPECTED(code > 0xffffff)) {
 		unsigned len = code >> 24;
 		const unsigned *p = &_uccase_extra_table[code & 0xffffff];
-		memcpy(out, p + 1, len * sizeof(unsigned));
-		return len;
+		while (len--) {
+			(next_filter->filter_function)(*++p, next_filter);
+		}
+	} else {
+		(next_filter->filter_function)(code, next_filter);
 	}
-	*out = code;
-	return 1;
 }
-static inline unsigned php_unicode_toupper_full(
-		unsigned code, enum mbfl_no_encoding enc, unsigned *out) {
+
+static inline void php_unicode_toupper_full(unsigned code, enum mbfl_no_encoding enc,
+	mbfl_convert_filter* next_filter) {
 	code = php_unicode_toupper_raw(code, enc);
 	if (UNEXPECTED(code > 0xffffff)) {
 		unsigned len = code >> 24;
 		const unsigned *p = &_uccase_extra_table[code & 0xffffff];
-		memcpy(out, p + 1, len * sizeof(unsigned));
-		return len;
+		while (len--) {
+			(next_filter->filter_function)(*++p, next_filter);
+		}
+	} else {
+		(next_filter->filter_function)(code, next_filter);
 	}
-	*out = code;
-	return 1;
 }
-static inline unsigned php_unicode_totitle_full(
-		unsigned code, enum mbfl_no_encoding enc, unsigned *out) {
+
+static inline void php_unicode_totitle_full(unsigned code, enum mbfl_no_encoding enc,
+	mbfl_convert_filter* next_filter) {
 	code = php_unicode_totitle_raw(code, enc);
 	if (UNEXPECTED(code > 0xffffff)) {
 		unsigned len = code >> 24;
 		const unsigned *p = &_uccase_extra_table[code & 0xffffff];
-		memcpy(out, p + 1, len * sizeof(unsigned));
-		return len;
+		while (len--) {
+			(next_filter->filter_function)(*++p, next_filter);
+		}
+	} else {
+		(next_filter->filter_function)(code, next_filter);
 	}
-	*out = code;
-	return 1;
 }
-static inline unsigned php_unicode_tofold_full(
-		unsigned code, enum mbfl_no_encoding enc, unsigned *out) {
+
+static inline void php_unicode_tofold_full(unsigned code, enum mbfl_no_encoding enc,
+	mbfl_convert_filter* next_filter) {
 	code = php_unicode_tofold_raw(code, enc);
 	if (UNEXPECTED(code > 0xffffff)) {
 		unsigned len = code >> 24;
 		const unsigned *p = &_uccase_extra_table[code & 0xffffff];
-		memcpy(out, p + 1, len * sizeof(unsigned));
-		return len;
+		while (len--) {
+			(next_filter->filter_function)(*++p, next_filter);
+		}
+	} else {
+		(next_filter->filter_function)(code, next_filter);
 	}
-	*out = code;
-	return 1;
 }
 
 struct convert_case_data {
@@ -308,8 +315,7 @@ struct convert_case_data {
 static int convert_case_filter(int c, void *void_data)
 {
 	struct convert_case_data *data = (struct convert_case_data *) void_data;
-	unsigned out[3];
-	unsigned len, i;
+	unsigned code;
 
 	/* Handle invalid characters early, as we assign special meaning to
 	 * codepoints above 0xffffff. */
@@ -320,30 +326,30 @@ static int convert_case_filter(int c, void *void_data)
 
 	switch (data->case_mode) {
 		case PHP_UNICODE_CASE_UPPER_SIMPLE:
-			out[0] = php_unicode_toupper_simple(c, data->no_encoding);
-			len = 1;
+			code = php_unicode_toupper_simple(c, data->no_encoding);
+			(data->next_filter->filter_function)(code, data->next_filter);
 			break;
 
 		case PHP_UNICODE_CASE_UPPER:
-			len = php_unicode_toupper_full(c, data->no_encoding, out);
+			php_unicode_toupper_full(c, data->no_encoding, data->next_filter);
 			break;
 
 		case PHP_UNICODE_CASE_LOWER_SIMPLE:
-			out[0] = php_unicode_tolower_simple(c, data->no_encoding);
-			len = 1;
+			code = php_unicode_tolower_simple(c, data->no_encoding);
+			(data->next_filter->filter_function)(code, data->next_filter);
 			break;
 
 		case PHP_UNICODE_CASE_LOWER:
-			len = php_unicode_tolower_full(c, data->no_encoding, out);
+			php_unicode_tolower_full(c, data->no_encoding, data->next_filter);
 			break;
 
 		case PHP_UNICODE_CASE_FOLD:
-			len = php_unicode_tofold_full(c, data->no_encoding, out);
+			php_unicode_tofold_full(c, data->no_encoding, data->next_filter);
 			break;
 
 		case PHP_UNICODE_CASE_FOLD_SIMPLE:
-			out[0] = php_unicode_tofold_simple(c, data->no_encoding);
-			len = 1;
+			code = php_unicode_tofold_simple(c, data->no_encoding);
+			(data->next_filter->filter_function)(code, data->next_filter);
 			break;
 
 		case PHP_UNICODE_CASE_TITLE_SIMPLE:
@@ -351,17 +357,17 @@ static int convert_case_filter(int c, void *void_data)
 		{
 			if (data->title_mode) {
 				if (data->case_mode == PHP_UNICODE_CASE_TITLE_SIMPLE) {
-					out[0] = php_unicode_tolower_simple(c, data->no_encoding);
-					len = 1;
+					code = php_unicode_tolower_simple(c, data->no_encoding);
+					(data->next_filter->filter_function)(code, data->next_filter);
 				} else {
-					len = php_unicode_tolower_full(c, data->no_encoding, out);
+					php_unicode_tolower_full(c, data->no_encoding, data->next_filter);
 				}
 			} else {
 				if (data->case_mode == PHP_UNICODE_CASE_TITLE_SIMPLE) {
-					out[0] = php_unicode_totitle_simple(c, data->no_encoding);
-					len = 1;
+					code = php_unicode_totitle_simple(c, data->no_encoding);
+					(data->next_filter->filter_function)(code, data->next_filter);
 				} else {
-					len = php_unicode_totitle_full(c, data->no_encoding, out);
+					php_unicode_totitle_full(c, data->no_encoding, data->next_filter);
 				}
 			}
 			if (!php_unicode_is_case_ignorable(c)) {
@@ -372,9 +378,6 @@ static int convert_case_filter(int c, void *void_data)
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 
-	for (i = 0; i < len; i++) {
-		(*data->next_filter->filter_function)(out[i], data->next_filter);
-	}
 	return 0;
 }
 
