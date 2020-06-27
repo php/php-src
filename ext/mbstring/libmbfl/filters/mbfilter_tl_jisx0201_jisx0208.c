@@ -22,7 +22,6 @@
  *
  */
 
-#include "mbfl_allocators.h"
 #include "mbfilter_tl_jisx0201_jisx0208.h"
 #include "translit_kana_jisx0201_jisx0208.h"
 

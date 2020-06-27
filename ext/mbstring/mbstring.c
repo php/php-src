@@ -33,7 +33,6 @@
 #include "main/php_output.h"
 #include "ext/standard/info.h"
 
-#include "libmbfl/mbfl/mbfl_allocators.h"
 #include "libmbfl/mbfl/mbfilter_8bit.h"
 #include "libmbfl/mbfl/mbfilter_pass.h"
 #include "libmbfl/mbfl/mbfilter_wchar.h"
@@ -215,35 +214,6 @@ ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 ZEND_GET_MODULE(mbstring)
 #endif
-
-/* {{{ allocators */
-static void *_php_mb_allocators_malloc(size_t sz)
-{
-	return emalloc(sz);
-}
-
-static void *_php_mb_allocators_realloc(void *ptr, size_t sz)
-{
-	return erealloc(ptr, sz);
-}
-
-static void *_php_mb_allocators_calloc(size_t nelems, size_t szelem)
-{
-	return ecalloc(nelems, szelem);
-}
-
-static void _php_mb_allocators_free(void *ptr)
-{
-	efree(ptr);
-}
-
-static const mbfl_allocators _php_mb_allocators = {
-	_php_mb_allocators_malloc,
-	_php_mb_allocators_realloc,
-	_php_mb_allocators_calloc,
-	_php_mb_allocators_free,
-};
-/* }}} */
 
 /* {{{ static sapi_post_entry mbstr_post_entries[] */
 static const sapi_post_entry mbstr_post_entries[] = {
@@ -1151,7 +1121,6 @@ PHP_MINIT_FUNCTION(mbstring)
 #if defined(COMPILE_DL_MBSTRING) && defined(ZTS)
 ZEND_TSRMLS_CACHE_UPDATE();
 #endif
-	__mbfl_allocators = (mbfl_allocators*)&_php_mb_allocators;
 
 	REGISTER_INI_ENTRIES();
 

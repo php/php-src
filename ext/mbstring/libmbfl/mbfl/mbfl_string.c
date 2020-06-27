@@ -34,7 +34,6 @@
 
 #include <stddef.h>
 
-#include "mbfl_allocators.h"
 #include "mbfl_string.h"
 #include "mbfilter_pass.h"
 
@@ -61,7 +60,7 @@ void
 mbfl_string_clear(mbfl_string *string)
 {
 	if (string->val != (unsigned char*)NULL) {
-		mbfl_free(string->val);
+		efree(string->val);
 	}
 	string->val = (unsigned char*)NULL;
 	string->len = 0;

@@ -587,7 +587,7 @@ mbfl_filt_conv_wchar_cp50220_ctor(mbfl_convert_filter *filt)
 
 	mbfl_filt_conv_common_ctor(filt);
 
-	ctx = mbfl_malloc(sizeof(mbfl_filt_conv_wchar_cp50220_ctx));
+	ctx = emalloc(sizeof(mbfl_filt_conv_wchar_cp50220_ctx));
 	ctx->tl_param.mode = MBFL_FILT_TL_HAN2ZEN_KATAKANA | MBFL_FILT_TL_HAN2ZEN_GLUE;
 
 	ctx->last = *filt;
@@ -608,7 +608,7 @@ mbfl_filt_conv_wchar_cp50220_copy(mbfl_convert_filter *src, mbfl_convert_filter 
 	mbfl_filt_conv_wchar_cp50220_ctx *ctx;
 
 	*dest = *src;
-	ctx = mbfl_malloc(sizeof(mbfl_filt_conv_wchar_cp50220_ctx));
+	ctx = emalloc(sizeof(mbfl_filt_conv_wchar_cp50220_ctx));
 	dest->opaque = ctx;
 	dest->data = &ctx->last;
 }
@@ -619,7 +619,7 @@ mbfl_filt_conv_wchar_cp50220_dtor(mbfl_convert_filter *filt)
 	vtbl_tl_jisx0201_jisx0208.filter_dtor(filt);
 
 	if (filt->opaque != NULL) {
-		mbfl_free(filt->opaque);
+		efree(filt->opaque);
 	}
 
 	mbfl_filt_conv_common_dtor(filt);

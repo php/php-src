@@ -124,7 +124,7 @@ mbfl_buffer_converter_new(
 	const mbfl_encoding *to,
     size_t buf_initsz)
 {
-	mbfl_buffer_converter *convd = mbfl_malloc(sizeof(mbfl_buffer_converter));
+	mbfl_buffer_converter *convd = emalloc(sizeof(mbfl_buffer_converter));
 	convd->from = from;
 	convd->to = to;
 
@@ -147,7 +147,7 @@ mbfl_buffer_converter_new(
 		}
 	}
 	if (convd->filter1 == NULL) {
-		mbfl_free(convd);
+		efree(convd);
 		return NULL;
 	}
 
@@ -168,7 +168,7 @@ mbfl_buffer_converter_delete(mbfl_buffer_converter *convd)
 			mbfl_convert_filter_delete(convd->filter2);
 		}
 		mbfl_memory_device_clear(&convd->device);
-		mbfl_free((void*)convd);
+		efree((void*)convd);
 	}
 }
 
@@ -368,8 +368,8 @@ mbfl_encoding_detector_new(const mbfl_encoding **elist, int elistsz, int strict)
 	}
 
 	/* allocate */
-	identd = mbfl_malloc(sizeof(mbfl_encoding_detector));
-	identd->filter_list = mbfl_calloc(elistsz, sizeof(mbfl_identify_filter *));
+	identd = emalloc(sizeof(mbfl_encoding_detector));
+	identd->filter_list = ecalloc(elistsz, sizeof(mbfl_identify_filter *));
 
 	/* create filters */
 	i = 0;
@@ -403,9 +403,9 @@ mbfl_encoding_detector_delete(mbfl_encoding_detector *identd)
 				i--;
 				mbfl_identify_filter_delete(identd->filter_list[i]);
 			}
-			mbfl_free((void *)identd->filter_list);
+			efree((void *)identd->filter_list);
 		}
-		mbfl_free((void *)identd);
+		efree((void *)identd);
 	}
 }
 
@@ -557,7 +557,7 @@ mbfl_identify_encoding(mbfl_string *string, const mbfl_encoding **elist, int eli
 	const mbfl_encoding *encoding;
 
 	/* flist is an array of mbfl_identify_filter instances */
-	flist = mbfl_calloc(elistsz, sizeof(mbfl_identify_filter));
+	flist = ecalloc(elistsz, sizeof(mbfl_identify_filter));
 
 	num = 0;
 	if (elist != NULL) {
@@ -624,7 +624,7 @@ mbfl_identify_encoding(mbfl_string *string, const mbfl_encoding **elist, int eli
 		mbfl_identify_filter_cleanup(&flist[i]);
 	}
 
-	mbfl_free((void *)flist);
+	efree((void *)flist);
 
 	return encoding;
 }
@@ -1108,7 +1108,7 @@ mbfl_substr(
 		/* allocate memory and copy */
 		n = end - start;
 		result->len = 0;
-		result->val = w = (unsigned char*)mbfl_malloc(n + 1);
+		result->val = w = (unsigned char*)emalloc(n + 1);
 		result->len = n;
 		memcpy(w, string->val + start, n);
 		w[n] = '\0';
@@ -1256,7 +1256,7 @@ mbfl_strcut(
 
 		/* allocate memory and copy string */
 		sz = end - start;
-		w = mbfl_calloc(sz + 8, sizeof(unsigned char));
+		w = ecalloc(sz + 8, sizeof(unsigned char));
 
 		memcpy(w, start, sz);
 		w[sz] = '\0';
@@ -1686,7 +1686,7 @@ mbfl_ja_jp_hantozen(
 	}
 	next_filter = decoder;
 
-	param = mbfl_malloc(sizeof(mbfl_filt_tl_jisx0201_jisx0208_param));
+	param = emalloc(sizeof(mbfl_filt_tl_jisx0201_jisx0208_param));
 	param->mode = mode;
 
 	tl_filter = mbfl_convert_filter_new2(
@@ -1695,7 +1695,7 @@ mbfl_ja_jp_hantozen(
 		(int(*)(void*))next_filter->filter_flush,
 		next_filter);
 	if (tl_filter == NULL) {
-		mbfl_free(param);
+		efree(param);
 		goto out;
 	}
 
@@ -1729,7 +1729,7 @@ mbfl_ja_jp_hantozen(
 out:
 	if (tl_filter != NULL) {
 		if (tl_filter->opaque != NULL) {
-			mbfl_free(tl_filter->opaque);
+			efree(tl_filter->opaque);
 		}
 		mbfl_convert_filter_delete(tl_filter);
 	}
@@ -1922,7 +1922,7 @@ mime_header_encoder_new(
 		return NULL;
 	}
 
-	pe = mbfl_malloc(sizeof(struct mime_header_encoder_data));
+	pe = emalloc(sizeof(struct mime_header_encoder_data));
 	mbfl_memory_device_init(&pe->outdev, 0, 0);
 	mbfl_memory_device_init(&pe->tmpdev, 0, 0);
 	pe->prevpos = 0;
@@ -2003,7 +2003,7 @@ mime_header_encoder_delete(struct mime_header_encoder_data *pe)
 		mbfl_convert_filter_delete(pe->encod_filter_backup);
 		mbfl_memory_device_clear(&pe->outdev);
 		mbfl_memory_device_clear(&pe->tmpdev);
-		mbfl_free((void*)pe);
+		efree((void*)pe);
 	}
 }
 
@@ -2265,7 +2265,7 @@ mime_header_decoder_result(struct mime_header_decoder_data *pd, mbfl_string *res
 struct mime_header_decoder_data*
 mime_header_decoder_new(const mbfl_encoding *outcode)
 {
-	struct mime_header_decoder_data *pd = mbfl_malloc(sizeof(struct mime_header_decoder_data));
+	struct mime_header_decoder_data *pd = emalloc(sizeof(struct mime_header_decoder_data));
 
 	mbfl_memory_device_init(&pd->outdev, 0, 0);
 	mbfl_memory_device_init(&pd->tmpdev, 0, 0);
@@ -2297,7 +2297,7 @@ mime_header_decoder_delete(struct mime_header_decoder_data *pd)
 		mbfl_convert_filter_delete(pd->deco_filter);
 		mbfl_memory_device_clear(&pd->outdev);
 		mbfl_memory_device_clear(&pd->tmpdev);
-		mbfl_free((void*)pd);
+		efree((void*)pd);
 	}
 }
 

@@ -35,7 +35,6 @@
 #include <stddef.h>
 
 #include "mbfl_ident.h"
-#include "mbfl_allocators.h"
 #include "mbfilter_pass.h"
 #include "mbfilter_8bit.h"
 #include "mbfilter_wchar.h"
@@ -191,9 +190,9 @@ const struct mbfl_identify_vtbl * mbfl_identify_filter_get_vtbl(enum mbfl_no_enc
 
 mbfl_identify_filter *mbfl_identify_filter_new(enum mbfl_no_encoding encoding)
 {
-	mbfl_identify_filter *filter = mbfl_malloc(sizeof(mbfl_identify_filter));
+	mbfl_identify_filter *filter = emalloc(sizeof(mbfl_identify_filter));
 	if (mbfl_identify_filter_init(filter, encoding)) {
-		mbfl_free(filter);
+		efree(filter);
 		return NULL;
 	}
 
@@ -202,9 +201,9 @@ mbfl_identify_filter *mbfl_identify_filter_new(enum mbfl_no_encoding encoding)
 
 mbfl_identify_filter *mbfl_identify_filter_new2(const mbfl_encoding *encoding)
 {
-	mbfl_identify_filter *filter = mbfl_malloc(sizeof(mbfl_identify_filter));
+	mbfl_identify_filter *filter = emalloc(sizeof(mbfl_identify_filter));
 	if (mbfl_identify_filter_init2(filter, encoding)) {
-		mbfl_free(filter);
+		efree(filter);
 		return NULL;
 	}
 
@@ -251,7 +250,7 @@ void mbfl_identify_filter_delete(mbfl_identify_filter *filter)
 	}
 
 	mbfl_identify_filter_cleanup(filter);
-	mbfl_free((void*)filter);
+	efree((void*)filter);
 }
 
 void mbfl_identify_filter_cleanup(mbfl_identify_filter *filter)

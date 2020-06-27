@@ -35,7 +35,6 @@
 #include <stddef.h>
 
 #include "mbfl_encoding.h"
-#include "mbfl_allocators.h"
 #include "mbfl_filter_output.h"
 #include "mbfilter_pass.h"
 #include "mbfilter_8bit.h"
@@ -173,11 +172,11 @@ mbfl_convert_filter_new(
 		return NULL;
 	}
 
-	filter = mbfl_malloc(sizeof(mbfl_convert_filter));
+	filter = emalloc(sizeof(mbfl_convert_filter));
 
 	if (mbfl_convert_filter_common_init(filter, from, to, vtbl,
 			output_function, flush_function, data)) {
-		mbfl_free(filter);
+		efree(filter);
 		return NULL;
 	}
 
@@ -201,11 +200,11 @@ mbfl_convert_filter_new2(
 	from_encoding = mbfl_no2encoding(vtbl->from);
 	to_encoding = mbfl_no2encoding(vtbl->to);
 
-	filter = mbfl_malloc(sizeof(mbfl_convert_filter));
+	filter = emalloc(sizeof(mbfl_convert_filter));
 
 	if (mbfl_convert_filter_common_init(filter, from_encoding, to_encoding, vtbl,
 			output_function, flush_function, data)) {
-		mbfl_free(filter);
+		efree(filter);
 		return NULL;
 	}
 
@@ -217,7 +216,7 @@ mbfl_convert_filter_delete(mbfl_convert_filter *filter)
 {
 	if (filter) {
 		(*filter->filter_dtor)(filter);
-		mbfl_free((void*)filter);
+		efree((void*)filter);
 	}
 }
 

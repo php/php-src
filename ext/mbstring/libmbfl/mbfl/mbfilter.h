@@ -85,9 +85,10 @@
 #ifndef MBFL_MBFILTER_H
 #define MBFL_MBFILTER_H
 
+#include "zend.h"
+
 #include "mbfl_defs.h"
 #include "mbfl_consts.h"
-#include "mbfl_allocators.h"
 #include "mbfl_encoding.h"
 #include "mbfl_language.h"
 #include "mbfl_string.h"
