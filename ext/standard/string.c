@@ -6265,5 +6265,7 @@ PHP_FUNCTION(unaccent) {
     zend_string *str = zend_string_init(unnacent, length < length_unparsed_string ? length : length_unparsed_string , 0);
     RETURN_STR(str);
     zend_string_release(str);
+	efree(unnacent);
+    efree(unparsed_string);
 }
 /* }}} */
