@@ -66,12 +66,6 @@ try {
     echo $e->getMessage(), "\n";
 }
 
-try {
-    var_dump( range(0, 1, "140962482048819216326.24.") );
-} catch (\ValueError $e) {
-    echo $e->getMessage(), "\n";
-}
-
 echo "\n-- Testing Invalid steps --\n";
 $step_arr = array( "string", NULL, FALSE, "", "\0" );
 
@@ -83,7 +77,7 @@ foreach( $step_arr as $step ) {
     }
 }
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing error conditions ***
 
 -- Testing ( (low < high) && (step = 0) ) --
@@ -106,9 +100,6 @@ range(): Argument #3 ($step) must not exceed the specified range
 -- Testing other conditions --
 range(): Argument #3 ($step) must not exceed the specified range
 range(): Argument #3 ($step) must be of type int|float, string given
-range(): Argument #3 ($step) must not exceed the specified range
-
-Notice: A non well formed numeric value encountered in %s on line %d
 range(): Argument #3 ($step) must not exceed the specified range
 
 -- Testing Invalid steps --

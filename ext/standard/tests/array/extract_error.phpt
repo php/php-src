@@ -10,7 +10,7 @@ echo "*** Testing Error Conditions ***\n";
 $arr = array(1);
 
 try {
-    var_dump( extract($arr, -1 . "wddr") );
+    var_dump( extract($arr, -1) );
 } catch (\ValueError $e) {
     echo $e->getMessage() . "\n";
 }
@@ -29,10 +29,8 @@ try {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing Error Conditions ***
-
-Notice: A non well formed numeric value encountered in %s on line %d
 extract(): Argument #2 ($extract_type) must be a valid extract type
 extract(): Argument #2 ($extract_type) must be a valid extract type
 extract(): Argument #3 ($prefix) is required when using this extract type
