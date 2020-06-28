@@ -682,6 +682,8 @@ function utf8_encode(string $data): string {}
 
 function utf8_decode(string $data): string {}
 
+function unaccent(string $str): string {}
+
 /**
  * @param resource $context
  * @return resource|false

@@ -6139,3 +6139,131 @@ PHP_FUNCTION(utf8_decode)
 	RETURN_STR(php_utf8_decode(arg, arg_len));
 }
 /* }}} */
+
+/* {{{ proto string unaccent(string str)
+   Removes acents (diacritic sings) from string */
+PHP_FUNCTION(unaccent) {
+
+    zend_string *string;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_STR(string)
+    ZEND_PARSE_PARAMETERS_END();
+
+    setlocale(LC_CTYPE,"en_US.UTF-8");
+
+    int length = ZSTR_LEN(string);
+    wchar_t *unparsed_string = emalloc(sizeof(wchar_t) * length);
+
+    /* the text string is converted to a long string that supports special characters */
+    mbstowcs(unparsed_string, ZSTR_VAL(string), length);
+
+    /* the string "aâ" has a length of 4 ('â' is a long character). The real number of characters is obtained with wcslen */
+    int length_unparsed_string = wcslen(unparsed_string);
+
+    char *unnacent = emalloc(sizeof(char) * length_unparsed_string);
+
+    for(int i=0; i<length_unparsed_string; i++) {
+        switch(unparsed_string[i]) {
+            case L'â':
+            case L'ä':
+            case L'à':
+            case L'å':
+            case L'á':
+            case L'ã':
+                unnacent[i] = 'a';
+                break;
+            case L'Ä':
+            case L'Å':
+            case L'Á':
+            case L'Â':
+            case L'À':
+                unnacent[i] = 'A';
+                break;
+            case L'é':
+            case L'ê':
+            case L'ë':
+            case L'è':
+                unnacent[i] = 'e';
+                break;
+            case L'É':
+            case L'Ê':
+            case L'Ë':
+            case L'È':
+                unnacent[i] = 'E';
+                break;
+            case L'ï':
+            case L'î':
+            case L'ì':
+            case L'í':
+            case L'ı':
+                unnacent[i] = 'i';
+                break;
+            case L'Í':
+            case L'Î':
+            case L'Ï':
+                unnacent[i] = 'I';
+                break;
+            case L'ô':
+            case L'ö':
+            case L'ò':
+            case L'ø':
+            case L'ó':
+            case L'õ':
+                unnacent[i] = 'o';
+                break;
+            case L'Ö':
+            case L'Ø':
+            case L'Ó':
+            case L'Ô':
+            case L'Ò':
+            case L'Õ':
+                unnacent[i] = 'O';
+                break;
+            case L'ü':
+            case L'û':
+            case L'ù':
+            case L'ú':
+                unnacent[i] = 'u';
+                break;
+            case L'Ü':
+            case L'Ú':
+            case L'Û':
+            case L'Ù':
+                unnacent[i] = 'U';
+                break;
+            case L'ÿ':
+            case L'ý':
+                unnacent[i] = 'y';
+                break;
+            case L'Ý':
+                unnacent[i] = 'Y';
+                break;
+            case L'ñ':
+                unnacent[i] = 'n';
+                break;
+            case L'Ñ':
+                unnacent[i] = 'N';
+                break;
+            case L'Ç':
+                unnacent[i] = 'C';
+                break;
+            case L'ç':
+                unnacent[i] = 'c';
+                break;
+            case L'Ð':
+                unnacent[i] = 'D';
+                break;
+            case L'ð':
+                unnacent[i] = 'd';
+                break;
+            default:
+                unnacent[i] = unparsed_string[i];
+        }
+    }
+
+    /* When the text string has no accents, the length of the final text string is the same. */
+    zend_string *str = zend_string_init(unnacent, length < length_unparsed_string ? length : length_unparsed_string , 0);
+    RETURN_STR(str);
+    zend_string_release(str);
+}
+/* }}} */

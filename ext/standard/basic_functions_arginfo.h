@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 8890ebea8b2391a8614b844e8e1abc04a988eeb8 */
+ * Stub hash: c3cf66c57e95f2a303f47d1491644ce0c71c7f3d */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -1100,6 +1100,8 @@ ZEND_END_ARG_INFO()
 #define arginfo_utf8_encode arginfo_bin2hex
 
 #define arginfo_utf8_decode arginfo_bin2hex
+
+#define arginfo_unaccent arginfo_base64_encode
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_opendir, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, path, IS_STRING, 0)
@@ -2540,6 +2542,7 @@ ZEND_FUNCTION(strpbrk);
 ZEND_FUNCTION(substr_compare);
 ZEND_FUNCTION(utf8_encode);
 ZEND_FUNCTION(utf8_decode);
+ZEND_FUNCTION(unaccent);
 ZEND_FUNCTION(opendir);
 ZEND_FUNCTION(getdir);
 ZEND_FUNCTION(closedir);
@@ -3175,6 +3178,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(substr_compare, arginfo_substr_compare)
 	ZEND_FE(utf8_encode, arginfo_utf8_encode)
 	ZEND_FE(utf8_decode, arginfo_utf8_decode)
+	ZEND_FE(unaccent, arginfo_unaccent)
 	ZEND_FE(opendir, arginfo_opendir)
 	ZEND_FE(getdir, arginfo_getdir)
 	ZEND_FALIAS(dir, getdir, arginfo_dir)
