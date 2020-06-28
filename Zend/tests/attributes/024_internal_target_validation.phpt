@@ -1,9 +1,11 @@
 --TEST--
-Attributes: Prevent Attribute on non classes
+Internal attribute targets are validated.
 --FILE--
 <?php
 
 <<Attribute>>
-function foo() {}
+function a1() { }
+
+?>
 --EXPECTF--
 Fatal error: Attribute "Attribute" cannot target function (allowed targets: class) in %s

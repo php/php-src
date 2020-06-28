@@ -59,7 +59,7 @@ var_dump($ref->getAttributes()[0]->getArguments());
 
 echo "\n";
 
-<<PhpAttribute>>
+<<Attribute>>
 class C5
 {
 	public function __construct() { }
