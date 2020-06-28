@@ -3,7 +3,7 @@ Attributes can be converted into objects.
 --FILE--
 <?php
 
-<<PhpAttribute>>
+<<Attribute(Attribute::TARGET_FUNCTION)>>
 class A1
 {
 	public string $name;
@@ -56,7 +56,7 @@ try {
 
 echo "\n";
 
-<<PhpAttribute>>
+<<Attribute>>
 class A3
 {
 	private function __construct() { }
@@ -72,7 +72,7 @@ try {
 
 echo "\n";
 
-<<PhpAttribute>>
+<<Attribute>>
 class A4 { }
 
 $ref = new \ReflectionFunction(<<A4(1)>> function () { });
@@ -117,4 +117,4 @@ string(7) "ERROR 5"
 string(71) "Attribute class 'A4' does not have a constructor, cannot pass arguments"
 
 string(7) "ERROR 6"
-string(78) "Attempting to use class 'A5' as attribute that does not have <<PhpAttribute>>."
+string(55) "Attempting to use non-attribute class 'A5' as attribute"

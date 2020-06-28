@@ -4,9 +4,9 @@ Attributes: Example from Attributes RFC
 <?php
 // https://wiki.php.net/rfc/attributes_v2#attribute_syntax
 namespace My\Attributes {
-    use PhpAttribute;
+    use Attribute;
 
-    <<PhpAttribute>>
+    <<Attribute>>
     class SingleArgument {
         public $argumentValue;
 
@@ -37,7 +37,7 @@ array(1) {
   [0]=>
   string(11) "Hello World"
 }
-object(My\Attributes\SingleArgument)#3 (1) {
+object(My\Attributes\SingleArgument)#%d (1) {
   ["argumentValue"]=>
   string(11) "Hello World"
 }

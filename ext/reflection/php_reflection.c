@@ -139,8 +139,10 @@ typedef struct _type_reference {
 
 /* Struct for attributes */
 typedef struct _attribute_reference {
+	HashTable *attributes;
 	zend_attribute *data;
 	zend_class_entry *scope;
+	uint32_t target;
 } attribute_reference;
 
 typedef enum {
@@ -1074,7 +1076,8 @@ static void _extension_string(smart_str *str, zend_module_entry *module, char *i
 /* }}} */
 
 /* {{{ reflection_attribute_factory */
-static void reflection_attribute_factory(zval *object, zend_attribute *data, zend_class_entry *scope)
+static void reflection_attribute_factory(zval *object, HashTable *attributes, zend_attribute *data,
+		zend_class_entry *scope, uint32_t target)
 {
 	reflection_object *intern;
 	attribute_reference *reference;
@@ -1082,15 +1085,17 @@ static void reflection_attribute_factory(zval *object, zend_attribute *data, zen
 	reflection_instantiate(reflection_attribute_ptr, object);
 	intern  = Z_REFLECTION_P(object);
 	reference = (attribute_reference*) emalloc(sizeof(attribute_reference));
+	reference->attributes = attributes;
 	reference->data = data;
 	reference->scope = scope;
+	reference->target = target;
 	intern->ptr = reference;
 	intern->ref_type = REF_TYPE_ATTRIBUTE;
 }
 /* }}} */
 
 static int read_attributes(zval *ret, HashTable *attributes, zend_class_entry *scope,
-		uint32_t offset, zend_string *name, zend_class_entry *base) /* {{{ */
+		uint32_t offset, uint32_t target, zend_string *name, zend_class_entry *base) /* {{{ */
 {
 	ZEND_ASSERT(attributes != NULL);
 
@@ -1103,7 +1108,7 @@ static int read_attributes(zval *ret, HashTable *attributes, zend_class_entry *s
 
 		ZEND_HASH_FOREACH_PTR(attributes, attr) {
 			if (attr->offset == offset && zend_string_equals(attr->lcname, filter)) {
-				reflection_attribute_factory(&tmp, attr, scope);
+				reflection_attribute_factory(&tmp, attributes, attr, scope, target);
 				add_next_index_zval(ret, &tmp);
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -1135,7 +1140,7 @@ static int read_attributes(zval *ret, HashTable *attributes, zend_class_entry *s
 			}
 		}
 
-		reflection_attribute_factory(&tmp, attr, scope);
+		reflection_attribute_factory(&tmp, attributes, attr, scope, target);
 		add_next_index_zval(ret, &tmp);
 	} ZEND_HASH_FOREACH_END();
 
@@ -1144,7 +1149,7 @@ static int read_attributes(zval *ret, HashTable *attributes, zend_class_entry *s
 /* }}} */
 
 static void reflect_attributes(INTERNAL_FUNCTION_PARAMETERS, HashTable *attributes,
-		uint32_t offset, zend_class_entry *scope) /* {{{ */
+		uint32_t offset, zend_class_entry *scope, uint32_t target) /* {{{ */
 {
 	zend_string *name = NULL;
 	zend_long flags = 0;
@@ -1177,7 +1182,7 @@ static void reflect_attributes(INTERNAL_FUNCTION_PARAMETERS, HashTable *attribut
 
 	array_init(return_value);
 
-	if (FAILURE == read_attributes(return_value, attributes, scope, offset, name, base)) {
+	if (FAILURE == read_attributes(return_value, attributes, scope, offset, target, name, base)) {
 		RETURN_THROWS();
 	}
 }
@@ -1755,10 +1760,17 @@ ZEND_METHOD(ReflectionFunctionAbstract, getAttributes)
 {
 	reflection_object *intern;
 	zend_function *fptr;
+	uint32_t target;
 
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
-	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU, fptr->common.attributes, 0, fptr->common.scope);
+	if (fptr->common.scope) {
+		target = ZEND_ATTRIBUTE_TARGET_METHOD;
+	} else {
+		target = ZEND_ATTRIBUTE_TARGET_FUNCTION;
+	}
+
+	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU, fptr->common.attributes, 0, fptr->common.scope, target);
 }
 /* }}} */
 
@@ -2696,7 +2708,7 @@ ZEND_METHOD(ReflectionParameter, getAttributes)
 	HashTable *attributes = param->fptr->common.attributes;
 	zend_class_entry *scope = param->fptr->common.scope;
 
-	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU, attributes, param->offset + 1, scope);
+	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU, attributes, param->offset + 1, scope, ZEND_ATTRIBUTE_TARGET_PARAMETER);
 }
 
 /* {{{ proto public int ReflectionParameter::getPosition()
@@ -3779,7 +3791,7 @@ ZEND_METHOD(ReflectionClassConstant, getAttributes)
 
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU, ref->attributes, 0, ref->ce);
+	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU, ref->attributes, 0, ref->ce, ZEND_ATTRIBUTE_TARGET_CLASS_CONST);
 }
 /* }}} */
 
@@ -4194,7 +4206,7 @@ ZEND_METHOD(ReflectionClass, getAttributes)
 
 	GET_REFLECTION_OBJECT_PTR(ce);
 
-	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU, ce->attributes, 0, ce);
+	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU, ce->attributes, 0, ce, ZEND_ATTRIBUTE_TARGET_CLASS);
 }
 /* }}} */
 
@@ -5686,7 +5698,7 @@ ZEND_METHOD(ReflectionProperty, getAttributes)
 
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU, ref->prop->attributes, 0, ref->prop->ce);
+	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU, ref->prop->attributes, 0, ref->prop->ce, ZEND_ATTRIBUTE_TARGET_PROPERTY);
 }
 /* }}} */
 
@@ -6427,18 +6439,35 @@ ZEND_METHOD(ReflectionAttribute, getName)
 }
 /* }}} */
 
-static zend_always_inline int import_attribute_value(zval *ret, zval *val, zend_class_entry *scope) /* {{{ */
+/* {{{ proto public int ReflectionAttribute::getTarget()
+ *	   Returns the target of the attribute */
+ZEND_METHOD(ReflectionAttribute, getTarget)
 {
-	ZVAL_COPY_OR_DUP(ret, val);
+	reflection_object *intern;
+	attribute_reference *attr;
 
-	if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
-		if (SUCCESS != zval_update_constant_ex(ret, scope)) {
-			zval_ptr_dtor(ret);
-			return FAILURE;
-		}
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
 	}
+	GET_REFLECTION_OBJECT_PTR(attr);
 
-	return SUCCESS;
+	RETURN_LONG(attr->target);
+}
+/* }}} */
+
+/* {{{ proto public bool ReflectionAttribute::isRepeated()
+ *	   Returns true if the attribute is repeated */
+ZEND_METHOD(ReflectionAttribute, isRepeated)
+{
+	reflection_object *intern;
+	attribute_reference *attr;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+	GET_REFLECTION_OBJECT_PTR(attr);
+
+	RETURN_BOOL(zend_is_attribute_repeated(attr->attributes, attr->data));
 }
 /* }}} */
 
@@ -6460,7 +6489,7 @@ ZEND_METHOD(ReflectionAttribute, getArguments)
 	array_init(return_value);
 
 	for (i = 0; i < attr->data->argc; i++) {
-		if (FAILURE == import_attribute_value(&tmp, &attr->data->argv[i], attr->scope)) {
+		if (FAILURE == zend_get_attribute_value(&tmp, attr->data, i, attr->scope)) {
 			RETURN_THROWS();
 		}
 
@@ -6513,6 +6542,7 @@ ZEND_METHOD(ReflectionAttribute, newInstance)
 {
 	reflection_object *intern;
 	attribute_reference *attr;
+	zend_attribute *marker;
 
 	zend_class_entry *ce;
 	zval obj;
@@ -6532,9 +6562,44 @@ ZEND_METHOD(ReflectionAttribute, newInstance)
 		RETURN_THROWS();
 	}
 
-	if (!zend_get_attribute_str(ce->attributes, ZEND_STRL("phpattribute"))) {
-		zend_throw_error(NULL, "Attempting to use class '%s' as attribute that does not have <<PhpAttribute>>.", ZSTR_VAL(attr->data->name));
+	if (NULL == (marker = zend_get_attribute_str(ce->attributes, ZEND_STRL("attribute")))) {
+		zend_throw_error(NULL, "Attempting to use non-attribute class '%s' as attribute", ZSTR_VAL(attr->data->name));
 		RETURN_THROWS();
+	}
+
+	if (ce->type == ZEND_USER_CLASS) {
+		uint32_t flags = ZEND_ATTRIBUTE_TARGET_ALL;
+
+		if (marker->argc > 0) {
+			zval tmp;
+
+			if (FAILURE == zend_get_attribute_value(&tmp, marker, 0, ce)) {
+				RETURN_THROWS();
+			}
+
+			flags = (uint32_t) Z_LVAL(tmp);
+		}
+
+		if (!(attr->target & flags)) {
+			zend_string *location = zend_get_attribute_target_names(attr->target);
+			zend_string *allowed = zend_get_attribute_target_names(flags);
+
+			zend_throw_error(NULL, "Attribute \"%s\" cannot target %s (allowed targets: %s)",
+				ZSTR_VAL(attr->data->name), ZSTR_VAL(location), ZSTR_VAL(allowed)
+			);
+
+			zend_string_release(location);
+			zend_string_release(allowed);
+
+			RETURN_THROWS();
+		}
+
+		if (!(flags & ZEND_ATTRIBUTE_IS_REPEATABLE)) {
+			if (zend_is_attribute_repeated(attr->attributes, attr->data)) {
+				zend_throw_error(NULL, "Attribute \"%s\" must not be repeated", ZSTR_VAL(attr->data->name));
+				RETURN_THROWS();
+			}
+		}
 	}
 
 	if (SUCCESS != object_init_ex(&obj, ce)) {
@@ -6547,7 +6612,7 @@ ZEND_METHOD(ReflectionAttribute, newInstance)
 		args = emalloc(count * sizeof(zval));
 
 		for (argc = 0; argc < attr->data->argc; argc++) {
-			if (FAILURE == import_attribute_value(&args[argc], &attr->data->argv[argc], attr->scope)) {
+			if (FAILURE == zend_get_attribute_value(&args[argc], attr->data, argc, attr->scope)) {
 				attribute_ctor_cleanup(&obj, args, argc);
 				RETURN_THROWS();
 			}
