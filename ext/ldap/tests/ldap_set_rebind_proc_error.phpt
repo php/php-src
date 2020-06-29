@@ -40,4 +40,4 @@ try {
 }
 ?>
 --EXPECTF--
-ldap_set_rebind_proc(): Argument #2 ($callback) must be a valid callback, string given
+ldap_set_rebind_proc(): Argument #2 ($callback) must be a valid callback or null, string given

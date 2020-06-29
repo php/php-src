@@ -3736,7 +3736,7 @@ int _ldap_rebind_proc(LDAP *ldap, const char *url, ber_tag_t req, ber_int_t msgi
 }
 /* }}} */
 
-/* {{{ proto bool ldap_set_rebind_proc(resource link, string callback)
+/* {{{ proto bool ldap_set_rebind_proc(resource link, ?callable callback)
    Set a callback function to do re-binds on referral chasing. */
 PHP_FUNCTION(ldap_set_rebind_proc)
 {
@@ -3751,7 +3751,7 @@ PHP_FUNCTION(ldap_set_rebind_proc)
 		RETURN_THROWS();
 	}
 
-	if (Z_TYPE_P(callback) == IS_STRING && Z_STRLEN_P(callback) == 0) {
+	if (Z_TYPE_P(callback) == IS_NULL) {
 		/* unregister rebind procedure */
 		if (!Z_ISUNDEF(ld->rebindproc)) {
 			zval_ptr_dtor(&ld->rebindproc);
@@ -3763,7 +3763,7 @@ PHP_FUNCTION(ldap_set_rebind_proc)
 
 	/* callable? */
 	if (!zend_is_callable(callback, 0, NULL)) {
-		zend_argument_type_error(2, "must be a valid callback, %s given", zend_zval_type_name(callback));
+		zend_argument_type_error(2, "must be a valid callback or null, %s given", zend_zval_type_name(callback));
 		RETURN_THROWS();
 	}
 
