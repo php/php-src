@@ -1,11 +1,5 @@
 --TEST--
 Test lstat() and stat() functions: usage variations - link names stored in array/object
---SKIPIF--
-<?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip.. lstat() not available on Windows');
-}
-?>
 --FILE--
 <?php
 /* Prototype: array lstat ( string $filename );
@@ -88,9 +82,9 @@ array(26) {
   [10]=>
   int(%d)
   [11]=>
-  int(%d)
+  int(%i)
   [12]=>
-  int(%d)
+  int(%i)
   ["dev"]=>
   int(%d)
   ["ino"]=>
@@ -114,9 +108,9 @@ array(26) {
   ["ctime"]=>
   int(%d)
   ["blksize"]=>
-  int(%d)
+  int(%i)
   ["blocks"]=>
-  int(%d)
+  int(%i)
 }
 
 -- Testing stat() on link name stored inside an array --
@@ -144,9 +138,9 @@ array(26) {
   [10]=>
   int(%d)
   [11]=>
-  int(%d)
+  int(%i)
   [12]=>
-  int(%d)
+  int(%i)
   ["dev"]=>
   int(%d)
   ["ino"]=>
@@ -170,9 +164,9 @@ array(26) {
   ["ctime"]=>
   int(%d)
   ["blksize"]=>
-  int(%d)
+  int(%i)
   ["blocks"]=>
-  int(%d)
+  int(%i)
 }
 array(26) {
   [0]=>
@@ -198,9 +192,9 @@ array(26) {
   [10]=>
   int(%d)
   [11]=>
-  int(%d)
+  int(%i)
   [12]=>
-  int(%d)
+  int(%i)
   ["dev"]=>
   int(%d)
   ["ino"]=>
@@ -224,9 +218,9 @@ array(26) {
   ["ctime"]=>
   int(%d)
   ["blksize"]=>
-  int(%d)
+  int(%i)
   ["blocks"]=>
-  int(%d)
+  int(%i)
 }
 array(26) {
   [0]=>
@@ -252,9 +246,9 @@ array(26) {
   [10]=>
   int(%d)
   [11]=>
-  int(%d)
+  int(%i)
   [12]=>
-  int(%d)
+  int(%i)
   ["dev"]=>
   int(%d)
   ["ino"]=>
@@ -278,9 +272,9 @@ array(26) {
   ["ctime"]=>
   int(%d)
   ["blksize"]=>
-  int(%d)
+  int(%i)
   ["blocks"]=>
-  int(%d)
+  int(%i)
 }
 
 --- Done ---
