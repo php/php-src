@@ -189,11 +189,12 @@ PHPAPI char *php_ctime_r(const time_t *clock, char *buf)
 	tmp = ctime(clock);
 	if (tmp) {
 		strcpy(buf, tmp);
+		tmp = buf;
 	}
 
 	local_unlock(CTIME_R);
 
-	return tmp ? buf : NULL;
+	return tmp;
 }
 
 #endif
@@ -207,11 +208,14 @@ PHPAPI char *php_asctime_r(const struct tm *tm, char *buf)
 	local_lock(ASCTIME_R);
 
 	tmp = asctime(tm);
-	strcpy(buf, tmp);
+	if (tmp) {
+		strcpy(buf, tmp);
+		tmp = buf;
+	}
 
 	local_unlock(ASCTIME_R);
 
-	return buf;
+	return tmp;
 }
 
 #endif
