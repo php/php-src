@@ -10,6 +10,9 @@ PHP                                                                        NEWS
   . Fixed bug #79740 (serialize() and unserialize() methods can not be called
     statically). (Nikita)
 
+- Fileinfo:
+  . Fixed bug #79756 (finfo_file crash (FILEINFO_MIME)). (cmb)
+
 - FTP:
   . Fixed bug #55857 (ftp_size on large files). (cmb)
 
