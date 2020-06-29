@@ -3511,7 +3511,6 @@ static zend_always_inline int _zend_update_type_info(
 			}
 			break;
 		case ZEND_CATCH:
-		case ZEND_INCLUDE_OR_EVAL:
 			/* Forbidden opcodes */
 			ZEND_UNREACHABLE();
 			break;

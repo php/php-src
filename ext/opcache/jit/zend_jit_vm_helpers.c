@@ -713,6 +713,9 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 			if (EX(call)->func->type == ZEND_INTERNAL_FUNCTION) {
 				TRACE_RECORD(ZEND_JIT_TRACE_DO_ICALL, 0, EX(call)->func);
 			}
+		} else if (opline->opcode == ZEND_INCLUDE_OR_EVAL) {
+			stop = ZEND_JIT_TRACE_STOP_INTERPRETER;
+			break;
 		}
 
 		handler = (zend_vm_opcode_handler_t)ZEND_OP_TRACE_INFO(opline, offset)->call_handler;
@@ -975,7 +978,8 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 	TRACE_END(ZEND_JIT_TRACE_END, stop, end_opline);
 
 #ifdef HAVE_GCC_GLOBAL_REGS
-	if (stop != ZEND_JIT_TRACE_STOP_HALT) {
+	if (stop != ZEND_JIT_TRACE_STOP_HALT
+	 && stop != ZEND_JIT_TRACE_STOP_RETURN_HALT) {
 		EX(opline) = opline;
 	}
 #endif

@@ -3183,7 +3183,10 @@ static int zend_jit_trace_handler(dasm_State **Dst, const zend_op_array *op_arra
 
 	if (zend_jit_trace_may_exit(op_array, opline)) {
 		// TODO: try to avoid this check ???
-		if (opline->opcode == ZEND_RETURN || opline->opcode == ZEND_RETURN_BY_REF) {
+		if (opline->opcode == ZEND_RETURN ||
+		    opline->opcode == ZEND_RETURN_BY_REF ||
+		    opline->opcode == ZEND_GENERATOR_CREATE) {
+
 			if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
 				|	cmp IP, zend_jit_halt_op
 				|	je ->trace_halt
@@ -3194,8 +3197,17 @@ static int zend_jit_trace_handler(dasm_State **Dst, const zend_op_array *op_arra
 				|	test eax, eax
 				|	jl ->trace_halt
 			}
+		} else if (opline->opcode == ZEND_EXIT ||
+		           opline->opcode == ZEND_GENERATOR_RETURN ||
+		           opline->opcode == ZEND_YIELD ||
+		           opline->opcode == ZEND_YIELD_FROM) {
+			|	jmp ->trace_halt
 		}
-		if (trace->op != ZEND_JIT_TRACE_END || trace->stop != ZEND_JIT_TRACE_STOP_RETURN) {
+		if (trace->op != ZEND_JIT_TRACE_END ||
+		    (trace->stop != ZEND_JIT_TRACE_STOP_RETURN &&
+		     trace->stop != ZEND_JIT_TRACE_STOP_RETURN_HALT &&
+		     trace->stop != ZEND_JIT_TRACE_STOP_INTERPRETER)) {
+
 			const zend_op *next_opline = trace->opline;
 			const zend_op *exit_opline = NULL;
 			uint32_t exit_point;

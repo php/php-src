@@ -4456,10 +4456,16 @@ done:
 				}
 			}
 		} else if (p->stop == ZEND_JIT_TRACE_STOP_LINK
+		        || p->stop == ZEND_JIT_TRACE_STOP_RETURN_HALT
 		        || p->stop == ZEND_JIT_TRACE_STOP_INTERPRETER) {
 			if (opline->opcode == ZEND_DO_UCALL
 			 || opline->opcode == ZEND_DO_FCALL
-			 || opline->opcode == ZEND_DO_FCALL_BY_NAME) {
+			 || opline->opcode == ZEND_DO_FCALL_BY_NAME
+			 || opline->opcode == ZEND_GENERATOR_CREATE
+			 || opline->opcode == ZEND_GENERATOR_RETURN
+			 || opline->opcode == ZEND_YIELD
+			 || opline->opcode == ZEND_YIELD_FROM
+			 || opline->opcode == ZEND_INCLUDE_OR_EVAL) {
 				zend_jit_trace_setup_ret_counter(opline, jit_extension->offset);
 			}
 			if (JIT_G(current_frame)
@@ -5499,12 +5505,6 @@ static zend_always_inline uint8_t zend_jit_trace_supported(const zend_op *opline
 		case ZEND_CATCH:
 		case ZEND_FAST_CALL:
 		case ZEND_FAST_RET:
-		case ZEND_GENERATOR_CREATE:
-		case ZEND_GENERATOR_RETURN:
-		case ZEND_EXIT:
-		case ZEND_YIELD:
-		case ZEND_YIELD_FROM:
-		case ZEND_INCLUDE_OR_EVAL:
 			return ZEND_JIT_TRACE_UNSUPPORTED;
 		default:
 			return ZEND_JIT_TRACE_SUPPORTED;

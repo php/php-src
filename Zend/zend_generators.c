@@ -742,9 +742,11 @@ try_again:
 	{
 		/* Backup executor globals */
 		zend_execute_data *original_execute_data = EG(current_execute_data);
+		uint32_t original_jit_trace_num = EG(jit_trace_num);
 
 		/* Set executor globals */
 		EG(current_execute_data) = generator->execute_data;
+		EG(jit_trace_num) = 0;
 
 		/* We want the backtrace to look as if the generator function was
 		 * called from whatever method we are current running (e.g. next()).
@@ -777,6 +779,7 @@ try_again:
 
 		/* Restore executor globals */
 		EG(current_execute_data) = original_execute_data;
+		EG(jit_trace_num) = original_jit_trace_num;
 
 		/* If an exception was thrown in the generator we have to internally
 		 * rethrow it in the parent scope.
