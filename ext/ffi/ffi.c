@@ -1096,6 +1096,9 @@ again:
 		}
 		convert_to_string(writeobj);
 		return SUCCESS;
+	} else if (type == _IS_BOOL) {
+		ZVAL_TRUE(writeobj);
+		return SUCCESS;
 	}
 
 	return FAILURE;
@@ -4642,7 +4645,13 @@ static HashTable *zend_fake_get_gc(zend_object *ob, zval **table, int *n) /* {{{
 
 static int zend_fake_cast_object(zend_object *obj, zval *result, int type)
 {
-	return FAILURE;
+	switch (type) {
+		case _IS_BOOL:
+			ZVAL_TRUE(result);
+			return SUCCESS;
+		default:
+			return FAILURE;
+	}
 }
 
 static ZEND_COLD zend_never_inline void zend_ffi_use_after_free(void) /* {{{ */
