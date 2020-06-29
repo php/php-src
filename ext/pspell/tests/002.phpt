@@ -25,7 +25,7 @@ if ($res) {
     echo "bool(false)\n";
 }
 ?>
---EXPECTF--
+--EXPECT--
 bool(false)
 bool(false)
 bool(true)

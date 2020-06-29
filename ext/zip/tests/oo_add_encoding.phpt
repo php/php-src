@@ -39,7 +39,7 @@ $dirname = __DIR__ . '/oo_add_encoding_dir/';
 unlink($dirname . 'tmp.zip');
 rmdir($dirname);
 ?>
---EXPECTF--
+--EXPECT--
 0 foo/
 1 é/
 2 è/

@@ -128,7 +128,7 @@ fclose($fp);
 closedir($dfp);
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing is_float(), is_double() with float values***
 -- Iteration 1 --
 bool(true)

@@ -23,7 +23,7 @@ foreach ($queries as $query) {
     test($query);
 }
 ?>
---EXPECTF--
+--EXPECT--
 array(2) {
   ["foo"]=>
   string(3) "abc"

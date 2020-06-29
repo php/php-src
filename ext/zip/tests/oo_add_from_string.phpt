@@ -44,7 +44,7 @@ $dirname = __DIR__ . '/oo_add_from_string_dir/';
 unlink($dirname . 'tmp.zip');
 rmdir($dirname);
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 bool(false)

@@ -20,7 +20,7 @@ try {
     echo get_class($e) . ": " . $e->getMessage()."\n";
 }
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(false)
 TypeError: FFI::isNull(): Argument #1 ($ptr) must be of type FFI\CData, null given

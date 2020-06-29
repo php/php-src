@@ -21,7 +21,7 @@ if (is_object($broker)) {
 }
 echo "OK\n";
 ?>
---EXPECTF--
+--EXPECT--
 OK
 Invalid or uninitialized EnchantBroker object
 OK

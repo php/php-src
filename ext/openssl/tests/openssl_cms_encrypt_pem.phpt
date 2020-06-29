@@ -41,7 +41,7 @@ if (file_exists($decryptfile)) {
 }
 unlink($tname);
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 Now is the winter of our discontent.
 true

@@ -12,5 +12,5 @@ if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows
 ?>
 --FILE--
 Unreachable
---EXPECTF--
+--EXPECT--
 Fatal error: Failed to load class Foo used by typed property Test::$prop during preloading in Unknown on line 0

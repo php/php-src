@@ -302,7 +302,7 @@ echo "\nDone";
 
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing var_export() with integer values ***
 
 *** Output for integer values ***

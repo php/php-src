@@ -40,7 +40,7 @@ namespace {
     dump_attributes((new ReflectionFunction('Foo\foo'))->getAttributes());
 }
 ?>
---EXPECTF--
+--EXPECT--
 array(5) {
   [0]=>
   array(2) {

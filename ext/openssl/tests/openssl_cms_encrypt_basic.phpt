@@ -42,7 +42,7 @@ if (file_exists($outfile2)) {
     unlink($outfile2);
 }
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 bool(true)

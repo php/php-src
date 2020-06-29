@@ -7,6 +7,6 @@ Bug #77753 (Heap-buffer-overflow in php_ifd_get32s)
 @var_dump(exif_read_data(__DIR__."/bug77753.tiff"));
 ?>
 DONE
---EXPECTF--
+--EXPECT--
 bool(false)
 DONE

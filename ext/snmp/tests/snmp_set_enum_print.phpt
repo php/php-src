@@ -15,7 +15,7 @@ echo "Checking working\n";
 var_dump(snmp_set_enum_print(0));
 var_dump(snmp_set_enum_print(1));
 ?>
---EXPECTF--
+--EXPECT--
 Checking working
 bool(true)
 bool(true)

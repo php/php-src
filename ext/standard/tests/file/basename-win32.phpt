@@ -116,7 +116,7 @@ check_basename( $file_path_variations );
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing basic operations ***
 
 --Iteration 1--

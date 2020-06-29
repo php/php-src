@@ -31,7 +31,7 @@ for ($i = 0; $i < count($values); $i++) {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 float(1.588153083)
 float(-1.588153083)
 float(8.895619796)

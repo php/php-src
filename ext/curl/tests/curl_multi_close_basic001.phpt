@@ -13,7 +13,7 @@ var_dump($multi_close_result);
 var_dump($cmh);
 curl_multi_close($cmh);
 ?>
---EXPECTF--
+--EXPECT--
 object(CurlMultiHandle)#1 (0) {
 }
 NULL

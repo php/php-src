@@ -22,7 +22,7 @@ try {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 Shared memory block has already been destroyed
 Done

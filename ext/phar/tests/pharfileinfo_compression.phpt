@@ -73,7 +73,7 @@ var_dump($b->decompress());
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar'); ?>
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.tar'); ?>
---EXPECTF--
+--EXPECT--
 Unknown compression type specified
 Unknown compression type specified
 Cannot compress with Gzip compression, not possible with tar-based phar archives

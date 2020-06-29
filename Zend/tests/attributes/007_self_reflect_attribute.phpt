@@ -14,7 +14,7 @@ foreach ($attributes as $attribute) {
     var_dump(get_class($a));
     var_dump($a->flags == Attribute::TARGET_ALL);
 }
---EXPECTF--
+--EXPECT--
 string(9) "Attribute"
 array(0) {
 }

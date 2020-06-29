@@ -8,5 +8,5 @@ readline_clear_history(): Basic test
 var_dump(readline_clear_history());
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)

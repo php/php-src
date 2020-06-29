@@ -34,7 +34,7 @@ var_dump(function_exists('oci_free_descriptor'));
 echo "Done\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 Test 1
 bool(true)
 bool(true)

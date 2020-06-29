@@ -50,7 +50,7 @@ foreach ($h as $key => $val) {
 <?php
 require(__DIR__ .'/clean.inc');
 ?>
---EXPECTF--
+--EXPECT--
 database handler: flatfile
 Test 1
 Success: flatfile enabled

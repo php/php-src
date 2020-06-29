@@ -14,7 +14,7 @@ var_dump(pcntl_alarm(1) > 0);
 $siginfo = array();
 var_dump(pcntl_sigtimedwait(array(SIGALRM),$siginfo,2) === SIGALRM);
 ?>
---EXPECTF--
+--EXPECT--
 int(0)
 bool(true)
 bool(true)

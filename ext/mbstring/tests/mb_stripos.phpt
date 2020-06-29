@@ -102,7 +102,7 @@ $r = mb_stripos($euc_jp, "\n");
 ($r === FALSE) ? print "OK_NEWLINE\n" : print "NG_NEWLINE\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 String len: 43
 == POSITIVE OFFSET ==
 10

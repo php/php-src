@@ -25,6 +25,6 @@ if ($zip->status == ZipArchive::ER_RDONLY) {
 }
 $zip->close();
 ?>
---EXPECTF--
+--EXPECT--
 bool(false)
 OK
