@@ -89,6 +89,8 @@ PHP_COM_DOTNET_API char *php_com_olestring_to_string(OLECHAR *olestring,
 		size_t *string_len, int codepage);
 PHP_COM_DOTNET_API OLECHAR *php_com_string_to_olestring(char *string,
 		size_t string_len, int codepage);
+BSTR php_com_string_to_bstr(zend_string *string, int codepage);
+zend_string *php_com_bstr_to_string(BSTR bstr, int codepage);
 
 
 /* com_com.c */
