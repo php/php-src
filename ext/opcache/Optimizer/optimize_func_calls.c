@@ -106,6 +106,12 @@ static void zend_try_inline_call(zend_op_array *op_array, zend_op *fcall, zend_o
 			uint32_t i, num_args = func->op_array.num_args;
 			num_args += (func->op_array.fn_flags & ZEND_ACC_VARIADIC) != 0;
 
+			if (fcall->opcode == ZEND_INIT_STATIC_METHOD_CALL
+					&& !(func->op_array.fn_flags & ZEND_ACC_STATIC)) {
+				/* Don't inline static call to instance method. */
+				return;
+			}
+
 			if (fcall->opcode == ZEND_INIT_METHOD_CALL && fcall->op1_type == IS_UNUSED) {
 				/* TODO: we can't inlne methods, because $this may be used
 				 *       not in object context ???
