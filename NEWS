@@ -72,6 +72,8 @@ PHP                                                                        NEWS
   . Removed deprecated INTL_IDNA_VARIANT_2003. (cmb)
 
 - JIT:
+  . Fixed bug #79743 (Fatal error when assigning to array property
+    with JIT enabled). (Laruence)
   . Fixed bug #79582 (Crash seen when opcache.jit=1235 and
     opcache.jit_debug=2). (Laruence)
   . Fixed bug #77857 (Wrong result if executed with JIT). (Laruence)

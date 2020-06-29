@@ -1536,10 +1536,10 @@ static void ZEND_FASTCALL zend_jit_check_array_promotion(zval *val, zend_propert
 	const zend_op *opline = execute_data->opline;
 	zval *result = EX_VAR(opline->result.var);
 
-	if (((Z_TYPE_P(val) <= IS_FALSE
-	  || (Z_ISREF_P(val) && Z_TYPE_P(Z_REFVAL_P(val)) <= IS_FALSE))
-	 &&	ZEND_TYPE_IS_SET(prop->type)
-	 && ZEND_TYPE_FULL_MASK(prop->type) & (MAY_BE_ITERABLE|MAY_BE_ARRAY)) == 0) {
+	if ((Z_TYPE_P(val) <= IS_FALSE
+		|| (Z_ISREF_P(val) && Z_TYPE_P(Z_REFVAL_P(val)) <= IS_FALSE))
+		&& ZEND_TYPE_IS_SET(prop->type)
+		&& (ZEND_TYPE_FULL_MASK(prop->type) & (MAY_BE_ITERABLE|MAY_BE_ARRAY)) == 0) {
 		zend_string *type_str = zend_type_to_string(prop->type);
 		zend_type_error(
 			"Cannot auto-initialize an array inside property %s::$%s of type %s",
