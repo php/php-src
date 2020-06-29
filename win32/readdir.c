@@ -1,8 +1,9 @@
+#include "php.h"
+
 #include <malloc.h>
 #include <string.h>
 #include <errno.h>
 
-#include "php.h"
 #include "readdir.h"
 #include "win32/ioutil.h"
 

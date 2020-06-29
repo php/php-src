@@ -38,7 +38,6 @@
 #ifdef PHP_WIN32
 #include <string.h>
 #include "config.w32.h"
-#define strdup _strdup
 #undef WINDOWS
 #undef strcasecmp
 #undef strncasecmp
