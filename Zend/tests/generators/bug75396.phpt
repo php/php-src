@@ -19,4 +19,5 @@ $gen->send("x");
 ?>
 --EXPECT--
 Try
+Finally
 Exit

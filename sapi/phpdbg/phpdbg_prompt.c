@@ -1711,6 +1711,11 @@ void phpdbg_execute_ex(zend_execute_data *execute_data) /* {{{ */
 		}
 #endif
 
+		if (exception && zend_is_unwind_exit(exception)) {
+			/* Restore bailout based exit. */
+			zend_bailout();
+		}
+
 		if (PHPDBG_G(flags) & PHPDBG_PREVENT_INTERACTIVE) {
 			phpdbg_print_opline_ex(execute_data, 0);
 			goto next;

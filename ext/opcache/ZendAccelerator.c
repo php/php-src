@@ -4484,9 +4484,10 @@ static int accel_preload(const char *config)
 					zend_user_exception_handler();
 				}
 				if (EG(exception)) {
-					zend_exception_error(EG(exception), E_ERROR);
-					CG(unclean_shutdown) = 1;
-					ret = FAILURE;
+					ret = zend_exception_error(EG(exception), E_ERROR);
+					if (ret == FAILURE) {
+						CG(unclean_shutdown) = 1;
+					}
 				}
 			}
 			destroy_op_array(op_array);

@@ -1621,6 +1621,11 @@ ZEND_API ZEND_COLD void zend_user_exception_handler(void) /* {{{ */
 	zval orig_user_exception_handler;
 	zval params[1], retval2;
 	zend_object *old_exception;
+
+	if (zend_is_unwind_exit(EG(exception))) {
+		return;
+	}
+
 	old_exception = EG(exception);
 	EG(exception) = NULL;
 	ZVAL_OBJ(&params[0], old_exception);
@@ -1666,8 +1671,7 @@ ZEND_API int zend_execute_scripts(int type, zval *retval, int file_count, ...) /
 					zend_user_exception_handler();
 				}
 				if (EG(exception)) {
-					zend_exception_error(EG(exception), E_ERROR);
-					ret = FAILURE;
+					ret = zend_exception_error(EG(exception), E_ERROR);
 				}
 			}
 			destroy_op_array(op_array);

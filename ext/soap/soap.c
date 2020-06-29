@@ -1382,8 +1382,10 @@ PHP_METHOD(SoapServer, handle)
 	xmlFreeDoc(doc_request);
 
 	if (EG(exception)) {
-		php_output_discard();
-		_soap_server_exception(service, function, ZEND_THIS);
+		if (!zend_is_unwind_exit(EG(exception))) {
+			php_output_discard();
+			_soap_server_exception(service, function, ZEND_THIS);
+		}
 		goto fail;
 	}
 
@@ -1576,15 +1578,17 @@ PHP_METHOD(SoapServer, handle)
 	efree(fn_name);
 
 	if (EG(exception)) {
-		php_output_discard();
-		_soap_server_exception(service, function, ZEND_THIS);
-		if (service->type == SOAP_CLASS) {
+		if (!zend_is_unwind_exit(EG(exception))) {
+			php_output_discard();
+			_soap_server_exception(service, function, ZEND_THIS);
+			if (service->type == SOAP_CLASS) {
 #if defined(HAVE_PHP_SESSION) && !defined(COMPILE_DL_SESSION)
-			if (soap_obj && service->soap_class.persistence != SOAP_PERSISTENCE_SESSION) {
+				if (soap_obj && service->soap_class.persistence != SOAP_PERSISTENCE_SESSION) {
 #else
-			if (soap_obj) {
+				if (soap_obj) {
 #endif
-				zval_ptr_dtor(soap_obj);
+					zval_ptr_dtor(soap_obj);
+				}
 			}
 		}
 		goto fail;

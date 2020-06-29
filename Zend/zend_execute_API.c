@@ -1141,8 +1141,7 @@ ZEND_API int zend_eval_stringl_ex(const char *str, size_t str_len, zval *retval_
 
 	result = zend_eval_stringl(str, str_len, retval_ptr, string_name);
 	if (handle_exceptions && EG(exception)) {
-		zend_exception_error(EG(exception), E_ERROR);
-		result = FAILURE;
+		result = zend_exception_error(EG(exception), E_ERROR);
 	}
 	return result;
 }
