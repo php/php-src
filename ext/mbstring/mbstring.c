@@ -3582,9 +3582,9 @@ PHP_FUNCTION(mb_send_mail)
 	mbfl_string orig_str, conv_str;
 	mbfl_string *pstr;	/* pointer to mbfl string for return value */
 	enum mbfl_no_encoding;
-	const mbfl_encoding *tran_cs,	/* transfar text charset */
-						*head_enc,	/* header transfar encoding */
-						*body_enc;	/* body transfar encoding */
+	const mbfl_encoding *tran_cs,	/* transfer text charset */
+						*head_enc,	/* header transfer encoding */
+						*body_enc;	/* body transfer encoding */
 	mbfl_memory_device device;	/* automatic allocateable buffer for additional header */
 	const mbfl_language *lang;
 	int err = 0;
