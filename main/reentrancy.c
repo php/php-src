@@ -187,11 +187,13 @@ PHPAPI char *php_ctime_r(const time_t *clock, char *buf)
 	local_lock(CTIME_R);
 
 	tmp = ctime(clock);
-	strcpy(buf, tmp);
+	if (tmp) {
+		strcpy(buf, tmp);
+	}
 
 	local_unlock(CTIME_R);
 
-	return buf;
+	return tmp ? buf : NULL;
 }
 
 #endif
