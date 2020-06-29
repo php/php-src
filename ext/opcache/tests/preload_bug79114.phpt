@@ -19,7 +19,7 @@ var_dump(class_parents('Bar'));
 new Foo();
 f3();
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 array(1) {

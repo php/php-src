@@ -72,7 +72,7 @@ if (file_exists($vout)) {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 S/MIME attached
 Plain text:
 Now is the winter of our discontent.

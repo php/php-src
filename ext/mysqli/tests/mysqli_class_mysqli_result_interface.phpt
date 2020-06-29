@@ -149,7 +149,7 @@ require_once('skipifconnectfailure.inc');
 
     print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 Parent class:
 bool(false)
 

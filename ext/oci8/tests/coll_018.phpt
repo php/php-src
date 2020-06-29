@@ -52,7 +52,7 @@ echo "Done\n";
 require __DIR__."/drop_type.inc";
 
 ?>
---EXPECTF--
+--EXPECT--
 Test 2.
 bool(true)
 

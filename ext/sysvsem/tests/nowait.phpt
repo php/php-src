@@ -118,7 +118,7 @@ if ($pid) {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 P: parent process running.
 P: got semaphore.
 P: acquired semaphore.

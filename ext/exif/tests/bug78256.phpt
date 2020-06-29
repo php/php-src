@@ -7,5 +7,5 @@ Bug #78256 (heap-buffer-overflow on exif_process_user_comment)
 @exif_read_data(__DIR__."/bug78256.jpg", 'COMMENT', FALSE, TRUE);
 ?>
 DONE
---EXPECTF--
+--EXPECT--
 DONE

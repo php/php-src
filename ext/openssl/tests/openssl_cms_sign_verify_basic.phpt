@@ -35,7 +35,7 @@ if (file_exists($vout)) {
     unlink($vout);
 }
 ?>
---EXPECTF--
+--EXPECT--
 Plain text:
 Now is the winter of our discontent.
 bool(true)

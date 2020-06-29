@@ -12,7 +12,7 @@ var_dump(readline_list_history());
 var_dump(readline_clear_history());
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 array(1) {
   [0]=>

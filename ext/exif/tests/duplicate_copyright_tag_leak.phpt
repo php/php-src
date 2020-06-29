@@ -14,5 +14,5 @@ if (!extension_loaded('exif')) {
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 ===DONE===

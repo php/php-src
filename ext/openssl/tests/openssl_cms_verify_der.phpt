@@ -47,7 +47,7 @@ if (file_exists($contentfile)) {
 <?php
 unlink(__DIR__ . DIRECTORY_SEPARATOR . '/openssl_cms_verify__pkcsfile.tmp');
 ?>
---EXPECTF--
+--EXPECT--
 bool(false)
 bool(false)
 bool(false)

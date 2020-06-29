@@ -26,7 +26,7 @@ if (file_exists($outfile)) {
     unlink($outfile);
 }
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 true

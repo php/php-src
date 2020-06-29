@@ -51,7 +51,7 @@ var_dump(function_exists('ocicollsize'));
 var_dump(function_exists('ocicollmax'));
 var_dump(function_exists('ocicolltrim'));
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 bool(true)

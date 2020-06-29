@@ -32,7 +32,7 @@ for ($i = 0; $i < count($values); $i++) {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sqrt() : usage variations ***
 float(4.795831523312719)
 float(NAN)

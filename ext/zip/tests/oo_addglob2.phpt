@@ -60,6 +60,6 @@ $dirname = __DIR__ . '/';
 include $dirname . 'utils.inc';
 rmdir_rf(__DIR__ . '/__tmp_oo_addglob2/');
 ?>
---EXPECTF--
+--EXPECT--
 0: foo.txt, comp=8, enc=0
 1: bar.txt, comp=0, enc=259

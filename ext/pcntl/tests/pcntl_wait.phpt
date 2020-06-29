@@ -25,7 +25,7 @@ if ($pid == -1) {
     exit(42);
 }
 ?>
---EXPECTF--
+--EXPECT--
 bool(false)
 bool(false)
 bool(false)

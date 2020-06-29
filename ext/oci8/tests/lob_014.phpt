@@ -43,7 +43,7 @@ require __DIR__.'/drop_table.inc';
 echo "Done\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 int(4)
 bool(true)
 int(4)
