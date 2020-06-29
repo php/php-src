@@ -10,6 +10,9 @@ PHP                                                                        NEWS
   . Fixed bug #79741 (curl_setopt CURLOPT_POSTFIELDS asserts on object with
     declared properties). (Nikita)
 
+- Fileinfo:
+  . Fixed bug #79756 (finfo_file crash (FILEINFO_MIME)). (cmb)
+
 - FTP:
   . Fixed bug #55857 (ftp_size on large files). (cmb)
 
