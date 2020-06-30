@@ -275,6 +275,8 @@ PHP 8.0 UPGRADE NOTES
 
 - LDAP:
   . The deprecated function ldap_sort has been removed.
+  . The interface of ldap_set_rebind_proc has changed; the $callback parameter
+    does not accept empty string anymore; null value shall be used instead.
 
 - Mbstring:
   . The mbstring.func_overload directive has been removed. The related
