@@ -315,6 +315,10 @@ PHP 8.0 UPGRADE NOTES
   . The legacy behaviour of passing the encoding as the third argument instead
     of an offset for the mb_strrpos() function has been removed, provide an
     explicit 0 offset with the encoding as the fourth argument instead.
+  . The ISO_8859-* character encoding aliases have been replaced by ISO8859-*
+    aliases for better interoperability with the iconv extension. The mbregex
+    ISO 8859 aliases with underscores (ISO_8859_* and ISO8859_*) have also been
+    removed.
 
 - PCRE:
   . When passing invalid escape sequences they are no longer interpreted as
