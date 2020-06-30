@@ -28,8 +28,6 @@
 #include "ext/standard/php_var.h"
 
 int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t FullSize) {
-	zend_execute_data execute_data;
-	zend_function func;
 	const uint8_t *Start = memchr(Data, '|', FullSize);
 	if (!Start) {
 		return 0;
@@ -41,20 +39,11 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t FullSize) {
 	memcpy(orig_data, Start, Size);
 	orig_data[Size] = '\0';
 
-	if (fuzzer_request_startup()==FAILURE) {
+	if (fuzzer_request_startup() == FAILURE) {
 		return 0;
 	}
 
-	/* Set up a dummy stack frame so that exceptions may be thrown. */
-	{
-		memset(&execute_data, 0, sizeof(zend_execute_data));
-		memset(&func, 0, sizeof(zend_function));
-
-		func.type = ZEND_INTERNAL_FUNCTION;
-		func.common.function_name = ZSTR_EMPTY_ALLOC();
-		execute_data.func = &func;
-		EG(current_execute_data) = &execute_data;
-	}
+	fuzzer_setup_dummy_frame();
 
 	{
 		const unsigned char *data = orig_data;
@@ -77,22 +66,11 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t FullSize) {
 		}
 
 		zval_ptr_dtor(&result);
-
-		/* Destroy any thrown exception. */
-		if (EG(exception)) {
-			zend_object_release(EG(exception));
-			EG(exception) = NULL;
-		}
 	}
-
-	/* Unserialize may create circular structure. Make sure we free them.
-	 * Two calls are performed to handle objects with destructors. */
-	zend_gc_collect_cycles();
-	zend_gc_collect_cycles();
-	php_request_shutdown(NULL);
 
 	free(orig_data);
 
+	fuzzer_request_shutdown();
 	return 0;
 }
 

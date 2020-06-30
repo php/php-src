@@ -156,6 +156,37 @@ int fuzzer_request_startup()
 	return SUCCESS;
 }
 
+void fuzzer_request_shutdown()
+{
+	/* Destroy thrown exceptions. This does not happen as part of request shutdown. */
+	if (EG(exception)) {
+		zend_object_release(EG(exception));
+		EG(exception) = NULL;
+	}
+
+	/* Some fuzzers (like unserialize) may create circular structures. Make sure we free them.
+	 * Two calls are performed to handle objects with destructors. */
+	zend_gc_collect_cycles();
+	zend_gc_collect_cycles();
+
+	php_request_shutdown(NULL);
+}
+
+/* Set up a dummy stack frame so that exceptions may be thrown. */
+void fuzzer_setup_dummy_frame()
+{
+	static zend_execute_data execute_data;
+	static zend_function func;
+
+	memset(&execute_data, 0, sizeof(zend_execute_data));
+	memset(&func, 0, sizeof(zend_function));
+
+	func.type = ZEND_INTERNAL_FUNCTION;
+	func.common.function_name = ZSTR_EMPTY_ALLOC();
+	execute_data.func = &func;
+	EG(current_execute_data) = &execute_data;
+}
+
 void fuzzer_set_ini_file(const char *file)
 {
 	if (fuzzer_module.php_ini_path_override) {
