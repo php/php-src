@@ -76,9 +76,15 @@ void zend_exception_set_previous(zend_object *exception, zend_object *add_previo
 	zval  pv, zv, rv;
 	zend_class_entry *base_ce;
 
-	if (exception == add_previous || !add_previous || !exception) {
+	if (!exception || !add_previous) {
 		return;
 	}
+
+	if (exception == add_previous) {
+		OBJ_RELEASE(add_previous);
+		return;
+	}
+
 	ZVAL_OBJ(&pv, add_previous);
 	if (!instanceof_function(Z_OBJCE(pv), zend_ce_throwable)) {
 		zend_error_noreturn(E_CORE_ERROR, "Previous exception must implement Throwable");
