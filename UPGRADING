@@ -628,6 +628,9 @@ PHP 8.0 UPGRADE NOTES
 3. Changes in SAPI modules
 ========================================
 
+- Apache:
+  . The PHP module has been renamed from php7_module to php_module.
+
 - CGI and FPM will now use CONTEXT_DOCUMENT_ROOT to scan for .user.ini files,
   if it is defined. Otherwise, DOCUMENT_ROOT will be used as before. This
   improves support for Apache mod_userdir and mod_alias.
