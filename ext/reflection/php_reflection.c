@@ -2813,10 +2813,11 @@ ZEND_METHOD(ReflectionParameter, isDefaultValueConstant)
 	if (Z_TYPE(default_value) == IS_CONSTANT_AST) {
 		zend_ast *ast = Z_ASTVAL(default_value);
 		RETVAL_BOOL(ast->kind == ZEND_AST_CONSTANT || ast->kind == ZEND_AST_CONSTANT_CLASS);
-		zval_ptr_dtor_nogc(&default_value);
 	} else {
-		RETURN_FALSE;
+		RETVAL_FALSE;
 	}
+
+	zval_ptr_dtor_nogc(&default_value);
 }
 /* }}} */
 
