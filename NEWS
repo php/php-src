@@ -25,6 +25,9 @@ PHP                                                                        NEWS
   . Fixed bug #69804 ()::getStaticPropertyValue() throws on protected props).
     (cmb, Nikita)
 
+- Standard:
+  . Fixed bug #70362 (Can't copy() large 'data://' with open_basedir). (cmb)
+
 ?? ??? 2020, PHP 7.4.8
 
 - Core:
