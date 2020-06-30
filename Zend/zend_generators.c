@@ -1023,8 +1023,6 @@ ZEND_METHOD(Generator, getReturn)
 
 static void zend_generator_iterator_dtor(zend_object_iterator *iterator) /* {{{ */
 {
-	zend_generator *generator = (zend_generator*)Z_OBJ(iterator->data);
-	generator->iterator = NULL;
 	zval_ptr_dtor(&iterator->data);
 }
 /* }}} */
@@ -1114,8 +1112,7 @@ zend_object_iterator *zend_generator_get_iterator(zend_class_entry *ce, zval *ob
 		return NULL;
 	}
 
-	iterator = generator->iterator = emalloc(sizeof(zend_object_iterator));
-
+	iterator = emalloc(sizeof(zend_object_iterator));
 	zend_iterator_init(iterator);
 
 	iterator->funcs = &zend_generator_iterator_functions;
