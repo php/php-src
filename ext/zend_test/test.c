@@ -132,6 +132,82 @@ ZEND_FUNCTION(zend_leak_variable)
 }
 /* }}} */
 
+/* Tests Z_PARAM_STR_OR_OBJ */
+ZEND_FUNCTION(zend_string_or_object)
+{
+	zend_string *str;
+	zend_object *object;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR_OR_OBJ(str, object)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (str) {
+		RETURN_STR_COPY(str);
+	} else {
+		RETURN_OBJ_COPY(object);
+	}
+}
+/* }}} */
+
+/* Tests Z_PARAM_STR_OR_OBJ_OR_NULL */
+ZEND_FUNCTION(zend_string_or_object_or_null)
+{
+	zend_string *str;
+	zend_object *object;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR_OR_OBJ_OR_NULL(str, object)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (str) {
+		RETURN_STR_COPY(str);
+	} else if (object) {
+		RETURN_OBJ_COPY(object);
+	} else {
+		RETURN_NULL();
+	}
+}
+/* }}} */
+
+/* Tests Z_PARAM_STR_OR_OBJ_OF_CLASS */
+ZEND_FUNCTION(zend_string_or_stdclass)
+{
+	zend_string *str;
+	zend_object *object;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR_OR_OBJ_OF_CLASS(str, object, zend_standard_class_def)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (str) {
+		RETURN_STR_COPY(str);
+	} else {
+		RETURN_OBJ_COPY(object);
+	}
+}
+/* }}} */
+
+/* Tests Z_PARAM_STR_OR_OBJ_OF_CLASS_OR_NULL */
+ZEND_FUNCTION(zend_string_or_stdclass_or_null)
+{
+	zend_string *str;
+	zend_object *object;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR_OR_OBJ_OF_CLASS_OR_NULL(str, object, zend_standard_class_def)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (str) {
+		RETURN_STR_COPY(str);
+	} else if (object) {
+		RETURN_OBJ_COPY(object);
+	} else {
+		RETURN_NULL();
+	}
+}
+/* }}} */
+
 static zend_object *zend_test_class_new(zend_class_entry *class_type) /* {{{ */ {
 	zend_object *obj = zend_objects_new(class_type);
 	object_properties_init(obj, class_type);

@@ -252,6 +252,26 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_or_null_error(i
 }
 /* }}} */
 
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_string_or_class_error(int num, const char *name, zval *arg) /* {{{ */
+{
+	if (EG(exception)) {
+		return;
+	}
+
+	zend_argument_type_error(num, "must be of type %s|string, %s given", name, zend_zval_type_name(arg));
+}
+/* }}} */
+
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_string_or_class_or_null_error(int num, const char *name, zval *arg) /* {{{ */
+{
+	if (EG(exception)) {
+		return;
+	}
+
+	zend_argument_type_error(num, "must be of type %s|string|null, %s given", name, zend_zval_type_name(arg));
+}
+/* }}} */
+
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int num, char *error) /* {{{ */
 {
 	if (EG(exception)) {
