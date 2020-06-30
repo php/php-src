@@ -24,9 +24,9 @@ var_dump(`$php -n --re pcre`);
 echo "Done\n";
 ?>
 --EXPECTF--
-string(44) "Exception: Extension unknown does not exist
+string(46) "Exception: Extension "unknown" does not exist
 "
-string(37) "Exception: Extension  does not exist
+string(39) "Exception: Extension "" does not exist
 "
 string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
 

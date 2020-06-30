@@ -61,5 +61,5 @@ string(17) "changed protected"
 string(14) "changed public"
 
 Retrieving non-existent values from A with no default value:
-Class A does not have a property named "rotectedDoesNotExist"
-Class A does not have a property named "privateDoesNotExist"
+Property A::$protectedDoesNotExist does not exist
+Property A::$privateDoesNotExist does not exist

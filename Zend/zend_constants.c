@@ -462,7 +462,7 @@ failure:
 	}
 
 	if (!(flags & ZEND_FETCH_CLASS_SILENT) && (ZEND_CONSTANT_FLAGS(c) & CONST_DEPRECATED)) {
-		zend_error(E_DEPRECATED, "Constant \"%s\" is deprecated", name);
+		zend_error(E_DEPRECATED, "Constant %s is deprecated", name);
 	}
 	return &c->value;
 }

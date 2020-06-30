@@ -80,7 +80,7 @@ Stack trace:
 #0 %s ReflectionMethod->__construct(true, 'foo')
 #1 {main}
 Wrong type of argument (string, bool):
-ReflectionException: Method "TestClass::1" does not exist in %s:%d
+ReflectionException: Method TestClass::1() does not exist in %s:%d
 Stack trace:
 #0 %s ReflectionMethod->__construct('TestClass', '1')
 #1 {main}
@@ -90,7 +90,7 @@ Stack trace:
 #0 %s ReflectionMethod->__construct('TestClass')
 #1 {main}
 Class and Method in same string, bad method name:
-ReflectionException: Method "TestClass::foop::dedoop" does not exist in %s:%d
+ReflectionException: Method TestClass::foop::dedoop() does not exist in %s:%d
 Stack trace:
 #0 %s ReflectionMethod->__construct('TestClass::foop...')
 #1 {main}

@@ -1793,7 +1793,7 @@ static void ZEND_FASTCALL zend_jit_invalid_property_read(zval *container, const 
 static void ZEND_FASTCALL zend_jit_invalid_property_write(zval *container, const char *property_name)
 {
 	zend_throw_error(NULL,
-		"Attempt to modify property '%s' on %s",
+		"Attempt to modify property \"%s\" on %s",
 		property_name, zend_zval_type_name(container));
 }
 

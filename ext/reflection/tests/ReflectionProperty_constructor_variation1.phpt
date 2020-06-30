@@ -46,13 +46,13 @@ D::testFromD();
 ?>
 --EXPECT--
 --> Reflect inherited private from global scope:
-Property "D::$p" does not exist
+Property D::$p does not exist
 
 --> Reflect inherited private from declaring scope:
-Property "D::$p" does not exist
+Property D::$p does not exist
 
 --> Reflect inherited private from declaring scope via subclass:
-Property "D::$p" does not exist
+Property D::$p does not exist
 
 --> Reflect inherited private from subclass:
-Property "D::$p" does not exist
+Property D::$p does not exist

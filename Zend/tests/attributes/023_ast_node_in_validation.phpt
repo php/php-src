@@ -8,4 +8,4 @@ class A1 { }
 
 ?>
 --EXPECTF--
-Fatal error: Class 'Foo' not found in %s
+Fatal error: Class "Foo" not found in %s on line %d

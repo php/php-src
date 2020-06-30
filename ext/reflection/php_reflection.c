@@ -1511,7 +1511,7 @@ ZEND_METHOD(ReflectionFunction, __construct)
 
 		if (fptr == NULL) {
 			zend_throw_exception_ex(reflection_exception_ptr, 0,
-				"Function \"%s\" does not exist", ZSTR_VAL(fname));
+				"Function %s() does not exist", ZSTR_VAL(fname));
 			RETURN_THROWS();
 		}
 	}
@@ -2253,7 +2253,7 @@ ZEND_METHOD(ReflectionParameter, __construct)
 				zend_string_release(lcname);
 				if (!fptr) {
 					zend_throw_exception_ex(reflection_exception_ptr, 0,
-						"Function \"%s\" does not exist", Z_STRVAL_P(reference));
+						"Function %s() does not exist", Z_STRVAL_P(reference));
 					RETURN_THROWS();
 				}
 				ce = fptr->common.scope;
@@ -2303,7 +2303,7 @@ ZEND_METHOD(ReflectionParameter, __construct)
 					zend_string_release(name);
 					zend_string_release(lcname);
 					zend_throw_exception_ex(reflection_exception_ptr, 0,
-						"Method \"%s::%s\" does not exist", ZSTR_VAL(ce->name), Z_STRVAL_P(method));
+						"Method %s::%s() does not exist", ZSTR_VAL(ce->name), Z_STRVAL_P(method));
 					RETURN_THROWS();
 				}
 				zend_string_release(name);
@@ -2320,7 +2320,7 @@ ZEND_METHOD(ReflectionParameter, __construct)
 					is_closure = 1;
 				} else if ((fptr = zend_hash_find_ptr(&ce->function_table, ZSTR_KNOWN(ZEND_STR_MAGIC_INVOKE))) == NULL) {
 					zend_throw_exception_ex(reflection_exception_ptr, 0,
-						"Method \"%s::%s\" does not exist", ZSTR_VAL(ce->name), ZEND_INVOKE_FUNC_NAME);
+						"Method %s::%s() does not exist", ZSTR_VAL(ce->name), ZEND_INVOKE_FUNC_NAME);
 					RETURN_THROWS();
 				}
 			}
@@ -3058,7 +3058,7 @@ ZEND_METHOD(ReflectionMethod, __construct)
 	} else if ((mptr = zend_hash_str_find_ptr(&ce->function_table, lcname, name_len)) == NULL) {
 		efree(lcname);
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
-			"Method \"%s::%s\" does not exist", ZSTR_VAL(ce->name), name_str);
+			"Method %s::%s() does not exist", ZSTR_VAL(ce->name), name_str);
 		RETURN_THROWS();
 	}
 	efree(lcname);
@@ -3552,7 +3552,7 @@ ZEND_METHOD(ReflectionClassConstant, __construct)
 	}
 
 	if ((constant = zend_hash_find_ptr(&ce->constants_table, constname)) == NULL) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0, "Constant \"%s::%s\" does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(constname));
+		zend_throw_exception_ex(reflection_exception_ptr, 0, "Constant %s::%s does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(constname));
 		RETURN_THROWS();
 	}
 
@@ -3876,7 +3876,7 @@ ZEND_METHOD(ReflectionClass, getStaticPropertyValue)
 			ZVAL_COPY(return_value, def_value);
 		} else {
 			zend_throw_exception_ex(reflection_exception_ptr, 0,
-				"Property \"%s::$%s\" does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(name));
+				"Property %s::$%s does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(name));
 		}
 		return;
 	} else {
@@ -4173,7 +4173,7 @@ ZEND_METHOD(ReflectionClass, getMethod)
 		reflection_method_factory(ce, mptr, NULL, return_value);
 	} else {
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
-				"Method \"%s::%s\" does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(name));
+				"Method %s::%s() does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(name));
 	}
 	zend_string_release(lc_name);
 }
@@ -4328,7 +4328,7 @@ ZEND_METHOD(ReflectionClass, getProperty)
 			return;
 		}
 	}
-	zend_throw_exception_ex(reflection_exception_ptr, 0, "Property \"%s::$%s\" does not exist", ZSTR_VAL(ce->name), str_name);
+	zend_throw_exception_ex(reflection_exception_ptr, 0, "Property %s::$%s does not exist", ZSTR_VAL(ce->name), str_name);
 }
 /* }}} */
 
@@ -5224,7 +5224,7 @@ ZEND_METHOD(ReflectionProperty, __construct)
 			}
 		}
 		if (dynam_prop == 0) {
-			zend_throw_exception_ex(reflection_exception_ptr, 0, "Property \"%s::$%s\" does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(name));
+			zend_throw_exception_ex(reflection_exception_ptr, 0, "Property %s::$%s does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(name));
 			RETURN_THROWS();
 		}
 	}

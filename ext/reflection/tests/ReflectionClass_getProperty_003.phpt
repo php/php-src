@@ -112,7 +112,7 @@ object(ReflectionProperty)#%d (2) {
 }
 Cannot access non-public property C::$protA
 --- (Reflecting on privA) ---
-Property "C::$privA" does not exist
+Property C::$privA does not exist
 --- (Reflecting on pubB) ---
 object(ReflectionProperty)#%d (2) {
   ["name"]=>
@@ -130,7 +130,7 @@ object(ReflectionProperty)#%d (2) {
 }
 Cannot access non-public property C::$protB
 --- (Reflecting on privB) ---
-Property "C::$privB" does not exist
+Property C::$privB does not exist
 --- (Reflecting on pubC) ---
 object(ReflectionProperty)#%d (2) {
   ["name"]=>
@@ -156,7 +156,7 @@ object(ReflectionProperty)#%d (2) {
 }
 Cannot access non-public property C::$privC
 --- (Reflecting on doesNotExist) ---
-Property "C::$doesNotExist" does not exist
+Property C::$doesNotExist does not exist
 --- (Reflecting on A::pubC) ---
 object(ReflectionProperty)#%d (2) {
   ["name"]=>
@@ -214,7 +214,7 @@ object(ReflectionProperty)#%d (2) {
 }
 string(9) "pubC in C"
 --- (Reflecting on c::PUBC) ---
-Property "C::$PUBC" does not exist
+Property C::$PUBC does not exist
 --- (Reflecting on C::pubC) ---
 object(ReflectionProperty)#%d (2) {
   ["name"]=>

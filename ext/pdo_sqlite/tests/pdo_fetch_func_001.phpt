@@ -92,17 +92,12 @@ array(2) {
   string(0) ""
 }
 
-Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: function 'nothing' not found or invalid function name in %s on line %d
+Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: function "nothing" not found or invalid function name in %s on line %d
 
 Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error in %s on line %d
 bool(false)
 
-Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: function '' not found or invalid function name in %s on line %d
-
-Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error in %s on line %d
-bool(false)
-
-Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: no array or string given in %s on line %d
+Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: function "" not found or invalid function name in %s on line %d
 
 Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error in %s on line %d
 bool(false)
@@ -112,7 +107,12 @@ Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: no array or s
 Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error in %s on line %d
 bool(false)
 
-Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: class 'PDOStatement' does not have a method 'foo' in %s on line %d
+Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: no array or string given in %s on line %d
+
+Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error in %s on line %d
+bool(false)
+
+Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: class PDOStatement does not have a method "foo" in %s on line %d
 
 Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error in %s on line %d
 bool(false)
@@ -139,7 +139,7 @@ Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: non-static me
 Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error in %s on line %d
 bool(false)
 
-Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: class 'bar' does not have a method 'inexistent' in %s on line %d
+Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: class bar does not have a method "inexistent" in %s on line %d
 
 Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error in %s on line %d
 bool(false)

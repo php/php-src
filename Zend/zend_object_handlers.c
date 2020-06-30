@@ -1399,7 +1399,7 @@ ZEND_API zval *zend_std_get_static_property_with_info(zend_class_entry *ce, zend
 		} else {
 undeclared_property:
 			if (type != BP_VAR_IS) {
-				zend_throw_error(NULL, "Access to undeclared static property \"%s::$%s\"", ZSTR_VAL(ce->name), ZSTR_VAL(property_name));
+				zend_throw_error(NULL, "Access to undeclared static property %s::$%s", ZSTR_VAL(ce->name), ZSTR_VAL(property_name));
 			}
 			return NULL;
 		}
