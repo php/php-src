@@ -3545,7 +3545,7 @@ ZEND_EXT_API void zend_jit_unprotect(void)
 		if (!VirtualProtect(dasm_buf, dasm_size, PAGE_READWRITE, &old)) {
 			DWORD err = GetLastError();
 			char *msg = php_win32_error_to_msg(err);
-			fprintf(stderr, "VirtualProtect() failed [%d] %s\n", err, msg);
+			fprintf(stderr, "VirtualProtect() failed [%u] %s\n", err, msg);
 			php_win32_error_msg_free(msg);
 		}
 	}
@@ -3567,7 +3567,7 @@ ZEND_EXT_API void zend_jit_protect(void)
 		if (!VirtualProtect(dasm_buf, dasm_size, PAGE_EXECUTE_READ, &old)) {
 			DWORD err = GetLastError();
 			char *msg = php_win32_error_to_msg(err);
-			fprintf(stderr, "VirtualProtect() failed [%d] %s\n", err, msg);
+			fprintf(stderr, "VirtualProtect() failed [%u] %s\n", err, msg);
 			php_win32_error_msg_free(msg);
 		}
 	}
@@ -3783,7 +3783,7 @@ ZEND_EXT_API int zend_jit_startup(void *buf, size_t size, zend_bool reattached)
 		if (!VirtualProtect(dasm_buf, dasm_size, PAGE_EXECUTE_READWRITE, &old)) {
 			DWORD err = GetLastError();
 			char *msg = php_win32_error_to_msg(err);
-			fprintf(stderr, "VirtualProtect() failed [%d] %s\n", err, msg);
+			fprintf(stderr, "VirtualProtect() failed [%u] %s\n", err, msg);
 			php_win32_error_msg_free(msg);
 		}
 	} else {
@@ -3792,7 +3792,7 @@ ZEND_EXT_API int zend_jit_startup(void *buf, size_t size, zend_bool reattached)
 		if (!VirtualProtect(dasm_buf, dasm_size, PAGE_EXECUTE_READ, &old)) {
 			DWORD err = GetLastError();
 			char *msg = php_win32_error_to_msg(err);
-			fprintf(stderr, "VirtualProtect() failed [%d] %s\n", err, msg);
+			fprintf(stderr, "VirtualProtect() failed [%u] %s\n", err, msg);
 			php_win32_error_msg_free(msg);
 		}
 	}
