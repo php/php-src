@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2020 University of Cambridge
+          New API code Copyright (c) 2016-2019 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -58,7 +58,7 @@ collecting data (e.g. minimum matching length). */
 
 /* Returns from set_start_bits() */
 
-enum { SSB_FAIL, SSB_DONE, SSB_CONTINUE, SSB_UNKNOWN, SSB_TOODEEP };
+enum { SSB_FAIL, SSB_DONE, SSB_CONTINUE, SSB_UNKNOWN };
 
 
 /*************************************************
@@ -772,19 +772,15 @@ Arguments:
   p             points to the first code unit of the character
   caseless      TRUE if caseless
   utf           TRUE for UTF mode
-  ucp           TRUE for UCP mode
 
 Returns:        pointer after the character
 */
 
 static PCRE2_SPTR
-set_table_bit(pcre2_real_code *re, PCRE2_SPTR p, BOOL caseless, BOOL utf,
-  BOOL ucp)
+set_table_bit(pcre2_real_code *re, PCRE2_SPTR p, BOOL caseless, BOOL utf)
 {
 uint32_t c = *p++;   /* First code unit */
-
-(void)utf;           /* Stop compiler warnings when UTF not supported */
-(void)ucp;
+(void)utf;           /* Stop compiler warning when UTF not supported */
 
 /* In 16-bit and 32-bit modes, code units greater than 0xff set the bit for
 0xff. */
@@ -814,26 +810,22 @@ if (utf)
 if (caseless)
   {
 #ifdef SUPPORT_UNICODE
-  if (utf || ucp)
+  if (utf)
     {
-    c = UCD_OTHERCASE(c);
 #if PCRE2_CODE_UNIT_WIDTH == 8
-    if (utf)
-      {
-      PCRE2_UCHAR buff[6];
-      (void)PRIV(ord2utf)(c, buff);
-      SET_BIT(buff[0]);
-      }
-    else if (c < 256) SET_BIT(c);
+    PCRE2_UCHAR buff[6];
+    c = UCD_OTHERCASE(c);
+    (void)PRIV(ord2utf)(c, buff);
+    SET_BIT(buff[0]);
 #else  /* 16-bit or 32-bit mode */
+    c = UCD_OTHERCASE(c);
     if (c > 0xff) SET_BIT(0xff); else SET_BIT(c);
 #endif
     }
-
   else
 #endif  /* SUPPORT_UNICODE */
 
-  /* Not UTF or UCP */
+  /* Not UTF */
 
   if (MAX_255(c)) SET_BIT(re->tables[fcc_offset + c]);
   }
@@ -932,26 +924,19 @@ The SSB_CONTINUE return is useful for parenthesized groups in patterns such as
 must continue at the outer level to find at least one mandatory code unit. At
 the outermost level, this function fails unless the result is SSB_DONE.
 
-We restrict recursion (for nested groups) to 1000 to avoid stack overflow
-issues.
-
 Arguments:
   re           points to the compiled regex block
   code         points to an expression
   utf          TRUE if in UTF mode
-  ucp          TRUE if in UCP mode
-  depthptr     pointer to recurse depth
 
 Returns:       SSB_FAIL     => Failed to find any starting code units
                SSB_DONE     => Found mandatory starting code units
                SSB_CONTINUE => Found optional starting code units
                SSB_UNKNOWN  => Hit an unrecognized opcode
-               SSB_TOODEEP  => Recursion is too deep
 */
 
 static int
-set_start_bits(pcre2_real_code *re, PCRE2_SPTR code, BOOL utf, BOOL ucp,
-  int *depthptr)
+set_start_bits(pcre2_real_code *re, PCRE2_SPTR code, BOOL utf)
 {
 uint32_t c;
 int yield = SSB_DONE;
@@ -961,9 +946,6 @@ int table_limit = utf? 16:32;
 #else
 int table_limit = 32;
 #endif
-
-*depthptr += 1;
-if (*depthptr > 1000) return SSB_TOODEEP;
 
 do
   {
@@ -1121,17 +1103,13 @@ do
       case OP_SCRIPT_RUN:
       case OP_ASSERT:
       case OP_ASSERT_NA:
-      rc = set_start_bits(re, tcode, utf, ucp, depthptr);
-      if (rc == SSB_DONE)
-        {
-        try_next = FALSE;
-        }
-      else if (rc == SSB_CONTINUE)
+      rc = set_start_bits(re, tcode, utf);
+      if (rc == SSB_FAIL || rc == SSB_UNKNOWN) return rc;
+      if (rc == SSB_DONE) try_next = FALSE; else
         {
         do tcode += GET(tcode, 1); while (*tcode == OP_ALT);
         tcode += 1 + LINK_SIZE;
         }
-      else return rc;   /* FAIL, UNKNOWN, or TOODEEP */
       break;
 
       /* If we hit ALT or KET, it means we haven't found anything mandatory in
@@ -1177,8 +1155,8 @@ do
       case OP_BRAZERO:
       case OP_BRAMINZERO:
       case OP_BRAPOSZERO:
-      rc = set_start_bits(re, ++tcode, utf, ucp, depthptr);
-      if (rc == SSB_FAIL || rc == SSB_UNKNOWN || rc == SSB_TOODEEP) return rc;
+      rc = set_start_bits(re, ++tcode, utf);
+      if (rc == SSB_FAIL || rc == SSB_UNKNOWN) return rc;
       do tcode += GET(tcode,1); while (*tcode == OP_ALT);
       tcode += 1 + LINK_SIZE;
       break;
@@ -1199,7 +1177,7 @@ do
       case OP_QUERY:
       case OP_MINQUERY:
       case OP_POSQUERY:
-      tcode = set_table_bit(re, tcode + 1, FALSE, utf, ucp);
+      tcode = set_table_bit(re, tcode + 1, FALSE, utf);
       break;
 
       case OP_STARI:
@@ -1208,7 +1186,7 @@ do
       case OP_QUERYI:
       case OP_MINQUERYI:
       case OP_POSQUERYI:
-      tcode = set_table_bit(re, tcode + 1, TRUE, utf, ucp);
+      tcode = set_table_bit(re, tcode + 1, TRUE, utf);
       break;
 
       /* Single-char upto sets the bit and tries the next */
@@ -1216,13 +1194,13 @@ do
       case OP_UPTO:
       case OP_MINUPTO:
       case OP_POSUPTO:
-      tcode = set_table_bit(re, tcode + 1 + IMM2_SIZE, FALSE, utf, ucp);
+      tcode = set_table_bit(re, tcode + 1 + IMM2_SIZE, FALSE, utf);
       break;
 
       case OP_UPTOI:
       case OP_MINUPTOI:
       case OP_POSUPTOI:
-      tcode = set_table_bit(re, tcode + 1 + IMM2_SIZE, TRUE, utf, ucp);
+      tcode = set_table_bit(re, tcode + 1 + IMM2_SIZE, TRUE, utf);
       break;
 
       /* At least one single char sets the bit and stops */
@@ -1234,7 +1212,7 @@ do
       case OP_PLUS:
       case OP_MINPLUS:
       case OP_POSPLUS:
-      (void)set_table_bit(re, tcode + 1, FALSE, utf, ucp);
+      (void)set_table_bit(re, tcode + 1, FALSE, utf);
       try_next = FALSE;
       break;
 
@@ -1245,7 +1223,7 @@ do
       case OP_PLUSI:
       case OP_MINPLUSI:
       case OP_POSPLUSI:
-      (void)set_table_bit(re, tcode + 1, TRUE, utf, ucp);
+      (void)set_table_bit(re, tcode + 1, TRUE, utf);
       try_next = FALSE;
       break;
 
@@ -1674,7 +1652,6 @@ PRIV(study)(pcre2_real_code *re)
 int count = 0;
 PCRE2_UCHAR *code;
 BOOL utf = (re->overall_options & PCRE2_UTF) != 0;
-BOOL ucp = (re->overall_options & PCRE2_UCP) != 0;
 
 /* Find start of compiled code */
 
@@ -1687,8 +1664,7 @@ code units. */
 
 if ((re->flags & (PCRE2_FIRSTSET|PCRE2_STARTLINE)) == 0)
   {
-  int depth = 0;
-  int rc = set_start_bits(re, code, utf, ucp, &depth);
+  int rc = set_start_bits(re, code, utf);
   if (rc == SSB_UNKNOWN) return 1;
 
   /* If a list of starting code units was set up, scan the list to see if only
@@ -1736,27 +1712,27 @@ if ((re->flags & (PCRE2_FIRSTSET|PCRE2_STARTLINE)) == 0)
           }
 
         /* c contains the code unit value, in the range 0-255. In 8-bit UTF
-        mode, only values < 128 can be used. In all the other cases, c is a
-        character value. */
+        mode, only values < 128 can be used. */
 
 #if PCRE2_CODE_UNIT_WIDTH == 8
-        if (utf && c > 127) goto DONE;
+        if (c > 127) goto DONE;
 #endif
-        if (a < 0) a = c;   /* First one found, save in a */
+        if (a < 0) a = c;   /* First one found */
         else if (b < 0)     /* Second one found */
           {
           int d = TABLE_GET((unsigned int)c, re->tables + fcc_offset, c);
 
 #ifdef SUPPORT_UNICODE
-          if (utf || ucp)
-            {
-            if (UCD_CASESET(c) != 0) goto DONE;     /* Multiple case set */
-            if (c > 127) d = UCD_OTHERCASE(c);
-            }
+#if PCRE2_CODE_UNIT_WIDTH == 8
+          if (utf && UCD_CASESET(c) != 0) goto DONE;   /* Multiple case set */
+#else   /* 16-bit or 32-bit */
+          if (UCD_CASESET(c) != 0) goto DONE;     /* Multiple case set */
+          if (utf && c > 127) d = UCD_OTHERCASE(c);
+#endif  /* Code width */
 #endif  /* SUPPORT_UNICODE */
 
-          if (d != a) goto DONE;   /* Not the other case of a */
-          b = c;                   /* Save second in b */
+          if (d != a) goto DONE;   /* Not other case of a */
+          b = c;
           }
         else goto DONE;   /* More than two characters found */
         }
