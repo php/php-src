@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c9ce0e98ab386130b6332ae017808bec67b1cd07 */
+ * Stub hash: 63d7fc9e11bd2821a77f6ee709ceaf1fdcbf190e */
 
 #if defined(HAVE_ORALDAP)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_connect, 0, 0, 0)
@@ -244,6 +244,13 @@ ZEND_END_ARG_INFO()
 #endif
 
 #if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ldap_count_references, 0, 2, IS_LONG, 0)
+	ZEND_ARG_INFO(0, link_identifier)
+	ZEND_ARG_INFO(0, result_identifier)
+ZEND_END_ARG_INFO()
+#endif
+
+#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_first_reference, 0, 0, 2)
 	ZEND_ARG_INFO(0, link)
 	ZEND_ARG_INFO(0, result)
@@ -412,6 +419,9 @@ ZEND_FUNCTION(ldap_get_option);
 ZEND_FUNCTION(ldap_set_option);
 #endif
 #if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
+ZEND_FUNCTION(ldap_count_references);
+#endif
+#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 ZEND_FUNCTION(ldap_first_reference);
 #endif
 #if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
@@ -516,6 +526,9 @@ static const zend_function_entry ext_functions[] = {
 #endif
 #if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 	ZEND_FE(ldap_set_option, arginfo_ldap_set_option)
+#endif
+#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
+	ZEND_FE(ldap_count_references, arginfo_ldap_count_references)
 #endif
 #if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 	ZEND_FE(ldap_first_reference, arginfo_ldap_first_reference)
