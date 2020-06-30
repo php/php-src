@@ -1217,6 +1217,8 @@ static zend_always_inline zval *zend_try_array_init(zval *zv)
 	_(Z_EXPECTED_STRING_OR_ARRAY_OR_NULL, "of type string|array|null") \
 	_(Z_EXPECTED_STRING_OR_LONG,	"of type string|int") \
 	_(Z_EXPECTED_STRING_OR_LONG_OR_NULL, "of type string|int|null") \
+	_(Z_EXPECTED_CLASS_NAME_OR_OBJECT,	"a valid class name or object") \
+	_(Z_EXPECTED_CLASS_NAME_OR_OBJECT_OR_NULL, "a valid class name, object, or null") \
 
 #define Z_EXPECTED_TYPE
 
@@ -1395,6 +1397,20 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_value_error(uint32_t arg_num
 #define Z_PARAM_CLASS(dest) \
 	Z_PARAM_CLASS_EX(dest, 0, 0)
 
+#define Z_PARAM_CLASS_NAME_OR_OBJ_EX(dest, allow_null) \
+	Z_PARAM_PROLOGUE(0, 0); \
+	if (UNEXPECTED(!zend_parse_arg_class_name_or_obj(_arg, &dest, _i, allow_null))) { \
+		_expected_type = allow_null ? Z_EXPECTED_CLASS_NAME_OR_OBJECT_OR_NULL : Z_EXPECTED_CLASS_NAME_OR_OBJECT; \
+		_error_code = ZPP_ERROR_WRONG_ARG; \
+		break; \
+	}
+
+#define Z_PARAM_CLASS_NAME_OR_OBJ(dest) \
+	Z_PARAM_CLASS_NAME_OR_OBJ_EX(dest, 0);
+
+#define Z_PARAM_CLASS_NAME_OR_OBJ_OR_NULL(dest) \
+	Z_PARAM_CLASS_NAME_OR_OBJ_EX(dest, 1);
+
 /* old "d" */
 #define Z_PARAM_DOUBLE_EX2(dest, is_null, check_null, deref, separate) \
 		Z_PARAM_PROLOGUE(deref, separate); \
@@ -1513,6 +1529,9 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_value_error(uint32_t arg_num
 #define Z_PARAM_OBJECT(dest) \
 	Z_PARAM_OBJECT_EX(dest, 0, 0)
 
+#define Z_PARAM_OBJECT_OR_NULL(dest) \
+	Z_PARAM_OBJECT_EX(dest, 1, 0)
+
 /* old "O" */
 #define Z_PARAM_OBJECT_OF_CLASS_EX2(dest, _ce, check_null, deref, separate) \
 		Z_PARAM_PROLOGUE(deref, separate); \
@@ -1533,6 +1552,9 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_value_error(uint32_t arg_num
 
 #define Z_PARAM_OBJECT_OF_CLASS(dest, _ce) \
 	Z_PARAM_OBJECT_OF_CLASS_EX(dest, _ce, 0, 0)
+
+#define Z_PARAM_OBJECT_OF_CLASS_OR_NULL(dest, _ce) \
+	Z_PARAM_OBJECT_OF_CLASS_EX(dest, _ce, 1, 0)
 
 /* old "p" */
 #define Z_PARAM_PATH_EX2(dest, dest_len, check_null, deref, separate) \
@@ -1673,6 +1695,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_value_error(uint32_t arg_num
 
 #define Z_PARAM_STR_OR_LONG_OR_NULL(dest_str, dest_long, is_null) \
 	Z_PARAM_STR_OR_LONG_EX(dest_str, dest_long, is_null, 1);
+
 /* End of new parameter parsing API */
 
 /* Inlined implementations shared by new and old parameter parsing APIs */
@@ -1928,6 +1951,24 @@ static zend_always_inline int zend_parse_arg_str_or_long(zval *arg, zend_string 
 	} else {
 		return zend_parse_arg_str_or_long_slow(arg, dest_str, dest_long);
 	}
+	return 1;
+}
+
+static zend_always_inline int zend_parse_arg_class_name_or_obj(
+	zval *arg, zend_class_entry **destination, int num, int allow_null
+) {
+	if (EXPECTED(Z_TYPE_P(arg) == IS_STRING)) {
+		*destination = zend_lookup_class(Z_STR_P(arg));
+
+		return *destination != NULL;
+	} else if (EXPECTED(Z_TYPE_P(arg) == IS_OBJECT)) {
+		*destination = Z_OBJ_P(arg)->ce;
+	} else if (allow_null && EXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
+		*destination = NULL;
+	} else {
+		return 0;
+	}
+
 	return 1;
 }
 

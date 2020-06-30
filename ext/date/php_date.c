@@ -2295,7 +2295,7 @@ PHP_FUNCTION(date_create)
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STRING(time_str, time_str_len)
-		Z_PARAM_OBJECT_OF_CLASS_EX(timezone_object, date_ce_timezone, 1, 0)
+		Z_PARAM_OBJECT_OF_CLASS_OR_NULL(timezone_object, date_ce_timezone)
 	ZEND_PARSE_PARAMETERS_END();
 
 	php_date_instantiate(date_ce_date, return_value);
@@ -2318,7 +2318,7 @@ PHP_FUNCTION(date_create_immutable)
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STRING(time_str, time_str_len)
-		Z_PARAM_OBJECT_OF_CLASS_EX(timezone_object, date_ce_timezone, 1, 0)
+		Z_PARAM_OBJECT_OF_CLASS_OR_NULL(timezone_object, date_ce_timezone)
 	ZEND_PARSE_PARAMETERS_END();
 
 	php_date_instantiate(date_ce_immutable, return_value);
@@ -2342,7 +2342,7 @@ PHP_FUNCTION(date_create_from_format)
 		Z_PARAM_STRING(format_str, format_str_len)
 		Z_PARAM_STRING(time_str, time_str_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_OBJECT_OF_CLASS_EX(timezone_object, date_ce_timezone, 1, 0)
+		Z_PARAM_OBJECT_OF_CLASS_OR_NULL(timezone_object, date_ce_timezone)
 	ZEND_PARSE_PARAMETERS_END();
 
 	php_date_instantiate(date_ce_date, return_value);
@@ -2366,7 +2366,7 @@ PHP_FUNCTION(date_create_immutable_from_format)
 		Z_PARAM_STRING(format_str, format_str_len)
 		Z_PARAM_STRING(time_str, time_str_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_OBJECT_OF_CLASS_EX(timezone_object, date_ce_timezone, 1, 0)
+		Z_PARAM_OBJECT_OF_CLASS_OR_NULL(timezone_object, date_ce_timezone)
 	ZEND_PARSE_PARAMETERS_END();
 
 	php_date_instantiate(date_ce_immutable, return_value);
@@ -2390,7 +2390,7 @@ PHP_METHOD(DateTime, __construct)
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STRING(time_str, time_str_len)
-		Z_PARAM_OBJECT_OF_CLASS_EX(timezone_object, date_ce_timezone, 1, 0)
+		Z_PARAM_OBJECT_OF_CLASS_OR_NULL(timezone_object, date_ce_timezone)
 	ZEND_PARSE_PARAMETERS_END();
 
 	zend_replace_error_handling(EH_THROW, NULL, &error_handling);
@@ -2412,7 +2412,7 @@ PHP_METHOD(DateTimeImmutable, __construct)
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STRING(time_str, time_str_len)
-		Z_PARAM_OBJECT_OF_CLASS_EX(timezone_object, date_ce_timezone, 1, 0)
+		Z_PARAM_OBJECT_OF_CLASS_OR_NULL(timezone_object, date_ce_timezone)
 	ZEND_PARSE_PARAMETERS_END();
 
 	zend_replace_error_handling(EH_THROW, NULL, &error_handling);
