@@ -35,7 +35,7 @@
 #include "mbfilter_iso8859_7.h"
 #include "unicode_table_iso8859_7.h"
 
-static const char *mbfl_encoding_8859_7_aliases[] = {"ISO_8859-7", "greek", NULL};
+static const char *mbfl_encoding_8859_7_aliases[] = {"ISO8859-7", "greek", NULL};
 
 const mbfl_encoding mbfl_encoding_8859_7 = {
 	mbfl_no_encoding_8859_7,

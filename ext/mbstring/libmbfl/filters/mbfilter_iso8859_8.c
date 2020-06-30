@@ -35,7 +35,7 @@
 #include "mbfilter_iso8859_8.h"
 #include "unicode_table_iso8859_8.h"
 
-static const char *mbfl_encoding_8859_8_aliases[] = {"ISO_8859-8", "hebrew", NULL};
+static const char *mbfl_encoding_8859_8_aliases[] = {"ISO8859-8", "hebrew", NULL};
 
 const mbfl_encoding mbfl_encoding_8859_8 = {
 	mbfl_no_encoding_8859_8,

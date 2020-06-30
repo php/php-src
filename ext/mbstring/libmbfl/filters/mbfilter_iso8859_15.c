@@ -35,7 +35,7 @@
 #include "mbfilter_iso8859_15.h"
 #include "unicode_table_iso8859_15.h"
 
-static const char *mbfl_encoding_8859_15_aliases[] = {"ISO_8859-15", NULL};
+static const char *mbfl_encoding_8859_15_aliases[] = {"ISO8859-15", NULL};
 
 const mbfl_encoding mbfl_encoding_8859_15 = {
 	mbfl_no_encoding_8859_15,
