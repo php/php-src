@@ -53,10 +53,6 @@ AH_BOTTOM([
 #include <sys/select.h>
 #endif
 
-#ifdef HAVE_IEEEFP_H
-# include <ieeefp.h>
-#endif
-
 #include <string.h>
 
 #endif /* PHP_CONFIG_H */
