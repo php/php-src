@@ -29,3 +29,13 @@ function zend_terminate_string(string &$str): void {}
 function zend_leak_variable(mixed $variable): void {}
 
 function zend_leak_bytes(int $bytes = 3): void {}
+
+function zend_string_or_object(string|object $param): string|object {}
+
+function zend_string_or_object_or_null(string|object|null $param): string|object|null {}
+
+/** @param string|stdClass $param */
+function zend_string_or_stdclass($param): string|stdClass|null {}
+
+/** @param string|stdClass|null $param */
+function zend_string_or_stdclass_or_null($param): string|stdClass|null {}
