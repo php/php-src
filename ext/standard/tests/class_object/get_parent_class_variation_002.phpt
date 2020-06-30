@@ -87,96 +87,90 @@ Error: 2 - Undefined variable $undefined_var
 Error: 2 - Undefined variable $unset_var
 
 Arg value 0
-In autoload(0)
-bool(false)
+get_parent_class(): Argument #1 ($object) must be a valid class name or object, int given
 
 Arg value 1
-In autoload(1)
-bool(false)
+get_parent_class(): Argument #1 ($object) must be a valid class name or object, int given
 
 Arg value 12345
-In autoload(12345)
-bool(false)
+get_parent_class(): Argument #1 ($object) must be a valid class name or object, int given
 
 Arg value -2345
-bool(false)
+get_parent_class(): Argument #1 ($object) must be a valid class name or object, int given
 
 Arg value 10.5
-bool(false)
+get_parent_class(): Argument #1 ($object) must be a valid class name or object, float given
 
 Arg value -10.5
-bool(false)
+get_parent_class(): Argument #1 ($object) must be a valid class name or object, float given
 
 Arg value 101234567000
-In autoload(101234567000)
-bool(false)
+get_parent_class(): Argument #1 ($object) must be a valid class name or object, float given
 
 Arg value 1.07654321E-9
-bool(false)
+get_parent_class(): Argument #1 ($object) must be a valid class name or object, float given
 
 Arg value 0.5
-bool(false)
+get_parent_class(): Argument #1 ($object) must be a valid class name or object, float given
 Error: 2 - Array to string conversion
 
 Arg value Array
-get_parent_class(): Argument #1 ($object) must be of type string|object, array given
+get_parent_class(): Argument #1 ($object) must be a valid class name or object, array given
 Error: 2 - Array to string conversion
 
 Arg value Array
-get_parent_class(): Argument #1 ($object) must be of type string|object, array given
+get_parent_class(): Argument #1 ($object) must be a valid class name or object, array given
 Error: 2 - Array to string conversion
 
 Arg value Array
-get_parent_class(): Argument #1 ($object) must be of type string|object, array given
+get_parent_class(): Argument #1 ($object) must be a valid class name or object, array given
 Error: 2 - Array to string conversion
 
 Arg value Array
-get_parent_class(): Argument #1 ($object) must be of type string|object, array given
+get_parent_class(): Argument #1 ($object) must be a valid class name or object, array given
 Error: 2 - Array to string conversion
 
 Arg value Array
-get_parent_class(): Argument #1 ($object) must be of type string|object, array given
+get_parent_class(): Argument #1 ($object) must be a valid class name or object, array given
 
 Arg value 
-bool(false)
+get_parent_class(): Argument #1 ($object) must be a valid class name or object, null given
 
 Arg value 
-bool(false)
+get_parent_class(): Argument #1 ($object) must be a valid class name or object, null given
 
 Arg value 1
-In autoload(1)
-bool(false)
+get_parent_class(): Argument #1 ($object) must be a valid class name or object, bool given
 
 Arg value 
-bool(false)
+get_parent_class(): Argument #1 ($object) must be a valid class name or object, bool given
 
 Arg value 1
-In autoload(1)
-bool(false)
+get_parent_class(): Argument #1 ($object) must be a valid class name or object, bool given
 
 Arg value 
-bool(false)
+get_parent_class(): Argument #1 ($object) must be a valid class name or object, bool given
 
 Arg value 
-bool(false)
+get_parent_class(): Argument #1 ($object) must be a valid class name or object, string given
 
 Arg value 
-bool(false)
+get_parent_class(): Argument #1 ($object) must be a valid class name or object, string given
 
 Arg value string
 In autoload(string)
-bool(false)
+get_parent_class(): Argument #1 ($object) must be a valid class name or object, string given
 
 Arg value String
 In autoload(String)
-bool(false)
+get_parent_class(): Argument #1 ($object) must be a valid class name or object, string given
 
 Arg value stdClass
 bool(false)
 
 Arg value 
-bool(false)
+get_parent_class(): Argument #1 ($object) must be a valid class name or object, null given
 
 Arg value 
-bool(false)
+get_parent_class(): Argument #1 ($object) must be a valid class name or object, null given
 Done
