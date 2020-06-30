@@ -8,10 +8,6 @@ parameters:
 # we are only interested in finding assertion failures, segfaults and sanitizer violations,
 # and don't care about the actual test results, as there will commonly be failures for
 # pre-release versions of PHP.
-#
-# Because exit() in PHP results in an unclean shutdown, test runs are patching phpunit to
-# avoid the exit, which allows us to also check for memory leaks. Otherwise we use
-# USE_TRACKED_ALLOC=1 to avoid reporting of leaks that will be handled by ZMM.
 jobs:
   - job: ${{ parameters.configurationName }}
     timeoutInMinutes: ${{ parameters.timeoutInMinutes }}
@@ -53,12 +49,9 @@ jobs:
         cd framework
         php7.3 /usr/bin/composer install --no-progress
         export USE_ZEND_ALLOC=0
-        sed -i 's/$exit = true/$exit = false/g' vendor/phpunit/phpunit/src/TextUI/Command.php
-        # Avoid test using exit(), which thus leaks.
-        # We can use USE_TRACKED_ALLOC=1 if more of these show up.
-        sed -i "s/function_exists('pcntl_fork')/false/" tests/Filesystem/FilesystemTest.php
         # Work around PHP 8 incompatibility in Doctrine
         sed -i 's/function query()/function query($statement = null)/' vendor/doctrine/dbal/lib/Doctrine/DBAL/Driver/PDOConnection.php
+        sed -i 's/public function getMessage();//' vendor/doctrine/dbal/lib/Doctrine/DBAL/Driver/DriverException.php
         php vendor/bin/phpunit
       displayName: 'Test Laravel'
     - script: |
@@ -87,7 +80,6 @@ jobs:
         cd amp
         php /usr/bin/composer install --no-progress --ignore-platform-reqs
         export USE_ZEND_ALLOC=0
-        sed -i 's/$exit = true/$exit = false/g' vendor/phpunit/phpunit/src/TextUI/Command.php
         php vendor/bin/phpunit
       displayName: 'Test Amphp'
       condition: or(succeeded(), failed())
