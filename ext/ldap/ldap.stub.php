@@ -227,6 +227,12 @@ function ldap_get_option($link_identifier, int $option, &$retval = null): bool {
 function ldap_set_option($link_identifier, int $option, $newval): bool {}
 
 /**
+ * @param resource $link_identifier
+ * @param resource $result_identifier
+ */
+function ldap_count_references($link_identifier, $result_identifier): int {}
+
+/**
  * @param resource $link
  * @param resource $result
  * @return resource|false

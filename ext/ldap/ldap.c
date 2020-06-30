@@ -3464,6 +3464,30 @@ PHP_FUNCTION(ldap_parse_exop)
 #endif
 /* }}} */
 
+/* {{{ proto int ldap_count_references(resource link, resource result)
+   Count the number of references in a search result */
+PHP_FUNCTION(ldap_count_references)
+{
+	zval *link, *result;
+	ldap_linkdata *ld;
+	LDAPMessage *ldap_result;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rr", &link, &result) != SUCCESS) {
+		RETURN_THROWS();
+	}
+
+	if ((ld = (ldap_linkdata *)zend_fetch_resource(Z_RES_P(link), "ldap link", le_link)) == NULL) {
+		RETURN_THROWS();
+	}
+
+	if ((ldap_result = (LDAPMessage *)zend_fetch_resource(Z_RES_P(result), "ldap result", le_result)) == NULL) {
+		RETURN_THROWS();
+	}
+
+	RETURN_LONG(ldap_count_references(ld->link, ldap_result));
+}
+/* }}} */
+
 /* {{{ proto resource ldap_first_reference(resource link, resource result)
    Return first reference */
 PHP_FUNCTION(ldap_first_reference)

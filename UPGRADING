@@ -711,6 +711,10 @@ PHP 8.0 UPGRADE NOTES
   . Added get_resource_id($resource) function, which returns the same value as
     (int) $resource. It provides the same functionality under a clearer API.
 
+- LDAP:
+  . Added ldap_count_references(), which returns the number of reference
+    messages in a search result.
+
 - OpenSSL:
   . Added openssl_cms_encrypt() encrypts the message in the file with the
     certificates and outputs the result to the supplied file.
