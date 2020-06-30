@@ -215,7 +215,7 @@ if (p1 < str_ptr)
   }
 else
   data2 = shift_left_n_lanes(data, offs1 - offs2);
-
+ 
 if (compare1_type == compare_match1)
   data = VCEQQ(data, cmp1a);
 else
