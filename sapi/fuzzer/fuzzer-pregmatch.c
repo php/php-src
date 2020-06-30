@@ -27,22 +27,33 @@
 #include "fuzzer-sapi.h"
 
 int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
+        if (Size < 200)
+        {
+            return 0;
+        }
+
         char *args[2];
-        char *data = malloc(Size+1);
-        memcpy(data, Data, Size);
-        data[Size] = '\0';
+        char *data = malloc(101);
+        memcpy(data, Data, 100);
+        data[100] = '\0';
+
+        char *data2 = malloc(Size - 101);
+        Data += 100;
+        memcpy(data2, Data, Size-100);
+        data2[Size-100] = '\0';
 
         if (fuzzer_request_startup() == FAILURE) {
                 return 0;
         }
 
         args[0] = data;
-        args[1] = "test123";
+        args[1] = data2;
         fuzzer_call_php_func("preg_match", 2, args);
 
         php_request_shutdown(NULL);
 
         free(data);
+        free(data2);
         return 0;
 }
 
