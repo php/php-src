@@ -18,30 +18,21 @@
 */
 
 #include <stdlib.h>
+#include <time.h>
+#include <string.h>
 
 #include "php.h"
 
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#if PHP_USE_PHP_CRYPT_R
-# include "php_crypt_r.h"
-# include "crypt_freesec.h"
-#else
-# if HAVE_CRYPT_H
-#  if defined(CRYPT_R_GNU_SOURCE) && !defined(_GNU_SOURCE)
-#   define _GNU_SOURCE
-#  endif
-#  include <crypt.h>
-# endif
-#endif
-#include <time.h>
-#include <string.h>
 
 #ifdef PHP_WIN32
 #include <process.h>
 #endif
 
+#include "php_crypt_r.h"
+#include "crypt_freesec.h"
 #include "php_crypt.h"
 #include "php_random.h"
 
@@ -61,27 +52,20 @@ PHP_MINIT_FUNCTION(crypt) /* {{{ */
 	REGISTER_LONG_CONSTANT("CRYPT_SHA256", 1, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CRYPT_SHA512", 1, CONST_CS | CONST_PERSISTENT);
 
-#if PHP_USE_PHP_CRYPT_R
 	php_init_crypt_r();
-#endif
-
 	return SUCCESS;
 }
 /* }}} */
 
 PHP_MSHUTDOWN_FUNCTION(crypt) /* {{{ */
 {
-#if PHP_USE_PHP_CRYPT_R
 	php_shutdown_crypt_r();
-#endif
-
 	return SUCCESS;
 }
 /* }}} */
 
 static unsigned char itoa64[] = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
-/* Encode a string of bytes as Base64 */
 static void php_to64(char *s, int n) /* {{{ */
 {
 	while (--n >= 0) {
@@ -100,103 +84,80 @@ PHPAPI zend_string *php_crypt(const char *password, const int pass_len, const ch
 		return NULL;
 	}
 
-/* Windows (win32/crypt) has a stripped down version of libxcrypt and
-	a CryptoApi md5_crypt implementation */
-#if PHP_USE_PHP_CRYPT_R
-	{
-		struct php_crypt_extended_data buffer;
+	struct php_crypt_extended_data buffer;
 
-		if (salt[0]=='$' && salt[1]=='1' && salt[2]=='$') {
-			char output[MD5_HASH_MAX_LEN], *out;
+	if (salt[0]=='$' && salt[1]=='1' && salt[2]=='$') {
+		char output[MD5_HASH_MAX_LEN], *out;
 
-			out = php_md5_crypt_r(password, salt, output);
-			if (out) {
-				return zend_string_init(out, strlen(out), 0);
-			}
-			return NULL;
-		} else if (salt[0]=='$' && salt[1]=='6' && salt[2]=='$') {
-			char *output;
-			output = emalloc(PHP_MAX_SALT_LEN);
-
-			crypt_res = php_sha512_crypt_r(password, salt, output, PHP_MAX_SALT_LEN);
-			if (!crypt_res) {
-				ZEND_SECURE_ZERO(output, PHP_MAX_SALT_LEN);
-				efree(output);
-				return NULL;
-			} else {
-				result = zend_string_init(output, strlen(output), 0);
-				ZEND_SECURE_ZERO(output, PHP_MAX_SALT_LEN);
-				efree(output);
-				return result;
-			}
-		} else if (salt[0]=='$' && salt[1]=='5' && salt[2]=='$') {
-			char *output;
-			output = emalloc(PHP_MAX_SALT_LEN);
-
-			crypt_res = php_sha256_crypt_r(password, salt, output, PHP_MAX_SALT_LEN);
-			if (!crypt_res) {
-				ZEND_SECURE_ZERO(output, PHP_MAX_SALT_LEN);
-				efree(output);
-				return NULL;
-			} else {
-				result = zend_string_init(output, strlen(output), 0);
-				ZEND_SECURE_ZERO(output, PHP_MAX_SALT_LEN);
-				efree(output);
-				return result;
-			}
-		} else if (
-				salt[0] == '$' &&
-				salt[1] == '2' &&
-				salt[3] == '$') {
-			char output[PHP_MAX_SALT_LEN + 1];
-
-			memset(output, 0, PHP_MAX_SALT_LEN + 1);
-
-			crypt_res = php_crypt_blowfish_rn(password, salt, output, sizeof(output));
-			if (!crypt_res) {
-				ZEND_SECURE_ZERO(output, PHP_MAX_SALT_LEN + 1);
-				return NULL;
-			} else {
-				result = zend_string_init(output, strlen(output), 0);
-				ZEND_SECURE_ZERO(output, PHP_MAX_SALT_LEN + 1);
-				return result;
-			}
-		} else if (salt[0] == '_'
-				|| (IS_VALID_SALT_CHARACTER(salt[0]) && IS_VALID_SALT_CHARACTER(salt[1]))) {
-			/* DES Fallback */
-			memset(&buffer, 0, sizeof(buffer));
-			_crypt_extended_init_r();
-
-			crypt_res = _crypt_extended_r((const unsigned char *) password, salt, &buffer);
-			if (!crypt_res || (salt[0] == '*' && salt[1] == '0')) {
-				return NULL;
-			} else {
-				result = zend_string_init(crypt_res, strlen(crypt_res), 0);
-				return result;
-			}
-		} else {
-			/* Unknown hash type */
-			return NULL;
+		out = php_md5_crypt_r(password, salt, output);
+		if (out) {
+			return zend_string_init(out, strlen(out), 0);
 		}
-	}
-#else
+		return NULL;
+	} else if (salt[0]=='$' && salt[1]=='6' && salt[2]=='$') {
+		char *output;
+		output = emalloc(PHP_MAX_SALT_LEN);
 
-# if defined(HAVE_CRYPT_R) && (defined(_REENTRANT) || defined(_THREAD_SAFE))
-#  if defined(CRYPT_R_STRUCT_CRYPT_DATA)
-	struct crypt_data buffer;
-	memset(&buffer, 0, sizeof(buffer));
-#  elif defined(CRYPT_R_CRYPTD)
-	CRYPTD buffer;
-#  else
-#   error Data struct used by crypt_r() is unknown. Please report.
-#  endif
-	crypt_res = crypt_r(password, salt, &buffer);
-# elif defined(HAVE_CRYPT)
-	crypt_res = crypt(password, salt);
-# else
-#  error No crypt() implementation
-# endif
-#endif
+		crypt_res = php_sha512_crypt_r(password, salt, output, PHP_MAX_SALT_LEN);
+		if (!crypt_res) {
+			ZEND_SECURE_ZERO(output, PHP_MAX_SALT_LEN);
+			efree(output);
+			return NULL;
+		} else {
+			result = zend_string_init(output, strlen(output), 0);
+			ZEND_SECURE_ZERO(output, PHP_MAX_SALT_LEN);
+			efree(output);
+			return result;
+		}
+	} else if (salt[0]=='$' && salt[1]=='5' && salt[2]=='$') {
+		char *output;
+		output = emalloc(PHP_MAX_SALT_LEN);
+
+		crypt_res = php_sha256_crypt_r(password, salt, output, PHP_MAX_SALT_LEN);
+		if (!crypt_res) {
+			ZEND_SECURE_ZERO(output, PHP_MAX_SALT_LEN);
+			efree(output);
+			return NULL;
+		} else {
+			result = zend_string_init(output, strlen(output), 0);
+			ZEND_SECURE_ZERO(output, PHP_MAX_SALT_LEN);
+			efree(output);
+			return result;
+		}
+	} else if (
+			salt[0] == '$' &&
+			salt[1] == '2' &&
+			salt[3] == '$') {
+		char output[PHP_MAX_SALT_LEN + 1];
+
+		memset(output, 0, PHP_MAX_SALT_LEN + 1);
+
+		crypt_res = php_crypt_blowfish_rn(password, salt, output, sizeof(output));
+		if (!crypt_res) {
+			ZEND_SECURE_ZERO(output, PHP_MAX_SALT_LEN + 1);
+			return NULL;
+		} else {
+			result = zend_string_init(output, strlen(output), 0);
+			ZEND_SECURE_ZERO(output, PHP_MAX_SALT_LEN + 1);
+			return result;
+		}
+	} else if (salt[0] == '_'
+			|| (IS_VALID_SALT_CHARACTER(salt[0]) && IS_VALID_SALT_CHARACTER(salt[1]))) {
+		/* DES Fallback */
+		memset(&buffer, 0, sizeof(buffer));
+		_crypt_extended_init_r();
+
+		crypt_res = _crypt_extended_r((const unsigned char *) password, salt, &buffer);
+		if (!crypt_res || (salt[0] == '*' && salt[1] == '0')) {
+			return NULL;
+		} else {
+			result = zend_string_init(crypt_res, strlen(crypt_res), 0);
+			return result;
+		}
+	} else {
+		/* Unknown hash type */
+		return NULL;
+	}
 
 	if (!crypt_res || (salt[0] == '*' && salt[1] == '0')) {
 		return NULL;

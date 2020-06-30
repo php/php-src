@@ -51,237 +51,20 @@ if test "$ac_cv_flush_io" = "yes"; then
   AC_DEFINE(HAVE_FLUSHIO, 1, [Define if flush should be called explicitly after a buffered io.])
 fi
 
-PHP_CHECK_FUNC(crypt, crypt)
-PHP_CHECK_FUNC(crypt_r, crypt)
-if test "$ac_cv_func_crypt_r" = "yes"; then
-  PHP_CRYPT_R_STYLE
-fi
-
-AC_CACHE_CHECK(for standard DES crypt, ac_cv_crypt_des,[
-  AC_RUN_IFELSE([AC_LANG_SOURCE([[
-#if HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-
-#if HAVE_CRYPT_H
-#include <crypt.h>
-#endif
-
-#include <stdlib.h>
-#include <string.h>
-
-int main() {
-#if HAVE_CRYPT
-	char *encrypted = crypt("rasmuslerdorf","rl");
-	exit(!encrypted || strcmp(encrypted,"rl.3StKT.4T8M"));
-#else
-	exit(1);
-#endif
-}]])],[
-  ac_cv_crypt_des=yes
-],[
-  ac_cv_crypt_des=no
-],[
-  ac_cv_crypt_des=yes
-])])
-
-AC_CACHE_CHECK(for extended DES crypt, ac_cv_crypt_ext_des,[
-  AC_RUN_IFELSE([AC_LANG_SOURCE([[
-#if HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-
-#if HAVE_CRYPT_H
-#include <crypt.h>
-#endif
-
-#include <stdlib.h>
-#include <string.h>
-
-int main() {
-#if HAVE_CRYPT
-	char *encrypted = crypt("rasmuslerdorf","_J9..rasm");
-	exit(!encrypted || strcmp(encrypted,"_J9..rasmBYk8r9AiWNc"));
-#else
-	exit(1);
-#endif
-}]])],[
-  ac_cv_crypt_ext_des=yes
-],[
-  ac_cv_crypt_ext_des=no
-],[
-  ac_cv_crypt_ext_des=no
-])])
-
-AC_CACHE_CHECK(for MD5 crypt, ac_cv_crypt_md5,[
-AC_RUN_IFELSE([AC_LANG_SOURCE([[
-#if HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-
-#if HAVE_CRYPT_H
-#include <crypt.h>
-#endif
-
-#include <stdlib.h>
-#include <string.h>
-
-int main() {
-#if HAVE_CRYPT
-	char salt[15], answer[40];
-	char *encrypted;
-
-	salt[0]='$'; salt[1]='1'; salt[2]='$';
-	salt[3]='r'; salt[4]='a'; salt[5]='s';
-	salt[6]='m'; salt[7]='u'; salt[8]='s';
-	salt[9]='l'; salt[10]='e'; salt[11]='$';
-	salt[12]='\0';
-	strcpy(answer,salt);
-	strcat(answer,"rISCgZzpwk3UhDidwXvin0");
-	encrypted = crypt("rasmuslerdorf",salt);
-	exit(!encrypted || strcmp(encrypted,answer));
-#else
-	exit(1);
-#endif
-}]])],[
-  ac_cv_crypt_md5=yes
-],[
-  ac_cv_crypt_md5=no
-],[
-  ac_cv_crypt_md5=no
-])])
-
-AC_CACHE_CHECK(for Blowfish crypt, ac_cv_crypt_blowfish,[
-AC_RUN_IFELSE([AC_LANG_SOURCE([[
-#if HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-
-#if HAVE_CRYPT_H
-#include <crypt.h>
-#endif
-
-#include <stdlib.h>
-#include <string.h>
-
-int main() {
-#if HAVE_CRYPT
-	char salt[30], answer[70];
-	char *encrypted;
-
-	salt[0]='$'; salt[1]='2'; salt[2]='a'; salt[3]='$'; salt[4]='0'; salt[5]='7'; salt[6]='$'; salt[7]='\0';
-	strcat(salt,"rasmuslerd............");
-	strcpy(answer,salt);
-	strcpy(&answer[29],"nIdrcHdxcUxWomQX9j6kvERCFjTg7Ra");
-	encrypted = crypt("rasmuslerdorf",salt);
-	exit(!encrypted || strcmp(encrypted,answer));
-#else
-	exit(1);
-#endif
-}]])],[
-  ac_cv_crypt_blowfish=yes
-],[
-  ac_cv_crypt_blowfish=no
-],[
-  ac_cv_crypt_blowfish=no
-])])
-
-AC_CACHE_CHECK(for SHA512 crypt, ac_cv_crypt_sha512,[
-AC_RUN_IFELSE([AC_LANG_SOURCE([[
-#if HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-
-#if HAVE_CRYPT_H
-#include <crypt.h>
-#endif
-
-#include <stdlib.h>
-#include <string.h>
-
-int main() {
-#if HAVE_CRYPT
-	char salt[21], answer[21+86];
-	char *encrypted;
-
-	strcpy(salt,"\$6\$rasmuslerdorf\$");
-	strcpy(answer, salt);
-	strcat(answer, "EeHCRjm0bljalWuALHSTs1NB9ipEiLEXLhYeXdOpx22gmlmVejnVXFhd84cEKbYxCo.XuUTrW.RLraeEnsvWs/");
-	encrypted = crypt("rasmuslerdorf",salt);
-	exit(!encrypted || strcmp(encrypted,answer));
-#else
-	exit(1);
-#endif
-}]])],[
-  ac_cv_crypt_sha512=yes
-],[
-  ac_cv_crypt_sha512=no
-],[
-  ac_cv_crypt_sha512=no
-])])
-
-AC_CACHE_CHECK(for SHA256 crypt, ac_cv_crypt_sha256,[
-AC_RUN_IFELSE([AC_LANG_SOURCE([[
-#if HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-
-#if HAVE_CRYPT_H
-#include <crypt.h>
-#endif
-
-#include <stdlib.h>
-#include <string.h>
-
-int main() {
-#if HAVE_CRYPT
-	char salt[21], answer[21+43];
-	char *encrypted;
-
-	strcpy(salt,"\$5\$rasmuslerdorf\$");
-	strcpy(answer, salt);
-	strcat(answer, "cFAm2puLCujQ9t.0CxiFIIvFi4JyQx5UncCt/xRIX23");
-	encrypted = crypt("rasmuslerdorf",salt);
-	exit(!encrypted || strcmp(encrypted,answer));
-#else
-	exit(1);
-#endif
-}]])],[
-  ac_cv_crypt_sha256=yes
-],[
-  ac_cv_crypt_sha256=no
-],[
-  ac_cv_crypt_sha256=no
-])])
-
-
 dnl
-dnl If one of them is missing, use our own implementation, portable code is then possible
+dnl Check for __alignof__ support in the compiler
 dnl
-dnl TODO This is currently always enabled
-if test "$ac_cv_crypt_blowfish" = "no" || test "$ac_cv_crypt_des" = "no" || test "$ac_cv_crypt_ext_des" = "no" || test "$ac_cv_crypt_md5" = "no" || test "$ac_cv_crypt_sha512" = "no" || test "$ac_cv_crypt_sha256" = "no" || test "$ac_cv_func_crypt_r" != "yes" || true; then
-
-  dnl
-  dnl Check for __alignof__ support in the compiler
-  dnl
-  AC_CACHE_CHECK(whether the compiler supports __alignof__, ac_cv_alignof_exists,[
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-  ]],[[
-    int align = __alignof__(int);
-  ]])],[
-    ac_cv_alignof_exists=yes
-  ],[
-    ac_cv_alignof_exists=no
-  ])])
-  if test "$ac_cv_alignof_exists" = "yes"; then
-    AC_DEFINE([HAVE_ALIGNOF], 1, [whether the compiler supports __alignof__])
-  fi
-
-  AC_DEFINE_UNQUOTED(PHP_USE_PHP_CRYPT_R, 1, [Whether PHP has to use its own crypt_r for blowfish, des, ext des and md5])
-
-  PHP_ADD_SOURCES(PHP_EXT_DIR(standard), crypt_freesec.c crypt_blowfish.c crypt_sha512.c crypt_sha256.c php_crypt_r.c)
-else
-  AC_DEFINE_UNQUOTED(PHP_USE_PHP_CRYPT_R, 0, [Whether PHP has to use its own crypt_r for blowfish, des and ext des])
+AC_CACHE_CHECK(whether the compiler supports __alignof__, ac_cv_alignof_exists,[
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+]],[[
+  int align = __alignof__(int);
+]])],[
+  ac_cv_alignof_exists=yes
+],[
+  ac_cv_alignof_exists=no
+])])
+if test "$ac_cv_alignof_exists" = "yes"; then
+  AC_DEFINE([HAVE_ALIGNOF], 1, [whether the compiler supports __alignof__])
 fi
 
 dnl
@@ -466,7 +249,8 @@ PHP_NEW_EXTENSION(standard, array.c base64.c basic_functions.c browscap.c crc32.
                             http_fopen_wrapper.c php_fopen_wrapper.c credits.c css.c \
                             var_unserializer.c ftok.c sha1.c user_filters.c uuencode.c \
                             filters.c proc_open.c streamsfuncs.c http.c password.c \
-                            random.c net.c hrtime.c,,,
+                            random.c net.c hrtime.c crypt_freesec.c crypt_blowfish.c \
+                            crypt_sha512.c crypt_sha256.c php_crypt_r.c,,,
 			    -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
 PHP_ADD_MAKEFILE_FRAGMENT
