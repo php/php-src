@@ -253,10 +253,6 @@ static void zend_generator_free_storage(zend_object *object) /* {{{ */
 	}
 
 	zend_object_std_dtor(&generator->std);
-
-	if (generator->iterator) {
-		zend_iterator_dtor(generator->iterator);
-	}
 }
 /* }}} */
 
