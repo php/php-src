@@ -1,5 +1,5 @@
 --TEST--
-Invalid numeric string E_WARNINGs and E_NOTICEs
+Invalid numeric string E_WARNINGs
 --FILE--
 <?php
 
@@ -18,7 +18,10 @@ echo "---", PHP_EOL;
 var_dump("23 dolore" ** "29 magna");
 var_dump("aliqua." ** "Ut");
 echo "---", PHP_EOL;
-var_dump("31 enim" % "37 ad");
+try {
+    var_dump("31 enim" % "37 ad");
+} catch (DivisionByZeroError $e) {
+}
 try {
     var_dump("minim" % "veniam,");
 } catch (DivisionByZeroError $e) {
@@ -52,10 +55,10 @@ var_dump(-"151 velit");
 var_dump(-"esse");
 ?>
 --EXPECTF--
-Notice: A non well formed numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered in %s on line %d
 
-Notice: A non well formed numeric value encountered in %s on line %d
-int(5)
+Warning: A non-numeric value encountered in %s on line %d
+int(0)
 
 Warning: A non-numeric value encountered in %s on line %d
 
@@ -63,10 +66,10 @@ Warning: A non-numeric value encountered in %s on line %d
 int(0)
 ---
 
-Notice: A non well formed numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered in %s on line %d
 
-Notice: A non well formed numeric value encountered in %s on line %d
-int(-2)
+Warning: A non-numeric value encountered in %s on line %d
+int(0)
 
 Warning: A non-numeric value encountered in %s on line %d
 
@@ -74,10 +77,10 @@ Warning: A non-numeric value encountered in %s on line %d
 int(0)
 ---
 
-Notice: A non well formed numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered in %s on line %d
 
-Notice: A non well formed numeric value encountered in %s on line %d
-int(143)
+Warning: A non-numeric value encountered in %s on line %d
+int(0)
 
 Warning: A non-numeric value encountered in %s on line %d
 
@@ -85,10 +88,12 @@ Warning: A non-numeric value encountered in %s on line %d
 int(0)
 ---
 
-Notice: A non well formed numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered in %s on line %d
 
-Notice: A non well formed numeric value encountered in %s on line %d
-float(0.8947368421052632)
+Warning: A non-numeric value encountered in %s on line %d
+
+Warning: Division by zero in %s on line %d
+float(NAN)
 
 Warning: A non-numeric value encountered in %s on line %d
 
@@ -98,10 +103,10 @@ Warning: Division by zero in %s on line %d
 float(NAN)
 ---
 
-Notice: A non well formed numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered in %s on line %d
 
-Notice: A non well formed numeric value encountered in %s on line %d
-float(3.0910586430935376E+39)
+Warning: A non-numeric value encountered in %s on line %d
+int(1)
 
 Warning: A non-numeric value encountered in %s on line %d
 
@@ -109,30 +114,18 @@ Warning: A non-numeric value encountered in %s on line %d
 int(1)
 ---
 
-Notice: A non well formed numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered in %s on line %d
 
-Notice: A non well formed numeric value encountered in %s on line %d
-int(31)
+Warning: A non-numeric value encountered in %s on line %d
 
 Warning: A non-numeric value encountered in %s on line %d
 
 Warning: A non-numeric value encountered in %s on line %d
 ---
 
-Notice: A non well formed numeric value encountered in %s on line %d
-
-Notice: A non well formed numeric value encountered in %s on line %d
-int(%d)
-
 Warning: A non-numeric value encountered in %s on line %d
 
 Warning: A non-numeric value encountered in %s on line %d
-int(0)
----
-
-Notice: A non well formed numeric value encountered in %s on line %d
-
-Notice: A non well formed numeric value encountered in %s on line %d
 int(0)
 
 Warning: A non-numeric value encountered in %s on line %d
@@ -141,11 +134,22 @@ Warning: A non-numeric value encountered in %s on line %d
 int(0)
 ---
 
-Notice: A non well formed numeric value encountered in %s on line %d
-int(63)
+Warning: A non-numeric value encountered in %s on line %d
 
-Notice: A non well formed numeric value encountered in %s on line %d
-int(71)
+Warning: A non-numeric value encountered in %s on line %d
+int(0)
+
+Warning: A non-numeric value encountered in %s on line %d
+
+Warning: A non-numeric value encountered in %s on line %d
+int(0)
+---
+
+Warning: A non-numeric value encountered in %s on line %d
+int(61)
+
+Warning: A non-numeric value encountered in %s on line %d
+int(67)
 
 Warning: A non-numeric value encountered in %s on line %d
 int(73)
@@ -154,11 +158,11 @@ Warning: A non-numeric value encountered in %s on line %d
 int(79)
 ---
 
-Notice: A non well formed numeric value encountered in %s on line %d
-int(81)
+Warning: A non-numeric value encountered in %s on line %d
+int(0)
 
-Notice: A non well formed numeric value encountered in %s on line %d
-int(97)
+Warning: A non-numeric value encountered in %s on line %d
+int(0)
 
 Warning: A non-numeric value encountered in %s on line %d
 int(0)
@@ -167,11 +171,11 @@ Warning: A non-numeric value encountered in %s on line %d
 int(0)
 ---
 
-Notice: A non well formed numeric value encountered in %s on line %d
-int(28)
+Warning: A non-numeric value encountered in %s on line %d
+int(113)
 
-Notice: A non well formed numeric value encountered in %s on line %d
-int(252)
+Warning: A non-numeric value encountered in %s on line %d
+int(127)
 
 Warning: A non-numeric value encountered in %s on line %d
 int(137)
@@ -180,15 +184,15 @@ Warning: A non-numeric value encountered in %s on line %d
 int(139)
 ---
 
-Notice: A non well formed numeric value encountered in %s on line %d
-int(149)
+Warning: A non-numeric value encountered in %s on line %d
+int(0)
 
 Warning: A non-numeric value encountered in %s on line %d
 int(0)
 ---
 
-Notice: A non well formed numeric value encountered in %s on line %d
-int(-151)
+Warning: A non-numeric value encountered in %s on line %d
+int(0)
 
 Warning: A non-numeric value encountered in %s on line %d
 int(0)

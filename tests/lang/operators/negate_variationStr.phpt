@@ -32,30 +32,30 @@ Warning: A non-numeric value encountered in %s on line %d
 int(0)
 --- testing: '123abc' ---
 
-Notice: A non well formed numeric value encountered in %s on line %d
-int(-123)
+Warning: A non-numeric value encountered in %s on line %d
+int(0)
 --- testing: '123e5' ---
 float(-12300000)
 --- testing: '123e5xyz' ---
 
-Notice: A non well formed numeric value encountered in %s on line %d
-float(-12300000)
+Warning: A non-numeric value encountered in %s on line %d
+int(0)
 --- testing: ' 123abc' ---
 
-Notice: A non well formed numeric value encountered in %s on line %d
-int(-123)
+Warning: A non-numeric value encountered in %s on line %d
+int(0)
 --- testing: '123 abc' ---
 
-Notice: A non well formed numeric value encountered in %s on line %d
-int(-123)
+Warning: A non-numeric value encountered in %s on line %d
+int(0)
 --- testing: '123abc ' ---
 
-Notice: A non well formed numeric value encountered in %s on line %d
-int(-123)
+Warning: A non-numeric value encountered in %s on line %d
+int(0)
 --- testing: '3.4a' ---
 
-Notice: A non well formed numeric value encountered in %s on line %d
-float(-3.4)
+Warning: A non-numeric value encountered in %s on line %d
+int(0)
 --- testing: 'a5.9' ---
 
 Warning: A non-numeric value encountered in %s on line %d

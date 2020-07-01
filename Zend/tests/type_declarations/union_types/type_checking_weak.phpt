@@ -66,7 +66,7 @@ Type int|float:
 INF              => INF
 "42"             => 42
 "42.0"           => 42.0
-"42x"            => 42 (A non well formed numeric value encountered)
+"42x"            => Argument ... must be of type int|float, string given
 "x"              => Argument ... must be of type int|float, string given
 ""               => Argument ... must be of type int|float, string given
 true             => 1
@@ -82,7 +82,7 @@ Type int|float|false:
 INF              => INF
 "42"             => 42
 "42.0"           => 42.0
-"42x"            => 42 (A non well formed numeric value encountered)
+"42x"            => Argument ... must be of type int|float|false, string given
 "x"              => Argument ... must be of type int|float|false, string given
 ""               => Argument ... must be of type int|float|false, string given
 true             => 1
@@ -98,7 +98,7 @@ Type int|float|bool:
 INF              => INF
 "42"             => 42
 "42.0"           => 42.0
-"42x"            => 42 (A non well formed numeric value encountered)
+"42x"            => true
 "x"              => true
 ""               => false
 true             => true
@@ -114,7 +114,7 @@ Type int|bool:
 INF              => true
 "42"             => 42
 "42.0"           => 42
-"42x"            => 42 (A non well formed numeric value encountered)
+"42x"            => true
 "x"              => true
 ""               => false
 true             => true
@@ -162,7 +162,7 @@ Type float|array:
 INF              => INF
 "42"             => 42.0
 "42.0"           => 42.0
-"42x"            => 42.0 (A non well formed numeric value encountered)
+"42x"            => Argument ... must be of type array|float, string given
 "x"              => Argument ... must be of type array|float, string given
 ""               => Argument ... must be of type array|float, string given
 true             => 1.0

@@ -24,6 +24,6 @@ int(13)
 Warning: A non-numeric value encountered in %s on line %d
 int(0)
 
-Notice: A non well formed numeric value encountered in %s on line %d
-int(3)
+Warning: A non-numeric value encountered in %s on line %d
+int(0)
 Done

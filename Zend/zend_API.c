@@ -420,7 +420,7 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_long_weak(zval *arg, zend_long *dest) 
 		}
 	} else if (EXPECTED(Z_TYPE_P(arg) == IS_STRING)) {
 		double d;
-		int type;
+		zend_uchar type;
 
 		if (UNEXPECTED((type = is_numeric_str_function(Z_STR_P(arg), dest, &d)) != IS_LONG)) {
 			if (EXPECTED(type != 0)) {
@@ -465,7 +465,7 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_double_weak(zval *arg, double *dest) /
 		*dest = (double)Z_LVAL_P(arg);
 	} else if (EXPECTED(Z_TYPE_P(arg) == IS_STRING)) {
 		zend_long l;
-		int type;
+		zend_uchar type;
 
 		if (UNEXPECTED((type = is_numeric_str_function(Z_STR_P(arg), &l, dest)) != IS_DOUBLE)) {
 			if (EXPECTED(type != 0)) {
@@ -509,7 +509,7 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_number_slow(zval *arg, zval **dest) /*
 		zend_string *str = Z_STR_P(arg);
 		zend_long lval;
 		double dval;
-		zend_uchar type = is_numeric_string(ZSTR_VAL(str), ZSTR_LEN(str), &lval, &dval, -1);
+		zend_uchar type = is_numeric_str_function(str, &lval, &dval);
 		if (type == IS_LONG) {
 			ZVAL_LONG(arg, lval);
 		} else if (type == IS_DOUBLE) {

@@ -32,8 +32,8 @@ int(109)
 Warning: A non-numeric value encountered in %s on line %d
 int(11)
 
-Notice: A non well formed numeric value encountered in %s on line %d
-int(45312)
+Warning: A non-numeric value encountered in %s on line %d
+int(33)
 string(1) "F"
 string(2) "FF"
 Done

@@ -72,8 +72,7 @@ int(1)
 *** Trying float(1.5)
 int(1)
 *** Trying string(2) "1a"
-E_NOTICE: A non well formed numeric value encountered on line %d
-int(1)
+*** Caught {closure}(): Return value must be of type int, string returned in %s on line %d
 *** Trying string(1) "a"
 *** Caught {closure}(): Return value must be of type int, string returned in %s on line %d
 *** Trying string(0) ""
@@ -110,8 +109,7 @@ float(1)
 *** Trying float(1.5)
 float(1.5)
 *** Trying string(2) "1a"
-E_NOTICE: A non well formed numeric value encountered on line %d
-float(1)
+*** Caught {closure}(): Return value must be of type float, string returned in %s on line %d
 *** Trying string(1) "a"
 *** Caught {closure}(): Return value must be of type float, string returned in %s on line %d
 *** Trying string(0) ""

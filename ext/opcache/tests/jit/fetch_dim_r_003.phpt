@@ -54,8 +54,8 @@ string(1) "A"
 Warning: Illegal string offset "ab" in %sfetch_dim_r_003.php on line 15
 string(1) "A"
 
-Notice: A non well formed numeric value encountered in %sfetch_dim_r_003.php on line 16
+Warning: Illegal string offset "2x" in %sfetch_dim_r_003.php on line 16
 string(1) "C"
 
-Notice: A non well formed numeric value encountered in %sfetch_dim_r_003.php on line 19
+Warning: Illegal string offset "2x" in %sfetch_dim_r_003.php on line 19
 string(1) "C"

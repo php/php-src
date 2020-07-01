@@ -679,7 +679,7 @@ try_string_offset:
 		switch (Z_TYPE_P(dim)) {
 			/* case IS_LONG: */
 			case IS_STRING:
-				if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, -1)) {
+				if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, false)) {
 					break;
 				}
 				zend_error(E_WARNING, "Illegal string offset \"%s\"", Z_STRVAL_P(dim));
@@ -728,7 +728,7 @@ try_string_offset:
 		switch (Z_TYPE_P(dim)) {
 			/* case IS_LONG: */
 			case IS_STRING:
-				if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, -1)) {
+				if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, false)) {
 					break;
 				}
 				ZVAL_NULL(result);
@@ -818,7 +818,7 @@ try_again:
 	if (UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
 		switch(Z_TYPE_P(dim)) {
 			case IS_STRING:
-				if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, -1)) {
+				if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, false)) {
 					break;
 				}
 				if (type != BP_VAR_UNSET) {
@@ -1173,7 +1173,7 @@ isset_str_offset:
 			ZVAL_DEREF(offset);
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
-						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
+						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, false))) {
 				lval = zval_get_long(offset);
 				goto isset_str_offset;
 			}

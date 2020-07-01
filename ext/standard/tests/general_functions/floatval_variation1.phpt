@@ -45,9 +45,9 @@ foreach ($not_float_types as $key => $type ) {
 }
 ?>
 --EXPECTF--
-Notice: A non well formed numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered in %s on line %d
 
-Notice: A non well formed numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered in %s on line %d
 
 *** Testing floatval() on non floating types ***
 
@@ -58,10 +58,10 @@ float(-2147483648)
 float(2147483648)
 
 -- Iteration : file resoruce --
-float(%d)
+float(5)
 
 -- Iteration : directory resource --
-float(%d)
+float(6)
 
 -- Iteration : "0.0" --
 float(0)
@@ -82,10 +82,10 @@ float(10)
 float(10.2)
 
 -- Iteration : "10.0 dollar" + 1 --
-float(11)
+float(1)
 
 -- Iteration : "10.0 dollar" + 1.0 --
-float(11)
+float(1)
 
 -- Iteration : "" --
 float(0)
@@ -108,10 +108,10 @@ float(-2147483648)
 float(2147483648)
 
 -- Iteration : file resoruce --
-float(%d)
+float(5)
 
 -- Iteration : directory resource --
-float(%d)
+float(6)
 
 -- Iteration : "0.0" --
 float(0)
@@ -132,10 +132,10 @@ float(10)
 float(10.2)
 
 -- Iteration : "10.0 dollar" + 1 --
-float(11)
+float(1)
 
 -- Iteration : "10.0 dollar" + 1.0 --
-float(11)
+float(1)
 
 -- Iteration : "" --
 float(0)

@@ -33,19 +33,19 @@ float(-0)
 --- testing: '0' / 'abc' ---
 float(NAN)
 --- testing: '0' / '123abc' ---
-int(0)
+float(NAN)
 --- testing: '0' / '123e5' ---
 float(0)
 --- testing: '0' / '123e5xyz' ---
-float(0)
+float(NAN)
 --- testing: '0' / ' 123abc' ---
-int(0)
+float(NAN)
 --- testing: '0' / '123 abc' ---
-int(0)
+float(NAN)
 --- testing: '0' / '123abc ' ---
-int(0)
+float(NAN)
 --- testing: '0' / '3.4a' ---
-float(0)
+float(NAN)
 --- testing: '0' / 'a5.9' ---
 float(NAN)
 --- testing: '65' / '0' ---
@@ -61,19 +61,19 @@ float(-8.441558441558442)
 --- testing: '65' / 'abc' ---
 float(INF)
 --- testing: '65' / '123abc' ---
-float(0.5284552845528455)
+float(INF)
 --- testing: '65' / '123e5' ---
 float(5.2845528455284555E-6)
 --- testing: '65' / '123e5xyz' ---
-float(5.2845528455284555E-6)
+float(INF)
 --- testing: '65' / ' 123abc' ---
-float(0.5284552845528455)
+float(INF)
 --- testing: '65' / '123 abc' ---
-float(0.5284552845528455)
+float(INF)
 --- testing: '65' / '123abc ' ---
-float(0.5284552845528455)
+float(INF)
 --- testing: '65' / '3.4a' ---
-float(19.11764705882353)
+float(INF)
 --- testing: '65' / 'a5.9' ---
 float(INF)
 --- testing: '-44' / '0' ---
@@ -89,19 +89,19 @@ float(5.714285714285714)
 --- testing: '-44' / 'abc' ---
 float(-INF)
 --- testing: '-44' / '123abc' ---
-float(-0.35772357723577236)
+float(-INF)
 --- testing: '-44' / '123e5' ---
 float(-3.5772357723577236E-6)
 --- testing: '-44' / '123e5xyz' ---
-float(-3.5772357723577236E-6)
+float(-INF)
 --- testing: '-44' / ' 123abc' ---
-float(-0.35772357723577236)
+float(-INF)
 --- testing: '-44' / '123 abc' ---
-float(-0.35772357723577236)
+float(-INF)
 --- testing: '-44' / '123abc ' ---
-float(-0.35772357723577236)
+float(-INF)
 --- testing: '-44' / '3.4a' ---
-float(-12.941176470588236)
+float(-INF)
 --- testing: '-44' / 'a5.9' ---
 float(-INF)
 --- testing: '1.2' / '0' ---
@@ -117,19 +117,19 @@ float(-0.15584415584415584)
 --- testing: '1.2' / 'abc' ---
 float(INF)
 --- testing: '1.2' / '123abc' ---
-float(0.00975609756097561)
+float(INF)
 --- testing: '1.2' / '123e5' ---
 float(9.75609756097561E-8)
 --- testing: '1.2' / '123e5xyz' ---
-float(9.75609756097561E-8)
+float(INF)
 --- testing: '1.2' / ' 123abc' ---
-float(0.00975609756097561)
+float(INF)
 --- testing: '1.2' / '123 abc' ---
-float(0.00975609756097561)
+float(INF)
 --- testing: '1.2' / '123abc ' ---
-float(0.00975609756097561)
+float(INF)
 --- testing: '1.2' / '3.4a' ---
-float(0.35294117647058826)
+float(INF)
 --- testing: '1.2' / 'a5.9' ---
 float(INF)
 --- testing: '-7.7' / '0' ---
@@ -145,19 +145,19 @@ float(1)
 --- testing: '-7.7' / 'abc' ---
 float(-INF)
 --- testing: '-7.7' / '123abc' ---
-float(-0.06260162601626017)
+float(-INF)
 --- testing: '-7.7' / '123e5' ---
 float(-6.260162601626017E-7)
 --- testing: '-7.7' / '123e5xyz' ---
-float(-6.260162601626017E-7)
+float(-INF)
 --- testing: '-7.7' / ' 123abc' ---
-float(-0.06260162601626017)
+float(-INF)
 --- testing: '-7.7' / '123 abc' ---
-float(-0.06260162601626017)
+float(-INF)
 --- testing: '-7.7' / '123abc ' ---
-float(-0.06260162601626017)
+float(-INF)
 --- testing: '-7.7' / '3.4a' ---
-float(-2.264705882352941)
+float(-INF)
 --- testing: '-7.7' / 'a5.9' ---
 float(-INF)
 --- testing: 'abc' / '0' ---
@@ -173,49 +173,49 @@ float(-0)
 --- testing: 'abc' / 'abc' ---
 float(NAN)
 --- testing: 'abc' / '123abc' ---
-int(0)
+float(NAN)
 --- testing: 'abc' / '123e5' ---
 float(0)
 --- testing: 'abc' / '123e5xyz' ---
-float(0)
+float(NAN)
 --- testing: 'abc' / ' 123abc' ---
-int(0)
+float(NAN)
 --- testing: 'abc' / '123 abc' ---
-int(0)
+float(NAN)
 --- testing: 'abc' / '123abc ' ---
-int(0)
+float(NAN)
 --- testing: 'abc' / '3.4a' ---
-float(0)
+float(NAN)
 --- testing: 'abc' / 'a5.9' ---
 float(NAN)
 --- testing: '123abc' / '0' ---
-float(INF)
+float(NAN)
 --- testing: '123abc' / '65' ---
-float(1.8923076923076922)
+int(0)
 --- testing: '123abc' / '-44' ---
-float(-2.7954545454545454)
+int(0)
 --- testing: '123abc' / '1.2' ---
-float(102.5)
+float(0)
 --- testing: '123abc' / '-7.7' ---
-float(-15.974025974025974)
+float(-0)
 --- testing: '123abc' / 'abc' ---
-float(INF)
+float(NAN)
 --- testing: '123abc' / '123abc' ---
-int(1)
+float(NAN)
 --- testing: '123abc' / '123e5' ---
-float(1.0E-5)
+float(0)
 --- testing: '123abc' / '123e5xyz' ---
-float(1.0E-5)
+float(NAN)
 --- testing: '123abc' / ' 123abc' ---
-int(1)
+float(NAN)
 --- testing: '123abc' / '123 abc' ---
-int(1)
+float(NAN)
 --- testing: '123abc' / '123abc ' ---
-int(1)
+float(NAN)
 --- testing: '123abc' / '3.4a' ---
-float(36.1764705882353)
+float(NAN)
 --- testing: '123abc' / 'a5.9' ---
-float(INF)
+float(NAN)
 --- testing: '123e5' / '0' ---
 float(INF)
 --- testing: '123e5' / '65' ---
@@ -229,161 +229,161 @@ float(-1597402.5974025973)
 --- testing: '123e5' / 'abc' ---
 float(INF)
 --- testing: '123e5' / '123abc' ---
-float(100000)
+float(INF)
 --- testing: '123e5' / '123e5' ---
 float(1)
 --- testing: '123e5' / '123e5xyz' ---
-float(1)
+float(INF)
 --- testing: '123e5' / ' 123abc' ---
-float(100000)
+float(INF)
 --- testing: '123e5' / '123 abc' ---
-float(100000)
+float(INF)
 --- testing: '123e5' / '123abc ' ---
-float(100000)
+float(INF)
 --- testing: '123e5' / '3.4a' ---
-float(3617647.0588235296)
+float(INF)
 --- testing: '123e5' / 'a5.9' ---
 float(INF)
 --- testing: '123e5xyz' / '0' ---
-float(INF)
+float(NAN)
 --- testing: '123e5xyz' / '65' ---
-float(189230.76923076922)
+int(0)
 --- testing: '123e5xyz' / '-44' ---
-float(-279545.45454545453)
+int(0)
 --- testing: '123e5xyz' / '1.2' ---
-float(10250000)
+float(0)
 --- testing: '123e5xyz' / '-7.7' ---
-float(-1597402.5974025973)
+float(-0)
 --- testing: '123e5xyz' / 'abc' ---
-float(INF)
+float(NAN)
 --- testing: '123e5xyz' / '123abc' ---
-float(100000)
+float(NAN)
 --- testing: '123e5xyz' / '123e5' ---
-float(1)
+float(0)
 --- testing: '123e5xyz' / '123e5xyz' ---
-float(1)
+float(NAN)
 --- testing: '123e5xyz' / ' 123abc' ---
-float(100000)
+float(NAN)
 --- testing: '123e5xyz' / '123 abc' ---
-float(100000)
+float(NAN)
 --- testing: '123e5xyz' / '123abc ' ---
-float(100000)
+float(NAN)
 --- testing: '123e5xyz' / '3.4a' ---
-float(3617647.0588235296)
+float(NAN)
 --- testing: '123e5xyz' / 'a5.9' ---
-float(INF)
+float(NAN)
 --- testing: ' 123abc' / '0' ---
-float(INF)
+float(NAN)
 --- testing: ' 123abc' / '65' ---
-float(1.8923076923076922)
+int(0)
 --- testing: ' 123abc' / '-44' ---
-float(-2.7954545454545454)
+int(0)
 --- testing: ' 123abc' / '1.2' ---
-float(102.5)
+float(0)
 --- testing: ' 123abc' / '-7.7' ---
-float(-15.974025974025974)
+float(-0)
 --- testing: ' 123abc' / 'abc' ---
-float(INF)
+float(NAN)
 --- testing: ' 123abc' / '123abc' ---
-int(1)
+float(NAN)
 --- testing: ' 123abc' / '123e5' ---
-float(1.0E-5)
+float(0)
 --- testing: ' 123abc' / '123e5xyz' ---
-float(1.0E-5)
+float(NAN)
 --- testing: ' 123abc' / ' 123abc' ---
-int(1)
+float(NAN)
 --- testing: ' 123abc' / '123 abc' ---
-int(1)
+float(NAN)
 --- testing: ' 123abc' / '123abc ' ---
-int(1)
+float(NAN)
 --- testing: ' 123abc' / '3.4a' ---
-float(36.1764705882353)
+float(NAN)
 --- testing: ' 123abc' / 'a5.9' ---
-float(INF)
+float(NAN)
 --- testing: '123 abc' / '0' ---
-float(INF)
+float(NAN)
 --- testing: '123 abc' / '65' ---
-float(1.8923076923076922)
+int(0)
 --- testing: '123 abc' / '-44' ---
-float(-2.7954545454545454)
+int(0)
 --- testing: '123 abc' / '1.2' ---
-float(102.5)
+float(0)
 --- testing: '123 abc' / '-7.7' ---
-float(-15.974025974025974)
+float(-0)
 --- testing: '123 abc' / 'abc' ---
-float(INF)
+float(NAN)
 --- testing: '123 abc' / '123abc' ---
-int(1)
+float(NAN)
 --- testing: '123 abc' / '123e5' ---
-float(1.0E-5)
+float(0)
 --- testing: '123 abc' / '123e5xyz' ---
-float(1.0E-5)
+float(NAN)
 --- testing: '123 abc' / ' 123abc' ---
-int(1)
+float(NAN)
 --- testing: '123 abc' / '123 abc' ---
-int(1)
+float(NAN)
 --- testing: '123 abc' / '123abc ' ---
-int(1)
+float(NAN)
 --- testing: '123 abc' / '3.4a' ---
-float(36.1764705882353)
+float(NAN)
 --- testing: '123 abc' / 'a5.9' ---
-float(INF)
+float(NAN)
 --- testing: '123abc ' / '0' ---
-float(INF)
+float(NAN)
 --- testing: '123abc ' / '65' ---
-float(1.8923076923076922)
+int(0)
 --- testing: '123abc ' / '-44' ---
-float(-2.7954545454545454)
+int(0)
 --- testing: '123abc ' / '1.2' ---
-float(102.5)
+float(0)
 --- testing: '123abc ' / '-7.7' ---
-float(-15.974025974025974)
+float(-0)
 --- testing: '123abc ' / 'abc' ---
-float(INF)
+float(NAN)
 --- testing: '123abc ' / '123abc' ---
-int(1)
+float(NAN)
 --- testing: '123abc ' / '123e5' ---
-float(1.0E-5)
+float(0)
 --- testing: '123abc ' / '123e5xyz' ---
-float(1.0E-5)
+float(NAN)
 --- testing: '123abc ' / ' 123abc' ---
-int(1)
+float(NAN)
 --- testing: '123abc ' / '123 abc' ---
-int(1)
+float(NAN)
 --- testing: '123abc ' / '123abc ' ---
-int(1)
+float(NAN)
 --- testing: '123abc ' / '3.4a' ---
-float(36.1764705882353)
+float(NAN)
 --- testing: '123abc ' / 'a5.9' ---
-float(INF)
+float(NAN)
 --- testing: '3.4a' / '0' ---
-float(INF)
+float(NAN)
 --- testing: '3.4a' / '65' ---
-float(0.052307692307692305)
+int(0)
 --- testing: '3.4a' / '-44' ---
-float(-0.07727272727272727)
+int(0)
 --- testing: '3.4a' / '1.2' ---
-float(2.8333333333333335)
+float(0)
 --- testing: '3.4a' / '-7.7' ---
-float(-0.44155844155844154)
+float(-0)
 --- testing: '3.4a' / 'abc' ---
-float(INF)
+float(NAN)
 --- testing: '3.4a' / '123abc' ---
-float(0.027642276422764227)
+float(NAN)
 --- testing: '3.4a' / '123e5' ---
-float(2.764227642276423E-7)
+float(0)
 --- testing: '3.4a' / '123e5xyz' ---
-float(2.764227642276423E-7)
+float(NAN)
 --- testing: '3.4a' / ' 123abc' ---
-float(0.027642276422764227)
+float(NAN)
 --- testing: '3.4a' / '123 abc' ---
-float(0.027642276422764227)
+float(NAN)
 --- testing: '3.4a' / '123abc ' ---
-float(0.027642276422764227)
+float(NAN)
 --- testing: '3.4a' / '3.4a' ---
-float(1)
+float(NAN)
 --- testing: '3.4a' / 'a5.9' ---
-float(INF)
+float(NAN)
 --- testing: 'a5.9' / '0' ---
 float(NAN)
 --- testing: 'a5.9' / '65' ---
@@ -397,18 +397,18 @@ float(-0)
 --- testing: 'a5.9' / 'abc' ---
 float(NAN)
 --- testing: 'a5.9' / '123abc' ---
-int(0)
+float(NAN)
 --- testing: 'a5.9' / '123e5' ---
 float(0)
 --- testing: 'a5.9' / '123e5xyz' ---
-float(0)
+float(NAN)
 --- testing: 'a5.9' / ' 123abc' ---
-int(0)
+float(NAN)
 --- testing: 'a5.9' / '123 abc' ---
-int(0)
+float(NAN)
 --- testing: 'a5.9' / '123abc ' ---
-int(0)
+float(NAN)
 --- testing: 'a5.9' / '3.4a' ---
-float(0)
+float(NAN)
 --- testing: 'a5.9' / 'a5.9' ---
 float(NAN)

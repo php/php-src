@@ -728,7 +728,7 @@ static zend_bool zend_verify_weak_scalar_type_hint(uint32_t type_mask, zval *arg
 		/* For an int|float union type and string value,
 		 * determine chosen type by is_numeric_string() semantics. */
 		if ((type_mask & MAY_BE_DOUBLE) && Z_TYPE_P(arg) == IS_STRING) {
-			zend_uchar type = is_numeric_string(Z_STRVAL_P(arg), Z_STRLEN_P(arg), &lval, &dval, -1);
+			zend_uchar type = is_numeric_string(Z_STRVAL_P(arg), Z_STRLEN_P(arg), &lval, &dval, false);
 			if (type == IS_LONG) {
 				zend_string_release(Z_STR_P(arg));
 				ZVAL_LONG(arg, lval);
@@ -770,35 +770,11 @@ static zend_bool zend_verify_weak_scalar_type_hint_no_sideeffect(uint32_t type_m
 	double dval;
 	zend_bool bval;
 
-	if (type_mask & MAY_BE_LONG) {
-		if (Z_TYPE_P(arg) == IS_STRING) {
-			/* Handle this case separately to avoid the "non well-formed" warning */
-			zend_uchar type = is_numeric_string(Z_STRVAL_P(arg), Z_STRLEN_P(arg), NULL, &dval, 1);
-			if (type == IS_LONG) {
-				return 1;
-			}
-			if (type == IS_DOUBLE) {
-				if ((type_mask & MAY_BE_DOUBLE)
-						|| (!zend_isnan(dval) && ZEND_DOUBLE_FITS_LONG(dval))) {
-					return 1;
-				}
-
-			}
-		}
-		if (zend_parse_arg_long_weak(arg, &lval)) {
-			return 1;
-		}
+	if (type_mask & MAY_BE_LONG && zend_parse_arg_long_weak(arg, &lval)) {
+		return 1;
 	}
-	if (type_mask & MAY_BE_DOUBLE) {
-		if (Z_TYPE_P(arg) == IS_STRING) {
-			/* Handle this case separately to avoid the "non well-formed" warning */
-			if (is_numeric_string(Z_STRVAL_P(arg), Z_STRLEN_P(arg), NULL, NULL, 1) != 0) {
-				return 1;
-			}
-		}
-		if (zend_parse_arg_double_weak(arg, &dval)) {
-			return 1;
-		}
+	if (type_mask & MAY_BE_DOUBLE && zend_parse_arg_double_weak(arg, &dval)) {
+		return 1;
 	}
 	/* We don't call cast_object here, because this check must be side-effect free. As this
 	 * is only used for a sanity check of arginfo/zpp consistency, it's okay if we accept
@@ -1364,7 +1340,7 @@ try_again:
 	if (UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
 		switch(Z_TYPE_P(dim)) {
 			case IS_STRING:
-				if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, -1)) {
+				if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, false)) {
 					break;
 				}
 				if (type != BP_VAR_UNSET) {
@@ -2351,7 +2327,7 @@ try_string_offset:
 			switch (Z_TYPE_P(dim)) {
 				/* case IS_LONG: */
 				case IS_STRING:
-					if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, -1)) {
+					if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, false)) {
 						break;
 					}
 					if (type == BP_VAR_IS) {

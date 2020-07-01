@@ -243,7 +243,8 @@ static zend_never_inline int ZEND_FASTCALL _zendi_try_convert_scalar_to_number(z
 			ZVAL_LONG(holder, 1);
 			return SUCCESS;
 		case IS_STRING:
-			if ((Z_TYPE_INFO_P(holder) = is_numeric_string(Z_STRVAL_P(op), Z_STRLEN_P(op), &Z_LVAL_P(holder), &Z_DVAL_P(holder), -1)) == 0) {
+			if ((Z_TYPE_INFO_P(holder) = is_numeric_string(Z_STRVAL_P(op), Z_STRLEN_P(op),
+					&Z_LVAL_P(holder), &Z_DVAL_P(holder), false)) == 0) {
 				ZVAL_LONG(holder, 0);
 				zend_error(E_WARNING, "A non-numeric value encountered");
 				if (UNEXPECTED(EG(exception))) {
@@ -293,7 +294,7 @@ static zend_never_inline zend_long ZEND_FASTCALL zendi_try_get_long(zval *op, ze
 				zend_uchar type;
 				zend_long lval;
 				double dval;
-				if (0 == (type = is_numeric_string(Z_STRVAL_P(op), Z_STRLEN_P(op), &lval, &dval, -1))) {
+				if (0 == (type = is_numeric_string(Z_STRVAL_P(op), Z_STRLEN_P(op), &lval, &dval, false))) {
 					zend_error(E_WARNING, "A non-numeric value encountered");
 					if (UNEXPECTED(EG(exception))) {
 						*failed = 1;
@@ -771,7 +772,7 @@ try_again:
 }
 /* }}} */
 
-static zend_always_inline zend_long ZEND_FASTCALL _zval_get_long_func_ex(zval *op, zend_bool silent) /* {{{ */
+ZEND_API zend_long ZEND_FASTCALL zval_get_long_func(zval *op) /* {{{ */
 {
 try_again:
 	switch (Z_TYPE_P(op)) {
@@ -792,10 +793,7 @@ try_again:
 				zend_uchar type;
 				zend_long lval;
 				double dval;
-				if (0 == (type = is_numeric_string(Z_STRVAL_P(op), Z_STRLEN_P(op), &lval, &dval, silent ? 1 : -1))) {
-					if (!silent) {
-						zend_error(E_WARNING, "A non-numeric value encountered");
-					}
+				if (0 == (type = is_numeric_string(Z_STRVAL_P(op), Z_STRLEN_P(op), &lval, &dval, true))) {
 					return 0;
 				} else if (EXPECTED(type == IS_LONG)) {
 					return lval;
@@ -826,12 +824,6 @@ try_again:
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 	return 0;
-}
-/* }}} */
-
-ZEND_API zend_long ZEND_FASTCALL zval_get_long_func(zval *op) /* {{{ */
-{
-	return _zval_get_long_func_ex(op, 1);
 }
 /* }}} */
 
@@ -2404,7 +2396,7 @@ try_again:
 				zend_long lval;
 				double dval;
 
-				switch (is_numeric_string(Z_STRVAL_P(op1), Z_STRLEN_P(op1), &lval, &dval, 0)) {
+				switch (is_numeric_string(Z_STRVAL_P(op1), Z_STRLEN_P(op1), &lval, &dval, false)) {
 					case IS_LONG:
 						zval_ptr_dtor_str(op1);
 						if (lval == ZEND_LONG_MAX) {
@@ -2471,7 +2463,7 @@ try_again:
 				ZVAL_LONG(op1, -1);
 				break;
 			}
-			switch (is_numeric_string(Z_STRVAL_P(op1), Z_STRLEN_P(op1), &lval, &dval, 0)) {
+			switch (is_numeric_string(Z_STRVAL_P(op1), Z_STRLEN_P(op1), &lval, &dval, false)) {
 				case IS_LONG:
 					zval_ptr_dtor_str(op1);
 					if (lval == ZEND_LONG_MIN) {
@@ -2816,8 +2808,8 @@ ZEND_API int ZEND_FASTCALL zendi_smart_streq(zend_string *s1, zend_string *s2) /
 	zend_long lval1 = 0, lval2 = 0;
 	double dval1 = 0.0, dval2 = 0.0;
 
-	if ((ret1 = is_numeric_string_ex(s1->val, s1->len, &lval1, &dval1, 0, &oflow1)) &&
-		(ret2 = is_numeric_string_ex(s2->val, s2->len, &lval2, &dval2, 0, &oflow2))) {
+	if ((ret1 = is_numeric_string_ex(s1->val, s1->len, &lval1, &dval1, false, &oflow1)) &&
+		(ret2 = is_numeric_string_ex(s2->val, s2->len, &lval2, &dval2, false, &oflow2))) {
 #if ZEND_ULONG_MAX == 0xFFFFFFFF
 		if (oflow1 != 0 && oflow1 == oflow2 && dval1 - dval2 == 0. &&
 			((oflow1 == 1 && dval1 > 9007199254740991. /*0x1FFFFFFFFFFFFF*/)
@@ -2864,8 +2856,8 @@ ZEND_API int ZEND_FASTCALL zendi_smart_strcmp(zend_string *s1, zend_string *s2) 
 	zend_long lval1 = 0, lval2 = 0;
 	double dval1 = 0.0, dval2 = 0.0;
 
-	if ((ret1 = is_numeric_string_ex(s1->val, s1->len, &lval1, &dval1, 0, &oflow1)) &&
-		(ret2 = is_numeric_string_ex(s2->val, s2->len, &lval2, &dval2, 0, &oflow2))) {
+	if ((ret1 = is_numeric_string_ex(s1->val, s1->len, &lval1, &dval1, false, &oflow1)) &&
+		(ret2 = is_numeric_string_ex(s2->val, s2->len, &lval2, &dval2, false, &oflow2))) {
 #if ZEND_ULONG_MAX == 0xFFFFFFFF
 		if (oflow1 != 0 && oflow1 == oflow2 && dval1 - dval2 == 0. &&
 			((oflow1 == 1 && dval1 > 9007199254740991. /*0x1FFFFFFFFFFFFF*/)
@@ -2962,11 +2954,12 @@ ZEND_API zend_string* ZEND_FASTCALL zend_long_to_str(zend_long num) /* {{{ */
 /* }}} */
 
 ZEND_API zend_uchar ZEND_FASTCALL is_numeric_str_function(const zend_string *str, zend_long *lval, double *dval) /* {{{ */ {
-    return is_numeric_string_ex(ZSTR_VAL(str), ZSTR_LEN(str), lval, dval, -1, NULL);
+    return is_numeric_string(ZSTR_VAL(str), ZSTR_LEN(str), lval, dval, false);
 }
 /* }}} */
 
-ZEND_API zend_uchar ZEND_FASTCALL _is_numeric_string_ex(const char *str, size_t length, zend_long *lval, double *dval, int allow_errors, int *oflow_info) /* {{{ */
+ZEND_API zend_uchar ZEND_FASTCALL _is_numeric_string_ex(const char *str, size_t length, zend_long *lval,
+	double *dval, bool allow_errors, int *oflow_info) /* {{{ */
 {
 	const char *ptr;
 	int digits = 0, dp_or_e = 0;
@@ -3007,7 +3000,7 @@ ZEND_API zend_uchar ZEND_FASTCALL _is_numeric_string_ex(const char *str, size_t 
 		/* Count the number of digits. If a decimal point/exponent is found,
 		 * it's a double. Otherwise, if there's a dval or no need to check for
 		 * a full match, stop when there are too many digits for a long */
-		for (type = IS_LONG; !(digits >= MAX_LENGTH_OF_LONG && (dval || allow_errors == 1)); digits++, ptr++) {
+		for (type = IS_LONG; !(digits >= MAX_LENGTH_OF_LONG && (dval || allow_errors)); digits++, ptr++) {
 check_digits:
 			if (ZEND_IS_DIGIT(*ptr)) {
 				tmp_lval = tmp_lval * 10 + (*ptr) - '0';
@@ -3043,7 +3036,7 @@ process_double:
 		 * the digits if we need to check for a full match */
 		if (dval) {
 			local_dval = zend_strtod(str, &ptr);
-		} else if (allow_errors != 1 && dp_or_e != -1) {
+		} else if (!allow_errors && dp_or_e != -1) {
 			dp_or_e = (*ptr++ == '.') ? 1 : 2;
 			goto check_digits;
 		}
@@ -3059,12 +3052,6 @@ process_double:
 		}
 		if (ptr != str + length) {
 			if (!allow_errors) {
-				return 0;
-			}
-			if (allow_errors == -1) {
-				zend_error(E_NOTICE, "A non well formed numeric value encountered");
-			}
-			if (EG(exception)) {
 				return 0;
 			}
 		}

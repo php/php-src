@@ -140,21 +140,21 @@ float(-5000000)
 
 *** Testing floatval() on non floating types ***
 
-Notice: A non well formed numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered in %s on line %d
 
-Notice: A non well formed numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered in %s on line %d
 float(-2147483648)
 float(2147483648)
-float(%d)
-float(%d)
+float(5)
+float(6)
 float(0)
 float(1)
 float(-1300)
 float(0)
 float(10)
 float(10.2)
-float(11)
-float(11)
+float(1)
+float(1)
 float(0)
 float(1)
 float(0)
@@ -163,16 +163,16 @@ float(0)
 *** Testing doubleval() on non floating types ***
 float(-2147483648)
 float(2147483648)
-float(%d)
-float(%d)
+float(5)
+float(6)
 float(0)
 float(1)
 float(-1300)
 float(0)
 float(10)
 float(10.2)
-float(11)
-float(11)
+float(1)
+float(1)
 float(0)
 float(1)
 float(0)
