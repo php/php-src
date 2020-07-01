@@ -1132,7 +1132,7 @@ returns_ref:
 
 lexical_vars:
 		%empty { $$ = NULL; }
-	|	T_USE '(' lexical_var_list ')' { $$ = $3; }
+	|	T_USE '(' lexical_var_list possible_comma ')' { $$ = $3; }
 ;
 
 lexical_var_list:
