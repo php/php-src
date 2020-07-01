@@ -14,7 +14,7 @@ PHP 8.0 INTERNALS UPGRADE NOTES
   k. The 'I' length modifier
   l. Some VM instructions switched to IS_TMP_VAR result instead of IS_VAR
   m. All internal functions must have arginfo
-  n. zend_hash_sort and zend_hash_sort compare function signature change
+  n. zend_hash_sort compare function and zend_hash_sort signature change
   o. cast_object() object handler is now required
   p. ARG_COUNT() macro removed
   q. GC_COLLECTABLE flag
