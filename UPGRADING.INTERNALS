@@ -14,7 +14,7 @@ PHP 8.0 INTERNALS UPGRADE NOTES
   k. The 'I' length modifier
   l. Some VM instructions switched to IS_TMP_VAR result instead of IS_VAR
   m. All internal functions must have arginfo
-  n. zend_hash_sort compare function signature change
+  n. zend_hash_sort and zend_hash_sort compare function signature change
   o. cast_object() object handler is now required
   p. ARG_COUNT() macro removed
   q. GC_COLLECTABLE flag
@@ -113,6 +113,8 @@ PHP 8.0 INTERNALS UPGRADE NOTES
          typedef int (*bucket_compare_func_t)(Bucket *a, Bucket *b);
 
      Previously compare_func_t was used, which accepted void pointers.
+     Furthermore, the return type of zend_hash_sort and zend_ts_hash_sort has
+     been changed from int to void; these functions always succeed.
 
   o. The cast_object() handler is now required, i.e. must be non-null. You can
      indicate that casting is not supported by always returning FAILURE.
