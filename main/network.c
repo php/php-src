@@ -97,8 +97,7 @@ const struct in6_addr in6addr_any = {0}; /* IN6ADDR_ANY_INIT; */
 #  define PHP_GAI_STRERROR(x) (gai_strerror(x))
 #else
 #  define PHP_GAI_STRERROR(x) (php_gai_strerror(x))
-/* {{{ php_gai_strerror
- */
+/* {{{ php_gai_strerror */
 static const char *php_gai_strerror(int code)
 {
         static struct {
@@ -136,8 +135,7 @@ static const char *php_gai_strerror(int code)
 #endif
 #endif
 
-/* {{{ php_network_freeaddresses
- */
+/* {{{ php_network_freeaddresses */
 PHPAPI void php_network_freeaddresses(struct sockaddr **sal)
 {
 	struct sockaddr **sap;

@@ -47,8 +47,7 @@ union semun {
 
 #endif
 
-/* {{{ sysvsem_module_entry
- */
+/* {{{ sysvsem_module_entry */
 zend_module_entry sysvsem_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"sysvsem",
@@ -149,8 +148,7 @@ static void sysvsem_free_obj(zend_object *object)
 }
 /* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION
- */
+/* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(sysvsem)
 {
 	zend_class_entry ce;
@@ -171,8 +169,7 @@ PHP_MINIT_FUNCTION(sysvsem)
 }
 /* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
- */
+/* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(sysvsem)
 {
 	php_info_print_table_start();
@@ -187,8 +184,7 @@ PHP_MINFO_FUNCTION(sysvsem)
 #undef SETVAL_WANTS_PTR
 #endif
 
-/* {{{ proto SysvSemaphore sem_get(int key [, int max_acquire [, int perm [, int auto_release]])
-   Return an id for the semaphore with the given key, and allow max_acquire (default 1) processes to acquire it simultaneously */
+/* {{{ Return an id for the semaphore with the given key, and allow max_acquire (default 1) processes to acquire it simultaneously */
 PHP_FUNCTION(sem_get)
 {
 	zend_long key, max_acquire = 1, perm = 0666, auto_release = 1;
@@ -297,8 +293,7 @@ PHP_FUNCTION(sem_get)
 }
 /* }}} */
 
-/* {{{ php_sysvsem_semop
- */
+/* {{{ php_sysvsem_semop */
 static void php_sysvsem_semop(INTERNAL_FUNCTION_PARAMETERS, int acquire)
 {
 	zval *arg_id;
@@ -341,24 +336,21 @@ static void php_sysvsem_semop(INTERNAL_FUNCTION_PARAMETERS, int acquire)
 }
 /* }}} */
 
-/* {{{ proto bool sem_acquire(SysvSemaphore id)
-   Acquires the semaphore with the given id, blocking if necessary */
+/* {{{ Acquires the semaphore with the given id, blocking if necessary */
 PHP_FUNCTION(sem_acquire)
 {
 	php_sysvsem_semop(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
-/* {{{ proto bool sem_release(SysvSemaphore id)
-   Releases the semaphore with the given id */
+/* {{{ Releases the semaphore with the given id */
 PHP_FUNCTION(sem_release)
 {
 	php_sysvsem_semop(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
-/* {{{ proto bool sem_remove(SysvSemaphore id)
-   Removes semaphore from Unix systems */
+/* {{{ Removes semaphore from Unix systems */
 
 /*
  * contributed by Gavin Sherry gavin@linuxworld.com.au

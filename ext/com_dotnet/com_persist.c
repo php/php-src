@@ -320,8 +320,7 @@ static inline HRESULT get_persist_file(php_com_persist_helper *helper)
 }
 
 
-/* {{{ proto string COMPersistHelper::GetCurFile()
-   Determines the filename into which an object will be saved, or false if none is set, via IPersistFile::GetCurFile */
+/* {{{ Determines the filename into which an object will be saved, or false if none is set, via IPersistFile::GetCurFile */
 CPH_METHOD(GetCurFileName)
 {
 	HRESULT res;
@@ -359,8 +358,7 @@ CPH_METHOD(GetCurFileName)
 /* }}} */
 
 
-/* {{{ proto bool COMPersistHelper::SaveToFile(string filename [, bool remember])
-   Persist object data to file, via IPersistFile::Save */
+/* {{{ Persist object data to file, via IPersistFile::Save */
 CPH_METHOD(SaveToFile)
 {
 	HRESULT res;
@@ -421,8 +419,7 @@ CPH_METHOD(SaveToFile)
 }
 /* }}} */
 
-/* {{{ proto bool COMPersistHelper::LoadFromFile(string filename [, int flags])
-   Load object data from file, via IPersistFile::Load */
+/* {{{ Load object data from file, via IPersistFile::Load */
 CPH_METHOD(LoadFromFile)
 {
 	HRESULT res;
@@ -466,8 +463,7 @@ CPH_METHOD(LoadFromFile)
 }
 /* }}} */
 
-/* {{{ proto int COMPersistHelper::GetMaxStreamSize()
-   Gets maximum stream size required to store the object data, via IPersistStream::GetSizeMax (or IPersistStreamInit::GetSizeMax) */
+/* {{{ Gets maximum stream size required to store the object data, via IPersistStream::GetSizeMax (or IPersistStreamInit::GetSizeMax) */
 CPH_METHOD(GetMaxStreamSize)
 {
 	HRESULT res;
@@ -502,8 +498,7 @@ CPH_METHOD(GetMaxStreamSize)
 }
 /* }}} */
 
-/* {{{ proto int COMPersistHelper::InitNew()
-   Initializes the object to a default state, via IPersistStreamInit::InitNew */
+/* {{{ Initializes the object to a default state, via IPersistStreamInit::InitNew */
 CPH_METHOD(InitNew)
 {
 	HRESULT res;
@@ -530,8 +525,7 @@ CPH_METHOD(InitNew)
 }
 /* }}} */
 
-/* {{{ proto mixed COMPersistHelper::LoadFromStream(resource stream)
-   Initializes an object from the stream where it was previously saved, via IPersistStream::Load or OleLoadFromStream */
+/* {{{ Initializes an object from the stream where it was previously saved, via IPersistStream::Load or OleLoadFromStream */
 CPH_METHOD(LoadFromStream)
 {
 	zval *zstm;
@@ -589,8 +583,7 @@ CPH_METHOD(LoadFromStream)
 }
 /* }}} */
 
-/* {{{ proto int COMPersistHelper::SaveToStream(resource stream)
-   Saves the object to a stream, via IPersistStream::Save */
+/* {{{ Saves the object to a stream, via IPersistStream::Save */
 CPH_METHOD(SaveToStream)
 {
 	zval *zstm;
@@ -639,8 +632,7 @@ CPH_METHOD(SaveToStream)
 }
 /* }}} */
 
-/* {{{ proto COMPersistHelper::__construct([object com_object])
-   Creates a persistence helper object, usually associated with a com_object */
+/* {{{ Creates a persistence helper object, usually associated with a com_object */
 CPH_METHOD(__construct)
 {
 	php_com_dotnet_object *obj = NULL;

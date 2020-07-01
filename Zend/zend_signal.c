@@ -330,8 +330,7 @@ void zend_signal_activate(void)
 	SIGG(depth)  = 0;
 } /* }}} */
 
-/* {{{ zend_signal_deactivate
- * */
+/* {{{ zend_signal_deactivate */
 void zend_signal_deactivate(void)
 {
 	if (SIGG(check)) {

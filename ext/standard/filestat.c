@@ -176,8 +176,7 @@ static int php_disk_total_space(char *path, double *space) /* {{{ */
 /* }}} */
 /* }}} */
 
-/* {{{ proto float|false disk_total_space(string path)
-   Get total disk space for filesystem that path is on */
+/* {{{ Get total disk space for filesystem that path is on */
 PHP_FUNCTION(disk_total_space)
 {
 	double bytestotal;
@@ -270,8 +269,7 @@ static int php_disk_free_space(char *path, double *space) /* {{{ */
 /* }}} */
 /* }}} */
 
-/* {{{ proto float|false disk_free_space(string path)
-   Get free disk space for filesystem that path is on */
+/* {{{ Get free disk space for filesystem that path is on */
 PHP_FUNCTION(disk_free_space)
 {
 	double bytesfree;
@@ -407,16 +405,14 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto bool chgrp(string filename, mixed group)
-   Change file group */
+/* {{{ Change file group */
 PHP_FUNCTION(chgrp)
 {
 	php_do_chgrp(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
-/* {{{ proto bool lchgrp(string filename, mixed group)
-   Change symlink group */
+/* {{{ Change symlink group */
 #if HAVE_LCHOWN
 PHP_FUNCTION(lchgrp)
 {
@@ -545,16 +541,14 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 /* }}} */
 
 
-/* {{{ proto bool chown(string filename, mixed user)
-   Change file owner */
+/* {{{ Change file owner */
 PHP_FUNCTION(chown)
 {
 	php_do_chown(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
-/* {{{ proto bool chown(string filename, mixed user)
-   Change file owner */
+/* {{{ Change file owner */
 #if HAVE_LCHOWN
 PHP_FUNCTION(lchown)
 {
@@ -568,8 +562,7 @@ PHP_FUNCTION(lchown)
 #endif
 /* }}} */
 
-/* {{{ proto bool chmod(string filename, int mode)
-   Change file mode */
+/* {{{ Change file mode */
 PHP_FUNCTION(chmod)
 {
 	char *filename;
@@ -615,8 +608,7 @@ PHP_FUNCTION(chmod)
 /* }}} */
 
 #if HAVE_UTIME
-/* {{{ proto bool touch(string filename [, int time [, int atime]])
-   Set modification time of file */
+/* {{{ Set modification time of file */
 PHP_FUNCTION(touch)
 {
 	char *filename;
@@ -704,8 +696,7 @@ PHP_FUNCTION(touch)
 /* }}} */
 #endif
 
-/* {{{ php_clear_stat_cache()
-*/
+/* {{{ php_clear_stat_cache() */
 PHPAPI void php_clear_stat_cache(zend_bool clear_realpath_cache, const char *filename, size_t filename_len)
 {
 	/* always clear CurrentStatFile and CurrentLStatFile even if filename is not NULL
@@ -729,8 +720,7 @@ PHPAPI void php_clear_stat_cache(zend_bool clear_realpath_cache, const char *fil
 }
 /* }}} */
 
-/* {{{ proto void clearstatcache([bool clear_realpath_cache[, string filename]])
-   Clear file stat cache */
+/* {{{ Clear file stat cache */
 PHP_FUNCTION(clearstatcache)
 {
 	zend_bool  clear_realpath_cache = 0;
@@ -752,8 +742,7 @@ PHP_FUNCTION(clearstatcache)
 #define IS_ABLE_CHECK(__t) ((__t) == FS_IS_R || (__t) == FS_IS_W || (__t) == FS_IS_X)
 #define IS_ACCESS_CHECK(__t) (IS_ABLE_CHECK(type) || (__t) == FS_EXISTS)
 
-/* {{{ php_stat
- */
+/* {{{ php_stat */
 PHPAPI void php_stat(const char *filename, size_t filename_length, int type, zval *return_value)
 {
 	zend_stat_t *stat_sb;
@@ -978,98 +967,79 @@ ZEND_NAMED_FUNCTION(name) { \
 }
 /* }}} */
 
-/* {{{ proto int fileperms(string filename)
-   Get file permissions */
+/* {{{ Get file permissions */
 FileFunction(PHP_FN(fileperms), FS_PERMS)
 /* }}} */
 
-/* {{{ proto int fileinode(string filename)
-   Get file inode */
+/* {{{ Get file inode */
 FileFunction(PHP_FN(fileinode), FS_INODE)
 /* }}} */
 
-/* {{{ proto int filesize(string filename)
-   Get file size */
+/* {{{ Get file size */
 FileFunction(PHP_FN(filesize), FS_SIZE)
 /* }}} */
 
-/* {{{ proto int fileowner(string filename)
-   Get file owner */
+/* {{{ Get file owner */
 FileFunction(PHP_FN(fileowner), FS_OWNER)
 /* }}} */
 
-/* {{{ proto int filegroup(string filename)
-   Get file group */
+/* {{{ Get file group */
 FileFunction(PHP_FN(filegroup), FS_GROUP)
 /* }}} */
 
-/* {{{ proto int fileatime(string filename)
-   Get last access time of file */
+/* {{{ Get last access time of file */
 FileFunction(PHP_FN(fileatime), FS_ATIME)
 /* }}} */
 
-/* {{{ proto int filemtime(string filename)
-   Get last modification time of file */
+/* {{{ Get last modification time of file */
 FileFunction(PHP_FN(filemtime), FS_MTIME)
 /* }}} */
 
-/* {{{ proto int filectime(string filename)
-   Get inode modification time of file */
+/* {{{ Get inode modification time of file */
 FileFunction(PHP_FN(filectime), FS_CTIME)
 /* }}} */
 
-/* {{{ proto string filetype(string filename)
-   Get file type */
+/* {{{ Get file type */
 FileFunction(PHP_FN(filetype), FS_TYPE)
 /* }}} */
 
-/* {{{ proto bool is_writable(string filename)
-   Returns true if file can be written */
+/* {{{ Returns true if file can be written */
 FileFunction(PHP_FN(is_writable), FS_IS_W)
 /* }}} */
 
-/* {{{ proto bool is_readable(string filename)
-   Returns true if file can be read */
+/* {{{ Returns true if file can be read */
 FileFunction(PHP_FN(is_readable), FS_IS_R)
 /* }}} */
 
-/* {{{ proto bool is_executable(string filename)
-   Returns true if file is executable */
+/* {{{ Returns true if file is executable */
 FileFunction(PHP_FN(is_executable), FS_IS_X)
 /* }}} */
 
-/* {{{ proto bool is_file(string filename)
-   Returns true if file is a regular file */
+/* {{{ Returns true if file is a regular file */
 FileFunction(PHP_FN(is_file), FS_IS_FILE)
 /* }}} */
 
-/* {{{ proto bool is_dir(string filename)
-   Returns true if file is directory */
+/* {{{ Returns true if file is directory */
 FileFunction(PHP_FN(is_dir), FS_IS_DIR)
 /* }}} */
 
-/* {{{ proto bool is_link(string filename)
-   Returns true if file is symbolic link */
+/* {{{ Returns true if file is symbolic link */
 FileFunction(PHP_FN(is_link), FS_IS_LINK)
 /* }}} */
 
-/* {{{ proto bool file_exists(string filename)
-   Returns true if filename exists */
+/* {{{ Returns true if filename exists */
 FileFunction(PHP_FN(file_exists), FS_EXISTS)
 /* }}} */
 
-/* {{{ proto array lstat(string filename)
-   Give information about a file or symbolic link */
+/* {{{ Give information about a file or symbolic link */
 FileFunction(PHP_FN(lstat), FS_LSTAT)
 /* }}} */
 
-/* {{{ proto array stat(string filename)
-   Give information about a file */
+/* {{{ Give information about a file */
 FileFunction(PHP_FN(stat), FS_STAT)
 /* }}} */
 
-/* {{{ proto bool realpath_cache_size()
-   Get current size of realpath cache */
+/* {{{ Get current size of realpath cache */
 PHP_FUNCTION(realpath_cache_size)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -1077,8 +1047,7 @@ PHP_FUNCTION(realpath_cache_size)
 	RETURN_LONG(realpath_cache_size());
 }
 
-/* {{{ proto bool realpath_cache_get()
-   Get current size of realpath cache */
+/* {{{ Get current size of realpath cache */
 PHP_FUNCTION(realpath_cache_get)
 {
 	realpath_cache_bucket **buckets = realpath_cache_get_buckets(), **end = buckets + realpath_cache_max_buckets();

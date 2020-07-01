@@ -199,8 +199,7 @@ php_version_compare(const char *orig_ver1, const char *orig_ver2)
 }
 
 /* }}} */
-/* {{{ proto int|bool|null version_compare(string ver1, string ver2 [, string oper])
-  Compares two "PHP-standardized" version number strings */
+/* {{{ Compares two "PHP-standardized" version number strings */
 
 PHP_FUNCTION(version_compare)
 {

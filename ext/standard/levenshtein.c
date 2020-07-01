@@ -74,8 +74,7 @@ static zend_long reference_levdist(const char *s1, size_t l1, const char *s2, si
 }
 /* }}} */
 
-/* {{{ custom_levdist
- */
+/* {{{ custom_levdist */
 static int custom_levdist(char *str1, char *str2, char *callback_name)
 {
 	php_error_docref(NULL, E_WARNING, "The general Levenshtein support is not there yet");
@@ -85,8 +84,7 @@ static int custom_levdist(char *str1, char *str2, char *callback_name)
 }
 /* }}} */
 
-/* {{{ proto int levenshtein(string str1, string str2[, int cost_ins, int cost_rep, int cost_del])
-   Calculate Levenshtein distance between two strings */
+/* {{{ Calculate Levenshtein distance between two strings */
 PHP_FUNCTION(levenshtein)
 {
 	int argc = ZEND_NUM_ARGS();

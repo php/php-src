@@ -112,8 +112,7 @@ PHP_MINFO_FUNCTION(readline)
 
 /* }}} */
 
-/* {{{ proto string readline([string prompt])
-   Reads a line */
+/* {{{ Reads a line */
 PHP_FUNCTION(readline)
 {
 	char *prompt = NULL;
@@ -138,8 +137,7 @@ PHP_FUNCTION(readline)
 
 #define SAFE_STRING(s) ((s)?(char*)(s):"")
 
-/* {{{ proto mixed readline_info([string varname [, string newvalue]])
-   Gets/sets various internal readline variables. */
+/* {{{ Gets/sets various internal readline variables. */
 PHP_FUNCTION(readline_info)
 {
 	char *what = NULL;
@@ -267,8 +265,7 @@ PHP_FUNCTION(readline_info)
 }
 
 /* }}} */
-/* {{{ proto bool readline_add_history(string prompt)
-   Adds a line to the history */
+/* {{{ Adds a line to the history */
 PHP_FUNCTION(readline_add_history)
 {
 	char *arg;
@@ -284,8 +281,7 @@ PHP_FUNCTION(readline_add_history)
 }
 
 /* }}} */
-/* {{{ proto bool readline_clear_history(void)
-   Clears the history */
+/* {{{ Clears the history */
 PHP_FUNCTION(readline_clear_history)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -305,8 +301,7 @@ PHP_FUNCTION(readline_clear_history)
 /* }}} */
 
 #ifdef HAVE_HISTORY_LIST
-/* {{{ proto array readline_list_history(void)
-   Lists the history */
+/* {{{ Lists the history */
 PHP_FUNCTION(readline_list_history)
 {
 	HIST_ENTRY **history;
@@ -359,8 +354,7 @@ PHP_FUNCTION(readline_list_history)
 /* }}} */
 #endif
 
-/* {{{ proto bool readline_read_history([string filename])
-   Reads the history */
+/* {{{ Reads the history */
 PHP_FUNCTION(readline_read_history)
 {
 	char *arg = NULL;
@@ -384,8 +378,7 @@ PHP_FUNCTION(readline_read_history)
 }
 
 /* }}} */
-/* {{{ proto bool readline_write_history([string filename])
-   Writes the history */
+/* {{{ Writes the history */
 PHP_FUNCTION(readline_write_history)
 {
 	char *arg = NULL;
@@ -407,8 +400,7 @@ PHP_FUNCTION(readline_write_history)
 }
 
 /* }}} */
-/* {{{ proto bool readline_completion_function(string funcname)
-   Readline completion function? */
+/* {{{ Readline completion function? */
 
 static char *_readline_command_generator(const char *text, int state)
 {
@@ -519,8 +511,7 @@ static void php_rl_callback_handler(char *the_line)
 	zval_ptr_dtor(&dummy);
 }
 
-/* {{{ proto void readline_callback_handler_install(string prompt, mixed callback)
-   Initializes the readline callback interface and terminal, prints the prompt and returns immediately */
+/* {{{ Initializes the readline callback interface and terminal, prints the prompt and returns immediately */
 PHP_FUNCTION(readline_callback_handler_install)
 {
 	zval *callback;
@@ -551,8 +542,7 @@ PHP_FUNCTION(readline_callback_handler_install)
 }
 /* }}} */
 
-/* {{{ proto void readline_callback_read_char()
-   Informs the readline callback interface that a character is ready for input */
+/* {{{ Informs the readline callback interface that a character is ready for input */
 PHP_FUNCTION(readline_callback_read_char)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -565,8 +555,7 @@ PHP_FUNCTION(readline_callback_read_char)
 }
 /* }}} */
 
-/* {{{ proto bool readline_callback_handler_remove()
-   Removes a previously installed callback handler and restores terminal settings */
+/* {{{ Removes a previously installed callback handler and restores terminal settings */
 PHP_FUNCTION(readline_callback_handler_remove)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -583,8 +572,7 @@ PHP_FUNCTION(readline_callback_handler_remove)
 }
 /* }}} */
 
-/* {{{ proto void readline_redisplay(void)
-   Ask readline to redraw the display */
+/* {{{ Ask readline to redraw the display */
 PHP_FUNCTION(readline_redisplay)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -603,8 +591,7 @@ PHP_FUNCTION(readline_redisplay)
 #endif
 
 #if HAVE_RL_ON_NEW_LINE
-/* {{{ proto void readline_on_new_line(void)
-   Inform readline that the cursor has moved to a new line */
+/* {{{ Inform readline that the cursor has moved to a new line */
 PHP_FUNCTION(readline_on_new_line)
 {
 	if (zend_parse_parameters_none() == FAILURE) {

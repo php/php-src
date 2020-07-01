@@ -37,8 +37,7 @@ zend_class_entry
    	*php_com_exception_class_entry,
 	*php_com_saproxy_class_entry;
 
-/* {{{ com_dotnet_module_entry
- */
+/* {{{ com_dotnet_module_entry */
 zend_module_entry com_dotnet_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"com_dotnet",
@@ -64,8 +63,7 @@ ZEND_TSRMLS_CACHE_DEFINE()
 ZEND_GET_MODULE(com_dotnet)
 #endif
 
-/* {{{ PHP_INI
- */
+/* {{{ PHP_INI */
 
 /* com.typelib_file is the path to a file containing a
  * list of typelibraries to register *persistently*.
@@ -149,8 +147,7 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 /* }}} */
 
-/* {{{ PHP_GINIT_FUNCTION
- */
+/* {{{ PHP_GINIT_FUNCTION */
 static PHP_GINIT_FUNCTION(com_dotnet)
 {
 #if defined(COMPILE_DL_COM_DOTNET) && defined(ZTS)
@@ -161,8 +158,7 @@ static PHP_GINIT_FUNCTION(com_dotnet)
 }
 /* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION
- */
+/* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(com_dotnet)
 {
 	zend_class_entry ce, *tmp;
@@ -288,8 +284,7 @@ PHP_MINIT_FUNCTION(com_dotnet)
 }
 /* }}} */
 
-/* {{{ PHP_MSHUTDOWN_FUNCTION
- */
+/* {{{ PHP_MSHUTDOWN_FUNCTION */
 PHP_MSHUTDOWN_FUNCTION(com_dotnet)
 {
 	UNREGISTER_INI_ENTRIES();
@@ -305,8 +300,7 @@ PHP_MSHUTDOWN_FUNCTION(com_dotnet)
 }
 /* }}} */
 
-/* {{{ PHP_RINIT_FUNCTION
- */
+/* {{{ PHP_RINIT_FUNCTION */
 PHP_RINIT_FUNCTION(com_dotnet)
 {
 	COMG(rshutdown_started) = 0;
@@ -314,8 +308,7 @@ PHP_RINIT_FUNCTION(com_dotnet)
 }
 /* }}} */
 
-/* {{{ PHP_RSHUTDOWN_FUNCTION
- */
+/* {{{ PHP_RSHUTDOWN_FUNCTION */
 PHP_RSHUTDOWN_FUNCTION(com_dotnet)
 {
 #if HAVE_MSCOREE_H
@@ -328,8 +321,7 @@ PHP_RSHUTDOWN_FUNCTION(com_dotnet)
 }
 /* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
- */
+/* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(com_dotnet)
 {
 	php_info_print_table_start();

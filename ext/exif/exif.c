@@ -64,8 +64,7 @@ typedef unsigned char uchar;
 
 #define MAX_IFD_NESTING_LEVEL 150
 
-/* {{{ PHP_MINFO_FUNCTION
- */
+/* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(exif)
 {
 	php_info_print_table_start();
@@ -103,8 +102,7 @@ ZEND_DECLARE_MODULE_GLOBALS(exif)
 ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 
-/* {{{ PHP_INI
- */
+/* {{{ PHP_INI */
 
 ZEND_INI_MH(OnUpdateEncode)
 {
@@ -146,8 +144,7 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 /* }}} */
 
-/* {{{ PHP_GINIT_FUNCTION
- */
+/* {{{ PHP_GINIT_FUNCTION */
 static PHP_GINIT_FUNCTION(exif)
 {
 #if defined(COMPILE_DL_EXIF) && defined(ZTS)
@@ -163,8 +160,7 @@ static PHP_GINIT_FUNCTION(exif)
 }
 /* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION(exif)
- */
+/* {{{ PHP_MINIT_FUNCTION(exif) */
 PHP_MINIT_FUNCTION(exif)
 {
 	REGISTER_INI_ENTRIES();
@@ -177,8 +173,7 @@ PHP_MINIT_FUNCTION(exif)
 }
 /* }}} */
 
-/* {{{ PHP_MSHUTDOWN_FUNCTION
- */
+/* {{{ PHP_MSHUTDOWN_FUNCTION */
 PHP_MSHUTDOWN_FUNCTION(exif)
 {
 	UNREGISTER_INI_ENTRIES();
@@ -198,8 +193,7 @@ static const zend_module_dep exif_module_deps[] = {
 };
 /* }}} */
 
-/* {{{ exif_module_entry
- */
+/* {{{ exif_module_entry */
 zend_module_entry exif_module_entry = {
 	STANDARD_MODULE_HEADER_EX, NULL,
 	exif_module_deps,
@@ -236,8 +230,7 @@ static size_t php_strnlen(char* str, size_t maxlen) {
 }
 /* }}} */
 
-/* {{{ error messages
-*/
+/* {{{ error messages */
 static const char * EXIF_ERROR_FILEEOF   = "Unexpected end of file reached";
 static const char * EXIF_ERROR_CORRUPT   = "File structure corrupted";
 static const char * EXIF_ERROR_THUMBEOF  = "Thumbnail goes IFD boundary or end of file reached";
@@ -506,8 +499,7 @@ static char *exif_get_tagformat(int format)
 
 /* }}} */
 
-/* {{{ TabTable[]
- */
+/* {{{ TabTable[] */
 typedef const struct {
 	unsigned short Tag;
 	char *Desc;
@@ -1752,8 +1744,7 @@ static size_t exif_convert_any_to_int(void *value, int format, int motorola_inte
 }
 /* }}} */
 
-/* {{{ struct image_info_value, image_info_list
-*/
+/* {{{ struct image_info_value, image_info_list */
 #ifndef WORD
 #define WORD unsigned short
 #endif
@@ -2023,8 +2014,7 @@ static void exif_error_docref(const char *docref EXIFERR_DC, image_info_type *Im
 }
 /* }}} */
 
-/* {{{ jpeg_sof_info
- */
+/* {{{ jpeg_sof_info */
 typedef struct {
 	int     bits_per_sample;
 	size_t  width;
@@ -2752,8 +2742,7 @@ static char * exif_get_markername(int marker)
 #endif
 /* }}} */
 
-/* {{{ proto string exif_tagname(int index)
-	Get headername for index or false if not defined */
+/* {{{ Get headername for index or false if not defined */
 PHP_FUNCTION(exif_tagname)
 {
 	zend_long tag;
@@ -4341,8 +4330,7 @@ static bool exif_discard_imageinfo(image_info_type *ImageInfo)
 }
 /* }}} */
 
-/* {{{ exif_read_from_impl
- */
+/* {{{ exif_read_from_impl */
 static bool exif_read_from_impl(image_info_type *ImageInfo, php_stream *stream, int read_thumbnail, int read_all)
 {
 	bool ret;
@@ -4404,8 +4392,7 @@ static bool exif_read_from_impl(image_info_type *ImageInfo, php_stream *stream, 
 }
 /* }}} */
 
-/* {{{ exif_read_from_stream
- */
+/* {{{ exif_read_from_stream */
 static bool exif_read_from_stream(image_info_type *ImageInfo, php_stream *stream, int read_thumbnail, int read_all)
 {
 	bool ret;
@@ -4425,8 +4412,7 @@ static bool exif_read_from_stream(image_info_type *ImageInfo, php_stream *stream
 }
 /* }}} */
 
-/* {{{ exif_read_from_file
- */
+/* {{{ exif_read_from_file */
 static bool exif_read_from_file(image_info_type *ImageInfo, char *FileName, int read_thumbnail, int read_all)
 {
 	bool ret;
@@ -4450,8 +4436,7 @@ static bool exif_read_from_file(image_info_type *ImageInfo, char *FileName, int 
 }
 /* }}} */
 
-/* {{{ proto array exif_read_data(mixed stream [, string sections_needed [, bool sub_arrays[, bool read_thumbnail]]])
-   Reads header data from an image and optionally reads the internal thumbnails */
+/* {{{ Reads header data from an image and optionally reads the internal thumbnails */
 PHP_FUNCTION(exif_read_data)
 {
 	zend_string *z_sections_needed = NULL;
@@ -4654,8 +4639,7 @@ PHP_FUNCTION(exif_read_data)
 }
 /* }}} */
 
-/* {{{ proto string exif_thumbnail(string filename [, &width, &height [, &imagetype]])
-   Reads the embedded thumbnail */
+/* {{{ Reads the embedded thumbnail */
 PHP_FUNCTION(exif_thumbnail)
 {
 	bool ret;
@@ -4738,8 +4722,7 @@ PHP_FUNCTION(exif_thumbnail)
 }
 /* }}} */
 
-/* {{{ proto int exif_imagetype(string imagefile)
-   Get the type of an image */
+/* {{{ Get the type of an image */
 PHP_FUNCTION(exif_imagetype)
 {
 	char *imagefile;

@@ -21,9 +21,7 @@
 #include "intl_error.h"
 #include "common_error.h"
 
-/* {{{ proto int intl_get_error_code()
- * Get code of the last occurred error.
- */
+/* {{{ Get code of the last occurred error. */
 PHP_FUNCTION( intl_get_error_code )
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -34,9 +32,7 @@ PHP_FUNCTION( intl_get_error_code )
 }
 /* }}} */
 
-/* {{{ proto string intl_get_error_message()
- * Get text description of the last occurred error.
- */
+/* {{{ Get text description of the last occurred error. */
 PHP_FUNCTION( intl_get_error_message )
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -47,8 +43,7 @@ PHP_FUNCTION( intl_get_error_message )
 }
 /* }}} */
 
-/* {{{ proto bool intl_is_failure()
- * Check whether the given error code indicates a failure.
+/* {{{ Check whether the given error code indicates a failure.
  * Returns true if it does, and false if the code
  * indicates success or a warning.
  */
@@ -67,8 +62,7 @@ PHP_FUNCTION( intl_is_failure )
 }
 /* }}} */
 
-/* {{{ proto string intl_error_name()
- * Return a string for a given error code.
+/* {{{ Return a string for a given error code.
  * The string will be the same as the name of the error code constant.
  */
 PHP_FUNCTION( intl_error_name )

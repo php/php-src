@@ -155,8 +155,7 @@ static zend_always_inline php_hrtime_t _timer_current(void)
 	} while (0)
 #endif
 
-/* {{{ proto mixed hrtime([bool get_as_number = false])
-	Returns an array of integers in form [seconds, nanoseconds] counted
+/* {{{ Returns an array of integers in form [seconds, nanoseconds] counted
 	from an arbitrary point in time. If an optional boolean argument is
 	passed, returns an integer on 64-bit platforms or float on 32-bit
 	containing the current high-resolution time in nanoseconds. The

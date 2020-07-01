@@ -38,8 +38,7 @@
 #endif
 #endif /* defined(HAVE_LIBDL) */
 
-/* {{{ proto bool dl(string extension_filename)
-   Load a PHP extension at runtime */
+/* {{{ Load a PHP extension at runtime */
 PHPAPI PHP_FUNCTION(dl)
 {
 	char *filename;
@@ -68,8 +67,7 @@ PHPAPI PHP_FUNCTION(dl)
 
 #if defined(HAVE_LIBDL)
 
-/* {{{ php_load_shlib
- */
+/* {{{ php_load_shlib */
 PHPAPI void *php_load_shlib(const char *path, char **errp)
 {
 	void *handle;
@@ -96,8 +94,7 @@ PHPAPI void *php_load_shlib(const char *path, char **errp)
 }
 /* }}} */
 
-/* {{{ php_load_extension
- */
+/* {{{ php_load_extension */
 PHPAPI int php_load_extension(const char *filename, int type, int start_now)
 {
 	void *handle;
@@ -265,8 +262,7 @@ PHPAPI int php_load_extension(const char *filename, int type, int start_now)
 
 #endif
 
-/* {{{ php_dl
- */
+/* {{{ php_dl */
 PHPAPI void php_dl(const char *file, int type, zval *return_value, int start_now)
 {
     /* Load extension */

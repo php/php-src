@@ -193,8 +193,7 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, zend_bool should_throw)
 }
 /* }}} */
 
-/* {{{ proto string random_bytes(int length)
-Return an arbitrary length of pseudo-random bytes as binary string */
+/* {{{ Return an arbitrary length of pseudo-random bytes as binary string */
 PHP_FUNCTION(random_bytes)
 {
 	zend_long size;
@@ -266,8 +265,7 @@ PHPAPI int php_random_int(zend_long min, zend_long max, zend_long *result, zend_
 }
 /* }}} */
 
-/* {{{ proto int random_int(int min, int max)
-Return an arbitrary pseudo-random integer */
+/* {{{ Return an arbitrary pseudo-random integer */
 PHP_FUNCTION(random_int)
 {
 	zend_long min;

@@ -67,8 +67,7 @@ PHPAPI char *php_std_date(time_t t)
 char *strptime(const char *s, const char *format, struct tm *tm);
 #endif
 
-/* {{{ proto array|false strptime(string timestamp, string format)
-   Parse a time/date generated with strftime() */
+/* {{{ Parse a time/date generated with strftime() */
 PHP_FUNCTION(strptime)
 {
 	char      *ts;

@@ -752,16 +752,14 @@ void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, zend_long cto
 }
 /* }}} */
 
-/* {{{ proto DirectoryIterator::__construct(string path)
- Cronstructs a new dir iterator from a path. */
+/* {{{ Cronstructs a new dir iterator from a path. */
 PHP_METHOD(DirectoryIterator, __construct)
 {
 	spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
-/* {{{ proto void DirectoryIterator::rewind()
-   Rewind dir back to the start */
+/* {{{ Rewind dir back to the start */
 PHP_METHOD(DirectoryIterator, rewind)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -778,8 +776,7 @@ PHP_METHOD(DirectoryIterator, rewind)
 }
 /* }}} */
 
-/* {{{ proto string DirectoryIterator::key()
-   Return current dir entry */
+/* {{{ Return current dir entry */
 PHP_METHOD(DirectoryIterator, key)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -796,8 +793,7 @@ PHP_METHOD(DirectoryIterator, key)
 }
 /* }}} */
 
-/* {{{ proto DirectoryIterator DirectoryIterator::current()
-   Return this (needed for Iterator interface) */
+/* {{{ Return this (needed for Iterator interface) */
 PHP_METHOD(DirectoryIterator, current)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -807,8 +803,7 @@ PHP_METHOD(DirectoryIterator, current)
 }
 /* }}} */
 
-/* {{{ proto void DirectoryIterator::next()
-   Move to next entry */
+/* {{{ Move to next entry */
 PHP_METHOD(DirectoryIterator, next)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -829,8 +824,7 @@ PHP_METHOD(DirectoryIterator, next)
 }
 /* }}} */
 
-/* {{{ proto void DirectoryIterator::seek(int position)
-   Seek to the given position */
+/* {{{ Seek to the given position */
 PHP_METHOD(DirectoryIterator, seek)
 {
 	spl_filesystem_object *intern    = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -859,8 +853,7 @@ PHP_METHOD(DirectoryIterator, seek)
 	}
 } /* }}} */
 
-/* {{{ proto string DirectoryIterator::valid()
-   Check whether dir contains more entries */
+/* {{{ Check whether dir contains more entries */
 PHP_METHOD(DirectoryIterator, valid)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -873,8 +866,7 @@ PHP_METHOD(DirectoryIterator, valid)
 }
 /* }}} */
 
-/* {{{ proto string SplFileInfo::getPath()
-   Return the path */
+/* {{{ Return the path */
 PHP_METHOD(SplFileInfo, getPath)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -894,8 +886,7 @@ PHP_METHOD(SplFileInfo, getPath)
 }
 /* }}} */
 
-/* {{{ proto string SplFileInfo::getFilename()
-   Return filename only */
+/* {{{ Return filename only */
 PHP_METHOD(SplFileInfo, getFilename)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -915,8 +906,7 @@ PHP_METHOD(SplFileInfo, getFilename)
 }
 /* }}} */
 
-/* {{{ proto string DirectoryIterator::getFilename()
-   Return filename of current dir entry */
+/* {{{ Return filename of current dir entry */
 PHP_METHOD(DirectoryIterator, getFilename)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -929,8 +919,7 @@ PHP_METHOD(DirectoryIterator, getFilename)
 }
 /* }}} */
 
-/* {{{ proto string SplFileInfo::getExtension()
-   Returns file extension component of path */
+/* {{{ Returns file extension component of path */
 PHP_METHOD(SplFileInfo, getExtension)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -970,8 +959,7 @@ PHP_METHOD(SplFileInfo, getExtension)
 }
 /* }}}*/
 
-/* {{{ proto string DirectoryIterator::getExtension()
-   Returns the file extension component of path */
+/* {{{ Returns the file extension component of path */
 PHP_METHOD(DirectoryIterator, getExtension)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -997,8 +985,7 @@ PHP_METHOD(DirectoryIterator, getExtension)
 }
 /* }}} */
 
-/* {{{ proto string SplFileInfo::getBasename([string $suffix])
-   Returns filename component of path */
+/* {{{ Returns filename component of path */
 PHP_METHOD(SplFileInfo, getBasename)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -1024,8 +1011,7 @@ PHP_METHOD(SplFileInfo, getBasename)
 }
 /* }}}*/
 
-/* {{{ proto string DirectoryIterator::getBasename([string $suffix])
-   Returns filename component of current dir entry */
+/* {{{ Returns filename component of current dir entry */
 PHP_METHOD(DirectoryIterator, getBasename)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -1043,8 +1029,7 @@ PHP_METHOD(DirectoryIterator, getBasename)
 }
 /* }}} */
 
-/* {{{ proto string SplFileInfo::getPathname()
-   Return path and filename */
+/* {{{ Return path and filename */
 PHP_METHOD(SplFileInfo, getPathname)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -1063,8 +1048,7 @@ PHP_METHOD(SplFileInfo, getPathname)
 }
 /* }}} */
 
-/* {{{ proto string FilesystemIterator::key()
-   Return getPathname() or getFilename() depending on flags */
+/* {{{ Return getPathname() or getFilename() depending on flags */
 PHP_METHOD(FilesystemIterator, key)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -1082,8 +1066,7 @@ PHP_METHOD(FilesystemIterator, key)
 }
 /* }}} */
 
-/* {{{ proto string FilesystemIterator::current()
-   Return getFilename(), getFileInfo() or $this depending on flags */
+/* {{{ Return getFilename(), getFileInfo() or $this depending on flags */
 PHP_METHOD(FilesystemIterator, current)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -1104,8 +1087,7 @@ PHP_METHOD(FilesystemIterator, current)
 }
 /* }}} */
 
-/* {{{ proto bool DirectoryIterator::isDot()
-   Returns true if current entry is '.' or  '..' */
+/* {{{ Returns true if current entry is '.' or  '..' */
 PHP_METHOD(DirectoryIterator, isDot)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -1118,8 +1100,7 @@ PHP_METHOD(DirectoryIterator, isDot)
 }
 /* }}} */
 
-/* {{{ proto SplFileInfo::__construct(string file_name)
- Cronstructs a new SplFileInfo from a path. */
+/* {{{ Cronstructs a new SplFileInfo from a path. */
 /* When the constructor gets called the object is already created
    by the engine, so we must only call 'additional' initializations.
  */
@@ -1158,83 +1139,67 @@ PHP_METHOD(SplFileInfo, func_name) \
 }
 /* }}} */
 
-/* {{{ proto int SplFileInfo::getPerms()
-   Get file permissions */
+/* {{{ Get file permissions */
 FileInfoFunction(getPerms, FS_PERMS)
 /* }}} */
 
-/* {{{ proto int SplFileInfo::getInode()
-   Get file inode */
+/* {{{ Get file inode */
 FileInfoFunction(getInode, FS_INODE)
 /* }}} */
 
-/* {{{ proto int SplFileInfo::getSize()
-   Get file size */
+/* {{{ Get file size */
 FileInfoFunction(getSize, FS_SIZE)
 /* }}} */
 
-/* {{{ proto int SplFileInfo::getOwner()
-   Get file owner */
+/* {{{ Get file owner */
 FileInfoFunction(getOwner, FS_OWNER)
 /* }}} */
 
-/* {{{ proto int SplFileInfo::getGroup()
-   Get file group */
+/* {{{ Get file group */
 FileInfoFunction(getGroup, FS_GROUP)
 /* }}} */
 
-/* {{{ proto int SplFileInfo::getATime()
-   Get last access time of file */
+/* {{{ Get last access time of file */
 FileInfoFunction(getATime, FS_ATIME)
 /* }}} */
 
-/* {{{ proto int SplFileInfo::getMTime()
-   Get last modification time of file */
+/* {{{ Get last modification time of file */
 FileInfoFunction(getMTime, FS_MTIME)
 /* }}} */
 
-/* {{{ proto int SplFileInfo::getCTime()
-   Get inode modification time of file */
+/* {{{ Get inode modification time of file */
 FileInfoFunction(getCTime, FS_CTIME)
 /* }}} */
 
-/* {{{ proto string SplFileInfo::getType()
-   Get file type */
+/* {{{ Get file type */
 FileInfoFunction(getType, FS_TYPE)
 /* }}} */
 
-/* {{{ proto bool SplFileInfo::isWritable()
-   Returns true if file can be written */
+/* {{{ Returns true if file can be written */
 FileInfoFunction(isWritable, FS_IS_W)
 /* }}} */
 
-/* {{{ proto bool SplFileInfo::isReadable()
-   Returns true if file can be read */
+/* {{{ Returns true if file can be read */
 FileInfoFunction(isReadable, FS_IS_R)
 /* }}} */
 
-/* {{{ proto bool SplFileInfo::isExecutable()
-   Returns true if file is executable */
+/* {{{ Returns true if file is executable */
 FileInfoFunction(isExecutable, FS_IS_X)
 /* }}} */
 
-/* {{{ proto bool SplFileInfo::isFile()
-   Returns true if file is a regular file */
+/* {{{ Returns true if file is a regular file */
 FileInfoFunction(isFile, FS_IS_FILE)
 /* }}} */
 
-/* {{{ proto bool SplFileInfo::isDir()
-   Returns true if file is directory */
+/* {{{ Returns true if file is directory */
 FileInfoFunction(isDir, FS_IS_DIR)
 /* }}} */
 
-/* {{{ proto bool SplFileInfo::isLink()
-   Returns true if file is symbolic link */
+/* {{{ Returns true if file is symbolic link */
 FileInfoFunction(isLink, FS_IS_LINK)
 /* }}} */
 
-/* {{{ proto string SplFileInfo::getLinkTarget()
-   Return the target of a symbolic link */
+/* {{{ Return the target of a symbolic link */
 PHP_METHOD(SplFileInfo, getLinkTarget)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -1283,8 +1248,7 @@ PHP_METHOD(SplFileInfo, getLinkTarget)
 }
 /* }}} */
 
-/* {{{ proto string SplFileInfo::getRealPath()
-   Return the resolved path */
+/* {{{ Return the resolved path */
 PHP_METHOD(SplFileInfo, getRealPath)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -1324,8 +1288,7 @@ PHP_METHOD(SplFileInfo, getRealPath)
 }
 /* }}} */
 
-/* {{{ proto SplFileObject SplFileInfo::openFile([string mode = 'r' [, bool use_include_path  [, resource context]]])
-   Open the current file */
+/* {{{ Open the current file */
 PHP_METHOD(SplFileInfo, openFile)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -1334,8 +1297,7 @@ PHP_METHOD(SplFileInfo, openFile)
 }
 /* }}} */
 
-/* {{{ proto void SplFileInfo::setFileClass([string class_name])
-   Class to use in openFile() */
+/* {{{ Class to use in openFile() */
 PHP_METHOD(SplFileInfo, setFileClass)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -1349,8 +1311,7 @@ PHP_METHOD(SplFileInfo, setFileClass)
 }
 /* }}} */
 
-/* {{{ proto void SplFileInfo::setInfoClass([string class_name])
-   Class to use in getFileInfo(), getPathInfo() */
+/* {{{ Class to use in getFileInfo(), getPathInfo() */
 PHP_METHOD(SplFileInfo, setInfoClass)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -1364,8 +1325,7 @@ PHP_METHOD(SplFileInfo, setInfoClass)
 }
 /* }}} */
 
-/* {{{ proto SplFileInfo SplFileInfo::getFileInfo([string $class_name])
-   Get/copy file info */
+/* {{{ Get/copy file info */
 PHP_METHOD(SplFileInfo, getFileInfo)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -1379,8 +1339,7 @@ PHP_METHOD(SplFileInfo, getFileInfo)
 }
 /* }}} */
 
-/* {{{ proto SplFileInfo SplFileInfo::getPathInfo([string $class_name])
-   Get/copy file info */
+/* {{{ Get/copy file info */
 PHP_METHOD(SplFileInfo, getPathInfo)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -1402,7 +1361,7 @@ PHP_METHOD(SplFileInfo, getPathInfo)
 }
 /* }}} */
 
-/* {{{ proto void SplFileInfo::__debugInfo() */
+/* {{{ */
 PHP_METHOD(SplFileInfo, __debugInfo)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1412,7 +1371,7 @@ PHP_METHOD(SplFileInfo, __debugInfo)
 	RETURN_ARR(spl_filesystem_object_get_debug_info(Z_OBJ_P(ZEND_THIS)));
 } /* }}} */
 
-/* {{{  proto SplFileInfo::_bad_state_ex(void) */
+/* {{{ */
 PHP_METHOD(SplFileInfo, _bad_state_ex)
 {
 	zend_throw_exception_ex(spl_ce_LogicException, 0,
@@ -1421,16 +1380,14 @@ PHP_METHOD(SplFileInfo, _bad_state_ex)
 }
 /* }}} */
 
-/* {{{ proto FilesystemIterator::__construct(string path [, int flags])
- Cronstructs a new dir iterator from a path. */
+/* {{{ Cronstructs a new dir iterator from a path. */
 PHP_METHOD(FilesystemIterator, __construct)
 {
 	spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, DIT_CTOR_FLAGS | SPL_FILE_DIR_SKIPDOTS);
 }
 /* }}} */
 
-/* {{{ proto void FilesystemIterator::rewind()
-   Rewind dir back to the start */
+/* {{{ Rewind dir back to the start */
 PHP_METHOD(FilesystemIterator, rewind)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -1450,8 +1407,7 @@ PHP_METHOD(FilesystemIterator, rewind)
 }
 /* }}} */
 
-/* {{{ proto int FilesystemIterator::getFlags()
-   Get handling flags */
+/* {{{ Get handling flags */
 PHP_METHOD(FilesystemIterator, getFlags)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -1463,8 +1419,7 @@ PHP_METHOD(FilesystemIterator, getFlags)
 	RETURN_LONG(intern->flags & (SPL_FILE_DIR_KEY_MODE_MASK | SPL_FILE_DIR_CURRENT_MODE_MASK | SPL_FILE_DIR_OTHERS_MASK));
 } /* }}} */
 
-/* {{{ proto void FilesystemIterator::setFlags(long $flags)
-   Set handling flags */
+/* {{{ Set handling flags */
 PHP_METHOD(FilesystemIterator, setFlags)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -1478,8 +1433,7 @@ PHP_METHOD(FilesystemIterator, setFlags)
 	intern->flags |= ((SPL_FILE_DIR_KEY_MODE_MASK|SPL_FILE_DIR_CURRENT_MODE_MASK|SPL_FILE_DIR_OTHERS_MASK) & flags);
 } /* }}} */
 
-/* {{{ proto bool RecursiveDirectoryIterator::hasChildren([bool $allow_links = false])
-   Returns whether current entry is a directory and not '.' or '..' */
+/* {{{ Returns whether current entry is a directory and not '.' or '..' */
 PHP_METHOD(RecursiveDirectoryIterator, hasChildren)
 {
 	zend_bool allow_links = 0;
@@ -1503,8 +1457,7 @@ PHP_METHOD(RecursiveDirectoryIterator, hasChildren)
 }
 /* }}} */
 
-/* {{{ proto RecursiveDirectoryIterator DirectoryIterator::getChildren()
-   Returns an iterator for the current entry if it is a directory */
+/* {{{ Returns an iterator for the current entry if it is a directory */
 PHP_METHOD(RecursiveDirectoryIterator, getChildren)
 {
 	zval zpath, zflags;
@@ -1538,8 +1491,7 @@ PHP_METHOD(RecursiveDirectoryIterator, getChildren)
 }
 /* }}} */
 
-/* {{{ proto void RecursiveDirectoryIterator::getSubPath()
-   Get sub path */
+/* {{{ Get sub path */
 PHP_METHOD(RecursiveDirectoryIterator, getSubPath)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -1556,8 +1508,7 @@ PHP_METHOD(RecursiveDirectoryIterator, getSubPath)
 }
 /* }}} */
 
-/* {{{ proto void RecursiveDirectoryIterator::getSubPathname()
-   Get sub path and file name */
+/* {{{ Get sub path and file name */
 PHP_METHOD(RecursiveDirectoryIterator, getSubPathname)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -1575,8 +1526,7 @@ PHP_METHOD(RecursiveDirectoryIterator, getSubPathname)
 }
 /* }}} */
 
-/* {{{ proto RecursiveDirectoryIterator::__construct(string path [, int flags])
- Cronstructs a new dir iterator from a path. */
+/* {{{ Cronstructs a new dir iterator from a path. */
 PHP_METHOD(RecursiveDirectoryIterator, __construct)
 {
 	spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, DIT_CTOR_FLAGS);
@@ -1584,16 +1534,14 @@ PHP_METHOD(RecursiveDirectoryIterator, __construct)
 /* }}} */
 
 #ifdef HAVE_GLOB
-/* {{{ proto GlobIterator::__construct(string path [, int flags])
- Cronstructs a new dir iterator from a glob expression (no glob:// needed). */
+/* {{{ Cronstructs a new dir iterator from a glob expression (no glob:// needed). */
 PHP_METHOD(GlobIterator, __construct)
 {
 	spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, DIT_CTOR_FLAGS|DIT_CTOR_GLOB);
 }
 /* }}} */
 
-/* {{{ proto int GlobIterator::count()
-   Return the number of directories and files found by globbing */
+/* {{{ Return the number of directories and files found by globbing */
 PHP_METHOD(GlobIterator, count)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -2115,8 +2063,7 @@ static void spl_filesystem_file_rewind(zval * this_ptr, spl_filesystem_object *i
 	}
 } /* }}} */
 
-/* {{{ proto SplFileObject::__construct(string filename [, string mode = 'r' [, bool use_include_path  [, resource context]]]])
-   Construct a new file object */
+/* {{{ Construct a new file object */
 PHP_METHOD(SplFileObject, __construct)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -2175,8 +2122,7 @@ PHP_METHOD(SplFileObject, __construct)
 
 } /* }}} */
 
-/* {{{ proto SplTempFileObject::__construct([int max_memory])
-   Construct a new temp file object */
+/* {{{ Construct a new temp file object */
 PHP_METHOD(SplTempFileObject, __construct)
 {
 	zend_long max_memory = PHP_STREAM_MAX_MEM;
@@ -2209,8 +2155,7 @@ PHP_METHOD(SplTempFileObject, __construct)
 	zend_restore_error_handling(&error_handling);
 } /* }}} */
 
-/* {{{ proto void SplFileObject::rewind()
-   Rewind the file and read the first line */
+/* {{{ Rewind the file and read the first line */
 PHP_METHOD(SplFileObject, rewind)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -2222,8 +2167,7 @@ PHP_METHOD(SplFileObject, rewind)
 	spl_filesystem_file_rewind(ZEND_THIS, intern);
 } /* }}} */
 
-/* {{{ proto void SplFileObject::eof()
-   Return whether end of file is reached */
+/* {{{ Return whether end of file is reached */
 PHP_METHOD(SplFileObject, eof)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -2240,8 +2184,7 @@ PHP_METHOD(SplFileObject, eof)
 	RETURN_BOOL(php_stream_eof(intern->u.file.stream));
 } /* }}} */
 
-/* {{{ proto void SplFileObject::valid()
-   Return !eof() */
+/* {{{ Return !eof() */
 PHP_METHOD(SplFileObject, valid)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -2260,8 +2203,7 @@ PHP_METHOD(SplFileObject, valid)
 	}
 } /* }}} */
 
-/* {{{ proto string SplFileObject::fgets()
-   Return next line from file */
+/* {{{ Return next line from file */
 PHP_METHOD(SplFileObject, fgets)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -2281,8 +2223,7 @@ PHP_METHOD(SplFileObject, fgets)
 	RETURN_STRINGL(intern->u.file.current_line, intern->u.file.current_line_len);
 } /* }}} */
 
-/* {{{ proto string SplFileObject::current()
-   Return current line from file */
+/* {{{ Return current line from file */
 PHP_METHOD(SplFileObject, current)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -2310,8 +2251,7 @@ PHP_METHOD(SplFileObject, current)
 	RETURN_FALSE;
 } /* }}} */
 
-/* {{{ proto int SplFileObject::key()
-   Return line number */
+/* {{{ Return line number */
 PHP_METHOD(SplFileObject, key)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -2327,8 +2267,7 @@ PHP_METHOD(SplFileObject, key)
 	RETURN_LONG(intern->u.file.current_line_num);
 } /* }}} */
 
-/* {{{ proto void SplFileObject::next()
-   Read next line */
+/* {{{ Read next line */
 PHP_METHOD(SplFileObject, next)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -2344,8 +2283,7 @@ PHP_METHOD(SplFileObject, next)
 	intern->u.file.current_line_num++;
 } /* }}} */
 
-/* {{{ proto void SplFileObject::setFlags(int flags)
-   Set file handling flags */
+/* {{{ Set file handling flags */
 PHP_METHOD(SplFileObject, setFlags)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -2355,8 +2293,7 @@ PHP_METHOD(SplFileObject, setFlags)
 	}
 } /* }}} */
 
-/* {{{ proto int SplFileObject::getFlags()
-   Get file handling flags */
+/* {{{ Get file handling flags */
 PHP_METHOD(SplFileObject, getFlags)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -2368,8 +2305,7 @@ PHP_METHOD(SplFileObject, getFlags)
 	RETURN_LONG(intern->flags & SPL_FILE_OBJECT_MASK);
 } /* }}} */
 
-/* {{{ proto void SplFileObject::setMaxLineLen(int max_len)
-   Set maximum line length */
+/* {{{ Set maximum line length */
 PHP_METHOD(SplFileObject, setMaxLineLen)
 {
 	zend_long max_len;
@@ -2388,8 +2324,7 @@ PHP_METHOD(SplFileObject, setMaxLineLen)
 	intern->u.file.max_line_len = max_len;
 } /* }}} */
 
-/* {{{ proto int SplFileObject::getMaxLineLen()
-   Get maximum line length */
+/* {{{ Get maximum line length */
 PHP_METHOD(SplFileObject, getMaxLineLen)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -2401,8 +2336,7 @@ PHP_METHOD(SplFileObject, getMaxLineLen)
 	RETURN_LONG((zend_long)intern->u.file.max_line_len);
 } /* }}} */
 
-/* {{{ proto bool SplFileObject::hasChildren()
-   Return false */
+/* {{{ Return false */
 PHP_METHOD(SplFileObject, hasChildren)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -2412,8 +2346,7 @@ PHP_METHOD(SplFileObject, hasChildren)
 	RETURN_FALSE;
 } /* }}} */
 
-/* {{{ proto bool SplFileObject::getChildren()
-   Read NULL */
+/* {{{ Read NULL */
 PHP_METHOD(SplFileObject, getChildren)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -2431,8 +2364,7 @@ PHP_METHOD(SplFileObject, func_name) \
 }
 /* }}} */
 
-/* {{{ proto array SplFileObject::fgetcsv([string delimiter [, string enclosure [, escape = '\\']]])
-   Return current line as csv */
+/* {{{ Return current line as csv */
 PHP_METHOD(SplFileObject, fgetcsv)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -2483,8 +2415,7 @@ PHP_METHOD(SplFileObject, fgetcsv)
 }
 /* }}} */
 
-/* {{{ proto int SplFileObject::fputcsv(array fields, [string delimiter [, string enclosure [, string escape]]])
-   Output a field array as a CSV line */
+/* {{{ Output a field array as a CSV line */
 PHP_METHOD(SplFileObject, fputcsv)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -2538,8 +2469,7 @@ PHP_METHOD(SplFileObject, fputcsv)
 }
 /* }}} */
 
-/* {{{ proto void SplFileObject::setCsvControl([string delimiter [, string enclosure [, string escape ]]])
-   Set the delimiter, enclosure and escape character used in fgetcsv */
+/* {{{ Set the delimiter, enclosure and escape character used in fgetcsv */
 PHP_METHOD(SplFileObject, setCsvControl)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -2588,8 +2518,7 @@ PHP_METHOD(SplFileObject, setCsvControl)
 }
 /* }}} */
 
-/* {{{ proto array SplFileObject::getCsvControl()
-   Get the delimiter, enclosure and escape character used in fgetcsv */
+/* {{{ Get the delimiter, enclosure and escape character used in fgetcsv */
 PHP_METHOD(SplFileObject, getCsvControl)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -2614,13 +2543,11 @@ PHP_METHOD(SplFileObject, getCsvControl)
 }
 /* }}} */
 
-/* {{{ proto bool SplFileObject::flock(int operation [, int &wouldblock])
-   Portable file locking */
+/* {{{ Portable file locking */
 FileFunction(flock)
 /* }}} */
 
-/* {{{ proto bool SplFileObject::fflush()
-   Flush the file */
+/* {{{ Flush the file */
 PHP_METHOD(SplFileObject, fflush)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -2633,8 +2560,7 @@ PHP_METHOD(SplFileObject, fflush)
 	RETURN_BOOL(!php_stream_flush(intern->u.file.stream));
 } /* }}} */
 
-/* {{{ proto int SplFileObject::ftell()
-   Return current file position */
+/* {{{ Return current file position */
 PHP_METHOD(SplFileObject, ftell)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -2654,8 +2580,7 @@ PHP_METHOD(SplFileObject, ftell)
 	}
 } /* }}} */
 
-/* {{{ proto int SplFileObject::fseek(int pos [, int whence = SEEK_SET])
-   Return current file position */
+/* {{{ Return current file position */
 PHP_METHOD(SplFileObject, fseek)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -2674,8 +2599,7 @@ PHP_METHOD(SplFileObject, fseek)
 	RETURN_LONG(php_stream_seek(intern->u.file.stream, pos, (int)whence));
 } /* }}} */
 
-/* {{{ proto int SplFileObject::fgetc()
-   Get a character form the file */
+/* {{{ Get a character form the file */
 PHP_METHOD(SplFileObject, fgetc)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -2704,8 +2628,7 @@ PHP_METHOD(SplFileObject, fgetc)
 	}
 } /* }}} */
 
-/* {{{ proto int SplFileObject::fpassthru()
-   Output all remaining data from a file pointer */
+/* {{{ Output all remaining data from a file pointer */
 PHP_METHOD(SplFileObject, fpassthru)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -2718,8 +2641,7 @@ PHP_METHOD(SplFileObject, fpassthru)
 	RETURN_LONG(php_stream_passthru(intern->u.file.stream));
 } /* }}} */
 
-/* {{{ proto bool SplFileObject::fscanf(string format [, string ...])
-   Implements a mostly ANSI compatible fscanf() */
+/* {{{ Implements a mostly ANSI compatible fscanf() */
 PHP_METHOD(SplFileObject, fscanf)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -2736,8 +2658,7 @@ PHP_METHOD(SplFileObject, fscanf)
 }
 /* }}} */
 
-/* {{{ proto int|false SplFileObject::fwrite(string str [, int length])
-   Binary-safe file write */
+/* {{{ Binary-safe file write */
 PHP_METHOD(SplFileObject, fwrite)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -2801,13 +2722,11 @@ PHP_METHOD(SplFileObject, fread)
 	RETURN_STR(str);
 }
 
-/* {{{ proto bool SplFileObject::fstat()
-   Stat() on a filehandle */
+/* {{{ Stat() on a filehandle */
 FileFunction(fstat)
 /* }}} */
 
-/* {{{ proto bool SplFileObject::ftruncate(int size)
-   Truncate file to 'size' length */
+/* {{{ Truncate file to 'size' length */
 PHP_METHOD(SplFileObject, ftruncate)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -2830,8 +2749,7 @@ PHP_METHOD(SplFileObject, ftruncate)
 	RETURN_BOOL(0 == php_stream_truncate_set_size(intern->u.file.stream, size));
 } /* }}} */
 
-/* {{{ proto void SplFileObject::seek(int line_pos)
-   Seek to specified line */
+/* {{{ Seek to specified line */
 PHP_METHOD(SplFileObject, seek)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -2859,8 +2777,7 @@ PHP_METHOD(SplFileObject, seek)
 	}
 } /* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION(spl_directory)
- */
+/* {{{ PHP_MINIT_FUNCTION(spl_directory) */
 PHP_MINIT_FUNCTION(spl_directory)
 {
 	REGISTER_SPL_STD_CLASS_EX(SplFileInfo, spl_filesystem_object_new, class_SplFileInfo_methods);

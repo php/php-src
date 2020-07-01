@@ -109,8 +109,7 @@ SAPI_API void sapi_free_header(sapi_header_struct *sapi_header)
 	efree(sapi_header->header);
 }
 
-/* {{{ proto bool header_register_callback(mixed callback)
-   call a header function */
+/* {{{ call a header function */
 PHP_FUNCTION(header_register_callback)
 {
 	zval *callback_func;

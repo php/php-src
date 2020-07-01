@@ -78,8 +78,7 @@ static int big_endian_longlong_map[8];
 static int little_endian_longlong_map[8];
 #endif
 
-/* {{{ php_pack
- */
+/* {{{ php_pack */
 static void php_pack(zval *val, size_t size, int *map, char *output)
 {
 	size_t i;
@@ -94,8 +93,7 @@ static void php_pack(zval *val, size_t size, int *map, char *output)
 }
 /* }}} */
 
-/* {{{ php_pack_reverse_int32
- */
+/* {{{ php_pack_reverse_int32 */
 static inline uint32_t php_pack_reverse_int32(uint32_t arg)
 {
     uint32_t result;
@@ -105,8 +103,7 @@ static inline uint32_t php_pack_reverse_int32(uint32_t arg)
 }
 /* }}} */
 
-/* {{{ php_pack
- */
+/* {{{ php_pack */
 static inline uint64_t php_pack_reverse_int64(uint64_t arg)
 {
 	union Swap64 {
@@ -121,8 +118,7 @@ static inline uint64_t php_pack_reverse_int64(uint64_t arg)
 }
 /* }}} */
 
-/* {{{ php_pack_copy_float
- */
+/* {{{ php_pack_copy_float */
 static void php_pack_copy_float(int is_little_endian, void * dst, float f)
 {
 	union Copy32 {
@@ -145,8 +141,7 @@ static void php_pack_copy_float(int is_little_endian, void * dst, float f)
 }
 /* }}} */
 
-/* {{{ php_pack_copy_double
- */
+/* {{{ php_pack_copy_double */
 static void php_pack_copy_double(int is_little_endian, void * dst, double d)
 {
 	union Copy64 {
@@ -169,8 +164,7 @@ static void php_pack_copy_double(int is_little_endian, void * dst, double d)
 }
 /* }}} */
 
-/* {{{ php_pack_parse_float
- */
+/* {{{ php_pack_parse_float */
 static float php_pack_parse_float(int is_little_endian, void * src)
 {
 	union Copy32 {
@@ -193,8 +187,7 @@ static float php_pack_parse_float(int is_little_endian, void * src)
 }
 /* }}} */
 
-/* {{{ php_pack_parse_double
- */
+/* {{{ php_pack_parse_double */
 static double php_pack_parse_double(int is_little_endian, void * src)
 {
 	union Copy64 {
@@ -221,8 +214,7 @@ static double php_pack_parse_double(int is_little_endian, void * src)
  * Implemented formats are Z, A, a, h, H, c, C, s, S, i, I, l, L, n, N, q, Q, J, P, f, d, x, X, @.
  * Added g, G for little endian float and big endian float, added e, E for little endian double and big endian double.
  */
-/* {{{ proto string pack(string format, mixed arg1 [, mixed arg2 [, mixed ...]])
-   Takes one or more arguments and packs them into a binary string according to the format argument */
+/* {{{ Takes one or more arguments and packs them into a binary string according to the format argument */
 PHP_FUNCTION(pack)
 {
 	zval *argv = NULL;
@@ -685,8 +677,7 @@ too_few_args:
 }
 /* }}} */
 
-/* {{{ php_unpack
- */
+/* {{{ php_unpack */
 static zend_long php_unpack(char *data, size_t size, int issigned, int *map)
 {
 	zend_long result;
@@ -716,8 +707,7 @@ static zend_long php_unpack(char *data, size_t size, int issigned, int *map)
  * Implemented formats are Z, A, a, h, H, c, C, s, S, i, I, l, L, n, N, q, Q, J, P, f, d, x, X, @.
  * Added g, G for little endian float and big endian float, added e, E for little endian double and big endian double.
  */
-/* {{{ proto array|false unpack(string format, string input)
-   Unpack binary string into named array elements according to format argument */
+/* {{{ Unpack binary string into named array elements according to format argument */
 PHP_FUNCTION(unpack)
 {
 	char *format, *input;
@@ -1210,8 +1200,7 @@ PHP_FUNCTION(unpack)
 }
 /* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION
- */
+/* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(pack)
 {
 	int machine_endian_check = 1;

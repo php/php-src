@@ -423,8 +423,7 @@ static void sapi_cli_ini_defaults(HashTable *configuration_hash)
 }
 /* }}} */
 
-/* {{{ sapi_module_struct cli_sapi_module
- */
+/* {{{ sapi_module_struct cli_sapi_module */
 static sapi_module_struct cli_sapi_module = {
 	"cli",							/* name */
 	"Command Line Interface",    	/* pretty name */
@@ -471,8 +470,7 @@ static const zend_function_entry additional_functions[] = {
 	PHP_FE_END
 };
 
-/* {{{ php_cli_usage
- */
+/* {{{ php_cli_usage */
 static void php_cli_usage(char *argv0)
 {
 	char *prog;
@@ -581,8 +579,7 @@ static void cli_register_file_handles(void) /* {{{ */
 
 static const char *param_mode_conflict = "Either execute direct code, process stdin or use a file.\n";
 
-/* {{{ cli_seek_file_begin
- */
+/* {{{ cli_seek_file_begin */
 static int cli_seek_file_begin(zend_file_handle *file_handle, char *script_file)
 {
 	FILE *fp = VCWD_FOPEN(script_file, "rb");
@@ -1141,8 +1138,7 @@ err:
 }
 /* }}} */
 
-/* {{{ main
- */
+/* {{{ main */
 #ifdef PHP_CLI_WIN32_NO_CONSOLE
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
 #else

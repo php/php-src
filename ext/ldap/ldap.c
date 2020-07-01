@@ -693,15 +693,13 @@ static void _php_ldap_controls_free (LDAPControl*** ctrls)
 }
 /* }}} */
 
-/* {{{ PHP_INI_BEGIN
- */
+/* {{{ PHP_INI_BEGIN */
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY_EX("ldap.max_links", "-1", PHP_INI_SYSTEM, OnUpdateLong, max_links, zend_ldap_globals, ldap_globals, display_link_numbers)
 PHP_INI_END()
 /* }}} */
 
-/* {{{ PHP_GINIT_FUNCTION
- */
+/* {{{ PHP_GINIT_FUNCTION */
 static PHP_GINIT_FUNCTION(ldap)
 {
 #if defined(COMPILE_DL_LDAP) && defined(ZTS)
@@ -711,8 +709,7 @@ static PHP_GINIT_FUNCTION(ldap)
 }
 /* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION
- */
+/* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(ldap)
 {
 	REGISTER_INI_ENTRIES();
@@ -932,8 +929,7 @@ PHP_MINIT_FUNCTION(ldap)
 }
 /* }}} */
 
-/* {{{ PHP_MSHUTDOWN_FUNCTION
- */
+/* {{{ PHP_MSHUTDOWN_FUNCTION */
 PHP_MSHUTDOWN_FUNCTION(ldap)
 {
 	UNREGISTER_INI_ENTRIES();
@@ -941,8 +937,7 @@ PHP_MSHUTDOWN_FUNCTION(ldap)
 }
 /* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
- */
+/* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(ldap)
 {
 	char tmp[32];
@@ -980,8 +975,7 @@ PHP_MINFO_FUNCTION(ldap)
 }
 /* }}} */
 
-/* {{{ proto resource ldap_connect([string host [, int port [, string wallet [, string wallet_passwd [, int authmode]]]]])
-   Connect to an LDAP server */
+/* {{{ Connect to an LDAP server */
 PHP_FUNCTION(ldap_connect)
 {
 	char *host = NULL;
@@ -1083,8 +1077,7 @@ PHP_FUNCTION(ldap_connect)
 }
 /* }}} */
 
-/* {{{ _get_lderrno
- */
+/* {{{ _get_lderrno */
 static int _get_lderrno(LDAP *ldap)
 {
 #if LDAP_API_VERSION > 2000 || defined(HAVE_ORALDAP)
@@ -1099,8 +1092,7 @@ static int _get_lderrno(LDAP *ldap)
 }
 /* }}} */
 
-/* {{{ _set_lderrno
- */
+/* {{{ _set_lderrno */
 static void _set_lderrno(LDAP *ldap, int lderr)
 {
 #if LDAP_API_VERSION > 2000 || defined(HAVE_ORALDAP)
@@ -1112,8 +1104,7 @@ static void _set_lderrno(LDAP *ldap, int lderr)
 }
 /* }}} */
 
-/* {{{ proto bool ldap_bind(resource link [, string dn [, string password]])
-   Bind to LDAP directory */
+/* {{{ Bind to LDAP directory */
 PHP_FUNCTION(ldap_bind)
 {
 	zval *link;
@@ -1166,8 +1157,7 @@ PHP_FUNCTION(ldap_bind)
 }
 /* }}} */
 
-/* {{{ proto resource ldap_bind_ext(resource link [, string dn [, string password [, serverctrls]]])
-   Bind to LDAP directory */
+/* {{{ Bind to LDAP directory */
 PHP_FUNCTION(ldap_bind_ext)
 {
 	zval *serverctrls = NULL;
@@ -1252,8 +1242,7 @@ typedef struct {
 	char *authzid;
 } php_ldap_bictx;
 
-/* {{{ _php_sasl_setdefs
- */
+/* {{{ _php_sasl_setdefs */
 static php_ldap_bictx *_php_sasl_setdefs(LDAP *ld, char *sasl_mech, char *sasl_realm, char *sasl_authc_id, char *passwd, char *sasl_authz_id)
 {
 	php_ldap_bictx *ctx;
@@ -1282,8 +1271,7 @@ static php_ldap_bictx *_php_sasl_setdefs(LDAP *ld, char *sasl_mech, char *sasl_r
 }
 /* }}} */
 
-/* {{{ _php_sasl_freedefs
- */
+/* {{{ _php_sasl_freedefs */
 static void _php_sasl_freedefs(php_ldap_bictx *ctx)
 {
 	if (ctx->mech) ber_memfree(ctx->mech);
@@ -1328,8 +1316,7 @@ static int _php_sasl_interact(LDAP *ld, unsigned flags, void *defaults, void *in
 }
 /* }}} */
 
-/* {{{ proto bool ldap_sasl_bind(resource link [, string binddn [, string password [, string sasl_mech [, string sasl_realm [, string sasl_authc_id [, string sasl_authz_id [, string props]]]]]]])
-   Bind to LDAP directory using SASL */
+/* {{{ Bind to LDAP directory using SASL */
 PHP_FUNCTION(ldap_sasl_bind)
 {
 	zval *link;
@@ -1370,8 +1357,7 @@ PHP_FUNCTION(ldap_sasl_bind)
 /* }}} */
 #endif /* HAVE_LDAP_SASL */
 
-/* {{{ proto bool ldap_unbind(resource link)
-   Unbind from LDAP directory */
+/* {{{ Unbind from LDAP directory */
 PHP_FUNCTION(ldap_unbind)
 {
 	zval *link;
@@ -1390,8 +1376,7 @@ PHP_FUNCTION(ldap_unbind)
 }
 /* }}} */
 
-/* {{{ php_set_opts
- */
+/* {{{ php_set_opts */
 static void php_set_opts(LDAP *ldap, int sizelimit, int timelimit, int deref, int *old_sizelimit, int *old_timelimit, int *old_deref)
 {
 	/* sizelimit */
@@ -1429,8 +1414,7 @@ static void php_set_opts(LDAP *ldap, int sizelimit, int timelimit, int deref, in
 }
 /* }}} */
 
-/* {{{ php_ldap_do_search
- */
+/* {{{ php_ldap_do_search */
 static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 {
 	zval *link, *base_dn, *filter, *attrs = NULL, *attr, *serverctrls = NULL;
@@ -1677,32 +1661,28 @@ cleanup:
 }
 /* }}} */
 
-/* {{{ proto resource ldap_read(resource|array link, string base_dn, string filter [, array attrs [, int attrsonly [, int sizelimit [, int timelimit [, int deref [, array servercontrols]]]]]])
-   Read an entry */
+/* {{{ Read an entry */
 PHP_FUNCTION(ldap_read)
 {
 	php_ldap_do_search(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_SCOPE_BASE);
 }
 /* }}} */
 
-/* {{{ proto resource ldap_list(resource|array link, string base_dn, string filter [, array attrs [, int attrsonly [, int sizelimit [, int timelimit [, int deref [, array servercontrols]]]]]])
-   Single-level search */
+/* {{{ Single-level search */
 PHP_FUNCTION(ldap_list)
 {
 	php_ldap_do_search(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_SCOPE_ONELEVEL);
 }
 /* }}} */
 
-/* {{{ proto resource ldap_search(resource|array link, string base_dn, string filter [, array attrs [, int attrsonly [, int sizelimit [, int timelimit [, int deref [, array servercontrols]]]]]])
-   Search LDAP tree under base_dn */
+/* {{{ Search LDAP tree under base_dn */
 PHP_FUNCTION(ldap_search)
 {
 	php_ldap_do_search(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_SCOPE_SUBTREE);
 }
 /* }}} */
 
-/* {{{ proto bool ldap_free_result(resource result)
-   Free result memory */
+/* {{{ Free result memory */
 PHP_FUNCTION(ldap_free_result)
 {
 	zval *result;
@@ -1721,8 +1701,7 @@ PHP_FUNCTION(ldap_free_result)
 }
 /* }}} */
 
-/* {{{ proto int ldap_count_entries(resource link, resource result)
-   Count the number of entries in a search result */
+/* {{{ Count the number of entries in a search result */
 PHP_FUNCTION(ldap_count_entries)
 {
 	zval *link, *result;
@@ -1745,8 +1724,7 @@ PHP_FUNCTION(ldap_count_entries)
 }
 /* }}} */
 
-/* {{{ proto resource ldap_first_entry(resource link, resource result)
-   Return first result id */
+/* {{{ Return first result id */
 PHP_FUNCTION(ldap_first_entry)
 {
 	zval *link, *result;
@@ -1778,8 +1756,7 @@ PHP_FUNCTION(ldap_first_entry)
 }
 /* }}} */
 
-/* {{{ proto resource ldap_next_entry(resource link, resource result_entry)
-   Get next result entry */
+/* {{{ Get next result entry */
 PHP_FUNCTION(ldap_next_entry)
 {
 	zval *link, *result_entry;
@@ -1810,8 +1787,7 @@ PHP_FUNCTION(ldap_next_entry)
 }
 /* }}} */
 
-/* {{{ proto array ldap_get_entries(resource link, resource result)
-   Get all result entries */
+/* {{{ Get all result entries */
 PHP_FUNCTION(ldap_get_entries)
 {
 	zval *link, *result;
@@ -1911,8 +1887,7 @@ PHP_FUNCTION(ldap_get_entries)
 }
 /* }}} */
 
-/* {{{ proto string ldap_first_attribute(resource link, resource result_entry)
-   Return first attribute */
+/* {{{ Return first attribute */
 PHP_FUNCTION(ldap_first_attribute)
 {
 	zval *link, *result_entry;
@@ -1944,8 +1919,7 @@ PHP_FUNCTION(ldap_first_attribute)
 }
 /* }}} */
 
-/* {{{ proto string ldap_next_attribute(resource link, resource result_entry)
-   Get the next attribute in result */
+/* {{{ Get the next attribute in result */
 PHP_FUNCTION(ldap_next_attribute)
 {
 	zval *link, *result_entry;
@@ -1988,8 +1962,7 @@ PHP_FUNCTION(ldap_next_attribute)
 }
 /* }}} */
 
-/* {{{ proto array ldap_get_attributes(resource link, resource result_entry)
-   Get attributes from a search result entry */
+/* {{{ Get attributes from a search result entry */
 PHP_FUNCTION(ldap_get_attributes)
 {
 	zval *link, *result_entry;
@@ -2047,8 +2020,7 @@ PHP_FUNCTION(ldap_get_attributes)
 }
 /* }}} */
 
-/* {{{ proto array ldap_get_values_len(resource link, resource result_entry, string attribute)
-   Get all values with lengths from a result entry */
+/* {{{ Get all values with lengths from a result entry */
 PHP_FUNCTION(ldap_get_values_len)
 {
 	zval *link, *result_entry;
@@ -2089,8 +2061,7 @@ PHP_FUNCTION(ldap_get_values_len)
 }
 /* }}} */
 
-/* {{{ proto string ldap_get_dn(resource link, resource result_entry)
-   Get the DN of a result entry */
+/* {{{ Get the DN of a result entry */
 PHP_FUNCTION(ldap_get_dn)
 {
 	zval *link, *result_entry;
@@ -2124,8 +2095,7 @@ PHP_FUNCTION(ldap_get_dn)
 }
 /* }}} */
 
-/* {{{ proto array ldap_explode_dn(string dn, int with_attrib)
-   Splits DN into its component parts */
+/* {{{ Splits DN into its component parts */
 PHP_FUNCTION(ldap_explode_dn)
 {
 	zend_long with_attrib;
@@ -2157,8 +2127,7 @@ PHP_FUNCTION(ldap_explode_dn)
 }
 /* }}} */
 
-/* {{{ proto string ldap_dn2ufn(string dn)
-   Convert DN to User Friendly Naming format */
+/* {{{ Convert DN to User Friendly Naming format */
 PHP_FUNCTION(ldap_dn2ufn)
 {
 	char *dn, *ufn;
@@ -2184,8 +2153,7 @@ PHP_FUNCTION(ldap_dn2ufn)
 
 /* added to fix use of ldap_modify_add for doing an ldap_add, gerrit thomson. */
 #define PHP_LD_FULL_ADD 0xff
-/* {{{ php_ldap_do_modify
- */
+/* {{{ php_ldap_do_modify */
 static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 {
 	zval *serverctrls = NULL;
@@ -2362,8 +2330,7 @@ cleanup:
 }
 /* }}} */
 
-/* {{{ proto bool ldap_add(resource link, string dn, array entry [, array servercontrols])
-   Add entries to LDAP directory */
+/* {{{ Add entries to LDAP directory */
 PHP_FUNCTION(ldap_add)
 {
 	/* use a newly define parameter into the do_modify so ldap_mod_add can be used the way it is supposed to be used , Gerrit THomson */
@@ -2371,8 +2338,7 @@ PHP_FUNCTION(ldap_add)
 }
 /* }}} */
 
-/* {{{ proto resource ldap_add_ext(resource link, string dn, array entry [, array servercontrols])
-   Add entries to LDAP directory */
+/* {{{ Add entries to LDAP directory */
 PHP_FUNCTION(ldap_add_ext)
 {
 	php_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_LD_FULL_ADD, 1);
@@ -2381,56 +2347,49 @@ PHP_FUNCTION(ldap_add_ext)
 
 /* three functions for attribute base modifications, gerrit Thomson */
 
-/* {{{ proto bool ldap_mod_replace(resource link, string dn, array entry [, array servercontrols])
-   Replace attribute values with new ones */
+/* {{{ Replace attribute values with new ones */
 PHP_FUNCTION(ldap_mod_replace)
 {
 	php_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_MOD_REPLACE, 0);
 }
 /* }}} */
 
-/* {{{ proto resource ldap_mod_replace_ext(resource link, string dn, array entry [, array servercontrols])
-   Replace attribute values with new ones */
+/* {{{ Replace attribute values with new ones */
 PHP_FUNCTION(ldap_mod_replace_ext)
 {
 	php_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_MOD_REPLACE, 1);
 }
 /* }}} */
 
-/* {{{ proto bool ldap_mod_add(resource link, string dn, array entry [, array servercontrols])
-   Add attribute values to current */
+/* {{{ Add attribute values to current */
 PHP_FUNCTION(ldap_mod_add)
 {
 	php_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_MOD_ADD, 0);
 }
 /* }}} */
 
-/* {{{ proto resource ldap_mod_add(resource link, string dn, array entry [, array servercontrols])
-   Add attribute values to current */
+/* {{{ Add attribute values to current */
 PHP_FUNCTION(ldap_mod_add_ext)
 {
 	php_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_MOD_ADD, 1);
 }
 /* }}} */
 
-/* {{{ proto bool ldap_mod_del(resource link, string dn, array entry [, array servercontrols])
-   Delete attribute values */
+/* {{{ Delete attribute values */
 PHP_FUNCTION(ldap_mod_del)
 {
 	php_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_MOD_DELETE, 0);
 }
 /* }}} */
 
-/* {{{ proto resource ldap_mod_del_ext(resource link, string dn, array entry [, array servercontrols])
-   Delete attribute values */
+/* {{{ Delete attribute values */
 PHP_FUNCTION(ldap_mod_del_ext)
 {
 	php_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_MOD_DELETE, 1);
 }
 /* }}} */
 
-/* {{{ php_ldap_do_delete
- */
+/* {{{ php_ldap_do_delete */
 static void php_ldap_do_delete(INTERNAL_FUNCTION_PARAMETERS, int ext)
 {
 	zval *serverctrls = NULL;
@@ -2490,24 +2449,21 @@ cleanup:
 }
 /* }}} */
 
-/* {{{ proto bool ldap_delete(resource link, string dn [, array servercontrols])
-   Delete an entry from a directory */
+/* {{{ Delete an entry from a directory */
 PHP_FUNCTION(ldap_delete)
 {
 	php_ldap_do_delete(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
-/* {{{ proto resource ldap_delete_ext(resource link, string dn [, array servercontrols])
-   Delete an entry from a directory */
+/* {{{ Delete an entry from a directory */
 PHP_FUNCTION(ldap_delete_ext)
 {
 	php_ldap_do_delete(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
-/* {{{ _ldap_str_equal_to_const
- */
+/* {{{ _ldap_str_equal_to_const */
 static size_t _ldap_str_equal_to_const(const char *str, size_t str_len, const char *cstr)
 {
 	size_t i;
@@ -2525,8 +2481,7 @@ static size_t _ldap_str_equal_to_const(const char *str, size_t str_len, const ch
 }
 /* }}} */
 
-/* {{{ _ldap_strlen_max
- */
+/* {{{ _ldap_strlen_max */
 static size_t _ldap_strlen_max(const char *str, size_t max_len)
 {
 	size_t i;
@@ -2541,16 +2496,14 @@ static size_t _ldap_strlen_max(const char *str, size_t max_len)
 }
 /* }}} */
 
-/* {{{ _ldap_hash_fetch
- */
+/* {{{ _ldap_hash_fetch */
 static void _ldap_hash_fetch(zval *hashTbl, const char *key, zval **out)
 {
 	*out = zend_hash_str_find(Z_ARRVAL_P(hashTbl), key, strlen(key));
 }
 /* }}} */
 
-/* {{{ proto bool ldap_modify_batch(resource link, string dn, array modifs [, array servercontrols])
-   Perform multiple modifications as part of one operation */
+/* {{{ Perform multiple modifications as part of one operation */
 PHP_FUNCTION(ldap_modify_batch)
 {
 	zval *serverctrls = NULL;
@@ -2867,8 +2820,7 @@ PHP_FUNCTION(ldap_modify_batch)
 }
 /* }}} */
 
-/* {{{ proto int ldap_errno(resource link)
-   Get the current ldap error number */
+/* {{{ Get the current ldap error number */
 PHP_FUNCTION(ldap_errno)
 {
 	zval *link;
@@ -2886,8 +2838,7 @@ PHP_FUNCTION(ldap_errno)
 }
 /* }}} */
 
-/* {{{ proto string ldap_err2str(int errno)
-   Convert error number to error string */
+/* {{{ Convert error number to error string */
 PHP_FUNCTION(ldap_err2str)
 {
 	zend_long perrno;
@@ -2900,8 +2851,7 @@ PHP_FUNCTION(ldap_err2str)
 }
 /* }}} */
 
-/* {{{ proto string ldap_error(resource link)
-   Get the current ldap error string */
+/* {{{ Get the current ldap error string */
 PHP_FUNCTION(ldap_error)
 {
 	zval *link;
@@ -2922,8 +2872,7 @@ PHP_FUNCTION(ldap_error)
 }
 /* }}} */
 
-/* {{{ proto bool ldap_compare(resource link, string dn, string attr, string value)
-   Determine if an entry has a specific value for one of its attributes */
+/* {{{ Determine if an entry has a specific value for one of its attributes */
 PHP_FUNCTION(ldap_compare)
 {
 	zval *serverctrls = NULL;
@@ -2980,8 +2929,7 @@ cleanup:
 /* }}} */
 
 #if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
-/* {{{ proto bool ldap_get_option(resource link, int option, mixed retval)
-   Get the current value of various session-wide parameters */
+/* {{{ Get the current value of various session-wide parameters */
 PHP_FUNCTION(ldap_get_option)
 {
 	zval *link, *retval;
@@ -3148,8 +3096,7 @@ PHP_FUNCTION(ldap_get_option)
 }
 /* }}} */
 
-/* {{{ proto bool ldap_set_option(resource link, int option, mixed newval)
-   Set the value of various session-wide parameters */
+/* {{{ Set the value of various session-wide parameters */
 PHP_FUNCTION(ldap_set_option)
 {
 	zval *link, *newval;
@@ -3331,8 +3278,7 @@ PHP_FUNCTION(ldap_set_option)
 /* }}} */
 
 #ifdef HAVE_LDAP_PARSE_RESULT
-/* {{{ proto bool ldap_parse_result(resource link, resource result, int &errcode [, string &matcheddn [, string &errmsg [, array &referrals [, array &controls]]]])
-   Extract information from result */
+/* {{{ Extract information from result */
 PHP_FUNCTION(ldap_parse_result)
 {
 	zval *link, *result, *errcode, *matcheddn, *errmsg, *referrals, *serverctrls;
@@ -3407,8 +3353,7 @@ PHP_FUNCTION(ldap_parse_result)
 
 /* {{{ Extended operation response parsing, Pierangelo Masarati */
 #ifdef HAVE_LDAP_PARSE_EXTENDED_RESULT
-/* {{{ proto bool ldap_parse_exop(resource link, resource result [, string &retdata [, string &retoid]])
-   Extract information from extended operation result */
+/* {{{ Extract information from extended operation result */
 PHP_FUNCTION(ldap_parse_exop)
 {
 	zval *link, *result, *retdata, *retoid;
@@ -3464,8 +3409,7 @@ PHP_FUNCTION(ldap_parse_exop)
 #endif
 /* }}} */
 
-/* {{{ proto int ldap_count_references(resource link, resource result)
-   Count the number of references in a search result */
+/* {{{ Count the number of references in a search result */
 PHP_FUNCTION(ldap_count_references)
 {
 	zval *link, *result;
@@ -3488,8 +3432,7 @@ PHP_FUNCTION(ldap_count_references)
 }
 /* }}} */
 
-/* {{{ proto resource ldap_first_reference(resource link, resource result)
-   Return first reference */
+/* {{{ Return first reference */
 PHP_FUNCTION(ldap_first_reference)
 {
 	zval *link, *result;
@@ -3521,8 +3464,7 @@ PHP_FUNCTION(ldap_first_reference)
 }
 /* }}} */
 
-/* {{{ proto resource ldap_next_reference(resource link, resource reference_entry)
-   Get next reference */
+/* {{{ Get next reference */
 PHP_FUNCTION(ldap_next_reference)
 {
 	zval *link, *result_entry;
@@ -3555,8 +3497,7 @@ PHP_FUNCTION(ldap_next_reference)
 /* }}} */
 
 #ifdef HAVE_LDAP_PARSE_REFERENCE
-/* {{{ proto bool ldap_parse_reference(resource link, resource reference_entry, array &referrals)
-   Extract information from reference entry */
+/* {{{ Extract information from reference entry */
 PHP_FUNCTION(ldap_parse_reference)
 {
 	zval *link, *result_entry, *referrals;
@@ -3598,8 +3539,7 @@ PHP_FUNCTION(ldap_parse_reference)
 /* }}} */
 #endif
 
-/* {{{ php_ldap_do_rename
- */
+/* {{{ php_ldap_do_rename */
 static void php_ldap_do_rename(INTERNAL_FUNCTION_PARAMETERS, int ext)
 {
 	zval *serverctrls = NULL;
@@ -3680,16 +3620,14 @@ cleanup:
 }
 /* }}} */
 
-/* {{{ proto bool ldap_rename(resource link, string dn, string newrdn, string newparent, bool deleteoldrdn [, array servercontrols])
-   Modify the name of an entry */
+/* {{{ Modify the name of an entry */
 PHP_FUNCTION(ldap_rename)
 {
 	php_ldap_do_rename(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
-/* {{{ proto resource ldap_rename_ext(resource link, string dn, string newrdn, string newparent, bool deleteoldrdn [, array servercontrols])
-   Modify the name of an entry */
+/* {{{ Modify the name of an entry */
 PHP_FUNCTION(ldap_rename_ext)
 {
 	php_ldap_do_rename(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
@@ -3697,8 +3635,7 @@ PHP_FUNCTION(ldap_rename_ext)
 /* }}} */
 
 #ifdef HAVE_LDAP_START_TLS_S
-/* {{{ proto bool ldap_start_tls(resource link)
-   Start TLS */
+/* {{{ Start TLS */
 PHP_FUNCTION(ldap_start_tls)
 {
 	zval *link;
@@ -3727,8 +3664,7 @@ PHP_FUNCTION(ldap_start_tls)
 #endif /* (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP) */
 
 #if defined(LDAP_API_FEATURE_X_OPENLDAP) && defined(HAVE_3ARG_SETREBINDPROC)
-/* {{{ _ldap_rebind_proc()
-*/
+/* {{{ _ldap_rebind_proc() */
 int _ldap_rebind_proc(LDAP *ldap, const char *url, ber_tag_t req, ber_int_t msgid, void *params)
 {
 	ldap_linkdata *ld;
@@ -3760,8 +3696,7 @@ int _ldap_rebind_proc(LDAP *ldap, const char *url, ber_tag_t req, ber_int_t msgi
 }
 /* }}} */
 
-/* {{{ proto bool ldap_set_rebind_proc(resource link, ?callable callback)
-   Set a callback function to do re-binds on referral chasing. */
+/* {{{ Set a callback function to do re-binds on referral chasing. */
 PHP_FUNCTION(ldap_set_rebind_proc)
 {
 	zval *link, *callback;
@@ -3889,8 +3824,7 @@ PHP_FUNCTION(ldap_escape)
 }
 
 #ifdef STR_TRANSLATION
-/* {{{ php_ldap_do_translate
- */
+/* {{{ php_ldap_do_translate */
 static void php_ldap_do_translate(INTERNAL_FUNCTION_PARAMETERS, int way)
 {
 	char *value;
@@ -3921,16 +3855,14 @@ static void php_ldap_do_translate(INTERNAL_FUNCTION_PARAMETERS, int way)
 }
 /* }}} */
 
-/* {{{ proto string ldap_t61_to_8859(string value)
-   Translate t61 characters to 8859 characters */
+/* {{{ Translate t61 characters to 8859 characters */
 PHP_FUNCTION(ldap_t61_to_8859)
 {
 	php_ldap_do_translate(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
-/* {{{ proto string ldap_8859_to_t61(string value)
-   Translate 8859 characters to t61 characters */
+/* {{{ Translate 8859 characters to t61 characters */
 PHP_FUNCTION(ldap_8859_to_t61)
 {
 	php_ldap_do_translate(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
@@ -3939,8 +3871,7 @@ PHP_FUNCTION(ldap_8859_to_t61)
 #endif
 
 #ifdef LDAP_CONTROL_PAGEDRESULTS
-/* {{{ proto mixed ldap_control_paged_result(resource link, int pagesize [, bool iscritical [, string cookie]])
-   Inject paged results control*/
+/* {{{ Inject paged results control*/
 PHP_FUNCTION(ldap_control_paged_result)
 {
 	zend_long pagesize;
@@ -4033,8 +3964,7 @@ lcpr_error_out:
 }
 /* }}} */
 
-/* {{{ proto bool ldap_control_paged_result_response(resource link, resource result [, string &cookie [, int &estimated]])
-   Extract paged results control response */
+/* {{{ Extract paged results control response */
 PHP_FUNCTION(ldap_control_paged_result_response)
 {
 	zval *link, *result, *cookie, *estimated;
@@ -4131,8 +4061,7 @@ PHP_FUNCTION(ldap_control_paged_result_response)
 
 /* {{{ Extended operations, Pierangelo Masarati */
 #ifdef HAVE_LDAP_EXTENDED_OPERATION_S
-/* {{{ proto resource ldap_exop(resource link, string reqoid [, string reqdata [, array servercontrols [, string &retdata [, string &retoid]]]])
-   Extended operation */
+/* {{{ Extended operation */
 PHP_FUNCTION(ldap_exop)
 {
 	zval *serverctrls = NULL;
@@ -4234,8 +4163,7 @@ PHP_FUNCTION(ldap_exop)
 #endif
 
 #ifdef HAVE_LDAP_PASSWD
-/* {{{ proto bool|string ldap_exop_passwd(resource link [, string user [, string oldpw [, string newpw [, array ctrls]]]])
-   Passwd modify extended operation */
+/* {{{ Passwd modify extended operation */
 PHP_FUNCTION(ldap_exop_passwd)
 {
 	zval *link, *serverctrls;
@@ -4327,8 +4255,7 @@ PHP_FUNCTION(ldap_exop_passwd)
 #endif
 
 #ifdef HAVE_LDAP_WHOAMI_S
-/* {{{ proto bool|string ldap_exop_whoami(resource link)
-   Whoami extended operation */
+/* {{{ Whoami extended operation */
 PHP_FUNCTION(ldap_exop_whoami)
 {
 	zval *link;
@@ -4363,8 +4290,7 @@ PHP_FUNCTION(ldap_exop_whoami)
 #endif
 
 #ifdef HAVE_LDAP_REFRESH_S
-/* {{{ proto bool|int ldap_exop_refresh(resource link , string dn , int ttl)
-   DDS refresh extended operation */
+/* {{{ DDS refresh extended operation */
 PHP_FUNCTION(ldap_exop_refresh)
 {
 	zval *link, *ttl;

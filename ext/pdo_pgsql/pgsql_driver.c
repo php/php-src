@@ -544,8 +544,7 @@ static int pgsql_handle_rollback(pdo_dbh_t *dbh)
 	return pdo_pgsql_transaction_cmd("ROLLBACK", dbh);
 }
 
-/* {{{ proto string PDO::pgsqlCopyFromArray(string $table_name , array $rows [, string $delimiter [, string $null_as ] [, string $fields])
-   Returns true if the copy worked fine or false if error */
+/* {{{ Returns true if the copy worked fine or false if error */
 static PHP_METHOD(PDO, pgsqlCopyFromArray)
 {
 	pdo_dbh_t *dbh;
@@ -658,8 +657,7 @@ static PHP_METHOD(PDO, pgsqlCopyFromArray)
 }
 /* }}} */
 
-/* {{{ proto string PDO::pgsqlCopyFromFile(string $table_name , string $filename [, string $delimiter [, string $null_as ] [, string $fields])
-   Returns true if the copy worked fine or false if error */
+/* {{{ Returns true if the copy worked fine or false if error */
 static PHP_METHOD(PDO, pgsqlCopyFromFile)
 {
 	pdo_dbh_t *dbh;
@@ -757,8 +755,7 @@ static PHP_METHOD(PDO, pgsqlCopyFromFile)
 /* }}} */
 
 
-/* {{{ proto string PDO::pgsqlCopyToFile(string $table_name , string $filename, [string $delimiter [, string $null_as [, string $fields]]])
-   Returns true if the copy worked fine or false if error */
+/* {{{ Returns true if the copy worked fine or false if error */
 static PHP_METHOD(PDO, pgsqlCopyToFile)
 {
 	pdo_dbh_t *dbh;
@@ -852,8 +849,7 @@ static PHP_METHOD(PDO, pgsqlCopyToFile)
 }
 /* }}} */
 
-/* {{{ proto string PDO::pgsqlCopyToArray(string $table_name , [string $delimiter [, string $null_as [, string $fields]]])
-   Returns true if the copy worked fine or false if error */
+/* {{{ Returns true if the copy worked fine or false if error */
 static PHP_METHOD(PDO, pgsqlCopyToArray)
 {
 	pdo_dbh_t *dbh;
@@ -929,8 +925,7 @@ static PHP_METHOD(PDO, pgsqlCopyToArray)
 /* }}} */
 
 
-/* {{{ proto string PDO::pgsqlLOBCreate()
-   Creates a new large object, returning its identifier.  Must be called inside a transaction. */
+/* {{{ Creates a new large object, returning its identifier.  Must be called inside a transaction. */
 static PHP_METHOD(PDO, pgsqlLOBCreate)
 {
 	pdo_dbh_t *dbh;
@@ -958,8 +953,7 @@ static PHP_METHOD(PDO, pgsqlLOBCreate)
 }
 /* }}} */
 
-/* {{{ proto resource PDO::pgsqlLOBOpen(string oid [, string mode = 'rb'])
-   Opens an existing large object stream.  Must be called inside a transaction. */
+/* {{{ Opens an existing large object stream.  Must be called inside a transaction. */
 static PHP_METHOD(PDO, pgsqlLOBOpen)
 {
 	pdo_dbh_t *dbh;
@@ -1010,8 +1004,7 @@ static PHP_METHOD(PDO, pgsqlLOBOpen)
 }
 /* }}} */
 
-/* {{{ proto bool PDO::pgsqlLOBUnlink(string oid)
-   Deletes the large object identified by oid.  Must be called inside a transaction. */
+/* {{{ Deletes the large object identified by oid.  Must be called inside a transaction. */
 static PHP_METHOD(PDO, pgsqlLOBUnlink)
 {
 	pdo_dbh_t *dbh;
@@ -1046,8 +1039,7 @@ static PHP_METHOD(PDO, pgsqlLOBUnlink)
 }
 /* }}} */
 
-/* {{{ proto mixed PDO::pgsqlGetNotify([ int $result_type = PDO::FETCH_USE_DEFAULT] [, int $ms_timeout = 0 ]])
-   Get asynchronous notification */
+/* {{{ Get asynchronous notification */
 static PHP_METHOD(PDO, pgsqlGetNotify)
 {
 	pdo_dbh_t *dbh;
@@ -1127,8 +1119,7 @@ static PHP_METHOD(PDO, pgsqlGetNotify)
 }
 /* }}} */
 
-/* {{{ proto int PDO::pgsqlGetPid()
-   Get backend(server) pid */
+/* {{{ Get backend(server) pid */
 static PHP_METHOD(PDO, pgsqlGetPid)
 {
 	pdo_dbh_t *dbh;

@@ -91,8 +91,7 @@
 #define twist(m,u,v)  (m ^ (mixBits(u,v)>>1) ^ ((uint32_t)(-(int32_t)(loBit(v))) & 0x9908b0dfU))
 #define twist_php(m,u,v)  (m ^ (mixBits(u,v)>>1) ^ ((uint32_t)(-(int32_t)(loBit(u))) & 0x9908b0dfU))
 
-/* {{{ php_mt_initialize
- */
+/* {{{ php_mt_initialize */
 static inline void php_mt_initialize(uint32_t seed, uint32_t *state)
 {
 	/* Initialize generator state with seed
@@ -112,8 +111,7 @@ static inline void php_mt_initialize(uint32_t seed, uint32_t *state)
 }
 /* }}} */
 
-/* {{{ php_mt_reload
- */
+/* {{{ php_mt_reload */
 static inline void php_mt_reload(void)
 {
 	/* Generate N new values in state
@@ -142,8 +140,7 @@ static inline void php_mt_reload(void)
 }
 /* }}} */
 
-/* {{{ php_mt_srand
- */
+/* {{{ php_mt_srand */
 PHPAPI void php_mt_srand(uint32_t seed)
 {
 	/* Seed the generator with a simple uint32 */
@@ -155,8 +152,7 @@ PHPAPI void php_mt_srand(uint32_t seed)
 }
 /* }}} */
 
-/* {{{ php_mt_rand
- */
+/* {{{ php_mt_rand */
 PHPAPI uint32_t php_mt_rand(void)
 {
 	/* Pull a 32-bit integer from the generator state
@@ -181,8 +177,7 @@ PHPAPI uint32_t php_mt_rand(void)
 }
 /* }}} */
 
-/* {{{ proto void mt_srand([int seed])
-   Seeds Mersenne Twister random number generator */
+/* {{{ Seeds Mersenne Twister random number generator */
 PHP_FUNCTION(mt_srand)
 {
 	zend_long seed = 0;
@@ -271,8 +266,7 @@ static uint64_t rand_range64(uint64_t umax) {
 }
 #endif
 
-/* {{{ php_mt_rand_range
- */
+/* {{{ php_mt_rand_range */
 PHPAPI zend_long php_mt_rand_range(zend_long min, zend_long max)
 {
 	zend_ulong umax = max - min;
@@ -306,8 +300,7 @@ PHPAPI zend_long php_mt_rand_common(zend_long min, zend_long max)
 }
 /* }}} */
 
-/* {{{ proto int mt_rand([int min, int max])
-   Returns a random number from Mersenne Twister */
+/* {{{ Returns a random number from Mersenne Twister */
 PHP_FUNCTION(mt_rand)
 {
 	zend_long min;
@@ -333,8 +326,7 @@ PHP_FUNCTION(mt_rand)
 }
 /* }}} */
 
-/* {{{ proto int mt_getrandmax(void)
-   Returns the maximum value a random number from Mersenne Twister can have */
+/* {{{ Returns the maximum value a random number from Mersenne Twister can have */
 PHP_FUNCTION(mt_getrandmax)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
