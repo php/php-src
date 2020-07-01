@@ -1087,6 +1087,14 @@ static void zend_generator_iterator_rewind(zend_object_iterator *iterator) /* {{
 }
 /* }}} */
 
+static HashTable *zend_generator_iterator_get_gc(
+		zend_object_iterator *iterator, zval **table, int *n)
+{
+	*table = &iterator->data;
+	*n = 1;
+	return NULL;
+}
+
 static const zend_object_iterator_funcs zend_generator_iterator_functions = {
 	zend_generator_iterator_dtor,
 	zend_generator_iterator_valid,
@@ -1095,7 +1103,7 @@ static const zend_object_iterator_funcs zend_generator_iterator_functions = {
 	zend_generator_iterator_move_forward,
 	zend_generator_iterator_rewind,
 	NULL,
-	NULL, /* get_gc */
+	zend_generator_iterator_get_gc,
 };
 
 zend_object_iterator *zend_generator_get_iterator(zend_class_entry *ce, zval *object, int by_ref) /* {{{ */
