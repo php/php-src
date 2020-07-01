@@ -175,7 +175,7 @@ PHPAPI void config_zval_dtor(zval *zvalue)
 		zend_string_release_ex(Z_STR_P(zvalue), 1);
 	}
 }
-/* Reset / free active_ini_sectin global */
+/* Reset / free active_ini_section global */
 #define RESET_ACTIVE_INI_HASH() do { \
 	active_ini_hash = NULL;          \
 	is_special_section = 0;          \
@@ -408,6 +408,66 @@ static void php_load_zend_extension_cb(void *arg) { }
 #endif
 /* }}} */
 
+/* {{{ get_env_location
+ */
+static char* get_env_location(const char *envname)
+{
+	char *env_location = getenv(envname);
+#ifdef PHP_WIN32
+	char phprc_path[MAXPATHLEN];
+#endif
+
+#ifdef PHP_WIN32
+	if (!env_location) {
+		char dummybuf;
+		int size;
+
+		SetLastError(0);
+
+		/*If the given buffer is not large enough to hold the data, the return value is
+		the buffer size,  in characters, required to hold the string and its terminating
+		null character. We use this return value to alloc the final buffer. */
+		size = GetEnvironmentVariableA(envname, &dummybuf, 0);
+		if (GetLastError() == ERROR_ENVVAR_NOT_FOUND) {
+			/* The environment variable doesn't exist. */
+			return NULL;
+		}
+
+		if (size == 0) {
+			return NULL;
+		}
+
+		size = GetEnvironmentVariableA(envname, phprc_path, size);
+		if (size == 0) {
+			return NULL;
+		}
+
+		env_location = phprc_path;
+	}
+#else
+	if (!env_location) {
+		return NULL;
+	}
+#endif
+
+	return estrdup(env_location);
+}
+/* }}} */
+
+/* {{{ append_ini_path
+ */
+static void append_ini_path(char *php_ini_search_path, int search_path_size, char *path)
+{
+	static const char paths_separator[] = { ZEND_PATHS_SEPARATOR, 0 };
+
+	if (*php_ini_search_path) {
+		strlcat(php_ini_search_path, paths_separator, search_path_size);
+	}
+
+	strlcat(php_ini_search_path, path, search_path_size);
+}
+/* }}} */
+
 /* {{{ php_init_config
  */
 int php_init_config(void)
@@ -439,51 +499,14 @@ int php_init_config(void)
 	} else if (!sapi_module.php_ini_ignore) {
 		int search_path_size;
 		char *default_location;
-		char *env_location;
-		static const char paths_separator[] = { ZEND_PATHS_SEPARATOR, 0 };
+		char *env_location = get_env_location("PHPRC");
 #ifdef PHP_WIN32
 		char *reg_location;
-		char phprc_path[MAXPATHLEN];
 #endif
 
-		env_location = getenv("PHPRC");
-
-#ifdef PHP_WIN32
-		if (!env_location) {
-			char dummybuf;
-			int size;
-
-			SetLastError(0);
-
-			/*If the given buffer is not large enough to hold the data, the return value is
-			the buffer size,  in characters, required to hold the string and its terminating
-			null character. We use this return value to alloc the final buffer. */
-			size = GetEnvironmentVariableA("PHPRC", &dummybuf, 0);
-			if (GetLastError() == ERROR_ENVVAR_NOT_FOUND) {
-				/* The environment variable doesn't exist. */
-				env_location = "";
-			} else {
-				if (size == 0) {
-					env_location = "";
-				} else {
-					size = GetEnvironmentVariableA("PHPRC", phprc_path, size);
-					if (size == 0) {
-						env_location = "";
-					} else {
-						env_location = phprc_path;
-					}
-				}
-			}
-		}
-#else
-		if (!env_location) {
-			env_location = "";
-		}
-#endif
 		/*
 		 * Prepare search path
 		 */
-
 		search_path_size = MAXPATHLEN * 4 + (int)strlen(env_location) + 3 + 1;
 		php_ini_search_path = (char *) emalloc(search_path_size);
 		free_ini_search_path = 1;
@@ -491,31 +514,26 @@ int php_init_config(void)
 
 		/* Add environment location */
 		if (env_location[0]) {
-			if (*php_ini_search_path) {
-				strlcat(php_ini_search_path, paths_separator, search_path_size);
-			}
-			strlcat(php_ini_search_path, env_location, search_path_size);
+			append_ini_path(php_ini_search_path, search_path_size, env_location);
 			php_ini_file_name = env_location;
+		}
+
+		if (env_location) {
+			efree(env_location);
 		}
 
 #ifdef PHP_WIN32
 		/* Add registry location */
 		reg_location = GetIniPathFromRegistry();
 		if (reg_location != NULL) {
-			if (*php_ini_search_path) {
-				strlcat(php_ini_search_path, paths_separator, search_path_size);
-			}
-			strlcat(php_ini_search_path, reg_location, search_path_size);
+			append_ini_path(php_ini_search_path, search_path_size, reg_location);
 			efree(reg_location);
 		}
 #endif
 
 		/* Add cwd (not with CLI) */
 		if (!sapi_module.php_ini_ignore_cwd) {
-			if (*php_ini_search_path) {
-				strlcat(php_ini_search_path, paths_separator, search_path_size);
-			}
-			strlcat(php_ini_search_path, ".", search_path_size);
+			append_ini_path(php_ini_search_path, search_path_size, ".");
 		}
 
 		if (PG(php_binary)) {
@@ -527,10 +545,8 @@ int php_init_config(void)
 			if (separator_location && separator_location != binary_location) {
 				*(separator_location) = 0;
 			}
-			if (*php_ini_search_path) {
-				strlcat(php_ini_search_path, paths_separator, search_path_size);
-			}
-			strlcat(php_ini_search_path, binary_location, search_path_size);
+			append_ini_path(php_ini_search_path, search_path_size, binary_location);
+
 			efree(binary_location);
 		}
 
@@ -539,29 +555,20 @@ int php_init_config(void)
 		default_location = (char *) emalloc(MAXPATHLEN + 1);
 
 		if (0 < GetWindowsDirectory(default_location, MAXPATHLEN)) {
-			if (*php_ini_search_path) {
-				strlcat(php_ini_search_path, paths_separator, search_path_size);
-			}
-			strlcat(php_ini_search_path, default_location, search_path_size);
+			append_ini_path(php_ini_search_path, search_path_size, default_location);
 		}
 
 		/* For people running under terminal services, GetWindowsDirectory will
 		 * return their personal Windows directory, so lets add the system
 		 * windows directory too */
 		if (0 < GetSystemWindowsDirectory(default_location, MAXPATHLEN)) {
-			if (*php_ini_search_path) {
-				strlcat(php_ini_search_path, paths_separator, search_path_size);
-			}
-			strlcat(php_ini_search_path, default_location, search_path_size);
+			append_ini_path(php_ini_search_path, search_path_size, default_location);
 		}
 		efree(default_location);
 
 #else
 		default_location = PHP_CONFIG_FILE_PATH;
-		if (*php_ini_search_path) {
-			strlcat(php_ini_search_path, paths_separator, search_path_size);
-		}
-		strlcat(php_ini_search_path, default_location, search_path_size);
+		append_ini_path(php_ini_search_path, search_path_size, default_location);
 #endif
 	}
 
