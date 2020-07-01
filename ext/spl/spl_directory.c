@@ -2259,7 +2259,7 @@ PHP_METHOD(SplFileObject, valid)
 } /* }}} */
 
 /* {{{ proto string SplFileObject::fgets()
-   Rturn next line from file */
+   Return next line from file */
 PHP_METHOD(SplFileObject, fgets)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
