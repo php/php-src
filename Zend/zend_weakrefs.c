@@ -501,7 +501,8 @@ static const zend_object_iterator_funcs zend_weakmap_iterator_funcs = {
 	zend_weakmap_iterator_get_current_key,
 	zend_weakmap_iterator_move_forward,
 	zend_weakmap_iterator_rewind,
-	NULL
+	NULL,
+	NULL, /* get_gc */
 };
 
 static zend_object_iterator *zend_weakmap_get_iterator(

@@ -1628,7 +1628,8 @@ static const zend_object_iterator_funcs spl_filesystem_dir_it_funcs = {
 	spl_filesystem_dir_it_current_key,
 	spl_filesystem_dir_it_move_forward,
 	spl_filesystem_dir_it_rewind,
-	NULL
+	NULL,
+	NULL, /* get_gc */
 };
 /* }}} */
 
@@ -1828,7 +1829,8 @@ static const zend_object_iterator_funcs spl_filesystem_tree_it_funcs = {
 	spl_filesystem_tree_it_current_key,
 	spl_filesystem_tree_it_move_forward,
 	spl_filesystem_tree_it_rewind,
-	NULL
+	NULL,
+	NULL, /* get_gc */
 };
 /* }}} */
 

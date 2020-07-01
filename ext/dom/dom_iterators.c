@@ -250,7 +250,8 @@ static const zend_object_iterator_funcs php_dom_iterator_funcs = {
 	php_dom_iterator_current_key,
 	php_dom_iterator_move_forward,
 	NULL,
-	NULL
+	NULL,
+	NULL, /* get_gc */
 };
 
 zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, int by_ref) /* {{{ */

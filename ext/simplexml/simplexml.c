@@ -2470,7 +2470,8 @@ static const zend_object_iterator_funcs php_sxe_iterator_funcs = { /* {{{ */
 	php_sxe_iterator_current_key,
 	php_sxe_iterator_move_forward,
 	php_sxe_iterator_rewind,
-	NULL
+	NULL,
+	NULL, /* get_gc */
 };
 /* }}} */
 
