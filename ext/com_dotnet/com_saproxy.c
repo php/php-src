@@ -512,7 +512,8 @@ static const zend_object_iterator_funcs saproxy_iter_funcs = {
 	saproxy_iter_get_data,
 	saproxy_iter_get_key,
 	saproxy_iter_move_forwards,
-	NULL
+	NULL,
+	NULL, /* get_gc */
 };
 
 

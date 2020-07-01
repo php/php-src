@@ -1526,7 +1526,8 @@ static const zend_object_iterator_funcs date_period_it_funcs = {
 	date_period_it_current_key,
 	date_period_it_move_forward,
 	date_period_it_rewind,
-	date_period_it_invalidate_current
+	date_period_it_invalidate_current,
+	NULL, /* get_gc */
 };
 
 zend_object_iterator *date_object_period_get_iterator(zend_class_entry *ce, zval *object, int by_ref) /* {{{ */

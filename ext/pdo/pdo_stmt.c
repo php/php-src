@@ -2304,7 +2304,8 @@ static const zend_object_iterator_funcs pdo_stmt_iter_funcs = {
 	pdo_stmt_iter_get_key,
 	pdo_stmt_iter_move_forwards,
 	NULL,
-	NULL
+	NULL,
+	NULL, /* get_gc */
 };
 
 zend_object_iterator *pdo_stmt_iter_get(zend_class_entry *ce, zval *object, int by_ref)

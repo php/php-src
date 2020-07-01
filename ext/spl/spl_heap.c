@@ -1068,7 +1068,8 @@ static const zend_object_iterator_funcs spl_heap_it_funcs = {
 	spl_heap_it_get_current_key,
 	spl_heap_it_move_forward,
 	spl_heap_it_rewind,
-	NULL
+	NULL,
+	NULL, /* get_gc */
 };
 
 static const zend_object_iterator_funcs spl_pqueue_it_funcs = {
@@ -1078,7 +1079,8 @@ static const zend_object_iterator_funcs spl_pqueue_it_funcs = {
 	spl_heap_it_get_current_key,
 	spl_heap_it_move_forward,
 	spl_heap_it_rewind,
-	NULL
+	NULL,
+	NULL, /* get_gc */
 };
 
 zend_object_iterator *spl_heap_get_iterator(zend_class_entry *ce, zval *object, int by_ref) /* {{{ */

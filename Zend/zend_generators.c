@@ -1094,7 +1094,8 @@ static const zend_object_iterator_funcs zend_generator_iterator_functions = {
 	zend_generator_iterator_get_key,
 	zend_generator_iterator_move_forward,
 	zend_generator_iterator_rewind,
-	NULL
+	NULL,
+	NULL, /* get_gc */
 };
 
 zend_object_iterator *zend_generator_get_iterator(zend_class_entry *ce, zval *object, int by_ref) /* {{{ */

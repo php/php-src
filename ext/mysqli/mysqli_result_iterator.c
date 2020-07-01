@@ -150,6 +150,7 @@ const zend_object_iterator_funcs php_mysqli_result_iterator_funcs = {
 	php_mysqli_result_iterator_current_key,
 	php_mysqli_result_iterator_move_forward,
 	php_mysqli_result_iterator_rewind,
-	NULL
+	NULL,
+	NULL, /* get_gc */
 };
 /* }}} */

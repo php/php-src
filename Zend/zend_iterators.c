@@ -70,7 +70,11 @@ static void iter_wrapper_dtor(zend_object *object)
 }
 
 static HashTable *iter_wrapper_get_gc(zend_object *object, zval **table, int *n) {
-	/* TODO: We need a get_gc iterator handler */
+	zend_object_iterator *iter = (zend_object_iterator*)object;
+	if (iter->funcs->get_gc) {
+		return iter->funcs->get_gc(iter, table, n);
+	}
+
 	*table = NULL;
 	*n = 0;
 	return NULL;

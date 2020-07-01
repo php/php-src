@@ -50,6 +50,10 @@ typedef struct _zend_object_iterator_funcs {
 
 	/* invalidate current value/key (optional, may be NULL) */
 	void (*invalidate_current)(zend_object_iterator *iter);
+
+	/* Expose owned values to GC.
+	 * This has the same semantics as the corresponding object handler. */
+	HashTable *(*get_gc)(zend_object_iterator *iter, zval **table, int *n);
 } zend_object_iterator_funcs;
 
 struct _zend_object_iterator {

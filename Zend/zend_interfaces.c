@@ -198,7 +198,8 @@ static const zend_object_iterator_funcs zend_interface_iterator_funcs_iterator =
 	zend_user_it_get_current_key,
 	zend_user_it_move_forward,
 	zend_user_it_rewind,
-	zend_user_it_invalidate_current
+	zend_user_it_invalidate_current,
+	NULL, /* get_gc */
 };
 
 /* {{{ zend_user_it_get_iterator */

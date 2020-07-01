@@ -438,7 +438,8 @@ static const zend_object_iterator_funcs spl_recursive_it_iterator_funcs = {
 	spl_recursive_it_get_current_key,
 	spl_recursive_it_move_forward,
 	spl_recursive_it_rewind,
-	NULL
+	NULL,
+	NULL, /* get_gc */
 };
 
 static zend_object_iterator *spl_recursive_it_get_iterator(zend_class_entry *ce, zval *zobject, int by_ref)
