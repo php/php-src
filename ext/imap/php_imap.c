@@ -802,7 +802,16 @@ static void php_imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	imap_stream = mail_open(NIL, ZSTR_VAL(mailbox), flags);
 
 	if (imap_stream == NIL) {
+#ifndef HAVE_IMAP_SSL
+		if (strstr(ZSTR_VAL(mailbox), "/tls") != NULL || strstr(ZSTR_VAL(mailbox), "/ssl") != NULL) {
+			php_error_docref(NULL, E_WARNING, "Couldn't open stream %s. The reason could be that mailbox contains /tls or /ssl and imap was not compiled with HAVE_IMAP_SSL defined.", ZSTR_VAL(mailbox));
+		}
+		else {
+			php_error_docref(NULL, E_WARNING, "Couldn't open stream %s", ZSTR_VAL(mailbox));
+		}
+#else
 		php_error_docref(NULL, E_WARNING, "Couldn't open stream %s", ZSTR_VAL(mailbox));
+#endif
 		efree(IMAPG(imap_user)); IMAPG(imap_user) = 0;
 		efree(IMAPG(imap_password)); IMAPG(imap_password) = 0;
 		RETURN_FALSE;
