@@ -4621,6 +4621,7 @@ PHP_IMAP_EXPORT void mm_dlog(char *str)
 	/* CJH: this is for debugging; it might be useful to allow setting
 	   the stream to debug mode and capturing this somewhere - syslog?
 	   php debugger? */
+	php_error_docref(NULL, E_NOTICE, "%s", str);
 }
 
 PHP_IMAP_EXPORT void mm_login(NETMBX *mb, char *user, char *pwd, long trial)
