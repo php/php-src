@@ -917,25 +917,14 @@ static int same_name(zend_string *key, zend_string *name) /* {{{ */
    Returns an array of method names for class or class instance. */
 ZEND_FUNCTION(get_class_methods)
 {
-	zval *klass;
 	zval method_name;
 	zend_class_entry *ce = NULL;
 	zend_class_entry *scope;
 	zend_function *mptr;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &klass) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	if (Z_TYPE_P(klass) == IS_OBJECT) {
-		ce = Z_OBJCE_P(klass);
-	} else if (Z_TYPE_P(klass) == IS_STRING) {
-		ce = zend_lookup_class(Z_STR_P(klass));
-	}
-
-	if (!ce) {
-		RETURN_NULL();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_CLASS_NAME_OR_OBJ(ce)
+	ZEND_PARSE_PARAMETERS_END();
 
 	array_init(return_value);
 	scope = zend_get_executed_scope();
