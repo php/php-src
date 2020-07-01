@@ -486,8 +486,7 @@ static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, const char 
 }
 
 
-/* {{{ proto bool stream_wrapper_register(string protocol, string classname[, int flags])
-   Registers a custom URL protocol handler class */
+/* {{{ Registers a custom URL protocol handler class */
 PHP_FUNCTION(stream_wrapper_register)
 {
 	zend_string *protocol, *classname;
@@ -529,8 +528,7 @@ PHP_FUNCTION(stream_wrapper_register)
 }
 /* }}} */
 
-/* {{{ proto bool stream_wrapper_unregister(string protocol)
-	Unregister a wrapper for the life of the current request. */
+/* {{{ Unregister a wrapper for the life of the current request. */
 PHP_FUNCTION(stream_wrapper_unregister)
 {
 	zend_string *protocol;
@@ -549,8 +547,7 @@ PHP_FUNCTION(stream_wrapper_unregister)
 }
 /* }}} */
 
-/* {{{ proto bool stream_wrapper_restore(string protocol)
-	Restore the original protocol handler, overriding if necessary */
+/* {{{ Restore the original protocol handler, overriding if necessary */
 PHP_FUNCTION(stream_wrapper_restore)
 {
 	zend_string *protocol;

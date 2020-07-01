@@ -432,8 +432,7 @@ skip_phar:
 #define IS_ABLE_CHECK(__t) ((__t) == FS_IS_R || (__t) == FS_IS_W || (__t) == FS_IS_X)
 #define IS_ACCESS_CHECK(__t) (IS_ABLE_CHECK(type) || (__t) == FS_EXISTS)
 
-/* {{{ php_stat
- */
+/* {{{ php_stat */
 static void phar_fancy_stat(zend_stat_t *stat_sb, int type, zval *return_value)
 {
 	zval stat_dev, stat_ino, stat_mode, stat_nlink, stat_uid, stat_gid, stat_rdev,
@@ -773,73 +772,59 @@ ZEND_NAMED_FUNCTION(fname) { \
 }
 /* }}} */
 
-/* {{{ proto int fileperms(string filename)
-   Get file permissions */
+/* {{{ Get file permissions */
 PharFileFunction(phar_fileperms, FS_PERMS, orig_fileperms)
 /* }}} */
 
-/* {{{ proto int fileinode(string filename)
-   Get file inode */
+/* {{{ Get file inode */
 PharFileFunction(phar_fileinode, FS_INODE, orig_fileinode)
 /* }}} */
 
-/* {{{ proto int filesize(string filename)
-   Get file size */
+/* {{{ Get file size */
 PharFileFunction(phar_filesize, FS_SIZE, orig_filesize)
 /* }}} */
 
-/* {{{ proto int fileowner(string filename)
-   Get file owner */
+/* {{{ Get file owner */
 PharFileFunction(phar_fileowner, FS_OWNER, orig_fileowner)
 /* }}} */
 
-/* {{{ proto int filegroup(string filename)
-   Get file group */
+/* {{{ Get file group */
 PharFileFunction(phar_filegroup, FS_GROUP, orig_filegroup)
 /* }}} */
 
-/* {{{ proto int fileatime(string filename)
-   Get last access time of file */
+/* {{{ Get last access time of file */
 PharFileFunction(phar_fileatime, FS_ATIME, orig_fileatime)
 /* }}} */
 
-/* {{{ proto int filemtime(string filename)
-   Get last modification time of file */
+/* {{{ Get last modification time of file */
 PharFileFunction(phar_filemtime, FS_MTIME, orig_filemtime)
 /* }}} */
 
-/* {{{ proto int filectime(string filename)
-   Get inode modification time of file */
+/* {{{ Get inode modification time of file */
 PharFileFunction(phar_filectime, FS_CTIME, orig_filectime)
 /* }}} */
 
-/* {{{ proto string filetype(string filename)
-   Get file type */
+/* {{{ Get file type */
 PharFileFunction(phar_filetype, FS_TYPE, orig_filetype)
 /* }}} */
 
-/* {{{ proto bool is_writable(string filename)
-   Returns true if file can be written */
+/* {{{ Returns true if file can be written */
 PharFileFunction(phar_is_writable, FS_IS_W, orig_is_writable)
 /* }}} */
 
-/* {{{ proto bool is_readable(string filename)
-   Returns true if file can be read */
+/* {{{ Returns true if file can be read */
 PharFileFunction(phar_is_readable, FS_IS_R, orig_is_readable)
 /* }}} */
 
-/* {{{ proto bool is_executable(string filename)
-   Returns true if file is executable */
+/* {{{ Returns true if file is executable */
 PharFileFunction(phar_is_executable, FS_IS_X, orig_is_executable)
 /* }}} */
 
-/* {{{ proto bool file_exists(string filename)
-   Returns true if filename exists */
+/* {{{ Returns true if filename exists */
 PharFileFunction(phar_file_exists, FS_EXISTS, orig_file_exists)
 /* }}} */
 
-/* {{{ proto bool is_dir(string filename)
-   Returns true if file is directory */
+/* {{{ Returns true if file is directory */
 PharFileFunction(phar_is_dir, FS_IS_DIR, orig_is_dir)
 /* }}} */
 
@@ -975,13 +960,11 @@ skip_phar:
 }
 /* }}} */
 
-/* {{{ proto array lstat(string filename)
-   Give information about a file or symbolic link */
+/* {{{ Give information about a file or symbolic link */
 PharFileFunction(phar_lstat, FS_LSTAT, orig_lstat)
 /* }}} */
 
-/* {{{ proto array stat(string filename)
-   Give information about a file */
+/* {{{ Give information about a file */
 PharFileFunction(phar_stat, FS_STAT, orig_stat)
 /* }}} */
 

@@ -195,8 +195,7 @@ void intl_errors_set( intl_error* err, UErrorCode code, const char* msg, int cop
 }
 /* }}} */
 
-/* {{{ void intl_errors_reset( intl_error* err )
- */
+/* {{{ void intl_errors_reset( intl_error* err ) */
 void intl_errors_reset( intl_error* err )
 {
 	if(err) {
@@ -206,8 +205,7 @@ void intl_errors_reset( intl_error* err )
 }
 /* }}} */
 
-/* {{{ void intl_errors_set_custom_msg( intl_error* err, char* msg, int copyMsg )
- */
+/* {{{ void intl_errors_set_custom_msg( intl_error* err, char* msg, int copyMsg ) */
 void intl_errors_set_custom_msg( intl_error* err, const char* msg, int copyMsg )
 {
 	if(err) {
@@ -217,8 +215,7 @@ void intl_errors_set_custom_msg( intl_error* err, const char* msg, int copyMsg )
 }
 /* }}} */
 
-/* {{{ intl_errors_set_code( intl_error* err, UErrorCode err_code )
- */
+/* {{{ intl_errors_set_code( intl_error* err, UErrorCode err_code ) */
 void intl_errors_set_code( intl_error* err, UErrorCode err_code )
 {
 	if(err) {

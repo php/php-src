@@ -558,8 +558,7 @@ static HashTable *spl_pqueue_object_get_gc(zend_object *obj, zval **gc_data, int
 }
 /* }}} */
 
-/* {{{ proto int SplHeap::count()
- Return the number of elements in the heap. */
+/* {{{ Return the number of elements in the heap. */
 PHP_METHOD(SplHeap, count)
 {
 	zend_long count;
@@ -574,8 +573,7 @@ PHP_METHOD(SplHeap, count)
 }
 /* }}} */
 
-/* {{{ proto int SplHeap::isEmpty()
- Return true if the heap is empty. */
+/* {{{ Return true if the heap is empty. */
 PHP_METHOD(SplHeap, isEmpty)
 {
 	spl_heap_object *intern = Z_SPLHEAP_P(ZEND_THIS);
@@ -588,8 +586,7 @@ PHP_METHOD(SplHeap, isEmpty)
 }
 /* }}} */
 
-/* {{{ proto bool SplHeap::insert(mixed value)
-	   Push $value on the heap */
+/* {{{ Push $value on the heap */
 PHP_METHOD(SplHeap, insert)
 {
 	zval *value;
@@ -613,8 +610,7 @@ PHP_METHOD(SplHeap, insert)
 }
 /* }}} */
 
-/* {{{ proto mixed SplHeap::extract()
-	   extract the element out of the top of the heap */
+/* {{{ extract the element out of the top of the heap */
 PHP_METHOD(SplHeap, extract)
 {
 	spl_heap_object *intern;
@@ -637,8 +633,7 @@ PHP_METHOD(SplHeap, extract)
 }
 /* }}} */
 
-/* {{{ proto bool SplPriorityQueue::insert(mixed value, mixed priority)
-	   Push $value with the priority $priodiry on the priorityqueue */
+/* {{{ Push $value with the priority $priodiry on the priorityqueue */
 PHP_METHOD(SplPriorityQueue, insert)
 {
 	zval *data, *priority;
@@ -665,8 +660,7 @@ PHP_METHOD(SplPriorityQueue, insert)
 }
 /* }}} */
 
-/* {{{ proto mixed SplPriorityQueue::extract()
-	   extract the element out of the top of the priority queue */
+/* {{{ extract the element out of the top of the priority queue */
 PHP_METHOD(SplPriorityQueue, extract)
 {
 	spl_pqueue_elem elem;
@@ -693,8 +687,7 @@ PHP_METHOD(SplPriorityQueue, extract)
 }
 /* }}} */
 
-/* {{{ proto mixed SplPriorityQueue::top()
-	   Peek at the top element of the priority queue */
+/* {{{ Peek at the top element of the priority queue */
 PHP_METHOD(SplPriorityQueue, top)
 {
 	spl_heap_object *intern;
@@ -723,8 +716,7 @@ PHP_METHOD(SplPriorityQueue, top)
 /* }}} */
 
 
-/* {{{ proto int SplPriorityQueue::setExtractFlags(int flags)
- Set the flags of extraction*/
+/* {{{ Set the flags of extraction*/
 PHP_METHOD(SplPriorityQueue, setExtractFlags)
 {
 	zend_long value;
@@ -746,8 +738,7 @@ PHP_METHOD(SplPriorityQueue, setExtractFlags)
 }
 /* }}} */
 
-/* {{{ proto int SplPriorityQueue::getExtractFlags()
- Get the flags of extraction*/
+/* {{{ Get the flags of extraction*/
 PHP_METHOD(SplPriorityQueue, getExtractFlags)
 {
 	spl_heap_object *intern;
@@ -762,8 +753,7 @@ PHP_METHOD(SplPriorityQueue, getExtractFlags)
 }
 /* }}} */
 
-/* {{{ proto int SplHeap::recoverFromCorruption()
- Recover from a corrupted state*/
+/* {{{ Recover from a corrupted state*/
 PHP_METHOD(SplHeap, recoverFromCorruption)
 {
 	spl_heap_object *intern;
@@ -780,8 +770,7 @@ PHP_METHOD(SplHeap, recoverFromCorruption)
 }
 /* }}} */
 
-/* {{{ proto int SplHeap::isCorrupted()
- Tells if the heap is in a corrupted state*/
+/* {{{ Tells if the heap is in a corrupted state*/
 PHP_METHOD(SplHeap, isCorrupted)
 {
 	spl_heap_object *intern;
@@ -796,8 +785,7 @@ PHP_METHOD(SplHeap, isCorrupted)
 }
 /* }}} */
 
-/* {{{ proto bool SplPriorityQueue::compare(mixed $value1, mixed $value2)
-	   compare the priorities */
+/* {{{ compare the priorities */
 PHP_METHOD(SplPriorityQueue, compare)
 {
 	zval *a, *b;
@@ -810,8 +798,7 @@ PHP_METHOD(SplPriorityQueue, compare)
 }
 /* }}} */
 
-/* {{{ proto mixed SplHeap::top()
-	   Peek at the top element of the heap */
+/* {{{ Peek at the top element of the heap */
 PHP_METHOD(SplHeap, top)
 {
 	zval *value;
@@ -839,8 +826,7 @@ PHP_METHOD(SplHeap, top)
 }
 /* }}} */
 
-/* {{{ proto bool SplMinHeap::compare(mixed $value1, mixed $value2)
-	   compare the values */
+/* {{{ compare the values */
 PHP_METHOD(SplMinHeap, compare)
 {
 	zval *a, *b;
@@ -853,8 +839,7 @@ PHP_METHOD(SplMinHeap, compare)
 }
 /* }}} */
 
-/* {{{ proto bool SplMaxHeap::compare(mixed $value1, mixed $value2)
-	   compare the values */
+/* {{{ compare the values */
 PHP_METHOD(SplMaxHeap, compare)
 {
 	zval *a, *b;
@@ -949,8 +934,7 @@ static void spl_heap_it_move_forward(zend_object_iterator *iter) /* {{{ */
 }
 /* }}} */
 
-/* {{{  proto int SplHeap::key()
-   Return current array key */
+/* {{{ Return current array key */
 PHP_METHOD(SplHeap, key)
 {
 	spl_heap_object *intern = Z_SPLHEAP_P(ZEND_THIS);
@@ -963,8 +947,7 @@ PHP_METHOD(SplHeap, key)
 }
 /* }}} */
 
-/* {{{ proto void SplHeap::next()
-   Move to next entry */
+/* {{{ Move to next entry */
 PHP_METHOD(SplHeap, next)
 {
 	spl_heap_object *intern = Z_SPLHEAP_P(ZEND_THIS);
@@ -977,8 +960,7 @@ PHP_METHOD(SplHeap, next)
 }
 /* }}} */
 
-/* {{{ proto bool SplHeap::valid()
-   Check whether the datastructure contains more entries */
+/* {{{ Check whether the datastructure contains more entries */
 PHP_METHOD(SplHeap, valid)
 {
 	spl_heap_object *intern = Z_SPLHEAP_P(ZEND_THIS);
@@ -991,8 +973,7 @@ PHP_METHOD(SplHeap, valid)
 }
 /* }}} */
 
-/* {{{ proto void SplHeap::rewind()
-   Rewind the datastructure back to the start */
+/* {{{ Rewind the datastructure back to the start */
 PHP_METHOD(SplHeap, rewind)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1002,8 +983,7 @@ PHP_METHOD(SplHeap, rewind)
 }
 /* }}} */
 
-/* {{{ proto mixed|NULL SplHeap::current()
-   Return current datastructure entry */
+/* {{{ Return current datastructure entry */
 PHP_METHOD(SplHeap, current)
 {
 	spl_heap_object *intern  = Z_SPLHEAP_P(ZEND_THIS);
@@ -1021,8 +1001,7 @@ PHP_METHOD(SplHeap, current)
 }
 /* }}} */
 
-/* {{{ proto mixed|NULL SplPriorityQueue::current()
-   Return current datastructure entry */
+/* {{{ Return current datastructure entry */
 PHP_METHOD(SplPriorityQueue, current)
 {
 	spl_heap_object  *intern  = Z_SPLHEAP_P(ZEND_THIS);
@@ -1040,7 +1019,7 @@ PHP_METHOD(SplPriorityQueue, current)
 }
 /* }}} */
 
-/* {{{ proto void SplHeap::__debugInfo() */
+/* {{{ */
 PHP_METHOD(SplHeap, __debugInfo)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1050,7 +1029,7 @@ PHP_METHOD(SplHeap, __debugInfo)
 	RETURN_ARR(spl_heap_object_get_debug_info(spl_ce_SplHeap, Z_OBJ_P(ZEND_THIS)));
 } /* }}} */
 
-/* {{{ proto void SplPriorityQueue::__debugInfo() */
+/* {{{ */
 PHP_METHOD(SplPriorityQueue, __debugInfo)
 {
 	if (zend_parse_parameters_none() == FAILURE) {

@@ -4861,8 +4861,7 @@ static int zend_ffi_preload(char *preload) /* {{{ */
 }
 /* }}} */
 
-/* {{{ ZEND_MINIT_FUNCTION
- */
+/* {{{ ZEND_MINIT_FUNCTION */
 ZEND_MINIT_FUNCTION(ffi)
 {
 	zend_class_entry ce;
@@ -5033,8 +5032,7 @@ ZEND_MINIT_FUNCTION(ffi)
 }
 /* }}} */
 
-/* {{{ ZEND_RSHUTDOWN_FUNCTION
- */
+/* {{{ ZEND_RSHUTDOWN_FUNCTION */
 ZEND_RSHUTDOWN_FUNCTION(ffi)
 {
 	if (FFI_G(callbacks)) {
@@ -5054,8 +5052,7 @@ ZEND_RSHUTDOWN_FUNCTION(ffi)
 }
 /* }}} */
 
-/* {{{ ZEND_MINFO_FUNCTION
- */
+/* {{{ ZEND_MINFO_FUNCTION */
 ZEND_MINFO_FUNCTION(ffi)
 {
 	php_info_print_table_start();
@@ -5130,8 +5127,7 @@ const struct {
 	{"__gnuc_va_list",    &zend_ffi_type_ptr},
 };
 
-/* {{{ ZEND_GINIT_FUNCTION
- */
+/* {{{ ZEND_GINIT_FUNCTION */
 static ZEND_GINIT_FUNCTION(ffi)
 {
 	size_t i;
@@ -5147,8 +5143,7 @@ static ZEND_GINIT_FUNCTION(ffi)
 }
 /* }}} */
 
-/* {{{ ZEND_GINIT_FUNCTION
- */
+/* {{{ ZEND_GINIT_FUNCTION */
 static ZEND_GSHUTDOWN_FUNCTION(ffi)
 {
 	if (ffi_globals->scopes) {
@@ -5159,8 +5154,7 @@ static ZEND_GSHUTDOWN_FUNCTION(ffi)
 }
 /* }}} */
 
-/* {{{ ffi_module_entry
- */
+/* {{{ ffi_module_entry */
 zend_module_entry ffi_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"FFI",					/* Extension name */

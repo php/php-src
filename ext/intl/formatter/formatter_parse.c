@@ -27,11 +27,7 @@
 
 #define ICU_LOCALE_BUG 1
 
-/* {{{ proto mixed NumberFormatter::parse( string $str[, int $type, int &$position ])
- * Parse a number. }}} */
-/* {{{ proto mixed numfmt_parse( NumberFormatter $nf, string $str[, int $type, int &$position ])
- * Parse a number.
- */
+/* {{{ Parse a number. */
 PHP_FUNCTION( numfmt_parse )
 {
 	zend_long type = FORMAT_TYPE_DOUBLE;
@@ -110,11 +106,7 @@ PHP_FUNCTION( numfmt_parse )
 }
 /* }}} */
 
-/* {{{ proto float NumberFormatter::parseCurrency( string $str, string &$currency[, int &$position] )
- * Parse a number as currency. }}} */
-/* {{{ proto float numfmt_parse_currency( NumberFormatter $nf, string $str, string &$currency[, int &$position] )
- * Parse a number as currency.
- */
+/* {{{ Parse a number as currency. */
 PHP_FUNCTION( numfmt_parse_currency )
 {
 	double number;

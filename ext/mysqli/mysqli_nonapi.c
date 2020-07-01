@@ -31,8 +31,7 @@
 
 #define SAFE_STR(a) ((a)?a:"")
 
-/* {{{ php_mysqli_set_error
- */
+/* {{{ php_mysqli_set_error */
 static void php_mysqli_set_error(zend_long mysql_errno, char *mysql_err)
 {
 	MyG(error_no) = mysql_errno;
@@ -370,24 +369,21 @@ err:
 	RETVAL_FALSE;
 } /* }}} */
 
-/* {{{ proto object mysqli_connect([string hostname [,string username [,string passwd [,string dbname [,int port [,string socket]]]]]])
-   Open a connection to a mysql server */
+/* {{{ Open a connection to a mysql server */
 PHP_FUNCTION(mysqli_connect)
 {
 	mysqli_common_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, FALSE, FALSE);
 }
 /* }}} */
 
-/* {{{ proto object mysqli_link_construct()
-  */
+/* {{{ */
 PHP_FUNCTION(mysqli_link_construct)
 {
 	mysqli_common_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, FALSE, TRUE);
 }
 /* }}} */
 
-/* {{{ proto int mysqli_connect_errno(void)
-   Returns the numerical value of the error message from last connect command */
+/* {{{ Returns the numerical value of the error message from last connect command */
 PHP_FUNCTION(mysqli_connect_errno)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -398,8 +394,7 @@ PHP_FUNCTION(mysqli_connect_errno)
 }
 /* }}} */
 
-/* {{{ proto string mysqli_connect_error(void)
-   Returns the text of the error message from previous MySQL operation */
+/* {{{ Returns the text of the error message from previous MySQL operation */
 PHP_FUNCTION(mysqli_connect_error)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -414,24 +409,21 @@ PHP_FUNCTION(mysqli_connect_error)
 }
 /* }}} */
 
-/* {{{ proto mixed mysqli_fetch_array(object result [,int resulttype])
-   Fetch a result row as an associative array, a numeric array, or both */
+/* {{{ Fetch a result row as an associative array, a numeric array, or both */
 PHP_FUNCTION(mysqli_fetch_array)
 {
 	php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0, 0);
 }
 /* }}} */
 
-/* {{{ proto mixed mysqli_fetch_assoc(object result)
-   Fetch a result row as an associative array */
+/* {{{ Fetch a result row as an associative array */
 PHP_FUNCTION(mysqli_fetch_assoc)
 {
 	php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MYSQLI_ASSOC, 0);
 }
 /* }}} */
 
-/* {{{ proto mixed mysqli_fetch_all(object result [,int resulttype])
-   Fetches all result rows as an associative array, a numeric array, or both */
+/* {{{ Fetches all result rows as an associative array, a numeric array, or both */
 #ifdef MYSQLI_USE_MYSQLND
 PHP_FUNCTION(mysqli_fetch_all)
 {
@@ -454,8 +446,7 @@ PHP_FUNCTION(mysqli_fetch_all)
 }
 /* }}} */
 
-/* {{{ proto array mysqli_get_client_stats(void)
-   Returns statistics about the zval cache */
+/* {{{ Returns statistics about the zval cache */
 PHP_FUNCTION(mysqli_get_client_stats)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -465,8 +456,7 @@ PHP_FUNCTION(mysqli_get_client_stats)
 }
 /* }}} */
 
-/* {{{ proto array mysqli_get_connection_stats(void)
-   Returns statistics about the zval cache */
+/* {{{ Returns statistics about the zval cache */
 PHP_FUNCTION(mysqli_get_connection_stats)
 {
 	MY_MYSQL	*mysql;
@@ -483,8 +473,7 @@ PHP_FUNCTION(mysqli_get_connection_stats)
 #endif
 /* }}} */
 
-/* {{{ proto mixed mysqli_error_list(object connection)
-   Fetches all client errors */
+/* {{{ Fetches all client errors */
 PHP_FUNCTION(mysqli_error_list)
 {
 	MY_MYSQL	*mysql;
@@ -529,8 +518,7 @@ PHP_FUNCTION(mysqli_error_list)
 }
 /* }}} */
 
-/* {{{ proto string mysqli_stmt_error_list(object stmt)
-*/
+/* {{{ */
 PHP_FUNCTION(mysqli_stmt_error_list)
 {
 	MY_STMT	*stmt;
@@ -575,16 +563,14 @@ PHP_FUNCTION(mysqli_stmt_error_list)
 }
 /* }}} */
 
-/* {{{ proto mixed mysqli_fetch_object(object result [, string class_name [, NULL|array ctor_params]])
-   Fetch a result row as an object */
+/* {{{ Fetch a result row as an object */
 PHP_FUNCTION(mysqli_fetch_object)
 {
 	php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MYSQLI_ASSOC, 1);
 }
 /* }}} */
 
-/* {{{ proto bool mysqli_multi_query(object link, string query)
-   allows to execute multiple queries  */
+/* {{{ allows to execute multiple queries  */
 PHP_FUNCTION(mysqli_multi_query)
 {
 	MY_MYSQL	*mysql;
@@ -631,7 +617,7 @@ PHP_FUNCTION(mysqli_multi_query)
 }
 /* }}} */
 
-/* {{{ proto mixed mysqli_query(object link, string query [,int resultmode]) */
+/* {{{ */
 PHP_FUNCTION(mysqli_query)
 {
 	MY_MYSQL			*mysql;
@@ -835,8 +821,7 @@ static int mysqlnd_dont_poll_zval_array_from_mysqlnd_array(MYSQLND **in_array, z
 }
 /* }}} */
 
-/* {{{ proto int mysqli_poll(array read, array write, array error, int sec [, int usec]) U
-   Poll connections */
+/* {{{ Poll connections */
 PHP_FUNCTION(mysqli_poll)
 {
 	zval			*r_array, *e_array, *dont_poll_array;
@@ -899,8 +884,7 @@ PHP_FUNCTION(mysqli_poll)
 }
 /* }}} */
 
-/* {{{ proto int mysqli_reap_async_query(object link) U
-   Poll connections */
+/* {{{ Poll connections */
 PHP_FUNCTION(mysqli_reap_async_query)
 {
 	MY_MYSQL		*mysql;
@@ -952,8 +936,7 @@ PHP_FUNCTION(mysqli_reap_async_query)
 }
 /* }}} */
 
-/* {{{ proto object mysqli_stmt_get_result(object link) U
-   Buffer result set on client */
+/* {{{ Buffer result set on client */
 PHP_FUNCTION(mysqli_stmt_get_result)
 {
 	MYSQL_RES 		*result;
@@ -979,7 +962,7 @@ PHP_FUNCTION(mysqli_stmt_get_result)
 /* }}} */
 #endif
 
-/* {{{ proto object mysqli_get_warnings(object link) */
+/* {{{ */
 PHP_FUNCTION(mysqli_get_warnings)
 {
 	MY_MYSQL			*mysql;
@@ -1009,7 +992,7 @@ PHP_FUNCTION(mysqli_get_warnings)
 }
 /* }}} */
 
-/* {{{ proto object mysqli_stmt_get_warnings(object link) */
+/* {{{ */
 PHP_FUNCTION(mysqli_stmt_get_warnings)
 {
 	MY_STMT				*stmt;
@@ -1035,8 +1018,7 @@ PHP_FUNCTION(mysqli_stmt_get_warnings)
 }
 /* }}} */
 
-/* {{{ proto bool mysqli_set_charset(object link, string csname)
-   sets client character set */
+/* {{{ sets client character set */
 PHP_FUNCTION(mysqli_set_charset)
 {
 	MY_MYSQL	*mysql;
@@ -1056,8 +1038,7 @@ PHP_FUNCTION(mysqli_set_charset)
 }
 /* }}} */
 
-/* {{{ proto object mysqli_get_charset(object link) U
-   returns a character set object */
+/* {{{ returns a character set object */
 PHP_FUNCTION(mysqli_get_charset)
 {
 	MY_MYSQL				*mysql;
@@ -1116,7 +1097,7 @@ PHP_FUNCTION(mysqli_get_charset)
 #ifndef MYSQLI_USE_MYSQLND
 extern char * mysqli_escape_string_for_tx_name_in_comment(const char * const name);
 
-/* {{{ proto bool mysqli_begin_transaction_libmysql */
+/* {{{ */
 static int mysqli_begin_transaction_libmysql(MYSQL * conn, const unsigned int mode, const char * const name)
 {
 	int ret;
@@ -1165,8 +1146,7 @@ static int mysqli_begin_transaction_libmysql(MYSQL * conn, const unsigned int mo
 /* }}} */
 #endif
 
-/* {{{ proto bool mysqli_begin_transaction(object link, [int flags [, string name]])
-   Starts a transaction */
+/* {{{ Starts a transaction */
 PHP_FUNCTION(mysqli_begin_transaction)
 {
 	MY_MYSQL	*mysql;
@@ -1206,7 +1186,7 @@ PHP_FUNCTION(mysqli_begin_transaction)
 /* }}} */
 
 #ifndef MYSQLI_USE_MYSQLND
-/* {{{ proto bool mysqli_savepoint_libmysql */
+/* {{{ */
 static int mysqli_savepoint_libmysql(MYSQL * conn, const char * const name, zend_bool release)
 {
 	int ret;
@@ -1219,8 +1199,7 @@ static int mysqli_savepoint_libmysql(MYSQL * conn, const char * const name, zend
 /* }}} */
 #endif
 
-/* {{{ proto bool mysqli_savepoint(object link, string name)
-   Starts a transaction */
+/* {{{ Starts a transaction */
 PHP_FUNCTION(mysqli_savepoint)
 {
 	MY_MYSQL	*mysql;
@@ -1248,8 +1227,7 @@ PHP_FUNCTION(mysqli_savepoint)
 }
 /* }}} */
 
-/* {{{ proto bool mysqli_release_savepoint(object link, string name)
-   Starts a transaction */
+/* {{{ Starts a transaction */
 PHP_FUNCTION(mysqli_release_savepoint)
 {
 	MY_MYSQL	*mysql;
@@ -1276,8 +1254,7 @@ PHP_FUNCTION(mysqli_release_savepoint)
 }
 /* }}} */
 
-/* {{{ proto bool mysqli_get_links_stats()
-   Returns information about open and cached links */
+/* {{{ Returns information about open and cached links */
 PHP_FUNCTION(mysqli_get_links_stats)
 {
 	if (zend_parse_parameters_none() == FAILURE) {

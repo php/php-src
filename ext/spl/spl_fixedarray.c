@@ -519,8 +519,7 @@ static int spl_fixedarray_object_count_elements(zend_object *object, zend_long *
 }
 /* }}} */
 
-/* {{{ proto SplFixedArray::__construct([int size])
-*/
+/* {{{ */
 PHP_METHOD(SplFixedArray, __construct)
 {
 	zval *object = ZEND_THIS;
@@ -547,8 +546,7 @@ PHP_METHOD(SplFixedArray, __construct)
 }
 /* }}} */
 
-/* {{{ proto SplFixedArray::__wakeup()
-*/
+/* {{{ */
 PHP_METHOD(SplFixedArray, __wakeup)
 {
 	spl_fixedarray_object *intern = Z_SPLFIXEDARRAY_P(ZEND_THIS);
@@ -577,8 +575,7 @@ PHP_METHOD(SplFixedArray, __wakeup)
 }
 /* }}} */
 
-/* {{{ proto int SplFixedArray::count(void)
-*/
+/* {{{ */
 PHP_METHOD(SplFixedArray, count)
 {
 	zval *object = ZEND_THIS;
@@ -593,8 +590,7 @@ PHP_METHOD(SplFixedArray, count)
 }
 /* }}} */
 
-/* {{{ proto object SplFixedArray::toArray()
-*/
+/* {{{ */
 PHP_METHOD(SplFixedArray, toArray)
 {
 	spl_fixedarray_object *intern;
@@ -619,8 +615,7 @@ PHP_METHOD(SplFixedArray, toArray)
 }
 /* }}} */
 
-/* {{{ proto object SplFixedArray::fromArray(array array[, bool save_indexes])
-*/
+/* {{{ */
 PHP_METHOD(SplFixedArray, fromArray)
 {
 	zval *data;
@@ -684,8 +679,7 @@ PHP_METHOD(SplFixedArray, fromArray)
 }
 /* }}} */
 
-/* {{{ proto int SplFixedArray::getSize(void)
-*/
+/* {{{ */
 PHP_METHOD(SplFixedArray, getSize)
 {
 	zval *object = ZEND_THIS;
@@ -700,8 +694,7 @@ PHP_METHOD(SplFixedArray, getSize)
 }
 /* }}} */
 
-/* {{{ proto bool SplFixedArray::setSize(int size)
-*/
+/* {{{ */
 PHP_METHOD(SplFixedArray, setSize)
 {
 	zval *object = ZEND_THIS;
@@ -724,8 +717,7 @@ PHP_METHOD(SplFixedArray, setSize)
 }
 /* }}} */
 
-/* {{{ proto bool SplFixedArray::offsetExists(mixed $index)
- Returns whether the requested $index exists. */
+/* {{{ Returns whether the requested $index exists. */
 PHP_METHOD(SplFixedArray, offsetExists)
 {
 	zval                  *zindex;
@@ -740,8 +732,7 @@ PHP_METHOD(SplFixedArray, offsetExists)
 	RETURN_BOOL(spl_fixedarray_object_has_dimension_helper(intern, zindex, 0));
 } /* }}} */
 
-/* {{{ proto mixed SplFixedArray::offsetGet(mixed $index)
- Returns the value at the specified $index. */
+/* {{{ Returns the value at the specified $index. */
 PHP_METHOD(SplFixedArray, offsetGet)
 {
 	zval *zindex, *value;
@@ -761,8 +752,7 @@ PHP_METHOD(SplFixedArray, offsetGet)
 	}
 } /* }}} */
 
-/* {{{ proto void SplFixedArray::offsetSet(mixed $index, mixed $newval)
- Sets the value at the specified $index to $newval. */
+/* {{{ Sets the value at the specified $index to $newval. */
 PHP_METHOD(SplFixedArray, offsetSet)
 {
 	zval                  *zindex, *value;
@@ -777,8 +767,7 @@ PHP_METHOD(SplFixedArray, offsetSet)
 
 } /* }}} */
 
-/* {{{ proto void SplFixedArray::offsetUnset(mixed $index)
- Unsets the value at the specified $index. */
+/* {{{ Unsets the value at the specified $index. */
 PHP_METHOD(SplFixedArray, offsetUnset)
 {
 	zval                  *zindex;
@@ -877,8 +866,7 @@ static void spl_fixedarray_it_move_forward(zend_object_iterator *iter) /* {{{ */
 }
 /* }}} */
 
-/* {{{  proto int SplFixedArray::key()
-   Return current array key */
+/* {{{ Return current array key */
 PHP_METHOD(SplFixedArray, key)
 {
 	spl_fixedarray_object *intern = Z_SPLFIXEDARRAY_P(ZEND_THIS);
@@ -891,8 +879,7 @@ PHP_METHOD(SplFixedArray, key)
 }
 /* }}} */
 
-/* {{{ proto void SplFixedArray::next()
-   Move to next entry */
+/* {{{ Move to next entry */
 PHP_METHOD(SplFixedArray, next)
 {
 	spl_fixedarray_object *intern = Z_SPLFIXEDARRAY_P(ZEND_THIS);
@@ -905,8 +892,7 @@ PHP_METHOD(SplFixedArray, next)
 }
 /* }}} */
 
-/* {{{ proto bool SplFixedArray::valid()
-   Check whether the datastructure contains more entries */
+/* {{{ Check whether the datastructure contains more entries */
 PHP_METHOD(SplFixedArray, valid)
 {
 	spl_fixedarray_object *intern = Z_SPLFIXEDARRAY_P(ZEND_THIS);
@@ -919,8 +905,7 @@ PHP_METHOD(SplFixedArray, valid)
 }
 /* }}} */
 
-/* {{{ proto void SplFixedArray::rewind()
-   Rewind the datastructure back to the start */
+/* {{{ Rewind the datastructure back to the start */
 PHP_METHOD(SplFixedArray, rewind)
 {
 	spl_fixedarray_object *intern = Z_SPLFIXEDARRAY_P(ZEND_THIS);
@@ -933,8 +918,7 @@ PHP_METHOD(SplFixedArray, rewind)
 }
 /* }}} */
 
-/* {{{ proto mixed|NULL SplFixedArray::current()
-   Return current datastructure entry */
+/* {{{ Return current datastructure entry */
 PHP_METHOD(SplFixedArray, current)
 {
 	zval zindex, *value;

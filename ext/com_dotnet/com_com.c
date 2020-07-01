@@ -282,8 +282,7 @@ PHP_METHOD(com, __construct)
 }
 /* }}} */
 
-/* {{{ proto object com_get_active_object(string progid [, int code_page ])
-   Returns a handle to an already running instance of a COM object */
+/* {{{ Returns a handle to an already running instance of a COM object */
 PHP_FUNCTION(com_get_active_object)
 {
 	CLSID clsid;
@@ -658,8 +657,7 @@ int php_com_do_invoke(php_com_dotnet_object *obj, char *name, size_t namelen,
 	return php_com_do_invoke_by_id(obj, dispid, flags, v, nargs, args, 0, allow_noarg);
 }
 
-/* {{{ proto string com_create_guid()
-   Generate a globally unique identifier (GUID) */
+/* {{{ Generate a globally unique identifier (GUID) */
 PHP_FUNCTION(com_create_guid)
 {
 	GUID retval;
@@ -686,8 +684,7 @@ PHP_FUNCTION(com_create_guid)
 }
 /* }}} */
 
-/* {{{ proto bool com_event_sink(object comobject, object sinkobject [, mixed sinkinterface])
-   Connect events from a COM object to a PHP object */
+/* {{{ Connect events from a COM object to a PHP object */
 PHP_FUNCTION(com_event_sink)
 {
 	zval *object, *sinkobject, *sink=NULL;
@@ -746,8 +743,7 @@ PHP_FUNCTION(com_event_sink)
 }
 /* }}} */
 
-/* {{{ proto bool com_print_typeinfo(object comobject | string typelib, string dispinterface, bool wantsink)
-   Print out a PHP class definition for a dispatchable interface */
+/* {{{ Print out a PHP class definition for a dispatchable interface */
 PHP_FUNCTION(com_print_typeinfo)
 {
 	zval *arg1;
@@ -783,8 +779,7 @@ PHP_FUNCTION(com_print_typeinfo)
 }
 /* }}} */
 
-/* {{{ proto bool com_message_pump([int timeoutms])
-   Process COM messages, sleeping for up to timeoutms milliseconds */
+/* {{{ Process COM messages, sleeping for up to timeoutms milliseconds */
 PHP_FUNCTION(com_message_pump)
 {
 	zend_long timeoutms = 0;
@@ -811,8 +806,7 @@ PHP_FUNCTION(com_message_pump)
 }
 /* }}} */
 
-/* {{{ proto bool com_load_typelib(string typelib_name [, bool case_insensitive])
-   Loads a Typelibrary and registers its constants */
+/* {{{ Loads a Typelibrary and registers its constants */
 PHP_FUNCTION(com_load_typelib)
 {
 	char *name;

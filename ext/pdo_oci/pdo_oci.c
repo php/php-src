@@ -84,8 +84,7 @@ OCIEnv *pdo_oci_Env = NULL;
 static MUTEX_T pdo_oci_env_mutex;
 #endif
 
-/* {{{ PHP_MINIT_FUNCTION
- */
+/* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(pdo_oci)
 {
 	REGISTER_PDO_CLASS_CONST_LONG("OCI_ATTR_ACTION", (zend_long)PDO_OCI_ATTR_ACTION);
@@ -107,8 +106,7 @@ PHP_MINIT_FUNCTION(pdo_oci)
 }
 /* }}} */
 
-/* {{{ PHP_RINIT_FUNCTION
- */
+/* {{{ PHP_RINIT_FUNCTION */
 PHP_RINIT_FUNCTION(pdo_oci)
 {
 	if (!pdo_oci_Env) {
@@ -132,8 +130,7 @@ PHP_RINIT_FUNCTION(pdo_oci)
 }
 /* }}} */
 
-/* {{{ PHP_MSHUTDOWN_FUNCTION
- */
+/* {{{ PHP_MSHUTDOWN_FUNCTION */
 PHP_MSHUTDOWN_FUNCTION(pdo_oci)
 {
 	php_pdo_unregister_driver(&pdo_oci_driver);
@@ -150,8 +147,7 @@ PHP_MSHUTDOWN_FUNCTION(pdo_oci)
 }
 /* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
- */
+/* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(pdo_oci)
 {
 	php_info_print_table_start();

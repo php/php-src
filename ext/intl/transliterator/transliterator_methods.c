@@ -94,10 +94,7 @@ static int create_transliterator( char *str_id, size_t str_id_len, zend_long dir
 	return SUCCESS;
 }
 
-/* {{{ proto Transliterator transliterator_create( string id [, int direction ] )
- *     proto Transliterator Transliterator::create( string id [, int direction ] )
- * Opens a transliterator by id.
- */
+/* {{{ Opens a transliterator by id. */
 PHP_FUNCTION( transliterator_create )
 {
 	char     *str_id;
@@ -124,10 +121,7 @@ PHP_FUNCTION( transliterator_create )
 }
 /* }}} */
 
-/* {{{ proto Transliterator transliterator_create_from_rules( string rules [, int direction ] )
- *     proto Transliterator Transliterator::createFromRules( string rules [, int direction ] )
- * Opens a transliterator by id.
- */
+/* {{{ Opens a transliterator by id. */
 PHP_FUNCTION( transliterator_create_from_rules )
 {
 	char		    *str_rules;
@@ -194,10 +188,7 @@ PHP_FUNCTION( transliterator_create_from_rules )
 }
 /* }}} */
 
-/* {{{ proto Transliterator transliterator_create_inverse( Transliterator orig_trans )
- *     proto Transliterator Transliterator::createInverse()
- * Opens the inverse transliterator transliterator.
- */
+/* {{{ Opens the inverse transliterator transliterator. */
 PHP_FUNCTION( transliterator_create_inverse )
 {
 	Transliterator_object *to_orig;
@@ -226,10 +217,7 @@ PHP_FUNCTION( transliterator_create_inverse )
 }
 /* }}} */
 
-/* {{{ proto array transliterator_list_ids()
- *     proto array Transliterator::listIDs()
- * Return an array with the registered transliterator IDs.
- */
+/* {{{ Return an array with the registered transliterator IDs. */
 PHP_FUNCTION( transliterator_list_ids )
 {
 	UEnumeration  *en;
@@ -275,9 +263,7 @@ PHP_FUNCTION( transliterator_list_ids )
 }
 /* }}} */
 
-/* {{{ proto string transliterator_transliterate( Transliterator trans, string subject [, int start = 0 [, int end = -1 ]] )
- *     proto string Transliterator::transliterate( string subject [, int start = 0 [, int end = -1 ]] )
- * Transliterate a string. */
+/* {{{ Transliterate a string. */
 PHP_FUNCTION( transliterator_transliterate )
 {
 	char	    *str;
@@ -450,10 +436,7 @@ PHP_METHOD( Transliterator, __construct )
 		0 );
 }
 
-/* {{{ proto int transliterator_get_error_code( Transliterator trans )
- *     proto int Transliterator::getErrorCode()
- * Get the last error code for this transliterator.
- */
+/* {{{ Get the last error code for this transliterator. */
 PHP_FUNCTION( transliterator_get_error_code )
 {
 	TRANSLITERATOR_METHOD_INIT_VARS
@@ -474,10 +457,7 @@ PHP_FUNCTION( transliterator_get_error_code )
 /* }}} */
 
 
-/* {{{ proto string transliterator_get_error_message( Transliterator trans )
- *     proto string Transliterator::getErrorMessage()
- * Get the last error message for this transliterator.
- */
+/* {{{ Get the last error message for this transliterator. */
 PHP_FUNCTION( transliterator_get_error_message )
 {
 	zend_string* message = NULL;

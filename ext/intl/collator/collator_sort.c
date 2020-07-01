@@ -326,11 +326,7 @@ static void collator_sort_internal( int renumber, INTERNAL_FUNCTION_PARAMETERS )
 }
 /* }}} */
 
-/* {{{ proto bool Collator::sort( Collator $coll, array(string) $arr [, int $sort_flags] )
- * Sort array using specified collator. }}} */
-/* {{{ proto bool collator_sort(  Collator $coll, array(string) $arr [, int $sort_flags] )
- * Sort array using specified collator.
- */
+/* {{{ Sort array using specified collator. */
 PHP_FUNCTION( collator_sort )
 {
 	collator_sort_internal( TRUE, INTERNAL_FUNCTION_PARAM_PASSTHRU );
@@ -346,11 +342,9 @@ static void collator_sortkey_swap(collator_sort_key_index_t *p, collator_sort_ke
 }
 /* }}} */
 
-/* {{{ proto bool Collator::sortWithSortKeys( Collator $coll, array(string) $arr )
- * Equivalent to standard PHP sort using Collator.
+/* {{{ Equivalent to standard PHP sort using Collator.
  * Uses ICU ucol_getSortKey for performance. }}} */
-/* {{{ proto bool collator_sort_with_sort_keys( Collator $coll, array(string) $arr )
- * Equivalent to standard PHP sort using Collator.
+/* {{{ Equivalent to standard PHP sort using Collator.
  * Uses ICU ucol_getSortKey for performance.
  */
 PHP_FUNCTION( collator_sort_with_sort_keys )
@@ -517,21 +511,14 @@ PHP_FUNCTION( collator_sort_with_sort_keys )
 }
 /* }}} */
 
-/* {{{ proto bool Collator::asort( Collator $coll, array(string) $arr )
- * Sort array using specified collator, maintaining index association. }}} */
-/* {{{ proto bool collator_asort( Collator $coll, array(string) $arr )
- * Sort array using specified collator, maintaining index association.
- */
+/* {{{ Sort array using specified collator, maintaining index association. */
 PHP_FUNCTION( collator_asort )
 {
 	collator_sort_internal( FALSE, INTERNAL_FUNCTION_PARAM_PASSTHRU );
 }
 /* }}} */
 
-/* {{{ proto bool Collator::getSortKey( Collator $coll, string $str )
- * Get a sort key for a string from a Collator. }}} */
-/* {{{ proto bool collator_get_sort_key( Collator $coll, string $str )
- * Get a sort key for a string from a Collator. */
+/* {{{ Get a sort key for a string from a Collator. */
 PHP_FUNCTION( collator_get_sort_key )
 {
 	char*            str      = NULL;

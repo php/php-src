@@ -69,8 +69,7 @@ static void sysvshm_free_obj(zend_object *object)
 	zend_object_std_dtor(&sysvshm->std);
 }
 
-/* {{{ sysvshm_module_entry
- */
+/* {{{ sysvshm_module_entry */
 zend_module_entry sysvshm_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"sysvshm",
@@ -97,8 +96,7 @@ static int php_put_shm_data(sysvshm_chunk_head *ptr, zend_long key, const char *
 static zend_long php_check_shm_data(sysvshm_chunk_head *ptr, zend_long key);
 static int php_remove_shm_data(sysvshm_chunk_head *ptr, zend_long shm_varpos);
 
-/* {{{ PHP_MINIT_FUNCTION
- */
+/* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(sysvshm)
 {
 	zend_class_entry ce;
@@ -122,8 +120,7 @@ PHP_MINIT_FUNCTION(sysvshm)
 }
 /* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
- */
+/* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(sysvshm)
 {
 	php_info_print_table_start();
@@ -132,8 +129,7 @@ PHP_MINFO_FUNCTION(sysvshm)
 }
 /* }}} */
 
-/* {{{ proto int shm_attach(int key [, int memsize [, int perm]])
-   Creates or open a shared memory segment */
+/* {{{ Creates or open a shared memory segment */
 PHP_FUNCTION(shm_attach)
 {
 	sysvshm_shm *shm_list_ptr;
@@ -192,8 +188,7 @@ PHP_FUNCTION(shm_attach)
 }
 /* }}} */
 
-/* {{{ proto bool shm_detach(SysvSharedMemory shm_identifier)
-   Disconnects from shared memory segment */
+/* {{{ Disconnects from shared memory segment */
 PHP_FUNCTION(shm_detach)
 {
 	zval *shm_id;
@@ -216,8 +211,7 @@ PHP_FUNCTION(shm_detach)
 }
 /* }}} */
 
-/* {{{ proto bool shm_remove(SysvSharedMemory shm_identifier)
-   Removes shared memory from Unix systems */
+/* {{{ Removes shared memory from Unix systems */
 PHP_FUNCTION(shm_remove)
 {
 	zval *shm_id;
@@ -242,8 +236,7 @@ PHP_FUNCTION(shm_remove)
 }
 /* }}} */
 
-/* {{{ proto bool shm_put_var(SysvSharedMemory shm_identifier, int variable_key, mixed variable)
-   Inserts or updates a variable in shared memory */
+/* {{{ Inserts or updates a variable in shared memory */
 PHP_FUNCTION(shm_put_var)
 {
 	zval *shm_id, *arg_var;
@@ -282,8 +275,7 @@ PHP_FUNCTION(shm_put_var)
 }
 /* }}} */
 
-/* {{{ proto mixed shm_get_var(SysvSharedMemory id, int variable_key)
-   Returns a variable from shared memory */
+/* {{{ Returns a variable from shared memory */
 PHP_FUNCTION(shm_get_var)
 {
 	zval *shm_id;
@@ -324,8 +316,7 @@ PHP_FUNCTION(shm_get_var)
 }
 /* }}} */
 
-/* {{{ proto bool shm_has_var(SysvSharedMemory id, int variable_key)
-	Checks whether a specific entry exists */
+/* {{{ Checks whether a specific entry exists */
 PHP_FUNCTION(shm_has_var)
 {
 	zval *shm_id;
@@ -346,8 +337,7 @@ PHP_FUNCTION(shm_has_var)
 }
 /* }}} */
 
-/* {{{ proto bool shm_remove_var(SysvSharedMemory id, int variable_key)
-   Removes variable from shared memory */
+/* {{{ Removes variable from shared memory */
 PHP_FUNCTION(shm_remove_var)
 {
 	zval *shm_id;
@@ -404,8 +394,7 @@ static int php_put_shm_data(sysvshm_chunk_head *ptr, zend_long key, const char *
 }
 /* }}} */
 
-/* {{{ php_check_shm_data
- */
+/* {{{ php_check_shm_data */
 static zend_long php_check_shm_data(sysvshm_chunk_head *ptr, zend_long key)
 {
 	zend_long pos;
@@ -433,8 +422,7 @@ static zend_long php_check_shm_data(sysvshm_chunk_head *ptr, zend_long key)
 }
 /* }}} */
 
-/* {{{ php_remove_shm_data
- */
+/* {{{ php_remove_shm_data */
 static int php_remove_shm_data(sysvshm_chunk_head *ptr, zend_long shm_varpos)
 {
 	sysvshm_chunk *chunk_ptr, *next_chunk_ptr;

@@ -58,8 +58,7 @@ static inline php_curlm *curl_multi_from_obj(zend_object *obj) {
 
 #define Z_CURL_MULTI_P(zv) curl_multi_from_obj(Z_OBJ_P(zv))
 
-/* {{{ proto CurlMultiHandle curl_multi_init(void)
-   Returns a new cURL multi handle */
+/* {{{ Returns a new cURL multi handle */
 PHP_FUNCTION(curl_multi_init)
 {
 	php_curlm *mh;
@@ -75,8 +74,7 @@ PHP_FUNCTION(curl_multi_init)
 }
 /* }}} */
 
-/* {{{ proto int curl_multi_add_handle(CurlMultiHandle mh, Curl ch)
-   Add a normal cURL handle to a cURL multi handle */
+/* {{{ Add a normal cURL handle to a cURL multi handle */
 PHP_FUNCTION(curl_multi_add_handle)
 {
 	zval      *z_mh;
@@ -144,8 +142,7 @@ static zval *_php_curl_multi_find_easy_handle(php_curlm *mh, CURL *easy) /* {{{ 
 }
 /* }}} */
 
-/* {{{ proto int curl_multi_remove_handle(CurlMultiHandle mh, Curl ch)
-   Remove a multi handle from a set of cURL handles */
+/* {{{ Remove a multi handle from a set of cURL handles */
 PHP_FUNCTION(curl_multi_remove_handle)
 {
 	zval      *z_mh;
@@ -171,8 +168,7 @@ PHP_FUNCTION(curl_multi_remove_handle)
 }
 /* }}} */
 
-/* {{{ proto int curl_multi_select(CurlMultiHandle mh[, double timeout])
-   Get all the sockets associated with the cURL extension, which can then be "selected" */
+/* {{{ Get all the sockets associated with the cURL extension, which can then be "selected" */
 PHP_FUNCTION(curl_multi_select)
 {
 	zval           *z_mh;
@@ -199,8 +195,7 @@ PHP_FUNCTION(curl_multi_select)
 }
 /* }}} */
 
-/* {{{ proto int curl_multi_exec(CurlMultiHandle mh, int &still_running)
-   Run the sub-connections of the current cURL handle */
+/* {{{ Run the sub-connections of the current cURL handle */
 PHP_FUNCTION(curl_multi_exec)
 {
 	zval      *z_mh;
@@ -238,8 +233,7 @@ PHP_FUNCTION(curl_multi_exec)
 }
 /* }}} */
 
-/* {{{ proto string curl_multi_getcontent(CurlHandle ch)
-   Return the content of a cURL handle if CURLOPT_RETURNTRANSFER is set */
+/* {{{ Return the content of a cURL handle if CURLOPT_RETURNTRANSFER is set */
 PHP_FUNCTION(curl_multi_getcontent)
 {
 	zval     *z_ch;
@@ -263,8 +257,7 @@ PHP_FUNCTION(curl_multi_getcontent)
 }
 /* }}} */
 
-/* {{{ proto array curl_multi_info_read(CurlMultiHandle mh [, int &msgs_in_queue])
-   Get information about the current transfers */
+/* {{{ Get information about the current transfers */
 PHP_FUNCTION(curl_multi_info_read)
 {
 	zval      *z_mh;
@@ -310,8 +303,7 @@ PHP_FUNCTION(curl_multi_info_read)
 }
 /* }}} */
 
-/* {{{ proto void curl_multi_close(CurlMultiHandle mh)
-   Close a set of cURL handles */
+/* {{{ Close a set of cURL handles */
 PHP_FUNCTION(curl_multi_close)
 {
 	php_curlm *mh;
@@ -336,8 +328,7 @@ PHP_FUNCTION(curl_multi_close)
 }
 /* }}} */
 
-/* {{{ proto int curl_multi_errno(CurlMultiHandle mh)
-         Return an integer containing the last multi curl error number */
+/* {{{ Return an integer containing the last multi curl error number */
 PHP_FUNCTION(curl_multi_errno)
 {
 	zval        *z_mh;
@@ -353,8 +344,7 @@ PHP_FUNCTION(curl_multi_errno)
 }
 /* }}} */
 
-/* {{{ proto bool curl_multi_strerror(int code)
-         return string describing error code */
+/* {{{ return string describing error code */
 PHP_FUNCTION(curl_multi_strerror)
 {
 	zend_long code;
@@ -498,8 +488,7 @@ static int _php_curl_multi_setopt(php_curlm *mh, zend_long option, zval *zvalue,
 }
 /* }}} */
 
-/* {{{ proto int curl_multi_setopt(CurlMultiHandle mh, int option, mixed value)
-       Set an option for the curl multi handle */
+/* {{{ Set an option for the curl multi handle */
 PHP_FUNCTION(curl_multi_setopt)
 {
 	zval       *z_mh, *zvalue;

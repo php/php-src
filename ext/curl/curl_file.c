@@ -50,8 +50,7 @@ static void curlfile_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	}
 }
 
-/* {{{ proto CURLFile::__construct(string $name, [string $mimetype [, string $postfilename]])
-   Create the CURLFile object */
+/* {{{ Create the CURLFile object */
 ZEND_METHOD(CURLFile, __construct)
 {
 	return_value = ZEND_THIS;
@@ -59,8 +58,7 @@ ZEND_METHOD(CURLFile, __construct)
 }
 /* }}} */
 
-/* {{{ proto CURLFile curl_file_create(string $name, [string $mimetype [, string $postfilename]])
-   Create the CURLFile object */
+/* {{{ Create the CURLFile object */
 PHP_FUNCTION(curl_file_create)
 {
     object_init_ex( return_value, curl_CURLFile_class );
@@ -88,40 +86,35 @@ static void curlfile_set_property(char *name, size_t name_len, INTERNAL_FUNCTION
 	zend_update_property_string(curl_CURLFile_class, ZEND_THIS, name, name_len, ZSTR_VAL(arg));
 }
 
-/* {{{ proto string CURLFile::getFilename()
-   Get file name */
+/* {{{ Get file name */
 ZEND_METHOD(CURLFile, getFilename)
 {
 	curlfile_get_property("name", sizeof("name")-1, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
-/* {{{ proto string CURLFile::getMimeType()
-   Get MIME type */
+/* {{{ Get MIME type */
 ZEND_METHOD(CURLFile, getMimeType)
 {
 	curlfile_get_property("mime", sizeof("mime")-1, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
-/* {{{ proto string CURLFile::getPostFilename()
-   Get file name for POST */
+/* {{{ Get file name for POST */
 ZEND_METHOD(CURLFile, getPostFilename)
 {
 	curlfile_get_property("postname", sizeof("postname")-1, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
-/* {{{ proto void CURLFile::setMimeType(string $mime)
-   Set MIME type */
+/* {{{ Set MIME type */
 ZEND_METHOD(CURLFile, setMimeType)
 {
 	curlfile_set_property("mime", sizeof("mime")-1, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
-/* {{{ proto void CURLFile::setPostFilename(string $name)
-   Set file name for POST */
+/* {{{ Set file name for POST */
 ZEND_METHOD(CURLFile, setPostFilename)
 {
 	curlfile_set_property("postname", sizeof("postname")-1, INTERNAL_FUNCTION_PARAM_PASSTHRU);

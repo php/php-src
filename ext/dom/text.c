@@ -31,7 +31,7 @@
 * Since:
 */
 
-/* {{{ proto DOMText::__construct([string value]); */
+/* {{{ */
 PHP_METHOD(DOMText, __construct)
 {
 	xmlNodePtr nodep = NULL, oldnode = NULL;
@@ -101,8 +101,7 @@ int dom_text_whole_text_read(dom_object *obj, zval *retval)
 
 /* }}} */
 
-/* {{{ proto DOMText dom_text_split_text(int offset)
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-38853C1D
+/* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-38853C1D
 Since:
 */
 PHP_METHOD(DOMText, splitText)
@@ -163,8 +162,7 @@ PHP_METHOD(DOMText, splitText)
 }
 /* }}} end dom_text_split_text */
 
-/* {{{ proto bool dom_text_is_whitespace_in_element_content()
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Text3-isWhitespaceInElementContent
+/* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Text3-isWhitespaceInElementContent
 Since: DOM Level 3
 */
 PHP_METHOD(DOMText, isWhitespaceInElementContent)

@@ -112,8 +112,7 @@ PHP_MINIT_FUNCTION(pdo_odbc)
 }
 /* }}} */
 
-/* {{{ PHP_MSHUTDOWN_FUNCTION
- */
+/* {{{ PHP_MSHUTDOWN_FUNCTION */
 PHP_MSHUTDOWN_FUNCTION(pdo_odbc)
 {
 	php_pdo_unregister_driver(&pdo_odbc_driver);
@@ -121,8 +120,7 @@ PHP_MSHUTDOWN_FUNCTION(pdo_odbc)
 }
 /* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
- */
+/* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(pdo_odbc)
 {
 	php_info_print_table_start();

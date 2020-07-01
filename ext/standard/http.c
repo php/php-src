@@ -228,8 +228,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 }
 /* }}} */
 
-/* {{{ proto string|false http_build_query(mixed formdata [, string prefix [, string arg_separator [, int enc_type]]])
-   Generates a form-encoded query string from an associative array or object. */
+/* {{{ Generates a form-encoded query string from an associative array or object. */
 PHP_FUNCTION(http_build_query)
 {
 	zval *formdata;

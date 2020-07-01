@@ -781,8 +781,7 @@ static PHP_INI_MH(OnUpdateRfc1867Freq) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-/* {{{ PHP_INI
- */
+/* {{{ PHP_INI */
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("session.save_path",          "",          PHP_INI_ALL, OnUpdateSaveDir,       save_path,          php_ps_globals,    ps_globals)
 	STD_PHP_INI_ENTRY("session.name",               "PHPSESSID", PHP_INI_ALL, OnUpdateName,          session_name,       php_ps_globals,    ps_globals)
@@ -1662,8 +1661,7 @@ PHPAPI void session_adapt_url(const char *url, size_t url_len, char **new_url, s
    * Userspace exported functions *
    ******************************** */
 
-/* {{{ proto bool session_set_cookie_params(int lifetime [, string path [, string domain [, bool secure[, bool httponly]]]])
-                  session_set_cookie_params(array options)
+/* {{{ session_set_cookie_params(array options)
    Set session cookie parameters */
 PHP_FUNCTION(session_set_cookie_params)
 {
@@ -1822,8 +1820,7 @@ cleanup:
 }
 /* }}} */
 
-/* {{{ proto array session_get_cookie_params(void)
-   Return the session cookie parameters */
+/* {{{ Return the session cookie parameters */
 PHP_FUNCTION(session_get_cookie_params)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1841,8 +1838,7 @@ PHP_FUNCTION(session_get_cookie_params)
 }
 /* }}} */
 
-/* {{{ proto string session_name([string newname])
-   Return the current session name. If newname is given, the session name is replaced with newname */
+/* {{{ Return the current session name. If newname is given, the session name is replaced with newname */
 PHP_FUNCTION(session_name)
 {
 	zend_string *name = NULL;
@@ -1872,8 +1868,7 @@ PHP_FUNCTION(session_name)
 }
 /* }}} */
 
-/* {{{ proto string session_module_name([string newname])
-   Return the current module name used for accessing session data. If newname is given, the module name is replaced with newname */
+/* {{{ Return the current module name used for accessing session data. If newname is given, the module name is replaced with newname */
 PHP_FUNCTION(session_module_name)
 {
 	zend_string *name = NULL;
@@ -1933,8 +1928,7 @@ static int save_handler_check_session() {
 	return SUCCESS;
 }
 
-/* {{{ proto bool session_set_save_handler(string open, string close, string read, string write, string destroy, string gc, string create_sid)
-   Sets user-level functions */
+/* {{{ Sets user-level functions */
 PHP_FUNCTION(session_set_save_handler)
 {
 	zval *args = NULL;
@@ -2095,8 +2089,7 @@ PHP_FUNCTION(session_set_save_handler)
 }
 /* }}} */
 
-/* {{{ proto string session_save_path([string newname])
-   Return the current save path passed to module_name. If newname is given, the save path is replaced with newname */
+/* {{{ Return the current save path passed to module_name. If newname is given, the save path is replaced with newname */
 PHP_FUNCTION(session_save_path)
 {
 	zend_string *name = NULL;
@@ -2126,8 +2119,7 @@ PHP_FUNCTION(session_save_path)
 }
 /* }}} */
 
-/* {{{ proto string session_id([string newid])
-   Return the current session id. If newid is given, the session id is replaced with newid */
+/* {{{ Return the current session id. If newid is given, the session id is replaced with newid */
 PHP_FUNCTION(session_id)
 {
 	zend_string *name = NULL;
@@ -2169,8 +2161,7 @@ PHP_FUNCTION(session_id)
 }
 /* }}} */
 
-/* {{{ proto bool session_regenerate_id([bool delete_old_session])
-   Update the current session id with a newly generated one. If delete_old_session is set to true, remove the old session. */
+/* {{{ Update the current session id with a newly generated one. If delete_old_session is set to true, remove the old session. */
 PHP_FUNCTION(session_regenerate_id)
 {
 	zend_bool del_ses = 0;
@@ -2269,8 +2260,7 @@ PHP_FUNCTION(session_regenerate_id)
 }
 /* }}} */
 
-/* {{{ proto string session_create_id([string prefix])
-   Generate new session ID. Intended for user save handlers. */
+/* {{{ Generate new session ID. Intended for user save handlers. */
 /* This is not used yet */
 PHP_FUNCTION(session_create_id)
 {
@@ -2324,8 +2314,7 @@ PHP_FUNCTION(session_create_id)
 }
 /* }}} */
 
-/* {{{ proto string session_cache_limiter([string new_cache_limiter])
-   Return the current cache limiter. If new_cache_limited is given, the current cache_limiter is replaced with new_cache_limiter */
+/* {{{ Return the current cache limiter. If new_cache_limited is given, the current cache_limiter is replaced with new_cache_limiter */
 PHP_FUNCTION(session_cache_limiter)
 {
 	zend_string *limiter = NULL;
@@ -2355,8 +2344,7 @@ PHP_FUNCTION(session_cache_limiter)
 }
 /* }}} */
 
-/* {{{ proto int session_cache_expire([int new_cache_expire])
-   Return the current cache expire. If new_cache_expire is given, the current cache_expire is replaced with new_cache_expire */
+/* {{{ Return the current cache expire. If new_cache_expire is given, the current cache_expire is replaced with new_cache_expire */
 PHP_FUNCTION(session_cache_expire)
 {
 	zend_long expires;
@@ -2388,8 +2376,7 @@ PHP_FUNCTION(session_cache_expire)
 }
 /* }}} */
 
-/* {{{ proto string session_encode(void)
-   Serializes the current setup and returns the serialized representation */
+/* {{{ Serializes the current setup and returns the serialized representation */
 PHP_FUNCTION(session_encode)
 {
 	zend_string *enc;
@@ -2407,8 +2394,7 @@ PHP_FUNCTION(session_encode)
 }
 /* }}} */
 
-/* {{{ proto bool session_decode(string data)
-   Deserializes data and reinitializes the variables */
+/* {{{ Deserializes data and reinitializes the variables */
 PHP_FUNCTION(session_decode)
 {
 	zend_string *str = NULL;
@@ -2441,8 +2427,7 @@ static int php_session_start_set_ini(zend_string *varname, zend_string *new_valu
 	return ret;
 }
 
-/* {{{ proto bool session_start([array options])
-+   Begin session */
+/* {{{ +   Begin session */
 PHP_FUNCTION(session_start)
 {
 	zval *options = NULL;
@@ -2519,8 +2504,7 @@ PHP_FUNCTION(session_start)
 }
 /* }}} */
 
-/* {{{ proto bool session_destroy(void)
-   Destroy the current session and all data associated with it */
+/* {{{ Destroy the current session and all data associated with it */
 PHP_FUNCTION(session_destroy)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -2531,8 +2515,7 @@ PHP_FUNCTION(session_destroy)
 }
 /* }}} */
 
-/* {{{ proto bool session_unset(void)
-   Unset all registered variables */
+/* {{{ Unset all registered variables */
 PHP_FUNCTION(session_unset)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -2554,8 +2537,7 @@ PHP_FUNCTION(session_unset)
 }
 /* }}} */
 
-/* {{{ proto int session_gc(void)
-   Perform GC and return number of deleted sessions */
+/* {{{ Perform GC and return number of deleted sessions */
 PHP_FUNCTION(session_gc)
 {
 	zend_long num;
@@ -2579,8 +2561,7 @@ PHP_FUNCTION(session_gc)
 /* }}} */
 
 
-/* {{{ proto bool session_write_close(void)
-   Write session data and end session */
+/* {{{ Write session data and end session */
 PHP_FUNCTION(session_write_close)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -2595,8 +2576,7 @@ PHP_FUNCTION(session_write_close)
 }
 /* }}} */
 
-/* {{{ proto bool session_abort(void)
-   Abort session and end session. Session data will not be written */
+/* {{{ Abort session and end session. Session data will not be written */
 PHP_FUNCTION(session_abort)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -2611,8 +2591,7 @@ PHP_FUNCTION(session_abort)
 }
 /* }}} */
 
-/* {{{ proto bool session_reset(void)
-   Reset session data from saved session data */
+/* {{{ Reset session data from saved session data */
 PHP_FUNCTION(session_reset)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -2627,8 +2606,7 @@ PHP_FUNCTION(session_reset)
 }
 /* }}} */
 
-/* {{{ proto int session_status(void)
-   Returns the current session status */
+/* {{{ Returns the current session status */
 PHP_FUNCTION(session_status)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -2639,8 +2617,7 @@ PHP_FUNCTION(session_status)
 }
 /* }}} */
 
-/* {{{ proto void session_register_shutdown(void)
-   Registers session_write_close() as a shutdown function */
+/* {{{ Registers session_write_close() as a shutdown function */
 PHP_FUNCTION(session_register_shutdown)
 {
 	php_shutdown_function_entry shutdown_function_entry;

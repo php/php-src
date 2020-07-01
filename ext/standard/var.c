@@ -16,8 +16,7 @@
    +----------------------------------------------------------------------+
 */
 
-/* {{{ includes
-*/
+/* {{{ includes */
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -203,8 +202,7 @@ again:
 }
 /* }}} */
 
-/* {{{ proto void var_dump(mixed var)
-   Dumps a string representation of variable to output */
+/* {{{ Dumps a string representation of variable to output */
 PHP_FUNCTION(var_dump)
 {
 	zval *args;
@@ -379,8 +377,7 @@ again:
 }
 /* }}} */
 
-/* {{{ proto void debug_zval_dump(mixed var)
-   Dumps a string representation of an internal zend value to output. */
+/* {{{ Dumps a string representation of an internal zend value to output. */
 PHP_FUNCTION(debug_zval_dump)
 {
 	zval *args;
@@ -605,8 +602,7 @@ PHPAPI void php_var_export(zval *struc, int level) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto mixed var_export(mixed var [, bool return])
-   Outputs or returns a string representation of a variable */
+/* {{{ Outputs or returns a string representation of a variable */
 PHP_FUNCTION(var_export)
 {
 	zval *var;
@@ -1142,8 +1138,7 @@ PHPAPI void php_var_serialize_destroy(php_serialize_data_t d) {
 	}
 }
 
-/* {{{ proto string serialize(mixed variable)
-   Returns a string representation of variable (which can later be unserialized) */
+/* {{{ Returns a string representation of variable (which can later be unserialized) */
 PHP_FUNCTION(serialize)
 {
 	zval *struc;
@@ -1171,8 +1166,7 @@ PHP_FUNCTION(serialize)
 }
 /* }}} */
 
-/* {{{ proto mixed unserialize(string variable_representation[, array options])
-   Takes a string representation of variable and recreates it */
+/* {{{ Takes a string representation of variable and recreates it */
 PHP_FUNCTION(unserialize)
 {
 	char *buf = NULL;
@@ -1292,8 +1286,7 @@ cleanup:
 }
 /* }}} */
 
-/* {{{ proto int memory_get_usage([bool real_usage])
-   Returns the allocated by PHP memory */
+/* {{{ Returns the allocated by PHP memory */
 PHP_FUNCTION(memory_get_usage) {
 	zend_bool real_usage = 0;
 
@@ -1306,8 +1299,7 @@ PHP_FUNCTION(memory_get_usage) {
 }
 /* }}} */
 
-/* {{{ proto int memory_get_peak_usage([bool real_usage])
-   Returns the peak allocated by PHP memory */
+/* {{{ Returns the peak allocated by PHP memory */
 PHP_FUNCTION(memory_get_peak_usage) {
 	zend_bool real_usage = 0;
 

@@ -93,8 +93,7 @@ static void init_sapi_from_env(sapi_module_struct *sapi_module)
         sapi_module->php_ini_path_override = p;
 }
 
-/* {{{ php_lsapi_startup
- */
+/* {{{ php_lsapi_startup */
 static int php_lsapi_startup(sapi_module_struct *sapi_module)
 {
     if (php_module_startup(sapi_module, NULL, 0)==FAILURE) {
@@ -131,8 +130,7 @@ static void sapi_lsapi_ini_defaults(HashTable *configuration_hash)
 /* }}} */
 
 
-/* {{{ sapi_lsapi_ub_write
- */
+/* {{{ sapi_lsapi_ub_write */
 static size_t sapi_lsapi_ub_write(const char *str, size_t str_length)
 {
     int ret;
@@ -160,8 +158,7 @@ static size_t sapi_lsapi_ub_write(const char *str, size_t str_length)
 /* }}} */
 
 
-/* {{{ sapi_lsapi_flush
- */
+/* {{{ sapi_lsapi_flush */
 static void sapi_lsapi_flush(void * server_context)
 {
     if ( lsapi_mode ) {
@@ -173,8 +170,7 @@ static void sapi_lsapi_flush(void * server_context)
 /* }}} */
 
 
-/* {{{ sapi_lsapi_deactivate
- */
+/* {{{ sapi_lsapi_deactivate */
 static int sapi_lsapi_deactivate(void)
 {
     if ( SG(request_info).path_translated ) {
@@ -189,8 +185,7 @@ static int sapi_lsapi_deactivate(void)
 
 
 
-/* {{{ sapi_lsapi_getenv
- */
+/* {{{ sapi_lsapi_getenv */
 static char *sapi_lsapi_getenv(const char * name, size_t name_len )
 {
     if ( lsapi_mode ) {
@@ -260,8 +255,7 @@ static void litespeed_php_import_environment_variables(zval *array_ptr)
     }
 }
 
-/* {{{ sapi_lsapi_register_variables
- */
+/* {{{ sapi_lsapi_register_variables */
 static void sapi_lsapi_register_variables(zval *track_vars_array)
 {
     char * php_self = "";
@@ -288,8 +282,7 @@ static void sapi_lsapi_register_variables(zval *track_vars_array)
 /* }}} */
 
 
-/* {{{ sapi_lsapi_read_post
- */
+/* {{{ sapi_lsapi_read_post */
 static size_t sapi_lsapi_read_post(char *buffer, size_t count_bytes)
 {
     if ( lsapi_mode ) {
@@ -304,8 +297,7 @@ static size_t sapi_lsapi_read_post(char *buffer, size_t count_bytes)
 
 
 
-/* {{{ sapi_lsapi_read_cookies
- */
+/* {{{ sapi_lsapi_read_cookies */
 static char *sapi_lsapi_read_cookies(void)
 {
     if ( lsapi_mode ) {
@@ -463,8 +455,7 @@ static int sapi_lsapi_send_headers_like_cgi(sapi_headers_struct *sapi_headers)
 static int mod_lsapi_mode = 0;
 
 
-/* {{{ sapi_lsapi_send_headers
- */
+/* {{{ sapi_lsapi_send_headers */
 static int sapi_lsapi_send_headers(sapi_headers_struct *sapi_headers)
 {
     sapi_header_struct  *h;
@@ -507,8 +498,7 @@ static int sapi_lsapi_send_headers(sapi_headers_struct *sapi_headers)
 /* }}} */
 
 
-/* {{{ sapi_lsapi_send_headers
- */
+/* {{{ sapi_lsapi_send_headers */
 static void sapi_lsapi_log_message(const char *message, int syslog_type_int)
 {
     char buf[8192];
@@ -597,8 +587,7 @@ static int sapi_lsapi_activate()
     }
     return SUCCESS;
 }
-/* {{{ sapi_module_struct cgi_sapi_module
- */
+/* {{{ sapi_module_struct cgi_sapi_module */
 static sapi_module_struct lsapi_sapi_module =
 {
     "litespeed",
@@ -1678,8 +1667,7 @@ static int add_associate_array( const char * pKey, int keyLen, const char * pVal
 }
 
 
-/* {{{ proto array litespeed_request_headers(void)
-   Fetch all HTTP request headers */
+/* {{{ Fetch all HTTP request headers */
 PHP_FUNCTION(litespeed_request_headers)
 {
     if (zend_parse_parameters_none() == FAILURE) {
@@ -1694,8 +1682,7 @@ PHP_FUNCTION(litespeed_request_headers)
 
 
 
-/* {{{ proto array litespeed_response_headers(void)
-   Fetch all HTTP response headers */
+/* {{{ Fetch all HTTP response headers */
 PHP_FUNCTION(litespeed_response_headers)
 {
     sapi_header_struct  *h;
@@ -1737,8 +1724,7 @@ PHP_FUNCTION(litespeed_response_headers)
 /* }}} */
 
 
-/* {{{ proto array apache_get_modules(void)
-   Fetch all loaded module names  */
+/* {{{ Fetch all loaded module names  */
 PHP_FUNCTION(apache_get_modules)
 {
     static const char * mod_names[] =
@@ -1761,8 +1747,7 @@ PHP_FUNCTION(apache_get_modules)
 /* }}} */
 
 
-/* {{{ proto bool litespeed_finish_request(void)
-   Flushes all response data to the client */
+/* {{{ Flushes all response data to the client */
 PHP_FUNCTION(litespeed_finish_request)
 {
 	if (zend_parse_parameters_none() == FAILURE) {

@@ -17,8 +17,7 @@
 #include "php.h"
 #include "php_incomplete_class.h"
 
-/* {{{ proto string gettype(mixed var)
-   Returns the type of the variable */
+/* {{{ Returns the type of the variable */
 PHP_FUNCTION(gettype)
 {
 	zval *arg;
@@ -37,8 +36,7 @@ PHP_FUNCTION(gettype)
 }
 /* }}} */
 
-/* {{{ proto string get_debug_type(mixed var)
-   Returns the type of the variable resolving class names */
+/* {{{ Returns the type of the variable resolving class names */
 PHP_FUNCTION(get_debug_type)
 {
 	zval *arg;
@@ -83,8 +81,7 @@ PHP_FUNCTION(get_debug_type)
 /* }}} */
 
 
-/* {{{ proto bool settype(mixed &var, string type)
-   Set the type of the variable */
+/* {{{ Set the type of the variable */
 PHP_FUNCTION(settype)
 {
 	zval *var;
@@ -142,8 +139,7 @@ PHP_FUNCTION(settype)
 }
 /* }}} */
 
-/* {{{ proto int intval(mixed var [, int base])
-   Get the integer value of a variable using the optional base for the conversion */
+/* {{{ Get the integer value of a variable using the optional base for the conversion */
 PHP_FUNCTION(intval)
 {
 	zval *num;
@@ -202,8 +198,7 @@ PHP_FUNCTION(intval)
 }
 /* }}} */
 
-/* {{{ proto float floatval(mixed var)
-   Get the float value of a variable */
+/* {{{ Get the float value of a variable */
 PHP_FUNCTION(floatval)
 {
 	zval *num;
@@ -216,8 +211,7 @@ PHP_FUNCTION(floatval)
 }
 /* }}} */
 
-/* {{{ proto bool boolval(mixed value)
-   Get the boolean value of a variable */
+/* {{{ Get the boolean value of a variable */
 PHP_FUNCTION(boolval)
 {
 	zval *value;
@@ -230,8 +224,7 @@ PHP_FUNCTION(boolval)
 }
 /* }}} */
 
-/* {{{ proto string strval(mixed value)
-   Get the string value of a variable */
+/* {{{ Get the string value of a variable */
 PHP_FUNCTION(strval)
 {
 	zval *value;
@@ -266,8 +259,7 @@ static inline void php_is_type(INTERNAL_FUNCTION_PARAMETERS, int type)
 }
 
 
-/* {{{ proto bool is_null(mixed var)
-   Returns true if variable is null
+/* {{{ Returns true if variable is null
    Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
 PHP_FUNCTION(is_null)
 {
@@ -275,8 +267,7 @@ PHP_FUNCTION(is_null)
 }
 /* }}} */
 
-/* {{{ proto bool is_resource(mixed var)
-   Returns true if variable is a resource
+/* {{{ Returns true if variable is a resource
    Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
 PHP_FUNCTION(is_resource)
 {
@@ -284,8 +275,7 @@ PHP_FUNCTION(is_resource)
 }
 /* }}} */
 
-/* {{{ proto bool is_bool(mixed var)
-   Returns true if variable is a boolean
+/* {{{ Returns true if variable is a boolean
    Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
 PHP_FUNCTION(is_bool)
 {
@@ -299,8 +289,7 @@ PHP_FUNCTION(is_bool)
 }
 /* }}} */
 
-/* {{{ proto bool is_int(mixed var)
-   Returns true if variable is an integer
+/* {{{ Returns true if variable is an integer
    Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
 PHP_FUNCTION(is_int)
 {
@@ -308,8 +297,7 @@ PHP_FUNCTION(is_int)
 }
 /* }}} */
 
-/* {{{ proto bool is_float(mixed var)
-   Returns true if variable is float point
+/* {{{ Returns true if variable is float point
    Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
 PHP_FUNCTION(is_float)
 {
@@ -317,8 +305,7 @@ PHP_FUNCTION(is_float)
 }
 /* }}} */
 
-/* {{{ proto bool is_string(mixed var)
-   Returns true if variable is a string
+/* {{{ Returns true if variable is a string
    Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
 PHP_FUNCTION(is_string)
 {
@@ -326,8 +313,7 @@ PHP_FUNCTION(is_string)
 }
 /* }}} */
 
-/* {{{ proto bool is_array(mixed var)
-   Returns true if variable is an array
+/* {{{ Returns true if variable is an array
    Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
 PHP_FUNCTION(is_array)
 {
@@ -335,8 +321,7 @@ PHP_FUNCTION(is_array)
 }
 /* }}} */
 
-/* {{{ proto bool is_object(mixed var)
-   Returns true if variable is an object
+/* {{{ Returns true if variable is an object
    Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
 PHP_FUNCTION(is_object)
 {
@@ -344,8 +329,7 @@ PHP_FUNCTION(is_object)
 }
 /* }}} */
 
-/* {{{ proto bool is_numeric(mixed value)
-   Returns true if value is a number or a numeric string */
+/* {{{ Returns true if value is a number or a numeric string */
 PHP_FUNCTION(is_numeric)
 {
 	zval *arg;
@@ -375,8 +359,7 @@ PHP_FUNCTION(is_numeric)
 }
 /* }}} */
 
-/* {{{ proto bool is_scalar(mixed value)
-   Returns true if value is a scalar */
+/* {{{ Returns true if value is a scalar */
 PHP_FUNCTION(is_scalar)
 {
 	zval *arg;
@@ -401,8 +384,7 @@ PHP_FUNCTION(is_scalar)
 }
 /* }}} */
 
-/* {{{ proto bool is_callable(mixed var [, bool syntax_only [, string &callable_name]])
-   Returns true if var is callable. */
+/* {{{ Returns true if var is callable. */
 PHP_FUNCTION(is_callable)
 {
 	zval *var, *callable_name = NULL;
@@ -437,8 +419,7 @@ PHP_FUNCTION(is_callable)
 }
 /* }}} */
 
-/* {{{ proto bool is_iterable(mixed var)
-   Returns true if var is iterable (array or instance of Traversable). */
+/* {{{ Returns true if var is iterable (array or instance of Traversable). */
 PHP_FUNCTION(is_iterable)
 {
 	zval *var;
@@ -451,8 +432,7 @@ PHP_FUNCTION(is_iterable)
 }
 /* }}} */
 
-/* {{{ proto bool is_countable(mixed var)
-   Returns true if var is countable (array or instance of Countable). */
+/* {{{ Returns true if var is countable (array or instance of Countable). */
 PHP_FUNCTION(is_countable)
 {
 	zval *var;

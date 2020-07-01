@@ -44,8 +44,7 @@ void tokenizer_token_get_all_register_constants(INIT_FUNC_ARGS) {
 	REGISTER_LONG_CONSTANT("TOKEN_PARSE", TOKEN_PARSE, CONST_CS|CONST_PERSISTENT);
 }
 
-/* {{{ tokenizer_module_entry
- */
+/* {{{ tokenizer_module_entry */
 zend_module_entry tokenizer_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"tokenizer",
@@ -249,8 +248,7 @@ PHP_METHOD(PhpToken, __toString)
 	RETURN_STR_COPY(text);
 }
 
-/* {{{ PHP_MINIT_FUNCTION
- */
+/* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(tokenizer)
 {
 	zend_class_entry ce;
@@ -289,8 +287,7 @@ PHP_MINIT_FUNCTION(tokenizer)
 }
 /* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
- */
+/* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(tokenizer)
 {
 	php_info_print_table_start();
@@ -545,8 +542,7 @@ static zend_bool tokenize_common(
 
 /* }}} */
 
-/* {{{ proto array token_get_all(string source [, int flags])
- */
+/* {{{ */
 PHP_FUNCTION(token_get_all)
 {
 	zend_string *source;
@@ -564,8 +560,7 @@ PHP_FUNCTION(token_get_all)
 }
 /* }}} */
 
-/* {{{ proto string token_name(int type)
- */
+/* {{{ */
 PHP_FUNCTION(token_name)
 {
 	zend_long type;

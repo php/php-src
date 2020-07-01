@@ -30,7 +30,7 @@
 * Since:
 */
 
-/* {{{ proto DOMEntityReference::__construct(string name) */
+/* {{{ */
 PHP_METHOD(DOMEntityReference, __construct)
 {
 	xmlNode *node;

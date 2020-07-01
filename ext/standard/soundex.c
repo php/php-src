@@ -21,8 +21,7 @@
 #include "php_string.h"
 
 /* Simple soundex algorithm as described by Knuth in TAOCP, vol 3 */
-/* {{{ proto string soundex(string str)
-   Calculate the soundex key of a string */
+/* {{{ Calculate the soundex key of a string */
 PHP_FUNCTION(soundex)
 {
 	char	*str;

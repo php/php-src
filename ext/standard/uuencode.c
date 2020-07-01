@@ -196,8 +196,7 @@ err:
 }
 /* }}} */
 
-/* {{{ proto string|false convert_uuencode(string data)
-   uuencode a string */
+/* {{{ uuencode a string */
 PHP_FUNCTION(convert_uuencode)
 {
 	zend_string *src;
@@ -211,8 +210,7 @@ PHP_FUNCTION(convert_uuencode)
 }
 /* }}} */
 
-/* {{{ proto string|false convert_uudecode(string data)
-   decode a uuencoded string */
+/* {{{ decode a uuencoded string */
 PHP_FUNCTION(convert_uudecode)
 {
 	zend_string *src;

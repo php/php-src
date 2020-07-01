@@ -30,7 +30,7 @@
 * Since:
 */
 
-/* {{{ proto DOMCdataSection::__construct(string value); */
+/* {{{ */
 PHP_METHOD(DOMCdataSection, __construct)
 {
 	xmlNodePtr nodep = NULL, oldnode = NULL;

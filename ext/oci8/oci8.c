@@ -124,8 +124,7 @@ ZEND_GET_MODULE(oci8)
 
 #include "oci8_arginfo.h"
 
-/* {{{ extension definition structures
-*/
+/* {{{ extension definition structures */
 
 zend_module_entry oci8_module_entry = {
 	STANDARD_MODULE_HEADER,
@@ -163,8 +162,7 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 /* }}} */
 
-/* {{{ startup, shutdown and info functions
-*/
+/* {{{ startup, shutdown and info functions */
 
 /* {{{	php_oci_init_global_handles()
  *

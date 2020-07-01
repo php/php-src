@@ -579,8 +579,7 @@ zend_bool php_std_auto_global_callback(char *name, uint32_t name_len)
 	return 0; /* don't rearm */
 }
 
-/* {{{ php_build_argv
- */
+/* {{{ php_build_argv */
 PHPAPI void php_build_argv(const char *s, zval *track_vars_array)
 {
 	zval arr, argc, tmp;
@@ -638,8 +637,7 @@ PHPAPI void php_build_argv(const char *s, zval *track_vars_array)
 }
 /* }}} */
 
-/* {{{ php_register_server_variables
- */
+/* {{{ php_register_server_variables */
 static inline void php_register_server_variables(void)
 {
 	zval tmp;
@@ -677,8 +675,7 @@ static inline void php_register_server_variables(void)
 }
 /* }}} */
 
-/* {{{ php_autoglobal_merge
- */
+/* {{{ php_autoglobal_merge */
 static void php_autoglobal_merge(HashTable *dest, HashTable *src)
 {
 	zval *src_entry, *dest_entry;
@@ -710,8 +707,7 @@ static void php_autoglobal_merge(HashTable *dest, HashTable *src)
 }
 /* }}} */
 
-/* {{{ php_hash_environment
- */
+/* {{{ php_hash_environment */
 PHPAPI int php_hash_environment(void)
 {
 	memset(PG(http_globals), 0, sizeof(PG(http_globals)));

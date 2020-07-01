@@ -76,11 +76,7 @@ static UBool intl_is_normalized(zend_long form, const UChar *uinput, int32_t uin
 }/*}}}*/
 #endif
 
-/* {{{ proto string Normalizer::normalize( string $input [, string $form = FORM_C] )
- * Normalize a string. }}} */
-/* {{{ proto string normalizer_normalize( string $input [, string $form = FORM_C] )
- * Normalize a string.
- */
+/* {{{ Normalize a string. */
 PHP_FUNCTION( normalizer_normalize )
 {
 	char*			input = NULL;
@@ -219,11 +215,7 @@ PHP_FUNCTION( normalizer_normalize )
 }
 /* }}} */
 
-/* {{{ proto bool Normalizer::isNormalized( string $input [, string $form = FORM_C] )
- * Test if a string is in a given normalization form. }}} */
-/* {{{ proto bool normalizer_is_normalized( string $input [, string $form = FORM_C] )
- * Test if a string is in a given normalization form.
- */
+/* {{{ Test if a string is in a given normalization form. */
 PHP_FUNCTION( normalizer_is_normalized )
 {
 	char*	 	input = NULL;
@@ -306,11 +298,7 @@ PHP_FUNCTION( normalizer_is_normalized )
 }
 /* }}} */
 
-/* {{{ proto string|null Normalizer::getRawDecomposition( string $input [, string $form = FORM_C] )
- * Returns the Decomposition_Mapping property for the given UTF-8 encoded code point. }}} */
-/* {{{ proto string|null normalizer_get_raw_decomposition( string $input [, string $form = FORM_C] )
- * Returns the Decomposition_Mapping property for the given UTF-8 encoded code point.
- */
+/* {{{ Returns the Decomposition_Mapping property for the given UTF-8 encoded code point. */
 #if U_ICU_VERSION_MAJOR_NUM >= 56
 PHP_FUNCTION( normalizer_get_raw_decomposition )
 {
