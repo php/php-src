@@ -464,8 +464,13 @@ static PHP_METHOD(PDO, connect)
 	}
 
 	// Now the driver has been identified, this is where we should be doing `new PDOSQLite()` for sqlite datasources
+	if (driver->driver_name == 'sqlite') {
+	    thingtoreturn = new PDOSQLite(data_source, username, password, options)
+	}
+	// @TODO Add a catch-all for drivers without this implemented
 
 	// Somehow return the new object...
+    ZVAL_OBJ(return_value, thingtoreturn); // Or pointer to *thingtoreturn?
 }
 /* }}} */
 
