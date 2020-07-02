@@ -260,7 +260,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> identifier type_expr_without_static union_type_without_static
 %type <ast> inline_function union_type
 %type <ast> attributed_statement attributed_class_statement attributed_parameter
-%type <ast> attribute_arguments attribute_decl attribute attributes
+%type <ast> attribute_decl attribute attributes
 
 %type <num> returns_ref function fn is_reference is_variadic variable_modifiers
 %type <num> method_modifiers non_empty_member_modifiers member_modifier optional_visibility_modifier
@@ -317,20 +317,11 @@ name:
 	|	T_NS_SEPARATOR namespace_name				{ $$ = $2; $$->attr = ZEND_NAME_FQ; }
 ;
 
-attribute_arguments:
-		expr
-			{ $$ = zend_ast_create_list(1, ZEND_AST_ARG_LIST, $1); }
-	|	attribute_arguments ',' expr
-			{ $$ = zend_ast_list_add($1, $3); }
-;
-
 attribute_decl:
 		class_name
 			{ $$ = zend_ast_create(ZEND_AST_ATTRIBUTE, $1, NULL); }
-	|	class_name '(' ')'
-			{ $$ = zend_ast_create(ZEND_AST_ATTRIBUTE, $1, NULL); }
-	|	class_name '(' attribute_arguments ')'
-			{ $$ = zend_ast_create(ZEND_AST_ATTRIBUTE, $1, $3); }
+	|	class_name argument_list
+			{ $$ = zend_ast_create(ZEND_AST_ATTRIBUTE, $1, $2); }
 ;
 
 attribute:

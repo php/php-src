@@ -5743,6 +5743,11 @@ static void zend_compile_attributes(HashTable **attributes, zend_ast *ast, uint3
 			ZEND_ASSERT(args->kind == ZEND_AST_ARG_LIST);
 
 			for (j = 0; j < args->children; j++) {
+				if (args->child[j]->kind == ZEND_AST_UNPACK) {
+					zend_error_noreturn(E_COMPILE_ERROR,
+						"Cannot use unpacking in attribute argument list");
+				}
+
 				zend_const_expr_to_zval(&attr->argv[j], args->child[j]);
 			}
 		}
