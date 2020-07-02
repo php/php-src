@@ -922,9 +922,9 @@ ZEND_FUNCTION(get_class_methods)
 	zend_class_entry *scope;
 	zend_function *mptr;
 
-	ZEND_PARSE_PARAMETERS_START_EX(ZEND_PARSE_PARAMS_QUIET, 1, 1)
+	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_CLASS_NAME_OR_OBJ(ce)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_NULL());
+	ZEND_PARSE_PARAMETERS_END();
 
 	array_init(return_value);
 	scope = zend_get_executed_scope();
