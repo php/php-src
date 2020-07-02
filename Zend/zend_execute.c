@@ -2599,7 +2599,7 @@ num_key:
 		str = ZSTR_EMPTY_ALLOC();
 		goto str_key;
 	} else {
-		zend_type_error("Illegal offset type");
+		zend_illegal_offset();
 		return 0;
 	}
 }
