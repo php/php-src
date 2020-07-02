@@ -1,11 +1,5 @@
 --TEST--
 Test lstat() and stat() functions: usage variations - hardlink
---SKIPIF--
-<?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-   die('skip.. lstat() not available on Windows');
-}
-?>
 --FILE--
 <?php
 /* test the effects of is_link() on stats of hard link */

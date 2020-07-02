@@ -1,11 +1,5 @@
 --TEST--
 Test lstat() and stat() functions: usage variations - dir/file names in array
---SKIPIF--
-<?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip.. Not valid for Windows');
-}
-?>
 --FILE--
 <?php
 /* test for stats of dir/file when their names are stored in an array */
@@ -79,9 +73,9 @@ array(26) {
   [10]=>
   int(%d)
   [11]=>
-  int(%d)
+  int(%i)
   [12]=>
-  int(%d)
+  int(%i)
   ["dev"]=>
   int(%d)
   ["ino"]=>
@@ -105,9 +99,9 @@ array(26) {
   ["ctime"]=>
   int(%d)
   ["blksize"]=>
-  int(%d)
+  int(%i)
   ["blocks"]=>
-  int(%d)
+  int(%i)
 }
 array(26) {
   [0]=>
@@ -133,9 +127,9 @@ array(26) {
   [10]=>
   int(%d)
   [11]=>
-  int(%d)
+  int(%i)
   [12]=>
-  int(%d)
+  int(%i)
   ["dev"]=>
   int(%d)
   ["ino"]=>
@@ -159,9 +153,9 @@ array(26) {
   ["ctime"]=>
   int(%d)
   ["blksize"]=>
-  int(%d)
+  int(%i)
   ["blocks"]=>
-  int(%d)
+  int(%i)
 }
 
 -- Testing stat() on dir name stored inside an array --
@@ -189,9 +183,9 @@ array(26) {
   [10]=>
   int(%d)
   [11]=>
-  int(%d)
+  int(%i)
   [12]=>
-  int(%d)
+  int(%i)
   ["dev"]=>
   int(%d)
   ["ino"]=>
@@ -215,9 +209,9 @@ array(26) {
   ["ctime"]=>
   int(%d)
   ["blksize"]=>
-  int(%d)
+  int(%i)
   ["blocks"]=>
-  int(%d)
+  int(%i)
 }
 array(26) {
   [0]=>
@@ -243,9 +237,9 @@ array(26) {
   [10]=>
   int(%d)
   [11]=>
-  int(%d)
+  int(%i)
   [12]=>
-  int(%d)
+  int(%i)
   ["dev"]=>
   int(%d)
   ["ino"]=>
@@ -269,9 +263,9 @@ array(26) {
   ["ctime"]=>
   int(%d)
   ["blksize"]=>
-  int(%d)
+  int(%i)
   ["blocks"]=>
-  int(%d)
+  int(%i)
 }
 
 --- Done ---

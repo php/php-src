@@ -3,9 +3,6 @@ Test lstat() and stat() functions: usage variations - effects of is_dir()
 --SKIPIF--
 <?php
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip.. Not valid for Windows');
-}
 ?>
 --FILE--
 <?php

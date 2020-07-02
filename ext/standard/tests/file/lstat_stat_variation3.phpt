@@ -2,8 +2,9 @@
 Test lstat() and stat() functions: usage variations - effects of rename() on link
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip.. Not valid for Windows');
+if (PHP_OS_FAMILY === 'Windows') {
+    include_once __DIR__ . '/windows_links/common.inc';
+    skipIfSeCreateSymbolicLinkPrivilegeIsDisabled(__FILE__);
 }
 ?>
 --FILE--
