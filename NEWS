@@ -9,6 +9,9 @@ PHP                                                                        NEWS
   . Fixed bug #79743 (Fatal error when assigning to array property
     with JIT enabled). (Laruence)
 
+- PCRE:
+  . Updated to PCRE2 10.35. (cmb)
+
 25 Jun 2020, PHP 8.0.0alpha1
 
 - Core:
