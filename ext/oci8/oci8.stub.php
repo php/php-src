@@ -393,7 +393,7 @@ function oci_error($connection_or_statement_resource = UNKNOWN): array|false {}
  * @alias oci_error
  * @deprecated
  */
-function ocierror($connection_or_statement_resource = null): array|false {}
+function ocierror($connection_or_statement_resource = UNKNOWN): array|false {}
 
 /**
  * @param resource $statement_resource
@@ -437,7 +437,7 @@ function oci_set_prefetch($statement_resource, int $number_of_rows): ?bool {}
  * @alias oci_set_prefetch
  * @deprecated
  */
-function ocisetprefetch($statement_resource, int $number_of_rows): bool {}
+function ocisetprefetch($statement_resource, int $number_of_rows): ?bool {}
 
 /**
  * @param resource $connection_resource
@@ -565,13 +565,13 @@ function oci_collection_append(OCI_Collection $collection, string $value): bool 
  */
 function ocicollappend(OCI_Collection $collection, string $value): bool {}
 
-function oci_collection_element_get(OCI_Collection $collection, int $index): string|double|null {}
+function oci_collection_element_get(OCI_Collection $collection, int $index): string|float|null|false {}
 
 /**
  * @alias oci_collection_element_get
  * @deprecated
  */
-function ocicollgetelem(OCI_Collection $collection, int $index): string|double|null {}
+function ocicollgetelem(OCI_Collection $collection, int $index): string|float|null|false {}
 
 function oci_collection_assign(OCI_Collection $collection_to, OCI_Collection $collection_from): bool {}
 
@@ -779,7 +779,7 @@ class OCI_Collection {
 
     /**
      * @alias oci_collection_element_get
-     * @return string|double|null
+     * @return string|float|null|false
      */
     public function getElem(int $index) {}
 

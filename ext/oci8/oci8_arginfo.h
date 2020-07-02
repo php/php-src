@@ -278,9 +278,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_oci_error, 0, 0, MAY_BE_ARRAY|MA
 	ZEND_ARG_INFO(0, connection_or_statement_resource)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ocierror, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
-	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, connection_or_statement_resource, "null")
-ZEND_END_ARG_INFO()
+#define arginfo_ocierror arginfo_oci_error
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_num_fields, 0, 1, IS_LONG, 0)
 	ZEND_ARG_INFO(0, statement_resource)
@@ -304,10 +302,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_set_prefetch, 0, 2, _IS_BOOL
 	ZEND_ARG_TYPE_INFO(0, number_of_rows, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ocisetprefetch, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, statement_resource)
-	ZEND_ARG_TYPE_INFO(0, number_of_rows, IS_LONG, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_ocisetprefetch arginfo_oci_set_prefetch
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_set_client_identifier, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, connection_resource)
@@ -396,7 +391,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_ocicollappend arginfo_oci_collection_append
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_oci_collection_element_get, 0, 2, double, MAY_BE_STRING|MAY_BE_NULL)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_oci_collection_element_get, 0, 2, MAY_BE_STRING|MAY_BE_DOUBLE|MAY_BE_NULL|MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, collection, OCI_Collection, 0)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 ZEND_END_ARG_INFO()
