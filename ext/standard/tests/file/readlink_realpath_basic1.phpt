@@ -2,8 +2,9 @@
 Test readlink() and realpath functions: basic functionality - diff. path notation for links(Bug #42038)
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip no symlinks on Windows');
+if (PHP_OS_FAMILY === 'Windows') {
+    include __DIR__ . '/windows_links/common.inc';
+    skipIfSeCreateSymbolicLinkPrivilegeIsDisabled(__FILE__);
 }
 ?>
 --FILE--
@@ -74,32 +75,32 @@ rmdir("$name_prefix/");
 *** Testing readlink() and realpath(): with valid and invalid path ***
 
 -- Iteration 1 --
-string(%d) "%s/readlink_realpath_basic1/home/readlink_realpath_basic1.tmp"
-string(%d) "%s/readlink_realpath_basic1/home/readlink_realpath_basic1.tmp"
+string(%d) "%s%ereadlink_realpath_basic1%ehome%ereadlink_realpath_basic1.tmp"
+string(%d) "%s%ereadlink_realpath_basic1%ehome%ereadlink_realpath_basic1.tmp"
 
 -- Iteration 2 --
-string(%d) "%s/readlink_realpath_basic1/home/test/readlink_realpath_basic1.tmp"
-string(%d) "%s/readlink_realpath_basic1/home/test/readlink_realpath_basic1.tmp"
+string(%d) "%s%ereadlink_realpath_basic1%ehome%etest%ereadlink_realpath_basic1.tmp"
+string(%d) "%s%ereadlink_realpath_basic1%ehome%etest%ereadlink_realpath_basic1.tmp"
 
 -- Iteration 3 --
-string(%d) "%s/readlink_realpath_basic1/home/test/readlink_realpath_basic1.tmp"
-string(%d) "%s/readlink_realpath_basic1/home/test/readlink_realpath_basic1.tmp"
+string(%d) "%s%ereadlink_realpath_basic1%ehome%etest%ereadlink_realpath_basic1.tmp"
+string(%d) "%s%ereadlink_realpath_basic1%ehome%etest%ereadlink_realpath_basic1.tmp"
 
 -- Iteration 4 --
 
-Warning: readlink(): No such file or directory in %s on line %d
+Warning: readlink(): %s in %s on line %d
 bool(false)
 bool(false)
 
 -- Iteration 5 --
 
-Warning: readlink(): No such file or directory in %s on line %d
+Warning: readlink(): %s in %s on line %d
 bool(false)
 bool(false)
 
 -- Iteration 6 --
 
-Warning: readlink(): No such file or directory in %s on line %d
+Warning: readlink(): %s in %s on line %d
 bool(false)
 %s
 
