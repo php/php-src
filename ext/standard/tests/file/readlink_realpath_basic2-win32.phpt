@@ -2,8 +2,8 @@
 Test readlink() and realpath functions: basic functionality - diff. path notation for files
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip not for Windows');
+if (substr(PHP_OS, 0, 3) != 'WIN') {
+    die('skip only for Windows');
 }
 ?>
 --FILE--
@@ -57,22 +57,22 @@ rmdir("$name_prefix/");
 *** Testing realpath() on filenames ***
 
 -- Iteration 1 --
-string(%d) "%s/readlink_realpath_basic2/home/readlink_realpath_basic2.tmp"
+string(%d) "%s%ereadlink_realpath_basic2%ehome%ereadlink_realpath_basic2.tmp"
 
 -- Iteration 2 --
-string(%d) "%s/readlink_realpath_basic2/readlink_realpath_basic2.tmp"
+string(%d) "%s%ereadlink_realpath_basic2%ereadlink_realpath_basic2.tmp"
 
 -- Iteration 3 --
-string(%d) "%s/readlink_realpath_basic2/home/test/readlink_realpath_basic2.tmp"
+string(%d) "%s%ereadlink_realpath_basic2%ehome%etest%ereadlink_realpath_basic2.tmp"
 
 -- Iteration 4 --
-string(%d) "%s/readlink_realpath_basic2/readlink_realpath_basic2.tmp"
+string(%d) "%s%ereadlink_realpath_basic2%ereadlink_realpath_basic2.tmp"
 
 -- Iteration 5 --
 bool(false)
 
 -- Iteration 6 --
-bool(false)
+string(%d) "%s%eext%estandard%etests%efile%ereadlink_realpath_basic2%ereadlink_realpath_basic2.tmp"
 
 -- Iteration 7 --
 %s
