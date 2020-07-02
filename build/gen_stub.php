@@ -12,7 +12,7 @@ use PhpParser\PrettyPrinterAbstract;
 
 error_reporting(E_ALL);
 
-function processDirectory(string $dir) {
+function processDirectory(string $dir, bool $forceRegeneration) {
     $it = new RecursiveIteratorIterator(
         new RecursiveDirectoryIterator($dir),
         RecursiveIteratorIterator::LEAVES_ONLY
@@ -20,12 +20,12 @@ function processDirectory(string $dir) {
     foreach ($it as $file) {
         $pathName = $file->getPathName();
         if (preg_match('/\.stub\.php$/', $pathName)) {
-            processStubFile($pathName);
+            processStubFile($pathName, $forceRegeneration);
         }
     }
 }
 
-function processStubFile(string $stubFile) {
+function processStubFile(string $stubFile, bool $forceRegeneration) {
     try {
         if (!file_exists($stubFile)) {
             throw new Exception("File $stubFile does not exist");
@@ -35,7 +35,7 @@ function processStubFile(string $stubFile) {
         $stubCode = file_get_contents($stubFile);
         $stubHash = computeStubHash($stubCode);
         $oldStubHash = extractStubHash($arginfoFile);
-        if ($stubHash === $oldStubHash) {
+        if ($stubHash === $oldStubHash && $forceRegeneration === false) {
             /* Stub file did not change, do not regenerate. */
             return;
         }
@@ -1093,17 +1093,17 @@ function initPhpParser() {
     });
 }
 
-if ($argc >= 2) {
-    if (is_file($argv[1])) {
-        // Generate single file.
-        processStubFile($argv[1]);
-    } else if (is_dir($argv[1])) {
-        processDirectory($argv[1]);
-    } else {
-        echo "$argv[1] is neither a file nor a directory.\n";
-        exit(1);
-    }
+$optind = null;
+$options = getopt("f", ["force-regeneration"], $optind);
+$forceRegeneration = isset($options["f"]) || isset($options["force-regeneration"]);
+$location = $argv[$optind + 1] ?? ".";
+
+if (is_file($location)) {
+    // Generate single file.
+    processStubFile($location, $forceRegeneration);
+} else if (is_dir($location)) {
+    processDirectory($location, $forceRegeneration);
 } else {
-    // Regenerate all stub files we can find.
-    processDirectory('.');
+    echo "$location is neither a file nor a directory.\n";
+    exit(1);
 }
