@@ -133,8 +133,9 @@ LDAP_TEST_HOST (default: localhost)                        Host to connect to
 LDAP_TEST_PORT (default: 389)                              Port to connect to
 LDAP_TEST_BASE (default: dc=my-domain,dc=com)              Base to use. May be the ldap root or a subtree. (ldap_search_variation6 will fail if a subtree is used)
 LDAP_TEST_USER (default: cn=Manager,dc=my-domain,dc=com)   DN used for binding
-LDAP_TEST_SASL_USER (default: Manager)                     SASL user used for SASL binding
-LDAP_TEST_PASSWD (default: secret)                         Password used for plain and SASL binding
+LDAP_TEST_PASSWD (default: secret)                         Password used for plain binding
+LDAP_TEST_SASL_USER (default: userA)                       SASL user used for SASL binding
+LDAP_TEST_SASL_PASSWD (default: oops)                      Password used for SASL binding
 LDAP_TEST_OPT_PROTOCOL_VERSION (default: 3)                Version of LDAP protocol to use
 LDAP_TEST_SKIP_BIND_FAILURE (default: true)                Whether to fail the test or not in case binding fails
 ```
