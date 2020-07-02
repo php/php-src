@@ -3243,7 +3243,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						if (!zend_jit_assign_dim_op(&dasm_state, opline, op_array,
 								op1_info, op1_def_info, op1_addr, op2_info,
 								op1_data_info, OP1_DATA_RANGE(),
-								zend_may_throw(opline, ssa_op, op_array, ssa))) {
+								zend_may_throw_ex(opline, ssa_op, op_array, ssa, op1_info, op2_info))) {
 							goto jit_failure;
 						}
 						goto done;
@@ -3267,7 +3267,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						CHECK_OP1_DATA_TRACE_TYPE();
 						if (!zend_jit_assign_dim(&dasm_state, opline, op_array,
 								op1_info, op1_addr, op2_info, op1_data_info,
-								zend_may_throw(opline, ssa_op, op_array, ssa))) {
+								zend_may_throw_ex(opline, ssa_op, op_array, ssa, op1_info, op2_info))) {
 							goto jit_failure;
 						}
 						goto done;
@@ -3318,7 +3318,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								op1_def_info, op1_def_addr,
 								op2_info, op2_addr, op2_def_addr,
 								res_info, res_addr,
-								zend_may_throw(opline, ssa_op, op_array, ssa))) {
+								zend_may_throw_ex(opline, ssa_op, op_array, ssa, op1_info, op2_info))) {
 							goto jit_failure;
 						}
 						goto done;
@@ -3768,7 +3768,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						}
 						if (!zend_jit_isset_isempty_dim(&dasm_state, opline, op_array,
 								op1_info, op1_addr, op2_info,
-								zend_may_throw(opline, ssa_op, op_array, ssa),
+								zend_may_throw_ex(opline, ssa_op, op_array, ssa, op1_info, op2_info),
 								smart_branch_opcode, -1, -1,
 								exit_addr)) {
 							goto jit_failure;
@@ -3839,7 +3839,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						if (!zend_jit_fetch_obj(&dasm_state, opline, op_array,
 								op1_info, op1_addr, op1_indirect, ce, ce_is_instanceof,
 								delayed_fetch_this,
-								zend_may_throw(opline, ssa_op, op_array, ssa))) {
+								zend_may_throw_ex(opline, ssa_op, op_array, ssa, op1_info, MAY_BE_STRING))) {
 							goto jit_failure;
 						}
 						goto done;

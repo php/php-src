@@ -4255,11 +4255,8 @@ void zend_inference_check_recursive_dependencies(zend_op_array *op_array)
 	free_alloca(worklist, use_heap);
 }
 
-int zend_may_throw(const zend_op *opline, const zend_ssa_op *ssa_op, const zend_op_array *op_array, zend_ssa *ssa)
+int zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op, const zend_op_array *op_array, zend_ssa *ssa, uint32_t t1, uint32_t t2)
 {
-	uint32_t t1 = OP1_INFO();
-	uint32_t t2 = OP2_INFO();
-
 	if (opline->op1_type == IS_CV) {
 		if (t1 & MAY_BE_UNDEF) {
 			switch (opline->opcode) {
@@ -4593,4 +4590,9 @@ int zend_may_throw(const zend_op *opline, const zend_ssa_op *ssa_op, const zend_
 		default:
 			return 1;
 	}
+}
+
+int zend_may_throw(const zend_op *opline, const zend_ssa_op *ssa_op, const zend_op_array *op_array, zend_ssa *ssa)
+{
+	return zend_may_throw_ex(opline, ssa_op, op_array, ssa, OP1_INFO(), OP2_INFO());
 }
