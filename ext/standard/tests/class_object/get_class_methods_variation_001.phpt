@@ -70,7 +70,11 @@ $values = array(
 
 foreach($values as $value) {
       echo "\nArg value " . (is_object($value) ? get_class($value) : $value) . " \n";
-      var_dump( get_class_methods($value) );
+      try {
+            var_dump( get_class_methods($value) );
+      } catch (TypeError $exception) {
+            echo $exception->getMessage() . "\n";
+      }
 };
 echo "Done";
 ?>
@@ -80,89 +84,89 @@ Error: 2 - Undefined variable $undefined_var
 Error: 2 - Undefined variable $unset_var
 
 Arg value 0 
-NULL
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, int given
 
 Arg value 1 
-NULL
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, int given
 
 Arg value 12345 
-NULL
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, int given
 
 Arg value -2345 
-NULL
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, int given
 
 Arg value 10.5 
-NULL
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, float given
 
 Arg value -10.5 
-NULL
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, float given
 
 Arg value 101234567000 
-NULL
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, float given
 
 Arg value 1.07654321E-9 
-NULL
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, float given
 
 Arg value 0.5 
-NULL
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, float given
 Error: 2 - Array to string conversion
 
 Arg value Array 
-NULL
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, array given
 Error: 2 - Array to string conversion
 
 Arg value Array 
-NULL
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, array given
 Error: 2 - Array to string conversion
 
 Arg value Array 
-NULL
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, array given
 Error: 2 - Array to string conversion
 
 Arg value Array 
-NULL
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, array given
 Error: 2 - Array to string conversion
 
 Arg value Array 
-NULL
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, array given
 
 Arg value  
-NULL
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, null given
 
 Arg value  
-NULL
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, null given
 
 Arg value 1 
-NULL
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, bool given
 
 Arg value  
-NULL
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, bool given
 
 Arg value 1 
-NULL
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, bool given
 
 Arg value  
-NULL
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, bool given
 
 Arg value  
-NULL
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, string given
 
 Arg value  
-NULL
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, string given
 
 Arg value string 
-NULL
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, string given
 
 Arg value string 
-NULL
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, string given
 
 Arg value stdClass 
 array(0) {
 }
 
 Arg value  
-NULL
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, null given
 
 Arg value  
-NULL
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, null given
 Done
