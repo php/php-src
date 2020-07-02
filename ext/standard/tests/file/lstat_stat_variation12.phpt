@@ -3,6 +3,10 @@ Test lstat() and stat() functions: usage variations - effects of is_link()
 --SKIPIF--
 <?php
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
+if (PHP_OS_FAMILY === 'Windows') {
+    include_once __DIR__ . '/windows_links/common.inc';
+    skipIfSeCreateSymbolicLinkPrivilegeIsDisabled(__FILE__);
+}
 ?>
 --FILE--
 <?php
