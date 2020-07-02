@@ -1422,6 +1422,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	RETURN_TOKEN_WITH_IDENT(T_RETURN);
 }
 
+<ST_IN_SCRIPTING>"@@" {
+	RETURN_TOKEN(T_ATTRIBUTE);
+}
+
 <ST_IN_SCRIPTING>"yield"{WHITESPACE}"from"[^a-zA-Z0-9_\x80-\xff] {
 	yyless(yyleng - 1);
 	HANDLE_NEWLINES(yytext, yyleng);

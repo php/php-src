@@ -3,27 +3,27 @@ Attributes can be placed on all supported elements.
 --FILE--
 <?php
 
-<<A1(1)>>
+@@A1(1)
 class Foo
 {
-    <<A1(2)>>
+    @@A1(2)
     public const FOO = 'foo';
     
-    <<A1(3)>>
+    @@A1(3)
     public $x;
     
-    <<A1(4)>>
-    public function foo(<<A1(5)>> $a, <<A1(6)>> $b) { }
+    @@A1(4)
+    public function foo(@@A1(5) $a, @@A1(6) $b) { }
 }
 
-$object = new <<A1(7)>> class () { };
+$object = new @@A1(7) class () { };
 
-<<A1(8)>>
+@@A1(8)
 function f1() { }
 
-$f2 = <<A1(9)>> function () { };
+$f2 = @@A1(9) function () { };
 
-$f3 = <<A1(10)>> fn () => 1;
+$f3 = @@A1(10) fn () => 1;
 
 $ref = new \ReflectionClass(Foo::class);
 
