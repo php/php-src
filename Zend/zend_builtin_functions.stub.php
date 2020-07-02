@@ -42,7 +42,7 @@ function get_object_vars(object $obj): array {}
 
 function get_mangled_object_vars(object $obj): array {}
 
-function get_class_methods($class): ?array {}
+function get_class_methods(string|object $class): array {}
 
 function method_exists($object_or_class, string $method): bool {}
 
