@@ -4804,8 +4804,10 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 			|	// if (EXPECTED(Z_TYPE_P(dim) == IS_LONG))
 			|	IF_NOT_ZVAL_TYPE op2_addr, IS_LONG, >3
 		}
-		|	// hval = Z_LVAL_P(dim);
-		|	GET_ZVAL_LVAL ZREG_FCARG2a, op2_addr
+		if (type == BP_VAR_W || type == BP_VAR_RW) {
+			|	// hval = Z_LVAL_P(dim);
+			|	GET_ZVAL_LVAL ZREG_FCARG2a, op2_addr
+		}
 		if (op1_info & MAY_BE_ARRAY_KEY_LONG) {
 			if (Z_MODE(op2_addr) == IS_CONST_ZVAL) {
 				zend_long val = Z_LVAL_P(Z_ZV(op2_addr));
@@ -4843,6 +4845,10 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 					}
 				}
 			} else {
+				if (type != BP_VAR_W && type != BP_VAR_RW) {
+					|	// hval = Z_LVAL_P(dim);
+					|	GET_ZVAL_LVAL ZREG_FCARG2a, op2_addr
+				}
 				|	// ZEND_HASH_INDEX_FIND(ht, hval, retval, num_undef);
 				|	test dword [FCARG1a + offsetof(zend_array, u.flags)], HASH_FLAG_PACKED
 				|	jz >4 // HASH_FIND
@@ -4880,6 +4886,10 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 				if (op1_info & MAY_BE_ARRAY_KEY_LONG) {
 					|4:
 				}
+				if (Z_MODE(op2_addr) == IS_CONST_ZVAL) {
+					|	// hval = Z_LVAL_P(dim);
+					|	GET_ZVAL_LVAL ZREG_FCARG2a, op2_addr
+				}
 				|	EXT_CALL _zend_hash_index_find, r0
 				|	test r0, r0
 				|	jz >9 // NOT_FOUND
@@ -4906,6 +4916,10 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 						|	jmp >2 // NOT_FOUND
 					}
 					|4:
+				}
+				if (Z_MODE(op2_addr) == IS_CONST_ZVAL) {
+					|	// hval = Z_LVAL_P(dim);
+					|	GET_ZVAL_LVAL ZREG_FCARG2a, op2_addr
 				}
 				|	EXT_CALL _zend_hash_index_find, r0
 				|	test r0, r0
