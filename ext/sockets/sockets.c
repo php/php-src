@@ -2028,61 +2028,62 @@ PHP_FUNCTION(socket_get_option)
 	}
 #endif
 
-	/* sol_socket options and general case */
-	switch(optname) {
-		case SO_LINGER:
-			optlen = sizeof(linger_val);
+	if (level == SOL_SOCKET) {
+		switch (optname) {
+			case SO_LINGER:
+				optlen = sizeof(linger_val);
 
-			if (getsockopt(php_sock->bsd_socket, level, optname, (char*)&linger_val, &optlen) != 0) {
-				PHP_SOCKET_ERROR(php_sock, "unable to retrieve socket option", errno);
-				RETURN_FALSE;
-			}
+				if (getsockopt(php_sock->bsd_socket, level, optname, (char*)&linger_val, &optlen) != 0) {
+					PHP_SOCKET_ERROR(php_sock, "unable to retrieve socket option", errno);
+					RETURN_FALSE;
+				}
 
-			array_init(return_value);
-			add_assoc_long(return_value, "l_onoff", linger_val.l_onoff);
-			add_assoc_long(return_value, "l_linger", linger_val.l_linger);
-			break;
+				array_init(return_value);
+				add_assoc_long(return_value, "l_onoff", linger_val.l_onoff);
+				add_assoc_long(return_value, "l_linger", linger_val.l_linger);
+				return;
 
-		case SO_RCVTIMEO:
-		case SO_SNDTIMEO:
+			case SO_RCVTIMEO:
+			case SO_SNDTIMEO:
 #ifndef PHP_WIN32
-			optlen = sizeof(tv);
+				optlen = sizeof(tv);
 
-			if (getsockopt(php_sock->bsd_socket, level, optname, (char*)&tv, &optlen) != 0) {
-				PHP_SOCKET_ERROR(php_sock, "unable to retrieve socket option", errno);
-				RETURN_FALSE;
-			}
+				if (getsockopt(php_sock->bsd_socket, level, optname, (char*)&tv, &optlen) != 0) {
+					PHP_SOCKET_ERROR(php_sock, "unable to retrieve socket option", errno);
+					RETURN_FALSE;
+				}
 #else
-			optlen = sizeof(int);
+				optlen = sizeof(int);
 
-			if (getsockopt(php_sock->bsd_socket, level, optname, (char*)&timeout, &optlen) != 0) {
-				PHP_SOCKET_ERROR(php_sock, "unable to retrieve socket option", errno);
-				RETURN_FALSE;
-			}
+				if (getsockopt(php_sock->bsd_socket, level, optname, (char*)&timeout, &optlen) != 0) {
+					PHP_SOCKET_ERROR(php_sock, "unable to retrieve socket option", errno);
+					RETURN_FALSE;
+				}
 
-			tv.tv_sec = timeout ? timeout / 1000 : 0;
-			tv.tv_usec = timeout ? (timeout * 1000) % 1000000 : 0;
+				tv.tv_sec = timeout ? timeout / 1000 : 0;
+				tv.tv_usec = timeout ? (timeout * 1000) % 1000000 : 0;
 #endif
 
-			array_init(return_value);
+				array_init(return_value);
 
-			add_assoc_long(return_value, "sec", tv.tv_sec);
-			add_assoc_long(return_value, "usec", tv.tv_usec);
-			break;
-
-		default:
-			optlen = sizeof(other_val);
-
-			if (getsockopt(php_sock->bsd_socket, level, optname, (char*)&other_val, &optlen) != 0) {
-				PHP_SOCKET_ERROR(php_sock, "unable to retrieve socket option", errno);
-				RETURN_FALSE;
-			}
-			if (optlen == 1)
-				other_val = *((unsigned char *)&other_val);
-
-			RETURN_LONG(other_val);
-			break;
+				add_assoc_long(return_value, "sec", tv.tv_sec);
+				add_assoc_long(return_value, "usec", tv.tv_usec);
+				return;
+		}
 	}
+
+	optlen = sizeof(other_val);
+
+	if (getsockopt(php_sock->bsd_socket, level, optname, (char*)&other_val, &optlen) != 0) {
+		PHP_SOCKET_ERROR(php_sock, "unable to retrieve socket option", errno);
+		RETURN_FALSE;
+	}
+
+	if (optlen == 1) {
+		other_val = *((unsigned char *)&other_val);
+	}
+
+	RETURN_LONG(other_val);
 }
 /* }}} */
 
