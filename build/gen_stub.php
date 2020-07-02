@@ -1074,6 +1074,10 @@ function initPhpParser() {
         return;
     }
 
+    if (!extension_loaded("tokenizer")) {
+        throw new Exception("The \"tokenizer\" extension is not available");
+    }
+
     $isInitialized = true;
     $version = "4.3.0";
     $phpParserDir = __DIR__ . "/PHP-Parser-$version";
