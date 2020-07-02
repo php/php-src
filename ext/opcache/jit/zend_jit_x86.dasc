@@ -1411,11 +1411,14 @@ static void* dasm_labels[zend_lb_MAX];
 
 |.macro SEPARATE_ARRAY, addr, op_info, cold
 ||	if (RC_MAY_BE_N(op_info)) {
-||		if (Z_REG(addr) == ZREG_FCARG1a) {
+||		if (Z_REG(addr) != ZREG_FP) {
 |			GET_ZVAL_LVAL ZREG_R0, addr
 ||			if (RC_MAY_BE_1(op_info)) {
 |				cmp dword [r0], 1 // if (GC_REFCOUNT() > 1)
 |				jbe >2
+||			}
+||			if (Z_REG(addr) != ZREG_FCARG1a || Z_OFFSET(addr) != 0) {
+|				LOAD_ZVAL_ADDR FCARG1a, addr
 ||			}
 |			EXT_CALL zend_jit_zval_array_dup, r0
 |2:
@@ -11589,16 +11592,15 @@ static zend_bool zend_jit_fetch_reference(dasm_State **Dst, const zend_op *oplin
 
 	|	IF_NOT_ZVAL_TYPE var_addr, IS_REFERENCE, &exit_addr
 	|	GET_ZVAL_PTR FCARG1a, var_addr
-	|	add FCARG1a, offsetof(zend_reference, val)
 
-	var_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, 0);
+	var_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, offsetof(zend_reference, val));
 	*var_addr_ptr = var_addr;
 
 	var_type &= ~(IS_TRACE_REFERENCE|IS_TRACE_INDIRECT);
 	if (add_type_guard
 	 && var_type != IS_UNKNOWN
 	 && (var_info & (MAY_BE_ANY|MAY_BE_UNDEF)) != (1 << var_type)) {
-		|	IF_NOT_Z_TYPE FCARG1a, var_type, &exit_addr
+		|	IF_NOT_ZVAL_TYPE var_addr, var_type, &exit_addr
 
 		ZEND_ASSERT(var_info & (1 << var_type));
 		if (var_type < IS_STRING) {
