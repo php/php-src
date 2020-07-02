@@ -7,6 +7,9 @@ steps:
       sudo apt install bison \
                        re2c \
                        locales \
+                       ldap-utils \
+                       openssl \
+                       slapd \
                        language-pack-de \
                        re2c \
                        libgmp-dev \
@@ -29,7 +32,6 @@ steps:
                        libpq-dev \
                        libreadline-dev \
                        libldap2-dev \
-                       libsasl2-dev \
                        libsodium-dev \
                        libargon2-0-dev \
                        postgresql \
