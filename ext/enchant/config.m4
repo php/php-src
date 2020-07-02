@@ -4,7 +4,7 @@ PHP_ARG_WITH([enchant],
     [Include Enchant support])])
 
 if test "$PHP_ENCHANT" != "no"; then
-  PKG_CHECK_MODULES([ENCHANT2], [enchant-2], [found_enchant_2=yes], [found_enchant_2=no])
+  dnl PKG_CHECK_MODULES([ENCHANT2], [enchant-2], [found_enchant_2=yes], [found_enchant_2=no])
 
   if test "$found_enchant_2" = "yes"; then
 
