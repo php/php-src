@@ -2,8 +2,11 @@
 Test readlink() and realpath() functions: usage variation - linkname/filename stored in object(Bug #42038)
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip not for Windows');
+if (substr(PHP_OS, 0, 3) != 'WIN') {
+    die('skip only for Windows');
+} else {
+    include __DIR__ . '/windows_links/common.inc';
+    skipIfSeCreateSymbolicLinkPrivilegeIsDisabled(__FILE__);
 }
 ?>
 --FILE--
@@ -79,21 +82,17 @@ rmdir("$name_prefix/");
 
 -- Testing readlink() and realpath() with softlink, linkname stored inside an object --
 bool(true)
-string(%d) "%s/readlink_realpath_variation1/home/tests/link/readlink_realpath_variation1.tmp"
-string(%d) "%s/readlink_realpath_variation1/home/tests/link/readlink_realpath_variation1.tmp"
+string(%d) "%s%ereadlink_realpath_variation1%ehome%etests%elink%ereadlink_realpath_variation1.tmp"
+string(%d) "%s%ereadlink_realpath_variation1%ehome%etests%elink%ereadlink_realpath_variation1.tmp"
 bool(true)
-string(%d) "%s/readlink_realpath_variation1/home/tests/link/readlink_realpath_variation1.tmp"
-string(%d) "%s/readlink_realpath_variation1/home/tests/link/readlink_realpath_variation1.tmp"
+string(%d) "%s%ereadlink_realpath_variation1%ehome%etests%elink%ereadlink_realpath_variation1.tmp"
+string(%d) "%s%ereadlink_realpath_variation1%ehome%etests%elink%ereadlink_realpath_variation1.tmp"
 
 -- Testing readlink() and realpath() with hardlink, linkname stored inside an object --
 bool(true)
-
-Warning: readlink(): Invalid argument in %s on line %d
-bool(false)
-string(%d) "%s/readlink_realpath_variation1/home/readlink_realpath_variation1_link.tmp"
+string(%d) "%s%ereadlink_realpath_variation1%ehome%ereadlink_realpath_variation1_link.tmp"
+string(%d) "%s%ereadlink_realpath_variation1%ehome%ereadlink_realpath_variation1_link.tmp"
 bool(true)
-
-Warning: readlink(): Invalid argument in %s on line %d
-bool(false)
-string(%d) "%s/readlink_realpath_variation1_link.tmp"
+string(%d) "%s%ereadlink_realpath_variation1_link.tmp"
+string(%d) "%s%ereadlink_realpath_variation1_link.tmp"
 Done

@@ -2,8 +2,8 @@
 Test readlink() and realpath() functions: error conditions
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip not for Windows');
+if (substr(PHP_OS, 0, 3) != 'WIN') {
+    die('skip only for Windows');
 }
 ?>
 --FILE--
@@ -48,18 +48,14 @@ NULL
 
 *** Testing readlink() on a non-existent link ***
 
-Warning: readlink(): No such file or directory in %s on line %d
+Warning: readlink(): readlink failed to read the symbolic link (%s, error %d) in %s on line %d
 bool(false)
 
 *** Testing readlink() on existing file ***
-
-Warning: readlink(): Invalid argument in %s on line %d
-bool(false)
+string(%d) "%s%eext%estandard%etests%efile%ereadlink_realpath_error-win32.php"
 
 *** Testing readlink() on existing directory ***
-
-Warning: readlink(): Invalid argument in %s on line %d
-bool(false)
+string(%d) "%s%eext%estandard%etests%efile"
 *** Testing realpath(): error conditions ***
 
 Warning: realpath() expects exactly 1 parameter, 0 given in %s on line %d

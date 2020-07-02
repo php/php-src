@@ -2,8 +2,11 @@
 Test readlink() and realpath() functions: usage variation - linkname/filename stored in array(Bug #42038)
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip not for Windows');
+if (substr(PHP_OS, 0, 3) != 'WIN') {
+    die('skip only for Windows');
+} else {
+    include __DIR__ . '/windows_links/common.inc';
+    skipIfSeCreateSymbolicLinkPrivilegeIsDisabled(__FILE__);
 }
 ?>
 --FILE--
@@ -74,13 +77,13 @@ rmdir("$name_prefix/");
 
 -- Testing readlink() and realpath() with softlink, linkname stored inside an array --
 bool(true)
-string(%d) "%s/readlink_realpath_variation2/home/tests/link/readlink_realpath_variation2.tmp"
-string(%d) "%s/readlink_realpath_variation2/home/tests/link/readlink_realpath_variation2.tmp"
+string(%d) "%s%ereadlink_realpath_variation2%ehome%etests%elink%ereadlink_realpath_variation2.tmp"
+string(%d) "%s%ereadlink_realpath_variation2%ehome%etests%elink%ereadlink_realpath_variation2.tmp"
 
 Warning: symlink(): No such file or directory in %s on line %d
 bool(false)
 
-Warning: readlink(): No such file or directory in %s on line %d
+Warning: readlink(): readlink failed to read the symbolic link (%s) in %s on line %d
 bool(false)
 bool(false)
 
@@ -88,15 +91,13 @@ Warning: unlink(%s/./readlink_realpath_variation2/home/../home//tests//..//..//.
 
 -- Testing readlink() and realpath() with hardlink, linkname stored inside an array --
 bool(true)
-
-Warning: readlink(): Invalid argument in %s on line %d
-bool(false)
-string(%d) "%s/readlink_realpath_variation2/home/tests/link/readlink_realpath_variation2_link.tmp"
+string(%d) "%s%ereadlink_realpath_variation2%ehome%etests%elink%ereadlink_realpath_variation2_link.tmp"
+string(%d) "%s%ereadlink_realpath_variation2%ehome%etests%elink%ereadlink_realpath_variation2_link.tmp"
 
 Warning: link(): No such file or directory in %s on line %d
 bool(false)
 
-Warning: readlink(): No such file or directory in %s on line %d
+Warning: readlink(): readlink failed to read the symbolic link (%s) in %s on line %d
 bool(false)
 bool(false)
 
