@@ -5081,6 +5081,8 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 							// zend_error(E_NOTICE, "Undefined index: %s", ZSTR_VAL(offset_key));
 							|	UNDEFINED_INDEX opline
 							|	jmp >9
+						} else {
+							|	jmp &exit_addr
 						}
 						break;
 					case BP_VAR_IS:
