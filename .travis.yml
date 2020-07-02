@@ -9,9 +9,13 @@ addons:
     packages:
       - locales
       - language-pack-de
+      - ldap-utils
+      - openssl
+      - slapd
       - re2c
       - libgmp-dev
       - libicu-dev
+      - libldap2-dev
       - libtidy-dev
       - libenchant-dev
       - libaspell-dev
@@ -64,6 +68,7 @@ before_script:
     - . ./travis/ext/pdo_mysql/setup.sh
     - . ./travis/ext/pgsql/setup.sh
     - . ./travis/ext/pdo_pgsql/setup.sh
+    - . ./travis/ext/ldap/setup.sh
 
 # Run PHPs run-tests.php
 script:

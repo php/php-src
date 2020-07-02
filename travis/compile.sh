@@ -77,6 +77,8 @@ $TS \
 --with-kerberos \
 --enable-sysvmsg \
 --enable-zend-test=shared \
+--with-ldap \
+--with-ldap-sasl \
 > "$CONFIG_LOG_FILE"
 
 make "-j${MAKE_JOBS}" $MAKE_QUIET > "$MAKE_LOG_FILE"
