@@ -372,8 +372,7 @@ int zend_dfa_optimize_calls(zend_op_array *op_array, zend_ssa *ssa)
 			if (call_info->caller_call_opline
 			 && call_info->caller_call_opline->opcode == ZEND_DO_ICALL
 			 && call_info->callee_func
-			 && ZSTR_LEN(call_info->callee_func->common.function_name) == sizeof("in_array")-1
-			 && memcmp(ZSTR_VAL(call_info->callee_func->common.function_name), "in_array", sizeof("in_array")-1) == 0
+			 && zend_string_equals_literal(call_info->callee_func->common.function_name, "in_array")
 			 && (call_info->caller_init_opline->extended_value == 2
 			  || (call_info->caller_init_opline->extended_value == 3
 			   && (call_info->caller_call_opline - 1)->opcode == ZEND_SEND_VAL

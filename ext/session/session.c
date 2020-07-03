@@ -471,8 +471,7 @@ static void php_session_save_current_state(int write) /* {{{ */
 					if (PS(lazy_write) && PS(session_vars)
 						&& PS(mod)->s_update_timestamp
 						&& PS(mod)->s_update_timestamp != php_session_update_timestamp
-						&& ZSTR_LEN(val) == ZSTR_LEN(PS(session_vars))
-						&& !memcmp(ZSTR_VAL(val), ZSTR_VAL(PS(session_vars)), ZSTR_LEN(val))
+						&& zend_string_equals(val, PS(session_vars))
 					) {
 						ret = PS(mod)->s_update_timestamp(&PS(mod_data), PS(id), val, PS(gc_maxlifetime));
 					} else {
