@@ -3281,64 +3281,62 @@ PHP_FUNCTION(mb_convert_variables)
 }
 /* }}} */
 
-/* {{{ HTML numeric entity */
-/* {{{ static void php_mb_numericentity_exec() */
-static void
-php_mb_numericentity_exec(INTERNAL_FUNCTION_PARAMETERS, int type)
+/* HTML numeric entities */
+
+/* Convert PHP array to data structure required by mbfl_html_numeric_entity */
+static int* make_conversion_map(HashTable *target_hash, int *convmap_size)
+{
+	zval *hash_entry;
+
+	int n_elems = zend_hash_num_elements(target_hash);
+	if (n_elems % 4 != 0) {
+		zend_argument_value_error(2, "must have a multiple of 4 elements");
+		return NULL;
+	}
+
+	int *convmap = (int *)safe_emalloc(n_elems, sizeof(int), 0);
+	int *mapelm = convmap;
+	int mapsize = 0;
+
+	ZEND_HASH_FOREACH_VAL(target_hash, hash_entry) {
+		*mapelm++ = zval_get_long(hash_entry);
+		mapsize++;
+	} ZEND_HASH_FOREACH_END();
+
+	*convmap_size = mapsize / 4;
+	return convmap;
+}
+
+/* {{{ Converts specified characters to HTML numeric entities */
+PHP_FUNCTION(mb_encode_numericentity)
 {
 	char *str = NULL;
-	size_t str_len;
 	zend_string *encoding = NULL;
-	zval *hash_entry;
+	int mapsize;
 	HashTable *target_hash;
-	int i, *convmap, *mapelm, mapsize=0;
 	zend_bool is_hex = 0;
 	mbfl_string string, result, *ret;
 
-	if (type == 0) {
-		ZEND_PARSE_PARAMETERS_START(2, 4)
-			Z_PARAM_STRING(str, str_len)
-			Z_PARAM_ARRAY_HT(target_hash)
-			Z_PARAM_OPTIONAL
-			Z_PARAM_STR(encoding)
-			Z_PARAM_BOOL(is_hex)
-		ZEND_PARSE_PARAMETERS_END();
-	} else {
-		ZEND_PARSE_PARAMETERS_START(2, 3)
-			Z_PARAM_STRING(str, str_len)
-			Z_PARAM_ARRAY_HT(target_hash)
-			Z_PARAM_OPTIONAL
-			Z_PARAM_STR(encoding)
-		ZEND_PARSE_PARAMETERS_END();
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 4)
+		Z_PARAM_STRING(str, string.len)
+		Z_PARAM_ARRAY_HT(target_hash)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR(encoding)
+		Z_PARAM_BOOL(is_hex)
+	ZEND_PARSE_PARAMETERS_END();
 
 	string.val = (unsigned char *)str;
-	string.len = str_len;
 	string.encoding = php_mb_get_encoding(encoding, 3);
 	if (!string.encoding) {
 		RETURN_THROWS();
 	}
 
-	if (type == 0 && is_hex) {
-		type = 2; /* output in hex format */
-	}
-
-	/* conversion map */
-	i = zend_hash_num_elements(target_hash);
-	if (i % 4 != 0) {
-		zend_argument_value_error(2, "must have a multiple of 4 elements");
+	int *convmap = make_conversion_map(target_hash, &mapsize);
+	if (convmap == NULL) {
 		RETURN_THROWS();
 	}
-	convmap = (int *)safe_emalloc(i, sizeof(int), 0);
-	mapelm = convmap;
-	mapsize = 0;
-	ZEND_HASH_FOREACH_VAL(target_hash, hash_entry) {
-		*mapelm++ = zval_get_long(hash_entry);
-		mapsize++;
-	} ZEND_HASH_FOREACH_END();
-	mapsize /= 4;
 
-	ret = mbfl_html_numeric_entity(&string, &result, convmap, mapsize, type);
+	ret = mbfl_html_numeric_entity(&string, &result, convmap, mapsize, is_hex ? 2 : 0);
 	ZEND_ASSERT(ret != NULL);
 	// TODO: avoid reallocation ???
 	RETVAL_STRINGL((char *)ret->val, ret->len);
@@ -3347,19 +3345,40 @@ php_mb_numericentity_exec(INTERNAL_FUNCTION_PARAMETERS, int type)
 }
 /* }}} */
 
-/* {{{ Converts specified characters to HTML numeric entities */
-PHP_FUNCTION(mb_encode_numericentity)
-{
-	php_mb_numericentity_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
-}
-/* }}} */
-
 /* {{{ Converts HTML numeric entities to character code */
 PHP_FUNCTION(mb_decode_numericentity)
 {
-	php_mb_numericentity_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+	char *str = NULL;
+	zend_string *encoding = NULL;
+	int mapsize;
+	HashTable *target_hash;
+	mbfl_string string, result, *ret;
+
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_STRING(str, string.len)
+		Z_PARAM_ARRAY_HT(target_hash)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR(encoding)
+	ZEND_PARSE_PARAMETERS_END();
+
+	string.val = (unsigned char *)str;
+	string.encoding = php_mb_get_encoding(encoding, 3);
+	if (!string.encoding) {
+		RETURN_THROWS();
+	}
+
+	int *convmap = make_conversion_map(target_hash, &mapsize);
+	if (convmap == NULL) {
+		RETURN_THROWS();
+	}
+
+	ret = mbfl_html_numeric_entity(&string, &result, convmap, mapsize, 1);
+	ZEND_ASSERT(ret != NULL);
+	// TODO: avoid reallocation ???
+	RETVAL_STRINGL((char *)ret->val, ret->len);
+	efree(ret->val);
+	efree((void *)convmap);
 }
-/* }}} */
 /* }}} */
 
 /* {{{ Sends an email message with MIME scheme */
