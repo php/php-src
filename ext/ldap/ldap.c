@@ -397,7 +397,6 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 						if (ber_flatten2(vrber, control_value, 0) == -1) {
 							rc = -1;
 						}
-						ber_free(vrber, 1);
 					}
 				}
 			}
@@ -425,6 +424,10 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 							rc = -1;
 							php_error_docref(NULL, E_WARNING, "Failed to encode attribute list");
 							goto failure;
+						}
+
+						if (tmpstring) {
+							zend_string_release(tmpstring);
 						}
 
 						tmpstring = zval_get_string(attr);
@@ -471,6 +474,9 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 					goto failure;
 				}
 				sort_keys[i] = emalloc(sizeof(LDAPSortKey));
+				if (tmpstring) {
+					zend_string_release(tmpstring);
+				}
 				tmpstring = zval_get_string(tmp);
 				if (EG(exception)) {
 					rc = -1;
@@ -479,6 +485,9 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 				sort_keys[i]->attributeType = ZSTR_VAL(tmpstring);
 
 				if ((tmp = zend_hash_str_find(Z_ARRVAL_P(sortkey), "oid", sizeof("oid") - 1)) != NULL) {
+					if (tmpstring) {
+						zend_string_release(tmpstring);
+					}
 					tmpstring = zval_get_string(tmp);
 					if (EG(exception)) {
 						rc = -1;
@@ -3438,6 +3447,7 @@ PHP_FUNCTION(ldap_parse_result)
 	/* Reverse -> fall through */
 	switch (myargcount) {
 		case 7:
+			zval_ptr_dtor(serverctrls);
 			_php_ldap_controls_to_array(ld->link, lserverctrls, serverctrls, 0);
 		case 6:
 			zval_ptr_dtor(referrals);
@@ -4327,6 +4337,11 @@ PHP_FUNCTION(ldap_exop_passwd)
 		lnewpw.bv_len > 0 ? &lnewpw : NULL,
 		requestctrls,
 		NULL, &msgid);
+
+	if (requestctrls != NULL) {
+		efree(requestctrls);
+	}
+
 	if (rc != LDAP_SUCCESS ) {
 		php_error_docref(NULL, E_WARNING, "Passwd modify extended operation failed: %s (%d)", ldap_err2string(rc), rc);
 		RETURN_FALSE;
@@ -4366,6 +4381,7 @@ PHP_FUNCTION(ldap_exop_passwd)
 	}
 
 	if (myargcount > 4) {
+		zval_ptr_dtor(serverctrls);
 		_php_ldap_controls_to_array(ld->link, lserverctrls, serverctrls, 0);
 	}
 
