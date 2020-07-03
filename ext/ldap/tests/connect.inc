@@ -9,8 +9,9 @@ $host			= getenv("LDAP_TEST_HOST")	?: "localhost";
 $port			= getenv("LDAP_TEST_PORT")	?: 389;
 $base			= getenv("LDAP_TEST_BASE")	?: "dc=my-domain,dc=com";
 $user			= getenv("LDAP_TEST_USER")	?: "cn=Manager,$base";
-$sasl_user		= getenv("LDAP_TEST_SASL_USER")	?: "Manager";
 $passwd			= getenv("LDAP_TEST_PASSWD")	?: "secret";
+$sasl_user      = getenv("LDAP_TEST_SASL_USER") ?: "userA";
+$sasl_passwd    = getenv("LDAP_TEST_SASL_PASSWD")   ?: "oops";
 $protocol_version	= getenv("LDAP_TEST_OPT_PROTOCOL_VERSION")	?: 3;
 $skip_on_bind_failure	= getenv("LDAP_TEST_SKIP_BIND_FAILURE") ?: true;
 
