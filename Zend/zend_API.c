@@ -1359,90 +1359,81 @@ ZEND_API void object_init(zval *arg) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int add_assoc_long_ex(zval *arg, const char *key, size_t key_len, zend_long n) /* {{{ */
+ZEND_API void add_assoc_long_ex(zval *arg, const char *key, size_t key_len, zend_long n) /* {{{ */
 {
 	zval tmp;
 
 	ZVAL_LONG(&tmp, n);
 	zend_symtable_str_update(Z_ARRVAL_P(arg), key, key_len, &tmp);
-	return SUCCESS;
 }
 /* }}} */
 
-ZEND_API int add_assoc_null_ex(zval *arg, const char *key, size_t key_len) /* {{{ */
+ZEND_API void add_assoc_null_ex(zval *arg, const char *key, size_t key_len) /* {{{ */
 {
 	zval tmp;
 
 	ZVAL_NULL(&tmp);
 	zend_symtable_str_update(Z_ARRVAL_P(arg), key, key_len, &tmp);
-	return SUCCESS;
 }
 /* }}} */
 
-ZEND_API int add_assoc_bool_ex(zval *arg, const char *key, size_t key_len, int b) /* {{{ */
+ZEND_API void add_assoc_bool_ex(zval *arg, const char *key, size_t key_len, int b) /* {{{ */
 {
 	zval tmp;
 
 	ZVAL_BOOL(&tmp, b);
 	zend_symtable_str_update(Z_ARRVAL_P(arg), key, key_len, &tmp);
-	return SUCCESS;
 }
 /* }}} */
 
-ZEND_API int add_assoc_resource_ex(zval *arg, const char *key, size_t key_len, zend_resource *r) /* {{{ */
+ZEND_API void add_assoc_resource_ex(zval *arg, const char *key, size_t key_len, zend_resource *r) /* {{{ */
 {
 	zval tmp;
 
 	ZVAL_RES(&tmp, r);
 	zend_symtable_str_update(Z_ARRVAL_P(arg), key, key_len, &tmp);
-	return SUCCESS;
 }
 /* }}} */
 
-ZEND_API int add_assoc_double_ex(zval *arg, const char *key, size_t key_len, double d) /* {{{ */
+ZEND_API void add_assoc_double_ex(zval *arg, const char *key, size_t key_len, double d) /* {{{ */
 {
 	zval tmp;
 
 	ZVAL_DOUBLE(&tmp, d);
 	zend_symtable_str_update(Z_ARRVAL_P(arg), key, key_len, &tmp);
-	return SUCCESS;
 }
 /* }}} */
 
-ZEND_API int add_assoc_str_ex(zval *arg, const char *key, size_t key_len, zend_string *str) /* {{{ */
+ZEND_API void add_assoc_str_ex(zval *arg, const char *key, size_t key_len, zend_string *str) /* {{{ */
 {
 	zval tmp;
 
 	ZVAL_STR(&tmp, str);
 	zend_symtable_str_update(Z_ARRVAL_P(arg), key, key_len, &tmp);
-	return SUCCESS;
 }
 /* }}} */
 
-ZEND_API int add_assoc_string_ex(zval *arg, const char *key, size_t key_len, const char *str) /* {{{ */
+ZEND_API void add_assoc_string_ex(zval *arg, const char *key, size_t key_len, const char *str) /* {{{ */
 {
 	zval tmp;
 
 	ZVAL_STRING(&tmp, str);
 	zend_symtable_str_update(Z_ARRVAL_P(arg), key, key_len, &tmp);
-	return SUCCESS;
 }
 /* }}} */
 
-ZEND_API int add_assoc_stringl_ex(zval *arg, const char *key, size_t key_len, const char *str, size_t length) /* {{{ */
+ZEND_API void add_assoc_stringl_ex(zval *arg, const char *key, size_t key_len, const char *str, size_t length) /* {{{ */
 {
 	zval tmp;
 
 	ZVAL_STRINGL(&tmp, str, length);
 	zend_symtable_str_update(Z_ARRVAL_P(arg), key, key_len, &tmp);
-	return SUCCESS;
 }
 /* }}} */
 
-ZEND_API int add_assoc_zval_ex(zval *arg, const char *key, size_t key_len, zval *value) /* {{{ */
+ZEND_API void add_assoc_zval_ex(zval *arg, const char *key, size_t key_len, zval *value) /* {{{ */
 {
 	zend_symtable_str_update(Z_ARRVAL_P(arg), key, key_len, value);
-	return SUCCESS;
 }
 /* }}} */
 
