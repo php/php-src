@@ -447,14 +447,14 @@ ZEND_API void add_assoc_zval_ex(zval *arg, const char *key, size_t key_len, zval
 #define add_assoc_stringl(__arg, __key, __str, __length) add_assoc_stringl_ex(__arg, __key, strlen(__key), __str, __length)
 #define add_assoc_zval(__arg, __key, __value) add_assoc_zval_ex(__arg, __key, strlen(__key), __value)
 
-ZEND_API int add_index_long(zval *arg, zend_ulong index, zend_long n);
-ZEND_API int add_index_null(zval *arg, zend_ulong index);
-ZEND_API int add_index_bool(zval *arg, zend_ulong index, int b);
-ZEND_API int add_index_resource(zval *arg, zend_ulong index, zend_resource *r);
-ZEND_API int add_index_double(zval *arg, zend_ulong index, double d);
-ZEND_API int add_index_str(zval *arg, zend_ulong index, zend_string *str);
-ZEND_API int add_index_string(zval *arg, zend_ulong index, const char *str);
-ZEND_API int add_index_stringl(zval *arg, zend_ulong index, const char *str, size_t length);
+ZEND_API void add_index_long(zval *arg, zend_ulong index, zend_long n);
+ZEND_API void add_index_null(zval *arg, zend_ulong index);
+ZEND_API void add_index_bool(zval *arg, zend_ulong index, int b);
+ZEND_API void add_index_resource(zval *arg, zend_ulong index, zend_resource *r);
+ZEND_API void add_index_double(zval *arg, zend_ulong index, double d);
+ZEND_API void add_index_str(zval *arg, zend_ulong index, zend_string *str);
+ZEND_API void add_index_string(zval *arg, zend_ulong index, const char *str);
+ZEND_API void add_index_stringl(zval *arg, zend_ulong index, const char *str, size_t length);
 
 static zend_always_inline int add_index_zval(zval *arg, zend_ulong index, zval *value)
 {

@@ -1437,83 +1437,75 @@ ZEND_API void add_assoc_zval_ex(zval *arg, const char *key, size_t key_len, zval
 }
 /* }}} */
 
-ZEND_API int add_index_long(zval *arg, zend_ulong index, zend_long n) /* {{{ */
+ZEND_API void add_index_long(zval *arg, zend_ulong index, zend_long n) /* {{{ */
 {
 	zval tmp;
 
 	ZVAL_LONG(&tmp, n);
 	zend_hash_index_update(Z_ARRVAL_P(arg), index, &tmp);
-	return SUCCESS;
 }
 /* }}} */
 
-ZEND_API int add_index_null(zval *arg, zend_ulong index) /* {{{ */
+ZEND_API void add_index_null(zval *arg, zend_ulong index) /* {{{ */
 {
 	zval tmp;
 
 	ZVAL_NULL(&tmp);
 	zend_hash_index_update(Z_ARRVAL_P(arg), index, &tmp);
-	return SUCCESS;
 }
 /* }}} */
 
-ZEND_API int add_index_bool(zval *arg, zend_ulong index, int b) /* {{{ */
+ZEND_API void add_index_bool(zval *arg, zend_ulong index, int b) /* {{{ */
 {
 	zval tmp;
 
 	ZVAL_BOOL(&tmp, b);
 	zend_hash_index_update(Z_ARRVAL_P(arg), index, &tmp);
-	return SUCCESS;
 }
 /* }}} */
 
-ZEND_API int add_index_resource(zval *arg, zend_ulong index, zend_resource *r) /* {{{ */
+ZEND_API void add_index_resource(zval *arg, zend_ulong index, zend_resource *r) /* {{{ */
 {
 	zval tmp;
 
 	ZVAL_RES(&tmp, r);
 	zend_hash_index_update(Z_ARRVAL_P(arg), index, &tmp);
-	return SUCCESS;
 }
 /* }}} */
 
-ZEND_API int add_index_double(zval *arg, zend_ulong index, double d) /* {{{ */
+ZEND_API void add_index_double(zval *arg, zend_ulong index, double d) /* {{{ */
 {
 	zval tmp;
 
 	ZVAL_DOUBLE(&tmp, d);
 	zend_hash_index_update(Z_ARRVAL_P(arg), index, &tmp);
-	return SUCCESS;
 }
 /* }}} */
 
-ZEND_API int add_index_str(zval *arg, zend_ulong index, zend_string *str) /* {{{ */
+ZEND_API void add_index_str(zval *arg, zend_ulong index, zend_string *str) /* {{{ */
 {
 	zval tmp;
 
 	ZVAL_STR(&tmp, str);
 	zend_hash_index_update(Z_ARRVAL_P(arg), index, &tmp);
-	return SUCCESS;
 }
 /* }}} */
 
-ZEND_API int add_index_string(zval *arg, zend_ulong index, const char *str) /* {{{ */
+ZEND_API void add_index_string(zval *arg, zend_ulong index, const char *str) /* {{{ */
 {
 	zval tmp;
 
 	ZVAL_STRING(&tmp, str);
 	zend_hash_index_update(Z_ARRVAL_P(arg), index, &tmp);
-	return SUCCESS;
 }
 /* }}} */
 
-ZEND_API int add_index_stringl(zval *arg, zend_ulong index, const char *str, size_t length) /* {{{ */
+ZEND_API void add_index_stringl(zval *arg, zend_ulong index, const char *str, size_t length) /* {{{ */
 {
 	zval tmp;
 
 	ZVAL_STRINGL(&tmp, str, length);
 	zend_hash_index_update(Z_ARRVAL_P(arg), index, &tmp);
-	return SUCCESS;
 }
 /* }}} */
 
