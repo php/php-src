@@ -126,6 +126,17 @@ build_dirs = new Array();
 extension_include_code = "";
 extension_module_ptrs = "";
 
+(function () {
+	var wmiservice = GetObject("winmgmts:{impersonationLevel=impersonate}!\\\\.\\root\\cimv2");
+	var oss = wmiservice.ExecQuery("Select * from Win32_OperatingSystem");
+	var os = oss.ItemIndex(0);
+	AC_DEFINE("PHP_BUILD_SYSTEM", os.Caption + " [" + os.Version + "]", "Windows build system version");
+	var build_provider = WshShell.Environment("Process").Item("PHP_BUILD_PROVIDER");
+	if (build_provider) {
+		AC_DEFINE("PHP_BUILD_PROVIDER", build_provider);
+	}
+}());
+
 if (!MODE_PHPIZE) {
 	get_version_numbers();
 }
