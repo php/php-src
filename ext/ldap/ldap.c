@@ -283,7 +283,8 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 	int control_iscritical = 0, rc = LDAP_SUCCESS;
 	char** ldap_attrs = NULL;
 	LDAPSortKey** sort_keys = NULL;
-	zend_string *tmpstring = NULL;
+	zend_string *tmpstring = NULL, **tmpstrings1 = NULL, **tmpstrings2 = NULL;
+	size_t num_tmpstrings1 = 0, num_tmpstrings2 = 0;
 
 	if ((val = zend_hash_str_find(Z_ARRVAL_P(array), "oid", sizeof("oid") - 1)) == NULL) {
 		php_error_docref(NULL, E_WARNING, "Control must have an oid key");
@@ -397,7 +398,6 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 						if (ber_flatten2(vrber, control_value, 0) == -1) {
 							rc = -1;
 						}
-						ber_free(vrber, 1);
 					}
 				}
 			}
@@ -419,6 +419,8 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 
 					num_attribs = zend_hash_num_elements(Z_ARRVAL_P(tmp));
 					ldap_attrs = safe_emalloc((num_attribs+1), sizeof(char *), 0);
+					tmpstrings1 = safe_emalloc(num_attribs, sizeof(zend_string*), 0);
+					num_tmpstrings1 = 0;
 
 					for (i = 0; i<num_attribs; i++) {
 						if ((attr = zend_hash_index_find(Z_ARRVAL_P(tmp), i)) == NULL) {
@@ -427,12 +429,13 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 							goto failure;
 						}
 
-						tmpstring = zval_get_string(attr);
+						tmpstrings1[num_tmpstrings1] = zval_get_string(attr);
 						if (EG(exception)) {
 							rc = -1;
 							goto failure;
 						}
-						ldap_attrs[i] = ZSTR_VAL(tmpstring);
+						ldap_attrs[i] = ZSTR_VAL(tmpstrings1[num_tmpstrings1]);
+						++num_tmpstrings1;
 					}
 					ldap_attrs[num_attribs] = NULL;
 
@@ -457,6 +460,10 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 
 			num_keys = zend_hash_num_elements(Z_ARRVAL_P(val));
 			sort_keys = safe_emalloc((num_keys+1), sizeof(LDAPSortKey*), 0);
+			tmpstrings1 = safe_emalloc(num_keys, sizeof(zend_string*), 0);
+			tmpstrings2 = safe_emalloc(num_keys, sizeof(zend_string*), 0);
+			num_tmpstrings1 = 0;
+			num_tmpstrings2 = 0;
 
 			for (i = 0; i<num_keys; i++) {
 				if ((sortkey = zend_hash_index_find(Z_ARRVAL_P(val), i)) == NULL) {
@@ -471,20 +478,22 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 					goto failure;
 				}
 				sort_keys[i] = emalloc(sizeof(LDAPSortKey));
-				tmpstring = zval_get_string(tmp);
+				tmpstrings1[num_tmpstrings1] = zval_get_string(tmp);
 				if (EG(exception)) {
 					rc = -1;
 					goto failure;
 				}
-				sort_keys[i]->attributeType = ZSTR_VAL(tmpstring);
+				sort_keys[i]->attributeType = ZSTR_VAL(tmpstrings1[num_tmpstrings1]);
+				++num_tmpstrings1;
 
 				if ((tmp = zend_hash_str_find(Z_ARRVAL_P(sortkey), "oid", sizeof("oid") - 1)) != NULL) {
-					tmpstring = zval_get_string(tmp);
+					tmpstrings2[num_tmpstrings2] = zval_get_string(tmp);
 					if (EG(exception)) {
 						rc = -1;
 						goto failure;
 					}
-					sort_keys[i]->orderingRule = ZSTR_VAL(tmpstring);
+					sort_keys[i]->orderingRule = ZSTR_VAL(tmpstrings2[num_tmpstrings2]);
+					++num_tmpstrings2;
 				} else {
 					sort_keys[i]->orderingRule = NULL;
 				}
@@ -590,6 +599,20 @@ failure:
 	zend_string_release(control_oid);
 	if (tmpstring != NULL) {
 		zend_string_release(tmpstring);
+	}
+	if (tmpstrings1 != NULL) {
+		int i;
+		for (i = 0; i < num_tmpstrings1; ++i) {
+			zend_string_release(tmpstrings1[i]);
+		}
+		efree(tmpstrings1);
+	}
+	if (tmpstrings2 != NULL) {
+		int i;
+		for (i = 0; i < num_tmpstrings2; ++i) {
+			zend_string_release(tmpstrings2[i]);
+		}
+		efree(tmpstrings2);
 	}
 	if (control_value != NULL) {
 		ber_memfree(control_value);
@@ -3438,6 +3461,7 @@ PHP_FUNCTION(ldap_parse_result)
 	/* Reverse -> fall through */
 	switch (myargcount) {
 		case 7:
+			zval_ptr_dtor(serverctrls);
 			_php_ldap_controls_to_array(ld->link, lserverctrls, serverctrls, 0);
 		case 6:
 			zval_ptr_dtor(referrals);
@@ -4327,6 +4351,11 @@ PHP_FUNCTION(ldap_exop_passwd)
 		lnewpw.bv_len > 0 ? &lnewpw : NULL,
 		requestctrls,
 		NULL, &msgid);
+
+	if (requestctrls != NULL) {
+		efree(requestctrls);
+	}
+
 	if (rc != LDAP_SUCCESS ) {
 		php_error_docref(NULL, E_WARNING, "Passwd modify extended operation failed: %s (%d)", ldap_err2string(rc), rc);
 		RETURN_FALSE;
@@ -4366,6 +4395,7 @@ PHP_FUNCTION(ldap_exop_passwd)
 	}
 
 	if (myargcount > 4) {
+		zval_ptr_dtor(serverctrls);
 		_php_ldap_controls_to_array(ld->link, lserverctrls, serverctrls, 0);
 	}
 
