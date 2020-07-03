@@ -2,8 +2,9 @@
 Test symlink(), linkinfo(), link() and is_link() functions : usage variations - work on deleted link
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip no symlinks on Windows');
+if (PHP_OS_FAMILY === 'Windows') {
+    require_once __DIR__ . '/windows_links/common.inc';
+    skipIfSeCreateSymbolicLinkPrivilegeIsDisabled(__FILE__);
 }
 ?>
 --FILE--

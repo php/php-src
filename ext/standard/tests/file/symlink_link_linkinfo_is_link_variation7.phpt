@@ -2,8 +2,9 @@
 Test symlink(), linkinfo(), link() and is_link() functions : usage variations - try link to self
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip no symlinks on Windows');
+if (PHP_OS_FAMILY === 'Windows') {
+    require_once __DIR__ . '/windows_links/common.inc';
+    skipIfSeCreateSymbolicLinkPrivilegeIsDisabled(__FILE__);
 }
 ?>
 --FILE--
@@ -51,7 +52,11 @@ var_dump( symlink($dirname, $linkname) );
 // create another link to $dirname
 var_dump( symlink($linkname, $linkname) );
 // delete link
-unlink($linkname);
+if (PHP_OS_FAMILY === 'Windows') {
+    rmdir($linkname);
+} else {
+    unlink($linkname);
+}
 
 echo "\n*** Create hard link to file and then to itself ***\n";
 // create hard link to $filename

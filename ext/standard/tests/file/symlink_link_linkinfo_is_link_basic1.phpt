@@ -2,8 +2,9 @@
 Test symlink(), linkinfo(), link() and is_link() functions: basic functionality - link to files
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip no symlinks on Windows');
+if (PHP_OS_FAMILY === 'Windows') {
+    require_once __DIR__ . '/windows_links/common.inc';
+    skipIfSeCreateSymbolicLinkPrivilegeIsDisabled(__FILE__);
 }
 ?>
 --FILE--
@@ -58,7 +59,8 @@ foreach($files as $file) {
   // create soft link
   var_dump( symlink($file, $sym_linkname) );
   // checking information of link with linkinfo()
-  var_dump( linkinfo($sym_linkname) );
+  $linkinfo = linkinfo($sym_linkname);
+  var_dump( is_int($linkinfo) && $linkinfo !== -1 );
   // checking if given file is soft link
   var_dump( is_link($sym_linkname) );
   // clear the cache
@@ -69,7 +71,8 @@ foreach($files as $file) {
   // creating hard link
   var_dump( link($file, $linkname) );
   // checking information of link with linkinfo()
-  var_dump( linkinfo($linkname) );
+  $linkinfo = linkinfo($sym_linkname);
+  var_dump( is_int($linkinfo) && $linkinfo !== -1 );
   // checking if given link is soft link; expected: false
   var_dump( is_link($linkname) );
   // clear the cache
@@ -95,20 +98,20 @@ rmdir($dirname);
 -- Iteration 1 --
 -- Testing on soft links --
 bool(true)
-int(%d)
+bool(true)
 bool(true)
 -- Testing on hard links --
 bool(true)
-int(%d)
+bool(true)
 bool(false)
 
 -- Iteration 2 --
 -- Testing on soft links --
 bool(true)
-int(%d)
+bool(true)
 bool(true)
 -- Testing on hard links --
 bool(true)
-int(%d)
+bool(true)
 bool(false)
 Done

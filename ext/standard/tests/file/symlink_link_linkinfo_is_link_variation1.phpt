@@ -2,8 +2,9 @@
 Test symlink(), linkinfo(), link() and is_link() functions : usage variations - link name stored in an array/object
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip no symlinks on Windows');
+if (PHP_OS_FAMILY === 'Windows') {
+    require_once __DIR__ . '/windows_links/common.inc';
+    skipIfSeCreateSymbolicLinkPrivilegeIsDisabled(__FILE__);
 }
 ?>
 --FILE--
@@ -47,7 +48,8 @@ echo "\n-- Working with soft links --\n";
 // creating soft link
 var_dump( symlink($filename, $obj->linkname) );
 // check if the link exists
-var_dump( linkinfo($obj->linkname) );
+$linkinfo = linkinfo($obj->linkname);
+var_dump( is_int($linkinfo) && $linkinfo !== -1 );
 // check if link is soft link
 var_dump( is_link($obj->linkname) );
 // delete the link created
@@ -60,7 +62,8 @@ echo "\n-- Working with hard links --\n";
 // creating hard link
 var_dump( link($filename, $obj->linkname) );
 // check if the link exists
-var_dump( linkinfo($obj->linkname) );
+$linkinfo = linkinfo($obj->linkname);
+var_dump( is_int($linkinfo) && $linkinfo !== -1 );
 // check if link is soft link; expected: false as the link is a hardlink
 var_dump( is_link($obj->linkname) );
 // delete the link created
@@ -77,7 +80,8 @@ echo "\n-- Working with soft links --\n";
 // creating soft link
 var_dump( symlink($filename, $link_arr[0]) );
 // check if the link exist
-var_dump( linkinfo($link_arr[0]) );
+$linkinfo = linkinfo($link_arr[0]);
+var_dump( is_int($linkinfo) && $linkinfo !== -1 );
 // check if link is soft link
 var_dump( is_link($link_arr[0]) );
 // delete the link created
@@ -90,7 +94,8 @@ echo "\n-- Working with hard links --\n";
 // creating hard link
 var_dump( link($filename, $link_arr[0]) );
 // check if the link exist
-var_dump( linkinfo($link_arr[0]) );
+$linkinfo = linkinfo($link_arr[0]);
+var_dump( is_int($linkinfo) && $linkinfo !== -1 );
 // check if link is soft link; expected: false as this is a hardlink
 var_dump( is_link($link_arr[0]) );
 // delete the links created
@@ -114,23 +119,23 @@ rmdir($dirname);
 
 -- Working with soft links --
 bool(true)
-int(%d)
+bool(true)
 bool(true)
 
 -- Working with hard links --
 bool(true)
-int(%d)
+bool(true)
 bool(false)
 
 *** Testing symlink(), link(), linkinfo() and is_link() with linknames stored as members of an array ***
 
 -- Working with soft links --
 bool(true)
-int(%d)
+bool(true)
 bool(true)
 
 -- Working with hard links --
 bool(true)
-int(%d)
+bool(true)
 bool(false)
 Done
