@@ -477,15 +477,15 @@ static zend_always_inline int add_next_index_zval(zval *arg, zval *value)
 
 ZEND_API int array_set_zval_key(HashTable *ht, zval *key, zval *value);
 
-ZEND_API int add_property_long_ex(zval *arg, const char *key, size_t key_len, zend_long l);
-ZEND_API int add_property_null_ex(zval *arg, const char *key, size_t key_len);
-ZEND_API int add_property_bool_ex(zval *arg, const char *key, size_t key_len, zend_long b);
-ZEND_API int add_property_resource_ex(zval *arg, const char *key, size_t key_len, zend_resource *r);
-ZEND_API int add_property_double_ex(zval *arg, const char *key, size_t key_len, double d);
-ZEND_API int add_property_str_ex(zval *arg, const char *key, size_t key_len, zend_string *str);
-ZEND_API int add_property_string_ex(zval *arg, const char *key, size_t key_len, const char *str);
-ZEND_API int add_property_stringl_ex(zval *arg, const char *key, size_t key_len,  const char *str, size_t length);
-ZEND_API int add_property_zval_ex(zval *arg, const char *key, size_t key_len, zval *value);
+ZEND_API void add_property_long_ex(zval *arg, const char *key, size_t key_len, zend_long l);
+ZEND_API void add_property_null_ex(zval *arg, const char *key, size_t key_len);
+ZEND_API void add_property_bool_ex(zval *arg, const char *key, size_t key_len, zend_long b);
+ZEND_API void add_property_resource_ex(zval *arg, const char *key, size_t key_len, zend_resource *r);
+ZEND_API void add_property_double_ex(zval *arg, const char *key, size_t key_len, double d);
+ZEND_API void add_property_str_ex(zval *arg, const char *key, size_t key_len, zend_string *str);
+ZEND_API void add_property_string_ex(zval *arg, const char *key, size_t key_len, const char *str);
+ZEND_API void add_property_stringl_ex(zval *arg, const char *key, size_t key_len,  const char *str, size_t length);
+ZEND_API void add_property_zval_ex(zval *arg, const char *key, size_t key_len, zval *value);
 
 #define add_property_long(__arg, __key, __n) add_property_long_ex(__arg, __key, strlen(__key), __n)
 #define add_property_null(__arg, __key) add_property_null_ex(__arg, __key, strlen(__key))
