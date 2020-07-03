@@ -57,7 +57,7 @@ rmdir("$file_path/lstat_stat_variation18");
 -- Testing stat() on filename stored inside an object --
 array(26) {
   [0]=>
-  int(%d)
+  int(%i)
   [1]=>
   int(%d)
   [2]=>
@@ -83,7 +83,7 @@ array(26) {
   [12]=>
   int(%i)
   ["dev"]=>
-  int(%d)
+  int(%i)
   ["ino"]=>
   int(%d)
   ["mode"]=>
@@ -113,7 +113,7 @@ array(26) {
 -- Testing stat() on directory name stored inside an object --
 array(26) {
   [0]=>
-  int(%d)
+  int(%i)
   [1]=>
   int(%d)
   [2]=>
@@ -139,7 +139,7 @@ array(26) {
   [12]=>
   int(%i)
   ["dev"]=>
-  int(%d)
+  int(%i)
   ["ino"]=>
   int(%d)
   ["mode"]=>
