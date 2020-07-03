@@ -20,6 +20,6 @@ array(2) {
   [1]=>
   object(ReflectionParameter)#%d (1) {
     ["name"]=>
-    string(10) "resultmode"
+    string(11) "result_mode"
   }
 }

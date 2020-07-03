@@ -37,7 +37,11 @@ require_once('skipifconnectfailure.inc');
 
     mysqli_multi_query($link, "BAR; FOO;");
     mysqli_query($link, "FOO");
-    mysqli_kill($link, -1);
+    try {
+        mysqli_kill($link, -1);
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
 
     // mysqli_ping() cannot be tested, because one would need to cause an error inside the C function to test it
     mysqli_prepare($link, "FOO");
@@ -53,7 +57,11 @@ require_once('skipifconnectfailure.inc');
 
     mysqli_multi_query($link, "BAR; FOO;");
     mysqli_query($link, "FOO");
-    mysqli_kill($link, -1);
+    try {
+        mysqli_kill($link, -1);
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
     mysqli_prepare($link, "FOO");
     mysqli_real_query($link, "FOO");
     mysqli_select_db($link, "Oh lord, let this be an unknown database name");
@@ -280,14 +288,12 @@ require_once('skipifconnectfailure.inc');
 Warning: mysqli_multi_query(): (%d/%d): You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'BAR; FOO' at line 1 in %s on line %d
 
 Warning: mysqli_query(): (%d/%d): You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'FOO' at line 1 in %s on line %d
-
-Warning: mysqli_kill(): processid should have positive value in %s on line %d
+mysqli_kill(): Argument #2 ($connection_id) must be greater than 0
 
 Warning: mysqli_prepare(): (%d/%d): You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'FOO' at line 1 in %s on line %d
 
 Warning: mysqli_real_query(): (%d/%d): You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'FOO' at line 1 in %s on line %d
-
-Warning: mysqli_kill(): processid should have positive value in %s on line %d
+mysqli_kill(): Argument #2 ($connection_id) must be greater than 0
 
 Warning: mysqli_stmt_prepare(): (%d/%d): You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'FOO' at line 1 in %s on line %d
 [013] Access denied for user '%s'@'%s' (using password: YES)

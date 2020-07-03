@@ -23,8 +23,11 @@ if (!have_innodb($link))
         printf("[003] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
             $host, $user, $db, $port, $socket);
 
-    if (false !== ($tmp = mysqli_release_savepoint($link, '')))
-        printf("[006] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        mysqli_release_savepoint($link, '');
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
 
     if (!mysqli_query($link, 'DROP TABLE IF EXISTS test'))
         printf("[007] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -61,8 +64,8 @@ if (!have_innodb($link))
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
-Warning: mysqli_release_savepoint(): Savepoint name cannot be empty in %s on line %d
+--EXPECT--
+mysqli_release_savepoint(): Argument #2 ($name) cannot be empty
 array(1) {
   ["id"]=>
   string(1) "1"

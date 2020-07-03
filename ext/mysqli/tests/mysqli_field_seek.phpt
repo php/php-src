@@ -69,7 +69,11 @@ require_once('skipifconnectfailure.inc');
         printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
     }
 
-    var_dump(mysqli_field_seek($res, -1));
+    try {
+        var_dump(mysqli_field_seek($res, -1));
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
     var_dump(mysqli_fetch_field($res));
     var_dump(mysqli_field_seek($res, 0));
     var_dump(mysqli_fetch_field($res));
@@ -115,8 +119,7 @@ require_once('skipifconnectfailure.inc');
 	require_once("clean_table.inc");
 ?>
 --EXPECTF--
-Warning: mysqli_field_seek(): Invalid field offset in %s on line %d
-bool(false)
+mysqli_field_seek(): Argument #2 ($field_nr) must be greater than or equal to 0
 object(stdClass)#%d (13) {
   ["name"]=>
   string(2) "id"

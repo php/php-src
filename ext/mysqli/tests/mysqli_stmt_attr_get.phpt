@@ -19,20 +19,17 @@ require_once('skipifconnectfailure.inc');
     if ($IS_MYSQLND && mysqli_get_client_version() > 50007)
         $valid_attr["prefetch_rows"] = MYSQLI_STMT_ATTR_PREFETCH_ROWS;
 
-    do {
-        $invalid_attr = mt_rand(0, 10000);
-    } while (in_array($invalid_attr, $valid_attr));
-
     $stmt = mysqli_stmt_init($link);
     mysqli_stmt_prepare($stmt, 'SELECT * FROM test');
 
     try {
-        mysqli_stmt_attr_get($stmt, $invalid_attr);
-    } catch (Error $exception) {
-        echo $exception->getMessage() . "\n";
+        mysqli_stmt_attr_get($stmt, -100);
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
     }
 
     foreach ($valid_attr as $k => $attr) {
+        /* This can't happen anymore as it only returns int */
         if (false === ($tmp = mysqli_stmt_attr_get($stmt, $attr))) {
             printf("[006] Expecting any type, but not boolean/false, got %s/%s for attribute %s/%s\n",
                 gettype($tmp), $tmp, $k, $attr);
@@ -44,7 +41,7 @@ require_once('skipifconnectfailure.inc');
     foreach ($valid_attr as $k => $attr) {
         try {
             mysqli_stmt_attr_get($stmt, $attr);
-        } catch (Error $exception) {
+        } catch (Throwable $exception) {
             echo $exception->getMessage() . "\n";
         }
     }
@@ -57,6 +54,7 @@ require_once('skipifconnectfailure.inc');
 	require_once("clean_table.inc");
 ?>
 --EXPECT--
+mysqli_stmt_attr_get(): Argument #2 ($attr) must be one of MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH, MYSQLI_STMT_ATTR_PREFETCH_ROWS, or STMT_ATTR_CURSOR_TYPE
 mysqli_stmt object is already closed
 mysqli_stmt object is already closed
 mysqli_stmt object is already closed
