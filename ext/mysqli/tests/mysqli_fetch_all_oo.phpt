@@ -81,14 +81,14 @@ if (!function_exists('mysqli_fetch_all'))
         exit(1);
     }
 
-    do {
-        $illegal_mode = mt_rand(-10000, 10000);
-    } while (in_array($illegal_mode, array(MYSQLI_ASSOC, MYSQLI_NUM, MYSQLI_BOTH)));
-    // NOTE: for BC reasons with ext/mysql, ext/mysqli accepts invalid result modes.
-    $tmp = $res->fetch_all($illegal_mode);
-    if (false !== $tmp)
-        printf("[019] Expecting boolean/false although, got %s/%s. [%d] %s\n",
-            gettype($tmp), $tmp, $mysqli->errno, $mysqli->error);
+    try {
+        $tmp = $res->fetch_all(-10);
+        if (false !== $tmp)
+            printf("[019] Expecting boolean/false although, got %s/%s. [%d] %s\n",
+                gettype($tmp), $tmp, $mysqli->errno, $mysqli->error);
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
 
     $res->free_result();
 
@@ -436,7 +436,6 @@ array(1) {
     string(1) "1"
   }
 }
-
-Warning: mysqli_result::fetch_all(): Mode can be only MYSQLI_FETCH_NUM, MYSQLI_FETCH_ASSOC or MYSQLI_FETCH_BOTH in %s on line %d
+mysqli_result::fetch_all(): Argument #1 ($result_type) must be one of MYSQLI_FETCH_NUM, MYSQLI_FETCH_ASSOC, or MYSQLI_FETCH_BOTH
 mysqli_result object is already closed
 done!

@@ -56,8 +56,11 @@ require_once('skipifconnectfailure.inc');
     if ($res = mysqli_query($link, 'SELECT id FROM test', MYSQLI_USE_RESULT)) {
 
         $row = mysqli_fetch_row($res);
-        if (0 !== ($tmp = mysqli_num_rows($res)))
-            printf("[031] Expecting int/0, got %s/%d\n", gettype($tmp), $tmp);
+        try {
+            var_dump(mysqli_num_rows($res));
+        } catch (\Error $e) {
+            echo $e->getMessage() . \PHP_EOL;
+        }
 
         mysqli_free_result($res);
     } else {
@@ -71,12 +74,11 @@ require_once('skipifconnectfailure.inc');
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 mysqli_result object is already closed
 mysqli_result object is already closed
 mysqli_result object is already closed
 mysqli_result object is already closed
 run_tests.php don't fool me with your 'ungreedy' expression '.+?'!
-
-Warning: mysqli_num_rows(): Function cannot be used with MYSQL_USE_RESULT in %s on line %d
+mysqli_num_rows() cannot be used with MYSQLI_USE_RESULT
 done!

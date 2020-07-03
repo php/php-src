@@ -31,14 +31,20 @@ require_once('skipifconnectfailure.inc');
     if (!mysqli_stmt_prepare($stmt, "SELECT id, label FROM test ORDER BY id LIMIT 1"))
         printf("[004] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
-    if (false !== ($tmp = mysqli_stmt_bind_result($stmt, $id)))
-        printf("[005] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        mysqli_stmt_bind_result($stmt, $id);
+    } catch (\ArgumentCountError $e) {
+        echo $e->getMessage() . PHP_EOL;
+    }
 
     if (true !== ($tmp = mysqli_stmt_bind_result($stmt, $id, $label)))
         printf("[006] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
 
-    if (false !== ($tmp = mysqli_stmt_bind_result($stmt, $id, $label, $foo)))
-        printf("[007] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        mysqli_stmt_bind_result($stmt, $id, $label, $foo);
+    } catch (\ArgumentCountError $e) {
+        echo $e->getMessage() . PHP_EOL;
+    }
 
     if (!mysqli_stmt_execute($stmt))
         printf("[008] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
@@ -290,8 +296,11 @@ require_once('skipifconnectfailure.inc');
         printf("[3001] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
     $id = null;
-    if (false !== @mysqli_stmt_bind_result($stmt, $id))
-        printf("[3002] Bind result should not be allowed");
+    try {
+        mysqli_stmt_bind_result($stmt, $id);
+    } catch (\ArgumentCountError $e) {
+        $e->getMessage() . \PHP_EOL;
+    }
 
     mysqli_stmt_close($stmt);
 
@@ -304,10 +313,8 @@ require_once('skipifconnectfailure.inc');
 ?>
 --EXPECTF--
 mysqli_stmt object is not fully initialized
-
-Warning: mysqli_stmt_bind_result(): Number of bind variables doesn't match number of fields in prepared statement in %s on line %d
-
-Warning: mysqli_stmt_bind_result(): Number of bind variables doesn't match number of fields in prepared statement in %s on line %d
+Number of bind variables doesn't match number of fields in prepared statement
+Number of bind variables doesn't match number of fields in prepared statement
 int(1)
 %s(1) "a"
 done!

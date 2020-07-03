@@ -488,7 +488,6 @@ static const func_info_t func_infos[] = {
 	F1("mysqli_prepare",						MAY_BE_FALSE | MAY_BE_OBJECT),
 	F1("mysqli_real_escape_string",				MAY_BE_STRING),
 	F1("mysqli_stmt_affected_rows",				MAY_BE_LONG | MAY_BE_STRING),
-	F0("mysqli_stmt_data_seek",					MAY_BE_NULL | MAY_BE_FALSE),
 	F1("mysqli_stmt_insert_id",					MAY_BE_LONG | MAY_BE_STRING),
 	F1("mysqli_stmt_num_rows",					MAY_BE_LONG | MAY_BE_STRING),
 	F1("mysqli_sqlstate",						MAY_BE_NULL | MAY_BE_STRING),
