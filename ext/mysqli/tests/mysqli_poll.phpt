@@ -30,12 +30,16 @@ if (!$IS_MYSQLND)
         printf("[009] Expecting int/0 got %s/%s\n", gettype($tmp), var_export($tmp, true));
 
     $read = $error = $reject = array($link);
-    if (false !== ($tmp = (mysqli_poll($read, $error, $reject, -1, 1))))
-        printf("[010] Expecting false got %s/%s\n", gettype($tmp), var_export($tmp, true));
-
-    $read = $error = $reject = array($link);
-    if (false !== ($tmp = (mysqli_poll($read, $error, $reject, 0, -1))))
-        printf("[011] Expecting false got %s/%s\n", gettype($tmp), var_export($tmp, true));
+    try {
+        mysqli_poll($read, $error, $reject, -1, 1);
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
+    try {
+        mysqli_poll($read, $error, $reject, 0, -1);
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
 
     function poll_async($offset, $link, $links, $errors, $reject, $exp_ready, $use_oo_syntax) {
 
@@ -111,9 +115,8 @@ if (!$IS_MYSQLND)
     print "done!";
 ?>
 --EXPECTF--
-Warning: mysqli_poll(): Negative values passed for sec and/or usec in %s on line %d
-
-Warning: mysqli_poll(): Negative values passed for sec and/or usec in %s on line %d
+mysqli_poll(): Argument #4 ($sec) must be greater than or equal to 0
+mysqli_poll(): Argument #5 ($usec) must be greater than or equal to 0
 [012 + 6] Rejecting thread %d: 0/
 [013 + 6] Rejecting thread %d: 0/
 [014 + 6] Rejecting thread %d: 0/

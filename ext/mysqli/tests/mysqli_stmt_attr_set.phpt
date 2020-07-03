@@ -28,8 +28,8 @@ require_once("connect.inc");
     $stmt = mysqli_stmt_init($link);
     try {
         mysqli_stmt_attr_set($stmt, 0, 0);
-    } catch (Error $exception) {
-        echo $exception->getMessage() . "\n";
+    } catch (\Throwable $e) {
+        echo get_class($e) . ': ' . $e->getMessage() . PHP_EOL;
     }
 
     $stmt->prepare("SELECT * FROM test");
@@ -40,18 +40,22 @@ require_once("connect.inc");
         if (in_array($i, $valid_attr))
             continue;
         $invalid_attr = $i;
-        if (false !== ($tmp = @mysqli_stmt_attr_set($stmt, $invalid_attr, 0))) {
-            printf("[006a] Expecting boolean/false for attribute %d, got %s/%s\n", $invalid_attr, gettype($tmp), $tmp);
-        }
+        try {
+            if (false !== ($tmp = mysqli_stmt_attr_set($stmt, $invalid_attr, 0))) {
+                printf("[006a] Expecting boolean/false for attribute %d, got %s/%s\n", $invalid_attr, gettype($tmp), $tmp);
+            }
+        } catch (\ValueError $e) {/* Suppress because RANDOM */}
     }
 
     for ($i = 0; $i < 2; $i++) {
         do {
             $invalid_attr = mt_rand(-1 * (min(4294967296, PHP_INT_MAX) + 1), min(4294967296, PHP_INT_MAX));
         } while (in_array($invalid_attr, $valid_attr));
-        if (false !== ($tmp = @mysqli_stmt_attr_set($stmt, $invalid_attr, 0))) {
-            printf("[006b] Expecting boolean/false for attribute %d, got %s/%s\n", $invalid_attr, gettype($tmp), $tmp);
-        }
+        try {
+            if (false !== ($tmp = mysqli_stmt_attr_set($stmt, $invalid_attr, 0))) {
+                printf("[006b] Expecting boolean/false for attribute %d, got %s/%s\n", $invalid_attr, gettype($tmp), $tmp);
+            }
+        } catch (\ValueError $e) {/* Suppress because RANDOM */}
     }
     $stmt->close();
 
@@ -122,21 +126,19 @@ require_once("connect.inc");
 
     if (mysqli_get_client_version() > 50003) {
 
-        $cursor_types = array(
-            MYSQLI_CURSOR_TYPE_NO_CURSOR,
-            MYSQLI_CURSOR_TYPE_READ_ONLY,
-            MYSQLI_CURSOR_TYPE_FOR_UPDATE,
-            MYSQLI_CURSOR_TYPE_SCROLLABLE
-        );
-        do {
-            $invalid_cursor_type = mt_rand(-1000, 1000);
-        } while (in_array($invalid_cursor_type, $cursor_types));
-
         $stmt = mysqli_stmt_init($link);
         $stmt->prepare("SELECT id, label FROM test");
 
-        if (false !== ($tmp = @$stmt->attr_set(MYSQLI_STMT_ATTR_CURSOR_TYPE, $invalid_cursor_type)))
-            printf("[010] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
+        try {
+            $stmt->attr_set(MYSQLI_STMT_ATTR_CURSOR_TYPE, -100);
+        } catch (\ValueError $e) {
+            echo $e->getMessage() . \PHP_EOL;
+        }
+        try {
+            $stmt->attr_set(MYSQLI_STMT_ATTR_CURSOR_TYPE, 200);
+        } catch (\ValueError $e) {
+            echo $e->getMessage() . \PHP_EOL;
+        }
 
         if (false !== ($tmp = $stmt->attr_set(MYSQLI_STMT_ATTR_CURSOR_TYPE, MYSQLI_CURSOR_TYPE_FOR_UPDATE)))
             printf("[011] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
@@ -262,5 +264,6 @@ require_once("connect.inc");
 	require_once("clean_table.inc");
 ?>
 --EXPECT--
-mysqli_stmt object is not fully initialized
+Error: mysqli_stmt object is not fully initialized
+mysqli_stmt::attr_set(): Argument #2 ($mode_in) must be greater than or equal to 0
 done!

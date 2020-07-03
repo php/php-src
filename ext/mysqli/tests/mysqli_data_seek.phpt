@@ -31,8 +31,11 @@ require_once('skipifconnectfailure.inc');
     if (false !== ($tmp = mysqli_data_seek($res, 4)))
         printf("[009] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
 
-    if (false !== ($tmp = mysqli_data_seek($res, -1)))
-        printf("[010] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        mysqli_data_seek($res, -1);
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
 
     mysqli_free_result($res);
 
@@ -59,6 +62,8 @@ require_once('skipifconnectfailure.inc');
 	require_once("clean_table.inc");
 ?>
 --EXPECTF--
+mysqli_data_seek(): Argument #2 ($offset) must be greater than or equal to 0
+
 Warning: mysqli_data_seek(): Function cannot be used with MYSQL_USE_RESULT in %s on line %d
 mysqli_result object is already closed
 done!

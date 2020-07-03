@@ -61,8 +61,11 @@ if (!function_exists('mysqli_stmt_get_result'))
         }
     }
 
-    if (false !== ($tmp = $res->data_seek(-1)))
-        printf("[011] Expecting boolean/false got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        $res->data_seek(-1);
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
 
     if (false !== ($tmp = $res->data_seek($res->num_rows + 1)))
         printf("[012] Expecting boolean/false got %s/%s\n", gettype($tmp), $tmp);
@@ -70,18 +73,20 @@ if (!function_exists('mysqli_stmt_get_result'))
     for ($i = 0; $i < 100; $i++) {
         /* intentionally out of range! */
         $pos = mt_rand(-1, 4);
-        $tmp = mysqli_data_seek($res, $pos);
-        if (($pos >= 0 && $pos < 3)) {
-            if (true !== $tmp)
-                printf("[015] Expecting boolan/true got %s/%s\n", gettype($tmp), $tmp);
-            $row = $res->fetch_array(MYSQLI_NUM);
-            if ($row[0] !== $pos + 1)
-                printf("[016] Expecting id = %d for pos %d got %s/%s\n",
-                    $pos + 1, $pos, gettype($row[0]), $row[0]);
-        } else {
-            if (false !== $tmp)
-                printf("[014] Expecting boolan/false got %s/%s\n", gettype($tmp), $tmp);
-        }
+        try {
+            $tmp = @mysqli_data_seek($res, $pos);
+            if (($pos >= 0 && $pos < 3)) {
+                if (true !== $tmp)
+                    printf("[015] Expecting boolan/true got %s/%s\n", gettype($tmp), $tmp);
+                $row = $res->fetch_array(MYSQLI_NUM);
+                if ($row[0] !== $pos + 1)
+                    printf("[016] Expecting id = %d for pos %d got %s/%s\n",
+                        $pos + 1, $pos, gettype($row[0]), $row[0]);
+            } else {
+                if (false !== $tmp)
+                    printf("[014] Expecting boolan/false got %s/%s\n", gettype($tmp), $tmp);
+            }
+        } catch (\ValueError $e) { /* Suppress because RANDOM */}
     }
 
     mysqli_stmt_close($stmt);
@@ -127,6 +132,7 @@ if (!function_exists('mysqli_stmt_get_result'))
 	require_once("clean_table.inc");
 ?>
 --EXPECT--
+mysqli_result::data_seek(): Argument #1 ($offset) must be greater than or equal to 0
 mysqli_result object is already closed
 mysqli_result object is already closed
 mysqli_result object is already closed

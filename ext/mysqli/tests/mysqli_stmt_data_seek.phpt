@@ -59,8 +59,11 @@ require_once('skipifconnectfailure.inc');
 
     var_dump($id);
 
-    if (false !== ($tmp = mysqli_stmt_data_seek($stmt, -1)))
-        printf("[015] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        mysqli_stmt_data_seek($stmt, -1);
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
 
     if (mysqli_stmt_fetch($stmt))
         printf("[016] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
@@ -87,8 +90,7 @@ mysqli_stmt object is not fully initialized
 int(3)
 int(1)
 int(1)
-
-Warning: mysqli_stmt_data_seek(): Offset must be positive in %s on line %d
+mysqli_stmt_data_seek(): Argument #2 ($offset) must be greater than or equal to 0
 int(1)
 mysqli_stmt object is already closed
 done!
