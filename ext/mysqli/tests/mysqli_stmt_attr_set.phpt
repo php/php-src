@@ -33,29 +33,11 @@ require_once("connect.inc");
     }
 
     $stmt->prepare("SELECT * FROM test");
-
-    mt_srand(microtime(true));
-
-    for ($i = -100; $i < 1000; $i++) {
-        if (in_array($i, $valid_attr))
-            continue;
-        $invalid_attr = $i;
-        try {
-            if (false !== ($tmp = mysqli_stmt_attr_set($stmt, $invalid_attr, 0))) {
-                printf("[006a] Expecting boolean/false for attribute %d, got %s/%s\n", $invalid_attr, gettype($tmp), $tmp);
-            }
-        } catch (\ValueError $e) {/* Suppress because RANDOM */}
-    }
-
-    for ($i = 0; $i < 2; $i++) {
-        do {
-            $invalid_attr = mt_rand(-1 * (min(4294967296, PHP_INT_MAX) + 1), min(4294967296, PHP_INT_MAX));
-        } while (in_array($invalid_attr, $valid_attr));
-        try {
-            if (false !== ($tmp = mysqli_stmt_attr_set($stmt, $invalid_attr, 0))) {
-                printf("[006b] Expecting boolean/false for attribute %d, got %s/%s\n", $invalid_attr, gettype($tmp), $tmp);
-            }
-        } catch (\ValueError $e) {/* Suppress because RANDOM */}
+    // Invalid Attribute (2nd argument)
+    try {
+        mysqli_stmt_attr_set($stmt, -1, 0);
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
     }
     $stmt->close();
 
@@ -117,6 +99,13 @@ require_once("connect.inc");
         if ($meta->max_length !== 0)
             printf("[009] max_length should not be set (= 0), got %s for field %s\n", $meta->max_length, $meta->name);
     }
+
+    // Invalid mode for MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH
+    try {
+        $stmt->attr_set(MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH, -1);
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
     $res->close();
     $stmt->close();
 
@@ -129,13 +118,9 @@ require_once("connect.inc");
         $stmt = mysqli_stmt_init($link);
         $stmt->prepare("SELECT id, label FROM test");
 
+        // Invalid cursor type
         try {
-            $stmt->attr_set(MYSQLI_STMT_ATTR_CURSOR_TYPE, -100);
-        } catch (\ValueError $e) {
-            echo $e->getMessage() . \PHP_EOL;
-        }
-        try {
-            $stmt->attr_set(MYSQLI_STMT_ATTR_CURSOR_TYPE, 200);
+            $stmt->attr_set(MYSQLI_STMT_ATTR_CURSOR_TYPE, -1);
         } catch (\ValueError $e) {
             echo $e->getMessage() . \PHP_EOL;
         }
@@ -211,6 +196,13 @@ require_once("connect.inc");
 
         $stmt = mysqli_stmt_init($link);
         $stmt->prepare("SELECT id, label FROM test");
+        // Invalid prefetch value
+        try {
+            $stmt->attr_set(MYSQLI_STMT_ATTR_PREFETCH_ROWS, 0);
+        } catch (\ValueError $e) {
+            echo $e->getMessage() . \PHP_EOL;
+        }
+
         if (true !== ($tmp = $stmt->attr_set(MYSQLI_STMT_ATTR_PREFETCH_ROWS, 1)))
             printf("[020] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
         $stmt->execute();
@@ -265,5 +257,8 @@ require_once("connect.inc");
 ?>
 --EXPECT--
 Error: mysqli_stmt object is not fully initialized
-mysqli_stmt::attr_set(): Argument #2 ($mode_in) must be greater than or equal to 0
+mysqli_stmt_attr_set(): Argument #2 ($attr) must be one of MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH, MYSQLI_STMT_ATTR_PREFETCH_ROWS, or STMT_ATTR_CURSOR_TYPE
+mysqli_stmt::attr_set(): Argument #2 ($mode_in) must be 0 or 1 for attribute MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH
+mysqli_stmt::attr_set(): Argument #2 ($mode_in) must be one of MYSQLI_CURSOR_TYPE_NO_CURSOR, MYSQLI_CURSOR_TYPE_READ_ONLY, MYSQLI_CURSOR_TYPE_FOR_UPDATE, or MYSQLI_CURSOR_TYPE_SCROLLABLE for attribute MYSQLI_STMT_ATTR_CURSOR_TYPE
+mysqli_stmt::attr_set(): Argument #2 ($mode_in) must be greater than 0 for attribute MYSQLI_STMT_ATTR_PREFETCH_ROWS
 done!

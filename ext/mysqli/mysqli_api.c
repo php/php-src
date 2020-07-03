@@ -2243,9 +2243,6 @@ PHP_FUNCTION(mysqli_stmt_attr_set)
 	MY_STMT	*stmt;
 	zval	*mysql_stmt;
 	zend_long	mode_in;
-#if MYSQL_VERSION_ID >= 50107
-	my_bool	mode_b;
-#endif
 	unsigned long	mode;
 	zend_long	attr;
 	void	*mode_p;
@@ -2254,27 +2251,57 @@ PHP_FUNCTION(mysqli_stmt_attr_set)
 		RETURN_THROWS();
 	}
 
-	/* TODO Improve the mode to depend on the ATTR */
-	if (mode_in < 0) {
-		zend_argument_value_error(ERROR_ARG_POS(3), "must be greater than or equal to 0");
-		RETURN_THROWS();
-	}
-
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, mysql_stmt, MYSQLI_STATUS_VALID);
 
 	switch (attr) {
 #if MYSQL_VERSION_ID >= 50107
 	case STMT_ATTR_UPDATE_MAX_LENGTH:
+	{
+		my_bool mode_b;
+		if (mode_in != 0 && mode_in != 1) {
+			zend_argument_value_error(ERROR_ARG_POS(3), "must be 0 or 1 for attribute MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH");
+			RETURN_THROWS();
+		}
 		mode_b = (my_bool) mode_in;
 		mode_p = &mode_b;
 		break;
+	}
 #endif
-	default:
+	case STMT_ATTR_CURSOR_TYPE: {
+		switch (mode_in) {
+			case CURSOR_TYPE_NO_CURSOR:
+			case CURSOR_TYPE_READ_ONLY:
+			case CURSOR_TYPE_FOR_UPDATE:
+			case CURSOR_TYPE_SCROLLABLE:
+				break;
+			default:
+				zend_argument_value_error(ERROR_ARG_POS(3), "must be one of MYSQLI_CURSOR_TYPE_NO_CURSOR, "
+					"MYSQLI_CURSOR_TYPE_READ_ONLY, MYSQLI_CURSOR_TYPE_FOR_UPDATE, or MYSQLI_CURSOR_TYPE_SCROLLABLE "
+					"for attribute MYSQLI_STMT_ATTR_CURSOR_TYPE");
+				RETURN_THROWS();
+		}
 		mode = mode_in;
 		mode_p = &mode;
 		break;
 	}
+	case STMT_ATTR_PREFETCH_ROWS:
+		if (mode_in < 1) {
+			zend_argument_value_error(ERROR_ARG_POS(3), "must be greater than 0 for attribute MYSQLI_STMT_ATTR_PREFETCH_ROWS");
+			RETURN_THROWS();
+		}
+		mode = mode_in;
+		mode_p = &mode;
+		break;
+	default:
+		zend_argument_value_error(ERROR_ARG_POS(2), "must be one of "
+#if MYSQL_VERSION_ID >= 50107
+			"MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH, "
+#endif
+			"MYSQLI_STMT_ATTR_PREFETCH_ROWS, or STMT_ATTR_CURSOR_TYPE");
+		RETURN_THROWS();
+	}
 
+// TODO Can unify this?
 #ifndef MYSQLI_USE_MYSQLND
 	if (mysql_stmt_attr_set(stmt->stmt, attr, mode_p)) {
 #else
