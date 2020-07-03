@@ -3745,73 +3745,71 @@ ZEND_API int zend_try_assign_typed_ref_zval_ex(zend_reference *ref, zval *zv, ze
 }
 /* }}} */
 
-ZEND_API int zend_declare_property_ex(zend_class_entry *ce, zend_string *name, zval *property, int access_type, zend_string *doc_comment) /* {{{ */
+ZEND_API void zend_declare_property_ex(zend_class_entry *ce, zend_string *name, zval *property, int access_type, zend_string *doc_comment) /* {{{ */
 {
 	zend_declare_typed_property(ce, name, property, access_type, doc_comment, (zend_type) ZEND_TYPE_INIT_NONE(0));
-	return SUCCESS;
 }
 /* }}} */
 
-ZEND_API int zend_declare_property(zend_class_entry *ce, const char *name, size_t name_length, zval *property, int access_type) /* {{{ */
+ZEND_API void zend_declare_property(zend_class_entry *ce, const char *name, size_t name_length, zval *property, int access_type) /* {{{ */
 {
 	zend_string *key = zend_string_init(name, name_length, is_persistent_class(ce));
-	int ret = zend_declare_property_ex(ce, key, property, access_type, NULL);
+	zend_declare_property_ex(ce, key, property, access_type, NULL);
 	zend_string_release(key);
-	return ret;
 }
 /* }}} */
 
-ZEND_API int zend_declare_property_null(zend_class_entry *ce, const char *name, size_t name_length, int access_type) /* {{{ */
+ZEND_API void zend_declare_property_null(zend_class_entry *ce, const char *name, size_t name_length, int access_type) /* {{{ */
 {
 	zval property;
 
 	ZVAL_NULL(&property);
-	return zend_declare_property(ce, name, name_length, &property, access_type);
+	zend_declare_property(ce, name, name_length, &property, access_type);
 }
 /* }}} */
 
-ZEND_API int zend_declare_property_bool(zend_class_entry *ce, const char *name, size_t name_length, zend_long value, int access_type) /* {{{ */
+ZEND_API void zend_declare_property_bool(zend_class_entry *ce, const char *name, size_t name_length, zend_long value, int access_type) /* {{{ */
 {
 	zval property;
 
 	ZVAL_BOOL(&property, value);
-	return zend_declare_property(ce, name, name_length, &property, access_type);
+	zend_declare_property(ce, name, name_length, &property, access_type);
 }
 /* }}} */
 
-ZEND_API int zend_declare_property_long(zend_class_entry *ce, const char *name, size_t name_length, zend_long value, int access_type) /* {{{ */
+ZEND_API void zend_declare_property_long(zend_class_entry *ce, const char *name, size_t name_length, zend_long value, int access_type) /* {{{ */
 {
 	zval property;
 
 	ZVAL_LONG(&property, value);
-	return zend_declare_property(ce, name, name_length, &property, access_type);
+	zend_declare_property(ce, name, name_length, &property, access_type);
 }
 /* }}} */
 
-ZEND_API int zend_declare_property_double(zend_class_entry *ce, const char *name, size_t name_length, double value, int access_type) /* {{{ */
+ZEND_API void zend_declare_property_double(zend_class_entry *ce, const char *name, size_t name_length, double value, int access_type) /* {{{ */
 {
 	zval property;
 
 	ZVAL_DOUBLE(&property, value);
-	return zend_declare_property(ce, name, name_length, &property, access_type);
+	zend_declare_property(ce, name, name_length, &property, access_type);
 }
 /* }}} */
 
-ZEND_API int zend_declare_property_string(zend_class_entry *ce, const char *name, size_t name_length, const char *value, int access_type) /* {{{ */
+ZEND_API void zend_declare_property_string(zend_class_entry *ce, const char *name, size_t name_length, const char *value, int access_type) /* {{{ */
 {
 	zval property;
 
 	ZVAL_NEW_STR(&property, zend_string_init(value, strlen(value), ce->type & ZEND_INTERNAL_CLASS));
-	return zend_declare_property(ce, name, name_length, &property, access_type);
+	zend_declare_property(ce, name, name_length, &property, access_type);
 }
 /* }}} */
 
-ZEND_API int zend_declare_property_stringl(zend_class_entry *ce, const char *name, size_t name_length, const char *value, size_t value_len, int access_type) /* {{{ */
+ZEND_API void zend_declare_property_stringl(zend_class_entry *ce, const char *name, size_t name_length, const char *value, size_t value_len, int access_type) /* {{{ */
 {
 	zval property;
 
 	ZVAL_NEW_STR(&property, zend_string_init(value, value_len, ce->type & ZEND_INTERNAL_CLASS));
-	return zend_declare_property(ce, name, name_length, &property, access_type);
+	zend_declare_property(ce, name, name_length, &property, access_type);
 }
 /* }}} */
 
