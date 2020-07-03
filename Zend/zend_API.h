@@ -316,7 +316,7 @@ ZEND_API int zend_startup_module(zend_module_entry *module_entry);
 ZEND_API zend_module_entry* zend_register_internal_module(zend_module_entry *module_entry);
 ZEND_API zend_module_entry* zend_register_module_ex(zend_module_entry *module);
 ZEND_API int zend_startup_module_ex(zend_module_entry *module);
-ZEND_API int zend_startup_modules(void);
+ZEND_API void zend_startup_modules(void);
 ZEND_API void zend_collect_module_handlers(void);
 ZEND_API void zend_destroy_modules(void);
 ZEND_API void zend_check_magic_method_implementation(
