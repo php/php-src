@@ -418,7 +418,7 @@ ZEND_API const char *zend_get_type_by_const(int type);
 
 #define array_init(arg)				ZVAL_ARR((arg), zend_new_array(0))
 #define array_init_size(arg, size)	ZVAL_ARR((arg), zend_new_array(size))
-ZEND_API int object_init(zval *arg);
+ZEND_API void object_init(zval *arg);
 ZEND_API int object_init_ex(zval *arg, zend_class_entry *ce);
 ZEND_API int object_and_properties_init(zval *arg, zend_class_entry *ce, HashTable *properties);
 ZEND_API void object_properties_init(zend_object *object, zend_class_entry *class_type);

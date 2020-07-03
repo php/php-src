@@ -1353,10 +1353,9 @@ ZEND_API int object_init_ex(zval *arg, zend_class_entry *class_type) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int object_init(zval *arg) /* {{{ */
+ZEND_API void object_init(zval *arg) /* {{{ */
 {
 	ZVAL_OBJ(arg, zend_objects_new(zend_standard_class_def));
-	return SUCCESS;
 }
 /* }}} */
 
