@@ -1,5 +1,12 @@
 --TEST--
 Test lstat() and stat() functions: usage variations - link names stored in array/object
+--SKIPIF--
+<?php
+if (PHP_OS_FAMILY === 'Windows') {
+    include_once __DIR__ . '/windows_links/common.inc';
+    skipIfSeCreateSymbolicLinkPrivilegeIsDisabled(__FILE__);
+}
+?>
 --FILE--
 <?php
 /* Prototype: array lstat ( string $filename );
