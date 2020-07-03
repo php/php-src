@@ -668,9 +668,17 @@ static void *zend_mm_chunk_alloc_int(size_t size, size_t alignment)
 	if (ptr == NULL) {
 		return NULL;
 	} else if (ZEND_MM_ALIGNED_OFFSET(ptr, alignment) == 0) {
-#ifdef MADV_HUGEPAGE
+#if defined(MADV_HUGEPAGE)
 		if (zend_mm_use_huge_pages) {
 			madvise(ptr, size, MADV_HUGEPAGE);
+		}
+#elif defined(__sun)
+		if (zend_mm_use_huge_pages) {
+			struct memcntl_mha m;
+			m.mha_cmd = MHA_MAPSIZE_VA;
+			m.mha_pagesize = ZEND_MM_CHUNK_SIZE;
+			m.mha_flags = 0;
+			(void)memcntl(ptr, size, MC_HAT_ADVISE, (caddr_t)&m, 0, 0);
 		}
 #endif
 		return ptr;
@@ -701,9 +709,17 @@ static void *zend_mm_chunk_alloc_int(size_t size, size_t alignment)
 		if (alignment > REAL_PAGE_SIZE) {
 			zend_mm_munmap((char*)ptr + size, alignment - REAL_PAGE_SIZE);
 		}
-# ifdef MADV_HUGEPAGE
+# if defined(MADV_HUGEPAGE)
 		if (zend_mm_use_huge_pages) {
 			madvise(ptr, size, MADV_HUGEPAGE);
+		}
+# elif defined(__sun)
+		if (zend_mm_use_huge_pages) {
+			struct memcntl_mha m;
+			m.mha_cmd = MHA_MAPSIZE_VA;
+			m.mha_pagesize = ZEND_MM_CHUNK_SIZE;
+			m.mha_flags = 0;
+			(void)memcntl(ptr, size, MC_HAT_ADVISE, (caddr_t)&m, 0, 0);
 		}
 # endif
 #endif
