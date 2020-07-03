@@ -3,6 +3,8 @@ Bug #37811 (define not using toString on objects)
 --FILE--
 <?php
 
+require __DIR__ . '/constants_helpers.inc';
+
 class TestClass
 {
     function __toString()
@@ -11,19 +13,17 @@ class TestClass
     }
 }
 
-define("Bar",new TestClass);
-var_dump(Bar);
-define("Baz",new stdClass);
-var_dump(Baz);
+tchelper_define("Bar",new TestClass);
+
+tchelper_define("Baz",new stdClass);
 
 ?>
 ===DONE===
---EXPECTF--
-string(3) "Foo"
+--EXPECT--
+>> define("Bar", object);
+true
 
-Warning: Constants may only evaluate to scalar values, arrays or resources in %sbug37811.php on line %d
+>> define("Baz", object);
+TypeError :: Constants may only evaluate to scalar values, arrays or resources
 
-Fatal error: Uncaught Error: Undefined constant 'Baz' in %s:%d
-Stack trace:
-#0 {main}
-  thrown in %s on line %d
+===DONE===

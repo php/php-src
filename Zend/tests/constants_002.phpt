@@ -1,20 +1,17 @@
 --TEST--
-Defining constants with non-scalar values
+Defining constants with non-scalar values should throw an error
 --FILE--
 <?php
 
-define('foo', new stdClass);
-try {
-    var_dump(foo);
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
-}
+require __DIR__ . '/constants_helpers.inc';
 
-define('foo', fopen(__FILE__, 'r'));
-var_dump(foo);
+tchelper_define('foo', new stdClass);
+tchelper_define('foo', fopen(__FILE__, 'r'));
 
 ?>
---EXPECTF--
-Warning: Constants may only evaluate to scalar values, arrays or resources in %s on line %d
-Undefined constant 'foo'
-resource(5) of type (stream)
+--EXPECT--
+>> define("foo", object);
+TypeError :: Constants may only evaluate to scalar values, arrays or resources
+
+>> define("foo", resource);
+true

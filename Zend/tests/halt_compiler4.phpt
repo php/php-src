@@ -2,9 +2,14 @@
 __HALT_COMPILER(); bad define() of __COMPILER_HALT_OFFSET__ 2
 --FILE--
 <?php
-define ('__COMPILER_HALT_OFFSET__', 1);
+require __DIR__ . '/constants_helpers.inc';
+
+tchelper_define('__COMPILER_HALT_OFFSET__', 1);
+
 __HALT_COMPILER();
 ?>
+
 ==DONE==
---EXPECTF--
-Notice: Constant __COMPILER_HALT_OFFSET__ already defined in %s on line %d
+--EXPECT--
+>> define("__COMPILER_HALT_OFFSET__", integer);
+ValueError :: Constant __COMPILER_HALT_OFFSET__ already defined
