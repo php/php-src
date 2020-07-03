@@ -1612,16 +1612,12 @@ static zend_bool is_power_of_two(uint32_t x)
 
 static zend_bool has_concrete_type(uint32_t value_type)
 {
-	if (value_type & MAY_BE_UNDEF) {
-		value_type |= MAY_BE_NULL;
-	}
-	value_type &= MAY_BE_ANY;
-	return is_power_of_two (value_type);
+	return is_power_of_two (value_type & (MAY_BE_ANY|MAY_BE_UNDEF));
 }
 
 static uint32_t concrete_type(uint32_t value_type)
 {
-	return floor_log2(value_type & MAY_BE_ANY);
+	return floor_log2(value_type & (MAY_BE_ANY|MAY_BE_UNDEF));
 }
 
 static inline zend_bool is_signed(double d)
