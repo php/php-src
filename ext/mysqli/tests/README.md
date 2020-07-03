@@ -1,6 +1,11 @@
 # The mysqli extension tests
 
-There are default values for `MYSQL_TEST_HOST`, `MYSQL_TEST_USER`, `MYSQL_TEST_DB` and `MYSQL_TEST_PASSWD`. If your values differ from the defaults, then the environment variables must be set.
+To run the tests, a test database must be created in the MySQL command-line:  
+```sql
+CREATE DATABASE 'test';
+```
+
+There are default values for `MYSQL_TEST_HOST`, `MYSQL_TEST_USER`, `MYSQL_TEST_DB` and `MYSQL_TEST_PASSWD`. If your values differ from the defaults, then environment variables must be set.
 
 ```bash
 # Database host
