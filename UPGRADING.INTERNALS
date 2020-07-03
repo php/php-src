@@ -20,6 +20,7 @@ PHP 8.0 INTERNALS UPGRADE NOTES
   q. GC_COLLECTABLE flag
   r. Cannot implement Traversable only
   s. zend_fcall_info no_separation flag removed
+  t. Signature changes
 
 2. Build system changes
   a. Abstract
@@ -89,7 +90,7 @@ PHP 8.0 INTERNALS UPGRADE NOTES
   j. compare_objects() handler was removed. Extensions should use compare() object
      handler instead and check if both arguments are objects and have the same
      compare handler, using ZEND_COMPARE_OBJECTS_FALLBACK() macro.
-     
+
   k. The 'I' length modifier, used to denote 32 and 64bit integer from the custom
      snprintf and spprintf implementations has been removed.
      Use the ZEND_LONG_FMT, ZEND_ULONG_FMT and ZEND_XLONG_FMT macros defined in
@@ -136,10 +137,21 @@ PHP 8.0 INTERNALS UPGRADE NOTES
              zend_create_internal_iterator_zval(return_value, ZEND_THIS);
          }
 
-   s. The zend_fcall_info no_separation flag has been removed, and separation is
+  s. The zend_fcall_info no_separation flag has been removed, and separation is
       never allowed. If you wish to pass (or allow passing) arguments by
       reference, explicitly create those arguments as references using
       ZEND_MAKE_REF.
+
+  t. The following ZEND_API function have changed signature:
+     1. Void in Zend Engine 4.0:
+        - add_assoc_*()
+        - add_index_*()
+        - add_property_*()
+        - object_init()
+        - zend_declare_class_constant*()
+        - zend_declare_property*()
+        - zend_startup_modules()
+        - zend_wrong_parameters_none_error()
 
 ========================
 2. Build system changes
