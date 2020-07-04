@@ -14,4 +14,4 @@ $finfo = new finfo(FILEINFO_MIME_TYPE);
 echo $finfo->buffer($a) . "\n";
 ?>
 --EXPECT--
-text/x-python
+text/x-script.python

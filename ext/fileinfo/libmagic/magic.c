@@ -28,7 +28,7 @@
 #include "file.h"
 
 #ifndef	lint
-FILE_RCSID("@(#)$File: magic.c,v 1.111 2019/05/07 02:27:11 christos Exp $")
+FILE_RCSID("@(#)$File: magic.c,v 1.112 2020/06/08 19:44:10 christos Exp $")
 #endif	/* lint */
 
 #include "magic.h"
@@ -189,6 +189,7 @@ close_and_restore(const struct magic_set *ms, const char *name, int fd,
 }
 #endif
 
+#ifndef COMPILE_ONLY
 
 /*
  * find type of descriptor
@@ -312,6 +313,7 @@ magic_buffer(struct magic_set *ms, const void *buf, size_t nb)
 	}
 	return file_getbuffer(ms);
 }
+#endif
 
 public const char *
 magic_error(struct magic_set *ms)

@@ -35,12 +35,11 @@
 #include "file.h"
 
 #ifndef	lint
-FILE_RCSID("@(#)$File: ascmagic.c,v 1.104 2019/05/07 02:27:11 christos Exp $")
+FILE_RCSID("@(#)$File: ascmagic.c,v 1.107 2020/06/08 19:58:36 christos Exp $")
 #endif	/* lint */
 
 #include "magic.h"
 #include <string.h>
-#include <memory.h>
 #include <ctype.h>
 #include <stdlib.h>
 #ifdef HAVE_UNISTD_H
@@ -116,7 +115,6 @@ file_ascmagic_with_encoding(struct magic_set *ms,
 	int need_separator = 0;
 
 	const char *subtype = NULL;
-	const char *subtype_mime = NULL;
 
 	int has_escapes = 0;
 	int has_backspace = 0;
@@ -165,8 +163,11 @@ file_ascmagic_with_encoding(struct magic_set *ms,
 			goto done;
 		}
 	}
-	if ((ms->flags & (MAGIC_APPLE|MAGIC_EXTENSION)))
-		return 0;
+
+	if ((ms->flags & (MAGIC_APPLE|MAGIC_EXTENSION))) {
+		rv = 0;
+		goto done;
+	}
 
 	/* Now try to discover other details about the file. */
 	for (i = 0; i < ulen; i++) {
@@ -222,10 +223,6 @@ file_ascmagic_with_encoding(struct magic_set *ms,
 					goto done;
 				}
 				if (need_separator && file_separator(ms) == -1)
-					goto done;
-			}
-			if (subtype_mime) {
-				if (file_printf(ms, "%s", subtype_mime) == -1)
 					goto done;
 			} else {
 				if (file_printf(ms, "text/plain") == -1)
