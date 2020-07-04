@@ -1219,6 +1219,8 @@ static zend_always_inline zval *zend_try_array_init(zval *zv)
 	_(Z_EXPECTED_STRING_OR_LONG_OR_NULL, "of type string|int|null") \
 	_(Z_EXPECTED_CLASS_NAME_OR_OBJECT,	"a valid class name or object") \
 	_(Z_EXPECTED_CLASS_NAME_OR_OBJECT_OR_NULL, "a valid class name, object, or null") \
+	_(Z_EXPECTED_REF,               "a reference") \
+	_(Z_EXPECTED_REF_OR_NULL,       "a reference or null") \
 
 #define Z_EXPECTED_TYPE
 
@@ -1696,6 +1698,20 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_value_error(uint32_t arg_num
 #define Z_PARAM_STR_OR_LONG_OR_NULL(dest_str, dest_long, is_null) \
 	Z_PARAM_STR_OR_LONG_EX(dest_str, dest_long, is_null, 1);
 
+#define Z_PARAM_REF_EX(dest, is_null, allow_null) \
+	Z_PARAM_PROLOGUE(0, 0); \
+	if (UNEXPECTED(!zend_parse_arg_ref(_arg, &dest, &is_null, allow_null))) { \
+		_expected_type = allow_null ? Z_EXPECTED_REF_OR_NULL : Z_EXPECTED_REF; \
+		_error_code = ZPP_ERROR_WRONG_ARG; \
+		break; \
+	}
+
+#define Z_PARAM_REF(dest) \
+	Z_PARAM_REF_EX(dest, _dummy, 0);
+
+#define Z_PARAM_REF_OR_NULL(dest, is_null) \
+	Z_PARAM_REF_EX(dest, is_null, 1);
+
 /* End of new parameter parsing API */
 
 /* Inlined implementations shared by new and old parameter parsing APIs */
@@ -1965,6 +1981,23 @@ static zend_always_inline int zend_parse_arg_class_name_or_obj(
 		*destination = Z_OBJ_P(arg)->ce;
 	} else if (allow_null && EXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
 		*destination = NULL;
+	} else {
+		return 0;
+	}
+
+	return 1;
+}
+
+static zend_always_inline int zend_parse_arg_ref(zval *arg, zval **dest, zend_bool *is_null, int allow_null)
+{
+	if (allow_null) {
+		*is_null = 0;
+	}
+	if (EXPECTED(Z_TYPE_P(arg) == IS_REFERENCE)) {
+		*dest = arg;
+	} else if (allow_null && EXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
+		*is_null = 1;
+		*dest = NULL;
 	} else {
 		return 0;
 	}
