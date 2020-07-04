@@ -25,6 +25,9 @@ PHP                                                                        NEWS
 - FTP:
   . Fixed bug #55857 (ftp_size on large files). (cmb)
 
+- Mbstring:
+  . Fixed bug #79787 (mb_strimwidth does not trim string). (XXiang)
+
 - Standard:
   . Fixed bug #70362 (Can't copy() large 'data://' with open_basedir). (cmb)
 

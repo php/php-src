@@ -1734,13 +1734,17 @@ mbfl_strimwidth(
 		mbfl_convert_filter_flush(encoder);
 		if (pc.status != 0 && mkwidth > 0) {
 			pc.width += mkwidth;
-			while (n > 0) {
-				if ((*encoder->filter_function)(*p++, encoder) < 0) {
-					break;
+			if (n > 0) {
+				while (n > 0) {
+					if ((*encoder->filter_function)(*p++, encoder) < 0) {
+						break;
+					}
+					n--;
 				}
-				n--;
+				mbfl_convert_filter_flush(encoder);
+			} else if (pc.outwidth > pc.width) {
+				pc.status++;
 			}
-			mbfl_convert_filter_flush(encoder);
 			if (pc.status != 1) {
 				pc.status = 10;
 				pc.device.pos = pc.endpos;
