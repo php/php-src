@@ -28,15 +28,11 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include <stddef.h>
-#include <string.h>
+#include "libmbfl/config.h"
 
 #ifdef HAVE_STRINGS_H
-#include <strings.h>
+	/* For strcasecmp */
+	#include <strings.h>
 #endif
 
 #include "mbfl_encoding.h"

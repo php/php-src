@@ -28,15 +28,10 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include <stddef.h>
 #include <string.h>
 
 #include "zend.h"
-#include "mbfl_string.h"
 #include "mbfl_memory_device.h"
 
 /*

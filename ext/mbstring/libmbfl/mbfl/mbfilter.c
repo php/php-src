@@ -79,20 +79,12 @@
  *
  */
 
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-#include "zend_operators.h"
-
 #include <stddef.h>
 #include <string.h>
-#include <limits.h>
 
 #include "mbfilter.h"
 #include "mbfl_filter_output.h"
 #include "mbfilter_8bit.h"
-#include "mbfilter_pass.h"
 #include "mbfilter_wchar.h"
 #include "filters/mbfilter_ascii.h"
 #include "filters/mbfilter_base64.h"

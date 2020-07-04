@@ -27,10 +27,6 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "mbfilter.h"
 #include "mbfilter_euc_kr.h"
 #include "unicode_table_uhc.h"

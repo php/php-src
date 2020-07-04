@@ -28,10 +28,6 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "mbfl_convert.h"
 #include "mbfl_filter_output.h"
 

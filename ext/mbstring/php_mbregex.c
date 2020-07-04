@@ -14,9 +14,7 @@
    +----------------------------------------------------------------------+
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include "libmbfl/config.h"
 
 #include "php.h"
 #include "php_ini.h"

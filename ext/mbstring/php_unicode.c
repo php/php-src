@@ -28,12 +28,7 @@
 	all copies or substantial portions of the Software.
 */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "php.h"
-#include "php_ini.h"
 
 #ifdef HAVE_MBSTRING
 

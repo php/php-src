@@ -19,11 +19,6 @@
 #ifndef _MBSTRING_H
 #define _MBSTRING_H
 
-#ifdef COMPILE_DL_MBSTRING
-#undef HAVE_MBSTRING
-#define HAVE_MBSTRING 1
-#endif
-
 #include "php_version.h"
 #define PHP_MBSTRING_VERSION PHP_VERSION
 
@@ -43,7 +38,6 @@
 #	undef MBSTRING_API
 #	define MBSTRING_API /* nothing special */
 #endif
-
 
 #ifdef HAVE_MBSTRING
 

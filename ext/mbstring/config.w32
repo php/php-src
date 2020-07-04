@@ -10,8 +10,7 @@ if (PHP_MBSTRING != "no") {
 
 		STDOUT.WriteLine("Using bundled libmbfl...");
 
-		ADD_FLAG("CFLAGS_MBSTRING", "-Iext/mbstring/libmbfl -Iext/mbstring/libmbfl/mbfl \
-			/D HAVE_CONFIG_H \
+		ADD_FLAG("CFLAGS_MBSTRING", "-Iext/mbstring -Iext/mbstring/libmbfl -Iext/mbstring/libmbfl/mbfl \
 			/D HAVE_STRICMP /D MBFL_DLL_EXPORT=1 /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1")
 
 		FSO.CopyFile("ext\\mbstring\\libmbfl\\config.h.w32",
