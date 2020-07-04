@@ -209,6 +209,8 @@ ZEND_EXT_API void zend_jit_status(zval *ret)
 		add_assoc_long(&stats, "buffer_size", 0);
 		add_assoc_long(&stats, "buffer_free", 0);
 	}
+	add_assoc_long(&stats, "function_compilation_successes", JIT_G(function_compilation_successes));
+	add_assoc_long(&stats, "function_compilation_failures", JIT_G(function_compilation_failures));
 	add_assoc_zval(ret, "jit", &stats);
 }
 
@@ -1981,6 +1983,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 					op_array->function_name ? ZSTR_VAL(op_array->function_name) : "{main}",
 					ZSTR_VAL(op_array->filename), op_array->line_start);
 			}
+			JIT_G(function_compilation_failures)++;
 			return FAILURE;
 		}
 	}
@@ -2089,7 +2092,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						if (JIT_G(opt_flags) & (ZEND_JIT_REG_ALLOC_LOCAL|ZEND_JIT_REG_ALLOC_GLOBAL)) {
 							zend_arena_release(&CG(arena), checkpoint);
 						}
-						return SUCCESS;
+						goto jit_success;
 					}
 					zend_jit_label(&dasm_state, ssa->cfg.blocks_count + b);
 					zend_jit_prologue(&dasm_state);
@@ -2104,7 +2107,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 				if (JIT_G(opt_flags) & (ZEND_JIT_REG_ALLOC_LOCAL|ZEND_JIT_REG_ALLOC_GLOBAL)) {
 					zend_arena_release(&CG(arena), checkpoint);
 				}
-				return SUCCESS;
+				goto jit_success;
 			} else {
 				zend_jit_label(&dasm_state, ssa->cfg.blocks_count + b);
 				zend_jit_prologue(&dasm_state);
@@ -2974,7 +2977,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 					break;
 				case ZEND_NEW:
 					if (!zend_jit_handler(&dasm_state, opline, 1)) {
-						return 0;
+						goto jit_success;
 					}
 					if (opline->extended_value == 0 && (opline+1)->opcode == ZEND_DO_FCALL) {
 						zend_class_entry *ce = NULL;
@@ -3037,6 +3040,9 @@ done:
 	if (JIT_G(opt_flags) & (ZEND_JIT_REG_ALLOC_LOCAL|ZEND_JIT_REG_ALLOC_GLOBAL)) {
 		zend_arena_release(&CG(arena), checkpoint);
 	}
+
+jit_success:
+	JIT_G(function_compilation_successes)++;
 	return SUCCESS;
 
 jit_failure:
@@ -3046,6 +3052,8 @@ jit_failure:
 	if (JIT_G(opt_flags) & (ZEND_JIT_REG_ALLOC_LOCAL|ZEND_JIT_REG_ALLOC_GLOBAL)) {
 		zend_arena_release(&CG(arena), checkpoint);
 	}
+
+	JIT_G(function_compilation_failures)++;
 	return FAILURE;
 }
 

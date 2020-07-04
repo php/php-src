@@ -5595,6 +5595,8 @@ static void zend_jit_trace_init_caches(void)
 	memset(JIT_G(bad_root_cache_count), 0, sizeof(JIT_G(bad_root_cache_count)));
 	memset(JIT_G(bad_root_cache_stop), 0, sizeof(JIT_G(bad_root_cache_count)));
 	JIT_G(bad_root_slot) = 0;
+	JIT_G(function_compilation_successes) = 0;
+	JIT_G(function_compilation_failures) = 0;
 
 	memset(JIT_G(exit_counters), 0, sizeof(JIT_G(exit_counters)));
 }
