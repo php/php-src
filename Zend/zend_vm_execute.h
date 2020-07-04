@@ -2322,7 +2322,10 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_EXIT_SPEC_HANDLER
 		} while (0);
 		FREE_OP(opline->op1_type, opline->op1.var);
 	}
-	zend_throw_unwind_exit();
+
+	if (!EG(exception)) {
+		zend_throw_unwind_exit();
+	}
 	HANDLE_EXCEPTION();
 }
 
@@ -2476,7 +2479,6 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_dispatch_try
 {
 	/* May be NULL during generator closing (only finally blocks are executed) */
 	zend_object *ex = EG(exception);
-	zend_bool is_unwind_exit = ex && zend_is_unwind_exit(ex);
 
 	/* Walk try/catch/finally structures upwards, performing the necessary actions */
 	for (; try_catch_offset != (uint32_t) -1; try_catch_offset--) {
@@ -2489,7 +2491,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_dispatch_try
 			ZEND_VM_JMP_EX(&EX(func)->op_array.opcodes[try_catch->catch_op], 0);
 
 		} else if (op_num < try_catch->finally_op) {
-			if (is_unwind_exit) {
+			if (ex && zend_is_unwind_exit(ex)) {
 				/* Don't execute finally blocks on exit (for now) */
 				continue;
 			}

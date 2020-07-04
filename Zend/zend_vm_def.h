@@ -6893,7 +6893,10 @@ ZEND_VM_COLD_HANDLER(79, ZEND_EXIT, ANY, ANY)
 		} while (0);
 		FREE_OP1();
 	}
-	zend_throw_unwind_exit();
+
+	if (!EG(exception)) {
+		zend_throw_unwind_exit();
+	}
 	HANDLE_EXCEPTION();
 }
 
