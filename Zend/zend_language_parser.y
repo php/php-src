@@ -260,7 +260,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> identifier type_expr_without_static union_type_without_static
 %type <ast> inline_function union_type
 %type <ast> attributed_statement attributed_class_statement attributed_parameter
-%type <ast> attribute_decl attribute attributes
+%type <ast> attribute_decl attribute attributes halt_compiler_statement
 
 %type <num> returns_ref function fn is_reference is_variadic variable_modifiers
 %type <num> method_modifiers non_empty_member_modifiers member_modifier optional_visibility_modifier
@@ -344,6 +344,10 @@ top_statement:
 		statement							{ $$ = $1; }
 	|	attributed_statement					{ $$ = $1; }
 	|	attributes attributed_statement		{ $$ = zend_ast_with_attributes($2, $1); }
+	|	T_HALT_COMPILER ';'
+			{ $$ = zend_ast_create(ZEND_AST_HALT_COMPILER,
+			      zend_ast_create_zval_from_long(zend_get_scanned_file_offset()));
+			  zend_stop_lexing(); }
 	|	T_HALT_COMPILER '(' ')' ';'
 			{ $$ = zend_ast_create(ZEND_AST_HALT_COMPILER,
 			      zend_ast_create_zval_from_long(zend_get_scanned_file_offset()));
@@ -443,9 +447,16 @@ inner_statement:
 		statement { $$ = $1; }
 	|	attributed_statement					{ $$ = $1; }
 	|	attributes attributed_statement		{ $$ = zend_ast_with_attributes($2, $1); }
-	|	T_HALT_COMPILER '(' ')' ';'
-			{ $$ = NULL; zend_throw_exception(zend_ce_compile_error,
+	|	halt_compiler_statement { $$ = $1; zend_throw_exception(zend_ce_compile_error,
 			      "__HALT_COMPILER() can only be used from the outermost scope", 0); YYERROR; }
+;
+
+
+halt_compiler_statement:
+		T_HALT_COMPILER ';'
+			{ $$ = NULL; }
+	|	T_HALT_COMPILER '(' ')' ';'
+			{ $$ = NULL; }
 ;
 
 
