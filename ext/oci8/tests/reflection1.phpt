@@ -26,7 +26,6 @@ reflection::export(new reflectionfunction('oci_fetch_assoc'));
 reflection::export(new reflectionfunction('oci_fetch_array'));
 reflection::export(new reflectionfunction('oci_fetch_all'));
 reflection::export(new reflectionfunction('oci_free_statement'));
-reflection::export(new reflectionfunction('oci_internal_debug'));
 reflection::export(new reflectionfunction('oci_num_fields'));
 reflection::export(new reflectionfunction('oci_parse'));
 reflection::export(new reflectionfunction('oci_new_cursor'));
@@ -238,13 +237,6 @@ Function [ <internal%s> function oci_free_statement ] {
 
   - Parameters [1] {
     Parameter #0 [ <required> $statement_resource ]
-  }
-}
-
-Function [ <internal%s> function oci_internal_debug ] {
-
-  - Parameters [1] {
-    Parameter #0 [ <required> $mode ]
   }
 }
 
