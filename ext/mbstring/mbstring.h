@@ -39,15 +39,13 @@
 #	define MBSTRING_API /* nothing special */
 #endif
 
-#ifdef HAVE_MBSTRING
-
 #include "libmbfl/mbfl/mbfilter.h"
 #include "SAPI.h"
 
 #define PHP_MBSTRING_API 20021024
 
 extern zend_module_entry mbstring_module_entry;
-#define mbstring_module_ptr &mbstring_module_entry
+#define phpext_mbstring_ptr &mbstring_module_entry
 
 PHP_MINIT_FUNCTION(mbstring);
 PHP_MSHUTDOWN_FUNCTION(mbstring);
@@ -123,12 +121,4 @@ ZEND_END_MODULE_GLOBALS(mbstring)
 ZEND_TSRMLS_CACHE_EXTERN()
 #endif
 
-#else	/* HAVE_MBSTRING */
-
-#define mbstring_module_ptr NULL
-
-#endif	/* HAVE_MBSTRING */
-
-#define phpext_mbstring_ptr mbstring_module_ptr
-
-#endif		/* _MBSTRING_H */
+#endif /* _MBSTRING_H */

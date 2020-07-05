@@ -37,8 +37,6 @@
 #include "mb_gpc.h"
 /* }}} */
 
-#ifdef HAVE_MBSTRING
-
 ZEND_EXTERN_MODULE_GLOBALS(mbstring)
 
 /* {{{ MBSTRING_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
@@ -373,5 +371,3 @@ SAPI_POST_HANDLER_FUNC(php_mb_post_handler)
 	}
 }
 /* }}} */
-
-#endif /* HAVE_MBSTRING */

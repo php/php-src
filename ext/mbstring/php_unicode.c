@@ -30,8 +30,6 @@
 
 #include "php.h"
 
-#ifdef HAVE_MBSTRING
-
 /* include case folding data generated from the official UnicodeData.txt file */
 #include "mbstring.h"
 #include "php_unicode.h"
@@ -440,6 +438,3 @@ MBSTRING_API char *php_unicode_convert_case(
 	*ret_len = result.len;
 	return (char *) result.val;
 }
-
-
-#endif /* HAVE_MBSTRING */

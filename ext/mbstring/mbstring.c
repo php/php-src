@@ -74,8 +74,6 @@ onig_match(re, str, end, at, region, option)
 #include "mbstring_arginfo.h"
 /* }}} */
 
-#ifdef HAVE_MBSTRING
-
 /* {{{ prototypes */
 ZEND_DECLARE_MODULE_GLOBALS(mbstring)
 
@@ -4532,5 +4530,3 @@ static void php_mb_gpc_set_input_encoding(const zend_encoding *encoding) /* {{{ 
 	MBSTRG(http_input_identify) = (const mbfl_encoding*)encoding;
 }
 /* }}} */
-
-#endif	/* HAVE_MBSTRING */
