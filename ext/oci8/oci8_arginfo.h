@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 9b7f698c1f9f099a392760d85d2bb85e17846f13 */
+ * Stub hash: 157a4128645b816f23fb0bcbbb5860362f446cb3 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_define_by_name, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, statement_resource)
@@ -187,12 +187,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_field_is_null, 0, 2, _IS_BOO
 ZEND_END_ARG_INFO()
 
 #define arginfo_ocicolumnisnull arginfo_oci_field_is_null
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_internal_debug, 0, 1, IS_VOID, 0)
-	ZEND_ARG_TYPE_INFO(0, mode, _IS_BOOL, 0)
-ZEND_END_ARG_INFO()
-
-#define arginfo_ociinternaldebug arginfo_oci_internal_debug
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_execute, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, statement_resource)
@@ -581,7 +575,6 @@ ZEND_FUNCTION(oci_field_precision);
 ZEND_FUNCTION(oci_field_type);
 ZEND_FUNCTION(oci_field_type_raw);
 ZEND_FUNCTION(oci_field_is_null);
-ZEND_FUNCTION(oci_internal_debug);
 ZEND_FUNCTION(oci_execute);
 ZEND_FUNCTION(oci_cancel);
 ZEND_FUNCTION(oci_fetch);
@@ -681,15 +674,13 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_DEP_FALIAS(ocicolumntyperaw, oci_field_type_raw, arginfo_ocicolumntyperaw)
 	ZEND_FE(oci_field_is_null, arginfo_oci_field_is_null)
 	ZEND_DEP_FALIAS(ocicolumnisnull, oci_field_is_null, arginfo_ocicolumnisnull)
-	ZEND_FE(oci_internal_debug, arginfo_oci_internal_debug)
-	ZEND_DEP_FALIAS(ociinternaldebug, oci_internal_debug, arginfo_ociinternaldebug)
 	ZEND_FE(oci_execute, arginfo_oci_execute)
 	ZEND_DEP_FALIAS(ociexecute, oci_execute, arginfo_ociexecute)
 	ZEND_FE(oci_cancel, arginfo_oci_cancel)
 	ZEND_DEP_FALIAS(ocicancel, oci_cancel, arginfo_ocicancel)
 	ZEND_FE(oci_fetch, arginfo_oci_fetch)
 	ZEND_DEP_FALIAS(ocifetch, oci_fetch, arginfo_ocifetch)
-	ZEND_FE(ocifetchinto, arginfo_ocifetchinto)
+	ZEND_DEP_FE(ocifetchinto, arginfo_ocifetchinto)
 	ZEND_FE(oci_fetch_all, arginfo_oci_fetch_all)
 	ZEND_DEP_FALIAS(ocifetchstatement, oci_fetch_all, arginfo_ocifetchstatement)
 	ZEND_FE(oci_fetch_object, arginfo_oci_fetch_object)

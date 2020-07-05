@@ -226,14 +226,6 @@ function oci_field_is_null($statement_resource, string|int $column_number_or_nam
  */
 function ocicolumnisnull($statement_resource, string|int $column_number_or_name): bool {}
 
-function oci_internal_debug(bool $mode): void {}
-
-/**
- * @alias oci_internal_debug
- * @deprecated
- */
-function ociinternaldebug(bool $mode): void {}
-
 /**
  * @param resource $statement_resource
  */
@@ -273,6 +265,7 @@ function ocifetch($statement_resource): bool {}
 /**
  * @param resource $statement_resource
  * @param array $result
+ * @deprecated
  */
 function ocifetchinto($statement_resource, &$result, int $mode = OCI_NUM): int|false {}
 
