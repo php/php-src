@@ -362,6 +362,9 @@ top_statement:
 	|	T_USE use_declarations ';'					{ $$ = $2; $$->attr = ZEND_SYMBOL_CLASS; }
 	|	T_USE use_type use_declarations ';'			{ $$ = $3; $$->attr = $2; }
 	|	T_CONST const_list ';'						{ $$ = $2; }
+	|	T_DECLARE const_list ';'
+			{ if (!zend_handle_encoding_declaration($2)) { YYERROR; };
+			  $$ = zend_ast_create(ZEND_AST_DECLARE, $2, NULL); }
 ;
 
 use_type:
