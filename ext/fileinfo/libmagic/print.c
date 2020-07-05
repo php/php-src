@@ -44,8 +44,6 @@ FILE_RCSID("@(#)$File: print.c,v 1.88 2020/05/09 18:57:15 christos Exp $")
 #endif
 #include <time.h>
 
-#define SZOF(a)	(sizeof(a) / sizeof(a[0]))
-
 #include "cdf.h"
 
 #ifndef COMPILE_ONLY

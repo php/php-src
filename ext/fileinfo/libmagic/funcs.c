@@ -227,6 +227,8 @@ file_badread(struct magic_set *ms)
 	file_error(ms, errno, "error reading");
 }
 
+#ifndef COMPILE_ONLY
+
 protected int
 file_separator(struct magic_set *ms)
 {
@@ -465,6 +467,7 @@ simple:
 
 	return m;
 }
+#endif
 
 protected int
 file_reset(struct magic_set *ms, int checkloaded)

@@ -24,7 +24,7 @@ array(%d) {
   ["%s/resources/test.awk"]=>
   string(10) "text/plain"
   ["%s/resources/test.bmp"]=>
-  string(9) "image/bmp"
+  string(14) "image/x-ms-bmp"
   ["%s/resources/test.gif"]=>
   string(9) "image/gif"
   ["%s/resources/test.jpg"]=>

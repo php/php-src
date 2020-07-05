@@ -53,7 +53,9 @@ FILE_RCSID("@(#)$File: apprentice.c,v 1.297 2020/05/09 18:57:15 christos Exp $")
 #include "win32/unistd.h"
 #define strtoull _strtoui64
 #else
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #endif
 #include <string.h>
 #include <assert.h>
@@ -149,10 +151,7 @@ private uint16_t swap2(uint16_t);
 private uint32_t swap4(uint32_t);
 private uint64_t swap8(uint64_t);
 private char *mkdbname(struct magic_set *, const char *, int);
-private struct magic_map *apprentice_buf(struct magic_set *, struct magic *,
-    size_t);
 private struct magic_map *apprentice_map(struct magic_set *, const char *);
-private int check_buffer(struct magic_set *, struct magic_map *, const char *);
 private void apprentice_unmap(struct magic_map *);
 private int apprentice_compile(struct magic_set *, struct magic_map *,
     const char *);
@@ -428,8 +427,10 @@ private int
 apprentice_1(struct magic_set *ms, const char *fn, int action)
 {
 	struct magic_map *map;
+#ifndef COMPILE_ONLY
 	struct mlist *ml;
 	size_t i;
+#endif
 
 	if (magicsize != FILE_MAGICSIZE) {
 		file_error(ms, 0, "magic element size %lu != %lu",
@@ -608,51 +609,6 @@ mlist_free(struct mlist *mlist)
 	}
 	mlist_free_one(mlist);
 }
-
-#ifndef COMPILE_ONLY
-/* void **bufs: an array of compiled magic files */
-protected int
-buffer_apprentice(struct magic_set *ms, struct magic **bufs,
-    size_t *sizes, size_t nbufs)
-{
-	size_t i, j;
-	struct mlist *ml;
-	struct magic_map *map;
-
-	if (nbufs == 0)
-		return -1;
-
-	(void)file_reset(ms, 0);
-
-	init_file_tables();
-
-	for (i = 0; i < MAGIC_SETS; i++) {
-		mlist_free(ms->mlist[i]);
-		if ((ms->mlist[i] = mlist_alloc()) == NULL) {
-			file_oomem(ms, sizeof(*ms->mlist[i]));
-			goto fail;
-		}
-	}
-
-	for (i = 0; i < nbufs; i++) {
-		map = apprentice_buf(ms, bufs[i], sizes[i]);
-		if (map == NULL)
-			goto fail;
-
-		for (j = 0; j < MAGIC_SETS; j++) {
-			if (add_mlist(ms->mlist[j], map, j) == -1) {
-				file_oomem(ms, sizeof(*ml));
-				goto fail;
-			}
-		}
-	}
-
-	return 0;
-fail:
-	mlist_free_all(ms);
-	return -1;
-}
-#endif
 
 /* const char *fn: list of magic files and directories */
 protected int
@@ -2251,6 +2207,11 @@ parse(struct magic_set *ms, struct magic_entry *me, const char *line,
 		if (check_format(ms, m) == -1)
 			return -1;
 	}
+#ifndef COMPILE_ONLY
+	if (action == FILE_CHECK) {
+		file_mdump(m);
+	}
+#endif
 	m->mimetype[0] = '\0';		/* initialise MIME type to none */
 	return 0;
 }
@@ -3056,28 +3017,6 @@ eatsize(const char **p)
 }
 
 /*
- * handle a buffer containing a compiled file.
- */
-private struct magic_map *
-apprentice_buf(struct magic_set *ms, struct magic *buf, size_t len)
-{
-	struct magic_map *map;
-
-	if ((map = CAST(struct magic_map *, calloc(1, sizeof(*map)))) == NULL) {
-		file_oomem(ms, sizeof(*map));
-		return NULL;
-	}
-	map->len = len;
-	map->p = buf;
-	map->type = MAP_TYPE_USER;
-	if (check_buffer(ms, map, "buffer") != 0) {
-		apprentice_unmap(map);
-		return NULL;
-	}
-	return map;
-}
-
-/*
  * handle a compiled file.
  */
 
@@ -3222,62 +3161,6 @@ error:
 		efree(dbname);
 	}
 	return NULL;
-}
-
-private int
-check_buffer(struct magic_set *ms, struct magic_map *map, const char *dbname)
-{
-	uint32_t *ptr;
-	uint32_t entries, nentries;
-	uint32_t version;
-	int i, needsbyteswap;
-
-	ptr = CAST(uint32_t *, map->p);
-	if (*ptr != MAGICNO) {
-		if (swap4(*ptr) != MAGICNO) {
-			file_error(ms, 0, "bad magic in `%s'", dbname);
-			return -1;
-		}
-		needsbyteswap = 1;
-	} else
-		needsbyteswap = 0;
-	if (needsbyteswap)
-		version = swap4(ptr[1]);
-	else
-		version = ptr[1];
-	if (version != VERSIONNO) {
-		file_error(ms, 0, "File %s supports only version %d magic "
-		    "files. `%s' is version %d", FILE_VERSION_MAJOR,
-		    VERSIONNO, dbname, version);
-		return -1;
-	}
-	entries = CAST(uint32_t, map->len / sizeof(struct magic));
-	if ((entries * sizeof(struct magic)) != map->len) {
-		file_error(ms, 0, "Size of `%s' %" SIZE_T_FORMAT "u is not "
-		    "a multiple of %" SIZE_T_FORMAT "u",
-		    dbname, map->len, sizeof(struct magic));
-		return -1;
-	}
-	map->magic[0] = CAST(struct magic *, map->p) + 1;
-	nentries = 0;
-	for (i = 0; i < MAGIC_SETS; i++) {
-		if (needsbyteswap)
-			map->nmagic[i] = swap4(ptr[i + 2]);
-		else
-			map->nmagic[i] = ptr[i + 2];
-		if (i != MAGIC_SETS - 1)
-			map->magic[i + 1] = map->magic[i] + map->nmagic[i];
-		nentries += map->nmagic[i];
-	}
-	if (entries != nentries + 1) {
-		file_error(ms, 0, "Inconsistent entries in `%s' %u != %u",
-		    dbname, entries, nentries + 1);
-		return -1;
-	}
-	if (needsbyteswap)
-		for (i = 0; i < MAGIC_SETS; i++)
-			byteswap(map->magic[i], map->nmagic[i]);
-	return 0;
 }
 
 /*
