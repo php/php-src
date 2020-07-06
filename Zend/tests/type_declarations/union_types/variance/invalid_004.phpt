@@ -10,4 +10,4 @@ class B extends A {
 }
 ?>
 --EXPECTF--
-Fatal error: Type of B::$prop must be X|B (as in class A) in %s on line %d
+Fatal error: Property B::$prop must be of type X|B to be compatible with overridden property A::$prop in %s on line %d

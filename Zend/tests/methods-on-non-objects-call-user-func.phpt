@@ -1,5 +1,5 @@
 --TEST--
-call_user_func() in combination with "Call to a member function method() on a non-object"
+call_user_func() in combination with "Call to method method() on a non-object"
 --FILE--
 <?php
 $comparator = null;

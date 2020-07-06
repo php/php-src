@@ -10,4 +10,4 @@ switch (0) {
 }
 ?>
 --EXPECTF--
-Fatal error: 'goto' into loop or switch statement is disallowed in %sjump10.php on line 2
+Fatal error: goto into a loop or switch statement is disallowed in %s on line %d

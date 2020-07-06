@@ -20,4 +20,4 @@ class fail extends pass {
 echo "Done\n"; // Shouldn't be displayed
 ?>
 --EXPECTF--
-Fatal error: Cannot override final method pass::show() in %s on line 12
+Fatal error: Method fail::show() cannot override final method pass::show() in %s on line %d

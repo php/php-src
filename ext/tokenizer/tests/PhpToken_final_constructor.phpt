@@ -12,4 +12,4 @@ class MyPhpToken extends PhpToken {
 
 ?>
 --EXPECTF--
-Fatal error: Cannot override final method PhpToken::__construct() in %s on line %d
+Fatal error: Method MyPhpToken::__construct() cannot override final method PhpToken::__construct() in %s on line %d

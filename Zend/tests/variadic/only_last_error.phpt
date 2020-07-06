@@ -7,4 +7,4 @@ function test($foo, ...$bar, $baz) {}
 
 ?>
 --EXPECTF--
-Fatal error: Only the last parameter can be variadic in %s on line %d
+Fatal error: test(): Parameter #3 ($baz) cannot be variadic in %s on line %d

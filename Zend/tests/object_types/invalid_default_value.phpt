@@ -7,4 +7,4 @@ function test(object $obj = 42) { }
 
 ?>
 --EXPECTF--
-Fatal error: Cannot use int as default value for parameter $obj of type object in %s on line %d
+Fatal error: test(): Parameter #1 ($obj) of type object cannot have a default value of type int in %s on line %d

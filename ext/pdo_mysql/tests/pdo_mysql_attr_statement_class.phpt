@@ -149,7 +149,7 @@ array(1) {
   }
 }
 
-Fatal error: Uncaught Error: Cannot instantiate abstract class mystatement6 in %s:%d
+Fatal error: Uncaught Error: Abstract class mystatement6 cannot be instantiated in %s:%d
 Stack trace:
 #0 %s(%d): PDO->query('SELECT id, labe...')
 #1 {main}

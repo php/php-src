@@ -5802,7 +5802,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 			HANDLE_EXCEPTION();
 		}
 		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
+			zend_throw_error(NULL, "Private method %s::__construct() cannot be called from the %s%s", ZSTR_VAL(ce->name),
+				Z_OBJ(EX(This))->ce ? "scope of class " : "global scope",
+				Z_OBJ(EX(This))->ce ? ZSTR_VAL(Z_OBJ(EX(This))->ce->name) : ""
+			);
 			HANDLE_EXCEPTION();
 		}
 		fbc = ce->constructor;
@@ -5946,7 +5949,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_CONS
 			c = Z_PTR_P(zv);
 			scope = EX(func)->op_array.scope;
 			if (!zend_verify_const_access(c, scope)) {
-				zend_throw_error(NULL, "Cannot access %s constant %s::%s", zend_visibility_string(Z_ACCESS_FLAGS(c->value)), ZSTR_VAL(ce->name), Z_STRVAL_P(RT_CONSTANT(opline, opline->op2)));
+				zend_throw_error(NULL, "%s constant %s::%s cannot be accessed from the %s%s",
+					zend_visibility_string_capitalized(Z_ACCESS_FLAGS(c->value)), ZSTR_VAL(ce->name), Z_STRVAL_P(RT_CONSTANT(opline, opline->op2)),
+					scope ? "scope of class " : "global scope",
+					scope ? ZSTR_VAL(scope->name) : ""
+				);
+
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				HANDLE_EXCEPTION();
 			}
@@ -6266,7 +6274,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DECLARE_CLASS_DELAYED_SPEC_CON
 			ce = Z_CE_P(zv);
 			zv = zend_hash_set_bucket_key(EG(class_table), (Bucket*)zv, Z_STR_P(lcname));
 			if (UNEXPECTED(!zv)) {
-				zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(ce->name));
+				zend_error_noreturn(E_COMPILE_ERROR, "%s %s cannot be declared, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(ce->name));
 			} else {
 				if (zend_do_link_class(ce, Z_STR_P(RT_CONSTANT(opline, opline->op2))) == FAILURE) {
 					/* Reload bucket pointer, the hash table may have been reallocated */
@@ -8014,7 +8022,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 			HANDLE_EXCEPTION();
 		}
 		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
+			zend_throw_error(NULL, "Private method %s::__construct() cannot be called from the %s%s", ZSTR_VAL(ce->name),
+				Z_OBJ(EX(This))->ce ? "scope of class " : "global scope",
+				Z_OBJ(EX(This))->ce ? ZSTR_VAL(Z_OBJ(EX(This))->ce->name) : ""
+			);
 			HANDLE_EXCEPTION();
 		}
 		fbc = ce->constructor;
@@ -8755,7 +8766,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 			HANDLE_EXCEPTION();
 		}
 		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
+			zend_throw_error(NULL, "Private method %s::__construct() cannot be called from the %s%s", ZSTR_VAL(ce->name),
+				Z_OBJ(EX(This))->ce ? "scope of class " : "global scope",
+				Z_OBJ(EX(This))->ce ? ZSTR_VAL(Z_OBJ(EX(This))->ce->name) : ""
+			);
 			HANDLE_EXCEPTION();
 		}
 		fbc = ce->constructor;
@@ -10283,7 +10297,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 			HANDLE_EXCEPTION();
 		}
 		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
+			zend_throw_error(NULL, "Private method %s::__construct() cannot be called from the %s%s", ZSTR_VAL(ce->name),
+				Z_OBJ(EX(This))->ce ? "scope of class " : "global scope",
+				Z_OBJ(EX(This))->ce ? ZSTR_VAL(Z_OBJ(EX(This))->ce->name) : ""
+			);
 			HANDLE_EXCEPTION();
 		}
 		fbc = ce->constructor;
@@ -22886,7 +22903,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 			HANDLE_EXCEPTION();
 		}
 		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
+			zend_throw_error(NULL, "Private method %s::__construct() cannot be called from the %s%s", ZSTR_VAL(ce->name),
+				Z_OBJ(EX(This))->ce ? "scope of class " : "global scope",
+				Z_OBJ(EX(This))->ce ? ZSTR_VAL(Z_OBJ(EX(This))->ce->name) : ""
+			);
 			HANDLE_EXCEPTION();
 		}
 		fbc = ce->constructor;
@@ -22969,7 +22989,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_VAR_
 			c = Z_PTR_P(zv);
 			scope = EX(func)->op_array.scope;
 			if (!zend_verify_const_access(c, scope)) {
-				zend_throw_error(NULL, "Cannot access %s constant %s::%s", zend_visibility_string(Z_ACCESS_FLAGS(c->value)), ZSTR_VAL(ce->name), Z_STRVAL_P(RT_CONSTANT(opline, opline->op2)));
+				zend_throw_error(NULL, "%s constant %s::%s cannot be accessed from the %s%s",
+					zend_visibility_string_capitalized(Z_ACCESS_FLAGS(c->value)), ZSTR_VAL(ce->name), Z_STRVAL_P(RT_CONSTANT(opline, opline->op2)),
+					scope ? "scope of class " : "global scope",
+					scope ? ZSTR_VAL(scope->name) : ""
+				);
+
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				HANDLE_EXCEPTION();
 			}
@@ -25108,7 +25133,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 			HANDLE_EXCEPTION();
 		}
 		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
+			zend_throw_error(NULL, "Private method %s::__construct() cannot be called from the %s%s", ZSTR_VAL(ce->name),
+				Z_OBJ(EX(This))->ce ? "scope of class " : "global scope",
+				Z_OBJ(EX(This))->ce ? ZSTR_VAL(Z_OBJ(EX(This))->ce->name) : ""
+			);
 			HANDLE_EXCEPTION();
 		}
 		fbc = ce->constructor;
@@ -26402,7 +26430,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 			HANDLE_EXCEPTION();
 		}
 		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
+			zend_throw_error(NULL, "Private method %s::__construct() cannot be called from the %s%s", ZSTR_VAL(ce->name),
+				Z_OBJ(EX(This))->ce ? "scope of class " : "global scope",
+				Z_OBJ(EX(This))->ce ? ZSTR_VAL(Z_OBJ(EX(This))->ce->name) : ""
+			);
 			HANDLE_EXCEPTION();
 		}
 		fbc = ce->constructor;
@@ -28669,7 +28700,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 			HANDLE_EXCEPTION();
 		}
 		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
+			zend_throw_error(NULL, "Private method %s::__construct() cannot be called from the %s%s", ZSTR_VAL(ce->name),
+				Z_OBJ(EX(This))->ce ? "scope of class " : "global scope",
+				Z_OBJ(EX(This))->ce ? ZSTR_VAL(Z_OBJ(EX(This))->ce->name) : ""
+			);
 			HANDLE_EXCEPTION();
 		}
 		fbc = ce->constructor;
@@ -30852,7 +30886,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 			HANDLE_EXCEPTION();
 		}
 		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
+			zend_throw_error(NULL, "Private method %s::__construct() cannot be called from the %s%s", ZSTR_VAL(ce->name),
+				Z_OBJ(EX(This))->ce ? "scope of class " : "global scope",
+				Z_OBJ(EX(This))->ce ? ZSTR_VAL(Z_OBJ(EX(This))->ce->name) : ""
+			);
 			HANDLE_EXCEPTION();
 		}
 		fbc = ce->constructor;
@@ -30951,7 +30988,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_UNUS
 			c = Z_PTR_P(zv);
 			scope = EX(func)->op_array.scope;
 			if (!zend_verify_const_access(c, scope)) {
-				zend_throw_error(NULL, "Cannot access %s constant %s::%s", zend_visibility_string(Z_ACCESS_FLAGS(c->value)), ZSTR_VAL(ce->name), Z_STRVAL_P(RT_CONSTANT(opline, opline->op2)));
+				zend_throw_error(NULL, "%s constant %s::%s cannot be accessed from the %s%s",
+					zend_visibility_string_capitalized(Z_ACCESS_FLAGS(c->value)), ZSTR_VAL(ce->name), Z_STRVAL_P(RT_CONSTANT(opline, opline->op2)),
+					scope ? "scope of class " : "global scope",
+					scope ? ZSTR_VAL(scope->name) : ""
+				);
+
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				HANDLE_EXCEPTION();
 			}
@@ -32716,7 +32758,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 			HANDLE_EXCEPTION();
 		}
 		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
+			zend_throw_error(NULL, "Private method %s::__construct() cannot be called from the %s%s", ZSTR_VAL(ce->name),
+				Z_OBJ(EX(This))->ce ? "scope of class " : "global scope",
+				Z_OBJ(EX(This))->ce ? ZSTR_VAL(Z_OBJ(EX(This))->ce->name) : ""
+			);
 			HANDLE_EXCEPTION();
 		}
 		fbc = ce->constructor;
@@ -33130,7 +33175,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 			HANDLE_EXCEPTION();
 		}
 		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
+			zend_throw_error(NULL, "Private method %s::__construct() cannot be called from the %s%s", ZSTR_VAL(ce->name),
+				Z_OBJ(EX(This))->ce ? "scope of class " : "global scope",
+				Z_OBJ(EX(This))->ce ? ZSTR_VAL(Z_OBJ(EX(This))->ce->name) : ""
+			);
 			HANDLE_EXCEPTION();
 		}
 		fbc = ce->constructor;
@@ -35112,7 +35160,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 			HANDLE_EXCEPTION();
 		}
 		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
+			zend_throw_error(NULL, "Private method %s::__construct() cannot be called from the %s%s", ZSTR_VAL(ce->name),
+				Z_OBJ(EX(This))->ce ? "scope of class " : "global scope",
+				Z_OBJ(EX(This))->ce ? ZSTR_VAL(Z_OBJ(EX(This))->ce->name) : ""
+			);
 			HANDLE_EXCEPTION();
 		}
 		fbc = ce->constructor;

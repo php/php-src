@@ -12,4 +12,4 @@ try {
 
 ?>
 --EXPECT--
-Cannot instantiate abstract class RecursiveFilterIterator
+Abstract class RecursiveFilterIterator cannot be instantiated

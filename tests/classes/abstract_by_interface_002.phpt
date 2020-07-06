@@ -27,7 +27,7 @@ class Fails extends Root implements MyInterface {
 ?>
 ===DONE===
 --EXPECTF--
-object(Leaf)#%d (0) {
+object(Leaf)#1 (0) {
 }
 
-Fatal error: Class Fails contains 1 abstract method and must therefore be declared abstract or implement the remaining methods (MyInterface::MyInterfaceFunc) in %sabstract_by_interface_002.php on line %d
+Fatal error: Class Fails contains 1 abstract method and must therefore be declared abstract or implement the remaining methods (MyInterface::MyInterfaceFunc) in %s on line %d

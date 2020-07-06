@@ -12,4 +12,4 @@ function foo () {
 foo();
 ?>
 --EXPECTF--
-Fatal error: 'break' not in the 'loop' or 'switch' context in %stry_finally_011.php on line %d
+Fatal error: break statement can only be used inside a loop or a switch statement in %s on line %d

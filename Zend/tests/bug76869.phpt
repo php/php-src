@@ -20,4 +20,4 @@ try {
 }
 ?>
 --EXPECT--
-Exception: Call to protected method B::f() from global scope
+Exception: Protected method B::f() cannot be called from the global scope

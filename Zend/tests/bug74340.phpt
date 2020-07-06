@@ -24,7 +24,7 @@ $test->test;
 --EXPECTF--
 __get test
 
-Warning: Undefined property: Test::$test in %s on line %d
+Warning: Undefined property Test::$test in %s on line %d
 __get test2
 
-Warning: Undefined property: Test::$test in %s on line %d
+Warning: Undefined property Test::$test in %s on line %d

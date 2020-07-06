@@ -4,5 +4,7 @@ void return type: not valid as a parameter type
 <?php
 
 function foobar(void $a) {}
+
+?>
 --EXPECTF--
-Fatal error: void cannot be used as a parameter type in %s on line %d
+Fatal error: foobar(): Parameter #1 ($a) cannot be of type void in %s on line %d

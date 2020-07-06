@@ -15,4 +15,4 @@ class Bar extends Foo
 
 ?>
 --EXPECTF--
-Fatal error: Type of Bar::$property1 must be int (as in class Foo) in %s on line %d
+Fatal error: Property Bar::$property1 must be of type int to be compatible with overridden property Foo::$property1 in %s on line %d

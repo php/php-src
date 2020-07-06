@@ -20,4 +20,4 @@ var_dump($x->test());
 
 ?>
 --EXPECTF--
-Fatal error: Cannot override final method baz::test() in %s on line %d
+Fatal error: Method foo::test() cannot override final method baz::test() in %s on line %d

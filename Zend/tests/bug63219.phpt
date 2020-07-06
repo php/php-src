@@ -15,4 +15,4 @@ class C {
 echo "okey";
 ?>
 --EXPECTF--
-Fatal error: Could not find trait Typo in %sbug63219.php on line %d
+Fatal error: Trait Typo cannot be found in %s on line %d

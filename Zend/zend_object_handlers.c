@@ -249,21 +249,25 @@ static zend_never_inline zend_property_info *zend_get_parent_private_property(ze
 }
 /* }}} */
 
-static ZEND_COLD zend_never_inline void zend_bad_property_access(zend_property_info *property_info, zend_class_entry *ce, zend_string *member) /* {{{ */
+static ZEND_COLD zend_never_inline void zend_bad_property_access(zend_property_info *property_info, zend_class_entry *ce, zend_string *member, zend_class_entry *scope) /* {{{ */
 {
-	zend_throw_error(NULL, "Cannot access %s property %s::$%s", zend_visibility_string(property_info->flags), ZSTR_VAL(ce->name), ZSTR_VAL(member));
+	zend_throw_error(NULL, "%s property %s::$%s cannot be accessed from the %s%s", zend_visibility_string_capitalized(property_info->flags),
+		ZSTR_VAL(ce->name), ZSTR_VAL(member),
+		scope ? "scope of class " : "global scope",
+		scope ? ZSTR_VAL(scope->name) : ""
+	);
 }
 /* }}} */
 
 static ZEND_COLD zend_never_inline void zend_bad_property_name(void) /* {{{ */
 {
-	zend_throw_error(NULL, "Cannot access property starting with \"\\0\"");
+	zend_throw_error(NULL, "Property starting with \"\\0\" cannot be accessed");
 }
 /* }}} */
 
 static ZEND_COLD zend_never_inline void zend_forbidden_dynamic_property(
 		zend_class_entry *ce, zend_string *member) {
-	zend_throw_error(NULL, "Cannot create dynamic property %s::$%s",
+	zend_throw_error(NULL, "Dynamic property %s::$%s cannot be created",
 		ZSTR_VAL(ce->name), ZSTR_VAL(member));
 }
 
@@ -329,7 +333,7 @@ dynamic:
 wrong:
 					/* Information was available, but we were denied access.  Error out. */
 					if (!silent) {
-						zend_bad_property_access(property_info, ce, member);
+						zend_bad_property_access(property_info, ce, member, scope);
 					}
 					return ZEND_WRONG_PROPERTY_OFFSET;
 				}
@@ -345,7 +349,7 @@ wrong:
 found:
 	if (UNEXPECTED(flags & ZEND_ACC_STATIC)) {
 		if (!silent) {
-			zend_error(E_NOTICE, "Accessing static property %s::$%s as non static", ZSTR_VAL(ce->name), ZSTR_VAL(member));
+			zend_error(E_NOTICE, "Accessing static property %s::$%s as non-static", ZSTR_VAL(ce->name), ZSTR_VAL(member));
 		}
 		return ZEND_DYNAMIC_PROPERTY_OFFSET;
 	}
@@ -420,7 +424,7 @@ dynamic:
 wrong:
 					/* Information was available, but we were denied access.  Error out. */
 					if (!silent) {
-						zend_bad_property_access(property_info, ce, member);
+						zend_bad_property_access(property_info, ce, member, scope);
 					}
 					return ZEND_WRONG_PROPERTY_INFO;
 				}
@@ -436,7 +440,7 @@ wrong:
 found:
 	if (UNEXPECTED(flags & ZEND_ACC_STATIC)) {
 		if (!silent) {
-			zend_error(E_NOTICE, "Accessing static property %s::$%s as non static", ZSTR_VAL(ce->name), ZSTR_VAL(member));
+			zend_error(E_NOTICE, "Accessing static property %s::$%s as non-static", ZSTR_VAL(ce->name), ZSTR_VAL(member));
 		}
 	}
 	return property_info;
@@ -679,7 +683,7 @@ uninit_error:
 				ZSTR_VAL(prop_info->ce->name),
 				ZSTR_VAL(name));
 		} else {
-			zend_error(E_WARNING, "Undefined property: %s::$%s", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
+			zend_error(E_WARNING, "Undefined property %s::$%s", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
 		}
 	}
 	retval = &EG(uninitialized_zval);
@@ -928,7 +932,7 @@ ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *zobj, zend_string *nam
 						retval = &EG(error_zval);
 					} else {
 						ZVAL_NULL(retval);
-						zend_error(E_WARNING, "Undefined property: %s::$%s", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
+						zend_error(E_WARNING, "Undefined property %s::$%s", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
 					}
 				}
 			} else {
@@ -961,7 +965,7 @@ ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *zobj, zend_string *nam
 			/* Notice is thrown after creation of the property, to avoid EG(std_property_info)
 			 * being overwritten in an error handler. */
 			if (UNEXPECTED(type == BP_VAR_RW || type == BP_VAR_R)) {
-				zend_error(E_WARNING, "Undefined property: %s::$%s", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
+				zend_error(E_WARNING, "Undefined property %s::$%s", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
 			}
 		}
 	} else if (zobj->ce->__get == NULL) {
@@ -1161,9 +1165,9 @@ static zend_always_inline zend_function *zend_get_user_call_function(zend_class_
 
 static ZEND_COLD zend_never_inline void zend_bad_method_call(zend_function *fbc, zend_string *method_name, zend_class_entry *scope) /* {{{ */
 {
-	zend_throw_error(NULL, "Call to %s method %s::%s() from %s%s",
-		zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), ZSTR_VAL(method_name),
-		scope ? "scope " : "global scope",
+	zend_throw_error(NULL, "%s method %s::%s() cannot be called from the %s%s",
+		zend_visibility_string_capitalized(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), ZSTR_VAL(method_name),
+		scope ? "scope of class " : "global scope",
 		scope ? ZSTR_VAL(scope->name) : ""
 	);
 }
@@ -1171,7 +1175,7 @@ static ZEND_COLD zend_never_inline void zend_bad_method_call(zend_function *fbc,
 
 static ZEND_COLD zend_never_inline void zend_abstract_method_call(zend_function *fbc) /* {{{ */
 {
-	zend_throw_error(NULL, "Cannot call abstract method %s::%s()",
+	zend_throw_error(NULL, "Abstract method %s::%s() cannot be called",
 		ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
 }
 /* }}} */
@@ -1379,7 +1383,7 @@ ZEND_API zval *zend_std_get_static_property_with_info(zend_class_entry *ce, zend
 			if (UNEXPECTED(property_info->flags & ZEND_ACC_PRIVATE)
 			 || UNEXPECTED(!is_protected_compatible_scope(property_info->ce, scope))) {
 				if (type != BP_VAR_IS) {
-					zend_bad_property_access(property_info, ce, property_name);
+					zend_bad_property_access(property_info, ce, property_name, scope);
 				}
 				return NULL;
 			}
@@ -1439,14 +1443,12 @@ ZEND_API ZEND_COLD zend_bool zend_std_unset_static_property(zend_class_entry *ce
 
 static ZEND_COLD zend_never_inline void zend_bad_constructor_call(zend_function *constructor, zend_class_entry *scope) /* {{{ */
 {
-	if (scope) {
-		zend_throw_error(NULL, "Call to %s %s::%s() from scope %s",
-			zend_visibility_string(constructor->common.fn_flags), ZSTR_VAL(constructor->common.scope->name),
-			ZSTR_VAL(constructor->common.function_name), ZSTR_VAL(scope->name)
-		);
-	} else {
-		zend_throw_error(NULL, "Call to %s %s::%s() from global scope", zend_visibility_string(constructor->common.fn_flags), ZSTR_VAL(constructor->common.scope->name), ZSTR_VAL(constructor->common.function_name));
-	}
+	zend_throw_error(NULL, "%s method %s::%s() cannot be called from the %s%s",
+		zend_visibility_string_capitalized(constructor->common.fn_flags), ZSTR_VAL(constructor->common.scope->name),
+		ZSTR_VAL(constructor->common.function_name),
+		scope ? "scope of class " : "global scope",
+		scope ? ZSTR_VAL(scope->name) : ""
+	);
 }
 /* }}} */
 

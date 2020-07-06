@@ -40,7 +40,7 @@ echo "Done\n";
 --EXPECTF--
 string(%d) "
 <br />
-<b>Fatal error</b>:  Uncaught Error: Cannot access private property test::$pri in %s004.test.php:8
+<b>Fatal error</b>:  Uncaught Error: Private property test::$pri cannot be accessed from the global scope in %s004.test.php:8
 Stack trace:
 #0 {main}
   thrown in <b>%s004.test.php</b> on line <b>8</b><br />

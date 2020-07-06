@@ -14,4 +14,4 @@ $fn();
 
 ?>
 --EXPECT--
-Cannot access "self" when no class scope is active
+"self" cannot be used in the global scope

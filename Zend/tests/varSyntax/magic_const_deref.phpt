@@ -21,4 +21,4 @@ string(1) "t"
 
 Warning: Attempt to read property "prop" on string in %s on line %d
 NULL
-Call to a member function method() on string
+Call to method method() on string

@@ -24,7 +24,7 @@ try {
 C::foo();
 ?>
 --EXPECTF--
-Error: Cannot call abstract method C::foo() in %s:%d
+Error: Abstract method C::foo() cannot be called in %s:%d
 Stack trace:
 #0 {main}
 
@@ -34,7 +34,7 @@ Stack trace:
 #1 {main}
 
 
-Fatal error: Uncaught Error: Cannot call abstract method C::foo() in %s:%d
+Fatal error: Uncaught Error: Abstract method C::foo() cannot be called in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

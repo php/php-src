@@ -18,17 +18,17 @@ class B extends A {
 new B;
 ?>
 --EXPECTF--
-Notice: Accessing static property B::$a as non static in %sbug76860_2.php on line 7
+Notice: Accessing static property B::$a as non-static in %s on line %d
 
-Warning: Undefined property: B::$a in %s on line %d
+Warning: Undefined property B::$a in %s on line %d
 
-Notice: Accessing static property B::$b as non static in %sbug76860_2.php on line 7
+Notice: Accessing static property B::$b as non-static in %s on line %d
 
-Warning: Undefined property: B::$b in %s on line %d
+Warning: Undefined property B::$b in %s on line %d
 
-Notice: Accessing static property B::$c as non static in %sbug76860_2.php on line 7
+Notice: Accessing static property B::$c as non-static in %s on line %d
 
-Warning: Undefined property: B::$c in %s on line %d
+Warning: Undefined property B::$c in %s on line %d
 NULL
 NULL
 NULL

@@ -13,8 +13,8 @@ print 'DONE';
 
 ?>
 --EXPECTF--
-Warning: Unsupported encoding [%d] in %sdeclare_004.php on line 3
+Warning: Encoding "1" is unsupported in %s on line %d
 
-Warning: Unsupported encoding [%f] in %sdeclare_004.php on line 4
+Warning: Encoding "%f" is unsupported in %s on line %d
 
 Fatal error: Encoding must be a literal in %sdeclare_004.php on line 5

@@ -36,7 +36,7 @@ echo "Done\n";
 --EXPECTF--
 string(%d) "
 
-Fatal error: Uncaught Error: Cannot access private property test::$pri in %s:%d
+Fatal error: Uncaught Error: Private property test::$pri cannot be accessed from the global scope in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

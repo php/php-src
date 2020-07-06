@@ -22,5 +22,5 @@ try {
 
 ?>
 --EXPECT--
-Cannot call abstract method Test::method()
-Cannot call abstract method Test::method()
+Abstract method Test::method() cannot be called
+Abstract method Test::method() cannot be called

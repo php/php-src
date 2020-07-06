@@ -29,4 +29,4 @@ Redeclare inherited public property as protected.
   $b->showB();
 ?>
 --EXPECTF--
-Fatal error: Access level to B::$p must be public (as in class A) in %s on line 18
+Fatal error: Property B::$p must have public visibility to be compatible with overridden property A::$p in %s on line %d

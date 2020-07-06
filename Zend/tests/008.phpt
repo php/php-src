@@ -27,13 +27,13 @@ echo "Done\n";
 --EXPECTF--
 TypeError: define(): Argument #1 ($constant_name) must be of type string, array given
 
-Notice: Constant TRUE already defined in %s on line %d
+Notice: Constant TRUE has already been defined in %s on line %d
 bool(false)
 bool(true)
 bool(true)
 bool(true)
 
-Notice: Constant test const already defined in %s on line %d
+Notice: Constant test const has already been defined in %s on line %d
 bool(false)
 bool(true)
 bool(true)

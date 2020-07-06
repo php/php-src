@@ -35,7 +35,7 @@ bar();
 --EXPECTF--
 int(2)
 
-Warning: Undefined property: A::$y in %s on line %d
+Warning: Undefined property A::$y in %s on line %d
 NULL
 int(3)
 string(5) "__get"

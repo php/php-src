@@ -14,4 +14,4 @@ test();
 
 ?>
 --EXPECT--
-Cannot call extract() dynamically
+extract() cannot be called dynamically

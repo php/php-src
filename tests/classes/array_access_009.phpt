@@ -122,15 +122,15 @@ $people[0]['name'] = 'BlaBla';
 var_dump($people[0]['name']);
 
 ?>
---EXPECTF--
+--EXPECT--
 string(3) "Foo"
 string(6) "FooBar"
 string(9) "FooBarBaz"
 ===ArrayOverloading===
 ArrayProxy::__construct(0)
-object(ArrayProxy)#%d (2) {
+object(ArrayProxy)#1 (2) {
   ["object":"ArrayProxy":private]=>
-  object(Peoples)#%d (1) {
+  object(Peoples)#2 (1) {
     ["person"]=>
     array(1) {
       [0]=>
@@ -165,9 +165,9 @@ string(12) "FooBarBarBaz"
 ArrayProxy::__construct(0)
 ArrayProxy::offsetUnset(0, name)
 ArrayProxy::__construct(0)
-object(ArrayProxy)#%d (2) {
+object(ArrayProxy)#1 (2) {
   ["object":"ArrayProxy":private]=>
-  object(Peoples)#%d (1) {
+  object(Peoples)#2 (1) {
     ["person"]=>
     array(1) {
       [0]=>

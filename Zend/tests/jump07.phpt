@@ -8,4 +8,4 @@ while (0) {
 goto L1;
 ?>
 --EXPECTF--
-Fatal error: 'goto' into loop or switch statement is disallowed in %sjump07.php on line 5
+Fatal error: goto into a loop or switch statement is disallowed in %s on line %d

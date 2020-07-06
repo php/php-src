@@ -31,6 +31,6 @@ test_calls('extract');
 
 ?>
 --EXPECT--
-Cannot call extract() dynamically
-Cannot call extract() dynamically
-Cannot call extract() dynamically
+extract() cannot be called dynamically
+extract() cannot be called dynamically
+extract() cannot be called dynamically

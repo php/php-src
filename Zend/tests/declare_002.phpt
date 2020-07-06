@@ -20,8 +20,8 @@ print 'DONE';
 
 ?>
 --EXPECTF--
-Warning: Unsupported encoding [%d] in %sdeclare_002.php on line 3
+Warning: Encoding "%d" is unsupported in %sdeclare_002.php on line 3
 
-Warning: Unsupported encoding [%f] in %sdeclare_002.php on line 4
+Warning: Encoding "%f" is unsupported in %sdeclare_002.php on line 4
 
 Fatal error: Encoding must be a literal in %sdeclare_002.php on line 6

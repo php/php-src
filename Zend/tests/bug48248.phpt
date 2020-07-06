@@ -21,7 +21,7 @@ var_dump($b->test);
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: Cannot access private property B::$test in %s:%d
+Fatal error: Uncaught Error: Private property B::$test cannot be accessed from the scope of class A in %s:%d
 Stack trace:
 #0 %s(%d): A->__get('test')
 #1 {main}

@@ -1505,6 +1505,103 @@ ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_at_noreturn(
 	abort();
 }
 
+static ZEND_COLD void ZEND_FASTCALL zend_function_error_noreturn_variadic(
+	int orig_type, const char *error_filename, uint32_t error_lineno, const char *function, const char *format, va_list args
+) {
+	zend_op_array *op_array = CG(active_op_array);
+	zend_class_entry *scope = op_array->scope;
+	zend_string *function_name = op_array->function_name;
+
+	zend_string *message1 = zend_vstrpprintf(0, format, args);
+	zend_string *message2 = zend_strpprintf(
+		0, "%s %s%s%s() %s",
+		function ? function : (scope ? "Method" : "Function"),
+		scope ? ZSTR_VAL(scope->name) : "", scope ? "::" : "", ZSTR_VAL(function_name), ZSTR_VAL(message1)
+	);
+
+	zend_error_impl(orig_type, error_filename, error_lineno, message2);
+}
+
+ZEND_API ZEND_COLD ZEND_NORETURN void zend_function_error_noreturn(int type, const char *function, const char *format, ...)
+{
+	const char *filename;
+	uint32_t lineno;
+	va_list args;
+
+	get_filename_lineno(type, &filename, &lineno);
+	va_start(args, format);
+	zend_function_error_noreturn_variadic(type, filename, lineno, function, format, args);
+	va_end(args);
+	/* Should never reach this. */
+	abort();
+}
+
+static ZEND_COLD void ZEND_FASTCALL zend_parameter_error_noreturn_variadic(
+	int orig_type, const char *error_filename, uint32_t error_lineno,
+	const char *parameter, int parameter_number, const char *parameter_name, const char *format, va_list args
+) {
+	zend_op_array *op_array = CG(active_op_array);
+	zend_class_entry *scope = op_array->scope;
+	zend_string *function_name = op_array->function_name;
+
+	zend_string *message1 = zend_vstrpprintf(0, format, args);
+	zend_string *message2 = zend_strpprintf(
+		0, "%s%s%s(): %s #%d%s%s%s %s",
+		scope ? ZSTR_VAL(scope->name) : "", scope ? "::" : "", ZSTR_VAL(function_name),
+		parameter ? parameter : "Parameter", parameter_number,
+		parameter_name ? " ($" : "", parameter_name ? parameter_name : "",
+		parameter_name ? ")" : "", ZSTR_VAL(message1)
+	);
+
+	zend_error_impl(orig_type, error_filename, error_lineno, message2);
+}
+
+ZEND_API ZEND_COLD ZEND_NORETURN void zend_parameter_error_noreturn(
+	int type, const char *parameter, int parameter_number, const char *parameter_name, const char *format, ...
+) {
+	const char *filename;
+	uint32_t lineno;
+	va_list args;
+
+	get_filename_lineno(type, &filename, &lineno);
+	va_start(args, format);
+	zend_parameter_error_noreturn_variadic(type, filename, lineno, parameter, parameter_number, parameter_name, format, args);
+	va_end(args);
+	/* Should never reach this. */
+	abort();
+}
+
+static ZEND_COLD void ZEND_FASTCALL zend_property_error_noreturn_variadic(
+	int orig_type, const char *error_filename, uint32_t error_lineno,
+	const char *property, const char *property_name, const char *format, va_list args
+) {
+	zend_op_array *op_array = CG(active_op_array);
+	zend_class_entry *scope = op_array->scope;
+
+	zend_string *message1 = zend_vstrpprintf(0, format, args);
+	zend_string *message2 = zend_strpprintf(
+		0, "%s %s::$%s %s",
+		property ? property : "Property", scope ? ZSTR_VAL(scope->name) : "", property_name, ZSTR_VAL(message1)
+	);
+
+	zend_error_impl(orig_type, error_filename, error_lineno, message2);
+}
+
+ZEND_API ZEND_COLD ZEND_NORETURN void zend_property_error_noreturn(
+	int type, const char *property, const char *property_name, const char *format, ...
+) {
+	const char *filename;
+	uint32_t lineno;
+	va_list args;
+
+	get_filename_lineno(type, &filename, &lineno);
+	va_start(args, format);
+	zend_property_error_noreturn_variadic(type, filename, lineno, property, property_name, format, args);
+	va_end(args);
+	/* Should never reach this. */
+	abort();
+}
+
 ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn(int type, const char *format, ...)
 {
 	const char *filename;

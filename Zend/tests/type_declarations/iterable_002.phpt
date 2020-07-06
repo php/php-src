@@ -17,4 +17,4 @@ function baz(iterable $iterable = 1) {
 
 ?>
 --EXPECTF--
-Fatal error: Cannot use int as default value for parameter $iterable of type iterable in %s on line %d
+Fatal error: baz(): Parameter #1 ($iterable) of type iterable cannot have a default value of type int in %s on line %d

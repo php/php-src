@@ -33,12 +33,12 @@ $obj->printVars();
 ===BASE===
 string(4) "Base"
 
-Warning: Undefined property: BaseClass::$private_child in %s on line %d
+Warning: Undefined property BaseClass::$private_child in %s on line %d
 NULL
 ===CHILD===
 string(4) "Base"
 
-Fatal error: Uncaught Error: Cannot access private property ChildClass::$private_child in %sbug29674.php:%d
+Fatal error: Uncaught Error: Private property ChildClass::$private_child cannot be accessed from the scope of class BaseClass in %s:%d
 Stack trace:
 #0 %s(%d): BaseClass->printVars()
 #1 {main}

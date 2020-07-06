@@ -297,6 +297,9 @@ extern ZEND_API void (*zend_post_shutdown_cb)(void);
 extern ZEND_API int (*zend_preload_autoload)(zend_string *filename);
 
 ZEND_API ZEND_COLD void zend_error(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
+ZEND_API ZEND_COLD ZEND_NORETURN void zend_function_error_noreturn(int type, const char *function, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 3, 4);
+ZEND_API ZEND_COLD ZEND_NORETURN void zend_parameter_error_noreturn(int type, const char *parameter, int parameter_number, const char *parameter_name, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 5, 6);
+ZEND_API ZEND_COLD ZEND_NORETURN void zend_property_error_noreturn(int type, const char *property, const char *property_name, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 4, 5);
 ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 /* If filename is NULL the default filename is used. */
 ZEND_API ZEND_COLD void zend_error_at(int type, const char *filename, uint32_t lineno, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 4, 5);

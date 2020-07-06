@@ -36,7 +36,7 @@ try { test4(); } catch (Error $e) { echo $e->getMessage(), "\n"; }
 
 ?>
 --EXPECT--
-Cannot instantiate abstract class Foo
-Cannot instantiate interface Bar
-Cannot instantiate trait Baz
-Cannot declare self-referencing constant Abc::BAR
+Abstract class Foo cannot be instantiated
+Interface Bar cannot be instantiated
+Trait Baz cannot be instantiated
+Constant Abc::BAR cannot reference itself

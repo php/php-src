@@ -19,6 +19,6 @@ eval('class A { private function __invoke() { } }');
 
 ?>
 --EXPECTF--
-string(%d) "The magic method A::__invoke() must have public visibility"
+string(48) "Method A::__invoke() must have public visibility"
 string(%d) "%s(%d) : eval()'d code"
 string(1) "X"

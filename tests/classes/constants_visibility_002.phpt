@@ -24,4 +24,4 @@ try {
 --EXPECT--
 string(14) "protectedConst"
 string(14) "protectedConst"
-Cannot access protected constant A::protectedConst
+Protected constant A::protectedConst cannot be accessed from the global scope

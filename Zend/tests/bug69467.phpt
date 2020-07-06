@@ -18,4 +18,4 @@ $test = new Foo();
 var_dump($test instanceof Baz);
 ?>
 --EXPECTF--
-Fatal error: Access level to Foo::bad() must be public (as in class Baz) in %sbug69467.php on line %d
+Fatal error: Method Foo::bad() must have public visibility to be compatible with overridden method Baz::bad() in %s on line %d

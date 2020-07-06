@@ -50,6 +50,6 @@ try {
 
 ?>
 --EXPECT--
-Cannot access private property Test::$prop
-Cannot access private property Test::$prop
-Cannot access private property Test::$prop
+Private property Test::$prop cannot be accessed from the global scope
+Private property Test::$prop cannot be accessed from the global scope
+Private property Test::$prop cannot be accessed from the global scope

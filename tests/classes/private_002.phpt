@@ -30,7 +30,7 @@ echo "Done\n"; // shouldn't be displayed
 Call pass::show()
 Call fail::show()
 
-Fatal error: Uncaught Error: Call to private method pass::show() from scope fail in %s:%d
+Fatal error: Uncaught Error: Private method pass::show() cannot be called from the scope of class fail in %s:%d
 Stack trace:
 #0 %s(%d): fail::show()
 #1 {main}

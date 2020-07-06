@@ -8,4 +8,4 @@ function test(int|float $arg = "0") {
 
 ?>
 --EXPECTF--
-Fatal error: Cannot use string as default value for parameter $arg of type int|float in %s on line %d
+Fatal error: test(): Parameter #1 ($arg) of type int|float cannot have a default value of type string in %s on line %d

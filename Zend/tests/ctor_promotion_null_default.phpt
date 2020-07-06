@@ -9,4 +9,4 @@ class Test {
 
 ?>
 --EXPECTF--
-Fatal error: Cannot use null as default value for parameter $x of type int in %s on line %d
+Fatal error: Test::__construct(): Parameter #1 ($x) of type int cannot have a default value of type null in %s on line %d

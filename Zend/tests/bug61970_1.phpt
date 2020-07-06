@@ -11,4 +11,4 @@ class Bar extends Foo {
     protected function __construct(){}
 }
 --EXPECTF--
-Fatal error: Access level to Bar::__construct() must be public (as in class Foo) in %s on line 8
+Fatal error: Method Bar::__construct() must have public visibility to be compatible with overridden method Foo::__construct() in %s on line %d

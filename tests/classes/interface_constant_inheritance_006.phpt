@@ -6,4 +6,4 @@ interface A {
     protected const FOO = 10;
 }
 --EXPECTF--
-Fatal error: Access type for interface constant A::FOO must be public in %s on line 3
+Fatal error: Interface constant A::FOO must have public visibility in %s on line %d

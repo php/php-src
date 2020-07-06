@@ -24,6 +24,6 @@ string(1) "f"
 
 Warning: Attempt to read property "prop" on string in %s on line %d
 NULL
-Call to a member function method() on string
+Call to method method() on string
 int(42)
 int(42)

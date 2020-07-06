@@ -14,6 +14,6 @@ class a extends b {
 
 ?>
 --EXPECTF--
-Warning: The magic method a::__set() must have public visibility in %s on line %d
+Warning: Method a::__set() must have public visibility in %s on line %d
 
-Fatal error: Access level to a::__set() must be public (as in class b) in %s on line 8
+Fatal error: Method a::__set() must have public visibility to be compatible with overridden method b::__set() in %s on line %d

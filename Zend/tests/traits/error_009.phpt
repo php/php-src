@@ -9,4 +9,4 @@ class foo extends abc { }
 
 ?>
 --EXPECTF--
-Fatal error: Class foo cannot extend from trait abc in %s on line %d
+Fatal error: Class foo cannot extend trait abc in %s on line %d

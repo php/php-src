@@ -14,4 +14,4 @@ class test extends test1 {
 echo "Done\n";
 ?>
 --EXPECTF--
-Fatal error: Access level to test::$var must be protected (as in class test1) or weaker in %s on line %d
+Fatal error: Property test::$var must have protected or public visibility to be compatible with overridden property test1::$var in %s on line %d

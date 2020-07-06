@@ -188,9 +188,10 @@ static void do_inherit_parent_constructor(zend_class_entry *ce) /* {{{ */
 
 	if (ce->constructor) {
 		if (parent->constructor && UNEXPECTED(parent->constructor->common.fn_flags & ZEND_ACC_FINAL)) {
-			zend_error_noreturn(E_ERROR, "Cannot override final %s::%s() with %s::%s()",
-				ZSTR_VAL(parent->name), ZSTR_VAL(parent->constructor->common.function_name),
-				ZSTR_VAL(ce->name), ZSTR_VAL(ce->constructor->common.function_name));
+			zend_error_noreturn(E_ERROR, "Method %s::%s() cannot override final method %s::%s()",
+				ZSTR_VAL(ce->name), ZSTR_VAL(ce->constructor->common.function_name),
+				ZSTR_VAL(parent->name), ZSTR_VAL(parent->constructor->common.function_name)
+			);
 		}
 		return;
 	}
@@ -208,6 +209,19 @@ char *zend_visibility_string(uint32_t fn_flags) /* {{{ */
 	} else {
 		ZEND_ASSERT(fn_flags & ZEND_ACC_PROTECTED);
 		return "protected";
+	}
+}
+/* }}} */
+
+char *zend_visibility_string_capitalized(uint32_t fn_flags) /* {{{ */
+{
+	if (fn_flags & ZEND_ACC_PUBLIC) {
+		return "Public";
+	} else if (fn_flags & ZEND_ACC_PRIVATE) {
+		return "Private";
+	} else {
+		ZEND_ASSERT(fn_flags & ZEND_ACC_PROTECTED);
+		return "Protected";
 	}
 }
 /* }}} */
@@ -841,8 +855,10 @@ static zend_always_inline inheritance_status do_inheritance_check_on_method_ex(
 			return INHERITANCE_ERROR;
 		}
 		zend_error_at_noreturn(E_COMPILE_ERROR, NULL, func_lineno(child),
-			"Cannot override final method %s::%s()",
-			ZEND_FN_SCOPE_NAME(parent), ZSTR_VAL(child->common.function_name));
+			"Method %s::%s() cannot override final method %s::%s()",
+			ZEND_FN_SCOPE_NAME(child), ZSTR_VAL(child->common.function_name),
+			ZEND_FN_SCOPE_NAME(parent), ZSTR_VAL(child->common.function_name)
+		);
 	}
 
 	child_flags	= child->common.fn_flags;
@@ -852,15 +868,12 @@ static zend_always_inline inheritance_status do_inheritance_check_on_method_ex(
 		if (check_only) {
 			return INHERITANCE_ERROR;
 		}
-		if (child_flags & ZEND_ACC_STATIC) {
-			zend_error_at_noreturn(E_COMPILE_ERROR, NULL, func_lineno(child),
-				"Cannot make non static method %s::%s() static in class %s",
-				ZEND_FN_SCOPE_NAME(parent), ZSTR_VAL(child->common.function_name), ZEND_FN_SCOPE_NAME(child));
-		} else {
-			zend_error_at_noreturn(E_COMPILE_ERROR, NULL, func_lineno(child),
-				"Cannot make static method %s::%s() non static in class %s",
-				ZEND_FN_SCOPE_NAME(parent), ZSTR_VAL(child->common.function_name), ZEND_FN_SCOPE_NAME(child));
-		}
+		zend_error_at_noreturn(E_COMPILE_ERROR, NULL, func_lineno(child),
+			"Method %s::%s() %s to be compatible with overridden method %s::%s()",
+			ZEND_FN_SCOPE_NAME(child), ZSTR_VAL(child->common.function_name),
+			(parent_flags & ZEND_ACC_STATIC) ? "must be static" : "must not be static",
+			ZEND_FN_SCOPE_NAME(parent), ZSTR_VAL(child->common.function_name)
+		);
 	}
 
 	/* Disallow making an inherited method abstract. */
@@ -869,8 +882,10 @@ static zend_always_inline inheritance_status do_inheritance_check_on_method_ex(
 			return INHERITANCE_ERROR;
 		}
 		zend_error_at_noreturn(E_COMPILE_ERROR, NULL, func_lineno(child),
-			"Cannot make non abstract method %s::%s() abstract in class %s",
-			ZEND_FN_SCOPE_NAME(parent), ZSTR_VAL(child->common.function_name), ZEND_FN_SCOPE_NAME(child));
+			"Abstract method %s::%s() cannot override method %s::%s()",
+			ZEND_FN_SCOPE_NAME(child), ZSTR_VAL(child->common.function_name),
+			ZEND_FN_SCOPE_NAME(parent), ZSTR_VAL(child->common.function_name)
+		);
 	}
 
 	if (!check_only && (parent_flags & (ZEND_ACC_PRIVATE|ZEND_ACC_CHANGED))) {
@@ -915,8 +930,11 @@ static zend_always_inline inheritance_status do_inheritance_check_on_method_ex(
 			return INHERITANCE_ERROR;
 		}
 		zend_error_at_noreturn(E_COMPILE_ERROR, NULL, func_lineno(child),
-			"Access level to %s::%s() must be %s (as in class %s)%s",
-			ZEND_FN_SCOPE_NAME(child), ZSTR_VAL(child->common.function_name), zend_visibility_string(parent_flags), ZEND_FN_SCOPE_NAME(parent), (parent_flags&ZEND_ACC_PUBLIC) ? "" : " or weaker");
+			"Method %s::%s() must have %s visibility to be compatible with overridden method %s::%s()",
+			ZEND_FN_SCOPE_NAME(child), ZSTR_VAL(child->common.function_name),
+			(parent_flags & ZEND_ACC_PUBLIC) ? "public" : "protected or public",
+			ZEND_FN_SCOPE_NAME(parent), ZSTR_VAL(child->common.function_name)
+		);
 	}
 
 	if (!checked) {
@@ -1005,11 +1023,13 @@ static void emit_incompatible_property_error(
 		const zend_property_info *child, const zend_property_info *parent) {
 	zend_string *type_str = zend_type_to_string_resolved(parent->type, parent->ce);
 	zend_error_noreturn(E_COMPILE_ERROR,
-		"Type of %s::$%s must be %s (as in class %s)",
+		"Property %s::$%s must be of type %s to be compatible with overridden property %s::$%s",
 		ZSTR_VAL(child->ce->name),
 		zend_get_unmangled_property_name(child->name),
 		ZSTR_VAL(type_str),
-		ZSTR_VAL(parent->ce->name));
+		ZSTR_VAL(parent->ce->name),
+		zend_get_unmangled_property_name(child->name)
+	);
 }
 
 static void do_inherit_property(zend_property_info *parent_info, zend_string *key, zend_class_entry *ce) /* {{{ */
@@ -1024,13 +1044,18 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 		}
 		if (!(parent_info->flags & ZEND_ACC_PRIVATE)) {
 			if (UNEXPECTED((parent_info->flags & ZEND_ACC_STATIC) != (child_info->flags & ZEND_ACC_STATIC))) {
-				zend_error_noreturn(E_COMPILE_ERROR, "Cannot redeclare %s%s::$%s as %s%s::$%s",
-					(parent_info->flags & ZEND_ACC_STATIC) ? "static " : "non static ", ZSTR_VAL(parent_info->ce->name), ZSTR_VAL(key),
-					(child_info->flags & ZEND_ACC_STATIC) ? "static " : "non static ", ZSTR_VAL(ce->name), ZSTR_VAL(key));
+				zend_error_noreturn(E_COMPILE_ERROR, "Property %s::$%s %s to be compatible with overridden property %s::$%s",
+					ZSTR_VAL(child_info->ce->name), ZSTR_VAL(key),
+					(parent_info->flags & ZEND_ACC_STATIC) ? "must be static" : "must not be static",
+					ZSTR_VAL(parent_info->ce->name), ZSTR_VAL(key)
+				);
 			}
 
 			if (UNEXPECTED((child_info->flags & ZEND_ACC_PPP_MASK) > (parent_info->flags & ZEND_ACC_PPP_MASK))) {
-				zend_error_noreturn(E_COMPILE_ERROR, "Access level to %s::$%s must be %s (as in class %s)%s", ZSTR_VAL(ce->name), ZSTR_VAL(key), zend_visibility_string(parent_info->flags), ZSTR_VAL(parent_info->ce->name), (parent_info->flags&ZEND_ACC_PUBLIC) ? "" : " or weaker");
+				zend_error_noreturn(E_COMPILE_ERROR, "Property %s::$%s must have %s visibility to be compatible with overridden property %s::$%s",
+					ZSTR_VAL(ce->name), ZSTR_VAL(key), (parent_info->flags & ZEND_ACC_PUBLIC) ? "public" : "protected or public",
+					ZSTR_VAL(parent_info->ce->name), ZSTR_VAL(key)
+				);
 			} else if ((child_info->flags & ZEND_ACC_STATIC) == 0) {
 				int parent_num = OBJ_PROP_TO_NUM(parent_info->offset);
 				int child_num = OBJ_PROP_TO_NUM(child_info->offset);
@@ -1052,10 +1077,9 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 				}
 			} else if (UNEXPECTED(ZEND_TYPE_IS_SET(child_info->type) && !ZEND_TYPE_IS_SET(parent_info->type))) {
 				zend_error_noreturn(E_COMPILE_ERROR,
-						"Type of %s::$%s must not be defined (as in class %s)",
-						ZSTR_VAL(ce->name),
-						ZSTR_VAL(key),
-						ZSTR_VAL(parent_info->ce->name));
+					"Property %s::$%s must not have a type to be compatible with overridden property %s::$%s",
+					ZSTR_VAL(ce->name), ZSTR_VAL(key), ZSTR_VAL(parent_info->ce->name), ZSTR_VAL(key)
+				);
 			}
 		}
 	} else {
@@ -1122,8 +1146,11 @@ static void do_inherit_class_constant(zend_string *name, zend_class_constant *pa
 	if (zv != NULL) {
 		c = (zend_class_constant*)Z_PTR_P(zv);
 		if (UNEXPECTED((Z_ACCESS_FLAGS(c->value) & ZEND_ACC_PPP_MASK) > (Z_ACCESS_FLAGS(parent_const->value) & ZEND_ACC_PPP_MASK))) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Access level to %s::%s must be %s (as in class %s)%s",
-				ZSTR_VAL(ce->name), ZSTR_VAL(name), zend_visibility_string(Z_ACCESS_FLAGS(parent_const->value)), ZSTR_VAL(parent_const->ce->name), (Z_ACCESS_FLAGS(parent_const->value) & ZEND_ACC_PUBLIC) ? "" : " or weaker");
+			zend_error_noreturn(E_COMPILE_ERROR, "Constant %s::%s must have %s visibility to be compatible with overridden constant %s::%s",
+				ZSTR_VAL(ce->name), ZSTR_VAL(name),
+				(Z_ACCESS_FLAGS(parent_const->value) & ZEND_ACC_PUBLIC) ? "public" : "protected or public",
+				ZSTR_VAL(parent_const->ce->name), ZSTR_VAL(name)
+			);
 		}
 	} else if (!(Z_ACCESS_FLAGS(parent_const->value) & ZEND_ACC_PRIVATE)) {
 		if (Z_TYPE(parent_const->value) == IS_CONSTANT_AST) {
@@ -1187,19 +1214,19 @@ ZEND_API void zend_do_inheritance_ex(zend_class_entry *ce, zend_class_entry *par
 	if (UNEXPECTED(ce->ce_flags & ZEND_ACC_INTERFACE)) {
 		/* Interface can only inherit other interfaces */
 		if (UNEXPECTED(!(parent_ce->ce_flags & ZEND_ACC_INTERFACE))) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Interface %s may not inherit from class (%s)", ZSTR_VAL(ce->name), ZSTR_VAL(parent_ce->name));
+			zend_error_noreturn(E_COMPILE_ERROR, "Interface %s cannot extend class %s", ZSTR_VAL(ce->name), ZSTR_VAL(parent_ce->name));
 		}
 	} else if (UNEXPECTED(parent_ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_FINAL))) {
 		/* Class declaration must not extend traits or interfaces */
 		if (parent_ce->ce_flags & ZEND_ACC_INTERFACE) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Class %s cannot extend from interface %s", ZSTR_VAL(ce->name), ZSTR_VAL(parent_ce->name));
+			zend_error_noreturn(E_COMPILE_ERROR, "Class %s cannot extend interface %s", ZSTR_VAL(ce->name), ZSTR_VAL(parent_ce->name));
 		} else if (parent_ce->ce_flags & ZEND_ACC_TRAIT) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Class %s cannot extend from trait %s", ZSTR_VAL(ce->name), ZSTR_VAL(parent_ce->name));
+			zend_error_noreturn(E_COMPILE_ERROR, "Class %s cannot extend trait %s", ZSTR_VAL(ce->name), ZSTR_VAL(parent_ce->name));
 		}
 
 		/* Class must not extend a final class */
 		if (parent_ce->ce_flags & ZEND_ACC_FINAL) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Class %s may not inherit from final class (%s)", ZSTR_VAL(ce->name), ZSTR_VAL(parent_ce->name));
+			zend_error_noreturn(E_COMPILE_ERROR, "Class %s cannot extend final class %s", ZSTR_VAL(ce->name), ZSTR_VAL(parent_ce->name));
 		}
 	}
 
@@ -1709,7 +1736,7 @@ static uint32_t zend_check_trait_usage(zend_class_entry *ce, zend_class_entry *t
 	uint32_t i;
 
 	if (UNEXPECTED((trait->ce_flags & ZEND_ACC_TRAIT) != ZEND_ACC_TRAIT)) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Class %s is not a trait, Only traits may be used in 'as' and 'insteadof' statements", ZSTR_VAL(trait->name));
+		zend_error_noreturn(E_COMPILE_ERROR, "Class %s is not a trait, only traits may be used in \"as\" and \"insteadof\" statements", ZSTR_VAL(trait->name));
 		return 0;
 	}
 
@@ -1718,7 +1745,7 @@ static uint32_t zend_check_trait_usage(zend_class_entry *ce, zend_class_entry *t
 			return i;
 		}
 	}
-	zend_error_noreturn(E_COMPILE_ERROR, "Required Trait %s wasn't added to %s", ZSTR_VAL(trait->name), ZSTR_VAL(ce->name));
+	zend_error_noreturn(E_COMPILE_ERROR, "Required trait %s wasn't added to %s", ZSTR_VAL(trait->name), ZSTR_VAL(ce->name));
 	return 0;
 }
 /* }}} */
@@ -1746,7 +1773,7 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce, zend_class_e
 			trait = zend_fetch_class(cur_method_ref->class_name,
 							ZEND_FETCH_CLASS_TRAIT|ZEND_FETCH_CLASS_NO_AUTOLOAD);
 			if (!trait) {
-				zend_error_noreturn(E_COMPILE_ERROR, "Could not find trait %s", ZSTR_VAL(cur_method_ref->class_name));
+				zend_error_noreturn(E_COMPILE_ERROR, "Trait %s cannot be found", ZSTR_VAL(cur_method_ref->class_name));
 			}
 			zend_check_trait_usage(ce, trait, traits);
 
@@ -1772,7 +1799,7 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce, zend_class_e
 				uint32_t trait_num;
 
 				if (!exclude_ce) {
-					zend_error_noreturn(E_COMPILE_ERROR, "Could not find trait %s", ZSTR_VAL(class_name));
+					zend_error_noreturn(E_COMPILE_ERROR, "Trait %s cannot be found", ZSTR_VAL(class_name));
 				}
 				trait_num = zend_check_trait_usage(ce, exclude_ce, traits);
 				if (!exclude_tables[trait_num]) {
@@ -1815,7 +1842,7 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce, zend_class_e
 				/* For all aliases with an explicit class name, resolve the class now. */
 				trait = zend_fetch_class(cur_method_ref->class_name, ZEND_FETCH_CLASS_TRAIT|ZEND_FETCH_CLASS_NO_AUTOLOAD);
 				if (!trait) {
-					zend_error_noreturn(E_COMPILE_ERROR, "Could not find trait %s", ZSTR_VAL(cur_method_ref->class_name));
+					zend_error_noreturn(E_COMPILE_ERROR, "Trait %s cannot be found", ZSTR_VAL(cur_method_ref->class_name));
 				}
 				zend_check_trait_usage(ce, trait, traits);
 				aliases[i] = trait;
@@ -2522,7 +2549,7 @@ zend_bool zend_try_early_bind(zend_class_entry *ce, zend_class_entry *parent_ce,
 	if (EXPECTED(status != INHERITANCE_UNRESOLVED)) {
 		if (delayed_early_binding) {
 			if (UNEXPECTED(zend_hash_set_bucket_key(EG(class_table), (Bucket*)delayed_early_binding, lcname) == NULL)) {
-				zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(ce->name));
+				zend_error_noreturn(E_COMPILE_ERROR, "%s %s cannot be declared, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(ce->name));
 				return 0;
 			}
 		} else {

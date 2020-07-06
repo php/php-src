@@ -7,4 +7,4 @@ class Foo {
 }
 ?>
 --EXPECTF--
-Fatal error: Cannot use int as default value for property Foo::$bar of type array in %s on line 3
+Fatal error: Property Foo::$bar of type array cannot have a default value of type int in %s on line %d

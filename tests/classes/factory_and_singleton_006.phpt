@@ -14,7 +14,7 @@ $obj = NULL;
 echo "Done\n";
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: Call to private test::__destruct() from global scope in %s:%d
+Fatal error: Uncaught Error: Private method test::__destruct() cannot be called from the global scope in %s:%d
 Stack trace:
 #0 {main}
   thrown in %sfactory_and_singleton_006.php on line %d

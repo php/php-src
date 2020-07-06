@@ -11,4 +11,4 @@ test();
 
 ?>
 --EXPECTF--
-Fatal error: A function with return type must return a value (did you mean "return null;" instead of "return;"?) in %s on line %d
+Fatal error: Function test() with return type ?int must return a value (did you mean "return null;" instead of "return;"?) in %s on line %d

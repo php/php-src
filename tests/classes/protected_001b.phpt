@@ -22,7 +22,7 @@ echo "Done\n"; // shouldn't be displayed
 --EXPECTF--
 Call fail()
 
-Fatal error: Uncaught Error: Call to protected method pass::fail() from global scope in %s:%d
+Fatal error: Uncaught Error: Protected method pass::fail() cannot be called from the global scope in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

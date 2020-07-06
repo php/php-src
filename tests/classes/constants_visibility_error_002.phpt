@@ -10,7 +10,7 @@ var_dump(A::protectedConst);
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: Cannot access protected constant A::protectedConst in %s:6
+Fatal error: Uncaught Error: Protected constant A::protectedConst cannot be accessed from the global scope in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line 6

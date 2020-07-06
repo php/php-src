@@ -11,4 +11,4 @@ class B extends A {
     protected const publicConst = 1;
 }
 --EXPECTF--
-Fatal error: Access level to B::publicConst must be public (as in class A) in %s on line 9
+Fatal error: Constant B::publicConst must have public visibility to be compatible with overridden constant A::publicConst in %s on line %d

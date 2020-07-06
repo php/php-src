@@ -8,4 +8,4 @@ class B extends A { protected $x; }
 
 ?>
 --EXPECTF--
-Fatal error: Type of B::$x must be int (as in class A) in %s on line %d
+Fatal error: Property B::$x must be of type int to be compatible with overridden property A::$x in %s on line %d

@@ -22,7 +22,7 @@ $op->x = 'test';
 echo "Done\n";
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: Cannot access private property ExtOperation::$x in %s:%d
+Fatal error: Uncaught Error: Private property ExtOperation::$x cannot be accessed from the scope of class Operation in %s:%d
 Stack trace:
 #0 %s(%d): Operation->__set('x', 'test')
 #1 {main}

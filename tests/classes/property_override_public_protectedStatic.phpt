@@ -29,4 +29,4 @@ Redeclare inherited public property as protected static.
   B::showB();
 ?>
 --EXPECTF--
-Fatal error: Cannot redeclare non static A::$p as static B::$p in %s on line 18
+Fatal error: Property B::$p must not be static to be compatible with overridden property A::$p in %s on line %d

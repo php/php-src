@@ -9,4 +9,4 @@ class Test {
 
 ?>
 --EXPECTF--
-Fatal error: Cannot declare variadic promoted property in %s on line %d
+Fatal error: Variadic promoted property Test::$strings cannot be declared in %s on line %d

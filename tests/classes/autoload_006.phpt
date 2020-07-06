@@ -24,12 +24,12 @@ var_dump(interface_exists('autoload_interface', false));
 var_dump(class_exists('autoload_implements', false));
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(false)
 bool(false)
 autoload(autoload_interface)
 autoload(Autoload_Implements)
-object(autoload_implements)#%d (0) {
+object(autoload_implements)#2 (0) {
 }
 bool(true)
 bool(true)

@@ -16,7 +16,7 @@ $t = new pass();
 echo "Done\n"; // Shouldn't be displayed
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: Cannot instantiate abstract class fail in %s:%d
+Fatal error: Uncaught Error: Abstract class fail cannot be instantiated in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %s on line %d 
+  thrown in %s on line %d

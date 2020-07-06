@@ -16,7 +16,7 @@ var_dump($x->test());
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: Call to protected method bar::test() from global scope in %s:%d
+Fatal error: Uncaught Error: Protected method bar::test() cannot be called from the global scope in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

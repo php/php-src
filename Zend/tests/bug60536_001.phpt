@@ -22,5 +22,5 @@ $a->__construct();
 echo "DONE";
 ?>
 --EXPECTF--
-Warning: Undefined property: Z::$x in %s on line %d
+Warning: Undefined property Z::$x in %s on line %d
 DONE

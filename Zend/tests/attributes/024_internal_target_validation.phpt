@@ -8,4 +8,4 @@ function a1() { }
 
 ?>
 --EXPECTF--
-Fatal error: Attribute "Attribute" cannot target function (allowed targets: class) in %s
+Fatal error: Attribute Attribute cannot target function (allowed targets: class) in %s on line %d

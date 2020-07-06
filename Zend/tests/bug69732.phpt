@@ -20,7 +20,7 @@ $wpq->interesting =& ret_assoc();
 $x = $wpq->interesting;
 printf("%s\n", $x);
 --EXPECTF--
-Warning: Undefined property: wpq::$interesting in %s on line %d
+Warning: Undefined property wpq::$interesting in %s on line %d
 
 Notice: Indirect modification of overloaded property wpq::$interesting has no effect in %sbug69732.php on line 16
 

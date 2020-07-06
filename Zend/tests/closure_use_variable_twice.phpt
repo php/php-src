@@ -12,4 +12,4 @@ var_dump($a);
 
 ?>
 --EXPECTF--
-Fatal error: Cannot use variable $a twice in %s on line %d
+Fatal error: Variable $a cannot be used multiple times in %s on line %d

@@ -9,4 +9,4 @@ class Test {
 
 ?>
 --EXPECTF--
-Fatal error: Property Test::$callable cannot have type callable in %s on line %d
+Fatal error: Promoted property Test::$callable cannot be of type callable in %s on line %d

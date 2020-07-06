@@ -20,5 +20,5 @@ try {
 
 ?>
 --EXPECT--
-Call to a member function length() on string
-Call to a member function length() on string
+Call to method length() on string
+Call to method length() on string

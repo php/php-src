@@ -29,17 +29,17 @@ var_dump(isset($c->y));
 --> Access visible static prop like instance prop:
 bool(false)
 
-Notice: Accessing static property C::$x as non static in %s on line 11
+Notice: Accessing static property C::$x as non-static in %s on line %d
 
-Notice: Accessing static property C::$x as non static in %s on line 12
+Notice: Accessing static property C::$x as non-static in %s on line %d
 
-Warning: Undefined property: C::$x in %s on line %d
+Warning: Undefined property C::$x in %s on line %d
 
-Notice: Accessing static property C::$x as non static in %s on line 13
+Notice: Accessing static property C::$x as non-static in %s on line %d
 
-Notice: Accessing static property C::$x as non static in %s on line 15
+Notice: Accessing static property C::$x as non-static in %s on line %d
 
-Notice: Accessing static property C::$x as non static in %s on line 16
+Notice: Accessing static property C::$x as non-static in %s on line %d
 string(3) "ref"
 string(5) "C::$x"
 

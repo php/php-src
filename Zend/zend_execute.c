@@ -1949,7 +1949,7 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_undefined_method(cons
 
 static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_invalid_method_call(zval *object, zval *function_name)
 {
-	zend_throw_error(NULL, "Call to a member function %s() on %s",
+	zend_throw_error(NULL, "Call to method %s() on %s",
 		Z_STRVAL_P(function_name), zend_zval_type_name(object));
 }
 
@@ -3327,9 +3327,9 @@ static zend_never_inline void zend_fetch_this_var(int type OPLINE_DC EXECUTE_DAT
 
 static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_wrong_clone_call(zend_function *clone, zend_class_entry *scope)
 {
-	zend_throw_error(NULL, "Call to %s %s::__clone() from %s%s",
-		zend_visibility_string(clone->common.fn_flags), ZSTR_VAL(clone->common.scope->name),
-		scope ? "scope " : "global scope",
+	zend_throw_error(NULL, "%s method %s::__clone() cannot be called from the %s%s",
+		zend_visibility_string_capitalized(clone->common.fn_flags), ZSTR_VAL(clone->common.scope->name),
+		scope ? "scope of class " : "global scope",
 		scope ? ZSTR_VAL(scope->name) : ""
 	);
 }

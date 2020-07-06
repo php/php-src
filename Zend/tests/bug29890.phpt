@@ -20,4 +20,4 @@ define("TEST",3);
 
 ?>
 --EXPECT--
-error :Constant TEST already defined
+error :Constant TEST has already been defined

@@ -22,4 +22,4 @@ fail::show();
 echo "Done\n"; // shouldn't be displayed
 ?>
 --EXPECTF--
-Fatal error: Cannot make non static method pass::show() static in class fail in %s on line 10
+Fatal error: Method fail::show() must not be static to be compatible with overridden method pass::show() in %s on line %d

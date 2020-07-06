@@ -353,16 +353,16 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 
 		if (zend_string_equals_literal_ci(class_name, "self")) {
 			if (UNEXPECTED(!scope)) {
-				zend_throw_error(NULL, "Cannot access \"self\" when no class scope is active");
+				zend_throw_error(NULL, "\"self\" cannot be used in the global scope");
 				goto failure;
 			}
 			ce = scope;
 		} else if (zend_string_equals_literal_ci(class_name, "parent")) {
 			if (UNEXPECTED(!scope)) {
-				zend_throw_error(NULL, "Cannot access \"parent\" when no class scope is active");
+				zend_throw_error(NULL, "\"parent\" cannot be used in the global scope");
 				goto failure;
 			} else if (UNEXPECTED(!scope->parent)) {
-				zend_throw_error(NULL, "Cannot access \"parent\" when current class scope has no parent");
+				zend_throw_error(NULL, "\"parent\" cannot be used when current class scope has no parent");
 				goto failure;
 			} else {
 				ce = scope->parent;
@@ -370,7 +370,7 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 		} else if (zend_string_equals_literal_ci(class_name, "static")) {
 			ce = zend_get_called_scope(EG(current_execute_data));
 			if (UNEXPECTED(!ce)) {
-				zend_throw_error(NULL, "Cannot access \"static\" when no class scope is active");
+				zend_throw_error(NULL, "\"static\" cannot be used in the global scope");
 				goto failure;
 			}
 		} else {
@@ -387,7 +387,11 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 			} else {
 				if (!zend_verify_const_access(c, scope)) {
 					if ((flags & ZEND_FETCH_CLASS_SILENT) == 0) {
-						zend_throw_error(NULL, "Cannot access %s constant %s::%s", zend_visibility_string(Z_ACCESS_FLAGS(c->value)), ZSTR_VAL(class_name), ZSTR_VAL(constant_name));
+						zend_throw_error(NULL, "%s constant %s::%s cannot be accessed from the %s%s",
+							zend_visibility_string_capitalized(Z_ACCESS_FLAGS(c->value)), ZSTR_VAL(class_name), ZSTR_VAL(constant_name),
+							scope ? "scope of class " : "global scope",
+							scope ? ZSTR_VAL(scope->name) : ""
+						);
 					}
 					goto failure;
 				}
@@ -399,7 +403,7 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 			int ret;
 
 			if (IS_CONSTANT_VISITED(ret_constant)) {
-				zend_throw_error(NULL, "Cannot declare self-referencing constant %s::%s", ZSTR_VAL(class_name), ZSTR_VAL(constant_name));
+				zend_throw_error(NULL, "Constant %s::%s cannot reference itself", ZSTR_VAL(class_name), ZSTR_VAL(constant_name));
 				ret_constant = NULL;
 				goto failure;
 			}
@@ -506,7 +510,7 @@ ZEND_API int zend_register_constant(zend_constant *c)
 		|| (!persistent && zend_get_special_const(ZSTR_VAL(name), ZSTR_LEN(name)))
 		|| zend_hash_add_constant(EG(zend_constants), name, c) == NULL
 	) {
-		zend_error(E_NOTICE,"Constant %s already defined", ZSTR_VAL(name));
+		zend_error(E_NOTICE,"Constant %s has already been defined", ZSTR_VAL(name));
 		zend_string_release(c->name);
 		if (!persistent) {
 			zval_ptr_dtor_nogc(&c->value);

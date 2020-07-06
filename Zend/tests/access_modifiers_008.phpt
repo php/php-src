@@ -18,4 +18,4 @@ B2::test();
 
 ?>
 --EXPECTF--
-Fatal error: Call to protected method B1::f() from scope B2 in %s on line %d
+Fatal error: Protected method B1::f() cannot be called from the scope of class B2 in %s on line %d

@@ -9,4 +9,4 @@ try {
   echo "Exception: {$e->getMessage()}\n";
 }
 --EXPECT--
-Exception: Call to private HashContext::__construct() from global scope
+Exception: Private method HashContext::__construct() cannot be called from the global scope

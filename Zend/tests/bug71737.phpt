@@ -13,4 +13,4 @@ class Test {
 
 ?>
 --EXPECTF--
-Fatal error: Cannot use $this as parameter in %s on line %d
+Fatal error: {closure}(): Parameter #1 cannot be called $this in %s on line %d

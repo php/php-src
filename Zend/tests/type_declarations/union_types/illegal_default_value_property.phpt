@@ -9,4 +9,4 @@ class Test {
 
 ?>
 --EXPECTF--
-Fatal error: Cannot use string as default value for property Test::$prop of type int|float in %s on line %d
+Fatal error: Property Test::$prop of type int|float cannot have a default value of type string in %s on line %d

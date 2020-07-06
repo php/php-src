@@ -102,7 +102,7 @@ object(ArrayObject)#2 (3) {
 --> Read existent, non-existent and dynamic:
 string(7) "changed"
 
-Warning: Undefined property: ArrayObject::$nonexistent in %s on line %d
+Warning: Undefined property ArrayObject::$nonexistent in %s on line %d
 NULL
 string(11) "new.changed"
   Original wrapped object:

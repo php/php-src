@@ -10,7 +10,7 @@ var_dump(A::privateConst);
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: Cannot access private constant A::privateConst in %s:6
+Fatal error: Uncaught Error: Private constant A::privateConst cannot be accessed from the global scope in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line 6

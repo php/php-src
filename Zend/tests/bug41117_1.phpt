@@ -10,4 +10,4 @@ class foo {
 $obj = new foo("Hello world");
 ?>
 --EXPECTF--
-Fatal error: Cannot use $this as parameter in %s on line %d
+Fatal error: foo::__construct(): Parameter #1 cannot be called $this in %s on line %d

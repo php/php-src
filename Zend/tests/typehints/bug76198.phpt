@@ -10,4 +10,4 @@ var_dump(foo());
 
 ?>
 --EXPECTF--
-Fatal error: Type declaration 'iterable' must be unqualified in %s on line %d
+Fatal error: Type declaration "iterable" must be unqualified in %s on line %d

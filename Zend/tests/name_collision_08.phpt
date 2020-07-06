@@ -12,4 +12,4 @@ namespace Bazzle {
     function bar() {}
 }
 --EXPECTF--
-Fatal error: Cannot declare function Bazzle\bar because the name is already in use in %s on line %d
+Fatal error: Function Bazzle\bar() cannot be declared because the name is already in use in %s on line %d

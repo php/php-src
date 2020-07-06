@@ -8,7 +8,7 @@ class A {
 }
 class B extends A {
     public function test2($x) {
-        $x->test(); // Uncaught Error: Call to protected method D::test() from scope B
+        $x->test(); // Uncaught Error: Protected method D::test() cannot be called from the scope of class B
     }
 }
 class C extends A {

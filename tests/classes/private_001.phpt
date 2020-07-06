@@ -21,7 +21,7 @@ echo "Done\n"; // shouldn't be displayed
 --EXPECTF--
 Call show()
 
-Fatal error: Uncaught Error: Call to private method pass::show() from global scope in %s:%d
+Fatal error: Uncaught Error: Private method pass::show() cannot be called from the global scope in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

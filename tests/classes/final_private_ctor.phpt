@@ -18,4 +18,4 @@ class Extended extends Base
 
 ?>
 --EXPECTF--
-Fatal error: Cannot override final method Base::__construct() in %s on line %d
+Fatal error: Method Extended::__construct() cannot override final method Base::__construct() in %s on line %d

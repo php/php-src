@@ -50,7 +50,7 @@ object(D)#%d (1) {
 
 Unset a protected property, and attempt to recreate it outside of scope (expected failure):
 
-Fatal error: Uncaught Error: Cannot access protected property %s::$p in %s:32
+Fatal error: Uncaught Error: Protected property D::$p cannot be accessed from the global scope in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line 32

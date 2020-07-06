@@ -16,6 +16,6 @@ try {
 ?>
 --EXPECTF--
 --> Access non-visible static prop like instance prop:
-Error: Cannot access protected property C::$y in %s:%d
+Error: Protected property C::$y cannot be accessed from the global scope in %s:%d
 Stack trace:
 #0 {main}

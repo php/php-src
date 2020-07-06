@@ -34,5 +34,5 @@ echo "\n";
 isset
 empty
 
-Warning: Undefined property: myclass::$foo in %s on line %d
+Warning: Undefined property myclass::$foo in %s on line %d
 empty

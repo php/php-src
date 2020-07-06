@@ -29,7 +29,7 @@ var_dump($f->bindTo($a, A::CLASS)()());
 --EXPECTF--
 int(123)
 
-Fatal error: Uncaught Error: Cannot access private property Foo::$bar in %s:%d
+Fatal error: Uncaught Error: Private property Foo::$bar cannot be accessed from the scope of class A in %s:%d
 Stack trace:
 #0 %s(%d): A->{closure}()
 #1 {main}

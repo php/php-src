@@ -5,4 +5,4 @@ Bug #69767 (Default parameter value with wrong type segfaults)
 function foo(String $bar = 0) {}
 ?>
 --EXPECTF--
-Fatal error: Cannot use int as default value for parameter $bar of type string in %s on line %d
+Fatal error: foo(): Parameter #1 ($bar) of type string cannot have a default value of type int in %s on line %d

@@ -15,4 +15,4 @@ class C {
 
 ?>
 --EXPECTF--
-Fatal error: Cannot make static method T::method() non static in class C in %s on line %d
+Fatal error: Method C::method() must be static to be compatible with overridden method T::method() in %s on line %d

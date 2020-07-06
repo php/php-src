@@ -8,4 +8,4 @@ class T {
 }
 ?>
 --EXPECTF--
-Fatal error: Cannot use int as default value for parameter $p of type P in %s on line %d
+Fatal error: T::f(): Parameter #1 ($p) of type P cannot have a default value of type int in %s on line %d

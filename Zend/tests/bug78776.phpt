@@ -25,4 +25,4 @@ B::createApp();
 
 ?>
 --EXPECTF--
-Fatal error: Cannot make non static method A::createApp() static in class C in %s on line %d
+Fatal error: Method C::createApp() must not be static to be compatible with overridden method A::createApp() in %s on line %d

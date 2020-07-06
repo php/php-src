@@ -11,4 +11,4 @@ class test {
 echo "Done\n";
 ?>
 --EXPECTF--
-Fatal error: Cannot use string as default value for parameter $a of type array in %s on line %d
+Fatal error: test::foo(): Parameter #1 ($a) of type array cannot have a default value of type string in %s on line %d

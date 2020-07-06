@@ -7,4 +7,4 @@ function foo () {
 }
 ?>
 --EXPECTF--
-Fatal error: 'break' not in the 'loop' or 'switch' context in %sbreak_error_003.php on line 3
+Fatal error: break statement can only be used inside a loop or a switch statement in %s on line %d

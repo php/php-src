@@ -6,4 +6,4 @@ function test1() : StdClass {
     yield 1;
 }
 --EXPECTF--
-Fatal error: Generator return type must be a supertype of Generator, StdClass given in %s on line %d
+Fatal error: Generator return type must be a supertype of Generator, StdClass returned in %s on line %d

@@ -9,4 +9,4 @@ class Test {
 
 ?>
 --EXPECTF--
-Fatal error: Cannot declare promoted property outside a constructor in %s on line %d
+Fatal error: Test::foobar(): Promoted property $x cannot be declared outside a constructor in %s on line %d

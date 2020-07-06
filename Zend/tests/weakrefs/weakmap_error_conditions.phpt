@@ -82,11 +82,11 @@ Cannot append to WeakMap
 Cannot append to WeakMap
 Object stdClass#2 not contained in WeakMap
 
-Warning: Undefined property: WeakMap::$prop in %s on line %d
+Warning: Undefined property WeakMap::$prop in %s on line %d
 NULL
 bool(false)
-Cannot create dynamic property WeakMap::$prop
-Cannot create dynamic property WeakMap::$prop
-Cannot create dynamic property WeakMap::$prop
+Dynamic property WeakMap::$prop cannot be created
+Dynamic property WeakMap::$prop cannot be created
+Dynamic property WeakMap::$prop cannot be created
 Serialization of 'WeakMap' is not allowed
 Unserialization of 'WeakMap' is not allowed

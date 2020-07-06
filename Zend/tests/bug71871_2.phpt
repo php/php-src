@@ -9,4 +9,4 @@ interface test {
 
 ?>
 --EXPECTF--
-Fatal error: Access type for interface method test::test() must be omitted in %s on line %d
+Fatal error: Interface method test::test() cannot be abstract in %s on line %d

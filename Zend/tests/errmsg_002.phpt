@@ -11,4 +11,4 @@ abstract class test {
 echo "Done\n";
 ?>
 --EXPECTF--
-Fatal error: Abstract function test::foo() cannot be declared private in %s on line %d
+Fatal error: Abstract method test::foo() must have public or protected visibility in %s on line %d

@@ -12,4 +12,4 @@ class Dummy extends Xmlparser {
 ?>
 ===DONE===
 --EXPECTF--
-Fatal error: Class Dummy may not inherit from final class (XmlParser) in %s on line %d
+Fatal error: Class Dummy cannot extend final class XmlParser in %s on line %d

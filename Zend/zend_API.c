@@ -1349,11 +1349,11 @@ static zend_always_inline int _object_and_properties_init(zval *arg, zend_class_
 {
 	if (UNEXPECTED(class_type->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))) {
 		if (class_type->ce_flags & ZEND_ACC_INTERFACE) {
-			zend_throw_error(NULL, "Cannot instantiate interface %s", ZSTR_VAL(class_type->name));
+			zend_throw_error(NULL, "Interface %s cannot be instantiated", ZSTR_VAL(class_type->name));
 		} else if (class_type->ce_flags & ZEND_ACC_TRAIT) {
-			zend_throw_error(NULL, "Cannot instantiate trait %s", ZSTR_VAL(class_type->name));
+			zend_throw_error(NULL, "Trait %s cannot be instantiated", ZSTR_VAL(class_type->name));
 		} else {
-			zend_throw_error(NULL, "Cannot instantiate abstract class %s", ZSTR_VAL(class_type->name));
+			zend_throw_error(NULL, "Abstract class %s cannot be instantiated", ZSTR_VAL(class_type->name));
 		}
 		ZVAL_NULL(arg);
 		Z_OBJ_P(arg) = NULL;
@@ -2055,7 +2055,7 @@ static void zend_check_magic_method_public(
 {
 	// TODO: Remove this warning after adding proper visibility handling.
 	if (!(fptr->common.fn_flags & ZEND_ACC_PUBLIC)) {
-		zend_error(E_WARNING, "The magic method %s::%s() must have public visibility",
+		zend_error(E_WARNING, "Method %s::%s() must have public visibility",
 			ZSTR_VAL(ce->name), ZSTR_VAL(fptr->common.function_name));
 	}
 }
@@ -2778,7 +2778,7 @@ static int zend_is_callable_check_class(zend_string *name, zend_class_entry *sco
 	*strict_class = 0;
 	if (zend_string_equals_literal(lcname, "self")) {
 		if (!scope) {
-			if (error) *error = estrdup("cannot access \"self\" when no class scope is active");
+			if (error) *error = estrdup("\"self\" cannot be used in the global scope");
 		} else {
 			fcc->called_scope = zend_get_called_scope(EG(current_execute_data));
 			fcc->calling_scope = scope;
@@ -2789,9 +2789,9 @@ static int zend_is_callable_check_class(zend_string *name, zend_class_entry *sco
 		}
 	} else if (zend_string_equals_literal(lcname, "parent")) {
 		if (!scope) {
-			if (error) *error = estrdup("cannot access \"parent\" when no class scope is active");
+			if (error) *error = estrdup("\"parent\" cannot be used in the global scope");
 		} else if (!scope->parent) {
-			if (error) *error = estrdup("cannot access \"parent\" when current class scope has no parent");
+			if (error) *error = estrdup("\"parent\" cannot be used when current class scope has no parent");
 		} else {
 			fcc->called_scope = zend_get_called_scope(EG(current_execute_data));
 			fcc->calling_scope = scope->parent;
@@ -2805,7 +2805,7 @@ static int zend_is_callable_check_class(zend_string *name, zend_class_entry *sco
 		zend_class_entry *called_scope = zend_get_called_scope(EG(current_execute_data));
 
 		if (!called_scope) {
-			if (error) *error = estrdup("cannot access \"static\" when no class scope is active");
+			if (error) *error = estrdup("\"static\" cannot be used in the global scope");
 		} else {
 			fcc->called_scope = called_scope;
 			fcc->calling_scope = called_scope;
@@ -3041,7 +3041,7 @@ get_function_via_handler:
 			if (fcc->function_handler->common.fn_flags & ZEND_ACC_ABSTRACT) {
 				retval = 0;
 				if (error) {
-					zend_spprintf(error, 0, "cannot call abstract method %s::%s()", ZSTR_VAL(fcc->calling_scope->name), ZSTR_VAL(fcc->function_handler->common.function_name));
+					zend_spprintf(error, 0, "abstract method %s::%s() cannot be called", ZSTR_VAL(fcc->calling_scope->name), ZSTR_VAL(fcc->function_handler->common.function_name));
 				}
 			} else if (!fcc->object && !(fcc->function_handler->common.fn_flags & ZEND_ACC_STATIC)) {
 				retval = 0;
@@ -3783,13 +3783,13 @@ ZEND_API zend_class_constant *zend_declare_class_constant_ex(zend_class_entry *c
 
 	if (ce->ce_flags & ZEND_ACC_INTERFACE) {
 		if (access_type != ZEND_ACC_PUBLIC) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Access type for interface constant %s::%s must be public", ZSTR_VAL(ce->name), ZSTR_VAL(name));
+			zend_error_noreturn(E_COMPILE_ERROR, "Interface constant %s::%s must have public visibility", ZSTR_VAL(ce->name), ZSTR_VAL(name));
 		}
 	}
 
 	if (zend_string_equals_literal_ci(name, "class")) {
 		zend_error_noreturn(ce->type == ZEND_INTERNAL_CLASS ? E_CORE_ERROR : E_COMPILE_ERROR,
-				"A class constant must not be called 'class'; it is reserved for class name fetching");
+				"A class constant must not be called \"class\"; it is reserved for class name fetching");
 	}
 
 	if (Z_TYPE_P(value) == IS_STRING && !ZSTR_IS_INTERNED(Z_STR_P(value))) {
@@ -3812,7 +3812,7 @@ ZEND_API zend_class_constant *zend_declare_class_constant_ex(zend_class_entry *c
 
 	if (!zend_hash_add_ptr(&ce->constants_table, name, c)) {
 		zend_error_noreturn(ce->type == ZEND_INTERNAL_CLASS ? E_CORE_ERROR : E_COMPILE_ERROR,
-			"Cannot redefine class constant %s::%s", ZSTR_VAL(ce->name), ZSTR_VAL(name));
+			"Constant %s::%s cannot be redefined", ZSTR_VAL(ce->name), ZSTR_VAL(name));
 	}
 
 	return c;
@@ -4205,7 +4205,7 @@ ZEND_API void zend_restore_error_handling(zend_error_handling *saved) /* {{{ */
 
 ZEND_API ZEND_COLD const char *zend_get_object_type(const zend_class_entry *ce) /* {{{ */
 {
-	if(ce->ce_flags & ZEND_ACC_TRAIT) {
+	if (ce->ce_flags & ZEND_ACC_TRAIT) {
 		return "trait";
 	} else if (ce->ce_flags & ZEND_ACC_INTERFACE) {
 		return "interface";

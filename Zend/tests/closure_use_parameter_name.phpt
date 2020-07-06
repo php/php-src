@@ -11,4 +11,4 @@ $fn(2);
 
 ?>
 --EXPECTF--
-Fatal error: Cannot use lexical variable $a as a parameter name in %s on line %d
+Fatal error: Lexical variable $a cannot be used as a parameter name in %s on line %d

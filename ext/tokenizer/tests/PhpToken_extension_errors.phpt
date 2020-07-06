@@ -27,4 +27,4 @@ try {
 ?>
 --EXPECT--
 Undefined constant "UNKNOWN"
-Cannot instantiate abstract class MyPhpToken2
+Abstract class MyPhpToken2 cannot be instantiated

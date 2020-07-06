@@ -18,7 +18,7 @@ test();
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: Cannot call forward_static_call() when no class scope is active in %s:%d
+Fatal error: Uncaught Error: forward_static_call() cannot be called from the global scope in %s:%d
 Stack trace:
 #0 %s(%d): forward_static_call(Array)
 #1 %s(%d): test()

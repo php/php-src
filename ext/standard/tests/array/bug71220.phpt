@@ -11,4 +11,4 @@ try {
 ?>
 
 --EXPECT--
-Cannot call compact() dynamically
+compact() cannot be called dynamically

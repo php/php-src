@@ -40,6 +40,6 @@ foreach ((new ReflectionObject($f))->getProperties() as $p) {
 ?>
 --EXPECT--
 dummy1 = 
-ErrorHandler::handleError dealing with error Undefined property: Foo::$dummy2
+ErrorHandler::handleError dealing with error Undefined property Foo::$dummy2
 THIS IS PRIVATE
 dummy2 =

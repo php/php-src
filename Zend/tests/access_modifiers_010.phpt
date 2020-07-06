@@ -28,7 +28,7 @@ new c;
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: Call to private method d::test2() from scope a in %s:%d
+Fatal error: Uncaught Error: Private method d::test2() cannot be called from the scope of class a in %s:%d
 Stack trace:
 #0 %s(%d): a->test()
 #1 %s(%d): c->__construct()

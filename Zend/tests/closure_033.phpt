@@ -25,7 +25,7 @@ $o->func();
 --EXPECTF--
 {closure}()
 
-Fatal error: Uncaught Error: Call to private method Test::func() from global scope in %s:%d
+Fatal error: Uncaught Error: Private method Test::func() cannot be called from the global scope in %s:%d
 Stack trace:
 #0 {main}
   thrown in %sclosure_033.php on line %d

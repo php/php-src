@@ -19,4 +19,4 @@ $obj = new Derived;
 --EXPECT--
 ===DONE===
 
-Warning: Call to private Derived::__destruct() from global scope during shutdown ignored in Unknown on line 0
+Warning: Call to private Derived::__destruct() from the global scope during shutdown is ignored in Unknown on line 0

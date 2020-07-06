@@ -465,12 +465,12 @@ failure:
 	CG(zend_lineno) = function1->op_array.opcodes[0].lineno;
 	if (function2->type == ZEND_USER_FUNCTION
 		&& function2->op_array.last > 0) {
-		zend_error(E_ERROR, "Cannot redeclare %s() (previously declared in %s:%d)",
+		zend_error(E_ERROR, "Function %s() cannot be redeclared (previous declaration in %s:%d)",
 				   ZSTR_VAL(function1->common.function_name),
 				   ZSTR_VAL(function2->op_array.filename),
 				   (int)function2->op_array.opcodes[0].lineno);
 	} else {
-		zend_error(E_ERROR, "Cannot redeclare %s()", ZSTR_VAL(function1->common.function_name));
+		zend_error(E_ERROR, "Function %s() cannot be redeclared", ZSTR_VAL(function1->common.function_name));
 	}
 }
 
@@ -509,12 +509,12 @@ failure:
 	CG(zend_lineno) = function1->op_array.opcodes[0].lineno;
 	if (function2->type == ZEND_USER_FUNCTION
 		&& function2->op_array.last > 0) {
-		zend_error(E_ERROR, "Cannot redeclare %s() (previously declared in %s:%d)",
+		zend_error(E_ERROR, "%s() cannot be redeclared (previous declaration in %s:%d)",
 				   ZSTR_VAL(function1->common.function_name),
 				   ZSTR_VAL(function2->op_array.filename),
 				   (int)function2->op_array.opcodes[0].lineno);
 	} else {
-		zend_error(E_ERROR, "Cannot redeclare %s()", ZSTR_VAL(function1->common.function_name));
+		zend_error(E_ERROR, "Function %s() cannot be redeclared", ZSTR_VAL(function1->common.function_name));
 	}
 }
 
@@ -541,7 +541,7 @@ static void zend_accel_class_hash_copy(HashTable *target, HashTable *source)
 					zend_set_compiled_filename(ce1->info.user.filename);
 					CG(zend_lineno) = ce1->info.user.line_start;
 					zend_error(E_ERROR,
-							"Cannot declare %s %s, because the name is already in use",
+							"%s %s cannot be declared, because the name is already in use",
 							zend_get_object_type(ce1), ZSTR_VAL(ce1->name));
 					return;
 				}
@@ -578,7 +578,7 @@ static void zend_accel_class_hash_copy_from_shm(HashTable *target, HashTable *so
 					zend_set_compiled_filename(ce1->info.user.filename);
 					CG(zend_lineno) = ce1->info.user.line_start;
 					zend_error(E_ERROR,
-							"Cannot declare %s %s, because the name is already in use",
+							"%s %s cannot be declared, because the name is already in use",
 							zend_get_object_type(ce1), ZSTR_VAL(ce1->name));
 					return;
 				}

@@ -21,8 +21,8 @@ try {
 }
 ?>
 --EXPECTF--
-Warning: Undefined property: WeakReference::$disallow in %s on line %d
+Warning: Undefined property WeakReference::$disallow in %s on line %d
 NULL
 bool(false)
-string(55) "Cannot create dynamic property WeakReference::$disallow"
-string(57) "Cannot create dynamic property WeakReference::$disallowed"
+string(59) "Dynamic property WeakReference::$disallow cannot be created"
+string(61) "Dynamic property WeakReference::$disallowed cannot be created"

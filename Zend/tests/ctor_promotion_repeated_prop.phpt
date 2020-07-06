@@ -11,4 +11,4 @@ class Test {
 
 ?>
 --EXPECTF--
-Fatal error: Cannot redeclare Test::$prop in %s on line %d
+Fatal error: Promoted property Test::$prop cannot redeclare standard property in %s on line %d

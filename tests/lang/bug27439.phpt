@@ -65,7 +65,7 @@ echo "===DONE===";
 ?>
 --EXPECTF--
 123
-Warning: Undefined property: test::$foobar in %s on line %d
+Warning: Undefined property test::$foobar in %s on line %d
 
 Warning: foreach() argument must be of type array|object, null given in %s on line %d
 

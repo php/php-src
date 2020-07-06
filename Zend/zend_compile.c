@@ -201,7 +201,7 @@ void zend_assert_valid_class_name(const zend_string *name) /* {{{ */
 {
 	if (zend_is_reserved_class_name(name)) {
 		zend_error_noreturn(E_COMPILE_ERROR,
-			"Cannot use '%s' as class name as it is reserved", ZSTR_VAL(name));
+			"Cannot use \"%s\" as class name as it is reserved", ZSTR_VAL(name));
 	}
 }
 /* }}} */
@@ -949,7 +949,7 @@ zend_string *zend_resolve_class_name(zend_string *name, uint32_t type) /* {{{ */
 		}
 		/* Ensure that \self, \parent and \static are not used */
 		if (ZEND_FETCH_CLASS_DEFAULT != zend_get_class_fetch_type(name)) {
-			zend_error_noreturn(E_COMPILE_ERROR, "'\\%s' is an invalid class name", ZSTR_VAL(name));
+			zend_error_noreturn(E_COMPILE_ERROR, "\"\\%s\" is an invalid class name", ZSTR_VAL(name));
 		}
 		return name;
 	}
@@ -1064,12 +1064,12 @@ static zend_never_inline ZEND_COLD ZEND_NORETURN void do_bind_function_error(zen
 	old_function = (zend_function*)Z_PTR_P(zv);
 	if (old_function->type == ZEND_USER_FUNCTION
 		&& old_function->op_array.last > 0) {
-		zend_error_noreturn(error_level, "Cannot redeclare %s() (previously declared in %s:%d)",
+		zend_error_noreturn(error_level, "Function %s() cannot be redeclared (previous declaration in %s:%d)",
 					op_array ? ZSTR_VAL(op_array->function_name) : ZSTR_VAL(old_function->common.function_name),
 					ZSTR_VAL(old_function->op_array.filename),
 					old_function->op_array.opcodes[0].lineno);
 	} else {
-		zend_error_noreturn(error_level, "Cannot redeclare %s()",
+		zend_error_noreturn(error_level, "Function %s() cannot be redeclared",
 			op_array ? ZSTR_VAL(op_array->function_name) : ZSTR_VAL(old_function->common.function_name));
 	}
 }
@@ -1107,7 +1107,7 @@ ZEND_API int do_bind_class(zval *lcname, zend_string *lc_parent_name) /* {{{ */
 	if (UNEXPECTED(!zv)) {
 		ce = zend_hash_find_ptr(EG(class_table), Z_STR_P(lcname));
 		if (ce) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(ce->name));
+			zend_error_noreturn(E_COMPILE_ERROR, "%s %s cannot be declared, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(ce->name));
 			return FAILURE;
 		} else {
 			do {
@@ -1129,7 +1129,7 @@ ZEND_API int do_bind_class(zval *lcname, zend_string *lc_parent_name) /* {{{ */
 	ce = (zend_class_entry*)Z_PTR_P(zv);
 	zv = zend_hash_set_bucket_key(EG(class_table), (Bucket*)zv, Z_STR_P(lcname));
 	if (UNEXPECTED(!zv)) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(ce->name));
+		zend_error_noreturn(E_COMPILE_ERROR, "%s %s cannot be declared, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(ce->name));
 		return FAILURE;
 	}
 
@@ -1279,7 +1279,7 @@ static void zend_mark_function_as_generator() /* {{{ */
 		if (!valid_type) {
 			zend_string *str = zend_type_to_string(return_type);
 			zend_error_noreturn(E_COMPILE_ERROR,
-				"Generator return type must be a supertype of Generator, %s given",
+				"Generator return type must be a supertype of Generator, %s returned",
 				ZSTR_VAL(str));
 		}
 	}
@@ -1536,12 +1536,12 @@ static void zend_ensure_valid_class_fetch_type(uint32_t fetch_type) /* {{{ */
 	if (fetch_type != ZEND_FETCH_CLASS_DEFAULT && zend_is_scope_known()) {
 		zend_class_entry *ce = CG(active_class_entry);
 		if (!ce) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use \"%s\" when no class scope is active",
+			zend_error_noreturn(E_COMPILE_ERROR, "\"%s\" cannot be used in the global scope",
 				fetch_type == ZEND_FETCH_CLASS_SELF ? "self" :
 				fetch_type == ZEND_FETCH_CLASS_PARENT ? "parent" : "static");
 		} else if (fetch_type == ZEND_FETCH_CLASS_PARENT && !ce->parent_name) {
 			zend_error_noreturn(E_COMPILE_ERROR,
-				"Cannot use \"parent\" when current class scope has no parent");
+				"\"parent\" cannot be used when current class scope has no parent");
 		}
 	}
 }
@@ -2275,7 +2275,7 @@ static size_t zend_type_get_num_classes(zend_type type) {
 }
 
 static void zend_emit_return_type_check(
-		znode *expr, zend_arg_info *return_info, zend_bool implicit) /* {{{ */
+		znode *expr, zend_arg_info *return_info, zend_class_entry *scope, zend_bool implicit) /* {{{ */
 {
 	zend_type type = return_info->type;
 	if (ZEND_TYPE_IS_SET(type)) {
@@ -2285,11 +2285,11 @@ static void zend_emit_return_type_check(
 		if (ZEND_TYPE_CONTAINS_CODE(type, IS_VOID)) {
 			if (expr) {
 				if (expr->op_type == IS_CONST && Z_TYPE(expr->u.constant) == IS_NULL) {
-					zend_error_noreturn(E_COMPILE_ERROR,
-						"A void function must not return a value "
-						"(did you mean \"return;\" instead of \"return null;\"?)");
+					zend_function_error_noreturn(E_COMPILE_ERROR, NULL,
+						"with return type void must not return a value (did you mean \"return;\" instead of \"return null;\"?)"
+					);
 				} else {
-					zend_error_noreturn(E_COMPILE_ERROR, "A void function must not return a value");
+					zend_function_error_noreturn(E_COMPILE_ERROR, NULL, "with return type void must not return a value");
 				}
 			}
 			/* we don't need run-time check */
@@ -2298,12 +2298,14 @@ static void zend_emit_return_type_check(
 
 		if (!expr && !implicit) {
 			if (ZEND_TYPE_ALLOW_NULL(type)) {
-				zend_error_noreturn(E_COMPILE_ERROR,
-					"A function with return type must return a value "
-					"(did you mean \"return null;\" instead of \"return;\"?)");
+				zend_function_error_noreturn(E_COMPILE_ERROR, NULL,
+					"with return type %s must return a value (did you mean \"return null;\" instead of \"return;\"?)",
+					ZSTR_VAL(zend_type_to_string_resolved(type, scope))
+				);
 			} else {
-				zend_error_noreturn(E_COMPILE_ERROR,
-					"A function with return type must return a value");
+				zend_function_error_noreturn(E_COMPILE_ERROR, NULL,
+					"with return type %s must return a value", ZSTR_VAL(zend_type_to_string_resolved(type, scope))
+				);
 			}
 		}
 
@@ -2336,7 +2338,7 @@ void zend_emit_final_return(int return_one) /* {{{ */
 
 	if ((CG(active_op_array)->fn_flags & ZEND_ACC_HAS_RETURN_TYPE)
 			&& !(CG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR)) {
-		zend_emit_return_type_check(NULL, CG(active_op_array)->arg_info - 1, 1);
+		zend_emit_return_type_check(NULL, CG(active_op_array)->arg_info - 1, CG(active_op_array)->scope, 1);
 	}
 
 	zn.op_type = IS_CONST;
@@ -4529,7 +4531,7 @@ void zend_compile_return(zend_ast *ast) /* {{{ */
 	/* Generator return types are handled separately */
 	if (!is_generator && (CG(active_op_array)->fn_flags & ZEND_ACC_HAS_RETURN_TYPE)) {
 		zend_emit_return_type_check(
-			expr_ast ? &expr_node : NULL, CG(active_op_array)->arg_info - 1, 0);
+			expr_ast ? &expr_node : NULL, CG(active_op_array)->arg_info - 1, CG(active_op_array)->scope, 0);
 	}
 
 	zend_handle_loops_and_finally((expr_node.op_type & (IS_TMP_VAR | IS_VAR)) ? &expr_node : NULL);
@@ -4589,13 +4591,13 @@ void zend_compile_break_continue(zend_ast *ast) /* {{{ */
 	if (depth_ast) {
 		zval *depth_zv;
 		if (depth_ast->kind != ZEND_AST_ZVAL) {
-			zend_error_noreturn(E_COMPILE_ERROR, "'%s' operator with non-integer operand "
-				"is no longer supported", ast->kind == ZEND_AST_BREAK ? "break" : "continue");
+			zend_error_noreturn(E_COMPILE_ERROR, "%s statement with non-integer argument is no longer supported",
+				ast->kind == ZEND_AST_BREAK ? "break" : "continue");
 		}
 
 		depth_zv = zend_ast_get_zval(depth_ast);
 		if (Z_TYPE_P(depth_zv) != IS_LONG || Z_LVAL_P(depth_zv) < 1) {
-			zend_error_noreturn(E_COMPILE_ERROR, "'%s' operator accepts only positive integers",
+			zend_error_noreturn(E_COMPILE_ERROR, "%s statement accepts only an integer argument greater than or equal to 0",
 				ast->kind == ZEND_AST_BREAK ? "break" : "continue");
 		}
 
@@ -4605,11 +4607,11 @@ void zend_compile_break_continue(zend_ast *ast) /* {{{ */
 	}
 
 	if (CG(context).current_brk_cont == -1) {
-		zend_error_noreturn(E_COMPILE_ERROR, "'%s' not in the 'loop' or 'switch' context",
+		zend_error_noreturn(E_COMPILE_ERROR, "%s statement can only be used inside a loop or a switch statement",
 			ast->kind == ZEND_AST_BREAK ? "break" : "continue");
 	} else {
 		if (!zend_handle_loops_and_finally_ex(depth, NULL)) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Cannot '%s' " ZEND_LONG_FMT " level%s",
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot %s " ZEND_LONG_FMT " level%s",
 				ast->kind == ZEND_AST_BREAK ? "break" : "continue",
 				depth, depth == 1 ? "" : "s");
 		}
@@ -4657,7 +4659,7 @@ void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline) /* {{{ */
 		CG(in_compilation) = 1;
 		CG(active_op_array) = op_array;
 		CG(zend_lineno) = opline->lineno;
-		zend_error_noreturn(E_COMPILE_ERROR, "'goto' to undefined label '%s'", Z_STRVAL_P(label));
+		zend_error_noreturn(E_COMPILE_ERROR, "goto to undefined label %s", Z_STRVAL_P(label));
 	}
 
 	zval_ptr_dtor_str(label);
@@ -4669,7 +4671,7 @@ void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline) /* {{{ */
 			CG(in_compilation) = 1;
 			CG(active_op_array) = op_array;
 			CG(zend_lineno) = opline->lineno;
-			zend_error_noreturn(E_COMPILE_ERROR, "'goto' into loop or switch statement is disallowed");
+			zend_error_noreturn(E_COMPILE_ERROR, "goto into a loop or switch statement is disallowed");
 		}
 		if (CG(context).brk_cont_array[current].start >= 0) {
 			remove_oplines--;
@@ -4735,7 +4737,7 @@ void zend_compile_label(zend_ast *ast) /* {{{ */
 	dest.opline_num = get_next_op_number();
 
 	if (!zend_hash_add_mem(CG(context).labels, label, &dest, sizeof(zend_label))) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Label '%s' already defined", ZSTR_VAL(label));
+		zend_error_noreturn(E_COMPILE_ERROR, "Label %s cannot be redefined", ZSTR_VAL(label));
 	}
 }
 /* }}} */
@@ -5594,7 +5596,7 @@ zend_bool zend_handle_encoding_declaration(zend_ast *ast) /* {{{ */
 
 				new_encoding = zend_multibyte_fetch_encoding(ZSTR_VAL(encoding_name));
 				if (!new_encoding) {
-					zend_error(E_COMPILE_WARNING, "Unsupported encoding [%s]", ZSTR_VAL(encoding_name));
+					zend_error(E_COMPILE_WARNING, "Encoding \"%s\" is unsupported", ZSTR_VAL(encoding_name));
 				} else {
 					old_input_filter = LANG_SCNG(input_filter);
 					old_encoding = LANG_SCNG(script_encoding);
@@ -5693,7 +5695,7 @@ void zend_compile_declare(zend_ast *ast) /* {{{ */
 			}
 
 		} else {
-			zend_error(E_COMPILE_WARNING, "Unsupported declare '%s'", ZSTR_VAL(name));
+			zend_error(E_COMPILE_WARNING, "\"%s\" declaration is unsupported", ZSTR_VAL(name));
 		}
 	}
 
@@ -5746,7 +5748,7 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 	if (ast->kind == ZEND_AST_TYPE) {
 		if (ast->attr == IS_STATIC && !CG(active_class_entry) && zend_is_scope_known()) {
 			zend_error_noreturn(E_COMPILE_ERROR,
-				"Cannot use \"static\" when no class scope is active");
+				"\"static\" cannot be used in the global scope");
 		}
 		return (zend_type) ZEND_TYPE_INIT_CODE(ast->attr, 0, 0);
 	} else {
@@ -5756,7 +5758,7 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 		if (type_code != 0) {
 			if ((ast->attr & ZEND_NAME_NOT_FQ) != ZEND_NAME_NOT_FQ) {
 				zend_error_noreturn(E_COMPILE_ERROR,
-					"Type declaration '%s' must be unqualified",
+					"Type declaration \"%s\" must be unqualified",
 					ZSTR_VAL(zend_string_tolower(class_name)));
 			}
 			return (zend_type) ZEND_TYPE_INIT_CODE(type_code, 0, 0);
@@ -5784,7 +5786,7 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 						ZSTR_VAL(orig_name), correct_name, ZSTR_VAL(class_name), extra);
 				} else {
 					zend_error(E_COMPILE_WARNING,
-						"\"%s\" is not a supported builtin type "
+						"\"%s\" is not a supported built-in type "
 						"and will be interpreted as a class name. "
 						"Write \"\\%s\"%s to suppress this warning",
 						ZSTR_VAL(orig_name), ZSTR_VAL(class_name), extra);
@@ -6000,14 +6002,14 @@ static void zend_compile_attributes(HashTable **attributes, zend_ast *ast, uint3
 			zend_string *location = zend_get_attribute_target_names(target);
 			zend_string *allowed = zend_get_attribute_target_names(config->flags);
 
-			zend_error_noreturn(E_ERROR, "Attribute \"%s\" cannot target %s (allowed targets: %s)",
+			zend_error_noreturn(E_ERROR, "Attribute %s cannot target %s (allowed targets: %s)",
 				ZSTR_VAL(attr->name), ZSTR_VAL(location), ZSTR_VAL(allowed)
 			);
 		}
 
 		if (!(config->flags & ZEND_ATTRIBUTE_IS_REPEATABLE)) {
 			if (zend_is_attribute_repeated(*attributes, attr)) {
-				zend_error_noreturn(E_ERROR, "Attribute \"%s\" must not be repeated", ZSTR_VAL(attr->name));
+				zend_error_noreturn(E_ERROR, "Attribute %s must not be repeated", ZSTR_VAL(attr->name));
 			}
 		}
 
@@ -6066,7 +6068,7 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fall
 		zend_arg_info *arg_info;
 
 		if (zend_is_auto_global(name)) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Cannot re-assign auto-global variable %s",
+			zend_error_noreturn(E_COMPILE_ERROR, "Auto-global variable %s cannot be re-assigned",
 				ZSTR_VAL(name));
 		}
 
@@ -6074,14 +6076,13 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fall
 		var_node.u.op.var = lookup_cv(name);
 
 		if (EX_VAR_TO_NUM(var_node.u.op.var) != i) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Redefinition of parameter $%s",
-				ZSTR_VAL(name));
+			zend_parameter_error_noreturn(E_COMPILE_ERROR, NULL, i + 1, ZSTR_VAL(name), "cannot be redefined");
 		} else if (zend_string_equals_literal(name, "this")) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use $this as parameter");
+			zend_parameter_error_noreturn(E_COMPILE_ERROR, NULL, i + 1, NULL, "cannot be called $this");
 		}
 
 		if (op_array->fn_flags & ZEND_ACC_VARIADIC) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Only the last parameter can be variadic");
+			zend_parameter_error_noreturn(E_COMPILE_ERROR, NULL, i + 1, ZSTR_VAL(name), "cannot be variadic");
 		}
 
 		if (is_variadic) {
@@ -6090,8 +6091,9 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fall
 			op_array->fn_flags |= ZEND_ACC_VARIADIC;
 
 			if (default_ast) {
-				zend_error_noreturn(E_COMPILE_ERROR,
-					"Variadic parameter cannot have a default value");
+				zend_parameter_error_noreturn(
+					E_COMPILE_ERROR, "Variadic parameter", i + 1, ZSTR_VAL(name), "cannot have a default value"
+				);
 			}
 		} else if (default_ast) {
 			/* we cannot substitute constants here or it will break ReflectionParameter::getDefaultValueConstantName() and ReflectionParameter::isDefaultValueConstant() */
@@ -6116,7 +6118,7 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fall
 			default_node.op_type = IS_UNUSED;
 			op_array->required_num_args = i + 1;
 			if (optional_param) {
-				zend_error(E_DEPRECATED, "Required parameter $%s follows optional parameter $%s",
+				zend_error(E_DEPRECATED, "Required parameter $%s should precede optional parameter $%s",
 					ZSTR_VAL(name), ZSTR_VAL(optional_param));
 			}
 		}
@@ -6137,16 +6139,16 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fall
 			arg_info->type = zend_compile_typename(type_ast, force_nullable, /* use_arena */ 0);
 
 			if (ZEND_TYPE_FULL_MASK(arg_info->type) & MAY_BE_VOID) {
-				zend_error_noreturn(E_COMPILE_ERROR, "void cannot be used as a parameter type");
+				zend_parameter_error_noreturn(E_COMPILE_ERROR, NULL, i + 1, ZSTR_VAL(name), "cannot be of type void");
 			}
 
 			if (default_type != IS_UNDEF && default_type != IS_CONSTANT_AST && !force_nullable
 					&& !zend_is_valid_default_value(arg_info->type, &default_node.u.constant)) {
 				zend_string *type_str = zend_type_to_string(arg_info->type);
-				zend_error_noreturn(E_COMPILE_ERROR,
-					"Cannot use %s as default value for parameter $%s of type %s",
-					zend_get_type_by_const(default_type),
-					ZSTR_VAL(name), ZSTR_VAL(type_str));
+				zend_parameter_error_noreturn(E_COMPILE_ERROR, NULL, i + 1, ZSTR_VAL(name),
+					"of type %s cannot have a default value of type %s",
+					ZSTR_VAL(type_str), zend_get_type_by_const(default_type)
+				);
 			}
 		}
 
@@ -6173,28 +6175,34 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fall
 			zend_class_entry *scope = op_array->scope;
 			zend_bool is_ctor =
 				scope && zend_is_constructor(op_array->function_name);
+
 			if (!is_ctor) {
 				zend_error_noreturn(E_COMPILE_ERROR,
-					"Cannot declare promoted property outside a constructor");
+					"%s%s%s(): Promoted property $%s cannot be declared outside a constructor",
+					scope ? ZSTR_VAL(scope->name) : "", scope ? "::" : "", ZSTR_VAL(op_array->function_name), ZSTR_VAL(name)
+				);
 			}
 			if ((op_array->fn_flags & ZEND_ACC_ABSTRACT)
 					|| (scope->ce_flags & ZEND_ACC_INTERFACE)) {
-				zend_error_noreturn(E_COMPILE_ERROR,
-					"Cannot declare promoted property in an abstract constructor");
+				zend_property_error_noreturn(E_COMPILE_ERROR,
+					"Promoted property", ZSTR_VAL(name), "cannot be declared in an abstract constructor"
+				);
 			}
 			if (is_variadic) {
-				zend_error_noreturn(E_COMPILE_ERROR,
-					"Cannot declare variadic promoted property");
+				zend_property_error_noreturn(E_COMPILE_ERROR,
+					"Variadic promoted property", ZSTR_VAL(name), "cannot be declared"
+				);
 			}
 			if (zend_hash_exists(&scope->properties_info, name)) {
-				zend_error_noreturn(E_COMPILE_ERROR, "Cannot redeclare %s::$%s",
-					ZSTR_VAL(scope->name), ZSTR_VAL(name));
+				zend_property_error_noreturn(E_COMPILE_ERROR,
+					"Promoted property", ZSTR_VAL(name), "cannot redeclare standard property"
+				);
 			}
 			if (ZEND_TYPE_FULL_MASK(arg_info->type) & MAY_BE_CALLABLE) {
 				zend_string *str = zend_type_to_string(arg_info->type);
-				zend_error_noreturn(E_COMPILE_ERROR,
-					"Property %s::$%s cannot have type %s",
-					ZSTR_VAL(scope->name), ZSTR_VAL(name), ZSTR_VAL(str));
+				zend_property_error_noreturn(E_COMPILE_ERROR,
+					"Promoted property", ZSTR_VAL(name), "cannot be of type %s", ZSTR_VAL(str)
+				);
 			}
 
 			/* Recompile the type, as it has different memory management requirements. */
@@ -6289,7 +6297,7 @@ static void zend_compile_closure_binding(znode *closure, zend_op_array *op_array
 		value = zend_hash_add(op_array->static_variables, var_name, &EG(uninitialized_zval));
 		if (!value) {
 			zend_error_noreturn(E_COMPILE_ERROR,
-				"Cannot use variable $%s twice", ZSTR_VAL(var_name));
+				"Variable $%s cannot be used multiple times", ZSTR_VAL(var_name));
 		}
 
 		CG(zend_lineno) = zend_ast_get_lineno(var_name_ast);
@@ -6421,7 +6429,7 @@ static void zend_compile_closure_uses(zend_ast *ast) /* {{{ */
 			for (i = 0; i < op_array->last_var; i++) {
 				if (zend_string_equals(op_array->vars[i], var_name)) {
 					zend_error_noreturn(E_COMPILE_ERROR,
-						"Cannot use lexical variable $%s as a parameter name", ZSTR_VAL(var_name));
+						"Lexical variable $%s cannot be used as a parameter name", ZSTR_VAL(var_name));
 				}
 			}
 		}
@@ -6474,27 +6482,37 @@ zend_string *zend_begin_method_decl(zend_op_array *op_array, zend_string *name, 
 	}
 
 	if (in_interface) {
-		if (!(fn_flags & ZEND_ACC_PUBLIC) || (fn_flags & (ZEND_ACC_FINAL|ZEND_ACC_ABSTRACT))) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Access type for interface method "
-				"%s::%s() must be omitted", ZSTR_VAL(ce->name), ZSTR_VAL(name));
+		if (!(fn_flags & ZEND_ACC_PUBLIC)) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Interface method %s::%s() must have public visibility",
+				ZSTR_VAL(ce->name), ZSTR_VAL(name));
+		}
+		if (fn_flags & ZEND_ACC_FINAL) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Interface method %s::%s() cannot be final",
+				ZSTR_VAL(ce->name), ZSTR_VAL(name)
+			);
+		}
+		if (fn_flags & ZEND_ACC_ABSTRACT) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Interface method %s::%s() cannot be abstract",
+				ZSTR_VAL(ce->name), ZSTR_VAL(name)
+			);
 		}
 		op_array->fn_flags |= ZEND_ACC_ABSTRACT;
 	}
 
 	if (op_array->fn_flags & ZEND_ACC_ABSTRACT) {
 		if ((op_array->fn_flags & ZEND_ACC_PRIVATE) && !(ce->ce_flags & ZEND_ACC_TRAIT)) {
-			zend_error_noreturn(E_COMPILE_ERROR, "%s function %s::%s() cannot be declared private",
+			zend_error_noreturn(E_COMPILE_ERROR, "%s method %s::%s() must have public or protected visibility",
 				in_interface ? "Interface" : "Abstract", ZSTR_VAL(ce->name), ZSTR_VAL(name));
 		}
 
 		if (has_body) {
-			zend_error_noreturn(E_COMPILE_ERROR, "%s function %s::%s() cannot contain body",
+			zend_error_noreturn(E_COMPILE_ERROR, "%s method %s::%s() cannot have a body",
 				in_interface ? "Interface" : "Abstract", ZSTR_VAL(ce->name), ZSTR_VAL(name));
 		}
 
 		ce->ce_flags |= ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
 	} else if (!has_body) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Non-abstract method %s::%s() must contain body",
+		zend_error_noreturn(E_COMPILE_ERROR, "Non-abstract method %s::%s() must have a body",
 			ZSTR_VAL(ce->name), ZSTR_VAL(name));
 	}
 
@@ -6505,7 +6523,7 @@ zend_string *zend_begin_method_decl(zend_op_array *op_array, zend_string *name, 
 	lcname = zend_new_interned_string(lcname);
 
 	if (zend_hash_add_ptr(&ce->function_table, lcname, op_array) == NULL) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Cannot redeclare %s::%s()",
+		zend_error_noreturn(E_COMPILE_ERROR, "Method %s::%s() cannot be redeclared",
 			ZSTR_VAL(ce->name), ZSTR_VAL(name));
 	}
 
@@ -6531,8 +6549,8 @@ static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_as
 		zend_string *import_name =
 			zend_hash_find_ptr_lc(FC(imports_function), unqualified_name);
 		if (import_name && !zend_string_equals_ci(lcname, import_name)) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare function %s "
-				"because the name is already in use", ZSTR_VAL(name));
+			zend_error_noreturn(E_COMPILE_ERROR, "Function %s() cannot be declared because the name is already in use",
+				ZSTR_VAL(name));
 		}
 	}
 
@@ -6740,7 +6758,7 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t flags, z
 			if (ZEND_TYPE_FULL_MASK(type) & (MAY_BE_VOID|MAY_BE_CALLABLE)) {
 				zend_string *str = zend_type_to_string(type);
 				zend_error_noreturn(E_COMPILE_ERROR,
-					"Property %s::$%s cannot have type %s",
+					"Property %s::$%s cannot be of type %s",
 					ZSTR_VAL(ce->name), ZSTR_VAL(name), ZSTR_VAL(str));
 			}
 		}
@@ -6751,13 +6769,13 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t flags, z
 		}
 
 		if (flags & ZEND_ACC_FINAL) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare property %s::$%s final, "
+			zend_error_noreturn(E_COMPILE_ERROR, "Property %s::$%s cannot be declared final, "
 				"the final modifier is allowed only for methods and classes",
 				ZSTR_VAL(ce->name), ZSTR_VAL(name));
 		}
 
 		if (zend_hash_exists(&ce->properties_info, name)) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Cannot redeclare %s::$%s",
+			zend_error_noreturn(E_COMPILE_ERROR, "Property %s::$%s cannot be redeclared",
 				ZSTR_VAL(ce->name), ZSTR_VAL(name));
 		}
 
@@ -6769,14 +6787,13 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t flags, z
 				zend_string *str = zend_type_to_string(type);
 				if (Z_TYPE(value_zv) == IS_NULL) {
 					zend_error_noreturn(E_COMPILE_ERROR,
-						"Default value for property of type %s may not be null. "
-						"Use the nullable type ?%s to allow null default value",
-						ZSTR_VAL(str), ZSTR_VAL(str));
+						"Property %s:$%s of type %s cannot have a default value of null. "
+						"Use the nullable type ?%s to allow a null default value",
+						ZSTR_VAL(ce->name), ZSTR_VAL(name), ZSTR_VAL(str), ZSTR_VAL(str));
 				} else {
 					zend_error_noreturn(E_COMPILE_ERROR,
-						"Cannot use %s as default value for property %s::$%s of type %s",
-						zend_zval_type_name(&value_zv),
-						ZSTR_VAL(ce->name), ZSTR_VAL(name), ZSTR_VAL(str));
+						"Property %s::$%s of type %s cannot have a default value of type %s",
+						ZSTR_VAL(ce->name), ZSTR_VAL(name), ZSTR_VAL(str), zend_zval_type_name(&value_zv));
 				}
 			}
 		} else if (!ZEND_TYPE_IS_SET(type)) {
@@ -6812,11 +6829,11 @@ void zend_compile_prop_group(zend_ast *ast) /* {{{ */
 static void zend_check_const_and_trait_alias_attr(uint32_t attr, const char* entity) /* {{{ */
 {
 	if (attr & ZEND_ACC_STATIC) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use 'static' as %s modifier", entity);
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use \"static\" as %s modifier", entity);
 	} else if (attr & ZEND_ACC_ABSTRACT) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use 'abstract' as %s modifier", entity);
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use \"abstract\" as %s modifier", entity);
 	} else if (attr & ZEND_ACC_FINAL) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use 'final' as %s modifier", entity);
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use \"final\" as %s modifier", entity);
 	}
 }
 /* }}} */
@@ -7043,8 +7060,8 @@ void zend_compile_class_decl(znode *result, zend_ast *ast, zend_bool toplevel) /
 			zend_string *import_name =
 				zend_hash_find_ptr_lc(FC(imports), unqualified_name);
 			if (import_name && !zend_string_equals_ci(lcname, import_name)) {
-				zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare class %s "
-						"because the name is already in use", ZSTR_VAL(name));
+				zend_error_noreturn(E_COMPILE_ERROR, "Class %s cannot be declared because the name is already in use",
+					ZSTR_VAL(name));
 			}
 		}
 
@@ -7275,8 +7292,8 @@ void zend_compile_use(zend_ast *ast) /* {{{ */
 				new_name = zend_string_copy(old_name);
 
 				if (!current_ns) {
-					zend_error(E_WARNING, "The use statement with non-compound name '%s' "
-						"has no effect", ZSTR_VAL(new_name));
+					zend_error(E_WARNING, "The use statement with non-compound name %s has no effect",
+						ZSTR_VAL(new_name));
 				}
 			}
 		}
@@ -7359,7 +7376,7 @@ void zend_compile_const_decl(zend_ast *ast) /* {{{ */
 
 		if (zend_get_special_const(ZSTR_VAL(unqualified_name), ZSTR_LEN(unqualified_name))) {
 			zend_error_noreturn(E_COMPILE_ERROR,
-				"Cannot redeclare constant '%s'", ZSTR_VAL(unqualified_name));
+				"Constant %s cannot be redeclared", ZSTR_VAL(unqualified_name));
 		}
 
 		name = zend_prefix_with_ns(unqualified_name);
@@ -7368,8 +7385,8 @@ void zend_compile_const_decl(zend_ast *ast) /* {{{ */
 		if (FC(imports_const)) {
 			zend_string *import_name = zend_hash_find_ptr(FC(imports_const), unqualified_name);
 			if (import_name && !zend_string_equals(import_name, name)) {
-				zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare const %s because "
-					"the name is already in use", ZSTR_VAL(name));
+				zend_error_noreturn(E_COMPILE_ERROR, "Constant %s cannot be declared because the name is already in use",
+					ZSTR_VAL(name));
 			}
 		}
 
@@ -7433,7 +7450,7 @@ void zend_compile_namespace(zend_ast *ast) /* {{{ */
 		name = zend_ast_get_str(name_ast);
 
 		if (ZEND_FETCH_CLASS_DEFAULT != zend_get_class_fetch_type(name)) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use '%s' as namespace name", ZSTR_VAL(name));
+			zend_error_noreturn(E_COMPILE_ERROR, "\"%s\" cannot be used as namespace name", ZSTR_VAL(name));
 		}
 
 		FC(current_namespace) = zend_string_copy(name);

@@ -13,4 +13,4 @@ try {
 }
 ?>
 --EXPECT--
-Cannot access private constant Foo::C1
+Private constant Foo::C1 cannot be accessed from the global scope

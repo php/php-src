@@ -15,7 +15,7 @@ $obj = NULL;
 echo "Done\n";
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: Call to private test::__clone() from global scope in %s:%d
+Fatal error: Uncaught Error: Private method test::__clone() cannot be called from the global scope in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

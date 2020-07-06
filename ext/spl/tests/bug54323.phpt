@@ -17,7 +17,7 @@ function testAccess($c, $ao) {
         var_dump($c->prop, $ao['prop']);
 }
 --EXPECTF--
-Warning: Undefined property: C::$prop in %s on line %d
+Warning: Undefined property C::$prop in %s on line %d
 
 Notice: Undefined array key "prop" in %sbug54323.php on line 14
 NULL

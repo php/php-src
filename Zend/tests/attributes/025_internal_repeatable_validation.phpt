@@ -9,4 +9,4 @@ class A1 { }
 
 ?>
 --EXPECTF--
-Fatal error: Attribute "Attribute" must not be repeated in %s
+Fatal error: Attribute Attribute must not be repeated in %s on line %d

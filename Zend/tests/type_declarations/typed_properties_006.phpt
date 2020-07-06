@@ -11,4 +11,4 @@ class Bar extends Foo {
 }
 ?>
 --EXPECTF--
-Fatal error: Type of Bar::$qux must be int (as in class Foo) in %s on line 8
+Fatal error: Property Bar::$qux must be of type int to be compatible with overridden property Foo::$qux in %s on line %d

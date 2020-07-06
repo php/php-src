@@ -9,4 +9,4 @@ abstract class Test {
 
 ?>
 --EXPECTF--
-Fatal error: Cannot declare promoted property in an abstract constructor in %s on line %d
+Fatal error: Promoted property Test::$x cannot be declared in an abstract constructor in %s on line %d

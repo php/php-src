@@ -61,7 +61,7 @@ bool(true)
 bool(true)
   - Unset:
 
-Warning: Undefined property: ArrayObject::$prop in %s on line %d
+Warning: Undefined property ArrayObject::$prop in %s on line %d
 
 Notice: Undefined array key "prop" in %s on line %d
 NULL
@@ -89,7 +89,7 @@ bool(true)
 bool(true)
   - Unset:
 
-Warning: Undefined property: MyArrayObject::$prop in %s on line %d
+Warning: Undefined property MyArrayObject::$prop in %s on line %d
 
 Notice: Undefined array key "prop" in %s on line %d
 NULL

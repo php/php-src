@@ -16,9 +16,9 @@ echo $b->__invoke();
 
 ?>
 --EXPECTF--
-Warning: The magic method Bar::__invoke() must have public visibility in %sbug61025.php on line %d
+Warning: Method Bar::__invoke() must have public visibility in %sbug61025.php on line %d
 Bar
-Fatal error: Uncaught Error: Call to private method Bar::__invoke() from global scope in %s:%d
+Fatal error: Uncaught Error: Private method Bar::__invoke() cannot be called from the global scope in %s:%d
 Stack trace:
 #0 {main}
   thrown in %sbug61025.php on line %d

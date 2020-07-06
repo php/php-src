@@ -7,4 +7,4 @@ function foo () {
 }
 ?>
 --EXPECTF--
-Fatal error: 'break' operator with non-integer operand is no longer supported in %sbreak_error_002.php on line 3
+Fatal error: break statement with non-integer argument is no longer supported in %s on line %d

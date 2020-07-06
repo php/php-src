@@ -608,7 +608,7 @@ static zend_always_inline int zend_forbid_dynamic_call(const char *func_name)
 	ZEND_ASSERT(ex != NULL && ex->func != NULL);
 
 	if (ZEND_CALL_INFO(ex) & ZEND_CALL_DYNAMIC) {
-		zend_throw_error(NULL, "Cannot call %s dynamically", func_name);
+		zend_throw_error(NULL, "%s cannot be called dynamically", func_name);
 		return FAILURE;
 	}
 

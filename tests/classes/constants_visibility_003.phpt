@@ -24,4 +24,4 @@ try {
 --EXPECT--
 string(12) "privateConst"
 string(12) "privateConst"
-Cannot access private constant A::privateConst
+Private constant A::privateConst cannot be accessed from the global scope

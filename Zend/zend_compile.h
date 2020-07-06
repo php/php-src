@@ -353,6 +353,7 @@ typedef struct _zend_oparray_context {
 #define ZEND_ACC_CALL_VIA_HANDLER     ZEND_ACC_CALL_VIA_TRAMPOLINE
 
 char *zend_visibility_string(uint32_t fn_flags);
+char *zend_visibility_string_capitalized(uint32_t fn_flags);
 
 typedef struct _zend_property_info {
 	uint32_t offset; /* property offset for object properties or

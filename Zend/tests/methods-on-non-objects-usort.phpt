@@ -1,5 +1,5 @@
 --TEST--
-usort() in combination with "Call to a member function method() on null"
+usort() in combination with "Call to method method() on null"
 --FILE--
 <?php
 set_error_handler(function($code, $message) {
@@ -21,13 +21,13 @@ echo "Alive\n";
 ?>
 --EXPECT--
 int(0)
-string(43) "Call to a member function compare() on null"
+string(32) "Call to method compare() on null"
 int(0)
-string(43) "Call to a member function compare() on null"
+string(32) "Call to method compare() on null"
 int(0)
-string(43) "Call to a member function compare() on null"
+string(32) "Call to method compare() on null"
 int(0)
-string(43) "Call to a member function compare() on null"
+string(32) "Call to method compare() on null"
 array(5) {
   [0]=>
   int(1)

@@ -28,4 +28,4 @@ TestClass::Test2(new stdClass);
 ?>
 ===DONE===
 --EXPECTF--
-Fatal error: Cannot use $this as parameter in %sstatic_this.php on line 16
+Fatal error: TestClass::Test2(): Parameter #1 cannot be called $this in %s on line %d

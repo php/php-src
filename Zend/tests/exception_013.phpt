@@ -29,7 +29,7 @@ var_dump(C::$a);
 --EXPECTF--
 Exception: Access to undeclared static property C::$a in %s on line %d
 
-Exception: Cannot access private property C::$p in %sexception_013.php on line 13
+Exception: Private property C::$p cannot be accessed from the global scope in %s on line %d
 
 Exception: Attempt to unset static property C::$a in %sexception_013.php on line 19
 

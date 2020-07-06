@@ -1604,7 +1604,7 @@ PHP_FUNCTION(forward_static_call)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!EX(prev_execute_data)->func->common.scope) {
-		zend_throw_error(NULL, "Cannot call forward_static_call() when no class scope is active");
+		zend_throw_error(NULL, "forward_static_call() cannot be called from the global scope");
 		RETURN_THROWS();
 	}
 
