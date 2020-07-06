@@ -348,14 +348,14 @@ PHP 8.0 UPGRADE NOTES
 
         ReflectionClass::newInstance(...$args)
         ReflectionFunction::invoke(...$args)
-        ReflectionMethod::invoke($object, ...$args)
+        ReflectionMethod::invoke($object = null, ...$args)
 
     Code that must be compatible with both PHP 7 and PHP 8 can use the following
     signatures to be compatible with both versions:
 
         ReflectionClass::newInstance($arg = null, ...$args)
         ReflectionFunction::invoke($arg = null, ...$args)
-        ReflectionMethod::invoke($object, $arg = null, ...$args)
+        ReflectionMethod::invoke($object = null, $arg = null, ...$args)
 
   . The ReflectionType::__toString() method will now return a complete debug
     representation of the type, and is no longer deprecated. In particular the
