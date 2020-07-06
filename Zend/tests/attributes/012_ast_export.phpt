@@ -29,7 +29,7 @@ Warning: assert(): assert(0 && ($a = <<A1(1, 2, 1 + 2)>> fn() => 1)) failed in %
 Warning: assert(): assert(0 && ($a = new <<A1>> class {
     <<A1>>
     <<A2>>
-    const FOO = 'foo';
+    public const FOO = 'foo';
     <<A2>>
     public $x;
     <<A3>>

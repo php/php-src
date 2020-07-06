@@ -164,8 +164,8 @@ Warning: assert(): assert(0 && ($a = function () {
 
 Warning: assert(): assert(0 && ($a = function &(array &$a, ?X $b = null) use($c, &$d): ?X {
     abstract class A extends B implements C, D {
-        const X = 12;
-        const Y = self::X, Z = 'aaa';
+        public const X = 12;
+        public const Y = self::X, Z = 'aaa';
         public $a = 1, $b;
         protected $c;
         private static $d = null;

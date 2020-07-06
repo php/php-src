@@ -6613,18 +6613,18 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t flags, z
 }
 /* }}} */
 
-void zend_compile_prop_group(zend_ast *list) /* {{{ */
+void zend_compile_prop_group(zend_ast *ast) /* {{{ */
 {
-	zend_ast *type_ast = list->child[0];
-	zend_ast *prop_ast = list->child[1];
-	zend_ast *attr_ast = list->child[2];
+	zend_ast *type_ast = ast->child[0];
+	zend_ast *prop_ast = ast->child[1];
+	zend_ast *attr_ast = ast->child[2];
 
 	if (attr_ast && zend_ast_get_list(prop_ast)->children > 1) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot apply attributes to a group of properties");
 		return;
 	}
 
-	zend_compile_prop_decl(prop_ast, type_ast, list->attr, attr_ast);
+	zend_compile_prop_decl(prop_ast, type_ast, ast->attr, attr_ast);
 }
 /* }}} */
 
@@ -6640,23 +6640,18 @@ static void zend_check_const_and_trait_alias_attr(uint32_t attr, const char* ent
 }
 /* }}} */
 
-void zend_compile_class_const_decl(zend_ast *ast, zend_ast *attr_ast) /* {{{ */
+void zend_compile_class_const_decl(zend_ast *ast, uint32_t flags, zend_ast *attr_ast) /* {{{ */
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
 	zend_class_entry *ce = CG(active_class_entry);
-	uint32_t i;
+	uint32_t i, children = list->children;
 
 	if ((ce->ce_flags & ZEND_ACC_TRAIT) != 0) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Traits cannot have constants");
 		return;
 	}
 
-	if (attr_ast && list->children > 1) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Cannot apply attributes to a group of constants");
-		return;
-	}
-
-	for (i = 0; i < list->children; ++i) {
+	for (i = 0; i < children; ++i) {
 		zend_class_constant *c;
 		zend_ast *const_ast = list->child[i];
 		zend_ast *name_ast = const_ast->child[0];
@@ -6666,17 +6661,32 @@ void zend_compile_class_const_decl(zend_ast *ast, zend_ast *attr_ast) /* {{{ */
 		zend_string *doc_comment = doc_comment_ast ? zend_string_copy(zend_ast_get_str(doc_comment_ast)) : NULL;
 		zval value_zv;
 
-		if (UNEXPECTED(ast->attr & (ZEND_ACC_STATIC|ZEND_ACC_ABSTRACT|ZEND_ACC_FINAL))) {
-			zend_check_const_and_trait_alias_attr(ast->attr, "constant");
+		if (UNEXPECTED(flags & (ZEND_ACC_STATIC|ZEND_ACC_ABSTRACT|ZEND_ACC_FINAL))) {
+			zend_check_const_and_trait_alias_attr(flags, "constant");
 		}
 
 		zend_const_expr_to_zval(&value_zv, value_ast);
-		c = zend_declare_class_constant_ex(ce, name, &value_zv, ast->attr, doc_comment);
+		c = zend_declare_class_constant_ex(ce, name, &value_zv, flags, doc_comment);
 
 		if (attr_ast) {
 			zend_compile_attributes(&c->attributes, attr_ast, 0, ZEND_ATTRIBUTE_TARGET_CLASS_CONST);
 		}
 	}
+}
+/* }}} */
+
+void zend_compile_class_const_group(zend_ast *ast) /* {{{ */
+{
+	zend_ast *const_ast = ast->child[0];
+	zend_ast *attr_ast = ast->child[1];
+
+	if (attr_ast && zend_ast_get_list(const_ast)->children > 1) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot apply attributes to a group of constants");
+
+		return;
+	}
+
+	zend_compile_class_const_decl(const_ast, ast->attr, attr_ast);
 }
 /* }}} */
 
@@ -8983,7 +8993,7 @@ void zend_compile_stmt(zend_ast *ast) /* {{{ */
 			zend_compile_prop_group(ast);
 			break;
 		case ZEND_AST_CLASS_CONST_GROUP:
-			zend_compile_class_const_decl(ast->child[0], ast->child[1]);
+			zend_compile_class_const_group(ast);
 			break;
 		case ZEND_AST_USE_TRAIT:
 			zend_compile_use_trait(ast);
