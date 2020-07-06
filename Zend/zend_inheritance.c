@@ -1129,17 +1129,10 @@ static void do_inherit_class_constant(zend_string *name, zend_class_constant *pa
 				ZSTR_VAL(ce->name), ZSTR_VAL(name), zend_visibility_string(Z_ACCESS_FLAGS(parent_const->value)), ZSTR_VAL(parent_const->ce->name), (Z_ACCESS_FLAGS(parent_const->value) & ZEND_ACC_PUBLIC) ? "" : " or weaker");
 		}
 
-		if (!(Z_ACCESS_FLAGS(parent_const->value) & ZEND_ACC_PRIVATE)) {
-			if (UNEXPECTED(ZEND_TYPE_IS_SET(parent_const->type))) {
-				if (class_constant_types_compatible(parent_const, c) == INHERITANCE_ERROR) {
-					zend_string *type_str = zend_type_to_string_resolved(parent_const->type, parent_const->ce);
-
-					zend_error_noreturn(E_COMPILE_ERROR, "Type of %s::%s must be %s (as in class %s)",
-						ZSTR_VAL(c->ce->name), ZSTR_VAL(name), ZSTR_VAL(type_str), ZSTR_VAL(parent_const->ce->name));
-				}
-			} else if (UNEXPECTED(ZEND_TYPE_IS_SET(c->type) && !ZEND_TYPE_IS_SET(parent_const->type))) {
-				zend_error_noreturn(E_COMPILE_ERROR, "Type of %s::%s must not be defined (as in class %s)",
-					ZSTR_VAL(c->ce->name), ZSTR_VAL(name),  ZSTR_VAL(parent_const->ce->name));
+		if (!(Z_ACCESS_FLAGS(parent_const->value) & ZEND_ACC_PRIVATE) && UNEXPECTED(ZEND_TYPE_IS_SET(parent_const->type))) {
+			if (class_constant_types_compatible(parent_const, c) == INHERITANCE_ERROR) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Declaration of %s::%s must be compatible with %s::%s",
+					ZSTR_VAL(c->ce->name), ZSTR_VAL(name), ZSTR_VAL(parent_const->ce->name), ZSTR_VAL(name));
 			}
 		}
 	} else if (!(Z_ACCESS_FLAGS(parent_const->value) & ZEND_ACC_PRIVATE)) {

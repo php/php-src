@@ -11,4 +11,4 @@ class B extends A {
 }
 ?>
 --EXPECTF--
-Fatal error: Type of B::A must be int (as in class A) in %s on line %d
+Fatal error: Declaration of B::A must be compatible with A::A in %s on line %d
