@@ -3,11 +3,11 @@ Typed class constants (inheritance; missing type in parent)
 --FILE--
 <?php
 class A {
-	public const A = 1;
+    public const A = 1;
 }
 
 class B extends A {
-	public const int A = 0;
+    public const int A = 0;
 }
 ?>
 --EXPECTF--

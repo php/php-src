@@ -3,7 +3,7 @@ Typed class constants (type mismatch; compile-time)
 --FILE--
 <?php
 class A {
-	public const string A = 1;
+    public const string A = 1;
 }
 ?>
 --EXPECTF--

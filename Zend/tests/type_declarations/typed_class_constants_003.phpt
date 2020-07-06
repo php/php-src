@@ -3,7 +3,7 @@ Typed class constants (type mismatch; runtime)
 --FILE--
 <?php
 class A {
-	public const string A = A;
+    public const string A = A;
 }
 
 define('A', 1);
