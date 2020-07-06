@@ -37,9 +37,6 @@ static zend_long reference_levdist(const char *s1, size_t l1, const char *s2, si
 		return l1 * cost_del;
 	}
 
-	if ((l1 > LEVENSHTEIN_MAX_LENGTH) || (l2 > LEVENSHTEIN_MAX_LENGTH)) {
-		return -1;
-	}
 	p1 = safe_emalloc((l2 + 1), sizeof(zend_long), 0);
 	p2 = safe_emalloc((l2 + 1), sizeof(zend_long), 0);
 
@@ -74,57 +71,31 @@ static zend_long reference_levdist(const char *s1, size_t l1, const char *s2, si
 }
 /* }}} */
 
-/* {{{ custom_levdist
- */
-static int custom_levdist(char *str1, char *str2, char *callback_name)
-{
-	php_error_docref(NULL, E_WARNING, "The general Levenshtein support is not there yet");
-	/* not there yet */
-
-	return -1;
-}
-/* }}} */
-
 /* {{{ proto int levenshtein(string str1, string str2[, int cost_ins, int cost_rep, int cost_del])
    Calculate Levenshtein distance between two strings */
 PHP_FUNCTION(levenshtein)
 {
-	int argc = ZEND_NUM_ARGS();
-	char *str1, *str2;
-	char *callback_name;
-	size_t str1_len, str2_len, callback_len;
-	zend_long cost_ins, cost_rep, cost_del;
-	zend_long distance = -1;
+	zend_string *string1, *string2;
+	zend_long cost_ins = 1;
+	zend_long cost_rep = 1;
+	zend_long cost_del = 1;
+	zend_long distance = 0;
 
-	switch (argc) {
-		case 2: /* just two strings: use maximum performance version */
-			if (zend_parse_parameters(2, "ss", &str1, &str1_len, &str2, &str2_len) == FAILURE) {
-				RETURN_THROWS();
-			}
-			distance = reference_levdist(str1, str1_len, str2, str2_len, 1, 1, 1);
-			break;
-
-		case 5: /* more general version: calc cost by ins/rep/del weights */
-			if (zend_parse_parameters(5, "sslll", &str1, &str1_len, &str2, &str2_len, &cost_ins, &cost_rep, &cost_del) == FAILURE) {
-				RETURN_THROWS();
-			}
-			distance = reference_levdist(str1, str1_len, str2, str2_len, cost_ins, cost_rep, cost_del);
-			break;
-
-		case 3: /* most general version: calc cost by user-supplied function */
-			if (zend_parse_parameters(3, "sss", &str1, &str1_len, &str2, &str2_len, &callback_name, &callback_len) == FAILURE) {
-				RETURN_THROWS();
-			}
-			distance = custom_levdist(str1, str2, callback_name);
-			break;
-
-		default:
-			WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS|lll", &string1, &string2, &cost_ins, &cost_rep, &cost_del) == FAILURE) {
+		RETURN_THROWS();
 	}
 
-	if (distance < 0 && /* TODO */ ZEND_NUM_ARGS() != 3) {
-		php_error_docref(NULL, E_WARNING, "Argument string(s) too long");
+	if (ZSTR_LEN(string1) > LEVENSHTEIN_MAX_LENGTH) {
+		zend_argument_value_error(1, "must be less than %d characters", LEVENSHTEIN_MAX_LENGTH + 1);
+		RETURN_THROWS();
 	}
+
+	if (ZSTR_LEN(string2) > LEVENSHTEIN_MAX_LENGTH) {
+		zend_argument_value_error(2, "must be less than %d characters", LEVENSHTEIN_MAX_LENGTH + 1);
+		RETURN_THROWS();
+	}
+
+	distance = reference_levdist(ZSTR_VAL(string1), ZSTR_LEN(string1), ZSTR_VAL(string2), ZSTR_LEN(string2), cost_ins, cost_rep, cost_del);
 
 	RETURN_LONG(distance);
 }
