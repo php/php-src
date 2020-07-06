@@ -1219,8 +1219,8 @@ static zend_always_inline zval *zend_try_array_init(zval *zv)
 	_(Z_EXPECTED_STRING_OR_LONG_OR_NULL, "of type string|int|null") \
 	_(Z_EXPECTED_CLASS_NAME_OR_OBJECT,	"a valid class name or object") \
 	_(Z_EXPECTED_CLASS_NAME_OR_OBJECT_OR_NULL, "a valid class name, object, or null") \
-	_(Z_EXPECTED_STRING_OR_OBJECT,	"of type string|object") \
-	_(Z_EXPECTED_STRING_OR_OBJECT_OR_NULL, "of type string|object|null") \
+	_(Z_EXPECTED_STRING_OR_OBJECT,	"of type object|string") \
+	_(Z_EXPECTED_STRING_OR_OBJECT_OR_NULL, "of type object|string|null") \
 
 #define Z_EXPECTED_TYPE
 
@@ -2019,16 +2019,16 @@ static zend_always_inline int zend_parse_arg_class_name_or_obj(
 static zend_always_inline int zend_parse_arg_str_or_obj(
 	zval *arg, zend_string **destination_string, zend_object **destination_object, zend_class_entry *base_ce, int allow_null
 ) {
-	if (EXPECTED(Z_TYPE_P(arg) == IS_STRING)) {
-		*destination_string = Z_STR_P(arg);
-		*destination_object = NULL;
-	} else if (EXPECTED(Z_TYPE_P(arg) == IS_OBJECT)) {
+	if (EXPECTED(Z_TYPE_P(arg) == IS_OBJECT)) {
 		if (base_ce && UNEXPECTED(!instanceof_function(Z_OBJCE_P(arg), base_ce))) {
 			return 0;
 		}
 
 		*destination_string = NULL;
 		*destination_object = Z_OBJ_P(arg);
+	} else if (EXPECTED(Z_TYPE_P(arg) == IS_STRING)) {
+		*destination_string = Z_STR_P(arg);
+		*destination_object = NULL;
 	} else if (allow_null && EXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
 		*destination_string = NULL;
 		*destination_object = NULL;

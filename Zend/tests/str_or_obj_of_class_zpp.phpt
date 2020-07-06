@@ -50,12 +50,12 @@ string(1) "1"
 string(0) ""
 object(stdClass)#1 (0) {
 }
-zend_string_or_stdclass(): Argument #1 ($param) must be of type string|stdClass, array given
-zend_string_or_stdclass(): Argument #1 ($param) must be of type string|stdClass, Foo given
+zend_string_or_stdclass(): Argument #1 ($param) must be of type stdClass|string, array given
+zend_string_or_stdclass(): Argument #1 ($param) must be of type stdClass|string, Foo given
 string(6) "string"
 string(1) "1"
 NULL
 object(stdClass)#1 (0) {
 }
-zend_string_or_stdclass_or_null(): Argument #1 ($param) must be of type string|stdClass|null, array given
-zend_string_or_stdclass_or_null(): Argument #1 ($param) must be of type string|stdClass|null, Foo given
+zend_string_or_stdclass_or_null(): Argument #1 ($param) must be of type stdClass|string|null, array given
+zend_string_or_stdclass_or_null(): Argument #1 ($param) must be of type stdClass|string|null, Foo given

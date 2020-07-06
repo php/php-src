@@ -143,7 +143,7 @@ ZEND_FUNCTION(zend_string_or_object)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (str) {
-		RETURN_STR(str);
+		RETURN_STR_COPY(str);
 	} else {
 		RETURN_OBJ_COPY(object);
 	}
@@ -161,7 +161,7 @@ ZEND_FUNCTION(zend_string_or_object_or_null)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (str) {
-		RETURN_STR(str);
+		RETURN_STR_COPY(str);
 	} else if (object) {
 		RETURN_OBJ_COPY(object);
 	} else {
@@ -181,7 +181,7 @@ ZEND_FUNCTION(zend_string_or_stdclass)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (str) {
-		RETURN_STR(str);
+		RETURN_STR_COPY(str);
 	} else {
 		RETURN_OBJ_COPY(object);
 	}
@@ -199,7 +199,7 @@ ZEND_FUNCTION(zend_string_or_stdclass_or_null)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (str) {
-		RETURN_STR(str);
+		RETURN_STR_COPY(str);
 	} else if (object) {
 		RETURN_OBJ_COPY(object);
 	} else {

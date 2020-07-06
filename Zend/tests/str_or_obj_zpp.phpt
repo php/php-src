@@ -42,7 +42,7 @@ object(stdClass)#1 (0) {
 }
 object(Foo)#1 (0) {
 }
-zend_string_or_object(): Argument #1 ($param) must be of type string|object, array given
+zend_string_or_object(): Argument #1 ($param) must be of type object|string, array given
 string(6) "string"
 string(1) "1"
 NULL
@@ -50,4 +50,4 @@ object(stdClass)#2 (0) {
 }
 object(Foo)#2 (0) {
 }
-zend_string_or_object_or_null(): Argument #1 ($param) must be of type string|object|null, array given
+zend_string_or_object_or_null(): Argument #1 ($param) must be of type object|string|null, array given

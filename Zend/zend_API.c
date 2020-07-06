@@ -258,7 +258,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_string_or_class_error
 		return;
 	}
 
-	zend_argument_type_error(num, "must be of type string|%s, %s given", name, zend_zval_type_name(arg));
+	zend_argument_type_error(num, "must be of type %s|string, %s given", name, zend_zval_type_name(arg));
 }
 /* }}} */
 
@@ -268,7 +268,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_string_or_class_or_nu
 		return;
 	}
 
-	zend_argument_type_error(num, "must be of type string|%s|null, %s given", name, zend_zval_type_name(arg));
+	zend_argument_type_error(num, "must be of type %s|string|null, %s given", name, zend_zval_type_name(arg));
 }
 /* }}} */
 
