@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: ce2eb70f449197eca39ca5d8c53ee1369577b035 */
+ * Stub hash: bb1f9f45ea75ccb96886d8fe5a2bc8f5c06e6661 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gd_info, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -853,5 +853,10 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(imagegetinterpolation, arginfo_imagegetinterpolation)
 	ZEND_FE(imagesetinterpolation, arginfo_imagesetinterpolation)
 	ZEND_FE(imageresolution, arginfo_imageresolution)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_GdImage_methods[] = {
 	ZEND_FE_END
 };

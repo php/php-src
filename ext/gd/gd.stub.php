@@ -2,6 +2,10 @@
 
 /** @generate-function-entries */
 
+final class GdImage
+{
+}
+
 function gd_info(): array {}
 
 function imageloadfont(string $filename): int|false {}
