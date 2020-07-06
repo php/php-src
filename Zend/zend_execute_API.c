@@ -507,13 +507,10 @@ ZEND_API const char *get_function_arg_name(const zend_function *func, uint32_t a
 		return NULL;
 	}
 
-	switch (func->type) {
-		case ZEND_USER_FUNCTION:
-			return ZSTR_VAL(func->common.arg_info[arg_num - 1].name);
-		case ZEND_INTERNAL_FUNCTION:
-			return ((zend_internal_arg_info*) func->common.arg_info)[arg_num - 1].name;
-		default:
-			return NULL;
+	if (func->type == ZEND_USER_FUNCTION || (func->common.fn_flags & ZEND_ACC_USER_ARG_INFO)) {
+		return ZSTR_VAL(func->common.arg_info[arg_num - 1].name);
+	} else {
+		return ((zend_internal_arg_info*) func->common.arg_info)[arg_num - 1].name;
 	}
 }
 /* }}} */
