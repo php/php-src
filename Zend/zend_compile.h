@@ -376,9 +376,11 @@ typedef struct _zend_property_info {
 
 typedef struct _zend_class_constant {
 	zval value; /* access flags are stored in reserved: zval.u2.access_flags */
+	zend_string *name;
 	zend_string *doc_comment;
 	HashTable *attributes;
 	zend_class_entry *ce;
+	zend_type type;
 } zend_class_constant;
 
 /* arg_info for internal functions */

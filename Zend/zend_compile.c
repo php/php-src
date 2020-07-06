@@ -6640,7 +6640,7 @@ static void zend_check_const_and_trait_alias_attr(uint32_t attr, const char* ent
 }
 /* }}} */
 
-void zend_compile_class_const_decl(zend_ast *ast, uint32_t flags, zend_ast *attr_ast) /* {{{ */
+void zend_compile_class_const_decl(zend_ast *ast, zend_ast *type_ast, uint32_t flags, zend_ast *attr_ast) /* {{{ */
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
 	zend_class_entry *ce = CG(active_class_entry);
@@ -6648,6 +6648,7 @@ void zend_compile_class_const_decl(zend_ast *ast, uint32_t flags, zend_ast *attr
 
 	if ((ce->ce_flags & ZEND_ACC_TRAIT) != 0) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Traits cannot have constants");
+
 		return;
 	}
 
@@ -6660,13 +6661,35 @@ void zend_compile_class_const_decl(zend_ast *ast, uint32_t flags, zend_ast *attr
 		zend_string *name = zval_make_interned_string(zend_ast_get_zval(name_ast));
 		zend_string *doc_comment = doc_comment_ast ? zend_string_copy(zend_ast_get_str(doc_comment_ast)) : NULL;
 		zval value_zv;
+		zend_type type = ZEND_TYPE_INIT_NONE(0);
+
+		if (type_ast) {
+			type = zend_compile_typename(type_ast, /* force_allow_null */ 0, /* use_arena */ 1);
+
+			if (ZEND_TYPE_FULL_MASK(type) & (MAY_BE_CALLABLE|MAY_BE_VOID) || ZEND_TYPE_HAS_NAME(type)) {
+				zend_string *type_str = zend_type_to_string(type);
+
+				zend_error_noreturn(E_COMPILE_ERROR, "Class constant %s::%s cannot have type %s",
+					ZSTR_VAL(ce->name), ZSTR_VAL(name), ZSTR_VAL(type_str));
+
+				return;
+			}
+		}
 
 		if (UNEXPECTED(flags & (ZEND_ACC_STATIC|ZEND_ACC_ABSTRACT|ZEND_ACC_FINAL))) {
 			zend_check_const_and_trait_alias_attr(flags, "constant");
 		}
 
 		zend_const_expr_to_zval(&value_zv, value_ast);
-		c = zend_declare_class_constant_ex(ce, name, &value_zv, flags, doc_comment);
+
+		if (!Z_CONSTANT(value_zv) && !zend_is_valid_default_value(type, &value_zv)) {
+			zend_string *type_str = zend_type_to_string(type);
+
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use %s as value for class constant %s::%s of type %s",
+				zend_zval_type_name(&value_zv), ZSTR_VAL(ce->name), ZSTR_VAL(name), ZSTR_VAL(type_str));
+		}
+
+		c = zend_declare_typed_class_constant(ce, name, &value_zv, flags, doc_comment, type);
 
 		if (attr_ast) {
 			zend_compile_attributes(&c->attributes, attr_ast, 0, ZEND_ATTRIBUTE_TARGET_CLASS_CONST);
@@ -6677,8 +6700,9 @@ void zend_compile_class_const_decl(zend_ast *ast, uint32_t flags, zend_ast *attr
 
 void zend_compile_class_const_group(zend_ast *ast) /* {{{ */
 {
-	zend_ast *const_ast = ast->child[0];
-	zend_ast *attr_ast = ast->child[1];
+	zend_ast *type_ast = ast->child[0];
+	zend_ast *const_ast = ast->child[1];
+	zend_ast *attr_ast = ast->child[2];
 
 	if (attr_ast && zend_ast_get_list(const_ast)->children > 1) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot apply attributes to a group of constants");
@@ -6686,7 +6710,7 @@ void zend_compile_class_const_group(zend_ast *ast) /* {{{ */
 		return;
 	}
 
-	zend_compile_class_const_decl(const_ast, ast->attr, attr_ast);
+	zend_compile_class_const_decl(const_ast, type_ast, ast->attr, attr_ast);
 }
 /* }}} */
 

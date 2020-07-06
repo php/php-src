@@ -476,6 +476,10 @@ class ReflectionClassConstant implements Reflector
     /** @return string|false */
     public function getDocComment() {}
 
+    public function hasType(): bool {}
+
+    public function getType(): ReflectionType|null {}
+
     /** @return ReflectionAttribute[] */
     public function getAttributes(?string $name = null, int $flags = 0): array {}
 }

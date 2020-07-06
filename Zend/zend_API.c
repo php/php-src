@@ -1152,6 +1152,10 @@ ZEND_API int zend_update_class_constants(zend_class_entry *class_type) /* {{{ */
 				if (UNEXPECTED(zval_update_constant_ex(val, c->ce) != SUCCESS)) {
 					return FAILURE;
 				}
+
+				if (ZEND_TYPE_IS_SET(c->type) && UNEXPECTED(!zend_verify_class_constant_type(c, val))) {
+					return FAILURE;
+				}
 			}
 		} ZEND_HASH_FOREACH_END();
 
@@ -3835,7 +3839,7 @@ ZEND_API int zend_declare_property_stringl(zend_class_entry *ce, const char *nam
 }
 /* }}} */
 
-ZEND_API zend_class_constant *zend_declare_class_constant_ex(zend_class_entry *ce, zend_string *name, zval *value, int access_type, zend_string *doc_comment) /* {{{ */
+ZEND_API zend_class_constant *zend_declare_typed_class_constant(zend_class_entry *ce, zend_string *name, zval *value, int access_type, zend_string *doc_comment, zend_type type) /* {{{ */
 {
 	zend_class_constant *c;
 
@@ -3859,11 +3863,16 @@ ZEND_API zend_class_constant *zend_declare_class_constant_ex(zend_class_entry *c
 	} else {
 		c = zend_arena_alloc(&CG(arena), sizeof(zend_class_constant));
 	}
+
 	ZVAL_COPY_VALUE(&c->value, value);
 	Z_ACCESS_FLAGS(c->value) = access_type;
+
+	c->name = name;
 	c->doc_comment = doc_comment;
 	c->attributes = NULL;
 	c->ce = ce;
+	c->type = type;
+
 	if (Z_TYPE_P(value) == IS_CONSTANT_AST) {
 		ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 	}
@@ -3874,6 +3883,12 @@ ZEND_API zend_class_constant *zend_declare_class_constant_ex(zend_class_entry *c
 	}
 
 	return c;
+}
+/* }}} */
+
+ZEND_API zend_class_constant *zend_declare_class_constant_ex(zend_class_entry *ce, zend_string *name, zval *value, int access_type, zend_string *doc_comment) /* {{{ */
+{
+	return zend_declare_typed_class_constant(ce, name, value, access_type, doc_comment, (zend_type) ZEND_TYPE_INIT_NONE(0));
 }
 /* }}} */
 

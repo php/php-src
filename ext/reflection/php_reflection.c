@@ -3783,6 +3783,42 @@ ZEND_METHOD(ReflectionClassConstant, getDocComment)
 }
 /* }}} */
 
+/* {{{ proto public ReflectionType ReflectionClassConstant::getType()
+   Returns the type associated with the class constant */
+ZEND_METHOD(ReflectionClassConstant, getType)
+{
+	reflection_object *intern;
+	zend_class_constant *ref;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	GET_REFLECTION_OBJECT_PTR(ref);
+
+	if (!ZEND_TYPE_IS_SET(ref->type)) {
+		RETURN_NULL();
+	}
+
+	reflection_type_factory(ref->type, return_value, 1);
+}
+/* }}} */
+
+/* {{{ proto public bool ReflectionClassConstant::hasType()
+   Returns whether class constant has a type */
+ZEND_METHOD(ReflectionClassConstant, hasType)
+{
+	reflection_object *intern;
+	zend_class_constant *ref;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	GET_REFLECTION_OBJECT_PTR(ref);
+	RETVAL_BOOL(ZEND_TYPE_IS_SET(ref->type));
+}
+
 /* {{{ proto public array ReflectionClassConstant::getAttributes([ string name, int flags ])
    Returns the attributes of this constant */
 ZEND_METHOD(ReflectionClassConstant, getAttributes)

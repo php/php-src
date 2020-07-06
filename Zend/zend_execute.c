@@ -833,6 +833,35 @@ ZEND_API zend_bool zend_verify_scalar_type_hint(uint32_t type_mask, zval *arg, z
 	return zend_verify_weak_scalar_type_hint(type_mask, arg);
 }
 
+ZEND_COLD zend_never_inline void zend_verify_class_constant_type_error(zend_class_constant *c, zval *constant)
+{
+	zend_string *type_str = zend_type_to_string(c->type);
+
+	zend_type_error("Cannot assign %s to class constant %s::%s of type %s",
+		zend_zval_type_name(constant), ZSTR_VAL(c->ce->name), ZSTR_VAL(c->name), ZSTR_VAL(type_str));
+}
+
+zend_bool zend_never_inline zend_verify_class_constant_type(zend_class_constant *c, zval *constant)
+{
+	if (EXPECTED(ZEND_TYPE_CONTAINS_CODE(c->type, Z_TYPE_P(constant)))) {
+		return 1;
+	}
+
+	uint32_t type_mask = ZEND_TYPE_FULL_MASK(c->type);
+
+	if ((type_mask & MAY_BE_ITERABLE) && zend_is_iterable(constant)) {
+		return 1;
+	}
+
+	if (zend_verify_scalar_type_hint(type_mask, constant, /* strict */ 1, /* is_internal_arg */ 0)) {
+		return 1;
+	}
+
+	zend_verify_class_constant_type_error(c, constant);
+
+	return 0;
+}
+
 ZEND_COLD zend_never_inline void zend_verify_property_type_error(zend_property_info *info, zval *property)
 {
 	zend_string *type_str;

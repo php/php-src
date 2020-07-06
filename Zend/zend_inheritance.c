@@ -1110,6 +1110,12 @@ static void zend_do_inherit_interfaces(zend_class_entry *ce, const zend_class_en
 }
 /* }}} */
 
+inheritance_status class_constant_types_compatible(const zend_class_constant *parent, const zend_class_constant *child) /* {{{ */
+{
+	return zend_perform_covariant_type_check(child->ce, child->type, parent->ce, parent->type);
+}
+/* }}} */
+
 static void do_inherit_class_constant(zend_string *name, zend_class_constant *parent_const, zend_class_entry *ce) /* {{{ */
 {
 	zval *zv = zend_hash_find_ex(&ce->constants_table, name, 1);
@@ -1117,9 +1123,24 @@ static void do_inherit_class_constant(zend_string *name, zend_class_constant *pa
 
 	if (zv != NULL) {
 		c = (zend_class_constant*)Z_PTR_P(zv);
+
 		if (UNEXPECTED((Z_ACCESS_FLAGS(c->value) & ZEND_ACC_PPP_MASK) > (Z_ACCESS_FLAGS(parent_const->value) & ZEND_ACC_PPP_MASK))) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Access level to %s::%s must be %s (as in class %s)%s",
 				ZSTR_VAL(ce->name), ZSTR_VAL(name), zend_visibility_string(Z_ACCESS_FLAGS(parent_const->value)), ZSTR_VAL(parent_const->ce->name), (Z_ACCESS_FLAGS(parent_const->value) & ZEND_ACC_PUBLIC) ? "" : " or weaker");
+		}
+
+		if (!(Z_ACCESS_FLAGS(parent_const->value) & ZEND_ACC_PRIVATE)) {
+			if (UNEXPECTED(ZEND_TYPE_IS_SET(parent_const->type))) {
+				if (class_constant_types_compatible(parent_const, c) == INHERITANCE_ERROR) {
+					zend_string *type_str = zend_type_to_string_resolved(parent_const->type, parent_const->ce);
+
+					zend_error_noreturn(E_COMPILE_ERROR, "Type of %s::%s must be %s (as in class %s)",
+						ZSTR_VAL(c->ce->name), ZSTR_VAL(name), ZSTR_VAL(type_str), ZSTR_VAL(parent_const->ce->name));
+				}
+			} else if (UNEXPECTED(ZEND_TYPE_IS_SET(c->type) && !ZEND_TYPE_IS_SET(parent_const->type))) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Type of %s::%s must not be defined (as in class %s)",
+					ZSTR_VAL(c->ce->name), ZSTR_VAL(name),  ZSTR_VAL(parent_const->ce->name));
+			}
 		}
 	} else if (!(Z_ACCESS_FLAGS(parent_const->value) & ZEND_ACC_PRIVATE)) {
 		if (Z_TYPE(parent_const->value) == IS_CONSTANT_AST) {
