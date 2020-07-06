@@ -1121,7 +1121,7 @@ PHP_FUNCTION(locale_get_all_variants)
 }
 /* }}} */
 
-/* {{{ * Converts to lower case and also replaces all hyphens with the underscore */
+/* {{{ Converts to lower case and also replaces all hyphens with the underscore */
 static int strToMatch(const char* str ,char *retstr)
 {
 	char* 	anchor 	= NULL;

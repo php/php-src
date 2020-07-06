@@ -238,9 +238,7 @@ static int collator_compare_func(Bucket *f, Bucket *s)
 }
 /* }}} */
 
-/* {{{ collator_cmp_sort_keys
- * Compare sort keys
- */
+/* {{{ Compare sort keys */
 static int collator_cmp_sort_keys( const void *p1, const void *p2 )
 {
 	char* key1 = ((collator_sort_key_index_t*)p1)->key;
@@ -250,9 +248,7 @@ static int collator_cmp_sort_keys( const void *p1, const void *p2 )
 }
 /* }}} */
 
-/* {{{ collator_get_compare_function
- * Choose compare function according to sort flags.
- */
+/* {{{ Choose compare function according to sort flags. */
 static collator_compare_func_t collator_get_compare_function( const zend_long sort_flags )
 {
 	collator_compare_func_t func;
@@ -277,9 +273,7 @@ static collator_compare_func_t collator_get_compare_function( const zend_long so
 }
 /* }}} */
 
-/* {{{ collator_sort_internal
- * Common code shared by collator_sort() and collator_asort() API functions.
- */
+/* {{{ Common code shared by collator_sort() and collator_asort() API functions. */
 static void collator_sort_internal( int renumber, INTERNAL_FUNCTION_PARAMETERS )
 {
 	zval           saved_collator;
@@ -342,8 +336,6 @@ static void collator_sortkey_swap(collator_sort_key_index_t *p, collator_sort_ke
 }
 /* }}} */
 
-/* {{{ Equivalent to standard PHP sort using Collator.
- * Uses ICU ucol_getSortKey for performance. }}} */
 /* {{{ Equivalent to standard PHP sort using Collator.
  * Uses ICU ucol_getSortKey for performance.
  */

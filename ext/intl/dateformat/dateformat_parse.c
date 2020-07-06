@@ -75,7 +75,7 @@ static void add_to_localtime_arr( IntlDateFormatter_object *dfo, zval* return_va
 	}
 }
 
-/* {{{ * Internal function which calls the udat_parseCalendar */
+/* {{{ Internal function which calls the udat_parseCalendar */
 static void internal_parse_to_localtime(IntlDateFormatter_object *dfo, char* text_to_parse, size_t text_len, int32_t *parse_pos, zval *return_value)
 {
 	UCalendar      *parsed_calendar = NULL;
