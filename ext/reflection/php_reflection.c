@@ -3818,6 +3818,7 @@ ZEND_METHOD(ReflectionClassConstant, hasType)
 	GET_REFLECTION_OBJECT_PTR(ref);
 	RETVAL_BOOL(ZEND_TYPE_IS_SET(ref->type));
 }
+/* }}} */
 
 /* {{{ proto public array ReflectionClassConstant::getAttributes([ string name, int flags ])
    Returns the attributes of this constant */
