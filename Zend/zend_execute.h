@@ -393,6 +393,9 @@ ZEND_API void zend_cleanup_unfinished_execution(zend_execute_data *execute_data,
 
 #define ZEND_CLASS_HAS_TYPE_HINTS(ce) ((ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) == ZEND_ACC_HAS_TYPE_HINTS)
 
+zend_bool zend_verify_class_constant_type(zend_class_constant *c, zval *constant);
+ZEND_COLD void zend_verify_class_constant_type_error(zend_class_constant *c, zval *constant);
+
 zend_bool zend_verify_property_type(zend_property_info *info, zval *property, zend_bool strict);
 ZEND_COLD void zend_verify_property_type_error(zend_property_info *info, zval *property);
 
