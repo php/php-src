@@ -478,7 +478,7 @@ class ReflectionClassConstant implements Reflector
 
     public function hasType(): bool {}
 
-    public function getType(): ReflectionType|null {}
+    public function getType(): ?ReflectionType {}
 
     /** @return ReflectionAttribute[] */
     public function getAttributes(?string $name = null, int $flags = 0): array {}
