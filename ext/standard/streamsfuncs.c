@@ -859,7 +859,7 @@ static void user_space_stream_notifier(php_stream_context *context, int notifyco
 	ZVAL_LONG(&zvs[4], bytes_sofar);
 	ZVAL_LONG(&zvs[5], bytes_max);
 
-	if (FAILURE == call_user_function_ex(NULL, NULL, callback, &retval, 6, zvs, 0, NULL)) {
+	if (FAILURE == call_user_function(NULL, NULL, callback, &retval, 6, zvs)) {
 		php_error_docref(NULL, E_WARNING, "Failed to call user notifier");
 	}
 	for (i = 0; i < 6; i++) {

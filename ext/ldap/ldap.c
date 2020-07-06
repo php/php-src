@@ -3748,7 +3748,7 @@ int _ldap_rebind_proc(LDAP *ldap, const char *url, ber_tag_t req, ber_int_t msgi
 	/* callback */
 	ZVAL_COPY_VALUE(&cb_args[0], cb_link);
 	ZVAL_STRING(&cb_args[1], url);
-	if (call_user_function_ex(EG(function_table), NULL, &ld->rebindproc, &cb_retval, 2, cb_args, 0, NULL) == SUCCESS && !Z_ISUNDEF(cb_retval)) {
+	if (call_user_function(EG(function_table), NULL, &ld->rebindproc, &cb_retval, 2, cb_args) == SUCCESS && !Z_ISUNDEF(cb_retval)) {
 		retval = zval_get_long(&cb_retval);
 		zval_ptr_dtor(&cb_retval);
 	} else {

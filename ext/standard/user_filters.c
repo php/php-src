@@ -174,15 +174,15 @@ php_stream_filter_status_t userfilter_filter(
 	} else {
 		ZVAL_NULL(&args[2]);
 	}
+	ZVAL_MAKE_REF(&args[2]);
 
 	ZVAL_BOOL(&args[3], flags & PSFS_FLAG_FLUSH_CLOSE);
 
-	call_result = call_user_function_ex(NULL,
+	call_result = call_user_function(NULL,
 			obj,
 			&func_name,
 			&retval,
-			4, args,
-			0, NULL);
+			4, args);
 
 	zval_ptr_dtor(&func_name);
 

@@ -500,9 +500,9 @@ ZEND_API int add_property_zval_ex(zval *arg, const char *key, size_t key_len, zv
 
 ZEND_API int _call_user_function_ex(zval *object, zval *function_name, zval *retval_ptr, uint32_t param_count, zval params[], int no_separation);
 
-#define call_user_function(function_table, object, function_name, retval_ptr, param_count, params) \
+#define call_user_function(_unused, object, function_name, retval_ptr, param_count, params) \
 	_call_user_function_ex(object, function_name, retval_ptr, param_count, params, 1)
-#define call_user_function_ex(function_table, object, function_name, retval_ptr, param_count, params, no_separation, symbol_table) \
+#define call_user_function_ex(_unused, object, function_name, retval_ptr, param_count, params, no_separation, _unused2) \
 	_call_user_function_ex(object, function_name, retval_ptr, param_count, params, no_separation)
 
 ZEND_API extern const zend_fcall_info empty_fcall_info;

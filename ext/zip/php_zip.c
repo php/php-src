@@ -2929,7 +2929,7 @@ static void _php_zip_progress_callback(zip_t *arch, double state, void *ptr)
 	ze_zip_object *obj = ptr;
 
 	ZVAL_DOUBLE(&cb_args[0], state);
-	if (call_user_function_ex(EG(function_table), NULL, &obj->progress_callback, &cb_retval, 1, cb_args, 0, NULL) == SUCCESS && !Z_ISUNDEF(cb_retval)) {
+	if (call_user_function(EG(function_table), NULL, &obj->progress_callback, &cb_retval, 1, cb_args) == SUCCESS && !Z_ISUNDEF(cb_retval)) {
 		zval_ptr_dtor(&cb_retval);
 	}
 }
@@ -2985,7 +2985,7 @@ static int _php_zip_cancel_callback(zip_t *arch, void *ptr)
 	int retval = 0;
 	ze_zip_object *obj = ptr;
 
-	if (call_user_function_ex(EG(function_table), NULL, &obj->cancel_callback, &cb_retval, 0, NULL, 0, NULL) == SUCCESS && !Z_ISUNDEF(cb_retval)) {
+	if (call_user_function(EG(function_table), NULL, &obj->cancel_callback, &cb_retval, 0, NULL) == SUCCESS && !Z_ISUNDEF(cb_retval)) {
 		retval = zval_get_long(&cb_retval);
 		zval_ptr_dtor(&cb_retval);
 	}

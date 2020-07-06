@@ -1097,7 +1097,7 @@ object ":" uiv ":" ["]	{
 
 		ZVAL_STR_COPY(&args[0], class_name);
 		BG(serialize_lock)++;
-		if (call_user_function_ex(NULL, NULL, &user_func, &retval, 1, args, 0, NULL) != SUCCESS) {
+		if (call_user_function(NULL, NULL, &user_func, &retval, 1, args) != SUCCESS) {
 			BG(serialize_lock)--;
 			if (EG(exception)) {
 				zend_string_release_ex(class_name, 0);
