@@ -153,6 +153,7 @@ PHP_FUNCTION(gethostbyaddr)
 	hostname = php_gethostbyaddr(addr);
 
 	if (hostname == NULL) {
+		// TODO Convert to ValueError?
 #if HAVE_IPV6 && HAVE_INET_PTON
 		php_error_docref(NULL, E_WARNING, "Address is not a valid IPv4 or IPv6 address");
 #else
@@ -210,10 +211,10 @@ PHP_FUNCTION(gethostbyname)
 		Z_PARAM_STRING(hostname, hostname_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if(hostname_len > MAXFQDNLEN) {
+	if (hostname_len > MAXFQDNLEN) {
 		/* name too long, protect from CVE-2015-0235 */
-		php_error_docref(NULL, E_WARNING, "Host name is too long, the limit is %d characters", MAXFQDNLEN);
-		RETURN_STRINGL(hostname, hostname_len);
+		zend_argument_value_error(1, "must be less than %d characters", MAXFQDNLEN);
+		RETURN_THROWS();
 	}
 
 	RETURN_STR(php_gethostbyname(hostname));
@@ -233,11 +234,11 @@ PHP_FUNCTION(gethostbynamel)
 		Z_PARAM_STRING(hostname, hostname_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if(hostname_len > MAXFQDNLEN) {
-		/* name too long, protect from CVE-2015-0235 */
-		php_error_docref(NULL, E_WARNING, "Host name is too long, the limit is %d characters", MAXFQDNLEN);
-		RETURN_FALSE;
-	}
+	if (hostname_len > MAXFQDNLEN) {
+    	/* name too long, protect from CVE-2015-0235 */
+    	zend_argument_value_error(1, "must be less than %d characters", MAXFQDNLEN);
+    	RETURN_THROWS();
+    }
 
 	hp = php_network_gethostbyname(hostname);
 	if (!hp) {
@@ -393,8 +394,9 @@ PHP_FUNCTION(dns_check_record)
 		else if (!strcasecmp("NAPTR", rectype)) type = DNS_T_NAPTR;
 		else if (!strcasecmp("A6",    rectype)) type = DNS_T_A6;
 		else {
-			php_error_docref(NULL, E_WARNING, "Type '%s' not supported", rectype);
-			RETURN_FALSE;
+			zend_argument_value_error(2, "must be one of \"A\", \"NS\", \"MX\", \"PTR\", \"ANY\", \"SAO\", \"CAA\", "
+				"\"TXT\", \"CNAME\", \"AAAA\", \"SRV\", \"NAPTR\", or \"A6\"");
+			RETURN_THROWS();
 		}
 	}
 
@@ -837,14 +839,14 @@ PHP_FUNCTION(dns_get_record)
 
 	if (!raw) {
 		if ((type_param & ~PHP_DNS_ALL) && (type_param != PHP_DNS_ANY)) {
-			php_error_docref(NULL, E_WARNING, "Type '" ZEND_LONG_FMT "' not supported", type_param);
-			RETURN_FALSE;
+			zend_argument_value_error(2, "must be one of DNS_A, DNS_CNAME, DNS_HINFO, DNS_CAA, DNS_MX, "
+				"DNS_NS, DNS_PTR, DNS_SOA, DNS_TXT, DNS_AAAA, DNS_SRV, DNS_NAPTR, DNS_A6, DNS_ALL, or DNS_ANY");
+			RETURN_THROWS();
 		}
 	} else {
 		if ((type_param < 1) || (type_param > 0xFFFF)) {
-			php_error_docref(NULL, E_WARNING,
-				"Numeric DNS record type must be between 1 and 65535, '" ZEND_LONG_FMT "' given", type_param);
-			RETURN_FALSE;
+			zend_argument_value_error(2, "must be between 1 and 65535 when Argument #5 ($raw) is true");
+			RETURN_THROWS();
 		}
 	}
 
