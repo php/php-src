@@ -300,8 +300,9 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 			efree(wildcard);
 		}
 		if (fdat == NULL) {
-			php_error_docref(NULL, E_WARNING,
-					"Err, filter \"%s\" is not in the user-filter map, but somehow the user-filter-factory was invoked for it!?", filtername);
+			zend_throw_error(NULL, "Filter \"%s\" is not in the user-filter map, "
+				"but user-filter-factory was invoked for it."
+				"This is a bug, please report it at https://bugs.php.net", filtername);
 			return NULL;
 		}
 	}
