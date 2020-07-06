@@ -220,12 +220,12 @@ static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!cmd_len) {
-		php_error_docref(NULL, E_WARNING, "Cannot execute a blank command");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
 	}
 	if (strlen(cmd) != cmd_len) {
-		php_error_docref(NULL, E_WARNING, "NULL byte detected. Possible attack");
-		RETURN_FALSE;
+		zend_argument_type_error(1, "must not contain any null bytes");
+		RETURN_THROWS();
 	}
 
 	if (!ret_array) {
@@ -523,12 +523,12 @@ PHP_FUNCTION(shell_exec)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!command_len) {
-		php_error_docref(NULL, E_WARNING, "Cannot execute a blank command");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
 	}
 	if (strlen(command) != command_len) {
-		php_error_docref(NULL, E_WARNING, "NULL byte detected. Possible attack");
-		RETURN_FALSE;
+		zend_argument_type_error(1, "must not contain any null bytes");
+		RETURN_THROWS();
 	}
 
 #ifdef PHP_WIN32
