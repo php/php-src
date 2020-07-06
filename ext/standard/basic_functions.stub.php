@@ -1314,7 +1314,7 @@ function stream_isatty($stream): bool {}
 
 #ifdef PHP_WIN32
 /** @param resource $stream */
-function sapi_windows_vt100_support($stream, bool $enable): bool {}
+function sapi_windows_vt100_support($stream, bool $enable = UNKNOWN): bool {}
 #endif
 
 /** @param resource $stream */
