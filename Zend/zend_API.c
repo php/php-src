@@ -3839,7 +3839,7 @@ ZEND_API int zend_declare_property_stringl(zend_class_entry *ce, const char *nam
 }
 /* }}} */
 
-ZEND_API zend_class_constant *zend_declare_typed_class_constant(zend_class_entry *ce, zend_string *name, zval *value, int access_type, zend_string *doc_comment, zend_type type) /* {{{ */
+ZEND_API zend_class_constant *zend_declare_typed_class_constant(zend_class_entry *ce, zend_string *name, zval *value, int access_type, zend_string *doc_comment, zend_type type)
 {
 	zend_class_constant *c;
 
@@ -3884,13 +3884,11 @@ ZEND_API zend_class_constant *zend_declare_typed_class_constant(zend_class_entry
 
 	return c;
 }
-/* }}} */
 
-ZEND_API zend_class_constant *zend_declare_class_constant_ex(zend_class_entry *ce, zend_string *name, zval *value, int access_type, zend_string *doc_comment) /* {{{ */
+ZEND_API zend_class_constant *zend_declare_class_constant_ex(zend_class_entry *ce, zend_string *name, zval *value, int access_type, zend_string *doc_comment)
 {
 	return zend_declare_typed_class_constant(ce, name, value, access_type, doc_comment, (zend_type) ZEND_TYPE_INIT_NONE(0));
 }
-/* }}} */
 
 ZEND_API int zend_declare_class_constant(zend_class_entry *ce, const char *name, size_t name_length, zval *value) /* {{{ */
 {

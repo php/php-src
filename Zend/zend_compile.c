@@ -6640,7 +6640,7 @@ static void zend_check_const_and_trait_alias_attr(uint32_t attr, const char* ent
 }
 /* }}} */
 
-void zend_compile_class_const_decl(zend_ast *ast, zend_ast *type_ast, uint32_t flags, zend_ast *attr_ast) /* {{{ */
+void zend_compile_class_const_decl(zend_ast *ast, zend_ast *type_ast, uint32_t flags, zend_ast *attr_ast)
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
 	zend_class_entry *ce = CG(active_class_entry);
@@ -6696,9 +6696,8 @@ void zend_compile_class_const_decl(zend_ast *ast, zend_ast *type_ast, uint32_t f
 		}
 	}
 }
-/* }}} */
 
-void zend_compile_class_const_group(zend_ast *ast) /* {{{ */
+void zend_compile_class_const_group(zend_ast *ast)
 {
 	zend_ast *type_ast = ast->child[0];
 	zend_ast *const_ast = ast->child[1];
@@ -6712,7 +6711,6 @@ void zend_compile_class_const_group(zend_ast *ast) /* {{{ */
 
 	zend_compile_class_const_decl(const_ast, type_ast, ast->attr, attr_ast);
 }
-/* }}} */
 
 static void zend_compile_method_ref(zend_ast *ast, zend_trait_method_reference *method_ref) /* {{{ */
 {

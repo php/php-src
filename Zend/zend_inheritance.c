@@ -1110,11 +1110,10 @@ static void zend_do_inherit_interfaces(zend_class_entry *ce, const zend_class_en
 }
 /* }}} */
 
-inheritance_status class_constant_types_compatible(const zend_class_constant *parent, const zend_class_constant *child) /* {{{ */
+inheritance_status class_constant_types_compatible(const zend_class_constant *parent, const zend_class_constant *child)
 {
 	return zend_perform_covariant_type_check(child->ce, child->type, parent->ce, parent->type);
 }
-/* }}} */
 
 static void do_inherit_class_constant(zend_string *name, zend_class_constant *parent_const, zend_class_entry *ce) /* {{{ */
 {
