@@ -985,7 +985,7 @@ function iptcparse(string $iptcblock): array|false {}
 
 /* levenshtein.c */
 
-function levenshtein(string $str1, string $str2, $cost_ins = UNKNOWN, int $cost_rep = UNKNOWN, int $cost_del = UNKNOWN): int {}
+function levenshtein(string $str1, string $str2, int $cost_ins = 1, int $cost_rep = 1, int $cost_del = 1): int {}
 
 /* link.c */
 
