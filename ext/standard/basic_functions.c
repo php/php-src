@@ -2647,8 +2647,8 @@ PHP_FUNCTION(parse_ini_file)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (filename_len == 0) {
-		php_error_docref(NULL, E_WARNING, "Filename cannot be empty!");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
 	}
 
 	/* Set callback function */
