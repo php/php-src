@@ -746,18 +746,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 				} else if (!ARG_MAY_BE_SENT_BY_REF(func, i + 1)) {
 					/* By-value send is not allowed -- emit a warning,
 					 * but still perform the call with a by-value send. */
-					const char *arg_name = get_function_arg_name(func, i + 1);
-
-					zend_error(E_WARNING,
-						"%s%s%s(): Argument #%d%s%s%s must be passed by reference, value given",
-						func->common.scope ? ZSTR_VAL(func->common.scope->name) : "",
-						func->common.scope ? "::" : "",
-						ZSTR_VAL(func->common.function_name),
-						i+1,
-						arg_name ? " ($" : "",
-						arg_name ? arg_name : "",
-						arg_name ? ")" : ""
-					);
+					zend_param_must_be_ref(func, i + 1);
 					if (UNEXPECTED(EG(exception))) {
 						ZEND_CALL_NUM_ARGS(call) = i;
 						zend_vm_stack_free_args(call);

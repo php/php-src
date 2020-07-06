@@ -1931,7 +1931,7 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_non_static_method_cal
 		ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
 }
 
-static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_param_must_be_ref(const zend_function *func, uint32_t arg_num)
+ZEND_COLD void ZEND_FASTCALL zend_param_must_be_ref(const zend_function *func, uint32_t arg_num)
 {
 	const char *arg_name = get_function_arg_name(func, arg_num);
 
