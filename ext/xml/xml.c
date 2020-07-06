@@ -1055,24 +1055,21 @@ static void php_xml_parser_create_impl(INTERNAL_FUNCTION_PARAMETERS, int ns_supp
 }
 /* }}} */
 
-/* {{{ proto resource xml_parser_create([string encoding])
-   Create an XML parser */
+/* {{{ Create an XML parser */
 PHP_FUNCTION(xml_parser_create)
 {
 	php_xml_parser_create_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
-/* {{{ proto resource xml_parser_create_ns([string encoding [, string sep]])
-   Create an XML parser */
+/* {{{ Create an XML parser */
 PHP_FUNCTION(xml_parser_create_ns)
 {
 	php_xml_parser_create_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
-/* {{{ proto int xml_set_object(resource parser, object &obj)
-   Set up object which should be used for callbacks */
+/* {{{ Set up object which should be used for callbacks */
 PHP_FUNCTION(xml_set_object)
 {
 	xml_parser *parser;
@@ -1091,8 +1088,7 @@ PHP_FUNCTION(xml_set_object)
 }
 /* }}} */
 
-/* {{{ proto int xml_set_element_handler(resource parser, string shdl, string ehdl)
-   Set up start and end element handlers */
+/* {{{ Set up start and end element handlers */
 PHP_FUNCTION(xml_set_element_handler)
 {
 	xml_parser *parser;
@@ -1110,8 +1106,7 @@ PHP_FUNCTION(xml_set_element_handler)
 }
 /* }}} */
 
-/* {{{ proto int xml_set_character_data_handler(resource parser, string hdl)
-   Set up character data handler */
+/* {{{ Set up character data handler */
 PHP_FUNCTION(xml_set_character_data_handler)
 {
 	xml_parser *parser;
@@ -1128,8 +1123,7 @@ PHP_FUNCTION(xml_set_character_data_handler)
 }
 /* }}} */
 
-/* {{{ proto int xml_set_processing_instruction_handler(resource parser, string hdl)
-   Set up processing instruction (PI) handler */
+/* {{{ Set up processing instruction (PI) handler */
 PHP_FUNCTION(xml_set_processing_instruction_handler)
 {
 	xml_parser *parser;
@@ -1146,8 +1140,7 @@ PHP_FUNCTION(xml_set_processing_instruction_handler)
 }
 /* }}} */
 
-/* {{{ proto int xml_set_default_handler(resource parser, string hdl)
-   Set up default handler */
+/* {{{ Set up default handler */
 PHP_FUNCTION(xml_set_default_handler)
 {
 	xml_parser *parser;
@@ -1164,8 +1157,7 @@ PHP_FUNCTION(xml_set_default_handler)
 }
 /* }}} */
 
-/* {{{ proto int xml_set_unparsed_entity_decl_handler(resource parser, string hdl)
-   Set up unparsed entity declaration handler */
+/* {{{ Set up unparsed entity declaration handler */
 PHP_FUNCTION(xml_set_unparsed_entity_decl_handler)
 {
 	xml_parser *parser;
@@ -1182,8 +1174,7 @@ PHP_FUNCTION(xml_set_unparsed_entity_decl_handler)
 }
 /* }}} */
 
-/* {{{ proto int xml_set_notation_decl_handler(resource parser, string hdl)
-   Set up notation declaration handler */
+/* {{{ Set up notation declaration handler */
 PHP_FUNCTION(xml_set_notation_decl_handler)
 {
 	xml_parser *parser;
@@ -1200,8 +1191,7 @@ PHP_FUNCTION(xml_set_notation_decl_handler)
 }
 /* }}} */
 
-/* {{{ proto int xml_set_external_entity_ref_handler(resource parser, string hdl)
-   Set up external entity reference handler */
+/* {{{ Set up external entity reference handler */
 PHP_FUNCTION(xml_set_external_entity_ref_handler)
 {
 	xml_parser *parser;
@@ -1218,8 +1208,7 @@ PHP_FUNCTION(xml_set_external_entity_ref_handler)
 }
 /* }}} */
 
-/* {{{ proto int xml_set_start_namespace_decl_handler(resource parser, string hdl)
-   Set up character data handler */
+/* {{{ Set up character data handler */
 PHP_FUNCTION(xml_set_start_namespace_decl_handler)
 {
 	xml_parser *parser;
@@ -1236,8 +1225,7 @@ PHP_FUNCTION(xml_set_start_namespace_decl_handler)
 }
 /* }}} */
 
-/* {{{ proto int xml_set_end_namespace_decl_handler(resource parser, string hdl)
-   Set up character data handler */
+/* {{{ Set up character data handler */
 PHP_FUNCTION(xml_set_end_namespace_decl_handler)
 {
 	xml_parser *parser;
@@ -1254,8 +1242,7 @@ PHP_FUNCTION(xml_set_end_namespace_decl_handler)
 }
 /* }}} */
 
-/* {{{ proto int xml_parse(resource parser, string data [, bool isFinal])
-   Start parsing an XML document */
+/* {{{ Start parsing an XML document */
 PHP_FUNCTION(xml_parse)
 {
 	xml_parser *parser;
@@ -1278,8 +1265,7 @@ PHP_FUNCTION(xml_parse)
 
 /* }}} */
 
-/* {{{ proto int xml_parse_into_struct(resource parser, string data, array &values [, array &index ])
-   Parsing a XML document */
+/* {{{ Parsing a XML document */
 PHP_FUNCTION(xml_parse_into_struct)
 {
 	xml_parser *parser;
@@ -1326,8 +1312,7 @@ PHP_FUNCTION(xml_parse_into_struct)
 }
 /* }}} */
 
-/* {{{ proto int xml_get_error_code(resource parser)
-   Get XML parser error code */
+/* {{{ Get XML parser error code */
 PHP_FUNCTION(xml_get_error_code)
 {
 	xml_parser *parser;
@@ -1342,8 +1327,7 @@ PHP_FUNCTION(xml_get_error_code)
 }
 /* }}} */
 
-/* {{{ proto string xml_error_string(int code)
-   Get XML parser error string */
+/* {{{ Get XML parser error string */
 PHP_FUNCTION(xml_error_string)
 {
 	zend_long code;
@@ -1360,8 +1344,7 @@ PHP_FUNCTION(xml_error_string)
 }
 /* }}} */
 
-/* {{{ proto int xml_get_current_line_number(resource parser)
-   Get current line number for an XML parser */
+/* {{{ Get current line number for an XML parser */
 PHP_FUNCTION(xml_get_current_line_number)
 {
 	xml_parser *parser;
@@ -1376,8 +1359,7 @@ PHP_FUNCTION(xml_get_current_line_number)
 }
 /* }}} */
 
-/* {{{ proto int xml_get_current_column_number(resource parser)
-   Get current column number for an XML parser */
+/* {{{ Get current column number for an XML parser */
 PHP_FUNCTION(xml_get_current_column_number)
 {
 	xml_parser *parser;
@@ -1392,8 +1374,7 @@ PHP_FUNCTION(xml_get_current_column_number)
 }
 /* }}} */
 
-/* {{{ proto int xml_get_current_byte_index(resource parser)
-   Get current byte index for an XML parser */
+/* {{{ Get current byte index for an XML parser */
 PHP_FUNCTION(xml_get_current_byte_index)
 {
 	xml_parser *parser;
@@ -1408,8 +1389,7 @@ PHP_FUNCTION(xml_get_current_byte_index)
 }
 /* }}} */
 
-/* {{{ proto int xml_parser_free(resource parser)
-   Free an XML parser */
+/* {{{ Free an XML parser */
 PHP_FUNCTION(xml_parser_free)
 {
 	zval *pind;
@@ -1429,8 +1409,7 @@ PHP_FUNCTION(xml_parser_free)
 }
 /* }}} */
 
-/* {{{ proto int xml_parser_set_option(resource parser, int option, mixed value)
-   Set options in an XML parser */
+/* {{{ Set options in an XML parser */
 PHP_FUNCTION(xml_parser_set_option)
 {
 	xml_parser *parser;
@@ -1479,8 +1458,7 @@ PHP_FUNCTION(xml_parser_set_option)
 }
 /* }}} */
 
-/* {{{ proto int xml_parser_get_option(resource parser, int option)
-   Get options from an XML parser */
+/* {{{ Get options from an XML parser */
 PHP_FUNCTION(xml_parser_get_option)
 {
 	xml_parser *parser;

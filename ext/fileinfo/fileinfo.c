@@ -76,8 +76,7 @@ static inline finfo_object *php_finfo_fetch_object(zend_object *obj) {
 	} \
 }
 
-/* {{{ finfo_objects_free
- */
+/* {{{ finfo_objects_free */
 static void finfo_objects_free(zend_object *object)
 {
 	finfo_object *intern = php_finfo_fetch_object(object);
@@ -91,8 +90,7 @@ static void finfo_objects_free(zend_object *object)
 }
 /* }}} */
 
-/* {{{ finfo_objects_new
- */
+/* {{{ finfo_objects_new */
 PHP_FILEINFO_API zend_object *finfo_objects_new(zend_class_entry *class_type)
 {
 	finfo_object *intern;
@@ -129,8 +127,7 @@ void finfo_resource_destructor(zend_resource *rsrc) /* {{{ */
 }
 /* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION
- */
+/* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(finfo)
 {
 	zend_class_entry _finfo_class_entry;
@@ -169,8 +166,7 @@ PHP_MINIT_FUNCTION(finfo)
 }
 /* }}} */
 
-/* {{{ fileinfo_module_entry
- */
+/* {{{ fileinfo_module_entry */
 zend_module_entry fileinfo_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"fileinfo",
@@ -189,8 +185,7 @@ zend_module_entry fileinfo_module_entry = {
 ZEND_GET_MODULE(fileinfo)
 #endif
 
-/* {{{ PHP_MINFO_FUNCTION
- */
+/* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(fileinfo)
 {
 	char magic_ver[5];
@@ -205,8 +200,7 @@ PHP_MINFO_FUNCTION(fileinfo)
 }
 /* }}} */
 
-/* {{{ proto resource finfo_open([int options [, string arg]])
-   Create a new fileinfo resource. */
+/* {{{ Create a new fileinfo resource. */
 PHP_FUNCTION(finfo_open)
 {
 	zend_long options = MAGIC_NONE;
@@ -297,8 +291,7 @@ PHP_FUNCTION(finfo_open)
 }
 /* }}} */
 
-/* {{{ proto resource finfo_close(resource finfo)
-   Close fileinfo resource. */
+/* {{{ Close fileinfo resource. */
 PHP_FUNCTION(finfo_close)
 {
 	php_fileinfo *finfo;
@@ -318,8 +311,7 @@ PHP_FUNCTION(finfo_close)
 }
 /* }}} */
 
-/* {{{ proto bool finfo_set_flags(resource finfo, int options)
-   Set libmagic configuration options. */
+/* {{{ Set libmagic configuration options. */
 PHP_FUNCTION(finfo_set_flags)
 {
 	zend_long options;
@@ -518,24 +510,21 @@ clean:
 }
 /* }}} */
 
-/* {{{ proto string finfo_file(resource finfo, char *file_name [, int options [, resource context]])
-   Return information about a file. */
+/* {{{ Return information about a file. */
 PHP_FUNCTION(finfo_file)
 {
 	_php_finfo_get_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, FILEINFO_MODE_FILE, 0);
 }
 /* }}} */
 
-/* {{{ proto string finfo_buffer(resource finfo, char *string [, int options [, resource context]])
-   Return information about a string buffer. */
+/* {{{ Return information about a string buffer. */
 PHP_FUNCTION(finfo_buffer)
 {
 	_php_finfo_get_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, FILEINFO_MODE_BUFFER, 0);
 }
 /* }}} */
 
-/* {{{ proto string mime_content_type(string filename|resource stream)
-   Return content-type for file */
+/* {{{ Return content-type for file */
 PHP_FUNCTION(mime_content_type)
 {
 	_php_finfo_get_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, -1, 1);

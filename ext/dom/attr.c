@@ -32,7 +32,7 @@
 * Since:
 */
 
-/* {{{ proto DOMAttr::__construct(string name, [string value]) */
+/* {{{ */
 PHP_METHOD(DOMAttr, __construct)
 {
 	xmlAttrPtr nodep = NULL;
@@ -202,8 +202,7 @@ int dom_attr_schema_type_info_read(dom_object *obj, zval *retval)
 
 /* }}} */
 
-/* {{{ proto bool domattr::isId()
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Attr-isId
+/* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Attr-isId
 Since: DOM Level 3
 */
 PHP_METHOD(DOMAttr, isId)

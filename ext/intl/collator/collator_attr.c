@@ -23,11 +23,7 @@
 
 #include <unicode/ustring.h>
 
-/* {{{ proto int Collator::getAttribute( int $attr )
- * Get collation attribute value. }}} */
-/* {{{ proto int collator_get_attribute( Collator $coll, int $attr )
- * Get collation attribute value.
- */
+/* {{{ Get collation attribute value. */
 PHP_FUNCTION( collator_get_attribute )
 {
 	zend_long attribute, value;
@@ -51,11 +47,7 @@ PHP_FUNCTION( collator_get_attribute )
 }
 /* }}} */
 
-/* {{{ proto bool Collator::getAttribute( int $attr )
- * Get collation attribute value. }}} */
-/* {{{ proto bool collator_set_attribute( Collator $coll, int $attr, int $val )
- * Set collation attribute.
- */
+/* {{{ Set collation attribute. */
 PHP_FUNCTION( collator_set_attribute )
 {
 	zend_long attribute, value;
@@ -80,11 +72,7 @@ PHP_FUNCTION( collator_set_attribute )
 }
 /* }}} */
 
-/* {{{ proto int Collator::getStrength()
- * Returns the current collation strength. }}} */
-/* {{{ proto int collator_get_strength(Collator coll)
- * Returns the current collation strength.
- */
+/* {{{ Returns the current collation strength. */
 PHP_FUNCTION( collator_get_strength )
 {
 	COLLATOR_METHOD_INIT_VARS
@@ -104,11 +92,7 @@ PHP_FUNCTION( collator_get_strength )
 }
 /* }}} */
 
-/* {{{ proto bool Collator::setStrength(int strength)
- * Set the collation strength. }}} */
-/* {{{ proto bool collator_set_strength(Collator coll, int strength)
- * Set the collation strength.
- */
+/* {{{ Set the collation strength. */
 PHP_FUNCTION( collator_set_strength )
 {
 	zend_long strength;

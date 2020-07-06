@@ -36,8 +36,7 @@
 #ifdef HAVE_GETTIMEOFDAY
 ZEND_TLS struct timeval prev_tv = { 0, 0 };
 
-/* {{{ proto string uniqid([string prefix [, bool more_entropy]])
-   Generates a unique ID */
+/* {{{ Generates a unique ID */
 PHP_FUNCTION(uniqid)
 {
 	char *prefix = "";

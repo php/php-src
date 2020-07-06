@@ -91,8 +91,7 @@ cleanup:
 }
 /* }}} */
 
-/* {{{ proto bool dns_check_record(string host [, string type])
-   Check DNS records corresponding to a given Internet host name or IP address */
+/* {{{ Check DNS records corresponding to a given Internet host name or IP address */
 PHP_FUNCTION(dns_check_record)
 {
 	char *hostname, *rectype = NULL;
@@ -344,8 +343,7 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw,
 }
 /* }}} */
 
-/* {{{ proto array|false dns_get_record(string hostname [, int type[, array &authns[, array &addtl[, bool raw]]]])
-   Get any Resource Record corresponding to a given Internet host name */
+/* {{{ Get any Resource Record corresponding to a given Internet host name */
 PHP_FUNCTION(dns_get_record)
 {
 	char *hostname;

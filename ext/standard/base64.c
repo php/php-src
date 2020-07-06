@@ -925,8 +925,7 @@ PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, size_t length
 #endif
 /* }}} */
 
-/* {{{ proto string base64_encode(string str)
-   Encodes string using MIME base64 algorithm */
+/* {{{ Encodes string using MIME base64 algorithm */
 PHP_FUNCTION(base64_encode)
 {
 	char *str;
@@ -942,8 +941,7 @@ PHP_FUNCTION(base64_encode)
 }
 /* }}} */
 
-/* {{{ proto string|false base64_decode(string str[, bool strict])
-   Decodes string using MIME base64 algorithm */
+/* {{{ Decodes string using MIME base64 algorithm */
 PHP_FUNCTION(base64_decode)
 {
 	char *str;

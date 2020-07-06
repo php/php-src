@@ -78,8 +78,7 @@ static const filter_list_entry filter_list[] = {
 static unsigned int php_sapi_filter(int arg, const char *var, char **val, size_t val_len, size_t *new_val_len);
 static unsigned int php_sapi_filter_init(void);
 
-/* {{{ filter_module_entry
- */
+/* {{{ filter_module_entry */
 zend_module_entry filter_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"filter",
@@ -117,8 +116,7 @@ static PHP_INI_MH(UpdateDefaultFilter) /* {{{ */
 }
 /* }}} */
 
-/* {{{ PHP_INI
- */
+/* {{{ PHP_INI */
 static PHP_INI_MH(OnUpdateFlags)
 {
 	if (!new_value) {
@@ -154,8 +152,7 @@ ZEND_TSRMLS_CACHE_UPDATE();
 
 #define PARSE_REQUEST 99
 
-/* {{{ PHP_MINIT_FUNCTION
- */
+/* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(filter)
 {
 	ZEND_INIT_MODULE_GLOBALS(filter, php_filter_init_globals, NULL);
@@ -237,8 +234,7 @@ PHP_MINIT_FUNCTION(filter)
 }
 /* }}} */
 
-/* {{{ PHP_MSHUTDOWN_FUNCTION
- */
+/* {{{ PHP_MSHUTDOWN_FUNCTION */
 PHP_MSHUTDOWN_FUNCTION(filter)
 {
 	UNREGISTER_INI_ENTRIES();
@@ -247,8 +243,7 @@ PHP_MSHUTDOWN_FUNCTION(filter)
 }
 /* }}} */
 
-/* {{{ PHP_RSHUTDOWN_FUNCTION
- */
+/* {{{ PHP_RSHUTDOWN_FUNCTION */
 #define VAR_ARRAY_COPY_DTOR(a)   \
 	if (!Z_ISUNDEF(IF_G(a))) {   \
 		zval_ptr_dtor(&IF_G(a)); \
@@ -269,8 +264,7 @@ PHP_RSHUTDOWN_FUNCTION(filter)
 }
 /* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
- */
+/* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(filter)
 {
 	php_info_print_table_start();
@@ -506,9 +500,7 @@ static zval *php_filter_get_storage(zend_long arg)/* {{{ */
 }
 /* }}} */
 
-/* {{{ proto mixed filter_has_var(constant type, string variable_name)
- * Returns true if the variable with the name 'name' exists in source.
- */
+/* {{{ Returns true if the variable with the name 'name' exists in source. */
 PHP_FUNCTION(filter_has_var)
 {
 	zend_long         arg;
@@ -649,9 +641,7 @@ static void php_filter_array_handler(zval *input, zval *op, zval *return_value, 
 }
 /* }}} */
 
-/* {{{ proto mixed filter_input(constant type, string variable_name [, int filter [, mixed options]])
- * Returns the filtered variable 'name'* from source `type`.
- */
+/* {{{ Returns the filtered variable 'name'* from source `type`. */
 PHP_FUNCTION(filter_input)
 {
 	zend_long fetch_from, filter = FILTER_DEFAULT;
@@ -705,9 +695,7 @@ PHP_FUNCTION(filter_input)
 }
 /* }}} */
 
-/* {{{ proto mixed filter_var(mixed variable [, int filter [, mixed options]])
- * Returns the filtered version of the variable.
- */
+/* {{{ Returns the filtered version of the variable. */
 PHP_FUNCTION(filter_var)
 {
 	zend_long filter = FILTER_DEFAULT;
@@ -727,9 +715,7 @@ PHP_FUNCTION(filter_var)
 }
 /* }}} */
 
-/* {{{ proto mixed filter_input_array(constant type, [, mixed options [, bool add_empty]]])
- * Returns an array with all arguments defined in 'definition'.
- */
+/* {{{ Returns an array with all arguments defined in 'definition'. */
 PHP_FUNCTION(filter_input_array)
 {
 	zend_long    fetch_from;
@@ -773,9 +759,7 @@ PHP_FUNCTION(filter_input_array)
 }
 /* }}} */
 
-/* {{{ proto mixed filter_var_array(array data, [, mixed options [, bool add_empty]]])
- * Returns an array with all arguments defined in 'definition'.
- */
+/* {{{ Returns an array with all arguments defined in 'definition'. */
 PHP_FUNCTION(filter_var_array)
 {
 	zval *array_input = NULL, *op = NULL;
@@ -793,8 +777,7 @@ PHP_FUNCTION(filter_var_array)
 }
 /* }}} */
 
-/* {{{ proto filter_list()
- * Returns a list of all supported filters */
+/* {{{ Returns a list of all supported filters */
 PHP_FUNCTION(filter_list)
 {
 	int i, size = sizeof(filter_list) / sizeof(filter_list_entry);
@@ -810,8 +793,7 @@ PHP_FUNCTION(filter_list)
 }
 /* }}} */
 
-/* {{{ proto filter_id(string filtername)
- * Returns the filter ID belonging to a named filter */
+/* {{{ Returns the filter ID belonging to a named filter */
 PHP_FUNCTION(filter_id)
 {
 	int i;

@@ -312,8 +312,7 @@ void xsl_ext_function_object_php(xmlXPathParserContextPtr ctxt, int nargs) /* {{
 }
 /* }}} */
 
-/* {{{ proto void XSLTProcessor::importStylesheet(domdocument doc)
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#
+/* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#
 Since:
 */
 PHP_METHOD(XSLTProcessor, importStylesheet)
@@ -539,8 +538,7 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 }
 /* }}} */
 
-/* {{{ proto domdocument XSLTProcessor::transformToDoc(domnode doc)
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#
+/* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#
 Since:
 */
 PHP_METHOD(XSLTProcessor, transformToDoc)
@@ -596,8 +594,7 @@ PHP_METHOD(XSLTProcessor, transformToDoc)
 }
 /* }}} end XSLTProcessor::transformToDoc */
 
-/* {{{ proto int XSLTProcessor::transformToUri(domdocument doc, string uri)
-*/
+/* {{{ */
 PHP_METHOD(XSLTProcessor, transformToUri)
 {
 	zval *id, *docp = NULL;
@@ -628,8 +625,7 @@ PHP_METHOD(XSLTProcessor, transformToUri)
 }
 /* }}} end XSLTProcessor::transformToUri */
 
-/* {{{ proto string XSLTProcessor::transformToXml(domdocument doc)
-*/
+/* {{{ */
 PHP_METHOD(XSLTProcessor, transformToXml)
 {
 	zval *id, *docp = NULL;
@@ -666,8 +662,7 @@ PHP_METHOD(XSLTProcessor, transformToXml)
 }
 /* }}} end XSLTProcessor::transformToXml */
 
-/* {{{ proto bool XSLTProcessor::setParameter(string namespace, mixed name [, string value])
-*/
+/* {{{ */
 PHP_METHOD(XSLTProcessor, setParameter)
 {
 
@@ -711,8 +706,7 @@ PHP_METHOD(XSLTProcessor, setParameter)
 }
 /* }}} end XSLTProcessor::setParameter */
 
-/* {{{ proto string XSLTProcessor::getParameter(string namespace, string name)
-*/
+/* {{{ */
 PHP_METHOD(XSLTProcessor, getParameter)
 {
 	zval *id = ZEND_THIS;
@@ -734,8 +728,7 @@ PHP_METHOD(XSLTProcessor, getParameter)
 }
 /* }}} end XSLTProcessor::getParameter */
 
-/* {{{ proto bool XSLTProcessor::removeParameter(string namespace, string name)
-*/
+/* {{{ */
 PHP_METHOD(XSLTProcessor, removeParameter)
 {
 	zval *id = ZEND_THIS;
@@ -756,8 +749,7 @@ PHP_METHOD(XSLTProcessor, removeParameter)
 }
 /* }}} end XSLTProcessor::removeParameter */
 
-/* {{{ proto void XSLTProcessor::registerPHPFunctions([mixed $restrict])
-*/
+/* {{{ */
 PHP_METHOD(XSLTProcessor, registerPHPFunctions)
 {
 	zval *id = ZEND_THIS;
@@ -795,7 +787,7 @@ PHP_METHOD(XSLTProcessor, registerPHPFunctions)
 }
 /* }}} end XSLTProcessor::registerPHPFunctions(); */
 
-/* {{{ proto bool XSLTProcessor::setProfiling(string filename) */
+/* {{{ */
 PHP_METHOD(XSLTProcessor, setProfiling)
 {
 	zval *id = ZEND_THIS;
@@ -821,7 +813,7 @@ PHP_METHOD(XSLTProcessor, setProfiling)
 }
 /* }}} end XSLTProcessor::setProfiling */
 
-/* {{{ proto int XSLTProcessor::setSecurityPrefs(int securityPrefs) */
+/* {{{ */
 PHP_METHOD(XSLTProcessor, setSecurityPrefs)
 {
 	zval *id = ZEND_THIS;
@@ -840,7 +832,7 @@ PHP_METHOD(XSLTProcessor, setSecurityPrefs)
 }
 /* }}} end XSLTProcessor::setSecurityPrefs */
 
-/* {{{ proto int XSLTProcessor::getSecurityPrefs() */
+/* {{{ */
 PHP_METHOD(XSLTProcessor, getSecurityPrefs)
 {
 	zval *id = ZEND_THIS;
@@ -856,8 +848,7 @@ PHP_METHOD(XSLTProcessor, getSecurityPrefs)
 }
 /* }}} end XSLTProcessor::getSecurityPrefs */
 
-/* {{{ proto bool XSLTProcessor::hasExsltSupport()
-*/
+/* {{{ */
 PHP_METHOD(XSLTProcessor, hasExsltSupport)
 {
 	if (zend_parse_parameters_none() == FAILURE) {

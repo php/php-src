@@ -104,16 +104,14 @@ static const zend_module_dep imap_deps[] = {
 /* }}} */
 
 
-/* {{{ PHP_INI
- */
+/* {{{ PHP_INI */
 PHP_INI_BEGIN()
 STD_PHP_INI_BOOLEAN("imap.enable_insecure_rsh", "0", PHP_INI_SYSTEM, OnUpdateBool, enable_rsh, zend_imap_globals, imap_globals)
 PHP_INI_END()
 /* }}} */
 
 
-/* {{{ imap_module_entry
- */
+/* {{{ imap_module_entry */
 zend_module_entry imap_module_entry = {
 	STANDARD_MODULE_HEADER_EX, NULL,
 	imap_deps,
@@ -149,8 +147,7 @@ static int le_imap;
 		RETURN_FALSE;	\
 	}	\
 
-/* {{{ mail_close_it
- */
+/* {{{ mail_close_it */
 static void mail_close_it(zend_resource *rsrc)
 {
 	pils *imap_le_struct = (pils *)rsrc->ptr;
@@ -173,8 +170,7 @@ static void mail_close_it(zend_resource *rsrc)
 }
 /* }}} */
 
-/* {{{ add_assoc_object
- */
+/* {{{ add_assoc_object */
 static zval *add_assoc_object(zval *arg, char *key, zval *tmp)
 {
 	HashTable *symtable;
@@ -188,8 +184,7 @@ static zval *add_assoc_object(zval *arg, char *key, zval *tmp)
 }
 /* }}} */
 
-/* {{{ add_next_index_object
- */
+/* {{{ add_next_index_object */
 static inline zval *add_next_index_object(zval *arg, zval *tmp)
 {
 	HashTable *symtable;
@@ -349,8 +344,7 @@ void mail_getacl(MAILSTREAM *stream, char *mailbox, ACLLIST *alist)
 /* }}} */
 #endif
 
-/* {{{ PHP_GINIT_FUNCTION
- */
+/* {{{ PHP_GINIT_FUNCTION */
 static PHP_GINIT_FUNCTION(imap)
 {
 #if defined(COMPILE_DL_IMAP) && defined(ZTS)
@@ -382,8 +376,7 @@ static PHP_GINIT_FUNCTION(imap)
 }
 /* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION
- */
+/* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(imap)
 {
 	unsigned long sa_all =	SA_MESSAGES | SA_RECENT | SA_UNSEEN | SA_UIDNEXT | SA_UIDVALIDITY;
@@ -618,8 +611,7 @@ PHP_MINIT_FUNCTION(imap)
 }
 /* }}} */
 
-/* {{{ PHP_RINIT_FUNCTION
- */
+/* {{{ PHP_RINIT_FUNCTION */
 PHP_RINIT_FUNCTION(imap)
 {
 	IMAPG(imap_errorstack) = NIL;
@@ -629,8 +621,7 @@ PHP_RINIT_FUNCTION(imap)
 }
 /* }}} */
 
-/* {{{ PHP_RSHUTDOWN_FUNCTION
- */
+/* {{{ PHP_RSHUTDOWN_FUNCTION */
 PHP_RSHUTDOWN_FUNCTION(imap)
 {
 	ERRORLIST *ecur = NIL;
@@ -687,8 +678,7 @@ PHP_RSHUTDOWN_FUNCTION(imap)
 # endif
 #endif
 
-/* {{{ PHP_MINFO_FUNCTION
- */
+/* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(imap)
 {
 	php_info_print_table_start();
@@ -705,8 +695,7 @@ PHP_MINFO_FUNCTION(imap)
 }
 /* }}} */
 
-/* {{{ imap_do_open
- */
+/* {{{ imap_do_open */
 static void php_imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
 	zend_string *mailbox, *user, *passwd;
@@ -816,16 +805,14 @@ static void php_imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 }
 /* }}} */
 
-/* {{{ proto resource imap_open(string mailbox, string user, string password [, int options [, int n_retries]])
-   Open an IMAP stream to a mailbox */
+/* {{{ Open an IMAP stream to a mailbox */
 PHP_FUNCTION(imap_open)
 {
 	php_imap_do_open(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
-/* {{{ proto bool imap_reopen(resource stream_id, string mailbox [, int options [, int n_retries]])
-   Reopen an IMAP stream to a new mailbox */
+/* {{{ Reopen an IMAP stream to a new mailbox */
 PHP_FUNCTION(imap_reopen)
 {
 	zval *streamind;
@@ -871,8 +858,7 @@ PHP_FUNCTION(imap_reopen)
 }
 /* }}} */
 
-/* {{{ proto bool imap_append(resource stream_id, string folder, string message [, string options [, string internal_date]])
-   Append a new message to a specified mailbox */
+/* {{{ Append a new message to a specified mailbox */
 PHP_FUNCTION(imap_append)
 {
 	zval *streamind;
@@ -921,8 +907,7 @@ PHP_FUNCTION(imap_append)
 }
 /* }}} */
 
-/* {{{ proto int imap_num_msg(resource stream_id)
-   Gives the number of messages in the current mailbox */
+/* {{{ Gives the number of messages in the current mailbox */
 PHP_FUNCTION(imap_num_msg)
 {
 	zval *streamind;
@@ -940,8 +925,7 @@ PHP_FUNCTION(imap_num_msg)
 }
 /* }}} */
 
-/* {{{ proto bool imap_ping(resource stream_id)
-   Check if the IMAP stream is still active */
+/* {{{ Check if the IMAP stream is still active */
 PHP_FUNCTION(imap_ping)
 {
 	zval *streamind;
@@ -959,8 +943,7 @@ PHP_FUNCTION(imap_ping)
 }
 /* }}} */
 
-/* {{{ proto int imap_num_recent(resource stream_id)
-   Gives the number of recent messages in current mailbox */
+/* {{{ Gives the number of recent messages in current mailbox */
 PHP_FUNCTION(imap_num_recent)
 {
 	zval *streamind;
@@ -979,8 +962,7 @@ PHP_FUNCTION(imap_num_recent)
 /* }}} */
 
 #if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
-/* {{{ proto array imap_get_quota(resource stream_id, string qroot)
-	Returns the quota set to the mailbox account qroot */
+/* {{{ Returns the quota set to the mailbox account qroot */
 PHP_FUNCTION(imap_get_quota)
 {
 	zval *streamind;
@@ -1008,8 +990,7 @@ PHP_FUNCTION(imap_get_quota)
 }
 /* }}} */
 
-/* {{{ proto array imap_get_quotaroot(resource stream_id, string mbox)
-	Returns the quota set to the mailbox account mbox */
+/* {{{ Returns the quota set to the mailbox account mbox */
 PHP_FUNCTION(imap_get_quotaroot)
 {
 	zval *streamind;
@@ -1037,8 +1018,7 @@ PHP_FUNCTION(imap_get_quotaroot)
 }
 /* }}} */
 
-/* {{{ proto bool imap_set_quota(resource stream_id, string qroot, int mailbox_size)
-   Will set the quota for qroot mailbox */
+/* {{{ Will set the quota for qroot mailbox */
 PHP_FUNCTION(imap_set_quota)
 {
 	zval *streamind;
@@ -1063,8 +1043,7 @@ PHP_FUNCTION(imap_set_quota)
 }
 /* }}} */
 
-/* {{{ proto bool imap_setacl(resource stream_id, string mailbox, string id, string rights)
-	Sets the ACL for a given mailbox */
+/* {{{ Sets the ACL for a given mailbox */
 PHP_FUNCTION(imap_setacl)
 {
 	zval *streamind;
@@ -1083,8 +1062,7 @@ PHP_FUNCTION(imap_setacl)
 }
 /* }}} */
 
-/* {{{ proto array imap_getacl(resource stream_id, string mailbox)
-	Gets the ACL for a given mailbox */
+/* {{{ Gets the ACL for a given mailbox */
 PHP_FUNCTION(imap_getacl)
 {
 	zval *streamind;
@@ -1117,8 +1095,7 @@ PHP_FUNCTION(imap_getacl)
 /* }}} */
 #endif /* HAVE_IMAP2000 || HAVE_IMAP2001 */
 
-/* {{{ proto bool imap_expunge(resource stream_id)
-   Permanently delete all messages marked for deletion */
+/* {{{ Permanently delete all messages marked for deletion */
 PHP_FUNCTION(imap_expunge)
 {
 	zval *streamind;
@@ -1138,8 +1115,7 @@ PHP_FUNCTION(imap_expunge)
 }
 /* }}} */
 
-/* {{{ proto bool imap_gc(resource stream_id, int flags)
-   This function garbage collects (purges) the cache of entries of a specific type. */
+/* {{{ This function garbage collects (purges) the cache of entries of a specific type. */
 PHP_FUNCTION(imap_gc)
 {
 	zval *streamind;
@@ -1165,8 +1141,7 @@ PHP_FUNCTION(imap_gc)
 }
 /* }}} */
 
-/* {{{ proto bool imap_close(resource stream_id [, int options])
-   Close an IMAP stream */
+/* {{{ Close an IMAP stream */
 PHP_FUNCTION(imap_close)
 {
 	zval *streamind;
@@ -1205,8 +1180,7 @@ PHP_FUNCTION(imap_close)
 }
 /* }}} */
 
-/* {{{ proto array imap_headers(resource stream_id)
-   Returns headers for all messages in a mailbox */
+/* {{{ Returns headers for all messages in a mailbox */
 PHP_FUNCTION(imap_headers)
 {
 	zval *streamind;
@@ -1257,8 +1231,7 @@ PHP_FUNCTION(imap_headers)
 }
 /* }}} */
 
-/* {{{ proto string imap_body(resource stream_id, int msg_no [, int options])
-   Read the message body */
+/* {{{ Read the message body */
 PHP_FUNCTION(imap_body)
 {
 	zval *streamind;
@@ -1303,8 +1276,7 @@ PHP_FUNCTION(imap_body)
 }
 /* }}} */
 
-/* {{{ proto bool imap_mail_copy(resource stream_id, string msglist, string mailbox [, int options])
-   Copy specified message to a mailbox */
+/* {{{ Copy specified message to a mailbox */
 PHP_FUNCTION(imap_mail_copy)
 {
 	zval *streamind;
@@ -1329,8 +1301,7 @@ PHP_FUNCTION(imap_mail_copy)
 }
 /* }}} */
 
-/* {{{ proto bool imap_mail_move(resource stream_id, string sequence, string mailbox [, int options])
-   Move specified message to a mailbox */
+/* {{{ Move specified message to a mailbox */
 PHP_FUNCTION(imap_mail_move)
 {
 	zval *streamind;
@@ -1355,8 +1326,7 @@ PHP_FUNCTION(imap_mail_move)
 }
 /* }}} */
 
-/* {{{ proto bool imap_createmailbox(resource stream_id, string mailbox)
-   Create a new mailbox */
+/* {{{ Create a new mailbox */
 PHP_FUNCTION(imap_createmailbox)
 {
 	zval *streamind;
@@ -1379,8 +1349,7 @@ PHP_FUNCTION(imap_createmailbox)
 }
 /* }}} */
 
-/* {{{ proto bool imap_renamemailbox(resource stream_id, string old_name, string new_name)
-   Rename a mailbox */
+/* {{{ Rename a mailbox */
 PHP_FUNCTION(imap_renamemailbox)
 {
 	zval *streamind;
@@ -1403,8 +1372,7 @@ PHP_FUNCTION(imap_renamemailbox)
 }
 /* }}} */
 
-/* {{{ proto bool imap_deletemailbox(resource stream_id, string mailbox)
-   Delete a mailbox */
+/* {{{ Delete a mailbox */
 PHP_FUNCTION(imap_deletemailbox)
 {
 	zval *streamind;
@@ -1427,8 +1395,7 @@ PHP_FUNCTION(imap_deletemailbox)
 }
 /* }}} */
 
-/* {{{ proto array imap_list(resource stream_id, string ref, string pattern)
-   Read the list of mailboxes */
+/* {{{ Read the list of mailboxes */
 PHP_FUNCTION(imap_list)
 {
 	zval *streamind;
@@ -1465,8 +1432,7 @@ PHP_FUNCTION(imap_list)
 
 /* }}} */
 
-/* {{{ proto array imap_getmailboxes(resource stream_id, string ref, string pattern)
-   Reads the list of mailboxes and returns a full array of objects containing name, attributes, and delimiter */
+/* {{{ Reads the list of mailboxes and returns a full array of objects containing name, attributes, and delimiter */
 /* Author: CJH */
 PHP_FUNCTION(imap_getmailboxes)
 {
@@ -1516,8 +1482,7 @@ PHP_FUNCTION(imap_getmailboxes)
 }
 /* }}} */
 
-/* {{{ proto array imap_listscan(resource stream_id, string ref, string pattern, string content)
-   Read list of mailboxes containing a certain string */
+/* {{{ Read list of mailboxes containing a certain string */
 PHP_FUNCTION(imap_listscan)
 {
 	zval *streamind;
@@ -1551,8 +1516,7 @@ PHP_FUNCTION(imap_listscan)
 
 /* }}} */
 
-/* {{{ proto object imap_check(resource stream_id)
-   Get mailbox properties */
+/* {{{ Get mailbox properties */
 PHP_FUNCTION(imap_check)
 {
 	zval *streamind;
@@ -1585,8 +1549,7 @@ PHP_FUNCTION(imap_check)
 }
 /* }}} */
 
-/* {{{ proto bool imap_delete(resource stream_id, int msg_no [, int options])
-   Mark a message for deletion */
+/* {{{ Mark a message for deletion */
 PHP_FUNCTION(imap_delete)
 {
 	zval *streamind, *sequence;
@@ -1611,8 +1574,7 @@ PHP_FUNCTION(imap_delete)
 }
 /* }}} */
 
-/* {{{ proto bool imap_undelete(resource stream_id, int msg_no [, int flags])
-   Remove the delete flag from a message */
+/* {{{ Remove the delete flag from a message */
 PHP_FUNCTION(imap_undelete)
 {
 	zval *streamind, *sequence;
@@ -1637,8 +1599,7 @@ PHP_FUNCTION(imap_undelete)
 }
 /* }}} */
 
-/* {{{ proto object imap_headerinfo(resource stream_id, int msg_no [, int from_length [, int subject_length [, string default_host]]])
-   Read the headers of the message */
+/* {{{ Read the headers of the message */
 PHP_FUNCTION(imap_headerinfo)
 {
 	zval *streamind;
@@ -1722,8 +1683,7 @@ PHP_FUNCTION(imap_headerinfo)
 }
 /* }}} */
 
-/* {{{ proto object imap_rfc822_parse_headers(string headers [, string default_host])
-   Parse a set of mail headers contained in a string, and return an object similar to imap_headerinfo() */
+/* {{{ Parse a set of mail headers contained in a string, and return an object similar to imap_headerinfo() */
 PHP_FUNCTION(imap_rfc822_parse_headers)
 {
 	zend_string *headers, *defaulthost = NULL;
@@ -1748,8 +1708,7 @@ PHP_FUNCTION(imap_rfc822_parse_headers)
 /* }}} */
 
 /* KMLANG */
-/* {{{ proto array imap_lsub(resource stream_id, string ref, string pattern)
-   Return a list of subscribed mailboxes */
+/* {{{ Return a list of subscribed mailboxes */
 PHP_FUNCTION(imap_lsub)
 {
 	zval *streamind;
@@ -1785,8 +1744,7 @@ PHP_FUNCTION(imap_lsub)
 }
 /* }}} */
 
-/* {{{ proto array imap_getsubscribed(resource stream_id, string ref, string pattern)
-   Return a list of subscribed mailboxes, in the same format as imap_getmailboxes() */
+/* {{{ Return a list of subscribed mailboxes, in the same format as imap_getmailboxes() */
 /* Author: CJH */
 PHP_FUNCTION(imap_getsubscribed)
 {
@@ -1836,8 +1794,7 @@ PHP_FUNCTION(imap_getsubscribed)
 }
 /* }}} */
 
-/* {{{ proto bool imap_subscribe(resource stream_id, string mailbox)
-   Subscribe to a mailbox */
+/* {{{ Subscribe to a mailbox */
 PHP_FUNCTION(imap_subscribe)
 {
 	zval *streamind;
@@ -1860,8 +1817,7 @@ PHP_FUNCTION(imap_subscribe)
 }
 /* }}} */
 
-/* {{{ proto bool imap_unsubscribe(resource stream_id, string mailbox)
-   Unsubscribe from a mailbox */
+/* {{{ Unsubscribe from a mailbox */
 PHP_FUNCTION(imap_unsubscribe)
 {
 	zval *streamind;
@@ -1884,8 +1840,7 @@ PHP_FUNCTION(imap_unsubscribe)
 }
 /* }}} */
 
-/* {{{ proto object imap_fetchstructure(resource stream_id, int msg_no [, int options])
-   Read the full structure of a message */
+/* {{{ Read the full structure of a message */
 PHP_FUNCTION(imap_fetchstructure)
 {
 	zval *streamind;
@@ -1934,8 +1889,7 @@ PHP_FUNCTION(imap_fetchstructure)
 }
 /* }}} */
 
-/* {{{ proto string imap_fetchbody(resource stream_id, int msg_no, string section [, int options])
-   Get a specific body section */
+/* {{{ Get a specific body section */
 PHP_FUNCTION(imap_fetchbody)
 {
 	zval *streamind;
@@ -1976,8 +1930,7 @@ PHP_FUNCTION(imap_fetchbody)
 /* }}} */
 
 
-/* {{{ proto string imap_fetchmime(resource stream_id, int msg_no, string section [, int options])
-   Get a specific body section's MIME headers */
+/* {{{ Get a specific body section's MIME headers */
 PHP_FUNCTION(imap_fetchmime)
 {
 	zval *streamind;
@@ -2017,8 +1970,7 @@ PHP_FUNCTION(imap_fetchmime)
 
 /* }}} */
 
-/* {{{ proto bool imap_savebody(resource stream_id, string|resource file, int msg_no[, string section = ""[, int options = 0]])
-	Save a specific body section to a file */
+/* {{{ Save a specific body section to a file */
 PHP_FUNCTION(imap_savebody)
 {
 	zval *stream, *out;
@@ -2074,8 +2026,7 @@ PHP_FUNCTION(imap_savebody)
 }
 /* }}} */
 
-/* {{{ proto string imap_base64(string text)
-   Decode BASE64 encoded text */
+/* {{{ Decode BASE64 encoded text */
 PHP_FUNCTION(imap_base64)
 {
 	zend_string *text;
@@ -2097,8 +2048,7 @@ PHP_FUNCTION(imap_base64)
 }
 /* }}} */
 
-/* {{{ proto string imap_qprint(string text)
-   Convert a quoted-printable string to an 8-bit string */
+/* {{{ Convert a quoted-printable string to an 8-bit string */
 PHP_FUNCTION(imap_qprint)
 {
 	zend_string *text;
@@ -2120,8 +2070,7 @@ PHP_FUNCTION(imap_qprint)
 }
 /* }}} */
 
-/* {{{ proto string imap_8bit(string text)
-   Convert an 8-bit string to a quoted-printable string */
+/* {{{ Convert an 8-bit string to a quoted-printable string */
 PHP_FUNCTION(imap_8bit)
 {
 	zend_string *text;
@@ -2143,8 +2092,7 @@ PHP_FUNCTION(imap_8bit)
 }
 /* }}} */
 
-/* {{{ proto string imap_binary(string text)
-   Convert an 8bit string to a base64 string */
+/* {{{ Convert an 8bit string to a base64 string */
 PHP_FUNCTION(imap_binary)
 {
 	zend_string *text;
@@ -2166,8 +2114,7 @@ PHP_FUNCTION(imap_binary)
 }
 /* }}} */
 
-/* {{{ proto object imap_mailboxmsginfo(resource stream_id)
-   Returns info about the current mailbox */
+/* {{{ Returns info about the current mailbox */
 PHP_FUNCTION(imap_mailboxmsginfo)
 {
 	zval *streamind;
@@ -2212,8 +2159,7 @@ PHP_FUNCTION(imap_mailboxmsginfo)
 }
 /* }}} */
 
-/* {{{ proto string imap_rfc822_write_address(string mailbox, string host, string personal)
-   Returns a properly formatted email address given the mailbox, host, and personal info */
+/* {{{ Returns a properly formatted email address given the mailbox, host, and personal info */
 PHP_FUNCTION(imap_rfc822_write_address)
 {
 	zend_string *mailbox, *host, *personal;
@@ -2251,8 +2197,7 @@ PHP_FUNCTION(imap_rfc822_write_address)
 }
 /* }}} */
 
-/* {{{ proto array imap_rfc822_parse_adrlist(string address_string, string default_host)
-   Parses an address string */
+/* {{{ Parses an address string */
 PHP_FUNCTION(imap_rfc822_parse_adrlist)
 {
 	zval tovals;
@@ -2297,8 +2242,7 @@ PHP_FUNCTION(imap_rfc822_parse_adrlist)
 }
 /* }}} */
 
-/* {{{ proto string imap_utf8(string mime_encoded_text)
-   Convert a mime-encoded text to UTF-8 */
+/* {{{ Convert a mime-encoded text to UTF-8 */
 PHP_FUNCTION(imap_utf8)
 {
 	zend_string *str;
@@ -2350,8 +2294,7 @@ PHP_FUNCTION(imap_utf8)
 					(c) - 71 : (c) >= 'A' ? (c) - 65 : (c) + 4)
 /* }}} */
 
-/* {{{ proto string imap_utf7_decode(string buf)
-   Decode a modified UTF-7 string */
+/* {{{ Decode a modified UTF-7 string */
 PHP_FUNCTION(imap_utf7_decode)
 {
 	/* author: Andrew Skalski <askalski@chek.com> */
@@ -2489,8 +2432,7 @@ PHP_FUNCTION(imap_utf7_decode)
 }
 /* }}} */
 
-/* {{{ proto string imap_utf7_encode(string buf)
-   Encode a string in modified UTF-7 */
+/* {{{ Encode a string in modified UTF-7 */
 PHP_FUNCTION(imap_utf7_encode)
 {
 	/* author: Andrew Skalski <askalski@chek.com> */
@@ -2633,16 +2575,14 @@ static void php_imap_mutf7(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto string imap_utf8_to_mutf7(string in)
-   Encode a UTF-8 string to modified UTF-7 */
+/* {{{ Encode a UTF-8 string to modified UTF-7 */
 PHP_FUNCTION(imap_utf8_to_mutf7)
 {
 	php_imap_mutf7(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
-/* {{{ proto string imap_mutf7_to_utf8(string in)
-   Decode a modified UTF-7 string to UTF-8 */
+/* {{{ Decode a modified UTF-7 string to UTF-8 */
 PHP_FUNCTION(imap_mutf7_to_utf8)
 {
 	php_imap_mutf7(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
@@ -2650,8 +2590,7 @@ PHP_FUNCTION(imap_mutf7_to_utf8)
 /* }}} */
 #endif
 
-/* {{{ proto bool imap_setflag_full(resource stream_id, string sequence, string flag [, int options])
-   Sets flags on messages */
+/* {{{ Sets flags on messages */
 PHP_FUNCTION(imap_setflag_full)
 {
 	zval *streamind;
@@ -2672,8 +2611,7 @@ PHP_FUNCTION(imap_setflag_full)
 }
 /* }}} */
 
-/* {{{ proto bool imap_clearflag_full(resource stream_id, string sequence, string flag [, int options])
-   Clears flags on messages */
+/* {{{ Clears flags on messages */
 PHP_FUNCTION(imap_clearflag_full)
 {
 	zval *streamind;
@@ -2695,8 +2633,7 @@ PHP_FUNCTION(imap_clearflag_full)
 }
 /* }}} */
 
-/* {{{ proto array imap_sort(resource stream_id, int criteria, int reverse [, int options [, string search_criteria [, string charset]]])
-   Sort an array of message headers, optionally including only messages that meet specified criteria. */
+/* {{{ Sort an array of message headers, optionally including only messages that meet specified criteria. */
 PHP_FUNCTION(imap_sort)
 {
 	zval *streamind;
@@ -2756,8 +2693,7 @@ PHP_FUNCTION(imap_sort)
 }
 /* }}} */
 
-/* {{{ proto string imap_fetchheader(resource stream_id, int msg_no [, int options])
-   Get the full unfiltered header for a message */
+/* {{{ Get the full unfiltered header for a message */
 PHP_FUNCTION(imap_fetchheader)
 {
 	zval *streamind;
@@ -2793,8 +2729,7 @@ PHP_FUNCTION(imap_fetchheader)
 }
 /* }}} */
 
-/* {{{ proto int imap_uid(resource stream_id, int msg_no)
-   Get the unique message id associated with a standard sequential message number */
+/* {{{ Get the unique message id associated with a standard sequential message number */
 PHP_FUNCTION(imap_uid)
 {
 	zval *streamind;
@@ -2820,8 +2755,7 @@ PHP_FUNCTION(imap_uid)
 }
 /* }}} */
 
-/* {{{ proto int imap_msgno(resource stream_id, int unique_msg_id)
-   Get the sequence number associated with a UID */
+/* {{{ Get the sequence number associated with a UID */
 PHP_FUNCTION(imap_msgno)
 {
 	zval *streamind;
@@ -2840,8 +2774,7 @@ PHP_FUNCTION(imap_msgno)
 }
 /* }}} */
 
-/* {{{ proto object imap_status(resource stream_id, string mailbox, int options)
-   Get status info from a mailbox */
+/* {{{ Get status info from a mailbox */
 PHP_FUNCTION(imap_status)
 {
 	zval *streamind;
@@ -2882,8 +2815,7 @@ PHP_FUNCTION(imap_status)
 }
 /* }}} */
 
-/* {{{ proto object imap_bodystruct(resource stream_id, int msg_no, string section)
-   Read the structure of a specified body section of a specific message */
+/* {{{ Read the structure of a specified body section of a specific message */
 PHP_FUNCTION(imap_bodystruct)
 {
 	zval *streamind;
@@ -2995,8 +2927,7 @@ PHP_FUNCTION(imap_bodystruct)
 
 /* }}} */
 
-/* {{{ proto array imap_fetch_overview(resource stream_id, string sequence [, int options])
-   Read an overview of the information in the headers of the given message sequence */
+/* {{{ Read an overview of the information in the headers of the given message sequence */
 PHP_FUNCTION(imap_fetch_overview)
 {
 	zval *streamind;
@@ -3081,8 +3012,7 @@ PHP_FUNCTION(imap_fetch_overview)
 }
 /* }}} */
 
-/* {{{ proto string imap_mail_compose(array envelope, array body)
-   Create a MIME message based on given envelope and body sections */
+/* {{{ Create a MIME message based on given envelope and body sections */
 PHP_FUNCTION(imap_mail_compose)
 {
 	zval *envelope, *body;
@@ -3479,8 +3409,7 @@ done:
 }
 /* }}} */
 
-/* {{{ _php_imap_mail
- */
+/* {{{ _php_imap_mail */
 int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *cc, char *bcc, char* rpath)
 {
 #ifdef PHP_WIN32
@@ -3639,8 +3568,7 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 }
 /* }}} */
 
-/* {{{ proto bool imap_mail(string to, string subject, string message [, string additional_headers [, string cc [, string bcc [, string rpath]]]])
-   Send an email message */
+/* {{{ Send an email message */
 PHP_FUNCTION(imap_mail)
 {
 	zend_string *to=NULL, *message=NULL, *headers=NULL, *subject=NULL, *cc=NULL, *bcc=NULL, *rpath=NULL;
@@ -3678,8 +3606,7 @@ PHP_FUNCTION(imap_mail)
 }
 /* }}} */
 
-/* {{{ proto array imap_search(resource stream_id, string criteria [, int options [, string charset]])
-   Return a list of messages matching the given criteria */
+/* {{{ Return a list of messages matching the given criteria */
 PHP_FUNCTION(imap_search)
 {
 	zval *streamind;
@@ -3727,8 +3654,7 @@ PHP_FUNCTION(imap_search)
 }
 /* }}} */
 
-/* {{{ proto array imap_alerts(void)
-   Returns an array of all IMAP alerts that have been generated since the last page load or since the last imap_alerts() call, whichever came last. The alert stack is cleared after imap_alerts() is called. */
+/* {{{ Returns an array of all IMAP alerts that have been generated since the last page load or since the last imap_alerts() call, whichever came last. The alert stack is cleared after imap_alerts() is called. */
 /* Author: CJH */
 PHP_FUNCTION(imap_alerts)
 {
@@ -3754,8 +3680,7 @@ PHP_FUNCTION(imap_alerts)
 }
 /* }}} */
 
-/* {{{ proto array imap_errors(void)
-   Returns an array of all IMAP errors generated since the last page load, or since the last imap_errors() call, whichever came last. The error stack is cleared after imap_errors() is called. */
+/* {{{ Returns an array of all IMAP errors generated since the last page load, or since the last imap_errors() call, whichever came last. The error stack is cleared after imap_errors() is called. */
 /* Author: CJH */
 PHP_FUNCTION(imap_errors)
 {
@@ -3781,8 +3706,7 @@ PHP_FUNCTION(imap_errors)
 }
 /* }}} */
 
-/* {{{ proto string imap_last_error(void)
-   Returns the last error that was generated by an IMAP function. The error stack is NOT cleared after this call. */
+/* {{{ Returns the last error that was generated by an IMAP function. The error stack is NOT cleared after this call. */
 /* Author: CJH */
 PHP_FUNCTION(imap_last_error)
 {
@@ -3806,8 +3730,7 @@ PHP_FUNCTION(imap_last_error)
 }
 /* }}} */
 
-/* {{{ proto array imap_mime_header_decode(string str)
-   Decode mime header element in accordance with RFC 2047 and return array of objects containing 'charset' encoding and decoded 'text' */
+/* {{{ Decode mime header element in accordance with RFC 2047 and return array of objects containing 'charset' encoding and decoded 'text' */
 PHP_FUNCTION(imap_mime_header_decode)
 {
 	/* Author: Ted Parnefors <ted@mtv.se> */
@@ -3904,8 +3827,7 @@ PHP_FUNCTION(imap_mime_header_decode)
 /* Support Functions */
 
 #ifdef HAVE_RFC822_OUTPUT_ADDRESS_LIST
-/* {{{ _php_rfc822_soutr
- */
+/* {{{ _php_rfc822_soutr */
 static long _php_rfc822_soutr (void *stream, char *string)
 {
 	smart_str *ret = (smart_str*)stream;
@@ -3916,8 +3838,7 @@ static long _php_rfc822_soutr (void *stream, char *string)
 }
 /* }}} */
 
-/* {{{ _php_rfc822_write_address
- */
+/* {{{ _php_rfc822_write_address */
 static zend_string* _php_rfc822_write_address(ADDRESS *addresslist)
 {
 	char address[MAILTMPLEN];
@@ -3967,8 +3888,7 @@ static int _php_rfc822_len(char *str)
 }
 /* }}} */
 
-/* {{{ _php_imap_get_address_size
- */
+/* {{{ _php_imap_get_address_size */
 static int _php_imap_address_size (ADDRESS *addresslist)
 {
 	ADDRESS *tmp;
@@ -3996,8 +3916,7 @@ static int _php_imap_address_size (ADDRESS *addresslist)
 
 /* }}} */
 
-/* {{{ _php_rfc822_write_address
- */
+/* {{{ _php_rfc822_write_address */
 static zend_string* _php_rfc822_write_address(ADDRESS *addresslist)
 {
 	char address[SENDBUFLEN];
@@ -4012,8 +3931,7 @@ static zend_string* _php_rfc822_write_address(ADDRESS *addresslist)
 }
 /* }}} */
 #endif
-/* {{{ _php_imap_parse_address
- */
+/* {{{ _php_imap_parse_address */
 static zend_string* _php_imap_parse_address (ADDRESS *addresslist, zval *paddress)
 {
 	zend_string *fulladdress;
@@ -4037,8 +3955,7 @@ static zend_string* _php_imap_parse_address (ADDRESS *addresslist, zval *paddres
 }
 /* }}} */
 
-/* {{{ _php_make_header_object
- */
+/* {{{ _php_make_header_object */
 static void _php_make_header_object(zval *myzvalue, ENVELOPE *en)
 {
 	zval paddress;
@@ -4122,8 +4039,7 @@ static void _php_make_header_object(zval *myzvalue, ENVELOPE *en)
 }
 /* }}} */
 
-/* {{{ _php_imap_add_body
- */
+/* {{{ _php_imap_add_body */
 void _php_imap_add_body(zval *arg, BODY *body)
 {
 	zval parametres, param, dparametres, dparam;
@@ -4236,8 +4152,7 @@ void _php_imap_add_body(zval *arg, BODY *body)
 /* }}} */
 
 /* imap_thread, stealing this from header cclient -rjs3 */
-/* {{{ build_thread_tree_helper
- */
+/* {{{ build_thread_tree_helper */
 static void build_thread_tree_helper(THREADNODE *cur, zval *tree, long *numNodes, char *buf)
 {
 	unsigned long thisNode = *numNodes;
@@ -4267,8 +4182,7 @@ static void build_thread_tree_helper(THREADNODE *cur, zval *tree, long *numNodes
 }
 /* }}} */
 
-/* {{{ build_thread_tree
- */
+/* {{{ build_thread_tree */
 static int build_thread_tree(THREADNODE *top, zval **tree)
 {
 	long numNodes = 0;
@@ -4282,8 +4196,7 @@ static int build_thread_tree(THREADNODE *top, zval **tree)
 }
 /* }}} */
 
-/* {{{ proto array imap_thread(resource stream_id [, int options])
-   Return threaded by REFERENCES tree */
+/* {{{ Return threaded by REFERENCES tree */
 PHP_FUNCTION(imap_thread)
 {
 	zval *streamind;
@@ -4322,8 +4235,7 @@ PHP_FUNCTION(imap_thread)
 }
 /* }}} */
 
-/* {{{ proto mixed imap_timeout(int timeout_type [, int timeout])
-   Set or fetch imap timeout */
+/* {{{ Set or fetch imap timeout */
 PHP_FUNCTION(imap_timeout)
 {
 	zend_long ttype, timeout=-1;
@@ -4425,8 +4337,7 @@ static char *php_mail_gets(readfn_t f, void *stream, unsigned long size, GETS_DA
 }
 /* }}} */
 
-/* {{{ Interfaces to C-client
- */
+/* {{{ Interfaces to C-client */
 PHP_IMAP_EXPORT void mm_searched(MAILSTREAM *stream, unsigned long number)
 {
 	MESSAGELIST *cur = NIL;

@@ -68,8 +68,7 @@ PHP_MINFO_FUNCTION(php_gettext)
 	php_info_print_table_end();
 }
 
-/* {{{ proto string textdomain(string domain)
-   Set the textdomain to "domain". Returns the current domain */
+/* {{{ Set the textdomain to "domain". Returns the current domain */
 PHP_FUNCTION(textdomain)
 {
 	char *domain = NULL, *domain_name, *retval;
@@ -93,8 +92,7 @@ PHP_FUNCTION(textdomain)
 }
 /* }}} */
 
-/* {{{ proto string gettext(string msgid)
-   Return the translation of msgid for the current domain, or msgid unaltered if a translation does not exist */
+/* {{{ Return the translation of msgid for the current domain, or msgid unaltered if a translation does not exist */
 PHP_FUNCTION(gettext)
 {
 	char *msgstr;
@@ -115,8 +113,7 @@ PHP_FUNCTION(gettext)
 }
 /* }}} */
 
-/* {{{ proto string dgettext(string domain_name, string msgid)
-   Return the translation of msgid for domain_name, or msgid unaltered if a translation does not exist */
+/* {{{ Return the translation of msgid for domain_name, or msgid unaltered if a translation does not exist */
 PHP_FUNCTION(dgettext)
 {
 	char *msgstr;
@@ -139,8 +136,7 @@ PHP_FUNCTION(dgettext)
 }
 /* }}} */
 
-/* {{{ proto string dcgettext(string domain_name, string msgid, int category)
-   Return the translation of msgid for domain_name and category, or msgid unaltered if a translation does not exist */
+/* {{{ Return the translation of msgid for domain_name and category, or msgid unaltered if a translation does not exist */
 PHP_FUNCTION(dcgettext)
 {
 	char *msgstr;
@@ -164,8 +160,7 @@ PHP_FUNCTION(dcgettext)
 }
 /* }}} */
 
-/* {{{ proto string bindtextdomain(string domain_name, string dir)
-   Bind to the text domain domain_name, looking for translations in dir. Returns the current domain */
+/* {{{ Bind to the text domain domain_name, looking for translations in dir. Returns the current domain */
 PHP_FUNCTION(bindtextdomain)
 {
 	char *domain, *dir;
@@ -198,8 +193,7 @@ PHP_FUNCTION(bindtextdomain)
 /* }}} */
 
 #ifdef HAVE_NGETTEXT
-/* {{{ proto string ngettext(string MSGID1, string MSGID2, int N)
-   Plural version of gettext() */
+/* {{{ Plural version of gettext() */
 PHP_FUNCTION(ngettext)
 {
 	char *msgid1, *msgid2, *msgstr;
@@ -222,8 +216,7 @@ PHP_FUNCTION(ngettext)
 #endif
 
 #ifdef HAVE_DNGETTEXT
-/* {{{ proto string dngettext(string domain, string msgid1, string msgid2, int count)
-   Plural version of dgettext() */
+/* {{{ Plural version of dgettext() */
 PHP_FUNCTION(dngettext)
 {
 	char *domain, *msgid1, *msgid2, *msgstr = NULL;
@@ -248,8 +241,7 @@ PHP_FUNCTION(dngettext)
 #endif
 
 #ifdef HAVE_DCNGETTEXT
-/* {{{ proto string dcngettext(string domain, string msgid1, string msgid2, int n, int category)
-   Plural version of dcgettext() */
+/* {{{ Plural version of dcgettext() */
 PHP_FUNCTION(dcngettext)
 {
 	char *domain, *msgid1, *msgid2, *msgstr = NULL;
@@ -277,8 +269,7 @@ PHP_FUNCTION(dcngettext)
 
 #ifdef HAVE_BIND_TEXTDOMAIN_CODESET
 
-/* {{{ proto string bind_textdomain_codeset(string domain, string codeset)
-   Specify the character encoding in which the messages from the DOMAIN message catalog will be returned. */
+/* {{{ Specify the character encoding in which the messages from the DOMAIN message catalog will be returned. */
 PHP_FUNCTION(bind_textdomain_codeset)
 {
 	char *domain, *codeset, *retval = NULL;

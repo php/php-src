@@ -41,8 +41,7 @@ static const zend_module_dep xsl_deps[] = {
 	ZEND_MOD_END
 };
 
-/* {{{ xsl_module_entry
- */
+/* {{{ xsl_module_entry */
 zend_module_entry xsl_module_entry = {
 	STANDARD_MODULE_HEADER_EX, NULL,
 	xsl_deps,
@@ -118,8 +117,7 @@ zend_object *xsl_objects_new(zend_class_entry *class_type)
 }
 /* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION
- */
+/* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(xsl)
 {
 
@@ -229,8 +227,7 @@ void php_xsl_create_object(xsltStylesheetPtr obj, zval *wrapper_in, zval *return
 }
 /* }}} */
 
-/* {{{ PHP_MSHUTDOWN_FUNCTION
- */
+/* {{{ PHP_MSHUTDOWN_FUNCTION */
 PHP_MSHUTDOWN_FUNCTION(xsl)
 {
 	xsltUnregisterExtModuleFunction ((const xmlChar *) "functionString",
@@ -244,8 +241,7 @@ PHP_MSHUTDOWN_FUNCTION(xsl)
 }
 /* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
- */
+/* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(xsl)
 {
 	php_info_print_table_start();

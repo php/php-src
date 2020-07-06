@@ -99,8 +99,7 @@ ZEND_FUNCTION(zend_terminate_string)
 	ZSTR_VAL(str)[ZSTR_LEN(str)] = '\0';
 }
 
-/* {{{ proto void zend_leak_bytes([int num_bytes])
-   Cause an intentional memory leak, for testing/debugging purposes */
+/* {{{ Cause an intentional memory leak, for testing/debugging purposes */
 ZEND_FUNCTION(zend_leak_bytes)
 {
 	zend_long leakbytes = 3;
@@ -113,8 +112,7 @@ ZEND_FUNCTION(zend_leak_bytes)
 }
 /* }}} */
 
-/* {{{ proto void zend_leak_variable(mixed variable)
-   Leak a refcounted variable */
+/* {{{ Leak a refcounted variable */
 ZEND_FUNCTION(zend_leak_variable)
 {
 	zval *zv;

@@ -208,8 +208,7 @@ PHPAPI zend_string *php_crypt(const char *password, const int pass_len, const ch
 /* }}} */
 
 
-/* {{{ proto string crypt(string str [, string salt])
-   Hash a string */
+/* {{{ Hash a string */
 PHP_FUNCTION(crypt)
 {
 	char salt[PHP_MAX_SALT_LEN + 1];

@@ -605,16 +605,14 @@ void sapi_cgi_log_fastcgi(int level, char *message, size_t len)
 }
 /* }}} */
 
-/* {{{ sapi_cgi_log_message
- */
+/* {{{ sapi_cgi_log_message */
 static void sapi_cgi_log_message(const char *message, int syslog_type_int)
 {
 	zlog_msg(ZLOG_NOTICE, "PHP message: ", message);
 }
 /* }}} */
 
-/* {{{ php_cgi_ini_activate_user_config
- */
+/* {{{ php_cgi_ini_activate_user_config */
 static void php_cgi_ini_activate_user_config(char *path, int path_len, const char *doc_root, int doc_root_len)
 {
 	char *ptr;
@@ -777,8 +775,7 @@ static int php_cgi_startup(sapi_module_struct *sapi_module) /* {{{ */
 }
 /* }}} */
 
-/* {{{ sapi_module_struct cgi_sapi_module
- */
+/* {{{ sapi_module_struct cgi_sapi_module */
 static sapi_module_struct cgi_sapi_module = {
 	"fpm-fcgi",						/* name */
 	"FPM/FastCGI",					/* pretty name */
@@ -812,8 +809,7 @@ static sapi_module_struct cgi_sapi_module = {
 };
 /* }}} */
 
-/* {{{ php_cgi_usage
- */
+/* {{{ php_cgi_usage */
 static void php_cgi_usage(char *argv0)
 {
 	char *prog;
@@ -1404,8 +1400,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("fpm.config",    NULL, PHP_INI_SYSTEM, OnUpdateString, fpm_config, php_cgi_globals_struct, php_cgi_globals)
 PHP_INI_END()
 
-/* {{{ php_cgi_globals_ctor
- */
+/* {{{ php_cgi_globals_ctor */
 static void php_cgi_globals_ctor(php_cgi_globals_struct *php_cgi_globals)
 {
 	php_cgi_globals->rfc2616_headers = 0;
@@ -1421,8 +1416,7 @@ static void php_cgi_globals_ctor(php_cgi_globals_struct *php_cgi_globals)
 }
 /* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION
- */
+/* {{{ PHP_MINIT_FUNCTION */
 static PHP_MINIT_FUNCTION(cgi)
 {
 #ifdef ZTS
@@ -1435,8 +1429,7 @@ static PHP_MINIT_FUNCTION(cgi)
 }
 /* }}} */
 
-/* {{{ PHP_MSHUTDOWN_FUNCTION
- */
+/* {{{ PHP_MSHUTDOWN_FUNCTION */
 static PHP_MSHUTDOWN_FUNCTION(cgi)
 {
 	zend_hash_destroy(&CGIG(user_config_cache));
@@ -1446,8 +1439,7 @@ static PHP_MSHUTDOWN_FUNCTION(cgi)
 }
 /* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
- */
+/* {{{ PHP_MINFO_FUNCTION */
 static PHP_MINFO_FUNCTION(cgi)
 {
 	php_info_print_table_start();
@@ -1494,8 +1486,7 @@ PHP_FUNCTION(apache_request_headers) /* {{{ */
 	}
 } /* }}} */
 
-/* {{{ proto array fpm_get_status
- * Returns the status of the fastcgi process manager */
+/* {{{ Returns the status of the fastcgi process manager */
 PHP_FUNCTION(fpm_get_status) /* {{{ */
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1521,8 +1512,7 @@ static zend_module_entry cgi_module_entry = {
 	STANDARD_MODULE_PROPERTIES
 };
 
-/* {{{ main
- */
+/* {{{ main */
 int main(int argc, char *argv[])
 {
 	int exit_status = FPM_EXIT_OK;

@@ -436,8 +436,7 @@ PHP_FUNCTION(apache_response_headers) /* {{{ */
 }
 /* }}} */
 
-/* {{{ cli_server module
- */
+/* {{{ cli_server module */
 
 static void cli_server_init_globals(zend_cli_server_globals *cg)
 {
@@ -782,8 +781,7 @@ static void sapi_cli_server_log_message(const char *msg, int syslog_type_int) /*
 	sapi_cli_server_log_write(PHP_CLI_SERVER_LOG_MESSAGE, msg);
 } /* }}} */
 
-/* {{{ sapi_module_struct cli_server_sapi_module
- */
+/* {{{ sapi_module_struct cli_server_sapi_module */
 sapi_module_struct cli_server_sapi_module = {
 	"cli-server",							/* name */
 	"Built-in HTTP server",		/* pretty name */

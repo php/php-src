@@ -1290,8 +1290,7 @@ static int php_output_handler_devnull_func(void **handler_context, php_output_co
  * USERLAND (nearly 1:1 of old output.c)
  */
 
-/* {{{ proto bool ob_start([string|array user_function [, int chunk_size [, int flags]]])
-   Turn on Output Buffering (specifying an optional output handler). */
+/* {{{ Turn on Output Buffering (specifying an optional output handler). */
 PHP_FUNCTION(ob_start)
 {
 	zval *output_handler = NULL;
@@ -1314,8 +1313,7 @@ PHP_FUNCTION(ob_start)
 }
 /* }}} */
 
-/* {{{ proto bool ob_flush(void)
-   Flush (send) contents of the output buffer. The last buffer content is sent to next buffer */
+/* {{{ Flush (send) contents of the output buffer. The last buffer content is sent to next buffer */
 PHP_FUNCTION(ob_flush)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1335,8 +1333,7 @@ PHP_FUNCTION(ob_flush)
 }
 /* }}} */
 
-/* {{{ proto bool ob_clean(void)
-   Clean (delete) the current output buffer */
+/* {{{ Clean (delete) the current output buffer */
 PHP_FUNCTION(ob_clean)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1356,8 +1353,7 @@ PHP_FUNCTION(ob_clean)
 }
 /* }}} */
 
-/* {{{ proto bool ob_end_flush(void)
-   Flush (send) the output buffer, and delete current output buffer */
+/* {{{ Flush (send) the output buffer, and delete current output buffer */
 PHP_FUNCTION(ob_end_flush)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1373,8 +1369,7 @@ PHP_FUNCTION(ob_end_flush)
 }
 /* }}} */
 
-/* {{{ proto bool ob_end_clean(void)
-   Clean the output buffer, and delete current output buffer */
+/* {{{ Clean the output buffer, and delete current output buffer */
 PHP_FUNCTION(ob_end_clean)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1390,8 +1385,7 @@ PHP_FUNCTION(ob_end_clean)
 }
 /* }}} */
 
-/* {{{ proto string|false ob_get_flush(void)
-   Get current buffer contents, flush (send) the output buffer, and delete current output buffer */
+/* {{{ Get current buffer contents, flush (send) the output buffer, and delete current output buffer */
 PHP_FUNCTION(ob_get_flush)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1409,8 +1403,7 @@ PHP_FUNCTION(ob_get_flush)
 }
 /* }}} */
 
-/* {{{ proto string|false ob_get_clean(void)
-   Get current buffer contents and delete current output buffer */
+/* {{{ Get current buffer contents and delete current output buffer */
 PHP_FUNCTION(ob_get_clean)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1432,8 +1425,7 @@ PHP_FUNCTION(ob_get_clean)
 }
 /* }}} */
 
-/* {{{ proto string|false ob_get_contents(void)
-   Return the contents of the output buffer */
+/* {{{ Return the contents of the output buffer */
 PHP_FUNCTION(ob_get_contents)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1446,8 +1438,7 @@ PHP_FUNCTION(ob_get_contents)
 }
 /* }}} */
 
-/* {{{ proto int ob_get_level(void)
-   Return the nesting level of the output buffer */
+/* {{{ Return the nesting level of the output buffer */
 PHP_FUNCTION(ob_get_level)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1458,8 +1449,7 @@ PHP_FUNCTION(ob_get_level)
 }
 /* }}} */
 
-/* {{{ proto int|false ob_get_length(void)
-   Return the length of the output buffer */
+/* {{{ Return the length of the output buffer */
 PHP_FUNCTION(ob_get_length)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1472,8 +1462,7 @@ PHP_FUNCTION(ob_get_length)
 }
 /* }}} */
 
-/* {{{ proto null|array ob_list_handlers()
-   List all output_buffers in an array */
+/* {{{ List all output_buffers in an array */
 PHP_FUNCTION(ob_list_handlers)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1490,8 +1479,7 @@ PHP_FUNCTION(ob_list_handlers)
 }
 /* }}} */
 
-/* {{{ proto false|array ob_get_status([bool full_status])
-   Return the status of the active or all output buffers */
+/* {{{ Return the status of the active or all output buffers */
 PHP_FUNCTION(ob_get_status)
 {
 	zend_bool full_status = 0;
@@ -1514,8 +1502,7 @@ PHP_FUNCTION(ob_get_status)
 }
 /* }}} */
 
-/* {{{ proto void ob_implicit_flush([int flag])
-   Turn implicit flush on/off and is equivalent to calling flush() after every output call */
+/* {{{ Turn implicit flush on/off and is equivalent to calling flush() after every output call */
 PHP_FUNCTION(ob_implicit_flush)
 {
 	zend_long flag = 1;
@@ -1528,8 +1515,7 @@ PHP_FUNCTION(ob_implicit_flush)
 }
 /* }}} */
 
-/* {{{ proto bool output_reset_rewrite_vars(void)
-   Reset(clear) URL rewriter values */
+/* {{{ Reset(clear) URL rewriter values */
 PHP_FUNCTION(output_reset_rewrite_vars)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1544,8 +1530,7 @@ PHP_FUNCTION(output_reset_rewrite_vars)
 }
 /* }}} */
 
-/* {{{ proto bool output_add_rewrite_var(string name, string value)
-   Add URL rewriter values */
+/* {{{ Add URL rewriter values */
 PHP_FUNCTION(output_add_rewrite_var)
 {
 	char *name, *value;

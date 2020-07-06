@@ -28,8 +28,7 @@
 
 
 /* Implementation of the language Header() function */
-/* {{{ proto void header(string header [, bool replace, [int http_response_code]])
-   Sends a raw HTTP header */
+/* {{{ Sends a raw HTTP header */
 PHP_FUNCTION(header)
 {
 	zend_bool rep = 1;
@@ -50,8 +49,7 @@ PHP_FUNCTION(header)
 }
 /* }}} */
 
-/* {{{ proto void header_remove([string name])
-   Removes an HTTP header previously set using header() */
+/* {{{ Removes an HTTP header previously set using header() */
 PHP_FUNCTION(header_remove)
 {
 	sapi_header_line ctr = {0};
@@ -227,8 +225,7 @@ static void php_head_parse_cookie_options_array(zval *options, zend_long *expire
 	}
 }
 
-/* {{{ proto bool setcookie(string name [, string value [, int expires [, string path [, string domain [, bool secure[, bool httponly]]]]]])
-                  setcookie(string name [, string value [, array options]])
+/* {{{ setcookie(string name [, string value [, array options]])
    Send a cookie */
 PHP_FUNCTION(setcookie)
 {
@@ -282,8 +279,7 @@ PHP_FUNCTION(setcookie)
 }
 /* }}} */
 
-/* {{{ proto bool setrawcookie(string name [, string value [, int expires [, string path [, string domain [, bool secure[, bool httponly]]]]]])
-                  setrawcookie(string name [, string value [, array options]])
+/* {{{ setrawcookie(string name [, string value [, array options]])
    Send a cookie with no url encoding of the value */
 PHP_FUNCTION(setrawcookie)
 {
@@ -338,8 +334,7 @@ PHP_FUNCTION(setrawcookie)
 /* }}} */
 
 
-/* {{{ proto bool headers_sent([string &$file [, int &$line]])
-   Returns true if headers have already been sent, false otherwise */
+/* {{{ Returns true if headers have already been sent, false otherwise */
 PHP_FUNCTION(headers_sent)
 {
 	zval *arg1 = NULL, *arg2 = NULL;
@@ -388,8 +383,7 @@ static void php_head_apply_header_list_to_hash(void *data, void *arg)
 	}
 }
 
-/* {{{ proto array headers_list(void)
-   Return list of headers to be sent / already sent */
+/* {{{ Return list of headers to be sent / already sent */
 PHP_FUNCTION(headers_list)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -399,8 +393,7 @@ PHP_FUNCTION(headers_list)
 }
 /* }}} */
 
-/* {{{ proto int http_response_code([int response_code])
-   Sets a response code, or returns the current HTTP response code */
+/* {{{ Sets a response code, or returns the current HTTP response code */
 PHP_FUNCTION(http_response_code)
 {
 	zend_long response_code = 0;

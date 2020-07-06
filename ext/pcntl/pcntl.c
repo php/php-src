@@ -473,8 +473,7 @@ PHP_MINFO_FUNCTION(pcntl)
 	php_info_print_table_end();
 }
 
-/* {{{ proto int pcntl_fork(void)
-   Forks the currently running process following the same behavior as the UNIX fork() system call*/
+/* {{{ Forks the currently running process following the same behavior as the UNIX fork() system call*/
 PHP_FUNCTION(pcntl_fork)
 {
 	pid_t id;
@@ -493,8 +492,7 @@ PHP_FUNCTION(pcntl_fork)
 }
 /* }}} */
 
-/* {{{ proto int pcntl_alarm(int seconds)
-   Set an alarm clock for delivery of a signal*/
+/* {{{ Set an alarm clock for delivery of a signal*/
 PHP_FUNCTION(pcntl_alarm)
 {
 	zend_long seconds;
@@ -540,8 +538,7 @@ PHP_FUNCTION(pcntl_alarm)
 		PHP_RUSAGE_COMMON(from, to); \
 	}
 
-/* {{{ proto int pcntl_waitpid(int pid, int &status, int options, array &$rusage)
-   Waits on or returns the status of a forked child as defined by the waitpid() system call */
+/* {{{ Waits on or returns the status of a forked child as defined by the waitpid() system call */
 PHP_FUNCTION(pcntl_waitpid)
 {
 	zend_long pid, options = 0;
@@ -590,8 +587,7 @@ PHP_FUNCTION(pcntl_waitpid)
 }
 /* }}} */
 
-/* {{{ proto int pcntl_wait(int &status, int $options, array &$rusage)
-   Waits on or returns the status of a forked child as defined by the waitpid() system call */
+/* {{{ Waits on or returns the status of a forked child as defined by the waitpid() system call */
 PHP_FUNCTION(pcntl_wait)
 {
 	zend_long options = 0;
@@ -645,8 +641,7 @@ PHP_FUNCTION(pcntl_wait)
 #undef PHP_RUSAGE_COMMON
 #undef PHP_RUSAGE_TO_ARRAY
 
-/* {{{ proto bool pcntl_wifexited(int status)
-   Returns true if the child status code represents a successful exit */
+/* {{{ Returns true if the child status code represents a successful exit */
 PHP_FUNCTION(pcntl_wifexited)
 {
 	zend_long status_word;
@@ -666,8 +661,7 @@ PHP_FUNCTION(pcntl_wifexited)
 }
 /* }}} */
 
-/* {{{ proto bool pcntl_wifstopped(int status)
-   Returns true if the child status code represents a stopped process (WUNTRACED must have been used with waitpid) */
+/* {{{ Returns true if the child status code represents a stopped process (WUNTRACED must have been used with waitpid) */
 PHP_FUNCTION(pcntl_wifstopped)
 {
 	zend_long status_word;
@@ -687,8 +681,7 @@ PHP_FUNCTION(pcntl_wifstopped)
 }
 /* }}} */
 
-/* {{{ proto bool pcntl_wifsignaled(int status)
-   Returns true if the child status code represents a process that was terminated due to a signal */
+/* {{{ Returns true if the child status code represents a process that was terminated due to a signal */
 PHP_FUNCTION(pcntl_wifsignaled)
 {
 	zend_long status_word;
@@ -707,8 +700,7 @@ PHP_FUNCTION(pcntl_wifsignaled)
 	RETURN_FALSE;
 }
 /* }}} */
-/* {{{ proto bool pcntl_wifcontinued(int status)
-   Returns true if the child status code represents a process that was resumed due to a SIGCONT signal */
+/* {{{ Returns true if the child status code represents a process that was resumed due to a SIGCONT signal */
 PHP_FUNCTION(pcntl_wifcontinued)
 {
 	zend_long status_word;
@@ -728,8 +720,7 @@ PHP_FUNCTION(pcntl_wifcontinued)
 /* }}} */
 
 
-/* {{{ proto int pcntl_wexitstatus(int status)
-   Returns the status code of a child's exit */
+/* {{{ Returns the status code of a child's exit */
 PHP_FUNCTION(pcntl_wexitstatus)
 {
 	zend_long status_word;
@@ -747,8 +738,7 @@ PHP_FUNCTION(pcntl_wexitstatus)
 }
 /* }}} */
 
-/* {{{ proto int pcntl_wtermsig(int status)
-   Returns the number of the signal that terminated the process who's status code is passed  */
+/* {{{ Returns the number of the signal that terminated the process who's status code is passed  */
 PHP_FUNCTION(pcntl_wtermsig)
 {
 	zend_long status_word;
@@ -766,8 +756,7 @@ PHP_FUNCTION(pcntl_wtermsig)
 }
 /* }}} */
 
-/* {{{ proto int pcntl_wstopsig(int status)
-   Returns the number of the signal that caused the process to stop who's status code is passed */
+/* {{{ Returns the number of the signal that caused the process to stop who's status code is passed */
 PHP_FUNCTION(pcntl_wstopsig)
 {
 	zend_long status_word;
@@ -785,8 +774,7 @@ PHP_FUNCTION(pcntl_wstopsig)
 }
 /* }}} */
 
-/* {{{ proto bool pcntl_exec(string path [, array args [, array envs]])
-   Executes specified program in current process space as defined by exec(2) */
+/* {{{ Executes specified program in current process space as defined by exec(2) */
 PHP_FUNCTION(pcntl_exec)
 {
 	zval *args = NULL, *envs = NULL;
@@ -891,8 +879,7 @@ PHP_FUNCTION(pcntl_exec)
 }
 /* }}} */
 
-/* {{{ proto bool pcntl_signal(int signo, callback handle [, bool restart_syscalls])
-   Assigns a system signal handler to a PHP function */
+/* {{{ Assigns a system signal handler to a PHP function */
 PHP_FUNCTION(pcntl_signal)
 {
 	zval *handle;
@@ -968,8 +955,7 @@ PHP_FUNCTION(pcntl_signal)
 }
 /* }}} */
 
-/* {{{ proto bool pcntl_signal_get_handler(int signo)
-   Gets signal handler */
+/* {{{ Gets signal handler */
 PHP_FUNCTION(pcntl_signal_get_handler)
 {
 	zval *prev_handle;
@@ -991,8 +977,7 @@ PHP_FUNCTION(pcntl_signal_get_handler)
 	}
 }
 
-/* {{{ proto bool pcntl_signal_dispatch()
-   Dispatch signals to signal handlers */
+/* {{{ Dispatch signals to signal handlers */
 PHP_FUNCTION(pcntl_signal_dispatch)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1005,8 +990,7 @@ PHP_FUNCTION(pcntl_signal_dispatch)
 /* }}} */
 
 #ifdef HAVE_SIGPROCMASK
-/* {{{ proto bool pcntl_sigprocmask(int how, array set[, array &oldset])
-   Examine and change blocked signals */
+/* {{{ Examine and change blocked signals */
 PHP_FUNCTION(pcntl_sigprocmask)
 {
 	zend_long          how, signo;
@@ -1117,16 +1101,14 @@ static void pcntl_sigwaitinfo(INTERNAL_FUNCTION_PARAMETERS, int timedwait) /* {{
 }
 /* }}} */
 
-/* {{{ proto int pcntl_sigwaitinfo(array set[, array &siginfo])
-   Synchronously wait for queued signals */
+/* {{{ Synchronously wait for queued signals */
 PHP_FUNCTION(pcntl_sigwaitinfo)
 {
 	pcntl_sigwaitinfo(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
-/* {{{ proto int pcntl_sigtimedwait(array set[, array &siginfo[, int seconds[, int nanoseconds]]])
-   Wait for queued signals */
+/* {{{ Wait for queued signals */
 PHP_FUNCTION(pcntl_sigtimedwait)
 {
 	pcntl_sigwaitinfo(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
@@ -1191,8 +1173,7 @@ static void pcntl_siginfo_to_zval(int signo, siginfo_t *siginfo, zval *user_sigi
 #endif
 
 #ifdef HAVE_GETPRIORITY
-/* {{{ proto int pcntl_getpriority([int pid [, int process_identifier]])
-   Get the priority of any process */
+/* {{{ Get the priority of any process */
 PHP_FUNCTION(pcntl_getpriority)
 {
 	zend_long who = PRIO_PROCESS;
@@ -1231,8 +1212,7 @@ PHP_FUNCTION(pcntl_getpriority)
 #endif
 
 #ifdef HAVE_SETPRIORITY
-/* {{{ proto bool pcntl_setpriority(int priority [, int pid [, int process_identifier]])
-   Change the priority of any process */
+/* {{{ Change the priority of any process */
 PHP_FUNCTION(pcntl_setpriority)
 {
 	zend_long who = PRIO_PROCESS;
@@ -1271,8 +1251,7 @@ PHP_FUNCTION(pcntl_setpriority)
 /* }}} */
 #endif
 
-/* {{{ proto int pcntl_get_last_error(void)
-   Retrieve the error number set by the last pcntl function which failed. */
+/* {{{ Retrieve the error number set by the last pcntl function which failed. */
 PHP_FUNCTION(pcntl_get_last_error)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1283,8 +1262,7 @@ PHP_FUNCTION(pcntl_get_last_error)
 }
 /* }}} */
 
-/* {{{ proto string pcntl_strerror(int errno)
-   Retrieve the system error message associated with the given errno. */
+/* {{{ Retrieve the system error message associated with the given errno. */
 PHP_FUNCTION(pcntl_strerror)
 {
 	zend_long error;
@@ -1399,8 +1377,7 @@ void pcntl_signal_dispatch()
 	sigprocmask(SIG_SETMASK, &old_mask, NULL);
 }
 
-/* {{{ proto bool pcntl_async_signals([bool on])
-   Enable/disable asynchronous signal handling and return the old setting. */
+/* {{{ Enable/disable asynchronous signal handling and return the old setting. */
 PHP_FUNCTION(pcntl_async_signals)
 {
 	zend_bool on, on_is_null = 1;
@@ -1419,8 +1396,7 @@ PHP_FUNCTION(pcntl_async_signals)
 /* }}} */
 
 #ifdef HAVE_UNSHARE
-/* {{{ proto bool pcntl_unshare(int flags)
-   disassociate parts of the process execution context */
+/* {{{ disassociate parts of the process execution context */
 PHP_FUNCTION(pcntl_unshare)
 {
 	zend_long flags;

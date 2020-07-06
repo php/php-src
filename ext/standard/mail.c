@@ -248,8 +248,7 @@ PHPAPI zend_string *php_mail_build_headers(HashTable *headers)
 }
 
 
-/* {{{ proto bool mail(string to, string subject, string message [, string additional_headers [, string additional_parameters]])
-   Send an email message */
+/* {{{ Send an email message */
 PHP_FUNCTION(mail)
 {
 	char *to=NULL, *message=NULL;
@@ -423,8 +422,7 @@ static int php_mail_detect_multiple_crlf(const char *hdr) {
 }
 
 
-/* {{{ php_mail
- */
+/* {{{ php_mail */
 PHPAPI int php_mail(const char *to, const char *subject, const char *message, const char *headers, const char *extra_cmd)
 {
 #ifdef PHP_WIN32
@@ -605,8 +603,7 @@ PHPAPI int php_mail(const char *to, const char *subject, const char *message, co
 }
 /* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
- */
+/* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(mail)
 {
 	char *sendmail_path = INI_STR("sendmail_path");

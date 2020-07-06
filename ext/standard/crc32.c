@@ -68,8 +68,7 @@ static uint32_t crc32_aarch64(uint32_t crc, char *p, size_t nr) {
 # pragma GCC pop_options
 #endif
 
-/* {{{ proto string crc32(string str)
-   Calculate the crc32 polynomial of a string */
+/* {{{ Calculate the crc32 polynomial of a string */
 PHP_FUNCTION(crc32)
 {
 	char *p;

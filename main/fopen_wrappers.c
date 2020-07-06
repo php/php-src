@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
  */
 
-/* {{{ includes
- */
+/* {{{ includes */
 #include "php.h"
 #include "php_globals.h"
 #include "SAPI.h"
@@ -267,8 +266,7 @@ PHPAPI int php_check_open_basedir(const char *path)
 	return php_check_open_basedir_ex(path, 1);
 }
 
-/* {{{ php_check_open_basedir
- */
+/* {{{ php_check_open_basedir */
 PHPAPI int php_check_open_basedir_ex(const char *path, int warn)
 {
 	/* Only check when open_basedir is available */
@@ -316,8 +314,7 @@ PHPAPI int php_check_open_basedir_ex(const char *path, int warn)
 }
 /* }}} */
 
-/* {{{ php_fopen_and_set_opened_path
- */
+/* {{{ php_fopen_and_set_opened_path */
 static FILE *php_fopen_and_set_opened_path(const char *path, const char *mode, zend_string **opened_path)
 {
 	FILE *fp;
@@ -338,8 +335,7 @@ static FILE *php_fopen_and_set_opened_path(const char *path, const char *mode, z
 }
 /* }}} */
 
-/* {{{ php_fopen_primary_script
- */
+/* {{{ php_fopen_primary_script */
 PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle)
 {
 	char *path_info;
@@ -695,8 +691,7 @@ PHPAPI FILE *php_fopen_with_path(const char *filename, const char *mode, const c
 }
 /* }}} */
 
-/* {{{ php_strip_url_passwd
- */
+/* {{{ php_strip_url_passwd */
 PHPAPI char *php_strip_url_passwd(char *url)
 {
 	register char *p, *url_start;
@@ -735,24 +730,21 @@ PHPAPI char *php_strip_url_passwd(char *url)
 }
 /* }}} */
 
-/* {{{ expand_filepath
- */
+/* {{{ expand_filepath */
 PHPAPI char *expand_filepath(const char *filepath, char *real_path)
 {
 	return expand_filepath_ex(filepath, real_path, NULL, 0);
 }
 /* }}} */
 
-/* {{{ expand_filepath_ex
- */
+/* {{{ expand_filepath_ex */
 PHPAPI char *expand_filepath_ex(const char *filepath, char *real_path, const char *relative_to, size_t relative_to_len)
 {
 	return expand_filepath_with_mode(filepath, real_path, relative_to, relative_to_len, CWD_FILEPATH);
 }
 /* }}} */
 
-/* {{{ expand_filepath_use_realpath
- */
+/* {{{ expand_filepath_use_realpath */
 PHPAPI char *expand_filepath_with_mode(const char *filepath, char *real_path, const char *relative_to, size_t relative_to_len, int realpath_mode)
 {
 	cwd_state new_state;

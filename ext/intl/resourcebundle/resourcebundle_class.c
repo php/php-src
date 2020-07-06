@@ -132,9 +132,7 @@ static int resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS)
 }
 /* }}} */
 
-/* {{{ proto ResourceBundle::__construct( string $locale [, string $bundlename [, bool $fallback = true ]] )
- * ResourceBundle object constructor
- */
+/* {{{ ResourceBundle object constructor */
 PHP_METHOD( ResourceBundle, __construct )
 {
 	zend_error_handling error_handling;
@@ -150,9 +148,7 @@ PHP_METHOD( ResourceBundle, __construct )
 }
 /* }}} */
 
-/* {{{ proto ResourceBundle ResourceBundle::create( string $locale [, string $bundlename [, bool $fallback = true ]] )
-proto ResourceBundle resourcebundle_create( string $locale [, string $bundlename [, bool $fallback = true ]] )
-*/
+/* {{{ */
 PHP_FUNCTION( resourcebundle_create )
 {
 	object_init_ex( return_value, ResourceBundle_ce_ptr );
@@ -229,10 +225,7 @@ zval *resourcebundle_array_get(zend_object *object, zval *offset, int type, zval
 }
 /* }}} */
 
-/* {{{ proto mixed ResourceBundle::get( int|string $resindex [, bool $fallback = true ] )
- * proto mixed resourcebundle_get( ResourceBundle $rb, int|string $resindex [, bool $fallback = true ] )
- * Get resource identified by numerical index or key name.
- */
+/* {{{ Get resource identified by numerical index or key name. */
 PHP_FUNCTION( resourcebundle_get )
 {
 	zend_bool   fallback = 1;
@@ -264,10 +257,7 @@ int resourcebundle_array_count(zend_object *object, zend_long *count)
 }
 /* }}} */
 
-/* {{{ proto int ResourceBundle::count()
- * proto int resourcebundle_count( ResourceBundle $bundle )
- * Get resources count
- */
+/* {{{ Get resources count */
 PHP_FUNCTION( resourcebundle_count )
 {
 	int32_t                len;
@@ -283,10 +273,7 @@ PHP_FUNCTION( resourcebundle_count )
 	RETURN_LONG( len );
 }
 
-/* {{{ proto array ResourceBundle::getLocales( string $bundlename )
- * proto array resourcebundle_locales( string $bundlename )
- * Get available locales from ResourceBundle name
- */
+/* {{{ Get available locales from ResourceBundle name */
 PHP_FUNCTION( resourcebundle_locales )
 {
 	char * bundlename;
@@ -327,10 +314,7 @@ PHP_FUNCTION( resourcebundle_locales )
 }
 /* }}} */
 
-/* {{{ proto string ResourceBundle::getErrorCode( )
- * proto string resourcebundle_get_error_code( ResourceBundle $bundle )
- * Get text description for ResourceBundle's last error code.
- */
+/* {{{ Get text description for ResourceBundle's last error code. */
 PHP_FUNCTION( resourcebundle_get_error_code )
 {
 	RESOURCEBUNDLE_METHOD_INIT_VARS;
@@ -347,10 +331,7 @@ PHP_FUNCTION( resourcebundle_get_error_code )
 }
 /* }}} */
 
-/* {{{ proto string ResourceBundle::getErrorMessage( )
- * proto string resourcebundle_get_error_message( ResourceBundle $bundle )
- * Get text description for ResourceBundle's last error.
- */
+/* {{{ Get text description for ResourceBundle's last error. */
 PHP_FUNCTION( resourcebundle_get_error_message )
 {
 	zend_string* message = NULL;

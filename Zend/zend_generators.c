@@ -828,8 +828,7 @@ static inline void zend_generator_rewind(zend_generator *generator) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto void Generator::rewind()
- * Rewind the generator */
+/* {{{ Rewind the generator */
 ZEND_METHOD(Generator, rewind)
 {
 	zend_generator *generator;
@@ -842,8 +841,7 @@ ZEND_METHOD(Generator, rewind)
 }
 /* }}} */
 
-/* {{{ proto bool Generator::valid()
- * Check whether the generator is valid */
+/* {{{ Check whether the generator is valid */
 ZEND_METHOD(Generator, valid)
 {
 	zend_generator *generator;
@@ -860,8 +858,7 @@ ZEND_METHOD(Generator, valid)
 }
 /* }}} */
 
-/* {{{ proto mixed Generator::current()
- * Get the current value */
+/* {{{ Get the current value */
 ZEND_METHOD(Generator, current)
 {
 	zend_generator *generator, *root;
@@ -881,8 +878,7 @@ ZEND_METHOD(Generator, current)
 }
 /* }}} */
 
-/* {{{ proto mixed Generator::key()
- * Get the current key */
+/* {{{ Get the current key */
 ZEND_METHOD(Generator, key)
 {
 	zend_generator *generator, *root;
@@ -902,8 +898,7 @@ ZEND_METHOD(Generator, key)
 }
 /* }}} */
 
-/* {{{ proto void Generator::next()
- * Advances the generator */
+/* {{{ Advances the generator */
 ZEND_METHOD(Generator, next)
 {
 	zend_generator *generator;
@@ -918,8 +913,7 @@ ZEND_METHOD(Generator, next)
 }
 /* }}} */
 
-/* {{{ proto mixed Generator::send(mixed value)
- * Sends a value to the generator */
+/* {{{ Sends a value to the generator */
 ZEND_METHOD(Generator, send)
 {
 	zval *value;
@@ -955,8 +949,7 @@ ZEND_METHOD(Generator, send)
 }
 /* }}} */
 
-/* {{{ proto mixed Generator::throw(Exception exception)
- * Throws an exception into the generator */
+/* {{{ Throws an exception into the generator */
 ZEND_METHOD(Generator, throw)
 {
 	zval *exception;
@@ -993,8 +986,7 @@ ZEND_METHOD(Generator, throw)
 }
 /* }}} */
 
-/* {{{ proto mixed Generator::getReturn()
- * Retrieves the return value of the generator */
+/* {{{ Retrieves the return value of the generator */
 ZEND_METHOD(Generator, getReturn)
 {
 	zend_generator *generator;

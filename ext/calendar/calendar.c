@@ -169,8 +169,7 @@ static void _php_cal_info(int cal, zval *ret)
 
 }
 
-/* {{{ proto array cal_info([int calendar])
-   Returns information about a particular calendar */
+/* {{{ Returns information about a particular calendar */
 PHP_FUNCTION(cal_info)
 {
 	zend_long cal = -1;
@@ -201,8 +200,7 @@ PHP_FUNCTION(cal_info)
 }
 /* }}} */
 
-/* {{{ proto int cal_days_in_month(int calendar, int month, int year)
-   Returns the number of days in a month for a given year and calendar */
+/* {{{ Returns the number of days in a month for a given year and calendar */
 PHP_FUNCTION(cal_days_in_month)
 {
 	zend_long cal, month, year;
@@ -249,8 +247,7 @@ PHP_FUNCTION(cal_days_in_month)
 }
 /* }}} */
 
-/* {{{ proto int cal_to_jd(int calendar, int month, int day, int year)
-   Converts from a supported calendar to Julian Day Count */
+/* {{{ Converts from a supported calendar to Julian Day Count */
 PHP_FUNCTION(cal_to_jd)
 {
 	zend_long cal, month, day, year;
@@ -268,8 +265,7 @@ PHP_FUNCTION(cal_to_jd)
 }
 /* }}} */
 
-/* {{{ proto array cal_from_jd(int jd, int calendar)
-   Converts from Julian Day Count to a supported calendar and return extended information */
+/* {{{ Converts from Julian Day Count to a supported calendar and return extended information */
 PHP_FUNCTION(cal_from_jd)
 {
 	zend_long jd, cal;
@@ -320,8 +316,7 @@ PHP_FUNCTION(cal_from_jd)
 }
 /* }}} */
 
-/* {{{ proto string jdtogregorian(int juliandaycount)
-   Converts a julian day count to a gregorian calendar date */
+/* {{{ Converts a julian day count to a gregorian calendar date */
 PHP_FUNCTION(jdtogregorian)
 {
 	zend_long julday;
@@ -337,8 +332,7 @@ PHP_FUNCTION(jdtogregorian)
 }
 /* }}} */
 
-/* {{{ proto int gregoriantojd(int month, int day, int year)
-   Converts a gregorian calendar date to julian day count */
+/* {{{ Converts a gregorian calendar date to julian day count */
 PHP_FUNCTION(gregoriantojd)
 {
 	zend_long year, month, day;
@@ -351,8 +345,7 @@ PHP_FUNCTION(gregoriantojd)
 }
 /* }}} */
 
-/* {{{ proto string jdtojulian(int juliandaycount)
-   Convert a julian day count to a julian calendar date */
+/* {{{ Convert a julian day count to a julian calendar date */
 PHP_FUNCTION(jdtojulian)
 {
 	zend_long julday;
@@ -368,8 +361,7 @@ PHP_FUNCTION(jdtojulian)
 }
 /* }}} */
 
-/* {{{ proto int juliantojd(int month, int day, int year)
-   Converts a julian calendar date to julian day count */
+/* {{{ Converts a julian calendar date to julian day count */
 PHP_FUNCTION(juliantojd)
 {
 	zend_long year, month, day;
@@ -478,8 +470,7 @@ static char *heb_number_to_chars(int n, int fl, char **ret)
 }
 /* }}} */
 
-/* {{{ proto string jdtojewish(int juliandaycount [, bool hebrew [, int fl]])
-   Converts a julian day count to a jewish calendar date */
+/* {{{ Converts a julian day count to a jewish calendar date */
 PHP_FUNCTION(jdtojewish)
 {
 	zend_long julday, fl = 0;
@@ -512,8 +503,7 @@ PHP_FUNCTION(jdtojewish)
 }
 /* }}} */
 
-/* {{{ proto int jewishtojd(int month, int day, int year)
-   Converts a jewish calendar date to a julian day count */
+/* {{{ Converts a jewish calendar date to a julian day count */
 PHP_FUNCTION(jewishtojd)
 {
 	zend_long year, month, day;
@@ -526,8 +516,7 @@ PHP_FUNCTION(jewishtojd)
 }
 /* }}} */
 
-/* {{{ proto string jdtofrench(int juliandaycount)
-   Converts a julian day count to a french republic calendar date */
+/* {{{ Converts a julian day count to a french republic calendar date */
 PHP_FUNCTION(jdtofrench)
 {
 	zend_long julday;
@@ -543,8 +532,7 @@ PHP_FUNCTION(jdtofrench)
 }
 /* }}} */
 
-/* {{{ proto int frenchtojd(int month, int day, int year)
-   Converts a french republic calendar date to julian day count */
+/* {{{ Converts a french republic calendar date to julian day count */
 PHP_FUNCTION(frenchtojd)
 {
 	zend_long year, month, day;
@@ -557,8 +545,7 @@ PHP_FUNCTION(frenchtojd)
 }
 /* }}} */
 
-/* {{{ proto mixed jddayofweek(int juliandaycount [, int mode])
-   Returns name or number of day of week from julian day count */
+/* {{{ Returns name or number of day of week from julian day count */
 PHP_FUNCTION(jddayofweek)
 {
 	zend_long julday, mode = CAL_DOW_DAYNO;
@@ -588,8 +575,7 @@ PHP_FUNCTION(jddayofweek)
 }
 /* }}} */
 
-/* {{{ proto string jdmonthname(int juliandaycount, int mode)
-   Returns name of month for julian day count */
+/* {{{ Returns name of month for julian day count */
 PHP_FUNCTION(jdmonthname)
 {
 	zend_long julday, mode;

@@ -118,8 +118,7 @@ static zend_string *php_gethostbyaddr(char *ip);
 static zend_string *php_gethostbyname(char *name);
 
 #ifdef HAVE_GETHOSTNAME
-/* {{{ proto string|false gethostname()
-   Get the host name of the current machine */
+/* {{{ Get the host name of the current machine */
 PHP_FUNCTION(gethostname)
 {
 	char buf[HOST_NAME_MAX + 1];
@@ -140,8 +139,7 @@ PHP_FUNCTION(gethostname)
  we can have a dns.c, dns_unix.c and dns_win32.c instead of a messy dns.c full of #ifdef
 */
 
-/* {{{ proto string|false gethostbyaddr(string ip_address)
-   Get the Internet host name corresponding to a given IP address */
+/* {{{ Get the Internet host name corresponding to a given IP address */
 PHP_FUNCTION(gethostbyaddr)
 {
 	char *addr;
@@ -202,8 +200,7 @@ static zend_string *php_gethostbyaddr(char *ip)
 }
 /* }}} */
 
-/* {{{ proto string gethostbyname(string hostname)
-   Get the IP address corresponding to a given Internet host name */
+/* {{{ Get the IP address corresponding to a given Internet host name */
 PHP_FUNCTION(gethostbyname)
 {
 	char *hostname;
@@ -223,8 +220,7 @@ PHP_FUNCTION(gethostbyname)
 }
 /* }}} */
 
-/* {{{ proto array|false gethostbynamel(string hostname)
-   Return a list of IP addresses that a given hostname resolves to. */
+/* {{{ Return a list of IP addresses that a given hostname resolves to. */
 PHP_FUNCTION(gethostbynamel)
 {
 	char *hostname;
@@ -354,8 +350,7 @@ static void _php_dns_free_res(struct __res_state *res) { /* {{{ */
 #define php_dns_free_res(__res__)
 #endif
 
-/* {{{ proto bool dns_check_record(string host [, string type])
-   Check DNS records corresponding to a given Internet host name or IP address */
+/* {{{ Check DNS records corresponding to a given Internet host name or IP address */
 PHP_FUNCTION(dns_check_record)
 {
 #ifndef MAXPACKET
@@ -797,8 +792,7 @@ static u_char *php_parserr(u_char *cp, u_char *end, querybuf *answer, int type_t
 }
 /* }}} */
 
-/* {{{ proto array|false dns_get_record(string hostname [, int type[, array &authns[, array &addtl[, bool raw]]]])
-   Get any Resource Record corresponding to a given Internet host name */
+/* {{{ Get any Resource Record corresponding to a given Internet host name */
 PHP_FUNCTION(dns_get_record)
 {
 	char *hostname;
@@ -1037,8 +1031,7 @@ PHP_FUNCTION(dns_get_record)
 }
 /* }}} */
 
-/* {{{ proto bool dns_get_mx(string hostname, array mxhosts [, array weight])
-   Get MX records corresponding to a given Internet host name */
+/* {{{ Get MX records corresponding to a given Internet host name */
 PHP_FUNCTION(dns_get_mx)
 {
 	char *hostname;

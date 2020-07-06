@@ -831,8 +831,7 @@ static xmlNodePtr _php_dom_insert_fragment(xmlNodePtr nodep, xmlNodePtr prevsib,
 }
 /* }}} */
 
-/* {{{ proto domnode dom_node_insert_before(DomNode newChild, DomNode refChild);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-952280727
+/* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-952280727
 Since:
 */
 PHP_METHOD(DOMNode, insertBefore)
@@ -993,8 +992,7 @@ PHP_METHOD(DOMNode, insertBefore)
 }
 /* }}} end dom_node_insert_before */
 
-/* {{{ proto DomNode dom_node_replace_child(DomNode newChild, DomNode oldChild);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-785887307
+/* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-785887307
 Since:
 */
 PHP_METHOD(DOMNode, replaceChild)
@@ -1082,8 +1080,7 @@ PHP_METHOD(DOMNode, replaceChild)
 }
 /* }}} end dom_node_replace_child */
 
-/* {{{ proto DomNode dom_node_remove_child(DomNode oldChild);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1734834066
+/* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1734834066
 Since:
 */
 PHP_METHOD(DOMNode, removeChild)
@@ -1134,8 +1131,7 @@ PHP_METHOD(DOMNode, removeChild)
 }
 /* }}} end dom_node_remove_child */
 
-/* {{{ proto DomNode dom_node_append_child(DomNode newChild);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-184E7107
+/* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-184E7107
 Since:
 */
 PHP_METHOD(DOMNode, appendChild)
@@ -1236,8 +1232,7 @@ PHP_METHOD(DOMNode, appendChild)
 }
 /* }}} end dom_node_append_child */
 
-/* {{{ proto bool dom_node_has_child_nodes();
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-810594187
+/* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-810594187
 Since:
 */
 PHP_METHOD(DOMNode, hasChildNodes)
@@ -1265,8 +1260,7 @@ PHP_METHOD(DOMNode, hasChildNodes)
 }
 /* }}} end dom_node_has_child_nodes */
 
-/* {{{ proto DomNode dom_node_clone_node(bool deep);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-3A0ED0A4
+/* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-3A0ED0A4
 Since:
 */
 PHP_METHOD(DOMNode, cloneNode)
@@ -1327,8 +1321,7 @@ PHP_METHOD(DOMNode, cloneNode)
 }
 /* }}} end dom_node_clone_node */
 
-/* {{{ proto void dom_node_normalize();
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-normalize
+/* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-normalize
 Since:
 */
 PHP_METHOD(DOMNode, normalize)
@@ -1349,8 +1342,7 @@ PHP_METHOD(DOMNode, normalize)
 }
 /* }}} end dom_node_normalize */
 
-/* {{{ proto bool dom_node_is_supported(string feature, string version);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Level-2-Core-Node-supports
+/* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Level-2-Core-Node-supports
 Since: DOM Level 2
 */
 PHP_METHOD(DOMNode, isSupported)
@@ -1370,8 +1362,7 @@ PHP_METHOD(DOMNode, isSupported)
 }
 /* }}} end dom_node_is_supported */
 
-/* {{{ proto bool dom_node_has_attributes();
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-NodeHasAttrs
+/* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-NodeHasAttrs
 Since: DOM Level 2
 */
 PHP_METHOD(DOMNode, hasAttributes)
@@ -1398,8 +1389,7 @@ PHP_METHOD(DOMNode, hasAttributes)
 }
 /* }}} end dom_node_has_attributes */
 
-/* {{{ proto bool dom_node_is_same_node(DomNode other);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-isSameNode
+/* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-isSameNode
 Since: DOM Level 3
 */
 PHP_METHOD(DOMNode, isSameNode)
@@ -1425,8 +1415,7 @@ PHP_METHOD(DOMNode, isSameNode)
 }
 /* }}} end dom_node_is_same_node */
 
-/* {{{ proto string dom_node_lookup_prefix(string namespaceURI);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-lookupNamespacePrefix
+/* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-lookupNamespacePrefix
 Since: DOM Level 3
 */
 PHP_METHOD(DOMNode, lookupPrefix)
@@ -1477,8 +1466,7 @@ PHP_METHOD(DOMNode, lookupPrefix)
 }
 /* }}} end dom_node_lookup_prefix */
 
-/* {{{ proto bool dom_node_is_default_namespace(string namespaceURI);
-URL: http://www.w3.org/TR/DOM-Level-3-Core/core.html#Node3-isDefaultNamespace
+/* {{{ URL: http://www.w3.org/TR/DOM-Level-3-Core/core.html#Node3-isDefaultNamespace
 Since: DOM Level 3
 */
 PHP_METHOD(DOMNode, isDefaultNamespace)
@@ -1511,8 +1499,7 @@ PHP_METHOD(DOMNode, isDefaultNamespace)
 }
 /* }}} end dom_node_is_default_namespace */
 
-/* {{{ proto string dom_node_lookup_namespace_uri(string prefix);
-URL: http://www.w3.org/TR/DOM-Level-3-Core/core.html#Node3-lookupNamespaceURI
+/* {{{ URL: http://www.w3.org/TR/DOM-Level-3-Core/core.html#Node3-lookupNamespaceURI
 Since: DOM Level 3
 */
 PHP_METHOD(DOMNode, lookupNamespaceURI)
@@ -1721,24 +1708,21 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 }
 /* }}} */
 
-/* {{{ proto string DOMNode::C14N([bool exclusive [, bool with_comments [, array xpath [, array ns_prefixes]]]])
-   Canonicalize nodes to a string */
+/* {{{ Canonicalize nodes to a string */
 PHP_METHOD(DOMNode, C14N)
 {
 	dom_canonicalization(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
-/* {{{ proto int DOMNode::C14NFile(string uri [, bool exclusive [, bool with_comments [, array xpath [, array ns_prefixes]]]])
-   Canonicalize nodes to a file */
+/* {{{ Canonicalize nodes to a file */
 PHP_METHOD(DOMNode, C14NFile)
 {
 	dom_canonicalization(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
-/* {{{ proto string|null DOMNode::getNodePath()
-   Gets an xpath for a node */
+/* {{{ Gets an xpath for a node */
 PHP_METHOD(DOMNode, getNodePath)
 {
 	zval *id;
@@ -1762,8 +1746,7 @@ PHP_METHOD(DOMNode, getNodePath)
 }
 /* }}} */
 
-/* {{{ proto int DOMNode::getLineNo()
-   Gets line number for a node */
+/* {{{ Gets line number for a node */
 PHP_METHOD(DOMNode, getLineNo)
 {
 	zval *id;

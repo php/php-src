@@ -249,24 +249,21 @@ static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto string|false exec(string command [, array &output [, int &return_value]])
-   Execute an external program */
+/* {{{ Execute an external program */
 PHP_FUNCTION(exec)
 {
 	php_exec_ex(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
-/* {{{ proto int|false system(string command [, int &return_value])
-   Execute an external program and display output */
+/* {{{ Execute an external program and display output */
 PHP_FUNCTION(system)
 {
 	php_exec_ex(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
-/* {{{ proto bool passthru(string command [, int &return_value])
-   Execute an external program and display raw output */
+/* {{{ Execute an external program and display raw output */
 PHP_FUNCTION(passthru)
 {
 	php_exec_ex(INTERNAL_FUNCTION_PARAM_PASSTHRU, 3);
@@ -387,8 +384,7 @@ PHPAPI zend_string *php_escape_shell_cmd(const char *str)
 }
 /* }}} */
 
-/* {{{ php_escape_shell_arg
- */
+/* {{{ php_escape_shell_arg */
 PHPAPI zend_string *php_escape_shell_arg(const char *str)
 {
 	size_t x, y = 0;
@@ -472,8 +468,7 @@ PHPAPI zend_string *php_escape_shell_arg(const char *str)
 }
 /* }}} */
 
-/* {{{ proto string escapeshellcmd(string command)
-   Escape shell metacharacters */
+/* {{{ Escape shell metacharacters */
 PHP_FUNCTION(escapeshellcmd)
 {
 	char *command;
@@ -495,8 +490,7 @@ PHP_FUNCTION(escapeshellcmd)
 }
 /* }}} */
 
-/* {{{ proto string escapeshellarg(string arg)
-   Quote and escape an argument for use in a shell command */
+/* {{{ Quote and escape an argument for use in a shell command */
 PHP_FUNCTION(escapeshellarg)
 {
 	char *argument;
@@ -515,8 +509,7 @@ PHP_FUNCTION(escapeshellarg)
 }
 /* }}} */
 
-/* {{{ proto string|false shell_exec(string cmd)
-   Execute command via shell and return complete output as string */
+/* {{{ Execute command via shell and return complete output as string */
 PHP_FUNCTION(shell_exec)
 {
 	FILE *in;
@@ -558,8 +551,7 @@ PHP_FUNCTION(shell_exec)
 /* }}} */
 
 #ifdef HAVE_NICE
-/* {{{ proto bool proc_nice(int priority)
-   Change the priority of the current process */
+/* {{{ Change the priority of the current process */
 PHP_FUNCTION(proc_nice)
 {
 	zend_long pri;

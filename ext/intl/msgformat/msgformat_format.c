@@ -47,11 +47,7 @@ static void msgfmt_do_format(MessageFormatter_object *mfo, zval *args, zval *ret
 }
 /* }}} */
 
-/* {{{ proto mixed MessageFormatter::format( array $args )
- * Format a message. }}} */
-/* {{{ proto mixed msgfmt_format( MessageFormatter $nf, array $args )
- * Format a message.
- */
+/* {{{ Format a message. */
 PHP_FUNCTION( msgfmt_format )
 {
 	zval *args;
@@ -72,11 +68,7 @@ PHP_FUNCTION( msgfmt_format )
 }
 /* }}} */
 
-/* {{{ proto mixed MessageFormatter::formatMessage( string $locale, string $pattern, array $args )
- * Format a message. }}} */
-/* {{{ proto mixed msgfmt_format_message( string $locale, string $pattern, array $args )
- * Format a message.
- */
+/* {{{ Format a message. */
 PHP_FUNCTION( msgfmt_format_message )
 {
 	zval       *args;

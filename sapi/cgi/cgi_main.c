@@ -773,8 +773,7 @@ static void sapi_cgi_log_message(const char *message, int syslog_type_int)
 	}
 }
 
-/* {{{ php_cgi_ini_activate_user_config
- */
+/* {{{ php_cgi_ini_activate_user_config */
 static void php_cgi_ini_activate_user_config(char *path, size_t path_len, const char *doc_root, size_t doc_root_len)
 {
 	user_config_cache_entry *new_entry, *entry;
@@ -973,8 +972,7 @@ static int php_cgi_startup(sapi_module_struct *sapi_module)
 	return SUCCESS;
 }
 
-/* {{{ sapi_module_struct cgi_sapi_module
- */
+/* {{{ sapi_module_struct cgi_sapi_module */
 static sapi_module_struct cgi_sapi_module = {
 	"cgi-fcgi",						/* name */
 	"CGI/FastCGI",					/* pretty name */
@@ -1019,8 +1017,7 @@ static const zend_function_entry additional_functions[] = {
 	PHP_FE_END
 };
 
-/* {{{ php_cgi_usage
- */
+/* {{{ php_cgi_usage */
 static void php_cgi_usage(char *argv0)
 {
 	char *prog;
@@ -1525,8 +1522,7 @@ PHP_INI_BEGIN()
 #endif
 PHP_INI_END()
 
-/* {{{ php_cgi_globals_ctor
- */
+/* {{{ php_cgi_globals_ctor */
 static void php_cgi_globals_ctor(php_cgi_globals_struct *php_cgi_globals)
 {
 #if defined(ZTS) && defined(PHP_WIN32)
@@ -1547,8 +1543,7 @@ static void php_cgi_globals_ctor(php_cgi_globals_struct *php_cgi_globals)
 }
 /* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION
- */
+/* {{{ PHP_MINIT_FUNCTION */
 static PHP_MINIT_FUNCTION(cgi)
 {
 	REGISTER_INI_ENTRIES();
@@ -1556,8 +1551,7 @@ static PHP_MINIT_FUNCTION(cgi)
 }
 /* }}} */
 
-/* {{{ PHP_MSHUTDOWN_FUNCTION
- */
+/* {{{ PHP_MSHUTDOWN_FUNCTION */
 static PHP_MSHUTDOWN_FUNCTION(cgi)
 {
 	zend_hash_destroy(&CGIG(user_config_cache));
@@ -1567,8 +1561,7 @@ static PHP_MSHUTDOWN_FUNCTION(cgi)
 }
 /* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
- */
+/* {{{ PHP_MINFO_FUNCTION */
 static PHP_MINFO_FUNCTION(cgi)
 {
 	DISPLAY_INI_ENTRIES();
@@ -1735,8 +1728,7 @@ static zend_module_entry cgi_module_entry = {
 	STANDARD_MODULE_PROPERTIES
 };
 
-/* {{{ main
- */
+/* {{{ main */
 int main(int argc, char *argv[])
 {
 	int free_query_string = 0;

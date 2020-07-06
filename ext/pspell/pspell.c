@@ -91,8 +91,7 @@ static void php_pspell_close_config(zend_resource *rsrc)
 	manager = (PspellManager *)Z_RES_P(res)->ptr; \
 } while (0);
 
-/* {{{ PHP_MINIT_FUNCTION
- */
+/* {{{ PHP_MINIT_FUNCTION */
 static PHP_MINIT_FUNCTION(pspell)
 {
 	REGISTER_LONG_CONSTANT("PSPELL_FAST", PSPELL_FAST, CONST_PERSISTENT | CONST_CS);
@@ -105,8 +104,7 @@ static PHP_MINIT_FUNCTION(pspell)
 }
 /* }}} */
 
-/* {{{ proto int pspell_new(string language [, string spelling [, string jargon [, string encoding [, int mode]]]])
-   Load a dictionary */
+/* {{{ Load a dictionary */
 PHP_FUNCTION(pspell_new)
 {
 	char *language, *spelling = NULL, *jargon = NULL, *encoding = NULL;
@@ -202,8 +200,7 @@ PHP_FUNCTION(pspell_new)
 }
 /* }}} */
 
-/* {{{ proto int pspell_new_personal(string personal, string language [, string spelling [, string jargon [, string encoding [, int mode]]]])
-   Load a dictionary with a personal wordlist*/
+/* {{{ Load a dictionary with a personal wordlist*/
 PHP_FUNCTION(pspell_new_personal)
 {
 	char *personal, *language, *spelling = NULL, *jargon = NULL, *encoding = NULL;
@@ -307,8 +304,7 @@ PHP_FUNCTION(pspell_new_personal)
 }
 /* }}} */
 
-/* {{{ proto int pspell_new_config(int config)
-   Load a dictionary based on the given config */
+/* {{{ Load a dictionary based on the given config */
 PHP_FUNCTION(pspell_new_config)
 {
 	zend_long conf;
@@ -337,8 +333,7 @@ PHP_FUNCTION(pspell_new_config)
 }
 /* }}} */
 
-/* {{{ proto bool pspell_check(int pspell, string word)
-   Returns true if word is valid */
+/* {{{ Returns true if word is valid */
 PHP_FUNCTION(pspell_check)
 {
 	size_t word_len;
@@ -360,8 +355,7 @@ PHP_FUNCTION(pspell_check)
 }
 /* }}} */
 
-/* {{{ proto array pspell_suggest(int pspell, string word)
-   Returns array of suggestions */
+/* {{{ Returns array of suggestions */
 PHP_FUNCTION(pspell_suggest)
 {
 	zend_long scin;
@@ -393,8 +387,7 @@ PHP_FUNCTION(pspell_suggest)
 }
 /* }}} */
 
-/* {{{ proto bool pspell_store_replacement(int pspell, string misspell, string correct)
-   Notify the dictionary of a user-selected replacement */
+/* {{{ Notify the dictionary of a user-selected replacement */
 PHP_FUNCTION(pspell_store_replacement)
 {
 	size_t miss_len, corr_len;
@@ -418,8 +411,7 @@ PHP_FUNCTION(pspell_store_replacement)
 }
 /* }}} */
 
-/* {{{ proto bool pspell_add_to_personal(int pspell, string word)
-   Adds a word to a personal list */
+/* {{{ Adds a word to a personal list */
 PHP_FUNCTION(pspell_add_to_personal)
 {
 	size_t word_len;
@@ -448,8 +440,7 @@ PHP_FUNCTION(pspell_add_to_personal)
 }
 /* }}} */
 
-/* {{{ proto bool pspell_add_to_session(int pspell, string word)
-   Adds a word to the current session */
+/* {{{ Adds a word to the current session */
 PHP_FUNCTION(pspell_add_to_session)
 {
 	size_t word_len;
@@ -478,8 +469,7 @@ PHP_FUNCTION(pspell_add_to_session)
 }
 /* }}} */
 
-/* {{{ proto bool pspell_clear_session(int pspell)
-   Clears the current session */
+/* {{{ Clears the current session */
 PHP_FUNCTION(pspell_clear_session)
 {
 	zend_long scin;
@@ -501,8 +491,7 @@ PHP_FUNCTION(pspell_clear_session)
 }
 /* }}} */
 
-/* {{{ proto bool pspell_save_wordlist(int pspell)
-   Saves the current (personal) wordlist */
+/* {{{ Saves the current (personal) wordlist */
 PHP_FUNCTION(pspell_save_wordlist)
 {
 	zend_long scin;
@@ -526,8 +515,7 @@ PHP_FUNCTION(pspell_save_wordlist)
 }
 /* }}} */
 
-/* {{{ proto int pspell_config_create(string language [, string spelling [, string jargon [, string encoding]]])
-   Create a new config to be used later to create a manager */
+/* {{{ Create a new config to be used later to create a manager */
 PHP_FUNCTION(pspell_config_create)
 {
 	char *language, *spelling = NULL, *jargon = NULL, *encoding = NULL;
@@ -594,8 +582,7 @@ PHP_FUNCTION(pspell_config_create)
 }
 /* }}} */
 
-/* {{{ proto bool pspell_config_runtogether(int conf, bool runtogether)
-   Consider run-together words as valid components */
+/* {{{ Consider run-together words as valid components */
 PHP_FUNCTION(pspell_config_runtogether)
 {
 	zend_long conf;
@@ -614,8 +601,7 @@ PHP_FUNCTION(pspell_config_runtogether)
 }
 /* }}} */
 
-/* {{{ proto bool pspell_config_mode(int conf, int mode)
-   Select mode for config (PSPELL_FAST, PSPELL_NORMAL or PSPELL_BAD_SPELLERS) */
+/* {{{ Select mode for config (PSPELL_FAST, PSPELL_NORMAL or PSPELL_BAD_SPELLERS) */
 PHP_FUNCTION(pspell_config_mode)
 {
 	zend_long conf, mode;
@@ -640,8 +626,7 @@ PHP_FUNCTION(pspell_config_mode)
 }
 /* }}} */
 
-/* {{{ proto bool pspell_config_ignore(int conf, int ignore)
-   Ignore words <= n chars */
+/* {{{ Ignore words <= n chars */
 PHP_FUNCTION(pspell_config_ignore)
 {
 	char ignore_str[MAX_LENGTH_OF_LONG + 1];
@@ -683,32 +668,28 @@ static void pspell_config_path(INTERNAL_FUNCTION_PARAMETERS, char *option)
 	RETURN_TRUE;
 }
 
-/* {{{ proto bool pspell_config_personal(int conf, string personal)
-   Use a personal dictionary for this config */
+/* {{{ Use a personal dictionary for this config */
 PHP_FUNCTION(pspell_config_personal)
 {
 	pspell_config_path(INTERNAL_FUNCTION_PARAM_PASSTHRU, "personal");
 }
 /* }}} */
 
-/* {{{ proto bool pspell_config_dict_dir(int conf, string directory)
-   location of the main word list */
+/* {{{ location of the main word list */
 PHP_FUNCTION(pspell_config_dict_dir)
 {
 	pspell_config_path(INTERNAL_FUNCTION_PARAM_PASSTHRU, "dict-dir");
 }
 /* }}} */
 
-/* {{{ proto bool pspell_config_data_dir(int conf, string directory)
-    location of language data files */
+/* {{{ location of language data files */
 PHP_FUNCTION(pspell_config_data_dir)
 {
 	pspell_config_path(INTERNAL_FUNCTION_PARAM_PASSTHRU, "data-dir");
 }
 /* }}} */
 
-/* {{{ proto bool pspell_config_repl(int conf, string repl)
-   Use a personal dictionary with replacement pairs for this config */
+/* {{{ Use a personal dictionary with replacement pairs for this config */
 PHP_FUNCTION(pspell_config_repl)
 {
 	zend_long conf;
@@ -734,8 +715,7 @@ PHP_FUNCTION(pspell_config_repl)
 }
 /* }}} */
 
-/* {{{ proto bool pspell_config_save_repl(int conf, bool save)
-   Save replacement pairs when personal list is saved for this config */
+/* {{{ Save replacement pairs when personal list is saved for this config */
 PHP_FUNCTION(pspell_config_save_repl)
 {
 	zend_long conf;
@@ -754,8 +734,7 @@ PHP_FUNCTION(pspell_config_save_repl)
 }
 /* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
- */
+/* {{{ PHP_MINFO_FUNCTION */
 static PHP_MINFO_FUNCTION(pspell)
 {
 	php_info_print_table_start();

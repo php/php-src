@@ -474,8 +474,7 @@ static void browscap_bdata_dtor(browser_data *bdata, int persistent) /* {{{ */
 }
 /* }}} */
 
-/* {{{ PHP_INI_MH
- */
+/* {{{ PHP_INI_MH */
 PHP_INI_MH(OnChangeBrowscap)
 {
 	if (stage == PHP_INI_STAGE_STARTUP) {
@@ -676,8 +675,7 @@ static void browscap_zval_copy_ctor(zval *p) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto mixed get_browser([string browser_name [, bool return_array]])
-   Get information about the capabilities of a browser. If browser_name is omitted or null, HTTP_USER_AGENT is used. Returns an object by default; if return_array is true, returns an array. */
+/* {{{ Get information about the capabilities of a browser. If browser_name is omitted or null, HTTP_USER_AGENT is used. Returns an object by default; if return_array is true, returns an array. */
 PHP_FUNCTION(get_browser)
 {
 	zend_string *agent_name = NULL, *lookup_browser_name;

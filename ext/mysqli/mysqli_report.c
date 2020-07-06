@@ -25,8 +25,7 @@
 
 extern void php_mysqli_throw_sql_exception(char *sqlstate, int errorno, char *format, ...);
 
-/* {{{ proto bool mysqli_report(int flags)
-   sets report level */
+/* {{{ sets report level */
 PHP_FUNCTION(mysqli_report)
 {
 	zend_long flags;

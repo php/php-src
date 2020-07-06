@@ -517,8 +517,7 @@ int start_accel_module(void)
 	return zend_startup_module(&accel_module_entry);
 }
 
-/* {{{ proto array accelerator_get_scripts()
-   Get the scripts which are accelerated by ZendAccelerator */
+/* {{{ Get the scripts which are accelerated by ZendAccelerator */
 static int accelerator_get_scripts(zval *return_value)
 {
 	uint32_t i;
@@ -567,8 +566,7 @@ static int accelerator_get_scripts(zval *return_value)
 	return 1;
 }
 
-/* {{{ proto array accelerator_get_status([bool fetch_scripts])
-   Obtain statistics information regarding code acceleration */
+/* {{{ Obtain statistics information regarding code acceleration */
 ZEND_FUNCTION(opcache_get_status)
 {
 	zend_long reqs;
@@ -701,8 +699,7 @@ static int add_blacklist_path(zend_blacklist_entry *p, zval *return_value)
 	return 0;
 }
 
-/* {{{ proto array accelerator_get_configuration()
-   Obtain configuration information */
+/* {{{ Obtain configuration information */
 ZEND_FUNCTION(opcache_get_configuration)
 {
 	zval directives, version, blacklist;
@@ -809,8 +806,7 @@ ZEND_FUNCTION(opcache_get_configuration)
 	add_assoc_zval(return_value, "blacklist", &blacklist);
 }
 
-/* {{{ proto void accelerator_reset()
-   Request that the contents of the opcode cache to be reset */
+/* {{{ Request that the contents of the opcode cache to be reset */
 ZEND_FUNCTION(opcache_reset)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -836,8 +832,7 @@ ZEND_FUNCTION(opcache_reset)
 	RETURN_TRUE;
 }
 
-/* {{{ proto void opcache_invalidate(string $script [, bool $force = false])
-   Invalidates cached script (in necessary or forced) */
+/* {{{ Invalidates cached script (in necessary or forced) */
 ZEND_FUNCTION(opcache_invalidate)
 {
 	char *script_name;
@@ -909,8 +904,7 @@ ZEND_FUNCTION(opcache_compile_file)
 	zend_destroy_file_handle(&handle);
 }
 
-/* {{{ proto bool opcache_is_script_cached(string $script)
-   Return true if the script is cached in OPCache, false if it is not cached or if OPCache is not running. */
+/* {{{ Return true if the script is cached in OPCache, false if it is not cached or if OPCache is not running. */
 ZEND_FUNCTION(opcache_is_script_cached)
 {
 	zend_string *script_name;

@@ -572,8 +572,7 @@ static zend_always_inline size_t calculate_unit_length(pcre_cache_entry *pce, co
 }
 /* }}} */
 
-/* {{{ pcre_get_compiled_regex_cache
- */
+/* {{{ pcre_get_compiled_regex_cache */
 PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, int locale_aware)
 {
 	pcre2_code			*re = NULL;
@@ -875,16 +874,14 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, in
 }
 /* }}} */
 
-/* {{{ pcre_get_compiled_regex_cache
- */
+/* {{{ pcre_get_compiled_regex_cache */
 PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 {
 	return pcre_get_compiled_regex_cache_ex(regex, 1);
 }
 /* }}} */
 
-/* {{{ pcre_get_compiled_regex
- */
+/* {{{ pcre_get_compiled_regex */
 PHPAPI pcre2_code *pcre_get_compiled_regex(zend_string *regex, uint32_t *capture_count)
 {
 	pcre_cache_entry * pce = pcre_get_compiled_regex_cache(regex);
@@ -897,8 +894,7 @@ PHPAPI pcre2_code *pcre_get_compiled_regex(zend_string *regex, uint32_t *capture
 }
 /* }}} */
 
-/* {{{ pcre_get_compiled_regex_ex
- */
+/* {{{ pcre_get_compiled_regex_ex */
 PHPAPI pcre2_code* pcre_get_compiled_regex_ex(zend_string *regex, uint32_t *capture_count, uint32_t *preg_options, uint32_t *compile_options)
 {
 	pcre_cache_entry * pce = pcre_get_compiled_regex_cache(regex);
@@ -1468,24 +1464,21 @@ error:
 }
 /* }}} */
 
-/* {{{ proto int preg_match(string pattern, string subject [, array &subpatterns [, int flags [, int offset]]])
-   Perform a Perl-style regular expression match */
+/* {{{ Perform a Perl-style regular expression match */
 PHP_FUNCTION(preg_match)
 {
 	php_do_pcre_match(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
-/* {{{ proto int preg_match_all(string pattern, string subject [, array &subpatterns [, int flags [, int offset]]])
-   Perform a Perl-style global regular expression match */
+/* {{{ Perform a Perl-style global regular expression match */
 PHP_FUNCTION(preg_match_all)
 {
 	php_do_pcre_match(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
-/* {{{ preg_get_backref
- */
+/* {{{ preg_get_backref */
 static int preg_get_backref(char **str, int *backref)
 {
 	register char in_brace = 0;
@@ -1523,8 +1516,7 @@ static int preg_get_backref(char **str, int *backref)
 }
 /* }}} */
 
-/* {{{ preg_do_repl_func
- */
+/* {{{ preg_do_repl_func */
 static zend_string *preg_do_repl_func(zend_fcall_info *fci, zend_fcall_info_cache *fcc, const char *subject, PCRE2_SIZE *offsets, zend_string **subpat_names, uint32_t num_subpats, int count, const PCRE2_SPTR mark, zend_long flags)
 {
 	zend_string *result_str;
@@ -1560,8 +1552,7 @@ static zend_string *preg_do_repl_func(zend_fcall_info *fci, zend_fcall_info_cach
 }
 /* }}} */
 
-/* {{{ php_pcre_replace
- */
+/* {{{ php_pcre_replace */
 PHPAPI zend_string *php_pcre_replace(zend_string *regex,
 							  zend_string *subject_str,
 							  const char *subject, size_t subject_len,
@@ -2046,8 +2037,7 @@ error:
 }
 /* }}} */
 
-/* {{{ php_pcre_replace_func
- */
+/* {{{ php_pcre_replace_func */
 static zend_always_inline zend_string *php_pcre_replace_func(zend_string *regex,
 							  zend_string *subject_str,
 							  zend_fcall_info *fci, zend_fcall_info_cache *fcc,
@@ -2070,8 +2060,7 @@ static zend_always_inline zend_string *php_pcre_replace_func(zend_string *regex,
 }
 /* }}} */
 
-/* {{{ php_pcre_replace_array
- */
+/* {{{ php_pcre_replace_array */
 static zend_string *php_pcre_replace_array(HashTable *regex, zval *replace, zend_string *subject_str, size_t limit, size_t *replace_count)
 {
 	zval		*regex_entry;
@@ -2154,8 +2143,7 @@ static zend_string *php_pcre_replace_array(HashTable *regex, zval *replace, zend
 }
 /* }}} */
 
-/* {{{ php_replace_in_subject
- */
+/* {{{ php_replace_in_subject */
 static zend_always_inline zend_string *php_replace_in_subject(zval *regex, zval *replace, zval *subject, size_t limit, size_t *replace_count)
 {
 	zend_string *result;
@@ -2181,8 +2169,7 @@ static zend_always_inline zend_string *php_replace_in_subject(zval *regex, zval 
 }
 /* }}} */
 
-/* {{{ php_replace_in_subject_func
- */
+/* {{{ php_replace_in_subject_func */
 static zend_string *php_replace_in_subject_func(zval *regex, zend_fcall_info *fci, zend_fcall_info_cache *fcc, zval *subject, size_t limit, size_t *replace_count, zend_long flags)
 {
 	zend_string *result;
@@ -2221,8 +2208,7 @@ static zend_string *php_replace_in_subject_func(zval *regex, zend_fcall_info *fc
 }
 /* }}} */
 
-/* {{{ preg_replace_func_impl
- */
+/* {{{ preg_replace_func_impl */
 static size_t preg_replace_func_impl(zval *return_value, zval *regex, zend_fcall_info *fci, zend_fcall_info_cache *fcc, zval *subject, zend_long limit_val, zend_long flags)
 {
 	zend_string	*result;
@@ -2269,8 +2255,7 @@ static size_t preg_replace_func_impl(zval *return_value, zval *regex, zend_fcall
 }
 /* }}} */
 
-/* {{{ preg_replace_common
- */
+/* {{{ preg_replace_common */
 static void preg_replace_common(INTERNAL_FUNCTION_PARAMETERS, int is_filter)
 {
 	zval *regex, *replace, *subject, *zcount = NULL;
@@ -2357,16 +2342,14 @@ static void preg_replace_common(INTERNAL_FUNCTION_PARAMETERS, int is_filter)
 }
 /* }}} */
 
-/* {{{ proto mixed preg_replace(mixed regex, mixed replace, mixed subject [, int limit [, int &count]])
-   Perform Perl-style regular expression replacement. */
+/* {{{ Perform Perl-style regular expression replacement. */
 PHP_FUNCTION(preg_replace)
 {
 	preg_replace_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
-/* {{{ proto mixed preg_replace_callback(mixed regex, mixed callback, mixed subject [, int limit [, int &count]])
-   Perform Perl-style regular expression replacement using replacement callback. */
+/* {{{ Perform Perl-style regular expression replacement using replacement callback. */
 PHP_FUNCTION(preg_replace_callback)
 {
 	zval *regex, *subject, *zcount = NULL;
@@ -2393,8 +2376,7 @@ PHP_FUNCTION(preg_replace_callback)
 }
 /* }}} */
 
-/* {{{ proto mixed preg_replace_callback_array(array pattern, mixed subject [, int limit [, int &count]])
-   Perform Perl-style regular expression replacement using replacement callback. */
+/* {{{ Perform Perl-style regular expression replacement using replacement callback. */
 PHP_FUNCTION(preg_replace_callback_array)
 {
 	zval regex, zv, *replace, *subject, *pattern, *zcount = NULL;
@@ -2461,16 +2443,14 @@ PHP_FUNCTION(preg_replace_callback_array)
 }
 /* }}} */
 
-/* {{{ proto mixed preg_filter(mixed regex, mixed replace, mixed subject [, int limit [, int &count]])
-   Perform Perl-style regular expression replacement and only return matches. */
+/* {{{ Perform Perl-style regular expression replacement and only return matches. */
 PHP_FUNCTION(preg_filter)
 {
 	preg_replace_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
-/* {{{ proto array preg_split(string pattern, string subject [, int limit [, int flags]])
-   Split string into an array using a perl-style regular expression as a delimiter */
+/* {{{ Split string into an array using a perl-style regular expression as a delimiter */
 PHP_FUNCTION(preg_split)
 {
 	zend_string			*regex;			/* Regular expression */
@@ -2499,8 +2479,7 @@ PHP_FUNCTION(preg_split)
 }
 /* }}} */
 
-/* {{{ php_pcre_split
- */
+/* {{{ php_pcre_split */
 PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, zend_string *subject_str, zval *return_value,
 	zend_long limit_val, zend_long flags)
 {
@@ -2690,8 +2669,7 @@ last:
 }
 /* }}} */
 
-/* {{{ proto string preg_quote(string str [, string delim_char])
-   Quote regular expression characters plus an optional character */
+/* {{{ Quote regular expression characters plus an optional character */
 PHP_FUNCTION(preg_quote)
 {
 	zend_string *str;       		/* Input string argument */
@@ -2827,8 +2805,7 @@ PHP_FUNCTION(preg_quote)
 }
 /* }}} */
 
-/* {{{ proto array preg_grep(string regex, array input [, int flags])
-   Searches array and returns entries which match regex */
+/* {{{ Searches array and returns entries which match regex */
 PHP_FUNCTION(preg_grep)
 {
 	zend_string			*regex;			/* Regular expression */
@@ -2944,8 +2921,7 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 }
 /* }}} */
 
-/* {{{ proto int preg_last_error()
-   Returns the error code of the last regexp execution. */
+/* {{{ Returns the error code of the last regexp execution. */
 PHP_FUNCTION(preg_last_error)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -2954,8 +2930,7 @@ PHP_FUNCTION(preg_last_error)
 }
 /* }}} */
 
-/* {{{ proto string preg_last_error_msg()
-   Returns the error message of the last regexp execution. */
+/* {{{ Returns the error message of the last regexp execution. */
 PHP_FUNCTION(preg_last_error_msg)
 {
     ZEND_PARSE_PARAMETERS_NONE();

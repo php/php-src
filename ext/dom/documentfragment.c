@@ -30,7 +30,7 @@
 * Since:
 */
 
-/* {{{ proto DOMDocumentFragment::__construct() */
+/* {{{ */
 PHP_METHOD(DOMDocumentFragment, __construct)
 {
 	xmlNodePtr nodep = NULL, oldnode = NULL;
@@ -91,7 +91,7 @@ static void php_dom_xmlSetTreeDoc(xmlNodePtr tree, xmlDocPtr doc) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto void DOMDocumentFragment::appendXML(string data) */
+/* {{{ */
 PHP_METHOD(DOMDocumentFragment, appendXML) {
 	zval *id;
 	xmlNode *nodep;
@@ -130,8 +130,7 @@ PHP_METHOD(DOMDocumentFragment, appendXML) {
 }
 /* }}} */
 
-/* {{{ proto void domdocumentfragment::append(string|DOMNode ...$nodes)
-URL: https://dom.spec.whatwg.org/#dom-parentnode-append
+/* {{{ URL: https://dom.spec.whatwg.org/#dom-parentnode-append
 Since: DOM Living Standard (DOM4)
 */
 PHP_METHOD(DOMDocumentFragment, append)
@@ -152,8 +151,7 @@ PHP_METHOD(DOMDocumentFragment, append)
 }
 /* }}} */
 
-/* {{{ proto void domdocumentfragment::prepend(string|DOMNode ...$nodes)
-URL: https://dom.spec.whatwg.org/#dom-parentnode-prepend
+/* {{{ URL: https://dom.spec.whatwg.org/#dom-parentnode-prepend
 Since: DOM Living Standard (DOM4)
 */
 PHP_METHOD(DOMDocumentFragment, prepend)

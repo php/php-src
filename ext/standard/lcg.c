@@ -110,8 +110,7 @@ PHP_MINIT_FUNCTION(lcg) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto float lcg_value()
-   Returns a value from the combined linear congruential generator */
+/* {{{ Returns a value from the combined linear congruential generator */
 PHP_FUNCTION(lcg_value)
 {
 	ZEND_PARSE_PARAMETERS_NONE();

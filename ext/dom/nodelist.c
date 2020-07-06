@@ -82,8 +82,7 @@ int dom_nodelist_length_read(dom_object *obj, zval *retval)
 }
 
 
-/* {{{ proto int|bool dom_nodelist_count();
-*/
+/* {{{ */
 PHP_METHOD(DOMNodeList, count)
 {
 	zval *id;
@@ -103,8 +102,7 @@ PHP_METHOD(DOMNodeList, count)
 
 /* }}} */
 
-/* {{{ proto DOMNode dom_nodelist_item(int index);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-844377136
+/* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-844377136
 Since:
 */
 PHP_METHOD(DOMNodeList, item)

@@ -31,8 +31,7 @@
 
 #define SAVE_CURLSH_ERROR(__handle, __err) (__handle)->err.no = (int) __err;
 
-/* {{{ proto CurlShareHandle curl_share_init()
-   Initialize a share curl handle */
+/* {{{ Initialize a share curl handle */
 PHP_FUNCTION(curl_share_init)
 {
 	php_curlsh *sh;
@@ -46,8 +45,7 @@ PHP_FUNCTION(curl_share_init)
 }
 /* }}} */
 
-/* {{{ proto void curl_share_close(CurlShareHandle sh)
-   Close a set of cURL handles */
+/* {{{ Close a set of cURL handles */
 PHP_FUNCTION(curl_share_close)
 {
 	zval *z_sh;
@@ -80,8 +78,7 @@ static int _php_curl_share_setopt(php_curlsh *sh, zend_long option, zval *zvalue
 }
 /* }}} */
 
-/* {{{ proto bool curl_share_setopt(CurlShareHandle sh, int option, mixed value)
-      Set an option for a cURL transfer */
+/* {{{ Set an option for a cURL transfer */
 PHP_FUNCTION(curl_share_setopt)
 {
 	zval       *z_sh, *zvalue;
@@ -104,8 +101,7 @@ PHP_FUNCTION(curl_share_setopt)
 }
 /* }}} */
 
-/* {{{ proto int curl_share_errno(CurlShareHandle sh)
-         Return an integer containing the last share curl error number */
+/* {{{ Return an integer containing the last share curl error number */
 PHP_FUNCTION(curl_share_errno)
 {
 	zval        *z_sh;
@@ -122,8 +118,7 @@ PHP_FUNCTION(curl_share_errno)
 /* }}} */
 
 
-/* {{{ proto bool curl_share_strerror(int code)
-         return string describing error code */
+/* {{{ return string describing error code */
 PHP_FUNCTION(curl_share_strerror)
 {
 	zend_long code;

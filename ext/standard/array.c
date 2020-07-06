@@ -78,8 +78,7 @@
 
 ZEND_DECLARE_MODULE_GLOBALS(array)
 
-/* {{{ php_array_init_globals
-*/
+/* {{{ php_array_init_globals */
 static void php_array_init_globals(zend_array_globals *array_globals)
 {
 	memset(array_globals, 0, sizeof(zend_array_globals));
@@ -654,8 +653,7 @@ static bucket_compare_func_t php_get_data_compare_func_unstable(zend_long sort_t
 }
 /* }}} */
 
-/* {{{ proto bool krsort(array &array_arg [, int sort_flags])
-   Sort an array by key value in reverse order */
+/* {{{ Sort an array by key value in reverse order */
 PHP_FUNCTION(krsort)
 {
 	zval *array;
@@ -676,8 +674,7 @@ PHP_FUNCTION(krsort)
 }
 /* }}} */
 
-/* {{{ proto bool ksort(array &array_arg [, int sort_flags])
-   Sort an array by key */
+/* {{{ Sort an array by key */
 PHP_FUNCTION(ksort)
 {
 	zval *array;
@@ -727,8 +724,7 @@ PHPAPI zend_long php_count_recursive(HashTable *ht) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto int count(mixed var [, int mode])
-   Count the number of elements in a variable (usually an array) */
+/* {{{ Count the number of elements in a variable (usually an array) */
 PHP_FUNCTION(count)
 {
 	zval *array;
@@ -815,24 +811,21 @@ static void php_natsort(INTERNAL_FUNCTION_PARAMETERS, int fold_case) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto void natsort(array &array_arg)
-   Sort an array using natural sort */
+/* {{{ Sort an array using natural sort */
 PHP_FUNCTION(natsort)
 {
 	php_natsort(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
-/* {{{ proto void natcasesort(array &array_arg)
-   Sort an array using case-insensitive natural sort */
+/* {{{ Sort an array using case-insensitive natural sort */
 PHP_FUNCTION(natcasesort)
 {
 	php_natsort(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
-/* {{{ proto bool asort(array &array_arg [, int sort_flags])
-   Sort an array and maintain index association */
+/* {{{ Sort an array and maintain index association */
 PHP_FUNCTION(asort)
 {
 	zval *array;
@@ -853,8 +846,7 @@ PHP_FUNCTION(asort)
 }
 /* }}} */
 
-/* {{{ proto bool arsort(array &array_arg [, int sort_flags])
-   Sort an array in reverse order and maintain index association */
+/* {{{ Sort an array in reverse order and maintain index association */
 PHP_FUNCTION(arsort)
 {
 	zval *array;
@@ -875,8 +867,7 @@ PHP_FUNCTION(arsort)
 }
 /* }}} */
 
-/* {{{ proto bool sort(array &array_arg [, int sort_flags])
-   Sort an array */
+/* {{{ Sort an array */
 PHP_FUNCTION(sort)
 {
 	zval *array;
@@ -897,8 +888,7 @@ PHP_FUNCTION(sort)
 }
 /* }}} */
 
-/* {{{ proto bool rsort(array &array_arg [, int sort_flags])
-   Sort an array in reverse order */
+/* {{{ Sort an array in reverse order */
 PHP_FUNCTION(rsort)
 {
 	zval *array;
@@ -1039,16 +1029,14 @@ static void php_usort(INTERNAL_FUNCTION_PARAMETERS, bucket_compare_func_t compar
 }
 /* }}} */
 
-/* {{{ proto bool usort(array array_arg, string cmp_function)
-   Sort an array by values using a user-defined comparison function */
+/* {{{ Sort an array by values using a user-defined comparison function */
 PHP_FUNCTION(usort)
 {
 	php_usort(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_array_user_compare, 1);
 }
 /* }}} */
 
-/* {{{ proto bool uasort(array array_arg, string cmp_function)
-   Sort an array with a user-defined comparison function and maintain index association */
+/* {{{ Sort an array with a user-defined comparison function and maintain index association */
 PHP_FUNCTION(uasort)
 {
 	php_usort(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_array_user_compare, 0);
@@ -1129,16 +1117,14 @@ static int php_array_user_key_compare(Bucket *a, Bucket *b) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto bool uksort(array array_arg, string cmp_function)
-   Sort an array by keys using a user-defined comparison function */
+/* {{{ Sort an array by keys using a user-defined comparison function */
 PHP_FUNCTION(uksort)
 {
 	php_usort(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_array_user_key_compare, 0);
 }
 /* }}} */
 
-/* {{{ proto mixed end(array array_arg)
-   Advances array argument's internal pointer to the last element and return it */
+/* {{{ Advances array argument's internal pointer to the last element and return it */
 PHP_FUNCTION(end)
 {
 	HashTable *array;
@@ -1164,8 +1150,7 @@ PHP_FUNCTION(end)
 }
 /* }}} */
 
-/* {{{ proto mixed prev(array array_arg)
-   Move array argument's internal pointer to the previous element and return it */
+/* {{{ Move array argument's internal pointer to the previous element and return it */
 PHP_FUNCTION(prev)
 {
 	HashTable *array;
@@ -1191,8 +1176,7 @@ PHP_FUNCTION(prev)
 }
 /* }}} */
 
-/* {{{ proto mixed next(array array_arg)
-   Move array argument's internal pointer to the next element and return it */
+/* {{{ Move array argument's internal pointer to the next element and return it */
 PHP_FUNCTION(next)
 {
 	HashTable *array;
@@ -1218,8 +1202,7 @@ PHP_FUNCTION(next)
 }
 /* }}} */
 
-/* {{{ proto mixed reset(array array_arg)
-   Set array argument's internal pointer to the first element and return it */
+/* {{{ Set array argument's internal pointer to the first element and return it */
 PHP_FUNCTION(reset)
 {
 	HashTable *array;
@@ -1245,8 +1228,7 @@ PHP_FUNCTION(reset)
 }
 /* }}} */
 
-/* {{{ proto mixed current(array array_arg)
-   Return the element currently pointed to by the internal array pointer */
+/* {{{ Return the element currently pointed to by the internal array pointer */
 PHP_FUNCTION(current)
 {
 	HashTable *array;
@@ -1268,8 +1250,7 @@ PHP_FUNCTION(current)
 }
 /* }}} */
 
-/* {{{ proto mixed key(array array_arg)
-   Return the key of the element currently pointed to by the internal array pointer */
+/* {{{ Return the key of the element currently pointed to by the internal array pointer */
 PHP_FUNCTION(key)
 {
 	HashTable *array;
@@ -1504,8 +1485,7 @@ static int php_array_walk(zval *array, zval *userdata, int recursive) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto bool array_walk(array input, string funcname [, mixed userdata])
-   Apply a user function to every member of an array */
+/* {{{ Apply a user function to every member of an array */
 PHP_FUNCTION(array_walk)
 {
 	zval *array;
@@ -1535,8 +1515,7 @@ PHP_FUNCTION(array_walk)
 }
 /* }}} */
 
-/* {{{ proto bool array_walk_recursive(array input, string funcname [, mixed userdata])
-   Apply a user function recursively to every member of an array */
+/* {{{ Apply a user function recursively to every member of an array */
 PHP_FUNCTION(array_walk_recursive)
 {
 	zval *array;
@@ -1673,16 +1652,14 @@ static inline void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) 
 }
 /* }}} */
 
-/* {{{ proto bool in_array(mixed needle, array haystack [, bool strict])
-   Checks if the given value exists in the array */
+/* {{{ Checks if the given value exists in the array */
 PHP_FUNCTION(in_array)
 {
 	php_search_array(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
-/* {{{ proto mixed array_search(mixed needle, array haystack [, bool strict])
-   Searches the array for a given value and returns the corresponding key if successful */
+/* {{{ Searches the array for a given value and returns the corresponding key if successful */
 PHP_FUNCTION(array_search)
 {
 	php_search_array(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
@@ -2467,8 +2444,7 @@ static zend_long php_extract_skip(zend_array *arr, zend_array *symbol_table) /* 
 }
 /* }}} */
 
-/* {{{ proto int extract(array var_array [, int extract_type [, string prefix]])
-   Imports variables into symbol table from an array */
+/* {{{ Imports variables into symbol table from an array */
 PHP_FUNCTION(extract)
 {
 	zval *var_array_param;
@@ -2610,8 +2586,7 @@ static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_valu
 }
 /* }}} */
 
-/* {{{ proto array compact(mixed var_names [, mixed ...])
-   Creates a hash containing variables and their values */
+/* {{{ Creates a hash containing variables and their values */
 PHP_FUNCTION(compact)
 {
 	zval *args = NULL;	/* function arguments array */
@@ -2644,8 +2619,7 @@ PHP_FUNCTION(compact)
 }
 /* }}} */
 
-/* {{{ proto array array_fill(int start_key, int num, mixed val)
-   Create an array containing num elements starting with index start_key each initialized to val */
+/* {{{ Create an array containing num elements starting with index start_key each initialized to val */
 PHP_FUNCTION(array_fill)
 {
 	zval *val;
@@ -2714,8 +2688,7 @@ PHP_FUNCTION(array_fill)
 }
 /* }}} */
 
-/* {{{ proto array array_fill_keys(array keys, mixed val)
-   Create an array using the elements of the first parameter as keys each initialized to val */
+/* {{{ Create an array using the elements of the first parameter as keys each initialized to val */
 PHP_FUNCTION(array_fill_keys)
 {
 	zval *keys, *val, *entry;
@@ -2767,8 +2740,7 @@ PHP_FUNCTION(array_fill_keys)
 		zend_hash_real_init_packed(Z_ARRVAL_P(return_value)); \
 	} while (0)
 
-/* {{{ proto array range(mixed low, mixed high[, int step])
-   Create an array containing the range of integers or characters from low to high (inclusive) */
+/* {{{ Create an array containing the range of integers or characters from low to high (inclusive) */
 PHP_FUNCTION(range)
 {
 	zval *zlow, *zhigh, *zstep = NULL, tmp;
@@ -3039,8 +3011,7 @@ static void php_array_data_shuffle(zval *array) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto bool shuffle(array array_arg)
-   Randomly shuffle the contents of an array */
+/* {{{ Randomly shuffle the contents of an array */
 PHP_FUNCTION(shuffle)
 {
 	zval *array;
@@ -3190,8 +3161,7 @@ static void php_splice(HashTable *in_hash, zend_long offset, zend_long length, H
 }
 /* }}} */
 
-/* {{{ proto int array_push(array stack, mixed var [, mixed ...])
-   Pushes elements onto the end of the array */
+/* {{{ Pushes elements onto the end of the array */
 PHP_FUNCTION(array_push)
 {
 	zval   *args,		/* Function arguments array */
@@ -3222,8 +3192,7 @@ PHP_FUNCTION(array_push)
 }
 /* }}} */
 
-/* {{{ proto mixed array_pop(array stack)
-   Pops an element off the end of the array */
+/* {{{ Pops an element off the end of the array */
 PHP_FUNCTION(array_pop)
 {
 	zval *stack,	/* Input stack */
@@ -3272,8 +3241,7 @@ PHP_FUNCTION(array_pop)
 }
 /* }}} */
 
-/* {{{ proto mixed array_shift(array stack)
-   Pops an element off the beginning of the array */
+/* {{{ Pops an element off the beginning of the array */
 PHP_FUNCTION(array_shift)
 {
 	zval *stack,	/* Input stack */
@@ -3379,8 +3347,7 @@ PHP_FUNCTION(array_shift)
 }
 /* }}} */
 
-/* {{{ proto int array_unshift(array stack, mixed var [, mixed ...])
-   Pushes elements onto the beginning of the array */
+/* {{{ Pushes elements onto the beginning of the array */
 PHP_FUNCTION(array_unshift)
 {
 	zval   *args,			/* Function arguments array */
@@ -3436,8 +3403,7 @@ PHP_FUNCTION(array_unshift)
 }
 /* }}} */
 
-/* {{{ proto array array_splice(array input, int offset [, int length [, array replacement]])
-   Removes the elements designated by offset and length and replace them with supplied array */
+/* {{{ Removes the elements designated by offset and length and replace them with supplied array */
 PHP_FUNCTION(array_splice)
 {
 	zval *array,				/* Input array */
@@ -3526,8 +3492,7 @@ static inline Bucket* find_bucket_at_offset(HashTable* ht, zend_long offset)
 }
 /* }}} */
 
-/* {{{ proto array array_slice(array input, int offset [, int length [, bool preserve_keys]])
-   Returns elements specified by offset and length */
+/* {{{ Returns elements specified by offset and length */
 PHP_FUNCTION(array_slice)
 {
 	zval *input;                  /* Input array */
@@ -3953,40 +3918,35 @@ static zend_always_inline void php_array_merge_wrapper(INTERNAL_FUNCTION_PARAMET
 }
 /* }}} */
 
-/* {{{ proto array array_merge([array ...])
-   Merges elements from passed arrays into one array */
+/* {{{ Merges elements from passed arrays into one array */
 PHP_FUNCTION(array_merge)
 {
 	php_array_merge_wrapper(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
-/* {{{ proto array array_merge_recursive([array ...])
-   Recursively merges elements from passed arrays into one array */
+/* {{{ Recursively merges elements from passed arrays into one array */
 PHP_FUNCTION(array_merge_recursive)
 {
 	php_array_merge_wrapper(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
-/* {{{ proto array array_replace(array arr1 [, array ...])
-   Replaces elements from passed arrays into one array */
+/* {{{ Replaces elements from passed arrays into one array */
 PHP_FUNCTION(array_replace)
 {
 	php_array_replace_wrapper(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
-/* {{{ proto array array_replace_recursive(array arr1 [, array ...])
-   Recursively replaces elements from passed arrays into one array */
+/* {{{ Recursively replaces elements from passed arrays into one array */
 PHP_FUNCTION(array_replace_recursive)
 {
 	php_array_replace_wrapper(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
-/* {{{ proto array array_keys(array input [, mixed search_value[, bool strict]])
-   Return just the keys from the input array, optionally only for the specified search_value */
+/* {{{ Return just the keys from the input array, optionally only for the specified search_value */
 PHP_FUNCTION(array_keys)
 {
 	zval *input,				/* Input array */
@@ -4069,8 +4029,7 @@ PHP_FUNCTION(array_keys)
 }
 /* }}} */
 
-/* {{{ proto int|string|false array_key_first(array stack)
-   Get the key of the first element of the array */
+/* {{{ Get the key of the first element of the array */
 PHP_FUNCTION(array_key_first)
 {
 	zval *stack;    /* Input stack */
@@ -4085,8 +4044,7 @@ PHP_FUNCTION(array_key_first)
 }
 /* }}} */
 
-/* {{{ proto int|string|false array_key_last(array stack)
-   Get the key of the last element of the array */
+/* {{{ Get the key of the last element of the array */
 PHP_FUNCTION(array_key_last)
 {
 	zval *stack;    /* Input stack */
@@ -4102,8 +4060,7 @@ PHP_FUNCTION(array_key_last)
 }
 /* }}} */
 
-/* {{{ proto array array_values(array input)
-   Return just the values from the input array */
+/* {{{ Return just the values from the input array */
 PHP_FUNCTION(array_values)
 {
 	zval	 *input,		/* Input array */
@@ -4146,8 +4103,7 @@ PHP_FUNCTION(array_values)
 }
 /* }}} */
 
-/* {{{ proto array array_count_values(array input)
-   Return the value as key and the frequency of that value in input as value */
+/* {{{ Return the value as key and the frequency of that value in input as value */
 PHP_FUNCTION(array_count_values)
 {
 	zval	*input,		/* Input array */
@@ -4232,8 +4188,7 @@ static inline zval *array_column_fetch_prop(zval *data, zend_string *name_str, z
 }
 /* }}} */
 
-/* {{{ proto array array_column(array input, string|int|null column_key[, string|int|null index_key])
-   Return the values from a single column in the input array, identified by the
+/* {{{ Return the values from a single column in the input array, identified by the
    value_key and optionally indexed by the index_key */
 PHP_FUNCTION(array_column)
 {
@@ -4294,8 +4249,7 @@ PHP_FUNCTION(array_column)
 }
 /* }}} */
 
-/* {{{ proto array array_reverse(array input [, bool preserve keys])
-   Return input as a new array with the order of the entries reversed */
+/* {{{ Return input as a new array with the order of the entries reversed */
 PHP_FUNCTION(array_reverse)
 {
 	zval	 *input,				/* Input array */
@@ -4341,8 +4295,7 @@ PHP_FUNCTION(array_reverse)
 }
 /* }}} */
 
-/* {{{ proto array array_pad(array input, int pad_size, mixed pad_value)
-   Returns a copy of input array padded with pad_value to size pad_size */
+/* {{{ Returns a copy of input array padded with pad_value to size pad_size */
 PHP_FUNCTION(array_pad)
 {
 	zval  *input;		/* Input array */
@@ -4431,8 +4384,7 @@ PHP_FUNCTION(array_pad)
 }
 /* }}} */
 
-/* {{{ proto array array_flip(array input)
-   Return array with key <-> value flipped */
+/* {{{ Return array with key <-> value flipped */
 PHP_FUNCTION(array_flip)
 {
 	zval *array, *entry, data;
@@ -4468,8 +4420,7 @@ PHP_FUNCTION(array_flip)
 }
 /* }}} */
 
-/* {{{ proto array array_change_key_case(array input [, int case=CASE_LOWER])
-   Returns an array with all string keys lowercased [or uppercased] */
+/* {{{ Returns an array with all string keys lowercased [or uppercased] */
 PHP_FUNCTION(array_change_key_case)
 {
 	zval *array, *entry;
@@ -4504,8 +4455,7 @@ PHP_FUNCTION(array_change_key_case)
 }
 /* }}} */
 
-/* {{{ proto array array_unique(array input [, int sort_flags])
-   Removes duplicate values from array */
+/* {{{ Removes duplicate values from array */
 PHP_FUNCTION(array_unique)
 {
 	zval *array;
@@ -4956,64 +4906,56 @@ out:
 }
 /* }}} */
 
-/* {{{ proto array array_intersect_key(array arr1, array arr2 [, array ...])
-   Returns the entries of arr1 that have keys which are present in all the other arguments. Kind of equivalent to array_diff(array_keys($arr1), array_keys($arr2)[,array_keys(...)]). Equivalent of array_intersect_assoc() but does not do compare of the data. */
+/* {{{ Returns the entries of arr1 that have keys which are present in all the other arguments. Kind of equivalent to array_diff(array_keys($arr1), array_keys($arr2)[,array_keys(...)]). Equivalent of array_intersect_assoc() but does not do compare of the data. */
 PHP_FUNCTION(array_intersect_key)
 {
 	php_array_intersect_key(INTERNAL_FUNCTION_PARAM_PASSTHRU, INTERSECT_COMP_DATA_NONE);
 }
 /* }}} */
 
-/* {{{ proto array array_intersect_ukey(array arr1, array arr2 [, array ...], callback key_compare_func)
-   Returns the entries of arr1 that have keys which are present in all the other arguments. Kind of equivalent to array_diff(array_keys($arr1), array_keys($arr2)[,array_keys(...)]). The comparison of the keys is performed by a user supplied function. Equivalent of array_intersect_uassoc() but does not do compare of the data. */
+/* {{{ Returns the entries of arr1 that have keys which are present in all the other arguments. Kind of equivalent to array_diff(array_keys($arr1), array_keys($arr2)[,array_keys(...)]). The comparison of the keys is performed by a user supplied function. Equivalent of array_intersect_uassoc() but does not do compare of the data. */
 PHP_FUNCTION(array_intersect_ukey)
 {
 	php_array_intersect(INTERNAL_FUNCTION_PARAM_PASSTHRU, INTERSECT_KEY, INTERSECT_COMP_DATA_INTERNAL, INTERSECT_COMP_KEY_USER);
 }
 /* }}} */
 
-/* {{{ proto array array_intersect(array arr1, array arr2 [, array ...])
-   Returns the entries of arr1 that have values which are present in all the other arguments */
+/* {{{ Returns the entries of arr1 that have values which are present in all the other arguments */
 PHP_FUNCTION(array_intersect)
 {
 	php_array_intersect(INTERNAL_FUNCTION_PARAM_PASSTHRU, INTERSECT_NORMAL, INTERSECT_COMP_DATA_INTERNAL, INTERSECT_COMP_KEY_INTERNAL);
 }
 /* }}} */
 
-/* {{{ proto array array_uintersect(array arr1, array arr2 [, array ...], callback data_compare_func)
-   Returns the entries of arr1 that have values which are present in all the other arguments. Data is compared by using a user-supplied callback. */
+/* {{{ Returns the entries of arr1 that have values which are present in all the other arguments. Data is compared by using a user-supplied callback. */
 PHP_FUNCTION(array_uintersect)
 {
 	php_array_intersect(INTERNAL_FUNCTION_PARAM_PASSTHRU, INTERSECT_NORMAL, INTERSECT_COMP_DATA_USER, INTERSECT_COMP_KEY_INTERNAL);
 }
 /* }}} */
 
-/* {{{ proto array array_intersect_assoc(array arr1, array arr2 [, array ...])
-   Returns the entries of arr1 that have values which are present in all the other arguments. Keys are used to do more restrictive check */
+/* {{{ Returns the entries of arr1 that have values which are present in all the other arguments. Keys are used to do more restrictive check */
 PHP_FUNCTION(array_intersect_assoc)
 {
 	php_array_intersect_key(INTERNAL_FUNCTION_PARAM_PASSTHRU, INTERSECT_COMP_DATA_INTERNAL);
 }
 /* }}} */
 
-/* {{{ proto array array_intersect_uassoc(array arr1, array arr2 [, array ...], callback key_compare_func) U
-   Returns the entries of arr1 that have values which are present in all the other arguments. Keys are used to do more restrictive check and they are compared by using a user-supplied callback. */
+/* {{{ Returns the entries of arr1 that have values which are present in all the other arguments. Keys are used to do more restrictive check and they are compared by using a user-supplied callback. */
 PHP_FUNCTION(array_intersect_uassoc)
 {
 	php_array_intersect(INTERNAL_FUNCTION_PARAM_PASSTHRU, INTERSECT_ASSOC, INTERSECT_COMP_DATA_INTERNAL, INTERSECT_COMP_KEY_USER);
 }
 /* }}} */
 
-/* {{{ proto array array_uintersect_assoc(array arr1, array arr2 [, array ...], callback data_compare_func) U
-   Returns the entries of arr1 that have values which are present in all the other arguments. Keys are used to do more restrictive check. Data is compared by using a user-supplied callback. */
+/* {{{ Returns the entries of arr1 that have values which are present in all the other arguments. Keys are used to do more restrictive check. Data is compared by using a user-supplied callback. */
 PHP_FUNCTION(array_uintersect_assoc)
 {
 	php_array_intersect_key(INTERNAL_FUNCTION_PARAM_PASSTHRU, INTERSECT_COMP_DATA_USER);
 }
 /* }}} */
 
-/* {{{ proto array array_uintersect_uassoc(array arr1, array arr2 [, array ...], callback data_compare_func, callback key_compare_func)
-   Returns the entries of arr1 that have values which are present in all the other arguments. Keys are used to do more restrictive check. Both data and keys are compared by using user-supplied callbacks. */
+/* {{{ Returns the entries of arr1 that have values which are present in all the other arguments. Keys are used to do more restrictive check. Both data and keys are compared by using user-supplied callbacks. */
 PHP_FUNCTION(array_uintersect_uassoc)
 {
 	php_array_intersect(INTERNAL_FUNCTION_PARAM_PASSTHRU, INTERSECT_ASSOC, INTERSECT_COMP_DATA_USER, INTERSECT_COMP_KEY_USER);
@@ -5361,24 +5303,21 @@ out:
 }
 /* }}} */
 
-/* {{{ proto array array_diff_key(array arr1, array arr2 [, array ...])
-   Returns the entries of arr1 that have keys which are not present in any of the others arguments. This function is like array_diff() but works on the keys instead of the values. The associativity is preserved. */
+/* {{{ Returns the entries of arr1 that have keys which are not present in any of the others arguments. This function is like array_diff() but works on the keys instead of the values. The associativity is preserved. */
 PHP_FUNCTION(array_diff_key)
 {
 	php_array_diff_key(INTERNAL_FUNCTION_PARAM_PASSTHRU, DIFF_COMP_DATA_NONE);
 }
 /* }}} */
 
-/* {{{ proto array array_diff_ukey(array arr1, array arr2 [, array ...], callback key_comp_func)
-   Returns the entries of arr1 that have keys which are not present in any of the others arguments. User supplied function is used for comparing the keys. This function is like array_udiff() but works on the keys instead of the values. The associativity is preserved. */
+/* {{{ Returns the entries of arr1 that have keys which are not present in any of the others arguments. User supplied function is used for comparing the keys. This function is like array_udiff() but works on the keys instead of the values. The associativity is preserved. */
 PHP_FUNCTION(array_diff_ukey)
 {
 	php_array_diff(INTERNAL_FUNCTION_PARAM_PASSTHRU, DIFF_KEY, DIFF_COMP_DATA_INTERNAL, DIFF_COMP_KEY_USER);
 }
 /* }}} */
 
-/* {{{ proto array array_diff(array arr1, array arr2 [, array ...])
-   Returns the entries of arr1 that have values which are not present in any of the others arguments. */
+/* {{{ Returns the entries of arr1 that have values which are not present in any of the others arguments. */
 PHP_FUNCTION(array_diff)
 {
 	zval *args;
@@ -5507,40 +5446,35 @@ PHP_FUNCTION(array_diff)
 }
 /* }}} */
 
-/* {{{ proto array array_udiff(array arr1, array arr2 [, array ...], callback data_comp_func)
-   Returns the entries of arr1 that have values which are not present in any of the others arguments. Elements are compared by user supplied function. */
+/* {{{ Returns the entries of arr1 that have values which are not present in any of the others arguments. Elements are compared by user supplied function. */
 PHP_FUNCTION(array_udiff)
 {
 	php_array_diff(INTERNAL_FUNCTION_PARAM_PASSTHRU, DIFF_NORMAL, DIFF_COMP_DATA_USER, DIFF_COMP_KEY_INTERNAL);
 }
 /* }}} */
 
-/* {{{ proto array array_diff_assoc(array arr1, array arr2 [, array ...])
-   Returns the entries of arr1 that have values which are not present in any of the others arguments but do additional checks whether the keys are equal */
+/* {{{ Returns the entries of arr1 that have values which are not present in any of the others arguments but do additional checks whether the keys are equal */
 PHP_FUNCTION(array_diff_assoc)
 {
 	php_array_diff_key(INTERNAL_FUNCTION_PARAM_PASSTHRU, DIFF_COMP_DATA_INTERNAL);
 }
 /* }}} */
 
-/* {{{ proto array array_diff_uassoc(array arr1, array arr2 [, array ...], callback data_comp_func)
-   Returns the entries of arr1 that have values which are not present in any of the others arguments but do additional checks whether the keys are equal. Elements are compared by user supplied function. */
+/* {{{ Returns the entries of arr1 that have values which are not present in any of the others arguments but do additional checks whether the keys are equal. Elements are compared by user supplied function. */
 PHP_FUNCTION(array_diff_uassoc)
 {
 	php_array_diff(INTERNAL_FUNCTION_PARAM_PASSTHRU, DIFF_ASSOC, DIFF_COMP_DATA_INTERNAL, DIFF_COMP_KEY_USER);
 }
 /* }}} */
 
-/* {{{ proto array array_udiff_assoc(array arr1, array arr2 [, array ...], callback key_comp_func)
-   Returns the entries of arr1 that have values which are not present in any of the others arguments but do additional checks whether the keys are equal. Keys are compared by user supplied function. */
+/* {{{ Returns the entries of arr1 that have values which are not present in any of the others arguments but do additional checks whether the keys are equal. Keys are compared by user supplied function. */
 PHP_FUNCTION(array_udiff_assoc)
 {
 	php_array_diff_key(INTERNAL_FUNCTION_PARAM_PASSTHRU, DIFF_COMP_DATA_USER);
 }
 /* }}} */
 
-/* {{{ proto array array_udiff_uassoc(array arr1, array arr2 [, array ...], callback data_comp_func, callback key_comp_func)
-   Returns the entries of arr1 that have values which are not present in any of the others arguments but do additional checks whether the keys are equal. Keys and elements are compared by user supplied functions. */
+/* {{{ Returns the entries of arr1 that have values which are not present in any of the others arguments but do additional checks whether the keys are equal. Keys and elements are compared by user supplied functions. */
 PHP_FUNCTION(array_udiff_uassoc)
 {
 	php_array_diff(INTERNAL_FUNCTION_PARAM_PASSTHRU, DIFF_ASSOC, DIFF_COMP_DATA_USER, DIFF_COMP_KEY_USER);
@@ -5587,8 +5521,7 @@ static void array_bucket_p_sawp(void *p, void *q) /* {{{ */ {
 }
 /* }}} */
 
-/* {{{ proto bool array_multisort(array &$array1 [, mixed $array1_sort_order [, mixed $array1_sort_flags [, mixed ... ]]]
-   Sort multiple arrays at once similar to how ORDER BY clause works in SQL */
+/* {{{ Sort multiple arrays at once similar to how ORDER BY clause works in SQL */
 PHP_FUNCTION(array_multisort)
 {
 	zval*			args;
@@ -5763,8 +5696,7 @@ PHP_FUNCTION(array_multisort)
 }
 /* }}} */
 
-/* {{{ proto int|string|array array_rand(array input [, int num_req])
-   Return key/keys for random entry/entries in the array */
+/* {{{ Return key/keys for random entry/entries in the array */
 PHP_FUNCTION(array_rand)
 {
 	zval *input;
@@ -5874,8 +5806,7 @@ PHP_FUNCTION(array_rand)
 }
 /* }}} */
 
-/* {{{ proto int|float array_sum(array input)
-   Returns the sum of the array entries */
+/* {{{ Returns the sum of the array entries */
 PHP_FUNCTION(array_sum)
 {
 	zval *input,
@@ -5899,8 +5830,7 @@ PHP_FUNCTION(array_sum)
 }
 /* }}} */
 
-/* {{{ proto int|float array_product(array input)
-   Returns the product of the array entries */
+/* {{{ Returns the product of the array entries */
 PHP_FUNCTION(array_product)
 {
 	zval *input,
@@ -5938,8 +5868,7 @@ PHP_FUNCTION(array_product)
 }
 /* }}} */
 
-/* {{{ proto mixed array_reduce(array input, mixed callback [, mixed initial])
-   Iteratively reduce the array to a single value via the callback. */
+/* {{{ Iteratively reduce the array to a single value via the callback. */
 PHP_FUNCTION(array_reduce)
 {
 	zval *input;
@@ -5999,8 +5928,7 @@ PHP_FUNCTION(array_reduce)
 }
 /* }}} */
 
-/* {{{ proto array array_filter(array input [, mixed callback [, int use_type]])
-   Filters elements from the array via the callback. */
+/* {{{ Filters elements from the array via the callback. */
 PHP_FUNCTION(array_filter)
 {
 	zval *array;
@@ -6092,8 +6020,7 @@ PHP_FUNCTION(array_filter)
 }
 /* }}} */
 
-/* {{{ proto array array_map(mixed callback, array input1 [, array input2 ,...])
-   Applies the callback to the elements in given arrays. */
+/* {{{ Applies the callback to the elements in given arrays. */
 PHP_FUNCTION(array_map)
 {
 	zval *arrays = NULL;
@@ -6251,8 +6178,7 @@ PHP_FUNCTION(array_map)
 }
 /* }}} */
 
-/* {{{ proto bool array_key_exists(mixed key, array search)
-   Checks if the given key or index exists in the array */
+/* {{{ Checks if the given key or index exists in the array */
 PHP_FUNCTION(array_key_exists)
 {
 	zval *key;
@@ -6293,8 +6219,7 @@ PHP_FUNCTION(array_key_exists)
 }
 /* }}} */
 
-/* {{{ proto array array_chunk(array input, int size [, bool preserve_keys])
-   Split array into chunks */
+/* {{{ Split array into chunks */
 PHP_FUNCTION(array_chunk)
 {
 	int num_in;
@@ -6366,8 +6291,7 @@ PHP_FUNCTION(array_chunk)
 }
 /* }}} */
 
-/* {{{ proto array array_combine(array keys, array values)
-   Creates an array by using the elements of the first parameter as keys and the elements of the second as the corresponding values */
+/* {{{ Creates an array by using the elements of the first parameter as keys and the elements of the second as the corresponding values */
 PHP_FUNCTION(array_combine)
 {
 	HashTable *values, *keys;

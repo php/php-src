@@ -39,8 +39,7 @@
 
 #include "ext/standard/info.h"
 
-/* {{{ shmop_module_entry
- */
+/* {{{ shmop_module_entry */
 zend_module_entry shmop_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"shmop",
@@ -106,8 +105,7 @@ static void shmop_free_obj(zend_object *object)
 	zend_object_std_dtor(&shmop->std);
 }
 
-/* {{{ PHP_MINIT_FUNCTION
- */
+/* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(shmop)
 {
 	zend_class_entry ce;
@@ -128,8 +126,7 @@ PHP_MINIT_FUNCTION(shmop)
 }
 /* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
- */
+/* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(shmop)
 {
 	php_info_print_table_start();
@@ -138,8 +135,7 @@ PHP_MINFO_FUNCTION(shmop)
 }
 /* }}} */
 
-/* {{{ proto Shmop shmop_open(int key, string flags, int mode, int size)
-   gets and attaches a shared memory segment */
+/* {{{ gets and attaches a shared memory segment */
 PHP_FUNCTION(shmop_open)
 {
 	zend_long key, mode, size;
@@ -223,8 +219,7 @@ err:
 }
 /* }}} */
 
-/* {{{ proto string shmop_read(Shmop shmid, int start, int count)
-   reads from a shm segment */
+/* {{{ reads from a shm segment */
 PHP_FUNCTION(shmop_read)
 {
 	zval *shmid;
@@ -259,8 +254,7 @@ PHP_FUNCTION(shmop_read)
 }
 /* }}} */
 
-/* {{{ proto void shmop_close(Shmop shmid)
-   used to close a shared memory segment; now a NOP */
+/* {{{ used to close a shared memory segment; now a NOP */
 PHP_FUNCTION(shmop_close)
 {
 	zval *shmid;
@@ -271,8 +265,7 @@ PHP_FUNCTION(shmop_close)
 }
 /* }}} */
 
-/* {{{ proto int shmop_size(Shmop shmid)
-   returns the shm size */
+/* {{{ returns the shm size */
 PHP_FUNCTION(shmop_size)
 {
 	zval *shmid;
@@ -288,8 +281,7 @@ PHP_FUNCTION(shmop_size)
 }
 /* }}} */
 
-/* {{{ proto int shmop_write(Shmop shmid, string data, int offset)
-   writes to a shared memory segment */
+/* {{{ writes to a shared memory segment */
 PHP_FUNCTION(shmop_write)
 {
 	php_shmop *shmop;
@@ -321,8 +313,7 @@ PHP_FUNCTION(shmop_write)
 }
 /* }}} */
 
-/* {{{ proto bool shmop_delete(Shmop shmid)
-   mark segment for deletion */
+/* {{{ mark segment for deletion */
 PHP_FUNCTION(shmop_delete)
 {
 	zval *shmid;

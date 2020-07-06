@@ -158,8 +158,7 @@ ZEND_GET_MODULE(snmp)
 
 /* THREAD_LS snmp_module php_snmp_module; - may need one of these at some point */
 
-/* {{{ PHP_GINIT_FUNCTION
- */
+/* {{{ PHP_GINIT_FUNCTION */
 static PHP_GINIT_FUNCTION(snmp)
 {
 	snmp_globals->valueretrieval = SNMP_VALUE_LIBRARY;
@@ -1240,48 +1239,42 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 }
 /* }}} */
 
-/* {{{ proto mixed snmpget(string host, string community, mixed object_id [, int timeout [, int retries]])
-   Fetch a SNMP object */
+/* {{{ Fetch a SNMP object */
 PHP_FUNCTION(snmpget)
 {
 	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU, SNMP_CMD_GET, SNMP_VERSION_1);
 }
 /* }}} */
 
-/* {{{ proto mixed snmpgetnext(string host, string community, mixed object_id [, int timeout [, int retries]])
-   Fetch a SNMP object */
+/* {{{ Fetch a SNMP object */
 PHP_FUNCTION(snmpgetnext)
 {
 	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU, SNMP_CMD_GETNEXT, SNMP_VERSION_1);
 }
 /* }}} */
 
-/* {{{ proto mixed snmpwalk(string host, string community, mixed object_id [, int timeout [, int retries]])
-   Return all objects under the specified object id */
+/* {{{ Return all objects under the specified object id */
 PHP_FUNCTION(snmpwalk)
 {
 	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU, (SNMP_CMD_WALK | SNMP_NUMERIC_KEYS), SNMP_VERSION_1);
 }
 /* }}} */
 
-/* {{{ proto mixed snmprealwalk(string host, string community, mixed object_id [, int timeout [, int retries]])
-   Return all objects including their respective object id within the specified one */
+/* {{{ Return all objects including their respective object id within the specified one */
 PHP_FUNCTION(snmprealwalk)
 {
 	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU, SNMP_CMD_WALK, SNMP_VERSION_1);
 }
 /* }}} */
 
-/* {{{ proto bool snmpset(string host, string community, mixed object_id, mixed type, mixed value [, int timeout [, int retries]])
-   Set the value of a SNMP object */
+/* {{{ Set the value of a SNMP object */
 PHP_FUNCTION(snmpset)
 {
 	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU, SNMP_CMD_SET, SNMP_VERSION_1);
 }
 /* }}} */
 
-/* {{{ proto bool snmp_get_quick_print(void)
-   Return the current status of quick_print */
+/* {{{ Return the current status of quick_print */
 PHP_FUNCTION(snmp_get_quick_print)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1292,8 +1285,7 @@ PHP_FUNCTION(snmp_get_quick_print)
 }
 /* }}} */
 
-/* {{{ proto bool snmp_set_quick_print(int quick_print)
-   Return all objects including their respective object id within the specified one */
+/* {{{ Return all objects including their respective object id within the specified one */
 PHP_FUNCTION(snmp_set_quick_print)
 {
 	zend_long a1;
@@ -1307,8 +1299,7 @@ PHP_FUNCTION(snmp_set_quick_print)
 }
 /* }}} */
 
-/* {{{ proto bool snmp_set_enum_print(int enum_print)
-   Return all values that are enums with their enum value instead of the raw integer */
+/* {{{ Return all values that are enums with their enum value instead of the raw integer */
 PHP_FUNCTION(snmp_set_enum_print)
 {
 	zend_long a1;
@@ -1322,8 +1313,7 @@ PHP_FUNCTION(snmp_set_enum_print)
 }
 /* }}} */
 
-/* {{{ proto bool snmp_set_oid_output_format(int oid_format)
-   Set the OID output format. */
+/* {{{ Set the OID output format. */
 PHP_FUNCTION(snmp_set_oid_output_format)
 {
 	zend_long a1;
@@ -1350,88 +1340,77 @@ PHP_FUNCTION(snmp_set_oid_output_format)
 }
 /* }}} */
 
-/* {{{ proto mixed snmp2_get(string host, string community, mixed object_id [, int timeout [, int retries]])
-   Fetch a SNMP object */
+/* {{{ Fetch a SNMP object */
 PHP_FUNCTION(snmp2_get)
 {
 	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU, SNMP_CMD_GET, SNMP_VERSION_2c);
 }
 /* }}} */
 
-/* {{{ proto mixed snmp2_getnext(string host, string community, mixed object_id [, int timeout [, int retries]])
-   Fetch a SNMP object */
+/* {{{ Fetch a SNMP object */
 PHP_FUNCTION(snmp2_getnext)
 {
 	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU, SNMP_CMD_GETNEXT, SNMP_VERSION_2c);
 }
 /* }}} */
 
-/* {{{ proto mixed snmp2_walk(string host, string community, mixed object_id [, int timeout [, int retries]])
-   Return all objects under the specified object id */
+/* {{{ Return all objects under the specified object id */
 PHP_FUNCTION(snmp2_walk)
 {
 	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU, (SNMP_CMD_WALK | SNMP_NUMERIC_KEYS), SNMP_VERSION_2c);
 }
 /* }}} */
 
-/* {{{ proto mixed snmp2_real_walk(string host, string community, mixed object_id [, int timeout [, int retries]])
-   Return all objects including their respective object id within the specified one */
+/* {{{ Return all objects including their respective object id within the specified one */
 PHP_FUNCTION(snmp2_real_walk)
 {
 	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU, SNMP_CMD_WALK, SNMP_VERSION_2c);
 }
 /* }}} */
 
-/* {{{ proto bool snmp2_set(string host, string community, mixed object_id, mixed type, mixed value [, int timeout [, int retries]])
-   Set the value of a SNMP object */
+/* {{{ Set the value of a SNMP object */
 PHP_FUNCTION(snmp2_set)
 {
 	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU, SNMP_CMD_SET, SNMP_VERSION_2c);
 }
 /* }}} */
 
-/* {{{ proto mixed snmp3_get(string host, string sec_name, string sec_level, string auth_protocol, string auth_passphrase, string priv_protocol, string priv_passphrase, mixed object_id [, int timeout [, int retries]])
-   Fetch the value of a SNMP object */
+/* {{{ Fetch the value of a SNMP object */
 PHP_FUNCTION(snmp3_get)
 {
 	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU, SNMP_CMD_GET, SNMP_VERSION_3);
 }
 /* }}} */
 
-/* {{{ proto mixed snmp3_getnext(string host, string sec_name, string sec_level, string auth_protocol, string auth_passphrase, string priv_protocol, string priv_passphrase, mixed object_id [, int timeout [, int retries]])
-   Fetch the value of a SNMP object */
+/* {{{ Fetch the value of a SNMP object */
 PHP_FUNCTION(snmp3_getnext)
 {
 	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU, SNMP_CMD_GETNEXT, SNMP_VERSION_3);
 }
 /* }}} */
 
-/* {{{ proto mixed snmp3_walk(string host, string sec_name, string sec_level, string auth_protocol, string auth_passphrase, string priv_protocol, string priv_passphrase, mixed object_id [, int timeout [, int retries]])
-   Fetch the value of a SNMP object */
+/* {{{ Fetch the value of a SNMP object */
 PHP_FUNCTION(snmp3_walk)
 {
 	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU, (SNMP_CMD_WALK | SNMP_NUMERIC_KEYS), SNMP_VERSION_3);
 }
 /* }}} */
 
-/* {{{ proto mixed snmp3_real_walk(string host, string sec_name, string sec_level, string auth_protocol, string auth_passphrase, string priv_protocol, string priv_passphrase, mixed object_id [, int timeout [, int retries]])
-   Fetch the value of a SNMP object */
+/* {{{ Fetch the value of a SNMP object */
 PHP_FUNCTION(snmp3_real_walk)
 {
 	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU, SNMP_CMD_WALK, SNMP_VERSION_3);
 }
 /* }}} */
 
-/* {{{ proto bool snmp3_set(string host, string sec_name, string sec_level, string auth_protocol, string auth_passphrase, string priv_protocol, string priv_passphrase, mixed object_id, mixed type, mixed value [, int timeout [, int retries]])
-   Fetch the value of a SNMP object */
+/* {{{ Fetch the value of a SNMP object */
 PHP_FUNCTION(snmp3_set)
 {
 	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU, SNMP_CMD_SET, SNMP_VERSION_3);
 }
 /* }}} */
 
-/* {{{ proto bool snmp_set_valueretrieval(int method)
-   Specify the method how the SNMP values will be returned */
+/* {{{ Specify the method how the SNMP values will be returned */
 PHP_FUNCTION(snmp_set_valueretrieval)
 {
 	zend_long method;
@@ -1450,8 +1429,7 @@ PHP_FUNCTION(snmp_set_valueretrieval)
 }
 /* }}} */
 
-/* {{{ proto int snmp_get_valueretrieval()
-   Return the method how the SNMP values will be returned */
+/* {{{ Return the method how the SNMP values will be returned */
 PHP_FUNCTION(snmp_get_valueretrieval)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1462,8 +1440,7 @@ PHP_FUNCTION(snmp_get_valueretrieval)
 }
 /* }}} */
 
-/* {{{ proto bool snmp_read_mib(string filename)
-   Reads and parses a MIB file into the active MIB tree. */
+/* {{{ Reads and parses a MIB file into the active MIB tree. */
 PHP_FUNCTION(snmp_read_mib)
 {
 	char *filename;
@@ -1482,8 +1459,7 @@ PHP_FUNCTION(snmp_read_mib)
 }
 /* }}} */
 
-/* {{{ proto SNMP::__construct(int version, string hostname, string community|securityName [, int timeout [, int retries]])
-	Creates a new SNMP session to specified host. */
+/* {{{ Creates a new SNMP session to specified host. */
 PHP_METHOD(SNMP, __construct)
 {
 	php_snmp_object *snmp_object;
@@ -1529,8 +1505,7 @@ PHP_METHOD(SNMP, __construct)
 }
 /* }}} */
 
-/* {{{ proto bool SNMP::close()
-	Close SNMP session */
+/* {{{ Close SNMP session */
 PHP_METHOD(SNMP, close)
 {
 	php_snmp_object *snmp_object;
@@ -1548,40 +1523,35 @@ PHP_METHOD(SNMP, close)
 }
 /* }}} */
 
-/* {{{ proto mixed SNMP::get(mixed object_id [, bool preserve_keys])
-   Fetch a SNMP object returning scalar for single OID and array of oid->value pairs for multi OID request */
+/* {{{ Fetch a SNMP object returning scalar for single OID and array of oid->value pairs for multi OID request */
 PHP_METHOD(SNMP, get)
 {
 	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU, SNMP_CMD_GET, (-1));
 }
 /* }}} */
 
-/* {{{ proto mixed SNMP::getnext(mixed object_id)
-   Fetch a SNMP object returning scalar for single OID and array of oid->value pairs for multi OID request */
+/* {{{ Fetch a SNMP object returning scalar for single OID and array of oid->value pairs for multi OID request */
 PHP_METHOD(SNMP, getnext)
 {
 	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU, SNMP_CMD_GETNEXT, (-1));
 }
 /* }}} */
 
-/* {{{ proto mixed SNMP::walk(mixed object_id [, bool $suffix_as_key = FALSE [, int $max_repetitions [, int $non_repeaters]])
-   Return all objects including their respective object id within the specified one as array of oid->value pairs */
+/* {{{ Return all objects including their respective object id within the specified one as array of oid->value pairs */
 PHP_METHOD(SNMP, walk)
 {
 	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU, SNMP_CMD_WALK, (-1));
 }
 /* }}} */
 
-/* {{{ proto bool SNMP::set(mixed object_id, mixed type, mixed value)
-   Set the value of a SNMP object */
+/* {{{ Set the value of a SNMP object */
 PHP_METHOD(SNMP, set)
 {
 	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU, SNMP_CMD_SET, (-1));
 }
 /* }}} */
 
-/* {{{ proto bool SNMP::setSecurity(string sec_level, [ string auth_protocol, string auth_passphrase [, string priv_protocol, string priv_passphrase [, string contextName [, string contextEngineID]]]])
-	Set SNMPv3 security-related session parameters */
+/* {{{ Set SNMPv3 security-related session parameters */
 PHP_METHOD(SNMP, setSecurity)
 {
 	php_snmp_object *snmp_object;
@@ -1605,8 +1575,7 @@ PHP_METHOD(SNMP, setSecurity)
 }
 /* }}} */
 
-/* {{{ proto int SNMP::getErrno()
-	Get last error code number */
+/* {{{ Get last error code number */
 PHP_METHOD(SNMP, getErrno)
 {
 	php_snmp_object *snmp_object;
@@ -1623,8 +1592,7 @@ PHP_METHOD(SNMP, getErrno)
 }
 /* }}} */
 
-/* {{{ proto int SNMP::getError()
-	Get last error message */
+/* {{{ Get last error message */
 PHP_METHOD(SNMP, getError)
 {
 	php_snmp_object *snmp_object;
@@ -1962,8 +1930,7 @@ const php_snmp_prop_handler php_snmp_property_entries[] = {
 };
 /* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION
- */
+/* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(snmp)
 {
 	netsnmp_log_handler *logh;
@@ -2052,8 +2019,7 @@ PHP_MINIT_FUNCTION(snmp)
 }
 /* }}} */
 
-/* {{{ PHP_MSHUTDOWN_FUNCTION
- */
+/* {{{ PHP_MSHUTDOWN_FUNCTION */
 PHP_MSHUTDOWN_FUNCTION(snmp)
 {
 	snmp_shutdown("snmpapp");
@@ -2064,8 +2030,7 @@ PHP_MSHUTDOWN_FUNCTION(snmp)
 }
 /* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
- */
+/* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(snmp)
 {
 	php_info_print_table_start();
@@ -2075,16 +2040,14 @@ PHP_MINFO_FUNCTION(snmp)
 }
 /* }}} */
 
-/* {{{ snmp_module_deps[]
- */
+/* {{{ snmp_module_deps[] */
 static const zend_module_dep snmp_module_deps[] = {
 	ZEND_MOD_REQUIRED("spl")
 	ZEND_MOD_END
 };
 /* }}} */
 
-/* {{{ snmp_module_entry
- */
+/* {{{ snmp_module_entry */
 zend_module_entry snmp_module_entry = {
 	STANDARD_MODULE_HEADER_EX,
 	NULL,

@@ -24,11 +24,7 @@
 #include "formatter_format.h"
 #include "intl_convert.h"
 
-/* {{{ proto mixed NumberFormatter::format( mixed $num[, int $type] )
- * Format a number. }}} */
-/* {{{ proto mixed numfmt_format( NumberFormatter $nf, mixed $num[, int type] )
- * Format a number.
- */
+/* {{{ Format a number. */
 PHP_FUNCTION( numfmt_format )
 {
 	zval *number;
@@ -118,11 +114,7 @@ PHP_FUNCTION( numfmt_format )
 }
 /* }}} */
 
-/* {{{ proto mixed NumberFormatter::formatCurrency( double $num, string $currency )
- * Format a number as currency. }}} */
-/* {{{ proto mixed numfmt_format_currency( NumberFormatter $nf, double $num, string $currency )
- * Format a number as currency.
- */
+/* {{{ Format a number as currency. */
 PHP_FUNCTION( numfmt_format_currency )
 {
 	double     number;

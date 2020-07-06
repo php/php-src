@@ -49,8 +49,7 @@ void grapheme_register_constants( INIT_FUNC_ARGS )
 }
 /* }}} */
 
-/* {{{ proto size_t grapheme_strlen(string str)
-   Get number of graphemes in a string */
+/* {{{ Get number of graphemes in a string */
 PHP_FUNCTION(grapheme_strlen)
 {
 	char* string;
@@ -99,8 +98,7 @@ PHP_FUNCTION(grapheme_strlen)
 }
 /* }}} */
 
-/* {{{ proto int grapheme_strpos(string haystack, string needle [, int offset ])
-   Find position of first occurrence of a string within another */
+/* {{{ Find position of first occurrence of a string within another */
 PHP_FUNCTION(grapheme_strpos)
 {
 	char *haystack, *needle;
@@ -160,8 +158,7 @@ PHP_FUNCTION(grapheme_strpos)
 }
 /* }}} */
 
-/* {{{ proto int grapheme_stripos(string haystack, string needle [, int offset ])
-   Find position of first occurrence of a string within another, ignoring case differences */
+/* {{{ Find position of first occurrence of a string within another, ignoring case differences */
 PHP_FUNCTION(grapheme_stripos)
 {
 	char *haystack, *needle;
@@ -228,8 +225,7 @@ PHP_FUNCTION(grapheme_stripos)
 }
 /* }}} */
 
-/* {{{ proto int grapheme_strrpos(string haystack, string needle [, int offset])
-   Find position of last occurrence of a string within another */
+/* {{{ Find position of last occurrence of a string within another */
 PHP_FUNCTION(grapheme_strrpos)
 {
 	char *haystack, *needle;
@@ -289,8 +285,7 @@ PHP_FUNCTION(grapheme_strrpos)
 }
 /* }}} */
 
-/* {{{ proto int grapheme_strripos(string haystack, string needle [, int offset])
-   Find position of last occurrence of a string within another, ignoring case */
+/* {{{ Find position of last occurrence of a string within another, ignoring case */
 PHP_FUNCTION(grapheme_strripos)
 {
 	char *haystack, *needle;
@@ -359,8 +354,7 @@ PHP_FUNCTION(grapheme_strripos)
 }
 /* }}} */
 
-/* {{{ proto string grapheme_substr(string str, int start [, int length])
-   Returns part of a string */
+/* {{{ Returns part of a string */
 PHP_FUNCTION(grapheme_substr)
 {
 	char *str;
@@ -641,16 +635,14 @@ static void strstr_common_handler(INTERNAL_FUNCTION_PARAMETERS, int f_ignore_cas
 }
 /* }}} */
 
-/* {{{ proto string grapheme_strstr(string haystack, string needle[, bool part])
-   Finds first occurrence of a string within another */
+/* {{{ Finds first occurrence of a string within another */
 PHP_FUNCTION(grapheme_strstr)
 {
 	strstr_common_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0 /* f_ignore_case */);
 }
 /* }}} */
 
-/* {{{ proto string grapheme_stristr(string haystack, string needle[, bool part])
-   Finds first occurrence of a string within another */
+/* {{{ Finds first occurrence of a string within another */
 PHP_FUNCTION(grapheme_stristr)
 {
 	strstr_common_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1 /* f_ignore_case */);
@@ -753,8 +745,7 @@ static grapheme_extract_iter grapheme_extract_iters[] = {
 };
 /* }}} */
 
-/* {{{ proto string grapheme_extract(string str, int size[, int extract_type[, int start[, int next]]])
-	Function to extract a sequence of default grapheme clusters */
+/* {{{ Function to extract a sequence of default grapheme clusters */
 PHP_FUNCTION(grapheme_extract)
 {
 	char *str, *pstr;

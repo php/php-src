@@ -16,8 +16,7 @@
 	ZEND_PARSE_PARAMETERS_END()
 #endif
 
-/* {{{ void test1()
- */
+/* {{{ void test1() */
 PHP_FUNCTION(test1)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -26,8 +25,7 @@ PHP_FUNCTION(test1)
 }
 /* }}} */
 
-/* {{{ string test2( [ string $var ] )
- */
+/* {{{ string test2( [ string $var ] ) */
 PHP_FUNCTION(test2)
 {
 	char *var = "World";
@@ -45,8 +43,7 @@ PHP_FUNCTION(test2)
 }
 /* }}}*/
 
-/* {{{ PHP_RINIT_FUNCTION
- */
+/* {{{ PHP_RINIT_FUNCTION */
 PHP_RINIT_FUNCTION(%EXTNAME%)
 {
 #if defined(ZTS) && defined(COMPILE_DL_%EXTNAMECAPS%)
@@ -57,8 +54,7 @@ PHP_RINIT_FUNCTION(%EXTNAME%)
 }
 /* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
- */
+/* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(%EXTNAME%)
 {
 	php_info_print_table_start();
@@ -67,8 +63,7 @@ PHP_MINFO_FUNCTION(%EXTNAME%)
 }
 /* }}} */
 
-/* {{{ %EXTNAME%_module_entry
- */
+/* {{{ %EXTNAME%_module_entry */
 zend_module_entry %EXTNAME%_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"%EXTNAME%",					/* Extension name */

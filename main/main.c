@@ -16,8 +16,7 @@
    +----------------------------------------------------------------------+
 */
 
-/* {{{ includes
- */
+/* {{{ includes */
 
 #define ZEND_INCLUDE_FULL_WINDOWS_HEADERS
 
@@ -95,8 +94,7 @@ PHPAPI size_t core_globals_offset;
 
 #define SAFE_FILENAME(f) ((f)?(f):"-")
 
-/* {{{ PHP_INI_MH
- */
+/* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnSetFacility)
 {
 	const char *facility = ZSTR_VAL(new_value);
@@ -232,8 +230,7 @@ static PHP_INI_MH(OnSetFacility)
 }
 /* }}} */
 
-/* {{{ PHP_INI_MH
- */
+/* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnSetPrecision)
 {
 	zend_long i;
@@ -248,8 +245,7 @@ static PHP_INI_MH(OnSetPrecision)
 }
 /* }}} */
 
-/* {{{ PHP_INI_MH
- */
+/* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnSetSerializePrecision)
 {
 	zend_long i;
@@ -265,8 +261,7 @@ static PHP_INI_MH(OnSetSerializePrecision)
 /* }}} */
 
 
-/* {{{ PHP_INI_MH
- */
+/* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnChangeMemoryLimit)
 {
 	if (new_value) {
@@ -278,8 +273,7 @@ static PHP_INI_MH(OnChangeMemoryLimit)
 }
 /* }}} */
 
-/* {{{ PHP_INI_MH
- */
+/* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnSetLogFilter)
 {
 	const char *filter = ZSTR_VAL(new_value);
@@ -305,8 +299,7 @@ static PHP_INI_MH(OnSetLogFilter)
 }
 /* }}} */
 
-/* {{{ php_disable_functions
- */
+/* {{{ php_disable_functions */
 static void php_disable_functions(void)
 {
 	char *s = NULL, *e;
@@ -343,8 +336,7 @@ static void php_disable_functions(void)
 }
 /* }}} */
 
-/* {{{ php_disable_classes
- */
+/* {{{ php_disable_classes */
 static void php_disable_classes(void)
 {
 	char *s = NULL, *e;
@@ -379,8 +371,7 @@ static void php_disable_classes(void)
 }
 /* }}} */
 
-/* {{{ php_binary_init
- */
+/* {{{ php_binary_init */
 static void php_binary_init(void)
 {
 	char *binary_location = NULL;
@@ -429,8 +420,7 @@ static void php_binary_init(void)
 }
 /* }}} */
 
-/* {{{ PHP_INI_MH
- */
+/* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnUpdateTimeout)
 {
 	if (stage==PHP_INI_STAGE_STARTUP) {
@@ -445,8 +435,7 @@ static PHP_INI_MH(OnUpdateTimeout)
 }
 /* }}} */
 
-/* {{{ php_get_display_errors_mode() helper function
- */
+/* {{{ php_get_display_errors_mode() helper function */
 static zend_uchar php_get_display_errors_mode(char *value, size_t value_length)
 {
 	zend_uchar mode;
@@ -476,8 +465,7 @@ static zend_uchar php_get_display_errors_mode(char *value, size_t value_length)
 }
 /* }}} */
 
-/* {{{ PHP_INI_MH
- */
+/* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnUpdateDisplayErrors)
 {
 	PG(display_errors) = php_get_display_errors_mode(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
@@ -486,8 +474,7 @@ static PHP_INI_MH(OnUpdateDisplayErrors)
 }
 /* }}} */
 
-/* {{{ PHP_INI_DISP
- */
+/* {{{ PHP_INI_DISP */
 static PHP_INI_DISP(display_errors_mode)
 {
 	zend_uchar mode;
@@ -564,8 +551,7 @@ PHPAPI const char *php_get_output_encoding() {
 
 PHPAPI void (*php_internal_encoding_changed)(void) = NULL;
 
-/* {{{ PHP_INI_MH
- */
+/* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnUpdateDefaultCharset)
 {
 	OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
@@ -581,8 +567,7 @@ static PHP_INI_MH(OnUpdateDefaultCharset)
 }
 /* }}} */
 
-/* {{{ PHP_INI_MH
- */
+/* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnUpdateInternalEncoding)
 {
 	OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
@@ -598,8 +583,7 @@ static PHP_INI_MH(OnUpdateInternalEncoding)
 }
 /* }}} */
 
-/* {{{ PHP_INI_MH
- */
+/* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnUpdateInputEncoding)
 {
 	OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
@@ -615,8 +599,7 @@ static PHP_INI_MH(OnUpdateInputEncoding)
 }
 /* }}} */
 
-/* {{{ PHP_INI_MH
- */
+/* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnUpdateOutputEncoding)
 {
 	OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
@@ -632,8 +615,7 @@ static PHP_INI_MH(OnUpdateOutputEncoding)
 }
 /* }}} */
 
-/* {{{ PHP_INI_MH
- */
+/* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnUpdateErrorLog)
 {
 	/* Only do the safemode/open_basedir check at runtime */
@@ -647,8 +629,7 @@ static PHP_INI_MH(OnUpdateErrorLog)
 }
 /* }}} */
 
-/* {{{ PHP_INI_MH
- */
+/* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnUpdateMailLog)
 {
 	/* Only do the safemode/open_basedir check at runtime */
@@ -662,8 +643,7 @@ static PHP_INI_MH(OnUpdateMailLog)
 }
 /* }}} */
 
-/* {{{ PHP_INI_MH
- */
+/* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnChangeMailForceExtra)
 {
 	/* Don't allow changing it in htaccess */
@@ -693,8 +673,7 @@ PHP_INI_MH(OnChangeBrowscap);
 # define DEFAULT_SENDMAIL_PATH PHP_PROG_SENDMAIL " -t -i"
 #endif
 
-/* {{{ PHP_INI
- */
+/* {{{ PHP_INI */
 PHP_INI_BEGIN()
 	PHP_INI_ENTRY_EX("highlight.comment",		HL_COMMENT_COLOR,	PHP_INI_ALL,	NULL,			php_ini_color_displayer_cb)
 	PHP_INI_ENTRY_EX("highlight.default",		HL_DEFAULT_COLOR,	PHP_INI_ALL,	NULL,			php_ini_color_displayer_cb)
@@ -813,16 +792,14 @@ static int php_during_module_shutdown(void)
 }
 /* }}} */
 
-/* {{{ php_get_module_initialized
- */
+/* {{{ php_get_module_initialized */
 PHPAPI int php_get_module_initialized(void)
 {
 	return module_initialized;
 }
 /* }}} */
 
-/* {{{ php_log_err_with_severity
- */
+/* {{{ php_log_err_with_severity */
 PHPAPI ZEND_COLD void php_log_err_with_severity(const char *log_message, int syslog_type_int)
 {
 	int fd = -1;
@@ -892,8 +869,7 @@ PHPAPI size_t php_write(void *buf, size_t size)
 }
 /* }}} */
 
-/* {{{ php_printf
- */
+/* {{{ php_printf */
 PHPAPI size_t php_printf(const char *format, ...)
 {
 	va_list args;
@@ -911,8 +887,7 @@ PHPAPI size_t php_printf(const char *format, ...)
 }
 /* }}} */
 
-/* {{{ php_printf_unchecked
- */
+/* {{{ php_printf_unchecked */
 PHPAPI size_t php_printf_unchecked(const char *format, ...)
 {
 	va_list args;
@@ -1414,8 +1389,7 @@ static ZEND_COLD void php_error_cb(int orig_type, const char *error_filename, co
 }
 /* }}} */
 
-/* {{{ php_get_current_user
- */
+/* {{{ php_get_current_user */
 PHPAPI char *php_get_current_user(void)
 {
 	zend_stat_t *pstat;
@@ -1483,8 +1457,7 @@ PHPAPI char *php_get_current_user(void)
 }
 /* }}} */
 
-/* {{{ proto bool set_time_limit(int seconds)
-   Sets the maximum time a script can run */
+/* {{{ Sets the maximum time a script can run */
 PHP_FUNCTION(set_time_limit)
 {
 	zend_long new_timeout;
@@ -1509,8 +1482,7 @@ PHP_FUNCTION(set_time_limit)
 }
 /* }}} */
 
-/* {{{ php_fopen_wrapper_for_zend
- */
+/* {{{ php_fopen_wrapper_for_zend */
 static FILE *php_fopen_wrapper_for_zend(const char *filename, zend_string **opened_path)
 {
 	return php_stream_open_wrapper_as_file((char *)filename, "rb", USE_PATH|IGNORE_URL_WIN|REPORT_ERRORS|STREAM_OPEN_FOR_INCLUDE, opened_path);
@@ -1578,16 +1550,14 @@ static zend_string *php_resolve_path_for_zend(const char *filename, size_t filen
 }
 /* }}} */
 
-/* {{{ php_get_configuration_directive_for_zend
- */
+/* {{{ php_get_configuration_directive_for_zend */
 static zval *php_get_configuration_directive_for_zend(zend_string *name)
 {
 	return cfg_get_entry_ex(name);
 }
 /* }}} */
 
-/* {{{ php_free_request_globals
- */
+/* {{{ php_free_request_globals */
 static void php_free_request_globals(void)
 {
 	clear_last_error();
@@ -1598,8 +1568,7 @@ static void php_free_request_globals(void)
 }
 /* }}} */
 
-/* {{{ php_message_handler_for_zend
- */
+/* {{{ php_message_handler_for_zend */
 static ZEND_COLD void php_message_handler_for_zend(zend_long message, const void *data)
 {
 	switch (message) {
@@ -1700,8 +1669,7 @@ void php_on_timeout(int seconds)
 }
 
 #if PHP_SIGCHILD
-/* {{{ sigchld_handler
- */
+/* {{{ sigchld_handler */
 static void sigchld_handler(int apar)
 {
 	int errno_save = errno;
@@ -1714,8 +1682,7 @@ static void sigchld_handler(int apar)
 /* }}} */
 #endif
 
-/* {{{ php_request_startup
- */
+/* {{{ php_request_startup */
 int php_request_startup(void)
 {
 	int retval = SUCCESS;
@@ -1799,8 +1766,7 @@ int php_request_startup(void)
 }
 /* }}} */
 
-/* {{{ php_request_shutdown
- */
+/* {{{ php_request_shutdown */
 void php_request_shutdown(void *dummy)
 {
 	zend_bool report_memleaks;
@@ -1920,8 +1886,7 @@ void php_request_shutdown(void *dummy)
 }
 /* }}} */
 
-/* {{{ php_com_initialize
- */
+/* {{{ php_com_initialize */
 PHPAPI void php_com_initialize(void)
 {
 #ifdef PHP_WIN32
@@ -1935,8 +1900,7 @@ PHPAPI void php_com_initialize(void)
 /* }}} */
 
 #ifdef ZTS
-/* {{{ core_globals_ctor
- */
+/* {{{ core_globals_ctor */
 static void core_globals_ctor(php_core_globals *core_globals)
 {
 	memset(core_globals, 0, sizeof(*core_globals));
@@ -1945,8 +1909,7 @@ static void core_globals_ctor(php_core_globals *core_globals)
 /* }}} */
 #endif
 
-/* {{{ core_globals_dtor
- */
+/* {{{ core_globals_dtor */
 static void core_globals_dtor(php_core_globals *core_globals)
 {
 	/* These should have been freed earlier. */
@@ -1975,8 +1938,7 @@ PHP_MINFO_FUNCTION(php_core) { /* {{{ */
 }
 /* }}} */
 
-/* {{{ php_register_extensions
- */
+/* {{{ php_register_extensions */
 int php_register_extensions(zend_module_entry * const * ptr, int count)
 {
 	zend_module_entry * const * end = ptr + count;
@@ -2043,8 +2005,7 @@ void dummy_invalid_parameter_handler(
 }
 #endif
 
-/* {{{ php_module_startup
- */
+/* {{{ php_module_startup */
 int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_modules, uint32_t num_additional_modules)
 {
 	zend_utility_functions zuf;
@@ -2401,8 +2362,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 }
 /* }}} */
 
-/* {{{ php_module_shutdown_wrapper
- */
+/* {{{ php_module_shutdown_wrapper */
 int php_module_shutdown_wrapper(sapi_module_struct *sapi_globals)
 {
 	php_module_shutdown();
@@ -2410,8 +2370,7 @@ int php_module_shutdown_wrapper(sapi_module_struct *sapi_globals)
 }
 /* }}} */
 
-/* {{{ php_module_shutdown
- */
+/* {{{ php_module_shutdown */
 void php_module_shutdown(void)
 {
 	int module_number=0;	/* for UNREGISTER_INI_ENTRIES() */
@@ -2488,8 +2447,7 @@ void php_module_shutdown(void)
 }
 /* }}} */
 
-/* {{{ php_execute_script
- */
+/* {{{ php_execute_script */
 PHPAPI int php_execute_script(zend_file_handle *primary_file)
 {
 	zend_file_handle *prepend_file_p, *append_file_p;
@@ -2601,8 +2559,7 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file)
 }
 /* }}} */
 
-/* {{{ php_execute_simple_script
- */
+/* {{{ php_execute_simple_script */
 PHPAPI int php_execute_simple_script(zend_file_handle *primary_file, zval *ret)
 {
 	char *old_cwd;
@@ -2638,8 +2595,7 @@ PHPAPI int php_execute_simple_script(zend_file_handle *primary_file, zval *ret)
 }
 /* }}} */
 
-/* {{{ php_handle_aborted_connection
- */
+/* {{{ php_handle_aborted_connection */
 PHPAPI void php_handle_aborted_connection(void)
 {
 
@@ -2652,8 +2608,7 @@ PHPAPI void php_handle_aborted_connection(void)
 }
 /* }}} */
 
-/* {{{ php_handle_auth_data
- */
+/* {{{ php_handle_auth_data */
 PHPAPI int php_handle_auth_data(const char *auth)
 {
 	int ret = -1;
@@ -2694,8 +2649,7 @@ PHPAPI int php_handle_auth_data(const char *auth)
 }
 /* }}} */
 
-/* {{{ php_lint_script
- */
+/* {{{ php_lint_script */
 PHPAPI int php_lint_script(zend_file_handle *file)
 {
 	zend_op_array *op_array;
@@ -2720,8 +2674,7 @@ PHPAPI int php_lint_script(zend_file_handle *file)
 /* }}} */
 
 #ifdef ZTS
-/* {{{ php_reserve_tsrm_memory
- */
+/* {{{ php_reserve_tsrm_memory */
 PHPAPI void php_reserve_tsrm_memory(void)
 {
 	tsrm_reserve(
@@ -2741,8 +2694,7 @@ PHPAPI void php_reserve_tsrm_memory(void)
 }
 /* }}} */
 
-/* {{{ php_tsrm_startup
- */
+/* {{{ php_tsrm_startup */
 PHPAPI int php_tsrm_startup(void)
 {
 	int ret = tsrm_startup(1, 1, 0, NULL);

@@ -28,8 +28,7 @@
 
 static zend_object_handlers php_incomplete_object_handlers;
 
-/* {{{ incomplete_class_message
- */
+/* {{{ incomplete_class_message */
 static void incomplete_class_message(zend_object *object, int error_type)
 {
 	zend_string *class_name;
@@ -92,8 +91,7 @@ static zend_function *incomplete_class_get_method(zend_object **object, zend_str
 }
 /* }}} */
 
-/* {{{ php_create_incomplete_class
- */
+/* {{{ php_create_incomplete_class */
 static zend_object *php_create_incomplete_object(zend_class_entry *class_type)
 {
 	zend_object *object;
@@ -129,8 +127,7 @@ PHPAPI zend_class_entry *php_create_incomplete_class(void)
 }
 /* }}} */
 
-/* {{{ php_lookup_class_name
- */
+/* {{{ php_lookup_class_name */
 PHPAPI zend_string *php_lookup_class_name(zend_object *object)
 {
 	if (object->properties) {
@@ -145,8 +142,7 @@ PHPAPI zend_string *php_lookup_class_name(zend_object *object)
 }
 /* }}} */
 
-/* {{{ php_store_class_name
- */
+/* {{{ php_store_class_name */
 PHPAPI void php_store_class_name(zval *object, const char *name, size_t len)
 {
 	zval val;

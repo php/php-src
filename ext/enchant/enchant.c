@@ -82,8 +82,7 @@ static zend_object *enchant_dict_create_object(zend_class_entry *class_type) {
 #define PHP_ENCHANT_MYSPELL 1
 #define PHP_ENCHANT_ISPELL 2
 
-/* {{{ enchant_module_entry
- */
+/* {{{ enchant_module_entry */
 zend_module_entry enchant_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"enchant",
@@ -184,8 +183,7 @@ static void php_enchant_dict_free(zend_object *object) /* {{{ */
 }
 /* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION
- */
+/* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(enchant)
 {
 	zend_class_entry bce, dce;
@@ -223,8 +221,7 @@ PHP_MINIT_FUNCTION(enchant)
 }
 /* }}} */
 
-/* {{{ PHP_MSHUTDOWN_FUNCTION
- */
+/* {{{ PHP_MSHUTDOWN_FUNCTION */
 PHP_MSHUTDOWN_FUNCTION(enchant)
 {
 	return SUCCESS;
@@ -240,8 +237,7 @@ static void __enumerate_providers_fn (const char * const name,
 }
 /* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
- */
+/* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(enchant)
 {
 	EnchantBroker *pbroker;
@@ -277,8 +273,7 @@ PHP_MINFO_FUNCTION(enchant)
 		RETURN_THROWS(); \
 	}
 
-/* {{{ proto resource enchant_broker_init()
-   create a new broker object capable of requesting */
+/* {{{ create a new broker object capable of requesting */
 PHP_FUNCTION(enchant_broker_init)
 {
 	enchant_broker *broker;
@@ -300,8 +295,7 @@ PHP_FUNCTION(enchant_broker_init)
 }
 /* }}} */
 
-/* {{{ proto bool enchant_broker_free(resource broker)
-   Destroys the broker object and its dictionaries */
+/* {{{ Destroys the broker object and its dictionaries */
 PHP_FUNCTION(enchant_broker_free)
 {
 	zval *broker;
@@ -324,8 +318,7 @@ PHP_FUNCTION(enchant_broker_free)
 }
 /* }}} */
 
-/* {{{ proto string enchant_broker_get_error(resource broker)
-   Returns the last error of the broker */
+/* {{{ Returns the last error of the broker */
 PHP_FUNCTION(enchant_broker_get_error)
 {
 	zval *broker;
@@ -346,8 +339,7 @@ PHP_FUNCTION(enchant_broker_get_error)
 }
 /* }}} */
 
-/* {{{ proto bool enchant_broker_set_dict_path(resource broker, int dict_type, string value)
-	Set the directory path for a given backend, works with ispell and myspell */
+/* {{{ Set the directory path for a given backend, works with ispell and myspell */
 PHP_FUNCTION(enchant_broker_set_dict_path)
 {
 	zval *broker;
@@ -388,8 +380,7 @@ PHP_FUNCTION(enchant_broker_set_dict_path)
 /* }}} */
 
 
-/* {{{ proto string enchant_broker_get_dict_path(resource broker, int dict_type)
-	Get the directory path for a given backend, works with ispell and myspell */
+/* {{{ Get the directory path for a given backend, works with ispell and myspell */
 PHP_FUNCTION(enchant_broker_get_dict_path)
 {
 	zval *broker;
@@ -429,8 +420,7 @@ PHP_FUNCTION(enchant_broker_get_dict_path)
 }
 /* }}} */
 
-/* {{{ proto array enchant_broker_list_dicts(resource broker)
-   Lists the dictionaries available for the given broker */
+/* {{{ Lists the dictionaries available for the given broker */
 PHP_FUNCTION(enchant_broker_list_dicts)
 {
 	zval *broker;
@@ -447,8 +437,7 @@ PHP_FUNCTION(enchant_broker_list_dicts)
 }
 /* }}} */
 
-/* {{{ proto resource enchant_broker_request_dict(resource broker, string tag)
-	create a new dictionary using tag, the non-empty language tag you wish to request
+/* {{{ create a new dictionary using tag, the non-empty language tag you wish to request
 	a dictionary for ("en_US", "de_DE", ...) */
 PHP_FUNCTION(enchant_broker_request_dict)
 {
@@ -484,8 +473,7 @@ PHP_FUNCTION(enchant_broker_request_dict)
 }
 /* }}} */
 
-/* {{{ proto resource enchant_broker_request_pwl_dict(resource broker, string filename)
-   creates a dictionary using a PWL file. A PWL file is personal word file one word per line. It must exist before the call.*/
+/* {{{ creates a dictionary using a PWL file. A PWL file is personal word file one word per line. It must exist before the call.*/
 PHP_FUNCTION(enchant_broker_request_pwl_dict)
 {
 	zval *broker;
@@ -519,8 +507,7 @@ PHP_FUNCTION(enchant_broker_request_pwl_dict)
 }
 /* }}} */
 
-/* {{{ proto resource enchant_broker_free_dict(resource dict)
-   Free the dictionary resource */
+/* {{{ Free the dictionary resource */
 PHP_FUNCTION(enchant_broker_free_dict)
 {
 	zval *dict;
@@ -547,8 +534,7 @@ PHP_FUNCTION(enchant_broker_free_dict)
 }
 /* }}} */
 
-/* {{{ proto bool enchant_broker_dict_exists(resource broker, string tag)
-   Whether a dictionary exists or not. Using non-empty tag */
+/* {{{ Whether a dictionary exists or not. Using non-empty tag */
 PHP_FUNCTION(enchant_broker_dict_exists)
 {
 	zval *broker;
@@ -566,8 +552,7 @@ PHP_FUNCTION(enchant_broker_dict_exists)
 }
 /* }}} */
 
-/* {{{ proto bool enchant_broker_set_ordering(resource broker, string tag, string ordering)
-	Declares a preference of dictionaries to use for the language
+/* {{{ Declares a preference of dictionaries to use for the language
 	described/referred to by 'tag'. The ordering is a comma delimited
 	list of provider names. As a special exception, the "*" tag can
 	be used as a language tag to declare a default ordering for any
@@ -593,8 +578,7 @@ PHP_FUNCTION(enchant_broker_set_ordering)
 }
 /* }}} */
 
-/* {{{ proto array enchant_broker_describe(resource broker)
-	Enumerates the Enchant providers and tells you some rudimentary information about them. The same info is provided through phpinfo() */
+/* {{{ Enumerates the Enchant providers and tells you some rudimentary information about them. The same info is provided through phpinfo() */
 PHP_FUNCTION(enchant_broker_describe)
 {
 	EnchantBrokerDescribeFn describetozval = enumerate_providers_fn;
@@ -612,8 +596,7 @@ PHP_FUNCTION(enchant_broker_describe)
 }
 /* }}} */
 
-/* {{{ proto bool enchant_dict_quick_check(resource dict, string word [, array &suggestions])
-    If the word is correctly spelled return true, otherwise return false, if suggestions variable
+/* {{{ If the word is correctly spelled return true, otherwise return false, if suggestions variable
     is provided, fill it with spelling alternatives. */
 PHP_FUNCTION(enchant_dict_quick_check)
 {
@@ -659,8 +642,7 @@ PHP_FUNCTION(enchant_dict_quick_check)
 }
 /* }}} */
 
-/* {{{ proto bool enchant_dict_check(resource dict, string word)
-    If the word is correctly spelled return true, otherwise return false */
+/* {{{ If the word is correctly spelled return true, otherwise return false */
 PHP_FUNCTION(enchant_dict_check)
 {
 	zval *dict;
@@ -678,8 +660,7 @@ PHP_FUNCTION(enchant_dict_check)
 }
 /* }}} */
 
-/* {{{ proto array enchant_dict_suggest(resource dict, string word)
-    Will return a list of values if any of those pre-conditions are not met.*/
+/* {{{ Will return a list of values if any of those pre-conditions are not met.*/
 PHP_FUNCTION(enchant_dict_suggest)
 {
 	zval *dict;
@@ -709,8 +690,7 @@ PHP_FUNCTION(enchant_dict_suggest)
 }
 /* }}} */
 
-/* {{{ proto void enchant_dict_add(resource dict, string word)
-     add 'word' to personal word list */
+/* {{{ add 'word' to personal word list */
 PHP_FUNCTION(enchant_dict_add)
 {
 	zval *dict;
@@ -728,8 +708,7 @@ PHP_FUNCTION(enchant_dict_add)
 }
 /* }}} */
 
-/* {{{ proto void enchant_dict_add_to_session(resource dict, string word)
-   add 'word' to this spell-checking session */
+/* {{{ add 'word' to this spell-checking session */
 PHP_FUNCTION(enchant_dict_add_to_session)
 {
 	zval *dict;
@@ -747,8 +726,7 @@ PHP_FUNCTION(enchant_dict_add_to_session)
 }
 /* }}} */
 
-/* {{{ proto bool enchant_dict_is_added(resource dict, string word)
-   whether or not 'word' exists in this spelling-session */
+/* {{{ whether or not 'word' exists in this spelling-session */
 PHP_FUNCTION(enchant_dict_is_added)
 {
 	zval *dict;
@@ -766,8 +744,7 @@ PHP_FUNCTION(enchant_dict_is_added)
 }
 /* }}} */
 
-/* {{{ proto void enchant_dict_store_replacement(resource dict, string mis, string cor)
-	add a correction for 'mis' using 'cor'.
+/* {{{ add a correction for 'mis' using 'cor'.
 	Notes that you replaced @mis with @cor, so it's possibly more likely
 	that future occurrences of @mis will be replaced with @cor. So it might
 	bump @cor up in the suggestion list.*/
@@ -789,8 +766,7 @@ PHP_FUNCTION(enchant_dict_store_replacement)
 }
 /* }}} */
 
-/* {{{ proto string enchant_dict_get_error(resource dict)
-   Returns the last error of the current spelling-session */
+/* {{{ Returns the last error of the current spelling-session */
 PHP_FUNCTION(enchant_dict_get_error)
 {
 	zval *dict;
@@ -812,8 +788,7 @@ PHP_FUNCTION(enchant_dict_get_error)
 }
 /* }}} */
 
-/* {{{ proto array enchant_dict_describe(resource dict)
-   Describes an individual dictionary 'dict' */
+/* {{{ Describes an individual dictionary 'dict' */
 PHP_FUNCTION(enchant_dict_describe)
 {
 	zval *dict;

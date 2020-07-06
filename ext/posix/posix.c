@@ -50,8 +50,7 @@
 ZEND_DECLARE_MODULE_GLOBALS(posix)
 static PHP_MINFO_FUNCTION(posix);
 
-/* {{{ PHP_MINFO_FUNCTION
- */
+/* {{{ PHP_MINFO_FUNCTION */
 static PHP_MINFO_FUNCTION(posix)
 {
 	php_info_print_table_start();
@@ -69,8 +68,7 @@ static PHP_GINIT_FUNCTION(posix) /* {{{ */
 }
 /* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION(posix)
- */
+/* {{{ PHP_MINIT_FUNCTION(posix) */
 static PHP_MINIT_FUNCTION(posix)
 {
 	REGISTER_LONG_CONSTANT("POSIX_F_OK", F_OK, CONST_CS | CONST_PERSISTENT);
@@ -147,8 +145,7 @@ static PHP_MINIT_FUNCTION(posix)
 }
 /* }}} */
 
-/* {{{ posix_module_entry
- */
+/* {{{ posix_module_entry */
 zend_module_entry posix_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"posix",
@@ -189,8 +186,7 @@ ZEND_GET_MODULE(posix)
 	}	\
 	RETURN_TRUE;
 
-/* {{{ proto bool posix_kill(int pid, int sig)
-   Send a signal to a process (POSIX.1, 3.3.2) */
+/* {{{ Send a signal to a process (POSIX.1, 3.3.2) */
 
 PHP_FUNCTION(posix_kill)
 {
@@ -210,72 +206,63 @@ PHP_FUNCTION(posix_kill)
 }
 /* }}} */
 
-/* {{{ proto int posix_getpid(void)
-   Get the current process id (POSIX.1, 4.1.1) */
+/* {{{ Get the current process id (POSIX.1, 4.1.1) */
 PHP_FUNCTION(posix_getpid)
 {
 	PHP_POSIX_RETURN_LONG_FUNC(getpid);
 }
 /* }}} */
 
-/* {{{ proto int posix_getppid(void)
-   Get the parent process id (POSIX.1, 4.1.1) */
+/* {{{ Get the parent process id (POSIX.1, 4.1.1) */
 PHP_FUNCTION(posix_getppid)
 {
 	PHP_POSIX_RETURN_LONG_FUNC(getppid);
 }
 /* }}} */
 
-/* {{{ proto int posix_getuid(void)
-   Get the current user id (POSIX.1, 4.2.1) */
+/* {{{ Get the current user id (POSIX.1, 4.2.1) */
 PHP_FUNCTION(posix_getuid)
 {
 	PHP_POSIX_RETURN_LONG_FUNC(getuid);
 }
 /* }}} */
 
-/* {{{ proto int posix_getgid(void)
-   Get the current group id (POSIX.1, 4.2.1) */
+/* {{{ Get the current group id (POSIX.1, 4.2.1) */
 PHP_FUNCTION(posix_getgid)
 {
 	PHP_POSIX_RETURN_LONG_FUNC(getgid);
 }
 /* }}} */
 
-/* {{{ proto int posix_geteuid(void)
-   Get the current effective user id (POSIX.1, 4.2.1) */
+/* {{{ Get the current effective user id (POSIX.1, 4.2.1) */
 PHP_FUNCTION(posix_geteuid)
 {
 	PHP_POSIX_RETURN_LONG_FUNC(geteuid);
 }
 /* }}} */
 
-/* {{{ proto int posix_getegid(void)
-   Get the current effective group id (POSIX.1, 4.2.1) */
+/* {{{ Get the current effective group id (POSIX.1, 4.2.1) */
 PHP_FUNCTION(posix_getegid)
 {
 	PHP_POSIX_RETURN_LONG_FUNC(getegid);
 }
 /* }}} */
 
-/* {{{ proto bool posix_setuid(int uid)
-   Set user id (POSIX.1, 4.2.2) */
+/* {{{ Set user id (POSIX.1, 4.2.2) */
 PHP_FUNCTION(posix_setuid)
 {
 	PHP_POSIX_SINGLE_ARG_FUNC(setuid);
 }
 /* }}} */
 
-/* {{{ proto bool posix_setgid(int uid)
-   Set group id (POSIX.1, 4.2.2) */
+/* {{{ Set group id (POSIX.1, 4.2.2) */
 PHP_FUNCTION(posix_setgid)
 {
 	PHP_POSIX_SINGLE_ARG_FUNC(setgid);
 }
 /* }}} */
 
-/* {{{ proto bool posix_seteuid(int uid)
-   Set effective user id */
+/* {{{ Set effective user id */
 #ifdef HAVE_SETEUID
 PHP_FUNCTION(posix_seteuid)
 {
@@ -284,8 +271,7 @@ PHP_FUNCTION(posix_seteuid)
 #endif
 /* }}} */
 
-/* {{{ proto bool posix_setegid(int uid)
-   Set effective group id */
+/* {{{ Set effective group id */
 #ifdef HAVE_SETEGID
 PHP_FUNCTION(posix_setegid)
 {
@@ -294,8 +280,7 @@ PHP_FUNCTION(posix_setegid)
 #endif
 /* }}} */
 
-/* {{{ proto array posix_getgroups(void)
-   Get supplementary group id's (POSIX.1, 4.2.3) */
+/* {{{ Get supplementary group id's (POSIX.1, 4.2.3) */
 #ifdef HAVE_GETGROUPS
 PHP_FUNCTION(posix_getgroups)
 {
@@ -319,8 +304,7 @@ PHP_FUNCTION(posix_getgroups)
 #endif
 /* }}} */
 
-/* {{{ proto string posix_getlogin(void)
-   Get user name (POSIX.1, 4.2.4) */
+/* {{{ Get user name (POSIX.1, 4.2.4) */
 #ifdef HAVE_GETLOGIN
 PHP_FUNCTION(posix_getlogin)
 {
@@ -338,16 +322,14 @@ PHP_FUNCTION(posix_getlogin)
 #endif
 /* }}} */
 
-/* {{{ proto int posix_getpgrp(void)
-   Get current process group id (POSIX.1, 4.3.1) */
+/* {{{ Get current process group id (POSIX.1, 4.3.1) */
 PHP_FUNCTION(posix_getpgrp)
 {
 	PHP_POSIX_RETURN_LONG_FUNC(getpgrp);
 }
 /* }}} */
 
-/* {{{ proto int posix_setsid(void)
-   Create session and set process group id (POSIX.1, 4.3.2) */
+/* {{{ Create session and set process group id (POSIX.1, 4.3.2) */
 #ifdef HAVE_SETSID
 PHP_FUNCTION(posix_setsid)
 {
@@ -356,8 +338,7 @@ PHP_FUNCTION(posix_setsid)
 #endif
 /* }}} */
 
-/* {{{ proto bool posix_setpgid(int pid, int pgid)
-   Set process group id for job control (POSIX.1, 4.3.3) */
+/* {{{ Set process group id for job control (POSIX.1, 4.3.3) */
 PHP_FUNCTION(posix_setpgid)
 {
 	zend_long pid, pgid;
@@ -376,8 +357,7 @@ PHP_FUNCTION(posix_setpgid)
 }
 /* }}} */
 
-/* {{{ proto int posix_getpgid(void)
-   Get the process group id of the specified process (This is not a POSIX function, but a SVR4ism, so we compile conditionally) */
+/* {{{ Get the process group id of the specified process (This is not a POSIX function, but a SVR4ism, so we compile conditionally) */
 #ifdef HAVE_GETPGID
 PHP_FUNCTION(posix_getpgid)
 {
@@ -396,8 +376,7 @@ PHP_FUNCTION(posix_getpgid)
 #endif
 /* }}} */
 
-/* {{{ proto int posix_getsid(void)
-   Get process group id of session leader (This is not a POSIX function, but a SVR4ism, so be compile conditionally) */
+/* {{{ Get process group id of session leader (This is not a POSIX function, but a SVR4ism, so be compile conditionally) */
 #ifdef HAVE_GETSID
 PHP_FUNCTION(posix_getsid)
 {
@@ -416,8 +395,7 @@ PHP_FUNCTION(posix_getsid)
 #endif
 /* }}} */
 
-/* {{{ proto array posix_uname(void)
-   Get system name (POSIX.1, 4.4.1) */
+/* {{{ Get system name (POSIX.1, 4.4.1) */
 PHP_FUNCTION(posix_uname)
 {
 	struct utsname u;
@@ -447,8 +425,7 @@ PHP_FUNCTION(posix_uname)
 							already covered by PHP
  */
 
-/* {{{ proto array posix_times(void)
-   Get process times (POSIX.1, 4.5.2) */
+/* {{{ Get process times (POSIX.1, 4.5.2) */
 PHP_FUNCTION(posix_times)
 {
 	struct tms t;
@@ -475,8 +452,7 @@ PHP_FUNCTION(posix_times)
 							already covered by PHP
 */
 
-/* {{{ proto string posix_ctermid(void)
-   Generate terminal path name (POSIX.1, 4.7.1) */
+/* {{{ Generate terminal path name (POSIX.1, 4.7.1) */
 #ifdef HAVE_CTERMID
 PHP_FUNCTION(posix_ctermid)
 {
@@ -520,8 +496,7 @@ static int php_posix_stream_get_fd(zval *zfp, int *fd) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto string posix_ttyname(int fd)
-   Determine terminal device name (POSIX.1, 4.7.2) */
+/* {{{ Determine terminal device name (POSIX.1, 4.7.2) */
 PHP_FUNCTION(posix_ttyname)
 {
 	zval *z_fd;
@@ -568,8 +543,7 @@ PHP_FUNCTION(posix_ttyname)
 }
 /* }}} */
 
-/* {{{ proto bool posix_isatty(int fd)
-   Determine if filedesc is a tty (POSIX.1, 4.7.1) */
+/* {{{ Determine if filedesc is a tty (POSIX.1, 4.7.1) */
 PHP_FUNCTION(posix_isatty)
 {
 	zval *z_fd;
@@ -606,8 +580,7 @@ PHP_FUNCTION(posix_isatty)
 				already supported by PHP
  */
 
-/* {{{ proto string posix_getcwd(void)
-   Get working directory pathname (POSIX.1, 5.2.2) */
+/* {{{ Get working directory pathname (POSIX.1, 5.2.2) */
 PHP_FUNCTION(posix_getcwd)
 {
 	char  buffer[MAXPATHLEN];
@@ -631,8 +604,7 @@ PHP_FUNCTION(posix_getcwd)
 		already supported by PHP.
  */
 
-/* {{{ proto bool posix_mkfifo(string pathname, int mode)
-   Make a FIFO special file (POSIX.1, 5.4.2) */
+/* {{{ Make a FIFO special file (POSIX.1, 5.4.2) */
 #ifdef HAVE_MKFIFO
 PHP_FUNCTION(posix_mkfifo)
 {
@@ -660,8 +632,7 @@ PHP_FUNCTION(posix_mkfifo)
 #endif
 /* }}} */
 
-/* {{{ proto bool posix_mknod(string pathname, int mode [, int major [, int minor]])
-   Make a special or ordinary file (POSIX.1) */
+/* {{{ Make a special or ordinary file (POSIX.1) */
 #ifdef HAVE_MKNOD
 PHP_FUNCTION(posix_mknod)
 {
@@ -756,8 +727,7 @@ int php_posix_group_to_array(struct group *g, zval *array_group) /* {{{ */
 	POSIX.1, 5.6.x stat(), chmod(), utime() already supported by PHP.
 */
 
-/* {{{ proto bool posix_access(string file [, int mode])
-   Determine accessibility of a file (POSIX.1 5.6.3) */
+/* {{{ Determine accessibility of a file (POSIX.1 5.6.3) */
 PHP_FUNCTION(posix_access)
 {
 	zend_long mode = 0;
@@ -801,8 +771,7 @@ PHP_FUNCTION(posix_access)
 	POSIX.1, 9.x system database access
 */
 
-/* {{{ proto array posix_getgrnam(string groupname)
-   Group database access (POSIX.1, 9.2.1) */
+/* {{{ Group database access (POSIX.1, 9.2.1) */
 PHP_FUNCTION(posix_getgrnam)
 {
 	char *name;
@@ -856,8 +825,7 @@ try_again:
 }
 /* }}} */
 
-/* {{{ proto array posix_getgrgid(int gid)
-   Group database access (POSIX.1, 9.2.1) */
+/* {{{ Group database access (POSIX.1, 9.2.1) */
 PHP_FUNCTION(posix_getgrgid)
 {
 	zend_long gid;
@@ -933,8 +901,7 @@ int php_posix_passwd_to_array(struct passwd *pw, zval *return_value) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto array posix_getpwnam(string groupname)
-   User database access (POSIX.1, 9.2.2) */
+/* {{{ User database access (POSIX.1, 9.2.2) */
 PHP_FUNCTION(posix_getpwnam)
 {
 	struct passwd *pw;
@@ -988,8 +955,7 @@ try_again:
 }
 /* }}} */
 
-/* {{{ proto array posix_getpwuid(int uid)
-   User database access (POSIX.1, 9.2.2) */
+/* {{{ User database access (POSIX.1, 9.2.2) */
 PHP_FUNCTION(posix_getpwuid)
 {
 	zend_long uid;
@@ -1050,8 +1016,7 @@ try_again:
 
 #define UNLIMITED_STRING "unlimited"
 
-/* {{{ posix_addlimit
- */
+/* {{{ posix_addlimit */
 static int posix_addlimit(int limit, const char *name, zval *return_value) {
 	int result;
 	struct rlimit rl;
@@ -1083,8 +1048,7 @@ static int posix_addlimit(int limit, const char *name, zval *return_value) {
 }
 /* }}} */
 
-/* {{{ limits[]
- */
+/* {{{ limits[] */
 static const struct limitlist {
 	int limit;
 	const char *name;
@@ -1142,8 +1106,7 @@ static const struct limitlist {
 /* }}} */
 
 
-/* {{{ proto array posix_getrlimit(void)
-   Get system resource consumption limits (This is not a POSIX function, but a BSDism and a SVR4ism. We compile conditionally) */
+/* {{{ Get system resource consumption limits (This is not a POSIX function, but a BSDism and a SVR4ism. We compile conditionally) */
 PHP_FUNCTION(posix_getrlimit)
 {
 	const struct limitlist *l = NULL;
@@ -1164,8 +1127,7 @@ PHP_FUNCTION(posix_getrlimit)
 #endif /* HAVE_GETRLIMIT */
 
 #ifdef HAVE_SETRLIMIT
-/* {{{ proto bool posix_setrlimit(int resource, int softlimit, int hardlimit)
-   Set system resource consumption limits (POSIX.1-2001) */
+/* {{{ Set system resource consumption limits (POSIX.1-2001) */
 PHP_FUNCTION(posix_setrlimit)
 {
 	struct rlimit rl;
@@ -1192,8 +1154,7 @@ PHP_FUNCTION(posix_setrlimit)
 #endif /* HAVE_SETRLIMIT */
 
 
-/* {{{ proto int posix_get_last_error(void)
-   Retrieve the error number set by the last posix function which failed. */
+/* {{{ Retrieve the error number set by the last posix function which failed. */
 PHP_FUNCTION(posix_get_last_error)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -1202,8 +1163,7 @@ PHP_FUNCTION(posix_get_last_error)
 }
 /* }}} */
 
-/* {{{ proto string posix_strerror(int errno)
-   Retrieve the system error message associated with the given errno. */
+/* {{{ Retrieve the system error message associated with the given errno. */
 PHP_FUNCTION(posix_strerror)
 {
 	zend_long error;
@@ -1219,8 +1179,7 @@ PHP_FUNCTION(posix_strerror)
 #endif
 
 #ifdef HAVE_INITGROUPS
-/* {{{ proto bool posix_initgroups(string name, int base_group_id)
-   Calculate the group access list for the user specified in name. */
+/* {{{ Calculate the group access list for the user specified in name. */
 PHP_FUNCTION(posix_initgroups)
 {
 	zend_long basegid;

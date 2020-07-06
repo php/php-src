@@ -59,8 +59,7 @@
 ZEND_DECLARE_MODULE_GLOBALS(iconv)
 static PHP_GINIT_FUNCTION(iconv);
 
-/* {{{ iconv_module_entry
- */
+/* {{{ iconv_module_entry */
 zend_module_entry iconv_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"iconv",
@@ -182,8 +181,7 @@ static PHP_INI_MH(OnUpdateInternalEncoding)
 }
 
 
-/* {{{ PHP_INI
- */
+/* {{{ PHP_INI */
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("iconv.input_encoding",    "", PHP_INI_ALL, OnUpdateInputEncoding,    input_encoding,    zend_iconv_globals, iconv_globals)
 	STD_PHP_INI_ENTRY("iconv.output_encoding",   "", PHP_INI_ALL, OnUpdateOutputEncoding,   output_encoding,   zend_iconv_globals, iconv_globals)
@@ -434,8 +432,7 @@ static int _php_check_ignore(const char *charset)
 #endif
 /* }}} */
 
-/* {{{ php_iconv_string()
- */
+/* {{{ php_iconv_string() */
 PHP_ICONV_API php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len, zend_string **out, const char *out_charset, const char *in_charset)
 {
 	iconv_t cd;
@@ -1822,8 +1819,7 @@ static void _php_iconv_show_error(php_iconv_err_t err, const char *out_charset, 
 }
 /* }}} */
 
-/* {{{ proto int iconv_strlen(string str [, string charset])
-   Returns the character count of str */
+/* {{{ Returns the character count of str */
 PHP_FUNCTION(iconv_strlen)
 {
 	const char *charset = NULL;
@@ -1856,8 +1852,7 @@ PHP_FUNCTION(iconv_strlen)
 }
 /* }}} */
 
-/* {{{ proto string iconv_substr(string str, int offset, [int length, string charset])
-   Returns specified part of a string */
+/* {{{ Returns specified part of a string */
 PHP_FUNCTION(iconv_substr)
 {
 	const char *charset = NULL;
@@ -1898,8 +1893,7 @@ PHP_FUNCTION(iconv_substr)
 }
 /* }}} */
 
-/* {{{ proto int iconv_strpos(string haystack, string needle [, int offset [, string charset]])
-   Finds position of first occurrence of needle within part of haystack beginning with offset */
+/* {{{ Finds position of first occurrence of needle within part of haystack beginning with offset */
 PHP_FUNCTION(iconv_strpos)
 {
 	const char *charset = NULL;
@@ -1955,8 +1949,7 @@ PHP_FUNCTION(iconv_strpos)
 }
 /* }}} */
 
-/* {{{ proto int iconv_strrpos(string haystack, string needle [, string charset])
-   Finds position of last occurrence of needle within part of haystack beginning with offset */
+/* {{{ Finds position of last occurrence of needle within part of haystack beginning with offset */
 PHP_FUNCTION(iconv_strrpos)
 {
 	const char *charset = NULL;
@@ -1997,8 +1990,7 @@ PHP_FUNCTION(iconv_strrpos)
 }
 /* }}} */
 
-/* {{{ proto string iconv_mime_encode(string field_name, string field_value [, array preference])
-   Composes a mime header field with field_name and field_value in a specified scheme */
+/* {{{ Composes a mime header field with field_name and field_value in a specified scheme */
 PHP_FUNCTION(iconv_mime_encode)
 {
 	zend_string *field_name = NULL;
@@ -2100,8 +2092,7 @@ PHP_FUNCTION(iconv_mime_encode)
 }
 /* }}} */
 
-/* {{{ proto string iconv_mime_decode(string encoded_string [, int mode, string charset])
-   Decodes a mime header field */
+/* {{{ Decodes a mime header field */
 PHP_FUNCTION(iconv_mime_decode)
 {
 	zend_string *encoded_str;
@@ -2142,8 +2133,7 @@ PHP_FUNCTION(iconv_mime_decode)
 }
 /* }}} */
 
-/* {{{ proto array iconv_mime_decode_headers(string headers [, int mode, string charset])
-   Decodes multiple mime header fields */
+/* {{{ Decodes multiple mime header fields */
 PHP_FUNCTION(iconv_mime_decode_headers)
 {
 	zend_string *encoded_str;
@@ -2242,8 +2232,7 @@ PHP_FUNCTION(iconv_mime_decode_headers)
 }
 /* }}} */
 
-/* {{{ proto string iconv(string in_charset, string out_charset, string str)
-   Returns str converted to the out_charset character set */
+/* {{{ Returns str converted to the out_charset character set */
 PHP_FUNCTION(iconv)
 {
 	char *in_charset, *out_charset;
@@ -2275,8 +2264,7 @@ PHP_FUNCTION(iconv)
 }
 /* }}} */
 
-/* {{{ proto bool iconv_set_encoding(string type, string charset)
-   Sets internal encoding and output encoding for ob_iconv_handler() */
+/* {{{ Sets internal encoding and output encoding for ob_iconv_handler() */
 PHP_FUNCTION(iconv_set_encoding)
 {
 	char *type;
@@ -2314,8 +2302,7 @@ PHP_FUNCTION(iconv_set_encoding)
 }
 /* }}} */
 
-/* {{{ proto mixed iconv_get_encoding([string type])
-   Get internal encoding and output encoding for ob_iconv_handler() */
+/* {{{ Get internal encoding and output encoding for ob_iconv_handler() */
 PHP_FUNCTION(iconv_get_encoding)
 {
 	char *type = "all";

@@ -52,8 +52,7 @@ struct php_msgbuf {
 #define PHP_MSG_NOERROR		2
 #define PHP_MSG_EXCEPT		4
 
-/* {{{ sysvmsg_module_entry
- */
+/* {{{ sysvmsg_module_entry */
 zend_module_entry sysvmsg_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"sysvmsg",
@@ -106,8 +105,7 @@ static void sysvmsg_queue_free_obj(zend_object *object)
 }
 /* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION
- */
+/* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(sysvmsg)
 {
 	zend_class_entry ce;
@@ -133,8 +131,7 @@ PHP_MINIT_FUNCTION(sysvmsg)
 }
 /* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
- */
+/* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(sysvmsg)
 {
 	php_info_print_table_start();
@@ -143,8 +140,7 @@ PHP_MINFO_FUNCTION(sysvmsg)
 }
 /* }}} */
 
-/* {{{ proto bool msg_set_queue(SysvMessageQueue queue, array data)
-   Set information for a message queue */
+/* {{{ Set information for a message queue */
 PHP_FUNCTION(msg_set_queue)
 {
 	zval *queue, *data;
@@ -182,8 +178,7 @@ PHP_FUNCTION(msg_set_queue)
 }
 /* }}} */
 
-/* {{{ proto array msg_stat_queue(SysvMessageQueue queue)
-   Returns information about a message queue */
+/* {{{ Returns information about a message queue */
 PHP_FUNCTION(msg_stat_queue)
 {
 	zval *queue;
@@ -215,8 +210,7 @@ PHP_FUNCTION(msg_stat_queue)
 }
 /* }}} */
 
-/* {{{ proto bool msg_queue_exists(int key)
-   Check whether a message queue exists */
+/* {{{ Check whether a message queue exists */
 PHP_FUNCTION(msg_queue_exists)
 {
 	zend_long key;
@@ -233,8 +227,7 @@ PHP_FUNCTION(msg_queue_exists)
 }
 /* }}} */
 
-/* {{{ proto SysvMessageQueue msg_get_queue(int key [, int perms])
-   Attach to a message queue */
+/* {{{ Attach to a message queue */
 PHP_FUNCTION(msg_get_queue)
 {
 	zend_long key;
@@ -262,8 +255,7 @@ PHP_FUNCTION(msg_get_queue)
 }
 /* }}} */
 
-/* {{{ proto bool msg_remove_queue(SysvMessageQueue queue)
-   Destroy the queue */
+/* {{{ Destroy the queue */
 PHP_FUNCTION(msg_remove_queue)
 {
 	zval *queue;
@@ -283,8 +275,7 @@ PHP_FUNCTION(msg_remove_queue)
 }
 /* }}} */
 
-/* {{{ proto mixed msg_receive(SysvMessageQueue queue, int desiredmsgtype, int &msgtype, int maxsize, mixed &message [, bool unserialize=true [, int flags=0 [, int &errorcode]]])
-   Send a message of type msgtype (must be > 0) to a message queue */
+/* {{{ Send a message of type msgtype (must be > 0) to a message queue */
 PHP_FUNCTION(msg_receive)
 {
 	zval *out_message, *queue, *out_msgtype, *zerrcode = NULL;
@@ -367,8 +358,7 @@ PHP_FUNCTION(msg_receive)
 }
 /* }}} */
 
-/* {{{ proto bool msg_send(SysvMessageQueue queue, int msgtype, mixed message [, bool serialize=true [, bool blocking=true [, int errorcode]]])
-   Send a message of type msgtype (must be > 0) to a message queue */
+/* {{{ Send a message of type msgtype (must be > 0) to a message queue */
 PHP_FUNCTION(msg_send)
 {
 	zval *message, *queue, *zerror=NULL;

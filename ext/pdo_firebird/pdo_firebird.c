@@ -31,8 +31,7 @@ static const zend_function_entry pdo_firebird_functions[] = { /* {{{ */
 };
 /* }}} */
 
-/* {{{ pdo_firebird_deps
- */
+/* {{{ pdo_firebird_deps */
 static const zend_module_dep pdo_firebird_deps[] = {
 	ZEND_MOD_REQUIRED("pdo")
 	ZEND_MOD_END

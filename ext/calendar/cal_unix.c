@@ -21,8 +21,7 @@
 #include "sdncal.h"
 #include <time.h>
 
-/* {{{ proto int unixtojd([int timestamp])
-   Convert UNIX timestamp to Julian Day */
+/* {{{ Convert UNIX timestamp to Julian Day */
 PHP_FUNCTION(unixtojd)
 {
 	time_t ts;
@@ -48,8 +47,7 @@ PHP_FUNCTION(unixtojd)
 }
 /* }}} */
 
-/* {{{ proto int jdtounix(int jday)
-   Convert Julian Day to UNIX timestamp */
+/* {{{ Convert Julian Day to UNIX timestamp */
 PHP_FUNCTION(jdtounix)
 {
 	zend_long uday;

@@ -34,8 +34,7 @@
 		RETURN_FALSE;						\
 	}
 
-/* {{{ proto bool SessionHandler::open(string save_path, string session_name)
-   Wraps the old open handler */
+/* {{{ Wraps the old open handler */
 PHP_METHOD(SessionHandler, open)
 {
 	char *save_path = NULL, *session_name = NULL;
@@ -61,8 +60,7 @@ PHP_METHOD(SessionHandler, open)
 }
 /* }}} */
 
-/* {{{ proto bool SessionHandler::close()
-   Wraps the old close handler */
+/* {{{ Wraps the old close handler */
 PHP_METHOD(SessionHandler, close)
 {
 	int ret;
@@ -86,8 +84,7 @@ PHP_METHOD(SessionHandler, close)
 }
 /* }}} */
 
-/* {{{ proto bool SessionHandler::read(string id)
-   Wraps the old read handler */
+/* {{{ Wraps the old read handler */
 PHP_METHOD(SessionHandler, read)
 {
 	zend_string *val;
@@ -107,8 +104,7 @@ PHP_METHOD(SessionHandler, read)
 }
 /* }}} */
 
-/* {{{ proto bool SessionHandler::write(string id, string data)
-   Wraps the old write handler */
+/* {{{ Wraps the old write handler */
 PHP_METHOD(SessionHandler, write)
 {
 	zend_string *key, *val;
@@ -123,8 +119,7 @@ PHP_METHOD(SessionHandler, write)
 }
 /* }}} */
 
-/* {{{ proto bool SessionHandler::destroy(string id)
-   Wraps the old destroy handler */
+/* {{{ Wraps the old destroy handler */
 PHP_METHOD(SessionHandler, destroy)
 {
 	zend_string *key;
@@ -139,8 +134,7 @@ PHP_METHOD(SessionHandler, destroy)
 }
 /* }}} */
 
-/* {{{ proto bool SessionHandler::gc(int maxlifetime)
-   Wraps the old gc handler */
+/* {{{ Wraps the old gc handler */
 PHP_METHOD(SessionHandler, gc)
 {
 	zend_long maxlifetime;
@@ -159,8 +153,7 @@ PHP_METHOD(SessionHandler, gc)
 }
 /* }}} */
 
-/* {{{ proto char SessionHandler::create_sid()
-   Wraps the old create_sid handler */
+/* {{{ Wraps the old create_sid handler */
 PHP_METHOD(SessionHandler, create_sid)
 {
 	zend_string *id;

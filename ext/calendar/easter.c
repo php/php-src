@@ -115,16 +115,14 @@ static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, zend_long gm)
     ZVAL_LONG(return_value, result);
 }
 
-/* {{{ proto int easter_date([int year])
-   Return the timestamp of midnight on Easter of a given year (defaults to current year) */
+/* {{{ Return the timestamp of midnight on Easter of a given year (defaults to current year) */
 PHP_FUNCTION(easter_date)
 {
 	_cal_easter(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
-/* {{{ proto int easter_days([int year, [int method]])
-   Return the number of days after March 21 that Easter falls on for a given year (defaults to current year) */
+/* {{{ Return the number of days after March 21 that Easter falls on for a given year (defaults to current year) */
 PHP_FUNCTION(easter_days)
 {
 	_cal_easter(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);

@@ -79,8 +79,7 @@ PDO_API zend_class_entry *php_pdo_get_exception_base(int root) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto array pdo_drivers()
- Return array of available PDO drivers */
+/* {{{ Return array of available PDO drivers */
 PHP_FUNCTION(pdo_drivers)
 {
 	pdo_driver_t *pdriver;

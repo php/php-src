@@ -135,8 +135,7 @@ static void Decode(uint32_t *output, const unsigned char *input, unsigned int le
 #define ROTR(x,n)	(((x) >> (n)) | ((x) << (32 - (n))))
 
 
-/* {{{ PHP_3HAVALTransform
- */
+/* {{{ PHP_3HAVALTransform */
 static void PHP_3HAVALTransform(uint32_t state[8], const unsigned char block[128])
 {
 	uint32_t E[8];
@@ -169,8 +168,7 @@ static void PHP_3HAVALTransform(uint32_t state[8], const unsigned char block[128
 }
 /* }}} */
 
-/* {{{ PHP_4HAVALTransform
- */
+/* {{{ PHP_4HAVALTransform */
 static void PHP_4HAVALTransform(uint32_t state[8], const unsigned char block[128])
 {
 	uint32_t E[8];
@@ -206,8 +204,7 @@ static void PHP_4HAVALTransform(uint32_t state[8], const unsigned char block[128
 }
 /* }}} */
 
-/* {{{ PHP_5HAVALTransform
- */
+/* {{{ PHP_5HAVALTransform */
 static void PHP_5HAVALTransform(uint32_t state[8], const unsigned char block[128])
 {
 	uint32_t E[8];
@@ -280,8 +277,7 @@ PHP_HASH_HAVAL_INIT(5,192)
 PHP_HASH_HAVAL_INIT(5,224)
 PHP_HASH_HAVAL_INIT(5,256)
 
-/* {{{ PHP_HAVALUpdate
- */
+/* {{{ PHP_HAVALUpdate */
 PHP_HASH_API void PHP_HAVALUpdate(PHP_HAVAL_CTX *context, const unsigned char *input, size_t inputLen)
 {
 	unsigned int i, index, partLen;
@@ -318,8 +314,7 @@ PHP_HASH_API void PHP_HAVALUpdate(PHP_HAVAL_CTX *context, const unsigned char *i
 
 #define PHP_HASH_HAVAL_VERSION	0x01
 
-/* {{{ PHP_HAVAL128Final
- */
+/* {{{ PHP_HAVAL128Final */
 PHP_HASH_API void PHP_HAVAL128Final(unsigned char *digest, PHP_HAVAL_CTX * context)
 {
 	unsigned char bits[10];
@@ -372,8 +367,7 @@ PHP_HASH_API void PHP_HAVAL128Final(unsigned char *digest, PHP_HAVAL_CTX * conte
 }
 /* }}} */
 
-/* {{{ PHP_HAVAL160Final
- */
+/* {{{ PHP_HAVAL160Final */
 PHP_HASH_API void PHP_HAVAL160Final(unsigned char *digest, PHP_HAVAL_CTX * context)
 {
 	unsigned char bits[10];
@@ -426,8 +420,7 @@ PHP_HASH_API void PHP_HAVAL160Final(unsigned char *digest, PHP_HAVAL_CTX * conte
 }
 /* }}} */
 
-/* {{{ PHP_HAVAL192Final
- */
+/* {{{ PHP_HAVAL192Final */
 PHP_HASH_API void PHP_HAVAL192Final(unsigned char *digest, PHP_HAVAL_CTX * context)
 {
 	unsigned char bits[10];
@@ -466,8 +459,7 @@ PHP_HASH_API void PHP_HAVAL192Final(unsigned char *digest, PHP_HAVAL_CTX * conte
 }
 /* }}} */
 
-/* {{{ PHP_HAVAL224Final
- */
+/* {{{ PHP_HAVAL224Final */
 PHP_HASH_API void PHP_HAVAL224Final(unsigned char *digest, PHP_HAVAL_CTX * context)
 {
 	unsigned char bits[10];
@@ -507,8 +499,7 @@ PHP_HASH_API void PHP_HAVAL224Final(unsigned char *digest, PHP_HAVAL_CTX * conte
 }
 /* }}} */
 
-/* {{{ PHP_HAVAL256Final
- */
+/* {{{ PHP_HAVAL256Final */
 PHP_HASH_API void PHP_HAVAL256Final(unsigned char *digest, PHP_HAVAL_CTX * context)
 {
 	unsigned char bits[10];
