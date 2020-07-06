@@ -184,7 +184,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract
     public function getModifiers() {}
 
     /** @return mixed */
-    public function invoke(?object $object = null, mixed ...$args) {}
+    public function invoke(?object $object, mixed ...$args) {}
 
     /** @return mixed */
     public function invokeArgs(?object $object, array $args) {}
