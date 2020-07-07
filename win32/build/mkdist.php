@@ -185,11 +185,11 @@ function extract_file_from_tarball($pkg, $filename, $dest_dir) /* {{{ */
 			break;
 		$checksum = 0;
 		for ($i = 0; $i < 148; $i++)
-			$checksum += ord($hdr_data{$i});
+			$checksum += ord($hdr_data[$i]);
 		for ($i = 148; $i < 156; $i++)
 			$checksum += 32;
 		for ($i = 156; $i < 512; $i++)
-			$checksum += ord($hdr_data{$i});
+			$checksum += ord($hdr_data[$i]);
 
 		$hdr = unpack("a100filename/a8mode/a8uid/a8gid/a12size/a12mtime/a8checksum/a1typeflag/a100link/a6magic/a2version/a32uname/a32gname/a8devmajor/a8devminor", $hdr_data);
 
