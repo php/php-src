@@ -11,10 +11,10 @@ try {
     echo $p->getMetadata();
     foreach (new RecursiveIteratorIterator($p) as $file) {
         // $file is a PharFileInfo class, and inherits from SplFileInfo
-    $temp="";
+        $temp="";
         $temp= $file->getFileName() . "\n";
         $temp.=file_get_contents($file->getPathName()) . "\n"; // display contents
-    var_dump($file->getMetadata());
+        var_dump($file->getMetadata());
     }
 }
  catch (Exception $e) {
@@ -29,7 +29,7 @@ array(1) {
   ["whatever"]=>
   int(123)
 }
-object(DateTime)#2 (3) {
+object(DateTime)#6 (3) {
   ["date"]=>
   string(26) "2000-01-01 00:00:00.000000"
   ["timezone_type"]=>

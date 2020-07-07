@@ -425,6 +425,11 @@ PHP 8.0 UPGRADE NOTES
 - PDO_ODBC:
   . The php.ini directive pdo_odbc.db2_instance_name has been removed
 
+- Phar:
+  . Metadata associated with a phar will no longer be automatically unserialized,
+    to fix potential security vulnerabilities due to object instantiation, autoloading, etc.
+    RFC: https://wiki.php.net/rfc/phar_stop_autoloading_metadata
+
 - Reflection:
   . The method signatures
 

@@ -2266,10 +2266,7 @@ static zend_object *phar_convert_to_other(phar_archive_data *source, int convert
 	phar->is_temporary_alias = source->is_temporary_alias;
 	phar->alias = source->alias;
 
-	if (Z_TYPE(source->metadata) != IS_UNDEF) {
-		ZVAL_DUP(&phar->metadata, &source->metadata);
-		phar->metadata_len = 0;
-	}
+	phar_metadata_tracker_copy(&phar->metadata_tracker, &source->metadata_tracker, phar->is_persistent);
 
 	/* first copy each file's uncompressed contents to a temporary file and set per-file flags */
 	ZEND_HASH_FOREACH_PTR(&source->manifest, entry) {
@@ -2286,8 +2283,6 @@ static zend_object *phar_convert_to_other(phar_archive_data *source, int convert
 			goto no_copy;
 		}
 
-		newentry.metadata_str.s = NULL;
-
 		if (FAILURE == phar_copy_file_contents(&newentry, phar->fp)) {
 			zend_hash_destroy(&(phar->manifest));
 			php_stream_close(phar->fp);
@@ -2298,10 +2293,7 @@ static zend_object *phar_convert_to_other(phar_archive_data *source, int convert
 no_copy:
 		newentry.filename = estrndup(newentry.filename, newentry.filename_len);
 
-		if (Z_TYPE(newentry.metadata) != IS_UNDEF) {
-			zval_copy_ctor(&newentry.metadata);
-			newentry.metadata_str.s = NULL;
-		}
+		phar_metadata_tracker_clone(&newentry.metadata_tracker);
 
 		newentry.is_zip = phar->is_zip;
 		newentry.is_tar = phar->is_tar;
@@ -3444,10 +3436,7 @@ PHP_METHOD(Phar, copy)
 
 	memcpy((void *) &newentry, oldentry, sizeof(phar_entry_info));
 
-	if (Z_TYPE(newentry.metadata) != IS_UNDEF) {
-		zval_copy_ctor(&newentry.metadata);
-		newentry.metadata_str.s = NULL;
-	}
+	phar_metadata_tracker_clone(&newentry.metadata_tracker);
 
 	newentry.filename = estrndup(newfile, newfile_len);
 	newentry.filename_len = newfile_len;
@@ -3951,31 +3940,59 @@ PHP_METHOD(Phar, hasMetadata)
 		RETURN_THROWS();
 	}
 
-	RETURN_BOOL(Z_TYPE(phar_obj->archive->metadata) != IS_UNDEF);
+	RETURN_BOOL(phar_metadata_tracker_has_data(&phar_obj->archive->metadata_tracker, phar_obj->archive->is_persistent));
 }
 /* }}} */
 
 /* {{{ Returns the global metadata of the phar */
 PHP_METHOD(Phar, getMetadata)
 {
+	HashTable *unserialize_options = NULL;
+	phar_metadata_tracker *tracker;
 	PHAR_ARCHIVE_OBJECT();
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ARRAY_HT(unserialize_options)
+	ZEND_PARSE_PARAMETERS_END();
 
-	if (Z_TYPE(phar_obj->archive->metadata) != IS_UNDEF) {
-		if (phar_obj->archive->is_persistent) {
-			char *buf = estrndup((char *) Z_PTR(phar_obj->archive->metadata), phar_obj->archive->metadata_len);
-			/* assume success, we would have failed before */
-			phar_parse_metadata(&buf, return_value, phar_obj->archive->metadata_len);
-			efree(buf);
-		} else {
-			ZVAL_COPY(return_value, &phar_obj->archive->metadata);
-		}
+	tracker = &phar_obj->archive->metadata_tracker;
+	if (phar_metadata_tracker_has_data(tracker, phar_obj->archive->is_persistent)) {
+		phar_metadata_tracker_unserialize_or_copy(tracker, return_value, phar_obj->archive->is_persistent, unserialize_options, "Phar::getMetadata");
 	}
 }
 /* }}} */
+
+/* {{{ Modifies the phar metadata or throws */
+static int serialize_metadata_or_throw(phar_metadata_tracker *tracker, int persistent, zval *metadata)
+{
+	php_serialize_data_t metadata_hash;
+	smart_str main_metadata_str = {0};
+
+	PHP_VAR_SERIALIZE_INIT(metadata_hash);
+	php_var_serialize(&main_metadata_str, metadata, &metadata_hash);
+	PHP_VAR_SERIALIZE_DESTROY(metadata_hash);
+	if (EG(exception)) {
+		/* Serialization can throw. Don't overwrite the original value or original string. */
+		return FAILURE;
+	}
+
+	phar_metadata_tracker_free(tracker, persistent);
+	if (EG(exception)) {
+		/* Destructor can throw. */
+		zend_string_release(main_metadata_str.s);
+		return FAILURE;
+	}
+
+	if (tracker->str) {
+		zend_throw_exception_ex(phar_ce_PharException, 0, "Metadata unexpectedly changed during setMetadata()");
+		zend_string_release(main_metadata_str.s);
+		return FAILURE;
+	}
+	ZVAL_COPY(&tracker->val, metadata);
+	tracker->str = main_metadata_str.s;
+	return SUCCESS;
+}
 
 /* {{{ Sets the global metadata of the phar */
 PHP_METHOD(Phar, setMetadata)
@@ -3998,12 +4015,12 @@ PHP_METHOD(Phar, setMetadata)
 		zend_throw_exception_ex(phar_ce_PharException, 0, "phar \"%s\" is persistent, unable to copy on write", phar_obj->archive->fname);
 		RETURN_THROWS();
 	}
-	if (Z_TYPE(phar_obj->archive->metadata) != IS_UNDEF) {
-		zval_ptr_dtor(&phar_obj->archive->metadata);
-		ZVAL_UNDEF(&phar_obj->archive->metadata);
+
+	ZEND_ASSERT(!phar_obj->archive->is_persistent); /* Should no longer be persistent */
+	if (serialize_metadata_or_throw(&phar_obj->archive->metadata_tracker, phar_obj->archive->is_persistent, metadata) != SUCCESS) {
+		RETURN_THROWS();
 	}
 
-	ZVAL_COPY(&phar_obj->archive->metadata, metadata);
 	phar_obj->archive->is_modified = 1;
 	phar_flush(phar_obj->archive, 0, 0, 0, &error);
 
@@ -4030,20 +4047,18 @@ PHP_METHOD(Phar, delMetadata)
 		RETURN_THROWS();
 	}
 
-	if (Z_TYPE(phar_obj->archive->metadata) != IS_UNDEF) {
-		zval_ptr_dtor(&phar_obj->archive->metadata);
-		ZVAL_UNDEF(&phar_obj->archive->metadata);
-		phar_obj->archive->is_modified = 1;
-		phar_flush(phar_obj->archive, 0, 0, 0, &error);
+	if (!phar_metadata_tracker_has_data(&phar_obj->archive->metadata_tracker, phar_obj->archive->is_persistent)) {
+		RETURN_TRUE;
+	}
 
-		if (error) {
-			zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
-			efree(error);
-			RETURN_THROWS();
-		} else {
-			RETURN_TRUE;
-		}
+	phar_metadata_tracker_free(&phar_obj->archive->metadata_tracker, phar_obj->archive->is_persistent);
+	phar_obj->archive->is_modified = 1;
+	phar_flush(phar_obj->archive, 0, 0, 0, &error);
 
+	if (error) {
+		zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
+		efree(error);
+		RETURN_THROWS();
 	} else {
 		RETURN_TRUE;
 	}
@@ -4630,28 +4645,25 @@ PHP_METHOD(PharFileInfo, hasMetadata)
 		RETURN_THROWS();
 	}
 
-	RETURN_BOOL(Z_TYPE(entry_obj->entry->metadata) != IS_UNDEF);
+	RETURN_BOOL(phar_metadata_tracker_has_data(&entry_obj->entry->metadata_tracker, entry_obj->entry->is_persistent));
 }
 /* }}} */
 
 /* {{{ Returns the metadata of the entry */
 PHP_METHOD(PharFileInfo, getMetadata)
 {
+	HashTable *unserialize_options = NULL;
+	phar_metadata_tracker *tracker;
 	PHAR_ENTRY_OBJECT();
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ARRAY_HT(unserialize_options)
+	ZEND_PARSE_PARAMETERS_END();
 
-	if (Z_TYPE(entry_obj->entry->metadata) != IS_UNDEF) {
-		if (entry_obj->entry->is_persistent) {
-			char *buf = estrndup((char *) Z_PTR(entry_obj->entry->metadata), entry_obj->entry->metadata_len);
-			/* assume success, we would have failed before */
-			phar_parse_metadata(&buf, return_value, entry_obj->entry->metadata_len);
-			efree(buf);
-		} else {
-			ZVAL_COPY(return_value, &entry_obj->entry->metadata);
-		}
+	tracker = &entry_obj->entry->metadata_tracker;
+	if (phar_metadata_tracker_has_data(tracker, entry_obj->entry->is_persistent)) {
+		phar_metadata_tracker_unserialize_or_copy(tracker, return_value, entry_obj->entry->is_persistent, unserialize_options, "PharFileInfo::getMetadata");
 	}
 }
 /* }}} */
@@ -4688,13 +4700,12 @@ PHP_METHOD(PharFileInfo, setMetadata)
 		}
 		/* re-populate after copy-on-write */
 		entry_obj->entry = zend_hash_str_find_ptr(&phar->manifest, entry_obj->entry->filename, entry_obj->entry->filename_len);
-	}
-	if (Z_TYPE(entry_obj->entry->metadata) != IS_UNDEF) {
-		zval_ptr_dtor(&entry_obj->entry->metadata);
-		ZVAL_UNDEF(&entry_obj->entry->metadata);
+		ZEND_ASSERT(!entry_obj->entry->is_persistent); /* Should no longer be persistent */
 	}
 
-	ZVAL_COPY(&entry_obj->entry->metadata, metadata);
+	if (serialize_metadata_or_throw(&entry_obj->entry->metadata_tracker, entry_obj->entry->is_persistent, metadata) != SUCCESS) {
+		RETURN_THROWS();
+	}
 
 	entry_obj->entry->is_modified = 1;
 	entry_obj->entry->phar->is_modified = 1;
@@ -4729,7 +4740,7 @@ PHP_METHOD(PharFileInfo, delMetadata)
 		RETURN_THROWS();
 	}
 
-	if (Z_TYPE(entry_obj->entry->metadata) != IS_UNDEF) {
+	if (phar_metadata_tracker_has_data(&entry_obj->entry->metadata_tracker, entry_obj->entry->is_persistent)) {
 		if (entry_obj->entry->is_persistent) {
 			phar_archive_data *phar = entry_obj->entry->phar;
 
@@ -4740,8 +4751,8 @@ PHP_METHOD(PharFileInfo, delMetadata)
 			/* re-populate after copy-on-write */
 			entry_obj->entry = zend_hash_str_find_ptr(&phar->manifest, entry_obj->entry->filename, entry_obj->entry->filename_len);
 		}
-		zval_ptr_dtor(&entry_obj->entry->metadata);
-		ZVAL_UNDEF(&entry_obj->entry->metadata);
+		/* multiple values may reference the metadata */
+		phar_metadata_tracker_free(&entry_obj->entry->metadata_tracker, entry_obj->entry->is_persistent);
 		entry_obj->entry->is_modified = 1;
 		entry_obj->entry->phar->is_modified = 1;
 
