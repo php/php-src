@@ -17,6 +17,8 @@ PHP                                                                        NEWS
     static variable). (Nikita)
   . Fixed bug #79779 (Assertion failure when assigning property of string
     offset by reference). (Nikita)
+  . Fixed bug #79792 (HT iterators not removed if empty array is destroyed).
+    (Nikita)
 
 - Fileinfo:
   . Fixed bug #79756 (finfo_file crash (FILEINFO_MIME)). (cmb)

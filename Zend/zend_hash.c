@@ -1627,11 +1627,11 @@ ZEND_API void ZEND_FASTCALL zend_array_destroy(HashTable *ht)
 				}
 			} while (++p != end);
 		}
-		zend_hash_iterators_remove(ht);
-		SET_INCONSISTENT(HT_DESTROYED);
 	} else if (EXPECTED(HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED)) {
 		goto free_ht;
 	}
+	zend_hash_iterators_remove(ht);
+	SET_INCONSISTENT(HT_DESTROYED);
 	efree(HT_GET_DATA_ADDR(ht));
 free_ht:
 	FREE_HASHTABLE(ht);
