@@ -4319,6 +4319,7 @@ static zend_always_inline zend_execute_data *_zend_vm_stack_push_call_frame(uint
 	if (check_exception) { \
 		OPLINE = EX(opline) + (skip); \
 	} else { \
+		ZEND_ASSERT(!EG(exception)); \
 		OPLINE = opline + (skip); \
 	} \
 	ZEND_VM_CONTINUE()
