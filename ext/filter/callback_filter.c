@@ -30,7 +30,7 @@ void php_filter_callback(PHP_INPUT_FILTER_PARAM_DECL)
 	}
 
 	ZVAL_COPY(&args[0], value);
-	status = call_user_function_ex(NULL, NULL, option_array, &retval, 1, args, 0, NULL);
+	status = call_user_function(NULL, NULL, option_array, &retval, 1, args);
 
 	if (status == SUCCESS && !Z_ISUNDEF(retval)) {
 		zval_ptr_dtor(value);

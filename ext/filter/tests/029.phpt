@@ -45,30 +45,13 @@ var_dump(filter_var("data", FILTER_CALLBACK, array("options"=>"test2")));
 var_dump(filter_var("~!@#$%^&*()_QWERTYUIOPASDFGHJKLZXCVBNM<>>?\"}{:", FILTER_CALLBACK, array("options"=>"test2")));
 var_dump(filter_var("", FILTER_CALLBACK, array("options"=>"test2")));
 
-/* unsetting data */
-function test3(&$var) {
-    unset($var);
-}
-
-var_dump(filter_var("data", FILTER_CALLBACK, array("options"=>"test3")));
-var_dump(filter_var("~!@#$%^&*()_QWERTYUIOPASDFGHJKLZXCVBNM<>>?\"}{:", FILTER_CALLBACK, array("options"=>"test3")));
-var_dump(filter_var("", FILTER_CALLBACK, array("options"=>"test3")));
-
-/* unset data and return value */
-function test4(&$var) {
-    unset($var);
-    return 1;
-}
-
-var_dump(filter_var("data", FILTER_CALLBACK, array("options"=>"test4")));
-
 /* thrown exception in the callback */
-function test5(&$var) {
+function test3($var) {
     throw new Exception("test");
 }
 
 try {
-    var_dump(filter_var("data", FILTER_CALLBACK, array("options"=>"test5")));
+    var_dump(filter_var("data", FILTER_CALLBACK, array("options"=>"test3")));
 } catch (Exception $e) {
     var_dump($e->getMessage());
 }
@@ -94,12 +77,14 @@ string(0) ""
 NULL
 NULL
 NULL
+
+Warning: test2(): Argument #1 ($var) must be passed by reference, value given in %s on line %d
 NULL
+
+Warning: test2(): Argument #1 ($var) must be passed by reference, value given in %s on line %d
 NULL
+
+Warning: test2(): Argument #1 ($var) must be passed by reference, value given in %s on line %d
 NULL
-NULL
-NULL
-NULL
-int(1)
 string(4) "test"
 Done
