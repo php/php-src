@@ -287,6 +287,24 @@ static int ZEND_FASTCALL zend_jit_undefined_op_helper(uint32_t var)
 	return EG(exception) == NULL;
 }
 
+static int ZEND_FASTCALL zend_jit_undefined_op_helper_write(HashTable *ht, uint32_t var)
+{
+	const zend_execute_data *execute_data = EG(current_execute_data);
+	zend_string *cv = EX(func)->op_array.vars[EX_VAR_TO_NUM(var)];
+
+	/* The array may be destroyed while throwing the notice.
+	 * Temporarily increase the refcount to detect this situation. */
+	if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+		GC_ADDREF(ht);
+	}
+	zend_error(E_WARNING, "Undefined variable $%s", ZSTR_VAL(cv));
+	if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+		zend_array_destroy(ht);
+		return 0;
+	}
+	return EG(exception) == NULL;
+}
+
 static void ZEND_FASTCALL zend_jit_fetch_dim_r_helper(zend_array *ht, zval *dim, zval *result)
 {
 	zend_long hval;
@@ -513,7 +531,9 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_rw_helper(zend_array *ht, zval *di
 			offset_key = Z_STR_P(dim);
 			goto str_index;
 		case IS_UNDEF:
-			zend_jit_undefined_op_helper(EG(current_execute_data)->opline->op2.var);
+			if (!zend_jit_undefined_op_helper_write(ht, EG(current_execute_data)->opline->op2.var)) {
+				return NULL;
+			}
 			/* break missing intentionally */
 		case IS_NULL:
 			offset_key = ZSTR_EMPTY_ALLOC();
@@ -588,7 +608,9 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_w_helper(zend_array *ht, zval *dim
 			offset_key = Z_STR_P(dim);
 			goto str_index;
 		case IS_UNDEF:
-			zend_jit_undefined_op_helper(EG(current_execute_data)->opline->op2.var);
+			if (!zend_jit_undefined_op_helper_write(ht, EG(current_execute_data)->opline->op2.var)) {
+				return NULL;
+			}
 			/* break missing intentionally */
 		case IS_NULL:
 			offset_key = ZSTR_EMPTY_ALLOC();
