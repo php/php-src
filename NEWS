@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-25 Jun 2020, PHP 7.4.8RC1
+?? ??? ????, PHP 7.4.8
 
 - Core:
   . Fixed bug #79649 (Altering disable_functions from module init corrupts
