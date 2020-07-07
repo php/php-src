@@ -1897,8 +1897,8 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                             out($f,"# define SAVE_OPLINE()\n");
                             out($f,"# define SAVE_OPLINE_EX()\n");
                             out($f,"#endif\n");
-                            out($f,"#define HANDLE_EXCEPTION() LOAD_OPLINE(); ZEND_VM_CONTINUE()\n");
-                            out($f,"#define HANDLE_EXCEPTION_LEAVE() LOAD_OPLINE(); ZEND_VM_LEAVE()\n");
+                            out($f,"#define HANDLE_EXCEPTION() ZEND_ASSERT(EG(exception)); LOAD_OPLINE(); ZEND_VM_CONTINUE()\n");
+                            out($f,"#define HANDLE_EXCEPTION_LEAVE() ZEND_ASSERT(EG(exception)); LOAD_OPLINE(); ZEND_VM_LEAVE()\n");
                             out($f,"#if defined(ZEND_VM_FP_GLOBAL_REG)\n");
                             out($f,"# define ZEND_VM_ENTER_EX()        ZEND_VM_INTERRUPT_CHECK(); ZEND_VM_CONTINUE()\n");
                             out($f,"# define ZEND_VM_ENTER()           execute_data = EG(current_execute_data); LOAD_OPLINE(); ZEND_VM_ENTER_EX()\n");
@@ -1938,8 +1938,8 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                             out($f,"#define LOAD_NEXT_OPLINE() opline = EX(opline) + 1\n");
                             out($f,"#define SAVE_OPLINE() EX(opline) = opline\n");
                             out($f,"#define SAVE_OPLINE_EX()\n");
-                            out($f,"#define HANDLE_EXCEPTION() LOAD_OPLINE(); ZEND_VM_CONTINUE()\n");
-                            out($f,"#define HANDLE_EXCEPTION_LEAVE() LOAD_OPLINE(); ZEND_VM_LEAVE()\n");
+                            out($f,"#define HANDLE_EXCEPTION() ZEND_ASSERT(EG(exception)); LOAD_OPLINE(); ZEND_VM_CONTINUE()\n");
+                            out($f,"#define HANDLE_EXCEPTION_LEAVE() ZEND_ASSERT(EG(exception)); LOAD_OPLINE(); ZEND_VM_LEAVE()\n");
                             out($f,"#define ZEND_VM_CONTINUE() goto zend_vm_continue\n");
                             out($f,"#define ZEND_VM_RETURN()   return\n");
                             out($f,"#define ZEND_VM_ENTER_EX() ZEND_VM_INTERRUPT_CHECK(); ZEND_VM_CONTINUE()\n");
@@ -1965,11 +1965,11 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                             out($f,"#define SAVE_OPLINE() EX(opline) = opline\n");
                             out($f,"#define SAVE_OPLINE_EX()\n");
                             if (ZEND_VM_SPEC) {
-                                out($f,"#define HANDLE_EXCEPTION() goto ZEND_HANDLE_EXCEPTION_SPEC_LABEL\n");
-                                out($f,"#define HANDLE_EXCEPTION_LEAVE() goto ZEND_HANDLE_EXCEPTION_SPEC_LABEL\n");
+                                out($f,"#define HANDLE_EXCEPTION() ZEND_ASSERT(EG(exception)); goto ZEND_HANDLE_EXCEPTION_SPEC_LABEL\n");
+                                out($f,"#define HANDLE_EXCEPTION_LEAVE() ZEND_ASSERT(EG(exception)); goto ZEND_HANDLE_EXCEPTION_SPEC_LABEL\n");
                             } else {
-                                out($f,"#define HANDLE_EXCEPTION() goto ZEND_HANDLE_EXCEPTION_LABEL\n");
-                                out($f,"#define HANDLE_EXCEPTION_LEAVE() goto ZEND_HANDLE_EXCEPTION_LABEL\n");
+                                out($f,"#define HANDLE_EXCEPTION() ZEND_ASSERT(EG(exception)); goto ZEND_HANDLE_EXCEPTION_LABEL\n");
+                                out($f,"#define HANDLE_EXCEPTION_LEAVE() ZEND_ASSERT(EG(exception)); goto ZEND_HANDLE_EXCEPTION_LABEL\n");
                             }
                             out($f,"#define ZEND_VM_CONTINUE() goto *(void**)(OPLINE->handler)\n");
                             out($f,"#define ZEND_VM_RETURN()   return\n");
