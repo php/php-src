@@ -367,8 +367,8 @@ static zend_always_inline zval *_get_zval_ptr_cv_BP_VAR_RW(uint32_t var EXECUTE_
 	zval *ret = EX_VAR(var);
 
 	if (UNEXPECTED(Z_TYPE_P(ret) == IS_UNDEF)) {
-		ZVAL_NULL(ret);
 		zval_undefined_cv(var EXECUTE_DATA_CC);
+		ZVAL_NULL(ret);
 		return ret;
 	}
 	return ret;
