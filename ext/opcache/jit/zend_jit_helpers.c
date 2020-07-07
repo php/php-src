@@ -162,10 +162,14 @@ static zval* ZEND_FASTCALL zend_jit_hash_lookup_rw(HashTable *ht, zend_string *s
 			}
 		}
 	} else {
+		/* Key may be released while throwing the undefined index warning. */
+		zend_string_addref(str);
 		if (UNEXPECTED(zend_undefined_index_write(ht, str) == FAILURE)) {
+			zend_string_release(str);
 			return NULL;
 		}
-		retval = zend_hash_update(ht, str, &EG(uninitialized_zval));
+		retval = zend_hash_add_new(ht, str, &EG(uninitialized_zval));
+		zend_string_release(str);
 	}
 	return retval;
 }
@@ -229,10 +233,14 @@ static zval* ZEND_FASTCALL zend_jit_symtable_lookup_rw(HashTable *ht, zend_strin
 			}
 		}
 	} else {
+		/* Key may be released while throwing the undefined index warning. */
+		zend_string_addref(str);
 		if (UNEXPECTED(zend_undefined_index_write(ht, str) == FAILURE)) {
+			zend_string_release(str);
 			return NULL;
 		}
 		retval = zend_hash_add_new(ht, str, &EG(uninitialized_zval));
+		zend_string_release(str);
 	}
 	return retval;
 }
@@ -571,10 +579,14 @@ str_index:
 			}
 		}
 	} else {
+		/* Key may be released while throwing the undefined index warning. */
+		zend_string_addref(offset_key);
 		if (UNEXPECTED(zend_undefined_index_write(ht, offset_key) == FAILURE)) {
+			zend_string_release(offset_key);
 			return NULL;
 		}
 		retval = zend_hash_add_new(ht, offset_key, &EG(uninitialized_zval));
+		zend_string_release(offset_key);
 	}
 	return retval;
 
