@@ -1241,13 +1241,6 @@ PHP_FUNCTION(oci_field_is_null)
 }
 /* }}} */
 
-/* {{{ Toggle internal debugging output for the OCI extension */
-PHP_FUNCTION(oci_internal_debug)
-{
-	/* NOP in OCI8 2.0. Obsoleted by DTrace probes */
-}
-/* }}} */
-
 /* {{{ Execute a parsed statement */
 PHP_FUNCTION(oci_execute)
 {
