@@ -1909,8 +1909,7 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_undefined_index(const
 	zend_error(E_NOTICE, "Undefined index: %s", ZSTR_VAL(offset));
 }
 
-static zend_never_inline ZEND_COLD int ZEND_FASTCALL zend_undefined_offset_write(
-		HashTable *ht, zend_long lval)
+ZEND_API ZEND_COLD int ZEND_FASTCALL zend_undefined_offset_write(HashTable *ht, zend_long lval)
 {
 	/* The array may be destroyed while throwing the notice.
 	 * Temporarily increase the refcount to detect this situation. */
@@ -1928,8 +1927,7 @@ static zend_never_inline ZEND_COLD int ZEND_FASTCALL zend_undefined_offset_write
 	return SUCCESS;
 }
 
-static zend_never_inline ZEND_COLD int ZEND_FASTCALL zend_undefined_index_write(
-		HashTable *ht, zend_string *offset)
+ZEND_API ZEND_COLD int ZEND_FASTCALL zend_undefined_index_write(HashTable *ht, zend_string *offset)
 {
 	/* The array may be destroyed while throwing the notice.
 	 * Temporarily increase the refcount to detect this situation. */

@@ -129,8 +129,10 @@ static zval* ZEND_FASTCALL zend_jit_hash_index_lookup_rw(HashTable *ht, zend_lon
 	zval *retval = _zend_hash_index_find(ht, idx);
 
 	if (!retval) {
-		zend_error(E_NOTICE,"Undefined offset: " ZEND_LONG_FMT, idx);
-		retval = zend_hash_index_update(ht, idx, &EG(uninitialized_zval));
+		if (UNEXPECTED(zend_undefined_offset_write(ht, idx) == FAILURE)) {
+			return NULL;
+		}
+		retval = zend_hash_index_add_new(ht, idx, &EG(uninitialized_zval));
 	}
 	return retval;
 }
@@ -153,12 +155,16 @@ static zval* ZEND_FASTCALL zend_jit_hash_lookup_rw(HashTable *ht, zend_string *s
 		if (UNEXPECTED(Z_TYPE_P(retval) == IS_INDIRECT)) {
 			retval = Z_INDIRECT_P(retval);
 			if (UNEXPECTED(Z_TYPE_P(retval) == IS_UNDEF)) {
-				zend_error(E_NOTICE,"Undefined index: %s", ZSTR_VAL(str));
+				if (UNEXPECTED(zend_undefined_index_write(ht, str) == FAILURE)) {
+					return NULL;
+				}
 				ZVAL_NULL(retval);
 			}
 		}
 	} else {
-		zend_error(E_NOTICE,"Undefined index: %s", ZSTR_VAL(str));
+		if (UNEXPECTED(zend_undefined_index_write(ht, str) == FAILURE)) {
+			return NULL;
+		}
 		retval = zend_hash_update(ht, str, &EG(uninitialized_zval));
 	}
 	return retval;
@@ -202,8 +208,10 @@ static zval* ZEND_FASTCALL zend_jit_symtable_lookup_rw(HashTable *ht, zend_strin
 		if (_zend_handle_numeric_str_ex(str->val, str->len, &idx)) {
 			retval = zend_hash_index_find(ht, idx);
 			if (!retval) {
-				zend_error(E_NOTICE,"Undefined index: %s", ZSTR_VAL(str));
-				retval = zend_hash_index_update(ht, idx, &EG(uninitialized_zval));
+				if (UNEXPECTED(zend_undefined_index_write(ht, str) == FAILURE)) {
+					return NULL;
+				}
+				retval = zend_hash_index_add_new(ht, idx, &EG(uninitialized_zval));
 			}
 			return retval;
 		}
@@ -214,13 +222,17 @@ static zval* ZEND_FASTCALL zend_jit_symtable_lookup_rw(HashTable *ht, zend_strin
 		if (UNEXPECTED(Z_TYPE_P(retval) == IS_INDIRECT)) {
 			retval = Z_INDIRECT_P(retval);
 			if (UNEXPECTED(Z_TYPE_P(retval) == IS_UNDEF)) {
-				zend_error(E_NOTICE,"Undefined index: %s", ZSTR_VAL(str));
+				if (UNEXPECTED(zend_undefined_index_write(ht, str) == FAILURE)) {
+					return NULL;
+				}
 				ZVAL_NULL(retval);
 			}
 		}
 	} else {
-		zend_error(E_NOTICE,"Undefined index: %s", ZSTR_VAL(str));
-		retval = zend_hash_update(ht, str, &EG(uninitialized_zval));
+		if (UNEXPECTED(zend_undefined_index_write(ht, str) == FAILURE)) {
+			return NULL;
+		}
+		retval = zend_hash_add_new(ht, str, &EG(uninitialized_zval));
 	}
 	return retval;
 }
@@ -531,13 +543,17 @@ str_index:
 		if (UNEXPECTED(Z_TYPE_P(retval) == IS_INDIRECT)) {
 			retval = Z_INDIRECT_P(retval);
 			if (UNEXPECTED(Z_TYPE_P(retval) == IS_UNDEF)) {
-				zend_error(E_NOTICE, "Undefined index: %s", ZSTR_VAL(offset_key));
+				if (UNEXPECTED(zend_undefined_index_write(ht, offset_key) == FAILURE)) {
+					return NULL;
+				}
 				ZVAL_NULL(retval);
 			}
 		}
 	} else {
-		zend_error(E_NOTICE, "Undefined index: %s", ZSTR_VAL(offset_key));
-		retval = zend_hash_update(ht, offset_key, &EG(uninitialized_zval));
+		if (UNEXPECTED(zend_undefined_index_write(ht, offset_key) == FAILURE)) {
+			return NULL;
+		}
+		retval = zend_hash_add_new(ht, offset_key, &EG(uninitialized_zval));
 	}
 	return retval;
 
@@ -546,8 +562,10 @@ num_index:
 	return retval;
 
 num_undef:
-	zend_error(E_NOTICE,"Undefined offset: " ZEND_LONG_FMT, hval);
-	retval = zend_hash_index_update(ht, hval, &EG(uninitialized_zval));
+	if (UNEXPECTED(zend_undefined_offset_write(ht, hval) == FAILURE)) {
+		return NULL;
+	}
+	retval = zend_hash_index_add_new(ht, hval, &EG(uninitialized_zval));
 	return retval;
 }
 
