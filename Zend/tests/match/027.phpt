@@ -20,7 +20,7 @@ function main() {
     Test::usesValue(match(true) { true => $i });
     echo "i is $i\n";
     $j = 1;
-    Test::usesRef(match(true) { true => $i });
+    Test::usesRef(match(true) { true => $j });
     echo "j is $j\n";
 }
 main();
