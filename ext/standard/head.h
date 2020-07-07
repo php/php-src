@@ -28,6 +28,8 @@
 extern PHP_RINIT_FUNCTION(head);
 
 PHPAPI int php_header(void);
-PHPAPI int php_setcookie(zend_string *name, zend_string *value, time_t expires, zend_string *path, zend_string *domain, int secure, int httponly, zend_string *samesite, int url_encode);
+PHPAPI zend_result php_setcookie(zend_string *name, zend_string *value, time_t expires,
+	zend_string *path, zend_string *domain, bool secure, bool httponly,
+	zend_string *samesite, bool url_encode);
 
 #endif
