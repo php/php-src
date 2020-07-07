@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #79030 (Upgrade apache2handler's php_apache_sapi_get_request_time
     to return usec). (Herbert256)
 
+- Core:
+  . Fixed bug #79778 (Assertion failure if dumping closure with unresolved
+    static variable). (Nikita)
+
 - COM:
   . Fixed bug #63208 (BSTR to PHP string conversion not binary safe). (cmb)
   

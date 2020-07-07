@@ -506,9 +506,16 @@ static HashTable *zend_closure_get_debug_info(zval *object, int *is_temp) /* {{{
 	debug_info = zend_new_array(8);
 
 	if (closure->func.type == ZEND_USER_FUNCTION && closure->func.op_array.static_variables) {
+		zval *var;
 		HashTable *static_variables = closure->func.op_array.static_variables;
 		ZVAL_ARR(&val, zend_array_dup(static_variables));
 		zend_hash_update(debug_info, ZSTR_KNOWN(ZEND_STR_STATIC), &val);
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL(val), var) {
+			if (Z_TYPE_P(var) == IS_CONSTANT_AST) {
+				zval_ptr_dtor(var);
+				ZVAL_STRING(var, "<constant ast>");
+			}
+		} ZEND_HASH_FOREACH_END();
 	}
 
 	if (Z_TYPE(closure->this_ptr) != IS_UNDEF) {
