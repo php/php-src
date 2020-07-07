@@ -39,13 +39,17 @@ require_once("connect.inc");
     } catch (\ValueError $e) {
         echo $e->getMessage() . \PHP_EOL;
     }
+    // Invalid mode for MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH
+    try {
+        $stmt->attr_set(MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH, -1);
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
     $stmt->close();
 
     //
     // MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH
     //
-
-
     // expecting max_length not to be set and be 0 in all cases
     $stmt = mysqli_stmt_init($link);
     $stmt->prepare("SELECT label FROM test");
@@ -65,7 +69,7 @@ require_once("connect.inc");
     // expecting max_length to _be_ set
     $stmt = mysqli_stmt_init($link);
     $stmt->prepare("SELECT label FROM test");
-    $stmt->attr_set(MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH, 1);
+    var_dump($stmt->attr_set(MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH, 1));
     $res = $stmt->attr_get(MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH);
     if ($res !== 1)
         printf("[007.1] max_length should be 1, got %s\n", $res);
@@ -98,13 +102,6 @@ require_once("connect.inc");
         $max_lengths[$meta->name] = $meta->max_length;
         if ($meta->max_length !== 0)
             printf("[009] max_length should not be set (= 0), got %s for field %s\n", $meta->max_length, $meta->name);
-    }
-
-    // Invalid mode for MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH
-    try {
-        $stmt->attr_set(MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH, -1);
-    } catch (\ValueError $e) {
-        echo $e->getMessage() . \PHP_EOL;
     }
     $res->close();
     $stmt->close();
@@ -259,6 +256,7 @@ require_once("connect.inc");
 Error: mysqli_stmt object is not fully initialized
 mysqli_stmt_attr_set(): Argument #2 ($attr) must be one of MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH, MYSQLI_STMT_ATTR_PREFETCH_ROWS, or STMT_ATTR_CURSOR_TYPE
 mysqli_stmt::attr_set(): Argument #2 ($mode_in) must be 0 or 1 for attribute MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH
+bool(true)
 mysqli_stmt::attr_set(): Argument #2 ($mode_in) must be one of MYSQLI_CURSOR_TYPE_NO_CURSOR, MYSQLI_CURSOR_TYPE_READ_ONLY, MYSQLI_CURSOR_TYPE_FOR_UPDATE, or MYSQLI_CURSOR_TYPE_SCROLLABLE for attribute MYSQLI_STMT_ATTR_CURSOR_TYPE
 mysqli_stmt::attr_set(): Argument #2 ($mode_in) must be greater than 0 for attribute MYSQLI_STMT_ATTR_PREFETCH_ROWS
 done!
