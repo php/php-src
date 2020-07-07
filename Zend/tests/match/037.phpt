@@ -52,13 +52,13 @@ var_dump(match(3) {
 });
 
 --EXPECTF--
-string(%d) "UnhandledMatchError in %s037.php:5
+string(%d) "UnhandledMatchError: Unhandled match value true in %s037.php:5
 Stack trace:
 #0 {main}"
-string(%d) "UnhandledMatchError in %s037.php:13
+string(%d) "UnhandledMatchError: Unhandled match value 6 in %s037.php:13
 Stack trace:
 #0 {main}"
-string(%d) "UnhandledMatchError in %s037.php:21
+string(%d) "UnhandledMatchError: Unhandled match value "3" in %s037.php:21
 Stack trace:
 #0 {main}"
 string(3) "foo"

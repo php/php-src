@@ -664,6 +664,7 @@ constant_binary_op:
 		case ZEND_GENERATOR_RETURN:
 		case ZEND_EXIT:
 		case ZEND_THROW:
+		case ZEND_MATCH_ERROR:
 		case ZEND_CATCH:
 		case ZEND_FAST_CALL:
 		case ZEND_FAST_RET:

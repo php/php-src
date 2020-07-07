@@ -5368,16 +5368,7 @@ void zend_compile_match(znode *result, zend_ast *ast) /* {{{ */
 			opline->extended_value = get_next_op_number();
 		}
 
-		zval error_name;
-		ZVAL_STRING(&error_name, "UnhandledMatchError");
-		zend_ast *error_name_ast = zend_ast_create_zval(&error_name);
-
-		zend_ast *error_args_ast = zend_ast_create_list(0, ZEND_AST_ARG_LIST);
-		zend_ast *new_error_ast = zend_ast_create(ZEND_AST_NEW, error_name_ast, error_args_ast);
-		zend_ast *throw_ast = zend_ast_create(ZEND_AST_THROW, new_error_ast);
-		zend_compile_throw(NULL, throw_ast);
-
-		zval_ptr_dtor(&error_name);
+		zend_emit_op(NULL, ZEND_MATCH_ERROR, &expr_node, NULL);
 	}
 
 	for (uint32_t i = 0; i < arms->children; ++i) {

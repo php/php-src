@@ -2923,6 +2923,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 				case ZEND_RETURN_BY_REF:
 				case ZEND_RETURN:
 				case ZEND_EXIT:
+				case ZEND_MATCH_ERROR:
 				/* switch through trampoline */
 				case ZEND_YIELD:
 				case ZEND_YIELD_FROM:

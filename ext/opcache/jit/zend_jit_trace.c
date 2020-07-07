@@ -297,6 +297,7 @@ static int zend_jit_trace_may_exit(const zend_op_array *op_array, const zend_op 
 		case ZEND_YIELD:
 		case ZEND_YIELD_FROM:
 		case ZEND_INCLUDE_OR_EVAL:
+		case ZEND_MATCH_ERROR:
 			/* unsupported */
 			return 1;
 		case ZEND_DO_FCALL:
