@@ -21,6 +21,8 @@ PHP                                                                        NEWS
     (Nikita)
   . Fixed bug #78598 (Changing array during undef index RW error segfaults).
     (Nikita)
+  . Fixed bug #79784 (Use after free if changing array during undef var during
+    array write fetch). (Nikita)
 
 - Fileinfo:
   . Fixed bug #79756 (finfo_file crash (FILEINFO_MIME)). (cmb)
