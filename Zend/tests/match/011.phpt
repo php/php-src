@@ -14,6 +14,6 @@ var_dump(match ('foo') {
 });
 
 ?>
---EXPECTF--
+--EXPECT--
 string(3) "foo"
 string(3) "foo"
