@@ -278,12 +278,13 @@ static zval* ZEND_FASTCALL zend_jit_symtable_lookup_w(HashTable *ht, zend_string
 	return retval;
 }
 
-static void ZEND_FASTCALL zend_jit_undefined_op_helper(uint32_t var)
+static int ZEND_FASTCALL zend_jit_undefined_op_helper(uint32_t var)
 {
 	const zend_execute_data *execute_data = EG(current_execute_data);
 	zend_string *cv = EX(func)->op_array.vars[EX_VAR_TO_NUM(var)];
 
 	zend_error(E_WARNING, "Undefined variable $%s", ZSTR_VAL(cv));
+	return EG(exception) == NULL;
 }
 
 static void ZEND_FASTCALL zend_jit_fetch_dim_r_helper(zend_array *ht, zval *dim, zval *result)

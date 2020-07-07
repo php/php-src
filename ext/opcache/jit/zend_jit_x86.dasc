@@ -9235,6 +9235,8 @@ static int zend_jit_send_var(dasm_State **Dst, const zend_op *opline, const zend
 		|	mov FCARG1d, opline->op1.var
 		|	EXT_CALL zend_jit_undefined_op_helper, r0
 		|	SET_ZVAL_TYPE_INFO arg_addr, IS_NULL
+		|	test r0, r0
+		|	jz ->exception_handler
 
 		if (op1_info & (MAY_BE_ANY|MAY_BE_REF)) {
 			|	jmp >7
