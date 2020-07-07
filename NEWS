@@ -9,6 +9,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #79778 (Assertion failure if dumping closure with unresolved
     static variable). (Nikita)
+  . Fixed bug #79792 (HT iterators not removed if empty array is destroyed).
+    (Nikita)
 
 - COM:
   . Fixed bug #63208 (BSTR to PHP string conversion not binary safe). (cmb)
