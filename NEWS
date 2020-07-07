@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.0.0alpha2
+09 Jul 2020, PHP 8.0.0alpha2
 
 - FFI:
   . Fixed bug #79749 (Converting FFI instances to bool fails). (cmb)
