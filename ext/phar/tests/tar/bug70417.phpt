@@ -13,7 +13,7 @@ if ($status !== 0) {
 --FILE--
 <?php
 function countOpenFiles() {
-    exec('lsof -p ' . escapeshellarg(getmypid()) . ' 2> /dev/null', $out);
+    exec('lsof -p ' . escapeshellarg(getmypid()) . ' 2> /dev/null', $out);  // Note: valgrind can produce false positives for /usr/bin/lsof
     return count($out);
 }
 $filename = __DIR__ . '/bug70417.tar';

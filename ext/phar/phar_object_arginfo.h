@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: fd4f05b74248e4f7efb234cac8e3a90e17037ee0 */
+ * Stub hash: 586c79f097e9153b70f6c6e208daa08acc0ce1d4 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -82,7 +82,9 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Phar_getPath arginfo_class_Phar___destruct
 
-#define arginfo_class_Phar_getMetadata arginfo_class_Phar___destruct
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar_getMetadata, 0, 0, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, unserialize_options, IS_ARRAY, 0, "[]")
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_Phar_getModified arginfo_class_Phar___destruct
 
@@ -252,7 +254,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_PharData_getPath arginfo_class_Phar___destruct
 
-#define arginfo_class_PharData_getMetadata arginfo_class_Phar___destruct
+#define arginfo_class_PharData_getMetadata arginfo_class_Phar_getMetadata
 
 #define arginfo_class_PharData_getModified arginfo_class_Phar___destruct
 
@@ -346,7 +348,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_PharFileInfo_getContent arginfo_class_Phar___destruct
 
-#define arginfo_class_PharFileInfo_getMetadata arginfo_class_Phar___destruct
+#define arginfo_class_PharFileInfo_getMetadata arginfo_class_Phar_getMetadata
 
 #define arginfo_class_PharFileInfo_getPharFlags arginfo_class_Phar___destruct
 

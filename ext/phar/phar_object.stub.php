@@ -67,7 +67,7 @@ class Phar extends RecursiveDirectoryIterator implements Countable, ArrayAccess
     public function getPath() {}
 
     /** @return mixed */
-    public function getMetadata() {}
+    public function getMetadata(array $unserialize_options = []) {}
 
     /** @return bool */
     public function getModified() {}
@@ -303,7 +303,7 @@ class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAcc
      * @return mixed
      * @alias Phar::getMetadata
      */
-    public function getMetadata() {}
+    public function getMetadata(array $unserialize_options = []) {}
 
     /**
      * @return bool
@@ -510,7 +510,7 @@ class PharFileInfo extends SplFileInfo
     public function getContent() {}
 
     /** @return mixed */
-    public function getMetadata() {}
+    public function getMetadata(array $unserialize_options = []) {}
 
     /** @return int */
     public function getPharFlags() {}
