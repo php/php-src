@@ -1952,7 +1952,7 @@ static void emit_type_narrowing_warning(const zend_op_array *op_array, zend_ssa 
 	zend_error(E_WARNING, "Narrowing occurred during type inference of %s. Please file a bug report on bugs.php.net", def_op_name);
 }
 
-uint32_t zend_array_element_type(uint32_t t1, int write, int insert)
+uint32_t zend_array_element_type(uint32_t t1, zend_uchar op_type, int write, int insert)
 {
 	uint32_t tmp = 0;
 
@@ -1972,15 +1972,18 @@ uint32_t zend_array_element_type(uint32_t t1, int write, int insert)
 			if (tmp & MAY_BE_ARRAY) {
 				tmp |= MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
 			}
-			if (t1 & MAY_BE_ARRAY_OF_REF) {
+			if (tmp & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
 				if (!write) {
 					/* can't be REF  because of ZVAL_COPY_DEREF() usage */
-					tmp |= MAY_BE_RC1 | MAY_BE_RCN;
-				} else {
+					tmp |= MAY_BE_RCN;
+					if ((op_type & (IS_VAR|IS_TMP_VAR)) && (t1 & MAY_BE_RC1)) {
+						tmp |= MAY_BE_RC1;
+					}
+				} else if (t1 & MAY_BE_ARRAY_OF_REF) {
 					tmp |= MAY_BE_REF | MAY_BE_RC1 | MAY_BE_RCN;
+				} else {
+					tmp |= MAY_BE_RC1 | MAY_BE_RCN;
 				}
-			} else if (tmp & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
-				tmp |= MAY_BE_RC1 | MAY_BE_RCN;
 			}
 		}
 		if (write) {
@@ -2513,7 +2516,7 @@ static zend_always_inline int _zend_update_type_info(
 			        tmp |= MAY_BE_REF;
 				}
 				orig = t1;
-				t1 = zend_array_element_type(t1, 1, 0);
+				t1 = zend_array_element_type(t1, opline->op1_type, 1, 0);
 				t2 = OP1_DATA_INFO();
 			} else if (opline->opcode == ZEND_ASSIGN_STATIC_PROP_OP) {
 				prop_info = zend_fetch_static_prop_info(script, op_array, ssa, opline);
@@ -3380,6 +3383,7 @@ static zend_always_inline int _zend_update_type_info(
 			/* FETCH_LIST on a string behaves like FETCH_R on null */
 			tmp = zend_array_element_type(
 				opline->opcode != ZEND_FETCH_LIST_R ? t1 : ((t1 & ~MAY_BE_STRING) | MAY_BE_NULL),
+				opline->op1_type,
 				opline->result_type == IS_VAR,
 				opline->op2_type == IS_UNUSED);
 			if (opline->opcode == ZEND_FETCH_DIM_IS && (t1 & MAY_BE_STRING)) {
