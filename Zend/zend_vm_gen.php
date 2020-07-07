@@ -1879,13 +1879,6 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                             out($f,"\n");
                             out($f,"typedef ZEND_OPCODE_HANDLER_RET (ZEND_FASTCALL *opcode_handler_t) (ZEND_OPCODE_HANDLER_ARGS);\n");
                             out($f,"\n");
-                            out($f,"#undef OPLINE\n");
-                            out($f,"#undef DCL_OPLINE\n");
-                            out($f,"#undef USE_OPLINE\n");
-                            out($f,"#undef LOAD_OPLINE\n");
-                            out($f,"#undef LOAD_OPLINE_EX\n");
-                            out($f,"#undef SAVE_OPLINE\n");
-                            out($f,"#undef SAVE_OPLINE_EX\n");
                             out($f,"#define DCL_OPLINE\n");
                             out($f,"#ifdef ZEND_VM_IP_GLOBAL_REG\n");
                             out($f,"# define OPLINE opline\n");
@@ -1904,8 +1897,6 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                             out($f,"# define SAVE_OPLINE()\n");
                             out($f,"# define SAVE_OPLINE_EX()\n");
                             out($f,"#endif\n");
-                            out($f,"#undef HANDLE_EXCEPTION\n");
-                            out($f,"#undef HANDLE_EXCEPTION_LEAVE\n");
                             out($f,"#define HANDLE_EXCEPTION() LOAD_OPLINE(); ZEND_VM_CONTINUE()\n");
                             out($f,"#define HANDLE_EXCEPTION_LEAVE() LOAD_OPLINE(); ZEND_VM_LEAVE()\n");
                             out($f,"#if defined(ZEND_VM_FP_GLOBAL_REG)\n");
@@ -1935,14 +1926,6 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                             break;
                         case ZEND_VM_KIND_SWITCH:
                             out($f,"\n");
-                            out($f,"#undef OPLINE\n");
-                            out($f,"#undef DCL_OPLINE\n");
-                            out($f,"#undef USE_OPLINE\n");
-                            out($f,"#undef LOAD_OPLINE\n");
-                            out($f,"#undef LOAD_OPLINE_EX\n");
-                            out($f,"#undef LOAD_NEXT_OPLINE\n");
-                            out($f,"#undef SAVE_OPLINE\n");
-                            out($f,"#undef SAVE_OPLINE_EX\n");
                             out($f,"#define OPLINE opline\n");
                             out($f,"#ifdef ZEND_VM_IP_GLOBAL_REG\n");
                             out($f,"# define DCL_OPLINE register const zend_op *opline __asm__(ZEND_VM_IP_GLOBAL_REG);\n");
@@ -1955,8 +1938,6 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                             out($f,"#define LOAD_NEXT_OPLINE() opline = EX(opline) + 1\n");
                             out($f,"#define SAVE_OPLINE() EX(opline) = opline\n");
                             out($f,"#define SAVE_OPLINE_EX()\n");
-                            out($f,"#undef HANDLE_EXCEPTION\n");
-                            out($f,"#undef HANDLE_EXCEPTION_LEAVE\n");
                             out($f,"#define HANDLE_EXCEPTION() LOAD_OPLINE(); ZEND_VM_CONTINUE()\n");
                             out($f,"#define HANDLE_EXCEPTION_LEAVE() LOAD_OPLINE(); ZEND_VM_LEAVE()\n");
                             out($f,"#define ZEND_VM_CONTINUE() goto zend_vm_continue\n");
@@ -1971,14 +1952,6 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                             break;
                         case ZEND_VM_KIND_GOTO:
                             out($f,"\n");
-                            out($f,"#undef OPLINE\n");
-                            out($f,"#undef DCL_OPLINE\n");
-                            out($f,"#undef USE_OPLINE\n");
-                            out($f,"#undef LOAD_OPLINE\n");
-                            out($f,"#undef LOAD_OPLINE_EX\n");
-                            out($f,"#undef LOAD_NEXT_OPLINE\n");
-                            out($f,"#undef SAVE_OPLINE\n");
-                            out($f,"#undef SAVE_OPLINE_EX\n");
                             out($f,"#define OPLINE opline\n");
                             out($f,"#ifdef ZEND_VM_IP_GLOBAL_REG\n");
                             out($f,"# define DCL_OPLINE register const zend_op *opline __asm__(ZEND_VM_IP_GLOBAL_REG);\n");
@@ -1991,8 +1964,6 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                             out($f,"#define LOAD_NEXT_OPLINE() opline = EX(opline) + 1\n");
                             out($f,"#define SAVE_OPLINE() EX(opline) = opline\n");
                             out($f,"#define SAVE_OPLINE_EX()\n");
-                            out($f,"#undef HANDLE_EXCEPTION\n");
-                            out($f,"#undef HANDLE_EXCEPTION_LEAVE\n");
                             if (ZEND_VM_SPEC) {
                                 out($f,"#define HANDLE_EXCEPTION() goto ZEND_HANDLE_EXCEPTION_SPEC_LABEL\n");
                                 out($f,"#define HANDLE_EXCEPTION_LEAVE() goto ZEND_HANDLE_EXCEPTION_SPEC_LABEL\n");

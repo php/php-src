@@ -391,13 +391,6 @@ static const void *zend_vm_get_opcode_handler_func(zend_uchar opcode, const zend
 
 typedef ZEND_OPCODE_HANDLER_RET (ZEND_FASTCALL *opcode_handler_t) (ZEND_OPCODE_HANDLER_ARGS);
 
-#undef OPLINE
-#undef DCL_OPLINE
-#undef USE_OPLINE
-#undef LOAD_OPLINE
-#undef LOAD_OPLINE_EX
-#undef SAVE_OPLINE
-#undef SAVE_OPLINE_EX
 #define DCL_OPLINE
 #ifdef ZEND_VM_IP_GLOBAL_REG
 # define OPLINE opline
@@ -416,8 +409,6 @@ typedef ZEND_OPCODE_HANDLER_RET (ZEND_FASTCALL *opcode_handler_t) (ZEND_OPCODE_H
 # define SAVE_OPLINE()
 # define SAVE_OPLINE_EX()
 #endif
-#undef HANDLE_EXCEPTION
-#undef HANDLE_EXCEPTION_LEAVE
 #define HANDLE_EXCEPTION() LOAD_OPLINE(); ZEND_VM_CONTINUE()
 #define HANDLE_EXCEPTION_LEAVE() LOAD_OPLINE(); ZEND_VM_LEAVE()
 #if defined(ZEND_VM_FP_GLOBAL_REG)
