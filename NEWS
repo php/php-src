@@ -12,6 +12,7 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #79740 (serialize() and unserialize() methods can not be called
     statically). (Nikita)
+  . Fixede bug #79783 (Segfault in php_str_replace_common). (Nikita)
 
 - Fileinfo:
   . Fixed bug #79756 (finfo_file crash (FILEINFO_MIME)). (cmb)

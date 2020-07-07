@@ -3009,7 +3009,11 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 				zend_compile_var(&arg_node, arg, BP_VAR_R, 0);
 				if (arg_node.op_type & (IS_CONST|IS_TMP_VAR)) {
 					/* Function call was converted into builtin instruction */
-					opcode = ZEND_SEND_VAL;
+					if (!fbc || ARG_MUST_BE_SENT_BY_REF(fbc, arg_num)) {
+						opcode = ZEND_SEND_VAL_EX;
+					} else {
+						opcode = ZEND_SEND_VAL;
+					}
 				} else {
 					if (fbc) {
 						if (ARG_MUST_BE_SENT_BY_REF(fbc, arg_num)) {
