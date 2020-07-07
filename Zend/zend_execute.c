@@ -2181,10 +2181,15 @@ str_index:
 					retval = &EG(uninitialized_zval);
 					break;
 				case BP_VAR_RW:
+					/* Key may be released while throwing the undefined index warning. */
+					zend_string_addref(offset_key);
 					if (UNEXPECTED(zend_undefined_index_write(ht, offset_key) == FAILURE)) {
+						zend_string_release(offset_key);
 						return NULL;
 					}
-					/* break missing intentionally */
+					retval = zend_hash_add_new(ht, offset_key, &EG(uninitialized_zval));
+					zend_string_release(offset_key);
+					break;
 				case BP_VAR_W:
 					retval = zend_hash_add_new(ht, offset_key, &EG(uninitialized_zval));
 					break;
