@@ -1816,7 +1816,6 @@ ZEND_METHOD(ReflectionFunction, invoke)
 	fci.retval = &retval;
 	fci.param_count = num_args;
 	fci.params = params;
-	fci.no_separation = 1;
 
 	fcc.function_handler = fptr;
 	fcc.called_scope = NULL;
@@ -1878,7 +1877,6 @@ ZEND_METHOD(ReflectionFunction, invokeArgs)
 	fci.retval = &retval;
 	fci.param_count = argc;
 	fci.params = params;
-	fci.no_separation = 1;
 
 	fcc.function_handler = fptr;
 	fcc.called_scope = NULL;
@@ -3206,7 +3204,6 @@ static void reflection_method_invoke(INTERNAL_FUNCTION_PARAMETERS, int variadic)
 	fci.retval = &retval;
 	fci.param_count = argc;
 	fci.params = params;
-	fci.no_separation = 1;
 
 	fcc.function_handler = mptr;
 	fcc.called_scope = intern->ce;

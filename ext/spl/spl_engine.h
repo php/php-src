@@ -63,7 +63,6 @@ static inline void spl_instantiate_arg_n(zend_class_entry *pce, zval *retval, in
 	fci.retval = &dummy;
 	fci.param_count = argc;
 	fci.params = argv;
-	fci.no_separation = 1;
 
 	fcc.function_handler = func;
 	fcc.called_scope = pce;

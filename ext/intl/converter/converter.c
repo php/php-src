@@ -229,7 +229,6 @@ static void php_converter_to_u_callback(const void *context,
 	objval->to_cb.param_count    = 4;
 	objval->to_cb.params = zargs;
 	objval->to_cb.retval = &retval;
-	objval->to_cb.no_separation  = 1;
 	if (zend_call_function(&(objval->to_cb), &(objval->to_cache)) == FAILURE) {
 		/* Unlikely */
 		php_converter_throw_failure(objval, U_INTERNAL_PROGRAM_ERROR, "Unexpected failure calling toUCallback()");
@@ -312,7 +311,6 @@ static void php_converter_from_u_callback(const void *context,
 	objval->from_cb.param_count = 4;
 	objval->from_cb.params = zargs;
 	objval->from_cb.retval = &retval;
-	objval->from_cb.no_separation  = 1;
 	if (zend_call_function(&(objval->from_cb), &(objval->from_cache)) == FAILURE) {
 		/* Unlikely */
 		php_converter_throw_failure(objval, U_INTERNAL_PROGRAM_ERROR, "Unexpected failure calling fromUCallback()");

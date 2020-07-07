@@ -2146,7 +2146,6 @@ static int php_sqlite3_authorizer(void *autharg, int action, const char *arg1, c
 	fci->retval = &retval;
 	fci->param_count = 5;
 	fci->params = argv;
-	fci->no_separation = 1;
 
 	int authreturn = SQLITE_DENY;
 

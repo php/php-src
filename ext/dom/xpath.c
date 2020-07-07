@@ -151,7 +151,6 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs,
 
 	fci.object = NULL;
 	fci.retval = &retval;
-	fci.no_separation = 1;
 
 	if (!zend_make_callable(&fci.function_name, &callable)) {
 		php_error_docref(NULL, E_WARNING, "Unable to call handler %s()", ZSTR_VAL(callable));

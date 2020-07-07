@@ -566,7 +566,6 @@ static xmlParserInputPtr _php_libxml_external_entity_loader(const char *URL,
 	fci->retval	= &retval;
 	fci->params	= params;
 	fci->param_count = sizeof(params)/sizeof(*params);
-	fci->no_separation	= 1;
 
 	status = zend_call_function(fci, &LIBXML(entity_loader).fcc);
 	if (status != SUCCESS || Z_ISUNDEF(retval)) {

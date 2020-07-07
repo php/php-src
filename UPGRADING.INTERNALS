@@ -19,6 +19,7 @@ PHP 8.0 INTERNALS UPGRADE NOTES
   p. ARG_COUNT() macro removed
   q. GC_COLLECTABLE flag
   r. Cannot implement Traversable only
+  s. zend_fcall_info no_separation flag removed
 
 2. Build system changes
   a. Abstract
@@ -134,6 +135,11 @@ PHP 8.0 INTERNALS UPGRADE NOTES
              ZEND_PARSE_PARAMETERS_NONE();
              zend_create_internal_iterator_zval(return_value, ZEND_THIS);
          }
+
+   s. The zend_fcall_info no_separation flag has been removed, and separation is
+      never allowed. If you wish to pass (or allow passing) arguments by
+      reference, explicitly create those arguments as references using
+      ZEND_MAKE_REF.
 
 ========================
 2. Build system changes

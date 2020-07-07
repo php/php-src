@@ -921,7 +921,6 @@ static inline int php_array_user_compare_unstable(Bucket *f, Bucket *s) /* {{{ *
 	BG(user_compare_fci).param_count = 2;
 	BG(user_compare_fci).params = args;
 	BG(user_compare_fci).retval = &retval;
-	BG(user_compare_fci).no_separation = 1;
 	call_failed = zend_call_function(&BG(user_compare_fci), &BG(user_compare_fci_cache)) == FAILURE || Z_TYPE(retval) == IS_UNDEF;
 	zval_ptr_dtor(&args[1]);
 	zval_ptr_dtor(&args[0]);
@@ -1063,7 +1062,6 @@ static inline int php_array_user_key_compare_unstable(Bucket *f, Bucket *s) /* {
 	BG(user_compare_fci).param_count = 2;
 	BG(user_compare_fci).params = args;
 	BG(user_compare_fci).retval = &retval;
-	BG(user_compare_fci).no_separation = 1;
 	call_failed = zend_call_function(&BG(user_compare_fci), &BG(user_compare_fci_cache)) == FAILURE || Z_TYPE(retval) == IS_UNDEF;
 	zval_ptr_dtor(&args[1]);
 	zval_ptr_dtor(&args[0]);
@@ -1374,7 +1372,6 @@ static int php_array_walk(zval *array, zval *userdata, int recursive) /* {{{ */
 	BG(array_walk_fci).retval = &retval;
 	BG(array_walk_fci).param_count = userdata ? 3 : 2;
 	BG(array_walk_fci).params = args;
-	BG(array_walk_fci).no_separation = 1;
 
 	zend_hash_internal_pointer_reset_ex(target_hash, &pos);
 	ht_iter = zend_hash_iterator_add(target_hash, pos);
@@ -4546,7 +4543,6 @@ static int zval_user_compare(zval *a, zval *b) /* {{{ */
 	BG(user_compare_fci).param_count = 2;
 	BG(user_compare_fci).params = args;
 	BG(user_compare_fci).retval = &retval;
-	BG(user_compare_fci).no_separation = 1;
 
 	if (zend_call_function(&BG(user_compare_fci), &BG(user_compare_fci_cache)) == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
 		zend_long ret = zval_get_long(&retval);
@@ -5906,7 +5902,6 @@ PHP_FUNCTION(array_reduce)
 
 	fci.retval = &retval;
 	fci.param_count = 2;
-	fci.no_separation = 1;
 
 	ZEND_HASH_FOREACH_VAL(htbl, operand) {
 		ZVAL_COPY_VALUE(&args[0], return_value);
@@ -5959,7 +5954,6 @@ PHP_FUNCTION(array_filter)
 
 	if (ZEND_FCI_INITIALIZED(fci)) {
 		have_callback = 1;
-		fci.no_separation = 1;
 		fci.retval = &retval;
 		if (use_type == ARRAY_FILTER_USE_BOTH) {
 			fci.param_count = 2;
@@ -6062,7 +6056,6 @@ PHP_FUNCTION(array_map)
 			fci.retval = &result;
 			fci.param_count = 1;
 			fci.params = &arg;
-			fci.no_separation = 1;
 
 			ZVAL_COPY(&arg, zv);
 			ret = zend_call_function(&fci, &fci_cache);
@@ -6151,7 +6144,6 @@ PHP_FUNCTION(array_map)
 				fci.retval = &result;
 				fci.param_count = n_arrays;
 				fci.params = params;
-				fci.no_separation = 1;
 
 				if (zend_call_function(&fci, &fci_cache) != SUCCESS || Z_TYPE(result) == IS_UNDEF) {
 					efree(array_pos);

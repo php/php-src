@@ -46,7 +46,6 @@ typedef struct _zend_fcall_info {
 	zval *retval;
 	zval *params;
 	zend_object *object;
-	zend_bool no_separation;
 	uint32_t param_count;
 } zend_fcall_info;
 
@@ -498,12 +497,10 @@ ZEND_API int add_property_zval_ex(zval *arg, const char *key, size_t key_len, zv
 #define add_property_zval(__arg, __key, __value) add_property_zval_ex(__arg, __key, strlen(__key), __value)
 
 
-ZEND_API int _call_user_function_ex(zval *object, zval *function_name, zval *retval_ptr, uint32_t param_count, zval params[], int no_separation);
+ZEND_API int _call_user_function_ex(zval *object, zval *function_name, zval *retval_ptr, uint32_t param_count, zval params[]);
 
 #define call_user_function(_unused, object, function_name, retval_ptr, param_count, params) \
-	_call_user_function_ex(object, function_name, retval_ptr, param_count, params, 1)
-#define call_user_function_ex(_unused, object, function_name, retval_ptr, param_count, params, no_separation, _unused2) \
-	_call_user_function_ex(object, function_name, retval_ptr, param_count, params, no_separation)
+	_call_user_function_ex(object, function_name, retval_ptr, param_count, params)
 
 ZEND_API extern const zend_fcall_info empty_fcall_info;
 ZEND_API extern const zend_fcall_info_cache empty_fcall_info_cache;

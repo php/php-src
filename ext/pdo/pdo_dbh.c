@@ -437,7 +437,6 @@ static void pdo_stmt_construct(zend_execute_data *execute_data, pdo_stmt_t *stmt
 		fci.retval = &retval;
 		fci.param_count = 0;
 		fci.params = NULL;
-		fci.no_separation = 1;
 
 		zend_fcall_info_args(&fci, ctor_args);
 

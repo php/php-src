@@ -1785,7 +1785,6 @@ PHP_METHOD(CallbackFilterIterator, accept)
 	fci->retval = return_value;
 	fci->param_count = 3;
 	fci->params = params;
-	fci->no_separation = 1;
 
 	if (zend_call_function(fci, fcc) != SUCCESS || Z_ISUNDEF_P(return_value)) {
 		RETURN_FALSE;

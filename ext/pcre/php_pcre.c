@@ -1529,7 +1529,6 @@ static zend_string *preg_do_repl_func(zend_fcall_info *fci, zend_fcall_info_cach
 	fci->retval = &retval;
 	fci->param_count = 1;
 	fci->params = &arg;
-	fci->no_separation = 1;
 
 	if (zend_call_function(fci, fcc) == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
 		if (EXPECTED(Z_TYPE(retval) == IS_STRING)) {

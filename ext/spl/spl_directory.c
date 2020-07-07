@@ -1904,7 +1904,6 @@ static int spl_filesystem_file_call(spl_filesystem_object *intern, zend_function
 	fci.retval = return_value;
 	fci.param_count = num_args;
 	fci.params = params;
-	fci.no_separation = 1;
 	ZVAL_STR(&fci.function_name, func_ptr->common.function_name);
 
 	fcic.function_handler = func_ptr;

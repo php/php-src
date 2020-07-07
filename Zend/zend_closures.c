@@ -167,7 +167,6 @@ ZEND_METHOD(Closure, call)
 	fci.size = sizeof(fci);
 	ZVAL_OBJ(&fci.function_name, &closure->std);
 	fci.retval = &closure_result;
-	fci.no_separation = 1;
 
 	if (zend_call_function(&fci, &fci_cache) == SUCCESS && Z_TYPE(closure_result) != IS_UNDEF) {
 		if (Z_ISREF(closure_result)) {

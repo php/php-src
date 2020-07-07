@@ -655,7 +655,6 @@ static int do_fetch_class_prepare(pdo_stmt_t *stmt) /* {{{ */
 		fci->retval = &stmt->fetch.cls.retval;
 		fci->param_count = 0;
 		fci->params = NULL;
-		fci->no_separation = 1;
 
 		zend_fcall_info_args_ex(fci, ce->constructor, &stmt->fetch.cls.ctor_args);
 
