@@ -796,13 +796,6 @@ static ZEND_COLD zend_function *zend_stack_frame_get_constructor(zend_object *ob
 	return NULL;
 }
 
-static ZEND_COLD zval *zend_stack_frame_object_write_property(zend_object *object, zend_string *name, zval *value, void **cache_slot)
-{
-	zend_throw_error(NULL, "'%s' objects are immutable and do not support writing properties", ZSTR_VAL(object->ce->name));
-
-	return &EG(uninitialized_zval);
-}
-
 static ZEND_COLD zval *zend_stack_frame_read_dimension(zend_object *object, zval *offset, int type, zval *rv)
 {
 	zval *retval = rv;
@@ -982,8 +975,7 @@ void zend_register_default_exception(void) /* {{{ */
 	declare_stack_frame_properties(zend_ce_stack_frame);
 
 	memcpy(&zend_stack_frame_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	// this needs different approach as it blocks property updates
-	// zend_stack_frame_handlers.write_property = zend_stack_frame_object_write_property;
+	// this needs different approach than adding fake write_property as it blocks property updates
 	zend_stack_frame_handlers.read_dimension = zend_stack_frame_read_dimension;
 	zend_stack_frame_handlers.write_dimension = zend_stack_frame_write_dimension;
 	zend_stack_frame_handlers.has_dimension = zend_stack_frame_has_dimension;
