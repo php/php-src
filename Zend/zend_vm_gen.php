@@ -738,7 +738,7 @@ function format_condition($condition) {
 }
 
 // Generates code for opcode handler or helper
-function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name, $extra_spec=null) {
+function gen_code($f, $spec, $kind, $code, $op1, $op2, $name, $extra_spec=null) {
     global $op1_type, $op2_type, $op1_get_zval_ptr, $op2_get_zval_ptr,
         $op1_get_zval_ptr_deref, $op2_get_zval_ptr_deref,
         $op1_get_zval_ptr_undef, $op2_get_zval_ptr_undef,
@@ -796,8 +796,6 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name, $extra_sp
         "/^#(\s*)if\s+0\s*&&.*[^\\\\]$/m" => "#\\1if 0",
         "/^#(\s*)elif\s+1\s*\\|\\|.*[^\\\\]$/m" => "#\\1elif 1",
         "/^#(\s*)elif\s+0\s*&&.*[^\\\\]$/m" => "#\\1elif 0",
-        "/^#(\s*)ifdef\s+ZEND_VM_EXPORT\s*\n/m" => $export?"#\\1if 1\n":"#\\1if 0\n",
-        "/^#(\s*)ifndef\s+ZEND_VM_EXPORT\s*\n/m" => $export?"#\\1if 0\n":"#\\1if 1\n",
         "/OP_DATA_TYPE/" => $op_data_type[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"],
         "/GET_OP_DATA_ZVAL_PTR\(([^)]*)\)/" => $op_data_get_zval_ptr[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"],
         "/GET_OP_DATA_ZVAL_PTR_DEREF\(([^)]*)\)/" => $op_data_get_zval_ptr_deref[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"],
@@ -1064,7 +1062,7 @@ function gen_handler($f, $spec, $kind, $name, $op1, $op2, $use, $code, $lineno, 
         case ZEND_VM_KIND_HYBRID:
             if (is_inline_hybrid_handler($name, $opcode["hot"], $op1, $op2, $extra_spec)) {
                 $out = fopen('php://memory', 'w+');
-                gen_code($out, $spec, $kind, 0, $code, $op1, $op2, $name, $extra_spec);
+                gen_code($out, $spec, $kind, $code, $op1, $op2, $name, $extra_spec);
                 rewind($out);
                 $code =
                       "\t\t\tHYBRID_CASE({$spec_name}):\n"
@@ -1123,7 +1121,7 @@ function gen_handler($f, $spec, $kind, $name, $op1, $op2, $use, $code, $lineno, 
     }
 
     // Generate opcode handler's code
-    gen_code($f, $spec, $kind, 0, $code, $op1, $op2, $name, $extra_spec);
+    gen_code($f, $spec, $kind, $code, $op1, $op2, $name, $extra_spec);
 
     if ($additional_func) {
         out($f,"static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL {$spec_name}_HANDLER(ZEND_OPCODE_HANDLER_ARGS)\n");
@@ -1186,7 +1184,7 @@ function gen_helper($f, $spec, $kind, $name, $op1, $op2, $param, $code, $lineno,
     }
 
     // Generate helper's code
-    gen_code($f, $spec, $kind, 0, $code, $op1, $op2, $name, $extra_spec);
+    gen_code($f, $spec, $kind, $code, $op1, $op2, $name, $extra_spec);
 }
 
 
@@ -2332,7 +2330,6 @@ function gen_vm($def, $skel) {
     $max_opcode_len = 0;
     $max_opcode     = 0;
     $extra_num      = 256;
-    $export         = array();
     foreach ($in as $line) {
         ++$lineno;
         if (strpos($line,"ZEND_VM_HANDLER(") === 0 ||
@@ -2482,28 +2479,6 @@ function gen_vm($def, $skel) {
 
             $handler = null;
             $list[$lineno] = array("helper"=>$helper);
-        } else if (strpos($line,"ZEND_VM_EXPORT_HANDLER(") === 0) {
-            if (preg_match(
-                    "/^ZEND_VM_EXPORT_HANDLER\(\s*([A-Za-z_]+)\s*,\s*([A-Z_]+)\s*\)/",
-                    $line,
-                    $m) == 0) {
-                die("ERROR ($def:$lineno): Invalid ZEND_VM_EXPORT_HANDLER definition.\n");
-            }
-            if (!isset($opnames[$m[2]])) {
-                die("ERROR ($def:$lineno): opcode '{$m[2]}' is not defined.\n");
-            }
-            $export[] = array("handler",$m[1],$m[2]);
-        } else if (strpos($line,"ZEND_VM_EXPORT_HELPER(") === 0) {
-            if (preg_match(
-                    "/^ZEND_VM_EXPORT_HELPER\(\s*([A-Za-z_]+)\s*,\s*([A-Za-z_]+)\s*\)/",
-                    $line,
-                    $m) == 0) {
-                die("ERROR ($def:$lineno): Invalid ZEND_VM_EXPORT_HELPER definition.\n");
-            }
-            if (!isset($helpers[$m[2]])) {
-                die("ERROR ($def:$lineno): helper '{$m[2]}' is not defined.\n");
-            }
-            $export[] = array("helper",$m[1],$m[2]);
         } else if (strpos($line,"ZEND_VM_DEFINE_OP(") === 0) {
             if (preg_match(
                     "/^ZEND_VM_DEFINE_OP\(\s*([0-9]+)\s*,\s*([A-Z_]+)\s*\);/",
@@ -2947,80 +2922,6 @@ function gen_vm($def, $skel) {
         out($f, "\tzend_error_noreturn(E_CORE_ERROR, \"zend_vm_call_opcode_handler() is not supported\");\n");
         out($f, "\treturn 0;\n");
         out($f, "}\n\n");
-    }
-
-    // Export handlers and helpers
-    if (count($export) > 0 &&
-        ZEND_VM_KIND != ZEND_VM_KIND_CALL) {
-        out($f,"#undef OPLINE\n");
-        out($f,"#undef DCL_OPLINE\n");
-        out($f,"#undef USE_OPLINE\n");
-        out($f,"#undef LOAD_OPLINE\n");
-        out($f,"#undef LOAD_OPLINE_EX\n");
-        out($f,"#undef LOAD_NEXT_OPLINE\n");
-        out($f,"#undef SAVE_OPLINE\n");
-        out($f,"#undef SAVE_OPLINE_EX\n");
-        out($f,"#define OPLINE EX(opline)\n");
-        out($f,"#define DCL_OPLINE\n");
-        out($f,"#define USE_OPLINE const zend_op *opline = EX(opline);\n");
-        out($f,"#define LOAD_OPLINE()\n");
-        out($f,"#define LOAD_OPLINE_EX()\n");
-        out($f,"#define LOAD_NEXT_OPLINE() ZEND_VM_INC_OPCODE()\n");
-        out($f,"#define SAVE_OPLINE()\n");
-        out($f,"#define SAVE_OPLINE_EX()\n");
-        out($f,"#undef HANDLE_EXCEPTION\n");
-        out($f,"#undef HANDLE_EXCEPTION_LEAVE\n");
-        out($f,"#define HANDLE_EXCEPTION() LOAD_OPLINE(); ZEND_VM_CONTINUE()\n");
-        out($f,"#define HANDLE_EXCEPTION_LEAVE() LOAD_OPLINE(); ZEND_VM_LEAVE()\n");
-        out($f,"#undef ZEND_VM_CONTINUE\n");
-        out($f,"#undef ZEND_VM_RETURN\n");
-        out($f,"#undef ZEND_VM_ENTER_EX\n");
-        out($f,"#undef ZEND_VM_ENTER\n");
-        out($f,"#undef ZEND_VM_LEAVE\n");
-        out($f,"#undef ZEND_VM_DISPATCH\n");
-        out($f,"#define ZEND_VM_CONTINUE()   return  0\n");
-        out($f,"#define ZEND_VM_RETURN()     return -1\n");
-        out($f,"#define ZEND_VM_ENTER_EX()   return  1\n");
-        out($f,"#define ZEND_VM_ENTER()      return  1\n");
-        out($f,"#define ZEND_VM_LEAVE()      return  2\n");
-        out($f,"#define ZEND_VM_INTERRUPT()  return zend_interrupt_helper(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);\n");
-        out($f,"#define ZEND_VM_DISPATCH(opcode, opline) return zend_vm_get_opcode_handler(opcode, opline)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);\n\n");
-        out($f,"\n");
-    }
-    foreach ($export as $dsk) {
-        list($kind, $func, $name) = $dsk;
-        out($f, "ZEND_API int $func(");
-        if ($kind == "handler") {
-            out($f, "ZEND_OPCODE_HANDLER_ARGS)\n");
-            $code = $opcodes[$opnames[$name]]['code'];
-        } else {
-            $h = $helpers[$name];
-            if ($h['param'] == null) {
-                out($f, "ZEND_OPCODE_HANDLER_ARGS)\n");
-            } else {
-                out($f, $h['param']. " ZEND_OPCODE_HANDLER_ARGS_DC)\n");
-            }
-            $code = $h['code'];
-        }
-        $done = 0;
-        if (ZEND_VM_KIND == ZEND_VM_KIND_CALL) {
-            if ($kind == "handler") {
-                $op = $opcodes[$opnames[$name]];
-                if (isset($op['op1']["ANY"]) && isset($op['op2']["ANY"])) {
-                    out($f, "{\n\treturn ".$name.(ZEND_VM_SPEC?"_SPEC":"")."_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);\n}\n\n");
-                    $done = 1;
-                }
-            } else if ($helpers[$name]["param"] == null) {
-                $h = $helpers[$name];
-                if (isset($h['op1']["ANY"]) && isset($h['op2']["ANY"])) {
-                    out($f, "{\n\treturn ".$name.(ZEND_VM_SPEC?"_SPEC":"")."(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);\n}\n\n");
-                    $done = 1;
-                }
-            }
-        }
-        if (!$done) {
-            gen_code($f, 0, ZEND_VM_KIND_CALL, 1, $code, 'ANY', 'ANY', $name);
-        }
     }
 
     fclose($f);
