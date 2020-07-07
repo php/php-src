@@ -1972,15 +1972,15 @@ uint32_t zend_array_element_type(uint32_t t1, int write, int insert)
 			if (tmp & MAY_BE_ARRAY) {
 				tmp |= MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
 			}
-			if (tmp & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
+			if (t1 & MAY_BE_ARRAY_OF_REF) {
 				if (!write) {
 					/* can't be REF  because of ZVAL_COPY_DEREF() usage */
-					tmp |= MAY_BE_RCN;
-				} else if (t1 & MAY_BE_ARRAY_OF_REF) {
-					tmp |= MAY_BE_REF | MAY_BE_RC1 | MAY_BE_RCN;
-				} else {
 					tmp |= MAY_BE_RC1 | MAY_BE_RCN;
+				} else {
+					tmp |= MAY_BE_REF | MAY_BE_RC1 | MAY_BE_RCN;
 				}
+			} else if (tmp & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
+				tmp |= MAY_BE_RC1 | MAY_BE_RCN;
 			}
 		}
 		if (write) {
