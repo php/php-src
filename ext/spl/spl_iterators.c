@@ -1785,7 +1785,7 @@ PHP_METHOD(CallbackFilterIterator, accept)
 	fci->retval = return_value;
 	fci->param_count = 3;
 	fci->params = params;
-	fci->no_separation = 0;
+	fci->no_separation = 1;
 
 	if (zend_call_function(fci, fcc) != SUCCESS || Z_ISUNDEF_P(return_value)) {
 		RETURN_FALSE;
@@ -1794,10 +1794,6 @@ PHP_METHOD(CallbackFilterIterator, accept)
 	if (EG(exception)) {
 		RETURN_THROWS();
 	}
-
-	/* zend_call_function may change args to IS_REF */
-	ZVAL_COPY_VALUE(&intern->current.data, &params[0]);
-	ZVAL_COPY_VALUE(&intern->current.key, &params[1]);
 }
 /* }}} */
 

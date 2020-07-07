@@ -17,10 +17,10 @@ $data = $callbackTest->current();
 $callbackTest->next();
 print_r($data);
 ?>
---EXPECT--
+--EXPECTF--
+Warning: {closure}(): Argument #1 ($current) must be passed by reference, value given in %s on line %d
 Array
 (
     [0] => 1
     [1] => 2
-    [message] => Test message
 )
