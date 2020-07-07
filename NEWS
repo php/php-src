@@ -1,7 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.2.32
+09 Jul 2020, PHP 7.2.32
 
+- Core:
+  . No source changes to this release.
+    Vesion number added for reproduction of Windows builds. (cmb)
 
 14 May 2020, PHP 7.2.31
 
