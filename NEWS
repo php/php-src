@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.0.0alpha3
 
+- Core:
+  . Fixed bug #79790 ("Illegal offset type" exception during AST evaluation
+    not handled properly). (Nikita)
 
 09 Jul 2020, PHP 8.0.0alpha2
 
