@@ -119,3 +119,22 @@ class ArithmeticError extends Error
 class DivisionByZeroError extends ArithmeticError
 {
 }
+
+final class StackFrame
+{
+    public static function getTrace(): array {}
+
+    public function getFile(): string {}
+
+    public function getLine(): int {}
+
+    public function getFunction(): ?string {}
+
+    public function getClass(): ?string {}
+
+    public function getObject(): ?object {}
+
+    public function getType(): ?string {}
+
+    public function getArgs(): array {}
+}

@@ -35,6 +35,9 @@ extern ZEND_API zend_class_entry *zend_ce_argument_count_error;
 extern ZEND_API zend_class_entry *zend_ce_value_error;
 extern ZEND_API zend_class_entry *zend_ce_arithmetic_error;
 extern ZEND_API zend_class_entry *zend_ce_division_by_zero_error;
+extern ZEND_API zend_class_entry *zend_ce_stack_frame;
+
+extern zend_object_handlers zend_stack_frame_handlers;
 
 ZEND_API void zend_exception_set_previous(zend_object *exception, zend_object *add_previous);
 ZEND_API void zend_exception_save(void);

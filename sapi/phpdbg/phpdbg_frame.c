@@ -277,7 +277,7 @@ void phpdbg_dump_backtrace(size_t num) /* {{{ */
 	}
 
 	phpdbg_try_access {
-		zend_fetch_debug_backtrace(&zbacktrace, 0, 0, limit);
+		zend_fetch_debug_backtrace(&zbacktrace, 0, 0, limit, 0);
 	} phpdbg_catch_access {
 		phpdbg_error("signalsegv", "", "Couldn't fetch backtrace, invalid data source");
 		return;

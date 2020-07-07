@@ -2145,7 +2145,7 @@ ZEND_METHOD(ReflectionGenerator, getTrace)
 	}
 
 	EG(current_execute_data) = root_generator->execute_data;
-	zend_fetch_debug_backtrace(return_value, 0, options, 0);
+	zend_fetch_debug_backtrace(return_value, 0, options, 0, 0);
 	EG(current_execute_data) = ex_backup;
 
 	root_generator->execute_data->prev_execute_data = root_prev;

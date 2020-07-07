@@ -40,6 +40,7 @@ ZEND_API zend_class_entry *zend_ce_argument_count_error;
 ZEND_API zend_class_entry *zend_ce_value_error;
 ZEND_API zend_class_entry *zend_ce_arithmetic_error;
 ZEND_API zend_class_entry *zend_ce_division_by_zero_error;
+ZEND_API zend_class_entry *zend_ce_stack_frame;
 
 /* Internal pseudo-exception that is not exposed to userland. */
 static zend_class_entry zend_ce_unwind_exit;
@@ -47,6 +48,7 @@ static zend_class_entry zend_ce_unwind_exit;
 ZEND_API void (*zend_throw_exception_hook)(zval *ex);
 
 static zend_object_handlers default_exception_handlers;
+zend_object_handlers zend_stack_frame_handlers;
 
 /* {{{ zend_implement_throwable */
 static int zend_implement_throwable(zend_class_entry *interface, zend_class_entry *class_type)
@@ -228,7 +230,7 @@ static zend_object *zend_default_exception_new_ex(zend_class_entry *class_type, 
 	if (EG(current_execute_data)) {
 		zend_fetch_debug_backtrace(&trace,
 			skip_top_traces,
-			EG(exception_ignore_args) ? DEBUG_BACKTRACE_IGNORE_ARGS : 0, 0);
+			EG(exception_ignore_args) ? DEBUG_BACKTRACE_IGNORE_ARGS : 0, 0, 0);
 	} else {
 		array_init(&trace);
 	}
@@ -758,6 +760,164 @@ static void declare_exception_properties(zend_class_entry *ce)
 		(zend_type) ZEND_TYPE_INIT_CE(zend_ce_throwable, /* allow_null */ 1, 0));
 }
 
+static void declare_stack_frame_properties(zend_class_entry *ce)
+{
+	zval val;
+
+	ZVAL_NULL(&val);
+	zend_declare_typed_property(
+		ce, ZSTR_KNOWN(ZEND_STR_FILE), &val, ZEND_ACC_PUBLIC, NULL,
+		(zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_declare_typed_property(
+		ce, ZSTR_KNOWN(ZEND_STR_LINE), &val, ZEND_ACC_PUBLIC, NULL,
+		(zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_property(
+		ce, ZSTR_KNOWN(ZEND_STR_FUNCTION), &val, ZEND_ACC_PUBLIC, NULL,
+		(zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_declare_typed_property(
+		ce, ZSTR_KNOWN(ZEND_STR_CLASS), &val, ZEND_ACC_PUBLIC, NULL,
+		(zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_declare_typed_property(
+		ce, ZSTR_KNOWN(ZEND_STR_TYPE), &val, ZEND_ACC_PUBLIC, NULL,
+		(zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_declare_typed_property(
+		ce, ZSTR_KNOWN(ZEND_STR_OBJECT), &val, ZEND_ACC_PUBLIC, NULL,
+		(zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_OBJECT));
+
+	ZVAL_EMPTY_ARRAY(&val);
+	zend_declare_typed_property(
+		ce, ZSTR_KNOWN(ZEND_STR_ARGS), &val, ZEND_ACC_PUBLIC, NULL,
+		(zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY));
+}
+
+static ZEND_COLD zend_function *zend_stack_frame_get_constructor(zend_object *object)
+{
+	zend_throw_error(NULL, "Instantiation of '%s' is not allowed", ZSTR_VAL(object->ce->name));
+	return NULL;
+}
+
+static ZEND_COLD zval *zend_stack_frame_object_write_property(zend_object *object, zend_string *name, zval *value, void **cache_slot)
+{
+	zend_throw_error(NULL, "'%s' objects are immutable and do not support writing properties", ZSTR_VAL(object->ce->name));
+
+	return &EG(uninitialized_zval);
+}
+
+static ZEND_COLD zval *zend_stack_frame_read_dimension(zend_object *object, zval *offset, int type, zval *rv)
+{
+	zval *retval = rv;
+	if (offset == NULL) {
+		zend_throw_error(NULL, "Cannot append to '%s'", ZSTR_VAL(object->ce->name));
+		return NULL;
+	}
+
+	if (Z_TYPE_P(offset) != IS_STRING) {
+		zend_type_error("'%s' key must be a string", ZSTR_VAL(object->ce->name));
+		return NULL;
+	}
+
+	retval = zend_std_read_property(object, Z_STR_P(offset), type, NULL, rv);
+
+	return retval;
+}
+
+static ZEND_COLD void zend_stack_frame_write_dimension(zend_object *object, zval *offset, zval *value)
+{
+	zend_throw_error(NULL, "Cannot modify a '%s'", ZSTR_VAL(object->ce->name));
+}
+
+static ZEND_COLD int zend_stack_frame_has_dimension(zend_object *object, zval *offset, int check_empty)
+{
+	if (Z_TYPE_P(offset) != IS_STRING) {
+		zend_type_error("'%s' key must be a string", ZSTR_VAL(object->ce->name));
+		return 0;
+	}
+
+	return zend_std_has_property(object, Z_STR_P(offset), 0, NULL);
+}
+
+static ZEND_COLD void zend_stack_frame_unset_dimension(zend_object *object, zval *offset)
+{
+	zend_throw_error(NULL, "Cannot modify a '%s'", ZSTR_VAL(object->ce->name));
+}
+
+ZEND_METHOD(StackFrame, getTrace)
+{
+	zend_long options = DEBUG_BACKTRACE_PROVIDE_OBJECT;
+	zend_long limit = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|ll", &options, &limit) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	zend_fetch_debug_backtrace(return_value, 1, options, limit, 1);
+}
+
+ZEND_METHOD(StackFrame, getFile)
+{
+	zval *prop, rv;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	prop = GET_PROPERTY(ZEND_THIS, ZEND_STR_FILE);
+	RETURN_STR(zval_get_string(prop));
+}
+
+ZEND_METHOD(StackFrame, getLine)
+{
+	zval *prop, rv;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	prop = GET_PROPERTY(ZEND_THIS, ZEND_STR_LINE);
+	RETURN_LONG(zval_get_long(prop));
+}
+
+ZEND_METHOD(StackFrame, getFunction)
+{
+	zval rv;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	ZVAL_COPY(return_value, GET_PROPERTY_SILENT(ZEND_THIS, ZEND_STR_FUNCTION));
+}
+
+ZEND_METHOD(StackFrame, getClass)
+{
+	zval rv;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	ZVAL_COPY(return_value, GET_PROPERTY_SILENT(ZEND_THIS, ZEND_STR_CLASS));
+}
+
+ZEND_METHOD(StackFrame, getObject)
+{
+	zval rv;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	ZVAL_COPY(return_value, GET_PROPERTY_SILENT(ZEND_THIS, ZEND_STR_OBJECT));
+}
+
+ZEND_METHOD(StackFrame, getType)
+{
+	zval rv;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	ZVAL_COPY(return_value, GET_PROPERTY_SILENT(ZEND_THIS, ZEND_STR_TYPE));
+}
+
+ZEND_METHOD(StackFrame, getArgs)
+{
+	zval rv;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	ZVAL_COPY(return_value, GET_PROPERTY_SILENT(ZEND_THIS, ZEND_STR_ARGS));
+}
+
 void zend_register_default_exception(void) /* {{{ */
 {
 	zend_class_entry ce;
@@ -814,6 +974,21 @@ void zend_register_default_exception(void) /* {{{ */
 	zend_ce_division_by_zero_error->create_object = zend_default_exception_new;
 
 	INIT_CLASS_ENTRY(zend_ce_unwind_exit, "UnwindExit", NULL);
+
+	INIT_CLASS_ENTRY(ce, "StackFrame", class_StackFrame_methods);
+	zend_ce_stack_frame = zend_register_internal_class_ex(&ce, NULL);
+	zend_ce_stack_frame->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	zend_class_implements(zend_ce_stack_frame, 1, zend_ce_arrayaccess);
+	declare_stack_frame_properties(zend_ce_stack_frame);
+
+	memcpy(&zend_stack_frame_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	// this needs different approach as it blocks property updates
+	// zend_stack_frame_handlers.write_property = zend_stack_frame_object_write_property;
+	zend_stack_frame_handlers.read_dimension = zend_stack_frame_read_dimension;
+	zend_stack_frame_handlers.write_dimension = zend_stack_frame_write_dimension;
+	zend_stack_frame_handlers.has_dimension = zend_stack_frame_has_dimension;
+	zend_stack_frame_handlers.unset_dimension = zend_stack_frame_unset_dimension;
+	zend_stack_frame_handlers.get_constructor = zend_stack_frame_get_constructor;
 }
 /* }}} */
 

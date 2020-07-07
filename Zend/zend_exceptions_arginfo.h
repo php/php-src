@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7eb20393f4ca314324d9813983124f724189ce8a */
+ * Stub hash: 686db33b530c54804faf1fe5d4f8b1d6a6b06d6e */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Throwable_getMessage, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -79,6 +79,24 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Error___toString arginfo_class_Throwable_getMessage
 
+#define arginfo_class_StackFrame_getTrace arginfo_class_Throwable_getTrace
+
+#define arginfo_class_StackFrame_getFile arginfo_class_Throwable_getMessage
+
+#define arginfo_class_StackFrame_getLine arginfo_class_Throwable_getLine
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_StackFrame_getFunction, 0, 0, IS_STRING, 1)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_StackFrame_getClass arginfo_class_StackFrame_getFunction
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_StackFrame_getObject, 0, 0, IS_OBJECT, 1)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_StackFrame_getType arginfo_class_StackFrame_getFunction
+
+#define arginfo_class_StackFrame_getArgs arginfo_class_Throwable_getTrace
+
 
 ZEND_METHOD(Exception, __clone);
 ZEND_METHOD(Exception, __construct);
@@ -93,6 +111,14 @@ ZEND_METHOD(Exception, getTraceAsString);
 ZEND_METHOD(Exception, __toString);
 ZEND_METHOD(ErrorException, __construct);
 ZEND_METHOD(ErrorException, getSeverity);
+ZEND_METHOD(StackFrame, getTrace);
+ZEND_METHOD(StackFrame, getFile);
+ZEND_METHOD(StackFrame, getLine);
+ZEND_METHOD(StackFrame, getFunction);
+ZEND_METHOD(StackFrame, getClass);
+ZEND_METHOD(StackFrame, getObject);
+ZEND_METHOD(StackFrame, getType);
+ZEND_METHOD(StackFrame, getArgs);
 
 
 static const zend_function_entry class_Throwable_methods[] = {
@@ -177,5 +203,18 @@ static const zend_function_entry class_ArithmeticError_methods[] = {
 
 
 static const zend_function_entry class_DivisionByZeroError_methods[] = {
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_StackFrame_methods[] = {
+	ZEND_ME(StackFrame, getTrace, arginfo_class_StackFrame_getTrace, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(StackFrame, getFile, arginfo_class_StackFrame_getFile, ZEND_ACC_PUBLIC)
+	ZEND_ME(StackFrame, getLine, arginfo_class_StackFrame_getLine, ZEND_ACC_PUBLIC)
+	ZEND_ME(StackFrame, getFunction, arginfo_class_StackFrame_getFunction, ZEND_ACC_PUBLIC)
+	ZEND_ME(StackFrame, getClass, arginfo_class_StackFrame_getClass, ZEND_ACC_PUBLIC)
+	ZEND_ME(StackFrame, getObject, arginfo_class_StackFrame_getObject, ZEND_ACC_PUBLIC)
+	ZEND_ME(StackFrame, getType, arginfo_class_StackFrame_getType, ZEND_ACC_PUBLIC)
+	ZEND_ME(StackFrame, getArgs, arginfo_class_StackFrame_getArgs, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
