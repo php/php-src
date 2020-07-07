@@ -83,30 +83,6 @@ PHPAPI int php_setcookie(zend_string *name, zend_string *value, time_t expires, 
 	int result;
 	smart_str buf = {0};
 
-	if (!ZSTR_LEN(name)) {
-		zend_error( E_WARNING, "Cookie names must not be empty" );
-		return FAILURE;
-	} else if (strpbrk(ZSTR_VAL(name), "=,; \t\r\n\013\014") != NULL) {   /* man isspace for \013 and \014 */
-		zend_error(E_WARNING, "Cookie names cannot contain any of the following '=,; \\t\\r\\n\\013\\014'" );
-		return FAILURE;
-	}
-
-	if (!url_encode && value &&
-			strpbrk(ZSTR_VAL(value), ",; \t\r\n\013\014") != NULL) { /* man isspace for \013 and \014 */
-		zend_error(E_WARNING, "Cookie values cannot contain any of the following ',; \\t\\r\\n\\013\\014'" );
-		return FAILURE;
-	}
-
-	if (path && strpbrk(ZSTR_VAL(path), ",; \t\r\n\013\014") != NULL) { /* man isspace for \013 and \014 */
-		zend_error(E_WARNING, "Cookie paths cannot contain any of the following ',; \\t\\r\\n\\013\\014'" );
-		return FAILURE;
-	}
-
-	if (domain && strpbrk(ZSTR_VAL(domain), ",; \t\r\n\013\014") != NULL) { /* man isspace for \013 and \014 */
-		zend_error(E_WARNING, "Cookie domains cannot contain any of the following ',; \\t\\r\\n\\013\\014'" );
-		return FAILURE;
-	}
-
 	if (value == NULL || ZSTR_LEN(value) == 0) {
 		/*
 		 * MSIE doesn't delete a cookie when you set it to a null value
@@ -225,10 +201,10 @@ static void php_head_parse_cookie_options_array(zval *options, zend_long *expire
 	}
 }
 
-/* {{{ setcookie(string name [, string value [, array options]])
-   Send a cookie */
-PHP_FUNCTION(setcookie)
+#define ILLEGAL_COOKIE_CHARACTER "\",\", \";\", \" \", \"\\t\", \"\\r\", \"\\n\", \"\\013\", and \"\\014\""
+static void php_setcookie_common(INTERNAL_FUNCTION_PARAMETERS, bool is_raw)
 {
+	/* to handle overloaded function array|int */
 	zval *expires_or_options = NULL;
 	zend_string *name, *value = NULL, *path = NULL, *domain = NULL, *samesite = NULL;
 	zend_long expires = 0;
@@ -248,17 +224,53 @@ PHP_FUNCTION(setcookie)
 	if (expires_or_options) {
 		if (Z_TYPE_P(expires_or_options) == IS_ARRAY) {
 			if (UNEXPECTED(ZEND_NUM_ARGS() > 3)) {
-				php_error_docref(NULL, E_WARNING, "Cannot pass arguments after the options array");
-				RETURN_FALSE;
+				zend_argument_count_error("%s(): Expects exactly 3 arguments when argument #3 "
+					"($expires_or_options) is an array", get_active_function_name());
+				RETURN_THROWS();
 			}
 			php_head_parse_cookie_options_array(expires_or_options, &expires, &path, &domain, &secure, &httponly, &samesite);
+			if (path && strpbrk(ZSTR_VAL(path), ",; \t\r\n\013\014") != NULL) { /* man isspace for \013 and \014 */
+				zend_value_error("%s(): Argument #3 ($expires_or_options[\"path\"]) cannot contain "
+					ILLEGAL_COOKIE_CHARACTER, get_active_function_name());
+				goto cleanup;
+				RETURN_THROWS();
+			}
+			if (domain && strpbrk(ZSTR_VAL(domain), ",; \t\r\n\013\014") != NULL) { /* man isspace for \013 and \014 */
+				zend_value_error("%s(): Argument #3 ($expires_or_options[\"domain\"]) cannot contain "
+					ILLEGAL_COOKIE_CHARACTER, get_active_function_name());
+				goto cleanup;
+				RETURN_THROWS();
+			}
+			/* Should check value of SameSite? */
 		} else {
 			expires = zval_get_long(expires_or_options);
+			if (path && strpbrk(ZSTR_VAL(path), ",; \t\r\n\013\014") != NULL) { /* man isspace for \013 and \014 */
+				zend_argument_value_error(4, "cannot contain " ILLEGAL_COOKIE_CHARACTER);
+				RETURN_THROWS();
+			}
+			if (domain && strpbrk(ZSTR_VAL(domain), ",; \t\r\n\013\014") != NULL) { /* man isspace for \013 and \014 */
+				zend_argument_value_error(5, "cannot contain " ILLEGAL_COOKIE_CHARACTER);
+				RETURN_THROWS();
+			}
 		}
 	}
 
+	if (!ZSTR_LEN(name)) {
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
+	}
+	if (strpbrk(ZSTR_VAL(name), "=,; \t\r\n\013\014") != NULL) {   /* man isspace for \013 and \014 */
+		zend_argument_value_error(1, "cannot contain \"=\", " ILLEGAL_COOKIE_CHARACTER);
+		RETURN_THROWS();
+	}
+	if (is_raw && value &&
+		strpbrk(ZSTR_VAL(value), ",; \t\r\n\013\014") != NULL) { /* man isspace for \013 and \014 */
+		zend_argument_value_error(2, "cannot contain " ILLEGAL_COOKIE_CHARACTER);
+		RETURN_THROWS();
+	}
+
 	if (!EG(exception)) {
-		if (php_setcookie(name, value, expires, path, domain, secure, httponly, samesite, 1) == SUCCESS) {
+		if (php_setcookie(name, value, expires, path, domain, secure, httponly, samesite, !is_raw) == SUCCESS) {
 			RETVAL_TRUE;
 		} else {
 			RETVAL_FALSE;
@@ -266,6 +278,7 @@ PHP_FUNCTION(setcookie)
 	}
 
 	if (expires_or_options && Z_TYPE_P(expires_or_options) == IS_ARRAY) {
+		cleanup:
 		if (path) {
 			zend_string_release(path);
 		}
@@ -277,59 +290,20 @@ PHP_FUNCTION(setcookie)
 		}
 	}
 }
+
+/* {{{ setcookie(string name [, string value [, array options]])
+   Send a cookie */
+PHP_FUNCTION(setcookie)
+{
+	php_setcookie_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
+}
 /* }}} */
 
 /* {{{ setrawcookie(string name [, string value [, array options]])
    Send a cookie with no url encoding of the value */
 PHP_FUNCTION(setrawcookie)
 {
-	zval *expires_or_options = NULL;
-	zend_string *name, *value = NULL, *path = NULL, *domain = NULL, *samesite = NULL;
-	zend_long expires = 0;
-	zend_bool secure = 0, httponly = 0;
-
-	ZEND_PARSE_PARAMETERS_START(1, 7)
-		Z_PARAM_STR(name)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_STR(value)
-		Z_PARAM_ZVAL(expires_or_options)
-		Z_PARAM_STR(path)
-		Z_PARAM_STR(domain)
-		Z_PARAM_BOOL(secure)
-		Z_PARAM_BOOL(httponly)
-	ZEND_PARSE_PARAMETERS_END();
-
-	if (expires_or_options) {
-		if (Z_TYPE_P(expires_or_options) == IS_ARRAY) {
-			if (UNEXPECTED(ZEND_NUM_ARGS() > 3)) {
-				php_error_docref(NULL, E_WARNING, "Cannot pass arguments after the options array");
-				RETURN_FALSE;
-			}
-			php_head_parse_cookie_options_array(expires_or_options, &expires, &path, &domain, &secure, &httponly, &samesite);
-		} else {
-			expires = zval_get_long(expires_or_options);
-		}
-	}
-
-	if (!EG(exception)) {
-		if (php_setcookie(name, value, expires, path, domain, secure, httponly, samesite, 0) == SUCCESS) {
-			RETVAL_TRUE;
-		} else {
-			RETVAL_FALSE;
-		}
-	}
-
-	if (expires_or_options && Z_TYPE_P(expires_or_options) == IS_ARRAY) {
-		if (path) {
-			zend_string_release(path);
-		}
-		if (domain) {
-			zend_string_release(domain);
-		}
-		if (samesite) {
-			zend_string_release(samesite);
-		}
-	}
+	php_setcookie_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
 }
 /* }}} */
 
