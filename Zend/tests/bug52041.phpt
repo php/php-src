@@ -71,23 +71,23 @@ Warning: Undefined variable $x in %s on line %d
 
 Warning: Undefined variable $x in %s on line %d
 
-Notice: Undefined offset: 0 in %s on line %d
+Notice: Undefined array offset 0 in %s on line %d
 
 Warning: Undefined variable $x in %s on line %d
 
-Notice: Undefined offset: 0 in %s on line %d
+Notice: Undefined array offset 0 in %s on line %d
 
-Notice: Undefined offset: 0 in %s on line %d
-
-Warning: Undefined variable $x in %s on line %d
-
-Notice: Undefined offset: 0 in %s on line %d
+Notice: Undefined array offset 0 in %s on line %d
 
 Warning: Undefined variable $x in %s on line %d
 
-Notice: Undefined offset: 0 in %s on line %d
+Notice: Undefined array offset 0 in %s on line %d
 
-Notice: Undefined offset: 0 in %s on line %d
+Warning: Undefined variable $x in %s on line %d
+
+Notice: Undefined array offset 0 in %s on line %d
+
+Notice: Undefined array offset 0 in %s on line %d
 
 Warning: Undefined variable $x in %s on line %d
 NULL

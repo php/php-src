@@ -1895,20 +1895,20 @@ static int zend_jit_undefined_offset_stub(dasm_State **Dst)
 	|3:
 	|.if X64WIN
 		|	mov CARG1, E_NOTICE
-		|	LOAD_ADDR CARG2, "Undefined offset: " ZEND_LONG_FMT
+		|	LOAD_ADDR CARG2, "Undefined array offset " ZEND_LONG_FMT
 		|	mov CARG3, aword [r0]
 		|	EXT_CALL zend_error, r0
 		|	add r4, 0x28 // stack alignment
 	|.elif X64
 		|	mov CARG1, E_NOTICE
-		|	LOAD_ADDR CARG2, "Undefined offset: " ZEND_LONG_FMT
+		|	LOAD_ADDR CARG2, "Undefined array offset " ZEND_LONG_FMT
 		|	mov CARG3, aword [r0]
 		|	EXT_CALL zend_error, r0
 		|	add r4, 8 // stack alignment
 	|.else
 		|	sub r4, 4
 		|	push aword [r0]
-		|	push "Undefined offset: " ZEND_LONG_FMT
+		|	push "Undefined array offset " ZEND_LONG_FMT
 		|	push E_NOTICE
 		|	EXT_CALL zend_error, r0
 		|	add r4, 28
@@ -1963,14 +1963,14 @@ static int zend_jit_undefined_index_stub(dasm_State **Dst)
 	|3:
 	|.if X64WIN
 		|	mov CARG1, E_NOTICE
-		|	LOAD_ADDR CARG2, "Undefined index: %s"
+		|	LOAD_ADDR CARG2, "Undefined array index \"%s\""
 		|	mov CARG3, aword [r0]
 		|	add CARG3, offsetof(zend_string, val)
 		|	EXT_CALL zend_error, r0
 		|	add r4, 0x28
 	|.elif X64
 		|	mov CARG1, E_NOTICE
-		|	LOAD_ADDR CARG2, "Undefined index: %s"
+		|	LOAD_ADDR CARG2, "Undefined array index \"%s\""
 		|	mov CARG3, aword [r0]
 		|	add CARG3, offsetof(zend_string, val)
 		|	EXT_CALL zend_error, r0
@@ -1980,7 +1980,7 @@ static int zend_jit_undefined_index_stub(dasm_State **Dst)
 		|	mov r0, aword [r0]
 		|	add r0, offsetof(zend_string, val)
 		|	push r0
-		|	push "Undefined index: %s"
+		|	push "Undefined array index \"%s\""
 		|	push E_NOTICE
 		|	EXT_CALL zend_error, r0
 		|	add r4, 28
@@ -4944,7 +4944,7 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 				switch (type) {
 					case BP_VAR_R:
 						if (JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE) {
-							|	// zend_error(E_NOTICE,"Undefined offset: " ZEND_LONG_FMT, hval);
+							|	// zend_error(E_NOTICE,"Undefined array offset " ZEND_LONG_FMT, hval);
 							|	// retval = &EG(uninitialized_zval);
 							|	UNDEFINED_OFFSET opline
 							|	jmp >9
@@ -4965,7 +4965,7 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 				|2:
 				if (JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE) {
 					|	SAVE_VALID_OPLINE opline, r0
-					|	// zend_error(E_NOTICE,"Undefined offset: " ZEND_LONG_FMT, hval);
+					|	// zend_error(E_NOTICE,"Undefined arary offset " ZEND_LONG_FMT, hval);
 					|	//retval = zend_hash_index_update(ht, hval, &EG(uninitialized_zval));
 					|	EXT_CALL zend_jit_fetch_dimension_rw_long_helper, r0
 				}
@@ -5076,7 +5076,7 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 				switch (type) {
 					case BP_VAR_R:
 						if (JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE) {
-							// zend_error(E_NOTICE, "Undefined index: %s", ZSTR_VAL(offset_key));
+							// zend_error(E_NOTICE, "Undefined array index \"%s\"", ZSTR_VAL(offset_key));
 							|	UNDEFINED_INDEX opline
 							|	jmp >9
 						} else {

@@ -48,11 +48,11 @@ string(1) "S"
 Warning: String offset cast occurred in %s on line %d
 string(1) "S"
 
-Warning: Illegal string offset 'run away' in %s on line %d
+Warning: Illegal string offset "run away" in %s on line %d
 string(1) "S"
 string(1) "c"
 
-Warning: Illegal string offset '14.5' in %s on line %d
+Warning: Illegal string offset "14.5" in %s on line %d
 string(1) "o"
 
 Notice: A non well formed numeric value encountered in %s on line %d

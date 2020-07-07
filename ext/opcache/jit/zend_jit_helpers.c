@@ -362,13 +362,13 @@ str_index:
 		if (UNEXPECTED(Z_TYPE_P(retval) == IS_INDIRECT)) {
 			retval = Z_INDIRECT_P(retval);
 			if (UNEXPECTED(Z_TYPE_P(retval) == IS_UNDEF)) {
-				zend_error(E_NOTICE, "Undefined index: %s", ZSTR_VAL(offset_key));
+				zend_error(E_NOTICE, "Undefined array index \"%s\"", ZSTR_VAL(offset_key));
 				ZVAL_NULL(result);
 				return;
 			}
 		}
 	} else {
-		zend_error(E_NOTICE, "Undefined index: %s", ZSTR_VAL(offset_key));
+		zend_error(E_NOTICE, "Undefined array index \"%s\"", ZSTR_VAL(offset_key));
 		ZVAL_NULL(result);
 		return;
 	}
@@ -381,7 +381,7 @@ num_index:
 	return;
 
 num_undef:
-	zend_error(E_NOTICE,"Undefined offset: " ZEND_LONG_FMT, hval);
+	zend_error(E_NOTICE,"Undefined array offset " ZEND_LONG_FMT, hval);
 	ZVAL_NULL(result);
 }
 
@@ -682,7 +682,7 @@ try_string_offset:
 				if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, -1)) {
 					break;
 				}
-				zend_error(E_WARNING, "Illegal string offset '%s'", Z_STRVAL_P(dim));
+				zend_error(E_WARNING, "Illegal string offset \"%s\"", Z_STRVAL_P(dim));
 				break;
 			case IS_UNDEF:
 				zend_jit_undefined_op_helper(EG(current_execute_data)->opline->op2.var);
@@ -812,7 +812,7 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_obj_is_helper(zval *container, zval
 
 static zval* ZEND_FASTCALL zend_jit_fetch_dimension_rw_long_helper(HashTable *ht, zend_long hval)
 {
-	zend_error(E_NOTICE,"Undefined offset: " ZEND_LONG_FMT, hval);
+	zend_error(E_NOTICE,"Undefined array offset " ZEND_LONG_FMT, hval);
 	return zend_hash_index_update(ht, hval, &EG(uninitialized_zval));
 }
 
@@ -828,7 +828,7 @@ try_again:
 					break;
 				}
 				if (type != BP_VAR_UNSET) {
-					zend_error(E_WARNING, "Illegal string offset '%s'", Z_STRVAL_P(dim));
+					zend_error(E_WARNING, "Illegal string offset \"%s\"", Z_STRVAL_P(dim));
 				}
 				break;
 			case IS_UNDEF:

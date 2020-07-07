@@ -41,7 +41,7 @@ string(15) "abCZefghijklmno"
 string(15) "abCZefghijPlmno"
 string(15) "abCZefghijPQmno"
 
-Warning: Illegal string offset:  -20 in %sstr_offset_004.php on line %d
+Warning: Illegal string offset -20 in %s on line %d
 string(15) "abCZefghijPQmno"
 string(15) "AbCZefghijPQmno"
 string(21) "AbCZefghijPQmno     N"

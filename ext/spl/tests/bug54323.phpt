@@ -19,6 +19,6 @@ function testAccess($c, $ao) {
 --EXPECTF--
 Warning: Undefined property: C::$prop in %s on line %d
 
-Notice: Undefined index: prop in %sbug54323.php on line 14
+Notice: Undefined array index "prop" in %sbug54323.php on line 14
 NULL
 NULL

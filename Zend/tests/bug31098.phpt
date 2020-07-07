@@ -47,9 +47,9 @@ ok
 Warning: Attempt to read property "wrong" on string in %s on line %d
 ok
 
-Warning: Illegal string offset 'wrong' in %s on line %d
+Warning: Illegal string offset "wrong" in %s on line %d
 ok
 ok
 
-Warning: Illegal string offset 'wrong' in %s on line %d
+Warning: Illegal string offset "wrong" in %s on line %d
 ok

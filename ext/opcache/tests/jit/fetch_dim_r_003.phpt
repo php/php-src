@@ -48,10 +48,10 @@ string(1) "B"
 Warning: String offset cast occurred in %s on line %d
 string(1) "A"
 
-Warning: Illegal string offset 'ab' in %sfetch_dim_r_003.php on line 12
+Warning: Illegal string offset "ab" in %sfetch_dim_r_003.php on line 12
 string(1) "A"
 
-Warning: Illegal string offset 'ab' in %sfetch_dim_r_003.php on line 15
+Warning: Illegal string offset "ab" in %sfetch_dim_r_003.php on line 15
 string(1) "A"
 
 Notice: A non well formed numeric value encountered in %sfetch_dim_r_003.php on line 16
