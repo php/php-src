@@ -6666,7 +6666,7 @@ void zend_compile_class_const_decl(zend_ast *ast, zend_ast *type_ast, uint32_t f
 		if (type_ast) {
 			type = zend_compile_typename(type_ast, /* force_allow_null */ 0, /* use_arena */ 1);
 
-			if (ZEND_TYPE_FULL_MASK(type) & (MAY_BE_CALLABLE|MAY_BE_VOID) || ZEND_TYPE_HAS_NAME(type)) {
+			if (ZEND_TYPE_FULL_MASK(type) & (MAY_BE_OBJECT|MAY_BE_CALLABLE|MAY_BE_VOID) || ZEND_TYPE_HAS_NAME(type)) {
 				zend_string *type_str = zend_type_to_string(type);
 
 				zend_error_noreturn(E_COMPILE_ERROR, "Class constant %s::%s cannot have type %s",
