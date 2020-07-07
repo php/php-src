@@ -34,7 +34,7 @@ var_dump($array_arg);
 
 echo "Done"
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing uasort() : anonymous function as 'cmp_function' ***
 -- Anonymous 'cmp_function' with parameters passed by value --
 bool(true)
@@ -51,6 +51,22 @@ array(5) {
   int(100)
 }
 -- Anonymous 'cmp_function' with parameters passed by reference --
+
+Warning: {closure}(): Argument #1 ($value1) must be passed by reference, value given in %s on line %d
+
+Warning: {closure}(): Argument #2 ($value2) must be passed by reference, value given in %s on line %d
+
+Warning: {closure}(): Argument #1 ($value1) must be passed by reference, value given in %s on line %d
+
+Warning: {closure}(): Argument #2 ($value2) must be passed by reference, value given in %s on line %d
+
+Warning: {closure}(): Argument #1 ($value1) must be passed by reference, value given in %s on line %d
+
+Warning: {closure}(): Argument #2 ($value2) must be passed by reference, value given in %s on line %d
+
+Warning: {closure}(): Argument #1 ($value1) must be passed by reference, value given in %s on line %d
+
+Warning: {closure}(): Argument #2 ($value2) must be passed by reference, value given in %s on line %d
 bool(true)
 array(4) {
   ["a"]=>

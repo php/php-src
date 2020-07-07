@@ -34,6 +34,14 @@ echo "Done\n";
 ?>
 --EXPECTF--
 Notice: Only variables should be passed by reference in %s on line %d
+
+Warning: test(): Argument #3 ($columns) must be passed by reference, value given in %s on line %d
+
+Warning: test(): Argument #3 ($columns) must be passed by reference, value given in %s on line %d
+
+Warning: test(): Argument #3 ($columns) must be passed by reference, value given in %s on line %d
+
+Warning: test(): Argument #3 ($columns) must be passed by reference, value given in %s on line %d
 object(Test)#%d (4) {
   ["_table"]=>
   string(0) ""
