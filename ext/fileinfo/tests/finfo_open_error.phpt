@@ -34,7 +34,7 @@ Warning: finfo_open(%sfoobarfile): Failed to open stream: No such file or direct
 Warning: finfo_open(): Failed to load magic database at '%sfoobarfile'. in %sfinfo_open_error.php on line %d
 bool(false)
 
-Notice: finfo_open(): Warning: using regular magic file `%smagic' in %sfinfo_open_error.php on line %d
+Warning: finfo_open(): using regular magic file `%smagic' in %sfinfo_open_error.php on line %d
 resource(6) of type (file_info)
 finfo_open(): Argument #1 ($options) must be of type int, string given
 finfo::__construct(): Argument #1 ($options) must be of type int, string given
