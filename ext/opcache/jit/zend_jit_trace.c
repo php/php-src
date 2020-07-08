@@ -343,6 +343,9 @@ static zend_always_inline int zend_jit_var_may_be_modified_indirectly(const zend
 	if ((!op_array->function_name || (ssa->cfg.flags & ZEND_FUNC_INDIRECT_VAR_ACCESS))
 	 && var < op_array->last_var) {
 		return 1;
+	} else if (var < op_array->last_var
+	 && zend_string_equals_literal(op_array->vars[var], "http_response_header")) {
+		return 1;
 	}
 	return 0;
 }
