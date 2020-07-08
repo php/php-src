@@ -2380,9 +2380,11 @@ PHP_FUNCTION(preg_replace_callback)
 /* {{{ Perform Perl-style regular expression replacement using replacement callback. */
 PHP_FUNCTION(preg_replace_callback_array)
 {
-	zval zv, *replace, *subject, *zcount = NULL;
+	zval zv, *replace, *zcount = NULL;
 	HashTable *pattern;
 	zend_string *str_idx_regex;
+	zend_string *subject_str;
+	HashTable *subject_ht;
 	zend_long limit = -1, flags = 0;
 	size_t replace_count = 0;
 	zend_fcall_info fci;
@@ -2391,7 +2393,7 @@ PHP_FUNCTION(preg_replace_callback_array)
 	/* Get function parameters and do error-checking. */
 	ZEND_PARSE_PARAMETERS_START(2, 5)
 		Z_PARAM_ARRAY_HT(pattern)
-		Z_PARAM_ZVAL(subject)
+		Z_PARAM_STR_OR_ARRAY_HT(subject_str, subject_ht)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(limit)
 		Z_PARAM_ZVAL(zcount)
@@ -2418,16 +2420,28 @@ PHP_FUNCTION(preg_replace_callback_array)
 		ZVAL_COPY_VALUE(&fci.function_name, replace);
 
 		replace_count += preg_replace_func_impl(&zv, str_idx_regex, /* regex_ht */ NULL, &fci, &fcc,
-			Z_STR_P(subject), Z_ARRVAL_P(subject),
+			subject_str, subject_ht,
 			limit, flags);
 
-		if (subject != return_value) {
-			subject = return_value;
-		} else {
-			zval_ptr_dtor(return_value);
+		switch (Z_TYPE(zv)) {
+			case IS_NULL:
+				ZEND_ASSERT(subject_str != NULL);
+				zval_ptr_dtor(return_value);
+				break;
+			case IS_STRING:
+				ZEND_ASSERT(subject_str != NULL);
+				zend_string_release(subject_str);
+				subject_str = zend_string_copy(Z_STR(zv));
+				break;
+			case IS_ARRAY:
+				ZEND_ASSERT(subject_ht != NULL);
+				zend_hash_copy(subject_ht, Z_ARR(zv), NULL);
+				break;
+			EMPTY_SWITCH_DEFAULT_CASE()
 		}
 
 		ZVAL_COPY_VALUE(return_value, &zv);
+		zval_ptr_dtor(&zv);
 
 		if (UNEXPECTED(EG(exception))) {
 			zval_ptr_dtor(return_value);

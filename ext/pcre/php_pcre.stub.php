@@ -12,8 +12,7 @@ function preg_filter(string|array $regex, string|array $replace, string|array $s
 
 function preg_replace_callback(string|array $regex, callable $callback, string|array $subject, int $limit = -1, &$count = null, int $flags = 0): string|array|null {}
 
-/** @param string|array $subject */
-function preg_replace_callback_array(array $pattern, $subject, int $limit = -1, &$count = null, int $flags = 0): string|array|null {}
+function preg_replace_callback_array(array $pattern, string|array $subject, int $limit = -1, &$count = null, int $flags = 0): string|array|null {}
 
 function preg_split(string $pattern, string $subject, int $limit = -1, int $flags = 0): array|false {}
 

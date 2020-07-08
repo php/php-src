@@ -125,7 +125,7 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
 
       - Parameters [5] {
         Parameter #0 [ <required> array $pattern ]
-        Parameter #1 [ <required> $subject ]
+        Parameter #1 [ <required> array|string $subject ]
         Parameter #2 [ <optional> int $limit = -1 ]
         Parameter #3 [ <optional> &$count = null ]
         Parameter #4 [ <optional> int $flags = 0 ]
