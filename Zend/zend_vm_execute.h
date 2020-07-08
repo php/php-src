@@ -6516,8 +6516,11 @@ match_try_again:
 	} else {
 		if (UNEXPECTED((IS_CONST & IS_CV) && Z_TYPE_P(op) == IS_UNDEF)) {
 			SAVE_OPLINE();
-			ZVAL_UNDEFINED_OP1();
-			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+			op = ZVAL_UNDEFINED_OP1();
+			if (UNEXPECTED(EG(exception))) {
+				HANDLE_EXCEPTION();
+			}
+			goto match_try_again;
 		}
 
 		goto default_branch;
@@ -11427,8 +11430,11 @@ match_try_again:
 	} else {
 		if (UNEXPECTED(((IS_TMP_VAR|IS_VAR|IS_CV) & IS_CV) && Z_TYPE_P(op) == IS_UNDEF)) {
 			SAVE_OPLINE();
-			ZVAL_UNDEFINED_OP1();
-			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+			op = ZVAL_UNDEFINED_OP1();
+			if (UNEXPECTED(EG(exception))) {
+				HANDLE_EXCEPTION();
+			}
+			goto match_try_again;
 		}
 
 		goto default_branch;

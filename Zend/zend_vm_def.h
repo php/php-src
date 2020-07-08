@@ -8428,8 +8428,11 @@ ZEND_VM_C_LABEL(match_try_again):
 	} else {
 		if (UNEXPECTED((OP1_TYPE & IS_CV) && Z_TYPE_P(op) == IS_UNDEF)) {
 			SAVE_OPLINE();
-			ZVAL_UNDEFINED_OP1();
-			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+			op = ZVAL_UNDEFINED_OP1();
+			if (UNEXPECTED(EG(exception))) {
+				HANDLE_EXCEPTION();
+			}
+			ZEND_VM_C_GOTO(match_try_again);
 		}
 
 		ZEND_VM_C_GOTO(default_branch);
