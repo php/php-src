@@ -11339,10 +11339,6 @@ static int zend_jit_switch(dasm_State **Dst, const zend_op *opline, const zend_o
 {
 	HashTable *jumptable = Z_ARRVAL_P(RT_CONSTANT(opline, opline->op2));
 
-	if (sizeof(void*) == 8 && !IS_32BIT(dasm_end)) {
-		// TODO: DynASM stores .aword as 4-bytes even in 64-bit mode ???
-		return 1;
-	}
 	if (opline->op1_type == IS_CONST) {
 		zval *zv = RT_CONSTANT(opline, opline->op1);
 		zval *jump_zv;
@@ -11406,9 +11402,7 @@ static int zend_jit_switch(dasm_State **Dst, const zend_op *opline, const zend_o
 					|	cmp FCARG2a, jumptable->nNumUsed
 					|	jae >3
 					|.if X64
-					|	// TODO: DynASM stores .aword as 4-bytes even in 64-bit mode ???
-					|	movsxd r0, dword [FCARG2a * 4 + >4]
-					|	jmp r0
+					|	jmp aword [FCARG2a * 8 + >4]
 					|.else
 					|	jmp aword [FCARG2a * 4 + >4]
 					|.endif
@@ -11418,11 +11412,9 @@ static int zend_jit_switch(dasm_State **Dst, const zend_op *opline, const zend_o
 					p = jumptable->arData;
 					do {
 						if (Z_TYPE(p->val) == IS_UNDEF) {
-							|	// TODO: DynASM stores .aword as 4-bytes even in 64-bit mode ???
 							|	.aword =>b
 						} else {
 							int b = ssa->cfg.map[ZEND_OFFSET_TO_OPLINE(opline, Z_LVAL(p->val)) - op_array->opcodes];
-							|	// TODO: DynASM stores .aword as 4-bytes even in 64-bit mode ???
 							|	.aword =>b
 						}
 						p++;
@@ -11436,7 +11428,6 @@ static int zend_jit_switch(dasm_State **Dst, const zend_op *opline, const zend_o
 					|	jz =>b
 					|	LOAD_ADDR FCARG1a, jumptable
 					|	sub r0, aword [FCARG1a + offsetof(HashTable, arData)]
-					|	// TODO: DynASM stores .aword as 4-bytes even in 64-bit mode ???
 					|	mov FCARG1a, (sizeof(Bucket) / sizeof(uint32_t))
 					|.if X64
 					|	cqo
@@ -11444,19 +11435,12 @@ static int zend_jit_switch(dasm_State **Dst, const zend_op *opline, const zend_o
 					|	cdq
 					|.endif
 					|	idiv FCARG1a
-					|.if X64
-					|	// TODO: DynASM stores .aword as 4-bytes even in 64-bit mode ???
-					|	movsxd r0, dword [r0 + >4]
-					|	jmp r0
-					|.else
-					|	jmp dword [r0 + >4]
-					|.endif
+					|	jmp aword [r0 + >4]
 					|3:
 					|.cold_code
 					|4:
 					ZEND_HASH_FOREACH_VAL(jumptable, val) {
 						b = ssa->cfg.map[ZEND_OFFSET_TO_OPLINE(opline, Z_LVAL_P(val)) - op_array->opcodes];
-						|	// TODO: DynASM stores .aword as 4-bytes even in 64-bit mode ???
 						|	.aword =>b
 					} ZEND_HASH_FOREACH_END();
 					|.code
@@ -11489,7 +11473,6 @@ static int zend_jit_switch(dasm_State **Dst, const zend_op *opline, const zend_o
 				|	jz =>b
 				|	LOAD_ADDR FCARG1a, jumptable
 				|	sub r0, aword [FCARG1a + offsetof(HashTable, arData)]
-				|	// TODO: DynASM stores .aword as 4-bytes even in 64-bit mode ???
 				|	mov FCARG1a, (sizeof(Bucket) / sizeof(uint32_t))
 				|.if X64
 				|	cqo
@@ -11497,24 +11480,13 @@ static int zend_jit_switch(dasm_State **Dst, const zend_op *opline, const zend_o
 				|	cdq
 				|.endif
 				|	idiv FCARG1a
-				|.if X64
-				|	// TODO: DynASM stores .aword as 4-bytes even in 64-bit mode ???
-				|	movsxd r0, dword [r0 + >4]
-				|	jmp r0
-				|.else
-				|	jmp dword [r0 + >4]
-				|.endif
+				|	jmp aword [r0 + >4]
 				|3:
 				|.cold_code
 				|4:
 				ZEND_HASH_FOREACH_VAL(jumptable, val) {
 					b = ssa->cfg.map[ZEND_OFFSET_TO_OPLINE(opline, Z_LVAL_P(val)) - op_array->opcodes];
-					|	// TODO: DynASM stores .aword as 4-bytes even in 64-bit mode ???
-					|.if X64
 					|	.aword =>b
-					|.else
-					|	.aword =>b
-					|.endif
 				} ZEND_HASH_FOREACH_END();
 				|.code
 			}

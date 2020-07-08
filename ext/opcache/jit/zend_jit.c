@@ -309,6 +309,9 @@ static void *dasm_link_and_encode(dasm_State             **dasm_state,
 
 	if (ret != DASM_S_OK) {
 		// TODO: dasm_encode() failed ???
+#if ZEND_DEBUG
+		ZEND_UNREACHABLE();
+#endif
 		return NULL;
 	}
 
