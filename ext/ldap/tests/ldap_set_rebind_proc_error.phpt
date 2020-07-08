@@ -39,5 +39,5 @@ try {
     echo $error->getMessage(), "\n";
 }
 ?>
---EXPECTF--
-ldap_set_rebind_proc(): Argument #2 ($callback) must be a valid callback or null, string given
+--EXPECT--
+ldap_set_rebind_proc(): Argument #2 ($callback) must be a valid callback or null, function "rebind_proc_inexistent" not found or invalid function name
