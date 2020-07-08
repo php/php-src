@@ -503,52 +503,6 @@ ZEND_API void zend_print_zval_r(zval *expr, int indent) /* {{{ */
 }
 /* }}} */
 
-ZEND_API zend_string *zend_zval_to_readable_string(zval *expr)
-{
-try_again:
-	switch (Z_TYPE_P(expr)) {
-		case IS_UNDEF:
-		case IS_ARRAY:
-		case IS_OBJECT:
-		case IS_RESOURCE:
-			return NULL;
-		case IS_NULL:
-			return zend_string_init("null", strlen("null"), 0);
-		case IS_FALSE:
-			return zend_string_init("false", strlen("false"), 0);
-		case IS_TRUE:
-			return zend_string_init("true", strlen("true"), 0);
-		case IS_LONG:
-			return zend_long_to_str(Z_LVAL_P(expr));
-		case IS_DOUBLE:
-			return zend_strpprintf_unchecked(0, "%.*H", (int) EG(precision), Z_DVAL_P(expr));
-		case IS_STRING: {
-			zend_string *str = Z_STR_P(expr);
-			size_t str_len = ZSTR_LEN(str);
-			smart_str readable_str = {0};
-			smart_str_appendc(&readable_str, '"');
-			if (str_len <= READABLE_ZVAL_MAX_STR_LENGTH) {
-				smart_str_appends(&readable_str, ZSTR_VAL(str));
-			} else {
-				// FIXME: Doesn't handle multi byte strings
-				zend_string *truncated_str = zend_string_init_fast(ZSTR_VAL(str), READABLE_ZVAL_MAX_STR_LENGTH);
-				// FIXME: Doesn't handle escaping of special chars (namely " and \)
-				smart_str_appends(&readable_str, ZSTR_VAL(truncated_str));
-				zend_string_release_ex(truncated_str, 0);
-				smart_str_appends(&readable_str, "...");
-			}
-			smart_str_appendc(&readable_str, '"');
-			smart_str_0(&readable_str);
-			return readable_str.s;
-		}
-		case IS_REFERENCE:
-			expr = Z_REFVAL_P(expr);
-			goto try_again;
-		EMPTY_SWITCH_DEFAULT_CASE()
-	}
-	return NULL;
-}
-
 static FILE *zend_fopen_wrapper(const char *filename, zend_string **opened_path) /* {{{ */
 {
 	if (opened_path) {

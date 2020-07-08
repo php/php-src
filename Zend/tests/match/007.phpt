@@ -19,7 +19,7 @@ echo get_value(3) . "\n";
 1
 2
 
-Fatal error: Uncaught UnhandledMatchError: Unhandled match value 3 in %s
+Fatal error: Uncaught UnhandledMatchError: Unhandled match value of type int in %s
 Stack trace:
 #0 %s: get_value(3)
 #1 {main}

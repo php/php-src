@@ -8453,18 +8453,10 @@ ZEND_VM_COLD_CONST_HANDLER(197, ZEND_MATCH_ERROR, CONST|TMPVARCV, UNUSED)
 {
 	USE_OPLINE
 	zval *op;
-	zend_string *zval_str;
 
+	SAVE_OPLINE();
 	op = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
-	zval_str = zend_zval_to_readable_string(op);
-
-	if (zval_str != NULL) {
-		zend_throw_exception_ex(zend_ce_unhandled_match_error, 0, "Unhandled match value %s", ZSTR_VAL(zval_str));
-		zend_string_release_ex(zval_str, 0);
-	} else {
-		zend_throw_exception_ex(zend_ce_unhandled_match_error, 0, "Unhandled match value of type %s", zend_zval_type_name(op));
-	}
-
+	zend_throw_exception_ex(zend_ce_unhandled_match_error, 0, "Unhandled match value of type %s", zend_zval_type_name(op));
 	HANDLE_EXCEPTION();
 }
 
