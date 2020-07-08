@@ -18,5 +18,5 @@ var_dump(match ($undefinedVariable) {
 Warning: Undefined variable $undefinedVariable in %s.php on line 3
 string(4) "null"
 
-Warning: Undefined variable $undefinedVariable in /Users/ilijatovilo/Developer/php-src/Zend/tests/match/042.php on line 8
+Warning: Undefined variable $undefinedVariable in %s.php on line 8
 string(3) "bar"

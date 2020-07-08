@@ -48,7 +48,7 @@ LIVE RANGES:
      1: 0005 - 0013 (loop)
 
 test:
-     ; (lines=11, args=1, vars=1, tmps=1)
+     ; (lines=9, args=1, vars=1, tmps=0)
      ; (after optimizer)
      ; %s
 0000 CV0($char) = RECV 1
@@ -59,11 +59,7 @@ test:
 0005 RETURN string("e, f")
 0006 RETURN string("g")
 0007 RETURN string("h, i")
-0008 V1 = NEW 0 string("UnhandledMatchError")
-0009 DO_FCALL
-0010 THROW V1
-LIVE RANGES:
-     1: 0009 - 0010 (new)
+0008 MATCH_ERROR CV0($char)
 string(1) "a"
 string(4) "b, c"
 string(4) "b, c"
