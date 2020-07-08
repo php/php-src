@@ -2921,6 +2921,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 			uint8_t op3_type = p->op3_type;
 			uint8_t orig_op1_type = op1_type;
 			zend_bool op1_indirect;
+			zend_class_entry *op1_ce = NULL;
 
 			opline = p->opline;
 			if (op1_type & (IS_TRACE_REFERENCE|IS_TRACE_INDIRECT)) {
@@ -2934,7 +2935,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 			}
 
 			if ((p+1)->op == ZEND_JIT_TRACE_OP1_TYPE) {
-				// TODO: support for recorded classes ???
+				op1_ce = (zend_class_entry*)(p+1)->ce;
 				p++;
 			}
 			if ((p+1)->op == ZEND_JIT_TRACE_OP2_TYPE) {
@@ -3837,9 +3838,9 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								delayed_fetch_this = ssa->var_info[ssa_op->op1_use].delayed_fetch_this;
 							}
 						}
-						if (!zend_jit_fetch_obj(&dasm_state, opline, op_array,
+						if (!zend_jit_fetch_obj(&dasm_state, opline, op_array, ssa, ssa_op,
 								op1_info, op1_addr, op1_indirect, ce, ce_is_instanceof,
-								delayed_fetch_this,
+								delayed_fetch_this, op1_ce,
 								zend_may_throw_ex(opline, ssa_op, op_array, ssa, op1_info, MAY_BE_STRING))) {
 							goto jit_failure;
 						}

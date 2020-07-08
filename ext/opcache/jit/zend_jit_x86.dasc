@@ -10898,7 +10898,31 @@ static zend_bool zend_may_be_dynamic_property(zend_class_entry *ce, zend_string 
 	return 0;
 }
 
-static int zend_jit_fetch_obj(dasm_State **Dst, const zend_op *opline, const zend_op_array *op_array, uint32_t op1_info, zend_jit_addr op1_addr, zend_bool op1_indirect, zend_class_entry *ce, zend_bool ce_is_instanceof, zend_bool use_this, int may_throw)
+static int zend_jit_class_guard(dasm_State **Dst, const zend_op *opline, zend_class_entry *ce)
+{
+	int32_t exit_point = zend_jit_trace_get_exit_point(opline, opline, NULL, 0);
+	const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+
+	if (!exit_addr) {
+		return 0;
+	}
+
+	|.if X64
+	||	if (!IS_SIGNED_32BIT(ce)) {
+	|		mov64 r0, ((ptrdiff_t)ce)
+	|		cmp aword [FCARG1a + offsetof(zend_object, ce)], r0
+	||	} else {
+	|		cmp aword [FCARG1a + offsetof(zend_object, ce)], ce
+	||	}
+	|.else
+	|	cmp aword [FCARG1a + offsetof(zend_object, ce)], ce
+	|.endif
+	|	jne &exit_addr
+
+	return 1;
+}
+
+static int zend_jit_fetch_obj(dasm_State **Dst, const zend_op *opline, const zend_op_array *op_array, zend_ssa *ssa, const zend_ssa_op *ssa_op, uint32_t op1_info, zend_jit_addr op1_addr, zend_bool op1_indirect, zend_class_entry *ce, zend_bool ce_is_instanceof, zend_bool use_this, zend_class_entry *trace_ce, int may_throw)
 {
 	zval *member;
 	zend_property_info *prop_info;
@@ -10948,6 +10972,20 @@ static int zend_jit_fetch_obj(dasm_State **Dst, const zend_op *opline, const zen
 			}
 		}
 		|	GET_ZVAL_PTR FCARG1a, op1_addr
+	}
+
+	if (!prop_info && trace_ce && (trace_ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
+		prop_info = zend_get_known_property_info(trace_ce, Z_STR_P(member), opline->op1_type == IS_UNUSED, op_array->filename);
+		if (prop_info) {
+			if (!(op1_info & MAY_BE_CLASS_GUARD)) {
+				if (!zend_jit_class_guard(Dst, opline, trace_ce)) {
+					return 0;
+				}
+				if (ssa->var_info && ssa_op->op1_use >= 0) {
+					ssa->var_info[ssa_op->op1_use].type |= MAY_BE_CLASS_GUARD;
+				}
+			}
+		}
 	}
 
 	if (!prop_info) {
