@@ -1062,7 +1062,7 @@ diff -u libmagic.orig/buffer.c libmagic/buffer.c
  
 diff -u libmagic.orig/cdf.c libmagic/cdf.c
 --- libmagic.orig/cdf.c	2019-02-20 03:35:27.000000000 +0100
-+++ libmagic/cdf.c	2020-04-07 22:25:10.517321000 +0200
++++ libmagic/cdf.c	2020-05-05 20:05:37.698461100 +0200
 @@ -43,7 +43,17 @@
  #include <err.h>
  #endif
@@ -1395,7 +1395,7 @@ diff -u libmagic.orig/cdf_time.c libmagic/cdf_time.c
  	(void)snprintf(buf, 26, "*Bad* %#16.16" INT64_T_FORMAT "x\n",
 diff -u libmagic.orig/compress.c libmagic/compress.c
 --- libmagic.orig/compress.c	2019-05-07 04:27:11.000000000 +0200
-+++ libmagic/compress.c	2020-04-07 22:25:10.517321000 +0200
++++ libmagic/compress.c	2020-06-17 02:13:31.620121400 +0200
 @@ -45,13 +45,11 @@
  #endif
  #include <string.h>
@@ -1636,7 +1636,7 @@ diff -u libmagic.orig/encoding.c libmagic/encoding.c
  }
 diff -u libmagic.orig/file.h libmagic/file.h
 --- libmagic.orig/file.h	2019-05-07 04:27:11.000000000 +0200
-+++ libmagic/file.h	2020-04-22 20:15:46.790840100 +0200
++++ libmagic/file.h	2020-06-21 00:23:48.421548900 +0200
 @@ -33,18 +33,9 @@
  #ifndef __file_h__
  #define __file_h__
@@ -2212,7 +2212,7 @@ diff -u libmagic.orig/fsmagic.c libmagic/fsmagic.c
  	case S_IFSOCK:
 diff -u libmagic.orig/funcs.c libmagic/funcs.c
 --- libmagic.orig/funcs.c	2019-05-07 04:27:11.000000000 +0200
-+++ libmagic/funcs.c	2020-04-14 17:15:50.737587100 +0200
++++ libmagic/funcs.c	2020-06-17 02:13:31.651362400 +0200
 @@ -31,87 +31,80 @@
  #endif	/* lint */
  
@@ -3048,7 +3048,7 @@ diff -u libmagic.orig/magic.c libmagic/magic.c
  public const char *
  magic_error(struct magic_set *ms)
 diff -u libmagic.orig/magic.h libmagic/magic.h
---- libmagic.orig/magic.h	2020-04-22 20:17:15.432186600 +0200
+--- libmagic.orig/magic.h	2020-07-08 18:10:37.403232400 +0200
 +++ libmagic/magic.h	2020-04-07 22:25:10.548560600 +0200
 @@ -124,6 +124,7 @@
  
@@ -3060,7 +3060,7 @@ diff -u libmagic.orig/magic.h libmagic/magic.h
  
 diff -u libmagic.orig/print.c libmagic/print.c
 --- libmagic.orig/print.c	2019-03-12 21:43:05.000000000 +0100
-+++ libmagic/print.c	2020-04-07 22:25:10.548560600 +0200
++++ libmagic/print.c	2020-07-08 18:05:40.114527900 +0200
 @@ -28,6 +28,7 @@
  /*
   * print.c - debugging printout routines
@@ -3108,7 +3108,7 @@ diff -u libmagic.orig/print.c libmagic/print.c
 -	(void) fputc('\n', stderr);
 +
 +	if (expanded_len >= 0 && expanded_format) {
-+		php_error_docref(NULL, E_NOTICE, "Warning: %s", expanded_format);
++		php_error_docref(NULL, E_WARNING, "%s", expanded_format);
 +
 +		free(expanded_format);
 +	}
@@ -3253,7 +3253,7 @@ diff -u libmagic.orig/readcdf.c libmagic/readcdf.c
  	if (i != -1)
 diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
 --- libmagic.orig/softmagic.c	2019-05-17 04:24:59.000000000 +0200
-+++ libmagic/softmagic.c	2020-04-07 22:25:10.548560600 +0200
++++ libmagic/softmagic.c	2020-04-26 00:43:35.734037100 +0200
 @@ -43,6 +43,10 @@
  #include <time.h>
  #include "der.h"

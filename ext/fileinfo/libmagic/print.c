@@ -226,7 +226,7 @@ file_magwarn(struct magic_set *ms, const char *f, ...)
 	va_end(va);
 
 	if (expanded_len >= 0 && expanded_format) {
-		php_error_docref(NULL, E_NOTICE, "Warning: %s", expanded_format);
+		php_error_docref(NULL, E_WARNING, "%s", expanded_format);
 
 		free(expanded_format);
 	}
