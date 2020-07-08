@@ -2886,19 +2886,12 @@ PHP_METHOD(ZipArchive, registerProgressCallback)
 	struct zip *intern;
 	zval *self = ZEND_THIS;
 	double rate;
-	zval *callback;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
 	ze_zip_object *obj;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "dz", &rate, &callback) == FAILURE) {
-		return;
-	}
-
-	/* callable? */
-	if (!zend_is_callable(callback, 0, NULL)) {
-		zend_string *callback_name = zend_get_callable_name(callback);
-		php_error_docref(NULL, E_WARNING, "Invalid callback '%s'", ZSTR_VAL(callback_name));
-		zend_string_release_ex(callback_name, 0);
-		RETURN_FALSE;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "df", &rate, &fci, &fcc) == FAILURE) {
+		RETURN_THROWS();
 	}
 
 	ZIP_FROM_OBJECT(intern, self);
@@ -2909,7 +2902,7 @@ PHP_METHOD(ZipArchive, registerProgressCallback)
 	_php_zip_progress_callback_free(obj);
 
 	/* register */
-	ZVAL_COPY(&obj->progress_callback, callback);
+	ZVAL_COPY(&obj->progress_callback, fci->function_name);
 	if (zip_register_progress_callback_with_state(intern, rate, _php_zip_progress_callback, _php_zip_progress_callback_free, obj)) {
 		RETURN_FALSE;
 	}
@@ -2939,22 +2932,14 @@ PHP_METHOD(ZipArchive, registerCancelCallback)
 {
 	struct zip *intern;
 	zval *self = ZEND_THIS;
-	zval *callback;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
 	ze_zip_object *obj;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &callback) == FAILURE) {
-		return;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "f", &fci, &fcc) == FAILURE) {
+		RETURN_THROWS();
 	}
 
 	ZIP_FROM_OBJECT(intern, self);
-
-	/* callable? */
-	if (!zend_is_callable(callback, 0, NULL)) {
-		zend_string *callback_name = zend_get_callable_name(callback);
-		php_error_docref(NULL, E_WARNING, "Invalid callback '%s'", ZSTR_VAL(callback_name));
-		zend_string_release_ex(callback_name, 0);
-		RETURN_FALSE;
-	}
 
 	obj = Z_ZIP_P(self);
 
@@ -2962,7 +2947,7 @@ PHP_METHOD(ZipArchive, registerCancelCallback)
 	_php_zip_cancel_callback_free(obj);
 
 	/* register */
-	ZVAL_COPY(&obj->cancel_callback, callback);
+	ZVAL_COPY(&obj->cancel_callback, fci->function_name);
 	if (zip_register_cancel_callback_with_state(intern, _php_zip_cancel_callback, _php_zip_cancel_callback_free, obj)) {
 		RETURN_FALSE;
 	}
