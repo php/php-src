@@ -371,6 +371,8 @@ PHP 8.0 UPGRADE NOTES
   . ReflectionMethod::isConstructor() and ReflectionMethod::isDestructor() now
     also return true for `__construct` and `__destruct` methods of interfaces.
     Previously, this would only be true for methods of classes and traits.
+  . ReflectionType::isBuiltin() method has been moved to ReflectionNamedType.
+    ReflectionUnionType does not have it.
 
 - Socket:
   . The deprecated AI_IDN_ALLOW_UNASSIGNED and AI_IDN_USE_STD3_ASCII_RULES
