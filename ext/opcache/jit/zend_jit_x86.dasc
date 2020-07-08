@@ -10819,56 +10819,53 @@ static int zend_jit_recv_init(dasm_State **Dst, const zend_op *opline, const zen
 	return 1;
 }
 
-#define ZEND_WRONG_PROPERTY_OFFSET 0
-
-static uint32_t zend_get_known_property_offset(zend_class_entry *ce, zend_string *member, zend_bool on_this, zend_string *filename, zend_property_info **prop_info)
+static zend_property_info* zend_get_known_property_info(zend_class_entry *ce, zend_string *member, zend_bool on_this, zend_string *filename)
 {
-	zend_property_info *info;
-
-	*prop_info = NULL;
+	zend_property_info *info = NULL;
 
 	if (!ce || !(ce->ce_flags & ZEND_ACC_LINKED) || (ce->ce_flags & ZEND_ACC_TRAIT)) {
-		return ZEND_WRONG_PROPERTY_OFFSET;
+		return NULL;
 	}
 
-	if (ce->info.user.filename != filename) {
-		/* class declaration might be changed independently */
-		return ZEND_WRONG_PROPERTY_OFFSET;
-	}
+	if (!(ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
+		if (ce->info.user.filename != filename) {
+			/* class declaration might be changed independently */
+			return NULL;
+		}
 
-	if (ce->parent) {
-		zend_class_entry *parent = ce->parent;
+		if (ce->parent) {
+			zend_class_entry *parent = ce->parent;
 
-		do {
-			if (parent->type == ZEND_INTERNAL_CLASS) {
-				break;
-			} else if (parent->info.user.filename != filename) {
-				/* some of parents class declarations might be changed independently */
-				/* TODO: this check may be not enough, because even
-				 * in the same it's possible to conditionally define
-				 * few classes with the same name, and "parent" may
-				 * change from request to request.
-				 */
-				return ZEND_WRONG_PROPERTY_OFFSET;
-			}
-			parent = parent->parent;
-		} while (parent);
+			do {
+				if (parent->type == ZEND_INTERNAL_CLASS) {
+					break;
+				} else if (parent->info.user.filename != filename) {
+					/* some of parents class declarations might be changed independently */
+					/* TODO: this check may be not enough, because even
+					 * in the same it's possible to conditionally define
+					 * few classes with the same name, and "parent" may
+					 * change from request to request.
+					 */
+					return NULL;
+				}
+				parent = parent->parent;
+			} while (parent);
+		}
 	}
 
 	info = (zend_property_info*)zend_hash_find_ptr(&ce->properties_info, member);
 	if (info == NULL ||
-	    info->offset == ZEND_WRONG_PROPERTY_OFFSET ||
+	    !IS_VALID_PROPERTY_OFFSET(info->offset) ||
 	    (info->flags & ZEND_ACC_STATIC)) {
-		return ZEND_WRONG_PROPERTY_OFFSET;
+		return NULL;
 	}
 
 	if (!(info->flags & ZEND_ACC_PUBLIC) &&
 	    (!on_this || info->ce != ce)) {
-		return ZEND_WRONG_PROPERTY_OFFSET;
+		return NULL;
 	}
 
-	*prop_info = info;
-	return info->offset;
+	return info;
 }
 
 static zend_bool zend_may_be_dynamic_property(zend_class_entry *ce, zend_string *member, zend_bool on_this, zend_string *filename)
@@ -10879,14 +10876,16 @@ static zend_bool zend_may_be_dynamic_property(zend_class_entry *ce, zend_string 
 		return 1;
 	}
 
-	if (ce->info.user.filename != filename) {
-		/* class declaration might be changed independently */
-		return 1;
+	if (!(ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
+		if (ce->info.user.filename != filename) {
+			/* class declaration might be changed independently */
+			return 1;
+		}
 	}
 
 	info = (zend_property_info*)zend_hash_find_ptr(&ce->properties_info, member);
 	if (info == NULL ||
-	    info->offset == ZEND_WRONG_PROPERTY_OFFSET ||
+	    !IS_VALID_PROPERTY_OFFSET(info->offset) ||
 	    (info->flags & ZEND_ACC_STATIC)) {
 		return 1;
 	}
@@ -10902,7 +10901,6 @@ static zend_bool zend_may_be_dynamic_property(zend_class_entry *ce, zend_string 
 static int zend_jit_fetch_obj(dasm_State **Dst, const zend_op *opline, const zend_op_array *op_array, uint32_t op1_info, zend_jit_addr op1_addr, zend_bool op1_indirect, zend_class_entry *ce, zend_bool ce_is_instanceof, zend_bool use_this, int may_throw)
 {
 	zval *member;
-	uint32_t offset;
 	zend_property_info *prop_info;
 	zend_bool may_be_dynamic = 1;
 	zend_jit_addr res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
@@ -10914,7 +10912,7 @@ static int zend_jit_fetch_obj(dasm_State **Dst, const zend_op *opline, const zen
 
 	member = RT_CONSTANT(opline, opline->op2);
 	ZEND_ASSERT(Z_TYPE_P(member) == IS_STRING && Z_STRVAL_P(member)[0] != '\0');
-	offset = zend_get_known_property_offset(ce, Z_STR_P(member), opline->op1_type == IS_UNUSED, op_array->filename, &prop_info);
+	prop_info = zend_get_known_property_info(ce, Z_STR_P(member), opline->op1_type == IS_UNUSED, op_array->filename);
 
 	if (opline->op1_type == IS_UNUSED || use_this) {
 		|	GET_ZVAL_PTR FCARG1a, this_addr
@@ -10952,7 +10950,7 @@ static int zend_jit_fetch_obj(dasm_State **Dst, const zend_op *opline, const zen
 		|	GET_ZVAL_PTR FCARG1a, op1_addr
 	}
 
-	if (offset == ZEND_WRONG_PROPERTY_OFFSET) {
+	if (!prop_info) {
 		|	mov r0, EX->run_time_cache
 		|	mov r2, aword [r0 + (opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS)]
 		|	cmp r2, aword [FCARG1a + offsetof(zend_object, ce)]
@@ -11004,8 +11002,8 @@ static int zend_jit_fetch_obj(dasm_State **Dst, const zend_op *opline, const zen
 			|.code
 		}
 	} else {
-		prop_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, offset);
-		|	mov edx, dword [FCARG1a + offset + 8]
+		prop_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, prop_info->offset);
+		|	mov edx, dword [FCARG1a + prop_info->offset + 8]
 		if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
 			int32_t exit_point = zend_jit_trace_get_exit_point(opline, opline, NULL, ZEND_JIT_EXIT_TO_VM);
 			const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
@@ -11074,7 +11072,7 @@ static int zend_jit_fetch_obj(dasm_State **Dst, const zend_op *opline, const zen
 
 	|.cold_code
 
-	if (JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE || offset == ZEND_WRONG_PROPERTY_OFFSET) {
+	if (JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE || !prop_info) {
 		|5:
 		|	SAVE_VALID_OPLINE opline, r0
 		if (opline->opcode == ZEND_FETCH_OBJ_W) {
@@ -11120,7 +11118,7 @@ static int zend_jit_fetch_obj(dasm_State **Dst, const zend_op *opline, const zen
 		}
 	}
 
-	if (offset == ZEND_WRONG_PROPERTY_OFFSET
+	if (!prop_info
 	 && may_be_dynamic
 	 && opline->opcode != ZEND_FETCH_OBJ_W) {
 		|8:
@@ -11155,7 +11153,7 @@ static int zend_jit_fetch_obj(dasm_State **Dst, const zend_op *opline, const zen
 	}
 
 	if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE
-	 && offset != ZEND_WRONG_PROPERTY_OFFSET
+	 && prop_info
 	 && opline->op1_type != IS_VAR
 	 && opline->op1_type != IS_TMP_VAR) {
 		may_throw = 0;
