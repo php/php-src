@@ -5606,3 +5606,13 @@ static void zend_jit_trace_init_caches(void)
 static void zend_jit_trace_reset_caches(void)
 {
 }
+
+static void zend_jit_trace_restart(void)
+{
+	ZEND_JIT_TRACE_NUM = 1;
+	ZEND_JIT_COUNTER_NUM = 0;
+	ZEND_JIT_EXIT_NUM = 0;
+	ZEND_JIT_EXIT_COUNTERS = 0;
+
+	zend_jit_trace_init_caches();
+}

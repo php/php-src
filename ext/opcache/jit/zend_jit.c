@@ -3798,7 +3798,7 @@ ZEND_EXT_API int zend_jit_startup(void *buf, size_t size, zend_bool reattached)
 	}
 #endif
 
-	dasm_ptr = dasm_end = (void*)(((char*)dasm_buf) + size - sizeof(*dasm_ptr));
+	dasm_ptr = dasm_end = (void*)(((char*)dasm_buf) + size - sizeof(*dasm_ptr) * 2);
 	if (!reattached) {
 		zend_jit_unprotect();
 		*dasm_ptr = dasm_buf;
@@ -3846,6 +3846,11 @@ ZEND_EXT_API int zend_jit_startup(void *buf, size_t size, zend_bool reattached)
 	if (zend_jit_trace_startup() != SUCCESS) {
 		return FAILURE;
 	}
+
+	/* save JIT buffer pos */
+	zend_jit_unprotect();
+	dasm_ptr[1] = dasm_ptr[0];
+	zend_jit_protect();
 
 	return SUCCESS;
 }
@@ -3923,6 +3928,20 @@ ZEND_EXT_API void zend_jit_deactivate(void)
 		zend_shared_alloc_unlock();
 
 		zend_jit_profile_counter = 0;
+	}
+}
+
+ZEND_EXT_API void zend_jit_restart(void)
+{
+	if (dasm_buf) {
+		zend_jit_unprotect();
+
+		/* restore JIT buffer pos */
+		dasm_ptr[0] = dasm_ptr[1];
+
+		zend_jit_trace_restart();
+
+		zend_jit_protect();
 	}
 }
 

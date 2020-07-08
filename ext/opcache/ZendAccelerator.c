@@ -2506,6 +2506,11 @@ int accel_activate(INIT_FUNC_ARGS)
 				if (ZCSG(preload_script)) {
 					preload_restart();
 				}
+
+#ifdef HAVE_JIT
+				zend_jit_restart();
+#endif
+
 				ZCSG(accelerator_enabled) = ZCSG(cache_status_before_restart);
 				if (ZCSG(last_restart_time) < ZCG(request_time)) {
 					ZCSG(last_restart_time) = ZCG(request_time);
