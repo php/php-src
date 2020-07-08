@@ -570,7 +570,7 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 				zval *zv;
 				uint32_t s = 0;
 
-				block->successors_count = 2 + zend_hash_num_elements(jumptable);
+				block->successors_count = (opline->opcode == ZEND_MATCH ? 1 : 2) + zend_hash_num_elements(jumptable);
 				block->successors = zend_arena_calloc(arena, block->successors_count, sizeof(int));
 
 				ZEND_HASH_FOREACH_VAL(jumptable, zv) {
@@ -578,7 +578,9 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 				} ZEND_HASH_FOREACH_END();
 
 				block->successors[s++] = block_map[ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value)];
-				block->successors[s++] = j + 1;
+				if (opline->opcode != ZEND_MATCH) {
+					block->successors[s++] = j + 1;
+				}
 				break;
 			}
 			default:
