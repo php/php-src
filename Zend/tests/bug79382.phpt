@@ -6,13 +6,11 @@ disable_functions=strlen
 <?php
 
 function strlen(string $x): int {
-    $len = 0;
-    while (isset($x[$len])) $len++;
-    return $len;
+    return 42;
 }
 
 var_dump(strlen("foobar"));
 
 ?>
 --EXPECT--
-int(6)
+int(42)
