@@ -334,7 +334,7 @@ typedef struct {
 #endif
 } zip_options;
 
-static int php_zip_parse_options(zval *options, zip_options *opts)
+static int php_zip_parse_options(HashTable *options, zip_options *opts)
 /* {{{ */
 {
 	zval *option;
@@ -347,23 +347,23 @@ static int php_zip_parse_options(zval *options, zip_options *opts)
 	opts->enc_method = -1;  /* -1 to not change default */
 #endif
 
-	if ((option = zend_hash_str_find(Z_ARRVAL_P(options), "remove_all_path", sizeof("remove_all_path") - 1)) != NULL) {
+	if ((option = zend_hash_str_find(options, "remove_all_path", sizeof("remove_all_path") - 1)) != NULL) {
 		opts->remove_all_path = zval_get_long(option);
 	}
 
-	if ((option = zend_hash_str_find(Z_ARRVAL_P(options), "comp_method", sizeof("comp_method") - 1)) != NULL) {
+	if ((option = zend_hash_str_find(options, "comp_method", sizeof("comp_method") - 1)) != NULL) {
 		opts->comp_method = zval_get_long(option);
 
-		if ((option = zend_hash_str_find(Z_ARRVAL_P(options), "comp_flags", sizeof("comp_flags") - 1)) != NULL) {
+		if ((option = zend_hash_str_find(options, "comp_flags", sizeof("comp_flags") - 1)) != NULL) {
 			opts->comp_flags = zval_get_long(option);
 		}
 	}
 
 #ifdef HAVE_ENCRYPTION
-	if ((option = zend_hash_str_find(Z_ARRVAL_P(options), "enc_method", sizeof("enc_method") - 1)) != NULL) {
+	if ((option = zend_hash_str_find(options, "enc_method", sizeof("enc_method") - 1)) != NULL) {
 		opts->enc_method = zval_get_long(option);
 
-		if ((option = zend_hash_str_find(Z_ARRVAL_P(options), "enc_password", sizeof("enc_password") - 1)) != NULL) {
+		if ((option = zend_hash_str_find(options, "enc_password", sizeof("enc_password") - 1)) != NULL) {
 			if (Z_TYPE_P(option) != IS_STRING) {
 				php_error_docref(NULL, E_WARNING, "enc_password option expected to be a string");
 				return -1;
@@ -373,7 +373,7 @@ static int php_zip_parse_options(zval *options, zip_options *opts)
 	}
 #endif
 
-	if ((option = zend_hash_str_find(Z_ARRVAL_P(options), "remove_path", sizeof("remove_path") - 1)) != NULL) {
+	if ((option = zend_hash_str_find(options, "remove_path", sizeof("remove_path") - 1)) != NULL) {
 		if (Z_TYPE_P(option) != IS_STRING) {
 			php_error_docref(NULL, E_WARNING, "remove_path option expected to be a string");
 			return -1;
@@ -393,7 +393,7 @@ static int php_zip_parse_options(zval *options, zip_options *opts)
 		opts->remove_path = Z_STRVAL_P(option);
 	}
 
-	if ((option = zend_hash_str_find(Z_ARRVAL_P(options), "add_path", sizeof("add_path") - 1)) != NULL) {
+	if ((option = zend_hash_str_find(options, "add_path", sizeof("add_path") - 1)) != NULL) {
 		if (Z_TYPE_P(option) != IS_STRING) {
 			php_error_docref(NULL, E_WARNING, "add_path option expected to be a string");
 			return -1;
@@ -413,7 +413,7 @@ static int php_zip_parse_options(zval *options, zip_options *opts)
 		opts->add_path = Z_STRVAL_P(option);
 	}
 
-	if ((option = zend_hash_str_find(Z_ARRVAL_P(options), "flags", sizeof("flags") - 1)) != NULL) {
+	if ((option = zend_hash_str_find(options, "flags", sizeof("flags") - 1)) != NULL) {
 		if (Z_TYPE_P(option) != IS_LONG) {
 			php_error_docref(NULL, E_WARNING, "flags option expected to be a integer");
 			return -1;
@@ -1658,19 +1658,19 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 	char *path = ".";
 	size_t  path_len = 1;
 	zend_long glob_flags = 0;
-	zval *options = NULL;
+	HashTable *options = NULL;
 	zip_options opts;
 	int found;
 	zend_string *pattern;
 
 	/* 1 == glob, 2 == pcre */
 	if (type == 1) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "P|la",
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "P|lh",
 					&pattern, &glob_flags, &options) == FAILURE) {
 			RETURN_THROWS();
 		}
 	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "P|sa",
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "P|sh",
 					&pattern, &path, &path_len, &options) == FAILURE) {
 			RETURN_THROWS();
 		}
@@ -1680,7 +1680,7 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 		php_error_docref(NULL, E_NOTICE, "Empty string as pattern");
 		RETURN_FALSE;
 	}
-	if (options && zend_hash_num_elements(Z_ARRVAL_P(options)) > 0 && (php_zip_parse_options(options, &opts) < 0)) {
+	if (options && zend_hash_num_elements(options) > 0 && (php_zip_parse_options(options, &opts) < 0)) {
 		RETURN_FALSE;
 	}
 
