@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: f81f2b4cf552c4ee8406b91c437797feb1164be0 */
+ * Stub hash: 0d3c035fc2b9f0dcdbf6efe3c740d8aa3805ec32 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_version, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -127,7 +127,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_user_error arginfo_trigger_error
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_set_error_handler, 0, 0, 1)
-	ZEND_ARG_INFO(0, error_handler)
+	ZEND_ARG_TYPE_INFO(0, error_handler, IS_CALLABLE, 1)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, error_types, IS_LONG, 0, "E_ALL")
 ZEND_END_ARG_INFO()
 
@@ -135,7 +135,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_restore_error_handler, 0, 0, _IS
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_set_exception_handler, 0, 0, 1)
-	ZEND_ARG_INFO(0, exception_handler)
+	ZEND_ARG_TYPE_INFO(0, exception_handler, IS_CALLABLE, 1)
 ZEND_END_ARG_INFO()
 
 #define arginfo_restore_exception_handler arginfo_restore_error_handler

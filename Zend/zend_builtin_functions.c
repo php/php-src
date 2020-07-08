@@ -1179,20 +1179,13 @@ ZEND_FUNCTION(trigger_error)
 /* {{{ Sets a user-defined error handler function.  Returns the previously defined error handler, or false on error */
 ZEND_FUNCTION(set_error_handler)
 {
-	zval *error_handler;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
 	zend_long error_type = E_ALL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|l", &error_handler, &error_type) == FAILURE) {
+	/* callable argument corresponds to the error handler */
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "f!|l", &fci, &fcc, &error_type) == FAILURE) {
 		RETURN_THROWS();
-	}
-
-	if (Z_TYPE_P(error_handler) != IS_NULL) { /* NULL == unset */
-		if (!zend_is_callable(error_handler, 0, NULL)) {
-			zend_string *error_handler_name = zend_get_callable_name(error_handler);
-			zend_argument_type_error(1, "must be a valid callback");
-			zend_string_release_ex(error_handler_name, 0);
-			RETURN_THROWS();
-		}
 	}
 
 	if (Z_TYPE(EG(user_error_handler)) != IS_UNDEF) {
@@ -1202,12 +1195,12 @@ ZEND_FUNCTION(set_error_handler)
 	zend_stack_push(&EG(user_error_handlers_error_reporting), &EG(user_error_handler_error_reporting));
 	zend_stack_push(&EG(user_error_handlers), &EG(user_error_handler));
 
-	if (Z_TYPE_P(error_handler) == IS_NULL) { /* unset user-defined handler */
+	if (!ZEND_FCI_INITIALIZED(fci)) { /* unset user-defined handler */
 		ZVAL_UNDEF(&EG(user_error_handler));
 		return;
 	}
 
-	ZVAL_COPY(&EG(user_error_handler), error_handler);
+	ZVAL_COPY(&EG(user_error_handler), &(fci.function_name));
 	EG(user_error_handler_error_reporting) = (int)error_type;
 }
 /* }}} */
@@ -1244,19 +1237,12 @@ ZEND_FUNCTION(restore_error_handler)
 /* {{{ Sets a user-defined exception handler function. Returns the previously defined exception handler, or false on error */
 ZEND_FUNCTION(set_exception_handler)
 {
-	zval *exception_handler;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &exception_handler) == FAILURE) {
+	/* callable argument corresponds to the exception handler */
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "f!", &fci, &fcc) == FAILURE) {
 		RETURN_THROWS();
-	}
-
-	if (Z_TYPE_P(exception_handler) != IS_NULL) { /* NULL == unset */
-		if (!zend_is_callable(exception_handler, 0, NULL)) {
-		zend_string *exception_handler_name = zend_get_callable_name(exception_handler);
-			zend_argument_type_error(1, "must be a valid callback");
-			zend_string_release_ex(exception_handler_name, 0);
-			RETURN_THROWS();
-		}
 	}
 
 	if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {
@@ -1265,12 +1251,12 @@ ZEND_FUNCTION(set_exception_handler)
 
 	zend_stack_push(&EG(user_exception_handlers), &EG(user_exception_handler));
 
-	if (Z_TYPE_P(exception_handler) == IS_NULL) { /* unset user-defined handler */
+	if (!ZEND_FCI_INITIALIZED(fci)) { /* unset user-defined handler */
 		ZVAL_UNDEF(&EG(user_exception_handler));
 		return;
 	}
 
-	ZVAL_COPY(&EG(user_exception_handler), exception_handler);
+	ZVAL_COPY(&EG(user_exception_handler), &(fci.function_name));
 }
 /* }}} */
 
