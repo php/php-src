@@ -23307,7 +23307,7 @@ try_assign_dim_array:
 			}
 			dim = RT_CONSTANT(opline, opline->op2);
 assign_dim_error:
-			zval_ptr_dtor_nogc(free_op_data);
+			zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_NULL(EX_VAR(opline->result.var));
 			}
@@ -23422,7 +23422,7 @@ try_assign_dim_array:
 			}
 			dim = RT_CONSTANT(opline, opline->op2);
 assign_dim_error:
-			zval_ptr_dtor_nogc(free_op_data);
+			zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_NULL(EX_VAR(opline->result.var));
 			}
@@ -25601,7 +25601,7 @@ try_assign_dim_array:
 			}
 			dim = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
 assign_dim_error:
-			zval_ptr_dtor_nogc(free_op_data);
+			zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_NULL(EX_VAR(opline->result.var));
 			}
@@ -25716,7 +25716,7 @@ try_assign_dim_array:
 			}
 			dim = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
 assign_dim_error:
-			zval_ptr_dtor_nogc(free_op_data);
+			zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_NULL(EX_VAR(opline->result.var));
 			}
@@ -27176,7 +27176,7 @@ try_assign_dim_array:
 			}
 			dim = NULL;
 assign_dim_error:
-			zval_ptr_dtor_nogc(free_op_data);
+			zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_NULL(EX_VAR(opline->result.var));
 			}
@@ -27291,7 +27291,7 @@ try_assign_dim_array:
 			}
 			dim = NULL;
 assign_dim_error:
-			zval_ptr_dtor_nogc(free_op_data);
+			zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_NULL(EX_VAR(opline->result.var));
 			}
@@ -29274,7 +29274,7 @@ try_assign_dim_array:
 			}
 			dim = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
 assign_dim_error:
-			zval_ptr_dtor_nogc(free_op_data);
+			zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_NULL(EX_VAR(opline->result.var));
 			}
@@ -29389,7 +29389,7 @@ try_assign_dim_array:
 			}
 			dim = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
 assign_dim_error:
-			zval_ptr_dtor_nogc(free_op_data);
+			zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_NULL(EX_VAR(opline->result.var));
 			}
@@ -40475,7 +40475,7 @@ try_assign_dim_array:
 			}
 			dim = RT_CONSTANT(opline, opline->op2);
 assign_dim_error:
-			zval_ptr_dtor_nogc(free_op_data);
+			zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_NULL(EX_VAR(opline->result.var));
 			}
@@ -40590,7 +40590,7 @@ try_assign_dim_array:
 			}
 			dim = RT_CONSTANT(opline, opline->op2);
 assign_dim_error:
-			zval_ptr_dtor_nogc(free_op_data);
+			zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_NULL(EX_VAR(opline->result.var));
 			}
@@ -43973,7 +43973,7 @@ try_assign_dim_array:
 			}
 			dim = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
 assign_dim_error:
-			zval_ptr_dtor_nogc(free_op_data);
+			zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_NULL(EX_VAR(opline->result.var));
 			}
@@ -44088,7 +44088,7 @@ try_assign_dim_array:
 			}
 			dim = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
 assign_dim_error:
-			zval_ptr_dtor_nogc(free_op_data);
+			zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_NULL(EX_VAR(opline->result.var));
 			}
@@ -46002,7 +46002,7 @@ try_assign_dim_array:
 			}
 			dim = NULL;
 assign_dim_error:
-			zval_ptr_dtor_nogc(free_op_data);
+			zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_NULL(EX_VAR(opline->result.var));
 			}
@@ -46117,7 +46117,7 @@ try_assign_dim_array:
 			}
 			dim = NULL;
 assign_dim_error:
-			zval_ptr_dtor_nogc(free_op_data);
+			zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_NULL(EX_VAR(opline->result.var));
 			}
@@ -49051,7 +49051,7 @@ try_assign_dim_array:
 			}
 			dim = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
 assign_dim_error:
-			zval_ptr_dtor_nogc(free_op_data);
+			zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_NULL(EX_VAR(opline->result.var));
 			}
@@ -49166,7 +49166,7 @@ try_assign_dim_array:
 			}
 			dim = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
 assign_dim_error:
-			zval_ptr_dtor_nogc(free_op_data);
+			zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_NULL(EX_VAR(opline->result.var));
 			}
