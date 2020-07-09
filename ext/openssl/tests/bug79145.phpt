@@ -17,7 +17,7 @@ C9C4JmhTOjBVAK8SewIDAQAC
 $start = memory_get_usage(true);
 for ($i = 0; $i < 100000; $i++) {
     $a = openssl_get_publickey($b);
-    openssl_free_key($a);
+    @openssl_free_key($a);
 }
 $end = memory_get_usage(true);
 var_dump($end <= 1.1 * $start);

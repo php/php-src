@@ -4,7 +4,7 @@ class CertificateGenerator
 {
     const CONFIG = __DIR__. DIRECTORY_SEPARATOR . 'openssl.cnf';
 
-    /** @var resource */
+    /** @var X509Certificate */
     private $ca;
 
     /** @var resource */

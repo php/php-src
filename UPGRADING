@@ -366,6 +366,23 @@ PHP 8.0 UPGRADE NOTES
   . Several alias functions have been marked as deprecated.
   . oci_internal_debug() and its alias ociinternaldebug() have been removed.
 
+- OpenSSL:
+  . openssl_x509_read() and openssl_csr_sign() will now return an
+    X509Certificate object rather than a resource. Return value checks using
+    is_resource() should be replaced with checks for `false`.
+  . The openssl_x509_free() function is deprecated and no longer has an effect,
+    instead the X509Certificate instance is automatically destroyed if it is no
+    longer referenced.
+  . openssl_csr_new() will now return an X509CertificateSigningRequest object
+    rather than a resource. Return value checks using is_resource() should be
+    replaced with checks for `false`.
+  . openssl_pkey_new() will now return an OpenSSLKey object rather than a
+    resource. Return value checks using is_resource() should be replaced with
+    checks for `false`.
+  . The openssl_pkey_free() function is deprecated and no longer has an effect,
+    instead the OpenSSLKey instance is automatically destroyed if it is no
+    longer referenced.
+
 - PCRE:
   . When passing invalid escape sequences they are no longer interpreted as
     literals. This behavior previously required the X modifier - which is
