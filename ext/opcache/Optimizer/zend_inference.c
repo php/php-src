@@ -4389,6 +4389,7 @@ int zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op, const ze
 		case ZEND_FUNC_GET_ARGS:
 		case ZEND_COPY_TMP:
 		case ZEND_CHECK_FUNC_ARG:
+		case ZEND_CASE_STRICT:
 			return 0;
 		case ZEND_INIT_FCALL:
 			/* can't throw, because call is resolved at compile time */
@@ -4460,7 +4461,6 @@ int zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op, const ze
 		case ZEND_IS_SMALLER:
 		case ZEND_IS_SMALLER_OR_EQUAL:
 		case ZEND_CASE:
-		case ZEND_CASE_STRICT:
 		case ZEND_SPACESHIP:
 			if ((t1 & MAY_BE_ANY) == MAY_BE_NULL
 			 || (t2 & MAY_BE_ANY) == MAY_BE_NULL) {
