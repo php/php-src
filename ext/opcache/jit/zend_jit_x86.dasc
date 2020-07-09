@@ -11466,7 +11466,7 @@ static int zend_jit_switch(dasm_State **Dst, const zend_op *opline, const zend_o
 					|	jz =>b
 					|	LOAD_ADDR FCARG1a, jumptable
 					|	sub r0, aword [FCARG1a + offsetof(HashTable, arData)]
-					|	mov FCARG1a, (sizeof(Bucket) / sizeof(uint32_t))
+					|	mov FCARG1a, (sizeof(Bucket) / sizeof(void*))
 					|.if X64
 					|	cqo
 					|.else
@@ -11511,7 +11511,7 @@ static int zend_jit_switch(dasm_State **Dst, const zend_op *opline, const zend_o
 				|	jz =>b
 				|	LOAD_ADDR FCARG1a, jumptable
 				|	sub r0, aword [FCARG1a + offsetof(HashTable, arData)]
-				|	mov FCARG1a, (sizeof(Bucket) / sizeof(uint32_t))
+				|	mov FCARG1a, (sizeof(Bucket) / sizeof(void*))
 				|.if X64
 				|	cqo
 				|.else
