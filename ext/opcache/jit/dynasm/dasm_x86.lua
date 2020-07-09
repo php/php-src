@@ -47,7 +47,7 @@ local action_names = {
   -- action arg (1 byte) or int arg, 2 buffer pos (link, offset):
   "REL_LG", "REL_PC",
   -- action arg (1 byte) or int arg, 1 buffer pos (link):
-  "IMM_LG", "IMM_PC",
+  "IMM_LG", "IMM_PC", "IMM_PC64",
   -- action arg (1 byte) or int arg, 1 buffer pos (offset):
   "LABEL_LG", "LABEL_PC",
   -- action arg (1 byte), 1 buffer pos (offset):
@@ -434,7 +434,11 @@ local function wputlabel(aprefix, imm, num)
     end
     wputxb(imm)
   else
-    waction(aprefix.."PC", imm, num)
+    if aprefix == "IMM_" and x64 then
+      waction("IMM_PC64", imm, num)
+    else
+      waction(aprefix.."PC", imm, num)
+    end
   end
 end
 
