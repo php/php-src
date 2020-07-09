@@ -684,15 +684,13 @@ static int zend_jit_op_array_analyze1(const zend_op_array *op_array, zend_script
 	return SUCCESS;
 }
 
-static int zend_jit_op_array_analyze2(const zend_op_array *op_array, zend_script *script, zend_ssa *ssa)
+static int zend_jit_op_array_analyze2(const zend_op_array *op_array, zend_script *script, zend_ssa *ssa, uint32_t optimization_level)
 {
 	if ((JIT_G(opt_level) >= ZEND_JIT_LEVEL_OPT_FUNC)
 	 && ssa->cfg.blocks
 	 && op_array->last_try_catch == 0
 	 && !(op_array->fn_flags & ZEND_ACC_GENERATOR)
 	 && !(ssa->cfg.flags & ZEND_FUNC_INDIRECT_VAR_ACCESS)) {
-
-		uint32_t optimization_level = ZCG(accel_directives).optimization_level;
 		if (zend_ssa_inference(&CG(arena), op_array, script, ssa, optimization_level) != SUCCESS) {
 			return FAILURE;
 		}
@@ -3133,7 +3131,7 @@ static int zend_real_jit_func(zend_op_array *op_array, zend_script *script, cons
 		}
 	}
 
-	if (zend_jit_op_array_analyze2(op_array, script, &ssa) != SUCCESS) {
+	if (zend_jit_op_array_analyze2(op_array, script, &ssa, ZCG(accel_directives).optimization_level) != SUCCESS) {
 		goto jit_failure;
 	}
 
@@ -3458,7 +3456,7 @@ ZEND_EXT_API int zend_jit_script(zend_script *script)
 			}
 			info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
 			if (info) {
-				if (zend_jit_op_array_analyze2(call_graph.op_arrays[i], script, &info->ssa) != SUCCESS) {
+				if (zend_jit_op_array_analyze2(call_graph.op_arrays[i], script, &info->ssa, ZCG(accel_directives).optimization_level) != SUCCESS) {
 					goto jit_failure;
 				}
 				info->flags = info->ssa.cfg.flags;
