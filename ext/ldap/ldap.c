@@ -281,7 +281,7 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 	char** ldap_attrs = NULL;
 	LDAPSortKey** sort_keys = NULL;
 	zend_string *tmpstring = NULL, **tmpstrings1 = NULL, **tmpstrings2 = NULL;
-	int num_tmpstrings1 = 0, num_tmpstrings2 = 0;
+	size_t num_tmpstrings1 = 0, num_tmpstrings2 = 0;
 
 	if ((val = zend_hash_str_find(Z_ARRVAL_P(array), "oid", sizeof("oid") - 1)) == NULL) {
 		php_error_docref(NULL, E_WARNING, "Control must have an oid key");
@@ -427,12 +427,12 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 						}
 
 						tmpstrings1[num_tmpstrings1] = zval_get_string(attr);
-						++num_tmpstrings1;
 						if (EG(exception)) {
 							rc = -1;
 							goto failure;
 						}
-						ldap_attrs[i] = ZSTR_VAL(tmpstrings1[num_tmpstrings1-1]);
+						ldap_attrs[i] = ZSTR_VAL(tmpstrings1[num_tmpstrings1]);
+						++num_tmpstrings1;
 					}
 					ldap_attrs[num_attribs] = NULL;
 
@@ -476,21 +476,21 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 				}
 				sort_keys[i] = emalloc(sizeof(LDAPSortKey));
 				tmpstrings1[num_tmpstrings1] = zval_get_string(tmp);
-				++num_tmpstrings1;
 				if (EG(exception)) {
 					rc = -1;
 					goto failure;
 				}
-				sort_keys[i]->attributeType = ZSTR_VAL(tmpstrings1[num_tmpstrings1-1]);
+				sort_keys[i]->attributeType = ZSTR_VAL(tmpstrings1[num_tmpstrings1]);
+				++num_tmpstrings1;
 
 				if ((tmp = zend_hash_str_find(Z_ARRVAL_P(sortkey), "oid", sizeof("oid") - 1)) != NULL) {
 					tmpstrings2[num_tmpstrings2] = zval_get_string(tmp);
-					++num_tmpstrings2;
 					if (EG(exception)) {
 						rc = -1;
 						goto failure;
 					}
-					sort_keys[i]->orderingRule = ZSTR_VAL(tmpstrings2[num_tmpstrings2-1]);
+					sort_keys[i]->orderingRule = ZSTR_VAL(tmpstrings2[num_tmpstrings2]);
+					++num_tmpstrings2;
 				} else {
 					sort_keys[i]->orderingRule = NULL;
 				}
@@ -600,18 +600,14 @@ failure:
 	if (tmpstrings1 != NULL) {
 		int i;
 		for (i = 0; i < num_tmpstrings1; ++i) {
-			if (tmpstrings1[i] != NULL) {
-				zend_string_release(tmpstrings1[i]);
-			}
+			zend_string_release(tmpstrings1[i]);
 		}
 		efree(tmpstrings1);
 	}
 	if (tmpstrings2 != NULL) {
 		int i;
 		for (i = 0; i < num_tmpstrings2; ++i) {
-			if (tmpstrings2[i] != NULL) {
-				zend_string_release(tmpstrings2[i]);
-			}
+			zend_string_release(tmpstrings2[i]);
 		}
 		efree(tmpstrings2);
 	}
