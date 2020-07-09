@@ -335,17 +335,15 @@ ZEND_API int zend_alter_ini_entry_ex(zend_string *name, zend_string *new_value, 
 		}
 	}
 
-	if (ini_entry->modifiable != ZEND_INI_SYSTEM) {
-		if (!EG(modified_ini_directives)) {
-			ALLOC_HASHTABLE(EG(modified_ini_directives));
-			zend_hash_init(EG(modified_ini_directives), 8, NULL, NULL, 0);
-		}
-		if (!modified) {
-			ini_entry->orig_value = ini_entry->value;
-			ini_entry->orig_modifiable = modifiable;
-			ini_entry->modified = 1;
-			zend_hash_add_ptr(EG(modified_ini_directives), ini_entry->name, ini_entry);
-		}
+	if (!EG(modified_ini_directives)) {
+		ALLOC_HASHTABLE(EG(modified_ini_directives));
+		zend_hash_init(EG(modified_ini_directives), 8, NULL, NULL, 0);
+	}
+	if (!modified) {
+		ini_entry->orig_value = ini_entry->value;
+		ini_entry->orig_modifiable = modifiable;
+		ini_entry->modified = 1;
+		zend_hash_add_ptr(EG(modified_ini_directives), ini_entry->name, ini_entry);
 	}
 
 	duplicate = zend_string_copy(new_value);
