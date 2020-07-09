@@ -1261,7 +1261,8 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 				} else {
 					ssa_var_info[i].type = MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_REF | MAY_BE_ANY  | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
 				}
-			} else if (op_array->function_name) {
+			} else if (op_array->function_name
+			        && !zend_jit_var_may_be_modified_indirectly(op_array, ssa, i)) {
 				ssa_vars[i].no_val = ssa->vars ? ssa->vars[i].no_val : 0;
 				ssa_var_info[i].type = MAY_BE_UNDEF;
 			} else {
@@ -1722,7 +1723,8 @@ propagate_arg:
 					} else {
 						ssa_var_info[v].type = MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_REF | MAY_BE_ANY  | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
 					}
-				} else if (op_array->function_name) {
+				} else if (op_array->function_name
+				        && !zend_jit_var_may_be_modified_indirectly(op_array, ssa, i)) {
 					ssa_vars[v].no_val = ssa->vars ? ssa->vars[i].no_val : 0;
 					ssa_var_info[v].type = MAY_BE_UNDEF;
 				} else {
