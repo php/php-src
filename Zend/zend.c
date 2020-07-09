@@ -1254,10 +1254,6 @@ ZEND_API zval *zend_get_configuration_directive(zend_string *name) /* {{{ */
 		} \
 	} while (0)
 
-static void arg_copy_ctor(zval *zv) {
-	zval_copy_ctor(zv);
-}
-
 static ZEND_COLD void zend_error_va_list(
 		int type, const char *error_filename, uint32_t error_lineno,
 		const char *format, va_list args)
@@ -1351,9 +1347,7 @@ static ZEND_COLD void zend_error_va_list(
 			if (!symbol_table) {
 				ZVAL_NULL(&params[4]);
 			} else {
-				array_init(&params[4]);
-				/* always try to do noninvasive duplication */
-				zend_hash_copy(Z_ARRVAL(params[4]), symbol_table, arg_copy_ctor);
+				ZVAL_ARR(&params[4], zend_array_dup(symbol_table));
 			}
 
 			ZVAL_COPY_VALUE(&orig_user_error_handler, &EG(user_error_handler));
