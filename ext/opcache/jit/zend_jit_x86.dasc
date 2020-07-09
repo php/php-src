@@ -11446,6 +11446,7 @@ static int zend_jit_switch(dasm_State **Dst, const zend_op *opline, const zend_o
 					|.endif
 					|3:
 					|.cold_code
+					|.align aword
 					|4:
 					p = jumptable->arData;
 					do {
@@ -11476,6 +11477,7 @@ static int zend_jit_switch(dasm_State **Dst, const zend_op *opline, const zend_o
 					|	jmp aword [r0 + >4]
 					|3:
 					|.cold_code
+					|.align aword
 					|4:
 					ZEND_HASH_FOREACH_VAL(jumptable, val) {
 						b = ssa->cfg.map[ZEND_OFFSET_TO_OPLINE(opline, Z_LVAL_P(val)) - op_array->opcodes];
@@ -11521,6 +11523,7 @@ static int zend_jit_switch(dasm_State **Dst, const zend_op *opline, const zend_o
 				|	jmp aword [r0 + >4]
 				|3:
 				|.cold_code
+				|.align aword
 				|4:
 				ZEND_HASH_FOREACH_VAL(jumptable, val) {
 					b = ssa->cfg.map[ZEND_OFFSET_TO_OPLINE(opline, Z_LVAL_P(val)) - op_array->opcodes];
