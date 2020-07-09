@@ -11440,7 +11440,12 @@ static int zend_jit_switch(dasm_State **Dst, const zend_op *opline, const zend_o
 					|	cmp FCARG2a, jumptable->nNumUsed
 					|	jae >3
 					|.if X64
-					|	jmp aword [FCARG2a * 8 + >4]
+						if (!IS_32BIT(dasm_end)) {
+							|	lea r0, aword [>4]
+							|	jmp aword [r0 + FCARG2a * 8]
+						} else {
+							|	jmp aword [FCARG2a * 8 + >4]
+						}
 					|.else
 					|	jmp aword [FCARG2a * 4 + >4]
 					|.endif
@@ -11474,7 +11479,16 @@ static int zend_jit_switch(dasm_State **Dst, const zend_op *opline, const zend_o
 					|	cdq
 					|.endif
 					|	idiv FCARG1a
+					|.if X64
+					if (!IS_32BIT(dasm_end)) {
+						|	lea FCARG1a, aword [>4]
+						|	jmp aword [FCARG1a + r0]
+					} else {
+						|	jmp aword [r0 + >4]
+					}
+					|.else
 					|	jmp aword [r0 + >4]
+					|.endif
 					|3:
 					|.cold_code
 					|.align aword
@@ -11520,7 +11534,16 @@ static int zend_jit_switch(dasm_State **Dst, const zend_op *opline, const zend_o
 				|	cdq
 				|.endif
 				|	idiv FCARG1a
+				|.if X64
+				if (!IS_32BIT(dasm_end)) {
+					|	lea FCARG1a, aword [>4]
+					|	jmp aword [FCARG1a + r0]
+				} else {
+					|	jmp aword [r0 + >4]
+				}
+				|.else
 				|	jmp aword [r0 + >4]
+				|.endif
 				|3:
 				|.cold_code
 				|.align aword
