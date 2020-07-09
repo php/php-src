@@ -262,7 +262,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> inline_function union_type
 %type <ast> attributed_statement attributed_class_statement attributed_parameter
 %type <ast> attribute_decl attribute attributes
-%type <ast> match match_arm_list non_empty_match_arm_list match_arm match_arm_cond_list match_arm_body
+%type <ast> match match_arm_list non_empty_match_arm_list match_arm match_arm_cond_list
 
 %type <num> returns_ref function fn is_reference is_variadic variable_modifiers
 %type <num> method_modifiers non_empty_member_modifiers member_modifier optional_visibility_modifier
@@ -642,19 +642,15 @@ non_empty_match_arm_list:
 ;
 
 match_arm:
-		match_arm_cond_list possible_comma T_DOUBLE_ARROW match_arm_body
+		match_arm_cond_list possible_comma T_DOUBLE_ARROW expr
 			{ $$ = zend_ast_create(ZEND_AST_MATCH_ARM, $1, $4); }
-	|	T_DEFAULT possible_comma T_DOUBLE_ARROW match_arm_body
+	|	T_DEFAULT possible_comma T_DOUBLE_ARROW expr
 			{ $$ = zend_ast_create(ZEND_AST_MATCH_ARM, NULL, $4); }
 ;
 
 match_arm_cond_list:
 		expr { $$ = zend_ast_create_list(1, ZEND_AST_EXPR_LIST, $1); }
 	|	match_arm_cond_list ',' expr { $$ = zend_ast_list_add($1, $3); }
-;
-
-match_arm_body:
-		expr { $$ = $1; }
 ;
 
 
