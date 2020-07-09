@@ -66,7 +66,6 @@ static char *zend_version_info;
 static uint32_t zend_version_info_length;
 #define ZEND_CORE_VERSION_INFO	"Zend Engine v" ZEND_VERSION ", Copyright (c) Zend Technologies\n"
 #define PRINT_ZVAL_INDENT 4
-#define READABLE_ZVAL_MAX_STR_LENGTH 20
 
 /* true multithread-shared globals */
 ZEND_API zend_class_entry *zend_standard_class_def = NULL;
