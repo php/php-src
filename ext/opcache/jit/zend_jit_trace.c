@@ -2122,9 +2122,12 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 					 || opline->opcode == ZEND_ADD
 					 || opline->opcode == ZEND_SUB
 					 || opline->opcode == ZEND_MUL) {
-						start[ssa_op->result_def] = idx;
-						vars_op_array[ssa_op->result_def] = op_array;
-						count++;
+						if (!(ssa->var_info[ssa_op->result_def].type & MAY_BE_DOUBLE)
+						 || (opline->opcode != ZEND_PRE_INC && opline->opcode != ZEND_PRE_DEC)) {
+							start[ssa_op->result_def] = idx;
+							vars_op_array[ssa_op->result_def] = op_array;
+							count++;
+						}
 					}
 				}
 				if (ssa_op->op1_def >= 0
