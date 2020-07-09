@@ -5211,7 +5211,7 @@ static zend_bool can_match_use_jumptable(zend_ast_list *arms) {
 	return 1;
 }
 
-void zend_compile_match(znode *result, zend_ast *ast) /* {{{ */
+void zend_compile_match(znode *result, zend_ast *ast)
 {
 	zend_ast *expr_ast = ast->child[0];
 	zend_ast_list *arms = zend_ast_get_list(ast->child[1]);
@@ -5387,7 +5387,6 @@ void zend_compile_match(znode *result, zend_ast *ast) /* {{{ */
 	}
 	efree(jmp_end_opnums);
 }
-/* }}} */
 
 void zend_compile_try(zend_ast *ast) /* {{{ */
 {
