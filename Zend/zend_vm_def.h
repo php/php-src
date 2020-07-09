@@ -2619,15 +2619,14 @@ ZEND_VM_HANDLER(23, ZEND_ASSIGN_DIM, VAR|CV, CONST|TMPVAR|UNUSED|NEXT|CV, SPEC(O
 
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_ARRAY)) {
 ZEND_VM_C_LABEL(try_assign_dim_array):
+		value = GET_OP_DATA_ZVAL_PTR(BP_VAR_R);
 		SEPARATE_ARRAY(object_ptr);
 		if (OP2_TYPE == IS_UNUSED) {
-			value = GET_OP_DATA_ZVAL_PTR(BP_VAR_R);
 			if (OP_DATA_TYPE == IS_CV || OP_DATA_TYPE == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
 			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
 			if (UNEXPECTED(variable_ptr == NULL)) {
-				FREE_OP_DATA();
 				zend_cannot_add_element();
 				ZEND_VM_C_GOTO(assign_dim_error);
 			} else if (OP_DATA_TYPE == IS_CV) {
@@ -2656,7 +2655,6 @@ ZEND_VM_C_LABEL(try_assign_dim_array):
 			if (UNEXPECTED(variable_ptr == NULL)) {
 				ZEND_VM_C_GOTO(assign_dim_error);
 			}
-			value = GET_OP_DATA_ZVAL_PTR(BP_VAR_R);
 			value = zend_assign_to_variable(variable_ptr, value, OP_DATA_TYPE, EX_USES_STRICT_TYPES());
 		}
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -2707,7 +2705,7 @@ ZEND_VM_C_LABEL(try_assign_dim_array):
 			}
 			dim = GET_OP2_ZVAL_PTR(BP_VAR_R);
 ZEND_VM_C_LABEL(assign_dim_error):
-			FREE_UNFETCHED_OP_DATA();
+			FREE_OP_DATA();
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_NULL(EX_VAR(opline->result.var));
 			}
