@@ -280,7 +280,8 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 	int control_iscritical = 0, rc = LDAP_SUCCESS;
 	char** ldap_attrs = NULL;
 	LDAPSortKey** sort_keys = NULL;
-	zend_string *tmpstring = NULL;
+	zend_string *tmpstring = NULL, **tmpstrings1 = NULL, **tmpstrings2 = NULL;
+	int num_tmpstrings1 = 0, num_tmpstrings2 = 0;
 
 	if ((val = zend_hash_str_find(Z_ARRVAL_P(array), "oid", sizeof("oid") - 1)) == NULL) {
 		php_error_docref(NULL, E_WARNING, "Control must have an oid key");
@@ -415,6 +416,8 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 
 					num_attribs = zend_hash_num_elements(Z_ARRVAL_P(tmp));
 					ldap_attrs = safe_emalloc((num_attribs+1), sizeof(char *), 0);
+					tmpstrings1 = safe_emalloc(num_attribs, sizeof(zend_string*), 0);
+					num_tmpstrings1 = 0;
 
 					for (i = 0; i<num_attribs; i++) {
 						if ((attr = zend_hash_index_find(Z_ARRVAL_P(tmp), i)) == NULL) {
@@ -423,16 +426,13 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 							goto failure;
 						}
 
-						if (tmpstring != NULL) {
-							zend_string_release(tmpstring);
-						}
-
-						tmpstring = zval_get_string(attr);
+						tmpstrings1[num_tmpstrings1] = zval_get_string(attr);
+						++num_tmpstrings1;
 						if (EG(exception)) {
 							rc = -1;
 							goto failure;
 						}
-						ldap_attrs[i] = ZSTR_VAL(tmpstring);
+						ldap_attrs[i] = ZSTR_VAL(tmpstrings1[num_tmpstrings1-1]);
 					}
 					ldap_attrs[num_attribs] = NULL;
 
@@ -457,6 +457,10 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 
 			num_keys = zend_hash_num_elements(Z_ARRVAL_P(val));
 			sort_keys = safe_emalloc((num_keys+1), sizeof(LDAPSortKey*), 0);
+			tmpstrings1 = safe_emalloc(num_keys, sizeof(zend_string*), 0);
+			tmpstrings2 = safe_emalloc(num_keys, sizeof(zend_string*), 0);
+			num_tmpstrings1 = 0;
+			num_tmpstrings2 = 0;
 
 			for (i = 0; i<num_keys; i++) {
 				if ((sortkey = zend_hash_index_find(Z_ARRVAL_P(val), i)) == NULL) {
@@ -471,26 +475,22 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 					goto failure;
 				}
 				sort_keys[i] = emalloc(sizeof(LDAPSortKey));
-				if (tmpstring) {
-					zend_string_release(tmpstring);
-				}
-				tmpstring = zval_get_string(tmp);
+				tmpstrings1[num_tmpstrings1] = zval_get_string(tmp);
+				++num_tmpstrings1;
 				if (EG(exception)) {
 					rc = -1;
 					goto failure;
 				}
-				sort_keys[i]->attributeType = ZSTR_VAL(tmpstring);
+				sort_keys[i]->attributeType = ZSTR_VAL(tmpstrings1[num_tmpstrings1-1]);
 
 				if ((tmp = zend_hash_str_find(Z_ARRVAL_P(sortkey), "oid", sizeof("oid") - 1)) != NULL) {
-					if (tmpstring) {
-						zend_string_release(tmpstring);
-					}
-					tmpstring = zval_get_string(tmp);
+					tmpstrings2[num_tmpstrings2] = zval_get_string(tmp);
+					++num_tmpstrings2;
 					if (EG(exception)) {
 						rc = -1;
 						goto failure;
 					}
-					sort_keys[i]->orderingRule = ZSTR_VAL(tmpstring);
+					sort_keys[i]->orderingRule = ZSTR_VAL(tmpstrings2[num_tmpstrings2-1]);
 				} else {
 					sort_keys[i]->orderingRule = NULL;
 				}
@@ -596,6 +596,24 @@ failure:
 	zend_string_release(control_oid);
 	if (tmpstring != NULL) {
 		zend_string_release(tmpstring);
+	}
+	if (tmpstrings1 != NULL) {
+		int i;
+		for (i = 0; i < num_tmpstrings1; ++i) {
+			if (tmpstrings1[i] != NULL) {
+				zend_string_release(tmpstrings1[i]);
+			}
+		}
+		efree(tmpstrings1);
+	}
+	if (tmpstrings2 != NULL) {
+		int i;
+		for (i = 0; i < num_tmpstrings2; ++i) {
+			if (tmpstrings2[i] != NULL) {
+				zend_string_release(tmpstrings2[i]);
+			}
+		}
+		efree(tmpstrings2);
 	}
 	if (control_value != NULL) {
 		ber_memfree(control_value);
