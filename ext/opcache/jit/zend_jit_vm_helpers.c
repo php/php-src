@@ -475,7 +475,7 @@ static int zend_jit_trace_record_fake_init_call_ex(zend_execute_data *call, zend
 		}
 
 		func = call->func;
-		if (func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
+		if (func->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE|ZEND_ACC_NEVER_CACHE)) {
 			/* TODO: Can we continue recording ??? */
 			return -1;
 		}
@@ -854,6 +854,10 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 				if (EX(call)->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
 					/* TODO: Can we continue recording ??? */
 					stop = ZEND_JIT_TRACE_STOP_TRAMPOLINE;
+					break;
+				} else if (EX(call)->func->common.fn_flags & ZEND_ACC_NEVER_CACHE) {
+					/* TODO: Can we continue recording ??? */
+					stop = ZEND_JIT_TRACE_STOP_BAD_FUNC;
 					break;
 				}
 				func = EX(call)->func;
