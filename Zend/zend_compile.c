@@ -5018,7 +5018,7 @@ static zend_uchar determine_switch_jumptable_type(zend_ast_list *cases) {
 	return common_type;
 }
 
-static zend_bool should_use_jumptable(uint32_t num_children, zend_uchar jumptable_type) {
+static zend_bool should_use_jumptable(zend_ast_list *cases, zend_uchar jumptable_type) {
 	if (CG(compiler_options) & ZEND_COMPILE_NO_JUMPTABLES) {
 		return 0;
 	}
@@ -5026,10 +5026,10 @@ static zend_bool should_use_jumptable(uint32_t num_children, zend_uchar jumptabl
 	/* Thresholds are chosen based on when the average switch time for equidistributed
 	 * input becomes smaller when using the jumptable optimization. */
 	if (jumptable_type == IS_LONG) {
-		return num_children >= 5;
+		return cases->children >= 5;
 	} else {
 		ZEND_ASSERT(jumptable_type == IS_STRING);
-		return num_children >= 2;
+		return cases->children >= 2;
 	}
 }
 
@@ -5055,7 +5055,7 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 	case_node.u.op.var = get_temporary_variable();
 
 	jumptable_type = determine_switch_jumptable_type(cases);
-	if (jumptable_type != IS_UNDEF && should_use_jumptable(cases->children, jumptable_type)) {
+	if (jumptable_type != IS_UNDEF && should_use_jumptable(cases, jumptable_type)) {
 		znode jumptable_op;
 
 		ALLOC_HASHTABLE(jumptable);
