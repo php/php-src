@@ -494,28 +494,6 @@ $op2_free_op_var_ptr = array(
     "TMPVARCV" => "???",
 );
 
-$op1_free_unfetched = array(
-    "ANY"      => "FREE_UNFETCHED_OP(opline->op1_type, opline->op1.var)",
-    "TMP"      => "zval_ptr_dtor_nogc(EX_VAR(opline->op1.var))",
-    "VAR"      => "zval_ptr_dtor_nogc(EX_VAR(opline->op1.var))",
-    "CONST"    => "",
-    "UNUSED"   => "",
-    "CV"       => "",
-    "TMPVAR"   => "zval_ptr_dtor_nogc(EX_VAR(opline->op1.var))",
-    "TMPVARCV" => "???",
-);
-
-$op2_free_unfetched = array(
-    "ANY"      => "FREE_UNFETCHED_OP(opline->op2_type, opline->op2.var)",
-    "TMP"      => "zval_ptr_dtor_nogc(EX_VAR(opline->op2.var))",
-    "VAR"      => "zval_ptr_dtor_nogc(EX_VAR(opline->op2.var))",
-    "CONST"    => "",
-    "UNUSED"   => "",
-    "CV"       => "",
-    "TMPVAR"   => "zval_ptr_dtor_nogc(EX_VAR(opline->op2.var))",
-    "TMPVARCV" => "???",
-);
-
 $op_data_type = array(
     "ANY"      => "(opline+1)->op1_type",
     "TMP"      => "IS_TMP_VAR",
@@ -579,17 +557,6 @@ $op_data_free_op_var_ptr = array(
     "UNUSED"   => "",
     "CV"       => "",
     "TMPVAR"   => "???",
-    "TMPVARCV" => "???",
-);
-
-$op_data_free_unfetched = array(
-    "ANY"      => "FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var)",
-    "TMP"      => "zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var))",
-    "VAR"      => "zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var))",
-    "CONST"    => "",
-    "UNUSED"   => "",
-    "CV"       => "",
-    "TMPVAR"   => "zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var))",
     "TMPVARCV" => "???",
 );
 
@@ -786,8 +753,6 @@ function gen_code($f, $spec, $kind, $code, $op1, $op2, $name, $extra_spec=null) 
         "/FREE_OP2_IF_VAR\(\)/" => $op2_free_op_if_var[$op2],
         "/FREE_OP1_VAR_PTR\(\)/" => $op1_free_op_var_ptr[$op1],
         "/FREE_OP2_VAR_PTR\(\)/" => $op2_free_op_var_ptr[$op2],
-        "/FREE_UNFETCHED_OP1\(\)/" => $op1_free_unfetched[$op1],
-        "/FREE_UNFETCHED_OP2\(\)/" => $op2_free_unfetched[$op2],
         "/\!ZEND_VM_SPEC/m" => ($op1!="ANY"||$op2!="ANY")?"0":"1",
         "/ZEND_VM_SPEC/m" => ($op1!="ANY"||$op2!="ANY")?"1":"0",
         "/ZEND_VM_C_LABEL\(\s*([A-Za-z_]*)\s*\)/m" => "\\1".(($spec && $kind != ZEND_VM_KIND_CALL)?("_SPEC".$prefix[$op1].$prefix[$op2].extra_spec_name($extra_spec)):""),
@@ -802,7 +767,6 @@ function gen_code($f, $spec, $kind, $code, $op1, $op2, $name, $extra_spec=null) 
         "/GET_OP_DATA_ZVAL_PTR_PTR\(([^)]*)\)/" => $op_data_get_zval_ptr_ptr[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"],
         "/FREE_OP_DATA\(\)/" => $op_data_free_op[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"],
         "/FREE_OP_DATA_VAR_PTR\(\)/" => $op_data_free_op_var_ptr[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"],
-        "/FREE_UNFETCHED_OP_DATA\(\)/" => $op_data_free_unfetched[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"],
         "/RETURN_VALUE_USED\(opline\)/" => isset($extra_spec['RETVAL']) ? $extra_spec['RETVAL'] : "RETURN_VALUE_USED(opline)",
         "/arg_num <= MAX_ARG_FLAG_NUM/" => isset($extra_spec['QUICK_ARG']) ? $extra_spec['QUICK_ARG'] : "arg_num <= MAX_ARG_FLAG_NUM",
         "/ZEND_VM_SMART_BRANCH\(\s*([^,)]*)\s*,\s*([^)]*)\s*\)/" => isset($extra_spec['SMART_BRANCH']) ?

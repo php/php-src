@@ -162,9 +162,6 @@ ZEND_API const zend_internal_function zend_pass_function = {
 		zval_ptr_dtor_nogc(EX_VAR(var)); \
 	}
 
-#define FREE_UNFETCHED_OP(type, var) \
-	FREE_OP(type, var)
-
 #define FREE_OP_VAR_PTR(type, var) \
 	FREE_OP(type, var)
 
@@ -2903,7 +2900,7 @@ static zend_never_inline int zend_fetch_static_property_address_ex(zval **retval
 		if (EXPECTED((ce = CACHED_PTR(cache_slot)) == NULL)) {
 			ce = zend_fetch_class_by_name(Z_STR_P(class_name), Z_STR_P(class_name + 1), ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
 			if (UNEXPECTED(ce == NULL)) {
-				FREE_UNFETCHED_OP(op1_type, opline->op1.var);
+				FREE_OP(op1_type, opline->op1.var);
 				return FAILURE;
 			}
 			if (UNEXPECTED(op1_type != IS_CONST)) {
@@ -2914,7 +2911,7 @@ static zend_never_inline int zend_fetch_static_property_address_ex(zval **retval
 		if (EXPECTED(op2_type == IS_UNUSED)) {
 			ce = zend_fetch_class(NULL, opline->op2.num);
 			if (UNEXPECTED(ce == NULL)) {
-				FREE_UNFETCHED_OP(op1_type, opline->op1.var);
+				FREE_OP(op1_type, opline->op1.var);
 				return FAILURE;
 			}
 		} else {

@@ -1095,7 +1095,7 @@ ZEND_VM_HANDLER(29, ZEND_ASSIGN_STATIC_PROP_OP, ANY, ANY, OP)
 
 	if (UNEXPECTED(zend_fetch_static_property_address(&prop, &prop_info, (opline+1)->extended_value, BP_VAR_RW, 0 OPLINE_CC EXECUTE_DATA_CC) != SUCCESS)) {
 		UNDEF_RESULT();
-		FREE_UNFETCHED_OP_DATA();
+		FREE_OP_DATA();
 		HANDLE_EXCEPTION();
 	}
 
@@ -1935,8 +1935,8 @@ ZEND_VM_COLD_HELPER(zend_use_tmp_in_write_context_helper, ANY, ANY)
 
 	SAVE_OPLINE();
 	zend_throw_error(NULL, "Cannot use temporary expression in write context");
-	FREE_UNFETCHED_OP2();
-	FREE_UNFETCHED_OP1();
+	FREE_OP2();
+	FREE_OP1();
 	ZVAL_UNDEF(EX_VAR(opline->result.var));
 	HANDLE_EXCEPTION();
 }
@@ -1947,8 +1947,8 @@ ZEND_VM_COLD_HELPER(zend_use_undef_in_read_context_helper, ANY, ANY)
 
 	SAVE_OPLINE();
 	zend_throw_error(NULL, "Cannot use [] for reading");
-	FREE_UNFETCHED_OP2();
-	FREE_UNFETCHED_OP1();
+	FREE_OP2();
+	FREE_OP1();
 	ZVAL_UNDEF(EX_VAR(opline->result.var));
 	HANDLE_EXCEPTION();
 }
@@ -2480,7 +2480,7 @@ ZEND_VM_HANDLER(25, ZEND_ASSIGN_STATIC_PROP, ANY, ANY, CACHE_SLOT, SPEC(OP_DATA=
 	SAVE_OPLINE();
 
 	if (zend_fetch_static_property_address(&prop, &prop_info, opline->extended_value, BP_VAR_W, 0 OPLINE_CC EXECUTE_DATA_CC) != SUCCESS) {
-		FREE_UNFETCHED_OP_DATA();
+		FREE_OP_DATA();
 		UNDEF_RESULT();
 		HANDLE_EXCEPTION();
 	}
@@ -2578,7 +2578,7 @@ ZEND_VM_C_LABEL(try_assign_dim_array):
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (OP2_TYPE == IS_UNUSED) {
 				zend_use_new_element_for_string();
-				FREE_UNFETCHED_OP_DATA();
+				FREE_OP_DATA();
 				UNDEF_RESULT();
 			} else {
 				dim = GET_OP2_ZVAL_PTR(BP_VAR_R);
@@ -2591,7 +2591,7 @@ ZEND_VM_C_LABEL(try_assign_dim_array):
 			 && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(orig_object_ptr))
 			 && !zend_verify_ref_array_assignable(Z_REF_P(orig_object_ptr))) {
 				dim = GET_OP2_ZVAL_PTR(BP_VAR_R);
-				FREE_UNFETCHED_OP_DATA();
+				FREE_OP_DATA();
 				UNDEF_RESULT();
 			} else {
 				ZVAL_ARR(object_ptr, zend_new_array(8));
@@ -2601,7 +2601,7 @@ ZEND_VM_C_LABEL(try_assign_dim_array):
 			zend_use_scalar_as_array();
 			dim = GET_OP2_ZVAL_PTR(BP_VAR_R);
 ZEND_VM_C_LABEL(assign_dim_error):
-			FREE_UNFETCHED_OP_DATA();
+			FREE_OP_DATA();
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_NULL(EX_VAR(opline->result.var));
 			}
@@ -2716,7 +2716,7 @@ ZEND_VM_HANDLER(33, ZEND_ASSIGN_STATIC_PROP_REF, ANY, ANY, CACHE_SLOT|SRC)
 	SAVE_OPLINE();
 
 	if (zend_fetch_static_property_address(&prop, &prop_info, opline->extended_value & ~ZEND_RETURNS_FUNCTION, BP_VAR_W, 0 OPLINE_CC EXECUTE_DATA_CC) != SUCCESS) {
-		FREE_UNFETCHED_OP_DATA();
+		FREE_OP_DATA();
 		UNDEF_RESULT();
 		HANDLE_EXCEPTION();
 	}
@@ -3521,7 +3521,7 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, UNUSED|CLASS_FETCH|CONST|VAR,
 		if (UNEXPECTED(ce == NULL)) {
 			ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op1)), Z_STR_P(RT_CONSTANT(opline, opline->op1) + 1), ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
 			if (UNEXPECTED(ce == NULL)) {
-				FREE_UNFETCHED_OP2();
+				FREE_OP2();
 				HANDLE_EXCEPTION();
 			}
 			if (OP2_TYPE != IS_CONST) {
@@ -3531,7 +3531,7 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, UNUSED|CLASS_FETCH|CONST|VAR,
 	} else if (OP1_TYPE == IS_UNUSED) {
 		ce = zend_fetch_class(NULL, opline->op1.num);
 		if (UNEXPECTED(ce == NULL)) {
-			FREE_UNFETCHED_OP2();
+			FREE_OP2();
 			HANDLE_EXCEPTION();
 		}
 	} else {
@@ -4519,7 +4519,7 @@ ZEND_VM_COLD_HELPER(zend_cannot_pass_by_ref_helper, ANY, ANY)
 
 	SAVE_OPLINE();
 	zend_throw_error(NULL, "Cannot pass parameter %d by reference", arg_num);
-	FREE_UNFETCHED_OP1();
+	FREE_OP1();
 	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
 	ZVAL_UNDEF(arg);
 	HANDLE_EXCEPTION();
@@ -4929,7 +4929,7 @@ ZEND_VM_HANDLER(119, ZEND_SEND_ARRAY, ANY, ANY, NUM)
 			}
 		}
 		zend_type_error("call_user_func_array(): Argument #2 ($args) must be of type array, %s given", zend_zval_type_name(args));
-		FREE_UNFETCHED_OP2();
+		FREE_OP2();
 		FREE_OP1();
 		HANDLE_EXCEPTION();
 	} else {
@@ -5947,7 +5947,7 @@ ZEND_VM_COLD_HANDLER(179, ZEND_UNSET_STATIC_PROP, ANY, ANY, CACHE_SLOT)
 		if (UNEXPECTED(ce == NULL)) {
 			ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op2)), Z_STR_P(RT_CONSTANT(opline, opline->op2) + 1), ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
 			if (UNEXPECTED(ce == NULL)) {
-				FREE_UNFETCHED_OP1();
+				FREE_OP1();
 				HANDLE_EXCEPTION();
 			}
 			/*CACHE_PTR(opline->extended_value, ce);*/
@@ -5955,7 +5955,7 @@ ZEND_VM_COLD_HANDLER(179, ZEND_UNSET_STATIC_PROP, ANY, ANY, CACHE_SLOT)
 	} else if (OP2_TYPE == IS_UNUSED) {
 		ce = zend_fetch_class(NULL, opline->op2.num);
 		if (UNEXPECTED(ce == NULL)) {
-			FREE_UNFETCHED_OP1();
+			FREE_OP1();
 			HANDLE_EXCEPTION();
 		}
 	} else {
@@ -7497,8 +7497,8 @@ ZEND_VM_COLD_HELPER(zend_yield_in_closed_generator_helper, ANY, ANY)
 
 	SAVE_OPLINE();
 	zend_throw_error(NULL, "Cannot yield from finally in a force-closed generator");
-	FREE_UNFETCHED_OP2();
-	FREE_UNFETCHED_OP1();
+	FREE_OP2();
+	FREE_OP1();
 	UNDEF_RESULT();
 	HANDLE_EXCEPTION();
 }
