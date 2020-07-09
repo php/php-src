@@ -2601,7 +2601,7 @@ ZEND_VM_C_LABEL(try_assign_dim_array):
 			zend_use_scalar_as_array();
 			dim = GET_OP2_ZVAL_PTR(BP_VAR_R);
 ZEND_VM_C_LABEL(assign_dim_error):
-			FREE_OP_DATA();
+			FREE_UNFETCHED_OP_DATA();
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_NULL(EX_VAR(opline->result.var));
 			}
