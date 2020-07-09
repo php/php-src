@@ -44,11 +44,9 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #70362 (Can't copy() large 'data://' with open_basedir). (cmb)
 
-?? ??? 2020, PHP 7.4.8
+09 Jul 2020, PHP 7.4.8
 
 - Core:
-  . Fixed bug #79649 (Altering disable_functions from module init corrupts
-    memory). (Laruence)
   . Fixed bug #79595 (zend_init_fpu() alters FPU precision). (cmb, Nikita)
   . Fixed bug #79650 (php-win.exe 100% cpu lockup). (cmb)
   . Fixed bug #79668 (get_defined_functions(true) may miss functions). (cmb,
