@@ -910,7 +910,7 @@ optimize_jmpnz:
 							removed_ops++;
 							MAKE_NOP(opline);
 							opline->extended_value = 0;
-							take_successor_ex(ssa, block_num, block, block->successors[0]);
+							take_successor_ex(ssa, block_num, block, block->successors[block->successors_count - 1]);
 							goto optimize_nop;
 						} else {
 							HashTable *jmptable = Z_ARRVAL_P(CT_CONSTANT_EX(op_array, opline->op2.constant));
