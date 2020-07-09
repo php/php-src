@@ -14,7 +14,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 */
 
 
-$file_path = __DIR__.DIRECTORY_SEPARATOR."私はガラスを食べられます";
+$file_path = __DIR__.DIRECTORY_SEPARATOR."unlinkVar1私はガラスを食べられます";
 @mkdir($file_path);
 
 // temp dir name used here
