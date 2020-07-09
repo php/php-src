@@ -5038,6 +5038,11 @@ repeat:
 		return 0;
 	}
 
+	if (JIT_G(tracing)) {
+		++(*ZEND_OP_TRACE_INFO(opline, offset)->counter);
+		return 0;
+	}
+
 	if (JIT_G(debug) & ZEND_JIT_DEBUG_TRACE_START) {
 		fprintf(stderr, "---- TRACE %d start (%s) %s() %s:%d\n",
 			trace_num,
@@ -5053,8 +5058,10 @@ repeat:
 		goto abort;
 	}
 
+	JIT_G(tracing) = 1;
 	stop = zend_jit_trace_execute(execute_data, opline, trace_buffer,
 		ZEND_OP_TRACE_INFO(opline, offset)->trace_flags & ZEND_JIT_TRACE_START_MASK, 0);
+	JIT_G(tracing) = 0;
 
 	if (UNEXPECTED(JIT_G(debug) & ZEND_JIT_DEBUG_TRACE_BYTECODE)) {
 		zend_jit_dump_trace(trace_buffer, NULL);
@@ -5335,7 +5342,9 @@ int ZEND_FASTCALL zend_jit_trace_hot_side(zend_execute_data *execute_data, uint3
 		}
 	}
 
+	JIT_G(tracing) = 1;
 	stop = zend_jit_trace_execute(execute_data, EX(opline), trace_buffer, ZEND_JIT_TRACE_START_SIDE, is_megamorphic);
+	JIT_G(tracing) = 0;
 
 	if (UNEXPECTED(JIT_G(debug) & ZEND_JIT_DEBUG_TRACE_BYTECODE)) {
 		zend_jit_dump_trace(trace_buffer, NULL);
@@ -5468,7 +5477,7 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 		EX(opline) = opline;
 	}
 
-	if (EG(vm_interrupt)) {
+	if (EG(vm_interrupt) || JIT_G(tracing)) {
 		return 1;
 	/* Lock-free check if the side trace was already JIT-ed or blacklist-ed in another process */
 	} else if (t->exit_info[exit_num].flags & (ZEND_JIT_EXIT_JITED|ZEND_JIT_EXIT_BLACKLISTED)) {
@@ -5607,6 +5616,7 @@ static void zend_jit_trace_init_caches(void)
 
 static void zend_jit_trace_reset_caches(void)
 {
+	JIT_G(tracing) = 0;
 }
 
 static void zend_jit_trace_restart(void)

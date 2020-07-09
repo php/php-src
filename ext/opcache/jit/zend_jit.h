@@ -109,6 +109,8 @@ typedef struct _zend_jit_globals {
 
 	zend_sym_node *symbols;            /* symbols for disassembler */
 
+	zend_bool tracing;
+
 	zend_jit_trace_rec *current_trace;
 	zend_jit_trace_stack_frame *current_frame;
 
