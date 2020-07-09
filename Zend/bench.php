@@ -15,6 +15,7 @@ function simple() {
 
 /****/
 
+
 function simplecall() {
   for ($i = 0; $i < 1000000; $i++)
     strlen("hallo");
@@ -23,6 +24,7 @@ function simplecall() {
 /****/
 
 function hallo($a) {
+
 }
 
 function simpleucall() {
@@ -46,8 +48,8 @@ function mandel() {
   $w1=50;
   $h1=150;
   $recen=-.45;
-  $imcen=0.0;
   $r=0.7;
+  $imcen=0.0;
   $s=0;  $rec=0;  $imc=0;  $re=0;  $im=0;  $re2=0;  $im2=0;
   $x=0;  $y=0;  $w2=0;  $h2=0;  $color=0;
   $s=2*$r/$w1;

@@ -40,7 +40,7 @@ Synopsis:
 Options:
     -j<workers> Run up to <workers> simultaneous testing processes in parallel for
                 quicker testing on systems with multiple logical processors.
-                Note that this is experimental feature.
+                Note: this is experimental feature.
 
     -l <file>   Read the testfiles to be executed from <file>. After the test
                 has finished all failed tests are written to the same <file>.

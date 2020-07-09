@@ -13,6 +13,7 @@ foreach ($files as $path) {
     }
 
     $outPath = $matches[1] . '.out';
+
     if (!file_exists($outPath)) {
         // Test did not fail
         continue;
@@ -22,7 +23,7 @@ foreach ($files as $path) {
     $out = file_get_contents($outPath);
 
     if (false !== strpos($phpt, '--XFAIL--')) {
-        // Don't modify expected output of XFAIL tests
+        //Don't modify expected output of XFAIL tests!
         continue;
     }
 
