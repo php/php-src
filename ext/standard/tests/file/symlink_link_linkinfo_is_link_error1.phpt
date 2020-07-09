@@ -2,9 +2,6 @@
 Test symlink(), linkinfo(), link() and is_link() functions : error conditions - symlink & linkinfo
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip no symlinks on Windows');
-}
 if (substr(PHP_OS, 0, 3) == 'SUN') {
   die('skip Not valid for Sun Solaris');
 }
