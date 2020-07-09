@@ -1930,13 +1930,13 @@ ZEND_FUNCTION(debug_print_backtrace)
 ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int options, int limit, int as_objects) /* {{{ */
 {
 	zend_execute_data *ptr, *skip, *call = NULL;
-	zend_object *object, *frame_object;
+	zend_object *object, *frame_object = NULL;
 	int lineno, frameno = 0;
 	zend_function *func;
 	zend_string *function_name;
 	zend_string *filename;
 	zend_string *include_filename = NULL;
-	zval stack_frame, tmp;
+	zval stack_frame, tmp, tmp2;
 
 	array_init(return_value);
 
@@ -1969,13 +1969,13 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 
 	while (ptr && (limit == 0 || frameno < limit)) {
 		frameno++;
-		if (as_objects == 0) {
-			array_init(&stack_frame);
-		} else {
+		if (as_objects == 1) {
 			frame_object = zend_objects_new(zend_ce_stack_frame);
 			ZVAL_OBJ(&stack_frame, frame_object);
 			object_properties_init(frame_object, zend_ce_stack_frame);
 			frame_object->handlers = &zend_stack_frame_handlers;
+		} else {
+			array_init(&stack_frame);
 		}
 
 		ptr = zend_generator_check_placeholder_frame(ptr);
@@ -1997,17 +1997,14 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 			} else {
 				lineno = skip->opline->lineno;
 			}
-			ZVAL_STR_COPY(&tmp, filename);
-			if (as_objects == 0) {
+			if (as_objects == 1) {
+				ZVAL_STR_COPY(OBJ_PROP_NUM(frame_object, 0), filename);
+				ZVAL_LONG(OBJ_PROP_NUM(frame_object, 1), lineno);
+			} else {
+				ZVAL_STR_COPY(&tmp, filename);
 				zend_hash_add_new(Z_ARRVAL(stack_frame), ZSTR_KNOWN(ZEND_STR_FILE), &tmp);
-			} else {
-				zend_update_property_ex(zend_ce_stack_frame, &stack_frame, ZSTR_KNOWN(ZEND_STR_FILE), &tmp);
-			}
-			ZVAL_LONG(&tmp, lineno);
-			if (as_objects == 0) {
+				ZVAL_LONG(&tmp, lineno);
 				zend_hash_add_new(Z_ARRVAL(stack_frame), ZSTR_KNOWN(ZEND_STR_LINE), &tmp);
-			} else {
-				zend_update_property_ex(zend_ce_stack_frame, &stack_frame, ZSTR_KNOWN(ZEND_STR_LINE), &tmp);
 			}
 
 			/* try to fetch args only if an FCALL was just made - elsewise we're in the middle of a function
@@ -2025,17 +2022,14 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 					break;
 				}
 				if (prev->func && ZEND_USER_CODE(prev->func->common.type)) {
-					ZVAL_STR_COPY(&tmp, prev->func->op_array.filename);
-					if (as_objects == 0) {
+					if (as_objects == 1) {
+						ZVAL_STR_COPY(OBJ_PROP_NUM(frame_object, 0), prev->func->op_array.filename);
+						ZVAL_LONG(OBJ_PROP_NUM(frame_object, 1), prev->opline->lineno);
+					} else {
+						ZVAL_STR_COPY(&tmp, prev->func->op_array.filename);
 						zend_hash_add_new(Z_ARRVAL(stack_frame), ZSTR_KNOWN(ZEND_STR_FILE), &tmp);
-					} else {
-						zend_update_property_ex(zend_ce_stack_frame, &stack_frame, ZSTR_KNOWN(ZEND_STR_FILE), &tmp);
-					}
-					ZVAL_LONG(&tmp, prev->opline->lineno);
-					if (as_objects == 0) {
+						ZVAL_LONG(&tmp, prev->opline->lineno);
 						zend_hash_add_new(Z_ARRVAL(stack_frame), ZSTR_KNOWN(ZEND_STR_LINE), &tmp);
-					} else {
-						zend_update_property_ex(zend_ce_stack_frame, &stack_frame, ZSTR_KNOWN(ZEND_STR_LINE), &tmp);
 					}
 					break;
 				}
@@ -2057,53 +2051,69 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 		}
 
 		if (function_name) {
-			ZVAL_STR_COPY(&tmp, function_name);
-			if (as_objects == 0) {
-				zend_hash_add_new(Z_ARRVAL(stack_frame), ZSTR_KNOWN(ZEND_STR_FUNCTION), &tmp);
+			if (as_objects == 1) {
+				ZVAL_STR_COPY(OBJ_PROP_NUM(frame_object, 2), function_name);
 			} else {
-				zend_update_property_ex(zend_ce_stack_frame, &stack_frame, ZSTR_KNOWN(ZEND_STR_FUNCTION), &tmp);
+				ZVAL_STR_COPY(&tmp, function_name);
+				zend_hash_add_new(Z_ARRVAL(stack_frame), ZSTR_KNOWN(ZEND_STR_FUNCTION), &tmp);
 			}
 
 			if (object) {
-				if (func->common.scope) {
-					ZVAL_STR_COPY(&tmp, func->common.scope->name);
-				} else if (object->handlers->get_class_name == zend_std_get_class_name) {
-					ZVAL_STR_COPY(&tmp, object->ce->name);
-				} else {
-					ZVAL_STR(&tmp, object->handlers->get_class_name(object));
-				}
-				if (as_objects == 0) {
-					zend_hash_add_new(Z_ARRVAL(stack_frame), ZSTR_KNOWN(ZEND_STR_CLASS), &tmp);
-				} else {
-					zend_update_property_ex(zend_ce_stack_frame, &stack_frame, ZSTR_KNOWN(ZEND_STR_CLASS), &tmp);
-				}
-				if ((options & DEBUG_BACKTRACE_PROVIDE_OBJECT) != 0) {
-					ZVAL_OBJ_COPY(&tmp, object);
-					if (as_objects == 0) {
-						zend_hash_add_new(Z_ARRVAL(stack_frame), ZSTR_KNOWN(ZEND_STR_OBJECT), &tmp);
+				if (as_objects == 1) {
+					if (func->common.scope) {
+						ZVAL_STR_COPY(OBJ_PROP_NUM(frame_object, 3), func->common.scope->name);
+					} else if (object->handlers->get_class_name == zend_std_get_class_name) {
+						ZVAL_STR_COPY(OBJ_PROP_NUM(frame_object, 3), object->ce->name);
 					} else {
+						ZVAL_STR_COPY(OBJ_PROP_NUM(frame_object, 6), object->handlers->get_class_name(object));
+					}
+					if (object->handlers->get_class_name == zend_std_get_class_name) {
+						ZVAL_STR_COPY(OBJ_PROP_NUM(frame_object, 6), object->ce->name);
+					} else {
+						ZVAL_STR_COPY(OBJ_PROP_NUM(frame_object, 6), object->handlers->get_class_name(object));
+					}
+					if (func->common.fn_flags & ZEND_ACC_CLOSURE) {
+						ZVAL_OBJ_COPY(&tmp2, object);
+						zend_create_closure(&tmp, func, func->common.scope, object->ce, &tmp2);
+						zend_update_property_ex(zend_ce_stack_frame, &stack_frame, ZSTR_KNOWN(ZEND_STR_CALLABLE), &tmp);
+					}
+					if ((options & DEBUG_BACKTRACE_PROVIDE_OBJECT) != 0) {
+						ZVAL_OBJ_COPY(&tmp, object);
 						zend_update_property_ex(zend_ce_stack_frame, &stack_frame, ZSTR_KNOWN(ZEND_STR_OBJECT), &tmp);
 					}
-				}
-
-				ZVAL_INTERNED_STR(&tmp, ZSTR_KNOWN(ZEND_STR_OBJECT_OPERATOR));
-				if (as_objects == 0) {
-					zend_hash_add_new(Z_ARRVAL(stack_frame), ZSTR_KNOWN(ZEND_STR_TYPE), &tmp);
+					zval_ptr_dtor(OBJ_PROP_NUM(frame_object, 4));
+					ZVAL_STR_COPY(OBJ_PROP_NUM(frame_object, 4), ZSTR_KNOWN(ZEND_STR_OBJECT_OPERATOR));
 				} else {
-					zend_update_property_ex(zend_ce_stack_frame, &stack_frame, ZSTR_KNOWN(ZEND_STR_TYPE), &tmp);
+					if (func->common.scope) {
+						ZVAL_STR_COPY(&tmp, func->common.scope->name);
+					} else if (object->handlers->get_class_name == zend_std_get_class_name) {
+						ZVAL_STR_COPY(&tmp, object->ce->name);
+					} else {
+						ZVAL_STR(&tmp, object->handlers->get_class_name(object));
+					}
+					zend_hash_add_new(Z_ARRVAL(stack_frame), ZSTR_KNOWN(ZEND_STR_CLASS), &tmp);
+					if ((options & DEBUG_BACKTRACE_PROVIDE_OBJECT) != 0) {
+						ZVAL_OBJ_COPY(&tmp, object);
+						zend_hash_add_new(Z_ARRVAL(stack_frame), ZSTR_KNOWN(ZEND_STR_OBJECT), &tmp);
+					}
+					ZVAL_INTERNED_STR(&tmp, ZSTR_KNOWN(ZEND_STR_OBJECT_OPERATOR));
+					zend_hash_add_new(Z_ARRVAL(stack_frame), ZSTR_KNOWN(ZEND_STR_TYPE), &tmp);
 				}
 			} else if (func->common.scope) {
-				ZVAL_STR_COPY(&tmp, func->common.scope->name);
 				if (as_objects == 0) {
+					ZVAL_STR_COPY(&tmp, func->common.scope->name);
 					zend_hash_add_new(Z_ARRVAL(stack_frame), ZSTR_KNOWN(ZEND_STR_CLASS), &tmp);
-				} else {
-					zend_update_property_ex(zend_ce_stack_frame, &stack_frame, ZSTR_KNOWN(ZEND_STR_CLASS), &tmp);
-				}
-				ZVAL_INTERNED_STR(&tmp, ZSTR_KNOWN(ZEND_STR_PAAMAYIM_NEKUDOTAYIM));
-				if (as_objects == 0) {
+					ZVAL_INTERNED_STR(&tmp, ZSTR_KNOWN(ZEND_STR_PAAMAYIM_NEKUDOTAYIM));
 					zend_hash_add_new(Z_ARRVAL(stack_frame), ZSTR_KNOWN(ZEND_STR_TYPE), &tmp);
 				} else {
-					zend_update_property_ex(zend_ce_stack_frame, &stack_frame, ZSTR_KNOWN(ZEND_STR_TYPE), &tmp);
+					zval_ptr_dtor(OBJ_PROP_NUM(frame_object, 3));
+					ZVAL_STR_COPY(OBJ_PROP_NUM(frame_object, 3), func->common.scope->name);
+					zval_ptr_dtor(OBJ_PROP_NUM(frame_object, 4));
+					ZVAL_STR_COPY(OBJ_PROP_NUM(frame_object, 4), ZSTR_KNOWN(ZEND_STR_PAAMAYIM_NEKUDOTAYIM));
+					if (func->common.fn_flags & ZEND_ACC_CLOSURE) {
+						zend_create_closure(&tmp, func, func->common.scope, NULL, NULL);
+						zend_update_property_ex(zend_ce_stack_frame, &stack_frame, ZSTR_KNOWN(ZEND_STR_CALLABLE), &tmp);
+					}
 				}
 			}
 

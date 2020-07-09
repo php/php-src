@@ -763,29 +763,37 @@ static void declare_exception_properties(zend_class_entry *ce)
 static void declare_stack_frame_properties(zend_class_entry *ce)
 {
 	zval val;
+	zend_string *prop;
 
 	ZVAL_NULL(&val);
-	zend_declare_typed_property(
+	zend_declare_typed_property( // 0
 		ce, ZSTR_KNOWN(ZEND_STR_FILE), &val, ZEND_ACC_PUBLIC, NULL,
 		(zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_declare_typed_property(
+	zend_declare_typed_property( // 1
 		ce, ZSTR_KNOWN(ZEND_STR_LINE), &val, ZEND_ACC_PUBLIC, NULL,
 		(zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_declare_typed_property(
+	zend_declare_typed_property( // 2
 		ce, ZSTR_KNOWN(ZEND_STR_FUNCTION), &val, ZEND_ACC_PUBLIC, NULL,
 		(zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_declare_typed_property(
+	zend_declare_typed_property( // 3
 		ce, ZSTR_KNOWN(ZEND_STR_CLASS), &val, ZEND_ACC_PUBLIC, NULL,
 		(zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_declare_typed_property(
+	zend_declare_typed_property( // 4
 		ce, ZSTR_KNOWN(ZEND_STR_TYPE), &val, ZEND_ACC_PUBLIC, NULL,
 		(zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_declare_typed_property(
+	zend_declare_typed_property( // 5
 		ce, ZSTR_KNOWN(ZEND_STR_OBJECT), &val, ZEND_ACC_PUBLIC, NULL,
 		(zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_OBJECT));
 
+	prop = zend_string_init("object_class", sizeof("object_class")-1, 1);
+	zend_declare_typed_property( // 6
+		ce, prop, &val, ZEND_ACC_PUBLIC, NULL,
+		(zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release(prop); // 7
+	zend_declare_property_null(ce, "closure", sizeof("closure")-1, ZEND_ACC_PUBLIC);
+
 	ZVAL_EMPTY_ARRAY(&val);
-	zend_declare_typed_property(
+	zend_declare_typed_property( // 8
 		ce, ZSTR_KNOWN(ZEND_STR_ARGS), &val, ZEND_ACC_PUBLIC, NULL,
 		(zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY));
 }
@@ -893,6 +901,20 @@ ZEND_METHOD(StackFrame, getObject)
 	ZVAL_COPY(return_value, GET_PROPERTY_SILENT(ZEND_THIS, ZEND_STR_OBJECT));
 }
 
+ZEND_METHOD(StackFrame, getObjectClass)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	ZVAL_COPY(return_value, OBJ_PROP_NUM(Z_OBJ_P(ZEND_THIS), 6));
+}
+
+ZEND_METHOD(StackFrame, getClosure)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	ZVAL_COPY(return_value, OBJ_PROP_NUM(Z_OBJ_P(ZEND_THIS), 7));
+}
+
 ZEND_METHOD(StackFrame, getType)
 {
 	zval rv;
@@ -970,12 +992,11 @@ void zend_register_default_exception(void) /* {{{ */
 
 	INIT_CLASS_ENTRY(ce, "StackFrame", class_StackFrame_methods);
 	zend_ce_stack_frame = zend_register_internal_class_ex(&ce, NULL);
-	zend_ce_stack_frame->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	zend_ce_stack_frame->ce_flags |= ZEND_ACC_FINAL;
 	zend_class_implements(zend_ce_stack_frame, 1, zend_ce_arrayaccess);
 	declare_stack_frame_properties(zend_ce_stack_frame);
 
 	memcpy(&zend_stack_frame_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	// this needs different approach than adding fake write_property as it blocks property updates
 	zend_stack_frame_handlers.read_dimension = zend_stack_frame_read_dimension;
 	zend_stack_frame_handlers.write_dimension = zend_stack_frame_write_dimension;
 	zend_stack_frame_handlers.has_dimension = zend_stack_frame_has_dimension;

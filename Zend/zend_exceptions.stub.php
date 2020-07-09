@@ -122,7 +122,7 @@ class DivisionByZeroError extends ArithmeticError
 
 final class StackFrame
 {
-    public static function getTrace(): array {}
+    public static function getTrace(int $options = DEBUG_BACKTRACE_PROVIDE_OBJECT, int $limit = 0): array {}
 
     public function getFile(): string {}
 
@@ -133,6 +133,10 @@ final class StackFrame
     public function getClass(): ?string {}
 
     public function getObject(): ?object {}
+
+    public function getObjectClass(): ?string {}
+
+    public function getClosure(): ?\Closure {}
 
     public function getType(): ?string {}
 

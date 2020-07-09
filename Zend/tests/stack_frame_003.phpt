@@ -16,10 +16,12 @@ var_dump([
     'type' => $frame->getType(),
     'object' => $frame->getObject(),
     'args' => $frame->getArgs(),
+    'object_class' => $frame->getObjectClass(),
+    'closure' => $frame->getClosure(),
 ]);
 
 --EXPECTF--
-array(7) {
+array(%d) {
   ["file"]=>
   string(%d) "%s.php"
   ["line"]=>
@@ -35,4 +37,8 @@ array(7) {
   ["args"]=>
   array(0) {
   }
+  ["object_class"]=>
+  NULL
+  ["closure"]=>
+  NULL
 }

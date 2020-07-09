@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 686db33b530c54804faf1fe5d4f8b1d6a6b06d6e */
+ * Stub hash: ef999915ca870d847b00554a51ae420e44a8602c */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Throwable_getMessage, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -79,7 +79,10 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Error___toString arginfo_class_Throwable_getMessage
 
-#define arginfo_class_StackFrame_getTrace arginfo_class_Throwable_getTrace
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_StackFrame_getTrace, 0, 0, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_LONG, 0, "DEBUG_BACKTRACE_PROVIDE_OBJECT")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, limit, IS_LONG, 0, "0")
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_StackFrame_getFile arginfo_class_Throwable_getMessage
 
@@ -91,6 +94,11 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_StackFrame_getClass arginfo_class_StackFrame_getFunction
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_StackFrame_getObject, 0, 0, IS_OBJECT, 1)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_StackFrame_getObjectClass arginfo_class_StackFrame_getFunction
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_StackFrame_getClosure, 0, 0, Closure, 1)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_StackFrame_getType arginfo_class_StackFrame_getFunction
@@ -117,6 +125,8 @@ ZEND_METHOD(StackFrame, getLine);
 ZEND_METHOD(StackFrame, getFunction);
 ZEND_METHOD(StackFrame, getClass);
 ZEND_METHOD(StackFrame, getObject);
+ZEND_METHOD(StackFrame, getObjectClass);
+ZEND_METHOD(StackFrame, getClosure);
 ZEND_METHOD(StackFrame, getType);
 ZEND_METHOD(StackFrame, getArgs);
 
@@ -214,6 +224,8 @@ static const zend_function_entry class_StackFrame_methods[] = {
 	ZEND_ME(StackFrame, getFunction, arginfo_class_StackFrame_getFunction, ZEND_ACC_PUBLIC)
 	ZEND_ME(StackFrame, getClass, arginfo_class_StackFrame_getClass, ZEND_ACC_PUBLIC)
 	ZEND_ME(StackFrame, getObject, arginfo_class_StackFrame_getObject, ZEND_ACC_PUBLIC)
+	ZEND_ME(StackFrame, getObjectClass, arginfo_class_StackFrame_getObjectClass, ZEND_ACC_PUBLIC)
+	ZEND_ME(StackFrame, getClosure, arginfo_class_StackFrame_getClosure, ZEND_ACC_PUBLIC)
 	ZEND_ME(StackFrame, getType, arginfo_class_StackFrame_getType, ZEND_ACC_PUBLIC)
 	ZEND_ME(StackFrame, getArgs, arginfo_class_StackFrame_getArgs, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
