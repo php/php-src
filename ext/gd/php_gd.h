@@ -77,6 +77,8 @@ PHP_MINIT_FUNCTION(gd);
 PHP_MSHUTDOWN_FUNCTION(gd);
 PHP_RSHUTDOWN_FUNCTION(gd);
 
+PHP_GD_API struct gdImageStruct *php_gd_libgdimageptr_from_zval_p(zval* zp);
+
 #else
 
 #define phpext_gd_ptr NULL

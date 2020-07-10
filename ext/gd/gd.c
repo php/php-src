@@ -178,7 +178,7 @@ static zend_always_inline php_gd_image_object* php_gd_exgdimage_from_zobj_p(zend
  * Converts an extension GdImage instance contained within a zval into the gdImagePtr
  * for use with library APIs
  */
-static zend_always_inline gdImagePtr php_gd_libgdimageptr_from_zval_p(zval* zp)
+inline gdImagePtr php_gd_libgdimageptr_from_zval_p(zval* zp)
 {
 	return php_gd_exgdimage_from_zobj_p(Z_OBJ_P(zp))->image;
 }
