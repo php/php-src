@@ -2484,7 +2484,7 @@ PHP_METHOD(CachingIterator, offsetGet)
 	}
 
 	if ((value = zend_symtable_find(Z_ARRVAL(intern->u.caching.zcache), key)) == NULL) {
-		zend_error(E_NOTICE, "Undefined array index \"%s\"", ZSTR_VAL(key));
+		zend_error(E_NOTICE, "Undefined array key \"%s\"", ZSTR_VAL(key));
 		return;
 	}
 

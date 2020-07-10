@@ -8,8 +8,8 @@ var_dump($y[NULL]);
 var_dump($y[NULL]++);
 ?>
 --EXPECTF--
-Notice: Undefined array index "" in %s on line %d
+Notice: Undefined array key "" in %s on line %d
 NULL
 
-Notice: Undefined array index "" in %s on line %d
+Notice: Undefined array key "" in %s on line %d
 NULL

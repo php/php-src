@@ -61,11 +61,11 @@ bool(true)
 bool(true)
   - Unset:
 
-Notice: Undefined array index "prop" in %s on line %d
+Notice: Undefined array key "prop" in %s on line %d
 
-Notice: Undefined array index "prop" in %s on line %d
+Notice: Undefined array key "prop" in %s on line %d
 
-Notice: Undefined array index "prop" in %s on line %d
+Notice: Undefined array key "prop" in %s on line %d
 NULL
 NULL
   - After:
@@ -91,9 +91,9 @@ bool(true)
 bool(true)
   - Unset:
 
-Notice: Undefined array index "prop" in %s on line %d
+Notice: Undefined array key "prop" in %s on line %d
 
-Notice: Undefined array index "prop" in %s on line %d
+Notice: Undefined array key "prop" in %s on line %d
 NULL
 NULL
   - After:

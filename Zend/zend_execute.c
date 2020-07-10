@@ -1898,12 +1898,12 @@ static zend_always_inline HashTable *zend_get_target_symbol_table(int fetch_type
 
 static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_undefined_offset(zend_long lval)
 {
-	zend_error(E_NOTICE, "Undefined array offset " ZEND_LONG_FMT, lval);
+	zend_error(E_NOTICE, "Undefined array key " ZEND_LONG_FMT, lval);
 }
 
 static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_undefined_index(const zend_string *offset)
 {
-	zend_error(E_NOTICE, "Undefined array index \"%s\"", ZSTR_VAL(offset));
+	zend_error(E_NOTICE, "Undefined array key \"%s\"", ZSTR_VAL(offset));
 }
 
 ZEND_API ZEND_COLD int ZEND_FASTCALL zend_undefined_offset_write(HashTable *ht, zend_long lval)

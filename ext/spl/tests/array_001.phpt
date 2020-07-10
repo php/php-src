@@ -77,15 +77,15 @@ object(ArrayObject)#%d (1) {
 }
 int(0)
 
-Notice: Undefined array offset 6 in %s on line %d
+Notice: Undefined array key 6 in %s on line %d
 NULL
 
-Notice: Undefined array index "b" in %s on line %d
+Notice: Undefined array key "b" in %s on line %d
 NULL
 
-Notice: Undefined array offset 7 in %s on line %d
+Notice: Undefined array key 7 in %s on line %d
 
-Notice: Undefined array index "c" in %s on line %d
+Notice: Undefined array key "c" in %s on line %d
 object(ArrayObject)#%d (1) {
   ["storage":"ArrayObject":private]=>
   array(2) {

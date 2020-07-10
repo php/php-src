@@ -78,7 +78,7 @@ Exception: MyCachingIterator does not use a full cache (see CachingIterator::__c
 int(0)
 bool(false)
 
-Notice: Undefined array index "0" in %s on line %d
+Notice: Undefined array key "0" in %s on line %d
 NULL
 ===1===
 object(stdClass)#%d (0) {
@@ -90,31 +90,31 @@ object(MyFoo)#%d (0) {
 }
 bool(false)
 
-Notice: Undefined array index "foo" in %s on line %d
+Notice: Undefined array key "foo" in %s on line %d
 NULL
 ===3===
 NULL
 bool(false)
 
-Notice: Undefined array index "" in %s on line %d
+Notice: Undefined array key "" in %s on line %d
 NULL
 ===4===
 int(2)
 bool(false)
 
-Notice: Undefined array index "2" in %s on line %d
+Notice: Undefined array key "2" in %s on line %d
 NULL
 ===5===
 string(3) "foo"
 bool(false)
 
-Notice: Undefined array index "foo" in %s on line %d
+Notice: Undefined array key "foo" in %s on line %d
 NULL
 ===6===
 int(3)
 bool(false)
 
-Notice: Undefined array index "3" in %s on line %d
+Notice: Undefined array key "3" in %s on line %d
 NULL
 ===FILL===
 ===0===
@@ -135,7 +135,7 @@ int(1)
 NULL
 bool(false)
 
-Notice: Undefined array index "" in %s on line %d
+Notice: Undefined array key "" in %s on line %d
 NULL
 ===4===
 int(2)
@@ -149,5 +149,5 @@ int(1)
 int(3)
 bool(false)
 
-Notice: Undefined array index "3" in %s on line %d
+Notice: Undefined array key "3" in %s on line %d
 NULL

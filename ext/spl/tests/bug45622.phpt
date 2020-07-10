@@ -41,7 +41,7 @@ string(13) "array element"
 --> Remove the array element and try access again:
 bool(false)
 
-Notice: Undefined array index "p" in %s on line %d
+Notice: Undefined array key "p" in %s on line %d
 NULL
 
 --> Re-add the real property:

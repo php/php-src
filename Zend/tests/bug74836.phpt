@@ -24,10 +24,10 @@ bool(true)
 string(2) "42"
 bool(true)
 
-Notice: Undefined array index "010" in %s on line %d
+Notice: Undefined array key "010" in %s on line %d
 NULL
 bool(false)
 
-Notice: Undefined array index "010" in %s on line %d
+Notice: Undefined array key "010" in %s on line %d
 NULL
 bool(false)

@@ -18,5 +18,5 @@ echo "ok\n";
 --EXPECTF--
 1
 
-Notice: Undefined array index "x" in %s on line %d
+Notice: Undefined array key "x" in %s on line %d
 ok

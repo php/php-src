@@ -25,10 +25,10 @@ var_dump($a[$fp]);
 
 fclose($fp);
 --EXPECTF--
-Notice: Undefined array index "epic_magic" in %s on line %d
+Notice: Undefined array key "epic_magic" in %s on line %d
 NULL
 
-Notice: Undefined array index "epic_magic" in %s on line %d
+Notice: Undefined array key "epic_magic" in %s on line %d
 NULL
 
 Warning: Undefined variable $c in %s on line %d
@@ -36,17 +36,17 @@ Warning: Undefined variable $c in %s on line %d
 Warning: Trying to access array offset on value of type null in %s on line %d
 NULL
 
-Notice: Undefined array index "epic_magic" in %s on line %d
+Notice: Undefined array key "epic_magic" in %s on line %d
 NULL
 
-Notice: Undefined array index "epic_magic" in %s on line %d
+Notice: Undefined array key "epic_magic" in %s on line %d
 NULL
 
-Notice: Undefined array index "epic_magic" in %s on line %d
+Notice: Undefined array key "epic_magic" in %s on line %d
 NULL
 bool(false)
 
 Warning: Resource ID#%d used as offset, casting to integer (%d) in %sbug62978.php on line %d
 
-Notice: Undefined array offset %d in %sbug62978.php on line %d
+Notice: Undefined array key %d in %sbug62978.php on line %d
 NULL
