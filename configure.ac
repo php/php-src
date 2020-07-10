@@ -1278,6 +1278,12 @@ AC_DEFINE_UNQUOTED(PHP_BUILD_SYSTEM,"$PHP_BUILD_SYSTEM",[builder uname output])
 if test -n "${PHP_BUILD_PROVIDER}"; then
   AC_DEFINE_UNQUOTED(PHP_BUILD_PROVIDER,"$PHP_BUILD_PROVIDER",[build provider])
 fi
+if test -n "${PHP_BUILD_COMPILER}"; then
+  AC_DEFINE_UNQUOTED(COMPILER,"$PHP_BUILD_COMPILER",[used compiler for build])
+fi
+if test -n "${PHP_BUILD_ARCH}"; then
+  AC_DEFINE_UNQUOTED(ARCHITECTURE,"$PHP_BUILD_ARCH",[build architecture])
+fi
 
 PHP_SUBST_OLD(PHP_INSTALLED_SAPIS)
 
