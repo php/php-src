@@ -127,6 +127,7 @@ again:
 					PUTS("*RECURSION*\n");
 					return;
 				}
+				GC_ADDREF(myht);
 				GC_PROTECT_RECURSION(myht);
 			}
 			count = zend_array_count(myht);
@@ -528,8 +529,10 @@ again:
 			ZEND_HASH_FOREACH_KEY_VAL_IND(myht, index, key, val) {
 				php_array_element_export(val, index, key, level, buf);
 			} ZEND_HASH_FOREACH_END();
+
 			if (!(GC_FLAGS(myht) & GC_IMMUTABLE)) {
 				GC_UNPROTECT_RECURSION(myht);
+				GC_DELREF(myht);
 			}
 			if (level > 1) {
 				buffer_append_spaces(buf, level - 1);
