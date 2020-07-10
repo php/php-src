@@ -77,8 +77,6 @@ PHP_MINIT_FUNCTION(gd);
 PHP_MSHUTDOWN_FUNCTION(gd);
 PHP_RSHUTDOWN_FUNCTION(gd);
 
-PHP_GD_API int phpi_get_le_gd(void);
-
 #else
 
 #define phpext_gd_ptr NULL
