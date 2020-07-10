@@ -5,74 +5,68 @@ Using different sorts of numerical strings as a string offset
 
 $str = "The world is fun";
 
-var_dump($str["7"]);
-var_dump($str["7.5"]);
-var_dump($str["  7"]);
-var_dump($str["  7.5"]);
-var_dump($str["  7  "]);
-var_dump($str["  7.5  "]);
-var_dump($str["7  "]);
-var_dump($str["7.5  "]);
-var_dump($str["7str"]);
-var_dump($str["7.5str"]);
-var_dump($str["  7str"]);
-var_dump($str["  7.5str"]);
-var_dump($str["  7  str"]);
-var_dump($str["  7.5  str"]);
-var_dump($str["7  str"]);
-var_dump($str["7.5  str"]);
-var_dump($str["0xC"]);
-var_dump($str["0b10"]);
-var_dump($str["07"]);
+$keys = [
+    "7",
+    "7.5",
+    "  7",
+    "  7.5",
+    "  7  ",
+    "  7.5  ",
+    "7  ",
+    "7.5  ",
+    "7str",
+    "7.5str",
+    "  7str",
+    "  7.5str",
+    "  7  str",
+    "  7.5  str",
+    "7  str",
+    "7.5  str",
+    "0xC",
+    "0b10",
+    "07",
+];
+
+foreach ($keys as $key) {
+    try {
+        var_dump($str[$key]);
+    } catch (\TypeError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
+}
 
 echo "Done\n";
 ?>
 --EXPECTF--
 string(1) "l"
+Illegal offset type
+string(1) "l"
+Illegal offset type
+string(1) "l"
+Illegal offset type
+string(1) "l"
+Illegal offset type
 
-Warning: Illegal string offset "7.5" in %s on line 6
+Warning: Illegal string offset "7str" in %s on line %d
 string(1) "l"
-string(1) "l"
+Illegal offset type
 
-Warning: Illegal string offset "  7.5" in %s on line 8
+Warning: Illegal string offset "  7str" in %s on line %d
 string(1) "l"
-string(1) "l"
+Illegal offset type
 
-Warning: Illegal string offset "  7.5  " in %s on line 10
+Warning: Illegal string offset "  7  str" in %s on line %d
 string(1) "l"
-string(1) "l"
+Illegal offset type
 
-Warning: Illegal string offset "7.5  " in %s on line 12
+Warning: Illegal string offset "7  str" in %s on line %d
 string(1) "l"
+Illegal offset type
 
-Warning: Illegal string offset "7str" in %s on line 13
-string(1) "l"
-
-Warning: Illegal string offset "7.5str" in %s on line 14
-string(1) "l"
-
-Warning: Illegal string offset "  7str" in %s on line 15
-string(1) "l"
-
-Warning: Illegal string offset "  7.5str" in %s on line 16
-string(1) "l"
-
-Warning: Illegal string offset "  7  str" in %s on line 17
-string(1) "l"
-
-Warning: Illegal string offset "  7.5  str" in %s on line 18
-string(1) "l"
-
-Warning: Illegal string offset "7  str" in %s on line 19
-string(1) "l"
-
-Warning: Illegal string offset "7.5  str" in %s on line 20
-string(1) "l"
-
-Warning: Illegal string offset "0xC" in %s on line 21
+Warning: Illegal string offset "0xC" in %s on line %d
 string(1) "T"
 
-Warning: Illegal string offset "0b10" in %s on line 22
+Warning: Illegal string offset "0b10" in %s on line %d
 string(1) "T"
 string(1) "l"
 Done

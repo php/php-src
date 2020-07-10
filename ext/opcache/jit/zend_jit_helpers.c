@@ -677,13 +677,19 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_str_r_helper(zval *container, zval 
 try_string_offset:
 	if (UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
 		switch (Z_TYPE_P(dim)) {
-			/* case IS_LONG: */
 			case IS_STRING:
-				if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, false)) {
-					break;
+			{
+				/* allow errors in string offset for BC reasons */
+				if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), &offset, NULL, true)) {
+					/* emit Illegal string warning on leading numerical string */
+					if (0 == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, false)) {
+						zend_error(E_WARNING, "Illegal string offset \"%s\"", Z_STRVAL_P(dim));
+					}
+					goto out;
 				}
-				zend_error(E_WARNING, "Illegal string offset \"%s\"", Z_STRVAL_P(dim));
+				zend_type_error("Illegal offset type");
 				break;
+			}
 			case IS_UNDEF:
 				zend_jit_undefined_op_helper(EG(current_execute_data)->opline->op2.var);
 			case IS_DOUBLE:
@@ -704,6 +710,7 @@ try_string_offset:
 	} else {
 		offset = Z_LVAL_P(dim);
 	}
+	out:
 
 	if (UNEXPECTED(Z_STRLEN_P(container) < ((offset < 0) ? -(size_t)offset : ((size_t)offset + 1)))) {
 		zend_error(E_WARNING, "Uninitialized string offset " ZEND_LONG_FMT, offset);
@@ -818,13 +825,19 @@ try_again:
 	if (UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
 		switch(Z_TYPE_P(dim)) {
 			case IS_STRING:
-				if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, false)) {
-					break;
+			{
+				/* allow errors in string offset for BC reasons */
+				if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), &offset, NULL, true)) {
+					/* emit Illegal string warning on leading numerical string */
+					if (0 == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, false)
+							&& type != BP_VAR_UNSET) {
+						zend_error(E_WARNING, "Illegal string offset \"%s\"", Z_STRVAL_P(dim));
+					}
+					return offset;
 				}
-				if (type != BP_VAR_UNSET) {
-					zend_error(E_WARNING, "Illegal string offset \"%s\"", Z_STRVAL_P(dim));
-				}
+				zend_type_error("Illegal offset type");
 				break;
+			}
 			case IS_UNDEF:
 				zend_jit_undefined_op_helper(EG(current_execute_data)->opline->op2.var);
 			case IS_DOUBLE:
