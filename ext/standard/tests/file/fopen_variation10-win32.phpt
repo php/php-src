@@ -7,7 +7,7 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 if(substr(PHP_OS, 0, 3) != "WIN")
   die("skip Run only on Windows");
 
-if (!is_writable('c:\\fopen_variation10.tmp')) {
+if (!is_writable('c:\\')) {
 	die('skip. C:\\ not writable.');
 }
 
@@ -95,14 +95,14 @@ Warning: fclose(): Argument #1 must be of type resource, bool given in %s on lin
 
 --\--
 
-Warning: fopen(\\fopen_variation10.tmp): Failed to open stream: Invalid argument in %s on line %d
+Warning: fopen(\\fopen_variation10.tmp): Failed to open stream: No such file or directory in %s on line %d
 file not opened for read
 
 Warning: fclose(): Argument #1 must be of type resource, bool given in %s on line %d
 
 --/--
 
-Warning: fopen(/\fopen_variation10.tmp): Failed to open stream: Invalid argument in %s on line %d
+Warning: fopen(/\fopen_variation10.tmp): Failed to open stream: No such file or directory in %s on line %d
 file not opened for read
 
 Warning: fclose(): Argument #1 must be of type resource, bool given in %s on line %d

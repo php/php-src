@@ -2,8 +2,9 @@
 Test fileinode() function: Variations
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip no link()/symlink() on Windows');
+if (PHP_OS_FAMILY === 'Windows') {
+    require_once __DIR__ . '/windows_links/common.inc';
+    skipIfSeCreateSymbolicLinkPrivilegeIsDisabled(__FILE__);
 }
 ?>
 --FILE--
