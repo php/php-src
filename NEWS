@@ -30,6 +30,7 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fixed bug #70362 (Can't copy() large 'data://' with open_basedir). (cmb)
+  . Fixed bug #79817 (str_replace() does not handle INDIRECT elements). (Nikita)
 
 ?? ??? ????, PHP 7.3.20
 
