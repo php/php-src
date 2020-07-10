@@ -5155,8 +5155,20 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 			case BP_JIT_IS:
 				|	EXT_CALL zend_jit_fetch_dim_isset_helper, r0
 				|	test r0, r0
-				|	jne >8
-				|	jmp >9
+				if (not_found_exit_addr) {
+					|	je &not_found_exit_addr
+					if (op2_info & (MAY_BE_LONG|MAY_BE_STRING)) {
+						|	jmp >8
+					}
+				} else if (found_exit_addr) {
+					|	jne &found_exit_addr
+					if (op2_info & (MAY_BE_LONG|MAY_BE_STRING)) {
+						|	jmp >9
+					}
+				} else {
+					|	jne >8
+					|	jmp >9
+				}
 				break;
 			case BP_VAR_IS:
 			case BP_VAR_UNSET:
@@ -10398,7 +10410,7 @@ static int zend_jit_isset_isempty_dim(dasm_State **Dst, const zend_op *opline, c
 		 && !(op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_ARRAY))
 		 && !may_throw
 		 && !(opline->op1_type & (IS_TMP_VAR|IS_VAR))
-		 && (!(opline->op2_type & (IS_TMP_VAR|IS_VAR)) || !(op2_info & MAY_BE_LONG))) {
+		 && (!(opline->op2_type & (IS_TMP_VAR|IS_VAR)) || !(op2_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_LONG)))) {
 			if (smart_branch_opcode == ZEND_JMPNZ) {
 				found_exit_addr = exit_addr;
 			} else {
