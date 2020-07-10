@@ -2,8 +2,9 @@
 Test symlink(), linkinfo(), link() and is_link() functions : usage variations - try link with same name in diff. dir
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip no symlinks on Windows');
+if (PHP_OS_FAMILY === 'Windows') {
+    require_once __DIR__ . '/windows_links/common.inc';
+    skipIfSeCreateSymbolicLinkPrivilegeIsDisabled(__FILE__);
 }
 ?>
 --FILE--
@@ -64,7 +65,7 @@ bool(true)
 
 *** Create soft link in different directory with same filename ***
 
-Warning: symlink(): File exists in %s on line %d
+Warning: symlink(): %rFile exists|Permission denied%r in %s on line %d
 bool(false)
 bool(true)
 Done

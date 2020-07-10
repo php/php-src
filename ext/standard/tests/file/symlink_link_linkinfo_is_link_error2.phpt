@@ -2,8 +2,8 @@
 Test symlink(), linkinfo(), link() and is_link() functions : error conditions - link & is_link
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip no symlinks on Windows');
+if (PHP_OS_FAMILY === 'Windows' && PHP_ZTS) {
+    die('xfail different handling of space as filename with ZTS/NTS on Windows');
 }
 ?>
 --FILE--

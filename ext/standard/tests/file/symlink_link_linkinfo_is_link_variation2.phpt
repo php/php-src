@@ -1,11 +1,5 @@
 --TEST--
 Test symlink(), linkinfo(), link() and is_link() functions : usage variations - hardlink to non-existent file
---SKIPIF--
-<?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip no symlinks on Windows');
-}
-?>
 --FILE--
 <?php
 /* Variation 2 : Create hard link to non-existent file */
