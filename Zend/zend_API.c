@@ -213,6 +213,33 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameters_count_error(int min_
 }
 /* }}} */
 
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_error(int error_code, int num, char *name, zend_expected_type expected_type, zval *arg) /* {{{ */
+{
+	switch (error_code) {
+		case ZPP_ERROR_WRONG_CALLBACK:
+			zend_wrong_callback_error(num, name);
+			break;
+		case ZPP_ERROR_WRONG_CLASS:
+			zend_wrong_parameter_class_error(num, name, arg);
+			break;
+		case ZPP_ERROR_WRONG_CLASS_OR_NULL:
+			zend_wrong_parameter_class_or_null_error(num, name, arg);
+			break;
+		case ZPP_ERROR_WRONG_ARG:
+			zend_wrong_parameter_type_error(num, expected_type, arg);
+			break;
+		case ZPP_ERROR_WRONG_STRING_OR_CLASS:
+			zend_wrong_parameter_string_or_class_error(num, name, arg);
+			break;
+		case ZPP_ERROR_WRONG_STRING_OR_CLASS_OR_NULL:
+			zend_wrong_parameter_string_or_class_or_null_error(num, name, arg);
+			break;
+		default:
+			ZEND_ASSERT(error_code != ZPP_ERROR_OK);
+	}
+}
+/* }}} */
+
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_type_error(int num, zend_expected_type expected_type, zval *arg) /* {{{ */
 {
 	static const char * const expected_error[] = {
