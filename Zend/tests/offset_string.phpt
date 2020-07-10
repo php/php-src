@@ -57,7 +57,9 @@ Warning: String offset cast occurred in %s on line %d
 string(1) "S"
 Illegal offset type
 string(1) "c"
-Illegal offset type
+
+Warning: String offset cast occurred in %s on line %d
+string(1) "o"
 
 Warning: Illegal string offset "15 and then some" in %s on line %d
 string(1) "r"

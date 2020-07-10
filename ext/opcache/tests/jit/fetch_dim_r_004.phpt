@@ -34,6 +34,22 @@ foo("2x");
 $x=2;
 $y="x";
 foo($x.$y);
+foo("5.5");
+$x = "5.";
+$y = "5";
+foo($x.$y);
+try {
+    foo("5.5c");
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    $x = "5.5";
+    $y = "c";
+    foo($x.$y);
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 --EXPECTF--
 string(1) "A"
 string(1) "C"
@@ -54,8 +70,16 @@ string(1) "A"
 Illegal offset type
 Illegal offset type
 
-Warning: Illegal string offset "2x" in %sfetch_dim_r_004.php on line 5
+Warning: Illegal string offset "2x" in %s on line %d
 string(1) "C"
 
-Warning: Illegal string offset "2x" in %sfetch_dim_r_004.php on line 5
+Warning: Illegal string offset "2x" in %s on line %d
 string(1) "C"
+
+Warning: String offset cast occurred in %s on line %d
+string(1) "F"
+
+Warning: String offset cast occurred in %s on line %d
+string(1) "F"
+Illegal offset type
+Illegal offset type
