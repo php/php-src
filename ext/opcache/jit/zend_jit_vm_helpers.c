@@ -590,6 +590,10 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 
 	if (UNEXPECTED(opline->opcode == ZEND_HANDLE_EXCEPTION)) {
 		/* Abort trace because of exception */
+#ifdef HAVE_GCC_GLOBAL_REGS
+		execute_data = save_execute_data;
+		opline = save_opline;
+#endif
 		return ZEND_JIT_TRACE_STOP_EXCEPTION;
 	}
 
@@ -609,6 +613,10 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 	if (prev_call) {
 		int ret = zend_jit_trace_record_fake_init_call(prev_call, trace_buffer, idx, is_megamorphic, &megamorphic, ret_level + level);
 		if (ret < 0) {
+#ifdef HAVE_GCC_GLOBAL_REGS
+			execute_data = save_execute_data;
+			opline = save_opline;
+#endif
 			return ZEND_JIT_TRACE_STOP_BAD_FUNC;
 		}
 		idx = ret;
