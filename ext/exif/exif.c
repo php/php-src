@@ -1374,10 +1374,10 @@ static char *exif_get_tagname_key(int tag_num, char *buf, size_t buf_size, tag_t
 /* {{{ exif_char_dump
  * Do not use! This is a debug function... */
 #ifdef EXIF_DEBUG
-static unsigned char* exif_char_dump(unsigned char * addr, int len, int offset)
+static char* exif_char_dump(char * addr, int len, int offset)
 {
-	static unsigned char buf[4096+1];
-	static unsigned char tmp[20];
+	static char buf[4096+1];
+	static char tmp[20];
 	int c, i, p=0, n = 5+31;
 
 	p += slprintf(buf+p, sizeof(buf)-p, "\nDump Len: %08X (%d)", len, len);
@@ -1387,7 +1387,7 @@ static unsigned char* exif_char_dump(unsigned char * addr, int len, int offset)
 				p += slprintf(buf+p, sizeof(buf)-p, "\n%08X: ", i+offset);
 			}
 			if (i<len) {
-				c = *addr++;
+				c = *((unsigned char *)addr++);
 				p += slprintf(buf+p, sizeof(buf)-p, "%02X ", c);
 				tmp[i%16] = c>=32 ? c : '.';
 				tmp[(i%16)+1] = '\0';
@@ -1536,7 +1536,7 @@ static double php_ifd_get_double(char *data) {
 }
 
 #ifdef EXIF_DEBUG
-char * exif_dump_data(int *dump_free, int format, int components, int length, int motorola_intel, char *value_ptr) /* {{{ */
+char * exif_dump_data(int *dump_free, int format, int components, int motorola_intel, char *value_ptr) /* {{{ */
 {
 	char *dump;
 	int len;
@@ -1556,7 +1556,7 @@ char * exif_dump_data(int *dump_free, int format, int components, int length, in
 	}
 	*dump_free = 1;
 	if (components > 1) {
-		len = spprintf(&dump, 0, "(%d,%d) {", components, length);
+		len = spprintf(&dump, 0, "(%d) {", components);
 	} else {
 		len = spprintf(&dump, 0, "{");
 	}
@@ -1981,7 +1981,12 @@ typedef struct {
 } image_info_type;
 /* }}} */
 
+// EXIF_DEBUG can produce lots of messages
+#ifndef EXIF_DEBUG
 #define EXIF_MAX_ERRORS 10
+#else
+#define EXIF_MAX_ERRORS 100000
+#endif
 
 /* {{{ exif_error_docref */
 static void exif_error_docref(const char *docref EXIFERR_DC, image_info_type *ImageInfo, int type, const char *format, ...)
@@ -2003,7 +2008,7 @@ static void exif_error_docref(const char *docref EXIFERR_DC, image_info_type *Im
 	{
 		char *buf;
 
-		spprintf(&buf, 0, "%s(%d): %s", _file, _line, format);
+		spprintf(&buf, 0, "%s(%ld): %s", _file, _line, format);
 		php_verror(docref, ImageInfo && ImageInfo->FileName ? ImageInfo->FileName:"", type, buf, args);
 		efree(buf);
 	}
@@ -2078,6 +2083,11 @@ static inline zend_bool exif_offset_info_contains(
 	 * so we use >= and <= to do the checks, respectively. */
 	end = start + length;
 	return start >= info->valid_start && end <= info->valid_end;
+}
+
+static inline int exif_offset_info_length(const exif_offset_info *info)
+{
+	return info->valid_end - info->valid_start;
 }
 
 /* {{{ exif_file_sections_add
@@ -2444,9 +2454,6 @@ static void add_assoc_image_info(zval *value, int sub_array, image_info_type *im
 
 	for (int i = 0; i<image_info->info_list[section_index].count; i++) {
 		image_info_data *info_data = &image_info->info_list[section_index].list[i];
-#ifdef EXIF_DEBUG
-		int info_tag = info_data->tag; /* conversion */
-#endif
 		image_info_value *info_value = &info_data->value;
 		const char *name = info_data->name;
 		if (!name) {
@@ -2846,9 +2853,6 @@ static void exif_thumbnail_build(image_info_type *ImageInfo) {
 	int               i, byte_count;
 	image_info_list   *info_list;
 	image_info_data   *info_data;
-#ifdef EXIF_DEBUG
-	char              tagname[64];
-#endif
 
 	if (!ImageInfo->read_thumbnail || !ImageInfo->Thumbnail.offset || !ImageInfo->Thumbnail.size) {
 		return; /* ignore this call */
@@ -3152,14 +3156,13 @@ static bool exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * val
 
 	if (value_len < 2 || maker_note->offset >= value_len - 1) {
 		/* Do not go past the value end */
-		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "IFD data too short: 0x%04X offset 0x%04X", value_len, maker_note->offset);
 		return true;
 	}
 
 	dir_start = value_ptr + maker_note->offset;
 
 #ifdef EXIF_DEBUG
-	exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Process %s @x%04X + 0x%04X=%d: %s", exif_get_sectionname(section_index), (int)dir_start-(int)offset_base+maker_note->offset+displacement, value_len, value_len, exif_char_dump(value_ptr, value_len, (int)dir_start-(int)offset_base+maker_note->offset+displacement));
+	exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Process %s @x%04X + 0x%04X=%d: %s", exif_get_sectionname(section_index), (intptr_t)dir_start-(intptr_t)info->offset_base+maker_note->offset+displacement, value_len, value_len, exif_char_dump(value_ptr, value_len, (intptr_t)dir_start-(intptr_t)info->offset_base+maker_note->offset+displacement));
 #endif
 
 	ImageInfo->sections_found |= FOUND_MAKERNOTE;
@@ -3315,7 +3318,7 @@ static bool exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, co
 
 	ImageInfo->sections_found |= FOUND_ANY_TAG;
 #ifdef EXIF_DEBUG
-	dump_data = exif_dump_data(&dump_free, format, components, length, ImageInfo->motorola_intel, value_ptr);
+	dump_data = exif_dump_data(&dump_free, format, components, ImageInfo->motorola_intel, value_ptr);
 	exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Process tag(x%04X=%s,@x%04X + x%04X(=%d)): %s%s %s", tag, exif_get_tagname_debug(tag, tag_table), offset_val+displacement, byte_count, byte_count, (components>1)&&format!=TAG_FMT_UNDEFINED&&format!=TAG_FMT_STRING?"ARRAY OF ":"", exif_get_tagformat(format), dump_data);
 	if (dump_free) {
 		efree(dump_data);
@@ -3561,7 +3564,7 @@ static bool exif_process_IFD_in_JPEG(image_info_type *ImageInfo, char *dir_start
 	int NextDirOffset = 0;
 
 #ifdef EXIF_DEBUG
-	exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Process %s (x%04X(=%d))", exif_get_sectionname(section_index), IFDlength, IFDlength);
+	exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Process %s (x%04X(=%d))", exif_get_sectionname(section_index), exif_offset_info_length(info), exif_offset_info_length(info));
 #endif
 
 	ImageInfo->sections_found |= FOUND_IFD0;
