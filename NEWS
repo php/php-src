@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #79884 (PHP_CONFIG_FILE_PATH is meaningless). (cmb)
   . Fixed bug #77932 (File extensions are case-sensitive). (cmb)
 
+- LDAP:
+  . Fixed memory leaks. (ptomulik)
+
 ?? ??? ????, PHP 7.3.21
 
 - Apache:
