@@ -35,11 +35,13 @@
 #include "zend_interfaces.h"
 #include "zend_closures.h"
 #include "zend_generators.h"
+#include "zend_observer.h"
 #include "zend_vm.h"
 #include "zend_dtrace.h"
 #include "zend_inheritance.h"
 #include "zend_type_info.h"
 #include "zend_smart_str.h"
+#include "zend_observer.h"
 
 /* Virtual current working directory support */
 #include "zend_virtual_cwd.h"
@@ -3550,6 +3552,7 @@ static zend_always_inline void init_func_run_time_cache_i(zend_op_array *op_arra
 	run_time_cache = zend_arena_alloc(&CG(arena), op_array->cache_size);
 	memset(run_time_cache, 0, op_array->cache_size);
 	ZEND_MAP_PTR_SET(op_array->run_time_cache, run_time_cache);
+	zend_observer_fcall_install((zend_function*) op_array);
 }
 /* }}} */
 
@@ -3615,6 +3618,8 @@ static zend_always_inline void i_init_code_execute_data(zend_execute_data *execu
 		ptr = (char*)ptr + sizeof(void*);
 		ZEND_MAP_PTR_SET(op_array->run_time_cache, ptr);
 		memset(ptr, 0, op_array->cache_size);
+
+		zend_observer_fcall_install((zend_function*)op_array);
 	}
 	EX(run_time_cache) = RUN_TIME_CACHE(op_array);
 

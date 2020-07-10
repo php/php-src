@@ -1170,6 +1170,10 @@ ZEND_API const char *get_zend_version(void) /* {{{ */
 }
 /* }}} */
 
+
+ZEND_API void zend_observer_activate(void);
+ZEND_API void zend_observer_deactivate(void);
+
 ZEND_API void zend_activate(void) /* {{{ */
 {
 #ifdef ZTS
@@ -1182,6 +1186,7 @@ ZEND_API void zend_activate(void) /* {{{ */
 	if (CG(map_ptr_last)) {
 		memset(ZEND_MAP_PTR_REAL_BASE(CG(map_ptr_base)), 0, CG(map_ptr_last) * sizeof(void*));
 	}
+	zend_observer_activate();
 }
 /* }}} */
 
@@ -1197,6 +1202,8 @@ ZEND_API void zend_deactivate(void) /* {{{ */
 {
 	/* we're no longer executing anything */
 	EG(current_execute_data) = NULL;
+
+	zend_observer_deactivate();
 
 	zend_try {
 		shutdown_scanner();
