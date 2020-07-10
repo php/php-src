@@ -1798,7 +1798,7 @@ ldap.max_links = -1
 ; Each OPcache exclude list file is a text file that holds the names of files
 ; that should not be accelerated. The file format is to add each filename
 ; to a new line. The filename may be a full path or just a file prefix
-; (i.e., /var/www/x  exclude lists all the files and directories in /var/www
+; (i.e., /var/www/x  excludes all the files and directories in /var/www
 ; that start with 'x'). Line starting with a ; are ignored (comments).
 ;opcache.exclude_list_filename=
 
