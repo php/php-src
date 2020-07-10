@@ -2,9 +2,6 @@
 Test filetype() function: Variations
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip no link()/symlink() on Windows');
-}
 if (!function_exists("posix_mkfifo")) {
     die("skip no posix_mkfifo()");
 }
