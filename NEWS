@@ -14,7 +14,9 @@ PHP                                                                        NEWS
 
 - COM:
   . Fixed bug #63208 (BSTR to PHP string conversion not binary safe). (cmb)
-  
+  . Fixed bug #63527 (DCOM does not work with Username, Password parameter).
+    (cmb)
+
 - Curl:
   . Fixed bug #79741 (curl_setopt CURLOPT_POSTFIELDS asserts on object with
     declared properties). (Nikita)
