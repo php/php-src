@@ -150,7 +150,7 @@ ZEND_END_ARG_INFO()
 
 static const zend_function_entry additional_functions[] = {
 	ZEND_FE(dl, arginfo_dl)
-	{NULL, NULL, NULL}
+	ZEND_FE_END
 };
 
 EMBED_SAPI_API int php_embed_init(int argc, char **argv)
