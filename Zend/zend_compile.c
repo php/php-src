@@ -5368,7 +5368,10 @@ void zend_compile_match(znode *result, zend_ast *ast)
 			opline->extended_value = get_next_op_number();
 		}
 
-		zend_emit_op(NULL, ZEND_MATCH_ERROR, &expr_node, NULL);
+		zend_op *opline = zend_emit_op(NULL, ZEND_MATCH_ERROR, &expr_node, NULL);
+		if (opline->op1_type == IS_CONST) {
+			Z_TRY_ADDREF_P(CT_CONSTANT(opline->op1));
+		}
 	}
 
 	for (uint32_t i = 0; i < arms->children; ++i) {
