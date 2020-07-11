@@ -153,6 +153,24 @@ PHP 8.0 INTERNALS UPGRADE NOTES
         - zend_declare_property*()
         - zend_startup_modules()
         - zend_wrong_parameters_none_error()
+        - zend_fcall_info_argp()
+        - zend_fcall_info_argv()
+        - zend_fcall_info_argn()
+     2. Argument int to uint32_t in Zend Engine 4.0:
+        - _zend_get_parameters_array_ex()
+        - zend_copy_parameters_array()
+        - zend_fcall_info_args_save()
+        - zend_fcall_info_args_restore()
+        - zend_fcall_info_argp()
+        - zend_fcall_info_argv()
+        - zend_fcall_info_argn()
+        - zend_wrong_parameter*()
+        - zend_wrong_callback_error()
+        - zend_parse_arg_class()
+     3. Argument int to zend_bool in Zend Engine 4.0:
+        - add_next_index_bool()
+     4. Argument int to size_t in Zend Engine 4.0:
+        - zend_set_hash_symbol()
 
 ========================
 2. Build system changes
