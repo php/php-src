@@ -300,7 +300,7 @@ again:
 			GC_ADDREF(myht);
 		}
 		count = zend_array_count(myht);
-		php_printf("%sarray(%d) refcount(%u){\n", COMMON, count, Z_REFCOUNTED_P(struc) ? Z_REFCOUNT_P(struc) : 1);
+		php_printf("%sarray(%d) refcount(%u){\n", COMMON, count, Z_REFCOUNTED_P(struc) ? Z_REFCOUNT_P(struc) - 1 : 1);
 		ZEND_HASH_FOREACH_KEY_VAL_IND(myht, index, key, val) {
 			zval_array_element_dump(val, index, key, level);
 		} ZEND_HASH_FOREACH_END();
