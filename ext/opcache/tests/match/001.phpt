@@ -52,14 +52,14 @@ test:
      ; (after optimizer)
      ; %s
 0000 CV0($char) = RECV 1
-0001 MATCH CV0($char) "a": 0002, "b": 0003, "c": 0003, "d": 0004, "e": 0005, "f": 0005, "g": 0006, "h": 0007, "i": 0007, default: 0008
-0002 RETURN string("a")
-0003 RETURN string("b, c")
-0004 RETURN string("d")
-0005 RETURN string("e, f")
-0006 RETURN string("g")
-0007 RETURN string("h, i")
-0008 MATCH_ERROR CV0($char)
+0001 MATCH CV0($char) "a": 0003, "b": 0004, "c": 0004, "d": 0005, "e": 0006, "f": 0006, "g": 0007, "h": 0008, "i": 0008, default: 0002
+0002 MATCH_ERROR CV0($char)
+0003 RETURN string("a")
+0004 RETURN string("b, c")
+0005 RETURN string("d")
+0006 RETURN string("e, f")
+0007 RETURN string("g")
+0008 RETURN string("h, i")
 string(1) "a"
 string(4) "b, c"
 string(4) "b, c"

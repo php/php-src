@@ -5297,6 +5297,24 @@ void zend_compile_match(znode *result, zend_ast *ast)
 	uint32_t cond_count = 0;
 	uint32_t *jmp_end_opnums = safe_emalloc(sizeof(uint32_t), arms->children, 0);
 
+	// The generated default arm is emitted first to avoid live range issues where the tmpvar
+	// for the arm result is freed even though it has not been initialized yet.
+	if (!has_default_arm) {
+		if (!uses_jumptable) {
+			zend_update_jump_target_to_next(opnum_default_jmp);
+		}
+
+		if (jumptable) {
+			zend_op *opline = &CG(active_op_array)->opcodes[opnum_match];
+			opline->extended_value = get_next_op_number();
+		}
+
+		zend_op *opline = zend_emit_op(NULL, ZEND_MATCH_ERROR, &expr_node, NULL);
+		if (opline->op1_type == IS_CONST) {
+			Z_TRY_ADDREF_P(CT_CONSTANT(opline->op1));
+		}
+	}
+
 	for (uint32_t i = 0; i < arms->children; ++i) {
 		zend_ast *arm_ast = arms->child[i];
 		zend_ast *body_ast = arm_ast->child[1];
@@ -5356,22 +5374,6 @@ void zend_compile_match(znode *result, zend_ast *ast)
 	if (arms->children == 0) {
 		result->op_type = IS_CONST;
 		ZVAL_NULL(&result->u.constant);
-	}
-
-	if (!has_default_arm) {
-		if (!uses_jumptable) {
-			zend_update_jump_target_to_next(opnum_default_jmp);
-		}
-
-		if (jumptable) {
-			zend_op *opline = &CG(active_op_array)->opcodes[opnum_match];
-			opline->extended_value = get_next_op_number();
-		}
-
-		zend_op *opline = zend_emit_op(NULL, ZEND_MATCH_ERROR, &expr_node, NULL);
-		if (opline->op1_type == IS_CONST) {
-			Z_TRY_ADDREF_P(CT_CONSTANT(opline->op1));
-		}
 	}
 
 	for (uint32_t i = 0; i < arms->children; ++i) {
