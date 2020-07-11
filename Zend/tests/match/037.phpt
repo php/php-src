@@ -51,6 +51,7 @@ var_dump(match(3) {
     default => 'bar',
 });
 
+?>
 --EXPECTF--
 string(%d) "UnhandledMatchError: Unhandled match value of type bool in %s037.php:5
 Stack trace:

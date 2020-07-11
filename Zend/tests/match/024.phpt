@@ -15,5 +15,6 @@ echo match (false) {
     false => "false\n",
 };
 
+?>
 --EXPECT--
 false

@@ -49,6 +49,7 @@ foreach (range(0, 9) as $int) {
     var_dump(test_string($int));
 }
 
+?>
 --EXPECT--
 string(1) "0"
 string(11) "Not matched"

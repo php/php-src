@@ -14,6 +14,7 @@ echo match ($undefVar) {
 
 echo "unreachable\n";
 
+?>
 --EXPECTF--
 Fatal error: Uncaught Exception: Custom error handler: Undefined variable $undefVar in %s029.php:4
 Stack trace:

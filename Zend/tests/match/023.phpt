@@ -16,5 +16,6 @@ echo match (true) {
     true => "true\n",
 };
 
+?>
 --EXPECT--
 true

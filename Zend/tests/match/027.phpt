@@ -25,6 +25,7 @@ function main() {
 }
 main();
 
+?>
 --EXPECTF--
 usesValue 0
 i is 0

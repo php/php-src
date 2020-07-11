@@ -29,6 +29,7 @@ try {
     printf("Caught %s\n", $e->getMessage());
 }
 
+?>
 --EXPECT--
 usesValue 42
 usesValue 42
