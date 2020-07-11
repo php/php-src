@@ -2026,9 +2026,6 @@ function generate_tmp_php_ini()
 		var directive = (extensions_enabled[i][2] ? 'zend_extension' : 'extension');
 
 		var ext_name = extensions_enabled[i][0];
-		if ("gd" == ext_name) {
-			ext_name = "gd2";
-		}
 
 		if (!is_on_exclude_list_for_test_ini(ext_list, ext_name)) {
 			INI.WriteLine(directive + "=php_" + ext_name + ".dll");
