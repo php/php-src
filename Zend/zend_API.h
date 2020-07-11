@@ -276,10 +276,10 @@ typedef struct _zend_fcall_info_cache {
 ZEND_API int zend_next_free_module(void);
 
 BEGIN_EXTERN_C()
-ZEND_API int _zend_get_parameters_array_ex(int param_count, zval *argument_array);
+ZEND_API int _zend_get_parameters_array_ex(uint32_t param_count, zval *argument_array);
 
 /* internal function to efficiently copy parameters when executing __call() */
-ZEND_API int zend_copy_parameters_array(int param_count, zval *argument_array);
+ZEND_API int zend_copy_parameters_array(uint32_t param_count, zval *argument_array);
 
 #define zend_get_parameters_array(ht, param_count, argument_array) \
 	_zend_get_parameters_array_ex(param_count, argument_array)
@@ -462,7 +462,7 @@ static zend_always_inline int add_index_zval(zval *arg, zend_ulong index, zval *
 
 ZEND_API int add_next_index_long(zval *arg, zend_long n);
 ZEND_API int add_next_index_null(zval *arg);
-ZEND_API int add_next_index_bool(zval *arg, int b);
+ZEND_API int add_next_index_bool(zval *arg, zend_bool b);
 ZEND_API int add_next_index_resource(zval *arg, zend_resource *r);
 ZEND_API int add_next_index_double(zval *arg, double d);
 ZEND_API int add_next_index_str(zval *arg, zend_string *str);
@@ -523,11 +523,11 @@ ZEND_API void zend_fcall_info_args_clear(zend_fcall_info *fci, int free_mem);
 /** Save current arguments from zend_fcall_info *fci
  * params array will be set to NULL
  */
-ZEND_API void zend_fcall_info_args_save(zend_fcall_info *fci, int *param_count, zval **params);
+ZEND_API void zend_fcall_info_args_save(zend_fcall_info *fci, uint32_t *param_count, zval **params);
 
 /** Free arguments connected with zend_fcall_info *fci andset back saved ones.
  */
-ZEND_API void zend_fcall_info_args_restore(zend_fcall_info *fci, int param_count, zval *params);
+ZEND_API void zend_fcall_info_args_restore(zend_fcall_info *fci, uint32_t param_count, zval *params);
 
 /** Set or clear the arguments in the zend_call_info struct taking care of
  * refcount. If args is NULL and arguments are set then those are cleared.
@@ -539,19 +539,19 @@ ZEND_API int zend_fcall_info_args_ex(zend_fcall_info *fci, zend_function *func, 
  * If argc is 0 the arguments which are set will be cleared, else pass
  * a variable amount of zval** arguments.
  */
-ZEND_API int zend_fcall_info_argp(zend_fcall_info *fci, int argc, zval *argv);
+ZEND_API void zend_fcall_info_argp(zend_fcall_info *fci, uint32_t argc, zval *argv);
 
 /** Set arguments in the zend_fcall_info struct taking care of refcount.
  * If argc is 0 the arguments which are set will be cleared, else pass
  * a variable amount of zval** arguments.
  */
-ZEND_API int zend_fcall_info_argv(zend_fcall_info *fci, int argc, va_list *argv);
+ZEND_API void zend_fcall_info_argv(zend_fcall_info *fci, uint32_t argc, va_list *argv);
 
 /** Set arguments in the zend_fcall_info struct taking care of refcount.
  * If argc is 0 the arguments which are set will be cleared, else pass
  * a variable amount of zval** arguments.
  */
-ZEND_API int zend_fcall_info_argn(zend_fcall_info *fci, int argc, ...);
+ZEND_API void zend_fcall_info_argn(zend_fcall_info *fci, uint32_t argc, ...);
 
 /** Call a function using information created by zend_fcall_info_init()/args().
  * If args is given then those replace the argument info in fci is temporarily.
@@ -591,7 +591,7 @@ static zend_always_inline void zend_call_known_instance_method_with_1_params(
 ZEND_API void zend_call_known_instance_method_with_2_params(
 		zend_function *fn, zend_object *object, zval *retval_ptr, zval *param1, zval *param2);
 
-ZEND_API int zend_set_hash_symbol(zval *symbol, const char *name, int name_length, zend_bool is_ref, int num_symbol_tables, ...);
+ZEND_API int zend_set_hash_symbol(zval *symbol, const char *name, size_t name_length, zend_bool is_ref, int num_symbol_tables, ...);
 
 ZEND_API int zend_delete_global_variable(zend_string *name);
 
@@ -1230,14 +1230,14 @@ typedef enum _zend_expected_type {
 } zend_expected_type;
 
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameters_none_error(void);
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameters_count_error(int min_num_args, int max_num_args);
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_error(int error_code, int num, char *name, zend_expected_type expected_type, zval *arg);
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_type_error(int num, zend_expected_type expected_type, zval *arg);
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_error(int num, const char *name, zval *arg);
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_or_null_error(int num, const char *name, zval *arg);
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_string_or_class_error(int num, const char *name, zval *arg);
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_string_or_class_or_null_error(int num, const char *name, zval *arg);
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int num, char *error);
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameters_count_error(uint32_t min_num_args, uint32_t max_num_args);
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_error(int error_code, uint32_t num, char *name, zend_expected_type expected_type, zval *arg);
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_type_error(uint32_t num, zend_expected_type expected_type, zval *arg);
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_error(uint32_t num, const char *name, zval *arg);
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_or_null_error(uint32_t num, const char *name, zval *arg);
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_string_or_class_error(uint32_t num, const char *name, zval *arg);
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_string_or_class_or_null_error(uint32_t num, const char *name, zval *arg);
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(uint32_t num, char *error);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_error(zend_class_entry *error_ce, uint32_t arg_num, const char *format, ...);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_type_error(uint32_t arg_num, const char *format, ...);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_value_error(uint32_t arg_num, const char *format, ...);
@@ -1254,10 +1254,10 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_value_error(uint32_t arg_num
 
 #define ZEND_PARSE_PARAMETERS_START_EX(flags, min_num_args, max_num_args) do { \
 		const int _flags = (flags); \
-		int _min_num_args = (min_num_args); \
+		uint32_t _min_num_args = (min_num_args); \
 		int _max_num_args = (max_num_args); \
-		int _num_args = EX_NUM_ARGS(); \
-		int _i = 0; \
+		uint32_t _num_args = EX_NUM_ARGS(); \
+		uint32_t _i = 0; \
 		zval *_real_arg, *_arg = NULL; \
 		zend_expected_type _expected_type = Z_EXPECTED_LONG; \
 		char *_error = NULL; \
@@ -1683,7 +1683,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_value_error(uint32_t arg_num
 
 /* old "+" and "*" */
 #define Z_PARAM_VARIADIC_EX(spec, dest, dest_num, post_varargs) do { \
-		int _num_varargs = _num_args - _i - (post_varargs); \
+		uint32_t _num_varargs = _num_args - _i - (post_varargs); \
 		if (EXPECTED(_num_varargs > 0)) { \
 			dest = _real_arg + 1; \
 			dest_num = _num_varargs; \
@@ -1730,7 +1730,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_value_error(uint32_t arg_num
 
 /* Inlined implementations shared by new and old parameter parsing APIs */
 
-ZEND_API int ZEND_FASTCALL zend_parse_arg_class(zval *arg, zend_class_entry **pce, int num, int check_null);
+ZEND_API int ZEND_FASTCALL zend_parse_arg_class(zval *arg, zend_class_entry **pce, uint32_t num, int check_null);
 ZEND_API int ZEND_FASTCALL zend_parse_arg_bool_slow(zval *arg, zend_bool *dest);
 ZEND_API int ZEND_FASTCALL zend_parse_arg_bool_weak(zval *arg, zend_bool *dest);
 ZEND_API int ZEND_FASTCALL zend_parse_arg_long_slow(zval *arg, zend_long *dest);
