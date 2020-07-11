@@ -51,7 +51,11 @@
 #define PHP_IMG_TGA  128
 
 #ifdef PHP_WIN32
-#	define PHP_GD_API __declspec(dllexport)
+#	ifdef PHP_GD_EXPORTS
+#		define PHP_GD_API __declspec(dllexport)
+#	else
+#		define PHP_GD_API __declspec(dllimport)
+#	endif
 #elif defined(__GNUC__) && __GNUC__ >= 4
 #	define PHP_GD_API __attribute__ ((visibility("default")))
 #else
@@ -76,6 +80,8 @@ PHP_MINFO_FUNCTION(gd);
 PHP_MINIT_FUNCTION(gd);
 PHP_MSHUTDOWN_FUNCTION(gd);
 PHP_RSHUTDOWN_FUNCTION(gd);
+
+PHP_GD_API struct gdImageStruct *php_gd_libgdimageptr_from_zval_p(zval* zp);
 
 #else
 

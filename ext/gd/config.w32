@@ -33,7 +33,7 @@ if (PHP_GD != "no") {
 		CHECK_LIB("User32.lib", "gd", PHP_GD);
 		CHECK_LIB("Gdi32.lib", "gd", PHP_GD);
 
-		EXTENSION("gd", "gd.c", null, "-Iext/gd/libgd", "php_gd2.dll");
+		EXTENSION("gd", "gd.c", null, "-Iext/gd/libgd");
 		ADD_SOURCES("ext/gd/libgd", "gd2copypal.c gd.c \
 			gdcache.c gdfontg.c gdfontl.c gdfontmb.c gdfonts.c gdfontt.c \
 			gdft.c gd_gd2.c gd_gd.c gd_gif_in.c gd_gif_out.c gdhelpers.c gd_io.c gd_io_dp.c \
@@ -43,6 +43,7 @@ if (PHP_GD != "no") {
 			gd_crop.c gd_interpolation.c gd_matrix.c gd_bmp.c gd_tga.c", "gd");
 		AC_DEFINE('HAVE_LIBGD', 1, 'GD support');
 		ADD_FLAG("CFLAGS_GD", " \
+/D PHP_GD_EXPORTS=1 \
 /D HAVE_GD_DYNAMIC_CTX_EX=1 \
 /D HAVE_GD_BUNDLED=1  \
 /D HAVE_GD_GD2  \

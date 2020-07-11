@@ -888,6 +888,9 @@ PHP 8.0 UPGRADE NOTES
     shell now consistently execute `%comspec% /s /c "$commandline"`, which has
     the same effect as executing `$commandline` (without additional quotes).
 
+- GD:
+  . php_gd2.dll has been renamed to php_gd.dll.
+
 - php-test-pack:
   . The test runner has been renamed from run-test.php to run-tests.php, to
     match its name in php-src.
