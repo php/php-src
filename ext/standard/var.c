@@ -304,14 +304,12 @@ again:
 	case IS_ARRAY:
 		myht = Z_ARRVAL_P(struc);
 		if (!(GC_FLAGS(myht) & GC_IMMUTABLE)) {
-			if (level > 1) {
-				if (GC_IS_RECURSIVE(myht)) {
-					PUTS("*RECURSION*\n");
-					return;
-				}
-				GC_PROTECT_RECURSION(myht);
+			if (GC_IS_RECURSIVE(myht)) {
+				PUTS("*RECURSION*\n");
+				return;
 			}
 			GC_ADDREF(myht);
+			GC_PROTECT_RECURSION(myht);
 		}
 		count = zend_array_count(myht);
 		php_printf("%sarray(%d) refcount(%u){\n", COMMON, count, Z_REFCOUNTED_P(struc) ? Z_REFCOUNT_P(struc) - 1 : 1);
@@ -319,9 +317,7 @@ again:
 			zval_array_element_dump(val, index, key, level);
 		} ZEND_HASH_FOREACH_END();
 		if (!(GC_FLAGS(myht) & GC_IMMUTABLE)) {
-			if (level > 1) {
-				GC_UNPROTECT_RECURSION(myht);
-			}
+			GC_UNPROTECT_RECURSION(myht);
 			GC_DELREF(myht);
 		}
 		if (level > 1) {
