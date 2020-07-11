@@ -1,8 +1,8 @@
 --TEST--
-CLI php -m 
+CLI php -m
 --SKIPIF--
-<?php 
-include "skipif.inc"; 
+<?php
+include "skipif.inc";
 if (substr(PHP_OS, 0, 3) == 'WIN') {
 	die ("skip not for Windows");
 }
@@ -17,7 +17,7 @@ echo `"$php" -n -m`;
 
 echo "Done\n";
 ?>
---EXPECTF--     
+--EXPECTF--
 [PHP Modules]
 %a
 pcre

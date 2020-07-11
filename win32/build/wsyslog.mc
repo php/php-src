@@ -25,4 +25,3 @@ SymbolicName=PHP_SYSLOG_ERROR_TYPE
 Language=English
 %1 %2
 .
-

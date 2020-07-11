@@ -1,4 +1,3 @@
-
 <?php
 $data = <<<QUOTE
 To be or not to be, that is the question;

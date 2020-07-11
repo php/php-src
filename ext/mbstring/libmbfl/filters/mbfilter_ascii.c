@@ -45,7 +45,9 @@ const mbfl_encoding mbfl_encoding_ascii = {
 	"US-ASCII", /* preferred MIME name */
 	(const char *(*)[])&mbfl_encoding_ascii_aliases,
 	NULL,
-	MBFL_ENCTYPE_SBCS
+	MBFL_ENCTYPE_SBCS,
+	&vtbl_ascii_wchar,
+	&vtbl_wchar_ascii
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_ascii = {
@@ -61,7 +63,8 @@ const struct mbfl_convert_vtbl vtbl_ascii_wchar = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_ascii_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_ascii = {
@@ -70,7 +73,8 @@ const struct mbfl_convert_vtbl vtbl_wchar_ascii = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_wchar_ascii,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
@@ -92,9 +96,7 @@ int mbfl_filt_conv_wchar_ascii(int c, mbfl_convert_filter *filter)
 	if (c >= 0 && c < 0x80) {
 		CK((*filter->output_function)(c, filter->data));
 	} else {
-		if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-			CK(mbfl_filt_conv_illegal_output(c, filter));
-		}
+		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
 	return c;

@@ -1,13 +1,7 @@
 --TEST--
-Test print() function : basic functionality 
+Test print() function : basic functionality
 --FILE--
 <?php
-
-/* Prototype  : int print  ( string $arg  )
- * Description: Output a string
- * Source code: n/a, print is a language construct not an extension function
- * Test based on php.net manual example.
-*/
 
 echo "*** Testing print() : basic functionality ***\n";
 
@@ -50,7 +44,7 @@ echo "\n-- Iteration 9 --\n";
 print $foo;          // foobar
 
 echo "\n-- Iteration 10 --\n";
-$variable = "VARIABLE"; 
+$variable = "VARIABLE";
 print <<<END
 This uses the "here document" syntax to output
 multiple lines with $variable interpolation. Note
@@ -58,7 +52,6 @@ that the here document terminator must appear on a
 line with just a semicolon no extra whitespace!\n
 END;
 ?>
-===DONE===
 --EXPECT--
 *** Testing print() : basic functionality ***
 
@@ -89,4 +82,3 @@ This uses the "here document" syntax to output
 multiple lines with VARIABLE interpolation. Note
 that the here document terminator must appear on a
 line with just a semicolon no extra whitespace!
-===DONE===

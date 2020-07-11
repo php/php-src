@@ -1,15 +1,9 @@
-
-	/* $Id: fpm_atomic.h,v 1.3 2008/09/18 23:34:11 anight Exp $ */
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #ifndef FPM_ATOMIC_H
 #define FPM_ATOMIC_H 1
 
-#if HAVE_INTTYPES_H
-# include <inttypes.h>
-#else
-# include <stdint.h>
-#endif
+#include <inttypes.h>
 #include <sched.h>
 
 #ifdef HAVE_BUILTIN_ATOMIC
@@ -165,4 +159,3 @@ static inline int fpm_spinlock(atomic_t *lock, int try_once) /* {{{ */
 #define fpm_unlock(lock) lock = 0
 
 #endif
-

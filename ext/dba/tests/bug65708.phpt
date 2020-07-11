@@ -1,15 +1,15 @@
 --TEST--
 Bug #65708 (dba functions cast $key param to string in-place, bypassing copy on write)
 --SKIPIF--
-<?php 
-	require_once(dirname(__FILE__) .'/skipif.inc');
+<?php
+	require_once(__DIR__ .'/skipif.inc');
 ?>
 --FILE--
 <?php
 
 error_reporting(E_ALL);
 
-require_once(dirname(__FILE__) .'/test.inc');
+require_once(__DIR__ .'/test.inc');
 
 $db = dba_popen($db_filename, 'c');
 
@@ -28,8 +28,8 @@ dba_close($db);
 
 ?>
 --CLEAN--
-<?php 
-	require(dirname(__FILE__) .'/clean.inc'); 
+<?php
+	require(__DIR__ .'/clean.inc');
 ?>
 --EXPECT--
 integer

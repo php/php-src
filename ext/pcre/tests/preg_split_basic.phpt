@@ -1,9 +1,8 @@
 --TEST--
-Test preg_split() function : basic functionality 
+Test preg_split() function : basic functionality
 --FILE--
 <?php
 /*
-* proto array preg_split(string pattern, string subject [, int limit [, int flags]])
 * Function is implemented in ext/pcre/php_pcre.c
 */
 $string = 'this is a_list: value1, Test__, string; Hello, world!_(parentheses)';

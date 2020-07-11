@@ -3,9 +3,6 @@ uuencode family tests
 --FILE--
 <?php
 
-var_dump(convert_uuencode(array()));
-var_dump(convert_uudecode(array()));
-
 var_dump(convert_uuencode(""));
 var_dump(convert_uudecode(""));
 var_dump($enc = convert_uuencode("~!@#$%^&*()_}{POIUYTREWQQSDFGHJKL:<MNBVCXZ"));
@@ -17,12 +14,7 @@ var_dump(convert_uudecode(substr($enc, 0, -10)));
 
 echo "Done\n";
 ?>
---EXPECTF--	
-Warning: convert_uuencode() expects parameter 1 to be string, array given in %s on line %d
-bool(false)
-
-Warning: convert_uudecode() expects parameter 1 to be string, array given in %s on line %d
-bool(false)
+--EXPECTF--
 bool(false)
 bool(false)
 string(60) "J?B%`(R0E7B8J*"E??7M03TE5651215=145-$1D=(2DM,.CQ-3D)60UA:

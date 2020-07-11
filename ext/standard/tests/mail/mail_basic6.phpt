@@ -1,7 +1,7 @@
 --TEST--
 Test mail() function : basic functionality
 --INI--
-sendmail_path=tee mailBasic.out >/dev/null
+sendmail_path=tee mailBasic6.out >/dev/null
 mail.add_x_header = Off
 --SKIPIF--
 <?php
@@ -10,12 +10,6 @@ if(substr(PHP_OS, 0, 3) == "WIN")
 ?>
 --FILE--
 <?php
-/* Prototype  : int mail(string to, string subject, string message [, string additional_headers [, string additional_parameters]])
- * Description: Send an email message with invalid addtional_headers
- * Source code: ext/standard/mail.c
- * Alias to functions:
- */
-
 echo "*** Testing mail() : basic functionality ***\n";
 
 
@@ -24,7 +18,7 @@ $to = 'user@example.com';
 $subject = 'Test Subject';
 $message = 'A Message';
 $additional_headers = "HEAD1: a\r\nHEAD2: b\r\n";
-$outFile = "mailBasic.out";
+$outFile = "mailBasic6.out";
 @unlink($outFile);
 
 echo "-- Valid Header --\n";
@@ -59,7 +53,7 @@ echo @file_get_contents($outFile);
 $additional_headers = "\nHEAD1: a\nHEAD2: b\n";
 @unlink($outFile);
 
-echo "-- Invalid Header - preceeding newline--\n";
+echo "-- Invalid Header - preceding newline--\n";
 // Calling mail() with all additional headers
 var_dump( mail($to, $subject, $message, $additional_headers) );
 echo @file_get_contents($outFile);
@@ -69,7 +63,7 @@ echo @file_get_contents($outFile);
 $additional_headers = "\rHEAD1: a\nHEAD2: b\r";
 @unlink($outFile);
 
-echo "-- Invalid Header - preceeding newline--\n";
+echo "-- Invalid Header - preceding newline--\n";
 // Calling mail() with all additional headers
 var_dump( mail($to, $subject, $message, $additional_headers) );
 echo @file_get_contents($outFile);
@@ -79,7 +73,7 @@ echo @file_get_contents($outFile);
 $additional_headers = "\r\nHEAD1: a\r\nHEAD2: b\r\n";
 @unlink($outFile);
 
-echo "-- Invalid Header - preceeding newline--\n";
+echo "-- Invalid Header - preceding newline--\n";
 // Calling mail() with all additional headers
 var_dump( mail($to, $subject, $message, $additional_headers) );
 echo @file_get_contents($outFile);
@@ -89,7 +83,7 @@ echo @file_get_contents($outFile);
 $additional_headers = "\r\n\r\nHEAD1: a\r\nHEAD2: b\r\n";
 @unlink($outFile);
 
-echo "-- Invalid Header - preceeding newline--\n";
+echo "-- Invalid Header - preceding newline--\n";
 // Calling mail() with all additional headers
 var_dump( mail($to, $subject, $message, $additional_headers) );
 echo @file_get_contents($outFile);
@@ -99,7 +93,7 @@ echo @file_get_contents($outFile);
 $additional_headers = "\n\nHEAD1: a\r\nHEAD2: b\r\n";
 @unlink($outFile);
 
-echo "-- Invalid Header - preceeding newline--\n";
+echo "-- Invalid Header - preceding newline--\n";
 // Calling mail() with all additional headers
 var_dump( mail($to, $subject, $message, $additional_headers) );
 echo @file_get_contents($outFile);
@@ -109,7 +103,7 @@ echo @file_get_contents($outFile);
 $additional_headers = "\r\rHEAD1: a\r\nHEAD2: b\r\n";
 @unlink($outFile);
 
-echo "-- Invalid Header - preceeding newline--\n";
+echo "-- Invalid Header - preceding newline--\n";
 // Calling mail() with all additional headers
 var_dump( mail($to, $subject, $message, $additional_headers) );
 echo @file_get_contents($outFile);
@@ -220,7 +214,6 @@ echo @file_get_contents($outFile);
 @unlink($outFile);
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing mail() : basic functionality ***
 -- Valid Header --
@@ -246,27 +239,27 @@ Subject: Test Subject
 HEAD1: aHEAD2: b
 
 A Message
--- Invalid Header - preceeding newline--
+-- Invalid Header - preceding newline--
 
 Warning: mail(): Multiple or malformed newlines found in additional_header in %s/mail_basic6.php on line %d
 bool(false)
--- Invalid Header - preceeding newline--
+-- Invalid Header - preceding newline--
 
 Warning: mail(): Multiple or malformed newlines found in additional_header in %s/mail_basic6.php on line %d
 bool(false)
--- Invalid Header - preceeding newline--
+-- Invalid Header - preceding newline--
 
 Warning: mail(): Multiple or malformed newlines found in additional_header in %s/mail_basic6.php on line %d
 bool(false)
--- Invalid Header - preceeding newline--
+-- Invalid Header - preceding newline--
 
 Warning: mail(): Multiple or malformed newlines found in additional_header in %s/mail_basic6.php on line %d
 bool(false)
--- Invalid Header - preceeding newline--
+-- Invalid Header - preceding newline--
 
 Warning: mail(): Multiple or malformed newlines found in additional_header in %s/mail_basic6.php on line %d
 bool(false)
--- Invalid Header - preceeding newline--
+-- Invalid Header - preceding newline--
 
 Warning: mail(): Multiple or malformed newlines found in additional_header in %s/mail_basic6.php on line %d
 bool(false)
@@ -326,4 +319,3 @@ HEAD1: a
 HEAD2: b
 
 A Message
-===DONE===

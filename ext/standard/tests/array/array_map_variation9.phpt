@@ -2,11 +2,6 @@
 Test array_map() function : usage variations - binary safe checking
 --FILE--
 <?php
-/* Prototype  : array array_map  ( callback $callback  , array $arr1  [, array $...  ] )
- * Description: Applies the callback to the elements of the given arrays
- * Source code: ext/standard/array.c
- */
-
 /*
  * Test array_map() by passing array having binary values for $arr1 argument
  */
@@ -30,14 +25,14 @@ var_dump( array_map('callback1', $arr1) );
 
 echo "-- checking binary safe array with two parameter callback function --\n";
 try {
-	var_dump( array_map(b"callback2", $arr1) );
+    var_dump( array_map(b"callback2", $arr1) );
 } catch (Throwable $e) {
-	echo "Exception: " . $e->getMessage() . "\n";
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_map() : array with binary data for 'arr1' argument ***
 -- checking binary safe array with one parameter callback function --
 array(4) {

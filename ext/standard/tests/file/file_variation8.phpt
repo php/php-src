@@ -4,22 +4,16 @@ Test file function : variation - various absolute and relative paths
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
-/* Prototype  : array file(string filename [, int flags[, resource context]])
- * Description: Read entire file into an array 
- * Source code: ext/standard/file.c
- * Alias to functions: 
- */
-
 echo "*** Testing file() : variation ***\n";
 $mainDir = "fileVar8.dir";
 $subDir = "fileVar8Sub";
-$absMainDir = dirname(__FILE__)."/".$mainDir;
+$absMainDir = __DIR__."/".$mainDir;
 mkdir($absMainDir);
 $absSubDir = $absMainDir."/".$subDir;
 mkdir($absSubDir);
 
 $old_dir_path = getcwd();
-chdir(dirname(__FILE__));
+chdir(__DIR__);
 
 $allDirs = array(
   // absolute paths
@@ -29,14 +23,14 @@ $allDirs = array(
   "$absSubDir/../../".$mainDir."/./".$subDir,
   "$absSubDir/..///".$subDir."//..//../".$subDir,
   "$absSubDir/BADDIR",
-  
+
   // relative paths
   $mainDir."/".$subDir,
-  $mainDir."//".$subDir, 
-   $mainDir."///".$subDir, 
+  $mainDir."//".$subDir,
+   $mainDir."///".$subDir,
   "./".$mainDir."/../".$mainDir."/".$subDir,
-  "BADDIR",  
-  
+  "BADDIR",
+
 );
 
 $filename = 'FileGetContentsVar7.tmp';
@@ -88,12 +82,12 @@ array(1) {
 
 -- Iteration 5 --
 
-Warning: file(%sfileVar8.dir/fileVar8Sub/..///fileVar8Sub//..//../fileVar8Sub/FileGetContentsVar7.tmp): failed to open stream: No such file or directory in %s on line %d
+Warning: file(%sfileVar8.dir/fileVar8Sub/..///fileVar8Sub//..//../fileVar8Sub/FileGetContentsVar7.tmp): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 -- Iteration 6 --
 
-Warning: file(%sfileVar8.dir/fileVar8Sub/BADDIR/FileGetContentsVar7.tmp): failed to open stream: No such file or directory in %s on line %d
+Warning: file(%sfileVar8.dir/fileVar8Sub/BADDIR/FileGetContentsVar7.tmp): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 -- Iteration 7 --
@@ -122,7 +116,7 @@ array(1) {
 
 -- Iteration 11 --
 
-Warning: file(BADDIR/FileGetContentsVar7.tmp): failed to open stream: No such file or directory in %s on line %d
+Warning: file(BADDIR/FileGetContentsVar7.tmp): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 *** Done ***

@@ -1,6 +1,5 @@
 --TEST--
 setcookie() tests
---DESCRIPTION--
 --INI--
 date.timezone=UTC
 --FILE--
@@ -18,54 +17,58 @@ setcookie('name', 'value', 0, '', 'domain.tld');
 setcookie('name', 'value', 0, '', '', TRUE);
 setcookie('name', 'value', 0, '', '', FALSE, TRUE);
 
+setcookie('name', 'value', ['expires' => $tsp]);
+setcookie('name', 'value', ['expires' => $tsn, 'path' => '/path/', 'domain' => 'domain.tld', 'secure' => true, 'httponly' => true, 'samesite' => 'Strict']);
 
 $expected = array(
-	'Set-Cookie: name=deleted; expires='.date('D, d-M-Y H:i:s', 1).' GMT; Max-Age=0',
-	'Set-Cookie: name=deleted; expires='.date('D, d-M-Y H:i:s', 1).' GMT; Max-Age=0',
-	'Set-Cookie: name=value',
-	'Set-Cookie: name=space+value',
-	'Set-Cookie: name=value',
-	'Set-Cookie: name=value; expires='.date('D, d-M-Y H:i:s', $tsp).' GMT; Max-Age=5',
-	'Set-Cookie: name=value; expires='.date('D, d-M-Y H:i:s', $tsn).' GMT; Max-Age=-6',
-	'Set-Cookie: name=value; expires='.date('D, d-M-Y H:i:s', $tsc).' GMT; Max-Age=0',
-	'Set-Cookie: name=value; path=/path/',
-	'Set-Cookie: name=value; domain=domain.tld',
-	'Set-Cookie: name=value; secure',
-	'Set-Cookie: name=value; HttpOnly'
+    'Set-Cookie: name=deleted; expires='.date('D, d-M-Y H:i:s', 1).' GMT; Max-Age=0',
+    'Set-Cookie: name=deleted; expires='.date('D, d-M-Y H:i:s', 1).' GMT; Max-Age=0',
+    'Set-Cookie: name=value',
+    'Set-Cookie: name=space%20value',
+    'Set-Cookie: name=value',
+    'Set-Cookie: name=value; expires='.date('D, d-M-Y H:i:s', $tsp).' GMT; Max-Age=5',
+    'Set-Cookie: name=value; expires='.date('D, d-M-Y H:i:s', $tsn).' GMT; Max-Age=0',
+    'Set-Cookie: name=value; expires='.date('D, d-M-Y H:i:s', $tsc).' GMT; Max-Age=0',
+    'Set-Cookie: name=value; path=/path/',
+    'Set-Cookie: name=value; domain=domain.tld',
+    'Set-Cookie: name=value; secure',
+    'Set-Cookie: name=value; HttpOnly',
+    'Set-Cookie: name=value; expires='.date('D, d-M-Y H:i:s', $tsp).' GMT; Max-Age=5',
+    'Set-Cookie: name=value; expires='.date('D, d-M-Y H:i:s', $tsn).' GMT; Max-Age=0; path=/path/; domain=domain.tld; secure; HttpOnly; SameSite=Strict'
 );
 
 $headers = headers_list();
 if (($i = count($expected)) > count($headers))
 {
-	echo "Fewer headers are being sent than expected - aborting";
-	return;
+    echo "Fewer headers are being sent than expected - aborting";
+    return;
 }
 
 do
 {
-	if (strncmp(current($headers), 'Set-Cookie:', 11) !== 0)
-	{
-		continue;
-	}
+    if (strncmp(current($headers), 'Set-Cookie:', 11) !== 0)
+    {
+        continue;
+    }
 
-	if (current($headers) === current($expected))
-	{
-		$i--;
-	}
-	else
-	{
-		echo "Header mismatch:\n\tExpected: "
-			.current($expected)
-			."\n\tReceived: ".current($headers)."\n";
-	}
+    if (current($headers) === current($expected))
+    {
+        $i--;
+    }
+    else
+    {
+        echo "Header mismatch:\n\tExpected: "
+            .current($expected)
+            ."\n\tReceived: ".current($headers)."\n";
+    }
 
-	next($expected);
+    next($expected);
 }
 while (next($headers) !== FALSE);
 
 echo ($i === 0)
-	? 'OK'
-	: 'A total of '.$i.' errors found.';
+    ? 'OK'
+    : 'A total of '.$i.' errors found.';
 ?>
 --EXPECTHEADERS--
 

@@ -3,8 +3,8 @@ Bug #54358 (Closure, use and reference)
 --FILE--
 <?php
 class asserter {
-	public function call($function) {
-	}
+    public function call($function) {
+    }
 }
 
 $asserter = new asserter();

@@ -8,7 +8,7 @@ phar.require_hash=0
 --FILE--
 <?php
 
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 $file = "<?php
 Phar::mapPhar('hio');
@@ -25,9 +25,9 @@ echo file_get_contents($pname . '/b/x') . "\n";
 echo file_get_contents($pname . '/a/x') . "\n";
 ?>
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
 a
 a
 
-Warning: file_get_contents(phar://%srename_dir.phar.php/a/x): failed to open stream: phar error: "a/x" is not a file in phar "%srename_dir.phar.php" in %srename_dir.php on line %d
+Warning: file_get_contents(phar://%srename_dir.phar.php/a/x): Failed to open stream: phar error: "a/x" is not a file in phar "%srename_dir.phar.php" in %srename_dir.php on line %d

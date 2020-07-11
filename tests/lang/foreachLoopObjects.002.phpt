@@ -4,82 +4,82 @@ Foreach loop tests - visibility.
 <?php
 
 class C {
-	public $a = "Original a";
-	public $b = "Original b";
-	public $c = "Original c";
-	protected $d = "Original d";
-	private $e = "Original e";
+    public $a = "Original a";
+    public $b = "Original b";
+    public $c = "Original c";
+    protected $d = "Original d";
+    private $e = "Original e";
 
-	function doForEachC() {
-		echo "in C::doForEachC\n";
-		foreach ($this as $k=>&$v) {
-			var_dump($v);
-			$v="changed.$k";
-		}
-	}
-		
-	static function doForEach($obj) {
-		echo "in C::doForEach\n";
-		foreach ($obj as $k=>&$v) {
-			var_dump($v);
-			$v="changed.$k";
-		}
-	}
-	
-	function doForEachOnThis() {
-		echo "in C::doForEachOnThis\n";
-		foreach ($this as $k=>&$v) {
-			var_dump($v);
-			$v="changed.$k";
-		}
-	}
-	
+    function doForEachC() {
+        echo "in C::doForEachC\n";
+        foreach ($this as $k=>&$v) {
+            var_dump($v);
+            $v="changed.$k";
+        }
+    }
+
+    static function doForEach($obj) {
+        echo "in C::doForEach\n";
+        foreach ($obj as $k=>&$v) {
+            var_dump($v);
+            $v="changed.$k";
+        }
+    }
+
+    function doForEachOnThis() {
+        echo "in C::doForEachOnThis\n";
+        foreach ($this as $k=>&$v) {
+            var_dump($v);
+            $v="changed.$k";
+        }
+    }
+
 }
 
 class D extends C {
-	
-	private $f = "Original f";
-	protected $g = "Original g";
-	
-	static function doForEach($obj) {
-		echo "in D::doForEach\n";
-		foreach ($obj as $k=>&$v) {
-			var_dump($v);
-			$v="changed.$k";
-		}
-	}
 
-	function doForEachOnThis() {
-		echo "in D::doForEachOnThis\n";
-		foreach ($this as $k=>&$v) {
-			var_dump($v);
-			$v="changed.$k";
-		}
-	}
+    private $f = "Original f";
+    protected $g = "Original g";
+
+    static function doForEach($obj) {
+        echo "in D::doForEach\n";
+        foreach ($obj as $k=>&$v) {
+            var_dump($v);
+            $v="changed.$k";
+        }
+    }
+
+    function doForEachOnThis() {
+        echo "in D::doForEachOnThis\n";
+        foreach ($this as $k=>&$v) {
+            var_dump($v);
+            $v="changed.$k";
+        }
+    }
 }
 
 class E extends D {
-	public $a = "Overridden a";
-	public $b = "Overridden b";
-	public $c = "Overridden c";
-	protected $d = "Overridden d";
-	private $e = "Overridden e";	
+    public $a = "Overridden a";
+    public $b = "Overridden b";
+    public $c = "Overridden c";
+    protected $d = "Overridden d";
+    private $e = "Overridden e";
 
-	static function doForEach($obj) {
-		echo "in E::doForEach\n";
-		foreach ($obj as $k=>&$v) {
-			var_dump($v);
-			$v="changed.$k";
-		}
-	}
+    static function doForEach($obj) {
+        echo "in E::doForEach\n";
+        foreach ($obj as $k=>&$v) {
+            var_dump($v);
+            $v="changed.$k";
+        }
+    }
 
-	function doForEachOnThis() {
-		echo "in E::doForEachOnThis\n";
-		foreach ($this as $k=>&$v) {
-			var_dump($v);
-			$v="changed.$k";
-		}
-	}
+    function doForEachOnThis() {
+        echo "in E::doForEachOnThis\n";
+        foreach ($this as $k=>&$v) {
+            var_dump($v);
+            $v="changed.$k";
+        }
+    }
 }
 
 echo "\n\nIterate over various generations from within overridden methods:\n";
@@ -147,26 +147,25 @@ echo "\n\nIterate over various generations from outside the object:\n";
 echo "\n--> Using instance of C:\n";
 $myC = new C;
 foreach ($myC as $k=>&$v) {
-	var_dump($v);
-	$v="changed.$k";
+    var_dump($v);
+    $v="changed.$k";
 }
 var_dump($myC);
 echo "\n--> Using instance of D:\n";
 $myD = new D;
 foreach ($myD as $k=>&$v) {
-	var_dump($v);
-	$v="changed.$k";
+    var_dump($v);
+    $v="changed.$k";
 }
 var_dump($myD);
 echo "\n--> Using instance of E:\n";
 $myE = new E;
 foreach ($myE as $k=>&$v) {
-	var_dump($v);
-	$v="changed.$k";
+    var_dump($v);
+    $v="changed.$k";
 }
 var_dump($myE);
 ?>
-===DONE===
 --EXPECTF--
 Iterate over various generations from within overridden methods:
 
@@ -584,4 +583,3 @@ object(E)#%d (8) {
   ["e":"C":private]=>
   string(10) "Original e"
 }
-===DONE===

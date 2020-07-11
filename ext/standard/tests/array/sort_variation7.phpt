@@ -2,15 +2,9 @@
 Test sort() function : usage variations - sort boolean values
 --FILE--
 <?php
-/* Prototype  : bool sort ( array &$array [, int $sort_flags] )
- * Description: This function sorts an array. 
-                Elements will be arranged from lowest to highest when this function has completed.
- * Source code: ext/standard/array.c
-*/
-
 /*
  * testing sort() by providing bool value array for $array argument with following flag values.
- * flag  value as defualt
+ * flag  value as default
  * SORT_REGULAR - compare items normally
 */
 
@@ -19,7 +13,7 @@ echo "*** Testing sort() : usage variations ***\n";
 // bool value array
 $bool_values = array (true, false, TRUE, FALSE);
 
-echo "\n-- Testing sort() by supplying bool value array, 'flag' value is defualt --\n";
+echo "\n-- Testing sort() by supplying bool value array, 'flag' value is default --\n";
 $temp_array = $bool_values;
 var_dump(sort($temp_array) );
 var_dump($temp_array);
@@ -41,10 +35,10 @@ var_dump($temp_array);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sort() : usage variations ***
 
--- Testing sort() by supplying bool value array, 'flag' value is defualt --
+-- Testing sort() by supplying bool value array, 'flag' value is default --
 bool(true)
 array(4) {
   [0]=>

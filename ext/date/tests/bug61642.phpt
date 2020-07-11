@@ -12,29 +12,29 @@ $dates = array('2012-03-29', '2012-03-30', '2012-03-31', '2012-04-01', '2012-04-
 $header = array();
 
 foreach ($dates as $startdate) {
-	$date = new DateTime($startdate);
+    $date = new DateTime($startdate);
 
-	$header[] = $date->format('Y-m-d D');
+    $header[] = $date->format('Y-m-d D');
 }
 
 echo '###  ', implode('  ', $header), "\n\n";
 
 foreach ($weekdays as $days) {
-	$line = array();
+    $line = array();
 
-	printf('%+3d  ', $days);
+    printf('%+3d  ', $days);
 
-	foreach ($dates as $startdate) {
-		$date = new DateTime($startdate);
-		$date->modify("{$days} weekdays");
+    foreach ($dates as $startdate) {
+        $date = new DateTime($startdate);
+        $date->modify("{$days} weekdays");
 
-		$line[] = $date->format('Y-m-d D');
-	}
+        $line[] = $date->format('Y-m-d D');
+    }
 
-	echo implode('  ', $line), "\n";
+    echo implode('  ', $line), "\n";
 }
 ?>
---EXPECTF--
+--EXPECT--
 ###  2012-03-29 Thu  2012-03-30 Fri  2012-03-31 Sat  2012-04-01 Sun  2012-04-02 Mon  2012-04-03 Tue  2012-04-04 Wed  2012-04-05 Thu
 
 -11  2012-03-14 Wed  2012-03-15 Thu  2012-03-16 Fri  2012-03-16 Fri  2012-03-16 Fri  2012-03-19 Mon  2012-03-20 Tue  2012-03-21 Wed

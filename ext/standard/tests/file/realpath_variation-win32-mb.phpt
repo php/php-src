@@ -8,14 +8,10 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype: string realpath ( string $path );
-   Description: Returns canonicalized absolute pathname
-*/
-
-require dirname(__FILE__).'/file.inc';
+require __DIR__.'/file.inc';
 
 echo "*** Testing realpath(): usage variations ***\n";
-$name_prefix = dirname(__FILE__);
+$name_prefix = __DIR__;
 $filename = "$name_prefix/realpath_variation_私はガラスを食べられます/home/tests/realpath_variation_私はガラスを食べられます.tmp";
 mkdir("$name_prefix/realpath_variation_私はガラスを食べられます/home/tests/", 0777, true);
 
@@ -43,7 +39,7 @@ $file_arr = array (
   "$name_prefix/./realpath_variation_私はガラスを食べられます/home/../home//tests//..//..//..//home//realpath_variation_私はガラスを食べられます.tmp/"
 );
 
-var_dump( realpath($file_arr[0]) ); 
+var_dump( realpath($file_arr[0]) );
 var_dump( realpath($file_arr[1]) );
 
 echo "\n*** Testing realpath() with filename as empty string, NULL and single space ***\n";
@@ -62,14 +58,14 @@ for($loop_counter = 0; $loop_counter < count($file_string); $loop_counter++) {
   echo "-- Iteration";
   echo $loop_counter + 1;
   echo " --\n";
-  var_dump( realpath($file_string[$loop_counter]) ); 
+  var_dump( realpath($file_string[$loop_counter]) );
 }
 
 echo "Done\n";
 ?>
 --CLEAN--
 <?php
-$name_prefix = dirname(__FILE__)."/realpath_variation_私はガラスを食べられます";
+$name_prefix = __DIR__."/realpath_variation_私はガラスを食べられます";
 unlink("$name_prefix/home/tests/realpath_variation_私はガラスを食べられます.tmp");
 rmdir("$name_prefix/home/tests/");
 rmdir("$name_prefix/home/");

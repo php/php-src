@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +14,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 /*  Based on the public domain algorithm found at
 	http://www.isthe.com/chongo/tech/comp/fnv/index.html */
 
@@ -25,43 +21,63 @@
 #include "php_hash_fnv.h"
 
 const php_hash_ops php_hash_fnv132_ops = {
+	"fnv132",
 	(php_hash_init_func_t) PHP_FNV132Init,
 	(php_hash_update_func_t) PHP_FNV132Update,
 	(php_hash_final_func_t) PHP_FNV132Final,
-	(php_hash_copy_func_t) php_hash_copy,
+	php_hash_copy,
+	php_hash_serialize,
+	php_hash_unserialize,
+	PHP_FNV132_SPEC,
 	4,
 	4,
-	sizeof(PHP_FNV132_CTX)
+	sizeof(PHP_FNV132_CTX),
+	0
 };
 
-	const php_hash_ops php_hash_fnv1a32_ops = {
+const php_hash_ops php_hash_fnv1a32_ops = {
+	"fnv1a32",
 	(php_hash_init_func_t) PHP_FNV132Init,
 	(php_hash_update_func_t) PHP_FNV1a32Update,
- 	(php_hash_final_func_t) PHP_FNV132Final,
-	(php_hash_copy_func_t) php_hash_copy,
+	(php_hash_final_func_t) PHP_FNV132Final,
+	php_hash_copy,
+	php_hash_serialize,
+	php_hash_unserialize,
+	PHP_FNV132_SPEC,
 	4,
 	4,
-	sizeof(PHP_FNV132_CTX)
+	sizeof(PHP_FNV132_CTX),
+	0
 };
 
 const php_hash_ops php_hash_fnv164_ops = {
+	"fnv164",
 	(php_hash_init_func_t) PHP_FNV164Init,
 	(php_hash_update_func_t) PHP_FNV164Update,
 	(php_hash_final_func_t) PHP_FNV164Final,
-	(php_hash_copy_func_t) php_hash_copy,
+	php_hash_copy,
+	php_hash_serialize,
+	php_hash_unserialize,
+	PHP_FNV164_SPEC,
 	8,
 	4,
-	sizeof(PHP_FNV164_CTX)
+	sizeof(PHP_FNV164_CTX),
+	0
 };
 
 const php_hash_ops php_hash_fnv1a64_ops = {
+	"fnv1a64",
 	(php_hash_init_func_t) PHP_FNV164Init,
 	(php_hash_update_func_t) PHP_FNV1a64Update,
- 	(php_hash_final_func_t) PHP_FNV164Final,
-	(php_hash_copy_func_t) php_hash_copy,
+	(php_hash_final_func_t) PHP_FNV164Final,
+	php_hash_copy,
+	php_hash_serialize,
+	php_hash_unserialize,
+	PHP_FNV164_SPEC,
 	8,
 	4,
-	sizeof(PHP_FNV164_CTX)
+	sizeof(PHP_FNV164_CTX),
+	0
 };
 
 /* {{{ PHP_FNV132Init
@@ -74,13 +90,13 @@ PHP_HASH_API void PHP_FNV132Init(PHP_FNV132_CTX *context)
 /* }}} */
 
 PHP_HASH_API void PHP_FNV132Update(PHP_FNV132_CTX *context, const unsigned char *input,
-		unsigned int inputLen)
+		size_t inputLen)
 {
 	context->state = fnv_32_buf((void *)input, inputLen, context->state, 0);
 }
 
 PHP_HASH_API void PHP_FNV1a32Update(PHP_FNV132_CTX *context, const unsigned char *input,
-		unsigned int inputLen)
+		size_t inputLen)
 {
 	context->state = fnv_32_buf((void *)input, inputLen, context->state, 1);
 }
@@ -109,13 +125,13 @@ PHP_HASH_API void PHP_FNV164Init(PHP_FNV164_CTX *context)
 /* }}} */
 
 PHP_HASH_API void PHP_FNV164Update(PHP_FNV164_CTX *context, const unsigned char *input,
-		unsigned int inputLen)
+		size_t inputLen)
 {
 	context->state = fnv_64_buf((void *)input, inputLen, context->state, 0);
 }
 
 PHP_HASH_API void PHP_FNV1a64Update(PHP_FNV164_CTX *context, const unsigned char *input,
-		unsigned int inputLen)
+		size_t inputLen)
 {
 	context->state = fnv_64_buf((void *)input, inputLen, context->state, 1);
 }
@@ -156,15 +172,16 @@ fnv_32_buf(void *buf, size_t len, uint32_t hval, int alternate)
 	/*
 	 * FNV-1 hash each octet in the buffer
 	 */
-	while (bp < be) {
-
-		if (alternate == 0) {
+	if (alternate == 0) {
+		while (bp < be) {
 			/* multiply by the 32 bit FNV magic prime mod 2^32 */
 			hval *= PHP_FNV_32_PRIME;
 
 			/* xor the bottom with the current octet */
 			hval ^= (uint32_t)*bp++;
-		} else {
+		}
+	} else {
+		while (bp < be) {
 			/* xor the bottom with the current octet */
 			hval ^= (uint32_t)*bp++;
 
@@ -198,15 +215,17 @@ fnv_64_buf(void *buf, size_t len, uint64_t hval, int alternate)
 	/*
 	 * FNV-1 hash each octet of the buffer
 	 */
-	while (bp < be) {
 
-		if (alternate == 0) {
+	if (alternate == 0) {
+		while (bp < be) {
 			/* multiply by the 64 bit FNV magic prime mod 2^64 */
 			hval *= PHP_FNV_64_PRIME;
 
 			/* xor the bottom with the current octet */
 			hval ^= (uint64_t)*bp++;
-		 } else {
+		}
+	 } else {
+		while (bp < be) {
 			/* xor the bottom with the current octet */
 			hval ^= (uint64_t)*bp++;
 
@@ -218,12 +237,3 @@ fnv_64_buf(void *buf, size_t len, uint64_t hval, int alternate)
 	/* return our new hash value */
 	return hval;
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

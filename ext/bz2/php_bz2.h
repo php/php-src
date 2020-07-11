@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -16,12 +14,10 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef PHP_BZ2_H
 #define PHP_BZ2_H
 
-#if HAVE_BZ2
+#ifdef HAVE_BZ2
 
 extern zend_module_entry bz2_module_entry;
 #define phpext_bz2_ptr &bz2_module_entry
@@ -56,8 +52,8 @@ PHP_BZ2_API php_stream *_php_stream_bz2open_from_BZFILE(BZFILE *bz, const char *
 #define php_stream_bz2open_from_BZFILE(bz, mode, innerstream)	_php_stream_bz2open_from_BZFILE((bz), (mode), (innerstream) STREAMS_CC)
 #define php_stream_bz2open(wrapper, path, mode, options, opened_path)	_php_stream_bz2open((wrapper), (path), (mode), (options), (opened_path), NULL STREAMS_CC)
 
-extern php_stream_filter_factory php_bz2_filter_factory;
-extern php_stream_ops php_stream_bz2io_ops;
+extern const php_stream_filter_factory php_bz2_filter_factory;
+extern const php_stream_ops php_stream_bz2io_ops;
 #define PHP_STREAM_IS_BZIP2	&php_stream_bz2io_ops
 
 /* 400kb */
@@ -67,11 +63,3 @@ extern php_stream_ops php_stream_bz2io_ops;
 #define PHP_BZ2_FILTER_DEFAULT_WORKFACTOR       0
 
 #endif
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */

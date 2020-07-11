@@ -14,5 +14,5 @@ var_dump(isset($t->$name));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Method test::__isset() cannot take arguments by reference in %s on line %d

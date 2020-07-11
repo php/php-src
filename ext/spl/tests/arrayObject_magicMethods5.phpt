@@ -3,34 +3,34 @@ SPL: ArrayObject: ensure the magic methods for property access of a subclass of 
 --FILE--
 <?php
 class C {
-	public $a = 1;
-	public $b = 2;
-	public $c = 3;
+    public $a = 1;
+    public $b = 2;
+    public $c = 3;
 
-	private $priv = 'secret';
+    private $priv = 'secret';
 }
 
 class UsesMagic extends ArrayObject {
-	
-	public $b = "This should appear in storage";
 
-	function __get($name) { 
-		$args = func_get_args();
-		echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
-	}
-	function __set($name, $value) { 
-		$args = func_get_args();
-		echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
-	}
-	function __isset($name) { 
-		$args = func_get_args();
-		echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
-	}
-	function __unset($name) { 
-		$args = func_get_args();
-		echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
-	}
-	
+    public $b = "This should appear in storage";
+
+    function __get($name) {
+        $args = func_get_args();
+        echo "In " . __METHOD__ . "(" . implode(',', $args) . ")\n";
+    }
+    function __set($name, $value) {
+        $args = func_get_args();
+        echo "In " . __METHOD__ . "(" . implode(',', $args) . ")\n";
+    }
+    function __isset($name) {
+        $args = func_get_args();
+        echo "In " . __METHOD__ . "(" . implode(',', $args) . ")\n";
+    }
+    function __unset($name) {
+        $args = func_get_args();
+        echo "In " . __METHOD__ . "(" . implode(',', $args) . ")\n";
+    }
+
 }
 $obj = new C;
 $ao = new UsesMagic($obj);
@@ -70,7 +70,7 @@ var_dump($obj);
 echo "  Wrapping ArrayObject:\n";
 var_dump($ao);
 ?>
---EXPECTF--
+--EXPECT--
 --> Write existent, non-existent and dynamic:
 In UsesMagic::__set(a,changed)
 In UsesMagic::__set(dynamic,new)

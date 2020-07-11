@@ -12,7 +12,7 @@ $x1 = "okey";
 myFunction(${"x$i"});
 
 function myFunction($x) {
-	var_dump($x);
+    var_dump($x);
 }
 
 ?>

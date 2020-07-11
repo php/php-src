@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +14,6 @@
    |          Marcus Boerger <helly@php.net>                              |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -185,7 +181,7 @@ DBA_UPDATE_FUNC(cdb)
 	if (!cdb->make)
 		return FAILURE; /* database was opened readonly */
 	if (!mode)
-		return FAILURE; /* cdb_make dosn't know replace */
+		return FAILURE; /* cdb_make doesn't know replace */
 	if (cdb_make_add(&cdb->m, key, keylen, val, vallen) != -1)
 		return SUCCESS;
 #endif
@@ -225,12 +221,12 @@ DBA_DELETE_FUNC(cdb)
 /* {{{ cdb_file_lseek
  php_stream_seek does not return actual position */
 #if DBA_CDB_BUILTIN
-int cdb_file_lseek(php_stream *fp, off_t offset, int whence) {
+zend_off_t cdb_file_lseek(php_stream *fp, zend_off_t offset, int whence) {
 	php_stream_seek(fp, offset, whence);
 	return php_stream_tell(fp);
 }
 #else
-int cdb_file_lseek(int fd, off_t offset, int whence) {
+zend_off_t cdb_file_lseek(int fd, zend_off_t offset, int whence) {
 	return lseek(fd, offset, whence);
 }
 #endif
@@ -238,7 +234,7 @@ int cdb_file_lseek(int fd, off_t offset, int whence) {
 
 #define CSEEK(n) do { \
 	if (n >= cdb->eod) return NULL; \
-	if (cdb_file_lseek(cdb->file, (off_t)n, SEEK_SET) != (off_t) n) return NULL; \
+	if (cdb_file_lseek(cdb->file, (zend_off_t)n, SEEK_SET) != (zend_off_t) n) return NULL; \
 } while (0)
 
 
@@ -339,12 +335,3 @@ DBA_INFO_FUNC(cdb)
 }
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

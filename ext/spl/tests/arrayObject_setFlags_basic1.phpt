@@ -1,17 +1,17 @@
 --TEST--
-SPL: ArrayObject::setFlags basic usage with ArrayObject::ARRAY_AS_PROPS. Currently fails on php.net due to bug 45622. 
+SPL: ArrayObject::setFlags basic usage with ArrayObject::ARRAY_AS_PROPS. Currently fails on php.net due to bug 45622.
 --FILE--
 <?php
 class C extends ArrayObject {
-	public $p = 'object property';
-}	
+    public $p = 'object property';
+}
 
 function access_p($ao) {
   // isset
   var_dump(isset($ao->p));
   // read
   var_dump($ao->p);
-  // write  
+  // write
   $ao->p = $ao->p . '.changed';
   var_dump($ao->p);
 }
@@ -44,8 +44,8 @@ string(21) "array element.changed"
 --> Remove the array element and try access again:
 bool(false)
 
-Notice: Undefined index: p in %s on line 10
+Notice: Undefined array key "p" in %s on line %d
 NULL
 
-Notice: Undefined index: p in %s on line 12
+Notice: Undefined array key "p" in %s on line %d
 string(8) ".changed"

@@ -5,10 +5,10 @@ Bug #66286: Incorrect object comparison with inheritance
 
 abstract class first {
     protected $someArray = array();
-}     
+}
 
-class second extends first {    
-    protected $someArray = array();        
+class second extends first {
+    protected $someArray = array();
     protected $someValue = null;
 
     public function __construct($someValue) {
@@ -16,10 +16,10 @@ class second extends first {
     }
 }
 
-$objFirst = new second('123');       
-$objSecond = new second('321');       
+$objFirst = new second('123');
+$objSecond = new second('321');
 
-var_dump ($objFirst == $objSecond);    
+var_dump ($objFirst == $objSecond);
 
 ?>
 --EXPECT--

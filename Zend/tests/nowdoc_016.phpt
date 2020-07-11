@@ -1,7 +1,7 @@
 --TEST--
 Testing nowdocs with escape sequences
 --FILE--
-<?php 
+<?php
 
 $test = <<<'TEST'
 TEST;

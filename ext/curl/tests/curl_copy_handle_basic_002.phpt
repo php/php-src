@@ -12,7 +12,7 @@ Rick Buitenman <rick@meritos.nl>
 
   echo '*** Testing curl copy handle with simple POST ***' . "\n";
 
-  $url = "{$host}/get.php?test=getpost";
+  $url = "{$host}/get.inc?test=getpost";
   $ch = curl_init();
 
   ob_start(); // start output buffering
@@ -20,17 +20,16 @@ Rick Buitenman <rick@meritos.nl>
   curl_setopt($ch, CURLOPT_POST, 1);
   curl_setopt($ch, CURLOPT_POSTFIELDS, "Hello=World&Foo=Bar&Person=John%20Doe");
   curl_setopt($ch, CURLOPT_URL, $url); //set the url we want to use
-  
+
   $copy = curl_copy_handle($ch);
   curl_close($ch);
- 
+
   $curl_content = curl_exec($copy);
   curl_close($copy);
 
   var_dump( $curl_content );
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing curl copy handle with simple POST ***
 string(163) "array(1) {
   ["test"]=>
@@ -45,4 +44,3 @@ array(3) {
   string(8) "John Doe"
 }
 "
-===DONE=== 

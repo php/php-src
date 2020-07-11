@@ -15,7 +15,8 @@ $test1->paramTest($test2);
 $refParam = new ReflectionParameter(array('stubParamTest', 'paramTest'), 'param');
 var_dump($refParam->getClass());
 ?>
---EXPECT--	
+--EXPECTF--
+Deprecated: Method ReflectionParameter::getClass() is deprecated in %s on line %d
 object(ReflectionClass)#4 (1) {
   ["name"]=>
   string(13) "stubParamTest"

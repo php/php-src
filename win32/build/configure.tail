@@ -1,5 +1,4 @@
 // vim:ft=javascript
-// $Id$
 // tail end of configure
 
 if (!MODE_PHPIZE && sapi_enabled.length < 1) {
@@ -8,4 +7,3 @@ if (!MODE_PHPIZE && sapi_enabled.length < 1) {
 }
 
 generate_files();
-

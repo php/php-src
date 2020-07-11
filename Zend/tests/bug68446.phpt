@@ -6,11 +6,11 @@ const FOO = [1];
 const BAR = null;
 
 function a(array $a = FOO) {
-	var_dump($a);
+    var_dump($a);
 }
 
-function b(array $b = BAR) {
-	var_dump($b);
+function b(?array $b = BAR) {
+    var_dump($b);
 }
 
 b(null);
@@ -32,9 +32,8 @@ array(1) {
   int(1)
 }
 
-Fatal error: Uncaught TypeError: Argument 1 passed to a() must be of the type array, null given, called in %s on line %d and defined in %s:%d
+Fatal error: Uncaught TypeError: a(): Argument #1 ($a) must be of type array, null given, called in %s:%d
 Stack trace:
 #0 %s(%d): a(NULL)
 #1 {main}
   thrown in %s on line %d
-

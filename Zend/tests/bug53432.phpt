@@ -50,11 +50,11 @@ string(1) "a"
 string(1) "a"
 string(6) "     a"
 
-Warning: Illegal string offset:  -1 in %s on line %d
+Warning: Illegal string offset -1 in %s on line %d
 NULL
 string(0) ""
 
-Warning: Illegal string offset 'foo' in %s on line %d
+Warning: Illegal string offset "foo" in %s on line %d
 string(1) "a"
 string(1) "a"
 Error: [] operator not supported for strings

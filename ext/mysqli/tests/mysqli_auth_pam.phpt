@@ -6,11 +6,7 @@ require_once('skipif.inc');
 require_once('skipifemb.inc');
 require_once('connect.inc');
 
-if (version_compare(PHP_VERSION, '5.3.99') >= 0) {
-	die("SKIP Available as of PHP 5.3.99");
-}
-
-if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
+if (!$link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
 	die(sprintf("SKIP Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 		$host, $user, $db, $port, $socket));
 }
@@ -60,30 +56,30 @@ if (!mysqli_query($link, sprintf("GRANT SELECT ON TABLE %s.test TO pamtest@'%%'"
 max_execution_time=240
 --FILE--
 <?php
-	require_once('connect.inc');
-	require_once('table.inc');
+    require_once('connect.inc');
+    require_once('table.inc');
 
-	if (!$link = my_mysqli_connect($host, 'pamtest', 'pamtest', $db, $port, $socket)) {
-		printf("[001] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
-			$host, $user, $db, $port, $socket);
-	} else {
+    if (!$link = my_mysqli_connect($host, 'pamtest', 'pamtest', $db, $port, $socket)) {
+        printf("[001] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
+            $host, $user, $db, $port, $socket);
+    } else {
 
-	  if (!$res = $link->query("SELECT id FROM test WHERE id = 1"))
-		  printf("[002] [%d] %s\n", $link->errno, $link->error);
+      if (!$res = $link->query("SELECT id FROM test WHERE id = 1"))
+          printf("[002] [%d] %s\n", $link->errno, $link->error);
 
-	  if (!$row = mysqli_fetch_assoc($res)) {
-		  printf("[003] [%d] %s\n", $link->errno, $link->error);
-	  }
+      if (!$row = mysqli_fetch_assoc($res)) {
+          printf("[003] [%d] %s\n", $link->errno, $link->error);
+      }
 
-	  if ($row['id'] != 1) {
-		  printf("[004] Expecting 1 got %s/'%s'", gettype($row['id']), $row['id']);
-	  }
+      if ($row['id'] != 1) {
+          printf("[004] Expecting 1 got %s/'%s'", gettype($row['id']), $row['id']);
+      }
 
-	  $res->close();
-	  $link->close();
-	}
+      $res->close();
+      $link->close();
+    }
 
-	print "done!";
+    print "done!";
 ?>
 --CLEAN--
 <?php
@@ -92,7 +88,6 @@ max_execution_time=240
 	mysqli_query($link, 'DROP USER pamtest@localhost');
 ?>
 --EXPECTF--
-
 Warning: mysqli_real_connect(): (28000/1045): Access denied for user %s
 [001] Cannot connect to the server using host=%s
 done!

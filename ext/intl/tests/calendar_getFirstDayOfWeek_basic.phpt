@@ -13,8 +13,6 @@ $intlcal = IntlCalendar::createInstance('UTC');
 var_dump($intlcal->getFirstDayOfWeek());
 var_dump(intlcal_get_first_day_of_week($intlcal));
 ?>
-==DONE==
 --EXPECT--
 int(2)
-int(2)
-==DONE==
+int(2)

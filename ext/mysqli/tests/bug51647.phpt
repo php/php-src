@@ -12,6 +12,9 @@ if ($IS_MYSQLND && !extension_loaded("openssl"))
 if (!($link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)))
 	die(sprintf("skip Connect failed, [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
 
+if (false === strpos($link->host_info, 'TCP/IP'))
+	die(sprintf("skip SSL only supported on TCP/IP"));
+
 $row = NULL;
 if ($res = $link->query('SHOW VARIABLES LIKE "have_ssl"')) {
 	$row = $res->fetch_row();
@@ -36,69 +39,69 @@ $link->close();
 ?>
 --FILE--
 <?php
-	include ("connect.inc");
+    include ("connect.inc");
 
-	if (!is_object($link = mysqli_init()))
-		printf("[001] Cannot create link\n");
+    if (!is_object($link = mysqli_init()))
+        printf("[001] Cannot create link\n");
 
-	if (!my_mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket, MYSQLI_CLIENT_SSL | MYSQLI_CLIENT_SSL_DONT_VERIFY_SERVER_CERT)) {
-		printf("[003] Connect failed, [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
-	}
+    if (!my_mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket, MYSQLI_CLIENT_SSL | MYSQLI_CLIENT_SSL_DONT_VERIFY_SERVER_CERT)) {
+        printf("[003] Connect failed, [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
+    }
 
-	if (!$res = $link->query('SHOW STATUS like "Ssl_cipher"')) {
-		if (1064 == $link->errno) {
-			/* ERROR 1064 (42000): You have an error in your SQL syntax;  = sql strict mode */
-			if ($res = $link->query("SHOW STATUS")) {
-				while ($row = $res->fetch_assoc())
-					if ($row['Variable_name'] == 'Ssl_cipher')
-						break;
-			} else {
-				printf("[005] [%d] %s\n", $link->errno, $link->error);
-			}
-		} else {
-			printf("[004] [%d] %s\n", $link->errno, $link->error);
-		}
-	} else {
-		if (!$row = $res->fetch_assoc())
-			printf("[006] [%d] %s\n", $link->errno, $link->error);
-		if (!strlen($row["Value"]))
-			printf("[007] Empty cipher. No encrytion!");
-		var_dump($row);
-	}
+    if (!$res = $link->query('SHOW STATUS like "Ssl_cipher"')) {
+        if (1064 == $link->errno) {
+            /* ERROR 1064 (42000): You have an error in your SQL syntax;  = sql strict mode */
+            if ($res = $link->query("SHOW STATUS")) {
+                while ($row = $res->fetch_assoc())
+                    if ($row['Variable_name'] == 'Ssl_cipher')
+                        break;
+            } else {
+                printf("[005] [%d] %s\n", $link->errno, $link->error);
+            }
+        } else {
+            printf("[004] [%d] %s\n", $link->errno, $link->error);
+        }
+    } else {
+        if (!$row = $res->fetch_assoc())
+            printf("[006] [%d] %s\n", $link->errno, $link->error);
+        if (!strlen($row["Value"]))
+            printf("[007] Empty cipher. No encryption!");
+        var_dump($row);
+    }
 
-	$link->close();
+    $link->close();
 
-	if (!is_object($link = mysqli_init()))
-		printf("[008] Cannot create link\n");
+    if (!is_object($link = mysqli_init()))
+        printf("[008] Cannot create link\n");
 
-	if (!my_mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket, MYSQLI_CLIENT_SSL)) {
-		printf("[009] Connect failed, [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
-	}
+    if (!my_mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket, MYSQLI_CLIENT_SSL)) {
+        printf("[009] Connect failed, [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
+    }
 
-	if (!$res = $link->query('SHOW STATUS like "Ssl_cipher"')) {
-		if (1064 == $link->errno) {
-			/* ERROR 1064 (42000): You have an error in your SQL syntax;  = sql strict mode */
-			if ($res = $link->query("SHOW STATUS")) {
-				while ($row = $res->fetch_assoc())
-					if ($row['Variable_name'] == 'Ssl_cipher')
-						break;
-			} else {
-				printf("[010] [%d] %s\n", $link->errno, $link->error);
-			}
-		} else {
-			printf("[011] [%d] %s\n", $link->errno, $link->error);
-		}
-	} else {
-		if (!$row = $res->fetch_assoc())
-			printf("[012] [%d] %s\n", $link->errno, $link->error);
-		if (!strlen($row["Value"]))
-			printf("[013] Empty cipher. No encrytion!");
-		var_dump($row);
-	}
+    if (!$res = $link->query('SHOW STATUS like "Ssl_cipher"')) {
+        if (1064 == $link->errno) {
+            /* ERROR 1064 (42000): You have an error in your SQL syntax;  = sql strict mode */
+            if ($res = $link->query("SHOW STATUS")) {
+                while ($row = $res->fetch_assoc())
+                    if ($row['Variable_name'] == 'Ssl_cipher')
+                        break;
+            } else {
+                printf("[010] [%d] %s\n", $link->errno, $link->error);
+            }
+        } else {
+            printf("[011] [%d] %s\n", $link->errno, $link->error);
+        }
+    } else {
+        if (!$row = $res->fetch_assoc())
+            printf("[012] [%d] %s\n", $link->errno, $link->error);
+        if (!strlen($row["Value"]))
+            printf("[013] Empty cipher. No encryption!");
+        var_dump($row);
+    }
 
-	$link->close();
+    $link->close();
 
-	print "done!";
+    print "done!";
 ?>
 --EXPECTF--
 array(2) {

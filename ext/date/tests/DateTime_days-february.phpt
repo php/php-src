@@ -1,5 +1,5 @@
 --TEST--
-DateTime::diff() days -- february 
+DateTime::diff() days -- february
 --CREDITS--
 Daniel Convissor <danielc@php.net>
 --FILE--

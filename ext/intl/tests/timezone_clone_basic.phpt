@@ -18,7 +18,6 @@ print_r($gmt);
 print_r(clone $gmt);
 
 ?>
-==DONE==
 --EXPECTF--
 IntlTimeZone Object
 (
@@ -47,5 +46,4 @@ IntlTimeZone Object
     [id] => GMT
     [rawOffset] => 0
     [currentOffset] => 0
-)
-==DONE==
+)

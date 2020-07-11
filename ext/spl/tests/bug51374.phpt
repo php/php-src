@@ -12,8 +12,6 @@ $file = $fileInfo->openFile('r');
 
 print var_dump($file->bam); // is null or UNKNOWN:0
 ?>
-===DONE===
 --EXPECT--
 array(0) {
 }
-===DONE===

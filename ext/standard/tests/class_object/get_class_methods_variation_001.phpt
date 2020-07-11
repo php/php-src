@@ -2,15 +2,8 @@
 Test get_class_methods() function : usage variations  - unexpected types
 --FILE--
 <?php
-/* Prototype  : proto array get_class_methods(mixed class)
- * Description: Returns an array of method names for class or class instance. 
- * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
- */
-
-
-function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
-	echo "Error: $err_no - $err_msg, $filename($linenum)\n";
+function test_error_handler($err_no, $err_msg, $filename, $linenum) {
+    echo "Error: $err_no - $err_msg\n";
 }
 set_error_handler('test_error_handler');
 
@@ -76,102 +69,104 @@ $values = array(
 // loop through each element of the array for class
 
 foreach($values as $value) {
-      echo "\nArg value $value \n";
-      var_dump( get_class_methods($value) );
+      echo "\nArg value " . (is_object($value) ? get_class($value) : $value) . " \n";
+      try {
+            var_dump( get_class_methods($value) );
+      } catch (TypeError $exception) {
+            echo $exception->getMessage() . "\n";
+      }
 };
-
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing get_class_methods() : usage variations ***
-Error: 8 - Undefined variable: undefined_var, %s(67)
-Error: 8 - Undefined variable: unset_var, %s(70)
+Error: 2 - Undefined variable $undefined_var
+Error: 2 - Undefined variable $unset_var
 
 Arg value 0 
-NULL
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, int given
 
 Arg value 1 
-NULL
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, int given
 
 Arg value 12345 
-NULL
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, int given
 
 Arg value -2345 
-NULL
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, int given
 
 Arg value 10.5 
-NULL
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, float given
 
 Arg value -10.5 
-NULL
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, float given
 
 Arg value 101234567000 
-NULL
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, float given
 
 Arg value 1.07654321E-9 
-NULL
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, float given
 
 Arg value 0.5 
-NULL
-Error: 8 - Array to string conversion, %sget_class_methods_variation_001.php(%d)
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, float given
+Error: 2 - Array to string conversion
 
 Arg value Array 
-NULL
-Error: 8 - Array to string conversion, %sget_class_methods_variation_001.php(%d)
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, array given
+Error: 2 - Array to string conversion
 
 Arg value Array 
-NULL
-Error: 8 - Array to string conversion, %sget_class_methods_variation_001.php(%d)
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, array given
+Error: 2 - Array to string conversion
 
 Arg value Array 
-NULL
-Error: 8 - Array to string conversion, %sget_class_methods_variation_001.php(%d)
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, array given
+Error: 2 - Array to string conversion
 
 Arg value Array 
-NULL
-Error: 8 - Array to string conversion, %sget_class_methods_variation_001.php(%d)
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, array given
+Error: 2 - Array to string conversion
 
 Arg value Array 
-NULL
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, array given
 
 Arg value  
-NULL
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, null given
 
 Arg value  
-NULL
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, null given
 
 Arg value 1 
-NULL
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, bool given
 
 Arg value  
-NULL
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, bool given
 
 Arg value 1 
-NULL
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, bool given
 
 Arg value  
-NULL
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, bool given
 
 Arg value  
-NULL
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, string given
 
 Arg value  
-NULL
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, string given
 
 Arg value string 
-NULL
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, string given
 
 Arg value string 
-NULL
-Error: 4096 - Object of class stdClass could not be converted to string, %s(76)
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, string given
 
-Arg value  
+Arg value stdClass 
 array(0) {
 }
 
 Arg value  
-NULL
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, null given
 
 Arg value  
-NULL
+get_class_methods(): Argument #1 ($class) must be a valid class name or object, null given
 Done

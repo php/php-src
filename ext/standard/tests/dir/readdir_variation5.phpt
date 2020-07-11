@@ -5,23 +5,10 @@ Test readdir() function : usage variations - different permissions
 if( substr(PHP_OS, 0, 3) == 'WIN') {
   die('skip Not for Windows');
 }
-// Skip if being run by root (files are always readable, writeable and executable)
-$filename = dirname(__FILE__)."/readdir_root_check.tmp";
-$fp = fopen($filename, 'w');
-fclose($fp);
-if(fileowner($filename) == 0) {
-        unlink ($filename);
-        die('skip...cannot be run as root\n');
-}
-unlink($filename);
+require __DIR__ . '/../skipif_root.inc';
 ?>
 --FILE--
 <?php
-/* Prototype  : string readdir([resource $dir_handle])
- * Description: Read directory entry from dir_handle 
- * Source code: ext/standard/dir.c
- */
-
 /*
  * Open a directory with different premissions then try to read it
  * to test behaviour of readdir()
@@ -30,7 +17,7 @@ unlink($filename);
 echo "*** Testing readdir() : usage variations ***\n";
 
 // create the temporary directory
-$dir_path = dirname(__FILE__) . "/readdir_variation5";
+$dir_path = __DIR__ . "/readdir_variation5";
 mkdir($dir_path);
 
 /* different values for directory permissions */
@@ -54,29 +41,28 @@ $permission_values = array(
 // Open directory with different permission values, read and close, expected: none of them to succeed.
 $iterator = 1;
 foreach($permission_values as $perm) {
-	echo "\n-- Iteration $iterator --\n";
-	
-	if (is_dir($dir_path)) {
-		chmod ($dir_path, 0777); // change dir permission to allow all operation
-		rmdir ($dir_path);
-	}
-	mkdir($dir_path);
+    echo "\n-- Iteration $iterator --\n";
 
-	// change the dir permisson to test dir on it
-	var_dump( chmod($dir_path, $perm) );
-	var_dump($dh = opendir($dir_path));
+    if (is_dir($dir_path)) {
+        chmod ($dir_path, 0777); // change dir permission to allow all operation
+        rmdir ($dir_path);
+    }
+    mkdir($dir_path);
 
-	echo "-- Calling readdir() --\n";
-	var_dump(readdir($dh));
+    // change the dir permission to test dir on it
+    var_dump( chmod($dir_path, $perm) );
+    var_dump($dh = opendir($dir_path));
 
-	closedir($dh);
-	$iterator++;
+    echo "-- Calling readdir() --\n";
+    var_dump(readdir($dh));
+
+    closedir($dh);
+    $iterator++;
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
-$dir_path = dirname(__FILE__) . "/readdir_variation5";
+$dir_path = __DIR__ . "/readdir_variation5";
 rmdir($dir_path);
 ?>
 --EXPECTF--
@@ -141,4 +127,3 @@ bool(true)
 resource(%d) of type (stream)
 -- Calling readdir() --
 string(%d) "%s"
-===DONE===

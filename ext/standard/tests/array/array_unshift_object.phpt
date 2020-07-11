@@ -2,13 +2,8 @@
 Test array_unshift() function : passing object for 'var' argument
 --FILE--
 <?php
-/* Prototype  : int array_unshift(array $array, mixed $var [, mixed ...])
- * Description: Pushes elements onto the beginning of the array
- * Source code: ext/standard/array.c
-*/
-
 /*
- * Testing the functionality of array_unshift() by passing 
+ * Testing the functionality of array_unshift() by passing
  * an object to the $var argument
 */
 

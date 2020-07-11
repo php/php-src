@@ -1,17 +1,11 @@
 --TEST--
-Test sort() function : basic functionality   
+Test sort() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : bool sort ( array &$array [, int $sort_flags] )
- * Description: This function sorts an array. 
-                Elements will be arranged from lowest to highest when this function has completed.
- * Source code: ext/standard/array.c
-*/
-
 /*
- * Testing sort() by providing arrays with default keys and assoc arrays 
+ * Testing sort() by providing arrays with default keys and assoc arrays
  * to check the basic functionality with following flag values.
- *  flag value as defualt
+ *  flag value as default
  *  SORT_REGULAR - compare items normally
  *  SORT_NUMERIC - compare items numerically
  *  SORT_STRING - compare items as strings
@@ -19,22 +13,22 @@ Test sort() function : basic functionality
 
 echo "*** Testing sort() : basic functionality ***\n";
 
-// associative array containing unsorted string values  
+// associative array containing unsorted string values
 $unsorted_strings = array(
-	"l" => "lemon", "o" => "orange",
-	"O" => "Orange", "O1" => "Orange1", "o2" => "orange2", "O3" => "Orange3", "o20" => "orange20",
-	"b" => "banana",
+    "l" => "lemon", "o" => "orange",
+    "O" => "Orange", "O1" => "Orange1", "o2" => "orange2", "O3" => "Orange3", "o20" => "orange20",
+    "b" => "banana",
 );
- 
+
 // array with default keys containing unsorted numeric values
 $unsorted_numerics =  array( 100, 33, 555, 22 );
 
-echo "\n-- Testing sort() by supplying string array, 'flag' value is defualt --\n";
+echo "\n-- Testing sort() by supplying string array, 'flag' value is default --\n";
 $temp_array = $unsorted_strings;
 var_dump( sort($temp_array) ); // expecting : bool(true)
 var_dump( $temp_array);
 
-echo "\n-- Testing sort() by supplying numeric array, 'flag' value is defualt --\n";
+echo "\n-- Testing sort() by supplying numeric array, 'flag' value is default --\n";
 $temp_array = $unsorted_numerics;
 var_dump( sort($temp_array) ); // expecting : bool(true)
 var_dump( $temp_array);
@@ -76,10 +70,10 @@ var_dump( $temp_array);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sort() : basic functionality ***
 
--- Testing sort() by supplying string array, 'flag' value is defualt --
+-- Testing sort() by supplying string array, 'flag' value is default --
 bool(true)
 array(8) {
   [0]=>
@@ -100,7 +94,7 @@ array(8) {
   string(8) "orange20"
 }
 
--- Testing sort() by supplying numeric array, 'flag' value is defualt --
+-- Testing sort() by supplying numeric array, 'flag' value is default --
 bool(true)
 array(4) {
   [0]=>

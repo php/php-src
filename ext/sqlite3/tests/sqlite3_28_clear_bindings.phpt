@@ -23,14 +23,14 @@ var_dump($stmt->bindParam(1, $foo, SQLITE3_TEXT));
 $foo = 'a';
 $results = $stmt->execute();
 while ($result = $results->fetchArray(SQLITE3_NUM)) {
-	var_dump($result);
+    var_dump($result);
 }
 $stmt->reset();
 $stmt->clear();
 var_dump($stmt->bindValue(1, 'b', SQLITE3_TEXT));
 $results = $stmt->execute();
 while ($result = $results->fetchArray(SQLITE3_NUM)) {
-	var_dump($result);
+    var_dump($result);
 }
 $results->finalize();
 

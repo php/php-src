@@ -17,8 +17,6 @@ ini_set('intl.default_locale', 'pt_PT');
 var_dump($lsb->getDisplayName());
 
 ?>
-==DONE==
 --EXPECTF--
 string(%d) "Western European%sTime"
-string(%d) "Hora%sda Europa Ocidental"
-==DONE==
+string(%d) "Hora%sda Europa Ocidental"

@@ -1,9 +1,8 @@
 --TEST--
-Test preg_grep() function : basic functionality 
+Test preg_grep() function : basic functionality
 --FILE--
 <?php
 /*
-* proto array preg_grep(string regex, array input [, int flags])
 * Function is implemented in ext/pcre/php_pcre.c
 */
 $array = array('HTTP://WWW.EXAMPLE.COM', '/index.html', '/info/stat/', 'http://test.uk.com/index/html', '/display/dept.php');

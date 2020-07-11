@@ -5,7 +5,7 @@ Bug #55478 (FILTER_VALIDATE_EMAIL fails with internationalized domain name addre
 --FILE--
 <?php
 $email_address = "test@xn--example--7za.de"; // "example-ä.de"
-var_dump(filter_var($email_address, FILTER_VALIDATE_EMAIL));   
+var_dump(filter_var($email_address, FILTER_VALIDATE_EMAIL));
 ?>
---EXPECT--	
+--EXPECT--
 string(24) "test@xn--example--7za.de"

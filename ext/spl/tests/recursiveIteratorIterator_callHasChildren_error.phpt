@@ -1,7 +1,7 @@
 --TEST--
 SPL: RecursiveIteratorIterator - Exception thrown in callHasChildren which should be handled in next()
 --FILE--
-<?php 
+<?php
 
 $arr = array(1,2);
 $arrOb = new ArrayObject($arr);
@@ -9,9 +9,9 @@ $arrOb = new ArrayObject($arr);
 $recArrIt = new RecursiveArrayIterator($arrOb->getIterator());
 
 class MyRecursiveIteratorIterator extends RecursiveIteratorIterator {
-    
+
     function callHasChildren() {
-    	throw new Exception;
+        throw new Exception;
     }
 }
 

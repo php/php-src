@@ -19,10 +19,10 @@ iterate($xml->unknown);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 SimpleXMLElement Object
 (
 )
 
-Warning: Invalid argument supplied for foreach() in %sbug38347.php on line 6
+Warning: foreach() argument must be of type array|object, null given in %sbug38347.php on line 6
 Done

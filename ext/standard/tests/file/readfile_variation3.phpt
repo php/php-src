@@ -2,15 +2,12 @@
 Test readfile() function: usage variation - include path
 --FILE--
 <?php
-/* Prototype: int readfile ( string $filename [, bool $use_include_path [, resource $context]] );
-   Description: Outputs a file
-*/
 /* test readfile() by providing an include path, second argument */
 
-// include file.inc 
+// include file.inc
 require("file.inc");
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $dirname = "$file_path/readfile_variation3";
 
 echo "*** Testing readfile(): checking second argument, include path ***\n";
@@ -40,8 +37,8 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-unlink(dirname(__FILE__)."/readfile_variation3/readfile_variation3.tmp");
-rmdir(dirname(__FILE__)."/readfile_variation3");
+unlink(__DIR__."/readfile_variation3/readfile_variation3.tmp");
+rmdir(__DIR__."/readfile_variation3");
 ?>
 --EXPECT--
 *** Testing readfile(): checking second argument, include path ***

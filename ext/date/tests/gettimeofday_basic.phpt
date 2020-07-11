@@ -1,13 +1,7 @@
 --TEST--
-Test gettimeofday() function : basic functionality 
+Test gettimeofday() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : array gettimeofday([bool get_as_float])
- * Description: Returns the current time as array 
- * Source code: ext/standard/microtime.c
- * Alias to functions: 
- */
-
 echo "*** Testing gettimeofday() : basic functionality ***\n";
 
 date_default_timezone_set("Asia/Calcutta");
@@ -28,7 +22,6 @@ $get_as_float = false;
 var_dump( gettimeofday($get_as_float) );
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing gettimeofday() : basic functionality ***
 float(%f)
@@ -52,4 +45,3 @@ array(4) {
   ["dsttime"]=>
   int(0)
 }
-===DONE===

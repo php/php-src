@@ -11,7 +11,7 @@ $cert = file_get_contents(__DIR__.'/bug64802.pem');
 $r = openssl_x509_parse($cert,$use_short_names=false);
 var_dump($r['subject']['commonName']);
 ?>
---EXPECTF--
+--EXPECT--
 array(6) {
   [0]=>
   string(9) "www.rd.io"

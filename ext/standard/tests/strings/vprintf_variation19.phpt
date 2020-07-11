@@ -6,11 +6,6 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 ?>
 --FILE--
 <?php
-/* Prototype  : string vprintf(string $format , array $args)
- * Description: Output a formatted string 
- * Source code: ext/standard/formatted_print.c
-*/
-
 echo "*** Testing vprintf() : with  white spaces in format strings ***\n";
 
 // initializing the format array
@@ -54,7 +49,6 @@ foreach($formats as $format) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing vprintf() : with  white spaces in format strings ***
 
@@ -101,4 +95,3 @@ int(16)
 -- Iteration 11 --
 2.000000E+1  2.000000E-1  -2.000000E+1
 int(38)
-===DONE===

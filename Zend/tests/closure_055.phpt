@@ -1,6 +1,5 @@
 --TEST--
 Closure 055: self::class in static closure in static method.
-
 --FILE--
 <?php
 
@@ -16,6 +15,5 @@ class A {
 class B extends A {}
 
 var_dump(B::foo());
-
 --EXPECT--
 string(1) "A"

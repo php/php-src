@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +13,6 @@
    | Author: Jim Winstead <jimw@php.net>                                  |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #ifndef FOPEN_WRAPPERS_H
 #define FOPEN_WRAPPERS_H
@@ -39,7 +35,7 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 
 PHPAPI int php_check_safe_mode_include_dir(const char *path);
 
-PHPAPI zend_string *php_resolve_path(const char *filename, int filename_len, const char *path);
+PHPAPI zend_string *php_resolve_path(const char *filename, size_t filename_len, const char *path);
 
 PHPAPI FILE *php_fopen_with_path(const char *filename, const char *mode, const char *path, zend_string **opened_path);
 
@@ -49,9 +45,3 @@ PHPAPI ZEND_INI_MH(OnUpdateBaseDir);
 END_EXTERN_C()
 
 #endif
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */

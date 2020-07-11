@@ -2,14 +2,14 @@
 Set and check Oracle 11gR2 "edition" attribute
 --SKIPIF--
 <?php
-if (!extension_loaded('oci8')) die("skip no oci8 extension"); 
-require(dirname(__FILE__)."/connect.inc");
+if (!extension_loaded('oci8')) die("skip no oci8 extension");
+require(__DIR__."/connect.inc");
 if (strcasecmp($user, "system") && strcasecmp($user, "sys"))
     die("skip needs to be run as a DBA user");
 if ($test_drcp)
     die("skip as Output might vary with DRCP");
 preg_match('/.*Release ([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)*/', oci_server_version($c), $matches);
-if (!(isset($matches[0]) && 
+if (!(isset($matches[0]) &&
       (($matches[1] == 11 && $matches[2] >= 2) ||
        ($matches[1] >= 12)
        ))) {
@@ -33,9 +33,9 @@ if (!(isset($matches[0]) &&
  */
 
 $testuser     = 'testuser_ed_2';  // Used in conn_attr.inc
-$testpassword = 'testuser'; 
+$testpassword = 'testuser';
 
-require(dirname(__FILE__)."/conn_attr.inc");
+require(__DIR__."/conn_attr.inc");
 
 echo"**Test 1.1 - Default value for  the attribute **************\n";
 get_edit_attr($c);
@@ -63,7 +63,7 @@ get_edit_attr($pc1);
 oci_close($pc1);
 
 
-echo"\n\n**Test 1.3 change the value and verify with existing conenctions.*********\n";
+echo"\n\n**Test 1.3 change the value and verify with existing connections.*********\n";
 set_edit_attr('MYEDITION1');
 get_edit_attr($conn2);
 get_edit_attr($conn3); // Old value
@@ -87,12 +87,12 @@ oci_close($c5);
 echo "\n\n**Test 1.4 - with different type of values *********\n";
 $values_array = array(123,NULL,'NO EDITION','edition name which has more than thirty chars!!!edition name which has more than thirty chars!!!');
 foreach ($values_array as $val ) {
-	set_edit_attr($val);
-	$c1 = get_conn(1); //oci_connect()
-	if ($c1) {
-		get_edit_attr($c1);
-		oci_close($c1);
-	}	
+    set_edit_attr($val);
+    $c1 = get_conn(1); //oci_connect()
+    if ($c1) {
+        get_edit_attr($c1);
+        oci_close($c1);
+    }
 }
 
 echo "\n\n**Test 1.5 - Negative case with an invalid string value. *********\n";
@@ -113,7 +113,7 @@ echo "\n\n**Test 1.7 - Test with ALTER SESSION statement to change the edition *
 
 set_edit_attr('MYEDITION');
 $c1 = get_conn(3);
-echo "get the value set to MYEDITION with oci_set_edition \n";
+echo "get the value set to MYEDITION with oci_set_edition\n";
 get_edit_attr($c1);
 
 $alter_stmt = "alter session set edition = MYEDITION1";
@@ -123,7 +123,7 @@ oci_commit($c1);
 echo "Get the value set to MYEDITION1 with alter session\n";
 get_edit_attr($c1);
 
-echo " Get the value with a new connection \n";
+echo " Get the value with a new connection\n";
 $c2 = get_conn(1);
 get_edit_attr($c2);
 
@@ -131,7 +131,7 @@ echo " Set the value back using oci-set_edition\n";
 set_edit_attr('MYEDITION');
 get_edit_attr($c2);
 
-echo " Get the value with a new conenction \n";
+echo " Get the value with a new connection\n";
 $c3 = get_conn(1);
 get_edit_attr($c3);
 
@@ -149,7 +149,7 @@ echo "Done\n";
 
 
 function set_scope() {
-	$r = set_edit_attr('MYEDITION1');
+    $r = set_edit_attr('MYEDITION1');
 }
 
 function get_scope() {
@@ -158,8 +158,8 @@ function get_scope() {
         $m = oci_error();
         die("Error:" . $m['message']);
     }
-	get_edit_attr($sc1);
-	oci_close($sc1);
+    get_edit_attr($sc1);
+    oci_close($sc1);
 }
 ?>
 --EXPECTF--
@@ -178,7 +178,7 @@ The value of current EDITION is MYEDITION
 The value of current EDITION is MYEDITION
 
 
-**Test 1.3 change the value and verify with existing conenctions.*********
+**Test 1.3 change the value and verify with existing connections.*********
  The value of edition has been successfully set
 The value of current EDITION is MYEDITION
 The value of current EDITION is MYEDITION
@@ -225,17 +225,17 @@ The value of current EDITION is MYEDITION1
 **Test 1.7 - Test with ALTER SESSION statement to change the edition *******
  The value of edition has been successfully set
 Testing with oci_new_connect()
-get the value set to MYEDITION with oci_set_edition 
+get the value set to MYEDITION with oci_set_edition
 The value of current EDITION is MYEDITION
 Get the value set to MYEDITION1 with alter session
 The value of current EDITION is MYEDITION1
- Get the value with a new connection 
+ Get the value with a new connection
 Testing with oci_connect()
 The value of current EDITION is MYEDITION
  Set the value back using oci-set_edition
  The value of edition has been successfully set
 The value of current EDITION is MYEDITION
- Get the value with a new conenction 
+ Get the value with a new connection
 Testing with oci_connect()
 The value of current EDITION is MYEDITION
 
@@ -244,4 +244,3 @@ The value of current EDITION is MYEDITION
  The value of edition has been successfully set
 The value of current EDITION is MYEDITION1
 Done
-

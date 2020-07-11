@@ -1,12 +1,9 @@
 --TEST--
-mb_substitute_character()  
+mb_substitute_character()
 --SKIPIF--
 <?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
 --FILE--
 <?php
-//$debug = true;
-ini_set('include_path', dirname(__FILE__));
-include_once('common.inc');
 
 // Note: It does not return TRUE/FALSE for setting char
 
@@ -26,7 +23,11 @@ var_dump(mb_substitute_character('entity'));
 var_dump(mb_substitute_character());
 var_dump(bin2hex(mb_convert_encoding("\xe2\x99\xa0\xe3\x81\x82", "CP932", "UTF-8")));
 
-var_dump(mb_substitute_character('BAD_NAME'));
+try {
+    var_dump(mb_substitute_character('BAD_NAME'));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 ?>
 --EXPECT--
 bool(true)
@@ -41,5 +42,4 @@ string(4) "82a0"
 bool(true)
 string(6) "entity"
 string(20) "262378323636303b82a0"
-ERR: Warning
-bool(false)
+mb_substitute_character(): Argument #1 ($substitute_character) must be "none", "long", "entity" or a valid codepoint

@@ -6,33 +6,30 @@ Class constant declarations
   $def = 456;
   define('DEFINED_TO_VAR', $def);
   define('DEFINED_TO_UNDEF_VAR', $undef);
-  
+
   class C
   {
-      const c0 = UNDEFINED;
-      
       const c1 = 1, c2 = 1.5;
       const c3 =  + 1, c4 =  + 1.5;
       const c5 = -1, c6 = -1.5;
-      
+
       const c7 = __LINE__;
       const c8 = __FILE__;
       const c9 = __CLASS__;
       const c10 = __METHOD__;
       const c11 = __FUNCTION__;
-      
+
       const c12 = DEFINED;
       const c13 = DEFINED_TO_VAR;
       const c14 = DEFINED_TO_UNDEF_VAR;
-      
+
       const c15 = "hello1";
       const c16 = 'hello2';
       const c17 = C::c16;
       const c18 = self::c17;
   }
-  
+
   echo "\nAttempt to access various kinds of class constants:\n";
-  var_dump(C::c0);
   var_dump(C::c1);
   var_dump(C::c2);
   var_dump(C::c3);
@@ -51,30 +48,26 @@ Class constant declarations
   var_dump(C::c16);
   var_dump(C::c17);
   var_dump(C::c18);
-  
+
   echo "\nExpecting fatal error:\n";
   var_dump(C::c19);
-  
+
   echo "\nYou should not see this.";
 ?>
 --EXPECTF--
-
-Notice: Undefined variable: undef in %s on line 5
+Warning: Undefined variable $undef in %s on line %d
 
 Attempt to access various kinds of class constants:
-
-Notice: Use of undefined constant UNDEFINED - assumed 'UNDEFINED' in %s on line %d
-string(9) "UNDEFINED"
 int(1)
 float(1.5)
 int(1)
 float(1.5)
 int(-1)
 float(-1.5)
-int(15)
+int(13)
 string(%d) "%s"
 string(1) "C"
-string(1) "C"
+string(0) ""
 string(0) ""
 int(1234)
 int(456)
@@ -86,7 +79,7 @@ string(6) "hello2"
 
 Expecting fatal error:
 
-Fatal error: Uncaught Error: Undefined class constant 'c19' in %s:53
+Fatal error: Uncaught Error: Undefined constant C::c19 in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %s on line 53
+  thrown in %s on line %d

@@ -5,10 +5,10 @@ Bug #42838 (Wrong results in array_diff_uassoc())
 
 function key_compare_func($a, $b)
 {
-	if ($a === $b) {
-		return 0;
-	}
-	return ($a > $b)? 1:-1;
+    if ($a === $b) {
+        return 0;
+    }
+    return ($a > $b)? 1:-1;
 }
 
 $array1 = array("a" => "green", "b" => "Brown", 'c' => 'blue', 0 => 'red');

@@ -5,11 +5,11 @@ errmsg: __clone() cannot be static
 
 class test {
 
-	static function __clone() {
-	}
+    static function __clone() {
+    }
 }
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Clone method test::__clone() cannot be static in %s on line %d

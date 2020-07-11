@@ -10,7 +10,7 @@ Redeclare inherited protected static property as private.
           echo self::$p . "\n";
       }
   }
-  
+
   class B extends A
   {
       private $p = "B::p";
@@ -19,15 +19,13 @@ Redeclare inherited protected static property as private.
           echo $this->p . "\n";
       }
   }
-  
-  
+
+
   A::showA();
-  
+
   $b = new B;
   $b->showA();
   $b->showB();
 ?>
 --EXPECTF--
-
 Fatal error: Cannot redeclare static A::$p as non static B::$p in %s on line 18
-

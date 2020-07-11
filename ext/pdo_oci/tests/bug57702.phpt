@@ -3,7 +3,7 @@ PDO OCI Bug #57702 (Multi-row BLOB fetches)
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_oci')) die('skip not loaded');
-require(dirname(__FILE__).'/../../pdo/tests/pdo_test.inc');
+require(__DIR__.'/../../pdo/tests/pdo_test.inc');
 PDOTest::skip();
 ?>
 --FILE--
@@ -25,20 +25,20 @@ $stmt->execute();
 
 function do_insert($db, $id, $data1, $data2)
 {
-	$db->beginTransaction(); 
-	$stmt = $db->prepare("insert into bug57702 (id, data1, data2) values (:id, empty_blob(), empty_blob()) returning data1, data2 into :blob1, :blob2");
-	$stmt->bindParam(':id', $id);
-	$stmt->bindParam(':blob1', $blob1, PDO::PARAM_LOB);
-	$stmt->bindParam(':blob2', $blob2, PDO::PARAM_LOB);
-	$blob1 = null;
-	$blob2 = null;
-	$stmt->execute();
+    $db->beginTransaction();
+    $stmt = $db->prepare("insert into bug57702 (id, data1, data2) values (:id, empty_blob(), empty_blob()) returning data1, data2 into :blob1, :blob2");
+    $stmt->bindParam(':id', $id);
+    $stmt->bindParam(':blob1', $blob1, PDO::PARAM_LOB);
+    $stmt->bindParam(':blob2', $blob2, PDO::PARAM_LOB);
+    $blob1 = null;
+    $blob2 = null;
+    $stmt->execute();
 
-	fwrite($blob1, $data1);  
-	fclose($blob1);
-	fwrite($blob2, $data2);  
-	fclose($blob2);	
-	$db->commit();
+    fwrite($blob1, $data1);
+    fclose($blob1);
+    fwrite($blob2, $data2);
+    fclose($blob2);
+    $db->commit();
 }
 
 do_insert($db, 1, "row 1 col 1", "row 1 col 2");
@@ -63,8 +63,8 @@ var_dump($row['data2']);
 echo "\nSecond Query\n";
 
 foreach($db->query("select data1 as d1, data2 as d2 from bug57702 order by id") as $row) {
-	var_dump($row['d1']);
-	var_dump($row['d2']);
+    var_dump($row['d1']);
+    var_dump($row['d2']);
 }
 
 ////////////////////
@@ -84,13 +84,13 @@ while ($stmt->fetch(PDO::FETCH_BOUND)) {
 
 ////////////////////
 
-echo "\nFourth Query\n"; 
+echo "\nFourth Query\n";
 
 $a = array();
 $i = 0;
 foreach($db->query("select data1 as d4_1, data2 as d4_2 from bug57702 order by id") as $row) {
-	$a[$i][0] = $row['d4_1'];
-	$a[$i][1] = $row['d4_2'];
+    $a[$i][0] = $row['d4_1'];
+    $a[$i][1] = $row['d4_2'];
     $i++;
 }
 
@@ -101,7 +101,7 @@ for ($i = 0; $i < count($a); $i++) {
 
 ////////////////////
 
-echo "\nFifth Query\n"; 
+echo "\nFifth Query\n";
 
 $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);  // Let's use streams
 
@@ -112,8 +112,8 @@ $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);  // Let's use streams
 $a = array();
 $i = 0;
 foreach($db->query("select data1 as d4_1, data2 as d4_2 from bug57702 order by id") as $row) {
-	$a[$i][0] = $row['d4_1'];
-	$a[$i][1] = $row['d4_2'];
+    $a[$i][0] = $row['d4_1'];
+    $a[$i][1] = $row['d4_2'];
     $i++;
 }
 
@@ -124,18 +124,18 @@ for ($i = 0; $i < count($a); $i++) {
 
 ////////////////////
 
-echo "\nSixth Query\n"; 
+echo "\nSixth Query\n";
 
 $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);  // Let's use streams
 
 $a = array();
 $i = 0;
 foreach($db->query("select data1 as d4_1, data2 as d4_2 from bug57702 order by id") as $row) {
-	$a[$i][0] = $row['d4_1'];
-	$a[$i][1] = $row['d4_2'];
-	var_dump(stream_get_contents($a[$i][0]));
-	var_dump(stream_get_contents($a[$i][1]));
-	$i++;
+    $a[$i][0] = $row['d4_1'];
+    $a[$i][1] = $row['d4_2'];
+    var_dump(stream_get_contents($a[$i][0]));
+    var_dump(stream_get_contents($a[$i][1]));
+    $i++;
 }
 
 // Cleanup
@@ -146,7 +146,7 @@ $stmt->execute();
 print "done\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 First Query
 string(11) "row 1 col 1"
 string(11) "row 1 col 2"

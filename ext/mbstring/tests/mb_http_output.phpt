@@ -1,12 +1,11 @@
 --TEST--
-mb_http_output()  
+mb_http_output()
 --SKIPIF--
 <?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
 --FILE--
 <?php
 //TODO: Add more encoding. Wrong parameter type test.
-//$debug = true;
-ini_set('include_path', dirname(__FILE__));
+ini_set('include_path', __DIR__);
 include_once('common.inc');
 
 // Set HTTP output encoding to ASCII
@@ -42,24 +41,17 @@ print "$enc\n";
 // Invalid parameters
 print "== INVALID PARAMETER ==\n";
 
-// Note: Bad string raise Warning. Bad Type raise Notice (Type Conversion) and Warning....
-$r = mb_http_output('BAD_NAME');
-($r === FALSE) ? print "OK_BAD_SET\n" : print "NG_BAD_SET\n";
-$enc = mb_http_output();
-print "$enc\n";
-
-$r = mb_http_output($t_ary);
-($r === NULL) ? print "OK_BAD_ARY_SET\n" : print "NG_BAD_ARY_SET\n";
-$enc = mb_http_output();
-print "$enc\n";
-
-$r = mb_http_output($t_obj);
-($r === NULL) ? print "OK_BAD_OBJ_SET\n" : print "NG_BAD_OBJ_SET\n";
+// Note: Bad string raise ValueError. Bad Type raise Notice (Type Conversion) and ValueError
+try {
+    $r = mb_http_output('BAD_NAME');
+    print 'NG_BAD_SET' . \PHP_EOL;
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 $enc = mb_http_output();
 print "$enc\n";
 
 ?>
-
 --EXPECT--
 OK_ASCII_SET
 ASCII
@@ -72,13 +64,5 @@ UTF-8
 OK_EUC-JP_SET
 EUC-JP
 == INVALID PARAMETER ==
-ERR: Warning
-OK_BAD_SET
+mb_http_output(): Argument #1 ($encoding) must be a valid encoding, "BAD_NAME" given
 EUC-JP
-ERR: Warning
-OK_BAD_ARY_SET
-EUC-JP
-ERR: Warning
-OK_BAD_OBJ_SET
-EUC-JP
-

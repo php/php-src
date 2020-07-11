@@ -3,19 +3,19 @@ Bug #44008 (Incorrect usage of OCI-Lob->close crashes PHP)
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
-?> 
+require(__DIR__.'/skipif.inc');
+?>
 --FILE--
 <?php
 
-require dirname(__FILE__).'/connect.inc';
+require __DIR__.'/connect.inc';
 
 // Initialization
 
 $stmtarray = array(
-		"create or replace procedure bug44008_proc (p in out clob)
-		as begin p := 'A';
-		end;"
+        "create or replace procedure bug44008_proc (p in out clob)
+        as begin p := 'A';
+        end;"
 );
 
 oci8_test_sql_execute($c, $stmtarray);

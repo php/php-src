@@ -3,18 +3,18 @@ Test oci_commit failure
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
-?> 
+require(__DIR__.'/skipif.inc');
+?>
 --FILE--
 <?php
 
-require(dirname(__FILE__).'/connect.inc');
+require(__DIR__.'/connect.inc');
 
 // Initialization
 
 $stmtarray = array(
-	"drop table commit_002_tab",
-	"create table commit_002_tab
+    "drop table commit_002_tab",
+    "create table commit_002_tab
      ( x int constraint commit_002_tab_check_x check ( x > 0 ) deferrable initially immediate,
        y int constraint commit_002_tab_check_y check ( y > 0 ) deferrable initially deferred)"
 );
@@ -54,14 +54,12 @@ if (!$r) {
 // Clean up
 
 $stmtarray = array(
-	"drop table commit_002_tab"
+    "drop table commit_002_tab"
 );
 
 oci8_test_sql_execute($c, $stmtarray);
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 First Insert
 Could not execute: ORA-02290: %s (%s.COMMIT_002_TAB_CHECK_X) %s
@@ -71,4 +69,3 @@ Warning: oci_commit(): ORA-02091: %s
 ORA-02290: %s (%s.COMMIT_002_TAB_CHECK_Y) %s in %scommit_002.php on line %d
 Could not commit: ORA-02091: %s
 ORA-02290: %s (%s.COMMIT_002_TAB_CHECK_Y) %s
-===DONE===

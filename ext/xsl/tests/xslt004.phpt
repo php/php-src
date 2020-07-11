@@ -1,7 +1,7 @@
 --TEST--
 Test 4: Checking UTF8 Output
 --SKIPIF--
-<?php require_once dirname(__FILE__) .'/skipif.inc'; ?>
+<?php require_once __DIR__ .'/skipif.inc'; ?>
 --FILE--
 <?php
 echo "Test 4: Checking UTF8 Output";
@@ -17,8 +17,6 @@ $proc->importStylesheet($xsl);
 print "\n";
 print $proc->transformToXml($dom);
 print "\n";
-
-
 --EXPECT--
 Test 4: Checking UTF8 Output
 <?xml version="1.0" encoding="utf-8"?>

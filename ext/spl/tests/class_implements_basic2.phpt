@@ -1,13 +1,7 @@
 --TEST--
-SPL: Test class_implements() function : basic 
+SPL: Test class_implements() function : basic
 --FILE--
 <?php
-/* Prototype  : array class_implements(mixed what [, bool autoload ])
- * Description: Return all classes and interfaces implemented by SPL 
- * Source code: ext/spl/php_spl.c
- * Alias to functions: 
- */
-
 echo "*** Testing class_implements() : basic ***\n";
 
 
@@ -36,7 +30,6 @@ function s_var_dump($arr) {
    var_dump($arr);
 }
 ?>
-===DONE===
 --EXPECT--
 *** Testing class_implements() : basic ***
 array(2) {
@@ -71,4 +64,3 @@ array(1) {
   ["foo"]=>
   string(3) "foo"
 }
-===DONE===

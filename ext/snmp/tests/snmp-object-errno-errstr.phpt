@@ -1,14 +1,14 @@
---TEST--                                 
+--TEST--
 OO API: getErrno & getError methods
 --CREDITS--
 Boris Lytochkin
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__).'/skipif.inc');
+require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
-require_once(dirname(__FILE__).'/snmp_include.inc');
+require_once(__DIR__.'/snmp_include.inc');
 
 //EXPECTF format is quickprint OFF
 snmp_set_enum_print(false);
@@ -100,21 +100,21 @@ var_dump($session->close());
 ?>
 --EXPECTF--
 SNMP::ERRNO_NOERROR
-%string|unicode%(%d) "%s"
+string(%d) "%s"
 bool(true)
-%string|unicode%(0) ""
+string(0) ""
 SNMP::ERRNO_TIMEOUT
 bool(false)
 bool(true)
-%string|unicode%(%d) "No response from %s"
+string(%d) "No response from %s"
 SNMP::ERRNO_ERROR_IN_REPLY
 bool(false)
 bool(true)
-%string|unicode%(%d) "Error in packet %s"
+string(%d) "Error in packet %s"
 SNMP::ERRNO_GENERIC
 bool(false)
 bool(true)
-%string|unicode%(%d) "Fatal error: Unknown user name"
+string(%d) "Fatal error: Unknown user name"
 bool(false)
 SNMP::ERRNO_OID_PARSING_ERROR
 GET: Single wrong OID

@@ -4,20 +4,20 @@ Bug #33171 (foreach enumerates private fields declared in base classes)
 <?php
 class A
 {
-	private $c = "A's c";
+    private $c = "A's c";
 }
 
 class B extends A
 {
-	private $c = "B's c";
-		
-	public function go()
-	{
-		foreach ($this as $key => $val)
-		{
-			echo "$key => $val\n";
-		}
-	}
+    private $c = "B's c";
+
+    public function go()
+    {
+        foreach ($this as $key => $val)
+        {
+            echo "$key => $val\n";
+        }
+    }
 };
 
 $x = new B;

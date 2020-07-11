@@ -20,7 +20,6 @@ try {
     unserialize( $s2 );
 } catch ( Exception $e ) {}
 var_dump( $foo );
-
 --EXPECTF--
 Fatal error: Uncaught Error: Invalid serialization data for DateTime object in %sbug62852_var3.php:%d
 Stack trace:

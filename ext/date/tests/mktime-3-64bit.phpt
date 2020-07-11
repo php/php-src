@@ -1,7 +1,7 @@
 --TEST--
 mktime() [3] (64-bit)
 --SKIPIF--
-<?php echo PHP_INT_SIZE != 8 ? "skip 64-bit only" : "OK" ?>
+<?php if (PHP_INT_SIZE != 8) die("skip 64-bit only"); ?>
 --INI--
 error_reporting=2047
 --FILE--
@@ -10,18 +10,18 @@ $tzs = array("America/Toronto", "Europe/Oslo");
 $years = array(0, 69, 70, 71, 99, 100, 101, 105, 110, 1900, 1901, 1902, 1999, 2000, 2001);
 
 foreach ($tzs as $tz) {
-	echo $tz, "\n";
-	date_default_timezone_set($tz);
-	foreach ($years as $year) {
-		printf("Y: %4d - ", $year);
-		$ret = mktime(1, 1, 1, 1, 1, $year);
-		if ($ret == FALSE) {
-			echo "out of range\n";
-		} else {
-			echo date("F ".DATE_ISO8601, $ret), "\n";
-		}
-	}
-	echo "\n";
+    echo $tz, "\n";
+    date_default_timezone_set($tz);
+    foreach ($years as $year) {
+        printf("Y: %4d - ", $year);
+        $ret = mktime(1, 1, 1, 1, 1, $year);
+        if ($ret == FALSE) {
+            echo "out of range\n";
+        } else {
+            echo date("F ".DATE_ISO8601, $ret), "\n";
+        }
+    }
+    echo "\n";
 }
 ?>
 --EXPECTF--

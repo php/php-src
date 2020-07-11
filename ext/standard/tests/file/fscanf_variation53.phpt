@@ -1,18 +1,13 @@
 --TEST--
-Test fscanf() function: usage variations - file pointer pointing to EOF 
+Test fscanf() function: usage variations - file pointer pointing to EOF
 --FILE--
 <?php
 
-/*
-  Prototype: mixed fscanf ( resource $handle, string $format [, mixed &$...] );
-  Description: Parses input from a file according to a format
-*/
-
 /* Test fscanf() to read a file when file pointer is pointing to EOF */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
-echo "*** Test fscanf(): to read a file when file pointer is pointing to EOF ***\n"; 
+echo "*** Test fscanf(): to read a file when file pointer is pointing to EOF ***\n";
 
 // various formats
 $formats = array( "%d", "%f", "%e", "%u", " %s", "%x", "%o");
@@ -28,16 +23,16 @@ $modes = array("r", "rb", "rt", "r+", "r+b", "r+t",
 $counter = 1;
 // reading the values from file using different integer formats
 foreach($modes as $mode) {
-  
+
   // create an empty file
   $filename = "$file_path/fscanf_variation53.tmp";
   $file_handle = fopen($filename, "w");
   if($file_handle == false)
     exit("Error:failed to open file $filename");
- 
+
   //writing data to the file
   @fwrite($file_handle, "Sample text\n");
-  
+
   // writing a blank line
   @fwrite($file_handle, "\n");
 
@@ -50,14 +45,14 @@ foreach($modes as $mode) {
     exit("Error:failed to open file $filename");
   }
   echo "\n-- iteration $counter --\n";
- 
+
   // current location
   var_dump( ftell($file_handle) );
- 
+
   // set the file pointer to eof
   var_dump( fseek($file_handle, 0, SEEK_END) );
-  
-  // current location  
+
+  // current location
   var_dump( ftell($file_handle) );
 
   foreach($formats as $format) {
@@ -72,7 +67,7 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $filename = "$file_path/fscanf_variation53.tmp";
 if(file_exists($filename)) {
   unlink($filename);
@@ -226,4 +221,3 @@ bool(false)
 bool(false)
 
 *** Done ***
-

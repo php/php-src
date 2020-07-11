@@ -1,15 +1,15 @@
 --TEST--
-oci_lob_copy() - 2 
+oci_lob_copy() - 2
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
-?> 
+require(__DIR__.'/skipif.inc');
+?>
 --FILE--
 <?php
-	
-require dirname(__FILE__).'/connect.inc';
-require dirname(__FILE__).'/create_table.inc';
+
+require __DIR__.'/connect.inc';
+require __DIR__.'/create_table.inc';
 
 $ora_sql = "INSERT INTO
                        ".$schema.$table_name." (id, blob)
@@ -61,7 +61,6 @@ var_dump(oci_lob_copy($row2[0], $row1[0], 0));
 var_dump(oci_lob_copy($row2[0], $row1[0], -1));
 var_dump(oci_lob_copy($row2[0], $row1[0], 100000));
 
-var_dump(oci_lob_size());
 var_dump(oci_lob_size($row2[0]));
 unset($dummy->descriptor);
 var_dump(oci_lob_size($dummy));
@@ -77,7 +76,7 @@ oci_execute($s, OCI_DEFAULT);
 
 var_dump($row2 = oci_fetch_array($s, OCI_RETURN_LOBS));
 
-require dirname(__FILE__).'/drop_table.inc';
+require __DIR__.'/drop_table.inc';
 
 echo "Done\n";
 
@@ -95,9 +94,6 @@ bool(false)
 Warning: oci_lob_copy(): Length parameter must be greater than 0 in %s on line %d
 bool(false)
 bool(true)
-
-Warning: oci_lob_size() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
 int(0)
 
 Warning: oci_lob_size(): Unable to find descriptor property in %s on line %d

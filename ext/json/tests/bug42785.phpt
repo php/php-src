@@ -1,8 +1,9 @@
 --TEST--
 Bug #42785 (Incorrect formatting of double values with non-english locales)
+--INI--
+serialize_precision=-1
 --SKIPIF--
 <?php
-if (!extension_loaded('json')) die('skip');
 if (!setlocale(LC_CTYPE, "de_DE", "de", "german", "ge", "de_DE.ISO8859-1", "ISO8859-1")) {
 	die("skip locale needed for this test is not supported on this platform");
 }

@@ -18,9 +18,7 @@ var_dump($lsb->getDisplayName(false));
 var_dump($lsb->getDisplayName(true));
 
 ?>
-==DONE==
 --EXPECTF--
 string(%d) "Western European%sTime"
 string(%d) "Western European%sTime"
-string(28) "Western European Summer Time"
-==DONE==
+string(28) "Western European Summer Time"

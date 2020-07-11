@@ -1,23 +1,18 @@
 --TEST--
-Test fgetc() function : usage variations - different read modes 
+Test fgetc() function : usage variations - different read modes
 --FILE--
 <?php
-/*
- Prototype: string fgetc ( resource $handle );
- Description: Gets character from file pointer
-*/
-
 /* read from fie using fgetc, file opened using different
    read read modes */
 
 echo "*** Testing fgetc() : usage variations ***\n";
 echo "-- Testing fgetc() with files opened with different read modes --\n";
 
-$file_modes = array( "a+", "a+b", "a+t", 
-                     "x+", "x+b", "x+t", 
+$file_modes = array( "a+", "a+b", "a+t",
+                     "x+", "x+b", "x+t",
                      "w+", "w+b", "w+t" );
 
-$filename = dirname(__FILE__)."/fgetc_variation4.tmp";
+$filename = __DIR__."/fgetc_variation4.tmp";
 foreach ($file_modes as $file_mode ) {
   echo "-- File opened in mode : $file_mode --\n";
 
@@ -30,8 +25,8 @@ foreach ($file_modes as $file_mode ) {
   fwrite($file_handle, $data);
 
   // rewind the file pointer to beginning of the file
-  var_dump( rewind($file_handle) ); 
-  var_dump( ftell($file_handle) ); 
+  var_dump( rewind($file_handle) );
+  var_dump( ftell($file_handle) );
   var_dump( feof($file_handle) );
 
   // read from file, at least 7 chars
@@ -45,12 +40,12 @@ foreach ($file_modes as $file_mode ) {
   fclose($file_handle);
 
   // delete the file
-  unlink($filename); 
+  unlink($filename);
 }
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
  *** Testing fgetc() : usage variations ***
 -- Testing fgetc() with files opened with different read modes --
 -- File opened in mode : a+ --

@@ -7,18 +7,12 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip.. Not for Windows');
 }
-?> 
+?>
 --FILE--
 <?php
-/* Prototype  : bool unlink(string filename[, context context])
- * Description: Delete a file 
- * Source code: ext/standard/file.c
- * Alias to functions: 
- */
-
 echo "*** Testing unlink() : variation ***\n";
 
-$workDir = "unlinkVar8.tmp";
+$workDir = "unlinkVar10.tmp";
 $tmpDir = "subDir.tmp";
 $dirToLinkTo = $workDir.'/'."linkme.tmp";
 
@@ -31,18 +25,18 @@ $dirs = array(
              $workDir.'/'.$tmpDir,
              './'.$workDir.'/'.$tmpDir,
              $workDir.'/../'.$workDir.'/'.$tmpDir,
-                         
+
              //absolute
              $cwd.'/'.$workDir.'/'.$tmpDir,
              $cwd.'/./'.$workDir.'/'.$tmpDir,
              $cwd.'/'.$workDir.'/../'.$workDir.'/'.$tmpDir,
-           
+
              // multiple separators
              $workDir.'//'.$tmpDir,
              $cwd.'//'.$workDir.'//'.$tmpDir,
-             
+
              );
-             
+
 
 foreach($dirs as $dirToUnlink) {
    test_link($workDir.'/'.$tmpDir, $dirToLinkTo, $dirToUnlink, true);  //soft link
@@ -56,18 +50,18 @@ rmdir($workDir);
 
 function test_link($linkedDir, $toLinkTo, $tounlink, $softlink) {
    if ($softlink == true) {
-   	  symlink($toLinkTo, $linkedDir);
-   	  $msg = "soft link";
+      symlink($toLinkTo, $linkedDir);
+      $msg = "soft link";
    }
    else {
-   	  link($toLinkTo, $linkedDir);
-   	  $msg = "hard link";   	  
-   }   
-   echo "-- unlinking $msg $tounlink --\n";           
+      link($toLinkTo, $linkedDir);
+      $msg = "hard link";
+   }
+   echo "-- unlinking $msg $tounlink --\n";
    $res = unlink($tounlink);
    if ($res === true) {
       if (is_link($tounlink) === false) {
-      	echo "directory unlinked\n";
+        echo "directory unlinked\n";
       }
       else {
         echo "FAILED: directory not unlinked\n";
@@ -80,27 +74,25 @@ function test_link($linkedDir, $toLinkTo, $tounlink, $softlink) {
 
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing unlink() : variation ***
--- unlinking soft link unlinkVar8.tmp/subDir.tmp --
+-- unlinking soft link unlinkVar10.tmp/subDir.tmp --
 directory unlinked
--- unlinking soft link ./unlinkVar8.tmp/subDir.tmp --
+-- unlinking soft link ./unlinkVar10.tmp/subDir.tmp --
 directory unlinked
--- unlinking soft link unlinkVar8.tmp/../unlinkVar8.tmp/subDir.tmp --
+-- unlinking soft link unlinkVar10.tmp/../unlinkVar10.tmp/subDir.tmp --
 directory unlinked
--- unlinking soft link /%s/unlinkVar8.tmp/subDir.tmp --
+-- unlinking soft link /%s/unlinkVar10.tmp/subDir.tmp --
 directory unlinked
--- unlinking soft link /%s/./unlinkVar8.tmp/subDir.tmp --
+-- unlinking soft link /%s/./unlinkVar10.tmp/subDir.tmp --
 directory unlinked
--- unlinking soft link /%s/unlinkVar8.tmp/../unlinkVar8.tmp/subDir.tmp --
+-- unlinking soft link /%s/unlinkVar10.tmp/../unlinkVar10.tmp/subDir.tmp --
 directory unlinked
--- unlinking soft link unlinkVar8.tmp//subDir.tmp --
+-- unlinking soft link unlinkVar10.tmp//subDir.tmp --
 directory unlinked
--- unlinking soft link /%s//unlinkVar8.tmp//subDir.tmp --
+-- unlinking soft link /%s//unlinkVar10.tmp//subDir.tmp --
 directory unlinked
 
 --- try to unlink a directory ---
 
-Warning: unlink(unlinkVar8.tmp/linkme.tmp): %s in %s on line %d
-===DONE===
+Warning: unlink(unlinkVar10.tmp/linkme.tmp): %s in %s on line %d

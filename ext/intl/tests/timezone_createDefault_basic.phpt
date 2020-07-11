@@ -12,7 +12,6 @@ print_r($tz);
 $tz = intltz_create_default();
 print_r($tz);
 ?>
-==DONE==
 --EXPECTF--
 IntlTimeZone Object
 (
@@ -28,4 +27,3 @@ IntlTimeZone Object
     [rawOffset] => %i
     [currentOffset] => %i
 )
-==DONE==

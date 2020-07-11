@@ -1,13 +1,7 @@
 --TEST--
-Test compact() function : basic functionality 
+Test compact() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : proto array compact(mixed var_names [, mixed ...])
- * Description: Creates a hash containing variables and their values 
- * Source code: ext/standard/array.c
- * Alias to functions: 
- */
-
 /*
  * Test basic functionality
  */
@@ -80,6 +74,8 @@ array(0) {
 }
 array(0) {
 }
+
+Notice: compact(): Undefined variable $g in %s on line %d
 array(0) {
 }
 Done

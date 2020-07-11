@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -78,7 +76,7 @@ gdImagePtr gdImageCreateFromXbm(FILE * fd)
 				max_bit = 32768;
 			}
 			if (max_bit) {
-				bytes = (width * height / 8) + 1;
+				bytes = (width + 7) / 8 * height;
 				if (!bytes) {
 					return 0;
 				}
@@ -136,7 +134,11 @@ gdImagePtr gdImageCreateFromXbm(FILE * fd)
 			}
 			h[3] = ch;
 		}
-		sscanf(h, "%x", &b);
+		if (sscanf(h, "%x", &b) != 1) {
+			gd_error("Invalid XBM");
+			gdImageDestroy(im);
+			return 0;
+		}
 		for (bit = 1; bit <= max_bit; bit = bit << 1) {
 			gdImageSetPixel(im, x++, y, (b & bit) ? 1 : 0);
 			if (x == im->sx) {
@@ -231,12 +233,3 @@ void gdImageXbmCtx(gdImagePtr image, char* file_name, int fg, gdIOCtx * out)
 	gdCtxPrintf(out, "};\n");
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

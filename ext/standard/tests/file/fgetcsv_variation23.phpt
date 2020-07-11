@@ -2,18 +2,13 @@
 Test fgetcsv() : usage variations - empty file
 --FILE--
 <?php
-/* 
- Prototype: array fgetcsv ( resource $handle [, int $length [, string $delimiter [, string $enclosure]]] );
- Description: Gets line from file pointer and parse for CSV fields
-*/
-
 /* Testing fgetcsv() to read from an empty file */
 
 echo "*** Testing fgetcsv() : reading from file which is having zero content ***\n";
 
 // try reading from file which is having zero content
-// create the file and then open in read mode and try reading 
-$filename = dirname(__FILE__) . '/fgetcsv_variation23.tmp';
+// create the file and then open in read mode and try reading
+$filename = __DIR__ . '/fgetcsv_variation23.tmp';
 $fp = fopen ($filename, "w");
 fclose($fp);
 $fp = fopen ($filename, "r");

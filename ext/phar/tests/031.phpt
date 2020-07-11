@@ -21,8 +21,8 @@ require $pname;
 ?>
 ===DONE===
 --CLEAN--
-<?php 
-unlink(dirname(__FILE__) . '/files/031.phar.php');
+<?php
+unlink(__DIR__ . '/files/031.phar.php');
 __halt_compiler();
 ?>
 --EXPECTF--

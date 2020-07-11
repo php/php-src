@@ -1,5 +1,7 @@
 --TEST--
 Using procedural finfo API in a method
+--SKIPIF--
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

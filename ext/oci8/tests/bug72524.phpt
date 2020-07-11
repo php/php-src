@@ -3,13 +3,12 @@ Bug #72524 (Binding null values triggers ORA-24816 error)
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => true);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
+require(__DIR__.'/skipif.inc');
 ?>
 --FILE--
-
 <?php
 
-require(dirname(__FILE__).'/connect.inc');
+require(__DIR__.'/connect.inc');
 
 // Initialize
 
@@ -76,8 +75,6 @@ $stmtarray = array(
 oci8_test_sql_execute($c, $stmtarray);
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 Test 1 - P1 Value: NULL  P1 Length: Default  P1 Type: Default  P2 Value: NULL P2 Length: Default  P2 Type: Default
 bool(true)
@@ -93,4 +90,3 @@ Test 5 - P1 Value: NULL  P1 Length: 0        P1 Type: SQLT_LNG P2 Value: NULL P2
 
 Warning: oci_execute(): ORA-24816: %s in %s on line %d
 bool(false)
-===DONE===

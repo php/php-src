@@ -6,7 +6,7 @@ Test function getservbyname() by substituting argument 1 with int values.
 
 echo "*** Test substituting argument 1 with int values ***\n";
 
-$protocol = "tcp"; 
+$protocol = "tcp";
 
 
 $variation_array = array (
@@ -21,7 +21,7 @@ foreach ( $variation_array as $var ) {
   var_dump(getservbyname( $var ,  $protocol ) );
 }
 ?>
---EXPECTF--
+--EXPECT--
 *** Test substituting argument 1 with int values ***
 bool(false)
 bool(false)

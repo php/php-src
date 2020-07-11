@@ -2,14 +2,7 @@
 Test strval() function : usage variations  - Pass different data types as strval
 --FILE--
 <?php
-/* Prototype  : string strval  ( mixed $var  )
- * Description: Get the string value of a variable. 
- * Source code: ext/standard/string.c
- */
-
 echo "*** Testing strval() : usage variations ***\n";
-
-error_reporting(E_ALL ^ E_NOTICE);
 
 //get an unset variable
 $unset_var = 10;
@@ -27,59 +20,59 @@ class MyClass
 
 //array of values to iterate over
 $values = array(
-		  //Decimal values
+          //Decimal values
 /*1*/	  0,
-		  1,
-		  12345,
-		  -12345,
-		  
-		  //Octal values
+          1,
+          12345,
+          -12345,
+
+          //Octal values
 /*5*/	  02,
-		  010,
-		  030071,
-		  -030071,
-		  
-		  //Hexadecimal values
+          010,
+          030071,
+          -030071,
+
+          //Hexadecimal values
 /*9*/	  0x0,
-		  0x1,
-		  0xABCD,
-		  -0xABCD,
-	
-	      // float data
+          0x1,
+          0xABCD,
+          -0xABCD,
+
+          // float data
 /*13*/    100.5,
-	      -100.5,
-	      100.1234567e10,
-	      100.7654321E-10,
-	      .5,
-	
-	      // array data
+          -100.5,
+          100.1234567e10,
+          100.7654321E-10,
+          .5,
+
+          // array data
 /*18*/    array(),
-	      array('color' => 'red', 'item' => 'pen'),
-	
-	      // null data
+          array('color' => 'red', 'item' => 'pen'),
+
+          // null data
 /*20*/    NULL,
-	      null,
-	
-	      // boolean data
+          null,
+
+          // boolean data
 /*22*/    true,
-	      false,
-	      TRUE,
-	      FALSE,
-	
-	      // empty data
+          false,
+          TRUE,
+          FALSE,
+
+          // empty data
 /*26*/    "",
-	      '',
-	
-	      // object data
+          '',
+
+          // object data
 /*28*/    new MyClass(),
-	      
-	      // resource
-/*29*/    $file_handle, 
-	
-	      // undefined data
+
+          // resource
+/*29*/    $file_handle,
+
+          // undefined data
 /*30*/    @$undefined_var,
-	
-	      // unset data
+
+          // unset data
 /*31*/    @$unset_var,
 );
 
@@ -91,7 +84,6 @@ foreach($values as $value) {
       $iterator++;
 };
 ?>
-===DONE===
 --EXPECTF--
 *** Testing strval() : usage variations ***
 
@@ -147,9 +139,13 @@ string(14) "1.007654321E-8"
 string(3) "0.5"
 
 -- Iteration 18 --
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 
 -- Iteration 19 --
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 
 -- Iteration 20 --
@@ -187,4 +183,3 @@ string(0) ""
 
 -- Iteration 31 --
 string(0) ""
-===DONE===

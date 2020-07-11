@@ -1,26 +1,26 @@
 --TEST--
 Testing GOTO inside blocks
 --FILE--
-<?php 
+<?php
 
 goto A;
 
 {
-	B:
-		goto C;	
-		return;
+    B:
+        goto C;
+        return;
 }
 
 A:
-	goto B;
+    goto B;
 
 
 
 {
-	C:
-	{
-		print "Done!\n";
-	}
+    C:
+    {
+        print "Done!\n";
+    }
 }
 
 ?>

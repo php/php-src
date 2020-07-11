@@ -1,5 +1,5 @@
 --TEST--
-DateTime::diff() -- february 
+DateTime::diff() -- february
 --CREDITS--
 Daniel Convissor <danielc@php.net>
 --FILE--

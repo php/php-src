@@ -7,12 +7,6 @@ Test session_start() function : variation
 
 ob_start();
 
-/* 
- * Prototype : bool session_start(void)
- * Description : Initialize session data
- * Source code : ext/session/session.c 
- */
-
 echo "*** Testing session_start() : variation ***\n";
 
 $_SESSION['blah'] = 'foo';
@@ -25,7 +19,7 @@ echo "Done";
 ob_end_flush();
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing session_start() : variation ***
 array(1) {
   ["blah"]=>
@@ -34,4 +28,3 @@ array(1) {
 array(0) {
 }
 Done
-

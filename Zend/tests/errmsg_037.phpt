@@ -4,10 +4,10 @@ errmsg: properties cannot be abstract
 <?php
 
 class test {
-	abstract $var = 1;
+    abstract $var = 1;
 }
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Properties cannot be declared abstract in %s on line %d

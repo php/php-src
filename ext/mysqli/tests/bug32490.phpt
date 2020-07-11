@@ -10,4 +10,3 @@ var_dump(method_exists("mysqli", "__construct"));
 --EXPECT--
 bool(false)
 bool(true)
-

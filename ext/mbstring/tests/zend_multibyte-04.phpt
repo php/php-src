@@ -1,10 +1,11 @@
 --TEST--
 zend multibyte (4)
 --SKIPIF--
+<?php require 'skipif.inc'; ?>
 --INI--
 zend.multibyte=On
 zend.script_encoding=CP932
-mbstring.internal_encoding=UTF-8
+internal_encoding=UTF-8
 --FILE--
 <?php
 var_dump(bin2hex("ƒeƒXƒg"));

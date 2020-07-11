@@ -1,11 +1,7 @@
 --TEST--
-Test isset() function : basic functionality 
+Test isset() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : bool isset  ( mixed $var  [, mixed $var  [,  $...  ]] )
- * Description:  Determine if a variable is set and is not NULL
- */		
-
 class foo {}
 
 echo "*** Testing isset() : basic functionality ***\n";
@@ -40,7 +36,6 @@ echo "Null test: " . (isset($n) ? "YES": "NO") . "\n";
 echo "Object test: " . (isset($obj) ? "YES": "NO") . "\n";
 echo "Resource test: " . (isset($res) ? "YES": "NO") . "\n";
 ?>
-===DONE===
 --EXPECT--
 *** Testing isset() : basic functionality ***
 Integer test: YES
@@ -63,4 +58,3 @@ Boolean test: NO
 Null test: NO
 Object test: NO
 Resource test: NO
-===DONE===

@@ -24,13 +24,13 @@ echo new ReflectionClass('C');
 ?>
 --EXPECTF--
 int(2)
-Constant [ public integer X ] { 2 }
+Constant [ public int X ] { 2 }
 Class [ <user> class C ] {
   @@ %s 12-15
 
   - Constants [2] {
-    Constant [ public integer X ] { 2 }
-    Constant [ public integer Y ] { 1 }
+    Constant [ public int X ] { 2 }
+    Constant [ public int Y ] { 1 }
   }
 
   - Static properties [0] {

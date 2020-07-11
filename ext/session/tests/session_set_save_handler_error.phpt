@@ -7,12 +7,6 @@ Test session_set_save_handler() function : error functionality
 
 ob_start();
 
-/* 
- * Prototype : bool session_set_save_handler(callback $open, callback $close, callback $read, callback $write, callback $destroy, callback $gc)
- * Description : Sets user-level session storage functions
- * Source code : ext/session/session.c 
- */
-
 echo "*** Testing session_set_save_handler() : error functionality ***\n";
 
 // Get an unset variable
@@ -57,7 +51,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // Empty strings
 /*16*/ "",
        '',
@@ -66,7 +60,7 @@ $inputs = array(
 /*18*/ "Nothing",
        'Nothing',
        $heredoc,
-       
+
        // Object data
 /*21*/ new classA(),
 
@@ -215,4 +209,3 @@ bool(false)
 Warning: session_set_save_handler(): Argument 1 is not a valid callback in %s on line %d
 bool(false)
 Done
-

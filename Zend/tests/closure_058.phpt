@@ -3,12 +3,12 @@ Closure 058: Closure scope and object
 --FILE--
 <?php
 class A {
-	static function foo() {
-		return function () {var_dump(get_class(),get_called_class());};
-	}
-	function bar() {
-		return function () {var_dump(get_class(),get_called_class(),$this);};
-	}
+    static function foo() {
+        return function () {var_dump(get_class(),get_called_class());};
+    }
+    function bar() {
+        return function () {var_dump(get_class(),get_called_class(),$this);};
+    }
 }
 $z = "call_user_func";
 

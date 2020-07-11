@@ -1,9 +1,9 @@
 --TEST--
 Set and get of connection attributes across persistent connections and sysdba connection.
 --SKIPIF--
-<?php 
+<?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
+require(__DIR__.'/skipif.inc');
 
 if (strcasecmp($user, "system") && strcasecmp($user, "sys")) die("skip needs to be run as a DBA user");
 if ($test_drcp) die("skip output might vary with DRCP");
@@ -16,13 +16,12 @@ if (!(isset($matches[0]) && $matches[1] >= 10)) {
 --INI--
 oci8.privileged_connect = On
 --FILE--
-
 <?php
 
 $testuser     = 'testuser_attr_2';  // Used in conn_attr.inc
-$testpassword = 'testuser'; 
+$testpassword = 'testuser';
 
-require(dirname(__FILE__)."/conn_attr.inc");
+require(__DIR__."/conn_attr.inc");
 
 $attr_array = array('MODULE','ACTION','CLIENT_INFO','CLIENT_IDENTIFIER');
 
@@ -30,21 +29,21 @@ echo"**Set values using pconnect-1**\n";
 
 var_dump($pc1 = oci_pconnect($testuser,$testpassword,$dbase));
 foreach($attr_array as $attr) {
-	set_attr($pc1,$attr,100);
+    set_attr($pc1,$attr,100);
 }
 
 //  using pc1 again
 echo"\n**Get values using pconnect-2**\n";
 var_dump($pc3 = oci_pconnect($testuser,$testpassword,$dbase));
 foreach($attr_array as $attr) {
-	get_attr($pc3,$attr);
+    get_attr($pc3,$attr);
 }
 
 // Get with different pconnect
 echo"\n**Get values using pconnect-3**\n";
 var_dump($pc2 = oci_pconnect($testuser,$testpassword,$dbase,'UTF8'));
 foreach($attr_array as $attr) {
-	get_attr($pc2,$attr);
+    get_attr($pc2,$attr);
 }
 
 oci_close($pc1);
@@ -55,7 +54,7 @@ oci_close($pc3);
 echo "\n**Re-open a pconnect()**\n";
 var_dump($pc4 = oci_pconnect($testuser,$testpassword,$dbase));
 foreach($attr_array as $attr) {
-	get_attr($pc4,$attr);
+    get_attr($pc4,$attr);
 }
 oci_close($pc4);
 
@@ -69,10 +68,10 @@ if (!$sys_c1) {
         var_dump($e);
     }
 } else {
-	set_attr($sys_c1,'ACTION',10);
-	get_sys_attr($sys_c1,'ACTION');
-	get_attr($sys_c1,'ACTION');
-	oci_close($sys_c1);
+    set_attr($sys_c1,'ACTION',10);
+    get_sys_attr($sys_c1,'ACTION');
+    get_attr($sys_c1,'ACTION');
+    oci_close($sys_c1);
 }
 
 clean_up($c);

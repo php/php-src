@@ -7,9 +7,9 @@ Bug #30928 (When Using WSDL, SoapServer doesn't handle private or protected prop
 ini_set("soap.wsdl_cache_enabled", 0);
 
 class foo {
-	public    $a="a";
-	private   $b="b";
-	protected $c="c";
+    public    $a="a";
+    private   $b="b";
+    protected $c="c";
 }
 
 function test($x) {
@@ -33,11 +33,11 @@ class LocalSoapClient extends SoapClient {
   }
 }
 
-$x = new LocalSoapClient(dirname(__FILE__)."/bug30928.wsdl", 
+$x = new LocalSoapClient(__DIR__."/bug30928.wsdl",
                          array());
 var_dump($x->test(new foo()));
 
-$x = new LocalSoapClient(dirname(__FILE__)."/bug30928.wsdl", 
+$x = new LocalSoapClient(__DIR__."/bug30928.wsdl",
                          array("classmap" => array('testType'=>'foo')));
 var_dump($x->test(new foo()));
 

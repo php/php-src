@@ -1,6 +1,0 @@
-$variation_array = array(
-  'lowercase true' => true,
-  'lowercase false' =>false,
-  'uppercase TRUE' =>TRUE,
-  'uppercase FALSE' =>FALSE,
-  );

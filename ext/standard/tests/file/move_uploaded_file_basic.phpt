@@ -28,7 +28,7 @@ $destination1 = __FILE__ . ".tmp";
 
 var_dump(move_uploaded_file($_FILES['file1']['tmp_name'], $destination1));
 $file_contents = file_get_contents($destination1);
-$contents_matches = ($file_contents == b"abcdef123456789xxxDDDxxxDDDxxxDDD");
+$contents_matches = ($file_contents == "abcdef123456789xxxDDDxxxDDDxxxDDD");
 var_dump($contents_matches);
 unlink($destination1);
 echo "\n";
@@ -49,13 +49,8 @@ fclose($fd);
 var_dump(move_uploaded_file($_FILES['file2']['tmp_name'], $destination4));
 unlink($destination4);
 
-echo "Wrong parameters\n";
-var_dump(move_uploaded_file());
-var_dump(move_uploaded_file(1, 2, 3));
-
-
 ?>
---EXPECTF--
+--EXPECT--
 Valid move
 bool(true)
 bool(true)
@@ -66,11 +61,3 @@ Non-uploaded source file
 bool(false)
 Valid move to existing file
 bool(true)
-Wrong parameters
-
-Warning: move_uploaded_file() expects exactly 2 parameters, 0 given in %s on line %d
-NULL
-
-Warning: move_uploaded_file() expects exactly 2 parameters, 3 given in %s on line %d
-NULL
-

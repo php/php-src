@@ -4,11 +4,11 @@ using multiple access modifiers (static methods)
 <?php
 
 class test {
-	static static function foo() {
-	}
+    static static function foo() {
+    }
 }
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Multiple static modifiers are not allowed in %s on line %d

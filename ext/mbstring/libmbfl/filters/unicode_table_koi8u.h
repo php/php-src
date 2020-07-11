@@ -163,4 +163,3 @@ static const int koi8u_ucs_table_max = 0x80 + (sizeof (koi8u_ucs_table) / sizeof
 
 
 #endif /* UNNICODE_TABLE_KOI8U_H */
-

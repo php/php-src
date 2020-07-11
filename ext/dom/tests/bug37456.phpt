@@ -7,7 +7,7 @@ Bug #37456 (DOMElement->setAttribute() loops forever)
 
 $doc = new DOMDocument();
 $doc->resolveExternals = true;
-$doc->load(dirname(__FILE__)."/dom.xml");
+$doc->load(__DIR__."/dom.xml");
 
 $root = $doc->getElementsByTagName('foo')->item(0);
 $root->setAttribute('bar', '&gt;');
@@ -17,6 +17,4 @@ print $attr->nodeValue;
 
 ?>
 --EXPECT--
-
 newval
-

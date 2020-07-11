@@ -1,7 +1,7 @@
 --TEST--
 PDO Common: PDO::FETCH_CLASS
 --SKIPIF--
-<?php # vim:ft=php
+<?php
 if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
@@ -10,7 +10,7 @@ PDOTest::skip();
 ?>
 --FILE--
 <?php
-if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE__) . '/../../pdo/tests/');
+if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../../pdo/tests/');
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
@@ -23,20 +23,20 @@ $stmt = $db->prepare('SELECT id, val, val2 from test');
 
 class TestBase
 {
-	public $id;
-	protected $val;
-	private $val2;
+    public $id;
+    protected $val;
+    private $val2;
 }
 
 class TestDerived extends TestBase
 {
-	protected $row;
+    protected $row;
 
-	public function __construct(&$row)
-	{
-		echo __METHOD__ . "($row,{$this->id})\n";
-		$this->row = $row++;
-	}
+    public function __construct(&$row)
+    {
+        echo __METHOD__ . "($row,{$this->id})\n";
+        $this->row = $row++;
+    }
 }
 
 $stmt->execute();

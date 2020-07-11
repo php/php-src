@@ -1,7 +1,7 @@
 --TEST--
 Check if textdomain() returns the new domain
 --SKIPIF--
-<?php 
+<?php
 	if (!extension_loaded("gettext")) {
 		die("skip\n");
 	}
@@ -12,7 +12,7 @@ Check if textdomain() returns the new domain
 --FILE--
 <?php
 
-chdir(dirname(__FILE__));
+chdir(__DIR__);
 setlocale(LC_ALL, 'en_US.UTF-8');
 bindtextdomain ("messages", "./locale");
 echo textdomain('test'), "\n";
@@ -20,7 +20,6 @@ echo textdomain(null), "\n";
 echo textdomain('foo'), "\n";
 ?>
 --EXPECT--
-
 test
 test
 foo

@@ -14,4 +14,3 @@ echo $s->offsetGet($o1);
 ?>
 --EXPECT--
 some_value
-

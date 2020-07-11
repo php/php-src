@@ -2,7 +2,6 @@
 Bug #11216 (::addEmptyDir() crashes when the directory already exists)
 --SKIPIF--
 <?php
-/* $Id$ */
 if(!extension_loaded('zip')) die('skip');
  ?>
 --FILE--
@@ -19,6 +18,7 @@ unlink('__test.zip');
 bool(true)
 ZipArchive Object
 (
+    [lastId] => 0
     [status] => 0
     [statusSys] => 0
     [numFiles] => 1

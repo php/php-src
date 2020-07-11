@@ -2,13 +2,15 @@
 Thai UTF-8 cmd test
 --SKIPIF--
 <?php
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 skip_if_not_win();
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 skip_if_no_required_exts();
 
 ?>
+--CONFLICTS--
+file_cp874
 --FILE--
 <?php
 /*
@@ -16,10 +18,10 @@ skip_if_no_required_exts();
 #vim: set encoding=cp874
 */
 
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc"; 
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 
-$item = "เป็นแฟ้มที่ทดสอบ11"; 
+$item = "เป็นแฟ้มที่ทดสอบ11";
 $prefix = create_data("file_cp874", $item);
 $fn = $prefix . DIRECTORY_SEPARATOR . $item;
 
@@ -31,10 +33,8 @@ system("dir /b " . $fn);
 remove_data("file_cp874");
 
 ?>
-===DONE===
---EXPECTF--	
+--EXPECTF--
 string(%d) "%s\เป็นแฟ้มที่ทดสอบ11"
 bool(true)
 bool(true)
 เป็นแฟ้มที่ทดสอบ11
-===DONE===

@@ -6,7 +6,7 @@ Objects of DOM extension: debug info object handler.
 <?php
 $xml = <<<XML
 <foo>
-	<bar>foobar</bar>
+    <bar>foobar</bar>
 </foo>
 XML;
 $d = new domdocument;
@@ -39,6 +39,9 @@ DOMDocument Object
     [preserveWhiteSpace] => 1
     [recover] => 
     [substituteEntities] => 
+    [firstElementChild] => (object value omitted)
+    [lastElementChild] => (object value omitted)
+    [childElementCount] => 1
     [nodeName] => #document
     [nodeValue] => 
     [nodeType] => 9
@@ -47,6 +50,7 @@ DOMDocument Object
     [firstChild] => (object value omitted)
     [lastChild] => (object value omitted)
     [previousSibling] => 
+    [nextSibling] => 
     [attributes] => 
     [ownerDocument] => 
     [namespaceURI] => 
@@ -54,6 +58,6 @@ DOMDocument Object
     [localName] => 
     [baseURI] => %s
     [textContent] => 
-	foobar
+    foobar
 
 )

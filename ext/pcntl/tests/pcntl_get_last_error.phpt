@@ -2,10 +2,10 @@
 Test pcntl_get_last_error()
 --SKIPIF--
 <?php
-	if (!extension_loaded("pcntl")) print "skip"; 
+	if (!extension_loaded("pcntl")) print "skip";
 ?>
 --FILE--
-<?php 
+<?php
 var_dump(pcntl_get_last_error());
 $pid = pcntl_wait($status);
 var_dump($pid);

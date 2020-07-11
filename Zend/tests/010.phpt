@@ -4,19 +4,19 @@ get_parent_class() tests
 <?php
 
 interface i {
-	function test();
+    function test();
 }
 
 class foo implements i {
-	function test() {
-		var_dump(get_parent_class());
-	}
+    function test() {
+        var_dump(get_parent_class());
+    }
 }
 
 class bar extends foo {
-	function test_bar() {
-		var_dump(get_parent_class());
-	}
+    function test_bar() {
+        var_dump(get_parent_class());
+    }
 }
 
 $bar = new bar;
@@ -32,16 +32,41 @@ var_dump(get_parent_class("bar"));
 var_dump(get_parent_class("foo"));
 var_dump(get_parent_class("i"));
 
-var_dump(get_parent_class(""));
-var_dump(get_parent_class("[[[["));
-var_dump(get_parent_class(" "));
+try {
+    get_parent_class("");
+} catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    get_parent_class("[[[[");
+} catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    get_parent_class(" ");
+} catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
 var_dump(get_parent_class(new stdclass));
-var_dump(get_parent_class(array()));
-var_dump(get_parent_class(1));
+
+try {
+    get_parent_class(array());
+} catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    get_parent_class(1);
+} catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--
 bool(false)
 bool(false)
 string(3) "foo"
@@ -50,10 +75,10 @@ bool(false)
 string(3) "foo"
 bool(false)
 bool(false)
+get_parent_class(): Argument #1 ($object) must be a valid class name or object, string given
+get_parent_class(): Argument #1 ($object) must be a valid class name or object, string given
+get_parent_class(): Argument #1 ($object) must be a valid class name or object, string given
 bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
+get_parent_class(): Argument #1 ($object) must be a valid class name or object, array given
+get_parent_class(): Argument #1 ($object) must be a valid class name or object, int given
 Done

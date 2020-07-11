@@ -1,5 +1,3 @@
-
-	/* $Id: fpm_status.c 312399 2011-06-23 08:03:52Z fat $ */
 	/* (c) 2009 Jerome Loyet */
 
 #include "php.h"
@@ -103,7 +101,7 @@ void fpm_scoreboard_update(int idle, int active, int lq, int lq_len, int request
 		if (lq_len >= 0) {
 			scoreboard->lq_len = lq_len;
 		}
-#ifdef HAVE_FPM_LQ /* prevent unnecessary test */
+#if HAVE_FPM_LQ /* prevent unnecessary test */
 		if (scoreboard->lq > scoreboard->lq_max) {
 			scoreboard->lq_max = scoreboard->lq;
 		}
@@ -247,7 +245,7 @@ void fpm_scoreboard_free(struct fpm_scoreboard_s *scoreboard) /* {{{ */
 
 	scoreboard_size        = sizeof(struct fpm_scoreboard_s) + (scoreboard->nprocs) * sizeof(struct fpm_scoreboard_proc_s *);
 	scoreboard_nprocs_size = sizeof(struct fpm_scoreboard_proc_s) * scoreboard->nprocs;
-	
+
 	fpm_shm_free(scoreboard, scoreboard_size + scoreboard_nprocs_size);
 }
 /* }}} */
@@ -336,4 +334,3 @@ float fpm_scoreboard_get_tick() /* {{{ */
 }
 /* }}} */
 #endif
-

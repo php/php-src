@@ -8,7 +8,7 @@ const a = 1;
 
 
 if (defined('a')) {
-	print a;
+    print a;
 }
 
 ?>

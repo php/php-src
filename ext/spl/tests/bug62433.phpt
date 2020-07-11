@@ -11,7 +11,7 @@ var_dump(in_array(__DIR__ . DIRECTORY_SEPARATOR . '..', $dots));
 var_dump(in_array(__DIR__ . DIRECTORY_SEPARATOR . '.', $ndots));
 var_dump(in_array(__DIR__ . DIRECTORY_SEPARATOR . '..', $ndots));
 ?>
---EXPECT--	
+--EXPECT--
 bool(true)
 bool(true)
 bool(false)

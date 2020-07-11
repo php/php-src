@@ -20,7 +20,7 @@ Check for number base recognition
         $test[] = gmp_init("1234");
         $test[] = gmp_init("1234", 10);
 
-        /* Hexidecimal */
+        /* Hexadecimal */
         $test[] = gmp_init("0x4d2");
         $test[] = gmp_init("0x4d2", 16);
         $test[] = gmp_init("4d2");

@@ -9,7 +9,7 @@ class ReflectTestClass {
     public static function staticMethod(&$paramOne, $anotherParam) {
         return ++$theIncrement;
     }
-    
+
     public function instanceMethod($firstParam, &$secondParam) {
       $firstParam = "Hello\n";
     }
@@ -21,11 +21,11 @@ $method = new ReflectionMethod('ReflectTestClass', 'staticMethod');
 $parameters = $method->getParameters();
 echo "Parameters from staticMethod:\n\n";
 foreach($parameters as $parameter) {
-	var_dump($parameter);
+    var_dump($parameter);
     if($parameter->isPassedByReference()) {
-    	echo "This param is passed by reference\n";
+        echo "This param is passed by reference\n";
     } else {
-    	echo "This param is not passed by reference\n";
+        echo "This param is not passed by reference\n";
     }
     echo "\n";
 }
@@ -36,11 +36,11 @@ $method = new ReflectionMethod('ReflectTestClass', 'instanceMethod');
 $parameters = $method->getParameters();
 echo "Parameters from instanceMethod:\n\n";
 foreach($parameters as $parameter) {
-	var_dump($parameter);
+    var_dump($parameter);
     if($parameter->isPassedByReference()) {
-    	echo "This param is passed by reference\n";
+        echo "This param is passed by reference\n";
     } else {
-    	echo "This param is not passed by reference\n";
+        echo "This param is not passed by reference\n";
     }
     echo "\n";
 }

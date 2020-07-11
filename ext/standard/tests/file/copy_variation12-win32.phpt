@@ -7,14 +7,9 @@ if(substr(PHP_OS, 0, 3) != "WIN")
 ?>
 --FILE--
 <?php
-/* Prototype: bool copy ( string $source, string $dest );
-   Description: Makes a copy of the file source to dest.
-     Returns TRUE on success or FALSE on failure.
-*/
-
 /* Test copy(): Trying to create a copy of an existing dir */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 echo "*** Test copy() function: Trying to create a copy of an existing dir ***\n";
 $src_dir = $file_path."/copy_variation12";
@@ -30,13 +25,11 @@ var_dump( filesize($src_dir) );
 
 echo "*** Done ***\n";
 ?>
-
 --CLEAN--
 <?php
-unlink(dirname(__FILE__)."/copy_copy_variation12");
-rmdir(dirname(__FILE__)."/copy_variation12");
+unlink(__DIR__."/copy_copy_variation12");
+rmdir(__DIR__."/copy_variation12");
 ?>
-
 --EXPECTF--
 *** Test copy() function: Trying to create a copy of an existing dir ***
 

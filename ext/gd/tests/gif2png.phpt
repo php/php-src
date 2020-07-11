@@ -15,13 +15,13 @@ gif --> png conversion test
 ?>
 --FILE--
 <?php
-	$cwd = dirname(__FILE__);
+    $cwd = __DIR__;
 
-	echo "GIF to PNG conversion: ";
-	echo imagepng(imagecreatefromgif($cwd . "/conv_test.gif"), $cwd . "/test_gif.png") ? 'ok' : 'failed';
-	echo "\n";
+    echo "GIF to PNG conversion: ";
+    echo imagepng(imagecreatefromgif($cwd . "/conv_test.gif"), $cwd . "/test_gif.png") ? 'ok' : 'failed';
+    echo "\n";
 
-	@unlink($cwd . "/test_gif.png");
+    @unlink($cwd . "/test_gif.png");
 ?>
 --EXPECT--
 GIF to PNG conversion: ok

@@ -1,7 +1,0 @@
-#! /bin/sh
-
-if test -d '.git' -o -f '.git'; then
-    ${MAKE:-make} -f build/build.mk gitclean-work
-else
-    echo "Can't figure out your VCS, not cleaning."
-fi

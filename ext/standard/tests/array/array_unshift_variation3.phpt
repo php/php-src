@@ -2,13 +2,8 @@
 Test array_unshift() function : usage variations - different array values for 'array' argument
 --FILE--
 <?php
-/* Prototype  : int array_unshift(array $array, mixed $var [, mixed ...])
- * Description: Pushes elements onto the beginning of the array
- * Source code: ext/standard/array.c
-*/
-
 /*
- * Testing the behavior of array_unshift() by passing different types of arrays 
+ * Testing the behavior of array_unshift() by passing different types of arrays
  * to $array argument to which the $var arguments will be prepended
 */
 
@@ -41,7 +36,7 @@ $arrays = array (
        array(1 => '', 2 => "", 3 => NULL, 4 => null, 5 => false, 6 => true),
        array('' => 1, "" => 2, NULL => 3, null => 4, false => 5, true => 6),
 
-       // array with repetative keys
+       // array with repetitive keys
 /*18*/ array("One" => 1, "two" => 2, "One" => 10, "two" => 20, "three" => 3)
 );
 
@@ -72,7 +67,7 @@ foreach($arrays as $array) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_unshift() : different arrays for $array argument ***
 -- Iteration 1 --
 int(3)

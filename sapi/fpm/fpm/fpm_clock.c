@@ -1,10 +1,8 @@
-
-	/* $Id: fpm_clock.c,v 1.4 2008/09/18 23:19:59 anight Exp $ */
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #include "fpm_config.h"
 
-#if defined(HAVE_CLOCK_GETTIME)
+#ifdef HAVE_CLOCK_GETTIME
 #include <time.h> /* for CLOCK_MONOTONIC */
 #endif
 

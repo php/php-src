@@ -4,7 +4,7 @@ Bug #71998 Function pg_insert does not insert when column type = inet
 <?php include("skipif.inc"); ?>
 --FILE--
 <?php
-// Kudos for the IP regex to 
+// Kudos for the IP regex to
 // http://stackoverflow.com/a/17871737/3358424
 
 include('config.inc');
@@ -14,69 +14,68 @@ $db = pg_connect($conn_str);
 pg_query("CREATE TABLE tmp_statistics (id integer NOT NULL, remote_addr inet);");
 
 $ips = array(
-	/* IPv4*/
-	"127.0.0.1",
-	"10.0.0.1",
-	"192.168.1.1",
-	"0.0.0.0",
-	"255.255.255.255",
-	"192.168.1.35/24",
+    /* IPv4*/
+    "127.0.0.1",
+    "10.0.0.1",
+    "192.168.1.1",
+    "0.0.0.0",
+    "255.255.255.255",
+    "192.168.1.35/24",
 
-	/* IPv6 */
-	"::1",
-	"::10.2.3.4",
-	"::ffff:10.4.3.2",
-	"1:2:3:4:5:6:7:8",
-	"::ffff:10.0.0.1",
-	"::ffff:1.2.3.4",
-	"::ffff:0.0.0.0",
-	"1:2:3:4:5:6:77:88",
-	"::ffff:255.255.255.255",
-	"fe08::7:8",
-	"ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff",
-	"::5:aef1:ffff/128",
-	"2001:4f8:3:ba::/112",
+    /* IPv6 */
+    "::1",
+    "::10.2.3.4",
+    "::ffff:10.4.3.2",
+    "1:2:3:4:5:6:7:8",
+    "::ffff:10.0.0.1",
+    "::ffff:1.2.3.4",
+    "::ffff:0.0.0.0",
+    "1:2:3:4:5:6:77:88",
+    "::ffff:255.255.255.255",
+    "fe08::7:8",
+    "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff",
+    "::5:aef1:ffff/128",
+    "2001:4f8:3:ba::/112",
 
 );
 
 $bad = array(
-	/* bad */
-	"256.257.258.259",
-	"fe08::7:8interface",
-	"schnitzel",
-	"10002.3.4",
-	"1.2.3.4.5",
-	"256.0.0.0",
-	"260.0.0.0",
+    /* bad */
+    "256.257.258.259",
+    "fe08::7:8interface",
+    "schnitzel",
+    "10002.3.4",
+    "1.2.3.4.5",
+    "256.0.0.0",
+    "260.0.0.0",
 );
 
 $ips = array_merge($ips, $bad);
 $i = 0;
 $errors = 0;
 foreach ($ips as $ip) {
-	$data = array("id" => ++$i, "remote_addr" => $ip);
-	$r = @pg_insert($db, 'tmp_statistics', $data);   
+    $data = array("id" => ++$i, "remote_addr" => $ip);
+    $r = @pg_insert($db, 'tmp_statistics', $data);
 
-	if (!$r && in_array($ip, $bad)) {
-		$errors++;
-		//echo pg_last_error($db);
-	}
+    if (!$r && in_array($ip, $bad)) {
+        $errors++;
+        //echo pg_last_error($db);
+    }
 
-	//pg_query($db, "INSERT INTO tmp_statistics (id, remote_addr) VALUES (2, '127.0.0.1')"); // OK, record inserted
+    //pg_query($db, "INSERT INTO tmp_statistics (id, remote_addr) VALUES (2, '127.0.0.1')"); // OK, record inserted
 }
 
 
 $r = pg_query($db, "SELECT * FROM tmp_statistics");
 while (false != ($row = pg_fetch_row($r))) {
-	var_dump($row);
+    var_dump($row);
 }
-echo $errors, " errors catched\n";
+echo $errors, " errors caught\n";
 
 pg_query($db, "DROP TABLE tmp_statistics");
 pg_close($db);
 
 ?>
-==DONE==
 --EXPECT--
 array(2) {
   [0]=>
@@ -192,5 +191,4 @@ array(2) {
   [1]=>
   string(19) "2001:4f8:3:ba::/112"
 }
-7 errors catched
-==DONE==
+7 errors caught

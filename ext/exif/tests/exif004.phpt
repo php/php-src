@@ -1,7 +1,7 @@
 --TEST--
-Check for exif_read_data, Unicode WinXP tags	
+Check for exif_read_data, Unicode WinXP tags
 --SKIPIF--
-<?php 
+<?php
 	if (!extension_loaded('exif')) die('skip exif extension not available');
 	if (!extension_loaded('mbstring')) die('skip mbstring extension not available');
 	if (!defined("EXIF_USE_MBSTRING") || !EXIF_USE_MBSTRING) die ('skip mbstring loaded by dl');
@@ -17,7 +17,7 @@ exif.encode_unicode=ISO-8859-1
 /*
   test4.jpg is a 1*1 image that contains Exif tags written by WindowsXP
 */
-$image  = exif_read_data(dirname(__FILE__).'/test4.jpg','',true,false);
+$image  = exif_read_data(__DIR__.'/test4.jpg','',true,false);
 var_dump($image['WINXP']);
 ?>
 --EXPECT--

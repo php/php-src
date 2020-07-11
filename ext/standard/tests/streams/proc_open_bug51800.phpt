@@ -18,7 +18,7 @@ so then the pipe buffer is emptied more often and the child has chance to contin
 write. The behaviour might look some better if write/read in a separate thread, however
 this is much more resource greedy and complexer to integrate into the user script. */
 
-$callee = dirname(__FILE__) . "/process_proc_open_bug51800.php";
+$callee = __DIR__ . "/process_proc_open_bug51800.php";
 $php = PHP_BINARY;
 $cmd = "$php $callee";
 
@@ -47,7 +47,7 @@ exit(0);
 ');
 
 if (!$r) {
-	die("couldn't create helper script '$callee'");
+    die("couldn't create helper script '$callee'");
 }
 
 $process = proc_open($cmd, $descriptors, $pipes);
@@ -56,13 +56,13 @@ if (is_resource($process))
 {
         fclose($pipes[0]);
 
-	while (!feof($pipes[1]))
-		$stdout .= fread($pipes[1], 1024);
-	fclose($pipes[1]);
+    while (!feof($pipes[1]))
+        $stdout .= fread($pipes[1], 1024);
+    fclose($pipes[1]);
 
-	while (!feof($pipes[2]))
-		$stderr .= fread($pipes[2], 1024);
-	fclose($pipes[2]);
+    while (!feof($pipes[2]))
+        $stderr .= fread($pipes[2], 1024);
+    fclose($pipes[2]);
 
         $status = proc_close($process);
 }
@@ -74,10 +74,9 @@ var_dump(array(
 ), strlen($stdout), strlen($stderr));
 
 ?>
-===DONE===
 --CLEAN--
 <?php
-$callee = dirname(__FILE__) . "/process_proc_open_bug51800.php";
+$callee = __DIR__ . "/process_proc_open_bug51800.php";
 unlink($callee);
 ?>
 --EXPECTF--
@@ -91,5 +90,3 @@ array(3) {
 }
 int(10000)
 int(10000)
-===DONE===
-

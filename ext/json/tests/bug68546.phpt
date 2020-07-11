@@ -1,10 +1,5 @@
 --TEST--
 Bug #68546 (json_decode() Fatal error: Cannot access property started with '\0')
---SKIPIF--
-<?php
-
-if (!extension_loaded('json')) die('skip');
-?>
 --FILE--
 <?php
 
@@ -16,7 +11,7 @@ var_dump(json_last_error_msg());
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 NULL
 bool(true)
 NULL

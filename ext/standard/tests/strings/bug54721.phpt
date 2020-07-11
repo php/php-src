@@ -1,7 +1,7 @@
 --TEST--
 Bug #54721 (Different Hashes on Windows, BSD and Linux on wrong Salt size)
 --FILE--
-<?php 
+<?php
 echo crypt("", '$1$dW0.is5.$10CH101gGOr1677ZYd517.') . "\n";
 echo crypt("b", '$1$dW0.is5.$10CH101gGOr1677ZYd517.') . "\n";
 echo crypt("bu", '$1$dW0.is5.$10CH101gGOr1677ZYd517.') . "\n";

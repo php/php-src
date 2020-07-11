@@ -3,16 +3,11 @@ Test fscanf() function: usage variations - objects
 --FILE--
 <?php
 
-/*
-  Prototype: mixed fscanf ( resource $handle, string $format [, mixed &$...] );
-  Description: Parses input from a file according to a format
-*/
-
 /* Test fscanf() to scan a file to read objects */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
-echo "*** Test fscanf(): to read objects from a file ***\n"; 
+echo "*** Test fscanf(): to read objects from a file ***\n";
 
 // declare a class
 class foo
@@ -43,7 +38,7 @@ $formats = array( "%d", "%f", "%e", "%u", " %s", "%x", "%o");
 
 $counter = 1;
 
-// opening file for read  
+// opening file for read
 $file_handle = fopen($filename, "r");
   if($file_handle == false) {
     exit("Error:failed to open file $filename");
@@ -60,7 +55,7 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $filename = "$file_path/fscanf_variation54.tmp";
 unlink($filename);
 ?>
@@ -98,4 +93,3 @@ array(1) {
 }
 
 *** Done ***
-

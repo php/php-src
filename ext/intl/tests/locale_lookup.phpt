@@ -7,45 +7,45 @@ locale_lookup.phpt() icu >= 4.8 && icu < 50.1.2
 <?php
 
 /*
- * Try parsing different Locales  
+ * Try parsing different Locales
  * with Procedural and Object methods.
  */
 
 function ut_main()
 {
-	$loc_ranges = array(
-		'de-de',
-		'sl_IT',
-		'sl_IT_Nedis',
-		'jbo',
-		'art-lojban'
-	);
-	
-	$lang_tags = array(
-		'de-DEVA',
-		'de-DE-1996',
-		'de-DE',
-		'zh_Hans',
-		'de-CH-1996',
-		'sl_IT',
-		'sl_IT_nedis-a-kirti-x-xyz',
-		'sl_IT_rozaj',
-		'sl_IT_NEDIS_ROJAZ_1901',
-		'i-enochian',
-		'sgn-CH-de',
-		'art-lojban',
-		'i-lux',
-		'art-lojban',
-		'jbo',
-		'en_sl_IT',
-		'zh-Hant-CN-x-prv1-prv2'
-	);
+    $loc_ranges = array(
+        'de-de',
+        'sl_IT',
+        'sl_IT_Nedis',
+        'jbo',
+        'art-lojban'
+    );
+
+    $lang_tags = array(
+        'de-DEVA',
+        'de-DE-1996',
+        'de-DE',
+        'zh_Hans',
+        'de-CH-1996',
+        'sl_IT',
+        'sl_IT_nedis-a-kirti-x-xyz',
+        'sl_IT_rozaj',
+        'sl_IT_NEDIS_ROJAZ_1901',
+        'i-enochian',
+        'sgn-CH-de',
+        'art-lojban',
+        'i-lux',
+        'art-lojban',
+        'jbo',
+        'en_sl_IT',
+        'zh-Hant-CN-x-prv1-prv2'
+    );
 
 
     $res_str = '';
     $isCanonical = false;
 
-	foreach($loc_ranges as $loc_range){
+    foreach($loc_ranges as $loc_range){
             $res_str .="--------------\n";
             $result= ut_loc_locale_lookup( $lang_tags , $loc_range,$isCanonical,"en_US");
             $comma_arr =implode(",",$lang_tags);
@@ -56,9 +56,9 @@ function ut_main()
             $can_loc_range = ut_loc_canonicalize($loc_range);
             $res_str .= "Canonical lookup result:$result\n";
 
-	}
+    }
 
-	$res_str .= "\n";
+    $res_str .= "\n";
     return $res_str;
 
 }

@@ -3,17 +3,21 @@ fstat() tests
 --FILE--
 <?php
 
-$filename = dirname(__FILE__)."/fstat.dat";
+$filename = __DIR__."/fstat.dat";
 
 $fp = fopen($filename, "w");
 var_dump(fstat($fp));
 fclose($fp);
-var_dump(fstat($fp));
+try {
+    var_dump(fstat($fp));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 @unlink($filename);
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 array(26) {
   [0]=>
   int(%i)
@@ -68,7 +72,5 @@ array(26) {
   ["blocks"]=>
   int(%i)
 }
-
-Warning: fstat(): supplied resource is not a valid stream resource in %s on line %d
-bool(false)
+fstat(): supplied resource is not a valid stream resource
 Done

@@ -15,10 +15,10 @@ foreach($stat_result as $key =>$value) {
       // windows, dev and rdev will not match this is expected
    }
    else {
-	   if ($fstat_result[$key] != $value) {
-	      echo "FAIL: stat differs at '$key'. $fstat_result[$key] -- $value\n";
-	      $failed = true;
-	   }
+       if ($fstat_result[$key] != $value) {
+          echo "FAIL: stat differs at '$key'. $fstat_result[$key] -- $value\n";
+          $failed = true;
+       }
    }
 }
 if ($failed !== true) {
@@ -27,7 +27,5 @@ if ($failed !== true) {
 
 
 ?>
-===DONE===
 --EXPECT--
 PASSED: all elements are the same
-===DONE===

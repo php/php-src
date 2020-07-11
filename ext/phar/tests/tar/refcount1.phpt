@@ -2,15 +2,13 @@
 Phar: test that refcounting avoids problems with deleting a file tar-based
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("spl")) die("skip SPL not available"); ?>
-<?php if (version_compare(PHP_VERSION, "5.3", "<")) die("skip requires 5.3 or later"); ?>
 --INI--
 phar.readonly=0
 phar.require_hash=0
 --FILE--
 <?php
-include dirname(__FILE__) . '/files/tarmaker.php.inc';
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.tar';
+include __DIR__ . '/files/tarmaker.php.inc';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.tar';
 $alias = 'phar://' . $fname;
 
 $tar = new tarmaker($fname, 'none');
@@ -25,13 +23,13 @@ $files['b/c.php'] = '<?php echo "This is b/c\n"; ?>';
 $files['.phar/alias.txt'] = 'hio';
 
 foreach ($files as $n => $file) {
-	$tar->addFile($n, $file);
+    $tar->addFile($n, $file);
 }
 
 $tar->close();
 
 $fp = fopen($alias . '/b/c.php', 'wb');
-fwrite($fp, b"extra");
+fwrite($fp, "extra");
 fclose($fp);
 echo "===CLOSE===\n";
 $phar = new Phar($fname);
@@ -48,9 +46,8 @@ include $alias . '/b/c.php';
 
 ?>
 
-===DONE===
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.tar'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar'); ?>
 --EXPECTF--
 ===CLOSE===
 object(PharFileInfo)#%d (2) {
@@ -71,4 +68,3 @@ object(PharFileInfo)#%d (2) {
 }
 string(5) "extra"
 extra
-===DONE===

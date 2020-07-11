@@ -10,21 +10,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype  : string setlocale (int $category , string $locale [,string $..] )
-              : string setlocale(int $category , array $locale);  
- * Description: Sets locale information.Returns the new current locale , or FALSE if locale functionality is not implemented in this platform. 
- * Source code: ext/standard/string.c
-*/
-
 echo "*** Testing setlocale() : error conditions ***\n";
-
-// Zero argument
-echo "\n-- Testing setlocale() function with Zero arguments --";
-var_dump( setlocale());
-
-// One argument
-echo "\n-- Testing setlocale() function with One argument, 'category' = LC_ALL --";
-var_dump( setlocale(LC_ALL) );
 
 echo "\n-- Testing setlocale() function with invalid locale array, 'category' = LC_ALL --\n";
 //Invalid array of locales
@@ -43,14 +29,6 @@ echo "\nDone";
 ?>
 --EXPECTF--
 *** Testing setlocale() : error conditions ***
-
--- Testing setlocale() function with Zero arguments --
-Warning: setlocale() expects at least 2 parameters, 0 given in %s on line %d
-NULL
-
--- Testing setlocale() function with One argument, 'category' = LC_ALL --
-Warning: setlocale() expects at least 2 parameters, 1 given in %s on line %d
-NULL
 
 -- Testing setlocale() function with invalid locale array, 'category' = LC_ALL --
 bool(false)

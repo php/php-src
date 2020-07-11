@@ -2,11 +2,6 @@
 Test array_walk() function : usage variations - different callback functions
 --FILE--
 <?php
-/* Prototype  : bool array_walk(array $input, string $funcname [, mixed $userdata])
- * Description: Apply a user function to every member of an array 
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Passing different types of callback functions to array_walk()
  *   without parameters
@@ -46,11 +41,11 @@ function callback_no_parameter()
 var_dump( array_walk($input, 'callback_no_parameter'));
 
 echo "-- passing one more parameter to function with two parameters --\n";
-var_dump( array_walk($input, 'callback_two_parameter', 10)); 
+var_dump( array_walk($input, 'callback_two_parameter', 10));
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_walk() : callback function variation ***
 -- callback function with both parameters --
 int(0)

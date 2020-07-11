@@ -1,7 +1,7 @@
 /*
  * Copyright (c) Christos Zoulas 2008.
  * All Rights Reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -11,7 +11,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- *  
+ *
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -41,8 +41,8 @@
 			return toomany(ms, "program headers", phnum);
 		flags |= FLAGS_IS_CORE;
 		if (dophn_core(ms, clazz, swap, fd,
-		    (zend_off_t)elf_getu(swap, elfhdr.e_phoff), phnum,
-		    (size_t)elf_getu16(swap, elfhdr.e_phentsize),
+		    CAST(zend_off_t, elf_getu(swap, elfhdr.e_phoff)), phnum,
+		    CAST(size_t, elf_getu16(swap, elfhdr.e_phentsize)),
 		    fsize, &flags, &notecount) == -1)
 			return -1;
 		break;
@@ -56,8 +56,8 @@
 		if (shnum > ms->elf_shnum_max)
 			return toomany(ms, "section", shnum);
 		if (dophn_exec(ms, clazz, swap, fd,
-		    (zend_off_t)elf_getu(swap, elfhdr.e_phoff), phnum,
-		    (size_t)elf_getu16(swap, elfhdr.e_phentsize),
+		    CAST(zend_off_t, elf_getu(swap, elfhdr.e_phoff)), phnum,
+		    CAST(size_t, elf_getu16(swap, elfhdr.e_phentsize)),
 		    fsize, shnum, &flags, &notecount) == -1)
 			return -1;
 		/*FALLTHROUGH*/
@@ -66,10 +66,10 @@
 		if (shnum > ms->elf_shnum_max)
 			return toomany(ms, "section headers", shnum);
 		if (doshn(ms, clazz, swap, fd,
-		    (zend_off_t)elf_getu(swap, elfhdr.e_shoff), shnum,
-		    (size_t)elf_getu16(swap, elfhdr.e_shentsize),
+		    CAST(zend_off_t, elf_getu(swap, elfhdr.e_shoff)), shnum,
+		    CAST(size_t, elf_getu16(swap, elfhdr.e_shentsize)),
 		    fsize, elf_getu16(swap, elfhdr.e_machine),
-		    (int)elf_getu16(swap, elfhdr.e_shstrndx),
+		    CAST(int, elf_getu16(swap, elfhdr.e_shstrndx)),
 		    &flags, &notecount) == -1)
 			return -1;
 		break;

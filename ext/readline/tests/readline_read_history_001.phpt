@@ -5,9 +5,9 @@ readline_read_history(): Basic test
 --FILE--
 <?php
 
-$name = tempnam('/tmp', 'readline.tmp');
+$name = tempnam(sys_get_temp_dir(), 'readline.tmp');
 
-readline_add_history("foo\n");
+readline_add_history("foo");
 
 var_dump(readline_write_history($name));
 

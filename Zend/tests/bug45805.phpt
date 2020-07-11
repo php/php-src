@@ -1,7 +1,5 @@
 --TEST--
 Bug #45805 (Crash on throwing exception from error handler)
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 class PHPUnit_Util_ErrorHandler
@@ -31,16 +29,16 @@ class B {
 }
 
 set_error_handler(
-  array('PHPUnit_Util_ErrorHandler', 'handleError'), E_ALL | E_STRICT
+  array('PHPUnit_Util_ErrorHandler', 'handleError'), E_ALL
 );
-            
+
 $o = new B;
 $o->bar();
 ?>
 --EXPECTF--
 Fatal error: Uncaught RuntimeException in %sbug45805.php:%d
 Stack trace:
-#0 %sbug45805.php(%d): PHPUnit_Util_ErrorHandler::handleError(8, 'Only variables ...', '%s', %d, Array)
+#0 %sbug45805.php(%d): PHPUnit_Util_ErrorHandler::handleError(8, 'Only variables ...', '%s', %d)
 #1 [internal function]: B->foo()
 #2 %sbug45805.php(%d): ReflectionMethod->invoke(Object(B))
 #3 %sbug45805.php(%d): B->bar()

@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,11 +14,15 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #define ZEND_INCLUDE_FULL_WINDOWS_HEADERS
 
 #include "php.h"
+#ifdef strcasecmp
+# undef strcasecmp
+#endif
+#ifdef strncasecmp
+# undef strncasecmp
+#endif
 #include "zend_smart_str.h"
 #include "ext/standard/info.h"
 #include "ext/standard/head.h"
@@ -42,11 +44,12 @@
 #include "util_script.h"
 #include "http_core.h"
 #include "ap_mpm.h"
-#if !defined(WIN32) && !defined(WINNT) && !defined(NETWARE)
+#ifndef PHP_WIN32
 #include "unixd.h"
 #endif
 
 #include "php_apache.h"
+#include "php_functions_arginfo.h"
 
 #ifdef ZTS
 int php_apache2_info_id;
@@ -67,8 +70,7 @@ static request_rec *php_apache_lookup_uri(char *filename)
 	return ap_sub_req_lookup_uri(filename, ctx->r, ctx->r->output_filters);
 }
 
-/* {{{ proto bool virtual(string uri)
- Perform an apache sub-request */
+/* {{{ Perform an apache sub-request */
 PHP_FUNCTION(virtual)
 {
 	char *filename;
@@ -76,7 +78,7 @@ PHP_FUNCTION(virtual)
 	request_rec *rr;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &filename, &filename_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!(rr = php_apache_lookup_uri(filename))) {
@@ -122,7 +124,7 @@ PHP_FUNCTION(apache_lookup_uri)
 	size_t filename_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &filename, &filename_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!(rr = php_apache_lookup_uri(filename))) {
@@ -168,8 +170,7 @@ PHP_FUNCTION(apache_lookup_uri)
 	RETURN_FALSE;
 }
 
-/* {{{ proto array getallheaders(void)
-   Fetch all HTTP request headers */
+/* {{{ Fetch all HTTP request headers */
 PHP_FUNCTION(apache_request_headers)
 {
 	php_struct *ctx;
@@ -177,7 +178,7 @@ PHP_FUNCTION(apache_request_headers)
 	char *key, *val;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	array_init(return_value);
@@ -192,8 +193,7 @@ PHP_FUNCTION(apache_request_headers)
 }
 /* }}} */
 
-/* {{{ proto array apache_response_headers(void)
-   Fetch all HTTP response headers */
+/* {{{ Fetch all HTTP response headers */
 PHP_FUNCTION(apache_response_headers)
 {
 	php_struct *ctx;
@@ -201,7 +201,7 @@ PHP_FUNCTION(apache_response_headers)
 	char *key, *val;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	array_init(return_value);
@@ -216,8 +216,7 @@ PHP_FUNCTION(apache_response_headers)
 }
 /* }}} */
 
-/* {{{ proto string apache_note(string note_name [, string note_value])
-   Get and set Apache request notes */
+/* {{{ Get and set Apache request notes */
 PHP_FUNCTION(apache_note)
 {
 	php_struct *ctx;
@@ -226,7 +225,7 @@ PHP_FUNCTION(apache_note)
 	char *old_note_val=NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s", &note_name, &note_name_len, &note_val, &note_val_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	ctx = SG(server_context);
@@ -246,8 +245,7 @@ PHP_FUNCTION(apache_note)
 /* }}} */
 
 
-/* {{{ proto bool apache_setenv(string variable, string value [, bool walk_to_top])
-   Set an Apache subprocess_env variable */
+/* {{{ Set an Apache subprocess_env variable */
 /*
  * XXX this doesn't look right. shouldn't it be the parent ?*/
 PHP_FUNCTION(apache_setenv)
@@ -260,7 +258,7 @@ PHP_FUNCTION(apache_setenv)
 	request_rec *r;
 
 	if (zend_parse_parameters(arg_count, "ss|b", &variable, &variable_len, &string_val, &string_val_len, &walk_to_top) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	ctx = SG(server_context);
@@ -280,8 +278,7 @@ PHP_FUNCTION(apache_setenv)
 }
 /* }}} */
 
-/* {{{ proto bool apache_getenv(string variable [, bool walk_to_top])
-   Get an Apache subprocess_env variable */
+/* {{{ Get an Apache subprocess_env variable */
 /*
  * XXX: shouldn't this be the parent not the 'prev'
  */
@@ -296,7 +293,7 @@ PHP_FUNCTION(apache_getenv)
 	request_rec *r;
 
 	if (zend_parse_parameters(arg_count, "s|b", &variable, &variable_len, &walk_to_top) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	ctx = SG(server_context);
@@ -329,8 +326,7 @@ static char *php_apache_get_version()
 #endif
 }
 
-/* {{{ proto string apache_get_version(void)
-   Fetch Apache version */
+/* {{{ Fetch Apache version */
 PHP_FUNCTION(apache_get_version)
 {
 	char *apv = php_apache_get_version();
@@ -343,8 +339,7 @@ PHP_FUNCTION(apache_get_version)
 }
 /* }}} */
 
-/* {{{ proto array apache_get_modules(void)
-   Get a list of loaded Apache modules */
+/* {{{ Get a list of loaded Apache modules */
 PHP_FUNCTION(apache_get_modules)
 {
 	int n;
@@ -371,12 +366,12 @@ PHP_MINFO_FUNCTION(apache)
 	int n, max_requests;
 	char *p;
 	server_rec *serv = ((php_struct *) SG(server_context))->r->server;
-#if !defined(WIN32) && !defined(WINNT) && !defined(NETWARE)
-#if MODULE_MAGIC_NUMBER_MAJOR >= 20081201
+#ifndef PHP_WIN32
+# if MODULE_MAGIC_NUMBER_MAJOR >= 20081201
 	AP_DECLARE_DATA extern unixd_config_rec ap_unixd_config;
-#else
+# else
 	AP_DECLARE_DATA extern unixd_config_rec unixd_config;
-#endif
+# endif
 #endif
 
 	for (n = 0; ap_loaded_modules[n]; ++n) {
@@ -410,7 +405,7 @@ PHP_MINFO_FUNCTION(apache)
 	snprintf(tmp, sizeof(tmp), "%s:%u", serv->server_hostname, serv->port);
 	php_info_print_table_row(2, "Hostname:Port", tmp);
 
-#if !defined(WIN32) && !defined(WINNT) && !defined(NETWARE)
+#ifndef PHP_WIN32
 #if MODULE_MAGIC_NUMBER_MAJOR >= 20081201
 	snprintf(tmp, sizeof(tmp), "%s(%d)/%d", ap_unixd_config.user_name, ap_unixd_config.user_id, ap_unixd_config.group_id);
 #else
@@ -479,62 +474,10 @@ PHP_MINFO_FUNCTION(apache)
 	}
 }
 
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_apache2handler_lookup_uri, 0, 0, 1)
-	ZEND_ARG_INFO(0, filename)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_apache2handler_virtual, 0, 0, 1)
-	ZEND_ARG_INFO(0, uri)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_apache2handler_response_headers, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_apache2handler_getallheaders, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_apache2handler_note, 0, 0, 1)
-	ZEND_ARG_INFO(0, note_name)
-	ZEND_ARG_INFO(0, note_value)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_apache2handler_setenv, 0, 0, 2)
-	ZEND_ARG_INFO(0, variable)
-	ZEND_ARG_INFO(0, value)
-	ZEND_ARG_INFO(0, walk_to_top)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_apache2handler_getenv, 0, 0, 1)
-	ZEND_ARG_INFO(0, variable)
-	ZEND_ARG_INFO(0, walk_to_top)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_apache2handler_get_version, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_apache2handler_get_modules, 0)
-ZEND_END_ARG_INFO()
-/* }}} */
-
-static const zend_function_entry apache_functions[] = {
-	PHP_FE(apache_lookup_uri, 		arginfo_apache2handler_lookup_uri)
-	PHP_FE(virtual, 				arginfo_apache2handler_virtual)
-	PHP_FE(apache_request_headers, 	arginfo_apache2handler_getallheaders)
-	PHP_FE(apache_response_headers, arginfo_apache2handler_response_headers)
-	PHP_FE(apache_setenv, 		arginfo_apache2handler_setenv)
-	PHP_FE(apache_getenv, 		arginfo_apache2handler_getenv)
-	PHP_FE(apache_note, 		arginfo_apache2handler_note)
-	PHP_FE(apache_get_version, 	arginfo_apache2handler_get_version)
-	PHP_FE(apache_get_modules, 	arginfo_apache2handler_get_modules)
-	PHP_FALIAS(getallheaders, 	apache_request_headers, arginfo_apache2handler_getallheaders)
-	{NULL, NULL, NULL}
-};
-
 PHP_INI_BEGIN()
-	STD_PHP_INI_ENTRY("xbithack",		"0",	PHP_INI_ALL,	OnUpdateBool,	xbithack,	php_apache2_info_struct, php_apache2_info)
-	STD_PHP_INI_ENTRY("engine",		"1",	PHP_INI_ALL,	OnUpdateBool,	engine, 	php_apache2_info_struct, php_apache2_info)
-	STD_PHP_INI_ENTRY("last_modified",	"0",	PHP_INI_ALL,	OnUpdateBool,	last_modified,	php_apache2_info_struct, php_apache2_info)
+	STD_PHP_INI_BOOLEAN("xbithack",		"0",	PHP_INI_ALL,	OnUpdateBool,	xbithack,	php_apache2_info_struct, php_apache2_info)
+	STD_PHP_INI_BOOLEAN("engine",		"1",	PHP_INI_ALL,	OnUpdateBool,	engine, 	php_apache2_info_struct, php_apache2_info)
+	STD_PHP_INI_BOOLEAN("last_modified",	"0",	PHP_INI_ALL,	OnUpdateBool,	last_modified,	php_apache2_info_struct, php_apache2_info)
 PHP_INI_END()
 
 static PHP_MINIT_FUNCTION(apache)
@@ -555,21 +498,12 @@ static PHP_MSHUTDOWN_FUNCTION(apache)
 zend_module_entry php_apache_module = {
 	STANDARD_MODULE_HEADER,
 	"apache2handler",
-	apache_functions,
+	ext_functions,
 	PHP_MINIT(apache),
 	PHP_MSHUTDOWN(apache),
 	NULL,
 	NULL,
 	PHP_MINFO(apache),
-	NULL,
+	PHP_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

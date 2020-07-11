@@ -10,7 +10,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-chdir(dirname(__FILE__));
+chdir(__DIR__);
 @unlink('test.file');
 if (file_exists('test.file')) {
     echo "test.file exists\n";
@@ -97,4 +97,3 @@ test.file is a regular file
 test.file is not a directory
 test.file does not exist
 test.file does not exist
-

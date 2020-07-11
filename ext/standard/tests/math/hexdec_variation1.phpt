@@ -8,11 +8,6 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 ?>
 --FILE--
 <?php
-/* Prototype  : number hexdec  ( string $hex_string  )
- * Description: Returns the decimal equivalent of the hexadecimal number represented by the hex_string  argument. 
- * Source code: ext/standard/math.c
- */
-
 echo "*** Testing hexdec() : usage variations ***\n";
 //get an unset variable
 $unset_var = 10;
@@ -32,9 +27,9 @@ $inputs = array(
 /*1*/  0,
        1,
        12345,
-       -2345,       
-       4294967295,  // largest decimal  
-       4294967296, 
+       -2345,
+       4294967295,  // largest decimal
+       4294967296,
 
        // float data
 /*7*/  10.5,
@@ -52,7 +47,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*18*/ "",
        '',
@@ -76,13 +71,16 @@ $inputs = array(
 // loop through each element of $inputs to check the behaviour of hexdec()
 $iterator = 1;
 foreach($inputs as $input) {
-	echo "\n-- Iteration $iterator --\n";
-	var_dump(hexdec($input));
-	$iterator++;
+    echo "\n-- Iteration $iterator --\n";
+    try {
+        var_dump(hexdec($input));
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
+    $iterator++;
 };
 fclose($fp);
 ?>
-===Done===
 --EXPECTF--
 *** Testing hexdec() : usage variations ***
 
@@ -96,6 +94,8 @@ int(1)
 int(74565)
 
 -- Iteration 4 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(9029)
 
 -- Iteration 5 --
@@ -105,18 +105,26 @@ float(285960729237)
 float(285960729238)
 
 -- Iteration 7 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(261)
 
 -- Iteration 8 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(261)
 
 -- Iteration 9 --
 float(20015998341120)
 
 -- Iteration 10 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 float(1250999896553)
 
 -- Iteration 11 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(5)
 
 -- Iteration 12 --
@@ -144,17 +152,21 @@ int(0)
 int(0)
 
 -- Iteration 20 --
-
-Notice: Array to string conversion in %s on line %d
-int(170)
+hexdec(): Argument #1 ($hex_string) must be of type string, array given
 
 -- Iteration 21 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(2748)
 
 -- Iteration 22 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(2748)
 
 -- Iteration 23 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(2748)
 
 -- Iteration 24 --
@@ -164,5 +176,4 @@ int(0)
 int(0)
 
 -- Iteration 26 --
-%s
-===Done===
+hexdec(): Argument #1 ($hex_string) must be of type string, resource given

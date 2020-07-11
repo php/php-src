@@ -1,0 +1,3 @@
+ext\pdo\pdo_sql_parser.c: ext\pdo\pdo_sql_parser.re
+	cd $(PHP_SRC_DIR)
+	$(RE2C) $(RE2C_FLAGS) --no-generation-date -o ext/pdo/pdo_sql_parser.c ext/pdo/pdo_sql_parser.re

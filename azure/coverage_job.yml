@@ -1,0 +1,45 @@
+parameters:
+  configurationName: ''
+  configurationParameters: ''
+  runTestsParameters: ''
+  timeoutInMinutes: 60
+
+jobs:
+  - job: ${{ parameters.configurationName }}
+    timeoutInMinutes: ${{ parameters.timeoutInMinutes }}
+    pool:
+      vmImage: 'ubuntu-18.04'
+    steps:
+    - template: apt.yml
+    - script: |
+        sudo -H pip install gcovr
+      displayName: 'Install gcovr'
+    - template: configure.yml
+      parameters:
+        configurationParameters: --enable-gcov ${{ parameters.configurationParameters }}
+    - script: make -j$(/usr/bin/nproc) >/dev/null
+      displayName: 'Make Build'
+    - template: install.yml
+    - template: setup.yml
+    - template: test.yml
+      parameters:
+        configurationName: ${{ parameters.configurationName }}
+        runTestsParameters: ${{ parameters.runTestsParameters }}
+    - template: test.yml
+      parameters:
+        configurationName: ${{ parameters.configurationName }}
+        runTestsName: 'OpCache'
+        runTestsParameters: >-
+          ${{ parameters.runTestsParameters }}
+          -d zend_extension=opcache.so
+    - script: |
+        make gcovr-xml
+        mv gcovr.xml coverage.xml
+      displayName: 'Generate ${{ parameters.configurationName }} Test Coverage'
+      condition: or(succeeded(), failed())
+    - task: PublishCodeCoverageResults@1
+      inputs:
+        codeCoverageTool: 'Cobertura'
+        summaryFileLocation: coverage.xml
+      displayName: 'Publish ${{ parameters.configurationName }} Test Coverage'
+      condition: or(succeeded(), failed())

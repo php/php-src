@@ -1,5 +1,5 @@
 --TEST--
-Test touch() function : basic functionality 
+Test touch() function : basic functionality
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --SKIPIF--
@@ -10,15 +10,9 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype  : proto bool touch(string filename [, int time [, int atime]])
- * Description: Set modification time of file 
- * Source code: ext/standard/filestat.c
- * Alias to functions: 
- */
-
 echo "*** Testing touch() : basic functionality ***\n";
 
-$filename = dirname(__FILE__)."/touch_私はガラスを食べられます.dat";
+$filename = __DIR__."/touch_私はガラスを食べられます.dat";
 
 echo "\n--- testing touch creates a file ---\n";
 @unlink($filename);
@@ -93,4 +87,3 @@ ctime=%d
 mtime=10000
 atime=20470
 Done
-

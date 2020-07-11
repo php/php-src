@@ -14,4 +14,4 @@ $db->sqliteCreateFunction('bar-alias', 'bar');
 
 ?>
 --EXPECTF--
-Warning: PDO::sqliteCreateFunction(): function 'bar' is not callable in %s on line %d
+Warning: PDO::sqliteCreateFunction(): Function 'bar' is not callable in %s on line %d

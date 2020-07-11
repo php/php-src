@@ -2,10 +2,6 @@
 Test is_array() function
 --FILE--
 <?php
-/* Prototype: bool is_array ( mixed $var );
- * Description: Finds whether the given variable is an array
- */
-
 echo "*** Testing is_array() on different type of arrays ***\n";
 /* different types of arrays */
 $arrays = array(
@@ -25,7 +21,7 @@ $arrays = array(
   array("string", "test"),
   array('string', 'test')
 );
-/* loop to check that is_array() recognizes different 
+/* loop to check that is_array() recognizes different
    type of arrays, expected output bool(true) */
 $loop_counter = 1;
 foreach ($arrays as $var_array ) {
@@ -37,16 +33,16 @@ echo "\n*** Testing is_array() on non array types ***\n";
 
 // get a resource type variable
 $fp = fopen (__FILE__, "r");
-$dfp = opendir ( dirname(__FILE__) );
+$dfp = opendir ( __DIR__ );
 
-// unset variables 
+// unset variables
 $unset_array = array(10);
 unset($unset_array);
 
-// other types in a array 
+// other types in a array
 $varient_arrays = array (
   /* integers */
-  543915, 
+  543915,
   -5322,
   0x55F,
   -0xCCF,
@@ -54,7 +50,7 @@ $varient_arrays = array (
   -0654,
 
   /* strings */
-  "",  
+  "",
   '',
   "0",
   '0',
@@ -68,20 +64,20 @@ $varient_arrays = array (
   .5E+8,
   -.5e+90,
   1e5,
-  
+
   /* objects */
-  new stdclass, 
-  
+  new stdclass,
+
   /* resources */
-  $fp, 
-  $dfp, 
+  $fp,
+  $dfp,
 
   /* nulls */
-  null,  
+  null,
   NULL,
 
   /* boolean */
-  true, 
+  true,
   TRUE,
   FALSE,
   false,
@@ -90,7 +86,7 @@ $varient_arrays = array (
   @$unset_array,
   @$undefined_array
 );
-/* loop through the $varient_array to see working of 
+/* loop through the $varient_array to see working of
    is_array() on non array types, expected output bool(false) */
 $loop_counter = 1;
 foreach ($varient_arrays as $type ) {
@@ -98,19 +94,12 @@ foreach ($varient_arrays as $type ) {
   var_dump( is_array ($type) );
 }
 
-echo "\n*** Testing error conditions ***\n";
-//Zero argument
-var_dump( is_array() );
-
-//arguments more than expected 
-var_dump( is_array ($fp, $fp) );
- 
 echo "Done\n";
 /* close resources */
 fclose($fp);
 closedir($dfp);
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing is_array() on different type of arrays ***
 -- Iteration 1 --
 bool(true)
@@ -201,13 +190,5 @@ bool(false)
 -- Iteration 28 --
 bool(false)
 -- Iteration 29 --
-bool(false)
-
-*** Testing error conditions ***
-
-Warning: is_array() expects exactly 1 parameter, 0 given in %s on line %d
-bool(false)
-
-Warning: is_array() expects exactly 1 parameter, 2 given in %s on line %d
 bool(false)
 Done

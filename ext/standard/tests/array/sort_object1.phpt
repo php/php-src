@@ -2,13 +2,8 @@
 Test sort() function : object functionality - sorting objects, 'sort_flags' as default/SORT_REGULAR
 --FILE--
 <?php
-/* Prototype  : bool sort ( array &$array [, int $sort_flags] )
- * Description: This function sorts an array. 
-                Elements will be arranged from lowest to highest when this function has completed.
- * Source code: ext/standard/array.c
-*/
 /*
- * testing sort() by providing integer/string object arrays with flag values are defualt, SORT_REGULAR
+ * testing sort() by providing integer/string object arrays with flag values are default, SORT_REGULAR
 */
 
 echo "*** Testing sort() : object functionality ***\n";
@@ -41,14 +36,14 @@ class for_string_sort
 }
 
 // array of integer objects
-$unsorted_int_obj = array( 
+$unsorted_int_obj = array(
   new for_integer_sort(11), new for_integer_sort(66),
   new for_integer_sort(23), new for_integer_sort(-5),
   new for_integer_sort(0.001), new for_integer_sort(0)
 );
 
 // array of string objects
-$unsorted_str_obj = array ( 
+$unsorted_str_obj = array (
   new for_string_sort("axx"), new for_string_sort("t"),
   new for_string_sort("w"), new for_string_sort("py"),
   new for_string_sort("apple"), new for_string_sort("Orange"),
@@ -56,14 +51,14 @@ $unsorted_str_obj = array (
 );
 
 
-echo "\n-- Testing sort() by supplying various object arrays, 'flag' value is defualt --\n";
+echo "\n-- Testing sort() by supplying various object arrays, 'flag' value is default --\n";
 
-// testing sort() function by supplying integer object array, flag value is defualt
+// testing sort() function by supplying integer object array, flag value is default
 $temp_array = $unsorted_int_obj;
 var_dump(sort($temp_array) );
 var_dump($temp_array);
 
-// testing sort() function by supplying string object array, flag value is defualt
+// testing sort() function by supplying string object array, flag value is default
 $temp_array = $unsorted_str_obj;
 var_dump(sort($temp_array) );
 var_dump($temp_array);
@@ -84,7 +79,7 @@ echo "Done\n";
 --EXPECTF--
 *** Testing sort() : object functionality ***
 
--- Testing sort() by supplying various object arrays, 'flag' value is defualt --
+-- Testing sort() by supplying various object arrays, 'flag' value is default --
 bool(true)
 array(6) {
   [0]=>

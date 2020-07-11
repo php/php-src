@@ -1,15 +1,15 @@
 --TEST--
-oci_lob_free()/close() 
+oci_lob_free()/close()
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
-?> 
+require(__DIR__.'/skipif.inc');
+?>
 --FILE--
 <?php
-	
-require dirname(__FILE__).'/connect.inc';
-require dirname(__FILE__).'/create_table.inc';
+
+require __DIR__.'/connect.inc';
+require __DIR__.'/create_table.inc';
 
 $ora_sql = "INSERT INTO
                        ".$schema.$table_name." (blob)
@@ -29,7 +29,6 @@ var_dump($blob->write("test"));
 var_dump($blob->close());
 var_dump($blob->write("test"));
 var_dump($blob->free());
-var_dump($blob->write("test"));
 
 oci_commit($c);
 
@@ -39,19 +38,16 @@ oci_execute($s);
 
 var_dump(oci_fetch_array($s, OCI_NUM + OCI_RETURN_LOBS));
 
-require dirname(__FILE__).'/drop_table.inc';
+require __DIR__.'/drop_table.inc';
 
 echo "Done\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 int(4)
 bool(true)
 int(4)
 bool(true)
-
-Warning: OCI-Lob::write(): %s is not a valid oci8 descriptor resource in %slob_014.php on line %d
-bool(false)
 array(1) {
   [0]=>
   string(8) "testtest"

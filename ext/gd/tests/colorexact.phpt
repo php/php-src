@@ -31,7 +31,7 @@ echo imagecolorexact($im, 12,12,12) . "\n";
 
 imagedestroy($im);
 ?>
---EXPECTF--
+--EXPECT--
 FF00FF
 64FF00FF
 0

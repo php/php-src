@@ -1,7 +1,7 @@
 --TEST--
 Bug #51615 (PHP crash with wrong HTML in SimpleXML)
 --SKIPIF--
-<?php if (!extension_loaded("simplexml")) print "skip"; 
+<?php if (!extension_loaded("simplexml")) print "skip";
  if (!extension_loaded("dom")) print "skip";
 ?>
 --FILE--
@@ -14,7 +14,7 @@ $html = simplexml_import_dom($dom);
 var_dump($html->body->span);
 
 foreach ($html->body->span as $obj) {
-	var_dump((string)$obj->title);
+    var_dump((string)$obj->title);
 }
 
 ?>

@@ -13,7 +13,7 @@ c:
     print "ok!\n";
     goto b;
 ?>
---EXPECTF--
+--EXPECT--
 ok!
 ok!
 ok!

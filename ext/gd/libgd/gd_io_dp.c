@@ -152,6 +152,9 @@ static int dynamicSeek (struct gdIOCtx *ctx, const int pos)
 	dynamicPtr *dp;
 	dpIOCtx *dctx;
 
+	if (pos < 0) {
+		return FALSE;
+	}
 	dctx = (dpIOCtx *) ctx;
 	dp = dctx->dp;
 

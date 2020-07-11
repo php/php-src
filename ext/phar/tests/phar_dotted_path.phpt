@@ -9,7 +9,7 @@ phar.require_hash=0
 --FILE--
 <?php
 
-$dir = dirname(__FILE__) . '/broken.dirname';
+$dir = __DIR__ . '/broken.dirname';
 mkdir($dir, 0777);
 
 $fname = $dir . '/dotted_path.phar';
@@ -29,13 +29,11 @@ foreach ($phar as $entry) {
 }
 
 ?>
-===DONE===
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) . '/broken.dirname/dotted_path.phar');
-rmdir(dirname(__FILE__) . '/broken.dirname');
+unlink(__DIR__ . '/broken.dirname/dotted_path.phar');
+rmdir(__DIR__ . '/broken.dirname');
 ?>
 --EXPECT--
 this is a
 this is b
-===DONE===

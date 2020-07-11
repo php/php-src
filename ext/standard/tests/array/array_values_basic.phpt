@@ -1,12 +1,7 @@
 --TEST--
-Test array_values() function : basic functionality 
+Test array_values() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : array array_values(array $input)
- * Description: Return just the values from the input array 
- * Source code: ext/standard/array.c
- */
-
 /*
  * Test basic functionality of array_values()
  */
@@ -22,8 +17,7 @@ var_dump( array_values($input) );
 
 echo "Done";
 ?>
-
---EXPECTF--
+--EXPECT--
 *** Testing array_values() : basic functionality ***
 array(5) {
   [0]=>

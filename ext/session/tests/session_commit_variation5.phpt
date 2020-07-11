@@ -9,12 +9,6 @@ session.use_strict_mode=0
 
 ob_start();
 
-/*
- * Prototype : bool session_commit(void)
- * Description : Write session data and end session
- * Source code : ext/session/session.c
- */
-
 echo "*** Testing session_commit() : variation ***\n";
 
 $id = md5(uniqid());
@@ -49,22 +43,21 @@ string(0) ""
 bool(true)
 string(32) "%s"
 bool(true)
-NULL
+bool(true)
+bool(true)
+string(32) "%s"
+bool(true)
 bool(true)
 string(32) "%s"
 bool(true)
 bool(true)
 string(32) "%s"
-NULL
-bool(true)
-string(32) "%s"
 bool(true)
 bool(true)
 string(32) "%s"
-NULL
+bool(true)
 bool(true)
 string(32) "%s"
 bool(true)
 bool(true)
 Done
-

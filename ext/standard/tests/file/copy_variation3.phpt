@@ -5,22 +5,19 @@ Test copy() function: usage variations - destination file names(white spaces)
 if(substr(PHP_OS, 0, 3) == "WIN")
   die("skip do not run on Windows");
 ?>
+--CONFLICTS--
+obscure_filename
 --FILE--
 <?php
-/* Prototype: bool copy ( string $source, string $dest );
-   Description: Makes a copy of the file source to dest.
-     Returns TRUE on success or FALSE on failure.
-*/
-
 /* Test copy() function: In creation of destination file names containing white spaces
      and checking the existence and size of destination files
 */
 
 echo "*** Test copy() function: destination file names containing whitespaces ***\n";
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $src_file_name = $file_path."/copy_variation3.tmp";
 $file_handle = fopen($src_file_name, "w");
-fwrite( $file_handle, str_repeat(b"Hello2World...\n", 100) );
+fwrite( $file_handle, str_repeat("Hello2World...\n", 100) );
 fclose($file_handle);
 
 /* array of destination file names */
@@ -30,7 +27,7 @@ $dest_files = array(
   "copy variation3.tmp",  //file name containing blank space
   " copy_variation3.tmp",  //file name starts with blank space
   "copy\tvariation3.tmp",
-  " ",  //blank space as file name 
+  " ",  //blank space as file name
 );
 
 echo "Size of the source file before copy operation => ";
@@ -43,9 +40,9 @@ foreach($dest_files as $dest_file) {
 
   echo "\n-- Iteration $count --\n";
   $dest_file_name = $dest_file;
-  
+
   echo "Copy operation => ";
-  var_dump( copy($src_file_name, $dest_file_name) );  
+  var_dump( copy($src_file_name, $dest_file_name) );
 
   echo "Existence of destination file => ";
   var_dump( file_exists($dest_file_name) );
@@ -69,13 +66,11 @@ foreach($dest_files as $dest_file) {
 
 echo "*** Done ***\n";
 ?>
-
 --CLEAN--
 <?php
-unlink(dirname(__FILE__)."/copy_variation3.tmp");
+unlink(__DIR__."/copy_variation3.tmp");
 ?>
-
---EXPECTF--
+--EXPECT--
 *** Test copy() function: destination file names containing whitespaces ***
 Size of the source file before copy operation => int(1500)
 

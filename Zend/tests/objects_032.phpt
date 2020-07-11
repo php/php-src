@@ -25,8 +25,7 @@ $a['foo']['bar'] = 2;
 var_dump($a);
 
 ?>
-==DONE==
---EXPECTF--
+--EXPECT--
 object(A)#1 (1) {
   ["foo"]=>
   array(1) {
@@ -37,4 +36,3 @@ object(A)#1 (1) {
     }
   }
 }
-==DONE==

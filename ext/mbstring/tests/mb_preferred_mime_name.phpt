@@ -6,11 +6,6 @@ mb_preferred_mime_name()
 <?php
 // TODO: Add more encoding names
 
-//$debug=true;
-ini_set('include_path', dirname(__FILE__));
-include_once('common.inc');
-
-
 $str = mb_preferred_mime_name('sjis-win');
 echo "$str\n";
 
@@ -39,12 +34,14 @@ $str = mb_preferred_mime_name('UCS4');
 echo "$str\n";
 
 echo "== INVALID PARAMETER ==\n";
-// Invalid name
-$r = mb_preferred_mime_name('BAD_NAME');
-($r === FALSE) ? print("OK_BAD_NAME\n") : print("NG_BAD_NAME\n");
+// Invalid encoding
+try {
+    var_dump(mb_preferred_mime_name('BAD_NAME'));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 ?>
-
 --EXPECT--
 Shift_JIS
 Shift_JIS
@@ -56,6 +53,4 @@ ISO-8859-1
 UCS-2
 UCS-4
 == INVALID PARAMETER ==
-ERR: Warning
-OK_BAD_NAME
-
+mb_preferred_mime_name(): Argument #1 ($encoding) must be a valid encoding, "BAD_NAME" given

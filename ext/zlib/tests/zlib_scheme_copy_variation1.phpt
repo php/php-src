@@ -1,14 +1,14 @@
 --TEST--
 Test compress.zlib:// scheme with the copy function: compressed to uncompressed
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded"; 
-}	 
+	print "skip - ZLIB extension not loaded";
+}
 ?>
 --FILE--
 <?php
-$inputFileName = dirname(__FILE__)."/004.txt.gz";
+$inputFileName = __DIR__."/004.txt.gz";
 $outputFileName = __FILE__.'.tmp';
 
 $srcFile = "compress.zlib://$inputFileName";
@@ -32,7 +32,5 @@ else {
 }
 unlink($outputFileName);
 ?>
-===DONE===
 --EXPECT--
 OK: Copy identical
-===DONE===

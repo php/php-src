@@ -5,16 +5,16 @@ Bug #55355 (Abstract functions required by a trait are not correctly found when 
 
 // A trait that has a abstract function
 trait ATrait {
-	function bar() {
-		$this->foo();
-	}
-	abstract function foo(); 
+    function bar() {
+        $this->foo();
+    }
+    abstract function foo();
 }
 
 // A class on the second level in the
 // inheritance chain
 class Level2Impl {
-	function foo() {}
+    function foo() {}
 }
 
 class Level1Indirect extends Level2Impl {}

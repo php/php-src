@@ -9,5 +9,5 @@ $a = new ArrayObject(array());
 $a->unserialize("");
 ?>
 Done
---EXPECTF--
+--EXPECT--
 Done

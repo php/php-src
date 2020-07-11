@@ -1,5 +1,5 @@
 --TEST--
-Test gettype() & settype() functions : usage variatoins
+Test gettype() & settype() functions : usage variations
 --SKIPIF--
 <?php
 if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
@@ -8,23 +8,16 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 precision=14
 --FILE--
 <?php
-/* Prototype: string gettype ( mixed $var );
-   Description: Returns the type of the PHP variable var
-
-   Prototype: bool settype ( mixed &$var, string $type );
-   Description: Set the type of variable var to type 
-*/
-
-/* Test usage variation of gettype() and settype() functions: 
-         settype() to null type. 
+/* Test usage variation of gettype() and settype() functions:
+         settype() to null type.
    Set type of the data to "null" and verify using gettype
    Following are performed in the listed sequence:
-     get the current type of the variable 
+     get the current type of the variable
      set the type of the variable to "null type"
      dump the variable to see its new data
      get the new type of the variable
 */
-     
+
 /* function to handle catchable errors */
 function foo($errno, $errstr, $errfile, $errline) {
 //	var_dump($errstr);
@@ -32,15 +25,11 @@ function foo($errno, $errstr, $errfile, $errline) {
    echo "$errno: $errstr\n";
 }
 //set the error handler, this is required as
-// settype() would fail with catachable fatal error 
-set_error_handler("foo"); 
+// settype() would fail with catachable fatal error
+set_error_handler("foo");
 
 $var1 = "another string";
 $var2 = array(2,3,4);
-
-// a variable which is unset
-$unset_var = 10.5;
-unset( $unset_var );
 
 class point
 {
@@ -57,15 +46,15 @@ class point
   }
 }
 
-$var_values = array ( 
+$var_values = array (
   /* nulls */
-  null,  
+  null,
 
   /* boolean */
-  FALSE, 
+  FALSE,
   TRUE,
   true,
- 
+
   /* strings */
   "\xFF",
   "\x66",
@@ -79,7 +68,7 @@ $var_values = array (
   "10",
   "10string",
   '10string',
-  "1",  
+  "1",
   "-1",
   "1e2",
   " 1",
@@ -125,11 +114,11 @@ $var_values = array (
   0555,
   -0555,
   02224242434343152, // an octal value > than max int
-  
+
   /* floats */
   1e5,
   -1e5,
-  1E5, 
+  1E5,
   -1E5,
   -1.5,
   .5,
@@ -149,13 +138,9 @@ $var_values = array (
   new point(NULL, NULL),
   new point(2.5, 40.5),
   new point(0, 0),
-
-  /* undefined/unset vars */
-  $unset_var,
-  $undef_var
 );
 
-/* test conversion to null type */                
+/* test conversion to null type */
 $type = "null";
 
 echo "\n*** Testing gettype() & settype() functions : usage variations ***\n";
@@ -164,25 +149,22 @@ $loop_count = 1;
 foreach ($var_values as $var) {
   echo "-- Iteration $loop_count --\n"; $loop_count++;
 
-  // get the current data type 
+  // get the current data type
   var_dump( gettype($var) );
-  
-  // convert it to null 
+
+  // convert it to null
   var_dump( settype($var, $type) );
 
-  // dump the converted data 
+  // dump the converted data
   var_dump( $var );
-  
+
   // check the new type after conversion
   var_dump( gettype($var) );
 }
 
 echo "Done\n";
 ?>
---EXPECTF--	
-8: Undefined variable: unset_var
-8: Undefined variable: undef_var
-
+--EXPECT--
 *** Testing gettype() & settype() functions : usage variations ***
 
 -- Setting type of data to null --
@@ -573,16 +555,6 @@ NULL
 string(4) "NULL"
 -- Iteration 78 --
 string(6) "object"
-bool(true)
-NULL
-string(4) "NULL"
--- Iteration 79 --
-string(4) "NULL"
-bool(true)
-NULL
-string(4) "NULL"
--- Iteration 80 --
-string(4) "NULL"
 bool(true)
 NULL
 string(4) "NULL"

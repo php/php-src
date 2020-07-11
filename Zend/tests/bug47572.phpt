@@ -14,4 +14,7 @@ $foo = new Foo();
 
 ?>
 --EXPECTF--
-Notice: Use of undefined constant FOO - assumed 'FOO' in %s on line %d
+Fatal error: Uncaught Error: Undefined constant "FOO" in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d

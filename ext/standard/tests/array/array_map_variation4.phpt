@@ -2,11 +2,6 @@
 Test array_map() function : usage variations - associative array with different keys
 --FILE--
 <?php
-/* Prototype  : array array_map  ( callback $callback  , array $arr1  [, array $...  ] )
- * Description: Applies the callback to the elements of the given arrays
- * Source code: ext/standard/array.c
- */
-
 /*
  * Test array_map() by passing associative array with different keys for $arr1 argument
  */
@@ -58,11 +53,11 @@ $arrays = array (
        array("hello", $heredoc => "string"), // heredoc
 
        // array with object, unset variable and resource variable
-       array(new classA() => 11, @$unset_var => "hello", $fp => 'resource'),
+       array(@$unset_var => "hello", $fp => 'resource'),
 
        // array with mixed values
-/*11*/ array('hello' => 1, new classA() => 2, "fruit" => 2.2, 
-              $fp => 'resource', 133 => "int", 444.432 => "float", 
+/*11*/ array('hello' => 1, "fruit" => 2.2,
+              $fp => 'resource', 133 => "int", 444.432 => "float",
               @$unset_var => "unset", $heredoc => "heredoc")
 );
 
@@ -79,13 +74,9 @@ echo "Done";
 --EXPECTF--
 *** Testing array_map() : associative array with diff. keys for 'arr1' argument ***
 
-Warning: Illegal offset type in %s on line %d%d
+Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 
-Warning: Illegal offset type in %s on line %d%d
-
-Warning: Illegal offset type in %s on line %d%d
-
-Warning: Illegal offset type in %s on line %d%d
+Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 -- Iteration 1 --
 array(0) {
 }
@@ -157,16 +148,20 @@ array(2) {
   string(6) "string"
 }
 -- Iteration 10 --
-array(1) {
+array(2) {
   [""]=>
   string(5) "hello"
+  [5]=>
+  string(8) "resource"
 }
 -- Iteration 11 --
-array(6) {
+array(7) {
   ["hello"]=>
   int(1)
   ["fruit"]=>
   float(2.2)
+  [5]=>
+  string(8) "resource"
   [133]=>
   string(3) "int"
   [444]=>

@@ -7,7 +7,7 @@ Bug #48801 (Problem with imagettfbbox)
 ?>
 --FILE--
 <?php
-$cwd = dirname(__FILE__);
+$cwd = __DIR__;
 $font = "$cwd/Tuffy.ttf";
 $bbox = imageftbbox(50, 0, $font, "image");
 echo '(' . $bbox[0] . ', ' . $bbox[1] . ")\n";

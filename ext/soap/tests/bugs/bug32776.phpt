@@ -10,8 +10,8 @@ soap.wsdl_cache_enabled=0
 $d = null;
 
 function test($x) {
-	global $d;
-	$d = $x;
+    global $d;
+    $d = $x;
 }
 
 class LocalSoapClient extends SoapClient {
@@ -32,7 +32,7 @@ class LocalSoapClient extends SoapClient {
 
 }
 
-$x = new LocalSoapClient(dirname(__FILE__)."/bug32776.wsdl",array("trace"=>true,"exceptions"=>false)); 
+$x = new LocalSoapClient(__DIR__."/bug32776.wsdl",array("trace"=>true,"exceptions"=>false));
 var_dump($x->test("Hello"));
 var_dump($d);
 var_dump($x->__getLastRequest());

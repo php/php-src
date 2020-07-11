@@ -15,7 +15,7 @@ $data_provider = array(
 
 foreach($data_provider as $input) {
 
-	$s = new SplObjectStorage();
+    $s = new SplObjectStorage();
 
     try {
         $s->unserialize($input);
@@ -31,4 +31,3 @@ Error at offset %d of %d bytes
 Error at offset %d of %d bytes
 Error at offset %d of %d bytes
 Error at offset %d of %d bytes
-

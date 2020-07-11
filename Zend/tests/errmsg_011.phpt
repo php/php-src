@@ -5,12 +5,12 @@ errmsg: cannot redeclare (method)
 
 class test {
 
-	function foo() {}
-	function foo() {}
+    function foo() {}
+    function foo() {}
 
 }
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Cannot redeclare test::foo() in %s on line %d

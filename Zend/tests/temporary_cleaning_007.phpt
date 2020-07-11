@@ -7,7 +7,7 @@ class saboteurTestController {
 }
 
 $controllers = array(new saboteurTestController(),new saboteurTestController());
-foreach ($controllers as $controller) {	
+foreach ($controllers as $controller) {
     try {
         if ($controller->isConsistent()) {
             return $controller;

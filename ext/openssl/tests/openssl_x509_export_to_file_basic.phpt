@@ -4,8 +4,8 @@ openssl_x509_export_to_file() tests
 <?php if (!extension_loaded("openssl")) print "skip"; ?>
 --FILE--
 <?php
-$outfilename = dirname(__FILE__) . "/openssl_x509_export_to_file__outfilename.tmp";
-$cert_file = dirname(__FILE__) . "/cert.crt";
+$outfilename = __DIR__ . "/openssl_x509_export_to_file__outfilename.tmp";
+$cert_file = __DIR__ . "/cert.crt";
 
 $a = file_get_contents($cert_file);
 $b = "file://" . $cert_file;
@@ -23,20 +23,20 @@ var_dump($exists = file_exists($outfilename));
 ?>
 --CLEAN--
 <?php
-$outfilename = dirname(__FILE__) . "/openssl_x509_export_to_file__outfilename.tmp";
+$outfilename = __DIR__ . "/openssl_x509_export_to_file__outfilename.tmp";
 if (file_exists($outfilename)) {
-	unlink($outfilename);
+    unlink($outfilename);
 }
 ?>
 --EXPECTF--
 bool(true)
 bool(true)
 
-Warning: openssl_x509_export_to_file(): cannot get cert from parameter 1 in %s on line %d
+Warning: openssl_x509_export_to_file(): Cannot get cert from parameter 1 in %s on line %d
 bool(false)
 bool(true)
 
-Warning: openssl_x509_export_to_file(): cannot get cert from parameter 1 in %s on line %d
+Warning: openssl_x509_export_to_file(): Cannot get cert from parameter 1 in %s on line %d
 bool(false)
 ---
 bool(true)

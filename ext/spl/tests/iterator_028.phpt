@@ -41,17 +41,15 @@ $it->setMaxDepth(-1);
 var_dump($it->getMaxDepth());
 try
 {
-	$it->setMaxDepth(4);
-	$it->setMaxDepth(-2);
+    $it->setMaxDepth(4);
+    $it->setMaxDepth(-2);
 }
 catch(Exception $e)
 {
-	var_dump($e->getMessage());
+    var_dump($e->getMessage());
 }
 var_dump($it->getMaxDepth());
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 ===?===
 bool(false)
@@ -109,4 +107,3 @@ int(0)
 bool(false)
 string(33) "Parameter max_depth must be >= -1"
 int(4)
-===DONE===

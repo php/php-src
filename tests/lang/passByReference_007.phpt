@@ -3,42 +3,42 @@ Pass function and method calls by reference and by value.
 --FILE--
 <?php
 class C {
-	static function sreturnVal() {
-		global $a;
-		return $a;
-	}
-	
-	static function &sreturnReference() {
-		global $a;
-		return $a;
-	}
+    static function sreturnVal() {
+        global $a;
+        return $a;
+    }
 
-	function returnVal() {
-		global $a;
-		return $a;
-	}
-	
-	function &returnReference() {
-		global $a;
-		return $a;
-	}
+    static function &sreturnReference() {
+        global $a;
+        return $a;
+    }
+
+    function returnVal() {
+        global $a;
+        return $a;
+    }
+
+    function &returnReference() {
+        global $a;
+        return $a;
+    }
 }
 
 function returnVal() {
-		global $a;
-		return $a;
+        global $a;
+        return $a;
 }
 
 function &returnReference() {
-		global $a;
-		return $a;
+        global $a;
+        return $a;
 }
 
 
 
 function foo(&$ref) {
-	var_dump($ref);
-	$ref = "changed";
+    var_dump($ref);
+    $ref = "changed";
 }
 
 

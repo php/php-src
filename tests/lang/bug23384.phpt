@@ -5,7 +5,7 @@ Bug #23384 (use of class constants in statics)
 define('TEN', 10);
 class Foo {
     const HUN = 100;
-    function test($x = Foo::HUN) {
+    static function test($x = Foo::HUN) {
         static $arr2 = array(TEN => 'ten');
         static $arr = array(Foo::HUN => 'ten');
 
@@ -15,11 +15,10 @@ class Foo {
     }
 }
 
-Foo::test();   
+Foo::test();
 echo Foo::HUN."\n";
 ?>
---EXPECTF--
-Deprecated: Non-static method Foo::test() should not be called statically in %sbug23384.php on line %d
+--EXPECT--
 Array
 (
     [100] => ten

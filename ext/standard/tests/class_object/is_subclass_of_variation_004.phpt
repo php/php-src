@@ -2,18 +2,13 @@
 Test is_subclass_of() function : usage variations  - unexpected type for arg 1 with valid class in arg 2.
 --FILE--
 <?php
-/* Prototype  : proto bool is_subclass_of(object object, string class_name)
- * Description: Returns true if the object has this class as one of its parents 
- * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
- */
 // Note: basic use cases in Zend/tests/is_a.phpt
-function __autoload($className) {
-	echo "In __autoload($className)\n";
-}
+spl_autoload_register(function ($className) {
+    echo "In autoload($className)\n";
+});
 
-function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
-	echo "Error: $err_no - $err_msg, $filename($linenum)\n";
+function test_error_handler($err_no, $err_msg, $filename, $linenum) {
+    echo "Error: $err_no - $err_msg\n";
 }
 set_error_handler('test_error_handler');
 
@@ -84,10 +79,10 @@ foreach($values as $value) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing is_subclass_of() : usage variations ***
-Error: 8 - Undefined variable: undefined_var, %s(69)
-Error: 8 - Undefined variable: unset_var, %s(72)
+Error: 2 - Undefined variable $undefined_var
+Error: 2 - Undefined variable $unset_var
 
 Arg value 0 
 bool(false)
@@ -115,23 +110,23 @@ bool(false)
 
 Arg value 0.5 
 bool(false)
-Error: 8 - Array to string conversion, %sis_subclass_of_variation_004.php(%d)
+Error: 2 - Array to string conversion
 
 Arg value Array 
 bool(false)
-Error: 8 - Array to string conversion, %sis_subclass_of_variation_004.php(%d)
+Error: 2 - Array to string conversion
 
 Arg value Array 
 bool(false)
-Error: 8 - Array to string conversion, %sis_subclass_of_variation_004.php(%d)
+Error: 2 - Array to string conversion
 
 Arg value Array 
 bool(false)
-Error: 8 - Array to string conversion, %sis_subclass_of_variation_004.php(%d)
+Error: 2 - Array to string conversion
 
 Arg value Array 
 bool(false)
-Error: 8 - Array to string conversion, %sis_subclass_of_variation_004.php(%d)
+Error: 2 - Array to string conversion
 
 Arg value Array 
 bool(false)
@@ -161,11 +156,11 @@ Arg value
 bool(false)
 
 Arg value string 
-In __autoload(string)
+In autoload(string)
 bool(false)
 
 Arg value String 
-In __autoload(String)
+In autoload(String)
 bool(false)
 
 Arg value  

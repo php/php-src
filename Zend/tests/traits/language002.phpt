@@ -15,18 +15,18 @@ trait World {
      echo 'World';
    }
 }
- 
+
 class MyHelloWorld {
    use Hello, World;
    public function sayExclamationMark() {
      echo '!';
    }
 }
- 
+
 $o = new MyHelloWorld();
 $o->sayHello();
 $o->sayWorld();
 $o->sayExclamationMark();
 ?>
---EXPECTF--	
+--EXPECT--
 Hello World!

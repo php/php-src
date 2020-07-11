@@ -1,13 +1,7 @@
 --TEST--
-Test stripcslashes() function : basic functionality 
+Test stripcslashes() function : basic functionality
 --FILE--
 <?php
-
-/* Prototype  : string stripcslashes  ( string $str  )
- * Description: Returns a string with backslashes stripped off. Recognizes C-like \n, \r ..., 
- *              octal and hexadecimal representation.
- * Source code: ext/standard/string.c
-*/
 
 echo "*** Testing stripcslashes() : basic functionality ***\n";
 var_dump(stripcslashes('\H\e\l\l\o \W\or\l\d'));
@@ -22,7 +16,6 @@ var_dump(bin2hex(stripcslashes('\\f')));
 var_dump(bin2hex(stripcslashes('\\t')));
 var_dump(bin2hex(stripcslashes('\\v')));
 ?>
-===DONE===
 --EXPECT--
 *** Testing stripcslashes() : basic functionality ***
 string(11) "Hello World"
@@ -36,5 +29,3 @@ string(2) "08"
 string(2) "0c"
 string(2) "09"
 string(2) "0b"
-===DONE===
-

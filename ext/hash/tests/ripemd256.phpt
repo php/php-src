@@ -1,7 +1,5 @@
 --TEST--
-ripemd256 algorithm
---SKIPIF--
-<?php if(!extension_loaded("hash")) print "skip"; ?>
+Hash: ripemd256 algorithm
 --FILE--
 <?php
 echo hash('ripemd256', '') . "\n";

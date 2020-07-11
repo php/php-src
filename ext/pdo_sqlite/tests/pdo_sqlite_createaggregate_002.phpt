@@ -12,6 +12,6 @@ $pdo->sqliteCreateAggregate('foo', 'strlen', '');
 
 ?>
 --EXPECTF--
-Warning: PDO::sqliteCreateAggregate(): function 'a' is not callable in %s on line %d
+Warning: PDO::sqliteCreateAggregate(): Function 'a' is not callable in %s on line %d
 
-Warning: PDO::sqliteCreateAggregate(): function '' is not callable in %s on line %d
+Warning: PDO::sqliteCreateAggregate(): Function '' is not callable in %s on line %d

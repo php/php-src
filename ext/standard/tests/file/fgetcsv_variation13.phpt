@@ -1,25 +1,19 @@
 --TEST--
 Test fgetcsv() : usage variations - with line without any csv fields
-
 --FILE--
 <?php
-/* 
- Prototype: array fgetcsv ( resource $handle [, int $length [, string $delimiter [, string $enclosure]]] );
- Description: Gets line from file pointer and parse for CSV fields
-*/
-
 /* Testing fgetcsv() to read a line from a file which doesn't have any CSV field */
 
 echo "*** Testing fgetcsv() : reading the line which is without csv fields ***\n";
 
 
-$filename = dirname(__FILE__) . '/fgetcsv_variation13.tmp';
+$filename = __DIR__ . '/fgetcsv_variation13.tmp';
 @unlink($filename);
 
 $file_modes = array ("r","rb", "rt", "r+", "r+b", "r+t",
                      "a+", "a+b", "a+t",
                      "w+", "w+b", "w+t",
-                     "x+", "x+b", "x+t"); 
+                     "x+", "x+b", "x+t");
 
 $loop_counter = 1;
   for($mode_counter = 0; $mode_counter < count($file_modes); $mode_counter++) {
@@ -37,7 +31,7 @@ $loop_counter = 1;
     fwrite($file_handle, "This is line of text without csv fields\n");
 
     // close the file if the mode to be used is read mode  and re-open using read mode
-    // else rewind the file pointer to beginning of the file 
+    // else rewind the file pointer to beginning of the file
     if ( strstr($file_modes[$mode_counter], "r" ) ) {
       fclose($file_handle);
       $file_handle = fopen($filename, $file_modes[$mode_counter]);
@@ -45,10 +39,10 @@ $loop_counter = 1;
       // rewind the file pointer to bof
       rewind($file_handle);
     }
-      
-    echo "\n-- Testing fgetcsv() with file opened using $file_modes[$mode_counter] mode --\n"; 
 
-     
+    echo "\n-- Testing fgetcsv() with file opened using $file_modes[$mode_counter] mode --\n";
+
+
     // read the line which is without csv fields, provide delimiter and see the working of fgetcsv
     $fp_pos = ftell($file_handle);
     var_dump( fgetcsv($file_handle) );
@@ -60,7 +54,7 @@ $loop_counter = 1;
     fclose($file_handle);
     //delete file
     unlink($filename);
-  } //end of mode loop 
+  } //end of mode loop
 
 echo "Done\n";
 ?>

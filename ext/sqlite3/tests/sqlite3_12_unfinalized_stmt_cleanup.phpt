@@ -19,9 +19,9 @@ echo "SELECTING results\n";
 $results = $db->query("SELECT * FROM test ORDER BY id ASC");
 while ($result = $results->fetchArray(SQLITE3_NUM))
 {
-	var_dump($result);
-	/* Only read one row and break */
-	break;
+    var_dump($result);
+    /* Only read one row and break */
+    break;
 }
 
 echo "Closing database\n";

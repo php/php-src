@@ -3,6 +3,7 @@ Bug #72691 (mb_ereg_search raises a warning if a match zero-width)
 --SKIPIF--
 <?php
 if (!extension_loaded('mbstring')) die('skip ext/mbstring required');
+if (!function_exists('mb_ereg')) die('skip mbregex support not available');
 ?>
 --FILE--
 <?php

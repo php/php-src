@@ -3,12 +3,12 @@ abstract alias
 --FILE--
 <?php
 trait T1 {
-	function foo() {}
+    function foo() {}
 }
 class C1 {
-	use T1 {
-		T1::foo as abstract;
-	}
+    use T1 {
+        T1::foo as abstract;
+    }
 }
 ?>
 --EXPECTF--

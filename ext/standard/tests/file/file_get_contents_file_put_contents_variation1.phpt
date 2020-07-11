@@ -1,19 +1,11 @@
 --TEST--
 Test file_get_contents() and file_put_contents() functions : usage variations - all arguments
-
 --FILE--
 <?php
-/* Prototype: string file_get_contents( string $filename[, bool $use_include_path[, 
- *                                      resource $context[, int $offset[, int $maxlen]]]] )
- * Description: Reads entire file into a string
- */
 
-/* Prototype: int file_put_contents( string $filename, mixed $data[,int $flags[, resource $context]] )
- * Description: Write a string to a file
- */
 
 /* Testing variation in all argument values */
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 include($file_path."/file.inc");
 
 echo "*** Testing with variations in the arguments values ***\n";
@@ -36,12 +28,12 @@ echo "--- Done ---";
 ?>
 --CLEAN--
 <?php
-//Deleting the temporary file 
+//Deleting the temporary file
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink($file_path."/file_put_contents_variation1.tmp");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing with variations in the arguments values ***
 string(100) "text text text text text text text text text text text text text text text text text text text text "
 string(100) "text text text text text text text text text text text text text text text text text text text text "

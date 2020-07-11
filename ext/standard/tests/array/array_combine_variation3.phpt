@@ -2,14 +2,8 @@
 Test array_combine() function : usage variations - different arrays(Bug#43424)
 --FILE--
 <?php
-/* Prototype  : array array_combine(array $keys, array $values)
- * Description: Creates an array by using the elements of the first parameter as keys
- *              and the elements of the second as the corresponding values
- * Source code: ext/standard/array.c
-*/
-
 /*
-* Passing different types of arrays to both $keys and $values arguments and testing whether 
+* Passing different types of arrays to both $keys and $values arguments and testing whether
 * array_combine() behaves in an expected way with the arguments passed to the function
 */
 
@@ -69,7 +63,7 @@ $arrays = array (
        array(1 => '', 2 => "", 3 => NULL, 4 => null, 5 => false, 6 => true),
        array('' => 1, "" => 2, NULL => 3, null => 4, false => 5, true => 6),
 
-       // array with repetative keys
+       // array with repetitive keys
 /*19*/ array("One" => 1, "two" => 2, "One" => 10, "two" => 20, "three" => 3)
 );
 
@@ -84,7 +78,7 @@ foreach($arrays as $array) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_combine() : Passing different types of arrays to both $keys and $values argument ***
 -- Iteration 1 --
 array(2) {

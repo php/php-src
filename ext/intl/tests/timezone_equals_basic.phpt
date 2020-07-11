@@ -20,7 +20,6 @@ echo "Comparison to GMT:\n";
 var_dump($tz1 == intltz_get_gmt());
 
 ?>
-==DONE==
 --EXPECT--
 Comparison to self:
 bool(true)
@@ -29,5 +28,4 @@ bool(true)
 Comparison to equivalent instance:
 bool(false)
 Comparison to GMT:
-bool(false)
-==DONE==
+bool(false)

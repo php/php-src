@@ -2,15 +2,20 @@
 Test array_splice(): basic functionality
 --FILE--
 <?php
-/* 
- * proto array array_splice(array input, int offset [, int length [, array replacement]])
+/*
  * Function is implemented in ext/standard/array.c
-*/ 
+*/
 
 echo "*** Testing array_splice() basic operations ***\n";
 echo "test truncation \n";
 $input = array("red", "green", "blue", "yellow");
 var_dump (array_splice($input, 2));
+var_dump ($input);
+// $input is now array("red", "green")
+
+echo "test truncation with null length \n";
+$input = array("red", "green", "blue", "yellow");
+var_dump (array_splice($input, 2, null));
 var_dump ($input);
 // $input is now array("red", "green")
 
@@ -44,6 +49,19 @@ var_dump ($input);
 --EXPECT--
 *** Testing array_splice() basic operations ***
 test truncation 
+array(2) {
+  [0]=>
+  string(4) "blue"
+  [1]=>
+  string(6) "yellow"
+}
+array(2) {
+  [0]=>
+  string(3) "red"
+  [1]=>
+  string(5) "green"
+}
+test truncation with null length 
 array(2) {
   [0]=>
   string(4) "blue"

@@ -1,22 +1,10 @@
 --TEST--
-Test uasort() function : basic functionality 
+Test uasort() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : bool uasort(array $array_arg, string $cmp_function)
- * Description: Sort an array with a user-defined comparison function and maintain index association 
- * Source code: ext/standard/array.c
-*/
-
 echo "*** Testing uasort() : basic functionality ***\n";
 
 // comparison function
-/* Prototype : int cmp(mixed $value1, mixed $value2)
- * Parameters : $value1 and $value2 - values to be compared
- * Return value : 0 - if both values are same
- *                1 - if value1 is greater than value2
- *               -1 - if value1 is less than value2
- * Description : compares value1 and value2
- */
 function cmp($value1, $value2)
 {
   if($value1 == $value2) {
@@ -55,7 +43,7 @@ var_dump($string_key_arg);
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing uasort() : basic functionality ***
 -- Numeric array with default keys --
 bool(true)

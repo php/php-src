@@ -1,5 +1,3 @@
-
-	/* $Id: fpm_php_trace.c,v 1.27.2.1 2008/11/15 00:57:24 anight Exp $ */
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #include "fpm_config.h"
@@ -11,11 +9,7 @@
 
 #include <stdio.h>
 #include <stddef.h>
-#if HAVE_INTTYPES_H
-# include <inttypes.h>
-#else
-# include <stdint.h>
-#endif
+#include <inttypes.h>
 #include <unistd.h>
 #include <sys/time.h>
 #include <sys/types.h>
@@ -42,7 +36,7 @@
 
 static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog) /* {{{ */
 {
-	int callers_limit = 20;
+	int callers_limit = child->wp->config->request_slowlog_trace_depth;
 	pid_t pid = child->pid;
 	struct timeval tv;
 	static const int buf_size = 1024;
@@ -80,7 +74,7 @@ static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog) /* {{{ *
 		long function_name;
 		long file_name;
 		long prev;
-		uint lineno = 0;
+		uint32_t lineno = 0;
 
 		if (0 > fpm_trace_get_long(execute_data + offsetof(zend_execute_data, func), &l)) {
 			return -1;
@@ -101,12 +95,12 @@ static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog) /* {{{ *
 					return -1;
 				}
 
-				if (ZEND_CALL_KIND_EX((*call_info) >> 24) == ZEND_CALL_TOP_CODE) {
+				if (ZEND_CALL_KIND_EX(*call_info) == ZEND_CALL_TOP_CODE) {
 					return 0;
-				} else if (ZEND_CALL_KIND_EX(*(call_info) >> 24) == ZEND_CALL_NESTED_CODE) {
+				} else if (ZEND_CALL_KIND_EX(*call_info) == ZEND_CALL_NESTED_CODE) {
 					memcpy(buf, "[INCLUDE_OR_EVAL]", sizeof("[INCLUDE_OR_EVAL]"));
 				} else {
-					ZEND_ASSERT(0);
+					ZEND_UNREACHABLE();
 				}
 			} else {
 				if (0 > fpm_trace_get_strz(buf, buf_size, function_name + offsetof(zend_string, val))) {
@@ -117,7 +111,7 @@ static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog) /* {{{ *
 		} else {
 			memcpy(buf, "???", sizeof("???"));
 		}
-		
+
 		fprintf(slowlog, "[0x%" PTR_FMT "lx] ", execute_data);
 
 		fprintf(slowlog, "%s()", buf);
@@ -144,7 +138,7 @@ static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog) /* {{{ *
 			}
 
 			type = (zend_uchar *)&l;
-			if (0 > fpm_trace_get_long(function + offsetof(zend_function, type), &l)) { 
+			if (0 > fpm_trace_get_long(function + offsetof(zend_function, type), &l)) {
 				return -1;
 			}
 
@@ -174,7 +168,7 @@ static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog) /* {{{ *
 					lineno = *lu;
 				}
 				break;
-			} 
+			}
 
 			if (0 > fpm_trace_get_long(prev + offsetof(zend_execute_data, prev_execute_data), &l)) {
 				return -1;
@@ -232,4 +226,3 @@ done0:
 /* }}} */
 
 #endif
-

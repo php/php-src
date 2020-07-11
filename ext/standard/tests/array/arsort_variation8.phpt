@@ -1,13 +1,7 @@
 --TEST--
-Test arsort() function : usage variations - sort array with diff. sub arrays, 'sort_flags' as default/SORT_REGULAR 
+Test arsort() function : usage variations - sort array with diff. sub arrays, 'sort_flags' as default/SORT_REGULAR
 --FILE--
 <?php
-/* Prototype  : bool arsort ( array &$array [, int $sort_flags] )
- * Description: Sort an array and maintain index association. 
-                Elements will be arranged from highest to lowest when this function has completed.
- * Source code: ext/standard/array.c
-*/
-
 /*
  * testing arsort() by providing arrays contains sub arrays for $array argument with flowing flag values
  * flag value as default
@@ -29,7 +23,7 @@ $various_arrays = array (
   "array[2]" => array("data[2,0]" => 44, "data[2,1]" => 11, "sub_array[2][0] " => array(64,61) ),
 
   // array contains sub arrays
-  "array[3]" => array ( "sub_array[3][0]" => array(33,-5,6), "sub_array[3][1]" => array(11), 
+  "array[3]" => array ( "sub_array[3][0]" => array(33,-5,6), "sub_array[3][1]" => array(11),
                         "sub_array[3][2]" => array(22,-55), "sub_array[3][3]" => array() )
 );
 
@@ -39,8 +33,8 @@ echo "\n-- Testing arsort() by supplying various arrays containing sub arrays --
 
 // loop through to test arsort() with different arrays
 foreach ($various_arrays as $array) {
- 
-  echo "\n-- Iteration $count --\n"; 
+
+  echo "\n-- Iteration $count --\n";
   // testing arsort() function by supplying different arrays, flag value is default
   echo "- With default sort_flag -\n";
   $temp_array = $array;
@@ -57,7 +51,7 @@ foreach ($various_arrays as $array) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing arsort() : usage variations ***
 
 -- Testing arsort() by supplying various arrays containing sub arrays --

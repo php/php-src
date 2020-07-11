@@ -2,17 +2,6 @@
 Test unserialize(): error is indistinguishable from deserialized boolean
 --FILE--
 <?php
-/* Prototype  : proto string serialize(mixed variable)
- * Description: Returns a string representation of variable (which can later be unserialized)
- * Source code: ext/standard/var.c
- * Alias to functions:
- */
-/* Prototype  : proto mixed unserialize(string variable_representation)
- * Description: Takes a string representation of variable and recreates it
- * Source code: ext/standard/var.c
- * Alias to functions:
- */
-
 echo "*** Testing unserialize() error/boolean distinction ***\n";
 
 $garbage = "obvious non-serialized data";
@@ -43,7 +32,7 @@ echo "Done";
 *** Testing unserialize() error/boolean distinction ***
 string(4) "b:0;"
 
-Notice: unserialize(): Error at offset 0 of 27 bytes in %s%eserialization_error_002.php on line 20
+Notice: unserialize(): Error at offset 0 of 27 bytes in %s on line %d
 bool(false)
 bool(false)
 unserialize error and deserialized false are identical? 1

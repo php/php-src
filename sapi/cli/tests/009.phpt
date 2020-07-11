@@ -12,7 +12,7 @@ var_dump(`$php -n -r "echo hello;" -a`);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--
 string(57) "Either execute direct code, process stdin or use a file.
 "
 string(57) "Either execute direct code, process stdin or use a file.

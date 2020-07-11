@@ -8,12 +8,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-/*
-   Prototype: array stat ( string $filename );
-   Description: Gives information about a file
-*/
-
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require("$file_path/file.inc");
 
 echo "*** Testing stat() : basic functionality ***\n";
@@ -34,23 +29,23 @@ $file_handle = fopen($filename, "w");
 fclose($file_handle);
 // stat of the file created
 $file_stat = stat($filename);
-sleep(2);
+sleep(1);
 
 // now new stat of the dir after file is created
 $new_dir_stat = stat($dirname);
 clearstatcache();
 
-// stat contains 13 different values stored twice, can be accessed using 
-// numeric and named keys, compare them to see they are same  
+// stat contains 13 different values stored twice, can be accessed using
+// numeric and named keys, compare them to see they are same
 echo "*** Testing stat(): validating the values stored in stat ***\n";
 // Initial stat values
 var_dump( compare_self_stat($file_stat) ); //expect true
 var_dump( compare_self_stat($dir_stat) );  //expect true
 
-// New stat values taken after creation of file 
+// New stat values taken after creation of file
 var_dump( compare_self_stat($new_dir_stat) );  // expect true
 
-// compare the two stat values, initial stat and stat recorded after 
+// compare the two stat values, initial stat and stat recorded after
 // creating file, also dump the value of stats
 echo "*** Testing stat(): comparing stats (recorded before and after file creation) ***\n";
 echo "-- comparing difference in dir stats before and after creating file in it --\n";
@@ -64,7 +59,7 @@ echo "\n---Done---";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink("$file_path/stat_basic/stat_basic.tmp");
 rmdir("$file_path/stat_basic");
 ?>
@@ -78,9 +73,9 @@ bool(true)
 -- comparing difference in dir stats before and after creating file in it --
 array(26) {
   [0]=>
-  int(%d)
+  int(%i)
   [1]=>
-  int(0)
+  int(%d)
   [2]=>
   int(%d)
   [3]=>
@@ -104,9 +99,9 @@ array(26) {
   [12]=>
   int(-1)
   ["dev"]=>
-  int(%d)
+  int(%i)
   ["ino"]=>
-  int(0)
+  int(%d)
   ["mode"]=>
   int(%d)
   ["nlink"]=>
@@ -132,7 +127,7 @@ array(26) {
 }
 array(26) {
   [0]=>
-  int(%d)
+  int(%i)
   [1]=>
   int(%d)
   [2]=>
@@ -158,7 +153,7 @@ array(26) {
   [12]=>
   int(-1)
   ["dev"]=>
-  int(%d)
+  int(%i)
   ["ino"]=>
   int(%d)
   ["mode"]=>
@@ -189,4 +184,3 @@ bool(true)
 bool(true)
 
 ---Done---
-

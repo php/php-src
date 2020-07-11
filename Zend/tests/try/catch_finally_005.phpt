@@ -17,5 +17,5 @@ function foo ($a) {
 
 var_dump(foo("para"));
 ?>
---EXPECTF--
+--EXPECT--
 int(3)

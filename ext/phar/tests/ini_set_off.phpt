@@ -3,7 +3,6 @@ Phar: test ini_set with readonly and require_hash disabled
 --SKIPIF--
 <?php
 if (!extension_loaded("phar")) die("skip");
-if (version_compare(PHP_VERSION, "6.0", "==")) die("skip pre-unicode version of PHP required");
 ?>
 --INI--
 phar.require_hash=0
@@ -54,7 +53,6 @@ var_dump(Phar::canWrite());
 var_dump(ini_get('phar.require_hash'));
 var_dump(ini_get('phar.readonly'));
 ?>
-===DONE===
 --EXPECT--
 string(1) "0"
 string(1) "0"
@@ -85,4 +83,3 @@ string(4) "true"
 bool(true)
 string(1) "0"
 string(1) "0"
-===DONE===

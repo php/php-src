@@ -9,11 +9,11 @@ class sw {
         return true;
     }
 
-	public function stream_stat() {
-		return array(
+    public function stream_stat() {
+        return array(
             'atime' => $this->undefined,
         );
-	}
+    }
 
 }
 stream_wrapper_register('sx', 'sw') or die('failed');
@@ -24,9 +24,8 @@ $s[] = 1; //  Cannot use a scalar value as an array
 
 print_r($s);
 --EXPECTF--
-Notice: Undefined property: sw::$undefined in %s on line %d
+Warning: Undefined property: sw::$undefined in %s on line %d
 Array
 (
     [0] => 1
 )
-

@@ -26,7 +26,7 @@ proc_close($process2);
 echo "Done\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 Opening process 1
 Opening process 2
 Closing process 1

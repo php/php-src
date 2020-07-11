@@ -21,7 +21,8 @@ var_dump($b->test);
 
 ?>
 --EXPECTF--
-Notice: Undefined property: B::$test in %s on line %d
-
-Notice: Only variable references should be returned by reference in %s on line %d
-NULL
+Fatal error: Uncaught Error: Cannot access private property B::$test in %s:%d
+Stack trace:
+#0 %s(%d): A->__get('test')
+#1 {main}
+  thrown in %s on line %d

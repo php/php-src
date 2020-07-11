@@ -2,7 +2,7 @@
 Bug #30730 Filename path length limit broken on NTFS volume, using rename
 --SKIPIF--
 <?php
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 skip_if_not_win();
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
@@ -11,7 +11,7 @@ if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 --FILE--
 <?php
 
-$dir = dirname(__FILE__) . DIRECTORY_SEPARATOR . "test_bug30730";
+$dir = __DIR__ . DIRECTORY_SEPARATOR . "test_bug30730";
 $file = $dir . DIRECTORY_SEPARATOR . "test_file";
 
 var_dump(mkdir($dir));
@@ -34,12 +34,9 @@ var_dump(unlink($dest_file));
 var_dump(rmdir($dest_dir));
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 bool(true)
 bool(true)
 bool(true)
-===DONE===
-

@@ -8,16 +8,13 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype : bool unlink ( string $filename [, resource $context] );
-   Description : Deletes filename
-*/
 
 /* Delete file having default permission but its dir having readonly permission
    Delete file having readonly permission but dir having default permission
 */
 
 
-$file_path = dirname(__FILE__).DIRECTORY_SEPARATOR."私はガラスを食べられます";
+$file_path = __DIR__.DIRECTORY_SEPARATOR."unlinkVar1私はガラスを食べられます";
 @mkdir($file_path);
 
 // temp dir name used here

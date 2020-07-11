@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache JIT                                                     |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2014 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,11 +12,9 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Dmitry Stogov <dmitry@zend.com>                             |
+   | Authors: Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
 */
-
-/* $Id:$ */
 
 #ifndef _ZEND_BITSET_H_
 #define _ZEND_BITSET_H_
@@ -56,14 +54,14 @@ static zend_always_inline int zend_ulong_ntz(zend_ulong num)
 	if (!BitScanForward(&index, num)) {
 #endif
 		/* undefined behavior */
-		return 32;
+		return SIZEOF_ZEND_LONG * 8;
 	}
 
 	return (int) index;
 #else
 	int n;
 
-	if (num == Z_UL(0)) return ZEND_MM_BITSET_LEN;
+	if (num == Z_UL(0)) return SIZEOF_ZEND_LONG * 8;
 
 	n = 1;
 #if SIZEOF_ZEND_LONG == 8
@@ -86,7 +84,7 @@ static inline uint32_t zend_bitset_len(uint32_t n)
 
 static inline zend_bool zend_bitset_in(zend_bitset set, uint32_t n)
 {
-	return (set[ZEND_BITSET_ELM_NUM(n)] & (Z_UL(1) << ZEND_BITSET_BIT_NUM(n))) != Z_UL(0);
+	return ZEND_BIT_TEST(set, n);
 }
 
 static inline void zend_bitset_incl(zend_bitset set, uint32_t n)
@@ -245,12 +243,12 @@ static inline int zend_bitset_last(zend_bitset set, uint32_t len)
 	} \
 } while (0)
 
-#endif /* _ZEND_BITSET_H_ */
+static inline int zend_bitset_pop_first(zend_bitset set, uint32_t len) {
+	int i = zend_bitset_first(set, len);
+	if (i >= 0) {
+		zend_bitset_excl(set, i);
+	}
+	return i;
+}
 
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */
+#endif /* _ZEND_BITSET_H_ */

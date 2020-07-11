@@ -5,7 +5,7 @@ oci_define_by_name() for statement re-execution
 --FILE--
 <?php
 
-require(dirname(__FILE__)."/connect.inc");
+require(__DIR__."/connect.inc");
 
 // Initialize
 
@@ -25,8 +25,8 @@ $stmt = oci_parse($c, "select string from define5_tab where id = 1");
 oci_execute($stmt);
 var_dump(oci_define_by_name($stmt, "STRING", $string));
 while (oci_fetch($stmt)) {
-	var_dump($string);  // gives NULL
-	var_dump(oci_result($stmt, 'STRING'));
+    var_dump($string);  // gives NULL
+    var_dump(oci_result($stmt, 'STRING'));
 }
 
 echo "Test 2 - normal define order\n";
@@ -35,15 +35,15 @@ var_dump(oci_define_by_name($stmt, "STRING", $string));
 oci_execute($stmt);
 
 while (oci_fetch($stmt)) {
-	var_dump($string);
+    var_dump($string);
 }
 
 echo "Test 3 - no new define done\n";
 $stmt = oci_parse($c, "select string from define5_tab where id = 2");
 oci_execute($stmt);
 while (oci_fetch($stmt)) {
-	var_dump($string); // not updated with new value
-	var_dump(oci_result($stmt, 'STRING'));
+    var_dump($string); // not updated with new value
+    var_dump(oci_result($stmt, 'STRING'));
 }
 
 // Cleanup
@@ -57,7 +57,7 @@ oci8_test_sql_execute($c, $stmtarray);
 echo "Done\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 Test 1 - must do define before execute
 bool(true)
 NULL
@@ -69,4 +69,3 @@ Test 3 - no new define done
 string(4) "some"
 string(5) "thing"
 Done
-

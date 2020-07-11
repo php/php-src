@@ -2,11 +2,6 @@
 Test array_filter() function : usage variations - Different types of 'callback' function
 --FILE--
 <?php
-/* Prototype  : array array_filter(array $input [, callback $callback])
- * Description: Filters elements from the array via the callback. 
- * Source code: ext/standard/array.c
-*/
-
 /*
 * Passing different types of callback functions to array_filter()
 * with parameters and return
@@ -20,7 +15,6 @@ echo "*** Testing array_filter() : usage variation - different 'callback' functi
 // Initialize variables
 $input = array(0, -1, 2, 3.4E-3, 'hello', "value", "key" => 4, 'null' => NULL);
 
-// callback function without parameters and with return value
 function callback1()
 {
   return 1;
@@ -32,11 +26,9 @@ var_dump( array_filter($input, "callback1") );
 function callback2($input)
 {
 }
-echo "-- Callback funciton with parameter and without return --\n";
+echo "-- Callback function with parameter and without return --\n";
 var_dump( array_filter($input, "callback2") );
 
-
-// callback function without parameter and without return value
 function callback3()
 {
 }
@@ -46,7 +38,7 @@ var_dump( array_filter($input, "callback3") );
 // callback function with parameter and with return value
 function callback4($input)
 {
-  if($input > 0 ) { 
+  if($input > 0 ) {
     return true;
   }
   else {
@@ -58,7 +50,7 @@ var_dump( array_filter($input, "callback4") );
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_filter() : usage variation - different 'callback' functions***
 -- Callback function without parameter and with return --
 array(8) {
@@ -79,7 +71,7 @@ array(8) {
   ["null"]=>
   NULL
 }
--- Callback funciton with parameter and without return --
+-- Callback function with parameter and without return --
 array(0) {
 }
 -- Callback function without parameter and return --

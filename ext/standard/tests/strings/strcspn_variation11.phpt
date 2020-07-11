@@ -2,13 +2,6 @@
 Test strcspn() function : usage variations - with varying start and default len args
 --FILE--
 <?php
-/* Prototype  : proto int strcspn(string str, string mask [, int start [, int len]])
- * Description: Finds length of initial segment consisting entirely of characters not found in mask.
-                If start or/and length is provided works like strcspn(substr($s,$start,$len),$bad_chars) 
- * Source code: ext/standard/string.c
- * Alias to functions: none
-*/
-
 /*
 * Testing strcspn() : with varying start and default len arguments
 */
@@ -61,7 +54,7 @@ $start_array = array(
                      2147483647,  // max positive integer
                      -2147483648,  // min negative integer
                     );
-		
+
 
 // loop through each element of the arrays for str,mask and start arguments
 $count = 1;
@@ -77,7 +70,7 @@ foreach($strings as $str) {
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strcspn() : with different start and default len values ***
 
 -- Iteration 1 --

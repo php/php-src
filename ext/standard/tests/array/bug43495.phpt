@@ -8,14 +8,17 @@ $a["key1"]["key2"]["key3"]=&$a;
 $b=array("key1"=>array("key2"=>array()));
 $b["key1"]["key2"]["key3"]=&$b;
 
-array_merge_recursive($a,$b); 
+
+try {
+    array_merge_recursive($a,$b);
+} catch (\Error $e) {
+    echo $e->getMessage() . "\n";
+}
 
 /* Break recursion */
 $a["key1"]["key2"]["key3"] = null;
 $b["key1"]["key2"]["key3"] = null;
 
-echo "Done.\n";
 ?>
---EXPECTF--
-Warning: array_merge_recursive(): recursion detected in %sbug43495.php on line %d
-Done.
+--EXPECT--
+Recursion detected

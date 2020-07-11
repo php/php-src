@@ -1,16 +1,16 @@
 --TEST--
 DBA CDB handler test
 --SKIPIF--
-<?php 
+<?php
 $handler = 'cdb';
-require_once(dirname(__FILE__) .'/skipif.inc');
+require_once(__DIR__ .'/skipif.inc');
 die('info CDB does not support replace or delete');
 ?>
 --FILE--
 <?php
 
 $handler = 'cdb';
-require_once(dirname(__FILE__) .'/test.inc');
+require_once(__DIR__ .'/test.inc');
 
 echo "Test 0\n";
 
@@ -61,10 +61,9 @@ else {
 }
 
 ?>
-===DONE===
 --CLEAN--
-<?php 
-require(dirname(__FILE__) .'/clean.inc'); 
+<?php
+require(__DIR__ .'/clean.inc');
 ?>
 --EXPECTF--
 Test 0
@@ -86,4 +85,3 @@ Test 3
 
 Warning: dba_open(%stest0.dbm,w): Driver initialization failed for handler: cdb: Update operations are not supported in %sdba_cdb_001.php on line %d
 Failed to open DB
-===DONE===

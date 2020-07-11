@@ -5,32 +5,32 @@ Marco Pivetta <ocramius@gmail.com>
 --FILE--
 <?php
 class Test {
-	public    $publicProperty;
-	protected $protectedProperty;
-	private   $privateProperty;
+    public    $publicProperty;
+    protected $protectedProperty;
+    private   $privateProperty;
 
-	public function __construct() {
-		unset(
-			$this->publicProperty, 
-			$this->protectedProperty, 
-			$this->privateProperty
-		);
-	}
+    public function __construct() {
+        unset(
+            $this->publicProperty,
+            $this->protectedProperty,
+            $this->privateProperty
+        );
+    }
 
-	function __get($name) {
-		echo '__get ' . $name . "\n";
-		return $this->$name;
-	}
+    function __get($name) {
+        echo '__get ' . $name . "\n";
+        return $this->$name;
+    }
 
-	function __set($name, $value) {
-		echo '__set ' . $name . "\n";
-		$this->$name = $value;
-	}
+    function __set($name, $value) {
+        echo '__set ' . $name . "\n";
+        $this->$name = $value;
+    }
 
-	function __isset($name) {
-		echo '__isset ' . $name . "\n";
-		return isset($this->$name);
-	}
+    function __isset($name) {
+        echo '__isset ' . $name . "\n";
+        return isset($this->$name);
+    }
 }
 
 $test = new Test();
@@ -49,20 +49,19 @@ $test->protectedProperty = 'value';
 $test->privateProperty   = 'value';
 
 ?>
-
 --EXPECTF--
 __get nonExisting
 
-Notice: Undefined property: Test::$nonExisting in %s on line %d
+Warning: Undefined property: Test::$nonExisting in %s on line %d
 __get publicProperty
 
-Notice: Undefined property: Test::$publicProperty in %s on line %d
+Warning: Undefined property: Test::$publicProperty in %s on line %d
 __get protectedProperty
 
-Notice: Undefined property: Test::$protectedProperty in %s on line %d
+Warning: Undefined property: Test::$protectedProperty in %s on line %d
 __get privateProperty
 
-Notice: Undefined property: Test::$privateProperty in %s on line %d
+Warning: Undefined property: Test::$privateProperty in %s on line %d
 __isset nonExisting
 __isset publicProperty
 __isset protectedProperty
@@ -71,4 +70,3 @@ __set nonExisting
 __set publicProperty
 __set protectedProperty
 __set privateProperty
-

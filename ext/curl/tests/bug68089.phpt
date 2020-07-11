@@ -1,7 +1,7 @@
 --TEST--
 Bug #68089 (NULL byte injection - cURL lib)
 --SKIPIF--
-<?php 
+<?php
 include 'skipif.inc';
 
 ?>

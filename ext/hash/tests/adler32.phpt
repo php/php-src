@@ -1,7 +1,5 @@
 --TEST--
-ADLER32
---SKIPIF--
-<?php extension_loaded('hash') or die('skip'); ?>
+Hash: ADLER32 algorithm
 --FILE--
 <?php
 echo hash('adler32', ''), "\n";

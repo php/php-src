@@ -17,15 +17,13 @@ var_dump(gmp_strval(gmp_xor($n, "34332")));
 $n1 = gmp_init("987657878765436543456");
 var_dump(gmp_strval(gmp_xor($n, $n1)));
 
-var_dump(gmp_xor($n, $n1, 1));
-var_dump(gmp_xor(1));
 var_dump(gmp_xor(array(), 1));
 var_dump(gmp_xor(1, array()));
 var_dump(gmp_xor(array(), array()));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(7) "2120329"
 string(6) "476369"
 string(10) "2342340648"
@@ -36,12 +34,6 @@ Warning: gmp_xor(): Unable to convert variable to GMP - string is not an integer
 string(1) "0"
 string(15) "987657876574716"
 string(21) "987658017016065701376"
-
-Warning: gmp_xor() expects exactly 2 parameters, 3 given in %s on line %d
-NULL
-
-Warning: gmp_xor() expects exactly 2 parameters, 1 given in %s on line %d
-NULL
 
 Warning: gmp_xor(): Unable to convert variable to GMP - wrong type in %s on line %d
 bool(false)

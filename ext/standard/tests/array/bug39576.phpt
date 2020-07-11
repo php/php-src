@@ -5,9 +5,9 @@ Bug #39576 (array_walk() doesn't separate userdata zval)
 
 class Test {
 
-	public $_table = '';
-	public $_columns = array ();
-	public $_primary = array ();
+    public $_table = '';
+    public $_columns = array ();
+    public $_primary = array ();
 
 }
 
@@ -18,22 +18,30 @@ $test->_columns['name'] = new stdClass;
 function test ($value, $column, &$columns) {}
 
 array_walk (
-	get_object_vars ($test),
-	'test',
-	$test->_columns
+    get_object_vars ($test),
+    'test',
+    $test->_columns
 );
 
 var_dump($test);
 
 array_intersect_key (
-	get_object_vars ($test),
-	$test->_primary
+    get_object_vars ($test),
+    $test->_primary
 );
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Notice: Only variables should be passed by reference in %s on line %d
+
+Warning: test(): Argument #3 ($columns) must be passed by reference, value given in %s on line %d
+
+Warning: test(): Argument #3 ($columns) must be passed by reference, value given in %s on line %d
+
+Warning: test(): Argument #3 ($columns) must be passed by reference, value given in %s on line %d
+
+Warning: test(): Argument #3 ($columns) must be passed by reference, value given in %s on line %d
 object(Test)#%d (4) {
   ["_table"]=>
   string(0) ""

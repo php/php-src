@@ -1,7 +1,5 @@
 --TEST--
-sha1 algorithm
---SKIPIF--
-<?php if(!extension_loaded("hash")) print "skip"; ?>
+Hash: sha1 algorithm
 --FILE--
 <?php
 echo hash('sha1', '') . "\n";

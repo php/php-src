@@ -4,11 +4,11 @@ ReflectionNamedType::getName() and ReflectionNamedType::__toString()
 <?php
 
 function testInternalTypes(?Traversable $traversable): ?string {
-	return 'test';
+    return 'test';
 }
 
 function testUserDefinedTypes(?Test $traversable): ?Test {
-	return new Test;
+    return new Test;
 }
 
 $function = new ReflectionFunction('testInternalTypes');
@@ -32,10 +32,10 @@ var_dump((string) $return);
 ?>
 --EXPECT--
 string(11) "Traversable"
-string(11) "Traversable"
+string(12) "?Traversable"
 string(6) "string"
-string(6) "string"
+string(7) "?string"
 string(4) "Test"
+string(5) "?Test"
 string(4) "Test"
-string(4) "Test"
-string(4) "Test"
+string(5) "?Test"

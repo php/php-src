@@ -16,8 +16,6 @@ $locales = intlcal_get_available_locales();
 var_dump(in_array('pt', $locales));
 
 ?>
-==DONE==
 --EXPECT--
 bool(true)
-bool(true)
-==DONE==
+bool(true)

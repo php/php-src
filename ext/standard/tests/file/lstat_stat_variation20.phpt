@@ -1,23 +1,17 @@
 --TEST--
-Test lstat() and stat() functions: usage variations - link names stored in array/object 
+Test lstat() and stat() functions: usage variations - link names stored in array/object
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip.. lstat() not available on Windows');
+if (PHP_OS_FAMILY === 'Windows') {
+    include_once __DIR__ . '/windows_links/common.inc';
+    skipIfSeCreateSymbolicLinkPrivilegeIsDisabled(__FILE__);
 }
 ?>
 --FILE--
 <?php
-/* Prototype: array lstat ( string $filename );
-   Description: Gives information about a file or symbolic link
-
-   Prototype: array stat ( string $filename );
-   Description: Gives information about a file
-*/
-
 /* test for stats of link when their names are stored in object and array */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require "$file_path/file.inc";
 
 $fp = fopen("$file_path/lstat_stat_variation20.tmp", "w");  // temp file
@@ -37,8 +31,8 @@ class names {
 // link name stored in an object
 $link_object = new names("$file_path/lstat_stat_variation20_link.tmp");
 
-// link name stored in side an array 
-// with default numeric key 
+// link name stored in side an array
+// with default numeric key
 $link_array = array("$file_path/lstat_stat_variation20_link.tmp");
 
 // with string key index
@@ -54,10 +48,9 @@ var_dump( stat($link_array_with_key['linkname']) );
 
 echo "\n--- Done ---";
 ?>
-
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink("$file_path/lstat_stat_variation20_link.tmp");
 unlink("$file_path/lstat_stat_variation20.tmp");
 ?>
@@ -89,9 +82,9 @@ array(26) {
   [10]=>
   int(%d)
   [11]=>
-  int(%d)
+  int(%i)
   [12]=>
-  int(%d)
+  int(%i)
   ["dev"]=>
   int(%d)
   ["ino"]=>
@@ -115,9 +108,9 @@ array(26) {
   ["ctime"]=>
   int(%d)
   ["blksize"]=>
-  int(%d)
+  int(%i)
   ["blocks"]=>
-  int(%d)
+  int(%i)
 }
 
 -- Testing stat() on link name stored inside an array --
@@ -145,9 +138,9 @@ array(26) {
   [10]=>
   int(%d)
   [11]=>
-  int(%d)
+  int(%i)
   [12]=>
-  int(%d)
+  int(%i)
   ["dev"]=>
   int(%d)
   ["ino"]=>
@@ -171,9 +164,9 @@ array(26) {
   ["ctime"]=>
   int(%d)
   ["blksize"]=>
-  int(%d)
+  int(%i)
   ["blocks"]=>
-  int(%d)
+  int(%i)
 }
 array(26) {
   [0]=>
@@ -199,9 +192,9 @@ array(26) {
   [10]=>
   int(%d)
   [11]=>
-  int(%d)
+  int(%i)
   [12]=>
-  int(%d)
+  int(%i)
   ["dev"]=>
   int(%d)
   ["ino"]=>
@@ -225,9 +218,9 @@ array(26) {
   ["ctime"]=>
   int(%d)
   ["blksize"]=>
-  int(%d)
+  int(%i)
   ["blocks"]=>
-  int(%d)
+  int(%i)
 }
 array(26) {
   [0]=>
@@ -253,9 +246,9 @@ array(26) {
   [10]=>
   int(%d)
   [11]=>
-  int(%d)
+  int(%i)
   [12]=>
-  int(%d)
+  int(%i)
   ["dev"]=>
   int(%d)
   ["ino"]=>
@@ -279,9 +272,9 @@ array(26) {
   ["ctime"]=>
   int(%d)
   ["blksize"]=>
-  int(%d)
+  int(%i)
   ["blocks"]=>
-  int(%d)
+  int(%i)
 }
 
 --- Done ---

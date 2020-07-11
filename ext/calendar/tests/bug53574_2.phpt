@@ -1,7 +1,7 @@
 --TEST--
 Bug #53574 (Integer overflow in SdnToJulian; leads to segfault)
 --SKIPIF--
-<?php 
+<?php
 include 'skipif.inc';
 if (PHP_INT_SIZE == 4) {
         die("skip this test is for 64bit platform only");
@@ -33,4 +33,3 @@ array(9) {
   ["monthname"]=>
   string(0) ""
 }
-

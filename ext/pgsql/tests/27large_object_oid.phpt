@@ -1,8 +1,8 @@
 --TEST--
 PostgreSQL create large object with given oid
 --SKIPIF--
-<?php 
-include("skipif.inc"); 
+<?php
+include("skipif.inc");
 $v = pg_version($conn);
 if (version_compare("8.3", $v["client"]) > 0) die("skip - requires pg client >= 8.3\n");
 if (version_compare("8.3", $v["server"]) > 0) die("skip - requires pg server >= 8.3\n");

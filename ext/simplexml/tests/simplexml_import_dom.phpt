@@ -4,9 +4,9 @@ SimpleXML [interop]: simplexml_import_dom
 <?php if (!extension_loaded("simplexml")) die("skip"); ?>
 <?php if (!extension_loaded("dom")) die("skip dom extension not loaded"); ?>
 --FILE--
-<?php 
+<?php
 $dom = new domDocument;
-$dom->load(dirname(__FILE__)."/book.xml");
+$dom->load(__DIR__."/book.xml");
 if(!$dom) {
   echo "Error while parsing the document\n";
   exit;
@@ -14,7 +14,7 @@ if(!$dom) {
 $s = simplexml_import_dom($dom);
 $books = $s->book;
 foreach ($books as $book) {
-	echo "{$book->title} was written by {$book->author}\n";
+    echo "{$book->title} was written by {$book->author}\n";
 }
 ?>
 --EXPECT--

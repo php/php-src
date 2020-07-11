@@ -3,9 +3,9 @@ Prefetch with REF cursor. Test different values for prefetch with oci_set_prefet
 --SKIPIF--
 <?php if (!extension_loaded('oci8')) die("skip no oci8 extension");
 if (!extension_loaded('oci8')) die("skip no oci8 extension");
-require(dirname(__FILE__)."/connect.inc");
+require(__DIR__."/connect.inc");
 preg_match('/.*Release ([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)*/', oci_server_version($c), $matches);
-if (!(isset($matches[0]) && 
+if (!(isset($matches[0]) &&
       ($matches[1] >= 10))) {
        	die("skip expected output only valid when using Oracle 10g or greater database server");
 }
@@ -19,29 +19,29 @@ if (!(isset($matches[0]) &&
 ?>
 --FILE--
 <?php
-require(dirname(__FILE__)."/connect.inc");
+require(__DIR__."/connect.inc");
 
-// Creates the necessary package and tables. 
+// Creates the necessary package and tables.
 $stmtarray = array(
-	   "DROP TABLE refcurtest",
-	   "CREATE TABLE refcurtest (c1 NUMBER, c2 VARCHAR(20))",
+       "DROP TABLE refcurtest",
+       "CREATE TABLE refcurtest (c1 NUMBER, c2 VARCHAR(20))",
            "CREATE or REPLACE PACKAGE refcurpkg is
            type refcursortype is ref cursor;
            procedure open_ref_cur(cur1 out refcursortype);
            procedure fetch_ref_cur(cur1 in refcursortype, c1 out number,c2 out varchar2);
            end refcurpkg;",
           "CREATE or REPLACE PACKAGE body refcurpkg is
-  	    procedure open_ref_cur(cur1 out refcursortype) is
+        procedure open_ref_cur(cur1 out refcursortype) is
               begin
-	        open cur1 for select * from refcurtest order by c1;
-	      end open_ref_cur;
-  	     procedure fetch_ref_cur(cur1 in refcursortype, c1 out number,
-		c2 out varchar2) is
-  	      begin
-	    	fetch cur1 into c1,c2;
-	    end fetch_ref_cur;
+            open cur1 for select * from refcurtest order by c1;
+          end open_ref_cur;
+         procedure fetch_ref_cur(cur1 in refcursortype, c1 out number,
+        c2 out varchar2) is
+          begin
+            fetch cur1 into c1,c2;
+        end fetch_ref_cur;
          end refcurpkg;"
-	);
+    );
 
 oci8_test_sql_execute($c, $stmtarray);
 
@@ -86,7 +86,7 @@ function fetch_frm_php($c,$cur1,$value) {
     echo "Fetch Row from PHP\n";
     var_dump(oci_fetch_row($cur1));
 }
- 
+
 // This function calls the fetch_ref_cur procedure to get the values from the REF cur.
 
 function fetch_frm_plsql($c,$cur1) {

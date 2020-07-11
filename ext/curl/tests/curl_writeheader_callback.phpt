@@ -1,5 +1,5 @@
 --TEST--
-Test curl option CURLOPT_HEADERFUNCTION 
+Test curl option CURLOPT_HEADERFUNCTION
 --CREDITS--
 Mathieu Kooiman <mathieuk@gmail.com>
 Dutch UG, TestFest 2009, Utrecht
@@ -12,8 +12,8 @@ Hit the host and determine that the headers are sent to the callback specified f
 
 function curl_header_callback($curl_handle, $data)
 {
-	if (strtolower(substr($data,0, 4)) == 'http')
-		echo $data;
+    if (strtolower(substr($data,0, 4)) == 'http')
+        echo $data;
 }
 
 include 'server.inc';

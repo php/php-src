@@ -5,21 +5,23 @@ Bug #36745 (LOAD DATA LOCAL INFILE doesn't return correct error message)
 require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
+--INI--
+mysqli.allow_local_infile=1
 --FILE--
 <?php
-	require_once("connect.inc");
+    require_once("connect.inc");
 
-	/*** test mysqli_connect 127.0.0.1 ***/
-	$mysql = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
+    /*** test mysqli_connect 127.0.0.1 ***/
+    $mysql = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 
-	$mysql->query("DROP TABLE IF EXISTS litest");
-	$mysql->query("CREATE TABLE litest (a VARCHAR(20))");
+    $mysql->query("DROP TABLE IF EXISTS litest");
+    $mysql->query("CREATE TABLE litest (a VARCHAR(20))");
 
-	$mysql->query("LOAD DATA LOCAL INFILE 'filenotfound' INTO TABLE litest");
-	var_dump($mysql->error);
+    $mysql->query("LOAD DATA LOCAL INFILE 'filenotfound' INTO TABLE litest");
+    var_dump($mysql->error);
 
-	$mysql->close();
-	printf("Done");
+    $mysql->close();
+    printf("Done");
 ?>
 --CLEAN--
 <?php

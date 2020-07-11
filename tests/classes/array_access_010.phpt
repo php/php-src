@@ -1,71 +1,71 @@
 --TEST--
 ZE2 ArrayAccess and ArrayReferenceProxy with references
 --FILE--
-<?php 
+<?php
 
 // NOTE: This will become part of SPL
 
 class ArrayReferenceProxy implements ArrayAccess
 {
-	private $object;
-	private $element;
-	
-	function __construct(ArrayAccess $object, array &$element)
-	{
-		echo __METHOD__ . "(Array)\n";
-		$this->object = $object;
-		$this->element = &$element;
-	}
+    private $object;
+    private $element;
 
-	function offsetExists($index) {
-		echo __METHOD__ . "($this->element, $index)\n";
-		return array_key_exists($index, $this->element);
-	}
+    function __construct(ArrayAccess $object, array &$element)
+    {
+        echo __METHOD__ . "(Array)\n";
+        $this->object = $object;
+        $this->element = &$element;
+    }
 
-	function offsetGet($index) {
-		echo __METHOD__ . "(Array, $index)\n";
-		return isset($this->element[$index]) ? $this->element[$index] : NULL;
-	}
+    function offsetExists($index) {
+        echo __METHOD__ . "($this->element, $index)\n";
+        return array_key_exists($index, $this->element);
+    }
 
-	function offsetSet($index, $value) {
-		echo __METHOD__ . "(Array, $index, $value)\n";
-		$this->element[$index] = $value;
-	}
+    function offsetGet($index) {
+        echo __METHOD__ . "(Array, $index)\n";
+        return isset($this->element[$index]) ? $this->element[$index] : NULL;
+    }
 
-	function offsetUnset($index) {
-		echo __METHOD__ . "(Array, $index)\n";
-		unset($this->element[$index]);
-	}
+    function offsetSet($index, $value) {
+        echo __METHOD__ . "(Array, $index, $value)\n";
+        $this->element[$index] = $value;
+    }
+
+    function offsetUnset($index) {
+        echo __METHOD__ . "(Array, $index)\n";
+        unset($this->element[$index]);
+    }
 }
 
 class Peoples implements ArrayAccess
 {
-	public $person;
-	
-	function __construct()
-	{
-		$this->person = array(array('name'=>'Foo'));
-	}
+    public $person;
 
-	function offsetExists($index)
-	{
-		return array_key_exists($index, $this->person);
-	}
+    function __construct()
+    {
+        $this->person = array(array('name'=>'Foo'));
+    }
 
-	function offsetGet($index)
-	{
-		return new ArrayReferenceProxy($this, $this->person[$index]);
-	}
+    function offsetExists($index)
+    {
+        return array_key_exists($index, $this->person);
+    }
 
-	function offsetSet($index, $value)
-	{
-		$this->person[$index] = $value;
-	}
+    function offsetGet($index)
+    {
+        return new ArrayReferenceProxy($this, $this->person[$index]);
+    }
 
-	function offsetUnset($index)
-	{
-		unset($this->person[$index]);
-	}
+    function offsetSet($index, $value)
+    {
+        $this->person[$index] = $value;
+    }
+
+    function offsetUnset($index)
+    {
+        unset($this->person[$index]);
+    }
 }
 
 $people = new Peoples;
@@ -95,8 +95,6 @@ $people[0]['name'] = 'BlaBla';
 var_dump($people[0]['name']);
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 string(3) "Foo"
 string(6) "FooBar"
@@ -165,4 +163,3 @@ ArrayReferenceProxy::offsetSet(Array, name, BlaBla)
 ArrayReferenceProxy::__construct(Array)
 ArrayReferenceProxy::offsetGet(Array, name)
 string(6) "BlaBla"
-===DONE===

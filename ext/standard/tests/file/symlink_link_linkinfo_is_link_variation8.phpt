@@ -2,31 +2,19 @@
 Test symlink(), linkinfo(), link() and is_link() functions : usage variations - try link with same name in diff. dir
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip no symlinks on Windows');
+if (PHP_OS_FAMILY === 'Windows') {
+    require_once __DIR__ . '/windows_links/common.inc';
+    skipIfSeCreateSymbolicLinkPrivilegeIsDisabled(__FILE__);
 }
 ?>
 --FILE--
 <?php
-/* Prototype: bool symlink ( string $target, string $link );
-   Description: creates a symbolic link to the existing target with the specified name link
-
-   Prototype: bool is_link ( string $filename );
-   Description: Tells whether the given file is a symbolic link.
-
-   Prototype: bool link ( string $target, string $link );
-   Description: Create a hard link
-
-   Prototype: int linkinfo ( string $path );
-   Description: Gets information about a link
-*/
-
 /* Variation 8 : Create soft/hard link to different directory */
 
 /* creating link to a file in different dir with the same name as the file */
 echo "\n*** Create hard link in different directory with same filename ***\n";
 // temp file used
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $filename = "$file_path/symlink_link_linkinfo_is_link_variation8.tmp";
 // temp link name used
 $dirname = "$file_path/symlink_link_linkinfo_is_link1_variation8";
@@ -77,7 +65,7 @@ bool(true)
 
 *** Create soft link in different directory with same filename ***
 
-Warning: symlink(): File exists in %s on line %d
+Warning: symlink(): %rFile exists|Permission denied%r in %s on line %d
 bool(false)
 bool(true)
 Done

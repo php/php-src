@@ -15,22 +15,19 @@ max_execution_time=60
 mysqlnd.net_read_timeout=1
 --FILE--
 <?php
-	include ("connect.inc");
+    include ("connect.inc");
 
-	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
-		printf("[001] Connect failed, [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
-	}
+    if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
+        printf("[001] Connect failed, [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
+    }
 
-	if (!$res = mysqli_query($link, "SELECT SLEEP(5)"))
-		printf("[002] [%d] %s\n",  mysqli_errno($link), mysqli_error($link));
+    if (!$res = mysqli_query($link, "SELECT SLEEP(5)"))
+        printf("[002] [%d] %s\n",  mysqli_errno($link), mysqli_error($link));
 
-	mysqli_close($link);
+    mysqli_close($link);
 
-	print "done!";
+    print "done!";
 ?>
---EXPECTF--
-Warning: mysqli_query(): MySQL server has gone away in %s on line %d
-
-Warning: mysqli_query(): Error reading result set's header in %s on line %d
-[002] [%d] %s
+--EXPECT--
+[002] [2006] MySQL server has gone away
 done!

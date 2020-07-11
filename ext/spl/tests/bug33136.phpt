@@ -5,25 +5,25 @@ Bug #33136 (method offsetSet in class extended from ArrayObject crash PHP)
 
 class Collection extends ArrayObject
 {
-	private $data;
-	
-	function __construct()
-	{
-		$this->data = array();
-		parent::__construct($this->data);
-	}
-	
-	function offsetGet($index)
-	{
-		echo __METHOD__ . "($index)\n";
-		return parent::offsetGet($index);
-	}
-	
-	function offsetSet($index, $value)
-	{
-		echo __METHOD__ . "(" . (is_null($index) ? "NULL" : $index) . ",$value)\n";
-		parent::offsetSet($index, $value);
-	}
+    private $data;
+
+    function __construct()
+    {
+        $this->data = array();
+        parent::__construct($this->data);
+    }
+
+    function offsetGet($index)
+    {
+        echo __METHOD__ . "($index)\n";
+        return parent::offsetGet($index);
+    }
+
+    function offsetSet($index, $value)
+    {
+        echo __METHOD__ . "(" . (is_null($index) ? "NULL" : $index) . ",$value)\n";
+        parent::offsetSet($index, $value);
+    }
 }
 
 echo "\n\nInitiate Obj\n";
@@ -46,8 +46,6 @@ print_r($arrayObj);
 var_dump(count($arrayObj));
 
 ?>
-===DONE===
-<?php //exit(0); ?>
 --EXPECT--
 Initiate Obj
 Assign values
@@ -77,4 +75,3 @@ Collection Object
 
 )
 int(3)
-===DONE===

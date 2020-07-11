@@ -4,11 +4,11 @@ errmsg: cannot redeclare property
 <?php
 
 class test {
-	var $var;
-	var $var;
+    var $var;
+    var $var;
 }
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Cannot redeclare test::$var in %s on line %d

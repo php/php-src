@@ -7,8 +7,8 @@ soap.wsdl_cache=3
 --FILE--
 <?php
 class TestSoapClient extends SoapClient {
-	function __doRequest($request, $location, $action, $version, $one_way = 0) {
-		return <<<EOF
+    function __doRequest($request, $location, $action, $version, $one_way = 0) {
+        return <<<EOF
 <?xml version="1.0" encoding="utf-8"?>
 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 <soapenv:Body>
@@ -38,19 +38,19 @@ class TestSoapClient extends SoapClient {
 <multiRef id="id12" soapenc:root="0" soapenv:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xsi:type="ns22:Map" xmlns:ns22="http://xml.apache.org/xml-soap" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/"><item><key xsi:type="soapenc:string">maxDateTime</key><value soapenc:arrayType="xsd:anyType[1]" xsi:type="soapenc:Array"><value xsi:type="xsd:dateTime">2038-12-31T22:59:59.000Z</value></value></item><item><key xsi:type="soapenc:string">minDateTime</key><value soapenc:arrayType="xsd:anyType[1]" xsi:type="soapenc:Array"><value xsi:type="xsd:dateTime">2004-11-01T16:58:00.000Z</value></value></item><item><key xsi:type="soapenc:string">minLongitude</key><value soapenc:arrayType="xsd:anyType[1]" xsi:type="soapenc:Array"><value xsi:type="soapenc:double">108.11</value></value></item><item><key xsi:type="soapenc:string">maxLongitude</key><value soapenc:arrayType="xsd:anyType[1]" xsi:type="soapenc:Array"><value xsi:type="soapenc:double">113.383</value></value></item><item><key xsi:type="soapenc:string">maxLatitude</key><value soapenc:arrayType="xsd:anyType[1]" xsi:type="soapenc:Array"><value xsi:type="soapenc:double">-31.666</value></value></item><item><key xsi:type="soapenc:string">minLatitude</key><value soapenc:arrayType="xsd:anyType[1]" xsi:type="soapenc:Array"><value xsi:type="soapenc:double">-35.075</value></value></item></multiRef>
 </soapenv:Body></soapenv:Envelope>
 EOF;
-	}
+    }
 }
 for ($i = 0; $i < 10; $i++) {
-	$ws=new TestSoapClient(dirname(__FILE__).'/bug37083.wsdl',
+    $ws=new TestSoapClient(__DIR__.'/bug37083.wsdl',
                    array('encoding'=>'ISO-8859-1',
                          'cache_wsdl'=>WSDL_CACHE_BOTH));
-	$search=new stdClass();
-	$search->queryString='argo';
-	$search->ranges[]=$r=new stdClass();
-	$r->field='maxDateTime';
-	$r->min='2003-04-01';
-	$search->index='all';
-	$res=$ws->search($search,0,10);
+    $search=new stdClass();
+    $search->queryString='argo';
+    $search->ranges[]=$r=new stdClass();
+    $r->field='maxDateTime';
+    $r->min='2003-04-01';
+    $search->index='all';
+    $res=$ws->search($search,0,10);
 }
 echo "ok\n";
 ?>

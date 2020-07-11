@@ -4,11 +4,10 @@ Bug #60201 (SplFileObject::setCsvControl does not expose third argument via Refl
 <?php
 
 $method = new ReflectionMethod('SplFileObject', 'setCsvControl');
-$params = $method->getParameters(); 
+$params = $method->getParameters();
 var_dump($params);
 
 ?>
-===DONE===
 --EXPECTF--
 array(3) {
   [0]=>
@@ -27,4 +26,3 @@ array(3) {
     string(6) "escape"
   }
 }
-===DONE===

@@ -30,10 +30,10 @@ var_dump($a->getSize());
 
 $a = new SplFixedArray(3);
 
-$a[0] = "test"; 
-$a[1] = array(1,2,"blah"); 
-$a[2] = 1; 
-$a[0] = "test"; 
+$a[0] = "test";
+$a[1] = array(1,2,"blah");
+$a[2] = 1;
+$a[0] = "test";
 
 $a->setSize(0);
 var_dump($a->getSize());

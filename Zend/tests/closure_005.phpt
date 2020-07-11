@@ -4,37 +4,37 @@ Closure 005: Lambda inside class, lifetime of $this
 <?php
 
 class A {
-	private $x;
+    private $x;
 
-	function __construct($x) {
-		$this->x = $x;
-	}
+    function __construct($x) {
+        $this->x = $x;
+    }
 
-	function __destruct() {
-		echo "Destroyed\n";
-	}
+    function __destruct() {
+        echo "Destroyed\n";
+    }
 
-	function getIncer($val) {
-		return function() use ($val) {
-			$this->x += $val;
-		};
-	}
+    function getIncer($val) {
+        return function() use ($val) {
+            $this->x += $val;
+        };
+    }
 
-	function getPrinter() {
-		return function() {
-			echo $this->x."\n";
-		};
-	}
-	
-	function getError() {
-		return static function() {
-			echo $this->x."\n";
-		};
-	}
-	
-	function printX() {
-		echo $this->x."\n";
-	}
+    function getPrinter() {
+        return function() {
+            echo $this->x."\n";
+        };
+    }
+
+    function getError() {
+        return static function() {
+            echo $this->x."\n";
+        };
+    }
+
+    function printX() {
+        echo $this->x."\n";
+    }
 }
 
 $a = new A(3);

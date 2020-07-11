@@ -12,8 +12,6 @@ echo "\n";
 print_R(intltz_get_tz_data_version());
 echo "\n";
 ?>
-==DONE==
 --EXPECTF--
 20%d%s
-20%d%s
-==DONE==
+20%d%s

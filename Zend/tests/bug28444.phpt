@@ -3,43 +3,41 @@ Bug #28444 (Cannot access undefined property for object with overloaded property
 --FILE--
 <?php
 
-function my_error_handler($errno, $errstr, $errfile, $errline) {
-	var_dump($errstr);
-}
-
-set_error_handler('my_error_handler');
-
-class Object
+class ObjectOne
 {
-	public $x;
+    public $x;
 
-	function __construct($x)
-	{
-		$this->x = $x;
-	}
+    function __construct($x)
+    {
+        $this->x = $x;
+    }
+
+    function __toString() {
+        return "Object";
+    }
 }
 
 class Overloaded
 {
-	public $props = array();
-	public $x;
+    public $props = array();
+    public $x;
 
-	function __construct($x)
-	{
-		$this->x = new Object($x);
-	}
+    function __construct($x)
+    {
+        $this->x = new ObjectOne($x);
+    }
 
-	function __get($prop)
-	{
-		echo __METHOD__ . "($prop)\n";
-		return $this->props[$prop];
-	}
+    function __get($prop)
+    {
+        echo __METHOD__ . "($prop)\n";
+        return $this->props[$prop];
+    }
 
-	function __set($prop, $val)
-	{
-		echo __METHOD__ . "($prop,$val)\n";
-		$this->props[$prop] = $val;
-	}
+    function __set($prop, $val)
+    {
+        echo __METHOD__ . "($prop,$val)\n";
+        $this->props[$prop] = $val;
+    }
 }
 $y = new Overloaded(2);
 var_dump($y->x);
@@ -47,16 +45,15 @@ var_dump($y->x->x);
 var_dump($y->x->x = 3);
 var_dump($y->y = 3);
 var_dump($y->y);
-var_dump($y->z = new Object(4));
+var_dump($y->z = new ObjectOne(4));
 var_dump($y->z->x);
 $t = $y->z;
 var_dump($t->x = 5);
 var_dump($y->z->x = 6);
 
 ?>
-===DONE===
---EXPECTF--
-object(Object)#%d (1) {
+--EXPECT--
+object(ObjectOne)#2 (1) {
   ["x"]=>
   int(2)
 }
@@ -66,9 +63,8 @@ Overloaded::__set(y,3)
 int(3)
 Overloaded::__get(y)
 int(3)
-string(55) "Object of class Object could not be converted to string"
-Overloaded::__set(z,)
-object(Object)#%d (1) {
+Overloaded::__set(z,Object)
+object(ObjectOne)#3 (1) {
   ["x"]=>
   int(4)
 }
@@ -78,4 +74,3 @@ Overloaded::__get(z)
 int(5)
 Overloaded::__get(z)
 int(6)
-===DONE===

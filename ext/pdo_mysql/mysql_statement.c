@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -18,8 +16,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -34,7 +30,7 @@
 
 #ifdef PDO_USE_MYSQLND
 #	define pdo_mysql_stmt_execute_prepared(stmt) pdo_mysql_stmt_execute_prepared_mysqlnd(stmt)
-#	define pdo_free_bound_result(res) zval_dtor(res.zv)
+#	define pdo_free_bound_result(res) zval_ptr_dtor(res.zv)
 #	define pdo_mysql_stmt_close(stmt) mysqlnd_stmt_close(stmt, 0)
 #else
 #	define pdo_mysql_stmt_execute_prepared(stmt) pdo_mysql_stmt_execute_prepared_libmysql(stmt)
@@ -90,7 +86,7 @@ static int pdo_mysql_stmt_dtor(pdo_stmt_t *stmt) /* {{{ */
 
 	if (!Z_ISUNDEF(stmt->database_object_handle)
 		&& IS_OBJ_VALID(EG(objects_store).object_buckets[Z_OBJ_HANDLE(stmt->database_object_handle)])
-		&& (!(GC_FLAGS(Z_OBJ(stmt->database_object_handle)) & IS_OBJ_FREE_CALLED))) {
+		&& (!(OBJ_FLAGS(Z_OBJ(stmt->database_object_handle)) & IS_OBJ_FREE_CALLED))) {
 		while (mysql_more_results(S->H->server)) {
 			MYSQL_RES *res;
 			if (mysql_next_result(S->H->server) != 0) {
@@ -104,7 +100,7 @@ static int pdo_mysql_stmt_dtor(pdo_stmt_t *stmt) /* {{{ */
 		}
 	}
 
-#if PDO_USE_MYSQLND
+#ifdef PDO_USE_MYSQLND
 	if (!S->stmt && S->current_data) {
 		mnd_free(S->current_data);
 	}
@@ -343,13 +339,13 @@ static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt) /* {{{ */
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 	pdo_mysql_db_handle *H = S->H;
-#if PDO_USE_MYSQLND
+#ifdef PDO_USE_MYSQLND
 	zend_long row_count;
 #endif
 	PDO_DBG_ENTER("pdo_mysql_stmt_next_rowset");
 	PDO_DBG_INF_FMT("stmt=%p", S->stmt);
 
-#if PDO_USE_MYSQLND
+#ifdef PDO_USE_MYSQLND
 	if (!H->emulate_prepare) {
 		if (!mysqlnd_stmt_more_results(S->stmt)) {
 			PDO_DBG_RETURN(0);
@@ -420,7 +416,7 @@ static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt) /* {{{ */
 		/* No more results */
 		PDO_DBG_RETURN(0);
 	}
-#if PDO_USE_MYSQLND
+#ifdef PDO_USE_MYSQLND
 	if (mysql_next_result(H->server) == FAIL) {
 		pdo_mysql_error_stmt(stmt);
 		PDO_DBG_RETURN(0);
@@ -495,7 +491,7 @@ static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 					parameter = Z_REFVAL(param->parameter);
 				}
 
-#if PDO_USE_MYSQLND
+#ifdef PDO_USE_MYSQLND
 				if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_NULL || (Z_TYPE_P(parameter) == IS_NULL)) {
 					mysqlnd_stmt_bind_one_param(S->stmt, param->paramno, parameter, MYSQL_TYPE_NULL);
 					PDO_DBG_RETURN(1);
@@ -541,7 +537,7 @@ static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 						;
 				}
 
-#if PDO_USE_MYSQLND
+#ifdef PDO_USE_MYSQLND
 				/* Is it really correct to check the zval's type? - But well, that's what the old code below does, too */
 				PDO_DBG_INF_FMT("param->parameter->type=%d", Z_TYPE(param->parameter));
 				if (!Z_ISREF(param->parameter)) {
@@ -559,6 +555,10 @@ static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 #elif SIZEOF_ZEND_LONG==4
 						mysqlnd_stmt_bind_one_param(S->stmt, param->paramno, parameter, MYSQL_TYPE_LONG);
 #endif /* SIZEOF_LONG */
+						break;
+					case IS_TRUE:
+					case IS_FALSE:
+						mysqlnd_stmt_bind_one_param(S->stmt, param->paramno, parameter, MYSQL_TYPE_TINY);
 						break;
 					case IS_DOUBLE:
 						mysqlnd_stmt_bind_one_param(S->stmt, param->paramno, parameter, MYSQL_TYPE_DOUBLE);
@@ -614,7 +614,7 @@ static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 static int pdo_mysql_stmt_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori, zend_long offset) /* {{{ */
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
-#if PDO_USE_MYSQLND
+#ifdef PDO_USE_MYSQLND
 	zend_bool fetched_anything;
 
 	PDO_DBG_ENTER("pdo_mysql_stmt_fetch");
@@ -653,14 +653,14 @@ static int pdo_mysql_stmt_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori
 		strcpy(stmt->error_code, "HY000");
 		PDO_DBG_RETURN(0);
 	}
-#if PDO_USE_MYSQLND
+#ifdef PDO_USE_MYSQLND
 	if (!S->stmt && S->current_data) {
 		mnd_free(S->current_data);
 	}
 #endif /* PDO_USE_MYSQLND */
 
 	if ((S->current_data = mysql_fetch_row(S->result)) == NULL) {
-#if PDO_USE_MYSQLND
+#ifdef PDO_USE_MYSQLND
 		if (S->result->unbuf && !S->result->unbuf->eof_reached && mysql_errno(S->H->server)) {
 #else
 		if (!S->result->eof && mysql_errno(S->H->server)) {
@@ -743,7 +743,7 @@ static int pdo_mysql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, size_
 		/* error invalid column */
 		PDO_DBG_RETURN(0);
 	}
-#if PDO_USE_MYSQLND
+#ifdef PDO_USE_MYSQLND
 	if (S->stmt) {
 		Z_TRY_ADDREF(S->stmt->data->result_bind[colno].zv);
 		*ptr = (char*)&S->stmt->data->result_bind[colno].zv;
@@ -876,7 +876,7 @@ static int pdo_mysql_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *retu
 		case MYSQL_TYPE_SHORT:
 		case MYSQL_TYPE_INT24:
 		case MYSQL_TYPE_LONG:
-#if SIZEOF_LONG==8
+#if SIZEOF_ZEND_LONG==8
 		case MYSQL_TYPE_LONGLONG:
 #endif
 			add_assoc_long(return_value, "pdo_type", PDO_PARAM_INT);
@@ -923,7 +923,7 @@ static int pdo_mysql_stmt_cursor_closer(pdo_stmt_t *stmt) /* {{{ */
 }
 /* }}} */
 
-struct pdo_stmt_methods mysql_stmt_methods = {
+const struct pdo_stmt_methods mysql_stmt_methods = {
 	pdo_mysql_stmt_dtor,
 	pdo_mysql_stmt_execute,
 	pdo_mysql_stmt_fetch,
@@ -936,12 +936,3 @@ struct pdo_stmt_methods mysql_stmt_methods = {
 	pdo_mysql_stmt_next_rowset,
 	pdo_mysql_stmt_cursor_closer
 };
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

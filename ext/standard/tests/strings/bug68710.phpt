@@ -21,5 +21,5 @@ for ($i=4; $i<100; $i++) {
 }
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 ===DONE===

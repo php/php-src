@@ -1,7 +1,5 @@
 --TEST--
 testing the behavior of string offset chaining
---INI--
-error_reporting=E_ALL | E_DEPRECATED
 --FILE--
 <?php
 $array = array('expected_array' => "foobar");
@@ -17,11 +15,11 @@ bool(true)
 string(6) "foobar"
 bool(false)
 
-Warning: Illegal string offset 'foo' in %soffsets_chaining_5.php on line %d
+Warning: Illegal string offset "foo" in %s on line %d
 string(1) "f"
 bool(false)
 
-Warning: Illegal string offset 'foo' in %soffsets_chaining_5.php on line %d
+Warning: Illegal string offset "foo" in %s on line %d
 
-Warning: Illegal string offset 'bar' in %soffsets_chaining_5.php on line %d
+Warning: Illegal string offset "bar" in %s on line %d
 string(1) "f"

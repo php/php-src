@@ -28,7 +28,7 @@ var_dump(file_exists($tmp_file));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: readlink(): No such file or directory in %s on line %d
 bool(false)
 string(%d) "%srename_variation6.php.tmp"

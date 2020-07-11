@@ -41,7 +41,9 @@ const mbfl_encoding mbfl_encoding_base64 = {
 	"BASE64",
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_ENC_STRM | MBFL_ENCTYPE_GL_UNSAFE
+	MBFL_ENCTYPE_ENC_STRM | MBFL_ENCTYPE_GL_UNSAFE,
+	NULL,
+	NULL
 };
 
 const struct mbfl_convert_vtbl vtbl_8bit_b64 = {
@@ -50,7 +52,8 @@ const struct mbfl_convert_vtbl vtbl_8bit_b64 = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_base64enc,
-	mbfl_filt_conv_base64enc_flush
+	mbfl_filt_conv_base64enc_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_b64_8bit = {
@@ -59,7 +62,8 @@ const struct mbfl_convert_vtbl vtbl_b64_8bit = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_base64dec,
-	mbfl_filt_conv_base64dec_flush
+	mbfl_filt_conv_base64dec_flush,
+	NULL,
 };
 
 
@@ -210,5 +214,3 @@ int mbfl_filt_conv_base64dec_flush(mbfl_convert_filter *filter)
 	}
 	return 0;
 }
-
-

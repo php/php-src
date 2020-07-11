@@ -5,7 +5,7 @@ oci_connect() with invalid character set
 --FILE--
 <?php
 
-require dirname(__FILE__)."/connect.inc";
+require __DIR__."/connect.inc";
 
 var_dump($c1 = oci_connect($user, $password, $dbase));
 var_dump($c2 = oci_connect($user, $password, $dbase, ""));
@@ -21,7 +21,7 @@ var_dump($c5 == $c6);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 resource(%d) of type (oci8 connection)
 resource(%d) of type (oci8 connection)
 

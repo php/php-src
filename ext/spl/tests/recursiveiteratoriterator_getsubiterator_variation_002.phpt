@@ -17,4 +17,3 @@ var_dump(is_null($iterator->getSubIterator()));
 --EXPECT--
 bool(false)
 bool(false)
-

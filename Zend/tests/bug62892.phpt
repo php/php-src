@@ -2,7 +2,7 @@
 Bug #62892 (ReflectionClass::getTraitAliases crashes on importing trait methods as private)
 --FILE--
 <?php
- 
+
 trait myTrait {
      public function run() {}
 }
@@ -16,6 +16,6 @@ $class = new \ReflectionClass('myClass');
 var_dump($class->getTraitAliases());
 
 ?>
---EXPECTF--
+--EXPECT--
 array(0) {
 }

@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,28 +13,28 @@
    | Author: Wez Furlong <wez@thebrainroom.com>                           |
    +----------------------------------------------------------------------+
  */
-/* $Id$ */
 
 #ifdef PHP_WIN32
 typedef HANDLE php_file_descriptor_t;
 typedef DWORD php_process_id_t;
+# define PHP_INVALID_FD INVALID_HANDLE_VALUE
 #else
 typedef int php_file_descriptor_t;
 typedef pid_t php_process_id_t;
+# define PHP_INVALID_FD (-1)
 #endif
 
-/* Environment block under win32 is a NUL terminated sequence of NUL terminated
- * name=value strings.
- * Under unix, it is an argv style array.
- * */
+/* Environment block under Win32 is a NUL terminated sequence of NUL terminated
+ *   name=value strings.
+ * Under Unix, it is an argv style array. */
 typedef struct _php_process_env {
 	char *envp;
 #ifndef PHP_WIN32
 	char **envarray;
 #endif
-} php_process_env_t;
+} php_process_env;
 
-struct php_process_handle {
+typedef struct _php_process_handle {
 	php_process_id_t	child;
 #ifdef PHP_WIN32
 	HANDLE childHandle;
@@ -44,7 +42,5 @@ struct php_process_handle {
 	int npipes;
 	zend_resource **pipes;
 	char *command;
-	int is_persistent;
-	php_process_env_t env;
-};
-
+	php_process_env env;
+} php_process_handle;

@@ -1,98 +1,98 @@
 --TEST--
 ZE2 ArrayAccess and ArrayProxyAccess, ArrayProxy
 --FILE--
-<?php 
+<?php
 
 // NOTE: This will become part of SPL
 
 interface ArrayProxyAccess extends ArrayAccess
 {
-	function proxyGet($element);
-	function proxySet($element, $index, $value);
-	function proxyUnset($element, $index);
+    function proxyGet($element);
+    function proxySet($element, $index, $value);
+    function proxyUnset($element, $index);
 }
 
 class ArrayProxy implements ArrayAccess
 {
-	private $object;
-	private $element;
-	
-	function __construct(ArrayProxyAccess $object, $element)
-	{
-		echo __METHOD__ . "($element)\n";
-		if (!$object->offsetExists($element))
-		{
-			$object[$element] = array();
-		}
-		$this->object = $object;
-		$this->element = $element;
-	}
+    private $object;
+    private $element;
 
-	function offsetExists($index) {
-		echo __METHOD__ . "($this->element, $index)\n";
-		return array_key_exists($index, $this->object->proxyGet($this->element));
-	}
+    function __construct(ArrayProxyAccess $object, $element)
+    {
+        echo __METHOD__ . "($element)\n";
+        if (!$object->offsetExists($element))
+        {
+            $object[$element] = array();
+        }
+        $this->object = $object;
+        $this->element = $element;
+    }
 
-	function offsetGet($index) {
-		echo __METHOD__ . "($this->element, $index)\n";
-		$tmp = $this->object->proxyGet($this->element);
-		return isset($tmp[$index]) ? $tmp[$index] : NULL;
-	}
+    function offsetExists($index) {
+        echo __METHOD__ . "($this->element, $index)\n";
+        return array_key_exists($index, $this->object->proxyGet($this->element));
+    }
 
-	function offsetSet($index, $value) {
-		echo __METHOD__ . "($this->element, $index, $value)\n";
-		$this->object->proxySet($this->element, $index, $value);
-	}
+    function offsetGet($index) {
+        echo __METHOD__ . "($this->element, $index)\n";
+        $tmp = $this->object->proxyGet($this->element);
+        return isset($tmp[$index]) ? $tmp[$index] : NULL;
+    }
 
-	function offsetUnset($index) {
-		echo __METHOD__ . "($this->element, $index)\n";
-		$this->object->proxyUnset($this->element, $index);
-	}
+    function offsetSet($index, $value) {
+        echo __METHOD__ . "($this->element, $index, $value)\n";
+        $this->object->proxySet($this->element, $index, $value);
+    }
+
+    function offsetUnset($index) {
+        echo __METHOD__ . "($this->element, $index)\n";
+        $this->object->proxyUnset($this->element, $index);
+    }
 }
 
 class Peoples implements ArrayProxyAccess
 {
-	public $person;
-	
-	function __construct()
-	{
-		$this->person = array(array('name'=>'Foo'));
-	}
+    public $person;
 
-	function offsetExists($index)
-	{
-		return array_key_exists($index, $this->person);
-	}
+    function __construct()
+    {
+        $this->person = array(array('name'=>'Foo'));
+    }
 
-	function offsetGet($index)
-	{
-		return new ArrayProxy($this, $index);
-	}
+    function offsetExists($index)
+    {
+        return array_key_exists($index, $this->person);
+    }
 
-	function offsetSet($index, $value)
-	{
-		$this->person[$index] = $value;
-	}
+    function offsetGet($index)
+    {
+        return new ArrayProxy($this, $index);
+    }
 
-	function offsetUnset($index)
-	{
-		unset($this->person[$index]);
-	}
+    function offsetSet($index, $value)
+    {
+        $this->person[$index] = $value;
+    }
 
-	function proxyGet($element)
-	{
-		return $this->person[$element];
-	}
+    function offsetUnset($index)
+    {
+        unset($this->person[$index]);
+    }
 
-	function proxySet($element, $index, $value)
-	{
-		$this->person[$element][$index] = $value;
-	}
-	
-	function proxyUnset($element, $index)
-	{
-		unset($this->person[$element][$index]);
-	}
+    function proxyGet($element)
+    {
+        return $this->person[$element];
+    }
+
+    function proxySet($element, $index, $value)
+    {
+        $this->person[$element][$index] = $value;
+    }
+
+    function proxyUnset($element, $index)
+    {
+        unset($this->person[$element][$index]);
+    }
 }
 
 $people = new Peoples;
@@ -122,7 +122,6 @@ $people[0]['name'] = 'BlaBla';
 var_dump($people[0]['name']);
 
 ?>
-===DONE===
 --EXPECTF--
 string(3) "Foo"
 string(6) "FooBar"
@@ -187,4 +186,3 @@ ArrayProxy::offsetSet(0, name, BlaBla)
 ArrayProxy::__construct(0)
 ArrayProxy::offsetGet(0, name)
 string(6) "BlaBla"
-===DONE===

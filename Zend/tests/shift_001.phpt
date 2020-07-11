@@ -18,7 +18,7 @@ var_dump($s2);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 int(492)
 
 Warning: A non-numeric value encountered in %s on line %d

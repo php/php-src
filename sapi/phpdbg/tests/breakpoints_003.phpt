@@ -1,5 +1,11 @@
 --TEST--
 Test deleting breakpoints
+--SKIPIF--
+<?php
+if (PHP_OS_FAMILY === 'Windows' && ini_get('opcache.jit') && ini_get('opcache.jit_buffer_size')) {
+    die('xfail breakpoint/watchpoint issues with JIT on Windows');
+}
+?>
 --PHPDBG--
 b 4
 b del 0
@@ -30,4 +36,3 @@ echo $i++;
 echo $i++;
 echo $i++;
 echo $i++;
-

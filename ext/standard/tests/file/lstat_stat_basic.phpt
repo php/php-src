@@ -4,19 +4,12 @@ Test lstat() & stat() functions: basic functionality
 <?php
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip.. lstat() not available on Windows');
+    die('skip not for Windows');
 }
 ?>
 --FILE--
 <?php
-/* Prototype: array lstat ( string $filename );
-   Description: Gives information about a file or symbolic link
-
-   Prototype: array stat ( string $filename );
-   Description: Gives information about a file
-*/
-
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require("$file_path/file.inc");
 
 echo "*** Testing lstat() & stat() : basic functionality ***\n";
@@ -54,8 +47,8 @@ sleep(2);
 $new_file_stat = stat($filename);
 clearstatcache();
 
-// stat contains 13 different values stored twice, can be accessed using 
-// numeric and named keys, compare them to see they are same  
+// stat contains 13 different values stored twice, can be accessed using
+// numeric and named keys, compare them to see they are same
 echo "*** Testing stat() and lstat() : validating the values stored in stat ***\n";
 // Initial stat values
 var_dump( compare_self_stat($file_stat) ); //expect true
@@ -66,7 +59,7 @@ var_dump( compare_self_stat($link_stat) ); // expect true
 var_dump( compare_self_stat($new_file_stat) ); //expect true
 var_dump( compare_self_stat($new_dir_stat) );  // expect true
 
-// compare the two stat values, initial stat and stat recorded after 
+// compare the two stat values, initial stat and stat recorded after
 // creating files and link, also dump the value of stats
 echo "*** Testing stat() and lstat() : comparing stats (recorded before and after file/link creation) ***\n";
 echo "-- comparing difference in dir stats before and after creating file in it --\n";
@@ -80,7 +73,7 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink("$file_path/lstat_stat_basic_link.tmp");
 unlink("$file_path/lstat_stat_basic/lstat_stat_basic.tmp");
 rmdir("$file_path/lstat_stat_basic");

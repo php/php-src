@@ -1,28 +1,28 @@
 --TEST--
-globals in local scope - 3 
+globals in local scope - 3
 --INI--
 variables_order="egpcs"
 --FILE--
 <?php
 
 function test() {
-	include dirname(__FILE__)."/globals.inc";
+    include __DIR__."/globals.inc";
 }
 
 test();
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 bool(true)
 bool(false)
 string(5) "array"
 int(%d)
 string(%d) "%s"
 
-Notice: Undefined index: PHP_SELF in %s on line %d
+Notice: Undefined array key "PHP_SELF" in %s on line %d
 NULL
 
-Notice: Undefined variable: _SERVER in %s on line %d
+Warning: Undefined variable $_SERVER in %s on line %d
 NULL
 Done

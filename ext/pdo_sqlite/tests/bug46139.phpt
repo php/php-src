@@ -7,8 +7,8 @@ if (!extension_loaded('pdo_sqlite')) print 'skip not loaded';
 --FILE--
 <?php
 
-require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
-$db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
+require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
+$db = PDOTest::test_factory(__DIR__ . '/common.phpt');
 
 class Person {
     public $test = NULL;

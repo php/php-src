@@ -28,7 +28,7 @@ $values = Array(
 'ǅǼ੧ఘⅧ⒇৪@example.com',
 );
 foreach ($values as $value) {
-	var_dump(filter_var($value, FILTER_VALIDATE_EMAIL, FILTER_FLAG_EMAIL_UNICODE));
+    var_dump(filter_var($value, FILTER_VALIDATE_EMAIL, FILTER_FLAG_EMAIL_UNICODE));
 }
 echo "Done\n";
 ?>

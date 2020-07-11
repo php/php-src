@@ -1,4 +1,3 @@
-// $Id$
 // vim:ft=javascript
 
 ARG_WITH("pdo-odbc", "ODBC support for PDO", "no");
@@ -16,5 +15,3 @@ if (PHP_PDO_ODBC != "no") {
 		PHP_PDO_ODBC = "no"
 	}
 }
-
-

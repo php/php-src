@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,11 +10,9 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author: Stig Sæther Bakken <ssb@php.net>                             |
+   | Author: Stig SÃ¦ther Bakken <ssb@php.net>                             |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #include "php.h"
 
@@ -36,15 +32,14 @@
 #include "basic_functions.h"
 #include "php_ext_syslog.h"
 
-/* {{{ PHP_MINIT_FUNCTION
- */
+/* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(syslog)
 {
 	/* error levels */
 	REGISTER_LONG_CONSTANT("LOG_EMERG", LOG_EMERG, CONST_CS | CONST_PERSISTENT); /* system unusable */
 	REGISTER_LONG_CONSTANT("LOG_ALERT", LOG_ALERT, CONST_CS | CONST_PERSISTENT); /* immediate action required */
 	REGISTER_LONG_CONSTANT("LOG_CRIT", LOG_CRIT, CONST_CS | CONST_PERSISTENT); /* critical conditions */
-	REGISTER_LONG_CONSTANT("LOG_ERR", LOG_ERR, CONST_CS | CONST_PERSISTENT); 
+	REGISTER_LONG_CONSTANT("LOG_ERR", LOG_ERR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("LOG_WARNING", LOG_WARNING, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("LOG_NOTICE", LOG_NOTICE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("LOG_INFO", LOG_INFO, CONST_CS | CONST_PERSISTENT);
@@ -125,8 +120,13 @@ PHP_MSHUTDOWN_FUNCTION(syslog)
 	return SUCCESS;
 }
 
-/* {{{ proto bool openlog(string ident, int option, int facility)
-   Open connection to system logger */
+void php_openlog(const char *ident, int option, int facility)
+{
+	openlog(ident, option, facility);
+	PG(have_called_openlog) = 1;
+}
+
+/* {{{ Open connection to system logger */
 /*
    ** OpenLog("nettopp", $LOG_PID, $LOG_LOCAL1);
    ** Syslog($LOG_EMERG, "help me!")
@@ -138,10 +138,12 @@ PHP_FUNCTION(openlog)
 	zend_long option, facility;
 	size_t ident_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sll", &ident,
-							  &ident_len, &option, &facility) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(3, 3)
+		Z_PARAM_STRING(ident, ident_len)
+		Z_PARAM_LONG(option)
+		Z_PARAM_LONG(facility)
+	ZEND_PARSE_PARAMETERS_END();
+
 	if (BG(syslog_device)) {
 		free(BG(syslog_device));
 	}
@@ -149,18 +151,15 @@ PHP_FUNCTION(openlog)
 	if(BG(syslog_device) == NULL) {
 		RETURN_FALSE;
 	}
-	openlog(BG(syslog_device), option, facility);
+	php_openlog(BG(syslog_device), option, facility);
 	RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ proto bool closelog(void)
-   Close connection to system logger */
+/* {{{ Close connection to system logger */
 PHP_FUNCTION(closelog)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	closelog();
 	if (BG(syslog_device)) {
@@ -171,18 +170,17 @@ PHP_FUNCTION(closelog)
 }
 /* }}} */
 
-/* {{{ proto bool syslog(int priority, string message)
-   Generate a system log message */
+/* {{{ Generate a system log message */
 PHP_FUNCTION(syslog)
 {
 	zend_long priority;
 	char *message;
 	size_t message_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ls", &priority,
-							  &message, &message_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_LONG(priority)
+		Z_PARAM_STRING(message, message_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	php_syslog(priority, "%s", message);
 	RETURN_TRUE;
@@ -190,12 +188,3 @@ PHP_FUNCTION(syslog)
 /* }}} */
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

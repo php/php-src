@@ -1,7 +1,5 @@
 --TEST--
-snefru
---SKIPIF--
-<?php extension_loaded('hash') or die('skip'); ?>
+Hash: snefru algorithm
 --FILE--
 <?php
 echo hash('snefru', ''), "\n";

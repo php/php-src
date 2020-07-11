@@ -16,10 +16,8 @@ var_dump($gmt->useDaylightTime());
 var_dump(intltz_use_daylight_time($lsb));
 var_dump(intltz_use_daylight_time($gmt));
 ?>
-==DONE==
 --EXPECT--
 bool(true)
 bool(false)
 bool(true)
-bool(false)
-==DONE==
+bool(false)

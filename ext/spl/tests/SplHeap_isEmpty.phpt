@@ -10,6 +10,5 @@ $h = new SplMaxHeap();
 var_dump($h->isEmpty());
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
-

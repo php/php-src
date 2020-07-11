@@ -12,82 +12,82 @@ if (!$TEST_EXPERIMENTAL)
 ?>
 --FILE--
 <?php
-	require('connect.inc');
+    require('connect.inc');
 
-	$warning = new mysqli_warning();
-	$warning = new mysqli_warning(null);
-	$warning = new mysqli_warning(null, null);
+    $warning = new mysqli_warning();
+    $warning = new mysqli_warning(null);
+    $warning = new mysqli_warning(null, null);
 
-	$mysqli = new mysqli();
-	$warning = new mysqli_warning($mysqli);
+    $mysqli = new mysqli();
+    $warning = new mysqli_warning($mysqli);
 
-	$mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
-	$stmt = new mysqli_stmt($mysqli);
-	$warning = new mysqli_warning($stmt);
+    $mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
+    $stmt = new mysqli_stmt($mysqli);
+    $warning = new mysqli_warning($stmt);
 
-	$stmt = $mysqli->stmt_init();
-	$warning = new mysqli_warning($stmt);
+    $stmt = $mysqli->stmt_init();
+    $warning = new mysqli_warning($stmt);
 
-	$obj = new stdClass();
-	$warning = new mysqli_warning($obj);
+    $obj = new stdClass();
+    $warning = new mysqli_warning($obj);
 
-	include("table.inc");
-	$mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
-	$res = $mysqli->query('INSERT INTO test(id, label) VALUES (1, "zz")');
-	$warning = mysqli_get_warnings($mysqli);
+    include("table.inc");
+    $mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
+    $res = $mysqli->query('INSERT INTO test(id, label) VALUES (1, "zz")');
+    $warning = mysqli_get_warnings($mysqli);
 
-	printf("Parent class:\n");
-	var_dump(get_parent_class($warning));
+    printf("Parent class:\n");
+    var_dump(get_parent_class($warning));
 
-	printf("\nMethods:\n");
-	$methods = get_class_methods($warning);
-	$expected_methods = array(
-		'next'                      => true,
-	);
+    printf("\nMethods:\n");
+    $methods = get_class_methods($warning);
+    $expected_methods = array(
+        'next'                      => true,
+    );
 
-	foreach ($methods as $k => $method) {
-		if (isset($expected_methods[$method])) {
-			unset($methods[$k]);
-			unset($expected_methods[$method]);
-		}
-	}
-	if (!empty($methods)) {
-		printf("Dumping list of unexpected methods.\n");
-		var_dump($methods);
-	}
-	if (!empty($expected_methods)) {
-		printf("Dumping list of missing methods.\n");
-		var_dump($expected_methods);
-	}
-	if (empty($methods) && empty($expected_methods))
-		printf("ok\n");
+    foreach ($methods as $k => $method) {
+        if (isset($expected_methods[$method])) {
+            unset($methods[$k]);
+            unset($expected_methods[$method]);
+        }
+    }
+    if (!empty($methods)) {
+        printf("Dumping list of unexpected methods.\n");
+        var_dump($methods);
+    }
+    if (!empty($expected_methods)) {
+        printf("Dumping list of missing methods.\n");
+        var_dump($expected_methods);
+    }
+    if (empty($methods) && empty($expected_methods))
+        printf("ok\n");
 
-	printf("\nClass variables:\n");
-	$variables = get_class_vars(get_class($mysqli));
-	sort($variables);
-	foreach ($variables as $k => $var)
-		printf("%s\n", $var);
+    printf("\nClass variables:\n");
+    $variables = get_class_vars(get_class($mysqli));
+    sort($variables);
+    foreach ($variables as $k => $var)
+        printf("%s\n", $var);
 
-	printf("\nObject variables:\n");
-	$variables = get_object_vars($mysqli);
-	foreach ($variables as $k => $var)
-		printf("%s\n", $var);
+    printf("\nObject variables:\n");
+    $variables = get_object_vars($mysqli);
+    foreach ($variables as $k => $var)
+        printf("%s\n", $var);
 
-	printf("\nMagic, magic properties:\n");
+    printf("\nMagic, magic properties:\n");
 
-	assert('' === $warning->message);
-	printf("warning->message = '%s'\n", $warning->message);
+    assert('' === $warning->message);
+    printf("warning->message = '%s'\n", $warning->message);
 
-	assert('' === $warning->sqlstate);
-	printf("warning->sqlstate= '%s'\n", $warning->sqlstate);
+    assert('' === $warning->sqlstate);
+    printf("warning->sqlstate= '%s'\n", $warning->sqlstate);
 
-	assert(0 === $warning->errno);
-	printf("warning->errno = '%s'\n", $warning->errno);
+    assert(0 === $warning->errno);
+    printf("warning->errno = '%s'\n", $warning->errno);
 
-	printf("\nAccess to undefined properties:\n");
-	printf("warning->unknown = '%s'\n", @$warning->unknown);
+    printf("\nAccess to undefined properties:\n");
+    printf("warning->unknown = '%s'\n", @$warning->unknown);
 
-	print "done!";
+    print "done!";
 ?>
 --CLEAN--
 <?php
@@ -96,19 +96,15 @@ if (!$TEST_EXPERIMENTAL)
 --EXPECTF--
 Warning: Wrong parameter count for mysqli_warning::mysqli_warning() in %s on line %d
 
-Warning: mysqli_warning::mysqli_warning() expects parameter 1 to be object, null given in %s on line %d
+Warning: mysqli_warning::mysqli_warning(): Argument #1 must be of type object, null given in %s on line %d
 
 Warning: Wrong parameter count for mysqli_warning::mysqli_warning() in %s on line %d
 
-Warning: mysqli_warning::mysqli_warning(): Couldn't fetch mysqli in %s on line %d
+Warning: mysqli_warning::mysqli_warning(): mysqli object is already closed in %s on line %d
+mysqli_stmt object is not fully initialized
+mysqli_stmt object is not fully initialized
 
-Warning: mysqli_warning::mysqli_warning(): invalid object or resource mysqli_stmt
- in %s on line %d
-
-Warning: mysqli_warning::mysqli_warning(): invalid object or resource mysqli_stmt
- in %s on line %d
-
-Warning: mysqli_warning::mysqli_warning(): invalid class argument in /home/nixnutz/php6_mysqlnd/ext/mysqli/tests/mysqli_class_mysqli_warning.php on line 19
+Warning: mysqli_warning::mysqli_warning(): Invalid class argument in /home/nixnutz/php6_mysqlnd/ext/mysqli/tests/mysqli_class_mysqli_warning.php on line 19
 
 Warning: mysqli_warning::mysqli_warning(): No warnings found in %s on line %d
 Parent class:

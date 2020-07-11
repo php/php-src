@@ -9,12 +9,6 @@ session.auto_start=1
 
 ob_start();
 
-/* 
- * Prototype : bool session_start(void)
- * Description : Initialize session data
- * Source code : ext/session/session.c 
- */
-
 echo "*** Testing session_start() : variation ***\n";
 
 var_dump(session_id());
@@ -30,10 +24,9 @@ ob_end_flush();
 *** Testing session_start() : variation ***
 string(%d) "%s"
 
-Notice: A session had already been started - ignoring session_start() in %s on line %d
+Notice: session_start(): A session had already been started - ignoring in %s on line %d
 bool(true)
 string(%d) "%s"
 bool(true)
 string(0) ""
 Done
-

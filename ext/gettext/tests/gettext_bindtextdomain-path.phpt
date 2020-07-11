@@ -7,9 +7,9 @@ if (!extension_loaded("gettext")) {
 }
 --FILE--
 <?php
-chdir(dirname(__FILE__));
+chdir(__DIR__);
 var_dump(bindtextdomain('example.org', 'foobar'));
---EXPECTF--
+--EXPECT--
 bool(false)
 --CREDITS--
 Till Klampaeckel, till@php.net

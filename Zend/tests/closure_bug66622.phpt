@@ -1,6 +1,5 @@
 --TEST--
 Bug 66622: Closures do not correctly capture the late bound class (static::) in some cases
-
 --FILE--
 <?php
 class A {
@@ -29,7 +28,6 @@ function test() {
     B::baz();
 }
 test();
-
 --EXPECT--
 B vs B
 B vs B

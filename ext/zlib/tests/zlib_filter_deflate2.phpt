@@ -11,6 +11,6 @@ stream_filter_append($fp, 'zlib.deflate', STREAM_FILTER_WRITE, array('level' => 
 fwrite($fp, $text);
 fclose($fp);
 
-?> 
---EXPECT-- 
+?>
+--EXPECT--
 ËA€ DÑ«ÌÎñ£†1´MBâíUvñ_‚(ÆELÆõÌ/•aP¹=Pié;Ò6‰fÅCe4·U9;wˆ5ý±m/ 

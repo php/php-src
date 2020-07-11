@@ -1,11 +1,11 @@
 --TEST--
-POST Method test and arrays - 6 
+POST Method test and arrays - 6
 --POST--
 a[][]=1&a[][]=3&b[a][b][c]=1&b[a][b][d]=1
 --FILE--
 <?php
-var_dump($_POST['a']); 
-var_dump($_POST['b']); 
+var_dump($_POST['a']);
+var_dump($_POST['b']);
 ?>
 --EXPECT--
 array(2) {

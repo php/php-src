@@ -7,7 +7,7 @@ highlight.keyword=#007700
 highlight.default=#0000BB
 highlight.html=#000000
 --FILE--
-<?php 
+<?php
 $var = highlight_string("<br /><?php echo \"foo\"; ?><br />");
 $var = highlight_string("<br /><?php echo \"bar\"; ?><br />", TRUE);
 echo "\n[$var]\n";

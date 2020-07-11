@@ -3,8 +3,8 @@ Bug #52940 (call_user_func_array still allows call-time pass-by-reference)
 --FILE--
 <?php
 function foo($a) {
-	$a++;
-	var_dump($a);	
+    $a++;
+    var_dump($a);
 }
 function bar(&$a) {
         $a++;

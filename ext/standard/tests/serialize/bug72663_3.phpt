@@ -13,5 +13,7 @@ var_dump($_SESSION);
 ?>
 --EXPECTF--
 Notice: session_decode(): Unexpected end of serialized data in %s on line %d
+
+Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s on line %d
 array(0) {
 }

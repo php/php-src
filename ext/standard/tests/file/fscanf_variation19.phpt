@@ -1,18 +1,13 @@
 --TEST--
-Test fscanf() function: usage variations - string formats with boolean 
+Test fscanf() function: usage variations - string formats with boolean
 --FILE--
 <?php
 
-/*
-  Prototype: mixed fscanf ( resource $handle, string $format [, mixed &$...] );
-  Description: Parses input from a file according to a format
-*/
-
 /* Test fscanf() to scan boolean data using different string format types */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
-echo "*** Test fscanf(): different string format types with boolean data ***\n"; 
+echo "*** Test fscanf(): different string format types with boolean data ***\n";
 
 // create a file
 $filename = "$file_path/fscanf_variation19.tmp";
@@ -31,8 +26,8 @@ $bool_types = array (
 $string_formats = array( "%s",
                          "%hs", "%ls", "%Ls",
                          " %s", "%s ", "% s",
-			 "\t%s", "\n%s", "%4s",
-			 "%30s", "%[a-zA-Z0-9]", "%*s");
+             "\t%s", "\n%s", "%4s",
+             "%30s", "%[a-zA-Z0-9]", "%*s");
 
 $counter = 1;
 
@@ -57,7 +52,11 @@ foreach($string_formats as $string_format) {
   rewind($file_handle);
   echo "\n-- iteration $counter --\n";
   while( !feof($file_handle) ) {
-    var_dump( fscanf($file_handle,$string_format) );
+    try {
+      var_dump(fscanf($file_handle,$string_format));
+    } catch (ValueError $exception) {
+      echo $exception->getMessage() . "\n";
+    }
   }
   $counter++;
 }
@@ -66,11 +65,11 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $filename = "$file_path/fscanf_variation19.tmp";
 unlink($filename);
 ?>
---EXPECTF--
+--EXPECT--
 *** Test fscanf(): different string format types with boolean data ***
 
 -- iteration 1 --
@@ -152,18 +151,10 @@ NULL
 bool(false)
 
 -- iteration 7 --
-
-Warning: fscanf(): Bad scan conversion character " " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character " " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character " " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character " " in %s on line %d
-NULL
+Bad scan conversion character " "
+Bad scan conversion character " "
+Bad scan conversion character " "
+Bad scan conversion character " "
 bool(false)
 
 -- iteration 8 --
@@ -247,4 +238,3 @@ NULL
 bool(false)
 
 *** Done ***
-

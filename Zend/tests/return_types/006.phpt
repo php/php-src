@@ -1,6 +1,5 @@
 --TEST--
 Return type allowed in child when parent does not have return type
-
 --FILE--
 <?php
 class Comment {}
@@ -15,7 +14,6 @@ $comments = new CommentsIterator([new Comment]);
 foreach ($comments as $comment) {
     var_dump($comment);
 }
-
 --EXPECTF--
 object(Comment)#%d (%d) {
 }

@@ -2,13 +2,8 @@
 Test usort() function : object functionality - Different types of classes
 --FILE--
 <?php
-/* Prototype  : bool usort(array $array_arg, string $cmp_function)
- * Description: Sort an array by values using a user-defined comparison function 
- * Source code: ext/standard/array.c
- */
-
 /*
- * Pass an array of objects which are either: 
+ * Pass an array of objects which are either:
  * 1. Empty
  * 2. Static
  * 2. Inherited
@@ -95,7 +90,6 @@ $array_arg = array(
 var_dump( usort($array_arg, 'cmp_function') );
 var_dump($array_arg);
 ?>
-===DONE===
 --EXPECTF--
 *** Testing usort() : object functionality ***
 -- Testing usort() with StaticClass objects --
@@ -162,4 +156,3 @@ array(4) {
     NULL
   }
 }
-===DONE===

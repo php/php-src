@@ -2,12 +2,6 @@
 Test dir() function : usage variations - operate on previously opened directory
 --FILE--
 <?php
-/* 
- * Prototype  : object dir(string $directory[, resource $context])
- * Description: Directory class with properties, handle and class and methods read, rewind and close
- * Source code: ext/standard/dir.c
- */
-
 /*
  * Testing the behavior of dir() function by trying to open a
  * directory which is already open.
@@ -16,10 +10,10 @@ Test dir() function : usage variations - operate on previously opened directory
 echo "*** Testing dir() : operate on previously opened directory ***\n";
 
 // include the file.inc for Function: function create_files()
-include( dirname(__FILE__)."/../file/file.inc");
+include( __DIR__."/../file/file.inc");
 
 // create the temporary directory
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $dir_path = $file_path."/dir_variation4";
 @mkdir($dir_path);
 
@@ -46,7 +40,7 @@ echo "Done";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $dir_path = $file_path."/dir_variation4";
 
 rmdir($dir_path);

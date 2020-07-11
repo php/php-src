@@ -1,8 +1,8 @@
 --TEST--
 Test if socket_set_option() works, option:SO_SNDTIMEO
 --DESCRIPTION--
--wrong params 
--set/get params comparison 
+-wrong params
+-set/get params comparison
 --SKIPIF--
 <?php
 if (!extension_loaded('sockets')) {
@@ -18,7 +18,11 @@ if (!$socket) {
 socket_set_block($socket);
 
 //wrong params
-$retval_1 = socket_set_option( $socket, SOL_SOCKET, SO_SNDTIMEO, array());
+try {
+    $retval_1 = socket_set_option( $socket, SOL_SOCKET, SO_SNDTIMEO, []);
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 //set/get comparison
 $options = array("sec" => 1, "usec" => 0);
@@ -29,9 +33,8 @@ var_dump($retval_2);
 var_dump($retval_3 === $options);
 socket_close($socket);
 ?>
-
---EXPECTF--
-Warning: socket_set_option(): no key "sec" passed in optval in %s on line %d
+--EXPECT--
+socket_set_option(): Argument #4 ($optval) must have key "sec"
 bool(true)
 bool(true)
 --CREDITS--

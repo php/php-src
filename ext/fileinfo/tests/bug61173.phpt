@@ -13,5 +13,5 @@ try {
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
---EXPECTF--
-finfo::finfo() expects at most 2 parameters, 3 given
+--EXPECT--
+finfo::__construct() expects at most 2 parameters, 3 given

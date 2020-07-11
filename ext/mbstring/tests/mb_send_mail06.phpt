@@ -24,8 +24,8 @@ mb_send_mail($to, mb_language(), "test");
 
 /* Traditional Chinese () */
 if (mb_language("traditional chinese")) {
-	mb_internal_encoding('BIG5');
-	mb_send_mail($to, "代喷 ".mb_language(), "代喷");
+    mb_internal_encoding('BIG5');
+    mb_send_mail($to, "代喷 ".mb_language(), "代喷");
 }
 ?>
 --EXPECTF--

@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -59,8 +57,12 @@ static int collator_regular_compare_function(zval *result, zval *op1, zval *op2)
 	zval norm1, norm2;
 	zval *num1_p = NULL, *num2_p = NULL;
 	zval *norm1_p = NULL, *norm2_p = NULL;
-	zval* str1_p  = collator_convert_object_to_string( op1, &str1 );
-	zval* str2_p  = collator_convert_object_to_string( op2, &str2 );
+	zval *str1_p, *str2_p;
+
+	ZVAL_NULL(&str1);
+	str1_p  = collator_convert_object_to_string( op1, &str1 );
+	ZVAL_NULL(&str2);
+	str2_p  = collator_convert_object_to_string( op2, &str2 );
 
 	/* If both args are strings AND either of args is not numeric string
 	 * then use ICU-compare. Otherwise PHP-compare. */
@@ -206,19 +208,11 @@ static int collator_icu_compare_function(zval *result, zval *op1, zval *op2)
 /* {{{ collator_compare_func
  * Taken from PHP7 source (array_data_compare).
  */
-static int collator_compare_func( const void* a, const void* b )
+static int collator_compare_func(Bucket *f, Bucket *s)
 {
-	Bucket *f;
-	Bucket *s;
 	zval result;
-	zval *first;
-	zval *second;
-
-	f = (Bucket *) a;
-	s = (Bucket *) b;
-
-	first = &f->val;
-	second = &s->val;
+	zval *first = &f->val;
+	zval *second = &s->val;
 
 	if( INTL_G(compare_func)( &result, first, second) == FAILURE )
 		return 0;
@@ -244,9 +238,7 @@ static int collator_compare_func( const void* a, const void* b )
 }
 /* }}} */
 
-/* {{{ collator_cmp_sort_keys
- * Compare sort keys
- */
+/* {{{ Compare sort keys */
 static int collator_cmp_sort_keys( const void *p1, const void *p2 )
 {
 	char* key1 = ((collator_sort_key_index_t*)p1)->key;
@@ -256,9 +248,7 @@ static int collator_cmp_sort_keys( const void *p1, const void *p2 )
 }
 /* }}} */
 
-/* {{{ collator_get_compare_function
- * Choose compare function according to sort flags.
- */
+/* {{{ Choose compare function according to sort flags. */
 static collator_compare_func_t collator_get_compare_function( const zend_long sort_flags )
 {
 	collator_compare_func_t func;
@@ -283,9 +273,7 @@ static collator_compare_func_t collator_get_compare_function( const zend_long so
 }
 /* }}} */
 
-/* {{{ collator_sort_internal
- * Common code shared by collator_sort() and collator_asort() API functions.
- */
+/* {{{ Common code shared by collator_sort() and collator_asort() API functions. */
 static void collator_sort_internal( int renumber, INTERNAL_FUNCTION_PARAMETERS )
 {
 	zval           saved_collator;
@@ -299,10 +287,7 @@ static void collator_sort_internal( int renumber, INTERNAL_FUNCTION_PARAMETERS )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Oa/|l",
 		&object, Collator_ce_ptr, &array, &sort_flags ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"collator_sort_internal: unable to parse input params", 0 );
-
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */
@@ -319,7 +304,7 @@ static void collator_sort_internal( int renumber, INTERNAL_FUNCTION_PARAMETERS )
 
 	/* Save specified collator in the request-global (?) variable. */
 	ZVAL_COPY_VALUE(&saved_collator, &INTL_G( current_collator ));
-	ZVAL_COPY_VALUE(&INTL_G( current_collator ), object);
+	ZVAL_OBJ(&INTL_G( current_collator ), Z_OBJ_P(object));
 
 	/* Sort specified array. */
 	zend_hash_sort(hash, collator_compare_func, renumber);
@@ -335,11 +320,7 @@ static void collator_sort_internal( int renumber, INTERNAL_FUNCTION_PARAMETERS )
 }
 /* }}} */
 
-/* {{{ proto bool Collator::sort( Collator $coll, array(string) $arr [, int $sort_flags] )
- * Sort array using specified collator. }}} */
-/* {{{ proto bool collator_sort(  Collator $coll, array(string) $arr [, int $sort_flags] )
- * Sort array using specified collator.
- */
+/* {{{ Sort array using specified collator. */
 PHP_FUNCTION( collator_sort )
 {
 	collator_sort_internal( TRUE, INTERNAL_FUNCTION_PARAM_PASSTHRU );
@@ -355,11 +336,7 @@ static void collator_sortkey_swap(collator_sort_key_index_t *p, collator_sort_ke
 }
 /* }}} */
 
-/* {{{ proto bool Collator::sortWithSortKeys( Collator $coll, array(string) $arr )
- * Equivalent to standard PHP sort using Collator.
- * Uses ICU ucol_getSortKey for performance. }}} */
-/* {{{ proto bool collator_sort_with_sort_keys( Collator $coll, array(string) $arr )
- * Equivalent to standard PHP sort using Collator.
+/* {{{ Equivalent to standard PHP sort using Collator.
  * Uses ICU ucol_getSortKey for performance.
  */
 PHP_FUNCTION( collator_sort_with_sort_keys )
@@ -393,10 +370,7 @@ PHP_FUNCTION( collator_sort_with_sort_keys )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Oa",
 		&object, Collator_ce_ptr, &array ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"collator_sort_with_sort_keys: unable to parse input params", 0 );
-
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */
@@ -408,7 +382,7 @@ PHP_FUNCTION( collator_sort_with_sort_keys )
 			"Object not initialized", 0 );
 		zend_throw_error(NULL, "Object not initialized");
 
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/*
@@ -529,21 +503,14 @@ PHP_FUNCTION( collator_sort_with_sort_keys )
 }
 /* }}} */
 
-/* {{{ proto bool Collator::asort( Collator $coll, array(string) $arr )
- * Sort array using specified collator, maintaining index association. }}} */
-/* {{{ proto bool collator_asort( Collator $coll, array(string) $arr )
- * Sort array using specified collator, maintaining index association.
- */
+/* {{{ Sort array using specified collator, maintaining index association. */
 PHP_FUNCTION( collator_asort )
 {
 	collator_sort_internal( FALSE, INTERNAL_FUNCTION_PARAM_PASSTHRU );
 }
 /* }}} */
 
-/* {{{ proto bool Collator::getSortKey( Collator $coll, string $str )
- * Get a sort key for a string from a Collator. }}} */
-/* {{{ proto bool collator_get_sort_key( Collator $coll, string $str )
- * Get a sort key for a string from a Collator. */
+/* {{{ Get a sort key for a string from a Collator. */
 PHP_FUNCTION( collator_get_sort_key )
 {
 	char*            str      = NULL;
@@ -559,10 +526,7 @@ PHP_FUNCTION( collator_get_sort_key )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Os",
 		&object, Collator_ce_ptr, &str, &str_len ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			 "collator_get_sort_key: unable to parse input params", 0 );
-
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */
@@ -574,7 +538,7 @@ PHP_FUNCTION( collator_get_sort_key )
 			"Object not initialized", 0 );
 		zend_throw_error(NULL, "Object not initialized");
 
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/*
@@ -613,12 +577,3 @@ PHP_FUNCTION( collator_get_sort_key )
 	RETVAL_NEW_STR(key_str);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

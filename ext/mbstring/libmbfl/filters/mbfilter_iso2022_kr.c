@@ -43,7 +43,9 @@ const mbfl_encoding mbfl_encoding_2022kr = {
 	"ISO-2022-KR",
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE | MBFL_ENCTYPE_GL_UNSAFE
+	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE | MBFL_ENCTYPE_GL_UNSAFE,
+	&vtbl_2022kr_wchar,
+	&vtbl_wchar_2022kr
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_2022kr = {
@@ -59,7 +61,8 @@ const struct mbfl_convert_vtbl vtbl_wchar_2022kr = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_wchar_2022kr,
-	mbfl_filt_conv_any_2022kr_flush
+	mbfl_filt_conv_any_2022kr_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_2022kr_wchar = {
@@ -68,7 +71,8 @@ const struct mbfl_convert_vtbl vtbl_2022kr_wchar = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_2022kr_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
@@ -261,9 +265,7 @@ mbfl_filt_conv_wchar_2022kr(int c, mbfl_convert_filter *filter)
 			CK((*filter->output_function)(s & 0xff, filter->data));
 		}
 	} else {
-		if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-			CK(mbfl_filt_conv_illegal_output(c, filter));
-		}
+		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
 	return c;
@@ -355,5 +357,3 @@ retry:
 
 	return c;
 }
-
-

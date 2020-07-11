@@ -1,15 +1,15 @@
 --TEST--
 Test function gzeof while writing.
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded"; 
+	print "skip - ZLIB extension not loaded";
 }
 ?>
 --FILE--
 <?php
 
-$filename = dirname(__FILE__)."/gzeof_variation1.txt.gz";
+$filename = __DIR__."/gzeof_variation1.txt.gz";
 $h = gzopen($filename, 'w');
 $str = "Here is the string to be written. ";
 $length = 10;
@@ -18,14 +18,14 @@ var_dump(gzeof($h));
 gzwrite( $h, $str, $length);
 var_dump(gzeof($h));
 gzclose($h);
-var_dump(gzeof($h));
+try {
+    var_dump(gzeof($h));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 unlink($filename);
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 bool(false)
 bool(false)
-
-Warning: gzeof(): supplied resource is not a valid stream resource in %s on line %d
-bool(false)
-===DONE===
+gzeof(): supplied resource is not a valid stream resource

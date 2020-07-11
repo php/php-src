@@ -2,7 +2,7 @@
 @unlink(dirname(__FILE__) . '/frontcontroller8.phar');
 $a = new Phar(dirname(__FILE__) . '/frontcontroller8.phar');
 $a['a.phps'] = 'hio1';
-$a['a1.phps'] = '<?php var_dump($_SERVER[b"REQUEST_URI"], $_SERVER[b"PATH_INFO"]);';
+$a['a1.phps'] = '<?php var_dump($_SERVER["REQUEST_URI"], $_SERVER["PATH_INFO"]);';
 $a['a.jpg'] = 'hio2';
 $a['a.php'] = '<?php function hio(){}';
 $a['fronk.gronk'] = 'hio3';

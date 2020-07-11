@@ -1,15 +1,7 @@
 --TEST--
 Test array_diff() function : usage variations - multidimensional arrays
---INI--
-error_reporting=E_ALL & ~E_NOTICE
 --FILE--
 <?php
-/* Prototype  : array array_diff(array $arr1, array $arr2 [, array ...])
- * Description: Returns the entries of arr1 that have values which are 
- * not present in any of the others arguments. 
- * Source code: ext/standard/array.c
- */
-
 /*
  * Test how array_diff() compares multidimensional arrays
  */
@@ -38,11 +30,27 @@ var_dump(array_diff($array1, $array2['sub_arraya']));
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_diff() : usage variations ***
 -- Compare two 2-D arrays --
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
 array(0) {
 }
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
 array(0) {
 }
 
@@ -71,6 +79,10 @@ array(3) {
 }
 
 -- Compare a subarray from one 2-D array and one 2-D array --
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
 array(3) {
   [0]=>
   int(1)
@@ -79,6 +91,10 @@ array(3) {
   [2]=>
   int(3)
 }
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
 array(2) {
   ["sub_array1"]=>
   array(3) {

@@ -45,7 +45,6 @@ var_dump($r);
 $r = socket_get_option($s, $level, IP_MULTICAST_IF);
 var_dump($r);
 echo "\n";
-
 --EXPECT--
 Setting IP_MULTICAST_TTL
 bool(true)

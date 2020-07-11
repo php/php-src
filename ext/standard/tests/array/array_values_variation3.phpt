@@ -2,11 +2,6 @@
 Test array_values() function : usage variations - array keys different data types
 --FILE--
 <?php
-/* Prototype  : array array_values(array $input)
- * Description: Return just the values from the input array 
- * Source code: ext/standard/array.c
- */
-
 /*
  * Pass arrays where the keys are different data types as $input argument
  * to array_values() to test behaviour
@@ -40,7 +35,7 @@ $inputs = array(
        -10.5 => 'negative',
        .5 => 'half',
        ),
-       
+
 /*3*/  'extreme floats' => array(
        12.3456789000e10 => 'large',
        12.3456789000E-10 => 'small',
@@ -49,8 +44,8 @@ $inputs = array(
        // null data
 /*4*/ 'null uppercase' => array(
        NULL => 'null 1',
-       ), 
-       
+       ),
+
 /*5*/  'null lowercase' => array(
        null => 'null 2',
        ),
@@ -60,17 +55,17 @@ $inputs = array(
        true => 'lowert',
        false => 'lowerf',
        ),
-       
+
 /*7*/  'bool uppercase' => array(
        TRUE => 'uppert',
        FALSE => 'upperf',
        ),
-       
+
        // empty data
 /*8*/ 'empty double quotes' => array(
        "" => 'emptyd',
        ),
-       
+
 /*9*/  'empty single quotes' => array(
        '' => 'emptys',
        ),
@@ -102,8 +97,7 @@ foreach($inputs as $key => $input) {
 };
 echo "Done";
 ?>
-
---EXPECTF--
+--EXPECT--
 *** Testing array_values() : usage variations ***
 
 -- Iteration 1: int data --

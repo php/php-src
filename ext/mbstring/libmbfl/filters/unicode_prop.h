@@ -164,4 +164,3 @@ static const unsigned char mbfl_charprop_table[] = {
 /* ~	126 */	MBFL_CHP_MMHQENC ,
 /* DEL	127 */	MBFL_CHP_MMHQENC
 };
-

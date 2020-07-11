@@ -3,6 +3,7 @@ collator_get_sort_key() icu >= 56.1
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
 <?php if (version_compare(INTL_ICU_VERSION, '56.1') < 0) die('skip for ICU >= 56.1'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '62.1') >=  0) die('skip for ICU < 62.1'); ?>
 --FILE--
 <?php
 
@@ -15,11 +16,11 @@ function sort_arrays( $locale, $data )
 
     $coll = ut_coll_create( $locale );
 
-	foreach($data as $value) {
-		$res_val = ut_coll_get_sort_key( $coll, $value );
-		$res_str .= "source: ".$value."\n".
-					"key: ".bin2hex($res_val)."\n";
-	}
+    foreach($data as $value) {
+        $res_val = ut_coll_get_sort_key( $coll, $value );
+        $res_str .= "source: ".$value."\n".
+                    "key: ".bin2hex($res_val)."\n";
+    }
 
     return $res_str;
 }
@@ -31,9 +32,9 @@ function ut_main()
 
     // Regular strings keys
     $test_params = array(
-		'abc', 'abd', 'aaa',
-		'аа', 'а', 'z',
-		'', null , '3',
+        'abc', 'abd', 'aaa',
+        'аа', 'а', 'z',
+        '', null , '3',
         'y'  , 'i'  , 'k'
     );
 
@@ -41,7 +42,7 @@ function ut_main()
 
     // Sort a non-ASCII array using ru_RU locale.
     $test_params = array(
-		'абг', 'абв', 'жжж', 'эюя'
+        'абг', 'абв', 'жжж', 'эюя'
     );
 
     $res_str .= sort_arrays( 'ru_RU', $test_params );

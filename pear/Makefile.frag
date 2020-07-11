@@ -1,5 +1,3 @@
-# -*- makefile -*-
-
 peardir=$(PEAR_INSTALLDIR)
 
 # Skip all php.ini files altogether
@@ -34,4 +32,3 @@ install-pear:
 	else \
 		cat $(srcdir)/install-pear.txt; \
 	fi
-

@@ -16,7 +16,5 @@ $buffer = ob_get_clean();
 $header = unpack('@10/nchunk_size', $buffer);
 printf("chunk size: %d\n", $header['chunk_size']);
 ?>
-===DONE===
 --EXPECT--
 chunk size: 256
-===DONE===

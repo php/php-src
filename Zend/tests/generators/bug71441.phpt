@@ -7,13 +7,13 @@ $num = 2000; /* to be sure to be in wild memory */
 $add = str_repeat("1 +", $num);
 $gen = (eval(<<<PHP
 return function (): \Generator {
-	try {
-		\$a = 1;
-		\$foo = \$a + $add \$a;
-		return yield \$foo;
-	} finally {
-		print "Ok\n";
-	}
+    try {
+        \$a = 1;
+        \$foo = \$a + $add \$a;
+        return yield \$foo;
+    } finally {
+        print "Ok\n";
+    }
 };
 PHP
 ))();
@@ -26,4 +26,3 @@ var_dump($gen->getReturn());
 int(2002)
 Ok
 string(7) "Success"
-

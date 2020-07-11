@@ -15,19 +15,19 @@ Content-Type: text/plain-file1
 var_dump($_FILES);
 var_dump($_POST);
 ?>
---EXPECTF--
+--EXPECT--
 array(1) {
-  [%u|b%"file1"]=>
+  ["file1"]=>
   array(5) {
-    [%u|b%"name"]=>
-    %string|unicode%(9) "file1.txt"
-    [%u|b%"type"]=>
-    %string|unicode%(0) ""
-    [%u|b%"tmp_name"]=>
-    %string|unicode%(0) ""
-    [%u|b%"error"]=>
+    ["name"]=>
+    string(9) "file1.txt"
+    ["type"]=>
+    string(0) ""
+    ["tmp_name"]=>
+    string(0) ""
+    ["error"]=>
     int(3)
-    [%u|b%"size"]=>
+    ["size"]=>
     int(0)
   }
 }

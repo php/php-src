@@ -2,13 +2,15 @@
 Test mkdir/rmdir UTF-8 path with cp1250 specific symbols
 --SKIPIF--
 <?php
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 skip_if_not_win();
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 skip_if_no_required_exts();
 
 ?>
+--CONFLICTS--
+dir_cp1250
 --FILE--
 <?php
 /*
@@ -16,7 +18,7 @@ skip_if_no_required_exts();
 #vim: set encoding=cp1250
 */
 
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 $item = "Árvíztűrő tükörfúrógép"; // cp1250 specific chars
 $prefix = create_data("dir_cp1250", "${item}42");
@@ -36,8 +38,7 @@ var_dump(rmdir($subpath));
 remove_data("dir_cp1250");
 
 ?>
-===DONE===
---EXPECTF--	
+--EXPECTF--
 bool(true)
 bool(true)
 bool(true)
@@ -48,4 +49,3 @@ bool(true)
 string(%d) "%s\Árvíztűrő tükörfúrógép42\Árvíztűrő tükörfúrógép4"
 Active code page: %d
 bool(true)
-===DONE===

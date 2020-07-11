@@ -17,10 +17,8 @@ var_dump(dba_fetch('foo', $db));
 
 dba_close($db);
 ?>
-==DONE==
 --EXPECT--
 string(6) "value2"
-==DONE==
 --CLEAN--
 <?php
 $filename = __DIR__ . DIRECTORY_SEPARATOR . 'bug71514.ini';

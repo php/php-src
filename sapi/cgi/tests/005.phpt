@@ -22,7 +22,7 @@ var_dump(`$php -n -f 'wrong' -a`);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--
 string(51) "No input file specified.
 Interactive mode enabled
 

@@ -6,41 +6,41 @@ iconv_mime_decode()
 iconv.internal_charset=iso-8859-1
 --FILE--
 <?php
-function my_error_handler($errno, $errmsg, $filename, $linenum, $vars)
+function my_error_handler($errno, $errmsg, $filename, $linenum)
 {
-	echo "$errno: $errmsg\n";
+    echo "$errno: $errmsg\n";
 }
 set_error_handler('my_error_handler');
 
 function do_single_test($header)
 {
-	global $mode;
+    global $mode;
 
-	$result = iconv_mime_decode($header, $mode, "UTF-8");
-	printf("(%d) \"%s\"\n", iconv_strlen($result, "UTF-8"), $result);
+    $result = iconv_mime_decode($header, $mode, "UTF-8");
+    printf("(%d) \"%s\"\n", iconv_strlen($result, "UTF-8"), $result);
 }
 
 function do_regression_test()
 {
-	do_single_test(<<< HERE
+    do_single_test(<<< HERE
 Subject: =?ISO-8859-1?Q?Pr=FCfung?=
-	=?ISO-8859-1*de_DE?Q?Pr=FCfung?=\t
- 	 =?ISO-8859-2?Q?k=F9=D4=F1=D3let?=
+    =?ISO-8859-1*de_DE?Q?Pr=FCfung?=\t
+     =?ISO-8859-2?Q?k=F9=D4=F1=D3let?=
 HERE
 );
-	do_single_test(<<< HERE
+    do_single_test(<<< HERE
 Subject: =?ISO-8859-1?Q?Pr=FCfung?= =?ISO-8859-1*de_DE?Q?=20Pr=FCfung?= \t  =?ISO-8859-2?Q?k=F9=D4=F1=D3let?=
 HERE
 );
-	do_single_test(<<< HERE
+    do_single_test(<<< HERE
 Subject: =?ISO-8859-1?Q?Pr=FCfung?==?ISO-8859-1*de_DE?Q?Pr=FCfung?==?ISO-8859-2?Q?k=F9=D4=F1=D3let?=
 HERE
 );
-	do_single_test(<<< HERE
+    do_single_test(<<< HERE
 Subject: =?ISO-8859-1?Q?Pr=FCfung?= =?ISO-8859-1*de_DE?Q?Pr=FCfung??   =?ISO-8859-2?X?k=F9=D4=F1=D3let?=
 HERE
 );
-	do_single_test(<<< HERE
+    do_single_test(<<< HERE
 From: =?ISO-2022-JP?B?GyRCJTUbKEI=?=
  =?ISO-2022-JP?B?GyRCJXMlVxsoQg==?=
  =?ISO-2022-JP?B?GyRCJWtKOBsoQg==?=
@@ -87,4 +87,3 @@ do_regression_test();
 (100) "Subject: =?ISO-8859-1?Q?Pr=FCfung?==?ISO-8859-1*de_DE?Q?Pr=FCfung?==?ISO-8859-2?Q?k=F9=D4=F1=D3let?="
 (84) "Subject: Prüfung=?ISO-8859-1*de_DE?Q?Pr=FCfung??   =?ISO-8859-2?X?k=F9=D4=F1=D3let?="
 (27) "From: サンプル文字列サンプル文字列日本語テキスト"
-

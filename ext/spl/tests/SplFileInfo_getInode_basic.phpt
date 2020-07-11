@@ -26,5 +26,5 @@ var_dump($fileInfo->getInode() == $result);
 <?php
 unlink('SplFileInfo_getInode_basic.txt');
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)

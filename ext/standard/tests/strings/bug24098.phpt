@@ -4,7 +4,7 @@ Bug #24098 (pathinfo() crash)
 <?php if (DIRECTORY_SEPARATOR == '\\') die("skip directory separator won't match expected output"); ?>
 --FILE--
 <?php
-	var_dump(pathinfo("/dsds.asa"));
+    var_dump(pathinfo("/dsds.asa"));
 ?>
 --EXPECT--
 array(4) {

@@ -1,4 +1,3 @@
-// $Id$
 // vim:ft=javascript
 
 ARG_ENABLE("odbc", "ODBC support", "no");
@@ -11,7 +10,7 @@ if (PHP_ODBC == "yes") {
 		EXTENSION("odbc", "php_odbc.c", PHP_ODBC_SHARED, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 		AC_DEFINE("HAVE_UODBC", 1, "ODBC support");
 		if ("no" == PHP_ODBCVER) {
-			AC_DEFINE("ODBCVER", "0x0300", "The highest supported ODBC version", false);
+			AC_DEFINE("ODBCVER", "0x0350", "The highest supported ODBC version", false);
 		} else if ("0" != PHP_ODBCVER) {
 			AC_DEFINE("ODBCVER", PHP_ODBCVER, "The highest supported ODBC version", false);
 		}

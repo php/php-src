@@ -1,5 +1,7 @@
 --TEST--
 Bug #69840 (iconv_substr() doesn't work with UTF-16BE)
+--SKIPIF--
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 $str = iconv_substr("a\x00b\x00", 0, 1, 'UTF-16LE');

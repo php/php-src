@@ -1,5 +1,4 @@
 // vim:ft=javascript
-// $Id$
 
 ARG_ENABLE('embed', 'Embedded SAPI library', 'no');
 

@@ -28,7 +28,6 @@ $child->test();
 
 ?>
 --EXPECT--
-
  From parent scope
 array(1) {
   ["prot"]=>

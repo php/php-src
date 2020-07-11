@@ -10,16 +10,16 @@ class test_wrapper {
   function stream_open($path, $mode, $openedpath) {
     return true;
   }
-  
+
   function stream_eof() {
     return false;
   }
-  
+
   function stream_write($data) {
     echo "size: ", strlen($data), "\n";
     return strlen($data);
   }
-  
+
   function stream_set_option($option, $arg1, $arg2) {
     echo "option: ", $option, ", ", $arg1, ", ", $arg2, "\n";
     return false;
@@ -42,6 +42,5 @@ bool(true)
 option: %d, %d, %d
 int(%i)
 int(%d)
-size: %d
 size: %d
 int(%d)

@@ -6,5 +6,7 @@ class test implements a {
 }
 ?>
 --EXPECTF--
-Fatal error: Interface 'a' not found in %sbug30519.php on line 2
-
+Fatal error: Uncaught Error: Interface "a" not found in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d

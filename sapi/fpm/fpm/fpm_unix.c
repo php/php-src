@@ -1,5 +1,3 @@
-
-	/* $Id: fpm_unix.c,v 1.25.2.1 2008/12/13 03:18:23 anight Exp $ */
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #include "fpm_config.h"
@@ -165,27 +163,35 @@ int fpm_unix_resolve_socket_premissions(struct fpm_worker_pool_s *wp) /* {{{ */
 #endif
 
 	if (c->listen_owner && *c->listen_owner) {
-		struct passwd *pwd;
+		if (strlen(c->listen_owner) == strspn(c->listen_owner, "0123456789")) {
+			wp->socket_uid = strtoul(c->listen_owner, 0, 10);
+		} else {
+			struct passwd *pwd;
 
-		pwd = getpwnam(c->listen_owner);
-		if (!pwd) {
-			zlog(ZLOG_SYSERROR, "[pool %s] cannot get uid for user '%s'", wp->config->name, c->listen_owner);
-			return -1;
+			pwd = getpwnam(c->listen_owner);
+			if (!pwd) {
+				zlog(ZLOG_SYSERROR, "[pool %s] cannot get uid for user '%s'", wp->config->name, c->listen_owner);
+				return -1;
+			}
+
+			wp->socket_uid = pwd->pw_uid;
+			wp->socket_gid = pwd->pw_gid;
 		}
-
-		wp->socket_uid = pwd->pw_uid;
-		wp->socket_gid = pwd->pw_gid;
 	}
 
 	if (c->listen_group && *c->listen_group) {
-		struct group *grp;
+		if (strlen(c->listen_group) == strspn(c->listen_group, "0123456789")) {
+			wp->socket_gid = strtoul(c->listen_group, 0, 10);
+		} else {
+			struct group *grp;
 
-		grp = getgrnam(c->listen_group);
-		if (!grp) {
-			zlog(ZLOG_SYSERROR, "[pool %s] cannot get gid for group '%s'", wp->config->name, c->listen_group);
-			return -1;
+			grp = getgrnam(c->listen_group);
+			if (!grp) {
+				zlog(ZLOG_SYSERROR, "[pool %s] cannot get gid for group '%s'", wp->config->name, c->listen_group);
+				return -1;
+			}
+			wp->socket_gid = grp->gr_gid;
 		}
-		wp->socket_gid = grp->gr_gid;
 	}
 
 	return 0;
@@ -398,7 +404,7 @@ int fpm_unix_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 	}
 
 #ifdef HAVE_PRCTL
-	if (0 > prctl(PR_SET_DUMPABLE, 1, 0, 0, 0)) {
+	if (wp->config->process_dumpable && 0 > prctl(PR_SET_DUMPABLE, 1, 0, 0, 0)) {
 		zlog(ZLOG_SYSERROR, "[pool %s] failed to prctl(PR_SET_DUMPABLE)", wp->config->name);
 	}
 #endif
@@ -536,7 +542,7 @@ int fpm_unix_init_main() /* {{{ */
 						exit(FPM_EXIT_SOFTWARE);
 					} else {
 						if (readval == 1) {
-							zlog(ZLOG_DEBUG, "I received a valid acknoledge from the master process, I can exit without error");
+							zlog(ZLOG_DEBUG, "I received a valid acknowledge from the master process, I can exit without error");
 							fpm_cleanups_run(FPM_CLEANUP_PARENT_EXIT);
 							exit(FPM_EXIT_OK);
 						} else {
@@ -579,4 +585,3 @@ int fpm_unix_init_main() /* {{{ */
 	return 0;
 }
 /* }}} */
-

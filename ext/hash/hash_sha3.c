@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,7 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
+#include "php_hash.h"
 #include "php_hash_sha3.h"
+
+#ifdef HAVE_SLOW_HASH3
+// ================= slow algo ==============================================
 
 #if (defined(__APPLE__) || defined(__APPLE_CC__)) && \
     (defined(__BIG_ENDIAN__) || defined(__LITTLE_ENDIAN__))
@@ -38,7 +40,7 @@ static inline unsigned char idx(unsigned char x, unsigned char y) {
 
 #ifdef WORDS_BIGENDIAN
 static inline uint64_t load64(const unsigned char* x) {
-	char i;
+	signed char i;
 	uint64_t ret = 0;
 	for (i = 7; i >= 0; --i) {
 		ret <<= 8;
@@ -47,14 +49,14 @@ static inline uint64_t load64(const unsigned char* x) {
 	return ret;
 }
 static inline void store64(unsigned char* x, uint64_t val) {
-	char i;
+	size_t i;
 	for (i = 0; i < 8; ++i) {
 		x[i] = val & 0xFF;
 		val >>= 8;
 	}
 }
 static inline void xor64(unsigned char* x, uint64_t val) {
-	char i;
+	size_t i;
 	for (i = 0; i < 8; ++i) {
 		x[i] ^= val & 0xFF;
 		val >>= 8;
@@ -152,15 +154,21 @@ static void PHP_SHA3_Init(PHP_SHA3_CTX* ctx,
 
 static void PHP_SHA3_Update(PHP_SHA3_CTX* ctx,
                             const unsigned char* buf,
-                            unsigned int count,
+                            size_t count,
                             size_t block_size) {
 	while (count > 0) {
-		unsigned int len = block_size - ctx->pos;
-		if (len > count) len = count;
+		size_t len = block_size - ctx->pos;
+
+		if (len > count) {
+			len = count;
+		}
+
 		count -= len;
+
 		while (len-- > 0) {
 			ctx->state[ctx->pos++] ^= *(buf++);
 		}
+
 		if (ctx->pos >= block_size) {
 			permute(ctx);
 			ctx->pos = 0;
@@ -170,9 +178,9 @@ static void PHP_SHA3_Update(PHP_SHA3_CTX* ctx,
 
 static void PHP_SHA3_Final(unsigned char* digest,
                            PHP_SHA3_CTX* ctx,
-                           int block_size,
-                           int digest_size) {
-	int len = digest_size;
+                           size_t block_size,
+                           size_t digest_size) {
+	size_t len = digest_size;
 
 	// Pad state to finalize
 	ctx->state[ctx->pos++] ^= 0x06;
@@ -190,7 +198,23 @@ static void PHP_SHA3_Final(unsigned char* digest,
 	}
 
 	// Zero out context
-	memset(ctx, 0, sizeof(PHP_SHA3_CTX));
+	ZEND_SECURE_ZERO(ctx, sizeof(PHP_SHA3_CTX));
+}
+
+static int php_sha3_unserialize(php_hashcontext_object *hash,
+				zend_long magic,
+				const zval *zv,
+				size_t block_size)
+{
+	PHP_SHA3_CTX *ctx = (PHP_SHA3_CTX *) hash->context;
+	int r = FAILURE;
+	if (magic == PHP_HASH_SERIALIZE_MAGIC_SPEC
+		&& (r = php_hash_unserialize_spec(hash, zv, PHP_SHA3_SPEC)) == SUCCESS
+		&& ctx->pos < block_size) {
+		return SUCCESS;
+	} else {
+		return r != SUCCESS ? r : -2000;
+	}
 }
 
 // ==========================================================================
@@ -201,7 +225,7 @@ void PHP_SHA3##bits##Init(PHP_SHA3_##bits##_CTX* ctx) { \
 } \
 void PHP_SHA3##bits##Update(PHP_SHA3_##bits##_CTX* ctx, \
                             const unsigned char* input, \
-                            unsigned int inputLen) { \
+                            size_t inputLen) { \
 	PHP_SHA3_Update(ctx, input, inputLen, \
                     (1600 - (2 * bits)) >> 3); \
 } \
@@ -211,15 +235,116 @@ void PHP_SHA3##bits##Final(unsigned char* digest, \
                    (1600 - (2 * bits)) >> 3, \
                    bits >> 3); \
 } \
+static int php_sha3##bits##_unserialize(php_hashcontext_object *hash, \
+					zend_long magic, \
+					const zval *zv) { \
+	return php_sha3_unserialize(hash, magic, zv, (1600 - (2 * bits)) >> 3); \
+} \
 const php_hash_ops php_hash_sha3_##bits##_ops = { \
+	"sha3-" #bits, \
 	(php_hash_init_func_t) PHP_SHA3##bits##Init, \
 	(php_hash_update_func_t) PHP_SHA3##bits##Update, \
 	(php_hash_final_func_t) PHP_SHA3##bits##Final, \
 	php_hash_copy, \
+	php_hash_serialize, \
+	php_sha3##bits##_unserialize, \
+	PHP_SHA3_SPEC, \
 	bits >> 3, \
 	(1600 - (2 * bits)) >> 3, \
-	sizeof(PHP_SHA3_##bits##_CTX) \
+	sizeof(PHP_SHA3_##bits##_CTX), \
+	1 \
 }
+
+#else
+
+// ================= fast algo ==============================================
+
+#define SUCCESS SHA3_SUCCESS /* Avoid conflict between KeccacHash.h and zend_types.h */
+#include "KeccakHash.h"
+
+/* KECCAK SERIALIZATION
+
+   Keccak_HashInstance consists of:
+	KeccakWidth1600_SpongeInstance {
+		unsigned char state[200];
+		unsigned int rate;         -- fixed for digest size
+		unsigned int byteIOIndex;  -- in range [0, rate/8)
+		int squeezing;             -- 0 normally, 1 only during finalize
+	} sponge;
+	unsigned int fixedOutputLength;    -- fixed for digest size
+	unsigned char delimitedSuffix;     -- fixed for digest size
+
+   NB If the external sha3/ library is updated, the serialization code
+   may need to be updated.
+
+   The simpler SHA3 code's serialization states are not interchangeable with
+   Keccak. Furthermore, the Keccak sponge state is sensitive to architecture
+   -- 32-bit and 64-bit implementations produce different states. It does not
+   appear that the state is sensitive to endianness. */
+
+#if Keccak_HashInstance_ImplType == 64
+/* corresponds to sha3/generic64lc */
+# define PHP_HASH_SERIALIZE_MAGIC_KECCAK 100
+#elif Keccak_HashInstance_ImplType == 32
+/* corresponds to sha3/generic32lc */
+# define PHP_HASH_SERIALIZE_MAGIC_KECCAK 101
+#else
+# error "Unknown Keccak_HashInstance_ImplType"
+#endif
+#define PHP_KECCAK_SPEC "b200IiIIB"
+
+static int php_keccak_serialize(const php_hashcontext_object *hash, zend_long *magic, zval *zv)
+{
+	*magic = PHP_HASH_SERIALIZE_MAGIC_KECCAK;
+	return php_hash_serialize_spec(hash, zv, PHP_KECCAK_SPEC);
+}
+
+static int php_keccak_unserialize(php_hashcontext_object *hash, zend_long magic, const zval *zv)
+{
+	Keccak_HashInstance *ctx = (Keccak_HashInstance *) hash->context;
+	int r = FAILURE;
+	if (magic == PHP_HASH_SERIALIZE_MAGIC_KECCAK
+		&& (r = php_hash_unserialize_spec(hash, zv, PHP_KECCAK_SPEC)) == SUCCESS
+		&& ctx->sponge.byteIOIndex < ctx->sponge.rate / 8) {
+		return SUCCESS;
+	} else {
+		return r != SUCCESS ? r : -2000;
+	}
+}
+
+// ==========================================================================
+
+#define DECLARE_SHA3_OPS(bits) \
+void PHP_SHA3##bits##Init(PHP_SHA3_##bits##_CTX* ctx) { \
+	ZEND_ASSERT(sizeof(Keccak_HashInstance) <= sizeof(PHP_SHA3_##bits##_CTX)); \
+	Keccak_HashInitialize_SHA3_##bits((Keccak_HashInstance *)ctx); \
+} \
+void PHP_SHA3##bits##Update(PHP_SHA3_##bits##_CTX* ctx, \
+                            const unsigned char* input, \
+                            size_t inputLen) { \
+	Keccak_HashUpdate((Keccak_HashInstance *)ctx, input, inputLen * 8); \
+} \
+void PHP_SHA3##bits##Final(unsigned char* digest, \
+                           PHP_SHA3_##bits##_CTX* ctx) { \
+	Keccak_HashFinal((Keccak_HashInstance *)ctx, digest); \
+} \
+const php_hash_ops php_hash_sha3_##bits##_ops = { \
+	"sha3-" #bits, \
+	(php_hash_init_func_t) PHP_SHA3##bits##Init, \
+	(php_hash_update_func_t) PHP_SHA3##bits##Update, \
+	(php_hash_final_func_t) PHP_SHA3##bits##Final, \
+	php_hash_copy, \
+	php_keccak_serialize, \
+	php_keccak_unserialize, \
+	PHP_KECCAK_SPEC, \
+	bits >> 3, \
+	(1600 - (2 * bits)) >> 3, \
+	sizeof(PHP_SHA3_CTX), \
+	1 \
+}
+
+#endif
+// ================= both algo ==============================================
 
 DECLARE_SHA3_OPS(224);
 DECLARE_SHA3_OPS(256);
@@ -227,12 +352,3 @@ DECLARE_SHA3_OPS(384);
 DECLARE_SHA3_OPS(512);
 
 #undef DECLARE_SHA3_OPS
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

@@ -4,12 +4,6 @@ Test ctype_punct() function : usage variations - different punctuation
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-/* Prototype  : bool ctype_punct(mixed $c)
- * Description: Checks for any printable character which is not whitespace 
- * or an alphanumeric character 
- * Source code: ext/ctype/ctype.c
- */
-
 /*
  * Pass strings containing different character types to ctype_punct() to test
  * which are considered valid punctuation character only strings
@@ -41,7 +35,7 @@ $values = array(
        "abc123\n",
 /*20*/ 'abc 123',
        '',
-       ' ', 
+       ' ',
        base64_decode("w4DDoMOHw6fDiMOo"), // non-ascii characters
        "!$%@\n",
 /*25*/ "\"?!\"",
@@ -56,8 +50,7 @@ foreach($values as $value) {
 };
 setlocale(LC_CTYPE, $orig);
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ctype_punct() : usage variations ***
 
 -- Iteration 1 --
@@ -137,4 +130,3 @@ bool(true)
 
 -- Iteration 26 --
 bool(false)
-===DONE===

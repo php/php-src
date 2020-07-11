@@ -18,10 +18,10 @@ $sxe = simplexml_load_string($xml);
 
 function test($xpath)
 {
-	global $sxe;
+    global $sxe;
 
-	echo "===$xpath===\n";
-	var_dump($sxe->xpath($xpath));
+    echo "===$xpath===\n";
+    var_dump($sxe->xpath($xpath));
 }
 
 test('elem/@attr2');
@@ -30,7 +30,6 @@ test('//@*');
 test('elem[2]/@attr2');
 
 ?>
-===DONE===
 --EXPECTF--
 ===elem/@attr2===
 array(3) {
@@ -172,4 +171,3 @@ array(1) {
     }
   }
 }
-===DONE===

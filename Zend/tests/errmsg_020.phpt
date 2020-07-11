@@ -5,10 +5,12 @@ disable_functions=phpinfo
 --FILE--
 <?php
 
-phpinfo();
+try {
+    phpinfo();
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
-echo "Done\n";
 ?>
---EXPECTF--	
-Warning: phpinfo() has been disabled for security reasons in %s on line %d
-Done
+--EXPECT--
+Call to undefined function phpinfo()

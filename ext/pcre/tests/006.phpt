@@ -17,7 +17,7 @@ var_dump($result);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--
 string(58) "[CODE]&lt;td align=&quot;$stylevar[right]&quot;&gt;[/CODE]"
 NULL
 string(58) "[CODE]&lt;td align=&quot;$stylevar[right]&quot;&gt;[/CODE]"

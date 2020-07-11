@@ -6,15 +6,15 @@ error_reporting=0
 <?php
 class foo
 {
-	function __toString()
-	{
-		return "Object";
-	}
+    function __toString()
+    {
+        return "Object";
+    }
 }
 
 
 $a = new foo();
-			    
+
 $arr = array(0=>&$a, 1=>&$a);
 var_dump(implode(",",$arr));
 var_dump($arr)

@@ -39,27 +39,14 @@ class_exists('ThisClassDoesNotExist');
 ===DONE===
 --EXPECTF--
 autoload_first
-autoload_second
-second
 first
 autoload_first
-autoload_second
-second
 first
 autoload_first
-autoload_second
 
 Fatal error: Uncaught Exception: first in %sspl_autoload_012.php:%d
 Stack trace:
 #0 [internal function]: autoload_first('ThisClassDoesNo...')
-#1 [internal function]: spl_autoload_call('ThisClassDoesNo...')
-#2 %sspl_autoload_012.php(%d): class_exists('ThisClassDoesNo...')
-#3 {main}
-
-Next Exception: second in %sspl_autoload_012.php:%d
-Stack trace:
-#0 [internal function]: autoload_second('ThisClassDoesNo...')
-#1 [internal function]: spl_autoload_call('ThisClassDoesNo...')
-#2 %sspl_autoload_012.php(%d): class_exists('ThisClassDoesNo...')
-#3 {main}
-  thrown in %sspl_autoload_012.php on line %d
+#1 %sspl_autoload_012.php(%d): class_exists('ThisClassDoesNo...')
+#2 {main}
+  thrown in %s on line %d

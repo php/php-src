@@ -11,22 +11,22 @@ require 'server.inc';
 
 function do_test() {
 
-	$responses = array(
-		"data://text/plain,HTTP/1.0 200 OK\r\n\r\n",
-	);
+    $responses = array(
+        "data://text/plain,HTTP/1.0 200 OK\r\n\r\n",
+    );
 
-	$pid = http_server("tcp://127.0.0.1:12342", $responses, $output);
+    $pid = http_server("tcp://127.0.0.1:12342", $responses, $output);
 
-	foreach($responses as $r) {
+    foreach($responses as $r) {
 
-		$fd = fopen('http://127.0.0.1:12342/', 'rb', false);
+        $fd = fopen('http://127.0.0.1:12342/', 'rb', false);
 
-		fseek($output, 0, SEEK_SET);
-		var_dump(stream_get_contents($output));
-		fseek($output, 0, SEEK_SET);
-	}
+        fseek($output, 0, SEEK_SET);
+        var_dump(stream_get_contents($output));
+        fseek($output, 0, SEEK_SET);
+    }
 
-	http_server_kill($pid);
+    http_server_kill($pid);
 
 }
 

@@ -11,7 +11,7 @@
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.  (COPYING.LIB)
+    Lesser General Public License for more details.  (LICENSE)
 
     You should have received a copy of the GNU Lesser General Public
     License along with this library; if not, write to:
@@ -31,7 +31,6 @@
 
 #include <config.h>
 #include <stdio.h>
-#include <assert.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdarg.h>
@@ -153,7 +152,6 @@ bc_out_num (bc_num num, int o_base, void (*out_char)(), int leading_zero)
 	    bc_modulo (int_part, base, &cur_dig, 0);
 		/* PHP Change:  malloc() -> emalloc() */
 	    temp = (stk_rec *) emalloc (sizeof(stk_rec));
-	    if (temp == NULL) bc_out_of_memory();
 	    temp->digit = bc_num2long (cur_dig);
 	    temp->next = digits;
 	    digits = temp;

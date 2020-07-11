@@ -32,7 +32,7 @@ prompt> string(4) "test"
  00017: 
 prompt> [Variables in foo() (1)]
 Address            Refs    Type      Variable
-%s 1       string    $baz
+%s %d       string    $baz
 string (4) "test"
 prompt> [Superglobal variables (8)]
 Address            Refs    Type      Variable
@@ -48,7 +48,7 @@ prompt> ------------------------------------------------
 Function Breakpoints:
 #0		foo
 prompt> [User-defined constants (0)]
-prompt> [Included files: 0]
+prompt> [Included files: %d]%A
 prompt> [No error found!]
 prompt> [Literal Constants in foo() (2)]
 |-------- C0 -------> [var_dump]

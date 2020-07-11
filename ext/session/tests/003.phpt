@@ -13,8 +13,8 @@ session.save_handler=files
 error_reporting(E_ALL);
 
 class foo {
-	public $bar = "ok";
-	function method() { $this->yes++; }
+    public $bar = "ok";
+    function method() { $this->yes++; }
 }
 
 session_id("abtest");
@@ -43,4 +43,3 @@ array(1) {
     int(2)
   }
 }
-

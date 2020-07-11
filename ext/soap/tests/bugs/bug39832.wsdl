@@ -19,7 +19,7 @@
 					<s:minInclusive value="0"/>
 					<s:maxInclusive value="3"/>
 			   </s:restriction>
-			</s:simpleType>	
+			</s:simpleType>
 		</s:schema>
 	</types>
 

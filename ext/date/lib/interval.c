@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015 Derick Rethans
+ * Copyright (c) 2015-2019 Derick Rethans
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,6 +23,7 @@
  */
 
 #include "timelib.h"
+#include "timelib_private.h"
 #include <math.h>
 
 timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
@@ -34,7 +35,10 @@ timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
 
 	rt = timelib_rel_time_ctor();
 	rt->invert = 0;
-	if (one->sse > two->sse) {
+	if (
+		(one->sse > two->sse) ||
+		(one->sse == two->sse && one->us > two->us)
+	) {
 		swp = two;
 		two = one;
 		one = swp;
@@ -65,7 +69,7 @@ timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
 	rt->h = two->h - one->h;
 	rt->i = two->i - one->i;
 	rt->s = two->s - one->s;
-	rt->f = two->f - one->f;
+	rt->us = two->us - one->us;
 	if (one_backup.dst == 0 && two_backup.dst == 1 && two->sse >= one->sse + 86400 - dst_corr) {
 		rt->h += dst_h_corr;
 		rt->i += dst_m_corr;
@@ -99,19 +103,19 @@ timelib_time *timelib_add(timelib_time *old_time, timelib_rel_time *interval)
 	timelib_time *t = timelib_time_clone(old_time);
 
 	if (interval->have_weekday_relative || interval->have_special_relative) {
-		memcpy(&t->relative, interval, sizeof(struct timelib_rel_time));
+		memcpy(&t->relative, interval, sizeof(timelib_rel_time));
 	} else {
 		if (interval->invert) {
 			bias = -1;
 		}
-		memset(&t->relative, 0, sizeof(struct timelib_rel_time));
+		memset(&t->relative, 0, sizeof(timelib_rel_time));
 		t->relative.y = interval->y * bias;
 		t->relative.m = interval->m * bias;
 		t->relative.d = interval->d * bias;
 		t->relative.h = interval->h * bias;
 		t->relative.i = interval->i * bias;
 		t->relative.s = interval->s * bias;
-		t->relative.f = interval->f * bias;
+		t->relative.us = interval->us * bias;
 	}
 	t->have_relative = 1;
 	t->sse_uptodate = 0;
@@ -140,14 +144,14 @@ timelib_time *timelib_sub(timelib_time *old_time, timelib_rel_time *interval)
 		bias = -1;
 	}
 
-	memset(&t->relative, 0, sizeof(struct timelib_rel_time));
+	memset(&t->relative, 0, sizeof(timelib_rel_time));
 	t->relative.y = 0 - (interval->y * bias);
 	t->relative.m = 0 - (interval->m * bias);
 	t->relative.d = 0 - (interval->d * bias);
 	t->relative.h = 0 - (interval->h * bias);
 	t->relative.i = 0 - (interval->i * bias);
 	t->relative.s = 0 - (interval->s * bias);
-	t->relative.f = 0 - (interval->f * bias);
+	t->relative.us = 0 - (interval->us * bias);
 	t->have_relative = 1;
 	t->sse_uptodate = 0;
 

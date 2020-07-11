@@ -1,25 +1,28 @@
 --TEST--
 tlsv1.2 stream wrapper
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("openssl")) die("skip openssl not loaded");
 if (!function_exists("proc_open")) die("skip no proc_open");
-if (OPENSSL_VERSION_NUMBER < 0x10001001) die("skip OpenSSL 1.0.1 required");
+?>
 --FILE--
 <?php
+$certFile = __DIR__ . DIRECTORY_SEPARATOR . 'tlsv1.2_wrapper.pem.tmp';
+
 $serverCode = <<<'CODE'
     $flags = STREAM_SERVER_BIND|STREAM_SERVER_LISTEN;
     $ctx = stream_context_create(['ssl' => [
-        'local_cert' => __DIR__ . '/streams_crypto_method.pem',
+        'local_cert' => '%s',
     ]]);
 
     $server = stream_socket_server('tlsv1.2://127.0.0.1:64321', $errno, $errstr, $flags, $ctx);
     phpt_notify();
 
-    for ($i=0; $i < 3; $i++) {
+    for ($i = 0; $i < (phpt_has_sslv3() ? 3 : 2); $i++) {
         @stream_socket_accept($server, 3);
     }
 CODE;
+$serverCode = sprintf($serverCode, $certFile);
 
 $clientCode = <<<'CODE'
     $flags = STREAM_CLIENT_CONNECT;
@@ -32,16 +35,25 @@ $clientCode = <<<'CODE'
 
     $client = stream_socket_client("tlsv1.2://127.0.0.1:64321", $errno, $errstr, 3, $flags, $ctx);
     var_dump($client);
-    
+
     $client = @stream_socket_client("sslv3://127.0.0.1:64321", $errno, $errstr, 3, $flags, $ctx);
     var_dump($client);
-    
+
     $client = @stream_socket_client("tlsv1.1://127.0.0.1:64321", $errno, $errstr, 3, $flags, $ctx);
     var_dump($client);
 CODE;
 
+include 'CertificateGenerator.inc';
+$certificateGenerator = new CertificateGenerator();
+$certificateGenerator->saveNewCertAsFileWithKey('tlsv1.2_wrapper', $certFile);
+
 include 'ServerClientTestCase.inc';
 ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
+?>
+--CLEAN--
+<?php
+@unlink(__DIR__ . DIRECTORY_SEPARATOR . 'tlsv1.2_wrapper.pem.tmp');
+?>
 --EXPECTF--
 resource(%d) of type (stream)
 bool(false)

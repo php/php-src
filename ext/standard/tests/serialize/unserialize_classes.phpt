@@ -14,7 +14,6 @@ var_dump(unserialize($s, ["allowed_classes" => true]));
 var_dump(unserialize($s, ["allowed_classes" => ["bar"]]));
 var_dump(unserialize($s, ["allowed_classes" => ["FOO"]]));
 var_dump(unserialize($s, ["allowed_classes" => ["bar", "foO"]]));
-
 --EXPECTF--
 array(3) {
   [0]=>

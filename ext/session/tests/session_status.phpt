@@ -17,7 +17,7 @@ session_start();
 var_dump(session_status() == PHP_SESSION_ACTIVE);
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing session_status() : active, none
 bool(true)
 bool(true)

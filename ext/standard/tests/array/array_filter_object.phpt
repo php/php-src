@@ -1,12 +1,7 @@
 --TEST--
-Test array_filter() function : object functionality 
+Test array_filter() function : object functionality
 --FILE--
 <?php
-/* Prototype  : array array_filter(array $input [, callback $callback])
- * Description: Filters elements from the array via the callback. 
- * Source code: ext/standard/array.c
-*/
-
 /* This file uses 'input' array with different types of objects and passes
  * it to array_filter() to test object functionality
  * i.e. object of simple class with members and functions
@@ -42,7 +37,7 @@ abstract class AbstractClass
 class ChildClass extends AbstractClass
 {
   private $var3;
-  public function emptyMethod() { 
+  public function emptyMethod() {
     echo "defined in child";
   }
 }
@@ -51,7 +46,7 @@ class ChildClass extends AbstractClass
 class FinalClass
 {
   private $var4;
-  final function finalMethod() { 
+  final function finalMethod() {
     echo 'This can not be overloaded';
   }
 }
@@ -65,7 +60,6 @@ class StaticClass
   }
 }
 
-// Callback function which returns always true
 function always_true($input)
 {
   return true;
@@ -79,8 +73,8 @@ function always_false($input)
 
 // 'input' array containing objects as elements
 $input = array(
-  new SimpleClass(), 
-  new EmptyClass(), 
+  new SimpleClass(),
+  new EmptyClass(),
   new ChildClass(),
   new FinalClass(),
   new StaticClass()

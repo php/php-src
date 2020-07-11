@@ -4,12 +4,12 @@ Bug #41421 (Uncaught exception from a stream wrapper segfaults)
 <?php
 
 class wrapper {
-	function stream_open() {
-		return true;
-	}
-	function stream_eof() {
-		throw new exception();
-	}
+    function stream_open() {
+        return true;
+    }
+    function stream_eof() {
+        throw new exception();
+    }
 }
 
 stream_wrapper_register("wrap", "wrapper");
@@ -18,7 +18,7 @@ feof($fp);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: feof(): wrapper::stream_eof is not implemented! Assuming EOF in %s on line %d
 
 Fatal error: Uncaught Exception in %s:%d

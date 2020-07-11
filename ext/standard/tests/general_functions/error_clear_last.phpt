@@ -15,14 +15,14 @@ var_dump(error_get_last());
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 NULL
 NULL
 array(4) {
   ["type"]=>
-  int(8)
+  int(2)
   ["message"]=>
-  string(21) "Undefined variable: b"
+  string(21) "Undefined variable $b"
   ["file"]=>
   string(%d) "%s"
   ["line"]=>

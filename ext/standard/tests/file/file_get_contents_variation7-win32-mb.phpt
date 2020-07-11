@@ -9,22 +9,16 @@ if(substr(PHP_OS, 0, 3) != "WIN")
 ?>
 --FILE--
 <?php
-/* Prototype  : string file_get_contents(string filename [, bool use_include_path [, resource context [, long offset [, long maxlen]]]])
- * Description: Read the entire file into a string 
- * Source code: ext/standard/file.c
- * Alias to functions: 
- */
-
 echo "*** Testing file_get_contents() : variation ***\n";
 $mainDir = "fileGetContentsVar7私はガラスを食べられます.dir";
 $subDir = "fileGetContentsVar7Sub私はガラスを食べられます";
-$absMainDir = dirname(__FILE__)."\\".$mainDir;
+$absMainDir = __DIR__."\\".$mainDir;
 mkdir($absMainDir);
 $absSubDir = $absMainDir."\\".$subDir;
 mkdir($absSubDir);
 
 $old_dir_path = getcwd();
-chdir(dirname(__FILE__));
+chdir(__DIR__);
 $unixifiedDir = '/'.substr(str_replace('\\','/',$absSubDir),3);
 
 $allDirs = array(
@@ -35,14 +29,14 @@ $allDirs = array(
   "$absSubDir\\..\\..\\".$mainDir."\\.\\".$subDir,
   "$absSubDir\\..\\\\\\".$subDir."\\\\..\\\\..\\".$subDir,
   "$absSubDir\\BADDIR",
-  
+
   // relative paths
   $mainDir."\\".$subDir,
-  $mainDir."\\\\".$subDir, 
-   $mainDir."\\\\\\".$subDir, 
+  $mainDir."\\\\".$subDir,
+   $mainDir."\\\\\\".$subDir,
   ".\\".$mainDir."\\..\\".$mainDir."\\".$subDir,
-  "BADDIR",  
-  
+  "BADDIR",
+
   // unixifed path
   $unixifiedDir,
 );
@@ -84,12 +78,12 @@ string(%d) "contents read"
 
 -- Iteration 5 --
 
-Warning: file_get_contents(%sfileGetContentsVar7私はガラスを食べられます.dir\fileGetContentsVar7Sub私はガラスを食べられます\..\\\fileGetContentsVar7Sub私はガラスを食べられます\\..\\..\fileGetContentsVar7Sub私はガラスを食べられます\FileGetContentsVar7.tmp): failed to open stream: No such file or directory in %s on line %d
+Warning: file_get_contents(%sfileGetContentsVar7私はガラスを食べられます.dir\fileGetContentsVar7Sub私はガラスを食べられます\..\\\fileGetContentsVar7Sub私はガラスを食べられます\\..\\..\fileGetContentsVar7Sub私はガラスを食べられます\FileGetContentsVar7.tmp): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 -- Iteration 6 --
 
-Warning: file_get_contents(%sfileGetContentsVar7私はガラスを食べられます.dir\fileGetContentsVar7Sub私はガラスを食べられます\BADDIR\FileGetContentsVar7.tmp): failed to open stream: No such file or directory in %s on line %d
+Warning: file_get_contents(%sfileGetContentsVar7私はガラスを食べられます.dir\fileGetContentsVar7Sub私はガラスを食べられます\BADDIR\FileGetContentsVar7.tmp): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 -- Iteration 7 --
@@ -106,7 +100,7 @@ string(%d) "contents read"
 
 -- Iteration 11 --
 
-Warning: file_get_contents(BADDIR\FileGetContentsVar7.tmp): failed to open stream: No such file or directory in %s on line %d
+Warning: file_get_contents(BADDIR\FileGetContentsVar7.tmp): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 -- Iteration 12 --

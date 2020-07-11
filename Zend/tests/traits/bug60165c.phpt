@@ -17,6 +17,5 @@ class MyClass {
         baz as foobar;
     }
 }
-
 --EXPECTF--
 Fatal error: An alias (foobar) was defined for method baz(), but this method does not exist in %s on line %d

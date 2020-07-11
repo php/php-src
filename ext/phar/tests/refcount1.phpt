@@ -2,16 +2,14 @@
 Phar: test that refcounting avoids problems with deleting a file
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("spl")) die("skip SPL not available"); ?>
-<?php if (version_compare(PHP_VERSION, "5.3", "<")) die("skip requires 5.3 or later"); ?>
 --INI--
 phar.readonly=0
 phar.require_hash=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
-$file = b"<?php __HALT_COMPILER(); ?>";
+$file = "<?php __HALT_COMPILER(); ?>";
 
 $files = array();
 $files['a.php'] = '<?php echo "This is a\n"; ?>';
@@ -20,7 +18,7 @@ $files['b/c.php'] = '<?php echo "This is b/c\n"; ?>';
 include 'files/phar_test.inc';
 
 $fp = fopen($pname . '/b/c.php', 'wb');
-fwrite($fp, b"extra");
+fwrite($fp, "extra");
 fclose($fp);
 echo "===CLOSE===\n";
 $p = new Phar($fname);
@@ -36,9 +34,8 @@ var_dump(fread($b, 20));
 include $pname . '/b/c.php';
 ?>
 
-===DONE===
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
 ===CLOSE===
 object(PharFileInfo)#%d (2) {
@@ -59,4 +56,3 @@ object(PharFileInfo)#%d (2) {
 }
 string(5) "extra"
 extra
-===DONE===

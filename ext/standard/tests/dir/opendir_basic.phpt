@@ -1,19 +1,15 @@
 --TEST--
-Test opendir() function : basic functionality 
+Test opendir() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : mixed opendir(string $path[, resource $context])
- * Description: Open a directory and return a dir_handle 
- * Source code: ext/standard/dir.c
- */
-
 /*
  * Test basic functionality of opendir() with absolute and relative paths as $path argument
  */
 
 echo "*** Testing opendir() : basic functionality ***\n";
 
-$base_dir_path = dirname(__FILE__);
+$base_dir_path = __DIR__ . '/opendir_basic';
+@mkdir($base_dir_path);
 
 $level_one_dir_name = "level_one";
 $level_one_dir_path = "$base_dir_path/$level_one_dir_name";
@@ -39,12 +35,12 @@ var_dump($dh1);
 closedir($dh2);
 var_dump($dh2);
 ?>
-===DONE===
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
-rmdir("$file_path/level_one/level_two");
-rmdir("$file_path/level_one");
+$base_dir_path = __DIR__ . '/opendir_basic';
+rmdir("$base_dir_path/level_one/level_two");
+rmdir("$base_dir_path/level_one");
+rmdir($base_dir_path);
 ?>
 --EXPECTF--
 *** Testing opendir() : basic functionality ***
@@ -59,4 +55,3 @@ resource(%d) of type (stream)
 -- Close directory handles: --
 resource(%d) of type (Unknown)
 resource(%d) of type (Unknown)
-===DONE===

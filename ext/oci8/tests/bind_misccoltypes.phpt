@@ -3,12 +3,12 @@ Bind miscellaneous column types using default types
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
-?> 
+require(__DIR__.'/skipif.inc');
+?>
 --FILE--
 <?php
 
-require(dirname(__FILE__).'/connect.inc');
+require(__DIR__.'/connect.inc');
 
 // Initialization
 
@@ -16,9 +16,9 @@ $stmtarray = array(
 
     "alter session set nls_date_format = 'DD-MON-YY'",
 
-	"drop table bind_misccoltypes_tab",
+    "drop table bind_misccoltypes_tab",
 
-	"create table bind_misccoltypes_tab (
+    "create table bind_misccoltypes_tab (
         id                number,
         char_t            char(1),
         char_t10          char(10),
@@ -260,7 +260,7 @@ check_col($c, 'date_t', 60);
 // Clean up
 
 $stmtarray = array(
-	"drop table bind_misccoltypes_tab"
+    "drop table bind_misccoltypes_tab"
 );
 
 oci8_test_sql_execute($c, $stmtarray);
@@ -268,9 +268,7 @@ oci8_test_sql_execute($c, $stmtarray);
 oci_close($c);
 
 ?>
-===DONE===
-<?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 TEST86 insert all ORATYPE values
 
 TEST87 SELECT all values using DEFINEs
@@ -363,4 +361,3 @@ array(1) {
     string(9) "09-APR-10"
   }
 }
-===DONE===

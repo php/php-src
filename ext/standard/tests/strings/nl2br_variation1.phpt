@@ -2,12 +2,7 @@
 Test nl2br() function : usage variations - double quoted strings for 'str' argument
 --FILE--
 <?php
-/* Prototype  : string nl2br(string $str);
- * Description: Inserts HTML line breaks before all newlines in a string
- * Source code: ext/standard/string.c
-*/
-
-/* Test nl2br() function by passing double quoted strings containing various 
+/* Test nl2br() function by passing double quoted strings containing various
  *   combinations of new line chars to 'str' argument
 */
 
@@ -22,7 +17,7 @@ $strings = array(
   "Hello\r\nWorld",
   "\r\nHello\r\nWorld\r\n",
 
-  //one blank line 
+  //one blank line
   "
 ",
 
@@ -45,7 +40,7 @@ foreach( $strings as $str ){
 }
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing nl2br() : usage variations ***
 -- Iteration 1 --
 string(17) "Hello<br />

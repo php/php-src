@@ -1,11 +1,11 @@
 --TEST--
 Bug #32223 (weird behaviour of pg_last_notice using define)
 --SKIPIF--
-<?php 
+<?php
 require_once('skipif.inc');
 
 _skip_lc_messages();
-	
+
 @pg_query($conn, "CREATE LANGUAGE 'plpgsql' HANDLER plpgsql_call_handler LANCOMPILER 'PL/pgSQL'");
 $res = @pg_query($conn, "CREATE OR REPLACE FUNCTION test_notice() RETURNS boolean AS '
 begin
@@ -55,7 +55,6 @@ tester();
 pg_close(dbh);
 
 ?>
-===DONE===
 --EXPECTF--
 resource(%d) of type (pgsql result)
 array(1) {
@@ -63,4 +62,3 @@ array(1) {
   string(1) "f"
 }
 string(14) "NOTICE:  11111"
-===DONE===

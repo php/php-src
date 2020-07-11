@@ -7,12 +7,6 @@ Test session_start() function : variation
 
 ob_start();
 
-/* 
- * Prototype : bool session_start(void)
- * Description : Initialize session data
- * Source code : ext/session/session.c 
- */
-
 echo "*** Testing session_start() : variation ***\n";
 
 var_dump(session_start());
@@ -29,7 +23,7 @@ var_dump(session_destroy());
 echo "Done";
 ob_end_flush();
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing session_start() : variation ***
 bool(true)
 bool(true)
@@ -42,4 +36,3 @@ bool(true)
 bool(true)
 bool(true)
 Done
-

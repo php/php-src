@@ -3,12 +3,12 @@ returning multiple lobs
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
-?> 
+require(__DIR__.'/skipif.inc');
+?>
 --FILE--
 <?php
-	
-require dirname(__FILE__).'/connect.inc';
+
+require __DIR__.'/connect.inc';
 
 $drop = "DROP table lob_test";
 $statement = oci_parse($c, $drop);

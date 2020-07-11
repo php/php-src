@@ -1,12 +1,15 @@
-dnl
-dnl $Id$
-dnl
+PHP_ARG_ENABLE([session],
+  [whether to enable PHP sessions],
+  [AS_HELP_STRING([--disable-session],
+    [Disable session support])],
+  [yes])
 
-PHP_ARG_ENABLE(session, whether to enable PHP sessions,
-[  --disable-session       Disable session support], yes)
-
-PHP_ARG_WITH(mm,for mm support,
-[  --with-mm[=DIR]           SESSION: Include mm support for session storage], no, no)
+PHP_ARG_WITH([mm],
+  [for mm support],
+  [AS_HELP_STRING([[--with-mm[=DIR]]],
+    [SESSION: Include mm support for session storage])],
+  [no],
+  [no])
 
 if test "$PHP_SESSION" != "no"; then
   PHP_PWRITE_TEST
@@ -27,7 +30,12 @@ if test "$PHP_MM" != "no"; then
   if test -z "$MM_DIR" ; then
     AC_MSG_ERROR(cannot find mm library)
   fi
-  
+
+  if test "$enable_zts" = "yes"; then
+    dnl The mm library is not thread-safe, and mod_mm.c refuses to compile.
+    AC_MSG_ERROR(--with-mm cannot be combined with --enable-zts)
+  fi
+
   PHP_ADD_LIBRARY_WITH_PATH(mm, $MM_DIR/$PHP_LIBDIR, SESSION_SHARED_LIBADD)
   PHP_ADD_INCLUDE($MM_DIR/include)
   PHP_INSTALL_HEADERS([ext/session/mod_mm.h])

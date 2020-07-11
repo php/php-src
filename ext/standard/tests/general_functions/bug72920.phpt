@@ -3,13 +3,14 @@ Bug #72920 (Accessing a private constant using constant() creates an exception A
 --FILE--
 <?php
 class Foo {
-	private const C1 = "a";
+    private const C1 = "a";
 }
 
 try {
-	var_dump(constant('Foo::C1'));
+    var_dump(constant('Foo::C1'));
 } catch (Error $e) {
-	var_dump($e->getMessage());
+    echo $e->getMessage(), "\n";
 }
+?>
 --EXPECT--
-string(35) "Cannot access private const Foo::C1"
+Cannot access private constant Foo::C1

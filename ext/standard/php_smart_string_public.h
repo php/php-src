@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,17 +15,5 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
-#ifndef PHP_SMART_STRING_PUBLIC_H
-#define PHP_SMART_STRING_PUBLIC_H
-
-#include <sys/types.h>
-
-typedef struct {
-	char *c;
-	size_t len;
-	size_t a;
-} smart_string;
-
-#endif
+/* Header moved to Zend. This file is retained for BC. */
+#include "zend_smart_string_public.h"

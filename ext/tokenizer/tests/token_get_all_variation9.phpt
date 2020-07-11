@@ -4,11 +4,6 @@ Test token_get_all() function : usage variations - with different types of comme
 <?php if (!extension_loaded("tokenizer")) print "skip"; ?>
 --FILE--
 <?php
-/* Prototype  : array token_get_all(string $source)
- * Description: splits the given source into an array of PHP languange tokens
- * Source code: ext/tokenizer/tokenizer.c
-*/
-
 /*
  * Passing 'source' argument with different style of comments
  */
@@ -20,7 +15,7 @@ echo "*** Testing token_get_all() : 'source' string with different comments ***\
 
 // types of comments: '//', '/* */', '#' & /** */
 
-$source = '<?php 
+$source = '<?php
 /** Performing addition operation on given values :
   * a, b
   */
@@ -30,8 +25,8 @@ $a = 10;
 $b = 20;
 $c = true; // bool value
 
-/* 
- * Performing operation on $a,$b 
+/*
+ * Performing operation on $a,$b
  * display result
  */
 $c = $a + $b;
@@ -45,27 +40,18 @@ echo "Done"
 ?>
 --EXPECTF--
 *** Testing token_get_all() : 'source' string with different comments ***
-array(51) {
+array(52) {
   [0]=>
   array(3) {
     [0]=>
     int(%d)
     [1]=>
-    string(6) "<?php "
-    [2]=>
-    int(1)
-  }
-  [1]=>
-  array(3) {
-    [0]=>
-    int(%d)
-    [1]=>
-    string(1) "
+    string(6) "<?php
 "
     [2]=>
     int(1)
   }
-  [2]=>
+  [1]=>
   array(3) {
     [0]=>
     int(%d)
@@ -76,7 +62,7 @@ array(51) {
     [2]=>
     int(2)
   }
-  [3]=>
+  [2]=>
   array(3) {
     [0]=>
     int(%d)
@@ -87,12 +73,21 @@ array(51) {
     [2]=>
     int(4)
   }
+  [3]=>
+  array(3) {
+    [0]=>
+    int(%d)
+    [1]=>
+    string(12) "// int value"
+    [2]=>
+    int(6)
+  }
   [4]=>
   array(3) {
     [0]=>
     int(%d)
     [1]=>
-    string(13) "// int value
+    string(1) "
 "
     [2]=>
     int(6)
@@ -251,8 +246,7 @@ array(51) {
     [0]=>
     int(%d)
     [1]=>
-    string(14) "// bool value
-"
+    string(13) "// bool value"
     [2]=>
     int(9)
   }
@@ -261,18 +255,19 @@ array(51) {
     [0]=>
     int(%d)
     [1]=>
-    string(1) "
+    string(2) "
+
 "
     [2]=>
-    int(10)
+    int(9)
   }
   [28]=>
   array(3) {
     [0]=>
     int(%d)
     [1]=>
-    string(59) "/* 
- * Performing operation on $a,$b 
+    string(57) "/*
+ * Performing operation on $a,$b
  * display result
  */"
     [2]=>
@@ -405,8 +400,7 @@ array(51) {
     [0]=>
     int(%d)
     [1]=>
-    string(20) "# expected: int(%d)
-"
+    string(19) "# expected: int(30)"
     [2]=>
     int(16)
   }
@@ -415,22 +409,32 @@ array(51) {
     [0]=>
     int(%d)
     [1]=>
-    string(1) "
+    string(2) "
+
 "
     [2]=>
-    int(17)
+    int(16)
   }
   [49]=>
   array(3) {
     [0]=>
     int(%d)
     [1]=>
-    string(17) "# end of program
-"
+    string(16) "# end of program"
     [2]=>
     int(18)
   }
   [50]=>
+  array(3) {
+    [0]=>
+    int(%d)
+    [1]=>
+    string(1) "
+"
+    [2]=>
+    int(18)
+  }
+  [51]=>
   array(3) {
     [0]=>
     int(%d)

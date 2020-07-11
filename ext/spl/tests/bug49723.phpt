@@ -1,5 +1,5 @@
 --TEST--
-LimitIterator: do not seek if not needed 
+LimitIterator: do not seek if not needed
 --FILE--
 <?php
 

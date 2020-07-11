@@ -6,7 +6,7 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 <?php
 
 
-$filename = dirname(__FILE__)."/touch_variation2.dat";
+$filename = __DIR__."/touch_variation2.dat";
 $fp=fopen($filename,"w");
 fwrite ($fp,"mydata");
 fclose($fp);
@@ -18,7 +18,7 @@ var_dump(file_get_contents($filename));
 echo "Done\n";
 
 ?>
---EXPECT--	
+--EXPECT--
 bool(true)
 string(6) "mydata"
 Done

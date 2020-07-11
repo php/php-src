@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -18,9 +16,6 @@
 #define FORMATTER_FORMAT_H
 
 #include <php.h>
-
-PHP_FUNCTION( numfmt_format );
-PHP_FUNCTION( numfmt_format_currency );
 
 #define FORMAT_TYPE_DEFAULT	0
 #define FORMAT_TYPE_INT32	1

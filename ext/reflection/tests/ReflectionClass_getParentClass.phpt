@@ -10,12 +10,14 @@ class Foo {}
 
 class Bar extends Foo {}
 
-$rc1 = new ReflectionClass("Bar");
-var_dump($rc1->getParentClass());
+$rc = new ReflectionClass("Bar");
+$parent = $rc->getParentClass();
+$grandParent = $parent->getParentClass();
+var_dump($parent, $grandParent);
 ?>
-
 --EXPECTF--
 object(ReflectionClass)#%d (1) {
   ["name"]=>
   string(3) "Foo"
 }
+bool(false)

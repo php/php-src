@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,11 +12,9 @@
    +----------------------------------------------------------------------+
    | Authors: Brian Schaffner <brian@tool.net>                            |
    |          Shane Caraveo <shane@caraveo.com>                           |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   |          Zeev Suraski <zeev@php.net>                                 |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #include "php.h"
 #include "dl.h"
@@ -31,34 +27,26 @@
 #if defined(HAVE_LIBDL)
 #include <stdlib.h>
 #include <stdio.h>
-#ifdef HAVE_STRING_H
 #include <string.h>
-#else
-#include <strings.h>
-#endif
 #ifdef PHP_WIN32
 #include "win32/param.h"
 #include "win32/winutil.h"
 #define GET_DL_ERROR()	php_win_err()
-#elif defined(NETWARE)
-#include <sys/param.h>
-#define GET_DL_ERROR()	dlerror()
 #else
 #include <sys/param.h>
 #define GET_DL_ERROR()	DL_ERROR()
 #endif
 #endif /* defined(HAVE_LIBDL) */
 
-/* {{{ proto int dl(string extension_filename)
-   Load a PHP extension at runtime */
+/* {{{ Load a PHP extension at runtime */
 PHPAPI PHP_FUNCTION(dl)
 {
 	char *filename;
 	size_t filename_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &filename, &filename_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(filename, filename_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (!PG(enable_dl)) {
 		php_error_docref(NULL, E_WARNING, "Dynamically loaded extensions aren't enabled");
@@ -79,16 +67,43 @@ PHPAPI PHP_FUNCTION(dl)
 
 #if defined(HAVE_LIBDL)
 
-/* {{{ php_load_extension
- */
-PHPAPI int php_load_extension(char *filename, int type, int start_now)
+/* {{{ php_load_shlib */
+PHPAPI void *php_load_shlib(const char *path, char **errp)
+{
+	void *handle;
+	char *err;
+
+	handle = DL_LOAD(path);
+	if (!handle) {
+		err = GET_DL_ERROR();
+#ifdef PHP_WIN32
+		if (err && (*err)) {
+			size_t i = strlen(err);
+			(*errp)=estrdup(err);
+			php_win32_error_msg_free(err);
+			while (i > 0 && isspace((*errp)[i-1])) { (*errp)[i-1] = '\0'; i--; }
+		} else {
+			(*errp) = estrdup("<No message>");
+		}
+#else
+		(*errp) = estrdup(err);
+		GET_DL_ERROR(); /* free the buffer storing the error */
+#endif
+	}
+	return handle;
+}
+/* }}} */
+
+/* {{{ php_load_extension */
+PHPAPI int php_load_extension(const char *filename, int type, int start_now)
 {
 	void *handle;
 	char *libpath;
 	zend_module_entry *module_entry;
 	zend_module_entry *(*get_module)(void);
-	int error_type;
+	int error_type, slash_suffix = 0;
 	char *extension_dir;
+	char *err1, *err2;
 
 	if (type == MODULE_PERSISTENT) {
 		extension_dir = INI_STR("extension_dir");
@@ -111,9 +126,9 @@ PHPAPI int php_load_extension(char *filename, int type, int start_now)
 		}
 		libpath = estrdup(filename);
 	} else if (extension_dir && extension_dir[0]) {
-		int extension_dir_len = (int)strlen(extension_dir);
-
-		if (IS_SLASH(extension_dir[extension_dir_len-1])) {
+		slash_suffix = IS_SLASH(extension_dir[strlen(extension_dir)-1]);
+		/* Try as filename first */
+		if (slash_suffix) {
 			spprintf(&libpath, 0, "%s%s", extension_dir, filename); /* SAFE */
 		} else {
 			spprintf(&libpath, 0, "%s%c%s", extension_dir, DEFAULT_SLASH, filename); /* SAFE */
@@ -122,24 +137,41 @@ PHPAPI int php_load_extension(char *filename, int type, int start_now)
 		return FAILURE; /* Not full path given or extension_dir is not set */
 	}
 
-	/* load dynamic symbol */
-	handle = DL_LOAD(libpath);
+	handle = php_load_shlib(libpath, &err1);
 	if (!handle) {
-#if PHP_WIN32
-		char *err = GET_DL_ERROR();
-		if (err && (*err != '\0')) {
-			php_error_docref(NULL, error_type, "Unable to load dynamic library '%s' - %s", libpath, err);
-			LocalFree(err);
+		/* Now, consider 'filename' as extension name and build file name */
+		char *orig_libpath = libpath;
+
+		if (slash_suffix) {
+			spprintf(&libpath, 0, "%s" PHP_SHLIB_EXT_PREFIX "%s." PHP_SHLIB_SUFFIX, extension_dir, filename); /* SAFE */
 		} else {
-			php_error_docref(NULL, error_type, "Unable to load dynamic library '%s' - %s", libpath, "Unknown reason");
+			spprintf(&libpath, 0, "%s%c" PHP_SHLIB_EXT_PREFIX "%s." PHP_SHLIB_SUFFIX, extension_dir, DEFAULT_SLASH, filename); /* SAFE */
 		}
-#else
-		php_error_docref(NULL, error_type, "Unable to load dynamic library '%s' - %s", libpath, GET_DL_ERROR());
-		GET_DL_ERROR(); /* free the buffer storing the error */
-#endif
-		efree(libpath);
-		return FAILURE;
+
+		handle = php_load_shlib(libpath, &err2);
+		if (!handle) {
+			php_error_docref(NULL, error_type, "Unable to load dynamic library '%s' (tried: %s (%s), %s (%s))",
+				filename, orig_libpath, err1, libpath, err2);
+			efree(orig_libpath);
+			efree(err1);
+			efree(libpath);
+			efree(err2);
+			return FAILURE;
+		}
+		efree(orig_libpath);
+		efree(err1);
 	}
+
+#ifdef PHP_WIN32
+	if (!php_win32_image_compatible(libpath, &err1)) {
+			php_error_docref(NULL, error_type, err1);
+			efree(err1);
+			efree(libpath);
+			DL_UNLOAD(handle);
+			return FAILURE;
+	}
+#endif
+
 	efree(libpath);
 
 	get_module = (zend_module_entry *(*)(void)) DL_FETCH_SYMBOL(handle, "get_module");
@@ -208,44 +240,46 @@ PHPAPI int php_load_extension(char *filename, int type, int start_now)
 }
 /* }}} */
 
-/* {{{ php_dl
- */
-PHPAPI void php_dl(char *file, int type, zval *return_value, int start_now)
+#else
+
+static void php_dl_error(const char *filename)
 {
-	/* Load extension */
-	if (php_load_extension(file, type, start_now) == FAILURE) {
-		RETVAL_FALSE;
-	} else {
-		RETVAL_TRUE;
-	}
+    php_error_docref(NULL, E_WARNING, "Cannot dynamically load %s - dynamic modules are not supported", filename);
+}
+
+PHPAPI void *php_load_shlib(const char *path, char **errp)
+{
+    php_dl_error(filename);
+    (*errp) = estrdup("No DL support");
+}
+
+PHPAPI int php_load_extension(const char *filename, int type, int start_now)
+{
+    php_dl_error(filename);
+
+    return FAILURE;
+}
+
+#endif
+
+/* {{{ php_dl */
+PHPAPI void php_dl(const char *file, int type, zval *return_value, int start_now)
+{
+    /* Load extension */
+    if (php_load_extension(file, type, start_now) == FAILURE) {
+        RETVAL_FALSE;
+    } else {
+        RETVAL_TRUE;
+    }
 }
 /* }}} */
 
 PHP_MINFO_FUNCTION(dl)
 {
-	php_info_print_table_row(2, "Dynamic Library Support", "enabled");
-}
-
+#if defined(HAVE_LIBDL)
+#define PHP_DL_SUPPORT_STATUS "enabled"
 #else
-
-PHPAPI void php_dl(char *file, int type, zval *return_value, int start_now)
-{
-	php_error_docref(NULL, E_WARNING, "Cannot dynamically load %s - dynamic modules are not supported", file);
-	RETVAL_FALSE;
-}
-
-PHP_MINFO_FUNCTION(dl)
-{
-	PUTS("Dynamic Library support not available<br />.\n");
-}
-
+#define PHP_DL_SUPPORT_STATUS "unavailable"
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */
+    php_info_print_table_row(2, "Dynamic Library Support", PHP_DL_SUPPORT_STATUS);
+}

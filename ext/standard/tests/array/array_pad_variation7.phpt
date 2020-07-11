@@ -2,11 +2,6 @@
 Test array_pad() function : usage variations - two dimensional array for 'input' argument
 --FILE--
 <?php
-/* Prototype  : array array_pad(array $input, int $pad_size, mixed $pad_value)
- * Description: Returns a copy of input array padded with pad_value to size pad_size
- * Source code: ext/standard/array.c
-*/
-
 /*
 * Passing two dimensional array to $input argument and testing whether
 * array_pad() behaves in an expected way with the other arguments passed to the function.
@@ -38,7 +33,7 @@ var_dump( array_pad($input[1], -$pad_size, $pad_value) );  // negative 'pad_size
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_pad() : Passing 2-D array to $input argument ***
 -- Entire 2-d array for $input argument --
 array(5) {

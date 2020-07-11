@@ -5,31 +5,13 @@ Test fileperms() & chmod() functions: basic functionality
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip Not on Windows');
 }
-// Skip if being run by root
-$filename = dirname(__FILE__)."/006_root_check.tmp";
-$fp = fopen($filename, 'w');
-fclose($fp);
-if(fileowner($filename) == 0) {
-        unlink ($filename);
-        die('skip cannot be run as root');
-}
-
-unlink($filename);
-
+require __DIR__ . '/../skipif_root.inc';
 ?>
 --FILE--
 <?php
-/*
-  Prototype: int fileperms ( string $filename );
-  Description: Returns the permissions on the file, or FALSE in case of an error
+$path = __DIR__;
 
-  Prototype: bool chmod ( string $filename, int $mode );
-  Description: Attempts to change the mode of the file specified by
-    filename to that given in mode
-*/
-$path = dirname(__FILE__);
-
-echo "*** Testing fileperms(), chmod() with files and dirs ***\n"; 
+echo "*** Testing fileperms(), chmod() with files and dirs ***\n";
 fopen($path."/perm.tmp", "w");
 var_dump( chmod($path."/perm.tmp", 0755 ) );
 printf("%o", fileperms($path."/perm.tmp") );
@@ -46,10 +28,10 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-unlink(dirname(__FILE__)."/perm.tmp");
-rmdir(dirname(__FILE__)."/perm");
+unlink(__DIR__."/perm.tmp");
+rmdir(__DIR__."/perm");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fileperms(), chmod() with files and dirs ***
 bool(true)
 100755

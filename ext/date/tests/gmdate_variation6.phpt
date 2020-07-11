@@ -2,12 +2,6 @@
 Test gmdate() function : usage variation - Passing Month format options to format argument.
 --FILE--
 <?php
-/* Prototype  : string gmdate(string format [, long timestamp])
- * Description: Format a GMT date/time 
- * Source code: ext/date/php_date.c
- * Alias to functions: 
- */
-
 echo "*** Testing gmdate() : usage variation ***\n";
 
 // Initialise all required variables
@@ -35,7 +29,6 @@ var_dump( gmdate('t') );
 var_dump( gmdate('t', $timestamp) );
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing gmdate() : usage variation ***
 
@@ -58,4 +51,3 @@ string(1) "8"
 -- Testing gmdate() function with number of days in a month format --
 string(%d) "%d"
 string(2) "31"
-===DONE===

@@ -25,5 +25,5 @@ $doc->loadXML($xml);
 $node = $doc->getElementsByTagName('title')->item(0);
 var_dump($node->C14N());
 ?>
---EXPECTF--
+--EXPECT--
 string(34) "<title>The Grapes of Wrath</title>"

@@ -7,26 +7,18 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip.. Not valid for Windows');
 }
 ?>
-?>
 --FILE--
 <?php
-/* Prototype: array lstat ( string $filename );
-   Description: Gives information about a file or symbolic link
-
-   Prototype: array stat ( string $filename );
-   Description: Gives information about a file
-*/
-
 /* test the effects of touch() on stats of dir */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require "$file_path/file.inc";
 
 
 /* create temp directory */
 
 $dir_name = "$file_path/lstat_stat_variation5";
-@rmdir($dir_name);  //ensure that dir doesn't exists 
+@rmdir($dir_name);  //ensure that dir doesn't exists
 mkdir($dir_name);  // temp dir
 
 // touch a directory and check stat, there should be difference in atime
@@ -34,7 +26,7 @@ echo "*** Testing stat() for directory after using touch() on the directory ***\
 $old_stat = stat($dir_name);
 // clear the cache
 clearstatcache();
-sleep(2);
+sleep(1);
 var_dump( touch($dir_name) );
 $new_stat = stat($dir_name);
 
@@ -50,13 +42,12 @@ clearstatcache();
 
 echo "\n--- Done ---";
 ?>
-
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 rmdir("$file_path/lstat_stat_variation5");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing stat() for directory after using touch() on the directory ***
 bool(true)
 bool(true)

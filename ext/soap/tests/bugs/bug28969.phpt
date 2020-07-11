@@ -27,9 +27,9 @@ class LocalSoapClient extends SoapClient {
 
 }
 
-$x = new LocalSoapClient(NULL,array('location'=>'test://', 
+$x = new LocalSoapClient(NULL,array('location'=>'test://',
                                     'uri'=>'http://testuri.org',
-                                    'encoding'=>'ISO-8859-1')); 
+                                    'encoding'=>'ISO-8859-1'));
 var_dump($x->test());
 echo "ok\n";
 ?>

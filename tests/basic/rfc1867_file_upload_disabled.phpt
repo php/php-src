@@ -23,12 +23,12 @@ foo
 var_dump($_FILES);
 var_dump($_POST);
 ?>
---EXPECTF--
+--EXPECT--
 array(0) {
 }
 array(2) {
-  [%u|b%"foo"]=>
-  %unicode|string%(3) "bar"
-  [%u|b%"bar"]=>
-  %unicode|string%(3) "foo"
+  ["foo"]=>
+  string(3) "bar"
+  ["bar"]=>
+  string(3) "foo"
 }

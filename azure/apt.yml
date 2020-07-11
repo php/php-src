@@ -1,0 +1,41 @@
+parameters:
+  packages: ''
+
+steps:
+  - script: |
+      sudo apt-get update -y | true
+      sudo apt install bison \
+                       re2c \
+                       locales \
+                       ldap-utils \
+                       openssl \
+                       slapd \
+                       language-pack-de \
+                       re2c \
+                       libgmp-dev \
+                       libicu-dev \
+                       libtidy-dev \
+                       libenchant-dev \
+                       libaspell-dev \
+                       libpspell-dev \
+                       libsasl2-dev \
+                       libxpm-dev \
+                       libzip-dev \
+                       libsqlite3-dev \
+                       libwebp-dev \
+                       libonig-dev \
+                       libkrb5-dev \
+                       libgssapi-krb5-2 \
+                       libcurl4-openssl-dev \
+                       libxml2-dev \
+                       libxslt1-dev \
+                       libpq-dev \
+                       libreadline-dev \
+                       libldap2-dev \
+                       libsodium-dev \
+                       libargon2-0-dev \
+                       postgresql \
+                       postgresql-contrib \
+                       llvm \
+                       ${{ parameters.packages }}
+    displayName: 'APT'

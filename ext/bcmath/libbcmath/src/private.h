@@ -11,7 +11,7 @@
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.  (COPYING.LIB)
+    Lesser General Public License for more details.  (LICENSE)
 
     You should have received a copy of the GNU Lesser General Public
     License along with this library; if not, write to:
@@ -30,11 +30,6 @@
 *************************************************************************/
 
 /* "Private" routines to bcmath. */
-
-/* variables */
-#if SANDER_0
-extern bc_num _bc_Free_list;
-#endif
 
 /* routines */
 int _bc_do_compare (bc_num n1, bc_num n2, int use_sign, int ignore_last);

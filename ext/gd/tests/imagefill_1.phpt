@@ -1,7 +1,7 @@
 --TEST--
 imagefill() infinite loop with wrong color index
 --SKIPIF--
-<?php 
+<?php
 	if (!extension_loaded('gd')) {
 		die("skip gd extension not available.");
 	}

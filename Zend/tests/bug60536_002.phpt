@@ -1,11 +1,10 @@
 --TEST--
-The same rules are applied for properties that are defined in the class hierarchy. Thus, if the properties are compatible, a notice is issued, if not a fatal error occures. (relevant with #60536)
+The same rules are applied for properties that are defined in the class hierarchy. Thus, if the properties are compatible, a notice is issued, if not a fatal error occurs. (relevant with #60536)
 --FILE--
 <?php
-error_reporting(E_ALL | E_STRICT);
 
 class Base {
-  private $hello;    
+  private $hello;
 }
 
 trait THello1 {
@@ -22,7 +21,7 @@ echo "POST-CLASS-GUARD\n";
 // now we do the test for a fatal error
 
 class TraitsTest {
-	use THello1;
+    use THello1;
     public $hello;
 }
 
@@ -31,7 +30,7 @@ echo "POST-CLASS-GUARD2\n";
 $t = new TraitsTest;
 $t->hello = "foo";
 ?>
---EXPECTF--	
+--EXPECTF--
 PRE-CLASS-GUARD
 POST-CLASS-GUARD
 

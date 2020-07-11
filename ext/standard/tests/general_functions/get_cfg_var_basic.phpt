@@ -17,7 +17,7 @@ var_dump(get_cfg_var( 'session.serialize_handler' ) );
 var_dump(get_cfg_var( 'session.save_handler' ) );
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Test by calling method or function with its expected arguments ***
 string(1) "0"
 string(3) "php"

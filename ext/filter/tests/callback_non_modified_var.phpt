@@ -5,10 +5,10 @@ callback function returns non modified value
 --FILE--
 <?php
 function callback($var) {
-	return $var;
+    return $var;
 }
 $var = "test";
 var_dump(filter_var($var, FILTER_CALLBACK, array('options'=>'callback')));
 ?>
---EXPECT--	
+--EXPECT--
 string(4) "test"

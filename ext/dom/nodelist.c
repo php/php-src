@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,34 +15,21 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #include "php.h"
-#if HAVE_LIBXML && HAVE_DOM
+#if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
-
-
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_nodelist_item, 0, 0, 1)
-	ZEND_ARG_INFO(0, index)
-ZEND_END_ARG_INFO();
-/* }}} */
+#include "zend_interfaces.h"
 
 /*
 * class DOMNodeList
 *
-* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-536297177
+* URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-536297177
 * Since:
 */
-
-const zend_function_entry php_dom_nodelist_class_functions[] = {
-	PHP_FALIAS(item, dom_nodelist_item, arginfo_dom_nodelist_item)
-	PHP_FE_END
-};
 
 /* {{{ length	int
 readonly=yes
@@ -96,13 +81,31 @@ int dom_nodelist_length_read(dom_object *obj, zval *retval)
 	return SUCCESS;
 }
 
+
+/* {{{ */
+PHP_METHOD(DOMNodeList, count)
+{
+	zval *id;
+	dom_object *intern;
+
+	id = ZEND_THIS;
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	intern = Z_DOMOBJ_P(id);
+	if(dom_nodelist_length_read(intern, return_value) == FAILURE) {
+		RETURN_FALSE;
+	}
+}
+/* }}} end dom_nodelist_count */
+
 /* }}} */
 
-/* {{{ proto DOMNode dom_nodelist_item(int index);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-844377136
+/* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-844377136
 Since:
 */
-PHP_FUNCTION(dom_nodelist_item)
+PHP_METHOD(DOMNodeList, item)
 {
 	zval *id;
 	zend_long index;
@@ -114,8 +117,9 @@ PHP_FUNCTION(dom_nodelist_item)
 	xmlNodePtr nodep, curnode;
 	int count = 0;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Ol", &id, dom_nodelist_class_entry, &index) == FAILURE) {
-		return;
+	id = ZEND_THIS;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &index) == FAILURE) {
+		RETURN_THROWS();
 	}
 
 	if (index >= 0) {
@@ -170,13 +174,13 @@ PHP_FUNCTION(dom_nodelist_item)
 }
 /* }}} end dom_nodelist_item */
 
-#endif
+ZEND_METHOD(DOMNodeList, getIterator)
+{
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */
+	zend_create_internal_iterator_zval(return_value, ZEND_THIS);
+}
+
+#endif

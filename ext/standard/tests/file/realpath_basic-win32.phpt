@@ -8,14 +8,10 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype: string realpath ( string $path );
-   Description: Returns canonicalized absolute pathname
-*/
-
 echo "\n*** Testing basic functions of realpath() with files ***\n";
 
 /* creating directories and files */
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 mkdir("$file_path/realpath_basic/home/test/", 0777, true);
 
 $file_handle1 = fopen("$file_path/realpath_basic/home/test/realpath_basic.tmp", "w");
@@ -34,7 +30,7 @@ $filenames = array (
   "$file_path/realpath_basic/home//../././realpath_basic.tmp//",
 
    // checking for binary safe
-  b"$file_path/realpath_basic/home/realpath_basic.tmp",
+  "$file_path/realpath_basic/home/realpath_basic.tmp",
 
   /* filenames with invalid path */
   "$file_path///realpath_basic/home//..//././test//realpath_basic.tmp",
@@ -53,7 +49,7 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-$name_prefix = dirname(__FILE__)."/realpath_basic";
+$name_prefix = __DIR__."/realpath_basic";
 unlink("$name_prefix/home/test/realpath_basic.tmp");
 unlink("$name_prefix/home/realpath_basic.tmp");
 unlink("$name_prefix/realpath_basic.tmp");

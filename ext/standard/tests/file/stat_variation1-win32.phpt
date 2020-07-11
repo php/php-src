@@ -9,14 +9,9 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 --FILE--
 <?php
 
-/*
- *  Prototype: array stat ( string $filename );
- *  Description: Gives information about a file
- */
-
 /* test the effects of rename() on stats of dir/file */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require "$file_path/file.inc";
 
 
@@ -35,15 +30,15 @@ $old_filename = "$file_path/stat_variation1.tmp";
 $new_filename = "$file_path/stat_variation1a.tmp";
 $old_stat = stat($old_filename);
 clearstatcache();
-sleep(2);
+sleep(1);
 var_dump( rename($old_filename, $new_filename) );
 $new_stat = stat($new_filename);
 
-// compare the self stat 
+// compare the self stat
 var_dump( compare_self_stat($old_stat) );
 var_dump( compare_self_stat($new_stat) );
 
-// compare the two stats 
+// compare the two stats
 var_dump( compare_stats($old_stat, $old_stat, $all_stat_keys) );
 // clear the cache
 clearstatcache();
@@ -70,14 +65,13 @@ clearstatcache();
 
 echo "\n*** Done ***";
 ?>
-
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink("$file_path/stat_variation1a.tmp");
 rmdir("$file_path/stat_variation1a");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing stat(): on file and directory ater renaming them ***
 -- Testing stat() for files after being renamed --
 bool(true)
@@ -91,4 +85,3 @@ bool(true)
 bool(true)
 
 *** Done ***
-

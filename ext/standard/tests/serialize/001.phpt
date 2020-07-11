@@ -3,39 +3,39 @@ serialize()/unserialize()/var_dump()
 --INI--
 serialize_precision=100
 --FILE--
-<?php 
+<?php
 class t
 {
-	function __construct()
-	{
-		$this->a = "hallo";
-	}
+    function __construct()
+    {
+        $this->a = "hallo";
+    }
 }
 
 class s
 {
-	public $a;
-	public $b;
-	public $c;
+    public $a;
+    public $b;
+    public $c;
 
-	function __construct()
-	{
-		$this->a = "hallo";
-		$this->b = "php";
-		$this->c = "world";
-		$this->d = "!";
-	}
+    function __construct()
+    {
+        $this->a = "hallo";
+        $this->b = "php";
+        $this->c = "world";
+        $this->d = "!";
+    }
 
-	function __sleep()
-	{
-		echo "__sleep called\n";
-		return array("a","c");
-	}
+    function __sleep()
+    {
+        echo "__sleep called\n";
+        return array("a","c");
+    }
 
-	function __wakeup()
-	{
-		echo "__wakeup called\n";
-	}
+    function __wakeup()
+    {
+        echo "__wakeup called\n";
+    }
 }
 
 

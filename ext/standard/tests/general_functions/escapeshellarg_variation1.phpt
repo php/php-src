@@ -8,11 +8,6 @@ if( substr(PHP_OS, 0, 3) == "WIN" )
 --FILE--
 <?php
 
-/* Prototype  : string escapeshellarg  ( string $arg  )
- * Description:  Escape a string to be used as a shell argument.
- * Source code: ext/standard/exec.c
- */
-
 echo "*** Testing escapeshellarg() : usage variations ***\n";
 
 //get an unset variable
@@ -34,7 +29,7 @@ $inputs = array(
 /*1*/  0,
        1,
        12,
-       -12,       
+       -12,
        2147483647,
 
        // float data
@@ -53,7 +48,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*17*/ "",
        '',
@@ -69,12 +64,11 @@ $inputs = array(
 // loop through each element of $inputs to check the behaviour of escapeshellarg()
 $iterator = 1;
 foreach($inputs as $input) {
-	echo "\n-- Iteration $iterator --\n";
-	var_dump(escapeshellarg($input));
-	$iterator++;
+    echo "\n-- Iteration $iterator --\n";
+    var_dump(escapeshellarg($input));
+    $iterator++;
 };
 ?>
-===Done===
 --EXPECT--
 *** Testing escapeshellarg() : usage variations ***
 
@@ -137,4 +131,3 @@ string(2) "''"
 
 -- Iteration 20 --
 string(2) "''"
-===Done===

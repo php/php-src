@@ -2,14 +2,8 @@
 Test sort() function : object functionality - sorting objects with diff. accessibility of member vars
 --FILE--
 <?php
-/* Prototype  : bool sort ( array &$array [, int $sort_flags] )
- * Description: This function sorts an array. 
-                Elements will be arranged from lowest to highest when this function has completed.
- * Source code: ext/standard/array.c
-*/
-
 /*
- * testing sort() by providing integer/string object arrays with flag values are defualt, SORT_REGULAR
+ * testing sort() by providing integer/string object arrays with flag values are default, SORT_REGULAR
 */
 
 echo "*** Testing sort() : object functionality ***\n";
@@ -19,13 +13,13 @@ class for_integer_sort
 {
   public $public_class_value;
   private $private_class_value;
-  protected $protected_class_value;   
+  protected $protected_class_value;
 
   // initializing object member value
   function __construct($value1, $value2,$value3){
     $this->public_class_value = $value1;
     $this->private_class_value = $value2;
-    $this->protected_class_value = $value3; 
+    $this->protected_class_value = $value3;
   }
 }
 
@@ -50,7 +44,7 @@ class for_string_sort
 }
 
 // array of integer objects
-$unsorted_int_obj = array( 
+$unsorted_int_obj = array(
   new for_integer_sort(11,33,30),
   new for_integer_sort(66,44,4),
   new for_integer_sort(-88,-5,5),
@@ -58,22 +52,22 @@ $unsorted_int_obj = array(
 );
 
 // array of string objects
-$unsorted_str_obj = array ( 
-  new for_string_sort("axx","AXX","ass"), 
+$unsorted_str_obj = array (
+  new for_string_sort("axx","AXX","ass"),
   new for_string_sort("t","eee","abb"),
   new for_string_sort("w","W", "c"),
   new for_string_sort("py","PY", "pt"),
 );
 
 
-echo "\n-- Testing sort() by supplying various object arrays, 'flag' value is defualt --\n";
+echo "\n-- Testing sort() by supplying various object arrays, 'flag' value is default --\n";
 
-// testing sort() function by supplying integer object array, flag value is defualt
+// testing sort() function by supplying integer object array, flag value is default
 $temp_array = $unsorted_int_obj;
 var_dump(sort($temp_array) );
 var_dump($temp_array);
 
-// testing sort() function by supplying string object array, flag value is defualt
+// testing sort() function by supplying string object array, flag value is default
 $temp_array = $unsorted_str_obj;
 var_dump(sort($temp_array) );
 var_dump($temp_array);
@@ -94,7 +88,7 @@ echo "Done\n";
 --EXPECTF--
 *** Testing sort() : object functionality ***
 
--- Testing sort() by supplying various object arrays, 'flag' value is defualt --
+-- Testing sort() by supplying various object arrays, 'flag' value is default --
 bool(true)
 array(4) {
   [0]=>

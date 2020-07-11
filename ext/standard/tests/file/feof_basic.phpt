@@ -1,15 +1,9 @@
 --TEST--
-Test feof() function : basic functionality 
+Test feof() function : basic functionality
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
-/* Prototype  : proto bool feof(resource fp)
- * Description: Test for end-of-file on a file pointer 
- * Source code: ext/standard/file.c
- * Alias to functions: gzeof
- */
-
 echo "*** Testing feof() : basic functionality ***\n";
 $tmpFile1 = __FILE__.".tmp1";
 $h = fopen($tmpFile1, 'wb');
@@ -31,7 +25,7 @@ while (!feof($h)) {
    $lastline = fgets($h);
 }
 echo $previousLine;
-var_dump($lastline); // this should be false 
+var_dump($lastline); // this should be false
 fclose($h);
 
 $tmpFile2 = __FILE__.".tmp2";
@@ -64,13 +58,17 @@ var_dump(feof($h));
 
 echo "*** closing file, testing eof ***\n";
 fclose($h);
-feof($h);
+try {
+    feof($h);
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 unlink($tmpFile1);
 unlink($tmpFile2);
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing feof() : basic functionality ***
 
 *** testing reading complete file using feof to stop ***
@@ -96,6 +94,5 @@ bool(false)
 *** testing feof after a seek passed the end ***
 bool(false)
 *** closing file, testing eof ***
-
-Warning: feof(): supplied resource is not a valid stream resource in %s on line %d
+feof(): supplied resource is not a valid stream resource
 Done

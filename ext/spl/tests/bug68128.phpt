@@ -21,13 +21,13 @@ foreach ($rRegexIterator as $key1 => $value1) {
         // print all children
         echo "Children: ";
         foreach ($rRegexIterator->getChildren() as $key => $value) {
-			print_r($value);
+            print_r($value);
         }
         echo "\n";
     } else {
         echo "No children ";
-		print_r($value1);
-		echo "\n";
+        print_r($value1);
+        echo "\n";
     }
 }
 
@@ -88,4 +88,3 @@ Array
         )
 
 )
-

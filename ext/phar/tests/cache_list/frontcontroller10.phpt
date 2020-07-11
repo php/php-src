@@ -20,6 +20,6 @@ Status: 403 Access Denied
   <title>Access Denied</title>
  </head>
  <body>
-  <h1>403 - File /hi Access Denied</h1>
+  <h1>403 - File Access Denied</h1>
  </body>
 </html>

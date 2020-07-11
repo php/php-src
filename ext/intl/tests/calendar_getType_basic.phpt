@@ -16,8 +16,6 @@ VAR_DUMP($intlcal->getType());
 $intlcal = IntlCalendar::createInstance(null, "nl_NL@calendar=hebrew");
 VAR_DUMP(intlcal_get_type($intlcal));
 ?>
-==DONE==
 --EXPECT--
 string(9) "gregorian"
-string(6) "hebrew"
-==DONE==
+string(6) "hebrew"

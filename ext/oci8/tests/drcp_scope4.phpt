@@ -7,8 +7,8 @@ oci8.old_oci_close_semantics=0
 --FILE--
 <?php
 
-require dirname(__FILE__)."/drcp_functions.inc";
-require dirname(__FILE__)."/details.inc";
+require __DIR__."/drcp_functions.inc";
+require __DIR__."/details.inc";
 
 // The default expected behavior of this test is different between PHP
 // 5.2 and PHP 5.3
@@ -35,16 +35,16 @@ function2($user,$password,$dbase);
 
 function function1($user,$password,$dbase)
 {
-	var_dump($c = oci_pconnect($user,$password,$dbase));
-	drcp_update_table($c);
+    var_dump($c = oci_pconnect($user,$password,$dbase));
+    drcp_update_table($c);
 }
 
 // This is the second scope
 
 function function2($user,$password,$dbase)
 {
-	var_dump($c = oci_pconnect($user,$password,$dbase));
-	drcp_select_value($c);
+    var_dump($c = oci_pconnect($user,$password,$dbase));
+    drcp_select_value($c);
 }
 
 drcp_drop_table($c);

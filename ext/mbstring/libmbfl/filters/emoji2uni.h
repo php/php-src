@@ -1224,4 +1224,3 @@ static const unsigned short mb_tbl_uni_sb2code5_val[] = { // 0xfe4c5 - 0xfee7d
 	0x285F,	0x2860,	0x2861,	};
 
 static const unsigned short mb_tbl_uni_sb2code5_len = sizeof(mb_tbl_uni_sb2code5_key)/sizeof(unsigned short);
-

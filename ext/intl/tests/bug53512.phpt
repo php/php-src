@@ -10,13 +10,13 @@ if (PHP_INT_SIZE != 8) die('skip 64-bit only');
 $badvals = array(4294901761, 2147483648, -2147483648, -1);
 
 foreach ($badvals as $val) {
-	$x = numfmt_create("en", NumberFormatter::PATTERN_DECIMAL);
-	var_dump(numfmt_set_symbol($x, $val, ""));
-	var_dump(intl_get_error_message());
+    $x = numfmt_create("en", NumberFormatter::PATTERN_DECIMAL);
+    var_dump(numfmt_set_symbol($x, $val, ""));
+    var_dump(intl_get_error_message());
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(false)
 string(65) "numfmt_set_symbol: invalid symbol value: U_ILLEGAL_ARGUMENT_ERROR"
 bool(false)

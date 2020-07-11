@@ -4,7 +4,7 @@ targetNamespace="http://www.example.com/"
 xmlns:tns="http://www.example.com/"
 xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
 xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/">          
+xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/">
     <wsdl:types>
 
        <xsd:schema targetNamespace="http://www.example.com/"
@@ -13,7 +13,7 @@ xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/">
               <xsd:complexType>
               <xsd:all>
               <xsd:element name="id" type="xsd:integer"/>
-              
+
               </xsd:all>
               </xsd:complexType>
               </xsd:element>
@@ -42,7 +42,7 @@ xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/">
               </xsd:element>
        </xsd:schema>
 
-       
+
     </wsdl:types>
 
     <wsdl:message name="GetProductsRequest">

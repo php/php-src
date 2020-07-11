@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -46,6 +44,10 @@ void dateformat_register_constants( INIT_FUNC_ARGS )
 	DATEFORMATTER_EXPOSE_CLASS_CONST( MEDIUM );
 	DATEFORMATTER_EXPOSE_CLASS_CONST( SHORT );
 	DATEFORMATTER_EXPOSE_CLASS_CONST( NONE );
+	DATEFORMATTER_EXPOSE_CUSTOM_CLASS_CONST( "RELATIVE_FULL", UDAT_FULL_RELATIVE );
+	DATEFORMATTER_EXPOSE_CUSTOM_CLASS_CONST( "RELATIVE_LONG", UDAT_LONG_RELATIVE );
+	DATEFORMATTER_EXPOSE_CUSTOM_CLASS_CONST( "RELATIVE_MEDIUM", UDAT_MEDIUM_RELATIVE );
+	DATEFORMATTER_EXPOSE_CUSTOM_CLASS_CONST( "RELATIVE_SHORT", UDAT_SHORT_RELATIVE );
 
 /*
 	DATEFORMATTER_EXPOSE_CUSTOM_CLASS_CONST( "GREGORIAN", DATEF_GREGORIAN );
@@ -64,11 +66,7 @@ void dateformat_register_constants( INIT_FUNC_ARGS )
 }
 /* }}} */
 
-/* {{{ proto int IntlDateFormatter::getErrorCode()
- * Get formatter's last error code. }}} */
-/* {{{ proto int datefmt_get_error_code( IntlDateFormatter $nf )
- * Get formatter's last error code.
- */
+/* {{{ Get formatter's last error code. */
 PHP_FUNCTION( datefmt_get_error_code )
 {
 	DATE_FORMAT_METHOD_INIT_VARS;
@@ -77,9 +75,7 @@ PHP_FUNCTION( datefmt_get_error_code )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, IntlDateFormatter_ce_ptr ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"datefmt_get_error_code: unable to parse input params", 0 );
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	dfo = Z_INTL_DATEFORMATTER_P( object );
@@ -89,11 +85,7 @@ PHP_FUNCTION( datefmt_get_error_code )
 }
 /* }}} */
 
-/* {{{ proto string IntlDateFormatter::getErrorMessage( )
- * Get text description for formatter's last error code. }}} */
-/* {{{ proto string datefmt_get_error_message( IntlDateFormatter $coll )
- * Get text description for formatter's last error code.
- */
+/* {{{ Get text description for formatter's last error code. */
 PHP_FUNCTION( datefmt_get_error_message )
 {
 	zend_string *message = NULL;
@@ -103,10 +95,7 @@ PHP_FUNCTION( datefmt_get_error_message )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, IntlDateFormatter_ce_ptr ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"datefmt_get_error_message: unable to parse input params", 0 );
-
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	dfo = Z_INTL_DATEFORMATTER_P( object );

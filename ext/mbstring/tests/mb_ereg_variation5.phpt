@@ -7,11 +7,6 @@ function_exists('mb_ereg') or die("skip mb_ereg() is not available in this build
 ?>
 --FILE--
 <?php
-/* Prototype  : int mb_ereg(string $pattern, string $string [, array $registers])
- * Description: Regular expression match for multibyte string
- * Source code: ext/mbstring/php_mbregex.c
- */
-
 /*
  * Test mb_ereg with anchors (start and end of string) in $pattern
  */
@@ -20,10 +15,10 @@ echo "*** Testing mb_ereg() : usage variations ***\n";
 
 mb_regex_encoding('utf-8');
 
-$string_ascii = b'This is an English string. 0123456789.';
+$string_ascii = 'This is an English string. 0123456789.';
 $string_mb = base64_decode('5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII=');
 
-$regex = b'^.*?[[:blank:]]?[[:punct:][:digit:]]+\.?$';
+$regex = '^.*?[[:blank:]]?[[:punct:][:digit:]]+\.?$';
 
 echo "\nASCII String without \$regs arg:\t\t";
 var_dump(mb_ereg($regex, $string_ascii));
@@ -45,23 +40,23 @@ echo "Done";
  * @param array $regs
  */
 function base64_encode_var_dump($regs) {
-	if ($regs) {
-		echo "array(" . count($regs) . ") {\n";
-		foreach ($regs as $key => $value) {
-			echo "  [$key]=>\n  ";
-			if (is_string($value)) {
-				var_dump(base64_encode($value));
-			} else {
-				var_dump($value);
-			}
-		}
-		echo "}\n";
-	} else {
-		echo "NULL\n";
-	}
+    if ($regs) {
+        echo "array(" . count($regs) . ") {\n";
+        foreach ($regs as $key => $value) {
+            echo "  [$key]=>\n  ";
+            if (is_string($value)) {
+                var_dump(base64_encode($value));
+            } else {
+                var_dump($value);
+            }
+        }
+        echo "}\n";
+    } else {
+        echo "NULL\n";
+    }
 }
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing mb_ereg() : usage variations ***
 
 ASCII String without $regs arg:		int(1)

@@ -5,7 +5,7 @@ Bug #51291 (oci_error() doesn't report last error when called two times)
 --FILE--
 <?php
 
-require(dirname(__FILE__).'/connect.inc');
+require(__DIR__.'/connect.inc');
 
 echo "Test 1 - Parse\n";
 
@@ -20,16 +20,16 @@ echo "\nTest 2 - Parse\n";
 
 $s = @oci_parse($c, "select ' from dual");
 if (!$s) {
-    var_dump(oci_error(), oci_error($c), oci_error($s));
+    var_dump(oci_error(), oci_error($c));
     echo "2nd call\n";
-    var_dump(oci_error(), oci_error($c), oci_error($s));
+    var_dump(oci_error(), oci_error($c));
 }
 
 echo "\nTest 3 - Execute\n";
 
 $s = @oci_parse($c, 'select doesnotexist from dual');
 $r = @oci_execute($s, OCI_DEFAULT);
-if (!$r) { 
+if (!$r) {
     var_dump(oci_error($s));
     echo "2nd call\n";
     var_dump(oci_error($s));
@@ -39,7 +39,7 @@ echo "\nTest 4 - Execute - consecutive oci_error calls of different kinds\n";
 
 $s = @oci_parse($c, 'select doesnotexist from dual');
 $r = @oci_execute($s, OCI_DEFAULT);
-if (!$r) { 
+if (!$r) {
     var_dump(oci_error(), oci_error($c), oci_error($s));
     echo "2nd call\n";
     var_dump(oci_error(), oci_error($c), oci_error($s));
@@ -50,7 +50,7 @@ echo "\nTest 5 - Execute - after oci_rollback\n";
 
 $s = @oci_parse($c, 'select doesnotexist from dual');
 $r = @oci_execute($s, OCI_DEFAULT);
-if (!$r) { 
+if (!$r) {
     var_dump(oci_error(), oci_error($c), oci_error($s));
     $r = oci_rollback($c);
     echo "Rollback status is ";
@@ -68,7 +68,7 @@ echo "\nTest 6 - Execute - after successful 2nd query with new handle\n";
 
 $s = @oci_parse($c, 'select doesnotexist from dual');
 $r = @oci_execute($s, OCI_DEFAULT);
-if (!$r) { 
+if (!$r) {
     var_dump(oci_error(), oci_error($c), oci_error($s));
     $s2 = oci_parse($c, 'select 1 from dual');
     $r = oci_execute($s2, OCI_DEFAULT);
@@ -87,7 +87,7 @@ echo "\nTest 7 - Execute - after successful 2nd query with same handle\n";
 
 $s = @oci_parse($c, 'select doesnotexist from dual');
 $r = @oci_execute($s, OCI_DEFAULT);
-if (!$r) { 
+if (!$r) {
     var_dump(oci_error(), oci_error($c), oci_error($s));
     $s = oci_parse($c, 'select 1 from dual');
     $r = oci_execute($s, OCI_DEFAULT);
@@ -106,7 +106,7 @@ echo "\nTest 8 - Execute - after unsuccessful 2nd query with new handle\n";
 
 $s = @oci_parse($c, 'select doesnotexist from dual');
 $r = @oci_execute($s, OCI_DEFAULT);
-if (!$r) { 
+if (!$r) {
     var_dump(oci_error(), oci_error($c), oci_error($s));
     $s2 = oci_parse($c, 'select reallynothere from dual');
     $r = oci_execute($s2, OCI_DEFAULT);
@@ -124,7 +124,7 @@ echo "\nTest 9 - Execute - after unsuccessful 2nd query with same handle\n";
 
 $s = @oci_parse($c, 'select doesnotexist from dual');
 $r = @oci_execute($s, OCI_DEFAULT);
-if (!$r) { 
+if (!$r) {
     var_dump(oci_error(), oci_error($c), oci_error($s));
     $s = oci_parse($c, 'select reallynothere from dual');
     $r = oci_execute($s, OCI_DEFAULT);
@@ -139,8 +139,6 @@ if (!$r) {
 }
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 Test 1 - Parse
 array(4) {
@@ -166,8 +164,6 @@ array(4) {
 }
 
 Test 2 - Parse
-
-Warning: oci_error() expects parameter 1 to be resource, boolean given in %sbug51291_1.php on line %d
 bool(false)
 array(4) {
   ["code"]=>
@@ -179,10 +175,7 @@ array(4) {
   ["sqltext"]=>
   string(0) ""
 }
-NULL
 2nd call
-
-Warning: oci_error() expects parameter 1 to be resource, boolean given in %sbug51291_1.php on line %d
 bool(false)
 array(4) {
   ["code"]=>
@@ -194,7 +187,6 @@ array(4) {
   ["sqltext"]=>
   string(0) ""
 }
-NULL
 
 Test 3 - Execute
 array(4) {
@@ -391,4 +383,3 @@ array(4) {
   ["sqltext"]=>
   string(30) "select reallynothere from dual"
 }
-===DONE===

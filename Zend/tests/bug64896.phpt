@@ -7,18 +7,18 @@ zend.enable_gc=1
 $bar = NULL;
 class bad
 {
-	private $_private = array();
+    private $_private = array();
 
-	public function __construct()
-	{
-		$this->_private[] = 'php';
-	}
+    public function __construct()
+    {
+        $this->_private[] = 'php';
+    }
 
-	public function __destruct()
-	{
-		global $bar;
-		$bar = $this;
-	}
+    public function __destruct()
+    {
+        global $bar;
+        $bar = $this;
+    }
 }
 
 $foo = new stdclass;
@@ -29,7 +29,7 @@ gc_disable();
 
 unserialize(serialize($foo));
 gc_collect_cycles();
-var_dump($bar); 
+var_dump($bar);
 gc_enable();
 /*  will output:
 object(bad)#4 (1) {

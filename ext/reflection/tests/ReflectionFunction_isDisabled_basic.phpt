@@ -3,15 +3,22 @@ ReflectionFunction::isDisabled
 --CREDITS--
 Stefan Koopmanschap <stefan@phpgg.nl>
 TestFest PHP|Tek
---SKIPIF--
-<?php
-if (!extension_loaded('reflection')) print 'skip';
-?>
 --INI--
 disable_functions=is_file
---FILE-- 
+--FILE--
 <?php
-$rc = new ReflectionFunction('is_file');
-var_dump($rc->isDisabled());
+try {
+    $rf = new ReflectionFunction('is_file');
+    var_dump($rf->isDisabled());
+} catch (ReflectionException $e) {
+    echo $e->getMessage(), "\n";
+}
+
+$rf = new ReflectionFunction('is_string');
+var_dump($rf->isDisabled());
+?>
 --EXPECTF--
-bool(true)
+Function is_file() does not exist
+
+Deprecated: Method ReflectionFunction::isDisabled() is deprecated in %s on line %d
+bool(false)

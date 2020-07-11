@@ -1,12 +1,7 @@
 --TEST--
-Test ord() function : basic functionality 
+Test ord() function : basic functionality
 --FILE--
 <?php
-
-/* Prototype  : int ord  ( string $string  )
- * Description: Return ASCII value of character
- * Source code: ext/standard/string.c
-*/
 
 echo "*** Testing ord() : basic functionality ***\n";
 
@@ -24,13 +19,12 @@ var_dump(ord("Hello"));
 
 // Make sure all valid ascii chars round trip
 for ($i = 0; $i < 255; $i++) {
-	if (ord(chr($i)) != $i) {
-		exit("TEST FAILED: $i does not round trip\n");
-	} 	
+    if (ord(chr($i)) != $i) {
+        exit("TEST FAILED: $i does not round trip\n");
+    }
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing ord() : basic functionality ***
 int(97)
@@ -44,4 +38,3 @@ int(10)
 int(10)
 int(255)
 int(72)
-===DONE===

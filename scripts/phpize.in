@@ -9,11 +9,12 @@ includedir="`eval echo @includedir@`/php"
 builddir="`pwd`"
 SED="@SED@"
 
-FILES_BUILD="mkdep.awk scan_makefile_in.awk shtool libtool.m4"
-FILES="acinclude.m4 Makefile.global config.sub config.guess ltmain.sh run-tests*.php"
-CLEAN_FILES="$FILES *.o *.lo *.la .deps .libs/ build/ modules/ install-sh \
-	mkinstalldirs missing config.nice config.sub config.guess configure configure.in \
-	aclocal.m4 config.h config.h.in conftest* ltmain.sh libtool config.cache autom4te.cache/ \
+FILES_BUILD="php.m4 shtool libtool.m4 ax_check_compile_flag.m4 ax_gcc_func_attribute.m4 php_cxx_compile_stdcxx.m4 pkg.m4 \
+    config.guess config.sub ltmain.sh Makefile.global gen_stub.php"
+FILES="run-tests*.php"
+CLEAN_FILES="$FILES *.o *.lo *.la .libs/ build/ modules/ \
+	config.nice configure configure.ac \
+	config.h config.h.in conftest* libtool config.cache autom4te.cache/ \
 	config.log config.status Makefile Makefile.fragments Makefile.objects confdefs.h \
 	run-tests*.php tests/*.diff tests/*.exp tests/*.log tests/*.out tests/*.php"
 
@@ -31,7 +32,7 @@ phpize_no_configm4()
 
   echo "Cannot find config.m4. "
   echo "Make sure that you run '$0$clean' in the top level source directory of the module"
-  echo 
+  echo
 }
 
 phpize_clean()
@@ -107,8 +108,8 @@ phpize_check_shtool()
 
   if test ! -x "$builddir/build/shtool"; then
     cat <<EOF
-shtool at '$builddir/build/shtool' does not exist or is not executable. 
-Make sure that the file exists and is executable and then rerun this script. 
+shtool at '$builddir/build/shtool' does not exist or is not executable.
+Make sure that the file exists and is executable and then rerun this script.
 
 EOF
     exit 1
@@ -121,7 +122,7 @@ phpize_check_autotools()
 {
   test -z "$PHP_AUTOCONF" && PHP_AUTOCONF=autoconf
   test -z "$PHP_AUTOHEADER" && PHP_AUTOHEADER=autoheader
-  
+
   if test ! -x "$PHP_AUTOCONF" && test ! -x "`$php_shtool path $PHP_AUTOCONF`"; then
     cat <<EOF
 Cannot find autoconf. Please check your autoconf installation and the
@@ -143,28 +144,31 @@ EOF
 phpize_copy_files()
 {
   test -d build || mkdir build
- 
+
   (cd "$phpdir" && cp $FILES_BUILD "$builddir"/build)
   (cd "$phpdir" && cp $FILES "$builddir")
-  (cd "$builddir" && cat acinclude.m4 ./build/libtool.m4 > aclocal.m4)
 }
 
 phpize_replace_prefix()
 {
   $SED \
   -e "s#@prefix@#$prefix#" \
-  < "$phpdir/phpize.m4" > configure.in
+  < "$phpdir/phpize.m4" > configure.ac
 }
 
 phpize_autotools()
 {
+  # Remove aclocal.m4 if present. It is automatically included by autoconf but
+  # not used by the PHP build system since PHP 7.4.
+  rm -f aclocal.m4
+
   $PHP_AUTOCONF   || exit 1
   $PHP_AUTOHEADER || exit 1
 }
 
 # Main script
 
-case "$1" in 
+case "$1" in
   # Cleanup
   --clean)
     phpize_check_configm4 1
@@ -195,8 +199,6 @@ case "$1" in
      phpize_copy_files
 
      phpize_replace_prefix
-
-     touch install-sh mkinstalldirs missing
 
      phpize_check_shtool
 

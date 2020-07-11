@@ -2,11 +2,6 @@
 Test natcasesort() function : usage variations - position of internal array pointer
 --FILE--
 <?php
-/* Prototype  : bool natcasesort(array &$array_arg)
- * Description: Sort an array using case-insensitive natural sort
- * Source code: ext/standard/array.c
- */
-
 /*
  * Check position of internal array pointer after calling natcasesort()
  */
@@ -27,8 +22,7 @@ echo key($array_arg) . " => " . current ($array_arg) . "\n";
 
 echo "Done";
 ?>
-
---EXPECTF--
+--EXPECT--
 *** Testing natcasesort() : usage variations ***
 
 -- Initial Position of Internal Pointer: --

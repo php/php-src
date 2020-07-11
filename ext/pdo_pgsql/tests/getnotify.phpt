@@ -1,16 +1,16 @@
 --TEST--
 PDO PgSQL LISTEN/NOTIFY support
 --SKIPIF--
-<?php # vim:se ft=php:
+<?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_pgsql')) die('skip not loaded');
-require dirname(__FILE__) . '/config.inc';
-require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
+require __DIR__ . '/config.inc';
+require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
 PDOTest::skip();
 ?>
 --FILE--
 <?php
-require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
-$db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
+require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
+$db = PDOTest::test_factory(__DIR__ . '/common.phpt');
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 // pgsqlGetPid should return something meaningful
@@ -71,7 +71,7 @@ var_dump($db->pgsqlGetNotify());
 $t = microtime(1);
 $notify = $db->pgsqlGetNotify(PDO::FETCH_ASSOC, 1000);
 $diff = microtime(1) - $t;
-var_dump($diff >= 1 || 1 - abs($diff) < .01);
+var_dump($diff >= 1 || 1 - abs($diff) < .05);
 var_dump($notify);
 
 // Test second parameter, should return immediately because a notify is queued
@@ -79,7 +79,7 @@ $db->exec("NOTIFY notifies_phpt");
 $t = microtime(1);
 $notify = $db->pgsqlGetNotify(PDO::FETCH_ASSOC, 5000);
 $diff = microtime(1) - $t;
-var_dump($diff < 1 || abs(1 - abs($diff)) < .01);
+var_dump($diff < 1 || abs(1 - abs($diff)) < .05);
 var_dump(count($notify));
 
 ?>

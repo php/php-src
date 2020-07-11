@@ -5,7 +5,7 @@ oci_define_by_name() on partial number of columns
 --FILE--
 <?php
 
-require(dirname(__FILE__)."/connect.inc");
+require(__DIR__."/connect.inc");
 
 // Initialize
 
@@ -30,19 +30,23 @@ oci_execute($stmt);
 echo "Test 2\n";
 
 while (oci_fetch($stmt)) {
-	var_dump(oci_result($stmt, 'VALUE'));
-	var_dump($string);
-	var_dump(oci_result($stmt, 'STRING'));
-	var_dump($string);
-	var_dump(oci_result($stmt, 'VALUE'));
-	var_dump(oci_result($stmt, 'STRING'));
+    var_dump(oci_result($stmt, 'VALUE'));
+    var_dump($string);
+    var_dump(oci_result($stmt, 'STRING'));
+    var_dump($string);
+    var_dump(oci_result($stmt, 'VALUE'));
+    var_dump(oci_result($stmt, 'STRING'));
 }
 
 echo "Test 3\n";
 var_dump(oci_free_statement($stmt));
 var_dump($string);
-var_dump(oci_result($stmt, 'STRING'));
 
+try {
+    var_dump(oci_result($stmt, 'STRING'));
+} catch(\TypeError $exception) {
+    var_dump($exception->getMessage());
+}
 // Cleanup
 
 $stmtarray = array(
@@ -67,8 +71,5 @@ string(4) "some"
 Test 3
 bool(true)
 string(4) "some"
-
-Warning: oci_result(): supplied resource is not a valid oci8 statement resource in %s on line %d
-bool(false)
+string(%d) "oci_result(): supplied resource is not a valid oci8 statement resource"
 Done
-

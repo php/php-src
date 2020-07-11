@@ -15,13 +15,8 @@ var_dump(apache_response_headers());
 PHP
 );
 
-list($host, $port) = explode(':', PHP_CLI_SERVER_ADDRESS);
-$port = intval($port)?:80;
-
-$fp = fsockopen($host, $port, $errno, $errstr, 0.5);
-if (!$fp) {
-  die("connect failed");
-}
+$host = PHP_CLI_SERVER_HOSTNAME;
+$fp = php_cli_server_connect();
 
 if(fwrite($fp, <<<HEADER
 GET / HTTP/1.1

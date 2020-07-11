@@ -12,8 +12,7 @@ $xml = '
 $obj = simplexml_load_string($xml);
 print_r(get_object_vars($obj));
 ?>
-===DONE===
---EXPECT--	
+--EXPECT--
 Array
 (
     [@attributes] => Array
@@ -23,4 +22,3 @@ Array
 
     [key] => value
 )
-===DONE===

@@ -2,11 +2,6 @@
 Test vfprintf) function : basic functionality - hexadecimal format
 --FILE--
 <?php
-/* Prototype  : int vfprintf  ( resource $handle  , string $format , array $args  )
- * Description: Write a formatted string to a stream
- * Source code: ext/standard/formatted_print.c
-*/
-
 echo "*** Testing vfprintf) : basic functionality - using hexadecimal format ***\n";
 
 // Initialising different format strings
@@ -24,7 +19,7 @@ $arg2 = array(11,132);
 $arg3 = array(11,132,177);
 
 /* creating dumping file */
-$data_file = dirname(__FILE__) . '/vfprintf_basic9.txt';
+$data_file = __DIR__ . '/vfprintf_basic9.txt';
 if (!($fp = fopen($data_file, 'wt')))
    return;
 
@@ -48,7 +43,6 @@ print_r(file_get_contents($data_file));
 
 unlink($data_file);
 ?>
-===DONE===
 --EXPECT--
 *** Testing vfprintf) : basic functionality - using hexadecimal format ***
 b
@@ -57,4 +51,3 @@ b 84
 B 84
 b 84 b1
 B 84 B1
-===DONE===

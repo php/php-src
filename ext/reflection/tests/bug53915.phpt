@@ -4,8 +4,8 @@ Bug #53915 - ReflectionClass::getConstant(s) emits fatal error on selfreferencin
 <?php
 Class Foo
 {
-	const A = 1;
-	const B = self::A;
+    const A = 1;
+    const B = self::A;
 }
 
 $rc = new ReflectionClass('Foo');

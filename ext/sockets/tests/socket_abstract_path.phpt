@@ -28,8 +28,8 @@ socket_connect($clients, $path) or die("Error connecting");
 $conns = socket_accept($servers) or die("Could not accept connection");
 
 $r = socket_sendmsg($clients, [
-	//"name" => [ "addr" => $path, ],
-	"iov" => ["test ", "thing", "\n"],
+    //"name" => [ "addr" => $path, ],
+    "iov" => ["test ", "thing", "\n"],
 ], 0);
 var_dump($r);
 checktimeout($conns, 500);
@@ -37,7 +37,7 @@ checktimeout($conns, 500);
 if (!socket_recv($conns, $buf, 20, 0)) die("recv");
 print_r($buf);
 ?>
---EXPECTF--
+--EXPECT--
 creating server socket
 creating client socket
 int(11)

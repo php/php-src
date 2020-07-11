@@ -14,10 +14,8 @@ var_dump(IntlTimeZone::getCanonicalID('GMT +01:25', $isSystemId));
 var_dump($isSystemId);
 
 ?>
-==DONE==
 --EXPECT--
 string(13) "Europe/Lisbon"
 bool(true)
 string(0) ""
 bool(false)
-==DONE==

@@ -4,18 +4,12 @@ Bug #70470 (Built-in server truncates headers spanning over TCP packets)
 <?php
 include "skipif.inc";
 ?>
---XFAIL--
-bug is not fixed yet
 --FILE--
 <?php
 include "php_cli_server.inc";
 php_cli_server_start("var_dump(getAllheaders());");
 
-$fp = fsockopen(PHP_CLI_SERVER_HOSTNAME, PHP_CLI_SERVER_PORT, $errno, $errmsg, 0.5);
-
-if (!$fp) {
-	die("connect failed: " . $errmsg);
-}
+$fp = php_cli_server_connect();
 
 fwrite($fp, "GET / HTTP/1.1\r\n");
 fwrite($fp, "Host: " . PHP_CLI_SERVER_HOSTNAME . "\r\n");
@@ -28,7 +22,7 @@ fflush($fp);
 usleep(200000);
 fwrite($fp, "se\r\n\r\n");
 while (!feof($fp)) {
-	echo fgets($fp);
+    echo fgets($fp);
 }
 fclose($fp);
 ?>

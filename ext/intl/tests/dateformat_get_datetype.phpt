@@ -12,26 +12,26 @@ datefmt_get_datetype_code()
 
 function ut_main()
 {
-	$datetype_arr = array (
-		IntlDateFormatter::FULL,
-		IntlDateFormatter::LONG,
-		IntlDateFormatter::MEDIUM,
-		IntlDateFormatter::SHORT,
-		IntlDateFormatter::NONE
-	);
-	
-	$res_str = '';
+    $datetype_arr = array (
+        IntlDateFormatter::FULL,
+        IntlDateFormatter::LONG,
+        IntlDateFormatter::MEDIUM,
+        IntlDateFormatter::SHORT,
+        IntlDateFormatter::NONE
+    );
 
-	foreach( $datetype_arr as $datetype_entry )
-	{
-		$res_str .= "\nCreating IntlDateFormatter with date_type = $datetype_entry";
-		$fmt = ut_datefmt_create( "de-DE",  $datetype_entry , IntlDateFormatter::SHORT,'America/Los_Angeles', IntlDateFormatter::GREGORIAN  );
-		$date_type = ut_datefmt_get_datetype( $fmt);
-		$res_str .= "\nAfter call to get_datetype :  datetype= $date_type";
-		$res_str .= "\n";
-	}
+    $res_str = '';
 
-	return $res_str;
+    foreach( $datetype_arr as $datetype_entry )
+    {
+        $res_str .= "\nCreating IntlDateFormatter with date_type = $datetype_entry";
+        $fmt = ut_datefmt_create( "de-DE",  $datetype_entry , IntlDateFormatter::SHORT,'America/Los_Angeles', IntlDateFormatter::GREGORIAN  );
+        $date_type = ut_datefmt_get_datetype( $fmt);
+        $res_str .= "\nAfter call to get_datetype :  datetype= $date_type";
+        $res_str .= "\n";
+    }
+
+    return $res_str;
 
 }
 

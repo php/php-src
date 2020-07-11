@@ -2,11 +2,6 @@
 Test printf() function : usage variations - unexpected values for format argument
 --FILE--
 <?php
-/* Prototype  : int printf  ( string $format  [, mixed $args  [, mixed $...  ]] )
- * Description: Produces output according to format .
- * Source code: ext/standard/formatted_print.c
- */
-
 /*
 * Testing printf() : with different unexpected values for format argument other than the strings
 */
@@ -35,50 +30,50 @@ $file_handle = fopen(__FILE__, 'r');
 //array of values to iterate over
 $values = array(
 
-		  // int data
+          // int data
 /*1*/	  0,
-	      1,
-	      12345,
-	      -2345,
-	
-	      // float data
+          1,
+          12345,
+          -2345,
+
+          // float data
 /*5*/      10.5,
-	      -10.5,
-	      10.1234567e10,
-	      10.7654321E-10,
-	      .5,
-	
-	      // array data
+          -10.5,
+          10.1234567e10,
+          10.7654321E-10,
+          .5,
+
+          // array data
 /*10*/    array(),
-	      array(0),
-	      array(1),
-	      array(1, 2),
-	      array('color' => 'red', 'item' => 'pen'),
-	
-	      // null data
+          array(0),
+          array(1),
+          array(1, 2),
+          array('color' => 'red', 'item' => 'pen'),
+
+          // null data
 /*15*/    NULL,
-	      null,
-	
-	      // boolean data
+          null,
+
+          // boolean data
 /*17*/    true,
-	      false,
-	      TRUE,
-	      FALSE,
-	
-	      // empty data
+          false,
+          TRUE,
+          FALSE,
+
+          // empty data
 /*21*/    "",
-	      '',
-	
-	      // object data
+          '',
+
+          // object data
 /*23*/    new sample(),
-	
-	      // undefined data
+
+          // undefined data
 /*24*/    @$undefined_var,
-	
-	      // unset data
+
+          // unset data
 /*25*/    @$unset_var,
-	
-	      // resource data
+
+          // resource data
 /*26*/    $file_handle
 );
 
@@ -87,21 +82,33 @@ $values = array(
 $count = 1;
 foreach($values as $value) {
   echo "\n-- Iteration $count --\n";
-  
+
   // with default argument
-  $result = printf($value);
-  echo "\n";
-  var_dump($result);
-  
+  try {
+    $result = printf($value);
+    echo "\n";
+    var_dump($result);
+  } catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+  }
+
   // with two arguments
-  $result = printf($value, $arg1);
-  echo "\n";
-  var_dump($result);
+  try {
+    $result = printf($value, $arg1);
+    echo "\n";
+    var_dump($result);
+  } catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+  }
 
   // with three arguments
-  $result = printf($value, $arg1, $arg2);
-  echo "\n";
-  var_dump($result);
+  try {
+    $result = printf($value, $arg1, $arg2);
+    echo "\n";
+    var_dump($result);
+  } catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+  }
 
   $count++;
 };
@@ -110,8 +117,7 @@ foreach($values as $value) {
 fclose($file_handle);
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing printf() : with unexpected values for format argument ***
 
 -- Iteration 1 --
@@ -187,74 +193,29 @@ int(3)
 int(3)
 
 -- Iteration 10 --
-
-Notice: Array to string conversion in %s on line %d
-Array
-int(5)
-
-Notice: Array to string conversion in %s on line %d
-Array
-int(5)
-
-Notice: Array to string conversion in %s on line %d
-Array
-int(5)
+printf(): Argument #1 ($format) must be of type string, array given
+printf(): Argument #1 ($format) must be of type string, array given
+printf(): Argument #1 ($format) must be of type string, array given
 
 -- Iteration 11 --
-
-Notice: Array to string conversion in %s on line %d
-Array
-int(5)
-
-Notice: Array to string conversion in %s on line %d
-Array
-int(5)
-
-Notice: Array to string conversion in %s on line %d
-Array
-int(5)
+printf(): Argument #1 ($format) must be of type string, array given
+printf(): Argument #1 ($format) must be of type string, array given
+printf(): Argument #1 ($format) must be of type string, array given
 
 -- Iteration 12 --
-
-Notice: Array to string conversion in %s on line %d
-Array
-int(5)
-
-Notice: Array to string conversion in %s on line %d
-Array
-int(5)
-
-Notice: Array to string conversion in %s on line %d
-Array
-int(5)
+printf(): Argument #1 ($format) must be of type string, array given
+printf(): Argument #1 ($format) must be of type string, array given
+printf(): Argument #1 ($format) must be of type string, array given
 
 -- Iteration 13 --
-
-Notice: Array to string conversion in %s on line %d
-Array
-int(5)
-
-Notice: Array to string conversion in %s on line %d
-Array
-int(5)
-
-Notice: Array to string conversion in %s on line %d
-Array
-int(5)
+printf(): Argument #1 ($format) must be of type string, array given
+printf(): Argument #1 ($format) must be of type string, array given
+printf(): Argument #1 ($format) must be of type string, array given
 
 -- Iteration 14 --
-
-Notice: Array to string conversion in %s on line %d
-Array
-int(5)
-
-Notice: Array to string conversion in %s on line %d
-Array
-int(5)
-
-Notice: Array to string conversion in %s on line %d
-Array
-int(5)
+printf(): Argument #1 ($format) must be of type string, array given
+printf(): Argument #1 ($format) must be of type string, array given
+printf(): Argument #1 ($format) must be of type string, array given
 
 -- Iteration 15 --
 
@@ -345,10 +306,6 @@ int(0)
 int(0)
 
 -- Iteration 26 --
-Resource id #%d
-int(%d)
-Resource id #%d
-int(%d)
-Resource id #%d
-int(%d)
-===DONE===
+printf(): Argument #1 ($format) must be of type string, resource given
+printf(): Argument #1 ($format) must be of type string, resource given
+printf(): Argument #1 ($format) must be of type string, resource given

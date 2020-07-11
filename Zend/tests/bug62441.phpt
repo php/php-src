@@ -11,10 +11,9 @@ namespace ns {
     class Foo implements \Iface {
         function method(stdClass $o) { }
     }
-    
+
     (new Foo)->method(new \stdClass);
 }
 ?>
 --EXPECTF--
-Fatal error: Declaration of ns\Foo::method(ns\stdClass $o) must be compatible with Iface::method(stdClass $o) in %s on line %d
-
+Fatal error: Could not check compatibility between ns\Foo::method(ns\stdClass $o) and Iface::method(stdClass $o), because class ns\stdClass is not available in %s on line %d

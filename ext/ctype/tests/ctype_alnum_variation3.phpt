@@ -4,18 +4,13 @@ Test ctype_alnum() function : usage variations - different string values
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-/* Prototype  : bool ctype_alnum(mixed $c)
- * Description: Checks for alphanumeric character(s) 
- * Source code: ext/ctype/ctype.c
- */
-
 /*
  * Pass different strings to ctype_alnum to test behaviour
  */
 
 echo "*** Testing ctype_alnum() : usage variations ***\n";
 
-$orig = setlocale(LC_CTYPE, "C"); 
+$orig = setlocale(LC_CTYPE, "C");
 
 $values = array(
 /*1*/  "This string contains just letters and spaces", // Simple string
@@ -39,7 +34,7 @@ $values = array(
        'abc123\n',
 /*20*/ 'abc 123',
        '',
-       ' ', 
+       ' ',
 /*23*/ base64_decode("w4DDoMOHw6fDiMOo") // non-ascii characters
 );
 
@@ -54,8 +49,7 @@ foreach($values as $value) {
 
 setlocale(LC_CTYPE, $orig);
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ctype_alnum() : usage variations ***
 
 -- Iteration 1 --
@@ -126,4 +120,3 @@ bool(false)
 
 -- Iteration 23 --
 bool(false)
-===DONE===

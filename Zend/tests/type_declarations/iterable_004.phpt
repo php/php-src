@@ -21,5 +21,4 @@ class Bar extends Foo {
 
 ?>
 --EXPECTF--
-
-Warning: Declaration of Bar::testScalar(iterable $iterable) should be compatible with Foo::testScalar(int $int) in %s on line %d
+Fatal error: Declaration of Bar::testScalar(iterable $iterable) must be compatible with Foo::testScalar(int $int) in %s on line %d

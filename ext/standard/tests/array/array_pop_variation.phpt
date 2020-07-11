@@ -39,7 +39,7 @@ var_dump( current($mixed_array[1]) );
 
 echo"\nDone";
 ?>
---EXPECTF--
+--EXPECT--
 *** Checking for internal array pointer being reset when pop is called ***
 
 Current Element is : int(1)

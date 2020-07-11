@@ -5,31 +5,31 @@ SPL: RegexIterator::ALL_MATCHES
 
 class MyRegexIterator extends RegexIterator
 {
-	public $uk, $re;
-	
-	function __construct($it, $re, $mode, $flags = 0)
-	{
-		$this->uk = $flags & self::USE_KEY;
-		$this->re = $re;
-		parent::__construct($it, $re, $mode, $flags);
-	}
+    public $uk, $re;
 
-	function show()
-	{
-		foreach($this as $k => $v)
-		{
-			var_dump($k);
-			var_dump($v);
-		}
-	}
-	
-	function accept()
-	{
-		@preg_match_all($this->re, (string)($this->uk ? $this->key() : $this->current()), $sub);
-		$ret = parent::accept();
-		var_dump($sub == $this->current());
-		return $ret;
-	}
+    function __construct($it, $re, $mode, $flags = 0)
+    {
+        $this->uk = $flags & self::USE_KEY;
+        $this->re = $re;
+        parent::__construct($it, $re, $mode, $flags);
+    }
+
+    function show()
+    {
+        foreach($this as $k => $v)
+        {
+            var_dump($k);
+            var_dump($v);
+        }
+    }
+
+    function accept()
+    {
+        @preg_match_all($this->re, (string)($this->uk ? $this->key() : $this->current()), $sub);
+        $ret = parent::accept();
+        var_dump($sub == $this->current());
+        return $ret;
+    }
 }
 
 $ar = new ArrayIterator(array('1','1,2','1,2,3','',NULL,array(),'FooBar',',',',,'));
@@ -42,8 +42,6 @@ $it->show();
 var_dump($ar);
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 bool(true)
 bool(true)
@@ -174,4 +172,3 @@ object(ArrayIterator)#%d (1) {
     %s(2) ",,"
   }
 }
-===DONE===

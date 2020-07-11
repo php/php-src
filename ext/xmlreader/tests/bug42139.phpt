@@ -1,9 +1,7 @@
 --TEST--
 Bug #42139 (XMLReader option constants are broken using XML())
 --SKIPIF--
-<?php if (!extension_loaded("xmlreader")) print "skip";
-if (LIBXML_VERSION < 20628) die("skip: libxml2 2.6.28+ required");
-?>
+<?php if (!extension_loaded("xmlreader")) print "skip"; ?>
 --FILE--
 <?php
 
@@ -24,7 +22,7 @@ while ( $reader->read() ) {
 $reader->close();
 
 ?>
---EXPECT--	
+--EXPECT--
 10, root, 
 1, root, 
 3, #text, y

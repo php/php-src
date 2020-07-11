@@ -10,13 +10,13 @@ phar.readonly=0
 
 try {
 for ($i = 0; $i < 2; $i++) {
-	$fname = "DataArchive.phar";
-	$path = dirname(__FILE__) . DIRECTORY_SEPARATOR . $fname;
-	$phar = new Phar($path);
-	$phar->addFromString($i, "file $i in $fname");
-	var_dump(file_get_contents($phar[$i]));
-	unset($phar);
-	unlink($path);
+    $fname = "DataArchive.phar";
+    $path = __DIR__ . DIRECTORY_SEPARATOR . $fname;
+    $phar = new Phar($path);
+    $phar->addFromString($i, "file $i in $fname");
+    var_dump(file_get_contents($phar[$i]));
+    unset($phar);
+    unlink($path);
 }
 
 echo("\nWritten files: $i\n");
@@ -25,8 +25,6 @@ echo $e->getMessage() . "\n";
 }
 
 ?>
-===DONE===
 --EXPECTF--
 string(26) "file 0 in DataArchive.phar"
 unable to seek to start of file "0" while creating new phar "%sDataArchive.phar"
-===DONE===

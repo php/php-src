@@ -72,25 +72,25 @@ class Client
 
     /**
      * Socket
-     * @var Resource
+     * @var resource
      */
     private $_sock = null;
 
     /**
      * Host
-     * @var String
+     * @var string
      */
     private $_host = null;
 
     /**
      * Port
-     * @var Integer
+     * @var int
      */
     private $_port = null;
 
     /**
      * Keep Alive
-     * @var Boolean
+     * @var bool
      */
     private $_keepAlive = false;
 
@@ -110,27 +110,27 @@ class Client
 
     /**
      * Use persistent sockets to connect to backend
-     * @var Boolean
+     * @var bool
      */
     private $_persistentSocket = false;
 
     /**
      * Connect timeout in milliseconds
-     * @var Integer
+     * @var int
      */
     private $_connectTimeout = 5000;
 
     /**
      * Read/Write timeout in milliseconds
-     * @var Integer
+     * @var int
      */
     private $_readWriteTimeout = 5000;
 
     /**
      * Constructor
      *
-     * @param String $host Host of the FastCGI application
-     * @param Integer $port Port of the FastCGI application
+     * @param string $host Host of the FastCGI application
+     * @param int $port Port of the FastCGI application
      */
     public function __construct($host, $port)
     {
@@ -139,14 +139,24 @@ class Client
     }
 
     /**
+     * Get host.
+     *
+     * @return string
+     */
+    public function getHost()
+    {
+        return $this->_host;
+    }
+
+    /**
      * Define whether or not the FastCGI application should keep the connection
      * alive at the end of a request
      *
-     * @param Boolean $b true if the connection should stay alive, false otherwise
+     * @param bool $b true if the connection should stay alive, false otherwise
      */
     public function setKeepAlive($b)
     {
-        $this->_keepAlive = (boolean)$b;
+        $this->_keepAlive = (bool)$b;
         if (!$this->_keepAlive && $this->_sock) {
             fclose($this->_sock);
         }
@@ -155,7 +165,7 @@ class Client
     /**
      * Get the keep alive status
      *
-     * @return Boolean true if the connection should stay alive, false otherwise
+     * @return bool true if the connection should stay alive, false otherwise
      */
     public function getKeepAlive()
     {
@@ -166,12 +176,12 @@ class Client
      * Define whether or not PHP should attempt to re-use sockets opened by previous
      * request for efficiency
      *
-     * @param Boolean $b true if persistent socket should be used, false otherwise
+     * @param bool $b true if persistent socket should be used, false otherwise
      */
     public function setPersistentSocket($b)
     {
         $was_persistent = ($this->_sock && $this->_persistentSocket);
-        $this->_persistentSocket = (boolean)$b;
+        $this->_persistentSocket = (bool)$b;
         if (!$this->_persistentSocket && $was_persistent) {
             fclose($this->_sock);
         }
@@ -180,7 +190,7 @@ class Client
     /**
      * Get the pesistent socket status
      *
-     * @return Boolean true if the socket should be persistent, false otherwise
+     * @return bool true if the socket should be persistent, false otherwise
      */
     public function getPersistentSocket()
     {
@@ -191,7 +201,7 @@ class Client
     /**
      * Set the connect timeout
      *
-     * @param Integer  number of milliseconds before connect will timeout
+     * @param int  number of milliseconds before connect will timeout
      */
     public function setConnectTimeout($timeoutMs)
     {
@@ -201,7 +211,7 @@ class Client
     /**
      * Get the connect timeout
      *
-     * @return Integer  number of milliseconds before connect will timeout
+     * @return int  number of milliseconds before connect will timeout
      */
     public function getConnectTimeout()
     {
@@ -211,7 +221,7 @@ class Client
     /**
      * Set the read/write timeout
      *
-     * @param Integer  number of milliseconds before read or write call will timeout
+     * @param int  number of milliseconds before read or write call will timeout
      */
     public function setReadWriteTimeout($timeoutMs)
     {
@@ -222,7 +232,7 @@ class Client
     /**
      * Get the read timeout
      *
-     * @return Integer  number of milliseconds before read will timeout
+     * @return int  number of milliseconds before read will timeout
      */
     public function getReadWriteTimeout()
     {
@@ -232,14 +242,18 @@ class Client
     /**
      * Helper to avoid duplicating milliseconds to secs/usecs in a few places
      *
-     * @param Integer millisecond timeout
-     * @return Boolean
+     * @param int millisecond timeout
+     * @return bool
      */
     private function set_ms_timeout($timeoutMs) {
         if (!$this->_sock) {
             return false;
         }
-        return stream_set_timeout($this->_sock, floor($timeoutMs / 1000), ($timeoutMs % 1000) * 1000);
+        return stream_set_timeout(
+            $this->_sock,
+            floor($timeoutMs / 1000),
+            ($timeoutMs % 1000) * 1000
+        );
     }
 
 
@@ -250,9 +264,21 @@ class Client
     {
         if (!$this->_sock) {
             if ($this->_persistentSocket) {
-                $this->_sock = pfsockopen($this->_host, $this->_port, $errno, $errstr, $this->_connectTimeout/1000);
+                $this->_sock = pfsockopen(
+                    $this->_host,
+                    $this->_port,
+                    $errno,
+                    $errstr,
+                    $this->_connectTimeout/1000
+                );
             } else {
-                $this->_sock = fsockopen($this->_host, $this->_port, $errno, $errstr, $this->_connectTimeout/1000);
+                $this->_sock = fsockopen(
+                    $this->_host,
+                    $this->_port,
+                    $errno,
+                    $errstr,
+                    $this->_connectTimeout/1000
+                );
             }
 
             if (!$this->_sock) {
@@ -268,9 +294,10 @@ class Client
     /**
      * Build a FastCGI packet
      *
-     * @param Integer $type Type of the packet
-     * @param String $content Content of the packet
-     * @param Integer $requestId RequestId
+     * @param int $type Type of the packet
+     * @param string $content Content of the packet
+     * @param int $requestId RequestId
+     * @return string
      */
     private function buildPacket($type, $content, $requestId = 1)
     {
@@ -289,9 +316,9 @@ class Client
     /**
      * Build an FastCGI Name value pair
      *
-     * @param String $name Name
-     * @param String $value Value
-     * @return String FastCGI Name value pair
+     * @param string $name Name
+     * @param string $value Value
+     * @return string FastCGI Name value pair
      */
     private function buildNvpair($name, $value)
     {
@@ -302,14 +329,16 @@ class Client
             $nvpair = chr($nlen);
         } else {
             /* nameLengthB3 & nameLengthB2 & nameLengthB1 & nameLengthB0 */
-            $nvpair = chr(($nlen >> 24) | 0x80) . chr(($nlen >> 16) & 0xFF) . chr(($nlen >> 8) & 0xFF) . chr($nlen & 0xFF);
+            $nvpair = chr(($nlen >> 24) | 0x80) . chr(($nlen >> 16) & 0xFF)
+                . chr(($nlen >> 8) & 0xFF) . chr($nlen & 0xFF);
         }
         if ($vlen < 128) {
             /* valueLengthB0 */
             $nvpair .= chr($vlen);
         } else {
             /* valueLengthB3 & valueLengthB2 & valueLengthB1 & valueLengthB0 */
-            $nvpair .= chr(($vlen >> 24) | 0x80) . chr(($vlen >> 16) & 0xFF) . chr(($vlen >> 8) & 0xFF) . chr($vlen & 0xFF);
+            $nvpair .= chr(($vlen >> 24) | 0x80) . chr(($vlen >> 16) & 0xFF)
+                . chr(($vlen >> 8) & 0xFF) . chr($vlen & 0xFF);
         }
         /* nameData & valueData */
         return $nvpair . $name . $value;
@@ -318,7 +347,7 @@ class Client
     /**
      * Read a set of FastCGI Name value pairs
      *
-     * @param String $data Data containing the set of FastCGI NVPair
+     * @param string $data Data containing the set of FastCGI NVPair
      * @return array of NVPair
      */
     private function readNvpair($data, $length = null)
@@ -333,19 +362,19 @@ class Client
 
         while ($p != $length) {
 
-            $nlen = ord($data{$p++});
+            $nlen = ord($data[$p++]);
             if ($nlen >= 128) {
                 $nlen = ($nlen & 0x7F << 24);
-                $nlen |= (ord($data{$p++}) << 16);
-                $nlen |= (ord($data{$p++}) << 8);
-                $nlen |= (ord($data{$p++}));
+                $nlen |= (ord($data[$p++]) << 16);
+                $nlen |= (ord($data[$p++]) << 8);
+                $nlen |= (ord($data[$p++]));
             }
-            $vlen = ord($data{$p++});
+            $vlen = ord($data[$p++]);
             if ($vlen >= 128) {
                 $vlen = ($nlen & 0x7F << 24);
-                $vlen |= (ord($data{$p++}) << 16);
-                $vlen |= (ord($data{$p++}) << 8);
-                $vlen |= (ord($data{$p++}));
+                $vlen |= (ord($data[$p++]) << 16);
+                $vlen |= (ord($data[$p++]) << 8);
+                $vlen |= (ord($data[$p++]));
             }
             $array[substr($data, $p, $nlen)] = substr($data, $p+$nlen, $vlen);
             $p += ($nlen + $vlen);
@@ -357,18 +386,18 @@ class Client
     /**
      * Decode a FastCGI Packet
      *
-     * @param String $data String containing all the packet
+     * @param string $data string containing all the packet
      * @return array
      */
     private function decodePacketHeader($data)
     {
         $ret = array();
-        $ret['version']       = ord($data{0});
-        $ret['type']          = ord($data{1});
-        $ret['requestId']     = (ord($data{2}) << 8) + ord($data{3});
-        $ret['contentLength'] = (ord($data{4}) << 8) + ord($data{5});
-        $ret['paddingLength'] = ord($data{6});
-        $ret['reserved']      = ord($data{7});
+        $ret['version']       = ord($data[0]);
+        $ret['type']          = ord($data[1]);
+        $ret['requestId']     = (ord($data[2]) << 8) + ord($data[3]);
+        $ret['contentLength'] = (ord($data[4]) << 8) + ord($data[5]);
+        $ret['paddingLength'] = ord($data[6]);
+        $ret['reserved']      = ord($data[7]);
         return $ret;
     }
 
@@ -399,10 +428,11 @@ class Client
     }
 
     /**
-     * Get Informations on the FastCGI application
+     * Get Information on the FastCGI application
      *
      * @param array $requestedInfo information to retrieve
      * @return array
+     * @throws \Exception
      */
     public function getValues(array $requestedInfo)
     {
@@ -423,11 +453,14 @@ class Client
     }
 
     /**
-     * Execute a request to the FastCGI application
+     * Execute a request to the FastCGI application and return response body
      *
      * @param array $params Array of parameters
-     * @param String $stdin Content
-     * @return String
+     * @param string $stdin Content
+     * @return string
+     * @throws ForbiddenException
+     * @throws TimedOutException
+     * @throws \Exception
      */
     public function request(array $params, $stdin)
     {
@@ -436,19 +469,37 @@ class Client
     }
 
     /**
-     * Execute a request to the FastCGI application asyncronously
-     * 
+     * Execute a request to the FastCGI application and return request data
+     *
+     * @param array $params Array of parameters
+     * @param string $stdin Content
+     * @return array
+     * @throws ForbiddenException
+     * @throws TimedOutException
+     * @throws \Exception
+     */
+    public function request_data(array $params, $stdin)
+    {
+        $id = $this->async_request($params, $stdin);
+        return $this->wait_for_response_data($id);
+    }
+
+    /**
+     * Execute a request to the FastCGI application asynchronously
+     *
      * This sends request to application and returns the assigned ID for that request.
      *
      * You should keep this id for later use with wait_for_response(). Ids are chosen randomly
-     * rather than seqentially to guard against false-positives when using persistent sockets.
-     * In that case it is possible that a delayed response to a request made by a previous script 
-     * invocation comes back on this socket and is mistaken for response to request made with same ID
-     * during this request.
+     * rather than sequentially to guard against false-positives when using persistent sockets.
+     * In that case it is possible that a delayed response to a request made by a previous script
+     * invocation comes back on this socket and is mistaken for response to request made with same
+     * ID during this request.
      *
      * @param array $params Array of parameters
-     * @param String $stdin Content
-     * @return Integer
+     * @param string $stdin Content
+     * @return int
+     * @throws TimedOutException
+     * @throws \Exception
      */
     public function async_request(array $params, $stdin)
     {
@@ -457,13 +508,15 @@ class Client
         // Pick random number between 1 and max 16 bit unsigned int 65535
         $id = mt_rand(1, (1 << 16) - 1);
 
-        // Using persistent sockets implies you want them keept alive by server!
+        // Using persistent sockets implies you want them kept alive by server!
         $keepAlive = intval($this->_keepAlive || $this->_persistentSocket);
 
-        $request = $this->buildPacket(self::BEGIN_REQUEST
-                                     ,chr(0) . chr(self::RESPONDER) . chr($keepAlive) . str_repeat(chr(0), 5)
-                                     ,$id
-                                     );
+        $request = $this->buildPacket(
+            self::BEGIN_REQUEST,
+            chr(0) . chr(self::RESPONDER) . chr($keepAlive)
+            . str_repeat(chr(0), 5),
+            $id
+        );
 
         $paramsRequest = '';
         foreach ($params as $key => $value) {
@@ -494,21 +547,26 @@ class Client
 
         $this->_requests[$id] = array(
             'state' => self::REQ_STATE_WRITTEN,
-            'response' => null
+            'response' => null,
+            'err_response' => null,
+            'out_response' => null,
         );
 
         return $id;
     }
 
     /**
-     * Blocking call that waits for response to specific request
-     * 
-     * @param Integer $requestId
-     * @param Integer $timeoutMs [optional] the number of milliseconds to wait. Defaults to the ReadWriteTimeout value set.
-     * @return string  response body
+     * Blocking call that waits for response data of the specific request
+     *
+     * @param int $requestId
+     * @param int $timeoutMs [optional] the number of milliseconds to wait.
+     * @return array response data
+     * @throws ForbiddenException
+     * @throws TimedOutException
+     * @throws \Exception
      */
-    public function wait_for_response($requestId, $timeoutMs = 0) {
-
+    public function wait_for_response_data($requestId, $timeoutMs = 0)
+    {
         if (!isset($this->_requests[$requestId])) {
             throw new \Exception('Invalid request id given');
         }
@@ -531,18 +589,19 @@ class Client
         // but still not get the response requested
         $startTime = microtime(true);
 
-        do {
-            $resp = $this->readPacket();
-
+        while ($resp = $this->readPacket()) {
             if ($resp['type'] == self::STDOUT || $resp['type'] == self::STDERR) {
                 if ($resp['type'] == self::STDERR) {
                     $this->_requests[$resp['requestId']]['state'] = self::REQ_STATE_ERR;
+                    $this->_requests[$resp['requestId']]['err_response'] .= $resp['content'];
+                } else {
+                    $this->_requests[$resp['requestId']]['out_response'] .= $resp['content'];
                 }
                 $this->_requests[$resp['requestId']]['response'] .= $resp['content'];
             }
             if ($resp['type'] == self::END_REQUEST) {
                 $this->_requests[$resp['requestId']]['state'] = self::REQ_STATE_OK;
-                if ($resp['requestId'] == $requestId) { 
+                if ($resp['requestId'] == $requestId) {
                     break;
                 }
             }
@@ -551,7 +610,7 @@ class Client
                 $this->set_ms_timeout($this->_readWriteTimeout);
                 throw new \Exception('Timed out');
             }
-        } while ($resp);
+        }
 
         if (!is_array($resp)) {
             $info = stream_get_meta_data($this->_sock);
@@ -575,7 +634,7 @@ class Client
         // Reset timeout
         $this->set_ms_timeout($this->_readWriteTimeout);
 
-        switch (ord($resp['content']{4})) {
+        switch (ord($resp['content'][4])) {
             case self::CANT_MPX_CONN:
                 throw new \Exception('This app can\'t multiplex [CANT_MPX_CONN]');
                 break;
@@ -586,7 +645,22 @@ class Client
                 throw new \Exception('Role value not known [UNKNOWN_ROLE]');
                 break;
             case self::REQUEST_COMPLETE:
-                return $this->_requests[$requestId]['response'];
+                return $this->_requests[$requestId];
         }
+    }
+
+    /**
+     * Blocking call that waits for response to specific request
+     *
+     * @param int $requestId
+     * @param int $timeoutMs [optional] the number of milliseconds to wait.
+     * @return string The response content.
+     * @throws ForbiddenException
+     * @throws TimedOutException
+     * @throws \Exception
+     */
+    public function wait_for_response($requestId, $timeoutMs = 0)
+    {
+        return $this->wait_for_response_data($requestId, $timeoutMs)['response'];
     }
 }

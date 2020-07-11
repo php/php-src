@@ -14,10 +14,10 @@ Content-Disposition: form-data; name="foobar"
 var_dump($_FILES);
 var_dump($_POST);
 ?>
---EXPECTF--
+--EXPECT--
 array(0) {
 }
 array(1) {
-  [%u|b%"foobar"]=>
-  %unicode|string%(1) "1"
+  ["foobar"]=>
+  string(1) "1"
 }

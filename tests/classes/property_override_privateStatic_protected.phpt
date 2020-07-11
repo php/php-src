@@ -10,7 +10,7 @@ Redeclare inherited private static property as protected.
           echo self::$p . "\n";
       }
   }
-  
+
   class B extends A
   {
       protected $p = "B::p";
@@ -19,15 +19,15 @@ Redeclare inherited private static property as protected.
           echo $this->p . "\n";
       }
   }
-  
-  
+
+
   A::showA();
-  
+
   $b = new B;
   $b->showA();
   $b->showB();
 ?>
---EXPECTF--
+--EXPECT--
 A::p (static)
 A::p (static)
 B::p

@@ -1,16 +1,11 @@
 --TEST--
-Test krsort() function : basic functionality   
+Test krsort() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : bool krsort ( array &$array [, int $sort_flags] )
- * Description: Sort an array by key in reverse order, maintaining key to data correlation 			
- * Source code: ext/standard/array.c
-*/
-
 /*
- * Testing krsort() by providing array of integer/string values to check the basic functionality 
+ * Testing krsort() by providing array of integer/string values to check the basic functionality
  * with following flag values :
- *  1.flag value as defualt
+ *  1.flag value as default
  *  2.SORT_REGULAR - compare items normally
  *  3.SORT_NUMERIC - compare items numerically
  *  4.SORT_STRING - compare items as strings
@@ -18,22 +13,22 @@ Test krsort() function : basic functionality
 
 echo "*** Testing krsort() : basic functionality ***\n";
 
-// an array containing unsorted string values with indices  
-$unsorted_strings =   array( "lemon" => "l", "orange" => "o", "banana" => "b" ); 
+// an array containing unsorted string values with indices
+$unsorted_strings =   array( "lemon" => "l", "orange" => "o", "banana" => "b" );
 $unsorted_strings = array(
-	"l" => "lemon", "o" => "orange",
-	"O" => "Orange", "O1" => "Orange1", "o2" => "orange2", "O3" => "Orange3", "o20" => "orange20",
-	"b" => "banana",
+    "l" => "lemon", "o" => "orange",
+    "O" => "Orange", "O1" => "Orange1", "o2" => "orange2", "O3" => "Orange3", "o20" => "orange20",
+    "b" => "banana",
 );
-// an array containing unsorted numeric values with indices 
+// an array containing unsorted numeric values with indices
 $unsorted_numerics =  array( 100 => 4, 33 => 3, 555 => 2, 22 => 1 );
 
-echo "\n-- Testing krsort() by supplying string array, 'flag' value is defualt --\n";
+echo "\n-- Testing krsort() by supplying string array, 'flag' value is default --\n";
 $temp_array = $unsorted_strings;
 var_dump( krsort($temp_array) ); // expecting : bool(true)
 var_dump( $temp_array);
 
-echo "\n-- Testing krsort() by supplying numeric array, 'flag' value is defualt --\n";
+echo "\n-- Testing krsort() by supplying numeric array, 'flag' value is default --\n";
 $temp_array = $unsorted_numerics;
 var_dump( krsort($temp_array) ); // expecting : bool(true)
 var_dump( $temp_array);
@@ -75,10 +70,10 @@ var_dump( $temp_array);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing krsort() : basic functionality ***
 
--- Testing krsort() by supplying string array, 'flag' value is defualt --
+-- Testing krsort() by supplying string array, 'flag' value is default --
 bool(true)
 array(8) {
   ["o20"]=>
@@ -99,7 +94,7 @@ array(8) {
   string(6) "Orange"
 }
 
--- Testing krsort() by supplying numeric array, 'flag' value is defualt --
+-- Testing krsort() by supplying numeric array, 'flag' value is default --
 bool(true)
 array(4) {
   [555]=>

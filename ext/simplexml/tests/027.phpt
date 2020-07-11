@@ -3,7 +3,7 @@ SimpleXML: Adding an elements
 --SKIPIF--
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--
-<?php 
+<?php
 $xml =<<<EOF
 <people></people>
 EOF;
@@ -42,7 +42,6 @@ traverse_xml($people);
 $people->person[3]['gender'] = 'error';
 traverse_xml($people);
 ?>
-===DONE===
 --EXPECTF--
 <people>
 </people>
@@ -80,4 +79,3 @@ Warning: main(): Cannot add element person number 3 when only 2 such elements ex
   <person gender="error">
   </person>
 </people>
-===DONE===

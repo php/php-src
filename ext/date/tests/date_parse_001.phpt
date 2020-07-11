@@ -12,10 +12,9 @@ Test basic date_parse()
     var_dump(date_parse("03-03"));
     var_dump(date_parse("0-0"));
     var_dump(date_parse(""));
-    var_dump(date_parse(array()));
     echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--
 array(12) {
   ["year"]=>
   int(2006)
@@ -104,7 +103,7 @@ array(15) {
   ["zone_type"]=>
   int(1)
   ["zone"]=>
-  int(720)
+  int(-43200)
   ["is_dst"]=>
   bool(false)
 }
@@ -228,7 +227,7 @@ array(15) {
   ["zone_type"]=>
   int(1)
   ["zone"]=>
-  int(180)
+  int(-10800)
   ["is_dst"]=>
   bool(false)
 }
@@ -298,7 +297,4 @@ array(12) {
   ["is_localtime"]=>
   bool(false)
 }
-
-Warning: date_parse() expects parameter 1 to be string, array given in %sdate_parse_001.php on line %d
-bool(false)
 Done

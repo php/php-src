@@ -12,8 +12,8 @@ $res = ($ts == $ts2);
 var_dump($res);
 
 if (!$res) {
-	var_dump($ts);
-	var_dump($ts2);
+    var_dump($ts);
+    var_dump($ts2);
 }
 
 ?>

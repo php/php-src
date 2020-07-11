@@ -2,11 +2,6 @@
 Test vprintf() function : usage variations - unexpected values for the format argument
 --FILE--
 <?php
-/* Prototype  : string vprintf(string $format, array $args)
- * Description: Output a formatted string 
- * Source code: ext/standard/formatted_print.c
-*/
-
 /*
  * Test vprintf() when different unexpected format strings are passed to
  * the '$format' argument of the function
@@ -36,50 +31,50 @@ $file_handle = fopen(__FILE__, 'r');
 //array of values to iterate over
 $values = array(
 
-		  // int data
+          // int data
 /*1*/	  0,
-		  1,
-		  12345,
-		  -2345,
-		
-		  // float data
+          1,
+          12345,
+          -2345,
+
+          // float data
 /*5*/	  10.5,
-		  -10.5,
-		  10.1234567e10,
-		  10.7654321E-10,
-		  .5,
-		
-		  // array data
+          -10.5,
+          10.1234567e10,
+          10.7654321E-10,
+          .5,
+
+          // array data
 /*10*/	  array(),
-		  array(0),
-		  array(1),
-		  array(1,2),
-		  array('color' => 'red', 'item' => 'pen'),
-		
-		  // null data
+          array(0),
+          array(1),
+          array(1,2),
+          array('color' => 'red', 'item' => 'pen'),
+
+          // null data
 /*15*/	  NULL,
-		  null,
-		
-		  // boolean data
+          null,
+
+          // boolean data
 /*17*/	  true,
-		  false,
-		  TRUE,
-		  FALSE,
-		
-		  // empty data
+          false,
+          TRUE,
+          FALSE,
+
+          // empty data
 /*21*/	  "",
-		  '',
-		
-		  // object data
+          '',
+
+          // object data
 /*23*/	  new sample(),
-		
-		  // undefined data
+
+          // undefined data
 /*24*/	  @$undefined_var,
-		
-		  // unset data
+
+          // unset data
 /*25*/	  @$unset_var,
-		 
-		  // resource data
+
+          // resource data
 /*26*/	  $file_handle
 );
 
@@ -88,19 +83,22 @@ $values = array(
 $counter = 1;
 foreach($values as $value) {
   echo "\n -- Iteration $counter --\n";
-  $result = vprintf($value,$args);
-  echo "\n";
-  var_dump($result); 
+  try {
+    $result = vprintf($value, $args);
+    echo "\n";
+    var_dump($result);
+  } catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+  }
+
   $counter++;
-    
-};
+}
 
 // closing the resource
 fclose($file_handle);
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing vprintf() : with unexpected values for format argument ***
 
  -- Iteration 1 --
@@ -140,34 +138,19 @@ int(13)
 int(3)
 
  -- Iteration 10 --
-
-Notice: Array to string conversion in %s on line %d
-Array
-int(5)
+vprintf(): Argument #1 ($format) must be of type string, array given
 
  -- Iteration 11 --
-
-Notice: Array to string conversion in %s on line %d
-Array
-int(5)
+vprintf(): Argument #1 ($format) must be of type string, array given
 
  -- Iteration 12 --
-
-Notice: Array to string conversion in %s on line %d
-Array
-int(5)
+vprintf(): Argument #1 ($format) must be of type string, array given
 
  -- Iteration 13 --
-
-Notice: Array to string conversion in %s on line %d
-Array
-int(5)
+vprintf(): Argument #1 ($format) must be of type string, array given
 
  -- Iteration 14 --
-
-Notice: Array to string conversion in %s on line %d
-Array
-int(5)
+vprintf(): Argument #1 ($format) must be of type string, array given
 
  -- Iteration 15 --
 
@@ -214,6 +197,4 @@ int(0)
 int(0)
 
  -- Iteration 26 --
-Resource id #%d
-int(%d)
-===DONE===
+vprintf(): Argument #1 ($format) must be of type string, resource given

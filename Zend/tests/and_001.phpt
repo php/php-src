@@ -30,7 +30,7 @@ var_dump($s);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--
 string(3) "020"
 string(4) "pead"
 string(4) "pead"

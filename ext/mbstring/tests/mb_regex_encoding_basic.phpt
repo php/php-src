@@ -7,11 +7,6 @@ function_exists('mb_regex_encoding') or die("skip mb_regex_encoding() is not ava
 ?>
 --FILE--
 <?php
-/* Prototype  : proto string mb_regex_encoding([string encoding])
- * Description: Returns the current encoding for regex as a string. 
- * Source code: ext/mbstring/php_mbregex.c 
- */
-
 /*
  * Test Basic functionality of mb_regex_encoding
  */

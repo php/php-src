@@ -2,11 +2,6 @@
 Test array_walk() function : usage variations - 'input' argument containing reference variables
 --FILE--
 <?php
-/* Prototype  : bool array_walk(array $input, string $funcname [, mixed $userdata])
- * Description: Apply a user function to every member of an array 
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Testing array_walk() with an array having reference variables
 */
@@ -21,12 +16,6 @@ $value4 = 50;
 // 'input' array containing references to above variables
 $input = array(&$value1, &$value2, -35, &$value3, 0, &$value4);
 
-// callback function
-/* Prototype : callback(int $value, mixed $key)
- * Parameters : $value - values in given input array
- *              $key - keys in given input array
- * Description : function checks for the value whether positive or negative and displays according to that
- */
 function callback($value, $key)
 {
    // dump the arguments to check that they are passed
@@ -40,7 +29,7 @@ var_dump( array_walk($input, "callback"));
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_walk() : array with references ***
 int(0)
 int(10)

@@ -1,14 +1,7 @@
 --TEST--
-Test localtime() function : basic functionality 
+Test localtime() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : array localtime([int timestamp [, bool associative_array]])
- * Description: Returns the results of the C system call localtime as an associative array 
- * if the associative_array argument is set to 1 other wise it is a regular array 
- * Source code: ext/date/php_date.c
- * Alias to functions: 
- */
-
 echo "*** Testing localtime() : basic functionality ***\n";
 
 date_default_timezone_set("UTC");
@@ -27,7 +20,6 @@ var_dump( localtime($timestamp) );
 var_dump( localtime() );
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing localtime() : basic functionality ***
 array(9) {
@@ -90,4 +82,3 @@ array(9) {
   [8]=>
   int(%d)
 }
-===DONE===

@@ -2,23 +2,11 @@
 Test array_walk() function : basic functionality - associative array
 --FILE--
 <?php
-/* Prototype  : bool array_walk(array $input, string $funcname [, mixed $userdata])
- * Description: Apply a user function to every member of an array 
- * Source code: ext/standard/array.c
-*/
-
 echo "*** Testing array_walk() : basic functionality ***\n";
 
 // associative array
 $fruits = array("d" => "lemon", "a" => "orange", "b" => "banana", "c" => "apple");
 
-// User defined callback functions
-/*  Prototype : test_alter(mixed $item, mixed $key, string $prefix)
- *  Parameters : item - value in key/value pair 
- *               key - key in key/value pair
- *               prefix - string to be added 
- *  Description : alters the array values by appending prefix string
- */ 
 function test_alter(&$item, $key, $prefix)
 {
   // dump the arguments to check that they are passed
@@ -29,11 +17,6 @@ function test_alter(&$item, $key, $prefix)
   echo "\n"; // new line to separate the output between each element
 }
 
-/*  Prototype : test_print(mixed $item, mixed $key)
- *  Parameters : item - value in key/value pair 
- *               key - key in key/value pair
- *  Description : prints the array values with keys
- */
 function test_print($item, $key)
 {
   // dump the arguments to check that they are passed

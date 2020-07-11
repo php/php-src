@@ -1,14 +1,14 @@
 --TEST--
 pspell basic tests (warning: may fail with pspell/aspell < GNU Aspell 0.50.3)
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("pspell")) die("skip");
 if (!@pspell_new ("en", "", "", "", (PSPELL_FAST|PSPELL_RUN_TOGETHER))) {
 	die("skip English dictionary is not available");
 }
 ?>
 --FILE--
-<?php // $Id$
+<?php
 
 error_reporting(E_ALL);
 $string = "";
@@ -29,7 +29,7 @@ for($i=0,$u=count($array);$i<$u;++$i) {
     echo $array[$i].' : ';
     if (!pspell_check($pspell, $array[$i])) {
         echo "..false\n";
-        echo "Possible spellings: " . join(',',pspell_suggest ($pspell, $array[$i])) . "\n"; 
+        echo "Possible spellings: " . join(',',pspell_suggest ($pspell, $array[$i])) . "\n";
     } else {
         echo "true\n";
     }

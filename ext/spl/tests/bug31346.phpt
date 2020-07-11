@@ -14,5 +14,5 @@ $i->next();
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 ===DONE===

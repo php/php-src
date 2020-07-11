@@ -83,7 +83,7 @@
 
 		</schema>
 
-    	<schema xmlns="http://www.w3.org/2001/XMLSchema"
+	<schema xmlns="http://www.w3.org/2001/XMLSchema"
 			elementFormDefault="qualified"
 			targetNamespace="http://example.org/ts-tests">
 
@@ -134,7 +134,7 @@
 			<element name="RelativeReference" type="test:RelativeReference_t"/>
 			<complexType name="RelativeReference_t">
 				<attribute ref="xml:base"/>
- 				<attribute ref="xlink:href"/>
+				<attribute ref="xlink:href"/>
 			</complexType>
 
 			<element name="echoResolvedRef" type="test:echoResolvedRef_t"/>
@@ -359,26 +359,26 @@
 	</message>
 
 
-  	<portType name="Soap12TestPortTypeDoc">
-    		<operation name="emptyBody">
-      			<input message="tns:emptyBodyRequest" />
-      			<output message="tns:emptyBodyResponse" />
-    		</operation>
-    		<operation name="echoOk">
-      			<input message="tns:echoOkRequest" />
-      			<output message="tns:echoOkResponse" />
-    		</operation>
-    		<operation name="requiredHeader">
-      			<input message="tns:requiredHeaderRequest" />
-    		</operation>
-    		<operation name="echoHeader">
-      			<input message="tns:echoHeaderRequest" />
-      			<output message="tns:echoHeaderResponse" />
-    		</operation>
-    		<operation name="echoResolvedRef">
-      			<input message="tns:echoResolvedRefRequest" />
-      			<output message="tns:echoResolvedRefResponse" />
-    		</operation>
+	<portType name="Soap12TestPortTypeDoc">
+		<operation name="emptyBody">
+			<input message="tns:emptyBodyRequest" />
+			<output message="tns:emptyBodyResponse" />
+		</operation>
+		<operation name="echoOk">
+			<input message="tns:echoOkRequest" />
+			<output message="tns:echoOkResponse" />
+		</operation>
+		<operation name="requiredHeader">
+			<input message="tns:requiredHeaderRequest" />
+		</operation>
+		<operation name="echoHeader">
+			<input message="tns:echoHeaderRequest" />
+			<output message="tns:echoHeaderResponse" />
+		</operation>
+		<operation name="echoResolvedRef">
+			<input message="tns:echoResolvedRefRequest" />
+			<output message="tns:echoResolvedRefResponse" />
+		</operation>
 	</portType>
 
 	<portType name="Soap12TestPortTypeRpc">
@@ -493,63 +493,63 @@
 
 	</portType>
 
-  	<binding name="Soap12TestDocBinding" type="tns:Soap12TestPortTypeDoc">
-    		<soap12:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
-    		<operation name="emptyBody">
-      			<soap12:operation/>
-      			<input>
-        			<soap12:body use="literal" />
-        			<soap12:header message="tns:echoOkRequest" part="echoOk" use="literal" />
-        			<soap12:header message="tns:UnknownHdrBlockLit" part="Unknown" use="literal" />
-        			<soap12:header message="tns:validateCountryCodeRequest" part="validateCountryCode" use="literal">
-        			  <soap12:headerfault message="tns:validateCountryCodeFault" part="validateCountryCodeFault" use="literal"/>
-        			</soap12:header>
-      			</input>
-      			<output>
-        			<soap12:body use="literal" />
-        			<soap12:header message="tns:echoOkResponse" part="responseOk" use="literal" />
-        			<soap12:header message="tns:validateCountryCodeResponse" part="validateCountryCodeResponse" use="literal"/>
-      			</output>
-    		</operation>
-    		<operation name="echoOk">
-      			<soap12:operation/>
-      			<input>
-        			<soap12:body use="literal" />
-        			<soap12:header message="tns:echoOkRequest" part="echoOk" use="literal" />
+	<binding name="Soap12TestDocBinding" type="tns:Soap12TestPortTypeDoc">
+		<soap12:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
+		<operation name="emptyBody">
+			<soap12:operation/>
+			<input>
+			<soap12:body use="literal" />
+			<soap12:header message="tns:echoOkRequest" part="echoOk" use="literal" />
+			<soap12:header message="tns:UnknownHdrBlockLit" part="Unknown" use="literal" />
+			<soap12:header message="tns:validateCountryCodeRequest" part="validateCountryCode" use="literal">
+			  <soap12:headerfault message="tns:validateCountryCodeFault" part="validateCountryCodeFault" use="literal"/>
+			</soap12:header>
+			</input>
+			<output>
+			<soap12:body use="literal" />
+			<soap12:header message="tns:echoOkResponse" part="responseOk" use="literal" />
+			<soap12:header message="tns:validateCountryCodeResponse" part="validateCountryCodeResponse" use="literal"/>
+			</output>
+		</operation>
+		<operation name="echoOk">
+			<soap12:operation/>
+			<input>
+			<soap12:body use="literal" />
+			<soap12:header message="tns:echoOkRequest" part="echoOk" use="literal" />
 				<soap12:header message="tns:UnknownHdrBlockLit" part="Unknown" use="literal" />
-      			</input>
-      			<output>
-        			<soap12:body use="literal" />
-        			<soap12:header message="tns:echoOkResponse" part="responseOk" use="literal" />
-      			</output>
-    		</operation>
-    		<operation name="requiredHeader">
-      			<soap12:operation/>
-      			<input>
-        			<soap12:body use="literal" />
-      			</input>
-    		</operation>
-    		<operation name="echoHeader">
-      			<soap12:operation/>
-      			<input>
-        			<soap12:body use="literal" />
-        			<soap12:header message="tns:echoOkRequest" part="echoOk" use="literal" />
+			</input>
+			<output>
+			<soap12:body use="literal" />
+			<soap12:header message="tns:echoOkResponse" part="responseOk" use="literal" />
+			</output>
+		</operation>
+		<operation name="requiredHeader">
+			<soap12:operation/>
+			<input>
+			<soap12:body use="literal" />
+			</input>
+		</operation>
+		<operation name="echoHeader">
+			<soap12:operation/>
+			<input>
+			<soap12:body use="literal" />
+			<soap12:header message="tns:echoOkRequest" part="echoOk" use="literal" />
 				<soap12:header message="tns:UnknownHdrBlockLit" part="Unknown" use="literal" />
-      			</input>
-      			<output>
-        			<soap12:body use="literal" />
-        			<soap12:header message="tns:echoOkResponse" part="responseOk" use="literal" />
-      			</output>
-    		</operation>
-    		<operation name="echoResolvedRef">
-      			<soap12:operation/>
-      			<input>
-        			<soap12:body use="literal" />
-      			</input>
-      			<output>
-        			<soap12:body use="literal" />
-      			</output>
-    		</operation>
+			</input>
+			<output>
+			<soap12:body use="literal" />
+			<soap12:header message="tns:echoOkResponse" part="responseOk" use="literal" />
+			</output>
+		</operation>
+		<operation name="echoResolvedRef">
+			<soap12:operation/>
+			<input>
+			<soap12:body use="literal" />
+			</input>
+			<output>
+			<soap12:body use="literal" />
+			</output>
+		</operation>
 	</binding>
 
 	<binding name="Soap12TestRpcBinding" type="tns:Soap12TestPortTypeRpc">
@@ -759,12 +759,12 @@
 
 
 	<service name="WhiteMesaSoap12TestSvc">
-  		<port name="Soap12TestDocPort" binding="tns:Soap12TestDocBinding">
-    			<soap12:address location="http://localhost/soap12/test-doc"/>
-  		</port>
-  		<port name="Soap12TestRpcPort" binding="tns:Soap12TestRpcBinding">
-    			<soap12:address location="http://localhost/soap12/test-rpc"/>
-  		</port>
+		<port name="Soap12TestDocPort" binding="tns:Soap12TestDocBinding">
+			<soap12:address location="http://localhost/soap12/test-doc"/>
+		</port>
+		<port name="Soap12TestRpcPort" binding="tns:Soap12TestRpcBinding">
+			<soap12:address location="http://localhost/soap12/test-rpc"/>
+		</port>
 
 	</service>
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
    | Authors: Marcus Boerger <helly@php.net>                              |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifndef ZEND_INTERFACES_H
 #define ZEND_INTERFACES_H
@@ -31,6 +29,8 @@ extern ZEND_API zend_class_entry *zend_ce_aggregate;
 extern ZEND_API zend_class_entry *zend_ce_iterator;
 extern ZEND_API zend_class_entry *zend_ce_arrayaccess;
 extern ZEND_API zend_class_entry *zend_ce_serializable;
+extern ZEND_API zend_class_entry *zend_ce_countable;
+extern ZEND_API zend_class_entry *zend_ce_stringable;
 
 typedef struct _zend_user_iterator {
 	zend_object_iterator     it;
@@ -38,7 +38,7 @@ typedef struct _zend_user_iterator {
 	zval                     value;
 } zend_user_iterator;
 
-ZEND_API zval* zend_call_method(zval *object_pp, zend_class_entry *obj_ce, zend_function **fn_proxy, const char *function_name, size_t function_name_len, zval *retval, int param_count, zval* arg1, zval* arg2);
+ZEND_API zval* zend_call_method(zend_object *object, zend_class_entry *obj_ce, zend_function **fn_proxy, const char *function_name, size_t function_name_len, zval *retval, uint32_t param_count, zval* arg1, zval* arg2);
 
 #define zend_call_method_with_0_params(obj, obj_ce, fn_proxy, function_name, retval) \
 	zend_call_method(obj, obj_ce, fn_proxy, function_name, sizeof(function_name)-1, retval, 0, NULL, NULL)
@@ -52,7 +52,7 @@ ZEND_API zval* zend_call_method(zval *object_pp, zend_class_entry *obj_ce, zend_
 #define REGISTER_MAGIC_INTERFACE(class_name, class_name_str) \
 	{\
 		zend_class_entry ce;\
-		INIT_CLASS_ENTRY(ce, # class_name_str, zend_funcs_ ## class_name) \
+		INIT_CLASS_ENTRY(ce, # class_name_str, class_ ## class_name_str ## _methods) \
 		zend_ce_ ## class_name = zend_register_internal_interface(&ce);\
 		zend_ce_ ## class_name->interface_gets_implemented = zend_implement_ ## class_name;\
 	}
@@ -78,14 +78,8 @@ ZEND_API int zend_user_unserialize(zval *object, zend_class_entry *ce, const uns
 ZEND_API int zend_class_serialize_deny(zval *object, unsigned char **buffer, size_t *buf_len, zend_serialize_data *data);
 ZEND_API int zend_class_unserialize_deny(zval *object, zend_class_entry *ce, const unsigned char *buf, size_t buf_len, zend_unserialize_data *data);
 
+ZEND_API int zend_create_internal_iterator_zval(zval *return_value, zval *obj);
+
 END_EXTERN_C()
 
 #endif /* ZEND_INTERFACES_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */

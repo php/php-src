@@ -9,4 +9,3 @@ Fatal error: Uncaught Error: __clone method called on non-object in %sbug42818.p
 Stack trace:
 #0 {main}
   thrown in %sbug42818.php on line 2
-

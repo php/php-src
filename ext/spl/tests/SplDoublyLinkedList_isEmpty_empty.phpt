@@ -4,10 +4,10 @@ Check that SplDoublyLinkedList->isEmpty() correctly returns true for an empty li
 PHPNW Testfest 2009 - Paul Court ( g@rgoyle.com )
 --FILE--
 <?php
-	// Create a new Doubly Linked List
-	$dll = new SplDoublyLinkedList();
-	
-	var_dump($dll->isEmpty());
+    // Create a new Doubly Linked List
+    $dll = new SplDoublyLinkedList();
+
+    var_dump($dll->isEmpty());
 ?>
 --EXPECT--
 bool(true)

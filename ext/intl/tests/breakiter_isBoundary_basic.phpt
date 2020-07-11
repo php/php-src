@@ -18,11 +18,9 @@ var_dump($bi->isBoundary(-1));
 var_dump($bi->isBoundary(1));
 var_dump($bi->isBoundary(50));
 ?>
-==DONE==
 --EXPECT--
 bool(true)
 bool(true)
 bool(false)
 bool(false)
 bool(false)
-==DONE==

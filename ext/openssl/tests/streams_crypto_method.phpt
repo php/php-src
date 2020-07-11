@@ -4,14 +4,16 @@ Specific crypto method for ssl:// transports.
 <?php
 if (!extension_loaded("openssl")) die("skip openssl not loaded");
 if (!function_exists("proc_open")) die("skip no proc_open");
-if (OPENSSL_VERSION_NUMBER < 0x10001001) die("skip OpenSSLv1.0.1 required");
+?>
 --FILE--
 <?php
+$certFile = __DIR__ . DIRECTORY_SEPARATOR . 'streams_crypto_method.pem.tmp';
+
 $serverCode = <<<'CODE'
     $serverUri = "ssl://127.0.0.1:64321";
     $serverFlags = STREAM_SERVER_BIND | STREAM_SERVER_LISTEN;
     $serverCtx = stream_context_create(['ssl' => [
-        'local_cert' => __DIR__ . '/streams_crypto_method.pem',
+        'local_cert' => '%s',
     ]]);
 
     $server = stream_socket_server($serverUri, $errno, $errstr, $serverFlags, $serverCtx);
@@ -33,6 +35,7 @@ $serverCode = <<<'CODE'
         fclose($client);
     }
 CODE;
+$serverCode = sprintf($serverCode, $certFile);
 
 $clientCode = <<<'CODE'
     $serverUri = "https://127.0.0.1:64321/";
@@ -47,7 +50,16 @@ $clientCode = <<<'CODE'
     echo file_get_contents($serverUri, false, $clientCtx);
 CODE;
 
+include 'CertificateGenerator.inc';
+$certificateGenerator = new CertificateGenerator();
+$certificateGenerator->saveNewCertAsFileWithKey('streams_crypto_method', $certFile);
+
 include 'ServerClientTestCase.inc';
 ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
---EXPECTF--
+?>
+--CLEAN--
+<?php
+@unlink(__DIR__ . DIRECTORY_SEPARATOR . 'streams_crypto_method.pem.tmp');
+?>
+--EXPECT--
 Hello World!

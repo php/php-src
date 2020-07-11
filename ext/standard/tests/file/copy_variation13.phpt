@@ -2,15 +2,10 @@
 Test copy() function: usage variations - src as dir and dest as an existing file(Bug #42243)
 --FILE--
 <?php
-/* Prototype: bool copy ( string $source, string $dest );
-   Description: Makes a copy of the file source to dest.
-     Returns TRUE on success or FALSE on failure.
-*/
-
 /* Test copy(): Trying to copy dir to an existing file */
 
 echo "*** Test copy() function: Trying to copy dir to file ***\n";
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $file = $file_path."/copy_variation13_dir.tmp";
 fclose(fopen($file, "w"));
 $dir = $file_path."/copy_variation13";
@@ -33,13 +28,11 @@ var_dump( filesize($dir) );
 
 echo "*** Done ***\n";
 ?>
-
 --CLEAN--
 <?php
-unlink(dirname(__FILE__)."/copy_variation13_dir.tmp");
-rmdir(dirname(__FILE__)."/copy_variation13");
+unlink(__DIR__."/copy_variation13_dir.tmp");
+rmdir(__DIR__."/copy_variation13");
 ?>
-
 --EXPECTF--
 *** Test copy() function: Trying to copy dir to file ***
 *** Testing copy() in copying dir to file ***

@@ -7,21 +7,19 @@ Bug #67248 (imageaffinematrixget missing check of parameters)
 ?>
 --FILE--
 <?php
+require __DIR__ . '/func.inc';
+
 for($i=0;$i<7;$i++) {
-	imageaffinematrixget($i);
+    trycatch_dump(
+        fn() => imageaffinematrixget($i)
+    );
 }
 ?>
---EXPECTF--
-Warning: imageaffinematrixget(): Array expected as options in %s on line %d
-
-Warning: imageaffinematrixget(): Array expected as options in %s on line %d
-
-Warning: imageaffinematrixget(): Number is expected as option in %s on line %d
-
-Warning: imageaffinematrixget(): Number is expected as option in %s on line %d
-
-Warning: imageaffinematrixget(): Number is expected as option in %s on line %d
-
-Warning: imageaffinematrixget(): Invalid type for element 5 in %s on line %d
-
-Warning: imageaffinematrixget(): Invalid type for element 6 in %s on line %d
+--EXPECT--
+!! [TypeError] imageaffinematrixget(): Argument #1 ($type) must be of type array when using translate or scale
+!! [TypeError] imageaffinematrixget(): Argument #1 ($type) must be of type array when using translate or scale
+!! [TypeError] imageaffinematrixget(): Argument #2 ($options) must be of type int|double when using rotate or shear
+!! [TypeError] imageaffinematrixget(): Argument #2 ($options) must be of type int|double when using rotate or shear
+!! [TypeError] imageaffinematrixget(): Argument #2 ($options) must be of type int|double when using rotate or shear
+!! [ValueError] imageaffinematrixget(): Argument #1 ($type) must be a valid element type
+!! [ValueError] imageaffinematrixget(): Argument #1 ($type) must be a valid element type

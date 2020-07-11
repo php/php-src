@@ -8,18 +8,14 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype  : mixed opendir(string $path[, resource $context])
- * Description: Open a directory and return a dir_handle 
- * Source code: ext/standard/dir.c
- */
-
 /*
  * Test opendir() with different relative paths as $path argument
  */
 
 echo "*** Testing opendir() : usage variation ***\n";
 
-$base_dir_path = dirname(__FILE__);
+$base_dir_path = __DIR__ . '/opendir_variation4-win32-mb';
+@mkdir($base_dir_path);
 
 $level_one_dir_name = "私はガラスを食べられますlevel_one";
 $level_one_dir_path = "$base_dir_path/$level_one_dir_name";
@@ -69,18 +65,18 @@ clean_dh($dh);
  * and to ensure directory is not in use at CLEAN section so can me removed
  */
 function clean_dh($dh){
-	if (is_resource($dh)) {
-		closedir($dh);
-	}
-	unset($dh);
+    if (is_resource($dh)) {
+        closedir($dh);
+    }
+    unset($dh);
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
-rmdir("$file_path/私はガラスを食べられますlevel_one/私はガラスを食べられますlevel_two");
-rmdir("$file_path/私はガラスを食べられますlevel_one");
+$base_dir_path = __DIR__ . '/opendir_variation4-win32-mb';
+rmdir("$base_dir_path/私はガラスを食べられますlevel_one/私はガラスを食べられますlevel_two");
+rmdir("$base_dir_path/私はガラスを食べられますlevel_one");
+rmdir($base_dir_path);
 ?>
 --EXPECTF--
 *** Testing opendir() : usage variation ***
@@ -110,4 +106,3 @@ resource(%d) of type (stream)
 -- $path = '../../'私はガラスを食べられますlevel_one': --
 bool(true)
 resource(%d) of type (stream)
-===DONE===

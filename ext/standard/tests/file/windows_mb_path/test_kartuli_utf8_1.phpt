@@ -1,14 +1,16 @@
 --TEST--
-Test mkdir/rmdir Kartuli UTF-8 path 
+Test mkdir/rmdir Kartuli UTF-8 path
 --SKIPIF--
 <?php
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 skip_if_not_win();
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 skip_if_no_required_exts();
 
 ?>
+--CONFLICTS--
+dir_kartuli
 --FILE--
 <?php
 /*
@@ -16,7 +18,7 @@ skip_if_no_required_exts();
 #vim: set encoding=utf-8
 */
 
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 $item = "ქართველები";
 $prefix = create_data("dir_kartuli", "${item}42");
@@ -36,8 +38,7 @@ var_dump(rmdir($subpath));
 remove_data("dir_kartuli");
 
 ?>
-===DONE===
---EXPECTF--	
+--EXPECTF--
 bool(true)
 bool(true)
 bool(true)
@@ -48,4 +49,3 @@ bool(true)
 string(%d) "%s\ქართველები42\ქართველები4"
 Active code page: %d
 bool(true)
-===DONE===

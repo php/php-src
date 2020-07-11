@@ -1,9 +1,7 @@
 --TEST--
-mhash() test
+MHash: mhash() test
 --SKIPIF--
-<?php
-	include "skip_mhash.inc";
-?>
+<?php if(!function_exists('mhash')) { die('skip mhash compatibility layer not available'); } ?>
 --FILE--
 <?php
 
@@ -24,16 +22,16 @@ $supported_hash_al = array(
 $data = "This is the test of the mhash extension...";
 
 foreach ($supported_hash_al as $hash=>$wanted) {
-	$result = mhash(constant($hash), $data);
-	if (bin2hex($result)==$wanted) {
-		echo "$hash\nok\n";
-	} else {
-		echo "$hash: ";
-		var_dump($wanted);
-		echo "$hash: ";
-		var_dump(bin2hex($result));
-	}
-	echo "\n";
+    $result = mhash(constant($hash), $data);
+    if (bin2hex($result)==$wanted) {
+        echo "$hash\nok\n";
+    } else {
+        echo "$hash: ";
+        var_dump($wanted);
+        echo "$hash: ";
+        var_dump(bin2hex($result));
+    }
+    echo "\n";
 }
 ?>
 --EXPECT--

@@ -2,19 +2,13 @@
 Test dir() function : basic functionality
 --FILE--
 <?php
-/* 
- * Prototype  : object dir(string $directory[, resource $context])
- * Description: Directory class with properties, handle and class and methods read, rewind and close
- * Source code: ext/standard/dir.c
- */
-
 echo "*** Testing dir() : basic functionality ***\n";
 
 // include the file.inc for Function: function create_files()
-include(dirname(__FILE__)."/../file/file.inc");
+include(__DIR__."/../file/file.inc");
 
 // create the temporary directory
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $dir_path = $file_path."/dir_basic";
 @mkdir($dir_path);
 
@@ -38,8 +32,12 @@ echo "\nClose directory:\n";
 var_dump( $d->close() );
 var_dump( $d );
 
-echo "\nTest read after closing the dir:";
-var_dump( $d->read() );
+echo "\nTest read after closing the dir:\n";
+try {
+    var_dump( $d->read() );
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 // delete temp files
 delete_files($dir_path, 3, "dir_basic", 1, ".tmp");
@@ -47,7 +45,7 @@ echo "Done";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $dir_path = $file_path."/dir_basic";
 
 rmdir($dir_path);
@@ -81,6 +79,5 @@ object(Directory)#%d (2) {
 }
 
 Test read after closing the dir:
-Warning: Directory::read(): supplied resource is not a valid Directory resource in %s on line %d
-bool(false)
+Directory::read(): supplied resource is not a valid Directory resource
 Done

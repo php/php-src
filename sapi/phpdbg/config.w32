@@ -11,6 +11,10 @@ PHPDBG_DLL='php' + PHP_VERSION + 'phpdbg.dll';
 PHPDBG_EXE='phpdbg.exe';
 PHPDBG_CFLAGS='/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1';
 
+var PHP_PHPDBG_PGO = false;
+var PHP_PHPDBG_WEBHELPER_PGO = false;
+var PHP_PHPDBGS_PGO = false;
+
 if (PHP_PHPDBG == "yes") {
 	SAPI('phpdbg', PHPDBG_SOURCES, PHPDBG_EXE, PHPDBG_CFLAGS);
 	ADD_FLAG("LIBS_PHPDBG", "ws2_32.lib user32.lib");
@@ -27,4 +31,3 @@ if (PHP_PHPDBGS == "yes") {
 	ADD_FLAG("LIBS_PHPDBGS", "ws2_32.lib user32.lib");
 	ADD_FLAG("CFLAGS_PHPDBGS", "/D YY_NO_UNISTD_H");
 }
-

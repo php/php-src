@@ -4,39 +4,39 @@ Bug #31177 (Memory leak)
 <?php
 class DbGow {
 
-	public function query() {
-		throw new Exception;
-	}
-	
-	public function select() {
-		return new DbGowRecordSet($this->query());
-	}
+    public function query() {
+        throw new Exception;
+    }
 
-	public function select2() {
-		new DbGowRecordSet($this->query());
-	}
+    public function select() {
+        return new DbGowRecordSet($this->query());
+    }
+
+    public function select2() {
+        new DbGowRecordSet($this->query());
+    }
 
 }
 
 class DbGowRecordSet {
 
-	public function __construct($resource) {
-	}
+    public function __construct($resource) {
+    }
 
 }
 
 $db = new DbGow;
 
 try {
-	$rs = $db->select();
+    $rs = $db->select();
 } catch(Exception $e) {
-	echo "ok\n";
+    echo "ok\n";
 }
-	
+
 try {
-	$db->select2();
+    $db->select2();
 } catch(Exception $e) {
-	echo "ok\n";
+    echo "ok\n";
 }
 ?>
 --EXPECT--

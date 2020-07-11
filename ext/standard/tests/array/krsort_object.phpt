@@ -2,13 +2,9 @@
 Test krsort() function : object functionality - sort objects
 --FILE--
 <?php
-/* Prototype  : bool krsort ( array &$array [, int $sort_flags] )
- * Description: Sort an array by key in reverse order, maintaining key to data correlation  
- * Source code: ext/standard/array.c
-*/
 /*
  * testing krsort() by providing array of integer/string objects with following flag values:
- *  1.Defualt flag value
+ *  1.Default flag value
  *  2.SORT_REGULAR - compare items normally
 */
 
@@ -41,14 +37,14 @@ class StringObject
 }
 
 // array of integer objects with different key values
-$unsorted_int_obj = array ( 
+$unsorted_int_obj = array (
   10 => new IntegerObject(11), 20 =>  new IntegerObject(66),
   3 => new IntegerObject(23), 4 => new IntegerObject(-5),
   50 => new IntegerObject(0.001), 6 => new IntegerObject(0)
 );
 
 // array of string objects with different key values
-$unsorted_str_obj = array ( 
+$unsorted_str_obj = array (
   "axx" => new StringObject("axx"), "t" => new StringObject("t"),
   "w" => new StringObject("w"), "py" => new StringObject("py"),
   "apple" => new StringObject("apple"), "Orange" => new StringObject("Orange"),
@@ -56,14 +52,14 @@ $unsorted_str_obj = array (
 );
 
 
-echo "\n-- Testing krsort() by supplying various object arrays, 'flag' value is defualt --\n";
+echo "\n-- Testing krsort() by supplying various object arrays, 'flag' value is default --\n";
 
-// testing krsort() function by supplying integer object array, flag value is defualt
+// testing krsort() function by supplying integer object array, flag value is default
 $temp_array = $unsorted_int_obj;
 var_dump(krsort($temp_array) );
 var_dump($temp_array);
 
-// testing krsort() function by supplying string object array, flag value is defualt
+// testing krsort() function by supplying string object array, flag value is default
 $temp_array = $unsorted_str_obj;
 var_dump(krsort($temp_array) );
 var_dump($temp_array);
@@ -84,7 +80,7 @@ echo "Done\n";
 --EXPECTF--
 *** Testing krsort() : object functionality ***
 
--- Testing krsort() by supplying various object arrays, 'flag' value is defualt --
+-- Testing krsort() by supplying various object arrays, 'flag' value is default --
 bool(true)
 array(6) {
   [50]=>

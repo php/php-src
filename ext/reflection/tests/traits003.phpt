@@ -7,11 +7,11 @@ abstract class foo {
 }
 
 trait bar {
-	
+
 }
 
 final class baz {
-	
+
 }
 
 $x = new ReflectionClass('foo');

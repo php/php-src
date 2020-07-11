@@ -29,7 +29,7 @@ var_dump(bin2hex($s));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--
 string(6) "030107"
 string(6) "030107"
 string(8) "070a1e11"

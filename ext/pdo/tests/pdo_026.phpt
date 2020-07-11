@@ -1,7 +1,7 @@
 --TEST--
 PDO Common: extending PDO (2)
 --SKIPIF--
-<?php # vim:ft=php
+<?php
 if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
@@ -10,7 +10,7 @@ PDOTest::skip();
 ?>
 --FILE--
 <?php
-if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE__) . '/../../pdo/tests/');
+if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../../pdo/tests/');
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 
 $data = array(
@@ -22,16 +22,16 @@ $data = array(
 class PDOStatementX extends PDOStatement
 {
     public $dbh;
-    
+
     protected function __construct($dbh)
     {
-    	$this->dbh = $dbh;
-    	echo __METHOD__ . "()\n";
+        $this->dbh = $dbh;
+        echo __METHOD__ . "()\n";
     }
-    
+
     function __destruct()
     {
-    	echo __METHOD__ . "()\n";
+        echo __METHOD__ . "()\n";
     }
 }
 
@@ -39,16 +39,16 @@ class PDODatabase extends PDO
 {
     function __destruct()
     {
-    	echo __METHOD__ . "()\n";
+        echo __METHOD__ . "()\n";
     }
-    
+
     function query($sql)
     {
-    	echo __METHOD__ . "()\n";
-    	$stmt = $this->prepare($sql, array(PDO::ATTR_STATEMENT_CLASS=>array('PDOStatementx', array($this))));
-    	$stmt->setFetchMode(PDO::FETCH_ASSOC);
-    	$stmt->execute();
-    	return $stmt;
+        echo __METHOD__ . "()\n";
+        $stmt = $this->prepare($sql, array(PDO::ATTR_STATEMENT_CLASS=>array('PDOStatementx', array($this))));
+        $stmt->setFetchMode(PDO::FETCH_ASSOC);
+        $stmt->execute();
+        return $stmt;
     }
 }
 
@@ -70,7 +70,7 @@ var_dump(get_class($stmt));
 var_dump(get_class($stmt->dbh));
 
 foreach($stmt as $obj) {
-	var_dump($obj);
+    var_dump($obj);
 }
 
 echo "===DONE===\n";

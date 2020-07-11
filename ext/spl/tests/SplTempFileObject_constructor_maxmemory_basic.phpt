@@ -4,7 +4,7 @@ SPL SplTempFileObject constructor sets correct values when passed fixed memory s
 <?php
 var_dump(new SplTempFileObject(1024));
 ?>
---EXPECTF--
+--EXPECT--
 object(SplTempFileObject)#1 (5) {
   ["pathName":"SplFileInfo":private]=>
   string(25) "php://temp/maxmemory:1024"

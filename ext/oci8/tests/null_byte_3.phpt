@@ -8,7 +8,7 @@ error_reporting = E_WARNING
 --FILE--
 <?php
 
-require(dirname(__FILE__).'/connect.inc');
+require(__DIR__.'/connect.inc');
 
 // Run Test
 
@@ -27,8 +27,6 @@ oci_fetch_all($s, $res);
 var_dump($res);
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 Test 1: Invalid use of a null byte
 
@@ -39,4 +37,3 @@ array(1) {
   array(0) {
   }
 }
-===DONE===

@@ -3,21 +3,21 @@ Bug #60833 (self, parent, static behave inconsistently case-sensitive)
 --FILE--
 <?php
 class A {
-	static $x = "A";
-	function testit() {
-		$this->v1 = new sELF;
-		$this->v2 = new SELF;
-	}
+    static $x = "A";
+    function testit() {
+        $this->v1 = new sELF;
+        $this->v2 = new SELF;
+    }
 }
 
 class B extends A {
-	static $x = "B";
-	function testit() {
-		PARENT::testit();
-		$this->v3 = new sELF;
-		$this->v4 = new PARENT;
-		$this->v4 = STATIC::$x;
-	}
+    static $x = "B";
+    function testit() {
+        PARENT::testit();
+        $this->v3 = new sELF;
+        $this->v4 = new PARENT;
+        $this->v4 = STATIC::$x;
+    }
 }
 $t = new B();
 $t->testit();
@@ -37,4 +37,3 @@ object(B)#%d (4) {
   ["v4"]=>
   string(1) "B"
 }
-

@@ -18,7 +18,7 @@ class hariCow extends FIIFO {
                 } catch(Exception $e) {
                 }
         }
-        
+
         public function __toString() {
                 return "ok\n";
         }

@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,10 +14,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
-#define IS_EXT_MODULE
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -30,7 +24,7 @@
 #include <ctype.h>
 #include <stdio.h>
 
-#if HAVE_PSPELL
+#ifdef HAVE_PSPELL
 
 /* this will enforce compatibility in .12 version (broken after .11.2) */
 #define USE_ORIGINAL_MANAGER_FUNCS
@@ -38,6 +32,7 @@
 #include "php_pspell.h"
 #include <pspell.h>
 #include "ext/standard/info.h"
+#include "pspell_arginfo.h"
 
 #define PSPELL_FAST 1L
 #define PSPELL_NORMAL 2L
@@ -52,161 +47,12 @@
 
 static PHP_MINIT_FUNCTION(pspell);
 static PHP_MINFO_FUNCTION(pspell);
-static PHP_FUNCTION(pspell_new);
-static PHP_FUNCTION(pspell_new_personal);
-static PHP_FUNCTION(pspell_new_config);
-static PHP_FUNCTION(pspell_check);
-static PHP_FUNCTION(pspell_suggest);
-static PHP_FUNCTION(pspell_store_replacement);
-static PHP_FUNCTION(pspell_add_to_personal);
-static PHP_FUNCTION(pspell_add_to_session);
-static PHP_FUNCTION(pspell_clear_session);
-static PHP_FUNCTION(pspell_save_wordlist);
-static PHP_FUNCTION(pspell_config_create);
-static PHP_FUNCTION(pspell_config_runtogether);
-static PHP_FUNCTION(pspell_config_mode);
-static PHP_FUNCTION(pspell_config_ignore);
-static PHP_FUNCTION(pspell_config_personal);
-static PHP_FUNCTION(pspell_config_dict_dir);
-static PHP_FUNCTION(pspell_config_data_dir);
-static PHP_FUNCTION(pspell_config_repl);
-static PHP_FUNCTION(pspell_config_save_repl);
-
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_new, 0, 0, 1)
-	ZEND_ARG_INFO(0, language)
-	ZEND_ARG_INFO(0, spelling)
-	ZEND_ARG_INFO(0, jargon)
-	ZEND_ARG_INFO(0, encoding)
-	ZEND_ARG_INFO(0, mode)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_new_personal, 0, 0, 2)
-	ZEND_ARG_INFO(0, personal)
-	ZEND_ARG_INFO(0, language)
-	ZEND_ARG_INFO(0, spelling)
-	ZEND_ARG_INFO(0, jargon)
-	ZEND_ARG_INFO(0, encoding)
-	ZEND_ARG_INFO(0, mode)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_new_config, 0, 0, 1)
-	ZEND_ARG_INFO(0, config)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_check, 0, 0, 2)
-	ZEND_ARG_INFO(0, pspell)
-	ZEND_ARG_INFO(0, word)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_suggest, 0, 0, 2)
-	ZEND_ARG_INFO(0, pspell)
-	ZEND_ARG_INFO(0, word)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_store_replacement, 0, 0, 3)
-	ZEND_ARG_INFO(0, pspell)
-	ZEND_ARG_INFO(0, misspell)
-	ZEND_ARG_INFO(0, correct)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_add_to_personal, 0, 0, 2)
-	ZEND_ARG_INFO(0, pspell)
-	ZEND_ARG_INFO(0, word)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_add_to_session, 0, 0, 2)
-	ZEND_ARG_INFO(0, pspell)
-	ZEND_ARG_INFO(0, word)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_clear_session, 0, 0, 1)
-	ZEND_ARG_INFO(0, pspell)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_save_wordlist, 0, 0, 1)
-	ZEND_ARG_INFO(0, pspell)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_config_create, 0, 0, 1)
-	ZEND_ARG_INFO(0, language)
-	ZEND_ARG_INFO(0, spelling)
-	ZEND_ARG_INFO(0, jargon)
-	ZEND_ARG_INFO(0, encoding)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_config_runtogether, 0, 0, 2)
-	ZEND_ARG_INFO(0, conf)
-	ZEND_ARG_INFO(0, runtogether)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_config_mode, 0, 0, 2)
-	ZEND_ARG_INFO(0, conf)
-	ZEND_ARG_INFO(0, mode)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_config_ignore, 0, 0, 2)
-	ZEND_ARG_INFO(0, conf)
-	ZEND_ARG_INFO(0, ignore)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_config_personal, 0, 0, 2)
-	ZEND_ARG_INFO(0, conf)
-	ZEND_ARG_INFO(0, personal)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_config_dict_dir, 0, 0, 2)
-	ZEND_ARG_INFO(0, conf)
-	ZEND_ARG_INFO(0, directory)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_config_data_dir, 0, 0, 2)
-	ZEND_ARG_INFO(0, conf)
-	ZEND_ARG_INFO(0, directory)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_config_repl, 0, 0, 2)
-	ZEND_ARG_INFO(0, conf)
-	ZEND_ARG_INFO(0, repl)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_config_save_repl, 0, 0, 2)
-	ZEND_ARG_INFO(0, conf)
-	ZEND_ARG_INFO(0, save)
-ZEND_END_ARG_INFO()
-/* }}} */
-
-/* {{{ pspell_functions[]
- */
-static const zend_function_entry pspell_functions[] = {
-	PHP_FE(pspell_new,					arginfo_pspell_new)
-	PHP_FE(pspell_new_personal,			arginfo_pspell_new_personal)
-	PHP_FE(pspell_new_config,			arginfo_pspell_new_config)
-	PHP_FE(pspell_check,				arginfo_pspell_check)
-	PHP_FE(pspell_suggest,				arginfo_pspell_suggest)
-	PHP_FE(pspell_store_replacement,	arginfo_pspell_store_replacement)
-	PHP_FE(pspell_add_to_personal,		arginfo_pspell_add_to_personal)
-	PHP_FE(pspell_add_to_session,		arginfo_pspell_add_to_session)
-	PHP_FE(pspell_clear_session,		arginfo_pspell_clear_session)
-	PHP_FE(pspell_save_wordlist,		arginfo_pspell_save_wordlist)
-	PHP_FE(pspell_config_create,		arginfo_pspell_config_create)
-	PHP_FE(pspell_config_runtogether,	arginfo_pspell_config_runtogether)
-	PHP_FE(pspell_config_mode,			arginfo_pspell_config_mode)
-	PHP_FE(pspell_config_ignore,		arginfo_pspell_config_ignore)
-	PHP_FE(pspell_config_personal,		arginfo_pspell_config_personal)
-	PHP_FE(pspell_config_dict_dir,		arginfo_pspell_config_dict_dir)
-	PHP_FE(pspell_config_data_dir,		arginfo_pspell_config_data_dir)
-	PHP_FE(pspell_config_repl,			arginfo_pspell_config_repl)
-	PHP_FE(pspell_config_save_repl,		arginfo_pspell_config_save_repl)
-	PHP_FE_END
-};
-/* }}} */
 
 static int le_pspell, le_pspell_config;
 
 zend_module_entry pspell_module_entry = {
     STANDARD_MODULE_HEADER,
-	"pspell", pspell_functions, PHP_MINIT(pspell), NULL, NULL, NULL, PHP_MINFO(pspell), PHP_PSPELL_VERSION, STANDARD_MODULE_PROPERTIES
+	"pspell", ext_functions, PHP_MINIT(pspell), NULL, NULL, NULL, PHP_MINFO(pspell), PHP_PSPELL_VERSION, STANDARD_MODULE_PROPERTIES
 };
 
 #ifdef COMPILE_DL_PSPELL
@@ -245,8 +91,7 @@ static void php_pspell_close_config(zend_resource *rsrc)
 	manager = (PspellManager *)Z_RES_P(res)->ptr; \
 } while (0);
 
-/* {{{ PHP_MINIT_FUNCTION
- */
+/* {{{ PHP_MINIT_FUNCTION */
 static PHP_MINIT_FUNCTION(pspell)
 {
 	REGISTER_LONG_CONSTANT("PSPELL_FAST", PSPELL_FAST, CONST_PERSISTENT | CONST_CS);
@@ -259,9 +104,8 @@ static PHP_MINIT_FUNCTION(pspell)
 }
 /* }}} */
 
-/* {{{ proto int pspell_new(string language [, string spelling [, string jargon [, string encoding [, int mode]]]])
-   Load a dictionary */
-static PHP_FUNCTION(pspell_new)
+/* {{{ Load a dictionary */
+PHP_FUNCTION(pspell_new)
 {
 	char *language, *spelling = NULL, *jargon = NULL, *encoding = NULL;
 	size_t language_len, spelling_len = 0, jargon_len = 0, encoding_len = 0;
@@ -283,7 +127,7 @@ static PHP_FUNCTION(pspell_new)
 
 	if (zend_parse_parameters(argc, "s|sssl", &language, &language_len, &spelling, &spelling_len,
 		&jargon, &jargon_len, &encoding, &encoding_len, &mode) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	config = new_pspell_config();
@@ -356,9 +200,8 @@ static PHP_FUNCTION(pspell_new)
 }
 /* }}} */
 
-/* {{{ proto int pspell_new_personal(string personal, string language [, string spelling [, string jargon [, string encoding [, int mode]]]])
-   Load a dictionary with a personal wordlist*/
-static PHP_FUNCTION(pspell_new_personal)
+/* {{{ Load a dictionary with a personal wordlist*/
+PHP_FUNCTION(pspell_new_personal)
 {
 	char *personal, *language, *spelling = NULL, *jargon = NULL, *encoding = NULL;
 	size_t personal_len, language_len, spelling_len = 0, jargon_len = 0, encoding_len = 0;
@@ -380,7 +223,7 @@ static PHP_FUNCTION(pspell_new_personal)
 
 	if (zend_parse_parameters(argc, "ps|sssl", &personal, &personal_len, &language, &language_len,
 		&spelling, &spelling_len, &jargon, &jargon_len, &encoding, &encoding_len, &mode) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	config = new_pspell_config();
@@ -461,9 +304,8 @@ static PHP_FUNCTION(pspell_new_personal)
 }
 /* }}} */
 
-/* {{{ proto int pspell_new_config(int config)
-   Load a dictionary based on the given config */
-static PHP_FUNCTION(pspell_new_config)
+/* {{{ Load a dictionary based on the given config */
+PHP_FUNCTION(pspell_new_config)
 {
 	zend_long conf;
 	zval *ind;
@@ -472,7 +314,7 @@ static PHP_FUNCTION(pspell_new_config)
 	PspellConfig *config;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &conf) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PSPELL_FETCH_CONFIG;
@@ -491,9 +333,8 @@ static PHP_FUNCTION(pspell_new_config)
 }
 /* }}} */
 
-/* {{{ proto bool pspell_check(int pspell, string word)
-   Returns true if word is valid */
-static PHP_FUNCTION(pspell_check)
+/* {{{ Returns true if word is valid */
+PHP_FUNCTION(pspell_check)
 {
 	size_t word_len;
 	zend_long scin;
@@ -501,7 +342,7 @@ static PHP_FUNCTION(pspell_check)
 	PspellManager *manager;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ls", &scin, &word, &word_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PSPELL_FETCH_MANAGER;
@@ -514,9 +355,8 @@ static PHP_FUNCTION(pspell_check)
 }
 /* }}} */
 
-/* {{{ proto array pspell_suggest(int pspell, string word)
-   Returns array of suggestions */
-static PHP_FUNCTION(pspell_suggest)
+/* {{{ Returns array of suggestions */
+PHP_FUNCTION(pspell_suggest)
 {
 	zend_long scin;
 	char *word;
@@ -526,7 +366,7 @@ static PHP_FUNCTION(pspell_suggest)
 	const char *sug;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ls", &scin, &word, &word_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PSPELL_FETCH_MANAGER;
@@ -547,9 +387,8 @@ static PHP_FUNCTION(pspell_suggest)
 }
 /* }}} */
 
-/* {{{ proto bool pspell_store_replacement(int pspell, string misspell, string correct)
-   Notify the dictionary of a user-selected replacement */
-static PHP_FUNCTION(pspell_store_replacement)
+/* {{{ Notify the dictionary of a user-selected replacement */
+PHP_FUNCTION(pspell_store_replacement)
 {
 	size_t miss_len, corr_len;
 	zend_long scin;
@@ -557,7 +396,7 @@ static PHP_FUNCTION(pspell_store_replacement)
 	PspellManager *manager;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lss", &scin, &miss, &miss_len, &corr, &corr_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PSPELL_FETCH_MANAGER;
@@ -572,9 +411,8 @@ static PHP_FUNCTION(pspell_store_replacement)
 }
 /* }}} */
 
-/* {{{ proto bool pspell_add_to_personal(int pspell, string word)
-   Adds a word to a personal list */
-static PHP_FUNCTION(pspell_add_to_personal)
+/* {{{ Adds a word to a personal list */
+PHP_FUNCTION(pspell_add_to_personal)
 {
 	size_t word_len;
 	zend_long scin;
@@ -582,7 +420,7 @@ static PHP_FUNCTION(pspell_add_to_personal)
 	PspellManager *manager;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ls", &scin, &word, &word_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PSPELL_FETCH_MANAGER;
@@ -602,9 +440,8 @@ static PHP_FUNCTION(pspell_add_to_personal)
 }
 /* }}} */
 
-/* {{{ proto bool pspell_add_to_session(int pspell, string word)
-   Adds a word to the current session */
-static PHP_FUNCTION(pspell_add_to_session)
+/* {{{ Adds a word to the current session */
+PHP_FUNCTION(pspell_add_to_session)
 {
 	size_t word_len;
 	zend_long scin;
@@ -612,7 +449,7 @@ static PHP_FUNCTION(pspell_add_to_session)
 	PspellManager *manager;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ls", &scin, &word, &word_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PSPELL_FETCH_MANAGER;
@@ -632,15 +469,14 @@ static PHP_FUNCTION(pspell_add_to_session)
 }
 /* }}} */
 
-/* {{{ proto bool pspell_clear_session(int pspell)
-   Clears the current session */
-static PHP_FUNCTION(pspell_clear_session)
+/* {{{ Clears the current session */
+PHP_FUNCTION(pspell_clear_session)
 {
 	zend_long scin;
 	PspellManager *manager;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &scin) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PSPELL_FETCH_MANAGER;
@@ -655,15 +491,14 @@ static PHP_FUNCTION(pspell_clear_session)
 }
 /* }}} */
 
-/* {{{ proto bool pspell_save_wordlist(int pspell)
-   Saves the current (personal) wordlist */
-static PHP_FUNCTION(pspell_save_wordlist)
+/* {{{ Saves the current (personal) wordlist */
+PHP_FUNCTION(pspell_save_wordlist)
 {
 	zend_long scin;
 	PspellManager *manager;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &scin) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PSPELL_FETCH_MANAGER;
@@ -680,9 +515,8 @@ static PHP_FUNCTION(pspell_save_wordlist)
 }
 /* }}} */
 
-/* {{{ proto int pspell_config_create(string language [, string spelling [, string jargon [, string encoding]]])
-   Create a new config to be used later to create a manager */
-static PHP_FUNCTION(pspell_config_create)
+/* {{{ Create a new config to be used later to create a manager */
+PHP_FUNCTION(pspell_config_create)
 {
 	char *language, *spelling = NULL, *jargon = NULL, *encoding = NULL;
 	size_t language_len, spelling_len = 0, jargon_len = 0, encoding_len = 0;
@@ -699,7 +533,7 @@ static PHP_FUNCTION(pspell_config_create)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|sss", &language, &language_len, &spelling, &spelling_len,
 		&jargon, &jargon_len, &encoding, &encoding_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	config = new_pspell_config();
@@ -748,16 +582,15 @@ static PHP_FUNCTION(pspell_config_create)
 }
 /* }}} */
 
-/* {{{ proto bool pspell_config_runtogether(int conf, bool runtogether)
-   Consider run-together words as valid components */
-static PHP_FUNCTION(pspell_config_runtogether)
+/* {{{ Consider run-together words as valid components */
+PHP_FUNCTION(pspell_config_runtogether)
 {
 	zend_long conf;
 	zend_bool runtogether;
 	PspellConfig *config;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lb", &conf, &runtogether) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PSPELL_FETCH_CONFIG;
@@ -768,15 +601,14 @@ static PHP_FUNCTION(pspell_config_runtogether)
 }
 /* }}} */
 
-/* {{{ proto bool pspell_config_mode(int conf, long mode)
-   Select mode for config (PSPELL_FAST, PSPELL_NORMAL or PSPELL_BAD_SPELLERS) */
-static PHP_FUNCTION(pspell_config_mode)
+/* {{{ Select mode for config (PSPELL_FAST, PSPELL_NORMAL or PSPELL_BAD_SPELLERS) */
+PHP_FUNCTION(pspell_config_mode)
 {
 	zend_long conf, mode;
 	PspellConfig *config;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &conf, &mode) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PSPELL_FETCH_CONFIG;
@@ -794,16 +626,15 @@ static PHP_FUNCTION(pspell_config_mode)
 }
 /* }}} */
 
-/* {{{ proto bool pspell_config_ignore(int conf, int ignore)
-   Ignore words <= n chars */
-static PHP_FUNCTION(pspell_config_ignore)
+/* {{{ Ignore words <= n chars */
+PHP_FUNCTION(pspell_config_ignore)
 {
 	char ignore_str[MAX_LENGTH_OF_LONG + 1];
 	zend_long conf, ignore = 0L;
 	PspellConfig *config;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &conf, &ignore) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PSPELL_FETCH_CONFIG;
@@ -823,7 +654,7 @@ static void pspell_config_path(INTERNAL_FUNCTION_PARAMETERS, char *option)
 	PspellConfig *config;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lp", &conf, &value, &value_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PSPELL_FETCH_CONFIG;
@@ -837,33 +668,29 @@ static void pspell_config_path(INTERNAL_FUNCTION_PARAMETERS, char *option)
 	RETURN_TRUE;
 }
 
-/* {{{ proto bool pspell_config_personal(int conf, string personal)
-   Use a personal dictionary for this config */
-static PHP_FUNCTION(pspell_config_personal)
+/* {{{ Use a personal dictionary for this config */
+PHP_FUNCTION(pspell_config_personal)
 {
 	pspell_config_path(INTERNAL_FUNCTION_PARAM_PASSTHRU, "personal");
 }
 /* }}} */
 
-/* {{{ proto bool pspell_config_dict_dir(int conf, string directory)
-   location of the main word list */
-static PHP_FUNCTION(pspell_config_dict_dir)
+/* {{{ location of the main word list */
+PHP_FUNCTION(pspell_config_dict_dir)
 {
 	pspell_config_path(INTERNAL_FUNCTION_PARAM_PASSTHRU, "dict-dir");
 }
 /* }}} */
 
-/* {{{ proto bool pspell_config_data_dir(int conf, string directory)
-    location of language data files */
-static PHP_FUNCTION(pspell_config_data_dir)
+/* {{{ location of language data files */
+PHP_FUNCTION(pspell_config_data_dir)
 {
 	pspell_config_path(INTERNAL_FUNCTION_PARAM_PASSTHRU, "data-dir");
 }
 /* }}} */
 
-/* {{{ proto bool pspell_config_repl(int conf, string repl)
-   Use a personal dictionary with replacement pairs for this config */
-static PHP_FUNCTION(pspell_config_repl)
+/* {{{ Use a personal dictionary with replacement pairs for this config */
+PHP_FUNCTION(pspell_config_repl)
 {
 	zend_long conf;
 	char *repl;
@@ -871,7 +698,7 @@ static PHP_FUNCTION(pspell_config_repl)
 	PspellConfig *config;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lp", &conf, &repl, &repl_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PSPELL_FETCH_CONFIG;
@@ -888,16 +715,15 @@ static PHP_FUNCTION(pspell_config_repl)
 }
 /* }}} */
 
-/* {{{ proto bool pspell_config_save_repl(int conf, bool save)
-   Save replacement pairs when personal list is saved for this config */
-static PHP_FUNCTION(pspell_config_save_repl)
+/* {{{ Save replacement pairs when personal list is saved for this config */
+PHP_FUNCTION(pspell_config_save_repl)
 {
 	zend_long conf;
 	zend_bool save;
 	PspellConfig *config;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lb", &conf, &save) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PSPELL_FETCH_CONFIG;
@@ -908,8 +734,7 @@ static PHP_FUNCTION(pspell_config_save_repl)
 }
 /* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
- */
+/* {{{ PHP_MINFO_FUNCTION */
 static PHP_MINFO_FUNCTION(pspell)
 {
 	php_info_print_table_start();
@@ -919,12 +744,3 @@ static PHP_MINFO_FUNCTION(pspell)
 /* }}} */
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

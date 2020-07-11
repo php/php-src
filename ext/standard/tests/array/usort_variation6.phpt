@@ -2,11 +2,6 @@
 Test usort() function : usage variations - multi-dimensional arrays
 --FILE--
 <?php
-/* Prototype  : bool usort(array $array_arg, string $cmp_function)
- * Description: Sort an array by values using a user-defined comparison function 
- * Source code: ext/standard/array.c
- */
-
 /*
  * Pass a multi-dimensional array as $array_arg argument to usort()
  * to test how array is re-ordered
@@ -53,8 +48,7 @@ var_dump( usort($array_args[5], 'cmp_function') );
 echo "-- Array after call to usort() --\n";
 var_dump($array_args[5]);
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing usort() : usage variation ***
 
 -- Pass usort() a two-dimensional array --
@@ -136,4 +130,3 @@ array(5) {
   [4]=>
   int(54)
 }
-===DONE===

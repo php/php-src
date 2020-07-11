@@ -7,19 +7,16 @@ if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 --FILE--
 <?php
 
-ini_set('display_errors', 0);
-    
 echo "Start\n";
 
 function boo()
 {
-	echo "Shutdown\n";
+    echo "Shutdown\n";
 }
 
 register_shutdown_function("boo");
 
-/* not necessary, just to show the error sooner */
-set_time_limit(1); 
+set_time_limit(1);
 
 /* infinite loop to simulate long processing */
 for (;;) {}
@@ -27,6 +24,8 @@ for (;;) {}
 echo "End\n";
 
 ?>
---EXPECT--
+--EXPECTF--
 Start
+
+Fatal error: Maximum execution time of 1 second exceeded in %s on line %d
 Shutdown

@@ -1,5 +1,5 @@
 --TEST--
-Test readfile() function : variation 
+Test readfile() function : variation
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --SKIPIF--
@@ -9,16 +9,10 @@ if(substr(PHP_OS, 0, 3) != "WIN")
 ?>
 --FILE--
 <?php
-/* Prototype  : int readfile(string filename [, bool use_include_path[, resource context]])
- * Description: Output a file or a URL 
- * Source code: ext/standard/file.c
- * Alias to functions: 
- */
-
 echo "*** Testing readfile() : variation ***\n";
 $mainDir = "readfileVar私はガラスを食べられます8";
 $subDir = "readfileVar私はガラスを食べられます8Sub";
-$absMainDir = dirname(__FILE__)."\\".$mainDir;
+$absMainDir = __DIR__."\\".$mainDir;
 mkdir($absMainDir);
 $absSubDir = $absMainDir."\\".$subDir;
 mkdir($absSubDir);
@@ -33,7 +27,7 @@ fclose($h);
 
 
 $old_dir_path = getcwd();
-chdir(dirname(__FILE__));
+chdir(__DIR__);
 $unixifiedDir = '/'.substr(str_replace('\\','/',$absSubDir),3);
 
 $allDirs = array(
@@ -44,14 +38,14 @@ $allDirs = array(
   "$absSubDir\\..\\..\\".$mainDir."\\.\\".$subDir,
   "$absSubDir\\..\\\\\\".$subDir."\\\\..\\\\..\\".$subDir,
   "$absSubDir\\BADDIR",
-  
+
   // relative paths
   $mainDir."\\".$subDir,
-  $mainDir."\\\\".$subDir, 
-   $mainDir."\\\\\\".$subDir, 
+  $mainDir."\\\\".$subDir,
+   $mainDir."\\\\\\".$subDir,
   ".\\".$mainDir."\\..\\".$mainDir."\\".$subDir,
-  "BADDIR",  
-  
+  "BADDIR",
+
   // unixifed path
   $unixifiedDir,
 );
@@ -86,11 +80,11 @@ The File Contents
 The File Contents
 -- %s\readfileVar私はガラスを食べられます8\readfileVar私はガラスを食べられます8Sub\..\\\readfileVar私はガラスを食べられます8Sub\\..\\..\readfileVar私はガラスを食べられます8Sub --
 
-Warning: readfile(%s\readfileVar私はガラスを食べられます8\readfileVar私はガラスを食べられます8Sub\..\\\readfileVar私はガラスを食べられます8Sub\\..\\..\readfileVar私はガラスを食べられます8Sub\fileToRead.tmp): failed to open stream: No such file or directory in %s on line %d
+Warning: readfile(%s\readfileVar私はガラスを食べられます8\readfileVar私はガラスを食べられます8Sub\..\\\readfileVar私はガラスを食べられます8Sub\\..\\..\readfileVar私はガラスを食べられます8Sub\fileToRead.tmp): Failed to open stream: No such file or directory in %s on line %d
 
 -- %s\readfileVar私はガラスを食べられます8\readfileVar私はガラスを食べられます8Sub\BADDIR --
 
-Warning: readfile(%s\readfileVar私はガラスを食べられます8\readfileVar私はガラスを食べられます8Sub\BADDIR\fileToRead.tmp): failed to open stream: No such file or directory in %s on line %d
+Warning: readfile(%s\readfileVar私はガラスを食べられます8\readfileVar私はガラスを食べられます8Sub\BADDIR\fileToRead.tmp): Failed to open stream: No such file or directory in %s on line %d
 
 -- readfileVar私はガラスを食べられます8\readfileVar私はガラスを食べられます8Sub --
 The File Contents
@@ -102,7 +96,7 @@ The File Contents
 The File Contents
 -- BADDIR --
 
-Warning: readfile(BADDIR\fileToRead.tmp): failed to open stream: No such file or directory in %s on line %d
+Warning: readfile(BADDIR\fileToRead.tmp): Failed to open stream: No such file or directory in %s on line %d
 
 -- /%s/readfileVar私はガラスを食べられます8/readfileVar私はガラスを食べられます8Sub --
 The File Contents

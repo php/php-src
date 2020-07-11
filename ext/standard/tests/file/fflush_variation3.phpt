@@ -3,17 +3,14 @@ Test fflush() function: usage variations - hard links as resource
 --SKIPIF--
 <?php
 if( substr(PHP_OS, 0, 3) == 'WIN')
-  die("skip Links not valid on Windows");
+  die("skip not for Windows");
 ?>
 --FILE--
 <?php
-/*  Prototype: bool fflush ( resource $handle );
-    Description: Flushes the output to a file
-*/
 
 /* test fflush() with handle to hard links as resource */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require $file_path.'/file.inc';
 
 echo "*** Testing fflush(): with hard links to files opened in diff modes ***\n";
@@ -29,28 +26,28 @@ $count = 1;
 foreach( $file_types as $type ) {
   echo "-- Iteration $count with file containing $type data --\n";
   foreach( $file_modes as $mode ) {
-    
+
     // creating the file
     $file_handle = fopen($file_name, "w");
     if($file_handle == false)
       exit("Error:failed to open file $file_name");
 
-    // fill the fill with some data if mode is append mode 
-    if( substr($mode, 0, 1) == "a" ) 
-      fill_file($file_handle, $type, 10); 
+    // fill the fill with some data if mode is append mode
+    if( substr($mode, 0, 1) == "a" )
+      fill_file($file_handle, $type, 10);
 
     // fclose($file_handle);
-   
+
     // creating hard link to the file
     var_dump( link($file_name, $link_name) );
-  
+
     // opening the file in different modes
     $file_handle = fopen($link_name, $mode);
     if($file_handle == false)
       exit("Error:failed to open link $link_name");
-  
+
     // writing data to the file
-    var_dump( fill_file($file_handle, $type, 50) ); 
+    var_dump( fill_file($file_handle, $type, 50) );
     var_dump( fflush($file_handle) );
     fclose($file_handle);
 
@@ -65,7 +62,7 @@ foreach( $file_types as $type ) {
 
 echo "\n*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fflush(): with hard links to files opened in diff modes ***
 -- Iteration 1 with file containing empty data --
 bool(true)
@@ -380,4 +377,3 @@ bool(true)
 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 int(60)
 
 *** Done ***
-

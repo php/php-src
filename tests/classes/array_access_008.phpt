@@ -1,30 +1,30 @@
 --TEST--
-ZE2 ArrayAccess and ASSIGN_OP operators (.=) 
+ZE2 ArrayAccess and ASSIGN_OP operators (.=)
 --FILE--
-<?php 
+<?php
 
 class Peoples implements ArrayAccess {
-	public $person;
-	
-	function __construct() {
-		$this->person = array(array('name'=>'Foo'));
-	}
+    public $person;
 
-	function offsetExists($index) {
-		return array_key_exists($this->person, $index);
-	}
+    function __construct() {
+        $this->person = array(array('name'=>'Foo'));
+    }
 
-	function offsetGet($index) {
-		return $this->person[$index];
-	}
+    function offsetExists($index) {
+        return array_key_exists($this->person, $index);
+    }
 
-	function offsetSet($index, $value) {
-		$this->person[$index] = $value;
-	}
+    function offsetGet($index) {
+        return $this->person[$index];
+    }
 
-	function offsetUnset($index) {
-		unset($this->person[$index]);
-	}
+    function offsetSet($index, $value) {
+        $this->person[$index] = $value;
+    }
+
+    function offsetUnset($index) {
+        unset($this->person[$index]);
+    }
 }
 
 $people = new Peoples;
@@ -48,7 +48,6 @@ $people[0]['name'] .= 'Baz';
 var_dump($people[0]['name']);
 
 ?>
-===DONE===
 --EXPECTF--
 string(3) "Foo"
 string(6) "FooBar"
@@ -64,4 +63,3 @@ string(3) "Foo"
 
 Notice: Indirect modification of overloaded element of Peoples has no effect in %sarray_access_008.php on line 44
 string(3) "Foo"
-===DONE===

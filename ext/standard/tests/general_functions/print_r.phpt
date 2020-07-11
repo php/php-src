@@ -1,19 +1,10 @@
 --TEST--
 Test print_r() function
---SKIPIF--
-<?php
-if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
-?>
 --INI--
 precision=14
 --FILE--
 <?php
-/* Prototype: bool print_r ( mixed $expression [, bool $return] );
-   Description: Prints human-readable information about a variable
-*/
 
-/* Prototype: void check_printr( $variables )
-   Description: use print_r() to print variables */
 function check_printr( $variables ) {
   $counter = 1;
   foreach( $variables as $variable ) {
@@ -28,9 +19,9 @@ function check_printr( $variables ) {
     $counter++;
   }
 }
-  
+
 echo "\n*** Testing print_r() on integer variables ***\n";
-$integers = array ( 
+$integers = array (
   0,  // zero as argument
   000000123,  //octal value of 83
   123000000,
@@ -46,7 +37,7 @@ $integers = array (
   -0x80000000,  // min range of hexadecimal integer
   017777777777,  // max posotive octal integer
   -020000000000  // min range of octal integer
-);		    
+);
 /* calling check_printr() to display contents of integer variables
    using print_r() */
 check_printr($integers);
@@ -84,7 +75,7 @@ $floats = array (
   -0x80000001,  // float value, beyond max negative int
   0x80000001,  // float value, beyond max positive int
   020000000001,  // float value, beyond max positive int
-  -020000000001  // float value, beyond max negative int 
+  -020000000001  // float value, beyond max negative int
 );
 /* calling check_printr() to display contents of float variables
    using print_r() */
@@ -105,7 +96,7 @@ $strings = array (
   'PHP',
   "abcd\x0n1234\x0005678\x0000efgh\xijkl",  // strings with hexadecimal NULL
   "abcd\0efgh\0ijkl\x00mnop\x000qrst\00uvwx\0000yz",  // strings with octal NULL
-  "1234\t\n5678\n\t9100\rabcda"  // strings with escape characters
+  "1234\t\n5678\n\t9100\"abcda"  // strings with escape characters
 );
 /* calling check_printr() to display contents of strings using print_r() */
 check_printr($strings);
@@ -116,7 +107,7 @@ $booleans = array (
   FALSE,
   true,
   false
-);	  
+);
 /* calling check_printr() to display boolean variables using print_r() */
 check_printr($booleans);
 var_dump( reset($booleans) );
@@ -231,10 +222,10 @@ print_r($recursion_obj2);
 
 echo "\n*** Testing print_r() on resources ***\n";
 /* file type resource */
-$file_handle = fopen(__FILE__, "r"); 
+$file_handle = fopen(__FILE__, "r");
 
 /* directory type resource */
-$dir_handle = opendir( dirname(__FILE__) );
+$dir_handle = opendir( __DIR__ );
 
 $resources = array (
   $file_handle,
@@ -244,8 +235,8 @@ $resources = array (
    using print_r() */
 check_printr($resources);
 
-echo "\n*** Testing print_r() on different combinations of scalar 
-            and non-scalar variables ***\n";
+echo "\n*** Testing print_r() on different combinations of scalar
+    and non-scalar variables ***\n";
 /* a variable which is unset */
 $unset_var = 10.5;
 unset($unset_var);
@@ -259,46 +250,28 @@ $variations = array (
   array( new no_member_class, array(), false, 0 ),
   array( -0.00, "Where am I?", array(7,8,9), TRUE, 'A', 987654321 ),
   array( @$unset_var, 2.E+10, 100-20.9, 000004.599998 ),  //unusual data
-  array( "array(1,2,3,4)1.0000002TRUE", @$file_handle, 111333.00+45e5, '/00\7') 
+  array( "array(1,2,3,4)1.0000002TRUE", @$file_handle, 111333.00+45e5, '/00\7')
 );
-/* calling check_printr() to display combinations of scalar and 
+/* calling check_printr() to display combinations of scalar and
    non-scalar variables using print_r() */
 check_printr($variations);
 
-echo "\n*** Testing print_r() on miscelleneous input arguments ***\n";
+echo "\n*** Testing print_r() on miscellaneous input arguments ***\n";
 $misc_values = array (
   @$unset_var,
   NULL,  // NULL argument
   @$undef_variable,  //undefined variable
   null
 );
-/* calling check_printr() to display miscelleneous data using print_r() */
+/* calling check_printr() to display miscellaneous data using print_r() */
 check_printr($misc_values);
-
-/* checking print_r() on functions */
-echo "\n*** Testing print_r() on anonymous functions ***\n";
-$newfunc = create_function('$a,$b', 'return "$a * $b = " . ($a * $b);');
-echo "New anonymous function: $newfunc\n";
-print_r( $newfunc(2, 3) );
-/* creating anonymous function dynamically */
-print_r( create_function('$a', 'return "$a * $a = " . ($a * $b);') );
-
-echo "\n\n*** Testing error conditions ***\n";
-//passing zero argument
-var_dump( print_r() );
-
-//passing more than required no. of arguments
-var_dump( print_r(123, true, "abc") );
-
-// check when second arg is given other than boolean TRUE
-var_dump( print_r ($value, "string") );
 
 /* closing resource handle used */
 closedir($dir_handle);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing print_r() on integer variables ***
 
 -- Iteration 1 --
@@ -626,13 +599,13 @@ abcd efgh ijkl mnop 0qrst uvwx 0yz
 -- Iteration 14 --
 1234	
 5678
-	9100abcda
+	9100"abcda
 1234	
 5678
-	9100abcda
+	9100"abcda
 1234	
 5678
-	9100abcda
+	9100"abcda
 *** Testing print_r() on boolean variables ***
 
 -- Iteration 1 --
@@ -1484,15 +1457,15 @@ object_class Object
 *** Testing print_r() on resources ***
 
 -- Iteration 1 --
-Resource id #%d
-Resource id #%d
-Resource id #%d
+Resource id #5
+Resource id #5
+Resource id #5
 -- Iteration 2 --
-Resource id #%d
-Resource id #%d
-Resource id #%d
-*** Testing print_r() on different combinations of scalar 
-            and non-scalar variables ***
+Resource id #6
+Resource id #6
+Resource id #6
+*** Testing print_r() on different combinations of scalar
+    and non-scalar variables ***
 
 -- Iteration 1 --
 Array
@@ -1701,7 +1674,7 @@ Array
     [3] => /00\7
 )
 
-*** Testing print_r() on miscelleneous input arguments ***
+*** Testing print_r() on miscellaneous input arguments ***
 
 -- Iteration 1 --
 
@@ -1718,19 +1691,4 @@ Array
 -- Iteration 4 --
 
 
-
-*** Testing print_r() on anonymous functions ***
-New anonymous function:  lambda_1
-2 * 3 = 6 lambda_2
-
-*** Testing error conditions ***
-
-Warning: print_r() expects at least 1 parameter, 0 given in %s on line %d
-bool(false)
-
-Warning: print_r() expects at most 2 parameters, 3 given in %s on line %d
-bool(false)
-
-Notice: Undefined variable: value in %s on line %d
-string(0) ""
 Done

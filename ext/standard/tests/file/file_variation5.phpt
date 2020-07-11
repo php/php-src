@@ -9,7 +9,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 --FILE--
 <?php
 
-$script_directory = dirname(__FILE__);
+$script_directory = __DIR__;
 chdir($script_directory);
 $test_dirname = basename(__FILE__, ".php") . "testdir";
 mkdir($test_dirname);
@@ -25,7 +25,7 @@ var_dump(file("./$test_dirname/../$filename"));
 
 echo "\nfile() on a path containing .. with invalid directories\n";
 var_dump(file("./$test_dirname/bad_dir/../../$filename"));
- 
+
 echo "\nfile() on a linked file\n";
 $linkname = "somelink";
 var_dump(symlink($filepath, $linkname));

@@ -11,15 +11,15 @@ r
 c
 r
 q
---EXPECTF--
+--EXPECT--
 prompt> [Successful compilation of stdin input]
-prompt> [Breakpoint #0 added at -:3]
-prompt> [Breakpoint #0 at -:3, hits: 1]
+prompt> [Breakpoint #0 added at Standard input code:3]
+prompt> [Breakpoint #0 at Standard input code:3, hits: 1]
 >00003: echo "Hello, world!\n";
  00004: 
 prompt> Hello, world!
 [Script ended normally]
-prompt> [Breakpoint #0 at -:3, hits: 1]
+prompt> [Breakpoint #0 at Standard input code:3, hits: 1]
 >00003: echo "Hello, world!\n";
  00004: 
 prompt> 

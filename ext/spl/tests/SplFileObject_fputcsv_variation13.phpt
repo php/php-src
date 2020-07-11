@@ -1,5 +1,5 @@
 --TEST--
-Test fputcsv() : usage variations - with default enclosure & delimiter of two chars 
+Test fputcsv() : usage variations - with default enclosure & delimiter of two chars
 --FILE--
 <?php
 
@@ -8,7 +8,7 @@ Test fputcsv() : usage variations - with default enclosure & delimiter of two ch
 
 echo "*** Testing fputcsv() : with default enclosure & delimiter of two chars ***\n";
 
-$fo = new SplFileObject(__DIR__ . '/SplFileObject_fputcsv.csv', 'w');
+$fo = new SplFileObject(__DIR__ . '/SplFileObject_fputcsv_variation13.csv', 'w');
 
 var_dump($fo->fputcsv(array('water', 'fruit'), ',,', '"'));
 
@@ -18,7 +18,7 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-$file = __DIR__ . '/SplFileObject_fputcsv.csv';
+$file = __DIR__ . '/SplFileObject_fputcsv_variation13.csv';
 unlink($file);
 ?>
 --EXPECTF--

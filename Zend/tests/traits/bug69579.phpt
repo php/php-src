@@ -2,7 +2,7 @@
 Bug #69579 (Internal trait double-free)
 --SKIPIF--
 <?php
-if (!PHP_DEBUG) die("skip only run in debug version");
+if (!extension_loaded('zend-test')) die('skip zend-test extension not loaded');
 ?>
 --FILE--
 <?php

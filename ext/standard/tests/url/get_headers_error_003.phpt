@@ -1,9 +1,11 @@
 --TEST--
 Test get_headers() function : test with context
+--CONFLICTS--
+server
 --FILE--
 <?php
 
-include dirname(__FILE__)."/../../../../sapi/cli/tests/php_cli_server.inc";
+include __DIR__."/../../../../sapi/cli/tests/php_cli_server.inc";
 php_cli_server_start('header("X-Request-Method: ".$_SERVER["REQUEST_METHOD"]);');
 
 $opts = array(
@@ -22,10 +24,7 @@ echo $headers["X-Request-Method"]."\n";
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 HEAD
 HEAD
 Done
-
-
-

@@ -25,10 +25,8 @@ printf("size: %d\n", strlen($buffer));
 
 test_image_equals_file(__DIR__ . DIRECTORY_SEPARATOR . 'imagegd_truecolor.png', $im);
 ?>
-===DONE===
 --EXPECT--
 signature: 65534
 truecolor: 1
 size: 411
 The images are equal.
-===DONE===

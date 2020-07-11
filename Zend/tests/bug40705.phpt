@@ -14,7 +14,7 @@ var_dump(key($foo));
 doForeach($foo);
 var_dump(key($foo));
 foreach ($foo as $k => $v) {
-	var_dump($k);
+    var_dump($k);
 }
 var_dump(key($foo));
 --EXPECT--

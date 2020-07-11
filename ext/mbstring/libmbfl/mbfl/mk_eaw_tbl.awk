@@ -1,7 +1,5 @@
 #!/usr/bin/awk -f
 #
-# $Id$
-#
 # Description: a script to generate east asian width table.
 #
 
@@ -78,4 +76,4 @@ END {
 		printf("{ 0x%04x, 0x%04x }", first, prev)
 	}
 	print "\n};\n"
-} 
+}

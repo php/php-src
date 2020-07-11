@@ -4,47 +4,51 @@ func_get_args() tests
 <?php
 
 function test1() {
-	var_dump(func_get_args());
+    var_dump(func_get_args());
 }
 
 function test2($a) {
-	var_dump(func_get_args());
+    var_dump(func_get_args());
 }
 
 function test3($a, $b) {
-	var_dump(func_get_args());
+    var_dump(func_get_args());
 }
 
 test1();
 test1(10);
 test2(1);
 try {
-	test2();
+    test2();
 } catch (Throwable $e) {
-	echo "Exception: " . $e->getMessage() . "\n";
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 test3(1,2);
 
 call_user_func("test1");
 try {
-	call_user_func("test3", 1);
+    call_user_func("test3", 1);
 } catch (Throwable $e) {
-	echo "Exception: " . $e->getMessage() . "\n";
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 call_user_func("test3", 1, 2);
 
 class test {
-	static function test1($a) {
-		var_dump(func_get_args());
-	}
+    static function test1($a) {
+        var_dump(func_get_args());
+    }
 }
 
 test::test1(1);
-var_dump(func_get_args());
 
-echo "Done\n";
+try {
+    var_dump(func_get_args());
+} catch (\Error $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+
 ?>
---EXPECTF--	
+--EXPECTF--
 array(0) {
 }
 array(1) {
@@ -75,7 +79,4 @@ array(1) {
   [0]=>
   int(1)
 }
-
-Warning: func_get_args():  Called from the global scope - no function context in %s on line %d
-bool(false)
-Done
+func_get_args() cannot be called from the global scope

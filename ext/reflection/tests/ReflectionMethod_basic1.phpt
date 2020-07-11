@@ -31,17 +31,17 @@ class TestClass
     public function foo() {
         echo "Called foo()\n";
     }
-    
+
     static function stat() {
         echo "Called stat()\n";
     }
-    
+
     private function priv() {
         echo "Called priv()\n";
     }
-    
+
     protected function prot() {}
-    
+
     public function __destruct() {}
 }
 
@@ -49,6 +49,14 @@ class DerivedClass extends TestClass {}
 
 interface TestInterface {
     public function int();
+    public function __construct($arg);
+    public function __destruct();
+}
+
+trait TestTrait {
+    public abstract function __construct();
+    public function __destruct() {
+    }
 }
 
 reflectMethod("DerivedClass", "foo");
@@ -59,6 +67,10 @@ reflectMethod("DerivedClass", "prot");
 reflectMethod("TestInterface", "int");
 reflectMethod("ReflectionProperty", "__construct");
 reflectMethod("TestClass", "__destruct");
+reflectMethod("TestInterface", "__construct");
+reflectMethod("TestInterface", "__destruct");
+reflectMethod("TestTrait", "__construct");
+reflectMethod("TestTrait", "__destruct");
 
 ?>
 --EXPECT--
@@ -294,5 +306,119 @@ isDestructor():
 bool(true)
 
 **********************************
+**********************************
+Reflecting on method TestInterface::__construct()
 
 
+isFinal():
+bool(false)
+
+isAbstract():
+bool(true)
+
+isPublic():
+bool(true)
+
+isPrivate():
+bool(false)
+
+isProtected():
+bool(false)
+
+isStatic():
+bool(false)
+
+isConstructor():
+bool(true)
+
+isDestructor():
+bool(false)
+
+**********************************
+**********************************
+Reflecting on method TestInterface::__destruct()
+
+
+isFinal():
+bool(false)
+
+isAbstract():
+bool(true)
+
+isPublic():
+bool(true)
+
+isPrivate():
+bool(false)
+
+isProtected():
+bool(false)
+
+isStatic():
+bool(false)
+
+isConstructor():
+bool(false)
+
+isDestructor():
+bool(true)
+
+**********************************
+**********************************
+Reflecting on method TestTrait::__construct()
+
+
+isFinal():
+bool(false)
+
+isAbstract():
+bool(true)
+
+isPublic():
+bool(true)
+
+isPrivate():
+bool(false)
+
+isProtected():
+bool(false)
+
+isStatic():
+bool(false)
+
+isConstructor():
+bool(true)
+
+isDestructor():
+bool(false)
+
+**********************************
+**********************************
+Reflecting on method TestTrait::__destruct()
+
+
+isFinal():
+bool(false)
+
+isAbstract():
+bool(false)
+
+isPublic():
+bool(true)
+
+isPrivate():
+bool(false)
+
+isProtected():
+bool(false)
+
+isStatic():
+bool(false)
+
+isConstructor():
+bool(false)
+
+isDestructor():
+bool(true)
+
+**********************************

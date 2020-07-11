@@ -1,12 +1,7 @@
 --TEST--
-Test ltrim() function : basic functionality 
+Test ltrim() function : basic functionality
 --FILE--
 <?php
-
-/* Prototype  : string ltrim  ( string $str  [, string $charlist  ] )
- * Description: Strip whitespace (or other characters) from the beginning of a string.
- * Source code: ext/standard/string.c
-*/
 
 echo "*** Testing ltrim() : basic functionality ***\n";
 
@@ -18,13 +13,13 @@ $alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 echo "\n-- Trim string with all white space characters --\n";
 var_dump(ltrim($text));
 
-echo "\n-- Trim non-whitespace from a string --\n"; 
+echo "\n-- Trim non-whitespace from a string --\n";
 var_dump(ltrim($hello, "=!"));
 
-echo "\n-- Trim some non-white space characters from a string --\n"; 
+echo "\n-- Trim some non-white space characters from a string --\n";
 var_dump(ltrim($hello, "!oleH="));
 
-echo "\n-- Trim some non-white space characters from a string suing a character range --\n"; 
+echo "\n-- Trim some non-white space characters from a string suing a character range --\n";
 var_dump(ltrim($alpha, "A..Z"));
 
 
@@ -32,7 +27,6 @@ echo "\n-- Trim the ASCII control characters at the beginning of a string --\n";
 var_dump(ltrim($binary, "\x00..\x1F"));
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing ltrim() : basic functionality ***
 
@@ -50,4 +44,3 @@ string(10) "0123456789"
 
 -- Trim the ASCII control characters at the beginning of a string --
 string(14) "Example string"
-===DONE===

@@ -1,5 +1,5 @@
 --TEST--
-Bug #72197 pg_lo_create arbitrary read 
+Bug #72197 pg_lo_create arbitrary read
 --SKIPIF--
 <?php include("skipif.inc"); ?>
 --FILE--
@@ -7,7 +7,11 @@ Bug #72197 pg_lo_create arbitrary read
 /* This shouldn't crash. */
 $var1=-32768;
 $var2="12";
-pg_lo_create($var1, $var2);
+try {
+    pg_lo_create($var1, $var2);
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 /* This should work correctly. */
 include('config.inc');
@@ -26,10 +30,7 @@ var_dump($oid);
 pg_query($conn, "ROLLBACK");
 pg_close($conn);
 ?>
-==DONE==
 --EXPECTF--
-Warning: pg_lo_create(): supplied resource is not a valid PostgreSQL link resource in %sbug72197.php on line %d%w
+pg_lo_create(): supplied resource is not a valid PostgreSQL link resource%w
 int(%d)
 int(%d)
-==DONE==
-

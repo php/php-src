@@ -3,25 +3,25 @@ htmlentities() / htmlspecialchars() ENT_DISALLOWED
 --FILE--
 <?php
 function codepoint_to_utf8($k) {
-	if ($k < 0x80) {
-		$retval = pack('C', $k);
-	} else if ($k < 0x800) {
-		$retval = pack('C2', 
+    if ($k < 0x80) {
+        $retval = pack('C', $k);
+    } else if ($k < 0x800) {
+        $retval = pack('C2',
             0xc0 | ($k >> 6),
             0x80 | ($k & 0x3f));
-	} else if ($k < 0x10000) {
+    } else if ($k < 0x10000) {
         $retval = pack('C3',
             0xe0 | ($k >> 12),
             0x80 | (($k >> 6) & 0x3f),
             0x80 | ($k & 0x3f));
-	} else {
+    } else {
         $retval = pack('C4',
             0xf0 | ($k >> 18),
             0x80 | (($k >> 12) & 0x3f),
             0x80 | (($k >> 6) & 0x3f),
             0x80 | ($k & 0x3f));
-	}
-	return $retval;
+    }
+    return $retval;
 }
 
 $tests = array(

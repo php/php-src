@@ -1,23 +1,21 @@
 --TEST--
 ZE2 object cloning, 6
---SKIPIF--
-<?php if (version_compare(zend_version(), '2.0.0-dev', '<')) die('skip ZendEngine 2 needed'); ?>
 --INI--
 error_reporting=2047
 --FILE--
 <?php
 
 class MyCloneable {
-	static $id = 0;
+    static $id = 0;
 
-	function __construct() {
-		$this->id = self::$id++;
-	}
+    function __construct() {
+        $this->id = self::$id++;
+    }
 
-	function __clone() {
-		$this->address = "New York";
-		$this->id = self::$id++;
-	}
+    function __clone() {
+        $this->address = "New York";
+        $this->id = self::$id++;
+    }
 }
 
 $original = new MyCloneable();

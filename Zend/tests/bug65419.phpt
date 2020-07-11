@@ -18,6 +18,6 @@ class ghi
 
 ghi::def();
 ?>
---EXPECTF--
+--EXPECT--
 ghi
 ghi

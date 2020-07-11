@@ -12,14 +12,13 @@ error_reporting(E_ERROR);
 
 foreach ($strVals as $strVal) {
    foreach($strVals as $otherVal) {
-	   echo "--- testing: '$strVal' + '$otherVal' ---\n";   
+       echo "--- testing: '$strVal' + '$otherVal' ---\n";
       var_dump($strVal+$otherVal);
    }
 }
 
-   
+
 ?>
-===DONE===
 --EXPECT--
 --- testing: '0' + '0' ---
 int(0)
@@ -158,7 +157,7 @@ float(115.3)
 --- testing: '-7.7' + '123abc ' ---
 float(115.3)
 --- testing: '-7.7' + '3.4a' ---
-float(-4.3)
+float(-4.300000000000001)
 --- testing: '-7.7' + 'a5.9' ---
 float(-7.7)
 --- testing: 'abc' + '0' ---
@@ -366,7 +365,7 @@ float(-40.6)
 --- testing: '3.4a' + '1.2' ---
 float(4.6)
 --- testing: '3.4a' + '-7.7' ---
-float(-4.3)
+float(-4.300000000000001)
 --- testing: '3.4a' + 'abc' ---
 float(3.4)
 --- testing: '3.4a' + '123abc' ---
@@ -413,4 +412,3 @@ int(123)
 float(3.4)
 --- testing: 'a5.9' + 'a5.9' ---
 int(0)
-===DONE===

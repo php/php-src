@@ -2,7 +2,7 @@
 ReflectionParameter::get/hasType and ReflectionType tests
 --FILE--
 <?php
-function foo(stdClass $a, array $b, callable $c, stdClass $d = null, $e = null, string $f, bool $g, int $h, float $i, NotExisting $j) { }
+function foo(stdClass $a, array $b, callable $c, string $f, bool $g, int $h, float $i, NotExisting $j, stdClass $d = null, $e = null) { }
 
 function bar(): stdClass { return new stdClass; }
 
@@ -74,6 +74,32 @@ foreach ([
   }
 }
 
+echo "\n*** property types\n";
+
+class PropTypeTest {
+    public int $int;
+    public string $string;
+    public array $arr;
+    public iterable $iterable;
+    public stdClass $std;
+    public OtherThing $other;
+    public $mixed;
+}
+
+$reflector = new ReflectionClass(PropTypeTest::class);
+
+foreach ($reflector->getProperties() as $name => $property) {
+    if ($property->hasType()) {
+        printf("public %s $%s;\n",
+            $property->getType()->getName(), $property->getName());
+    } else printf("public $%s;\n", $property->getName());
+}
+
+echo "*** resolved property types\n";
+$obj = new PropTypeTest;
+$obj->std = new stdClass;
+$r = (new ReflectionProperty($obj, 'std'))->getType();
+var_dump($r->getName());
 ?>
 --EXPECT--
 *** functions
@@ -94,36 +120,36 @@ bool(true)
 string(8) "callable"
 ** Function 0 - Parameter 3
 bool(true)
-bool(true)
-bool(false)
-string(8) "stdClass"
-** Function 0 - Parameter 4
-bool(false)
-** Function 0 - Parameter 5
-bool(true)
 bool(false)
 bool(true)
 string(6) "string"
-** Function 0 - Parameter 6
+** Function 0 - Parameter 4
 bool(true)
 bool(false)
 bool(true)
 string(4) "bool"
-** Function 0 - Parameter 7
+** Function 0 - Parameter 5
 bool(true)
 bool(false)
 bool(true)
 string(3) "int"
-** Function 0 - Parameter 8
+** Function 0 - Parameter 6
 bool(true)
 bool(false)
 bool(true)
 string(5) "float"
-** Function 0 - Parameter 9
+** Function 0 - Parameter 7
 bool(true)
 bool(false)
 bool(false)
 string(11) "NotExisting"
+** Function 0 - Parameter 8
+bool(true)
+bool(true)
+bool(false)
+string(8) "stdClass"
+** Function 0 - Parameter 9
+bool(false)
 ** Function 1 - Parameter 0
 bool(true)
 bool(false)
@@ -185,3 +211,14 @@ bool(true)
 bool(false)
 bool(false)
 string(4) "Test"
+
+*** property types
+public int $int;
+public string $string;
+public array $arr;
+public iterable $iterable;
+public stdClass $std;
+public OtherThing $other;
+public $mixed;
+*** resolved property types
+string(8) "stdClass"

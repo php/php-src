@@ -2,13 +2,8 @@
 Test strrpos() function : usage variations - repetitive chars for 'haystack' argument
 --FILE--
 <?php
-/* Prototype  : int strrpos ( string $haystack, string $needle [, int $offset] );
- * Description: Find position of last occurrence of 'needle' in 'haystack'.
- * Source code: ext/standard/string.c
-*/
-
 /* Test strrpos() function with strings containing multiple occurrences of 'needle' in the 'haystack'
- *  and with various needles & offsets 
+ *  and with various needles & offsets
 */
 
 echo "*** Testing strrpos() function: strings repetitive chars ***\n";
@@ -24,7 +19,7 @@ for($offset = -1; $offset <= strlen($haystack); $offset++ ) {
 }
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strrpos() function: strings repetitive chars ***
 -- Iteration 1 --
 int(4)

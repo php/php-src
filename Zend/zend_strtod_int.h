@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -34,7 +34,7 @@
 #endif
 
 /* TODO check to undef this option, this might
-	make more perf. destroy_freelist() 
+	make more perf. destroy_freelist()
 	should be adapted then. */
 #define Omit_Private_Memory 1
 
@@ -42,11 +42,7 @@
 	https://wiki.php.net/rfc/remove_hex_support_in_numeric_strings */
 #define NO_HEX_FP 1
 
-#if defined(HAVE_INTTYPES_H)
 #include <inttypes.h>
-#elif defined(HAVE_STDINT_H)
-#include <stdint.h>
-#endif
 
 #ifndef HAVE_INT32_T
 # if SIZEOF_INT == 4
@@ -70,6 +66,10 @@ typedef unsigned long int uint32_t;
 
 #ifndef NO_INFNAN_CHECK
 #define NO_INFNAN_CHECK
+#endif
+
+#ifndef NO_ERRNO
+#define NO_ERRNO
 #endif
 
 #ifdef WORDS_BIGENDIAN
@@ -136,9 +136,8 @@ typedef unsigned long int uint32_t;
 	} else if (1 == x) { \
 		tsrm_mutex_unlock(pow5mult_mutex); \
 	}
-	
+
 
 #endif
 
 #endif /* ZEND_STRTOD_INT_H */
-

@@ -74,7 +74,7 @@ if (@(isset($_SERVER['REQUEST_URI']) && isset($_SERVER['REQUEST_METHOD']) && ($_
     $a = realpath(Extract_Phar::$temp . DIRECTORY_SEPARATOR . $pt);
     if (!$a || strlen(dirname($a)) < strlen(Extract_Phar::$temp)) {
         header('HTTP/1.0 404 Not Found');
-        echo "<html>\n <head>\n  <title>File Not Found<title>\n </head>\n <body>\n  <h1>404 - File ", $pt, " Not Found</h1>\n </body>\n</html>";
+        echo "<html>\n <head>\n  <title>File Not Found<title>\n </head>\n <body>\n  <h1>404 - File Not Found</h1>\n </body>\n</html>";
         exit;
     }
     $b = pathinfo($a);
@@ -127,7 +127,7 @@ class Extract_Phar
         } while (strlen($last) && strlen($m) < $L[1]);
 
         if (strlen($m) < $L[1]) {
-            die('ERROR: manifest length read was "' . 
+            die('ERROR: manifest length read was "' .
                 strlen($m) .'" should be "' .
                 $L[1] . '"');
         }
@@ -265,7 +265,7 @@ class Extract_Phar
 
         if (strlen($data) != $entry[0]) {
             die("Invalid internal .phar file (size error " . strlen($data) . " != " .
-                $stat[7] . ")");
+                $entry[0] . ")");
         }
 
         if ($entry[3] != sprintf("%u", crc32((binary)$data) & 0xffffffff)) {

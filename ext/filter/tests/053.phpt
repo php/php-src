@@ -13,5 +13,5 @@ filter_var('durty/boy', FILTER_CALLBACK, array(
 print "Done\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 Done

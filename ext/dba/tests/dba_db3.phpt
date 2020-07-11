@@ -1,17 +1,16 @@
 --TEST--
 DBA DB3 handler test
 --SKIPIF--
-<?php 
+<?php
 	$handler = 'db3';
-	require_once dirname(__FILE__) .'/skipif.inc';
+	require_once __DIR__ .'/skipif.inc';
 ?>
 --FILE--
 <?php
-	$handler = 'db3';
-	require_once dirname(__FILE__) .'/test.inc';
-	require_once dirname(__FILE__) .'/dba_handler.inc';
+    $handler = 'db3';
+    require_once __DIR__ .'/test.inc';
+    require_once __DIR__ .'/dba_handler.inc';
 ?>
-===DONE===
 --EXPECT--
 database handler: db3
 3NYNYY
@@ -47,4 +46,3 @@ array(3) {
   ["key5"]=>
   string(23) "The last content string"
 }
-===DONE===

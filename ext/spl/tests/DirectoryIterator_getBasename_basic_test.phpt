@@ -19,5 +19,5 @@ PHPNW Testfest 2009 - Adrian Hardy
    unlink($targetDir.DIRECTORY_SEPARATOR.'getBasename_test.txt');
    rmdir($targetDir);
 ?>
---EXPECTF--
+--EXPECT--
 getBasename_test

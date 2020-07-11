@@ -11,5 +11,5 @@ REQUEST_URI=/frontcontroller33.php
 Content-type: text/html; charset=UTF-8
 --FILE_EXTERNAL--
 files/frontcontroller18.phar
---EXPECTF--
+--EXPECT--
 phar error: rewrite callback must return a string or false

@@ -1,4 +1,3 @@
-// $Id$
 // vim:ft=javascript
 
 ARG_ENABLE("sockets", "SOCKETS support", "no");
@@ -14,4 +13,3 @@ if (PHP_SOCKETS != "no") {
 		WARNING("sockets not enabled; libraries and headers not found");
 	}
 }
-

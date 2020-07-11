@@ -1,12 +1,7 @@
 --TEST--
-Test strncmp() function : basic functionality 
+Test strncmp() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : int strncmp ( string $str1, string $str2, int $len );
- * Description: Binary safe case-sensitive string comparison of the first n characters
- * Source code: Zend/zend_builtin_functions.c
-*/
-
 echo "*** Testing strncmp() function: basic functionality ***\n";
 
 echo "-- Testing strncmp() with single quoted string --\n";

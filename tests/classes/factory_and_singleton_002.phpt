@@ -1,7 +1,5 @@
 --TEST--
 ZE2 factory and singleton, test 2
---SKIPIF--
-<?php if (version_compare(zend_version(), '2.0.0-dev', '<')) die('skip ZendEngine 2 needed'); ?>
 --FILE--
 <?php
 class test {
@@ -29,7 +27,7 @@ class test {
   }
 
   protected function __destruct() {
-  	test::$cnt--;
+    test::$cnt--;
   }
 
   public function get() {
@@ -43,7 +41,7 @@ class test {
       return NULL;
     }
   }
-  
+
   static public function count() {
     return test::$cnt;
   }
@@ -97,4 +95,4 @@ int(1)
 int(1)
 Done
 
-Warning: Call to protected test::__destruct() from context '' during shutdown ignored in Unknown on line 0
+Warning: Call to protected test::__destruct() from global scope during shutdown ignored in Unknown on line 0

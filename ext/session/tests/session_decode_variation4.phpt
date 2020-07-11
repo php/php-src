@@ -7,12 +7,6 @@ Test session_decode() function : variation
 
 ob_start();
 
-/* 
- * Prototype : string session_decode(void)
- * Description : Decodes session data from a string
- * Source code : ext/session/session.c 
- */
-
 echo "*** Testing session_decode() : variation ***\n";
 
 var_dump(session_start());
@@ -42,15 +36,12 @@ array(3) {
   ["guff"]=>
   float(123.456)
 }
-bool(true)
-array(3) {
-  ["foo"]=>
-  int(1234567890)
-  ["bar"]=>
-  string(5) "Blah!"
-  ["guff"]=>
-  float(123.456)
-}
-bool(true)
-Done
 
+Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s on line %d
+bool(false)
+array(0) {
+}
+
+Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
+bool(false)
+Done

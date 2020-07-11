@@ -4,8 +4,8 @@ Test function posix_getegid() by calling it with its expected arguments
 Michelangelo van Dam dragonbe@gmail.com
 #PHPTestFest Dutch PHP Conference 2012
 --SKIPIF--
-<?php 
-        if(!extension_loaded("posix")) print "skip - POSIX extension not loaded"; 
+<?php
+        if(!extension_loaded("posix")) print "skip - POSIX extension not loaded";
 ?>
 --FILE--
 <?php

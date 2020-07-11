@@ -3,9 +3,9 @@ SHA1
 --FILE--
 <?php
 function test($str) {
-	$res = sha1($str)."\n";
-	return $res;
-} 
+    $res = sha1($str)."\n";
+    return $res;
+}
 echo test("");
 echo test("a");
 echo test("abc");

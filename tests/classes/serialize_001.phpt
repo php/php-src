@@ -5,61 +5,59 @@ ZE2 Serializable
 
 class Test implements Serializable
 {
-	public $data;
+    public $data;
 
-	function __construct($data)
-	{
-		echo __METHOD__ . "($data)\n";
-		$this->data = $data;
-	}
+    function __construct($data)
+    {
+        echo __METHOD__ . "($data)\n";
+        $this->data = $data;
+    }
 
-	function serialize()
-	{
-		echo __METHOD__ . "({$this->data})\n";
-		return $this->data;
-	}
+    function serialize()
+    {
+        echo __METHOD__ . "({$this->data})\n";
+        return $this->data;
+    }
 
-	function unserialize($serialized)
-	{
-		echo __METHOD__ . "($serialized)\n";
-		$this->data = $serialized;
-		var_dump($this);
-	}
+    function unserialize($serialized)
+    {
+        echo __METHOD__ . "($serialized)\n";
+        $this->data = $serialized;
+        var_dump($this);
+    }
 }
 
 $tests = array('String', NULL, 42, false);
 
 foreach($tests as $data)
 {
-	try
-	{
-		echo "==========\n";
-		var_dump($data);
-		$ser = serialize(new Test($data));
-		var_dump(unserialize($ser));
-	}
-	catch(Exception $e)
-	{
-		echo 'Exception: ' . $e->getMessage() . "\n";
-	}
+    try
+    {
+        echo "==========\n";
+        var_dump($data);
+        $ser = serialize(new Test($data));
+        var_dump(unserialize($ser));
+    }
+    catch(Exception $e)
+    {
+        echo 'Exception: ' . $e->getMessage() . "\n";
+    }
 }
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 ==========
-%unicode|string%(6) "String"
+string(6) "String"
 Test::__construct(String)
 Test::serialize(String)
 Test::unserialize(String)
 object(Test)#%d (1) {
-  [%u|b%"data"]=>
-  %unicode|string%(6) "String"
+  ["data"]=>
+  string(6) "String"
 }
 object(Test)#%d (1) {
-  [%u|b%"data"]=>
-  %unicode|string%(6) "String"
+  ["data"]=>
+  string(6) "String"
 }
 ==========
 NULL
@@ -76,4 +74,3 @@ bool(false)
 Test::__construct()
 Test::serialize()
 Exception: Test::serialize() must return a string or NULL
-===DONE===

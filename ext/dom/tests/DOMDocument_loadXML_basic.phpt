@@ -17,5 +17,5 @@ XML_FILE=/book.xml
 LOAD_OPTIONS=0
 EXPECTED_RESULT=1
 --FILE_EXTERNAL--
-domdocumentloadxml_test_method.php
+domdocumentloadxml_test_method.inc
 --EXPECT--

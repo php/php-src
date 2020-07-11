@@ -2,7 +2,7 @@
 recursive mkdir() with unclean paths
 --FILE--
 <?php
-chdir(dirname(__FILE__));
+chdir(__DIR__);
 $dirpath = "./tmp/foo//bar/logs";
 mkdir($dirpath, 0777, true);
 

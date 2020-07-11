@@ -16,7 +16,7 @@ Date constants
         DATE_RSS,
         DATE_W3C
     );
-    
+
     foreach($constants as $const) {
         var_dump(date($const, strtotime("1 Jul 06 14:27:30 +0200")));
         var_dump(date($const, strtotime("2006-05-30T14:32:13+02:00")));

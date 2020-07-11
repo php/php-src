@@ -9,11 +9,11 @@ trait Foo {
 
 class Boo {
   use Foo {
-    bar as dontKnow; 
+    bar as dontKnow;
     dontKnow as protected;
   }
 }
 
 ?>
 --EXPECTF--
-Fatal error: The modifiers for the trait alias dontKnow() need to be changed in the same statement in which the alias is defined. Error in %s on line %d
+Fatal error: The modifiers of the trait method dontKnow() are changed, but this method does not exist. Error in %s on line %d

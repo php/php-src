@@ -20,7 +20,7 @@ function magic_sort_cmp($a, $b) {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 Array
 (
     [foo] => 0

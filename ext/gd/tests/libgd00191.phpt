@@ -14,9 +14,9 @@ imagefilledellipse($im, 30, 50, 20, 20, imagecolorallocate($im, 0, 0, 0));
 $index = imagecolorat($im, 12, 28);
 $arr = imagecolorsforindex($im, $index);
 if ($arr['red'] == 255 && $arr['green'] == 255 && $arr['blue'] == 255) {
-	echo "Ok";
+    echo "Ok";
 } else {
-	echo "failed";
+    echo "failed";
 }
 ?>
 --EXPECT--

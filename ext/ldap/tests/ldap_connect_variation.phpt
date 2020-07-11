@@ -29,11 +29,9 @@ var_dump($link);
 $link = ldap_connect("nonexistent" . $host);
 var_dump($link);
 ?>
-===DONE===
 --EXPECTF--
 resource(%d) of type (ldap link)
 resource(%d) of type (ldap link)
 resource(%d) of type (ldap link)
 resource(%d) of type (ldap link)
 resource(%d) of type (ldap link)
-===DONE===

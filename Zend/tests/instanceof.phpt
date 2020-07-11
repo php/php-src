@@ -1,11 +1,11 @@
 --TEST--
-instanceof shouldn't call __autoload
+instanceof shouldn't call autoloader
 --FILE--
 <?php
-function __autoload($name) {
-	echo("AUTOLOAD '$name'\n");
-	eval("class $name {}");
-}
+spl_autoload_register(function ($name) {
+    echo("AUTOLOAD '$name'\n");
+    eval("class $name {}");
+});
 
 class A {
 }

@@ -3,8 +3,8 @@ Bug #55719 (Argument restriction should come with a more specific error message)
 --FILE--
 <?php
 class Sub implements ArrayAccess {
-	public function offsetSet() {
-	}	
+    public function offsetSet() {
+    }
 }
 ?>
 --EXPECTF--

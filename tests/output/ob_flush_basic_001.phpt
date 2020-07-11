@@ -1,13 +1,7 @@
 --TEST--
-Test ob_flush() function : basic functionality 
+Test ob_flush() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : proto bool ob_flush(void)
- * Description: Flush (send) contents of the output buffer. The last buffer content is sent to next buffer 
- * Source code: main/output.c
- * Alias to functions: 
- */
-
 echo "*** Testing ob_flush() : basic functionality ***\n";
 
 // Zero arguments
@@ -30,7 +24,7 @@ echo "Done";
 
 -- Testing ob_flush() function with Zero arguments --
 
-Notice: ob_flush(): failed to flush buffer. No buffer to flush in %s on line 12
+Notice: ob_flush(): Failed to flush buffer. No buffer to flush in %s on line %d
 bool(false)
 This should get flushed.
 bool(true)

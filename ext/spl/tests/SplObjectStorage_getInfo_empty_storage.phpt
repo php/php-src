@@ -12,4 +12,3 @@ var_dump($s->getInfo());
 ?>
 --EXPECT--
 NULL
-

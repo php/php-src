@@ -11,15 +11,15 @@ $list->push('thar');
 $list->offsetUnset(0);
 var_dump($list);
 ?>
---EXPECTF--
+--EXPECT--
 object(SplDoublyLinkedList)#1 (2) {
-  [%u|b%"flags":%u|b%"SplDoublyLinkedList":private]=>
+  ["flags":"SplDoublyLinkedList":private]=>
   int(0)
-  [%u|b%"dllist":%u|b%"SplDoublyLinkedList":private]=>
+  ["dllist":"SplDoublyLinkedList":private]=>
   array(2) {
     [0]=>
-    %string|unicode%(3) "hai"
+    string(3) "hai"
     [1]=>
-    %string|unicode%(4) "thar"
+    string(4) "thar"
   }
 }

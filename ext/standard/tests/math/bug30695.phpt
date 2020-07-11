@@ -2,7 +2,7 @@
 Bug #30695 (32 bit issues)
 --FILE--
 <?php
-	function toUTF8( $char_code )
+    function toUTF8( $char_code )
     {
         switch ( $char_code )
         {
@@ -44,10 +44,9 @@ Bug #30695 (32 bit issues)
     }
 
 
-	echo "\n", toUTF8(65), "\n", toUTF8(233), "\n", toUTF8(1252), "\n", toUTF8(20095), "\n";
+    echo "\n", toUTF8(65), "\n", toUTF8(233), "\n", toUTF8(1252), "\n", toUTF8(20095), "\n";
 ?>
 --EXPECT--
-
 A
 é
 Ӥ

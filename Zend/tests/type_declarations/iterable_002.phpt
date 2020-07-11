@@ -17,5 +17,4 @@ function baz(iterable $iterable = 1) {
 
 ?>
 --EXPECTF--
-
-Fatal error: Default value for parameters with iterable type can only be an array or NULL in %s on line %d
+Fatal error: Cannot use int as default value for parameter $iterable of type iterable in %s on line %d

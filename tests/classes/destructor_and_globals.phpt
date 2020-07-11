@@ -28,10 +28,10 @@ class counter {
     global $test_cnt;
     $test_cnt--;
   }
-  
+
   static public function destroy(&$obj) {
-  	$obj = NULL;
-  	}
+    $obj = NULL;
+    }
 }
 Show();
 $obj1 = new counter;

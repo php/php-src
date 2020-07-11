@@ -4,71 +4,96 @@ Pass uninitialised variables by reference and by value to test implicit initiali
 <?php
 
 function v($val) {
-  $val = "Val changed";
+    $val = "Val changed";
 }
 
 function r(&$ref) {
-  $ref = "Ref changed";
+    $ref = "Ref changed";
 }
 
-
 function vv($val1, $val2) {
-  $val1 = "Val1 changed";
-  $val2 = "Val2 changed";
+    $val1 = "Val1 changed";
+    $val2 = "Val2 changed";
 }
 
 function vr($val, &$ref) {
-  $val = "Val changed";
-  $ref = "Ref changed";
+    $val = "Val changed";
+    $ref = "Ref changed";
 }
 
 function rv(&$ref, $val) {
-  $val = "Val changed";
-  $ref = "Ref changed";
+    $val = "Val changed";
+    $ref = "Ref changed";
 }
 
 function rr(&$ref1, &$ref2) {
-  $ref1 = "Ref1 changed";
-  $ref2 = "Ref2 changed";
+    $ref1 = "Ref1 changed";
+    $ref2 = "Ref2 changed";
 }
 
 
 class C {
+    function __construct($val, &$ref) {
+        $val = "Val changed";
+        $ref = "Ref changed";
+    }
 
-	function __construct($val, &$ref) {
-	  $val = "Val changed";
-	  $ref = "Ref changed";
-	}
+    function v($val) {
+        $val = "Val changed";
+    }
 
-	function v($val) {
-	  $val = "Val changed";
-	}
-	
-	function r(&$ref) {
-	  $ref = "Ref changed";
-	}
-	
-	function vv($val1, $val2) {
-	  $val1 = "Val1 changed";
-	  $val2 = "Val2 changed";
-	}
-	
-	function vr($val, &$ref) {
-	  $val = "Val changed";
-	  $ref = "Ref changed";
-	}
-	
-	function rv(&$ref, $val) {
-	  $val = "Val changed";
-	  $ref = "Ref changed";
-	}
-	
-	function rr(&$ref1, &$ref2) {
-	  $ref1 = "Ref1 changed";
-	  $ref2 = "Ref2 changed";
-	}
+    function r(&$ref) {
+        $ref = "Ref changed";
+    }
 
-} 
+    function vv($val1, $val2) {
+        $val1 = "Val1 changed";
+        $val2 = "Val2 changed";
+    }
+
+    function vr($val, &$ref) {
+        $val = "Val changed";
+        $ref = "Ref changed";
+    }
+
+    function rv(&$ref, $val) {
+        $val = "Val changed";
+        $ref = "Ref changed";
+    }
+
+    function rr(&$ref1, &$ref2) {
+        $ref1 = "Ref1 changed";
+        $ref2 = "Ref2 changed";
+    }
+
+    static function static_v($val) {
+        $val = "Val changed";
+    }
+
+    static function static_r(&$ref) {
+        $ref = "Ref changed";
+    }
+
+    static function static_vv($val1, $val2) {
+        $val1 = "Val1 changed";
+        $val2 = "Val2 changed";
+    }
+
+    static function static_vr($val, &$ref) {
+        $val = "Val changed";
+        $ref = "Ref changed";
+    }
+
+    static function static_rv(&$ref, $val) {
+        $val = "Val changed";
+        $ref = "Ref changed";
+    }
+
+    static function static_rr(&$ref1, &$ref2) {
+        $ref1 = "Ref1 changed";
+        $ref2 = "Ref2 changed";
+    }
+}
 
 echo "\n ---- Pass by ref / pass by val: functions ----\n";
 unset($u1, $u2);
@@ -95,24 +120,24 @@ var_dump($u1, $u2);
 
 echo "\n\n ---- Pass by ref / pass by val: static method calls ----\n";
 unset($u1, $u2);
-C::v($u1);
-C::r($u2);
+C::static_v($u1);
+C::static_r($u2);
 var_dump($u1, $u2);
 
 unset($u1, $u2);
-C::vv($u1, $u2);
+C::static_vv($u1, $u2);
 var_dump($u1, $u2);
 
 unset($u1, $u2);
-C::vr($u1, $u2);
+C::static_vr($u1, $u2);
 var_dump($u1, $u2);
 
 unset($u1, $u2);
-C::rv($u1, $u2);
+C::static_rv($u1, $u2);
 var_dump($u1, $u2);
 
 unset($u1, $u2);
-C::rr($u1, $u2);
+C::static_rr($u1, $u2);
 var_dump($u1, $u2);
 
 echo "\n\n ---- Pass by ref / pass by val: instance method calls ----\n";
@@ -143,34 +168,33 @@ var_dump($u1, $u2);
 
 ?>
 --EXPECTF--
-
 ---- Pass by ref / pass by val: functions ----
 
-Notice: Undefined variable: u1 in %s on line 72
+Warning: Undefined variable $u1 in %s on line %d
 
-Notice: Undefined variable: u1 in %s on line 74
+Warning: Undefined variable $u1 in %s on line %d
 NULL
 string(11) "Ref changed"
 
-Notice: Undefined variable: u1 in %s on line 77
+Warning: Undefined variable $u1 in %s on line %d
 
-Notice: Undefined variable: u2 in %s on line 77
+Warning: Undefined variable $u2 in %s on line %d
 
-Notice: Undefined variable: u1 in %s on line 78
+Warning: Undefined variable $u1 in %s on line %d
 
-Notice: Undefined variable: u2 in %s on line 78
+Warning: Undefined variable $u2 in %s on line %d
 NULL
 NULL
 
-Notice: Undefined variable: u1 in %s on line 81
+Warning: Undefined variable $u1 in %s on line %d
 
-Notice: Undefined variable: u1 in %s on line 82
+Warning: Undefined variable $u1 in %s on line %d
 NULL
 string(11) "Ref changed"
 
-Notice: Undefined variable: u2 in %s on line 85
+Warning: Undefined variable $u2 in %s on line %d
 
-Notice: Undefined variable: u2 in %s on line 86
+Warning: Undefined variable $u2 in %s on line %d
 string(11) "Ref changed"
 NULL
 string(12) "Ref1 changed"
@@ -179,82 +203,70 @@ string(12) "Ref2 changed"
 
  ---- Pass by ref / pass by val: static method calls ----
 
-Deprecated: Non-static method C::v() should not be called statically in %s on line 95
+Warning: Undefined variable $u1 in %s on line %d
 
-Notice: Undefined variable: u1 in %s on line 95
-
-Deprecated: Non-static method C::r() should not be called statically in %s on line 96
-
-Notice: Undefined variable: u1 in %s on line 97
+Warning: Undefined variable $u1 in %s on line %d
 NULL
 string(11) "Ref changed"
 
-Deprecated: Non-static method C::vv() should not be called statically in %s on line 100
+Warning: Undefined variable $u1 in %s on line %d
 
-Notice: Undefined variable: u1 in %s on line 100
+Warning: Undefined variable $u2 in %s on line %d
 
-Notice: Undefined variable: u2 in %s on line 100
+Warning: Undefined variable $u1 in %s on line %d
 
-Notice: Undefined variable: u1 in %s on line 101
-
-Notice: Undefined variable: u2 in %s on line 101
+Warning: Undefined variable $u2 in %s on line %d
 NULL
 NULL
 
-Deprecated: Non-static method C::vr() should not be called statically in %s on line 104
+Warning: Undefined variable $u1 in %s on line %d
 
-Notice: Undefined variable: u1 in %s on line 104
-
-Notice: Undefined variable: u1 in %s on line 105
+Warning: Undefined variable $u1 in %s on line %d
 NULL
 string(11) "Ref changed"
 
-Deprecated: Non-static method C::rv() should not be called statically in %s on line 108
+Warning: Undefined variable $u2 in %s on line %d
 
-Notice: Undefined variable: u2 in %s on line 108
-
-Notice: Undefined variable: u2 in %s on line 109
+Warning: Undefined variable $u2 in %s on line %d
 string(11) "Ref changed"
 NULL
-
-Deprecated: Non-static method C::rr() should not be called statically in %s on line 112
 string(12) "Ref1 changed"
 string(12) "Ref2 changed"
 
 
  ---- Pass by ref / pass by val: instance method calls ----
 
-Notice: Undefined variable: u1 in %s on line 117
+Warning: Undefined variable $u1 in %s on line %d
 
-Notice: Undefined variable: u1 in %s on line 118
+Warning: Undefined variable $u1 in %s on line %d
 NULL
 string(11) "Ref changed"
 
-Notice: Undefined variable: u1 in %s on line 121
+Warning: Undefined variable $u1 in %s on line %d
 
-Notice: Undefined variable: u1 in %s on line 123
+Warning: Undefined variable $u1 in %s on line %d
 NULL
 string(11) "Ref changed"
 
-Notice: Undefined variable: u1 in %s on line 126
+Warning: Undefined variable $u1 in %s on line %d
 
-Notice: Undefined variable: u2 in %s on line 126
+Warning: Undefined variable $u2 in %s on line %d
 
-Notice: Undefined variable: u1 in %s on line 127
+Warning: Undefined variable $u1 in %s on line %d
 
-Notice: Undefined variable: u2 in %s on line 127
+Warning: Undefined variable $u2 in %s on line %d
 NULL
 NULL
 
-Notice: Undefined variable: u1 in %s on line 130
+Warning: Undefined variable $u1 in %s on line %d
 
-Notice: Undefined variable: u1 in %s on line 131
+Warning: Undefined variable $u1 in %s on line %d
 NULL
 string(11) "Ref changed"
 
-Notice: Undefined variable: u2 in %s on line 134
+Warning: Undefined variable $u2 in %s on line %d
 
-Notice: Undefined variable: u2 in %s on line 135
+Warning: Undefined variable $u2 in %s on line %d
 string(11) "Ref changed"
 NULL
 string(12) "Ref1 changed"

@@ -7,27 +7,44 @@ disable_functions=strlen,defined,call_user_func,constant,is_string
 
 var_dump(function_exists("strlen"));
 var_dump(is_callable("strlen"));
-var_dump(strlen("xxx"));
-var_dump(defined("PHP_VERSION"));
-var_dump(constant("PHP_VERSION"));
-var_dump(call_user_func("strlen"));
-var_dump(is_string("xxx"));
+try {
+    var_dump(strlen("xxx"));
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump(defined("PHP_VERSION"));
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump(constant("PHP_VERSION"));
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump(call_user_func("strlen"));
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump(is_string("xxx"));
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump(is_string());
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
---EXPECTF--
+?>
+--EXPECT--
 bool(false)
-bool(true)
-
-Warning: strlen() has been disabled for security reasons in %sbug69315.php on line %d
-NULL
-
-Warning: defined() has been disabled for security reasons in %sbug69315.php on line %d
-NULL
-
-Warning: constant() has been disabled for security reasons in %sbug69315.php on line %d
-NULL
-
-Warning: call_user_func() has been disabled for security reasons in %sbug69315.php on line %d
-NULL
-
-Warning: is_string() has been disabled for security reasons in %sbug69315.php on line %d
-NULL
+bool(false)
+Call to undefined function strlen()
+Call to undefined function defined()
+Call to undefined function constant()
+Call to undefined function call_user_func()
+Call to undefined function is_string()
+Call to undefined function is_string()

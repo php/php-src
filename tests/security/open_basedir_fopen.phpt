@@ -40,42 +40,42 @@ bool(true)
 
 Warning: fopen(): open_basedir restriction in effect. File(../bad) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: fopen(../bad): failed to open stream: %s in %s on line %d
+Warning: fopen(../bad): Failed to open stream: %s in %s on line %d
 bool(false)
 
 Warning: fopen(): open_basedir restriction in effect. File(../bad/bad.txt) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: fopen(../bad/bad.txt): failed to open stream: %s in %s on line %d
+Warning: fopen(../bad/bad.txt): Failed to open stream: %s in %s on line %d
 bool(false)
 
 Warning: fopen(): open_basedir restriction in effect. File(..) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: fopen(..): failed to open stream: %s in %s on line %d
+Warning: fopen(..): Failed to open stream: %s in %s on line %d
 bool(false)
 
 Warning: fopen(): open_basedir restriction in effect. File(../) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: fopen(../): failed to open stream: %s in %s on line %d
+Warning: fopen(../): Failed to open stream: %s in %s on line %d
 bool(false)
 
 Warning: fopen(): open_basedir restriction in effect. File(/) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: fopen(/): failed to open stream: %s in %s on line %d
+Warning: fopen(/): Failed to open stream: %s in %s on line %d
 bool(false)
 
 Warning: fopen(): open_basedir restriction in effect. File(../bad/.) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: fopen(../bad/.): failed to open stream: %s in %s on line %d
+Warning: fopen(../bad/.): Failed to open stream: %s in %s on line %d
 bool(false)
 
 Warning: fopen(): open_basedir restriction in effect. File(../bad/./bad.txt) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: fopen(../bad/./bad.txt): failed to open stream: %s in %s on line 12
+Warning: fopen(../bad/./bad.txt): Failed to open stream: %s in %s on line 12
 bool(false)
 
 Warning: fopen(): open_basedir restriction in effect. File(./../.) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: fopen(./../.): failed to open stream: %s in %s on line %d
+Warning: fopen(./../.): Failed to open stream: %s in %s on line %d
 bool(false)
 resource(%d) of type (stream)
 resource(%d) of type (stream)
@@ -83,4 +83,3 @@ resource(%d) of type (stream)
 resource(%d) of type (stream)
 resource(%d) of type (stream)
 *** Finished testing open_basedir configuration [fopen] ***
-

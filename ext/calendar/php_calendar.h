@@ -12,25 +12,6 @@ extern zend_module_entry calendar_module_entry;
 PHP_MINIT_FUNCTION(calendar);
 PHP_MINFO_FUNCTION(calendar);
 
-PHP_FUNCTION(jdtogregorian);
-PHP_FUNCTION(gregoriantojd);
-PHP_FUNCTION(jdtojulian);
-PHP_FUNCTION(juliantojd);
-PHP_FUNCTION(jdtojewish);
-PHP_FUNCTION(jewishtojd);
-PHP_FUNCTION(jdtofrench);
-PHP_FUNCTION(frenchtojd);
-PHP_FUNCTION(jddayofweek);
-PHP_FUNCTION(jdmonthname);
-PHP_FUNCTION(easter_days);
-PHP_FUNCTION(easter_date);
-PHP_FUNCTION(unixtojd);
-PHP_FUNCTION(jdtounix);
-PHP_FUNCTION(cal_from_jd);
-PHP_FUNCTION(cal_to_jd);
-PHP_FUNCTION(cal_days_in_month);
-PHP_FUNCTION(cal_info);
-
 #define phpext_calendar_ptr calendar_module_ptr
 
 /*

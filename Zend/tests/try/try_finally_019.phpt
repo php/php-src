@@ -3,13 +3,13 @@ Combination of foreach, finally and goto (call order)
 --FILE--
 <?php
 class A {
-	public $n = 0;
-	function __construct($n) {
-		$this->n = $n;
-	}
-	function __destruct() {
-		echo "destruct" . $this->n . "\n";
-	}
+    public $n = 0;
+    function __construct($n) {
+        $this->n = $n;
+    }
+    function __destruct() {
+        echo "destruct" . $this->n . "\n";
+    }
 }
 
 foreach ([new A(1)] as $a) {

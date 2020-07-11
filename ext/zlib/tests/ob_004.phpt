@@ -17,8 +17,7 @@ ob_start("ob_gzhandler");
 echo "hi\n";
 ?>
 --EXPECTF--
-‹%s
+‹%a
 --EXPECTHEADERS--
 Content-Encoding: gzip
 Vary: Accept-Encoding
-

@@ -19,7 +19,7 @@ $methodWithArgs = new ReflectionMethod('TestClass', 'methodWithArgs');
 $testClassInstance = new TestClass();
 
 echo "\nMethod with args:\n";
-var_dump($methodWithArgs->invokeArgs($testClassInstance, array())); 
+var_dump($methodWithArgs->invokeArgs($testClassInstance, array()));
 
 ?>
 --EXPECTF--

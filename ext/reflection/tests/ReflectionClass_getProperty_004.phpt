@@ -6,56 +6,56 @@ Steve Seear <stevseea@php.net>
 --FILE--
 <?php
 class A {
-	public $pubC = "pubC in A";
-	protected $protC = "protC in A";
-	private $privC = "privC in A";
-	
-	public $pubA = "pubA in A";
-	protected $protA = "protA in A";
-	private $privA = "privA in A";		
+    public $pubC = "pubC in A";
+    protected $protC = "protC in A";
+    private $privC = "privC in A";
+
+    public $pubA = "pubA in A";
+    protected $protA = "protA in A";
+    private $privA = "privA in A";
 }
 
 class B extends A {
-	public $pubC = "pubC in B";
-	protected $protC = "protC in B";
-	private $privC = "privC in B";
+    public $pubC = "pubC in B";
+    protected $protC = "protC in B";
+    private $privC = "privC in B";
 
-	public $pubB = "pubB in B";
-	protected $protB = "protB in B";
-	private $privB = "privB in B";	
+    public $pubB = "pubB in B";
+    protected $protB = "protB in B";
+    private $privB = "privB in B";
 }
 
 class C extends B {
-	public $pubC = "pubC in C";
-	protected $protC = "protC in C";
-	private $privC = "privC in C";
+    public $pubC = "pubC in C";
+    protected $protC = "protC in C";
+    private $privC = "privC in C";
 }
 
 class X {
-	public $pubC = "pubC in X";
-	protected $protC = "protC in X";
-	private $privC = "privC in X";	
+    public $pubC = "pubC in X";
+    protected $protC = "protC in X";
+    private $privC = "privC in X";
 }
 
 $myC = new C;
 $rc = new ReflectionClass("C");
 
 function showInfo($name) {
-	global $rc, $myC;
-	echo "--- (Reflecting on $name) ---\n";
-	try {
-		$rp = $rc->getProperty($name);
-	} catch (Exception $e) {
-		echo $e->getMessage() . "\n";
-		return;
-	}
-	try {
-		var_dump($rp);
-		var_dump($rp->getValue($myC));
-	} catch (Exception $e) {		
-		echo $e->getMessage() . "\n";
-		return;
-	}		
+    global $rc, $myC;
+    echo "--- (Reflecting on $name) ---\n";
+    try {
+        $rp = $rc->getProperty($name);
+    } catch (Exception $e) {
+        echo $e->getMessage() . "\n";
+        return;
+    }
+    try {
+        var_dump($rp);
+        var_dump($rp->getValue($myC));
+    } catch (Exception $e) {
+        echo $e->getMessage() . "\n";
+        return;
+    }
 }
 
 
@@ -70,7 +70,7 @@ showInfo("privB");
 showInfo("pubC");
 showInfo("protC");
 showInfo("privC");
-showInfo("doesntExist");
+showInfo("doesNotExist");
 
 showInfo("A::pubC");
 showInfo("A::protC");
@@ -89,163 +89,163 @@ showInfo("C::privC");
 showInfo("X::pubC");
 showInfo("X::protC");
 showInfo("X::privC");
-showInfo("X::doesntExist");
+showInfo("X::doesNotExist");
 
-showInfo("doesntexist::doesntExist");
+showInfo("doesNotexist::doesNotExist");
 
 ?>
 --EXPECTF--
 --- (Reflecting on pubA) ---
 object(ReflectionProperty)#%d (2) {
-  [%u|b%"name"]=>
-  %unicode|string%(4) "pubA"
-  [%u|b%"class"]=>
-  %unicode|string%(1) "A"
+  ["name"]=>
+  string(4) "pubA"
+  ["class"]=>
+  string(1) "A"
 }
-%unicode|string%(9) "pubA in A"
+string(9) "pubA in A"
 --- (Reflecting on protA) ---
 object(ReflectionProperty)#%d (2) {
-  [%u|b%"name"]=>
-  %unicode|string%(5) "protA"
-  [%u|b%"class"]=>
-  %unicode|string%(1) "A"
+  ["name"]=>
+  string(5) "protA"
+  ["class"]=>
+  string(1) "A"
 }
-Cannot access non-public member C::protA
+Cannot access non-public property C::$protA
 --- (Reflecting on privA) ---
-Property privA does not exist
+Property C::$privA does not exist
 --- (Reflecting on pubB) ---
 object(ReflectionProperty)#%d (2) {
-  [%u|b%"name"]=>
-  %unicode|string%(4) "pubB"
-  [%u|b%"class"]=>
-  %unicode|string%(1) "B"
+  ["name"]=>
+  string(4) "pubB"
+  ["class"]=>
+  string(1) "B"
 }
-%unicode|string%(9) "pubB in B"
+string(9) "pubB in B"
 --- (Reflecting on protB) ---
 object(ReflectionProperty)#%d (2) {
-  [%u|b%"name"]=>
-  %unicode|string%(5) "protB"
-  [%u|b%"class"]=>
-  %unicode|string%(1) "B"
+  ["name"]=>
+  string(5) "protB"
+  ["class"]=>
+  string(1) "B"
 }
-Cannot access non-public member C::protB
+Cannot access non-public property C::$protB
 --- (Reflecting on privB) ---
-Property privB does not exist
+Property C::$privB does not exist
 --- (Reflecting on pubC) ---
 object(ReflectionProperty)#%d (2) {
-  [%u|b%"name"]=>
-  %unicode|string%(4) "pubC"
-  [%u|b%"class"]=>
-  %unicode|string%(1) "C"
+  ["name"]=>
+  string(4) "pubC"
+  ["class"]=>
+  string(1) "C"
 }
-%unicode|string%(9) "pubC in C"
+string(9) "pubC in C"
 --- (Reflecting on protC) ---
 object(ReflectionProperty)#%d (2) {
-  [%u|b%"name"]=>
-  %unicode|string%(5) "protC"
-  [%u|b%"class"]=>
-  %unicode|string%(1) "C"
+  ["name"]=>
+  string(5) "protC"
+  ["class"]=>
+  string(1) "C"
 }
-Cannot access non-public member C::protC
+Cannot access non-public property C::$protC
 --- (Reflecting on privC) ---
 object(ReflectionProperty)#%d (2) {
-  [%u|b%"name"]=>
-  %unicode|string%(5) "privC"
-  [%u|b%"class"]=>
-  %unicode|string%(1) "C"
+  ["name"]=>
+  string(5) "privC"
+  ["class"]=>
+  string(1) "C"
 }
-Cannot access non-public member C::privC
---- (Reflecting on doesntExist) ---
-Property doesntExist does not exist
+Cannot access non-public property C::$privC
+--- (Reflecting on doesNotExist) ---
+Property C::$doesNotExist does not exist
 --- (Reflecting on A::pubC) ---
 object(ReflectionProperty)#%d (2) {
-  [%u|b%"name"]=>
-  %unicode|string%(4) "pubC"
-  [%u|b%"class"]=>
-  %unicode|string%(1) "A"
+  ["name"]=>
+  string(4) "pubC"
+  ["class"]=>
+  string(1) "A"
 }
-%unicode|string%(9) "pubC in C"
+string(9) "pubC in C"
 --- (Reflecting on A::protC) ---
 object(ReflectionProperty)#%d (2) {
-  [%u|b%"name"]=>
-  %unicode|string%(5) "protC"
-  [%u|b%"class"]=>
-  %unicode|string%(1) "A"
+  ["name"]=>
+  string(5) "protC"
+  ["class"]=>
+  string(1) "A"
 }
-Cannot access non-public member A::protC
+Cannot access non-public property A::$protC
 --- (Reflecting on A::privC) ---
 object(ReflectionProperty)#%d (2) {
-  [%u|b%"name"]=>
-  %unicode|string%(5) "privC"
-  [%u|b%"class"]=>
-  %unicode|string%(1) "A"
+  ["name"]=>
+  string(5) "privC"
+  ["class"]=>
+  string(1) "A"
 }
-Cannot access non-public member A::privC
+Cannot access non-public property A::$privC
 --- (Reflecting on B::pubC) ---
 object(ReflectionProperty)#%d (2) {
-  [%u|b%"name"]=>
-  %unicode|string%(4) "pubC"
-  [%u|b%"class"]=>
-  %unicode|string%(1) "B"
+  ["name"]=>
+  string(4) "pubC"
+  ["class"]=>
+  string(1) "B"
 }
-%unicode|string%(9) "pubC in C"
+string(9) "pubC in C"
 --- (Reflecting on B::protC) ---
 object(ReflectionProperty)#%d (2) {
-  [%u|b%"name"]=>
-  %unicode|string%(5) "protC"
-  [%u|b%"class"]=>
-  %unicode|string%(1) "B"
+  ["name"]=>
+  string(5) "protC"
+  ["class"]=>
+  string(1) "B"
 }
-Cannot access non-public member B::protC
+Cannot access non-public property B::$protC
 --- (Reflecting on B::privC) ---
 object(ReflectionProperty)#%d (2) {
-  [%u|b%"name"]=>
-  %unicode|string%(5) "privC"
-  [%u|b%"class"]=>
-  %unicode|string%(1) "B"
+  ["name"]=>
+  string(5) "privC"
+  ["class"]=>
+  string(1) "B"
 }
-Cannot access non-public member B::privC
+Cannot access non-public property B::$privC
 --- (Reflecting on c::pubC) ---
 object(ReflectionProperty)#%d (2) {
-  [%u|b%"name"]=>
-  %unicode|string%(4) "pubC"
-  [%u|b%"class"]=>
-  %unicode|string%(1) "C"
+  ["name"]=>
+  string(4) "pubC"
+  ["class"]=>
+  string(1) "C"
 }
-%unicode|string%(9) "pubC in C"
+string(9) "pubC in C"
 --- (Reflecting on c::PUBC) ---
-Property PUBC does not exist
+Property C::$PUBC does not exist
 --- (Reflecting on C::pubC) ---
 object(ReflectionProperty)#%d (2) {
-  [%u|b%"name"]=>
-  %unicode|string%(4) "pubC"
-  [%u|b%"class"]=>
-  %unicode|string%(1) "C"
+  ["name"]=>
+  string(4) "pubC"
+  ["class"]=>
+  string(1) "C"
 }
-%unicode|string%(9) "pubC in C"
+string(9) "pubC in C"
 --- (Reflecting on C::protC) ---
 object(ReflectionProperty)#%d (2) {
-  [%u|b%"name"]=>
-  %unicode|string%(5) "protC"
-  [%u|b%"class"]=>
-  %unicode|string%(1) "C"
+  ["name"]=>
+  string(5) "protC"
+  ["class"]=>
+  string(1) "C"
 }
-Cannot access non-public member C::protC
+Cannot access non-public property C::$protC
 --- (Reflecting on C::privC) ---
 object(ReflectionProperty)#%d (2) {
-  [%u|b%"name"]=>
-  %unicode|string%(5) "privC"
-  [%u|b%"class"]=>
-  %unicode|string%(1) "C"
+  ["name"]=>
+  string(5) "privC"
+  ["class"]=>
+  string(1) "C"
 }
-Cannot access non-public member C::privC
+Cannot access non-public property C::$privC
 --- (Reflecting on X::pubC) ---
-Fully qualified property name X::pubC does not specify a base class of C
+Fully qualified property name X::$pubC does not specify a base class of C
 --- (Reflecting on X::protC) ---
-Fully qualified property name X::protC does not specify a base class of C
+Fully qualified property name X::$protC does not specify a base class of C
 --- (Reflecting on X::privC) ---
-Fully qualified property name X::privC does not specify a base class of C
---- (Reflecting on X::doesntExist) ---
-Fully qualified property name X::doesntExist does not specify a base class of C
---- (Reflecting on doesntexist::doesntExist) ---
-Class doesntexist does not exist
+Fully qualified property name X::$privC does not specify a base class of C
+--- (Reflecting on X::doesNotExist) ---
+Fully qualified property name X::$doesNotExist does not specify a base class of C
+--- (Reflecting on doesNotexist::doesNotExist) ---
+Class "doesnotexist" does not exist

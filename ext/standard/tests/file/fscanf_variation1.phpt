@@ -3,14 +3,9 @@ Test fscanf() function: usage variations - return type without third argument
 --FILE--
 <?php
 
-/*
-  Prototype: mixed fscanf ( resource $handle, string $format [, mixed &$...] );
-  Description: Parses input from a file according to a format
-*/
-
 /* test fscanf() for its return type */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 echo "*** Testing fscanf(): for its return type without third argument ***\n";
 
@@ -23,7 +18,7 @@ if($file_handle == false)
 @fwrite($file_handle, 12345);
 fclose($file_handle);
 
-// open file for reading 
+// open file for reading
 $file_handle = fopen($filename, "r");
 // capturing the return value from fscanf() called without third argument
 $return_value = fscanf($file_handle, "%s");
@@ -34,11 +29,11 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $filename = "$file_path/fscanf_variation1.tmp";
-unlink($filename); 
+unlink($filename);
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fscanf(): for its return type without third argument ***
 bool(true)
 array(1) {
@@ -47,4 +42,3 @@ array(1) {
 }
 
 *** Done ***
-

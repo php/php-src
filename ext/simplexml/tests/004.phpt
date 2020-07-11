@@ -3,7 +3,7 @@ SimpleXML: CDATA
 --SKIPIF--
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--
-<?php 
+<?php
 
 $sxe = simplexml_load_string(<<<EOF
 <?xml version='1.0'?>
@@ -32,7 +32,6 @@ $elem2 = $elem1->elem2;
 var_dump(trim((string)$elem2));
 
 ?>
-===DONE===
 --EXPECTF--
 object(SimpleXMLElement)#%d (2) {
   ["@attributes"]=>
@@ -65,4 +64,3 @@ object(SimpleXMLElement)#%d (2) {
   }
 }
 string(11) "CDATA block"
-===DONE===

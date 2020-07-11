@@ -5,10 +5,6 @@ curl_multi_setopt basic test
 if (!extension_loaded("curl")) {
 	    exit("skip curl extension not loaded");
 }
-$curl_version = curl_version();
-if ($curl_version['version_number'] < 0x071000) {
-	    exit("skip: test works only with curl >= 7.16.0");
-}
 ?>
 --FILE--
 <?php

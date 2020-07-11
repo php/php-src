@@ -7,9 +7,9 @@ filter_var() and FILTER_VALIDATE_BOOLEAN
 
 class test {
 
-	function __toString() {
-		return "blah";
-	}
+    function __toString() {
+        return "blah";
+    }
 }
 
 $t = new test;
@@ -30,11 +30,11 @@ var_dump(filter_var("", FILTER_VALIDATE_BOOLEAN));
 var_dump(filter_var(-1, FILTER_VALIDATE_BOOLEAN));
 var_dump(filter_var("000000", FILTER_VALIDATE_BOOLEAN));
 var_dump(filter_var("111111", FILTER_VALIDATE_BOOLEAN));
-	
+
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 bool(false)
 bool(false)
 bool(false)

@@ -5,7 +5,7 @@ Interop Test: Import from SimpleXML
 <?php	if (!extension_loaded('simplexml')) die('skip simplexml extension not available');?>
 --FILE--
 <?php
-$s = simplexml_load_file(dirname(__FILE__)."/book.xml");
+$s = simplexml_load_file(__DIR__."/book.xml");
 if(!$s) {
   echo "Error while loading the document\n";
   exit;

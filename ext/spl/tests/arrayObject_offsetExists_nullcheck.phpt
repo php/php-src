@@ -6,5 +6,5 @@ $ao = new ArrayObject(array('foo' => null));
 var_dump($ao->offsetExists('foo'));
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)

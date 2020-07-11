@@ -11,6 +11,6 @@ var_dump(strlen($num) == 3); // $num == 'inf'
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 bool(true)
 Done

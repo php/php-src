@@ -7,14 +7,8 @@ Venkat Raman Don
 if(substr(PHP_OS, 0, 3) != 'WIN' ) {
 		die('skip windows only test');
 }
-if(PHP_WINDOWS_VERSION_MAJOR < 6)  {
-        die('skip windows version 6.0+ only test');
-}
-
-$ret = exec('mklink rename_variation13tmp.lnk ' . __FILE__ .' 2>&1', $out);
-if (strpos($ret, 'privilege')) {
-	die('skip. SeCreateSymbolicLinkPrivilege not enable for this user.');
-}
+include_once __DIR__ . '/windows_links/common.inc';
+skipIfSeCreateSymbolicLinkPrivilegeIsDisabled(__FILE__);
 ?>
 --FILE--
 <?php

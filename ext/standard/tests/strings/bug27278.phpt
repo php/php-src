@@ -5,8 +5,8 @@ Bug #27278 (*printf() functions treat arguments as if passed by reference)
 
 function foo ($a)
 {
-	$a=sprintf("%02d",$a);
-	var_dump($a);
+    $a=sprintf("%02d",$a);
+    var_dump($a);
 }
 
 $x="02";

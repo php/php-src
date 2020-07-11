@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +14,12 @@
    +----------------------------------------------------------------------+
  */
 
+#ifndef PHP_WIN32_INET_H
+#define PHP_WIN32_INET_H
 
 #include <php.h>
 #include <Winsock2.h>
 
 PHPAPI int inet_aton(const char *cp, struct in_addr *inp);
+
+#endif

@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +14,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #include "php.h"
 
 #ifdef HAVE_SYS_TYPES_H
@@ -26,9 +22,6 @@
 #ifdef PHP_WIN32
 #include "win32/time.h"
 #include "win32/getrusage.h"
-#elif defined(NETWARE)
-#include <sys/timeval.h>
-#include <sys/time.h>
 #else
 #include <sys/time.h>
 #endif
@@ -43,7 +36,6 @@
 #include <stdio.h>
 #include <errno.h>
 
-#include "microtime.h"
 #include "ext/date/php_date.h"
 
 #define NUL  '\0'
@@ -56,12 +48,13 @@ static void _php_gettimeofday(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	zend_bool get_as_float = 0;
 	struct timeval tp = {0};
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &get_as_float) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(get_as_float)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (gettimeofday(&tp, NULL)) {
-		RETURN_FALSE;
+		ZEND_ASSERT(0 && "gettimeofday() can't fail");
 	}
 
 	if (get_as_float) {
@@ -82,23 +75,18 @@ static void _php_gettimeofday(INTERNAL_FUNCTION_PARAMETERS, int mode)
 
 		timelib_time_offset_dtor(offset);
 	} else {
-		char ret[100];
-
-		snprintf(ret, 100, "%.8F %ld", tp.tv_usec / MICRO_IN_SEC, tp.tv_sec);
-		RETURN_STRING(ret);
+		RETURN_NEW_STR(zend_strpprintf(0, "%.8F %ld", tp.tv_usec / MICRO_IN_SEC, (long)tp.tv_sec));
 	}
 }
 
-/* {{{ proto mixed microtime([bool get_as_float])
-   Returns either a string or a float containing the current time in seconds and microseconds */
+/* {{{ Returns either a string or a float containing the current time in seconds and microseconds */
 PHP_FUNCTION(microtime)
 {
 	_php_gettimeofday(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
-/* {{{ proto array gettimeofday([bool get_as_float])
-   Returns the current time as array */
+/* {{{ Returns the current time as array */
 PHP_FUNCTION(gettimeofday)
 {
 	_php_gettimeofday(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
@@ -107,17 +95,17 @@ PHP_FUNCTION(gettimeofday)
 /* }}} */
 
 #ifdef HAVE_GETRUSAGE
-/* {{{ proto array getrusage([int who])
-   Returns an array of usage statistics */
+/* {{{ Returns an array of usage statistics */
 PHP_FUNCTION(getrusage)
 {
 	struct rusage usg;
 	zend_long pwho = 0;
 	int who = RUSAGE_SELF;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &pwho) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(pwho)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (pwho == 1) {
 		who = RUSAGE_CHILDREN;
@@ -137,7 +125,7 @@ PHP_FUNCTION(getrusage)
 #ifdef PHP_WIN32 /* Windows only implements a limited amount of fields from the rusage struct */
 	PHP_RUSAGE_PARA(ru_majflt);
 	PHP_RUSAGE_PARA(ru_maxrss);
-#elif !defined( _OSD_POSIX) && !defined(__BEOS__) /* BS2000 has only a few fields in the rusage struct*/
+#elif !defined(_OSD_POSIX) && !defined(__HAIKU__)
 	PHP_RUSAGE_PARA(ru_oublock);
 	PHP_RUSAGE_PARA(ru_inblock);
 	PHP_RUSAGE_PARA(ru_msgsnd);
@@ -162,12 +150,3 @@ PHP_FUNCTION(getrusage)
 #endif /* HAVE_GETRUSAGE */
 
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

@@ -7,11 +7,6 @@ function_exists('mb_substr_count') or die("skip mb_substr_count() is not availab
 ?>
 --FILE--
 <?php
-/* Prototype  : int mb_substr_count(string $haystack, string $needle [, string $encoding])
- * Description: Count the number of substring occurrences 
- * Source code: ext/mbstring/mbstring.c
- */
-
 /*
  * Test behaviour of mb_substr_count() function when passed an unknown encoding
  */
@@ -23,15 +18,16 @@ $needle = 'Hello';
 $encoding = 'unknown-encoding';
 
 echo "\n-- Testing mb_substr_count() function with an unknown encoding --\n";
-var_dump(mb_substr_count($haystack, $needle, $encoding));
 
-echo "Done";
+try {
+    var_dump(mb_substr_count($haystack, $needle, $encoding));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing mb_substr_count() : error conditions ***
 
 -- Testing mb_substr_count() function with an unknown encoding --
-
-Warning: mb_substr_count(): Unknown encoding "unknown-encoding" in %s on line %d
-bool(false)
-Done
+mb_substr_count(): Argument #3 ($encoding) must be a valid encoding, "unknown-encoding" given

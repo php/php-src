@@ -1,21 +1,21 @@
 --TEST--
 Timeout within while loop
 --SKIPIF--
-<?php 
-	if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
+<?php
+if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 ?>
 --FILE--
 <?php
 
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "timeout_config.inc";
+set_time_limit(1);
 
-set_time_limit($t);
-
-while (1) { 
-	busy_wait(1);
+$x = true;
+$y = 0;
+while ($x) {
+    $y++;
 }
 
 ?>
 never reached here
 --EXPECTF--
-Fatal error: Maximum execution time of 3 seconds exceeded in %s on line %d
+Fatal error: Maximum execution time of 1 second exceeded in %s on line %d

@@ -7,7 +7,7 @@ a=1&b=2
 --FILE--
 <?php
 function myfunc($val) {
-	return $val . '_callback';
+    return $val . '_callback';
 }
 echo filter_input(INPUT_GET, 'a', FILTER_CALLBACK, array("options"=>'myfunc'));
 echo "\n";
@@ -19,13 +19,13 @@ echo filter_var($data, FILTER_CALLBACK, array("options"=>'myfunc'));
 echo "\n";
 
 $res = filter_input_array(INPUT_GET, array(
-				'a' => array(
-					'filter' => FILTER_CALLBACK,
-					'options' => 'myfunc'
-					),
-				'b' => FILTER_VALIDATE_INT 
-		)
-	);
+                'a' => array(
+                    'filter' => FILTER_CALLBACK,
+                    'options' => 'myfunc'
+                    ),
+                'b' => FILTER_VALIDATE_INT
+        )
+    );
 
 var_dump($res);
 ?>

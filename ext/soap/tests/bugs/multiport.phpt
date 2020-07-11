@@ -6,8 +6,8 @@ Proper binding selection
 soap.wsdl_cache_enabled=0
 --FILE--
 <?php
-$client = new SoapClient(dirname(__FILE__).'/multiport.wsdl', 
-	array('trace' => true, 'exceptions' => false));
+$client = new SoapClient(__DIR__.'/multiport.wsdl',
+    array('trace' => true, 'exceptions' => false));
 $response = $client->GetSessionId(array('userId'=>'user', 'password'=>'password'));
 echo $client->__getLastRequest();
 ?>

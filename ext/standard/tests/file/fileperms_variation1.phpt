@@ -9,13 +9,10 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 }
 --FILE--
 <?php
-/* Prototype: int fileperms ( string $filename )
- * Description: Returns the group ID of the file, or FALSE in case of an error.
- */
 
-/* Creating soft and hard links to a file and applying fileperms() on links */ 
+/* Creating soft and hard links to a file and applying fileperms() on links */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 fclose( fopen($file_path."/fileperms_variation1.tmp", "w") );
 
 echo "*** Testing fileperms() with links ***\n";
@@ -33,12 +30,11 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink($file_path."/fileperms_variation1_symlink.tmp");
 unlink($file_path."/fileperms_variation1_link.tmp");
 unlink($file_path."/fileperms_variation1.tmp");
 ?>
-
 --EXPECTF--
 *** Testing fileperms() with links ***
 int(%d)

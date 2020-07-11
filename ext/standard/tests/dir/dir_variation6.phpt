@@ -8,12 +8,6 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 ?>
 --FILE--
 <?php
-/* 
- * Prototype  : object dir(string $directory[, resource $context])
- * Description: Directory class with properties, handle and class and methods read, rewind and close
- * Source code: ext/standard/dir.c
- */
-
 /*
  * Passing a non-existent directory as argument to dir() function
  * and checking to see if proper warning message is output.
@@ -21,7 +15,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 echo "*** Testing dir() : open a non-existent directory ***\n";
 
 // create the temporary directory
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $dir_path = $file_path."/dir_variation6";
 @mkdir($dir_path);
 
@@ -48,10 +42,10 @@ echo "Done";
 *** Testing dir() : open a non-existent directory ***
 -- opening previously removed directory --
 
-Warning: dir(%s): failed to open dir: %s in %s on line %d
+Warning: dir(%s): Failed to open directory: %s in %s on line %d
 bool(false)
 -- opening non-existent directory --
 
-Warning: dir(%s): failed to open dir: %s in %s on line %d
+Warning: dir(%s): Failed to open directory: %s in %s on line %d
 bool(false)
 Done

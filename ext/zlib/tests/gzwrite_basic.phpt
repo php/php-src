@@ -1,9 +1,9 @@
 --TEST--
 Test function gzwrite() by calling it with its expected arguments
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded"; 
+	print "skip - ZLIB extension not loaded";
 }
 ?>
 --FILE--
@@ -23,9 +23,7 @@ gzclose($h);
 echo "\n";
 unlink($filename);
 ?>
-===DONE===
 --EXPECT--
 int(34)
 int(10)
 Here is the string to be written. Here is th
-===DONE===

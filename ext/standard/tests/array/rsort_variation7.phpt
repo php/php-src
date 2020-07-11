@@ -2,11 +2,6 @@
 Test rsort() function : usage variations - boolean values
 --FILE--
 <?php
-/* Prototype  : bool rsort(array &$array_arg [, int $sort_flags])
- * Description: Sort an array in reverse order 
- * Source code: ext/standard/array.c
- */
-
 /*
  * Pass rsort() arrays of boolean values to test behaviour
  */
@@ -16,7 +11,7 @@ echo "*** Testing rsort() : variation ***\n";
 // bool value array
 $bool_values = array (true, false, TRUE, FALSE);
 
-echo "\n-- 'flag' value is defualt --\n";
+echo "\n-- 'flag' value is default --\n";
 $temp_array = $bool_values;
 var_dump(rsort($temp_array) );
 var_dump($temp_array);
@@ -38,11 +33,10 @@ var_dump($temp_array);
 
 echo "Done";
 ?>
-
---EXPECTF--
+--EXPECT--
 *** Testing rsort() : variation ***
 
--- 'flag' value is defualt --
+-- 'flag' value is default --
 bool(true)
 array(4) {
   [0]=>

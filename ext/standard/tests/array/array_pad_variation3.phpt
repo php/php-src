@@ -2,12 +2,7 @@
 Test array_pad() function : usage variations - possible values for 'pad_value' argument
 --FILE--
 <?php
-/* Prototype  : array array_pad(array $input, int $pad_size, mixed $pad_value)
- * Description: Returns a copy of input array padded with pad_value to size pad_size 
- * Source code: ext/standard/array.c
-*/
-
-/* 
+/*
 * Testing array_pad() function for expected behavior by passing
 * different possible values for $pad_value argument.
 * $input and $pad_size arguments take fixed value.
@@ -97,7 +92,7 @@ $pad_values = array(
 
        // unset data
 /*30*/ @$unset_var,
-  
+
        // resource variable
 /*31*/ $fp,
 

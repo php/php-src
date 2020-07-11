@@ -1,7 +1,5 @@
 --TEST--
-sha512/224 algorithm
---SKIPIF--
-<?php if(!extension_loaded("hash")) print "skip"; ?>
+Hash: sha512/224 algorithm
 --FILE--
 <?php
 echo hash('sha512/224', '') . "\n";

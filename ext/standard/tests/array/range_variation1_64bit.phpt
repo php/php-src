@@ -20,7 +20,7 @@ var_dump( range(-2147483649, -2147483647) );
 
 echo "\nDone";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing max/outof range values ***
 array(2) {
   [0]=>

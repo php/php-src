@@ -7,77 +7,68 @@ Test SNMP Reflection
 
 /* ALL PHP_ME user callable methods of SNMP class should appear here */
 
-reflection::export(new reflectionmethod('snmp', '__construct'));
-reflection::export(new reflectionmethod('snmp', 'close'));
-reflection::export(new reflectionmethod('snmp', 'setSecurity'));
-reflection::export(new reflectionmethod('snmp', 'get'));
-reflection::export(new reflectionmethod('snmp', 'getnext'));
-reflection::export(new reflectionmethod('snmp', 'walk'));
-reflection::export(new reflectionmethod('snmp', 'set'));
-reflection::export(new reflectionmethod('snmp', 'getErrno'));
-reflection::export(new reflectionmethod('snmp', 'getError'));
+echo new reflectionmethod('snmp', '__construct');
+echo new reflectionmethod('snmp', 'close');
+echo new reflectionmethod('snmp', 'setSecurity');
+echo new reflectionmethod('snmp', 'get');
+echo new reflectionmethod('snmp', 'getnext');
+echo new reflectionmethod('snmp', 'walk');
+echo new reflectionmethod('snmp', 'set');
+echo new reflectionmethod('snmp', 'getErrno');
+echo new reflectionmethod('snmp', 'getError');
 
 
 ?>
-===DONE===
-<?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 Method [ <internal:snmp, ctor> public method __construct ] {
 
   - Parameters [5] {
-    Parameter #0 [ <required> $version ]
-    Parameter #1 [ <required> $host ]
-    Parameter #2 [ <required> $community ]
-    Parameter #3 [ <optional> $timeout ]
-    Parameter #4 [ <optional> $retries ]
+    Parameter #0 [ <required> int $version ]
+    Parameter #1 [ <required> string $host ]
+    Parameter #2 [ <required> string $community ]
+    Parameter #3 [ <optional> int $timeout ]
+    Parameter #4 [ <optional> int $retries ]
   }
 }
-
 Method [ <internal:snmp> public method close ] {
 
   - Parameters [0] {
   }
 }
-
 Method [ <internal:snmp> public method setSecurity ] {
 
   - Parameters [7] {
-    Parameter #0 [ <required> $sec_level ]
-    Parameter #1 [ <required> $auth_protocol ]
-    Parameter #2 [ <required> $auth_passphrase ]
-    Parameter #3 [ <required> $priv_protocol ]
-    Parameter #4 [ <required> $priv_passphrase ]
-    Parameter #5 [ <required> $contextName ]
-    Parameter #6 [ <required> $contextEngineID ]
+    Parameter #0 [ <required> string $sec_level ]
+    Parameter #1 [ <optional> string $auth_protocol ]
+    Parameter #2 [ <optional> string $auth_passphrase ]
+    Parameter #3 [ <optional> string $priv_protocol ]
+    Parameter #4 [ <optional> string $priv_passphrase ]
+    Parameter #5 [ <optional> string $contextName ]
+    Parameter #6 [ <optional> string $contextEngineID ]
   }
 }
-
 Method [ <internal:snmp> public method get ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $object_id ]
-    Parameter #1 [ <optional> $use_orignames ]
+    Parameter #1 [ <optional> bool $use_orignames ]
   }
 }
-
 Method [ <internal:snmp> public method getnext ] {
 
-  - Parameters [2] {
+  - Parameters [1] {
     Parameter #0 [ <required> $object_id ]
-    Parameter #1 [ <optional> $use_orignames ]
   }
 }
-
 Method [ <internal:snmp> public method walk ] {
 
   - Parameters [4] {
     Parameter #0 [ <required> $object_id ]
-    Parameter #1 [ <required> $suffix_keys ]
-    Parameter #2 [ <required> $max_repetitions ]
-    Parameter #3 [ <required> $non_repeaters ]
+    Parameter #1 [ <optional> bool $suffix_keys ]
+    Parameter #2 [ <optional> int $max_repetitions ]
+    Parameter #3 [ <optional> int $non_repeaters ]
   }
 }
-
 Method [ <internal:snmp> public method set ] {
 
   - Parameters [3] {
@@ -86,17 +77,13 @@ Method [ <internal:snmp> public method set ] {
     Parameter #2 [ <required> $value ]
   }
 }
-
 Method [ <internal:snmp> public method getErrno ] {
 
   - Parameters [0] {
   }
 }
-
 Method [ <internal:snmp> public method getError ] {
 
   - Parameters [0] {
   }
 }
-
-===DONE===

@@ -1,8 +1,8 @@
 --TEST--
 Bug #32555 (strtotime("tomorrow") can return false)
 --SKIPIF--
-<?php 
-if (substr(PHP_OS, 0, 3) == 'WIN') die('skip strftime uses system TZ'); 
+<?php
+if (substr(PHP_OS, 0, 3) == 'WIN') die('skip strftime uses system TZ');
 ?>
 --INI--
 date.timezone=US/Eastern

@@ -4,17 +4,17 @@ __TRAIT__: Basics, a constant denoiting the trait of definition.
 <?php
 
 trait TestTrait {
-	public static function test() {
-		return __TRAIT__;
-	}
+    public static function test() {
+        return __TRAIT__;
+    }
 }
 
 class Direct {
-	use TestTrait;
+    use TestTrait;
 }
 
 class IndirectInheritance extends Direct {
-  
+
 }
 
 trait TestTraitIndirect {

@@ -13,5 +13,5 @@ try {
     echo $e->getMessage(), "\n";
 }
 ?>
---EXPECTF--
+--EXPECT--
 DOMAttr::__construct() expects at least 1 parameter, 0 given

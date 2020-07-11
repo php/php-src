@@ -21,7 +21,7 @@ array(5) {
   string(1) "3"
 }
 [Script ended normally]
-prompt> int(5)
+prompt> int(4)
 array(4) {
   [0]=>
   string(%d) "%s"

@@ -26,4 +26,3 @@ Warning: session_start(): Failed to create session data file path. Too short ses
 
 Warning: session_start(): Failed to read session data: files (path: 123;:/really%scompletely:::/invalid;;,23123;213) in %s on line 4
 I live
-

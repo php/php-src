@@ -1,12 +1,7 @@
 --TEST--
-Test array_fill() function : usage variations - using return value of array_fill for 'val' argument 
+Test array_fill() function : usage variations - using return value of array_fill for 'val' argument
 --FILE--
 <?php
-/* Prototype  : proto array array_fill(int start_key, int num, mixed val)
- * Description: Create an array containing num elements starting with index start_key each initialized to val 
- * Source code: ext/standard/array.c
- */
-
 /* passing array_fill() as the 'val' argument in array_fill() function */
 
 echo "*** Testing array_fill() : variation ***\n";
@@ -17,7 +12,7 @@ $heredoc = <<<HERE_DOC
 Hello
 HERE_DOC;
 
-// array of possible valid values for 'val' argument 
+// array of possible valid values for 'val' argument
 $values = array (
 
   /* 1  */  NULL,
@@ -26,7 +21,7 @@ $values = array (
   /* 4  */  1.0,
             'hi',
             "hi",
-  /* 7  */  $heredoc 
+  /* 7  */  $heredoc
 );
 
 echo "*** Filling 2 dimensional array with all basic valid values ***\n";
@@ -35,15 +30,15 @@ for($i =0; $i < count($values); $i ++)
 {
   echo "-- Iteration $counter --\n";
   $val = $values[$i];
- 
+
   var_dump( array_fill($start_key,$num,array_fill($start_key,$num,$val)) );
-  
+
   $counter++;
-}  
+}
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_fill() : variation ***
 *** Filling 2 dimensional array with all basic valid values ***
 -- Iteration 1 --

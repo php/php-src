@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,78 +17,9 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include "zend.h"
 #include "zend_sort.h"
 #include <limits.h>
-
-#define QSORT_STACK_SIZE (sizeof(size_t) * CHAR_BIT)
-
-ZEND_API void zend_qsort(void *base, size_t nmemb, size_t siz, compare_func_t compare, swap_func_t swp) /* {{{ */
-{
-	void           *begin_stack[QSORT_STACK_SIZE];
-	void           *end_stack[QSORT_STACK_SIZE];
-	register char  *begin;
-	register char  *end;
-	register char  *seg1;
-	register char  *seg2;
-	register char  *seg2p;
-	register int    loop;
-	size_t          offset;
-
-	begin_stack[0] = (char *) base;
-	end_stack[0]   = (char *) base + ((nmemb - 1) * siz);
-
-	for (loop = 0; loop >= 0; --loop) {
-		begin = begin_stack[loop];
-		end   = end_stack[loop];
-
-		while (begin < end) {
-			offset = (end - begin) >> Z_L(1);
-			swp(begin, begin + (offset - (offset % siz)));
-
-			seg1 = begin + siz;
-			seg2 = end;
-
-			while (1) {
-				for (; seg1 < seg2 && compare(begin, seg1) > 0;
-				     seg1 += siz);
-
-				for (; seg2 >= seg1 && compare(seg2, begin) > 0;
-				     seg2 -= siz);
-
-				if (seg1 >= seg2)
-					break;
-
-				swp(seg1, seg2);
-
-				seg1 += siz;
-				seg2 -= siz;
-			}
-
-			swp(begin, seg2);
-
-			seg2p = seg2;
-
-			if ((seg2p - begin) <= (end - seg2p)) {
-				if ((seg2p + siz) < end) {
-					begin_stack[loop] = seg2p + siz;
-					end_stack[loop++] = end;
-				}
-				end = seg2p - siz;
-			}
-			else {
-				if ((seg2p - siz) > begin) {
-					begin_stack[loop] = begin;
-					end_stack[loop++] = seg2p - siz;
-				}
-				begin = seg2p + siz;
-			}
-		}
-	}
-}
-/* }}} */
 
 static inline void zend_sort_2(void *a, void *b, compare_func_t cmp, swap_func_t swp) /* {{{ */ {
 	if (cmp(a, b) > 0) {
@@ -231,58 +162,58 @@ ZEND_API void zend_insert_sort(void *base, size_t nmemb, size_t siz, compare_fun
 }
 /* }}} */
 
-/* {{{ ZEND_API void zend_sort(void *base, size_t nmemb, size_t siz, compare_func_t cmp, swap_func_t swp) 
+/* {{{ ZEND_API void zend_sort(void *base, size_t nmemb, size_t siz, compare_func_t cmp, swap_func_t swp)
  *
  * Derived from LLVM's libc++ implementation of std::sort.
  *
  * ===========================================================================
  * libc++ License
  * ===========================================================================
- * 
+ *
  * The libc++ library is dual licensed under both the University of Illinois
  * "BSD-Like" license and the MIT license. As a user of this code you may
  * choose to use it under either license. As a contributor, you agree to allow
  * your code to be used under both.
- * 
+ *
  * Full text of the relevant licenses is included below.
- * 
+ *
  * ===========================================================================
- * 
+ *
  * University of Illinois/NCSA
  * Open Source License
- * 
+ *
  * Copyright (c) 2009-2012 by the contributors listed at
  * http://llvm.org/svn/llvm-project/libcxx/trunk/CREDITS.TXT
- * 
+ *
  * All rights reserved.
- * 
+ *
  * Developed by:
- * 
+ *
  *     LLVM Team
- * 
+ *
  *     University of Illinois at Urbana-Champaign
- * 
+ *
  *     http://llvm.org
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
  * deal with the Software without restriction, including without limitation the
  * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
  * sell copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  *     * Redistributions of source code must retain the above copyright notice,
  *       this list of conditions and the following disclaimers.
- * 
+ *
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
- * 
+ *
  *     * Neither the names of the LLVM Team, University of Illinois at
  *       Urbana-Champaign, nor the names of its contributors may be used to
  *       endorse or promote products derived from this Software without
  *       specific prior written permission.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -290,22 +221,22 @@ ZEND_API void zend_insert_sort(void *base, size_t nmemb, size_t siz, compare_fun
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * WITH THE SOFTWARE.
- * 
+ *
  * ===========================================================================
- * 
+ *
  * Copyright (c) 2009-2012 by the contributors listed at
  * http://llvm.org/svn/llvm-project/libcxx/trunk/CREDITS.TXT
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
  * deal in the Software without restriction, including without limitation the
  * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
  * sell copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -374,12 +305,3 @@ done:
 	}
 }
 /* }}} */
-
-/*
- * Local Variables:
- * c-basic-offset: 4
- * tab-width: 4
- * End:
- * vim600: fdm=marker
- * vim: noet sw=4 ts=4
- */

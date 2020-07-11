@@ -1,51 +1,29 @@
 --TEST--
-mb_http_input() 
+mb_http_input()
 --SKIPIF--
 <?php
 extension_loaded('mbstring') or die('skip mbstring not available');
-(php_sapi_name()=='cgi') or die("skip sapi is not a cgi version");
-die("skip disabled temporarily");
 ?>
 --POST--
 a=╞№╦▄╕ь0123456789╞№╦▄╕ьеле┐еле╩д╥дщдмд╩
 --GET--
 b=╞№╦▄╕ь0123456789╞№╦▄╕ьеле┐еле╩д╥дщдмд╩
+--INI--
+mbstring.encoding_translation=1
+input_encoding=latin1
 --FILE--
 <?php
-// TODO: This is not a real test.... Need to change so that it does real testing
-//$debug = true;
-ini_set('include_path', dirname(__FILE__));
-include_once('common.inc');
 
-$ini = ini_get('mbstring.http_input');
-
-// It must be url encoded....
-// echo vars
 echo $_POST['a']."\n";
 echo $_GET['b']."\n";
 
 // Get encoding
-$enc = mb_http_input('P');
-
-// check
-if (empty($ini)) {
-	// Must be pass
-	if ($enc === 'pass') {
-		echo "OK\n";
-	}
-	else {
-		echo "NG\n";
-	}
-}
-else {
-	// Some encoding
-	echo "This heppens when php.ini-dist is not used\n";
-}
+var_dump(mb_http_input('P'));
+var_dump(mb_http_input('G'));
 
 ?>
-
 --EXPECT--
-╞№╦▄╕ь0123456789╞№╦▄╕ьеле┐еле╩д╥дщдмд╩
-╞№╦▄╕ь0123456789╞№╦▄╕ьеле┐еле╩д╥дщдмд╩
-OK
-
+├Ж├╝├Л├Ь┬╕├м0123456789├Ж├╝├Л├Ь┬╕├м┬е┬л┬е┬┐┬е┬л┬е├К┬д├Т┬д├й┬д┬м┬д├К
+├Ж├╝├Л├Ь┬╕├м0123456789├Ж├╝├Л├Ь┬╕├м┬е┬л┬е┬┐┬е┬л┬е├К┬д├Т┬д├й┬д┬м┬д├К
+string(10) "ISO-8859-1"
+string(10) "ISO-8859-1"

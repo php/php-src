@@ -2,11 +2,6 @@
 Test array_shift() function : usage variations - Pass array with different data types as keys
 --FILE--
 <?php
-/* Prototype  : mixed array_shift(array &$stack)
- * Description: Pops an element off the beginning of the array 
- * Source code: ext/standard/array.c
- */
-
 /*
  * Pass arrays with different data types as keys to test how array_shift() re-assigns keys
  */
@@ -39,7 +34,7 @@ $inputs = array(
        -10.5 => 'negative',
        .5 => 'half',
        ),
-       
+
 /*3*/  'extreme floats' => array(
        12.3456789000e10 => 'large',
        12.3456789000E-10 => 'small',
@@ -48,8 +43,8 @@ $inputs = array(
        // null data
 /*4*/  'null uppercase' => array(
        NULL => 'null 1',
-       ), 
-       
+       ),
+
 /*5*/  'null lowercase' => array(
        null => 'null 2',
        ),
@@ -59,17 +54,17 @@ $inputs = array(
        true => 'lowert',
        false => 'lowerf',
        ),
-       
+
 /*7*/  'bool uppercase' => array(
        TRUE => 'uppert',
        FALSE => 'upperf',
        ),
-       
+
        // empty data
 /*8*/  'empty double quotes' => array(
        "" => 'emptyd',
        ),
-       
+
 /*9*/  'empty single quotes' => array(
        '' => 'emptys',
        ),
@@ -103,7 +98,7 @@ foreach($inputs as $key => $input) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_shift() : usage variations ***
 
 -- Iteration 1 : int data --

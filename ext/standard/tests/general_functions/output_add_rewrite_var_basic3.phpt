@@ -7,7 +7,7 @@ session.trans_sid_tags="a=href,area=href,frame=src,form="
 url_rewriter.tags="a=href,area=href,frame=src,form="
 --FILE--
 <?php
-	ob_start();
+    ob_start();
 // Common setting
 ini_set('url_rewriter.hosts', 'example.com');
 ini_set('session.use_only_cookies', 0);
@@ -73,7 +73,6 @@ Test use_trans_sid=1
 <form action="http://php.net/bar.php" method="get"> </a>
 <form action="bad://php.net/bar.php" method="get"> </a>
 <form action="//www.php.net/bar.php" method="get"> </a>
-
 --EXPECT--
 Without session
 <a href="?%3CNAME%3E=%3CVALUE%3E"> </a>

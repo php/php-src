@@ -1,9 +1,9 @@
 --TEST--
 Bug #30862 (Static array with boolean indexes)
 --FILE--
-<?php 
+<?php
 class T {
-	static $a = array(false=>"false", true=>"true");
+    static $a = array(false=>"false", true=>"true");
 }
 print_r(T::$a);
 ?>
@@ -12,7 +12,7 @@ print_r(T::$a);
 define("X",0);
 define("Y",1);
 class T2 {
-	static $a = array(X=>"false", Y=>"true");
+    static $a = array(X=>"false", Y=>"true");
 }
 print_r(T2::$a);
 ?>

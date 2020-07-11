@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,7 +27,7 @@ ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
 /* {{{ Commands Table */
 #define PHPDBG_COMMAND_HELP_D(name, tip, alias, action) \
-	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, action, &phpdbg_prompt_commands[16], 0}
+	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, action, &phpdbg_prompt_commands[16], 0, NULL, (zend_bool) 0}
 
 const phpdbg_command_t phpdbg_help_commands[] = {
 	PHPDBG_COMMAND_HELP_D(aliases,    "show alias list", 'a', phpdbg_do_help_aliases),
@@ -209,6 +207,26 @@ static int get_command(
 
 } /* }}} */
 
+void phpdbg_do_help_cmd(char *type) { /* {{{ */
+	char *help;
+
+	if (!type) {
+		pretty_print(get_help("overview!"));
+		return;
+	}
+
+	help = get_help(type);
+
+	if (!help || memcmp(help, "", sizeof("")) == SUCCESS) {
+		pretty_print(get_help("overview!"));
+		pretty_print(
+			"\nrequested help page could not be found");
+		return;
+	}
+
+	pretty_print(help);
+} /* }}} */
+
 PHPDBG_COMMAND(help) /* {{{ */
 {
 	phpdbg_command_t const *cmd;
@@ -362,8 +380,8 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 
 "Type **help <command>** or (**help alias**) to get detailed help on any of the above commands, "
 "for example **help list** or **h l**.  Note that help will also match partial commands if unique "
-"(and list out options if not unique), so **help clea** will give help on the **clean** command, "
-"but **help cl** will list the summary for **clean** and **clear**." CR CR
+"(and list out options if not unique), so **help exp** will give help on the **export** command, "
+"but **help ex** will list the summary for **exec** and **export**." CR CR
 
 "Type **help aliases** to show a full alias list, including any registered phpdginit functions" CR
 "Type **help syntax** for a general introduction to the command syntax." CR
@@ -410,7 +428,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 
 "This mode is enabled by specifying the **-a** option. Phpdbg will bind only to the loopback "
 "interface by default, and this can only be overridden by explicitly setting the remote console "
-"bind address using the **-a** option. If **-a** is specied without an argument, then phpdbg "
+"bind address using the **-a** option. If **-a** is specified without an argument, then phpdbg "
 "will bind to all available interfaces.  You should be aware of the security implications of "
 "doing this, so measures should be taken to secure this service if bound to a publicly accessible "
 "interface/port." CR CR
@@ -524,8 +542,8 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "types:" CR CR
 
 "  **Target**   **Alias** **Purpose**" CR
-"  **at**       **A**     specify breakpoint by location and condition" CR
-"  **del**      **d**     delete breakpoint by breakpoint identifier number" CR CR
+"  **at**       **@**     specify breakpoint by location and condition" CR
+"  **del**      **~**     delete breakpoint by breakpoint identifier number" CR CR
 
 "**Break at** takes two arguments. The first is any valid target. The second "
 "is a valid PHP expression which will trigger the break in "
@@ -904,7 +922,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "     Enable refcount display when hitting watchpoints" CR CR
 
 "     $P S b 4 off" CR
-"     Temporarily disable breakpoint 4.  This can be subsequently reenabled by a **s b 4 on**." CR
+"     Temporarily disable breakpoint 4.  This can be subsequently re-enabled by a **S b 4 on**." CR
 //*********** check oplog syntax
 },
 

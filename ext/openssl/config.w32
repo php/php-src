@@ -1,19 +1,13 @@
-// $Id$
 // vim:ft=javascript
 
-ARG_WITH("openssl", "OpenSSL support", "no");
+ARG_WITH("openssl", "OpenSSL support", "no,shared");
 
 if (PHP_OPENSSL != "no") {
-	if (CHECK_LIB("ssleay32.lib", "openssl", PHP_OPENSSL) &&
-			CHECK_LIB("libeay32.lib", "openssl", PHP_OPENSSL) &&
-			CHECK_LIB("crypt32.lib", "openssl") &&
-			CHECK_HEADER_ADD_INCLUDE("openssl/ssl.h", "CFLAGS_OPENSSL")) {
-		EXTENSION("openssl", "openssl.c xp_ssl.c");
+	var ret = SETUP_OPENSSL("openssl", PHP_OPENSSL);
 
+	if (ret > 0) {
+		EXTENSION("openssl", "openssl.c xp_ssl.c");
 		AC_DEFINE("HAVE_OPENSSL_EXT", PHP_OPENSSL_SHARED ? 0 : 1, "Have openssl");
 		AC_DEFINE("HAVE_OPENSSL", 1);
-		AC_DEFINE("HAVE_DSA_DEFAULT_METHOD", 1);
 	}
 }
-
-

@@ -51,7 +51,7 @@ namespace {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 In NS
 string(11) "Foo\Bar\Moo"
 Top

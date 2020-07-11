@@ -3,14 +3,14 @@ PDO PgSQL Bug #69362 (PDO-pgsql fails to connect if password contains a leading 
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_pgsql')) die('skip not loaded');
-require dirname(__FILE__) . '/config.inc';
-require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
+require __DIR__ . '/config.inc';
+require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
 PDOTest::skip();
 
 $dsn = getenv('PDOTEST_DSN');
 if (empty($dsn)) die('skip no dsn found in env');
 
-$db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
+$db = PDOTest::test_factory(__DIR__ . '/common.phpt');
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 
@@ -37,8 +37,9 @@ $db->exec("DROP USER $user");
 ?>
 --FILE--
 <?php
-require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
-$pdo = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
+require __DIR__ . '/config.inc';
+require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
+$pdo = PDOTest::test_factory(__DIR__ . '/common.phpt');
 $pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
 $rand = rand(5, 400);
 $user = "pdo_test_$rand";
@@ -49,7 +50,7 @@ $testQuery = 'SELECT 1 as verification';
 // Create temp user with leading single quote
 $sql = sprintf($template, "''mypassword");
 $pdo->query($sql);
-$testConn = new PDO($conf['ENV']['PDOTEST_DSN'], $user, "'mypassword");
+$testConn = new PDO($config['ENV']['PDOTEST_DSN'], $user, "'mypassword");
 $result = $testConn->query($testQuery)->fetch();
 $check = $result[0];
 var_dump($check);
@@ -60,4 +61,3 @@ $pdo->query($dropUser);
 ?>
 --EXPECT--
 int(1)
-

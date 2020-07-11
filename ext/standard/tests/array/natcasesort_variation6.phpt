@@ -2,13 +2,8 @@
 Test natcasesort() function : usage variations - referenced variables
 --FILE--
 <?php
-/* Prototype  : bool natcasesort(array &$array_arg)
- * Description: Sort an array using case-insensitive natural sort
- * Source code: ext/standard/array.c
- */
-
 /*
- * Pass an array of referenced varaibles to test how natcasesort() re-orders it
+ * Pass an array of referenced variables to test how natcasesort() re-orders it
  */
 
 echo "*** Testing natcasesort() : usage variation ***\n";
@@ -29,7 +24,7 @@ var_dump($array);
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing natcasesort() : usage variation ***
 
 -- Initial test --

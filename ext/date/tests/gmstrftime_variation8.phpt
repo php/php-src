@@ -2,12 +2,6 @@
 Test gmstrftime() function : usage variation - Passing literal related strings to format argument.
 --FILE--
 <?php
-/* Prototype  : string gmstrftime(string format [, int timestamp])
- * Description: Format a GMT/UCT time/date according to locale settings 
- * Source code: ext/date/php_date.c
- * Alias to functions: 
- */
-
 echo "*** Testing gmstrftime() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
@@ -17,7 +11,7 @@ date_default_timezone_set("Asia/Calcutta");
 
 //array of values to iterate over
 $inputs = array(
-	  'A literal % character' => "%%",
+      'A literal % character' => "%%",
 );
 
 // loop through each element of the array for timestamp
@@ -29,11 +23,9 @@ foreach($inputs as $key =>$value) {
 };
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing gmstrftime() : usage variation ***
 
 --A literal % character--
 string(1) "%"
 string(1) "%"
-===DONE===

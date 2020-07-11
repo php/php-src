@@ -2,11 +2,6 @@
 Test strncasecmp() function: usage variations - single quoted strings
 --FILE--
 <?php
-/* Prototype  : int strncasecmp ( string $str1, string $str2, int $len ); 
- * Description: Binary safe case-insensitive string comparison of the first n characters
- * Source code: Zend/zend_builtin_functions.c
-*/
-
 /* Test strncasecmp() function with various single quoted strings for 'str1', 'str2' */
 
 echo "*** Test strncasecmp() function: with single quoted strings ***\n";

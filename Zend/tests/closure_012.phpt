@@ -16,9 +16,8 @@ $lambda();
 var_dump($i);
 ?>
 --EXPECTF--
-Notice: Undefined variable: i in %sclosure_012.php on line 2
+Warning: Undefined variable $i in %s on line %d
 
-Notice: Undefined variable: i in %sclosure_012.php on line 7
+Warning: Undefined variable $i in %s on line %d
 NULL
 int(2)
-

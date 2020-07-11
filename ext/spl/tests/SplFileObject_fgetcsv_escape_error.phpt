@@ -14,5 +14,5 @@ var_dump($fo->fgetcsv(',', '"', 'invalid'));
 unlink('SplFileObject__fgetcsv8.csv');
 ?>
 --EXPECTF--
-Warning: SplFileObject::fgetcsv(): escape must be a character in %s on line %d
+Warning: SplFileObject::fgetcsv(): escape must be empty or a single character in %s on line %d
 bool(false)

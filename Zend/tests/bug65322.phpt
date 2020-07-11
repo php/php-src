@@ -15,10 +15,10 @@ set_error_handler(function($_, $msg, $file) {
 
 /* This is just a particular example of a non-fatal compile-time error
  * If this breaks in future, just find another example and use it instead */
-eval('class A { function test() { } } class B extends A { function test($a) { } }');
+eval('class A { private function __invoke() { } }');
 
 ?>
 --EXPECTF--
-string(62) "Declaration of B::test($a) should be compatible with A::test()"
+string(%d) "The magic method A::__invoke() must have public visibility"
 string(%d) "%s(%d) : eval()'d code"
 string(1) "X"

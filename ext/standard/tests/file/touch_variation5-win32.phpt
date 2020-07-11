@@ -1,5 +1,5 @@
 --TEST--
-Test touch() function : variation: various valid and invalid paths 
+Test touch() function : variation: various valid and invalid paths
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --SKIPIF--
@@ -9,12 +9,6 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 }
 --FILE--
 <?php
-/* Prototype  : bool touch(string filename [, int time [, int atime]])
- * Description: Set modification time of file 
- * Source code: ext/standard/filestat.c
- * Alias to functions: 
- */
-
 $workDir = "touchVar5.tmp";
 $subDirOrFile = "aSubDirOrFile";
 $cwd = __DIR__;
@@ -22,42 +16,42 @@ chdir($cwd);
 if (!mkdir($cwd . '/' . $workDir)) die("cannot create directory $workDir");
 
 $paths = array(
-			 // relative
+             // relative
              $workDir.'/'.$subDirOrFile,
              './'.$workDir.'/'.$subDirOrFile,
              $workDir.'/../'.$workDir.'/'.$subDirOrFile,
-             
+
              // relative bad path (note p8 msgs differ)
              $workDir.'/../BADDIR/'.$subDirOrFile,
              'BADDIR/'.$subDirOrFile,
-             
+
              //absolute
              $cwd.'/'.$workDir.'/'.$subDirOrFile,
              $cwd.'/./'.$workDir.'/'.$subDirOrFile,
              $cwd.'/'.$workDir.'/../'.$workDir.'/'.$subDirOrFile,
 
-             //absolute bad path (note p8 msgs differ)             
+             //absolute bad path (note p8 msgs differ)
              $cwd.'/BADDIR/'.$subDirOrFile,
-             
+
              //trailing separators
              $workDir.'/'.$subDirOrFile.'/',
              $cwd.'/'.$workDir.'/'.$subDirOrFile.'/',
-             
+
              // multiple separators
              $workDir.'//'.$subDirOrFile,
              $cwd.'//'.$workDir.'//'.$subDirOrFile,
-             
+
              );
-             
+
 echo "*** Testing touch() : variation ***\n";
 
-echo "\n*** testing nonexisting paths ***\n";      
+echo "\n*** testing nonexisting paths ***\n";
 test_nonexisting($paths);
 
-echo "\n*** testing existing files ***\n";      
+echo "\n*** testing existing files ***\n";
 test_existing($paths, false);
 
-echo "\n*** testing existing directories ***\n";      
+echo "\n*** testing existing directories ***\n";
 test_existing($paths, true);
 
 
@@ -66,69 +60,69 @@ rmdir($workDir);
 
 
 function test_nonexisting($paths) {
-	foreach($paths as $path) {
-	   echo "--- testing $path ---\n";
-	   
-	   if (is_dir($path) || is_file($path)) {
-	      echo "FAILED: $path - exists\n";
-	   }
-	   else {
-	      $res = touch($path);
-	      if ($res === true) {
-	         // something was created
-	         if (file_exists($path)) {
-	              // something found
-			      if (is_dir($path)) {
-			         echo "FAILED: $path - unexpected directory\n";
-			      }
-			      else {
-			         echo "PASSED: $path - created\n";
-			         unlink($path);
-			      }
-	         }
-	         else {
-	            // nothing found
-	            echo "FAILED: $path - touch returned true, nothing there\n";
-	         }
-	      }
-	      else {
-	         // nothing created
-	         if (file_exists($path)) {
-	              //something found
-	              echo "FAILED: $path - touch returned false, something there\n";
-    		      if (is_dir($path)) {
-    		         rmdir($path);
-			      }
-			      else {
-			         unlink($path);
-			      }
-	         }
-	      }
-	   }
-	}
+    foreach($paths as $path) {
+       echo "--- testing $path ---\n";
+
+       if (is_dir($path) || is_file($path)) {
+          echo "FAILED: $path - exists\n";
+       }
+       else {
+          $res = touch($path);
+          if ($res === true) {
+             // something was created
+             if (file_exists($path)) {
+                  // something found
+                  if (is_dir($path)) {
+                     echo "FAILED: $path - unexpected directory\n";
+                  }
+                  else {
+                     echo "PASSED: $path - created\n";
+                     unlink($path);
+                  }
+             }
+             else {
+                // nothing found
+                echo "FAILED: $path - touch returned true, nothing there\n";
+             }
+          }
+          else {
+             // nothing created
+             if (file_exists($path)) {
+                  //something found
+                  echo "FAILED: $path - touch returned false, something there\n";
+                  if (is_dir($path)) {
+                     rmdir($path);
+                  }
+                  else {
+                     unlink($path);
+                  }
+             }
+          }
+       }
+    }
 }
 
 function test_existing($paths, $are_dirs) {
-	foreach($paths as $path) {
-	   if ($are_dirs) {
-	      $res = @mkdir($path);
-	      if ($res == true) {
+    foreach($paths as $path) {
+       if ($are_dirs) {
+          $res = @mkdir($path);
+          if ($res == true) {
              test_path($path);
              rmdir($path);
-          }	   
-	   }
-	   else {
-	      $h = @fopen($path,"w");
-	      if ($h !== false) {
-	         fclose($h);
+          }
+       }
+       else {
+          $h = @fopen($path,"w");
+          if ($h !== false) {
+             fclose($h);
              test_path($path);
              unlink($path);
-          }	   
-	   }
-	}
+          }
+       }
+    }
 }
-	   
-	
+
+
 function test_path($path) {
    echo "--- testing $path ---\n";
    $org_atime = get_atime($path);
@@ -150,7 +144,6 @@ function get_atime($path) {
 
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing touch() : variation ***
 
@@ -178,10 +171,10 @@ PASSED: %s/touchVar5.tmp/../touchVar5.tmp/aSubDirOrFile - created
 Warning: touch(): Unable to create file %s/BADDIR/aSubDirOrFile because %s in %s on line %d
 --- testing touchVar5.tmp/aSubDirOrFile/ ---
 
-Warning: touch(): Unable to create file touchVar5.tmp/aSubDirOrFile/ because Invalid argument in %s on line %d
+Warning: touch(): Unable to create file touchVar5.tmp/aSubDirOrFile/ because %s in %s on line %d
 --- testing %s/touchVar5.tmp/aSubDirOrFile/ ---
 
-Warning: touch(): Unable to create file %s/touchVar5.tmp/aSubDirOrFile/ because Invalid argument in %s on line %d
+Warning: touch(): Unable to create file %s/touchVar5.tmp/aSubDirOrFile/ because %s in %s on line %d
 --- testing touchVar5.tmp//aSubDirOrFile ---
 PASSED: touchVar5.tmp//aSubDirOrFile - created
 --- testing %s//touchVar5.tmp//aSubDirOrFile ---
@@ -226,5 +219,3 @@ PASSED: %s/touchVar5.tmp/aSubDirOrFile/ - touched
 PASSED: touchVar5.tmp//aSubDirOrFile - touched
 --- testing %s//touchVar5.tmp//aSubDirOrFile ---
 PASSED: %s//touchVar5.tmp//aSubDirOrFile - touched
-===DONE===
-

@@ -4,11 +4,11 @@ SPL: ArrayObject::__construct with too many arguments.
 <?php
 echo "Too many arguments:\n";
 Class C implements Iterator {
-	function current() {}
-	function next() {}
-	function key() {}
-	function valid() {}
-	function rewind() {}
+    function current() {}
+    function next() {}
+    function key() {}
+    function valid() {}
+    function rewind() {}
 }
 
 try {
@@ -17,6 +17,6 @@ try {
   echo $e->getMessage() . "(" . $e->getLine() .  ")\n";
 }
 ?>
---EXPECTF--
+--EXPECT--
 Too many arguments:
 ArrayObject::__construct() expects at most 3 parameters, 4 given(12)

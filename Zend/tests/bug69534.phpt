@@ -1,5 +1,7 @@
 --TEST--
 Bug #69534 (Cycle leaks through declared properties on internal classes)
+--INI--
+zend.enable_gc = 1
 --FILE--
 <?php
 class Node extends SplObjectStorage {

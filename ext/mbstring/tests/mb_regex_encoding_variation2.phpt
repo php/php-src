@@ -7,11 +7,6 @@ function_exists('mb_regex_encoding') or die("skip mb_regex_encoding() is not ava
 ?>
 --FILE--
 <?php
-/* Prototype  : string mb_regex_encoding([string $encoding])
- * Description: Returns the current encoding for regex as a string. 
- * Source code: ext/mbstring/php_mbregex.c
- */
-
 /*
  * Test all listed encoding types from php.net to check all are known to function
  * NB: The strings passed are *NOT* necessarily encoded in the encoding passed to the function.
@@ -79,27 +74,29 @@ $encoding = array('UCS-4',			/*1*/
 
 $iterator = 1;
 foreach($encoding as $enc) {
-	echo "\n-- Iteration $iterator --\n";
-	var_dump(mb_regex_encoding());
-	var_dump(mb_regex_encoding($enc));
-	var_dump(mb_regex_encoding());
-	$iterator++;
+    echo "\n-- Iteration $iterator --\n";
+    var_dump(mb_regex_encoding());
+    try {
+        var_dump(mb_regex_encoding($enc));
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
+    var_dump(mb_regex_encoding());
+    $iterator++;
 }
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing mb_regex_encoding() : usage variations ***
 
 -- Iteration 1 --
-string(%d) "%s"
+string(5) "UTF-8"
 bool(true)
 string(5) "UCS-4"
 
 -- Iteration 2 --
 string(5) "UCS-4"
-
-Warning: mb_regex_encoding(): Unknown encoding "UCS-4BE" in %s on line %d
-bool(false)
+mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "UCS-4BE" given
 string(5) "UCS-4"
 
 -- Iteration 3 --
@@ -109,23 +106,17 @@ string(7) "UCS-4LE"
 
 -- Iteration 4 --
 string(7) "UCS-4LE"
-
-Warning: mb_regex_encoding(): Unknown encoding "UCS-2" in %s on line %d
-bool(false)
+mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "UCS-2" given
 string(7) "UCS-4LE"
 
 -- Iteration 5 --
 string(7) "UCS-4LE"
-
-Warning: mb_regex_encoding(): Unknown encoding "UCS-2BE" in %s on line %d
-bool(false)
+mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "UCS-2BE" given
 string(7) "UCS-4LE"
 
 -- Iteration 6 --
 string(7) "UCS-4LE"
-
-Warning: mb_regex_encoding(): Unknown encoding "UCS-2LE" in %s on line %d
-bool(false)
+mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "UCS-2LE" given
 string(7) "UCS-4LE"
 
 -- Iteration 7 --
@@ -160,16 +151,12 @@ string(8) "UTF-16LE"
 
 -- Iteration 13 --
 string(8) "UTF-16LE"
-
-Warning: mb_regex_encoding(): Unknown encoding "UTF-7" in %s on line %d
-bool(false)
+mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "UTF-7" given
 string(8) "UTF-16LE"
 
 -- Iteration 14 --
 string(8) "UTF-16LE"
-
-Warning: mb_regex_encoding(): Unknown encoding "UTF7-IMAP" in %s on line %d
-bool(false)
+mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "UTF7-IMAP" given
 string(8) "UTF-16LE"
 
 -- Iteration 15 --
@@ -204,16 +191,12 @@ string(4) "SJIS"
 
 -- Iteration 21 --
 string(4) "SJIS"
-
-Warning: mb_regex_encoding(): Unknown encoding "ISO-2022-JP" in %s on line %d
-bool(false)
+mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "ISO-2022-JP" given
 string(4) "SJIS"
 
 -- Iteration 22 --
 string(4) "SJIS"
-
-Warning: mb_regex_encoding(): Unknown encoding "JIS" in %s on line %d
-bool(false)
+mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "JIS" given
 string(4) "SJIS"
 
 -- Iteration 23 --
@@ -283,58 +266,42 @@ string(11) "ISO-8859-15"
 
 -- Iteration 36 --
 string(11) "ISO-8859-15"
-
-Warning: mb_regex_encoding(): Unknown encoding "byte2be" in %s on line %d
-bool(false)
+mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "byte2be" given
 string(11) "ISO-8859-15"
 
 -- Iteration 37 --
 string(11) "ISO-8859-15"
-
-Warning: mb_regex_encoding(): Unknown encoding "byte2le" in %s on line %d
-bool(false)
+mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "byte2le" given
 string(11) "ISO-8859-15"
 
 -- Iteration 38 --
 string(11) "ISO-8859-15"
-
-Warning: mb_regex_encoding(): Unknown encoding "byte4be" in %s on line %d
-bool(false)
+mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "byte4be" given
 string(11) "ISO-8859-15"
 
 -- Iteration 39 --
 string(11) "ISO-8859-15"
-
-Warning: mb_regex_encoding(): Unknown encoding "byte4le" in %s on line %d
-bool(false)
+mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "byte4le" given
 string(11) "ISO-8859-15"
 
 -- Iteration 40 --
 string(11) "ISO-8859-15"
-
-Warning: mb_regex_encoding(): Unknown encoding "BASE64" in %s on line %d
-bool(false)
+mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "BASE64" given
 string(11) "ISO-8859-15"
 
 -- Iteration 41 --
 string(11) "ISO-8859-15"
-
-Warning: mb_regex_encoding(): Unknown encoding "HTML-ENTITIES" in %s on line %d
-bool(false)
+mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "HTML-ENTITIES" given
 string(11) "ISO-8859-15"
 
 -- Iteration 42 --
 string(11) "ISO-8859-15"
-
-Warning: mb_regex_encoding(): Unknown encoding "7bit" in %s on line %d
-bool(false)
+mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "7bit" given
 string(11) "ISO-8859-15"
 
 -- Iteration 43 --
 string(11) "ISO-8859-15"
-
-Warning: mb_regex_encoding(): Unknown encoding "8bit" in %s on line %d
-bool(false)
+mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "8bit" given
 string(11) "ISO-8859-15"
 
 -- Iteration 44 --
@@ -344,16 +311,12 @@ string(6) "EUC-CN"
 
 -- Iteration 45 --
 string(6) "EUC-CN"
-
-Warning: mb_regex_encoding(): Unknown encoding "CP936" in %s on line %d
-bool(false)
+mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "CP936" given
 string(6) "EUC-CN"
 
 -- Iteration 46 --
 string(6) "EUC-CN"
-
-Warning: mb_regex_encoding(): Unknown encoding "HZ" in %s on line %d
-bool(false)
+mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "HZ" given
 string(6) "EUC-CN"
 
 -- Iteration 47 --
@@ -363,9 +326,7 @@ string(6) "EUC-TW"
 
 -- Iteration 48 --
 string(6) "EUC-TW"
-
-Warning: mb_regex_encoding(): Unknown encoding "CP950" in %s on line %d
-bool(false)
+mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "CP950" given
 string(6) "EUC-TW"
 
 -- Iteration 49 --
@@ -380,37 +341,27 @@ string(6) "EUC-KR"
 
 -- Iteration 51 --
 string(6) "EUC-KR"
-
-Warning: mb_regex_encoding(): Unknown encoding "UHC" in %s on line %d
-bool(false)
+mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "UHC" given
 string(6) "EUC-KR"
 
 -- Iteration 52 --
 string(6) "EUC-KR"
-
-Warning: mb_regex_encoding(): Unknown encoding "ISO-2022-KR" in %s on line %d
-bool(false)
+mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "ISO-2022-KR" given
 string(6) "EUC-KR"
 
 -- Iteration 53 --
 string(6) "EUC-KR"
-
-Warning: mb_regex_encoding(): Unknown encoding "Windows-1251" in %s on line %d
-bool(false)
+mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "Windows-1251" given
 string(6) "EUC-KR"
 
 -- Iteration 54 --
 string(6) "EUC-KR"
-
-Warning: mb_regex_encoding(): Unknown encoding "Windows-1252" in %s on line %d
-bool(false)
+mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "Windows-1252" given
 string(6) "EUC-KR"
 
 -- Iteration 55 --
 string(6) "EUC-KR"
-
-Warning: mb_regex_encoding(): Unknown encoding "CP866" in %s on line %d
-bool(false)
+mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "CP866" given
 string(6) "EUC-KR"
 
 -- Iteration 56 --

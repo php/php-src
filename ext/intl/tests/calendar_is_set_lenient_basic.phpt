@@ -17,12 +17,10 @@ var_dump($intlcal1->isLenient());
 var_dump(intlcal_set_lenient($intlcal1, true));
 var_dump($intlcal1->isLenient());
 ?>
-==DONE==
 --EXPECT--
 bool(true)
 bool(true)
 bool(true)
 bool(false)
 bool(true)
-bool(true)
-==DONE==
+bool(true)

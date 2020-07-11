@@ -1,10 +1,10 @@
 --TEST--
-Test curl_copy_handle() function with basic functionality 
+Test curl_copy_handle() function with basic functionality
 --CREDITS--
 Francesco Fullone ff@ideato.it
 #PHPTestFest Cesena Italia on 2009-06-20
 --SKIPIF--
-<?php 
+<?php
 	if (!extension_loaded("curl")) exit("skip curl extension not loaded");
 ?>
 --FILE--
@@ -23,8 +23,6 @@ $ch2 = curl_copy_handle($ch);
 
 var_dump(curl_getinfo($ch) === curl_getinfo($ch2));
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing curl_copy_handle(): basic ***
 bool(true)
-===DONE===

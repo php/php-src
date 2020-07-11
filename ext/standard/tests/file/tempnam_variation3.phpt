@@ -5,16 +5,14 @@ Test tempnam() function: usage variations - obscure prefixes
 if(substr(PHP_OS, 0, 3) == "WIN")
   die("skip Do not run on Windows");
 ?>
+--CONFLICTS--
+obscure_filename
 --FILE--
 <?php
-/* Prototype:  string tempnam ( string $dir, string $prefix );
-   Description: Create file with unique file name.
-*/
-
 /* Passing invalid/non-existing args for $prefix */
 
 echo "*** Testing tempnam() with obscure prefixes ***\n";
-$file_path = dirname(__FILE__)."/tempnamVar3";
+$file_path = __DIR__."/tempnamVar3";
 mkdir($file_path);
 
 /* An array of prefixes */
@@ -37,7 +35,12 @@ $names_arr = array(
 
 for( $i=0; $i<count($names_arr); $i++ ) {
   echo "-- Iteration $i --\n";
-  $file_name = tempnam("$file_path", $names_arr[$i]);
+  try {
+    $file_name = tempnam("$file_path", $names_arr[$i]);
+  } catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+    continue;
+  }
 
   /* creating the files in existing dir */
   if( file_exists($file_name) ) {
@@ -71,7 +74,6 @@ for( $i=0; $i<count($names_arr); $i++ ) {
 }
 
 rmdir($file_path);
-echo "\n*** Done ***\n";
 ?>
 --EXPECTF--
 *** Testing tempnam() with obscure prefixes ***
@@ -100,17 +102,9 @@ File name is => %s/%s
 File permissions are => 100600
 File created in => directory specified
 -- Iteration 6 --
-
-Warning: tempnam() expects parameter 2 to be a valid path, string given in %s on line %d
--- File is not created --
-
-Warning: unlink(): %s in %s on line %d
+tempnam(): Argument #2 ($prefix) must be a valid path, string given
 -- Iteration 7 --
-
-Warning: tempnam() expects parameter 2 to be a valid path, array given in %s on line %d
--- File is not created --
-
-Warning: unlink(): %s in %s on line %d
+tempnam(): Argument #2 ($prefix) must be a valid path, array given
 -- Iteration 8 --
 File name is => %s/dir%s
 File permissions are => 100600
@@ -119,6 +113,3 @@ File created in => directory specified
 File name is => %s/php%s
 File permissions are => 100600
 File created in => directory specified
-
-*** Done ***
-

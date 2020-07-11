@@ -13,10 +13,8 @@ var_dump($finfo->buffer("<?php class A{}"));
 var_dump($finfo->buffer("<?php\tclass A{}"));
 var_dump($finfo->buffer("<?php\n\rclass A{}"));
 ?>
-===DONE===
 --EXPECT--
 string(10) "text/x-php"
 string(10) "text/x-php"
 string(10) "text/x-php"
 string(10) "text/x-php"
-===DONE===

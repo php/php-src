@@ -1,6 +1,5 @@
 --TEST--
 Exception thrown from function with return type
-
 --FILE--
 <?php
 function test() : array {
@@ -8,7 +7,6 @@ function test() : array {
 }
 
 test();
-
 --EXPECTF--
 Fatal error: Uncaught Exception in %s:%d
 Stack trace:

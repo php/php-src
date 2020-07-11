@@ -3,9 +3,9 @@ GMP functionality test - factorial
 --SKIPIF--
 <?php if (!extension_loaded("gmp")) print "skip"; ?>
 --FILE--
-<?php 
+<?php
 function fact($x) {
-  if($x <= 1) 
+  if($x <= 1)
         return 1;
   else
         return gmp_mul($x,fact($x-1));

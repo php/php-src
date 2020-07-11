@@ -3,23 +3,23 @@ PDO_OCI: Attribute: Oracle Nulls
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_oci')) die('skip not loaded');
-require(dirname(__FILE__).'/../../pdo/tests/pdo_test.inc');
+require(__DIR__.'/../../pdo/tests/pdo_test.inc');
 PDOTest::skip();
 ?>
 --FILE--
 <?php
 
-require(dirname(__FILE__) . '/../../pdo/tests/pdo_test.inc');
+require(__DIR__ . '/../../pdo/tests/pdo_test.inc');
 
 function do_query($dbh)
 {
-	var_dump($dbh->getAttribute(PDO::ATTR_ORACLE_NULLS));
-	$s = $dbh->prepare("select '' as myempty, null as mynull from dual");
-	$s->execute();
-	while ($r = $s->fetch()) {
-		var_dump($r[0]);
-		var_dump($r[1]);
-	}
+    var_dump($dbh->getAttribute(PDO::ATTR_ORACLE_NULLS));
+    $s = $dbh->prepare("select '' as myempty, null as mynull from dual");
+    $s->execute();
+    while ($r = $s->fetch()) {
+        var_dump($r[0]);
+        var_dump($r[1]);
+    }
 }
 
 $dbh = PDOTest::factory();

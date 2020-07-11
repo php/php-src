@@ -10,9 +10,9 @@ phar.readonly=0
 files/write5.phar
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) . '/copyonwrite5/file1');
-unlink(dirname(__FILE__) . '/copyonwrite5/file2');
-rmdir(dirname(__FILE__) . '/copyonwrite5');
+unlink(__DIR__ . '/copyonwrite5/file1');
+unlink(__DIR__ . '/copyonwrite5/file2');
+rmdir(__DIR__ . '/copyonwrite5');
 ?>
 --EXPECTF--
 array(2) {

@@ -4,9 +4,11 @@ Test sin function : 64bit long tests
 <?php
 if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 ?>
+--INI--
+serialize_precision=14
 --FILE--
 <?php
- 
+
 define("MAX_64Bit", 9223372036854775807);
 define("MAX_32Bit", 2147483647);
 define("MIN_64Bit", -9223372036854775807 - 1);
@@ -23,9 +25,8 @@ foreach ($longVals as $longVal) {
    echo "--- testing: $longVal ---\n";
    var_dump(sin($longVal));
 }
-   
+
 ?>
-===DONE===
 --EXPECT--
 --- testing: 9223372036854775807 ---
 float(0.99993037667344)
@@ -57,4 +58,3 @@ float(0.99993037667344)
 float(-0.99993037667344)
 --- testing: -9.2233720368548E+18 ---
 float(-0.99993037667344)
-===DONE===

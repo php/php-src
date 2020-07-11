@@ -2,7 +2,7 @@
 Bug #35239 (Objects can lose references)
 --FILE--
 <?php
-$a = new stdClass; 
+$a = new stdClass;
 $a->x0 = new stdClass;
 $a->x0->y0 = 'a';
 $a->x0->y1 =& $a->x0;

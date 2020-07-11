@@ -8,13 +8,6 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 precision=14
 --FILE--
 <?php
-/* Prototype: string gettype ( mixed $var );
-   Description: Returns the type of the PHP variable var
-
-   Prototype: bool settype ( mixed &$var, string $type );
-   Description: Set the type of variable var to type 
-*/
-
 /* Test usage variation of gettype() and settype() functions:
          settype() to array type.
    Set type of the data to "array" and verify using gettype
@@ -32,15 +25,11 @@ function foo($errno, $errstr, $errfile, $errline) {
    echo "$errno: $errstr\n";
 }
 //set the error handler, this is required as
-// settype() would fail with catachable fatal error 
-set_error_handler("foo"); 
+// settype() would fail with catachable fatal error
+set_error_handler("foo");
 
 $var1 = "another string";
 $var2 = array(2,3,4);
-
-// a variable which is unset
-$unset_var = 10.5;
-unset( $unset_var );
 
 class point
 {
@@ -57,15 +46,15 @@ class point
   }
 }
 
-$var_values = array ( 
+$var_values = array (
   /* nulls */
-  null,  
+  null,
 
   /* boolean */
-  FALSE, 
+  FALSE,
   TRUE,
   true,
- 
+
   /* strings */
   "\xFF",
   "\x66",
@@ -79,7 +68,7 @@ $var_values = array (
   "10",
   "10string",
   '10string',
-  "1",  
+  "1",
   "-1",
   "1e2",
   " 1",
@@ -125,11 +114,11 @@ $var_values = array (
   0555,
   -0555,
   02224242434343152, // an octal value > than max int
-  
+
   /* floats */
   1e5,
   -1e5,
-  1E5, 
+  1E5,
   -1E5,
   -1.5,
   .5,
@@ -149,10 +138,6 @@ $var_values = array (
   new point(NULL, NULL),
   new point(2.5, 40.5),
   new point(0, 0),
-
-  /* undefined/unset vars */
-  $unset_var,
-  $undef_var
 );
 
 /* test conversion to array type */
@@ -181,10 +166,7 @@ foreach ($var_values as $var) {
 
 echo "Done\n";
 ?>
---EXPECTF--	
-8: Undefined variable: unset_var
-8: Undefined variable: undef_var
-
+--EXPECTF--
 *** Testing gettype() & settype() functions : usage variations ***
 
 -- Setting type of data to array --
@@ -829,18 +811,6 @@ array(2) {
   int(0)
   ["y"]=>
   int(0)
-}
-string(5) "array"
--- Iteration 79 --
-string(4) "NULL"
-bool(true)
-array(0) {
-}
-string(5) "array"
--- Iteration 80 --
-string(4) "NULL"
-bool(true)
-array(0) {
 }
 string(5) "array"
 Done

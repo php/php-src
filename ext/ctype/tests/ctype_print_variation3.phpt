@@ -4,11 +4,6 @@ Test ctype_print() function : usage variations - different strings
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-/* Prototype  : bool ctype_print(mixed $c)
- * Description: Checks for printable character(s) 
- * Source code: ext/ctype/ctype.c
- */
-
 /*
  * Pass strings containing different character types to ctype_print() to test
  * which are considered valid printable character only strings
@@ -40,7 +35,7 @@ $values = array(
        "abc123\n",
 /*20*/ 'abc 123',
        '',
-       ' ', 
+       ' ',
 /*23*/ base64_decode("w4DDoMOHw6fDiMOo") // non-ascii characters
 );
 
@@ -53,8 +48,7 @@ foreach($values as $value) {
 
 setlocale(LC_CTYPE, $orig);
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ctype_print() : usage variations ***
 
 -- Iteration 1 --
@@ -125,4 +119,3 @@ bool(true)
 
 -- Iteration 23 --
 bool(false)
-===DONE===

@@ -4,7 +4,7 @@ ReflectionObject::__toString() : very basic test with no dynamic properties
 <?php
 
 class Foo  {
-	public $bar = 1;
+    public $bar = 1;
 }
 $f = new foo;
 
@@ -25,7 +25,7 @@ Object of class [ <user> class Foo ] {
   }
 
   - Properties [1] {
-    Property [ <default> public $bar ]
+    Property [ public $bar = 1 ]
   }
 
   - Dynamic properties [0] {

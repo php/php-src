@@ -1,5 +1,5 @@
 --TEST--
-Attempting to access static properties using instance property syntax 
+Attempting to access static properties using instance property syntax
 --FILE--
 <?php
 class C {
@@ -10,9 +10,8 @@ $c = new C;
 echo "\n--> Access non-visible static prop like instance prop:\n";
 unset($c->y);
 ?>
-==Done==
+===DONE===
 --EXPECTF--
-
 --> Access non-visible static prop like instance prop:
 
 Fatal error: Uncaught Error: Cannot access protected property C::$y in %s:8

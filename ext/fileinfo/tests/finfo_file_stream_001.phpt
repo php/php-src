@@ -1,8 +1,8 @@
 --TEST--
 finfo_file(): Files and directories inside an stream
 --SKIPIF--
-<?php require_once(dirname(__FILE__) . '/skipif.inc'); ?>
-<?php if (!extension_loaded('zip')) { die("skip"); } ?>
+<?php require_once(__DIR__ . '/skipif.inc'); ?>
+<?php if (!extension_loaded('zip')) { die("skip zip extension not loaded"); } ?>
 --FILE--
 <?php
 
@@ -20,7 +20,7 @@ var_dump(
          finfo_file($fp, $png)
 );
 ?>
---EXPECTF--
+--EXPECT--
 string(15) "application/zip"
 string(9) "directory"
 string(9) "image/png"

@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2016 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -51,29 +49,6 @@ mysqlnd_minfo_print_hash(zval *values)
 /* }}} */
 
 
-/* {{{ mysqlnd_minfo_dump_plugin_stats */
-static int
-mysqlnd_minfo_dump_plugin_stats(zval *el, void * argument)
-{
-	struct st_mysqlnd_plugin_header * plugin_header = (struct st_mysqlnd_plugin_header *)Z_PTR_P(el);
-	if (plugin_header->plugin_stats.values) {
-		char buf[64];
-		zval values;
-		snprintf(buf, sizeof(buf), "%s statistics", plugin_header->plugin_name);
-
-		mysqlnd_fill_stats_hash(plugin_header->plugin_stats.values, plugin_header->plugin_stats.names, &values ZEND_FILE_LINE_CC);
-
-		php_info_print_table_start();
-		php_info_print_table_header(2, buf, "");
-		mysqlnd_minfo_print_hash(&values);
-		php_info_print_table_end();
-		zval_dtor(&values);
-	}
-	return ZEND_HASH_APPLY_KEEP;
-}
-/* }}} */
-
-
 /* {{{ mysqlnd_minfo_dump_loaded_plugins */
 static int
 mysqlnd_minfo_dump_loaded_plugins(zval *el, void * buf)
@@ -108,8 +83,7 @@ mysqlnd_minfo_dump_api_plugins(smart_str * buffer)
 /* }}} */
 
 
-/* {{{ PHP_MINFO_FUNCTION
- */
+/* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(mysqlnd)
 {
 	char buf[32];
@@ -161,10 +135,6 @@ PHP_MINFO_FUNCTION(mysqlnd)
 	}
 
 	php_info_print_table_end();
-
-
-	/* Print client stats */
-	mysqlnd_plugin_apply_with_argument(mysqlnd_minfo_dump_plugin_stats, NULL);
 }
 /* }}} */
 
@@ -172,8 +142,7 @@ PHP_MINFO_FUNCTION(mysqlnd)
 PHPAPI ZEND_DECLARE_MODULE_GLOBALS(mysqlnd)
 
 
-/* {{{ PHP_GINIT_FUNCTION
- */
+/* {{{ PHP_GINIT_FUNCTION */
 static PHP_GINIT_FUNCTION(mysqlnd)
 {
 #if defined(COMPILE_DL_MYSQLND) && defined(ZTS)
@@ -202,8 +171,7 @@ static PHP_GINIT_FUNCTION(mysqlnd)
 /* }}} */
 
 
-/* {{{ PHP_INI_MH
- */
+/* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnUpdateNetCmdBufferSize)
 {
 	zend_long long_value;
@@ -219,8 +187,7 @@ static PHP_INI_MH(OnUpdateNetCmdBufferSize)
 /* }}} */
 
 
-/* {{{ PHP_INI_BEGIN
-*/
+/* {{{ PHP_INI_BEGIN */
 PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("mysqlnd.collect_statistics",	"1", 	PHP_INI_ALL,	OnUpdateBool,	collect_statistics, zend_mysqlnd_globals, mysqlnd_globals)
 	STD_PHP_INI_BOOLEAN("mysqlnd.collect_memory_statistics","0",PHP_INI_SYSTEM, OnUpdateBool,	collect_memory_statistics, zend_mysqlnd_globals, mysqlnd_globals)
@@ -246,8 +213,7 @@ PHP_INI_END()
 /* }}} */
 
 
-/* {{{ PHP_MINIT_FUNCTION
- */
+/* {{{ PHP_MINIT_FUNCTION */
 static PHP_MINIT_FUNCTION(mysqlnd)
 {
 	REGISTER_INI_ENTRIES();
@@ -258,8 +224,7 @@ static PHP_MINIT_FUNCTION(mysqlnd)
 /* }}} */
 
 
-/* {{{ PHP_MSHUTDOWN_FUNCTION
- */
+/* {{{ PHP_MSHUTDOWN_FUNCTION */
 static PHP_MSHUTDOWN_FUNCTION(mysqlnd)
 {
 	mysqlnd_library_end();
@@ -271,8 +236,7 @@ static PHP_MSHUTDOWN_FUNCTION(mysqlnd)
 
 
 #if PHP_DEBUG
-/* {{{ PHP_RINIT_FUNCTION
- */
+/* {{{ PHP_RINIT_FUNCTION */
 static PHP_RINIT_FUNCTION(mysqlnd)
 {
 	if (MYSQLND_G(debug)) {
@@ -297,8 +261,7 @@ static PHP_RINIT_FUNCTION(mysqlnd)
 
 
 #if PHP_DEBUG
-/* {{{ PHP_RSHUTDOWN_FUNCTION
- */
+/* {{{ PHP_RSHUTDOWN_FUNCTION */
 static PHP_RSHUTDOWN_FUNCTION(mysqlnd)
 {
 	MYSQLND_DEBUG * dbg = MYSQLND_G(dbg);
@@ -325,8 +288,7 @@ static const zend_module_dep mysqlnd_deps[] = {
 	ZEND_MOD_END
 };
 
-/* {{{ mysqlnd_module_entry
- */
+/* {{{ mysqlnd_module_entry */
 zend_module_entry mysqlnd_module_entry = {
 	STANDARD_MODULE_HEADER_EX,
 	NULL,
@@ -363,12 +325,3 @@ ZEND_TSRMLS_CACHE_DEFINE()
 ZEND_GET_MODULE(mysqlnd)
 #endif
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

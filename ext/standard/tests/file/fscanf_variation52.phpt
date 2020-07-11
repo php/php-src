@@ -1,18 +1,13 @@
 --TEST--
-Test fscanf() function: usage variations - empty file 
+Test fscanf() function: usage variations - empty file
 --FILE--
 <?php
 
-/*
-  Prototype: mixed fscanf ( resource $handle, string $format [, mixed &$...] );
-  Description: Parses input from a file according to a format
-*/
-
 /* Test fscanf() to scan an empty file */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
-echo "*** Test fscanf(): to read an empty file ***\n"; 
+echo "*** Test fscanf(): to read an empty file ***\n";
 
 // various formats
 $formats = array( "%d", "%f", "%e", "%u", " %s", "%x", "%o");
@@ -28,7 +23,7 @@ $modes = array("r", "rb", "rt", "r+", "r+b", "r+t",
 $counter = 1;
 // reading the values from file using different integer formats
 foreach($modes as $mode) {
-  
+
   // create an empty file
   $filename = "$file_path/fscanf_variation52.tmp";
   $file_handle = fopen($filename, "w");
@@ -57,7 +52,7 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $filename = "$file_path/fscanf_variation52.tmp";
 if(file_exists($filename)) {
   unlink($filename);
@@ -175,4 +170,3 @@ bool(false)
 bool(false)
 
 *** Done ***
-

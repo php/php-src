@@ -17,47 +17,49 @@ if ($msg = check_local_infile_support($link, $engine))
 
 mysqli_close($link);
 ?>
+--INI--
+mysqli.allow_local_infile=1
 --FILE--
 <?php
-	require_once("connect.inc");
+    require_once("connect.inc");
 
-	function my_read($fp, &$buffer, $buflen, &$error) {
-		$buffer = strrev(fread($fp, $buflen));
-		return(strlen($buffer));
-	}
+    function my_read($fp, &$buffer, $buflen, &$error) {
+        $buffer = strrev(fread($fp, $buflen));
+        return(strlen($buffer));
+    }
 
-	/*** test mysqli_connect 127.0.0.1 ***/
-	$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
+    /*** test mysqli_connect 127.0.0.1 ***/
+    $link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 
-	/* create temporary file */
-	$filename = dirname(__FILE__) . "061.csv";
-	$fp = fopen($filename, "w");
-	fwrite($fp, b"foo;bar");
-	fclose($fp);
+    /* create temporary file */
+    $filename = __DIR__ . "061.csv";
+    $fp = fopen($filename, "w");
+    fwrite($fp, "foo;bar");
+    fclose($fp);
 
-	if (!mysqli_query($link,"DROP TABLE IF EXISTS t_061"))
-		printf("Cannot drop table: [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-	if (!mysqli_query($link,"CREATE TABLE t_061 (c1 varchar(10), c2 varchar(10))"))
-		printf("Cannot create table: [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    if (!mysqli_query($link,"DROP TABLE IF EXISTS t_061"))
+        printf("Cannot drop table: [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    if (!mysqli_query($link,"CREATE TABLE t_061 (c1 varchar(10), c2 varchar(10))"))
+        printf("Cannot create table: [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	if (!mysqli_query($link, sprintf("LOAD DATA LOCAL INFILE '%s' INTO TABLE t_061 FIELDS TERMINATED BY ';'", mysqli_real_escape_string($link, $filename))))
-		printf("Cannot load data: [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    if (!mysqli_query($link, sprintf("LOAD DATA LOCAL INFILE '%s' INTO TABLE t_061 FIELDS TERMINATED BY ';'", mysqli_real_escape_string($link, $filename))))
+        printf("Cannot load data: [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	mysqli_set_local_infile_handler($link, "my_read");
-	if (!mysqli_query($link, sprintf("LOAD DATA LOCAL INFILE '%s' INTO TABLE t_061 FIELDS TERMINATED BY ';'", mysqli_real_escape_string($link, $filename))))
-		printf("Cannot load data using infile handler: [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    mysqli_set_local_infile_handler($link, "my_read");
+    if (!mysqli_query($link, sprintf("LOAD DATA LOCAL INFILE '%s' INTO TABLE t_061 FIELDS TERMINATED BY ';'", mysqli_real_escape_string($link, $filename))))
+        printf("Cannot load data using infile handler: [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	if ($result = mysqli_query($link, "SELECT c1,c2 FROM t_061")) {
-		while (($row = mysqli_fetch_row($result))) {
-			printf("%s-%s\n", $row[0], $row[1]);
-			printf("%s-%s\n", gettype($row[0]), gettype($row[1]));
-		}
-		mysqli_free_result($result);
-	}
+    if ($result = mysqli_query($link, "SELECT c1,c2 FROM t_061")) {
+        while (($row = mysqli_fetch_row($result))) {
+            printf("%s-%s\n", $row[0], $row[1]);
+            printf("%s-%s\n", gettype($row[0]), gettype($row[1]));
+        }
+        mysqli_free_result($result);
+    }
 
-	mysqli_close($link);
-	unlink($filename);
-	print "done!";
+    mysqli_close($link);
+    unlink($filename);
+    print "done!";
 ?>
 --CLEAN--
 <?php
@@ -70,9 +72,9 @@ if (!mysqli_query($link, "DROP TABLE IF EXISTS t_061"))
 
 mysqli_close($link);
 ?>
---EXPECTF--
+--EXPECT--
 foo-bar
-%unicode|string%-%unicode|string%
+string-string
 rab-oof
-%unicode|string%-%unicode|string%
+string-string
 done!

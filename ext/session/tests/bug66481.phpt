@@ -2,15 +2,16 @@
 Bug #66481: Calls to session_name() segfault when session.name is null.
 --INI--
 session.name=
+error_log=
 --SKIPIF--
 <?php include('skipif.inc'); ?>
-<?php if(substr(PHP_OS, 0, 3) == "WIN") die("skip Not for Windows"); ?>
 --FILE--
 <?php
+ob_start();
 
 var_dump(session_name("foo"));
 var_dump(session_name("bar"));
---EXPECTF--
+--EXPECT--
 PHP Warning:  PHP Startup: session.name cannot be a numeric or empty '' in Unknown on line 0
 
 Warning: PHP Startup: session.name cannot be a numeric or empty '' in Unknown on line 0

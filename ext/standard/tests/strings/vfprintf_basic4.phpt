@@ -2,11 +2,6 @@
 Test vfprintf() function : basic functionality - bool format
 --FILE--
 <?php
-/* Prototype  : int vfprintf  ( resource $handle  , string $format , array $args  )
- * Description: Write a formatted string to a stream
- * Source code: ext/standard/formatted_print.c
-*/
-
 echo "*** Testing vfprintf() : basic functionality - using bool format ***\n";
 
 // Initialise all required variables
@@ -19,7 +14,7 @@ $arg2 = array(TRUE,FALSE);
 $arg3 = array(TRUE,FALSE,TRUE);
 
 /* creating dumping file */
-$data_file = dirname(__FILE__) . '/vfprintf_basic4.txt';
+$data_file = __DIR__ . '/vfprintf_basic4.txt';
 if (!($fp = fopen($data_file, 'wt')))
    return;
 
@@ -37,11 +32,8 @@ print_r(file_get_contents($data_file));
 
 unlink($data_file);
 ?>
-===DONE===
 --EXPECT--
 *** Testing vfprintf() : basic functionality - using bool format ***
 1
 1 0
 1 0 1
-===DONE===
-

@@ -1,5 +1,11 @@
 --TEST--
 Test next command on function boundaries
+--SKIPIF--
+<?php
+if (PHP_OS_FAMILY === 'Windows' && ini_get('opcache.jit') && ini_get('opcache.jit_buffer_size')) {
+    die('xfail breakpoint/watchpoint issues with JIT on Windows');
+}
+?>
 --PHPDBG--
 b 4
 r
@@ -15,7 +21,7 @@ prompt> [Breakpoint #0 at %s:4, hits: 1]
  00005: }
  00006: 
 prompt> 0
-[L5 %s RETURN                  null                                                           %s]
+[L5 %s RETURN<-1>              null                                                           %s]
 >00005: }
  00006: 
  00007: foo();
@@ -23,7 +29,7 @@ prompt> [L8 %s ECHO                    1                                        
 >00008: echo 1;
  00009: 
 prompt> 1
-[L9 %s RETURN                  1                                                              %s]
+[L9 %s RETURN<-1>              1                                                              %s]
 >00009: 
 prompt> 
 --FILE--

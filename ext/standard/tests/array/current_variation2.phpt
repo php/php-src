@@ -2,12 +2,6 @@
 Test current() function : usage variations - arrays containing different data types
 --FILE--
 <?php
-/* Prototype  : mixed current(array $array_arg)
- * Description: Return the element currently pointed to by the internal array pointer
- * Source code: ext/standard/array.c
- * Alias to functions: pos
- */
-
 /*
  * Pass arrays of different data types as $array_arg to current() to test behaviour
  */
@@ -39,7 +33,7 @@ $inputs = array(
 
        // int data
 /*1*/  'int' => array(
-	   0,
+       0,
        1,
        12345,
        -2345,
@@ -67,13 +61,13 @@ $inputs = array(
        TRUE,
        FALSE,
        ),
-       
+
        // empty data
 /*5*/ 'empty string' => array(
        "",
        '',
        ),
-       
+
 /*6*/ 'empty array' => array(
        ),
 
@@ -83,7 +77,7 @@ $inputs = array(
        'string',
        $heredoc,
        ),
-       
+
        // object data
 /*8*/ 'object' => array(
        new classA(),
@@ -115,7 +109,6 @@ foreach($inputs as $key => $input) {
 
 fclose($fp);
 ?>
-===DONE===
 --EXPECTF--
 *** Testing current() : usage variations ***
 
@@ -152,4 +145,3 @@ NULL
 
 -- Iteration 11 : resource data --
 resource(%d) of type (stream)
-===DONE===

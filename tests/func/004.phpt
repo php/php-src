@@ -1,7 +1,7 @@
 --TEST--
 General function test
 --FILE--
-<?php 
+<?php
 
 echo "Before function declaration...\n";
 
@@ -34,7 +34,6 @@ some_other_function();
 
 ?>
 --EXPECT--
-
 Before function declaration...
 After function declaration...
 Calling function for the first time...

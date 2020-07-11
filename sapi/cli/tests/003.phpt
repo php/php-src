@@ -1,8 +1,8 @@
 --TEST--
 defining INI options with -d
 --SKIPIF--
-<?php 
-include "skipif.inc"; 
+<?php
+include "skipif.inc";
 if (substr(PHP_OS, 0, 3) == 'WIN') {
 	die ("skip not for Windows");
 }
@@ -19,7 +19,7 @@ var_dump(`$php -n -d upload_tmp_dir=/test/path -d max_execution_time=555 -r 'var
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--
 string(16) "string(3) "111"
 "
 string(16) "string(3) "500"

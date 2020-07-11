@@ -3,7 +3,7 @@ Bug #70187 (Notice: unserialize(): Unexpected end of serialized data)
 --FILE--
 <?php
 class A {
-	public $b;
+    public $b;
 }
 
 $a = new A;

@@ -18,7 +18,7 @@ trait World {
 
 
 class MyClass {
-   use Hello, World { sayHello as sayWorld; }
+   use Hello, World { World::sayHello as sayWorld; }
 }
 
 $o = new MyClass();
@@ -26,5 +26,5 @@ $o->sayHello();
 $o->sayWorld();
 
 ?>
---EXPECTF--	
-Fatal error: Trait method sayHello has not been applied, because there are collisions with other trait methods on MyClass in %s on line %d
+--EXPECTF--
+Fatal error: Trait method World::sayHello has not been applied as MyClass::sayHello, because of collision with Hello::sayHello in %s on line %d

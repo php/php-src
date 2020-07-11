@@ -1,20 +1,22 @@
 --TEST--
 Verify yield from on generators being properly cycle collected
+--INI--
+zend.enable_gc = 1
 --FILE--
 <?php
 
 function root() {
-	global $gens; // create cyclic reference to root
-	try {
-		yield 1;
-	} finally {
-		var_dump($gens);
-	}
+    global $gens; // create cyclic reference to root
+    try {
+        yield 1;
+    } finally {
+        var_dump($gens);
+    }
 }
 
 function gen($x) {
-	global $gens;
-	yield from $gens[] = $x ? gen(--$x) : root();
+    global $gens;
+    yield from $gens[] = $x ? gen(--$x) : root();
 }
 
 $gen = $gens[] = gen(2);

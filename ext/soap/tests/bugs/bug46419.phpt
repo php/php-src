@@ -26,8 +26,8 @@ class LocalSoapClient extends SoapClient {
 
 }
 
-$x = new LocalSoapClient(NULL,array('location'=>'test://', 
-                                   'uri'=>'http://testuri.org')); 
+$x = new LocalSoapClient(NULL,array('location'=>'test://',
+                                   'uri'=>'http://testuri.org'));
 var_dump($x->bar());
 ?>
 --EXPECT--

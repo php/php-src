@@ -1,9 +1,8 @@
+#!/usr/bin/env php
 <?php
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,9 +22,7 @@
 $t = <<<CODE
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-%s The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -36,8 +33,6 @@ $t = <<<CODE
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
-/* \$Id$ */
 
 #ifndef HTML_TABLES_H
 #define HTML_TABLES_H
@@ -122,7 +117,7 @@ typedef struct {
 
 CODE;
 
-echo sprintf($t, date("Y"));
+echo $t;
 
 $encodings = array(
     array(
@@ -190,10 +185,10 @@ foreach ($encodings as $e) {
         if (preg_match("/^0x([0-9A-Z]{2})\t0x([0-9A-Z]{2,})/i", $l, $matches))
             $map[] = array($matches[1], $matches[2]);
     }
-    
+
     $mappy = array();
     foreach ($map as $v) { $mappy[hexdec($v[0])] = hexdec($v[1]); }
-    
+
     $mstable = array("ident" => $e['ident']);
     /* calculate two-stage tables */
     for ($i = 0; $i < 4; $i++) {
@@ -202,7 +197,7 @@ foreach ($encodings as $e) {
             $mstable[$i][$j] = isset($mappy[$cp]) ? $mappy[$cp] : NULL;
         }
     }
-    
+
     echo
 "/* {{{ Stage 2 tables for {$e['name']} */\n\n";
 
@@ -212,9 +207,9 @@ foreach ($encodings as $e) {
             $s2tables_idents[$i] = $encodings[$t[0]/5]["ident"];
             continue;
         }
-        
+
         $s2tables_idents[$i] = $e["ident"];
-        
+
         echo "static const enc_to_uni_stage2 enc_to_uni_s2_{$e['ident']}_".
             sprintf("%02X", $i << 6)." = { {\n";
         for ($j = 0; $j < 64; $j++) {
@@ -227,10 +222,10 @@ foreach ($encodings as $e) {
                 echo "0xFFFF,"; /* special value; indicates no mapping */
         }
         echo "\n} };\n\n";
-        
+
         $prevStage2[] = $mstable[$i];
     }
-    
+
     echo
 "/* end of stage 2 tables for {$e['name']} }}} */\n\n";
 
@@ -333,23 +328,23 @@ foreach ($encodings as $e) {
         if (preg_match("/^0x([0-9A-Z]{2})\t0x([0-9A-Z]{2,})\s+#\s*(.*)$/i", $l, $matches))
             $map[] = array($matches[1], $matches[2], rtrim($matches[3]));
     }
-    
+
     $mappy = array();
     foreach ($map as $v) {
         if (hexdec($v[0]) >= $e['range'][0] && hexdec($v[0]) <= $e['range'][1])
             $mappy[hexdec($v[1])] = array(hexdec($v[0]), strtolower($v[2]));
     }
     ksort($mappy);
-    
+
     echo
 "static const uni_to_enc unimap_{$e['ident']}[] = {\n";
-    
+
     foreach ($mappy as $k => $v) {
         echo "\t{ ", sprintf("0x%04X", $k), ", ", sprintf("0x%02X", $v[0]), " },\t/* ",
             $v[1], " */\n";
     }
     echo "};\n";
-    
+
     echo
 "/* {{{ end of mappings *from* Unicode for {$e['name']} */\n\n";
 }
@@ -476,7 +471,7 @@ foreach ($multicp_rows as $k => $v) {
             $v['default'] = "gt";
 		echo "\t{ {", sprintf("\"%-21s", $v["default"].'",'),
 			"\t", sprintf("%02d", (count($v) - 1)), ",\t\t",
-            sprintf("% 2d", strlen($v["default"])), '} },', "\n"; 
+            sprintf("% 2d", strlen($v["default"])), '} },', "\n";
 	} else {
 		echo "\t{ {", sprintf("%-22s", 'NULL,'),
 			"\t", sprintf("%02d", count($v)), ",\t\t0} },\n";
@@ -484,7 +479,7 @@ foreach ($multicp_rows as $k => $v) {
 	unset($v["default"]);
 	foreach ($v as $l => $w) {
 		echo "\t{ {", sprintf("\"%-21s", $w.'",'), "\t", sprintf("0x%05s", $l), ",\t",
-            sprintf("% 2d", strlen($w)), '} },', "\n"; 
+            sprintf("% 2d", strlen($w)), '} },', "\n";
 	}
 	echo "};\n";
 }
@@ -561,7 +556,7 @@ for ($i = 0; $i < 0x1E; $i++) {
 				else
 					echo "{1, { {(void *)", sprintf("multi_cp_{$ident}_%05X",
 						($i << 12) | ($k << 6) | $y ), ", 0} } },";
-				
+
 			}
 			echo "\n};\n\n";
 		}
@@ -685,7 +680,7 @@ echo
 //			die("violated assumption for traverse_for_entities");
 //		}
 //	}
-//	
+//
 //	$k++;
 //}
 //echo "\n};\n\n";

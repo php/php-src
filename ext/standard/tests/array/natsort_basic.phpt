@@ -3,7 +3,6 @@ Test natsort(): basic functionality
 --FILE--
 <?php
 /*
-* proto bool natsort ( array &$array )
 * Function is implemented in ext/standard/array.c
 */
 $array1 = $array2 = array("img12.png", "img10.png", "img2.png", "img1.png");
@@ -32,4 +31,3 @@ Array
     [1] => img10.png
     [0] => img12.png
 )
-

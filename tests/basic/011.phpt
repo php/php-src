@@ -5,12 +5,12 @@ register_argc_argv=1
 --GET--
 ab+cd+ef+123+test
 --FILE--
-<?php 
+<?php
 $argc = $_SERVER['argc'];
 $argv = $_SERVER['argv'];
 
 for ($i=0; $i<$argc; $i++) {
-	echo "$i: ".$argv[$i]."\n";
+    echo "$i: ".$argv[$i]."\n";
 }
 
 ?>

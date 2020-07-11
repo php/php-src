@@ -12,5 +12,4 @@ test();
 
 ?>
 --EXPECTF--
-
-Fatal error: Default value for parameters with a float type can only be float, integer, or NULL in %s on line %d
+Fatal error: Cannot use bool as default value for parameter $arg of type float in %s on line %d

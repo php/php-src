@@ -4,45 +4,45 @@ preg_replace_callback_array() basic functions
 <?php
 
 class Rep {
-	public function __invoke() {
-		return "d";
-	}
+    public function __invoke() {
+        return "d";
+    }
 }
 
 class Foo {
-	public static function rep($rep) {
-		return "ok";
-	}
+    public static function rep($rep) {
+        return "ok";
+    }
 }
 
 function b() {
-	return "b";
+    return "b";
 }
 
 var_dump(preg_replace_callback_array(
-	array(
-		"/a/" => 'b',
-		"/b/" => function () { return "c"; },
-		"/c/" => new Rep,
-		'/d/' => array("Foo", "rep")), 'a'));
+    array(
+        "/a/" => 'b',
+        "/b/" => function () { return "c"; },
+        "/c/" => new Rep,
+        '/d/' => array("Foo", "rep")), 'a'));
 
 var_dump(preg_replace_callback_array(
-	array(
-		"/a/" => 'b',
-		"/c/" => new Rep,
-		"/b/" => function () { return "ok"; },
-		'/d/' => array("Foo", "rep")), 'a'));
+    array(
+        "/a/" => 'b',
+        "/c/" => new Rep,
+        "/b/" => function () { return "ok"; },
+        '/d/' => array("Foo", "rep")), 'a'));
 
 var_dump(preg_replace_callback_array(
-	array(
-		'/d/' => array("Foo", "rep"),
-		"/c/" => new Rep,
-		"/a/" => 'b',
-		"/b/" => create_function('$a', 'return "ok";')), 'a', -1, $count));
+    array(
+        '/d/' => array("Foo", "rep"),
+        "/c/" => new Rep,
+        "/a/" => 'b',
+        "/b/" => function($a) { return "ok"; }), 'a', -1, $count));
 
 var_dump($count);
 ?>
---EXPECTF--
+--EXPECT--
 string(2) "ok"
 string(2) "ok"
 string(2) "ok"

@@ -53,10 +53,10 @@ function ut_main()
         {
             $fmt = ut_nfmt_create( $locale, $style, $pattern );
 
-			if(!$fmt) {
-				$str_res .= "Bad formatter!\n";
-				continue;
-			}
+            if(!$fmt) {
+                $str_res .= "Bad formatter!\n";
+                continue;
+            }
             $str_res .= dump( isset($integer[$style])?ut_nfmt_format( $fmt, $number, NumberFormatter::TYPE_INT32):ut_nfmt_format( $fmt, $number ) ) . "\n";
         }
     }

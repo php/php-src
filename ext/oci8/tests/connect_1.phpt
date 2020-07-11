@@ -5,24 +5,24 @@ oci_pconnect() & oci_new_connect()
 --FILE--
 <?php
 
-require dirname(__FILE__)."/connect.inc";
+require __DIR__."/connect.inc";
 
 if (!empty($dbase)) {
-	var_dump($c1 = oci_pconnect($user, $password, $dbase));
+    var_dump($c1 = oci_pconnect($user, $password, $dbase));
 }
 else {
-	var_dump($c1 = oci_pconnect($user, $password));
+    var_dump($c1 = oci_pconnect($user, $password));
 }
 
 if (!empty($dbase)) {
-	var_dump($c2 = oci_new_connect($user, $password, $dbase));
+    var_dump($c2 = oci_new_connect($user, $password, $dbase));
 }
 else {
-	var_dump($c2 = oci_new_connect($user, $password));
+    var_dump($c2 = oci_new_connect($user, $password));
 }
 
 var_dump(oci_close($c1));
-var_dump(ocilogoff($c2));
+var_dump(oci_close($c2));
 
 echo "Done\n";
 

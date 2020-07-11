@@ -1,12 +1,11 @@
 --TEST--
 XMLWriter: libxml2 XML Writer DTD Element & Attlist
 --SKIPIF--
-<?php 
-if (!extension_loaded("xmlwriter")) die("skip"); 
+<?php
+if (!extension_loaded("xmlwriter")) die("skip");
 ?>
 --FILE--
-<?php 
-/* $Id$ */
+<?php
 
 $xw = new XMLWriter();
 $xw->openMemory();

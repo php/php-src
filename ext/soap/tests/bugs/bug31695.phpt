@@ -7,18 +7,18 @@ Bug #31695 (Cannot redefine endpoint when using WSDL)
 ini_set("soap.wsdl_cache_enabled", 0);
 
 function Test($x) {
-	return $x;
+    return $x;
 }
 
 class LocalSoapClient extends SoapClient {
   function __construct($wsdl, $options=array()) {
     parent::__construct($wsdl, $options);
     $this->server = new SoapServer($wsdl, $options);
-		$this->server->addFunction("Test"); 
+        $this->server->addFunction("Test");
   }
 
   function __doRequest($request, $location, $action, $version, $one_way = 0) {
-  	echo "$location\n";
+    echo "$location\n";
     ob_start();
     $this->server->handle($request);
     $response = ob_get_contents();
@@ -27,11 +27,11 @@ class LocalSoapClient extends SoapClient {
   }
 }
 
-$client = new LocalSoapClient(dirname(__FILE__)."/bug31695.wsdl");
+$client = new LocalSoapClient(__DIR__."/bug31695.wsdl");
 $client->Test("str");
-$client = new LocalSoapClient(dirname(__FILE__)."/bug31695.wsdl", array("location"=>"test://1"));
+$client = new LocalSoapClient(__DIR__."/bug31695.wsdl", array("location"=>"test://1"));
 $client->Test("str");
-$client->__soapCall("Test", 
+$client->__soapCall("Test",
                     array("arg1"),
                      array("location"=>"test://2"));
 $old = $client->__setLocation("test://3");

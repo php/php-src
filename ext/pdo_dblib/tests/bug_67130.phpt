@@ -3,11 +3,11 @@ PDO_DBLIB: \PDOStatement::nextRowset() should succeed when all rows in current r
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo_dblib')) die('skip not loaded');
-require dirname(__FILE__) . '/config.inc';
+require __DIR__ . '/config.inc';
 ?>
 --FILE--
 <?php
-require dirname(__FILE__) . '/config.inc';
+require __DIR__ . '/config.inc';
 
 $stmt = $db->query('SELECT 1; SELECT 2; SELECT 3;');
 var_dump($stmt->fetch());

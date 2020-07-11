@@ -2,7 +2,7 @@
 cp1254 cmd test
 --SKIPIF--
 <?php
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 skip_if_not_win();
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
@@ -10,6 +10,8 @@ skip_if_no_required_exts();
 skip_if_wrong_cp(1254, "ansi");
 
 ?>
+--CONFLICTS--
+file_cp1254
 --INI--
 default_charset=cp1254
 --FILE--
@@ -19,7 +21,7 @@ default_charset=cp1254
 #vim: set encoding=cp1254
 */
 
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc"; 
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 
 $item = "çokbaytlý iþleri";
@@ -34,10 +36,8 @@ system("dir /b \"" . $fn . "\"");
 remove_data("file_cp1254");
 
 ?>
-===DONE===
---EXPECTF--	
+--EXPECTF--
 string(%d) "%s\çokbaytlý iþleri"
 bool(true)
 bool(true)
 çokbaytlý iþleri
-===DONE===

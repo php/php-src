@@ -20,12 +20,6 @@ url_rewriter.hosts=
 
 ob_start();
 
-/*
- * Prototype : session.use_trans_sid=1
- * Description : Test basic functionality.
- * Source code : ext/session/session.c
- */
-
 echo "*** Testing basic session functionality : variation3 use_trans_sid ***\n";
 
 /*
@@ -344,7 +338,7 @@ ob_end_flush();
   <input type="text" name="test1"></input>
   <input type="text" name="test2" />
 </form>
-NULL
+bool(true)
 *** Cleanup ***
 bool(true)
 string(6) "testid"

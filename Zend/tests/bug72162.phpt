@@ -7,4 +7,8 @@ $var11 = new StdClass();
 $var16 = error_reporting($var11);
 ?>
 --EXPECTF--
-Recoverable fatal error: Object of class stdClass could not be converted to string in %sbug72162.php on line %d
+Fatal error: Uncaught Error: Object of class stdClass could not be converted to string in %s:%d
+Stack trace:
+#0 %s(%d): error_reporting(Object(stdClass))
+#1 {main}
+  thrown in %s on line %d

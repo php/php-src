@@ -3,23 +3,23 @@ Test oci_define_by_name types
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
-?> 
+require(__DIR__.'/skipif.inc');
+?>
 --FILE--
 <?php
 
-require(dirname(__FILE__)."/connect.inc");
+require(__DIR__."/connect.inc");
 
 $stmtarray = array(
-	"drop table phptestrawtable",
-	"create table phptestrawtable( id number(10), fileimage raw(1000))"
+    "drop table phptestrawtable",
+    "create table phptestrawtable( id number(10), fileimage raw(1000))"
 );
-						 
+
 oci8_test_sql_execute($c, $stmtarray);
 
 $stmt = oci_parse ($c, "insert into phptestrawtable (id, fileimage) values (:id, :fileimage)");
 $i=1;
-$fileimage = file_get_contents( dirname(__FILE__)."/test.gif");
+$fileimage = file_get_contents( __DIR__."/test.gif");
 $fileimage = substr($fileimage, 0, 300);
 var_dump(md5($fileimage));
 
@@ -34,8 +34,8 @@ var_dump(oci_define_by_name($stmt, 'FILEIMAGE', $fi));
 oci_execute($stmt);
 
 while (oci_fetch($stmt)) {
-	var_dump($fi);
-	echo "file md5:" . md5($fi) . "\n";
+    var_dump($fi);
+    echo "file md5:" . md5($fi) . "\n";
 }
 
 echo "Test 2\n";
@@ -44,8 +44,8 @@ var_dump(oci_define_by_name($stmt, 'FILEIMAGE', $fi));
 oci_execute($stmt);
 
 while (oci_fetch($stmt)) {
-	var_dump($fi);
-	echo "file md5:" . md5($fi) . "\n";
+    var_dump($fi);
+    echo "file md5:" . md5($fi) . "\n";
 }
 
 echo "Test 3 - test repeatability\n";
@@ -54,8 +54,8 @@ var_dump(oci_define_by_name($stmt, 'FILEIMAGE', $fi, SQLT_STR));
 oci_execute($stmt);
 
 while (oci_fetch($stmt)) {
-	var_dump($fi);
-	echo "file md5:" . md5($fi) . "\n";
+    var_dump($fi);
+    echo "file md5:" . md5($fi) . "\n";
 }
 
 echo "Test 4 - wrong type\n";
@@ -64,8 +64,8 @@ var_dump(oci_define_by_name($stmt, 'FILEIMAGE', $fi, SQLT_RSET));
 oci_execute($stmt);
 
 while (oci_fetch($stmt)) {
-	var_dump($fi);
-	echo "file md5:" . md5($fi) . "\n";
+    var_dump($fi);
+    echo "file md5:" . md5($fi) . "\n";
 }
 
 // Cleanup

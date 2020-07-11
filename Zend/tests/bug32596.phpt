@@ -4,7 +4,7 @@ Bug #32596 (Segfault/Memory Leak by getClass (etc) in __destruct)
 <?php
 class BUG {
   public $error = "please fix this thing, it wasted a nice part of my life!\n";
-  static function instance() {return new BUG();}  
+  static function instance() {return new BUG();}
 
   function __destruct()
   {
@@ -24,4 +24,3 @@ echo "this is still executed\n";
 BUG
 please fix this thing, it wasted a nice part of my life!
 this is still executed
-

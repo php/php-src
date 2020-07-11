@@ -1,7 +1,7 @@
 --TEST--
 PDO Common: bindValue
 --SKIPIF--
-<?php # vim:ft=php
+<?php
 if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
@@ -10,7 +10,7 @@ PDOTest::skip();
 ?>
 --FILE--
 <?php
-if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE__) . '/../../pdo/tests/');
+if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../../pdo/tests/');
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
@@ -20,7 +20,7 @@ $stmt = $db->prepare('INSERT INTO test values (1, ?, ?, ?)');
 $data = array("one", "two", "three");
 
 foreach ($data as $i => $v) {
-	$stmt->bindValue($i+1, $v);
+    $stmt->bindValue($i+1, $v);
 }
 $stmt->execute();
 

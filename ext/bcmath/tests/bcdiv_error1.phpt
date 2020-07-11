@@ -8,7 +8,11 @@ antoni@solucionsinternet.com
 <?php if(!extension_loaded("bcmath")) print "skip"; ?>
 --FILE--
 <?php
-echo bcdiv('10.99', '0');
+try {
+    bcdiv('10.99', '0');
+} catch (DivisionByZeroError $ex) {
+    echo $ex->getMessage(), PHP_EOL;
+}
 ?>
---EXPECTF--
-Warning: bcdiv(): Division by zero in %s.php on line %d
+--EXPECT--
+Division by zero

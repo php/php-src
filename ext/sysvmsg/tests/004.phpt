@@ -39,7 +39,7 @@ if (!msg_remove_queue($q)) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 Set mode:
 bool(true)
 Did really work:

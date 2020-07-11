@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
    | Authors: Christian Seiler <chris_se@gmx.net>                         |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifndef ZEND_FLOAT_H
 #define ZEND_FLOAT_H
@@ -57,10 +55,9 @@ END_EXTERN_C()
  Implementation notes:
 
  x86_64:
-  - Since all x86_64 compilers use SSE by default, it is probably unnecessary
-    to use these macros there. We define them anyway since we are too lazy
-    to differentiate the architecture. Also, the compiler option -mfpmath=i387
-    justifies this decision.
+  - Since all x86_64 compilers use SSE by default, we do not define these
+    macros there. We ignore the compiler option -mfpmath=i387, because there is
+    no reason to use it on x86_64.
 
  General:
   - It would be nice if one could detect whether SSE if used for math via some
@@ -68,10 +65,8 @@ END_EXTERN_C()
     on how to do that?
 
  MS Visual C:
-  - Since MSVC users tipically don't use autoconf or CMake, we will detect
-    MSVC via compile time define. Floating point precision change isn't
-    supported on 64 bit platforms, so it's NOP. See
-    http://msdn.microsoft.com/en-us/library/c9676k6h(v=vs.110).aspx
+  - Since MSVC users typically don't use autoconf or CMake, we will detect
+    MSVC via compile time define.
 */
 
 /* MSVC detection (MSVC people usually don't use autoconf) */
@@ -79,7 +74,7 @@ END_EXTERN_C()
 #  define HAVE__CONTROLFP_S
 #endif /* _MSC_VER */
 
-#ifdef HAVE__CONTROLFP_S
+#if defined(HAVE__CONTROLFP_S) && !defined(__x86_64__)
 
 /* float.h defines _controlfp_s */
 # include <float.h>
@@ -143,7 +138,7 @@ END_EXTERN_C()
                 return _xpfpa_result; \
             } while (0)
 
-#elif defined(HAVE__CONTROLFP)
+#elif defined(HAVE__CONTROLFP) && !defined(__x86_64__)
 
 /* float.h defines _controlfp */
 # include <float.h>
@@ -202,7 +197,7 @@ END_EXTERN_C()
                 return _xpfpa_result; \
             } while (0)
 
-#elif defined(HAVE__FPU_SETCW) /* glibc systems */
+#elif defined(HAVE__FPU_SETCW)  && !defined(__x86_64__) /* glibc systems */
 
 /* fpu_control.h defines _FPU_[GS]ETCW */
 # include <fpu_control.h>
@@ -261,7 +256,7 @@ END_EXTERN_C()
                 return _xpfpa_result; \
             } while (0)
 
-#elif defined(HAVE_FPSETPREC) /* FreeBSD */
+#elif defined(HAVE_FPSETPREC)  && !defined(__x86_64__) /* FreeBSD */
 
 /* fpu_control.h defines _FPU_[GS]ETCW */
 # include <machine/ieeefp.h>
@@ -317,7 +312,7 @@ END_EXTERN_C()
                 return _xpfpa_result; \
             } while (0)
 
-#elif defined(HAVE_FPU_INLINE_ASM_X86)
+#elif defined(HAVE_FPU_INLINE_ASM_X86) && !defined(__x86_64__)
 
 /*
   Custom x86 inline assembler implementation.

@@ -9,7 +9,7 @@ phar.readonly=0
 <?php if (!extension_loaded("zlib")) die("skip no zlib extension"); ?>
 --FILE_EXTERNAL--
 files/write25.phar
---EXPECTF--
+--EXPECT--
 bool(false)
 bool(true)
 <?php __HALT_COMPILER();

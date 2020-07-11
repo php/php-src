@@ -2,12 +2,7 @@
 Test htmlspecialchars_decode() function : usage variations - heredoc strings for 'string' argument
 --FILE--
 <?php
-/* Prototype  : string htmlspecialchars_decode(string $string [, int $quote_style])
- * Description: Convert special HTML entities back to characters
- * Source code: ext/standard/html.c
-*/
-
-/* 
+/*
  * testing htmlspecialchars_decode() with various heredoc strings as argument for $string
 */
 
@@ -71,7 +66,7 @@ for($index =0; $index < count($res_heredoc_strings); $index ++) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing htmlspecialchars_decode() : usage variations ***
 -- Iteration 1 --
 string(0) ""

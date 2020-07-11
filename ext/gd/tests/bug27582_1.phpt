@@ -6,7 +6,6 @@ Bug #27582 (ImageFillToBorder() on alphablending image looses alpha on fill colo
 ?>
 --FILE--
 <?php
-/* $id$ */
 $dest = dirname(realpath(__FILE__)) . '/bug27582.png';
 @unlink($dest);
 $im = ImageCreateTrueColor(10, 10);

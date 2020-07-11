@@ -17,7 +17,5 @@ $db->close();
 // Access the sqlite3_stmt object via the php_sqlite3_stmt container
 $stmt->reset();
 ?>
-==DONE==
 --EXPECTF--
 Warning: SQLite3Stmt::reset(): The SQLite3 object has not been correctly initialised in %s
-==DONE==

@@ -33,8 +33,8 @@ class myList {
     }
     public function __wakeup()
     {
-		$this->_obj = unserialize($this->_serialized);
-	}
+        $this->_obj = unserialize($this->_serialized);
+    }
 }
 
 echo "SCRIPT START" . PHP_EOL;
@@ -80,4 +80,3 @@ start serialize/unserialize
 finish serialize/unserialize
 check successful
 SCRIPT END
-

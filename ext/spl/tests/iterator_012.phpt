@@ -17,17 +17,14 @@ echo "===Foreach===\n";
 
 foreach($it as $key=>$val)
 {
-	echo "$key=>$val\n";
+    echo "$key=>$val\n";
 }
 
 ?>
-===DONE===
-<?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 ===Current===
 0=>A
 ===Next===
 ===Foreach===
 1=>B
 2=>C
-===DONE===

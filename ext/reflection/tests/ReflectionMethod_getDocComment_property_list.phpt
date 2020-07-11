@@ -30,7 +30,7 @@ $reflection = new ReflectionProperty('\X', 'z');
 echo 'X::z', PHP_EOL;
 var_dump($reflection->getDocComment());
 ?>
---EXPECTF--
+--EXPECT--
 X::x
 string(24) "/**
      * doc 1

@@ -2,12 +2,6 @@
 Test array_key_exists() function : usage variations - array keys are different data types
 --FILE--
 <?php
-/* Prototype  : bool array_key_exists(mixed $key, array $search)
- * Description: Checks if the given key or index exists in the array 
- * Source code: ext/standard/array.c
- * Alias to functions: key_exists
- */
-
 /*
  * Pass an array where the keys are different data types as the $search argument
  * then pass many different data types as $key argument to test where array_key_exist()
@@ -42,7 +36,7 @@ $inputs = array(
        -10.5 => 'negative',
        .5 => 'half',
        ),
-       
+
        'extreme floats' => array(
        12.3456789000e10 => 'large',
        12.3456789000E-10 => 'small',
@@ -51,7 +45,7 @@ $inputs = array(
        // null data
 /*3*/ 'null uppercase' => array(
        NULL => 'null 1',
-       ), 
+       ),
        'null lowercase' => array(
        null => 'null 2',
        ),
@@ -65,7 +59,7 @@ $inputs = array(
        TRUE => 'uppert',
        FALSE => 'upperf',
        ),
-       
+
        // empty data
 /*5*/ 'empty double quotes' => array(
        "" => 'emptyd',
@@ -95,22 +89,21 @@ $inputs = array(
 // loop through each element of $inputs to check the behavior of array_key_exists()
 $iterator = 1;
 foreach($inputs as $type => $input) {
-	echo "\n-- Iteration $iterator: $type data --\n";
+    echo "\n-- Iteration $iterator: $type data --\n";
 
-	//iterate over again to get all different key values
-	foreach ($inputs as $new_type => $new_input) {
-		echo "-- \$key arguments are $new_type data:\n";
-		foreach ($new_input as $key => $search) {
-			var_dump(array_key_exists($key, $input));
-		}
-	}
-	$iterator++;
+    //iterate over again to get all different key values
+    foreach ($inputs as $new_type => $new_input) {
+        echo "-- \$key arguments are $new_type data:\n";
+        foreach ($new_input as $key => $search) {
+            var_dump(array_key_exists($key, $input));
+        }
+    }
+    $iterator++;
 };
 
 echo "Done";
 ?>
-
---EXPECTF--
+--EXPECT--
 *** Testing array_key_exists() : usage variations ***
 
 -- Iteration 1: int data --

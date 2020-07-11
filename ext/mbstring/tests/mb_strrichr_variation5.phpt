@@ -7,21 +7,15 @@ function_exists('mb_strrichr') or die("skip mb_strrichr() is not available in th
 ?>
 --FILE--
 <?php
-/* Prototype  : string mb_strrichr(string haystack, string needle[, bool part[, string encoding]])
- * Description: Finds the last occurrence of a character in a string within another, case insensitive 
- * Source code: ext/mbstring/mbstring.c
- * Alias to functions: 
- */
-
 echo "*** Testing mb_strrichr() : basic functionality ***\n";
 
 mb_internal_encoding('UTF-8');
 
 //ascii mixed case, multiple needles
-$string_ascii = b'abcDef zBcDyx';
-$needle_ascii_upper = b"BCD";
-$needle_ascii_mixed = b"bCd";
-$needle_ascii_lower = b"bcd";
+$string_ascii = 'abcDef zBcDyx';
+$needle_ascii_upper = "BCD";
+$needle_ascii_mixed = "bCd";
+$needle_ascii_lower = "bcd";
 
 //Greek string in mixed case UTF-8 with multiple needles
 $string_mb = base64_decode('zrrOu868zr3Ovs6fzqDOoSDOus67zpzOnc6+zr/OoA==');
@@ -47,7 +41,6 @@ var_dump(bin2hex(mb_strrichr($string_mb, $needle_mb_mixed, false)));
 var_dump(bin2hex(mb_strrichr($string_mb, $needle_mb_mixed, true)));
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing mb_strrichr() : basic functionality ***
 
@@ -66,4 +59,3 @@ string(20) "ce9cce9dcebecebfcea0"
 string(42) "cebacebbcebccebdcebece9fcea0cea120cebacebb"
 string(20) "ce9cce9dcebecebfcea0"
 string(42) "cebacebbcebccebdcebece9fcea0cea120cebacebb"
-===DONE===

@@ -18,7 +18,7 @@ echo "-- pass null as second parameter and no third param to get back array_valu
 var_dump(array_column($rows, null));
 
 echo "Done\n";
---EXPECTF--
+--EXPECT--
 -- pass null as second parameter to get back all columns indexed by third parameter --
 array(2) {
   [3]=>

@@ -6,11 +6,6 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 ?>
 --FILE--
 <?php
-/* Prototype  : number bindec  ( string $binary_string  )
- * Description: Returns the decimal equivalent of the binary number represented by the binary_string  argument.
- * Source code: ext/standard/math.c
- */
-
 echo "*** Testing bindec() : usage variations ***\n";
 //get an unset variable
 $unset_var = 10;
@@ -48,7 +43,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -58,7 +53,7 @@ $inputs = array(
 /*19*/ "abcxyz",
        'abcxyz',
        $heredoc,
-       
+
        // undefined data
 /*22*/ @$undefined_var,
 
@@ -72,13 +67,16 @@ $inputs = array(
 // loop through each element of $inputs to check the behaviour of bindec()
 $iterator = 1;
 foreach($inputs as $input) {
-	echo "\n-- Iteration $iterator --\n";
-	var_dump(bindec($input));
-	$iterator++;
+    echo "\n-- Iteration $iterator --\n";
+    try {
+        var_dump(bindec($input));
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
+    $iterator++;
 };
 fclose($fp);
 ?>
-===Done===
 --EXPECTF--
 *** Testing bindec() : usage variations ***
 
@@ -89,24 +87,38 @@ int(0)
 int(1)
 
 -- Iteration 3 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(1)
 
 -- Iteration 4 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(0)
 
 -- Iteration 5 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(2)
 
 -- Iteration 6 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(2)
 
 -- Iteration 7 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(8)
 
 -- Iteration 8 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(1)
 
 -- Iteration 9 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(0)
 
 -- Iteration 10 --
@@ -134,17 +146,21 @@ int(0)
 int(0)
 
 -- Iteration 18 --
-
-Notice: Array to string conversion in %s on line %d
-int(0)
+bindec(): Argument #1 ($binary_string) must be of type string, array given
 
 -- Iteration 19 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(0)
 
 -- Iteration 20 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(0)
 
 -- Iteration 21 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(0)
 
 -- Iteration 22 --
@@ -154,5 +170,4 @@ int(0)
 int(0)
 
 -- Iteration 24 --
-int(%d)
-===Done===
+bindec(): Argument #1 ($binary_string) must be of type string, resource given

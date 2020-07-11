@@ -6,5 +6,3 @@ var_dump(new class{});
 --EXPECTF--
 object(class@%s)#%d (0) {
 }
-
-

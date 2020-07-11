@@ -15,7 +15,7 @@ var_dump(filter_var(".", FILTER_SANITIZE_STRING));
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 string(0) ""
 string(0) ""
 string(12) "!@#$%^&*()'""

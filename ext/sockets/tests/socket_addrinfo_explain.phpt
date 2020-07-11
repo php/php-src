@@ -13,16 +13,16 @@ $addrinfo = socket_addrinfo_lookup('127.0.0.1', 2000, array(
 ));
 var_dump(socket_addrinfo_explain($addrinfo[0]));
 echo "Done";
---EXPECT--
+--EXPECTF--
 array(5) {
   ["ai_flags"]=>
-  int(0)
+  int(%d)
   ["ai_family"]=>
   int(2)
   ["ai_socktype"]=>
   int(2)
   ["ai_protocol"]=>
-  int(17)
+  int(%d)
   ["ai_addr"]=>
   array(2) {
     ["sin_port"]=>

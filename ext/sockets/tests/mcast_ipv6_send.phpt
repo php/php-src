@@ -5,7 +5,7 @@ Multicast support: IPv6 send options
 if (!extension_loaded('sockets')) {
     die('skip sockets extension not available.');
 }
-if (!defined('IPPROTO_IPV6')) {
+if (getenv('CI_NO_IPV6') || !defined('IPPROTO_IPV6')) {
 	die('skip IPv6 not available.');
 }
 $level = IPPROTO_IPV6;
@@ -49,7 +49,6 @@ var_dump($r);
 $r = socket_get_option($s, $level, IPV6_MULTICAST_IF);
 var_dump($r);
 echo "\n";
-
 --EXPECT--
 Setting IPV6_MULTICAST_TTL
 bool(true)

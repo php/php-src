@@ -10,7 +10,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 open_basedir=/dev
 --FILE--
 <?php
-	var_dump(file_exists("/dev/bogus_file_no_such_thing"));
+    var_dump(file_exists("/dev/bogus_file_no_such_thing"));
 ?>
 --EXPECT--
 bool(false)

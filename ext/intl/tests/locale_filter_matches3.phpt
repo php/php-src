@@ -1,72 +1,72 @@
 --TEST--
-locale_filter_matches.phpt() ICU >= 51.2 
+locale_filter_matches.phpt() ICU >= 51.2 && ICU < 67.1
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if (version_compare(INTL_ICU_VERSION, '51.2') < 0) die('skip for ICU >= 51.2'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '67.1') >= 0) die('skip for ICU < 67.1'); ?>
 --FILE--
 <?php
 
 /*
- * Try parsing different Locales  
+ * Try parsing different Locales
  * with Procedural and Object methods.
  */
 
 function ut_main()
 {
-	$loc_ranges = array(
-		'de-de',
-		'sl_IT',
-		'sl_IT_Nedis',
-		'jbo',
-		'art-lojban',
-		'sl_IT'
-	);
-	
-	$lang_tags = array(
-		'de-DEVA',
-		'de-DE-1996',
-		'de-DE',
-		'zh_Hans',
-		'de-CH-1996',
-		'sl_IT',
-		'sl_IT_nedis-a-kirti-x-xyz',
-		'sl_IT_rozaj',
-		'sl_IT_NEDIS_ROJAZ_1901',
-		'i-enochian',
-		'sgn-CH-de',
-		'art-lojban',
-		'i-lux',
-		'art-lojban',
-		'jbo',
-		'en_sl_IT'
-	);
+    $loc_ranges = array(
+        'de-de',
+        'sl_IT',
+        'sl_IT_Nedis',
+        'jbo',
+        'art-lojban',
+        'sl_IT'
+    );
+
+    $lang_tags = array(
+        'de-DEVA',
+        'de-DE-1996',
+        'de-DE',
+        'zh_Hans',
+        'de-CH-1996',
+        'sl_IT',
+        'sl_IT_nedis-a-kirti-x-xyz',
+        'sl_IT_rozaj',
+        'sl_IT_NEDIS_ROJAZ_1901',
+        'i-enochian',
+        'sgn-CH-de',
+        'art-lojban',
+        'i-lux',
+        'art-lojban',
+        'jbo',
+        'en_sl_IT'
+    );
 
     $res_str = '';
     $isCanonical = false;
-	foreach($loc_ranges as $loc_range){
-		foreach($lang_tags as $lang_tag){
-			$res_str .="--------------\n";
-			$result= ut_loc_locale_filter_matches( $lang_tag , $loc_range , $isCanonical);
-			$res_str .= "loc_range:$loc_range matches lang_tag $lang_tag ? ";
-			if( $result){	
-				$res_str .= "YES\n";
-			}else{
-				$res_str .= "NO\n";
-			}
+    foreach($loc_ranges as $loc_range){
+        foreach($lang_tags as $lang_tag){
+            $res_str .="--------------\n";
+            $result= ut_loc_locale_filter_matches( $lang_tag , $loc_range , $isCanonical);
+            $res_str .= "loc_range:$loc_range matches lang_tag $lang_tag ? ";
+            if( $result){
+                $res_str .= "YES\n";
+            }else{
+                $res_str .= "NO\n";
+            }
 //canonicalized version
-			$result= ut_loc_locale_filter_matches( $lang_tag , $loc_range , !($isCanonical));
-			$can_loc_range = ut_loc_canonicalize($loc_range);
-			$can_lang_tag = ut_loc_canonicalize($lang_tag);
-			$res_str .= "loc_range:$can_loc_range canonically matches lang_tag $can_lang_tag ? ";
-			if( $result){	
-				$res_str .= "YES\n";
-			}else{
-				$res_str .= "NO\n";
-			}
-		}
-	}
+            $result= ut_loc_locale_filter_matches( $lang_tag , $loc_range , !($isCanonical));
+            $can_loc_range = ut_loc_canonicalize($loc_range);
+            $can_lang_tag = ut_loc_canonicalize($lang_tag);
+            $res_str .= "loc_range:$can_loc_range canonically matches lang_tag $can_lang_tag ? ";
+            if( $result){
+                $res_str .= "YES\n";
+            }else{
+                $res_str .= "NO\n";
+            }
+        }
+    }
 
-	$res_str .= "\n";
+    $res_str .= "\n";
     return $res_str;
 
 }

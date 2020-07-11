@@ -17,12 +17,11 @@ insert_dummy_data($link, $base);
 $dn = "$base";
 $filter = "(cn=user*)";
 var_dump(
-	ldap_control_paged_result($link, 1),
-	$result = ldap_search($link, $dn, $filter, array('cn')),
-	ldap_get_entries($link, $result)
+    ldap_control_paged_result($link, 1),
+    $result = ldap_search($link, $dn, $filter, array('cn')),
+    ldap_get_entries($link, $result)
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 include "connect.inc";
@@ -31,6 +30,7 @@ $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
 remove_dummy_data($link, $base);
 ?>
 --EXPECTF--
+Deprecated: Function ldap_control_paged_result() is deprecated in %s.php on line %d
 bool(true)
 resource(%d) of type (ldap result)
 array(2) {
@@ -53,4 +53,3 @@ array(2) {
     string(%d) "cn=userA,%s"
   }
 }
-===DONE===

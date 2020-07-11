@@ -1,5 +1,5 @@
 --TEST--
-Test chdir() function : basic functionality 
+Test chdir() function : basic functionality
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) != 'WIN') {
@@ -8,17 +8,13 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype  : bool chdir(string $directory)
- * Description: Change the current directory 
- * Source code: ext/standard/dir.c
- */
-
 /*
  * Test basic functionality of chdir() with absolute and relative paths
  */
 
 echo "*** Testing chdir() : basic functionality ***\n";
-$base_dir_path = dirname(__FILE__);
+$base_dir_path = __DIR__ . '/chdir_basic-win32-mb';
+@mkdir($base_dir_path);
 
 $level_one_dir_name = "私はガラスを食べられますlevel_one";
 $level_one_dir_path = "$base_dir_path/$level_one_dir_name";
@@ -39,13 +35,13 @@ echo "\n-- Testing chdir() with relative paths: --\n";
 var_dump(chdir($level_two_dir_name));
 var_dump(getcwd());
 ?>
-===DONE===
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
-chdir($file_path);
-rmdir("$file_path/私はガラスを食べられますlevel_one/私はガラスを食べられますlevel_two");
-rmdir("$file_path/私はガラスを食べられますlevel_one");
+$base_dir_path = __DIR__ . '/chdir_basic-win32-mb';
+chdir(__DIR__);
+rmdir("$base_dir_path/私はガラスを食べられますlevel_one/私はガラスを食べられますlevel_two");
+rmdir("$base_dir_path/私はガラスを食べられますlevel_one");
+rmdir($base_dir_path);
 ?>
 --EXPECTF--
 *** Testing chdir() : basic functionality ***
@@ -57,4 +53,3 @@ string(%d) "%s私はガラスを食べられますlevel_one"
 -- Testing chdir() with relative paths: --
 bool(true)
 string(%d) "%s私はガラスを食べられますlevel_one%e私はガラスを食べられますlevel_two"
-===DONE===

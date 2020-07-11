@@ -27,5 +27,5 @@ $o->setWorld(' World!');
 $o->sayHelloWorld();
 
 ?>
---EXPECTF--	
+--EXPECT--
 Hello World!

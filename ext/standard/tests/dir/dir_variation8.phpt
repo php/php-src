@@ -8,21 +8,15 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 ?>
 --FILE--
 <?php
-/* 
- * Prototype  : object dir(string $directory[, resource $context])
- * Description: Directory class with properties, handle and class and methods read, rewind and close
- * Source code: ext/standard/dir.c
- */
-
-/* 
- * Create more than one temporary directory & subdirectory and check if dir() function can open 
+/*
+ * Create more than one temporary directory & subdirectory and check if dir() function can open
  * those directories when wildcard characters are used to refer to them.
  */
 
 echo "*** Testing dir() : checking with wildcard characters ***\n";
 
 // create the temporary directories
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $dir_path = $file_path."/dir_variation81";
 $sub_dir_path = $dir_path."/sub_dir1";
 
@@ -31,7 +25,7 @@ $sub_dir_path = $dir_path."/sub_dir1";
 
 /* with different wildcard characters */
 
-echo "-- wildcard = '*' --\n"; 
+echo "-- wildcard = '*' --\n";
 var_dump( dir($file_path."/dir_var*") );
 var_dump( dir($file_path."/*") );
 
@@ -45,16 +39,16 @@ echo "Done";
 *** Testing dir() : checking with wildcard characters ***
 -- wildcard = '*' --
 
-Warning: dir(%s/dir_var*): failed to open dir: %s in %s on line %d
+Warning: dir(%s/dir_var*): Failed to open directory: %s in %s on line %d
 bool(false)
 
-Warning: dir(%s/*): failed to open dir: %s in %s on line %d
+Warning: dir(%s/*): Failed to open directory: %s in %s on line %d
 bool(false)
 -- wildcard = '?' --
 
-Warning: dir(%s/dir_variation81/sub_dir?): failed to open dir: %s in %s on line %d
+Warning: dir(%s/dir_variation81/sub_dir?): Failed to open directory: %s in %s on line %d
 bool(false)
 
-Warning: dir(%s/dir_variation81/sub?dir1): failed to open dir: %s in %s on line %d
+Warning: dir(%s/dir_variation81/sub?dir1): Failed to open directory: %s in %s on line %d
 bool(false)
 Done

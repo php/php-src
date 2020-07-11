@@ -17,8 +17,6 @@ var_dump($intlcal->inDaylightTime());
 $intlcal->setTime(strtotime('2012-04-01') * 1000);
 var_dump(intlcal_in_daylight_time($intlcal));
 ?>
-==DONE==
 --EXPECT--
 bool(false)
-bool(true)
-==DONE==
+bool(true)

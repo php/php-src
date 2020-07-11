@@ -1,26 +1,15 @@
 --TEST--
-Test fopen and fclose() functions - usage variations - "x+t" mode 
+Test fopen and fclose() functions - usage variations - "x+t" mode
 --FILE--
 <?php
-/*
- fopen() function:
- Prototype: resource fopen(string $filename, string $mode
-                            [, bool $use_include_path [, resource $context]] );
- Description: Opens file or URL.
-*/
-/*
- fclose() function:
- Prototype: bool fclose ( resource $handle );
- Description: Closes an open file pointer
-*/
 
 /* Test fopen() and fclose(): Opening the file in "x+t" mode,
    checking for the file creation, write & read operations,
    checking for the file pointer position,
-   checking for the warning msg when trying to open an existing file in "x+t" mode,  
+   checking for the warning msg when trying to open an existing file in "x+t" mode,
    and fclose function
 */
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $string = "abcdefghij\nmnopqrst\tuvwxyz\n0123456789";
 $file = $file_path."/007_variation16.tmp";
 
@@ -37,10 +26,10 @@ var_dump( ftell($file_handle) );  //File pointer position after read operation, 
 var_dump( fclose($file_handle) );  //Check for close operation on the file handle
 var_dump( get_resource_type($file_handle) );  //Check whether resource is lost after close operation
 $file_handle = fopen($file, "x+t");  //Opening the existing data file in "x+t" mode to check for the warning message
-echo "*** Done ***\n"; 
+echo "*** Done ***\n";
 --CLEAN--
 <?php
-unlink(dirname(__FILE__)."/007_variation16.tmp");
+unlink(__DIR__."/007_variation16.tmp");
 ?>
 --EXPECTF--
 *** Test fopen() & fclose() functions:  with 'x+t' mode ***
@@ -56,5 +45,5 @@ int(37)
 bool(true)
 string(7) "Unknown"
 
-Warning: fopen(%s): failed to open stream: File exists in %s on line %d
+Warning: fopen(%s): Failed to open stream: File exists in %s on line %d
 *** Done ***

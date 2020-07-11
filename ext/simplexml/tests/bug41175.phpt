@@ -11,8 +11,6 @@ $xml->addAttribute("alt", "");
 echo $xml->asXML();
 
 ?>
-===DONE===
---EXPECT--	
+--EXPECT--
 <?xml version="1.0"?>
 <img src="foo" alt=""/>
-===DONE===

@@ -4,14 +4,14 @@ No more errmsg: can now change initial value of property
 <?php
 
 class test1 {
-	static protected $var = 1;
+    static protected $var = 1;
 }
 
 class test extends test1 {
-	static $var = 10;
+    static $var = 10;
 }
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--
 Done

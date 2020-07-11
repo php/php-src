@@ -1,5 +1,5 @@
 --TEST--
-Ensure "undefined offset" notice formats message corectly when undefined key is negative
+Ensure "undefined offset" notice formats message correctly when undefined key is negative
 --FILE--
 <?php
 
@@ -10,12 +10,12 @@ Ensure "undefined offset" notice formats message corectly when undefined key is 
 
 echo "Done\n";
 ?>
---EXPECTF--	
-Notice: Undefined offset: -1 in %s on line 3
+--EXPECTF--
+Notice: Undefined array key -1 in %s on line %d
 
-Notice: Undefined offset: -1 in %s on line 4
+Notice: Undefined array key -1 in %s on line %d
 
-Notice: Undefined offset: -1 in %s on line 5
+Notice: Undefined array key -1 in %s on line 5
 
-Notice: Undefined offset: -1 in %s on line 6
+Notice: Undefined array key -1 in %s on line 6
 Done

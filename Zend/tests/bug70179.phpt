@@ -4,9 +4,9 @@ Bug #70179 ($this refcount issue)
 <?php
 
 class X {
-	function __invoke() {
-		var_dump($this);
-	}
+    function __invoke() {
+        var_dump($this);
+    }
 }
 (new X)();
 

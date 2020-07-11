@@ -1,9 +1,8 @@
 --TEST--
-array_udiff():Test return type and value for expected input 
+array_udiff():Test return type and value for expected input
 --FILE--
 <?php
 /*
-* proto array array_udiff ( array $array1, array $array2 [, array $ ..., callback $data_compare_func] )
 * Function is implemented in ext/standard/array.c
 */
 class cr {

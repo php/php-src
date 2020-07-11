@@ -6,12 +6,12 @@ Phar: tar with hard link and symbolic link
 phar.require_hash=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.tar';
-copy(dirname(__FILE__) . '/files/links.tar', $fname);
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.tar';
+copy(__DIR__ . '/files/links.tar', $fname);
 try {
-	$p = new PharData($fname);
+    $p = new PharData($fname);
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 var_dump($p['testit/link']->getContent());
 var_dump($p['testit/hard']->getContent());
@@ -19,10 +19,9 @@ var_dump($p['testit/file']->getContent());
 $p['testit/link'] = 'overwriting';
 var_dump($p['testit/link']->getContent());
 ?>
-===DONE===
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.tar');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.tar');
 ?>
 --EXPECT--
 string(3) "hi
@@ -32,4 +31,3 @@ string(3) "hi
 string(3) "hi
 "
 string(11) "overwriting"
-===DONE===

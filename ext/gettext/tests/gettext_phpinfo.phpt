@@ -1,7 +1,7 @@
 --TEST--
-Test phpinfo() displays gettext support 
+Test phpinfo() displays gettext support
 --SKIPIF--
-<?php 
+<?php
 	if (!extension_loaded("gettext")) {
 		die("SKIP extension gettext not loaded\n");
 	}

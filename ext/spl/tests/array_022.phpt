@@ -6,11 +6,11 @@ SPL: ArrayObject/Iterator and reference to self
 
 class MyArrayObject extends ArrayObject
 {
-	public function __construct()
-	{
-		parent::__construct($this);
-		$this['bar'] = 'baz';
-	}
+    public function __construct()
+    {
+        parent::__construct($this);
+        $this['bar'] = 'baz';
+    }
 }
 
 $a = new MyArrayObject;
@@ -27,11 +27,11 @@ var_dump($b);
 
 class MyArrayIterator extends ArrayIterator
 {
-	public function __construct()
-	{
-		parent::__construct($this);
-		$this['bar'] = 'baz';
-	}
+    public function __construct()
+    {
+        parent::__construct($this);
+        $this['bar'] = 'baz';
+    }
 }
 
 $a = new MyArrayIterator;
@@ -43,8 +43,7 @@ var_dump($a);
 var_dump($b);
 
 ?>
-===DONE===
---EXPECTF--	
+--EXPECTF--
 ==ArrayObject===
 object(MyArrayObject)#%d (1) {
   ["bar"]=>
@@ -67,4 +66,3 @@ object(MyArrayIterator)#%d (2) {
   ["baz"]=>
   string(3) "Foo"
 }
-===DONE===

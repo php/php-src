@@ -1,4 +1,3 @@
-// $Id$
 // vim:ft=javascript
 
 ARG_WITH("pspell", "pspell/aspell (whatever it's called this month) support", "no");
@@ -13,4 +12,3 @@ if (PHP_PSPELL != "no") {
 		WARNING("pspell not enabled; libraries and headers not found");
 	}
 }
-

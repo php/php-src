@@ -2,11 +2,6 @@
 Test array_sum() function : usage variations - array with different float values
 --FILE--
 <?php
-/* Prototype  : mixed array_sum(array $input)
- * Description: Returns the sum of the array entries 
- * Source code: ext/standard/array.c
-*/
-
 /*
  * sum of array containing different float values
 */
@@ -26,7 +21,7 @@ $float_input = array( 1.2E2, 23.4E3, -4.1E2, 0.2E2, 2.1E-2, .5E3);
 var_dump( array_sum($float_input) );
 
 // Mixed float array
-$float_input = array( 
+$float_input = array(
   1.2,
   0.5
   -5.8,
@@ -39,10 +34,10 @@ $float_input = array(
 );
 echo "-- Mixed float array --\n";
 var_dump( array_sum($float_input) );
-                     
+
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_sum() : array with different float values ***
 -- simple float array --
 float(1.3)

@@ -1,21 +1,10 @@
 --TEST--
 Test filesize() function: usage variations - file size after truncate
---SKIPIF--
-<?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip only valid for Linux');
-}
 --FILE--
 <?php
-/* 
- Prototype   : int filesize ( string $filename );
- Description : Returns the size of the file in bytes, or FALSE 
-   (and generates an error of level E_WARNING) in case of an error.
-*/
+$file_path = __DIR__;
 
-$file_path = dirname(__FILE__);
-
-echo "*** Testing filesize(): usage variations ***\n"; 
+echo "*** Testing filesize(): usage variations ***\n";
 $filename =  $file_path."/filesize_variation3.tmp";
 $file_handle = fopen($filename, "w");
 fwrite($file_handle, str_repeat("Hello,World ", 1000) ); // create file of size 12000 bytes
@@ -26,21 +15,24 @@ echo "-- Testing filesize() after truncating the file to a new length --\n";
 // truncate the same file, in the loop , each time with the decrement in size by 1200 bytes,
 //  until -1200bytes size
 for($size = filesize($filename); $size>=-1200; $size-=1200) {
-  $file_handle = fopen($filename, "r+");
-  var_dump( ftruncate($file_handle, $size) );
-  fclose($file_handle);
-  var_dump( filesize($filename) );
-  clearstatcache();
+    $file_handle = fopen($filename, "r+");
+    try {
+        var_dump( ftruncate($file_handle, $size) );
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
+    fclose($file_handle);
+    var_dump( filesize($filename) );
+    clearstatcache();
 }
 
-echo "*** Done ***\n";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink($file_path."/filesize_variation3.tmp");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing filesize(): usage variations ***
 -- Testing filesize() after truncating the file to a new length --
 bool(true)
@@ -65,8 +57,5 @@ bool(true)
 int(1200)
 bool(true)
 int(0)
-
-Warning: ftruncate(): Negative size is not supported in %s on line %d
-bool(false)
+ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)
-*** Done ***

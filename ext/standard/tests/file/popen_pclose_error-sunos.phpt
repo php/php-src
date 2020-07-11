@@ -5,17 +5,10 @@ Test popen() and pclose function: error conditions
 if( substr(PHP_OS, 0, 3) != 'Sun')
   die("skip Only valid for Sun Solaris");
 ?>
-
 --FILE--
 <?php
-/*
- * Prototype: resource popen ( string command, string mode )
- * Description: Opens process file pointer.
 
- * Prototype: int pclose ( resource handle );
- * Description: Closes process file pointer.
- */
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 echo "*** Testing for error conditions ***\n";
 var_dump( popen() );  // Zero Arguments
 var_dump( popen("abc.txt") );   // Single Argument
@@ -29,7 +22,7 @@ echo "\n--- Done ---";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink($file_path."/popen.tmp");
 ?>
 --EXPECTF--

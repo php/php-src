@@ -3,11 +3,11 @@ Trying to use an interface as trait
 --FILE--
 <?php
 
-interface abc { 
+interface abc {
 }
 
 class A {
-	use abc;
+    use abc;
 }
 
 ?>

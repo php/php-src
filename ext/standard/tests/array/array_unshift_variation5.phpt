@@ -2,23 +2,18 @@
 Test array_unshift() function : usage variations - assoc. array with diff values for 'array' argument
 --INI--
 precision=12
---FILE-- 
+--FILE--
 <?php
-/* Prototype  : int array_unshift(array $array, mixed $var [, mixed ...])
- * Description: Pushes elements onto the beginning of the array
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Testing the functionality of array_unshift() by passing different
  * associative arrays having different possible values to $array argument.
  * The $var argument passed is a fixed value
 */
- 
+
 echo "*** Testing array_unshift() : associative array with different values ***\n";
 
 // get an unset variable
-$unset_var = 10; 
+$unset_var = 10;
 unset ($unset_var);
 
 // get a resource variable
@@ -74,7 +69,7 @@ foreach($arrays as $array) {
 
   /* with default argument */
   // returns element count in the resulting array after arguments are pushed to
-  // beginning of the given array 
+  // beginning of the given array
   $temp_array = $array;
   var_dump( array_unshift($temp_array, $var) );
 
@@ -83,7 +78,7 @@ foreach($arrays as $array) {
 
   /* with optional arguments */
   // returns element count in the resulting array after arguments are pushed to
-  // beginning of the given array 
+  // beginning of the given array
   $temp_array = $array;
   var_dump( array_unshift($temp_array, $var, "hello", 'world') );
 
@@ -209,9 +204,9 @@ array(5) {
   ["f2"]=>
   float(3.33)
   [1]=>
-  float(4.8999992284)
+  float(4.89999922839999)
   ["f4"]=>
-  float(33333333.3333)
+  float(33333333.333333)
 }
 int(7)
 array(7) {
@@ -226,9 +221,9 @@ array(7) {
   ["f2"]=>
   float(3.33)
   [3]=>
-  float(4.8999992284)
+  float(4.89999922839999)
   ["f4"]=>
-  float(33333333.3333)
+  float(33333333.333333)
 }
 -- Iteration 7 --
 int(5)

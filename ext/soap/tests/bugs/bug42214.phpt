@@ -10,12 +10,12 @@ $request = <<<EOF
 EOF;
 
 function test() {
-	$a = $b;
-	obvious_error(); // will cause an error
+    $a = $b;
+    obvious_error(); // will cause an error
 }
 
 $server = new SoapServer(NULL, array('uri' =>'http://localhost/server.php',
-	'send_errors'=>0));
+    'send_errors'=>0));
 $server->addFunction('test');
 $server->handle($request);
 ?>

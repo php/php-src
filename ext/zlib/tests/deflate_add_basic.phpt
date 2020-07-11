@@ -1,9 +1,9 @@
 --TEST--
 Test incremental deflate_add() functionality
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("zlib")) {
-    print "skip - ZLIB extension not loaded"; 
+    print "skip - ZLIB extension not loaded";
 }
 ?>
 --FILE--
@@ -66,5 +66,5 @@ foreach ($modes as $modeKey => $mode) {
 }
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 ===DONE===

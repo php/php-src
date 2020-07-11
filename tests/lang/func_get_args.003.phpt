@@ -3,9 +3,12 @@ func_get_args() outside of a function declaration
 --FILE--
 <?php
 
-var_dump(func_get_args());	
+try {
+    var_dump(func_get_args());
+} catch (\Error $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 ?>
---EXPECTREGEX--
-Warning\: func_get_args\(\)\:  Called from the global scope - no function context in \S* on line 3
-bool\(false\)
+--EXPECT--
+func_get_args() cannot be called from the global scope

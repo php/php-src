@@ -7,12 +7,6 @@ Test session_id() function : basic functionality
 
 ob_start();
 
-/* 
- * Prototype : string session_id([string $id])
- * Description : Get and/or set the current session id
- * Source code : ext/session/session.c 
- */
-
 echo "*** Testing session_id() : basic functionality ***\n";
 
 ini_set('session.sid_bits_per_chracter', 6);
@@ -35,4 +29,3 @@ echo "Done";
 string(120) "%s"
 string(22) "%s"
 Done
-

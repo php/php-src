@@ -7,7 +7,6 @@ arg_separator.output=&
 var_dump(ini_set("arg_separator.output", ""));
 var_dump(ini_get("arg_separator.output"));
 ?>
---EXPECTF--
+--EXPECT--
 bool(false)
-%unicode|string%(1) "&"
-
+string(1) "&"

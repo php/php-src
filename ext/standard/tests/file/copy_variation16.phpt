@@ -7,16 +7,11 @@ if(substr(PHP_OS, 0, 3) == "WIN")
 ?>
 --FILE--
 <?php
-/* Prototype: bool copy ( string $source, string $dest );
-   Description: Makes a copy of the file source to dest.
-     Returns TRUE on success or FALSE on failure.
-*/
-
-/* Test copy() function: Trying to create copy of source file 
+/* Test copy() function: Trying to create copy of source file
      into different destination dir paths given in various notations */
 
 echo "*** Testing copy() function: copying data file across directories ***\n";
-$base_dir = dirname(__FILE__)."/copy_variation16";
+$base_dir = __DIR__."/copy_variation16";
 mkdir($base_dir);
 
 $sub_dir = $base_dir."/copy_variation16_sub";
@@ -25,7 +20,7 @@ mkdir($sub_dir);
 $dirname_with_blank = $sub_dir."/copy variation16";
 mkdir($dirname_with_blank);
 
-$src_file_name = dirname(__FILE__)."/copy_variation16.tmp";
+$src_file_name = __DIR__."/copy_variation16.tmp";
 $file_handle = fopen($src_file_name, "w");
 fwrite($file_handle, str_repeat("Hello world, this is 2007 year ...\n", 100));
 fclose($file_handle);
@@ -41,7 +36,7 @@ $dests = array(
   "$sub_dir/../copy_copy_variation16.tmp",
   "$sub_dir/../copy_variation16_sub/copy_copy_variation16.tmp",
   "$sub_dir/..///../copy_copy_variation16.tmp",
-  "$sub_dir/..///../*",
+  "$sub_dir///../*",
   "$dirname_with_blank/copy_copy_variation16.tmp"
 );
 
@@ -79,7 +74,6 @@ rmdir($base_dir);
 
 echo "*** Done ***\n";
 ?>
-
 --EXPECTF--
 *** Testing copy() function: copying data file across directories ***
 - Size of source file => int(3500)
@@ -131,7 +125,7 @@ Size of destination file => int(3500)
 Size of source file => int(3500)
 Copy operation => bool(true)
 Existence of destination file => bool(true)
-Destination file name is => %s/copy_variation16/copy_variation16_sub/..///../*
+Destination file name is => %s/copy_variation16/copy_variation16_sub///../*
 Size of destination file => int(3500)
 
 -- Iteration 8 --

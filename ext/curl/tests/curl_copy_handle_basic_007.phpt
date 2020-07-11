@@ -9,7 +9,7 @@ Test curl_copy_handle() with simple POST
 
   echo '*** Testing curl copy handle with simple POST using array as arguments ***' . "\n";
 
-  $url = "{$host}/get.php?test=getpost";
+  $url = "{$host}/get.inc?test=getpost";
   $ch = curl_init();
 
   ob_start(); // start output buffering
@@ -18,17 +18,16 @@ Test curl_copy_handle() with simple POST
   curl_setopt($ch, CURLOPT_POSTFIELDS, array("Hello" => "World", "Foo" => "Bar", "Person" => "John Doe"));
   curl_setopt($ch, CURLOPT_HTTPHEADER, array('Expect:')); // Disable Expect: header (lighttpd does not support it :)
   curl_setopt($ch, CURLOPT_URL, $url); //set the url we want to use
-  
+
   $copy = curl_copy_handle($ch);
   curl_close($ch);
- 
+
   $curl_content = curl_exec($copy);
   curl_close($copy);
 
   var_dump( $curl_content );
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing curl copy handle with simple POST using array as arguments ***
 string(163) "array(1) {
   ["test"]=>
@@ -43,4 +42,3 @@ array(3) {
   string(8) "John Doe"
 }
 "
-===DONE=== 

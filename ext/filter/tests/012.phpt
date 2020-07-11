@@ -11,7 +11,7 @@ var_dump(filter_input(INPUT_COOKIE, ""));
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 NULL
 NULL
 NULL

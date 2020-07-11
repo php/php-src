@@ -16,7 +16,7 @@ $ao2 = new ArrayObject($ao, 0);
 var_dump($ao2->getFlags());
 
 ?>
---EXPECTF--
+--EXPECT--
 int(3)
 int(3)
 int(3)

@@ -1,14 +1,7 @@
 --TEST--
-Test get_declared_traits() function : basic functionality 
+Test get_declared_traits() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : proto array get_declared_traits()
- * Description: Returns an array of all declared traits. 
- * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
- */
-
-
 echo "*** Testing get_declared_traits() : basic functionality ***\n";
 
 trait MyTrait {}
@@ -18,9 +11,9 @@ echo "\n-- Testing get_declared_traits() function with Zero arguments --\n";
 var_dump(get_declared_traits());
 
 foreach (get_declared_traits() as $trait) {
-	if (!trait_exists($trait)) {
-		echo "Error: $trait is not a valid trait.\n"; 
-	}
+    if (!trait_exists($trait)) {
+        echo "Error: $trait is not a valid trait.\n";
+    }
 }
 
 echo "\n-- Ensure trait is listed --\n";

@@ -2,11 +2,6 @@
 Test array_merge_recursive() function : usage variations - different arrays for 'arr1' argument
 --FILE--
 <?php
-/* Prototype  : array array_merge_recursive(array $arr1[, array $...])
- * Description: Recursively merges elements from passed arrays into one array
- * Source code: ext/standard/array.c
-*/
-
 /*
 * Passing different arrays to $arr1 argument and testing whether
 * array_merge_recursive() behaves in an expected way.
@@ -92,10 +87,10 @@ foreach($arrays as $arr1) {
 
   $iterator++;
 }
-  
+
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_merge_recursive() : Passing different arrays to $arr1 argument ***
 -- Iteration 1 --
 -- With default argument --

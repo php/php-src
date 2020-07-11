@@ -2,12 +2,6 @@
 Test gmdate() function : usage variation - Passing Timezone format options to format argument.
 --FILE--
 <?php
-/* Prototype  : string gmdate(string format [, long timestamp])
- * Description: Format a GMT date/time 
- * Source code: ext/date/php_date.c
- * Alias to functions: 
- */
-
 echo "*** Testing gmdate() : usage variation ***\n";
 
 // Initialise all required variables
@@ -39,7 +33,6 @@ var_dump( gmdate('T') );
 var_dump( gmdate('T', $timestamp) );
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing gmdate() : usage variation ***
 
@@ -66,4 +59,3 @@ string(3) "GMT"
 -- Testing gmdate() function with timezone offset format --
 string(3) "GMT"
 string(3) "GMT"
-===DONE===

@@ -2,9 +2,34 @@
 
 function http_server_skipif($socket_string) {
 
-	if (!function_exists('pcntl_fork')) die('skip pcntl_fork() not available');
-	if (!function_exists('posix_kill')) die('skip posix_kill() not available');
-	if (!stream_socket_server($socket_string)) die('skip stream_socket_server() failed');
+    if (!function_exists('pcntl_fork')) die('skip pcntl_fork() not available');
+    if (!function_exists('posix_kill')) die('skip posix_kill() not available');
+    if (!stream_socket_server($socket_string)) die('skip stream_socket_server() failed');
+}
+
+function http_server_init($socket_string, &$output = null) {
+    pcntl_alarm(60);
+
+    $server = stream_socket_server($socket_string, $errno, $errstr);
+    if (!$server) {
+        return false;
+    }
+
+    if ($output === null) {
+        $output = tmpfile();
+        if ($output === false) {
+            return false;
+        }
+    }
+
+    $pid = pcntl_fork();
+    if ($pid == -1) {
+        die('could not fork');
+    } else if ($pid) {
+        return $pid;
+    }
+
+    return $server;
 }
 
 /* Minimal HTTP server with predefined responses.
@@ -15,78 +40,79 @@ function http_server_skipif($socket_string) {
  */
 function http_server($socket_string, array $files, &$output = null) {
 
-	pcntl_alarm(60);
+    if (!is_resource($server = http_server_init($socket_string, $output))) {
+        return $server;
+    }
 
-	$server = stream_socket_server($socket_string, $errno, $errstr);
-	if (!$server) {
-		return false;
-	}
+    foreach($files as $file) {
 
-	if ($output === null) {
-		$output = tmpfile();
-		if ($output === false) {
-			return false;
-		}
-	}
+        $sock = stream_socket_accept($server);
+        if (!$sock) {
+            exit(1);
+        }
 
-	$pid = pcntl_fork();
-	if ($pid == -1) {
-		die('could not fork');
-	} else if ($pid) {
-		return $pid;
-	}
+        // read headers
 
-	foreach($files as $file) {
+        $content_length = 0;
 
-		$sock = stream_socket_accept($server);
-		if (!$sock) {
-			exit(1);
-		}
+        stream_set_blocking($sock, 0);
+        while (!feof($sock)) {
 
-		// read headers
+            list($r, $w, $e) = array(array($sock), null, null);
+            if (!stream_select($r, $w, $e, 1)) continue;
 
-		$content_length = 0;
+            $line = stream_get_line($sock, 8192, "\r\n");
+            if ($line === '') {
+                fwrite($output, "\r\n");
+                break;
+            } else if ($line !== false) {
+                fwrite($output, "$line\r\n");
 
-		stream_set_blocking($sock, 0);
-		while (!feof($sock)) {
+                if (preg_match('#^Content-Length\s*:\s*([[:digit:]]+)\s*$#i', $line, $matches)) {
+                    $content_length = (int) $matches[1];
+                }
+            }
+        }
+        stream_set_blocking($sock, 1);
 
-			list($r, $w, $e) = array(array($sock), null, null);
-			if (!stream_select($r, $w, $e, 1)) continue;
+        // read content
 
-			$line = stream_get_line($sock, 8192, "\r\n");
-			if ($line === b'') {
-				fwrite($output, b"\r\n");
-				break;
-			} else if ($line !== false) {
-				fwrite($output, b"$line\r\n");
+        if ($content_length > 0) {
+            stream_copy_to_stream($sock, $output, $content_length);
+        }
 
-				if (preg_match(b'#^Content-Length\s*:\s*([[:digit:]]+)\s*$#i', $line, $matches)) {
-					$content_length = (int) $matches[1];
-				}
-			}
-		}
-		stream_set_blocking($sock, 1);
+        // send response
 
-		// read content
+        $fd = fopen($file, 'rb');
+        stream_copy_to_stream($fd, $sock);
 
-		if ($content_length > 0) {
-			stream_copy_to_stream($sock, $output, $content_length);
-		}
+        fclose($sock);
+    }
 
-		// send response
+    exit(0);
+}
 
-		$fd = fopen($file, 'rb');
-		stream_copy_to_stream($fd, $sock);
+function http_server_sleep($socket_string, $micro_seconds = 500000)
+{
+    if (!is_resource($server = http_server_init($socket_string, $output))) {
+        return $server;
+    }
 
-		fclose($sock);
-	}
+    $sock = stream_socket_accept($server);
+    if (!$sock) {
+        exit(1);
+    }
 
-	exit(0);
+    usleep($micro_seconds);
+
+    fclose($sock);
+
+    exit(0);
 }
 
 function http_server_kill($pid) {
-	posix_kill($pid, SIGTERM);
-	pcntl_waitpid($pid, $status);
+    posix_kill($pid, SIGTERM);
+    pcntl_waitpid($pid, $status);
 }
 
 ?>

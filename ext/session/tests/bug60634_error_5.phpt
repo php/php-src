@@ -3,6 +3,7 @@ Bug #60634 (Segmentation fault when trying to die() in SessionHandler::write()) 
 --INI--
 session.save_path=
 session.name=PHPSESSID
+session.save_handler=files
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--
@@ -15,16 +16,16 @@ function open($save_path, $session_name) {
 }
 
 function close() {
-	echo "close: goodbye cruel world\n";
-	undefined_function();
+    echo "close: goodbye cruel world\n";
+    undefined_function();
 }
 
 function read($id) {
-	return '';
+    return '';
 }
 
 function write($id, $session_data) {
-	return true;
+    return true;
 }
 
 function destroy($id) {

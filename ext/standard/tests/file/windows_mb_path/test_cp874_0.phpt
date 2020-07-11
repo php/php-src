@@ -2,7 +2,7 @@
 Thai cp874 basic test
 --SKIPIF--
 <?php
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 skip_if_not_win();
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
@@ -19,35 +19,34 @@ default_charset=cp874
 #vim: set encoding=cp874
 */
 
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 $names = array( /* cp874 */
-	"เป็นแฟ้มที่ทดสอบ1",
-	"เป็นแฟ้มที่ทดสอบ2",
-	"เป็นแฟ้มที่ทดสอบ3",
-	"เป็นแฟ้มที่ทดสอบ4",
-	"เป็นแฟ้มที่ทดสอบ5",
-	"เป็นแฟ้มที่ทดสอบ6",
-	"เป็นแฟ้มที่ทดสอบ7",
-	"เป็นแฟ้มที่ทดสอบ8",
-	"เป็นแฟ้มที่ทดสอบ8 10",
+    "เป็นแฟ้มที่ทดสอบ1",
+    "เป็นแฟ้มที่ทดสอบ2",
+    "เป็นแฟ้มที่ทดสอบ3",
+    "เป็นแฟ้มที่ทดสอบ4",
+    "เป็นแฟ้มที่ทดสอบ5",
+    "เป็นแฟ้มที่ทดสอบ6",
+    "เป็นแฟ้มที่ทดสอบ7",
+    "เป็นแฟ้มที่ทดสอบ8",
+    "เป็นแฟ้มที่ทดสอบ8 10",
 );
 
 $i = 0;
 foreach ($names as $name) {
-	$path = dirname(__FILE__) . DIRECTORY_SEPARATOR . $name . ".txt";
+    $path = __DIR__ . DIRECTORY_SEPARATOR . $name . ".txt";
 
-	file_put_contents($path, "hello" . $i++);
+    file_put_contents($path, "hello" . $i++);
 
-	get_basename_with_cp($path, 874);
-	var_dump(file_get_contents($path));
+    get_basename_with_cp($path, 874);
+    var_dump(file_get_contents($path));
 
-	unlink($path);
+    unlink($path);
 }
 
 ?>
-===DONE===
---EXPECTF--	
+--EXPECTF--
 Active code page: %d
 getting basename of %sเป็นแฟ้มที่ทดสอบ1.txt
 string(%d) "เป็นแฟ้มที่ทดสอบ1.txt"
@@ -111,4 +110,3 @@ bool(true)
 string(%d) "%sเป็นแฟ้มที่ทดสอบ8 10.txt"
 Active code page: %d
 string(6) "hello8"
-===DONE===

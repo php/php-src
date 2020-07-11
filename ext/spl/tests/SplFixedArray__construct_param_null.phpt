@@ -10,7 +10,7 @@ $array = new SplFixedArray( NULL );
 print_r( $array );
 
 ?>
---EXPECTF--
+--EXPECT--
 SplFixedArray Object
 (
 )

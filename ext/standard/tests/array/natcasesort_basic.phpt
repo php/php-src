@@ -1,12 +1,7 @@
 --TEST--
-Test natcasesort() function : basic functionality 
+Test natcasesort() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : bool natcasesort(array &$array_arg)
- * Description: Sort an array using case-insensitive natural sort
- * Source code: ext/standard/array.c
- */
-
 /*
  * Test basic functionality of natcasesort()
  */
@@ -23,7 +18,7 @@ var_dump($array);
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing natcasesort() : basic functionality ***
 
 -- Before sorting: --

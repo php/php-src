@@ -1,7 +1,5 @@
 --TEST--
 Bug #24436 (isset()/empty() produce errors with non-existent variables in classes)
---SKIPIF--
-<?php if (version_compare(zend_version(), '2.0.0-dev', '<')) die('skip ZendEngine 2 is needed'); ?>
 --INI--
 error_reporting=2047
 --FILE--

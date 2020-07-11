@@ -1,5 +1,3 @@
-
-	/* $Id: fpm_worker_pool.h,v 1.13 2008/08/26 15:09:15 anight Exp $ */
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #ifndef FPM_WORKER_POOL_H
@@ -52,7 +50,8 @@ struct fpm_worker_pool_s *fpm_worker_pool_alloc();
 void fpm_worker_pool_free(struct fpm_worker_pool_s *wp);
 int fpm_worker_pool_init_main();
 
+void fpm_worker_pool_free_limit_extensions(char **limit_extensions);
+
 extern struct fpm_worker_pool_s *fpm_worker_all_pools;
 
 #endif
-

@@ -3,7 +3,7 @@ Set and get of connection attributes with oci_close().
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
+require(__DIR__.'/skipif.inc');
 
 if (strcasecmp($user, "system") && strcasecmp($user, "sys")) die("skip needs to be run as a DBA user");
 if ($test_drcp) die("skip output might vary with DRCP");
@@ -17,9 +17,9 @@ if (!(isset($matches[0]) && $matches[1] >= 10)) {
 <?php
 
 $testuser     = 'testuser_attr_3';  // Used in conn_attr.inc
-$testpassword = 'testuser'; 
+$testpassword = 'testuser';
 
-require(dirname(__FILE__)."/conn_attr.inc");
+require(__DIR__."/conn_attr.inc");
 
 echo"**Test Set and get values for  the attributes with oci_close() ************\n";
 // With oci_connect ,oci_pconnect ,oci_new_connect

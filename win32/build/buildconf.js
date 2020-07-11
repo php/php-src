@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2008 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -16,7 +14,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id: buildconf.js,v 1.13.2.2.2.1.2.5 2009-01-02 12:18:21 kalle Exp $ */
 // This generates a configure script for win32 build
 
 WScript.StdOut.WriteLine("Rebuilding configure.js");
@@ -56,17 +53,17 @@ function find_config_w32(dirname)
 	var c, i, ok, n;
 	var item = null;
 	var re_dep_line = new RegExp("ADD_EXTENSION_DEP\\([^,]*\\s*,\\s*['\"]([^'\"]+)['\"].*\\)", "gm");
-	
+
 	for (; !fc.atEnd(); fc.moveNext())
 	{
 		ok = true;
 		/* check if we already picked up a module with the same dirname;
 		 * if we have, don't include it here */
 		n = FSO.GetFileName(fc.item());
-		
+
 		if (n == '.svn' || n == 'tests')
 			continue;
-			
+
 	//	WScript.StdOut.WriteLine("checking " + dirname + "/" + n);
 		if (MODULES.Exists(n)) {
 			WScript.StdOut.WriteLine("Skipping " + dirname + "/" + n + " -- already have a module with that name");
@@ -244,6 +241,8 @@ for (i = 0; i < calls.length; i++) {
 }
 
 C.WriteBlankLines(1);
+C.WriteLine("check_binary_tools_sdk();");
+C.WriteBlankLines(1);
 C.WriteLine("STDOUT.WriteLine(\"PHP Version: \" + PHP_VERSION_STRING);");
 C.WriteLine("STDOUT.WriteBlankLines(1);");
 C.WriteLine("conf_process_args();");
@@ -257,4 +256,4 @@ C.WriteBlankLines(1);
 C.Write(file_get_contents("win32/build/configure.tail"));
 
 B.WriteLine("@echo off");
-B.WriteLine("cscript /nologo configure.js %*");
+B.WriteLine("cscript /nologo /e:jscript configure.js %*");

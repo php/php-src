@@ -2,11 +2,6 @@
 Test array_unique() function : usage variations - associative array with different values
 --FILE--
 <?php
-/* Prototype  : array array_unique(array $input)
- * Description: Removes duplicate values from array 
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Testing the functionality of array_unique() by passing different
  * associative arrays having different values to $input argument.
@@ -62,7 +57,7 @@ foreach($inputs as $input) {
 }
 
 fclose($fp);
-  
+
 echo "Done";
 ?>
 --EXPECTF--
@@ -91,7 +86,7 @@ array(3) {
   ["f2"]=>
   float(3.33)
   [3]=>
-  float(4.8999992284)
+  float(4.89999922839999)
 }
 -- Iteration 5 --
 array(3) {

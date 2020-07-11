@@ -2,11 +2,6 @@
 Test ucwords() function : usage variations - double quoted string
 --FILE--
 <?php
-/* Prototype  : string ucwords ( string $str )
- * Description: Uppercase the first character of each word in a string
- * Source code: ext/standard/string.c
-*/
-
 /*
  * test ucwords() with different string prepared using double quote
 */
@@ -31,7 +26,7 @@ $str_array = array(
   "\'t \'t\',test",
   "Jack's pen",
   "P't'y 't it's ",
-  
+
   // using other white spaces
   "\ttesting\ttesting\tucwords",
   "\\ttesting\\ttesting\tucwords",
@@ -48,7 +43,7 @@ $str_array = array(
   "t@@#$% %test ^test &test *test +test -test",
   "!test ~test `test` =test= @test@test.com",
   "/test/r\test\\ucwords\t\y\y\\u\3 \yy\ /uu/",
-  
+
   //only special chars
   "!@#$%^&*()_+=-`~"
 );
@@ -63,7 +58,7 @@ for($index = 0; $index < count($str_array); $index++) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing ucwords() : usage variations ***
 -- Iteration 1 --
 string(18) "Testing    Ucwords"

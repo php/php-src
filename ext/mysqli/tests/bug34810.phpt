@@ -9,40 +9,37 @@ require_once('skipifconnectfailure.inc');
 <?php
 
 class DbConnection {
-	public function connect() {
-		require_once("connect.inc");
+    public function connect() {
+        require_once("connect.inc");
 
-		$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
-		var_dump($link);
+        $link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
+        var_dump($link);
 
-		$link = mysqli_init();
-		/* @ is to suppress 'Property access is not allowed yet' */
-		@var_dump($link);
+        $link = mysqli_init();
+        var_dump($link);
 
-		$mysql = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
-		$mysql->query("DROP TABLE IF EXISTS test_warnings");
-		$mysql->query("CREATE TABLE test_warnings (a int not null)");
-		$mysql->query("SET sql_mode=''");
-		$mysql->query("INSERT INTO test_warnings VALUES (1),(2),(NULL)");
+        $mysql = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
+        $mysql->query("DROP TABLE IF EXISTS test_warnings");
+        $mysql->query("CREATE TABLE test_warnings (a int not null)");
+        $mysql->query("SET sql_mode=''");
+        $mysql->query("INSERT INTO test_warnings VALUES (1),(2),(NULL)");
 
-		$warning = $mysql->get_warnings();
-		if (!$warning)
-			printf("[001] No warning!\n");
+        $warning = $mysql->get_warnings();
+        if (!$warning)
+            printf("[001] No warning!\n");
 
-		if ($warning->errno == 1048 || $warning->errno == 1253) {
-			/* 1048 - Column 'a' cannot be null, 1263 - Data truncated; NULL supplied to NOT NULL column 'a' at row */
-			if ("HY000" != $warning->sqlstate)
-				printf("[003] Wrong sql state code: %s\n", $warning->sqlstate);
+        if ($warning->errno == 1048 || $warning->errno == 1253) {
+            /* 1048 - Column 'a' cannot be null, 1263 - Data truncated; NULL supplied to NOT NULL column 'a' at row */
+            if ("HY000" != $warning->sqlstate)
+                printf("[003] Wrong sql state code: %s\n", $warning->sqlstate);
 
-			if ("" == $warning->message)
-				printf("[004] Message string must not be empty\n");
-
-
-		} else {
-			printf("[002] Empty error message!\n");
-			var_dump($warning);
-		}
-	}
+            if ("" == $warning->message)
+                printf("[004] Message string must not be empty\n");
+        } else {
+            printf("[002] Empty error message!\n");
+            var_dump($warning);
+        }
+    }
 }
 
 $db = new DbConnection();
@@ -63,84 +60,56 @@ mysqli_close($link);
 ?>
 --EXPECTF--
 object(mysqli)#%d (%d) {
-  [%u|b%"affected_rows"]=>
+  ["affected_rows"]=>
   int(0)
-  [%u|b%"client_info"]=>
-  %unicode|string%(%d) "%s"
-  [%u|b%"client_version"]=>
+  ["client_info"]=>
+  string(%d) "%s"
+  ["client_version"]=>
   int(%d)
-  [%u|b%"connect_errno"]=>
+  ["connect_errno"]=>
   int(0)
-  [%u|b%"connect_error"]=>
+  ["connect_error"]=>
   NULL
-  [%u|b%"errno"]=>
+  ["errno"]=>
   int(0)
-  [%u|b%"error"]=>
-  %unicode|string%(0) ""
-  [%u|b%"error_list"]=>
+  ["error"]=>
+  string(0) ""
+  ["error_list"]=>
   array(0) {
   }
-  [%u|b%"field_count"]=>
+  ["field_count"]=>
   int(0)
-  [%u|b%"host_info"]=>
-  %unicode|string%(%d) "%s"
-  [%u|b%"info"]=>
+  ["host_info"]=>
+  string(%d) "%s"
+  ["info"]=>
   NULL
-  [%u|b%"insert_id"]=>
+  ["insert_id"]=>
   int(0)
-  [%u|b%"server_info"]=>
-  %unicode|string%(%d) "%s"
-  [%u|b%"server_version"]=>
+  ["server_info"]=>
+  string(%d) "%s"
+  ["server_version"]=>
   int(%d)
-  [%u|b%"stat"]=>
-  string(%d) "Uptime: %d  Threads: %d  Questions: %d  Slow queries: %d  Opens: %d  Flush tables: %d  Open tables: %d  Queries per second avg: %d.%d"
-  [%u|b%"sqlstate"]=>
-  %unicode|string%(5) "00000"
-  [%u|b%"protocol_version"]=>
+  ["sqlstate"]=>
+  string(5) "00000"
+  ["protocol_version"]=>
   int(10)
-  [%u|b%"thread_id"]=>
+  ["thread_id"]=>
   int(%d)
-  [%u|b%"warning_count"]=>
+  ["warning_count"]=>
   int(0)
 }
 object(mysqli)#%d (%d) {
-  [%u|b%"affected_rows"]=>
-  NULL
-  [%u|b%"client_info"]=>
-  %unicode|string%(%d) "%s"
-  [%u|b%"client_version"]=>
+  ["client_info"]=>
+  string(%d) "%s"
+  ["client_version"]=>
   int(%d)
-  [%u|b%"connect_errno"]=>
+  ["connect_errno"]=>
   int(0)
-  [%u|b%"connect_error"]=>
+  ["connect_error"]=>
   NULL
-  [%u|b%"errno"]=>
+  ["errno"]=>
   int(0)
-  [%u|b%"error"]=>
-  %unicode|string%(0) ""
-  [%u|b%"error_list"]=>
-  NULL
-  [%u|b%"field_count"]=>
-  NULL
-  [%u|b%"host_info"]=>
-  NULL
-  [%u|b%"info"]=>
-  NULL
-  [%u|b%"insert_id"]=>
-  NULL
-  [%u|b%"server_info"]=>
-  NULL
-  [%u|b%"server_version"]=>
-  NULL
-  [%u|b%"stat"]=>
-  NULL
-  [%u|b%"sqlstate"]=>
-  NULL
-  [%u|b%"protocol_version"]=>
-  NULL
-  [%u|b%"thread_id"]=>
-  NULL
-  [%u|b%"warning_count"]=>
-  NULL
+  ["error"]=>
+  string(0) ""
 }
 Done

@@ -18,7 +18,7 @@ foreach ($exts as $ext) {
     unlink($file . $ext);
 }
 ?>
---EXPECTF--
+--EXPECT--
 string(3) "txt"
 string(3) "txt"
 string(9) "extension"

@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -19,10 +17,6 @@
 #include "php.h"
 #include "php_network.h"
 
-#ifdef PHP_WIN32
-
-/* $Id$ */
-
 /* Win32 select() will only work with sockets, so we roll our own implementation here.
  * - If you supply only sockets, this simply passes through to winsock select().
  * - If you supply file handles, there is no way to distinguish between
@@ -34,7 +28,7 @@
  * - Calling this with NULL sets as a portable way to sleep with sub-second
  *   accuracy is not supported.
  * */
-PHPAPI int php_select(int max_fd, fd_set *rfds, fd_set *wfds, fd_set *efds, struct timeval *tv)
+PHPAPI int php_select(php_socket_t max_fd, fd_set *rfds, fd_set *wfds, fd_set *efds, struct timeval *tv)
 {
 	ULONGLONG ms_total, limit;
 	HANDLE handles[MAXIMUM_WAIT_OBJECTS];
@@ -45,6 +39,11 @@ PHPAPI int php_select(int max_fd, fd_set *rfds, fd_set *wfds, fd_set *efds, stru
 	int sock_max_fd = -1;
 	struct timeval tvslice;
 	int retcode;
+
+	/* As max_fd is unsigned, non socket might overflow. */
+	if (max_fd > (php_socket_t)INT_MAX) {
+		return -1;
+	}
 
 #define SAFE_FD_ISSET(fd, set)	(set != NULL && FD_ISSET(fd, set))
 
@@ -61,19 +60,19 @@ PHPAPI int php_select(int max_fd, fd_set *rfds, fd_set *wfds, fd_set *efds, stru
 	FD_ZERO(&sock_except);
 
 	/* build an array of handles for non-sockets */
-	for (i = 0; i < max_fd; i++) {
+	for (i = 0; (uint32_t)i < max_fd; i++) {
 		if (SAFE_FD_ISSET(i, rfds) || SAFE_FD_ISSET(i, wfds) || SAFE_FD_ISSET(i, efds)) {
 			handles[n_handles] = (HANDLE)(zend_uintptr_t)_get_osfhandle(i);
 			if (handles[n_handles] == INVALID_HANDLE_VALUE) {
 				/* socket */
 				if (SAFE_FD_ISSET(i, rfds)) {
-					FD_SET((uint)i, &sock_read);
+					FD_SET((uint32_t)i, &sock_read);
 				}
 				if (SAFE_FD_ISSET(i, wfds)) {
-					FD_SET((uint)i, &sock_write);
+					FD_SET((uint32_t)i, &sock_write);
 				}
 				if (SAFE_FD_ISSET(i, efds)) {
-					FD_SET((uint)i, &sock_except);
+					FD_SET((uint32_t)i, &sock_except);
 				}
 				if (i > sock_max_fd) {
 					sock_max_fd = i;
@@ -87,7 +86,7 @@ PHPAPI int php_select(int max_fd, fd_set *rfds, fd_set *wfds, fd_set *efds, stru
 
 	if (n_handles == 0) {
 		/* plain sockets only - let winsock handle the whole thing */
-		return select(max_fd, rfds, wfds, efds, tv);
+		return select(-1, rfds, wfds, efds, tv);
 	}
 
 	/* mixture of handles and sockets; lets multiplex between
@@ -111,13 +110,13 @@ PHPAPI int php_select(int max_fd, fd_set *rfds, fd_set *wfds, fd_set *efds, stru
 			tvslice.tv_sec = 0;
 			tvslice.tv_usec = 100000;
 
-			retcode = select(sock_max_fd+1, &aread, &awrite, &aexcept, &tvslice);
+			retcode = select(-1, &aread, &awrite, &aexcept, &tvslice);
 		}
 		if (n_handles > 0) {
 			/* check handles */
 			DWORD wret;
 
-			wret = MsgWaitForMultipleObjects(n_handles, handles, FALSE, retcode > 0 ? 0 : 100, QS_ALLEVENTS);
+			wret = WaitForMultipleObjects(n_handles, handles, FALSE, retcode > 0 ? 0 : 100);
 
 			if (wret == WAIT_TIMEOUT) {
 				/* set retcode to 0; this is the default.
@@ -136,13 +135,13 @@ PHPAPI int php_select(int max_fd, fd_set *rfds, fd_set *wfds, fd_set *efds, stru
 				for (i = 0; i < n_handles; i++) {
 					if (WAIT_OBJECT_0 == WaitForSingleObject(handles[i], 0)) {
 						if (SAFE_FD_ISSET(handle_slot_to_fd[i], rfds)) {
-							FD_SET((uint)handle_slot_to_fd[i], &aread);
+							FD_SET((uint32_t)handle_slot_to_fd[i], &aread);
 						}
 						if (SAFE_FD_ISSET(handle_slot_to_fd[i], wfds)) {
-							FD_SET((uint)handle_slot_to_fd[i], &awrite);
+							FD_SET((uint32_t)handle_slot_to_fd[i], &awrite);
 						}
 						if (SAFE_FD_ISSET(handle_slot_to_fd[i], efds)) {
-							FD_SET((uint)handle_slot_to_fd[i], &aexcept);
+							FD_SET((uint32_t)handle_slot_to_fd[i], &aexcept);
 						}
 						retcode++;
 					}
@@ -163,14 +162,3 @@ PHPAPI int php_select(int max_fd, fd_set *rfds, fd_set *wfds, fd_set *efds, stru
 
 	return retcode;
 }
-
-#endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

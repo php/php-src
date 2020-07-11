@@ -2,13 +2,8 @@
 Test array_unshift() function : usage variations - assoc. array with diff. keys for 'array' argument
 --FILE--
 <?php
-/* Prototype  : int array_unshift(array $array, mixed $var [, mixed ...])
- * Description: Pushes elements onto the beginning of the array
- * Source code: ext/standard/array.c
-*/
-
 /*
- * Testing the functionality of array_unshift() by passing different 
+ * Testing the functionality of array_unshift() by passing different
  * associative arrays having different possible keys to $array argument.
  * The $var argument passed is a fixed value
 */
@@ -52,21 +47,21 @@ $arrays = array (
        // arrays with float keys
 /*5*/  array(2.3333 => "float"),
        array(1.2 => "f1", 3.33 => "f2",
-             4.89999922839999 => "f3", 
+             4.89999922839999 => "f3",
              33333333.333333 => "f4"),
 
        // arrays with string keys
 /*7*/  array('\tHello' => 111, 're\td' => "color",
              '\v\fworld' => 2.2, 'pen\n' => 33),
-       array("\tHello" => 111, "re\td" => "color", 
+       array("\tHello" => 111, "re\td" => "color",
              "\v\fworld" => 2.2, "pen\n" => 33),
        array("hello", $heredoc => "string"), // heredoc
 
        // array with object, unset variable and resource variable
-       array(new classA() => 11, @$unset_var => "hello", $fp => 'resource'),
+       array(@$unset_var => "hello", $fp => 'resource'),
 
        // array with mixed keys
-/*11*/ array('hello' => 1, new classA() => 2, "fruit" => 2.2,
+/*11*/ array('hello' => 1, "fruit" => 2.2,
              $fp => 'resource', 133 => "int", 444.432 => "float",
              @$unset_var => "unset", $heredoc => "heredoc")
 );
@@ -101,13 +96,9 @@ echo "Done";
 --EXPECTF--
 *** Testing array_unshift() : associative array with different keys ***
 
-Warning: Illegal offset type in %s on line %d
+Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 
-Warning: Illegal offset type in %s on line %d
-
-Warning: Illegal offset type in %s on line %d
-
-Warning: Illegal offset type in %s on line %d
+Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 -- Iteration 1 --
 int(1)
 array(1) {
@@ -330,15 +321,17 @@ array(5) {
   string(6) "string"
 }
 -- Iteration 10 --
-int(2)
-array(2) {
+int(3)
+array(3) {
   [0]=>
   int(10)
   [""]=>
   string(5) "hello"
+  [1]=>
+  string(8) "resource"
 }
-int(4)
-array(4) {
+int(5)
+array(5) {
   [0]=>
   int(10)
   [1]=>
@@ -347,10 +340,12 @@ array(4) {
   string(5) "world"
   [""]=>
   string(5) "hello"
+  [3]=>
+  string(8) "resource"
 }
 -- Iteration 11 --
-int(7)
-array(7) {
+int(8)
+array(8) {
   [0]=>
   int(10)
   ["hello"]=>
@@ -358,16 +353,18 @@ array(7) {
   ["fruit"]=>
   float(2.2)
   [1]=>
-  string(3) "int"
+  string(8) "resource"
   [2]=>
+  string(3) "int"
+  [3]=>
   string(5) "float"
   [""]=>
   string(5) "unset"
   ["Hello world"]=>
   string(7) "heredoc"
 }
-int(9)
-array(9) {
+int(10)
+array(10) {
   [0]=>
   int(10)
   [1]=>
@@ -379,8 +376,10 @@ array(9) {
   ["fruit"]=>
   float(2.2)
   [3]=>
-  string(3) "int"
+  string(8) "resource"
   [4]=>
+  string(3) "int"
+  [5]=>
   string(5) "float"
   [""]=>
   string(5) "unset"

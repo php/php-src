@@ -1,5 +1,5 @@
 --TEST--
-assgin to object leaks with ref
+assign to object leaks with ref
 --FILE--
 <?php
 function &a($i) {
@@ -20,5 +20,5 @@ $a->test();
 $a->test();
 echo "okey";
 ?>
---EXPECT--	
+--EXPECT--
 okey

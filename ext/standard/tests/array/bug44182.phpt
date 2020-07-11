@@ -16,4 +16,3 @@ echo "Done\n";
 --EXPECTF--
 string(%d) "original.foo"
 Done
-

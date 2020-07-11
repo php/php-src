@@ -20,8 +20,12 @@ $rc = new ReflectionFunction($closure);
 var_dump($rc->getParameters()[0]->isCallable());
 
 ?>
---EXPECT--
-bool(true)
-bool(true)
+--EXPECTF--
+Deprecated: Method ReflectionParameter::isCallable() is deprecated in %s on line %d
 bool(true)
 
+Deprecated: Method ReflectionParameter::isCallable() is deprecated in %s on line %d
+bool(true)
+
+Deprecated: Method ReflectionParameter::isCallable() is deprecated in %s on line %d
+bool(true)

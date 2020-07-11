@@ -1,28 +1,35 @@
 --TEST--
-Bug #49908 (throwing exception in __autoload crashes when interface is not defined)
+Bug #49908 (throwing exception in autoloader crashes when interface is not defined)
 --FILE--
 <?php
 
-function __autoload($className) {
-	var_dump($className);
-	
-	if ($className == 'Foo') {
-		class Foo implements Bar {};
-	} else {
-		throw new Exception($className);
-	}
-}
+spl_autoload_register(function ($className) {
+    var_dump($className);
 
-new Foo;
+    if ($className == 'Foo') {
+        class Foo implements Bar {};
+    } else {
+        throw new Exception($className);
+    }
+});
+
+try {
+    new Foo();
+} catch (Exception $e) { }
+
+// We never reach here.
+var_dump(new Foo());
 
 ?>
 --EXPECTF--
-%unicode|string%(3) "Foo"
-%unicode|string%(3) "Bar"
+string(3) "Foo"
+string(3) "Bar"
+string(3) "Foo"
+string(3) "Bar"
 
 Fatal error: Uncaught Exception: Bar in %s:%d
 Stack trace:
-#0 %s(7): __autoload('Bar')
-#1 %s(13): __autoload('Foo')
+#0 %s(%d): {closure}('Bar')
+#1 %s(%d): {closure}('Foo')
 #2 {main}
   thrown in %s on line %d

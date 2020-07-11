@@ -16,9 +16,7 @@ var_dump($bi->following(5));
 var_dump($bi->following(50));
 var_dump($bi->following(-1));
 ?>
-==DONE==
 --EXPECT--
 int(7)
 int(-1)
 int(0)
-==DONE==

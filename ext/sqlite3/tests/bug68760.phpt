@@ -7,8 +7,8 @@ if (!extension_loaded('sqlite3')) die('skip');
 --FILE--
 <?php
 function oopsFunction($a, $b) {
-	echo "callback".PHP_EOL;
-	throw new \Exception("oops");
+    echo "callback".PHP_EOL;
+    throw new \Exception("oops");
 }
 
 $db = new SQLite3(":memory:");
@@ -29,7 +29,6 @@ catch(\Exception $e) {
     echo "Exception: ".$e->getMessage();
 }
 ?>
---EXPECTF--
+--EXPECT--
 callback
 Exception: oops
-

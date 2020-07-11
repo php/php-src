@@ -21,7 +21,6 @@ $tests = <<<TESTS
 "ABC" === trim("ABC\\x50\\xC1\\x60\\x90","\\x50..\\xC1")
 TESTS;
 
-include(dirname(__FILE__) . '/../../../../tests/quicktester.inc');
-
+include(__DIR__ . '/../../../../tests/quicktester.inc');
 --EXPECT--
 OK

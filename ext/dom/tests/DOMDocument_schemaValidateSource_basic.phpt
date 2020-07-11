@@ -10,9 +10,9 @@ Daniel Convissor <danielc@php.net>
 
 $doc = new DOMDocument;
 
-$doc->load(dirname(__FILE__)."/book.xml");
+$doc->load(__DIR__."/book.xml");
 
-$xsd = file_get_contents(dirname(__FILE__)."/book.xsd");
+$xsd = file_get_contents(__DIR__."/book.xsd");
 
 $result = $doc->schemaValidateSource($xsd);
 var_dump($result);

@@ -1,43 +1,20 @@
 --TEST--
-Test get_browser() function : error functionality 
+Test get_browser() function : error functionality
 --INI--
 browscap={PWD}/browscap.ini
---SKIPIF--
-<?php
-	/**
-	 * Basic test, it would be pretty much coincidence if there's
-	 * a browscap.ini on another place that isn't valid.
-	 */
-	if(! is_readable( ini_get( 'browscap' ) ) ) {
-		die( 'skip: browscap.ini file ' . ini_get('browscap') . " not readable" );
-	}
-?>
 --FILE--
 <?php
-/* Prototype  : mixed get_browser([string browser_name [, bool return_array]])
- * Description: Get information about the capabilities of a browser. 
- * If browser_name is omitted or null, HTTP_USER_AGENT is used. 
- * Returns an object by default; if return_array is true, returns an array. 
- *
- * Source code: ext/standard/browscap.c
- * Alias to functions: 
- */
-
-$browsers = include dirname(__FILE__) . DIRECTORY_SEPARATOR . 'browsernames.inc';
+$browsers = include __DIR__ . DIRECTORY_SEPARATOR . 'browsernames.inc';
 
 echo "*** Testing get_browser() : error functionality ***\n";
 
 /* Unknown browser uses defaults. */
 var_dump( get_browser( 'foobar', true ) );
 
-/* More than expected arguments */
-var_dump( get_browser( 'foobar', true, 15 ) );
-
 /* Some wrong parameters, no HTTP_USER_AGENT set */
 var_dump( get_browser( null, 'foobar' ) );
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing get_browser() : error functionality ***
 array(34) {
@@ -111,9 +88,5 @@ array(34) {
   string(1) "0"
 }
 
-Warning: get_browser() expects at most 2 parameters, 3 given in %s on line %d
-NULL
-
 Warning: get_browser(): HTTP_USER_AGENT variable is not set, cannot determine user agent name in %s on line %d
 bool(false)
-===DONE===

@@ -9,7 +9,7 @@ try {
 $phar = new PharData('bug72928.zip');
 var_dump($phar);
 } catch(UnexpectedValueException $e) {
-	print $e->getMessage()."\n";
+    print $e->getMessage()."\n";
 }
 ?>
 DONE

@@ -1,13 +1,7 @@
 --TEST--
-Test print() function : usage variations 
+Test print() function : usage variations
 --FILE--
 <?php
-
-/* Prototype  : int print  ( string $arg  )
- * Description: Output a string
- * Source code: n/a, print is a language construct not an extension function
- * Test based on php.net manual example.
-*/
 
 echo "*** Testing print() function: with unexpected inputs for 'arg' argument ***\n";
 
@@ -19,7 +13,7 @@ unset($unset_var);
 class sample  {
   public function __toString() {
     return "sample object";
-  } 
+  }
 }
 
 //getting the resource
@@ -28,43 +22,43 @@ $file_handle = fopen(__FILE__, "r");
 // array with different values for $input
 $inputs =  array (
 
-		  // integer values
+          // integer values
 /*1*/	  0,
-		  1,
-		  -2,
-		  2147483647,
-		  -2147483648,
-		
-		  // float values
+          1,
+          -2,
+          2147483647,
+          -2147483648,
+
+          // float values
 /*6*/	  10.5,
-		  -20.5,
-		  10.1234567e10,
-		
-		  // array values
+          -20.5,
+          10.1234567e10,
+
+          // array values
 /*9*/	  array(),
-		  array(0),
-		  array(1, 2),
-		
-		  // boolean values
+          array(0),
+          array(1, 2),
+
+          // boolean values
 /*12*/	  true,
-		  false,
-		  TRUE,
-		  FALSE,
-		
-		  // null vlaues
+          false,
+          TRUE,
+          FALSE,
+
+          // null values
 /*16*/	  NULL,
-		  null,
-		
-		  // objects
+          null,
+
+          // objects
 /*18*/	  new sample(),
-		
-		  // resource
+
+          // resource
 /*19*/	  $file_handle,
-		
-		  // undefined variable
+
+          // undefined variable
 /*20*/	  @$undefined_var,
-		
-		  // unset variable
+
+          // unset variable
 /*21*/	  @$unset_var
 );
 
@@ -74,14 +68,13 @@ foreach($inputs as $input) {
   echo "-- Iteration $count --\n";
   $res = print($input);
   echo "\n";
-  var_dump($res); 
+  var_dump($res);
   $count ++;
 }
 
 fclose($file_handle);  //closing the file handle
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing print() function: with unexpected inputs for 'arg' argument ***
 -- Iteration 1 --
@@ -110,17 +103,17 @@ int(1)
 int(1)
 -- Iteration 9 --
 
-Notice: Array to string conversion in %sprint_variation1.php on line %d
+Warning: Array to string conversion in %s on line %d
 Array
 int(1)
 -- Iteration 10 --
 
-Notice: Array to string conversion in %sprint_variation1.php on line %d
+Warning: Array to string conversion in %s on line %d
 Array
 int(1)
 -- Iteration 11 --
 
-Notice: Array to string conversion in %sprint_variation1.php on line %d
+Warning: Array to string conversion in %s on line %d
 Array
 int(1)
 -- Iteration 12 --
@@ -153,4 +146,3 @@ int(1)
 -- Iteration 21 --
 
 int(1)
-===DONE===

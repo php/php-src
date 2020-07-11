@@ -51,7 +51,7 @@ class zipmaker
 
     /**
      * Create an internal directory, creating parent directories as needed
-     * 
+     *
      * This is a no-op for the tar creator
      * @param string $dir
      */

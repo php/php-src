@@ -4,17 +4,17 @@ Closure 021: Throwing exception inside lambda
 <?php
 
 $foo = function() {
-	try {
-		throw new Exception('test!');
-	} catch(Exception $e) {
-		throw $e;
-	}
+    try {
+        throw new Exception('test!');
+    } catch(Exception $e) {
+        throw $e;
+    }
 };
 
 try {
-	$foo();
+    $foo();
 } catch (Exception $e) {
-	var_dump($e->getMessage());
+    var_dump($e->getMessage());
 }
 
 ?>

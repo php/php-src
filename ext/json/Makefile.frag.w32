@@ -1,0 +1,5 @@
+ext\json\json_scanner.c: ext\json\json_scanner.re
+	$(RE2C) $(RE2C_FLAGS) -t ext/json/php_json_scanner_defs.h --no-generation-date -bci -o ext/json/json_scanner.c ext/json/json_scanner.re
+
+ext\json\json_parser.tab.c: ext\json\json_parser.y
+	$(BISON) --defines -l ext/json/json_parser.y -o ext/json/json_parser.tab.c

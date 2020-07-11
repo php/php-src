@@ -4,10 +4,10 @@ errmsg: multiple access type modifiers are not allowed (properties)
 <?php
 
 class test {
-	public private $var;
+    public private $var;
 }
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Multiple access type modifiers are not allowed in %s on line %d

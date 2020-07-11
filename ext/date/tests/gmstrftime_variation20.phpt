@@ -1,5 +1,5 @@
 --TEST--
-Test gmstrftime() function : usage variation - Checking newline and tab formats which are supported other than on Windows. 
+Test gmstrftime() function : usage variation - Checking newline and tab formats which are supported other than on Windows.
 --SKIPIF--
 <?php
 if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
@@ -8,12 +8,6 @@ if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype  : string gmstrftime(string format [, int timestamp])
- * Description: Format a GMT/UCT time/date according to locale settings 
- * Source code: ext/date/php_date.c
- * Alias to functions: 
- */
-
 echo "*** Testing gmstrftime() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
@@ -23,8 +17,8 @@ date_default_timezone_set("Asia/Calcutta");
 
 //array of values to iterate over
 $inputs = array(
-	  'Newline character' => "%n",
-	  'Tab character' => "%t"
+      'Newline character' => "%n",
+      'Tab character' => "%t"
 );
 
 // loop through each element of the array for timestamp
@@ -36,7 +30,6 @@ foreach($inputs as $key =>$value) {
 };
 
 ?>
-===DONE===
 --EXPECTREGEX--
 \*\*\* Testing gmstrftime\(\) : usage variation \*\*\*
 
@@ -49,4 +42,3 @@ string\(1\) "
 --Tab character--
 string\(1\) "\s"
 string\(1\) "\s"
-===DONE===

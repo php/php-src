@@ -21,6 +21,6 @@ pg_close($dbh);
 echo "Done".PHP_EOL;
 
 ?>
---EXPECTF--
+--EXPECT--
 3,5
 Done

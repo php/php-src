@@ -2,11 +2,8 @@
 Test dirname() function : usage variations
 --FILE--
 <?php
-/* Prototype: string dirname ( string $path );
-   Description: Returns directory name component of path.
-*/
 class temp
-{ 
+{
    function __toString() {
      return "Object";
    }
@@ -26,7 +23,7 @@ $file_path_variations = array (
   "hostname:/home/user/My Pics.gz/",
   "hostname:/home/user/My Pics/",
   "hostname:/home/user/My Pics",
-  
+
   /* path containing numeric string */
   "10.5",
   "/10.5",
@@ -35,7 +32,7 @@ $file_path_variations = array (
   "10/10.gz",
   '0',
   "0",
-  
+
   /* object */
   new temp,
 
@@ -56,7 +53,7 @@ function check_dirname( $paths ) {
    for( ; $loop_counter < $noOfPaths; $loop_counter++ ) {
      echo "\n--Iteration ";
      echo $loop_counter +1;
-     echo " --\n"; 
+     echo " --\n";
      var_dump( dirname($paths[$loop_counter]) );
    }
 }

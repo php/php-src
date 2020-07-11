@@ -3,6 +3,7 @@ locale_get_display_name() icu >= 53.1
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
 <?php if (version_compare(INTL_ICU_VERSION, '53.1') < 0) die('skip for ICU >= 53.1'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '64.0') >= 0) die('skip for ICU < 64.0'); ?>
 --FILE--
 <?php
 
@@ -15,7 +16,7 @@ function ut_main()
 {
     $res_str='';
 
-	$disp_locales=array('en','fr','de');
+    $disp_locales=array('en','fr','de');
 
     $locales = array(
         'sl_IT_nedis_KIRTI',
@@ -83,16 +84,16 @@ function ut_main()
 
     $res_str = '';
 
-   	foreach( $locales as $locale )
+    foreach( $locales as $locale )
     {
-       	$res_str .= "locale='$locale'\n";
-   		foreach( $disp_locales as $disp_locale )
-    	{
-        	$scr = ut_loc_get_display_name( $locale ,$disp_locale );
-		$scr = str_replace(array('(', ')'), '#', $scr); 
-        	$res_str .= "disp_locale=$disp_locale :  display_name=$scr";
-        	$res_str .= "\n";
-		} 
+        $res_str .= "locale='$locale'\n";
+        foreach( $disp_locales as $disp_locale )
+        {
+            $scr = ut_loc_get_display_name( $locale ,$disp_locale );
+        $scr = str_replace(array('(', ')'), '#', $scr);
+            $res_str .= "disp_locale=$disp_locale :  display_name=$scr";
+            $res_str .= "\n";
+        }
         $res_str .= "-----------------\n";
     }
 

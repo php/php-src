@@ -5,7 +5,7 @@ oci_bind_array_by_name() and invalid values 7
 --FILE--
 <?php
 
-require dirname(__FILE__).'/connect.inc';
+require __DIR__.'/connect.inc';
 
 $drop = "DROP table bind_test";
 $statement = oci_parse($c, $drop);
@@ -16,15 +16,15 @@ $statement = oci_parse($c, $create);
 oci_execute($statement);
 
 $create_pkg = "
-CREATE OR REPLACE PACKAGE ARRAY_BIND_007_PKG AS 
-  TYPE ARRTYPE IS TABLE OF NUMBER INDEX BY BINARY_INTEGER; 
-  PROCEDURE iobind(c1 IN OUT ARRTYPE); 
+CREATE OR REPLACE PACKAGE ARRAY_BIND_007_PKG AS
+  TYPE ARRTYPE IS TABLE OF NUMBER INDEX BY BINARY_INTEGER;
+  PROCEDURE iobind(c1 IN OUT ARRTYPE);
 END ARRAY_BIND_007_PKG;";
 $statement = oci_parse($c, $create_pkg);
 oci_execute($statement);
 
 $create_pkg_body = "
-CREATE OR REPLACE PACKAGE BODY ARRAY_BIND_007_PKG AS 
+CREATE OR REPLACE PACKAGE BODY ARRAY_BIND_007_PKG AS
   CURSOR CUR IS SELECT name FROM bind_test;
   PROCEDURE iobind(c1 IN OUT ARRTYPE) IS
     BEGIN
@@ -58,7 +58,7 @@ var_dump($array);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: oci_bind_array_by_name(): Unknown or unsupported datatype given: -1 in %s on line %d
 
 Warning: oci_execute(): ORA-%r(01008|57000)%r: %s in %s on line %d

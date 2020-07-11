@@ -28,19 +28,19 @@ $list = array (
   19 => '"/""",aaa',
 );
 
-$file = dirname(__FILE__) . 'fgetcsv.csv';
+$file = __DIR__ . '/fputcsv_variation15.csv';
 @unlink($file);
 
 $fp = fopen($file, "w");
 foreach ($list as $v) {
-	fputcsv($fp, explode(',', $v), ',', '"', '/');
+    fputcsv($fp, explode(',', $v), ',', '"', '/');
 }
 fclose($fp);
 
 $res = file($file);
 foreach($res as &$val)
 {
-	$val = substr($val, 0, -1);
+    $val = substr($val, 0, -1);
 }
 echo '$list = ';var_export($res);echo ";\n";
 
@@ -48,7 +48,7 @@ $fp = fopen($file, "r");
 $res = array();
 while($l=fgetcsv($fp, 0, ',', '"', '/'))
 {
-	$res[] = join(',',$l);
+    $res[] = join(',',$l);
 }
 fclose($fp);
 
@@ -57,8 +57,6 @@ echo '$list = ';var_export($res);echo ";\n";
 @unlink($file);
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 $list = array (
   0 => 'aaa,bbb',
@@ -104,4 +102,3 @@ $list = array (
   18 => '"/"","aaa"',
   19 => '"/""",aaa',
 );
-===DONE===

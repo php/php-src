@@ -1,15 +1,15 @@
 --TEST--
-oci_lob_export() 
+oci_lob_export()
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
-?> 
+require(__DIR__.'/skipif.inc');
+?>
 --FILE--
 <?php
-	
-require dirname(__FILE__).'/connect.inc';
-require dirname(__FILE__).'/create_table.inc';
+
+require __DIR__.'/connect.inc';
+require __DIR__.'/create_table.inc';
 
 $ora_sql = "INSERT INTO
                        ".$schema.$table_name." (blob)
@@ -35,13 +35,13 @@ oci_execute($s, OCI_DEFAULT);
 
 $row = oci_fetch_array($s);
 
-var_dump($row[0]->export(dirname(__FILE__)."/lob_012.tmp", 3, 10));
+var_dump($row[0]->export(__DIR__."/lob_012.tmp", 3, 10));
 
-var_dump(file_get_contents(dirname(__FILE__)."/lob_012.tmp"));
+var_dump(file_get_contents(__DIR__."/lob_012.tmp"));
 
-@unlink(dirname(__FILE__)."/lob_012.tmp");
+@unlink(__DIR__."/lob_012.tmp");
 
-require dirname(__FILE__).'/drop_table.inc';
+require __DIR__.'/drop_table.inc';
 
 echo "Done\n";
 

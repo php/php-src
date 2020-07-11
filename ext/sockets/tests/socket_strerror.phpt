@@ -14,14 +14,11 @@ fa@php.net
 ?>
 --FILE--
 <?php
-    $s_s = socket_strerror();
     for ($i=0;$i<=132;$i++) {
         var_dump(socket_strerror($i));
     }
 ?>
 --EXPECTF--
-
-Warning: socket_strerror() expects exactly 1 parameter, 0 given in %s on line %i
 string(7) "Success"
 string(23) "Operation not permitted"
 string(25) "No such file or directory"
@@ -80,7 +77,7 @@ string(13) "Exchange full"
 string(8) "No anode"
 string(20) "Invalid request code"
 string(12) "Invalid slot"
-string(16) "Unknown error 58"
+string(%d) "%s"
 string(20) "Bad font file format"
 string(19) "Device not a stream"
 string(17) "No data available"

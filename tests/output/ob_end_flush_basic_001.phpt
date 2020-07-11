@@ -1,13 +1,7 @@
 --TEST--
-Test ob_end_flush() function : basic functionality 
+Test ob_end_flush() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : proto bool ob_end_flush(void)
- * Description: Flush (send) the output buffer, and delete current output buffer 
- * Source code: main/output.c
- * Alias to functions: 
- */
-
 echo "*** Testing ob_end_flush() : basic functionality ***\n";
 
 // Zero arguments
@@ -30,12 +24,12 @@ echo "Done";
 
 -- Testing ob_end_flush() function with Zero arguments --
 
-Notice: ob_end_flush(): failed to delete and flush buffer. No buffer to delete or flush in %s on line 12
+Notice: ob_end_flush(): Failed to delete and flush buffer. No buffer to delete or flush in %s on line %d
 bool(false)
 bool(true)
 Hello
 bool(true)
 
-Notice: ob_end_flush(): failed to delete and flush buffer. No buffer to delete or flush in %s on line 21
+Notice: ob_end_flush(): Failed to delete and flush buffer. No buffer to delete or flush in %s on line %d
 bool(false)
 Done

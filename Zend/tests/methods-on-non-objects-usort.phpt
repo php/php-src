@@ -10,16 +10,16 @@ $comparator= null;
 $list= [1, 4, 2, 3, -1];
 usort($list, function($a, $b) use ($comparator) {
   try {
-	  return $comparator->compare($a, $b);
+      return $comparator->compare($a, $b);
   } catch (Error $e) {
-	  var_dump($e->getCode(), $e->getMessage());
-	  return 0;
+      var_dump($e->getCode(), $e->getMessage());
+      return 0;
   }
 });
 var_dump($list);
 echo "Alive\n";
 ?>
---EXPECTF--
+--EXPECT--
 int(0)
 string(43) "Call to a member function compare() on null"
 int(0)

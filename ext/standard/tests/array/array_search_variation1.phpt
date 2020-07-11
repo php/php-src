@@ -2,12 +2,6 @@
 Test array_search() function : usage variations - different needle values
 --FILE--
 <?php
-/*
- * Prototype  : mixed array_search ( mixed $needle, array $haystack [, bool $strict] )
- * Description: Searches haystack for needle and returns the key if it is found in the array, FALSE otherwise
- * Source Code: ext/standard/array.c
-*/
-
 /* Test array_search() with different possible needle values */
 
 echo "*** Testing array_search() with different needle values ***\n";
@@ -19,7 +13,7 @@ $arrays = array (
   array(TRUE, FALSE),
   array("", array()),
   array("abcd\x00abcd\x00abcd"),
-  array("abcd\tabcd\nabcd\rabcd\0abcdefghij") 
+  array("abcd\tabcd\nabcd\rabcd\0abcdefghij")
 );
 
 $array_compare = array (
@@ -49,18 +43,18 @@ foreach($arrays as $array) {
   foreach($array_compare as $compare) {
     echo "-- Iteration $counter --\n";
     //strict option OFF
-    var_dump(array_search($compare,$array));  
+    var_dump(array_search($compare,$array));
     //strict option ON
-    var_dump(array_search($compare,$array,TRUE));  
+    var_dump(array_search($compare,$array,TRUE));
     //strict option OFF
-    var_dump(array_search($compare,$array,FALSE));  
+    var_dump(array_search($compare,$array,FALSE));
     $counter++;
  }
 }
-		
+
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_search() with different needle values ***
 -- Iteration 1 --
 bool(false)

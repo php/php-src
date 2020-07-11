@@ -1,7 +1,7 @@
 --TEST--
 Testing user-defined function in included file
 --FILE--
-<?php 
+<?php
 include "016.inc";
 MyFunc("Hello");
 ?>

@@ -4,11 +4,11 @@ Using the same function name on interface with inheritance
 <?php
 
 interface Itest {
-	function a();
+    function a();
 }
 
 interface Itest2 {
-	function a();
+    function a();
 }
 
 interface Itest3 extends Itest, Itest2 {
@@ -17,5 +17,5 @@ interface Itest3 extends Itest, Itest2 {
 echo "done!\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 done!

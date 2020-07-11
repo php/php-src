@@ -8,14 +8,12 @@ if (!extension_loaded("curl")) {
 ?>
 --FILE--
 <?php
-$data = 'a:2:{s:4:"file";O:8:"CURLFile":3:{s:4:"name";s:13:"testdata1.txt";s:4:"mime";s:0:"";s:8:"postname";s:0:"";}s:4:"data";s:3:"foo";}';
-var_dump(unserialize($data));
+$file = new CURLFile(__DIR__ . '/curl_testdata1.txt');
+var_dump(serialize($file));
 ?>
 --EXPECTF--
-Fatal error: Uncaught Exception: Unserialization of CURLFile instances is not allowed in %s
+Fatal error: Uncaught Exception: Serialization of 'CURLFile' is not allowed in %s:%d
 Stack trace:
-#0 [internal function]: CURLFile->__wakeup()
-#1 %s
-#2 {main}
+#0 %s(%d): serialize(Object(CURLFile))
+#1 {main}
   thrown in %s on line %d
-

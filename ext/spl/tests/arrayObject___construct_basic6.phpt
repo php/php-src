@@ -3,9 +3,9 @@ SPL: ArrayObject::__construct: check impact of ArrayObject::STD_PROP_LIST on var
 --FILE--
 <?php
 class MyArrayObject extends ArrayObject {
-	private $priv1 = 'secret1';
-	public $pub1 = 'public1';
-} 
+    private $priv1 = 'secret1';
+    public $pub1 = 'public1';
+}
 
 $ao = new ArrayObject(array(1,2,3));
 $ao->p = 1;
@@ -21,7 +21,7 @@ var_dump($ao);
 $ao = new MyArrayObject(array(1,2,3), ArrayObject::STD_PROP_LIST);
 var_dump($ao);
 ?>
---EXPECTF--
+--EXPECT--
 object(ArrayObject)#1 (2) {
   ["p"]=>
   int(1)

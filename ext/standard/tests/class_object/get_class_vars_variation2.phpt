@@ -1,18 +1,12 @@
 --TEST--
-Test get_class_vars() function : testing visibility 
+Test get_class_vars() function : testing visibility
 --FILE--
 <?php
-/* Prototype  : array get_class_vars(string class_name)
- * Description: Returns an array of default properties of the class. 
- * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
- */
-
 class Ancestor {
   function test() {
     var_dump(get_class_vars("Tester"));
   }
-  
+
   static function testStatic() {
     var_dump(get_class_vars("Tester"));
   }
@@ -22,15 +16,15 @@ class Tester extends Ancestor {
   public $pub = "public var";
   protected $prot = "protected var";
   private $priv = "private var";
-  
+
   static public $pubs = "public static var";
   static protected $prots = "protected static var";
   static private $privs = "private static var";
-  
+
   function test() {
     var_dump(get_class_vars("Tester"));
   }
-  
+
   static function testStatic() {
     var_dump(get_class_vars("Tester"));
   }
@@ -40,7 +34,7 @@ class Child extends Tester {
   function test() {
     var_dump(get_class_vars("Tester"));
   }
-  
+
   static function testStatic() {
     var_dump(get_class_vars("Tester"));
   }
@@ -74,8 +68,7 @@ $child->test();
 echo "\n-- From a child's static context --\n";
 Child::testStatic();
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing get_class_vars() : testing visibility
 
 -- From global context --
@@ -165,4 +158,3 @@ array(4) {
   ["prots"]=>
   string(20) "protected static var"
 }
-===DONE===

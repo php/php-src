@@ -2,7 +2,7 @@
 Bug#59597 NumberFormatter::parse() with TYPE_INT64 results in a 32 bit integer
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php echo PHP_INT_SIZE == 8 ? "skip 32-bit only" : "OK"; ?>
+<?php if (PHP_INT_SIZE == 8) die("skip 32-bit only"); ?>
 --FILE--
 <?php
 
@@ -18,4 +18,3 @@ var_dump($value);
 --EXPECT--
 int(2147483647)
 float(2147483650)
-

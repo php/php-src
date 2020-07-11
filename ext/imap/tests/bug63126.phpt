@@ -4,9 +4,9 @@ imap_open() DISABLE_AUTHENTICATOR ignores array param
 <?php
 extension_loaded('imap') or die('skip imap extension not available in this build');
 
-require_once(dirname(__FILE__).'/imap_include.inc');
+require_once(__DIR__.'/imap_include.inc');
 
-$in = imap_open($default_mailbox, $username, $password, OP_HALFOPEN, 1);
+$in = @imap_open($default_mailbox, $username, $password, OP_HALFOPEN, 1);
 if (!$in) {
     die("skip could not connect to mailbox $default_mailbox");
 }
@@ -28,7 +28,7 @@ $tests = array(
     'Array'  => array('DISABLE_AUTHENTICATOR' => array('GSSAPI','NTLM')),
     'String' => array('DISABLE_AUTHENTICATOR' => 'GSSAPI'),
 );
-require_once(dirname(__FILE__).'/imap_include.inc');
+require_once(__DIR__.'/imap_include.inc');
 foreach ($tests as $name => $testparams) {
     echo "Test for $name\n";
     $in = imap_open($default_mailbox, $username, $password, OP_HALFOPEN, 1, $testparams);
@@ -46,7 +46,7 @@ foreach ($tests as $name => $testparams) {
 }
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 Test for Array
 Test for String
 Done

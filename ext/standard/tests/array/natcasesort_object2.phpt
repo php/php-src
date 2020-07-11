@@ -2,11 +2,6 @@
 Test natcasesort() function : object functionality - mixed visibility within objects
 --FILE--
 <?php
-/* Prototype  : bool natcasesort(array &$array_arg)
- * Description: Sort an array using case-insensitive natural sort
- * Source code: ext/standard/array.c
- */
-
 /*
  * Pass natcasesort() an array of objects which have properties of different
  * visibilities to test how it re-orders the array.
@@ -17,20 +12,20 @@ echo "*** Testing natcasesort() : object functionality ***\n";
 // class declaration for string objects
 class for_string_natcasesort
 {
-	public $public_class_value;
-	private $private_class_value;
-	protected $protected_class_value;
-	// initializing object member value
-	function __construct($value1, $value2,$value3){
-		$this->public_class_value = $value1;
-		$this->private_class_value = $value2;
-		$this->protected_class_value = $value3;
-	}
+    public $public_class_value;
+    private $private_class_value;
+    protected $protected_class_value;
+    // initializing object member value
+    function __construct($value1, $value2,$value3){
+        $this->public_class_value = $value1;
+        $this->private_class_value = $value2;
+        $this->protected_class_value = $value3;
+    }
 
-	// return string value
-	function __tostring() {
-		return (string)$this->public_class_value;
-	}
+    // return string value
+    function __tostring() {
+        return (string)$this->public_class_value;
+    }
 
 }
 
@@ -52,7 +47,6 @@ var_dump($temp_array);
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing natcasesort() : object functionality ***
 

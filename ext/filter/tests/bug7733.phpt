@@ -1,20 +1,20 @@
 --TEST--
-filter_data() Float exponential weird result
+filter_var() Float exponential weird result
 --SKIPIF--
 <?php if (!extension_loaded("filter")) die("skip"); ?>
 --FILE--
 <?php
 $data = array(
-		'E2',
-		'10E',
-		'2E-',
-		'E-2',
-		'+E2'
-		);
+        'E2',
+        '10E',
+        '2E-',
+        'E-2',
+        '+E2'
+        );
 $out = filter_var($data, FILTER_VALIDATE_FLOAT, FILTER_REQUIRE_ARRAY);
 var_dump($out);
 ?>
---EXPECTF--	
+--EXPECT--
 array(5) {
   [0]=>
   bool(false)

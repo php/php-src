@@ -13,7 +13,7 @@ $br = socket_bind($s, '::', 3000);
 /* On Linux, there is no route ff00::/8 by default on lo, which makes it
  * troublesome to send multicast traffic from lo, which we must since
  * we're dealing with interface-local traffic... */
-$so = socket_set_option($s, IPPROTO_IPV6, MCAST_JOIN_GROUP, array(
+$so = @socket_set_option($s, IPPROTO_IPV6, MCAST_JOIN_GROUP, array(
 	"group"	=> 'ff01::114',
 	"interface" => 0,
 ));
@@ -24,12 +24,12 @@ $r = socket_sendto($s, $m = "testing packet", strlen($m), 0, 'ff01::114', 3000);
 if ($r === false) {
 	die('skip unable to send multicast packet.');
 }
-$so = socket_set_option($s, IPPROTO_IPV6, MCAST_LEAVE_GROUP, array(
+$so = @socket_set_option($s, IPPROTO_IPV6, MCAST_LEAVE_GROUP, array(
 	"group"	=> 'ff01::114',
 	"interface" => 0,
 ));
 if (defined("MCAST_JOIN_SOURCE_GROUP")) {
-	$so = socket_set_option($s, IPPROTO_IPV6, MCAST_JOIN_SOURCE_GROUP, array(
+	$so = @socket_set_option($s, IPPROTO_IPV6, MCAST_JOIN_SOURCE_GROUP, array(
 		"group"	=> 'ff01::114',
 		"interface" => 0,
 		"source" => '2001::dead:beef',
@@ -38,7 +38,6 @@ if (defined("MCAST_JOIN_SOURCE_GROUP")) {
 	    die('skip protocol independent multicast API is available.');
 	}
 }
-
 --FILE--
 <?php
 include __DIR__."/mcast_helpers.php.inc";
@@ -59,8 +58,8 @@ $br = socket_bind($s, '::0', 3000) or die("err");
 var_dump($br);
 
 $so = socket_set_option($s, $level, MCAST_JOIN_GROUP, array(
-	"group"	=> $mcastaddr,
-	"interface" => $interface,
+    "group"	=> $mcastaddr,
+    "interface" => $interface,
 )) or die("err");
 var_dump($so);
 
@@ -77,33 +76,33 @@ var_dump($r);
 $i = 0;
 checktimeout($s, 500);
 while (($str = socket_read($s, 3000, 500)) !== FALSE) {
-	$i++;
-	echo "$i> ", $str, "\n";
+    $i++;
+    echo "$i> ", $str, "\n";
 
 if ($i == 1) {
-	echo "leaving group\n";
-	$so = socket_set_option($s, $level, MCAST_LEAVE_GROUP, array(
-		"group"	=> $mcastaddr,
-		"interface" => $interface,
-	));
-	var_dump($so);
-	$r = socket_sendto($sends1, $m = "ignored mcast packet", strlen($m), 0, $mcastaddr, 3000);
-	var_dump($r);
-	$r = socket_sendto($sends1, $m = "unicast packet", strlen($m), 0, "::1", 3000);
-	var_dump($r);
+    echo "leaving group\n";
+    $so = socket_set_option($s, $level, MCAST_LEAVE_GROUP, array(
+        "group"	=> $mcastaddr,
+        "interface" => $interface,
+    ));
+    var_dump($so);
+    $r = socket_sendto($sends1, $m = "ignored mcast packet", strlen($m), 0, $mcastaddr, 3000);
+    var_dump($r);
+    $r = socket_sendto($sends1, $m = "unicast packet", strlen($m), 0, "::1", 3000);
+    var_dump($r);
 }
 if ($i == 2) {
-	echo "re-joining group\n";
-	$so = socket_set_option($s, $level, MCAST_JOIN_GROUP, array(
-		"group"	=> $mcastaddr,
-		"interface" => $interface,
-	));
-	var_dump($so);
-	$r = socket_sendto($sends1, $m = "mcast packet", strlen($m), 0, $mcastaddr, 3000);
-	var_dump($r);
+    echo "re-joining group\n";
+    $so = socket_set_option($s, $level, MCAST_JOIN_GROUP, array(
+        "group"	=> $mcastaddr,
+        "interface" => $interface,
+    ));
+    var_dump($so);
+    $r = socket_sendto($sends1, $m = "mcast packet", strlen($m), 0, $mcastaddr, 3000);
+    var_dump($r);
 }
 if ($i == 3) {
-	break;
+    break;
 }
 
 }

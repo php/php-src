@@ -2,11 +2,6 @@
 Test key() function : usage variations
 --FILE--
 <?php
-/* Prototype  : mixed key(array $array_arg)
- * Description: Return the key of the element currently pointed to by the internal array pointer 
- * Source code: ext/standard/array.c
- */
-
 /*
  * Pass arrays where keys are different data types as $array_arg to key() to test behaviour
  */
@@ -39,7 +34,7 @@ $inputs = array(
        -10.5 => 'negative',
        .5 => 'half',
        ),
-       
+
 /*3*/  'extreme floats' => array(
        12.3456789000e6 => 'large',
        12.3456789000E-10 => 'small',
@@ -48,8 +43,8 @@ $inputs = array(
        // null data
 /*4*/ 'null uppercase' => array(
        NULL => 'null 1',
-       ), 
-       
+       ),
+
 /*5*/  'null lowercase' => array(
        null => 'null 2',
        ),
@@ -59,17 +54,17 @@ $inputs = array(
        true => 'lowert',
        false => 'lowerf',
        ),
-       
+
 /*7*/  'bool uppercase' => array(
        TRUE => 'uppert',
        FALSE => 'upperf',
        ),
-       
+
        // empty data
 /*8*/ 'empty double quotes' => array(
        "" => 'emptyd',
        ),
-       
+
 /*9*/  'empty single quotes' => array(
        '' => 'emptys',
        ),
@@ -97,14 +92,13 @@ $iterator = 1;
 foreach($inputs as $key => $input) {
   echo "\n-- Iteration $iterator : $key data --\n";
   while (key($input) !== NULL) {
-  	var_dump(key($input));
-  	next($input);
+    var_dump(key($input));
+    next($input);
   }
   $iterator++;
 };
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing key() : usage variations ***
 
 -- Iteration 1 : int data --
@@ -152,4 +146,3 @@ string(0) ""
 
 -- Iteration 12 : unset data --
 string(0) ""
-===DONE===

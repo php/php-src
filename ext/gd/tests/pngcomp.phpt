@@ -12,9 +12,9 @@ png compression test
 ?>
 --FILE--
 <?php
-	$cwd = dirname(__FILE__);
+    $cwd = __DIR__;
 
-	echo "PNG compression test: ";
+    echo "PNG compression test: ";
 
         $im = imagecreatetruecolor(20,20);
         imagefilledrectangle($im, 5,5, 10,10, 0xffffff);
@@ -26,7 +26,7 @@ png compression test
                 echo "ok\n";
         }
 
-	@unlink($cwd . "/test_pngcomp.png");
+    @unlink($cwd . "/test_pngcomp.png");
 ?>
 --EXPECT--
 PNG compression test: ok

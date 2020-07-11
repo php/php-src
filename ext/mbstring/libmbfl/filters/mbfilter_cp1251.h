@@ -41,4 +41,3 @@ int mbfl_filt_conv_wchar_cp1251(int c, mbfl_convert_filter *filter);
 int mbfl_filt_conv_cp1251_wchar(int c, mbfl_convert_filter *filter);
 
 #endif /* MBFL_MBFILTER_CP1251_H */
-

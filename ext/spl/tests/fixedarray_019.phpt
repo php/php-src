@@ -1,5 +1,5 @@
 --TEST--
-SPL: FixedArray: overriden iterator methods
+SPL: FixedArray: overridden iterator methods
 --FILE--
 <?php
 class SplFixedArray2 extends SplFixedArray {

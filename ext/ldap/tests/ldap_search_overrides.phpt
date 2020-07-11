@@ -20,21 +20,20 @@ ldap_set_option($link, LDAP_OPT_NETWORK_TIMEOUT, 44);
 
 insert_dummy_data($link, $base);
 var_dump(
-	$result = ldap_search($link, "$base", "(objectClass=person)", array(), null, 111, 22, LDAP_DEREF_NEVER),
-	ldap_get_entries($link, $result)
+    $result = ldap_search($link, "$base", "(objectClass=person)", array(), null, 111, 22, LDAP_DEREF_NEVER),
+    ldap_get_entries($link, $result)
 );
 var_dump(
-	ldap_get_option($link, LDAP_OPT_DEREF, $option),
-	$option,
-	ldap_get_option($link, LDAP_OPT_SIZELIMIT, $option),
-	$option,
-	ldap_get_option($link, LDAP_OPT_TIMELIMIT, $option),
-	$option,
-	ldap_get_option($link, LDAP_OPT_NETWORK_TIMEOUT, $option),
-	$option
+    ldap_get_option($link, LDAP_OPT_DEREF, $option),
+    $option,
+    ldap_get_option($link, LDAP_OPT_SIZELIMIT, $option),
+    $option,
+    ldap_get_option($link, LDAP_OPT_TIMELIMIT, $option),
+    $option,
+    ldap_get_option($link, LDAP_OPT_NETWORK_TIMEOUT, $option),
+    $option
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 include "connect.inc";
@@ -81,7 +80,7 @@ array(4) {
       ["count"]=>
       int(1)
       [0]=>
-      string(4) "oops"
+      string(%d) "%s"
     }
     [3]=>
     string(12) "userpassword"
@@ -142,7 +141,7 @@ array(4) {
       ["count"]=>
       int(1)
       [0]=>
-      string(15) "oopsIDitItAgain"
+      string(%d) "%s"
     }
     [3]=>
     string(12) "userpassword"
@@ -194,7 +193,7 @@ array(4) {
       ["count"]=>
       int(1)
       [0]=>
-      string(17) "0r1g1na1 passw0rd"
+      string(%d) "%s"
     }
     [3]=>
     string(12) "userpassword"
@@ -212,4 +211,3 @@ bool(true)
 int(33)
 bool(true)
 int(44)
-===DONE===

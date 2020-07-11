@@ -1,2 +1,2 @@
 @echo off
-cscript /nologo configure.js %*
+cscript /nologo /e:jscript configure.js %*

@@ -9,12 +9,6 @@ if(substr(PHP_OS, 0, 3) == "WIN")
 ?>
 --FILE--
 <?php
-/* Prototype  : resource fopen(string filename, string mode [, bool use_include_path [, resource context]])
- * Description: Open a file or a URL and return a file pointer 
- * Source code: ext/standard/file.c
- * Alias to functions: 
- */
-
 $tmpDir = 'fopenVar19.Dir';
 $realFilename = __FILE__.'.real';
 $sortFilename = __FILE__.'.soft';
@@ -92,7 +86,6 @@ function writeFile($file) {
 
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing fopen() : variation ***
 *** testing reading of links ***
@@ -107,4 +100,3 @@ link of link:Hello World again! again! again!
 soft link:Goodbye World
 hard link:Goodbye World
 link of link:Goodbye World
-===DONE===

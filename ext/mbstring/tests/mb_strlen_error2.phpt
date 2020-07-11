@@ -7,11 +7,6 @@ function_exists('mb_strlen') or die("skip mb_strlen() is not available in this b
 ?>
 --FILE--
 <?php
-/* Prototype  : int mb_strlen(string $str [, string $encoding])
- * Description: Get character numbers of a string 
- * Source code: ext/mbstring/mbstring.c
- */
-
 /*
  * Test mb_strlen when passed an unknown encoding
  */
@@ -22,13 +17,13 @@ $string = 'abcdef';
 
 $encoding = 'unknown-encoding';
 
-var_dump(mb_strlen($string, $encoding));
+try {
+    var_dump(mb_strlen($string, $encoding));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
-echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing mb_strlen() : error ***
-
-Warning: mb_strlen(): Unknown encoding "unknown-encoding" in %s on line %d
-bool(false)
-Done
+mb_strlen(): Argument #2 ($encoding) must be a valid encoding, "unknown-encoding" given

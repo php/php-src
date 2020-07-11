@@ -4,14 +4,14 @@ Closure 047: Use in preg_replace_callback() using variables by reference
 <?php
 
 function replace_variables($text, $params) {
-	
-	preg_replace_callback( '/(\?)/', function($matches) use (&$params, &$text) {
-	
-		$text = preg_replace( '/(\?)/', array_shift( $params ), $text, 1 );
-	
-	}, $text );
-	
-	return $text;
+
+    preg_replace_callback( '/(\?)/', function($matches) use (&$params, &$text) {
+
+        $text = preg_replace( '/(\?)/', array_shift( $params ), $text, 1 );
+
+    }, $text );
+
+    return $text;
 }
 
 echo replace_variables('a=?', array('0')) . "\n";

@@ -2,25 +2,19 @@
 Test sort() function : usage variations - sort hexadecimal values
 --FILE--
 <?php
-/* Prototype  : bool sort ( array &$array [, int $sort_flags] )
- * Description: This function sorts an array. 
-                Elements will be arranged from lowest to highest when this function has completed.
- * Source code: ext/standard/array.c
-*/
-
 /*
  * testing sort() by providing different hexa-decimal array for $array argument with following flag values
- * flag  value as defualt
+ * flag  value as default
  * SORT_REGULAR - compare items normally
  * SORT_NUMERIC - compare items numerically
 */
 
 echo "*** Testing sort() : usage variations ***\n";
 
-// an array contains unsorted hexadecimal values  
+// an array contains unsorted hexadecimal values
 $unsorted_hex_array = array(0x1AB, 0xFFF, 0xF, 0xFF, 0x2AA, 0xBB, 0x1ab, 0xff, -0xFF, 0, -0x2aa);
 
-echo "\n-- Testing sort() by supplying hexadecimal value array, 'flag' value is defualt  --\n";
+echo "\n-- Testing sort() by supplying hexadecimal value array, 'flag' value is default  --\n";
 $temp_array = $unsorted_hex_array;
 var_dump(sort($temp_array) ); // expecting : bool(true)
 var_dump($temp_array);
@@ -37,10 +31,10 @@ var_dump($temp_array);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sort() : usage variations ***
 
--- Testing sort() by supplying hexadecimal value array, 'flag' value is defualt  --
+-- Testing sort() by supplying hexadecimal value array, 'flag' value is default  --
 bool(true)
 array(11) {
   [0]=>

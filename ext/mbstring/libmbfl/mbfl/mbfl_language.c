@@ -32,17 +32,8 @@
 #include "config.h"
 #endif
 
-#ifdef HAVE_STDDEF_H
 #include <stddef.h>
-#endif
-
-#ifdef HAVE_STDDEF_H
-#include <stddef.h>
-#endif
-
-#ifdef HAVE_STRING_H
 #include <string.h>
-#endif
 
 #ifdef HAVE_STRINGS_H
 #include <strings.h>
@@ -168,4 +159,3 @@ mbfl_no_language2name(enum mbfl_no_language no_language)
 		return language->name;
 	}
 }
-

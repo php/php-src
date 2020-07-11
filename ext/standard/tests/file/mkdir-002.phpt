@@ -3,7 +3,7 @@ mkdir(dir, 0777) tests
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip no symlinks on Windows');
+    die('skip not for Windows');
 }
 ?>
 --FILE--
@@ -21,16 +21,16 @@ var_dump(`ls -l ./mkdir-002`);
 var_dump(rmdir("./mkdir-002/subdir"));
 var_dump(rmdir("./mkdir-002"));
 
-var_dump(mkdir(dirname(__FILE__)."/mkdir-002", 0777));
-var_dump(mkdir(dirname(__FILE__)."/mkdir-002/subdir", 0777));
-$dirname = dirname(__FILE__)."/mkdir-002";
+var_dump(mkdir(__DIR__."/mkdir-002", 0777));
+var_dump(mkdir(__DIR__."/mkdir-002/subdir", 0777));
+$dirname = __DIR__."/mkdir-002";
 var_dump(`ls -l $dirname`);
-var_dump(rmdir(dirname(__FILE__)."/mkdir-002/subdir"));
-var_dump(rmdir(dirname(__FILE__)."/mkdir-002"));
+var_dump(rmdir(__DIR__."/mkdir-002/subdir"));
+var_dump(rmdir(__DIR__."/mkdir-002"));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 bool(true)
 bool(true)
 string(%d) "%s

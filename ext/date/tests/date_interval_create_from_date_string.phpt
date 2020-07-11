@@ -1,5 +1,5 @@
 --TEST--
-Test date_interval_create_from_date_string() function : basic functionality 
+Test date_interval_create_from_date_string() function : basic functionality
 --CREDITS--
 Rodrigo Prado de Jesus <royopa [at] gmail [dot] com>
 --FILE--
@@ -25,7 +25,7 @@ $i = date_interval_create_from_date_string($string);
 var_dump($i->y);
 var_dump($i->d);
 ?>
---EXPECTF--
+--EXPECT--
 int(1)
 int(14)
 int(3)

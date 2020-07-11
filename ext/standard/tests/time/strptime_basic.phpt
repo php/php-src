@@ -1,28 +1,22 @@
 --TEST--
-Test strptime() function : basic functionality 
+Test strptime() function : basic functionality
 --SKIPIF--
-<?php 
-	if (!function_exists('strptime')) { 
-		die("skip - strptime() function not available in this build"); 
-	}	 
+<?php
+	if (!function_exists('strptime')) {
+		die("skip - strptime() function not available in this build");
+	}
         if(PHP_OS == 'Darwin') die("skip - strptime() behaves differently on Darwin");
 ?>
-
 --FILE--
 <?php
-/* Prototype  : array strptime  ( string $date  , string $format  )
- * Description:  Parse a time/date generated with strftime()
- * Source code: ext/standard/datetime.c
-*/
-
 $orig = setlocale(LC_ALL, 'C');
-date_default_timezone_set("GMT"); 
+date_default_timezone_set("GMT");
 
 echo "*** Testing strptime() : basic functionality ***\n";
 
 $input = "10:00:00 AM July 2 1963";
 $tstamp = strtotime($input);
- 
+
 $str = strftime("%r %B%e %Y %Z", $tstamp);
 var_dump(strptime($str, '%H:%M:%S %p %B %d %Y'));
 
@@ -34,8 +28,7 @@ var_dump(strptime($str, '%A %B %e %R'));
 
 setlocale(LC_ALL, $orig);
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing strptime() : basic functionality ***
 array(9) {
   ["tm_sec"]=>
@@ -97,4 +90,3 @@ array(9) {
   ["unparsed"]=>
   string(0) ""
 }
-===DONE===

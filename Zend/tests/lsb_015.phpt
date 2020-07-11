@@ -1,5 +1,5 @@
 --TEST--
-ZE2 Late Static Binding with exceptions 
+ZE2 Late Static Binding with exceptions
 --FILE--
 <?php
 function foo() {
@@ -11,7 +11,7 @@ class C {
     }
     public static function getException() {
         return new Exception();
-         
+
     }
 }
 class A {
@@ -67,8 +67,7 @@ A::myCatch();
 echo "via B:\n";
 B::myCatch();
 ?>
-==DONE==
---EXPECTF--
+--EXPECT--
 via A:
 A
 A
@@ -89,4 +88,3 @@ B
 B
 B
 B
-==DONE==

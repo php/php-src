@@ -2,15 +2,9 @@
 Test array_combine() function : usage variations - associative array with different keys(Bug#43424)
 --FILE--
 <?php
-/* Prototype  : array array_combine(array $keys, array $values)
- * Description: Creates an array by using the elements of the first parameter as keys
- *              and the elements of the second as the corresponding values
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Testing the functionality of array_combine() by passing different
- * associative arrays having different possible keys to $keys argument and 
+ * associative arrays having different possible keys to $keys argument and
  * associative arrays having different possible keys to $values argument.
 */
 
@@ -60,18 +54,18 @@ $arrays = array (
        array("hello", $heredoc => "string"), // heredoc
 
        // array with object, unset variable and resource variable
-/*10*/ array(new classA() => 11, @$unset_var => "hello", $fp => 'resource'),
+/*10*/ array(@$unset_var => "hello", $fp => 'resource'),
 
        // array with mixed keys
-/*11*/ array('hello' => 1, new classA() => 2, "fruit" => 2.2,
+/*11*/ array('hello' => 1, "fruit" => 2.2,
              $fp => 'resource', 133 => "int", 444.432 => "float",
              @$unset_var => "unset", $heredoc => "heredoc")
 );
 
 // array to be passsed to $arr2 argument
 $arr2 = array(0 => 0, 2 => "float", 4 => "f3", 33333333 => "f4",
-              "\tHello" => 111, 2.2, 'color', "Hello world" => "string", 
-              "pen\n" => 33, new classA() => 11, 133 => "int");
+              "\tHello" => 111, 2.2, 'color', "Hello world" => "string",
+              "pen\n" => 33, 133 => "int");
 
 // loop through each sub-array within $arrays to check the behavior of array_combine()
 // same arrays are passed to both $keys and $values
@@ -90,15 +84,9 @@ echo "Done";
 --EXPECTF--
 *** Testing array_combine() : assoc array with diff keys to both $keys and $values argument ***
 
-Warning: Illegal offset type in %s on line %d
+Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 
-Warning: Illegal offset type in %s on line %d
-
-Warning: Illegal offset type in %s on line %d
-
-Warning: Illegal offset type in %s on line %d
-
-Warning: Illegal offset type in %s on line %d
+Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 -- Iteration 1 --
 array(0) {
 }
@@ -169,16 +157,20 @@ array(2) {
   string(6) "string"
 }
 -- Iteration 10 --
-array(1) {
+array(2) {
   ["hello"]=>
   string(5) "hello"
+  ["resource"]=>
+  string(8) "resource"
 }
 -- Iteration 11 --
-array(6) {
+array(7) {
   [1]=>
   int(1)
   ["2.2"]=>
   float(2.2)
+  ["resource"]=>
+  string(8) "resource"
   ["int"]=>
   string(3) "int"
   ["float"]=>

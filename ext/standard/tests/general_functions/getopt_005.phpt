@@ -7,7 +7,7 @@ register_argc_argv=On
 variables_order=GPS
 --FILE--
 <?php
-	var_dump(getopt("a:", array("arg:")));
+    var_dump(getopt("a:", array("arg:")));
 ?>
 --EXPECT--
 array(2) {
@@ -28,5 +28,3 @@ array(2) {
     string(5) "value"
   }
 }
-
-

@@ -1,25 +1,14 @@
 --TEST--
-Test fopen and fclose() functions - usage variations - "r+" mode 
+Test fopen and fclose() functions - usage variations - "r+" mode
 --FILE--
 <?php
-/*
- fopen() function:
- Prototype: resource fopen(string $filename, string $mode
-                            [, bool $use_include_path [, resource $context]] );
- Description: Opens file or URL.
-*/
-/*
- fclose() function:
- Prototype: bool fclose ( resource $handle );
- Description: Closes an open file pointer
-*/
 
 /* Test fopen() and fclose(): Opening the file in "r+" mode,
    checking for the file creation, write & read operations,
    checking for the file pointer position,
    and fclose function
 */
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require($file_path."/file.inc");
 
 create_files($file_path, 1, "text_with_new_line", 0755, 20, "w", "007_variation", 2, "bytes");
@@ -37,10 +26,10 @@ var_dump( fwrite($file_handle, $string) );  //Check for write operation; passes;
 var_dump( ftell($file_handle) );  //File pointer position after write operation, expected at the end of the file
 var_dump( fclose($file_handle) );  //Check for close operation on the file handle
 var_dump( get_resource_type($file_handle) );  //Check whether resource is lost after close operation
-echo "*** Done ***\n"; 
+echo "*** Done ***\n";
 --CLEAN--
 <?php
-unlink(dirname(__FILE__)."/007_variation2.tmp");
+unlink(__DIR__."/007_variation2.tmp");
 ?>
 --EXPECTF--
 *** Test fopen() & fclose() functions:  with 'r+' mode ***

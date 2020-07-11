@@ -4,19 +4,13 @@ Test ctype_punct() function : usage variations - different data types as $c argu
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-/* Prototype  : bool ctype_punct(mixed $c)
- * Description: Checks for any printable character which is not whitespace 
- * or an alphanumeric character 
- * Source code: ext/ctype/ctype.c
- */
-
 /*
  * Pass different data types as $c argument to ctype_punt() to test behaviour
  */
 
 echo "*** Testing ctype_punct() : usage variations ***\n";
 
-$orig = setlocale(LC_CTYPE, "C"); 
+$orig = setlocale(LC_CTYPE, "C");
 
 //get an unset variable
 $unset_var = 10;
@@ -63,7 +57,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -73,7 +67,7 @@ $inputs = array(
 /*19*/ ";:'@",
        '#~/?',
        $heredoc,
-       
+
        // object data
 /*22*/ new classA(),
 
@@ -97,10 +91,9 @@ foreach($inputs as $input) {
 
 fclose($fp);
 
-setlocale(LC_CTYPE, $orig); 
+setlocale(LC_CTYPE, $orig);
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ctype_punct() : usage variations ***
 
 -- Iteration 1 --
@@ -177,4 +170,3 @@ bool(false)
 
 -- Iteration 25 --
 bool(false)
-===DONE===

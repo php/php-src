@@ -2,15 +2,9 @@
 Test arsort() function : usage variations - sort integer/float values
 --FILE--
 <?php
-/* Prototype  : bool arsort ( array &$array [, int $sort_flags] )
- * Description: Sort an array and maintain index association 
-                Elements will be arranged from highest to lowest when this function has completed.
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Testing arsort() by providing different integer/float value arrays for $array argument with following values
- * 1. flag value as defualt
+ * 1. flag value as default
  * 2. SORT_REGULAR - compare items normally
  * 3. SORT_NUMERIC - compare items numerically
 */
@@ -27,7 +21,7 @@ $various_arrays = array(
 
   // mixed value array
   array(1 => .0001, 2 => .0021, 3 => -.01, 4 => -1, 5 => 0, 6 => .09, 7 => 2, 8 => -.9, 9 => 10.6E-2, 10 => -10.6E-2, 11 => 33),
- 
+
   // array values contains minimum and maximum ranges
   array(1 => 2147483647, 2 => 2147483648, 3 => -2147483647, 4 => -2147483648, 5 => -0, 6 => 0, 7 => -2147483649)
 );
@@ -42,20 +36,20 @@ echo "\n-- Testing arsort() by supplying various integer/float arrays --\n";
 foreach ($various_arrays as $array) {
   echo "\n-- Iteration $count --\n";
 
-  echo "- With default sort_flag -\n"; 
-  $temp_array = $array; 
+  echo "- With default sort_flag -\n";
+  $temp_array = $array;
   var_dump(arsort($temp_array) );
   var_dump($temp_array);
 
   // loop through $flag_value array and setting all possible flag values
   foreach($flag_value as $key => $flag){
     echo "- Sort_flag = $key -\n";
-    $temp_array = $array; 
+    $temp_array = $array;
     var_dump(arsort($temp_array, $flag) );
     var_dump($temp_array);
-  }  
+  }
   $count++;
-} 
+}
 
 echo "Done\n";
 ?>

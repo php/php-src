@@ -7,8 +7,8 @@ namespace foo\x;
 
 const x = 2;
 
-class x { 
-	const x = 1;
+class x {
+    const x = 1;
 }
 
 

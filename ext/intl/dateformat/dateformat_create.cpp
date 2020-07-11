@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -36,10 +34,6 @@ extern "C" {
 #include "dateformat_helpers.h"
 #include "zend_exceptions.h"
 
-#if U_ICU_VERSION_MAJOR_NUM < 50
-#define UDAT_PATTERN 0
-#endif
-
 #define INTL_UDATE_FMT_OK(i) \
 	(UDAT_FULL == (i) || UDAT_LONG == (i) ||    \
 	 UDAT_MEDIUM == (i) || UDAT_SHORT == (i) || \
@@ -49,7 +43,7 @@ extern "C" {
 	 UDAT_PATTERN == (i))
 
 /* {{{ */
-static int datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
+static int datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 {
 	zval		*object;
 	const char	*locale_str;
@@ -69,16 +63,13 @@ static int datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 	UChar*      svalue		= NULL;		/* UTF-16 pattern_str */
 	int32_t     slength		= 0;
 	IntlDateFormatter_object* dfo;
-	int zpp_flags = is_constructor ? ZEND_PARSE_PARAMS_THROW : 0;
 
 	intl_error_reset(NULL);
 	object = return_value;
 	/* Parse parameters. */
-	if (zend_parse_parameters_ex(zpp_flags, ZEND_NUM_ARGS(), "sll|zzs",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s!ll|zzs",
 			&locale_str, &locale_len, &date_type, &time_type, &timezone_zv,
 			&calendar_zv, &pattern_str, &pattern_str_len) == FAILURE) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"datefmt_create: "
-				"unable to parse input parameters", 0);
 		return FAILURE;
 	}
 
@@ -188,24 +179,18 @@ error:
 }
 /* }}} */
 
-/* {{{ proto IntlDateFormatter IntlDateFormatter::create(string $locale, long date_type, long time_type[, string $timezone_str, long $calendar, string $pattern] )
- * Create formatter. }}} */
-/* {{{ proto IntlDateFormatter datefmt_create(string $locale, long date_type, long time_type[, string $timezone_str, long $calendar, string $pattern)
- * Create formatter.
- */
+/* {{{ Create formatter. */
 U_CFUNC PHP_FUNCTION( datefmt_create )
 {
     object_init_ex( return_value, IntlDateFormatter_ce_ptr );
-	if (datefmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0) == FAILURE) {
+	if (datefmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU) == FAILURE) {
 		zval_ptr_dtor(return_value);
 		RETURN_NULL();
 	}
 }
 /* }}} */
 
-/* {{{ proto void IntlDateFormatter::__construct(string $locale, long date_type, long time_type[, string $timezone_str, long $calendar, string $pattern])
- * IntlDateFormatter object constructor.
- */
+/* {{{ IntlDateFormatter object constructor. */
 U_CFUNC PHP_METHOD( IntlDateFormatter, __construct )
 {
 	zend_error_handling error_handling;
@@ -213,10 +198,12 @@ U_CFUNC PHP_METHOD( IntlDateFormatter, __construct )
 	zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, &error_handling);
 	/* return_value param is being changed, therefore we will always return
 	 * NULL here */
-	return_value = getThis();
-	if (datefmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1) == FAILURE) {
+	return_value = ZEND_THIS;
+	if (datefmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU) == FAILURE) {
 		if (!EG(exception)) {
-			zend_throw_exception(IntlException_ce_ptr, "Constructor failed", 0);
+			zend_string *err = intl_error_get_message(NULL);
+			zend_throw_exception(IntlException_ce_ptr, ZSTR_VAL(err), intl_error_get_code(NULL));
+			zend_string_release_ex(err, 0);
 		}
 	}
 	zend_restore_error_handling(&error_handling);

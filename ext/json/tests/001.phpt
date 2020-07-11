@@ -1,11 +1,8 @@
 --TEST--
 json_decode() tests
---SKIPIF--
-<?php if (!extension_loaded("json")) print "skip"; ?>
 --FILE--
 <?php
 
-var_dump(json_decode());
 var_dump(json_decode(""));
 var_dump(json_decode("", 1));
 var_dump(json_decode("", 0));
@@ -24,10 +21,7 @@ var_dump(json_decode('{ "": { "": "" }'));
 var_dump(json_decode('{ "": "": "" } }'));
 
 ?>
-===DONE===
 --EXPECTF--
-Warning: json_decode() expects at least 1 parameter, 0 given in %s on line %d
-NULL
 NULL
 NULL
 NULL
@@ -68,4 +62,3 @@ object(stdClass)#%d (1) {
 }
 NULL
 NULL
-===DONE===

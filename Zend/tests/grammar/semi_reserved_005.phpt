@@ -55,6 +55,7 @@ class Obj
     const SWITCH = 'switch';
     const YIELD = 'yield';
     const FUNCTION = 'function';
+    const FN = 'fn';
     const IF = 'if';
     const ENDSWITCH = 'endswitch';
     const FINALLY = 'finally';
@@ -131,6 +132,7 @@ echo Obj::CONTINUE, PHP_EOL;
 echo Obj::SWITCH, PHP_EOL;
 echo Obj::YIELD, PHP_EOL;
 echo Obj::FUNCTION, PHP_EOL;
+echo Obj::FN, PHP_EOL;
 echo Obj::IF, PHP_EOL;
 echo Obj::ENDSWITCH, PHP_EOL;
 echo Obj::FINALLY, PHP_EOL;
@@ -157,8 +159,7 @@ echo Obj::__DIR__, PHP_EOL;
 echo Obj::__NAMESPACE__, PHP_EOL;
 
 echo "\nDone\n";
-
---EXPECTF--
+--EXPECT--
 empty
 callable
 trait
@@ -209,6 +210,7 @@ continue
 switch
 yield
 function
+fn
 if
 endswitch
 finally

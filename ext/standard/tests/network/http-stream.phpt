@@ -20,5 +20,5 @@ $e = $d->load("http://127.0.0.1:12342/news.rss");
 echo "ALIVE\n";
 http_server_kill($pid);
 ?>
---EXPECTF--
+--EXPECT--
 ALIVE

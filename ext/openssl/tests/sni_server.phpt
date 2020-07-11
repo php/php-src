@@ -3,6 +3,8 @@ sni_server
 --SKIPIF--
 <?php
 if (!extension_loaded("openssl")) die("skip openssl not loaded");
+if (!function_exists("proc_open")) die("skip no proc_open");
+?>
 --FILE--
 <?php
 $serverCode = <<<'CODE'
@@ -10,9 +12,9 @@ $serverCode = <<<'CODE'
     $ctx = stream_context_create(['ssl' => [
         'local_cert' => __DIR__ . '/domain1.pem',
         'SNI_server_certs' => [
-            "domain1.com" => __DIR__ . "/sni_server_domain1.pem",
-            "domain2.com" => __DIR__ . "/sni_server_domain2.pem",
-            "domain3.com" => __DIR__ . "/sni_server_domain3.pem"
+            "cs.php.net" => __DIR__ . "/sni_server_cs.pem",
+            "uk.php.net" => __DIR__ . "/sni_server_uk.pem",
+            "us.php.net" => __DIR__ . "/sni_server_us.pem"
         ]
     ]]);
 
@@ -33,19 +35,19 @@ $clientCode = <<<'CODE'
 
     phpt_wait();
 
-    $ctxArr['peer_name'] = 'domain1.com';
+    $ctxArr['peer_name'] = 'cs.php.net';
     $ctx = stream_context_create(['ssl' => $ctxArr]);
     $client = stream_socket_client("tls://127.0.0.1:64321", $errno, $errstr, 1, $flags, $ctx);
     $cert = stream_context_get_options($ctx)['ssl']['peer_certificate'];
     var_dump(openssl_x509_parse($cert)['subject']['CN']);
 
-    $ctxArr['peer_name'] = 'domain2.com';
+    $ctxArr['peer_name'] = 'uk.php.net';
     $ctx = stream_context_create(['ssl' => $ctxArr]);
     $client = @stream_socket_client("tls://127.0.0.1:64321", $errno, $errstr, 1, $flags, $ctx);
     $cert = stream_context_get_options($ctx)['ssl']['peer_certificate'];
     var_dump(openssl_x509_parse($cert)['subject']['CN']);
 
-    $ctxArr['peer_name'] = 'domain3.com';
+    $ctxArr['peer_name'] = 'us.php.net';
     $ctx = stream_context_create(['ssl' => $ctxArr]);
     $client = @stream_socket_client("tls://127.0.0.1:64321", $errno, $errstr, 1, $flags, $ctx);
     $cert = stream_context_get_options($ctx)['ssl']['peer_certificate'];
@@ -54,7 +56,8 @@ CODE;
 
 include 'ServerClientTestCase.inc';
 ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
+?>
 --EXPECTF--
-string(%d) "domain1.com"
-string(%d) "domain2.com"
-string(%d) "domain3.com"
+string(%d) "cs.php.net"
+string(%d) "uk.php.net"
+string(%d) "us.php.net"

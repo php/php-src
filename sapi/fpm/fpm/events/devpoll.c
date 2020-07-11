@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,14 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include "../fpm_config.h"
 #include "../fpm_events.h"
 #include "../fpm.h"
 #include "../zlog.h"
 
-#if HAVE_DEVPOLL
+#ifdef HAVE_DEVPOLL
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -57,7 +53,7 @@ static int npollfds = 0;
 
 struct fpm_event_module_s *fpm_event_devpoll_module() /* {{{ */
 {
-#if HAVE_DEVPOLL
+#ifdef HAVE_DEVPOLL
 	return &devpoll_module;
 #else
 	return NULL;
@@ -65,7 +61,7 @@ struct fpm_event_module_s *fpm_event_devpoll_module() /* {{{ */
 }
 /* }}} */
 
-#if HAVE_DEVPOLL
+#ifdef HAVE_DEVPOLL
 
 /*
  * Init module
@@ -168,7 +164,7 @@ static int fpm_event_devpoll_wait(struct fpm_event_queue_s *queue, unsigned long
 		}
 	}
 
-	/* iterate throught triggered events */
+	/* iterate through triggered events */
 	for (i = 0; i < ret; i++) {
 
 		/* find the corresponding event */
@@ -202,7 +198,7 @@ static int fpm_event_devpoll_add(struct fpm_event_s *ev) /* {{{ */
 {
 	struct pollfd pollfd;
 
-	/* fill pollfd with event informations */
+	/* fill pollfd with event information */
 	pollfd.fd = ev->fd;
 	pollfd.events = POLLIN;
 	pollfd.revents = 0;
@@ -227,7 +223,7 @@ static int fpm_event_devpoll_remove(struct fpm_event_s *ev) /* {{{ */
 {
 	struct pollfd pollfd;
 
-	/* fill pollfd with the same informations as fpm_event_devpoll_add */
+	/* fill pollfd with the same information as fpm_event_devpoll_add */
 	pollfd.fd = ev->fd;
 	pollfd.events = POLLIN | POLLREMOVE;
 	pollfd.revents = 0;

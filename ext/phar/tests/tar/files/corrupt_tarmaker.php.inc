@@ -32,7 +32,7 @@ class corrupt_tarmaker
 
     /**
      * save a file inside this package
-     * 
+     *
      * This code is modified from Vincent Lascaux's File_Archive
      * package, which is licensed under the LGPL license.
      * @param string relative path within the package
@@ -112,7 +112,7 @@ class corrupt_tarmaker
         $checksum = 256; // 8 * ord(' ');
         $checksum += array_reduce($checkheader, '_pear2tarchecksum');
 
-	if ($corrupt === 'checksum') $checksum++;
+    if ($corrupt === 'checksum') $checksum++;
         $checksum = pack('a8', sprintf('%6s ', decoct($checksum)));
 
         fwrite($this->tmp, $block . $checksum . $blockend, 512);
@@ -152,7 +152,7 @@ class corrupt_tarmaker
 
     /**
      * Create an internal directory, creating parent directories as needed
-     * 
+     *
      * @param string $dir
      */
     function mkdir($dir)

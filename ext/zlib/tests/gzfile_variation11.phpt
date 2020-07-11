@@ -9,7 +9,7 @@ if (PHP_INT_SIZE != 8) die('skip 64-bit only');
 <?php
 
 
-$filename = dirname(__FILE__)."/004.txt.gz";
+$filename = __DIR__."/004.txt.gz";
 
 
 $variation = array(
@@ -25,7 +25,6 @@ foreach ( $variation as $var ) {
   var_dump(gzfile( $filename, $var  ) );
 }
 ?>
-===DONE===
 --EXPECT--
 array(6) {
   [0]=>
@@ -127,4 +126,3 @@ array(6) {
   string(39) "and I know that it descends down on me
 "
 }
-===DONE===

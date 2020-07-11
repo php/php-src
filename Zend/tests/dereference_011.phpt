@@ -6,11 +6,11 @@ Testing array dereference with chaining
 error_reporting(E_ALL);
 
 class foo {
-	public $arr;
-	
-	public function &a() {
-		return $this->arr;
-	}
+    public $arr;
+
+    public function &a() {
+        return $this->arr;
+    }
 }
 
 $foo = new foo;

@@ -7,7 +7,7 @@ open_basedir=.
 require_once "open_basedir.inc";
 $initdir = getcwd();
 test_open_basedir_before("opendir");
-test_open_basedir_error("opendir");     
+test_open_basedir_error("opendir");
 
 var_dump(opendir($initdir."/test/ok/"));
 var_dump(opendir($initdir."/test/ok"));
@@ -29,45 +29,44 @@ bool(true)
 
 Warning: opendir(): open_basedir restriction in effect. File(../bad) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: opendir(../bad): failed to open dir: %s in %s on line %d
+Warning: opendir(../bad): Failed to open directory: %s in %s on line %d
 bool(false)
 
 Warning: opendir(): open_basedir restriction in effect. File(../bad/bad.txt) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: opendir(../bad/bad.txt): failed to open dir: %s in %s on line %d
+Warning: opendir(../bad/bad.txt): Failed to open directory: %s in %s on line %d
 bool(false)
 
 Warning: opendir(): open_basedir restriction in effect. File(..) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: opendir(..): failed to open dir: %s in %s on line %d
+Warning: opendir(..): Failed to open directory: %s in %s on line %d
 bool(false)
 
 Warning: opendir(): open_basedir restriction in effect. File(../) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: opendir(../): failed to open dir: %s in %s on line %d
+Warning: opendir(../): Failed to open directory: %s in %s on line %d
 bool(false)
 
 Warning: opendir(): open_basedir restriction in effect. File(/) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: opendir(/): failed to open dir: %s in %s on line %d
+Warning: opendir(/): Failed to open directory: %s in %s on line %d
 bool(false)
 
 Warning: opendir(): open_basedir restriction in effect. File(../bad/.) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: opendir(../bad/.): failed to open dir: %s in %s on line %d
+Warning: opendir(../bad/.): Failed to open directory: %s in %s on line %d
 bool(false)
 
 Warning: opendir(): open_basedir restriction in effect. File(%s/test/bad/bad.txt) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: opendir(%s/test/bad/bad.txt): failed to open dir: %s in %s on line %d
+Warning: opendir(%s/test/bad/bad.txt): Failed to open directory: %s in %s on line %d
 bool(false)
 
 Warning: opendir(): open_basedir restriction in effect. File(%s/test/bad/../bad/bad.txt) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: opendir(%s/test/bad/../bad/bad.txt): failed to open dir: %s in %s on line %d
+Warning: opendir(%s/test/bad/../bad/bad.txt): Failed to open directory: %s in %s on line %d
 bool(false)
 resource(%d) of type (stream)
 resource(%d) of type (stream)
 resource(%d) of type (stream)
 *** Finished testing open_basedir configuration [opendir] ***
-

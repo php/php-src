@@ -18,8 +18,8 @@ Bug #69316: Use-after-free in php_curl related to CURLOPT_FILE/_INFILE/_WRITEHEA
 
   include 'server.inc';
   $host = curl_cli_server_start();
-  $temp_file = dirname(__FILE__) . '/body.tmp';
-  $url = "{$host}/get.php?test=getpost";
+  $temp_file = __DIR__ . '/body.tmp';
+  $url = "{$host}/get.inc?test=getpost";
   $ch = curl_init();
   $f_file = fopen($temp_file, "w") or die("failed to open file\n");
   curl_setopt($ch, CURLOPT_BUFFERSIZE, 10);
@@ -29,10 +29,9 @@ Bug #69316: Use-after-free in php_curl related to CURLOPT_FILE/_INFILE/_WRITEHEA
   curl_exec($ch);
   curl_close($ch);
 ?>
-===DONE===
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) . '/body.tmp');
+unlink(__DIR__ . '/body.tmp');
 ?>
 --EXPECTF--
 Warning: curl_exec(): CURLOPT_FILE resource has gone away, resetting to default in %s on line %d
@@ -42,4 +41,3 @@ array(1) {
 }
 array(0) {
 }
-===DONE===

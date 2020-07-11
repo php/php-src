@@ -14,15 +14,22 @@ $mysqli = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 $result = $mysqli->query('select 1');
 
 $result->close();
-echo $result->num_rows;
+try {
+    $result->num_rows;
+} catch (Error $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 $mysqli->close();
-echo $result->num_rows;
+try {
+    $result->num_rows;
+} catch (Error $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 echo "Done\n";
 ?>
---EXPECTF--
-Warning: main(): Couldn't fetch mysqli_result in %s on line %d
-
-Warning: main(): Couldn't fetch mysqli_result in %s on line %d
+--EXPECT--
+mysqli_result object is already closed
+mysqli_result object is already closed
 Done

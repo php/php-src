@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +13,6 @@
    | Author: Clayton Collie <clcollie@mindspring.com>                     |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifndef  SCANF_H
 #define  SCANF_H
@@ -32,10 +28,7 @@
 									/* can be caused by bad parameters or format*/
 									/* string.									*/
 #define SCAN_ERROR_INVALID_FORMAT		(SCAN_ERROR_EOF - 1)
-#define SCAN_ERROR_VAR_PASSED_BYVAL		(SCAN_ERROR_INVALID_FORMAT - 1)
-#define SCAN_ERROR_WRONG_PARAM_COUNT	(SCAN_ERROR_VAR_PASSED_BYVAL - 1)
-#define SCAN_ERROR_INTERNAL             (SCAN_ERROR_WRONG_PARAM_COUNT - 1)
-
+#define SCAN_ERROR_WRONG_PARAM_COUNT	(SCAN_ERROR_INVALID_FORMAT - 1)
 
 /*
  * The following are here solely for the benefit of the scanf type functions

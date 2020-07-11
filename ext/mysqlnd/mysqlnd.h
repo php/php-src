@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2016 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -21,8 +19,8 @@
 #ifndef MYSQLND_H
 #define MYSQLND_H
 
-#define PHP_MYSQLND_VERSION "mysqlnd 5.0.12-dev - 20150407 - $Id$"
-#define MYSQLND_VERSION_ID 50012
+#define PHP_MYSQLND_VERSION "mysqlnd " PHP_VERSION
+#define MYSQLND_VERSION_ID PHP_VERSION_ID
 
 #define MYSQLND_PLUGIN_API_VERSION 2
 
@@ -38,7 +36,7 @@
   on production systems, if of course measured performance degradation is not
   minimal.
 */
-#if A0 && PHP_DEBUG
+#if defined(A0) && PHP_DEBUG
 #define MYSQLND_DO_WIRE_CHECK_BEFORE_COMMAND 1
 #endif
 
@@ -46,10 +44,6 @@
 #define MYSQLND_DBG_ENABLED 1
 #else
 #define MYSQLND_DBG_ENABLED 0
-#endif
-
-#if defined(MYSQLND_COMPRESSION_WANTED) && defined(HAVE_ZLIB)
-#define MYSQLND_COMPRESSION_ENABLED 1
 #endif
 
 #ifdef ZTS
@@ -66,9 +60,9 @@
 PHPAPI void mysqlnd_library_init(void);
 PHPAPI void mysqlnd_library_end(void);
 
-PHPAPI unsigned int mysqlnd_plugin_register();
+PHPAPI unsigned int mysqlnd_plugin_register(void);
 PHPAPI unsigned int mysqlnd_plugin_register_ex(struct st_mysqlnd_plugin_header * plugin);
-PHPAPI unsigned int mysqlnd_plugin_count();
+PHPAPI unsigned int mysqlnd_plugin_count(void);
 PHPAPI void * mysqlnd_plugin_find(const char * const name);
 
 PHPAPI void mysqlnd_plugin_apply_with_argument(apply_func_arg_t apply_func, void * argument);
@@ -78,7 +72,7 @@ PHPAPI void mysqlnd_plugin_apply_with_argument(apply_func_arg_t apply_func, void
 PHPAPI void mysqlnd_minfo_print_hash(zval *values);
 #define mysqlnd_thread_safe()	TRUE
 
-PHPAPI const MYSQLND_CHARSET * mysqlnd_find_charset_nr(unsigned int charsetno);
+PHPAPI const MYSQLND_CHARSET * mysqlnd_find_charset_nr(const unsigned int charsetno);
 PHPAPI const MYSQLND_CHARSET * mysqlnd_find_charset_name(const char * const charsetname);
 
 
@@ -161,8 +155,8 @@ PHPAPI enum_func_status mysqlnd_poll(MYSQLND **r_array, MYSQLND **e_array, MYSQL
 #define mysqlnd_fetch_fields(result)			(result)->m.fetch_fields((result))
 
 /* mysqlnd metadata */
-PHPAPI const char *	mysqlnd_get_client_info();
-PHPAPI unsigned int	mysqlnd_get_client_version();
+PHPAPI const char *	mysqlnd_get_client_info(void);
+PHPAPI unsigned long mysqlnd_get_client_version(void);
 
 #define mysqlnd_ssl_set(conn, key, cert, ca, capath, cipher) ((conn)->data)->m->ssl_set((conn)->data, (key), (cert), (ca), (capath), (cipher))
 
@@ -188,7 +182,7 @@ PHPAPI void mysqlnd_free_result_bind_dtor(MYSQLND_RESULT_BIND * result_bind);
 PHPAPI const char * mysqlnd_field_type_name(const enum mysqlnd_field_types field_type);
 
 /* LOAD DATA LOCAL */
-void mysqlnd_local_infile_default(MYSQLND_CONN_DATA * conn);
+PHPAPI void mysqlnd_local_infile_default(MYSQLND_CONN_DATA * conn);
 
 /* Simple commands */
 #define mysqlnd_autocommit(conn, mode)		((conn)->data)->m->set_autocommit((conn)->data, (mode))
@@ -338,13 +332,3 @@ ZEND_TSRMLS_CACHE_EXTERN()
 PHPAPI void mysqlnd_minfo_print_hash(zval *values);
 
 #endif	/* MYSQLND_H */
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

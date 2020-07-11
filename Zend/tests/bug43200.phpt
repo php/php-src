@@ -4,22 +4,22 @@ Bug #43200 (Interface implementation / inheritance not possible in abstract clas
 <?php
 
 interface a {
-	function foo();
-	function bar();
+    function foo();
+    function bar();
 }
 interface b {
-	function foo();
+    function foo();
 }
 
 abstract class c {
-	function bar() { }
+    function bar() { }
 }
 
 class x extends c implements a, b {
-	function foo() { }
+    function foo() { }
 }
 
-ReflectionClass::export('x');
+echo new ReflectionClass('x');
 
 ?>
 --EXPECTF--
@@ -48,4 +48,3 @@ Class [ <user> class x extends c implements a, b ] {
     }
   }
 }
-

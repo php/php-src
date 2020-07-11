@@ -8,5 +8,5 @@ bcmath.scale=0
 <?php
 echo bcpow("2", "-4");
 ?>
---EXPECTF--
+--EXPECT--
 0

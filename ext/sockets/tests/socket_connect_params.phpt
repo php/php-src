@@ -11,23 +11,28 @@ fa@php.net
 ?>
 --FILE--
 <?php
-    $rand = rand(1,999); 
-    $s_c = socket_create_listen(31330+$rand);
-    // wrong parameter count
-    $s_w = socket_connect();
+
+$s_c = socket_create_listen(0);
+socket_getsockname($s_c, $addr, $port);
+
+// wrong parameter count
+try {
     $s_w = socket_connect($s_c);
+} catch (\ArgumentCountError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
     $s_w = socket_connect($s_c, '0.0.0.0');
-    $s_w = socket_connect($s_c, '0.0.0.0', 31330+$rand);
-    
-    socket_close($s_c);
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+$s_w = socket_connect($s_c, '0.0.0.0', $port);
+
+socket_close($s_c);
 
 ?>
 --EXPECTF--
+socket_connect() expects at least 2 parameters, 1 given
+socket_connect(): Argument #3 ($port) must be specified for the AF_INET socket type
 
-Warning: socket_connect() expects at least 2 parameters, 0 given in %s on line %i
-
-Warning: socket_connect() expects at least 2 parameters, 1 given in %s on line %i
-
-Warning: socket_connect(): Socket of type AF_INET requires 3 arguments in %s on line %i
-
-Warning: socket_connect(): unable to connect [%i]: %a in %s on line %i
+Warning: socket_connect(): unable to connect [%i]: %a in %s on line %d

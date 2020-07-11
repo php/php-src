@@ -1,4 +1,3 @@
-// $Id$
 // vim:ft=javascript
 
 ARG_ENABLE("intl", "Enable internationalization support", "no");
@@ -91,7 +90,6 @@ if (PHP_INTL != "no") {
 					spoofchecker_create.c \
 					spoofchecker_main.c",
 					"intl");
-					AC_DEFINE("HAVE_INTL", 1, "Internationalization support enabled");
 		}
 
 		ADD_SOURCES(configure_module_dirname + "/transliterator", "\
@@ -99,18 +97,18 @@ if (PHP_INTL != "no") {
 				transliterator_class.c \
 				transliterator_methods.c",
 				"intl");
-		
+
 		ADD_SOURCES(configure_module_dirname + "/timezone", "\
 				timezone_class.cpp \
 				timezone_methods.cpp",
 				"intl");
-				
+
 		ADD_SOURCES(configure_module_dirname + "/calendar", "\
 				calendar_methods.cpp \
 				gregoriancalendar_methods.cpp \
 				calendar_class.cpp",
 				"intl");
-				
+
 		ADD_SOURCES(configure_module_dirname + "/breakiterator", "\
 				breakiterator_class.cpp \
 				breakiterator_methods.cpp \
@@ -119,7 +117,7 @@ if (PHP_INTL != "no") {
 				codepointiterator_internal.cpp \
 				codepointiterator_methods.cpp ",
 				"intl");
-		
+
 		ADD_FLAG("LIBS_INTL", "icudt.lib icuin.lib icuio.lib");
 
 		/* Compat for ICU before 58.1.*/
@@ -130,7 +128,7 @@ if (PHP_INTL != "no") {
 			ADD_FLAG("LIBS_INTL", "iculx.lib");
 		}
 
-		ADD_FLAG("CFLAGS_INTL", "/EHsc");
+		ADD_FLAG("CFLAGS_INTL", "/EHsc /DUNISTR_FROM_CHAR_EXPLICIT=explicit /DUNISTR_FROM_STRING_EXPLICIT=explicit /DU_NO_DEFAULT_INCLUDE_UTF_HEADERS=1 /DU_HIDE_OBSOLETE_UTF_OLD_H=1");
 		AC_DEFINE("HAVE_INTL", 1, "Internationalization support enabled");
 	} else {
 		WARNING("intl not enabled; libraries and/or headers not found");

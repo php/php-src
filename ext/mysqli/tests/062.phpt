@@ -7,24 +7,24 @@ require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php
-	require_once("connect.inc");
+    require_once("connect.inc");
 
-	$mysql = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
+    $mysql = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
 
-	$mysql->real_query("SELECT 'foo' FROM DUAL");
+    $mysql->real_query("SELECT 'foo' FROM DUAL");
 
-	$myresult = new mysqli_result($mysql);
+    $myresult = new mysqli_result($mysql);
 
-	$row = $myresult->fetch_row();
-	$myresult->close();
-	$mysql->close();
+    $row = $myresult->fetch_row();
+    $myresult->close();
+    $mysql->close();
 
-	var_dump($row);
-	print "done!";
+    var_dump($row);
+    print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 array(1) {
   [0]=>
-  %unicode|string%(3) "foo"
+  string(3) "foo"
 }
 done!

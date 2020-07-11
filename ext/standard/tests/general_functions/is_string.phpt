@@ -2,12 +2,8 @@
 Test is_string() function
 --FILE--
 <?php
-/* Prototype: bool is_string ( mixed $var );
- * Description: Finds whether the given variable is a string
- */
-
 echo "*** Testing is_string() with valid string values ***\n";
-// different valid strings 
+// different valid strings
 
 /* string created using Heredoc (<<<) */
 $heredoc_string = <<<EOT
@@ -17,7 +13,7 @@ EOT;
 /* heredoc string with only numerics */
 $heredoc_numeric_string = <<<EOT
 123456 3993
-4849 string 
+4849 string
 EOT;
 /* null heardoc string */
 $heredoc_empty_string = <<<EOT
@@ -50,7 +46,7 @@ $strings = array(
   $heredoc_empty_string,
   $heredoc_null_string
 );
-/* loop to check that is_string() recognizes different 
+/* loop to check that is_string() recognizes different
    strings, expected output bool(true) */
 $loop_counter = 1;
 foreach ($strings as $string ) {
@@ -62,7 +58,7 @@ echo "\n*** Testing is_string() on non string values ***\n";
 
 // get a resource type variable
 $fp = fopen (__FILE__, "r");
-$dfp = opendir ( dirname(__FILE__) );
+$dfp = opendir ( __DIR__ );
 
 // unset vars
 $unset_string1 = "string";
@@ -70,10 +66,10 @@ $unset_string2 = 'string';
 $unset_heredoc = <<<EOT
 this is heredoc string
 EOT;
-// unset the vars 
+// unset the vars
 unset($unset_string1, $unset_string2, $unset_heredoc);
 
-// other types in a array 
+// other types in a array
 $not_strings = array (
   /* integers */
   0,
@@ -130,9 +126,9 @@ $not_strings = array (
   @$unset_string1,
   @$unset_string2,
   @$unset_heredoc,
-  @$undefined_var 
+  @$undefined_var
 );
-/* loop through the $not_strings to see working of 
+/* loop through the $not_strings to see working of
    is_string() on non string types, expected output bool(false) */
 $loop_counter = 1;
 foreach ($not_strings as $type ) {
@@ -140,13 +136,6 @@ foreach ($not_strings as $type ) {
   var_dump( is_string($type) );
 }
 
-echo "\n*** Testing error conditions ***\n";
-//Zero argument
-var_dump( is_string() );
-
-//arguments more than expected 
-var_dump( is_string("string", "test") );
- 
 echo "Done\n";
 
 // close the resources used
@@ -154,7 +143,7 @@ fclose($fp);
 closedir($dfp);
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing is_string() with valid string values ***
 -- Iteration 1 --
 bool(true)
@@ -291,13 +280,5 @@ bool(false)
 -- Iteration 44 --
 bool(false)
 -- Iteration 45 --
-bool(false)
-
-*** Testing error conditions ***
-
-Warning: is_string() expects exactly 1 parameter, 0 given in %s on line %d
-bool(false)
-
-Warning: is_string() expects exactly 1 parameter, 2 given in %s on line %d
 bool(false)
 Done

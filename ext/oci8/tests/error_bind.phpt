@@ -5,7 +5,7 @@ Test some oci_bind_by_name error conditions
 --FILE--
 <?php
 
-require(dirname(__FILE__).'/connect.inc');
+require(__DIR__.'/connect.inc');
 
 $drop = "drop table bind_test";
 $statement = oci_parse($c, $drop);
@@ -23,7 +23,7 @@ $stmt = oci_parse($c, "insert into bind_test values (:name)");
 oci_bind_by_name($stmt, ":name", $name, 10, SQLT_CHR);
 var_dump(oci_execute($stmt));
 
-echo "Test 1 - Assign a resource to the bind variable and execute \n";
+echo "Test 1 - Assign a resource to the bind variable and execute\n";
 $name=$c;
 var_dump(oci_execute($stmt));
 
@@ -50,7 +50,7 @@ echo "Done\n";
 --EXPECTF--
 Insert value
 bool(true)
-Test 1 - Assign a resource to the bind variable and execute 
+Test 1 - Assign a resource to the bind variable and execute
 
 Warning: oci_execute(): Invalid variable used for bind in %s on line %d
 bool(false)

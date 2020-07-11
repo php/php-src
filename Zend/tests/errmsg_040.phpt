@@ -4,12 +4,12 @@ errmsg: arrays are not allowed in class constants
 <?php
 
 class test {
-	const TEST = array(1,2,3);
+    const TEST = array(1,2,3);
 }
 var_dump(test::TEST);
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--
 array(3) {
   [0]=>
   int(1)

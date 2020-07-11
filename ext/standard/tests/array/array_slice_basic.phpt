@@ -1,12 +1,7 @@
 --TEST--
-Test array_slice() function : basic functionality 
+Test array_slice() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : array array_slice(array $input, int $offset [, int $length [, bool $preserve_keys]])
- * Description: Returns elements specified by offset and length 
- * Source code: ext/standard/array.c
- */
-
 /*
  * Test basic functionality of array_slice()
  */
@@ -29,8 +24,7 @@ var_dump( array_slice($input, $offset) );
 
 echo "Done";
 ?>
-
---EXPECTF--
+--EXPECT--
 *** Testing array_slice() : basic functionality ***
 
 -- All arguments --

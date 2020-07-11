@@ -1,7 +1,5 @@
 --TEST--
-ZE2 A private member is 
---SKIPIF--
-<?php if (version_compare(zend_version(), '2.0.0-dev', '<')) die('skip ZendEngine 2 needed'); ?>
+ZE2 A private member is
 --FILE--
 <?php
 
@@ -11,15 +9,15 @@ class base
 
   function __construct()
   {
-  	echo __METHOD__ . "(begin)\n";
+    echo __METHOD__ . "(begin)\n";
     $this->member = 'base::member';
     $this->test();
-  	echo __METHOD__ . "(end)\n";
+    echo __METHOD__ . "(end)\n";
   }
 
   function test()
   {
-  	echo __METHOD__ . "\n";
+    echo __METHOD__ . "\n";
     print_r($this);
   }
 }
@@ -30,18 +28,18 @@ class derived extends base
 
   function __construct()
   {
-  	echo __METHOD__ . "(begin)\n";
-  	parent::__construct();
-  	parent::test();
-  	$this->test();
+    echo __METHOD__ . "(begin)\n";
+    parent::__construct();
+    parent::test();
+    $this->test();
     $this->member = 'derived::member';
-  	echo __METHOD__ . "(end)\n";
+    echo __METHOD__ . "(end)\n";
   }
 
   function test()
   {
-  	parent::test();
-  	echo __METHOD__ . "\n";
+    parent::test();
+    echo __METHOD__ . "\n";
     print_r($this);
   }
 }
@@ -53,7 +51,7 @@ unset($t);
 echo "Done\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 derived::__construct(begin)
 base::__construct(begin)
 base::test

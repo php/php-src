@@ -4,12 +4,6 @@ Test parse_ini_file() function : variation: handling different boolean values
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
-/* Prototype  : array parse_ini_file(string filename [, bool process_sections])
- * Description: Parse configuration file 
- * Source code: ext/standard/basic_functions.c
- * Alias to functions: 
- */
-
 echo "*** Testing parse_ini_file() : variation ***\n";
 $output_file = __FILE__.".ini";
 $iniFile = <<<FILE
@@ -47,7 +41,6 @@ $a = parse_ini_file($output_file, true);
 var_dump($a);
 unlink($output_file);
 ?>
-===DONE===
 --EXPECT--
 *** Testing parse_ini_file() : variation ***
 array(8) {
@@ -108,4 +101,3 @@ array(8) {
     string(0) ""
   }
 }
-===DONE===

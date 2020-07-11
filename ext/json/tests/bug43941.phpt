@@ -1,7 +1,5 @@
 --TEST--
 Bug #43941 (json_encode() invalid UTF-8)
---SKIPIF--
-<?php if (!extension_loaded("json")) print "skip"; ?>
 --FILE--
 <?php
 
@@ -12,7 +10,7 @@ var_dump(json_encode(array("ab\xE0", "ab\xE0c", "abc"), JSON_PARTIAL_OUTPUT_ON_E
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 string(5) ""abc""
 bool(false)
 string(4) "null"

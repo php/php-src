@@ -1,9 +1,9 @@
 --TEST--
 bug#53872 (internal corruption of phar)
 --SKIPIF--
-<?php 
-if (!extension_loaded("phar")) die("skip"); 
-if (!extension_loaded("zlib")) die("skip Test needs ext/zlib"); 
+<?php
+if (!extension_loaded("phar")) die("skip");
+if (!extension_loaded("zlib")) die("skip Test needs ext/zlib");
 ?>
 --INI--
 phar.readonly=0
@@ -25,4 +25,3 @@ unlink("bug53872-phar.phar");
 --EXPECT--
 content of first.txt
 content of third.txt
-

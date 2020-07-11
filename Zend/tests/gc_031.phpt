@@ -7,5 +7,5 @@ zend.enable_gc=0
 gc_collect_cycles();
 echo "DONE\n";
 ?>
---EXPECTF--
+--EXPECT--
 DONE

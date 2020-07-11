@@ -2,11 +2,6 @@
 Test natcasesort() function : usage variations - octal values
 --FILE--
 <?php
-/* Prototype  : bool natcasesort(array &$array_arg)
- * Description: Sort an array using case-insensitive natural sort
- * Source code: ext/standard/array.c
- */
-
 /*
  * Pass an array of octal values to test how natcasesort() re-orders it
  */
@@ -20,7 +15,7 @@ var_dump($unsorted_oct_array);
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing natcasesort() : usage variation ***
 bool(true)
 array(9) {

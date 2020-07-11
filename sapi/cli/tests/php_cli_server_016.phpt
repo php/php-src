@@ -5,7 +5,7 @@ this is an indirect test for bug 60591, since mem leak is reproted in the server
 and require php compiled with --enable-debug
 --SKIPIF--
 <?php
-include "skipif.inc"; 
+include "skipif.inc";
 ?>
 --FILE--
 <?php
@@ -19,13 +19,8 @@ else {
 PHP
 );
 
-list($host, $port) = explode(':', PHP_CLI_SERVER_ADDRESS);
-$port = intval($port)?:80;
-
-$fp = fsockopen($host, $port, $errno, $errstr, 0.5);
-if (!$fp) {
-  die("connect failed");
-}
+$host = PHP_CLI_SERVER_HOSTNAME;
+$fp = php_cli_server_connect();
 
 if(fwrite($fp, <<<HEADER
 POST /no-exists.jpg HTTP/1.1
@@ -34,13 +29,13 @@ Host: {$host}
 
 HEADER
 )) {
-	while (!feof($fp)) {
-		echo fgets($fp);
+    while (!feof($fp)) {
+        echo fgets($fp);
         break;
-	}
+    }
 }
 
 fclose($fp);
 ?>
---EXPECTF--
+--EXPECT--
 HTTP/1.1 404 Not Found

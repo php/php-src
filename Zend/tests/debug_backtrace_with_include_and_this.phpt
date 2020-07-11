@@ -1,5 +1,5 @@
 --TEST--
-debug_backtrace segmentation fault with include and error handler 
+debug_backtrace segmentation fault with include and error handler
 --FILE--
 <?php
 class CLWrapper {
@@ -28,7 +28,7 @@ try {
   echo $e."\n";
 }
 --EXPECTF--
-ERR#2: include(class://non.existent.Class): failed to open stream: "CLWrapper::stream_open" call failed @ include
+ERR#2: include(class://non.existent.Class): Failed to open stream: "CLWrapper::stream_open" call failed @ include
 ERR#2: include(): Failed opening 'class://non.existent.Class' for inclusion (include_path='%s') @ include
 
 Fatal error: Uncaught Exception: Failed loading class://non.existent.Class in %s
@@ -36,4 +36,3 @@ Stack trace:
 #0 %s(%d): CL->load('class://non.exi...')
 #1 {main}
   thrown in %s on line %d
-

@@ -1,10 +1,8 @@
 --TEST--
 JSON (http://www.crockford.com/JSON/JSON_checker/test/pass3.json)
---SKIPIF--
-<?php if (!extension_loaded("json")) print "skip"; ?>
 --FILE--
 <?php
-    
+
 $test = '
 {
     "JSON Test Pattern pass3": {
@@ -14,7 +12,7 @@ $test = '
 }
 ';
 
-echo 'Testing: ' . $test . "\n";
+echo 'Testing:' . $test . "\n";
 echo "DECODE: AS OBJECT\n";
 $obj = json_decode($test);
 var_dump($obj);
@@ -38,7 +36,7 @@ var_dump($arr);
 
 ?>
 --EXPECTF--
-Testing: 
+Testing:
 {
     "JSON Test Pattern pass3": {
         "The outermost value": "must be an object or array.",

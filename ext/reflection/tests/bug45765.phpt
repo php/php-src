@@ -4,26 +4,26 @@ Fixed bug #45765 (ReflectionObject with default parameters of self::xxx cause an
 <?php
 
 class foo2 {
-	const BAR = 'foobar';
+    const BAR = 'foobar';
 }
 
 class foo extends foo2 {
-	const BAR = "foo's bar";
-	
-	function test($a = self::BAR) {
-	}
-	
-	function test2($a = parent::BAR) {
-	}
+    const BAR = "foo's bar";
 
-	function test3($a = foo::BAR) {
-	}
-	
-	function test4($a = foo2::BAR) {
-	}
+    function test($a = self::BAR) {
+    }
+
+    function test2($a = parent::BAR) {
+    }
+
+    function test3($a = foo::BAR) {
+    }
+
+    function test4($a = foo2::BAR) {
+    }
 }
 
-ReflectionObject::export(new foo);
+echo new ReflectionObject(new foo);
 
 ?>
 --EXPECTF--

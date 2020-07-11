@@ -4,10 +4,10 @@ Bug #46813: class_exists doesn`t work with fully qualified namespace
 <?php
 namespace test;
 {
-	class inner
-	{
-		
-	}
+    class inner
+    {
+
+    }
 }
 
 $inner = new \test\inner();

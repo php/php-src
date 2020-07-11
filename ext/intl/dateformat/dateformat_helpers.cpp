@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -28,6 +26,8 @@ extern "C" {
 #include "../calendar/calendar_class.h"
 }
 
+using icu::GregorianCalendar;
+
 int datefmt_process_calendar_arg(zval* calendar_zv,
 								 Locale const& locale,
 								 const char *func_name,
@@ -51,7 +51,7 @@ int datefmt_process_calendar_arg(zval* calendar_zv,
 
 		zend_long v = Z_LVAL_P(calendar_zv);
 		if (v != (zend_long)UCAL_TRADITIONAL && v != (zend_long)UCAL_GREGORIAN) {
-			spprintf(&msg, 0, "%s: invalid value for calendar type; it must be "
+			spprintf(&msg, 0, "%s: Invalid value for calendar type; it must be "
 					"one of IntlDateFormatter::TRADITIONAL (locale's default "
 					"calendar) or IntlDateFormatter::GREGORIAN. "
 					"Alternatively, it can be an IntlCalendar object",
@@ -69,8 +69,7 @@ int datefmt_process_calendar_arg(zval* calendar_zv,
 		cal_int_type = Z_LVAL_P(calendar_zv);
 
 	} else if (Z_TYPE_P(calendar_zv) == IS_OBJECT &&
-			instanceof_function_ex(Z_OBJCE_P(calendar_zv),
-			Calendar_ce_ptr, 0)) {
+			instanceof_function(Z_OBJCE_P(calendar_zv), Calendar_ce_ptr)) {
 
 		cal = calendar_fetch_native_calendar(calendar_zv);
 		if (cal == NULL) {

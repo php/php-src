@@ -3,10 +3,10 @@ Bug #68370 "unset($this)" can make the program crash
 --FILE--
 <?php
 class C {
-	public function test() {
-		unset($this);
-		return get_defined_vars();
-	}
+    public function test() {
+        unset($this);
+        return get_defined_vars();
+    }
 }
 $c = new C();
 $x = $c->test();

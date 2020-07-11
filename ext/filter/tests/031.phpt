@@ -19,8 +19,8 @@ $floats = array(
 );
 
 foreach ($floats as $float) {
-	$out = filter_var($float, FILTER_VALIDATE_FLOAT);
-	var_dump($out);
+    $out = filter_var($float, FILTER_VALIDATE_FLOAT);
+    var_dump($out);
 }
 
 $floats = array(
@@ -33,8 +33,8 @@ $floats = array(
 
 echo "\ncustom decimal:\n";
 foreach ($floats as $float => $dec) {
-	$out = filter_var($float, FILTER_VALIDATE_FLOAT, array("options"=>array('decimal' => $dec)));
-	var_dump($out);
+    $out = filter_var($float, FILTER_VALIDATE_FLOAT, array("options"=>array('decimal' => $dec)));
+    var_dump($out);
 }
 
 ?>
@@ -53,6 +53,6 @@ bool(false)
 float(1.234)
 float(1.234)
 
-Warning: filter_var(): decimal separator must be one char in %s on line %d
+Warning: filter_var(): Decimal separator must be one char in %s on line %d
 bool(false)
 bool(false)

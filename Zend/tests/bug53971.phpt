@@ -7,5 +7,3 @@ var_dump(isset($s[0][0]));
 ?>
 --EXPECT--
 bool(false)
-
-

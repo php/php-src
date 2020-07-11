@@ -4,22 +4,16 @@ Test parse_ini_file() function : variation - various absolute and relative paths
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
-/* Prototype  : array parse_ini_file(string filename [, bool process_sections])
- * Description: Parse configuration file 
- * Source code: ext/standard/basic_functions.c
- * Alias to functions: 
- */
-
 echo "*** Testing parse_ini_file() : variation ***\n";
 $mainDir = "parseIniFileVar6.dir";
 $subDir = "parseIniFileVar6Sub";
-$absMainDir = dirname(__FILE__)."/".$mainDir;
+$absMainDir = __DIR__."/".$mainDir;
 mkdir($absMainDir);
 $absSubDir = $absMainDir."/".$subDir;
 mkdir($absSubDir);
 
 $old_dir_path = getcwd();
-chdir(dirname(__FILE__));
+chdir(__DIR__);
 
 $allDirs = array(
   // absolute paths
@@ -29,14 +23,14 @@ $allDirs = array(
   "$absSubDir/../../".$mainDir."/./".$subDir,
   "$absSubDir/..///".$subDir."//..//../".$subDir,
   "$absSubDir/BADDIR",
-  
+
   // relative paths
   $mainDir."/".$subDir,
-  $mainDir."//".$subDir, 
-   $mainDir."///".$subDir, 
+  $mainDir."//".$subDir,
+   $mainDir."///".$subDir,
   "./".$mainDir."/../".$mainDir."/".$subDir,
-  "BADDIR",  
-  
+  "BADDIR",
+
 );
 
 $filename = 'ParseIniFileVar6.ini';
@@ -89,12 +83,12 @@ array(1) {
 
 -- Iteration 5 --
 
-Warning: parse_ini_file(%sparseIniFileVar6.dir/parseIniFileVar6Sub/..///parseIniFileVar6Sub//..//../parseIniFileVar6Sub/ParseIniFileVar6.ini): failed to open stream: No such file or directory in %s on line %d
+Warning: parse_ini_file(%sparseIniFileVar6.dir/parseIniFileVar6Sub/..///parseIniFileVar6Sub//..//../parseIniFileVar6Sub/ParseIniFileVar6.ini): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 -- Iteration 6 --
 
-Warning: parse_ini_file(%sparseIniFileVar6.dir/parseIniFileVar6Sub/BADDIR/ParseIniFileVar6.ini): failed to open stream: No such file or directory in %s on line %d
+Warning: parse_ini_file(%sparseIniFileVar6.dir/parseIniFileVar6Sub/BADDIR/ParseIniFileVar6.ini): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 -- Iteration 7 --
@@ -123,7 +117,7 @@ array(1) {
 
 -- Iteration 11 --
 
-Warning: parse_ini_file(BADDIR/ParseIniFileVar6.ini): failed to open stream: No such file or directory in %s on line %d
+Warning: parse_ini_file(BADDIR/ParseIniFileVar6.ini): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 *** Done ***

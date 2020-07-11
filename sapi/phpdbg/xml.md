@@ -297,7 +297,7 @@ info (subcommands)
 
 - &lt;classinfo num="" /> with num having an integer value, indicating the number of loaded user-defined classes
 - Each class is enumerated with first a &lt;class>, then an optional &lt;parents> container and then a &lt;classsource> element
-- The &lt;parents> container contains the &lt;class> elements of the parent of the last &lt;class> element. 
+- The &lt;parents> container contains the &lt;class> elements of the parent of the last &lt;class> element.
 - &lt;class type="" flags="" name="" methodcount="" />
  - type: either "User" or "Internal"
  - flags: either "Interface", "Class" or "Abstract Class"
@@ -516,7 +516,7 @@ set
 
 ### prompt ###
 
-- without other args, a &lt;setpromt str="" /> tag is emitted where the value of the str attribue is the value of the prompt
+- without other args, a &lt;setpromt str="" /> tag is emitted where the value of the str attribute is the value of the prompt
 - when there is another arg, the prompt is changed to that arg, no further xml answer
 
 ### break ###
@@ -633,7 +633,7 @@ Other tags
 - &lt;watchhit variable="" />: when ever a watched variable is changed, followed by a &lt;watchdata> container
 - &lt;watchdata> may contain
  - for watchpoints on variables:
-  - each of these &lt;watch*> tags conatins a type attribute whose value is either "old" or "new")
+  - each of these &lt;watch*> tags contains a type attribute whose value is either "old" or "new")
   - &lt;watchvalue type="" inaccessible="inaccessible" />: old value is inaccessible
   - &lt;watchvalue type=""> may contain a &lt;stream> element which indicates the old/new (type attribute) value of the variable
   - &lt;watchrefcount type="" refcount="" isref="" />: old/new (type attribute) refcount and isref, both numbers

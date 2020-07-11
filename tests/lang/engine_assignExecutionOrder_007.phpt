@@ -1,5 +1,5 @@
 --TEST--
-Check key execution order with new. 
+Check key execution order with new.
 --FILE--
 <?php
 $a[2][3] = 'stdClass';
@@ -11,7 +11,7 @@ $o->a = new $a[$i=2][++$i];
 $o->a->b = new $a[$i=2][++$i];
 print_r($o);
 ?>
---EXPECTF--
+--EXPECT--
 Array
 (
     [2] => Array

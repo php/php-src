@@ -16,5 +16,4 @@ HTTP_ACCEPT_ENCODING=gzip
 echo "hi\n";
 ?>
 --EXPECTF--
-‹%s
-
+‹%a

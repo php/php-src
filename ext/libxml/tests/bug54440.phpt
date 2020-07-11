@@ -9,9 +9,9 @@ class TestWrapper {
 
 function stream_open($path, $mode, $options, &$opened_path)
 {
-	if ($this->context)
-		print_r(stream_context_get_options($this->context));
-	return false;
+    if ($this->context)
+        print_r(stream_context_get_options($this->context));
+    return false;
 }
 
 function url_stat($path, $flags)

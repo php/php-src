@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -138,7 +136,6 @@ int32_t grapheme_strpos_utf16(char *haystack, size_t haystack_len, char *needle,
 	UBreakIterator* bi = NULL;
 	UErrorCode status;
 	UStringSearch* src = NULL;
-	UCollator *coll;
 
 	if(puchar_pos) {
 		*puchar_pos = -1;
@@ -166,7 +163,7 @@ int32_t grapheme_strpos_utf16(char *haystack, size_t haystack_len, char *needle,
 	STRPOS_CHECK_STATUS(status, "Error creating search object");
 
 	if(f_ignore_case) {
-		coll = usearch_getCollator(src);
+		UCollator *coll = usearch_getCollator(src);
 		status = U_ZERO_ERROR;
 		ucol_setAttribute(coll, UCOL_STRENGTH, UCOL_SECONDARY, &status);
 		STRPOS_CHECK_STATUS(status, "Error setting collation strength");
@@ -398,13 +395,3 @@ UBreakIterator* grapheme_get_break_iterator(void *stack_buffer, UErrorCode *stat
 	return ubrk_safeClone(global_break_iterator, stack_buffer, &buffer_size, status);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: fdm=marker
- * vim: noet sw=4 ts=4
- */
-

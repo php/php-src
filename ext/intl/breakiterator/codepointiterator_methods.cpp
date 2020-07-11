@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -27,15 +25,13 @@ static inline CodePointBreakIterator *fetch_cpbi(BreakIterator_object *bio) {
 	return (CodePointBreakIterator*)bio->biter;
 }
 
-U_CFUNC PHP_FUNCTION(cpbi_get_last_code_point)
+U_CFUNC PHP_METHOD(IntlCodePointBreakIterator, getLastCodePoint)
 {
 	BREAKITER_METHOD_INIT_VARS;
-	object = getThis();
+	object = ZEND_THIS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"cpbi_get_last_code_point: bad arguments", 0);
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	BREAKITER_METHOD_FETCH_OBJECT;

@@ -1,9 +1,9 @@
 --TEST--
 Test function gzpassthru() by calling it with its expected arguments
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded"; 
+	print "skip - ZLIB extension not loaded";
 }
 ?>
 --FILE--
@@ -12,15 +12,14 @@ if (!extension_loaded("zlib")) {
 // note that gzpassthru is an alias to fpassthru. parameter checking tests will be
 // the same as fpassthru
 
-$f = dirname(__FILE__)."/004.txt.gz";
+$f = __DIR__."/004.txt.gz";
 $h = gzopen($f, 'r');
 var_dump(gzpassthru($h));
 var_dump(gzpassthru($h));
 gzclose($h);
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 When you're taught through feelings
 Destiny flying high above
 all I know is that you can realize it
@@ -29,4 +28,3 @@ as it turns around
 and I know that it descends down on me
 int(176)
 int(0)
-===DONE===

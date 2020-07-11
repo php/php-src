@@ -2,11 +2,6 @@
 Test strrchr() function : usage variations - single quoted strings
 --FILE--
 <?php
-/* Prototype  : string strrchr(string $haystack, string $needle);
- * Description: Finds the last occurrence of a character in a string.
- * Source code: ext/standard/string.c
-*/
-
 /* Test strrchr() function by passing various single quoted strings to 'haystack' & 'needle' */
 
 echo "*** Testing strrchr() function: with various single quoted strings ***";
@@ -71,7 +66,7 @@ $needle = array(
   42, //needle as int(ASCII value of '*')
   $haystack  //haystack as needle
 );
-  
+
 /* loop through to get the position of the needle in haystack string */
 $count = 1;
 for($index=0; $index<count($needle); $index++) {
@@ -81,7 +76,7 @@ for($index=0; $index<count($needle); $index++) {
 }
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strrchr() function: with various single quoted strings ***
 -- Iteration 1 --
 string(22) "lo123456he \x234 \101 "
@@ -213,7 +208,7 @@ bool(false)
 string(7) "4 \101 "
 
 -- Iteration 44 --
-string(37) "*+-./:;<=>?@hello123456he \x234 \101 "
+string(7) "4 \101 "
 
 -- Iteration 45 --
 string(63) "Hello,\t\n\0\n  $&!#%\o,()*+-./:;<=>?@hello123456he \x234 \101 "

@@ -2,26 +2,14 @@
 Test array_walk_recursive() function : object functionality - array of objects
 --FILE--
 <?php
-/* Prototype  : bool array_walk_recursive(array $input, string $funcname [, mixed $userdata])
- * Description: Apply a user function to every member of an array 
- * Source code: ext/standard/array.c
-*/
-
 /*
 * Testing array_walk_recursive() with an array of objects
 */
 
 echo "*** Testing array_walk_recursive() : array of objects ***\n";
 
-/*
- * Prototype : callback(mixed $value, mixed $key, int $addvalue
- * Parameters : $value - values in given input array
- *              $key - keys in given input array
- *              $addvalue - value to be added
- * Description : Function adds the addvalue to each element of an array
-*/
 function callback_private($value, $key, $addValue)
-{ 
+{
   echo "value : ";
   var_dump($value->getValue());
   echo "key : ";
@@ -58,7 +46,7 @@ class MyClass
   {
     return $this->pro_value;
   }
-};    
+};
 
 // array containing objects of MyClass
 $input = array (
@@ -75,11 +63,11 @@ var_dump( array_walk_recursive($input, "callback_private", 1));
 echo "-- For public member --\n";
 var_dump( array_walk_recursive($input, "callback_public"));
 echo "-- For protected member --\n";
-var_dump( array_walk_recursive($input, "callback_protected")); 
+var_dump( array_walk_recursive($input, "callback_protected"));
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_walk_recursive() : array of objects ***
 -- For private member --
 value : int(3)

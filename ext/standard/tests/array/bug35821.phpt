@@ -5,15 +5,15 @@ Bug #35821 (array_map() segfaults when exception is throwed from the callback)
 
 class Element
 {
-	public function ThrowException ()
-	{
-		throw new Exception();
-	}
+    public function ThrowException ()
+    {
+        throw new Exception();
+    }
 
-	public static function CallBack(Element $elem)
-	{
-		$elem->ThrowException();
-	}
+    public static function CallBack(Element $elem)
+    {
+        $elem->ThrowException();
+    }
 }
 
 $arr = array(new Element(), new Element(), new Element());
@@ -21,8 +21,7 @@ array_map(array('Element', 'CallBack'), $arr);
 
 echo "Done\n";
 ?>
---EXPECTF--	
-
+--EXPECTF--
 Fatal error: Uncaught Exception in %s:%d
 Stack trace:
 #0 %s(%d): Element->ThrowException()

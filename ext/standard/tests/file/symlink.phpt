@@ -3,14 +3,14 @@ symlink() & friends
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip no symlinks on Windows');
+    die('skip not for Windows');
 }
 ?>
 --FILE--
 <?php
 
-$filename = dirname(__FILE__)."/symlink.dat";
-$link = dirname(__FILE__)."/symlink.link";
+$filename = __DIR__."/symlink.dat";
+$link = __DIR__."/symlink.link";
 
 var_dump(symlink($filename, $link));
 var_dump(readlink($link));
@@ -21,7 +21,7 @@ var_dump(readlink($link));
 var_dump(linkinfo($link));
 
 touch($filename);
-var_dump(symlink($filename, dirname(__FILE__)));
+var_dump(symlink($filename, __DIR__));
 @unlink($link);
 
 var_dump(symlink($filename, $link));
@@ -44,7 +44,7 @@ var_dump(linkinfo("."));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 bool(true)
 string(%d) "%ssymlink.dat"
 int(%d)

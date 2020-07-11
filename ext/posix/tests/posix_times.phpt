@@ -7,8 +7,8 @@ Source code: ext/posix/posix.c
 Falko Menge, mail at falko-menge dot de
 PHP Testfest Berlin 2009-05-10
 --SKIPIF--
-<?php 
-	if (!extension_loaded('posix')) { 
+<?php
+	if (!extension_loaded('posix')) {
         die('SKIP - POSIX extension not available');
     }
 ?>
@@ -16,7 +16,6 @@ PHP Testfest Berlin 2009-05-10
 <?php
     var_dump(posix_times());
 ?>
-===DONE===
 --EXPECTF--
 array(5) {
   ["ticks"]=>
@@ -30,4 +29,3 @@ array(5) {
   ["cstime"]=>
   int(%d)
 }
-===DONE===

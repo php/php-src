@@ -27,7 +27,7 @@ $gen = gen();
 $gen->rewind(); // force run
 
 ?>
---EXPECTF--
+--EXPECT--
 before return
 before return in inner finally
 outer finally run

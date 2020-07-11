@@ -2,11 +2,6 @@
 Test basename() function : usage variations
 --FILE--
 <?php
-/* Prototype: string basename ( string $path [, string $suffix] );
-   Description: Given a string containing a path to a file,
-                this function will return the base name of the file. 
-                If the filename ends in suffix this will also be cut off.
-*/
 $file_path_variations = array (
   /* paths with shortcut home dir char, with suffix variation */
   array("~/home/user/bar"),
@@ -62,7 +57,7 @@ $file_path_variations = array (
   /* path with spaces */
   array(" "),
   array(' '),
-  
+
   /* empty paths */
   array(""),
   array(''),
@@ -76,8 +71,8 @@ function check_basename( $path_arrays ) {
      if( 1 == count($path) ) { // no suffix provided
        var_dump( basename($path[0]) );
      } else { // path as well as suffix provided,
-       var_dump( basename($path[0], $path[1]) );    
-     } 
+       var_dump( basename($path[0], $path[1]) );
+     }
    }
 }
 
@@ -85,8 +80,7 @@ echo "*** Testing possible variations in path and suffix ***\n";
 check_basename( $file_path_variations );
 
 echo "Done\n";
-
---EXPECTF--
+--EXPECT--
 *** Testing possible variations in path and suffix ***
 
 --Iteration 1--

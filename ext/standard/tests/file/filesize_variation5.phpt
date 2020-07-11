@@ -4,13 +4,7 @@ Test filesize() function: usage variations - size of files
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
-/* 
- * Prototype   : int filesize ( string $filename );
- * Description : Returns the size of the file in bytes, or FALSE 
- *               (and generates an error of level E_WARNING) in case of an error.
- */
-
-echo "*** Testing filesize(): usage variations ***\n"; 
+echo "*** Testing filesize(): usage variations ***\n";
 
 /* null, false, "", " " */
 var_dump( filesize(NULL) );
@@ -20,7 +14,7 @@ var_dump( filesize(' ') );
 var_dump( filesize('|') );
 echo "*** Done ***\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 *** Testing filesize(): usage variations ***
 bool(false)
 bool(false)

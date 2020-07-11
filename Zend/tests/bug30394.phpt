@@ -4,17 +4,17 @@ Bug #30394 (Assignment operators yield wrong result with __get/__set)
 <?php
 class Container
 {
-	public function __get( $what )
-	{
-		return $this->_p[ $what ];
-	}
-	
-	public function __set( $what, $value )
-	{
-		$this->_p[ $what ] = $value;
-	}
-	
-	private $_p = array();
+    public function __get( $what )
+    {
+        return $this->_p[ $what ];
+    }
+
+    public function __set( $what, $value )
+    {
+        $this->_p[ $what ] = $value;
+    }
+
+    private $_p = array();
 }
 
 $c = new Container();

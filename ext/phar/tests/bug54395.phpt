@@ -6,11 +6,11 @@ Bug #54395 (Phar::mount() crashes when calling with wrong parameters)
 <?php
 
 try {
-	phar::mount(1,1);
+    phar::mount(1,1);
 } catch (Exception $e) {
-	var_dump($e->getMessage());
+    var_dump($e->getMessage());
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 string(25) "Mounting of 1 to 1 failed"

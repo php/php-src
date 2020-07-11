@@ -10,10 +10,9 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-/* 
- * proto string basename(string path [, string suffix])
+/*
  * Function is implemented in ext/standard/string.c
- */ 
+ */
 $file_paths = array (
   /* simple paths */
   array("bar"),
@@ -33,15 +32,15 @@ $file_paths = array (
   array("bar.zip", "bar.zip"),
   array("\\foo\\bar.zip", ".zip"),
   array("foo\\bar.zip", ".zip"),
-  array("\\bar.zip", ".zip"),  
+  array("\\bar.zip", ".zip"),
 
   /* paths with suffix and trailing slashes with suffix removal*/
   array("bar.zip\\", ".zip"),
   array("\\bar.zip\\", ".zip"),
   array("\\foo\\bar.zip\\", ".zip"),
   array("foo\\bar.zip\\", ".zip"),
-  array("\\bar.zip\\", ".zip"),  
-  
+  array("\\bar.zip\\", ".zip"),
+
   /* paths with basename only suffix, with suffix removal*/
   array("\\.zip", ".zip"),
   array(".zip", ".zip"),
@@ -90,7 +89,7 @@ $file_path_variations = array (
   /* path with spaces */
   array(" "),
   array(' '),
-  
+
   /* empty paths */
   array(""),
   array(''),
@@ -104,8 +103,8 @@ function check_basename( $path_arrays ) {
      if( 1 == count($path) ) { // no suffix provided
        var_dump( basename($path[0]) );
      } else { // path as well as suffix provided,
-       var_dump( basename($path[0], $path[1]) );    
-     } 
+       var_dump( basename($path[0], $path[1]) );
+     }
    }
 }
 
@@ -115,26 +114,9 @@ check_basename( $file_paths );
 echo "\n*** Testing possible variations in path and suffix ***\n";
 check_basename( $file_path_variations );
 
-echo "\n*** Testing error conditions ***\n";
-// zero arguments 
-var_dump( basename() );
-
-// more than expected no. of arguments
-var_dump( basename("\\blah\\tmp\\bar.zip", ".zip", ".zip") );
-
-// passing invalid type arguments 
-$object = new stdclass;
-var_dump( basename( array("string\\bar") ) );
-var_dump( basename( array("string\\bar"), "bar" ) );
-var_dump( basename( "bar", array("string\\bar") ) );
-var_dump( basename( $object, "bar" ) );
-var_dump( basename( $object ) );
-var_dump( basename( $object, $object ) );
-var_dump( basename( "bar", $object ) );
-
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing basic operations ***
 
 --Iteration 1--
@@ -309,33 +291,4 @@ string(0) ""
 
 --Iteration 32--
 string(0) ""
-
-*** Testing error conditions ***
-
-Warning: basename() expects at least 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: basename() expects at most 2 parameters, 3 given in %s on line %d
-NULL
-
-Warning: basename() expects parameter 1 to be string, array given in %s on line %d
-NULL
-
-Warning: basename() expects parameter 1 to be string, array given in %s on line %d
-NULL
-
-Warning: basename() expects parameter 2 to be string, array given in %s on line %d
-NULL
-
-Warning: basename() expects parameter 1 to be string, object given in %s on line %d
-NULL
-
-Warning: basename() expects parameter 1 to be string, object given in %s on line %d
-NULL
-
-Warning: basename() expects parameter 1 to be string, object given in %s on line %d
-NULL
-
-Warning: basename() expects parameter 2 to be string, object given in %s on line %d
-NULL
 Done

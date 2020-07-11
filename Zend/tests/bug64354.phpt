@@ -16,9 +16,9 @@ $data = array(new B);
 
 try {
     serialize($data);
-} catch (Exception $e) { 
+} catch (Exception $e) {
     var_dump($e->getMessage());
 }
 ?>
---EXPECTF--
+--EXPECT--
 string(9) "serialize"

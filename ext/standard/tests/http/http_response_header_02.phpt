@@ -4,13 +4,12 @@ $http_reponse_header (redirect)
 <?php require 'server.inc'; http_server_skipif('tcp://127.0.0.1:22347'); ?>
 --INI--
 allow_url_fopen=1
-allow_url_include=1
 --FILE--
 <?php
 require 'server.inc';
 
 $responses = array(
-	"data://text/plain,HTTP/1.0 302 Found\r\n"
+    "data://text/plain,HTTP/1.0 302 Found\r\n"
     . "Some: Header\r\nLocation: http://127.0.0.1:22347/try-again\r\n\r\n",
     "data://test/plain,HTTP/1.0 200 Ok\r\nSome: Header\r\n\r\nBody",
 );
@@ -26,7 +25,6 @@ test();
 
 http_server_kill($pid);
 ?>
-==DONE==
 --EXPECT--
 string(4) "Body"
 array(5) {
@@ -41,4 +39,3 @@ array(5) {
   [4]=>
   string(12) "Some: Header"
 }
-==DONE==

@@ -36,7 +36,6 @@
 enum mbfl_no_encoding {
 	mbfl_no_encoding_invalid = -1,
 	mbfl_no_encoding_pass,
-	mbfl_no_encoding_auto,
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_byte2be,
 	mbfl_no_encoding_byte2le,
@@ -128,6 +127,17 @@ enum mbfl_no_encoding {
 
 typedef enum mbfl_no_encoding mbfl_encoding_id;
 
+struct _mbfl_convert_filter;
+struct mbfl_convert_vtbl {
+	enum mbfl_no_encoding from;
+	enum mbfl_no_encoding to;
+	void (*filter_ctor)(struct _mbfl_convert_filter *filter);
+	void (*filter_dtor)(struct _mbfl_convert_filter *filter);
+	int (*filter_function)(int c, struct _mbfl_convert_filter *filter);
+	int (*filter_flush)(struct _mbfl_convert_filter *filter);
+	void (*filter_copy)(struct _mbfl_convert_filter *src, struct _mbfl_convert_filter *dest);
+};
+
 /*
  * encoding
  */
@@ -138,6 +148,8 @@ typedef struct _mbfl_encoding {
 	const char *(*aliases)[];
 	const unsigned char *mblen_table;
 	unsigned int flag;
+	const struct mbfl_convert_vtbl *input_filter;
+	const struct mbfl_convert_vtbl *output_filter;
 } mbfl_encoding;
 
 MBFLAPI extern const mbfl_encoding * mbfl_name2encoding(const char *name);

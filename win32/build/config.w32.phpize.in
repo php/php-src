@@ -1,7 +1,9 @@
 // vim:ft=javascript
-// $Id: config.w32 306241 2010-12-11 22:18:10Z pajoye $
-// "Master" config file; think of it as a configure.in
+// "Master" config file; think of it as a configure.ac
 // equivalent.
+
+ARG_WITH("verbosity", "Output verbosity, 0-2.", "1");
+setup_verbosity();
 
 ARG_WITH("toolset", "Toolset to use for the compilation, give: vs, clang, icc. " +
 		"The only recommended and supported toolset for production use " +
@@ -44,7 +46,7 @@ ARG_WITH('prefix', 'PHP installation prefix', PHP_PREFIX);
 ARG_WITH('mp', 'Tell Visual Studio use up to [n,auto,disable] processes for compilation', 'auto');
 var PHP_MP_DISABLED = true;
 if (VS_TOOLSET && PHP_MP != 'disable') {
-		// no from disable-all 
+		// no from disable-all
 		if(PHP_MP == 'auto' || PHP_MP == 'no') {
 			 ADD_FLAG('CFLAGS', ' /MP ');
 			PHP_MP_DISABLED = false;
@@ -126,3 +128,10 @@ DEFINE("PHP_DIR", PHP_DIR);
 ARG_WITH("codegen-arch", "Architecture for code generation", "no");
 toolset_setup_codegen_arch();
 
+ARG_ENABLE("native-intrinsics", "Comma separated list of intrinsic optimizations to enable. \
+	Available optimization names are sse, sse2, sse3, ssse3, sse4.1, sse4.2, avx, avx2. \
+	SSE and SSE2 are enabled by default. The best optimization specified will \
+	automatically enable all the older optimizations. Note, that the produced binary \
+	might not work properly, if the optimizations are not available on the target \
+	processor.", "no");
+toolset_setup_intrinsic_cflags();

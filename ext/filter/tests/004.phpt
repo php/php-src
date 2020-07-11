@@ -10,7 +10,7 @@ d="quotes"&e=\slash
 a=O'Henry&b=&c=<b>Bold</b>
 --FILE--
 <?php echo $_GET['a'];
-echo $_GET['b']; 
+echo $_GET['b'];
 echo $_GET['c'];
 echo $_POST['d'];
 echo $_POST['e'];

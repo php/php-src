@@ -19,8 +19,8 @@ var_dump( array_values($arr_resource) );
 
 echo "\n*** Testing array_values() with range checking ***\n";
 $arr_range = array(
-  2147483647, 
-  2147483648, 
+  2147483647,
+  2147483648,
   -2147483647,
   -2147483648,
   -0,
@@ -35,7 +35,7 @@ var_dump( array_values(array()) );  // null array
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 *** Testing array_values() with resource type ***
 array(2) {
   [0]=>

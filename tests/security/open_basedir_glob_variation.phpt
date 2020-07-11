@@ -23,4 +23,3 @@ array(1) {
   [0]=>
   string(12) "../globtest1"
 }
-

@@ -4,53 +4,44 @@ Test variations in usage of deg2rad()
 precision = 10
 --FILE--
 <?php
-/* 
- * proto float deg2rad(float number)
+/*
  * Function is implemented in ext/standard/math.c
-*/ 
+*/
 
 
 //Test deg2rad with a different input values
 
 $values = array(23,
-		-23,
-		2.345e1,
-		-2.345e1,
-		0x17,
-		027,
-		"23",
-		"23.45",
-		"2.345e1",
-		"nonsense",				
-		"1000",
-		"1000ABC",
-		null,
-		true,
-		false);	
+        -23,
+        2.345e1,
+        -2.345e1,
+        0x17,
+        027,
+        "23",
+        "23.45",
+        "2.345e1",
+        "1000",
+        null,
+        true,
+        false);
 
 for ($i = 0; $i < count($values); $i++) {
-	$res = deg2rad($values[$i]);
-	var_dump($res);
+    $res = deg2rad($values[$i]);
+    var_dump($res);
 }
 
 ?>
---EXPECTF--
-float(0.401425728)
-float(-0.401425728)
-float(0.4092797096)
-float(-0.4092797096)
-float(0.401425728)
-float(0.401425728)
-float(0.401425728)
-float(0.4092797096)
-float(0.4092797096)
-
-Warning: deg2rad() expects parameter 1 to be float, string given in %s on line %d
-NULL
-float(17.45329252)
-
-Notice: A non well formed numeric value encountered in %s on line %d
-float(17.45329252)
+--EXPECT--
+float(0.40142572795869574)
+float(-0.40142572795869574)
+float(0.40927970959267024)
+float(-0.40927970959267024)
+float(0.40142572795869574)
+float(0.40142572795869574)
+float(0.40142572795869574)
+float(0.40927970959267024)
+float(0.40927970959267024)
+float(17.453292519943293)
 float(0)
-float(0.01745329252)
+float(0.017453292519943295)
 float(0)

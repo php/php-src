@@ -1,7 +1,7 @@
 --TEST--
 CLI shell shebang
 --SKIPIF--
-<?php 
+<?php
 include 'skipif.inc';
 if (substr(PHP_OS, 0, 3) == 'WIN') {
 	die ("skip not for Windows");
@@ -35,7 +35,7 @@ echo "\nDone\n";
 <?php
 unlink(__DIR__.'/021.tmp.php');
 ?>
---EXPECTF--
+--EXPECT--
 ola
 2
 adeus
