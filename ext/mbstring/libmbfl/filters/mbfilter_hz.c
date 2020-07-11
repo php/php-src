@@ -40,7 +40,7 @@ const mbfl_encoding mbfl_encoding_hz = {
 	"HZ-GB-2312",
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE | MBFL_ENCTYPE_GL_UNSAFE,
+	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_hz_wchar,
 	&vtbl_wchar_hz
 };
