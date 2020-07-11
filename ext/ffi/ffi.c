@@ -312,7 +312,7 @@ static ffi_type *zend_ffi_make_fake_struct_type(zend_ffi_type *type) /* {{{ */
 			case ZEND_FFI_TYPE_DOUBLE:
 				t->elements[i] = &ffi_type_double;
 				break;
-#ifndef PHP_WIN32
+#ifdef HAVE_LONG_DOUBLE
 			case ZEND_FFI_TYPE_LONGDOUBLE:
 				t->elements[i] = &ffi_type_longdouble;
 				break;
@@ -359,7 +359,7 @@ again:
 			return &ffi_type_float;
 		case ZEND_FFI_TYPE_DOUBLE:
 			return &ffi_type_double;
-#ifndef PHP_WIN32
+#ifdef HAVE_LONG_DOUBLE
 		case ZEND_FFI_TYPE_LONGDOUBLE:
 			return &ffi_type_longdouble;
 #endif
