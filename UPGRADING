@@ -320,6 +320,10 @@ PHP 8.0 UPGRADE NOTES
     ISO 8859 aliases with underscores (ISO_8859_* and ISO8859_*) have also been
     removed.
 
+- OCI8:
+  . Several alias functions have been marked as deprecated.
+  . oci_internal_debug() and its alias ociinternaldebug() have been removed.
+
 - PCRE:
   . When passing invalid escape sequences they are no longer interpreted as
     literals. This behaviour previously required the X modifier - which is
