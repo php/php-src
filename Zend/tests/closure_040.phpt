@@ -25,6 +25,7 @@ $ca = $a->getIncrementor();
 $cas = $a->getStaticIncrementor();
 
 $ca->bindTo($a, array());
+
 $cas->bindTo($a, 'A');
 
 ?>

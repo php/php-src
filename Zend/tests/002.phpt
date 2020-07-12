@@ -96,26 +96,26 @@ try {
 echo "Done\n";
 ?>
 --EXPECTF--
-func_get_arg(): Argument #1 ($arg_num) must be greater than or equal to 0
-func_get_arg(): Argument 0 not passed to function
-func_get_arg(): Argument 1 not passed to function
-func_get_arg(): Argument #1 ($arg_num) must be greater than or equal to 0
+func_get_arg(): Argument #1 ($position) must be greater than or equal to 0
+func_get_arg(): Argument #1 ($position) must be less than the number of the arguments passed to the currently executed function
+func_get_arg(): Argument #1 ($position) must be less than the number of the arguments passed to the currently executed function
+func_get_arg(): Argument #1 ($position) must be greater than or equal to 0
 int(10)
-func_get_arg(): Argument 1 not passed to function
+func_get_arg(): Argument #1 ($position) must be less than the number of the arguments passed to the currently executed function
 int(1)
-func_get_arg(): Argument 1 not passed to function
+func_get_arg(): Argument #1 ($position) must be less than the number of the arguments passed to the currently executed function
 Exception: Too few arguments to function test2(), 0 passed in %s002.php on line %d and exactly 1 expected
 int(1)
 int(2)
-func_get_arg(): Argument 2 not passed to function
-func_get_arg(): Argument #1 ($arg_num) must be greater than or equal to 0
-func_get_arg(): Argument 0 not passed to function
-func_get_arg(): Argument 1 not passed to function
+func_get_arg(): Argument #1 ($position) must be less than the number of the arguments passed to the currently executed function
+func_get_arg(): Argument #1 ($position) must be greater than or equal to 0
+func_get_arg(): Argument #1 ($position) must be less than the number of the arguments passed to the currently executed function
+func_get_arg(): Argument #1 ($position) must be less than the number of the arguments passed to the currently executed function
 Exception: Too few arguments to function test3(), 1 passed in %s on line %d and exactly 2 expected
 int(1)
 int(2)
-func_get_arg(): Argument 2 not passed to function
+func_get_arg(): Argument #1 ($position) must be less than the number of the arguments passed to the currently executed function
 int(1)
-func_get_arg(): Argument 1 not passed to function
+func_get_arg(): Argument #1 ($position) must be less than the number of the arguments passed to the currently executed function
 func_get_arg() cannot be called from the global scope
 Done

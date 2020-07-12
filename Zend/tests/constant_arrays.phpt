@@ -24,12 +24,21 @@ $y[0] = 3;
 var_dump($x, $y, QUX);
 
 // ensure objects not allowed in arrays
-var_dump(define('ELEPHPANT', [new StdClass]));
+try {
+    define('ELEPHPANT', [new StdClass]);
+} catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 // ensure recursion doesn't crash
 $recursive = [];
 $recursive[0] = &$recursive;
-var_dump(define('RECURSION', $recursive));
+
+try {
+    define('RECURSION', $recursive);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 --EXPECTF--
 array(4) {
   [0]=>
@@ -92,9 +101,5 @@ array(1) {
   [0]=>
   int(7)
 }
-
-Warning: Constants may only evaluate to scalar values, arrays or resources in %s on line %d
-bool(false)
-
-Warning: Constants cannot be recursive arrays in %s on line %d
-bool(false)
+define(): Argument #2 ($value) cannot be an object, stdClass given
+define(): Argument #2 ($value) cannot be a recursive array

@@ -16,7 +16,7 @@ var_dump(strncmp("qwerty", "qwerty123", 7));
 ?>
 --EXPECT--
 int(0)
-strncmp(): Argument #3 ($len) must be greater than or equal to 0
+strncmp(): Argument #3 ($length) must be greater than or equal to 0
 int(0)
 int(0)
 int(-1)

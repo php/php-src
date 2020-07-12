@@ -821,8 +821,7 @@ PHP_FUNCTION(com_load_typelib)
 	}
 
 	if (!cs) {
-		php_error_docref(NULL, E_WARNING, "Declaration of case-insensitive constants is no longer supported");
-		RETURN_FALSE;
+		php_error_docref(NULL, E_WARNING, "com_load_typelib(): Argument #2 ($case_insensitive) is ignored since declaration of case-insensitive constants is no longer supported");
 	}
 
 	RETVAL_FALSE;
