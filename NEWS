@@ -16,6 +16,10 @@ PHP                                                                        NEWS
   . Fixed bug #48585 (com_load_typelib holds reference, fails on second call).
     (cmb)
 
+- Exif:
+  . Fixed bug #75785 (Many errors from exif_read_data).
+    (Níckolas Daniel da Silva)
+
 - Gettext:
   . Fixed bug #70574 (Tests fail due to relying on Linux fallback behavior for
     gettext()). (Florian Engelhardt)
