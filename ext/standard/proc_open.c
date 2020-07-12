@@ -444,11 +444,18 @@ static inline HANDLE dup_fd_as_handle(int fd)
 # define close_descriptor(fd)	close(fd)
 #endif
 
+/* Determines the type of a descriptor item. */
+typedef enum _descriptor_type {
+	DESCRIPTOR_TYPE_STD,
+	DESCRIPTOR_TYPE_PIPE,
+	DESCRIPTOR_TYPE_SOCKET
+} descriptor_type;
+
 /* One instance of this struct is created for each item in `$descriptorspec` argument to `proc_open`
  * They are used within `proc_open` and freed before it returns */
 typedef struct _descriptorspec_item {
 	int index;                       /* desired FD # in child process */
-	int is_pipe;
+	descriptor_type type;
 	php_file_descriptor_t childend;  /* FD # opened for use in child
 	                                  * (will be copied to `index` in child) */
 	php_file_descriptor_t parentend; /* FD # opened for use in parent
@@ -679,7 +686,7 @@ static int set_proc_descriptor_to_pty(descriptorspec_item *desc, int *master_fd,
 		}
 	}
 
-	desc->is_pipe    = 1;
+	desc->type       = DESCRIPTOR_TYPE_PIPE;
 	desc->childend   = dup(*slave_fd);
 	desc->parentend  = dup(*master_fd);
 	desc->mode_flags = O_RDWR;
@@ -687,6 +694,19 @@ static int set_proc_descriptor_to_pty(descriptorspec_item *desc, int *master_fd,
 #else
 	php_error_docref(NULL, E_WARNING, "PTY (pseudoterminal) not supported on this system");
 	return FAILURE;
+#endif
+}
+
+/* Mark the descriptor close-on-exec, so it won't be inherited by children */
+static php_file_descriptor_t make_descriptor_cloexec(php_file_descriptor_t fd)
+{
+#ifdef PHP_WIN32
+	return dup_handle(fd, FALSE, TRUE);
+#else
+#if defined(F_SETFD) && defined(FD_CLOEXEC)
+	fcntl(fd, F_SETFD, FD_CLOEXEC);
+#endif
+	return fd;
 #endif
 }
 
@@ -699,7 +719,7 @@ static int set_proc_descriptor_to_pipe(descriptorspec_item *desc, zend_string *z
 		return FAILURE;
 	}
 
-	desc->is_pipe = 1;
+	desc->type = DESCRIPTOR_TYPE_PIPE;
 
 	if (strncmp(ZSTR_VAL(zmode), "w", 1) != 0) {
 		desc->parentend = newpipe[1];
@@ -711,13 +731,38 @@ static int set_proc_descriptor_to_pipe(descriptorspec_item *desc, zend_string *z
 		desc->mode_flags = O_RDONLY;
 	}
 
-#ifdef PHP_WIN32
-	/* don't let the child inherit the parent side of the pipe */
-	desc->parentend = dup_handle(desc->parentend, FALSE, TRUE);
+	desc->parentend = make_descriptor_cloexec(desc->parentend);
 
+#ifdef PHP_WIN32
 	if (ZSTR_LEN(zmode) >= 2 && ZSTR_VAL(zmode)[1] == 'b')
 		desc->mode_flags |= O_BINARY;
 #endif
+
+	return SUCCESS;
+}
+
+#ifdef PHP_WIN32
+#define create_socketpair(socks) socketpair_win32(AF_INET, SOCK_STREAM, 0, (socks), 0)
+#else
+#define create_socketpair(socks) socketpair(AF_UNIX, SOCK_STREAM, 0, (socks))
+#endif
+
+static int set_proc_descriptor_to_socket(descriptorspec_item *desc)
+{
+	php_socket_t sock[2];
+
+	if (create_socketpair(sock)) {
+		zend_string *err = php_socket_error_str(php_socket_errno());
+		php_error_docref(NULL, E_WARNING, "Unable to create socket pair: %s", ZSTR_VAL(err));
+		zend_string_release(err);
+		return FAILURE;
+	}
+
+	desc->type = DESCRIPTOR_TYPE_SOCKET;
+	desc->parentend = make_descriptor_cloexec((php_file_descriptor_t) sock[0]);
+
+	/* Pass sock[1] to child because it will never use overlapped IO on Windows. */
+	desc->childend = (php_file_descriptor_t) sock[1];
 
 	return SUCCESS;
 }
@@ -827,6 +872,9 @@ static int set_proc_descriptor_from_array(zval *descitem, descriptorspec_item *d
 			goto finish;
 		}
 		retval = set_proc_descriptor_to_pipe(&descriptors[ndesc], zmode);
+	} else if (zend_string_equals_literal(ztype, "socket")) {
+		/* Set descriptor to socketpair */
+		retval = set_proc_descriptor_to_socket(&descriptors[ndesc]);
 	} else if (zend_string_equals_literal(ztype, "file")) {
 		/* Set descriptor to file */
 		if ((zfile = get_string_parameter(descitem, 1, "file name parameter for 'file'")) == NULL) {
@@ -903,7 +951,7 @@ static int close_parentends_of_pipes(descriptorspec_item *descriptors, int ndesc
 	 * Also, dup() the child end of all pipes as necessary so they will use the FD
 	 * number which the user requested */
 	for (int i = 0; i < ndesc; i++) {
-		if (descriptors[i].is_pipe) {
+		if (descriptors[i].type != DESCRIPTOR_TYPE_STD) {
 			close(descriptors[i].parentend);
 		}
 		if (descriptors[i].childend != descriptors[i].index) {
@@ -1194,12 +1242,13 @@ PHP_FUNCTION(proc_open)
 	/* Clean up all the child ends and then open streams on the parent
 	 *   ends, where appropriate */
 	for (i = 0; i < ndesc; i++) {
-		char *mode_string = NULL;
 		php_stream *stream = NULL;
 
 		close_descriptor(descriptors[i].childend);
 
-		if (descriptors[i].is_pipe) {
+		if (descriptors[i].type == DESCRIPTOR_TYPE_PIPE) {
+			char *mode_string = NULL;
+
 			switch (descriptors[i].mode_flags) {
 #ifdef PHP_WIN32
 				case O_WRONLY|O_BINARY:
@@ -1219,32 +1268,31 @@ PHP_FUNCTION(proc_open)
 					mode_string = "r+";
 					break;
 			}
+
 #ifdef PHP_WIN32
 			stream = php_stream_fopen_from_fd(_open_osfhandle((zend_intptr_t)descriptors[i].parentend,
 						descriptors[i].mode_flags), mode_string, NULL);
 			php_stream_set_option(stream, PHP_STREAM_OPTION_PIPE_BLOCKING, blocking_pipes, NULL);
 #else
 			stream = php_stream_fopen_from_fd(descriptors[i].parentend, mode_string, NULL);
-# if defined(F_SETFD) && defined(FD_CLOEXEC)
-			/* Mark the descriptor close-on-exec, so it won't be inherited by
-			 * potential other children */
-			fcntl(descriptors[i].parentend, F_SETFD, FD_CLOEXEC);
-# endif
 #endif
-			if (stream) {
-				zval retfp;
-
-				/* nasty hack; don't copy it */
-				stream->flags |= PHP_STREAM_FLAG_NO_SEEK;
-
-				php_stream_to_zval(stream, &retfp);
-				add_index_zval(pipes, descriptors[i].index, &retfp);
-
-				proc->pipes[i] = Z_RES(retfp);
-				Z_ADDREF(retfp);
-			}
+		} else if (descriptors[i].type == DESCRIPTOR_TYPE_SOCKET) {
+			stream = php_stream_sock_open_from_socket((php_socket_t) descriptors[i].parentend, NULL);
 		} else {
 			proc->pipes[i] = NULL;
+		}
+
+		if (stream) {
+			zval retfp;
+
+			/* nasty hack; don't copy it */
+			stream->flags |= PHP_STREAM_FLAG_NO_SEEK;
+
+			php_stream_to_zval(stream, &retfp);
+			add_index_zval(pipes, descriptors[i].index, &retfp);
+
+			proc->pipes[i] = Z_RES(retfp);
+			Z_ADDREF(retfp);
 		}
 	}
 

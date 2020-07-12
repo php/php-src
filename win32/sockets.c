@@ -24,34 +24,33 @@
 
 #include "php.h"
 
-PHPAPI int socketpair(int domain, int type, int protocol, SOCKET sock[2])
+PHPAPI int socketpair_win32(int domain, int type, int protocol, SOCKET sock[2], int overlapped)
 {
 	struct sockaddr_in address;
 	SOCKET redirect;
 	int size = sizeof(address);
 
-	if(domain != AF_INET) {
+	if (domain != AF_INET) {
 		WSASetLastError(WSAENOPROTOOPT);
 		return -1;
 	}
 
-	sock[0] = sock[1] = redirect = INVALID_SOCKET;
+	sock[1] = redirect = INVALID_SOCKET;
 
-
-	sock[0]	= socket(domain, type, protocol);
+	sock[0] = socket(domain, type, protocol);
 	if (INVALID_SOCKET == sock[0]) {
 		goto error;
 	}
 
 	address.sin_addr.s_addr	= INADDR_ANY;
-	address.sin_family	= AF_INET;
-	address.sin_port	= 0;
+	address.sin_family = AF_INET;
+	address.sin_port = 0;
 
-	if (bind(sock[0], (struct sockaddr*)&address, sizeof(address)) != 0) {
+	if (bind(sock[0], (struct sockaddr *) &address, sizeof(address)) != 0) {
 		goto error;
 	}
 
-	if(getsockname(sock[0], (struct sockaddr *)&address, &size) != 0) {
+	if (getsockname(sock[0], (struct sockaddr *) &address, &size) != 0) {
 		goto error;
 	}
 
@@ -59,17 +58,22 @@ PHPAPI int socketpair(int domain, int type, int protocol, SOCKET sock[2])
 		goto error;
 	}
 
-	sock[1] = socket(domain, type, protocol);
+	if (overlapped) {
+		sock[1] = socket(domain, type, protocol);
+	} else {
+		sock[1] = WSASocket(domain, type, protocol, NULL, 0, 0);
+	}
+
 	if (INVALID_SOCKET == sock[1]) {
 		goto error;
 	}
 
 	address.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-	if(connect(sock[1], (struct sockaddr*)&address, sizeof(address)) != 0) {
+	if (connect(sock[1], (struct sockaddr *) &address, sizeof(address)) != 0) {
 		goto error;
 	}
 
-	redirect = accept(sock[0],(struct sockaddr*)&address, &size);
+	redirect = accept(sock[0], (struct sockaddr *) &address, &size);
 	if (INVALID_SOCKET == redirect) {
 		goto error;
 	}
@@ -85,4 +89,9 @@ error:
 	closesocket(sock[1]);
 	WSASetLastError(WSAECONNABORTED);
 	return -1;
+}
+
+PHPAPI int socketpair(int domain, int type, int protocol, SOCKET sock[2])
+{
+	return socketpair_win32(domain, type, protocol, sock, 1);
 }

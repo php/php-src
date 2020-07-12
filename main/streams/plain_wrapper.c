@@ -257,6 +257,11 @@ static void detect_is_seekable(php_stdio_stream_data *self) {
 
 		self->is_seekable = !(file_type == FILE_TYPE_PIPE || file_type == FILE_TYPE_CHAR);
 		self->is_pipe = file_type == FILE_TYPE_PIPE;
+
+		/* Additional check needed to distinguish between pipes and sockets. */
+		if (self->is_pipe && !GetNamedPipeInfo((HANDLE) handle, NULL, NULL, NULL, NULL)) {
+			self->is_pipe = 0;
+		}
 	}
 #endif
 }
