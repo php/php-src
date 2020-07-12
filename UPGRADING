@@ -631,6 +631,14 @@ PHP 8.0 UPGRADE NOTES
 
         $proc = proc_open($command, [['pty'], ['pty'], ['pty']], $pipes);
 
+  . proc_open() now supports socket pair descriptors. The following attaches
+    a distinct socket pair to stdin, stdout and stderr:
+
+        $proc = proc_open(
+            $command, [['socket'], ['socket'], ['socket']], $pipes);
+
+    Unlike pipes, sockets do not suffer from blocking I/O issues on Windows.
+    However, not all programs may work correctly with stdio sockets.
   . Sorting functions are now stable, which means that equal-comparing elements
     will retain their original order.
     RFC: https://wiki.php.net/rfc/stable_sorting
