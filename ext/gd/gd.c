@@ -135,13 +135,8 @@ static void php_image_filter_scatter(INTERNAL_FUNCTION_PARAMETERS);
 static gdImagePtr _php_image_create_from_string(zend_string *Data, char *tn, gdImagePtr (*ioctx_func_p)());
 static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, gdImagePtr (*func_p)(), gdImagePtr (*ioctx_func_p)());
 static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, void (*func_p)());
-static void _php_image_output_putc(struct gdIOCtx *ctx, int c);
-static int _php_image_output_putbuf(struct gdIOCtx *ctx, const void* buf, int l);
-static void _php_image_output_ctxfree(struct gdIOCtx *ctx);
-static void _php_image_stream_putc(struct gdIOCtx *ctx, int c);
-static int _php_image_stream_putbuf(struct gdIOCtx *ctx, const void* buf, int l);
-static void _php_image_stream_ctxfreeandclose(struct gdIOCtx *ctx);
-static void _php_image_stream_ctxfree(struct gdIOCtx *ctx);
+static gdIOCtx *create_stream_context(php_stream *stream, int close_stream);
+static gdIOCtx *create_output_context();
 static int _php_image_type(char data[12]);
 
 /* output streaming (formerly gd_ctx.c) */
@@ -1824,8 +1819,7 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 				}
 				(*func_p)(im, fp, q, t);
 				break;
-			default:
-				ZEND_UNREACHABLE();
+			EMPTY_SWITCH_DEFAULT_CASE()
 		}
 		fflush(fp);
 		fclose(fp);
@@ -1851,8 +1845,7 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 				}
 				(*func_p)(im, tmp, q, t);
 				break;
-			default:
-				ZEND_UNREACHABLE();
+			EMPTY_SWITCH_DEFAULT_CASE()
 		}
 
 		fseek(tmp, 0, SEEK_SET);
@@ -1894,16 +1887,9 @@ PHP_FUNCTION(imagexbm)
 			RETURN_FALSE;
 		}
 
-		ctx = ecalloc(1, sizeof(gdIOCtx));
-		ctx->putC = _php_image_stream_putc;
-		ctx->putBuf = _php_image_stream_putbuf;
-		ctx->gd_free = _php_image_stream_ctxfreeandclose;
-		ctx->data = (void *)stream;
+		ctx = create_stream_context(stream, 1);
 	} else {
-		ctx = ecalloc(1, sizeof(gdIOCtx));
-		ctx->putC = _php_image_output_putc;
-		ctx->putBuf = _php_image_output_putbuf;
-		ctx->gd_free = _php_image_output_ctxfree;
+		ctx = create_output_context();
 	}
 
 	if (argc < 3) {
@@ -1996,20 +1982,9 @@ PHP_FUNCTION(imagewbmp)
 			RETURN_THROWS();
 		}
 
-		ctx = ecalloc(1, sizeof(gdIOCtx));
-		ctx->putC = _php_image_stream_putc;
-		ctx->putBuf = _php_image_stream_putbuf;
-		if (close_stream) {
-			ctx->gd_free = _php_image_stream_ctxfreeandclose;
-		} else {
-			ctx->gd_free = _php_image_stream_ctxfree;
-		}
-		ctx->data = (void *)stream;
+		ctx = create_stream_context(stream, close_stream);
 	} else {
-		ctx = ecalloc(1, sizeof(gdIOCtx));
-		ctx->putC = _php_image_output_putc;
-		ctx->putBuf = _php_image_output_putbuf;
-		ctx->gd_free = _php_image_output_ctxfree;
+		ctx = create_output_context();
 	}
 
 	if (argc < 3) {
@@ -2084,20 +2059,9 @@ PHP_FUNCTION(imagebmp)
 			RETURN_THROWS();
 		}
 
-		ctx = ecalloc(1, sizeof(gdIOCtx));
-		ctx->putC = _php_image_stream_putc;
-		ctx->putBuf = _php_image_stream_putbuf;
-		if (close_stream) {
-			ctx->gd_free = _php_image_stream_ctxfreeandclose;
-		} else {
-			ctx->gd_free = _php_image_stream_ctxfree;
-		}
-		ctx->data = (void *)stream;
+		ctx = create_stream_context(stream, close_stream);
 	} else {
-		ctx = ecalloc(1, sizeof(gdIOCtx));
-		ctx->putC = _php_image_output_putc;
-		ctx->putBuf = _php_image_output_putbuf;
-		ctx->gd_free = _php_image_output_ctxfree;
+		ctx = create_output_context();
 	}
 
 	gdImageBmpCtx(im, ctx, (int) compressed);
@@ -4168,6 +4132,30 @@ static void _php_image_stream_ctxfreeandclose(struct gdIOCtx *ctx) /* {{{ */
 	}
 } /* }}} */
 
+static gdIOCtx *create_stream_context(php_stream *stream, int close_stream) {
+	gdIOCtx *ctx = ecalloc(1, sizeof(gdIOCtx));
+
+	ctx->putC = _php_image_stream_putc;
+	ctx->putBuf = _php_image_stream_putbuf;
+	if (close_stream) {
+		ctx->gd_free = _php_image_stream_ctxfreeandclose;
+	} else {
+		ctx->gd_free = _php_image_stream_ctxfree;
+	}
+	ctx->data = (void *)stream;
+
+	return ctx;
+}
+
+static gdIOCtx *create_output_context() {
+	gdIOCtx *ctx = ecalloc(1, sizeof(gdIOCtx));
+
+	ctx->putC = _php_image_output_putc;
+	ctx->putBuf = _php_image_output_putbuf;
+	ctx->gd_free = _php_image_output_ctxfree;
+
+	return ctx;
+}
 
 static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, void (*func_p)())
 {
@@ -4215,20 +4203,9 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 			RETURN_THROWS();
 		}
 
-		ctx = ecalloc(1, sizeof(gdIOCtx));
-		ctx->putC = _php_image_stream_putc;
-		ctx->putBuf = _php_image_stream_putbuf;
-		if (close_stream) {
-			ctx->gd_free = _php_image_stream_ctxfreeandclose;
-		} else {
-			ctx->gd_free = _php_image_stream_ctxfree;
-		}
-		ctx->data = (void *)stream;
+		ctx = create_stream_context(stream, close_stream);
 	} else {
-		ctx = ecalloc(1, sizeof(gdIOCtx));
-		ctx->putC = _php_image_output_putc;
-		ctx->putBuf = _php_image_output_putbuf;
-		ctx->gd_free = _php_image_output_ctxfree;
+		ctx = create_output_context();
 	}
 
 	switch (image_type) {
@@ -4257,9 +4234,7 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 		case PHP_GDIMG_TYPE_GIF:
 			(*func_p)(im, ctx);
 			break;
-
-		default:
-			ZEND_UNREACHABLE();
+		 EMPTY_SWITCH_DEFAULT_CASE()
 	}
 
 	ctx->gd_free(ctx);
