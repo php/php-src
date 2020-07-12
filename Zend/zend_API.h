@@ -1255,7 +1255,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_value_error(uint32_t arg_num
 #define ZEND_PARSE_PARAMETERS_START_EX(flags, min_num_args, max_num_args) do { \
 		const int _flags = (flags); \
 		uint32_t _min_num_args = (min_num_args); \
-		int _max_num_args = (max_num_args); \
+		int _max_num_args = (max_num_args);  /* TODO uint32_t */ \
 		uint32_t _num_args = EX_NUM_ARGS(); \
 		uint32_t _i = 0; \
 		zval *_real_arg, *_arg = NULL; \
