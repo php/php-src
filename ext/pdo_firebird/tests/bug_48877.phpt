@@ -9,6 +9,7 @@ require("testdb.inc");
 
 $value = '2';
 
+$dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 @$dbh->exec('DROP TABLE testz');
 $dbh->exec('CREATE TABLE testz (A integer)');
 $dbh->exec("INSERT INTO testz VALUES ('1')");
