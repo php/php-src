@@ -19,7 +19,7 @@ var_dump(strncasecmp("01", "01", 1000));
 
 ?>
 --EXPECT--
-strncasecmp(): Argument #3 ($len) must be greater than or equal to 0
+strncasecmp(): Argument #3 ($length) must be greater than or equal to 0
 int(0)
 int(-3)
 int(0)

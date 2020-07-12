@@ -6,23 +6,24 @@ function zend_version(): string {}
 
 function func_num_args(): int {}
 
-function func_get_arg(int $arg_num): mixed {}
+function func_get_arg(int $argument_number): mixed {}
 
 function func_get_args(): array {}
 
-function strlen(string $str): int {}
+function strlen(string $string): int {}
 
-function strcmp(string $str1, string $str2): int {}
+function strcmp(string $string1, string $string2): int {}
 
-function strncmp(string $str1, string $str2, int $len): int {}
+function strncmp(string $string1, string $string2, int $length): int {}
 
-function strcasecmp(string $str1, string $str2): int {}
+function strcasecmp(string $string1, string $string2): int {}
 
-function strncasecmp(string $str1, string $str2, int $len): int {}
+function strncasecmp(string $string1, string $string2, int $length): int {}
 
-function error_reporting($new_error_level = UNKNOWN): int {}
+function error_reporting(?int $error_level = null): int {}
 
-function define(string $constant_name, $value, bool $case_insensitive = false): bool {}
+/** @param bool|int|float|string|array|resource|null $value */
+function define(string $constant_name, $value): bool {}
 
 function defined(string $constant_name): bool {}
 
@@ -38,25 +39,28 @@ function is_a($object, string $class_name, bool $allow_string = false): bool {}
 
 function get_class_vars(string $class_name): array|false {}
 
-function get_object_vars(object $obj): array {}
+function get_object_vars(object $object): array {}
 
-function get_mangled_object_vars(object $obj): array {}
+function get_mangled_object_vars(object $object): array {}
 
-function get_class_methods(string|object $class): array {}
+/** string|object $class */
+function get_class_methods($class): array {}
 
+/** @param object|string $object_or_class */
 function method_exists($object_or_class, string $method): bool {}
 
+/** @param object|string $object_or_class */
 function property_exists($object_or_class, string $property_name): bool {}
 
-function class_exists(string $classname, bool $autoload = true): bool {}
+function class_exists(string $class_name, bool $autoload = true): bool {}
 
-function interface_exists(string $classname, bool $autoload = true): bool {}
+function interface_exists(string $interface_name, bool $autoload = true): bool {}
 
-function trait_exists(string $traitname, bool $autoload = true): bool {}
+function trait_exists(string $trait_name, bool $autoload = true): bool {}
 
 function function_exists(string $function_name): bool {}
 
-function class_alias(string $user_class_name, string $alias_name, bool $autoload = true): bool {}
+function class_alias(string $original_class_name, string $alias, bool $autoload = true): bool {}
 
 function get_included_files(): array {}
 
@@ -88,11 +92,13 @@ function get_defined_functions(bool $exclude_disabled = true): array {}
 
 function get_defined_vars(): array {}
 
-function get_resource_type($res): string {}
+/** @param resource $resource */
+function get_resource_type($resource): string {}
 
-function get_resource_id($res): int {}
+/** @param resource $resource */
+function get_resource_id($resource): int {}
 
-function get_resources(string $type = UNKNOWN): array {}
+function get_resources(?string $type = null): array {}
 
 function get_loaded_extensions(bool $zend_extensions = false): array {}
 
@@ -102,9 +108,9 @@ function debug_backtrace(int $options = DEBUG_BACKTRACE_PROVIDE_OBJECT, int $lim
 
 function debug_print_backtrace(int $options = 0, int $limit = 0): void {}
 
-function extension_loaded(string $extension_name): bool {}
+function extension_loaded(string $extension): bool {}
 
-function get_extension_funcs(string $extension_name): array|false {}
+function get_extension_funcs(string $extension): array|false {}
 
 #if ZEND_DEBUG && defined(ZTS)
 function zend_thread_id(): int {}
