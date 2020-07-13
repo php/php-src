@@ -1858,3 +1858,11 @@ static HashTable *ZEND_FASTCALL zend_jit_zval_array_dup(zval *arr)
 	ZVAL_ARR(arr, ht);
 	return ht;
 }
+
+static zend_array *ZEND_FASTCALL zend_jit_add_arrays_helper(zend_array *op1, zend_array *op2)
+{
+	zend_array *res;
+	res = zend_array_dup(op1);
+	zend_hash_merge(res, op2, zval_add_ref, 0);
+	return res;
+}

@@ -4357,6 +4357,22 @@ static int zend_jit_math(dasm_State **Dst, const zend_op *opline, const zend_op_
 	return 1;
 }
 
+static int zend_jit_add_arrays(dasm_State **Dst, const zend_op *opline, const zend_op_array *op_array, uint32_t op1_info, uint32_t op2_info)
+{
+	zend_jit_addr op1_addr = OP1_ADDR();
+	zend_jit_addr op2_addr = OP2_ADDR();
+	zend_jit_addr res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
+
+	|	GET_ZVAL_LVAL ZREG_FCARG1a, op1_addr
+	|	GET_ZVAL_LVAL ZREG_FCARG2a, op2_addr
+	|	EXT_CALL zend_jit_add_arrays_helper, r0
+	|	SET_ZVAL_PTR res_addr, r0
+	|	SET_ZVAL_TYPE_INFO res_addr, IS_ARRAY_EX
+	|	FREE_OP opline->op1_type, opline->op1, op1_info, 0, op_array, opline
+	|	FREE_OP opline->op2_type, opline->op2, op2_info, 0, op_array, opline
+	return 1;
+}
+
 static int zend_jit_long_math_helper(dasm_State    **Dst,
                                      const zend_op  *opline,
                                      zend_uchar      opcode,
