@@ -9,6 +9,8 @@ PHP                                                                        NEWS
     op). (Nikita)
   . Fixed bug #79841 (Syntax error in configure / unescaped "[]" in php.m4).
     (Nikita)
+  . Fixed bug #79828 (Segfault when trying to access non-existing variable).
+    (Nikita)
 
 09 Jul 2020, PHP 8.0.0alpha2
 

@@ -4126,7 +4126,7 @@ ZEND_VM_COLD_CONST_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV
 #if !ZEND_VM_SPEC || (OP1_TYPE != IS_UNUSED)
 		zval *retval_ref, *retval_ptr;
 		zend_arg_info *ret_info = EX(func)->common.arg_info - 1;
-		retval_ref = retval_ptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
+		retval_ref = retval_ptr = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
 
 		if (OP1_TYPE == IS_CONST) {
 			ZVAL_COPY(EX_VAR(opline->result.var), retval_ptr);
@@ -4142,6 +4142,14 @@ ZEND_VM_COLD_CONST_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV
 
 		if (EXPECTED(ZEND_TYPE_CONTAINS_CODE(ret_info->type, Z_TYPE_P(retval_ptr)))) {
 			ZEND_VM_NEXT_OPCODE();
+		}
+
+		if (OP1_TYPE == IS_CV && UNEXPECTED(Z_ISUNDEF_P(retval_ptr))) {
+			SAVE_OPLINE();
+			retval_ref = retval_ptr = ZVAL_UNDEFINED_OP1();
+			if (ZEND_TYPE_FULL_MASK(ret_info->type) & MAY_BE_NULL) {
+				ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+			}
 		}
 
 		zend_reference *ref = NULL;
