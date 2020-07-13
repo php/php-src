@@ -59,6 +59,7 @@ jobs:
         sed -i "s/function_exists('pcntl_fork')/false/" tests/Filesystem/FilesystemTest.php
         # Work around PHP 8 incompatibility in Doctrine
         sed -i 's/function query()/function query($statement = null)/' vendor/doctrine/dbal/lib/Doctrine/DBAL/Driver/PDOConnection.php
+        sed -i 's/public function getMessage();//' vendor/doctrine/dbal/lib/Doctrine/DBAL/Driver/DriverException.php
         php vendor/bin/phpunit
       displayName: 'Test Laravel'
     - script: |
