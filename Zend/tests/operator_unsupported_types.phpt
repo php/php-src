@@ -32,7 +32,7 @@ $legalValues = [
     '2',
     '3.5',
     '"123"',
-    '"foo"', // Semi-legal.
+    '"foo"', // Semi-legal
 ];
 
 set_error_handler(function($errno, $errstr) {
@@ -147,7 +147,6 @@ Unsupported operand types: float + array
 Unsupported operand types: array + string
 Unsupported operand types: string + array
 Unsupported operand types: array + string
-Warning: A non-numeric value encountered
 Unsupported operand types: string + array
 Unsupported operand types: stdClass + null
 Unsupported operand types: null + stdClass
@@ -162,7 +161,6 @@ Unsupported operand types: float + stdClass
 Unsupported operand types: stdClass + string
 Unsupported operand types: string + stdClass
 Unsupported operand types: stdClass + string
-Warning: A non-numeric value encountered
 Unsupported operand types: string + stdClass
 Unsupported operand types: resource + null
 Unsupported operand types: null + resource
@@ -177,7 +175,6 @@ Unsupported operand types: float + resource
 Unsupported operand types: resource + string
 Unsupported operand types: string + resource
 Unsupported operand types: resource + string
-Warning: A non-numeric value encountered
 Unsupported operand types: string + resource
 Unsupported operand types: array - array
 Unsupported operand types: array - stdClass
@@ -201,7 +198,6 @@ Unsupported operand types: float - array
 Unsupported operand types: array - string
 Unsupported operand types: string - array
 Unsupported operand types: array - string
-Warning: A non-numeric value encountered
 Unsupported operand types: string - array
 Unsupported operand types: stdClass - null
 Unsupported operand types: null - stdClass
@@ -216,7 +212,6 @@ Unsupported operand types: float - stdClass
 Unsupported operand types: stdClass - string
 Unsupported operand types: string - stdClass
 Unsupported operand types: stdClass - string
-Warning: A non-numeric value encountered
 Unsupported operand types: string - stdClass
 Unsupported operand types: resource - null
 Unsupported operand types: null - resource
@@ -231,7 +226,6 @@ Unsupported operand types: float - resource
 Unsupported operand types: resource - string
 Unsupported operand types: string - resource
 Unsupported operand types: resource - string
-Warning: A non-numeric value encountered
 Unsupported operand types: string - resource
 Unsupported operand types: array * array
 Unsupported operand types: stdClass * array
@@ -255,7 +249,6 @@ Unsupported operand types: float * array
 Unsupported operand types: array * string
 Unsupported operand types: string * array
 Unsupported operand types: array * string
-Warning: A non-numeric value encountered
 Unsupported operand types: string * array
 Unsupported operand types: stdClass * null
 Unsupported operand types: stdClass * null
@@ -307,7 +300,6 @@ Unsupported operand types: float / array
 Unsupported operand types: array / string
 Unsupported operand types: string / array
 Unsupported operand types: array / string
-Warning: A non-numeric value encountered
 Unsupported operand types: string / array
 Unsupported operand types: stdClass / null
 Unsupported operand types: null / stdClass
@@ -322,7 +314,6 @@ Unsupported operand types: float / stdClass
 Unsupported operand types: stdClass / string
 Unsupported operand types: string / stdClass
 Unsupported operand types: stdClass / string
-Warning: A non-numeric value encountered
 Unsupported operand types: string / stdClass
 Unsupported operand types: resource / null
 Unsupported operand types: null / resource
@@ -337,7 +328,6 @@ Unsupported operand types: float / resource
 Unsupported operand types: resource / string
 Unsupported operand types: string / resource
 Unsupported operand types: resource / string
-Warning: A non-numeric value encountered
 Unsupported operand types: string / resource
 Unsupported operand types: array % array
 Unsupported operand types: array % stdClass
@@ -361,7 +351,6 @@ Unsupported operand types: float % array
 Unsupported operand types: array % string
 Unsupported operand types: string % array
 Unsupported operand types: array % string
-Warning: A non-numeric value encountered
 Unsupported operand types: string % array
 Unsupported operand types: stdClass % null
 Unsupported operand types: null % stdClass
@@ -376,7 +365,6 @@ Unsupported operand types: float % stdClass
 Unsupported operand types: stdClass % string
 Unsupported operand types: string % stdClass
 Unsupported operand types: stdClass % string
-Warning: A non-numeric value encountered
 Unsupported operand types: string % stdClass
 Unsupported operand types: resource % null
 Unsupported operand types: null % resource
@@ -391,7 +379,6 @@ Unsupported operand types: float % resource
 Unsupported operand types: resource % string
 Unsupported operand types: string % resource
 Unsupported operand types: resource % string
-Warning: A non-numeric value encountered
 Unsupported operand types: string % resource
 Unsupported operand types: array ** array
 Unsupported operand types: array ** stdClass
@@ -415,7 +402,6 @@ Unsupported operand types: float ** array
 Unsupported operand types: array ** string
 Unsupported operand types: string ** array
 Unsupported operand types: array ** string
-Warning: A non-numeric value encountered
 Unsupported operand types: string ** array
 Unsupported operand types: stdClass ** null
 Unsupported operand types: null ** stdClass
@@ -430,7 +416,6 @@ Unsupported operand types: float ** stdClass
 Unsupported operand types: stdClass ** string
 Unsupported operand types: string ** stdClass
 Unsupported operand types: stdClass ** string
-Warning: A non-numeric value encountered
 Unsupported operand types: string ** stdClass
 Unsupported operand types: resource ** null
 Unsupported operand types: null ** resource
@@ -445,7 +430,6 @@ Unsupported operand types: float ** resource
 Unsupported operand types: resource ** string
 Unsupported operand types: string ** resource
 Unsupported operand types: resource ** string
-Warning: A non-numeric value encountered
 Unsupported operand types: string ** resource
 Unsupported operand types: array << array
 Unsupported operand types: array << stdClass
@@ -469,7 +453,6 @@ Unsupported operand types: float << array
 Unsupported operand types: array << string
 Unsupported operand types: string << array
 Unsupported operand types: array << string
-Warning: A non-numeric value encountered
 Unsupported operand types: string << array
 Unsupported operand types: stdClass << null
 Unsupported operand types: null << stdClass
@@ -484,7 +467,6 @@ Unsupported operand types: float << stdClass
 Unsupported operand types: stdClass << string
 Unsupported operand types: string << stdClass
 Unsupported operand types: stdClass << string
-Warning: A non-numeric value encountered
 Unsupported operand types: string << stdClass
 Unsupported operand types: resource << null
 Unsupported operand types: null << resource
@@ -499,7 +481,6 @@ Unsupported operand types: float << resource
 Unsupported operand types: resource << string
 Unsupported operand types: string << resource
 Unsupported operand types: resource << string
-Warning: A non-numeric value encountered
 Unsupported operand types: string << resource
 Unsupported operand types: array >> array
 Unsupported operand types: array >> stdClass
@@ -523,7 +504,6 @@ Unsupported operand types: float >> array
 Unsupported operand types: array >> string
 Unsupported operand types: string >> array
 Unsupported operand types: array >> string
-Warning: A non-numeric value encountered
 Unsupported operand types: string >> array
 Unsupported operand types: stdClass >> null
 Unsupported operand types: null >> stdClass
@@ -538,7 +518,6 @@ Unsupported operand types: float >> stdClass
 Unsupported operand types: stdClass >> string
 Unsupported operand types: string >> stdClass
 Unsupported operand types: stdClass >> string
-Warning: A non-numeric value encountered
 Unsupported operand types: string >> stdClass
 Unsupported operand types: resource >> null
 Unsupported operand types: null >> resource
@@ -553,7 +532,6 @@ Unsupported operand types: float >> resource
 Unsupported operand types: resource >> string
 Unsupported operand types: string >> resource
 Unsupported operand types: resource >> string
-Warning: A non-numeric value encountered
 Unsupported operand types: string >> resource
 Unsupported operand types: array & array
 Unsupported operand types: stdClass & array
@@ -577,7 +555,6 @@ Unsupported operand types: float & array
 Unsupported operand types: array & string
 Unsupported operand types: string & array
 Unsupported operand types: array & string
-Warning: A non-numeric value encountered
 Unsupported operand types: string & array
 Unsupported operand types: stdClass & null
 Unsupported operand types: stdClass & null
@@ -629,7 +606,6 @@ Unsupported operand types: float | array
 Unsupported operand types: array | string
 Unsupported operand types: string | array
 Unsupported operand types: array | string
-Warning: A non-numeric value encountered
 Unsupported operand types: string | array
 Unsupported operand types: stdClass | null
 Unsupported operand types: stdClass | null
@@ -681,7 +657,6 @@ Unsupported operand types: float ^ array
 Unsupported operand types: array ^ string
 Unsupported operand types: string ^ array
 Unsupported operand types: array ^ string
-Warning: A non-numeric value encountered
 Unsupported operand types: string ^ array
 Unsupported operand types: stdClass ^ null
 Unsupported operand types: stdClass ^ null
@@ -858,7 +833,6 @@ Unsupported operand types: float + array
 Unsupported operand types: array + string
 Unsupported operand types: string + array
 Unsupported operand types: array + string
-Warning: A non-numeric value encountered
 Unsupported operand types: string + array
 Unsupported operand types: stdClass + null
 Unsupported operand types: null + stdClass
@@ -873,7 +847,6 @@ Unsupported operand types: float + stdClass
 Unsupported operand types: stdClass + string
 Unsupported operand types: string + stdClass
 Unsupported operand types: stdClass + string
-Warning: A non-numeric value encountered
 Unsupported operand types: string + stdClass
 Unsupported operand types: resource + null
 Unsupported operand types: null + resource
@@ -888,7 +861,6 @@ Unsupported operand types: float + resource
 Unsupported operand types: resource + string
 Unsupported operand types: string + resource
 Unsupported operand types: resource + string
-Warning: A non-numeric value encountered
 Unsupported operand types: string + resource
 Unsupported operand types: array - array
 Unsupported operand types: array - stdClass
@@ -912,7 +884,6 @@ Unsupported operand types: float - array
 Unsupported operand types: array - string
 Unsupported operand types: string - array
 Unsupported operand types: array - string
-Warning: A non-numeric value encountered
 Unsupported operand types: string - array
 Unsupported operand types: stdClass - null
 Unsupported operand types: null - stdClass
@@ -927,7 +898,6 @@ Unsupported operand types: float - stdClass
 Unsupported operand types: stdClass - string
 Unsupported operand types: string - stdClass
 Unsupported operand types: stdClass - string
-Warning: A non-numeric value encountered
 Unsupported operand types: string - stdClass
 Unsupported operand types: resource - null
 Unsupported operand types: null - resource
@@ -942,7 +912,6 @@ Unsupported operand types: float - resource
 Unsupported operand types: resource - string
 Unsupported operand types: string - resource
 Unsupported operand types: resource - string
-Warning: A non-numeric value encountered
 Unsupported operand types: string - resource
 Unsupported operand types: array * array
 Unsupported operand types: array * stdClass
@@ -966,7 +935,6 @@ Unsupported operand types: float * array
 Unsupported operand types: array * string
 Unsupported operand types: string * array
 Unsupported operand types: array * string
-Warning: A non-numeric value encountered
 Unsupported operand types: string * array
 Unsupported operand types: stdClass * null
 Unsupported operand types: null * stdClass
@@ -981,7 +949,6 @@ Unsupported operand types: float * stdClass
 Unsupported operand types: stdClass * string
 Unsupported operand types: string * stdClass
 Unsupported operand types: stdClass * string
-Warning: A non-numeric value encountered
 Unsupported operand types: string * stdClass
 Unsupported operand types: resource * null
 Unsupported operand types: null * resource
@@ -996,7 +963,6 @@ Unsupported operand types: float * resource
 Unsupported operand types: resource * string
 Unsupported operand types: string * resource
 Unsupported operand types: resource * string
-Warning: A non-numeric value encountered
 Unsupported operand types: string * resource
 Unsupported operand types: array / array
 Unsupported operand types: array / stdClass
@@ -1020,7 +986,6 @@ Unsupported operand types: float / array
 Unsupported operand types: array / string
 Unsupported operand types: string / array
 Unsupported operand types: array / string
-Warning: A non-numeric value encountered
 Unsupported operand types: string / array
 Unsupported operand types: stdClass / null
 Unsupported operand types: null / stdClass
@@ -1035,7 +1000,6 @@ Unsupported operand types: float / stdClass
 Unsupported operand types: stdClass / string
 Unsupported operand types: string / stdClass
 Unsupported operand types: stdClass / string
-Warning: A non-numeric value encountered
 Unsupported operand types: string / stdClass
 Unsupported operand types: resource / null
 Unsupported operand types: null / resource
@@ -1050,7 +1014,6 @@ Unsupported operand types: float / resource
 Unsupported operand types: resource / string
 Unsupported operand types: string / resource
 Unsupported operand types: resource / string
-Warning: A non-numeric value encountered
 Unsupported operand types: string / resource
 Unsupported operand types: array % array
 Unsupported operand types: array % stdClass
@@ -1074,7 +1037,6 @@ Unsupported operand types: float % array
 Unsupported operand types: array % string
 Unsupported operand types: string % array
 Unsupported operand types: array % string
-Warning: A non-numeric value encountered
 Unsupported operand types: string % array
 Unsupported operand types: stdClass % null
 Unsupported operand types: null % stdClass
@@ -1089,7 +1051,6 @@ Unsupported operand types: float % stdClass
 Unsupported operand types: stdClass % string
 Unsupported operand types: string % stdClass
 Unsupported operand types: stdClass % string
-Warning: A non-numeric value encountered
 Unsupported operand types: string % stdClass
 Unsupported operand types: resource % null
 Unsupported operand types: null % resource
@@ -1104,7 +1065,6 @@ Unsupported operand types: float % resource
 Unsupported operand types: resource % string
 Unsupported operand types: string % resource
 Unsupported operand types: resource % string
-Warning: A non-numeric value encountered
 Unsupported operand types: string % resource
 Unsupported operand types: array ** array
 Unsupported operand types: array ** stdClass
@@ -1128,7 +1088,6 @@ Unsupported operand types: float ** array
 Unsupported operand types: array ** string
 Unsupported operand types: string ** array
 Unsupported operand types: array ** string
-Warning: A non-numeric value encountered
 Unsupported operand types: string ** array
 Unsupported operand types: stdClass ** null
 Unsupported operand types: null ** stdClass
@@ -1143,7 +1102,6 @@ Unsupported operand types: float ** stdClass
 Unsupported operand types: stdClass ** string
 Unsupported operand types: string ** stdClass
 Unsupported operand types: stdClass ** string
-Warning: A non-numeric value encountered
 Unsupported operand types: string ** stdClass
 Unsupported operand types: resource ** null
 Unsupported operand types: null ** resource
@@ -1158,7 +1116,6 @@ Unsupported operand types: float ** resource
 Unsupported operand types: resource ** string
 Unsupported operand types: string ** resource
 Unsupported operand types: resource ** string
-Warning: A non-numeric value encountered
 Unsupported operand types: string ** resource
 Unsupported operand types: array << array
 Unsupported operand types: array << stdClass
@@ -1182,7 +1139,6 @@ Unsupported operand types: float << array
 Unsupported operand types: array << string
 Unsupported operand types: string << array
 Unsupported operand types: array << string
-Warning: A non-numeric value encountered
 Unsupported operand types: string << array
 Unsupported operand types: stdClass << null
 Unsupported operand types: null << stdClass
@@ -1197,7 +1153,6 @@ Unsupported operand types: float << stdClass
 Unsupported operand types: stdClass << string
 Unsupported operand types: string << stdClass
 Unsupported operand types: stdClass << string
-Warning: A non-numeric value encountered
 Unsupported operand types: string << stdClass
 Unsupported operand types: resource << null
 Unsupported operand types: null << resource
@@ -1212,7 +1167,6 @@ Unsupported operand types: float << resource
 Unsupported operand types: resource << string
 Unsupported operand types: string << resource
 Unsupported operand types: resource << string
-Warning: A non-numeric value encountered
 Unsupported operand types: string << resource
 Unsupported operand types: array >> array
 Unsupported operand types: array >> stdClass
@@ -1236,7 +1190,6 @@ Unsupported operand types: float >> array
 Unsupported operand types: array >> string
 Unsupported operand types: string >> array
 Unsupported operand types: array >> string
-Warning: A non-numeric value encountered
 Unsupported operand types: string >> array
 Unsupported operand types: stdClass >> null
 Unsupported operand types: null >> stdClass
@@ -1251,7 +1204,6 @@ Unsupported operand types: float >> stdClass
 Unsupported operand types: stdClass >> string
 Unsupported operand types: string >> stdClass
 Unsupported operand types: stdClass >> string
-Warning: A non-numeric value encountered
 Unsupported operand types: string >> stdClass
 Unsupported operand types: resource >> null
 Unsupported operand types: null >> resource
@@ -1266,7 +1218,6 @@ Unsupported operand types: float >> resource
 Unsupported operand types: resource >> string
 Unsupported operand types: string >> resource
 Unsupported operand types: resource >> string
-Warning: A non-numeric value encountered
 Unsupported operand types: string >> resource
 Unsupported operand types: array & array
 Unsupported operand types: array & stdClass
@@ -1290,7 +1241,6 @@ Unsupported operand types: float & array
 Unsupported operand types: array & string
 Unsupported operand types: string & array
 Unsupported operand types: array & string
-Warning: A non-numeric value encountered
 Unsupported operand types: string & array
 Unsupported operand types: stdClass & null
 Unsupported operand types: null & stdClass
@@ -1305,7 +1255,6 @@ Unsupported operand types: float & stdClass
 Unsupported operand types: stdClass & string
 Unsupported operand types: string & stdClass
 Unsupported operand types: stdClass & string
-Warning: A non-numeric value encountered
 Unsupported operand types: string & stdClass
 Unsupported operand types: resource & null
 Unsupported operand types: null & resource
@@ -1320,7 +1269,6 @@ Unsupported operand types: float & resource
 Unsupported operand types: resource & string
 Unsupported operand types: string & resource
 Unsupported operand types: resource & string
-Warning: A non-numeric value encountered
 Unsupported operand types: string & resource
 Unsupported operand types: array | array
 Unsupported operand types: array | stdClass
@@ -1344,7 +1292,6 @@ Unsupported operand types: float | array
 Unsupported operand types: array | string
 Unsupported operand types: string | array
 Unsupported operand types: array | string
-Warning: A non-numeric value encountered
 Unsupported operand types: string | array
 Unsupported operand types: stdClass | null
 Unsupported operand types: null | stdClass
@@ -1359,7 +1306,6 @@ Unsupported operand types: float | stdClass
 Unsupported operand types: stdClass | string
 Unsupported operand types: string | stdClass
 Unsupported operand types: stdClass | string
-Warning: A non-numeric value encountered
 Unsupported operand types: string | stdClass
 Unsupported operand types: resource | null
 Unsupported operand types: null | resource
@@ -1374,7 +1320,6 @@ Unsupported operand types: float | resource
 Unsupported operand types: resource | string
 Unsupported operand types: string | resource
 Unsupported operand types: resource | string
-Warning: A non-numeric value encountered
 Unsupported operand types: string | resource
 Unsupported operand types: array ^ array
 Unsupported operand types: array ^ stdClass
@@ -1398,7 +1343,6 @@ Unsupported operand types: float ^ array
 Unsupported operand types: array ^ string
 Unsupported operand types: string ^ array
 Unsupported operand types: array ^ string
-Warning: A non-numeric value encountered
 Unsupported operand types: string ^ array
 Unsupported operand types: stdClass ^ null
 Unsupported operand types: null ^ stdClass
@@ -1413,7 +1357,6 @@ Unsupported operand types: float ^ stdClass
 Unsupported operand types: stdClass ^ string
 Unsupported operand types: string ^ stdClass
 Unsupported operand types: stdClass ^ string
-Warning: A non-numeric value encountered
 Unsupported operand types: string ^ stdClass
 Unsupported operand types: resource ^ null
 Unsupported operand types: null ^ resource
@@ -1428,7 +1371,6 @@ Unsupported operand types: float ^ resource
 Unsupported operand types: resource ^ string
 Unsupported operand types: string ^ resource
 Unsupported operand types: resource ^ string
-Warning: A non-numeric value encountered
 Unsupported operand types: string ^ resource
 Warning: Array to string conversion
 Warning: Array to string conversion

@@ -245,7 +245,13 @@ static zend_never_inline int ZEND_FASTCALL _zendi_try_convert_scalar_to_number(z
 		case IS_STRING:
 			if ((Z_TYPE_INFO_P(holder) = is_numeric_string(Z_STRVAL_P(op), Z_STRLEN_P(op),
 					&Z_LVAL_P(holder), &Z_DVAL_P(holder), false)) == 0) {
-				ZVAL_LONG(holder, 0);
+				/* Not strictly numeric
+				 * For BC reasons warn on leading numeric strings */
+				if ((Z_TYPE_INFO_P(holder) = is_numeric_string(Z_STRVAL_P(op), Z_STRLEN_P(op),
+						&Z_LVAL_P(holder), &Z_DVAL_P(holder), /* allow errors */ true)) == 0) {
+					/* Will lead to invalid OP type error */
+					return FAILURE;
+				}
 				zend_error(E_WARNING, "A non-numeric value encountered");
 				if (UNEXPECTED(EG(exception))) {
 					return FAILURE;
@@ -295,11 +301,28 @@ static zend_never_inline zend_long ZEND_FASTCALL zendi_try_get_long(zval *op, ze
 				zend_long lval;
 				double dval;
 				if (0 == (type = is_numeric_string(Z_STRVAL_P(op), Z_STRLEN_P(op), &lval, &dval, false))) {
+					/* Not strictly numeric
+					 * For BC reasons warn on leading numeric strings */
+					if (0 == (type = is_numeric_string(Z_STRVAL_P(op), Z_STRLEN_P(op), &lval, &dval,
+							/* allow errors */ true))) {
+						/* Will lead to invalid OP type error */
+						*failed = 1;
+						return 0;
+					}
 					zend_error(E_WARNING, "A non-numeric value encountered");
 					if (UNEXPECTED(EG(exception))) {
 						*failed = 1;
 					}
-					return 0;
+					if (type == IS_LONG) {
+						return lval;
+					} else {
+						/* Previously we used strtol here, not is_numeric_string,
+						 * and strtol gives you LONG_MAX/_MIN on overflow.
+						 * We use use saturating conversion to emulate strtol()'s
+						 * behaviour.
+						 */
+						return zend_dval_to_lval_cap(dval);
+					}
 				} else if (EXPECTED(type == IS_LONG)) {
 					return lval;
 				} else {

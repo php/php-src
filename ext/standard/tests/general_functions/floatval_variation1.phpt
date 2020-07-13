@@ -82,10 +82,10 @@ float(10)
 float(10.2)
 
 -- Iteration : "10.0 dollar" + 1 --
-float(1)
+float(11)
 
 -- Iteration : "10.0 dollar" + 1.0 --
-float(1)
+float(11)
 
 -- Iteration : "" --
 float(0)
@@ -132,10 +132,10 @@ float(10)
 float(10.2)
 
 -- Iteration : "10.0 dollar" + 1 --
-float(1)
+float(11)
 
 -- Iteration : "10.0 dollar" + 1.0 --
-float(1)
+float(11)
 
 -- Iteration : "" --
 float(0)

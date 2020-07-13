@@ -40,13 +40,13 @@ int(1234500000)
 int(-1234500000)
 
 Warning: A non-numeric value encountered in %s on line %d
-int(0)
+int(1234500000)
 
 Warning: A non-numeric value encountered in %s on line %d
-int(0)
+int(-1234500000)
 
 Warning: A non-numeric value encountered in %s on line %d
-int(0)
+int(1234500000)
 
 Warning: A non-numeric value encountered in %s on line %d
-int(0)
+int(-1234500000)

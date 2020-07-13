@@ -1,198 +1,206 @@
 --TEST--
-Invalid numeric string E_WARNINGs
+Invalid numeric string TypeErrors and E_WARNINGs
 --FILE--
 <?php
 
 var_dump("2 Lorem" + "3 ipsum");
-var_dump("dolor" + "sit");
+try {
+    var_dump("dolor" + "sit");
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 echo "---", PHP_EOL;
 var_dump("5 amet," - "7 consectetur");
-var_dump("adipiscing" - "elit,");
+try {
+    var_dump("adipiscing" - "elit,");
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 echo "---", PHP_EOL;
 var_dump("11 sed" * "13 do");
-var_dump("eiusmod" * "tempor");
+try {
+    var_dump("eiusmod" * "tempor");
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 echo "---", PHP_EOL;
 var_dump("17 incididunt" / "19 ut");
-var_dump("labore" / "et");
+try {
+    var_dump("labore" / "et");
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 echo "---", PHP_EOL;
 var_dump("23 dolore" ** "29 magna");
-var_dump("aliqua." ** "Ut");
-echo "---", PHP_EOL;
 try {
-    var_dump("31 enim" % "37 ad");
-} catch (DivisionByZeroError $e) {
+    var_dump("aliqua." ** "Ut");
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
 }
+echo "---", PHP_EOL;
+var_dump("31 enim" % "37 ad");
 try {
     var_dump("minim" % "veniam,");
-} catch (DivisionByZeroError $e) {
+} catch (\TypeError $e) {
+    echo get_class($e) . ': ' . $e->getMessage() . \PHP_EOL;
 }
 echo "---", PHP_EOL;
 var_dump("41 minim" << "43 veniam,");
-var_dump("quis" << "nostrud");
+try {
+    var_dump("quis" << "nostrud");
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 echo "---", PHP_EOL;
 var_dump("47 exercitation" >> "53 ullamco");
-var_dump("laboris" >> "nisi");
+try {
+    var_dump("laboris" >> "nisi");
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 echo "---", PHP_EOL;
 var_dump("59 ut" | 61);
 var_dump(67 | "71 aliquip");
-var_dump("ex" | 73);
-var_dump(79 | "ea");
+try {
+    var_dump("ex" | 73);
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    var_dump(79 | "ea");
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 echo "---", PHP_EOL;
 var_dump("83 commodo" & 89);
 var_dump(97 & "101 consequat.");
-var_dump("Duis" & 103);
-var_dump(107 & "aute");
+try {
+    var_dump("Duis" & 103);
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    var_dump(107 & "aute");
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 echo "---", PHP_EOL;
 var_dump("109 irure" ^ 113);
 var_dump(127 ^ "131 dolor");
-var_dump("in" ^ 137);
-var_dump(139 ^ "reprehenderit");
+try {
+    var_dump("in" ^ 137);
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    var_dump(139 ^ "reprehenderit");
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 echo "---", PHP_EOL;
 var_dump(+"149 in");
-var_dump(+"voluptate");
+try {
+    var_dump(+"voluptate");
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 echo "---", PHP_EOL;
 var_dump(-"151 velit");
-var_dump(-"esse");
+try {
+    var_dump(-"esse");
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 ?>
 --EXPECTF--
 Warning: A non-numeric value encountered in %s on line %d
 
 Warning: A non-numeric value encountered in %s on line %d
-int(0)
+int(5)
+Unsupported operand types: string + string
+---
 
 Warning: A non-numeric value encountered in %s on line %d
 
 Warning: A non-numeric value encountered in %s on line %d
-int(0)
+int(-2)
+Unsupported operand types: string - string
+---
+
+Warning: A non-numeric value encountered in %s on line %d
+
+Warning: A non-numeric value encountered in %s on line %d
+int(143)
+Unsupported operand types: string * string
+---
+
+Warning: A non-numeric value encountered in %s on line %d
+
+Warning: A non-numeric value encountered in %s on line %d
+float(0.8947368421052632)
+Unsupported operand types: string / string
+---
+
+Warning: A non-numeric value encountered in %s on line %d
+
+Warning: A non-numeric value encountered in %s on line %d
+float(3.0910586430935376E+39)
+Unsupported operand types: string ** string
+---
+
+Warning: A non-numeric value encountered in %s on line %d
+
+Warning: A non-numeric value encountered in %s on line %d
+int(31)
+TypeError: Unsupported operand types: string % string
+---
+
+Warning: A non-numeric value encountered in %s on line %d
+
+Warning: A non-numeric value encountered in %s on line %d
+int(360639813910528)
+Unsupported operand types: string << string
 ---
 
 Warning: A non-numeric value encountered in %s on line %d
 
 Warning: A non-numeric value encountered in %s on line %d
 int(0)
-
-Warning: A non-numeric value encountered in %s on line %d
-
-Warning: A non-numeric value encountered in %s on line %d
-int(0)
+Unsupported operand types: string >> string
 ---
 
 Warning: A non-numeric value encountered in %s on line %d
+int(63)
 
 Warning: A non-numeric value encountered in %s on line %d
-int(0)
-
-Warning: A non-numeric value encountered in %s on line %d
-
-Warning: A non-numeric value encountered in %s on line %d
-int(0)
+int(71)
+Unsupported operand types: string | int
+Unsupported operand types: int | string
 ---
 
 Warning: A non-numeric value encountered in %s on line %d
+int(81)
 
 Warning: A non-numeric value encountered in %s on line %d
-
-Warning: Division by zero in %s on line %d
-float(NAN)
-
-Warning: A non-numeric value encountered in %s on line %d
-
-Warning: A non-numeric value encountered in %s on line %d
-
-Warning: Division by zero in %s on line %d
-float(NAN)
+int(97)
+Unsupported operand types: string & int
+Unsupported operand types: int & string
 ---
 
 Warning: A non-numeric value encountered in %s on line %d
+int(28)
 
 Warning: A non-numeric value encountered in %s on line %d
-int(1)
-
-Warning: A non-numeric value encountered in %s on line %d
-
-Warning: A non-numeric value encountered in %s on line %d
-int(1)
+int(252)
+Unsupported operand types: string ^ int
+Unsupported operand types: int ^ string
 ---
 
 Warning: A non-numeric value encountered in %s on line %d
-
-Warning: A non-numeric value encountered in %s on line %d
-
-Warning: A non-numeric value encountered in %s on line %d
-
-Warning: A non-numeric value encountered in %s on line %d
+int(149)
+Unsupported operand types: int * string
 ---
 
 Warning: A non-numeric value encountered in %s on line %d
-
-Warning: A non-numeric value encountered in %s on line %d
-int(0)
-
-Warning: A non-numeric value encountered in %s on line %d
-
-Warning: A non-numeric value encountered in %s on line %d
-int(0)
----
-
-Warning: A non-numeric value encountered in %s on line %d
-
-Warning: A non-numeric value encountered in %s on line %d
-int(0)
-
-Warning: A non-numeric value encountered in %s on line %d
-
-Warning: A non-numeric value encountered in %s on line %d
-int(0)
----
-
-Warning: A non-numeric value encountered in %s on line %d
-int(61)
-
-Warning: A non-numeric value encountered in %s on line %d
-int(67)
-
-Warning: A non-numeric value encountered in %s on line %d
-int(73)
-
-Warning: A non-numeric value encountered in %s on line %d
-int(79)
----
-
-Warning: A non-numeric value encountered in %s on line %d
-int(0)
-
-Warning: A non-numeric value encountered in %s on line %d
-int(0)
-
-Warning: A non-numeric value encountered in %s on line %d
-int(0)
-
-Warning: A non-numeric value encountered in %s on line %d
-int(0)
----
-
-Warning: A non-numeric value encountered in %s on line %d
-int(113)
-
-Warning: A non-numeric value encountered in %s on line %d
-int(127)
-
-Warning: A non-numeric value encountered in %s on line %d
-int(137)
-
-Warning: A non-numeric value encountered in %s on line %d
-int(139)
----
-
-Warning: A non-numeric value encountered in %s on line %d
-int(0)
-
-Warning: A non-numeric value encountered in %s on line %d
-int(0)
----
-
-Warning: A non-numeric value encountered in %s on line %d
-int(0)
-
-Warning: A non-numeric value encountered in %s on line %d
-int(0)
+int(-151)
+Unsupported operand types: int * string
