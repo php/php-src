@@ -2564,6 +2564,21 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_dispatch_try
 	}
 
 	/* Uncaught exception */
+
+	zend_function *func = execute_data->func;
+	if (zend_observer_fcall_op_array_extension != -1
+	    && func
+	    && !(func->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE | ZEND_ACC_FAKE_CLOSURE))
+	) {
+		void *observer_handlers =
+			ZEND_OP_ARRAY_EXTENSION(&func->op_array, zend_observer_fcall_op_array_extension);
+		if (observer_handlers != ZEND_OBSERVER_NOT_OBSERVED) {
+			zval undef;
+			ZVAL_UNDEF(&undef);
+			zend_observe_fcall_end(observer_handlers, execute_data, &undef);
+		}
+
+	}
 	cleanup_live_vars(execute_data, op_num, 0);
 	if (UNEXPECTED((EX_CALL_INFO() & ZEND_CALL_GENERATOR) != 0)) {
 		zend_generator *generator = zend_get_running_generator(EXECUTE_DATA_C);
@@ -3571,6 +3586,21 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_CONST_
 			}
 		}
 	}
+
+	// todo: should this go in the leave helper?
+	zend_function *func = EG(current_execute_data)->func;
+	if (zend_observer_fcall_op_array_extension != -1
+	    && func
+	    && !(func->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE | ZEND_ACC_FAKE_CLOSURE))
+	) {
+		void *observer_handlers =
+			ZEND_OP_ARRAY_EXTENSION(&func->op_array, zend_observer_fcall_op_array_extension);
+		if (observer_handlers != ZEND_OBSERVER_NOT_OBSERVED) {
+			zend_observe_fcall_end(observer_handlers, EG(current_execute_data), return_value);
+		}
+
+	}
+
 	ZEND_VM_TAIL_CALL(zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 }
 
@@ -17532,6 +17562,21 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_TMP_HA
 			}
 		}
 	}
+
+	// todo: should this go in the leave helper?
+	zend_function *func = EG(current_execute_data)->func;
+	if (zend_observer_fcall_op_array_extension != -1
+	    && func
+	    && !(func->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE | ZEND_ACC_FAKE_CLOSURE))
+	) {
+		void *observer_handlers =
+			ZEND_OP_ARRAY_EXTENSION(&func->op_array, zend_observer_fcall_op_array_extension);
+		if (observer_handlers != ZEND_OBSERVER_NOT_OBSERVED) {
+			zend_observe_fcall_end(observer_handlers, EG(current_execute_data), return_value);
+		}
+
+	}
+
 	ZEND_VM_TAIL_CALL(zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 }
 
@@ -20018,6 +20063,21 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_VAR_HA
 			}
 		}
 	}
+
+	// todo: should this go in the leave helper?
+	zend_function *func = EG(current_execute_data)->func;
+	if (zend_observer_fcall_op_array_extension != -1
+	    && func
+	    && !(func->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE | ZEND_ACC_FAKE_CLOSURE))
+	) {
+		void *observer_handlers =
+			ZEND_OP_ARRAY_EXTENSION(&func->op_array, zend_observer_fcall_op_array_extension);
+		if (observer_handlers != ZEND_OBSERVER_NOT_OBSERVED) {
+			zend_observe_fcall_end(observer_handlers, EG(current_execute_data), return_value);
+		}
+
+	}
+
 	ZEND_VM_TAIL_CALL(zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 }
 
@@ -35983,6 +36043,21 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_CV_HAN
 			}
 		}
 	}
+
+	// todo: should this go in the leave helper?
+	zend_function *func = EG(current_execute_data)->func;
+	if (zend_observer_fcall_op_array_extension != -1
+	    && func
+	    && !(func->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE | ZEND_ACC_FAKE_CLOSURE))
+	) {
+		void *observer_handlers =
+			ZEND_OP_ARRAY_EXTENSION(&func->op_array, zend_observer_fcall_op_array_extension);
+		if (observer_handlers != ZEND_OBSERVER_NOT_OBSERVED) {
+			zend_observe_fcall_end(observer_handlers, EG(current_execute_data), return_value);
+		}
+
+	}
+
 	ZEND_VM_TAIL_CALL(zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 }
 
@@ -52579,6 +52654,21 @@ zend_leave_helper_SPEC_LABEL:
 			}
 		}
 	}
+
+	// todo: should this go in the leave helper?
+	zend_function *func = EG(current_execute_data)->func;
+	if (zend_observer_fcall_op_array_extension != -1
+	    && func
+	    && !(func->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE | ZEND_ACC_FAKE_CLOSURE))
+	) {
+		void *observer_handlers =
+			ZEND_OP_ARRAY_EXTENSION(&func->op_array, zend_observer_fcall_op_array_extension);
+		if (observer_handlers != ZEND_OBSERVER_NOT_OBSERVED) {
+			zend_observe_fcall_end(observer_handlers, EG(current_execute_data), return_value);
+		}
+
+	}
+
 	goto zend_leave_helper_SPEC_LABEL;
 }
 
@@ -54080,6 +54170,21 @@ zend_leave_helper_SPEC_LABEL:
 			}
 		}
 	}
+
+	// todo: should this go in the leave helper?
+	zend_function *func = EG(current_execute_data)->func;
+	if (zend_observer_fcall_op_array_extension != -1
+	    && func
+	    && !(func->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE | ZEND_ACC_FAKE_CLOSURE))
+	) {
+		void *observer_handlers =
+			ZEND_OP_ARRAY_EXTENSION(&func->op_array, zend_observer_fcall_op_array_extension);
+		if (observer_handlers != ZEND_OBSERVER_NOT_OBSERVED) {
+			zend_observe_fcall_end(observer_handlers, EG(current_execute_data), return_value);
+		}
+
+	}
+
 	goto zend_leave_helper_SPEC_LABEL;
 }
 
@@ -54373,6 +54478,21 @@ zend_leave_helper_SPEC_LABEL:
 			}
 		}
 	}
+
+	// todo: should this go in the leave helper?
+	zend_function *func = EG(current_execute_data)->func;
+	if (zend_observer_fcall_op_array_extension != -1
+	    && func
+	    && !(func->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE | ZEND_ACC_FAKE_CLOSURE))
+	) {
+		void *observer_handlers =
+			ZEND_OP_ARRAY_EXTENSION(&func->op_array, zend_observer_fcall_op_array_extension);
+		if (observer_handlers != ZEND_OBSERVER_NOT_OBSERVED) {
+			zend_observe_fcall_end(observer_handlers, EG(current_execute_data), return_value);
+		}
+
+	}
+
 	goto zend_leave_helper_SPEC_LABEL;
 }
 
@@ -55454,6 +55574,21 @@ zend_leave_helper_SPEC_LABEL:
 			}
 		}
 	}
+
+	// todo: should this go in the leave helper?
+	zend_function *func = EG(current_execute_data)->func;
+	if (zend_observer_fcall_op_array_extension != -1
+	    && func
+	    && !(func->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE | ZEND_ACC_FAKE_CLOSURE))
+	) {
+		void *observer_handlers =
+			ZEND_OP_ARRAY_EXTENSION(&func->op_array, zend_observer_fcall_op_array_extension);
+		if (observer_handlers != ZEND_OBSERVER_NOT_OBSERVED) {
+			zend_observe_fcall_end(observer_handlers, EG(current_execute_data), return_value);
+		}
+
+	}
+
 	goto zend_leave_helper_SPEC_LABEL;
 }
 

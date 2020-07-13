@@ -86,13 +86,23 @@ void zend_observe_fcall_begin(
 {
 	zend_observer_fcall *handler, *end = cache->end;
 	for (handler = cache->handlers; handler != end; ++handler) {
-		handler->begin(execute_data);
+		if (handler->begin) {
+			handler->begin(execute_data);
+                }
 	}
 }
 
 void zend_observe_fcall_end(
 	zend_observer_fcall_cache *cache,
 	zend_execute_data *execute_data,
-	zval *return_value) {}
+	zval *return_value)
+{
+	zend_observer_fcall *handler = cache->end, *end = cache->handlers;
+	while (handler-- != end) {
+		if (handler->end) {
+			handler->end(execute_data, return_value);
+		}
+	}
+}
 
 
