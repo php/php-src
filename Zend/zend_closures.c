@@ -159,6 +159,7 @@ ZEND_METHOD(Closure, call)
 			ptr = (char*)ptr + sizeof(void*);
 			ZEND_MAP_PTR_SET(my_function.op_array.run_time_cache, ptr);
 			memset(ptr, 0, my_function.op_array.cache_size);
+			zend_observer_fcall_install(&my_function);
 		}
 	}
 

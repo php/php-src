@@ -3,7 +3,7 @@
 #ifndef ZEND_OBSERVER_H
 #define ZEND_OBSERVER_H
 
-#include "php.h"
+#include "zend.h"
 #include "zend_llist.h"
 
 BEGIN_EXTERN_C()

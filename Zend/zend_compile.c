@@ -32,6 +32,10 @@
 #include "zend_language_scanner.h"
 #include "zend_inheritance.h"
 #include "zend_vm.h"
+//#include "zend_observer.h"
+
+// TODO
+ZEND_API void zend_observer_fcall_install(zend_function *function);
 
 #define SET_NODE(target, src) do { \
 		target ## _type = (src)->op_type; \
@@ -1326,6 +1330,7 @@ ZEND_API void zend_do_delayed_early_binding(zend_op_array *op_array, uint32_t fi
 			ptr = (char*)ptr + sizeof(void*);
 			ZEND_MAP_PTR_SET(op_array->run_time_cache, ptr);
 			memset(ptr, 0, op_array->cache_size);
+			zend_observer_fcall_install((zend_function*)op_array);
 		}
 		run_time_cache = RUN_TIME_CACHE(op_array);
 

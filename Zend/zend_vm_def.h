@@ -4051,7 +4051,7 @@ ZEND_VM_HOT_HANDLER(60, ZEND_DO_FCALL, ANY, ANY, SPEC(RETVAL))
 		execute_data = call;
 		i_init_func_execute_data(&fbc->op_array, ret, 1 EXECUTE_DATA_CC);
 
-		if (zend_observer_fcall_op_array_extension != -1) {
+		if (zend_observer_fcall_op_array_extension != -1 && !(fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE | ZEND_ACC_FAKE_CLOSURE))) {
 			void *observer_handlers = ZEND_OP_ARRAY_EXTENSION(&fbc->op_array, zend_observer_fcall_op_array_extension);
 			ZEND_ASSERT(observer_handlers);
 			if (observer_handlers != ZEND_OBSERVER_NOT_OBSERVED) {
