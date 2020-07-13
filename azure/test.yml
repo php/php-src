@@ -13,6 +13,7 @@ steps:
       export REPORT_EXIT_STATUS=no
       export SKIP_IO_CAPTURE_TESTS=1
       export MSAN_SYMBOLIZER_PATH=/usr/lib/llvm-6.0/bin/llvm-symbolizer
+      export ASAN_OPTIONS=fast_unwind_on_malloc=0
       rm -rf junit.xml | true
       php run-tests.php -P -q \
           -j$(/usr/bin/nproc) \
@@ -21,7 +22,8 @@ steps:
           --show-diff \
           --show-slow 1000 \
           --set-timeout 120 \
-          ${{ parameters.runTestsParameters }}
+          ${{ parameters.runTestsParameters }} \
+          ext/ldap
     displayName: 'Test ${{ parameters.configurationName }} ${{ parameters.runTestsName }}'
     condition: or(succeeded(), failed())
   - task: PublishTestResults@2
