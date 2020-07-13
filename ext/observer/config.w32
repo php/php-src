@@ -1,0 +1,7 @@
+ARG_ENABLE('observer', 'observer support', 'no');
+
+if (PHP_OBSERVER != 'no') {
+	AC_DEFINE('HAVE_OBSERVER', 1, 'observer support enabled');
+
+	EXTENSION('observer', 'observer.c', null, '/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1');
+}
