@@ -140,7 +140,8 @@ PHP 8.0 INTERNALS UPGRADE NOTES
   s. The zend_fcall_info no_separation flag has been removed, and separation is
       never allowed. If you wish to pass (or allow passing) arguments by
       reference, explicitly create those arguments as references using
-      ZEND_MAKE_REF.
+      ZEND_MAKE_REF. This removal also affects call_user_function_ex(), which
+      should be replaced by call_user_function().
 
   t. The following ZEND_API function have changed signature:
      1. Void in Zend Engine 4.0:
