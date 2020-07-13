@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     not handled properly). (Nikita)
   . Fixed bug #79791 (Assertion failure when unsetting variable during binary
     op). (Nikita)
+  . Fixed bug #79841 (Syntax error in configure / unescaped "[]" in php.m4).
+    (Nikita)
 
 09 Jul 2020, PHP 8.0.0alpha2
 
