@@ -11590,19 +11590,27 @@ static zend_bool zend_jit_verify_return_type(dasm_State **Dst, const zend_op *op
 
 	uint32_t type_mask = ZEND_TYPE_PURE_MASK(arg_info->type);
 	if (type_mask == 0) {
-		|	jmp >8
+		|	jmp >7
 	} else if (is_power_of_two(type_mask)) {
 		uint32_t type_code = concrete_type(type_mask);
 		|	cmp byte [r0 + 8], type_code
-		|	jne >8
+		|	jne >7
 	} else {
 		|	mov edx, 1
 		|	mov cl, byte [r0 + 8]
 		|	shl edx, cl
 		|	test edx, type_mask
-		|	je >8
+		|	je >7
 	}
 	|.cold_code
+	|7:
+	|	SAVE_VALID_OPLINE opline, r1
+	if (op1_info & MAY_BE_UNDEF) {
+		|	IF_NOT_ZVAL_TYPE op1_addr, IS_UNDEF, >8
+		|	mov FCARG1a, opline->op1.var
+		|	EXT_CALL zend_jit_undefined_op_helper, r1
+		|	LOAD_ADDR_ZTS r0, executor_globals, uninitialized_zval
+	}
 	|8:
 	|	mov FCARG1a, r0
 	|	mov r0, EX->run_time_cache
@@ -11611,13 +11619,11 @@ static zend_bool zend_jit_verify_return_type(dasm_State **Dst, const zend_op *op
 	|.if X64
 		|	LOAD_ADDR CARG3, (ptrdiff_t)arg_info
 		|	mov CARG4, r0
-		|	SAVE_VALID_OPLINE opline, r0
 		|	EXT_CALL zend_jit_verify_return_slow, r0
 	|.else
 		|	sub r4, 8
 		|	push r0
 		|	push (ptrdiff_t)arg_info
-		|	SAVE_VALID_OPLINE opline, r0
 		|	EXT_CALL zend_jit_verify_return_slow, r0
 		|	add r4, 8
 	|.endif
