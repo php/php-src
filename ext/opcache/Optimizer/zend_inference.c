@@ -3394,7 +3394,7 @@ static zend_always_inline int _zend_update_type_info(
 			break;
 		case ZEND_FETCH_THIS:
 			UPDATE_SSA_OBJ_TYPE(op_array->scope, 1, ssa_op->result_def);
-			UPDATE_SSA_TYPE(MAY_BE_RC1|MAY_BE_RCN|MAY_BE_OBJECT, ssa_op->result_def);
+			UPDATE_SSA_TYPE(MAY_BE_RCN|MAY_BE_OBJECT, ssa_op->result_def);
 			break;
 		case ZEND_FETCH_OBJ_R:
 		case ZEND_FETCH_OBJ_IS:
@@ -3408,20 +3408,22 @@ static zend_always_inline int _zend_update_type_info(
 				tmp = zend_fetch_prop_type(script, prop_info, &ce);
 				if (opline->result_type != IS_TMP_VAR) {
 					tmp |= MAY_BE_REF | MAY_BE_INDIRECT;
-				} else if (prop_info) {
-					/* FETCH_OBJ_R/IS for plain property increments reference counter,
-					   so it can't be 1 */
-					tmp &= ~MAY_BE_RC1;
-				} else {
-					zend_class_entry *ce = NULL;
-
-					if (opline->op1_type == IS_UNUSED) {
-						ce = op_array->scope;
-					} else if (ssa_op->op1_use >= 0 && !ssa->var_info[ssa_op->op1_use].is_instanceof) {
-						ce = ssa->var_info[ssa_op->op1_use].ce;
-					}
-					if (ce && !ce->create_object && !ce->__get) {
+				} else if (!(opline->op1_type & (IS_VAR|IS_TMP_VAR)) || !(t1 & MAY_BE_RC1)) {
+					if (prop_info) {
+						/* FETCH_OBJ_R/IS for plain property increments reference counter,
+						   so it can't be 1 */
 						tmp &= ~MAY_BE_RC1;
+					} else {
+						zend_class_entry *ce = NULL;
+
+						if (opline->op1_type == IS_UNUSED) {
+							ce = op_array->scope;
+						} else if (ssa_op->op1_use >= 0 && !ssa->var_info[ssa_op->op1_use].is_instanceof) {
+							ce = ssa->var_info[ssa_op->op1_use].ce;
+						}
+						if (ce && !ce->create_object && !ce->__get) {
+							tmp &= ~MAY_BE_RC1;
+						}
 					}
 				}
 				UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
