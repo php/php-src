@@ -2972,7 +2972,7 @@ static int accel_startup(zend_extension *extension)
 	orig_post_startup_cb = zend_post_startup_cb;
 	zend_post_startup_cb = accel_post_startup;
 
-	/* Prevent unloadig */
+	/* Prevent unloading */
 	extension->handle = 0;
 
 	return SUCCESS;
@@ -3902,7 +3902,7 @@ static void preload_link(void)
 		} ZEND_HASH_FOREACH_END();
 	} while (changed);
 
-	/* Move unlinked clases (and with unresilved constants) back to scripts */
+	/* Move unlinked clases (and with unresolved constants) back to scripts */
 	orig_dtor = EG(class_table)->pDestructor;
 	EG(class_table)->pDestructor = NULL;
 	ZEND_HASH_REVERSE_FOREACH_STR_KEY_VAL(EG(class_table), key, zv) {
