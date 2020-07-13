@@ -429,7 +429,6 @@ static void accel_interned_strings_save_state(void)
 
 static zend_always_inline zend_string *accel_find_interned_string(zend_string *str)
 {
-/* for now interned strings are supported only for non-ZTS build */
 	zend_ulong   h;
 	uint32_t     pos;
 	zend_string *s;
