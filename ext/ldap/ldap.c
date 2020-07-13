@@ -166,15 +166,17 @@ static void _php_ldap_control_to_array(LDAP *ld, LDAPControl* ctrl, zval* array,
 		}
 	} else if (strcmp(ctrl->ldctl_oid, LDAP_CONTROL_PAGEDRESULTS) == 0) {
 		int lestimated, rc;
-		struct berval lcookie;
+		struct berval lcookie = { 0L, NULL };
 		zval value;
 
 		if (ctrl->ldctl_value.bv_len) {
+			/* ldap_parse_pageresponse_control() allocates lcookie.bv_val */
 			rc = ldap_parse_pageresponse_control(ld, ctrl, &lestimated, &lcookie);
 		} else {
 			/* ldap_parse_pageresponse_control will crash if value is empty */
 			rc = -1;
 		}
+
 		if ( rc == LDAP_SUCCESS ) {
 			array_init(&value);
 			add_assoc_long(&value, "size", lestimated);
@@ -182,6 +184,10 @@ static void _php_ldap_control_to_array(LDAP *ld, LDAPControl* ctrl, zval* array,
 			add_assoc_zval(array, "value", &value);
 		} else {
 			add_assoc_null(array, "value");
+		}
+
+		if (lcookie.bv_val) {
+			ldap_memfree(lcookie.bv_val);
 		}
 	} else if ((strcmp(ctrl->ldctl_oid, LDAP_CONTROL_PRE_READ) == 0) || (strcmp(ctrl->ldctl_oid, LDAP_CONTROL_POST_READ) == 0)) {
 		BerElement *ber;
@@ -301,27 +307,23 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 		control_iscritical = 0;
 	}
 
-	struct berval *control_value = NULL;
+	BerElement *ber = NULL;
+	struct berval control_value = { 0L, NULL };
+	int control_value_alloc = 0;
 
 	if ((val = zend_hash_str_find(Z_ARRVAL_P(array), "value", sizeof("value") - 1)) != NULL) {
 		if (Z_TYPE_P(val) != IS_ARRAY) {
-			control_value = ber_memalloc(sizeof * control_value);
-			if (control_value == NULL) {
+			tmpstring = zval_get_string(val);
+			if (EG(exception)) {
 				rc = -1;
-				php_error_docref(NULL, E_WARNING, "Failed to allocate control value");
-			} else {
-				tmpstring = zval_get_string(val);
-				if (EG(exception)) {
-					rc = -1;
-					goto failure;
-				}
-				control_value->bv_val = ZSTR_VAL(tmpstring);
-				control_value->bv_len = ZSTR_LEN(tmpstring);
+				goto failure;
 			}
+			control_value.bv_val = ZSTR_VAL(tmpstring);
+			control_value.bv_len = ZSTR_LEN(tmpstring);
 		} else if (strcmp(ZSTR_VAL(control_oid), LDAP_CONTROL_PAGEDRESULTS) == 0) {
 			zval* tmp;
 			int pagesize = 1;
-			struct berval cookie = { 0, NULL };
+			struct berval cookie = { 0L, NULL };
 			if ((tmp = zend_hash_str_find(Z_ARRVAL_P(val), "size", sizeof("size") - 1)) != NULL) {
 				pagesize = zval_get_long(tmp);
 			}
@@ -334,15 +336,11 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 				cookie.bv_val = ZSTR_VAL(tmpstring);
 				cookie.bv_len = ZSTR_LEN(tmpstring);
 			}
-			control_value = ber_memalloc(sizeof * control_value);
-			if (control_value == NULL) {
-				rc = -1;
-				php_error_docref(NULL, E_WARNING, "Failed to allocate control value");
-			} else {
-				rc = ldap_create_page_control_value(ld, pagesize, &cookie, control_value);
-				if (rc != LDAP_SUCCESS) {
-					php_error_docref(NULL, E_WARNING, "Failed to create paged result control value: %s (%d)", ldap_err2string(rc), rc);
-				}
+			/* ldap_create_page_control_value() allocates memory for control_value.bv_val */
+			control_value_alloc = 1;
+			rc = ldap_create_page_control_value(ld, pagesize, &cookie, &control_value);
+			if (rc != LDAP_SUCCESS) {
+				php_error_docref(NULL, E_WARNING, "Failed to create paged result control value: %s (%d)", ldap_err2string(rc), rc);
 			}
 		} else if (strcmp(ZSTR_VAL(control_oid), LDAP_CONTROL_ASSERT) == 0) {
 			zval* tmp;
@@ -356,19 +354,15 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 					rc = -1;
 					goto failure;
 				}
-				control_value = ber_memalloc(sizeof * control_value);
-				if (control_value == NULL) {
-					rc = -1;
-					php_error_docref(NULL, E_WARNING, "Failed to allocate control value");
-				} else {
-					/* ldap_create_assertion_control_value does not reset ld_errno, we need to do it ourselves
-					   See http://www.openldap.org/its/index.cgi/Incoming?id=8674 */
-					int success = LDAP_SUCCESS;
-					ldap_set_option(ld, LDAP_OPT_RESULT_CODE, &success);
-					rc = ldap_create_assertion_control_value(ld, ZSTR_VAL(assert), control_value);
-					if (rc != LDAP_SUCCESS) {
-						php_error_docref(NULL, E_WARNING, "Failed to create assert control value: %s (%d)", ldap_err2string(rc), rc);
-					}
+				/* ldap_create_assertion_control_value does not reset ld_errno, we need to do it ourselves
+					 See http://www.openldap.org/its/index.cgi/Incoming?id=8674 */
+				int success = LDAP_SUCCESS;
+				ldap_set_option(ld, LDAP_OPT_RESULT_CODE, &success);
+				/* ldap_create_assertion_control_value() allocates memory for control_value.bv_val */
+				control_value_alloc = 1;
+				rc = ldap_create_assertion_control_value(ld, ZSTR_VAL(assert), &control_value);
+				if (rc != LDAP_SUCCESS) {
+					php_error_docref(NULL, E_WARNING, "Failed to create assert control value: %s (%d)", ldap_err2string(rc), rc);
 				}
 				zend_string_release(assert);
 			}
@@ -378,9 +372,8 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 				rc = -1;
 				php_error_docref(NULL, E_WARNING, "Filter missing from control value array");
 			} else {
-				BerElement *vrber = ber_alloc_t(LBER_USE_DER);
-				control_value = ber_memalloc(sizeof * control_value);
-				if ((control_value == NULL) || (vrber == NULL)) {
+				ber = ber_alloc_t(LBER_USE_DER);
+				if (ber == NULL) {
 					rc = -1;
 					php_error_docref(NULL, E_WARNING, "Failed to allocate control value");
 				} else {
@@ -389,14 +382,11 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 						rc = -1;
 						goto failure;
 					}
-					if (ldap_put_vrFilter(vrber, ZSTR_VAL(tmpstring)) == -1) {
-						ber_free(vrber, 1);
+					if (ldap_put_vrFilter(ber, ZSTR_VAL(tmpstring)) == -1) {
 						rc = -1;
 						php_error_docref(NULL, E_WARNING, "Failed to create control value: Bad ValuesReturnFilter: %s", ZSTR_VAL(tmpstring));
-					} else {
-						if (ber_flatten2(vrber, control_value, 0) == -1) {
-							rc = -1;
-						}
+					} else if (ber_flatten2(ber, &control_value, control_value_alloc) == -1) {
+						rc = -1;
 					}
 				}
 			}
@@ -406,10 +396,9 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 				rc = -1;
 				php_error_docref(NULL, E_WARNING, "Attributes list missing from control value array");
 			} else {
-				BerElement *ber = ber_alloc_t(LBER_USE_DER);
+				ber = ber_alloc_t(LBER_USE_DER);
 
-				control_value = ber_memalloc(sizeof * control_value);
-				if ((control_value == NULL) || (ber == NULL)) {
+				if (ber == NULL) {
 					rc = -1;
 					php_error_docref(NULL, E_WARNING, "Failed to allocate control value");
 				} else {
@@ -445,7 +434,7 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 						php_error_docref(NULL, E_WARNING, "Failed to encode attribute list");
 					} else {
 						int err;
-						err = ber_flatten2(ber, control_value, 0);
+						err = ber_flatten2(ber, &control_value, control_value_alloc);
 						if (err < 0) {
 							rc = -1;
 							php_error_docref(NULL, E_WARNING, "Failed to encode control value (%d)", err);
@@ -504,15 +493,11 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 				}
 			}
 			sort_keys[num_keys] = NULL;
-			control_value = ber_memalloc(sizeof * control_value);
-			if (control_value == NULL) {
-				rc = -1;
-				php_error_docref(NULL, E_WARNING, "Failed to allocate control value");
-			} else {
-				rc = ldap_create_sort_control_value(ld, sort_keys, control_value);
-				if (rc != LDAP_SUCCESS) {
-					php_error_docref(NULL, E_WARNING, "Failed to create sort control value: %s (%d)", ldap_err2string(rc), rc);
-				}
+			/* ldap_create_sort_control_value() allocates memory for control_value.bv_val */
+			control_value_alloc = 1;
+			rc = ldap_create_sort_control_value(ld, sort_keys, &control_value);
+			if (rc != LDAP_SUCCESS) {
+				php_error_docref(NULL, E_WARNING, "Failed to create sort control value: %s (%d)", ldap_err2string(rc), rc);
 			}
 		} else if (strcmp(ZSTR_VAL(control_oid), LDAP_CONTROL_VLVREQUEST) == 0) {
 			zval* tmp;
@@ -574,15 +559,11 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 				vlvInfo.ldvlv_context = NULL;
 			}
 
-			control_value = ber_memalloc(sizeof * control_value);
-			if (control_value == NULL) {
-				rc = -1;
-				php_error_docref(NULL, E_WARNING, "Failed to allocate control value");
-			} else {
-				rc = ldap_create_vlv_control_value(ld, &vlvInfo, control_value);
-				if (rc != LDAP_SUCCESS) {
-					php_error_docref(NULL, E_WARNING, "Failed to create VLV control value: %s (%d)", ldap_err2string(rc), rc);
-				}
+			/* ldap_create_vlv_control_value() allocates memory for control_value.bv_val */
+			control_value_alloc = 1;
+			rc = ldap_create_vlv_control_value(ld, &vlvInfo, &control_value);
+			if (rc != LDAP_SUCCESS) {
+				php_error_docref(NULL, E_WARNING, "Failed to create VLV control value: %s (%d)", ldap_err2string(rc), rc);
 			}
 		} else {
 			php_error_docref(NULL, E_WARNING, "Control OID %s does not expect an array as value", ZSTR_VAL(control_oid));
@@ -591,7 +572,7 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 	}
 
 	if (rc == LDAP_SUCCESS) {
-		rc = ldap_control_create(ZSTR_VAL(control_oid), control_iscritical, control_value, 1, ctrl);
+		rc = ldap_control_create(ZSTR_VAL(control_oid), control_iscritical, &control_value, 1, ctrl);
 	}
 
 failure:
@@ -613,9 +594,11 @@ failure:
 		}
 		efree(tmpstrings2);
 	}
-	if (control_value != NULL) {
-		ber_memfree(control_value);
-		control_value = NULL;
+	if (control_value.bv_val != NULL && control_value_alloc != 0) {
+		ber_memfree(control_value.bv_val);
+	}
+	if (ber != NULL) {
+		ber_free(ber, 1);
 	}
 	if (ldap_attrs != NULL) {
 		efree(ldap_attrs);
@@ -1463,7 +1446,7 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 	zend_string *ldap_filter = NULL, *ldap_base_dn = NULL;
 	char **ldap_attrs = NULL;
 	ldap_linkdata *ld = NULL;
-	LDAPMessage *ldap_res;
+	LDAPMessage *ldap_res = NULL;
 	LDAPControl **lserverctrls = NULL;
 	int ldap_attrsonly = 0, ldap_sizelimit = -1, ldap_timelimit = -1, ldap_deref = -1;
 	int old_ldap_sizelimit = -1, old_ldap_timelimit = -1, old_ldap_deref = -1;
@@ -1663,6 +1646,11 @@ cleanup_parallel:
 			&& errno != LDAP_REFERRAL
 #endif
 		) {
+			/* ldap_res should be freed regardless of return value of ldap_search_ext_s()
+			 * see: https://linux.die.net/man/3/ldap_search_ext_s */
+			if (ldap_res != NULL) {
+				ldap_msgfree(ldap_res);
+			}
 			php_error_docref(NULL, E_WARNING, "Search: %s", ldap_err2string(errno));
 			ret = 0;
 		} else {
@@ -3984,7 +3972,7 @@ PHP_FUNCTION(ldap_control_paged_result)
 	zval *link;
 	char *cookie = NULL;
 	size_t cookie_len = 0;
-	struct berval lcookie = { 0, NULL };
+	struct berval lcookie = { 0L, NULL };
 	ldap_linkdata *ld;
 	LDAP *ldap;
 	BerElement *ber = NULL;
@@ -4275,38 +4263,31 @@ PHP_FUNCTION(ldap_exop)
 PHP_FUNCTION(ldap_exop_passwd)
 {
 	zval *link, *serverctrls;
-	struct berval luser, loldpw, lnewpw, lgenpasswd;
-	LDAPControl **lserverctrls = NULL, **requestctrls = NULL;
-	LDAPControl *ctrl, **ctrlp;
-	LDAPMessage* ldap_res;
+	struct berval luser = { 0L, NULL };
+	struct berval loldpw = { 0L, NULL };
+	struct berval lnewpw = { 0L, NULL };
+	struct berval lgenpasswd = { 0L, NULL };
+	LDAPControl *ctrl, **lserverctrls = NULL, *requestctrls[2] = { NULL, NULL };
+	LDAPMessage* ldap_res = NULL;
 	ldap_linkdata *ld;
 	int rc, myargcount = ZEND_NUM_ARGS(), msgid, err;
-	char* errmsg;
-
-	luser.bv_len = 0;
-	loldpw.bv_len = 0;
-	lnewpw.bv_len = 0;
+	char* errmsg = NULL;
 
 	if (zend_parse_parameters(myargcount, "r|sssz/", &link, &luser.bv_val, &luser.bv_len, &loldpw.bv_val, &loldpw.bv_len, &lnewpw.bv_val, &lnewpw.bv_len, &serverctrls) == FAILURE) {
 		return;
 	}
 
 	if ((ld = (ldap_linkdata *)zend_fetch_resource(Z_RES_P(link), "ldap link", le_link)) == NULL) {
-		RETURN_FALSE;
+		RETVAL_FALSE;
+		goto cleanup;
 	}
 
 	switch (myargcount) {
 		case 5:
-			requestctrls = safe_emalloc(2, sizeof(*requestctrls), 0);
-			*requestctrls = NULL;
-			ctrlp = requestctrls;
-
+			/* ldap_create_passwordpolicy_control() allocates ctrl */
 			if (ldap_create_passwordpolicy_control(ld->link, &ctrl) == LDAP_SUCCESS) {
-				*ctrlp = ctrl;
-				++ctrlp;
+				requestctrls[0] = ctrl;
 			}
-
-			*ctrlp = NULL;
 	}
 
 	/* asynchronous call to get result and controls */
@@ -4316,35 +4297,43 @@ PHP_FUNCTION(ldap_exop_passwd)
 		requestctrls,
 		NULL, &msgid);
 
-	if (requestctrls != NULL) {
-		efree(requestctrls);
+	if (requestctrls[0] != NULL) {
+		ldap_control_free(requestctrls[0]);
 	}
 
 	if (rc != LDAP_SUCCESS ) {
 		php_error_docref(NULL, E_WARNING, "Passwd modify extended operation failed: %s (%d)", ldap_err2string(rc), rc);
-		RETURN_FALSE;
+		RETVAL_FALSE;
+		goto cleanup;
 	}
 
 	rc = ldap_result(ld->link, msgid, 1 /* LDAP_MSG_ALL */, NULL, &ldap_res);
 	if ((rc < 0) || !ldap_res) {
 		rc = _get_lderrno(ld->link);
 		php_error_docref(NULL, E_WARNING, "Passwd modify extended operation failed: %s (%d)", ldap_err2string(rc), rc);
-		RETURN_FALSE;
+		RETVAL_FALSE;
+		goto cleanup;
 	}
 
 	rc = ldap_parse_passwd(ld->link, ldap_res, &lgenpasswd);
 	if( rc != LDAP_SUCCESS ) {
 		php_error_docref(NULL, E_WARNING, "Passwd modify extended operation failed: %s (%d)", ldap_err2string(rc), rc);
-		ldap_msgfree(ldap_res);
-		RETURN_FALSE;
+		RETVAL_FALSE;
+		goto cleanup;
 	}
 
-	rc = ldap_parse_result(ld->link, ldap_res, &err, NULL, &errmsg, NULL, (myargcount > 4 ? &lserverctrls : NULL), 1);
+	rc = ldap_parse_result(ld->link, ldap_res, &err, NULL, &errmsg, NULL, (myargcount > 4 ? &lserverctrls : NULL), 0);
 	if( rc != LDAP_SUCCESS ) {
 		php_error_docref(NULL, E_WARNING, "Passwd modify extended operation failed: %s (%d)", ldap_err2string(rc), rc);
-		RETURN_FALSE;
+		RETVAL_FALSE;
+		goto cleanup;
 	}
 
+	if (myargcount > 4) {
+		_php_ldap_controls_to_array(ld->link, lserverctrls, serverctrls, 0);
+	}
+
+	/* return */
 	if (lnewpw.bv_len == 0) {
 		if (lgenpasswd.bv_len == 0) {
 			RETVAL_EMPTY_STRING();
@@ -4358,11 +4347,16 @@ PHP_FUNCTION(ldap_exop_passwd)
 		RETVAL_FALSE;
 	}
 
-	if (myargcount > 4) {
-		_php_ldap_controls_to_array(ld->link, lserverctrls, serverctrls, 0);
+cleanup:
+	if (lgenpasswd.bv_val != NULL) {
+		ldap_memfree(lgenpasswd.bv_val);
 	}
-
-	ldap_memfree(lgenpasswd.bv_val);
+	if (ldap_res != NULL) {
+		ldap_msgfree(ldap_res);
+	}
+	if (errmsg != NULL) {
+		ldap_memfree(errmsg);
+	}
 }
 /* }}} */
 #endif
