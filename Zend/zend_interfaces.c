@@ -469,6 +469,7 @@ ZEND_API int zend_create_internal_iterator_zval(zval *return_value, zval *obj) {
 	zend_internal_iterator *intern =
 		(zend_internal_iterator *) zend_internal_iterator_create(zend_ce_internal_iterator);
 	intern->iter = iter;
+	intern->iter->index = 0;
 	ZVAL_OBJ(return_value, &intern->std);
 	return SUCCESS;
 }
@@ -559,8 +560,9 @@ ZEND_METHOD(InternalIterator, next) {
 		RETURN_THROWS();
 	}
 
-	intern->iter->funcs->move_forward(intern->iter);
+	/* Advance index first to match foreach behavior. */
 	intern->iter->index++;
+	intern->iter->funcs->move_forward(intern->iter);
 }
 
 ZEND_METHOD(InternalIterator, valid) {

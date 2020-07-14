@@ -11,6 +11,8 @@ PHP                                                                        NEWS
     (Nikita)
   . Fixed bug #79828 (Segfault when trying to access non-existing variable).
     (Nikita)
+  . Fixed bug #79852 (count(DOMNodeList) doesn't match
+    count(IteratorIterator(DOMNodeList))). (Nikita)
 
 09 Jul 2020, PHP 8.0.0alpha2
 
