@@ -174,22 +174,21 @@ static void zend_persist_attributes_calc(HashTable *attributes)
 static void zend_persist_type_calc(zend_type *type)
 {
 	if (ZEND_TYPE_HAS_LIST(*type)) {
-		zend_type *list_type;
 		if (ZEND_TYPE_USES_ARENA(*type) && !ZCG(is_immutable_class)) {
 			ADD_ARENA_SIZE(ZEND_TYPE_LIST_SIZE(ZEND_TYPE_LIST(*type)->num_types));
 		} else {
 			ADD_SIZE(ZEND_TYPE_LIST_SIZE(ZEND_TYPE_LIST(*type)->num_types));
 		}
-		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(*type), list_type) {
-			zend_string *type_name = ZEND_TYPE_NAME(*list_type);
-			ADD_INTERNED_STRING(type_name);
-			ZEND_TYPE_SET_PTR(*list_type, type_name);
-		} ZEND_TYPE_LIST_FOREACH_END();
-	} else if (ZEND_TYPE_HAS_NAME(*type)) {
-		zend_string *type_name = ZEND_TYPE_NAME(*type);
-		ADD_INTERNED_STRING(type_name);
-		ZEND_TYPE_SET_PTR(*type, type_name);
 	}
+
+	zend_type *single_type;
+	ZEND_TYPE_FOREACH(*type, single_type) {
+		if (ZEND_TYPE_HAS_NAME(*single_type)) {
+			zend_string *type_name = ZEND_TYPE_NAME(*single_type);
+			ADD_INTERNED_STRING(type_name);
+			ZEND_TYPE_SET_PTR(*single_type, type_name);
+		}
+	} ZEND_TYPE_FOREACH_END();
 }
 
 static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
