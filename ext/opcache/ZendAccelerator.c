@@ -3672,12 +3672,15 @@ static zend_bool preload_try_resolve_property_types(zend_class_entry *ce)
 		ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop) {
 			zend_type *single_type;
 			ZEND_TYPE_FOREACH(prop->type, single_type) {
-				zend_class_entry *p = preload_fetch_resolved_ce(ZEND_TYPE_NAME(*single_type), ce);
-				if (!p) {
-					ok = 0;
-					continue;
+				if (ZEND_TYPE_HAS_NAME(*single_type)) {
+					zend_class_entry *p =
+						preload_fetch_resolved_ce(ZEND_TYPE_NAME(*single_type), ce);
+					if (!p) {
+						ok = 0;
+						continue;
+					}
+					ZEND_TYPE_SET_CE(*single_type, p);
 				}
-				ZEND_TYPE_SET_CE(*single_type, p);
 			} ZEND_TYPE_FOREACH_END();
 		} ZEND_HASH_FOREACH_END();
 	}
