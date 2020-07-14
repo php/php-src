@@ -718,19 +718,13 @@ static void zend_persist_class_method(zval *zv)
 	}
 }
 
-static void zend_persist_property_info(zval *zv)
+static zend_property_info *zend_persist_property_info(zend_property_info *prop)
 {
-	zend_property_info *prop = zend_shared_alloc_get_xlat_entry(Z_PTR_P(zv));
 	zend_class_entry *ce;
-
-	if (prop) {
-		Z_PTR_P(zv) = prop;
-		return;
-	}
 	if (ZCG(is_immutable_class)) {
-		prop = Z_PTR_P(zv) = zend_shared_memdup_put(Z_PTR_P(zv), sizeof(zend_property_info));
+		prop = zend_shared_memdup_put(prop, sizeof(zend_property_info));
 	} else {
-		prop = Z_PTR_P(zv) = zend_shared_memdup_arena_put(Z_PTR_P(zv), sizeof(zend_property_info));
+		prop = zend_shared_memdup_arena_put(prop, sizeof(zend_property_info));
 	}
 	ce = zend_shared_alloc_get_xlat_entry(prop->ce);
 	if (ce) {
@@ -752,6 +746,7 @@ static void zend_persist_property_info(zval *zv)
 		prop->attributes = zend_persist_attributes(prop->attributes);
 	}
 	zend_persist_type(&prop->type);
+	return prop;
 }
 
 static void zend_persist_class_constant(zval *zv)
@@ -798,7 +793,7 @@ static void zend_persist_class_constant(zval *zv)
 static void zend_persist_class_entry(zval *zv)
 {
 	Bucket *p;
-	zend_class_entry *ce = Z_PTR_P(zv);
+	zend_class_entry *orig_ce = Z_PTR_P(zv), *ce = orig_ce;
 
 	if (ce->type == ZEND_USER_CLASS) {
 		/* The same zend_class_entry may be reused by class_alias */
@@ -884,9 +879,21 @@ static void zend_persist_class_entry(zval *zv)
 		}
 		zend_hash_persist(&ce->properties_info);
 		ZEND_HASH_FOREACH_BUCKET(&ce->properties_info, p) {
+			zend_property_info *prop = Z_PTR(p->val);
 			ZEND_ASSERT(p->key != NULL);
 			zend_accel_store_interned_string(p->key);
-			zend_persist_property_info(&p->val);
+			if (prop->ce == orig_ce) {
+				Z_PTR(p->val) = zend_persist_property_info(prop);
+			} else {
+				prop = zend_shared_alloc_get_xlat_entry(prop);
+				if (prop) {
+					Z_PTR(p->val) = prop;
+				} else {
+					/* This can happen if preloading is used and we inherit a property from an
+					 * internal class. In that case we should keep pointing to the internal
+					 * property, without any adjustments. */
+				}
+			}
 		} ZEND_HASH_FOREACH_END();
 		HT_FLAGS(&ce->properties_info) &= (HASH_FLAG_UNINITIALIZED | HASH_FLAG_STATIC_KEYS);
 

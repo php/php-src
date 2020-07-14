@@ -339,21 +339,16 @@ static void zend_persist_class_method_calc(zval *zv)
 	}
 }
 
-static void zend_persist_property_info_calc(zval *zv)
+static void zend_persist_property_info_calc(zend_property_info *prop)
 {
-	zend_property_info *prop = Z_PTR_P(zv);
-
-	if (!zend_shared_alloc_get_xlat_entry(prop)) {
-		zend_shared_alloc_register_xlat_entry(prop, prop);
-		ADD_SIZE_EX(sizeof(zend_property_info));
-		ADD_INTERNED_STRING(prop->name);
-		zend_persist_type_calc(&prop->type);
-		if (ZCG(accel_directives).save_comments && prop->doc_comment) {
-			ADD_STRING(prop->doc_comment);
-		}
-		if (prop->attributes) {
-			zend_persist_attributes_calc(prop->attributes);
-		}
+	ADD_SIZE_EX(sizeof(zend_property_info));
+	ADD_INTERNED_STRING(prop->name);
+	zend_persist_type_calc(&prop->type);
+	if (ZCG(accel_directives).save_comments && prop->doc_comment) {
+		ADD_STRING(prop->doc_comment);
+	}
+	if (prop->attributes) {
+		zend_persist_attributes_calc(prop->attributes);
 	}
 }
 
@@ -462,9 +457,12 @@ static void zend_persist_class_entry_calc(zval *zv)
 
 		zend_hash_persist_calc(&ce->properties_info);
 		ZEND_HASH_FOREACH_BUCKET(&ce->properties_info, p) {
+			zend_property_info *prop = Z_PTR(p->val);
 			ZEND_ASSERT(p->key != NULL);
 			ADD_INTERNED_STRING(p->key);
-			zend_persist_property_info_calc(&p->val);
+			if (prop->ce == ce) {
+				zend_persist_property_info_calc(prop);
+			}
 		} ZEND_HASH_FOREACH_END();
 
 		if (ce->properties_info_table) {
