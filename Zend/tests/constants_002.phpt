@@ -20,6 +20,6 @@ var_dump(foo);
 
 ?>
 --EXPECT--
-define(): Argument #2 ($value) must be of type bool|int|float|string|array|resource|null, stdClass given
+define(): Argument #2 ($value) cannot be an object, stdClass given
 Undefined constant "foo"
 resource(5) of type (stream)

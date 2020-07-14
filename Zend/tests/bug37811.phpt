@@ -29,5 +29,5 @@ try {
 ?>
 --EXPECT--
 string(3) "Foo"
-define(): Argument #2 ($value) must be of type bool|int|float|string|array|resource|null, stdClass given
+define(): Argument #2 ($value) cannot be an object, stdClass given
 Undefined constant "Baz"

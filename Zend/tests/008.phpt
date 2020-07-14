@@ -42,7 +42,7 @@ Notice: Constant test const already defined in %s on line %d
 bool(false)
 bool(true)
 bool(true)
-define(): Argument #2 ($value) must be of type bool|int|float|string|array|resource|null, stdClass given
+define(): Argument #2 ($value) cannot be an object, stdClass given
 int(1)
 int(2)
 int(3)

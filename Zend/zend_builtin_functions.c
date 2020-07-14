@@ -441,9 +441,7 @@ static int validate_constant_array_argument(HashTable *ht, int argument_number) 
 					}
 				}
 			} else if (Z_TYPE_P(val) != IS_STRING && Z_TYPE_P(val) != IS_RESOURCE) {
-				zend_argument_type_error(2, "must be of type bool|int|float|string|array|resource|null, %s given",
-					zend_zval_type_name(val)
-				);
+				zend_argument_type_error(argument_number, "cannot be an object, %s given", zend_zval_type_name(val));
 				ret = 0;
 				break;
 			}
@@ -485,17 +483,25 @@ ZEND_FUNCTION(define)
 {
 	zend_string *name;
 	zval *val, val_free;
+	zend_bool non_cs = 0;
 	zend_constant c;
 
-	ZEND_PARSE_PARAMETERS_START(2, 2)
+	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STR(name)
 		Z_PARAM_ZVAL(val)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(non_cs)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (zend_memnstr(ZSTR_VAL(name), "::", sizeof("::") - 1, ZSTR_VAL(name) + ZSTR_LEN(name))) {
 		zend_argument_value_error(1, "cannot be a class constant");
 		RETURN_THROWS();
 	}
+
+	if (non_cs) {
+		zend_error(E_WARNING, "define(): Declaration of case-insensitive constants is no longer supported");
+    	RETURN_FALSE;
+    }
 
 	ZVAL_UNDEF(&val_free);
 
@@ -526,9 +532,7 @@ ZEND_FUNCTION(define)
 			/* no break */
 		default:
 			zval_ptr_dtor(&val_free);
-			zend_argument_type_error(2, "must be of type bool|int|float|string|array|resource|null, %s given",
-				zend_zval_type_name(val)
-			);
+			zend_argument_type_error(2, "cannot be an object, %s given", zend_zval_type_name(val));
 			RETURN_THROWS();
 	}
 
@@ -1453,8 +1457,8 @@ ZEND_FUNCTION(get_resources)
 		int id = zend_fetch_list_dtor_id(ZSTR_VAL(type));
 
 		if (id <= 0) {
-			zend_error(E_WARNING, "get_resources(): Unknown resource type \"%s\"", ZSTR_VAL(type));
-			RETURN_FALSE;
+			zend_argument_value_error(1, "must be a valid resource type");
+			RETURN_THROWS();
 		}
 
 		array_init(return_value);
