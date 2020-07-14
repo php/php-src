@@ -4451,13 +4451,14 @@ static int preload_autoload(zend_string *filename)
 	return ret;
 }
 
-static int accel_preload(const char *config)
+static int accel_preload(const char *config, zend_bool in_child)
 {
 	zend_file_handle file_handle;
 	int ret;
 	char *orig_open_basedir;
 	size_t orig_map_ptr_last;
 	zval *zv;
+	uint32_t orig_compiler_options;
 
 	ZCG(enabled) = 0;
 	ZCG(accelerator_enabled) = 0;
@@ -4473,6 +4474,17 @@ static int accel_preload(const char *config)
 
 	preload_scripts = emalloc(sizeof(HashTable));
 	zend_hash_init(preload_scripts, 0, NULL, NULL, 0);
+
+	orig_compiler_options = CG(compiler_options);
+	if (in_child) {
+		CG(compiler_options) |= ZEND_COMPILE_PRELOAD_IN_CHILD;
+	}
+	CG(compiler_options) |= ZEND_COMPILE_PRELOAD;
+	CG(compiler_options) |= ZEND_COMPILE_HANDLE_OP_ARRAY;
+	CG(compiler_options) |= ZEND_COMPILE_IGNORE_INTERNAL_CLASSES;
+	CG(compiler_options) |= ZEND_COMPILE_DELAYED_BINDING;
+	CG(compiler_options) |= ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION;
+	CG(compiler_options) |= ZEND_COMPILE_IGNORE_OTHER_FILES;
 
 	zend_try {
 		zend_op_array *op_array;
@@ -4512,6 +4524,7 @@ static int accel_preload(const char *config)
 	} zend_end_try();
 
 	PG(open_basedir) = orig_open_basedir;
+	CG(compiler_options) = orig_compiler_options;
 	accelerator_orig_compile_file = preload_orig_compile_file;
 	ZCG(enabled) = 1;
 
@@ -4809,7 +4822,6 @@ static int accel_finish_startup(void)
 		char *(*orig_getenv)(const char *name, size_t name_len) = sapi_module.getenv;
 		size_t (*orig_ub_write)(const char *str, size_t str_length) = sapi_module.ub_write;
 		void (*orig_flush)(void *server_context) = sapi_module.flush;
-		uint32_t orig_compiler_options = CG(compiler_options);
 #ifdef ZEND_SIGNALS
 		zend_bool old_reset_signals = SIGG(reset);
 #endif
@@ -4903,16 +4915,6 @@ static int accel_finish_startup(void)
 		sapi_module.ub_write = preload_ub_write;
 		sapi_module.flush = preload_flush;
 
-		if (in_child) {
-			CG(compiler_options) |= ZEND_COMPILE_PRELOAD_IN_CHILD;
-		}
-		CG(compiler_options) |= ZEND_COMPILE_PRELOAD;
-		CG(compiler_options) |= ZEND_COMPILE_HANDLE_OP_ARRAY;
-		CG(compiler_options) |= ZEND_COMPILE_IGNORE_INTERNAL_CLASSES;
-		CG(compiler_options) |= ZEND_COMPILE_DELAYED_BINDING;
-		CG(compiler_options) |= ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION;
-		CG(compiler_options) |= ZEND_COMPILE_IGNORE_OTHER_FILES;
-
 		zend_interned_strings_switch_storage(1);
 
 #ifdef ZEND_SIGNALS
@@ -4945,7 +4947,7 @@ static int accel_finish_startup(void)
 			ZCG(cwd_key_len) = 0;
 			ZCG(cwd_check) = 1;
 
-			if (accel_preload(ZCG(accel_directives).preload) != SUCCESS) {
+			if (accel_preload(ZCG(accel_directives).preload, in_child) != SUCCESS) {
 				ret = FAILURE;
 			}
 
@@ -4965,8 +4967,6 @@ static int accel_finish_startup(void)
 #ifdef ZEND_SIGNALS
 		SIGG(reset) = old_reset_signals;
 #endif
-
-		CG(compiler_options) = orig_compiler_options;
 
 		sapi_module.activate = orig_activate;
 		sapi_module.deactivate = orig_deactivate;
