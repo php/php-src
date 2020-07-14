@@ -30,6 +30,10 @@ PHP                                                                        NEWS
 - Mbstring:
   . Fixed bug #79787 (mb_strimwidth does not trim string). (XXiang)
 
+- Phar:
+  . Fixed bug #79797 (Use of freed hash key in the phar_parse_zipfile
+    function). (CVE-2020-7068) (cmb)
+
 - Standard:
   . Fixed bug #70362 (Can't copy() large 'data://' with open_basedir). (cmb)
   . Fixed bug #79817 (str_replace() does not handle INDIRECT elements). (Nikita)
