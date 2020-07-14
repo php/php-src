@@ -17,10 +17,10 @@
 
 /* Action definitions. DASM_STOP must be 255. */
 enum {
-  DASM_DISP = 232,
+  DASM_DISP = 231,
   DASM_IMM_S, DASM_IMM_B, DASM_IMM_W, DASM_IMM_D, DASM_IMM_WB, DASM_IMM_DB,
   DASM_VREG, DASM_SPACE, DASM_SETLABEL, DASM_REL_A, DASM_REL_LG, DASM_REL_PC,
-  DASM_IMM_LG, DASM_IMM_PC, DASM_IMM_PC64, DASM_LABEL_LG, DASM_LABEL_PC,
+  DASM_IMM_LG, DASM_IMM_LG64, DASM_IMM_PC, DASM_IMM_PC64, DASM_LABEL_LG, DASM_LABEL_PC,
   DASM_ALIGN, DASM_EXTERN, DASM_ESC, DASM_MARK, DASM_SECTION, DASM_STOP
 };
 
@@ -220,6 +220,7 @@ void dasm_put(Dst_DECL, int start, ...)
     } else {
       int *pl, n;
       switch (action) {
+      case DASM_IMM_LG64: ofs += 4;
       case DASM_REL_LG:
       case DASM_IMM_LG:
 	n = *p++; pl = D->lglabels + n;
@@ -333,7 +334,7 @@ int dasm_link(Dst_DECL, size_t *szp)
 	  pos += 2;
 	  break;
 	}
-	case DASM_SPACE: case DASM_IMM_LG: case DASM_VREG: p++;
+	case DASM_SPACE: case DASM_IMM_LG: case DASM_IMM_LG64: case DASM_VREG: p++;
 	case DASM_DISP: case DASM_IMM_S: case DASM_IMM_B: case DASM_IMM_W:
 	case DASM_IMM_D: case DASM_IMM_WB: case DASM_IMM_DB:
 	case DASM_SETLABEL: case DASM_REL_A: case DASM_IMM_PC: case DASM_IMM_PC64:
@@ -446,6 +447,11 @@ int dasm_encode(Dst_DECL, void *buffer)
 	  int *pb = DASM_POS2PTR(D, n);
 	  n = *pb < 0 ? pb[1] : (*pb + (int)(ptrdiff_t)base);
 	  goto wd;
+	}
+	case DASM_IMM_LG64: {
+	  p++;
+	  if (n < 0)
+	    dasmq((ptrdiff_t)D->globals[-n]);
 	}
 	case DASM_IMM_PC64: {
 	  int *pb = DASM_POS2PTR(D, n);
