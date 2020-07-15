@@ -65,7 +65,7 @@ static void observer_begin(zend_execute_data *execute_data)
 				case ZEND_REQUIRE:
 				case ZEND_REQUIRE_ONCE: {
 					char *filename = observer_get_filename(execute_data);
-					printf("%*s<%s filename=\"%s\">\n", 2 * nesting_depth, "", include_pretty_name[extended_value], filename ?: "(unknown)");
+					printf("%*s<%s filename=\"%s\">\n", 2 * nesting_depth, "", include_pretty_name[extended_value], filename ? filename : "(unknown)");
 				}
 				break;
 
