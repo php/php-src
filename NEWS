@@ -25,6 +25,8 @@ PHP                                                                        NEWS
     array write fetch). (Nikita)
   . Fixed bug #79793 (Use after free if string used in undefined index warning
     is changed). (Nikita)
+  . Fixed bug #79862 (Public non-static property in child should take priority
+    over private static). (Nikita)
 
 - Fileinfo:
   . Fixed bug #79756 (finfo_file crash (FILEINFO_MIME)). (cmb)
