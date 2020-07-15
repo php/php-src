@@ -84,24 +84,24 @@ echo "\n*** Done ***";
 --EXPECTF--
 *** Testing fileinode() with files, links and directories ***
 -- Testing with files --
-%d
-%d
+%i
+%i
 -- Testing with links: hard link --
-%d
-%d
+%i
+%i
 -- Testing with links: soft link --
-%d
-%d
+%i
+%i
 -- Testing after copying a file --
-%d
-%d
+%i
+%i
 -- Testing after renaming the file --
-%d
-%d
+%i
+%i
 -- Testing with directories --
-%d
-%d
+%i
+%i
 -- Testing with binary input --
-%d
-%d
+%i
+%i
 *** Done ***
