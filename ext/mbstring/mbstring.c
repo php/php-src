@@ -4104,7 +4104,7 @@ static inline zend_long php_mb_ord(const char *str, size_t str_len, zend_string 
 		/* If this assertion fails this means some memory allocation failure which is a bug */
 		ZEND_ASSERT(filter != NULL);
 
-		mbfl_convert_filter_feed_string(filter, (const unsigned char *) str, str_len);
+		mbfl_convert_filter_feed_string(filter, (unsigned char*)str, str_len);
 		mbfl_convert_filter_flush(filter);
 
 		if (dev.pos < 1 || filter->num_illegalchar || dev.buffer[0] >= MBFL_WCSGROUP_UCS4MAX) {
