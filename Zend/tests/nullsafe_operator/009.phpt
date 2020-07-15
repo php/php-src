@@ -3,22 +3,9 @@ Test fetch nullsafe property by ref
 --FILE--
 <?php
 
-class Foo {
-    public $bar;
-}
-
-function test(?Foo $foo) {
-    var_dump($ref = &$foo?->bar);
-    $ref = 'bar';
-    var_dump($foo?->bar);
-}
-
-test(null);
-test(new Foo());
+$foo = null;
+$ref = &$foo?->bar
 
 ?>
---EXPECT--
-NULL
-NULL
-NULL
-string(3) "bar"
+--EXPECTF--
+Fatal error: Cannot take reference of a nullsafe chain in %s.php on line 4

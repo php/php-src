@@ -3,29 +3,9 @@ Test fetch nested nullsafe property by ref
 --FILE--
 <?php
 
-class Foo {
-    public $bar;
-}
-
-class Bar {
-    public $baz;
-}
-
-function test(?Foo $foo) {
-    var_dump($ref = &$foo?->bar->baz);
-    $ref = 'baz';
-    var_dump($foo?->bar->baz);
-}
-
-test(null);
-
-$foo = new Foo();
-$foo->bar = new Bar();
-test($foo);
+$foo = null;
+$ref = &$foo?->bar->baz;
 
 ?>
---EXPECT--
-NULL
-NULL
-NULL
-string(3) "baz"
+--EXPECTF--
+Fatal error: Cannot take reference of a nullsafe chain in %s.php on line 4

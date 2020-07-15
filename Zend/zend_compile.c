@@ -3187,6 +3187,9 @@ void zend_compile_assign_ref(znode *result, zend_ast *ast) /* {{{ */
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot re-assign $this");
 	}
 	zend_ensure_writable_variable(target_ast);
+	if (zend_ast_is_short_circuited(source_ast)) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot take reference of a nullsafe chain");
+	}
 
 	offset = zend_delayed_compile_begin();
 	zend_delayed_compile_var(&target_node, target_ast, BP_VAR_W, 1);
@@ -4671,6 +4674,10 @@ void zend_compile_return(zend_ast *ast) /* {{{ */
 	if (is_generator) {
 		/* For generators the by-ref flag refers to yields, not returns */
 		by_ref = 0;
+	}
+
+	if (by_ref && zend_ast_is_short_circuited(expr_ast)) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot take reference of a nullsafe chain");
 	}
 
 	if (!expr_ast) {
