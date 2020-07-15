@@ -48,7 +48,7 @@ void zend_observe_fcall_end(
 	zend_execute_data *execute_data,
 	zval *return_value);
 
-ZEND_API zend_always_inline void zend_observer_maybe_fcall_call_end(
+ZEND_API inline void zend_observer_maybe_fcall_call_end(
 	zend_execute_data *execute_data,
 	zval *return_value)
 {

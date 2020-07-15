@@ -8,6 +8,10 @@ int zend_observer_fcall_op_array_extension = -1;
 
 ZEND_TLS zend_arena *fcall_handlers_arena = NULL;
 
+ZEND_API extern inline void zend_observer_maybe_fcall_call_end(
+	zend_execute_data *execute_data,
+	zval *return_value);
+
 // Call during minit/startup ONLY
 ZEND_API void zend_observer_fcall_register(zend_observer_fcall_init init) {
 	/* We don't want to get an extension handle unless an ext installs an observer */
