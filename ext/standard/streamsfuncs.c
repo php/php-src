@@ -1643,11 +1643,14 @@ PHP_FUNCTION(sapi_windows_vt100_support)
 		php_stream_cast(stream, PHP_STREAM_AS_FD, (void*)&fileno, 0);
 	}
 	else {
-		zend_type_error(
-			"%s() was not able to analyze the specified stream",
-			get_active_function_name()
-		);
-		RETURN_THROWS();
+		if (argc > 1) {
+			php_error_docref(
+				NULL,
+				E_WARNING,
+				"not able to analyze the specified stream"
+			);
+		}
+		RETURN_FALSE;
 	}
 
 	/* Check if the file descriptor is a console */

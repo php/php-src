@@ -76,70 +76,36 @@ STDERR (php://fd/2):
 - current value  : bool(false)
 - disabling VT100: bool(false)
 - current value  : bool(false)
-Not a stream:
-- current value  :
-Warning: sapi_windows_vt100_support(): Argument #1 must be of type resource, string given in %s on line %d
-bool(false)
-- enabling VT100 :
-Warning: sapi_windows_vt100_support(): Argument #1 must be of type resource, string given in %s on line %d
-bool(false)
-- current value  :
-Warning: sapi_windows_vt100_support(): Argument #1 must be of type resource, string given in %s on line %d
-bool(false)
-- disabling VT100:
-Warning: sapi_windows_vt100_support(): Argument #1 must be of type resource, string given in %s on line %d
-bool(false)
-- current value  :
-Warning: sapi_windows_vt100_support(): Argument #1 must be of type resource, string given in %s on line %d
-bool(false)
 Invalid stream (php://temp):
-- current value  :
-Warning: sapi_windows_vt100_support() was not able to analyze the specified stream in %s on line %d
+- current value  : bool(false)
+- enabling VT100 : 
+Warning: sapi_windows_vt100_support(): not able to analyze the specified stream in %s on line %d
 bool(false)
-- enabling VT100 :
-Warning: sapi_windows_vt100_support() was not able to analyze the specified stream in %s on line %d
+- current value  : bool(false)
+- disabling VT100: 
+Warning: sapi_windows_vt100_support(): not able to analyze the specified stream in %s on line %d
 bool(false)
-- current value  :
-Warning: sapi_windows_vt100_support() was not able to analyze the specified stream in %s on line %d
-bool(false)
-- disabling VT100:
-Warning: sapi_windows_vt100_support() was not able to analyze the specified stream in %s on line %d
-bool(false)
-- current value  :
-Warning: sapi_windows_vt100_support() was not able to analyze the specified stream in %s on line %d
-bool(false)
+- current value  : bool(false)
 Invalid stream (php://input):
-- current value  :
-Warning: sapi_windows_vt100_support() was not able to analyze the specified stream in %s on line %d
+- current value  : bool(false)
+- enabling VT100 : 
+Warning: sapi_windows_vt100_support(): not able to analyze the specified stream in %s on line %d
 bool(false)
-- enabling VT100 :
-Warning: sapi_windows_vt100_support() was not able to analyze the specified stream in %s on line %d
+- current value  : bool(false)
+- disabling VT100: 
+Warning: sapi_windows_vt100_support(): not able to analyze the specified stream in %s on line %d
 bool(false)
-- current value  :
-Warning: sapi_windows_vt100_support() was not able to analyze the specified stream in %s on line %d
-bool(false)
-- disabling VT100:
-Warning: sapi_windows_vt100_support() was not able to analyze the specified stream in %s on line %d
-bool(false)
-- current value  :
-Warning: sapi_windows_vt100_support() was not able to analyze the specified stream in %s on line %d
-bool(false)
+- current value  : bool(false)
 Invalid stream (php://memory):
-- current value  :
-Warning: sapi_windows_vt100_support() was not able to analyze the specified stream in %s on line %d
+- current value  : bool(false)
+- enabling VT100 : 
+Warning: sapi_windows_vt100_support(): not able to analyze the specified stream in %s on line %d
 bool(false)
-- enabling VT100 :
-Warning: sapi_windows_vt100_support() was not able to analyze the specified stream in %s on line %d
+- current value  : bool(false)
+- disabling VT100: 
+Warning: sapi_windows_vt100_support(): not able to analyze the specified stream in %s on line %d
 bool(false)
-- current value  :
-Warning: sapi_windows_vt100_support() was not able to analyze the specified stream in %s on line %d
-bool(false)
-- disabling VT100:
-Warning: sapi_windows_vt100_support() was not able to analyze the specified stream in %s on line %d
-bool(false)
-- current value  :
-Warning: sapi_windows_vt100_support() was not able to analyze the specified stream in %s on line %d
-bool(false)
+- current value  : bool(false)
 File stream:
 - current value  : bool(false)
 - enabling VT100 : bool(false)
