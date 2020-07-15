@@ -41,6 +41,9 @@
 #elif PHP_MAJOR_VERSION < 7
 /* PHP 7 is the minimum supported version for OCI8 2.1 */
 #error Use PHP OCI8 2.0 for your version of PHP
+#elif PHP_MAJOR_VERSION < 8
+/* PHP 8 is the minimum supported version for OCI8 3.0 */
+#error Use PHP OCI8 2.2 for your version of PHP
 #endif
 
 #include "php_oci8.h"
