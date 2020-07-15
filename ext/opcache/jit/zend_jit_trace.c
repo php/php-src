@@ -146,7 +146,8 @@ static uint32_t zend_jit_trace_get_exit_point(const zend_op *from_opline, const 
 		if (stack_size) {
 			stack = JIT_G(current_frame)->stack;
 			do {
-				if (STACK_TYPE(stack, stack_size-1) != IS_UNKNOWN) {
+				if (STACK_TYPE(stack, stack_size-1) != IS_UNKNOWN
+				 || STACK_REG(stack, stack_size-1) != ZREG_NONE) {
 					break;
 				}
 				stack_size--;
@@ -2832,16 +2833,36 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							goto jit_failure;
 						}
 					} else {
-						SET_STACK_REG(stack, i, ZREG_NONE);
+						if (STACK_REG(parent_stack, i) == ZREG_ZVAL_COPY_R0) {
+							SET_STACK_TYPE(stack, i, IS_UNKNOWN);
+						} else {
+							SET_STACK_REG(stack, i, ZREG_NONE);
+						}
 						if (!zend_jit_store_const(&dasm_state, i, STACK_REG(parent_stack, i))) {
 							goto jit_failure;
 						}
 					}
 				}
 			}
-
 			if (zend_jit_traces[parent_trace].exit_info[exit_num].flags & ZEND_JIT_EXIT_RESTORE_CALL) {
 				zend_jit_save_call_chain(&dasm_state, -1);
+			}
+			if (zend_jit_traces[parent_trace].exit_info[exit_num].flags & ZEND_JIT_EXIT_FREE_OP2) {
+				const zend_op *op = zend_jit_traces[parent_trace].exit_info[exit_num].opline - 1;
+				if (!zend_jit_free_op(&dasm_state, op, -1, op->op2.var)) {
+					goto jit_failure;
+				}
+			}
+			if (zend_jit_traces[parent_trace].exit_info[exit_num].flags & ZEND_JIT_EXIT_FREE_OP1) {
+				const zend_op *op = zend_jit_traces[parent_trace].exit_info[exit_num].opline - 1;
+				if (!zend_jit_free_op(&dasm_state, op, -1, op->op1.var)) {
+					goto jit_failure;
+				}
+			}
+			if (zend_jit_traces[parent_trace].exit_info[exit_num].flags & (ZEND_JIT_EXIT_FREE_OP1|ZEND_JIT_EXIT_FREE_OP2)) {
+				if (!zend_jit_check_exception(&dasm_state)) {
+					goto jit_failure;
+				}
 			}
 		}
 
@@ -3750,6 +3771,11 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 										(op2_info & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_ARRAY)) != 0)))) {
 							goto jit_failure;
 						}
+						if ((res_info & MAY_BE_GUARD)
+						 && JIT_G(current_frame)
+						 && (op1_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_ARRAY) {
+							ssa->var_info[ssa_op->result_def].type &= ~MAY_BE_GUARD;
+						}
 						goto done;
 					case ZEND_ISSET_ISEMPTY_DIM_OBJ:
 						if ((opline->extended_value & ZEND_ISEMPTY)) {
@@ -4598,6 +4624,21 @@ static const void *zend_jit_trace_exit_to_vm(uint32_t trace_num, uint32_t exit_n
 
 	opline = zend_jit_traces[trace_num].exit_info[exit_num].opline;
 	if (opline) {
+		if (zend_jit_traces[trace_num].exit_info[exit_num].flags & ZEND_JIT_EXIT_FREE_OP2) {
+			if (!zend_jit_free_op(&dasm_state, (opline-1), -1, (opline-1)->op2.var)) {
+				goto jit_failure;
+			}
+		}
+		if (zend_jit_traces[trace_num].exit_info[exit_num].flags & ZEND_JIT_EXIT_FREE_OP1) {
+			if (!zend_jit_free_op(&dasm_state, (opline-1), -1, (opline-1)->op1.var)) {
+				goto jit_failure;
+			}
+		}
+		if (zend_jit_traces[trace_num].exit_info[exit_num].flags & (ZEND_JIT_EXIT_FREE_OP1|ZEND_JIT_EXIT_FREE_OP2)) {
+			if (!zend_jit_check_exception(&dasm_state)) {
+				goto jit_failure;
+			}
+		}
 		zend_jit_set_ip(&dasm_state, opline);
 		if (opline == zend_jit_traces[zend_jit_traces[trace_num].root].opline) {
 			/* prevent endless loop */
@@ -4995,6 +5036,12 @@ static void zend_jit_dump_exit_info(zend_jit_trace_info *t)
 		if (t->exit_info[i].flags & ZEND_JIT_EXIT_POLYMORPHISM) {
 			fprintf(stderr, "/POLY");
 		}
+		if (t->exit_info[i].flags & ZEND_JIT_EXIT_FREE_OP1) {
+			fprintf(stderr, "/FREE_OP1");
+		}
+		if (t->exit_info[i].flags & ZEND_JIT_EXIT_FREE_OP2) {
+			fprintf(stderr, "/FREE_OP2");
+		}
 		for (j = 0; j < stack_size; j++) {
 			zend_uchar type = STACK_TYPE(stack, j);
 			if (type != IS_UNKNOWN) {
@@ -5005,16 +5052,18 @@ static void zend_jit_dump_exit_info(zend_jit_trace_info *t)
 					fprintf(stderr, "undef");
 				} else {
 					fprintf(stderr, "%s", zend_get_type_by_const(type));
-					if (STACK_REG(stack, j) != ZREG_NONE) {
-						if (STACK_REG(stack, j) < ZREG_NUM) {
-							fprintf(stderr, "(%s)", zend_reg_name[STACK_REG(stack, j)]);
-						} else if (STACK_REG(stack, j) == ZREG_THIS) {
-							fprintf(stderr, "(this)");
-						} else {
-							fprintf(stderr, "(const_%d)", STACK_REG(stack, j) - ZREG_NUM);
-						}
+				}
+				if (STACK_REG(stack, j) != ZREG_NONE) {
+					if (STACK_REG(stack, j) < ZREG_NUM) {
+						fprintf(stderr, "(%s)", zend_reg_name[STACK_REG(stack, j)]);
+					} else if (STACK_REG(stack, j) == ZREG_THIS) {
+						fprintf(stderr, "(this)");
+					} else {
+						fprintf(stderr, "(const_%d)", STACK_REG(stack, j) - ZREG_NUM);
 					}
 				}
+			} else if (STACK_REG(stack, j) == ZREG_ZVAL_COPY_R0) {
+				fprintf(stderr, " zval_copy(%s)", zend_reg_name[0]);
 			}
 		}
 		fprintf(stderr, "\n");
@@ -5477,6 +5526,12 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 
 				GC_ADDREF(obj);
 				ZVAL_OBJ(EX_VAR_NUM(i), obj);
+			} else if (STACK_REG(stack, i) == ZREG_NULL) {
+				ZVAL_NULL(EX_VAR_NUM(i));
+			} else if (STACK_REG(stack, i) == ZREG_ZVAL_COPY_R0) {
+				zval *val = (zval*)regs->r[0];
+
+				ZVAL_COPY(EX_VAR_NUM(i), val);
 			} else {
 				ZEND_UNREACHABLE();
 			}
@@ -5484,7 +5539,28 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 	}
 
 	opline = t->exit_info[exit_num].opline;
+
 	if (opline) {
+		if (t->exit_info[exit_num].flags & ZEND_JIT_EXIT_FREE_OP2) {
+			ZEND_ASSERT((opline-1)->opcode == ZEND_FETCH_DIM_R
+					|| (opline-1)->opcode == ZEND_FETCH_DIM_IS
+					|| (opline-1)->opcode == ZEND_FETCH_DIM_FUNC_ARG);
+			EX(opline) = opline-1;
+			zval_ptr_dtor_nogc(EX_VAR((opline-1)->op2.var));
+		}
+		if (t->exit_info[exit_num].flags & ZEND_JIT_EXIT_FREE_OP1) {
+			ZEND_ASSERT((opline-1)->opcode == ZEND_FETCH_DIM_R
+					|| (opline-1)->opcode == ZEND_FETCH_DIM_IS
+					|| (opline-1)->opcode == ZEND_FETCH_DIM_FUNC_ARG);
+			EX(opline) = opline-1;
+			zval_ptr_dtor_nogc(EX_VAR((opline-1)->op1.var));
+		}
+		if (t->exit_info[exit_num].flags & (ZEND_JIT_EXIT_FREE_OP1|ZEND_JIT_EXIT_FREE_OP2)) {
+			if (EG(exception)) {
+				return 1;
+			}
+		}
+
 		/* Set VM opline to continue interpretation */
 		EX(opline) = opline;
 	}
