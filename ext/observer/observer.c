@@ -39,7 +39,7 @@ static char *observer_get_filename(zend_execute_data *execute_data) {
 		|| extended_value == ZEND_REQUIRE_ONCE
 	);
 
-	zval *op = zend_get_zval_ptr(opline, opline->op1_type, &opline->op1, execute_data, BP_VAR_R);
+	zval *op = zend_get_zval_ptr(opline, opline->op1_type, &opline->op1, execute_data);
 	return (op && Z_TYPE_P(op) == IS_STRING) ? Z_STRVAL_P(op) : NULL;
 }
 
