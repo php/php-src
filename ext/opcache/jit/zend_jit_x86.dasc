@@ -5389,6 +5389,44 @@ static int zend_jit_simple_assign(dasm_State    **Dst,
 	return 1;
 }
 
+static int zend_jit_assign_to_typed_ref(dasm_State         **Dst,
+                                       const zend_op        *opline,
+                                       const zend_op_array  *op_array,
+                                       zend_uchar            val_type,
+                                       zend_jit_addr         val_addr,
+                                       zend_bool             check_exception)
+{
+	|	// if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(variable_ptr)))) {
+	|	cmp aword [FCARG1a + offsetof(zend_reference, sources.ptr)], 0
+	|	jnz >2
+	|.cold_code
+	|2:
+	|	LOAD_ZVAL_ADDR FCARG2a, val_addr
+	|	SAVE_VALID_OPLINE opline, r0
+	if (val_type == IS_CONST) {
+		|	EXT_CALL zend_jit_assign_const_to_typed_ref, r0
+	} else if (val_type == IS_TMP_VAR) {
+		|	EXT_CALL zend_jit_assign_tmp_to_typed_ref, r0
+	} else if (val_type == IS_VAR) {
+		|	EXT_CALL zend_jit_assign_var_to_typed_ref, r0
+	} else if (val_type == IS_CV) {
+		|	EXT_CALL zend_jit_assign_cv_to_typed_ref, r0
+	} else {
+		ZEND_UNREACHABLE();
+	}
+	if (check_exception) {
+		|	// if (UNEXPECTED(EG(exception) != NULL)) {
+		|	MEM_OP2_1_ZTS cmp, aword, executor_globals, exception, 0, r0
+		|	je >8  // END OF zend_jit_assign_to_variable()
+		|	jmp ->exception_handler
+	} else {
+		|	jmp >8
+	}
+	|.code
+
+	return 1;
+}
+
 static int zend_jit_assign_to_variable(dasm_State    **Dst,
                                        const zend_op  *opline,
                                        const zend_op_array *op_array,
@@ -5415,26 +5453,10 @@ static int zend_jit_assign_to_variable(dasm_State    **Dst,
 		|	IF_NOT_Z_TYPE, FCARG1a, IS_REFERENCE, >1
 		|	// if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(variable_ptr)))) {
 		|	GET_Z_PTR FCARG1a, FCARG1a
-		|	cmp aword [FCARG1a + offsetof(zend_reference, sources.ptr)], 0
-		|	jnz >2
-		|	add FCARG1a, offsetof(zend_reference, val)
-		|.cold_code
-		|2:
-		|	LOAD_ZVAL_ADDR FCARG2a, val_addr
-		|	SAVE_VALID_OPLINE opline, r0
-		if (val_type == IS_CONST) {
-			|	EXT_CALL zend_jit_assign_const_to_typed_ref, r0
-		} else if (val_type == IS_TMP_VAR) {
-			|	EXT_CALL zend_jit_assign_tmp_to_typed_ref, r0
-		} else if (val_type == IS_VAR) {
-			|	EXT_CALL zend_jit_assign_var_to_typed_ref, r0
-		} else if (val_type == IS_CV) {
-			|	EXT_CALL zend_jit_assign_cv_to_typed_ref, r0
-		} else {
-			ZEND_UNREACHABLE();
+		if (!zend_jit_assign_to_typed_ref(Dst, opline, op_array, val_type, val_addr, check_exception)) {
+			return 0;
 		}
-		|	jmp >8
-		|.code
+		|	add FCARG1a, offsetof(zend_reference, val)
 		|1:
 	}
 	if (var_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
@@ -7878,7 +7900,7 @@ static int zend_jit_assign(dasm_State **Dst, const zend_op *opline, const zend_o
 	}
 
 	if (!zend_jit_assign_to_variable(Dst, opline, op_array, op1_addr, op1_info, op1_def_info, opline->op2_type, opline->op2, op2_addr, op2_info, res_addr,
-			may_throw && !(op1_info & MAY_BE_REF) && (op1_info & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_ARRAY)))) {
+			may_throw)) {
 		return 0;
 	}
 	if (!zend_jit_store_var_if_necessary_ex(Dst, opline->op1.var, op1_addr, op1_def_info, op1_use_addr, op1_info)) {
@@ -7888,10 +7910,6 @@ static int zend_jit_assign(dasm_State **Dst, const zend_op *opline, const zend_o
 		if (!zend_jit_store_var_if_necessary(Dst, opline->result.var, res_addr, res_info)) {
 			return 0;
 		}
-	}
-
-	if (may_throw && (op1_info & MAY_BE_REF)) {
-		zend_jit_check_exception(Dst);
 	}
 
 	return 1;

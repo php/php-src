@@ -3341,6 +3341,9 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							if (!zend_jit_fetch_reference(&dasm_state, opline, orig_op1_type, &op1_info, &op1_addr, 0)) {
 								goto jit_failure;
 							}
+							if (!zend_jit_assign_to_typed_ref(&dasm_state, opline, op_array, opline->op2_type, op2_addr, 1)) {
+								goto jit_failure;
+							}
 							op1_def_addr = op1_addr;
 						} else {
 							USE_OP1_TRACE_TYPE();
