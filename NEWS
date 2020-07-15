@@ -38,8 +38,10 @@ PHP                                                                        NEWS
 - Reflection:
   . Fixed bug #79487 (::getStaticProperties() ignores property modifications).
     (cmb, Nikita)
-  . Fixed bug #69804 ()::getStaticPropertyValue() throws on protected props).
+  . Fixed bug #69804 (::getStaticPropertyValue() throws on protected props).
     (cmb, Nikita)
+  . Fixed bug #79820 (Use after free when type duplicated into
+    ReflectionProperty gets resolved). (Christopher Broadbent)
 
 - Standard:
   . Fixed bug #70362 (Can't copy() large 'data://' with open_basedir). (cmb)

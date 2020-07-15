@@ -238,6 +238,11 @@ static void reflection_free_objects_storage(zend_object *object) /* {{{ */
 		case REF_TYPE_PROPERTY:
 			prop_reference = (property_reference*)intern->ptr;
 			zend_string_release_ex(prop_reference->unmangled_name, 0);
+
+			if (ZEND_TYPE_IS_NAME(prop_reference->prop.type)) {
+				zend_string_release(ZEND_TYPE_NAME(prop_reference->prop.type));
+			}
+
 			efree(intern->ptr);
 			break;
 		case REF_TYPE_GENERATOR:
@@ -1233,6 +1238,11 @@ static void reflection_property_factory(zend_class_entry *ce, zend_string *name,
 	intern = Z_REFLECTION_P(object);
 	reference = (property_reference*) emalloc(sizeof(property_reference));
 	reference->prop = *prop;
+
+	if (ZEND_TYPE_IS_NAME(reference->prop.type)) {
+		zend_string_addref(ZEND_TYPE_NAME(reference->prop.type));
+	}
+
 	reference->unmangled_name = zend_string_copy(name);
 	reference->dynamic = dynamic;
 	intern->ptr = reference;
@@ -4258,6 +4268,7 @@ ZEND_METHOD(reflection_class, getProperty)
 			property_info_tmp.name = name;
 			property_info_tmp.doc_comment = NULL;
 			property_info_tmp.ce = ce;
+			property_info_tmp.type = 0;
 
 			reflection_property_factory(ce, name, &property_info_tmp, return_value, 1);
 			return;
@@ -4339,6 +4350,7 @@ static void _adddynproperty(zval *ptr, zend_string *key, zend_class_entry *ce, z
 	property_info.name = key;
 	property_info.ce = ce;
 	property_info.offset = -1;
+	property_info.type = 0;
 	reflection_property_factory(ce, key, &property_info, &property, 1);
 	add_next_index_zval(retval, &property);
 }
@@ -5319,10 +5331,15 @@ ZEND_METHOD(reflection_property, __construct)
 		reference->prop.name = name;
 		reference->prop.doc_comment = NULL;
 		reference->prop.ce = ce;
+		reference->prop.type = 0;
 		reference->dynamic = 1;
 	} else {
 		reference->prop = *property_info;
 		reference->dynamic = 0;
+
+		if (ZEND_TYPE_IS_NAME(reference->prop.type)) {
+			zend_string_addref(ZEND_TYPE_NAME(reference->prop.type));
+		}
 	}
 	reference->unmangled_name = zend_string_copy(name);
 	intern->ptr = reference;
