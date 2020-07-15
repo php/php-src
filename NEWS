@@ -47,6 +47,8 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fixed bug #70362 (Can't copy() large 'data://' with open_basedir). (cmb)
+  . Fixed bug #78008 (dns_check_record() always return true on Alpine).
+    (Andy Postnikov)
 
 09 Jul 2020, PHP 7.4.8
 

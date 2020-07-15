@@ -362,10 +362,8 @@ static void _php_dns_free_res(struct __res_state *res) { /* {{{ */
    Check DNS records corresponding to a given Internet host name or IP address */
 PHP_FUNCTION(dns_check_record)
 {
-#ifndef MAXPACKET
-#define MAXPACKET  8192 /* max packet size used internally by BIND */
-#endif
-	u_char ans[MAXPACKET];
+	HEADER *hp;
+	querybuf answer;
 	char *hostname, *rectype = NULL;
 	size_t hostname_len, rectype_len = 0;
 	int type = DNS_T_MX, i;
@@ -423,14 +421,14 @@ PHP_FUNCTION(dns_check_record)
 	res_init();
 #endif
 
-	RETVAL_TRUE;
-	i = php_dns_search(handle, hostname, C_IN, type, ans, sizeof(ans));
+	i = php_dns_search(handle, hostname, C_IN, type, answer.qb2, sizeof answer);
+	php_dns_free_handle(handle);
 
 	if (i < 0) {
-		RETVAL_FALSE;
+		RETURN_FALSE;
 	}
-
-	php_dns_free_handle(handle);
+	hp = (HEADER *)&answer;
+	RETURN_BOOL(ntohs(hp->ancount) != 0);
 }
 /* }}} */
 
@@ -1050,7 +1048,7 @@ PHP_FUNCTION(dns_get_mx)
 	zval *mx_list, *weight_list = NULL;
 	int count, qdc;
 	u_short type, weight;
-	u_char ans[MAXPACKET];
+	querybuf answer;
 	char buf[MAXHOSTNAMELEN];
 	HEADER *hp;
 	u_char *cp, *end;
@@ -1097,16 +1095,14 @@ PHP_FUNCTION(dns_get_mx)
 	res_init();
 #endif
 
-	i = php_dns_search(handle, hostname, C_IN, DNS_T_MX, (u_char *)&ans, sizeof(ans));
+	i = php_dns_search(handle, hostname, C_IN, DNS_T_MX, answer.qb2, sizeof answer);
 	if (i < 0) {
+		php_dns_free_handle(handle);
 		RETURN_FALSE;
 	}
-	if (i > (int)sizeof(ans)) {
-		i = sizeof(ans);
-	}
-	hp = (HEADER *)&ans;
-	cp = (u_char *)&ans + HFIXEDSZ;
-	end = (u_char *)&ans +i;
+	hp = (HEADER *)&answer;
+	cp = answer.qb2 + HFIXEDSZ;
+	end = answer.qb2 + i;
 	for (qdc = ntohs((unsigned short)hp->qdcount); qdc--; cp += i + QFIXEDSZ) {
 		if ((i = dn_skipname(cp, end)) < 0 ) {
 			php_dns_free_handle(handle);
@@ -1128,7 +1124,7 @@ PHP_FUNCTION(dns_get_mx)
 			continue;
 		}
 		GETSHORT(weight, cp);
-		if ((i = dn_expand(ans, end, cp, buf, sizeof(buf)-1)) < 0) {
+		if ((i = dn_expand(answer.qb2, end, cp, buf, sizeof(buf)-1)) < 0) {
 			php_dns_free_handle(handle);
 			RETURN_FALSE;
 		}
