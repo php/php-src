@@ -3,21 +3,9 @@ Test nullsafe property coalesce assignment
 --FILE--
 <?php
 
-class Foo {
-    public $bar;
-}
-
-function test(?Foo $foo) {
-    var_dump($foo?->bar ??= 'bar');
-    var_dump($foo?->bar);
-}
-
-test(null);
-test(new Foo());
+$foo = null;
+var_dump($foo?->bar ??= 'bar');
 
 ?>
---EXPECT--
-NULL
-NULL
-string(3) "bar"
-string(3) "bar"
+--EXPECTF--
+Fatal error: Can't use nullsafe operator in write context in %s.php on line 4

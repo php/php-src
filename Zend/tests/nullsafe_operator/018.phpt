@@ -3,7 +3,7 @@ Test nullsafe on undefined variable
 --FILE--
 <?php
 
-var_dump($foo?->bar = 10);
+var_dump($foo?->bar);
 var_dump($foo?->bar());
 var_dump($foo);
 

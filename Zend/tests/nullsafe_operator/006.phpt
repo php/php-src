@@ -1,29 +1,11 @@
 --TEST--
-Test nullsafe property post increment/decrement
+Test nullsafe property post increment
 --FILE--
 <?php
 
-class Foo {
-    public $bar = 0;
-}
-
-function test(?Foo $foo) {
-    var_dump(++$foo?->bar);
-    var_dump($foo?->bar);
-    var_dump(--$foo?->bar);
-    var_dump($foo?->bar);
-}
-
-test(null);
-test(new Foo());
+$foo = null;
+++$foo?->bar;
 
 ?>
---EXPECT--
-NULL
-NULL
-NULL
-NULL
-int(1)
-int(1)
-int(0)
-int(0)
+--EXPECTF--
+Fatal error: Can't use nullsafe operator in write context in %s.php on line 4

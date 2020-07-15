@@ -2251,21 +2251,13 @@ static zend_bool zend_ast_kind_is_short_circuited(uint32_t ast_kind)
 		case ZEND_AST_METHOD_CALL:
 		case ZEND_AST_NULLSAFE_METHOD_CALL:
 		case ZEND_AST_STATIC_CALL:
-		case ZEND_AST_ASSIGN:
-		case ZEND_AST_ASSIGN_REF:
-		case ZEND_AST_ASSIGN_OP:
-		case ZEND_AST_ASSIGN_COALESCE:
-		case ZEND_AST_POST_INC:
-		case ZEND_AST_POST_DEC:
-		case ZEND_AST_PRE_INC:
-		case ZEND_AST_PRE_DEC:
 			return 1;
 		default:
 			return 0;
 	}
 }
 
-static zend_bool zend_ast_is_short_circuited(zend_ast *ast)
+static zend_bool zend_ast_is_short_circuited(const zend_ast *ast)
 {
 	switch (ast->kind) {
 		case ZEND_AST_DIM:
@@ -2273,14 +2265,6 @@ static zend_bool zend_ast_is_short_circuited(zend_ast *ast)
 		case ZEND_AST_STATIC_PROP:
 		case ZEND_AST_METHOD_CALL:
 		case ZEND_AST_STATIC_CALL:
-		case ZEND_AST_ASSIGN:
-		case ZEND_AST_ASSIGN_REF:
-		case ZEND_AST_ASSIGN_OP:
-		case ZEND_AST_ASSIGN_COALESCE:
-		case ZEND_AST_POST_INC:
-		case ZEND_AST_POST_DEC:
-		case ZEND_AST_PRE_INC:
-		case ZEND_AST_PRE_DEC:
 			return zend_ast_is_short_circuited(ast->child[0]);
 		case ZEND_AST_NULLSAFE_PROP:
 		case ZEND_AST_NULLSAFE_METHOD_CALL:
@@ -2487,7 +2471,6 @@ static inline zend_bool zend_is_variable(zend_ast *ast) /* {{{ */
 	return ast->kind == ZEND_AST_VAR
 		|| ast->kind == ZEND_AST_DIM
 		|| ast->kind == ZEND_AST_PROP
-		|| ast->kind == ZEND_AST_NULLSAFE_PROP
 		|| ast->kind == ZEND_AST_STATIC_PROP;
 }
 /* }}} */
@@ -2520,7 +2503,6 @@ static inline zend_bool zend_can_write_to_variable(zend_ast *ast) /* {{{ */
 	while (
 		ast->kind == ZEND_AST_DIM
 		|| ast->kind == ZEND_AST_PROP
-		|| ast->kind == ZEND_AST_NULLSAFE_PROP
 	) {
 		ast = ast->child[0];
 	}
@@ -3049,6 +3031,9 @@ static void zend_ensure_writable_variable(const zend_ast *ast) /* {{{ */
 		|| ast->kind == ZEND_AST_STATIC_CALL
 	) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Can't use method return value in write context");
+	}
+	if (zend_ast_is_short_circuited(ast)) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Can't use nullsafe operator in write context");
 	}
 }
 /* }}} */
