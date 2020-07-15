@@ -1466,9 +1466,9 @@ do
         default:
         accelerated_start = NULL;
         fast_forward_allowed = FALSE;
-        break;
+        continue;
         }
-      continue;
+      break;
 
       case OP_ONCE:
       case OP_BRA:
@@ -1834,57 +1834,57 @@ while (cc < ccend)
     case OP_BRAZERO:
     case OP_BRAMINZERO:
     case OP_BRAPOSZERO:
-    repeat_check = FALSE;
     size = 1;
+    repeat_check = FALSE;
     break;
 
     CASE_ITERATOR_PRIVATE_DATA_1
-    space = 1;
     size = -2;
+    space = 1;
     break;
 
     CASE_ITERATOR_PRIVATE_DATA_2A
-    space = 2;
     size = -2;
+    space = 2;
     break;
 
     CASE_ITERATOR_PRIVATE_DATA_2B
-    space = 2;
     size = -(2 + IMM2_SIZE);
+    space = 2;
     break;
 
     CASE_ITERATOR_TYPE_PRIVATE_DATA_1
-    space = 1;
     size = 1;
+    space = 1;
     break;
 
     CASE_ITERATOR_TYPE_PRIVATE_DATA_2A
+    size = 1;
     if (cc[1] != OP_ANYNL && cc[1] != OP_EXTUNI)
       space = 2;
-    size = 1;
     break;
 
     case OP_TYPEUPTO:
+    size = 1 + IMM2_SIZE;
     if (cc[1 + IMM2_SIZE] != OP_ANYNL && cc[1 + IMM2_SIZE] != OP_EXTUNI)
       space = 2;
-    size = 1 + IMM2_SIZE;
     break;
 
     case OP_TYPEMINUPTO:
-    space = 2;
     size = 1 + IMM2_SIZE;
+    space = 2;
     break;
 
     case OP_CLASS:
     case OP_NCLASS:
-    space = get_class_iterator_size(cc + size);
     size = 1 + 32 / sizeof(PCRE2_UCHAR);
+    space = get_class_iterator_size(cc + size);
     break;
 
 #if defined SUPPORT_UNICODE || PCRE2_CODE_UNIT_WIDTH != 8
     case OP_XCLASS:
-    space = get_class_iterator_size(cc + size);
     size = GET(cc, 1);
+    space = get_class_iterator_size(cc + size);
     break;
 #endif
 
