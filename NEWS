@@ -122,6 +122,10 @@ PHP                                                                        NEWS
 - mysqlnd:
   . Fixed #60594 (mysqlnd exposes 160 lines of stats in phpinfo). (PeeHaa)
 
+- OCI8:
+  . Deprecated old OCI8 function aliases. (Jens de Nies)
+  . Removed obsolete no-op function oci_internal_debug(). (Jens de Nies)
+
 - OpCache:
   . Fixed bug #78654 (Incorrectly computed opcache checksum on files with
     non-ascii characters). (mhagstrand)
