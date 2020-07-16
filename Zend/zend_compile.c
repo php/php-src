@@ -3086,7 +3086,7 @@ void zend_compile_assign(znode *result, zend_ast *ast) /* {{{ */
 			zend_compile_expr(&expr_node, expr_ast);
 			zend_delayed_compile_end(offset);
 			zend_emit_op_tmp(result, ZEND_ASSIGN, &var_node, &expr_node);
-			break;
+			return;
 		case ZEND_AST_STATIC_PROP:
 			offset = zend_delayed_compile_begin();
 			zend_delayed_compile_var(result, var_ast, BP_VAR_W, 0);
@@ -3098,7 +3098,7 @@ void zend_compile_assign(znode *result, zend_ast *ast) /* {{{ */
 			result->op_type = IS_TMP_VAR;
 
 			zend_emit_op_data(&expr_node);
-			break;
+			return;
 		case ZEND_AST_DIM:
 			offset = zend_delayed_compile_begin();
 			zend_delayed_compile_dim(result, var_ast, BP_VAR_W);
@@ -3123,7 +3123,7 @@ void zend_compile_assign(znode *result, zend_ast *ast) /* {{{ */
 			result->op_type = IS_TMP_VAR;
 
 			opline = zend_emit_op_data(&expr_node);
-			break;
+			return;
 		case ZEND_AST_PROP:
 		case ZEND_AST_NULLSAFE_PROP:
 			offset = zend_delayed_compile_begin();
@@ -3136,7 +3136,7 @@ void zend_compile_assign(znode *result, zend_ast *ast) /* {{{ */
 			result->op_type = IS_TMP_VAR;
 
 			zend_emit_op_data(&expr_node);
-			break;
+			return;
 		case ZEND_AST_ARRAY:
 			if (zend_propagate_list_refs(var_ast)) {
 				if (!zend_is_variable_or_call(expr_ast)) {
@@ -3164,7 +3164,7 @@ void zend_compile_assign(znode *result, zend_ast *ast) /* {{{ */
 			}
 
 			zend_compile_list_assign(result, var_ast, &expr_node, var_ast->attr);
-			break;
+			return;
 		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 }
@@ -3262,7 +3262,7 @@ void zend_compile_compound_assign(znode *result, zend_ast *ast) /* {{{ */
 			zend_delayed_compile_end(offset);
 			opline = zend_emit_op_tmp(result, ZEND_ASSIGN_OP, &var_node, &expr_node);
 			opline->extended_value = opcode;
-			break;
+			return;
 		case ZEND_AST_STATIC_PROP:
 			offset = zend_delayed_compile_begin();
 			zend_delayed_compile_var(result, var_ast, BP_VAR_RW, 0);
@@ -3277,7 +3277,7 @@ void zend_compile_compound_assign(znode *result, zend_ast *ast) /* {{{ */
 
 			opline = zend_emit_op_data(&expr_node);
 			opline->extended_value = cache_slot;
-			break;
+			return;
 		case ZEND_AST_DIM:
 			offset = zend_delayed_compile_begin();
 			zend_delayed_compile_dim(result, var_ast, BP_VAR_RW);
@@ -3290,7 +3290,7 @@ void zend_compile_compound_assign(znode *result, zend_ast *ast) /* {{{ */
 			result->op_type = IS_TMP_VAR;
 
 			zend_emit_op_data(&expr_node);
-			break;
+			return;
 		case ZEND_AST_PROP:
 		case ZEND_AST_NULLSAFE_PROP:
 			offset = zend_delayed_compile_begin();
@@ -3306,7 +3306,7 @@ void zend_compile_compound_assign(znode *result, zend_ast *ast) /* {{{ */
 
 			opline = zend_emit_op_data(&expr_node);
 			opline->extended_value = cache_slot;
-			break;
+			return;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 }
