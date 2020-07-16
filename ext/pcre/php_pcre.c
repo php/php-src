@@ -2089,6 +2089,9 @@ static zend_string *php_pcre_replace_array(HashTable *regex,
 				}
 				zv = &replace_ht->arData[replace_idx].val;
 				replace_idx++;
+				if (Z_TYPE_P(zv) == IS_INDIRECT) {
+					zv = Z_INDIRECT_P(zv);
+				}
 				if (Z_TYPE_P(zv) != IS_UNDEF) {
 					replace_entry_str = zval_get_tmp_string(zv, &tmp_replace_entry_str);
 					break;
