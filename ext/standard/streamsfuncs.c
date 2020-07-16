@@ -1623,15 +1623,13 @@ PHP_FUNCTION(sapi_windows_vt100_support)
 {
 	zval *zsrc;
 	php_stream *stream;
-	zend_bool enable;
+	zend_bool enable, enable_is_null = 1;
 	zend_long fileno;
-
-	int argc = ZEND_NUM_ARGS();
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_RESOURCE(zsrc)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_BOOL(enable)
+		Z_PARAM_BOOL_OR_NULL(enable, enable_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
 	php_stream_from_zval(stream, zsrc);
@@ -1643,7 +1641,7 @@ PHP_FUNCTION(sapi_windows_vt100_support)
 		php_stream_cast(stream, PHP_STREAM_AS_FD, (void*)&fileno, 0);
 	}
 	else {
-		if (argc > 1) {
+		if (!enable_is_null) {
 			php_error_docref(
 				NULL,
 				E_WARNING,
@@ -1658,7 +1656,7 @@ PHP_FUNCTION(sapi_windows_vt100_support)
 		RETURN_FALSE;
 	}
 
-	if (argc == 1) {
+	if (enable_is_null) {
 		/* Check if the Windows standard handle has VT100 control codes enabled */
 		if (php_win32_console_fileno_has_vt100(fileno)) {
 			RETURN_TRUE;
