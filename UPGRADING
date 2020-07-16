@@ -799,6 +799,11 @@ PHP 8.0 UPGRADE NOTES
   . enchant_broker_free and enchant_broker_free_dict, unset the object instead
   . ENCHANT_MYSPELL and ENCHANT_ISPELL constants
 
+- LibXML:
+  . libxml_disable_entity_loader() has been deprecated. As libxml 2.9.0 is now
+    required, external entity loading is guaranteed to be disabled by default,
+    and this function is no longer needed to protect against XXE attacks.
+
 - PGSQL / PDO PGSQL:
   . The constant PG_VERSION_STR has now the same value as PG_VERSION, and thus
     is deprecated.
