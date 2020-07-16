@@ -2508,7 +2508,7 @@ static inline zend_bool zend_can_write_to_variable(zend_ast *ast) /* {{{ */
 		ast = ast->child[0];
 	}
 
-	return zend_is_variable_or_call(ast);
+	return zend_is_variable_or_call(ast) && !zend_ast_is_short_circuited(ast);
 }
 /* }}} */
 

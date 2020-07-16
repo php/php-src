@@ -18,4 +18,4 @@ $foo->bar = new Bar();
 var_dump($foo);
 
 --EXPECTF--
-Fatal error: Can't use nullsafe operator in write context in %s on line %d
+Fatal error: Assignments can only happen to writable values in %s on line %d
