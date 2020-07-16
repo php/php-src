@@ -1281,6 +1281,7 @@ static void zend_jmp_optimization(zend_basic_block *block, zend_op_array *op_arr
 
 		case ZEND_JMP_SET:
 		case ZEND_COALESCE:
+		case ZEND_JMP_NULL:
 			jmp_hitlist_count = 0;
 
 			target_block = get_target_block(cfg, block, 0, opt_count);
