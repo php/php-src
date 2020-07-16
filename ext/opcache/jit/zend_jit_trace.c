@@ -2829,15 +2829,12 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							goto jit_failure;
 						}
 					} else if (STACK_REG(parent_stack, i) == ZREG_THIS) {
+						SET_STACK_REG(stack, i, ZREG_NONE);
 						if (!zend_jit_load_this(&dasm_state, EX_NUM_TO_VAR(i))) {
 							goto jit_failure;
 						}
 					} else {
-						if (STACK_REG(parent_stack, i) == ZREG_ZVAL_COPY_R0) {
-							SET_STACK_TYPE(stack, i, IS_UNKNOWN);
-						} else {
-							SET_STACK_REG(stack, i, ZREG_NONE);
-						}
+						SET_STACK_REG(stack, i, ZREG_NONE);
 						if (!zend_jit_store_const(&dasm_state, i, STACK_REG(parent_stack, i))) {
 							goto jit_failure;
 						}
@@ -4051,7 +4048,7 @@ done:
 			}
 
 			if ((opline->op1_type & (IS_VAR|IS_TMP_VAR))
-			 && STACK_REG(stack, EX_VAR_TO_NUM(opline->op1.var)) == ZREG_THIS) {
+			 && STACK_REG(stack, EX_VAR_TO_NUM(opline->op1.var)) > ZREG_NUM) {
 				SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->op1.var), ZREG_NONE);
 			}
 
