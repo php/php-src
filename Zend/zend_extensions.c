@@ -18,6 +18,7 @@
 */
 
 #include "zend_extensions.h"
+#include "zend_system_id.h"
 
 ZEND_API zend_llist zend_extensions;
 ZEND_API uint32_t zend_extension_flags = 0;
@@ -247,18 +248,19 @@ ZEND_API void zend_extension_dispatch_message(int message, void *arg)
 }
 
 
-ZEND_API int zend_get_resource_handle(zend_extension *extension)
+ZEND_API int zend_get_resource_handle(const char *module_name)
 {
 	if (last_resource_number<ZEND_MAX_RESERVED_RESOURCES) {
-		extension->resource_number = last_resource_number;
+		zend_add_system_entropy(module_name, "zend_get_resource_handle", &last_resource_number, sizeof(int));
 		return last_resource_number++;
 	} else {
 		return -1;
 	}
 }
 
-ZEND_API int zend_get_op_array_extension_handle(void)
+ZEND_API int zend_get_op_array_extension_handle(const char *module_name)
 {
+	zend_add_system_entropy(module_name, "zend_get_op_array_extension_handle", &zend_op_array_extension_handles, sizeof(int));
 	return zend_op_array_extension_handles++;
 }
 

@@ -369,6 +369,10 @@ PHP 8.0 INTERNALS UPGRADE NOTES
         - zend_stack_is_empty()
         - zend_ts_hash_exists()
         - zend_ts_hash_index_exists()
+     9. Argument void to const char* in Zend Engine 4.0:
+        - zend_get_op_array_extension_handle()
+     10. Argument zend_extension to const char* in Zend Engine 4.0:
+        - zend_get_resource_handle()
 
   u. Instead of overwriting zend_error_cb extensions with debugging, monitoring
      use-cases catching Errors/Exceptions are strongly encouraged to use

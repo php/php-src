@@ -4071,7 +4071,7 @@ ZEND_EXT_API int zend_jit_startup(void *buf, size_t size, zend_bool reattached)
 		return FAILURE;
 	}
 
-	zend_jit_profile_counter_rid = zend_get_op_array_extension_handle();
+	zend_jit_profile_counter_rid = zend_get_op_array_extension_handle(ACCELERATOR_PRODUCT_NAME);
 
 #ifdef HAVE_GDB
 	zend_jit_gdb_init();

@@ -106,7 +106,6 @@ ZEND_TSRMLS_CACHE_DEFINE()
 zend_accel_shared_globals *accel_shared_globals = NULL;
 
 /* true globals, no need for thread safety */
-char accel_system_id[32];
 #ifdef ZEND_WIN32
 char accel_uname_id[32];
 #endif
@@ -126,7 +125,6 @@ static zif_handler orig_chdir = NULL;
 static ZEND_INI_MH((*orig_include_path_on_modify)) = NULL;
 static zend_result (*orig_post_startup_cb)(void);
 
-static void accel_gen_system_id(void);
 static zend_result accel_post_startup(void);
 static int accel_finish_startup(void);
 
@@ -2709,46 +2707,6 @@ static void accel_globals_ctor(zend_accel_globals *accel_globals)
 	memset(accel_globals, 0, sizeof(zend_accel_globals));
 }
 
-#define ZEND_BIN_ID "BIN_" ZEND_TOSTR(SIZEOF_INT) ZEND_TOSTR(SIZEOF_LONG) ZEND_TOSTR(SIZEOF_SIZE_T) ZEND_TOSTR(SIZEOF_ZEND_LONG) ZEND_TOSTR(ZEND_MM_ALIGNMENT)
-
-static void accel_gen_system_id(void)
-{
-	PHP_MD5_CTX context;
-	unsigned char digest[16];
-	zend_module_entry *module;
-	zend_extension *extension;
-	zend_llist_position pos;
-
-	PHP_MD5Init(&context);
-	PHP_MD5Update(&context, PHP_VERSION, sizeof(PHP_VERSION)-1);
-	PHP_MD5Update(&context, ZEND_EXTENSION_BUILD_ID, sizeof(ZEND_EXTENSION_BUILD_ID)-1);
-	PHP_MD5Update(&context, ZEND_BIN_ID, sizeof(ZEND_BIN_ID)-1);
-	if (strstr(PHP_VERSION, "-dev") != 0) {
-		/* Development versions may be changed from build to build */
-		PHP_MD5Update(&context, __DATE__, sizeof(__DATE__)-1);
-		PHP_MD5Update(&context, __TIME__, sizeof(__TIME__)-1);
-	}
-	/* Modules may have changed after restart which can cause dangling pointers from
-     * custom opcode handlers in the second-level cache files
-     */
-	ZEND_HASH_FOREACH_PTR(&module_registry, module) {
-		PHP_MD5Update(&context, module->name, strlen(module->name));
-		if (module->version != NULL) {
-			PHP_MD5Update(&context, module->version, strlen(module->version));
-		}
-	} ZEND_HASH_FOREACH_END();
-	extension = (zend_extension *) zend_llist_get_first_ex(&zend_extensions, &pos);
-	while (extension) {
-		PHP_MD5Update(&context, extension->name, strlen(extension->name));
-		if (extension->version != NULL) {
-			PHP_MD5Update(&context, extension->version, strlen(extension->version));
-		}
-		extension = (zend_extension *) zend_llist_get_next_ex(&zend_extensions, &pos);
-	}
-	PHP_MD5Final(digest, &context);
-	php_hash_bin2hex(accel_system_id, digest, sizeof digest);
-}
-
 #ifdef HAVE_HUGE_CODE_PAGES
 # ifndef _WIN32
 #  include <sys/mman.h>
@@ -2932,8 +2890,6 @@ static int accel_startup(zend_extension *extension)
 	_setmaxstdio(2048); /* The default configuration is limited to 512 stdio files */
 # endif
 #endif
-
-	accel_gen_system_id();
 
 	if (start_accel_module() == FAILURE) {
 		accel_startup_ok = 0;

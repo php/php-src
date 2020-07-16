@@ -942,11 +942,10 @@ uint32_t zend_get_func_info(
 
 int zend_func_info_startup(void)
 {
-	zend_extension dummy;
 	size_t i;
 
 	if (zend_func_info_rid == -1) {
-		zend_func_info_rid = zend_get_resource_handle(&dummy);
+		zend_func_info_rid = zend_get_resource_handle("Zend Optimizer");
 		if (zend_func_info_rid < 0) {
 			return FAILURE;
 		}
