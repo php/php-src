@@ -57,8 +57,6 @@ PHP                                                                        NEWS
   . Fixed bug #79650 (php-win.exe 100% cpu lockup). (cmb)
   . Fixed bug #79668 (get_defined_functions(true) may miss functions). (cmb,
     Nikita)
-  . Fixed bug #79657 ("yield from" hangs when invalid value encountered).
-    (Nikita)
   . Fixed bug #79683 (Fake reflection scope affects __toString()). (Nikita)
   . Fixed possibly unsupported timercmp() usage. (cmb)
 
@@ -107,6 +105,8 @@ PHP                                                                        NEWS
   . Fixed bug #79489 (.user.ini does not inherit). (cmb)
   . Fixed bug #79600 (Regression in 7.4.6 when yielding an array based
     generator). (Nikita)
+  . Fixed bug #79657 ("yield from" hangs when invalid value encountered).
+    (Nikita)
 
 - FFI:
   . Fixed bug #79571 (FFI: var_dumping unions may segfault). (cmb)
