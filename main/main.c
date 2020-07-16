@@ -72,6 +72,7 @@
 #include "zend_ini.h"
 #include "zend_dtrace.h"
 #include "zend_observer.h"
+#include "zend_system_id.h"
 
 #include "php_content_types.h"
 #include "php_ticks.h"
@@ -2202,6 +2203,9 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	php_startup_sapi_content_types();
 	zend_observer_startup();
 
+	/* Begin to fingerprint the process state */
+	zend_startup_system_id();
+
 	/* startup extensions statically compiled in */
 	if (php_register_internal_extensions_func() == FAILURE) {
 		php_printf("Unable to start builtin modules\n");
@@ -2244,6 +2248,9 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 		module->version = PHP_VERSION;
 		module->info_func = PHP_MINFO(php_core);
 	}
+
+	/* Extensions that add engine hooks after this point do so at their own peril */
+	zend_finalize_system_id();
 
 	module_initialized = 1;
 

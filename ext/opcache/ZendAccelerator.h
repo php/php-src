@@ -289,7 +289,6 @@ typedef struct _zend_accel_shared_globals {
 	zend_string_table interned_strings;
 } zend_accel_shared_globals;
 
-extern char accel_system_id[32];
 #ifdef ZEND_WIN32
 extern char accel_uname_id[32];
 #endif
