@@ -1395,7 +1395,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_value_error(uint32_t arg_num
 
 #define Z_PARAM_CLASS_NAME_OR_OBJ_EX(dest, allow_null) \
 	Z_PARAM_PROLOGUE(0, 0); \
-	if (UNEXPECTED(!zend_parse_arg_class_name_or_obj(_arg, &dest, _i, allow_null))) { \
+	if (UNEXPECTED(!zend_parse_arg_class_name_or_obj(_arg, &dest, allow_null))) { \
 		_expected_type = allow_null ? Z_EXPECTED_CLASS_NAME_OR_OBJECT_OR_NULL : Z_EXPECTED_CLASS_NAME_OR_OBJECT; \
 		_error_code = ZPP_ERROR_WRONG_ARG; \
 		break; \
@@ -1985,7 +1985,7 @@ static zend_always_inline int zend_parse_arg_str_or_long(zval *arg, zend_string 
 }
 
 static zend_always_inline int zend_parse_arg_class_name_or_obj(
-	zval *arg, zend_class_entry **destination, int num, int allow_null
+	zval *arg, zend_class_entry **destination, int allow_null
 ) {
 	if (EXPECTED(Z_TYPE_P(arg) == IS_STRING)) {
 		*destination = zend_lookup_class(Z_STR_P(arg));
