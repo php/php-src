@@ -57,7 +57,7 @@ const mbfl_encoding mbfl_encoding_utf8 = {
 	mbfl_no_encoding_utf8,
 	"UTF-8",
 	"UTF-8",
-	(const char *(*)[])&mbfl_encoding_utf8_aliases,
+	mbfl_encoding_utf8_aliases,
 	mblen_table_utf8,
 	MBFL_ENCTYPE_MBCS,
 	&vtbl_utf8_wchar,

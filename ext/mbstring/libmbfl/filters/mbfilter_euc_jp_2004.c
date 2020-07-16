@@ -40,7 +40,7 @@ const mbfl_encoding mbfl_encoding_eucjp2004 = {
 	mbfl_no_encoding_eucjp2004,
 	"EUC-JP-2004",
 	"EUC-JP",
-	(const char *(*)[])&mbfl_encoding_eucjp2004_aliases,
+	mbfl_encoding_eucjp2004_aliases,
 	mblen_table_eucjp,
 	MBFL_ENCTYPE_MBCS,
 	&vtbl_eucjp2004_wchar,

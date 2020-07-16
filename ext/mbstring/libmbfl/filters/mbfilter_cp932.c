@@ -60,7 +60,7 @@ const mbfl_encoding mbfl_encoding_cp932 = {
 	mbfl_no_encoding_cp932,
 	"CP932",
 	"Shift_JIS",
-	(const char *(*)[])&mbfl_encoding_cp932_aliases,
+	mbfl_encoding_cp932_aliases,
 	mblen_table_sjis,
 	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_cp932_wchar,

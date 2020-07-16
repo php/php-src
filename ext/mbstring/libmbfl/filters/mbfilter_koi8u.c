@@ -36,7 +36,7 @@ const mbfl_encoding mbfl_encoding_koi8u = {
 	mbfl_no_encoding_koi8u,
 	"KOI8-U",
 	"KOI8-U",
-	(const char *(*)[])&mbfl_encoding_koi8u_aliases,
+	mbfl_encoding_koi8u_aliases,
 	NULL,
 	MBFL_ENCTYPE_SBCS,
 	&vtbl_koi8u_wchar,

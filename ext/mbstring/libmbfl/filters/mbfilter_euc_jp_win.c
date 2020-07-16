@@ -69,7 +69,7 @@ const mbfl_encoding mbfl_encoding_eucjp_win = {
 	mbfl_no_encoding_eucjp_win,
 	"eucJP-win",
 	"EUC-JP",
-	(const char *(*)[])&mbfl_encoding_eucjp_win_aliases,
+	mbfl_encoding_eucjp_win_aliases,
 	mblen_table_eucjp,
 	MBFL_ENCTYPE_MBCS,
 	&vtbl_eucjpwin_wchar,

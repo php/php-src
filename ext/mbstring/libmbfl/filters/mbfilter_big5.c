@@ -59,7 +59,7 @@ const mbfl_encoding mbfl_encoding_big5 = {
 	mbfl_no_encoding_big5,
 	"BIG-5",
 	"BIG5",
-	(const char *(*)[])&mbfl_encoding_big5_aliases,
+	mbfl_encoding_big5_aliases,
 	mblen_table_big5,
 	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_big5_wchar,

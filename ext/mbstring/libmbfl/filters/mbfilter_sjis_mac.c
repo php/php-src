@@ -46,7 +46,7 @@ const mbfl_encoding mbfl_encoding_sjis_mac = {
 	mbfl_no_encoding_sjis_mac,
 	"SJIS-mac",
 	"Shift_JIS",
-	(const char *(*)[])&mbfl_encoding_sjis_mac_aliases,
+	mbfl_encoding_sjis_mac_aliases,
 	mblen_table_sjis,
 	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_sjis_mac_wchar,

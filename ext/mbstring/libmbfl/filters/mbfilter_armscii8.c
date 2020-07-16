@@ -38,7 +38,7 @@ const mbfl_encoding mbfl_encoding_armscii8 = {
 	mbfl_no_encoding_armscii8,
 	"ArmSCII-8",
 	"ArmSCII-8",
-	(const char *(*)[])&mbfl_encoding_armscii8_aliases,
+	mbfl_encoding_armscii8_aliases,
 	NULL,
 	MBFL_ENCTYPE_SBCS,
 	&vtbl_armscii8_wchar,

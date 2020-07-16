@@ -2764,8 +2764,7 @@ PHP_FUNCTION(mb_encoding_aliases)
 
 	array_init(return_value);
 	if (encoding->aliases != NULL) {
-		const char **alias;
-		for (alias = *encoding->aliases; *alias; ++alias) {
+		for (const char **alias = encoding->aliases; *alias; ++alias) {
 			add_next_index_string(return_value, (char *)*alias);
 		}
 	}
@@ -3649,7 +3648,7 @@ PHP_FUNCTION(mb_send_mail)
 	if (!suppressed_hdrs.cnt_type) {
 		mbfl_memory_device_strncat(&device, PHP_MBSTR_MAIL_MIME_HEADER2, sizeof(PHP_MBSTR_MAIL_MIME_HEADER2) - 1);
 
-		p = (char *)mbfl_no2preferred_mime_name(tran_cs->no_encoding);
+		p = (char *)mbfl_encoding_preferred_mime_name(tran_cs);
 		if (p != NULL) {
 			mbfl_memory_device_strncat(&device, PHP_MBSTR_MAIL_MIME_HEADER3, sizeof(PHP_MBSTR_MAIL_MIME_HEADER3) - 1);
 			mbfl_memory_device_strcat(&device, p);
@@ -3658,7 +3657,7 @@ PHP_FUNCTION(mb_send_mail)
 	}
 	if (!suppressed_hdrs.cnt_trans_enc) {
 		mbfl_memory_device_strncat(&device, PHP_MBSTR_MAIL_MIME_HEADER4, sizeof(PHP_MBSTR_MAIL_MIME_HEADER4) - 1);
-		p = (char *)mbfl_no2preferred_mime_name(body_enc->no_encoding);
+		p = (char *)mbfl_encoding_preferred_mime_name(body_enc);
 		if (p == NULL) {
 			p = "7bit";
 		}

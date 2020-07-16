@@ -36,7 +36,7 @@ const mbfl_encoding mbfl_encoding_ucs2 = {
 	mbfl_no_encoding_ucs2,
 	"UCS-2",
 	"UCS-2",
-	(const char *(*)[])&mbfl_encoding_ucs2_aliases,
+	mbfl_encoding_ucs2_aliases,
 	NULL,
 	MBFL_ENCTYPE_WCS2BE,
 	&vtbl_ucs2_wchar,

@@ -68,7 +68,7 @@ const mbfl_encoding mbfl_encoding_cp51932 = {
 	mbfl_no_encoding_cp51932,
 	"CP51932",
 	"CP51932",
-	(const char *(*)[])&mbfl_encoding_cp51932_aliases,
+	mbfl_encoding_cp51932_aliases,
 	mblen_table_eucjp,
 	MBFL_ENCTYPE_MBCS,
 	&vtbl_cp51932_wchar,

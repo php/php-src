@@ -63,7 +63,7 @@ const mbfl_encoding mbfl_encoding_sjis = {
 	mbfl_no_encoding_sjis,
 	"SJIS",
 	"Shift_JIS",
-	(const char *(*)[])&mbfl_encoding_sjis_aliases,
+	mbfl_encoding_sjis_aliases,
 	mblen_table_sjis,
 	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_sjis_wchar,

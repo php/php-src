@@ -39,7 +39,7 @@ const mbfl_encoding mbfl_encoding_cp866 = {
 	mbfl_no_encoding_cp866,
 	"CP866",
 	"CP866",
-	(const char *(*)[])&mbfl_encoding_cp866_aliases,
+	mbfl_encoding_cp866_aliases,
 	NULL,
 	MBFL_ENCTYPE_SBCS,
 	&vtbl_cp866_wchar,

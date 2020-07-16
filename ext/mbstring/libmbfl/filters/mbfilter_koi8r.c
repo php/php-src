@@ -39,7 +39,7 @@ const mbfl_encoding mbfl_encoding_koi8r = {
 	mbfl_no_encoding_koi8r,
 	"KOI8-R",
 	"KOI8-R",
-	(const char *(*)[])&mbfl_encoding_koi8r_aliases,
+	mbfl_encoding_koi8r_aliases,
 	NULL,
 	MBFL_ENCTYPE_SBCS,
 	&vtbl_koi8r_wchar,

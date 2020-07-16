@@ -44,7 +44,7 @@ const mbfl_encoding mbfl_encoding_2022jp_kddi = {
 	mbfl_no_encoding_2022jp_kddi,
 	"ISO-2022-JP-MOBILE#KDDI",
 	"ISO-2022-JP",
-	(const char *(*)[])&mbfl_encoding_2022jp_kddi_aliases,
+	mbfl_encoding_2022jp_kddi_aliases,
 	NULL,
 	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_2022jp_kddi_wchar,

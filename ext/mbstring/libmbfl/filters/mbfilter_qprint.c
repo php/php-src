@@ -37,7 +37,7 @@ const mbfl_encoding mbfl_encoding_qprint = {
 	mbfl_no_encoding_qprint,
 	"Quoted-Printable",
 	"Quoted-Printable",
-	(const char *(*)[])&mbfl_encoding_qprint_aliases,
+	mbfl_encoding_qprint_aliases,
 	NULL,
 	MBFL_ENCTYPE_GL_UNSAFE,
 	NULL,

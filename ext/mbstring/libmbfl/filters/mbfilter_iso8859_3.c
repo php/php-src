@@ -37,7 +37,7 @@ const mbfl_encoding mbfl_encoding_8859_3 = {
 	mbfl_no_encoding_8859_3,
 	"ISO-8859-3",
 	"ISO-8859-3",
-	(const char *(*)[])&mbfl_encoding_8859_3_aliases,
+	mbfl_encoding_8859_3_aliases,
 	NULL,
 	MBFL_ENCTYPE_SBCS,
 	&vtbl_8859_3_wchar,

@@ -39,7 +39,7 @@ const mbfl_encoding mbfl_encoding_ascii = {
 	mbfl_no_encoding_ascii,
 	"ASCII",
 	"US-ASCII", /* preferred MIME name */
-	(const char *(*)[])&mbfl_encoding_ascii_aliases,
+	mbfl_encoding_ascii_aliases,
 	NULL,
 	MBFL_ENCTYPE_SBCS,
 	&vtbl_ascii_wchar,

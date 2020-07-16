@@ -36,7 +36,7 @@ const mbfl_encoding mbfl_encoding_utf32 = {
 	mbfl_no_encoding_utf32,
 	"UTF-32",
 	"UTF-32",
-	(const char *(*)[])&mbfl_encoding_utf32_aliases,
+	mbfl_encoding_utf32_aliases,
 	NULL,
 	MBFL_ENCTYPE_WCS4BE,
 	&vtbl_utf32_wchar,

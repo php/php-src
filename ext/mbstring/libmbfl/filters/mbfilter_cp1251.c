@@ -39,7 +39,7 @@ const mbfl_encoding mbfl_encoding_cp1251 = {
 	mbfl_no_encoding_cp1251,
 	"Windows-1251",
 	"Windows-1251",
-	(const char *(*)[])&mbfl_encoding_cp1251_aliases,
+	mbfl_encoding_cp1251_aliases,
 	NULL,
 	MBFL_ENCTYPE_SBCS,
 	&vtbl_cp1251_wchar,

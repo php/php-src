@@ -35,7 +35,7 @@ const mbfl_encoding mbfl_encoding_cp850 = {
 	mbfl_no_encoding_cp850,
 	"CP850",
 	"CP850",
-	(const char *(*)[])&mbfl_encoding_cp850_aliases,
+	mbfl_encoding_cp850_aliases,
 	NULL,
 	MBFL_ENCTYPE_SBCS,
 	&vtbl_cp850_wchar,

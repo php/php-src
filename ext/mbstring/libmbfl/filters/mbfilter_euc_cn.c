@@ -59,7 +59,7 @@ const mbfl_encoding mbfl_encoding_euc_cn = {
 	mbfl_no_encoding_euc_cn,
 	"EUC-CN",
 	"CN-GB",
-	(const char *(*)[])&mbfl_encoding_euc_cn_aliases,
+	mbfl_encoding_euc_cn_aliases,
 	mblen_table_euccn,
 	MBFL_ENCTYPE_MBCS,
 	&vtbl_euccn_wchar,
