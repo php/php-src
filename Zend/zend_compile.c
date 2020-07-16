@@ -60,11 +60,6 @@ typedef struct _zend_loop_var {
 	uint32_t   try_catch_offset;
 } zend_loop_var;
 
-typedef struct _zend_short_circuiting_chain {
-	zend_stack jmp_null_opnums;
-	uint32_t flags;
-} zend_short_circuiting_chain;
-
 static inline uint32_t zend_alloc_cache_slots(unsigned count) {
 	if (count == 0) {
 		return (uint32_t) -1;
@@ -373,7 +368,7 @@ void zend_init_compiler_data_structures(void) /* {{{ */
 {
 	zend_stack_init(&CG(loop_var_stack), sizeof(zend_loop_var));
 	zend_stack_init(&CG(delayed_oplines_stack), sizeof(zend_op));
-	zend_stack_init(&CG(short_circuiting_chains), sizeof(zend_short_circuiting_chain));
+	zend_stack_init(&CG(short_circuiting_opnums), sizeof(uint32_t));
 	CG(active_class_entry) = NULL;
 	CG(in_compilation) = 0;
 	CG(skip_shebang) = 0;
@@ -381,7 +376,6 @@ void zend_init_compiler_data_structures(void) /* {{{ */
 	CG(encoding_declared) = 0;
 	CG(memoized_exprs) = NULL;
 	CG(memoize_mode) = 0;
-	CG(in_short_circuiting_chain) = 0;
 }
 /* }}} */
 
@@ -428,7 +422,7 @@ void shutdown_compiler(void) /* {{{ */
 {
 	zend_stack_destroy(&CG(loop_var_stack));
 	zend_stack_destroy(&CG(delayed_oplines_stack));
-	zend_stack_destroy(&CG(short_circuiting_chains));
+	zend_stack_destroy(&CG(short_circuiting_opnums));
 	zend_hash_destroy(&CG(filenames_table));
 	zend_arena_destroy(CG(arena));
 
@@ -2233,15 +2227,7 @@ static zend_op *zend_delayed_compile_end(uint32_t offset) /* {{{ */
 }
 /* }}} */
 
-#define ZEND_WAS_IN_SHORT_CIRCUITING_CHAIN (1 << 0)
-#define ZEND_SHORT_CIRCUITING_CHAIN_WAS_CREATED (1 << 1)
-
-static zend_short_circuiting_chain *zend_current_short_circuiting_chain()
-{
-	return zend_stack_top(&CG(short_circuiting_chains));
-}
-
-static zend_bool zend_ast_kind_is_short_circuited(uint32_t ast_kind)
+static zend_bool zend_ast_kind_is_short_circuited(zend_ast_kind ast_kind)
 {
 	switch (ast_kind) {
 		case ZEND_AST_DIM:
@@ -2276,67 +2262,56 @@ static zend_bool zend_ast_is_short_circuited(const zend_ast *ast)
 	return 0;
 }
 
-static uint32_t zend_begin_short_circuiting_chain(uint32_t ast_kind, zend_bool force)
-{
-	zend_bool was_in_short_circuiting_chain = CG(in_short_circuiting_chain);
-	zend_bool ast_kind_is_short_circuited = zend_ast_kind_is_short_circuited(ast_kind);
+/* Mark nodes that are an inner part of a short-circuiting chain.
+ * We should not perform a "commit" on them, as it will be performed by the outer-most node.
+ * We do this to avoid passing down an argument in various compile functions. */
 
-	uint32_t flags = 0;
-	if (was_in_short_circuiting_chain) {
-		flags |= ZEND_WAS_IN_SHORT_CIRCUITING_CHAIN;
+#define ZEND_SHORT_CIRCUITING_INNER 0x8000
+
+static void zend_short_circuiting_mark_inner(zend_ast *ast) {
+	if (zend_ast_kind_is_short_circuited(ast->kind)) {
+		ast->attr |= ZEND_SHORT_CIRCUITING_INNER;
 	}
-
-	if (force || (!was_in_short_circuiting_chain && ast_kind_is_short_circuited)) {
-		flags |= ZEND_SHORT_CIRCUITING_CHAIN_WAS_CREATED;
-
-		CG(in_short_circuiting_chain) = 1;
-
-		zend_short_circuiting_chain chain;
-		zend_stack_init(&chain.jmp_null_opnums, sizeof(uint32_t));
-		chain.flags = 0;
-		zend_stack_push(&CG(short_circuiting_chains), &chain);
-	}
-
-	if (!force && !ast_kind_is_short_circuited) {
-		CG(in_short_circuiting_chain) = 0;
-	}
-
-	return flags;
 }
 
-static void zend_end_short_circuiting_chain(uint32_t flags, znode *result)
+static uint32_t zend_short_circuiting_checkpoint()
 {
-	zend_bool was_in_short_circuiting_chain = (flags & ZEND_WAS_IN_SHORT_CIRCUITING_CHAIN) != 0;
-	zend_bool short_circuiting_chain_was_created = (flags & ZEND_SHORT_CIRCUITING_CHAIN_WAS_CREATED) != 0;
+	return zend_stack_count(&CG(short_circuiting_opnums));
+}
 
-	if (short_circuiting_chain_was_created) {
-		zend_short_circuiting_chain *chain = zend_current_short_circuiting_chain();
-		zend_stack *jmp_null_opnums = &chain->jmp_null_opnums;
-
-		while (!zend_stack_is_empty(jmp_null_opnums)) {
-			uint32_t jmp_null_opnum = *(uint32_t *)zend_stack_top(jmp_null_opnums);
-			zend_op *jmp_null_opline = &CG(active_op_array)->opcodes[jmp_null_opnum];
-			jmp_null_opline->op2.opline_num = get_next_op_number();
-			SET_NODE(jmp_null_opline->result, result);
-			jmp_null_opline->extended_value = chain->flags;
-			zend_stack_del_top(jmp_null_opnums);
-		}
-
-		zend_stack_destroy(jmp_null_opnums);
-		zend_stack_del_top(&CG(short_circuiting_chains));
+static void zend_short_circuiting_commit(uint32_t checkpoint, znode *result, zend_ast *ast)
+{
+	zend_bool is_short_circuited = zend_ast_kind_is_short_circuited(ast->kind)
+		|| ast->kind == ZEND_AST_ISSET || ast->kind == ZEND_AST_EMPTY;
+	if (!is_short_circuited) {
+		ZEND_ASSERT(zend_stack_count(&CG(short_circuiting_opnums)) == checkpoint
+			&& "Short circuiting stack should be empty");
+		return;
 	}
 
-	CG(in_short_circuiting_chain) = was_in_short_circuiting_chain;
+	if (ast->attr & ZEND_SHORT_CIRCUITING_INNER) {
+		/* Outer-most node will commit. */
+		return;
+	}
+
+	while (zend_stack_count(&CG(short_circuiting_opnums)) != checkpoint) {
+		uint32_t opnum = *(uint32_t *) zend_stack_top(&CG(short_circuiting_opnums));
+		zend_op *opline = &CG(active_op_array)->opcodes[opnum];
+		opline->op2.opline_num = get_next_op_number();
+		SET_NODE(opline->result, result);
+		opline->extended_value =
+			ast->kind == ZEND_AST_ISSET ? ZEND_SHORT_CIRCUITING_CHAIN_ISSET :
+			ast->kind == ZEND_AST_EMPTY ? ZEND_SHORT_CIRCUITING_CHAIN_EMPTY :
+			                              ZEND_SHORT_CIRCUITING_CHAIN_EXPR;
+		zend_stack_del_top(&CG(short_circuiting_opnums));
+	}
 }
 
 static void zend_emit_jmp_null(znode *obj_node)
 {
 	uint32_t jmp_null_opnum = get_next_op_number();
 	zend_emit_op(NULL, ZEND_JMP_NULL, obj_node, NULL);
-
-	zend_short_circuiting_chain *short_circuiting_chain = zend_current_short_circuiting_chain();
-	zend_stack *jmp_null_opnums = &short_circuiting_chain->jmp_null_opnums;
-	zend_stack_push(jmp_null_opnums, &jmp_null_opnum);
+	zend_stack_push(&CG(short_circuiting_opnums), &jmp_null_opnum);
 }
 
 #define ZEND_MEMOIZE_NONE 0
@@ -2658,10 +2633,7 @@ static zend_op *zend_compile_simple_var_no_cv(znode *result, zend_ast *ast, uint
 	znode name_node;
 	zend_op *opline;
 
-	zend_bool was_in_short_circuiting_chain = CG(in_short_circuiting_chain);
-	CG(in_short_circuiting_chain) = 0;
 	zend_compile_expr(&name_node, name_ast);
-	CG(in_short_circuiting_chain) = was_in_short_circuiting_chain;
 	if (name_node.op_type == IS_CONST) {
 		convert_to_string(&name_node.u.constant);
 	}
@@ -2761,6 +2733,7 @@ static zend_op *zend_delayed_compile_dim(znode *result, zend_ast *ast, uint32_t 
 
 	znode var_node, dim_node;
 
+	zend_short_circuiting_mark_inner(var_ast);
 	opline = zend_delayed_compile_var(&var_node, var_ast, type, 0);
 	if (opline && type == BP_VAR_W && (opline->opcode == ZEND_FETCH_STATIC_PROP_W || opline->opcode == ZEND_FETCH_OBJ_W)) {
 		opline->extended_value |= ZEND_FETCH_DIM_WRITE;
@@ -2777,10 +2750,7 @@ static zend_op *zend_delayed_compile_dim(znode *result, zend_ast *ast, uint32_t 
 		}
 		dim_node.op_type = IS_UNUSED;
 	} else {
-		zend_bool was_in_short_circuiting_chain = CG(in_short_circuiting_chain);
-		CG(in_short_circuiting_chain) = 0;
 		zend_compile_expr(&dim_node, dim_ast);
-		CG(in_short_circuiting_chain) = was_in_short_circuiting_chain;
 	}
 
 	opline = zend_delayed_emit_op(result, ZEND_FETCH_DIM_R, &var_node, &dim_node);
@@ -2818,6 +2788,7 @@ static zend_op *zend_delayed_compile_prop(znode *result, zend_ast *ast, uint32_t
 		}
 		CG(active_op_array)->fn_flags |= ZEND_ACC_USES_THIS;
 	} else {
+		zend_short_circuiting_mark_inner(obj_ast);
 		opline = zend_delayed_compile_var(&obj_node, obj_ast, type, 0);
 		zend_separate_if_call_and_write(&obj_node, obj_ast, type);
 	}
@@ -2826,10 +2797,7 @@ static zend_op *zend_delayed_compile_prop(znode *result, zend_ast *ast, uint32_t
 		zend_emit_jmp_null(&obj_node);
 	}
 
-	zend_bool was_in_short_circuiting_chain = CG(in_short_circuiting_chain);
-	CG(in_short_circuiting_chain) = 0;
 	zend_compile_expr(&prop_node, prop_ast);
-	CG(in_short_circuiting_chain) = was_in_short_circuiting_chain;
 
 	opline = zend_delayed_emit_op(result, ZEND_FETCH_OBJ_R, &obj_node, &prop_node);
 	if (opline->op2_type == IS_CONST) {
@@ -2862,12 +2830,10 @@ zend_op *zend_compile_static_prop(znode *result, zend_ast *ast, uint32_t type, i
 	znode class_node, prop_node;
 	zend_op *opline;
 
+	zend_short_circuiting_mark_inner(class_ast);
 	zend_compile_class_ref(&class_node, class_ast, ZEND_FETCH_CLASS_EXCEPTION);
 
-	zend_bool was_in_short_circuiting_chain = CG(in_short_circuiting_chain);
-	CG(in_short_circuiting_chain) = 0;
 	zend_compile_expr(&prop_node, prop_ast);
-	CG(in_short_circuiting_chain) = was_in_short_circuiting_chain;
 
 	if (delayed) {
 		opline = zend_delayed_emit_op(result, ZEND_FETCH_STATIC_PROP_R, &prop_node, NULL);
@@ -3325,9 +3291,6 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 	zend_bool uses_arg_unpack = 0;
 	uint32_t arg_count = 0; /* number of arguments not including unpacks */
 
-	zend_bool was_in_short_circuiting_chain = CG(in_short_circuiting_chain);
-	CG(in_short_circuiting_chain) = 0;
-
 	for (i = 0; i < args->children; ++i) {
 		zend_ast *arg = args->child[i];
 		uint32_t arg_num = i + 1;
@@ -3447,8 +3410,6 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 		opline->op2.opline_num = arg_num;
 		opline->result.var = EX_NUM_TO_VAR(arg_num - 1);
 	}
-
-	CG(in_short_circuiting_chain) = was_in_short_circuiting_chain;
 
 	return arg_count;
 }
@@ -4286,6 +4247,7 @@ void zend_compile_method_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 		}
 		CG(active_op_array)->fn_flags |= ZEND_ACC_USES_THIS;
 	} else {
+		zend_short_circuiting_mark_inner(obj_ast);
 		zend_compile_expr(&obj_node, obj_ast);
 	}
 
@@ -4360,12 +4322,10 @@ void zend_compile_static_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 	zend_op *opline;
 	zend_function *fbc = NULL;
 
+	zend_short_circuiting_mark_inner(class_ast);
 	zend_compile_class_ref(&class_node, class_ast, ZEND_FETCH_CLASS_EXCEPTION);
 
-	zend_bool was_in_short_circuiting_chain = CG(in_short_circuiting_chain);
-	CG(in_short_circuiting_chain) = 0;
 	zend_compile_expr(&method_node, method_ast);
-	CG(in_short_circuiting_chain) = was_in_short_circuiting_chain;
 
 	if (method_node.op_type == IS_CONST) {
 		zval *name = &method_node.u.constant;
@@ -8596,17 +8556,12 @@ void zend_compile_isset_or_empty(znode *result, zend_ast *ast) /* {{{ */
 
 	ZEND_ASSERT(ast->kind == ZEND_AST_ISSET || ast->kind == ZEND_AST_EMPTY);
 
-	uint32_t begin_short_circuiting_chain_flags = zend_begin_short_circuiting_chain(ast->kind, 1);
-	zend_current_short_circuiting_chain()->flags = ast->kind == ZEND_AST_ISSET
-		? ZEND_SHORT_CIRCUITING_CHAIN_ISSET
-		: ZEND_SHORT_CIRCUITING_CHAIN_EMPTY;
-
+	zend_short_circuiting_mark_inner(var_ast);
 	if (!zend_is_variable(var_ast)) {
 		if (ast->kind == ZEND_AST_EMPTY) {
 			/* empty(expr) can be transformed to !expr */
 			zend_ast *not_ast = zend_ast_create_ex(ZEND_AST_UNARY_OP, ZEND_BOOL_NOT, var_ast);
 			zend_compile_expr(result, not_ast);
-			zend_end_short_circuiting_chain(begin_short_circuiting_chain_flags, result);
 			return;
 		} else {
 			zend_error_noreturn(E_COMPILE_ERROR,
@@ -8647,8 +8602,6 @@ void zend_compile_isset_or_empty(znode *result, zend_ast *ast) /* {{{ */
 	if (!(ast->kind == ZEND_AST_ISSET)) {
 		opline->extended_value |= ZEND_ISEMPTY;
 	}
-
-	zend_end_short_circuiting_chain(begin_short_circuiting_chain_flags, result);
 }
 /* }}} */
 
@@ -9513,9 +9466,9 @@ static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 
 void zend_compile_expr(znode *result, zend_ast *ast)
 {
-	uint32_t begin_short_circuiting_chain_flags = zend_begin_short_circuiting_chain(ast->kind, 0);
+	uint32_t checkpoint = zend_short_circuiting_checkpoint();
 	zend_compile_expr_inner(result, ast);
-	zend_end_short_circuiting_chain(begin_short_circuiting_chain_flags, result);
+	zend_short_circuiting_commit(checkpoint, result, ast);
 }
 
 static zend_op *zend_compile_var_inner(znode *result, zend_ast *ast, uint32_t type, int by_ref)
@@ -9558,10 +9511,9 @@ static zend_op *zend_compile_var_inner(znode *result, zend_ast *ast, uint32_t ty
 
 zend_op *zend_compile_var(znode *result, zend_ast *ast, uint32_t type, int by_ref) /* {{{ */
 {
-	uint32_t begin_short_circuiting_chain_flags = zend_begin_short_circuiting_chain(ast->kind, 0);
+	uint32_t checkpoint = zend_short_circuiting_checkpoint();
 	zend_op *opcode = zend_compile_var_inner(result, ast, type, by_ref);
-	zend_end_short_circuiting_chain(begin_short_circuiting_chain_flags, result);
-
+	zend_short_circuiting_commit(checkpoint, result, ast);
 	return opcode;
 }
 
