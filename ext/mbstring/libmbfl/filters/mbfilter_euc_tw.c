@@ -70,7 +70,6 @@ const mbfl_encoding mbfl_encoding_euc_tw = {
 const struct mbfl_identify_vtbl vtbl_identify_euctw = {
 	mbfl_no_encoding_euc_tw,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_euctw
 };
 

@@ -54,7 +54,6 @@ const mbfl_encoding mbfl_encoding_2022jp_kddi = {
 const struct mbfl_identify_vtbl vtbl_identify_2022jp_kddi = {
 	mbfl_no_encoding_2022jp_kddi,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_2022jpms
 };
 

@@ -102,35 +102,30 @@ const mbfl_encoding mbfl_encoding_cp50222 = {
 const struct mbfl_identify_vtbl vtbl_identify_jis_ms = {
 	mbfl_no_encoding_jis_ms,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_jis_ms
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_cp50220 = {
 	mbfl_no_encoding_cp50220,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_cp50220
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_cp50220raw = {
 	mbfl_no_encoding_cp50220raw,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_cp50220
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_cp50221 = {
 	mbfl_no_encoding_cp50221,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_cp50221
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_cp50222 = {
 	mbfl_no_encoding_cp50222,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_cp50222
 };
 

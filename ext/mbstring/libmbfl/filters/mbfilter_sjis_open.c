@@ -70,7 +70,6 @@ const mbfl_encoding mbfl_encoding_sjis_open = {
 const struct mbfl_identify_vtbl vtbl_identify_sjis_open = {
 	mbfl_no_encoding_sjis_open,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_sjis_open
 };
 

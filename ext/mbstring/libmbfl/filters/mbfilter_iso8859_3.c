@@ -47,7 +47,6 @@ const mbfl_encoding mbfl_encoding_8859_3 = {
 const struct mbfl_identify_vtbl vtbl_identify_8859_3 = {
 	mbfl_no_encoding_8859_3,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_true
 };
 

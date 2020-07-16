@@ -48,7 +48,6 @@ const mbfl_encoding mbfl_encoding_hz = {
 const struct mbfl_identify_vtbl vtbl_identify_hz = {
 	mbfl_no_encoding_hz,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_hz
 };
 

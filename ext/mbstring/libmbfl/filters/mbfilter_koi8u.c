@@ -46,7 +46,6 @@ const mbfl_encoding mbfl_encoding_koi8u = {
 const struct mbfl_identify_vtbl vtbl_identify_koi8u = {
 	mbfl_no_encoding_koi8u,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_koi8u
 };
 

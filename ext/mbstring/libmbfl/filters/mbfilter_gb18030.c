@@ -51,7 +51,6 @@ const mbfl_encoding mbfl_encoding_gb18030 = {
 const struct mbfl_identify_vtbl vtbl_identify_gb18030 = {
 	mbfl_no_encoding_gb18030,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_gb18030
 };
 

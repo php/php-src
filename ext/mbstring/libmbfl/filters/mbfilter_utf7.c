@@ -61,7 +61,6 @@ const mbfl_encoding mbfl_encoding_utf7 = {
 const struct mbfl_identify_vtbl vtbl_identify_utf7 = {
 	mbfl_no_encoding_utf7,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_utf7
 };
 

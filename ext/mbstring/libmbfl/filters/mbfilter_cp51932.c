@@ -61,7 +61,6 @@ static const char *mbfl_encoding_cp51932_aliases[] = {"cp51932", NULL};
 const struct mbfl_identify_vtbl vtbl_identify_cp51932 = {
 	mbfl_no_encoding_cp51932,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_cp51932
 };
 

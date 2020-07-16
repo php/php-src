@@ -554,13 +554,6 @@ mbfl_identify_encoding(mbfl_string *string, const mbfl_encoding **elist, int eli
 		}
 	}
 
-	/* cleanup */
-	/* dtors should be called in reverse order */
-	i = num;
-	while (--i >= 0) {
-		mbfl_identify_filter_cleanup(&flist[i]);
-	}
-
 	efree((void *)flist);
 
 	return encoding;

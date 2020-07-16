@@ -80,14 +80,12 @@ const mbfl_encoding mbfl_encoding_cp950 = {
 const struct mbfl_identify_vtbl vtbl_identify_big5 = {
 	mbfl_no_encoding_big5,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_big5
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_cp950 = {
 	mbfl_no_encoding_cp950,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_big5
 };
 

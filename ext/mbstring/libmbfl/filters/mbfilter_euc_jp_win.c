@@ -62,7 +62,6 @@ static const char *mbfl_encoding_eucjp_win_aliases[] = {"eucJP-open",
 const struct mbfl_identify_vtbl vtbl_identify_eucjpwin = {
 	mbfl_no_encoding_eucjp_win,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_eucjp_win
 };
 

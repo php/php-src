@@ -47,7 +47,6 @@ const mbfl_encoding mbfl_encoding_2022kr = {
 const struct mbfl_identify_vtbl vtbl_identify_2022kr = {
 	mbfl_no_encoding_2022kr,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_2022kr
 };
 

@@ -69,7 +69,6 @@ const mbfl_encoding mbfl_encoding_cp936 = {
 const struct mbfl_identify_vtbl vtbl_identify_cp936 = {
 	mbfl_no_encoding_cp936,
 	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_cp936
 };
 
