@@ -13,6 +13,7 @@ function libxml_get_errors(): array {}
 
 function libxml_clear_errors(): void {}
 
+/** @deprecated */
 function libxml_disable_entity_loader(bool $disable = true): bool {}
 
 function libxml_set_external_entity_loader(?callable $resolver_function): bool {}
