@@ -12,7 +12,7 @@ jobs:
         ./buildconf --force
         export CFLAGS=-m32
         export CXXFLAGS=-m32
-        export LDFLAGS=-L/usr/lib/i386-linux-gnu
+        export LDFLAGS="-m32 -L/usr/lib/i386-linux-gnu"
         export PKG_CONFIG=/usr/bin/i686-linux-gnu-pkg-config
         ./configure ${{ parameters.configurationParameters }} \
             --enable-option-checking=fatal \
