@@ -984,6 +984,11 @@ PHP 8.0 UPGRADE NOTES
 - PDO:
   . PDOStatement now implements IteratorAggregate (instead of Traversable).
 
+- LibXML:
+  . The minimum required libxml version is now 2.9.0. This means that external
+    entity loading is now guaranteed to be disabled by default, and no extra
+    steps need to be taken to protect against XXE attacks.
+
 - MySQLi / PDO MySQL:
   . When mysqlnd is not used (which is the default and recommended option),
     the minimum supported libmysqlclient version is now 5.1.
