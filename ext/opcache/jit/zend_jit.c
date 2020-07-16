@@ -2731,7 +2731,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						if (PROFITABILITY_CHECKS && (!ssa->ops || !ssa->var_info)) {
 							break;
 						}
-						if (!zend_jit_fetch_dim_read(&dasm_state, opline, op_array,
+						if (!zend_jit_fetch_dim_read(&dasm_state, opline, op_array, ssa, ssa_op,
 								OP1_INFO(), OP1_REG_ADDR(), OP2_INFO(), RES_INFO(),
 								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;

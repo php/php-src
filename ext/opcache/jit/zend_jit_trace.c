@@ -3760,7 +3760,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						op2_info = OP2_INFO();
 						CHECK_OP2_TRACE_TYPE();
 						res_info = RES_INFO();
-						if (!zend_jit_fetch_dim_read(&dasm_state, opline, op_array,
+						if (!zend_jit_fetch_dim_read(&dasm_state, opline, op_array, ssa, ssa_op,
 								op1_info, op1_addr, op2_info, res_info,
 								(
 									(op1_info & MAY_BE_ANY) != MAY_BE_ARRAY ||
@@ -3773,11 +3773,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 									((opline->op2_type & (IS_TMP_VAR|IS_VAR)) != 0 &&
 										(op2_info & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_ARRAY)) != 0)))) {
 							goto jit_failure;
-						}
-						if ((res_info & MAY_BE_GUARD)
-						 && JIT_G(current_frame)
-						 && (op1_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_ARRAY) {
-							ssa->var_info[ssa_op->result_def].type &= ~MAY_BE_GUARD;
 						}
 						goto done;
 					case ZEND_ISSET_ISEMPTY_DIM_OBJ:
