@@ -2864,7 +2864,10 @@ zend_op *zend_compile_static_prop(znode *result, zend_ast *ast, uint32_t type, i
 
 	zend_compile_class_ref(&class_node, class_ast, ZEND_FETCH_CLASS_EXCEPTION);
 
+	zend_bool was_in_short_circuiting_chain = CG(in_short_circuiting_chain);
+	CG(in_short_circuiting_chain) = 0;
 	zend_compile_expr(&prop_node, prop_ast);
+	CG(in_short_circuiting_chain) = was_in_short_circuiting_chain;
 
 	if (delayed) {
 		opline = zend_delayed_emit_op(result, ZEND_FETCH_STATIC_PROP_R, &prop_node, NULL);
@@ -4359,7 +4362,11 @@ void zend_compile_static_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 
 	zend_compile_class_ref(&class_node, class_ast, ZEND_FETCH_CLASS_EXCEPTION);
 
+	zend_bool was_in_short_circuiting_chain = CG(in_short_circuiting_chain);
+	CG(in_short_circuiting_chain) = 0;
 	zend_compile_expr(&method_node, method_ast);
+	CG(in_short_circuiting_chain) = was_in_short_circuiting_chain;
+
 	if (method_node.op_type == IS_CONST) {
 		zval *name = &method_node.u.constant;
 		if (Z_TYPE_P(name) != IS_STRING) {
