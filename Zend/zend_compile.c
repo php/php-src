@@ -2658,7 +2658,10 @@ static zend_op *zend_compile_simple_var_no_cv(znode *result, zend_ast *ast, uint
 	znode name_node;
 	zend_op *opline;
 
+	zend_bool was_in_short_circuiting_chain = CG(in_short_circuiting_chain);
+	CG(in_short_circuiting_chain) = 0;
 	zend_compile_expr(&name_node, name_ast);
+	CG(in_short_circuiting_chain) = was_in_short_circuiting_chain;
 	if (name_node.op_type == IS_CONST) {
 		convert_to_string(&name_node.u.constant);
 	}
