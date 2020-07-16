@@ -5554,7 +5554,10 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 		if (t->exit_info[exit_num].flags & ZEND_JIT_EXIT_FREE_OP1) {
 			ZEND_ASSERT((opline-1)->opcode == ZEND_FETCH_DIM_R
 					|| (opline-1)->opcode == ZEND_FETCH_DIM_IS
-					|| (opline-1)->opcode == ZEND_FETCH_DIM_FUNC_ARG);
+					|| (opline-1)->opcode == ZEND_FETCH_DIM_FUNC_ARG
+					|| (opline-1)->opcode == ZEND_FETCH_OBJ_R
+					|| (opline-1)->opcode == ZEND_FETCH_OBJ_IS
+					|| (opline-1)->opcode == ZEND_FETCH_OBJ_FUNC_ARG);
 			EX(opline) = opline-1;
 			zval_ptr_dtor_nogc(EX_VAR((opline-1)->op1.var));
 		}
