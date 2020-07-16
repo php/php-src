@@ -138,7 +138,7 @@ const struct mbfl_convert_vtbl vtbl_jis_ms_wchar = {
 	mbfl_no_encoding_jis_ms,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_jis_ms_wchar,
 	mbfl_filt_conv_common_flush,
 	NULL,
@@ -148,7 +148,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_jis_ms = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_jis_ms,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_wchar_jis_ms,
 	mbfl_filt_conv_any_jis_flush,
 	NULL,
@@ -158,7 +158,7 @@ const struct mbfl_convert_vtbl vtbl_cp50220_wchar = {
 	mbfl_no_encoding_cp50220,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_jis_ms_wchar,
 	mbfl_filt_conv_common_flush,
 	NULL,
@@ -178,7 +178,7 @@ const struct mbfl_convert_vtbl vtbl_cp50220raw_wchar = {
 	mbfl_no_encoding_cp50220raw,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_jis_ms_wchar,
 	mbfl_filt_conv_common_flush,
 	NULL,
@@ -198,7 +198,7 @@ const struct mbfl_convert_vtbl vtbl_cp50221_wchar = {
 	mbfl_no_encoding_cp50221,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_jis_ms_wchar,
 	mbfl_filt_conv_common_flush,
 	NULL,
@@ -208,7 +208,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_cp50221 = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_cp50221,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_wchar_cp50221,
 	mbfl_filt_conv_any_jis_flush,
 	NULL,
@@ -218,7 +218,7 @@ const struct mbfl_convert_vtbl vtbl_cp50222_wchar = {
 	mbfl_no_encoding_cp50222,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_jis_ms_wchar,
 	mbfl_filt_conv_common_flush,
 	NULL,
@@ -228,7 +228,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_cp50222 = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_cp50222,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_wchar_cp50222,
 	mbfl_filt_conv_wchar_cp50222_flush,
 	NULL,
@@ -612,13 +612,9 @@ mbfl_filt_conv_wchar_cp50220_copy(mbfl_convert_filter *src, mbfl_convert_filter 
 static void
 mbfl_filt_conv_wchar_cp50220_dtor(mbfl_convert_filter *filt)
 {
-	vtbl_tl_jisx0201_jisx0208.filter_dtor(filt);
-
 	if (filt->opaque != NULL) {
 		efree(filt->opaque);
 	}
-
-	mbfl_filt_conv_common_dtor(filt);
 }
 
 /*

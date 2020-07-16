@@ -73,7 +73,6 @@ MBFLAPI extern const struct mbfl_convert_vtbl * mbfl_convert_filter_get_vtbl(con
 
 MBFLAPI extern void mbfl_filt_conv_common_ctor(mbfl_convert_filter *filter);
 MBFLAPI extern int mbfl_filt_conv_common_flush(mbfl_convert_filter *filter);
-MBFLAPI extern void mbfl_filt_conv_common_dtor(mbfl_convert_filter *filter);
 
 MBFLAPI extern void mbfl_convert_filter_devcat(mbfl_convert_filter *filter, mbfl_memory_device *src);
 MBFLAPI extern int mbfl_convert_filter_strcat(mbfl_convert_filter *filter, const unsigned char *p);

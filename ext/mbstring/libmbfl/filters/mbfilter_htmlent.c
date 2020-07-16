@@ -68,7 +68,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_html = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_html_ent,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_html_enc,
 	mbfl_filt_conv_html_enc_flush,
 	NULL,

@@ -169,7 +169,9 @@ mbfl_convert_filter* mbfl_convert_filter_new2(const struct mbfl_convert_vtbl *vt
 
 void mbfl_convert_filter_delete(mbfl_convert_filter *filter)
 {
-	(*filter->filter_dtor)(filter);
+	if (filter->filter_dtor) {
+		(*filter->filter_dtor)(filter);
+	}
 	efree(filter);
 }
 
@@ -387,7 +389,7 @@ const struct mbfl_convert_vtbl* mbfl_convert_filter_get_vtbl(const mbfl_encoding
 }
 
 /*
- * commonly used constructor and destructor
+ * commonly used constructor
  */
 void mbfl_filt_conv_common_ctor(mbfl_convert_filter *filter)
 {
@@ -404,10 +406,4 @@ int mbfl_filt_conv_common_flush(mbfl_convert_filter *filter)
 		(*filter->flush_function)(filter->data);
 	}
 	return 0;
-}
-
-void mbfl_filt_conv_common_dtor(mbfl_convert_filter *filter)
-{
-	filter->status = 0;
-	filter->cache = 0;
 }

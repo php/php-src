@@ -1232,8 +1232,10 @@ mbfl_strcut(
 			if (device.pos > length) {
 				p = _bk.p;
 				device.pos = _bk.pos;
-				decoder->filter_dtor(decoder);
-				encoder->filter_dtor(encoder);
+				if (decoder->filter_dtor)
+					decoder->filter_dtor(decoder);
+				if (encoder->filter_dtor)
+					encoder->filter_dtor(encoder);
 				mbfl_convert_filter_copy(&_bk.decoder, decoder);
 				mbfl_convert_filter_copy(&_bk.encoder, encoder);
 				bk = _bk;
@@ -1250,24 +1252,32 @@ mbfl_strcut(
 				/* if the offset of the resulting string exceeds the length,
 				 * then restore the state */
 				if (device.pos > length) {
-					bk.decoder.filter_dtor(&bk.decoder);
-					bk.encoder.filter_dtor(&bk.encoder);
+					if (bk.decoder.filter_dtor)
+						bk.decoder.filter_dtor(&bk.decoder);
+					if (bk.encoder.filter_dtor)
+						bk.encoder.filter_dtor(&bk.encoder);
 
 					p = _bk.p;
 					device.pos = _bk.pos;
-					decoder->filter_dtor(decoder);
-					encoder->filter_dtor(encoder);
+					if (decoder->filter_dtor)
+						decoder->filter_dtor(decoder);
+					if (encoder->filter_dtor)
+						encoder->filter_dtor(encoder);
 					mbfl_convert_filter_copy(&_bk.decoder, decoder);
 					mbfl_convert_filter_copy(&_bk.encoder, encoder);
 					bk = _bk;
 				} else {
-					_bk.decoder.filter_dtor(&_bk.decoder);
-					_bk.encoder.filter_dtor(&_bk.encoder);
+					if (_bk.decoder.filter_dtor)
+						_bk.decoder.filter_dtor(&_bk.decoder);
+					if (_bk.encoder.filter_dtor)
+						_bk.encoder.filter_dtor(&_bk.encoder);
 
 					p = bk.p;
 					device.pos = bk.pos;
-					decoder->filter_dtor(decoder);
-					encoder->filter_dtor(encoder);
+					if (decoder->filter_dtor)
+						decoder->filter_dtor(decoder);
+					if (encoder->filter_dtor)
+						encoder->filter_dtor(encoder);
 					mbfl_convert_filter_copy(&bk.decoder, decoder);
 					mbfl_convert_filter_copy(&bk.encoder, encoder);
 				}
@@ -1284,8 +1294,10 @@ mbfl_strcut(
 				/* restore filter */
 				p = bk.p;
 				device.pos = bk.pos;
-				decoder->filter_dtor(decoder);
-				encoder->filter_dtor(encoder);
+				if (decoder->filter_dtor)
+					decoder->filter_dtor(decoder);
+				if (encoder->filter_dtor)
+					encoder->filter_dtor(encoder);
 				mbfl_convert_filter_copy(&bk.decoder, decoder);
 				mbfl_convert_filter_copy(&bk.encoder, encoder);
 				break;
@@ -1302,26 +1314,34 @@ mbfl_strcut(
 			(*encoder->filter_flush)(encoder);
 
 			if (device.pos > length) {
-				_bk.decoder.filter_dtor(&_bk.decoder);
-				_bk.encoder.filter_dtor(&_bk.encoder);
+				if (_bk.decoder.filter_dtor)
+					_bk.decoder.filter_dtor(&_bk.decoder);
+				if (_bk.encoder.filter_dtor)
+					_bk.encoder.filter_dtor(&_bk.encoder);
 
 				/* restore filter */
 				p = bk.p;
 				device.pos = bk.pos;
-				decoder->filter_dtor(decoder);
-				encoder->filter_dtor(encoder);
+				if (decoder->filter_dtor)
+					decoder->filter_dtor(decoder);
+				if (encoder->filter_dtor)
+					encoder->filter_dtor(encoder);
 				mbfl_convert_filter_copy(&bk.decoder, decoder);
 				mbfl_convert_filter_copy(&bk.encoder, encoder);
 				break;
 			}
 
-			bk.decoder.filter_dtor(&bk.decoder);
-			bk.encoder.filter_dtor(&bk.encoder);
+			if (bk.decoder.filter_dtor)
+				bk.decoder.filter_dtor(&bk.decoder);
+			if (bk.encoder.filter_dtor)
+				bk.encoder.filter_dtor(&bk.encoder);
 
 			p = _bk.p;
 			device.pos = _bk.pos;
-			decoder->filter_dtor(decoder);
-			encoder->filter_dtor(encoder);
+			if (decoder->filter_dtor)
+				decoder->filter_dtor(decoder);
+			if (encoder->filter_dtor)
+				encoder->filter_dtor(encoder);
 			mbfl_convert_filter_copy(&_bk.decoder, decoder);
 			mbfl_convert_filter_copy(&_bk.encoder, encoder);
 
@@ -1330,8 +1350,10 @@ mbfl_strcut(
 
 		(*encoder->filter_flush)(encoder);
 
-		bk.decoder.filter_dtor(&bk.decoder);
-		bk.encoder.filter_dtor(&bk.encoder);
+		if (bk.decoder.filter_dtor)
+			bk.decoder.filter_dtor(&bk.decoder);
+		if (bk.encoder.filter_dtor)
+			bk.encoder.filter_dtor(&bk.encoder);
 
 		result = mbfl_memory_device_result(&device, result);
 

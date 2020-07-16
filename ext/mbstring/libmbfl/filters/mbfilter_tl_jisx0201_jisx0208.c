@@ -31,11 +31,6 @@ mbfl_filt_tl_jisx0201_jisx0208_init(mbfl_convert_filter *filt)
 	mbfl_filt_conv_common_ctor(filt);
 }
 
-void
-mbfl_filt_tl_jisx0201_jisx0208_cleanup(mbfl_convert_filter *filt)
-{
-}
-
 int
 mbfl_filt_tl_jisx0201_jisx0208(int c, mbfl_convert_filter *filt)
 {
@@ -294,7 +289,7 @@ const struct mbfl_convert_vtbl vtbl_tl_jisx0201_jisx0208 = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_tl_jisx0201_jisx0208_init,
-	mbfl_filt_tl_jisx0201_jisx0208_cleanup,
+	NULL,
 	mbfl_filt_tl_jisx0201_jisx0208,
 	mbfl_filt_tl_jisx0201_jisx0208_flush,
 	NULL,
