@@ -1241,8 +1241,3 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 
 	return script;
 }
-
-int zend_accel_script_persistable(zend_persistent_script *script)
-{
-	return 1;
-}
