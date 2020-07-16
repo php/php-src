@@ -72,6 +72,8 @@ typedef enum _zend_reg {
 	ZREG_LONG_MAX,
 	ZREG_LONG_MAX_PLUS_1,
 	ZREG_NULL,
+
+	ZREG_ZVAL_TRY_ADDREF,
 	ZREG_ZVAL_COPY_R0,
 } zend_reg;
 

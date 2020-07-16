@@ -3797,7 +3797,17 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							if (ra) {
 								zend_jit_trace_clenup_stack(stack, opline, ssa_op, ssa, ra);
 							}
-							exit_point = zend_jit_trace_get_exit_point(opline, exit_opline, p + 1, 0);
+							if (op1_info & AVOID_REFCOUNTING) {
+								/* Temporary reset ZREG_ZVAL_TRY_ADDREF */
+								zend_jit_trace_stack *stack = JIT_G(current_frame)->stack;
+								uint32_t old_info = STACK_INFO(stack, EX_VAR_TO_NUM(opline->op1.var));
+
+								SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->op1.var), ZREG_NONE);
+								exit_point = zend_jit_trace_get_exit_point(opline, exit_opline, p + 1, 0);
+								SET_STACK_INFO(stack, EX_VAR_TO_NUM(opline->op1.var), old_info);
+							} else {
+								exit_point = zend_jit_trace_get_exit_point(opline, exit_opline, p + 1, 0);
+							}
 							exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 							if (!exit_addr) {
 								goto jit_failure;
@@ -4088,6 +4098,8 @@ done:
 						if (opline->opcode == ZEND_FETCH_THIS
 						 && delayed_fetch_this) {
 							SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->result.var), ZREG_THIS);
+						} else if (ssa->var_info[ssa_op->result_def].type & AVOID_REFCOUNTING) {
+							SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->result.var), ZREG_ZVAL_TRY_ADDREF);
 						} else if (ra && ra[ssa_op->result_def]) {
 							SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->result.var), ra[ssa_op->result_def]->reg);
 						}
@@ -5053,12 +5065,20 @@ static void zend_jit_dump_exit_info(zend_jit_trace_info *t)
 						fprintf(stderr, "(%s)", zend_reg_name[STACK_REG(stack, j)]);
 					} else if (STACK_REG(stack, j) == ZREG_THIS) {
 						fprintf(stderr, "(this)");
+					} else if (STACK_REG(stack, j) == ZREG_ZVAL_TRY_ADDREF) {
+						fprintf(stderr, "(zval_try_addref)");
 					} else {
 						fprintf(stderr, "(const_%d)", STACK_REG(stack, j) - ZREG_NUM);
 					}
 				}
+			} else if (STACK_REG(stack, j) == ZREG_ZVAL_TRY_ADDREF) {
+				fprintf(stderr, " ");
+				zend_dump_var(op_array, (j < op_array->last_var) ? IS_CV : 0, j);
+				fprintf(stderr, ":unknown(zval_try_addref)");
 			} else if (STACK_REG(stack, j) == ZREG_ZVAL_COPY_R0) {
-				fprintf(stderr, " zval_copy(%s)", zend_reg_name[0]);
+				fprintf(stderr, " ");
+				zend_dump_var(op_array, (j < op_array->last_var) ? IS_CV : 0, j);
+				fprintf(stderr, ":unknown(zval_copy(%s))", zend_reg_name[0]);
 			}
 		}
 		fprintf(stderr, "\n");
@@ -5523,6 +5543,8 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 				ZVAL_OBJ(EX_VAR_NUM(i), obj);
 			} else if (STACK_REG(stack, i) == ZREG_NULL) {
 				ZVAL_NULL(EX_VAR_NUM(i));
+			} else if (STACK_REG(stack, i) == ZREG_ZVAL_TRY_ADDREF) {
+				Z_TRY_ADDREF_P(EX_VAR_NUM(i));
 			} else if (STACK_REG(stack, i) == ZREG_ZVAL_COPY_R0) {
 				zval *val = (zval*)regs->r[0];
 
