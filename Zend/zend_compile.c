@@ -3079,9 +3079,6 @@ void zend_compile_assign(znode *result, zend_ast *ast) /* {{{ */
 
 	zend_ensure_writable_variable(var_ast);
 
-	zend_bool was_in_short_circuiting_chain = CG(in_short_circuiting_chain);
-	CG(in_short_circuiting_chain) = 0;
-
 	switch (var_ast->kind) {
 		case ZEND_AST_VAR:
 			offset = zend_delayed_compile_begin();
@@ -3170,8 +3167,6 @@ void zend_compile_assign(znode *result, zend_ast *ast) /* {{{ */
 			break;
 		EMPTY_SWITCH_DEFAULT_CASE();
 	}
-
-	CG(in_short_circuiting_chain) = was_in_short_circuiting_chain;
 }
 /* }}} */
 
@@ -3259,9 +3254,6 @@ void zend_compile_compound_assign(znode *result, zend_ast *ast) /* {{{ */
 
 	zend_ensure_writable_variable(var_ast);
 
-	zend_bool was_in_short_circuiting_chain = CG(in_short_circuiting_chain);
-	CG(in_short_circuiting_chain) = 0;
-
 	switch (var_ast->kind) {
 		case ZEND_AST_VAR:
 			offset = zend_delayed_compile_begin();
@@ -3317,8 +3309,6 @@ void zend_compile_compound_assign(znode *result, zend_ast *ast) /* {{{ */
 			break;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
-
-	CG(in_short_circuiting_chain) = was_in_short_circuiting_chain;
 }
 /* }}} */
 
@@ -8387,11 +8377,8 @@ void zend_compile_assign_coalesce(znode *result, zend_ast *ast) /* {{{ */
 	coalesce_opnum = get_next_op_number();
 	zend_emit_op_tmp(result, ZEND_COALESCE, &var_node_is, NULL);
 
-	zend_bool was_in_short_circuiting_chain = CG(in_short_circuiting_chain);
-	CG(in_short_circuiting_chain) = 0;
 	CG(memoize_mode) = ZEND_MEMOIZE_NONE;
 	zend_compile_expr(&default_node, default_ast);
-	CG(in_short_circuiting_chain) = was_in_short_circuiting_chain;
 
 	CG(memoize_mode) = ZEND_MEMOIZE_FETCH;
 	zend_compile_var(&var_node_w, var_ast, BP_VAR_W, 0);
