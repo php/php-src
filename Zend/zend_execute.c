@@ -130,7 +130,7 @@ static ZEND_FUNCTION(pass)
 ZEND_API const zend_internal_function zend_pass_function = {
 	ZEND_INTERNAL_FUNCTION, /* type              */
 	{0, 0, 0},              /* arg_flags         */
-	0,                      /* fn_flags          */
+	ZEND_ACC_VARIADIC,      /* fn_flags          */
 	NULL,                   /* name              */
 	NULL,                   /* scope             */
 	NULL,                   /* prototype         */
@@ -1122,6 +1122,14 @@ static zend_never_inline ZEND_ATTRIBUTE_UNUSED int zend_verify_internal_arg_type
 static zend_always_inline zend_bool zend_internal_call_should_throw(zend_function *fbc, zend_execute_data *call)
 {
 	if (fbc->common.required_num_args > ZEND_CALL_NUM_ARGS(call)) {
+		/* Required argument not passed. */
+		return 1;
+	}
+
+	if (fbc->common.num_args < ZEND_CALL_NUM_ARGS(call)
+			&& !(fbc->common.fn_flags & ZEND_ACC_VARIADIC)) {
+		/* Too many arguments passed. For internal functions (unlike userland functions),
+		 * this should always throw. */
 		return 1;
 	}
 
