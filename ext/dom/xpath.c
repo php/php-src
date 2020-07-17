@@ -510,7 +510,6 @@ PHP_METHOD(DOMXPath, registerPhpFunctions)
 			zend_string_release_ex(str, 0);
 		} ZEND_HASH_FOREACH_END();
 		intern->registerPhpFunctions = 2;
-		RETURN_TRUE;
 	} else if (name) {
 		ZVAL_LONG(&new_string, 1);
 		zend_hash_update(intern->registered_phpfunctions, name, &new_string);
