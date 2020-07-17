@@ -41,11 +41,11 @@ PHP_METHOD(SessionHandler, open)
 	size_t save_path_len, session_name_len;
 	int ret;
 
-	PS_SANITY_CHECK;
-
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &save_path, &save_path_len, &session_name, &session_name_len) == FAILURE) {
 		RETURN_THROWS();
 	}
+
+	PS_SANITY_CHECK;
 
 	PS(mod_user_is_open) = 1;
 
@@ -65,11 +65,11 @@ PHP_METHOD(SessionHandler, close)
 {
 	int ret;
 
-	PS_SANITY_CHECK_IS_OPEN;
-
 	// don't return on failure, since not closing the default handler
 	// could result in memory leaks or other nasties
 	zend_parse_parameters_none();
+
+	PS_SANITY_CHECK_IS_OPEN;
 
 	PS(mod_user_is_open) = 0;
 
@@ -90,11 +90,11 @@ PHP_METHOD(SessionHandler, read)
 	zend_string *val;
 	zend_string *key;
 
-	PS_SANITY_CHECK_IS_OPEN;
-
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &key) == FAILURE) {
 		RETURN_THROWS();
 	}
+
+	PS_SANITY_CHECK_IS_OPEN;
 
 	if (PS(default_mod)->s_read(&PS(mod_data), key, &val, PS(gc_maxlifetime)) == FAILURE) {
 		RETURN_FALSE;
@@ -109,11 +109,11 @@ PHP_METHOD(SessionHandler, write)
 {
 	zend_string *key, *val;
 
-	PS_SANITY_CHECK_IS_OPEN;
-
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS", &key, &val) == FAILURE) {
 		RETURN_THROWS();
 	}
+
+	PS_SANITY_CHECK_IS_OPEN;
 
 	RETURN_BOOL(SUCCESS == PS(default_mod)->s_write(&PS(mod_data), key, val, PS(gc_maxlifetime)));
 }
@@ -124,11 +124,11 @@ PHP_METHOD(SessionHandler, destroy)
 {
 	zend_string *key;
 
-	PS_SANITY_CHECK_IS_OPEN;
-
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &key) == FAILURE) {
 		RETURN_THROWS();
 	}
+
+	PS_SANITY_CHECK_IS_OPEN;
 
 	RETURN_BOOL(SUCCESS == PS(default_mod)->s_destroy(&PS(mod_data), key));
 }
@@ -140,11 +140,11 @@ PHP_METHOD(SessionHandler, gc)
 	zend_long maxlifetime;
 	zend_long nrdels = -1;
 
-	PS_SANITY_CHECK_IS_OPEN;
-
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &maxlifetime) == FAILURE) {
 		RETURN_THROWS();
 	}
+
+	PS_SANITY_CHECK_IS_OPEN;
 
 	if (PS(default_mod)->s_gc(&PS(mod_data), maxlifetime, &nrdels) == FAILURE) {
 		RETURN_FALSE;
@@ -158,11 +158,11 @@ PHP_METHOD(SessionHandler, create_sid)
 {
 	zend_string *id;
 
-	PS_SANITY_CHECK;
-
 	if (zend_parse_parameters_none() == FAILURE) {
 	    RETURN_THROWS();
 	}
+
+	PS_SANITY_CHECK;
 
 	id = PS(default_mod)->s_create_sid(&PS(mod_data));
 
