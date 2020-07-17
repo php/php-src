@@ -60,6 +60,7 @@ ZEND_FUNCTION(zend_test_nullable_array_return)
 ZEND_FUNCTION(zend_test_void_return)
 {
 	/* dummy */
+	ZEND_PARSE_PARAMETERS_NONE();
 }
 
 ZEND_FUNCTION(zend_test_deprecated)
