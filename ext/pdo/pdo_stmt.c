@@ -1725,11 +1725,9 @@ PHP_METHOD(PDOStatement, getColumnMeta)
 
 /* {{{ Changes the default fetch mode for subsequent fetches (params have different meaning for different fetch modes) */
 
-int pdo_stmt_setup_fetch_mode(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, int skip)
+int pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, zval *args, uint32_t num_args)
 {
-	zend_long mode = PDO_FETCH_BOTH;
-	int flags = 0, argc = ZEND_NUM_ARGS() - skip;
-	zval *args;
+	int flags = 0;
 	zend_class_entry *cep;
 	int retval;
 
@@ -1748,29 +1746,11 @@ int pdo_stmt_setup_fetch_mode(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, in
 
 	stmt->default_fetch_type = PDO_FETCH_BOTH;
 
-	if (argc == 0) {
-		return SUCCESS;
-	}
-
-	args = safe_emalloc(ZEND_NUM_ARGS(), sizeof(zval), 0);
-
-	retval = zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args);
-
-	if (SUCCESS == retval) {
-		if (Z_TYPE(args[skip]) != IS_LONG) {
-			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "mode must be an integer");
-			retval = FAILURE;
-		} else {
-			mode = Z_LVAL(args[skip]);
-			flags = mode & PDO_FETCH_FLAGS;
-
-			retval = pdo_stmt_verify_mode(stmt, mode, 0);
-		}
-	}
+	flags = mode & PDO_FETCH_FLAGS;
+	retval = pdo_stmt_verify_mode(stmt, mode, 0);
 
 	if (FAILURE == retval) {
 		PDO_STMT_CLEAR_ERR();
-		efree(args);
 		return FAILURE;
 	}
 
@@ -1785,7 +1765,7 @@ int pdo_stmt_setup_fetch_mode(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, in
 		case PDO_FETCH_BOUND:
 		case PDO_FETCH_NAMED:
 		case PDO_FETCH_KEY_PAIR:
-			if (argc != 1) {
+			if (num_args != 0) {
 				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "fetch mode doesn't allow any extra arguments");
 			} else {
 				retval = SUCCESS;
@@ -1793,12 +1773,12 @@ int pdo_stmt_setup_fetch_mode(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, in
 			break;
 
 		case PDO_FETCH_COLUMN:
-			if (argc != 2) {
+			if (num_args != 1) {
 				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "fetch mode requires the colno argument");
-			} else	if (Z_TYPE(args[skip+1]) != IS_LONG) {
+			} else	if (Z_TYPE(args[0]) != IS_LONG) {
 				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "colno must be an integer");
 			} else {
-				stmt->fetch.column = Z_LVAL(args[skip+1]);
+				stmt->fetch.column = Z_LVAL(args[0]);
 				retval = SUCCESS;
 			}
 			break;
@@ -1806,21 +1786,21 @@ int pdo_stmt_setup_fetch_mode(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, in
 		case PDO_FETCH_CLASS:
 			/* Gets its class name from 1st column */
 			if ((flags & PDO_FETCH_CLASSTYPE) == PDO_FETCH_CLASSTYPE) {
-				if (argc != 1) {
+				if (num_args != 0) {
 					pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "fetch mode doesn't allow any extra arguments");
 				} else {
 					stmt->fetch.cls.ce = NULL;
 					retval = SUCCESS;
 				}
 			} else {
-				if (argc < 2) {
+				if (num_args < 1) {
 					pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "fetch mode requires the classname argument");
-				} else if (argc > 3) {
+				} else if (num_args > 2) {
 					pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "too many arguments");
-				} else if (Z_TYPE(args[skip+1]) != IS_STRING) {
+				} else if (Z_TYPE(args[0]) != IS_STRING) {
 					pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "classname must be a string");
 				} else {
-					cep = zend_lookup_class(Z_STR(args[skip+1]));
+					cep = zend_lookup_class(Z_STR(args[0]));
 					if (cep) {
 						retval = SUCCESS;
 						stmt->fetch.cls.ce = cep;
@@ -1835,12 +1815,12 @@ int pdo_stmt_setup_fetch_mode(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, in
 					php_error_docref(NULL, E_WARNING, "PHP might crash if you don't call $stmt->setFetchMode() to reset to defaults on this persistent statement.  This will be fixed in a later release");
 				}
 #endif
-				if (argc == 3) {
-					if (Z_TYPE(args[skip+2]) != IS_NULL && Z_TYPE(args[skip+2]) != IS_ARRAY) {
+				if (num_args == 2) {
+					if (Z_TYPE(args[1]) != IS_NULL && Z_TYPE(args[1]) != IS_ARRAY) {
 						pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "ctor_args must be either NULL or an array");
 						retval = FAILURE;
-					} else if (Z_TYPE(args[skip+2]) == IS_ARRAY && zend_hash_num_elements(Z_ARRVAL(args[skip+2]))) {
-						ZVAL_ARR(&stmt->fetch.cls.ctor_args, zend_array_dup(Z_ARRVAL(args[skip+2])));
+					} else if (Z_TYPE(args[1]) == IS_ARRAY && zend_hash_num_elements(Z_ARRVAL(args[1]))) {
+						ZVAL_ARR(&stmt->fetch.cls.ctor_args, zend_array_dup(Z_ARRVAL(args[1])));
 					}
 				}
 
@@ -1852,9 +1832,9 @@ int pdo_stmt_setup_fetch_mode(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, in
 			break;
 
 		case PDO_FETCH_INTO:
-			if (argc != 2) {
+			if (num_args != 1) {
 				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "fetch mode requires the object parameter");
-			} else if (Z_TYPE(args[skip+1]) != IS_OBJECT) {
+			} else if (Z_TYPE(args[0]) != IS_OBJECT) {
 				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "object must be an object");
 			} else {
 				retval = SUCCESS;
@@ -1866,7 +1846,7 @@ int pdo_stmt_setup_fetch_mode(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, in
 					php_error_docref(NULL, E_WARNING, "PHP might crash if you don't call $stmt->setFetchMode() to reset to defaults on this persistent statement.  This will be fixed in a later release");
 				}
 #endif
-				ZVAL_COPY(&stmt->fetch.into, &args[skip+1]);
+				ZVAL_COPY(&stmt->fetch.into, &args[0]);
 			}
 
 			break;
@@ -1888,19 +1868,21 @@ int pdo_stmt_setup_fetch_mode(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, in
 	 */
 	PDO_STMT_CLEAR_ERR();
 
-	efree(args);
-
 	return retval;
 }
 
 PHP_METHOD(PDOStatement, setFetchMode)
 {
+	zend_long fetch_mode;
+	zval *args = NULL;
+	uint32_t num_args = 0;
 	PHP_STMT_GET_OBJ;
 
-	RETVAL_BOOL(
-		pdo_stmt_setup_fetch_mode(INTERNAL_FUNCTION_PARAM_PASSTHRU,
-			stmt, 0) == SUCCESS
-		);
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l*", &fetch_mode, &args, &num_args) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	RETVAL_BOOL(pdo_stmt_setup_fetch_mode(stmt, fetch_mode, args, num_args) == SUCCESS);
 }
 /* }}} */
 

@@ -41,7 +41,7 @@ void pdo_dbstmt_free_storage(zend_object *std);
 zend_object_iterator *pdo_stmt_iter_get(zend_class_entry *ce, zval *object, int by_ref);
 extern zend_object_handlers pdo_dbstmt_object_handlers;
 int pdo_stmt_describe_columns(pdo_stmt_t *stmt);
-int pdo_stmt_setup_fetch_mode(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, int skip_first_arg);
+int pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long fetch_mode, zval *args, uint32_t num_args);
 
 extern zend_object *pdo_row_new(zend_class_entry *ce);
 extern const zend_function_entry pdo_row_functions[];
