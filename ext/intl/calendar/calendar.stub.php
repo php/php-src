@@ -283,7 +283,7 @@ class IntlCalendar
 
 class IntlGregorianCalendar extends IntlCalendar
 {
-    public function __construct() {}
+    public function __construct($timeZoneOrYear = UNKNOWN, $localeOrMonth = UNKNOWN, $dayOfMonth = UNKNOWN, $hour = UNKNOWN, $minute = UNKNOWN, $second = UNKNOWN) {}
 
     /**
      * @return bool

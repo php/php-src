@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: f5411cdc67ac288183c4210932b222c406bfe254 */
+ * Stub hash: 6130944985187815dd839f7425213f91c3261735 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_intlcal_create_instance, 0, 0, IntlCalendar, 1)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, timeZone, "null")
@@ -179,8 +179,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_intlcal_get_error_message, 0, 1,
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_intlgregcal_create_instance, 0, 0, IntlGregorianCalendar, 1)
-	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, timeZone, "null")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, locale, IS_STRING, 1, "null")
+	ZEND_ARG_INFO(0, timeZoneOrYear)
+	ZEND_ARG_INFO(0, localeOrMonth)
+	ZEND_ARG_INFO(0, dayOfMonth)
+	ZEND_ARG_INFO(0, hour)
+	ZEND_ARG_INFO(0, minute)
+	ZEND_ARG_INFO(0, second)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_intlgregcal_set_gregorian_change, 0, 2, _IS_BOOL, 0)

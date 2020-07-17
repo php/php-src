@@ -99,7 +99,7 @@ function intlcal_get_error_code(IntlCalendar $calendar): int|false {}
 function intlcal_get_error_message(IntlCalendar $calendar): string|false {}
 
 /** @param IntlTimeZone|DateTimeZone|string|null $timeZone */
-function intlgregcal_create_instance($timeZone = null, ?string $locale = null): ?IntlGregorianCalendar {}
+function intlgregcal_create_instance($timeZoneOrYear = UNKNOWN, $localeOrMonth = UNKNOWN, $dayOfMonth = UNKNOWN, $hour = UNKNOWN, $minute = UNKNOWN, $second = UNKNOWN): ?IntlGregorianCalendar {}
 
 function intlgregcal_set_gregorian_change(IntlGregorianCalendar $calendar, float $change): bool {}
 
