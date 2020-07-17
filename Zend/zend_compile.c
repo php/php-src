@@ -6197,14 +6197,19 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fall
 					ZSTR_VAL(scope->name), ZSTR_VAL(name), ZSTR_VAL(str));
 			}
 
-			/* Always use uninitialized as the default. */
-			zval default_value;
-			ZVAL_UNDEF(&default_value);
-
 			/* Recompile the type, as it has different memory management requirements. */
 			zend_type type = ZEND_TYPE_INIT_NONE(0);
 			if (type_ast) {
 				type = zend_compile_typename(type_ast, /* force_allow_null */ 0, /* use_arena */ 1);
+			}
+
+			/* Don't give the property an explicit default value. For typed properties this means
+			 * uninitialized, for untyped properties it means an implicit null default value. */
+			zval default_value;
+			if (ZEND_TYPE_IS_SET(type)) {
+				ZVAL_UNDEF(&default_value);
+			} else {
+				ZVAL_NULL(&default_value);
 			}
 
 			zend_string *doc_comment =
