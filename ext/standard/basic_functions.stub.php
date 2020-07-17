@@ -955,7 +955,7 @@ function http_build_query(array|object $data, string $numeric_prefix = "", $arg_
 
 function image_type_to_mime_type(int $image_type): string {}
 
-function image_type_to_extension(int $image_type): string|false {}
+function image_type_to_extension(int $image_type, bool $include_dot = true): string|false {}
 
 function getimagesize(string $image_path, &$image_info = null): array|false {}
 
