@@ -1585,16 +1585,20 @@ PHP_FUNCTION(pg_parameter_status)
 /* {{{ Ping database. If connection is bad, try to reconnect. */
 PHP_FUNCTION(pg_ping)
 {
-	zval *pgsql_link;
+	zval *pgsql_link = NULL;
 	PGconn *pgsql;
 	PGresult *res;
 	zend_resource *link;
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "r", &pgsql_link) == SUCCESS) {
-		link = Z_RES_P(pgsql_link);
-	} else {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|r", &pgsql_link) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (pgsql_link == NULL) {
 		link = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(link);
+	} else {
+		link = Z_RES_P(pgsql_link);
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(link, "PostgreSQL link", le_link, le_plink)) == NULL) {
@@ -2926,15 +2930,14 @@ PHP_FUNCTION(pg_trace)
 PHP_FUNCTION(pg_untrace)
 {
 	zval *pgsql_link = NULL;
-	int argc = ZEND_NUM_ARGS();
 	PGconn *pgsql;
 	zend_resource *link;
 
-	if (zend_parse_parameters(argc, "|r", &pgsql_link) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|r", &pgsql_link) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	if (argc == 0) {
+	if (pgsql_link == NULL) {
 		link = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(link);
 	} else {
@@ -3688,15 +3691,14 @@ PHP_FUNCTION(pg_set_client_encoding)
 PHP_FUNCTION(pg_client_encoding)
 {
 	zval *pgsql_link = NULL;
-	int argc = ZEND_NUM_ARGS();
 	PGconn *pgsql;
 	zend_resource *link;
 
-	if (zend_parse_parameters(argc, "|r", &pgsql_link) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|r", &pgsql_link) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	if (argc == 0) {
+	if (pgsql_link == NULL) {
 		link = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(link);
 	} else {
@@ -3717,16 +3719,15 @@ PHP_FUNCTION(pg_client_encoding)
 PHP_FUNCTION(pg_end_copy)
 {
 	zval *pgsql_link = NULL;
-	int argc = ZEND_NUM_ARGS();
 	PGconn *pgsql;
 	int result = 0;
 	zend_resource *link;
 
-	if (zend_parse_parameters(argc, "|r", &pgsql_link) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|r", &pgsql_link) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	if (argc == 0) {
+	if (pgsql_link == NULL) {
 		link = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(link);
 	} else {
