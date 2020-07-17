@@ -220,7 +220,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_field_num, 0, 0, 2)
 	ZEND_ARG_INFO(0, field_name)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_fetch_result, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_fetch_result, 0, 0, 2)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(0, row_number)
 	ZEND_ARG_INFO(0, field_name)
@@ -301,12 +301,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_lo_create, 0, 0, 0)
 	ZEND_ARG_INFO(0, large_object_id)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_lo_unlink, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_lo_unlink, 0, 0, 1)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_INFO(0, large_object_oid)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_lo_open, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_lo_open, 0, 0, 1)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_INFO(0, large_object_oid)
 	ZEND_ARG_INFO(0, mode)
@@ -337,7 +337,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_lo_import, 0, 0, 0)
 	ZEND_ARG_INFO(0, large_object_oid)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_lo_export, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_lo_export, 0, 0, 2)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_INFO(0, objoid)
 	ZEND_ARG_INFO(0, filename)
@@ -504,6 +504,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_meta_data, 0, 0, 2)
 	ZEND_ARG_INFO(0, db)
 	ZEND_ARG_INFO(0, table)
+	ZEND_ARG_INFO(0, extended)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_convert, 0, 0, 3)
@@ -659,7 +660,7 @@ static const zend_function_entry pgsql_functions[] = {
 	PHP_FALIAS(pg_fieldprtlen,	 pg_field_prtlen,   arginfo_pg_field_prtlen)
 	PHP_FALIAS(pg_fieldisnull,	 pg_field_is_null,  arginfo_pg_field_is_null)
 	PHP_FALIAS(pg_freeresult,    pg_free_result,    arginfo_pg_free_result)
-	PHP_FALIAS(pg_result,	     pg_fetch_result,   arginfo_pg_get_result)
+	PHP_FALIAS(pg_result,	     pg_fetch_result,   arginfo_pg_fetch_result)
 	PHP_FALIAS(pg_loreadall,	 pg_lo_read_all,    arginfo_pg_lo_read_all)
 	PHP_FALIAS(pg_locreate,	     pg_lo_create,      arginfo_pg_lo_create)
 	PHP_FALIAS(pg_lounlink,	     pg_lo_unlink,      arginfo_pg_lo_unlink)
@@ -3079,8 +3080,8 @@ PHP_FUNCTION(pg_lo_unlink)
 		CHECK_DEFAULT_LINK(link);
 	}
 	else {
-		php_error_docref(NULL, E_WARNING, "Requires 1 or 2 arguments");
-		RETURN_FALSE;
+		zend_argument_count_error("Requires 1 or 2 arguments, %d given", ZEND_NUM_ARGS());
+		RETURN_THROWS();
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(link, "PostgreSQL link", le_link, le_plink)) == NULL) {
@@ -3152,8 +3153,8 @@ PHP_FUNCTION(pg_lo_open)
 		CHECK_DEFAULT_LINK(link);
 	}
 	else {
-		php_error_docref(NULL, E_WARNING, "Requires 1 or 2 arguments");
-		RETURN_FALSE;
+		zend_argument_count_error("Requires 1 or 2 arguments, %d given", ZEND_NUM_ARGS());
+		RETURN_THROWS();
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(link, "PostgreSQL link", le_link, le_plink)) == NULL) {
@@ -3503,8 +3504,8 @@ PHP_FUNCTION(pg_lo_export)
 		link = Z_RES_P(pgsql_link);
 	}
 	else {
-		php_error_docref(NULL, E_WARNING, "Requires 2 or 3 arguments");
-		RETURN_FALSE;
+		zend_argument_count_error("Requires 2 or 3 arguments, %d given", ZEND_NUM_ARGS());
+		RETURN_THROWS();
 	}
 
 	if (php_check_open_basedir(file_out)) {
