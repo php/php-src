@@ -1383,6 +1383,16 @@ static int php_array_walk(zval *array, zval *userdata, int recursive) /* {{{ */
 				zend_hash_move_forward_ex(target_hash, &pos);
 				continue;
 			}
+
+			/* Add type source for property references. */
+			if (Z_TYPE_P(zv) != IS_REFERENCE && Z_TYPE_P(array) == IS_OBJECT) {
+				zend_property_info *prop_info =
+					zend_get_typed_property_info_for_slot(Z_OBJ_P(array), zv);
+				if (prop_info) {
+					ZVAL_NEW_REF(zv, zv);
+					ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(zv), prop_info);
+				}
+			}
 		}
 
 		/* Ensure the value is a reference. Otherwise the location of the value may be freed. */
