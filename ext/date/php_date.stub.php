@@ -394,7 +394,7 @@ class DateInterval
 class DatePeriod implements IteratorAggregate
 {
     /* Has an overloaded signature */
-    public function __construct($start, $interval = UNKNOWN, $end = UNKNOWN) {}
+    public function __construct($start, $interval = UNKNOWN, $end = UNKNOWN, $options = UNKNOWN) {}
 
     /** @return DateTimeInterface */
     public function getStartDate() {}
