@@ -32,7 +32,6 @@
 #include "cp932_table.h"
 
 typedef struct _mbfl_filt_conv_wchar_cp50220_ctx {
-	mbfl_filt_tl_jisx0201_jisx0208_param tl_param;
 	mbfl_convert_filter last;
 } mbfl_filt_conv_wchar_cp50220_ctx;
 
@@ -579,17 +578,14 @@ mbfl_filt_conv_wchar_cp50220_ctor(mbfl_convert_filter *filt)
 	mbfl_filt_conv_common_ctor(filt);
 
 	ctx = emalloc(sizeof(mbfl_filt_conv_wchar_cp50220_ctx));
-	ctx->tl_param.mode = MBFL_FILT_TL_HAN2ZEN_KATAKANA | MBFL_FILT_TL_HAN2ZEN_GLUE;
-
 	ctx->last = *filt;
-	ctx->last.opaque = ctx;
 	ctx->last.data = filt->data;
 	filt->filter_function = vtbl_tl_jisx0201_jisx0208.filter_function;
 	filt->filter_flush = (filter_flush_t)vtbl_tl_jisx0201_jisx0208.filter_flush;
 	filt->output_function = (output_function_t)ctx->last.filter_function;
 	filt->flush_function = (flush_function_t)ctx->last.filter_flush;
-	filt->data = &ctx->last;
-	filt->opaque = ctx;
+	filt->data = ctx;
+	filt->opaque = (void*)(MBFL_FILT_TL_HAN2ZEN_KATAKANA | MBFL_FILT_TL_HAN2ZEN_GLUE);
 	vtbl_tl_jisx0201_jisx0208.filter_ctor(filt);
 }
 
@@ -600,15 +596,14 @@ mbfl_filt_conv_wchar_cp50220_copy(mbfl_convert_filter *src, mbfl_convert_filter 
 
 	*dest = *src;
 	ctx = emalloc(sizeof(mbfl_filt_conv_wchar_cp50220_ctx));
-	dest->opaque = ctx;
-	dest->data = &ctx->last;
+	dest->data = ctx;
 }
 
 static void
 mbfl_filt_conv_wchar_cp50220_dtor(mbfl_convert_filter *filt)
 {
-	if (filt->opaque != NULL) {
-		efree(filt->opaque);
+	if (filt->data) {
+		efree(filt->data);
 	}
 }
 

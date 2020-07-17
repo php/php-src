@@ -86,6 +86,7 @@
 #define MBFL_MBFILTER_H
 
 #include <limits.h>
+#include <stdint.h>
 #include "zend.h"
 
 #include "mbfl_defs.h"
@@ -302,9 +303,8 @@ MBFLAPI extern mbfl_string *
 mbfl_html_numeric_entity_decode(mbfl_string *string, mbfl_string *result, int *convmap, int mapsize);
 
 /*
- * convert of harfwidth and fullwidth for japanese
+ * conversion of halfwidth and fullwidth characters for Japanese
  */
-MBFLAPI extern mbfl_string *
-mbfl_ja_jp_hantozen(mbfl_string *string, mbfl_string *result, int mode);
+MBFLAPI extern mbfl_string* mbfl_ja_jp_hantozen(mbfl_string *string, mbfl_string *result, intptr_t mode);
 
 #endif	/* MBFL_MBFILTER_H */

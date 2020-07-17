@@ -22,6 +22,7 @@
  *
  */
 
+#include <stdint.h>
 #include "mbfilter_tl_jisx0201_jisx0208.h"
 #include "translit_kana_jisx0201_jisx0208.h"
 
@@ -35,7 +36,7 @@ int
 mbfl_filt_tl_jisx0201_jisx0208(int c, mbfl_convert_filter *filt)
 {
 	int s, n;
-	int mode = ((mbfl_filt_tl_jisx0201_jisx0208_param *)filt->opaque)->mode;
+	intptr_t mode = (intptr_t)filt->opaque;
 
 	s = c;
 
@@ -268,7 +269,7 @@ int
 mbfl_filt_tl_jisx0201_jisx0208_flush(mbfl_convert_filter *filt)
 {
 	int ret, n;
-	int mode = ((mbfl_filt_tl_jisx0201_jisx0208_param *)filt->opaque)->mode;
+	intptr_t mode = (intptr_t)filt->opaque;
 
 	ret = 0;
 	if (filt->status) {
