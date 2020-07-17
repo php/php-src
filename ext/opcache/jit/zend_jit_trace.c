@@ -883,6 +883,11 @@ static int is_checked_guard(const zend_ssa *tssa, const zend_op **ssa_opcodes, u
 				 || opline->opcode == ZEND_POST_DEC
 				 || opline->opcode == ZEND_POST_INC) {
 					return 1;
+				} else if (opline->opcode == ZEND_ASSIGN_OP
+				 && (opline->extended_value == ZEND_ADD
+				  || opline->extended_value == ZEND_SUB
+				  || opline->extended_value == ZEND_MUL)) {
+					return 1;
 				}
 			}
 			if (tssa->ops[idx].result_def == var) {
