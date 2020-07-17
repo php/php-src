@@ -4,21 +4,12 @@
 
 class php_user_filter
 {
-    /**
-     * @return int
-     * @alias user_filter_nop
-     */
+    /** @return int */
     public function filter($in, $out, &$consumed, $closing) {}
 
-    /**
-     * @return void
-     * @alias user_filter_nop
-     */
+    /** @return void */
     public function onCreate() {}
 
-    /**
-     * @return void
-     * @alias user_filter_nop
-     */
+    /** @return void */
     public function onClose() {}
 }
