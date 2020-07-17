@@ -844,13 +844,20 @@ static inline int ct_eval_func_call(
 				|| zend_string_equals_literal(name, "urldecode")
 				|| zend_string_equals_literal(name, "rawurlencode")
 				|| zend_string_equals_literal(name, "rawurldecode")
-				|| zend_string_equals_literal(name, "php_uname")) {
+				|| zend_string_equals_literal(name, "php_uname")
+				|| zend_string_equals_literal(name, "dirname")
+				|| zend_string_equals_literal(name, "basename")
+				|| zend_string_equals_literal(name, "md5")
+				|| zend_string_equals_literal(name, "crc32")
+				|| zend_string_equals_literal(name, "sha1")) {
 			if (Z_TYPE_P(args[0]) != IS_STRING) {
 				return FAILURE;
 			}
 			/* pass */
 		} else if (zend_string_equals_literal(name, "array_keys")
-				|| zend_string_equals_literal(name, "array_values")) {
+				|| zend_string_equals_literal(name, "array_values")
+				|| zend_string_equals_literal(name, "array_unique")
+				|| zend_string_equals_literal(name, "array_filter")) {
 			if (Z_TYPE_P(args[0]) != IS_ARRAY) {
 				return FAILURE;
 			}
@@ -903,6 +910,12 @@ static inline int ct_eval_func_call(
 					|| (Z_TYPE_P(args[0]) != IS_LONG
 						&& Z_TYPE_P(args[0]) != IS_STRING
 						&& Z_TYPE_P(args[0]) != IS_NULL)) {
+				return FAILURE;
+			}
+			/* pass */
+		} else if (zend_string_equals_literal(name, "dirname")) {
+			if (Z_TYPE_P(args[0]) != IS_STRING
+					|| (Z_TYPE_P(args[1]) != IS_LONG)) {
 				return FAILURE;
 			}
 			/* pass */
@@ -962,7 +975,8 @@ static inline int ct_eval_func_call(
 				|| zend_string_equals_literal(name, "str_contains")
 				|| zend_string_equals_literal(name, "str_starts_with")
 				|| zend_string_equals_literal(name, "str_ends_with")
-				|| zend_string_equals_literal(name, "version_compare")) {
+				|| zend_string_equals_literal(name, "version_compare")
+				|| zend_string_equals_literal(name, "basename")) {
 			if (Z_TYPE_P(args[0]) != IS_STRING
 					|| Z_TYPE_P(args[1]) != IS_STRING) {
 				return FAILURE;
@@ -1004,7 +1018,8 @@ static inline int ct_eval_func_call(
 				}
 			}
 			/* pass */
-		} else if (zend_string_equals_literal(name, "version_compare")) {
+		} else if (zend_string_equals_literal(name, "version_compare")
+				|| zend_string_equals_literal(name, "str_replace")) {
 			if (Z_TYPE_P(args[0]) != IS_STRING
 					|| Z_TYPE_P(args[1]) != IS_STRING
 					|| Z_TYPE_P(args[2]) != IS_STRING) {
