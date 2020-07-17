@@ -13,19 +13,19 @@
    | Author: Wez Furlong (wez@thebrainroom.com)                           |
    +----------------------------------------------------------------------+
 
-	Based on code from ucdata-2.5, which has the following Copyright:
+  Based on code from ucdata-2.5, which has the following Copyright:
 
-	Copyright 2001 Computing Research Labs, New Mexico State University
+  Copyright 2001 Computing Research Labs, New Mexico State University
 
-	Permission is hereby granted, free of charge, to any person obtaining a
-	copy of this software and associated documentation files (the "Software"),
-	to deal in the Software without restriction, including without limitation
-	the rights to use, copy, modify, merge, publish, distribute, sublicense,
-	and/or sell copies of the Software, and to permit persons to whom the
-	Software is furnished to do so, subject to the following conditions:
+  Permission is hereby granted, free of charge, to any person obtaining a
+  copy of this software and associated documentation files (the "Software"),
+  to deal in the Software without restriction, including without limitation
+  the rights to use, copy, modify, merge, publish, distribute, sublicense,
+  and/or sell copies of the Software, and to permit persons to whom the
+  Software is furnished to do so, subject to the following conditions:
 
-	The above copyright notice and this permission notice shall be included in
-	all copies or substantial portions of the Software.
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
 */
 
 #include "php.h"
@@ -104,18 +104,19 @@ MBSTRING_API int php_unicode_is_prop(unsigned long code, ...)
 	return result;
 }
 
-static inline unsigned mph_hash(unsigned d, unsigned x) {
-    x ^= d;
-    x = ((x >> 16) ^ x) * 0x45d9f3b;
-    return x;
+/* Minimal Perfect Hash function for character substitution tables
+ * (uppercase, lowercase, titlecase, etc) */
+static inline unsigned mph_hash(unsigned d, unsigned x)
+{
+	x ^= d;
+	x = ((x >> 16) ^ x) * 0x45d9f3b;
+	return x;
 }
 
 #define CODE_NOT_FOUND ((unsigned) -1)
 
-static inline unsigned mph_lookup(
-		unsigned code,
-		const short *g_table, unsigned g_table_size,
-		const unsigned *table, unsigned table_size)
+static inline unsigned mph_lookup(unsigned code, const short *g_table, unsigned g_table_size,
+	const unsigned *table, unsigned table_size)
 {
 	short g = g_table[mph_hash(0, code) % g_table_size];
 
@@ -170,6 +171,10 @@ static unsigned php_unicode_tolower_raw(unsigned code, enum mbfl_no_encoding enc
 	} else {
 		unsigned new_code = CASE_LOOKUP(code, lower);
 		if (new_code != CODE_NOT_FOUND) {
+			/* If we are using Latin-5 encoding (for Turkish), and the character
+			 * being folded is a capital I with a dot, rather than converting it
+			 * to a small i followed by a "combining dot above" character, just
+			 * emit the small i by itself */
 			if (UNEXPECTED(enc == mbfl_no_encoding_8859_9 && code == 0x130)) {
 				return 0x69;
 			}
@@ -220,6 +225,7 @@ static inline unsigned php_unicode_tolower_simple(unsigned code, enum mbfl_no_en
 	}
 	return code;
 }
+
 static inline unsigned php_unicode_toupper_simple(unsigned code, enum mbfl_no_encoding enc) {
 	code = php_unicode_toupper_raw(code, enc);
 	if (UNEXPECTED(code > 0xffffff)) {
@@ -227,6 +233,7 @@ static inline unsigned php_unicode_toupper_simple(unsigned code, enum mbfl_no_en
 	}
 	return code;
 }
+
 static inline unsigned php_unicode_totitle_simple(unsigned code, enum mbfl_no_encoding enc) {
 	code = php_unicode_totitle_raw(code, enc);
 	if (UNEXPECTED(code > 0xffffff)) {
@@ -234,6 +241,7 @@ static inline unsigned php_unicode_totitle_simple(unsigned code, enum mbfl_no_en
 	}
 	return code;
 }
+
 static inline unsigned php_unicode_tofold_simple(unsigned code, enum mbfl_no_encoding enc) {
 	code = php_unicode_tofold_raw(code, enc);
 	if (UNEXPECTED(code > 0xffffff)) {
@@ -242,8 +250,7 @@ static inline unsigned php_unicode_tofold_simple(unsigned code, enum mbfl_no_enc
 	return code;
 }
 
-static inline void php_unicode_tolower_full(unsigned code, enum mbfl_no_encoding enc,
-	mbfl_convert_filter* next_filter) {
+static inline void php_unicode_tolower_full(unsigned code, enum mbfl_no_encoding enc, mbfl_convert_filter* next_filter) {
 	code = php_unicode_tolower_raw(code, enc);
 	if (UNEXPECTED(code > 0xffffff)) {
 		unsigned len = code >> 24;
@@ -256,8 +263,7 @@ static inline void php_unicode_tolower_full(unsigned code, enum mbfl_no_encoding
 	}
 }
 
-static inline void php_unicode_toupper_full(unsigned code, enum mbfl_no_encoding enc,
-	mbfl_convert_filter* next_filter) {
+static inline void php_unicode_toupper_full(unsigned code, enum mbfl_no_encoding enc, mbfl_convert_filter* next_filter) {
 	code = php_unicode_toupper_raw(code, enc);
 	if (UNEXPECTED(code > 0xffffff)) {
 		unsigned len = code >> 24;
@@ -270,8 +276,7 @@ static inline void php_unicode_toupper_full(unsigned code, enum mbfl_no_encoding
 	}
 }
 
-static inline void php_unicode_totitle_full(unsigned code, enum mbfl_no_encoding enc,
-	mbfl_convert_filter* next_filter) {
+static inline void php_unicode_totitle_full(unsigned code, enum mbfl_no_encoding enc, mbfl_convert_filter* next_filter) {
 	code = php_unicode_totitle_raw(code, enc);
 	if (UNEXPECTED(code > 0xffffff)) {
 		unsigned len = code >> 24;
@@ -312,7 +317,7 @@ static int convert_case_filter(int c, void *void_data)
 
 	/* Handle invalid characters early, as we assign special meaning to
 	 * codepoints above 0xffffff. */
-	if (UNEXPECTED((unsigned) c > 0xffffff)) {
+	if (UNEXPECTED((unsigned)c > 0xffffff)) {
 		(*data->next_filter->filter_function)(c, data->next_filter);
 		return 0;
 	}
@@ -374,29 +379,25 @@ static int convert_case_filter(int c, void *void_data)
 	return 0;
 }
 
-MBSTRING_API char *php_unicode_convert_case(
-		int case_mode, const char *srcstr, size_t srclen, size_t *ret_len,
-		const mbfl_encoding *src_encoding, int illegal_mode, int illegal_substchar)
+MBSTRING_API char *php_unicode_convert_case(int case_mode, const char *srcstr, size_t srclen,
+	size_t *ret_len, const mbfl_encoding *src_encoding, int illegal_mode, int illegal_substchar)
 {
 	struct convert_case_data data;
 	mbfl_convert_filter *from_wchar, *to_wchar;
-	mbfl_string result, *result_ptr;
+	mbfl_string result;
 
 	mbfl_memory_device device;
 	mbfl_memory_device_init(&device, srclen + 1, 0);
 
 	/* encoding -> wchar filter */
-	to_wchar = mbfl_convert_filter_new(src_encoding,
-			&mbfl_encoding_wchar, convert_case_filter, NULL, &data);
+	to_wchar = mbfl_convert_filter_new(src_encoding, &mbfl_encoding_wchar, convert_case_filter, NULL, &data);
 	if (to_wchar == NULL) {
 		mbfl_memory_device_clear(&device);
 		return NULL;
 	}
 
 	/* wchar -> encoding filter */
-	from_wchar = mbfl_convert_filter_new(
-			&mbfl_encoding_wchar, src_encoding,
-			mbfl_memory_device_output, NULL, &device);
+	from_wchar = mbfl_convert_filter_new(&mbfl_encoding_wchar, src_encoding, mbfl_memory_device_output, NULL, &device);
 	if (from_wchar == NULL) {
 		mbfl_convert_filter_delete(to_wchar);
 		mbfl_memory_device_clear(&device);
@@ -413,27 +414,13 @@ MBSTRING_API char *php_unicode_convert_case(
 	data.case_mode = case_mode;
 	data.title_mode = 0;
 
-	{
-		/* feed data */
-		const unsigned char *p = (const unsigned char *) srcstr;
-		size_t n = srclen;
-		while (n > 0) {
-			if ((*to_wchar->filter_function)(*p++, to_wchar) < 0) {
-				break;
-			}
-			n--;
-		}
-	}
+	mbfl_convert_filter_feed_string(to_wchar, (unsigned char*)srcstr, srclen);
 
 	mbfl_convert_filter_flush(to_wchar);
 	mbfl_convert_filter_flush(from_wchar);
-	result_ptr = mbfl_memory_device_result(&device, &result);
+	mbfl_memory_device_result(&device, &result);
 	mbfl_convert_filter_delete(to_wchar);
 	mbfl_convert_filter_delete(from_wchar);
-
-	if (!result_ptr) {
-		return NULL;
-	}
 
 	*ret_len = result.len;
 	return (char *) result.val;
