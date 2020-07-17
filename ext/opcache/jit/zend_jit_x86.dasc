@@ -10595,7 +10595,7 @@ static int zend_jit_isset_isempty_dim(dasm_State **Dst, const zend_op *opline, c
 		if (exit_addr
 		 && !(op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_ARRAY))
 		 && !may_throw
-		 && !(opline->op1_type & (IS_TMP_VAR|IS_VAR))
+		 && (!(opline->op1_type & (IS_TMP_VAR|IS_VAR)) || (op1_info & AVOID_REFCOUNTING))
 		 && (!(opline->op2_type & (IS_TMP_VAR|IS_VAR)) || !(op2_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_LONG)))) {
 			if (smart_branch_opcode == ZEND_JMPNZ) {
 				found_exit_addr = exit_addr;

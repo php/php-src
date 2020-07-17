@@ -3765,9 +3765,11 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 									((op1_info & MAY_BE_UNDEF) != 0 &&
 										opline->opcode == ZEND_FETCH_DIM_R) ||
 									((opline->op1_type & (IS_TMP_VAR|IS_VAR)) != 0 &&
+										(op1_info & MAY_BE_RC1) &&
 										(op1_info & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_ARRAY)) != 0) ||
 									(op2_info & MAY_BE_UNDEF) != 0 ||
 									((opline->op2_type & (IS_TMP_VAR|IS_VAR)) != 0 &&
+										(op2_info & MAY_BE_RC1) &&
 										(op2_info & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_ARRAY)) != 0)))) {
 							goto jit_failure;
 						}

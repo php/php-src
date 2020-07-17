@@ -4312,7 +4312,8 @@ int zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op, const ze
 			}
 		}
 	} else if (opline->op1_type & (IS_TMP_VAR|IS_VAR)) {
-		if (t1 & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_ARRAY)) {
+		if ((t1 & MAY_BE_RC1)
+		 && (t1 & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_ARRAY))) {
 			switch (opline->opcode) {
 				case ZEND_CASE:
 				case ZEND_CASE_STRICT:
@@ -4350,7 +4351,8 @@ int zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op, const ze
 			}
 		}
 	} else if (opline->op2_type & (IS_TMP_VAR|IS_VAR)) {
-		if (t2 & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_ARRAY)) {
+		if ((t2 & MAY_BE_RC1)
+		 && (t2 & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_ARRAY))) {
 			switch (opline->opcode) {
 				case ZEND_ASSIGN:
 					break;
