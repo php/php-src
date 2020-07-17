@@ -316,6 +316,8 @@ ZEND_METHOD(Exception, __construct)
 
 ZEND_METHOD(Exception, __wakeup)
 {
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	zval value, *pvalue;
 	zval *object = ZEND_THIS;
 	CHECK_EXC_TYPE(ZEND_STR_MESSAGE,  IS_STRING);
