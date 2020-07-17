@@ -7649,7 +7649,9 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, const z
 			if (!jmp_done) {
 				if (exit_addr) {
 					if (branch_opcode == ZEND_JMPNZ || branch_opcode == ZEND_JMPNZ_EX) {
-						|	jmp >9
+						if (op1_info & MAY_BE_LONG) {
+							|	jmp >9
+						}
 					} else if (op1_info & MAY_BE_LONG) {
 						|	jmp &exit_addr
 					}
