@@ -21,6 +21,7 @@ PHP 8.0 INTERNALS UPGRADE NOTES
   r. Cannot implement Traversable only
   s. zend_fcall_info no_separation flag removed
   t. Signature changes
+  u. Error Notification callbacks to replace zend_error_cb overwrite use-cases
 
 2. Build system changes
   a. Abstract
@@ -171,6 +172,22 @@ PHP 8.0 INTERNALS UPGRADE NOTES
         - add_next_index_bool()
      4. Argument int to size_t in Zend Engine 4.0:
         - zend_set_hash_symbol()
+
+  u. Instead of overwriting zend_error_cb extensions with debugging, monitoring
+     use-cases catching Errors/Exceptions are strongly encouraged to use
+	 the new error notification API instead.
+
+	 Error notification callbacks are guaranteed to be called regardless of
+	 the users error_reporting setting or userland error handler return values.
+
+     Register notification callbacks during MINIT of an extension:
+
+		void my_error_notify_cb(int type,
+			const char *error_filename,
+			uint32_t error_lineno,
+			zend_string *message) {
+		}
+		zend_register_error_notify_callback(my_error_notify_cb);
 
 ========================
 2. Build system changes
