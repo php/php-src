@@ -11,16 +11,16 @@ $ao = new ArrayObject();
 
 try {
     $ao->uksort();
-} catch (BadMethodCallException $e) {
+} catch (ArgumentCountError $e) {
     echo $e->getMessage() . "\n";
 }
 
 try {
     $ao->uksort(1,2);
-} catch (BadMethodCallException $e) {
+} catch (ArgumentCountError $e) {
     echo $e->getMessage() . "\n";
 }
 ?>
 --EXPECT--
-Function expects exactly one argument
-Function expects exactly one argument
+ArrayObject::uksort() expects exactly 1 parameter, 0 given
+ArrayObject::uksort() expects exactly 1 parameter, 2 given
