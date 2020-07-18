@@ -437,7 +437,7 @@ static void _readline_long_zval(zval *ret, long l)
 	ZVAL_LONG(ret, l);
 }
 
-static char **_readline_completion_cb(const char *text, int start, int end)
+char **php_readline_completion_cb(const char *text, int start, int end)
 {
 	zval params[3];
 	char **matches = NULL;
@@ -479,7 +479,8 @@ PHP_FUNCTION(readline_completion_function)
 	zval_ptr_dtor(&_readline_completion);
 	ZVAL_COPY(&_readline_completion, &fci.function_name);
 
-	rl_attempted_completion_function = _readline_completion_cb;
+	/* NOTE: The rl_attempted_completion_function variable (and others) are part of the readline library, not php */
+	rl_attempted_completion_function = php_readline_completion_cb;
 	if (rl_attempted_completion_function == NULL) {
 		RETURN_FALSE;
 	}
