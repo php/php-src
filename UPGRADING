@@ -932,6 +932,12 @@ PHP 8.0 UPGRADE NOTES
 - PGSQL / PDO PGSQL:
   . The PGSQL and PDO PGSQL extensions now require at least libpq 9.1.
 
+- Readline:
+  . Calling readline_completion_function() before the interactive prompt starts
+    (e.g. in auto_prepend_file) will now override the default interactive prompt
+	completion function. Previously, readline_completion_function() only worked
+	when called after starting the interactive prompt.
+
 - SimpleXML:
   . SimpleXMLElement now implements RecursiveIterator and absorbed the
     functionality of SimpleXMLIterator. SimpleXMLIterator is an empty extension
