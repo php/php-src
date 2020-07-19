@@ -8,6 +8,10 @@ if (PHP_INT_SIZE < 8) {
 	die("skip need PHP_INT_SIZE>=8");
 }
 
+if (disk_free_space(sys_get_temp_dir()) < 2300000000) {
+	die("skip need more than 2.15G of free disk space for the uploaded file");
+}
+
 if (!file_exists('/proc/meminfo')) {
 	die('skip Cannot check free RAM from /proc/meminfo on this platform');
 }
