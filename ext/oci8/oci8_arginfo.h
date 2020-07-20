@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 157a4128645b816f23fb0bcbbb5860362f446cb3 */
+ * Stub hash: 4a4e86dc175542bbf0bc29c9a957c5dfec834f93 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_define_by_name, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, statement_resource)
@@ -433,7 +433,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_register_taf_callback, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, connection_resource)
-	ZEND_ARG_INFO(0, function_name)
+	ZEND_ARG_TYPE_INFO(0, function_name, IS_CALLABLE, 1)
 ZEND_END_ARG_INFO()
 
 #define arginfo_oci_unregister_taf_callback arginfo_oci_rollback

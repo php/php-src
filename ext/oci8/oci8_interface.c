@@ -45,24 +45,20 @@ PHP_FUNCTION(oci_register_taf_callback)
 {
 	zval *z_connection;
 	php_oci_connection *connection;
-	zval *callback;
-	zend_string *callback_name;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
+	zval *callback = NULL;
 
-	/* TODO Use ZPP callable */
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|z!", &z_connection, &callback) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|f!", &z_connection, &fci, &fcc) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	if (callback) {
-		if (!zend_is_callable(callback, 0, 0)) {
-			callback_name = zend_get_callable_name(callback);
-			php_error_docref(NULL, E_WARNING, "Function '%s' is not callable", ZSTR_VAL(callback_name));
-			zend_string_release(callback_name);
-			RETURN_FALSE;
-		}
-	}
-
 	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
+
+	/* If callable passed, assign callback zval so that it can be passed to php_oci_register_taf_callback() */
+	if (ZEND_FCI_INITIALIZED(fci)) {
+		callback = &fci.function_name;
+	}
 
 	if (php_oci_register_taf_callback(connection, callback) == 0) {
 		RETURN_TRUE;
