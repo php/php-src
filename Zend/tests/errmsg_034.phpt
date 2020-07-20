@@ -12,4 +12,4 @@ class test {
 echo "Done\n";
 ?>
 --EXPECTF--
-Fatal error: Clone method test::__clone() cannot be static in %s on line %d
+Fatal error: Method test::__clone() cannot be static in %s on line %d

@@ -11,4 +11,4 @@ class Foo {
 
 ?>
 --EXPECTF--
-Warning: The magic method Foo::__set_state() must be static in %s on line %d
+Fatal error: Method Foo::__set_state() must be static in %s on line %d

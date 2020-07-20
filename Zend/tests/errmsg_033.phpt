@@ -12,4 +12,4 @@ class test {
 echo "Done\n";
 ?>
 --EXPECTF--
-Fatal error: Destructor test::__destruct() cannot be static in %s on line %d
+Fatal error: Method test::__destruct() cannot be static in %s on line %d
