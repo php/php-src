@@ -67,19 +67,19 @@ echo "Done\n";
 
 ?>
 --EXPECTF--
-object(OCI-Lob)#%d (1) {
+object(OCI_Lob)#%d (1) {
   ["descriptor"]=>
   resource(%d) of type (oci8 descriptor)
 }
 int(72)
 array(2) {
   [0]=>
-  object(OCI-Lob)#%d (1) {
+  object(OCI_Lob)#%d (1) {
     ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }
   ["BLOB"]=>
-  object(OCI-Lob)#%d (1) {
+  object(OCI_Lob)#%d (1) {
     ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }
@@ -96,11 +96,11 @@ string(10) "this is a "
 bool(true)
 string(0) ""
 
-Warning: OCI-Lob::truncate(): Length must be greater than or equal to zero in %s on line %d
+Warning: OCI_Lob::truncate(): Length must be greater than or equal to zero in %s on line %d
 bool(false)
 string(0) ""
 
-Warning: OCI-Lob::truncate(): Length must be greater than or equal to zero in %s on line %d
+Warning: OCI_Lob::truncate(): Length must be greater than or equal to zero in %s on line %d
 bool(false)
 bool(true)
 Done

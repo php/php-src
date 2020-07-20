@@ -41,6 +41,9 @@
 #elif PHP_MAJOR_VERSION < 7
 /* PHP 7 is the minimum supported version for OCI8 2.1 */
 #error Use PHP OCI8 2.0 for your version of PHP
+#elif PHP_MAJOR_VERSION < 8
+/* PHP 8 is the minimum supported version for OCI8 3.0 */
+#error Use PHP OCI8 2.2 for your version of PHP
 #endif
 
 #include "php_oci8.h"
@@ -288,8 +291,8 @@ PHP_MINIT_FUNCTION(oci)
 	le_descriptor = zend_register_list_destructors_ex(php_oci_descriptor_list_dtor, NULL, "oci8 descriptor", module_number);
 	le_collection = zend_register_list_destructors_ex(php_oci_collection_list_dtor, NULL, "oci8 collection", module_number);
 
-	INIT_CLASS_ENTRY(oci_lob_class_entry, "OCI-Lob", class_OCI_Lob_methods);
-	INIT_CLASS_ENTRY(oci_coll_class_entry, "OCI-Collection", class_OCI_Collection_methods);
+	INIT_CLASS_ENTRY(oci_lob_class_entry, "OCI_Lob", class_OCI_Lob_methods);
+	INIT_CLASS_ENTRY(oci_coll_class_entry, "OCI_Collection", class_OCI_Collection_methods);
 
 	oci_lob_class_entry_ptr = zend_register_internal_class(&oci_lob_class_entry);
 	oci_coll_class_entry_ptr = zend_register_internal_class(&oci_coll_class_entry);

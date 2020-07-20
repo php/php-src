@@ -44,29 +44,29 @@ echo "Done\n";
 
 ?>
 --EXPECTF--
-object(OCI-Lob)#%d (1) {
+object(OCI_Lob)#%d (1) {
   ["descriptor"]=>
   resource(%d) of type (oci8 descriptor)
 }
 
-Warning: OCI-Lob::writetemporary(): Invalid temporary lob type: %d in %s on line %d
+Warning: OCI_Lob::writetemporary(): Invalid temporary lob type: %d in %s on line %d
 bool(false)
 int(6)
 bool(true)
 bool(true)
 
-Warning: OCI-Lob::truncate(): Size must be less than or equal to the current LOB size in %s on line %d
+Warning: OCI_Lob::truncate(): Size must be less than or equal to the current LOB size in %s on line %d
 bool(false)
 
-Warning: OCI-Lob::truncate(): Length must be greater than or equal to zero in %s on line %d
+Warning: OCI_Lob::truncate(): Length must be greater than or equal to zero in %s on line %d
 bool(false)
 
-Warning: OCI-Lob::read(): Offset must be less than size of the LOB in %s on line %d
+Warning: OCI_Lob::read(): Offset must be less than size of the LOB in %s on line %d
 bool(false)
 
-Warning: OCI-Lob::import(): Can't open file %s in %s on line %d
+Warning: OCI_Lob::import(): Can't open file %s in %s on line %d
 bool(false)
 
-Warning: OCI-Lob::savefile(): Can't open file %s in %s on line %d
+Warning: OCI_Lob::savefile(): Can't open file %s in %s on line %d
 bool(false)
 Done

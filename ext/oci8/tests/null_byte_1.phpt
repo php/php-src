@@ -35,9 +35,9 @@ var_dump($r);
 --EXPECTF--
 Test 1: Import
 
-Warning: OCI-Lob::savefile(): Argument #1 ($function) must be a valid path, string given in %snull_byte_1.php on line %d
+Warning: OCI_Lob::savefile(): Argument #1 ($function) must be a valid path, string given in %snull_byte_1.php on line %d
 NULL
 Test 2: Export
 
-Warning: OCI-Lob::export(): Argument #1 ($function) must be a valid path, string given in %snull_byte_1.php on line %d
+Warning: OCI_Lob::export(): Argument #1 ($function) must be a valid path, string given in %snull_byte_1.php on line %d
 NULL
