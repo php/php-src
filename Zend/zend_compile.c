@@ -6443,16 +6443,6 @@ static void zend_compile_implicit_closure_uses(closure_info *info)
 	ZEND_HASH_FOREACH_END();
 }
 
-static void zend_check_magic_method_attr(uint32_t attr, zend_class_entry *ce, const char* method) /* {{{ */
-{
-	if (!(attr & ZEND_ACC_PUBLIC)) {
-		zend_error(E_WARNING,
-				"The magic method %s::%s() must have public visibility",
-				ZSTR_VAL(ce->name), method);
-	}
-}
-/* }}} */
-
 static void add_stringable_interface(zend_class_entry *ce) {
 	for (uint32_t i = 0; i < ce->num_interfaces; i++) {
 		if (zend_string_equals_literal(ce->interface_names[i].lc_name, "stringable")) {
@@ -6523,49 +6513,36 @@ zend_string *zend_begin_method_decl(zend_op_array *op_array, zend_string *name, 
 		/* pass */
 	} else if (zend_string_equals_literal(lcname, ZEND_CONSTRUCTOR_FUNC_NAME)) {
 		ce->constructor = (zend_function *) op_array;
+		ce->constructor->common.fn_flags |= ZEND_ACC_CTOR;
 	} else if (zend_string_equals_literal(lcname, ZEND_DESTRUCTOR_FUNC_NAME)) {
 		ce->destructor = (zend_function *) op_array;
 	} else if (zend_string_equals_literal(lcname, ZEND_CLONE_FUNC_NAME)) {
 		ce->clone = (zend_function *) op_array;
 	} else if (zend_string_equals_literal(lcname, ZEND_CALL_FUNC_NAME)) {
-		zend_check_magic_method_attr(fn_flags, ce, "__call");
 		ce->__call = (zend_function *) op_array;
 	} else if (zend_string_equals_literal(lcname, ZEND_CALLSTATIC_FUNC_NAME)) {
-		zend_check_magic_method_attr(fn_flags, ce, "__callStatic");
 		ce->__callstatic = (zend_function *) op_array;
 	} else if (zend_string_equals_literal(lcname, ZEND_GET_FUNC_NAME)) {
-		zend_check_magic_method_attr(fn_flags, ce, "__get");
 		ce->__get = (zend_function *) op_array;
 		ce->ce_flags |= ZEND_ACC_USE_GUARDS;
 	} else if (zend_string_equals_literal(lcname, ZEND_SET_FUNC_NAME)) {
-		zend_check_magic_method_attr(fn_flags, ce, "__set");
 		ce->__set = (zend_function *) op_array;
 		ce->ce_flags |= ZEND_ACC_USE_GUARDS;
 	} else if (zend_string_equals_literal(lcname, ZEND_UNSET_FUNC_NAME)) {
-		zend_check_magic_method_attr(fn_flags, ce, "__unset");
 		ce->__unset = (zend_function *) op_array;
 		ce->ce_flags |= ZEND_ACC_USE_GUARDS;
 	} else if (zend_string_equals_literal(lcname, ZEND_ISSET_FUNC_NAME)) {
-		zend_check_magic_method_attr(fn_flags, ce, "__isset");
 		ce->__isset = (zend_function *) op_array;
 		ce->ce_flags |= ZEND_ACC_USE_GUARDS;
 	} else if (zend_string_equals_literal(lcname, ZEND_TOSTRING_FUNC_NAME)) {
-		zend_check_magic_method_attr(fn_flags, ce, "__toString");
 		ce->__tostring = (zend_function *) op_array;
 		add_stringable_interface(ce);
-	} else if (zend_string_equals_literal(lcname, ZEND_INVOKE_FUNC_NAME)) {
-		zend_check_magic_method_attr(fn_flags, ce, "__invoke");
 	} else if (zend_string_equals_literal(lcname, ZEND_DEBUGINFO_FUNC_NAME)) {
-		zend_check_magic_method_attr(fn_flags, ce, "__debugInfo");
 		ce->__debugInfo = (zend_function *) op_array;
 	} else if (zend_string_equals_literal(lcname, "__serialize")) {
-		zend_check_magic_method_attr(fn_flags, ce, "__serialize");
 		ce->__serialize = (zend_function *) op_array;
 	} else if (zend_string_equals_literal(lcname, "__unserialize")) {
-		zend_check_magic_method_attr(fn_flags, ce, "__unserialize");
 		ce->__unserialize = (zend_function *) op_array;
-	} else if (zend_string_equals_literal(lcname, "__set_state")) {
-        zend_check_magic_method_attr(fn_flags, ce, "__set_state");
 	}
 
 	return lcname;
@@ -6740,6 +6717,7 @@ void zend_compile_func_decl(znode *result, zend_ast *ast, zend_bool toplevel) /*
 	zend_compile_stmt(stmt_ast);
 
 	if (is_method) {
+		CG(zend_lineno) = decl->start_lineno;
 		zend_check_magic_method_implementation(
 			CG(active_class_entry), (zend_function *) op_array, method_lcname, E_COMPILE_ERROR);
 		zend_string_release_ex(method_lcname, 0);
@@ -7158,10 +7136,6 @@ void zend_compile_class_decl(znode *result, zend_ast *ast, zend_bool toplevel) /
 
 	/* Reset lineno for final opcodes and errors */
 	CG(zend_lineno) = ast->lineno;
-
-	if (ce->constructor) {
-		ce->constructor->common.fn_flags |= ZEND_ACC_CTOR;
-	}
 
 	if ((ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) == ZEND_ACC_IMPLICIT_ABSTRACT_CLASS) {
 		zend_verify_abstract_class(ce);

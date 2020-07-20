@@ -10,6 +10,4 @@ class a {
 
 ?>
 --EXPECTF--
-Warning: The magic method a::__toString() must have public visibility in %s on line %d
-
 Fatal error: Method a::__toString() cannot take arguments in %s on line %d
