@@ -469,21 +469,15 @@ static char **_readline_completion_cb(const char *text, int start, int end)
 
 PHP_FUNCTION(readline_completion_function)
 {
-	zval *arg;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "z", &arg)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "f", &fci, &fcc)) {
 		RETURN_THROWS();
 	}
 
-	if (!zend_is_callable(arg, 0, NULL)) {
-		zend_string *name = zend_get_callable_name(arg);
-		php_error_docref(NULL, E_WARNING, "%s is not callable", ZSTR_VAL(name));
-		zend_string_release_ex(name, 0);
-		RETURN_FALSE;
-	}
-
 	zval_ptr_dtor(&_readline_completion);
-	ZVAL_COPY(&_readline_completion, arg);
+	ZVAL_COPY(&_readline_completion, &fci.function_name);
 
 	rl_attempted_completion_function = _readline_completion_cb;
 	if (rl_attempted_completion_function == NULL) {
@@ -514,19 +508,13 @@ static void php_rl_callback_handler(char *the_line)
 /* {{{ Initializes the readline callback interface and terminal, prints the prompt and returns immediately */
 PHP_FUNCTION(readline_callback_handler_install)
 {
-	zval *callback;
 	char *prompt;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
 	size_t prompt_len;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "sz", &prompt, &prompt_len, &callback)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "sf", &prompt, &prompt_len, &fci, &fcc)) {
 		RETURN_THROWS();
-	}
-
-	if (!zend_is_callable(callback, 0, NULL)) {
-		zend_string *name = zend_get_callable_name(callback);
-		php_error_docref(NULL, E_WARNING, "%s is not callable", ZSTR_VAL(name));
-		zend_string_release_ex(name, 0);
-		RETURN_FALSE;
 	}
 
 	if (Z_TYPE(_prepped_callback) != IS_UNDEF) {
@@ -534,7 +522,7 @@ PHP_FUNCTION(readline_callback_handler_install)
 		zval_ptr_dtor(&_prepped_callback);
 	}
 
-	ZVAL_COPY(&_prepped_callback, callback);
+	ZVAL_COPY(&_prepped_callback, &fci.function_name);
 
 	rl_callback_handler_install(prompt, php_rl_callback_handler);
 

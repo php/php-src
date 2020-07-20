@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 00f57c17d30b8071c9e3e231f5c9e0376799ed48 */
+ * Stub hash: c7d13f6960171cab30984837379db25b32f38c36 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_readline, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, prompt, IS_STRING, 1, "null")
@@ -29,13 +29,13 @@ ZEND_END_ARG_INFO()
 #define arginfo_readline_write_history arginfo_readline_read_history
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_readline_completion_function, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, funcname)
+	ZEND_ARG_TYPE_INFO(0, funcname, IS_CALLABLE, 0)
 ZEND_END_ARG_INFO()
 
 #if HAVE_RL_CALLBACK_READ_CHAR
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_readline_callback_handler_install, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, prompt, IS_STRING, 0)
-	ZEND_ARG_INFO(0, callback)
+	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
 ZEND_END_ARG_INFO()
 #endif
 
