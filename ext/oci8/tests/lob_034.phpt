@@ -48,6 +48,6 @@ bool(true)
 bool(true)
 bool(true)
 
-Warning: OCI-Lob::flush(): Invalid flag value: -1 in %s on line %d
+Warning: OCI_Lob::flush(): Invalid flag value: -1 in %s on line %d
 bool(false)
 Done

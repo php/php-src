@@ -75,33 +75,33 @@ echo "Done\n";
 --EXPECTF--
 Test 0
 
-Notice: OCI-Collection::append(): Unknown or unsupported type of element: 113 in %s on line %d
+Notice: OCI_Collection::append(): Unknown or unsupported type of element: 113 in %s on line %d
 bool(false)
 
-Notice: OCI-Collection::assignelem(): Unknown or unsupported type of element: 113 in %s on line %d
+Notice: OCI_Collection::assignelem(): Unknown or unsupported type of element: 113 in %s on line %d
 bool(false)
 bool(false)
 Test 1
 
-Warning: OCI-Collection::assignelem(): OCI-22165: given index [1] must be in the range of %s in %s on line %d
+Warning: OCI_Collection::assignelem(): OCI-22165: given index [1] must be in the range of %s in %s on line %d
 bool(false)
 bool(false)
 Test 2
 
-Warning: OCI-Collection::assignelem(): OCI-22165: given index [1] must be in the range of %s in %s on line %d
+Warning: OCI_Collection::assignelem(): OCI-22165: given index [1] must be in the range of %s in %s on line %d
 bool(false)
 bool(false)
 Test 3
 
-Warning: OCI-Collection::assignelem(): OCI-22165: given index [1] must be in the range of %s in %s on line %d
+Warning: OCI_Collection::assignelem(): OCI-22165: given index [1] must be in the range of %s in %s on line %d
 bool(false)
 bool(false)
 Test 4
 
-Warning: OCI-Collection::append(): OCI-01840: input value not long enough for date format in %s on line %d
+Warning: OCI_Collection::append(): OCI-01840: input value not long enough for date format in %s on line %d
 bool(false)
 
-Warning: OCI-Collection::assignelem(): OCI-22165: given index [1] must be in the range of %s in %s on line %d
+Warning: OCI_Collection::assignelem(): OCI-22165: given index [1] must be in the range of %s in %s on line %d
 bool(false)
 bool(false)
 Done
