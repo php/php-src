@@ -2147,7 +2147,6 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 	int count=0, unload=0;
 	HashTable *target_function_table = function_table;
 	int error_type;
-	zend_function *ctor = NULL, *dtor = NULL, *clone = NULL, *__get = NULL, *__set = NULL, *__unset = NULL, *__isset = NULL, *__call = NULL, *__callstatic = NULL, *__tostring = NULL, *__debugInfo = NULL, *__serialize = NULL, *__unserialize = NULL;
 	zend_string *lowercase_name;
 	size_t fname_len;
 
@@ -2299,36 +2298,36 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 			if (ZSTR_VAL(lowercase_name)[0] != '_' || ZSTR_VAL(lowercase_name)[1] != '_') {
 				reg_function = NULL;
 			} else if (zend_string_equals_literal(lowercase_name, ZEND_CONSTRUCTOR_FUNC_NAME)) {
-				ctor = reg_function;
-				ctor->common.fn_flags |= ZEND_ACC_CTOR;
+				scope->constructor = reg_function;
+				scope->constructor->common.fn_flags |= ZEND_ACC_CTOR;
 			} else if (zend_string_equals_literal(lowercase_name, ZEND_DESTRUCTOR_FUNC_NAME)) {
-				dtor = reg_function;
+				scope->destructor = reg_function;
 			} else if (zend_string_equals_literal(lowercase_name, ZEND_CLONE_FUNC_NAME)) {
-				clone = reg_function;
+				scope->clone = reg_function;
 			} else if (zend_string_equals_literal(lowercase_name, ZEND_CALL_FUNC_NAME)) {
-				__call = reg_function;
+				scope->__call = reg_function;
 			} else if (zend_string_equals_literal(lowercase_name, ZEND_CALLSTATIC_FUNC_NAME)) {
-				__callstatic = reg_function;
+				scope->__callstatic = reg_function;
 			} else if (zend_string_equals_literal(lowercase_name, ZEND_TOSTRING_FUNC_NAME)) {
-				__tostring = reg_function;
+				scope->__tostring = reg_function;
 			} else if (zend_string_equals_literal(lowercase_name, ZEND_GET_FUNC_NAME)) {
-				__get = reg_function;
+				scope->__get = reg_function;
 				scope->ce_flags |= ZEND_ACC_USE_GUARDS;
 			} else if (zend_string_equals_literal(lowercase_name, ZEND_SET_FUNC_NAME)) {
-				__set = reg_function;
+				scope->__set = reg_function;
 				scope->ce_flags |= ZEND_ACC_USE_GUARDS;
 			} else if (zend_string_equals_literal(lowercase_name, ZEND_UNSET_FUNC_NAME)) {
-				__unset = reg_function;
+				scope->__unset = reg_function;
 				scope->ce_flags |= ZEND_ACC_USE_GUARDS;
 			} else if (zend_string_equals_literal(lowercase_name, ZEND_ISSET_FUNC_NAME)) {
-				__isset = reg_function;
+				scope->__isset = reg_function;
 				scope->ce_flags |= ZEND_ACC_USE_GUARDS;
 			} else if (zend_string_equals_literal(lowercase_name, ZEND_DEBUGINFO_FUNC_NAME)) {
-				__debugInfo = reg_function;
+				scope->__debugInfo = reg_function;
 			} else if (zend_string_equals_literal(lowercase_name, "__serialize")) {
-				__serialize = reg_function;
+				scope->__serialize = reg_function;
 			} else if (zend_string_equals_literal(lowercase_name, "__unserialize")) {
-				__unserialize = reg_function;
+				scope->__unserialize = reg_function;
 			} else {
 				reg_function = NULL;
 			}
@@ -2354,21 +2353,6 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 		}
 		zend_unregister_functions(functions, count, target_function_table);
 		return FAILURE;
-	}
-	if (scope) {
-		scope->constructor = ctor;
-		scope->destructor = dtor;
-		scope->clone = clone;
-		scope->__call = __call;
-		scope->__callstatic = __callstatic;
-		scope->__tostring = __tostring;
-		scope->__get = __get;
-		scope->__set = __set;
-		scope->__unset = __unset;
-		scope->__isset = __isset;
-		scope->__debugInfo = __debugInfo;
-		scope->__serialize = __serialize;
-		scope->__unserialize = __unserialize;
 	}
 	return SUCCESS;
 }
