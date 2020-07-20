@@ -9,4 +9,4 @@ interface a {
 
 ?>
 --EXPECTF--
-Fatal error: Method a::__callStatic() must be static in %s on line %d
+Fatal error: Method a::__callstatic() must be static in %s on line %d
