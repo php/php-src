@@ -123,6 +123,8 @@ void ZEND_FASTCALL zend_jit_copy_extra_args_helper(EXECUTE_DATA_D)
 			/* Skip useless ZEND_RECV and ZEND_RECV_INIT opcodes */
 #ifdef HAVE_GCC_GLOBAL_REGS
 			opline += first_extra_arg;
+#else
+			EX(opline) += first_extra_arg;
 #endif
 		}
 

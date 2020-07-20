@@ -3180,7 +3180,8 @@ static int zend_jit_trace_handler(dasm_State **Dst, const zend_op_array *op_arra
 		    opline->opcode == ZEND_RETURN_BY_REF ||
 		    opline->opcode == ZEND_DO_UCALL ||
 		    opline->opcode == ZEND_DO_FCALL_BY_NAME ||
-		    opline->opcode == ZEND_DO_FCALL) {
+		    opline->opcode == ZEND_DO_FCALL ||
+		    opline->opcode == ZEND_GENERATOR_CREATE) {
 			|	MEM_OP2_2_ZTS mov, FP, aword, executor_globals, current_execute_data, r0
 		}
 	}
