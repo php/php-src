@@ -2064,6 +2064,8 @@ ZEND_API void zend_check_magic_method_implementation(const zend_class_entry *ce,
 		zend_check_magic_method_args(0, "__serialize", ce, fptr, error_type);
 	} else if (zend_string_equals_literal(lcname, "__unserialize")) {
 		zend_check_magic_method_args(1, "__unserialize", ce, fptr, error_type);
+	} else if (zend_string_equals_literal(lcname, "__set_state")) {
+		zend_check_magic_method_args(1, "__set_state", ce, fptr, error_type);
 	}
 }
 /* }}} */

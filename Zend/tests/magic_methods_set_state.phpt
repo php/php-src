@@ -4,7 +4,7 @@ Testing __set_state() declaration with wrong modifier
 <?php
 
 class Foo {
-    function __set_state()
+    function __set_state($array)
     {
     }
 }
