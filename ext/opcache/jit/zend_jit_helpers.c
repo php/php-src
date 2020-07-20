@@ -810,12 +810,6 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_obj_is_helper(zval *container, zval
 	}
 }
 
-static zval* ZEND_FASTCALL zend_jit_fetch_dimension_rw_long_helper(HashTable *ht, zend_long hval)
-{
-	zend_error(E_NOTICE,"Undefined array key " ZEND_LONG_FMT, hval);
-	return zend_hash_index_update(ht, hval, &EG(uninitialized_zval));
-}
-
 static zend_never_inline zend_long zend_check_string_offset(zval *dim, int type)
 {
 	zend_long offset;
