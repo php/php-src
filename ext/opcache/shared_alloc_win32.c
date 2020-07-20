@@ -93,28 +93,6 @@ static char *create_name_with_username(char *name)
 	return newname;
 }
 
-static char *get_mmap_base_file(void)
-{
-	static char windir[MAXPATHLEN+UNLEN + 3 + sizeof("\\\\@") + 1 + 32 + 21];
-	char *uname;
-	int l;
-
-	uname = php_win32_get_username();
-	if (!uname) {
-		return NULL;
-	}
-	GetTempPath(MAXPATHLEN, windir);
-	l = strlen(windir);
-	if ('\\' == windir[l-1]) {
-		l--;
-	}
-	snprintf(windir + l, sizeof(windir) - l - 1, "\\%s@%s@%.20s@%.32s", ACCEL_FILEMAP_BASE, uname, sapi_module.name, ZCG(system_id));
-
-	free(uname);
-
-	return windir;
-}
-
 void zend_shared_alloc_create_lock(void)
 {
 	memory_mutex = CreateMutex(NULL, FALSE, create_name_with_username(ACCEL_MUTEX_NAME));
@@ -143,39 +121,20 @@ static int zend_shared_alloc_reattach(size_t requested_size, char **error_in)
 {
 	int err;
 	void *wanted_mapping_base;
-	char *mmap_base_file = get_mmap_base_file();
-	FILE *fp = fopen(mmap_base_file, "r");
 	MEMORY_BASIC_INFORMATION info;
 	void *execute_ex_base;
 	int execute_ex_moved;
 
-	if (!fp) {
-		err = GetLastError();
-		zend_win_error_message(ACCEL_LOG_WARNING, mmap_base_file, err);
-		zend_win_error_message(ACCEL_LOG_FATAL, "Unable to open base address file", err);
-		*error_in="fopen";
-		return ALLOC_FAILURE;
-	}
-	if (!fscanf(fp, "%p", &wanted_mapping_base)) {
+	mapping_base = MapViewOfFileEx(memfile, FILE_MAP_ALL_ACCESS, 0, 0, 2 * sizeof(void*), NULL);
+	if (mapping_base == NULL) {
 		err = GetLastError();
 		zend_win_error_message(ACCEL_LOG_FATAL, "Unable to read base address", err);
 		*error_in="read mapping base";
-		fclose(fp);
 		return ALLOC_FAILURE;
 	}
-	if (!fscanf(fp, "%p", &execute_ex_base)) {
-		err = GetLastError();
-		zend_win_error_message(ACCEL_LOG_FATAL, "Unable to read execute_ex base address", err);
-		*error_in="read execute_ex base";
-		fclose(fp);
-		return ALLOC_FAILURE;
-	}
-	fclose(fp);
-
-	if (0 > win32_utime(mmap_base_file, NULL)) {
-		err = GetLastError();
-		zend_win_error_message(ACCEL_LOG_WARNING, mmap_base_file, err);
-	}
+	wanted_mapping_base = ((void**)mapping_base)[0];
+	execute_ex_base = ((void**)mapping_base)[1];
+	UnmapViewOfFile(mapping_base);
 
 	execute_ex_moved = (void *)execute_ex != execute_ex_base;
 
@@ -231,7 +190,7 @@ static int zend_shared_alloc_reattach(size_t requested_size, char **error_in)
 		}
 		return ALLOC_FAIL_MAPPING;
 	}
-	smm_shared_globals = (zend_smm_shared_globals *) mapping_base;
+	smm_shared_globals = (zend_smm_shared_globals *) ((char*)mapping_base + 2 * sizeof(void*));
 
 	return SUCCESSFULLY_REATTACHED;
 }
@@ -349,20 +308,10 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 		*error_in = "MapViewOfFile";
 		return ALLOC_FAILURE;
 	} else {
-		char *mmap_base_file = get_mmap_base_file();
-		void *execute_ex_base = (void *)execute_ex;
-		FILE *fp = fopen(mmap_base_file, "w");
-		if (!fp) {
-			err = GetLastError();
-			zend_shared_alloc_unlock_win32();
-			zend_win_error_message(ACCEL_LOG_WARNING, mmap_base_file, err);
-			zend_win_error_message(ACCEL_LOG_FATAL, "Unable to write base address", err);
-			return ALLOC_FAILURE;
+		((void**)mapping_base)[0] = mapping_base;
+		((void**)mapping_base)[1] = (void*)execute_ex;
+		((char*)shared_segment->p) += 2 * sizeof(void*);
 		}
-		fprintf(fp, "%p\n", mapping_base);
-		fprintf(fp, "%p\n", execute_ex_base);
-		fclose(fp);
-	}
 
 	shared_segment->pos = 0;
 	shared_segment->size = requested_size;
