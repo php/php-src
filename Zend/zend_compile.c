@@ -6509,40 +6509,9 @@ zend_string *zend_begin_method_decl(zend_op_array *op_array, zend_string *name, 
 			ZSTR_VAL(ce->name), ZSTR_VAL(name));
 	}
 
-	if (ZSTR_VAL(lcname)[0] != '_' || ZSTR_VAL(lcname)[1] != '_') {
-		/* pass */
-	} else if (zend_string_equals_literal(lcname, ZEND_CONSTRUCTOR_FUNC_NAME)) {
-		ce->constructor = (zend_function *) op_array;
-		ce->constructor->common.fn_flags |= ZEND_ACC_CTOR;
-	} else if (zend_string_equals_literal(lcname, ZEND_DESTRUCTOR_FUNC_NAME)) {
-		ce->destructor = (zend_function *) op_array;
-	} else if (zend_string_equals_literal(lcname, ZEND_CLONE_FUNC_NAME)) {
-		ce->clone = (zend_function *) op_array;
-	} else if (zend_string_equals_literal(lcname, ZEND_CALL_FUNC_NAME)) {
-		ce->__call = (zend_function *) op_array;
-	} else if (zend_string_equals_literal(lcname, ZEND_CALLSTATIC_FUNC_NAME)) {
-		ce->__callstatic = (zend_function *) op_array;
-	} else if (zend_string_equals_literal(lcname, ZEND_GET_FUNC_NAME)) {
-		ce->__get = (zend_function *) op_array;
-		ce->ce_flags |= ZEND_ACC_USE_GUARDS;
-	} else if (zend_string_equals_literal(lcname, ZEND_SET_FUNC_NAME)) {
-		ce->__set = (zend_function *) op_array;
-		ce->ce_flags |= ZEND_ACC_USE_GUARDS;
-	} else if (zend_string_equals_literal(lcname, ZEND_UNSET_FUNC_NAME)) {
-		ce->__unset = (zend_function *) op_array;
-		ce->ce_flags |= ZEND_ACC_USE_GUARDS;
-	} else if (zend_string_equals_literal(lcname, ZEND_ISSET_FUNC_NAME)) {
-		ce->__isset = (zend_function *) op_array;
-		ce->ce_flags |= ZEND_ACC_USE_GUARDS;
-	} else if (zend_string_equals_literal(lcname, ZEND_TOSTRING_FUNC_NAME)) {
-		ce->__tostring = (zend_function *) op_array;
+	zend_add_magic_method(ce, (zend_function *) op_array, lcname);
+	if (zend_string_equals_literal(lcname, ZEND_TOSTRING_FUNC_NAME)) {
 		add_stringable_interface(ce);
-	} else if (zend_string_equals_literal(lcname, ZEND_DEBUGINFO_FUNC_NAME)) {
-		ce->__debugInfo = (zend_function *) op_array;
-	} else if (zend_string_equals_literal(lcname, "__serialize")) {
-		ce->__serialize = (zend_function *) op_array;
-	} else if (zend_string_equals_literal(lcname, "__unserialize")) {
-		ce->__unserialize = (zend_function *) op_array;
 	}
 
 	return lcname;

@@ -2138,6 +2138,44 @@ ZEND_API void zend_check_magic_method_implementation(const zend_class_entry *ce,
 }
 /* }}} */
 
+ZEND_API void zend_add_magic_method(zend_class_entry *ce, zend_function *fptr, zend_string *lcname)
+{
+	if (ZSTR_VAL(lcname)[0] != '_' || ZSTR_VAL(lcname)[1] != '_') {
+		/* pass */
+	} else if (zend_string_equals_literal(lcname, ZEND_CLONE_FUNC_NAME)) {
+		ce->clone = fptr;
+	} else if (zend_string_equals_literal(lcname, ZEND_CONSTRUCTOR_FUNC_NAME)) {
+		ce->constructor = fptr;
+		ce->constructor->common.fn_flags |= ZEND_ACC_CTOR;
+	} else if (zend_string_equals_literal(lcname, ZEND_DESTRUCTOR_FUNC_NAME)) {
+		ce->destructor = fptr;
+	} else if (zend_string_equals_literal(lcname, ZEND_GET_FUNC_NAME)) {
+		ce->__get = fptr;
+		ce->ce_flags |= ZEND_ACC_USE_GUARDS;
+	} else if (zend_string_equals_literal(lcname, ZEND_SET_FUNC_NAME)) {
+		ce->__set = fptr;
+		ce->ce_flags |= ZEND_ACC_USE_GUARDS;
+	} else if (zend_string_equals_literal(lcname, ZEND_CALL_FUNC_NAME)) {
+		ce->__call = fptr;
+	} else if (zend_string_equals_literal(lcname, ZEND_UNSET_FUNC_NAME)) {
+		ce->__unset = fptr;
+		ce->ce_flags |= ZEND_ACC_USE_GUARDS;
+	} else if (zend_string_equals_literal(lcname, ZEND_ISSET_FUNC_NAME)) {
+		ce->__isset = fptr;
+		ce->ce_flags |= ZEND_ACC_USE_GUARDS;
+	} else if (zend_string_equals_literal(lcname, ZEND_CALLSTATIC_FUNC_NAME)) {
+		ce->__callstatic = fptr;
+	} else if (zend_string_equals_literal(lcname, ZEND_TOSTRING_FUNC_NAME)) {
+		ce->__tostring = fptr;
+	} else if (zend_string_equals_literal(lcname, ZEND_DEBUGINFO_FUNC_NAME)) {
+		ce->__debugInfo = fptr;
+	} else if (zend_string_equals_literal(lcname, "__serialize")) {
+		ce->__serialize = fptr;
+	} else if (zend_string_equals_literal(lcname, "__unserialize")) {
+		ce->__unserialize = fptr;
+	}
+}
+
 /* registers all functions in *library_functions in the function hash */
 ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_function_entry *functions, HashTable *function_table, int type) /* {{{ */
 {
@@ -2294,47 +2332,9 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 		}
 
 		if (scope) {
-			/* Look for ctor, dtor, clone */
-			if (ZSTR_VAL(lowercase_name)[0] != '_' || ZSTR_VAL(lowercase_name)[1] != '_') {
-				reg_function = NULL;
-			} else if (zend_string_equals_literal(lowercase_name, ZEND_CONSTRUCTOR_FUNC_NAME)) {
-				scope->constructor = reg_function;
-				scope->constructor->common.fn_flags |= ZEND_ACC_CTOR;
-			} else if (zend_string_equals_literal(lowercase_name, ZEND_DESTRUCTOR_FUNC_NAME)) {
-				scope->destructor = reg_function;
-			} else if (zend_string_equals_literal(lowercase_name, ZEND_CLONE_FUNC_NAME)) {
-				scope->clone = reg_function;
-			} else if (zend_string_equals_literal(lowercase_name, ZEND_CALL_FUNC_NAME)) {
-				scope->__call = reg_function;
-			} else if (zend_string_equals_literal(lowercase_name, ZEND_CALLSTATIC_FUNC_NAME)) {
-				scope->__callstatic = reg_function;
-			} else if (zend_string_equals_literal(lowercase_name, ZEND_TOSTRING_FUNC_NAME)) {
-				scope->__tostring = reg_function;
-			} else if (zend_string_equals_literal(lowercase_name, ZEND_GET_FUNC_NAME)) {
-				scope->__get = reg_function;
-				scope->ce_flags |= ZEND_ACC_USE_GUARDS;
-			} else if (zend_string_equals_literal(lowercase_name, ZEND_SET_FUNC_NAME)) {
-				scope->__set = reg_function;
-				scope->ce_flags |= ZEND_ACC_USE_GUARDS;
-			} else if (zend_string_equals_literal(lowercase_name, ZEND_UNSET_FUNC_NAME)) {
-				scope->__unset = reg_function;
-				scope->ce_flags |= ZEND_ACC_USE_GUARDS;
-			} else if (zend_string_equals_literal(lowercase_name, ZEND_ISSET_FUNC_NAME)) {
-				scope->__isset = reg_function;
-				scope->ce_flags |= ZEND_ACC_USE_GUARDS;
-			} else if (zend_string_equals_literal(lowercase_name, ZEND_DEBUGINFO_FUNC_NAME)) {
-				scope->__debugInfo = reg_function;
-			} else if (zend_string_equals_literal(lowercase_name, "__serialize")) {
-				scope->__serialize = reg_function;
-			} else if (zend_string_equals_literal(lowercase_name, "__unserialize")) {
-				scope->__unserialize = reg_function;
-			} else {
-				reg_function = NULL;
-			}
-			if (reg_function) {
-				zend_check_magic_method_implementation(
-					scope, reg_function, lowercase_name, E_CORE_ERROR);
-			}
+			zend_check_magic_method_implementation(
+				scope, reg_function, lowercase_name, E_CORE_ERROR);
+			zend_add_magic_method(scope, reg_function, lowercase_name);
 		}
 		ptr++;
 		count++;
