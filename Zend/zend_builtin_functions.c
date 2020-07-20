@@ -499,8 +499,7 @@ ZEND_FUNCTION(define)
 	}
 
 	if (non_cs) {
-		zend_error(E_WARNING, "define(): Declaration of case-insensitive constants is no longer supported");
-    	RETURN_FALSE;
+		zend_error(E_WARNING, "define(): Argument #3 ($case_insensitive) is ignored since declaration of case-insensitive constants is no longer supported");
     }
 
 	ZVAL_UNDEF(&val_free);

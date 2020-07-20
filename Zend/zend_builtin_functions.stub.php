@@ -6,7 +6,7 @@ function zend_version(): string {}
 
 function func_num_args(): int {}
 
-function func_get_arg(int $argument_number): mixed {}
+function func_get_arg(int $position): mixed {}
 
 function func_get_args(): array {}
 
@@ -22,7 +22,7 @@ function strncasecmp(string $string1, string $string2, int $length): int {}
 
 function error_reporting(?int $error_level = null): int {}
 
-/** @param bool|int|float|string|array|resource|null $value */
+/** @param mixed $value */
 function define(string $constant_name, $value, $case_insensitive = false): bool {}
 
 function defined(string $constant_name): bool {}
@@ -33,9 +33,11 @@ function get_called_class(): string {}
 
 function get_parent_class(string|object $object = UNKNOWN): string|false {}
 
-function is_subclass_of($object, string $class_name, bool $allow_string = true): bool {}
+/** @param object|string $object */
+function is_subclass_of(mixed $object, string $class_name, bool $allow_string = true): bool {}
 
-function is_a($object, string $class_name, bool $allow_string = false): bool {}
+/** @param object|string $object */
+function is_a(mixed $object, string $class_name, bool $allow_string = false): bool {}
 
 function get_class_vars(string $class_name): array|false {}
 
@@ -47,10 +49,10 @@ function get_mangled_object_vars(object $object): array {}
 function get_class_methods($class): array {}
 
 /** @param object|string $object_or_class */
-function method_exists($object_or_class, string $method): bool {}
+function method_exists(mixed $object_or_class, string $method): bool {}
 
 /** @param object|string $object_or_class */
-function property_exists($object_or_class, string $property_name): bool {}
+function property_exists(mixed $object_or_class, string $property): bool {}
 
 function class_exists(string $class_name, bool $autoload = true): bool {}
 
