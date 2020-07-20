@@ -2150,8 +2150,6 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 	zend_function *ctor = NULL, *dtor = NULL, *clone = NULL, *__get = NULL, *__set = NULL, *__unset = NULL, *__isset = NULL, *__call = NULL, *__callstatic = NULL, *__tostring = NULL, *__debugInfo = NULL, *__serialize = NULL, *__unserialize = NULL;
 	zend_string *lowercase_name;
 	size_t fname_len;
-	const char *lc_class_name = NULL;
-	size_t class_name_len = 0;
 
 	if (type==MODULE_PERSISTENT) {
 		error_type = E_CORE_WARNING;
@@ -2165,17 +2163,6 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 	internal_function->type = ZEND_INTERNAL_FUNCTION;
 	internal_function->module = EG(current_module);
 	memset(internal_function->reserved, 0, ZEND_MAX_RESERVED_RESOURCES * sizeof(void*));
-
-	if (scope) {
-		class_name_len = ZSTR_LEN(scope->name);
-		if ((lc_class_name = zend_memrchr(ZSTR_VAL(scope->name), '\\', class_name_len))) {
-			++lc_class_name;
-			class_name_len -= (lc_class_name - ZSTR_VAL(scope->name));
-			lc_class_name = zend_str_tolower_dup(lc_class_name, class_name_len);
-		} else {
-			lc_class_name = zend_str_tolower_dup(ZSTR_VAL(scope->name), class_name_len);
-		}
-	}
 
 	while (ptr->fname) {
 		fname_len = strlen(ptr->fname);
@@ -2250,14 +2237,10 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 			}
 		} else {
 			if (scope && (scope->ce_flags & ZEND_ACC_INTERFACE)) {
-				efree((char*)lc_class_name);
 				zend_error(error_type, "Interface %s cannot contain non abstract method %s()", ZSTR_VAL(scope->name), ptr->fname);
 				return FAILURE;
 			}
 			if (!internal_function->handler) {
-				if (scope) {
-					efree((char*)lc_class_name);
-				}
 				zend_error(error_type, "Method %s%s%s() cannot be a NULL function", scope ? ZSTR_VAL(scope->name) : "", scope ? "::" : "", ptr->fname);
 				zend_unregister_functions(functions, count, target_function_table);
 				return FAILURE;
@@ -2359,9 +2342,6 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 		zend_string_release(lowercase_name);
 	}
 	if (unload) { /* before unloading, display all remaining bad function in the module */
-		if (scope) {
-			efree((char*)lc_class_name);
-		}
 		while (ptr->fname) {
 			fname_len = strlen(ptr->fname);
 			lowercase_name = zend_string_alloc(fname_len, 0);
@@ -2389,7 +2369,6 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 		scope->__debugInfo = __debugInfo;
 		scope->__serialize = __serialize;
 		scope->__unserialize = __unserialize;
-		efree((char*)lc_class_name);
 	}
 	return SUCCESS;
 }
