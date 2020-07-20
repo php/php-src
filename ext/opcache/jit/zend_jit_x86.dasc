@@ -176,20 +176,20 @@ static void* dasm_labels[zend_lb_MAX];
 |	.if X64WIN
 |		gs
 |		mov reg, aword [0x58]
-|		mov reg, aword [reg + tsrm_tls_index]
-|		mov reg, aword [reg + tsrm_tls_offset]
+|		mov reg, aword [reg+tsrm_tls_index]
+|		mov reg, aword [reg+tsrm_tls_offset]
 |	.elif WIN
 |		fs
 |		mov reg, aword [0x2c]
-|		mov reg, aword [reg + tsrm_tls_index]
-|		mov reg, aword [reg + tsrm_tls_offset]
+|		mov reg, aword [reg+tsrm_tls_index]
+|		mov reg, aword [reg+tsrm_tls_offset]
 |	.elif X64APPLE
 |		gs
 ||		if (tsrm_ls_cache_tcb_offset) {
 |			mov reg, aword [tsrm_ls_cache_tcb_offset]
 ||		} else {
 |			mov reg, aword [tsrm_tls_index]
-|			mov reg, aword [reg + tsrm_tls_offset]
+|			mov reg, aword [reg+tsrm_tls_offset]
 ||		}
 |	.elif X64
 |		fs
@@ -197,8 +197,8 @@ static void* dasm_labels[zend_lb_MAX];
 |			mov reg, aword [tsrm_ls_cache_tcb_offset]
 ||		} else {
 |			mov reg, [0x8]
-|			mov reg, aword [reg + tsrm_tls_index]
-|			mov reg, aword [reg + tsrm_tls_offset]
+|			mov reg, aword [reg+tsrm_tls_index]
+|			mov reg, aword [reg+tsrm_tls_offset]
 ||		}
 |	.else
 |		gs
@@ -206,8 +206,8 @@ static void* dasm_labels[zend_lb_MAX];
 |			mov reg, aword [tsrm_ls_cache_tcb_offset]
 ||		} else {
 |			mov reg, [0x4]
-|			mov reg, aword [reg + tsrm_tls_index]
-|			mov reg, aword [reg + tsrm_tls_offset]
+|			mov reg, aword [reg+tsrm_tls_index]
+|			mov reg, aword [reg+tsrm_tls_offset]
 ||		}
 |	.endif
 |.endmacro
@@ -377,7 +377,7 @@ static void* dasm_labels[zend_lb_MAX];
 |.macro MEM_OP2_1_ZTS, mem_ins, prefix, struct, field, op2, tmp_reg
 |	.if ZTS
 |		LOAD_TSRM_CACHE tmp_reg
-|		mem_ins prefix [tmp_reg + (struct.._offset + offsetof(zend_..struct, field))], op2
+|		mem_ins prefix [tmp_reg+(struct.._offset+offsetof(zend_..struct, field))], op2
 |	.else
 |		MEM_OP2_1 mem_ins, prefix, &struct.field, op2, tmp_reg
 |	.endif
@@ -386,7 +386,7 @@ static void* dasm_labels[zend_lb_MAX];
 |.macro MEM_OP2_2_ZTS, mem_ins, op1, prefix, struct, field, tmp_reg
 |	.if ZTS
 |		LOAD_TSRM_CACHE tmp_reg
-|		mem_ins op1, prefix [tmp_reg + (struct.._offset + offsetof(zend_..struct, field))]
+|		mem_ins op1, prefix [tmp_reg+(struct.._offset+offsetof(zend_..struct, field))]
 |	.else
 |		MEM_OP2_2 mem_ins, op1, prefix, &struct.field, tmp_reg
 |	.endif
@@ -2867,12 +2867,47 @@ static int zend_jit_check_exception_undef_result(dasm_State **Dst, const zend_op
 	return zend_jit_check_exception(Dst);
 }
 
-static int zend_jit_trace_begin(dasm_State **Dst, uint32_t trace_num)
+static int zend_jit_trace_begin(dasm_State **Dst, uint32_t trace_num, zend_jit_trace_info *parent, uint32_t exit_num)
 {
+	zend_regset regset = ZEND_REGSET_SCRATCH;
+
+#if ZTS
+	if (1) {
+#else
+	if ((sizeof(void*) == 8 && !IS_32BIT(&EG(jit_trace_num)))) {
+#endif
+		/* assignment to EG(jit_trace_num) shouldn't clober CPU register used by deoptimizer */
+		if (parent) {
+			int i;
+			int parent_vars_count = parent->exit_info[exit_num].stack_size;
+			zend_jit_trace_stack *parent_stack =
+				parent->stack_map +
+				parent->exit_info[exit_num].stack_offset;
+
+			for (i = 0; i < parent_vars_count; i++) {
+				if (STACK_REG(parent_stack, i) != ZREG_NONE) {
+					if (STACK_REG(parent_stack, i) < ZREG_NUM) {
+						ZEND_REGSET_EXCL(regset, STACK_REG(parent_stack, i));
+					} else if (STACK_REG(parent_stack, i) == ZREG_ZVAL_COPY_R0) {
+						ZEND_REGSET_EXCL(regset, ZREG_R0);
+					}
+				}
+			}
+		}
+	}
+
 	current_trace_num = trace_num;
 
 	|	// EG(jit_trace_num) = trace_num;
-	|	MEM_OP2_1_ZTS mov, dword, executor_globals, jit_trace_num, trace_num, r0
+	if (regset == ZEND_REGSET_EMPTY) {
+		|	push r0
+		|	MEM_OP2_1_ZTS mov, dword, executor_globals, jit_trace_num, trace_num, r0
+		|	pop r0
+	} else {
+		zend_reg tmp = ZEND_REGSET_FIRST(regset);
+
+		|	MEM_OP2_1_ZTS mov, dword, executor_globals, jit_trace_num, trace_num, Ra(tmp)
+	}
 
 	return 1;
 }

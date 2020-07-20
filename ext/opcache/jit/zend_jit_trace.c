@@ -2752,7 +2752,8 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 	if (!parent_trace) {
 		zend_jit_prologue(&dasm_state);
 	}
-	zend_jit_trace_begin(&dasm_state, ZEND_JIT_TRACE_NUM);
+	zend_jit_trace_begin(&dasm_state, ZEND_JIT_TRACE_NUM,
+		parent_trace ? &zend_jit_traces[parent_trace] : NULL, exit_num);
 
 	if (!parent_trace) {
 		zend_jit_set_opline(&dasm_state, opline);
