@@ -129,7 +129,7 @@ PHP_METHOD(com, __construct)
 		info.pwszName = php_com_string_to_olestring(server_name, server_name_len, obj->code_page);
 
 		if (user_name) {
-			authid.User = php_com_string_to_olestring(user_name, -1, obj->code_page);
+			authid.User = (OLECHAR*)user_name;
 			authid.UserLength = (ULONG)user_name_len;
 
 			if (password) {
