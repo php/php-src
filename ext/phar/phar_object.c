@@ -4456,6 +4456,10 @@ PHP_METHOD(PharFileInfo, __destruct)
 	zval *zobj = ZEND_THIS;
 	phar_entry_object *entry_obj = (phar_entry_object*)((char*)Z_OBJ_P(zobj) - Z_OBJ_P(zobj)->handlers->offset);
 
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
 	if (entry_obj->entry && entry_obj->entry->is_temp_dir) {
 		if (entry_obj->entry->filename) {
 			efree(entry_obj->entry->filename);
