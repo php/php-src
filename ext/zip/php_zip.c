@@ -350,39 +350,35 @@ static bool php_zip_parse_options(HashTable *options, zip_options *opts)
 
 	if ((option = zend_hash_str_find(options, "remove_all_path", sizeof("remove_all_path") - 1)) != NULL) {
 		if (Z_TYPE_P(option) != IS_FALSE && Z_TYPE_P(option) != IS_TRUE) {
-			zend_type_error("Option \"remove_all_path\" must be of type bool, %s given",
+			php_error_docref(NULL, E_WARNING, "Option \"remove_all_path\" must be of type bool, %s given",
 				zend_zval_type_name(option));
-			return false;
 		}
-		opts->remove_all_path = Z_LVAL_P(option);
+		opts->remove_all_path = zval_get_long(option);
 	}
 
 	if ((option = zend_hash_str_find(options, "comp_method", sizeof("comp_method") - 1)) != NULL) {
 		if (Z_TYPE_P(option) != IS_LONG) {
-			zend_type_error("Option \"comp_method\" must be of type int, %s given",
+			php_error_docref(NULL, E_WARNING, "Option \"comp_method\" must be of type int, %s given",
 				zend_zval_type_name(option));
-			return false;
 		}
-		opts->comp_method = Z_LVAL_P(option);
+		opts->comp_method = zval_get_long(option);
 
 		if ((option = zend_hash_str_find(options, "comp_flags", sizeof("comp_flags") - 1)) != NULL) {
 			if (Z_TYPE_P(option) != IS_LONG) {
-				zend_type_error("Option \"comp_flags\" must be of type int, %s given",
+				php_error_docref(NULL, E_WARNING, "Option \"comp_flags\" must be of type int, %s given",
 					zend_zval_type_name(option));
-				return false;
 			}
-			opts->comp_flags = Z_LVAL_P(option);
+			opts->comp_flags = zval_get_long(option);
 		}
 	}
 
 #ifdef HAVE_ENCRYPTION
 	if ((option = zend_hash_str_find(options, "enc_method", sizeof("enc_method") - 1)) != NULL) {
 		if (Z_TYPE_P(option) != IS_LONG) {
-			zend_type_error("Option \"enc_method\" must be of type int, %s given",
+			php_error_docref(NULL, E_WARNING, "Option \"enc_method\" must be of type int, %s given",
 				zend_zval_type_name(option));
-			return false;
 		}
-		opts->enc_method = Z_LVAL_P(option);
+		opts->enc_method = zval_get_long(option);
 
 		if ((option = zend_hash_str_find(options, "enc_password", sizeof("enc_password") - 1)) != NULL) {
 			if (Z_TYPE_P(option) != IS_STRING) {
