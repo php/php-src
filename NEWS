@@ -8,6 +8,8 @@ PHP                                                                        NEWS
 
 - COM:
   . Fixed bug #63208 (BSTR to PHP string conversion not binary safe). (cmb)
+  . Fixed bug #63527 (DCOM does not work with Username, Password parameter).
+    (cmb)
 
 - Core:
   . Fixed bug #79740 (serialize() and unserialize() methods can not be called
