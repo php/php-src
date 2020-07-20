@@ -2007,6 +2007,32 @@ ZEND_API zend_module_entry* zend_register_internal_module(zend_module_entry *mod
 }
 /* }}} */
 
+static void zend_check_magic_method_args(
+		uint32_t num_args, const char *name,
+		const zend_class_entry *ce, const zend_function *fptr, int error_type)
+{
+	if (fptr->common.num_args != num_args) {
+		if (num_args == 0) {
+			zend_error(error_type, "Method %s::%s() cannot take arguments",
+				ZSTR_VAL(ce->name), name);
+		} else if (num_args == 1) {
+			zend_error(error_type, "Method %s::%s() must take exactly 1 argument",
+				ZSTR_VAL(ce->name), name);
+		} else {
+			zend_error(error_type, "Method %s::%s() must take exactly %" PRIu32 " arguments",
+				ZSTR_VAL(ce->name), name, num_args);
+		}
+		return;
+	}
+	for (uint32_t i = 0; i < num_args; i++) {
+		if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, i + 1)) {
+			zend_error(error_type, "Method %s::%s() cannot take arguments by reference",
+				ZSTR_VAL(ce->name), name);
+			return;
+		}
+	}
+}
+
 ZEND_API void zend_check_magic_method_implementation(const zend_class_entry *ce, const zend_function *fptr, zend_string *lcname, int error_type) /* {{{ */
 {
 	if (ZSTR_VAL(fptr->common.function_name)[0] != '_'
@@ -2014,54 +2040,30 @@ ZEND_API void zend_check_magic_method_implementation(const zend_class_entry *ce,
 		return;
 	}
 
-	if (zend_string_equals_literal(lcname, ZEND_DESTRUCTOR_FUNC_NAME) && fptr->common.num_args != 0) {
-		zend_error(error_type, "Destructor %s::%s() cannot take arguments", ZSTR_VAL(ce->name), ZEND_DESTRUCTOR_FUNC_NAME);
-	} else if (zend_string_equals_literal(lcname, ZEND_CLONE_FUNC_NAME) && fptr->common.num_args != 0) {
-		zend_error(error_type, "Method %s::%s() cannot accept any arguments", ZSTR_VAL(ce->name), ZEND_CLONE_FUNC_NAME);
+	if (zend_string_equals_literal(lcname, ZEND_DESTRUCTOR_FUNC_NAME)) {
+		zend_check_magic_method_args(0, "__destruct", ce, fptr, error_type);
+	} else if (zend_string_equals_literal(lcname, ZEND_CLONE_FUNC_NAME)) {
+		zend_check_magic_method_args(0, "__clone", ce, fptr, error_type);
 	} else if (zend_string_equals_literal(lcname, ZEND_GET_FUNC_NAME)) {
-		if (fptr->common.num_args != 1) {
-			zend_error(error_type, "Method %s::%s() must take exactly 1 argument", ZSTR_VAL(ce->name), ZEND_GET_FUNC_NAME);
-		} else if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 1)) {
-			zend_error(error_type, "Method %s::%s() cannot take arguments by reference", ZSTR_VAL(ce->name), ZEND_GET_FUNC_NAME);
-		}
+		zend_check_magic_method_args(1, "__get", ce, fptr, error_type);
 	} else if (zend_string_equals_literal(lcname, ZEND_SET_FUNC_NAME)) {
-		if (fptr->common.num_args != 2) {
-			zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ZSTR_VAL(ce->name), ZEND_SET_FUNC_NAME);
-		} else if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 1) || QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 2)) {
-			zend_error(error_type, "Method %s::%s() cannot take arguments by reference", ZSTR_VAL(ce->name), ZEND_SET_FUNC_NAME);
-		}
+		zend_check_magic_method_args(2, "__set", ce, fptr, error_type);
 	} else if (zend_string_equals_literal(lcname, ZEND_UNSET_FUNC_NAME)) {
-		if (fptr->common.num_args != 1) {
-			zend_error(error_type, "Method %s::%s() must take exactly 1 argument", ZSTR_VAL(ce->name), ZEND_UNSET_FUNC_NAME);
-		} else if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 1)) {
-			zend_error(error_type, "Method %s::%s() cannot take arguments by reference", ZSTR_VAL(ce->name), ZEND_UNSET_FUNC_NAME);
-		}
+		zend_check_magic_method_args(1, "__unset", ce, fptr, error_type);
 	} else if (zend_string_equals_literal(lcname, ZEND_ISSET_FUNC_NAME)) {
-		if (fptr->common.num_args != 1) {
-			zend_error(error_type, "Method %s::%s() must take exactly 1 argument", ZSTR_VAL(ce->name), ZEND_ISSET_FUNC_NAME);
-		} else if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 1)) {
-			zend_error(error_type, "Method %s::%s() cannot take arguments by reference", ZSTR_VAL(ce->name), ZEND_ISSET_FUNC_NAME);
-		}
+		zend_check_magic_method_args(1, "__isset", ce, fptr, error_type);
 	} else if (zend_string_equals_literal(lcname, ZEND_CALL_FUNC_NAME)) {
-		if (fptr->common.num_args != 2) {
-			zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ZSTR_VAL(ce->name), ZEND_CALL_FUNC_NAME);
-		} else if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 1) || QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 2)) {
-			zend_error(error_type, "Method %s::%s() cannot take arguments by reference", ZSTR_VAL(ce->name), ZEND_CALL_FUNC_NAME);
-		}
+		zend_check_magic_method_args(2, "__call", ce, fptr, error_type);
 	} else if (zend_string_equals_literal(lcname, ZEND_CALLSTATIC_FUNC_NAME)) {
-		if (fptr->common.num_args != 2) {
-			zend_error(error_type, "Method %s::__callStatic() must take exactly 2 arguments", ZSTR_VAL(ce->name));
-		} else if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 1) || QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 2)) {
-			zend_error(error_type, "Method %s::__callStatic() cannot take arguments by reference", ZSTR_VAL(ce->name));
-		}
-	} else if (zend_string_equals_literal(lcname, ZEND_TOSTRING_FUNC_NAME) && fptr->common.num_args != 0) {
-		zend_error(error_type, "Method %s::__toString() cannot take arguments", ZSTR_VAL(ce->name));
-	} else if (zend_string_equals_literal(lcname, ZEND_DEBUGINFO_FUNC_NAME) && fptr->common.num_args != 0) {
-		zend_error(error_type, "Method %s::__debugInfo() cannot take arguments", ZSTR_VAL(ce->name));
-	} else if (zend_string_equals_literal(lcname, "__serialize") && fptr->common.num_args != 0) {
-		zend_error(error_type, "Method %s::__serialize() cannot take arguments", ZSTR_VAL(ce->name));
-	} else if (zend_string_equals_literal(lcname, "__unserialize") && fptr->common.num_args != 1) {
-		zend_error(error_type, "Method %s::__unserialize() must take exactly 1 argument", ZSTR_VAL(ce->name));
+		zend_check_magic_method_args(2, "__callStatic", ce, fptr, error_type);
+	} else if (zend_string_equals_literal(lcname, ZEND_TOSTRING_FUNC_NAME)) {
+		zend_check_magic_method_args(0, "__toString", ce, fptr, error_type);
+	} else if (zend_string_equals_literal(lcname, ZEND_DEBUGINFO_FUNC_NAME)) {
+		zend_check_magic_method_args(0, "__debugInfo", ce, fptr, error_type);
+	} else if (zend_string_equals_literal(lcname, "__serialize")) {
+		zend_check_magic_method_args(0, "__serialize", ce, fptr, error_type);
+	} else if (zend_string_equals_literal(lcname, "__unserialize")) {
+		zend_check_magic_method_args(1, "__unserialize", ce, fptr, error_type);
 	}
 }
 /* }}} */
