@@ -742,6 +742,9 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 			if (rc < 0) {
 				stop = ZEND_JIT_TRACE_STOP_RETURN_HALT;
 				break;
+			} else if (execute_data == EG(current_execute_data)) {
+				/* return after interrupt handler */
+				rc = 0;
 			}
 			execute_data = EG(current_execute_data);
 			opline = EX(opline);
@@ -763,7 +766,9 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 #ifdef HAVE_GCC_GLOBAL_REGS
 			if (execute_data->prev_execute_data == prev_execute_data) {
 #else
-			if (rc == 1) {
+			if (rc == 0) {
+				/* pass */
+			} else if (rc == 1) {
 #endif
 				/* Enter into function */
 				prev_call = NULL;
