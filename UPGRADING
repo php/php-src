@@ -197,6 +197,8 @@ PHP 8.0 UPGRADE NOTES
   . Applying the final modifier on a private method will now produce a warning
     unless that method is the constructor.
     RFC: https://wiki.php.net/rfc/inheritance_private_methods
+  . If an object constructor exit()s, the object destructor will no longer be
+    called. This matches the behavior when the constructor throws.
 
 - COM:
   . Removed the ability to import case-insensitive constants from type
