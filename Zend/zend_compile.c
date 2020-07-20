@@ -7161,25 +7161,6 @@ void zend_compile_class_decl(znode *result, zend_ast *ast, zend_bool toplevel) /
 
 	if (ce->constructor) {
 		ce->constructor->common.fn_flags |= ZEND_ACC_CTOR;
-		if (ce->constructor->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
-			zend_error_noreturn(E_COMPILE_ERROR,
-				"Constructor %s::%s() cannot declare a return type",
-				ZSTR_VAL(ce->name), ZSTR_VAL(ce->constructor->common.function_name));
-		}
-	}
-	if (ce->destructor) {
-		if (ce->destructor->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
-			zend_error_noreturn(E_COMPILE_ERROR,
-				"Destructor %s::%s() cannot declare a return type",
-				ZSTR_VAL(ce->name), ZSTR_VAL(ce->destructor->common.function_name));
-		}
-	}
-	if (ce->clone) {
-		if (ce->clone->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
-			zend_error_noreturn(E_COMPILE_ERROR,
-				"Clone method %s::%s() cannot declare a return type",
-				ZSTR_VAL(ce->name), ZSTR_VAL(ce->clone->common.function_name));
-		}
 	}
 
 	if ((ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) == ZEND_ACC_IMPLICIT_ABSTRACT_CLASS) {

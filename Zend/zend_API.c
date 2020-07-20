@@ -2049,6 +2049,15 @@ static void zend_check_magic_method_static(
 	}
 }
 
+static void zend_check_magic_method_no_return_type(
+		const char *name, const zend_class_entry *ce, const zend_function *fptr, int error_type)
+{
+	if (fptr->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+		zend_error_noreturn(error_type, "Method %s::%s() cannot declare a return type",
+			ZSTR_VAL(ce->name), name);
+	}
+}
+
 ZEND_API void zend_check_magic_method_implementation(const zend_class_entry *ce, const zend_function *fptr, zend_string *lcname, int error_type) /* {{{ */
 {
 	if (ZSTR_VAL(fptr->common.function_name)[0] != '_'
@@ -2058,12 +2067,15 @@ ZEND_API void zend_check_magic_method_implementation(const zend_class_entry *ce,
 
 	if (zend_string_equals_literal(lcname, ZEND_CONSTRUCTOR_FUNC_NAME)) {
 		zend_check_magic_method_non_static("__construct", ce, fptr, error_type);
+		zend_check_magic_method_no_return_type("__construct", ce, fptr, error_type);
 	} else if (zend_string_equals_literal(lcname, ZEND_DESTRUCTOR_FUNC_NAME)) {
 		zend_check_magic_method_args(0, "__destruct", ce, fptr, error_type);
 		zend_check_magic_method_non_static("__destruct", ce, fptr, error_type);
+		zend_check_magic_method_no_return_type("__destruct", ce, fptr, error_type);
 	} else if (zend_string_equals_literal(lcname, ZEND_CLONE_FUNC_NAME)) {
 		zend_check_magic_method_args(0, "__clone", ce, fptr, error_type);
 		zend_check_magic_method_non_static("__clone", ce, fptr, error_type);
+		zend_check_magic_method_no_return_type("__clone", ce, fptr, error_type);
 	} else if (zend_string_equals_literal(lcname, ZEND_GET_FUNC_NAME)) {
 		zend_check_magic_method_args(1, "__get", ce, fptr, error_type);
 		zend_check_magic_method_non_static("__get", ce, fptr, error_type);
@@ -2358,17 +2370,6 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 		scope->__unserialize = __unserialize;
 		if (ctor) {
 			ctor->common.fn_flags |= ZEND_ACC_CTOR;
-		}
-		if (ctor && (ctor->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE)) {
-			zend_error_noreturn(E_CORE_ERROR, "Constructor %s::%s() cannot declare a return type", ZSTR_VAL(scope->name), ZSTR_VAL(ctor->common.function_name));
-		}
-
-		if (dtor && (dtor->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE)) {
-			zend_error_noreturn(E_CORE_ERROR, "Destructor %s::%s() cannot declare a return type", ZSTR_VAL(scope->name), ZSTR_VAL(dtor->common.function_name));
-		}
-
-		if (clone && (clone->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE)) {
-			zend_error_noreturn(E_CORE_ERROR, "%s::%s() cannot declare a return type", ZSTR_VAL(scope->name), ZSTR_VAL(clone->common.function_name));
 		}
 		efree((char*)lc_class_name);
 	}
