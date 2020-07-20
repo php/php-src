@@ -341,13 +341,13 @@ PHP_METHOD(PDOStatement, execute)
 {
 	zval *input_params = NULL;
 	int ret = 1;
-	PHP_STMT_GET_OBJ;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ARRAY_OR_NULL(input_params)
 	ZEND_PARSE_PARAMETERS_END();
 
+	PHP_STMT_GET_OBJ;
 	PDO_STMT_CLEAR_ERR();
 
 	if (input_params) {
@@ -1163,7 +1163,6 @@ PHP_METHOD(PDOStatement, fetch)
 	zend_long how = PDO_FETCH_USE_DEFAULT;
 	zend_long ori = PDO_FETCH_ORI_NEXT;
 	zend_long off = 0;
-    PHP_STMT_GET_OBJ;
 
 	ZEND_PARSE_PARAMETERS_START(0, 3)
 		Z_PARAM_OPTIONAL
@@ -1172,6 +1171,7 @@ PHP_METHOD(PDOStatement, fetch)
 		Z_PARAM_LONG(off)
 	ZEND_PARSE_PARAMETERS_END();
 
+    PHP_STMT_GET_OBJ;
 	PDO_STMT_CLEAR_ERR();
 
 	if (!pdo_stmt_verify_mode(stmt, how, 0)) {
@@ -1196,14 +1196,13 @@ PHP_METHOD(PDOStatement, fetchObject)
 	zval old_ctor_args, *ctor_args = NULL;
 	int error = 0, old_arg_count;
 
-	PHP_STMT_GET_OBJ;
-
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR_EX(class_name, 1, 0)
 		Z_PARAM_ARRAY(ctor_args)
 	ZEND_PARSE_PARAMETERS_END();
 
+	PHP_STMT_GET_OBJ;
 	PDO_STMT_CLEAR_ERR();
 
 	if (!pdo_stmt_verify_mode(stmt, how, 0)) {
@@ -1255,13 +1254,13 @@ PHP_METHOD(PDOStatement, fetchObject)
 PHP_METHOD(PDOStatement, fetchColumn)
 {
 	zend_long col_n = 0;
-	PHP_STMT_GET_OBJ;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(col_n)
 	ZEND_PARSE_PARAMETERS_END();
 
+	PHP_STMT_GET_OBJ;
 	PDO_STMT_CLEAR_ERR();
 
 	if (!do_fetch_common(stmt, PDO_FETCH_ORI_NEXT, 0, TRUE)) {
@@ -1282,7 +1281,6 @@ PHP_METHOD(PDOStatement, fetchAll)
 	zend_class_entry *old_ce;
 	zval old_ctor_args, *ctor_args = NULL;
 	int error = 0, flags, old_arg_count;
-	PHP_STMT_GET_OBJ;
 
 	ZEND_PARSE_PARAMETERS_START(0, 3)
 		Z_PARAM_OPTIONAL
@@ -1291,6 +1289,7 @@ PHP_METHOD(PDOStatement, fetchAll)
 		Z_PARAM_ZVAL(ctor_args)
 	ZEND_PARSE_PARAMETERS_END();
 
+	PHP_STMT_GET_OBJ;
 	if (!pdo_stmt_verify_mode(stmt, how, 1)) {
 		RETURN_FALSE;
 	}
@@ -1484,7 +1483,6 @@ PHP_METHOD(PDOStatement, bindValue)
 	struct pdo_bound_param_data param;
 	zend_long param_type = PDO_PARAM_STR;
 	zval *parameter;
-	PHP_STMT_GET_OBJ;
 
 	memset(&param, 0, sizeof(param));
 	param.paramno = -1;
@@ -1497,6 +1495,7 @@ PHP_METHOD(PDOStatement, bindValue)
 		}
 	}
 
+	PHP_STMT_GET_OBJ;
 	param.param_type = (int) param_type;
 
 	if (param.paramno > 0) {
@@ -1537,10 +1536,9 @@ PHP_METHOD(PDOStatement, bindColumn)
 /* {{{ Returns the number of rows in a result set, or the number of rows affected by the last execute().  It is not always meaningful. */
 PHP_METHOD(PDOStatement, rowCount)
 {
-	PHP_STMT_GET_OBJ;
-
 	ZEND_PARSE_PARAMETERS_NONE();
 
+	PHP_STMT_GET_OBJ;
 	RETURN_LONG(stmt->row_count);
 }
 /* }}} */
@@ -1548,10 +1546,9 @@ PHP_METHOD(PDOStatement, rowCount)
 /* {{{ Fetch the error code associated with the last operation on the statement handle */
 PHP_METHOD(PDOStatement, errorCode)
 {
-	PHP_STMT_GET_OBJ;
-
 	ZEND_PARSE_PARAMETERS_NONE();
 
+	PHP_STMT_GET_OBJ;
 	if (stmt->error_code[0] == '\0') {
 		RETURN_NULL();
 	}
@@ -1567,10 +1564,9 @@ PHP_METHOD(PDOStatement, errorInfo)
 	int error_count_diff     = 0;
 	int error_expected_count = 3;
 
-	PHP_STMT_GET_OBJ;
-
 	ZEND_PARSE_PARAMETERS_NONE();
 
+	PHP_STMT_GET_OBJ;
 	array_init(return_value);
 	add_next_index_string(return_value, stmt->error_code);
 
@@ -1596,13 +1592,13 @@ PHP_METHOD(PDOStatement, setAttribute)
 {
 	zend_long attr;
 	zval *value = NULL;
-	PHP_STMT_GET_OBJ;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_LONG(attr)
 		Z_PARAM_ZVAL_EX(value, 1, 0)
 	ZEND_PARSE_PARAMETERS_END();
 
+	PHP_STMT_GET_OBJ;
 	if (!stmt->methods->set_attribute) {
 		goto fail;
 	}
@@ -1637,12 +1633,12 @@ static int generic_stmt_attr_get(pdo_stmt_t *stmt, zval *return_value, zend_long
 PHP_METHOD(PDOStatement, getAttribute)
 {
 	zend_long attr;
-	PHP_STMT_GET_OBJ;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_LONG(attr)
 	ZEND_PARSE_PARAMETERS_END();
 
+	PHP_STMT_GET_OBJ;
 	if (!stmt->methods->get_attribute) {
 		if (!generic_stmt_attr_get(stmt, return_value, attr)) {
 			pdo_raise_impl_error(stmt->dbh, stmt, "IM001",
@@ -1676,10 +1672,9 @@ PHP_METHOD(PDOStatement, getAttribute)
 /* {{{ Returns the number of columns in the result set */
 PHP_METHOD(PDOStatement, columnCount)
 {
-	PHP_STMT_GET_OBJ;
-
 	ZEND_PARSE_PARAMETERS_NONE();
 
+	PHP_STMT_GET_OBJ;
 	RETURN_LONG(stmt->column_count);
 }
 /* }}} */
@@ -1689,12 +1684,12 @@ PHP_METHOD(PDOStatement, getColumnMeta)
 {
 	zend_long colno;
 	struct pdo_column_data *col;
-	PHP_STMT_GET_OBJ;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_LONG(colno)
 	ZEND_PARSE_PARAMETERS_END();
 
+	PHP_STMT_GET_OBJ;
 	if(colno < 0) {
 		pdo_raise_impl_error(stmt->dbh, stmt, "42P10", "column number must be non-negative");
 		RETURN_FALSE;
@@ -1876,12 +1871,12 @@ PHP_METHOD(PDOStatement, setFetchMode)
 	zend_long fetch_mode;
 	zval *args = NULL;
 	uint32_t num_args = 0;
-	PHP_STMT_GET_OBJ;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l*", &fetch_mode, &args, &num_args) == FAILURE) {
 		RETURN_THROWS();
 	}
 
+	PHP_STMT_GET_OBJ;
 	RETVAL_BOOL(pdo_stmt_setup_fetch_mode(stmt, fetch_mode, args, num_args) == SUCCESS);
 }
 /* }}} */
@@ -1918,10 +1913,9 @@ static int pdo_stmt_do_next_rowset(pdo_stmt_t *stmt)
 
 PHP_METHOD(PDOStatement, nextRowset)
 {
-	PHP_STMT_GET_OBJ;
-
 	ZEND_PARSE_PARAMETERS_NONE();
 
+	PHP_STMT_GET_OBJ;
 	if (!stmt->methods->next_rowset) {
 		pdo_raise_impl_error(stmt->dbh, stmt, "IM001", "driver does not support multiple rowsets");
 		RETURN_FALSE;
@@ -1941,10 +1935,9 @@ PHP_METHOD(PDOStatement, nextRowset)
 /* {{{ Closes the cursor, leaving the statement ready for re-execution. */
 PHP_METHOD(PDOStatement, closeCursor)
 {
-	PHP_STMT_GET_OBJ;
-
 	ZEND_PARSE_PARAMETERS_NONE();
 
+	PHP_STMT_GET_OBJ;
 	if (!stmt->methods->cursor_closer) {
 		/* emulate it by fetching and discarding rows */
 		do {
@@ -1981,10 +1974,10 @@ PHP_METHOD(PDOStatement, debugDumpParams)
 
 	php_stream *out = php_stream_open_wrapper("php://output", "w", 0, NULL);
 	struct pdo_bound_param_data *param;
-	PHP_STMT_GET_OBJ;
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
+	PHP_STMT_GET_OBJ;
 	if (out == NULL) {
 		RETURN_FALSE;
 	}
