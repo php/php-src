@@ -16,6 +16,9 @@ PHP                                                                        NEWS
   . Fixed bug #79867 (Promoted untyped properties should get null default
     value). (Nikita)
 
+- Standard:
+  . Fixed bug #79868 (Sorting with array_unique gives unwanted result). (Nikita)
+
 09 Jul 2020, PHP 8.0.0alpha2
 
 - FFI:

@@ -4462,13 +4462,30 @@ PHP_FUNCTION(array_change_key_case)
 }
 /* }}} */
 
+struct bucketindex {
+	Bucket b;
+	unsigned int i;
+};
+
+static void array_bucketindex_swap(void *p, void *q)
+{
+	struct bucketindex *f = (struct bucketindex *)p;
+	struct bucketindex *g = (struct bucketindex *)q;
+	struct bucketindex t;
+	t = *f;
+	*f = *g;
+	*g = t;
+}
+
 /* {{{ Removes duplicate values from array */
 PHP_FUNCTION(array_unique)
 {
 	zval *array;
-	Bucket *p, *lastkept = NULL;
+	Bucket *p;
 	zend_long sort_type = PHP_SORT_STRING;
 	bucket_compare_func_t cmp;
+	struct bucketindex *arTmp, *cmpdata, *lastkept;
+	uint32_t i, idx;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_ARRAY(array)
@@ -4520,19 +4537,47 @@ PHP_FUNCTION(array_unique)
 		return;
 	}
 
-	cmp = php_get_data_compare_func(sort_type, 0);
+	cmp = php_get_data_compare_func_unstable(sort_type, 0);
 
 	RETVAL_ARR(zend_array_dup(Z_ARRVAL_P(array)));
-	zend_hash_sort(Z_ARRVAL_P(return_value), cmp, /* reindex */ 0);
 
+	/* create and sort array with pointers to the target_hash buckets */
+	arTmp = pemalloc((Z_ARRVAL_P(array)->nNumOfElements + 1) * sizeof(struct bucketindex), GC_FLAGS(Z_ARRVAL_P(array)) & IS_ARRAY_PERSISTENT);
+	for (i = 0, idx = 0; idx < Z_ARRVAL_P(array)->nNumUsed; idx++) {
+		p = Z_ARRVAL_P(array)->arData + idx;
+		if (Z_TYPE(p->val) == IS_UNDEF) continue;
+		if (Z_TYPE(p->val) == IS_INDIRECT && Z_TYPE_P(Z_INDIRECT(p->val)) == IS_UNDEF) continue;
+		arTmp[i].b = *p;
+		arTmp[i].i = i;
+		i++;
+	}
+	ZVAL_UNDEF(&arTmp[i].b.val);
+	zend_sort((void *) arTmp, i, sizeof(struct bucketindex),
+			(compare_func_t) cmp, (swap_func_t) array_bucketindex_swap);
 	/* go through the sorted array and delete duplicates from the copy */
-	ZEND_HASH_FOREACH_BUCKET(Z_ARRVAL_P(return_value), p) {
-		if (!lastkept || cmp(lastkept, p)) {
-			lastkept = p;
+	lastkept = arTmp;
+	for (cmpdata = arTmp + 1; Z_TYPE(cmpdata->b.val) != IS_UNDEF; cmpdata++) {
+		if (cmp(&lastkept->b, &cmpdata->b)) {
+			lastkept = cmpdata;
 		} else {
-			zend_hash_del_bucket(Z_ARRVAL_P(return_value), p);
+			if (lastkept->i > cmpdata->i) {
+				p = &lastkept->b;
+				lastkept = cmpdata;
+			} else {
+				p = &cmpdata->b;
+			}
+			if (p->key == NULL) {
+				zend_hash_index_del(Z_ARRVAL_P(return_value), p->h);
+			} else {
+				if (Z_ARRVAL_P(return_value) == &EG(symbol_table)) {
+					zend_delete_global_variable(p->key);
+				} else {
+					zend_hash_del(Z_ARRVAL_P(return_value), p->key);
+				}
+			}
 		}
-	} ZEND_HASH_FOREACH_END();
+	}
+	pefree(arTmp, GC_FLAGS(Z_ARRVAL_P(array)) & IS_ARRAY_PERSISTENT);
 }
 /* }}} */
 
