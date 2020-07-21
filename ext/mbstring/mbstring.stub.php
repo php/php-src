@@ -105,11 +105,11 @@ function mb_split(string $pattern, string $string, int $limit = -1): array|false
 
 function mb_ereg_match(string $pattern, string $string, string $option = UNKNOWN): bool {}
 
-function mb_ereg_search(string $pattern = UNKNOWN, string $option = UNKNOWN): array|bool {}
+function mb_ereg_search(string $pattern = UNKNOWN, string $option = UNKNOWN): bool {}
 
-function mb_ereg_search_pos(string $pattern = UNKNOWN, string $option = UNKNOWN): array|bool {}
+function mb_ereg_search_pos(string $pattern = UNKNOWN, string $option = UNKNOWN): array|false {}
 
-function mb_ereg_search_regs(string $pattern = UNKNOWN, string $option = UNKNOWN): array|bool {}
+function mb_ereg_search_regs(string $pattern = UNKNOWN, string $option = UNKNOWN): array|false {}
 
 function mb_ereg_search_init(string $string, string $pattern = UNKNOWN, string $option = UNKNOWN): bool {}
 

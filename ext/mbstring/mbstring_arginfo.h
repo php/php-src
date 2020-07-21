@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0be93f43fd04fb04e07076006a5c1a94bf6afad0 */
+ * Stub hash: fad341194e6c8e180b17f9ba168c062a13db2977 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mb_language, 0, 0, MAY_BE_STRING|MAY_BE_BOOL)
 	ZEND_ARG_TYPE_INFO(0, language, IS_STRING, 0)
@@ -263,18 +263,21 @@ ZEND_END_ARG_INFO()
 #endif
 
 #if defined(HAVE_MBREGEX)
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mb_ereg_search, 0, 0, MAY_BE_ARRAY|MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mb_ereg_search, 0, 0, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, pattern, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, option, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 #endif
 
 #if defined(HAVE_MBREGEX)
-#define arginfo_mb_ereg_search_pos arginfo_mb_ereg_search
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mb_ereg_search_pos, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, pattern, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, option, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 #endif
 
 #if defined(HAVE_MBREGEX)
-#define arginfo_mb_ereg_search_regs arginfo_mb_ereg_search
+#define arginfo_mb_ereg_search_regs arginfo_mb_ereg_search_pos
 #endif
 
 #if defined(HAVE_MBREGEX)

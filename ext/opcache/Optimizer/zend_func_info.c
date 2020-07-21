@@ -562,8 +562,8 @@ static const func_info_t func_infos[] = {
 	F1("mb_ereg_replace_callback",              MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 	F1("mb_split",                              MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
 	F1("mb_ereg_search_pos",                    MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_LONG),
-	F1("mb_ereg_search_regs",                   MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_FALSE | MAY_BE_ARRAY_OF_TRUE | MAY_BE_ARRAY_OF_STRING),
-	F1("mb_ereg_search_getregs",                MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_FALSE | MAY_BE_ARRAY_OF_TRUE | MAY_BE_ARRAY_OF_STRING),
+	F1("mb_ereg_search_regs",                   MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_FALSE | MAY_BE_ARRAY_OF_STRING),
+	F1("mb_ereg_search_getregs",                MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_FALSE | MAY_BE_ARRAY_OF_STRING),
 
 	/* ext/iconv */
 	F1("iconv",                                 MAY_BE_FALSE | MAY_BE_STRING),
