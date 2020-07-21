@@ -18,4 +18,4 @@ try {
 
 ?>
 --EXPECT--
-PDO::sqliteCreateFunction(): Argument #2 must be a valid callback, function "bar" not found or invalid function name
+PDO::sqliteCreateFunction(): Argument #2 ($callback) must be a valid callback, function "bar" not found or invalid function name

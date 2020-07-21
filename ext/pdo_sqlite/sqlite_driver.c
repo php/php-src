@@ -26,6 +26,7 @@
 #include "php_pdo_sqlite.h"
 #include "php_pdo_sqlite_int.h"
 #include "zend_exceptions.h"
+#include "sqlite_driver_arginfo.h"
 
 int _pdo_sqlite_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int line) /* {{{ */
 {
@@ -516,7 +517,7 @@ static int php_sqlite3_collation_callback(void *context,
 
 /* {{{ bool SQLite::sqliteCreateFunction(string name, callable callback [, int argcount, int flags])
    Registers a UDF with the sqlite db handle */
-static PHP_METHOD(SQLite, sqliteCreateFunction)
+PHP_METHOD(PDO_SQLite_Ext, sqliteCreateFunction)
 {
 	struct pdo_sqlite_func *func;
 	zend_fcall_info fci;
@@ -583,7 +584,7 @@ static PHP_METHOD(SQLite, sqliteCreateFunction)
    aggregate UDF.
 */
 
-static PHP_METHOD(SQLite, sqliteCreateAggregate)
+PHP_METHOD(PDO_SQLite_Ext, sqliteCreateAggregate)
 {
 	struct pdo_sqlite_func *func;
 	zend_fcall_info step_fci, fini_fci;
@@ -634,7 +635,7 @@ static PHP_METHOD(SQLite, sqliteCreateAggregate)
 
 /* {{{ bool SQLite::sqliteCreateCollation(string name, callable callback)
    Registers a collation with the sqlite db handle */
-static PHP_METHOD(SQLite, sqliteCreateCollation)
+PHP_METHOD(PDO_SQLite_Ext, sqliteCreateCollation)
 {
 	struct pdo_sqlite_collation *collation;
 	zend_fcall_info fci;
@@ -674,18 +675,11 @@ static PHP_METHOD(SQLite, sqliteCreateCollation)
 }
 /* }}} */
 
-static const zend_function_entry dbh_methods[] = {
-	PHP_ME(SQLite, sqliteCreateFunction, NULL, ZEND_ACC_PUBLIC)
-	PHP_ME(SQLite, sqliteCreateAggregate, NULL, ZEND_ACC_PUBLIC)
-	PHP_ME(SQLite, sqliteCreateCollation, NULL, ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};
-
 static const zend_function_entry *get_driver_methods(pdo_dbh_t *dbh, int kind)
 {
 	switch (kind) {
 		case PDO_DBH_DRIVER_METHOD_KIND_DBH:
-			return dbh_methods;
+			return class_PDO_SQLite_Ext_methods;
 
 		default:
 			return NULL;
