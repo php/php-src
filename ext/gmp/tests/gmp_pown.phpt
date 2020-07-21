@@ -19,16 +19,28 @@ var_dump(gmp_strval(gmp_powm($n,$e,1000)));
 $m = gmp_init(900);
 var_dump(gmp_strval(gmp_powm($n,$e,$m)));
 
-var_dump(gmp_powm(5, 11, 0));
-var_dump(gmp_powm(5, "11", gmp_init(0)));
+try {
+    var_dump(gmp_powm(5, 11, 0));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    var_dump(gmp_powm(5, "11", gmp_init(0)));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 var_dump(gmp_powm(array(),$e,$m));
 var_dump(gmp_powm($n,array(),$m));
 var_dump(gmp_powm($n,$e,array()));
 var_dump(gmp_powm(array(),array(),array()));
 
-$n = gmp_init("-5");
-var_dump(gmp_powm(10, $n, 10));
+try {
+    $n = gmp_init("-5");
+    var_dump(gmp_powm(10, $n, 10));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 $n = gmp_init("0");
 var_dump(gmp_powm(10, $n, 10));
@@ -45,12 +57,8 @@ string(3) "533"
 string(3) "331"
 string(3) "171"
 string(3) "371"
-
-Warning: gmp_powm(): Modulus may not be zero in %s on line %d
-bool(false)
-
-Warning: gmp_powm(): Modulus may not be zero in %s on line %d
-bool(false)
+gmp_powm(): Argument #3 ($mod) must not be 0
+gmp_powm(): Argument #3 ($mod) must not be 0
 
 Warning: gmp_powm(): Unable to convert variable to GMP - wrong type in %s on line %d
 bool(false)
@@ -63,9 +71,7 @@ bool(false)
 
 Warning: gmp_powm(): Unable to convert variable to GMP - wrong type in %s on line %d
 bool(false)
-
-Warning: gmp_powm(): Second parameter cannot be less than 0 in %s on line %d
-bool(false)
+gmp_powm(): Argument #2 ($exp) must be greater than or equal to 0
 object(GMP)#%d (1) {
   ["num"]=>
   string(1) "1"

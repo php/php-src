@@ -157,6 +157,7 @@ if (IS_GMP(zval)) {                                               \
 	gmpnumber = temp.num;                                         \
 }
 
+/* TODO convert RETURN_FALSE */
 #define FETCH_GMP_ZVAL(gmpnumber, zval, temp)                     \
 if (IS_GMP(zval)) {                                               \
 	gmpnumber = GET_GMP_FROM_ZVAL(zval);                          \
@@ -864,8 +865,8 @@ ZEND_FUNCTION(gmp_init)
 	}
 
 	if (base && (base < 2 || base > GMP_MAX_BASE)) {
-		php_error_docref(NULL, E_WARNING, "Bad base for conversion: " ZEND_LONG_FMT " (should be between 2 and %d)", base, GMP_MAX_BASE);
-		RETURN_FALSE;
+		zend_argument_value_error(2, "must be between 2 and %d", GMP_MAX_BASE);
+		RETURN_THROWS();
 	}
 
 	INIT_GMP_RETVAL(gmpnumber);
@@ -879,8 +880,8 @@ ZEND_FUNCTION(gmp_init)
 int gmp_import_export_validate(zend_long size, zend_long options, int *order, int *endian)
 {
 	if (size < 1) {
-		php_error_docref(NULL, E_WARNING,
-			"Word size must be positive, " ZEND_LONG_FMT " given", size);
+		/* size argument is in second position */
+		zend_argument_value_error(2, "must be greater than or equal to 1");
 		return FAILURE;
 	}
 
@@ -893,8 +894,8 @@ int gmp_import_export_validate(zend_long size, zend_long options, int *order, in
 			*order = 1;
 			break;
 		default:
-			php_error_docref(NULL, E_WARNING,
-				"Invalid options: Conflicting word orders");
+			/* options argument is in second position */
+			zend_argument_value_error(3, "has conflicting word orders");
 			return FAILURE;
 	}
 
@@ -910,8 +911,8 @@ int gmp_import_export_validate(zend_long size, zend_long options, int *order, in
 			*endian = 0;
 			break;
 		default:
-			php_error_docref(NULL, E_WARNING,
-				"Invalid options: Conflicting word endianness");
+			/* options argument is in second position */
+			zend_argument_value_error(3, "has conflicting word endianness");
 			return FAILURE;
 	}
 
@@ -933,13 +934,12 @@ ZEND_FUNCTION(gmp_import)
 	}
 
 	if (gmp_import_export_validate(size, options, &order, &endian) == FAILURE) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if ((data_len % size) != 0) {
-		php_error_docref(NULL, E_WARNING,
-			"Input length must be a multiple of word size");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "must be a multiple of word size");
+		RETURN_THROWS();
 	}
 
 	INIT_GMP_RETVAL(gmpnumber);
@@ -963,7 +963,7 @@ ZEND_FUNCTION(gmp_export)
 	}
 
 	if (gmp_import_export_validate(size, options, &order, &endian) == FAILURE) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	FETCH_GMP_ZVAL(gmpnumber, gmpnumber_arg, temp_a);
@@ -1017,8 +1017,8 @@ ZEND_FUNCTION(gmp_strval)
 	/* Although the maximum base in general in GMP is 62, mpz_get_str()
 	 * is explicitly limited to -36 when dealing with negative bases. */
 	if ((base < 2 && base > -2) || base > GMP_MAX_BASE || base < -36) {
-		php_error_docref(NULL, E_WARNING, "Bad base for conversion: " ZEND_LONG_FMT " (should be between 2 and %d or -2 and -36)", base, GMP_MAX_BASE);
-		RETURN_FALSE;
+		zend_argument_value_error(2, "must be between 2 and %d or -2 and -36", GMP_MAX_BASE);
+		RETURN_THROWS();
 	}
 
 	FETCH_GMP_ZVAL(gmpnum, gmpnumber_arg, temp_a);
@@ -1071,8 +1071,8 @@ ZEND_FUNCTION(gmp_div_qr)
 		gmp_zval_binary_ui_op2(return_value, a_arg, b_arg, mpz_fdiv_qr, mpz_fdiv_qr_ui, 1);
 		break;
 	default:
-		php_error_docref(NULL, E_WARNING, "Invalid rounding mode");
-		RETURN_FALSE;
+		zend_argument_value_error(3, "must be one of GMP_ROUND_ZERO, GMP_ROUND_PLUSINF, or GMP_ROUND_MINUSINF");
+		RETURN_THROWS();
 	}
 }
 /* }}} */
@@ -1098,8 +1098,8 @@ ZEND_FUNCTION(gmp_div_r)
 		gmp_zval_binary_ui_op(return_value, a_arg, b_arg, mpz_fdiv_r, gmp_mpz_fdiv_r_ui, 1);
 		break;
 	default:
-		php_error_docref(NULL, E_WARNING, "Invalid rounding mode");
-		RETURN_FALSE;
+		zend_argument_value_error(3, "must be one of GMP_ROUND_ZERO, GMP_ROUND_PLUSINF, or GMP_ROUND_MINUSINF");
+		RETURN_THROWS();
 	}
 }
 /* }}} */
@@ -1125,8 +1125,8 @@ ZEND_FUNCTION(gmp_div_q)
 		gmp_zval_binary_ui_op(return_value, a_arg, b_arg, mpz_fdiv_q, gmp_mpz_fdiv_q_ui, 1);
 		break;
 	default:
-		php_error_docref(NULL, E_WARNING, "Invalid rounding mode");
-		RETURN_FALSE;
+		zend_argument_value_error(3, "must be one of GMP_ROUND_ZERO, GMP_ROUND_PLUSINF, or GMP_ROUND_MINUSINF");
+		RETURN_THROWS();
 	}
 
 }
@@ -1172,8 +1172,8 @@ ZEND_FUNCTION(gmp_fact)
 	if (IS_GMP(a_arg)) {
 		mpz_ptr gmpnum_tmp = GET_GMP_FROM_ZVAL(a_arg);
 		if (mpz_sgn(gmpnum_tmp) < 0) {
-			php_error_docref(NULL, E_WARNING, "Number has to be greater than or equal to 0");
-			RETURN_FALSE;
+			zend_argument_value_error(1, "must be greater than or equal to 0");
+			RETURN_THROWS();
 		}
 	} else {
 		/* Use convert_to_number first to detect getting non-integer */
@@ -1182,12 +1182,13 @@ ZEND_FUNCTION(gmp_fact)
 			convert_to_long(a_arg);
 			if (Z_LVAL_P(a_arg) >= 0) {
 				/* Only warn if we'll make it past the non-negative check */
+				// TODO: promote? Also I don't get this
 				php_error_docref(NULL, E_WARNING, "Number has to be an integer");
 			}
 		}
 		if (Z_LVAL_P(a_arg) < 0) {
-			php_error_docref(NULL, E_WARNING, "Number has to be greater than or equal to 0");
-			RETURN_FALSE;
+			zend_argument_value_error(1, "must be greater than or equal to 0");
+			RETURN_THROWS();
 		}
 	}
 
@@ -1207,8 +1208,8 @@ ZEND_FUNCTION(gmp_binomial)
 	}
 
 	if (k < 0) {
-		php_error_docref(NULL, E_WARNING, "k cannot be negative");
-		RETURN_FALSE;
+		zend_argument_value_error(2, "must be greater than or equal to 0");
+		RETURN_THROWS();
 	}
 
 	INIT_GMP_RETVAL(gmpnum_result);
@@ -1274,20 +1275,20 @@ ZEND_FUNCTION(gmp_powm)
 	} else {
 		FETCH_GMP_ZVAL_DEP(gmpnum_exp, exp_arg, temp_exp, temp_base);
 		if (mpz_sgn(gmpnum_exp) < 0) {
-			php_error_docref(NULL, E_WARNING, "Second parameter cannot be less than 0");
+			zend_argument_value_error(2, "must be greater than or equal to 0");
 			FREE_GMP_TEMP(temp_base);
 			FREE_GMP_TEMP(temp_exp);
-			RETURN_FALSE;
+			RETURN_THROWS();
 		}
 	}
 	FETCH_GMP_ZVAL_DEP_DEP(gmpnum_mod, mod_arg, temp_mod, temp_exp, temp_base);
 
 	if (!mpz_cmp_ui(gmpnum_mod, 0)) {
-		php_error_docref(NULL, E_WARNING, "Modulus may not be zero");
+		zend_argument_value_error(3, "must not be 0");
 		FREE_GMP_TEMP(temp_base);
 		FREE_GMP_TEMP(temp_exp);
 		FREE_GMP_TEMP(temp_mod);
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	INIT_GMP_RETVAL(gmpnum_result);
@@ -1317,9 +1318,9 @@ ZEND_FUNCTION(gmp_sqrt)
 	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
 
 	if (mpz_sgn(gmpnum_a) < 0) {
-		php_error_docref(NULL, E_WARNING, "Number has to be greater than or equal to 0");
+		zend_argument_value_error(1, "must be greater than or equal to 0");
 		FREE_GMP_TEMP(temp_a);
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	INIT_GMP_RETVAL(gmpnum_result);
@@ -1343,9 +1344,9 @@ ZEND_FUNCTION(gmp_sqrtrem)
 	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
 
 	if (mpz_sgn(gmpnum_a) < 0) {
-		php_error_docref(NULL, E_WARNING, "Number has to be greater than or equal to 0");
+		zend_argument_value_error(1, "must be greater than or equal to 0");
 		FREE_GMP_TEMP(temp_a);
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	gmp_create(&result1, &gmpnum_result1);
@@ -1373,8 +1374,8 @@ ZEND_FUNCTION(gmp_root)
 	}
 
 	if (nth <= 0) {
-		php_error_docref(NULL, E_WARNING, "The root must be positive");
-		RETURN_FALSE;
+		zend_argument_value_error(2, "must be greater than or equal to 1");
+		RETURN_THROWS();
 	}
 
 	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
@@ -1405,8 +1406,8 @@ ZEND_FUNCTION(gmp_rootrem)
 	}
 
 	if (nth <= 0) {
-		php_error_docref(NULL, E_WARNING, "The root must be positive");
-		RETURN_FALSE;
+		zend_argument_value_error(2, "must be greater than or equal to 1");
+		RETURN_THROWS();
 	}
 
 	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
@@ -1730,8 +1731,8 @@ ZEND_FUNCTION(gmp_random_bits)
 	}
 
 	if (bits <= 0) {
-		php_error_docref(NULL, E_WARNING, "The number of bits must be positive");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "must be greater than or equal to 1");
+		RETURN_THROWS();
 	}
 
 	INIT_GMP_RETVAL(gmpnum_result);
@@ -1856,12 +1857,12 @@ ZEND_FUNCTION(gmp_setbit)
 	}
 
 	if (index < 0) {
-		php_error_docref(NULL, E_WARNING, "Index must be greater than or equal to zero");
-		RETURN_FALSE;
+		zend_argument_value_error(2, "must be greater than or equal to zero");
+		RETURN_THROWS();
 	}
     if (index / GMP_NUMB_BITS >= INT_MAX) {
-        php_error_docref(NULL, E_WARNING, "Index must be less than %d * %d", INT_MAX, GMP_NUMB_BITS);
-        RETURN_FALSE;
+		zend_argument_value_error(2, "must be less than %d * %d", INT_MAX, GMP_NUMB_BITS);
+		RETURN_THROWS();
     }
 
 	gmpnum_a = GET_GMP_FROM_ZVAL(a_arg);
@@ -1886,8 +1887,8 @@ ZEND_FUNCTION(gmp_clrbit)
 	}
 
 	if (index < 0) {
-		php_error_docref(NULL, E_WARNING, "Index must be greater than or equal to zero");
-		RETURN_FALSE;
+		zend_argument_value_error(2, "must be greater than or equal to zero");
+		RETURN_THROWS();
 	}
 
 	gmpnum_a = GET_GMP_FROM_ZVAL(a_arg);
@@ -1908,8 +1909,8 @@ ZEND_FUNCTION(gmp_testbit)
 	}
 
 	if (index < 0) {
-		php_error_docref(NULL, E_WARNING, "Index must be greater than or equal to zero");
-		RETURN_FALSE;
+		zend_argument_value_error(2, "must be greater than or equal to zero");
+		RETURN_THROWS();
 	}
 
 	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
@@ -1959,8 +1960,8 @@ ZEND_FUNCTION(gmp_scan0)
 	}
 
 	if (start < 0) {
-		php_error_docref(NULL, E_WARNING, "Starting index must be greater than or equal to zero");
-		RETURN_FALSE;
+		zend_argument_value_error(2, "must be greater than or equal to zero");
+		RETURN_THROWS();
 	}
 
 	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
@@ -1983,8 +1984,8 @@ ZEND_FUNCTION(gmp_scan1)
 	}
 
 	if (start < 0) {
-		php_error_docref(NULL, E_WARNING, "Starting index must be greater than or equal to zero");
-		RETURN_FALSE;
+		zend_argument_value_error(2, "must be greater than or equal to zero");
+		RETURN_THROWS();
 	}
 
 	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);

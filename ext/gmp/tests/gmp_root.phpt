@@ -14,8 +14,17 @@ var_dump(gmp_root(100, 4));
 var_dump(gmp_root(-100, 4));
 
 var_dump(gmp_root(0, 3));
-var_dump(gmp_root(100, 0));
-var_dump(gmp_root(100, -3));
+
+try {
+    var_dump(gmp_root(100, 0));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    var_dump(gmp_root(100, -3));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 ?>
 --EXPECTF--
@@ -46,9 +55,5 @@ object(GMP)#%d (1) {
   ["num"]=>
   string(1) "0"
 }
-
-Warning: gmp_root(): The root must be positive in %s on line %d
-bool(false)
-
-Warning: gmp_root(): The root must be positive in %s on line %d
-bool(false)
+gmp_root(): Argument #2 ($nth) must be greater than or equal to 1
+gmp_root(): Argument #2 ($nth) must be greater than or equal to 1

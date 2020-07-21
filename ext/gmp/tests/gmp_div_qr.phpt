@@ -9,7 +9,11 @@ var_dump(gmp_div_qr(0,1));
 var_dump(gmp_div_qr(1,0));
 var_dump(gmp_div_qr(gmp_init(1), gmp_init(0)));
 var_dump(gmp_div_qr(12653,23482734));
-var_dump(gmp_div_qr(12653,23482734, 10));
+try {
+    var_dump(gmp_div_qr(12653,23482734, 10));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 var_dump(gmp_div_qr(1123123,123));
 var_dump(gmp_div_qr(1123123,123, 1));
 var_dump(gmp_div_qr(1123123,123, 2));
@@ -56,9 +60,7 @@ array(2) {
     string(5) "12653"
   }
 }
-
-Warning: gmp_div_qr(): Invalid rounding mode in %s on line %d
-bool(false)
+gmp_div_qr(): Argument #3 ($round) must be one of GMP_ROUND_ZERO, GMP_ROUND_PLUSINF, or GMP_ROUND_MINUSINF
 array(2) {
   [0]=>
   object(GMP)#%d (1) {

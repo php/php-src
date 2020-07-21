@@ -5,7 +5,12 @@ gmp_scan0() basic tests
 --FILE--
 <?php
 
-var_dump(gmp_scan0("434234", -10));
+try {
+    var_dump(gmp_scan0("434234", -10));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+
 var_dump(gmp_scan0("434234", 1));
 var_dump(gmp_scan0(4096, 0));
 var_dump(gmp_scan0("1000000000", 5));
@@ -19,8 +24,7 @@ var_dump(gmp_scan0(array(), 200));
 echo "Done\n";
 ?>
 --EXPECTF--
-Warning: gmp_scan0(): Starting index must be greater than or equal to zero in %s on line %d
-bool(false)
+gmp_scan0(): Argument #2 ($start) must be greater than or equal to zero
 int(2)
 int(0)
 int(5)

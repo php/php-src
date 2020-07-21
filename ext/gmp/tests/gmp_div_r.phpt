@@ -8,7 +8,11 @@ gmp_div_r() tests
 var_dump($r = gmp_div_r(0,1));
 var_dump($r = gmp_div_r(1,0));
 var_dump($r = gmp_div_r(12653,23482734));
-var_dump($r = gmp_div_r(12653,23482734, 10));
+try {
+    var_dump($r = gmp_div_r(12653,23482734, 10));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 var_dump($r = gmp_div_r(1123123,123));
 var_dump($r = gmp_div_r(1123123,123, 1));
 var_dump($r = gmp_div_r(1123123,123, 2));
@@ -35,9 +39,7 @@ object(GMP)#%d (1) {
   ["num"]=>
   string(5) "12653"
 }
-
-Warning: gmp_div_r(): Invalid rounding mode in %s on line %d
-bool(false)
+gmp_div_r(): Argument #3 ($round) must be one of GMP_ROUND_ZERO, GMP_ROUND_PLUSINF, or GMP_ROUND_MINUSINF
 object(GMP)#%d (1) {
   ["num"]=>
   string(2) "10"

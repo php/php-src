@@ -9,10 +9,10 @@ class GMP
 /** @param int|bool|string $number */
 function gmp_init($number, int $base = 0): GMP|false {}
 
-function gmp_import(string $data, int $word_size = 1, int $options = GMP_MSW_FIRST | GMP_NATIVE_ENDIAN): GMP|false {}
+function gmp_import(string $data, int $word_size = 1, int $options = GMP_MSW_FIRST | GMP_NATIVE_ENDIAN): GMP {}
 
 /** @param GMP|int|bool|string $gmpnumber */
-function gmp_export($gmpnumber, int $word_size = 1, int $options = GMP_MSW_FIRST | GMP_NATIVE_ENDIAN): string|false {}
+function gmp_export($gmpnumber, int $word_size = 1, int $options = GMP_MSW_FIRST | GMP_NATIVE_ENDIAN): string {}
 
 /** @param GMP|int|bool|string $gmpnumber */
 function gmp_intval($gmpnumber): int {}
@@ -169,7 +169,7 @@ function gmp_sign($a): int|false {}
 /** @param GMP|int|bool|string $seed */
 function gmp_random_seed($seed): ?bool {}
 
-function gmp_random_bits(int $bits): GMP|false {}
+function gmp_random_bits(int $bits): GMP {}
 
 /**
  * @param GMP|int|bool|string $min
@@ -198,9 +198,9 @@ function gmp_com($a): GMP|false {}
  */
 function gmp_xor($a, $b): GMP|false {}
 
-function gmp_setbit(GMP $a, int $index, bool $set_clear = true): ?bool {}
+function gmp_setbit(GMP $a, int $index, bool $set_clear = true): void {}
 
-function gmp_clrbit(GMP $a, int $index): ?bool {}
+function gmp_clrbit(GMP $a, int $index): void {}
 
 /** @param GMP|int|bool|string $a */
 function gmp_testbit($a, int $index): bool {}
@@ -224,4 +224,4 @@ function gmp_hamdist($a, $b): int|false {}
 function gmp_nextprime($a): GMP|false {}
 
 /** @param GMP|int|bool|string $a */
-function gmp_binomial($a, int $b): GMP|false {}
+function gmp_binomial($a, int $b): GMP {}
