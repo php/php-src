@@ -957,23 +957,25 @@ PHP_METHOD(SoapServer, setPersistence)
 	soapServicePtr service;
 	zend_long value;
 
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &value) == FAILURE) {
+		RETURN_THROWS();
+	}
+
 	SOAP_SERVER_BEGIN_CODE();
 
 	FETCH_THIS_SERVICE(service);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &value) != FAILURE) {
-		if (service->type == SOAP_CLASS) {
-			if (value == SOAP_PERSISTENCE_SESSION ||
-				value == SOAP_PERSISTENCE_REQUEST) {
-				service->soap_class.persistence = value;
-			} else {
-				php_error_docref(NULL, E_WARNING, "Tried to set persistence with bogus value (" ZEND_LONG_FMT ")", value);
-				return;
-			}
+	if (service->type == SOAP_CLASS) {
+		if (value == SOAP_PERSISTENCE_SESSION ||
+			value == SOAP_PERSISTENCE_REQUEST) {
+			service->soap_class.persistence = value;
 		} else {
-			php_error_docref(NULL, E_WARNING, "Tried to set persistence when you are using you SOAP SERVER in function mode, no persistence needed");
+			php_error_docref(NULL, E_WARNING, "Tried to set persistence with bogus value (" ZEND_LONG_FMT ")", value);
 			return;
 		}
+	} else {
+		php_error_docref(NULL, E_WARNING, "Tried to set persistence when you are using you SOAP SERVER in function mode, no persistence needed");
+		return;
 	}
 
 	SOAP_SERVER_END_CODE();
@@ -990,13 +992,13 @@ PHP_METHOD(SoapServer, setClass)
 	int num_args = 0;
 	zval *argv = NULL;
 
-	SOAP_SERVER_BEGIN_CODE();
-
-	FETCH_THIS_SERVICE(service);
-
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S*", &classname, &argv, &num_args) == FAILURE) {
 		RETURN_THROWS();
 	}
+
+	SOAP_SERVER_BEGIN_CODE();
+
+	FETCH_THIS_SERVICE(service);
 
 	ce = zend_lookup_class(classname);
 
@@ -1029,13 +1031,13 @@ PHP_METHOD(SoapServer, setObject)
 	soapServicePtr service;
 	zval *obj;
 
-	SOAP_SERVER_BEGIN_CODE();
-
-	FETCH_THIS_SERVICE(service);
-
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o", &obj) == FAILURE) {
 		RETURN_THROWS();
 	}
+
+	SOAP_SERVER_BEGIN_CODE();
+
+	FETCH_THIS_SERVICE(service);
 
 	service->type = SOAP_OBJECT;
 
@@ -1052,11 +1054,11 @@ PHP_METHOD(SoapServer, getFunctions)
 	soapServicePtr  service;
 	HashTable      *ft = NULL;
 
-	SOAP_SERVER_BEGIN_CODE();
-
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
+
+	SOAP_SERVER_BEGIN_CODE();
 
 	FETCH_THIS_SERVICE(service);
 
@@ -1095,13 +1097,13 @@ PHP_METHOD(SoapServer, addFunction)
 	soapServicePtr service;
 	zval *function_name, function_copy;
 
-	SOAP_SERVER_BEGIN_CODE();
-
-	FETCH_THIS_SERVICE(service);
-
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &function_name) == FAILURE) {
 		RETURN_THROWS();
 	}
+
+	SOAP_SERVER_BEGIN_CODE();
+
+	FETCH_THIS_SERVICE(service);
 
 	/* TODO: could use zend_is_callable here */
 
@@ -1214,14 +1216,14 @@ PHP_METHOD(SoapServer, handle)
 	int old_features;
 	zval tmp_soap;
 
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s", &arg, &arg_len) == FAILURE) {
+		RETURN_THROWS();
+	}
+
 	SOAP_SERVER_BEGIN_CODE();
 
 	FETCH_THIS_SERVICE(service);
 	SOAP_GLOBAL(soap_version) = service->version;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s", &arg, &arg_len) == FAILURE) {
-		RETURN_THROWS();
-	}
 
 	if (ZEND_NUM_ARGS() > 0 && ZEND_SIZE_T_INT_OVFL(arg_len)) {
 		soap_server_fault("Server", "Input string is too long", NULL, NULL, NULL);
@@ -1704,16 +1706,16 @@ PHP_METHOD(SoapServer, fault)
 	soapServicePtr service;
 	xmlCharEncodingHandlerPtr old_encoding;
 
-	SOAP_SERVER_BEGIN_CODE();
-	FETCH_THIS_SERVICE(service);
-	old_encoding = SOAP_GLOBAL(encoding);
-	SOAP_GLOBAL(encoding) = service->encoding;
-
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|szs",
 	    &code, &code_len, &string, &string_len, &actor, &actor_len, &details,
 	    &name, &name_len) == FAILURE) {
 		RETURN_THROWS();
 	}
+
+	SOAP_SERVER_BEGIN_CODE();
+	FETCH_THIS_SERVICE(service);
+	old_encoding = SOAP_GLOBAL(encoding);
+	SOAP_GLOBAL(encoding) = service->encoding;
 
 	soap_server_fault(code, string, actor, details, name);
 
@@ -1729,11 +1731,11 @@ PHP_METHOD(SoapServer, addSoapHeader)
 	zval *fault;
 	soapHeader **p;
 
-	SOAP_SERVER_BEGIN_CODE();
-
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &fault, soap_header_class_entry) == FAILURE) {
 		RETURN_THROWS();
 	}
+
+	SOAP_SERVER_BEGIN_CODE();
 
 	FETCH_THIS_SERVICE(service);
 
