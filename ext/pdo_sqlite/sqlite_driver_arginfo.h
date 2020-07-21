@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 5134a0b80848f852557b1c22ec102573d79ed9a4 */
+ * Stub hash: e367675f85371fb06484e39dd6ccb3433766ffb8 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PDO_SQLite_Ext_sqliteCreateFunction, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, function_name, IS_STRING, 0)
