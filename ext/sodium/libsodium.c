@@ -1785,6 +1785,7 @@ PHP_FUNCTION(sodium_crypto_pwhash_scryptsalsa208sha256_str_verify)
 		RETURN_THROWS();
 	}
 	if (hash_str_len != crypto_pwhash_scryptsalsa208sha256_STRBYTES - 1) {
+		/* Promote to Exception? */
 		zend_error(E_WARNING, "wrong size for the hashed password");
 		RETURN_FALSE;
 	}
