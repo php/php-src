@@ -3029,6 +3029,17 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							zend_may_throw(opline, ssa_op, op_array, ssa))) {
 						goto jit_failure;
 					}
+					if (i == end
+					 && (opline->result_type & (IS_SMART_BRANCH_JMPZ|IS_SMART_BRANCH_JMPNZ)) != 0) {
+						/* smart branch split across basic blocks */
+						if (!zend_jit_cond_jmp(&dasm_state, opline + 2, ssa->cfg.blocks[b+1].successors[0])) {
+							goto jit_failure;
+						}
+						if (!zend_jit_jmp(&dasm_state, ssa->cfg.blocks[b+1].successors[1])) {
+							goto jit_failure;
+						}
+						is_terminated = 1;
+					}
 			}
 done:
 			switch (opline->opcode) {

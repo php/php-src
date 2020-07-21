@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.0.0beta1
 
+- JIT:
+  . Fixed bug #79864 (JIT segfault in Symfony OptionsResolver). (Dmitry)
 
 23 Jul 2020, PHP 8.0.0alpha3
 
