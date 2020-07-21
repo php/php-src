@@ -110,8 +110,7 @@ int mbfl_filt_conv_qprintenc(int c, mbfl_convert_filter *filter)
 		}
 
 		if (s <= 0 || s >= 0x80 || s == 0x3d		/* not ASCII or '=' */
-		   || ((filter->status & MBFL_QPRINT_STS_MIME_HEADER) != 0 &&
-		       (mbfl_charprop_table[s] & MBFL_CHP_MMHQENC) != 0)) {
+		   || ((filter->status & MBFL_QPRINT_STS_MIME_HEADER) && mime_char_needs_qencode[s])) {
 			/* hex-octet */
 			CK((*filter->output_function)(0x3d, filter->data));		/* '=' */
 			n = (s >> 4) & 0xf;
