@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 43878ddb4f96ee0a2f409b87bb1484fc5378cfb5 */
+ * Stub hash: 82152767dbeda492da7dff97324d7277d3f0213b */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_use_soap_error_handler, 0, 0, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, handler, _IS_BOOL, 0, "true")
@@ -153,6 +153,7 @@ ZEND_METHOD(SoapServer, addFunction);
 ZEND_METHOD(SoapServer, handle);
 ZEND_METHOD(SoapClient, __construct);
 ZEND_METHOD(SoapClient, __call);
+ZEND_METHOD(SoapClient, __soapCall);
 ZEND_METHOD(SoapClient, __getFunctions);
 ZEND_METHOD(SoapClient, __getTypes);
 ZEND_METHOD(SoapClient, __getLastRequest);
@@ -215,7 +216,7 @@ static const zend_function_entry class_SoapServer_methods[] = {
 static const zend_function_entry class_SoapClient_methods[] = {
 	ZEND_ME(SoapClient, __construct, arginfo_class_SoapClient___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(SoapClient, __call, arginfo_class_SoapClient___call, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(SoapClient, __soapCall, __call, arginfo_class_SoapClient___soapCall, ZEND_ACC_PUBLIC)
+	ZEND_ME(SoapClient, __soapCall, arginfo_class_SoapClient___soapCall, ZEND_ACC_PUBLIC)
 	ZEND_ME(SoapClient, __getFunctions, arginfo_class_SoapClient___getFunctions, ZEND_ACC_PUBLIC)
 	ZEND_ME(SoapClient, __getTypes, arginfo_class_SoapClient___getTypes, ZEND_ACC_PUBLIC)
 	ZEND_ME(SoapClient, __getLastRequest, arginfo_class_SoapClient___getLastRequest, ZEND_ACC_PUBLIC)

@@ -2512,7 +2512,7 @@ static void verify_soap_headers_array(HashTable *ht) /* {{{ */
 /* }}} */
 
 /* {{{ Calls a SOAP function */
-PHP_METHOD(SoapClient, __call)
+void soap_client_call_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_soap_call)
 {
 	char *function, *location=NULL, *soap_action = NULL, *uri = NULL;
 	size_t function_len;
@@ -2529,9 +2529,15 @@ PHP_METHOD(SoapClient, __call)
 	zend_bool free_soap_headers = 0;
 	zval *this_ptr;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sa|a!zz",
-		&function, &function_len, &args, &options, &headers, &output_headers) == FAILURE) {
-		RETURN_THROWS();
+	if (is_soap_call) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "sa|a!zz",
+			&function, &function_len, &args, &options, &headers, &output_headers) == FAILURE) {
+			RETURN_THROWS();
+		}
+	} else {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "sa", &function, &function_len, &args) == FAILURE) {
+			RETURN_THROWS();
+		}
 	}
 
 	if (options) {
@@ -2620,6 +2626,15 @@ cleanup:
 }
 /* }}} */
 
+PHP_METHOD(SoapClient, __call)
+{
+	soap_client_call_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+}
+
+PHP_METHOD(SoapClient, __soapCall)
+{
+	soap_client_call_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+}
 
 /* {{{ Returns list of SOAP functions */
 PHP_METHOD(SoapClient, __getFunctions)
