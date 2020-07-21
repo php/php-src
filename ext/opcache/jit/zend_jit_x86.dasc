@@ -10405,11 +10405,11 @@ static int zend_jit_fetch_dim_read(dasm_State **Dst, const zend_op *opline, cons
 
 		if ((opline->op1_type & (IS_VAR|IS_TMP_VAR))
 		 && !(op1_info & AVOID_REFCOUNTING)) {
-			flags = ZEND_JIT_EXIT_FREE_OP1;
+			flags |= ZEND_JIT_EXIT_FREE_OP1;
 		}
 		if ((opline->op2_type & (IS_VAR|IS_TMP_VAR))
 		 && (op2_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
-			flags = ZEND_JIT_EXIT_FREE_OP2;
+			flags |= ZEND_JIT_EXIT_FREE_OP2;
 		}
 		if ((res_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))
 		 && (ssa_op+1)->op1_use == ssa_op->result_def
