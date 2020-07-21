@@ -932,11 +932,22 @@ uint32_t zend_get_func_info(
 		}
 
 #if ZEND_DEBUG
-		/* Check whether the func_info information is a subset of the information we can compute
-		 * from the specified return type. */
 		if (internal_ret) {
+			/* Check whether the func_info information is a subset of the information we can
+			 * compute from the specified return type, otherwise it contains redundant types. */
 			if (internal_ret & ~ret) {
 				fprintf(stderr, "Inaccurate func info for %s()\n", ZSTR_VAL(lcname));
+			}
+			/* If the return type is not mixed, check that the types match exactly if we exclude
+			 * RC and array information. */
+			uint32_t ret_any = ret & MAY_BE_ANY, internal_ret_any = internal_ret & MAY_BE_ANY;
+			if (ret_any != MAY_BE_ANY) {
+				uint32_t diff = internal_ret_any ^ ret_any;
+				/* Func info may contain "true" types as well as isolated "null" and "false". */
+				if (diff && !(diff == MAY_BE_FALSE && (ret & MAY_BE_FALSE))
+						&& (internal_ret_any & ~(MAY_BE_NULL|MAY_BE_FALSE))) {
+					fprintf(stderr, "Incorrect func info for %s()\n", ZSTR_VAL(lcname));
+				}
 			}
 			return internal_ret;
 		}
