@@ -127,6 +127,10 @@ static ZEND_FUNCTION(pass)
 {
 }
 
+ZEND_BEGIN_ARG_INFO_EX(zend_pass_function_arg_info, 0, 0, 0)
+	ZEND_ARG_VARIADIC_INFO(0, args)
+ZEND_END_ARG_INFO()
+
 ZEND_API const zend_internal_function zend_pass_function = {
 	ZEND_INTERNAL_FUNCTION, /* type              */
 	{0, 0, 0},              /* arg_flags         */
@@ -136,7 +140,7 @@ ZEND_API const zend_internal_function zend_pass_function = {
 	NULL,                   /* prototype         */
 	0,                      /* num_args          */
 	0,                      /* required_num_args */
-	NULL,                   /* arg_info          */
+	(zend_internal_arg_info *) zend_pass_function_arg_info + 1, /* arg_info */
 	NULL,                   /* attributes        */
 	ZEND_FN(pass),          /* handler           */
 	NULL,                   /* module            */
