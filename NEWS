@@ -1,5 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? ????, PHP 7.3.22
+
 ?? ??? ????, PHP 7.3.21
 
 - Apache:
@@ -36,7 +38,7 @@ PHP                                                                        NEWS
   . Fixed bug #78008 (dns_check_record() always return true on Alpine).
     (Andy Postnikov)
 
-?? ??? ????, PHP 7.3.20
+09 Jul 2020, PHP 7.3.20
 
 - Core:
   . Fixed bug #79650 (php-win.exe 100% cpu lockup). (cmb)
