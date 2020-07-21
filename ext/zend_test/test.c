@@ -45,16 +45,12 @@ ZEND_FUNCTION(zend_test_func)
 
 ZEND_FUNCTION(zend_test_array_return)
 {
-	zval *arg1, *arg2;
-
-	zend_parse_parameters(ZEND_NUM_ARGS(), "|zz", &arg1, &arg2);
+	ZEND_PARSE_PARAMETERS_NONE();
 }
 
 ZEND_FUNCTION(zend_test_nullable_array_return)
 {
-	zval *arg1, *arg2;
-
-	zend_parse_parameters(ZEND_NUM_ARGS(), "|zz", &arg1, &arg2);
+	ZEND_PARSE_PARAMETERS_NONE();
 }
 
 ZEND_FUNCTION(zend_test_void_return)
