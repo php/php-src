@@ -781,7 +781,7 @@ static const func_info_t func_infos[] = {
 	F1("pg_insert",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE | MAY_BE_RESOURCE | MAY_BE_STRING),
 	F1("pg_update",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE | MAY_BE_STRING),
 	F1("pg_delete",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE | MAY_BE_STRING),
-	F1("pg_select",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE | MAY_BE_STRING),
+	F1("pg_select",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE | MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_ARRAY),
 
 	/* ext/bcmath */
 	F1("bcadd",									MAY_BE_STRING),
