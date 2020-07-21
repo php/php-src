@@ -758,6 +758,16 @@ static void* dasm_labels[zend_lb_MAX];
 ||	}
 |.endmacro
 
+|.macro LONG_OP_WITH_32BIT_CONST, long_ins, op1_addr, lval
+||	if (Z_MODE(op1_addr) == IS_MEM_ZVAL) {
+|		long_ins aword [Ra(Z_REG(op1_addr))+Z_OFFSET(op1_addr)], lval
+||	} else if (Z_MODE(op1_addr) == IS_REG) {
+|		long_ins Ra(Z_REG(op1_addr)), lval
+||	} else {
+||		ZEND_UNREACHABLE();
+||	}
+|.endmacro
+
 |.macro LONG_OP_WITH_CONST, long_ins, op1_addr, lval
 ||	if (Z_MODE(op1_addr) == IS_MEM_ZVAL) {
 |	   .if X64
@@ -3643,9 +3653,9 @@ static int zend_jit_inc_dec(dasm_State **Dst, const zend_op *opline, const zend_
 		return 0;
 	}
 	if (opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_POST_INC) {
-		|	LONG_OP_WITH_CONST add, op1_def_addr, Z_L(1)
+		|	LONG_OP_WITH_32BIT_CONST add, op1_def_addr, Z_L(1)
 	} else {
-		|	LONG_OP_WITH_CONST sub, op1_def_addr, Z_L(1)
+		|	LONG_OP_WITH_32BIT_CONST sub, op1_def_addr, Z_L(1)
 	}
 
 	if (may_overflow &&
@@ -12306,6 +12316,8 @@ static zend_bool zend_needs_extra_reg_for_const(const zend_op *opline, zend_ucha
 ||		zval *zv = RT_CONSTANT(opline, op);
 ||		if (Z_TYPE_P(zv) == IS_DOUBLE && Z_DVAL_P(zv) != 0 && !IS_32BIT(zv)) {
 ||			return 1;
+||		} else if (Z_TYPE_P(zv) == IS_LONG && !IS_SIGNED_32BIT(Z_LVAL_P(zv))) {
+||			return 1;
 ||		}
 ||	}
 |.endif
@@ -12454,8 +12466,12 @@ static zend_regset zend_jit_get_scratch_regset(const zend_op *opline, const zend
 					}
 				}
 				if (zend_needs_extra_reg_for_const(opline, opline->op1_type, opline->op1) ||
-				    zend_needs_extra_reg_for_const(opline, opline->op1_type, opline->op2)) {
-					ZEND_REGSET_INCL(regset, ZREG_R0);
+				    zend_needs_extra_reg_for_const(opline, opline->op2_type, opline->op2)) {
+					if (!ZEND_REGSET_IN(regset, ZREG_R0)) {
+						ZEND_REGSET_INCL(regset, ZREG_R0);
+					} else {
+						ZEND_REGSET_INCL(regset, ZREG_R1);
+					}
 				}
 			}
 			break;
@@ -12470,6 +12486,14 @@ static zend_regset zend_jit_get_scratch_regset(const zend_op *opline, const zend
 				if (ssa_op->result_def != current_var &&
 				    (ssa_op->op1_use != current_var || !last_use)) {
 					ZEND_REGSET_INCL(regset, ZREG_R0);
+				}
+				if (zend_needs_extra_reg_for_const(opline, opline->op1_type, opline->op1) ||
+				    zend_needs_extra_reg_for_const(opline, opline->op2_type, opline->op2)) {
+					if (!ZEND_REGSET_IN(regset, ZREG_R0)) {
+						ZEND_REGSET_INCL(regset, ZREG_R0);
+					} else {
+						ZEND_REGSET_INCL(regset, ZREG_R1);
+					}
 				}
 			}
 			break;
@@ -12501,6 +12525,14 @@ static zend_regset zend_jit_get_scratch_regset(const zend_op *opline, const zend
 					if (ssa_op->result_def != current_var &&
 					    (ssa_op->op1_use != current_var || !last_use)) {
 						ZEND_REGSET_INCL(regset, ZREG_R0);
+					}
+					if (sizeof(void*) == 8
+					 && !IS_SIGNED_32BIT(Z_LVAL_P(RT_CONSTANT(opline, opline->op2)) - 1)) {
+						if (!ZEND_REGSET_IN(regset, ZREG_R0)) {
+							ZEND_REGSET_INCL(regset, ZREG_R0);
+						} else {
+							ZEND_REGSET_INCL(regset, ZREG_R1);
+						}
 					}
 				} else {
 					ZEND_REGSET_INCL(regset, ZREG_R0);
@@ -12540,7 +12572,7 @@ static zend_regset zend_jit_get_scratch_regset(const zend_op *opline, const zend
 					}
 				}
 				if (zend_needs_extra_reg_for_const(opline, opline->op1_type, opline->op1) ||
-				    zend_needs_extra_reg_for_const(opline, opline->op1_type, opline->op2)) {
+				    zend_needs_extra_reg_for_const(opline, opline->op2_type, opline->op2)) {
 					ZEND_REGSET_INCL(regset, ZREG_R0);
 				}
 			}
@@ -12588,23 +12620,33 @@ static zend_regset zend_jit_get_scratch_regset(const zend_op *opline, const zend
 		}
 	}
 
-#if ZTS
 	/* %r0 is used to check EG(vm_interrupt) */
 	if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
 		if (ssa_op == ssa->ops
 		 && (JIT_G(current_trace)->stop == ZEND_JIT_TRACE_STOP_LOOP ||
 			 JIT_G(current_trace)->stop == ZEND_JIT_TRACE_STOP_RECURSIVE_CALL)) {
+#if ZTS
 			ZEND_REGSET_INCL(regset, ZREG_R0);
+#else
+			if ((sizeof(void*) == 8 && !IS_32BIT(&EG(vm_interrupt)))) {
+				ZEND_REGSET_INCL(regset, ZREG_R0);
+			}
+#endif
 		}
 	} else  {
 		uint32_t b = ssa->cfg.map[ssa_op - ssa->ops];
 
 		if ((ssa->cfg.blocks[b].flags & ZEND_BB_LOOP_HEADER) != 0
 		 && ssa->cfg.blocks[b].start == ssa_op - ssa->ops) {
+#if ZTS
 			ZEND_REGSET_INCL(regset, ZREG_R0);
+#else
+			if ((sizeof(void*) == 8 && !IS_32BIT(&EG(vm_interrupt)))) {
+				ZEND_REGSET_INCL(regset, ZREG_R0);
+			}
+#endif
 		}
 	}
-#endif
 
 	return regset;
 }
