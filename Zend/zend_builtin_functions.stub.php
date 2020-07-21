@@ -31,22 +31,21 @@ function get_class(object $object = UNKNOWN): string {}
 
 function get_called_class(): string {}
 
-function get_parent_class(string|object $object = UNKNOWN): string|false {}
+function get_parent_class(object|string $object_or_class = UNKNOWN): string|false {}
 
-/** @param object|string $object */
-function is_subclass_of(mixed $object, string $class_name, bool $allow_string = true): bool {}
+/** @param object|string $object_or_class */
+function is_subclass_of(mixed $object_or_class, string $class, bool $allow_string = true): bool {}
 
-/** @param object|string $object */
-function is_a(mixed $object, string $class_name, bool $allow_string = false): bool {}
+/** @param object|string $object_or_class */
+function is_a(mixed $object_or_class, string $class, bool $allow_string = false): bool {}
 
-function get_class_vars(string $class_name): array|false {}
+function get_class_vars(string $class): array|false {}
 
 function get_object_vars(object $object): array {}
 
 function get_mangled_object_vars(object $object): array {}
 
-/** string|object $class */
-function get_class_methods($class): array {}
+function get_class_methods(object|string $object_or_class): array {}
 
 /** @param object|string $object_or_class */
 function method_exists(mixed $object_or_class, string $method): bool {}
@@ -54,15 +53,15 @@ function method_exists(mixed $object_or_class, string $method): bool {}
 /** @param object|string $object_or_class */
 function property_exists(mixed $object_or_class, string $property): bool {}
 
-function class_exists(string $class_name, bool $autoload = true): bool {}
+function class_exists(string $class, bool $autoload = true): bool {}
 
-function interface_exists(string $interface_name, bool $autoload = true): bool {}
+function interface_exists(string $interface, bool $autoload = true): bool {}
 
-function trait_exists(string $trait_name, bool $autoload = true): bool {}
+function trait_exists(string $trait, bool $autoload = true): bool {}
 
-function function_exists(string $function_name): bool {}
+function function_exists(string $function): bool {}
 
-function class_alias(string $original_class_name, string $alias, bool $autoload = true): bool {}
+function class_alias(string $class, string $alias, bool $autoload = true): bool {}
 
 function get_included_files(): array {}
 

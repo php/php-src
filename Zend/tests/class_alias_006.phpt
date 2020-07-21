@@ -11,4 +11,4 @@ try {
 
 ?>
 --EXPECT--
-class_alias(): Argument #1 ($original_class_name) must be a user-defined class name, internal class name given
+class_alias(): Argument #1 ($class) must be a user-defined class name, internal class name given

@@ -69,13 +69,13 @@ $values = array(
 // loop through each element of the array for class
 
 foreach($values as $value) {
-      echo "\nArg value " . (is_object($value) ? get_class($value) : $value) . " \n";
+      echo "\nArg value " . (is_object($value) ? get_class($value) : $value) . "\n";
       try {
             var_dump( get_class_methods($value) );
       } catch (TypeError $exception) {
             echo $exception->getMessage() . "\n";
       }
-};
+}
 echo "Done";
 ?>
 --EXPECT--
@@ -83,90 +83,90 @@ echo "Done";
 Error: 2 - Undefined variable $undefined_var
 Error: 2 - Undefined variable $unset_var
 
-Arg value 0 
-get_class_methods(): Argument #1 ($class) must be a valid class name or object, int given
+Arg value 0
+get_class_methods(): Argument #1 ($object_or_class) must be a valid class name or object, int given
 
-Arg value 1 
-get_class_methods(): Argument #1 ($class) must be a valid class name or object, int given
+Arg value 1
+get_class_methods(): Argument #1 ($object_or_class) must be a valid class name or object, int given
 
-Arg value 12345 
-get_class_methods(): Argument #1 ($class) must be a valid class name or object, int given
+Arg value 12345
+get_class_methods(): Argument #1 ($object_or_class) must be a valid class name or object, int given
 
-Arg value -2345 
-get_class_methods(): Argument #1 ($class) must be a valid class name or object, int given
+Arg value -2345
+get_class_methods(): Argument #1 ($object_or_class) must be a valid class name or object, int given
 
-Arg value 10.5 
-get_class_methods(): Argument #1 ($class) must be a valid class name or object, float given
+Arg value 10.5
+get_class_methods(): Argument #1 ($object_or_class) must be a valid class name or object, float given
 
-Arg value -10.5 
-get_class_methods(): Argument #1 ($class) must be a valid class name or object, float given
+Arg value -10.5
+get_class_methods(): Argument #1 ($object_or_class) must be a valid class name or object, float given
 
-Arg value 101234567000 
-get_class_methods(): Argument #1 ($class) must be a valid class name or object, float given
+Arg value 101234567000
+get_class_methods(): Argument #1 ($object_or_class) must be a valid class name or object, float given
 
-Arg value 1.07654321E-9 
-get_class_methods(): Argument #1 ($class) must be a valid class name or object, float given
+Arg value 1.07654321E-9
+get_class_methods(): Argument #1 ($object_or_class) must be a valid class name or object, float given
 
-Arg value 0.5 
-get_class_methods(): Argument #1 ($class) must be a valid class name or object, float given
+Arg value 0.5
+get_class_methods(): Argument #1 ($object_or_class) must be a valid class name or object, float given
 Error: 2 - Array to string conversion
 
-Arg value Array 
-get_class_methods(): Argument #1 ($class) must be a valid class name or object, array given
+Arg value Array
+get_class_methods(): Argument #1 ($object_or_class) must be a valid class name or object, array given
 Error: 2 - Array to string conversion
 
-Arg value Array 
-get_class_methods(): Argument #1 ($class) must be a valid class name or object, array given
+Arg value Array
+get_class_methods(): Argument #1 ($object_or_class) must be a valid class name or object, array given
 Error: 2 - Array to string conversion
 
-Arg value Array 
-get_class_methods(): Argument #1 ($class) must be a valid class name or object, array given
+Arg value Array
+get_class_methods(): Argument #1 ($object_or_class) must be a valid class name or object, array given
 Error: 2 - Array to string conversion
 
-Arg value Array 
-get_class_methods(): Argument #1 ($class) must be a valid class name or object, array given
+Arg value Array
+get_class_methods(): Argument #1 ($object_or_class) must be a valid class name or object, array given
 Error: 2 - Array to string conversion
 
-Arg value Array 
-get_class_methods(): Argument #1 ($class) must be a valid class name or object, array given
+Arg value Array
+get_class_methods(): Argument #1 ($object_or_class) must be a valid class name or object, array given
 
-Arg value  
-get_class_methods(): Argument #1 ($class) must be a valid class name or object, null given
+Arg value 
+get_class_methods(): Argument #1 ($object_or_class) must be a valid class name or object, null given
 
-Arg value  
-get_class_methods(): Argument #1 ($class) must be a valid class name or object, null given
+Arg value 
+get_class_methods(): Argument #1 ($object_or_class) must be a valid class name or object, null given
 
-Arg value 1 
-get_class_methods(): Argument #1 ($class) must be a valid class name or object, bool given
+Arg value 1
+get_class_methods(): Argument #1 ($object_or_class) must be a valid class name or object, bool given
 
-Arg value  
-get_class_methods(): Argument #1 ($class) must be a valid class name or object, bool given
+Arg value 
+get_class_methods(): Argument #1 ($object_or_class) must be a valid class name or object, bool given
 
-Arg value 1 
-get_class_methods(): Argument #1 ($class) must be a valid class name or object, bool given
+Arg value 1
+get_class_methods(): Argument #1 ($object_or_class) must be a valid class name or object, bool given
 
-Arg value  
-get_class_methods(): Argument #1 ($class) must be a valid class name or object, bool given
+Arg value 
+get_class_methods(): Argument #1 ($object_or_class) must be a valid class name or object, bool given
 
-Arg value  
-get_class_methods(): Argument #1 ($class) must be a valid class name or object, string given
+Arg value 
+get_class_methods(): Argument #1 ($object_or_class) must be a valid class name or object, string given
 
-Arg value  
-get_class_methods(): Argument #1 ($class) must be a valid class name or object, string given
+Arg value 
+get_class_methods(): Argument #1 ($object_or_class) must be a valid class name or object, string given
 
-Arg value string 
-get_class_methods(): Argument #1 ($class) must be a valid class name or object, string given
+Arg value string
+get_class_methods(): Argument #1 ($object_or_class) must be a valid class name or object, string given
 
-Arg value string 
-get_class_methods(): Argument #1 ($class) must be a valid class name or object, string given
+Arg value string
+get_class_methods(): Argument #1 ($object_or_class) must be a valid class name or object, string given
 
-Arg value stdClass 
+Arg value stdClass
 array(0) {
 }
 
-Arg value  
-get_class_methods(): Argument #1 ($class) must be a valid class name or object, null given
+Arg value 
+get_class_methods(): Argument #1 ($object_or_class) must be a valid class name or object, null given
 
-Arg value  
-get_class_methods(): Argument #1 ($class) must be a valid class name or object, null given
+Arg value 
+get_class_methods(): Argument #1 ($object_or_class) must be a valid class name or object, null given
 Done
