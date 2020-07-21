@@ -1414,6 +1414,7 @@ ZEND_FUNCTION(gmp_root)
 	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a, 1);
 
 	if (nth % 2 == 0 && mpz_sgn(gmpnum_a) < 0) {
+		// Todo promote to ValueError?
 		php_error_docref(NULL, E_WARNING, "Can't take even root of negative number");
 		FREE_GMP_TEMP(temp_a);
 		RETURN_FALSE;
@@ -1446,6 +1447,7 @@ ZEND_FUNCTION(gmp_rootrem)
 	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a, 1);
 
 	if (nth % 2 == 0 && mpz_sgn(gmpnum_a) < 0) {
+		// Todo promote to ValueError?
 		php_error_docref(NULL, E_WARNING, "Can't take even root of negative number");
 		FREE_GMP_TEMP(temp_a);
 		RETURN_FALSE;
@@ -1582,6 +1584,7 @@ ZEND_FUNCTION(gmp_invert)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &a_arg, &b_arg) == FAILURE){
 		RETURN_THROWS();
 	}
+	// TODO Check b_arg is not 0 as behaviour is undefined for op2 = 0 for mpz_invert
 
 	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a, 1);
 	FETCH_GMP_ZVAL_DEP(gmpnum_b, b_arg, temp_b, temp_a, 2);
@@ -1591,6 +1594,7 @@ ZEND_FUNCTION(gmp_invert)
 	FREE_GMP_TEMP(temp_a);
 	FREE_GMP_TEMP(temp_b);
 	if (!res) {
+		// Should return 0 instead of false? A legit 0 value is impossible.
 		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
 	}
