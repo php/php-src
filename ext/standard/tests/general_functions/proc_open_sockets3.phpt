@@ -45,11 +45,17 @@ printf("STDOUT << %s\n", read_pipe($pipes[1]));
 fwrite($pipes[0], 'done');
 fclose($pipes[0]);
 
+var_dump(feof($pipes[1]));
 printf("STDOUT << %s\n", read_pipe($pipes[1]));
+var_dump(read_pipe($pipes[1]));
+var_dump(feof($pipes[1]));
 
 ?>
 --EXPECTF--
 bool(true)
 STDOUT << hello
 STDOUT << world
+bool(false)
 STDOUT << DONE
+string(0) ""
+bool(true)

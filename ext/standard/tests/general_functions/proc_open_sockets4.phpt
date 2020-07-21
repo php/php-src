@@ -1,5 +1,5 @@
 --TEST--
-proc_open() with IO socketpairs
+proc_open() with non-blocking pipes (threaded on Windows)
 --FILE--
 <?php
 
@@ -40,11 +40,13 @@ $cmd = [
 ];
 
 $spec = [
-	['socket'],
-	['socket']
+	['pipe', 'rb'],
+	['pipe', 'wb']
 ];
 
-$proc = proc_open($cmd, $spec, $pipes);
+$proc = proc_open($cmd, $spec, $pipes, null, null, [
+	'threaded_pipes' => true
+]);
 
 foreach ($pipes as $pipe) {
 	var_dump(stream_set_blocking($pipe, false));
