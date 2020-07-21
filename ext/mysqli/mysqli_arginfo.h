@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 49567a0e831c0a484aaf2c2d213ad24109f2639b */
+ * Stub hash: cde1bbb449c6adae7a99c7df3e9d290d501e18be */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_affected_rows, 0, 1, MAY_BE_LONG|MAY_BE_STRING)
 	ZEND_ARG_OBJ_INFO(0, mysql_link, mysqli, 0)
@@ -162,9 +162,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_mysqli_get_proto_info arginfo_mysqli_field_count
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_get_server_info, 0, 1, IS_STRING, 1)
-	ZEND_ARG_OBJ_INFO(0, mysqli_link, mysqli, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_mysqli_get_server_info arginfo_mysqli_get_host_info
 
 #define arginfo_mysqli_get_server_version arginfo_mysqli_field_count
 
@@ -175,7 +173,9 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_mysqli_init, 0, 0, mysqli, MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-#define arginfo_mysqli_info arginfo_mysqli_get_server_info
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_info, 0, 1, IS_STRING, 1)
+	ZEND_ARG_OBJ_INFO(0, mysqli_link, mysqli, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_insert_id, 0, 1, MAY_BE_LONG|MAY_BE_STRING)
 	ZEND_ARG_OBJ_INFO(0, mysqli_link, mysqli, 0)
@@ -377,7 +377,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_mysqli_stmt_sqlstate arginfo_mysqli_stmt_error
 
-#define arginfo_mysqli_sqlstate arginfo_mysqli_get_server_info
+#define arginfo_mysqli_sqlstate arginfo_mysqli_info
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_ssl_set, 0, 6, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, mysql_link, mysqli, 0)

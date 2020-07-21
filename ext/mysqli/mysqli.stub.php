@@ -609,7 +609,7 @@ function mysqli_get_host_info(mysqli $mysqli_link): string {}
 
 function mysqli_get_proto_info(mysqli $mysqli_link): int {}
 
-function mysqli_get_server_info(mysqli $mysqli_link): ?string {}
+function mysqli_get_server_info(mysqli $mysqli_link): string {}
 
 function mysqli_get_server_version(mysqli $mysqli_link): int {}
 
