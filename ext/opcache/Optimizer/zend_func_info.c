@@ -938,6 +938,11 @@ uint32_t zend_get_func_info(
 			if (internal_ret & ~ret) {
 				fprintf(stderr, "Inaccurate func info for %s()\n", ZSTR_VAL(lcname));
 			}
+			/* Check whether the func info is completely redundant with arginfo.
+			 * Ignore UNKNOWN_INFO for now. */
+			if (internal_ret == ret && (internal_ret & MAY_BE_ANY) != MAY_BE_ANY) {
+				fprintf(stderr, "Useless func info for %s()\n", ZSTR_VAL(lcname));
+			}
 			/* If the return type is not mixed, check that the types match exactly if we exclude
 			 * RC and array information. */
 			uint32_t ret_any = ret & MAY_BE_ANY, internal_ret_any = internal_ret & MAY_BE_ANY;
