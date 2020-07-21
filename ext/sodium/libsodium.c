@@ -1499,6 +1499,10 @@ PHP_FUNCTION(sodium_crypto_pwhash)
 		zend_argument_error(sodium_exception_ce, 1, "is too large");
 		RETURN_THROWS();
 	}
+	if (passwd_len == 0) {
+		zend_argument_error(sodium_exception_ce, 2, "cannot be empty");
+		RETURN_THROWS();
+	}
 	if (passwd_len >= 0xffffffff) {
 		zend_argument_error(sodium_exception_ce, 2, "is too long");
 		RETURN_THROWS();
@@ -1518,9 +1522,6 @@ PHP_FUNCTION(sodium_crypto_pwhash)
 		&& alg != crypto_pwhash_ALG_DEFAULT) {
 		zend_throw_exception(sodium_exception_ce, "unsupported password hashing algorithm", 0);
 		RETURN_THROWS();
-	}
-	if (passwd_len <= 0) {
-		zend_error(E_WARNING, "empty password");
 	}
 	if (salt_len != crypto_pwhash_SALTBYTES) {
 		zend_argument_error(sodium_exception_ce, 3, "must be SODIUM_CRYPTO_PWHASH_SALTBYTES bytes long");
@@ -1574,6 +1575,14 @@ PHP_FUNCTION(sodium_crypto_pwhash_str)
 		sodium_remove_param_values_from_backtrace(EG(exception));
 		RETURN_THROWS();
 	}
+	if (passwd_len == 0) {
+		zend_argument_error(sodium_exception_ce, 1, "cannot be empty");
+		RETURN_THROWS();
+	}
+	if (passwd_len >= 0xffffffff) {
+		zend_argument_error(sodium_exception_ce, 1, "is too long");
+		RETURN_THROWS();
+	}
 	if (opslimit <= 0) {
 		zend_argument_error(sodium_exception_ce, 2, "must be greater than 0");
 		RETURN_THROWS();
@@ -1581,13 +1590,6 @@ PHP_FUNCTION(sodium_crypto_pwhash_str)
 	if (memlimit <= 0 || memlimit > SIZE_MAX) {
 		zend_argument_error(sodium_exception_ce, 3, "must be greater than 0");
 		RETURN_THROWS();
-	}
-	if (passwd_len >= 0xffffffff) {
-		zend_argument_error(sodium_exception_ce, 1, "is too long");
-		RETURN_THROWS();
-	}
-	if (passwd_len <= 0) {
-		zend_error(E_WARNING, "empty password");
 	}
 	if (opslimit < crypto_pwhash_OPSLIMIT_MIN) {
 		zend_argument_error(sodium_exception_ce, 2, "must be greater than or equal to %d", crypto_pwhash_OPSLIMIT_MIN);
@@ -1643,12 +1645,13 @@ PHP_FUNCTION(sodium_crypto_pwhash_str_verify)
 		sodium_remove_param_values_from_backtrace(EG(exception));
 		RETURN_THROWS();
 	}
+	if (passwd_len == 0) {
+		zend_argument_error(sodium_exception_ce, 2, "cannot be empty");
+		RETURN_THROWS();
+	}
 	if (passwd_len >= 0xffffffff) {
 		zend_argument_error(sodium_exception_ce, 2, "is too long");
 		RETURN_THROWS();
-	}
-	if (passwd_len <= 0) {
-		zend_error(E_WARNING, "empty password");
 	}
 	if (crypto_pwhash_str_verify
 		(hash_str, passwd, (unsigned long long) passwd_len) == 0) {
@@ -1682,6 +1685,10 @@ PHP_FUNCTION(sodium_crypto_pwhash_scryptsalsa208sha256)
 		zend_argument_error(sodium_exception_ce, 1, "must be greater than 0");
 		RETURN_THROWS();
 	}
+	if (passwd_len == 0) {
+		zend_argument_error(sodium_exception_ce, 2, "cannot be empty");
+		RETURN_THROWS();
+	}
 	if (opslimit <= 0) {
 		zend_argument_error(sodium_exception_ce, 4, "must be greater than 0");
 		RETURN_THROWS();
@@ -1689,9 +1696,6 @@ PHP_FUNCTION(sodium_crypto_pwhash_scryptsalsa208sha256)
 	if (memlimit <= 0 || memlimit > SIZE_MAX) {
 		zend_argument_error(sodium_exception_ce, 5, "must be greater than 0");
 		RETURN_THROWS();
-	}
-	if (passwd_len <= 0) {
-		zend_error(E_WARNING, "empty password");
 	}
 	if (salt_len != crypto_pwhash_scryptsalsa208sha256_SALTBYTES) {
 		zend_argument_error(sodium_exception_ce, 3, "must be SODIUM_CRYPTO_PWHASH_SCRYPTSALSA208SHA256_SALTBYTES bytes long");
@@ -1731,6 +1735,10 @@ PHP_FUNCTION(sodium_crypto_pwhash_scryptsalsa208sha256_str)
 		sodium_remove_param_values_from_backtrace(EG(exception));
 		RETURN_THROWS();
 	}
+	if (passwd_len == 0) {
+		zend_argument_error(sodium_exception_ce, 1, "cannot be empty");
+		RETURN_THROWS();
+	}
 	if (opslimit <= 0) {
 		zend_argument_error(sodium_exception_ce, 2, "must be greater than 0");
 		RETURN_THROWS();
@@ -1738,9 +1746,6 @@ PHP_FUNCTION(sodium_crypto_pwhash_scryptsalsa208sha256_str)
 	if (memlimit <= 0 || memlimit > SIZE_MAX) {
 		zend_argument_error(sodium_exception_ce, 3, "must be greater than 0");
 		RETURN_THROWS();
-	}
-	if (passwd_len <= 0) {
-		zend_error(E_WARNING, "empty password");
 	}
 	if (opslimit < crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_INTERACTIVE) {
 		zend_argument_error(sodium_exception_ce, 2, "must be greater than or equal to %d", crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_INTERACTIVE);
@@ -1775,8 +1780,9 @@ PHP_FUNCTION(sodium_crypto_pwhash_scryptsalsa208sha256_str_verify)
 		sodium_remove_param_values_from_backtrace(EG(exception));
 		RETURN_THROWS();
 	}
-	if (passwd_len <= 0) {
-		zend_error(E_WARNING, "empty password");
+	if (passwd_len == 0) {
+		zend_argument_error(sodium_exception_ce, 2, "cannot be empty");
+		RETURN_THROWS();
 	}
 	if (hash_str_len != crypto_pwhash_scryptsalsa208sha256_STRBYTES - 1) {
 		zend_error(E_WARNING, "wrong size for the hashed password");
