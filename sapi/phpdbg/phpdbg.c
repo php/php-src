@@ -29,6 +29,7 @@
 #include "phpdbg_print.h"
 #include "phpdbg_help.h"
 #include "phpdbg_arginfo.h"
+#include "zend_vm.h"
 
 #include "ext/standard/basic_functions.h"
 
@@ -272,6 +273,17 @@ static PHP_RINIT_FUNCTION(phpdbg) /* {{{ */
 {
 	/* deactivate symbol table caching to have these properly destroyed upon stack leaving (especially important for watchpoints) */
 	EG(symtable_cache_limit) = EG(symtable_cache);
+
+	if (zend_vm_kind() != ZEND_VM_KIND_HYBRID) {
+		/* phpdbg cannot work JIT-ed code */
+		zend_string *key = zend_string_init(ZEND_STRL("opcache.jit"), 1);
+		zend_string *value = zend_string_init(ZEND_STRL("off"), 1);
+
+		zend_alter_ini_entry(key, value, ZEND_INI_SYSTEM, ZEND_INI_STAGE_STARTUP);
+
+		zend_string_release(key);
+		zend_string_release(value);
+	}
 
 	return SUCCESS;
 } /* }}} */
