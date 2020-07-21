@@ -238,7 +238,7 @@ PHP_FUNCTION(assert_options)
 		if (ac == 2) {
 			zend_string *value_str = zval_try_get_string(value);
 			if (UNEXPECTED(!value_str)) {
-				return;
+				RETURN_THROWS();
 			}
 
 			key = zend_string_init("assert.active", sizeof("assert.active")-1, 0);
@@ -254,7 +254,7 @@ PHP_FUNCTION(assert_options)
 		if (ac == 2) {
 			zend_string *value_str = zval_try_get_string(value);
 			if (UNEXPECTED(!value_str)) {
-				return;
+				RETURN_THROWS();
 			}
 
 			key = zend_string_init("assert.bail", sizeof("assert.bail")-1, 0);
@@ -270,7 +270,7 @@ PHP_FUNCTION(assert_options)
 		if (ac == 2) {
 			zend_string *value_str = zval_try_get_string(value);
 			if (UNEXPECTED(!value_str)) {
-				return;
+				RETURN_THROWS();
 			}
 
 			key = zend_string_init("assert.warning", sizeof("assert.warning")-1, 0);
@@ -300,7 +300,7 @@ PHP_FUNCTION(assert_options)
 		if (ac == 2) {
 			zend_string *val = zval_try_get_string(value);
 			if (UNEXPECTED(!val)) {
-				return;
+				RETURN_THROWS();
 			}
 
 			key = zend_string_init("assert.exception", sizeof("assert.exception")-1, 0);
@@ -313,9 +313,7 @@ PHP_FUNCTION(assert_options)
 
 	default:
 		zend_argument_value_error(1, "must have a valid value");
-		break;
+		RETURN_THROWS();
 	}
-
-	return;
 }
 /* }}} */
