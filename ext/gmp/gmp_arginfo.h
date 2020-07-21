@@ -1,7 +1,7 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 06749fca2bc6bdcef104f2c6cc69fe12e6e534fd */
+ * Stub hash: b467c887efad8da11c353a60bc0adea5215aa781 */
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_gmp_init, 0, 1, GMP, MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_gmp_init, 0, 1, GMP, 0)
 	ZEND_ARG_INFO(0, number)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, base, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
@@ -22,12 +22,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gmp_intval, 0, 1, IS_LONG, 0)
 	ZEND_ARG_INFO(0, gmpnumber)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_gmp_strval, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gmp_strval, 0, 1, IS_STRING, 0)
 	ZEND_ARG_INFO(0, gmpnumber)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, base, IS_LONG, 0, "10")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_gmp_add, 0, 2, GMP, MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_gmp_add, 0, 2, GMP, 0)
 	ZEND_ARG_INFO(0, a)
 	ZEND_ARG_INFO(0, b)
 ZEND_END_ARG_INFO()
@@ -52,11 +52,14 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_gmp_div arginfo_gmp_div_q
 
-#define arginfo_gmp_mod arginfo_gmp_add
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_gmp_mod, 0, 2, GMP, MAY_BE_FALSE)
+	ZEND_ARG_INFO(0, a)
+	ZEND_ARG_INFO(0, b)
+ZEND_END_ARG_INFO()
 
-#define arginfo_gmp_divexact arginfo_gmp_add
+#define arginfo_gmp_divexact arginfo_gmp_mod
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_gmp_neg, 0, 1, GMP, MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_gmp_neg, 0, 1, GMP, 0)
 	ZEND_ARG_INFO(0, a)
 ZEND_END_ARG_INFO()
 
@@ -66,7 +69,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_gmp_sqrt arginfo_gmp_neg
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_gmp_sqrtrem, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gmp_sqrtrem, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_INFO(0, a)
 ZEND_END_ARG_INFO()
 
@@ -80,12 +83,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_gmp_rootrem, 0, 2, MAY_BE_ARRAY|
 	ZEND_ARG_TYPE_INFO(0, nth, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_gmp_pow, 0, 2, GMP, MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_gmp_pow, 0, 2, GMP, 0)
 	ZEND_ARG_INFO(0, base)
 	ZEND_ARG_TYPE_INFO(0, exp, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_gmp_powm, 0, 3, GMP, MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_gmp_powm, 0, 3, GMP, 0)
 	ZEND_ARG_INFO(0, base)
 	ZEND_ARG_INFO(0, exp)
 	ZEND_ARG_INFO(0, mod)
@@ -97,23 +100,23 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_gmp_perfect_power arginfo_gmp_perfect_square
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_gmp_prob_prime, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gmp_prob_prime, 0, 1, IS_LONG, 0)
 	ZEND_ARG_INFO(0, a)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, reps, IS_LONG, 0, "10")
 ZEND_END_ARG_INFO()
 
 #define arginfo_gmp_gcd arginfo_gmp_add
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_gmp_gcdext, 0, 2, MAY_BE_ARRAY|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gmp_gcdext, 0, 2, IS_ARRAY, 0)
 	ZEND_ARG_INFO(0, a)
 	ZEND_ARG_INFO(0, b)
 ZEND_END_ARG_INFO()
 
 #define arginfo_gmp_lcm arginfo_gmp_add
 
-#define arginfo_gmp_invert arginfo_gmp_add
+#define arginfo_gmp_invert arginfo_gmp_mod
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_gmp_jacobi, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gmp_jacobi, 0, 2, IS_LONG, 0)
 	ZEND_ARG_INFO(0, a)
 	ZEND_ARG_INFO(0, b)
 ZEND_END_ARG_INFO()
@@ -124,11 +127,11 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_gmp_cmp arginfo_gmp_jacobi
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_gmp_sign, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gmp_sign, 0, 1, IS_LONG, 0)
 	ZEND_ARG_INFO(0, a)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gmp_random_seed, 0, 1, _IS_BOOL, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gmp_random_seed, 0, 1, IS_VOID, 0)
 	ZEND_ARG_INFO(0, seed)
 ZEND_END_ARG_INFO()
 
@@ -165,7 +168,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gmp_testbit, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_gmp_scan0, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gmp_scan0, 0, 2, IS_LONG, 0)
 	ZEND_ARG_INFO(0, a)
 	ZEND_ARG_TYPE_INFO(0, start, IS_LONG, 0)
 ZEND_END_ARG_INFO()

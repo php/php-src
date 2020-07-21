@@ -19,13 +19,25 @@ $n1 = gmp_init("3498273496234234523451");
 var_dump(gmp_strval(gmp_invert($n, $n1)));
 var_dump(gmp_strval(gmp_invert($n1, $n)));
 
-var_dump(gmp_invert(array(), 1));
-var_dump(gmp_invert(1, array()));
-var_dump(gmp_invert(array(), array()));
+try {
+    var_dump(gmp_invert(array(), 1));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    var_dump(gmp_invert(1, array()));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    var_dump(gmp_invert(array(), array()));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 string(7) "2293131"
 string(1) "0"
 string(4) "5827"
@@ -35,13 +47,7 @@ string(1) "0"
 string(1) "0"
 string(22) "3498273496234234523441"
 string(1) "1"
-
-Warning: gmp_invert(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
-
-Warning: gmp_invert(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
-
-Warning: gmp_invert(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
+gmp_invert(): Argument #1 ($a) must be of type bool|int|string|GMP, array given
+gmp_invert(): Argument #2 ($b) must be of type bool|int|string|GMP, array given
+gmp_invert(): Argument #1 ($a) must be of type bool|int|string|GMP, array given
 Done

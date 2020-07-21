@@ -57,11 +57,15 @@ $r = gmp_sqrtrem($n);
 var_dump(gmp_strval($r[0]));
 var_dump(gmp_strval($r[1]));
 
-var_dump(gmp_sqrtrem(array()));
+try {
+    var_dump(gmp_sqrtrem(array()));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 gmp_sqrtrem(): Argument #1 ($a) must be greater than or equal to 0
 string(1) "0"
 string(1) "0"
@@ -82,7 +86,5 @@ string(1) "1"
 gmp_sqrtrem(): Argument #1 ($a) must be greater than or equal to 0
 string(4) "1000"
 string(1) "1"
-
-Warning: gmp_sqrtrem(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
+gmp_sqrtrem(): Argument #1 ($a) must be of type bool|int|string|GMP, array given
 Done

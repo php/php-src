@@ -31,11 +31,15 @@ try {
 $n = gmp_init(777);
 var_dump(gmp_strval(gmp_sqrt($n)));
 
-var_dump(gmp_sqrt(array()));
+try {
+    var_dump(gmp_sqrt(array()));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 gmp_sqrt(): Argument #1 ($a) must be greater than or equal to 0
 gmp_sqrt(): Argument #1 ($a) must be greater than or equal to 0
 string(1) "0"
@@ -44,7 +48,5 @@ string(2) "12"
 string(1) "0"
 gmp_sqrt(): Argument #1 ($a) must be greater than or equal to 0
 string(2) "27"
-
-Warning: gmp_sqrt(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
+gmp_sqrt(): Argument #1 ($a) must be of type bool|int|string|GMP, array given
 Done

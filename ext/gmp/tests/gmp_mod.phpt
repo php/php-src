@@ -5,12 +5,20 @@ gmp_mod tests()
 --FILE--
 <?php
 
-var_dump(gmp_mod("",""));
+try {
+    var_dump(gmp_mod("",""));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 var_dump(gmp_mod(0,1));
 var_dump(gmp_mod(0,-1));
 var_dump(gmp_mod(-1,0));
 
-var_dump(gmp_mod(array(), array()));
+try {
+    var_dump(gmp_mod(array(), array()));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 $a = gmp_init("-100000000");
 $b = gmp_init("353467");
@@ -20,8 +28,7 @@ var_dump(gmp_mod($a, $b));
 echo "Done\n";
 ?>
 --EXPECTF--
-Warning: gmp_mod(): Unable to convert variable to GMP - string is not an integer in %s on line %d
-bool(false)
+gmp_mod(): Argument #1 ($a) must be an integer string in base 10
 object(GMP)#%d (1) {
   ["num"]=>
   string(1) "0"
@@ -33,9 +40,7 @@ object(GMP)#%d (1) {
 
 Warning: gmp_mod(): Zero operand not allowed in %s on line %d
 bool(false)
-
-Warning: gmp_mod(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
+gmp_mod(): Argument #1 ($a) must be of type bool|int|string|GMP, array given
 object(GMP)#%d (1) {
   ["num"]=>
   string(5) "31161"

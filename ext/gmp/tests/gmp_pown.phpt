@@ -21,25 +21,41 @@ var_dump(gmp_strval(gmp_powm($n,$e,$m)));
 
 try {
     var_dump(gmp_powm(5, 11, 0));
-} catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\ValueError $error) {
+    echo $error->getMessage() . \PHP_EOL;
 }
 try {
     var_dump(gmp_powm(5, "11", gmp_init(0)));
-} catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\ValueError $error) {
+    echo $error->getMessage() . \PHP_EOL;
 }
 
-var_dump(gmp_powm(array(),$e,$m));
-var_dump(gmp_powm($n,array(),$m));
-var_dump(gmp_powm($n,$e,array()));
-var_dump(gmp_powm(array(),array(),array()));
+try {
+    var_dump(gmp_powm(array(),$e,$m));
+} catch (\TypeError $error) {
+    echo $error->getMessage() . \PHP_EOL;
+}
+try {
+    var_dump(gmp_powm($n,array(),$m));
+} catch (\TypeError $error) {
+    echo $error->getMessage() . \PHP_EOL;
+}
+try {
+    var_dump(gmp_powm($n,$error,array()));
+} catch (\TypeError $error) {
+    echo $error->getMessage() . \PHP_EOL;
+}
+try {
+    var_dump(gmp_powm(array(),array(),array()));
+} catch (\TypeError $error) {
+    echo $error->getMessage() . \PHP_EOL;
+}
 
 try {
     $n = gmp_init("-5");
     var_dump(gmp_powm(10, $n, 10));
-} catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\ValueError $error) {
+    echo $error->getMessage() . \PHP_EOL;
 }
 
 $n = gmp_init("0");
@@ -47,7 +63,7 @@ var_dump(gmp_powm(10, $n, 10));
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 string(1) "0"
 string(1) "5"
 string(1) "5"
@@ -59,20 +75,12 @@ string(3) "171"
 string(3) "371"
 gmp_powm(): Argument #3 ($mod) must not be 0
 gmp_powm(): Argument #3 ($mod) must not be 0
-
-Warning: gmp_powm(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
-
-Warning: gmp_powm(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
-
-Warning: gmp_powm(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
-
-Warning: gmp_powm(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
+gmp_powm(): Argument #1 ($base) must be of type bool|int|string|GMP, array given
+gmp_powm(): Argument #2 ($exp) must be of type bool|int|string|GMP, array given
+gmp_powm(): Argument #2 ($exp) must be of type bool|int|string|GMP, TypeError given
+gmp_powm(): Argument #1 ($base) must be of type bool|int|string|GMP, array given
 gmp_powm(): Argument #2 ($exp) must be greater than or equal to 0
-object(GMP)#%d (1) {
+object(GMP)#6 (1) {
   ["num"]=>
   string(1) "1"
 }

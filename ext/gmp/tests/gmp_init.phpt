@@ -12,26 +12,33 @@ try {
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
-var_dump(gmp_init("",36));
-var_dump(gmp_init("foo",3));
-var_dump(gmp_strval(gmp_init("993247326237679187178",3)));
+
+try {
+    var_dump(gmp_init("",36));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    var_dump(gmp_init("foo",3));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    var_dump(gmp_strval(gmp_init("993247326237679187178",3)));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 echo "Done\n";
 ?>
---EXPECTF--
-object(GMP)#%d (1) {
+--EXPECT--
+object(GMP)#1 (1) {
   ["num"]=>
   string(8) "98765678"
 }
 string(8) "98765678"
 gmp_init(): Argument #2 ($base) must be between 2 and 62
-
-Warning: gmp_init(): Unable to convert variable to GMP - string is not an integer in %s on line %d
-bool(false)
-
-Warning: gmp_init(): Unable to convert variable to GMP - string is not an integer in %s on line %d
-bool(false)
-
-Warning: gmp_init(): Unable to convert variable to GMP - string is not an integer in %s on line %d
-string(1) "0"
+gmp_init(): Argument #1 ($number) must be an integer string in base 36
+gmp_init(): Argument #1 ($number) must be an integer string in base 3
+gmp_init(): Argument #1 ($number) must be an integer string in base 3
 Done

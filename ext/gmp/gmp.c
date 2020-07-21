@@ -109,7 +109,7 @@ typedef struct _gmp_temp {
  * gmp_temp_t. This temporary value needs to be freed lateron using the
  * FREE_GMP_TEMP macro.
  *
- * If the conversion to a gmp number fails, the macros return false.
+ * If the conversion to a gmp number fails, the macros RETURN_THROWS() due to TypeError.
  * The _DEP / _DEP_DEP variants additionally free the temporary values
  * passed in the last / last two arguments.
  *
@@ -126,47 +126,46 @@ typedef struct _gmp_temp {
 		mpz_clear(temp.num); \
 	}
 
-#define FETCH_GMP_ZVAL_DEP_DEP(gmpnumber, zval, temp, dep1, dep2) \
+#define FETCH_GMP_ZVAL_DEP_DEP(gmpnumber, zval, temp, dep1, dep2, arg_pos) \
 if (IS_GMP(zval)) {                                               \
 	gmpnumber = GET_GMP_FROM_ZVAL(zval);                          \
 	temp.is_used = 0;                                             \
 } else {                                                          \
 	mpz_init(temp.num);                                           \
-	if (convert_to_gmp(temp.num, zval, 0) == FAILURE) { \
+	if (convert_to_gmp(temp.num, zval, 0, arg_pos) == FAILURE) {  \
 		mpz_clear(temp.num);                                      \
 		FREE_GMP_TEMP(dep1);                                      \
 		FREE_GMP_TEMP(dep2);                                      \
-		RETURN_FALSE;                                             \
+		RETURN_THROWS();                                          \
 	}                                                             \
 	temp.is_used = 1;                                             \
 	gmpnumber = temp.num;                                         \
 }
 
-#define FETCH_GMP_ZVAL_DEP(gmpnumber, zval, temp, dep)            \
+#define FETCH_GMP_ZVAL_DEP(gmpnumber, zval, temp, dep, arg_pos)   \
 if (IS_GMP(zval)) {                                               \
 	gmpnumber = GET_GMP_FROM_ZVAL(zval);                          \
 	temp.is_used = 0;                                             \
 } else {                                                          \
 	mpz_init(temp.num);                                           \
-	if (convert_to_gmp(temp.num, zval, 0) == FAILURE) { \
+	if (convert_to_gmp(temp.num, zval, 0, arg_pos) == FAILURE) {  \
 		mpz_clear(temp.num);                                      \
 		FREE_GMP_TEMP(dep);                                       \
-		RETURN_FALSE;                                             \
+		RETURN_THROWS();                                          \
 	}                                                             \
 	temp.is_used = 1;                                             \
 	gmpnumber = temp.num;                                         \
 }
 
-/* TODO convert RETURN_FALSE */
-#define FETCH_GMP_ZVAL(gmpnumber, zval, temp)                     \
+#define FETCH_GMP_ZVAL(gmpnumber, zval, temp, arg_pos)            \
 if (IS_GMP(zval)) {                                               \
 	gmpnumber = GET_GMP_FROM_ZVAL(zval);                          \
 	temp.is_used = 0;                                             \
 } else {                                                          \
 	mpz_init(temp.num);                                           \
-	if (convert_to_gmp(temp.num, zval, 0) == FAILURE) { \
+	if (convert_to_gmp(temp.num, zval, 0, arg_pos) == FAILURE) {  \
 		mpz_clear(temp.num);                                      \
-		RETURN_FALSE;                                             \
+		RETURN_THROWS();                                          \
 	}                                                             \
 	temp.is_used = 1;                                             \
 	gmpnumber = temp.num;                                         \
@@ -176,7 +175,7 @@ if (IS_GMP(zval)) {                                               \
 	gmp_create(return_value, &gmpnumber)
 
 static void gmp_strval(zval *result, mpz_t gmpnum, int base);
-static int convert_to_gmp(mpz_t gmpnumber, zval *val, zend_long base);
+static int convert_to_gmp(mpz_t gmpnumber, zval *val, zend_long base, uint32_t arg_pos);
 static void gmp_cmp(zval *return_value, zval *a_arg, zval *b_arg);
 
 /*
@@ -346,7 +345,7 @@ static void shift_operator_helper(gmp_binary_ui_op_t op, zval *return_value, zva
 		mpz_ptr gmpnum_op, gmpnum_result;
 		gmp_temp_t temp;
 
-		FETCH_GMP_ZVAL(gmpnum_op, op1, temp);
+		FETCH_GMP_ZVAL(gmpnum_op, op1, temp, 1);
 		INIT_GMP_RETVAL(gmpnum_result);
 		op(gmpnum_result, gmpnum_op, (gmp_ulong) shift);
 		FREE_GMP_TEMP(temp);
@@ -480,7 +479,7 @@ static int gmp_unserialize(zval *object, zend_class_entry *ce, const unsigned ch
 	zv = var_tmp_var(&unserialize_data);
 	if (!php_var_unserialize(zv, &p, max, &unserialize_data)
 		|| Z_TYPE_P(zv) != IS_STRING
-		|| convert_to_gmp(gmpnum, zv, 10) == FAILURE
+		|| convert_to_gmp(gmpnum, zv, 10, 0) == FAILURE
 	) {
 		zend_throw_exception(NULL, "Could not unserialize number", 0);
 		goto exit;
@@ -584,7 +583,7 @@ ZEND_MODULE_INFO_D(gmp)
 
 /* {{{ convert_to_gmp
  * Convert zval to be gmp number */
-static int convert_to_gmp(mpz_t gmpnumber, zval *val, zend_long base)
+static int convert_to_gmp(mpz_t gmpnumber, zval *val, zend_long base, uint32_t arg_pos)
 {
 	switch (Z_TYPE_P(val)) {
 	case IS_LONG:
@@ -610,16 +609,34 @@ static int convert_to_gmp(mpz_t gmpnumber, zval *val, zend_long base)
 
 		ret = mpz_set_str(gmpnumber, (skip_lead ? &numstr[2] : numstr), (int) base);
 		if (-1 == ret) {
-			php_error_docref(NULL, E_WARNING,
-				"Unable to convert variable to GMP - string is not an integer");
+			/* Try to guess base for better error message */
+			if (base == 0) {
+				if (numstr[0] == '0' || ((numstr[0] == '+' || numstr[0] == '-') && numstr[1] == '0')) {
+					base = 8;
+				} else { /* Default to base 10 */
+					base = 10;
+				}
+			}
+
+			/* if unserializing */
+			if (arg_pos == 0) {
+				php_error_docref(NULL, E_WARNING,
+					"Cannot convert variable to GMP, string is not an integer in base " ZEND_LONG_FMT, base);
+				return FAILURE;
+			}
+			zend_argument_type_error(arg_pos, "must be an integer string in base " ZEND_LONG_FMT, base);
 			return FAILURE;
 		}
 
 		return SUCCESS;
 	}
 	default:
-		php_error_docref(NULL, E_WARNING,
-			"Unable to convert variable to GMP - wrong type");
+		/* if unserializing */
+		if (arg_pos == 0) {
+			php_error_docref(NULL, E_WARNING, "Cannot convert variable of type %s to GMP", zend_zval_type_name(val));
+			return FAILURE;
+		}
+		zend_argument_type_error(arg_pos, "must be of type bool|int|string|GMP, %s given", zend_zval_type_name(val));
 		return FAILURE;
 	}
 }
@@ -663,13 +680,13 @@ static void gmp_cmp(zval *return_value, zval *a_arg, zval *b_arg) /* {{{ */
 	zend_bool use_si = 0;
 	zend_long res;
 
-	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
+	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a, 1);
 
 	if (Z_TYPE_P(b_arg) == IS_LONG) {
 		use_si = 1;
 		temp_b.is_used = 0;
 	} else {
-		FETCH_GMP_ZVAL_DEP(gmpnum_b, b_arg, temp_b, temp_a);
+		FETCH_GMP_ZVAL_DEP(gmpnum_b, b_arg, temp_b, temp_a, 2);
 	}
 
 	if (use_si) {
@@ -693,13 +710,13 @@ static inline void gmp_zval_binary_ui_op(zval *return_value, zval *a_arg, zval *
 	mpz_ptr gmpnum_a, gmpnum_b, gmpnum_result;
 	gmp_temp_t temp_a, temp_b;
 
-	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
+	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a, 1);
 
 	if (gmp_ui_op && Z_TYPE_P(b_arg) == IS_LONG && Z_LVAL_P(b_arg) >= 0) {
 		gmpnum_b = NULL;
 		temp_b.is_used = 0;
 	} else {
-		FETCH_GMP_ZVAL_DEP(gmpnum_b, b_arg, temp_b, temp_a);
+		FETCH_GMP_ZVAL_DEP(gmpnum_b, b_arg, temp_b, temp_a, 2);
 	}
 
 	if (check_b_zero) {
@@ -740,13 +757,13 @@ static inline void gmp_zval_binary_ui_op2(zval *return_value, zval *a_arg, zval 
 	gmp_temp_t temp_a, temp_b;
 	zval result1, result2;
 
-	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
+	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a, 1);
 
 	if (gmp_ui_op && Z_TYPE_P(b_arg) == IS_LONG && Z_LVAL_P(b_arg) >= 0) {
 		gmpnum_b = NULL;
 		temp_b.is_used = 0;
 	} else {
-		FETCH_GMP_ZVAL_DEP(gmpnum_b, b_arg, temp_b, temp_a);
+		FETCH_GMP_ZVAL_DEP(gmpnum_b, b_arg, temp_b, temp_a, 2);
 	}
 
 	if (check_b_zero) {
@@ -804,7 +821,7 @@ static inline void gmp_zval_unary_op(zval *return_value, zval *a_arg, gmp_unary_
 	mpz_ptr gmpnum_a, gmpnum_result;
 	gmp_temp_t temp_a;
 
-	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
+	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a, 1);
 
 	INIT_GMP_RETVAL(gmpnum_result);
 	gmp_op(gmpnum_result, gmpnum_a);
@@ -847,7 +864,7 @@ static inline void _gmp_unary_opl(INTERNAL_FUNCTION_PARAMETERS, gmp_unary_opl_t 
 		RETURN_THROWS();
 	}
 
-	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
+	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a, 1);
 	RETVAL_LONG(gmp_op(gmpnum_a));
 	FREE_GMP_TEMP(temp_a);
 }
@@ -870,9 +887,8 @@ ZEND_FUNCTION(gmp_init)
 	}
 
 	INIT_GMP_RETVAL(gmpnumber);
-	if (convert_to_gmp(gmpnumber, number_arg, base) == FAILURE) {
-		zval_ptr_dtor(return_value);
-		RETURN_FALSE;
+	if (convert_to_gmp(gmpnumber, number_arg, base, 1) == FAILURE) {
+		RETURN_THROWS();
 	}
 }
 /* }}} */
@@ -966,7 +982,7 @@ ZEND_FUNCTION(gmp_export)
 		RETURN_THROWS();
 	}
 
-	FETCH_GMP_ZVAL(gmpnumber, gmpnumber_arg, temp_a);
+	FETCH_GMP_ZVAL(gmpnumber, gmpnumber_arg, temp_a, 1);
 
 	if (mpz_sgn(gmpnumber) == 0) {
 		RETURN_EMPTY_STRING();
@@ -1021,7 +1037,7 @@ ZEND_FUNCTION(gmp_strval)
 		RETURN_THROWS();
 	}
 
-	FETCH_GMP_ZVAL(gmpnum, gmpnumber_arg, temp_a);
+	FETCH_GMP_ZVAL(gmpnum, gmpnumber_arg, temp_a, 1);
 
 	gmp_strval(return_value, gmpnum, (int)base);
 
@@ -1218,7 +1234,7 @@ ZEND_FUNCTION(gmp_binomial)
 	} else {
 		mpz_ptr gmpnum_n;
 		gmp_temp_t temp_n;
-		FETCH_GMP_ZVAL(gmpnum_n, n_arg, temp_n);
+		FETCH_GMP_ZVAL(gmpnum_n, n_arg, temp_n, 1);
 		mpz_bin_ui(gmpnum_result, gmpnum_n, (gmp_ulong) k);
 		FREE_GMP_TEMP(temp_n);
 	}
@@ -1247,7 +1263,7 @@ ZEND_FUNCTION(gmp_pow)
 		mpz_ui_pow_ui(gmpnum_result, Z_LVAL_P(base_arg), exp);
 	} else {
 		mpz_ptr gmpnum_base;
-		FETCH_GMP_ZVAL(gmpnum_base, base_arg, temp_base);
+		FETCH_GMP_ZVAL(gmpnum_base, base_arg, temp_base, 1);
 		INIT_GMP_RETVAL(gmpnum_result);
 		mpz_pow_ui(gmpnum_result, gmpnum_base, exp);
 		FREE_GMP_TEMP(temp_base);
@@ -1267,13 +1283,13 @@ ZEND_FUNCTION(gmp_powm)
 		RETURN_THROWS();
 	}
 
-	FETCH_GMP_ZVAL(gmpnum_base, base_arg, temp_base);
+	FETCH_GMP_ZVAL(gmpnum_base, base_arg, temp_base, 1);
 
 	if (Z_TYPE_P(exp_arg) == IS_LONG && Z_LVAL_P(exp_arg) >= 0) {
 		use_ui = 1;
 		temp_exp.is_used = 0;
 	} else {
-		FETCH_GMP_ZVAL_DEP(gmpnum_exp, exp_arg, temp_exp, temp_base);
+		FETCH_GMP_ZVAL_DEP(gmpnum_exp, exp_arg, temp_exp, temp_base, 2);
 		if (mpz_sgn(gmpnum_exp) < 0) {
 			zend_argument_value_error(2, "must be greater than or equal to 0");
 			FREE_GMP_TEMP(temp_base);
@@ -1281,7 +1297,7 @@ ZEND_FUNCTION(gmp_powm)
 			RETURN_THROWS();
 		}
 	}
-	FETCH_GMP_ZVAL_DEP_DEP(gmpnum_mod, mod_arg, temp_mod, temp_exp, temp_base);
+	FETCH_GMP_ZVAL_DEP_DEP(gmpnum_mod, mod_arg, temp_mod, temp_exp, temp_base, 3);
 
 	if (!mpz_cmp_ui(gmpnum_mod, 0)) {
 		zend_argument_value_error(3, "must not be 0");
@@ -1315,7 +1331,7 @@ ZEND_FUNCTION(gmp_sqrt)
 		RETURN_THROWS();
 	}
 
-	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
+	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a, 1);
 
 	if (mpz_sgn(gmpnum_a) < 0) {
 		zend_argument_value_error(1, "must be greater than or equal to 0");
@@ -1341,7 +1357,7 @@ ZEND_FUNCTION(gmp_sqrtrem)
 		RETURN_THROWS();
 	}
 
-	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
+	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a, 1);
 
 	if (mpz_sgn(gmpnum_a) < 0) {
 		zend_argument_value_error(1, "must be greater than or equal to 0");
@@ -1378,7 +1394,7 @@ ZEND_FUNCTION(gmp_root)
 		RETURN_THROWS();
 	}
 
-	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
+	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a, 1);
 
 	if (nth % 2 == 0 && mpz_sgn(gmpnum_a) < 0) {
 		php_error_docref(NULL, E_WARNING, "Can't take even root of negative number");
@@ -1410,7 +1426,7 @@ ZEND_FUNCTION(gmp_rootrem)
 		RETURN_THROWS();
 	}
 
-	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
+	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a, 1);
 
 	if (nth % 2 == 0 && mpz_sgn(gmpnum_a) < 0) {
 		php_error_docref(NULL, E_WARNING, "Can't take even root of negative number");
@@ -1450,7 +1466,7 @@ ZEND_FUNCTION(gmp_perfect_square)
 		RETURN_THROWS();
 	}
 
-	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
+	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a, 1);
 
 	RETVAL_BOOL((mpz_perfect_square_p(gmpnum_a) != 0));
 	FREE_GMP_TEMP(temp_a);
@@ -1468,7 +1484,7 @@ ZEND_FUNCTION(gmp_perfect_power)
 		RETURN_THROWS();
 	}
 
-	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
+	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a, 1);
 
 	RETVAL_BOOL((mpz_perfect_power_p(gmpnum_a) != 0));
 	FREE_GMP_TEMP(temp_a);
@@ -1487,7 +1503,7 @@ ZEND_FUNCTION(gmp_prob_prime)
 		RETURN_THROWS();
 	}
 
-	FETCH_GMP_ZVAL(gmpnum_a, gmpnumber_arg, temp_a);
+	FETCH_GMP_ZVAL(gmpnum_a, gmpnumber_arg, temp_a, 1);
 
 	RETVAL_LONG(mpz_probab_prime_p(gmpnum_a, (int)reps));
 	FREE_GMP_TEMP(temp_a);
@@ -1520,8 +1536,8 @@ ZEND_FUNCTION(gmp_gcdext)
 		RETURN_THROWS();
 	}
 
-	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
-	FETCH_GMP_ZVAL_DEP(gmpnum_b, b_arg, temp_b, temp_a);
+	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a, 1);
+	FETCH_GMP_ZVAL_DEP(gmpnum_b, b_arg, temp_b, temp_a, 2);
 
 	gmp_create(&result_g, &gmpnum_g);
 	gmp_create(&result_s, &gmpnum_s);
@@ -1550,8 +1566,8 @@ ZEND_FUNCTION(gmp_invert)
 		RETURN_THROWS();
 	}
 
-	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
-	FETCH_GMP_ZVAL_DEP(gmpnum_b, b_arg, temp_b, temp_a);
+	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a, 1);
+	FETCH_GMP_ZVAL_DEP(gmpnum_b, b_arg, temp_b, temp_a, 2);
 
 	INIT_GMP_RETVAL(gmpnum_result);
 	res = mpz_invert(gmpnum_result, gmpnum_a, gmpnum_b);
@@ -1575,8 +1591,8 @@ ZEND_FUNCTION(gmp_jacobi)
 		RETURN_THROWS();
 	}
 
-	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
-	FETCH_GMP_ZVAL_DEP(gmpnum_b, b_arg, temp_b, temp_a);
+	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a, 1);
+	FETCH_GMP_ZVAL_DEP(gmpnum_b, b_arg, temp_b, temp_a, 2);
 
 	RETVAL_LONG(mpz_jacobi(gmpnum_a, gmpnum_b));
 
@@ -1596,8 +1612,8 @@ ZEND_FUNCTION(gmp_legendre)
 		RETURN_THROWS();
 	}
 
-	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
-	FETCH_GMP_ZVAL_DEP(gmpnum_b, b_arg, temp_b, temp_a);
+	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a, 1);
+	FETCH_GMP_ZVAL_DEP(gmpnum_b, b_arg, temp_b, temp_a, 2);
 
 	RETVAL_LONG(mpz_legendre(gmpnum_a, gmpnum_b));
 
@@ -1623,14 +1639,14 @@ ZEND_FUNCTION(gmp_kronecker)
 		use_a_si = 1;
 		temp_a.is_used = 0;
 	} else {
-		FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
+		FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a, 1);
 	}
 
 	if (Z_TYPE_P(b_arg) == IS_LONG) {
 		use_b_si = 1;
 		temp_b.is_used = 0;
 	} else {
-		FETCH_GMP_ZVAL_DEP(gmpnum_b, b_arg, temp_b, temp_a);
+		FETCH_GMP_ZVAL_DEP(gmpnum_b, b_arg, temp_b, temp_a, 2);
 	}
 
 	if (use_a_si) {
@@ -1674,7 +1690,7 @@ ZEND_FUNCTION(gmp_sign)
 		RETURN_THROWS();
 	}
 
-	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
+	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a, 1);
 
 	RETVAL_LONG(mpz_sgn(gmpnum_a));
 	FREE_GMP_TEMP(temp_a);
@@ -1711,7 +1727,7 @@ ZEND_FUNCTION(gmp_random_seed)
 	else {
 		mpz_ptr gmpnum_seed;
 
-		FETCH_GMP_ZVAL(gmpnum_seed, seed, temp_a);
+		FETCH_GMP_ZVAL(gmpnum_seed, seed, temp_a, 1);
 
 		gmp_randseed(GMPG(rand_state), gmpnum_seed);
 
@@ -1756,7 +1772,7 @@ ZEND_FUNCTION(gmp_random_range)
 
 	gmp_init_random();
 
-	FETCH_GMP_ZVAL(gmpnum_max, max_arg, temp_a);
+	FETCH_GMP_ZVAL(gmpnum_max, max_arg, temp_a, 2);
 
 	if (Z_TYPE_P(min_arg) == IS_LONG && Z_LVAL_P(min_arg) >= 0) {
 		if (mpz_cmp_ui(gmpnum_max, Z_LVAL_P(min_arg)) <= 0) {
@@ -1785,7 +1801,7 @@ ZEND_FUNCTION(gmp_random_range)
 	} else {
 		mpz_ptr gmpnum_min;
 
-		FETCH_GMP_ZVAL_DEP(gmpnum_min, min_arg, temp_b, temp_a);
+		FETCH_GMP_ZVAL_DEP(gmpnum_min, min_arg, temp_b, temp_a, 1);
 
 		if (mpz_cmp(gmpnum_max, gmpnum_min) <= 0) {
 			FREE_GMP_TEMP(temp_b);
@@ -1913,7 +1929,7 @@ ZEND_FUNCTION(gmp_testbit)
 		RETURN_THROWS();
 	}
 
-	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
+	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a, 1);
 	RETVAL_BOOL(mpz_tstbit(gmpnum_a, index));
 	FREE_GMP_TEMP(temp_a);
 }
@@ -1937,8 +1953,8 @@ ZEND_FUNCTION(gmp_hamdist)
 		RETURN_THROWS();
 	}
 
-	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
-	FETCH_GMP_ZVAL_DEP(gmpnum_b, b_arg, temp_b, temp_a);
+	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a, 1);
+	FETCH_GMP_ZVAL_DEP(gmpnum_b, b_arg, temp_b, temp_a, 2);
 
 	RETVAL_LONG(mpz_hamdist(gmpnum_a, gmpnum_b));
 
@@ -1964,7 +1980,7 @@ ZEND_FUNCTION(gmp_scan0)
 		RETURN_THROWS();
 	}
 
-	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
+	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a, 1);
 
 	RETVAL_LONG(mpz_scan0(gmpnum_a, start));
 	FREE_GMP_TEMP(temp_a);
@@ -1988,7 +2004,7 @@ ZEND_FUNCTION(gmp_scan1)
 		RETURN_THROWS();
 	}
 
-	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
+	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a, 1);
 
 	RETVAL_LONG(mpz_scan1(gmpnum_a, start));
 	FREE_GMP_TEMP(temp_a);

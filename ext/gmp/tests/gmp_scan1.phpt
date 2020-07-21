@@ -19,18 +19,20 @@ var_dump(gmp_scan1("1000000000", 200));
 $n = gmp_init("24234527465274");
 var_dump(gmp_scan1($n, 10));
 
-var_dump(gmp_scan1(array(), 200));
+try {
+    var_dump(gmp_scan1(array(), 200));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 gmp_scan1(): Argument #2 ($start) must be greater than or equal to zero
 int(1)
 int(12)
 int(9)
 int(-1)
 int(10)
-
-Warning: gmp_scan1(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
+gmp_scan1(): Argument #1 ($a) must be of type bool|int|string|GMP, array given
 Done

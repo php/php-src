@@ -86,7 +86,11 @@ var_dump($a <= 42);
 var_dump($a > 42);
 var_dump($a >= 42);
 
-var_dump($a == new stdClass);
+try {
+    var_dump($a == new stdClass);
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 $a += 1;
 var_dump($a);
@@ -274,9 +278,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
-
-Warning: main(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
+main(): Argument #2 must be of type bool|int|string|GMP, stdClass given
 object(GMP)#%d (1) {
   ["num"]=>
   string(2) "43"

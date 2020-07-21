@@ -22,8 +22,16 @@ var_dump(gmp_div_q(1123123,123, GMP_ROUND_MINUSINF));
 
 $fp = fopen(__FILE__, 'r');
 
-var_dump(gmp_div_q($fp, $fp));
-var_dump(gmp_div_q(array(), array()));
+try {
+    var_dump(gmp_div_q($fp, $fp));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    var_dump(gmp_div_q(array(), array()));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 echo "Done\n";
 ?>
@@ -64,10 +72,6 @@ object(GMP)#%d (1) {
   ["num"]=>
   string(4) "9131"
 }
-
-Warning: gmp_div_q(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
-
-Warning: gmp_div_q(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
+gmp_div_q(): Argument #1 ($a) must be of type bool|int|string|GMP, resource given
+gmp_div_q(): Argument #1 ($a) must be of type bool|int|string|GMP, array given
 Done
