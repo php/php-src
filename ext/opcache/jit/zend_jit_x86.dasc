@@ -3277,6 +3277,8 @@ static int zend_jit_trace_handler(dasm_State **Dst, const zend_op_array *op_arra
 			const zend_op *exit_opline = NULL;
 			uint32_t exit_point;
 			const void *exit_addr;
+			uint32_t old_info = 0;
+			zend_jit_trace_stack *stack = JIT_G(current_frame)->stack;
 
 			if (zend_is_smart_branch(opline)) {
 				zend_bool exit_if_true = 0;
@@ -3302,6 +3304,10 @@ static int zend_jit_trace_handler(dasm_State **Dst, const zend_op_array *op_arra
 						break;
 					case ZEND_FE_FETCH_R:
 					case ZEND_FE_FETCH_RW:
+						if (opline->op2_type == IS_CV) {
+							old_info = STACK_INFO(stack, EX_VAR_TO_NUM(opline->op2.var));
+							SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->op2.var), IS_UNKNOWN);
+						}
 						exit_opline = (trace->opline == opline + 1) ?
 							ZEND_OFFSET_TO_OPLINE(opline, opline->extended_value) :
 							opline + 1;
@@ -3312,6 +3318,15 @@ static int zend_jit_trace_handler(dasm_State **Dst, const zend_op_array *op_arra
 
 			exit_point = zend_jit_trace_get_exit_point(opline, exit_opline, trace, 0);
 			exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+
+			switch (opline->opcode) {
+				case ZEND_FE_FETCH_R:
+				case ZEND_FE_FETCH_RW:
+					if (opline->op2_type == IS_CV) {
+						SET_STACK_INFO(stack, EX_VAR_TO_NUM(opline->op2.var), old_info);
+					}
+					break;
+			}
 
 			if (!exit_addr) {
 				return 0;

@@ -655,8 +655,9 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 		if (opline->op2_type & (IS_TMP_VAR|IS_VAR|IS_CV)
 		 && opline->opcode != ZEND_INSTANCEOF
 		 && opline->opcode != ZEND_UNSET_STATIC_PROP
-		 && opline->opcode != ZEND_FE_FETCH_R
-		 && opline->opcode != ZEND_FE_FETCH_RW) {
+		 && (opline->op2_type == IS_CV
+		  || (opline->opcode != ZEND_FE_FETCH_R
+		   && opline->opcode != ZEND_FE_FETCH_RW))) {
 			zval *zv = EX_VAR(opline->op2.var);
 			uint8_t flags = 0;
 
