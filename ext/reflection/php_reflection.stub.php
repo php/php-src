@@ -123,7 +123,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract
     public function getClosure() {}
 }
 
-class ReflectionGenerator
+final class ReflectionGenerator
 {
     public function __construct(Generator $generator) {}
 

@@ -6506,6 +6506,7 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionGenerator", class_ReflectionGenerator_methods);
 	reflection_init_class_handlers(&_reflection_entry);
 	reflection_generator_ptr = zend_register_internal_class(&_reflection_entry);
+	reflection_generator_ptr->ce_flags |= ZEND_ACC_FINAL;
 
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionParameter", class_ReflectionParameter_methods);
 	reflection_init_class_handlers(&_reflection_entry);
