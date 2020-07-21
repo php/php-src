@@ -3226,7 +3226,8 @@ static int zend_jit_trace_handler(dasm_State **Dst, const zend_op_array *op_arra
 	}
 	|	EXT_CALL handler, r0
 	if (may_throw) {
-		zend_jit_check_exception(Dst);
+		|	MEM_OP2_1_ZTS cmp, aword, executor_globals, exception, 0, r1
+		|	jne ->exception_handler
 	}
 
 	while (trace->op != ZEND_JIT_TRACE_VM && trace->op != ZEND_JIT_TRACE_END) {
@@ -3241,7 +3242,7 @@ static int zend_jit_trace_handler(dasm_State **Dst, const zend_op_array *op_arra
 		    opline->opcode == ZEND_DO_FCALL_BY_NAME ||
 		    opline->opcode == ZEND_DO_FCALL ||
 		    opline->opcode == ZEND_GENERATOR_CREATE) {
-			|	MEM_OP2_2_ZTS mov, FP, aword, executor_globals, current_execute_data, r0
+			|	MEM_OP2_2_ZTS mov, FP, aword, executor_globals, current_execute_data, r1
 		}
 	}
 
