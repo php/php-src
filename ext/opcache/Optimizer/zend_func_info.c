@@ -133,7 +133,7 @@ static const func_info_t func_infos[] = {
 	F1("md5",                          MAY_BE_STRING),
 	F1("md5_file",                     MAY_BE_FALSE | MAY_BE_STRING),
 	F1("iptcparse",                    MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_ARRAY),
-	F1("iptcembed",                    MAY_BE_FALSE | MAY_BE_STRING),
+	F1("iptcembed",                    MAY_BE_FALSE | MAY_BE_TRUE | MAY_BE_STRING),
 	F1("getimagesize",                 MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_STRING),
 	F1("getimagesizefromstring",       MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_STRING),
 	F1("image_type_to_mime_type",      MAY_BE_STRING),
