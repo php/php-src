@@ -4435,7 +4435,7 @@ static void php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAMETERS, int calc_su
 	}
 
 	if (longitude_is_null) {
-		latitude = INI_FLT("date.default_longitude");
+		longitude = INI_FLT("date.default_longitude");
 	}
 
 	if (zenith_is_null) {
