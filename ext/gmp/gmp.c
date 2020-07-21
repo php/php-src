@@ -1197,35 +1197,24 @@ ZEND_FUNCTION(gmp_abs)
 ZEND_FUNCTION(gmp_fact)
 {
 	zval *a_arg;
+	mpz_ptr gmpnum;
+	mpz_ptr gmpnum_result;
+	gmp_temp_t temp_a;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &a_arg) == FAILURE){
 		RETURN_THROWS();
 	}
 
-	if (IS_GMP(a_arg)) {
-		mpz_ptr gmpnum_tmp = GET_GMP_FROM_ZVAL(a_arg);
-		if (mpz_sgn(gmpnum_tmp) < 0) {
-			zend_argument_value_error(1, "must be greater than or equal to 0");
-			RETURN_THROWS();
-		}
-	} else {
-		/* Use convert_to_number first to detect getting non-integer */
-		convert_scalar_to_number(a_arg);
-		if (Z_TYPE_P(a_arg) != IS_LONG) {
-			convert_to_long(a_arg);
-			if (Z_LVAL_P(a_arg) >= 0) {
-				/* Only warn if we'll make it past the non-negative check */
-				// TODO: promote? Also I don't get this
-				php_error_docref(NULL, E_WARNING, "Number has to be an integer");
-			}
-		}
-		if (Z_LVAL_P(a_arg) < 0) {
-			zend_argument_value_error(1, "must be greater than or equal to 0");
-			RETURN_THROWS();
-		}
+	FETCH_GMP_ZVAL(gmpnum, a_arg, temp_a, 1);
+	FREE_GMP_TEMP(temp_a);
+
+	if (mpz_sgn(gmpnum) < 0) {
+		zend_argument_value_error(1, "must be greater than or equal to 0");
+		RETURN_THROWS();
 	}
 
-	gmp_zval_unary_ui_op(return_value, a_arg, mpz_fac_ui);
+	INIT_GMP_RETVAL(gmpnum_result);
+	mpz_fac_ui(gmpnum_result, zval_get_long(a_arg));
 }
 /* }}} */
 
