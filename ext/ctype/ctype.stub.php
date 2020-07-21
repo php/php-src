@@ -2,24 +2,35 @@
 
 /** @generate-function-entries */
 
-function ctype_alnum($text): bool {}
+/** @param string|int $input */
+function ctype_alnum(mixed $input): bool {}
 
-function ctype_alpha($text): bool {}
+/** @param string|int $input */
+function ctype_alpha(mixed $input): bool {}
 
-function ctype_cntrl($text): bool {}
+/** @param string|int $input */
+function ctype_cntrl(mixed $input): bool {}
 
-function ctype_digit($text): bool {}
+/** @param string|int $input */
+function ctype_digit(mixed $input): bool {}
 
-function ctype_lower($text): bool {}
+/** @param string|int $input */
+function ctype_lower(mixed $input): bool {}
 
-function ctype_graph($text): bool {}
+/** @param string|int $input */
+function ctype_graph(mixed $input): bool {}
 
-function ctype_print($text): bool {}
+/** @param string|int $input */
+function ctype_print(mixed $input): bool {}
 
-function ctype_punct($text): bool {}
+/** @param string|int $input */
+function ctype_punct(mixed $input): bool {}
 
-function ctype_space($text): bool {}
+/** @param string|int $input */
+function ctype_space(mixed $input): bool {}
 
-function ctype_upper($text): bool {}
+/** @param string|int $input */
+function ctype_upper(mixed $input): bool {}
 
-function ctype_xdigit($text): bool {}
+/** @param string|int $input */
+function ctype_xdigit(mixed $input): bool {}
