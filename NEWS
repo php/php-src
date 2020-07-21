@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     to return usec). (Herbert256)
 
 - Core:
+  . Fixed bug #79877 (getimagesize function silently truncates after a null 
+    byte) (cmb)
   . Fixed bug #79778 (Assertion failure if dumping closure with unresolved
     static variable). (Nikita)
   . Fixed bug #79792 (HT iterators not removed if empty array is destroyed).

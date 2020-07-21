@@ -1496,6 +1496,11 @@ static void php_getimagesize_from_any(INTERNAL_FUNCTION_PARAMETERS, int mode) { 
 		Z_PARAM_ZVAL_DEREF(info)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (mode == FROM_PATH && CHECK_NULL_PATH(input, input_len)) {
+		php_error_docref(NULL, E_WARNING, "Invalid path");
+		return;
+	}
+
 	if (argc == 2) {
 		zval_ptr_dtor(info);
 		array_init(info);
