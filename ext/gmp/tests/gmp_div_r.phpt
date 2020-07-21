@@ -6,7 +6,13 @@ gmp_div_r() tests
 <?php
 
 var_dump($r = gmp_div_r(0,1));
-var_dump($r = gmp_div_r(1,0));
+
+try {
+    var_dump($r = gmp_div_r(1,0));
+} catch (\DivisionByZeroError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+
 var_dump($r = gmp_div_r(12653,23482734));
 try {
     var_dump($r = gmp_div_r(12653,23482734, 10));
@@ -35,40 +41,38 @@ try {
 
 echo "Done\n";
 ?>
---EXPECTF--
-object(GMP)#%d (1) {
+--EXPECT--
+object(GMP)#1 (1) {
   ["num"]=>
   string(1) "0"
 }
-
-Warning: gmp_div_r(): Zero operand not allowed in %s on line %d
-bool(false)
-object(GMP)#%d (1) {
+Division by zero
+object(GMP)#3 (1) {
   ["num"]=>
   string(5) "12653"
 }
 gmp_div_r(): Argument #3 ($round) must be one of GMP_ROUND_ZERO, GMP_ROUND_PLUSINF, or GMP_ROUND_MINUSINF
-object(GMP)#%d (1) {
+object(GMP)#2 (1) {
   ["num"]=>
   string(2) "10"
 }
-object(GMP)#%d (1) {
+object(GMP)#3 (1) {
   ["num"]=>
   string(4) "-113"
 }
-object(GMP)#%d (1) {
+object(GMP)#2 (1) {
   ["num"]=>
   string(2) "10"
 }
-object(GMP)#%d (1) {
+object(GMP)#3 (1) {
   ["num"]=>
   string(2) "10"
 }
-object(GMP)#%d (1) {
+object(GMP)#2 (1) {
   ["num"]=>
   string(4) "-113"
 }
-object(GMP)#%d (1) {
+object(GMP)#3 (1) {
   ["num"]=>
   string(2) "10"
 }

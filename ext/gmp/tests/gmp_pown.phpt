@@ -21,12 +21,12 @@ var_dump(gmp_strval(gmp_powm($n,$e,$m)));
 
 try {
     var_dump(gmp_powm(5, 11, 0));
-} catch (\ValueError $error) {
+} catch (\DivisionByZeroError $error) {
     echo $error->getMessage() . \PHP_EOL;
 }
 try {
     var_dump(gmp_powm(5, "11", gmp_init(0)));
-} catch (\ValueError $error) {
+} catch (\DivisionByZeroError $error) {
     echo $error->getMessage() . \PHP_EOL;
 }
 
@@ -73,8 +73,8 @@ string(3) "533"
 string(3) "331"
 string(3) "171"
 string(3) "371"
-gmp_powm(): Argument #3 ($mod) must not be 0
-gmp_powm(): Argument #3 ($mod) must not be 0
+Modulo by zero
+Modulo by zero
 gmp_powm(): Argument #1 ($base) must be of type bool|int|string|GMP, array given
 gmp_powm(): Argument #2 ($exp) must be of type bool|int|string|GMP, array given
 gmp_powm(): Argument #2 ($exp) must be of type bool|int|string|GMP, TypeError given

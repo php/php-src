@@ -42,38 +42,38 @@ function gmp_mul($a, $b): GMP {}
  * @param GMP|int|bool|string $a
  * @param GMP|int|bool|string $b
  */
-function gmp_div_qr($a, $b, int $round = GMP_ROUND_ZERO): array|false {}
+function gmp_div_qr($a, $b, int $round = GMP_ROUND_ZERO): array {}
 
 /**
  * @param GMP|int|bool|string $a
  * @param GMP|int|bool|string $b
  */
-function gmp_div_q($a, $b, int $round = GMP_ROUND_ZERO): GMP|false {}
+function gmp_div_q($a, $b, int $round = GMP_ROUND_ZERO): GMP {}
 
 /**
  * @param GMP|int|bool|string $a
  * @param GMP|int|bool|string $b
  */
-function gmp_div_r($a, $b, int $round = GMP_ROUND_ZERO): GMP|false {}
+function gmp_div_r($a, $b, int $round = GMP_ROUND_ZERO): GMP {}
 
 /**
  * @param GMP|int|bool|string $a
  * @param GMP|int|bool|string $b
  * @alias gmp_div_q
  */
-function gmp_div($a, $b, int $round = GMP_ROUND_ZERO): GMP|false {}
+function gmp_div($a, $b, int $round = GMP_ROUND_ZERO): GMP {}
 
 /**
  * @param GMP|int|bool|string $a
  * @param GMP|int|bool|string $b
  */
-function gmp_mod($a, $b): GMP|false {}
+function gmp_mod($a, $b): GMP {}
 
 /**
  * @param GMP|int|bool|string $a
  * @param GMP|int|bool|string $b
  */
-function gmp_divexact($a, $b): GMP|false {}
+function gmp_divexact($a, $b): GMP {}
 
 /** @param GMP|int|bool|string $a */
 function gmp_neg($a): GMP {}
@@ -175,7 +175,7 @@ function gmp_random_bits(int $bits): GMP {}
  * @param GMP|int|bool|string $min
  * @param GMP|int|bool|string $max
  **/
-function gmp_random_range($min, $max): GMP|false {}
+function gmp_random_range($min, $max): GMP {}
 
 /**
  * @param GMP|int|bool|string $a

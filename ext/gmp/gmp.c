@@ -356,13 +356,17 @@ static void shift_operator_helper(gmp_binary_ui_op_t op, zval *return_value, zva
 	gmp_zval_binary_ui_op(                              \
 		result, op1, op2, op, uop, check_b_zero         \
 	);                                                  \
+	if (UNEXPECTED(EG(exception))) { return FAILURE; }  \
 	return SUCCESS;
 
 #define DO_BINARY_UI_OP(op) DO_BINARY_UI_OP_EX(op, op ## _ui, 0)
 #define DO_BINARY_OP(op) DO_BINARY_UI_OP_EX(op, NULL, 0)
 
-#define DO_UNARY_OP(op) \
+#define DO_UNARY_OP(op)                 \
 	gmp_zval_unary_op(result, op1, op); \
+	if (UNEXPECTED(EG(exception))) {    \
+		return FAILURE;                 \
+	}                                   \
 	return SUCCESS;
 
 static int gmp_do_operation_ex(zend_uchar opcode, zval *result, zval *op1, zval *op2) /* {{{ */
@@ -380,7 +384,14 @@ static int gmp_do_operation_ex(zend_uchar opcode, zval *result, zval *op1, zval 
 	case ZEND_DIV:
 		DO_BINARY_UI_OP_EX(mpz_tdiv_q, gmp_mpz_tdiv_q_ui, 1);
 	case ZEND_MOD:
-		DO_BINARY_UI_OP_EX(mpz_mod, gmp_mpz_mod_ui, 1);
+		gmp_zval_binary_ui_op(result, op1, op2, mpz_mod, gmp_mpz_mod_ui, 1);
+		/* Free Division by zero error and rethrow a new modulo by zero one */
+		if (UNEXPECTED(EG(exception) && EG(exception)->ce == zend_ce_division_by_zero_error)) {
+			zend_clear_exception();
+			zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Modulo by zero");
+			return FAILURE;
+		}
+		return SUCCESS;
 	case ZEND_SL:
 		shift_operator_helper(mpz_mul_2exp, result, op1, op2, opcode);
 		return SUCCESS;
@@ -728,10 +739,10 @@ static inline void gmp_zval_binary_ui_op(zval *return_value, zval *a_arg, zval *
 		}
 
 		if (b_is_zero) {
-			php_error_docref(NULL, E_WARNING, "Zero operand not allowed");
+			zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Division by zero");
 			FREE_GMP_TEMP(temp_a);
 			FREE_GMP_TEMP(temp_b);
-			RETURN_FALSE;
+			RETURN_THROWS();
 		}
 	}
 
@@ -775,10 +786,10 @@ static inline void gmp_zval_binary_ui_op2(zval *return_value, zval *a_arg, zval 
 		}
 
 		if (b_is_zero) {
-			php_error_docref(NULL, E_WARNING, "Zero operand not allowed");
+			zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Division by zero");
 			FREE_GMP_TEMP(temp_a);
 			FREE_GMP_TEMP(temp_b);
-			RETURN_FALSE;
+			RETURN_THROWS();
 		}
 	}
 
@@ -1152,6 +1163,12 @@ ZEND_FUNCTION(gmp_div_q)
 ZEND_FUNCTION(gmp_mod)
 {
 	gmp_binary_ui_op_no_zero(mpz_mod, gmp_mpz_mod_ui);
+	/* Clear division by zero and rethrow a modulo by zero exception */
+	if (UNEXPECTED(EG(exception) && EG(exception)->ce == zend_ce_division_by_zero_error)) {
+		zend_clear_exception();
+		zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Modulo by zero");
+		RETURN_THROWS();
+	}
 }
 /* }}} */
 
@@ -1300,7 +1317,7 @@ ZEND_FUNCTION(gmp_powm)
 	FETCH_GMP_ZVAL_DEP_DEP(gmpnum_mod, mod_arg, temp_mod, temp_exp, temp_base, 3);
 
 	if (!mpz_cmp_ui(gmpnum_mod, 0)) {
-		zend_argument_value_error(3, "must not be 0");
+		zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Modulo by zero");
 		FREE_GMP_TEMP(temp_base);
 		FREE_GMP_TEMP(temp_exp);
 		FREE_GMP_TEMP(temp_mod);
@@ -1777,8 +1794,8 @@ ZEND_FUNCTION(gmp_random_range)
 	if (Z_TYPE_P(min_arg) == IS_LONG && Z_LVAL_P(min_arg) >= 0) {
 		if (mpz_cmp_ui(gmpnum_max, Z_LVAL_P(min_arg)) <= 0) {
 			FREE_GMP_TEMP(temp_a);
-			php_error_docref(NULL, E_WARNING, "The minimum value must be less than the maximum value");
-			RETURN_FALSE;
+			zend_argument_value_error(1, "must be less than argument#2 ($maximum)");
+			RETURN_THROWS();
 		}
 
 		INIT_GMP_RETVAL(gmpnum_result);
@@ -1806,8 +1823,8 @@ ZEND_FUNCTION(gmp_random_range)
 		if (mpz_cmp(gmpnum_max, gmpnum_min) <= 0) {
 			FREE_GMP_TEMP(temp_b);
 			FREE_GMP_TEMP(temp_a);
-			php_error_docref(NULL, E_WARNING, "The minimum value must be less than the maximum value");
-			RETURN_FALSE;
+			zend_argument_value_error(1, "must be less than argument#2 ($maximum)");
+			RETURN_THROWS();
 		}
 
 		INIT_GMP_RETVAL(gmpnum_result);

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: b467c887efad8da11c353a60bc0adea5215aa781 */
+ * Stub hash: 3094dae32430922d11c7bdb3a4da0e2c0b47ac7e */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_gmp_init, 0, 1, GMP, 0)
 	ZEND_ARG_INFO(0, number)
@@ -36,13 +36,13 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_gmp_mul arginfo_gmp_add
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_gmp_div_qr, 0, 2, MAY_BE_ARRAY|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gmp_div_qr, 0, 2, IS_ARRAY, 0)
 	ZEND_ARG_INFO(0, a)
 	ZEND_ARG_INFO(0, b)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, round, IS_LONG, 0, "GMP_ROUND_ZERO")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_gmp_div_q, 0, 2, GMP, MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_gmp_div_q, 0, 2, GMP, 0)
 	ZEND_ARG_INFO(0, a)
 	ZEND_ARG_INFO(0, b)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, round, IS_LONG, 0, "GMP_ROUND_ZERO")
@@ -52,12 +52,9 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_gmp_div arginfo_gmp_div_q
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_gmp_mod, 0, 2, GMP, MAY_BE_FALSE)
-	ZEND_ARG_INFO(0, a)
-	ZEND_ARG_INFO(0, b)
-ZEND_END_ARG_INFO()
+#define arginfo_gmp_mod arginfo_gmp_add
 
-#define arginfo_gmp_divexact arginfo_gmp_mod
+#define arginfo_gmp_divexact arginfo_gmp_add
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_gmp_neg, 0, 1, GMP, 0)
 	ZEND_ARG_INFO(0, a)
@@ -114,7 +111,10 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_gmp_lcm arginfo_gmp_add
 
-#define arginfo_gmp_invert arginfo_gmp_mod
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_gmp_invert, 0, 2, GMP, MAY_BE_FALSE)
+	ZEND_ARG_INFO(0, a)
+	ZEND_ARG_INFO(0, b)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gmp_jacobi, 0, 2, IS_LONG, 0)
 	ZEND_ARG_INFO(0, a)
@@ -139,7 +139,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_gmp_random_bits, 0, 1, GMP, 0)
 	ZEND_ARG_TYPE_INFO(0, bits, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_gmp_random_range, 0, 2, GMP, MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_gmp_random_range, 0, 2, GMP, 0)
 	ZEND_ARG_INFO(0, min)
 	ZEND_ARG_INFO(0, max)
 ZEND_END_ARG_INFO()
