@@ -1922,6 +1922,7 @@ PHP_FUNCTION(highlight_file)
 	if (i) {
 		php_output_get_contents(return_value);
 		php_output_discard();
+		ZEND_ASSERT(Z_TYPE_P(return_value) == IS_STRING);
 	} else {
 		RETURN_TRUE;
 	}
@@ -2004,6 +2005,7 @@ PHP_FUNCTION(highlight_string)
 	if (i) {
 		php_output_get_contents(return_value);
 		php_output_discard();
+		ZEND_ASSERT(Z_TYPE_P(return_value) == IS_STRING);
 	} else {
 		RETURN_TRUE;
 	}

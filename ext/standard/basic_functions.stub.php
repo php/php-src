@@ -296,14 +296,14 @@ function forward_static_call_array(callable $function, array $args): mixed {}
 /** @param callable $function */
 function register_shutdown_function($function, mixed ...$args): ?bool {}
 
-function highlight_file(string $filename, bool $return = false): string|bool|null {}
+function highlight_file(string $filename, bool $return = false): string|bool {}
 
 /** @alias highlight_file */
-function show_source(string $filename, bool $return = false): string|bool|null {}
+function show_source(string $filename, bool $return = false): string|bool {}
 
 function php_strip_whitespace(string $filename): string {}
 
-function highlight_string(string $string, bool $return = false): string|bool|null {}
+function highlight_string(string $string, bool $return = false): string|bool {}
 
 function ini_get(string $varname): string|false {}
 
