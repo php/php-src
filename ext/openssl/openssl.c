@@ -3431,10 +3431,6 @@ static EVP_PKEY * php_openssl_evp_from_zval(
 		if (!what) {
 			TMP_CLEAN;
 		}
-		if (resourceval) {
-			*resourceval = res;
-			Z_ADDREF_P(val);
-		}
 		if (res->type == le_x509) {
 			/* extract key from cert, depending on public_key param */
 			cert = (X509*)what;
@@ -3458,6 +3454,10 @@ static EVP_PKEY * php_openssl_evp_from_zval(
 					zval_ptr_dtor_str(&tmp);
 				}
 				/* got the key - return it */
+				if (resourceval) {
+					*resourceval = res;
+					Z_ADDREF_P(val);
+				}
 				return (EVP_PKEY*)what;
 			}
 		} else {
