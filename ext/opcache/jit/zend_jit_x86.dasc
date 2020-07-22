@@ -3082,6 +3082,9 @@ mrm:
 	}
 }
 
+typedef ZEND_SET_ALIGNED(1, uint16_t unaligned_uint16_t);
+typedef ZEND_SET_ALIGNED(1, int32_t unaligned_int32_t);
+
 static int zend_jit_patch(const void *code, size_t size, const void *from_addr, const void *to_addr)
 {
 	int ret = 0;
@@ -3089,11 +3092,11 @@ static int zend_jit_patch(const void *code, size_t size, const void *from_addr, 
 	uint8_t *end = p + size - 5;
 
 	while (p < end) {
-		if ((*(uint16_t*)p & 0xf0ff) == 0x800f && p + *(int32_t*)(p+2) == (uint8_t*)from_addr - 6) {
-			*(int32_t*)(p+2) = ((uint8_t*)to_addr - (p + 6));
+		if ((*(unaligned_uint16_t*)p & 0xf0ff) == 0x800f && p + *(unaligned_int32_t*)(p+2) == (uint8_t*)from_addr - 6) {
+			*(unaligned_int32_t*)(p+2) = ((uint8_t*)to_addr - (p + 6));
 			ret++;
-		} else if (*p == 0xe9 && p + *(int32_t*)(p+1) == (uint8_t*)from_addr - 5) {
-			*(int32_t*)(p+1) = ((uint8_t*)to_addr - (p + 5));
+		} else if (*p == 0xe9 && p + *(unaligned_int32_t*)(p+1) == (uint8_t*)from_addr - 5) {
+			*(unaligned_int32_t*)(p+1) = ((uint8_t*)to_addr - (p + 5));
 			ret++;
 		}
 		p += _asm_x86_inslen(p);
