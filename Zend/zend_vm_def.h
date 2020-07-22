@@ -7068,10 +7068,10 @@ ZEND_VM_HOT_NOCONST_HANDLER(198, ZEND_JMP_NULL, CONST|TMPVAR|CV, JMP_ADDR)
 
 			ZVAL_NULL(result);
 		} else if (opline->extended_value == ZEND_SHORT_CIRCUITING_CHAIN_ISSET) {
-			ZVAL_BOOL(result, 0);
+			ZVAL_FALSE(result);
 		} else {
 			ZEND_ASSERT(opline->extended_value == ZEND_SHORT_CIRCUITING_CHAIN_EMPTY);
-			ZVAL_BOOL(result, 1);
+			ZVAL_TRUE(result);
 		}
 
 		FREE_OP1();
