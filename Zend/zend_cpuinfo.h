@@ -97,7 +97,7 @@ typedef enum _zend_cpu_feature {
 	/*intentionally don't support   = (1<<31 | ZEND_CPU_EDX_MASK)*/
 } zend_cpu_feature;
 
-void zend_cpu_startup();
+void zend_cpu_startup(void);
 ZEND_API int zend_cpu_supports(zend_cpu_feature feature);
 
 #ifndef __has_attribute

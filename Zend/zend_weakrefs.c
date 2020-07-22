@@ -140,7 +140,7 @@ static void zend_weakref_unregister(zend_object *object, void *payload) {
 	}
 }
 
-void zend_weakrefs_init() {
+void zend_weakrefs_init(void) {
 	zend_hash_init(&EG(weakrefs), 8, NULL, NULL, 0);
 }
 
@@ -158,7 +158,7 @@ void zend_weakrefs_notify(zend_object *object) {
 	}
 }
 
-void zend_weakrefs_shutdown() {
+void zend_weakrefs_shutdown(void) {
 	zend_ulong obj_addr;
 	void *tagged_ptr;
 	ZEND_HASH_FOREACH_NUM_KEY_PTR(&EG(weakrefs), obj_addr, tagged_ptr) {

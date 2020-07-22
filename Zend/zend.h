@@ -355,8 +355,8 @@ typedef void (*zend_error_notify_cb)(int type, const char *error_filename, uint3
 
 BEGIN_EXTERN_C()
 ZEND_API void zend_register_error_notify_callback(zend_error_notify_cb callback);
-void zend_startup_error_notify_callbacks();
-void zend_shutdown_error_notify_callbacks();
+void zend_startup_error_notify_callbacks(void);
+void zend_shutdown_error_notify_callbacks(void);
 void zend_error_notify_all_callbacks(int type, const char *error_filename, uint32_t error_lineno, zend_string *message);
 END_EXTERN_C()
 
