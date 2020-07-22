@@ -909,16 +909,16 @@ ZEND_FUNCTION(opcache_is_script_cached)
 {
 	zend_string *script_name;
 
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &script_name) == FAILURE) {
+		RETURN_THROWS();
+	}
+
 	if (!validate_api_restriction()) {
 		RETURN_FALSE;
 	}
 
 	if (!ZCG(accelerator_enabled)) {
 		RETURN_FALSE;
-	}
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &script_name) == FAILURE) {
-		RETURN_THROWS();
 	}
 
 	RETURN_BOOL(filename_is_in_cache(script_name));
