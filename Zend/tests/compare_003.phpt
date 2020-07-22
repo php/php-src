@@ -84,7 +84,7 @@ string(0) "" <= array(0) {}
 string(0) "" <= int(-2147483648)
 string(0) "" <= string(11) "-2147483648"
 int(1) <= array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)}
-int(1) <= string(0) ""
+int(1) > string(0) ""
 int(1) <= int(1)
 int(1) <= float(2.5)
 int(1) > int(0)
