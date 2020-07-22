@@ -2258,8 +2258,6 @@ static zend_bool zend_ast_is_short_circuited(const zend_ast *ast)
 		default:
 			return 0;
 	}
-
-	return 0;
 }
 
 /* Mark nodes that are an inner part of a short-circuiting chain.
