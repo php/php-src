@@ -1106,7 +1106,7 @@ void zend_shutdown(void) /* {{{ */
 		CG(map_ptr_size) = 0;
 	}
 	if (CG(script_encoding_list)) {
-		free(CG(script_encoding_list));
+		free(ZEND_VOIDP(CG(script_encoding_list)));
 		CG(script_encoding_list) = NULL;
 		CG(script_encoding_list_size) = 0;
 	}
