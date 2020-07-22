@@ -3336,12 +3336,8 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 					opcode = ZEND_SEND_VAR_NO_REF_EX;
 				}
 			}
-		} else if (zend_is_variable(arg)) {
-			if (zend_ast_is_short_circuited(arg)) {
-				// Must use SEND_VAL_EX to make sure the value isn't sent by ref
-				zend_compile_expr(&arg_node, arg);
-				opcode = ZEND_SEND_VAL_EX;
-			} else if (fbc) {
+		} else if (zend_is_variable(arg) && !zend_ast_is_short_circuited(arg)) {
+			if (fbc) {
 				if (ARG_SHOULD_BE_SENT_BY_REF(fbc, arg_num)) {
 					zend_compile_var(&arg_node, arg, BP_VAR_W, 1);
 					opcode = ZEND_SEND_REF;
