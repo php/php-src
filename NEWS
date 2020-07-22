@@ -41,6 +41,9 @@ PHP                                                                        NEWS
 - Mbstring:
   . Fixed bug #79787 (mb_strimwidth does not trim string). (XXiang)
 
+- OpenSSL:
+  . Fixed bug #79881 (Memory leak in openssl_pkey_get_public()). (Nikita)
+
 - Reflection:
   . Fixed bug #79487 (::getStaticProperties() ignores property modifications).
     (cmb, Nikita)
