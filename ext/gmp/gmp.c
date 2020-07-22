@@ -198,7 +198,6 @@ typedef gmp_ulong (*gmp_binary_ui_op2_t)(mpz_ptr, mpz_ptr, mpz_srcptr, gmp_ulong
 static inline void gmp_zval_binary_ui_op(zval *return_value, zval *a_arg, zval *b_arg, gmp_binary_op_t gmp_op, gmp_binary_ui_op_t gmp_ui_op, int check_b_zero);
 static inline void gmp_zval_binary_ui_op2(zval *return_value, zval *a_arg, zval *b_arg, gmp_binary_op2_t gmp_op, gmp_binary_ui_op2_t gmp_ui_op, int check_b_zero);
 static inline void gmp_zval_unary_op(zval *return_value, zval *a_arg, gmp_unary_op_t gmp_op);
-static inline void gmp_zval_unary_ui_op(zval *return_value, zval *a_arg, gmp_unary_ui_op_t gmp_op);
 
 static void gmp_mpz_tdiv_q_ui(mpz_ptr a, mpz_srcptr b, gmp_ulong c) {
 	mpz_tdiv_q_ui(a, b, c);
@@ -838,16 +837,6 @@ static inline void gmp_zval_unary_op(zval *return_value, zval *a_arg, gmp_unary_
 	gmp_op(gmpnum_result, gmpnum_a);
 
 	FREE_GMP_TEMP(temp_a);
-}
-/* }}} */
-
-/* {{{ gmp_zval_unary_ui_op */
-static inline void gmp_zval_unary_ui_op(zval *return_value, zval *a_arg, gmp_unary_ui_op_t gmp_op)
-{
-	mpz_ptr gmpnum_result;
-
-	INIT_GMP_RETVAL(gmpnum_result);
-	gmp_op(gmpnum_result, zval_get_long(a_arg));
 }
 /* }}} */
 
