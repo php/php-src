@@ -2428,6 +2428,9 @@ static int zend_jit_trace_exit_stub(dasm_State **Dst)
 	|	movsd qword [r4+16*8+2*8], xmm2
 	|	movsd qword [r4+16*8+1*8], xmm1
 	|	movsd qword [r4+16*8+0*8], xmm0
+	|.if X64WIN
+	|	sub r4, 32 /* shadow space */
+	|.endif
 	|.else
 	|	sub r4, 8*4+8*8-4 /* CPU regs + SSE regs */
 	|	mov aword [r4+7*4], edi
@@ -2450,7 +2453,9 @@ static int zend_jit_trace_exit_stub(dasm_State **Dst)
 	|	SAVE_OPLINE
 	|	// zend_jit_trace_exit(trace_num, exit_num)
 	|	EXT_CALL zend_jit_trace_exit, r0
-	|.if X64
+	|.if X64WIN
+	|	add r4, 16*8+16*8+32 /* CPU regs + SSE regs + shadow space */
+	|.elif X64
 	|	add r4, 16*8+16*8 /* CPU regs + SSE regs */
 	|.else
 	|	add r4, 8*4+8*8 /* CPU regs + SSE regs */
