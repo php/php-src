@@ -1784,7 +1784,7 @@ void zend_shutdown_error_notify_callbacks()
 	zend_llist_destroy(&zend_error_notify_callbacks);
 }
 
-void zend_register_error_notify_callback(zend_error_notify_cb cb)
+ZEND_API void zend_register_error_notify_callback(zend_error_notify_cb cb)
 {
 	zend_llist_add_element(&zend_error_notify_callbacks, &cb);
 }
