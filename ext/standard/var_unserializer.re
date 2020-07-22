@@ -52,7 +52,7 @@ struct php_unserialize_data {
 	var_entries       entries;
 };
 
-PHPAPI php_unserialize_data_t php_var_unserialize_init() {
+PHPAPI php_unserialize_data_t php_var_unserialize_init(void) {
 	php_unserialize_data_t d;
 	/* fprintf(stderr, "UNSERIALIZE_INIT    == lock: %u, level: %u\n", BG(serialize_lock), BG(unserialize).level); */
 	if (BG(serialize_lock) || !BG(unserialize).level) {

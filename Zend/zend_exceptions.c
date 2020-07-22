@@ -998,7 +998,7 @@ ZEND_API ZEND_COLD void zend_throw_exception_object(zval *exception) /* {{{ */
 }
 /* }}} */
 
-ZEND_API ZEND_COLD void zend_throw_unwind_exit()
+ZEND_API ZEND_COLD void zend_throw_unwind_exit(void)
 {
 	ZEND_ASSERT(!EG(exception));
 	EG(exception) = zend_objects_new(&zend_ce_unwind_exit);

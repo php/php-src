@@ -1774,12 +1774,12 @@ ZEND_API void zend_map_ptr_extend(size_t last)
 	}
 }
 
-void zend_startup_error_notify_callbacks()
+void zend_startup_error_notify_callbacks(void)
 {
 	zend_llist_init(&zend_error_notify_callbacks, sizeof(zend_error_notify_cb), NULL, 1);
 }
 
-void zend_shutdown_error_notify_callbacks()
+void zend_shutdown_error_notify_callbacks(void)
 {
 	zend_llist_destroy(&zend_error_notify_callbacks);
 }

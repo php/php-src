@@ -1114,7 +1114,7 @@ PHPAPI void php_var_serialize(smart_str *buf, zval *struc, php_serialize_data_t 
 }
 /* }}} */
 
-PHPAPI php_serialize_data_t php_var_serialize_init() {
+PHPAPI php_serialize_data_t php_var_serialize_init(void) {
 	struct php_serialize_data *d;
 	/* fprintf(stderr, "SERIALIZE_INIT      == lock: %u, level: %u\n", BG(serialize_lock), BG(serialize).level); */
 	if (BG(serialize_lock) || !BG(serialize).level) {
