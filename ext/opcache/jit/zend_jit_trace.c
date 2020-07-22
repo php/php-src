@@ -1060,6 +1060,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 
 	/* 2. Construct TSSA */
 	tssa = zend_arena_calloc(&CG(arena), 1, sizeof(zend_tssa));
+	tssa->cfg.flags = ZEND_SSA_TSSA;
 	tssa->cfg.blocks = zend_arena_calloc(&CG(arena), 2, sizeof(zend_basic_block));
 	tssa->blocks = zend_arena_calloc(&CG(arena), 2, sizeof(zend_ssa_block));
 	tssa->cfg.predecessors = zend_arena_calloc(&CG(arena), 2, sizeof(int));

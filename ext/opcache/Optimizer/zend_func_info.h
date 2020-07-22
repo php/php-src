@@ -21,7 +21,7 @@
 
 #include "zend_ssa.h"
 
-/* func flags */
+/* func/cfg flags */
 #define ZEND_FUNC_INDIRECT_VAR_ACCESS      (1<<0)  /* accesses variables by name  */
 #define ZEND_FUNC_HAS_CALLS                (1<<1)
 #define ZEND_FUNC_VARARG                   (1<<2)  /* uses func_get_args()        */
@@ -33,6 +33,7 @@
 #define ZEND_FUNC_RECURSIVE_INDIRECTLY     (1<<9)
 #define ZEND_FUNC_HAS_EXTENDED_FCALL       (1<<10)
 #define ZEND_FUNC_HAS_EXTENDED_STMT        (1<<11)
+#define ZEND_SSA_TSSA                      (1<<12) /* used by tracing JIT */
 
 typedef struct _zend_func_info zend_func_info;
 typedef struct _zend_call_info zend_call_info;
