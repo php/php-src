@@ -4609,7 +4609,6 @@ static const void *zend_jit_trace_exit_to_vm(uint32_t trace_num, uint32_t exit_n
 	dasm_init(&dasm_state, DASM_MAXSECTION);
 	dasm_setupglobal(&dasm_state, dasm_labels, zend_lb_MAX);
 	dasm_setup(&dasm_state, dasm_actions);
-	dasm_growpc(&dasm_state, 0);
 
 	zend_jit_align_func(&dasm_state);
 
