@@ -1105,6 +1105,11 @@ void zend_shutdown(void) /* {{{ */
 		ZEND_MAP_PTR_SET_REAL_BASE(CG(map_ptr_base), NULL);
 		CG(map_ptr_size) = 0;
 	}
+	if (CG(script_encoding_list)) {
+		free(CG(script_encoding_list));
+		CG(script_encoding_list) = NULL;
+		CG(script_encoding_list_size) = 0;
+	}
 #endif
 	zend_destroy_rsrc_list_dtors();
 }
