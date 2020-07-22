@@ -29,10 +29,12 @@ $_SESSION["Blah"] = "Hello World!";
 $_SESSION["Foo"] = FALSE;
 $_SESSION["Guff"] = 1234567890;
 var_dump($_SESSION);
+$oldsession = $_SESSION;
 
 var_dump(session_write_close());
 session_start();
-var_dump($_SESSION);
+// the session may have been GC'd or not; we accept either outcome
+var_dump($_SESSION === $oldsession || $_SESSION === []);
 var_dump(session_destroy());
 session_start();
 var_dump($_SESSION);
@@ -51,14 +53,7 @@ array(3) {
   int(1234567890)
 }
 bool(true)
-array(3) {
-  ["Blah"]=>
-  string(12) "Hello World!"
-  ["Foo"]=>
-  bool(false)
-  ["Guff"]=>
-  int(1234567890)
-}
+bool(true)
 bool(true)
 array(0) {
 }
