@@ -358,7 +358,7 @@ static void* dasm_labels[zend_lb_MAX];
 |			mem_ins prefix [tmp_reg], op2
 ||		}
 |	.else
-||		(void) tmp_reg;
+|		(void) tmp_reg;
 |		mem_ins prefix [addr], op2
 |	.endif
 |.endmacro
