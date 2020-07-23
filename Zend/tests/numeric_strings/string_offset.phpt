@@ -39,21 +39,13 @@ echo "Done\n";
 ?>
 --EXPECTF--
 string(1) "l"
-
-Warning: String offset cast occurred in %s on line %d
+Illegal offset type
 string(1) "l"
+Illegal offset type
 string(1) "l"
-
-Warning: String offset cast occurred in %s on line %d
+Illegal offset type
 string(1) "l"
-string(1) "l"
-
-Warning: String offset cast occurred in %s on line %d
-string(1) "l"
-string(1) "l"
-
-Warning: String offset cast occurred in %s on line %d
-string(1) "l"
+Illegal offset type
 
 Warning: Illegal string offset "7str" in %s on line %d
 string(1) "l"
