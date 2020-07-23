@@ -481,6 +481,10 @@ static int zend_jit_trace_record_fake_init_call_ex(zend_execute_data *call, zend
 			/* TODO: Can we continue recording ??? */
 			return -1;
 		}
+		if (func->type == ZEND_INTERNAL_FUNCTION
+		 && (func->op_array.fn_flags & (ZEND_ACC_CLOSURE|ZEND_ACC_FAKE_CLOSURE))) {
+			return -1;
+		}
 		if (func->type == ZEND_USER_FUNCTION
 		 && (func->op_array.fn_flags & ZEND_ACC_CLOSURE)) {
 			jit_extension =
@@ -724,6 +728,10 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 				break;
 			}
 			if (EX(call)->func->type == ZEND_INTERNAL_FUNCTION) {
+				if (EX(call)->func->op_array.fn_flags & (ZEND_ACC_CLOSURE|ZEND_ACC_FAKE_CLOSURE)) {
+					stop = ZEND_JIT_TRACE_STOP_BAD_FUNC;
+					break;
+				}
 				TRACE_RECORD(ZEND_JIT_TRACE_DO_ICALL, 0, EX(call)->func);
 			}
 		} else if (opline->opcode == ZEND_INCLUDE_OR_EVAL) {
@@ -879,6 +887,11 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 					break;
 				}
 				func = EX(call)->func;
+				if (func->type == ZEND_INTERNAL_FUNCTION
+				 && (func->op_array.fn_flags & (ZEND_ACC_CLOSURE|ZEND_ACC_FAKE_CLOSURE))) {
+					stop = ZEND_JIT_TRACE_STOP_BAD_FUNC;
+					break;
+				}
 				if (func->type == ZEND_USER_FUNCTION
 				 && (func->op_array.fn_flags & ZEND_ACC_CLOSURE)) {
 					jit_extension =
