@@ -51,8 +51,7 @@ const struct mbfl_convert_vtbl vtbl_pass = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_pass,
-	mbfl_filt_conv_common_flush,
-	NULL,
+	mbfl_filt_conv_common_flush
 };
 
 int mbfl_filt_conv_pass(int c, mbfl_convert_filter *filter)

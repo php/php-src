@@ -54,8 +54,7 @@ const struct mbfl_convert_vtbl vtbl_uuencode_8bit = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_uudec,
-	mbfl_filt_conv_common_flush,
-	NULL,
+	mbfl_filt_conv_common_flush
 };
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)

@@ -77,8 +77,7 @@ const struct mbfl_convert_vtbl vtbl_euckr_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_euckr_wchar,
-	mbfl_filt_conv_common_flush,
-	NULL,
+	mbfl_filt_conv_common_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_euckr = {
@@ -87,8 +86,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_euckr = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_wchar_euckr,
-	mbfl_filt_conv_common_flush,
-	NULL,
+	mbfl_filt_conv_common_flush
 };
 
 

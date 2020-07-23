@@ -95,8 +95,7 @@ const struct mbfl_convert_vtbl vtbl_big5_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_big5_wchar,
-	mbfl_filt_conv_common_flush,
-	NULL,
+	mbfl_filt_conv_common_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_big5 = {
@@ -105,8 +104,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_big5 = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_wchar_big5,
-	mbfl_filt_conv_common_flush,
-	NULL
+	mbfl_filt_conv_common_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_cp950_wchar = {
@@ -115,8 +113,7 @@ const struct mbfl_convert_vtbl vtbl_cp950_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_big5_wchar,
-	mbfl_filt_conv_common_flush,
-	NULL,
+	mbfl_filt_conv_common_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_cp950 = {
@@ -125,8 +122,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_cp950 = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_wchar_big5,
-	mbfl_filt_conv_common_flush,
-	NULL,
+	mbfl_filt_conv_common_flush
 };
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)

@@ -56,8 +56,7 @@ const struct mbfl_convert_vtbl vtbl_8bit_b64 = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_base64enc,
-	mbfl_filt_conv_base64enc_flush,
-	NULL,
+	mbfl_filt_conv_base64enc_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_b64_8bit = {
@@ -66,8 +65,7 @@ const struct mbfl_convert_vtbl vtbl_b64_8bit = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_base64dec,
-	mbfl_filt_conv_base64dec_flush,
-	NULL,
+	mbfl_filt_conv_base64dec_flush
 };
 
 

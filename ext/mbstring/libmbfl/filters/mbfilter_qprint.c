@@ -57,8 +57,7 @@ const struct mbfl_convert_vtbl vtbl_8bit_qprint = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_qprintenc,
-	mbfl_filt_conv_qprintenc_flush,
-	NULL,
+	mbfl_filt_conv_qprintenc_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_qprint_8bit = {
@@ -67,8 +66,7 @@ const struct mbfl_convert_vtbl vtbl_qprint_8bit = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_qprintdec,
-	mbfl_filt_conv_qprintdec_flush,
-	NULL,
+	mbfl_filt_conv_qprintdec_flush
 };
 
 

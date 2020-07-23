@@ -60,8 +60,7 @@ const struct mbfl_convert_vtbl vtbl_2022jp_2004_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_jis2004_wchar,
-	mbfl_filt_conv_jis2004_wchar_flush,
-	NULL,
+	mbfl_filt_conv_jis2004_wchar_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_2022jp_2004 = {
@@ -70,8 +69,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_2022jp_2004 = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_wchar_jis2004,
-	mbfl_filt_conv_wchar_jis2004_flush,
-	NULL,
+	mbfl_filt_conv_wchar_jis2004_flush
 };
 
 static int mbfl_filt_ident_2022jp_2004_0208(int c, mbfl_identify_filter *filter);

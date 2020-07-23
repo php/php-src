@@ -47,7 +47,6 @@ typedef int (*flush_function_t)(void *);
 struct _mbfl_convert_filter {
 	void (*filter_ctor)(mbfl_convert_filter *filter);
 	void (*filter_dtor)(mbfl_convert_filter *filter);
-	void (*filter_copy)(mbfl_convert_filter *src, mbfl_convert_filter *dest);
 	int (*filter_function)(int c, mbfl_convert_filter *filter);
 	filter_flush_t  filter_flush;
 	output_function_t output_function;
@@ -72,7 +71,6 @@ MBFLAPI extern int mbfl_convert_filter_feed(int c, mbfl_convert_filter *filter);
 MBFLAPI extern unsigned char* mbfl_convert_filter_feed_string(mbfl_convert_filter *filter, unsigned char *p, size_t len);
 MBFLAPI extern int mbfl_convert_filter_flush(mbfl_convert_filter *filter);
 MBFLAPI extern void mbfl_convert_filter_reset(mbfl_convert_filter *filter, const mbfl_encoding *from, const mbfl_encoding *to);
-MBFLAPI extern void mbfl_convert_filter_copy(mbfl_convert_filter *src, mbfl_convert_filter *dist);
 MBFLAPI extern int mbfl_filt_conv_illegal_output(int c, mbfl_convert_filter *filter);
 MBFLAPI extern const struct mbfl_convert_vtbl * mbfl_convert_filter_get_vtbl(const mbfl_encoding *from, const mbfl_encoding *to);
 

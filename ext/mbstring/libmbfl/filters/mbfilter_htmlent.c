@@ -77,8 +77,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_html = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_html_enc,
-	mbfl_filt_conv_html_enc_flush,
-	NULL,
+	mbfl_filt_conv_html_enc_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_html_wchar = {
@@ -87,8 +86,7 @@ const struct mbfl_convert_vtbl vtbl_html_wchar = {
 	mbfl_filt_conv_html_dec_ctor,
 	mbfl_filt_conv_html_dec_dtor,
 	mbfl_filt_conv_html_dec,
-	mbfl_filt_conv_html_dec_flush,
-	mbfl_filt_conv_html_dec_copy,
+	mbfl_filt_conv_html_dec_flush
 };
 
 
@@ -308,11 +306,4 @@ int mbfl_filt_conv_html_dec_flush(mbfl_convert_filter *filter)
 	}
 
 	return err;
-}
-
-void mbfl_filt_conv_html_dec_copy(mbfl_convert_filter *src, mbfl_convert_filter *dest)
-{
-	*dest = *src;
-	dest->opaque = emalloc(html_enc_buffer_size+1);
-	memcpy(dest->opaque, src->opaque, html_enc_buffer_size+1);
 }

@@ -63,8 +63,7 @@ const struct mbfl_convert_vtbl vtbl_2022jp_kddi_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_2022jp_mobile_wchar,
-	mbfl_filt_conv_common_flush,
-	NULL,
+	mbfl_filt_conv_common_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_2022jp_kddi = {
@@ -73,8 +72,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_2022jp_kddi = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_wchar_2022jp_mobile,
-	mbfl_filt_conv_any_jis_flush,
-	NULL,
+	mbfl_filt_conv_any_jis_flush
 };
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)

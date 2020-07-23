@@ -76,8 +76,7 @@ const struct mbfl_convert_vtbl vtbl_utf8_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_utf8_wchar,
-	mbfl_filt_conv_utf8_wchar_flush,
-	NULL,
+	mbfl_filt_conv_utf8_wchar_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_utf8 = {
@@ -86,8 +85,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_utf8 = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_wchar_utf8,
-	mbfl_filt_conv_common_flush,
-	NULL,
+	mbfl_filt_conv_common_flush
 };
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)

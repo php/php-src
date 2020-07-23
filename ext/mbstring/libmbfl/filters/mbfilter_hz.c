@@ -57,8 +57,7 @@ const struct mbfl_convert_vtbl vtbl_hz_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_hz_wchar,
-	mbfl_filt_conv_common_flush,
-	NULL,
+	mbfl_filt_conv_common_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_hz = {
@@ -67,8 +66,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_hz = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_wchar_hz,
-	mbfl_filt_conv_any_hz_flush,
-	NULL,
+	mbfl_filt_conv_any_hz_flush
 };
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)

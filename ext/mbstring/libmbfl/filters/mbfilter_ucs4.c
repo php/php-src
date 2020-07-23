@@ -94,8 +94,7 @@ const struct mbfl_convert_vtbl vtbl_ucs4_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_ucs4_wchar,
-	mbfl_filt_conv_ucs4_wchar_flush,
-	NULL,
+	mbfl_filt_conv_ucs4_wchar_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_ucs4 = {
@@ -104,8 +103,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_ucs4 = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_wchar_ucs4be,
-	mbfl_filt_conv_common_flush,
-	NULL,
+	mbfl_filt_conv_common_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_ucs4be_wchar = {
@@ -114,8 +112,7 @@ const struct mbfl_convert_vtbl vtbl_ucs4be_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_ucs4be_wchar,
-	mbfl_filt_conv_ucs4_wchar_flush,
-	NULL,
+	mbfl_filt_conv_ucs4_wchar_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_ucs4be = {
@@ -124,8 +121,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_ucs4be = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_wchar_ucs4be,
-	mbfl_filt_conv_common_flush,
-	NULL,
+	mbfl_filt_conv_common_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_ucs4le_wchar = {
@@ -134,8 +130,7 @@ const struct mbfl_convert_vtbl vtbl_ucs4le_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_ucs4le_wchar,
-	mbfl_filt_conv_ucs4_wchar_flush,
-	NULL,
+	mbfl_filt_conv_ucs4_wchar_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_ucs4le = {
@@ -144,8 +139,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_ucs4le = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_wchar_ucs4le,
-	mbfl_filt_conv_common_flush,
-	NULL,
+	mbfl_filt_conv_common_flush
 };
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)

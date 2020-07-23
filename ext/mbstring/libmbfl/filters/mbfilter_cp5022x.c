@@ -41,7 +41,6 @@ static int mbfl_filt_ident_cp50221(int c, mbfl_identify_filter *filter);
 static int mbfl_filt_ident_cp50222(int c, mbfl_identify_filter *filter);
 static void mbfl_filt_conv_wchar_cp50220_ctor(mbfl_convert_filter *filt);
 static void mbfl_filt_conv_wchar_cp50220_dtor(mbfl_convert_filter *filt);
-static void mbfl_filt_conv_wchar_cp50220_copy(mbfl_convert_filter *src, mbfl_convert_filter *dest);
 
 const mbfl_encoding mbfl_encoding_jis_ms = {
 	mbfl_no_encoding_jis_ms,
@@ -134,8 +133,7 @@ const struct mbfl_convert_vtbl vtbl_jis_ms_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_jis_ms_wchar,
-	mbfl_filt_conv_common_flush,
-	NULL,
+	mbfl_filt_conv_common_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_jis_ms = {
@@ -144,8 +142,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_jis_ms = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_wchar_jis_ms,
-	mbfl_filt_conv_any_jis_flush,
-	NULL,
+	mbfl_filt_conv_any_jis_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_cp50220_wchar = {
@@ -154,8 +151,7 @@ const struct mbfl_convert_vtbl vtbl_cp50220_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_jis_ms_wchar,
-	mbfl_filt_conv_common_flush,
-	NULL,
+	mbfl_filt_conv_common_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_cp50220 = {
@@ -164,8 +160,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_cp50220 = {
 	mbfl_filt_conv_wchar_cp50220_ctor,
 	mbfl_filt_conv_wchar_cp50220_dtor,
 	mbfl_filt_conv_wchar_cp50221,
-	mbfl_filt_conv_any_jis_flush,
-	mbfl_filt_conv_wchar_cp50220_copy
+	mbfl_filt_conv_any_jis_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_cp50220raw_wchar = {
@@ -174,8 +169,7 @@ const struct mbfl_convert_vtbl vtbl_cp50220raw_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_jis_ms_wchar,
-	mbfl_filt_conv_common_flush,
-	NULL,
+	mbfl_filt_conv_common_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_cp50220raw = {
@@ -184,8 +178,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_cp50220raw = {
 	mbfl_filt_conv_wchar_cp50220_ctor,
 	mbfl_filt_conv_wchar_cp50220_dtor,
 	mbfl_filt_conv_wchar_cp50220raw,
-	mbfl_filt_conv_any_jis_flush,
-	mbfl_filt_conv_wchar_cp50220_copy
+	mbfl_filt_conv_any_jis_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_cp50221_wchar = {
@@ -194,8 +187,7 @@ const struct mbfl_convert_vtbl vtbl_cp50221_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_jis_ms_wchar,
-	mbfl_filt_conv_common_flush,
-	NULL,
+	mbfl_filt_conv_common_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_cp50221 = {
@@ -204,8 +196,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_cp50221 = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_wchar_cp50221,
-	mbfl_filt_conv_any_jis_flush,
-	NULL,
+	mbfl_filt_conv_any_jis_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_cp50222_wchar = {
@@ -214,8 +205,7 @@ const struct mbfl_convert_vtbl vtbl_cp50222_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_jis_ms_wchar,
-	mbfl_filt_conv_common_flush,
-	NULL,
+	mbfl_filt_conv_common_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_cp50222 = {
@@ -224,8 +214,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_cp50222 = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_wchar_cp50222,
-	mbfl_filt_conv_wchar_cp50222_flush,
-	NULL,
+	mbfl_filt_conv_wchar_cp50222_flush
 };
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
@@ -587,16 +576,6 @@ mbfl_filt_conv_wchar_cp50220_ctor(mbfl_convert_filter *filt)
 	filt->data = ctx;
 	filt->opaque = (void*)(MBFL_FILT_TL_HAN2ZEN_KATAKANA | MBFL_FILT_TL_HAN2ZEN_GLUE);
 	vtbl_tl_jisx0201_jisx0208.filter_ctor(filt);
-}
-
-static void
-mbfl_filt_conv_wchar_cp50220_copy(mbfl_convert_filter *src, mbfl_convert_filter *dest)
-{
-	mbfl_filt_conv_wchar_cp50220_ctx *ctx;
-
-	*dest = *src;
-	ctx = emalloc(sizeof(mbfl_filt_conv_wchar_cp50220_ctx));
-	dest->data = ctx;
 }
 
 static void

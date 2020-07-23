@@ -100,8 +100,7 @@ const struct mbfl_convert_vtbl vtbl_sjis_docomo_wchar = {
  	mbfl_filt_conv_common_ctor,
 	NULL,
  	mbfl_filt_conv_sjis_mobile_wchar,
- 	mbfl_filt_conv_common_flush,
- 	NULL,
+	mbfl_filt_conv_common_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_sjis_docomo = {
@@ -110,8 +109,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_sjis_docomo = {
  	mbfl_filt_conv_common_ctor,
 	NULL,
  	mbfl_filt_conv_wchar_sjis_mobile,
- 	mbfl_filt_conv_sjis_mobile_flush,
- 	NULL,
+	mbfl_filt_conv_sjis_mobile_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_sjis_kddi_wchar = {
@@ -120,8 +118,7 @@ const struct mbfl_convert_vtbl vtbl_sjis_kddi_wchar = {
  	mbfl_filt_conv_common_ctor,
 	NULL,
  	mbfl_filt_conv_sjis_mobile_wchar,
- 	mbfl_filt_conv_common_flush,
- 	NULL,
+	mbfl_filt_conv_common_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_sjis_kddi = {
@@ -130,8 +127,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_sjis_kddi = {
  	mbfl_filt_conv_common_ctor,
 	NULL,
  	mbfl_filt_conv_wchar_sjis_mobile,
-	mbfl_filt_conv_sjis_mobile_flush,
-	NULL,
+	mbfl_filt_conv_sjis_mobile_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_sjis_sb_wchar = {
@@ -140,8 +136,7 @@ const struct mbfl_convert_vtbl vtbl_sjis_sb_wchar = {
  	mbfl_filt_conv_common_ctor,
 	NULL,
  	mbfl_filt_conv_sjis_mobile_wchar,
- 	mbfl_filt_conv_common_flush,
- 	NULL,
+	mbfl_filt_conv_common_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_sjis_sb = {
@@ -150,8 +145,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_sjis_sb = {
  	mbfl_filt_conv_common_ctor,
 	NULL,
  	mbfl_filt_conv_wchar_sjis_mobile,
-	mbfl_filt_conv_sjis_mobile_flush,
-	NULL,
+	mbfl_filt_conv_sjis_mobile_flush
 };
 
 static const char nflags_s[10][2] = {"CN","DE","ES","FR","GB","IT","JP","KR","RU","US"};

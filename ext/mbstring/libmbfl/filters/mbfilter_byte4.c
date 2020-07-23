@@ -73,8 +73,7 @@ const struct mbfl_convert_vtbl vtbl_byte4be_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_byte4be_wchar,
-	mbfl_filt_conv_common_flush,
-	NULL,
+	mbfl_filt_conv_common_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_byte4be = {
@@ -83,8 +82,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_byte4be = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_wchar_byte4be,
-	mbfl_filt_conv_common_flush,
-	NULL,
+	mbfl_filt_conv_common_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_byte4le_wchar = {
@@ -93,8 +91,7 @@ const struct mbfl_convert_vtbl vtbl_byte4le_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_byte4le_wchar,
-	mbfl_filt_conv_common_flush,
-	NULL,
+	mbfl_filt_conv_common_flush
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_byte4le = {
@@ -103,8 +100,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_byte4le = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_wchar_byte4le,
-	mbfl_filt_conv_common_flush,
-	NULL,
+	mbfl_filt_conv_common_flush
 };
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
