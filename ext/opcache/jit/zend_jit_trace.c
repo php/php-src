@@ -2067,7 +2067,7 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 			zend_bool support_opline;
 
 			support_opline =
-				zend_jit_opline_supports_reg(op_array, ssa, opline, ssa_op);
+				zend_jit_opline_supports_reg(op_array, ssa, opline, ssa_op, p);
 			if (ssa_op->op1_use >= 0
 			 && start[ssa_op->op1_use] >= 0
 			 && !zend_ssa_is_no_val_use(opline, ssa_op, ssa_op->op1_use)) {
@@ -2131,7 +2131,8 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 					 || opline->opcode == ZEND_POST_DEC
 					 || opline->opcode == ZEND_ADD
 					 || opline->opcode == ZEND_SUB
-					 || opline->opcode == ZEND_MUL) {
+					 || opline->opcode == ZEND_MUL
+					 || opline->opcode == ZEND_FETCH_DIM_R) {
 						if (!(ssa->var_info[ssa_op->result_def].type & MAY_BE_DOUBLE)
 						 || (opline->opcode != ZEND_PRE_INC && opline->opcode != ZEND_PRE_DEC)) {
 							start[ssa_op->result_def] = idx;
@@ -3850,7 +3851,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						CHECK_OP2_TRACE_TYPE();
 						res_info = RES_INFO();
 						if (!zend_jit_fetch_dim_read(&dasm_state, opline, op_array, ssa, ssa_op,
-								op1_info, op1_addr, op2_info, res_info,
+								op1_info, op1_addr, op2_info, res_info, RES_REG_ADDR(),
 								(
 									(op1_info & MAY_BE_ANY) != MAY_BE_ARRAY ||
 									(op2_info & (MAY_BE_ANY - (MAY_BE_LONG|MAY_BE_STRING))) != 0 ||
