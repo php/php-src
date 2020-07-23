@@ -25,6 +25,7 @@
 #endif
 #include "soap_arginfo.h"
 #include "zend_exceptions.h"
+#include "zend_interfaces.h"
 
 
 static int le_sdl = 0;
@@ -633,7 +634,6 @@ PHP_METHOD(SoapFault, __toString)
 {
 	zval *faultcode, *faultstring, *file, *line, trace, rv1, rv2, rv3, rv4;
 	zend_string *str;
-	zend_fcall_info fci;
 	zval *this_ptr;
 	zend_string *faultcode_val, *faultstring_val, *file_val;
 	zend_long line_val;
@@ -648,16 +648,8 @@ PHP_METHOD(SoapFault, __toString)
 	file = zend_read_property(soap_fault_class_entry, this_ptr, "file", sizeof("file")-1, 1, &rv3);
 	line = zend_read_property(soap_fault_class_entry, this_ptr, "line", sizeof("line")-1, 1, &rv4);
 
-	fci.size = sizeof(fci);
-	ZVAL_STRINGL(&fci.function_name, "gettraceasstring", sizeof("gettraceasstring")-1);
-	fci.object = Z_OBJ_P(ZEND_THIS);
-	fci.retval = &trace;
-	fci.param_count = 0;
-	fci.params = NULL;
-
-	zend_call_function(&fci, NULL);
-
-	zval_ptr_dtor(&fci.function_name);
+	zend_call_method_with_0_params(
+		Z_OBJ_P(ZEND_THIS), Z_OBJCE_P(ZEND_THIS), NULL, "gettraceasstring", &trace);
 
 	faultcode_val = zval_get_string(faultcode);
 	faultstring_val = zval_get_string(faultstring);
