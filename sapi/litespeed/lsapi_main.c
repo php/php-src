@@ -23,6 +23,7 @@
 #include "zend.h"
 #include "ext/standard/basic_functions.h"
 #include "ext/standard/info.h"
+#include "ext/standard/head.h"
 #include "lsapilib.h"
 #include "lsapi_main_arginfo.h"
 

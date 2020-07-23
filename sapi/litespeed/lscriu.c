@@ -403,8 +403,8 @@ static void LSCRIU_Restored_Error(int iFatal, char *format, ...) {
     }
 }
 #else // no debugging
-static void inline LSCRIU_Debugging(void) {}
-static void inline LSCRIU_Restored_Error(int iFatal, char *format, ...) {}
+static inline void LSCRIU_Debugging(void) {}
+static inline void LSCRIU_Restored_Error(int iFatal, char *format, ...) {}
 #endif
 
 
@@ -626,12 +626,14 @@ static int LSCRIU_Init_Env_Parameters(void)
                        gc_type == CRIU_GCOUNTER_SIG ? "signals" : "pipe");
             lsapi_criu_signal(SIGUSR2, lsapi_siguser2);
         }
-        else
+        else {
             lscriu_dbg("LSCRIU (%d): Use shared memory\n", getpid());
-        LSCRIU_Set_Global_Counter_Type(gc_type);
+	}
+    	LSCRIU_Set_Global_Counter_Type(gc_type);
     }
-    else
+    else {
         lscriu_dbg("LSCRIU (%d): NOT Listening\n", getpid());
+    }
 
     char *criu_mode = NULL;
     criu_mode = getenv("LSAPI_CRIU");
