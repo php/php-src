@@ -298,28 +298,8 @@ static void user_stream_create_object(struct php_user_stream_wrapper *uwrap, php
 	}
 
 	if (uwrap->ce->constructor) {
-		zend_fcall_info fci;
-		zend_fcall_info_cache fcc;
-		zval retval;
-
-		fci.size = sizeof(fci);
-		ZVAL_UNDEF(&fci.function_name);
-		fci.object = Z_OBJ_P(object);
-		fci.retval = &retval;
-		fci.param_count = 0;
-		fci.params = NULL;
-
-		fcc.function_handler = uwrap->ce->constructor;
-		fcc.called_scope = Z_OBJCE_P(object);
-		fcc.object = Z_OBJ_P(object);
-
-		if (zend_call_function(&fci, &fcc) == FAILURE) {
-			php_error_docref(NULL, E_WARNING, "Could not execute %s::%s()", ZSTR_VAL(uwrap->ce->name), ZSTR_VAL(uwrap->ce->constructor->common.function_name));
-			zval_ptr_dtor(object);
-			ZVAL_UNDEF(object);
-		} else {
-			zval_ptr_dtor(&retval);
-		}
+		zend_call_known_instance_method_with_0_params(
+			uwrap->ce->constructor, Z_OBJ_P(object), NULL);
 	}
 }
 
