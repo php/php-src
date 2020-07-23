@@ -53,7 +53,7 @@
 #include "lscriu.c"
 #endif
 
-#define SAPI_LSAPI_MAX_HEADER_LENGTH 2048
+#define SAPI_LSAPI_MAX_HEADER_LENGTH LSAPI_RESP_HTTP_HEADER_MAX
 
 /* Key for each cache entry is dirname(PATH_TRANSLATED).
  *
@@ -603,7 +603,7 @@ static int sapi_lsapi_activate()
 static sapi_module_struct lsapi_sapi_module =
 {
     "litespeed",
-    "LiteSpeed V7.6",
+    "LiteSpeed V7.7",
 
     php_lsapi_startup,              /* startup */
     php_module_shutdown_wrapper,    /* shutdown */
@@ -1736,7 +1736,7 @@ PHP_FUNCTION(litespeed_response_headers)
         if ( h->header_len > 0 ) {
             p = strchr( h->header, ':' );
             len = p - h->header;
-            if (( p )&&( len > 0 )) {
+            if (p && len > 0 && len < LSAPI_RESP_HTTP_HEADER_MAX) {
                 memmove( headerBuf, h->header, len );
                 while( len > 0 && (isspace( headerBuf[len-1])) ) {
                     --len;

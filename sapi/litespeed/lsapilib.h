@@ -70,7 +70,7 @@ struct LSAPI_key_value_pair
     int    valLen;
 };
 
-
+struct lsapi_child_status;
 #define LSAPI_MAX_RESP_HEADERS  1000
 
 typedef struct lsapi_request
@@ -91,6 +91,7 @@ typedef struct lsapi_request
     char            * m_pRespHeaderBuf;
     char            * m_pRespHeaderBufEnd;
     char            * m_pRespHeaderBufPos;
+    struct lsapi_child_status * child_status;
 
 
     struct iovec    * m_pIovec;
@@ -394,6 +395,12 @@ typedef void (*LSAPI_On_Timer_pf)(int *forked_child_pid);
 void LSAPI_Register_Pgrp_Timer_Callback(LSAPI_On_Timer_pf);
 
 int LSAPI_Inc_Req_Processed(int cnt);
+
+int LSAPI_Accept_Before_Fork(LSAPI_Request * pReq);
+
+int LSAPI_Postfork_Child(LSAPI_Request * pReq);
+
+int LSAPI_Postfork_Parent(LSAPI_Request * pReq);
 
 #define LSAPI_LOG_LEVEL_BITS    0xff
 #define LSAPI_LOG_FLAG_NONE     0
