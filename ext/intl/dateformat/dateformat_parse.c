@@ -51,7 +51,7 @@ static void internal_parse_to_timestamp(IntlDateFormatter_object *dfo, char* tex
 
 	/* Since return is in  sec. */
 	result = (double)timestamp / U_MILLIS_PER_SECOND;
-	if(result > LONG_MAX || result < -LONG_MAX) {
+	if (result > (double)LONG_MAX || result < (double)LONG_MIN) {
 		ZVAL_DOUBLE(return_value, result<0?ceil(result):floor(result));
 	} else {
 		ZVAL_LONG(return_value, (zend_long)result);

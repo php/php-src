@@ -110,6 +110,7 @@
 #if defined(__clang__)
 # pragma clang diagnostic push
 # pragma clang diagnostic ignored "-Wtautological-compare"
+# pragma clang diagnostic ignored "-Wstring-compare"
 #endif
 
 const char* zend_reg_name[] = {

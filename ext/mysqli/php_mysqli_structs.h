@@ -229,7 +229,7 @@ extern void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * resul
 		RETURN_THROWS();\
   	}\
 	__ptr = (__type)my_res->ptr; \
-	if (__check && my_res->status < __check) { \
+	if (my_res->status < __check) { \
 		zend_throw_error(NULL, "%s object is not fully initialized", ZSTR_VAL(intern->zo.ce->name)); \
 		RETURN_THROWS();\
 	}\
@@ -243,7 +243,7 @@ extern void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * resul
 		return;\
 	}\
 	__ptr = (__type)my_res->ptr; \
-	if (__check && my_res->status < __check) { \
+	if (my_res->status < __check) { \
 		zend_throw_error(NULL, "%s object is not fully initialized", ZSTR_VAL(intern->zo.ce->name)); \
 		return;\
 	}\
