@@ -449,7 +449,8 @@ static void zend_jit_trace_send_type(const zend_op *opline, zend_jit_trace_stack
 	const zend_op_array *op_array = &call->func->op_array;
 	uint32_t arg_num = opline->op2.num;
 
-	if (arg_num > op_array->num_args) {
+	if (op_array->type != ZEND_USER_FUNCTION
+	 || arg_num > op_array->num_args) {
 		return;
 	}
 	if (op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) {
