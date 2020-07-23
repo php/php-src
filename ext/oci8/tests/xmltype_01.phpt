@@ -83,7 +83,6 @@ echo "Done\n";
 ?>
 --EXPECT--
 Initial Data
-Initial Data
 string(316) "<?xml version="1.0"?>
         <Xt>
           <XtId>1</XtId>
