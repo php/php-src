@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.0.0beta1
 
+- Core:
+  . Fixed bug #78236 (convert error on receiving variables when duplicate [).
+    (cmb)
+
 - JIT:
   . Fixed bug #79864 (JIT segfault in Symfony OptionsResolver). (Dmitry)
 

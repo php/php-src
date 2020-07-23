@@ -178,8 +178,14 @@ PHPAPI void php_register_variable_ex(const char *var_name, zval *val, zval *trac
 			} else {
 				ip = strchr(ip, ']');
 				if (!ip) {
-					/* PHP variables cannot contain '[' in their names, so we replace the character with a '_' */
+					/* not an index; un-terminate the var name */
 					*(index_s - 1) = '_';
+					/* PHP variables cannot contain ' ', '.', '[' in their names, so we replace the characters with a '_' */
+					for (p = index_s; *p; p++) {
+						if (*p == ' ' || *p == '.' || *p == '[') {
+							*p = '_';
+						}
+					}
 
 					index_len = 0;
 					if (index) {
