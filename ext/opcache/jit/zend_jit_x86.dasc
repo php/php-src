@@ -7967,6 +7967,9 @@ static int zend_jit_qm_assign(dasm_State **Dst, const zend_op *opline, const zen
 		if (!zend_jit_update_regs(Dst, op1_addr, op1_def_addr, op1_info)) {
 			return 0;
 		}
+		if (Z_MODE(op1_def_addr) == IS_REG && Z_MODE(op1_addr) != IS_REG) {
+			op1_addr = op1_def_addr;
+		}
 	}
 
 	if (!zend_jit_simple_assign(Dst, opline, op_array, res_addr, -1, -1, opline->op1_type, opline->op1, op1_addr, op1_info, 0, 0, 0)) {
@@ -7985,6 +7988,9 @@ static int zend_jit_assign(dasm_State **Dst, const zend_op *opline, const zend_o
 	if (op2_addr != op2_def_addr) {
 		if (!zend_jit_update_regs(Dst, op2_addr, op2_def_addr, op2_info)) {
 			return 0;
+		}
+		if (Z_MODE(op2_def_addr) == IS_REG && Z_MODE(op2_addr) != IS_REG) {
+			op2_addr = op2_def_addr;
 		}
 	}
 
