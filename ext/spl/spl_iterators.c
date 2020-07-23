@@ -1365,7 +1365,7 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 			}
 			intern->dit_type = DIT_AppendIterator;
 			zend_replace_error_handling(EH_THROW, spl_ce_InvalidArgumentException, &error_handling);
-			spl_instantiate(spl_ce_ArrayIterator, &intern->u.append.zarrayit);
+			object_init_ex(&intern->u.append.zarrayit, spl_ce_ArrayIterator);
 			zend_call_method_with_0_params(Z_OBJ(intern->u.append.zarrayit), spl_ce_ArrayIterator, &spl_ce_ArrayIterator->constructor, "__construct", NULL);
 			intern->u.append.iterator = spl_ce_ArrayIterator->get_iterator(spl_ce_ArrayIterator, &intern->u.append.zarrayit, 0);
 			zend_restore_error_handling(&error_handling);
