@@ -8234,18 +8234,18 @@ void zend_compile_conditional(znode *result, zend_ast *ast) /* {{{ */
 			&& cond_ast->attr != ZEND_PARENTHESIZED_CONDITIONAL) {
 		if (cond_ast->child[1]) {
 			if (true_ast) {
-				zend_error(E_DEPRECATED,
-					"Unparenthesized `a ? b : c ? d : e` is deprecated. "
+				zend_error(E_COMPILE_ERROR,
+					"Unparenthesized `a ? b : c ? d : e` is not supported. "
 					"Use either `(a ? b : c) ? d : e` or `a ? b : (c ? d : e)`");
 			} else {
-				zend_error(E_DEPRECATED,
-					"Unparenthesized `a ? b : c ?: d` is deprecated. "
+				zend_error(E_COMPILE_ERROR,
+					"Unparenthesized `a ? b : c ?: d` is not supported. "
 					"Use either `(a ? b : c) ?: d` or `a ? b : (c ?: d)`");
 			}
 		} else {
 			if (true_ast) {
-				zend_error(E_DEPRECATED,
-					"Unparenthesized `a ?: b ? c : d` is deprecated. "
+				zend_error(E_COMPILE_ERROR,
+					"Unparenthesized `a ?: b ? c : d` is not supported. "
 					"Use either `(a ?: b) ? c : d` or `a ?: (b ? c : d)`");
 			} else {
 				/* This case is harmless:  (a ?: b) ?: c always produces the same result
