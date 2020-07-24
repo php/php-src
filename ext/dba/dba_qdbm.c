@@ -22,10 +22,7 @@
 
 #if DBA_QDBM
 #include "php_qdbm.h"
-
-#ifdef QDBM_INCLUDE_FILE
-#include QDBM_INCLUDE_FILE
-#endif
+#include "depot.h"
 
 #define QDBM_DATA dba_qdbm_data *dba = info->dbf
 

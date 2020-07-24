@@ -7,6 +7,7 @@ DBA TCADB handler test
 ?>
 --FILE--
 <?php
+	$handler = 'tcadb';
     $lock_flag = 'l';
     $db_filename = $db_file = __DIR__ .'/test0.tch';
     @unlink($db_filename);

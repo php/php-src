@@ -57,6 +57,10 @@ steps:
         --with-sodium \
         --enable-dba \
         --enable-werror \
+        --enable-dba \
+        --with-lmdb  \
+        --with-qdbm \
+        --with-tcadb \
         --with-config-file-path=/etc \
         --with-config-file-scan-dir=/etc/php.d
   displayName: 'Configure Build'
