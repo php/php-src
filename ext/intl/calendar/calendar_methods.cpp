@@ -347,11 +347,9 @@ static void _php_intlcal_before_after(
 	CALENDAR_METHOD_FETCH_OBJECT;
 
 	when_co = Z_INTL_CALENDAR_P(when_object);
-	/* Can this ever happen ? */
 	if (when_co->ucal == NULL) {
-		intl_errors_set(&co->err, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_before/after: Other IntlCalendar was unconstructed", 0);
-		RETURN_FALSE;
+		zend_argument_error(NULL, 2, "object is not fully initialized");
+		RETURN_THROWS();
 	}
 
 	UBool res = (co->ucal->*func)(*when_co->ucal, CALENDAR_ERROR_CODE(co));
@@ -716,11 +714,9 @@ U_CFUNC PHP_FUNCTION(intlcal_is_equivalent_to)
 	}
 
 	other_co = Z_INTL_CALENDAR_P(other_object);
-	// Can this happen?
 	if (other_co->ucal == NULL) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "intlcal_is_equivalent_to:"
-			" Other IntlCalendar is unconstructed", 0);
-		RETURN_FALSE;
+		zend_argument_error(NULL, 2, "object is not fully initialized");
+		RETURN_THROWS();
 	}
 
 	CALENDAR_METHOD_FETCH_OBJECT;
@@ -856,11 +852,9 @@ U_CFUNC PHP_FUNCTION(intlcal_equals)
 
 	CALENDAR_METHOD_FETCH_OBJECT;
 	other_co = Z_INTL_CALENDAR_P(other_object);
-	// Can this happen?
 	if (other_co->ucal == NULL) {
-		intl_errors_set(&co->err, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_equals: The second IntlCalendar is unconstructed", 0);
-		RETURN_FALSE;
+		zend_argument_error(NULL, 2, "object is not fully initialized");
+		RETURN_THROWS();
 	}
 
 	UBool result = co->ucal->equals(*other_co->ucal, CALENDAR_ERROR_CODE(co));
@@ -1085,6 +1079,7 @@ U_CFUNC PHP_FUNCTION(intlcal_to_date_time)
 	object_init_ex(return_value, php_date_get_date_ce());
 	zend_call_known_instance_method_with_2_params(
 		Z_OBJCE_P(return_value)->constructor, Z_OBJ_P(return_value), NULL, &ts_zval, timezone_zval);
+	// TODO Bubble up exception?
 	if (EG(exception)) {
 		intl_errors_set(CALENDAR_ERROR_P(co), U_ILLEGAL_ARGUMENT_ERROR,
 			"intlcal_to_date_time: DateTime constructor has thrown exception",

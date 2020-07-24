@@ -125,7 +125,7 @@ static void _php_intlgregcal_constructor_body(
 		// From date/time (3, 5 or 6 arguments)
 		for (int i = 0; i < variant; i++) {
 			if (largs[i] < INT32_MIN || largs[i] > INT32_MAX) {
-				zend_argument_value_error(getThis() ? (i-1):i,
+				zend_argument_value_error(getThis() ? (i-1) : i,
 					"must be between %d and %d", INT32_MIN, INT32_MAX);
 				RETURN_THROWS();
 			}
@@ -240,7 +240,7 @@ U_CFUNC PHP_FUNCTION(intlgregcal_is_leap_year)
 	}
 
 	if (year < INT32_MIN || year > INT32_MAX) {
-		zend_argument_value_error(getThis() ? 1:2, "must be between %d and %d", INT32_MIN, INT32_MAX);
+		zend_argument_value_error(getThis() ? 1 : 2, "must be between %d and %d", INT32_MIN, INT32_MAX);
 		RETURN_THROWS();
 	}
 
