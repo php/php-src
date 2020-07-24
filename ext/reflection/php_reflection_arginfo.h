@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 330900e4fdcc9691ef971a270d065f859cee47bd */
+ * Stub hash: 737d4147f85cc28aea2874c6816846110e5a3566 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, modifiers, IS_LONG, 0)
@@ -73,11 +73,11 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_ReflectionFunction_isDisabled arginfo_class_ReflectionFunctionAbstract___clone
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionFunction_invoke, 0, 0, 0)
-	ZEND_ARG_VARIADIC_TYPE_INFO(0, args, IS_MIXED, 0)
+	ZEND_ARG_VARIADIC_TYPE_INFO(0, arguments, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionFunction_invokeArgs, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, args, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, arguments, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionFunction_getClosure arginfo_class_ReflectionFunctionAbstract___clone
@@ -101,8 +101,8 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_ReflectionGenerator_getExecutingGenerator arginfo_class_ReflectionFunctionAbstract___clone
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionMethod___construct, 0, 0, 1)
-	ZEND_ARG_INFO(0, class_or_method)
-	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
+	ZEND_ARG_INFO(0, objectOrMethod)
+	ZEND_ARG_TYPE_INFO(0, method, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionMethod___toString arginfo_class_ReflectionFunction___toString
@@ -131,12 +131,12 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionMethod_invoke, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, object, IS_OBJECT, 1)
-	ZEND_ARG_VARIADIC_TYPE_INFO(0, args, IS_MIXED, 0)
+	ZEND_ARG_VARIADIC_TYPE_INFO(0, arguments, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionMethod_invokeArgs, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, object, IS_OBJECT, 1)
-	ZEND_ARG_TYPE_INFO(0, args, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, arguments, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionMethod_getDeclaringClass arginfo_class_ReflectionFunctionAbstract___clone
@@ -144,13 +144,13 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_ReflectionMethod_getPrototype arginfo_class_ReflectionFunctionAbstract___clone
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionMethod_setAccessible, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, visible, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, isAccessible, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionClass___clone arginfo_class_ReflectionFunctionAbstract___clone
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionClass___construct, 0, 0, 1)
-	ZEND_ARG_INFO(0, argument)
+	ZEND_ARG_INFO(0, objectOrClass)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionClass___toString arginfo_class_ReflectionFunction___toString
@@ -229,14 +229,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionClass_isInstance, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, object, IS_OBJECT, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionClass_newInstance, 0, 0, 0)
-	ZEND_ARG_VARIADIC_INFO(0, args)
-ZEND_END_ARG_INFO()
+#define arginfo_class_ReflectionClass_newInstance arginfo_class_ReflectionFunction_invoke
 
 #define arginfo_class_ReflectionClass_newInstanceWithoutConstructor arginfo_class_ReflectionFunctionAbstract___clone
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionClass_newInstanceArgs, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, args, IS_ARRAY, 0, "[]")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, arguments, IS_ARRAY, 0, "[]")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionClass_getParentClass arginfo_class_ReflectionFunctionAbstract___clone
@@ -286,7 +284,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_ReflectionProperty___clone arginfo_class_ReflectionFunctionAbstract___clone
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionProperty___construct, 0, 0, 2)
-	ZEND_ARG_INFO(0, class)
+	ZEND_ARG_TYPE_MASK(0, class, MAY_BE_OBJECT|MAY_BE_STRING, NULL)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
@@ -338,7 +336,10 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionClassConstant___clone arginfo_class_ReflectionFunctionAbstract___clone
 
-#define arginfo_class_ReflectionClassConstant___construct arginfo_class_ReflectionProperty___construct
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionClassConstant___construct, 0, 0, 2)
+	ZEND_ARG_TYPE_MASK(0, class, MAY_BE_OBJECT|MAY_BE_STRING, NULL)
+	ZEND_ARG_TYPE_INFO(0, constantName, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionClassConstant___toString arginfo_class_ReflectionFunction___toString
 

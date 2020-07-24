@@ -37,7 +37,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector, String
     Method [ <internal:Reflection, ctor> public method __construct ] {
 
       - Parameters [1] {
-        Parameter #0 [ <required> $argument ]
+        Parameter #0 [ <required> $objectOrClass ]
       }
     }
 
@@ -261,7 +261,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector, String
     Method [ <internal:Reflection> public method newInstance ] {
 
       - Parameters [1] {
-        Parameter #0 [ <optional> ...$args = <default> ]
+        Parameter #0 [ <optional> mixed ...$arguments = <default> ]
       }
     }
 
@@ -274,7 +274,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector, String
     Method [ <internal:Reflection> public method newInstanceArgs ] {
 
       - Parameters [1] {
-        Parameter #0 [ <optional> array $args = [] ]
+        Parameter #0 [ <optional> array $arguments = [] ]
       }
     }
 
