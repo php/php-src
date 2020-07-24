@@ -50,7 +50,6 @@ static const size_t DEF_UTF16_BUF_SIZE = 1024;
 /* {{{ collator_regular_compare_function */
 static int collator_regular_compare_function(zval *result, zval *op1, zval *op2)
 {
-	Collator_object* co = NULL;
 	int rc = SUCCESS;
 	zval str1, str2;
 	zval num1, num2;
@@ -70,21 +69,10 @@ static int collator_regular_compare_function(zval *result, zval *op1, zval *op2)
 		( str1_p == ( num1_p = collator_convert_string_to_number_if_possible( str1_p, &num1 ) ) ||
 		  str2_p == ( num2_p = collator_convert_string_to_number_if_possible( str2_p, &num2 ) ) ) )
 	{
-		/* Fetch collator object. */
-		co = Z_INTL_COLLATOR_P(&INTL_G(current_collator));
-
-		if (!co || !co->ucoll) {
-			intl_error_set_code( NULL, COLLATOR_ERROR_CODE( co ) );
-			intl_errors_set_custom_msg( COLLATOR_ERROR_P( co ),
-				"Object not initialized", 0 );
-			zend_throw_error(NULL, "Object not initialized");
-			rc = FAILURE;
-			goto cleanup;
-		}
-
 		/* Compare the strings using ICU. */
+		ZEND_ASSERT(INTL_G(current_collator) != NULL);
 		ZVAL_LONG(result, ucol_strcoll(
-					co->ucoll,
+					INTL_G(current_collator),
 					INTL_Z_STRVAL_P(str1_p), INTL_Z_STRLEN_P(str1_p),
 					INTL_Z_STRVAL_P(str2_p), INTL_Z_STRLEN_P(str2_p) ));
 	}
@@ -129,7 +117,6 @@ static int collator_regular_compare_function(zval *result, zval *op1, zval *op2)
 		zval_ptr_dtor( norm2_p );
 	}
 
-cleanup:
 	if( num1_p )
 		zval_ptr_dtor( num1_p );
 
@@ -182,19 +169,16 @@ static int collator_icu_compare_function(zval *result, zval *op1, zval *op2)
 {
 	zval str1, str2;
 	int rc              = SUCCESS;
-	Collator_object* co = NULL;
 	zval *str1_p        = NULL;
 	zval *str2_p        = NULL;
 
 	str1_p = collator_make_printable_zval( op1, &str1);
 	str2_p = collator_make_printable_zval( op2, &str2 );
 
-	/* Fetch collator object. */
-	co = Z_INTL_COLLATOR_P(&INTL_G(current_collator));
-
 	/* Compare the strings using ICU. */
+	ZEND_ASSERT(INTL_G(current_collator) != NULL);
 	ZVAL_LONG(result, ucol_strcoll(
-				co->ucoll,
+				INTL_G(current_collator),
 				INTL_Z_STRVAL_P(str1_p), INTL_Z_STRLEN_P(str1_p),
 				INTL_Z_STRVAL_P(str2_p), INTL_Z_STRLEN_P(str2_p) ));
 
@@ -276,7 +260,7 @@ static collator_compare_func_t collator_get_compare_function( const zend_long so
 /* {{{ Common code shared by collator_sort() and collator_asort() API functions. */
 static void collator_sort_internal( int renumber, INTERNAL_FUNCTION_PARAMETERS )
 {
-	zval           saved_collator;
+	UCollator*     saved_collator;
 	zval*          array            = NULL;
 	HashTable*     hash             = NULL;
 	zend_long           sort_flags       = COLLATOR_SORT_REGULAR;
@@ -293,6 +277,11 @@ static void collator_sort_internal( int renumber, INTERNAL_FUNCTION_PARAMETERS )
 	/* Fetch the object. */
 	COLLATOR_METHOD_FETCH_OBJECT;
 
+	if (!co->ucoll) {
+		zend_throw_error(NULL, "Object not initialized");
+		RETURN_THROWS();
+	}
+
 	/* Set 'compare function' according to sort flags. */
 	INTL_G(compare_func) = collator_get_compare_function( sort_flags );
 
@@ -303,14 +292,14 @@ static void collator_sort_internal( int renumber, INTERNAL_FUNCTION_PARAMETERS )
 	COLLATOR_CHECK_STATUS( co, "Error converting hash from UTF-8 to UTF-16" );
 
 	/* Save specified collator in the request-global (?) variable. */
-	ZVAL_COPY_VALUE(&saved_collator, &INTL_G( current_collator ));
-	ZVAL_OBJ(&INTL_G( current_collator ), Z_OBJ_P(object));
+	saved_collator = INTL_G( current_collator );
+	INTL_G( current_collator ) = co->ucoll;
 
 	/* Sort specified array. */
 	zend_hash_sort(hash, collator_compare_func, renumber);
 
 	/* Restore saved collator. */
-	ZVAL_COPY_VALUE(&INTL_G( current_collator ), &saved_collator);
+	INTL_G( current_collator ) = saved_collator;
 
 	/* Convert strings in the specified array back to UTF-8. */
 	collator_convert_hash_from_utf16_to_utf8( hash, COLLATOR_ERROR_CODE_P( co ) );
