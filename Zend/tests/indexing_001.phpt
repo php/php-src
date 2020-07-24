@@ -76,11 +76,11 @@ array(1) {
 }
 
 Warning: Array to string conversion in %s on line %d
-Illegal offset type
+Cannot access offset of type string on string
 string(0) ""
 
 Warning: Array to string conversion in %s on line %d
-Illegal offset type
+Cannot access offset of type string on string
 string(1) " "
 Cannot use a scalar value as an array
 float(0.1)

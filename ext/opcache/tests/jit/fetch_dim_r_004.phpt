@@ -51,8 +51,8 @@ string(1) "B"
 
 Warning: String offset cast occurred in %s on line %d
 string(1) "A"
-Illegal offset type
-Illegal offset type
+Cannot access offset of type string on string
+Cannot access offset of type string on string
 
 Warning: Illegal string offset "2x" in %sfetch_dim_r_004.php on line 5
 string(1) "C"

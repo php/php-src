@@ -55,9 +55,9 @@ string(1) "S"
 
 Warning: String offset cast occurred in %s on line %d
 string(1) "S"
-Illegal offset type
+Cannot access offset of type string on string
 string(1) "c"
-Illegal offset type
+Cannot access offset of type string on string
 
 Warning: Illegal string offset "15 and then some" in %s on line %d
 string(1) "r"
@@ -67,9 +67,9 @@ string(1) "i"
 
 Warning: String offset cast occurred in %s on line %d
 string(1) "S"
-Illegal offset type
+Cannot access offset of type resource on string
 
 Notice: Object of class stdClass could not be converted to int in %s on line %d
-Illegal offset type
-Illegal offset type
+Cannot access offset of type stdClass on string
+Cannot access offset of type array on string
 Done

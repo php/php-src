@@ -58,7 +58,7 @@ ok
 
 Warning: Attempt to read property "wrong" on string in %s on line %d
 ok
-Illegal offset type
+Cannot access offset of type string on string
 ok
-Illegal offset type
+Cannot access offset of type string on string
 ok

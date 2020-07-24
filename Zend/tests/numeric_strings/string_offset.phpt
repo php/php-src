@@ -39,29 +39,29 @@ echo "Done\n";
 ?>
 --EXPECTF--
 string(1) "l"
-Illegal offset type
+Cannot access offset of type string on string
 string(1) "l"
-Illegal offset type
+Cannot access offset of type string on string
 string(1) "l"
-Illegal offset type
+Cannot access offset of type string on string
 string(1) "l"
-Illegal offset type
+Cannot access offset of type string on string
 
 Warning: Illegal string offset "7str" in %s on line %d
 string(1) "l"
-Illegal offset type
+Cannot access offset of type string on string
 
 Warning: Illegal string offset "  7str" in %s on line %d
 string(1) "l"
-Illegal offset type
+Cannot access offset of type string on string
 
 Warning: Illegal string offset "  7  str" in %s on line %d
 string(1) "l"
-Illegal offset type
+Cannot access offset of type string on string
 
 Warning: Illegal string offset "7  str" in %s on line %d
 string(1) "l"
-Illegal offset type
+Cannot access offset of type string on string
 
 Warning: Illegal string offset "0xC" in %s on line %d
 string(1) "T"

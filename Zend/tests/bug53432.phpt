@@ -57,7 +57,7 @@ string(6) "     a"
 Warning: Illegal string offset -1 in %s on line %d
 NULL
 string(0) ""
-Illegal offset type
+Cannot access offset of type string on string
 string(1) "a"
 Error: [] operator not supported for strings
 string(0) ""

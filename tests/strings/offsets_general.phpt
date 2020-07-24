@@ -23,5 +23,5 @@ string(1) "f"
 string(1) "o"
 bool(true)
 bool(true)
-Illegal offset type
+Cannot access offset of type string on string
 bool(false)

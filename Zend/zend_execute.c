@@ -770,10 +770,10 @@ static zend_bool zend_verify_weak_scalar_type_hint_no_sideeffect(uint32_t type_m
 	double dval;
 	zend_bool bval;
 
-	if (type_mask & MAY_BE_LONG && zend_parse_arg_long_weak(arg, &lval)) {
+	if ((type_mask & MAY_BE_LONG) && zend_parse_arg_long_weak(arg, &lval)) {
 		return 1;
 	}
-	if (type_mask & MAY_BE_DOUBLE && zend_parse_arg_double_weak(arg, &dval)) {
+	if ((type_mask & MAY_BE_DOUBLE) && zend_parse_arg_double_weak(arg, &dval)) {
 		return 1;
 	}
 	/* We don't call cast_object here, because this check must be side-effect free. As this
@@ -1247,6 +1247,11 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_illegal_offset(void)
 	zend_type_error("Illegal offset type");
 }
 
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_illegal_string_offset(const zval *offset)
+{
+	zend_type_error("Cannot access offset of type %s on string", zend_zval_type_name(offset));
+}
+
 static zend_never_inline void zend_assign_to_object_dim(zval *object, zval *dim, zval *value OPLINE_DC EXECUTE_DATA_DC)
 {
 	Z_OBJ_HT_P(object)->write_dimension(Z_OBJ_P(object), dim, value);
@@ -1350,7 +1355,7 @@ try_again:
 					}
 					return offset;
 				}
-				zend_illegal_offset();
+				zend_illegal_string_offset(dim);
 				break;
 			}
 			case IS_UNDEF:
@@ -1365,7 +1370,7 @@ try_again:
 				dim = Z_REFVAL_P(dim);
 				goto try_again;
 			default:
-				zend_illegal_offset();
+				zend_illegal_string_offset(dim);
 				break;
 		}
 
@@ -2345,7 +2350,7 @@ try_string_offset:
 						ZVAL_NULL(result);
 						return;
 					}
-					zend_illegal_offset();
+					zend_illegal_string_offset(dim);
 					break;
 				}
 				case IS_UNDEF:
@@ -2362,7 +2367,7 @@ try_string_offset:
 					dim = Z_REFVAL_P(dim);
 					goto try_string_offset;
 				default:
-					zend_illegal_offset();
+					zend_illegal_string_offset(dim);
 					break;
 			}
 
