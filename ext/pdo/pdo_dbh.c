@@ -1026,12 +1026,13 @@ PHP_METHOD(PDO, query)
 	char *statement;
 	size_t statement_len;
 	zend_long fetch_mode;
+	zend_bool fetch_mode_is_null = 1;
 	zval *args = NULL;
 	uint32_t num_args = 0;
 	pdo_dbh_object_t *dbh_obj = Z_PDO_OBJECT_P(ZEND_THIS);
 	pdo_dbh_t *dbh = dbh_obj->inner;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|l*", &statement, &statement_len, &fetch_mode, &args, &num_args)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|l!*", &statement, &statement_len, &fetch_mode, &fetch_mode_is_null, &args, &num_args)) {
 		RETURN_THROWS();
 	}
 
@@ -1061,7 +1062,7 @@ PHP_METHOD(PDO, query)
 
 	if (dbh->methods->preparer(dbh, statement, statement_len, stmt, NULL)) {
 		PDO_STMT_CLEAR_ERR();
-		if (ZEND_NUM_ARGS() == 1 || SUCCESS == pdo_stmt_setup_fetch_mode(stmt, fetch_mode, args, num_args)) {
+		if (fetch_mode_is_null || SUCCESS == pdo_stmt_setup_fetch_mode(stmt, fetch_mode, args, num_args)) {
 
 			/* now execute the statement */
 			PDO_STMT_CLEAR_ERR();

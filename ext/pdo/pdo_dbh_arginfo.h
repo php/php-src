@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c329bfda55244467a2cd62f9d5c5120ec3f24eef */
+ * Stub hash: 36270d1418fc4ddd8f79018372b0ef00fb6f5889 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PDO___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, dsn, IS_STRING, 0)
@@ -40,7 +40,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PDO_query, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, statement, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, fetch_mode, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, fetch_mode, IS_LONG, 1, "null")
 	ZEND_ARG_VARIADIC_INFO(0, fetch_mode_args)
 ZEND_END_ARG_INFO()
 

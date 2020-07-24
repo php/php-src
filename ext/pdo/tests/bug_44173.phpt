@@ -54,7 +54,7 @@ var_dump($stmt);
 --EXPECTF--
 Warning: PDO::query(): SQLSTATE[HY000]: General error: fetch mode doesn't allow any extra arguments in %s
 bool(false)
-PDO::query(): Argument #2 ($fetch_mode) must be of type int, string given
+PDO::query(): Argument #2 ($fetch_mode) must be of type ?int, string given
 
 Warning: PDO::query(): SQLSTATE[HY000]: General error: too many arguments in %s
 bool(false)

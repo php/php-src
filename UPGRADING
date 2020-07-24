@@ -350,9 +350,11 @@ PHP 8.0 UPGRADE NOTES
     "exceptions". See https://www.php.net/manual/en/pdo.error-handling.php
     for details of behavior changes and how to explicitly set this attribute.
     RFC: https://wiki.php.net/rfc/pdo_default_errmode
-  . The method PDOStatement::setFetchMode() now accepts the following signature:
+  . The signatures of some PDO methods have changed:
 
-        PDOStatement::setFetchMode($mode, $classname, $params)
+        PDO::query(
+            string $statement, ?int $fetch_mode = null, ...$fetch_mode_args)
+        PDOStatement::setFetchMode(int $mode, ...$params)
 
 - PDO_ODBC:
   . The php.ini directive pdo_odbc.db2_instance_name has been removed
