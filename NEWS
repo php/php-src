@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #78236 (convert error on receiving variables when duplicate [).
     (cmb)
+  . Fixed bug #79108 (Referencing argument in a function makes it a reference
+    in the stack trace). (Nikita)
 
 - JIT:
   . Fixed bug #79864 (JIT segfault in Symfony OptionsResolver). (Dmitry)

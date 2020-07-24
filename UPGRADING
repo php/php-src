@@ -210,6 +210,9 @@ PHP 8.0 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/namespaced_names_as_token
   . Nested ternaries now require explicit parentheses.
     RFC: https://wiki.php.net/rfc/ternary_associativity
+  . debug_backtrace() and Exception::getTrace() will no longer provide
+    references to arguments. It will not be possible to change function
+    arguments through the backtrace.
 
 - COM:
   . Removed the ability to import case-insensitive constants from type

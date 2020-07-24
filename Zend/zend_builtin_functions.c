@@ -1591,16 +1591,12 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 					 * and we have to access them through symbol_table
 					 * See: https://bugs.php.net/bug.php?id=73156
 					 */
-					zend_string *arg_name;
-					zval *arg;
-
 					while (i < first_extra_arg) {
-						arg_name = call->func->op_array.vars[i];
-						arg = zend_hash_find_ex_ind(call->symbol_table, arg_name, 1);
+						zend_string *arg_name = call->func->op_array.vars[i];
+						zval *arg = zend_hash_find_ex_ind(call->symbol_table, arg_name, 1);
 						if (arg) {
-							if (Z_OPT_REFCOUNTED_P(arg)) {
-								Z_ADDREF_P(arg);
-							}
+							ZVAL_DEREF(arg);
+							Z_TRY_ADDREF_P(arg);
 							ZEND_HASH_FILL_SET(arg);
 						} else {
 							ZEND_HASH_FILL_SET_NULL();
@@ -1611,10 +1607,10 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 				} else {
 					while (i < first_extra_arg) {
 						if (EXPECTED(Z_TYPE_INFO_P(p) != IS_UNDEF)) {
-							if (Z_OPT_REFCOUNTED_P(p)) {
-								Z_ADDREF_P(p);
-							}
-							ZEND_HASH_FILL_SET(p);
+							zval *arg = p;
+							ZVAL_DEREF(arg);
+							Z_TRY_ADDREF_P(arg);
+							ZEND_HASH_FILL_SET(arg);
 						} else {
 							ZEND_HASH_FILL_SET_NULL();
 						}
@@ -1628,10 +1624,10 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 
 			while (i < num_args) {
 				if (EXPECTED(Z_TYPE_INFO_P(p) != IS_UNDEF)) {
-					if (Z_OPT_REFCOUNTED_P(p)) {
-						Z_ADDREF_P(p);
-					}
-					ZEND_HASH_FILL_SET(p);
+					zval *arg = p;
+					ZVAL_DEREF(arg);
+					Z_TRY_ADDREF_P(arg);
+					ZEND_HASH_FILL_SET(arg);
 				} else {
 					ZEND_HASH_FILL_SET_NULL();
 				}

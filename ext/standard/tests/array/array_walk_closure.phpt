@@ -223,7 +223,7 @@ array(2) {
     ["args"]=>
     array(2) {
       [0]=>
-      &array(3) {
+      array(3) {
         ["one"]=>
         int(1)
         ["two"]=>

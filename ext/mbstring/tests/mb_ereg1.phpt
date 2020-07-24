@@ -53,7 +53,7 @@ array(3) {
   [1]=>
   int(1)
   [2]=>
-  &string(0) ""
+  string(0) ""
 }
 mb_ereg(): Argument #2 ($string) must be of type string, array given
 array(3) {
@@ -63,7 +63,7 @@ array(3) {
   array(0) {
   }
   [2]=>
-  &string(0) ""
+  string(0) ""
 }
 bool(false)
 array(3) {

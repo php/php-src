@@ -111,13 +111,6 @@ static inline HashTable *spl_array_get_hash_table(spl_array_object* intern) { /*
 }
 /* }}} */
 
-static inline void spl_array_replace_hash_table(spl_array_object* intern, HashTable *ht) { /* {{{ */
-	HashTable **ht_ptr = spl_array_get_hash_table_ptr(intern);
-	zend_array_destroy(*ht_ptr);
-	*ht_ptr = ht;
-}
-/* }}} */
-
 static inline zend_bool spl_array_is_object(spl_array_object *intern) /* {{{ */
 {
 	while (intern->ar_flags & SPL_ARRAY_USE_OTHER) {
@@ -1412,7 +1405,8 @@ PHP_METHOD(ArrayObject, count)
 static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fname_len, int use_arg) /* {{{ */
 {
 	spl_array_object *intern = Z_SPLARRAY_P(ZEND_THIS);
-	HashTable *aht = spl_array_get_hash_table(intern);
+	HashTable **ht_ptr = spl_array_get_hash_table_ptr(intern);
+	HashTable *aht = *ht_ptr;
 	zval function_name, params[2], *arg = NULL;
 
 	ZVAL_STRINGL(&function_name, fname, fname_len);
@@ -1451,13 +1445,11 @@ static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fnam
 
 exit:
 	{
-		HashTable *new_ht = Z_ARRVAL_P(Z_REFVAL(params[0]));
-		if (aht != new_ht) {
-			spl_array_replace_hash_table(intern, new_ht);
-		} else {
-			GC_DELREF(aht);
-		}
-		ZVAL_NULL(Z_REFVAL(params[0]));
+		zval *ht_zv = Z_REFVAL(params[0]);
+		zend_array_release(*ht_ptr);
+		SEPARATE_ARRAY(ht_zv);
+		*ht_ptr = Z_ARRVAL_P(ht_zv);
+		ZVAL_NULL(ht_zv);
 		zval_ptr_dtor(&params[0]);
 		zend_string_free(Z_STR(function_name));
 	}
