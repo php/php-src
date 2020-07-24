@@ -174,9 +174,6 @@ U_CFUNC PHP_FUNCTION(intlcal_get_keyword_values_for_locale)
 		RETURN_THROWS();
 	}
 
-	//does not work; see ICU bug 9194
-	// TODO This was fixed in ICU 50.1 see: https://unicode-org.atlassian.net/browse/ICU-9194
-#if 0
 	StringEnumeration *se = Calendar::getKeywordValuesForLocale(key,
 		Locale::createFromName(locale), (UBool)commonly_used,
 		status);
@@ -185,18 +182,6 @@ U_CFUNC PHP_FUNCTION(intlcal_get_keyword_values_for_locale)
 			"error calling underlying method", 0);
 		RETURN_FALSE;
 	}
-#else
-    UEnumeration *uenum = ucal_getKeywordValuesForLocale(
-		key, locale, !!commonly_used, &status);
-    if (U_FAILURE(status)) {
-        uenum_close(uenum);
-		intl_error_set(NULL, status, "intlcal_get_keyword_values_for_locale: "
-			"error calling underlying method", 0);
-        RETURN_FALSE;
-    }
-
-    StringEnumeration *se = new BugStringCharEnumeration(uenum);
-#endif
 
 	IntlIterator_from_StringEnumeration(se, return_value);
 }
