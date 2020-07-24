@@ -905,14 +905,21 @@ function funcInfoToCode(FuncInfo $funcInfo): string {
                 }
             } else if (null !== $representableType = $argType->tryToRepresentableType()) {
                 if ($representableType->classType !== null) {
-                    throw new Exception('Unimplemented');
+                    $code .= sprintf(
+                        "\tZEND_%s_OBJ_TYPE_MASK(%s, %s, %s, %s, %s)\n",
+                        $argKind, $argInfo->getSendByString(), $argInfo->name,
+                        $representableType->classType->toEscapedName(),
+                        $representableType->toTypeMask(),
+                        $argInfo->getDefaultValueString()
+                    );
+                } else {
+                    $code .= sprintf(
+                        "\tZEND_%s_TYPE_MASK(%s, %s, %s, %s)\n",
+                        $argKind, $argInfo->getSendByString(), $argInfo->name,
+                        $representableType->toTypeMask(),
+                        $argInfo->getDefaultValueString()
+                    );
                 }
-                $code .= sprintf(
-                    "\tZEND_%s_TYPE_MASK(%s, %s, %s, %s)\n",
-                    $argKind, $argInfo->getSendByString(), $argInfo->name,
-                    $representableType->toTypeMask(),
-                    $argInfo->getDefaultValueString()
-                );
             } else {
                 throw new Exception('Unimplemented');
             }
