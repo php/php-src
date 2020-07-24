@@ -103,7 +103,7 @@ abstract class ReflectionFunctionAbstract implements Reflector
 class ReflectionFunction extends ReflectionFunctionAbstract
 {
     /** @param Closure|string $name */
-    public function __construct($name) {}
+    public function __construct($function) {}
 
     public function __toString(): string {}
 
@@ -114,10 +114,10 @@ class ReflectionFunction extends ReflectionFunctionAbstract
     public function isDisabled() {}
 
     /** @return mixed */
-    public function invoke(mixed ...$arguments) {}
+    public function invoke(mixed ...$args) {}
 
     /** @return mixed */
-    public function invokeArgs(array $arguments) {}
+    public function invokeArgs(array $args) {}
 
     /** @return Closure */
     public function getClosure() {}
@@ -184,10 +184,10 @@ class ReflectionMethod extends ReflectionFunctionAbstract
     public function getModifiers() {}
 
     /** @return mixed */
-    public function invoke(?object $object, mixed ...$arguments) {}
+    public function invoke(?object $object, mixed ...$args) {}
 
     /** @return mixed */
-    public function invokeArgs(?object $object, array $arguments) {}
+    public function invokeArgs(?object $object, array $args) {}
 
     /** @return ReflectionClass */
     public function getDeclaringClass() {}
@@ -308,13 +308,13 @@ class ReflectionClass implements Reflector
     public function isInstance(object $object) {}
 
     /** @return object */
-    public function newInstance(mixed ...$arguments) {}
+    public function newInstance(mixed ...$args) {}
 
     /** @return object */
     public function newInstanceWithoutConstructor() {}
 
     /** @return object */
-    public function newInstanceArgs(array $arguments = []) {}
+    public function newInstanceArgs(array $args = []) {}
 
     /** @return ReflectionClass|false */
     public function getParentClass() {}
@@ -381,7 +381,7 @@ class ReflectionProperty implements Reflector
     /** @alias ReflectionClass::__clone */
     final private function __clone() {}
 
-    public function __construct(object|string $class, string $name) {}
+    public function __construct(object|string $class, string $property) {}
 
     public function __toString(): string {}
 
@@ -392,7 +392,7 @@ class ReflectionProperty implements Reflector
     public function getValue(?object $object = null) {}
 
     /** @return void */
-    public function setValue($object_or_value, $value = UNKNOWN) {}
+    public function setValue($objectOrValue, $value = UNKNOWN) {}
 
     /** @return bool */
     public function isInitialized(?object $object = null) {}
@@ -446,7 +446,7 @@ class ReflectionClassConstant implements Reflector
     /** @alias ReflectionClass::__clone */
     final private function __clone() {}
 
-    public function __construct(object|string $class, string $constantName) {}
+    public function __construct(object|string $class, string $constant) {}
 
     public function __toString(): string {}
 

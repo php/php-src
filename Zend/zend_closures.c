@@ -394,9 +394,9 @@ ZEND_API zend_function *zend_get_closure_invoke_method(zend_object *object) /* {
 }
 /* }}} */
 
-ZEND_API const zend_function *zend_get_closure_method_def(zval *obj) /* {{{ */
+ZEND_API const zend_function *zend_get_closure_method_def(zend_object *obj) /* {{{ */
 {
-	zend_closure *closure = (zend_closure *)Z_OBJ_P(obj);
+	zend_closure *closure = (zend_closure *) obj;
 	return &closure->func;
 }
 /* }}} */

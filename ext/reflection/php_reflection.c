@@ -1603,7 +1603,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, getClosureScopeClass)
 	}
 	GET_REFLECTION_OBJECT();
 	if (!Z_ISUNDEF(intern->obj)) {
-		closure_func = zend_get_closure_method_def(Z_OBJ(&intern->obj));
+		closure_func = zend_get_closure_method_def(Z_OBJ_P(&intern->obj));
 		if (closure_func && closure_func->common.scope) {
 			zend_reflection_class_factory(closure_func->common.scope, return_value);
 		}
@@ -3847,7 +3847,7 @@ ZEND_METHOD(ReflectionClass, getStaticPropertyValue)
 	zend_string *name;
 	zval *prop, *def_value = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|z!", &name, &def_value) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|z", &name, &def_value) == FAILURE) {
 		RETURN_THROWS();
 	}
 
