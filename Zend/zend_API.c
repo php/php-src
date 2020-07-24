@@ -2314,11 +2314,20 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 		if (reg_function->common.arg_info && reg_function->common.num_args) {
 			uint32_t i;
 			for (i = 0; i < reg_function->common.num_args; i++) {
-				zend_arg_info *arg_info = &reg_function->common.arg_info[i];
+				zend_internal_arg_info *arg_info = &reg_function->internal_function.arg_info[i];
 				ZEND_ASSERT(arg_info->name && "Parameter must have a name");
 				if (ZEND_TYPE_IS_SET(arg_info->type)) {
 				    reg_function->common.fn_flags |= ZEND_ACC_HAS_TYPE_HINTS;
 				}
+#if ZEND_DEBUG
+				for (uint32_t j = 0; j < i; j++) {
+					if (!strcmp(arg_info->name, reg_function->internal_function.arg_info[j].name)) {
+						zend_error_noreturn(E_CORE_ERROR,
+							"Duplicate parameter name $%s for function %s%s%s()", arg_info->name,
+							scope ? ZSTR_VAL(scope->name) : "", scope ? "::" : "", ptr->fname);
+					}
+				}
+#endif
 			}
 		}
 
