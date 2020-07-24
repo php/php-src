@@ -102,8 +102,7 @@ abstract class ReflectionFunctionAbstract implements Reflector
 
 class ReflectionFunction extends ReflectionFunctionAbstract
 {
-    /** @param Closure|string $name */
-    public function __construct($function) {}
+    public function __construct(Closure|string $function) {}
 
     public function __toString(): string {}
 
@@ -319,11 +318,8 @@ class ReflectionClass implements Reflector
     /** @return ReflectionClass|false */
     public function getParentClass() {}
 
-    /**
-     * @param ReflectionClass|string $class
-     * @return bool
-     */
-    public function isSubclassOf($class) {}
+    /** @return bool */
+    public function isSubclassOf(ReflectionClass|string $class) {}
 
     /** @return array|null */
     public function getStaticProperties() {}
@@ -346,11 +342,8 @@ class ReflectionClass implements Reflector
      */
     public function isIterateable() {}
 
-    /**
-     * @param ReflectionClass|string $interface
-     * @return bool
-     */
-    public function implementsInterface($interface) {}
+    /** @return bool */
+    public function implementsInterface(ReflectionClass|string $interface) {}
 
     /** @return ReflectionExtension|null */
     public function getExtension() {}

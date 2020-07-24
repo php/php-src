@@ -287,7 +287,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector, String
     Method [ <internal:Reflection> public method isSubclassOf ] {
 
       - Parameters [1] {
-        Parameter #0 [ <required> $class ]
+        Parameter #0 [ <required> ReflectionClass|string $class ]
       }
     }
 
@@ -334,7 +334,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector, String
     Method [ <internal:Reflection> public method implementsInterface ] {
 
       - Parameters [1] {
-        Parameter #0 [ <required> $interface ]
+        Parameter #0 [ <required> ReflectionClass|string $interface ]
       }
     }
 

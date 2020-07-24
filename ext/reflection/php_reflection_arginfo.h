@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 592deeea5fae91456c70381b76961b9063d6364c */
+ * Stub hash: 0a3d9fb707ddf5e508075799bf06ff42b849a4b8 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, modifiers, IS_LONG, 0)
@@ -64,7 +64,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionFunctionAbstract
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionFunction___construct, 0, 0, 1)
-	ZEND_ARG_INFO(0, function)
+	ZEND_ARG_OBJ_TYPE_MASK(0, function, Closure, MAY_BE_STRING, NULL)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionFunction___toString, 0, 0, IS_STRING, 0)
@@ -240,7 +240,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_ReflectionClass_getParentClass arginfo_class_ReflectionFunctionAbstract___clone
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionClass_isSubclassOf, 0, 0, 1)
-	ZEND_ARG_INFO(0, class)
+	ZEND_ARG_OBJ_TYPE_MASK(0, class, ReflectionClass, MAY_BE_STRING, NULL)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionClass_getStaticProperties arginfo_class_ReflectionFunctionAbstract___clone
@@ -262,7 +262,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_ReflectionClass_isIterateable arginfo_class_ReflectionFunctionAbstract___clone
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionClass_implementsInterface, 0, 0, 1)
-	ZEND_ARG_INFO(0, interface)
+	ZEND_ARG_OBJ_TYPE_MASK(0, interface, ReflectionClass, MAY_BE_STRING, NULL)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionClass_getExtension arginfo_class_ReflectionFunctionAbstract___clone
