@@ -4,9 +4,9 @@ Internal class as parent
 <?php
 
 class Test extends DateTime {
-    public static function createFromFormat($format, $time, Wrong $timezone = null) { }
+    public static function createFromFormat($format, $datetime, Wrong $timezone = null) { }
 }
 
 ?>
 --EXPECTF--
-Fatal error: Could not check compatibility between Test::createFromFormat($format, $time, ?Wrong $timezone = null) and DateTime::createFromFormat(string $format, string $time, ?DateTimeZone $timezone = null), because class Wrong is not available in %s on line %d
+Fatal error: Could not check compatibility between Test::createFromFormat($format, $datetime, ?Wrong $timezone = null) and DateTime::createFromFormat(string $format, string $datetime, ?DateTimeZone $timezone = null), because class Wrong is not available in %s on line %d
