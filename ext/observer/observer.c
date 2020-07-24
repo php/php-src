@@ -19,7 +19,7 @@
 #endif
 
 int zend_observer_fcall_op_array_extension;
-ZEND_TLS unsigned int nesting_depth = 1;
+ZEND_TLS int nesting_depth = 0;
 
 PHP_FUNCTION(observer_op_array_extension_handle)
 {
@@ -80,29 +80,29 @@ static void observer_begin(zend_execute_data *execute_data)
 
 static void observer_end(zend_execute_data *execute_data, zval *retval) {
 	if (getenv("OBSERVER_DEBUG")) {
-    --nesting_depth;
+		--nesting_depth;
 
 		if (execute_data->func && execute_data->func->common.function_name) {
 			printf("%*s</%s>\n", 2 * nesting_depth, "", ZSTR_VAL(execute_data->func->common.function_name));
-		} else if (execute_data->opline->opcode == ZEND_INCLUDE_OR_EVAL) {
-			uint32_t extended_value = execute_data->opline->extended_value;
+			return;
+		}
+		zend_execute_data *prev_execute_data = execute_data->prev_execute_data;
+		if (prev_execute_data && prev_execute_data->opline->opcode == ZEND_INCLUDE_OR_EVAL) {
+			uint32_t extended_value = prev_execute_data->opline->extended_value;
 			switch (extended_value) {
 				case ZEND_INCLUDE:
 				case ZEND_INCLUDE_ONCE:
 				case ZEND_REQUIRE:
-				case ZEND_REQUIRE_ONCE: {
+				case ZEND_REQUIRE_ONCE:
 					printf("%*s</%s>\n", 2 * nesting_depth, "", include_pretty_name[extended_value]);
-				}
-				break;
+					break;
 
 				case ZEND_EVAL:
 					printf("%*s</eval>\n", 2 * nesting_depth, "");
-
+					break;
 				default:
-					ZEND_ASSERT(0 );
+					ZEND_ASSERT(0);
 			}
-		} else {
-			ZEND_ASSERT(0);
 		}
 	}
 }
