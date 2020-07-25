@@ -28,7 +28,6 @@
 #include "zend_dtrace.h"
 #include "zend_smart_str.h"
 #include "zend_exceptions_arginfo.h"
-#include "php_globals.h"
 
 ZEND_API zend_class_entry *zend_ce_throwable;
 ZEND_API zend_class_entry *zend_ce_exception;
@@ -483,8 +482,8 @@ static void _build_trace_args(zval *arg, smart_str *str) /* {{{ */
 			break;
 		case IS_STRING:
 			smart_str_appendc(str, '\'');
-			smart_str_append_escaped(str, Z_STRVAL_P(arg), MIN(Z_STRLEN_P(arg), PG(exception_string_param_max_len)));
-			if (Z_STRLEN_P(arg) > PG(exception_string_param_max_len)) {
+			smart_str_append_escaped(str, Z_STRVAL_P(arg), MIN(Z_STRLEN_P(arg), EG(exception_string_param_max_len)));
+			if (Z_STRLEN_P(arg) > EG(exception_string_param_max_len)) {
 				smart_str_appends(str, "...', ");
 			} else {
 				smart_str_appends(str, "', ");

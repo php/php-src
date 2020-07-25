@@ -167,8 +167,6 @@ struct _php_core_globals {
 	char *syslog_ident;
 	zend_bool have_called_openlog;
 	zend_long syslog_filter;
-
-	zend_long exception_string_param_max_len;
 };
 
 

@@ -260,22 +260,6 @@ static PHP_INI_MH(OnSetSerializePrecision)
 }
 /* }}} */
 
-/* {{{ PHP_INI_MH
- */
-static PHP_INI_MH(OnSetThrowableStringParamMaxLen)
-{
-	zend_long i;
-
-	ZEND_ATOL(i, ZSTR_VAL(new_value));
-	if (i >= 0 && i <= 1000000) {
-		PG(exception_string_param_max_len) = i;
-		return SUCCESS;
-	} else {
-		return FAILURE;
-	}
-}
-/* }}} */
-
 /* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnChangeMemoryLimit)
 {
@@ -719,7 +703,6 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("register_argc_argv",	"1",		PHP_INI_PERDIR|PHP_INI_SYSTEM,	OnUpdateBool,	register_argc_argv,		php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("auto_globals_jit",		"1",		PHP_INI_PERDIR|PHP_INI_SYSTEM,	OnUpdateBool,	auto_globals_jit,	php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("short_open_tag",	DEFAULT_SHORT_OPEN_TAG,	PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateBool,			short_tags,				zend_compiler_globals,	compiler_globals)
-	STD_PHP_INI_ENTRY("zend.exception_string_param_max_len",	"15",	PHP_INI_ALL,	OnSetThrowableStringParamMaxLen,	exception_string_param_max_len,		php_core_globals,	core_globals)
 
 	STD_PHP_INI_ENTRY("unserialize_callback_func",	NULL,	PHP_INI_ALL,		OnUpdateString,			unserialize_callback_func,	php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("serialize_precision",	"-1",	PHP_INI_ALL,		OnSetSerializePrecision,			serialize_precision,	php_core_globals,	core_globals)
