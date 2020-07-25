@@ -33,6 +33,7 @@
 #include "zend_smart_string.h"
 #include "zend_cpuinfo.h"
 #include "zend_attributes.h"
+#include "zend_observer.h"
 
 static size_t global_map_ptr_last = 0;
 
@@ -1170,10 +1171,6 @@ ZEND_API const char *get_zend_version(void) /* {{{ */
 }
 /* }}} */
 
-
-ZEND_API void zend_observer_activate(void);
-ZEND_API void zend_observer_deactivate(void);
-
 ZEND_API void zend_activate(void) /* {{{ */
 {
 #ifdef ZTS
@@ -1186,7 +1183,6 @@ ZEND_API void zend_activate(void) /* {{{ */
 	if (CG(map_ptr_last)) {
 		memset(ZEND_MAP_PTR_REAL_BASE(CG(map_ptr_base)), 0, CG(map_ptr_last) * sizeof(void*));
 	}
-	zend_observer_activate();
 }
 /* }}} */
 

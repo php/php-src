@@ -1328,7 +1328,8 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_UCALL_SPEC_RETV
 	i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
 
 	if (zend_observer_fcall_op_array_extension != -1 && !(fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE | ZEND_ACC_FAKE_CLOSURE))) {
-		void *observer_handlers = ZEND_OP_ARRAY_EXTENSION(&fbc->op_array, zend_observer_fcall_op_array_extension);
+		void *observer_handlers = ZEND_OBSERVER_HANDLERS(&fbc->op_array);
+		ZEND_ASSERT(observer_handlers);
 		if (observer_handlers != ZEND_OBSERVER_NOT_OBSERVED) {
 			zend_observe_fcall_begin(observer_handlers, call);
 		}
@@ -1359,7 +1360,8 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_UCALL_SPEC_RETV
 	i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
 
 	if (zend_observer_fcall_op_array_extension != -1 && !(fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE | ZEND_ACC_FAKE_CLOSURE))) {
-		void *observer_handlers = ZEND_OP_ARRAY_EXTENSION(&fbc->op_array, zend_observer_fcall_op_array_extension);
+		void *observer_handlers = ZEND_OBSERVER_HANDLERS(&fbc->op_array);
+		ZEND_ASSERT(observer_handlers);
 		if (observer_handlers != ZEND_OBSERVER_NOT_OBSERVED) {
 			zend_observe_fcall_begin(observer_handlers, call);
 		}
@@ -1389,7 +1391,8 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_S
 		i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
 
 		if (zend_observer_fcall_op_array_extension != -1 && !(fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE | ZEND_ACC_FAKE_CLOSURE))) {
-			void *observer_handlers = ZEND_OP_ARRAY_EXTENSION(&fbc->op_array, zend_observer_fcall_op_array_extension);
+			void *observer_handlers = ZEND_OBSERVER_HANDLERS(&fbc->op_array);
+			ZEND_ASSERT(observer_handlers);
 			if (observer_handlers != ZEND_OBSERVER_NOT_OBSERVED) {
 				zend_observe_fcall_begin(observer_handlers, call);
 			}
@@ -1478,7 +1481,8 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_S
 		i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
 
 		if (zend_observer_fcall_op_array_extension != -1 && !(fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE | ZEND_ACC_FAKE_CLOSURE))) {
-			void *observer_handlers = ZEND_OP_ARRAY_EXTENSION(&fbc->op_array, zend_observer_fcall_op_array_extension);
+			void *observer_handlers = ZEND_OBSERVER_HANDLERS(&fbc->op_array);
+			ZEND_ASSERT(observer_handlers);
 			if (observer_handlers != ZEND_OBSERVER_NOT_OBSERVED) {
 				zend_observe_fcall_begin(observer_handlers, call);
 			}
@@ -1567,7 +1571,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 		i_init_func_execute_data(&fbc->op_array, ret, 1 EXECUTE_DATA_CC);
 
 		if (zend_observer_fcall_op_array_extension != -1 && !(fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE | ZEND_ACC_FAKE_CLOSURE))) {
-			void *observer_handlers = ZEND_OP_ARRAY_EXTENSION(&fbc->op_array, zend_observer_fcall_op_array_extension);
+			void *observer_handlers = ZEND_OBSERVER_HANDLERS(&fbc->op_array);
 			ZEND_ASSERT(observer_handlers);
 			if (observer_handlers != ZEND_OBSERVER_NOT_OBSERVED) {
 				zend_observe_fcall_begin(observer_handlers, call);
@@ -1673,7 +1677,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 		i_init_func_execute_data(&fbc->op_array, ret, 1 EXECUTE_DATA_CC);
 
 		if (zend_observer_fcall_op_array_extension != -1 && !(fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE | ZEND_ACC_FAKE_CLOSURE))) {
-			void *observer_handlers = ZEND_OP_ARRAY_EXTENSION(&fbc->op_array, zend_observer_fcall_op_array_extension);
+			void *observer_handlers = ZEND_OBSERVER_HANDLERS(&fbc->op_array);
 			ZEND_ASSERT(observer_handlers);
 			if (observer_handlers != ZEND_OBSERVER_NOT_OBSERVED) {
 				zend_observe_fcall_begin(observer_handlers, call);
@@ -2797,7 +2801,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CALL_TRAMPOLINE_SPEC_HANDLER(Z
 
 /*
 		if (zend_observer_fcall_op_array_extension != -1) {
-			void *observer_handlers = ZEND_OP_ARRAY_EXTENSION(&fbc->op_array, zend_observer_fcall_op_array_extension);
+			void *observer_handlers = ZEND_OBSERVER_HANDLERS(&fbc->op_array);
 			ZEND_ASSERT(observer_handlers);
 		}
 */
@@ -4079,7 +4083,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_CONST_HAN
 		i_init_code_execute_data(call, new_op_array, return_value);
 
 		if (zend_observer_fcall_op_array_extension != -1 && new_op_array != ZEND_FAKE_OP_ARRAY) {
-			void *observer_handlers = ZEND_OP_ARRAY_EXTENSION(new_op_array, zend_observer_fcall_op_array_extension);
+			void *observer_handlers = ZEND_OBSERVER_HANDLERS(new_op_array);
+			ZEND_ASSERT(observer_handlers);
 			if (observer_handlers != ZEND_OBSERVER_NOT_OBSERVED) {
 				zend_observe_fcall_begin(observer_handlers, execute_data);
 			}
@@ -13315,7 +13320,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_TMPVAR_HA
 		i_init_code_execute_data(call, new_op_array, return_value);
 
 		if (zend_observer_fcall_op_array_extension != -1 && new_op_array != ZEND_FAKE_OP_ARRAY) {
-			void *observer_handlers = ZEND_OP_ARRAY_EXTENSION(new_op_array, zend_observer_fcall_op_array_extension);
+			void *observer_handlers = ZEND_OBSERVER_HANDLERS(new_op_array);
+			ZEND_ASSERT(observer_handlers);
 			if (observer_handlers != ZEND_OBSERVER_NOT_OBSERVED) {
 				zend_observe_fcall_begin(observer_handlers, execute_data);
 			}
@@ -36551,7 +36557,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_CV_HANDLE
 		i_init_code_execute_data(call, new_op_array, return_value);
 
 		if (zend_observer_fcall_op_array_extension != -1 && new_op_array != ZEND_FAKE_OP_ARRAY) {
-			void *observer_handlers = ZEND_OP_ARRAY_EXTENSION(new_op_array, zend_observer_fcall_op_array_extension);
+			void *observer_handlers = ZEND_OBSERVER_HANDLERS(new_op_array);
+			ZEND_ASSERT(observer_handlers);
 			if (observer_handlers != ZEND_OBSERVER_NOT_OBSERVED) {
 				zend_observe_fcall_begin(observer_handlers, execute_data);
 			}

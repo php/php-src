@@ -784,7 +784,8 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 
 		zend_init_func_execute_data(call, &func->op_array, fci->retval);
 		if (zend_observer_fcall_op_array_extension != -1 && !(func->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE | ZEND_ACC_FAKE_CLOSURE))) {
-			void *observer_handlers = ZEND_OP_ARRAY_EXTENSION(&func->op_array, zend_observer_fcall_op_array_extension);
+			void *observer_handlers = ZEND_OBSERVER_HANDLERS(&func->op_array);
+			ZEND_ASSERT(observer_handlers);
 			if (observer_handlers != ZEND_OBSERVER_NOT_OBSERVED) {
 				zend_observe_fcall_begin(observer_handlers, call);
 			}
