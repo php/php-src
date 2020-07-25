@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     (cmb)
   . Fixed bug #79108 (Referencing argument in a function makes it a reference
     in the stack trace). (Nikita)
+  . Fixed bug #79897 (Promoted constructor params with attribs cause crash).
+    (Deus Kane)
 
 - JIT:
   . Fixed bug #79864 (JIT segfault in Symfony OptionsResolver). (Dmitry)
