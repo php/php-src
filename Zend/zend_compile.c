@@ -6197,6 +6197,12 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fall
 		zend_op *opline;
 		zend_arg_info *arg_info;
 
+		zend_ast_ref *attributes_copy = 0;
+
+		if (visibility && attributes_ast) {
+			attributes_copy = zend_ast_copy(attributes_ast);
+		}
+
 		if (zend_is_auto_global(name)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot re-assign auto-global variable %s",
 				ZSTR_VAL(name));
@@ -6350,7 +6356,8 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fall
 				scope, name, &default_value, visibility | ZEND_ACC_PROMOTED, doc_comment, type);
 			if (attributes_ast) {
 				zend_compile_attributes(
-					&prop->attributes, attributes_ast, 0, ZEND_ATTRIBUTE_TARGET_PROPERTY);
+					&prop->attributes, GC_AST(attributes_copy), 0, ZEND_ATTRIBUTE_TARGET_PROPERTY);
+				zend_ast_ref_destroy(attributes_copy);
 			}
 		}
 	}
