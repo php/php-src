@@ -420,7 +420,7 @@ SECURITY_ATTRIBUTES php_proc_open_security = {
 	.bInheritHandle = TRUE
 };
 
-# define pipe(pair)		(CreatePipe(&pair[0], &pair[1], &php_proc_open_security, 0) ? 0 : -1)
+# define pipe(pair)		(CreatePipe(&pair[0], &pair[1], &php_proc_open_security, 8192) ? 0 : -1)
 
 # define COMSPEC_NT	"cmd.exe"
 
@@ -1011,17 +1011,24 @@ static int threaded_pipe_close(php_stream *stream, int close_handle)
 
 	data->closed = 1;
 
+	/* Writer thread will terminate when socket is closed. */
 	if (data->mode[0] == 'w') {
 		php_stream_close(data->stream);
+		data->stream = NULL;
 
 		/* Thread will write remaining buffer contents to pipe and exit. */
-		WaitForSingleObject(data->thread, INFINITE);
-	} else {
-		/* Interrupt IO calls in thread and wait with timeout to prevent race conditions. */
-		do {
-			CancelSynchronousIo(data->thread);
-		} while (WAIT_TIMEOUT == WaitForSingleObject(data->thread, 5));
+		if (WAIT_TIMEOUT != WaitForSingleObject(data->thread, 1000)) {
+			CloseHandle(data->thread);
+			return 0;
+		}
+	}
 
+	/* Interrupt IO calls in thread and wait with timeout to prevent race conditions. */
+	do {
+		CancelSynchronousIo(data->thread);
+	} while (WAIT_TIMEOUT == WaitForSingleObject(data->thread, 5));
+
+	if (data->stream) {
 		php_stream_close(data->stream);
 	}
 
