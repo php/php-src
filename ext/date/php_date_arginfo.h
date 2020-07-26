@@ -1,9 +1,9 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: dbb98fcf9462d309d4276ba76cfbbe20172d2f30 */
+ * Stub hash: 8791b7918a9d72cb4f1c1ab6703324e3c7a805c5 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_strtotime, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, datetime, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, now, IS_LONG, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, baseTimestamp, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_date, 0, 1, IS_STRING, 0)
@@ -119,8 +119,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_date_offset_get, 0, 1, IS_LONG, 
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_date_diff, 0, 2, DateInterval, 0)
-	ZEND_ARG_OBJ_INFO(0, object1, DateTimeInterface, 0)
-	ZEND_ARG_OBJ_INFO(0, object2, DateTimeInterface, 0)
+	ZEND_ARG_OBJ_INFO(0, baseObject, DateTimeInterface, 0)
+	ZEND_ARG_OBJ_INFO(0, targetObject, DateTimeInterface, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, absolute, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
@@ -176,8 +176,8 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_timezone_transitions_get, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, object, DateTimeZone, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, timestamp_begin, IS_LONG, 0, "PHP_INT_MIN")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, timestamp_end, IS_LONG, 0, "PHP_INT_MAX")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, timestampBegin, IS_LONG, 0, "PHP_INT_MIN")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, timestampEnd, IS_LONG, 0, "PHP_INT_MAX")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_timezone_location_get, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
@@ -205,7 +205,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_date_interval_format, 0, 2, IS_S
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_date_default_timezone_set, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO(0, timezone_identifier, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, timezoneID, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_date_default_timezone_get arginfo_timezone_version_get
@@ -239,7 +239,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_DateTimeInterface_getTimestamp arginfo_class_DateTimeInterface_getTimezone
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateTimeInterface_diff, 0, 0, 1)
-	ZEND_ARG_OBJ_INFO(0, object, DateTimeInterface, 0)
+	ZEND_ARG_OBJ_INFO(0, targetObject, DateTimeInterface, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, absolute, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
@@ -308,7 +308,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateTime_setISODate, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, year, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, week, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, day_of_week, IS_LONG, 0, "1")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, dayOfWeek, IS_LONG, 0, "1")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateTime_setTimestamp, 0, 0, 1)
@@ -337,7 +337,10 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DateTimeImmutable_getTimestamp arginfo_class_DateTimeInterface_getTimezone
 
-#define arginfo_class_DateTimeImmutable_diff arginfo_class_DateTimeInterface_diff
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateTimeImmutable_diff, 0, 0, 1)
+	ZEND_ARG_OBJ_INFO(0, object, DateTimeInterface, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, absolute, _IS_BOOL, 0, "false")
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_DateTimeImmutable_modify arginfo_class_DateTime_modify
 
@@ -370,12 +373,12 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_DateTimeZone_getName arginfo_class_DateTimeInterface_getTimezone
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateTimeZone_getOffset, 0, 0, 1)
-	ZEND_ARG_OBJ_INFO(0, datetime, DateTimeInterface, 0)
+	ZEND_ARG_OBJ_INFO(0, object, DateTimeInterface, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateTimeZone_getTransitions, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, timestamp_begin, IS_LONG, 0, "PHP_INT_MIN")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, timestamp_end, IS_LONG, 0, "PHP_INT_MAX")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, timestampBegin, IS_LONG, 0, "PHP_INT_MIN")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, timestampEnd, IS_LONG, 0, "PHP_INT_MAX")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_DateTimeZone_getLocation arginfo_class_DateTimeInterface_getTimezone
@@ -383,8 +386,8 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_DateTimeZone_listAbbreviations arginfo_class_DateTimeInterface_getTimezone
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateTimeZone_listIdentifiers, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, what, IS_LONG, 0, "DateTimeZone::ALL")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, country, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, timezoneGroup, IS_LONG, 0, "DateTimeZone::ALL")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, countryCode, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_DateTimeZone___wakeup arginfo_class_DateTimeInterface_getTimezone
@@ -392,7 +395,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_DateTimeZone___set_state arginfo_class_DateTime___set_state
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateInterval___construct, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, interval_spec, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, duration, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateInterval_createFromDateString, 0, 0, 1)

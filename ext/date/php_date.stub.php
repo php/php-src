@@ -2,7 +2,7 @@
 
 /** @generate-function-entries */
 
-function strtotime(string $datetime, ?int $now = null): int|false {}
+function strtotime(string $datetime, ?int $baseTimestamp = null): int|false {}
 
 function date(string $format, ?int $timestamp = null): string {}
 
@@ -62,7 +62,7 @@ function date_timezone_set(DateTimeInterface $object, DateTimeZone $timezone): D
 function date_offset_get(DateTimeInterface $object): int {}
 
 function date_diff(
-    DateTimeInterface $object1, DateTimeInterface $object2, bool $absolute = false): DateInterval {}
+    DateTimeInterface $baseObject, DateTimeInterface $targetObject, bool $absolute = false): DateInterval {}
 
 function date_time_set(
     DateTime $object, int $hour, int $minute, int $second = 0, int $microsecond = 0): DateTime {}
@@ -84,7 +84,7 @@ function timezone_name_from_abbr(string $abbr, int $gmtoffset = -1, int $isdst =
 function timezone_offset_get(DateTimeZone $object, DateTimeInterface $datetime): int {}
 
 function timezone_transitions_get(
-    DateTimeZone $object, int $timestamp_begin = PHP_INT_MIN, int $timestamp_end = PHP_INT_MAX): array|false {}
+    DateTimeZone $object, int $timestampBegin = PHP_INT_MIN, int $timestampEnd = PHP_INT_MAX): array|false {}
 
 function timezone_location_get(DateTimeZone $object): array|false {}
 
@@ -98,7 +98,7 @@ function date_interval_create_from_date_string(string $datetime): DateInterval|f
 
 function date_interval_format(DateInterval $object, string $format): string {}
 
-function date_default_timezone_set(string $timezone_identifier): bool {}
+function date_default_timezone_set(string $timezoneID): bool {}
 
 function date_default_timezone_get(): string {}
 
@@ -132,7 +132,7 @@ interface DateTimeInterface
     public function getTimestamp();
 
     /** @return DateInterval|false */
-    public function diff(DateTimeInterface $object, bool $absolute = false);
+    public function diff(DateTimeInterface $targetObject, bool $absolute = false);
 
     public function __wakeup();
 }
@@ -221,7 +221,7 @@ class DateTime implements DateTimeInterface
      * @return DateTime
      * @alias date_isodate_set
      */
-    public function setISODate(int $year, int $week, int $day_of_week = 1) {}
+    public function setISODate(int $year, int $week, int $dayOfWeek = 1) {}
 
     /**
      * @return DateTime
@@ -239,7 +239,7 @@ class DateTime implements DateTimeInterface
      * @return DateInterval|false
      * @alias date_diff
      */
-    public function diff(DateTimeInterface $object, bool $absolute = false) {}
+    public function diff(DateTimeInterface $targetObject, bool $absolute = false) {}
 }
 
 class DateTimeImmutable implements DateTimeInterface
@@ -312,7 +312,7 @@ class DateTimeImmutable implements DateTimeInterface
     public function setDate(int $year, int $month, int $day) {}
 
     /** @return DateTimeImmutable */
-    public function setISODate(int $year, int $week, int $day_of_week = 1) {}
+    public function setISODate(int $year, int $week, int $dayOfWeek = 1) {}
 
     /** @return DateTimeImmutable */
     public function setTimestamp(int $timestamp) {}
@@ -337,13 +337,13 @@ class DateTimeZone
      * @return int
      * @alias timezone_offset_get
      */
-    public function getOffset(DateTimeInterface $datetime) {}
+    public function getOffset(DateTimeInterface $object) {}
 
     /**
      * @return array|false
      * @alias timezone_transitions_get
      */
-    public function getTransitions(int $timestamp_begin = PHP_INT_MIN, int $timestamp_end = PHP_INT_MAX) {}
+    public function getTransitions(int $timestampBegin = PHP_INT_MIN, int $timestampEnd = PHP_INT_MAX) {}
 
     /**
      * @return array|false
@@ -361,7 +361,7 @@ class DateTimeZone
      * @return array|false
      * @alias timezone_identifiers_list
      */
-    public static function listIdentifiers(int $what = DateTimeZone::ALL, ?string $country = null) {}
+    public static function listIdentifiers(int $timezoneGroup = DateTimeZone::ALL, ?string $countryCode = null) {}
 
     public function __wakeup() {}
 
@@ -371,7 +371,7 @@ class DateTimeZone
 
 class DateInterval
 {
-    public function __construct(string $interval_spec) {}
+    public function __construct(string $duration) {}
 
     /**
      * @return DateInterval|false

@@ -8,5 +8,6 @@ class MyDateTimeZone extends DateTimeZone
     {
     }
 }
+?>
 --EXPECTF--
-Fatal error: Declaration of MyDateTimeZone::listIdentifiers() must be compatible with DateTimeZone::listIdentifiers(int $what = DateTimeZone::ALL, ?string $country = null) in %s on line %d
+Fatal error: Declaration of MyDateTimeZone::listIdentifiers() must be compatible with DateTimeZone::listIdentifiers(int $timezoneGroup = DateTimeZone::ALL, ?string $countryCode = null) in %s on line %d
