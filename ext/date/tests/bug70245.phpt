@@ -10,4 +10,4 @@ try {
 }
 ?>
 --EXPECT--
-strtotime(): Argument #2 ($now) must be of type ?int, DateTime given
+strtotime(): Argument #2 ($baseTimestamp) must be of type ?int, DateTime given

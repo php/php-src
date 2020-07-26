@@ -24,5 +24,5 @@ Parameter #1 [ <required> int $minute ]
 Parameter #2 [ <optional> int $second = 0 ]
 Parameter #3 [ <optional> int $microsecond = 0 ]
 ----------
-Parameter #0 [ <optional> int $what = DateTimeZone::ALL ]
-Parameter #1 [ <optional> ?string $country = null ]
+Parameter #0 [ <optional> int $timezoneGroup = DateTimeZone::ALL ]
+Parameter #1 [ <optional> ?string $countryCode = null ]
