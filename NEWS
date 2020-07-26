@@ -8,6 +8,10 @@ PHP                                                                        NEWS
   . Fixed bug #79108 (Referencing argument in a function makes it a reference
     in the stack trace). (Nikita)
 
+- Date:
+  . Implemented FR #79903 (datetime: new format "p", same as "P" but returning
+    "Z" for UTC). (gharlan)
+
 - JIT:
   . Fixed bug #79864 (JIT segfault in Symfony OptionsResolver). (Dmitry)
 
