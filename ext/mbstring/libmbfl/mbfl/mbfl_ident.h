@@ -65,4 +65,9 @@ MBFLAPI extern void mbfl_filt_ident_common_ctor(mbfl_identify_filter *filter);
 
 MBFLAPI extern int mbfl_filt_ident_true(int c, mbfl_identify_filter *filter);
 
+static inline int mbfl_identify_filter_feed(int c, mbfl_identify_filter *filter)
+{
+  return (*filter->filter_function)(c, filter);
+}
+
 #endif /* MBFL_IDENT_H */

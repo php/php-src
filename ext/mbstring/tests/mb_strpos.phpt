@@ -80,6 +80,12 @@ $r = mb_strpos($euc_jp, '´Ú¹ñ¸ì');
 $r = mb_strpos($euc_jp, "\n");
 ($r === FALSE) ? print "OK_NEWLINE\n" : print "NG_NEWLINE\n";
 
+// Some encodings can represent the _same_ character in more than one way
+// Even so, mb_strpos should be able to find them!
+echo "== DIFFERENT REPRESENTATIONS OF SAME CHARACTER ==\n";
+print mb_strpos("abc", "\x1B(Bb", 0, "ISO-2022-JP") . "\n";
+print mb_strpos("\x1B(Babc", "b", 0, "ISO-2022-JP") . "\n";
+
 ?>
 --EXPECT--
 String len: 43
@@ -115,3 +121,6 @@ OK_NEWLINE
 0
 OK_STR
 OK_NEWLINE
+== DIFFERENT REPRESENTATIONS OF SAME CHARACTER ==
+1
+1

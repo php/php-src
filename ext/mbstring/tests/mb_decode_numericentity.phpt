@@ -28,6 +28,14 @@ echo mb_decode_numericentity('&#000000000', $convmap), "\n";
 $convmap = [];
 echo mb_decode_numericentity('f&ouml;o', $convmap, "UTF-8")."\n";
 
+// Try numeric entities which follow one after other without terminating semicolons
+// Web browsers do accept and decode HTML numeric entities like this!
+$convmap = array(0x0, 0x2FFFF, 0, 0xFFFF);
+echo mb_decode_numericentity('&#65;&#66;', $convmap), "\n";
+echo mb_decode_numericentity('&#x41;&#66;', $convmap), "\n";
+echo mb_decode_numericentity('&#65;&#x42;', $convmap), "\n";
+echo mb_decode_numericentity('&#x41;&#x42;', $convmap), "\n";
+
 $convmap = array(0x0, 0x2FFFF, 0); // 3 elements
 try {
     echo mb_decode_numericentity($str3, $convmap, "UTF-8")."\n";
@@ -49,4 +57,8 @@ aŒbœcŠdše€fg
 &#0000000000
 &#000000000
 f&ouml;o
+AB
+AB
+AB
+AB
 mb_decode_numericentity(): Argument #2 ($map) must have a multiple of 4 elements

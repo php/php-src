@@ -31,6 +31,7 @@
 #ifndef MBFL_ENCODING_H
 #define MBFL_ENCODING_H
 
+#include <stddef.h>
 #include "mbfl_defs.h"
 
 enum mbfl_no_encoding {
@@ -152,6 +153,7 @@ typedef struct _mbfl_encoding {
 	const struct mbfl_convert_vtbl *output_filter;
 } mbfl_encoding;
 
+MBFLAPI extern const mbfl_encoding *mbfl_namelen2encoding(const char *name, size_t len);
 MBFLAPI extern const mbfl_encoding *mbfl_name2encoding(const char *name);
 MBFLAPI extern const mbfl_encoding *mbfl_no2encoding(enum mbfl_no_encoding no_encoding);
 MBFLAPI extern enum mbfl_no_encoding mbfl_name2no_encoding(const char *name);

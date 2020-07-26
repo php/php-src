@@ -30,11 +30,6 @@
 
 #include "libmbfl/config.h"
 
-#ifdef HAVE_STRINGS_H
-	/* For strcasecmp */
-	#include <strings.h>
-#endif
-
 #include "mbfl_encoding.h"
 #include "mbfilter_pass.h"
 #include "mbfilter_8bit.h"
@@ -80,13 +75,6 @@
 #include "filters/mbfilter_ucs4.h"
 #include "filters/mbfilter_ucs2.h"
 #include "filters/mbfilter_htmlent.h"
-
-#ifndef HAVE_STRCASECMP
-#ifdef HAVE_STRICMP
-#define strcasecmp stricmp
-#endif
-#endif
-
 
 static const mbfl_encoding *mbfl_encoding_ptr_list[] = {
 	&mbfl_encoding_wchar,
@@ -177,12 +165,17 @@ static const mbfl_encoding *mbfl_encoding_ptr_list[] = {
 	NULL
 };
 
-const mbfl_encoding *mbfl_name2encoding(const char *name)
+static inline int compare_encoding_name(const char *encname, const char *name, size_t len)
+{
+	return zend_binary_strcasecmp(encname, strlen(encname), name, len) == 0;
+}
+
+const mbfl_encoding *mbfl_namelen2encoding(const char *name, size_t len)
 {
 	const mbfl_encoding **encoding;
 
 	for (encoding = mbfl_encoding_ptr_list; *encoding; encoding++) {
-		if (strcasecmp((*encoding)->name, name) == 0) {
+		if (compare_encoding_name((*encoding)->name, name, len)) {
 			return *encoding;
 		}
 	}
@@ -190,7 +183,7 @@ const mbfl_encoding *mbfl_name2encoding(const char *name)
 	/* search MIME charset name */
 	for (encoding = mbfl_encoding_ptr_list; *encoding; encoding++) {
 		if ((*encoding)->mime_name) {
-			if (strcasecmp((*encoding)->mime_name, name) == 0) {
+			if (compare_encoding_name((*encoding)->mime_name, name, len)) {
 				return *encoding;
 			}
 		}
@@ -200,7 +193,7 @@ const mbfl_encoding *mbfl_name2encoding(const char *name)
 	for (encoding = mbfl_encoding_ptr_list; *encoding; encoding++) {
 		if ((*encoding)->aliases) {
 			for (const char **alias = (*encoding)->aliases; *alias; alias++) {
-				if (strcasecmp(*alias, name) == 0) {
+				if (compare_encoding_name(*alias, name, len)) {
 					return *encoding;
 				}
 			}
@@ -208,6 +201,11 @@ const mbfl_encoding *mbfl_name2encoding(const char *name)
 	}
 
 	return NULL;
+}
+
+const mbfl_encoding *mbfl_name2encoding(const char *name)
+{
+	return mbfl_namelen2encoding(name, strlen(name));
 }
 
 const mbfl_encoding *mbfl_no2encoding(enum mbfl_no_encoding no_encoding)
