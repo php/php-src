@@ -139,7 +139,9 @@ static inline unsigned mph_lookup(unsigned code, const short *g_table, unsigned 
 
 static unsigned php_unicode_toupper_raw(unsigned code, enum mbfl_no_encoding enc)
 {
-	if (code < 0x80) {
+	/* After the ASCII characters, the first codepoint with an uppercase version
+	 * is 0xB5 (MICRO SIGN) */
+	if (code < 0xB5) {
 		/* Fast path for ASCII */
 		if (code >= 0x61 && code <= 0x7A) {
 			if (UNEXPECTED(enc == mbfl_no_encoding_8859_9 && code == 0x69)) {
@@ -159,7 +161,9 @@ static unsigned php_unicode_toupper_raw(unsigned code, enum mbfl_no_encoding enc
 
 static unsigned php_unicode_tolower_raw(unsigned code, enum mbfl_no_encoding enc)
 {
-	if (code < 0x80) {
+	/* After the ASCII characters, the first codepoint with a lowercase version
+	 * is 0xC0 (LATIN CAPITAL LETTER A WITH GRAVE) */
+	if (code < 0xC0) {
 		/* Fast path for ASCII */
 		if (code >= 0x41 && code <= 0x5A) {
 			if (UNEXPECTED(enc == mbfl_no_encoding_8859_9 && code == 0x0049L)) {
