@@ -203,6 +203,28 @@ use these rules.
     RADAR // Radio Detecting and Ranging
     ```
 
+## User function/method parameter naming conventions
+
+1. Function parameter names for user-level functions should be in lowercase,
+    with words underscore delimited, with care taken to minimize the letter
+    count. Abbreviations should not be used when they greatly decrease the
+    readability of the parameter.
+
+2. Method parameter names follow the *studlyCaps* (also referred to as
+    *bumpy case* or *camel caps*) naming convention, with care taken to minimize
+    the letter count. The initial letter of the name is lowercase, and each
+    letter that starts a new `word` is capitalized.
+
+3. Try to use the same parameter names as in other functions and methods where
+    the parameter has the same meaning. Examples of commonly used parameter
+    names are:
+
+    ```php
+    $length
+    $filename
+    $function
+    ```
+
 ## Internal function naming conventions
 
 1. Functions that are part of the external API should be named
