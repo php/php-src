@@ -24,9 +24,9 @@ function all_the_stats(\$filename, \$message) {
     }
 }
 
-passthru('$php -n -r \'touch("$testfile");\'');
+passthru('$php -n -r \'touch(__DIR__.DIRECTORY_SEPARATOR."bug28790.file");\'');
 all_the_stats("$testfile", "testfile exists");
-passthru('$php -n -r \'unlink("$testfile");\'');
+passthru('$php -n -r \'unlink(__DIR__.DIRECTORY_SEPARATOR."bug28790.file");\'');
 all_the_stats("$testfile", "testfile exists (it shouldn't)");
 if (!@stat("$impossiblefile")) {
     print("stat impossiblefile does not exist.\n");
