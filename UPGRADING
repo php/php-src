@@ -683,6 +683,8 @@ PHP 8.0 UPGRADE NOTES
 - Date:
   . Added DateTime::createFromInterface() and
     DateTimeImmutable::createFromInterface().
+  . Added the DateTime format specifier "p" which is the same as "P" but
+    returning "Z" for UTC.
 
 - Dom:
   . Introduce DOMParentNode and DOMChildNode with new traversal and
