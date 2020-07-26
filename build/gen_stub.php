@@ -67,6 +67,106 @@ function extractStubHash(string $arginfoFile): ?string {
     return $matches[1];
 }
 
+function generateMethodsynopses(string $stubFile): void {
+    try {
+        if (!file_exists($stubFile)) {
+            throw new Exception("File $stubFile does not exist");
+        }
+
+        $docFile = str_replace('.stub.php', '.stub.xml', $stubFile);
+        $stubCode = file_get_contents($stubFile);
+
+        initPhpParser();
+        $fileInfo = parseStubFile($stubCode);
+        $doc = new DOMDocument();
+        $doc->appendChild($doc->createElement('methodsynopses'));
+        foreach ($fileInfo->getAllFuncInfos() as $funcInfo) {
+            $comment = $doc->createComment(" {$funcInfo->name} ");
+            $doc->documentElement->appendChild($comment);
+            $doc->documentElement->appendChild(generateMethodsynopsis($doc, $funcInfo));
+        }
+        file_put_contents($docFile, getFormattedXML($doc));
+    } catch (Exception $e) {
+        echo "In $stubFile:\n{$e->getMessage()}\n";
+        exit(1);
+    }
+}
+
+function generateMethodsynopsis(DOMDocument $doc, FuncInfo $funcInfo): DOMElement {
+    $methodsynopsis = $doc->createElement('methodsynopsis');
+    $typeString = getTypeAsString($funcInfo->return->type);
+    $type = $doc->createElement('type', $typeString);
+    $methodsynopsis->appendChild($type);
+    $methodname = $doc->createElement('methodname', $funcInfo->name->name);
+    $methodsynopsis->appendChild($methodname);
+    if (empty($funcInfo->args)) {
+        $void = $doc->createElement('void');
+        $methodsynopsis->appendChild($void);
+    } else foreach ($funcInfo->args as $arg) {
+        $methodparam = $doc->createElement('methodparam');
+        if ($arg->defaultValue !== null) {
+            $choice = $doc->createAttribute('choice');
+            $choice->value = "opt";
+            $methodparam->appendChild($choice);
+        }
+        $methodsynopsis->appendChild($methodparam);
+        $type = $doc->createElement('type', getTypeAsString($arg->type));
+        $methodparam->appendChild($type);
+        $parameter = $doc->createElement('parameter', $arg->name);
+        if ($arg->sendBy !== ArgInfo::SEND_BY_VAL) {
+            $role = $doc->createAttribute('role');
+            $role->value = "reference";
+            $parameter->appendChild($role);
+        }
+        $methodparam->appendChild($parameter);
+        $defaultValue = getDefaultValue($arg);
+        if ($defaultValue !== null) {
+            $initializer = $doc->createElement('initializer');
+            if (preg_match('/^[a-zA-Z_][a-zA-Z_0-9]*$/', $defaultValue)) {
+                $constant = $doc->createElement('constant', $defaultValue);
+                $initializer->appendChild($constant);
+            } else {
+                $initializer->nodeValue = $defaultValue;
+            }
+            $methodparam->appendChild($initializer);
+        }
+    }
+    return $methodsynopsis;
+}
+
+function getTypeAsString(?Type $type): string {
+    if ($type === null || $type->types === null) {
+        return 'mixed';
+    }
+    return implode('|', array_map(function ($type) {return $type->name;}, $type->types));
+}
+
+function getDefaultValue(ArgInfo $arg): ?string {
+    if ($arg->defaultValue === null) {
+        return null;
+    }
+    switch ($arg->defaultValue) {
+        case 'UNKNOWN':
+            return null;
+        case 'false':
+        case 'true':
+        case 'null':
+            return "&{$arg->defaultValue};";
+    }
+    return $arg->defaultValue;
+}
+
+function getFormattedXML(DOMDocument $doc): string {
+    $xml = $doc->saveXML();
+    $xml = str_replace('<!--', "\n\n  <!--", $xml);
+    $xml = str_replace('<methodsynopsis>', "\n  <methodsynopsis>\n   ", $xml);
+    $xml = str_replace('<methodparam', "\n   <methodparam", $xml);
+    $xml = str_replace('<void/>', "\n   <void/>", $xml);
+    $xml = str_replace('</methodsynopsis>', "\n  </methodsynopsis>", $xml);
+    $xml = str_replace('</methodsynopses>', "\n\n</methodsynopses>", $xml);
+    return $xml;
+}
+
 class SimpleType {
     /** @var string */
     public $name;
@@ -1101,13 +1201,17 @@ function initPhpParser() {
 }
 
 $optind = null;
-$options = getopt("f", ["force-regeneration"], $optind);
+$options = getopt("fd", ["force-regeneration"], $optind);
 $forceRegeneration = isset($options["f"]) || isset($options["force-regeneration"]);
-$location = $argv[$optind + 1] ?? ".";
+$location = $argv[$optind] ?? ".";
 
 if (is_file($location)) {
     // Generate single file.
-    processStubFile($location, $forceRegeneration);
+    if (isset($options["d"])) {
+        generateMethodsynopses($location);
+    } else {
+        processStubFile($location, $forceRegeneration);
+    }
 } else if (is_dir($location)) {
     processDirectory($location, $forceRegeneration);
 } else {
