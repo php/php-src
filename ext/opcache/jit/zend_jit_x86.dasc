@@ -11007,7 +11007,7 @@ static int zend_jit_recv(dasm_State **Dst, const zend_op *opline, const zend_op_
 	}
 
 	if (arg_info || (opline+1)->opcode != ZEND_RECV) {
-		|	cmp dword EX->This.u2.num_args, arg_num
+		zend_jit_addr res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
 		if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
 			int32_t exit_point = zend_jit_trace_get_exit_point(opline, opline, NULL, ZEND_JIT_EXIT_TO_VM);
 			const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
@@ -11015,9 +11015,9 @@ static int zend_jit_recv(dasm_State **Dst, const zend_op *opline, const zend_op_
 			if (!exit_addr) {
 				return 0;
 			}
-			|	jb &exit_addr
+			|	IF_ZVAL_TYPE res_addr, IS_UNDEF, &exit_addr
 		} else {
-			|	jb >1
+			|	IF_ZVAL_TYPE res_addr, IS_UNDEF, >1
 			|.cold_code
 			|1:
 			if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
@@ -11059,8 +11059,7 @@ static int zend_jit_recv_init(dasm_State **Dst, const zend_op *opline, const zen
 
 	if (JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE ||
 	    (op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		|	cmp dword EX->This.u2.num_args, arg_num
-		|	jae >5
+		|	IF_NOT_ZVAL_TYPE res_addr, IS_UNDEF, >5
 	}
 	|	ZVAL_COPY_CONST res_addr, -1, -1, zv, r0
 	if (Z_REFCOUNTED_P(zv)) {
