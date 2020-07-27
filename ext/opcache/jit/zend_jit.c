@@ -73,6 +73,10 @@ zend_jit_globals jit_globals;
 
 #define DASM_M_FREE(ctx, p, sz) efree(p)
 
+#if ZEND_DEBUG
+# define DASM_CHECKS 1
+#endif
+
 #include "dynasm/dasm_proto.h"
 
 typedef struct _zend_jit_stub {
