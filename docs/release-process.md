@@ -93,11 +93,12 @@
     beta. Do not use dashes, you should `#define PHP_VERSION "7.4.22RC1"` and
     not `#define PHP_VERSION "7.4.22-RC1"`.
 
-    When releasing the first alpha version, bump also API version numbers in
-    `Zend/zend_extensions.h`, `Zend/zend_modules.h`, and `main/php.h`. The API
-    versions between the alpha/beta/.0RCx releases can be left the same or
-    bumped as little as possible because PHP extensions will need to be rebuilt
-    with each bump.
+    When releasing the first release candidate, you must also bump the API
+    version numbers in `Zend/zend_extensions.h`, `Zend/zend_modules.h`, and
+    `main/php.h`. The API versions between the alpha/beta/.0RCx releases can be
+    left the same, or bumped as little as possible because PHP extensions will
+    need to be rebuilt with each bump. Do *not* bump the API versions after
+    RC1.
 
  6. Compile and run `make test`, with and without ZTS, using the right Bison and
     re2c version (for PHP 7.4, minimum Bison 3.0.0 and re2c 0.13.4 are used).
