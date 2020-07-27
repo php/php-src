@@ -10434,7 +10434,8 @@ static int zend_jit_fetch_dim_read(dasm_State **Dst, const zend_op *opline, cons
 		 && (op2_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
 			flags |= ZEND_JIT_EXIT_FREE_OP2;
 		}
-		if ((res_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))
+		if ((opline->result_type & (IS_VAR|IS_TMP_VAR))
+		 && (res_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))
 		 && (ssa_op+1)->op1_use == ssa_op->result_def
 		 && zend_jit_may_avoid_refcounting(opline+1)) {
 			res_info |= AVOID_REFCOUNTING;
@@ -11419,7 +11420,8 @@ static int zend_jit_fetch_obj(dasm_State **Dst, const zend_op *opline, const zen
 
 			|	LOAD_ZVAL_ADDR r0, prop_addr
 
-			if ((res_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))
+			if ((opline->result_type & (IS_VAR|IS_TMP_VAR))
+			 && (res_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))
 			 && (ssa_op+1)->op1_use == ssa_op->result_def
 			 && zend_jit_may_avoid_refcounting(opline+1)) {
 				res_info |= AVOID_REFCOUNTING;
