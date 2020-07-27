@@ -10891,7 +10891,7 @@ static int zend_jit_verify_arg_type(dasm_State **Dst, const zend_op *opline, zen
 {
 	zend_jit_addr res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
 	zend_bool in_cold = 0;
-	uint32_t type_mask = ZEND_TYPE_PURE_MASK(arg_info->type);
+	uint32_t type_mask = ZEND_TYPE_PURE_MASK(arg_info->type) & MAY_BE_ANY;
 	zend_reg tmp_reg = (type_mask == 0 || is_power_of_two(type_mask)) ? ZREG_FCARG1a : ZREG_R0;
 
 	if (ZEND_ARG_SEND_MODE(arg_info)) {
@@ -12029,7 +12029,7 @@ static zend_bool zend_jit_verify_return_type(dasm_State **Dst, const zend_op *op
 
 	|	LOAD_ZVAL_ADDR r0, op1_addr
 
-	uint32_t type_mask = ZEND_TYPE_PURE_MASK(arg_info->type);
+	uint32_t type_mask = ZEND_TYPE_PURE_MASK(arg_info->type) & MAY_BE_ANY;
 	if (type_mask == 0) {
 		|	jmp >7
 	} else if (is_power_of_two(type_mask)) {
