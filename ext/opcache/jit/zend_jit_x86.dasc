@@ -8995,6 +8995,23 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 			}
 		}
 
+		|	// EG(current_execute_data) = execute_data;
+		|	MEM_OP2_1_ZTS mov, aword, executor_globals, current_execute_data, RX, r1
+
+		if (may_have_named_args) {
+			|	test byte [RX + offsetof(zend_execute_data, This.u1.type_info) + 3], (ZEND_CALL_MAY_HAVE_UNDEF >> 24)
+			|	jnz >1
+			|.cold_code
+			|1:
+			|	mov FCARG1a, RX
+			|	EXT_CALL zend_handle_icall_undef_args, r0
+			|	jnz ->exception_handler
+			|	mov r0, EX:RX->func // reload
+			|	jmp >2
+			|.code
+			|2:
+		}
+
 		if (!RETURN_VALUE_USED(opline)) {
 			|.if not(X64WIN)
 			|	sub r4, 16 /* alloca() */
@@ -9004,9 +9021,6 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 		|	// ZVAL_NULL(EX_VAR(opline->result.var));
 		|	LOAD_ZVAL_ADDR FCARG2a, res_addr
 		|	SET_Z_TYPE_INFO FCARG2a, IS_NULL
-
-		|	// EG(current_execute_data) = execute_data;
-		|	MEM_OP2_1_ZTS mov, aword, executor_globals, current_execute_data, RX, r1
 
 		zend_jit_reset_opline(Dst, NULL);
 
@@ -9034,8 +9048,8 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 		if (may_have_named_args) {
 			|	test byte [RX + offsetof(zend_execute_data, This.u1.type_info) + 3], (ZEND_CALL_HAS_EXTRA_NAMED_PARAMS >> 24)
 			|	jnz >1
-			|1:
 			|.cold_code
+			|1:
 			|	mov FCARG1a, aword [RX + offsetof(zend_execute_data, extra_named_params)]
 			|	EXT_CALL zend_array_destroy, r0
 			|	jmp >2

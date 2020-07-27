@@ -4439,7 +4439,7 @@ zval * ZEND_FASTCALL zend_handle_named_arg(
 	return arg;
 }
 
-static int zend_handle_icall_undef_args(zend_execute_data *call) {
+ZEND_API int ZEND_FASTCALL zend_handle_icall_undef_args(zend_execute_data *call) {
 	zend_function *fbc = call->func;
 	if (fbc->common.fn_flags & ZEND_ACC_USER_ARG_INFO) {
 		/* Magic function, let it deal with it. */
