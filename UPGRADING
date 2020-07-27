@@ -930,6 +930,10 @@ PHP 8.0 UPGRADE NOTES
 11. Changes to INI File Handling
 ========================================
 
+- zend.exception_string_param_max_len
+  . New INI directive to set the maximum string length in an argument of a
+    stringified stack strace.
+
 ========================================
 12. Windows Support
 ========================================
