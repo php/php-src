@@ -79,7 +79,7 @@ function timezone_open(string $timezone): DateTimeZone|false {}
 
 function timezone_name_get(DateTimeZone $object): string {}
 
-function timezone_name_from_abbr(string $abbr, int $gmtoffset = -1, int $isdst = -1): string|false {}
+function timezone_name_from_abbr(string $abbr, int $utcOffset = -1, int $isDST = -1): string|false {}
 
 function timezone_offset_get(DateTimeZone $object, DateTimeInterface $datetime): int {}
 
@@ -88,7 +88,7 @@ function timezone_transitions_get(
 
 function timezone_location_get(DateTimeZone $object): array|false {}
 
-function timezone_identifiers_list(int $what = DateTimeZone::ALL, ?string $country = null): array|false {}
+function timezone_identifiers_list(int $timezoneGroup = DateTimeZone::ALL, ?string $countryCode = null): array|false {}
 
 function timezone_abbreviations_list(): array {}
 
@@ -103,14 +103,14 @@ function date_default_timezone_set(string $timezoneID): bool {}
 function date_default_timezone_get(): string {}
 
 function date_sunrise(
-    int $timestamp, int $retformat = SUNFUNCS_RET_STRING,
+    int $timestamp, int $returnFormat = SUNFUNCS_RET_STRING,
     ?float $latitude = null, ?float $longitude = null, ?float $zenith = null,
-    float $gmt_offset = 0): string|int|float|false {}
+    float $utcOffset = 0): string|int|float|false {}
 
 function date_sunset(
-    int $timestamp, int $retformat = SUNFUNCS_RET_STRING,
+    int $timestamp, int $returnFormat = SUNFUNCS_RET_STRING,
     ?float $latitude = null, ?float $longitude = null, ?float $zenith = null,
-    float $gmt_offset = 0): string|int|float|false {}
+    float $utcOffset = 0): string|int|float|false {}
 
 function date_sun_info(int $timestamp, float $latitude, float $longitude): array {}
 

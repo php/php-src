@@ -1092,9 +1092,9 @@ function fdiv(float $dividend, float $divisor): float {}
 /* microtime.c */
 
 #ifdef HAVE_GETTIMEOFDAY
-function microtime(bool $get_as_float = false): string|float {}
+function microtime(bool $getAsFloat = false): string|float {}
 
-function gettimeofday(bool $return_float = false): array|float {}
+function gettimeofday(bool $returnFloat = false): array|float {}
 #endif
 
 #ifdef HAVE_GETRUSAGE
