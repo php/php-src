@@ -240,6 +240,44 @@ static zend_string *zend_jit_func_name(const zend_op_array *op_array)
 	}
 }
 
+#if ZEND_DEBUG
+static void handle_dasm_error(int ret) {
+	switch (ret & 0xff000000u) {
+		case DASM_S_NOMEM:
+			fprintf(stderr, "DASM_S_NOMEM\n");
+			break;
+		case DASM_S_PHASE:
+			fprintf(stderr, "DASM_S_PHASE\n");
+			break;
+		case DASM_S_MATCH_SEC:
+			fprintf(stderr, "DASM_S_MATCH_SEC\n");
+			break;
+		case DASM_S_RANGE_I:
+			fprintf(stderr, "DASM_S_RANGE_I\n");
+			break;
+		case DASM_S_RANGE_SEC:
+			fprintf(stderr, "DASM_S_RANGE_SEC\n");
+			break;
+		case DASM_S_RANGE_LG:
+			fprintf(stderr, "DASM_S_RANGE_LG\n");
+			break;
+		case DASM_S_RANGE_PC:
+			fprintf(stderr, "DASM_S_RANGE_PC %d\n", ret & 0xffffffu);
+			break;
+		case DASM_S_RANGE_VREG:
+			fprintf(stderr, "DASM_S_RANGE_VREG\n");
+			break;
+		case DASM_S_UNDEF_L:
+			fprintf(stderr, "DASM_S_UNDEF_L\n");
+			break;
+		case DASM_S_UNDEF_PC:
+			fprintf(stderr, "DASM_S_UNDEF_PC\n");
+			break;
+	}
+	ZEND_UNREACHABLE();
+}
+#endif
+
 static void *dasm_link_and_encode(dasm_State             **dasm_state,
                                   const zend_op_array     *op_array,
                                   zend_ssa                *ssa,
@@ -294,8 +332,11 @@ static void *dasm_link_and_encode(dasm_State             **dasm_state,
 		}
 	}
 
-	if (dasm_link(dasm_state, &size) != DASM_S_OK) {
-		// TODO: dasm_link() failed ???
+	ret = dasm_link(dasm_state, &size);
+	if (ret != DASM_S_OK) {
+#if ZEND_DEBUG
+		handle_dasm_error(ret);
+#endif
 		return NULL;
 	}
 
@@ -306,11 +347,9 @@ static void *dasm_link_and_encode(dasm_State             **dasm_state,
 	}
 
 	ret = dasm_encode(dasm_state, *dasm_ptr);
-
 	if (ret != DASM_S_OK) {
-		// TODO: dasm_encode() failed ???
 #if ZEND_DEBUG
-		ZEND_UNREACHABLE();
+		handle_dasm_error(ret);
 #endif
 		return NULL;
 	}
