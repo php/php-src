@@ -8571,8 +8571,10 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 		unknown_num_args = 1;
 	}
 
-	/* TODO: Only do this for named args */
-	unknown_num_args = 1;
+	bool has_named_args = opline->extended_value == ZEND_FCALL_HAS_NAMED_ARGS;
+	if (has_named_args) {
+		unknown_num_args = 1;
+	}
 
 	if (info) {
 		call_info = info->callee_info;
@@ -8879,7 +8881,8 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 			|	mov ecx, dword [FP + offsetof(zend_execute_data, This.u2.num_args)] // reload
 			|	jmp >1
 			|.code
-			if (!func || (func->op_array.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) == 0) {
+			if (!has_named_args &&
+					(!func || (func->op_array.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) == 0)) {
 				if (!func) {
 					|	// if (EXPECTED((op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) == 0))
 					|	test dword [r0 + offsetof(zend_op_array, fn_flags)], ZEND_ACC_HAS_TYPE_HINTS

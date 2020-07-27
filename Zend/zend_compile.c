@@ -3484,6 +3484,32 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 }
 /* }}} */
 
+static inline zend_bool zend_args_contain_unpack_or_named(zend_ast_list *args) /* {{{ */
+{
+	uint32_t i;
+	for (i = 0; i < args->children; ++i) {
+		zend_ast *arg = args->child[i];
+		if (arg->kind == ZEND_AST_UNPACK || arg->kind == ZEND_AST_NAMED_ARG) {
+			return 1;
+		}
+	}
+	return 0;
+}
+/* }}} */
+
+static inline zend_bool zend_args_contain_named(zend_ast_list *args) /* {{{ */
+{
+	uint32_t i;
+	for (i = 0; i < args->children; ++i) {
+		zend_ast *arg = args->child[i];
+		if (arg->kind == ZEND_AST_NAMED_ARG) {
+			return 1;
+		}
+	}
+	return 0;
+}
+/* }}} */
+
 ZEND_API zend_uchar zend_get_call_op(const zend_op *init_op, zend_function *fbc) /* {{{ */
 {
 	if (fbc) {
@@ -3528,6 +3554,9 @@ void zend_compile_call_common(znode *result, zend_ast *args_ast, zend_function *
 	}
 
 	opline = zend_emit_op(result, zend_get_call_op(opline, fbc), NULL, NULL);
+	if (zend_args_contain_named(zend_ast_get_list(args_ast))) {
+		opline->extended_value = ZEND_FCALL_HAS_NAMED_ARGS;
+	}
 	zend_do_extended_fcall_end();
 }
 /* }}} */
@@ -3589,19 +3618,6 @@ void zend_compile_dynamic_call(znode *result, znode *name_node, zend_ast *args_a
 	}
 
 	zend_compile_call_common(result, args_ast, NULL);
-}
-/* }}} */
-
-static inline zend_bool zend_args_contain_unpack_or_named(zend_ast_list *args) /* {{{ */
-{
-	uint32_t i;
-	for (i = 0; i < args->children; ++i) {
-		zend_ast *arg = args->child[i];
-		if (arg->kind == ZEND_AST_UNPACK || arg->kind == ZEND_AST_NAMED_ARG) {
-			return 1;
-		}
-	}
-	return 0;
 }
 /* }}} */
 
