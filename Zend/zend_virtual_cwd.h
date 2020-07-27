@@ -222,7 +222,7 @@ typedef struct _virtual_cwd_globals {
 	zend_long                   realpath_cache_size;
 	zend_long                   realpath_cache_size_limit;
 	zend_long                   realpath_cache_ttl;
-	zend_bool                   disable_stat_cache;
+	zend_bool                   enable_stat_cache;
 	realpath_cache_bucket *realpath_cache[1024];
 } virtual_cwd_globals;
 

@@ -4,7 +4,7 @@ Bug #28790: Add php.ini option to disable stat cache (without cache)
 jnoll <jnoll [at] prim [dot] hu>
 Kevin Lyda <kevin [at] lyda [dot] ie>
 --INI--
-disable_stat_cache = True
+enable_stat_cache = False
 --FILE--
 <?php
 

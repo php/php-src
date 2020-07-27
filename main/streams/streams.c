@@ -1959,7 +1959,7 @@ PHPAPI int _php_stream_stat_path(const char *path, int flags, php_stream_statbuf
 
 	memset(ssb, 0, sizeof(*ssb));
 
-	if (!CWDG(disable_stat_cache) && !(flags & PHP_STREAM_URL_STAT_NOCACHE)) {
+	if (CWDG(enable_stat_cache) && !(flags & PHP_STREAM_URL_STAT_NOCACHE)) {
 		/* Try to hit the cache first */
 		if (flags & PHP_STREAM_URL_STAT_LINK) {
 			if (BG(CurrentLStatFile) && strcmp(path, BG(CurrentLStatFile)) == 0) {
@@ -1978,7 +1978,7 @@ PHPAPI int _php_stream_stat_path(const char *path, int flags, php_stream_statbuf
 	if (wrapper && wrapper->wops->url_stat) {
 		ret = wrapper->wops->url_stat(wrapper, path_to_open, flags, ssb, context);
 		if (ret == 0) {
-			if (!CWDG(disable_stat_cache) && !(flags & PHP_STREAM_URL_STAT_NOCACHE)) {
+			if (CWDG(enable_stat_cache) && !(flags & PHP_STREAM_URL_STAT_NOCACHE)) {
 				/* Drop into cache */
 				if (flags & PHP_STREAM_URL_STAT_LINK) {
 					if (BG(CurrentLStatFile)) {

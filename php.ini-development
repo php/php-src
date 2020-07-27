@@ -358,9 +358,9 @@ disable_classes =
 
 ; Allows user to disable the "stat cache." By default php remembers the
 ; results of the last call to stat() and lstat() and functions that call
-; it underneath.  Setting this to True disables that behaviour.
-; http://php.net/disable-stat-cache
-;disable_stat_cache = False
+; it underneath.  Setting this to False disables that behaviour.
+; http://php.net/enable-stat-cache
+;enable_stat_cache = On
 
 ; Enables or disables the circular reference collector.
 ; http://php.net/zend.enable-gc
