@@ -590,7 +590,6 @@ static size_t tsrm_realpath_r(char *path, size_t start, size_t len, int *ll, tim
 		}
 
 #ifdef ZEND_WIN32
-retry_reparse_point:
 		if (save) {
 			pathw = php_win32_ioutil_any_to_w(path);
 			if (!pathw) {
@@ -613,7 +612,7 @@ retry_reparse_point:
 		tmp = do_alloca(len+1, use_heap);
 		memcpy(tmp, path, len+1);
 
-retry_reparse_tag_cloud:
+retry:
 		if(save &&
 				!(IS_UNC_PATH(path, len) && len >= 3 && path[2] != '?') &&
                                (dataw.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT)
@@ -674,7 +673,7 @@ retry_reparse_tag_cloud:
 					dataw.dwFileAttributes = fileInformation.dwFileAttributes;
 					CloseHandle(hLink);
 					(*ll)--;
-					goto retry_reparse_tag_cloud;
+					goto retry;
 				}
 				free_alloca(tmp, use_heap);
 				CloseHandle(hLink);
@@ -820,15 +819,6 @@ retry_reparse_tag_cloud:
 #endif
 			free_alloca(pbuffer, use_heap_large);
 			free(substitutename);
-
-			{
-				DWORD attrs = GetFileAttributesA(path);
-				if (!isVolume && (attrs & FILE_ATTRIBUTE_REPARSE_POINT)) {
-					free_alloca(tmp, use_heap);
-					FREE_PATHW()
-					goto retry_reparse_point;
-				}
-			}
 
 			if(isabsolute == 1) {
 				if (!((j == 3) && (path[1] == ':') && (path[2] == '\\'))) {
