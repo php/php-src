@@ -882,9 +882,6 @@ void zend_dump_op_array_name(const zend_op_array *op_array)
 	} else {
 		fprintf(stderr, "%s", "$_main");
 	}
-	if (func_info && func_info->clone_num > 0) {
-		fprintf(stderr, "_@_clone_%d", func_info->clone_num);
-	}
 }
 
 void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_flags, const char *msg, const void *data)

@@ -54,12 +54,9 @@ struct _zend_func_info {
 	zend_call_info         *callee_info;  /* which functions are called from this one */
 	zend_call_info        **call_map;     /* Call info associated with init/call/send opnum */
 	int                     num_args;     /* (-1 - unknown) */
+	int                     return_value_used; /* -1 unknown, 0 no, 1 yes */
 	zend_recv_arg_info     *arg_info;
 	zend_ssa_var_info       return_info;
-	zend_func_info         *clone;
-	int                     clone_num;
-	int                     return_value_used; /* -1 unknown, 0 no, 1 yes */
-	void                   *codegen_data;
 };
 
 typedef struct _zend_call_graph {
