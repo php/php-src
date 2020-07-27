@@ -2221,9 +2221,9 @@ static zend_never_inline ZEND_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_ve
 static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RECV_NOTYPE_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	uint32_t arg_num = opline->op1.num;
 
-	if (UNEXPECTED(arg_num > EX_NUM_ARGS()) || Z_ISUNDEF_P(EX_VAR(opline->result.var))) {
+	if (UNEXPECTED(Z_ISUNDEF_P(EX_VAR(opline->result.var)))) {
+		uint32_t arg_num = opline->op1.num;
 		ZEND_VM_TAIL_CALL(zend_missing_arg_helper_SPEC(arg_num ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 	}
 
@@ -3237,11 +3237,9 @@ try_function_name:
 static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RECV_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	uint32_t arg_num = opline->op1.num;
-	zval *param;
-
-	param = EX_VAR(opline->result.var);
-	if (UNEXPECTED(arg_num > EX_NUM_ARGS() || Z_ISUNDEF_P(param))) {
+	zval *param = EX_VAR(opline->result.var);
+	if (UNEXPECTED(Z_ISUNDEF_P(param))) {
+		uint32_t arg_num = opline->op1.num;
 		ZEND_VM_TAIL_CALL(zend_missing_arg_helper_SPEC(arg_num ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 	}
 

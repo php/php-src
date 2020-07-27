@@ -5322,11 +5322,9 @@ ZEND_VM_COLD_HELPER(zend_verify_recv_arg_type_helper, ANY, ANY, zval *op_1)
 ZEND_VM_HOT_HANDLER(63, ZEND_RECV, NUM, UNUSED, CACHE_SLOT)
 {
 	USE_OPLINE
-	uint32_t arg_num = opline->op1.num;
-	zval *param;
-
-	param = EX_VAR(opline->result.var);
-	if (UNEXPECTED(arg_num > EX_NUM_ARGS() || Z_ISUNDEF_P(param))) {
+	zval *param = EX_VAR(opline->result.var);
+	if (UNEXPECTED(Z_ISUNDEF_P(param))) {
+		uint32_t arg_num = opline->op1.num;
 		ZEND_VM_DISPATCH_TO_HELPER(zend_missing_arg_helper, arg_num, arg_num);
 	}
 
@@ -5340,9 +5338,9 @@ ZEND_VM_HOT_HANDLER(63, ZEND_RECV, NUM, UNUSED, CACHE_SLOT)
 ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_RECV, op->op2.num == MAY_BE_ANY, ZEND_RECV_NOTYPE, NUM, NUM, CACHE_SLOT)
 {
 	USE_OPLINE
-	uint32_t arg_num = opline->op1.num;
 
-	if (UNEXPECTED(arg_num > EX_NUM_ARGS()) || Z_ISUNDEF_P(EX_VAR(opline->result.var))) {
+	if (UNEXPECTED(Z_ISUNDEF_P(EX_VAR(opline->result.var)))) {
+		uint32_t arg_num = opline->op1.num;
 		ZEND_VM_DISPATCH_TO_HELPER(zend_missing_arg_helper, arg_num, arg_num);
 	}
 
