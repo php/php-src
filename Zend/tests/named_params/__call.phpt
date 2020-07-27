@@ -1,5 +1,5 @@
 --TEST--
-Check that __invoke() works with named parameters
+Check that __call() and __callStatic() work with named parameters
 --FILE--
 <?php
 
