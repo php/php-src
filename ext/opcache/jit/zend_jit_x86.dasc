@@ -5785,7 +5785,7 @@ static int zend_jit_assign_dim(dasm_State **Dst, const zend_op *opline, const ze
 
 		if (op1_info & (MAY_BE_ANY-(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_ARRAY))) {
 			|	SAVE_VALID_OPLINE opline, r0
-		    if (Z_REG(op1_addr) != ZREG_FCARG1a) {
+		    if (Z_REG(op1_addr) != ZREG_FCARG1a || Z_OFFSET(op1_addr) != 0) {
 				|	LOAD_ZVAL_ADDR FCARG1a, op1_addr
 			}
 		    if (opline->op2_type == IS_UNUSED) {
@@ -6039,7 +6039,7 @@ static int zend_jit_assign_dim_op(dasm_State **Dst, const zend_op *opline, const
 		}
 
 		|	SAVE_VALID_OPLINE opline, r0
-		if (Z_REG(op1_addr) != ZREG_FCARG1a) {
+		if (Z_REG(op1_addr) != ZREG_FCARG1a || Z_OFFSET(op1_addr) != 0) {
 			|	LOAD_ZVAL_ADDR FCARG1a, op1_addr
 		}
 	    if (opline->op2_type == IS_UNUSED) {
@@ -7872,7 +7872,7 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, const z
 			|.cold_code
 			|2:
 		}
-		if (Z_REG(op1_addr) != ZREG_FCARG1a) {
+		if (Z_REG(op1_addr) != ZREG_FCARG1a || Z_OFFSET(op1_addr) != 0) {
 			|	LOAD_ZVAL_ADDR FCARG1a, op1_addr
 		}
 		|	SAVE_VALID_OPLINE opline, r0
@@ -10479,7 +10479,7 @@ static int zend_jit_fetch_dim_read(dasm_State **Dst, const zend_op *opline, cons
 				}
 			}
 			|	SAVE_VALID_OPLINE opline, r0
-		    if (Z_REG(op1_addr) != ZREG_FCARG1a) {
+		    if (Z_REG(op1_addr) != ZREG_FCARG1a || Z_OFFSET(op1_addr) != 0) {
 				|	LOAD_ZVAL_ADDR FCARG1a, op1_addr
 		    }
 			|	LOAD_ZVAL_ADDR FCARG2a, op2_addr
@@ -10513,7 +10513,7 @@ static int zend_jit_fetch_dim_read(dasm_State **Dst, const zend_op *opline, cons
 				}
 			}
 			|	SAVE_VALID_OPLINE opline, r0
-		    if (Z_REG(op1_addr) != ZREG_FCARG1a) {
+		    if (Z_REG(op1_addr) != ZREG_FCARG1a || Z_OFFSET(op1_addr) != 0) {
 				|	LOAD_ZVAL_ADDR FCARG1a, op1_addr
 		    }
 			if (opline->op2_type == IS_CONST && Z_EXTRA_P(RT_CONSTANT(opline, opline->op2)) == ZEND_EXTRA_VALUE) {
@@ -10694,7 +10694,7 @@ static int zend_jit_isset_isempty_dim(dasm_State **Dst, const zend_op *opline, c
 
 		if (op1_info & (MAY_BE_STRING|MAY_BE_OBJECT)) {
 			|	SAVE_VALID_OPLINE opline, r0
-		    if (Z_REG(op1_addr) != ZREG_FCARG1a) {
+		    if (Z_REG(op1_addr) != ZREG_FCARG1a || Z_OFFSET(op1_addr) != 0) {
 				|	LOAD_ZVAL_ADDR FCARG1a, op1_addr
 			}
 			if (opline->op2_type == IS_CONST && Z_EXTRA_P(RT_CONSTANT(opline, opline->op2)) == ZEND_EXTRA_VALUE) {
