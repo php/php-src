@@ -8579,14 +8579,6 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 	} else if (func->type == ZEND_INTERNAL_FUNCTION) {
 		ZEND_ASSERT(opline->opcode != ZEND_DO_UCALL);
 		call_num_args = call_info->num_args;
-#if ZEND_DEBUG
-		if (func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
-			// TODO: Now most internal functions have type hints ???
-			if (!trace) {
-				goto fallback;
-			}
-		}
-#endif
 	} else {
 		ZEND_UNREACHABLE();
 	}
@@ -9112,20 +9104,6 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 	}
 
 	return 1;
-#if ZEND_DEBUG
-fallback:
-	/* fallback to subroutine threading */
-	if (trace) {
-		return zend_jit_trace_handler(Dst, op_array, opline, /* may_throw */ 1, trace);
-	}
-	if (opline->opcode == ZEND_DO_FCALL ||
-	    opline->opcode == ZEND_DO_UCALL ||
-	    opline->opcode == ZEND_DO_FCALL_BY_NAME ){
-		return zend_jit_call(Dst, opline, next_block);
-	} else {
-		return zend_jit_handler(Dst, opline, /* may_throw */ 1);
-	}
-#endif
 }
 
 static int zend_jit_send_val(dasm_State **Dst, const zend_op *opline, const zend_op_array *op_array, uint32_t op1_info, zend_jit_addr op1_addr)

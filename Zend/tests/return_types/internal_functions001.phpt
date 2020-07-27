@@ -6,6 +6,8 @@ if (!extension_loaded('zend-test')) die('skip zend-test extension not loaded');
 // Internal function return types are only checked in debug builds
 if (!PHP_DEBUG) die('skip requires debug build');
 ?>
+--INI--
+opcache.jit=0
 --FILE--
 <?php
 zend_test_array_return();
