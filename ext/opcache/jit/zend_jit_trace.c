@@ -1009,6 +1009,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 				/* pass */
 			} else if (num_op_arrays == ZEND_JIT_TRACE_MAX_FUNCS) {
 				/* Too many functions in single trace */
+				*num_op_arrays_ptr = num_op_arrays;
 				return NULL;
 			} else {
 				/* Remember op_array to cleanup */
@@ -1026,6 +1027,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 					/* pass */
 				} else if (num_op_arrays == ZEND_JIT_TRACE_MAX_FUNCS) {
 					/* Too many functions in single trace */
+					*num_op_arrays_ptr = num_op_arrays;
 					return NULL;
 				} else {
 					/* Remember op_array to cleanup */
