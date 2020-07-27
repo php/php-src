@@ -29,6 +29,7 @@ static HashTable internal_attributes;
 
 void validate_attribute(zend_attribute *attr, uint32_t target, zend_class_entry *scope)
 {
+	// TODO: More proper signature validation: Too many args, incorrect arg names.
 	if (attr->argc > 0) {
 		zval flags;
 
@@ -121,7 +122,6 @@ ZEND_API int zend_get_attribute_value(zval *ret, zend_attribute *attr, uint32_t 
 		return FAILURE;
 	}
 
-	// TODO: Named args.
 	ZVAL_COPY_OR_DUP(ret, &attr->args[i].value);
 
 	if (Z_TYPE_P(ret) == IS_CONSTANT_AST) {
