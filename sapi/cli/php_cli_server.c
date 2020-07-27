@@ -368,8 +368,7 @@ static const char *get_mime_type(const php_cli_server *server, const char *ext, 
 	char *ret;
 	ALLOCA_FLAG(use_heap)
 	char *ext_lower = do_alloca(ext_len + 1, use_heap);
-	memcpy(ext_lower, ext, ext_len + 1);
-	zend_str_tolower(ext_lower, ext_len);
+	zend_str_tolower_copy(ext_lower, ext, ext_len);
 	ret = zend_hash_str_find_ptr(&server->extension_mime_types, ext_lower, ext_len);
 	free_alloca(ext_lower, use_heap);
 	return (const char*)ret;
