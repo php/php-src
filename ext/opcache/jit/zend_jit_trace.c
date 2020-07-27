@@ -2708,7 +2708,7 @@ static int zend_jit_trace_deoptimization(dasm_State             **Dst,
 					return 0;
 				}
 			} else {
-				/* delay custom deoptimization instructions to prevent register cpobbering */
+				/* delay custom deoptimization instructions to prevent register clobbering */
 				has_constants = 1;
 			}
 		}
