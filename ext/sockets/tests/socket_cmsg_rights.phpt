@@ -61,7 +61,7 @@ if ($data["control"]) {
     if ($control["level"] == SOL_SOCKET &&
         $control["type"]  == SCM_RIGHTS) {
         foreach ($control["data"] as $resource) {
-            if (!is_resource($resource)) {
+            if (!is_object($resource)) {
                 echo "FAIL RES\n";
                 var_dump($data);
                 exit;
@@ -79,9 +79,11 @@ if ($data["control"]) {
 }
 --EXPECTF--
 creating send socket
-resource(%d) of type (Socket)
+object(Socket)#%d (0) {
+}
 creating receive socket
-resource(%d) of type (Socket)
+object(Socket)#%d (0) {
+}
 bool(true)
 int(11)
 array(3) {

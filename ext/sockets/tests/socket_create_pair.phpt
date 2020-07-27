@@ -18,7 +18,9 @@ var_dump($sockets);
 --EXPECT--
 array(2) {
   [0]=>
-  resource(4) of type (Socket)
+  object(Socket)#1 (0) {
+  }
   [1]=>
-  resource(5) of type (Socket)
+  object(Socket)#2 (0) {
+  }
 }

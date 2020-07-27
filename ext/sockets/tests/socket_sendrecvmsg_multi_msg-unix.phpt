@@ -62,10 +62,12 @@ if (!socket_recvmsg($s, $data, 0)) die("recvmsg");
 print_r($data);
 --EXPECTF--
 creating send socket
-resource(5) of type (Socket)
+object(Socket)#%d (0) {
+}
 bool(true)
 creating receive socket
-resource(6) of type (Socket)
+object(Socket)#%d (0) {
+}
 bool(true)
 int(11)
 Array

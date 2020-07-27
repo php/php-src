@@ -33,6 +33,7 @@ echo "Done.";
 --EXPECTF--
 socket_export_stream(): supplied resource is not a valid Socket resource
 socket_export_stream(): supplied resource is not a valid Socket resource
-resource(%d) of type (Socket)
+object(Socket)#%d (0) {
+}
 socket_export_stream(): supplied resource is not a valid Socket resource
 Done.

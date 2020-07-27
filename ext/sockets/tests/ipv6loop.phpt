@@ -55,3 +55,9 @@ IPv6 Loopback test
 --EXPECT--
 string(10) "ABCdef123
 "
+
+Deprecated: Function socket_close() is deprecated
+
+Deprecated: Function socket_close() is deprecated
+
+Deprecated: Function socket_close() is deprecated
