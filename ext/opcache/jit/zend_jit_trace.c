@@ -4583,8 +4583,6 @@ done:
 			if (opline->opcode == ZEND_DO_UCALL
 			 || opline->opcode == ZEND_DO_FCALL
 			 || opline->opcode == ZEND_DO_FCALL_BY_NAME
-			 || opline->opcode == ZEND_GENERATOR_CREATE
-			 || opline->opcode == ZEND_GENERATOR_RETURN
 			 || opline->opcode == ZEND_YIELD
 			 || opline->opcode == ZEND_YIELD_FROM
 			 || opline->opcode == ZEND_INCLUDE_OR_EVAL) {
