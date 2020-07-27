@@ -7,6 +7,9 @@ if (!extension_loaded('sockets')) {
 }
 if (!function_exists('zend_leak_variable'))
 	die('SKIP only for debug builds');
+?>
+--INI--
+report_memleaks=0
 --FILE--
 <?php
 

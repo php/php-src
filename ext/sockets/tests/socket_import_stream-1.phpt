@@ -21,5 +21,6 @@ socket_close($sock);
 
 var_dump(stream_get_contents($s1));
 --EXPECTF--
-resource(%d) of type (Socket)
+object(Socket)#%d (0) {
+}
 string(12) "test message"

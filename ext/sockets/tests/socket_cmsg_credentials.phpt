@@ -58,9 +58,11 @@ $pid = getmypid();
 var_dump($data['control'][0]['data']['pid'] === $pid);
 --EXPECTF--
 creating send socket
-resource(%d) of type (Socket)
+object(Socket)#%d (0) {
+}
 creating receive socket
-resource(%d) of type (Socket)
+object(Socket)#%d (0) {
+}
 bool(true)
 int(5)
 Array

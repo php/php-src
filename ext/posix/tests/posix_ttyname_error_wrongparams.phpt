@@ -20,7 +20,7 @@ PHP Testfest Berlin 2009-05-10
 <?php
 var_dump(posix_ttyname(0)); // param not a resource
 try {
-    var_dump(posix_ttyname(socket_create(AF_INET, SOCK_DGRAM, SOL_UDP))); // wrong resource type
+    var_dump(posix_ttyname(finfo_open(FILEINFO_NONE, __DIR__))); // wrong resource type
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }

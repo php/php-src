@@ -17,14 +17,11 @@ $socket2 = socket_create_listen(31340);
 socket_close($socket2);
 try {
     var_dump(socket_set_block($socket2));
-} catch (TypeError $e) {
+} catch (Error $e) {
     echo $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
 bool(true)
-socket_set_block(): supplied resource is not a valid Socket resource
---CREDITS--
-Robin Mehner, robin@coding-robin.de
-PHP Testfest Berlin 2009-05-09
+socket_set_block(): Argument #1 ($socket) has already been closed

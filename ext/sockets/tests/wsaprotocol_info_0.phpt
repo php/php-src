@@ -48,9 +48,12 @@ if (!extension_loaded('sockets')) {
 ?>
 --EXPECTF--
 bool(true)
-resource(%d) of type (Socket)
-resource(%d) of type (Socket)
-resource(%d) of type (Socket)
+object(Socket)#%d (0) {
+}
+object(Socket)#%d (0) {
+}
+object(Socket)#%d (0) {
+}
 resource(%d) of type (Unknown)
 
 Warning: socket_wsaprotocol_info_export(): Unable to export WSA protocol info [0x00002726]: %s
