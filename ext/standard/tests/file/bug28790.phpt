@@ -24,9 +24,10 @@ function all_the_stats(\$filename, \$message) {
     }
 }
 
-passthru('$php -n -r \'touch("$testfile");\'');
+\$testfile = str_replace("\\\\", "/", "$testfile");
+passthru('$php -n -r \'touch("\$testfile");\'');
 all_the_stats("$testfile", "testfile exists");
-passthru('$php -n -r \'unlink("$testfile");\'');
+passthru('$php -n -r \'unlink("\$testfile");\'');
 all_the_stats("$testfile", "testfile exists (it shouldn't)");
 if (!@stat("$impossiblefile")) {
     print("stat impossiblefile does not exist.\n");
