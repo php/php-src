@@ -1019,7 +1019,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 			}
 		} else if (p->op == ZEND_JIT_TRACE_BACK) {
 			if (level == 0) {
-				stack_bottom += zend_jit_trace_frame_size(op_array);
+				stack_bottom += zend_jit_trace_frame_size(p->op_array);
 				jit_extension =
 					(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
 				ssa = &jit_extension->func_info.ssa;
