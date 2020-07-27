@@ -365,7 +365,13 @@ static void append_essential_headers(smart_str* buffer, php_cli_server_client *c
 
 static const char *get_mime_type(const php_cli_server *server, const char *ext, size_t ext_len) /* {{{ */
 {
-	return (const char*)zend_hash_str_find_ptr(&server->extension_mime_types, ext, ext_len);
+	char *ret;
+	ALLOCA_FLAG(use_heap)
+	char *ext_lower = do_alloca(ext_len + 1, use_heap);
+	zend_str_tolower_copy(ext_lower, ext, ext_len);
+	ret = zend_hash_str_find_ptr(&server->extension_mime_types, ext_lower, ext_len);
+	free_alloca(ext_lower, use_heap);
+	return (const char*)ret;
 } /* }}} */
 
 PHP_FUNCTION(apache_request_headers) /* {{{ */
@@ -2140,9 +2146,12 @@ static int php_cli_server_dispatch_router(php_cli_server *server, php_cli_server
 static int php_cli_server_dispatch(php_cli_server *server, php_cli_server_client *client) /* {{{ */
 {
 	int is_static_file  = 0;
+	const char *ext = client->request.ext;
 
 	SG(server_context) = client;
-	if (client->request.ext_len != 3 || memcmp(client->request.ext, "php", 3) || !client->request.path_translated) {
+	if (client->request.ext_len != 3
+	 || (ext[0] != 'p' && ext[0] != 'P') || (ext[1] != 'h' && ext[1] != 'H') || (ext[2] != 'p' && ext[2] != 'P')
+	 || !client->request.path_translated) {
 		is_static_file = 1;
 	}
 
