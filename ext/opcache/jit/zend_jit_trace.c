@@ -4433,6 +4433,7 @@ done:
 						SET_STACK_TYPE(stack, i, IS_UNKNOWN);
 					}
 				}
+				opline = NULL;
 			}
 			JIT_G(current_frame) = frame;
 			if (res_type != IS_UNKNOWN
@@ -4504,8 +4505,19 @@ done:
 							skip_guard = 1;
 						}
 					}
-					if (!skip_guard && !zend_jit_init_fcall_guard(&dasm_state, NULL, p->func, trace_buffer[1].opline)) {
-						goto jit_failure;
+
+					if (!skip_guard) {
+						if (!opline) {
+							zend_jit_trace_rec *q = p + 1;
+							while (q->op != ZEND_JIT_TRACE_VM && q->op != ZEND_JIT_TRACE_END) {
+								q++;
+							}
+							opline = q->opline;
+							ZEND_ASSERT(opline != NULL);
+						}
+						if (!zend_jit_init_fcall_guard(&dasm_state, NULL, p->func, opline)) {
+							goto jit_failure;
+						}
 					}
 				}
 			}
@@ -4590,12 +4602,13 @@ done:
 		} else if (p->stop == ZEND_JIT_TRACE_STOP_LINK
 		        || p->stop == ZEND_JIT_TRACE_STOP_RETURN_HALT
 		        || p->stop == ZEND_JIT_TRACE_STOP_INTERPRETER) {
-			if (opline->opcode == ZEND_DO_UCALL
-			 || opline->opcode == ZEND_DO_FCALL
-			 || opline->opcode == ZEND_DO_FCALL_BY_NAME
-			 || opline->opcode == ZEND_YIELD
-			 || opline->opcode == ZEND_YIELD_FROM
-			 || opline->opcode == ZEND_INCLUDE_OR_EVAL) {
+			if (opline
+			 && (opline->opcode == ZEND_DO_UCALL
+			  || opline->opcode == ZEND_DO_FCALL
+			  || opline->opcode == ZEND_DO_FCALL_BY_NAME
+			  || opline->opcode == ZEND_YIELD
+			  || opline->opcode == ZEND_YIELD_FROM
+			  || opline->opcode == ZEND_INCLUDE_OR_EVAL)) {
 				zend_jit_trace_setup_ret_counter(opline, jit_extension->offset);
 			}
 			if (JIT_G(current_frame)
