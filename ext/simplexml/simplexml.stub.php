@@ -2,19 +2,19 @@
 
 /** @generate-function-entries */
 
-function simplexml_load_file(string $filename, ?string $class_name = SimpleXMLElement::class, int $options = 0, string $ns = '', bool $is_prefix = false): SimpleXMLElement|false {}
+function simplexml_load_file(string $filename, ?string $class_name = SimpleXMLElement::class, int $options = 0, string $namespace_or_prefix = '', bool $is_prefix = false): SimpleXMLElement|false {}
 
-function simplexml_load_string(string $data, ?string $class_name = SimpleXMLElement::class, int $options = 0, string $ns = '', bool $is_prefix = false): SimpleXMLElement|false {}
+function simplexml_load_string(string $data, ?string $class_name = SimpleXMLElement::class, int $options = 0, string $namespace_or_prefix = '', bool $is_prefix = false): SimpleXMLElement|false {}
 
 function simplexml_import_dom(DOMNode $node, ?string $class_name = SimpleXMLElement::class): ?SimpleXMLElement {}
 
 class SimpleXMLElement implements Stringable, Countable, RecursiveIterator
 {
     /** @return array|false */
-    public function xpath(string $path) {}
+    public function xpath(string $expression) {}
 
     /** @return bool */
-    public function registerXPathNamespace(string $prefix, string $ns) {}
+    public function registerXPathNamespace(string $prefix, string $namespace) {}
 
     /** @return string|bool */
     public function asXML(string $filename = UNKNOWN) {}
@@ -29,21 +29,21 @@ class SimpleXMLElement implements Stringable, Countable, RecursiveIterator
     public function getNamespaces(bool $recursive = false) {}
 
     /** @return array|false */
-    public function getDocNamespaces(bool $recursive = false, bool $from_root = true) {}
+    public function getDocNamespaces(bool $recursive = false, bool $fromRoot = true) {}
 
     /** @return SimpleXMLIterator */
-    public function children(?string $ns = null, bool $is_prefix = false) {}
+    public function children(?string $namespaceOrPrefix = null, bool $isPrefix = false) {}
 
     /** @return SimpleXMLIterator */
-    public function attributes(?string $ns = null, bool $is_prefix = false) {}
+    public function attributes(?string $namespaceOrPrefix = null, bool $isPrefix = false) {}
 
-    public function __construct(string $data, int $options = 0, bool $data_is_url = false, string $ns = '', bool $is_prefix = false) {}
-
-    /** @return SimpleXMLElement */
-    public function addChild(string $name, ?string $value = null, ?string $ns = null) {}
+    public function __construct(string $data, int $options = 0, bool $dataIsURL = false, string $namespaceOrPrefix = '', bool $isPrefix = false) {}
 
     /** @return SimpleXMLElement */
-    public function addAttribute(string $name, ?string $value = null, ?string $ns = null) {}
+    public function addChild(string $qualifiedName, ?string $value = null, ?string $namespace = null) {}
+
+    /** @return SimpleXMLElement */
+    public function addAttribute(string $qualifiedName, ?string $value = null, ?string $namespace = null) {}
 
     /** @return string */
     public function getName() {}
