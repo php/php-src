@@ -9972,7 +9972,7 @@ static int zend_jit_free_cv(dasm_State **Dst, const zend_op *opline, const zend_
 {
 	if (info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
 		uint32_t offset = EX_NUM_TO_VAR(var);
-		| ZVAL_PTR_DTOR ZEND_ADDR_MEM_ZVAL(ZREG_FP, offset), info, 1, 1, opline
+		| ZVAL_PTR_DTOR ZEND_ADDR_MEM_ZVAL(ZREG_FP, offset), info, 1, 1, NULL
 	}
 	return 1;
 }
