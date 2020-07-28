@@ -309,21 +309,16 @@ static zend_never_inline zend_long ZEND_FASTCALL zendi_try_get_long(zval *op, ze
 				if (type == 0) {
 					*failed = 1;
 					return 0;
-				} else if (EXPECTED(type == IS_LONG)) {
-					if (UNEXPECTED(trailing_data)) {
-						zend_error(E_WARNING, "A non-numeric value encountered");
-						if (UNEXPECTED(EG(exception))) {
-							*failed = 1;
-						}
+				}
+				if (UNEXPECTED(trailing_data)) {
+					zend_error(E_WARNING, "A non-numeric value encountered");
+					if (UNEXPECTED(EG(exception))) {
+						*failed = 1;
 					}
+				}
+				if (EXPECTED(type == IS_LONG)) {
 					return lval;
 				} else {
-					if (trailing_data) {
-						zend_error(E_WARNING, "A non-numeric value encountered");
-						if (UNEXPECTED(EG(exception))) {
-							*failed = 1;
-						}
-					}
 					/* Previously we used strtol here, not is_numeric_string,
 					 * and strtol gives you LONG_MAX/_MIN on overflow.
 					 * We use use saturating conversion to emulate strtol()'s
