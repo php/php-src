@@ -64,6 +64,11 @@ static int zend_jit_trace_startup(void)
 	memset(&dummy_op_array, 0, sizeof(dummy_op_array));
 	dummy_op_array.fn_flags = ZEND_ACC_DONE_PASS_TWO;
 
+	JIT_G(exit_counters) = calloc(JIT_G(max_exit_counters), 1);
+	if (JIT_G(exit_counters) == NULL) {
+		return FAILURE;
+	}
+
 	return SUCCESS;
 }
 
@@ -4579,7 +4584,7 @@ done:
 		ZEND_ASSERT(0 && p->stop);
 	}
 
-	if (ZEND_JIT_EXIT_COUNTERS + t->exit_count >= ZEND_JIT_TRACE_MAX_EXIT_COUNTERS) {
+	if (ZEND_JIT_EXIT_COUNTERS + t->exit_count >= JIT_G(max_exit_counters)) {
 		goto jit_failure;
 	}
 
@@ -4788,7 +4793,7 @@ static zend_jit_trace_stop zend_jit_compile_root_trace(zend_jit_trace_rec *trace
 
 			ret = ZEND_JIT_TRACE_STOP_COMPILED;
 		} else if (t->exit_count >= ZEND_JIT_TRACE_MAX_EXITS ||
-		           ZEND_JIT_EXIT_COUNTERS + t->exit_count >= ZEND_JIT_TRACE_MAX_EXIT_COUNTERS) {
+		           ZEND_JIT_EXIT_COUNTERS + t->exit_count >= JIT_G(max_exit_counters)) {
 		    if (t->stack_map) {
 				efree(t->stack_map);
 				t->stack_map = NULL;
@@ -5388,7 +5393,7 @@ static zend_jit_trace_stop zend_jit_compile_side_trace(zend_jit_trace_rec *trace
 
 			ret = ZEND_JIT_TRACE_STOP_COMPILED;
 		} else if (t->exit_count >= ZEND_JIT_TRACE_MAX_EXITS ||
-		           ZEND_JIT_EXIT_COUNTERS + t->exit_count >= ZEND_JIT_TRACE_MAX_EXIT_COUNTERS) {
+		           ZEND_JIT_EXIT_COUNTERS + t->exit_count >= JIT_G(max_exit_counters)) {
 		    if (t->stack_map) {
 				efree(t->stack_map);
 				t->stack_map = NULL;
@@ -5766,7 +5771,9 @@ static void zend_jit_trace_init_caches(void)
 	memset(JIT_G(bad_root_cache_stop), 0, sizeof(JIT_G(bad_root_cache_count)));
 	JIT_G(bad_root_slot) = 0;
 
-	memset(JIT_G(exit_counters), 0, sizeof(JIT_G(exit_counters)));
+	if (JIT_G(exit_counters)) {
+		memset(JIT_G(exit_counters), 0, JIT_G(max_exit_counters));
+	}
 }
 
 static void zend_jit_trace_reset_caches(void)
