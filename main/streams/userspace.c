@@ -467,15 +467,17 @@ static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, const char 
 PHP_FUNCTION(stream_wrapper_register)
 {
 	zend_string *protocol;
-	struct php_user_stream_wrapper *uwrap = (struct php_user_stream_wrapper *)ecalloc(1, sizeof(*uwrap));;
+	struct php_user_stream_wrapper *uwrap;
+	zend_class_entry *ce = NULL;
 	zend_resource *rsrc;
 	zend_long flags = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SC|l", &protocol, &uwrap->ce, &flags) == FAILURE) {
-		efree(uwrap);
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SC|l", &protocol, &ce, &flags) == FAILURE) {
 		RETURN_THROWS();
 	}
 
+	uwrap = (struct php_user_stream_wrapper *)ecalloc(1, sizeof(*uwrap));
+	uwrap->ce = ce;
 	uwrap->protoname = estrndup(ZSTR_VAL(protocol), ZSTR_LEN(protocol));
 	uwrap->wrapper.wops = &user_stream_wops;
 	uwrap->wrapper.abstract = uwrap;
