@@ -11,6 +11,9 @@ PHP                                                                        NEWS
 - JIT:
   . Fixed bug #79864 (JIT segfault in Symfony OptionsResolver). (Dmitry)
 
+- LDAP:
+  . Fixed memory leaks. (ptomulik)
+
 - OCI8:
   . Modernized oci_register_taf_callback() callable argument parsing
     implementation. (girgias)
