@@ -158,7 +158,7 @@ TypeError: Unsupported operand types: string % string
 Warning: A non-numeric value encountered in %s on line %d
 
 Warning: A non-numeric value encountered in %s on line %d
-int(360639813910528)
+int(%d)
 Unsupported operand types: string << string
 ---
 
