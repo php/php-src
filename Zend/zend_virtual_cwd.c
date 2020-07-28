@@ -1077,8 +1077,15 @@ retry_reparse_tag_cloud:
 			free(substitutename);
 
 			{
-				DWORD attrs = GetFileAttributesA(path);
-				if (!isVolume && (attrs & FILE_ATTRIBUTE_REPARSE_POINT)) {
+				DWORD attrs;
+
+				FREE_PATHW()
+				pathw = php_win32_ioutil_any_to_w(path);
+				if (!pathw) {
+					return (size_t)-1;
+				}
+				attrs = GetFileAttributesW(pathw);
+				if (!isVolume && attrs != INVALID_FILE_ATTRIBUTES && (attrs & FILE_ATTRIBUTE_REPARSE_POINT)) {
 					free_alloca(tmp, use_heap);
 					FREE_PATHW()
 					goto retry_reparse_point;
