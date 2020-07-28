@@ -10,6 +10,10 @@ PHP                                                                        NEWS
 - LDAP:
   . Fixed memory leaks. (ptomulik)
 
+- OPcache:
+  . Fixed bug #73060 (php failed with error after temp folder cleaned up).
+    (cmb)
+
 ?? ??? ????, PHP 7.3.21
 
 - Apache:
