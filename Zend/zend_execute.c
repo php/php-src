@@ -728,7 +728,7 @@ static zend_bool zend_verify_weak_scalar_type_hint(uint32_t type_mask, zval *arg
 		/* For an int|float union type and string value,
 		 * determine chosen type by is_numeric_string() semantics. */
 		if ((type_mask & MAY_BE_DOUBLE) && Z_TYPE_P(arg) == IS_STRING) {
-			zend_uchar type = is_numeric_string(Z_STRVAL_P(arg), Z_STRLEN_P(arg), &lval, &dval, false);
+			zend_uchar type = is_numeric_str_function(Z_STR_P(arg), &lval, &dval);
 			if (type == IS_LONG) {
 				zend_string_release(Z_STR_P(arg));
 				ZVAL_LONG(arg, lval);
