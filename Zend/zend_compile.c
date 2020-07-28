@@ -4631,14 +4631,14 @@ void zend_compile_return(zend_ast *ast) /* {{{ */
 		by_ref = 0;
 	}
 
-	if (by_ref && zend_ast_is_short_circuited(expr_ast)) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Cannot take reference of a nullsafe chain");
-	}
-
 	if (!expr_ast) {
 		expr_node.op_type = IS_CONST;
 		ZVAL_NULL(&expr_node.u.constant);
 	} else if (by_ref && zend_is_variable(expr_ast)) {
+		if (zend_ast_is_short_circuited(expr_ast)) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot take reference of a nullsafe chain");
+		}
+
 		zend_compile_var(&expr_node, expr_ast, BP_VAR_W, 1);
 	} else {
 		zend_compile_expr(&expr_node, expr_ast);

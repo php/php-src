@@ -743,7 +743,15 @@ static int zend_jit_trace_restrict_ssa_var_info(const zend_op_array *op_array, c
 		tssa->var_info[ssa_var].type &= info->type;
 		if (info->ce) {
 			if (tssa->var_info[ssa_var].ce) {
-				ZEND_ASSERT(tssa->var_info[ssa_var].ce == info->ce);
+				if (tssa->var_info[ssa_var].ce != info->ce) {
+					if (instanceof_function(tssa->var_info[ssa_var].ce, info->ce)) {
+						/* everything fine */
+					} else if (instanceof_function(info->ce, tssa->var_info[ssa_var].ce)) {
+						// TODO: TSSA may miss Pi() functions and corresponding instanceof() constraints ???
+					} else {
+						ZEND_UNREACHABLE();
+					}
+				}
 				tssa->var_info[ssa_var].is_instanceof =
 					tssa->var_info[ssa_var].is_instanceof && info->is_instanceof;
 			} else {
@@ -1009,6 +1017,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 				/* pass */
 			} else if (num_op_arrays == ZEND_JIT_TRACE_MAX_FUNCS) {
 				/* Too many functions in single trace */
+				*num_op_arrays_ptr = num_op_arrays;
 				return NULL;
 			} else {
 				/* Remember op_array to cleanup */
@@ -1018,7 +1027,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 			}
 		} else if (p->op == ZEND_JIT_TRACE_BACK) {
 			if (level == 0) {
-				stack_bottom += zend_jit_trace_frame_size(op_array);
+				stack_bottom += zend_jit_trace_frame_size(p->op_array);
 				jit_extension =
 					(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
 				ssa = &jit_extension->func_info.ssa;
@@ -1026,6 +1035,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 					/* pass */
 				} else if (num_op_arrays == ZEND_JIT_TRACE_MAX_FUNCS) {
 					/* Too many functions in single trace */
+					*num_op_arrays_ptr = num_op_arrays;
 					return NULL;
 				} else {
 					/* Remember op_array to cleanup */
@@ -2708,7 +2718,7 @@ static int zend_jit_trace_deoptimization(dasm_State             **Dst,
 					return 0;
 				}
 			} else {
-				/* delay custom deoptimization instructions to prevent register cpobbering */
+				/* delay custom deoptimization instructions to prevent register clobbering */
 				has_constants = 1;
 			}
 		}
@@ -4115,6 +4125,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						}
 						if (opline->op1_type != IS_CONST
 						 && (p+1)->op == ZEND_JIT_TRACE_INIT_CALL && (p+1)->func) {
+							SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_OBJECT);
 							if (!zend_jit_init_fcall_guard(&dasm_state, opline, (p+1)->func, opline+1)) {
 								goto jit_failure;
 							}
@@ -4423,6 +4434,7 @@ done:
 						SET_STACK_TYPE(stack, i, IS_UNKNOWN);
 					}
 				}
+				opline = NULL;
 			}
 			JIT_G(current_frame) = frame;
 			if (res_type != IS_UNKNOWN
@@ -4494,8 +4506,19 @@ done:
 							skip_guard = 1;
 						}
 					}
-					if (!skip_guard && !zend_jit_init_fcall_guard(&dasm_state, NULL, p->func, trace_buffer[1].opline)) {
-						goto jit_failure;
+
+					if (!skip_guard) {
+						if (!opline) {
+							zend_jit_trace_rec *q = p + 1;
+							while (q->op != ZEND_JIT_TRACE_VM && q->op != ZEND_JIT_TRACE_END) {
+								q++;
+							}
+							opline = q->opline;
+							ZEND_ASSERT(opline != NULL);
+						}
+						if (!zend_jit_init_fcall_guard(&dasm_state, NULL, p->func, opline)) {
+							goto jit_failure;
+						}
 					}
 				}
 			}
@@ -4580,14 +4603,13 @@ done:
 		} else if (p->stop == ZEND_JIT_TRACE_STOP_LINK
 		        || p->stop == ZEND_JIT_TRACE_STOP_RETURN_HALT
 		        || p->stop == ZEND_JIT_TRACE_STOP_INTERPRETER) {
-			if (opline->opcode == ZEND_DO_UCALL
-			 || opline->opcode == ZEND_DO_FCALL
-			 || opline->opcode == ZEND_DO_FCALL_BY_NAME
-			 || opline->opcode == ZEND_GENERATOR_CREATE
-			 || opline->opcode == ZEND_GENERATOR_RETURN
-			 || opline->opcode == ZEND_YIELD
-			 || opline->opcode == ZEND_YIELD_FROM
-			 || opline->opcode == ZEND_INCLUDE_OR_EVAL) {
+			if (opline
+			 && (opline->opcode == ZEND_DO_UCALL
+			  || opline->opcode == ZEND_DO_FCALL
+			  || opline->opcode == ZEND_DO_FCALL_BY_NAME
+			  || opline->opcode == ZEND_YIELD
+			  || opline->opcode == ZEND_YIELD_FROM
+			  || opline->opcode == ZEND_INCLUDE_OR_EVAL)) {
 				zend_jit_trace_setup_ret_counter(opline, jit_extension->offset);
 			}
 			if (JIT_G(current_frame)

@@ -870,9 +870,6 @@ static void zend_dump_block_header(const zend_cfg *cfg, const zend_op_array *op_
 
 void zend_dump_op_array_name(const zend_op_array *op_array)
 {
-	zend_func_info *func_info = NULL;
-
-	func_info = ZEND_FUNC_INFO(op_array);
 	if (op_array->function_name) {
 		if (op_array->scope && op_array->scope->name) {
 			fprintf(stderr, "%s::%s", op_array->scope->name->val, op_array->function_name->val);
@@ -881,9 +878,6 @@ void zend_dump_op_array_name(const zend_op_array *op_array)
 		}
 	} else {
 		fprintf(stderr, "%s", "$_main");
-	}
-	if (func_info && func_info->clone_num > 0) {
-		fprintf(stderr, "_@_clone_%d", func_info->clone_num);
 	}
 }
 

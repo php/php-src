@@ -190,7 +190,8 @@ static void zend_jit_disasm_destroy_symbols(zend_sym_node *n) {
 	if (n) {
 		if (n->child[0]) {
 			zend_jit_disasm_destroy_symbols(n->child[0]);
-		} else if (n->child[1]) {
+		}
+		if (n->child[1]) {
 			zend_jit_disasm_destroy_symbols(n->child[1]);
 		}
 		free(n);

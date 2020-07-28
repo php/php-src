@@ -58,6 +58,8 @@ assert(0 && ($a = function &(array &$a, ?X $b = null) use ($c,&$d) : ?X {
             $x = C::$z;
             $x = ${$a . "_1"}::$z;
             $x = C::${$z . "_1"};
+            $x?->y;
+            $x?->y();
         }
     }
 }));
@@ -198,6 +200,8 @@ Warning: assert(): assert(0 && ($a = function &(array &$a, ?X $b = null) use($c,
             $x = C::$z;
             $x = ${$a . '_1'}::$z;
             $x = C::${$z . '_1'};
+            $x?->y;
+            $x?->y();
         }
 
     }
