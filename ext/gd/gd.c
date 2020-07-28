@@ -1872,12 +1872,11 @@ PHP_FUNCTION(imagexbm)
 	zend_long foreground_color;
 	zend_bool foreground_color_is_null = 1;
 	gdImagePtr im;
-	int argc = ZEND_NUM_ARGS();
 	int i;
 	gdIOCtx *ctx = NULL;
 	php_stream *stream;
 
-	if (zend_parse_parameters(argc, "Op!|l!", &imgind, gd_image_ce, &file, &file_len, &foreground_color, &foreground_color_is_null) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Op!|l!", &imgind, gd_image_ce, &file, &file_len, &foreground_color, &foreground_color_is_null) == FAILURE) {
 		RETURN_THROWS();
 	}
 
