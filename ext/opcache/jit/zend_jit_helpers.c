@@ -685,10 +685,11 @@ try_string_offset:
 		switch (Z_TYPE_P(dim)) {
 			case IS_STRING:
 			{
-				/* allow errors in string offset for BC reasons */
-				if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), &offset, NULL, true)) {
-					/* emit Illegal string warning on leading numerical string */
-					if (0 == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, false)) {
+				bool trailing_data = false;
+				/* For BC reasons we allow errors so that we can warn on leading numeric string */
+				if (IS_LONG == is_numeric_string_ex(Z_STRVAL_P(dim), Z_STRLEN_P(dim), &offset, NULL,
+						/* allow errors */ true, NULL, &trailing_data)) {
+					if (UNEXPECTED(trailing_data)) {
 						zend_error(E_WARNING, "Illegal string offset \"%s\"", Z_STRVAL_P(dim));
 					}
 					goto out;
@@ -832,11 +833,11 @@ try_again:
 		switch(Z_TYPE_P(dim)) {
 			case IS_STRING:
 			{
-				/* allow errors in string offset for BC reasons */
-				if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), &offset, NULL, true)) {
-					/* emit Illegal string warning on leading numerical string */
-					if (0 == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, false)
-							&& type != BP_VAR_UNSET) {
+				bool trailing_data = false;
+				/* For BC reasons we allow errors so that we can warn on leading numeric string */
+				if (IS_LONG == is_numeric_string_ex(Z_STRVAL_P(dim), Z_STRLEN_P(dim), &offset, NULL,
+						/* allow errors */ true, NULL, &trailing_data)) {
+					if (UNEXPECTED(trailing_data) && type != BP_VAR_UNSET) {
 						zend_error(E_WARNING, "Illegal string offset \"%s\"", Z_STRVAL_P(dim));
 					}
 					return offset;
