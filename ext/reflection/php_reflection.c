@@ -3089,16 +3089,20 @@ ZEND_METHOD(ReflectionMethod, __toString)
 ZEND_METHOD(ReflectionMethod, getClosure)
 {
 	reflection_object *intern;
-	zval *obj;
+	zval *obj = NULL;
 	zend_function *mptr;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|o!", &obj) == FAILURE) {
+		RETURN_THROWS();
+	}
 
 	GET_REFLECTION_OBJECT_PTR(mptr);
 
 	if (mptr->common.fn_flags & ZEND_ACC_STATIC)  {
 		zend_create_fake_closure(return_value, mptr, mptr->common.scope, mptr->common.scope, NULL);
 	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "o", &obj) == FAILURE) {
-			RETURN_THROWS();
+		if (!obj) {
+			zend_argument_value_error(1, "cannot be null for non-static methods");
 		}
 
 		if (!instanceof_function(Z_OBJCE_P(obj), mptr->common.scope)) {

@@ -238,14 +238,14 @@ class mysqli
     public function set_charset(string $charset) {}
 
     /**
-     * @param mixed $value
+     * @param string|int $value
      * @return bool
      * @alias mysqli_options
      */
     public function options(int $option, $value) {}
 
     /**
-     * @param mixed $value
+     * @param string|int $value
      * @return bool
      * @alias mysqli_options
      */
@@ -633,7 +633,7 @@ function mysqli_num_fields(mysqli_result $mysql_result): int {}
 
 function mysqli_num_rows(mysqli_result $mysqli_result): int|string {}
 
-/** @param mixed $value */
+/** @param string|int $value */
 function mysqli_options(mysqli $mysqli_link, int $option, $value): bool {}
 
 function mysqli_ping(mysqli $mysqli_link): bool {}
@@ -681,8 +681,7 @@ function mysqli_stmt_attr_set(mysqli_stmt $mysql_stmt, int $attr, int $mode_in):
 
 function mysqli_stmt_bind_param(mysqli_stmt $mysql_stmt, string $types, mixed &...$vars): bool {}
 
-/** @param mixed &...$vars */
-function mysqli_stmt_bind_result(mysqli_stmt $mysql_stmt, &...$vars): bool {}
+function mysqli_stmt_bind_result(mysqli_stmt $mysql_stmt, mixed &...$vars): bool {}
 
 function mysqli_stmt_close(mysqli_stmt $mysql_stmt): bool {}
 
@@ -757,7 +756,7 @@ function mysqli_refresh(mysqli $mysqli_link, int $options): bool {}
 function mysqli_escape_string(mysqli $mysqli_link, string $string_to_escape): string {}
 
 /**
- * @param mixed $value
+ * @param string|int $value
  * @alias mysqli_options
  */
 function mysqli_set_opt(mysqli $mysqli_link, int $option, $value): bool {}

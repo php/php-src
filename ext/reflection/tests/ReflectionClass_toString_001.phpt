@@ -301,7 +301,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector, String
 
       - Parameters [2] {
         Parameter #0 [ <required> string $name ]
-        Parameter #1 [ <optional> $default = <default> ]
+        Parameter #1 [ <optional> mixed $default = <default> ]
       }
     }
 
@@ -309,7 +309,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector, String
 
       - Parameters [2] {
         Parameter #0 [ <required> string $name ]
-        Parameter #1 [ <required> $value ]
+        Parameter #1 [ <required> mixed $value ]
       }
     }
 

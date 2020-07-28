@@ -16,6 +16,7 @@ function mb_substitute_character(string|int|null $substitute_character = null): 
 
 function mb_preferred_mime_name(string $encoding): string|false {}
 
+/** @param array $result */
 function mb_parse_str(string $encoded_string, &$result): bool {}
 
 function mb_output_handler(string $contents, int $status): string {}
@@ -70,7 +71,7 @@ function mb_decode_mimeheader(string $string): string {}
 
 function mb_convert_kana(string $str, string $option = "KV", ?string $encoding = null): string {}
 
-function mb_convert_variables(string $to, array|string $from, &$var, &...$vars): string|false {}
+function mb_convert_variables(string $to, array|string $from, mixed &$var, mixed &...$vars): string|false {}
 
 function mb_encode_numericentity(string $string, array $convmap, ?string $encoding = null, bool $is_hex = false): string {}
 
@@ -92,8 +93,10 @@ function mb_chr(int $cp, ?string $encoding = null): string|false {}
 #ifdef HAVE_MBREGEX
 function mb_regex_encoding(?string $encoding = null): string|bool {}
 
+/** @param array $registers */
 function mb_ereg(string $pattern, string $string, &$registers = null): int|false {}
 
+/** @param array $registers */
 function mb_eregi(string $pattern, string $string, &$registers = null): int|false {}
 
 function mb_ereg_replace(string $pattern, string $replacement, string $string, ?string $option = null): string|false|null {}

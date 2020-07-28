@@ -177,7 +177,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract
     public function isDestructor() {}
 
     /** @return Closure */
-    public function getClosure($object = UNKNOWN) {}
+    public function getClosure(?object $object = null) {}
 
     /** @return int */
     public function getModifiers() {}
@@ -325,10 +325,10 @@ class ReflectionClass implements Reflector
     public function getStaticProperties() {}
 
     /** @return mixed */
-    public function getStaticPropertyValue(string $name, $default = UNKNOWN) {}
+    public function getStaticPropertyValue(string $name, mixed $default = UNKNOWN) {}
 
     /** @return void */
-    public function setStaticPropertyValue(string $name, $value) {}
+    public function setStaticPropertyValue(string $name, mixed $value) {}
 
     /** @return array */
     public function getDefaultProperties() {}
@@ -385,7 +385,7 @@ class ReflectionProperty implements Reflector
     public function getValue(?object $object = null) {}
 
     /** @return void */
-    public function setValue($objectOrValue, $value = UNKNOWN) {}
+    public function setValue(mixed $objectOrValue, mixed $value = UNKNOWN) {}
 
     /** @return bool */
     public function isInitialized(?object $object = null) {}

@@ -90,26 +90,26 @@ function gmp_sqrt($a): GMP|false {}
 /** @param GMP|int|bool|string $a */
 function gmp_sqrtrem($a): array|false {}
 
-/** @param GMP|int|bool|string $a **/
+/** @param GMP|int|bool|string $a */
 function gmp_root($a, int $nth): GMP|false {}
 
-/** @param GMP|int|bool|string $a **/
+/** @param GMP|int|bool|string $a */
 function gmp_rootrem($a, int $nth): array|false {}
 
-/** @param GMP|int|bool|string $base **/
+/** @param GMP|int|bool|string $base */
 function gmp_pow($base, int $exp): GMP|false {}
 
 /**
  * @param GMP|int|bool|string $base
  * @param GMP|int|bool|string $exp
  * @param GMP|int|bool|string $mod
- **/
+ */
 function gmp_powm($base, $exp, $mod): GMP|false {}
 
-/** @param GMP|int|bool|string $a **/
+/** @param GMP|int|bool|string $a */
 function gmp_perfect_square($a): bool {}
 
-/** @param GMP|int|bool|string $a **/
+/** @param GMP|int|bool|string $a */
 function gmp_perfect_power($a): bool {}
 
 /** @param GMP|int|bool|string $a */

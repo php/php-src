@@ -1,14 +1,14 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 965dcbb494d51bb3fd41a2898a1c53d7478fd699 */
+ * Stub hash: caec4bba1103a07a86803ac0192782fef7d6680f */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_variant_set, 0, 2, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, variant, variant, 0)
-	ZEND_ARG_INFO(0, value)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_variant_add, 0, 2, variant, 0)
-	ZEND_ARG_INFO(0, left)
-	ZEND_ARG_INFO(0, right)
+	ZEND_ARG_TYPE_INFO(0, left, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, right, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_variant_cat arginfo_variant_add
@@ -36,7 +36,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_variant_xor arginfo_variant_add
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_variant_abs, 0, 1, variant, 0)
-	ZEND_ARG_INFO(0, left)
+	ZEND_ARG_TYPE_INFO(0, left, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_variant_fix arginfo_variant_abs
@@ -48,14 +48,14 @@ ZEND_END_ARG_INFO()
 #define arginfo_variant_not arginfo_variant_abs
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_variant_round, 0, 2, variant, 1)
-	ZEND_ARG_INFO(0, left)
+	ZEND_ARG_TYPE_INFO(0, left, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, decimals, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_variant_cmp, 0, 2, IS_LONG, 0)
-	ZEND_ARG_INFO(0, left)
-	ZEND_ARG_INFO(0, right)
-	ZEND_ARG_TYPE_INFO(0, lcid, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, left, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, right, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, lcid, IS_LONG, 0, "LOCALE_SYSTEM_DEFAULT")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
@@ -63,7 +63,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_variant_date_to_timestamp, 0, 1,
 	ZEND_ARG_OBJ_INFO(0, variant, variant, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_date_from_timestamp, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_variant_date_from_timestamp, 0, 1, variant, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, timestamp, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
@@ -83,7 +83,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_com_get_active_object, 0, 1, variant, 0)
 	ZEND_ARG_TYPE_INFO(0, progid, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, code_page, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, code_page, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_com_create_guid, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
@@ -111,7 +111,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_com_load_typelib, 0, 1, _IS_BOOL
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_variant___construct, 0, 0, 0)
-	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, value, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, value, IS_MIXED, 0, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, type, IS_LONG, 0, "VT_EMPTY")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, codepage, IS_LONG, 0, "CP_ACP")
 ZEND_END_ARG_INFO()

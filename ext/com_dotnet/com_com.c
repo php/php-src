@@ -288,16 +288,21 @@ PHP_FUNCTION(com_get_active_object)
 	CLSID clsid;
 	char *module_name;
 	size_t module_name_len;
-	zend_long code_page = COMG(code_page);
+	zend_long code_page;
+	zend_bool code_page_is_null = 1;
 	IUnknown *unk = NULL;
 	IDispatch *obj = NULL;
 	HRESULT res;
 	OLECHAR *module = NULL;
 
 	php_com_initialize();
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|l",
-				&module_name, &module_name_len, &code_page)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|l!",
+				&module_name, &module_name_len, &code_page, &code_page_is_null)) {
 		RETURN_THROWS();
+	}
+
+	if (code_page_is_null) {
+		code_page = COMG(code_page);
 	}
 
 	module = php_com_string_to_olestring(module_name, module_name_len, (int)code_page);

@@ -123,9 +123,9 @@ function imagejpeg(GdImage $im, $to = null, int $quality = -1): bool {}
 /** @param resource|string|null $to */
 function imagewbmp(GdImage $im, $to = null, ?int $foreground = null): bool {}
 
-function imagegd(GdImage $im, $to = UNKNOWN): bool {}
+function imagegd(GdImage $im, string $to = UNKNOWN): bool {}
 
-function imagegd2(GdImage $im, $to = UNKNOWN, int $chunk_size = UNKNOWN, int $type = UNKNOWN): bool {}
+function imagegd2(GdImage $im, string $to = UNKNOWN, int $chunk_size = UNKNOWN, int $type = UNKNOWN): bool {}
 
 #ifdef HAVE_GD_BMP
 /** @param resource|string|null $to */

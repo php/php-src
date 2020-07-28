@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0a3d9fb707ddf5e508075799bf06ff42b849a4b8 */
+ * Stub hash: beaf79270ab56d2e87a301a4a5d4444b2cc520d8 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, modifiers, IS_LONG, 0)
@@ -124,7 +124,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_ReflectionMethod_isDestructor arginfo_class_ReflectionFunctionAbstract___clone
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionMethod_getClosure, 0, 0, 0)
-	ZEND_ARG_INFO(0, object)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, object, IS_OBJECT, 1, "null")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionMethod_getModifiers arginfo_class_ReflectionFunctionAbstract___clone
@@ -247,12 +247,12 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionClass_getStaticPropertyValue, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
-	ZEND_ARG_INFO(0, default)
+	ZEND_ARG_TYPE_INFO(0, default, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionClass_setStaticPropertyValue, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
-	ZEND_ARG_INFO(0, value)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionClass_getDefaultProperties arginfo_class_ReflectionFunctionAbstract___clone
@@ -292,16 +292,14 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionProperty_getName arginfo_class_ReflectionFunctionAbstract___clone
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionProperty_getValue, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, object, IS_OBJECT, 1, "null")
-ZEND_END_ARG_INFO()
+#define arginfo_class_ReflectionProperty_getValue arginfo_class_ReflectionMethod_getClosure
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionProperty_setValue, 0, 0, 1)
-	ZEND_ARG_INFO(0, objectOrValue)
-	ZEND_ARG_INFO(0, value)
+	ZEND_ARG_TYPE_INFO(0, objectOrValue, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_ReflectionProperty_isInitialized arginfo_class_ReflectionProperty_getValue
+#define arginfo_class_ReflectionProperty_isInitialized arginfo_class_ReflectionMethod_getClosure
 
 #define arginfo_class_ReflectionProperty_isPublic arginfo_class_ReflectionFunctionAbstract___clone
 

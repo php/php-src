@@ -2,52 +2,51 @@
 
 /** @generate-function-entries */
 
-function variant_set(variant $variant, $value): void {}
+function variant_set(variant $variant, mixed $value): void {}
 
-function variant_add($left, $right): variant {}
+function variant_add(mixed $left, mixed $right): variant {}
 
-function variant_cat($left, $right): variant {}
+function variant_cat(mixed $left, mixed $right): variant {}
 
-function variant_sub($left, $right): variant {}
+function variant_sub(mixed $left, mixed $right): variant {}
 
-function variant_mul($left, $right): variant {}
+function variant_mul(mixed $left, mixed $right): variant {}
 
-function variant_and($left, $right): variant {}
+function variant_and(mixed $left, mixed $right): variant {}
 
-function variant_div($left, $right): variant {}
+function variant_div(mixed $left, mixed $right): variant {}
 
-function variant_eqv($left, $right): variant {}
+function variant_eqv(mixed $left, mixed $right): variant {}
 
-function variant_idiv($left, $right): variant {}
+function variant_idiv(mixed $left, mixed $right): variant {}
 
-function variant_imp($left, $right): variant {}
+function variant_imp(mixed $left, mixed $right): variant {}
 
-function variant_mod($left, $right): variant {}
+function variant_mod(mixed $left, mixed $right): variant {}
 
-function variant_or($left, $right): variant {}
+function variant_or(mixed $left, mixed $right): variant {}
 
-function variant_pow($left, $right): variant {}
+function variant_pow(mixed $left, mixed $right): variant {}
 
-function variant_xor($left, $right): variant {}
+function variant_xor(mixed $left, mixed $right): variant {}
 
-function variant_abs($left): variant {}
+function variant_abs(mixed $left): variant {}
 
-function variant_fix($left): variant {}
+function variant_fix(mixed $left): variant {}
 
-function variant_int($left): variant {}
+function variant_int(mixed $left): variant {}
 
-function variant_neg($left): variant {}
+function variant_neg(mixed $left): variant {}
 
-function variant_not($left): variant {}
+function variant_not(mixed $left): variant {}
 
-function variant_round($left, int $decimals): ?variant {}
+function variant_round(mixed $left, int $decimals): ?variant {}
 
-function variant_cmp($left, $right, int $lcid = UNKNOWN, int $flags = 0): int {}
+function variant_cmp(mixed $left, mixed $right, int $lcid = LOCALE_SYSTEM_DEFAULT, int $flags = 0): int {}
 
 function variant_date_to_timestamp(variant $variant): ?int {}
 
-/** @return variant|false */
-function variant_date_from_timestamp(int $timestamp) {}
+function variant_date_from_timestamp(int $timestamp): variant|false {}
 
 function variant_get_type(variant $variant): int {}
 
@@ -55,10 +54,11 @@ function variant_set_type(variant $variant, int $type): void {}
 
 function variant_cast(variant $variant, int $type): variant {}
 
-function com_get_active_object(string $progid, int $code_page = UNKNOWN): variant {}
+function com_get_active_object(string $progid, ?int $code_page = null): variant {}
 
 function com_create_guid(): string|false {}
 
+/** @param array|string|null $sinkinterface */
 function com_event_sink(variant $comobject, object $sinkobject, $sinkinterface = UNKNOWN): bool {}
 
 function com_print_typeinfo($comobject, ?string $dispinterface = null, bool $wantsink = false): bool {}
@@ -69,7 +69,7 @@ function com_load_typelib(string $typelib_name, bool $case_insensitive = true): 
 
 class variant
 {
-    public function __construct($value = null, int $type = VT_EMPTY, int $codepage = CP_ACP) {}
+    public function __construct(mixed $value = null, int $type = VT_EMPTY, int $codepage = CP_ACP) {}
 }
 
 class com

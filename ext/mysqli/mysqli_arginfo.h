@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: cde1bbb449c6adae7a99c7df3e9d290d501e18be */
+ * Stub hash: 0fb73727b9ca9f4fa9827fecd948b60948ddc423 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_affected_rows, 0, 1, MAY_BE_LONG|MAY_BE_STRING)
 	ZEND_ARG_OBJ_INFO(0, mysql_link, mysqli, 0)
@@ -304,7 +304,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_stmt_bind_result, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, mysql_stmt, mysqli_stmt, 0)
-	ZEND_ARG_VARIADIC_INFO(1, vars)
+	ZEND_ARG_VARIADIC_TYPE_INFO(1, vars, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_mysqli_stmt_close arginfo_mysqli_stmt_execute

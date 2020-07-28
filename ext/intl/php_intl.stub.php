@@ -366,6 +366,7 @@ function intltz_create_time_zone_id_enumeration(int $zoneType, ?string $region =
 
 function intltz_from_date_time_zone(DateTimeZone $zone): ?IntlTimeZone {}
 
+/** @param bool $isSystemID */
 function intltz_get_canonical_id(string $zoneId, &$isSystemID = null): string|false {}
 
 function intltz_get_display_name(IntlTimeZone $tz, bool $isDaylight = false, int $style = IntlTimeZone::DISPLAY_LONG, ?string $locale = null): string|false {}
@@ -414,7 +415,7 @@ function transliterator_list_ids(): array|false {}
 
 function transliterator_create_inverse(Transliterator $orig_trans): ?Transliterator {}
 
-/** @param Transliterator|string */
+/** @param Transliterator|string $transliterator */
 function transliterator_transliterate($transliterator, string $subject, int $start = 0, int $end = -1): string|false {}
 
 function transliterator_get_error_code(Transliterator $trans): int|false {}

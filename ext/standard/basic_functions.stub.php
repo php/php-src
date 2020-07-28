@@ -1337,7 +1337,7 @@ function gettype(mixed $var): string {}
 
 function get_debug_type(mixed $var): string {}
 
-function settype(&$var, string $type): bool {}
+function settype(mixed &$var, string $type): bool {}
 
 function intval(mixed $value, int $base = 10): int {}
 
@@ -1379,6 +1379,7 @@ function is_object(mixed $value): bool {}
 
 function is_scalar(mixed $value): bool {}
 
+/** @param string $callable_name */
 function is_callable(mixed $value, bool $syntax_only = false, &$callable_name = null): bool {}
 
 function is_iterable(mixed $value): bool {}

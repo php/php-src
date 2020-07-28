@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c3b97b8a9c7522fc5b58e63fbf9cd6a801f4bbc2 */
+ * Stub hash: 1aa9ef81a738328a334176d37683646b60b2f6fa */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IteratorAggregate_getIterator, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -15,14 +15,14 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_Iterator_rewind arginfo_class_IteratorAggregate_getIterator
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ArrayAccess_offsetExists, 0, 0, 1)
-	ZEND_ARG_INFO(0, offset)
+	ZEND_ARG_TYPE_INFO(0, offset, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ArrayAccess_offsetGet arginfo_class_ArrayAccess_offsetExists
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ArrayAccess_offsetSet, 0, 0, 2)
-	ZEND_ARG_INFO(0, offset)
-	ZEND_ARG_INFO(0, value)
+	ZEND_ARG_TYPE_INFO(0, offset, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ArrayAccess_offsetUnset arginfo_class_ArrayAccess_offsetExists
