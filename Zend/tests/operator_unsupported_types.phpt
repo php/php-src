@@ -98,7 +98,7 @@ echo "\n\nUNARY OP:\n";
 foreach ($illegalValues as $illegalValue) {
     try {
         eval("return ~$illegalValue;");
-        echo "No error for ~$copy\n";
+        echo "No error for ~$illegalValue\n";
     } catch (TypeError $e) {
         echo $e->getMessage() . "\n";
     }
