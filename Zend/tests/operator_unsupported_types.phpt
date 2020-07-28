@@ -2052,8 +2052,7 @@ UNARY OP:
 Cannot perform bitwise not on array
 Cannot perform bitwise not on stdClass
 Cannot perform bitwise not on resource
-Warning: Undefined variable $copy
-No error for ~
+No error for ~"foo"
 
 
 INCDEC:
