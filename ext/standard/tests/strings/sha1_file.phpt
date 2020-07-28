@@ -32,7 +32,11 @@ fclose($handle2);
 echo "\n*** Testing for error conditions ***\n";
 
 echo "\n-- No filename --\n";
-var_dump( sha1_file("") );
+try {
+    var_dump( sha1_file("") );
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 echo "\n-- invalid filename --\n";
 var_dump( sha1_file("rewncwYcn89q") );
@@ -41,7 +45,11 @@ echo "\n-- Scalar value as filename --\n";
 var_dump( sha1_file(12) );
 
 echo "\n-- NULL as filename --\n";
-var_dump( sha1_file(NULL) );
+try {
+    var_dump( sha1_file(NULL) );
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 echo "\n-- Hexadecimal Output for Empty file as Argument --\n";
 var_dump( sha1_file("EmptyFileSHA1.txt") );
@@ -66,9 +74,7 @@ unlink("EmptyFileSHA1.txt");
 *** Testing for error conditions ***
 
 -- No filename --
-
-Warning: sha1_file(): Filename cannot be empty in %s on line %d
-bool(false)
+Path cannot be empty
 
 -- invalid filename --
 
@@ -81,9 +87,7 @@ Warning: sha1_file(12): Failed to open stream: No such file or directory in %s o
 bool(false)
 
 -- NULL as filename --
-
-Warning: sha1_file(): Filename cannot be empty in %s on line %d
-bool(false)
+Path cannot be empty
 
 -- Hexadecimal Output for Empty file as Argument --
 string(40) "da39a3ee5e6b4b0d3255bfef95601890afd80709"

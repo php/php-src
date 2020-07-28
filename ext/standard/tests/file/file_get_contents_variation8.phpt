@@ -32,12 +32,12 @@ $names_arr = array(
 );
 
 for( $i=0; $i<count($names_arr); $i++ ) {
-  echo "-- Iteration $i --\n";
-  try {
-    var_dump(file_get_contents($names_arr[$i]));
-  } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
-  }
+    echo "-- Iteration $i --\n";
+    try {
+        var_dump(file_get_contents($names_arr[$i]));
+    } catch (\TypeError|\ValueError $e) {
+        echo get_class($e) . ': ' . $e->getMessage(), "\n";
+    }
 }
 
 echo "\n*** Done ***\n";
@@ -53,25 +53,19 @@ bool(false)
 Warning: file_get_contents(1): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 -- Iteration 2 --
-
-Warning: file_get_contents(): Filename cannot be empty in %s on line %d
-bool(false)
+ValueError: Path cannot be empty
 -- Iteration 3 --
-
-Warning: file_get_contents(): Filename cannot be empty in %s on line %d
-bool(false)
+ValueError: Path cannot be empty
 -- Iteration 4 --
-
-Warning: file_get_contents(): Filename cannot be empty in %s on line %d
-bool(false)
+ValueError: Path cannot be empty
 -- Iteration 5 --
 
 Warning: file_get_contents( ): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 -- Iteration 6 --
-file_get_contents(): Argument #1 ($filename) must be a valid path, string given
+TypeError: file_get_contents(): Argument #1 ($filename) must be a valid path, string given
 -- Iteration 7 --
-file_get_contents(): Argument #1 ($filename) must be a valid path, array given
+TypeError: file_get_contents(): Argument #1 ($filename) must be a valid path, array given
 -- Iteration 8 --
 
 Warning: file_get_contents(/no/such/file/dir): Failed to open stream: No such file or directory in %s on line %d
