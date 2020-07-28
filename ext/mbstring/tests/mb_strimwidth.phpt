@@ -65,18 +65,16 @@ testStrimwidth(6, $euc_jp, 15, -5, 'EUC-JP');
 // 25 less than that, which is 29.
 testStrimwidth(7, $euc_jp, -30, -25, 'EUC-JP');
 
+// Skip over 100 characters... but since string is only 39 characters long,
+// it takes us to the end of the string, and output is empty
+testStrimwidth(8, $euc_jp, 100, 10, 'EUC-JP');
+
 // Take the last 10 characters, which have a width of 20. Trim string down to
 // 12 less than that, which is a width of 8.
-testStrimwidth(8, $euc_jp, -10, -12, 'EUC-JP');
+testStrimwidth(9, $euc_jp, -10, -12, 'EUC-JP');
 
 try {
     var_dump(mb_strimwidth($euc_jp, 0, -100,'...','EUC-JP'));
-} catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
-}
-
-try {
-    var_dump(mb_strimwidth($euc_jp, 100, 10,'...','EUC-JP'));
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
@@ -101,7 +99,7 @@ Test 4: start=-30 width=5 result=[a4cf 2e 2e 2e] length=4 width=5
 Test 5: start=9 width=5 result=[a4cf 2e 2e 2e] length=4 width=5
 Test 6: start=15 width=-5 result=[a1a3 45 55 43 2d 4a 50 a4f2 bbc8 a4c3 a4c6 a4a4 a4de a4b9 a1a3 c6fc cbdc b8ec a4cf cccc 2e 2e 2e] length=23 width=37
 Test 7: start=-30 width=-25 result=[a4cf c6fc cbdc b8ec a4c7 a4b9 a1a3 45 55 43 2d 4a 50 a4f2 bbc8 a4c3 2e 2e 2e] length=19 width=29
-Test 8: start=-10 width=-12 result=[a1a3 c6fc 2e 2e 2e] length=5 width=7
+Test 8: start=100 width=10 result=[] length=0 width=0
+Test 9: start=-10 width=-12 result=[a1a3 c6fc 2e 2e 2e] length=5 width=7
 mb_strimwidth(): Argument #3 ($width) is out of range
-mb_strimwidth(): Argument #2 ($start) is out of range
 mb_strimwidth(): Argument #2 ($start) is out of range

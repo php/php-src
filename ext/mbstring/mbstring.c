@@ -2296,11 +2296,10 @@ PHP_FUNCTION(mb_strimwidth)
 
 	if (from < 0) {
 		from += mbfl_strlen(&string);
-	}
-
-	if (from < 0 || (size_t)from > str_len) {
-		zend_argument_value_error(2, "is out of range");
-		RETURN_THROWS();
+		if (from < 0) {
+			zend_argument_value_error(2, "is out of range");
+			RETURN_THROWS();
+		}
 	}
 
 	if (from != 0) {
