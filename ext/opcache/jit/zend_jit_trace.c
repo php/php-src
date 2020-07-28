@@ -3724,6 +3724,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							}
 						} else {
 							int j;
+							int may_throw = 0;
 
 							if (!zend_jit_return(&dasm_state, opline, op_array,
 									op1_info, OP1_REG_ADDR())) {
@@ -3750,9 +3751,14 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 									if (!zend_jit_free_cv(&dasm_state, opline, op_array, info, j)) {
 										goto jit_failure;
 									}
+									if (info & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_ARRAY_OF_RESOURCE)) {
+										if (info & MAY_BE_RC1) {
+											may_throw = 1;
+										}
+									}
 								}
 							}
-							if (!zend_jit_leave_func(&dasm_state, opline, op_array, p + 1, &zend_jit_traces[ZEND_JIT_TRACE_NUM])) {
+							if (!zend_jit_leave_func(&dasm_state, opline, op_array, p + 1, &zend_jit_traces[ZEND_JIT_TRACE_NUM], may_throw)) {
 								goto jit_failure;
 							}
 						}

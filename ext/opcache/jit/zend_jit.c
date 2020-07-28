@@ -2727,7 +2727,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 									}
 								}
 							}
-						    if (!zend_jit_leave_func(&dasm_state, opline, op_array, NULL, NULL)) {
+						    if (!zend_jit_leave_func(&dasm_state, opline, op_array, NULL, NULL, 1)) {
 								goto jit_failure;
 						    }
 						}

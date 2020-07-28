@@ -9986,7 +9986,7 @@ static int zend_jit_free_op(dasm_State **Dst, const zend_op *opline, /*const zen
 	return 1;
 }
 
-static int zend_jit_leave_func(dasm_State **Dst, const zend_op *opline, const zend_op_array *op_array, zend_jit_trace_rec *trace, zend_jit_trace_info *trace_info)
+static int zend_jit_leave_func(dasm_State **Dst, const zend_op *opline, const zend_op_array *op_array, zend_jit_trace_rec *trace, zend_jit_trace_info *trace_info, int may_throw)
 {
 	/* ZEND_CALL_FAKE_CLOSURE handled on slow path to eliminate check for ZEND_CALL_CLOSURE on fast path */
 	|	mov FCARG1d, dword [FP + offsetof(zend_execute_data, This.u1.type_info)]
@@ -10055,12 +10055,19 @@ static int zend_jit_leave_func(dasm_State **Dst, const zend_op *opline, const ze
 		 && (JIT_G(current_frame) && !TRACE_FRAME_IS_UNKNOWN_RETURN(JIT_G(current_frame)))) {
 			zend_jit_reset_opline(Dst, NULL);
 		} else {
-			// TODO: exception handling for tracing JIT ???
 			|	LOAD_OPLINE
 			|	ADD_IP sizeof(zend_op)
 		}
 
 		|8:
+
+		if ((trace->op != ZEND_JIT_TRACE_END ||
+				trace->stop != ZEND_JIT_TRACE_STOP_RECURSIVE_RET) &&
+					may_throw) {
+			|	// if (EG(exception))
+			|	MEM_OP2_1_ZTS cmp, aword, executor_globals, exception, 0, r0
+			|	jne ->leave_throw_handler
+		}
 
 		if (trace->op == ZEND_JIT_TRACE_BACK
 		 && (!JIT_G(current_frame) || TRACE_FRAME_IS_UNKNOWN_RETURN(JIT_G(current_frame)))) {
@@ -10074,6 +10081,7 @@ static int zend_jit_leave_func(dasm_State **Dst, const zend_op *opline, const ze
 			} while (trace->op == ZEND_JIT_TRACE_INIT_CALL);
 			ZEND_ASSERT(trace->op == ZEND_JIT_TRACE_VM || trace->op == ZEND_JIT_TRACE_END);
 			next_opline = trace->opline;
+			ZEND_ASSERT(next_opline != NULL);
 			current_frame = JIT_G(current_frame);
 			JIT_G(current_frame) = NULL;
 			exit_point = zend_jit_trace_get_exit_point(opline, NULL, trace, 0);
@@ -10082,7 +10090,6 @@ static int zend_jit_leave_func(dasm_State **Dst, const zend_op *opline, const ze
 			if (!exit_addr) {
 				return 0;
 			}
-			|	// TODO: exception handling ???
 			if (trace->op == ZEND_JIT_TRACE_END
 			 && trace->stop == ZEND_JIT_TRACE_STOP_RECURSIVE_RET) {
 				trace_info->flags |= ZEND_JIT_TRACE_LOOP;
