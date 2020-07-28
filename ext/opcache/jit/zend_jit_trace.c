@@ -2612,6 +2612,7 @@ static void zend_jit_trace_setup_ret_counter(const zend_op *opline, size_t offse
 	zend_op *next_opline = (zend_op*)(opline + 1);
 
 	if (JIT_G(hot_return) && !ZEND_OP_TRACE_INFO(next_opline, offset)->trace_flags) {
+		ZEND_ASSERT(zend_jit_ret_trace_counter_handler != NULL);
 		if (!ZEND_OP_TRACE_INFO(next_opline, offset)->counter) {
 			ZEND_OP_TRACE_INFO(next_opline, offset)->counter =
 				&zend_jit_hot_counters[ZEND_JIT_COUNTER_NUM];
@@ -5693,9 +5694,6 @@ static int zend_jit_setup_hot_trace_counters(zend_op_array *op_array)
 	zend_jit_op_array_trace_extension *jit_extension;
 	uint32_t i;
 
-	ZEND_ASSERT(zend_jit_func_trace_counter_handler != NULL);
-	ZEND_ASSERT(zend_jit_ret_trace_counter_handler != NULL);
-	ZEND_ASSERT(zend_jit_loop_trace_counter_handler != NULL);
 	ZEND_ASSERT(sizeof(zend_op_trace_info) == sizeof(zend_op));
 
 	jit_extension = (zend_jit_op_array_trace_extension*)zend_shared_alloc(sizeof(zend_jit_op_array_trace_extension) + (op_array->last - 1) * sizeof(zend_op_trace_info));
@@ -5715,6 +5713,8 @@ static int zend_jit_setup_hot_trace_counters(zend_op_array *op_array)
 
 	if (JIT_G(hot_loop)) {
 		zend_cfg cfg;
+
+		ZEND_ASSERT(zend_jit_loop_trace_counter_handler != NULL);
 
 		if (zend_jit_build_cfg(op_array, &cfg) != SUCCESS) {
 			return FAILURE;
@@ -5741,6 +5741,7 @@ static int zend_jit_setup_hot_trace_counters(zend_op_array *op_array)
 	}
 
 	if (JIT_G(hot_func)) {
+		ZEND_ASSERT(zend_jit_func_trace_counter_handler != NULL);
 		opline = op_array->opcodes;
 		if (!(op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
 			while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
