@@ -2271,7 +2271,7 @@ PHP_FUNCTION(mb_strimwidth)
 {
 	char *str, *trimmarker = NULL;
 	zend_string *encoding = NULL;
-	zend_long from, width, swidth = 0;
+	zend_long from, width;
 	size_t str_len, trimmarker_len;
 	mbfl_string string, result, marker, *ret;
 
@@ -2294,12 +2294,8 @@ PHP_FUNCTION(mb_strimwidth)
 	marker.val = NULL;
 	marker.len = 0;
 
-	if ((from < 0) || (width < 0)) {
-		swidth = mbfl_strwidth(&string);
-	}
-
 	if (from < 0) {
-		from += swidth;
+		from += mbfl_strlen(&string);
 	}
 
 	if (from < 0 || (size_t)from > str_len) {
@@ -2307,13 +2303,18 @@ PHP_FUNCTION(mb_strimwidth)
 		RETURN_THROWS();
 	}
 
-	if (width < 0) {
-		width = swidth + width - from;
+	if (from != 0) {
+		size_t offset = char_offset_to_byte_offset(string.encoding, string.val, string.len, from);
+		string.val += offset;
+		string.len -= offset;
 	}
 
 	if (width < 0) {
-		zend_argument_value_error(3, "is out of range");
-		RETURN_THROWS();
+		width += mbfl_strwidth(&string);
+		if (width < 0) {
+			zend_argument_value_error(3, "is out of range");
+			RETURN_THROWS();
+		}
 	}
 
 	if (trimmarker) {
@@ -2321,7 +2322,7 @@ PHP_FUNCTION(mb_strimwidth)
 		marker.len = trimmarker_len;
 	}
 
-	ret = mbfl_strimwidth(&string, &marker, &result, from, width);
+	ret = mbfl_strimwidth(&string, &marker, &result, width);
 	ZEND_ASSERT(ret != NULL);
 	// TODO: avoid reallocation ???
 	RETVAL_STRINGL((char *)ret->val, ret->len); /* the string is already strdup()'ed */

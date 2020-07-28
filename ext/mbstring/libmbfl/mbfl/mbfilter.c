@@ -159,7 +159,7 @@ static size_t byte_offset_to_char_offset(const mbfl_encoding *encoding, unsigned
 /* Character offset into multi-byte encoded string -> number of bytes up to that position
  * If requested offset is greater than character length of string, returns byte length of string
  * Negative offsets count back from the end of the string, but cannot count past the beginning */
-static size_t char_offset_to_byte_offset(const mbfl_encoding *encoding, unsigned char *start, size_t length, ssize_t char_offset)
+MBFLAPI size_t char_offset_to_byte_offset(const mbfl_encoding *encoding, unsigned char *start, size_t length, ssize_t char_offset)
 {
 	if (char_offset == 0) {
 		return 0;
@@ -834,7 +834,7 @@ size_t mbfl_strwidth(mbfl_string *string)
 	return width;
 }
 
-mbfl_string *mbfl_strimwidth(mbfl_string *string, mbfl_string *marker, mbfl_string *result, size_t from, size_t max_width)
+mbfl_string *mbfl_strimwidth(mbfl_string *string, mbfl_string *marker, mbfl_string *result, size_t max_width)
 {
 	/* Cut string down to total display width of `max_width` or less, where East Asian width is taken into account
 	 * If it is necessary to trim string, add `marker` at end (unless the marker is NULL)
@@ -852,18 +852,9 @@ mbfl_string *mbfl_strimwidth(mbfl_string *string, mbfl_string *marker, mbfl_stri
 		return result;
 	}
 
-	/* Skip over `from` characters and set start pointer */
 	unsigned char *start = string->val, *e = start + string->len;
-	if (from > 0) {
-		start += char_offset_to_byte_offset(string->encoding, string->val, string->len, from);
-	}
 
-	/* Did we skip right to the end of the input string? */
-	if (start == e) {
-		return result; /* if so, return empty string */
-	}
-
-	/* Now check how far we can get into remainder of string while still leaving
+	/* Check how far we can get into remainder of string while still leaving
 	 * enough space for the trim marker, in case it is necessary to add it */
 	size_t marker_width = (marker ? mbfl_strwidth(marker) : 0);
 
