@@ -117,18 +117,17 @@ mbfl_buffer_converter_new(
     size_t buf_initsz)
 {
 	mbfl_buffer_converter *convd = emalloc(sizeof(mbfl_buffer_converter));
-	convd->from = from;
 	convd->to = to;
 
 	/* create convert filter */
 	convd->filter1 = NULL;
 	convd->filter2 = NULL;
-	if (mbfl_convert_filter_get_vtbl(convd->from, convd->to) != NULL) {
-		convd->filter1 = mbfl_convert_filter_new(convd->from, convd->to, mbfl_memory_device_output, NULL, &convd->device);
+	if (mbfl_convert_filter_get_vtbl(from, to) != NULL) {
+		convd->filter1 = mbfl_convert_filter_new(from, to, mbfl_memory_device_output, NULL, &convd->device);
 	} else {
-		convd->filter2 = mbfl_convert_filter_new(&mbfl_encoding_wchar, convd->to, mbfl_memory_device_output, NULL, &convd->device);
+		convd->filter2 = mbfl_convert_filter_new(&mbfl_encoding_wchar, to, mbfl_memory_device_output, NULL, &convd->device);
 		if (convd->filter2 != NULL) {
-			convd->filter1 = mbfl_convert_filter_new(convd->from,
+			convd->filter1 = mbfl_convert_filter_new(from,
 					&mbfl_encoding_wchar,
 					(int (*)(int, void*))convd->filter2->filter_function,
 					convd->filter2->filter_flush,
