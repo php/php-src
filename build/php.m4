@@ -305,30 +305,6 @@ fi
 ])
 
 dnl
-dnl PHP_CHECK_GCC_ARG(arg, action-if-found, action-if-not-found)
-dnl
-AC_DEFUN([PHP_CHECK_GCC_ARG],[
-  gcc_arg_name=[ac_cv_gcc_arg]translit($1,A-Z=-,a-z__)
-  AC_CACHE_CHECK([whether $CC supports $1], [ac_cv_gcc_arg]translit($1,A-Z=-,a-z__), [
-  echo 'void somefunc() { };' > conftest.c
-  cmd='$CC $1 -c conftest.c'
-  if eval $cmd 2>&1 | $EGREP -e $1 >/dev/null ; then
-    ac_result=no
-  else
-    ac_result=yes
-  fi
-  eval $gcc_arg_name=$ac_result
-  rm -f conftest.*
-  ])
-  if eval test "\$$gcc_arg_name" = "yes"; then
-    $2
-  else
-    :
-    $3
-  fi
-])
-
-dnl
 dnl PHP_LIBGCC_LIBPATH(gcc)
 dnl
 dnl Stores the location of libgcc in libgcc_libpath.
