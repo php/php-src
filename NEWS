@@ -10,6 +10,7 @@ PHP                                                                        NEWS
 
 - JIT:
   . Fixed bug #79864 (JIT segfault in Symfony OptionsResolver). (Dmitry)
+  . Fixed bug #79888 (Incorrect execution with JIT enabled). (Dmitry)
 
 - LDAP:
   . Fixed memory leaks. (ptomulik)
