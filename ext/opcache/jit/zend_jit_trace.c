@@ -366,14 +366,27 @@ static zend_always_inline int zend_jit_var_may_be_modified_indirectly(const zend
 		SET_STACK_TYPE(stack, EX_VAR_TO_NUM(_var), _type); \
 	} while (0)
 
-#define ADD_OP_GUARD(_var, _op_type) do { \
-		if (_var >= 0 && _op_type != IS_UNKNOWN) { \
-			zend_ssa_var_info *info = &ssa_var_info[_var]; \
-			if (zend_jit_var_may_be_modified_indirectly(op_array, ssa, ssa_vars[_var].var)) { \
-				info->type = MAY_BE_GUARD | zend_jit_trace_type_to_info(_op_type); \
-			} else if ((info->type & (MAY_BE_ANY|MAY_BE_UNDEF)) != (1 << _op_type)) { \
-				info->type = MAY_BE_GUARD | zend_jit_trace_type_to_info_ex(_op_type, info->type); \
-			} \
+
+
+static zend_always_inline void zend_jit_trace_add_op_guard(const zend_op_array  *op_array,
+                                                           const zend_ssa       *ssa,
+                                                           zend_ssa             *tssa,
+                                                           uint32_t              var,
+                                                           int                   ssa_var,
+                                                           uint8_t               op_type)
+{
+	zend_ssa_var_info *info = &tssa->var_info[ssa_var];
+
+	if (zend_jit_var_may_be_modified_indirectly(op_array, ssa, EX_VAR_TO_NUM(var))) {
+		info->type = MAY_BE_GUARD | zend_jit_trace_type_to_info(op_type);
+	} else if ((info->type & (MAY_BE_ANY|MAY_BE_UNDEF)) != (1 << op_type)) {
+		info->type = MAY_BE_GUARD | zend_jit_trace_type_to_info_ex(op_type, info->type);
+	}
+}
+
+#define ADD_OP_GUARD(_var, _ssa_var, _op_type) do { \
+		if (_ssa_var >= 0 && _op_type != IS_UNKNOWN) { \
+			zend_jit_trace_add_op_guard(op_array, ssa, tssa, _var, _ssa_var, _op_type); \
 		} \
 	} while (0)
 
@@ -396,11 +409,11 @@ static zend_always_inline int zend_jit_var_may_be_modified_indirectly(const zend
 	} while (0)
 
 #define ADD_OP1_TRACE_GUARD() \
-	ADD_OP_GUARD(tssa->ops[idx].op1_use, op1_type)
+	ADD_OP_GUARD(opline->op1.var, tssa->ops[idx].op1_use, op1_type)
 #define ADD_OP2_TRACE_GUARD() \
-	ADD_OP_GUARD(tssa->ops[idx].op2_use, op2_type)
+	ADD_OP_GUARD(opline->op2.var, tssa->ops[idx].op2_use, op2_type)
 #define ADD_OP1_DATA_TRACE_GUARD() \
-	ADD_OP_GUARD(tssa->ops[idx+1].op1_use, op3_type)
+	ADD_OP_GUARD((opline+1)->op1.var, tssa->ops[idx+1].op1_use, op3_type)
 
 #define CHECK_OP1_TRACE_TYPE() \
 	CHECK_OP_TRACE_TYPE(opline->op1.var, ssa_op->op1_use, op1_info, op1_type)
