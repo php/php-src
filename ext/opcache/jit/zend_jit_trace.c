@@ -4549,6 +4549,14 @@ done:
 
 						while (call_info) {
 							if (call_info->caller_init_opline == init_opline) {
+								if (op_array->fn_flags & ZEND_ACC_TRAIT_CLONE) {
+									if (init_opline->opcode == ZEND_INIT_STATIC_METHOD_CALL
+									 && init_opline->op1_type != IS_CONST) {
+										break;
+									} else if (init_opline->opcode == ZEND_INIT_METHOD_CALL) {
+										break;
+									}
+								}
 								skip_guard = 1;
 								break;
 							}
