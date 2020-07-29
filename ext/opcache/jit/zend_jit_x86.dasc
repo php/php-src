@@ -4101,7 +4101,7 @@ static int zend_jit_math_double_long(dasm_State    **Dst,
 
 		if (Z_MODE(res_addr) == IS_REG) {
 			result_reg = Z_REG(res_addr);
-			tmp_reg = ZREG_XMM0;
+			tmp_reg = (result_reg == ZREG_XMM0) ? ZREG_XMM1 : ZREG_XMM0;
 		} else if (Z_MODE(op1_addr) == IS_REG && Z_LAST_USE(op1_addr)) {
 			result_reg = Z_REG(op1_addr);
 			tmp_reg = ZREG_XMM0;
