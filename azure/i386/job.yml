@@ -86,16 +86,7 @@ jobs:
         #sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'postgres';"
         #sudo -u postgres psql -c "CREATE DATABASE test;"
       displayName: 'Setup'
-    - template: test.yml
+    - template: ../tests.yml
       parameters:
         configurationName: ${{ parameters.configurationName }}
-    - template: test.yml
-      parameters:
-        configurationName: ${{ parameters.configurationName }}
-        runTestsName: 'OpCache'
-        runTestsParameters: -d zend_extension=opcache.so
-    - template: test.yml
-      parameters:
-        configurationName: ${{ parameters.configurationName }}
-        runTestsName: 'JIT'
-        runTestsParameters: -d zend_extension=opcache.so -d opcache.jit_buffer_size=16M
+        runTestsParameters: ${{ parameters.runTestsParameters }}
