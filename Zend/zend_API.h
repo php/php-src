@@ -2014,24 +2014,15 @@ static zend_always_inline int zend_parse_arg_str_or_obj(
 	zval *arg, zend_string **destination_string, zend_object **destination_object, zend_class_entry *base_ce, int allow_null
 ) {
 	if (EXPECTED(Z_TYPE_P(arg) == IS_OBJECT)) {
-		if (base_ce && UNEXPECTED(!instanceof_function(Z_OBJCE_P(arg), base_ce))) {
-			return 0;
+		if (!base_ce || EXPECTED(instanceof_function(Z_OBJCE_P(arg), base_ce))) {
+			*destination_string = NULL;
+			*destination_object = Z_OBJ_P(arg);
+			return 1;
 		}
-
-		*destination_string = NULL;
-		*destination_object = Z_OBJ_P(arg);
-	} else if (EXPECTED(Z_TYPE_P(arg) == IS_STRING)) {
-		*destination_string = Z_STR_P(arg);
-		*destination_object = NULL;
-	} else if (allow_null && EXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
-		*destination_string = NULL;
-		*destination_object = NULL;
-	} else {
-		*destination_object = NULL;
-		return zend_parse_arg_str_slow(arg, destination_string);
 	}
 
-	return 1;
+	*destination_object = NULL;
+	return zend_parse_arg_str(arg, destination_string, allow_null);
 }
 
 END_EXTERN_C()
