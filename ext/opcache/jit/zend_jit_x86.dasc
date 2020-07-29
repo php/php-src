@@ -8003,6 +8003,13 @@ static int zend_jit_assign(dasm_State **Dst, const zend_op *opline, const zend_o
 		}
 	}
 
+	if (Z_MODE(op1_addr) != IS_REG
+	 && Z_MODE(op1_use_addr) == IS_REG
+	 && !Z_LOAD(op1_use_addr)
+	 && !Z_STORE(op1_use_addr)) {
+		/* Force type update */
+		op1_info |= MAY_BE_UNDEF;
+	}
 	if (!zend_jit_assign_to_variable(Dst, opline, op_array, op1_addr, op1_info, op1_def_info, opline->op2_type, opline->op2, op2_addr, op2_info, res_addr,
 			may_throw)) {
 		return 0;
