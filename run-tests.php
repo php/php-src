@@ -2200,7 +2200,7 @@ COMMAND $cmd
 		// write .sh
 		if (strpos($log_format, 'S') !== false && file_put_contents($sh_filename, "#!/bin/sh
 
-{$cmd}
+exec {$cmd}
 ", FILE_BINARY) === false) {
 			error("Cannot create test shell script - $sh_filename");
 		}
