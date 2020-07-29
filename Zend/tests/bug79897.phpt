@@ -18,6 +18,15 @@ class A {
     }
 }
 
-echo "file compiled successfully";
+var_dump((new ReflectionParameter(['A', '__construct'], 'b'))->getAttributes()[0]->getArguments());
+var_dump((new ReflectionProperty('A', 'b'))->getAttributes()[0]->getArguments());
+?>
 --EXPECT--
-file compiled successfully
+array(1) {
+  [0]=>
+  int(12)
+}
+array(1) {
+  [0]=>
+  int(12)
+}
