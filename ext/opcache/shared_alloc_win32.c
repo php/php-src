@@ -311,11 +311,10 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 	} else {
 		((void**)mapping_base)[0] = mapping_base;
 		((void**)mapping_base)[1] = (void*)execute_ex;
-		((char*)shared_segment->p) += ACCEL_BASE_POINTER_SIZE;
 	}
 
-	shared_segment->pos = 0;
-	shared_segment->size = requested_size;
+	shared_segment->pos = ACCEL_BASE_POINTER_SIZE;
+	shared_segment->size = requested_size - ACCEL_BASE_POINTER_SIZE;
 
 	zend_shared_alloc_unlock_win32();
 
