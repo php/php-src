@@ -9097,6 +9097,10 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 
 		if ((!trace || !func) && opline->opcode != ZEND_DO_ICALL) {
 			|	LOAD_IP_ADDR (opline + 1)
+		} else if (trace
+		 && trace->op == ZEND_JIT_TRACE_END
+		 && trace->stop == ZEND_JIT_TRACE_STOP_INTERPRETER) {
+			|	LOAD_IP_ADDR (opline + 1)
 		}
 	}
 
