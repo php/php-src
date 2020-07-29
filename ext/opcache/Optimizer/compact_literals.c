@@ -228,6 +228,9 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 				case ZEND_POST_DEC_OBJ:
 				case ZEND_ISSET_ISEMPTY_PROP_OBJ:
 				case ZEND_ASSIGN_OBJ_OP:
+					if (opline->op1_type == IS_CONST) {
+						LITERAL_INFO(opline->op1.constant, LITERAL_VALUE, 1);
+					}
 					if (opline->op2_type == IS_CONST) {
 						LITERAL_INFO(opline->op2.constant, LITERAL_PROPERTY, 1);
 					}
