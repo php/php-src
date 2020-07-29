@@ -329,7 +329,7 @@ void shutdown_executor(void) /* {{{ */
 		zend_stack_clean(&EG(user_exception_handlers), (void (*)(void *))ZVAL_PTR_DTOR, 1);
 
 #if ZEND_DEBUG
-		if (gc_enabled() && !CG(unclean_shutdown)) {
+		if (!CG(unclean_shutdown)) {
 			gc_collect_cycles();
 		}
 #endif
