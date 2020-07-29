@@ -27,6 +27,12 @@ static ZEND_COLD void undef_result_after_exception() {
 	}
 }
 
+static ZEND_COLD void zend_jit_illegal_string_offset(zval *offset)
+{
+	zend_type_error("Cannot access offset of type %s on string", zend_zval_type_name(offset));
+}
+
+
 static zend_never_inline zend_function* ZEND_FASTCALL _zend_jit_init_func_run_time_cache(const zend_op_array *op_array) /* {{{ */
 {
 	void **run_time_cache;
@@ -350,8 +356,8 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_r_helper(zend_array *ht, zval *dim,
 			hval = 1;
 			goto num_index;
 		default:
-			zend_type_error("Illegal offset type");
-			ZVAL_NULL(result);
+			zend_jit_illegal_string_offset(dim);
+			undef_result_after_exception();
 			return;
 	}
 
@@ -422,8 +428,8 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_is_helper(zend_array *ht, zval *dim
 			hval = 1;
 			goto num_index;
 		default:
-			zend_type_error("Illegal offset type");
-			ZVAL_NULL(result);
+			zend_jit_illegal_string_offset(dim);
+			undef_result_after_exception();
 			return;
 	}
 
@@ -560,7 +566,7 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_rw_helper(zend_array *ht, zval *di
 			hval = 1;
 			goto num_index;
 		default:
-			zend_type_error("Illegal offset type");
+			zend_jit_illegal_string_offset(dim);
 			undef_result_after_exception();
 			return NULL;
 	}
@@ -641,7 +647,7 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_w_helper(zend_array *ht, zval *dim
 			hval = 1;
 			goto num_index;
 		default:
-			zend_type_error("Illegal offset type");
+			zend_jit_illegal_string_offset(dim);
 			undef_result_after_exception();
 			return NULL;
 	}
@@ -677,13 +683,20 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_str_r_helper(zval *container, zval 
 try_string_offset:
 	if (UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
 		switch (Z_TYPE_P(dim)) {
-			/* case IS_LONG: */
 			case IS_STRING:
-				if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, -1)) {
-					break;
+			{
+				bool trailing_data = false;
+				/* For BC reasons we allow errors so that we can warn on leading numeric string */
+				if (IS_LONG == is_numeric_string_ex(Z_STRVAL_P(dim), Z_STRLEN_P(dim), &offset, NULL,
+						/* allow errors */ true, NULL, &trailing_data)) {
+					if (UNEXPECTED(trailing_data)) {
+						zend_error(E_WARNING, "Illegal string offset \"%s\"", Z_STRVAL_P(dim));
+					}
+					goto out;
 				}
-				zend_error(E_WARNING, "Illegal string offset \"%s\"", Z_STRVAL_P(dim));
+				zend_jit_illegal_string_offset(dim);
 				break;
+			}
 			case IS_UNDEF:
 				zend_jit_undefined_op_helper(EG(current_execute_data)->opline->op2.var);
 			case IS_DOUBLE:
@@ -696,7 +709,7 @@ try_string_offset:
 				dim = Z_REFVAL_P(dim);
 				goto try_string_offset;
 			default:
-				zend_type_error("Illegal offset type");
+				zend_jit_illegal_string_offset(dim);
 				break;
 		}
 
@@ -704,6 +717,7 @@ try_string_offset:
 	} else {
 		offset = Z_LVAL_P(dim);
 	}
+	out:
 
 	if (UNEXPECTED(Z_STRLEN_P(container) < ((offset < 0) ? -(size_t)offset : ((size_t)offset + 1)))) {
 		zend_error(E_WARNING, "Uninitialized string offset " ZEND_LONG_FMT, offset);
@@ -728,7 +742,7 @@ try_string_offset:
 		switch (Z_TYPE_P(dim)) {
 			/* case IS_LONG: */
 			case IS_STRING:
-				if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, -1)) {
+				if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, false)) {
 					break;
 				}
 				ZVAL_NULL(result);
@@ -744,7 +758,7 @@ try_string_offset:
 				dim = Z_REFVAL_P(dim);
 				goto try_string_offset;
 			default:
-				zend_type_error("Illegal offset type");
+				zend_jit_illegal_string_offset(dim);
 				break;
 		}
 
@@ -818,13 +832,19 @@ try_again:
 	if (UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
 		switch(Z_TYPE_P(dim)) {
 			case IS_STRING:
-				if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, -1)) {
-					break;
+			{
+				bool trailing_data = false;
+				/* For BC reasons we allow errors so that we can warn on leading numeric string */
+				if (IS_LONG == is_numeric_string_ex(Z_STRVAL_P(dim), Z_STRLEN_P(dim), &offset, NULL,
+						/* allow errors */ true, NULL, &trailing_data)) {
+					if (UNEXPECTED(trailing_data) && type != BP_VAR_UNSET) {
+						zend_error(E_WARNING, "Illegal string offset \"%s\"", Z_STRVAL_P(dim));
+					}
+					return offset;
 				}
-				if (type != BP_VAR_UNSET) {
-					zend_error(E_WARNING, "Illegal string offset \"%s\"", Z_STRVAL_P(dim));
-				}
+				zend_jit_illegal_string_offset(dim);
 				break;
+			}
 			case IS_UNDEF:
 				zend_jit_undefined_op_helper(EG(current_execute_data)->opline->op2.var);
 			case IS_DOUBLE:
@@ -837,7 +857,7 @@ try_again:
 				dim = Z_REFVAL_P(dim);
 				goto try_again;
 			default:
-				zend_type_error("Illegal offset type");
+				zend_jit_illegal_string_offset(dim);
 				break;
 		}
 
@@ -1173,7 +1193,7 @@ isset_str_offset:
 			ZVAL_DEREF(offset);
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
-						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
+						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, false))) {
 				lval = zval_get_long(offset);
 				goto isset_str_offset;
 			}

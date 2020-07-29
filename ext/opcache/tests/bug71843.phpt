@@ -11,12 +11,9 @@ opcache.optimization_level=0xFFFFBFFF
 define('E', 'E');
 define('R', 'R');
 define('See', 'See');
-0 & ~E & ~R;
+"0" & ~E & ~R;
 6 && ~See
 ?>
 okey
---EXPECTF--
-Warning: A non-numeric value encountered in %s on line %d
-
-Warning: A non-numeric value encountered in %s on line %d
+--EXPECT--
 okey

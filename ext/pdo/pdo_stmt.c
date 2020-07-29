@@ -2302,7 +2302,7 @@ static zval *row_prop_read(zend_object *object, zend_string *name, int type, voi
 
 	ZVAL_NULL(rv);
 	if (stmt) {
-		if (is_numeric_string_ex(ZSTR_VAL(name), ZSTR_LEN(name), &lval, NULL, 0, NULL) == IS_LONG)	{
+		if (is_numeric_string(ZSTR_VAL(name), ZSTR_LEN(name), &lval, NULL, 0) == IS_LONG)	{
 			if (lval >= 0 && lval < stmt->column_count) {
 				fetch_value(stmt, rv, lval, NULL);
 			}
@@ -2340,7 +2340,7 @@ static zval *row_dim_read(zend_object *object, zval *member, int type, zval *rv)
 				fetch_value(stmt, rv, Z_LVAL_P(member), NULL);
 			}
 		} else if (Z_TYPE_P(member) == IS_STRING
-			   && is_numeric_string_ex(Z_STRVAL_P(member), Z_STRLEN_P(member), &lval, NULL, 0, NULL) == IS_LONG)	{
+			   && is_numeric_string(Z_STRVAL_P(member), Z_STRLEN_P(member), &lval, NULL, 0) == IS_LONG)	{
 			if (lval >= 0 && lval < stmt->column_count) {
 				fetch_value(stmt, rv, lval, NULL);
 			}
@@ -2387,7 +2387,7 @@ static int row_prop_exists(zend_object *object, zend_string *name, int check_emp
 	zend_long lval;
 
 	if (stmt) {
-		if (is_numeric_string_ex(ZSTR_VAL(name), ZSTR_LEN(name), &lval, NULL, 0, NULL) == IS_LONG)	{
+		if (is_numeric_string(ZSTR_VAL(name), ZSTR_LEN(name), &lval, NULL, 0) == IS_LONG)	{
 			return lval >=0 && lval < stmt->column_count;
 		}
 
@@ -2422,7 +2422,7 @@ static int row_dim_exists(zend_object *object, zval *member, int check_empty)
 		if (Z_TYPE_P(member) == IS_LONG) {
 			return Z_LVAL_P(member) >= 0 && Z_LVAL_P(member) < stmt->column_count;
 		} else if (Z_TYPE_P(member) == IS_STRING) {
-			if (is_numeric_string_ex(Z_STRVAL_P(member), Z_STRLEN_P(member), &lval, NULL, 0, NULL) == IS_LONG)	{
+			if (is_numeric_string(Z_STRVAL_P(member), Z_STRLEN_P(member), &lval, NULL, 0) == IS_LONG)	{
 				return lval >=0 && lval < stmt->column_count;
 			}
 		} else {

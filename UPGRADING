@@ -217,6 +217,27 @@ PHP 8.0 UPGRADE NOTES
   . debug_backtrace() and Exception::getTrace() will no longer provide
     references to arguments. It will not be possible to change function
     arguments through the backtrace.
+  . The concept of numeric-string has been altered to be less error prone.
+    Trailing whitespaces are now allowed in numeric strings making it symmetric
+    with how leading whitespaces were treated.
+    This mostly affects:
+     - The is_numeric() function
+     - String-to-string comparisons
+     - Type declarations
+     - Increment and Decrement operations
+    The concept of "leading-numeric string" has been mostly dropped, the cases
+    where this concept remains is in order to ease migration.
+    String which emitted an E_NOTICE "A non well formed numeric value encountered"
+    will now emit an E_WARNING "A non-numeric value encountered"
+    and all strings which emitted an E_WARNING "A non-numeric value encountered"
+    will now throw a TypeError.
+    This mostly affects:
+     - Arithmetic operations
+     - Bitwise operations
+    This E_WARNING to TypeError change also affects the E_WARNING
+    "Illegal string offset 'string'" for illegal string offsets.
+    This does not change the behaviour of explicit casts to int/float from strings.
+    RFC: https://wiki.php.net/rfc/saner-numeric-strings
 
 - COM:
   . Removed the ability to import case-insensitive constants from type
