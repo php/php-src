@@ -2019,6 +2019,8 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 		(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
 	op_array_ssa = &jit_extension->func_info.ssa;
 	frame = JIT_G(current_frame);
+	frame->prev = NULL;
+	frame->func = (const zend_function*)op_array;
 	stack = frame->stack;
 
 	count = 0;
@@ -2256,7 +2258,11 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 			}
 		} else if (p->op == ZEND_JIT_TRACE_ENTER) {
 			/* New call frames */
+			zend_jit_trace_stack_frame *prev_frame = frame;
+
 			frame = zend_jit_trace_call_frame(frame, op_array);
+			frame->prev = prev_frame;
+			frame->func = (const zend_function*)p->op_array;
 			stack = frame->stack;
 			op_array = p->op_array;
 			jit_extension =
@@ -2292,6 +2298,8 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 			stack = frame->stack;
 			if (level == 0) {
 				/* New return frames */
+				frame->prev = NULL;
+				frame->func = (const zend_function*)op_array;
 				j = ZEND_JIT_TRACE_GET_FIRST_SSA_VAR(p->info);
 				for (i = 0; i < op_array->last_var + op_array->T; i++) {
 					SET_STACK_VAR(stack, i, j);
@@ -2334,6 +2342,14 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 	} else {
 		for (i = 0; i < op_array->last_var; i++) {
 			zend_jit_close_var(stack, i, start, end, flags, idx);
+		}
+		while (frame->prev) {
+			frame = frame->prev;
+			op_array = &frame->func->op_array;
+			stack = frame->stack;
+			for (i = 0; i < op_array->last_var; i++) {
+				zend_jit_close_var(stack, i, start, end, flags, idx);
+			}
 		}
 	}
 
