@@ -676,48 +676,56 @@ num_undef:
 	return retval;
 }
 
+static zend_never_inline zend_long zend_check_string_offset(zval *dim/*, int type*/)
+{
+	zend_long offset;
+
+try_again:
+	switch(Z_TYPE_P(dim)) {
+		case IS_LONG:
+			return Z_LVAL_P(dim);
+		case IS_STRING:
+		{
+			bool trailing_data = false;
+			/* For BC reasons we allow errors so that we can warn on leading numeric string */
+			if (IS_LONG == is_numeric_string_ex(Z_STRVAL_P(dim), Z_STRLEN_P(dim), &offset, NULL,
+					/* allow errors */ true, NULL, &trailing_data)) {
+				if (UNEXPECTED(trailing_data) /*&& type != BP_VAR_UNSET*/) {
+					zend_error(E_WARNING, "Illegal string offset \"%s\"", Z_STRVAL_P(dim));
+				}
+				return offset;
+			}
+			zend_jit_illegal_string_offset(dim);
+			break;
+		}
+		case IS_UNDEF:
+			zend_jit_undefined_op_helper(EG(current_execute_data)->opline->op2.var);
+		case IS_DOUBLE:
+		case IS_NULL:
+		case IS_FALSE:
+		case IS_TRUE:
+			zend_error(E_WARNING, "String offset cast occurred");
+			break;
+		case IS_REFERENCE:
+			dim = Z_REFVAL_P(dim);
+			goto try_again;
+		default:
+			zend_jit_illegal_string_offset(dim);
+			break;
+	}
+
+	return _zval_get_long_func(dim);
+}
+
 static void ZEND_FASTCALL zend_jit_fetch_dim_str_r_helper(zval *container, zval *dim, zval *result)
 {
 	zend_long offset;
 
-try_string_offset:
 	if (UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
-		switch (Z_TYPE_P(dim)) {
-			case IS_STRING:
-			{
-				bool trailing_data = false;
-				/* For BC reasons we allow errors so that we can warn on leading numeric string */
-				if (IS_LONG == is_numeric_string_ex(Z_STRVAL_P(dim), Z_STRLEN_P(dim), &offset, NULL,
-						/* allow errors */ true, NULL, &trailing_data)) {
-					if (UNEXPECTED(trailing_data)) {
-						zend_error(E_WARNING, "Illegal string offset \"%s\"", Z_STRVAL_P(dim));
-					}
-					goto out;
-				}
-				zend_jit_illegal_string_offset(dim);
-				break;
-			}
-			case IS_UNDEF:
-				zend_jit_undefined_op_helper(EG(current_execute_data)->opline->op2.var);
-			case IS_DOUBLE:
-			case IS_NULL:
-			case IS_FALSE:
-			case IS_TRUE:
-				zend_error(E_WARNING, "String offset cast occurred");
-				break;
-			case IS_REFERENCE:
-				dim = Z_REFVAL_P(dim);
-				goto try_string_offset;
-			default:
-				zend_jit_illegal_string_offset(dim);
-				break;
-		}
-
-		offset = _zval_get_long_func(dim);
+		offset = zend_check_string_offset(dim/*, BP_VAR_R*/);
 	} else {
 		offset = Z_LVAL_P(dim);
 	}
-	out:
 
 	if (UNEXPECTED(Z_STRLEN_P(container) < ((offset < 0) ? -(size_t)offset : ((size_t)offset + 1)))) {
 		zend_error(E_WARNING, "Uninitialized string offset " ZEND_LONG_FMT, offset);
@@ -822,51 +830,6 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_obj_is_helper(zval *container, zval
 	} else {
 		ZVAL_NULL(result);
 	}
-}
-
-static zend_never_inline zend_long zend_check_string_offset(zval *dim, int type)
-{
-	zend_long offset;
-
-try_again:
-	if (UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
-		switch(Z_TYPE_P(dim)) {
-			case IS_STRING:
-			{
-				bool trailing_data = false;
-				/* For BC reasons we allow errors so that we can warn on leading numeric string */
-				if (IS_LONG == is_numeric_string_ex(Z_STRVAL_P(dim), Z_STRLEN_P(dim), &offset, NULL,
-						/* allow errors */ true, NULL, &trailing_data)) {
-					if (UNEXPECTED(trailing_data) && type != BP_VAR_UNSET) {
-						zend_error(E_WARNING, "Illegal string offset \"%s\"", Z_STRVAL_P(dim));
-					}
-					return offset;
-				}
-				zend_jit_illegal_string_offset(dim);
-				break;
-			}
-			case IS_UNDEF:
-				zend_jit_undefined_op_helper(EG(current_execute_data)->opline->op2.var);
-			case IS_DOUBLE:
-			case IS_NULL:
-			case IS_FALSE:
-			case IS_TRUE:
-				zend_error(E_WARNING, "String offset cast occurred");
-				break;
-			case IS_REFERENCE:
-				dim = Z_REFVAL_P(dim);
-				goto try_again;
-			default:
-				zend_jit_illegal_string_offset(dim);
-				break;
-		}
-
-		offset = _zval_get_long_func(dim);
-	} else {
-		offset = Z_LVAL_P(dim);
-	}
-
-	return offset;
 }
 
 static zend_never_inline ZEND_COLD void zend_wrong_string_offset(void)
@@ -975,7 +938,11 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 	size_t string_len;
 	zend_long offset;
 
-	offset = zend_check_string_offset(dim, BP_VAR_W);
+	if (UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
+		offset = zend_check_string_offset(dim/*, BP_VAR_W*/);
+	} else {
+		offset = Z_LVAL_P(dim);
+	}
 	if (offset < -(zend_long)Z_STRLEN_P(str)) {
 		/* Error on negative offset */
 		zend_error(E_WARNING, "Illegal string offset " ZEND_LONG_FMT, offset);
@@ -1108,7 +1075,9 @@ static void ZEND_FASTCALL zend_jit_assign_dim_op_helper(zval *container, zval *d
 			if (!dim) {
 				zend_throw_error(NULL, "[] operator not supported for strings");
 			} else {
-				zend_check_string_offset(dim, BP_VAR_RW);
+				if (UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
+					zend_check_string_offset(dim/*, BP_VAR_RW*/);
+				}
 				zend_wrong_string_offset();
 			}
 //???		} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
