@@ -1079,11 +1079,7 @@ U_CFUNC PHP_FUNCTION(intlcal_to_date_time)
 	object_init_ex(return_value, php_date_get_date_ce());
 	zend_call_known_instance_method_with_2_params(
 		Z_OBJCE_P(return_value)->constructor, Z_OBJ_P(return_value), NULL, &ts_zval, timezone_zval);
-	// TODO Bubble up exception?
 	if (EG(exception)) {
-		intl_errors_set(CALENDAR_ERROR_P(co), U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_to_date_time: DateTime constructor has thrown exception",
-			1);
 		zend_object_store_ctor_failed(Z_OBJ_P(return_value));
 		zval_ptr_dtor(return_value);
 		zval_ptr_dtor(&ts_zval);
