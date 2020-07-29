@@ -13,4 +13,4 @@ $fp = stream_socket_client(
 );
 ?>
 --EXPECTF--
-Warning: stream_socket_client(): Unable to connect to tcp://%s:80 (Failed to parse address "invalid") in %s on line %d
+Warning: stream_socket_client(): unable to connect to tcp://%s:80 (Failed to parse address "invalid") in %s on line %d
