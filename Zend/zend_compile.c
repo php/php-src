@@ -6197,7 +6197,7 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fall
 		zend_op *opline;
 		zend_arg_info *arg_info;
 
-		zend_ast_ref *attributes_copy = 0;
+		zend_ast_ref *attributes_copy = NULL;
 
 		if (visibility && attributes_ast) {
 			attributes_copy = zend_ast_copy(attributes_ast);
