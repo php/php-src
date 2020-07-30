@@ -3861,7 +3861,16 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							if (ra) {
 								zend_jit_trace_clenup_stack(stack, opline, ssa_op, ssa, ra);
 							}
-							exit_point = zend_jit_trace_get_exit_point(opline, exit_opline, p+1, 0);
+							if (opline->result_type == IS_TMP_VAR) {
+								zend_jit_trace_stack *stack = JIT_G(current_frame)->stack;
+								uint32_t old_info = STACK_INFO(stack, EX_VAR_TO_NUM(opline->result.var));
+
+								SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_UNKNOWN);
+								exit_point = zend_jit_trace_get_exit_point(opline, exit_opline, p+1, 0);
+								SET_STACK_INFO(stack, EX_VAR_TO_NUM(opline->result.var), old_info);
+							} else {
+								exit_point = zend_jit_trace_get_exit_point(opline, exit_opline, p+1, 0);
+							}
 							exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 							if (!exit_addr) {
 								goto jit_failure;
