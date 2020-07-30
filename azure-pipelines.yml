@@ -16,7 +16,7 @@ jobs:
     parameters:
       configurationName: DEBUG_ZTS_ASAN
       configurationParameters: >-
-          --enable-debug --enable-zts
+          --enable-debug-assertions --enable-zts
           CFLAGS='-fsanitize=address -DZEND_TRACK_ARENA_ALLOC'
           LDFLAGS='-fsanitize=address'
       runTestsParameters: --asan
@@ -25,7 +25,7 @@ jobs:
     parameters:
       configurationName: DEBUG_ZTS_UBSAN
       configurationParameters: >-
-          --enable-debug --enable-zts
+          --enable-debug-assertions --enable-zts
           CFLAGS='-fsanitize=undefined'
           LDFLAGS='-fsanitize=undefined'
       timeoutInMinutes: 240
