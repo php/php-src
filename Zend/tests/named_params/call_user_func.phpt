@@ -31,7 +31,16 @@ call_user_func($test, c: 'C');
 call_user_func($test_variadic, 'A', c: 'C');
 call_user_func($test_ref, ref: null);
 var_dump(call_user_func('call_user_func', $test, c: 'D'));
-var_dump(call_user_func('array_slice', [1, 2, 3, 4, 5], length: 2));
+try {
+    var_dump(call_user_func('array_slice', [1, 2, 3, 4, 5], length: 2));
+} catch (ArgumentCountError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump(call_user_func('array_slice', [1, 2, 3, 4, 'x' => 5], 3, preserve_keys: true));
+} catch (ArgumentCountError $e) {
+    echo $e->getMessage(), "\n";
+}
 echo "\n";
 
 $test->__invoke('A', c: 'C');
@@ -65,11 +74,12 @@ array(2) {
 Warning: {closure}(): Argument #1 ($ref) must be passed by reference, value given in %s on line %d
 a = a, b = b, c = D
 NULL
+array_slice(): Argument #2 ($offset) not passed
 array(2) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
+  [3]=>
+  int(4)
+  ["x"]=>
+  int(5)
 }
 
 a = A, b = b, c = C

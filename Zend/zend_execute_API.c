@@ -833,6 +833,17 @@ cleanup_args:
 		ZEND_ADD_CALL_FLAG(call, call_info);
 	}
 
+	if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_MAY_HAVE_UNDEF)) {
+		if (zend_handle_undef_args(call) == FAILURE) {
+			zend_vm_stack_free_args(call);
+			zend_vm_stack_free_call_frame(call);
+			if (EG(current_execute_data) == &dummy_execute_data) {
+				EG(current_execute_data) = dummy_execute_data.prev_execute_data;
+			}
+			return SUCCESS;
+		}
+	}
+
 	orig_fake_scope = EG(fake_scope);
 	EG(fake_scope) = NULL;
 	if (func->type == ZEND_USER_FUNCTION) {

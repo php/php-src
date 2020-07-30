@@ -349,7 +349,7 @@ ZEND_API void zend_cleanup_unfinished_execution(zend_execute_data *execute_data,
 zval * ZEND_FASTCALL zend_handle_named_arg(
 		zend_execute_data **call_ptr, zend_string *arg_name,
 		uint32_t *arg_num_ptr, void **cache_slot);
-ZEND_API int ZEND_FASTCALL zend_handle_icall_undef_args(zend_execute_data *call);
+ZEND_API int ZEND_FASTCALL zend_handle_undef_args(zend_execute_data *call);
 
 #define CACHE_ADDR(num) \
 	((void**)((char*)EX(run_time_cache) + (num)))

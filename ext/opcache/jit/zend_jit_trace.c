@@ -1576,6 +1576,9 @@ propagate_arg:
 						}
 					}
 					break;
+				case ZEND_CHECK_NAMED:
+					/* TODO: Trivial to support! */
+					break;
 				case ZEND_FETCH_OBJ_FUNC_ARG:
 					if (!frame
 					 || !frame->call

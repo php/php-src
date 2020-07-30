@@ -275,7 +275,8 @@ END_EXTERN_C()
 #define ZEND_CASE_STRICT                196
 #define ZEND_MATCH_ERROR                197
 #define ZEND_JMP_NULL                   198
+#define ZEND_CHECK_NAMED                199
 
-#define ZEND_VM_LAST_OPCODE             198
+#define ZEND_VM_LAST_OPCODE             199
 
 #endif

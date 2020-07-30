@@ -8880,9 +8880,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 			|	mov ecx, dword [FP + offsetof(zend_execute_data, This.u2.num_args)] // reload
 			|	jmp >1
 			|.code
-			// TODO: Emit ZEND_CALL_MAY_HAVE_UNDEF check for named args.
-			if (!may_have_named_args &&
-					(!func || (func->op_array.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) == 0)) {
+			if (!func || (func->op_array.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) == 0) {
 				if (!func) {
 					|	// if (EXPECTED((op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) == 0))
 					|	test dword [r0 + offsetof(zend_op_array, fn_flags)], ZEND_ACC_HAS_TYPE_HINTS
@@ -8997,20 +8995,6 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 
 		|	// EG(current_execute_data) = execute_data;
 		|	MEM_OP2_1_ZTS mov, aword, executor_globals, current_execute_data, RX, r1
-
-		if (may_have_named_args) {
-			|	test byte [RX + offsetof(zend_execute_data, This.u1.type_info) + 3], (ZEND_CALL_MAY_HAVE_UNDEF >> 24)
-			|	jnz >1
-			|.cold_code
-			|1:
-			|	mov FCARG1a, RX
-			|	EXT_CALL zend_handle_icall_undef_args, r0
-			|	jnz ->exception_handler
-			|	mov r0, EX:RX->func // reload
-			|	jmp >2
-			|.code
-			|2:
-		}
 
 		if (!RETURN_VALUE_USED(opline)) {
 			|.if not(X64WIN)

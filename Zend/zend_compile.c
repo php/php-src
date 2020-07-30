@@ -3314,6 +3314,7 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 	uint32_t i;
 	zend_bool uses_arg_unpack = 0;
 	zend_bool uses_named_args = 0;
+	zend_bool may_have_undef = 0;
 	uint32_t arg_count = 0; /* number of arguments not including unpacks */
 
 	for (i = 0; i < args->children; ++i) {
@@ -3338,6 +3339,9 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 			opline = zend_emit_op(NULL, ZEND_SEND_UNPACK, &arg_node, NULL);
 			opline->op2.num = arg_count;
 			opline->result.var = EX_NUM_TO_VAR(arg_count - 1);
+
+			/* Unpack may contain named arguments. */
+			may_have_undef = 1;
 			continue;
 		}
 
@@ -3360,6 +3364,10 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 				}
 			} else {
 				arg_num = (uint32_t) -1;
+			}
+
+			if (arg_name) {
+				may_have_undef = 1;
 			}
 		} else {
 			if (uses_arg_unpack) {
@@ -3478,6 +3486,10 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 			opline->op2.opline_num = arg_num;
 			opline->result.var = EX_NUM_TO_VAR(arg_num - 1);
 		}
+	}
+
+	if (may_have_undef) {
+		zend_emit_op(NULL, ZEND_CHECK_NAMED, NULL, NULL);
 	}
 
 	return arg_count;
@@ -3863,6 +3875,7 @@ int zend_compile_func_cufa(znode *result, zend_ast_list *args, zend_string *lcna
 	}
 	zend_compile_expr(&arg_node, args->child[1]);
 	zend_emit_op(NULL, ZEND_SEND_ARRAY, &arg_node, NULL);
+	zend_emit_op(NULL, ZEND_CHECK_NAMED, NULL, NULL);
 	zend_emit_op(result, ZEND_DO_FCALL, NULL, NULL);
 
 	return SUCCESS;
