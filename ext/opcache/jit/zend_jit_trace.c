@@ -3635,7 +3635,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							goto jit_failure;
 						}
 						goto done;
-					case ZEND_CHECK_NAMED:
+					case ZEND_CHECK_UNDEF_ARGS:
 						if (!zend_jit_check_named(&dasm_state, opline)) {
 							goto jit_failure;
 						}

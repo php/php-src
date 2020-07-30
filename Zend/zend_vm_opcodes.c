@@ -222,7 +222,7 @@ static const char *zend_vm_opcodes_names[200] = {
 	"ZEND_CASE_STRICT",
 	"ZEND_MATCH_ERROR",
 	"ZEND_JMP_NULL",
-	"ZEND_CHECK_NAMED",
+	"ZEND_CHECK_UNDEF_ARGS",
 };
 
 static uint32_t zend_vm_opcodes_flags[200] = {

@@ -3785,7 +3785,7 @@ static void cleanup_unfinished_calls(zend_execute_data *execute_data, uint32_t o
 						break;
 					case ZEND_SEND_ARRAY:
 					case ZEND_SEND_UNPACK:
-					case ZEND_CHECK_NAMED:
+					case ZEND_CHECK_UNDEF_ARGS:
 						if (level == 0) {
 							do_exit = 1;
 						}

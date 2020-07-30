@@ -3489,7 +3489,7 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 	}
 
 	if (may_have_undef) {
-		zend_emit_op(NULL, ZEND_CHECK_NAMED, NULL, NULL);
+		zend_emit_op(NULL, ZEND_CHECK_UNDEF_ARGS, NULL, NULL);
 	}
 
 	return arg_count;
@@ -3875,7 +3875,7 @@ int zend_compile_func_cufa(znode *result, zend_ast_list *args, zend_string *lcna
 	}
 	zend_compile_expr(&arg_node, args->child[1]);
 	zend_emit_op(NULL, ZEND_SEND_ARRAY, &arg_node, NULL);
-	zend_emit_op(NULL, ZEND_CHECK_NAMED, NULL, NULL);
+	zend_emit_op(NULL, ZEND_CHECK_UNDEF_ARGS, NULL, NULL);
 	zend_emit_op(result, ZEND_DO_FCALL, NULL, NULL);
 
 	return SUCCESS;
