@@ -11040,7 +11040,6 @@ static int zend_jit_recv(dasm_State **Dst, const zend_op *opline, const zend_op_
 				|	ADDR_OP2_2 mov, aword EX->opline, opline, r0
 			}
 			|	mov FCARG1a, FP
-			|	mov FCARG2d, arg_num
 			|	EXT_CALL zend_missing_arg_error, r0
 			|	jmp ->exception_handler
 			|.code

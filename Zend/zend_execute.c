@@ -712,7 +712,7 @@ ZEND_API ZEND_COLD void zend_verify_arg_error(
 
 		zend_string_release(need_msg);
 	} else {
-		zend_missing_arg_error(ptr, arg_num);
+		zend_missing_arg_error(ptr);
 	}
 }
 
@@ -1125,14 +1125,9 @@ static ZEND_COLD void zend_internal_call_arginfo_violation(zend_function *fbc)
 }
 #endif
 
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_missing_arg_error(zend_execute_data *execute_data, uint32_t arg_num)
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_missing_arg_error(zend_execute_data *execute_data)
 {
 	zend_execute_data *ptr = EX(prev_execute_data);
-
-	if (arg_num < EX_NUM_ARGS()) {
-		zend_argument_error(zend_ce_argument_count_error, arg_num, "not passed");
-		return;
-	}
 
 	if (ptr && ptr->func && ZEND_USER_CODE(ptr->func->common.type)) {
 		zend_throw_error(zend_ce_argument_count_error, "Too few arguments to function %s%s%s(), %d passed in %s on line %d and %s %d expected",
@@ -4500,7 +4495,7 @@ ZEND_API int ZEND_FASTCALL zend_handle_undef_args(zend_execute_data *call) {
 			} else {
 				ZEND_ASSERT(opline->opcode == ZEND_RECV);
 				start_fake_frame(call, opline);
-				zend_missing_arg_error(call, i + 1);
+				zend_argument_error(zend_ce_argument_count_error, i + 1, "not passed");
 				end_fake_frame(call);
 			}
 		}

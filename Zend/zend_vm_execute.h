@@ -2151,14 +2151,14 @@ send_array:
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-static zend_never_inline ZEND_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_missing_arg_helper_SPEC(uint32_t arg_num ZEND_OPCODE_HANDLER_ARGS_DC)
+static zend_never_inline ZEND_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_missing_arg_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 {
 #ifdef ZEND_VM_IP_GLOBAL_REG
 	USE_OPLINE
 
 	SAVE_OPLINE();
 #endif
-	zend_missing_arg_error(execute_data, arg_num);
+	zend_missing_arg_error(execute_data);
 	HANDLE_EXCEPTION();
 }
 
@@ -2177,10 +2177,10 @@ static zend_never_inline ZEND_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_ve
 static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RECV_NOTYPE_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
+	uint32_t arg_num = opline->op1.num;
 
-	if (UNEXPECTED(Z_ISUNDEF_P(EX_VAR(opline->result.var)))) {
-		uint32_t arg_num = opline->op1.num;
-		ZEND_VM_TAIL_CALL(zend_missing_arg_helper_SPEC(arg_num ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+	if (UNEXPECTED(arg_num > EX_NUM_ARGS())) {
+		ZEND_VM_TAIL_CALL(zend_missing_arg_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
 	ZEND_VM_NEXT_OPCODE();
@@ -3096,7 +3096,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RECV_INIT_SPEC_CON
 
 	arg_num = opline->op1.num;
 	param = EX_VAR(opline->result.var);
-	if (arg_num > EX_NUM_ARGS() || Z_ISUNDEF_P(param)) {
+	if (arg_num > EX_NUM_ARGS()) {
 		zval *default_value = RT_CONSTANT(opline, opline->op2);
 
 		if (Z_OPT_TYPE_P(default_value) == IS_CONSTANT_AST) {
@@ -3193,11 +3193,14 @@ try_function_name:
 static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RECV_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	zval *param = EX_VAR(opline->result.var);
-	if (UNEXPECTED(Z_ISUNDEF_P(param))) {
-		uint32_t arg_num = opline->op1.num;
-		ZEND_VM_TAIL_CALL(zend_missing_arg_helper_SPEC(arg_num ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+	uint32_t arg_num = opline->op1.num;
+	zval *param;
+
+	if (UNEXPECTED(arg_num > EX_NUM_ARGS())) {
+		ZEND_VM_TAIL_CALL(zend_missing_arg_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
+
+	param = EX_VAR(opline->result.var);
 
 	if (UNEXPECTED(!(opline->op2.num & (1u << Z_TYPE_P(param))))) {
 		ZEND_VM_TAIL_CALL(zend_verify_recv_arg_type_helper_SPEC(param ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));

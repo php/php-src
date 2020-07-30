@@ -5286,14 +5286,14 @@ ZEND_VM_HOT_HANDLER(199, ZEND_CHECK_NAMED, UNUSED, UNUSED)
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-ZEND_VM_COLD_HELPER(zend_missing_arg_helper, ANY, ANY, uint32_t arg_num)
+ZEND_VM_COLD_HELPER(zend_missing_arg_helper, ANY, ANY)
 {
 #ifdef ZEND_VM_IP_GLOBAL_REG
 	USE_OPLINE
 
 	SAVE_OPLINE();
 #endif
-	zend_missing_arg_error(execute_data, arg_num);
+	zend_missing_arg_error(execute_data);
 	HANDLE_EXCEPTION();
 }
 
@@ -5312,11 +5312,14 @@ ZEND_VM_COLD_HELPER(zend_verify_recv_arg_type_helper, ANY, ANY, zval *op_1)
 ZEND_VM_HOT_HANDLER(63, ZEND_RECV, NUM, UNUSED, CACHE_SLOT)
 {
 	USE_OPLINE
-	zval *param = EX_VAR(opline->result.var);
-	if (UNEXPECTED(Z_ISUNDEF_P(param))) {
-		uint32_t arg_num = opline->op1.num;
-		ZEND_VM_DISPATCH_TO_HELPER(zend_missing_arg_helper, arg_num, arg_num);
+	uint32_t arg_num = opline->op1.num;
+	zval *param;
+
+	if (UNEXPECTED(arg_num > EX_NUM_ARGS())) {
+		ZEND_VM_DISPATCH_TO_HELPER(zend_missing_arg_helper);
 	}
+
+	param = EX_VAR(opline->result.var);
 
 	if (UNEXPECTED(!(opline->op2.num & (1u << Z_TYPE_P(param))))) {
 		ZEND_VM_DISPATCH_TO_HELPER(zend_verify_recv_arg_type_helper, op_1, param);
@@ -5328,10 +5331,10 @@ ZEND_VM_HOT_HANDLER(63, ZEND_RECV, NUM, UNUSED, CACHE_SLOT)
 ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_RECV, op->op2.num == MAY_BE_ANY, ZEND_RECV_NOTYPE, NUM, NUM, CACHE_SLOT)
 {
 	USE_OPLINE
+	uint32_t arg_num = opline->op1.num;
 
-	if (UNEXPECTED(Z_ISUNDEF_P(EX_VAR(opline->result.var)))) {
-		uint32_t arg_num = opline->op1.num;
-		ZEND_VM_DISPATCH_TO_HELPER(zend_missing_arg_helper, arg_num, arg_num);
+	if (UNEXPECTED(arg_num > EX_NUM_ARGS())) {
+		ZEND_VM_DISPATCH_TO_HELPER(zend_missing_arg_helper);
 	}
 
 	ZEND_VM_NEXT_OPCODE();
@@ -5347,7 +5350,7 @@ ZEND_VM_HOT_HANDLER(64, ZEND_RECV_INIT, NUM, CONST, CACHE_SLOT)
 
 	arg_num = opline->op1.num;
 	param = EX_VAR(opline->result.var);
-	if (arg_num > EX_NUM_ARGS() || Z_ISUNDEF_P(param)) {
+	if (arg_num > EX_NUM_ARGS()) {
 		zval *default_value = RT_CONSTANT(opline, opline->op2);
 
 		if (Z_OPT_TYPE_P(default_value) == IS_CONSTANT_AST) {
