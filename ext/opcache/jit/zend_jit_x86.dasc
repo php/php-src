@@ -8568,8 +8568,10 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 	}
 
 	// TODO: This could be more precise by checking MAY_BE_ARRAY_KEY_STRING for unpacks.
+	// TODO: Clean this up.
 	bool may_have_named_args = 0;
 	if ((opline-1)->opcode == ZEND_SEND_UNPACK || (opline-1)->opcode == ZEND_SEND_ARRAY ||
+			(opline-1)->opcode == ZEND_CHECK_NAMED ||
 			opline->extended_value == ZEND_FCALL_HAS_NAMED_ARGS) {
 		unknown_num_args = 1;
 		may_have_named_args = 1;

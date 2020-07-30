@@ -4465,28 +4465,33 @@ ZEND_API int ZEND_FASTCALL zend_handle_undef_args(zend_execute_data *call) {
 				continue;
 			}
 
-			zend_op *opline = &fbc->op_array.opcodes[i];
+			zend_op_array *op_array = &fbc->op_array;
+			zend_op *opline = &op_array->opcodes[i];
 			if (EXPECTED(opline->opcode == ZEND_RECV_INIT)) {
 				zval *default_value = RT_CONSTANT(opline, opline->op2);
 				if (Z_OPT_TYPE_P(default_value) == IS_CONSTANT_AST) {
+					void *run_time_cache = RUN_TIME_CACHE(op_array);
 					zval *cache_val =
-						(zval *) ((char *) call->run_time_cache + Z_CACHE_SLOT_P(default_value));
+						(zval *) ((char *) run_time_cache + Z_CACHE_SLOT_P(default_value));
 
-					/* We keep in cache only not refcounted values */
 					if (Z_TYPE_P(cache_val) != IS_UNDEF) {
+						/* We keep in cache only not refcounted values */
 						ZVAL_COPY_VALUE(arg, cache_val);
 					} else {
-						ZVAL_COPY(arg, default_value);
+						/* Update constant inside a temporary zval, to make sure the CONSTANT_AST
+						 * value is not accessible through back traces. */
+						zval tmp;
+						ZVAL_COPY(&tmp, default_value);
 						start_fake_frame(call, opline);
-						int ret = zval_update_constant_ex(arg, fbc->op_array.scope);
+						int ret = zval_update_constant_ex(&tmp, fbc->op_array.scope);
 						end_fake_frame(call);
 						if (UNEXPECTED(ret == FAILURE)) {
-							zval_ptr_dtor_nogc(arg);
-							ZVAL_UNDEF(arg);
+							zval_ptr_dtor_nogc(&tmp);
 							return FAILURE;
 						}
-						if (!Z_REFCOUNTED_P(arg)) {
-							ZVAL_COPY_VALUE(cache_val, arg);
+						ZVAL_COPY_VALUE(arg, &tmp);
+						if (!Z_REFCOUNTED(tmp)) {
+							ZVAL_COPY_VALUE(cache_val, &tmp);
 						}
 					}
 				} else {
