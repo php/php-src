@@ -34,7 +34,6 @@ struct _zend_call_info {
 	zend_function          *callee_func;
 	zend_call_info         *next_caller;
 	zend_call_info         *next_callee;
-	zend_func_info         *clone;
 	zend_bool               recursive;
 	zend_bool               send_unpack;  /* Parameters passed by SEND_UNPACK or SEND_ARRAY */
 	int                     num_args;
@@ -48,8 +47,6 @@ struct _zend_func_info {
 	zend_call_info         *caller_info;  /* where this function is called from */
 	zend_call_info         *callee_info;  /* which functions are called from this one */
 	zend_call_info        **call_map;     /* Call info associated with init/call/send opnum */
-	int                     num_args;     /* (-1 - unknown) */
-	int                     return_value_used; /* -1 unknown, 0 no, 1 yes */
 	zend_ssa_var_info       return_info;
 };
 

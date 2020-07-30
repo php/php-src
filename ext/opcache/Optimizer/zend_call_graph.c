@@ -41,8 +41,6 @@ static void zend_op_array_collect(zend_op_array *op_array, void *context)
 	ZEND_SET_FUNC_INFO(op_array, func_info);
 	call_graph->op_arrays[call_graph->op_arrays_count] = op_array;
 	func_info->num = call_graph->op_arrays_count;
-	func_info->num_args = -1;
-	func_info->return_value_used = -1;
 	call_graph->op_arrays_count++;
 }
 

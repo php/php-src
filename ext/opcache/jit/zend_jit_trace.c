@@ -483,8 +483,6 @@ static zend_ssa *zend_jit_trace_build_ssa(const zend_op_array *op_array, zend_sc
 	jit_extension =
 		(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
 	memset(&jit_extension->func_info, 0, sizeof(jit_extension->func_info));
-	jit_extension->func_info.num_args = -1;
-	jit_extension->func_info.return_value_used = -1;
 	ssa = &jit_extension->func_info.ssa;
 
 	if (JIT_G(opt_level) >= ZEND_JIT_LEVEL_OPT_FUNC) {
@@ -4714,8 +4712,6 @@ jit_cleanup:
 			(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
 
 		memset(&jit_extension->func_info, 0, sizeof(jit_extension->func_info));
-		jit_extension->func_info.num_args = -1;
-		jit_extension->func_info.return_value_used = -1;
 	}
 
 	zend_arena_release(&CG(arena), checkpoint);
@@ -5763,8 +5759,6 @@ static int zend_jit_setup_hot_trace_counters(zend_op_array *op_array)
 
 	jit_extension = (zend_jit_op_array_trace_extension*)zend_shared_alloc(sizeof(zend_jit_op_array_trace_extension) + (op_array->last - 1) * sizeof(zend_op_trace_info));
 	memset(&jit_extension->func_info, 0, sizeof(zend_func_info));
-	jit_extension->func_info.num_args = -1;
-	jit_extension->func_info.return_value_used = -1;
 	jit_extension->op_array = op_array;
 	jit_extension->offset = (char*)jit_extension->trace_info - (char*)op_array->opcodes;
 	for (i = 0; i < op_array->last; i++) {

@@ -909,9 +909,6 @@ void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_flags, cons
 	fprintf(stderr, ":\n     ; (lines=%d, args=%d",
 		op_array->last,
 		op_array->num_args);
-	if (func_info && func_info->num_args >= 0) {
-		fprintf(stderr, "/%d", func_info->num_args);
-	}
 	fprintf(stderr, ", vars=%d, tmps=%d", op_array->last_var, op_array->T);
 	if (ssa) {
 		fprintf(stderr, ", ssa_vars=%d", ssa->vars_count);
@@ -958,11 +955,6 @@ void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_flags, cons
 		fprintf(stderr, ", inline");
 	}
 #endif
-	if (func_info && func_info->return_value_used == 0) {
-		fprintf(stderr, ", no_return_value");
-	} else if (func_info && func_info->return_value_used == 1) {
-		fprintf(stderr, ", return_value");
-	}
 	fprintf(stderr, ")\n");
 	if (msg) {
 		fprintf(stderr, "     ; (%s)\n", msg);
