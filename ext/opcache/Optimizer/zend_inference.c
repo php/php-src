@@ -1398,14 +1398,7 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 		case ZEND_RECV:
 		case ZEND_RECV_INIT:
 			if (ssa_op->result_def == var) {
-				zend_func_info *func_info = ZEND_FUNC_INFO(op_array);
-
-				if (func_info &&
-				    (int)opline->op1.num-1 < func_info->num_args &&
-				    func_info->arg_info[opline->op1.num-1].info.has_range) {
-					*tmp = func_info->arg_info[opline->op1.num-1].info.range;
-					return 1;
-				} else if (op_array->arg_info &&
+				if (op_array->arg_info &&
 				    opline->op1.num <= op_array->num_args) {
 					zend_type type = op_array->arg_info[opline->op1.num-1].type;
 					uint32_t mask = ZEND_TYPE_PURE_MASK_WITHOUT_NULL(type);
@@ -3005,7 +2998,6 @@ static zend_always_inline int _zend_update_type_info(
 		case ZEND_RECV_INIT:
 		{
 			/* Typehinting */
-			zend_func_info *func_info;
 			zend_arg_info *arg_info = &op_array->arg_info[opline->op1.num-1];
 
 			ce = NULL;
@@ -3014,21 +3006,8 @@ static zend_always_inline int _zend_update_type_info(
 				tmp |= MAY_BE_REF;
 			}
 
-			func_info = ZEND_FUNC_INFO(op_array);
-			if (func_info && (int)opline->op1.num-1 < func_info->num_args) {
-				tmp = (tmp & (MAY_BE_RC1|MAY_BE_RCN|MAY_BE_REF)) |
-					(tmp & func_info->arg_info[opline->op1.num-1].info.type);
-			}
-
 			UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
-			if (func_info &&
-			    (int)opline->op1.num-1 < func_info->num_args &&
-			    func_info->arg_info[opline->op1.num-1].info.ce) {
-				UPDATE_SSA_OBJ_TYPE(
-					func_info->arg_info[opline->op1.num-1].info.ce,
-					func_info->arg_info[opline->op1.num-1].info.is_instanceof,
-					ssa_op->result_def);
-			} else if (ce) {
+			if (ce) {
 				UPDATE_SSA_OBJ_TYPE(ce, 1, ssa_op->result_def);
 			} else {
 				UPDATE_SSA_OBJ_TYPE(NULL, 0, ssa_op->result_def);

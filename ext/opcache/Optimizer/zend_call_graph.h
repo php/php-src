@@ -27,11 +27,6 @@ typedef struct _zend_send_arg_info {
 	zend_op                *opline;
 } zend_send_arg_info;
 
-typedef struct _zend_recv_arg_info {
-	int                     ssa_var;
-	zend_ssa_var_info       info;
-} zend_recv_arg_info;
-
 struct _zend_call_info {
 	zend_op_array          *caller_op_array;
 	zend_op                *caller_init_opline;
@@ -55,7 +50,6 @@ struct _zend_func_info {
 	zend_call_info        **call_map;     /* Call info associated with init/call/send opnum */
 	int                     num_args;     /* (-1 - unknown) */
 	int                     return_value_used; /* -1 unknown, 0 no, 1 yes */
-	zend_recv_arg_info     *arg_info;
 	zend_ssa_var_info       return_info;
 };
 
