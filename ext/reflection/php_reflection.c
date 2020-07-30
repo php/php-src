@@ -3103,6 +3103,7 @@ ZEND_METHOD(ReflectionMethod, getClosure)
 	} else {
 		if (!obj) {
 			zend_argument_value_error(1, "cannot be null for non-static methods");
+			RETURN_THROWS();
 		}
 
 		if (!instanceof_function(Z_OBJCE_P(obj), mptr->common.scope)) {
