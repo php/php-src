@@ -3006,36 +3006,20 @@ static zend_always_inline int _zend_update_type_info(
 		{
 			/* Typehinting */
 			zend_func_info *func_info;
-			zend_arg_info *arg_info = NULL;
-			if (op_array->arg_info && opline->op1.num <= op_array->num_args) {
-				arg_info = &op_array->arg_info[opline->op1.num-1];
-			}
+			zend_arg_info *arg_info = &op_array->arg_info[opline->op1.num-1];
 
 			ce = NULL;
-			if (arg_info) {
-				tmp = zend_fetch_arg_info_type(script, arg_info, &ce);
-				if (ZEND_ARG_SEND_MODE(arg_info)) {
-					tmp |= MAY_BE_REF;
-				}
-			} else {
-				tmp = MAY_BE_REF|MAY_BE_RC1|MAY_BE_RCN|MAY_BE_ANY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
+			tmp = zend_fetch_arg_info_type(script, arg_info, &ce);
+			if (ZEND_ARG_SEND_MODE(arg_info)) {
+				tmp |= MAY_BE_REF;
 			}
+
 			func_info = ZEND_FUNC_INFO(op_array);
 			if (func_info && (int)opline->op1.num-1 < func_info->num_args) {
 				tmp = (tmp & (MAY_BE_RC1|MAY_BE_RCN|MAY_BE_REF)) |
 					(tmp & func_info->arg_info[opline->op1.num-1].info.type);
 			}
-#if 0
-			/* We won't receive unused arguments */
-			if (ssa_vars[ssa_op->result_def].use_chain < 0 &&
-			    ssa_vars[ssa_op->result_def].phi_use_chain == NULL &&
-			    op_array->arg_info &&
-			    opline->op1.num <= op_array->num_args &&
-			    op_array->arg_info[opline->op1.num-1].class_name == NULL &&
-			    !op_array->arg_info[opline->op1.num-1].type_hint) {
-				tmp = MAY_BE_UNDEF|MAY_BE_RCN;
-			}
-#endif
+
 			UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
 			if (func_info &&
 			    (int)opline->op1.num-1 < func_info->num_args &&
