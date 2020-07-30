@@ -10435,6 +10435,7 @@ static int zend_jit_fetch_dim_read(dasm_State **Dst, const zend_op *opline, cons
 		if ((opline->result_type & (IS_VAR|IS_TMP_VAR))
 		 && (res_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))
 		 && (ssa_op+1)->op1_use == ssa_op->result_def
+		 && !(op2_info & ((MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF) - (MAY_BE_STRING|MAY_BE_LONG)))
 		 && zend_jit_may_avoid_refcounting(opline+1)) {
 			res_info |= AVOID_REFCOUNTING;
 			ssa->var_info[ssa_op->result_def].type |= AVOID_REFCOUNTING;
