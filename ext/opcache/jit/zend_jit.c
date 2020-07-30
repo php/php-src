@@ -2584,8 +2584,10 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						}
 						goto done;
 					case ZEND_CHECK_NAMED:
-						/* TODO: Trivial to support! */
-						break;
+						if (!zend_jit_check_named(&dasm_state, opline)) {
+							goto jit_failure;
+						}
+						goto done;
 					case ZEND_DO_UCALL:
 						is_terminated = 1;
 						/* break missing intentionally */

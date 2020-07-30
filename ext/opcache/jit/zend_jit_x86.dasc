@@ -9200,6 +9200,24 @@ static int zend_jit_send_val(dasm_State **Dst, const zend_op *opline, const zend
 	return 1;
 }
 
+static int zend_jit_check_named(dasm_State **Dst, const zend_op *opline)
+{
+	|	mov FCARG1a, EX->call
+	|	test byte [FCARG1a + offsetof(zend_execute_data, This.u1.type_info) + 3], (ZEND_CALL_MAY_HAVE_UNDEF >> 24)
+	|	jnz >1
+	|.cold_code
+	|1:
+	|	SAVE_VALID_OPLINE opline, r0
+	|	EXT_CALL zend_handle_undef_args, r0
+	|	test r0, r0
+	|	jnz ->exception_handler
+	|	jmp >2
+	|.code
+	|2:
+
+	return 1;
+}
+
 static int zend_jit_send_ref(dasm_State **Dst, const zend_op *opline, const zend_op_array *op_array, uint32_t op1_info, int cold)
 {
 	zend_jit_addr op1_addr, arg_addr, ref_addr;

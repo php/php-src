@@ -1576,9 +1576,6 @@ propagate_arg:
 						}
 					}
 					break;
-				case ZEND_CHECK_NAMED:
-					/* TODO: Trivial to support! */
-					break;
 				case ZEND_FETCH_OBJ_FUNC_ARG:
 					if (!frame
 					 || !frame->call
@@ -3635,6 +3632,11 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							break;
 						}
 						if (!zend_jit_check_func_arg(&dasm_state, opline, op_array)) {
+							goto jit_failure;
+						}
+						goto done;
+					case ZEND_CHECK_NAMED:
+						if (!zend_jit_check_named(&dasm_state, opline)) {
 							goto jit_failure;
 						}
 						goto done;
