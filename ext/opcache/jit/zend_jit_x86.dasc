@@ -1613,6 +1613,7 @@ static uint32_t ones32(uint32_t x)
 
 static uint32_t floor_log2(uint32_t x)
 {
+	ZEND_ASSERT(x != 0);
 	x |= (x >> 1);
 	x |= (x >> 2);
 	x |= (x >> 4);
@@ -1623,7 +1624,7 @@ static uint32_t floor_log2(uint32_t x)
 
 static zend_bool is_power_of_two(uint32_t x)
 {
-	return !(x & (x - 1));
+	return !(x & (x - 1)) && x != 0;
 }
 
 static zend_bool has_concrete_type(uint32_t value_type)
