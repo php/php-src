@@ -2996,6 +2996,7 @@ static zend_always_inline int _zend_update_type_info(
 			break;
 		case ZEND_RECV:
 		case ZEND_RECV_INIT:
+		case ZEND_RECV_VARIADIC:
 		{
 			/* Typehinting */
 			zend_arg_info *arg_info = &op_array->arg_info[opline->op1.num-1];
@@ -3004,6 +3005,14 @@ static zend_always_inline int _zend_update_type_info(
 			tmp = zend_fetch_arg_info_type(script, arg_info, &ce);
 			if (ZEND_ARG_SEND_MODE(arg_info)) {
 				tmp |= MAY_BE_REF;
+			}
+
+			if (opline->opcode == ZEND_RECV_VARIADIC) {
+				uint32_t elem_type = tmp & MAY_BE_REF
+					? MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF
+					: (tmp & MAY_BE_ANY) << MAY_BE_ARRAY_SHIFT;
+				tmp = MAY_BE_RC1|MAY_BE_RCN|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_ANY|elem_type;
+				ce = NULL;
 			}
 
 			UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
