@@ -40,6 +40,6 @@ try {
 --EXPECT--
 bool(false)
 bool(false)
-openssl_x509_parse(): Argument #1 ($x509) must be of type X509Certificate|string, array given
+openssl_x509_parse(): Argument #1 ($x509) must be of type OpenSSLCertificate|string, array given
 bool(false)
-openssl_x509_parse(): Argument #1 ($x509) must be of type X509Certificate|string, stdClass given
+openssl_x509_parse(): Argument #1 ($x509) must be of type OpenSSLCertificate|string, stdClass given

@@ -111,20 +111,20 @@ PHP_OPENSSL_API zend_string* php_openssl_decrypt(
 	const char *tag, zend_long tag_len,
 	const char *aad, size_t aad_len);
 
-/* X509Certificate class */
+/* OpenSSLCertificate class */
 
-typedef struct _x509_certificate_object {
+typedef struct _php_openssl_certificate_object {
 	X509 *x509;
 	zend_object std;
-} x509_certificate_object;
+} php_openssl_certificate_object;
 
-zend_class_entry *x509_certificate_ce;
+zend_class_entry *php_openssl_certificate_ce;
 
-static inline x509_certificate_object *x509_certificate_from_obj(zend_object *obj) {
-	return (x509_certificate_object *)((char *)(obj) - XtOffsetOf(x509_certificate_object, std));
+static inline php_openssl_certificate_object *php_openssl_certificate_from_obj(zend_object *obj) {
+	return (php_openssl_certificate_object *)((char *)(obj) - XtOffsetOf(php_openssl_certificate_object, std));
 }
 
-#define Z_X509_CERTIFICATE_P(zv) x509_certificate_from_obj(Z_OBJ_P(zv))
+#define Z_OPENSSL_CERTIFICATE_P(zv) php_openssl_certificate_from_obj(Z_OBJ_P(zv))
 
 PHP_MINIT_FUNCTION(openssl);
 PHP_MSHUTDOWN_FUNCTION(openssl);

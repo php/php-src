@@ -9,9 +9,9 @@ openssl_x509_free($res);
 var_dump($res);
 ?>
 --EXPECTF--
-object(X509Certificate)#1 (0) {
+object(OpenSSLCertificate)#1 (0) {
 }
 
 Deprecated: Function openssl_x509_free() is deprecated in %s on line %d
-object(X509Certificate)#1 (0) {
+object(OpenSSLCertificate)#1 (0) {
 }

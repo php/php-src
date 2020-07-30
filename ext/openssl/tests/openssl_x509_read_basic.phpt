@@ -33,14 +33,14 @@ try {
 
 ?>
 --EXPECTF--
-object(X509Certificate)#%d (0) {
+object(OpenSSLCertificate)#%d (0) {
 }
-object(X509Certificate)#%d (0) {
+object(OpenSSLCertificate)#%d (0) {
 }
 
 Warning: openssl_x509_read(): X.509 Certificate cannot be retrieved in %s on line %d
 bool(false)
-object(X509Certificate)#%d (0) {
+object(OpenSSLCertificate)#%d (0) {
 }
-openssl_x509_read(): Argument #1 ($x509) must be of type X509Certificate|string, array given
-openssl_x509_read(): Argument #1 ($x509) must be of type X509Certificate|string, array given
+openssl_x509_read(): Argument #1 ($x509) must be of type OpenSSLCertificate|string, array given
+openssl_x509_read(): Argument #1 ($x509) must be of type OpenSSLCertificate|string, array given

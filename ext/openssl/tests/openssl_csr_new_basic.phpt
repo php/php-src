@@ -27,8 +27,8 @@ Warning: openssl_csr_new(): Key array must be of the form array(0 => key, 1 => p
 
 Warning: openssl_csr_new(): add1_attr_by_txt challengePassword_min -> 4 (failed; check error queue and value of string_mask OpenSSL option if illegal characters are reported) in %s on line %d
 bool(false)
-object(X509CertificateSigningRequest)#%d (0) {
+object(OpenSSLCertificateSigningRequest)#%d (0) {
 }
-object(X509CertificateSigningRequest)#%d (0) {
+object(OpenSSLCertificateSigningRequest)#%d (0) {
 }
 Done

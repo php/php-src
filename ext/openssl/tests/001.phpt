@@ -27,7 +27,7 @@ echo "Export key to file\n";
 if (!openssl_pkey_export_to_file($privkey, $key_file_name, $passphrase, $conf)) {
     die("failed to export to file $key_file_name");
 }
-var_dump($privkey instanceof OpenSSLKey);
+var_dump($privkey instanceof OpenSSLAsymmetricKey);
 
 echo "Load key from file - array syntax\n";
 

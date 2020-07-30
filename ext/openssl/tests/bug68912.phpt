@@ -19,4 +19,4 @@ try {
 }
 ?>
 --EXPECT--
-openssl_spki_new(): Argument #1 ($privkey) must be of type OpenSSLKey, resource given
+openssl_spki_new(): Argument #1 ($privkey) must be of type OpenSSLAsymmetricKey, resource given

@@ -12,8 +12,8 @@ var_dump(openssl_pkey_new(["private_key_type" => OPENSSL_KEYTYPE_DH, 'config' =>
 echo "DONE";
 ?>
 --EXPECTF--
-object(OpenSSLKey)#%d (0) {
+object(OpenSSLAsymmetricKey)#%d (0) {
 }
-object(OpenSSLKey)#%d (0) {
+object(OpenSSLAsymmetricKey)#%d (0) {
 }
 DONE

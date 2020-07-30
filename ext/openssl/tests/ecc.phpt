@@ -81,7 +81,7 @@ foreach ($curve_names as $curve_name) {
 ?>
 --EXPECTF--
 Testing openssl_pkey_new
-object(OpenSSLKey)#1 (0) {
+object(OpenSSLAsymmetricKey)#1 (0) {
 }
 
 Warning: openssl_pkey_new(): Unknown elliptic curve (short) name invalid_cuve_name in %s on line %d
@@ -90,22 +90,22 @@ int(384)
 int(215)
 string(9) "secp384r1"
 bool(true)
-object(OpenSSLKey)#%d (0) {
+object(OpenSSLAsymmetricKey)#%d (0) {
 }
 bool(true)
 Testing openssl_csr_new with key generation
 NULL
-object(OpenSSLKey)#%d (0) {
+object(OpenSSLAsymmetricKey)#%d (0) {
 }
 Testing openssl_csr_new with existing ecc key
-object(X509CertificateSigningRequest)#%d (0) {
+object(OpenSSLCertificateSigningRequest)#%d (0) {
 }
 bool(false)
 array(1) {
   ["d"]=>
   string(%d) "%a"
 }
-object(X509Certificate)#%d (0) {
+object(OpenSSLCertificate)#%d (0) {
 }
 Testing openssl_x509_check_private_key
 bool(true)
