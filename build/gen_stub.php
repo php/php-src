@@ -576,11 +576,23 @@ class DocCommentTag {
 
     public function getVariableName(): string {
         $value = $this->getValue();
-        if ($value === null || strlen($value) === 0 || $value[0] !== '$') {
-            throw new Exception("@$this->name not followed by variable name");
+        if ($value === null || strlen($value) === 0) {
+            throw new Exception("@$this->name doesn't have any value");
         }
 
-        return substr($value, 1);
+        $matches = [];
+
+        if ($this->name === "param") {
+            preg_match('/^\s*[\w\|\\\\]+\s*\$(\w+).*$/', $value, $matches);
+        } elseif ($this->name === "prefer-ref") {
+            preg_match('/^\s*\$(\w+).*$/', $value, $matches);
+        }
+
+        if (isset($matches[1]) === false) {
+            throw new Exception("@$this->name doesn't contain variable name or has an invalid format \"$value\"");
+        }
+
+        return $matches[1];
     }
 }
 
@@ -610,6 +622,7 @@ function parseFunctionLike(
     $alias = null;
     $isDeprecated = false;
     $haveDocReturnType = false;
+    $docParamTypes = [];
 
     if ($comment) {
         $tags = parseDocComment($comment);
@@ -631,6 +644,8 @@ function parseFunctionLike(
                 $isDeprecated = true;
             } else if ($tag->name === 'return') {
                 $haveDocReturnType = true;
+            } else if ($tag->name === 'param') {
+                $docParamTypes[$tag->getVariableName()] = true;
             }
         }
     }
@@ -656,6 +671,10 @@ function parseFunctionLike(
         }
 
         $type = $param->type ? Type::fromNode($param->type) : null;
+        if ($type === null && !isset($docParamTypes[$varName])) {
+            throw new Exception("Missing parameter type for function $name()");
+        }
+
         if ($param->default instanceof Expr\ConstFetch &&
             $param->default->name->toLowerString() === "null" &&
             $type && !$type->isNullable()
@@ -1103,7 +1122,7 @@ function initPhpParser() {
 $optind = null;
 $options = getopt("f", ["force-regeneration"], $optind);
 $forceRegeneration = isset($options["f"]) || isset($options["force-regeneration"]);
-$location = $argv[$optind + 1] ?? ".";
+$location = $argv[$optind] ?? ".";
 
 if (is_file($location)) {
     // Generate single file.
