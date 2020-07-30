@@ -19,8 +19,8 @@ $jis = base64_decode('GyRCRnxLXDhsJUYlLSU5JUgkRyQ5ISMbKEIwMTIzNBskQiM1IzYjNyM4Iz
 // EUC-JP string
 $euc_jp = '日本語テキストです。01234５６７８９。';
 
-// Test for single scaler
-echo "== SCALER TEST ==\n";
+// Test for single scalar
+echo "== SCALAR TEST ==\n";
 $s = $sjis;
 $encoding = mb_convert_variables('EUC-JP', 'SJIS', $s);
 print("$encoding\n"); // SJIS
@@ -116,8 +116,8 @@ print("$encoding\n"); // EUC-JP
 print("{$oo->s1}{$oo->s2}{$oo->s3}\n"); // Converted to EUC-JP
 
 
-// Test for scaler, array and object
-echo "== SCALER, ARRAY AND OBJECT TEST ==\n";
+// Test for scalar, array and object
+echo "== SCALAR, ARRAY AND OBJECT TEST ==\n";
 
 $s1 = $euc_jp;
 $s2 = $euc_jp;
@@ -134,7 +134,7 @@ print("{$oo->s1}{$oo->s2}{$oo->s3}\n"); // Converted to EUC-JP
 
 ?>
 --EXPECT--
-== SCALER TEST ==
+== SCALAR TEST ==
 SJIS
 日本語テキストです。01234５６７８９。
 JIS
@@ -155,7 +155,7 @@ EUC-JP
 日本語テキストです。01234５６７８９。日本語テキストです。01234５６７８９。日本語テキストです。01234５６７８９。
 EUC-JP
 日本語テキストです。01234５６７８９。日本語テキストです。01234５６７８９。日本語テキストです。01234５６７８９。
-== SCALER, ARRAY AND OBJECT TEST ==
+== SCALAR, ARRAY AND OBJECT TEST ==
 EUC-JP
 日本語テキストです。01234５６７８９。日本語テキストです。01234５６７８９。日本語テキストです。01234５６７８９。
 日本語テキストです。01234５６７８９。日本語テキストです。01234５６７８９。日本語テキストです。01234５６７８９。
