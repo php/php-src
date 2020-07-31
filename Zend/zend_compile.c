@@ -3349,7 +3349,9 @@ uint32_t zend_compile_args(
 
 			/* Unpack may contain named arguments. */
 			may_have_undef = 1;
-			*may_have_extra_named_args = 1;
+			if (!fbc || (fbc->common.fn_flags & ZEND_ACC_VARIADIC)) {
+				*may_have_extra_named_args = 1;
+			}
 			continue;
 		}
 
@@ -3369,13 +3371,15 @@ uint32_t zend_compile_args(
 					/* Using named arguments, but passing in order. */
 					arg_name = NULL;
 					arg_count++;
+				} else {
+					// TODO: We could track which arguments were passed, even if out of order.
+					may_have_undef = 1;
+					if (arg_num == (uint32_t) -1 && (fbc->common.fn_flags & ZEND_ACC_VARIADIC)) {
+						*may_have_extra_named_args = 1;
+					}
 				}
 			} else {
 				arg_num = (uint32_t) -1;
-			}
-
-			if (arg_name) {
-				// TODO: These could be made more precise if fbc is known.
 				may_have_undef = 1;
 				*may_have_extra_named_args = 1;
 			}
