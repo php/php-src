@@ -199,7 +199,7 @@ static void php_openssl_request_free_obj(zend_object *object)
 
 /* OpenSSLAsymmetricKey class */
 
-typedef struct _openssl_key_object {
+typedef struct _php_openssl_pkey_object {
 	EVP_PKEY *pkey;
 	zend_object std;
 } php_openssl_pkey_object;
@@ -265,6 +265,7 @@ ZEND_GET_MODULE(openssl)
 
 /* {{{ OpenSSL compatibility functions and macros */
 #if PHP_OPENSSL_API_VERSION < 0x10100
+
 #define EVP_PKEY_get0_RSA(_pkey) _pkey->pkey.rsa
 #define EVP_PKEY_get0_DH(_pkey) _pkey->pkey.dh
 #define EVP_PKEY_get0_DSA(_pkey) _pkey->pkey.dsa
@@ -381,16 +382,16 @@ static const unsigned char *ASN1_STRING_get0_data(const ASN1_STRING *asn1)
 	return M_ASN1_STRING_data(asn1);
 }
 
+static int EVP_PKEY_up_ref(EVP_PKEY *pkey)
+{
+	return CRYPTO_add(&pkey->references, 1, CRYPTO_LOCK_EVP_PKEY);
+}
+
 #if PHP_OPENSSL_API_VERSION < 0x10002
 
 static int X509_get_signature_nid(const X509 *x)
 {
 	return OBJ_obj2nid(x->sig_alg->algorithm);
-}
-
-static int EVP_PKEY_up_ref(EVP_PKEY *pkey)
-{
-	return CRYPTO_add(&pkey->references, 1, CRYPTO_LOCK_EVP_PKEY);
 }
 
 #endif
@@ -1460,13 +1461,13 @@ static X509 *php_openssl_x509_from_param(zend_object *cert_obj, zend_string *cer
 
 static X509 *php_openssl_x509_from_zval(zval *val, bool *free_cert)
 {
-	*free_cert = 1;
-
 	if (Z_TYPE_P(val) == IS_OBJECT && Z_OBJCE_P(val) == php_openssl_certificate_ce) {
 		*free_cert = 0;
 
 		return php_openssl_certificate_from_obj(Z_OBJ_P(val))->x509;
 	}
+
+	*free_cert = 1;
 
 	if (!try_convert_to_string(val)) {
 		return NULL;
@@ -1616,16 +1617,9 @@ cleanup:
 	if (spki != NULL) {
 		NETSCAPE_SPKI_free(spki);
 	}
-	if (free_pkey && pkey != NULL) {
-		EVP_PKEY_free(pkey);
-	}
 
 	if (s && ZSTR_LEN(s) <= 0) {
 		RETVAL_FALSE;
-	}
-
-	if (free_pkey && s != NULL) {
-		zend_string_release_ex(s, 0);
 	}
 }
 /* }}} */

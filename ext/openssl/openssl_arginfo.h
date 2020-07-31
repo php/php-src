@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 1d6c7e5e46e09f28ec41cc0fe440383ede11ee3e */
+ * Stub hash: 5189cc18305417d2566fe594f69806f72899c355 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_x509_export_to_file, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_TYPE_MASK(0, x509, OpenSSLCertificate, MAY_BE_STRING, NULL)
