@@ -455,8 +455,8 @@ PHP_FUNCTION(enchant_broker_request_dict)
 	PHP_ENCHANT_GET_BROKER;
 
 	if (taglen == 0) {
-		php_error_docref(NULL, E_WARNING, "Tag cannot be empty");
-		RETURN_FALSE;
+		zend_argument_value_error(2, "cannot be empty");
+		RETURN_THROWS();
 	}
 
 	pdict = enchant_broker_request_dict(pbroker->pbroker, (const char *)tag);
