@@ -350,7 +350,7 @@ PHP_FUNCTION(bzopen)
 	/* If it's not a resource its a string containing the filename to open */
 	if (Z_TYPE_P(file) == IS_STRING) {
 		if (Z_STRLEN_P(file) == 0) {
-			php_error_docref(NULL, E_WARNING, "Filename cannot be empty");
+			zend_argument_value_error(1, "cannot be empty");
 			RETURN_FALSE;
 		}
 
