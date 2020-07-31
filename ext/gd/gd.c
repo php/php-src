@@ -4162,7 +4162,7 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 	zval *to_zval = NULL;
 
 	if (image_type == PHP_GDIMG_TYPE_GIF) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|z", &imgind, gd_image_ce, &to_zval) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|z!", &imgind, gd_image_ce, &to_zval) == FAILURE) {
 			RETURN_THROWS();
 		}
 	} else if (image_type == PHP_GDIMG_TYPE_PNG) {
