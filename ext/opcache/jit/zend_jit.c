@@ -2584,7 +2584,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						}
 						goto done;
 					case ZEND_CHECK_UNDEF_ARGS:
-						if (!zend_jit_check_named(&dasm_state, opline)) {
+						if (!zend_jit_check_undef_args(&dasm_state, opline)) {
 							goto jit_failure;
 						}
 						goto done;

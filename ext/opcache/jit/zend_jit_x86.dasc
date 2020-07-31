@@ -9197,7 +9197,7 @@ static int zend_jit_send_val(dasm_State **Dst, const zend_op *opline, const zend
 	return 1;
 }
 
-static int zend_jit_check_named(dasm_State **Dst, const zend_op *opline)
+static int zend_jit_check_undef_args(dasm_State **Dst, const zend_op *opline)
 {
 	|	mov FCARG1a, EX->call
 	|	test byte [FCARG1a + offsetof(zend_execute_data, This.u1.type_info) + 3], (ZEND_CALL_MAY_HAVE_UNDEF >> 24)
