@@ -882,9 +882,7 @@ repeat:
 		case IS_OBJECT:
 			if (Z_TYPE(val_free) == IS_UNDEF) {
 				if (Z_OBJ_HT_P(val)->get) {
-					zval rv;
-					val = Z_OBJ_HT_P(val)->get(val, &rv);
-					ZVAL_COPY_VALUE(&val_free, val);
+					val = Z_OBJ_HT_P(val)->get(val, &val_free);
 					goto repeat;
 				} else if (Z_OBJ_HT_P(val)->cast_object) {
 					if (Z_OBJ_HT_P(val)->cast_object(val, &val_free, IS_STRING) == SUCCESS) {
