@@ -31,6 +31,7 @@
 #include "zend_virtual_cwd.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_filestat.h"
+#include "Zend/zend_attributes.h"
 #include "opcache_arginfo.h"
 
 #if HAVE_JIT
@@ -370,11 +371,54 @@ static ZEND_NAMED_FUNCTION(accel_is_readable)
 	}
 }
 
+#if HAVE_JIT
+static void zend_jit_validate_opcache_attribute(zend_attribute *jit, uint32_t target, zend_class_entry *scope)
+{
+	if (jit->argc == 0) {
+		zend_error(E_COMPILE_ERROR, "Too few arguments to attribute @@Jit, %d passed and exactly 1 expected", jit->argc);
+	}
+
+	if (jit->argc > 1) {
+		zend_error(E_COMPILE_ERROR, "Too many arguments to attribute @@Jit, %d passed and exactly 1 expected", jit->argc);
+	}
+
+	if (jit->argc == 1) {
+		zend_string *trigger;
+
+		if (Z_TYPE(jit->args[0].value) != IS_STRING) {
+			zend_error(E_COMPILE_ERROR, "@@Jit argument $mode must be a string");
+		}
+
+		trigger = Z_STR(jit->args[0].value);
+
+		if (!zend_string_equals_literal_ci(trigger, "off")) {
+			zend_error(E_COMPILE_ERROR, "@@Jit argument $mode only supports the value 'off'");
+		}
+	}
+}
+#endif
+
 static ZEND_MINIT_FUNCTION(zend_accelerator)
 {
 	(void)type; /* keep the compiler happy */
+#if HAVE_JIT
+	zend_class_entry ce;
+	zend_internal_attribute *attr;
+#endif
 
 	REGISTER_INI_ENTRIES();
+
+#if HAVE_JIT
+	INIT_CLASS_ENTRY(ce, "Jit", NULL);
+	zend_ce_opcache_jit_attribute = zend_register_internal_class(&ce);
+	zend_ce_opcache_jit_attribute->ce_flags |= ZEND_ACC_FINAL;
+
+	attr = zend_internal_attribute_register(
+		zend_ce_opcache_jit_attribute,
+		ZEND_ATTRIBUTE_TARGET_FUNCTION | ZEND_ATTRIBUTE_TARGET_METHOD
+	);
+	attr->validator = zend_jit_validate_opcache_attribute;
+#endif
 
 	return SUCCESS;
 }
