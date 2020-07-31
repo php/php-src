@@ -4119,15 +4119,8 @@ ZEND_VM_HOT_HANDLER(60, ZEND_DO_FCALL, ANY, ANY, SPEC(RETVAL))
 
 ZEND_VM_C_LABEL(fcall_end):
 		zend_vm_stack_free_args(call);
-
-		uint32_t call_info = ZEND_CALL_INFO(call);
-		if (UNEXPECTED(call_info & (ZEND_CALL_HAS_EXTRA_NAMED_PARAMS|ZEND_CALL_ALLOCATED))) {
-			if (call_info & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
-				zend_free_extra_named_params(call->extra_named_params);
-			}
-			zend_vm_stack_free_call_frame_ex(call_info, call);
-		} else {
-			EG(vm_stack_top) = (zval*)call;
+		if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS)) {
+			zend_free_extra_named_params(call->extra_named_params);
 		}
 
 		if (!RETURN_VALUE_USED(opline)) {
