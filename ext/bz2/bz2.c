@@ -351,7 +351,7 @@ PHP_FUNCTION(bzopen)
 	if (Z_TYPE_P(file) == IS_STRING) {
 		if (Z_STRLEN_P(file) == 0) {
 			zend_argument_value_error(1, "cannot be empty");
-			RETURN_FALSE;
+			RETURN_THROWS();
 		}
 
 		if (CHECK_ZVAL_NULL_PATH(file)) {
