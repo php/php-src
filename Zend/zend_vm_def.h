@@ -2795,7 +2795,7 @@ ZEND_VM_HOT_HELPER(zend_leave_helper, ANY, ANY)
 		}
 
 		if (UNEXPECTED(call_info & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS)) {
-			zend_free_extra_named_params_ex(EX(extra_named_params));
+			zend_free_extra_named_params(EX(extra_named_params));
 		}
 
 		/* Free extra args before releasing the closure,
@@ -2851,7 +2851,7 @@ ZEND_VM_HOT_HELPER(zend_leave_helper, ANY, ANY)
 				}
 				zend_vm_stack_free_extra_args_ex(call_info, execute_data);
 				if (UNEXPECTED(call_info & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS)) {
-					zend_free_extra_named_params_ex(EX(extra_named_params));
+					zend_free_extra_named_params(EX(extra_named_params));
 				}
 			}
 			if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
@@ -3907,7 +3907,7 @@ ZEND_VM_HOT_HANDLER(129, ZEND_DO_ICALL, ANY, ANY, SPEC(RETVAL))
 	uint32_t call_info = ZEND_CALL_INFO(call);
 	if (UNEXPECTED(call_info & (ZEND_CALL_HAS_EXTRA_NAMED_PARAMS|ZEND_CALL_ALLOCATED))) {
 		if (call_info & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
-			zend_free_extra_named_params_ex(call->extra_named_params);
+			zend_free_extra_named_params(call->extra_named_params);
 		}
 		zend_vm_stack_free_call_frame_ex(call_info, call);
 	} else {
@@ -4020,7 +4020,7 @@ ZEND_VM_C_LABEL(fcall_by_name_end):
 		uint32_t call_info = ZEND_CALL_INFO(call);
 		if (UNEXPECTED(call_info & (ZEND_CALL_HAS_EXTRA_NAMED_PARAMS|ZEND_CALL_ALLOCATED))) {
 			if (call_info & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
-				zend_free_extra_named_params_ex(call->extra_named_params);
+				zend_free_extra_named_params(call->extra_named_params);
 			}
 			zend_vm_stack_free_call_frame_ex(call_info, call);
 		} else {
@@ -4123,7 +4123,7 @@ ZEND_VM_C_LABEL(fcall_end):
 		uint32_t call_info = ZEND_CALL_INFO(call);
 		if (UNEXPECTED(call_info & (ZEND_CALL_HAS_EXTRA_NAMED_PARAMS|ZEND_CALL_ALLOCATED))) {
 			if (call_info & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
-				zend_free_extra_named_params_ex(call->extra_named_params);
+				zend_free_extra_named_params(call->extra_named_params);
 			}
 			zend_vm_stack_free_call_frame_ex(call_info, call);
 		} else {

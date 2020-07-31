@@ -1119,7 +1119,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_leave_helper
 		}
 
 		if (UNEXPECTED(call_info & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS)) {
-			zend_free_extra_named_params_ex(EX(extra_named_params));
+			zend_free_extra_named_params(EX(extra_named_params));
 		}
 
 		/* Free extra args before releasing the closure,
@@ -1175,7 +1175,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_leave_helper
 				}
 				zend_vm_stack_free_extra_args_ex(call_info, execute_data);
 				if (UNEXPECTED(call_info & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS)) {
-					zend_free_extra_named_params_ex(EX(extra_named_params));
+					zend_free_extra_named_params(EX(extra_named_params));
 				}
 			}
 			if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
@@ -1250,7 +1250,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_ICALL_SPEC_RETV
 	uint32_t call_info = ZEND_CALL_INFO(call);
 	if (UNEXPECTED(call_info & (ZEND_CALL_HAS_EXTRA_NAMED_PARAMS|ZEND_CALL_ALLOCATED))) {
 		if (call_info & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
-			zend_free_extra_named_params_ex(call->extra_named_params);
+			zend_free_extra_named_params(call->extra_named_params);
 		}
 		zend_vm_stack_free_call_frame_ex(call_info, call);
 	} else {
@@ -1311,7 +1311,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_ICALL_SPEC_RETV
 	uint32_t call_info = ZEND_CALL_INFO(call);
 	if (UNEXPECTED(call_info & (ZEND_CALL_HAS_EXTRA_NAMED_PARAMS|ZEND_CALL_ALLOCATED))) {
 		if (call_info & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
-			zend_free_extra_named_params_ex(call->extra_named_params);
+			zend_free_extra_named_params(call->extra_named_params);
 		}
 		zend_vm_stack_free_call_frame_ex(call_info, call);
 	} else {
@@ -1447,7 +1447,7 @@ fcall_by_name_end:
 		uint32_t call_info = ZEND_CALL_INFO(call);
 		if (UNEXPECTED(call_info & (ZEND_CALL_HAS_EXTRA_NAMED_PARAMS|ZEND_CALL_ALLOCATED))) {
 			if (call_info & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
-				zend_free_extra_named_params_ex(call->extra_named_params);
+				zend_free_extra_named_params(call->extra_named_params);
 			}
 			zend_vm_stack_free_call_frame_ex(call_info, call);
 		} else {
@@ -1537,7 +1537,7 @@ fcall_by_name_end:
 		uint32_t call_info = ZEND_CALL_INFO(call);
 		if (UNEXPECTED(call_info & (ZEND_CALL_HAS_EXTRA_NAMED_PARAMS|ZEND_CALL_ALLOCATED))) {
 			if (call_info & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
-				zend_free_extra_named_params_ex(call->extra_named_params);
+				zend_free_extra_named_params(call->extra_named_params);
 			}
 			zend_vm_stack_free_call_frame_ex(call_info, call);
 		} else {
@@ -1640,7 +1640,7 @@ fcall_end:
 		uint32_t call_info = ZEND_CALL_INFO(call);
 		if (UNEXPECTED(call_info & (ZEND_CALL_HAS_EXTRA_NAMED_PARAMS|ZEND_CALL_ALLOCATED))) {
 			if (call_info & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
-				zend_free_extra_named_params_ex(call->extra_named_params);
+				zend_free_extra_named_params(call->extra_named_params);
 			}
 			zend_vm_stack_free_call_frame_ex(call_info, call);
 		} else {
@@ -1749,7 +1749,7 @@ fcall_end:
 		uint32_t call_info = ZEND_CALL_INFO(call);
 		if (UNEXPECTED(call_info & (ZEND_CALL_HAS_EXTRA_NAMED_PARAMS|ZEND_CALL_ALLOCATED))) {
 			if (call_info & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
-				zend_free_extra_named_params_ex(call->extra_named_params);
+				zend_free_extra_named_params(call->extra_named_params);
 			}
 			zend_vm_stack_free_call_frame_ex(call_info, call);
 		} else {
@@ -53445,7 +53445,7 @@ zend_leave_helper_SPEC_LABEL:
 		}
 
 		if (UNEXPECTED(call_info & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS)) {
-			zend_free_extra_named_params_ex(EX(extra_named_params));
+			zend_free_extra_named_params(EX(extra_named_params));
 		}
 
 		/* Free extra args before releasing the closure,
@@ -53501,7 +53501,7 @@ zend_leave_helper_SPEC_LABEL:
 				}
 				zend_vm_stack_free_extra_args_ex(call_info, execute_data);
 				if (UNEXPECTED(call_info & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS)) {
-					zend_free_extra_named_params_ex(EX(extra_named_params));
+					zend_free_extra_named_params(EX(extra_named_params));
 				}
 			}
 			if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {

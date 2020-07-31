@@ -304,12 +304,7 @@ static zend_always_inline void zend_vm_stack_extend_call_frame(
 	}
 }
 
-ZEND_API void ZEND_FASTCALL zend_free_extra_named_params_ex(zend_array *extra_named_params);
-static zend_always_inline void zend_free_extra_named_params(zend_execute_data *call) {
-	if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS)) {
-		zend_free_extra_named_params_ex(call->extra_named_params);
-	}
-}
+ZEND_API void ZEND_FASTCALL zend_free_extra_named_params(zend_array *extra_named_params);
 
 /* services */
 ZEND_API const char *get_active_class_name(const char **space);

@@ -3830,7 +3830,9 @@ static void cleanup_unfinished_calls(zend_execute_data *execute_data, uint32_t o
 			if (ZEND_CALL_INFO(call) & ZEND_CALL_RELEASE_THIS) {
 				OBJ_RELEASE(Z_OBJ(call->This));
 			}
-			zend_free_extra_named_params(call);
+			if (ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
+				zend_free_extra_named_params(call->extra_named_params);
+			}
 			if (call->func->common.fn_flags & ZEND_ACC_CLOSURE) {
 				zend_object_release(ZEND_CLOSURE_OBJECT(call->func));
 			} else if (call->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
@@ -4545,7 +4547,7 @@ ZEND_API int ZEND_FASTCALL zend_handle_undef_args(zend_execute_data *call) {
 	return SUCCESS;
 }
 
-ZEND_API void ZEND_FASTCALL zend_free_extra_named_params_ex(zend_array *extra_named_params)
+ZEND_API void ZEND_FASTCALL zend_free_extra_named_params(zend_array *extra_named_params)
 {
 	/* Extra named params may be shared. */
 	zend_array_release(extra_named_params);
