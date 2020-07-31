@@ -37,7 +37,6 @@
 #define ZEND_JIT_REG_ALLOC_GLOBAL (1<<1) /* global linear scan register allocation */
 #define ZEND_JIT_CPU_AVX          (1<<2) /* use AVX instructions, if available */
 
-#define ZEND_JIT_DEFAULT_OPTIONS      "1254"
 #define ZEND_JIT_DEFAULT_BUFFER_SIZE  "0"
 
 #define ZEND_JIT_COUNTER_INIT         32531
