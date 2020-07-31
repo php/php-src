@@ -172,6 +172,8 @@ PHP 8.0 INTERNALS UPGRADE NOTES
         - add_next_index_bool()
      4. Argument int to size_t in Zend Engine 4.0:
         - zend_set_hash_symbol()
+     5. Argument zval* to zend_object* in Zend Engine 4.0:
+        - zend_get_closure_method_def()
 
   u. Instead of overwriting zend_error_cb extensions with debugging, monitoring
      use-cases catching Errors/Exceptions are strongly encouraged to use
