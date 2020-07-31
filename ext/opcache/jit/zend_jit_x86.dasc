@@ -5527,6 +5527,7 @@ static int zend_jit_assign_to_typed_ref(dasm_State         **Dst,
 static int zend_jit_assign_to_variable(dasm_State    **Dst,
                                        const zend_op  *opline,
                                        const zend_op_array *op_array,
+                                       zend_jit_addr   var_use_addr,
                                        zend_jit_addr   var_addr,
                                        uint32_t        var_info,
                                        uint32_t        var_def_info,
@@ -5540,11 +5541,10 @@ static int zend_jit_assign_to_variable(dasm_State    **Dst,
 {
 	int done = 0;
 
-	//ZEND_ASSERT(Z_MODE(var_addr) == IS_MEM_ZVAL);
 	if (var_info & MAY_BE_REF) {
-		if (Z_MODE(var_addr) != IS_MEM_ZVAL || Z_REG(var_addr) != ZREG_FCARG1a || Z_OFFSET(var_addr) != 0) {
-			|	LOAD_ZVAL_ADDR FCARG1a, var_addr
-			var_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, 0);
+		if (Z_MODE(var_use_addr) != IS_MEM_ZVAL || Z_REG(var_use_addr) != ZREG_FCARG1a || Z_OFFSET(var_use_addr) != 0) {
+			|	LOAD_ZVAL_ADDR FCARG1a, var_use_addr
+			var_addr = var_use_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, 0);
 		}
 		|	// if (Z_ISREF_P(variable_ptr)) {
 		|	IF_NOT_Z_TYPE, FCARG1a, IS_REFERENCE, >1
@@ -5557,27 +5557,27 @@ static int zend_jit_assign_to_variable(dasm_State    **Dst,
 		|1:
 	}
 	if (var_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
-		ZEND_ASSERT(Z_REG(var_addr) != ZREG_R0);
+		ZEND_ASSERT(Z_REG(var_use_addr) != ZREG_R0);
 		if (RC_MAY_BE_1(var_info)) {
 			int in_cold = 0;
 
 			if (var_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
-				|	IF_ZVAL_REFCOUNTED var_addr, >1
+				|	IF_ZVAL_REFCOUNTED var_use_addr, >1
 				|.cold_code
 				|1:
 				in_cold = 1;
 			}
-			if (Z_REG(var_addr) == ZREG_FCARG1a) {
-				|	GET_ZVAL_PTR r0, var_addr
+			if (Z_REG(var_use_addr) == ZREG_FCARG1a) {
+				|	GET_ZVAL_PTR r0, var_use_addr
 				|	mov aword T1, r0 // save
 				if (!zend_jit_simple_assign(Dst, opline, op_array, var_addr, var_info, var_def_info, val_type, val, val_addr, val_info, res_addr, in_cold, 0)) {
 					return 0;
 				}
-				if (Z_REG(var_addr) == ZREG_FCARG1a) {
+				if (Z_REG(var_use_addr) == ZREG_FCARG1a) {
 					|	mov FCARG1a, aword T1 // restore
 				}
 			} else {
-				|	GET_ZVAL_PTR FCARG1a, var_addr
+				|	GET_ZVAL_PTR FCARG1a, var_use_addr
 				if (!zend_jit_simple_assign(Dst, opline, op_array, var_addr, var_info, var_def_info, val_type, val, val_addr, val_info, res_addr, in_cold, 1)) {
 					return 0;
 				}
@@ -5613,27 +5613,27 @@ static int zend_jit_assign_to_variable(dasm_State    **Dst,
 			}
 		} else /* if (RC_MAY_BE_N(var_info)) */ {
 			if (var_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
-				|	IF_NOT_ZVAL_REFCOUNTED var_addr, >5
+				|	IF_NOT_ZVAL_REFCOUNTED var_use_addr, >5
 			}
-			|	GET_ZVAL_PTR r0, var_addr
+			|	GET_ZVAL_PTR r0, var_use_addr
 			|	GC_DELREF r0
 			if (var_info & (MAY_BE_ARRAY|MAY_BE_OBJECT)) {
-				if (Z_REG(var_addr) == ZREG_FP) {
-					|	GET_ZVAL_PTR FCARG1a, var_addr
+				if (Z_REG(var_use_addr) == ZREG_FP) {
+					|	GET_ZVAL_PTR FCARG1a, var_use_addr
 					|	IF_GC_MAY_NOT_LEAK FCARG1a, >5
-				} else if (Z_REG(var_addr) != ZREG_FCARG1a) {
-					|	GET_ZVAL_PTR FCARG1a, var_addr
+				} else if (Z_REG(var_use_addr) != ZREG_FCARG1a) {
+					|	GET_ZVAL_PTR FCARG1a, var_use_addr
 					|	IF_GC_MAY_NOT_LEAK FCARG1a, >5
-					|	mov T1, Ra(Z_REG(var_addr)) // save
+					|	mov T1, Ra(Z_REG(var_use_addr)) // save
 				} else {
-					|	GET_ZVAL_PTR r0, var_addr
+					|	GET_ZVAL_PTR r0, var_use_addr
 					|	IF_GC_MAY_NOT_LEAK r0, >5
-					|	mov T1, Ra(Z_REG(var_addr)) // save
-					|	GET_ZVAL_PTR FCARG1a, var_addr
+					|	mov T1, Ra(Z_REG(var_use_addr)) // save
+					|	GET_ZVAL_PTR FCARG1a, var_use_addr
 				}
 				|	EXT_CALL gc_possible_root, r0
-				if (Z_REG(var_addr) != ZREG_FP) {
-					|	mov Ra(Z_REG(var_addr)), T1 // restore
+				if (Z_REG(var_use_addr) != ZREG_FP) {
+					|	mov Ra(Z_REG(var_use_addr)), T1 // restore
 				}
 			}
 			|5:
@@ -5749,7 +5749,7 @@ static int zend_jit_assign_dim(dasm_State **Dst, const zend_op *opline, const ze
 				var_info |= MAY_BE_RC1;
 			}
 			|	// value = zend_assign_to_variable(variable_ptr, value, OP_DATA_TYPE);
-			if (!zend_jit_assign_to_variable(Dst, opline, op_array, var_addr, var_info, -1, (opline+1)->op1_type, (opline+1)->op1, op3_addr, val_info, res_addr, 0)) {
+			if (!zend_jit_assign_to_variable(Dst, opline, op_array, var_addr, var_addr, var_info, -1, (opline+1)->op1_type, (opline+1)->op1, op3_addr, val_info, res_addr, 0)) {
 				return 0;
 			}
 		}
@@ -8011,7 +8011,7 @@ static int zend_jit_assign(dasm_State **Dst, const zend_op *opline, const zend_o
 		/* Force type update */
 		op1_info |= MAY_BE_UNDEF;
 	}
-	if (!zend_jit_assign_to_variable(Dst, opline, op_array, op1_addr, op1_info, op1_def_info, opline->op2_type, opline->op2, op2_addr, op2_info, res_addr,
+	if (!zend_jit_assign_to_variable(Dst, opline, op_array, op1_use_addr, op1_addr, op1_info, op1_def_info, opline->op2_type, opline->op2, op2_addr, op2_info, res_addr,
 			may_throw)) {
 		return 0;
 	}
