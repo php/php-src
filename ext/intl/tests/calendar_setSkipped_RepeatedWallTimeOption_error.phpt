@@ -12,19 +12,23 @@ ini_set("intl.error_level", E_WARNING);
 
 $c = new IntlGregorianCalendar(NULL, 'pt_PT');
 
-var_dump($c->setSkippedWallTimeOption(3));
-var_dump($c->setRepeatedWallTimeOption(2));
+try {
+    var_dump($c->setSkippedWallTimeOption(3));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    var_dump($c->setRepeatedWallTimeOption(2));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
-var_dump(intlcal_set_repeated_wall_time_option(1, 1));
---EXPECTF--
-Warning: IntlCalendar::setSkippedWallTimeOption(): intlcal_set_skipped_wall_time_option: invalid option in %s on line %d
-bool(false)
-
-Warning: IntlCalendar::setRepeatedWallTimeOption(): intlcal_set_repeated_wall_time_option: invalid option in %s on line %d
-bool(false)
-
-Fatal error: Uncaught TypeError: intlcal_set_repeated_wall_time_option(): Argument #1 ($calendar) must be of type IntlCalendar, int given in %s:%d
-Stack trace:
-#0 %s(%d): intlcal_set_repeated_wall_time_option(1, 1)
-#1 {main}
-  thrown in %s on line %d
+try {
+    var_dump(intlcal_set_repeated_wall_time_option(1, 1));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+--EXPECT--
+IntlCalendar::setSkippedWallTimeOption(): Argument #1 ($wallTimeOption) must be one of IntlCalendar::WALLTIME_FIRST, IntlCalendar::WALLTIME_LAST, or IntlCalendar::WALLTIME_NEXT_VALID
+IntlCalendar::setRepeatedWallTimeOption(): Argument #1 ($wallTimeOption) must be either IntlCalendar::WALLTIME_FIRST or IntlCalendar::WALLTIME_LAST
+intlcal_set_repeated_wall_time_option(): Argument #1 ($calendar) must be of type IntlCalendar, int given

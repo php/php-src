@@ -16,13 +16,40 @@ var_dump($cal->toDateTime());
 var_dump("exception: {$e->getMessage()}");
 }
 
-var_dump(intlcal_to_date_time(3));
+try {
+    var_dump(intlcal_to_date_time($cal));
+} catch (\Exception $e) {
+    var_dump($e->getMessage());
+}
+
+$cal = IntlCalendar::createInstance("Etc/Unknown");
+try {
+    var_dump($cal->toDateTime());
+} catch (\Exception $e) {
+    var_dump($e->getMessage());
+}
+
+try {
+    var_dump(intlcal_to_date_time($cal));
+} catch (\Exception $e) {
+    var_dump($e->getMessage());
+}
+
+try {
+    var_dump(intlcal_to_date_time(3));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 --EXPECTF--
 Warning: IntlCalendar::toDateTime(): intlcal_to_date_time: DateTimeZone constructor threw exception in %s on line %d
 string(77) "exception: DateTimeZone::__construct(): Unknown or bad timezone (Etc/Unknown)"
 
-Fatal error: Uncaught TypeError: intlcal_to_date_time(): Argument #1 ($calendar) must be of type IntlCalendar, int given in %s:%d
-Stack trace:
-#0 %s(%d): intlcal_to_date_time(3)
-#1 {main}
-  thrown in %s on line %d
+Warning: intlcal_to_date_time(): intlcal_to_date_time: DateTimeZone constructor threw exception in %s on line %d
+string(66) "DateTimeZone::__construct(): Unknown or bad timezone (Etc/Unknown)"
+
+Warning: IntlCalendar::toDateTime(): intlcal_to_date_time: DateTimeZone constructor threw exception in %s on line %d
+string(66) "DateTimeZone::__construct(): Unknown or bad timezone (Etc/Unknown)"
+
+Warning: intlcal_to_date_time(): intlcal_to_date_time: DateTimeZone constructor threw exception in %s on line %d
+string(66) "DateTimeZone::__construct(): Unknown or bad timezone (Etc/Unknown)"
+intlcal_to_date_time(): Argument #1 ($calendar) must be of type IntlCalendar, int given

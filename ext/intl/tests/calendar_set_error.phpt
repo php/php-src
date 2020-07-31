@@ -24,22 +24,26 @@ try {
     echo $exception->getMessage() . "\n";
 }
 
-var_dump($c->set(-1, 2));
+try {
+    var_dump($c->set(-1, 2));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
-var_dump(intlcal_set($c, -1, 2));
-var_dump(intlcal_set(1, 2, 3));
---EXPECTF--
+try {
+    var_dump(intlcal_set($c, -1, 2));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+
+try {
+    var_dump(intlcal_set(1, 2, 3));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+--EXPECT--
 IntlCalendar::set() expects at most 6 parameters, 7 given
-No variant with 4 arguments
-
-Warning: IntlCalendar::set(): intlcal_set: invalid field in %s on line %d
-bool(false)
-
-Warning: intlcal_set(): intlcal_set: invalid field in %s on line %d
-bool(false)
-
-Fatal error: Uncaught TypeError: intlcal_set(): Argument #1 ($calendar) must be of type IntlCalendar, int given in %s:%d
-Stack trace:
-#0 %s(%d): intlcal_set(1, 2, 3)
-#1 {main}
-  thrown in %s on line %d
+IntlCalendar::set() has no variant with exactly 4 parameters
+IntlCalendar::set(): Argument #1 ($year) must be a valid field
+intlcal_set(): Argument #2 ($year) must be a valid field
+intlcal_set(): Argument #1 ($calendar) must be of type IntlCalendar, int given

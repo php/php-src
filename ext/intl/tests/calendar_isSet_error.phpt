@@ -8,19 +8,21 @@ if (!extension_loaded('intl'))
 	die('skip intl extension not enabled');
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
 
 $c = new IntlGregorianCalendar(NULL, 'pt_PT');
 
-var_dump($c->isSet(-1));
+try {
+    var_dump($c->isSet(-1));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
-var_dump(intlcal_is_set(1, 2));
---EXPECTF--
-Warning: IntlCalendar::isSet(): intlcal_is_set: invalid field in %s on line %d
-bool(false)
+try {
+    var_dump(intlcal_is_set(1, 2));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
-Fatal error: Uncaught TypeError: intlcal_is_set(): Argument #1 ($calendar) must be of type IntlCalendar, int given in %s:%d
-Stack trace:
-#0 %s(%d): intlcal_is_set(1, 2)
-#1 {main}
-  thrown in %s on line %d
+--EXPECT--
+IntlCalendar::isSet(): Argument #1 ($field) must be a valid field
+intlcal_is_set(): Argument #1 ($calendar) must be of type IntlCalendar, int given
