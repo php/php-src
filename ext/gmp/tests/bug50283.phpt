@@ -34,10 +34,10 @@ printf("Base 32 and 62-based: %s\n", gmp_strval(gmp_init("gh82179fbf5", 32), 62)
 --EXPECT--
 Decimal: 71915494046709, -36-based: PHPISCOOL
 Decimal: 71915494046709, 36-based: phpiscool
-gmp_strval(): Argument #2 ($base) must be between 2 and 62 or -2 and -36
-gmp_strval(): Argument #2 ($base) must be between 2 and 62 or -2 and -36
-gmp_strval(): Argument #2 ($base) must be between 2 and 62 or -2 and -36
+gmp_strval(): Argument #2 ($base) must be between 2 and 62, or -2 and -36
+gmp_strval(): Argument #2 ($base) must be between 2 and 62, or -2 and -36
+gmp_strval(): Argument #2 ($base) must be between 2 and 62, or -2 and -36
 Decimal: 71915494046709, 37-based: KHKATELJF
 Decimal: 71915494046709, 62-based: KQ6yq741
-gmp_strval(): Argument #2 ($base) must be between 2 and 62 or -2 and -36
+gmp_strval(): Argument #2 ($base) must be between 2 and 62, or -2 and -36
 Base 32 and 62-based: 1NHkAcdIiD

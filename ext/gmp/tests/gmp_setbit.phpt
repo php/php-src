@@ -52,7 +52,7 @@ echo "Done\n";
 ?>
 --EXPECT--
 string(2) "-1"
-gmp_setbit(): Argument #2 ($index) must be greater than or equal to zero
+gmp_setbit(): Argument #2 ($index) must be greater than or equal to 0
 string(1) "5"
 string(1) "1"
 string(1) "7"

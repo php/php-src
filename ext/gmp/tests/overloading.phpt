@@ -282,7 +282,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
-main(): Argument #2 must be of type bool|int|string|GMP, stdClass given
+main(): Argument #2 must be of type GMP|string|int|bool, stdClass given
 object(GMP)#4 (1) {
   ["num"]=>
   string(2) "43"

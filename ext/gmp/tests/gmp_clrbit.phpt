@@ -46,9 +46,9 @@ echo "Done\n";
 ?>
 --EXPECT--
 string(1) "0"
-gmp_clrbit(): Argument #2 ($index) must be greater than or equal to zero
+gmp_clrbit(): Argument #2 ($index) must be greater than or equal to 0
 string(2) "-1"
-gmp_clrbit(): Argument #2 ($index) must be greater than or equal to zero
+gmp_clrbit(): Argument #2 ($index) must be greater than or equal to 0
 string(7) "1000000"
 string(7) "1000000"
 string(30) "238462734628347239571822592658"

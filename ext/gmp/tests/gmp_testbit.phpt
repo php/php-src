@@ -48,12 +48,12 @@ var_dump(gmp_strval($n));
 echo "Done\n";
 ?>
 --EXPECT--
-gmp_testbit(): Argument #2 ($index) must be greater than or equal to zero
+gmp_testbit(): Argument #2 ($index) must be greater than or equal to 0
 bool(false)
 bool(false)
 bool(false)
 bool(true)
-gmp_testbit(): Argument #2 ($index) must be greater than or equal to zero
+gmp_testbit(): Argument #2 ($index) must be greater than or equal to 0
 bool(false)
 bool(true)
 string(7) "1000002"

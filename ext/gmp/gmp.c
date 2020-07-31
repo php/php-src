@@ -646,7 +646,7 @@ static int convert_to_gmp(mpz_t gmpnumber, zval *val, zend_long base, uint32_t a
 			php_error_docref(NULL, E_WARNING, "Cannot convert variable of type %s to GMP", zend_zval_type_name(val));
 			return FAILURE;
 		}
-		zend_argument_type_error(arg_pos, "must be of type bool|int|string|GMP, %s given", zend_zval_type_name(val));
+		zend_argument_type_error(arg_pos, "must be of type GMP|string|int|bool, %s given", zend_zval_type_name(val));
 		return FAILURE;
 	}
 }
@@ -911,7 +911,7 @@ int gmp_import_export_validate(zend_long size, zend_long options, int *order, in
 			break;
 		default:
 			/* options argument is in second position */
-			zend_argument_value_error(3, "has conflicting word orders");
+			zend_argument_value_error(3, "cannot use multiple word order options");
 			return FAILURE;
 	}
 
@@ -928,7 +928,7 @@ int gmp_import_export_validate(zend_long size, zend_long options, int *order, in
 			break;
 		default:
 			/* options argument is in second position */
-			zend_argument_value_error(3, "has conflicting word endianness");
+			zend_argument_value_error(3, "cannot use multiple endian options");
 			return FAILURE;
 	}
 
@@ -954,7 +954,7 @@ ZEND_FUNCTION(gmp_import)
 	}
 
 	if ((data_len % size) != 0) {
-		zend_argument_value_error(1, "must be a multiple of word size");
+		zend_argument_value_error(1, "must be a multiple of argument #2 ($word_size)");
 		RETURN_THROWS();
 	}
 
@@ -1033,7 +1033,7 @@ ZEND_FUNCTION(gmp_strval)
 	/* Although the maximum base in general in GMP is 62, mpz_get_str()
 	 * is explicitly limited to -36 when dealing with negative bases. */
 	if ((base < 2 && base > -2) || base > GMP_MAX_BASE || base < -36) {
-		zend_argument_value_error(2, "must be between 2 and %d or -2 and -36", GMP_MAX_BASE);
+		zend_argument_value_error(2, "must be between 2 and %d, or -2 and -36", GMP_MAX_BASE);
 		RETURN_THROWS();
 	}
 
@@ -1385,7 +1385,7 @@ ZEND_FUNCTION(gmp_root)
 	}
 
 	if (nth <= 0) {
-		zend_argument_value_error(2, "must be greater than or equal to 1");
+		zend_argument_value_error(2, "must be greater than 0");
 		RETURN_THROWS();
 	}
 
@@ -1776,7 +1776,7 @@ ZEND_FUNCTION(gmp_random_range)
 	if (Z_TYPE_P(min_arg) == IS_LONG && Z_LVAL_P(min_arg) >= 0) {
 		if (mpz_cmp_ui(gmpnum_max, Z_LVAL_P(min_arg)) <= 0) {
 			FREE_GMP_TEMP(temp_a);
-			zend_argument_value_error(1, "must be less than argument#2 ($maximum)");
+			zend_argument_value_error(1, "must be less than argument #2 ($maximum)");
 			RETURN_THROWS();
 		}
 
@@ -1805,7 +1805,7 @@ ZEND_FUNCTION(gmp_random_range)
 		if (mpz_cmp(gmpnum_max, gmpnum_min) <= 0) {
 			FREE_GMP_TEMP(temp_b);
 			FREE_GMP_TEMP(temp_a);
-			zend_argument_value_error(1, "must be less than argument#2 ($maximum)");
+			zend_argument_value_error(1, "must be less than argument #2 ($maximum)");
 			RETURN_THROWS();
 		}
 
@@ -1872,7 +1872,7 @@ ZEND_FUNCTION(gmp_setbit)
 	}
 
 	if (index < 0) {
-		zend_argument_value_error(2, "must be greater than or equal to zero");
+		zend_argument_value_error(2, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
     if (index / GMP_NUMB_BITS >= INT_MAX) {
@@ -1902,7 +1902,7 @@ ZEND_FUNCTION(gmp_clrbit)
 	}
 
 	if (index < 0) {
-		zend_argument_value_error(2, "must be greater than or equal to zero");
+		zend_argument_value_error(2, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
 
@@ -1924,7 +1924,7 @@ ZEND_FUNCTION(gmp_testbit)
 	}
 
 	if (index < 0) {
-		zend_argument_value_error(2, "must be greater than or equal to zero");
+		zend_argument_value_error(2, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
 
@@ -1975,7 +1975,7 @@ ZEND_FUNCTION(gmp_scan0)
 	}
 
 	if (start < 0) {
-		zend_argument_value_error(2, "must be greater than or equal to zero");
+		zend_argument_value_error(2, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
 
@@ -1999,7 +1999,7 @@ ZEND_FUNCTION(gmp_scan1)
 	}
 
 	if (start < 0) {
-		zend_argument_value_error(2, "must be greater than or equal to zero");
+		zend_argument_value_error(2, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
 

@@ -55,5 +55,5 @@ object(GMP)#%d (1) {
   ["num"]=>
   string(1) "0"
 }
-gmp_root(): Argument #2 ($nth) must be greater than or equal to 1
-gmp_root(): Argument #2 ($nth) must be greater than or equal to 1
+gmp_root(): Argument #2 ($nth) must be greater than 0
+gmp_root(): Argument #2 ($nth) must be greater than 0

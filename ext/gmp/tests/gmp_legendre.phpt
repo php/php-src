@@ -56,7 +56,7 @@ string(1) "0"
 string(2) "-1"
 string(1) "0"
 string(2) "-1"
-gmp_legendre(): Argument #2 ($b) must be of type bool|int|string|GMP, array given
-gmp_legendre(): Argument #1 ($a) must be of type bool|int|string|GMP, array given
-gmp_legendre(): Argument #1 ($a) must be of type bool|int|string|GMP, array given
+gmp_legendre(): Argument #2 ($b) must be of type GMP|string|int|bool, array given
+gmp_legendre(): Argument #1 ($a) must be of type GMP|string|int|bool, array given
+gmp_legendre(): Argument #1 ($a) must be of type GMP|string|int|bool, array given
 Done

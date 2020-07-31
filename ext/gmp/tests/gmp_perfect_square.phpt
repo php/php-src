@@ -41,5 +41,5 @@ bool(false)
 bool(false)
 bool(true)
 bool(false)
-gmp_perfect_square(): Argument #1 ($a) must be of type bool|int|string|GMP, array given
+gmp_perfect_square(): Argument #1 ($a) must be of type GMP|string|int|bool, array given
 Done

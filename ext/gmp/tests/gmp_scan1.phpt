@@ -28,11 +28,11 @@ try {
 echo "Done\n";
 ?>
 --EXPECT--
-gmp_scan1(): Argument #2 ($start) must be greater than or equal to zero
+gmp_scan1(): Argument #2 ($start) must be greater than or equal to 0
 int(1)
 int(12)
 int(9)
 int(-1)
 int(10)
-gmp_scan1(): Argument #1 ($a) must be of type bool|int|string|GMP, array given
+gmp_scan1(): Argument #1 ($a) must be of type GMP|string|int|bool, array given
 Done

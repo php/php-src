@@ -66,16 +66,16 @@ echo "Done\n";
 ?>
 --EXPECT--
 gmp_strval(): Argument #1 ($gmpnumber) must be an integer string in base 10
-gmp_strval(): Argument #2 ($base) must be between 2 and 62 or -2 and -36
-gmp_strval(): Argument #1 ($gmpnumber) must be of type bool|int|string|GMP, resource given
+gmp_strval(): Argument #2 ($base) must be between 2 and 62, or -2 and -36
+gmp_strval(): Argument #1 ($gmpnumber) must be of type GMP|string|int|bool, resource given
 string(7) "9765456"
-gmp_strval(): Argument #2 ($base) must be between 2 and 62 or -2 and -36
-gmp_strval(): Argument #2 ($base) must be between 2 and 62 or -2 and -36
+gmp_strval(): Argument #2 ($base) must be between 2 and 62, or -2 and -36
+gmp_strval(): Argument #2 ($base) must be between 2 and 62, or -2 and -36
 string(7) "9765456"
 string(8) "-3373333"
-gmp_strval(): Argument #2 ($base) must be between 2 and 62 or -2 and -36
-gmp_strval(): Argument #2 ($base) must be between 2 and 62 or -2 and -36
+gmp_strval(): Argument #2 ($base) must be between 2 and 62, or -2 and -36
+gmp_strval(): Argument #2 ($base) must be between 2 and 62, or -2 and -36
 string(8) "-3373333"
-gmp_strval(): Argument #1 ($gmpnumber) must be of type bool|int|string|GMP, array given
-gmp_strval(): Argument #1 ($gmpnumber) must be of type bool|int|string|GMP, stdClass given
+gmp_strval(): Argument #1 ($gmpnumber) must be of type GMP|string|int|bool, array given
+gmp_strval(): Argument #1 ($gmpnumber) must be of type GMP|string|int|bool, stdClass given
 Done

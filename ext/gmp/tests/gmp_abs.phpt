@@ -47,11 +47,11 @@ echo "Done\n";
 gmp_abs(): Argument #1 ($a) must be an integer string in base 10
 string(1) "0"
 string(1) "0"
-gmp_abs(): Argument #1 ($a) must be of type bool|int|string|GMP, float given
+gmp_abs(): Argument #1 ($a) must be of type GMP|string|int|bool, float given
 string(21) "111111111111111111111"
 string(21) "111111111111111111111"
 string(1) "0"
 gmp_abs(): Argument #1 ($a) must be an integer string in base 8
 gmp_abs(): Argument #1 ($a) must be an integer string in base 8
-gmp_abs(): Argument #1 ($a) must be of type bool|int|string|GMP, array given
+gmp_abs(): Argument #1 ($a) must be of type GMP|string|int|bool, array given
 Done

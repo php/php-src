@@ -74,7 +74,7 @@ while (1) {
 echo "Done\n";
 ?>
 --EXPECT--
-gmp_random_range(): Argument #1 ($min) must be less than argument#2 ($maximum)
-gmp_random_range(): Argument #1 ($min) must be less than argument#2 ($maximum)
-gmp_random_range(): Argument #1 ($min) must be less than argument#2 ($maximum)
+gmp_random_range(): Argument #1 ($min) must be less than argument #2 ($maximum)
+gmp_random_range(): Argument #1 ($min) must be less than argument #2 ($maximum)
+gmp_random_range(): Argument #1 ($min) must be less than argument #2 ($maximum)
 Done

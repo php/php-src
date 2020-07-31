@@ -38,7 +38,7 @@ echo "Done\n";
 ?>
 --EXPECT--
 gmp_sub(): Argument #1 ($a) must be an integer string in base 10
-gmp_sub(): Argument #1 ($a) must be of type bool|int|string|GMP, array given
+gmp_sub(): Argument #1 ($a) must be of type GMP|string|int|bool, array given
 object(GMP)#1 (1) {
   ["num"]=>
   string(2) "-1"
@@ -49,6 +49,6 @@ object(GMP)#3 (1) {
   string(5) "10001"
 }
 string(5) "10001"
-gmp_sub(): Argument #2 ($b) must be of type bool|int|string|GMP, stdClass given
-gmp_sub(): Argument #1 ($a) must be of type bool|int|string|GMP, stdClass given
+gmp_sub(): Argument #2 ($b) must be of type GMP|string|int|bool, stdClass given
+gmp_sub(): Argument #1 ($a) must be of type GMP|string|int|bool, stdClass given
 Done

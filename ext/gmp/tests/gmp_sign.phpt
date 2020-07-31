@@ -38,5 +38,5 @@ int(1)
 int(-1)
 gmp_sign(): Argument #1 ($a) must be an integer string in base 10
 gmp_init(): Argument #1 ($number) must be an integer string in base 8
-gmp_sign(): Argument #1 ($a) must be of type bool|int|string|GMP, array given
+gmp_sign(): Argument #1 ($a) must be of type GMP|string|int|bool, array given
 Done
