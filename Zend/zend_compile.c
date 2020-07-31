@@ -3308,14 +3308,21 @@ static uint32_t zend_get_arg_num(zend_function *fn, zend_string *arg_name) {
 	return (uint32_t) -1;
 }
 
-uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
+uint32_t zend_compile_args(
+		zend_ast *ast, zend_function *fbc, bool *may_have_extra_named_args) /* {{{ */
 {
 	zend_ast_list *args = zend_ast_get_list(ast);
 	uint32_t i;
 	zend_bool uses_arg_unpack = 0;
-	zend_bool uses_named_args = 0;
-	zend_bool may_have_undef = 0;
 	uint32_t arg_count = 0; /* number of arguments not including unpacks */
+
+	/* Whether named arguments are used syntactically, to enforce language level limitations.
+	 * May not actually use named argument passing. */
+	zend_bool uses_named_args = 0;
+	/* Whether there may be any undef arguments due to the use of named arguments. */
+	zend_bool may_have_undef = 0;
+	/* Whether there may be any extra named arguments collected into a variadic. */
+	*may_have_extra_named_args = 0;
 
 	for (i = 0; i < args->children; ++i) {
 		zend_ast *arg = args->child[i];
@@ -3342,6 +3349,7 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 
 			/* Unpack may contain named arguments. */
 			may_have_undef = 1;
+			*may_have_extra_named_args = 1;
 			continue;
 		}
 
@@ -3367,7 +3375,9 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 			}
 
 			if (arg_name) {
+				// TODO: These could be made more precise if fbc is known.
 				may_have_undef = 1;
+				*may_have_extra_named_args = 1;
 			}
 		} else {
 			if (uses_arg_unpack) {
@@ -3509,19 +3519,6 @@ static inline zend_bool zend_args_contain_unpack_or_named(zend_ast_list *args) /
 }
 /* }}} */
 
-static inline zend_bool zend_args_contain_named(zend_ast_list *args) /* {{{ */
-{
-	uint32_t i;
-	for (i = 0; i < args->children; ++i) {
-		zend_ast *arg = args->child[i];
-		if (arg->kind == ZEND_AST_NAMED_ARG) {
-			return 1;
-		}
-	}
-	return 0;
-}
-/* }}} */
-
 ZEND_API zend_uchar zend_get_call_op(const zend_op *init_op, zend_function *fbc) /* {{{ */
 {
 	if (fbc) {
@@ -3553,8 +3550,9 @@ void zend_compile_call_common(znode *result, zend_ast *args_ast, zend_function *
 	zend_op *opline;
 	uint32_t opnum_init = get_next_op_number() - 1;
 	uint32_t arg_count;
+	bool may_have_extra_named_args;
 
-	arg_count = zend_compile_args(args_ast, fbc);
+	arg_count = zend_compile_args(args_ast, fbc, &may_have_extra_named_args);
 
 	zend_do_extended_fcall_begin();
 
@@ -3566,8 +3564,8 @@ void zend_compile_call_common(znode *result, zend_ast *args_ast, zend_function *
 	}
 
 	opline = zend_emit_op(result, zend_get_call_op(opline, fbc), NULL, NULL);
-	if (zend_args_contain_named(zend_ast_get_list(args_ast))) {
-		opline->extended_value = ZEND_FCALL_HAS_NAMED_ARGS;
+	if (may_have_extra_named_args) {
+		opline->extended_value = ZEND_FCALL_MAY_HAVE_EXTRA_NAMED_PARAMS;
 	}
 	zend_do_extended_fcall_end();
 }

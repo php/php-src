@@ -8567,14 +8567,11 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 #endif
 	}
 
-	// TODO: This could be more precise by checking MAY_BE_ARRAY_KEY_STRING for unpacks.
-	// TODO: Clean this up.
-	bool may_have_named_args = 0;
+	bool may_have_extra_named_params =
+		opline->extended_value == ZEND_FCALL_MAY_HAVE_EXTRA_NAMED_PARAMS;
 	if ((opline-1)->opcode == ZEND_SEND_UNPACK || (opline-1)->opcode == ZEND_SEND_ARRAY ||
-			(opline-1)->opcode == ZEND_CHECK_UNDEF_ARGS ||
-			opline->extended_value == ZEND_FCALL_HAS_NAMED_ARGS) {
+			(opline-1)->opcode == ZEND_CHECK_UNDEF_ARGS) {
 		unknown_num_args = 1;
-		may_have_named_args = 1;
 	}
 
 	if (info) {
@@ -9031,7 +9028,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 			|	mov FCARG1a, RX
 			|	EXT_CALL zend_jit_vm_stack_free_args_helper, r0
 		}
-		if (may_have_named_args) {
+		if (may_have_extra_named_params) {
 			|	test byte [RX + offsetof(zend_execute_data, This.u1.type_info) + 3], (ZEND_CALL_HAS_EXTRA_NAMED_PARAMS >> 24)
 			|	jnz >1
 			|.cold_code

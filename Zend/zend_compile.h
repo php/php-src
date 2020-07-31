@@ -954,7 +954,7 @@ ZEND_API zend_string *zend_type_to_string(zend_type type);
 
 #define ZEND_THROW_IS_EXPR 1u
 
-#define ZEND_FCALL_HAS_NAMED_ARGS 1
+#define ZEND_FCALL_MAY_HAVE_EXTRA_NAMED_PARAMS 1
 
 /* The send mode and is_variadic flag are stored as part of zend_type */
 #define _ZEND_SEND_MODE_SHIFT _ZEND_TYPE_EXTRA_FLAGS_SHIFT
