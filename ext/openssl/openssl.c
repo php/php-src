@@ -388,6 +388,11 @@ static int X509_get_signature_nid(const X509 *x)
 	return OBJ_obj2nid(x->sig_alg->algorithm);
 }
 
+static int EVP_PKEY_up_ref(EVP_PKEY *pkey)
+{
+	return CRYPTO_add(&pkey->references, 1, CRYPTO_LOCK_EVP_PKEY);
+}
+
 #endif
 
 #define OpenSSL_version		SSLeay_version
@@ -4496,11 +4501,12 @@ PHP_FUNCTION(openssl_pkey_get_public)
 	zval *cert;
 	EVP_PKEY *pkey;
 	php_openssl_pkey_object *key_object;
+	bool free_pkey;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &cert) == FAILURE) {
 		RETURN_THROWS();
 	}
-	pkey = php_openssl_pkey_from_zval(cert, 1, NULL, 0, NULL);
+	pkey = php_openssl_pkey_from_zval(cert, 1, NULL, 0, &free_pkey);
 	if (pkey == NULL) {
 		RETURN_FALSE;
 	}
@@ -4508,6 +4514,9 @@ PHP_FUNCTION(openssl_pkey_get_public)
 	object_init_ex(return_value, php_openssl_pkey_ce);
 	key_object = Z_OPENSSL_PKEY_P(return_value);
 	key_object->pkey = pkey;
+	if (!free_pkey) {
+		EVP_PKEY_up_ref(pkey);
+	}
 }
 /* }}} */
 
