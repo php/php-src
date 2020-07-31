@@ -566,9 +566,14 @@ static void _build_trace_string(smart_str *str, HashTable *ht, uint32_t num) /* 
 	if (tmp) {
 		if (Z_TYPE_P(tmp) == IS_ARRAY) {
 			size_t last_len = ZSTR_LEN(str->s);
+			zend_string *name;
 			zval *arg;
 
-			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(tmp), arg) {
+			ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(tmp), name, arg) {
+				if (name) {
+					smart_str_append(str, name);
+					smart_str_appends(str, ": ");
+				}
 				_build_trace_args(arg, str);
 			} ZEND_HASH_FOREACH_END();
 
