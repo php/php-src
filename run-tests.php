@@ -114,6 +114,8 @@ Options:
 
     --no-clean  Do not execute clean section if any.
 
+    --no-color Do not colorize the result type in the test result
+
 
 HELP;
 }
@@ -133,7 +135,7 @@ function main(): void
     global $DETAILED, $PHP_FAILED_TESTS, $SHOW_ONLY_GROUPS, $argc, $argv, $cfg,
            $cfgfiles, $cfgtypes, $conf_passed, $end_time, $environment,
            $exts_skipped, $exts_tested, $exts_to_test, $failed_tests_file,
-           $ignored_by_ext, $ini_overwrites, $is_switch,
+           $ignored_by_ext, $ini_overwrites, $is_switch, $colorize,
            $just_save_results, $log_format, $matches, $no_clean, $no_file_cache,
            $optionals, $output_file, $pass_option_n, $pass_options,
            $pattern_match, $php, $php_cgi, $phpdbg, $preload, $redir_tests,
@@ -384,6 +386,10 @@ function main(): void
     $temp_urlbase = null;
     $conf_passed = null;
     $no_clean = false;
+    $colorize = true;
+    if (function_exists('sapi_windows_vt100_support') && !sapi_windows_vt100_support(STDOUT, true)) {
+        $colorize = false;
+    }
     $selected_tests = false;
     $slow_min_ms = INF;
     $preload = false;
@@ -529,6 +535,9 @@ function main(): void
                     break;
                 case '--no-clean':
                     $no_clean = true;
+                    break;
+                case '--no-color':
+                    $colorize = false;
                     break;
                 case 'p':
                     $php = $argv[++$i];
@@ -3266,10 +3275,27 @@ function show_result(
     string $extra = '',
     ?array $temp_filenames = null
 ): void {
-    global $temp_target, $temp_urlbase, $line_length, $SHOW_ONLY_GROUPS;
+    global $SHOW_ONLY_GROUPS, $colorize;
 
     if (!$SHOW_ONLY_GROUPS || in_array($result, $SHOW_ONLY_GROUPS)) {
-        echo "$result $tested [$tested_file] $extra\n";
+        if ($colorize) {
+            /* Use ANSI escape codes for coloring test result */
+            switch ( $result ) {
+                case 'PASS': // Light Green
+                    $color = "\e[1;32m{$result}\e[0m"; break;
+                case 'FAIL':
+                case 'BORK':
+                case 'LEAK':
+                    // Light Red
+                    $color = "\e[1;31m{$result}\e[0m"; break;
+                default: // Yellow
+                    $color = "\e[1;33m{$result}\e[0m"; break;
+            }
+
+            echo "$color $tested [$tested_file] $extra\n";
+        } else {
+            echo "$result $tested [$tested_file] $extra\n";
+        }
     } elseif (!$SHOW_ONLY_GROUPS) {
         clear_show_test();
     }
