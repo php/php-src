@@ -3384,7 +3384,7 @@ PHP_FUNCTION(openssl_csr_new)
 						if (X509_REQ_sign(csr, req.priv_key, req.digest)) {
 							object_init_ex(return_value, php_openssl_request_ce);
 							x509_request_obj = Z_OPENSSL_REQUEST_P(return_value);
-							x509_request_obj->csr = X509_REQ_dup(csr);
+							x509_request_obj->csr = csr;
 							csr = NULL;
 						} else {
 							php_openssl_store_errors();
