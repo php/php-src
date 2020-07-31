@@ -130,6 +130,8 @@ enum php_openssl_encoding {
 
 /* OpenSSLCertificate class */
 
+zend_class_entry *php_openssl_certificate_ce;
+
 static zend_object_handlers php_openssl_certificate_object_handlers;
 
 static zend_object *php_openssl_certificate_create_object(zend_class_entry *class_type) {

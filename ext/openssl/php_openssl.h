@@ -118,7 +118,7 @@ typedef struct _php_openssl_certificate_object {
 	zend_object std;
 } php_openssl_certificate_object;
 
-zend_class_entry *php_openssl_certificate_ce;
+extern zend_class_entry *php_openssl_certificate_ce;
 
 static inline php_openssl_certificate_object *php_openssl_certificate_from_obj(zend_object *obj) {
 	return (php_openssl_certificate_object *)((char *)(obj) - XtOffsetOf(php_openssl_certificate_object, std));
