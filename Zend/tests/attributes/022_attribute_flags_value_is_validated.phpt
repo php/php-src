@@ -3,7 +3,7 @@ Attribute flags value is validated.
 --FILE--
 <?php
 
-@@Attribute(-1)
+@[Attribute(-1)]
 class A1 { }
 
 ?>

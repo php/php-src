@@ -14,7 +14,7 @@ class C1
 
 	public static function foo()
 	{
-		return @@A1(self::class, self::FOO) function (@@A1(self::class, self::FOO) $p) { };
+		return @[A1(self::class, self::FOO)] function (@[A1(self::class, self::FOO)] $p) { };
 	}
 }
 

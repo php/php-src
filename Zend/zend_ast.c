@@ -1356,7 +1356,7 @@ static ZEND_COLD void zend_ast_export_attributes(smart_str *str, zend_ast *ast, 
 	for (i = 0; i < list->children; i++) {
 		zend_ast *attr = list->child[i];
 
-		smart_str_appends(str, "@@");
+		smart_str_appends(str, "@[");
 		zend_ast_export_ns_name(str, attr->child[0], 0, indent);
 
 		if (attr->child[1]) {
@@ -1372,6 +1372,8 @@ static ZEND_COLD void zend_ast_export_attributes(smart_str *str, zend_ast *ast, 
 			}
 			smart_str_appendc(str, ')');
 		}
+
+		smart_str_appendc(str, ']');
 
 		if (newlines) {
 			smart_str_appendc(str, '\n');

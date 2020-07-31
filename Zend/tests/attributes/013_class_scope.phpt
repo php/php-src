@@ -3,17 +3,17 @@ Attributes make use of class scope.
 --FILE--
 <?php
 
-@@A1(self::class, self::FOO)
+@[A1(self::class, self::FOO)]
 class C1
 {
-	@@A1(self::class, self::FOO)
+	@[A1(self::class, self::FOO)]
 	private const FOO = 'foo';
 
-	@@A1(self::class, self::FOO)
+	@[A1(self::class, self::FOO)]
 	public $a;
 
-	@@A1(self::class, self::FOO)
-	public function bar(@@A1(self::class, self::FOO) $p) { }
+	@[A1(self::class, self::FOO)]
+	public function bar(@[A1(self::class, self::FOO)] $p) { }
 }
 
 $ref = new \ReflectionClass(C1::class);
@@ -27,7 +27,7 @@ echo "\n";
 
 trait T1
 {
-	@@A1(self::class, self::FOO)
+	@[A1(self::class, self::FOO)]
 	public function foo() { }
 }
 
@@ -58,10 +58,10 @@ class C3
 
 	public static function foo()
 	{
-		return new @@A1(self::class, self::FOO) class() {
+		return new @[A1(self::class, self::FOO)] class() {
 			private const FOO = 'bar';
 
-			@@A1(self::class, self::FOO)
+			@[A1(self::class, self::FOO)]
 			public function bar() { }
 		};
 	}

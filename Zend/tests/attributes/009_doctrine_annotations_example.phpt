@@ -25,22 +25,22 @@ namespace {
 use Doctrine\ORM\Attributes as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
-@@ORM\Entity
+@[ORM\Entity]
 /** @ORM\Entity */
 class User
 {
     /** @ORM\Id @ORM\Column(type="integer"*) @ORM\GeneratedValue */
-    @@ORM\Id
-    @@ORM\Column("integer")
-    @@ORM\GeneratedValue
+    @[ORM\Id]
+    @[ORM\Column("integer")]
+    @[ORM\GeneratedValue]
     private $id;
 
     /**
      * @ORM\Column(type="string", unique=true)
      * @Assert\Email(message="The email '{{ value }}' is not a valid email.")
      */
-    @@ORM\Column("string", ORM\Column::UNIQUE)
-    @@Assert\Email(array("message" => "The email '{{ value }}' is not a valid email."))
+    @[ORM\Column("string", ORM\Column::UNIQUE)]
+    @[Assert\Email(array("message" => "The email '{{ value }}' is not a valid email."))]
     private $email;
 
     /**
@@ -52,8 +52,8 @@ class User
      *      maxMessage = "You cannot be taller than {{ limit }}cm to enter"
      * )
      */
-    @@Assert\Range(["min" => 120, "max" => 180, "minMessage" => "You must be at least {{ limit }}cm tall to enter"])
-    @@ORM\Column(ORM\Column::T_INTEGER)
+    @[Assert\Range(["min" => 120, "max" => 180, "minMessage" => "You must be at least {{ limit }}cm tall to enter"])]
+    @[ORM\Column(ORM\Column::T_INTEGER)]
     protected $height;
 
     /**
@@ -63,10 +63,10 @@ class User
      *      inverseJoinColumns={@ORM\JoinColumn(name="phonenumber_id", referencedColumnName="id", unique=true)}
      *      )
      */
-    @@ORM\ManyToMany(Phonenumber::class)
-    @@ORM\JoinTable("users_phonenumbers")
-    @@ORM\JoinColumn("user_id", "id")
-    @@ORM\InverseJoinColumn("phonenumber_id", "id", ORM\JoinColumn::UNIQUE)
+    @[ORM\ManyToMany(Phonenumber::class)]
+    @[ORM\JoinTable("users_phonenumbers")]
+    @[ORM\JoinColumn("user_id", "id")]
+    @[ORM\InverseJoinColumn("phonenumber_id", "id", ORM\JoinColumn::UNIQUE)]
     private $phonenumbers;
 }
 

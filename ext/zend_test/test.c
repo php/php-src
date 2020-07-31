@@ -257,7 +257,7 @@ static zend_function *zend_test_class_static_method_get(zend_class_entry *ce, ze
 void zend_attribute_validate_zendtestattribute(zend_attribute *attr, uint32_t target, zend_class_entry *scope)
 {
 	if (target != ZEND_ATTRIBUTE_TARGET_CLASS) {
-		zend_error(E_COMPILE_ERROR, "Only classes can be marked with @@ZendTestAttribute");
+		zend_error(E_COMPILE_ERROR, "Only classes can be marked with @[ZendTestAttribute]");
 	}
 }
 

@@ -3,7 +3,7 @@ Attribute arguments support only const expressions.
 --FILE--
 <?php
 
-@@A1(foo())
+@[A1(foo())]
 class C1 { }
 
 ?>

@@ -3,7 +3,7 @@ Attribute name cannot be a variable
 --FILE--
 <?php
 
-@@$x
+@[$x]
 class A {}
 
 ?>

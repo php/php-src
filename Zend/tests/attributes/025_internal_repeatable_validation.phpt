@@ -3,8 +3,8 @@ Internal attribute targets are validated.
 --FILE--
 <?php
 
-@@Attribute
-@@Attribute
+@[Attribute]
+@[Attribute]
 class A1 { }
 
 ?>

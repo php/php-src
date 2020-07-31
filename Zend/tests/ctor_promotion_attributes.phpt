@@ -5,7 +5,7 @@ Attributes on promoted properties are assigned to both the property and paramete
 
 class Test {
     public function __construct(
-        @@NonNegative
+        @[NonNegative]
         public int $num,
     ) {}
 }

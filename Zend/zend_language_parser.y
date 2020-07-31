@@ -178,7 +178,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token <ident> T_NS_C            "'__NAMESPACE__'"
 
 %token END 0 "end of file"
-%token T_ATTRIBUTE    "'@@'"
+%token T_ATTRIBUTE    "'@['"
 %token T_PLUS_EQUAL   "'+='"
 %token T_MINUS_EQUAL  "'-='"
 %token T_MUL_EQUAL    "'*='"
@@ -346,7 +346,7 @@ attribute_decl:
 ;
 
 attribute:
-		T_ATTRIBUTE attribute_decl	{ $$ = $2; }
+		T_ATTRIBUTE attribute_decl ']'	{ $$ = $2; }
 ;
 
 attributes:

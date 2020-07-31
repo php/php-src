@@ -3,7 +3,7 @@ Internal attribute targets are validated.
 --FILE--
 <?php
 
-@@Attribute
+@[Attribute]
 function a1() { }
 
 ?>

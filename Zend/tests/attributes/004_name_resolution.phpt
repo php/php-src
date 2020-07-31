@@ -25,11 +25,11 @@ namespace Foo {
     use Doctrine\ORM\Mapping as ORM;
     use Doctrine\ORM\Attributes;
 
-    @@Entity("imported class")
-    @@ORM\Entity("imported namespace")
-    @@\Doctrine\ORM\Mapping\Entity("absolute from namespace")
-    @@\Entity("import absolute from global")
-    @@Attributes\Table()
+    @[Entity("imported class")]
+    @[ORM\Entity("imported namespace")]
+    @[\Doctrine\ORM\Mapping\Entity("absolute from namespace")]
+    @[\Entity("import absolute from global")]
+    @[Attributes\Table()]
     function foo() {
     }
 }

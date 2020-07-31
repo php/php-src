@@ -3,7 +3,7 @@ Don't free uninitialized memory if a fatal error occurs in an attribute argument
 --FILE--
 <?php
 
-@@Attr(a->b::c)
+@[Attr(a->b::c)]
 function test() {}
 
 ?>

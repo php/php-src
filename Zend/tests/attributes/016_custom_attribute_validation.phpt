@@ -8,8 +8,8 @@ if (!extension_loaded('zend-test')) {
 --FILE--
 <?php
 
-@@ZendTestAttribute
+@[ZendTestAttribute]
 function foo() {
 }
 --EXPECTF--
-Fatal error: Only classes can be marked with @@ZendTestAttribute in %s
+Fatal error: Only classes can be marked with @[ZendTestAttribute] in %s
