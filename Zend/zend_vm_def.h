@@ -5170,15 +5170,17 @@ ZEND_VM_HANDLER(164, ZEND_RECV_VARIADIC, NUM, UNUSED, CACHE_SLOT)
 	params = EX_VAR(opline->result.var);
 
 	if (arg_num <= arg_count) {
-		zval *param;
+		ZEND_ASSERT(EX(func)->common.fn_flags & ZEND_ACC_VARIADIC);
+		ZEND_ASSERT(EX(func)->common.num_args == arg_num - 1);
+		zend_arg_info *arg_info = &EX(func)->common.arg_info[arg_num - 1];
 
 		array_init_size(params, arg_count - arg_num + 1);
 		zend_hash_real_init_packed(Z_ARRVAL_P(params));
 		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(params)) {
-			param = EX_VAR_NUM(EX(func)->op_array.last_var + EX(func)->op_array.T);
-			if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) != 0)) {
+			zval *param = EX_VAR_NUM(EX(func)->op_array.last_var + EX(func)->op_array.T);
+			if (UNEXPECTED(ZEND_TYPE_IS_SET(arg_info->type))) {
 				do {
-					if (UNEXPECTED(!zend_verify_variadic_arg_type(EX(func), arg_num, param, CACHE_ADDR(opline->extended_value)))) {
+					if (UNEXPECTED(!zend_verify_variadic_arg_type(EX(func), arg_info, arg_num, param, CACHE_ADDR(opline->extended_value)))) {
 						ZEND_HASH_FILL_FINISH();
 						HANDLE_EXCEPTION();
 					}

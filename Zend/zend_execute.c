@@ -1051,17 +1051,12 @@ static zend_always_inline int zend_verify_recv_arg_type(zend_function *zf, uint3
 	return 1;
 }
 
-static zend_always_inline int zend_verify_variadic_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, void **cache_slot)
+static zend_always_inline int zend_verify_variadic_arg_type(
+		zend_function *zf, zend_arg_info *arg_info, uint32_t arg_num, zval *arg, void **cache_slot)
 {
-	zend_arg_info *cur_arg_info;
-
-	ZEND_ASSERT(arg_num > zf->common.num_args);
-	ZEND_ASSERT(zf->common.fn_flags & ZEND_ACC_VARIADIC);
-	cur_arg_info = &zf->common.arg_info[zf->common.num_args];
-
-	if (ZEND_TYPE_IS_SET(cur_arg_info->type)
-			&& UNEXPECTED(!zend_check_type(cur_arg_info->type, arg, cache_slot, zf->common.scope, 0, 0))) {
-		zend_verify_arg_error(zf, cur_arg_info, arg_num, cache_slot, arg);
+	ZEND_ASSERT(ZEND_TYPE_IS_SET(arg_info->type));
+	if (UNEXPECTED(!zend_check_type(arg_info->type, arg, cache_slot, zf->common.scope, 0, 0))) {
+		zend_verify_arg_error(zf, arg_info, arg_num, cache_slot, arg);
 		return 0;
 	}
 
