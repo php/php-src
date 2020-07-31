@@ -8,6 +8,7 @@ PHP                                                                        NEWS
   . Fixed bug #79806 (realpath() erroneously resolves link to link). (cmb)
   . Fixed bug #79895 (PHP_CHECK_GCC_ARG does not allow flags with equal sign).
     (Santiago M. Mola)
+  . Fixed bug #79919 (Stack use-after-scope in define()). (cmb)
 
 - LDAP:
   . Fixed memory leaks. (ptomulik)
