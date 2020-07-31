@@ -3750,16 +3750,24 @@ ZEND_EXT_API int zend_jit_config(zend_string *jit, int stage)
 		JIT_G(on) = 0;
 		return SUCCESS;
 	} else if (zend_string_equals_literal_ci(jit, "0")
-	        || zend_string_equals_literal_ci(jit, "off")
-	        || zend_string_equals_literal_ci(jit, "no")
-	        || zend_string_equals_literal_ci(jit, "false")) {
+			|| zend_string_equals_literal_ci(jit, "off")
+			|| zend_string_equals_literal_ci(jit, "no")
+			|| zend_string_equals_literal_ci(jit, "false")) {
 		JIT_G(enabled) = 1;
 		JIT_G(on) = 0;
 		return SUCCESS;
 	} else if (zend_string_equals_literal_ci(jit, "1")
-	        || zend_string_equals_literal_ci(jit, "on")
-	        || zend_string_equals_literal_ci(jit, "yes")
-	        || zend_string_equals_literal_ci(jit, "true")) {
+			|| zend_string_equals_literal_ci(jit, "on")
+			|| zend_string_equals_literal_ci(jit, "yes")
+			|| zend_string_equals_literal_ci(jit, "true")
+			|| zend_string_equals_literal_ci(jit, "tracing")) {
+		JIT_G(enabled) = 1;
+		JIT_G(on) = 1;
+		JIT_G(opt_level) = ZEND_JIT_LEVEL_OPT_FUNCS;
+		JIT_G(trigger) = ZEND_JIT_ON_HOT_TRACE;
+		JIT_G(opt_flags) = ZEND_JIT_REG_ALLOC_GLOBAL | ZEND_JIT_CPU_AVX;
+		return SUCCESS;
+	} else if (zend_string_equals_literal_ci(jit, "function")) {
 		JIT_G(enabled) = 1;
 		JIT_G(on) = 1;
 		JIT_G(opt_level) = ZEND_JIT_LEVEL_OPT_SCRIPT;
