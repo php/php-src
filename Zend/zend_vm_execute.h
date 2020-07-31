@@ -1119,7 +1119,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_leave_helper
 		}
 
 		if (UNEXPECTED(call_info & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS)) {
-			zend_array_destroy(EX(extra_named_params));
+			zend_free_extra_named_params_ex(EX(extra_named_params));
 		}
 
 		/* Free extra args before releasing the closure,
@@ -1175,7 +1175,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_leave_helper
 				}
 				zend_vm_stack_free_extra_args_ex(call_info, execute_data);
 				if (UNEXPECTED(call_info & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS)) {
-					zend_array_destroy(EX(extra_named_params));
+					zend_free_extra_named_params_ex(EX(extra_named_params));
 				}
 			}
 			if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
@@ -1246,9 +1246,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_ICALL_SPEC_RETV
 
 	EG(current_execute_data) = execute_data;
 	zend_vm_stack_free_args(call);
-	if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS)) {
-		zend_array_destroy(call->extra_named_params);
-	}
+	zend_free_extra_named_params(call);
 	zend_vm_stack_free_call_frame(call);
 
 	if (!0) {
@@ -1301,9 +1299,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_ICALL_SPEC_RETV
 
 	EG(current_execute_data) = execute_data;
 	zend_vm_stack_free_args(call);
-	if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS)) {
-		zend_array_destroy(call->extra_named_params);
-	}
+	zend_free_extra_named_params(call);
 	zend_vm_stack_free_call_frame(call);
 
 	if (!1) {
@@ -1431,9 +1427,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_S
 
 fcall_by_name_end:
 		zend_vm_stack_free_args(call);
-		if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS)) {
-			zend_array_destroy(call->extra_named_params);
-		}
+		zend_free_extra_named_params(call);
 		zend_vm_stack_free_call_frame(call);
 
 		if (!0) {
@@ -1515,9 +1509,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_S
 
 fcall_by_name_end:
 		zend_vm_stack_free_args(call);
-		if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS)) {
-			zend_array_destroy(call->extra_named_params);
-		}
+		zend_free_extra_named_params(call);
 		zend_vm_stack_free_call_frame(call);
 
 		if (!1) {
@@ -1612,9 +1604,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 
 fcall_end:
 		zend_vm_stack_free_args(call);
-		if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS)) {
-			zend_array_destroy(call->extra_named_params);
-		}
+		zend_free_extra_named_params(call);
 		if (!0) {
 			i_zval_ptr_dtor(ret);
 		}
@@ -1713,9 +1703,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 
 fcall_end:
 		zend_vm_stack_free_args(call);
-		if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS)) {
-			zend_array_destroy(call->extra_named_params);
-		}
+		zend_free_extra_named_params(call);
 		if (!1) {
 			i_zval_ptr_dtor(ret);
 		}
@@ -53389,7 +53377,7 @@ zend_leave_helper_SPEC_LABEL:
 		}
 
 		if (UNEXPECTED(call_info & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS)) {
-			zend_array_destroy(EX(extra_named_params));
+			zend_free_extra_named_params_ex(EX(extra_named_params));
 		}
 
 		/* Free extra args before releasing the closure,
@@ -53445,7 +53433,7 @@ zend_leave_helper_SPEC_LABEL:
 				}
 				zend_vm_stack_free_extra_args_ex(call_info, execute_data);
 				if (UNEXPECTED(call_info & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS)) {
-					zend_array_destroy(EX(extra_named_params));
+					zend_free_extra_named_params_ex(EX(extra_named_params));
 				}
 			}
 			if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {

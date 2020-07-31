@@ -9036,7 +9036,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 			|.cold_code
 			|1:
 			|	mov FCARG1a, aword [RX + offsetof(zend_execute_data, extra_named_params)]
-			|	EXT_CALL zend_array_destroy, r0
+			|	EXT_CALL zend_free_extra_named_params_ex, r0
 			|	jmp >2
 			|.code
 			|2:
