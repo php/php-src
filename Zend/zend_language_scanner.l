@@ -135,6 +135,77 @@ static void strip_underscores(char *str, size_t *len)
 	*dest = '\0';
 }
 
+/* Get the number of bits in the representation of a hex literal. Precondition: *str represents a non-zero number that overflowed an int. */
+static int bits_in_hex_representation(const char *str, size_t len)
+{
+	size_t bits = len * 4;
+	const char *end = str + len - 1;
+	int last_digit;
+	while (*end == '0') {
+		bits -= 4;
+		end--;
+		ZEND_ASSERT(end >= str);
+	}
+	if ('0' <= *end && *end <= '9') {
+		last_digit = *end - '0';
+	} else if ('a' <= *end && *end <= 'f') {
+		last_digit = *end - 'a' + 10;
+	} else {
+		ZEND_ASSERT('A' <= *end && *end <= 'F');
+		last_digit = *end - 'A' + 10;
+	}
+	if ((last_digit & 1) == 0) {
+		bits--;
+		if ((last_digit & 2) == 0) {
+			bits--;
+			if ((last_digit & 4) == 0) {
+				bits--;
+			}
+		}
+	}
+	/* Check how many bits the first character started with */
+	if (*str < '2') {
+		bits -= 3;
+	} else if (*str < '4') {
+		bits -= 2;
+	} else if (*str < '8') {
+		bits -= 1;
+	}
+	return bits;
+}
+
+/* Get the number of bits in the representation of an octal literal. Precondition: *str represents a non-zero number that overflowed an int. */
+static size_t bits_in_octal_representation(const char *str, size_t len)
+{
+	size_t bits = len * 3;
+	const char *end = str + len - 1;
+	int last_digit;
+	while (*str == '0') {
+		bits -= 3;
+		str++;
+		ZEND_ASSERT(end >= str);
+	}
+	while (*end == '0') {
+		bits -= 3;
+		end--;
+		ZEND_ASSERT(end >= str);
+	}
+	last_digit = *end - '0';
+	if ((last_digit & 1) == 0) {
+		bits--;
+		if ((last_digit & 2) == 0) {
+			bits--;
+		}
+	}
+	if (*str < '2') {
+		bits -= 2;
+	} else if (*str < '4') {
+		bits -= 1;
+	}
+	return bits;
+}
+
+
 static size_t encoding_filter_script_to_internal(unsigned char **to, size_t *to_length, const unsigned char *from, size_t from_length)
 {
 	const zend_encoding *internal_encoding = zend_multibyte_get_internal_encoding();
@@ -1961,9 +2032,17 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		}
 		RETURN_TOKEN_WITH_VAL(T_LNUMBER);
 	} else {
+		const char* last_one_bit = bin + len - 1;
+		while (*last_one_bit == '0') {
+			last_one_bit--;
+			ZEND_ASSERT(last_one_bit > bin);
+		}
 		ZVAL_DOUBLE(zendlval, zend_bin_strtod(bin, (const char **)&end));
 		/* errno isn't checked since we allow HUGE_VAL/INF overflow */
 		ZEND_ASSERT(end == bin + len);
+		if (last_one_bit - bin + 1> 53) {
+			zend_error(E_COMPILE_WARNING, "Saw imprecise float binary literal - the last %zu non-zero bits were truncated", (size_t)(last_one_bit - bin + 1 - 53));
+		}
 		if (contains_underscores) {
 			efree(bin);
 		}
@@ -1975,6 +2054,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	size_t len = yyleng;
 	char *end, *lnum = yytext;
 	zend_bool is_octal = lnum[0] == '0';
+	zend_bool is_truncated = 0;
 	zend_bool contains_underscores = (memchr(lnum, '_', len) != NULL);
 
 	if (contains_underscores) {
@@ -1998,6 +2078,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 				/* Continue in order to determine if this is T_LNUMBER or T_DNUMBER. */
 				len = i;
+				is_truncated = 1;
 				break;
 			}
 		}
@@ -2016,6 +2097,12 @@ NEWLINE ("\r"|"\n"|"\r\n")
 			errno = 0;
 			if (is_octal) { /* octal overflow */
 				ZVAL_DOUBLE(zendlval, zend_oct_strtod(lnum, (const char **)&end));
+				if (!is_truncated) {
+					size_t bits_in_representation = bits_in_octal_representation(lnum, len);
+					if (bits_in_representation > 53) {
+						zend_error(E_COMPILE_WARNING, "Saw imprecise float octal literal - the last %zu non-zero bits were truncated", bits_in_representation - 53);
+					}
+				}
 			} else {
 				ZVAL_DOUBLE(zendlval, zend_strtod(lnum, (const char **)&end));
 			}
@@ -2066,9 +2153,13 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		}
 		RETURN_TOKEN_WITH_VAL(T_LNUMBER);
 	} else {
+		size_t bits_in_representation = bits_in_hex_representation(hex, len);
 		ZVAL_DOUBLE(zendlval, zend_hex_strtod(hex, (const char **)&end));
 		/* errno isn't checked since we allow HUGE_VAL/INF overflow */
 		ZEND_ASSERT(end == hex + len);
+		if (bits_in_representation > 53) {
+			zend_error(E_COMPILE_WARNING, "Saw imprecise float hex literal - the last %zu non-zero bits were truncated", bits_in_representation - 53);
+		}
 		if (contains_underscores) {
 			efree(hex);
 		}

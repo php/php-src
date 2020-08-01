@@ -79,7 +79,16 @@ var_dump(-0b1111111111111111111111111111111111111111111111111111111111111111);
 var_dump(-0b111111111111111111111111111111111111111111111111111111111111111);
 var_dump(-0b11111111111111111111111111111111111111111111111111111111111111);
 var_dump(-0b1);
---EXPECT--
+--EXPECTF--
+Warning: Saw imprecise float binary literal - the last 11 non-zero bits were truncated in %sbinary.php on line 66
+
+Warning: Saw imprecise float binary literal - the last 11 non-zero bits were truncated in %sbinary.php on line 67
+
+Warning: Saw imprecise float binary literal - the last 12 non-zero bits were truncated in %sbinary.php on line 68
+
+Warning: Saw imprecise float binary literal - the last 12 non-zero bits were truncated in %sbinary.php on line 69
+
+Warning: Saw imprecise float binary literal - the last 11 non-zero bits were truncated in %sbinary.php on line 71
 int(1)
 int(3)
 int(7)

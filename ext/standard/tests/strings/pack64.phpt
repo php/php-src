@@ -32,7 +32,14 @@ print_r(unpack("q", pack("q", 0x8000000000000002)));
 print_r(unpack("q", pack("q", -1)));
 print_r(unpack("q", pack("q", 0x8000000000000000)));
 ?>
---EXPECT--
+--EXPECTF--
+Warning: Saw imprecise float hex literal - the last 10 non-zero bits were truncated in %spack64.php on line 4
+
+Warning: Saw imprecise float hex literal - the last 10 non-zero bits were truncated in %spack64.php on line 10
+
+Warning: Saw imprecise float hex literal - the last 10 non-zero bits were truncated in %spack64.php on line 16
+
+Warning: Saw imprecise float hex literal - the last 10 non-zero bits were truncated in %spack64.php on line 22
 Array
 (
     [1] => 281474976710654
