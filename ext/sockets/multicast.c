@@ -225,7 +225,7 @@ mcast_req_fun: ;
 
 	if (retval != 0) {
 		if (retval != -2) { /* error, but message already emitted */
-			PHP_SOCKET_ERROR(php_sock, "unable to set socket option", errno);
+			PHP_SOCKET_ERROR(php_sock, "Unable to set socket option", errno);
 		}
 		return FAILURE;
 	}
@@ -294,7 +294,7 @@ ipv4_loop_ttl:
 dosockopt:
 	retval = setsockopt(php_sock->bsd_socket, level, optname, opt_ptr, optlen);
 	if (retval != 0) {
-		PHP_SOCKET_ERROR(php_sock, "unable to set socket option", errno);
+		PHP_SOCKET_ERROR(php_sock, "Unable to set socket option", errno);
 		return FAILURE;
 	}
 
@@ -358,7 +358,7 @@ ipv6_loop_hops:
 dosockopt:
 	retval = setsockopt(php_sock->bsd_socket, level, optname, opt_ptr, optlen);
 	if (retval != 0) {
-		PHP_SOCKET_ERROR(php_sock, "unable to set socket option", errno);
+		PHP_SOCKET_ERROR(php_sock, "Unable to set socket option", errno);
 		return FAILURE;
 	}
 

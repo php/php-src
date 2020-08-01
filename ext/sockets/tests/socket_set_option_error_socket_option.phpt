@@ -1,5 +1,5 @@
 --TEST--
-Test if socket_set_option() returns 'unable to set socket option' failure for invalid options
+Test if socket_set_option() returns 'Unable to set socket option' failure for invalid options
 --SKIPIF--
 <?php
 if (!extension_loaded('sockets')) {
