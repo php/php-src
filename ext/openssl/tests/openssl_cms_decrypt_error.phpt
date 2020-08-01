@@ -33,12 +33,12 @@ echo "Done\n";
 Object of class stdClass could not be converted to string
 object(stdClass)#1 (0) {
 }
-string(64) "openssl_cms_decrypt(): Unable to coerce parameter 3 to x509 cert"
+string(60) "openssl_cms_decrypt(): X.509 Certificate cannot be retrieved"
 bool(false)
-string(64) "openssl_cms_decrypt(): Unable to coerce parameter 3 to x509 cert"
+string(60) "openssl_cms_decrypt(): X.509 Certificate cannot be retrieved"
 bool(false)
-string(64) "openssl_cms_decrypt(): Unable to coerce parameter 3 to x509 cert"
+string(60) "openssl_cms_decrypt(): X.509 Certificate cannot be retrieved"
 bool(false)
-string(64) "openssl_cms_decrypt(): Unable to coerce parameter 3 to x509 cert"
+string(60) "openssl_cms_decrypt(): X.509 Certificate cannot be retrieved"
 bool(false)
 Done

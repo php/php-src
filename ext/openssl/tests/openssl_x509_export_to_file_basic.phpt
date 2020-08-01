@@ -17,7 +17,11 @@ var_dump(openssl_x509_export_to_file($a, $outfilename)); // read cert as a binar
 var_dump(openssl_x509_export_to_file($b, $outfilename)); // read cert from a filename string
 var_dump(openssl_x509_export_to_file($c, $outfilename)); // read an invalid cert, fails
 var_dump(openssl_x509_export_to_file($d, $outfilename)); // read cert from a resource
-var_dump(openssl_x509_export_to_file($e, $outfilename)); // read an array, fails
+try {
+    openssl_x509_export_to_file($e, $outfilename); // read an array, fails
+} catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 echo "---\n";
 var_dump($exists = file_exists($outfilename));
 ?>
@@ -32,11 +36,9 @@ if (file_exists($outfilename)) {
 bool(true)
 bool(true)
 
-Warning: openssl_x509_export_to_file(): Cannot get cert from parameter 1 in %s on line %d
+Warning: openssl_x509_export_to_file(): X.509 Certificate cannot be retrieved in %s on line %d
 bool(false)
 bool(true)
-
-Warning: openssl_x509_export_to_file(): Cannot get cert from parameter 1 in %s on line %d
-bool(false)
+openssl_x509_export_to_file(): Argument #1 ($x509) must be of type OpenSSLCertificate|string, array given
 ---
 bool(true)

@@ -39,8 +39,10 @@ try {
 }
 var_dump(openssl_csr_export($csr, $output, false));
 ?>
---EXPECT--
+--EXPECTF--
 bool(true)
-openssl_csr_export(): Argument #1 ($csr) must be of type resource, string given
-openssl_csr_export(): supplied resource is not a valid OpenSSL X.509 CSR resource
+
+Warning: openssl_csr_export(): X.509 Certificate Signing Request cannot be retrieved in %s on line %d
+bool(false)
+openssl_csr_export(): Argument #1 ($csr) must be of type OpenSSLCertificateSigningRequest|string, OpenSSLAsymmetricKey given
 bool(true)

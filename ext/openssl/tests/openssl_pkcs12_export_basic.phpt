@@ -48,11 +48,9 @@ bool(true)
 bool(true)
 int(3)
 
-Warning: openssl_pkcs12_export(): Cannot get cert from parameter 1 in %s on line %d
+Warning: openssl_pkcs12_export(): X.509 Certificate cannot be retrieved in %s on line %d
 bool(false)
 
-Warning: openssl_pkcs12_export(): Cannot get cert from parameter 1 in %s on line %d
+Warning: openssl_pkcs12_export(): X.509 Certificate cannot be retrieved in %s on line %d
 bool(false)
-
-Warning: openssl_pkcs12_export(): Cannot get cert from parameter 1 in %s on line %d
-openssl_pkcs12_export(): supplied resource is not a valid OpenSSL X.509 resource
+openssl_pkcs12_export(): Argument #1 ($x509) must be of type OpenSSLCertificate|string, OpenSSLAsymmetricKey given
