@@ -417,7 +417,9 @@ static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now) /* {{{
 				wp->idle_spawn_rate = 1;
 				continue;
 			}
-			wp->warn_max_children = 0;
+			if (!wp->shared) {
+				wp->warn_max_children = 0;
+			}
 
 			fpm_children_make(wp, 1, children_to_fork, 1);
 
@@ -528,8 +530,9 @@ void fpm_pctl_on_socket_accept(struct fpm_event_s *ev, short which, void *arg) /
 			return;
 		}
 	}
-
-	wp->warn_max_children = 0;
+	if (!wp->shared) {
+		wp->warn_max_children = 0;
+	}
 	fpm_children_make(wp, 1, 1, 1);
 
 	if (fpm_globals.is_child) {

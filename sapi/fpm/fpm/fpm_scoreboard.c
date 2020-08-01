@@ -71,6 +71,11 @@ int fpm_scoreboard_init_main() /* {{{ */
 		wp->scoreboard->pm          = wp->config->pm;
 		wp->scoreboard->start_epoch = time(NULL);
 		strlcpy(wp->scoreboard->pool, wp->config->name, sizeof(wp->scoreboard->pool));
+
+		if (wp->shared) {
+			/* shared pool is added after non shared ones so the shared scoreboard is allocated */
+			wp->scoreboard->shared = wp->shared->scoreboard;
+		}
 	}
 	return 0;
 }
