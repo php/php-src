@@ -27,12 +27,6 @@
 #include "php_pdo_sqlite_int.h"
 #include "zend_exceptions.h"
 
-/* {{{ pdo_sqlite_functions[] */
-static const zend_function_entry pdo_sqlite_functions[] = {
-	PHP_FE_END
-};
-/* }}} */
-
 /* {{{ pdo_sqlite_deps */
 static const zend_module_dep pdo_sqlite_deps[] = {
 	ZEND_MOD_REQUIRED("pdo")
@@ -45,7 +39,7 @@ zend_module_entry pdo_sqlite_module_entry = {
 	STANDARD_MODULE_HEADER_EX, NULL,
 	pdo_sqlite_deps,
 	"pdo_sqlite",
-	pdo_sqlite_functions,
+	NULL,
 	PHP_MINIT(pdo_sqlite),
 	PHP_MSHUTDOWN(pdo_sqlite),
 	NULL,

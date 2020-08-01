@@ -27,15 +27,6 @@
 zend_class_entry *xsl_xsltprocessor_class_entry;
 static zend_object_handlers xsl_object_handlers;
 
-/* {{{ xsl_functions[]
- *
- * Every user visible function must have an entry in xsl_functions[].
- */
-const zend_function_entry xsl_functions[] = {
-	PHP_FE_END
-};
-/* }}} */
-
 static const zend_module_dep xsl_deps[] = {
 	ZEND_MOD_REQUIRED("libxml")
 	ZEND_MOD_END
@@ -46,7 +37,7 @@ zend_module_entry xsl_module_entry = {
 	STANDARD_MODULE_HEADER_EX, NULL,
 	xsl_deps,
 	"xsl",
-	xsl_functions,
+	NULL,
 	PHP_MINIT(xsl),
 	PHP_MSHUTDOWN(xsl),
 	NULL,
