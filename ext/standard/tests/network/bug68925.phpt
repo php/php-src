@@ -15,5 +15,5 @@ try {
 
 ?>
 --EXPECT--
-gethostbyname(): Argument #1 ($hostname) must be less than 255 characters
-gethostbynamel(): Argument #1 ($hostname) must be less than 255 characters
+gethostbyname(): Argument #1 ($hostname) cannot be longer than 255 characters
+gethostbynamel(): Argument #1 ($hostname) cannot be longer than 255 characters

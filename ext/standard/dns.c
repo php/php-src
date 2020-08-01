@@ -213,7 +213,7 @@ PHP_FUNCTION(gethostbyname)
 
 	if (hostname_len > MAXFQDNLEN) {
 		/* name too long, protect from CVE-2015-0235 */
-		zend_argument_value_error(1, "must be less than %d characters", MAXFQDNLEN);
+		zend_argument_value_error(1, "cannot be longer than %d characters", MAXFQDNLEN);
 		RETURN_THROWS();
 	}
 
@@ -236,7 +236,7 @@ PHP_FUNCTION(gethostbynamel)
 
 	if (hostname_len > MAXFQDNLEN) {
     	/* name too long, protect from CVE-2015-0235 */
-    	zend_argument_value_error(1, "must be less than %d characters", MAXFQDNLEN);
+    	zend_argument_value_error(1, "cannot be longer than %d characters", MAXFQDNLEN);
     	RETURN_THROWS();
     }
 
@@ -845,7 +845,7 @@ PHP_FUNCTION(dns_get_record)
 		}
 	} else {
 		if ((type_param < 1) || (type_param > 0xFFFF)) {
-			zend_argument_value_error(2, "must be between 1 and 65535 when Argument #5 ($raw) is true");
+			zend_argument_value_error(2, "must be between 1 and 65535 when argument #5 ($raw) is true");
 			RETURN_THROWS();
 		}
 	}
