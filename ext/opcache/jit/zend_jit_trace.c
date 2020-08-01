@@ -4237,8 +4237,17 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						goto done;
 					case ZEND_SWITCH_LONG:
 					case ZEND_SWITCH_STRING:
-					case ZEND_MATCH:
 						if (!zend_jit_switch(&dasm_state, opline, op_array, op_array_ssa, p+1, &zend_jit_traces[ZEND_JIT_TRACE_NUM])) {
+							goto jit_failure;
+						}
+						goto done;
+					case ZEND_MATCH:
+						if (!zend_jit_match(&dasm_state, opline, op_array, op_array_ssa, p+1, &zend_jit_traces[ZEND_JIT_TRACE_NUM])) {
+							goto jit_failure;
+						}
+						goto done;
+					case ZEND_MATCH_ERROR:
+						if (!zend_jit_match_error(&dasm_state, opline, op_array, op_array_ssa, p+1)) {
 							goto jit_failure;
 						}
 						goto done;

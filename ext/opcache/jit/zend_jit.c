@@ -2945,8 +2945,17 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						goto done;
 					case ZEND_SWITCH_LONG:
 					case ZEND_SWITCH_STRING:
-					case ZEND_MATCH:
 						if (!zend_jit_switch(&dasm_state, opline, op_array, ssa, NULL, NULL)) {
+							goto jit_failure;
+						}
+						goto done;
+					case ZEND_MATCH:
+						if (!zend_jit_match(&dasm_state, opline, op_array, ssa, NULL, NULL)) {
+							goto jit_failure;
+						}
+						goto done;
+					case ZEND_MATCH_ERROR:
+						if (!zend_jit_match_error(&dasm_state, opline, op_array, ssa, NULL)) {
 							goto jit_failure;
 						}
 						goto done;

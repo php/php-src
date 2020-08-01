@@ -11851,13 +11851,6 @@ static int zend_jit_switch(dasm_State **Dst, const zend_op *opline, const zend_o
 		next_opline = trace->opline;
 	}
 
-	// TODO: Implement for match instructions
-	if (opline->opcode == ZEND_MATCH) {
-		// Since the match expression doesn't have a IS_IDENTICAL/JMPNZ chain
-		// we can't skip the jumptable and thus can't JIT the function
-		return 0;
-	}
-
 	if (opline->op1_type == IS_CONST) {
 		zval *zv = RT_CONSTANT(opline, opline->op1);
 		zval *jump_zv;
@@ -12153,6 +12146,285 @@ static int zend_jit_switch(dasm_State **Dst, const zend_op *opline, const zend_o
 			ZEND_UNREACHABLE();
 		}
 	}
+	return 1;
+}
+
+static int zend_jit_match(dasm_State **Dst, const zend_op *opline, const zend_op_array *op_array, zend_ssa *ssa, zend_jit_trace_rec *trace, zend_jit_trace_info *trace_info)
+{
+	HashTable *jumptable = Z_ARRVAL_P(RT_CONSTANT(opline, opline->op2));
+	const zend_op *next_opline = NULL;
+
+	if (trace) {
+		ZEND_ASSERT(trace->op == ZEND_JIT_TRACE_VM || trace->op == ZEND_JIT_TRACE_END);
+		ZEND_ASSERT(trace->opline != NULL);
+		next_opline = trace->opline;
+	}
+
+	if (opline->op1_type == IS_CONST) {
+		zval *zv = RT_CONSTANT(opline, opline->op1);
+		zval *jump_zv;
+		int b;
+
+		if (Z_TYPE_P(zv) == IS_LONG) {
+			jump_zv = zend_hash_index_find(jumptable, Z_LVAL_P(zv));
+		} else if (Z_TYPE_P(zv) == IS_STRING) {
+			jump_zv = zend_hash_find_ex(jumptable, Z_STR_P(zv), 1);
+		} else {
+			b = ssa->cfg.map[ZEND_OFFSET_TO_OPLINE(opline, opline->extended_value) - op_array->opcodes];
+			|	jmp =>b
+			goto done;
+		}
+
+		if (next_opline) {
+			const zend_op *target = ZEND_OFFSET_TO_OPLINE(opline, Z_LVAL_P(jump_zv));
+
+			ZEND_ASSERT(target == next_opline);
+		} else {
+			if (jump_zv != NULL) {
+				b = ssa->cfg.map[ZEND_OFFSET_TO_OPLINE(opline, Z_LVAL_P(jump_zv)) - op_array->opcodes];
+			} else {
+				b = ssa->cfg.map[ZEND_OFFSET_TO_OPLINE(opline, opline->extended_value) - op_array->opcodes];
+			}
+			|	jmp =>b
+		}
+	} else {
+		zend_ssa_op *ssa_op = &ssa->ops[opline - op_array->opcodes];
+		uint32_t op1_info = OP1_INFO();
+		zend_jit_addr op1_addr = OP1_ADDR();
+		const zend_op *default_opline = ZEND_OFFSET_TO_OPLINE(opline, opline->extended_value);
+		const zend_op *target;
+		int default_b = next_opline ? -1 : ssa->cfg.map[default_opline - op_array->opcodes];
+		int b;
+		zval *val;
+		int32_t exit_point;
+		const void *default_label = NULL;
+		const void *exit_addr;
+
+		if (next_opline) {
+			if (next_opline != opline + 1) {
+				exit_point = zend_jit_trace_get_exit_point(opline + 1, 0);
+			}
+			if (next_opline != default_opline) {
+				exit_point = zend_jit_trace_get_exit_point(default_opline, 0);
+				default_label = zend_jit_trace_get_exit_addr(exit_point);
+			}
+		}
+
+		if (opline->op1_type == IS_CV && op1_info & MAY_BE_UNDEF) {
+			|	SAVE_VALID_OPLINE opline, r0
+			|	IF_NOT_ZVAL_TYPE op1_addr, IS_UNDEF, >1
+			|	// zend_error(E_WARNING, "Undefined variable $%s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
+			|	mov FCARG1d, opline->op1.var
+			|	SET_ZVAL_TYPE_INFO op1_addr, IS_NULL
+			|	EXT_CALL zend_jit_undefined_op_helper, r0
+			zend_jit_check_exception_undef_result(Dst, opline);
+			op1_info |= MAY_BE_NULL;
+		}
+		|1:
+
+		if (!(op1_info & (MAY_BE_LONG|MAY_BE_STRING))) {
+			|	jmp =>default_b
+			goto done;
+		}
+
+		zend_bool packed_jumptable = HT_IS_PACKED(jumptable);
+
+		if (!packed_jumptable) {
+			|	LOAD_ADDR FCARG1a, jumptable
+		}
+
+		zend_bool skip_type_default_jump = false;
+
+		if (op1_info & MAY_BE_LONG) {
+			zend_bool may_only_be_long = (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)^MAY_BE_LONG)) == 0;
+			skip_type_default_jump |= may_only_be_long;
+			if (!may_only_be_long) {
+				|	IF_NOT_ZVAL_TYPE op1_addr, IS_LONG, >1
+			}
+			|	GET_ZVAL_LVAL ZREG_FCARG2a, op1_addr
+			if (!packed_jumptable) {
+				|	EXT_CALL zend_hash_index_find, r0
+			}
+			if (!may_only_be_long) {
+				|	jmp >4
+			}
+		}
+		|1:
+		if (op1_info & MAY_BE_STRING && !packed_jumptable) {
+			zend_bool may_only_be_string = (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)^MAY_BE_STRING)) == 0;
+			skip_type_default_jump |= may_only_be_string;
+			if (!may_only_be_string) {
+				|	IF_NOT_ZVAL_TYPE op1_addr, IS_STRING, >2
+			}
+			|	GET_ZVAL_PTR FCARG2a, op1_addr
+			|	EXT_CALL zend_hash_find, r0
+			if (!may_only_be_string) {
+				|	jmp >4
+			}
+		}
+		|2:
+		if (op1_info & MAY_BE_REF) {
+			|	IF_NOT_ZVAL_TYPE op1_addr, IS_REFERENCE, >3
+			|	GET_ZVAL_PTR FCARG2a, op1_addr
+			if (op1_info & MAY_BE_LONG) {
+				zend_bool may_only_be_long_ref = (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)^(MAY_BE_LONG|MAY_BE_REF))) == 0;
+				skip_type_default_jump |= may_only_be_long_ref;
+				if (!may_only_be_long_ref) {
+					|	IF_NOT_Z_TYPE FCARG2a + offsetof(zend_reference, val), IS_LONG, >7
+				}
+				|	mov FCARG2a, aword [FCARG2a + offsetof(zend_reference, val.value.lval)]
+				if (!packed_jumptable) {
+					|	EXT_CALL zend_hash_index_find, r0
+				}
+				if (!may_only_be_long_ref) {
+					|	jmp >4
+				}
+			}
+			|7:
+			if (op1_info & MAY_BE_STRING && !packed_jumptable) {
+				zend_bool may_only_be_string_ref = (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)^(MAY_BE_STRING|MAY_BE_REF))) == 0;
+				skip_type_default_jump |= may_only_be_string_ref;
+				if (!may_only_be_string_ref) {
+					|	IF_NOT_Z_TYPE FCARG2a + offsetof(zend_reference, val), IS_STRING, >3
+				}
+				|	mov FCARG2a, aword [FCARG2a + offsetof(zend_reference, val.value.ptr)]
+				|	EXT_CALL zend_hash_find, r0
+				if (!may_only_be_string_ref) {
+					|	jmp >4
+				}
+			}
+		}
+		|3:
+		if (!skip_type_default_jump) {
+			if (default_label) {
+				|	jmp &default_label
+			} else if (next_opline) {
+				|	jmp >6
+			} else {
+				|	jmp =>default_b
+			}
+		}
+		|4:
+
+		if (HT_IS_PACKED(jumptable)) {
+			uint32_t count = jumptable->nNumUsed;
+			Bucket *p = jumptable->arData;
+
+			|	cmp FCARG2a, jumptable->nNumUsed
+			if (default_label) {
+				|	jae &default_label
+			} else if (next_opline) {
+				|	jae >6
+			} else {
+				|	jae =>default_b
+			}
+			|.if X64
+				if (!IS_32BIT(dasm_end)) {
+					|	lea r0, aword [>5]
+					|	jmp aword [r0 + FCARG2a * 8]
+				} else {
+					|	jmp aword [FCARG2a * 8 + >5]
+				}
+			|.else
+			|	jmp aword [FCARG2a * 4 + >5]
+			|.endif
+			|.jmp_table
+			|.align aword
+			|5:
+			if (trace_info) {
+				trace_info->jmp_table_size += count;
+			}
+			p = jumptable->arData;
+			do {
+				if (Z_TYPE(p->val) == IS_UNDEF) {
+					if (default_label) {
+						|	.aword &default_label
+					} else if (next_opline) {
+						|	.aword >6
+					} else {
+						|	.aword =>default_b
+					}
+				} else {
+					target = ZEND_OFFSET_TO_OPLINE(opline, Z_LVAL(p->val));
+					if (!next_opline) {
+						b = ssa->cfg.map[target - op_array->opcodes];
+						|	.aword =>b
+					} else if (next_opline == target) {
+						|	.aword >6
+					} else {
+						exit_point = zend_jit_trace_get_exit_point(target, 0);
+						exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+						|	.aword &exit_addr
+					}
+				}
+				p++;
+				count--;
+			} while (count);
+			|.code
+			|6:
+		} else {
+			|	test r0, r0
+			if (default_label) {
+				|	jz &default_label
+			} else if (next_opline) {
+				|	jz >6
+			} else {
+				|	jz =>default_b
+			}
+			|	LOAD_ADDR FCARG1a, jumptable
+			|	sub r0, aword [FCARG1a + offsetof(HashTable, arData)]
+			|	mov FCARG1a, (sizeof(Bucket) / sizeof(void*))
+			|.if X64
+			|	cqo
+			|.else
+			|	cdq
+			|.endif
+			|	idiv FCARG1a
+			|.if X64
+			if (!IS_32BIT(dasm_end)) {
+				|	lea FCARG1a, aword [>5]
+				|	jmp aword [FCARG1a + r0]
+			} else {
+				|	jmp aword [r0 + >5]
+			}
+			|.else
+			|	jmp aword [r0 + >5]
+			|.endif
+			|.jmp_table
+			|.align aword
+			|5:
+			if (trace_info) {
+				trace_info->jmp_table_size += zend_hash_num_elements(jumptable);
+			}
+			ZEND_HASH_FOREACH_VAL(jumptable, val) {
+				target = ZEND_OFFSET_TO_OPLINE(opline, Z_LVAL_P(val));
+				if (!next_opline) {
+					b = ssa->cfg.map[target - op_array->opcodes];
+					|	.aword =>b
+				} else if (next_opline == target) {
+					|	.aword >6
+				} else {
+					exit_point = zend_jit_trace_get_exit_point(target, 0);
+					exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+					|	.aword &exit_addr
+				}
+			} ZEND_HASH_FOREACH_END();
+			|.code
+			|6:
+		}
+	}
+
+done:
+	return 1;
+}
+
+static int zend_jit_match_error(dasm_State **Dst, const zend_op *opline, const zend_op_array *op_array, zend_ssa *ssa, zend_jit_trace_rec *trace)
+{
+	|	SAVE_VALID_OPLINE opline, r0
+	zend_jit_addr op1_addr = OP1_ADDR();
+	|	LOAD_ZVAL_ADDR FCARG1a, op1_addr
+	|	EXT_CALL zend_jit_match_error_helper, r1
+	|	jmp ->exception_handler
 	return 1;
 }
 

@@ -4,6 +4,8 @@ Match expression long jump table
 opcache.enable=1
 opcache.enable_cli=1
 opcache.opt_debug_level=0x20000
+opcache.jit=1205
+;opcache.jit_debug=257
 --SKIPIF--
 <?php require_once(__DIR__ . '/../skipif.inc'); ?>
 --FILE--

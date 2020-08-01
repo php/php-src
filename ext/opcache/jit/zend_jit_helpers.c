@@ -1849,3 +1849,8 @@ static zend_array *ZEND_FASTCALL zend_jit_add_arrays_helper(zend_array *op1, zen
 	zend_hash_merge(res, op2, zval_add_ref, 0);
 	return res;
 }
+
+static void ZEND_FASTCALL zend_jit_match_error_helper(zval *val)
+{
+	zend_throw_exception_ex(zend_ce_unhandled_match_error, 0, "Unhandled match value of type %s", zend_zval_type_name(val));
+}
