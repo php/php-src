@@ -16,6 +16,7 @@ final class OpenSSLAsymmetricKey
 
 function openssl_x509_export_to_file(OpenSSLCertificate|string $x509, string $outfilename, bool $notext = true): bool {}
 
+/** @param string $out */
 function openssl_x509_export(OpenSSLCertificate|string $x509, &$out, bool $notext = true): bool {}
 
 function openssl_x509_fingerprint(OpenSSLCertificate|string $x509, string $method = "sha1", bool $raw_output = false): string|false {}
@@ -38,7 +39,10 @@ function openssl_x509_free(OpenSSLCertificate $x509): void {}
 /** @param OpenSSLAsymmetricKey|OpenSSLCertificate|array|string $priv_key */
 function openssl_pkcs12_export_to_file(OpenSSLCertificate|string $x509cert, string $filename, $priv_key, string $pass, array $args = []): bool {}
 
-/** @param OpenSSLAsymmetricKey|OpenSSLCertificate|array|string $priv_key */
+/**
+ * @param string $out
+ * @param OpenSSLAsymmetricKey|OpenSSLCertificate|array|string $priv_key
+ */
 function openssl_pkcs12_export(OpenSSLCertificate|string $x509, &$out, $priv_key, string $pass, array $args = []): bool {}
 
 /** @param array $certs */
@@ -115,9 +119,10 @@ function openssl_pkcs7_sign(string $infile, string $outfile, OpenSSLCertificate|
 /** @param OpenSSLAsymmetricKey|OpenSSLCertificate|array|string|null $recipkey */
 function openssl_pkcs7_decrypt(string $infilename, string $outfilename, OpenSSLCertificate|string $recipcert, $recipkey = null): bool {}
 
+/** @param array $certs */
 function openssl_pkcs7_read(string $infilename, &$certs): bool {}
 
-function openssl_cms_verify(string $filename, int $flags = 0, ?string $signerscerts = null, ?array $cainfo = null, ?string $extracerts = null, ?string $content = null, ?string $pk7 = null, ?string $sigfile = null, $encoding = OPENSSL_ENCODING_SMIME): bool {}
+function openssl_cms_verify(string $filename, int $flags = 0, ?string $signerscerts = null, ?array $cainfo = null, ?string $extracerts = null, ?string $content = null, ?string $pk7 = null, ?string $sigfile = null, int $encoding = OPENSSL_ENCODING_SMIME): bool {}
 
 /** @param OpenSSLCertificate|array|string $recipcerts */
 function openssl_cms_encrypt(string $infile, string $outfile, $recipcerts, ?array $headers, int $flags = 0, int $encoding = OPENSSL_ENCODING_SMIME,  int $cipher = OPENSSL_CIPHER_RC2_40): bool {}

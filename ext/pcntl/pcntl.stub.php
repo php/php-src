@@ -4,13 +4,13 @@
 
 function pcntl_fork(): int {}
 
+/** @param int $status */
 function pcntl_waitpid(int $pid, &$status, int $options = 0, &$rusage = []): int {}
 
+/** @param int $status */
 function pcntl_wait(&$status, int $options = 0, &$rusage = []): int {}
 
-/**
- * @param callable|int $handler
- */
+/** @param callable|int $handler */
 function pcntl_signal(int $signo, $handler, bool $restart_syscalls = true): bool {}
 
 /** @return mixed */
@@ -19,13 +19,16 @@ function pcntl_signal_get_handler(int $signo) {}
 function pcntl_signal_dispatch(): bool {}
 
 #ifdef HAVE_SIGPROCMASK
+/** @param array $oldset */
 function pcntl_sigprocmask(int $how, array $set, &$oldset = null): bool {}
 #endif
 
 #ifdef HAVE_STRUCT_SIGINFO_T
 #if defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT)
+/** @param array $info */
 function pcntl_sigwaitinfo(array $set, &$info = []): int|false {}
 
+/** @param array $info */
 function pcntl_sigtimedwait(array $set, &$info = [], int $seconds = 0, int $nanoseconds = 0): int|false {}
 #endif
 #endif
