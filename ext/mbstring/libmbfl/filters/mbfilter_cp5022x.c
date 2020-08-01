@@ -31,10 +31,6 @@
 #include "unicode_table_jis.h"
 #include "cp932_table.h"
 
-typedef struct _mbfl_filt_conv_wchar_cp50220_ctx {
-	mbfl_convert_filter last;
-} mbfl_filt_conv_wchar_cp50220_ctx;
-
 static int mbfl_filt_ident_jis_ms(int c, mbfl_identify_filter *filter);
 static int mbfl_filt_ident_cp50220(int c, mbfl_identify_filter *filter);
 static int mbfl_filt_ident_cp50221(int c, mbfl_identify_filter *filter);
@@ -562,20 +558,16 @@ mbfl_filt_conv_wchar_jis_ms(int c, mbfl_convert_filter *filter)
 static void
 mbfl_filt_conv_wchar_cp50220_ctor(mbfl_convert_filter *filt)
 {
-	mbfl_filt_conv_wchar_cp50220_ctx *ctx;
-
 	mbfl_filt_conv_common_ctor(filt);
 
-	ctx = emalloc(sizeof(mbfl_filt_conv_wchar_cp50220_ctx));
-	ctx->last = *filt;
-	ctx->last.data = filt->data;
+	mbfl_convert_filter *last = emalloc(sizeof(mbfl_convert_filter));
+	*last = *filt;
 	filt->filter_function = vtbl_tl_jisx0201_jisx0208.filter_function;
 	filt->filter_flush = (filter_flush_t)vtbl_tl_jisx0201_jisx0208.filter_flush;
-	filt->output_function = (output_function_t)ctx->last.filter_function;
-	filt->flush_function = (flush_function_t)ctx->last.filter_flush;
-	filt->data = ctx;
+	filt->output_function = (output_function_t)last->filter_function;
+	filt->flush_function = (flush_function_t)last->filter_flush;
+	filt->data = last;
 	filt->opaque = (void*)(MBFL_FILT_TL_HAN2ZEN_KATAKANA | MBFL_FILT_TL_HAN2ZEN_GLUE);
-	vtbl_tl_jisx0201_jisx0208.filter_ctor(filt);
 }
 
 static void
