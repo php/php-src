@@ -712,6 +712,11 @@ PHP 8.0 UPGRADE NOTES
   . enchant_dict_is_added()
   . LIBENCHANT_VERSION macro
 
+- FPM:
+  . Added a new option pm.status_listen that allows getting status from
+    different endpoint (e.g. port or UDS file) which is useful for getting
+    status when all children are busy with serving long running requests.
+
 - Hash:
   . HashContext objects can now be serialized.
 
