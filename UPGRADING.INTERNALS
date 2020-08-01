@@ -209,7 +209,7 @@ PHP 8.0 INTERNALS UPGRADE NOTES
         with extremely constrained memory, and compilation fails with an "out
         of memory" message, add "-O0" to CFLAGS.
 
-    5.  build system and provider are displayed in phpinfo from enviroment:
+    5.  build system and provider are displayed in phpinfo from environment:
         - PHP_BUILD_SYSTEM (default is same as PHP_UNAME)
         - PHP_BUILD_PROVIDER (no default)
 

@@ -226,7 +226,7 @@ PHP 8.0 UPGRADE NOTES
      - Increment and decrement operations
     The concept of a "leading-numeric string" has been mostly dropped; the
     cases where this remains exist in order to ease migration. Strings which
-    emitted an E_NOTICE "A non well formed numeric value encountered" will now
+    emitted an E_NOTICE "A non well-formed numeric value encountered" will now
     emit an E_WARNING "A non-numeric value encountered" and all strings which
     emitted an E_WARNING "A non-numeric value encountered" will now throw a
     TypeError. This mostly affects:
@@ -797,7 +797,7 @@ PHP 8.0 UPGRADE NOTES
    . env_method
    . enc_password
  . ZipArchive::addEmptyDir, ZipArchive::addFile and aZipArchive::addFromString
-   methods have a new "flags" argument. This allow to manage name encoding
+   methods have a new "flags" argument. This allows managing name encoding
    (ZipArchive::FL_ENC_*) and entry replacement (ZipArchive::FL_OVERWRITE)
  . ZipArchive::extractTo now restore file modification time.
 
