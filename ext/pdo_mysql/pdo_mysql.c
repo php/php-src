@@ -214,12 +214,6 @@ ZEND_TSRMLS_CACHE_UPDATE();
 }
 /* }}} */
 
-/* {{{ pdo_mysql_functions[] */
-static const zend_function_entry pdo_mysql_functions[] = {
-	PHP_FE_END
-};
-/* }}} */
-
 /* {{{ pdo_mysql_deps[] */
 static const zend_module_dep pdo_mysql_deps[] = {
 	ZEND_MOD_REQUIRED("pdo")
@@ -235,7 +229,7 @@ zend_module_entry pdo_mysql_module_entry = {
 	STANDARD_MODULE_HEADER_EX, NULL,
 	pdo_mysql_deps,
 	"pdo_mysql",
-	pdo_mysql_functions,
+	NULL,
 	PHP_MINIT(pdo_mysql),
 	PHP_MSHUTDOWN(pdo_mysql),
 #if defined(PDO_USE_MYSQLND) && PDO_DBG_ENABLED

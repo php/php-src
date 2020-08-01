@@ -29,12 +29,6 @@
 #include <TSRM/TSRM.h>
 #endif
 
-/* {{{ pdo_oci_functions[] */
-static const zend_function_entry pdo_oci_functions[] = {
-	PHP_FE_END
-};
-/* }}} */
-
 /* {{{ pdo_oci_module_entry */
 
 static const zend_module_dep pdo_oci_deps[] = {
@@ -46,7 +40,7 @@ zend_module_entry pdo_oci_module_entry = {
 	STANDARD_MODULE_HEADER_EX, NULL,
 	pdo_oci_deps,
 	"PDO_OCI",
-	pdo_oci_functions,
+	NULL,
 	PHP_MINIT(pdo_oci),
 	PHP_MSHUTDOWN(pdo_oci),
 	PHP_RINIT(pdo_oci),

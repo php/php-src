@@ -6381,10 +6381,6 @@ ZEND_METHOD(ReflectionAttribute, newInstance)
 
 	RETURN_COPY_VALUE(&obj);
 }
-/* }}} */
-static const zend_function_entry reflection_ext_functions[] = { /* {{{ */
-	PHP_FE_END
-}; /* }}} */
 
 /* {{{ _reflection_write_property */
 static zval *_reflection_write_property(zend_object *object, zend_string *name, zval *value, void **cache_slot)
@@ -6558,7 +6554,7 @@ PHP_MINFO_FUNCTION(reflection) /* {{{ */
 zend_module_entry reflection_module_entry = { /* {{{ */
 	STANDARD_MODULE_HEADER,
 	"Reflection",
-	reflection_ext_functions,
+	NULL,
 	PHP_MINIT(reflection),
 	NULL,
 	NULL,
