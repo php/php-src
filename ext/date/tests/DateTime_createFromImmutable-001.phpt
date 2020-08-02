@@ -1,5 +1,5 @@
 --TEST--
-Tests for DateTime::createFromImmutable.
+Tests for DateTime::createFromImmutable
 --INI--
 date.timezone=Europe/London
 --FILE--

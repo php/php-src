@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug #79897 (Promoted constructor params with attribs cause crash).
     (Deus Kane)
 
+- Date:
+  . Fixed bug #60302 (DateTime::createFromFormat should new static(), not new
+    self()). (Derick)
+
 - JIT:
   . Fixed bug #79864 (JIT segfault in Symfony OptionsResolver). (Dmitry)
   . Fixed bug #79888 (Incorrect execution with JIT enabled). (Dmitry)
