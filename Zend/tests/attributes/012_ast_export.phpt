@@ -1,5 +1,9 @@
 --TEST--
 Attributes AST can be exported.
+--INI--
+zend.assertions=1
+assert.exception=0
+assert.warning=1
 --FILE--
 <?php
 

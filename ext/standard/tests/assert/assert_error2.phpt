@@ -5,6 +5,7 @@ assert.active = 1
 assert.warning = 1
 assert.callback = f1
 assert.bail = 0
+assert.exception=0
 error_reporting = -1
 display_errors = 1
 --FILE--

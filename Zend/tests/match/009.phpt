@@ -1,5 +1,7 @@
 --TEST--
 Pretty printing for match expression
+--INI--
+assert.exception=0
 --FILE--
 <?php
 
