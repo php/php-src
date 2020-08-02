@@ -572,7 +572,7 @@ static const func_info_t func_infos[] = {
 
 	/* ext/xml */
 	F1("xml_error_string",                      MAY_BE_NULL | MAY_BE_STRING),
-	F1("xml_parser_get_option",                 MAY_BE_FALSE | MAY_BE_LONG | MAY_BE_STRING),
+	F1("xml_parser_get_option",                 MAY_BE_LONG | MAY_BE_STRING),
 	F1("utf8_encode",                           MAY_BE_STRING),
 	F1("utf8_decode",                           MAY_BE_STRING),
 
@@ -798,17 +798,17 @@ static const func_info_t func_infos[] = {
 	F1("filter_list",							MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
 
 	/* ext/gettext */
-	F1("textdomain",							MAY_BE_FALSE | MAY_BE_STRING),
-	F1("gettext",								MAY_BE_FALSE | MAY_BE_STRING),
-	F1("_",										MAY_BE_FALSE | MAY_BE_STRING),
-	F1("dgettext",								MAY_BE_FALSE | MAY_BE_STRING),
-	F1("dcgettext",								MAY_BE_FALSE | MAY_BE_STRING),
+	F1("textdomain",							MAY_BE_STRING),
+	F1("gettext",								MAY_BE_STRING),
+	F1("_",										MAY_BE_STRING),
+	F1("dgettext",								MAY_BE_STRING),
+	F1("dcgettext",								MAY_BE_STRING),
 	F1("bindtextdomain",						MAY_BE_FALSE | MAY_BE_STRING),
 #if HAVE_NGETTEXT
-	F1("ngettext",								MAY_BE_FALSE | MAY_BE_STRING),
+	F1("ngettext",								MAY_BE_STRING),
 #endif
 #if HAVE_DNGETTEXT
-	F1("dcngettext",							MAY_BE_FALSE | MAY_BE_STRING),
+	F1("dcngettext",							MAY_BE_STRING),
 #endif
 #if HAVE_BIND_TEXTDOMAIN_CODESET
 	F1("bind_textdomain_codeset",				MAY_BE_FALSE | MAY_BE_STRING),

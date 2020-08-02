@@ -295,8 +295,8 @@ PHP_FUNCTION(msg_receive)
 	}
 
 	if (maxsize <= 0) {
-		php_error_docref(NULL, E_WARNING, "Maximum size of the message has to be greater than zero");
-		return;
+		zend_argument_value_error(4, "must be greater than 0");
+		RETURN_THROWS();
 	}
 
 	if (flags != 0) {
@@ -399,7 +399,6 @@ PHP_FUNCTION(msg_send)
 				p = Z_STRVAL_P(message);
 				message_len = Z_STRLEN_P(message);
 				break;
-
 			case IS_LONG:
 				message_len = spprintf(&p, 0, ZEND_LONG_FMT, Z_LVAL_P(message));
 				break;
@@ -412,9 +411,10 @@ PHP_FUNCTION(msg_send)
 			case IS_DOUBLE:
 				message_len = spprintf(&p, 0, "%F", Z_DVAL_P(message));
 				break;
+
 			default:
-				php_error_docref(NULL, E_WARNING, "Message parameter must be either a string or a number.");
-				RETURN_FALSE;
+				zend_argument_type_error(3, "must be of type string|int|float|bool, %s given", zend_zval_type_name(message));
+				RETURN_THROWS();
 		}
 
 		messagebuffer = safe_emalloc(message_len, 1, sizeof(struct php_msgbuf));

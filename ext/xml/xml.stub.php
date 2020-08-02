@@ -2,9 +2,9 @@
 
 /** @generate-function-entries */
 
-function xml_parser_create(?string $encoding = null): XmlParser|false {}
+function xml_parser_create(?string $encoding = null): XmlParser {}
 
-function xml_parser_create_ns(?string $encoding = null, string $sep = ':'): XmlParser|false {}
+function xml_parser_create_ns(?string $encoding = null, string $sep = ':'): XmlParser {}
 
 function xml_set_object(XmlParser $parser, object $obj): bool {}
 
@@ -61,7 +61,7 @@ function xml_parser_free(XmlParser $parser): bool {}
 /** @param string|int $value */
 function xml_parser_set_option(XmlParser $parser, int $option, $value): bool {}
 
-function xml_parser_get_option(XmlParser $parser, int $option): string|int|false {}
+function xml_parser_get_option(XmlParser $parser, int $option): string|int {}
 
 final class XMLParser
 {
