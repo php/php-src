@@ -4314,14 +4314,15 @@ PHP_FUNCTION(ldap_exop_whoami)
 /* {{{ DDS refresh extended operation */
 PHP_FUNCTION(ldap_exop_refresh)
 {
-	zval *link, *ttl;
+	zval *link;
+	zend_long ttl;
 	struct berval ldn;
 	ber_int_t lttl;
 	ber_int_t newttl;
 	ldap_linkdata *ld;
 	int rc;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsz", &link, &ldn.bv_val, &ldn.bv_len, &ttl) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsl", &link, &ldn.bv_val, &ldn.bv_len, &ttl) != SUCCESS) {
 		RETURN_THROWS();
 	}
 
@@ -4329,7 +4330,7 @@ PHP_FUNCTION(ldap_exop_refresh)
 		RETURN_THROWS();
 	}
 
-	lttl = (ber_int_t)zval_get_long(ttl);
+	lttl = (ber_int_t) ttl;
 
 	rc = ldap_refresh_s(ld->link, &ldn, lttl, &newttl, NULL, NULL);
 	if (rc != LDAP_SUCCESS ) {

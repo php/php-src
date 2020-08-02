@@ -305,7 +305,7 @@ function ldap_exop_whoami($link): string|bool {}
 
 #ifdef HAVE_LDAP_REFRESH_S
 /** @param resource $link */
-function ldap_exop_refresh($link, string $dn, $ttl): int|false {}
+function ldap_exop_refresh($link, string $dn, int $ttl): int|false {}
 #endif
 
 
