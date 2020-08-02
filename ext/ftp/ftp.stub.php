@@ -37,7 +37,10 @@ function ftp_rmdir($ftp, string $directory): bool {}
 /** @param resource $ftp */
 function ftp_chmod($ftp, int $mode, string $filename): int|false {}
 
-/** @param resource $ftp */
+/**
+ * @param resource $ftp
+ * @param string $response
+ */
 function ftp_alloc($ftp, int $size, &$response = null): bool {}
 
 /** @param resource $ftp */
@@ -86,7 +89,7 @@ function ftp_fput($ftp, string $remote_file, $fp, int $mode = FTP_BINARY, int $s
  * @param resource $ftp
  * @param resource $fp
  */
-function ftp_nb_fput($ftp, string $remote_file, $fp, $mode = FTP_BINARY, $startpos = 0): int|false {}
+function ftp_nb_fput($ftp, string $remote_file, $fp, int $mode = FTP_BINARY, int $startpos = 0): int|false {}
 
 /** @param resource $ftp */
 function ftp_put($ftp, string $remote_file, string $local_file, int $mode = FTP_BINARY, int $startpos = 0): bool {}
@@ -121,7 +124,10 @@ function ftp_close($ftp): bool {}
  */
 function ftp_quit($ftp): bool {}
 
-/** @param resource $ftp */
+/**
+ * @param resource $ftp
+ * @param int|bool $value
+ */
 function ftp_set_option($ftp, int $option, $value): bool {}
 
 /** @param resource $ftp */

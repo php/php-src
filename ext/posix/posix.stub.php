@@ -61,8 +61,10 @@ function posix_times(): array|false {}
 function posix_ctermid(): string|false {}
 #endif
 
+/** @param resource|int $fd */
 function posix_ttyname($fd): string|false {}
 
+/** @param resource|int $fd */
 function posix_isatty($fd): bool {}
 
 function posix_getcwd(): string|false {}

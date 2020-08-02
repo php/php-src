@@ -204,6 +204,8 @@ function ldap_control_paged_result($link, int $pagesize, bool $iscritical = fals
 /**
  * @param resource $link
  * @param resource $result
+ * @param string $cookie
+ * @param int $estimated
  * @deprecated since 7.4
  */
 function ldap_control_paged_result_response($link, $result, &$cookie = null, &$estimated = null): bool {}
@@ -220,10 +222,16 @@ function ldap_rename($link_identifier, string $dn, string $newrdn, string $newpa
 function ldap_rename_ext($link_identifier, string $dn, string $newrdn, string $newparent, bool $deleteoldrdn, array $servercontrols = []) {}
 
 
-/** @param resource $link_identifier */
+/**
+ * @param resource $link_identifier
+ * @param array|string|int $retval
+ */
 function ldap_get_option($link_identifier, int $option, &$retval = null): bool {}
 
-/** @param resource|null $link_identifier */
+/**
+ * @param resource|null $link_identifier
+ * @param array|string|int|bool $newval
+ */
 function ldap_set_option($link_identifier, int $option, $newval): bool {}
 
 /**
@@ -250,6 +258,7 @@ function ldap_next_reference($link, $entry) {}
 /**
  * @param resource $link
  * @param resource $entry
+ * @param array $referrals
  */
 function ldap_parse_reference($link, $entry, &$referrals): bool {}
 #endif
@@ -264,13 +273,12 @@ function ldap_parse_result($link, $result, &$errcode, &$matcheddn = null, &$errm
 #endif
 
 #if defined(LDAP_API_FEATURE_X_OPENLDAP) && defined(HAVE_3ARG_SETREBINDPROC)
-/**
- * @param resource $link
- */
+/** @param resource $link */
 function ldap_set_rebind_proc($link, ?callable $callback): bool {}
 #endif
 
 #ifdef HAVE_LDAP_START_TLS_S
+/** @param resource $link_identifier */
 function ldap_start_tls($link_identifier): bool {}
 #endif
 
@@ -286,13 +294,18 @@ function ldap_8859_to_t61(string $value): string|false {}
 #ifdef HAVE_LDAP_EXTENDED_OPERATION_S
 /**
  * @param resource $link
+ * @param string $retdata
+ * @param string $retoid
  * @return resource|bool
  */
 function ldap_exop($link, string $reqoid, ?string $reqdata = null, ?array $servercontrols = [], &$retdata = null, &$retoid = null) {}
 #endif
 
 #ifdef HAVE_LDAP_PASSWD
-/** @param resource $link */
+/**
+ * @param resource $link
+ * @param array $serverctrls
+ */
 function ldap_exop_passwd($link, string $user = '', string $oldpw = '', string $newpw = '', &$serverctrls = null): string|bool {}
 #endif
 
@@ -302,17 +315,17 @@ function ldap_exop_passwd($link, string $user = '', string $oldpw = '', string $
 function ldap_exop_whoami($link): string|bool {}
 #endif
 
-
 #ifdef HAVE_LDAP_REFRESH_S
 /** @param resource $link */
 function ldap_exop_refresh($link, string $dn, int $ttl): int|false {}
 #endif
 
-
 #ifdef HAVE_LDAP_PARSE_EXTENDED_RESULT
 /**
  * @param resource $link
  * @param resource $result
+ * @param string $retdata
+ * @param string $retoid
  */
 function ldap_parse_exop($link, $result, &$retdata = null, &$retoid = null): bool {}
 #endif

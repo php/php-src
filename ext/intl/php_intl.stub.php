@@ -28,7 +28,7 @@ function intlcal_after(IntlCalendar $calendarObject, IntlCalendar $calendar): bo
 
 function intlcal_before(IntlCalendar $calendarObject, IntlCalendar $calendar): bool {}
 
-function intlcal_set(IntlCalendar $calendar, int $year, int $month, int $dayOfMonth = UNKNOWN, $hour = UNKNOWN, int $minute = UNKNOWN, int $second = UNKNOWN): bool {}
+function intlcal_set(IntlCalendar $calendar, int $year, int $month, int $dayOfMonth = UNKNOWN, int $hour = UNKNOWN, int $minute = UNKNOWN, int $second = UNKNOWN): bool {}
 
 /** @param int|bool $amountOrUpOrDown */
 function intlcal_roll(IntlCalendar $calendar, int $field, $amountOrUpOrDown): bool {}
@@ -190,8 +190,10 @@ function datefmt_format(IntlDateFormatter $df, $value): string|false {}
  */
 function datefmt_format_object($object, $format = null, ?string $locale = null): string|false {}
 
+/** @param int $position */
 function datefmt_parse(IntlDateFormatter $df, string $value, &$position = null): int|float|false {}
 
+/** @param int $position */
 function datefmt_localtime(IntlDateFormatter $df, string $value, &$position = null): array|false {}
 
 function datefmt_get_error_code(IntlDateFormatter $df): int {}
@@ -204,10 +206,15 @@ function numfmt_create(string $locale, int $style, string $pattern = ""): ?Numbe
 
 function numfmt_format(NumberFormatter $fmt, int|float $value, int $type = NumberFormatter::TYPE_DEFAULT): string|false {}
 
+/** @param int $position */
 function numfmt_parse(NumberFormatter $fmt, string $value, int $type = NumberFormatter::TYPE_DOUBLE, &$position = null): int|float|false {}
 
 function numfmt_format_currency(NumberFormatter $fmt, float $value, string $currency): string|false {}
 
+/**
+ * @param string $currency
+ * @param int $position
+ */
 function numfmt_parse_currency(NumberFormatter $fmt, string $value, &$currency, &$position = null): float|false {}
 
 /** @param int|float $value */
@@ -251,12 +258,15 @@ function grapheme_strstr(string $haystack, string $needle, bool $before_needle =
 
 function grapheme_stristr(string $haystack, string $needle, bool $before_needle = false): string|false {}
 
+/** @param int $next */
 function grapheme_extract(string $haystack, int $size, int $extract_type = GRAPHEME_EXTR_COUNT, int $start = 0, &$next = null): string|false {}
 
 /* idn */
 
+/** @param array $idna_info */
 function idn_to_ascii(string $domain, int $options = 0, int $variant = INTL_IDNA_VARIANT_UTS46, &$idna_info = null): string|false {}
 
+/** @param array $idna_info */
 function idn_to_utf8(string $domain, int $options = 0, int $variant = INTL_IDNA_VARIANT_UTS46, &$idna_info = null): string|false {}
 
 /* locale */

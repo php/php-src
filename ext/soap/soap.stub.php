@@ -4,7 +4,7 @@
 
 function use_soap_error_handler(bool $handler = true): bool {}
 
-function is_soap_fault($object): bool {}
+function is_soap_fault(mixed $object): bool {}
 
 class SoapParam
 {
