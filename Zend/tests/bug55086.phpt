@@ -26,7 +26,7 @@ namespace N2 {
     echo $a->hello(), PHP_EOL;
     echo $a->foo(), PHP_EOL;
     try {
-    } catch(namespace \Foo $e)
+    } catch(namespace\Foo $e)
     {
     }
 }
