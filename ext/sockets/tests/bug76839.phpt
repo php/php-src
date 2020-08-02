@@ -37,9 +37,9 @@ for ($i = 0; $i < 10; $i++) {
     socket_sendto($receiverSocket, 'Pong!', 5, 0, $from);
     echo "Responded to sender with 'Pong!'\n";
 
-    @socket_close($receiverSocket);
+    socket_close($receiverSocket);
     unlink($receiverSocketPath);
-    @socket_close($senderSocket);
+    socket_close($senderSocket);
     unlink($senderSocketPath);
 }
 --EXPECT--

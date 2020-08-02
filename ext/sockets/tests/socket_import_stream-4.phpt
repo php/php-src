@@ -100,9 +100,11 @@ Warning: socket_get_option(): Unable to retrieve socket option [%d]: %s in %s on
 close socket
 stream_set_blocking stream_set_blocking(): supplied resource is not a valid stream resource
 
-socket_set_block socket_set_block(): supplied resource is not a valid Socket resource
+socket_set_block 
+Warning: socket_set_block(): unable to set blocking mode [9]: Bad file descriptor in %s on line %d
 
-socket_get_option socket_get_option(): supplied resource is not a valid Socket resource
+socket_get_option 
+Warning: socket_get_option(): Unable to retrieve socket option [9]: Bad file descriptor in %s on line %d
 
 
 Done.

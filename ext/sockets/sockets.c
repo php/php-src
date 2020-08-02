@@ -144,10 +144,8 @@ static HashTable *socket_get_gc(zend_object *object, zval **table, int *n)
 {
 	php_socket *socket = socket_from_obj(object);
 
-	zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
-
-	zend_get_gc_buffer_add_zval(gc_buffer, &socket->zstream);
-	zend_get_gc_buffer_use(gc_buffer, table, n);
+	*table = &socket->zstream;
+	*n = 1;
 
 	return zend_std_get_properties(object);
 }
@@ -933,10 +931,26 @@ PHP_FUNCTION(socket_listen)
 /* {{{ Closes a file descriptor */
 PHP_FUNCTION(socket_close)
 {
-	zval		*arg1;
+	zval *arg1;
+	php_socket *php_socket;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &arg1, socket_ce) == FAILURE) {
 		RETURN_THROWS();
+	}
+
+	php_socket = Z_SOCKET_P(arg1);
+
+	if (!Z_ISUNDEF(php_socket->zstream)) {
+		php_stream *stream = NULL;
+		php_stream_from_zval_no_verify(stream, &php_socket->zstream);
+		if (stream != NULL) {
+			/* close & destroy stream, incl. removing it from the rsrc list;
+			 * resource stored in php_sock->zstream will become invalid */
+			php_stream_free(stream,
+					PHP_STREAM_FREE_KEEP_RSRC | PHP_STREAM_FREE_CLOSE |
+					(stream->is_persistent?PHP_STREAM_FREE_CLOSE_PERSISTENT:0));
+		}
+		ZVAL_UNDEF(&php_socket->zstream);
 	}
 }
 /* }}} */
@@ -1236,7 +1250,7 @@ PHP_FUNCTION(socket_connect)
 	int					retval;
 	size_t              addr_len;
 	zend_long				port;
-	zend_bool				port_is_null;
+	zend_bool				port_is_null = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Os|l!", &resource_socket, socket_ce, &addr, &addr_len, &port, &port_is_null) == FAILURE) {
 		RETURN_THROWS();
@@ -1249,8 +1263,8 @@ PHP_FUNCTION(socket_connect)
 		case AF_INET6: {
 			struct sockaddr_in6 sin6 = {0};
 
-			if (port) {
-				zend_argument_value_error(3, "must be specified for the AF_INET6 socket type");
+			if (port_is_null) {
+				zend_argument_value_error(3, "cannot be null when the socket type is AF_INET6");
 				RETURN_THROWS();
 			}
 
@@ -1271,7 +1285,7 @@ PHP_FUNCTION(socket_connect)
 			struct sockaddr_in sin = {0};
 
 			if (port_is_null) {
-				zend_argument_value_error(3, "cannot be null for the AF_INET socket type");
+				zend_argument_value_error(3, "cannot be null when the socket type is AF_INET");
 				RETURN_THROWS();
 			}
 
@@ -1461,12 +1475,12 @@ PHP_FUNCTION(socket_send)
 		RETURN_THROWS();
 	}
 
-	php_sock = Z_SOCKET_P(arg1);
-
 	if (len < 0) {
 		zend_argument_value_error(3, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
+
+	php_sock = Z_SOCKET_P(arg1);
 
 	retval = send(php_sock->bsd_socket, buf, (buf_len < (size_t)len ? buf_len : (size_t)len), flags);
 
@@ -1606,20 +1620,20 @@ PHP_FUNCTION(socket_sendto)
 #endif
 	int					retval;
 	size_t              buf_len, addr_len;
-	zend_long			len, flags, port = 0;
+	zend_long			len, flags, port;
+	zend_bool           port_is_null = 1;
 	char				*buf, *addr;
-	int					argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oslls|l", &arg1, socket_ce, &buf, &buf_len, &len, &flags, &addr, &addr_len, &port) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oslls|l!", &arg1, socket_ce, &buf, &buf_len, &len, &flags, &addr, &addr_len, &port, &port_is_null) == FAILURE) {
 		RETURN_THROWS();
 	}
-
-	php_sock = Z_SOCKET_P(arg1);
 
 	if (len < 0) {
 		zend_argument_value_error(3, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
+
+	php_sock = Z_SOCKET_P(arg1);
 
 	switch (php_sock->type) {
 		case AF_UNIX:
@@ -1631,8 +1645,9 @@ PHP_FUNCTION(socket_sendto)
 			break;
 
 		case AF_INET:
-			if (argc != 6) {
-				WRONG_PARAM_COUNT;
+			if (port_is_null) {
+				zend_argument_value_error(6, "cannot be null when the socket type is AF_INET");
+				RETURN_THROWS();
 			}
 
 			memset(&sin, 0, sizeof(sin));
@@ -1647,8 +1662,9 @@ PHP_FUNCTION(socket_sendto)
 			break;
 #if HAVE_IPV6
 		case AF_INET6:
-			if (argc != 6) {
-				WRONG_PARAM_COUNT;
+			if (port_is_null) {
+				zend_argument_value_error(6, "cannot be null when the socket type is AF_INET6");
+				RETURN_THROWS();
 			}
 
 			memset(&sin6, 0, sizeof(sin6));
@@ -2240,7 +2256,7 @@ PHP_FUNCTION(socket_export_stream)
 PHP_FUNCTION(socket_addrinfo_lookup)
 {
 	char *service = NULL;
-	size_t service_len;
+	size_t service_len = 0;
 	zend_string *hostname, *key;
 	zval *hint, *zhints = NULL;
 

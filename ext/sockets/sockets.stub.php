@@ -22,7 +22,6 @@ function socket_set_block(Socket $socket): bool {}
 
 function socket_listen(Socket $socket, int $backlog = 0): bool {}
 
-/** @deprecated */
 function socket_close(Socket $socket): void {}
 
 function socket_write(Socket $socket, string $buf, ?int $length = null): int|false {}
@@ -60,7 +59,7 @@ function socket_send(Socket $socket, string $buf, int $len, int $flags): int|fal
  */
 function socket_recvfrom(Socket $socket, &$buf, int $len, int $flags, &$name, &$port = UNKNOWN): int|false {}
 
-function socket_sendto(Socket $socket, string $buf, int $len, int $flags, string $addr, int $port = 0): int|false {}
+function socket_sendto(Socket $socket, string $buf, int $len, int $flags, string $addr, ?int $port = null): int|false {}
 
 function socket_get_option(Socket $socket, int $level, int $optname): array|int|false {}
 

@@ -466,9 +466,7 @@ PHP 8.0 UPGRADE NOTES
     socket_import_stream(), socket_addrinfo_connect(), socket_addrinfo_bind(),
     and socket_wsaprotocol_info_import() will now return a Socket object rather
     than a resource. Return value checks using is_resource() should be replaced
-    with checks for `false`. The socket_close() function is deprecated and no
-    longer has an effect, instead the Socket instance is automatically
-    destroyed if it is no longer referenced.
+    with checks for `false`.
   . socket_addrinfo_lookup() will now return an array of AddressInfo objects
     rather than resources.
 

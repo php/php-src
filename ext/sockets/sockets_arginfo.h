@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 1b2cbff950087492186cb8c216864b6e51abcf28 */
+ * Stub hash: 3256069f3943ec6dac1db915d737324962dda7c4 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_socket_select, 0, 4, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(1, read_fds, IS_ARRAY, 1)
@@ -104,7 +104,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_socket_sendto, 0, 5, MAY_BE_LONG
 	ZEND_ARG_TYPE_INFO(0, len, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, addr, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, port, IS_LONG, 0, "0")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, port, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_socket_get_option, 0, 3, MAY_BE_ARRAY|MAY_BE_LONG|MAY_BE_FALSE)
@@ -266,7 +266,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(socket_set_nonblock, arginfo_socket_set_nonblock)
 	ZEND_FE(socket_set_block, arginfo_socket_set_block)
 	ZEND_FE(socket_listen, arginfo_socket_listen)
-	ZEND_DEP_FE(socket_close, arginfo_socket_close)
+	ZEND_FE(socket_close, arginfo_socket_close)
 	ZEND_FE(socket_write, arginfo_socket_write)
 	ZEND_FE(socket_read, arginfo_socket_read)
 	ZEND_FE(socket_getsockname, arginfo_socket_getsockname)
