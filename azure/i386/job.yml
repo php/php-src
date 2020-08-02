@@ -1,9 +1,11 @@
 parameters:
   configurationName: ''
   configurationParameters: ''
+  timeoutInMinutes: 75
 
 jobs:
   - job: ${{ parameters.configurationName }}
+    timeoutInMinutes: ${{ parameters.timeoutInMinutes }}
     pool:
       vmImage: 'ubuntu-20.04'
     steps:

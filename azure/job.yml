@@ -2,7 +2,7 @@ parameters:
   configurationName: ''
   configurationParameters: ''
   runTestsParameters: ''
-  timeoutInMinutes: 60
+  timeoutInMinutes: 75
 
 jobs:
   - job: ${{ parameters.configurationName }}
