@@ -1,7 +1,7 @@
 --TEST--
 libxml_disable_entity_loader()
 --SKIPIF--
-<?php if (!extension_loaded('libxml') || !extension_loaded('dom') || defined('PHP_WINDOWS_VERSION_MAJOR')) die('skip'); ?>
+<?php if (!extension_loaded('libxml') || !extension_loaded('dom')) die('skip'); ?>
 --FILE--
 <?php
 
@@ -11,7 +11,8 @@ $xml = <<<EOT
 <foo>&xxe;</foo>
 EOT;
 
-$xml = str_replace('XXE_URI', __DIR__ . '/libxml_disable_entity_loader_payload.txt', $xml);
+$dir = str_replace('\\', '/', __DIR__);
+$xml = str_replace('XXE_URI', $dir . '/libxml_disable_entity_loader_payload.txt', $xml);
 
 function parseXML($xml) {
   $doc = new DOMDocument();
