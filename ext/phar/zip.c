@@ -705,7 +705,7 @@ foundit:
 			efree(actual_alias);
 		}
 
-		zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), actual_alias, mydata->alias_len, mydata);
+		zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), mydata->alias, mydata->alias_len, mydata);
 	} else {
 		phar_archive_data *fd_ptr;
 
