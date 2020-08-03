@@ -51,7 +51,6 @@
 # include <fcntl.h>
 # include <signal.h>
 # include <sys/uio.h>
-# define IS_INVALID_SOCKET(a)	(a->bsd_socket < 0)
 # define set_errno(a) (errno = a)
 # include "php_sockets.h"
 # if HAVE_IF_NAMETOINDEX
@@ -659,6 +658,10 @@ static int php_sock_array_to_fd_set(uint32_t arg_num, zval *sock_array, fd_set *
 		}
 
 		php_sock = Z_SOCKET_P(element);
+		if (IS_INVALID_SOCKET(php_sock)) {
+			zend_argument_type_error(arg_num, "contains a closed socket");
+			return -1;
+		}
 
 		PHP_SAFE_FD_SET(php_sock->bsd_socket, fds);
 		if (php_sock->bsd_socket > *max_fd) {
@@ -689,6 +692,7 @@ static int php_sock_array_from_fd_set(zval *sock_array, fd_set *fds) /* {{{ */
 
 		php_sock = Z_SOCKET_P(element);
 		ZEND_ASSERT(php_sock); /* element is supposed to be Socket object */
+		ZEND_ASSERT(!IS_INVALID_SOCKET(php_sock));
 
 		if (PHP_SAFE_FD_ISSET(php_sock->bsd_socket, fds)) {
 			/* Add fd to new array */
@@ -825,6 +829,7 @@ PHP_FUNCTION(socket_accept)
 	}
 
 	php_sock = Z_SOCKET_P(arg1);
+	ENSURE_SOCKET_VALID(php_sock);
 
 	object_init_ex(return_value, socket_ce);
 	new_sock = Z_SOCKET_P(return_value);
@@ -847,6 +852,7 @@ PHP_FUNCTION(socket_set_nonblock)
 	}
 
 	php_sock = Z_SOCKET_P(arg1);
+	ENSURE_SOCKET_VALID(php_sock);
 
 	if (!Z_ISUNDEF(php_sock->zstream)) {
 		php_stream *stream;
@@ -882,6 +888,7 @@ PHP_FUNCTION(socket_set_block)
 	}
 
 	php_sock = Z_SOCKET_P(arg1);
+	ENSURE_SOCKET_VALID(php_sock);
 
 	/* if socket was created from a stream, give the stream a chance to take
 	 * care of the operation itself, thereby allowing it to update its internal
@@ -920,6 +927,7 @@ PHP_FUNCTION(socket_listen)
 	}
 
 	php_sock = Z_SOCKET_P(arg1);
+	ENSURE_SOCKET_VALID(php_sock);
 
 	if (listen(php_sock->bsd_socket, backlog) != 0) {
 		PHP_SOCKET_ERROR(php_sock, "unable to listen on socket", errno);
@@ -940,6 +948,7 @@ PHP_FUNCTION(socket_close)
 	}
 
 	php_socket = Z_SOCKET_P(arg1);
+	ENSURE_SOCKET_VALID(php_socket);
 
 	if (!Z_ISUNDEF(php_socket->zstream)) {
 		php_stream *stream = NULL;
@@ -978,6 +987,7 @@ PHP_FUNCTION(socket_write)
 	}
 
 	php_sock = Z_SOCKET_P(arg1);
+	ENSURE_SOCKET_VALID(php_sock);
 
 	if (length < 0) {
 		zend_argument_value_error(3, "must be greater than or equal to 0");
@@ -1017,6 +1027,7 @@ PHP_FUNCTION(socket_read)
 	}
 
 	php_sock = Z_SOCKET_P(arg1);
+	ENSURE_SOCKET_VALID(php_sock);
 
 	/* overflow check */
 	if ((length + 1) < 2) {
@@ -1081,6 +1092,7 @@ PHP_FUNCTION(socket_getsockname)
 	}
 
 	php_sock = Z_SOCKET_P(arg1);
+	ENSURE_SOCKET_VALID(php_sock);
 
 	sa = (struct sockaddr *) &sa_storage;
 
@@ -1152,6 +1164,7 @@ PHP_FUNCTION(socket_getpeername)
 	}
 
 	php_sock = Z_SOCKET_P(arg1);
+	ENSURE_SOCKET_VALID(php_sock);
 
 	sa = (struct sockaddr *) &sa_storage;
 
@@ -1264,6 +1277,7 @@ PHP_FUNCTION(socket_connect)
 	}
 
 	php_sock = Z_SOCKET_P(resource_socket);
+	ENSURE_SOCKET_VALID(php_sock);
 
 	switch(php_sock->type) {
 #if HAVE_IPV6
@@ -1366,6 +1380,7 @@ PHP_FUNCTION(socket_bind)
 	}
 
 	php_sock = Z_SOCKET_P(arg1);
+	ENSURE_SOCKET_VALID(php_sock);
 
 	switch(php_sock->type) {
 		case AF_UNIX:
@@ -1443,6 +1458,7 @@ PHP_FUNCTION(socket_recv)
 	}
 
 	php_sock = Z_SOCKET_P(php_sock_res);
+	ENSURE_SOCKET_VALID(php_sock);
 
 	/* overflow check */
 	if ((len + 1) < 2) {
@@ -1482,12 +1498,13 @@ PHP_FUNCTION(socket_send)
 		RETURN_THROWS();
 	}
 
+	php_sock = Z_SOCKET_P(arg1);
+	ENSURE_SOCKET_VALID(php_sock);
+
 	if (len < 0) {
 		zend_argument_value_error(3, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
-
-	php_sock = Z_SOCKET_P(arg1);
 
 	retval = send(php_sock->bsd_socket, buf, (buf_len < (size_t)len ? buf_len : (size_t)len), flags);
 
@@ -1522,6 +1539,7 @@ PHP_FUNCTION(socket_recvfrom)
 	}
 
 	php_sock = Z_SOCKET_P(arg1);
+	ENSURE_SOCKET_VALID(php_sock);
 
 	/* overflow check */
 	/* Shouldthrow ? */
@@ -1635,12 +1653,13 @@ PHP_FUNCTION(socket_sendto)
 		RETURN_THROWS();
 	}
 
+	php_sock = Z_SOCKET_P(arg1);
+	ENSURE_SOCKET_VALID(php_sock);
+
 	if (len < 0) {
 		zend_argument_value_error(3, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
-
-	php_sock = Z_SOCKET_P(arg1);
 
 	switch (php_sock->type) {
 		case AF_UNIX:
@@ -1718,6 +1737,7 @@ PHP_FUNCTION(socket_get_option)
 	}
 
 	php_sock = Z_SOCKET_P(arg1);
+	ENSURE_SOCKET_VALID(php_sock);
 
 	if (level == IPPROTO_IP) {
 		switch (optname) {
@@ -1830,6 +1850,7 @@ PHP_FUNCTION(socket_set_option)
 	}
 
 	php_sock = Z_SOCKET_P(arg1);
+	ENSURE_SOCKET_VALID(php_sock);
 
 	set_errno(0);
 
@@ -2027,6 +2048,7 @@ PHP_FUNCTION(socket_shutdown)
 	}
 
 	php_sock = Z_SOCKET_P(arg1);
+	ENSURE_SOCKET_VALID(php_sock);
 
 	if (shutdown(php_sock->bsd_socket, how_shutdown) != 0) {
 		PHP_SOCKET_ERROR(php_sock, "Unable to shutdown socket", errno);
@@ -2050,6 +2072,8 @@ PHP_FUNCTION(socket_last_error)
 
 	if (arg1) {
 		php_sock = Z_SOCKET_P(arg1);
+		ENSURE_SOCKET_VALID(php_sock);
+
 		RETVAL_LONG(php_sock->error);
 	} else {
 		RETVAL_LONG(SOCKETS_G(last_error));
@@ -2069,6 +2093,8 @@ PHP_FUNCTION(socket_clear_error)
 
 	if (arg1) {
 		php_sock = Z_SOCKET_P(arg1);
+		ENSURE_SOCKET_VALID(php_sock);
+
 		php_sock->error = 0;
 	} else {
 		SOCKETS_G(last_error) = 0;
@@ -2179,6 +2205,7 @@ PHP_FUNCTION(socket_export_stream)
 	}
 
 	socket = Z_SOCKET_P(zsocket);
+	ENSURE_SOCKET_VALID(socket);
 
 	/* Either we already exported a stream or the socket came from an import,
 	 * just return the existing stream */
@@ -2520,6 +2547,7 @@ PHP_FUNCTION(socket_wsaprotocol_info_export)
 	}
 
 	socket = Z_SOCKET_P(arg1);
+	ENSURE_SOCKET_VALID(socket);
 
 	if (SOCKET_ERROR == WSADuplicateSocket(socket->bsd_socket, (DWORD)target_pid, &wi)) {
 		DWORD err = WSAGetLastError();

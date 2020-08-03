@@ -1341,10 +1341,16 @@ static void from_zval_write_fd_array_aux(zval *elem, unsigned i, void **args, se
 
 	if (Z_TYPE_P(elem) == IS_OBJECT && Z_OBJCE_P(elem) == socket_ce) {
 		php_socket *sock = Z_SOCKET_P(elem);
-		iarr[i] = sock->bsd_socket;
+		if (IS_INVALID_SOCKET(sock)) {
+			do_from_zval_err(ctx, "socket is already closed");
+			return;
+		}
 
+		iarr[i] = sock->bsd_socket;
 		return;
-	} else if (Z_TYPE_P(elem) == IS_RESOURCE) {
+	}
+
+	if (Z_TYPE_P(elem) == IS_RESOURCE) {
 		php_stream *stream;
 
 		stream = (php_stream *)zend_fetch_resource2_ex(elem, NULL, php_file_le_stream(), php_file_le_pstream());

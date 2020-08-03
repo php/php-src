@@ -179,6 +179,7 @@ PHP_FUNCTION(socket_sendmsg)
 	LONG_CHECK_VALID_INT(flags, 3);
 
 	php_sock = Z_SOCKET_P(zsocket);
+	ENSURE_SOCKET_VALID(php_sock);
 
 	msghdr = from_zval_run_conversions(zmsg, php_sock, from_zval_write_msghdr_send,
 			sizeof(*msghdr), "msghdr", &allocations, &err);
@@ -220,6 +221,7 @@ PHP_FUNCTION(socket_recvmsg)
 	LONG_CHECK_VALID_INT(flags, 3);
 
 	php_sock = Z_SOCKET_P(zsocket);
+	ENSURE_SOCKET_VALID(php_sock);
 
 	msghdr = from_zval_run_conversions(zmsg, php_sock, from_zval_write_msghdr_recv,
 			sizeof(*msghdr), "msghdr", &allocations, &err);

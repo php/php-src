@@ -22,7 +22,11 @@ $s = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
 var_dump($s);
 socket_close($s);
 
-var_dump(socket_export_stream($s));
+try {
+    var_dump(socket_export_stream($s));
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
 echo "Done.";
 ?>
@@ -31,5 +35,5 @@ socket_export_stream(): Argument #1 ($socket) must be of type Socket, resource g
 socket_export_stream(): Argument #1 ($socket) must be of type Socket, resource given
 object(Socket)#%d (0) {
 }
-resource(7) of type (stream)
+socket_export_stream(): Argument #1 ($socket) has already been closed
 Done.

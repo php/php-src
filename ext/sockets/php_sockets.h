@@ -29,6 +29,8 @@
 #include <php.h>
 #ifdef PHP_WIN32
 # include "windows_common.h"
+#else
+# define IS_INVALID_SOCKET(a) (a->bsd_socket < 0)
 #endif
 
 #define PHP_SOCKETS_VERSION PHP_VERSION
@@ -71,6 +73,12 @@ static inline php_socket *socket_from_obj(zend_object *obj) {
 
 #define Z_SOCKET_P(zv) socket_from_obj(Z_OBJ_P(zv))
 
+#define ENSURE_SOCKET_VALID(php_sock) do { \
+	if (IS_INVALID_SOCKET(php_sock)) { \
+		zend_argument_error(NULL, 1, "has already been closed"); \
+		RETURN_THROWS(); \
+	} \
+} while (0)
 
 #ifdef PHP_WIN32
 struct	sockaddr_un {
