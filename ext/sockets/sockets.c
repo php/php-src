@@ -951,8 +951,14 @@ PHP_FUNCTION(socket_close)
 					PHP_STREAM_FREE_KEEP_RSRC | PHP_STREAM_FREE_CLOSE |
 					(stream->is_persistent?PHP_STREAM_FREE_CLOSE_PERSISTENT:0));
 		}
-		ZVAL_UNDEF(&php_socket->zstream);
+	} else {
+		if (!IS_INVALID_SOCKET(php_socket)) {
+			close(php_socket->bsd_socket);
+		}
 	}
+
+	ZVAL_UNDEF(&php_socket->zstream);
+	php_socket->bsd_socket = -1;
 }
 /* }}} */
 
