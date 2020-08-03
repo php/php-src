@@ -1,4 +1,5 @@
 #!/bin/bash
+set -ex
 if [[ "$ENABLE_MAINTAINER_ZTS" == 1 ]]; then
 	TS="--enable-maintainer-zts";
 else
