@@ -114,6 +114,7 @@ PHP 8.0 UPGRADE NOTES
 
     * Attempting to read an undefined variable.
     * Attempting to read an undefined property.
+    * Attempting to read an undefined array key.
     * Attempting to read a property of a non-object.
     * Attempting to access an array index of a non-array.
     * Attempting to convert an array to string.

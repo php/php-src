@@ -16,5 +16,5 @@ try {
 
 ?>
 --EXPECTF--
-Notice: Undefined array key 0 in %s on line %d
+Warning: Undefined array key 0 in %s on line %d
 Attempt to assign property "y" on null

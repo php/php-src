@@ -150,7 +150,7 @@ bool(false)
 bool(true)
 ==== class with offsetGet() and offsetSet() ====
 
-Notice: Undefined array key "foo" in %s on line %d
+Warning: Undefined array key "foo" in %s on line %d
 bool(false)
 bool(true)
 bool(false)

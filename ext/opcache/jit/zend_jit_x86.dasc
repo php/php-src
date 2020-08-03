@@ -1923,13 +1923,13 @@ static int zend_jit_undefined_offset_stub(dasm_State **Dst)
 	|	add r0, FP
 	|3:
 	|.if X64WIN
-		|	mov CARG1, E_NOTICE
+		|	mov CARG1, E_WARNING
 		|	LOAD_ADDR CARG2, "Undefined array key " ZEND_LONG_FMT
 		|	mov CARG3, aword [r0]
 		|	EXT_CALL zend_error, r0
 		|	add r4, 0x28 // stack alignment
 	|.elif X64
-		|	mov CARG1, E_NOTICE
+		|	mov CARG1, E_WARNING
 		|	LOAD_ADDR CARG2, "Undefined array key " ZEND_LONG_FMT
 		|	mov CARG3, aword [r0]
 		|	EXT_CALL zend_error, r0
@@ -1938,7 +1938,7 @@ static int zend_jit_undefined_offset_stub(dasm_State **Dst)
 		|	sub r4, 4
 		|	push aword [r0]
 		|	push "Undefined array key " ZEND_LONG_FMT
-		|	push E_NOTICE
+		|	push E_WARNING
 		|	EXT_CALL zend_error, r0
 		|	add r4, 28
 	|.endif
@@ -1991,14 +1991,14 @@ static int zend_jit_undefined_index_stub(dasm_State **Dst)
 	|	add r0, FP
 	|3:
 	|.if X64WIN
-		|	mov CARG1, E_NOTICE
+		|	mov CARG1, E_WARNING
 		|	LOAD_ADDR CARG2, "Undefined array key \"%s\""
 		|	mov CARG3, aword [r0]
 		|	add CARG3, offsetof(zend_string, val)
 		|	EXT_CALL zend_error, r0
 		|	add r4, 0x28
 	|.elif X64
-		|	mov CARG1, E_NOTICE
+		|	mov CARG1, E_WARNING
 		|	LOAD_ADDR CARG2, "Undefined array key \"%s\""
 		|	mov CARG3, aword [r0]
 		|	add CARG3, offsetof(zend_string, val)
@@ -2010,7 +2010,7 @@ static int zend_jit_undefined_index_stub(dasm_State **Dst)
 		|	add r0, offsetof(zend_string, val)
 		|	push r0
 		|	push "Undefined array key \"%s\""
-		|	push E_NOTICE
+		|	push E_WARNING
 		|	EXT_CALL zend_error, r0
 		|	add r4, 28
 	|.endif
@@ -5084,7 +5084,7 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 				switch (type) {
 					case BP_VAR_R:
 						if (JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE) {
-							|	// zend_error(E_NOTICE,"Undefined array key " ZEND_LONG_FMT, hval);
+							|	// zend_error(E_WARNING,"Undefined array key " ZEND_LONG_FMT, hval);
 							|	// retval = &EG(uninitialized_zval);
 							|	UNDEFINED_OFFSET opline
 							|	jmp >9
@@ -5214,7 +5214,7 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 				switch (type) {
 					case BP_VAR_R:
 						if (JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE) {
-							// zend_error(E_NOTICE, "Undefined array key \"%s\"", ZSTR_VAL(offset_key));
+							// zend_error(E_WARNING, "Undefined array key \"%s\"", ZSTR_VAL(offset_key));
 							|	UNDEFINED_INDEX opline
 							|	jmp >9
 						} else {

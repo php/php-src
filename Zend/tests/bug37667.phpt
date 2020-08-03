@@ -29,7 +29,7 @@ var_dump($obj);
 --EXPECTF--
 string(3) "bar"
 
-Notice: Undefined array key 2 in %s on line %d
+Warning: Undefined array key 2 in %s on line %d
 NULL
 object(Test)#%d (1) {
   ["property":protected]=>

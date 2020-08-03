@@ -20,9 +20,9 @@ $_SESSION['bar'] = $bar;
 var_dump($_SESSION);
 ?>
 --EXPECTF--
-Notice: Undefined array key "foo" in %s on line %d
+Warning: Undefined array key "foo" in %s on line %d
 
-Notice: Undefined array key "bar" in %s on line %d
+Warning: Undefined array key "bar" in %s on line %d
 NULL
 NULL
 array(0) {

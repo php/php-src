@@ -32,7 +32,7 @@ int(1)
 int(4)
 int(1)
 
-Notice: Undefined array key 3 in %s on line %d
+Warning: Undefined array key 3 in %s on line %d
 array(3) {
   [0]=>
   int(1)
