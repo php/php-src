@@ -49,7 +49,7 @@ PHP 8.0 UPGRADE NOTES
     parameter consistent with isset() and normal array access. All key types now
     use the usual coercions and array/object keys throw a TypeError.
   . Any array that has a number n as its first numeric key will use n+1 for
-    its next implicit key. Even if n is negative.
+    its next implicit key, even if n is negative.
     RFC: https://wiki.php.net/rfc/negative_array_index
   . The default error_reporting level is now E_ALL. Previously it excluded
     E_NOTICE and E_DEPRECATED.
@@ -91,7 +91,7 @@ PHP 8.0 UPGRADE NOTES
   . The precedence of the concatenation operator has changed relative to
     bitshifts and addition as well as subtraction.
     RFC: https://wiki.php.net/rfc/concatenation_precedence
-  . Arguments with a default-value that resolves to null at run-time will no
+  . Arguments with a default value that resolves to null at runtime will no
     longer implicitly mark the argument type as nullable. Either use an explicit
     nullable type, or an explicit null default value instead.
 
@@ -121,7 +121,7 @@ PHP 8.0 UPGRADE NOTES
     * Attempting to access an array index of a non-array.
     * Attempting to convert an array to string.
     * Attempting to use a resource as an array key.
-    * Attempting to use null, a boolean or a float as a string offset.
+    * Attempting to use null, a boolean, or a float as a string offset.
     * Attempting to read an out-of-bounds string offset.
     * Attempting to assign an empty string to a string offset.
 
@@ -134,7 +134,7 @@ PHP 8.0 UPGRADE NOTES
   . Uncaught exceptions now go through "clean shutdown", which means that
     destructors will be called after an uncaught exception.
   . Compile time fatal error "Only variables can be passed by reference" has
-    been delayed until run-time and converted to "Cannot pass parameter by
+    been delayed until runtime and converted to "Cannot pass parameter by
     reference" exception.
   . Some "Only variables should be passed by reference" notices have been
     converted to "Cannot pass parameter by reference" exception.
@@ -150,13 +150,6 @@ PHP 8.0 UPGRADE NOTES
 
     The name shown above is still followed by a null byte and and a unique
     suffix.
-  . Declaring a required parameter after an optional one is deprecated. As an
-    exception, declaring a parameter of the form "Type $param = null" before
-    a required one continues to be allowed, because this pattern was sometimes
-    used to achieve nullable types in older PHP versions.
-
-        function test($a = [], $b) {}       // Deprecated
-        function test(Foo $a = null, $b) {} // Allowed
   . Non-absolute trait method references in trait alias adaptations are now
     required to be unambiguous:
 
@@ -239,9 +232,8 @@ PHP 8.0 UPGRADE NOTES
     "Illegal string offset 'string'" for illegal string offsets. The behavior
     of explicit casts to int/float from strings has not been changed.
     RFC: https://wiki.php.net/rfc/saner-numeric-strings
-  . Magic Methods will now have their arguments and return types
-    checked if they have them declared. The signatures should
-    match the following list:
+  . Magic Methods will now have their arguments and return types checked if
+    they have them declared. The signatures should match the following list:
 
       __call(string $name, array $arguments): mixed
       __callStatic(string $name, array $arguments): mixed
@@ -327,7 +319,7 @@ PHP 8.0 UPGRADE NOTES
     gmp_random_bits() should be used instead.
 
 - Iconv:
-  . iconv() implementations which do not properly set errno in case of errors,
+  . iconv() implementations which do not properly set errno in case of errors
     are no longer supported.
 
 - Intl:
@@ -378,7 +370,7 @@ PHP 8.0 UPGRADE NOTES
   . The $is_hex parameter, which was not used internally, has been removed from
     mb_decode_numericentity().
   . The legacy behavior of passing the encoding as the third argument instead
-    of an offset for the mb_strrpos() function has been removed, provide an
+    of an offset for the mb_strrpos() function has been removed; provide an
     explicit 0 offset with the encoding as the fourth argument instead.
   . The ISO_8859-* character encoding aliases have been replaced by ISO8859-*
     aliases for better interoperability with the iconv extension. The mbregex
@@ -549,10 +541,10 @@ PHP 8.0 UPGRADE NOTES
   . Specifying out of range rounds for sha256/sha526 crypt() will now fail with
     *0 instead of clamping to the closest limit. This matches glibc behavior.
   . The result of sorting functions may have changed, if the array contains
-    equal-comparing elements.
-  . Sort comparison functions return true/false will now throw a deprecation
-    warning and should be replaced with an implementation return an integer
-    smaller than, equal to, or greater than zero.
+    elements that compare as equal.
+  . Sort comparison functions that return true or false will now throw a
+    deprecation warning, and should be replaced with an implementation
+    that returns an integer less than, equal to, or greater than zero.
 
         // Replace
         usort($array, fn($a, $b) => $a > $b);
@@ -565,8 +557,8 @@ PHP 8.0 UPGRADE NOTES
     This was already the case for most, but not all, functions previously.
   . The HTTP stream wrapper as used by functions like file_get_contents()
     now advertises HTTP/1.1 rather than HTTP/1.0 by default. This does not
-    change the behaviour of the client, but may cause servers to respond
-    differently. To retain the old behaviour, set the 'protocol_version'
+    change the behavior of the client, but may cause servers to respond
+    differently. To retain the old behavior, set the 'protocol_version'
     stream context option, e.g.
 
         $ctx = stream_context_create(['http' => ['protocol_version' => '1.0']]);
@@ -614,8 +606,8 @@ PHP 8.0 UPGRADE NOTES
     objects instead of resources.
 
 - Zip:
-  . ZipArchive::OPSYS_Z_CPM have been removed, should use ZipArchive::OPSYS_CPM
-    (this name was a typo).
+  . ZipArchive::OPSYS_Z_CPM has been removed (this name was a typo). Use
+    ZipArchive::OPSYS_CPM instead.
 
 - Zlib:
   . gzgetss() has been removed.
@@ -787,6 +779,13 @@ PHP 8.0 UPGRADE NOTES
 ========================================
 
 - Core:
+  . Declaring a required parameter after an optional one is deprecated. As an
+    exception, declaring a parameter of the form "Type $param = null" before
+    a required one continues to be allowed, because this pattern was sometimes
+    used to achieve nullable types in older PHP versions.
+
+        function test($a = [], $b) {}       // Deprecated
+        function test(Foo $a = null, $b) {} // Allowed
   . Calling get_defined_functions() with $exclude_disabled explicitly set to
     false is deprecated. get_defined_functions() will never include disabled
     functions.
