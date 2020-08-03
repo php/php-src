@@ -2033,14 +2033,15 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		RETURN_TOKEN_WITH_VAL(T_LNUMBER);
 	} else {
 		const char* last_one_bit = bin + len - 1;
+		ZVAL_DOUBLE(zendlval, zend_bin_strtod(bin, (const char **)&end));
+		ZEND_ASSERT(end == bin + len);
 		while (*last_one_bit == '0') {
 			last_one_bit--;
 			ZEND_ASSERT(last_one_bit > bin);
 		}
-		ZVAL_DOUBLE(zendlval, zend_bin_strtod(bin, (const char **)&end));
 		/* errno isn't checked since we allow HUGE_VAL/INF overflow */
-		ZEND_ASSERT(end == bin + len);
-		if (last_one_bit - bin + 1> 53) {
+		/* TODO: Cross-platform macro for 64-bit double */
+		if (last_one_bit - bin + 1 > 53 && (SIZEOF_ZEND_LONG >= 8 || Z_DVAL_P(zendlval) >= (double)0x8000000000000000ULL)) {
 			zend_error(E_COMPILE_WARNING, "Saw imprecise float binary literal - the last %zu non-zero bits were truncated", (size_t)(last_one_bit - bin + 1 - 53));
 		}
 		if (contains_underscores) {
@@ -2097,7 +2098,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 			errno = 0;
 			if (is_octal) { /* octal overflow */
 				ZVAL_DOUBLE(zendlval, zend_oct_strtod(lnum, (const char **)&end));
-				if (!is_truncated) {
+				if (!is_truncated && (SIZEOF_ZEND_LONG >= 8 || Z_DVAL_P(zendlval) >= (double)0x8000000000000000ULL)) {
 					size_t bits_in_representation = bits_in_octal_representation(lnum, len);
 					if (bits_in_representation > 53) {
 						zend_error(E_COMPILE_WARNING, "Saw imprecise float octal literal - the last %zu non-zero bits were truncated", bits_in_representation - 53);
@@ -2153,12 +2154,14 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		}
 		RETURN_TOKEN_WITH_VAL(T_LNUMBER);
 	} else {
-		size_t bits_in_representation = bits_in_hex_representation(hex, len);
 		ZVAL_DOUBLE(zendlval, zend_hex_strtod(hex, (const char **)&end));
 		/* errno isn't checked since we allow HUGE_VAL/INF overflow */
 		ZEND_ASSERT(end == hex + len);
-		if (bits_in_representation > 53) {
-			zend_error(E_COMPILE_WARNING, "Saw imprecise float hex literal - the last %zu non-zero bits were truncated", bits_in_representation - 53);
+		if (SIZEOF_ZEND_LONG >= 8 || Z_DVAL_P(zendlval) >= (double)0x8000000000000000ULL) {
+			size_t bits_in_representation = bits_in_hex_representation(hex, len);
+			if (bits_in_representation > 53) {
+				zend_error(E_COMPILE_WARNING, "Saw imprecise float hex literal - the last %zu non-zero bits were truncated", bits_in_representation - 53);
+			}
 		}
 		if (contains_underscores) {
 			efree(hex);

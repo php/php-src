@@ -22,6 +22,11 @@ foreach ($doubles as $d) {
 echo "Done\n";
 ?>
 --EXPECTF--
+Warning: Saw imprecise float hex literal - the last 19 non-zero bits were truncated in %shex_overflow_32bit.php on line 5
+
+Warning: Saw imprecise float hex literal - the last 51 non-zero bits were truncated in %shex_overflow_32bit.php on line 6
+
+Warning: Saw imprecise float hex literal - the last 38 non-zero bits were truncated in %shex_overflow_32bit.php on line 7
 float(4.0833602971%dE+14)
 float(4.7223664828%dE+21)
 float(1.3521606402%dE+31)
