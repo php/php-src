@@ -5,5 +5,6 @@ Bug #79877 (getimagesize function silently truncates after a null byte)
 var_dump(getimagesize("/tmp/a.png\0xx"));
 ?>
 --EXPECTF--
-Warning: getimagesize(): Invalid path in %s on line %d
-NULL
+Fatal error: Uncaught TypeError: getimagesize(): Argument #1 ($image_path) must not contain any null bytes in %s:%d
+Stack trace:
+%a
