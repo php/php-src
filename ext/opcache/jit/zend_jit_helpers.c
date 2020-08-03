@@ -368,13 +368,13 @@ str_index:
 		if (UNEXPECTED(Z_TYPE_P(retval) == IS_INDIRECT)) {
 			retval = Z_INDIRECT_P(retval);
 			if (UNEXPECTED(Z_TYPE_P(retval) == IS_UNDEF)) {
-				zend_error(E_NOTICE, "Undefined array key \"%s\"", ZSTR_VAL(offset_key));
+				zend_error(E_WARNING, "Undefined array key \"%s\"", ZSTR_VAL(offset_key));
 				ZVAL_NULL(result);
 				return;
 			}
 		}
 	} else {
-		zend_error(E_NOTICE, "Undefined array key \"%s\"", ZSTR_VAL(offset_key));
+		zend_error(E_WARNING, "Undefined array key \"%s\"", ZSTR_VAL(offset_key));
 		ZVAL_NULL(result);
 		return;
 	}
@@ -387,7 +387,7 @@ num_index:
 	return;
 
 num_undef:
-	zend_error(E_NOTICE,"Undefined array key " ZEND_LONG_FMT, hval);
+	zend_error(E_WARNING, "Undefined array key " ZEND_LONG_FMT, hval);
 	ZVAL_NULL(result);
 }
 

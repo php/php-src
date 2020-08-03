@@ -73,10 +73,10 @@ int(1)
 Warning: Trying to access array offset on value of type int in %s on line %d
 NULL
 
-Notice: Undefined array key 4 in %s on line %d
+Warning: Undefined array key 4 in %s on line %d
 NULL
 
-Notice: Undefined array key 3 in %s on line %d
+Warning: Undefined array key 3 in %s on line %d
 
 Fatal error: Uncaught Error: Call to a member function bar() on null in %s:%d
 Stack trace:

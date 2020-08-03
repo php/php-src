@@ -128,5 +128,5 @@ meal 0 => breakfast
      --> MealIterator::valid (3)
  --> MealIterator::next (3)
 
-Notice: Undefined array key 3 in %s on line %d
+Warning: Undefined array key 3 in %s on line %d
  --> MealIterator::valid (4)

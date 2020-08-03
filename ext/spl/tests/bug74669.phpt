@@ -98,7 +98,7 @@ var_dump($selfArray['foo']);
 0 => test1
 1 => test2
 
-Notice: Undefined array key "foo" in %s on line %d
+Warning: Undefined array key "foo" in %s on line %d
 NULL
 object(SelfArray)#9 (1) {
   ["foo"]=>

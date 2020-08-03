@@ -30,57 +30,57 @@ echo "Done\n";
 --EXPECTF--
 int(7)
 
-Notice: Undefined array key "7.5" in %s on line 6
+Warning: Undefined array key "7.5" in %s on line %d
 NULL
 
-Notice: Undefined array key "  7" in %s on line 7
+Warning: Undefined array key "  7" in %s on line %d
 NULL
 
-Notice: Undefined array key "  7.5" in %s on line 8
+Warning: Undefined array key "  7.5" in %s on line %d
 NULL
 
-Notice: Undefined array key "  7  " in %s on line 9
+Warning: Undefined array key "  7  " in %s on line %d
 NULL
 
-Notice: Undefined array key "  7.5  " in %s on line 10
+Warning: Undefined array key "  7.5  " in %s on line %d
 NULL
 
-Notice: Undefined array key "7  " in %s on line 11
+Warning: Undefined array key "7  " in %s on line %d
 NULL
 
-Notice: Undefined array key "7.5  " in %s on line 12
+Warning: Undefined array key "7.5  " in %s on line %d
 NULL
 
-Notice: Undefined array key "7str" in %s on line 13
+Warning: Undefined array key "7str" in %s on line %d
 NULL
 
-Notice: Undefined array key "7.5str" in %s on line 14
+Warning: Undefined array key "7.5str" in %s on line %d
 NULL
 
-Notice: Undefined array key "  7str" in %s on line 15
+Warning: Undefined array key "  7str" in %s on line %d
 NULL
 
-Notice: Undefined array key "  7.5str" in %s on line 16
+Warning: Undefined array key "  7.5str" in %s on line %d
 NULL
 
-Notice: Undefined array key "  7  str" in %s on line 17
+Warning: Undefined array key "  7  str" in %s on line %d
 NULL
 
-Notice: Undefined array key "  7.5  str" in %s on line 18
+Warning: Undefined array key "  7.5  str" in %s on line %d
 NULL
 
-Notice: Undefined array key "7  str" in %s on line 19
+Warning: Undefined array key "7  str" in %s on line %d
 NULL
 
-Notice: Undefined array key "7.5  str" in %s on line 20
+Warning: Undefined array key "7.5  str" in %s on line %d
 NULL
 
-Notice: Undefined array key "0xA" in %s on line 21
+Warning: Undefined array key "0xA" in %s on line %d
 NULL
 
-Notice: Undefined array key "0b10" in %s on line 22
+Warning: Undefined array key "0b10" in %s on line %d
 NULL
 
-Notice: Undefined array key "07" in %s on line 23
+Warning: Undefined array key "07" in %s on line %d
 NULL
 Done
