@@ -375,7 +375,7 @@ num_index:
 		ZVAL_DEREF(offset);
 		goto try_again;
 	default:
-		zend_error(E_WARNING, "Illegal offset type");
+		zend_type_error("Illegal offset type");
 		return (type == BP_VAR_W || type == BP_VAR_RW) ?
 			&EG(error_zval) : &EG(uninitialized_zval);
 	}
@@ -499,7 +499,7 @@ num_index:
 			ZVAL_DEREF(offset);
 			goto try_again;
 		default:
-			zend_error(E_WARNING, "Illegal offset type");
+			zend_type_error("Illegal offset type");
 			zval_ptr_dtor(value);
 			return;
 	}
@@ -585,7 +585,7 @@ num_index:
 		ZVAL_DEREF(offset);
 		goto try_again;
 	default:
-		zend_error(E_WARNING, "Illegal offset type");
+		zend_type_error("Illegal offset type in unset");
 		return;
 	}
 } /* }}} */
@@ -661,7 +661,7 @@ num_index:
 				ZVAL_DEREF(offset);
 				goto try_again;
 			default:
-				zend_error(E_WARNING, "Illegal offset type");
+				zend_type_error("Illegal offset type in isset or empty");
 				return 0;
 		}
 
