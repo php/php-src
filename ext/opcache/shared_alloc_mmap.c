@@ -39,7 +39,11 @@
 static int create_segments(size_t requested_size, zend_shared_segment ***shared_segments_p, int *shared_segments_count, char **error_in)
 {
 	zend_shared_segment *shared_segment;
+  int flags = PROT_READ | PROT_WRITE;
 	void *p;
+#ifdef PROT_MPROTECT
+  flags |= PROT_MPROTECT(PROT_EXEC);
+#endif
 #ifdef MAP_HUGETLB
 	size_t huge_page_size = 2 * 1024 * 1024;
 
@@ -58,34 +62,34 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 		/* to got HUGE PAGES in low 32-bit address we have to reserve address
 		   space and then remap it using MAP_HUGETLB */
 
-		p = mmap(NULL, requested_size, PROT_READ | PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS|MAP_32BIT, -1, 0);
+		p = mmap(NULL, requested_size, flags, MAP_SHARED|MAP_ANONYMOUS|MAP_32BIT, -1, 0);
 		if (p != MAP_FAILED) {
 			munmap(p, requested_size);
 			p = (void*)(ZEND_MM_ALIGNED_SIZE_EX((ptrdiff_t)p, huge_page_size));
-			p = mmap(p, requested_size, PROT_READ | PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS|MAP_32BIT|MAP_HUGETLB|MAP_FIXED, -1, 0);
+			p = mmap(p, requested_size, flags, MAP_SHARED|MAP_ANONYMOUS|MAP_32BIT|MAP_HUGETLB|MAP_FIXED, -1, 0);
 			if (p != MAP_FAILED) {
 				goto success;
 			} else {
-				p = mmap(NULL, requested_size, PROT_READ | PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS|MAP_32BIT, -1, 0);
+				p = mmap(NULL, requested_size, flags, MAP_SHARED|MAP_ANONYMOUS|MAP_32BIT, -1, 0);
 				if (p != MAP_FAILED) {
 					goto success;
 				}
 			}
 		}
 # endif
-		p = mmap(0, requested_size, PROT_READ | PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS|MAP_HUGETLB, -1, 0);
+		p = mmap(0, requested_size, flags, MAP_SHARED|MAP_ANONYMOUS|MAP_HUGETLB, -1, 0);
 		if (p != MAP_FAILED) {
 			goto success;
 		}
 	}
 #elif defined(PREFER_MAP_32BIT) && defined(__x86_64__) && defined(MAP_32BIT)
-	p = mmap(NULL, requested_size, PROT_READ | PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS|MAP_32BIT, -1, 0);
+	p = mmap(NULL, requested_size, flags, MAP_SHARED|MAP_ANONYMOUS|MAP_32BIT, -1, 0);
 	if (p != MAP_FAILED) {
 		goto success;
 	}
 #endif
 
-	p = mmap(0, requested_size, PROT_READ | PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, -1, 0);
+	p = mmap(0, requested_size, flags, MAP_SHARED|MAP_ANONYMOUS, -1, 0);
 	if (p == MAP_FAILED) {
 		*error_in = "mmap";
 		return ALLOC_FAILURE;
