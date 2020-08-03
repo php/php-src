@@ -2,6 +2,7 @@
 ZEND_POW_ASSIGN
 --INI--
 zend.assertions=1
+assert.exception=0
 --FILE--
 <?php
 

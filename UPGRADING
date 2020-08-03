@@ -21,6 +21,8 @@ PHP 8.0 UPGRADE NOTES
 ========================================
 
 - Core:
+  . Assertion failures now throw by default. If the old behavior is desired,
+    then set `assert.exception=0` in INI settings.
   . Methods with the same name as the class are no longer interpreted as
     constructors. The __construct() method should be used instead.
   . Removed ability to call non-static methods statically.

@@ -2,6 +2,7 @@
 Serialization of backtick literal is incorrect
 --INI--
 zend.assertions=1
+assert.exception=0
 --FILE--
 <?php
 
