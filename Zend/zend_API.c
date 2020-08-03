@@ -2063,10 +2063,19 @@ static void zend_check_magic_method_arg_type(uint32_t arg_num, const zend_class_
 
 static void zend_check_magic_method_return_type(const zend_class_entry *ce, const zend_function *fptr, int error_type, int return_type)
 {
-	if (
-		(fptr->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE)
-		&& (ZEND_TYPE_FULL_MASK(fptr->common.arg_info[-1].type) & ~return_type)
-	) {
+	if (!(fptr->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE)) {
+		/* For backwards compatibility reasons, do not enforce the return type if it is not set. */
+		return;
+	}
+
+	bool has_class_type = ZEND_TYPE_HAS_CLASS(fptr->common.arg_info[-1].type);
+	uint32_t extra_types = ZEND_TYPE_PURE_MASK(fptr->common.arg_info[-1].type) & ~return_type;
+	if (extra_types & MAY_BE_STATIC) {
+		extra_types &= ~MAY_BE_STATIC;
+		has_class_type = 1;
+	}
+
+	if (extra_types || (has_class_type && return_type != MAY_BE_OBJECT)) {
 		zend_error(error_type, "%s::%s(): Return type must be %s when declared",
 			ZSTR_VAL(ce->name), ZSTR_VAL(fptr->common.function_name),
 			ZSTR_VAL(zend_type_to_string((zend_type) ZEND_TYPE_INIT_MASK(return_type))));
