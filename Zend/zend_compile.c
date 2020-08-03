@@ -8684,7 +8684,6 @@ void zend_compile_isset_or_empty(znode *result, zend_ast *ast) /* {{{ */
 
 	ZEND_ASSERT(ast->kind == ZEND_AST_ISSET || ast->kind == ZEND_AST_EMPTY);
 
-	zend_short_circuiting_mark_inner(var_ast);
 	if (!zend_is_variable(var_ast)) {
 		if (ast->kind == ZEND_AST_EMPTY) {
 			/* empty(expr) can be transformed to !expr */
@@ -8698,6 +8697,7 @@ void zend_compile_isset_or_empty(znode *result, zend_ast *ast) /* {{{ */
 		}
 	}
 
+	zend_short_circuiting_mark_inner(var_ast);
 	switch (var_ast->kind) {
 		case ZEND_AST_VAR:
 			if (is_this_fetch(var_ast)) {
