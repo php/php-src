@@ -1172,7 +1172,7 @@ PHP_FUNCTION(mysqli_begin_transaction)
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 	if (flags < 0) {
-		zend_argument_value_error(ERROR_ARG_POS(2), "must be MYSQLI_TRANS_START_WITH_CONSISTENT_SNAPSHOT"
+		zend_argument_value_error(ERROR_ARG_POS(2), "must be one of MYSQLI_TRANS_START_WITH_CONSISTENT_SNAPSHOT"
 			/* TODO Only MySQL 5.6 and later */
 			", MYSQLI_TRANS_START_READ_ONLY, or MYSQLI_TRANS_START_READ_WRITE"
 		);
