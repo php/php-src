@@ -1,4 +1,5 @@
 #!/bin/bash
+set -ex
 if [[ "$ENABLE_ZTS" == 1 ]]; then
 	TS="--enable-zts";
 else
