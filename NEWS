@@ -24,6 +24,8 @@ PHP                                                                        NEWS
     to return usec). (Herbert256)
 
 - Core:
+  . Fixed bug #79877 (getimagesize function silently truncates after a null 
+    byte) (cmb)
   . Fixed bug #79778 (Assertion failure if dumping closure with unresolved
     static variable). (Nikita)
   . Fixed bug #79792 (HT iterators not removed if empty array is destroyed).
@@ -46,6 +48,10 @@ PHP                                                                        NEWS
 
 - Mbstring:
   . Fixed bug #79787 (mb_strimwidth does not trim string). (XXiang)
+
+- Phar:
+  . Fixed bug #79797 (Use of freed hash key in the phar_parse_zipfile
+    function). (CVE-2020-7068) (cmb)
 
 - Standard:
   . Fixed bug #70362 (Can't copy() large 'data://' with open_basedir). (cmb)
