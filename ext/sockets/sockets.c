@@ -2542,11 +2542,11 @@ PHP_FUNCTION(socket_wsaprotocol_info_export)
 	zend_string *seg_name;
 	HANDLE map;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ol", &arg1, socket_ce, &target_pid) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ol", &zsocket, socket_ce, &target_pid) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	socket = Z_SOCKET_P(arg1);
+	socket = Z_SOCKET_P(zsocket);
 	ENSURE_SOCKET_VALID(socket);
 
 	if (SOCKET_ERROR == WSADuplicateSocket(socket->bsd_socket, (DWORD)target_pid, &wi)) {
