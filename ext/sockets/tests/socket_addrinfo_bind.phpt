@@ -14,6 +14,6 @@ $addrinfo = socket_addrinfo_lookup('127.0.0.1', 2000, array(
 var_dump(socket_addrinfo_bind($addrinfo[0]));
 echo "Done";
 --EXPECT--
-object(Socket)#1 (0) {
+object(Socket)#2 (0) {
 }
 Done

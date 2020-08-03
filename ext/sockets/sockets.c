@@ -186,10 +186,11 @@ static void address_info_free_obj(zend_object *object)
 {
 	php_addrinfo *address_info = address_info_from_obj(object);
 
-	efree(address_info->addrinfo->ai_addr);
 	if (address_info->addrinfo->ai_canonname != NULL) {
 		efree(address_info->addrinfo->ai_canonname);
 	}
+	efree(address_info->addrinfo->ai_addr);
+	efree(address_info->addrinfo);
 
 	zend_object_std_dtor(&address_info->std);
 }
@@ -2301,6 +2302,9 @@ PHP_FUNCTION(socket_addrinfo_lookup)
 
 			object_init_ex(&zaddr, address_info_ce);
 			res = Z_ADDRESS_INFO_P(&zaddr);
+
+			res->addrinfo = emalloc(sizeof(struct addrinfo));
+			memcpy(res->addrinfo, rp, sizeof(struct addrinfo));
 
 			res->addrinfo->ai_addr = emalloc(rp->ai_addrlen);
 			memcpy(res->addrinfo->ai_addr, rp->ai_addr, rp->ai_addrlen);
