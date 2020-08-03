@@ -154,7 +154,7 @@ static HashTable *socket_get_gc(zend_object *object, zval **table, int *n)
 /* AddressInfo class */
 
 typedef struct {
-	struct addrinfo *addrinfo;
+	struct addrinfo addrinfo;
 	zend_object std;
 } php_addrinfo;
 
@@ -186,11 +186,10 @@ static void address_info_free_obj(zend_object *object)
 {
 	php_addrinfo *address_info = address_info_from_obj(object);
 
-	if (address_info->addrinfo->ai_canonname != NULL) {
-		efree(address_info->addrinfo->ai_canonname);
+	if (address_info->addrinfo.ai_canonname != NULL) {
+		efree(address_info->addrinfo.ai_canonname);
 	}
-	efree(address_info->addrinfo->ai_addr);
-	efree(address_info->addrinfo);
+	efree(address_info->addrinfo.ai_addr);
 
 	zend_object_std_dtor(&address_info->std);
 }
@@ -2303,14 +2302,13 @@ PHP_FUNCTION(socket_addrinfo_lookup)
 			object_init_ex(&zaddr, address_info_ce);
 			res = Z_ADDRESS_INFO_P(&zaddr);
 
-			res->addrinfo = emalloc(sizeof(struct addrinfo));
-			memcpy(res->addrinfo, rp, sizeof(struct addrinfo));
+			memcpy(&res->addrinfo, rp, sizeof(struct addrinfo));
 
-			res->addrinfo->ai_addr = emalloc(rp->ai_addrlen);
-			memcpy(res->addrinfo->ai_addr, rp->ai_addr, rp->ai_addrlen);
+			res->addrinfo.ai_addr = emalloc(rp->ai_addrlen);
+			memcpy(res->addrinfo.ai_addr, rp->ai_addr, rp->ai_addrlen);
 
 			if (rp->ai_canonname != NULL) {
-				res->addrinfo->ai_canonname = estrdup(rp->ai_canonname);
+				res->addrinfo.ai_canonname = estrdup(rp->ai_canonname);
 			}
 
 			add_next_index_zval(return_value, &zaddr);
@@ -2338,8 +2336,8 @@ PHP_FUNCTION(socket_addrinfo_bind)
 	object_init_ex(return_value, socket_ce);
 	php_sock = Z_SOCKET_P(return_value);
 
-	php_sock->bsd_socket = socket(ai->addrinfo->ai_family, ai->addrinfo->ai_socktype, ai->addrinfo->ai_protocol);
-	php_sock->type = ai->addrinfo->ai_family;
+	php_sock->bsd_socket = socket(ai->addrinfo.ai_family, ai->addrinfo.ai_socktype, ai->addrinfo.ai_protocol);
+	php_sock->type = ai->addrinfo.ai_family;
 
 	if (IS_INVALID_SOCKET(php_sock)) {
 		SOCKETS_G(last_error) = errno;
@@ -2365,7 +2363,7 @@ PHP_FUNCTION(socket_addrinfo_bind)
 		case AF_INET6:
 #endif
 			{
-				retval = bind(php_sock->bsd_socket, ai->addrinfo->ai_addr, ai->addrinfo->ai_addrlen);
+				retval = bind(php_sock->bsd_socket, ai->addrinfo.ai_addr, ai->addrinfo.ai_addrlen);
 				break;
 			}
 		default:
@@ -2401,8 +2399,8 @@ PHP_FUNCTION(socket_addrinfo_connect)
 	object_init_ex(return_value, socket_ce);
 	php_sock = Z_SOCKET_P(return_value);
 
-	php_sock->bsd_socket = socket(ai->addrinfo->ai_family, ai->addrinfo->ai_socktype, ai->addrinfo->ai_protocol);
-	php_sock->type = ai->addrinfo->ai_family;
+	php_sock->bsd_socket = socket(ai->addrinfo.ai_family, ai->addrinfo.ai_socktype, ai->addrinfo.ai_protocol);
+	php_sock->type = ai->addrinfo.ai_family;
 
 	if (IS_INVALID_SOCKET(php_sock)) {
 		SOCKETS_G(last_error) = errno;
@@ -2428,7 +2426,7 @@ PHP_FUNCTION(socket_addrinfo_connect)
 		case AF_INET6:
 #endif
 			{
-				retval = connect(php_sock->bsd_socket, ai->addrinfo->ai_addr, ai->addrinfo->ai_addrlen);
+				retval = connect(php_sock->bsd_socket, ai->addrinfo.ai_addr, ai->addrinfo.ai_addrlen);
 				break;
 			}
 		default:
@@ -2461,34 +2459,34 @@ PHP_FUNCTION(socket_addrinfo_explain)
 
 	array_init(return_value);
 
-	add_assoc_long(return_value, "ai_flags", ai->addrinfo->ai_flags);
-	add_assoc_long(return_value, "ai_family", ai->addrinfo->ai_family);
-	add_assoc_long(return_value, "ai_socktype", ai->addrinfo->ai_socktype);
-	add_assoc_long(return_value, "ai_protocol", ai->addrinfo->ai_protocol);
-	if (ai->addrinfo->ai_canonname != NULL) {
-		add_assoc_string(return_value, "ai_canonname", ai->addrinfo->ai_canonname);
+	add_assoc_long(return_value, "ai_flags", ai->addrinfo.ai_flags);
+	add_assoc_long(return_value, "ai_family", ai->addrinfo.ai_family);
+	add_assoc_long(return_value, "ai_socktype", ai->addrinfo.ai_socktype);
+	add_assoc_long(return_value, "ai_protocol", ai->addrinfo.ai_protocol);
+	if (ai->addrinfo.ai_canonname != NULL) {
+		add_assoc_string(return_value, "ai_canonname", ai->addrinfo.ai_canonname);
 	}
 
 	array_init(&sockaddr);
-	switch(ai->addrinfo->ai_family) {
+	switch (ai->addrinfo.ai_family) {
 		case AF_INET:
 			{
-				struct sockaddr_in *sa = (struct sockaddr_in *) ai->addrinfo->ai_addr;
+				struct sockaddr_in *sa = (struct sockaddr_in *) ai->addrinfo.ai_addr;
 				char addr[INET_ADDRSTRLEN];
 
 				add_assoc_long(&sockaddr, "sin_port", ntohs((unsigned short) sa->sin_port));
-				inet_ntop(ai->addrinfo->ai_family, &sa->sin_addr, addr, sizeof(addr));
+				inet_ntop(ai->addrinfo.ai_family, &sa->sin_addr, addr, sizeof(addr));
 				add_assoc_string(&sockaddr, "sin_addr", addr);
 				break;
 			}
 #if HAVE_IPV6
 		case AF_INET6:
 			{
-				struct sockaddr_in6 *sa = (struct sockaddr_in6 *) ai->addrinfo->ai_addr;
+				struct sockaddr_in6 *sa = (struct sockaddr_in6 *) ai->addrinfo.ai_addr;
 				char addr[INET6_ADDRSTRLEN];
 
 				add_assoc_long(&sockaddr, "sin6_port", ntohs((unsigned short) sa->sin6_port));
-				inet_ntop(ai->addrinfo->ai_family, &sa->sin6_addr, addr, sizeof(addr));
+				inet_ntop(ai->addrinfo.ai_family, &sa->sin6_addr, addr, sizeof(addr));
 				add_assoc_string(&sockaddr, "sin6_addr", addr);
 				break;
 			}
