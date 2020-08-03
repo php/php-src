@@ -2,6 +2,13 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.2.33
 
+- Core:
+  . Fixed bug #79877 (getimagesize function silently truncates after a null 
+    byte) (cmb)
+
+- Phar:
+  . Fixed bug #79797 (Use of freed hash key in the phar_parse_zipfile
+    function). (CVE-2020-7068) (cmb)
 
 09 Jul 2020, PHP 7.2.32
 
