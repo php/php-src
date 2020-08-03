@@ -488,26 +488,12 @@ void to_zval_read_int(const char *data, zval *zv, res_context *ctx)
 
 	ZVAL_LONG(zv, (zend_long)ival);
 }
-static void to_zval_read_unsigned(const char *data, zval *zv, res_context *ctx)
-{
-	unsigned ival;
-	memcpy(&ival, data, sizeof(ival));
-
-	ZVAL_LONG(zv, (zend_long)ival);
-}
 static void to_zval_read_net_uint16(const char *data, zval *zv, res_context *ctx)
 {
 	uint16_t ival;
 	memcpy(&ival, data, sizeof(ival));
 
 	ZVAL_LONG(zv, (zend_long)ntohs(ival));
-}
-static void to_zval_read_uint32(const char *data, zval *zv, res_context *ctx)
-{
-	uint32_t ival;
-	memcpy(&ival, data, sizeof(ival));
-
-	ZVAL_LONG(zv, (zend_long)ival);
 }
 static void to_zval_read_sa_family(const char *data, zval *zv, res_context *ctx)
 {
@@ -516,6 +502,22 @@ static void to_zval_read_sa_family(const char *data, zval *zv, res_context *ctx)
 
 	ZVAL_LONG(zv, (zend_long)ival);
 }
+#if HAVE_IPV6
+static void to_zval_read_unsigned(const char *data, zval *zv, res_context *ctx)
+{
+	unsigned ival;
+	memcpy(&ival, data, sizeof(ival));
+
+	ZVAL_LONG(zv, (zend_long)ival);
+}
+static void to_zval_read_uint32(const char *data, zval *zv, res_context *ctx)
+{
+	uint32_t ival;
+	memcpy(&ival, data, sizeof(ival));
+
+	ZVAL_LONG(zv, (zend_long)ival);
+}
+#endif
 #ifdef SO_PASSCRED
 static void to_zval_read_pid_t(const char *data, zval *zv, res_context *ctx)
 {
@@ -1221,6 +1223,7 @@ void to_zval_read_msghdr(const char *msghdr_c, zval *zv, res_context *ctx)
 	to_zval_read_aggregation(msghdr_c, zv, descriptors, ctx);
 }
 
+#if defined(IPV6_PKTINFO) && HAVE_IPV6
 /* CONVERSIONS for if_index */
 static void from_zval_write_ifindex(const zval *zv, char *uinteger, ser_context *ctx)
 {
@@ -1277,7 +1280,6 @@ static void from_zval_write_ifindex(const zval *zv, char *uinteger, ser_context 
 }
 
 /* CONVERSIONS for struct in6_pktinfo */
-#if defined(IPV6_PKTINFO) && HAVE_IPV6
 static const field_descriptor descriptors_in6_pktinfo[] = {
 		{"addr", sizeof("addr"), 1, offsetof(struct in6_pktinfo, ipi6_addr), from_zval_write_sin6_addr, to_zval_read_sin6_addr},
 		{"ifindex", sizeof("ifindex"), 1, offsetof(struct in6_pktinfo, ipi6_ifindex), from_zval_write_ifindex, to_zval_read_unsigned},
