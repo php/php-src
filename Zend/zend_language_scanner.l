@@ -1971,6 +1971,33 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	}
 }
 
+/* Bigint support */
+<ST_IN_SCRIPTING>{LNUM}"n" {
+	/* Length without the "n" suffix */
+	size_t len = yyleng - 1;
+	char *lnum = yytext;
+	zend_bool is_octal = lnum[0] == '0';
+
+	/* Digits 8 and 9 are illegal in octal literals. */
+	if (is_octal) {
+		size_t i;
+		for (i = 0; i < len; i++) {
+			if (lnum[i] == '8' || lnum[i] == '9') {
+				zend_throw_exception(zend_ce_parse_error, "Invalid numeric literal", 0);
+				if (PARSER_MODE()) {
+					ZVAL_UNDEF(zendlval);
+					RETURN_TOKEN(T_ERROR);
+				}
+
+				/* Continue in order to determine if this is T_LNUMBER or T_DNUMBER. */
+				len = i;
+				break;
+			}
+		}
+	}
+	RETURN_TOKEN_WITH_STR(T_BIGINT, 0);
+}
+
 <ST_IN_SCRIPTING>{LNUM} {
 	size_t len = yyleng;
 	char *end, *lnum = yytext;

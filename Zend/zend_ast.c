@@ -1714,6 +1714,15 @@ simple_list:
 			}
 			smart_str_appendc(str, '`');
 			break;
+		case ZEND_AST_BIGINT:
+			{
+				zval *zv;
+				ZEND_ASSERT(ast->child[0]->kind == ZEND_AST_ZVAL);
+				zv = zend_ast_get_zval(ast->child[0]);
+				ZEND_ASSERT(Z_TYPE_P(zv) == IS_STRING);
+				smart_str_append(str, Z_STR_P(zv));
+			}
+			break;
 		case ZEND_AST_CLONE:
 			PREFIX_OP("clone ", 270, 271);
 		case ZEND_AST_EXIT:

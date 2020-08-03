@@ -88,6 +88,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 
 %token <ast> T_LNUMBER   "integer"
 %token <ast> T_DNUMBER   "floating-point number"
+%token <ast> T_BIGINT    "arbitrary precision integer"
 %token <ast> T_STRING    "identifier"
 %token <ast> T_NAME_FULLY_QUALIFIED "fully qualified name"
 %token <ast> T_NAME_RELATIVE "namespace-relative name"
@@ -1116,6 +1117,7 @@ expr:
 	|	T_EXIT exit_expr	{ $$ = zend_ast_create(ZEND_AST_EXIT, $2); }
 	|	'@' expr			{ $$ = zend_ast_create(ZEND_AST_SILENCE, $2); }
 	|	scalar { $$ = $1; }
+	|	T_BIGINT { $$ = zend_ast_create(ZEND_AST_BIGINT, $1); }
 	|	'`' backticks_expr '`' { $$ = zend_ast_create(ZEND_AST_SHELL_EXEC, $2); }
 	|	T_PRINT expr { $$ = zend_ast_create(ZEND_AST_PRINT, $2); }
 	|	T_YIELD { $$ = zend_ast_create(ZEND_AST_YIELD, NULL, NULL); CG(extra_fn_flags) |= ZEND_ACC_GENERATOR; }

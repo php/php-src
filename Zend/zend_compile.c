@@ -8770,6 +8770,57 @@ void zend_compile_shell_exec(znode *result, zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
+static void strip_underscores(char *str, size_t *len)
+{
+	char *src = str, *dest = str;
+	while (*src != '\0') {
+		if (*src != '_') {
+			*dest = *src;
+			dest++;
+		} else {
+			--(*len);
+		}
+		src++;
+	}
+	*dest = '\0';
+}
+
+
+void zend_compile_bigint(znode *result, zend_ast *ast) /* {{{ */
+{
+	zend_ast *expr_ast = ast->child[0];
+	zend_ast *new_expr_ast;
+	const zval *expr_zv = zend_ast_get_zval(expr_ast);
+	char* new_string = Z_STRVAL_P(expr_zv);
+	zval new_expr_zv;
+	size_t len = Z_STRLEN_P(expr_zv) - 1; /* Remove 'n' suffix */
+	zend_bool contains_underscores = (memchr(new_string, '_', len) != NULL);
+
+	zval fn_name;
+	zend_ast *name_ast, *args_ast, *call_ast;
+	ZEND_ASSERT(Z_TYPE_P(expr_zv) == IS_STRING);
+	if (contains_underscores) {
+		new_string = estrndup(new_string, len);
+		strip_underscores(new_string, &len);
+	}
+	ZVAL_STRINGL(&new_expr_zv, new_string, len);
+	if (contains_underscores) {
+		efree(new_string);
+	}
+
+	ZVAL_STRING(&fn_name, "gmp_init");
+	new_expr_ast = zend_ast_create_zval(&new_expr_zv);
+	name_ast = zend_ast_create_zval(&fn_name);
+	args_ast = zend_ast_create_list(1, ZEND_AST_ARG_LIST, new_expr_ast);
+	call_ast = zend_ast_create(ZEND_AST_CALL, name_ast, args_ast);
+
+	zend_compile_expr(result, call_ast);
+
+	zval_ptr_dtor(&fn_name);
+	zval_ptr_dtor(&new_expr_zv);
+}
+/* }}} */
+
 void zend_compile_array(znode *result, zend_ast *ast) /* {{{ */
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
@@ -9557,6 +9608,9 @@ static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 			return;
 		case ZEND_AST_SHELL_EXEC:
 			zend_compile_shell_exec(result, ast);
+			return;
+		case ZEND_AST_BIGINT:
+			zend_compile_bigint(result, ast);
 			return;
 		case ZEND_AST_ARRAY:
 			zend_compile_array(result, ast);
