@@ -102,6 +102,7 @@ static PHP_RSHUTDOWN_FUNCTION(sockets);
 
 /* Socket class */
 
+zend_class_entry *socket_ce;
 static zend_object_handlers socket_object_handlers;
 
 static zend_object *socket_create_object(zend_class_entry *class_type) {
