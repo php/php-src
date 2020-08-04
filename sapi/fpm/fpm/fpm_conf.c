@@ -725,8 +725,6 @@ static int fpm_worker_pool_shared_status_alloc(struct fpm_worker_pool_s *shared_
 
 	config->pm = PM_STYLE_ONDEMAND;
 	config->pm_max_children = 2;
-	/* set to 1 to not warn about max children for shared pool */
-	shared_wp->warn_max_children = 1;
 
 	current_wp->shared = shared_wp;
 

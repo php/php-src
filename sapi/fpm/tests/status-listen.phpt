@@ -2,8 +2,6 @@
 FPM: Status listen test
 --SKIPIF--
 <?php include "skipif.inc"; ?>
---XFAIL--
-Flaky test
 --FILE--
 <?php
 
