@@ -50,7 +50,11 @@ try {
     echo $exception->getMessage() . "\n";
 }
 
-var_dump(openssl_csr_sign($csr, null, array(), 365));
+try {
+    var_dump(openssl_csr_sign($csr, null, array(), 365));
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 var_dump(openssl_csr_sign($csr, null, $privkey, 365, $config_arg));
 ?>
 --EXPECTF--
@@ -73,10 +77,6 @@ Warning: openssl_csr_sign(): X.509 Certificate Signing Request cannot be retriev
 bool(false)
 openssl_csr_sign(): Argument #1 ($csr) must be of type OpenSSLCertificateSigningRequest|string, array given
 openssl_csr_sign(): Argument #2 ($cacert) must be of type OpenSSLCertificate|string|null, array given
-
-Warning: openssl_csr_sign(): Key array must be of the form array(0 => key, 1 => phrase) in %s on line %d
-
-Warning: openssl_csr_sign(): Cannot get private key from parameter 3 in %s on line %d
-bool(false)
+Key array must be of the form array(0 => key, 1 => phrase)
 object(OpenSSLCertificate)#%d (0) {
 }
