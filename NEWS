@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.0.0beta1
+?? ??? ????, PHP 8.0.0beta2
+
+
+06 Aug 2020, PHP 8.0.0beta1
 
 - Core:
   . Fixed bug #78236 (convert error on receiving variables when duplicate [).
