@@ -3979,7 +3979,7 @@ static inline zend_long php_mb_ord(const char *str, size_t str_len, zend_string 
 		mbfl_convert_filter *filter;
 		zend_long cp;
 
-		mbfl_wchar_device_init(&dev);
+		mbfl_wchar_device_init(&dev, 1);
 		filter = mbfl_convert_filter_new(enc, &mbfl_encoding_wchar, mbfl_wchar_device_output, 0, &dev);
 		/* If this assertion fails this means some memory allocation failure which is a bug */
 		ZEND_ASSERT(filter != NULL);

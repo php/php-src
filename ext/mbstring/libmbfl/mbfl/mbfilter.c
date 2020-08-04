@@ -266,7 +266,7 @@ static void create_encoding_conversion_filters(const mbfl_encoding *from, const 
 static unsigned int *convert_string_to_wchar(mbfl_string *string, size_t *len)
 {
 	mbfl_wchar_device wdev;
-	mbfl_wchar_device_init(&wdev);
+	mbfl_wchar_device_init(&wdev, mbfl_strlen(string));
 	mbfl_convert_filter *encoder = mbfl_convert_filter_new(string->encoding, &mbfl_encoding_wchar, mbfl_wchar_device_output, NULL, &wdev);
 	mbfl_filter_feed_data(string, encoder);
 	mbfl_convert_filter_flush(encoder);

@@ -139,10 +139,10 @@ int mbfl_memory_device_devcat(mbfl_memory_device *dest, mbfl_memory_device *src)
 	return mbfl_memory_device_strncat(dest, (const char*)src->buffer, src->pos);
 }
 
-void mbfl_wchar_device_init(mbfl_wchar_device *device)
+void mbfl_wchar_device_init(mbfl_wchar_device *device, size_t initsz)
 {
-	device->buffer = NULL;
-	device->length = 0;
+	device->buffer = (initsz > 0) ? emalloc(initsz * sizeof(int)) : NULL;
+	device->length = initsz;
 	device->pos = 0;
 	device->allocsz = MBFL_MEMORY_DEVICE_ALLOC_SIZE;
 }
