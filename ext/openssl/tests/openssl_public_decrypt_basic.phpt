@@ -26,11 +26,10 @@ try {
 
 try {
     var_dump(openssl_public_decrypt($encrypted, $output5, array($pubkey)));
-    var_dump($output4);
+    var_dump($output5);
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
-var_dump($output5);
 var_dump(openssl_public_decrypt($encrypted, $output6, array($pubkey, "")));
 var_dump($output6);
 ?>
@@ -45,6 +44,5 @@ bool(false)
 NULL
 Key array must be of the form array(0 => key, 1 => phrase)
 Key array must be of the form array(0 => key, 1 => phrase)
-NULL
 bool(true)
 string(32) "Testing openssl_public_decrypt()"
