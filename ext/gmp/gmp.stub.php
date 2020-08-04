@@ -91,10 +91,10 @@ function gmp_sqrt($a): GMP {}
 function gmp_sqrtrem($a): array {}
 
 /** @param GMP|int|bool|string $a */
-function gmp_root($a, int $nth): GMP|false {}
+function gmp_root($a, int $nth): GMP {}
 
 /** @param GMP|int|bool|string $a */
-function gmp_rootrem($a, int $nth): array|false {}
+function gmp_rootrem($a, int $nth): array {}
 
 /** @param GMP|int|bool|string $base */
 function gmp_pow($base, int $exp): GMP {}

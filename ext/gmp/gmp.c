@@ -1394,10 +1394,9 @@ ZEND_FUNCTION(gmp_root)
 	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a, 1);
 
 	if (nth % 2 == 0 && mpz_sgn(gmpnum_a) < 0) {
-		// Todo promote to ValueError?
-		php_error_docref(NULL, E_WARNING, "Can't take even root of negative number");
+		zend_argument_value_error(2, "must be odd if argument #1 ($a) is negative");
 		FREE_GMP_TEMP(temp_a);
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	INIT_GMP_RETVAL(gmpnum_result);
@@ -1427,10 +1426,9 @@ ZEND_FUNCTION(gmp_rootrem)
 	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a, 1);
 
 	if (nth % 2 == 0 && mpz_sgn(gmpnum_a) < 0) {
-		// Todo promote to ValueError?
-		php_error_docref(NULL, E_WARNING, "Can't take even root of negative number");
+		zend_argument_value_error(2, "must be odd if argument #1 ($a) is negative");
 		FREE_GMP_TEMP(temp_a);
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	gmp_create(&result1, &gmpnum_result1);

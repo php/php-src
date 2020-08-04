@@ -11,7 +11,12 @@ var_dump(gmp_root(-100, 3));
 
 var_dump(gmp_root(1000, 4));
 var_dump(gmp_root(100, 4));
-var_dump(gmp_root(-100, 4));
+
+try {
+    var_dump(gmp_root(-100, 4));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 var_dump(gmp_root(0, 3));
 
@@ -48,9 +53,7 @@ object(GMP)#%d (1) {
   ["num"]=>
   string(1) "3"
 }
-
-Warning: gmp_root(): Can't take even root of negative number in %s on line %d
-bool(false)
+gmp_root(): Argument #2 ($nth) must be odd if argument #1 ($a) is negative
 object(GMP)#%d (1) {
   ["num"]=>
   string(1) "0"

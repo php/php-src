@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3094dae32430922d11c7bdb3a4da0e2c0b47ac7e */
+ * Stub hash: a07c755ba28151df412a32411cd25f75eeea7fe0 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_gmp_init, 0, 1, GMP, 0)
 	ZEND_ARG_INFO(0, number)
@@ -70,12 +70,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gmp_sqrtrem, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_INFO(0, a)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_gmp_root, 0, 2, GMP, MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_gmp_root, 0, 2, GMP, 0)
 	ZEND_ARG_INFO(0, a)
 	ZEND_ARG_TYPE_INFO(0, nth, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_gmp_rootrem, 0, 2, MAY_BE_ARRAY|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gmp_rootrem, 0, 2, IS_ARRAY, 0)
 	ZEND_ARG_INFO(0, a)
 	ZEND_ARG_TYPE_INFO(0, nth, IS_LONG, 0)
 ZEND_END_ARG_INFO()
