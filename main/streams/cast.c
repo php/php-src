@@ -101,7 +101,7 @@ static ssize_t stream_cookie_writer(void *cookie, const char *buffer, size_t siz
 }
 
 # ifdef COOKIE_SEEKER_USES_OFF64_T
-static int stream_cookie_seeker(void *cookie, __off64_t *position, int whence)
+static int stream_cookie_seeker(void *cookie, off64_t *position, int whence)
 {
 
 	*position = php_stream_seek((php_stream *)cookie, (zend_off_t)*position, whence);

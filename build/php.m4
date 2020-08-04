@@ -1445,16 +1445,16 @@ AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <stdlib.h>
 
 struct cookiedata {
-  __off64_t pos;
+  off64_t pos;
 };
 
-__ssize_t reader(void *cookie, char *buffer, size_t size)
+ssize_t reader(void *cookie, char *buffer, size_t size)
 { return size; }
-__ssize_t writer(void *cookie, const char *buffer, size_t size)
+ssize_t writer(void *cookie, const char *buffer, size_t size)
 { return size; }
 int closer(void *cookie)
 { return 0; }
-int seeker(void *cookie, __off64_t *position, int whence)
+int seeker(void *cookie, off64_t *position, int whence)
 { ((struct cookiedata*)cookie)->pos = *position; return 0; }
 
 cookie_io_functions_t funcs = {reader, writer, seeker, closer};
