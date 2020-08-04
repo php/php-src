@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.2.33
+?? ??? ????, PHP 7.2.34
+
+
+06 Aug 2020, PHP 7.2.33
 
 - Core:
   . Fixed bug #79877 (getimagesize function silently truncates after a null 
