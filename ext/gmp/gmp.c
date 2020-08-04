@@ -383,11 +383,8 @@ static int gmp_do_operation_ex(zend_uchar opcode, zval *result, zval *op1, zval 
 	case ZEND_DIV:
 		DO_BINARY_UI_OP_EX(mpz_tdiv_q, gmp_mpz_tdiv_q_ui, 1);
 	case ZEND_MOD:
-		gmp_zval_binary_ui_op(result, op1, op2, mpz_mod, gmp_mpz_mod_ui, 1);
-		/* Free Division by zero error and rethrow a new modulo by zero one */
-		if (UNEXPECTED(EG(exception) && EG(exception)->ce == zend_ce_division_by_zero_error)) {
-			zend_clear_exception();
-			zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Modulo by zero");
+		DO_BINARY_UI_OP_EX(mpz_mod, gmp_mpz_mod_ui, 1);
+		if (UNEXPECTED(EG(exception))) {
 			return FAILURE;
 		}
 		return SUCCESS;
@@ -738,7 +735,11 @@ static inline void gmp_zval_binary_ui_op(zval *return_value, zval *a_arg, zval *
 		}
 
 		if (b_is_zero) {
-			zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Division by zero");
+			if ((gmp_binary_op_t) mpz_mod == gmp_op) {
+				zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Modulo by zero");
+			} else {
+				zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Division by zero");
+			}
 			FREE_GMP_TEMP(temp_a);
 			FREE_GMP_TEMP(temp_b);
 			RETURN_THROWS();
@@ -1154,8 +1155,9 @@ ZEND_FUNCTION(gmp_mod)
 	gmp_binary_ui_op_no_zero(mpz_mod, gmp_mpz_mod_ui);
 	/* Clear division by zero and rethrow a modulo by zero exception */
 	if (UNEXPECTED(EG(exception) && EG(exception)->ce == zend_ce_division_by_zero_error)) {
+		/*
 		zend_clear_exception();
-		zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Modulo by zero");
+		zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Modulo by zero");*/
 		RETURN_THROWS();
 	}
 }
