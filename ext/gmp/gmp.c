@@ -1562,17 +1562,23 @@ ZEND_FUNCTION(gmp_invert)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &a_arg, &b_arg) == FAILURE){
 		RETURN_THROWS();
 	}
-	// TODO Check b_arg is not 0 as behaviour is undefined for op2 = 0 for mpz_invert
 
 	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a, 1);
 	FETCH_GMP_ZVAL_DEP(gmpnum_b, b_arg, temp_b, temp_a, 2);
+
+	// TODO Early check if b_arg IS_LONG?
+	if (0 == mpz_cmp_ui(gmpnum_b, 0)) {
+		zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Division by zero");
+		FREE_GMP_TEMP(temp_a);
+		FREE_GMP_TEMP(temp_b);
+		RETURN_THROWS();
+	}
 
 	INIT_GMP_RETVAL(gmpnum_result);
 	res = mpz_invert(gmpnum_result, gmpnum_a, gmpnum_b);
 	FREE_GMP_TEMP(temp_a);
 	FREE_GMP_TEMP(temp_b);
 	if (!res) {
-		// Should return 0 instead of false? A legit 0 value is impossible.
 		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
 	}

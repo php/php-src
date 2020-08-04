@@ -8,7 +8,13 @@ gmp_invert() basic tests
 var_dump(gmp_strval(gmp_invert(123123,5467624)));
 var_dump(gmp_strval(gmp_invert(123123,"3333334345467624")));
 var_dump(gmp_strval(gmp_invert("12312323213123123",7624)));
-var_dump(gmp_strval(gmp_invert(444,0)));
+
+try {
+    var_dump(gmp_strval(gmp_invert(444,0)));
+} catch (\DivisionByZeroError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+
 var_dump(gmp_strval(gmp_invert(0,28347)));
 var_dump(gmp_strval(gmp_invert(-12,456456)));
 var_dump(gmp_strval(gmp_invert(234234,-435345)));
@@ -41,7 +47,7 @@ echo "Done\n";
 string(7) "2293131"
 string(1) "0"
 string(4) "5827"
-string(1) "0"
+Division by zero
 string(1) "0"
 string(1) "0"
 string(1) "0"
