@@ -29,6 +29,8 @@ PHP                                                                        NEWS
     is changed). (Nikita)
   . Fixed bug #79862 (Public non-static property in child should take priority
     over private static). (Nikita)
+  . Fixed bug #79877 (getimagesize function silently truncates after a null
+    byte) (cmb)
 
 - Fileinfo:
   . Fixed bug #79756 (finfo_file crash (FILEINFO_MIME)). (cmb)
@@ -38,6 +40,10 @@ PHP                                                                        NEWS
 
 - Mbstring:
   . Fixed bug #79787 (mb_strimwidth does not trim string). (XXiang)
+
+- Phar:
+  . Fixed bug #79797 (Use of freed hash key in the phar_parse_zipfile
+    function). (CVE-2020-7068) (cmb)
 
 - Reflection:
   . Fixed bug #79487 (::getStaticProperties() ignores property modifications).
