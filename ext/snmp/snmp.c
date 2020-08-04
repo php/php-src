@@ -78,7 +78,6 @@ extern netsnmp_log_handler *logh_head;
 #define SNMP_VALUE_OBJECT	(1 << 1)
 
 typedef struct snmp_session php_snmp_session;
-#define PHP_SNMP_SESSION_RES_NAME "SNMP session"
 
 #define PHP_SNMP_ADD_PROPERTIES(a, b) \
 { \
@@ -112,8 +111,6 @@ static PHP_GINIT_FUNCTION(snmp);
 
 /* constant - can be shared among threads */
 static oid objid_mib[] = {1, 3, 6, 1, 2, 1};
-
-static int le_snmp_session;
 
 /* Handlers */
 static zend_object_handlers php_snmp_object_handlers;
@@ -182,13 +179,6 @@ static void netsnmp_session_free(php_snmp_session **session) /* {{{ */
 		efree(*session);
 		*session = NULL;
 	}
-}
-/* }}} */
-
-static void php_snmp_session_destructor(zend_resource *rsrc) /* {{{ */
-{
-	php_snmp_session *session = (php_snmp_session *)rsrc->ptr;
-	netsnmp_session_free(&session);
 }
 /* }}} */
 
@@ -1935,8 +1925,6 @@ PHP_MINIT_FUNCTION(snmp)
 {
 	netsnmp_log_handler *logh;
 	zend_class_entry ce, cex;
-
-	le_snmp_session = zend_register_list_destructors_ex(php_snmp_session_destructor, NULL, PHP_SNMP_SESSION_RES_NAME, module_number);
 
 	init_snmp("snmpapp");
 	/* net-snmp corrupts the CTYPE locale during initialization. */
