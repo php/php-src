@@ -4662,6 +4662,15 @@ PHP_FUNCTION(setlocale)
 
 # ifndef PHP_WIN32
 		retval = php_my_setlocale(cat, loc ? ZSTR_VAL(loc) : NULL);
+#  if HAVE_BROKEN_SETLOCALE
+		/* musl libc always reports success for setlocale().
+		 * Manually whitelist the allowed locales "", "C" and "C.UTF-8" instead. */
+		if (retval && loc && ZSTR_LEN(loc) != 0
+				&& !zend_string_equals_literal(loc, "C")
+				&& !zend_string_equals_literal(loc, "C.UTF-8")) {
+			retval = NULL;
+		}
+#  endif
 # else
 		if (loc) {
 			/* BC: don't try /^[a-z]{2}_[A-Z]{2}($|\..*)/ except for /^u[ks]_U[KS]$/ */
