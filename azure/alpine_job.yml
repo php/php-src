@@ -1,0 +1,6 @@
+jobs:
+  - job: ALPINE
+    pool:
+      vmImage: 'ubuntu-20.04'
+    steps:
+      - script: docker build -f azure/Dockerfile .
