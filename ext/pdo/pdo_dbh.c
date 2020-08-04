@@ -1123,6 +1123,29 @@ PHP_METHOD(PDO, query)
 }
 /* }}} */
 
+/* {{{ Performs a liveness check */
+PHP_METHOD(PDO, checkLiveness)
+{
+	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	PDO_CONSTRUCT_CHECK;
+
+	if (!dbh->methods->check_liveness) {
+		zend_throw_exception_ex(php_pdo_get_exception(), 0, "This driver doesn't support checkLiveness");
+		RETURN_THROWS();
+	}
+
+	if (dbh->methods->check_liveness(dbh) != FAILURE) {
+		RETURN_TRUE;
+	}
+
+	PDO_HANDLE_DBH_ERR();
+	RETURN_FALSE;
+}
+/* }}} */
+
 /* {{{ quotes string for use in a query. The optional paramtype acts as a hint for drivers that have alternate quoting styles. The default value is PDO_PARAM_STR */
 PHP_METHOD(PDO, quote)
 {

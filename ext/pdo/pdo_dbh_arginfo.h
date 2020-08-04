@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 623f0a96bc1ae5eadcac5ba92eb73189cd3230cd */
+ * Stub hash: 379b21e9f0e26c7095c7366fa1eac71388ba0014 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PDO___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, dsn, IS_STRING, 0)
@@ -10,6 +10,8 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PDO_beginTransaction, 0, 0, 0)
 ZEND_END_ARG_INFO()
+
+#define arginfo_class_PDO_checkLiveness arginfo_class_PDO_beginTransaction
 
 #define arginfo_class_PDO_commit arginfo_class_PDO_beginTransaction
 
@@ -59,6 +61,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_METHOD(PDO, __construct);
 ZEND_METHOD(PDO, beginTransaction);
+ZEND_METHOD(PDO, checkLiveness);
 ZEND_METHOD(PDO, commit);
 ZEND_METHOD(PDO, errorCode);
 ZEND_METHOD(PDO, errorInfo);
@@ -77,6 +80,7 @@ ZEND_METHOD(PDO, setAttribute);
 static const zend_function_entry class_PDO_methods[] = {
 	ZEND_ME(PDO, __construct, arginfo_class_PDO___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(PDO, beginTransaction, arginfo_class_PDO_beginTransaction, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDO, checkLiveness, arginfo_class_PDO_checkLiveness, ZEND_ACC_PUBLIC)
 	ZEND_ME(PDO, commit, arginfo_class_PDO_commit, ZEND_ACC_PUBLIC)
 	ZEND_ME(PDO, errorCode, arginfo_class_PDO_errorCode, ZEND_ACC_PUBLIC)
 	ZEND_ME(PDO, errorInfo, arginfo_class_PDO_errorInfo, ZEND_ACC_PUBLIC)

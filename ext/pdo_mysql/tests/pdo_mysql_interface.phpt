@@ -18,6 +18,7 @@ if (false == MySQLPDOTest::detect_transactional_mysql_engine($db))
         '__construct'							=> true,
         'prepare' 							=> true,
         'beginTransaction'						=> true,
+        'checkLiveness'						=> true,
         'commit'							=> true,
         'rollBack'							=> true,
         'setAttribute'							=> true,

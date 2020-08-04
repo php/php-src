@@ -10,6 +10,9 @@ class PDO
     public function beginTransaction() {}
 
     /** @return bool */
+    public function checkLiveness() {}
+
+    /** @return bool */
     public function commit() {}
 
     /** @return string|null */
