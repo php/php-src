@@ -12,15 +12,21 @@ PHP Testfest Berlin 2009-05-10
 	if (!extension_loaded('posix')) {
         die('SKIP - POSIX extension not available');
     }
-	if (!extension_loaded('sockets')) {
-        die('SKIP - Sockets extension not available');
+	if (!extension_loaded('standard')) {
+        die('SKIP - Standard extension not available');
     }
 ?>
 --FILE--
 <?php
+
 var_dump(posix_ttyname(0)); // param not a resource
+
+$descriptors = [["pty"], ["pty"], ["pty"], ["pipe", "w"]];
+$pipes = [];
+$process = proc_open('echo "foo";', $descriptors, $pipes);
+
 try {
-    var_dump(posix_ttyname(finfo_open(FILEINFO_NONE, __DIR__))); // wrong resource type
+    var_dump(posix_ttyname($process)); // wrong resource type
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
