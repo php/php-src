@@ -17,7 +17,7 @@ PHP                                                                        NEWS
   . Fixed bug #73060 (php failed with error after temp folder cleaned up).
     (cmb)
 
-?? ??? ????, PHP 7.3.21
+06 Aug 2020, PHP 7.3.21
 
 - Apache:
   . Fixed bug #79030 (Upgrade apache2handler's php_apache_sapi_get_request_time
