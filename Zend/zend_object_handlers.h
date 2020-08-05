@@ -193,7 +193,10 @@ ZEND_API HashTable *zend_std_get_gc(zend_object *object, zval **table, int *n);
 ZEND_API HashTable *zend_std_get_debug_info(zend_object *object, int *is_temp);
 ZEND_API int zend_std_cast_object_tostring(zend_object *object, zval *writeobj, int type);
 ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *object, zend_string *member, int type, void **cache_slot);
-ZEND_API zval *zend_std_read_property(zend_object *object, zend_string *member, int type, void **cache_slot, zval *rv);
+/*
+When the object has "__get" method, you must pass the getter_return parameter, which points to the memory used to hold the return value of the getter function
+*/
+ZEND_API zval *zend_std_read_property(zend_object *object, zend_string *member, int type, void **cache_slot, zval *getter_return);
 ZEND_API zval *zend_std_write_property(zend_object *object, zend_string *member, zval *value, void **cache_slot);
 ZEND_API int zend_std_has_property(zend_object *object, zend_string *member, int has_set_exists, void **cache_slot);
 ZEND_API void zend_std_unset_property(zend_object *object, zend_string *member, void **cache_slot);
