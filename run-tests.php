@@ -1182,13 +1182,12 @@ function error_report(string $testname, string $logname, string $tested): void
 }
 
 /**
- * @param null $stdin
  * @return false|string
  */
 function system_with_timeout(
     string $commandline,
     ?array $env = null,
-    $stdin = null,
+    ?string $stdin = null,
     bool $captureStdIn = true,
     bool $captureStdOut = true,
     bool $captureStdErr = true
