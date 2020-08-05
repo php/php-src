@@ -13,24 +13,26 @@ $ftp = ftp_connect('127.0.0.1', $port);
 ftp_login($ftp, 'user', 'pass');
 $ftp or die("Couldn't connect to the server");
 
-var_dump(ftp_set_option($ftp, FTP_TIMEOUT_SEC, 0));
-var_dump(ftp_set_option($ftp, FTP_TIMEOUT_SEC, '0'));
-var_dump(ftp_set_option($ftp, FTP_USEPASVADDRESS, ['1']));
-var_dump(ftp_set_option($ftp, FTP_AUTOSEEK, 'true'));
-var_dump(ftp_set_option($ftp, FOO_BAR, 1));
+$options = [
+    [ 'option' => FTP_TIMEOUT_SEC, 'value' => 0 ],
+	[ 'option' => FTP_TIMEOUT_SEC, 'value' => '0' ],
+	[ 'option' => FTP_USEPASVADDRESS, 'value' => ['1'] ],
+	[ 'option' => FTP_AUTOSEEK, 'value' => 'true' ],
+	[ 'option' => FOO_BAR, 'value' => 1 ],
+];
+foreach ($options as $option) try {
+	var_dump(ftp_set_option($ftp, $option['option'], $option['value']));
+} catch (\Throwable $ex) {
+	echo "Exception: ", $ex->getMessage(), "\n";
+}
+
 ?>
 --EXPECTF--
 Warning: ftp_set_option(): Timeout has to be greater than 0 in %s on line %d
 bool(false)
-
-Warning: ftp_set_option(): Option TIMEOUT_SEC expects value of type int, string given in %s on line %d
-bool(false)
-
-Warning: ftp_set_option(): Option USEPASVADDRESS expects value of type bool, array given in %s on line %d
-bool(false)
-
-Warning: ftp_set_option(): Option AUTOSEEK expects value of type bool, string given in %s on line %d
-bool(false)
+Exception: ftp_set_option(): Argument #3 ($value) must be of type int, string given
+Exception: ftp_set_option(): Argument #3 ($value) must be of type bool, array given
+Exception: ftp_set_option(): Argument #3 ($value) must be of type bool, string given
 
 Warning: ftp_set_option(): Unknown option '10' in %s on line %d
 bool(false)

@@ -2,133 +2,58 @@
 
 /** @generate-function-entries */
 
-/** @return resource|false */
-function ftp_connect(string $host, int $port = 21, int $timeout = 90) {}
+function ftp_connect(string $host, int $port = 21, int $timeout = 90): FTPConnection|false {}
 
 #ifdef HAVE_FTP_SSL
-/** @return resource|false */
-function ftp_ssl_connect(string $host, int $port = 21, int $timeout = 90) {}
+function ftp_ssl_connect(string $host, int $port = 21, int $timeout = 90): FTPConnection|false {}
 #endif
 
-/** @param resource $ftp */
-function ftp_login($ftp, string $username, string $password): bool {}
+function ftp_login(FTPConnection $ftp, string $username, string $password): bool {}
+function ftp_pwd(FTPConnection $ftp): string|false {}
+function ftp_cdup(FTPConnection $ftp): bool {}
+function ftp_chdir(FTPConnection $ftp, string $directory): bool {}
+function ftp_exec(FTPConnection $ftp, string $command): bool {}
+function ftp_raw(FTPConnection $ftp, string $command): array {}
+function ftp_mkdir(FTPConnection $ftp, string $directory): string|false {}
+function ftp_rmdir(FTPConnection $ftp, string $directory): bool {}
+function ftp_chmod(FTPConnection $ftp, int $mode, string $filename): int|false {}
 
-/** @param resource $ftp */
-function ftp_pwd($ftp): string|false {}
+/** @param string $response */
+function ftp_alloc(FTPConnection $ftp, int $size, &$response = null): bool {}
+function ftp_nlist(FTPConnection $ftp, string $directory): array|false {}
+function ftp_rawlist(FTPConnection $ftp, string $directory, bool $recurse = false): array|false {}
+function ftp_mlsd(FTPConnection $ftp, string $directory): array|false {}
+function ftp_systype(FTPConnection $ftp): string|false {}
 
-/** @param resource $ftp */
-function ftp_cdup($ftp): bool {}
+/** @param resource $fp */
+function ftp_fget(FTPConnection $ftp, $fp, string $remote_file, int $mode = FTP_BINARY, int $resumepos = 0): bool {}
 
-/** @param resource $ftp */
-function ftp_chdir($ftp, string $directory): bool {}
+/** @param resource $fp */
+function ftp_nb_fget(FTPConnection $ftp, $fp, string $remote_file, int $mode = FTP_BINARY, int $resumpos = 0): int|false {}
 
-/** @param resource $ftp */
-function ftp_exec($ftp, string $command): bool {}
+function ftp_pasv(FTPConnection $ftp, bool $pasv): bool {}
+function ftp_get(FTPConnection $ftp, string $local_file, string $remote_file, int $mode = FTP_BINARY, int $resumepos = 0): bool {}
+function ftp_nb_get(FTPConnection $ftp, string $local_file, string $remote_file, int $mode = FTP_BINARY, int $resume_pos = 0): int {}
+function ftp_nb_continue(FTPConnection $ftp): int {}
 
-/** @param resource $ftp */
-function ftp_raw($ftp, string $command): array {}
+/** @param resource $fp */
+function ftp_fput(FTPConnection $ftp, string $remote_file, $fp, int $mode = FTP_BINARY, int $startpos = 0): bool {}
 
-/** @param resource $ftp */
-function ftp_mkdir($ftp, string $directory): string|false {}
+/** @param resource $fp */
+function ftp_nb_fput(FTPConnection $ftp, string $remote_file, $fp, int $mode = FTP_BINARY, int $startpos = 0): int|false {}
 
-/** @param resource $ftp */
-function ftp_rmdir($ftp, string $directory): bool {}
+function ftp_put(FTPConnection $ftp, string $remote_file, string $local_file, int $mode = FTP_BINARY, int $startpos = 0): bool {}
+function ftp_append(FTPConnection $ftp, string $remove_file, string $local_file, int $mode = FTP_BINARY): bool {}
+function ftp_nb_put(FTPConnection $ftp, string $remote_file, string $local_file, int $mode = FTP_BINARY, int $startpos = 0): int|false {}
+function ftp_size(FTPConnection $ftp, string $filename): int {}
+function ftp_mdtm(FTPConnection $ftp, string $filename): int {}
+function ftp_rename(FTPConnection $ftp, string $src, string $dest): bool {}
+function ftp_delete(FTPConnection $ftp, string $file): bool {}
+function ftp_site(FTPConnection $ftp, string $cmd): bool {}
+function ftp_close(FTPConnection $ftp): bool {}
 
-/** @param resource $ftp */
-function ftp_chmod($ftp, int $mode, string $filename): int|false {}
+/** @alias ftp_close */
+function ftp_quit(FTPConnection $ftp): bool {}
 
-/**
- * @param resource $ftp
- * @param string $response
- */
-function ftp_alloc($ftp, int $size, &$response = null): bool {}
-
-/** @param resource $ftp */
-function ftp_nlist($ftp, string $directory): array|false {}
-
-/** @param resource $ftp */
-function ftp_rawlist($ftp, string $directory, bool $recurse = false): array|false {}
-
-/** @param resource $ftp */
-function ftp_mlsd($ftp, string $directory): array|false {}
-
-/** @param resource $ftp */
-function ftp_systype($ftp): string|false {}
-
-/**
- * @param resource $ftp
- * @param resource $fp
- */
-function ftp_fget($ftp, $fp, string $remote_file, int $mode = FTP_BINARY, int $resumepos = 0): bool {}
-
-/**
- * @param resource $ftp
- * @param resource $fp
- */
-function ftp_nb_fget($ftp, $fp, string $remote_file, int $mode = FTP_BINARY, int $resumpos = 0): int|false {}
-
-/** @param resource $ftp */
-function ftp_pasv($ftp, bool $pasv): bool {}
-
-/** @param resource $ftp */
-function ftp_get($ftp, string $local_file, string $remote_file, int $mode = FTP_BINARY, int $resumepos = 0): bool {}
-
-/** @param resource $ftp */
-function ftp_nb_get($ftp, string $local_file, string $remote_file, int $mode = FTP_BINARY, int $resume_pos = 0): int {}
-
-/** @param resource $ftp */
-function ftp_nb_continue($ftp): int {}
-
-/**
- * @param resource $ftp
- * @param resource $fp
- */
-function ftp_fput($ftp, string $remote_file, $fp, int $mode = FTP_BINARY, int $startpos = 0): bool {}
-
-/**
- * @param resource $ftp
- * @param resource $fp
- */
-function ftp_nb_fput($ftp, string $remote_file, $fp, int $mode = FTP_BINARY, int $startpos = 0): int|false {}
-
-/** @param resource $ftp */
-function ftp_put($ftp, string $remote_file, string $local_file, int $mode = FTP_BINARY, int $startpos = 0): bool {}
-
-/** @param resource $ftp */
-function ftp_append($ftp, string $remove_file, string $local_file, int $mode = FTP_BINARY): bool {}
-
-/** @param resource $ftp */
-function ftp_nb_put($ftp, string $remote_file, string $local_file, int $mode = FTP_BINARY, int $startpos = 0): int|false {}
-
-/** @param resource $ftp */
-function ftp_size($ftp, string $filename): int {}
-
-/** @param resource $ftp */
-function ftp_mdtm($ftp, string $filename): int {}
-
-/** @param resource $ftp */
-function ftp_rename($ftp, string $src, string $dest): bool {}
-
-/** @param resource $ftp */
-function ftp_delete($ftp, string $file): bool {}
-
-/** @param resource $ftp */
-function ftp_site($ftp, string $cmd): bool {}
-
-/** @param resource $ftp */
-function ftp_close($ftp): bool {}
-
-/**
- * @param resource $ftp
- * @alias ftp_close
- */
-function ftp_quit($ftp): bool {}
-
-/**
- * @param resource $ftp
- * @param int|bool $value
- */
-function ftp_set_option($ftp, int $option, $value): bool {}
-
-/** @param resource $ftp */
-function ftp_get_option($ftp, int $option): int|bool {}
+function ftp_set_option(FTPConnection $ftp, int $option, int|bool $value): bool {}
+function ftp_get_option(FTPConnection $ftp, int $option): int|bool {}
