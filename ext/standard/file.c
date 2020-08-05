@@ -930,9 +930,17 @@ PHP_FUNCTION(popen)
 		char *z = memchr(posix_mode, 'b', mode_len);
 		if (z) {
 			memmove(z, z + 1, mode_len - (z - posix_mode));
+			mode_len--;
 		}
 	}
 #endif
+
+	/* Musl only partially validates the mode. Manually check it to ensure consistent behavior. */
+	if (mode_len != 1 || (*posix_mode != 'r' && *posix_mode != 'w')) {
+		php_error_docref2(NULL, command, posix_mode, E_WARNING, "Invalid mode");
+		efree(posix_mode);
+		RETURN_FALSE;
+	}
 
 	fp = VCWD_POPEN(command, posix_mode);
 	if (!fp) {

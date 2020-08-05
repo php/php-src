@@ -22,7 +22,7 @@ unlink($file_path."/popen.tmp");
 --EXPECTF--
 *** Testing for error conditions ***
 
-Warning: popen(abc.txt,rw): %s on line %d
+Warning: popen(abc.txt,rw): Invalid mode in %s on line %d
 bool(false)
 
 --- Done ---
