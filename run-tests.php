@@ -28,10 +28,10 @@
 /* Let there be no top-level code beyond this point:
  * Only functions and classes, thanks!
  *
- * Minimum required PHP version: 7.0.0
+ * Minimum required PHP version: 7.1.0
  */
 
-function show_usage()
+function show_usage(): void
 {
     echo <<<HELP
 Synopsis:
@@ -125,7 +125,7 @@ HELP;
  * code that was previously found at the top level. It could and should be
  * refactored to be smaller and more manageable.
  */
-function main()
+function main(): void
 {
     /* This list was derived in a naïve mechanical fashion. If a member
      * looks like it doesn't belong, it probably doesn't; cull at will.
@@ -796,7 +796,7 @@ if (!function_exists("hrtime")) {
     }
 }
 
-function verify_config()
+function verify_config(): void
 {
     global $php;
 
@@ -809,7 +809,7 @@ function verify_config()
     }
 }
 
-function write_information()
+function write_information(): void
 {
     global $php, $php_cgi, $phpdbg, $php_info, $user_tests, $ini_overwrites, $pass_options, $exts_to_test, $valgrind, $no_file_cache;
 
@@ -890,7 +890,7 @@ VALGRIND    : " . ($valgrind ? $valgrind->getHeader() : 'Not used') . "
 ";
 }
 
-function save_or_mail_results()
+function save_or_mail_results(): void
 {
     global $sum_results, $just_save_results, $failed_test_summary,
            $PHP_FAILED_TESTS, $php, $output_file;
@@ -1020,7 +1020,7 @@ function save_or_mail_results()
     }
 }
 
-function find_files($dir, $is_ext_dir = false, $ignore = false)
+function find_files(string $dir, bool $is_ext_dir = false, bool $ignore = false): void
 {
     global $test_files, $exts_to_test, $ignored_by_ext, $exts_skipped;
 
@@ -1055,7 +1055,10 @@ function find_files($dir, $is_ext_dir = false, $ignore = false)
     closedir($o);
 }
 
-function test_name($name)
+/**
+ * @param array|string $name
+ */
+function test_name($name): string
 {
     if (is_array($name)) {
         return $name[0] . ':' . $name[1];
@@ -1063,8 +1066,11 @@ function test_name($name)
         return $name;
     }
 }
-
-function test_sort($a, $b)
+/**
+ * @param array|string $a
+ * @param array|string $b
+ */
+function test_sort($a, $b): int
 {
     $a = test_name($a);
     $b = test_name($b);
@@ -1085,7 +1091,7 @@ function test_sort($a, $b)
 // Send Email to QA Team
 //
 
-function mail_qa_team($data, $status = false)
+function mail_qa_team(string $data, bool $status = false): bool
 {
     $url_bits = parse_url(QA_SUBMISSION_PAGE);
 
@@ -1124,14 +1130,14 @@ function mail_qa_team($data, $status = false)
     fwrite($fs, "\r\n\r\n");
     fclose($fs);
 
-    return 1;
+    return true;
 }
 
 //
 //  Write the given text to a temporary file, and return the filename.
 //
 
-function save_text($filename, $text, $filename_copy = null)
+function save_text(string $filename, string $text, ?string $filename_copy = null): void
 {
     global $DETAILED;
 
@@ -1158,7 +1164,7 @@ $text
 //  Write an error in a format recognizable to Emacs or MSVC.
 //
 
-function error_report($testname, $logname, $tested)
+function error_report(string $testname, string $logname, string $tested): void
 {
     $testname = realpath($testname);
     $logname = realpath($logname);
@@ -1175,8 +1181,18 @@ function error_report($testname, $logname, $tested)
     }
 }
 
-function system_with_timeout($commandline, $env = null, $stdin = null, $captureStdIn = true, $captureStdOut = true, $captureStdErr = true)
-{
+/**
+ * @param null $stdin
+ * @return false|string
+ */
+function system_with_timeout(
+    string $commandline,
+    ?array $env = null,
+    $stdin = null,
+    bool $captureStdIn = true,
+    bool $captureStdOut = true,
+    bool $captureStdErr = true
+) {
     global $valgrind;
 
     $data = '';
@@ -1256,7 +1272,10 @@ function system_with_timeout($commandline, $env = null, $stdin = null, $captureS
     return $data;
 }
 
-function run_all_tests($test_files, $env, $redir_tested = null)
+/**
+ * @param string|array|null $redir_tested
+ */
+function run_all_tests(array $test_files, array $env, $redir_tested = null): void
 {
     global $test_results, $failed_tests_file, $result_tests_file, $php, $test_idx, $file_cache;
     // Parallel testing
@@ -1324,8 +1343,10 @@ function run_all_tests($test_files, $env, $redir_tested = null)
     }
 }
 
-/** The heart of parallel testing. */
-function run_all_tests_parallel($test_files, $env, $redir_tested)
+/** The heart of parallel testing.
+ * @param string|array|null $redir_tested
+ */
+function run_all_tests_parallel(array $test_files, array $env, $redir_tested): void
 {
     global $workers, $test_idx, $test_cnt, $test_results, $failed_tests_file, $result_tests_file, $PHP_FAILED_TESTS, $shuffle, $SHOW_ONLY_GROUPS, $valgrind;
 
@@ -1648,7 +1669,7 @@ escape:
     }
 }
 
-function send_message($stream, array $message)
+function send_message($stream, array $message): void
 {
     $blocking = stream_get_meta_data($stream)["blocked"];
     stream_set_blocking($stream, true);
@@ -1656,7 +1677,7 @@ function send_message($stream, array $message)
     stream_set_blocking($stream, $blocking);
 }
 
-function kill_children(array $children)
+function kill_children(array $children): void
 {
     foreach ($children as $child) {
         if ($child) {
@@ -1665,6 +1686,9 @@ function kill_children(array $children)
     }
 }
 
+/**
+ * @return true|void
+ */
 function run_worker()
 {
     global $workerID, $workerSock;
@@ -1679,7 +1703,7 @@ function run_worker()
         error("Unexpected greeting of type $greeting[type]");
     }
 
-    set_error_handler(function ($errno, $errstr, $errfile, $errline) use ($workerSock) {
+    set_error_handler(function (int $errno, string $errstr, string $errfile, int $errline) use ($workerSock) {
         if (error_reporting() & $errno) {
             send_message($workerSock, compact('errno', 'errstr', 'errfile', 'errline') + [
                 'type' => 'php_error'
@@ -1732,7 +1756,7 @@ function run_worker()
 //
 //  Show file or result block
 //
-function show_file_block($file, $block, $section = null)
+function show_file_block(string $file, string $block, ?string $section = null): void
 {
     global $cfg;
 
@@ -1750,7 +1774,10 @@ function show_file_block($file, $block, $section = null)
 //
 //  Run an individual test case.
 //
-function run_test($php, $file, $env)
+/**
+ * @param string|array $file
+ */
+function run_test(string $php, $file, array $env): string
 {
     global $log_format, $ini_overwrites, $PHP_FAILED_TESTS;
     global $pass_options, $DETAILED, $IN_REDIRECT, $test_cnt, $test_idx;
@@ -2777,7 +2804,7 @@ $output
     return $restype[0] . 'ED';
 }
 
-function comp_line($l1, $l2, $is_reg)
+function comp_line(string $l1, string $l2, bool $is_reg)
 {
     if ($is_reg) {
         return preg_match('/^' . $l1 . '$/s', $l2);
@@ -2786,8 +2813,17 @@ function comp_line($l1, $l2, $is_reg)
     }
 }
 
-function count_array_diff($ar1, $ar2, $is_reg, $w, $idx1, $idx2, $cnt1, $cnt2, $steps)
-{
+function count_array_diff(
+    array $ar1,
+    array $ar2,
+    bool $is_reg,
+    array $w,
+    int $idx1,
+    int $idx2,
+    int $cnt1,
+    int $cnt2,
+    int $steps
+): int {
     $equal = 0;
 
     while ($idx1 < $cnt1 && $idx2 < $cnt2 && comp_line($ar1[$idx1], $ar2[$idx2], $is_reg)) {
@@ -2828,7 +2864,7 @@ function count_array_diff($ar1, $ar2, $is_reg, $w, $idx1, $idx2, $cnt1, $cnt2, $
     return $equal;
 }
 
-function generate_array_diff($ar1, $ar2, $is_reg, $w)
+function generate_array_diff(array $ar1, array $ar2, bool $is_reg, array $w): array
 {
     $idx1 = 0;
     $cnt1 = @count($ar1);
@@ -2896,7 +2932,7 @@ function generate_array_diff($ar1, $ar2, $is_reg, $w)
     return $diff;
 }
 
-function generate_diff($wanted, $wanted_re, $output)
+function generate_diff(string $wanted, ?string $wanted_re, string $output): string
 {
     $w = explode("\n", $wanted);
     $o = explode("\n", $output);
@@ -2906,13 +2942,13 @@ function generate_diff($wanted, $wanted_re, $output)
     return implode(PHP_EOL, $diff);
 }
 
-function error($message)
+function error(string $message): void
 {
     echo "ERROR: {$message}\n";
     exit(1);
 }
 
-function settings2array($settings, &$ini_settings)
+function settings2array(array $settings, &$ini_settings): void
 {
     foreach ($settings as $setting) {
         if (strpos($setting, '=') !== false) {
@@ -2933,7 +2969,7 @@ function settings2array($settings, &$ini_settings)
     }
 }
 
-function settings2params($ini_settings)
+function settings2params(array $ini_settings): string
 {
     $settings = '';
 
@@ -2962,7 +2998,7 @@ function settings2params($ini_settings)
     return $settings;
 }
 
-function compute_summary()
+function compute_summary(): void
 {
     global $n_total, $test_results, $ignored_by_ext, $sum_results, $percent_results;
 
@@ -2991,7 +3027,7 @@ function compute_summary()
     }
 }
 
-function get_summary($show_ext_summary)
+function get_summary(bool $show_ext_summary): string
 {
     global $exts_skipped, $exts_tested, $n_total, $sum_results, $percent_results, $end_time, $start_time, $failed_test_summary, $PHP_FAILED_TESTS, $valgrind;
 
@@ -3057,7 +3093,7 @@ Time taken      : ' . sprintf('%4d seconds', $end_time - $start_time) . '
     $failed_test_summary = '';
 
     if (count($PHP_FAILED_TESTS['SLOW'])) {
-        usort($PHP_FAILED_TESTS['SLOW'], function ($a, $b) {
+        usort($PHP_FAILED_TESTS['SLOW'], function (array $a, array $b): int {
             return $a['info'] < $b['info'] ? 1 : -1;
         });
 
@@ -3154,22 +3190,22 @@ EXPECTED LEAK TEST SUMMARY
     return $summary;
 }
 
-function show_start($start_time)
+function show_start($start_time): void
 {
     echo "TIME START " . date('Y-m-d H:i:s', $start_time) . "\n=====================================================================\n";
 }
 
-function show_end($end_time)
+function show_end($end_time): void
 {
     echo "=====================================================================\nTIME END " . date('Y-m-d H:i:s', $end_time) . "\n";
 }
 
-function show_summary()
+function show_summary(): void
 {
     echo get_summary(true);
 }
 
-function show_redirect_start($tests, $tested, $tested_file)
+function show_redirect_start(string $tests, string $tested, string $tested_file): void
 {
     global $SHOW_ONLY_GROUPS;
 
@@ -3180,7 +3216,7 @@ function show_redirect_start($tests, $tested, $tested_file)
     }
 }
 
-function show_redirect_ends($tests, $tested, $tested_file)
+function show_redirect_ends(string $tests, string $tested, string $tested_file): void
 {
     global $SHOW_ONLY_GROUPS;
 
@@ -3191,7 +3227,7 @@ function show_redirect_ends($tests, $tested, $tested_file)
     }
 }
 
-function show_test($test_idx, $shortname)
+function show_test(int $test_idx, string $shortname): void
 {
     global $test_cnt;
     global $line_length;
@@ -3202,7 +3238,7 @@ function show_test($test_idx, $shortname)
     flush();
 }
 
-function clear_show_test()
+function clear_show_test(): void
 {
     global $line_length;
     // Parallel testing
@@ -3221,8 +3257,13 @@ function parse_conflicts(string $text): array
     return array_map('trim', explode("\n", trim($text)));
 }
 
-function show_result($result, $tested, $tested_file, $extra = '', $temp_filenames = null)
-{
+function show_result(
+    string $result,
+    string $tested,
+    string $tested_file,
+    string $extra = '',
+    ?string $temp_filenames = null
+): void {
     global $temp_target, $temp_urlbase, $line_length, $SHOW_ONLY_GROUPS;
 
     if (!$SHOW_ONLY_GROUPS || in_array($result, $SHOW_ONLY_GROUPS)) {
@@ -3233,7 +3274,7 @@ function show_result($result, $tested, $tested_file, $extra = '', $temp_filename
 
 }
 
-function junit_init()
+function junit_init(): void
 {
     // Check whether a junit log is wanted.
     global $workerID;
@@ -3262,7 +3303,7 @@ function junit_init()
     );
 }
 
-function junit_save_xml()
+function junit_save_xml(): void
 {
     global $JUNIT;
     if (!junit_enabled()) {
@@ -3284,7 +3325,7 @@ function junit_save_xml()
     fwrite($JUNIT['fp'], $xml);
 }
 
-function junit_get_suite_xml($suite_name = '')
+function junit_get_suite_xml(string $suite_name = ''): string
 {
     global $JUNIT;
 
@@ -3313,7 +3354,7 @@ function junit_get_suite_xml($suite_name = '')
     return $result;
 }
 
-function junit_enabled()
+function junit_enabled(): bool
 {
     global $JUNIT;
     return !empty($JUNIT);
@@ -3321,16 +3362,15 @@ function junit_enabled()
 
 /**
  * @param array|string $type
- * @param string $file_name
- * @param string $test_name
- * @param int|string $time
- * @param string $message
- * @param string $details
- *
- * @return void
  */
-function junit_mark_test_as($type, $file_name, $test_name, $time = null, $message = '', $details = '')
-{
+function junit_mark_test_as(
+    $type,
+    string $file_name,
+    string $test_name,
+    ?int $time = null,
+    string $message = '',
+    string $details = ''
+): void {
     global $JUNIT;
     if (!junit_enabled()) {
         return;
@@ -3382,7 +3422,7 @@ function junit_mark_test_as($type, $file_name, $test_name, $time = null, $messag
     $JUNIT['files'][$file_name]['xml'] .= "</testcase>\n";
 }
 
-function junit_suite_record($suite, $param, $value = 1)
+function junit_suite_record(string $suite, string $param, int $value = 1): void
 {
     global $JUNIT;
 
@@ -3390,7 +3430,7 @@ function junit_suite_record($suite, $param, $value = 1)
     $JUNIT['suites'][$suite][$param] += $value;
 }
 
-function junit_get_timer($file_name)
+function junit_get_timer(string $file_name): int
 {
     global $JUNIT;
     if (!junit_enabled()) {
@@ -3404,7 +3444,7 @@ function junit_get_timer($file_name)
     return 0;
 }
 
-function junit_start_timer($file_name)
+function junit_start_timer(string $file_name): void
 {
     global $JUNIT;
     if (!junit_enabled()) {
@@ -3420,12 +3460,12 @@ function junit_start_timer($file_name)
     }
 }
 
-function junit_get_suitename_for($file_name)
+function junit_get_suitename_for(string $file_name): string
 {
     return junit_path_to_classname(dirname($file_name));
 }
 
-function junit_path_to_classname($file_name)
+function junit_path_to_classname(string $file_name): string
 {
     global $JUNIT;
 
@@ -3461,7 +3501,7 @@ function junit_path_to_classname($file_name)
     return $JUNIT['name'] . '.' . str_replace(array(DIRECTORY_SEPARATOR, '-'), '.', $file_name);
 }
 
-function junit_init_suite($suite_name)
+function junit_init_suite(string $suite_name): void
 {
     global $JUNIT;
     if (!junit_enabled()) {
@@ -3485,7 +3525,7 @@ function junit_init_suite($suite_name)
     );
 }
 
-function junit_finish_timer($file_name)
+function junit_finish_timer(string $file_name): void
 {
     global $JUNIT;
     if (!junit_enabled()) {
@@ -3505,7 +3545,7 @@ function junit_finish_timer($file_name)
     unset($JUNIT['files'][$file_name]['start']);
 }
 
-function junit_merge_results($junit)
+function junit_merge_results(array $junit): void
 {
     global $JUNIT;
     $JUNIT['test_total'] += $junit['test_total'];
@@ -3542,12 +3582,12 @@ class RuntestsValgrind
     protected $version_3_8_0 = false;
     protected $tool = null;
 
-    public function getVersion()
+    public function getVersion(): string
     {
         return $this->version;
     }
 
-    public function getHeader()
+    public function getHeader(): string
     {
         return $this->header;
     }
@@ -3572,7 +3612,7 @@ class RuntestsValgrind
         $this->version_3_8_0 = version_compare($version, '3.8.0', '>=');
     }
 
-    public function wrapCommand($cmd, $memcheck_filename, $check_all)
+    public function wrapCommand(string $cmd, string $memcheck_filename, bool $check_all): string
     {
         $vcmd = "valgrind -q --tool={$this->tool} --trace-children=yes";
         if ($check_all) {
@@ -3591,7 +3631,7 @@ class RuntestsValgrind
     }
 }
 
-function init_output_buffers()
+function init_output_buffers(): void
 {
     // Delete as much output buffers as possible.
     while (@ob_end_clean()) {
@@ -3602,7 +3642,7 @@ function init_output_buffers()
     }
 }
 
-function check_proc_open_function_exists()
+function check_proc_open_function_exists(): void
 {
     if (!function_exists('proc_open')) {
         echo <<<NO_PROC_OPEN_ERROR
