@@ -45,7 +45,7 @@ ZEND_API zend_class_entry *zend_ce_unhandled_match_error;
 /* Internal pseudo-exception that is not exposed to userland. */
 static zend_class_entry zend_ce_unwind_exit;
 
-ZEND_API void (*zend_throw_exception_hook)(zval *ex);
+ZEND_API void (*zend_throw_exception_hook)(zend_object *ex);
 
 static zend_object_handlers default_exception_handlers;
 
@@ -144,12 +144,12 @@ void zend_exception_restore(void) /* {{{ */
 }
 /* }}} */
 
-ZEND_API ZEND_COLD void zend_throw_exception_internal(zval *exception) /* {{{ */
+ZEND_API ZEND_COLD void zend_throw_exception_internal_obj(zend_object *exception) /* {{{ */
 {
 #ifdef HAVE_DTRACE
 	if (DTRACE_EXCEPTION_THROWN_ENABLED()) {
 		if (exception != NULL) {
-			DTRACE_EXCEPTION_THROWN(ZSTR_VAL(Z_OBJ_P(exception)->ce->name));
+			DTRACE_EXCEPTION_THROWN(ZSTR_VAL(exception->ce->name));
 		} else {
 			DTRACE_EXCEPTION_THROWN(NULL);
 		}
@@ -158,14 +158,14 @@ ZEND_API ZEND_COLD void zend_throw_exception_internal(zval *exception) /* {{{ */
 
 	if (exception != NULL) {
 		zend_object *previous = EG(exception);
-		zend_exception_set_previous(Z_OBJ_P(exception), EG(exception));
-		EG(exception) = Z_OBJ_P(exception);
+		zend_exception_set_previous(exception, EG(exception));
+		EG(exception) = exception;
 		if (previous) {
 			return;
 		}
 	}
 	if (!EG(current_execute_data)) {
-		if (exception && (Z_OBJCE_P(exception) == zend_ce_parse_error || Z_OBJCE_P(exception) == zend_ce_compile_error)) {
+		if (exception && (exception->ce == zend_ce_parse_error || exception->ce == zend_ce_compile_error)) {
 			return;
 		}
 		if (EG(exception)) {
@@ -187,6 +187,12 @@ ZEND_API ZEND_COLD void zend_throw_exception_internal(zval *exception) /* {{{ */
 	}
 	EG(opline_before_exception) = EG(current_execute_data)->opline;
 	EG(current_execute_data)->opline = EG(exception_op);
+}
+/* }}} */
+
+ZEND_API ZEND_COLD void zend_throw_exception_internal(zval *exception) /* {{{ */
+{
+	zend_throw_exception_internal_obj(Z_OBJ_P(exception));
 }
 /* }}} */
 
@@ -985,22 +991,28 @@ ZEND_API ZEND_COLD int zend_exception_error(zend_object *ex, int severity) /* {{
 }
 /* }}} */
 
+ZEND_API ZEND_COLD void zend_throw_exception_obj(zend_object *exception) /* {{{ */
+{
+	ZEND_ASSERT(exception && instanceof_function(exception->ce, zend_ce_throwable));
+
+	zend_throw_exception_internal_obj(exception);
+}
+
 ZEND_API ZEND_COLD void zend_throw_exception_object(zval *exception) /* {{{ */
 {
-	zend_class_entry *exception_ce;
-
 	if (exception == NULL || Z_TYPE_P(exception) != IS_OBJECT) {
 		zend_error_noreturn(E_CORE_ERROR, "Need to supply an object when throwing an exception");
 	}
 
-	exception_ce = Z_OBJCE_P(exception);
+	zend_class_entry *exception_ce = Z_OBJCE_P(exception);
 
 	if (!exception_ce || !instanceof_function(exception_ce, zend_ce_throwable)) {
 		zend_throw_error(NULL, "Cannot throw objects that do not implement Throwable");
 		zval_ptr_dtor(exception);
 		return;
 	}
-	zend_throw_exception_internal(exception);
+
+	zend_throw_exception_obj(Z_OBJ_P(exception));
 }
 /* }}} */
 

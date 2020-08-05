@@ -48,6 +48,7 @@ function socket_strerror(int $errno): string {}
 
 function socket_bind(Socket $socket, string $addr, int $port = 0): bool {}
 
+/** @param string|null $buf */
 function socket_recv(Socket $socket, &$buf, int $len, int $flags): int|false {}
 
 function socket_send(Socket $socket, string $buf, int $len, int $flags): int|false {}

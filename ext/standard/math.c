@@ -950,19 +950,16 @@ PHP_FUNCTION(dechex)
 /* {{{ Converts a number in a string from any base <= 36 to any base <= 36 */
 PHP_FUNCTION(base_convert)
 {
-	zval *number, temp;
+	zval temp;
+	zend_string *number;
 	zend_long frombase, tobase;
 	zend_string *result;
 
 	ZEND_PARSE_PARAMETERS_START(3, 3)
-		Z_PARAM_ZVAL(number)
+		Z_PARAM_STR(number)
 		Z_PARAM_LONG(frombase)
 		Z_PARAM_LONG(tobase)
 	ZEND_PARSE_PARAMETERS_END();
-
-	if (!try_convert_to_string(number)) {
-		RETURN_THROWS();
-	}
 
 	if (frombase < 2 || frombase > 36) {
 		zend_argument_value_error(2, "must be between 2 and 36 (inclusive)");
@@ -973,7 +970,7 @@ PHP_FUNCTION(base_convert)
 		RETURN_THROWS();
 	}
 
-	_php_math_basetozval(Z_STR_P(number), (int)frombase, &temp);
+	_php_math_basetozval(number, (int)frombase, &temp);
 	result = _php_math_zvaltobase(&temp, (int)tobase);
 	RETVAL_STR(result);
 }
