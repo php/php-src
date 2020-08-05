@@ -17,6 +17,10 @@ PHP                                                                        NEWS
   . Fixed bug #73060 (php failed with error after temp folder cleaned up).
     (cmb)
 
+- Standard:
+  . Fixed bug #79930 (array_merge_recursive() crashes when called with array
+    with single reference). (Nikita)
+
 06 Aug 2020, PHP 7.4.9
 
 - Apache:
