@@ -29,7 +29,8 @@ RUN apk add \
     re2c \
     readline-dev \
     sqlite-dev \
-    tidyhtml-dev
+    tidyhtml-dev \
+    tzdata
 
 ENV SKIP_IO_CAPTURE_TESTS=1
 
