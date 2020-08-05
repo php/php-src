@@ -1664,7 +1664,6 @@ static inline void list_code() {
 		zend_clear_exception(); \
 		list_code(); \
 		switch (phpdbg_interactive(allow_async_unsafe, NULL)) { \
-			zval zv; \
 			case PHPDBG_LEAVE: \
 			case PHPDBG_FINISH: \
 			case PHPDBG_UNTIL: \
@@ -1674,8 +1673,7 @@ static inline void list_code() {
 					EG(current_execute_data)->opline = backup_opline; \
 					EG(exception) = exception; \
 				} else { \
-					Z_OBJ(zv) = exception; \
-					zend_throw_exception_internal(&zv); \
+					zend_throw_exception_internal(exception); \
 				} \
 				EG(opline_before_exception) = before_ex; \
 		} \

@@ -2460,23 +2460,20 @@ PHP_FUNCTION(register_tick_function)
 /* {{{ Unregisters a tick callback function */
 PHP_FUNCTION(unregister_tick_function)
 {
-	zval *function;
 	user_tick_function_entry tick_fe;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fci_cache;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ZVAL(function)
+		Z_PARAM_FUNC(fci, fci_cache)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!BG(user_tick_functions)) {
 		return;
 	}
 
-	if (Z_TYPE_P(function) != IS_ARRAY && Z_TYPE_P(function) != IS_OBJECT) {
-		convert_to_string(function);
-	}
-
 	tick_fe.arguments = (zval *) emalloc(sizeof(zval));
-	ZVAL_COPY_VALUE(&tick_fe.arguments[0], function);
+	ZVAL_COPY_VALUE(&tick_fe.arguments[0], &fci.function_name);
 	tick_fe.arg_count = 1;
 	zend_llist_del_element(BG(user_tick_functions), &tick_fe, (int (*)(void *, void *)) user_tick_function_compare);
 	efree(tick_fe.arguments);

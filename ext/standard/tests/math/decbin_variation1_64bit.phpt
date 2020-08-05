@@ -77,15 +77,18 @@ $inputs = array(
 );
 
 // loop through each element of $inputs to check the behaviour of decbin()
-$iterator = 1;
-foreach($inputs as $input) {
+foreach($inputs as $i => $input) {
+    $iterator = $i + 1;
     echo "\n-- Iteration $iterator --\n";
-    var_dump(decbin($input));
-    $iterator++;
-};
+    try {
+        var_dump(decbin($input));
+    } catch (TypeError $exception) {
+        echo $exception->getMessage() . "\n";
+    }
+}
 fclose($fp);
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing decbin() : usage variations ***
 
 -- Iteration 1 --
@@ -101,10 +104,10 @@ string(14) "11000000111001"
 string(64) "1111111111111111111111111111111111111111111111111111011011010111"
 
 -- Iteration 5 --
-string(1) "0"
+decbin(): Argument #1 ($number) must be of type int, float given
 
 -- Iteration 6 --
-string(1) "0"
+decbin(): Argument #1 ($number) must be of type int, float given
 
 -- Iteration 7 --
 string(4) "1010"
@@ -140,27 +143,25 @@ string(1) "1"
 string(1) "0"
 
 -- Iteration 18 --
-string(1) "0"
+decbin(): Argument #1 ($number) must be of type int, string given
 
 -- Iteration 19 --
-string(1) "0"
+decbin(): Argument #1 ($number) must be of type int, string given
 
 -- Iteration 20 --
-string(1) "0"
+decbin(): Argument #1 ($number) must be of type int, array given
 
 -- Iteration 21 --
-string(1) "0"
+decbin(): Argument #1 ($number) must be of type int, string given
 
 -- Iteration 22 --
-string(1) "0"
+decbin(): Argument #1 ($number) must be of type int, string given
 
 -- Iteration 23 --
-string(1) "0"
+decbin(): Argument #1 ($number) must be of type int, string given
 
 -- Iteration 24 --
-
-Notice: Object of class classA could not be converted to int in %s on line %d
-string(1) "1"
+decbin(): Argument #1 ($number) must be of type int, classA given
 
 -- Iteration 25 --
 string(1) "0"
@@ -169,4 +170,4 @@ string(1) "0"
 string(1) "0"
 
 -- Iteration 27 --
-string(%d) "%d"
+decbin(): Argument #1 ($number) must be of type int, resource given

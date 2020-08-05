@@ -112,14 +112,11 @@ SAPI_API void sapi_free_header(sapi_header_struct *sapi_header)
 /* {{{ call a header function */
 PHP_FUNCTION(header_register_callback)
 {
-	zval *callback_func;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &callback_func) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "f", &fci, &fcc) == FAILURE) {
 		RETURN_THROWS();
-	}
-
-	if (!zend_is_callable(callback_func, 0, NULL)) {
-		RETURN_FALSE;
 	}
 
 	if (Z_TYPE(SG(callback_func)) != IS_UNDEF) {
@@ -127,7 +124,7 @@ PHP_FUNCTION(header_register_callback)
 		SG(fci_cache) = empty_fcall_info_cache;
 	}
 
-	ZVAL_COPY(&SG(callback_func), callback_func);
+	ZVAL_COPY(&SG(callback_func), &fci.function_name);
 
 	RETURN_TRUE;
 }

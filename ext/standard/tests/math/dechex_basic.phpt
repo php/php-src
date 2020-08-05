@@ -17,10 +17,14 @@ $values = array(10,
                 null,
                 );
 
-for ($i = 0; $i < count($values); $i++) {
-    $res = dechex($values[$i]);
-    var_dump($res);
+foreach ($values as $value) {
+    try {
+        var_dump(dechex($value));
+    } catch (TypeError $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 }
+
 ?>
 --EXPECT--
 string(1) "a"
@@ -32,7 +36,7 @@ string(1) "a"
 string(3) "f6e"
 string(3) "f6e"
 string(2) "27"
-string(1) "0"
+dechex(): Argument #1 ($number) must be of type int, string given
 string(1) "1"
 string(1) "0"
 string(1) "0"

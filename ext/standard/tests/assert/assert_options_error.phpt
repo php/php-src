@@ -10,4 +10,4 @@ try {
 }
 ?>
 --EXPECT--
-assert_options(): Argument #1 ($what) must have a valid value
+assert_options(): Argument #1 ($what) must be an ASSERT_* constant

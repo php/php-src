@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 4954f0d4dd0515dea5e4305b9db9d3344bdf40a4 */
+ * Stub hash: 40f03edb33ac213c9f436d5e7ea85ec2750fdf6e */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_msg_get_queue, 0, 1, SysvMessageQueue, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, key, IS_LONG, 0)
@@ -20,7 +20,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_msg_receive, 0, 5, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, desiredmsgtype, IS_LONG, 0)
 	ZEND_ARG_INFO(1, msgtype)
 	ZEND_ARG_TYPE_INFO(0, maxsize, IS_LONG, 0)
-	ZEND_ARG_INFO(1, message)
+	ZEND_ARG_TYPE_INFO(1, message, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, unserialize, _IS_BOOL, 0, "true")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, errorcode, "null")

@@ -520,7 +520,8 @@ PHP_FUNCTION(file_get_contents)
 	zend_bool use_include_path = 0;
 	php_stream *stream;
 	zend_long offset = 0;
-	zend_long maxlen = (ssize_t) PHP_STREAM_COPY_ALL;
+	zend_long maxlen;
+	zend_bool maxlen_is_null = 1;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
 	zend_string *contents;
@@ -532,10 +533,12 @@ PHP_FUNCTION(file_get_contents)
 		Z_PARAM_BOOL(use_include_path)
 		Z_PARAM_RESOURCE_OR_NULL(zcontext)
 		Z_PARAM_LONG(offset)
-		Z_PARAM_LONG(maxlen)
+		Z_PARAM_LONG_OR_NULL(maxlen, maxlen_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (ZEND_NUM_ARGS() == 5 && maxlen < 0) {
+	if (maxlen_is_null) {
+		maxlen = (ssize_t) PHP_STREAM_COPY_ALL;
+	} else if (maxlen < 0) {
 		zend_argument_value_error(5, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
@@ -1914,7 +1917,8 @@ PHP_FUNCTION(fgetcsv)
 	php_stream *stream;
 
 	{
-		zval *fd, *len_zv = NULL;
+		zval *fd;
+		zend_bool len_is_null = 1;
 		char *delimiter_str = NULL;
 		size_t delimiter_str_len = 0;
 		char *enclosure_str = NULL;
@@ -1925,7 +1929,7 @@ PHP_FUNCTION(fgetcsv)
 		ZEND_PARSE_PARAMETERS_START(1, 5)
 			Z_PARAM_RESOURCE(fd)
 			Z_PARAM_OPTIONAL
-			Z_PARAM_ZVAL(len_zv)
+			Z_PARAM_LONG_OR_NULL(len, len_is_null)
 			Z_PARAM_STRING(delimiter_str, delimiter_str_len)
 			Z_PARAM_STRING(enclosure_str, enclosure_str_len)
 			Z_PARAM_STRING(escape_str, escape_str_len)
@@ -1968,16 +1972,11 @@ PHP_FUNCTION(fgetcsv)
 			}
 		}
 
-		if (len_zv != NULL && Z_TYPE_P(len_zv) != IS_NULL) {
-			len = zval_get_long(len_zv);
-			if (len < 0) {
-				zend_argument_value_error(2, "must be a greater than or equal to 0");
-				RETURN_THROWS();
-			} else if (len == 0) {
-				len = -1;
-			}
-		} else {
+		if (len_is_null || len == 0) {
 			len = -1;
+		} else if (len < 0) {
+			zend_argument_value_error(2, "must be a greater than or equal to 0");
+			RETURN_THROWS();
 		}
 
 		PHP_STREAM_TO_ZVAL(stream, fd);

@@ -139,20 +139,27 @@ PHP_MINFO_FUNCTION(assert) /* {{{ */
 PHP_FUNCTION(assert)
 {
 	zval *assertion;
-	zval *description = NULL;
+	zend_string *description_str = NULL;
+	zend_object *description_obj = NULL;
 
-	if (! ASSERTG(active)) {
+	if (!ASSERTG(active)) {
 		RETURN_TRUE;
 	}
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_ZVAL(assertion)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL(description)
+		Z_PARAM_STR_OR_OBJ_OF_CLASS_OR_NULL(description_str, description_obj, zend_ce_throwable)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (zend_is_true(assertion)) {
 		RETURN_TRUE;
+	}
+
+	if (description_obj) {
+		GC_ADDREF(description_obj);
+		zend_throw_exception_internal(description_obj);
+		RETURN_THROWS();
 	}
 
 	if (Z_TYPE(ASSERTG(callback)) == IS_UNDEF && ASSERTG(cb)) {
@@ -171,15 +178,14 @@ PHP_FUNCTION(assert)
 
 		ZVAL_FALSE(&retval);
 
-		/* XXX do we want to check for error here? */
-		if (!description) {
-			call_user_function(NULL, NULL, &ASSERTG(callback), &retval, 3, args);
+		if (description_str) {
+			ZVAL_STR(&args[3], description_str);
+			call_user_function(NULL, NULL, &ASSERTG(callback), &retval, 4, args);
+			zval_ptr_dtor(&(args[3]));
 			zval_ptr_dtor(&(args[2]));
 			zval_ptr_dtor(&(args[0]));
 		} else {
-			ZVAL_STR(&args[3], zval_get_string(description));
-			call_user_function(NULL, NULL, &ASSERTG(callback), &retval, 4, args);
-			zval_ptr_dtor(&(args[3]));
+			call_user_function(NULL, NULL, &ASSERTG(callback), &retval, 3, args);
 			zval_ptr_dtor(&(args[2]));
 			zval_ptr_dtor(&(args[0]));
 		}
@@ -188,25 +194,9 @@ PHP_FUNCTION(assert)
 	}
 
 	if (ASSERTG(exception)) {
-		if (!description) {
-			zend_throw_exception(assertion_error_ce, NULL, E_ERROR);
-		} else if (Z_TYPE_P(description) == IS_OBJECT &&
-			instanceof_function(Z_OBJCE_P(description), zend_ce_throwable)) {
-			Z_ADDREF_P(description);
-			zend_throw_exception_object(description);
-		} else {
-			zend_string *str = zval_get_string(description);
-			zend_throw_exception(assertion_error_ce, ZSTR_VAL(str), E_ERROR);
-			zend_string_release_ex(str, 0);
-		}
+		zend_throw_exception(assertion_error_ce, description_str ? ZSTR_VAL(description_str) : NULL, E_ERROR);
 	} else if (ASSERTG(warning)) {
-		if (!description) {
-			php_error_docref(NULL, E_WARNING, "Assertion failed");
-		} else {
-			zend_string *str = zval_get_string(description);
-			php_error_docref(NULL, E_WARNING, "%s failed", ZSTR_VAL(str));
-			zend_string_release_ex(str, 0);
-		}
+		php_error_docref(NULL, E_WARNING, "%s failed", description_str ? ZSTR_VAL(description_str) : "Assertion failed");
 	}
 
 	if (ASSERTG(bail)) {
@@ -289,9 +279,14 @@ PHP_FUNCTION(assert_options)
 		} else {
 			RETVAL_NULL();
 		}
+
 		if (ac == 2) {
 			zval_ptr_dtor(&ASSERTG(callback));
-			ZVAL_COPY(&ASSERTG(callback), value);
+			if (Z_TYPE_P(value) == IS_NULL) {
+				ZVAL_UNDEF(&ASSERTG(callback));
+			} else {
+				ZVAL_COPY(&ASSERTG(callback), value);
+			}
 		}
 		return;
 
@@ -312,7 +307,7 @@ PHP_FUNCTION(assert_options)
 		break;
 
 	default:
-		zend_argument_value_error(1, "must have a valid value");
+		zend_argument_value_error(1, "must be an ASSERT_* constant");
 		RETURN_THROWS();
 	}
 }
