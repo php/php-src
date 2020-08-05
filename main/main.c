@@ -1312,7 +1312,8 @@ static ZEND_COLD void php_error_cb(int orig_type, const char *error_filename, co
 				break;
 		}
 
-		if (!module_initialized || PG(log_errors)) {
+		if (PG(log_errors)
+				|| (!module_initialized && (!PG(display_startup_errors) || !PG(display_errors)))) {
 			char *log_buffer;
 #ifdef PHP_WIN32
 			if (type == E_CORE_ERROR || type == E_CORE_WARNING) {
