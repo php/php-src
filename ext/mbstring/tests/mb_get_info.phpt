@@ -5,9 +5,9 @@ Test mb_get_info() function
 --INI--
 mbstring.encoding_translation=1
 mbstring.language=Korean
-mbstring.internal_encoding=UTF-8
-mbstring.http_input=ISO-8859-1
-mbstring.http_output=ISO-8859-15
+internal_encoding=UTF-8
+input_encoding=ISO-8859-1
+output_encoding=ISO-8859-15
 mbstring.http_output_conv_mimetypes=abc
 mbstring.detect_order=UTF-8,ISO-8859-15,ISO-8859-1,ASCII
 mbstring.substitute_character=123
@@ -23,15 +23,6 @@ foreach (array_keys($result) as $key) {
 }
 ?>
 --EXPECT--
-PHP Deprecated:  PHP Startup: Use of mbstring.http_input is deprecated in Unknown on line 0
-PHP Deprecated:  PHP Startup: Use of mbstring.http_output is deprecated in Unknown on line 0
-PHP Deprecated:  PHP Startup: Use of mbstring.internal_encoding is deprecated in Unknown on line 0
-
-Deprecated: PHP Startup: Use of mbstring.http_input is deprecated in Unknown on line 0
-
-Deprecated: PHP Startup: Use of mbstring.http_output is deprecated in Unknown on line 0
-
-Deprecated: PHP Startup: Use of mbstring.internal_encoding is deprecated in Unknown on line 0
 array(13) {
   ["internal_encoding"]=>
   string(5) "UTF-8"
