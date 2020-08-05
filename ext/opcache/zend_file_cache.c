@@ -870,7 +870,7 @@ int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
 	info.checksum = zend_adler32(info.checksum, (unsigned char*)ZSTR_VAL((zend_string*)ZCG(mem)), info.str_size);
 
 #ifdef HAVE_SYS_UIO_H
-	vec[0].iov_base = &info;
+	vec[0].iov_base = (void *)&info;
 	vec[0].iov_len = sizeof(info);
 	vec[1].iov_base = buf;
 	vec[1].iov_len = script->size;
