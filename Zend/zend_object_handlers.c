@@ -545,7 +545,7 @@ ZEND_API uint32_t *zend_get_property_guard(zend_object *zobj, zend_string *membe
 }
 /* }}} */
 
-ZEND_API zval *zend_std_read_property(zend_object *zobj, zend_string *name, int type, void **cache_slot, zval *rv) /* {{{ */
+ZEND_API zval *zend_std_read_property(zend_object *zobj, zend_string *name, int type, void **cache_slot, zval *getter_return) /* {{{ */
 {
 	zval *retval;
 	uintptr_t property_offset;
@@ -642,14 +642,14 @@ call_getter_addref:
 			GC_ADDREF(zobj);
 call_getter:
 			*guard |= IN_GET; /* prevent circular getting */
-			zend_std_call_getter(zobj, name, rv);
+			zend_std_call_getter(zobj, name, getter_return);
 			*guard &= ~IN_GET;
 
-			if (Z_TYPE_P(rv) != IS_UNDEF) {
-				retval = rv;
-				if (!Z_ISREF_P(rv) &&
+			if (Z_TYPE_P(getter_return) != IS_UNDEF) {
+				retval = getter_return;
+				if (!Z_ISREF_P(getter_return) &&
 				    (type == BP_VAR_W || type == BP_VAR_RW  || type == BP_VAR_UNSET)) {
-					if (UNEXPECTED(Z_TYPE_P(rv) != IS_OBJECT)) {
+					if (UNEXPECTED(Z_TYPE_P(getter_return) != IS_OBJECT)) {
 						zend_error(E_NOTICE, "Indirect modification of overloaded property %s::$%s has no effect", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
 					}
 				}
