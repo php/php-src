@@ -9,8 +9,11 @@ if (!defined("CLONE_NEWPID")) die("skip flag unavailable");
 if (getenv("SKIP_ASAN")) die("skip asan chokes on this");
 if (posix_getuid() !== 0 &&
     (!defined("CLONE_NEWUSER") ||
-    (pcntl_unshare(CLONE_NEWUSER) == false && pcntl_get_last_error() == PCNTL_EPERM))) {
-    die("skip Insufficient previleges to run test");
+    (@pcntl_unshare(CLONE_NEWUSER) == false && pcntl_get_last_error() == PCNTL_EPERM))) {
+    die("skip Insufficient privileges for CLONE_NEWUSER");
+}
+if (@pcntl_unshare(CLONE_NEWPID) == false && pcntl_get_last_error() == PCNTL_EPERM) {
+    die("skip Insufficient privileges for CLONE_NEWPID");
 }
 
 --FILE--
