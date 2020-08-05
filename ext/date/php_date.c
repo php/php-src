@@ -51,11 +51,7 @@ static inline long long php_date_llabs( long long i ) { return i >= 0 ? i : -i; 
 		int st = snprintf(s, len, "%lld", i); \
 		s[st] = '\0'; \
 	} while (0);
-#ifdef HAVE_ATOLL
-# define DATE_A64I(i, s) i = atoll(s)
-#else
-# define DATE_A64I(i, s) i = strtoll(s, NULL, 10)
-#endif
+#define DATE_A64I(i, s) i = strtoll(s, NULL, 10)
 #endif
 
 PHPAPI time_t php_time(void)

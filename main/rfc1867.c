@@ -31,11 +31,6 @@
 #include "ext/standard/php_string.h"
 #include "zend_smart_string.h"
 
-#if defined(PHP_WIN32) && !defined(HAVE_ATOLL)
-# define atoll(s) _atoi64(s)
-# define HAVE_ATOLL 1
-#endif
-
 #ifndef DEBUG_FILE_UPLOAD
 # define DEBUG_FILE_UPLOAD 0
 #endif
@@ -903,11 +898,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 				}
 
 				if (!strcasecmp(param, "MAX_FILE_SIZE")) {
-#ifdef HAVE_ATOLL
-					max_file_size = atoll(value);
-#else
 					max_file_size = strtoll(value, NULL, 10);
-#endif
 				}
 
 				efree(param);
