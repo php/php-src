@@ -194,7 +194,7 @@ PHP_FUNCTION(socket_sendmsg)
 	if (res != -1) {
 		RETVAL_LONG((zend_long)res);
 	} else {
-		PHP_SOCKET_ERROR(php_sock, "error in sendmsg", errno);
+		PHP_SOCKET_ERROR(php_sock, "Error in sendmsg", errno);
 		RETVAL_FALSE;
 	}
 
