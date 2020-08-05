@@ -192,14 +192,13 @@ PHP_FUNCTION(socket_sendmsg)
 	res = sendmsg(php_sock->bsd_socket, msghdr, (int)flags);
 
 	if (res != -1) {
-		zend_llist_destroy(allocations);
-		efree(allocations);
-
-		RETURN_LONG((zend_long)res);
+		RETVAL_LONG((zend_long)res);
 	} else {
 		PHP_SOCKET_ERROR(php_sock, "error in sendmsg", errno);
-		RETURN_FALSE;
+		RETVAL_FALSE;
 	}
+
+	allocations_dispose(&allocations);
 }
 
 PHP_FUNCTION(socket_recvmsg)
@@ -246,7 +245,6 @@ PHP_FUNCTION(socket_recvmsg)
 
 		/* we don;t need msghdr anymore; free it */
 		msghdr = NULL;
-		allocations_dispose(&allocations);
 
 		zval_ptr_dtor(zmsg);
 		if (!err.has_error) {
@@ -257,14 +255,15 @@ PHP_FUNCTION(socket_recvmsg)
 			/* no need to destroy/free zres -- it's NULL in this circumstance */
 			assert(zres == NULL);
 		}
+		RETVAL_LONG((zend_long)res);
 	} else {
 		SOCKETS_G(last_error) = errno;
 		php_error_docref(NULL, E_WARNING, "Error in recvmsg [%d]: %s",
 				errno, sockets_strerror(errno));
-		RETURN_FALSE;
+		RETVAL_FALSE;
 	}
 
-	RETURN_LONG((zend_long)res);
+	allocations_dispose(&allocations);
 }
 
 PHP_FUNCTION(socket_cmsg_space)
