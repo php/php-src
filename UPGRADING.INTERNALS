@@ -373,6 +373,10 @@ PHP 8.0 INTERNALS UPGRADE NOTES
         - zend_get_op_array_extension_handle()
      10. Argument zend_extension to const char* in Zend Engine 4.0:
         - zend_get_resource_handle()
+     11. Argument const char * to HMODULE in Zend Engine 4.0:
+        - php_win32_image_compatible()
+     12. const char * argument dropped in Zend Engine 4.0:
+        - php_win32_crt_compatible()
 
   u. Instead of overwriting zend_error_cb extensions with debugging, monitoring
      use-cases catching Errors/Exceptions are strongly encouraged to use

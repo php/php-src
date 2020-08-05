@@ -41,6 +41,13 @@ zend_result zend_load_extension(const char *path)
 #endif
 		return FAILURE;
 	}
+#ifdef ZEND_WIN32
+	char *err;
+	if (!php_win32_image_compatible(handle, &err)) {
+		zend_error(E_CORE_WARNING, err);
+		return FAILURE;
+	}
+#endif
 	return zend_load_extension_handle(handle, path);
 #else
 	fprintf(stderr, "Extensions are not supported on this platform.\n");

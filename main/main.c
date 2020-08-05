@@ -2055,21 +2055,12 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 #endif
 
 #ifdef PHP_WIN32
-# if PHP_LINKER_MAJOR == 14
-	/* Extend for other CRT if needed. */
-#  if PHP_DEBUG
-#   define PHP_VCRUNTIME "vcruntime140d.dll"
-#  else
-#   define PHP_VCRUNTIME "vcruntime140.dll"
-#  endif
 	char *img_err;
-	if (!php_win32_crt_compatible(PHP_VCRUNTIME, &img_err)) {
+	if (!php_win32_crt_compatible(&img_err)) {
 		php_error(E_CORE_WARNING, img_err);
 		efree(img_err);
 		return FAILURE;
 	}
-#  undef PHP_VCRUNTIME
-# endif
 
 	/* start up winsock services */
 	if (WSAStartup(wVersionRequested, &wsaData) != 0) {
