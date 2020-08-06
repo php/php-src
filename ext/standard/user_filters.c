@@ -299,12 +299,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 			}
 			efree(wildcard);
 		}
-		if (fdat == NULL) {
-			zend_throw_error(NULL, "Filter \"%s\" is not in the user-filter map, "
-				"but user-filter-factory was invoked for it."
-				"This is a bug, please report it at https://bugs.php.net", filtername);
-			return NULL;
-		}
+		ZEND_ASSERT(fdat);
 	}
 
 	/* bind the classname to the actual class */
