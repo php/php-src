@@ -19,4 +19,4 @@ try {
 
 ?>
 --EXPECT--
-mb_ereg_replace(): Argument #4 ($option) option 'e' is not supported
+Option "e" is not supported

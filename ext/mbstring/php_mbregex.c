@@ -652,10 +652,10 @@ static bool _php_mb_regex_init_options(const char *parg, size_t narg, OnigOption
 					*syntax = ONIG_SYNTAX_POSIX_EXTENDED;
 					break;
 				case 'e':
-					zend_argument_value_error(option_arg_num, "option 'e' is not supported");
+					zend_value_error("Option \"e\" is not supported");
 					return false;
 				default:
-					// TODO Unsupported ValueError
+					zend_value_error("Option \"%c\" is not supported", c);
 					break;
 			}
 		}
@@ -920,7 +920,7 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 		string_len,
 		php_mb_regex_get_mbctype_encoding()
 	)) {
-		zend_argument_value_error(2, "must be a valid string in '%s'", php_mb_regex_get_mbctype());
+		zend_argument_value_error(2, "must be a valid string in \"%s\" encoding", php_mb_regex_get_mbctype());
 		RETURN_THROWS();
 	}
 
@@ -1041,8 +1041,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 		}
 
 		if (!php_mb_check_encoding(string, string_len, enc)) {
-			zend_argument_value_error(3, "must be a valid string in '%s'", php_mb_regex_get_mbctype());
-			RETURN_THROWS();
+			RETURN_NULL();
 		}
 
 		if (option_str != NULL) {
@@ -1059,7 +1058,6 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 	/* create regex pattern buffer */
 	re = php_mbregex_compile_pattern(arg_pattern, arg_pattern_len, options, syntax);
 	if (re == NULL) {
-		// Should this be considered an error instead?
 		RETURN_FALSE;
 	}
 
@@ -1357,7 +1355,7 @@ static void _php_mb_regex_ereg_search_exec(INTERNAL_FUNCTION_PARAMETERS, int mod
 	}
 
 	if (arg_options) {
-		_php_mb_regex_init_options(arg_options, arg_options_len, &option, &syntax, NULL);
+		_php_mb_regex_init_options(arg_options, arg_options_len, &option, &syntax, 2);
 	} else {
 		option |= MBREX(regex_default_options);
 		syntax = MBREX(regex_default_syntax);
@@ -1496,7 +1494,7 @@ PHP_FUNCTION(mb_ereg_search_init)
 
 	if (arg_options) {
 		option = 0;
-		_php_mb_regex_init_options(arg_options, arg_options_len, &option, &syntax, NULL);
+		_php_mb_regex_init_options(arg_options, arg_options_len, &option, &syntax, 3);
 	} else {
 		option = MBREX(regex_default_options);
 		syntax = MBREX(regex_default_syntax);

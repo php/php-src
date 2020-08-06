@@ -14,4 +14,4 @@ try {
 }
 ?>
 --EXPECT--
-mb_eregi(): Argument #2 ($string) must be a valid string in 'UTF-8'
+mb_eregi(): Argument #2 ($string) must be a valid string in "UTF-8" encoding
