@@ -27,7 +27,11 @@ $n = gmp_init("227200");
 for($a = 1<<30; $a > 0 && $a < 0x8000000000; $a <<= 2) {
     $i = $a - 1;
     printf("%X\n", $i);
-    gmp_setbit($n, $i, 1);
+    try {
+        gmp_setbit($n, $i, 1);
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
 }
 echo "Done\n";
 ?>
@@ -37,6 +41,5 @@ FFFFFFFF
 3FFFFFFFF
 FFFFFFFFF
 3FFFFFFFFF
-
-Warning: gmp_setbit(): Index must be less than %d * %d in %s/gmp_setbit_long.php on line %d
+gmp_setbit(): Argument #2 ($index) must be less than %d * %d
 Done
