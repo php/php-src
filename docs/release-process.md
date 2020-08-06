@@ -288,13 +288,14 @@
     * Make sure there are no outdated "notes" or edited "date" keys in the
       `$RELEASES[X][$PHP_X_VERSION]["source"]` array.
 
- 3. Create the release file (`releases/x_y_z.php`)
-
-    Usually we use the same content as for point 6, but included in php template
-    instead of the release xml.
+ 3. Create the release file (`releases/x_y_z.php`):
 
     Optionally use `phpweb/bin/createReleaseEntry -v x.y.z -r` to create
     a standard announcement template for this and step 6.
+    Add `--security` for a security release.
+
+    Usually we use the same content as for point 6, but included in php
+    template instead of the release xml.
 
     Edit the generated files to expand on the base message if needed.
 
