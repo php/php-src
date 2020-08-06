@@ -142,6 +142,7 @@ PHPAPI enum_func_status mysqlnd_poll(MYSQLND **r_array, MYSQLND **e_array, MYSQL
 #define mysqlnd_get_proto_info(conn)	((conn)->data)->m->get_protocol_information((conn)->data)
 #define mysqlnd_thread_id(conn)			((conn)->data)->m->get_thread_id((conn)->data)
 #define mysqlnd_get_server_status(conn)	((conn)->data)->m->get_server_status((conn)->data)
+#define mysqlnd_check_stream_eof(conn)	php_stream_eof(((conn)->data)->vio->data->m.get_stream((conn)->data->vio))
 
 #define mysqlnd_num_rows(result)		(result)->m.num_rows((result))
 #define mysqlnd_num_fields(result)		(result)->m.num_fields((result))

@@ -506,10 +506,17 @@ static int pdo_mysql_check_liveness(pdo_dbh_t *dbh)
 	PDO_DBG_ENTER("pdo_mysql_check_liveness");
 	PDO_DBG_INF_FMT("dbh=%p", dbh);
 
+#ifdef PDO_USE_MYSQLND
+	if (mysqlnd_check_stream_eof(H->server)) {
+		PDO_DBG_RETURN(FAILURE);
+	}
+	PDO_DBG_RETURN(SUCCESS);
+#else
 	if (mysql_ping(H->server)) {
 		PDO_DBG_RETURN(FAILURE);
 	}
 	PDO_DBG_RETURN(SUCCESS);
+#endif
 }
 /* }}} */
 
