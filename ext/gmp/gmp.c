@@ -384,10 +384,6 @@ static int gmp_do_operation_ex(zend_uchar opcode, zval *result, zval *op1, zval 
 		DO_BINARY_UI_OP_EX(mpz_tdiv_q, gmp_mpz_tdiv_q_ui, 1);
 	case ZEND_MOD:
 		DO_BINARY_UI_OP_EX(mpz_mod, gmp_mpz_mod_ui, 1);
-		if (UNEXPECTED(EG(exception))) {
-			return FAILURE;
-		}
-		return SUCCESS;
 	case ZEND_SL:
 		shift_operator_helper(mpz_mul_2exp, result, op1, op2, opcode);
 		return SUCCESS;
@@ -1153,13 +1149,6 @@ ZEND_FUNCTION(gmp_div_q)
 ZEND_FUNCTION(gmp_mod)
 {
 	gmp_binary_ui_op_no_zero(mpz_mod, gmp_mpz_mod_ui);
-	/* Clear division by zero and rethrow a modulo by zero exception */
-	if (UNEXPECTED(EG(exception) && EG(exception)->ce == zend_ce_division_by_zero_error)) {
-		/*
-		zend_clear_exception();
-		zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Modulo by zero");*/
-		RETURN_THROWS();
-	}
 }
 /* }}} */
 
