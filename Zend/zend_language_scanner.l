@@ -1170,6 +1170,7 @@ static const char *next_newline(const char *str, const char *end, size_t *newlin
 	for (; str < end; str++) {
 		if (*str == '\r') {
 			*newline_len = str + 1 < end && *(str + 1) == '\n' ? 2 : 1;
+			return str;
 		} else if (*str == '\n') {
 			*newline_len = 1;
 			return str;
