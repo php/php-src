@@ -1177,20 +1177,28 @@ ZEND_FUNCTION(gmp_abs)
 ZEND_FUNCTION(gmp_fact)
 {
 	zval *a_arg;
-	mpz_ptr gmpnum;
 	mpz_ptr gmpnum_result;
-	gmp_temp_t temp_a;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &a_arg) == FAILURE){
 		RETURN_THROWS();
 	}
 
-	FETCH_GMP_ZVAL(gmpnum, a_arg, temp_a, 1);
-	FREE_GMP_TEMP(temp_a);
+	if (Z_TYPE_P(a_arg) == IS_LONG) {
+		if (Z_LVAL_P(a_arg) < 0) {
+			zend_argument_value_error(1, "must be greater than or equal to 0");
+			RETURN_THROWS();
+		}
+	} else {
+		mpz_ptr gmpnum;
+		gmp_temp_t temp_a;
 
-	if (mpz_sgn(gmpnum) < 0) {
-		zend_argument_value_error(1, "must be greater than or equal to 0");
-		RETURN_THROWS();
+		FETCH_GMP_ZVAL(gmpnum, a_arg, temp_a, 1);
+		FREE_GMP_TEMP(temp_a);
+
+		if (mpz_sgn(gmpnum) < 0) {
+			zend_argument_value_error(1, "must be greater than or equal to 0");
+			RETURN_THROWS();
+		}
 	}
 
 	INIT_GMP_RETVAL(gmpnum_result);

@@ -81,7 +81,7 @@ function gmp_neg($a): GMP {}
 /** @param GMP|int|bool|string $a */
 function gmp_abs($a): GMP {}
 
-/** @param GMP|int $a */
+/** @param GMP|int|bool|string $a */
 function gmp_fact($a): GMP {}
 
 /** @param GMP|int|bool|string $a */
