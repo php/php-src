@@ -193,7 +193,7 @@ PHP_FUNCTION(iptcembed)
 	}
 
 	if (iptcdata_len >= SIZE_MAX - sizeof(psheader) - 1025) {
-		zend_argument_value_error(1, "must be less than %d characters", SIZE_MAX - sizeof(psheader) - 1025);
+		zend_argument_value_error(1, "is too large");
 		RETURN_THROWS();
 	}
 
