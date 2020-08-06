@@ -33,7 +33,7 @@ var_dump(gmp_mod($a, $b));
 echo "Done\n";
 ?>
 --EXPECT--
-gmp_mod(): Argument #1 ($a) must be an integer string in base 10
+gmp_mod(): Argument #1 ($a) is not an integer string
 object(GMP)#2 (1) {
   ["num"]=>
   string(1) "0"

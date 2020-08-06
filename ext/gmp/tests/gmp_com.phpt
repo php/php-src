@@ -33,7 +33,7 @@ echo "Done\n";
 --EXPECT--
 string(2) "-1"
 string(2) "-1"
-gmp_com(): Argument #1 ($a) must be an integer string in base 10
+gmp_com(): Argument #1 ($a) is not an integer string
 string(14) "-2394876545679"
 string(3) "110"
 string(7) "-874654"

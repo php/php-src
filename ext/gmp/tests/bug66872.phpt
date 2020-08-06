@@ -13,4 +13,4 @@ try {
 
 ?>
 --EXPECT--
-gmp_testbit(): Argument #1 ($a) must be an integer string in base 10
+gmp_testbit(): Argument #1 ($a) is not an integer string

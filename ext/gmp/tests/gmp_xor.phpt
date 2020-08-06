@@ -46,7 +46,7 @@ string(6) "476369"
 string(10) "2342340648"
 string(5) "-3334"
 string(5) "-4563"
-gmp_xor(): Argument #1 ($a) must be an integer string in base 10
+gmp_xor(): Argument #1 ($a) is not an integer string
 string(15) "987657876574716"
 string(21) "987658017016065701376"
 gmp_xor(): Argument #1 ($a) must be of type GMP|string|int|bool, array given

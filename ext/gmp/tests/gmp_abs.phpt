@@ -44,14 +44,14 @@ try {
 echo "Done\n";
 ?>
 --EXPECT--
-gmp_abs(): Argument #1 ($a) must be an integer string in base 10
+gmp_abs(): Argument #1 ($a) is not an integer string
 string(1) "0"
 string(1) "0"
 gmp_abs(): Argument #1 ($a) must be of type GMP|string|int|bool, float given
 string(21) "111111111111111111111"
 string(21) "111111111111111111111"
 string(1) "0"
-gmp_abs(): Argument #1 ($a) must be an integer string in base 8
-gmp_abs(): Argument #1 ($a) must be an integer string in base 8
+gmp_abs(): Argument #1 ($a) is not an integer string
+gmp_abs(): Argument #1 ($a) is not an integer string
 gmp_abs(): Argument #1 ($a) must be of type GMP|string|int|bool, array given
 Done

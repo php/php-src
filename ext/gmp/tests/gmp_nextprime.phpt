@@ -44,6 +44,6 @@ string(1) "2"
 string(4) "1009"
 string(6) "100003"
 gmp_nextprime(): Argument #1 ($a) must be of type GMP|string|int|bool, array given
-gmp_nextprime(): Argument #1 ($a) must be an integer string in base 10
+gmp_nextprime(): Argument #1 ($a) is not an integer string
 gmp_nextprime(): Argument #1 ($a) must be of type GMP|string|int|bool, stdClass given
 Done

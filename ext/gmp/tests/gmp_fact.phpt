@@ -53,7 +53,7 @@ echo "Done\n";
 ?>
 --EXPECT--
 string(1) "1"
-gmp_fact(): Argument #1 ($a) must be an integer string in base 10
+gmp_fact(): Argument #1 ($a) is not an integer string
 string(1) "1"
 gmp_fact(): Argument #1 ($a) must be greater than or equal to 0
 gmp_fact(): Argument #1 ($a) must be greater than or equal to 0

@@ -612,22 +612,13 @@ static int convert_to_gmp(mpz_t gmpnumber, zval *val, zend_long base, uint32_t a
 
 		ret = mpz_set_str(gmpnumber, (skip_lead ? &numstr[2] : numstr), (int) base);
 		if (-1 == ret) {
-			/* Try to guess base for better error message */
-			if (base == 0) {
-				if (numstr[0] == '0' || ((numstr[0] == '+' || numstr[0] == '-') && numstr[1] == '0')) {
-					base = 8;
-				} else { /* Default to base 10 */
-					base = 10;
-				}
-			}
-
 			/* if unserializing */
 			if (arg_pos == 0) {
 				php_error_docref(NULL, E_WARNING,
-					"Cannot convert variable to GMP, string is not an integer in base " ZEND_LONG_FMT, base);
+					"Cannot convert variable to GMP, it is not an integer string");
 				return FAILURE;
 			}
-			zend_argument_type_error(arg_pos, "must be an integer string in base " ZEND_LONG_FMT, base);
+			zend_argument_type_error(arg_pos, "is not an integer string");
 			return FAILURE;
 		}
 

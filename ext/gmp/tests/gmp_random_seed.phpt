@@ -172,5 +172,5 @@ string(301) "7240560133683902061389868703829443708354917824328579773726122219756
 string(4) "9636"
 string(5) "-9848"
 string(5) "-9648"
-gmp_random_seed(): Argument #1 ($seed) must be an integer string in base 10
+gmp_random_seed(): Argument #1 ($seed) is not an integer string
 Done

@@ -37,7 +37,7 @@ try {
 echo "Done\n";
 ?>
 --EXPECT--
-gmp_sub(): Argument #1 ($a) must be an integer string in base 10
+gmp_sub(): Argument #1 ($a) is not an integer string
 gmp_sub(): Argument #1 ($a) must be of type GMP|string|int|bool, array given
 object(GMP)#1 (1) {
   ["num"]=>
