@@ -1618,6 +1618,10 @@ zend.assertions = -1
 ; Default: system ANSI code page
 ;com.code_page=
 
+; The version of the .NET framework to use. The value of the setting are the first three parts
+; of the framework's version number, separated by dots, and prefixed with "v", e.g. "v4.0.30319".
+;com.dotnet_version=
+
 [mbstring]
 ; language for internal character representation.
 ; This affects mb_send_mail() and mbstring.detect_order.
