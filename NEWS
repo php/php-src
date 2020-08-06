@@ -9,6 +9,8 @@ PHP                                                                        NEWS
   . Fixed bug #79895 (PHP_CHECK_GCC_ARG does not allow flags with equal sign).
     (Santiago M. Mola)
   . Fixed bug #79919 (Stack use-after-scope in define()). (cmb)
+  . Fixed bug #79934 (CRLF-only line in heredoc causes parsing error).
+    (Pieter van den Ham)
 
 - LDAP:
   . Fixed memory leaks. (ptomulik)
