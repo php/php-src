@@ -144,6 +144,8 @@ static const zend_elf_header zend_elfhdr_template = {
 	.eosabi      = 9,
 #elif defined(__OpenBSD__)
 	.eosabi      = 12,
+#elif defined(__NetBSD__)
+	.eosabi      = 2,
 #elif defined(__DragonFly__)
 	.eosabi      = 0,
 #elif (defined(__sun__) && defined(__svr4__))
