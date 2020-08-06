@@ -376,8 +376,8 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 				break;
 
 			default:
-				php_error_docref(NULL, E_WARNING, "Can only process string or stream arguments");
-				RETURN_FALSE;
+				zend_argument_type_error(2, "must be of type resource|string, %s given", zend_zval_type_name(what));
+				RETURN_THROWS();
 		}
 
 		magic = magic_open(MAGIC_MIME_TYPE);
@@ -439,14 +439,12 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 			php_stream_wrapper *wrap;
 			php_stream_statbuf ssb;
 
-			if (buffer == NULL || !*buffer) {
-				php_error_docref(NULL, E_WARNING, "Empty filename or path");
-				RETVAL_FALSE;
+			if (buffer == NULL || buffer_len == 0) {
+				zend_argument_value_error(1, "cannot be empty");
 				goto clean;
 			}
 			if (CHECK_NULL_PATH(buffer, buffer_len)) {
-				php_error_docref(NULL, E_WARNING, "Invalid path");
-				RETVAL_FALSE;
+				zend_argument_type_error(1, "must not contain null bytes");
 				goto clean;
 			}
 
@@ -484,9 +482,7 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 			}
 			break;
 		}
-
-		default:
-			php_error_docref(NULL, E_WARNING, "Can only process string or stream arguments");
+		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 
 common:
