@@ -1,19 +1,14 @@
 --TEST--
-Testing __debugInfo() magic method with bad returns OBJECT
+Testing __debugInfo() magic method with bad returns object
 --FILE--
 <?php
 
 class C {
-  public $val;
   public function __debugInfo() {
-    return $this->val;
-  }
-  public function __construct($val) {
-    $this->val = $val;
+    return new self();
   }
 }
 
-$c = new C(new stdClass);
-var_dump($c);
+var_dump(new C());
 --EXPECTF--
-Fatal error: __debuginfo() must return an array in %s%eZend%etests%edebug_info-error-object.php on line %d
+Fatal error: Method C::__debugInfo() must return an ?array in %s on line %d
