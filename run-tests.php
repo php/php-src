@@ -1706,7 +1706,7 @@ function run_worker(): void
             ]);
         }
 
-        return;
+        return true;
     });
 
     foreach ($greeting["GLOBALS"] as $var => $value) {
