@@ -1051,7 +1051,7 @@ PHP_FUNCTION(proc_open)
 #ifdef PHP_WIN32
 		/* Automatically bypass shell if command is given as an array */
 		bypass_shell = 1;
-		command = create_win_command_from_args(Z_ARRVAL_P(command_zv));
+		command = create_win_command_from_args(command_ht);
 		if (!command) {
 			RETURN_FALSE;
 		}

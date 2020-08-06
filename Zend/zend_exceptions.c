@@ -144,7 +144,7 @@ void zend_exception_restore(void) /* {{{ */
 }
 /* }}} */
 
-ZEND_API ZEND_COLD void zend_throw_exception_internal_obj(zend_object *exception) /* {{{ */
+ZEND_API ZEND_COLD void zend_throw_exception_internal(zend_object *exception) /* {{{ */
 {
 #ifdef HAVE_DTRACE
 	if (DTRACE_EXCEPTION_THROWN_ENABLED()) {
@@ -187,12 +187,6 @@ ZEND_API ZEND_COLD void zend_throw_exception_internal_obj(zend_object *exception
 	}
 	EG(opline_before_exception) = EG(current_execute_data)->opline;
 	EG(current_execute_data)->opline = EG(exception_op);
-}
-/* }}} */
-
-ZEND_API ZEND_COLD void zend_throw_exception_internal(zval *exception) /* {{{ */
-{
-	zend_throw_exception_internal_obj(Z_OBJ_P(exception));
 }
 /* }}} */
 
@@ -860,7 +854,8 @@ static zend_object *zend_throw_exception_zstr(zend_class_entry *exception_ce, ze
 		zend_update_property_ex(exception_ce, &ex, ZSTR_KNOWN(ZEND_STR_CODE), &tmp);
 	}
 
-	zend_throw_exception_internal(&ex);
+	zend_throw_exception_internal(Z_OBJ(ex));
+
 	return Z_OBJ(ex);
 }
 /* }}} */
@@ -995,7 +990,7 @@ ZEND_API ZEND_COLD void zend_throw_exception_obj(zend_object *exception) /* {{{ 
 {
 	ZEND_ASSERT(exception && instanceof_function(exception->ce, zend_ce_throwable));
 
-	zend_throw_exception_internal_obj(exception);
+	zend_throw_exception_internal(exception);
 }
 
 ZEND_API ZEND_COLD void zend_throw_exception_object(zval *exception) /* {{{ */

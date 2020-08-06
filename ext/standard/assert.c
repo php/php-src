@@ -156,6 +156,12 @@ PHP_FUNCTION(assert)
 		RETURN_TRUE;
 	}
 
+	if (description_obj) {
+		GC_ADDREF(description_obj);
+		zend_throw_exception_obj(description_obj);
+		RETURN_THROWS();
+	}
+
 	if (Z_TYPE(ASSERTG(callback)) == IS_UNDEF && ASSERTG(cb)) {
 		ZVAL_STRING(&ASSERTG(callback), ASSERTG(cb));
 	}
@@ -172,36 +178,25 @@ PHP_FUNCTION(assert)
 
 		ZVAL_FALSE(&retval);
 
-		if (!description_str && !description_obj) {
-			call_user_function(NULL, NULL, &ASSERTG(callback), &retval, 3, args);
-			zval_ptr_dtor(&(args[2]));
-			zval_ptr_dtor(&(args[0]));
-		} else if (description_str) {
+		if (description_str) {
 			ZVAL_STR(&args[3], description_str);
 			call_user_function(NULL, NULL, &ASSERTG(callback), &retval, 4, args);
 			zval_ptr_dtor(&(args[3]));
 			zval_ptr_dtor(&(args[2]));
 			zval_ptr_dtor(&(args[0]));
 		} else {
-			zend_argument_type_error(2, "must be of type string for the ASSERT_CALLBACK mode");
+			call_user_function(NULL, NULL, &ASSERTG(callback), &retval, 3, args);
+			zval_ptr_dtor(&(args[2]));
+			zval_ptr_dtor(&(args[0]));
 		}
 
 		zval_ptr_dtor(&retval);
 	}
 
 	if (ASSERTG(exception)) {
-		if (description_obj) {
-			GC_ADDREF(description_obj);
-			zend_throw_exception_obj(description_obj);
-		} else {
-			zend_throw_exception(assertion_error_ce, ZSTR_VAL(description_str), E_ERROR);
-		}
+		zend_throw_exception(assertion_error_ce, description_str ? ZSTR_VAL(description_str) : NULL, E_ERROR);
 	} else if (ASSERTG(warning)) {
-		if (description_obj) {
-			zend_argument_type_error(2, "must be of type string for the ASSERT_WARNING mode");
-		} else {
-			php_error_docref(NULL, E_WARNING, "%s failed", description_str ? ZSTR_VAL(description_str) : "Assertion failed");
-		}
+		php_error_docref(NULL, E_WARNING, "%s failed", description_str ? ZSTR_VAL(description_str) : "Assertion failed");
 	}
 
 	if (ASSERTG(bail)) {
@@ -218,18 +213,19 @@ PHP_FUNCTION(assert_options)
 	zval *value = NULL;
 	zend_long what;
 	zend_bool oldint;
+	int ac = ZEND_NUM_ARGS();
 	zend_string *key;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_LONG(what)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL_OR_NULL(value)
+		Z_PARAM_ZVAL(value)
 	ZEND_PARSE_PARAMETERS_END();
 
 	switch (what) {
 	case ASSERT_ACTIVE:
 		oldint = ASSERTG(active);
-		if (value) {
+		if (ac == 2) {
 			zend_string *value_str = zval_try_get_string(value);
 			if (UNEXPECTED(!value_str)) {
 				RETURN_THROWS();
@@ -245,7 +241,7 @@ PHP_FUNCTION(assert_options)
 
 	case ASSERT_BAIL:
 		oldint = ASSERTG(bail);
-		if (value) {
+		if (ac == 2) {
 			zend_string *value_str = zval_try_get_string(value);
 			if (UNEXPECTED(!value_str)) {
 				RETURN_THROWS();
@@ -261,7 +257,7 @@ PHP_FUNCTION(assert_options)
 
 	case ASSERT_WARNING:
 		oldint = ASSERTG(warning);
-		if (value) {
+		if (ac == 2) {
 			zend_string *value_str = zval_try_get_string(value);
 			if (UNEXPECTED(!value_str)) {
 				RETURN_THROWS();
@@ -283,7 +279,8 @@ PHP_FUNCTION(assert_options)
 		} else {
 			RETVAL_NULL();
 		}
-		if (value) {
+
+		if (ac == 2) {
 			zval_ptr_dtor(&ASSERTG(callback));
 			ZVAL_COPY(&ASSERTG(callback), value);
 		}
@@ -291,7 +288,7 @@ PHP_FUNCTION(assert_options)
 
 	case ASSERT_EXCEPTION:
 		oldint = ASSERTG(exception);
-		if (value) {
+		if (ac == 2) {
 			zend_string *val = zval_try_get_string(value);
 			if (UNEXPECTED(!val)) {
 				RETURN_THROWS();

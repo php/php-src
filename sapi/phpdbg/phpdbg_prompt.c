@@ -1675,7 +1675,7 @@ static inline void list_code() {
 					EG(exception) = exception; \
 				} else { \
 					Z_OBJ(zv) = exception; \
-					zend_throw_exception_internal(&zv); \
+					zend_throw_exception_internal(Z_OBJ(zv)); \
 				} \
 				EG(opline_before_exception) = before_ex; \
 		} \

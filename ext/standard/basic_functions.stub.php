@@ -528,7 +528,7 @@ function get_html_translation_table(int $table = HTML_SPECIALCHARS, int $quote_s
 function assert(mixed $assertion, Throwable|string|null $description = null): bool {}
 
 /** @param string|callable|null $value */
-function assert_options(int $what, $value = null): array|object|int|string|null {}
+function assert_options(int $what, $value = UNKNOWN): array|object|int|string|null {}
 
 /* string.c */
 
@@ -1116,11 +1116,11 @@ function hexdec(string $hex_string): int|float {}
 
 function octdec(string $octal_string): int|float {}
 
-function decbin(mixed $number): string {}
+function decbin(int $number): string {}
 
-function decoct(mixed $number): string {}
+function decoct(int $number): string {}
 
-function dechex(mixed $number): string {}
+function dechex(int $number): string {}
 
 function base_convert(string $number, int $frombase, int $tobase): string {}
 

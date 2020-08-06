@@ -41,8 +41,7 @@ ZEND_API void zend_exception_set_previous(zend_object *exception, zend_object *a
 ZEND_API void zend_exception_save(void);
 ZEND_API void zend_exception_restore(void);
 
-ZEND_API ZEND_COLD void zend_throw_exception_internal(zval *exception);
-ZEND_API ZEND_COLD void zend_throw_exception_internal_obj(zend_object *exception);
+ZEND_API ZEND_COLD void zend_throw_exception_internal(zend_object *exception);
 
 void zend_register_default_exception(void);
 

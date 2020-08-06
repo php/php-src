@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: cbc8308c646fd1f55792ffd9cdef2639435308df */
+ * Stub hash: ec90be5aaa5a4bb776200e2ab6848d19564f66dd */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -803,7 +803,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_assert_options, 0, 1, MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_LONG|MAY_BE_STRING|MAY_BE_NULL)
 	ZEND_ARG_TYPE_INFO(0, what, IS_LONG, 0)
-	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, value, "null")
+	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_bin2hex, 0, 1, IS_STRING, 0)
@@ -1709,7 +1709,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_octdec, 0, 1, MAY_BE_LONG|MAY_BE
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_decbin, 0, 1, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, number, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, number, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_decoct arginfo_decbin
