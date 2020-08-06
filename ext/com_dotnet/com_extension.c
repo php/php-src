@@ -141,6 +141,7 @@ PHP_INI_BEGIN()
     STD_PHP_INI_ENTRY("com.autoregister_casesensitive",	"1", PHP_INI_ALL, OnAutoregisterCasesensitive, autoreg_case_sensitive, zend_com_dotnet_globals, com_dotnet_globals)
 	STD_PHP_INI_ENTRY("com.code_page", "", PHP_INI_ALL, OnUpdateLong, code_page, zend_com_dotnet_globals, com_dotnet_globals)
 	PHP_INI_ENTRY("com.typelib_file", "", PHP_INI_SYSTEM, OnTypeLibFileUpdate)
+	PHP_INI_ENTRY("com.dotnet_version", NULL, PHP_INI_SYSTEM, NULL)
 PHP_INI_END()
 /* }}} */
 

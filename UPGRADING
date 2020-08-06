@@ -1048,6 +1048,10 @@ PHP 8.0 UPGRADE NOTES
   . New INI directive to set the maximum string length in an argument of a
     stringified stack strace.
 
+- com.dotnet_version
+  . New INI directive to choose the version of the .NET framework to use for
+    dotnet objects.
+
 ========================================
 12. Windows Support
 ========================================

@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #80007 (Potential type confusion in unixtojd() parameter parsing).
     (Andy Postnikov)
 
+- COM:
+  . Fixed bug #55847 (DOTNET .NET 4.0 GAC new location). (cmb)
+
 - DOM:
   . Fixed bug #79968 (DOMChildNode API crash on unattached nodes). (Benjamin)
 
