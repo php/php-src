@@ -1685,10 +1685,7 @@ function kill_children(array $children): void
     }
 }
 
-/**
- * @return true|void
- */
-function run_worker()
+function run_worker(): void
 {
     global $workerID, $workerSock;
 
@@ -1709,7 +1706,7 @@ function run_worker()
             ]);
         }
 
-        return true;
+        return;
     });
 
     foreach ($greeting["GLOBALS"] as $var => $value) {
@@ -3261,7 +3258,7 @@ function show_result(
     string $tested,
     string $tested_file,
     string $extra = '',
-    ?string $temp_filenames = null
+    ?array $temp_filenames = null
 ): void {
     global $temp_target, $temp_urlbase, $line_length, $SHOW_ONLY_GROUPS;
 
