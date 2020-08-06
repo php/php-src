@@ -783,6 +783,9 @@ function main(): void
 }
 
 if (!function_exists("hrtime")) {
+    /**
+     * @return array|float|int
+     */
     function hrtime(bool $as_num = false)
     {
         $t = microtime(true);
@@ -1699,7 +1702,7 @@ function run_worker(): void
         error("Unexpected greeting of type $greeting[type]");
     }
 
-    set_error_handler(function (int $errno, string $errstr, string $errfile, int $errline) use ($workerSock) {
+    set_error_handler(function (int $errno, string $errstr, string $errfile, int $errline) use ($workerSock): bool {
         if (error_reporting() & $errno) {
             send_message($workerSock, compact('errno', 'errstr', 'errfile', 'errline') + [
                 'type' => 'php_error'
@@ -2800,6 +2803,9 @@ $output
     return $restype[0] . 'ED';
 }
 
+/**
+ * @return bool|int
+ */
 function comp_line(string $l1, string $l2, bool $is_reg)
 {
     if ($is_reg) {
@@ -3380,7 +3386,7 @@ function junit_mark_test_as(
     junit_suite_record($suite, 'execution_time', $time);
 
     $escaped_details = htmlspecialchars($details, ENT_QUOTES, 'UTF-8');
-    $escaped_details = preg_replace_callback('/[\0-\x08\x0B\x0C\x0E-\x1F]/', function ($c) {
+    $escaped_details = preg_replace_callback('/[\0-\x08\x0B\x0C\x0E-\x1F]/', function (array $c): string {
         return sprintf('[[0x%02x]]', ord($c[0]));
     }, $escaped_details);
     $escaped_message = htmlspecialchars($message, ENT_QUOTES, 'UTF-8');
