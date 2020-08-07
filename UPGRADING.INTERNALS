@@ -34,9 +34,9 @@ PHP 8.0 INTERNALS UPGRADE NOTES
 1. Internal API changes
 ========================
 
-  a. Object Handlers API and some related functions, e.g. zend_call_method() and
-     zend_objects_clone_obj() were changed to receive zend_object* instead of
-     zval* and zend_string* instead of zval* for property names.
+  a. The Object Handlers API was changed to receive zend_object* instead of
+     zval* and zend_string* instead of zval* for property names. See also
+     section t for other similar changes.
 
   b. ZEND_OVERLOADED_FUNCTION and corresponding call_method() object handler
      were removed. ZEND_INTERNAL_FUNCTION with ZEND_ACC_CALL_VIA_HANDLER and
@@ -173,9 +173,15 @@ PHP 8.0 INTERNALS UPGRADE NOTES
      4. Argument int to size_t in Zend Engine 4.0:
         - zend_set_hash_symbol()
      5. Argument zval* to zend_object* in Zend Engine 4.0:
+        - zend_read_property()
+        - zend_update_property()
+        - zend_unset_property()
+        - zend_call_method()
+        - zend_objects_clone_obj()
         - zend_get_closure_method_def()
         - zend_throw_exception_hook()
         - zend_throw_exception_internal()
+        - zend_get_exception_base()
      6. Argument zval* to zend_long in Zend Engine 4.0:
         - _php_math_longtobase()
 
